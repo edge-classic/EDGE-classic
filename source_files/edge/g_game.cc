@@ -130,7 +130,7 @@ static void GameDoSaveGame(void);
 static void GameDoEndGame(void);
 
 static void InitNew(NewGameParameters &params);
-static void RespawnPlayer(player_t *p);
+static void RespawnPlayer(Player *p);
 static void SpawnInitialPlayers(void);
 
 static bool GameLoadGameFromFile(std::string filename, bool is_hub = false);
@@ -161,18 +161,18 @@ void LoadLevel_Bits(void)
     // -AJA- FIXME: this background camera stuff is a mess
     background_camera_map_object = nullptr;
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
+        Player *p = players[pnum];
         if (!p) continue;
 
-        if (p->playerstate == PST_DEAD ||
+        if (p->player_state_ == kPlayerDead ||
             (current_map->force_on_ & kMapFlagResetPlayer) || pistol_starts)
         {
-            p->playerstate = PST_REBORN;
+            p->player_state_ = kPlayerAwaitingRespawn;
         }
 
-        p->frags = 0;
+        p->frags_ = 0;
     }
 
     // -KM- 1998/12/16 Make map flags actually do stuff.
@@ -228,17 +228,17 @@ void LoadLevel_Bits(void)
     intermission_stats.kills       = intermission_stats.items =
         intermission_stats.secrets = 0;
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
+        Player *p = players[pnum];
         if (!p) continue;
 
-        p->killcount = p->secretcount = p->itemcount = 0;
-        p->mo                                        = nullptr;
+        p->kill_count_ = p->secret_count_ = p->item_count_ = 0;
+        p->map_object_                                        = nullptr;
     }
 
     // Initial height of PointOfView will be set by player think.
-    players[consoleplayer]->view_z = kFloatUnused;
+    players[console_player]->view_z_ = kFloatUnused;
 
     level_time_elapsed = 0;
 
@@ -301,7 +301,7 @@ void GameDoLoadLevel(void)
             // Need to investigate if CoalBeginLevel() needs to go here too now -
             // Dasho
 
-            GameRemoveOldAvatars();
+            RemoveOldAvatars();
 
             HubFastForward();
             return;
@@ -342,7 +342,7 @@ bool GameResponder(InputEvent *ev)
     {
         if (game_state == GS_LEVEL)  //!!!! && !DEATHMATCH())
         {
-            GameToggleDisplayPlayer();
+            ToggleDisplayPlayer();
             return true;
         }
     }
@@ -389,11 +389,11 @@ bool GameResponder(InputEvent *ev)
 
 static void CheckPlayersReborn(void)
 {
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
+        Player *p = players[pnum];
 
-        if (!p || p->playerstate != PST_REBORN) continue;
+        if (!p || p->player_state_ != kPlayerAwaitingRespawn) continue;
 
         if (SP_MATCH())
         {
@@ -531,20 +531,20 @@ void GameTicker(void)
     }
 }
 
-static void RespawnPlayer(player_t *p)
+static void RespawnPlayer(Player *p)
 {
     // first disassociate the corpse (if any)
-    if (p->mo) p->mo->player_ = nullptr;
+    if (p->map_object_) p->map_object_->player_ = nullptr;
 
-    p->mo = nullptr;
+    p->map_object_ = nullptr;
 
     // spawn at random spot if in death match
     if (DEATHMATCH())
-        GameDeathMatchSpawnPlayer(p);
+        DeathMatchSpawnPlayer(p);
     else if (current_hub_tag > 0)
         GameHubSpawnPlayer(p, current_hub_tag);
     else
-        GameCoopSpawnPlayer(p);  // respawn at the start
+        CoopSpawnPlayer(p);  // respawn at the start
 }
 
 static void SpawnInitialPlayers(void)
@@ -552,26 +552,26 @@ static void SpawnInitialPlayers(void)
     LogDebug("Deathmatch %d\n", deathmatch);
 
     // spawn the active players
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
+        Player *p = players[pnum];
         if (p == nullptr)
         {
             // no real player, maybe spawn a helper dog?
-            GameSpawnHelper(pnum);
+            SpawnHelper(pnum);
             continue;
         }
 
         RespawnPlayer(p);
 
-        if (!DEATHMATCH()) GameSpawnVoodooDolls(p);
+        if (!DEATHMATCH()) SpawnVoodooDolls(p);
     }
 
     // check for missing player start.
-    if (players[consoleplayer]->mo == nullptr)
+    if (players[console_player]->map_object_ == nullptr)
         FatalError("Missing player start !\n");
 
-    GameSetDisplayPlayer(consoleplayer);  // view the guy you are playing
+    SetDisplayPlayer(console_player);  // view the guy you are playing
 }
 
 void GameDeferredScreenShot(void) { m_screenshot_required = true; }
@@ -650,15 +650,15 @@ static void GameDoCompleted(void)
 
     exit_time = INT_MAX;
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
+        Player *p = players[pnum];
         if (!p) continue;
 
-        p->leveltime = level_time_elapsed;
+        p->level_time_ = level_time_elapsed;
 
         // take away cards and stuff
-        GamePlayerFinishLevel(p, exit_hub_tag > 0);
+        PlayerFinishLevel(p, exit_hub_tag > 0);
     }
 
     if (automap_active) AutomapStop();
@@ -683,7 +683,7 @@ static void GameDoCompleted(void)
 
                 // remember avatars of players, so we can remove them
                 // when we return to this level.
-                GameMarkPlayerAvatars();
+                MarkPlayerAvatars();
 
                 const char *mapname = SaveMapName(current_map);
 
@@ -756,7 +756,7 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
         if (!current_map)
             FatalError("LOAD-HUB: No such map %s !  Check WADS\n", globs->level);
 
-        GameSetDisplayPlayer(consoleplayer);
+        SetDisplayPlayer(console_player);
         automap_active = false;
 
         NetworkResetTics();
@@ -920,7 +920,7 @@ static bool GameSaveGameToFile(std::string filename, const char *description)
     globs->netgame  = network_game ? (1 + deathmatch) : 0;
     globs->p_random = RandomStateRead();
 
-    globs->console_player = consoleplayer;  // NB: not used
+    globs->console_player = console_player;  // NB: not used
 
     globs->level_time = level_time_elapsed;
     globs->exit_time  = exit_time;
@@ -1006,10 +1006,9 @@ NewGameParameters::NewGameParameters()
       total_players_(0),
       flags_(nullptr)
 {
-    for (int i = 0; i < MAXPLAYERS; i++)
+    for (int i = 0; i < kMaximumPlayers; i++)
     {
-        players_[i] = PFL_NOPLAYER;
-        nodes_[i]   = nullptr;
+        players_[i] = kPlayerFlagNoPlayer;
     }
 }
 
@@ -1023,10 +1022,9 @@ NewGameParameters::NewGameParameters(const NewGameParameters &src)
     random_seed_   = src.random_seed_;
     total_players_ = src.total_players_;
 
-    for (int i = 0; i < MAXPLAYERS; i++)
+    for (int i = 0; i < kMaximumPlayers; i++)
     {
         players_[i] = src.players_[i];
-        nodes_[i]   = src.nodes_[i];
     }
 
     flags_ = nullptr;
@@ -1042,13 +1040,11 @@ NewGameParameters::~NewGameParameters()
 void NewGameParameters::SinglePlayer(int num_bots)
 {
     total_players_ = 1 + num_bots;
-    players_[0]    = PFL_Zero;  // i.e. !BOT and !NETWORK
-    nodes_[0]      = nullptr;
+    players_[0]    = kPlayerFlagNone;  // i.e. !BOT and !NETWORK
 
     for (int pnum = 1; pnum <= num_bots; pnum++)
     {
-        players_[pnum] = PFL_Bot;
-        nodes_[pnum]   = nullptr;
+        players_[pnum] = kPlayerFlagBot;
     }
 }
 
@@ -1134,29 +1130,27 @@ static void InitNew(NewGameParameters &params)
 
     DestroyAllPlayers();
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        if (params.players_[pnum] == PFL_NOPLAYER) continue;
+        if (params.players_[pnum] == kPlayerFlagNoPlayer) continue;
 
-        P_CreatePlayer(pnum, (params.players_[pnum] & PFL_Bot) ? true : false);
+        P_CreatePlayer(pnum, (params.players_[pnum] & kPlayerFlagBot) ? true : false);
 
-        if (consoleplayer < 0 && !(params.players_[pnum] & PFL_Bot) &&
-            !(params.players_[pnum] & PFL_Network))
+        if (console_player < 0 && !(params.players_[pnum] & kPlayerFlagBot) &&
+            !(params.players_[pnum] & kPlayerFlagNetwork))
         {
-            GameSetConsolePlayer(pnum);
+            SetConsolePlayer(pnum);
         }
-
-        players[pnum]->node = params.nodes_[pnum];
     }
 
-    if (numplayers != params.total_players_)
+    if (total_players != params.total_players_)
         FatalError("Internal Error: InitNew: player miscount (%d != %d)\n",
-                numplayers, params.total_players_);
+                total_players, params.total_players_);
 
-    if (consoleplayer < 0)
+    if (console_player < 0)
         FatalError("Internal Error: InitNew: no local players!\n");
 
-    GameSetDisplayPlayer(consoleplayer);
+    SetDisplayPlayer(console_player);
 
     if (paused)
     {

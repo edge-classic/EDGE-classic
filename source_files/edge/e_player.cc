@@ -58,47 +58,47 @@
 // The consoleplayer and displayplayer variables must be valid
 // indices at all times.
 //
-player_t *players[MAXPLAYERS];
-int       numplayers;
-int       numbots;
+Player *players[kMaximumPlayers];
+int     total_players;
+int     total_bots;
 
-int consoleplayer = -1;  // player taking events
-int displayplayer = -1;  // view being displayed
+int console_player = -1;  // player taking events
+int display_player = -1;  // view being displayed
 
-#define MAX_BODIES 50
+static constexpr uint8_t kMaximumBodies = 50;
 
-static MapObject *bodyqueue[MAX_BODIES];
-static int        bodyqueue_size = 0;
+static MapObject *body_queue[kMaximumBodies];
+static int        body_queue_size = 0;
 
 // Maintain single and multi player starting spots.
-static std::vector<SpawnPoint> dm_starts;
+static std::vector<SpawnPoint> deathmatch_starts;
 static std::vector<SpawnPoint> coop_starts;
 static std::vector<SpawnPoint> voodoo_dolls;
 static std::vector<SpawnPoint> hub_starts;
 
-static void P_SpawnPlayer(player_t *p, const SpawnPoint *point, bool is_hub);
+static void P_SpawnPlayer(Player *p, const SpawnPoint *point, bool is_hub);
 
-void GameClearPlayerStarts(void)
+void ClearPlayerStarts(void)
 {
-    dm_starts.clear();
+    deathmatch_starts.clear();
     coop_starts.clear();
     voodoo_dolls.clear();
     hub_starts.clear();
 }
 
-void GameClearBodyQueue(void)
+void ClearBodyQueue(void)
 {
-    memset(bodyqueue, 0, sizeof(bodyqueue));
+    memset(body_queue, 0, sizeof(body_queue));
 
-    bodyqueue_size = 0;
+    body_queue_size = 0;
 }
 
 void GameAddBodyToQueue(MapObject *mo)
 {
     // flush an old corpse if needed
-    if (bodyqueue_size >= MAX_BODIES)
+    if (body_queue_size >= kMaximumBodies)
     {
-        MapObject *rotten = bodyqueue[bodyqueue_size % MAX_BODIES];
+        MapObject *rotten = body_queue[body_queue_size % kMaximumBodies];
         rotten->reference_count_--;
 
         P_RemoveMobj(rotten);
@@ -107,42 +107,42 @@ void GameAddBodyToQueue(MapObject *mo)
     // prevent accidental re-use
     mo->reference_count_++;
 
-    bodyqueue[bodyqueue_size % MAX_BODIES] = mo;
-    bodyqueue_size++;
+    body_queue[body_queue_size % kMaximumBodies] = mo;
+    body_queue_size++;
 }
 
 //
 // Called when a player completes a level.
 // For HUB changes, we keep powerups and keycards
 //
-void GamePlayerFinishLevel(player_t *p, bool keep_cards)
+void PlayerFinishLevel(Player *p, bool keep_cards)
 {
     if (!keep_cards)
     {
-        for (int i = 0; i < kTotalPowerTypes; i++) p->powers[i] = 0;
+        for (int i = 0; i < kTotalPowerTypes; i++) p->powers_[i] = 0;
 
-        p->keep_powers = 0;
+        p->keep_powers_ = 0;
 
-        p->cards = kDoorKeyNone;
+        p->cards_ = kDoorKeyNone;
 
-        p->mo->flags_ &= ~kMapObjectFlagFuzzy;  // cancel invisibility
+        p->map_object_->flags_ &= ~kMapObjectFlagFuzzy;  // cancel invisibility
     }
 
-    p->extralight = 0;  // cancel gun flashes
+    p->extra_light_ = 0;  // cancel gun flashes
 
     // cancel colourmap effects
-    p->effect_colourmap = nullptr;
+    p->effect_colourmap_ = nullptr;
 
     // no palette changes
-    p->damagecount        = 0;
-    p->damage_pain        = 0;
-    p->bonuscount         = 0;
-    p->grin_count         = 0;
-    p->last_damage_colour = SG_RED_RGBA32;
+    p->damage_count_       = 0;
+    p->damage_pain_        = 0;
+    p->bonus_count_        = 0;
+    p->grin_count_         = 0;
+    p->last_damage_colour_ = SG_RED_RGBA32;
 
     // Lobo 2023: uncomment if still getting
     //  "INTERNAL ERROR: player has a removed attacker"
-    p->attacker = nullptr;
+    p->attacker_ = nullptr;
 
     if (LuaUseLuaHud())
         LuaEndLevel();
@@ -151,99 +151,101 @@ void GamePlayerFinishLevel(player_t *p, bool keep_cards)
 }
 
 //
-// player_s::Reborn
+// Player::Reborn
 //
 // Called after a player dies.
 // Almost everything is cleared and initialised.
 //
-void player_s::Reborn()
+void Player::Reborn()
 {
-    LogDebug("player_s::Reborn\n");
+    LogDebug("Player::Reborn\n");
 
-    playerstate = PST_LIVE;
+    player_state_ = kPlayerAlive;
 
-    mo     = nullptr;
-    health = 0;
+    map_object_ = nullptr;
+    health_     = 0;
 
-    memset(armours, 0, sizeof(armours));
-    memset(armour_types, 0, sizeof(armour_types));
-    memset(powers, 0, sizeof(powers));
+    memset(armours_, 0, sizeof(armours_));
+    memset(armour_types_, 0, sizeof(armour_types_));
+    memset(powers_, 0, sizeof(powers_));
 
-    keep_powers = 0;
-    totalarmour = 0;
-    cards       = kDoorKeyNone;
+    keep_powers_  = 0;
+    total_armour_ = 0;
+    cards_        = kDoorKeyNone;
 
-    ready_wp   = WPSEL_None;
-    pending_wp = WPSEL_NoChange;
+    ready_weapon_   = KWeaponSelectionNone;
+    pending_weapon_ = KWeaponSelectionNoChange;
 
-    memset(weapons, 0, sizeof(weapons));
-    memset(avail_weapons, 0, sizeof(avail_weapons));
-    memset(ammo, 0, sizeof(ammo));
-    memset(inventory, 0, sizeof(inventory));
-    memset(counters, 0, sizeof(counters));
+    memset(weapons_, 0, sizeof(weapons_));
+    memset(available_weapons_, 0, sizeof(available_weapons_));
+    memset(ammo_, 0, sizeof(ammo_));
+    memset(inventory_, 0, sizeof(inventory_));
+    memset(counters_, 0, sizeof(counters_));
 
-    for (int w = 0; w <= 9; w++) key_choices[w] = WPSEL_None;
+    for (int w = 0; w <= 9; w++) key_choices_[w] = KWeaponSelectionNone;
 
-    cheats             = 0;
-    refire             = 0;
-    bob                = 0;
-    kick_offset        = 0;
-    zoom_fov           = 0;
-    bonuscount         = 0;
-    damagecount        = 0;
-    damage_pain        = 0;
-    extralight         = 0;
-    flash              = false;
-    last_damage_colour = SG_RED_RGBA32;
+    cheats_             = 0;
+    refire_             = 0;
+    bob_factor_         = 0;
+    kick_offset_        = 0;
+    zoom_field_of_view_ = 0;
+    bonus_count_        = 0;
+    damage_count_       = 0;
+    damage_pain_        = 0;
+    extra_light_        = 0;
+    flash_              = false;
+    last_damage_colour_ = SG_RED_RGBA32;
 
-    attacker = nullptr;
+    attacker_ = nullptr;
 
-    effect_colourmap = nullptr;
-    effect_left      = 0;
+    effect_colourmap_ = nullptr;
+    effect_left_      = 0;
 
-    memset(psprites, 0, sizeof(psprites));
+    memset(player_sprites_, 0, sizeof(player_sprites_));
 
-    jumpwait     = 0;
-    idlewait     = 0;
-    splashwait   = 0;
-    air_in_lungs = 0;
-    underwater   = false;
-    airless      = false;
-    swimming     = false;
-    wet_feet     = false;
+    jump_wait_    = 0;
+    idle_wait_    = 0;
+    splash_wait_  = 0;
+    air_in_lungs_ = 0;
+    underwater_   = false;
+    airless_      = false;
+    swimming_     = false;
+    wet_feet_     = false;
 
-    grin_count       = 0;
-    attackdown_count = 0;
-    face_index       = 0;
-    face_count       = 0;
+    grin_count_             = 0;
+    attack_sustained_count_ = 0;
+    face_index_             = 0;
+    face_count_             = 0;
 
-    remember_atk[0]   = -1;
-    remember_atk[1]   = -1;
-    remember_atk[2]   = -1;
-    remember_atk[3]   = -1;
-    weapon_last_frame = -1;
+    remember_attack_state_[0] = -1;
+    remember_attack_state_[1] = -1;
+    remember_attack_state_[2] = -1;
+    remember_attack_state_[3] = -1;
+    weapon_last_frame_        = -1;
 }
 
 //
 // Returns false if the player cannot be respawned at the given spot
 // because something is occupying it.
 //
-static bool GameCheckSpot(player_t *player, const SpawnPoint *point)
+static bool GameCheckSpot(Player *player, const SpawnPoint *point)
 {
     float x = point->x;
     float y = point->y;
     float z = point->z;
 
-    if (!player->mo)
+    if (!player->map_object_)
     {
         // first spawn of level, before corpses
-        for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+        for (int player_number_ = 0; player_number_ < kMaximumPlayers;
+             player_number_++)
         {
-            player_t *p = players[pnum];
+            Player *p = players[player_number_];
 
-            if (!p || !p->mo || p == player) continue;
+            if (!p || !p->map_object_ || p == player) continue;
 
-            if (fabs(p->mo->x - x) < 8.0f && fabs(p->mo->y - y) < 8.0f)
+            if (fabs(p->map_object_->x - x) < 8.0f &&
+                fabs(p->map_object_->y - y) < 8.0f)
                 return false;
         }
 
@@ -251,9 +253,9 @@ static bool GameCheckSpot(player_t *player, const SpawnPoint *point)
         return true;  // OK
     }
 
-    if (!CheckAbsolutePosition(player->mo, x, y, z)) return false;
+    if (!CheckAbsolutePosition(player->map_object_, x, y, z)) return false;
 
-    GameAddBodyToQueue(player->mo);
+    GameAddBodyToQueue(player->map_object_);
 
     // spawn a teleport fog
     // (temp fix for teleport effect)
@@ -271,49 +273,52 @@ static bool GameCheckSpot(player_t *player, const SpawnPoint *point)
 // Note: we don't rely on current value being valid, hence can use
 //       these functions during initialisation.
 //
-void GameSetConsolePlayer(int pnum)
+void SetConsolePlayer(int player_number_)
 {
-    consoleplayer = pnum;
+    console_player = player_number_;
 
-    SYS_ASSERT(players[consoleplayer]);
+    SYS_ASSERT(players[console_player]);
 
-    for (int i = 0; i < MAXPLAYERS; i++)
-        if (players[i]) players[i]->playerflags &= ~PFL_Console;
+    for (int i = 0; i < kMaximumPlayers; i++)
+        if (players[i]) players[i]->player_flags_ &= ~kPlayerFlagConsole;
 
-    players[pnum]->playerflags |= PFL_Console;
+    players[player_number_]->player_flags_ |= kPlayerFlagConsole;
 
-    if (ArgumentFind("testbot") > 0) { P_BotCreate(players[pnum], false); }
+    if (ArgumentFind("testbot") > 0)
+    {
+        P_BotCreate(players[player_number_], false);
+    }
     else
     {
-        players[pnum]->builder    = P_ConsolePlayerBuilder;
-        players[pnum]->build_data = nullptr;
+        players[player_number_]->Builder     = ConsolePlayerBuilder;
+        players[player_number_]->build_data_ = nullptr;
     }
 }
 
 //
 // GameSetDisplayPlayer
 //
-void GameSetDisplayPlayer(int pnum)
+void SetDisplayPlayer(int player_number_)
 {
-    displayplayer = pnum;
+    display_player = player_number_;
 
-    SYS_ASSERT(players[displayplayer]);
+    SYS_ASSERT(players[display_player]);
 
-    for (int i = 0; i < MAXPLAYERS; i++)
-        if (players[i]) players[i]->playerflags &= ~PFL_Display;
+    for (int i = 0; i < kMaximumPlayers; i++)
+        if (players[i]) players[i]->player_flags_ &= ~kPlayerFlagDisplay;
 
-    players[pnum]->playerflags |= PFL_Display;
+    players[player_number_]->player_flags_ |= kPlayerFlagDisplay;
 }
 
-void GameToggleDisplayPlayer(void)
+void ToggleDisplayPlayer(void)
 {
-    for (int i = 1; i <= MAXPLAYERS; i++)
+    for (int i = 1; i <= kMaximumPlayers; i++)
     {
-        int pnum = (displayplayer + i) % MAXPLAYERS;
+        int player_number_ = (display_player + i) % kMaximumPlayers;
 
-        if (players[pnum])
+        if (players[player_number_])
         {
-            GameSetDisplayPlayer(pnum);
+            SetDisplayPlayer(player_number_);
             break;
         }
     }
@@ -328,7 +333,7 @@ void GameToggleDisplayPlayer(void)
 // -KM- 1998/12/21 Cleaned this up a bit.
 // -KM- 1999/01/31 Removed all those nasty cases for doomednum (1/4001)
 //
-static void P_SpawnPlayer(player_t *p, const SpawnPoint *point, bool is_hub)
+static void P_SpawnPlayer(Player *p, const SpawnPoint *point, bool is_hub)
 {
     // -KM- 1998/11/25 This is in preparation for skins.  The creatures.ddf
     //   will hold player start objects, sprite will be taken for skin.
@@ -341,9 +346,10 @@ static void P_SpawnPlayer(player_t *p, const SpawnPoint *point, bool is_hub)
     LogDebug("* P_SpawnPlayer %d @ %1.0f,%1.0f\n", point->info->playernum_,
              point->x, point->y);
 
-    if (info->playernum_ <= 0) info = mobjtypes.LookupPlayer(p->pnum + 1);
+    if (info->playernum_ <= 0)
+        info = mobjtypes.LookupPlayer(p->player_number_ + 1);
 
-    if (p->playerstate == PST_REBORN)
+    if (p->player_state_ == kPlayerAwaitingRespawn)
     {
         p->Reborn();
 
@@ -355,31 +361,32 @@ static void P_SpawnPlayer(player_t *p, const SpawnPoint *point, bool is_hub)
     mobj->angle_          = point->angle;
     mobj->vertical_angle_ = point->vertical_angle;
     mobj->player_         = p;
-    mobj->health_         = p->health;
+    mobj->health_         = p->health_;
 
-    p->mo               = mobj;
-    p->playerstate      = PST_LIVE;
-    p->refire           = 0;
-    p->damagecount      = 0;
-    p->damage_pain      = 0;
-    p->bonuscount       = 0;
-    p->extralight       = 0;
-    p->effect_colourmap = nullptr;
-    p->std_viewheight   = mobj->height_ * info->viewheight_;
-    p->viewheight       = p->std_viewheight;
-    p->zoom_fov         = 0;
-    p->jumpwait         = 0;
+    p->map_object_           = mobj;
+    p->player_state_         = kPlayerAlive;
+    p->refire_               = 0;
+    p->damage_count_         = 0;
+    p->damage_pain_          = 0;
+    p->bonus_count_          = 0;
+    p->extra_light_          = 0;
+    p->effect_colourmap_     = nullptr;
+    p->standard_view_height_ = mobj->height_ * info->viewheight_;
+    p->view_height_          = p->standard_view_height_;
+    p->zoom_field_of_view_   = 0;
+    p->jump_wait_            = 0;
 
     // don't do anything immediately
-    p->attackdown[0] = p->attackdown[1] = false;
-    p->usedown                          = false;
-    p->actiondown[0] = p->actiondown[1] = false;
+    p->attack_button_down_[0] = p->attack_button_down_[1] = false;
+    p->attack_button_down_[2] = p->attack_button_down_[3] = false;
+    p->use_button_down_                                   = false;
+    p->action_button_down_[0] = p->action_button_down_[1] = false;
 
     // setup gun psprite
     if (!is_hub || !SP_MATCH()) SetupPlayerSprites(p);
 
     // give all cards in death match mode
-    if (DEATHMATCH()) p->cards = kDoorKeyBitmask;
+    if (DEATHMATCH()) p->cards_ = kDoorKeyBitmask;
 
     // -AJA- in COOP, all players are on the same side
     if (COOP_MATCH()) mobj->side_ = ~0;
@@ -398,31 +405,31 @@ static void P_SpawnPlayer(player_t *p, const SpawnPoint *point, bool is_hub)
     if (COOP_MATCH() && !level_flags.team_damage)
         mobj->hyper_flags_ |= kHyperFlagFriendlyFireImmune;
 
-    if (p->isBot())
+    if (p->IsBot())
     {
-        DeathBot *bot = (DeathBot *)p->build_data;
+        DeathBot *bot = (DeathBot *)p->build_data_;
         SYS_ASSERT(bot);
 
         bot->Respawn();
     }
 }
 
-static void P_SpawnVoodooDoll(player_t *p, const SpawnPoint *point)
+static void P_SpawnVoodooDoll(Player *p, const SpawnPoint *point)
 {
     const MapObjectDefinition *info = point->info;
 
     SYS_ASSERT(info);
     SYS_ASSERT(info->playernum_ > 0);
 
-    LogDebug("* P_SpawnVoodooDoll %d @ %1.0f,%1.0f\n", p->pnum + 1, point->x,
-             point->y);
+    LogDebug("* P_SpawnVoodooDoll %d @ %1.0f,%1.0f\n", p->player_number_ + 1,
+             point->x, point->y);
 
     MapObject *mobj = P_MobjCreateObject(point->x, point->y, point->z, info);
 
     mobj->angle_          = point->angle;
     mobj->vertical_angle_ = point->vertical_angle;
     mobj->player_         = p;
-    mobj->health_         = p->health;
+    mobj->health_         = p->health_;
 
     mobj->is_voodoo_ = true;
 
@@ -435,20 +442,21 @@ static void P_SpawnVoodooDoll(player_t *p, const SpawnPoint *point)
 // Spawns a player at one of the random deathmatch spots.
 // Called at level load and each death.
 //
-void GameDeathMatchSpawnPlayer(player_t *p)
+void DeathMatchSpawnPlayer(Player *p)
 {
-    if (p->pnum >= (int)dm_starts.size())
-        LogWarning("Few deathmatch spots, %d recommended.\n", p->pnum + 1);
+    if (p->player_number_ >= (int)deathmatch_starts.size())
+        LogWarning("Few deathmatch spots, %d recommended.\n",
+                   p->player_number_ + 1);
 
     int begin = RandomByteDeterministic();
 
-    if (dm_starts.size() > 0)
+    if (deathmatch_starts.size() > 0)
     {
-        for (int j = 0; j < (int)dm_starts.size(); j++)
+        for (int j = 0; j < (int)deathmatch_starts.size(); j++)
         {
-            int i = (begin + j) % (int)dm_starts.size();
+            int i = (begin + j) % (int)deathmatch_starts.size();
 
-            if (GameCheckSpot(p, &dm_starts[i])) return;
+            if (GameCheckSpot(p, &deathmatch_starts[i])) return;
         }
     }
 
@@ -472,15 +480,15 @@ void GameDeathMatchSpawnPlayer(player_t *p)
 // Spawns a player at one of the single player spots.
 // Called at level load and each death.
 //
-void GameCoopSpawnPlayer(player_t *p)
+void CoopSpawnPlayer(Player *p)
 {
-    SpawnPoint *point = GameFindCoopPlayer(p->pnum + 1);
+    SpawnPoint *point = FindCoopPlayer(p->player_number_ + 1);
 
     if (point && GameCheckSpot(p, point)) return;
 
-    LogWarning("Player %d start is invalid.\n", p->pnum + 1);
+    LogWarning("Player %d start is invalid.\n", p->player_number_ + 1);
 
-    int begin = p->pnum;
+    int begin = p->player_number_;
 
     // try to spawn at one of the other players spots
     for (int j = 0; j < (int)coop_starts.size(); j++)
@@ -493,7 +501,7 @@ void GameCoopSpawnPlayer(player_t *p)
     FatalError("No usable player start found!\n");
 }
 
-static SpawnPoint *GameFindHubPlayer(int pnum, int tag)
+static SpawnPoint *GameFindHubPlayer(int player_number_, int tag)
 {
     int count = 0;
 
@@ -506,35 +514,35 @@ static SpawnPoint *GameFindHubPlayer(int pnum, int tag)
 
         count++;
 
-        if (point->info->playernum_ == pnum) return point;
+        if (point->info->playernum_ == player_number_) return point;
     }
 
     if (count == 0)
         FatalError("Missing hub starts with tag %d\n", tag);
     else
-        FatalError("No usable hub start for player %d (tag %d)\n", pnum + 1,
-                   tag);
+        FatalError("No usable hub start for player %d (tag %d)\n",
+                   player_number_ + 1, tag);
 
     return nullptr; /* NOT REACHED */
 }
 
-void GameHubSpawnPlayer(player_t *p, int tag)
+void GameHubSpawnPlayer(Player *p, int tag)
 {
-    SYS_ASSERT(!p->mo);
+    SYS_ASSERT(!p->map_object_);
 
-    SpawnPoint *point = GameFindHubPlayer(p->pnum + 1, tag);
+    SpawnPoint *point = GameFindHubPlayer(p->player_number_ + 1, tag);
 
     // assume player will fit (too bad otherwise)
     P_SpawnPlayer(p, point, true);
 }
 
-void GameSpawnVoodooDolls(player_t *p)
+void SpawnVoodooDolls(Player *p)
 {
     for (int i = 0; i < (int)voodoo_dolls.size(); i++)
     {
         SpawnPoint *point = &voodoo_dolls[i];
 
-        if (point->info->playernum_ != p->pnum + 1) continue;
+        if (point->info->playernum_ != p->player_number_ + 1) continue;
 
         P_SpawnVoodooDoll(p, point);
     }
@@ -543,13 +551,13 @@ void GameSpawnVoodooDolls(player_t *p)
 // number of wanted dogs (1-3)
 EDGE_DEFINE_CONSOLE_VARIABLE(dogs, "0", kConsoleVariableFlagArchive)
 
-void GameSpawnHelper(int pnum)
+void SpawnHelper(int player_number_)
 {
-    if (pnum == 0) return;
+    if (player_number_ == 0) return;
 
-    if (pnum > dogs.d_) return;
+    if (player_number_ > dogs.d_) return;
 
-    SpawnPoint *point = GameFindCoopPlayer(pnum + 1);
+    SpawnPoint *point = FindCoopPlayer(player_number_ + 1);
     if (point == nullptr) return;
 
     const MapObjectDefinition *info = mobjtypes.Lookup(888);
@@ -565,8 +573,8 @@ void GameSpawnHelper(int pnum)
 
 bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
 {
-    player_t *p = mo->player_;
-    bool      temp;
+    Player *p = mo->player_;
+    bool    temp;
 
     for (; cond; cond = cond->next)
     {
@@ -590,15 +598,15 @@ bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
                 if (cond->exact)
                 {
                     if (cond->sub.type == kTotalArmourTypes)
-                        return (p->totalarmour == i_amount);
+                        return (p->total_armour_ == i_amount);
                     else
-                        return (p->armours[cond->sub.type] == i_amount);
+                        return (p->armours_[cond->sub.type] == i_amount);
                 }
 
                 if (cond->sub.type == kTotalArmourTypes)
-                    temp = (p->totalarmour >= i_amount);
+                    temp = (p->total_armour_ >= i_amount);
                 else
-                    temp = (p->armours[cond->sub.type] >= i_amount);
+                    temp = (p->armours_[cond->sub.type] >= i_amount);
 
                 if ((!cond->negate && !temp) || (cond->negate && temp))
                     return false;
@@ -608,7 +616,7 @@ bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
             case kConditionCheckTypeKey:
                 if (!p) return false;
 
-                temp = ((p->cards & cond->sub.type) != 0);
+                temp = ((p->cards_ & cond->sub.type) != 0);
 
                 if ((!cond->negate && !temp) || (cond->negate && temp))
                     return false;
@@ -622,8 +630,8 @@ bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
 
                 for (int i = 0; i < kMaximumWeapons; i++)
                 {
-                    if (p->weapons[i].owned &&
-                        p->weapons[i].info == cond->sub.weap)
+                    if (p->weapons_[i].owned &&
+                        p->weapons_[i].info == cond->sub.weap)
                     {
                         temp = true;
                         break;
@@ -639,9 +647,9 @@ bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
                 if (!p) return false;
 
                 if (cond->exact)
-                    return (p->powers[cond->sub.type] == cond->amount);
+                    return (p->powers_[cond->sub.type] == cond->amount);
 
-                temp = (p->powers[cond->sub.type] > cond->amount);
+                temp = (p->powers_[cond->sub.type] > cond->amount);
 
                 if ((!cond->negate && !temp) || (cond->negate && temp))
                     return false;
@@ -652,9 +660,9 @@ bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
                 if (!p) return false;
 
                 if (cond->exact)
-                    return (p->ammo[cond->sub.type].num == i_amount);
+                    return (p->ammo_[cond->sub.type].count == i_amount);
 
-                temp = (p->ammo[cond->sub.type].num >= i_amount);
+                temp = (p->ammo_[cond->sub.type].count >= i_amount);
 
                 if ((!cond->negate && !temp) || (cond->negate && temp))
                     return false;
@@ -665,9 +673,9 @@ bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
                 if (!p) return false;
 
                 if (cond->exact)
-                    return (p->inventory[cond->sub.type].num == i_amount);
+                    return (p->inventory_[cond->sub.type].count == i_amount);
 
-                temp = (p->inventory[cond->sub.type].num >= i_amount);
+                temp = (p->inventory_[cond->sub.type].count >= i_amount);
 
                 if ((!cond->negate && !temp) || (cond->negate && temp))
                     return false;
@@ -678,9 +686,9 @@ bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
                 if (!p) return false;
 
                 if (cond->exact)
-                    return (p->counters[cond->sub.type].num == i_amount);
+                    return (p->counters_[cond->sub.type].count == i_amount);
 
-                temp = (p->counters[cond->sub.type].num >= i_amount);
+                temp = (p->counters_[cond->sub.type].count >= i_amount);
 
                 if ((!cond->negate && !temp) || (cond->negate && temp))
                     return false;
@@ -690,7 +698,7 @@ bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
             case kConditionCheckTypeJumping:
                 if (!p) return false;
 
-                temp = (p->jumpwait > 0);
+                temp = (p->jump_wait_ > 0);
 
                 if ((!cond->negate && !temp) || (cond->negate && temp))
                     return false;
@@ -711,7 +719,7 @@ bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
             case kConditionCheckTypeSwimming:
                 if (!p) return false;
 
-                temp = p->swimming;
+                temp = p->swimming_;
 
                 if ((!cond->negate && !temp) || (cond->negate && temp))
                     return false;
@@ -721,7 +729,8 @@ bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
             case kConditionCheckTypeAttacking:
                 if (!p) return false;
 
-                temp = p->attackdown[0] || p->attackdown[1];
+                temp = p->attack_button_down_[0] || p->attack_button_down_[1] ||
+                       p->action_button_down_[2] || p->action_button_down_[3];
 
                 if ((!cond->negate && !temp) || (cond->negate && temp))
                     return false;
@@ -731,7 +740,7 @@ bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
             case kConditionCheckTypeRampaging:
                 if (!p) return false;
 
-                temp = (p->attackdown_count >= 70);
+                temp = (p->attack_sustained_count_ >= 70);
 
                 if ((!cond->negate && !temp) || (cond->negate && temp))
                     return false;
@@ -741,7 +750,7 @@ bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
             case kConditionCheckTypeUsing:
                 if (!p) return false;
 
-                temp = p->usedown;
+                temp = p->use_button_down_;
 
                 if ((!cond->negate && !temp) || (cond->negate && temp))
                     return false;
@@ -751,7 +760,7 @@ bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
             case kConditionCheckTypeAction1:
                 if (!p) return false;
 
-                temp = p->actiondown[0];
+                temp = p->action_button_down_[0];
 
                 if ((!cond->negate && !temp) || (cond->negate && temp))
                     return false;
@@ -761,7 +770,7 @@ bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
             case kConditionCheckTypeAction2:
                 if (!p) return false;
 
-                temp = p->actiondown[1];
+                temp = p->action_button_down_[1];
 
                 if ((!cond->negate && !temp) || (cond->negate && temp))
                     return false;
@@ -771,8 +780,8 @@ bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
             case kConditionCheckTypeWalking:
                 if (!p) return false;
 
-                temp = (p->actual_speed > PLAYER_kStopSpeed) &&
-                       (p->mo->z <= p->mo->floor_z_);
+                temp = (p->actual_speed_ > kPlayerStopSpeed) &&
+                       (p->map_object_->z <= p->map_object_->floor_z_);
 
                 if ((!cond->negate && !temp) || (cond->negate && temp))
                     return false;
@@ -790,47 +799,42 @@ bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
     return true;
 }
 
-void GameAddDeathmatchStart(const SpawnPoint &point)
+void AddDeathmatchStart(const SpawnPoint &point)
 {
-    dm_starts.push_back(point);
+    deathmatch_starts.push_back(point);
 }
 
-void GameAddHubStart(const SpawnPoint &point) { hub_starts.push_back(point); }
+void AddHubStart(const SpawnPoint &point) { hub_starts.push_back(point); }
 
-void GameAddCoopStart(const SpawnPoint &point)
-{
-    coop_starts.push_back(point);
-}
+void AddCoopStart(const SpawnPoint &point) { coop_starts.push_back(point); }
 
-void GameAddVoodooDoll(const SpawnPoint &point)
-{
-    voodoo_dolls.push_back(point);
-}
+void AddVoodooDoll(const SpawnPoint &point) { voodoo_dolls.push_back(point); }
 
-SpawnPoint *GameFindCoopPlayer(int pnum)
+SpawnPoint *FindCoopPlayer(int player_number_)
 {
     for (int i = 0; i < (int)coop_starts.size(); i++)
     {
         SpawnPoint *point = &coop_starts[i];
         SYS_ASSERT(point->info);
 
-        if (point->info->playernum_ == pnum) return point;
+        if (point->info->playernum_ == player_number_) return point;
     }
 
     return nullptr;  // not found
 }
 
-void GameMarkPlayerAvatars(void)
+void MarkPlayerAvatars(void)
 {
-    for (int i = 0; i < MAXPLAYERS; i++)
+    for (int i = 0; i < kMaximumPlayers; i++)
     {
-        player_t *p = players[i];
+        Player *p = players[i];
 
-        if (p && p->mo) p->mo->hyper_flags_ |= kHyperFlagRememberOldAvatars;
+        if (p && p->map_object_)
+            p->map_object_->hyper_flags_ |= kHyperFlagRememberOldAvatars;
     }
 }
 
-void GameRemoveOldAvatars(void)
+void RemoveOldAvatars(void)
 {
     MapObject *mo;
     MapObject *next;
@@ -848,24 +852,24 @@ void GameRemoveOldAvatars(void)
             (mo->target_->hyper_flags_ & kHyperFlagRememberOldAvatars))
         {
             SYS_ASSERT(mo->target_->player_);
-            SYS_ASSERT(mo->target_->player_->mo);
+            SYS_ASSERT(mo->target_->player_->map_object_);
 
             // LogDebug("Updating avatar reference: %p --> %p\n", mo->target_,
-            // mo->target_->player_->mo);
+            // mo->target_->player_->map_object_);
 
-            mo->SetTarget(mo->target_->player_->mo);
+            mo->SetTarget(mo->target_->player_->map_object_);
         }
 
         if (mo->source_ &&
             (mo->source_->hyper_flags_ & kHyperFlagRememberOldAvatars))
         {
-            mo->SetSource(mo->source_->player_->mo);
+            mo->SetSource(mo->source_->player_->map_object_);
         }
 
         if (mo->support_object_ &&
             (mo->support_object_->hyper_flags_ & kHyperFlagRememberOldAvatars))
         {
-            mo->SetSupportObject(mo->support_object_->player_->mo);
+            mo->SetSupportObject(mo->support_object_->player_->map_object_);
         }
 
         // the other three fields don't matter (tracer, above_object_,

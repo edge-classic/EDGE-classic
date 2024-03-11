@@ -100,34 +100,34 @@ void BringCorpseToLife(MapObject *corpse);
 //
 #define GRIN_TIME (kTicRate * 2)
 
-void SetupPlayerSprites(player_t *curplayer);
-void MovePlayerSprites(player_t *curplayer);
-void DropWeapon(player_t *player);
+void SetupPlayerSprites(Player *curplayer);
+void MovePlayerSprites(Player *curplayer);
+void DropWeapon(Player *player);
 bool CheckWeaponSprite(WeaponDefinition *info);
 
-void DesireWeaponChange(player_t *p, int key);
-void CycleWeapon(player_t *p, int dir);
-void SelectNewWeapon(player_t *player, int priority, AmmunitionType ammo);
-void TrySwitchNewWeapon(player_t *p, int new_weap, AmmunitionType new_ammo);
-bool TryFillNewWeapon(player_t *p, int idx, AmmunitionType ammo, int *qty);
-void FillWeapon(player_t *p, int slot);
-void P_FixWeaponClip(player_t *p, int slot);
+void DesireWeaponChange(Player *p, int key);
+void CycleWeapon(Player *p, int dir);
+void SelectNewWeapon(Player *player, int priority, AmmunitionType ammo);
+void TrySwitchNewWeapon(Player *p, int new_weap, AmmunitionType new_ammo);
+bool TryFillNewWeapon(Player *p, int idx, AmmunitionType ammo, int *qty);
+void FillWeapon(Player *p, int slot);
+void P_FixWeaponClip(Player *p, int slot);
 
 //
 // P_USER
 //
 void P_CreatePlayer(int pnum, bool is_bot);
 void DestroyAllPlayers(void);
-void P_GiveInitialBenefits(player_t *player, const MapObjectDefinition *info);
+void P_GiveInitialBenefits(Player *player, const MapObjectDefinition *info);
 
-bool P_PlayerThink(player_t *player, bool extra_tic);
-void UpdateAvailWeapons(player_t *p);
-void UpdateTotalArmour(player_t *p);
+bool P_PlayerThink(Player *player, bool extra_tic);
+void UpdateAvailWeapons(Player *p);
+void UpdateTotalArmour(Player *p);
 
-bool AddWeapon(player_t *player, WeaponDefinition *info, int *index);
-bool RemoveWeapon(player_t *player, WeaponDefinition *info);
-bool P_PlayerSwitchWeapon(player_t *player, WeaponDefinition *choice);
-void P_PlayerJump(player_t *pl, float dz, int wait);
+bool AddWeapon(Player *player, WeaponDefinition *info, int *index);
+bool RemoveWeapon(Player *player, WeaponDefinition *info);
+bool P_PlayerSwitchWeapon(Player *player, WeaponDefinition *choice);
+void P_PlayerJump(Player *pl, float dz, int wait);
 
 //
 // P_MOBJ
@@ -181,7 +181,7 @@ extern DirectionType diagonals[];
 extern float         xspeed[8];
 extern float         yspeed[8];
 
-void       NoiseAlert(player_t *p);
+void       NoiseAlert(Player *p);
 void       NoiseAlert(MapObject *actor);
 void       NewChaseDir(MapObject *actor);
 bool       P_CreateAggression(MapObject *actor);
@@ -282,7 +282,7 @@ void RadiusAttack(MapObject *spot, MapObject *source, float radius,
 bool TeleportMove(MapObject *thing, float x, float y, float z);
 bool TryMove(MapObject *thing, float x, float y);
 void P_SlideMove(MapObject *mo, float x, float y);
-void P_UseLines(player_t *player);
+void P_UseLines(Player *player);
 void P_LineAttack(MapObject *t1, BAMAngle angle, float distance, float slope,
                   float damage, const DamageClass *damtype,
                   const MapObjectDefinition *puff);
@@ -316,9 +316,9 @@ void TelefragMapObject(MapObject *target, MapObject *inflictor,
 void KillMapObject(MapObject *source, MapObject *target,
                    const DamageClass *damtype   = nullptr,
                    bool               weak_spot = false);
-bool GiveBenefitList(player_t *player, MapObject *special, Benefit *list,
+bool GiveBenefitList(Player *player, MapObject *special, Benefit *list,
                      bool lose_them);
-bool HasBenefitInList(player_t *player, Benefit *list);
+bool HasBenefitInList(Player *player, Benefit *list);
 
 //
 // P_SPEC

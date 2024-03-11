@@ -129,8 +129,8 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing,
 
     bool flipped = (def->special_ & kTeleportSpecialFlipped) ? true : false;
 
-    player_t *player = thing->player_;
-    if (player && player->mo != thing)  // exclude voodoo dolls
+    Player *player = thing->player_;
+    if (player && player->map_object_ != thing)  // exclude voodoo dolls
         player = nullptr;
 
     if (def->special_ & kTeleportSpecialLine)
@@ -246,9 +246,9 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing,
 
     if (player)
     {
-        player->viewheight      = player->std_viewheight;
-        player->view_z           = player->std_viewheight;
-        player->deltaviewheight = 0;
+        player->view_height_      = player->standard_view_height_;
+        player->view_z_           = player->standard_view_height_;
+        player->delta_view_height_ = 0;
     }
     else
         thing->teleport_tic_ = 18;
@@ -281,7 +281,7 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing,
 
         thing->momentum_.X = thing->momentum_.Y = thing->momentum_.Z = 0;
 
-        player->actual_speed = 0;
+        player->actual_speed_ = 0;
     }
 
     thing->angle_ = new_ang;
@@ -328,7 +328,7 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing,
             if (fog->info_->chase_state_)
                 P_SetMobjStateDeferred(fog, fog->info_->chase_state_, 0);
 
-            if (player == players[displayplayer] && reduce_flash)
+            if (player == players[display_player] && reduce_flash)
             {
                 fog->target_visibility_ = fog->visibility_ = INVISIBLE;
                 ConsoleImportantMessageLDF("Teleporting...");

@@ -626,14 +626,14 @@ void OptionMenuDrawPlayerList(void)
     int humans = 0;
 
     ///	for (i = 0; i < network_game_parameters->total_players; i++)
-    ///		if (! (network_game_parameters->players[i] & PFL_Bot))
+    ///		if (! (network_game_parameters->players[i] & kPlayerFlagBot))
     ///			humans++;
 
     for (i = 0; i < network_game_parameters->total_players_; i++)
     {
         int flags = network_game_parameters->players_[i];
 
-        if (flags & PFL_Bot) continue;
+        if (flags & kPlayerFlagBot) continue;
 
         humans++;
 
@@ -641,18 +641,16 @@ void OptionMenuDrawPlayerList(void)
 
         for (int j = 0; j < network_game_parameters->total_players_; j++)
         {
-            if ((network_game_parameters->players_[j] & PFL_Bot) &&
-                (network_game_parameters->nodes_[j] ==
-                 network_game_parameters->nodes_[i]))
+            if (network_game_parameters->players_[j] & kPlayerFlagBot)
                 bots_here++;
         }
 
-        HudWriteText(network_game_list_style, (flags & PFL_Network) ? 0 : 3, 20,
+        HudWriteText(network_game_list_style, (flags & kPlayerFlagNetwork) ? 0 : 3, 20,
                      y, epi::StringFormat("PLAYER %d", humans).c_str());
 
         HudWriteText(network_game_list_style, 1, 100, y, "Local");
 
-        HudWriteText(network_game_list_style, (flags & PFL_Network) ? 0 : 3,
+        HudWriteText(network_game_list_style, (flags & kPlayerFlagNetwork) ? 0 : 3,
                      200, y, epi::StringFormat("%d BOTS", bots_here).c_str());
         y += 10;
     }

@@ -2713,7 +2713,7 @@ static bool PTR_UseTraverse(PathIntercept *in, void *dataptr)
 //
 // Looks for special lines in front of the player to activate.
 //
-void P_UseLines(player_t *player)
+void P_UseLines(Player *player)
 {
     int   angle;
     float x1;
@@ -2721,14 +2721,14 @@ void P_UseLines(player_t *player)
     float x2;
     float y2;
 
-    use_thing = player->mo;
+    use_thing = player->map_object_;
     use_lower = -FLT_MAX;
     use_upper = FLT_MAX;
 
-    angle = player->mo->angle_;
+    angle = player->map_object_->angle_;
 
-    x1 = player->mo->x;
-    y1 = player->mo->y;
+    x1 = player->map_object_->x;
+    y1 = player->map_object_->y;
     x2 = x1 + USERANGE * epi::BAMCos(angle);
     y2 = y1 + USERANGE * epi::BAMSin(angle);
 

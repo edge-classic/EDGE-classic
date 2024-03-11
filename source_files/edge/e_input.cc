@@ -396,8 +396,8 @@ void EventBuildTicCommand(EventTicCommand *cmd)
     if (EventIsKeyPressed(key_fire)) cmd->buttons |= kButtonCodeAttack;
 
     if (EventIsKeyPressed(key_use) &&
-        players[cmd->player_index]->playerstate !=
-            PST_REBORN)  // Prevent passing use action when hitting 'use' to
+        players[cmd->player_index]->player_state_ !=
+            kPlayerAwaitingRespawn)  // Prevent passing use action when hitting 'use' to
                          // respawn
         cmd->buttons |= kButtonCodeUse;
 

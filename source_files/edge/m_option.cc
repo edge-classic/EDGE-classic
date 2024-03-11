@@ -2248,11 +2248,11 @@ static void OptionMenuChangeBobbing(int              key_pressed,
                                     ConsoleVariable *console_variable)
 {
     view_bobbing        = view_bobbing.d_;
-    player_t *player = players[consoleplayer];
+    Player *player = players[console_player];
     if (player)
     {
-        player->bob   = 0;
-        PlayerSprite *psp = &player->psprites[player->action_psp];
+        player->bob_factor_   = 0;
+        PlayerSprite *psp = &player->player_sprites_[player->action_player_sprite_];
         if (psp)
         {
             psp->screen_x = 0;

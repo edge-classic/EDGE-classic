@@ -27,9 +27,9 @@
 
 #include "e_player.h"
 
-void RendererRainbowEffect(player_t *player);
-void RendererColourmapEffect(player_t *player);
-void RendererPaletteEffect(player_t *player);
+void RendererRainbowEffect(Player *player);
+void RendererColourmapEffect(Player *player);
+void RendererPaletteEffect(Player *player);
 
 //
 //  FUZZY Emulation

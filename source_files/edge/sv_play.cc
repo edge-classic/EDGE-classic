@@ -40,7 +40,7 @@
 
 // forward decls.
 int   SaveGamePlayerCountElems(void);
-int   SaveGamePlayerGetIndex(player_t *elem);
+int   SaveGamePlayerGetIndex(Player *elem);
 void *SaveGamePlayerFindByIndex(int index);
 void  SaveGamePlayerCreateElems(int num_elems);
 void  SaveGamePlayerFinaliseElems(void);
@@ -72,259 +72,259 @@ extern void SaveGameMapObjectPutType(void *storage, int index, void *extra);
 //
 
 static SaveField sv_fields_player[] = {
-    {offsetof(player_t, pnum),
+    {offsetof(Player, player_number_),
      "pnum",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(player_t, playerstate),
+    {offsetof(Player, player_state_),
      "playerstate",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(player_t, playerflags),
+    {offsetof(Player, player_flags_),
      "playerflags",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(player_t, playername[0]),
+    {offsetof(Player, player_name_[0]),
      "playername",
      1,
      {kSaveFieldString, 0, nullptr},
      SR_PlayerGetName,
      SR_PlayerPutName,
      nullptr},
-    {offsetof(player_t, mo),
+    {offsetof(Player, map_object_),
      "mo",
      1,
      {kSaveFieldIndex, 4, "mobjs"},
      SaveGameGetMapObject,
      SaveGamePutMapObject,
      nullptr},
-    {offsetof(player_t, view_z),
+    {offsetof(Player, view_z_),
      "viewz",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetFloat,
      SaveGamePutFloat,
      nullptr},
-    {offsetof(player_t, viewheight),
+    {offsetof(Player, view_height_),
      "viewheight",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetFloat,
      SaveGamePutFloat,
      nullptr},
-    {offsetof(player_t, deltaviewheight),
+    {offsetof(Player, delta_view_height_),
      "deltaviewheight",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetFloat,
      SaveGamePutFloat,
      nullptr},
-    {offsetof(player_t, std_viewheight),
+    {offsetof(Player, standard_view_height_),
      "std_viewheight",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetFloat,
      SaveGamePutFloat,
      nullptr},
-    {offsetof(player_t, zoom_fov),
+    {offsetof(Player, zoom_field_of_view_),
      "zoom_fov",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(player_t, actual_speed),
+    {offsetof(Player, actual_speed_),
      "actual_speed",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetFloat,
      SaveGamePutFloat,
      nullptr},
-    {offsetof(player_t, health),
+    {offsetof(Player, health_),
      "health",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetFloat,
      SaveGamePutFloat,
      nullptr},
-    {offsetof(player_t, armours[0]),
+    {offsetof(Player, armours_[0]),
      "armours",
      kTotalArmourTypes,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetFloat,
      SaveGamePutFloat,
      nullptr},
-    {offsetof(player_t, armour_types[0]),
+    {offsetof(Player, armour_types_[0]),
      "armour_types",
      kTotalArmourTypes,
      {kSaveFieldString, 0, nullptr},
      SaveGameMapObjectGetType,
      SaveGameMapObjectPutType,
      nullptr},
-    {offsetof(player_t, powers[0]),
+    {offsetof(Player, powers_[0]),
      "powers",
      kTotalPowerTypes,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetFloat,
      SaveGamePutFloat,
      nullptr},
-    {offsetof(player_t, keep_powers),
+    {offsetof(Player, keep_powers_),
      "keep_powers",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(player_t, cards),
+    {offsetof(Player, cards_),
      "cards_ke",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(player_t, frags),
+    {offsetof(Player, frags_),
      "frags",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(player_t, totalfrags),
+    {offsetof(Player, total_frags_),
      "totalfrags",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(player_t, ready_wp),
+    {offsetof(Player, ready_weapon_),
      "ready_wp",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(player_t, pending_wp),
+    {offsetof(Player, pending_weapon_),
      "pending_wp",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(player_t, weapons[0]),
+    {offsetof(Player, weapons_[0]),
      "weapons",
      kMaximumWeapons,
      {kSaveFieldStruct, 0, "playerweapon_t"},
      SR_PlayerGetWeapon,
      SR_PlayerPutWeapon,
      nullptr},
-    {offsetof(player_t, ammo[0]),
+    {offsetof(Player, ammo_[0]),
      "ammo",
      kTotalAmmunitionTypes,
      {kSaveFieldStruct, 0, "playerammo_t"},
      SR_PlayerGetAmmo,
      SR_PlayerPutAmmo,
      nullptr},
-    {offsetof(player_t, inventory[0]),
+    {offsetof(Player, inventory_[0]),
      "inventory",
      kTotalInventoryTypes,
      {kSaveFieldStruct, 0, "playerinv_t"},
      SR_PlayerGetInv,
      SR_PlayerPutInv,
      nullptr},
-    {offsetof(player_t, counters[0]),
+    {offsetof(Player, counters_[0]),
      "counters",
      kTotalCounterTypes,
      {kSaveFieldStruct, 0, "playercounter_t"},
      SR_PlayerGetCounter,
      SR_PlayerPutCounter,
      nullptr},
-    {offsetof(player_t, cheats),
+    {offsetof(Player, cheats_),
      "cheats",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(player_t, refire),
+    {offsetof(Player, refire_),
      "refire",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(player_t, killcount),
+    {offsetof(Player, kill_count_),
      "killcount",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(player_t, itemcount),
+    {offsetof(Player, item_count_),
      "itemcount",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(player_t, secretcount),
+    {offsetof(Player, secret_count_),
      "secretcount",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(player_t, jumpwait),
+    {offsetof(Player, jump_wait_),
      "jumpwait",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(player_t, idlewait),
+    {offsetof(Player, idle_wait_),
      "idlewait",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(player_t, air_in_lungs),
+    {offsetof(Player, air_in_lungs_),
      "air_in_lungs",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(player_t, underwater),
+    {offsetof(Player, underwater_),
      "underwater",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetBoolean,
      SaveGamePutBoolean,
      nullptr},
-    {offsetof(player_t, airless),
+    {offsetof(Player, airless_),
      "airless",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetBoolean,
      SaveGamePutBoolean,
      nullptr},
-    {offsetof(player_t, flash),
+    {offsetof(Player, flash_),
      "flash_b",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetBoolean,
      SaveGamePutBoolean,
      nullptr},
-    {offsetof(player_t, psprites[0]),
+    {offsetof(Player, player_sprites_[0]),
      "psprites",
      kTotalPlayerSpriteTypes,
      {kSaveFieldStruct, 0, "psprite_t"},
@@ -460,14 +460,14 @@ SaveStruct sv_struct_playerweapon = {
 //  COUNTER STRUCTURE
 //
 
-static SaveField sv_fields_playercounter[] = {{offsetof(playercounter_t, num),
+static SaveField sv_fields_playercounter[] = {{offsetof(PlayerStock, count),
                                                "num",
                                                1,
                                                {kSaveFieldNumeric, 4, nullptr},
                                                SaveGameGetInteger,
                                                SaveGamePutInteger,
                                                nullptr},
-                                              {offsetof(playercounter_t, max),
+                                              {offsetof(PlayerStock, maximum),
                                                "max",
                                                1,
                                                {kSaveFieldNumeric, 4, nullptr},
@@ -497,14 +497,14 @@ SaveStruct sv_struct_playercounter = {
 //  INVENTORY STRUCTURE
 //
 
-static SaveField sv_fields_playerinv[] = {{offsetof(playerinv_t, num),
+static SaveField sv_fields_playerinv[] = {{offsetof(PlayerStock, count),
                                            "num",
                                            1,
                                            {kSaveFieldNumeric, 4, nullptr},
                                            SaveGameGetInteger,
                                            SaveGamePutInteger,
                                            nullptr},
-                                          {offsetof(playerinv_t, max),
+                                          {offsetof(PlayerStock, maximum),
                                            "max",
                                            1,
                                            {kSaveFieldNumeric, 4, nullptr},
@@ -534,14 +534,14 @@ SaveStruct sv_struct_playerinv = {
 //  AMMO STRUCTURE
 //
 
-static SaveField sv_fields_playerammo[] = {{offsetof(playerammo_t, num),
+static SaveField sv_fields_playerammo[] = {{offsetof(PlayerStock, count),
                                             "num",
                                             1,
                                             {kSaveFieldNumeric, 4, nullptr},
                                             SaveGameGetInteger,
                                             SaveGamePutInteger,
                                             nullptr},
-                                           {offsetof(playerammo_t, max),
+                                           {offsetof(PlayerStock, maximum),
                                             "max",
                                             1,
                                             {kSaveFieldNumeric, 4, nullptr},
@@ -634,12 +634,10 @@ int SaveGamePlayerCountElems(void)
 {
     int count = 0;
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
+        Player *p = players[pnum];
         if (!p) continue;
-
-        if (p->node) continue;
 
         count++;
     }
@@ -651,15 +649,13 @@ int SaveGamePlayerCountElems(void)
 
 void *SaveGamePlayerFindByIndex(int index)
 {
-    if (index >= numplayers)
+    if (index >= total_players)
         FatalError("LOADGAME: Invalid player index: %d\n", index);
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
+        Player *p = players[pnum];
         if (!p) continue;
-
-        if (p->node) continue;
 
         if (index == 0) return p;
 
@@ -671,16 +667,14 @@ void *SaveGamePlayerFindByIndex(int index)
     return nullptr;
 }
 
-int SaveGamePlayerGetIndex(player_t *elem)
+int SaveGamePlayerGetIndex(Player *elem)
 {
     int index = 0;
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
+        Player *p = players[pnum];
         if (!p) continue;
-
-        if (p->node) continue;
 
         if (p == elem) return index;
 
@@ -700,44 +694,44 @@ void SaveGamePlayerCreateElems(int num_elems)
     // free existing players (sets all pointers to nullptr)
     DestroyAllPlayers();
 
-    if (num_elems > MAXPLAYERS)
+    if (num_elems > kMaximumPlayers)
         FatalError("LOADGAME: too many players (%d)\n", num_elems);
 
-    numplayers = num_elems;
-    numbots    = 0;
+    total_players = num_elems;
+    total_bots    = 0;
 
     for (int pnum = 0; pnum < num_elems; pnum++)
     {
-        player_t *p = new player_t;
+        Player *p = new Player;
 
-        Z_Clear(p, player_t, 1);
+        Z_Clear(p, Player, 1);
 
         // Note: while loading, we don't follow the normal principle
-        //       where players[p->pnum] == p.  This is fixed in the
+        //       where players[p->player_number_] == p.  This is fixed in the
         //       finalisation function.
         players[pnum] = p;
 
         // initialise defaults
 
-        p->pnum = -1;  // checked during finalisation.
-        sprintf(p->playername, "Player%d", 1 + p->pnum);
+        p->player_number_ = -1;  // checked during finalisation.
+        sprintf(p->player_name_, "Player%d", 1 + p->player_number_);
 
-        p->remember_atk[0]   = -1;
-        p->remember_atk[1]   = -1;
-        p->remember_atk[2]   = -1;
-        p->remember_atk[3]   = -1;
-        p->weapon_last_frame = -1;
+        p->remember_attack_state_[0]   = -1;
+        p->remember_attack_state_[1]   = -1;
+        p->remember_attack_state_[2]   = -1;
+        p->remember_attack_state_[3]   = -1;
+        p->weapon_last_frame_ = -1;
 
         for (int j = 0; j < kTotalPlayerSpriteTypes; j++)
         {
-            p->psprites[j].screen_x = 0;
-            p->psprites[j].screen_y = 0;
+            p->player_sprites_[j].screen_x = 0;
+            p->player_sprites_[j].screen_y = 0;
         }
 
         for (int k = 0; k < kTotalWeaponKeys; k++)
-            p->key_choices[k] = WPSEL_None;
+            p->key_choices_[k] = KWeaponSelectionNone;
 
-        for (int w = 0; w < kMaximumWeapons; w++) p->weapons[w].model_skin = 1;
+        for (int w = 0; w < kMaximumWeapons; w++) p->weapons_[w].model_skin = 1;
     }
 }
 
@@ -745,48 +739,48 @@ void SaveGamePlayerFinaliseElems(void)
 {
     int first = -1;
 
-    consoleplayer = -1;
-    displayplayer = -1;
+    console_player = -1;
+    display_player = -1;
 
-    player_t *temp[MAXPLAYERS];
+    Player *temp[kMaximumPlayers];
 
-    for (int i = 0; i < MAXPLAYERS; i++)
+    for (int i = 0; i < kMaximumPlayers; i++)
     {
         temp[i]    = players[i];
         players[i] = nullptr;
     }
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = temp[pnum];
+        Player *p = temp[pnum];
         if (!p) continue;
 
-        if (p->pnum < 0)
+        if (p->player_number_ < 0)
             FatalError("LOADGAME: player did not load (index %d) !\n", pnum);
 
-        if (p->pnum >= MAXPLAYERS)
-            FatalError("LOADGAME: player with bad index (%d) !\n", p->pnum);
+        if (p->player_number_ >= kMaximumPlayers)
+            FatalError("LOADGAME: player with bad index (%d) !\n", p->player_number_);
 
-        if (!p->mo) FatalError("LOADGAME: Player %d has no mobj !\n", p->pnum);
+        if (!p->map_object_) FatalError("LOADGAME: Player %d has no mobj !\n", p->player_number_);
 
-        if (players[p->pnum])
+        if (players[p->player_number_])
             FatalError("LOADGAME: Two players with same number !\n");
 
-        players[p->pnum] = p;
+        players[p->player_number_] = p;
 
-        if (first < 0) first = p->pnum;
+        if (first < 0) first = p->player_number_;
 
-        if (p->playerflags & PFL_Console) consoleplayer = p->pnum;
+        if (p->player_flags_ & kPlayerFlagConsole) console_player = p->player_number_;
 
-        if (p->playerflags & PFL_Display) displayplayer = p->pnum;
+        if (p->player_flags_ & kPlayerFlagDisplay) display_player = p->player_number_;
 
-        if (p->playerflags & PFL_Bot)
+        if (p->player_flags_ & kPlayerFlagBot)
         {
-            numbots++;
+            total_bots++;
             P_BotCreate(p, true);
         }
         else
-            p->builder = P_ConsolePlayerBuilder;
+            p->Builder = ConsolePlayerBuilder;
 
         UpdateAvailWeapons(p);
         UpdateTotalArmour(p);
@@ -794,9 +788,9 @@ void SaveGamePlayerFinaliseElems(void)
 
     if (first < 0) FatalError("LOADGAME: No players !!\n");
 
-    if (consoleplayer < 0) GameSetConsolePlayer(first);
+    if (console_player < 0) SetConsolePlayer(first);
 
-    if (displayplayer < 0) GameSetDisplayPlayer(consoleplayer);
+    if (display_player < 0) SetDisplayPlayer(console_player);
 }
 
 //----------------------------------------------------------------------------
@@ -806,7 +800,7 @@ void SaveGamePlayerFinaliseElems(void)
 //
 bool SR_PlayerGetCounter(void *storage, int index, void *extra)
 {
-    playercounter_t *dest = (playercounter_t *)storage + index;
+    PlayerStock *dest = (PlayerStock *)storage + index;
 
     if (sv_struct_playercounter.counterpart)
         return SaveGameStructLoad(dest, sv_struct_playercounter.counterpart);
@@ -819,7 +813,7 @@ bool SR_PlayerGetCounter(void *storage, int index, void *extra)
 //
 void SR_PlayerPutCounter(void *storage, int index, void *extra)
 {
-    playercounter_t *src = (playercounter_t *)storage + index;
+    PlayerStock *src = (PlayerStock *)storage + index;
 
     SaveGameStructSave(src, &sv_struct_playercounter);
 }
@@ -829,7 +823,7 @@ void SR_PlayerPutCounter(void *storage, int index, void *extra)
 //
 bool SR_PlayerGetInv(void *storage, int index, void *extra)
 {
-    playerinv_t *dest = (playerinv_t *)storage + index;
+    PlayerStock *dest = (PlayerStock *)storage + index;
 
     if (sv_struct_playerinv.counterpart)
         return SaveGameStructLoad(dest, sv_struct_playerinv.counterpart);
@@ -842,7 +836,7 @@ bool SR_PlayerGetInv(void *storage, int index, void *extra)
 //
 void SR_PlayerPutInv(void *storage, int index, void *extra)
 {
-    playerinv_t *src = (playerinv_t *)storage + index;
+    PlayerStock *src = (PlayerStock *)storage + index;
 
     SaveGameStructSave(src, &sv_struct_playerinv);
 }
@@ -852,7 +846,7 @@ void SR_PlayerPutInv(void *storage, int index, void *extra)
 //
 bool SR_PlayerGetAmmo(void *storage, int index, void *extra)
 {
-    playerammo_t *dest = (playerammo_t *)storage + index;
+    PlayerStock *dest = (PlayerStock *)storage + index;
 
     if (sv_struct_playerammo.counterpart)
         return SaveGameStructLoad(dest, sv_struct_playerammo.counterpart);
@@ -865,7 +859,7 @@ bool SR_PlayerGetAmmo(void *storage, int index, void *extra)
 //
 void SR_PlayerPutAmmo(void *storage, int index, void *extra)
 {
-    playerammo_t *src = (playerammo_t *)storage + index;
+    PlayerStock *src = (PlayerStock *)storage + index;
 
     SaveGameStructSave(src, &sv_struct_playerammo);
 }
@@ -928,7 +922,7 @@ bool SR_PlayerGetName(void *storage, int index, void *extra)
     SYS_ASSERT(index == 0);
 
     str = SaveChunkGetString();
-    epi::CStringCopyMax(dest, str, MAX_PLAYNAME - 1);
+    epi::CStringCopyMax(dest, str, kPlayerNameCharacterLimit - 1);
     SaveChunkFreeString(str);
 
     return true;

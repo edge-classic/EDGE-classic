@@ -39,16 +39,16 @@ const Colormap *render_view_effect_colormap;
 EDGE_DEFINE_CONSOLE_VARIABLE(power_fade_out, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(debug_fullbright, "0", kConsoleVariableFlagCheat)
 
-static inline float EffectStrength(player_t *player)
+static inline float EffectStrength(Player *player)
 {
-    if (player->effect_left >= EFFECT_MAX_TIME) return 1.0f;
+    if (player->effect_left_ >= kMaximumEffectTime) return 1.0f;
 
     if (power_fade_out.d_ || reduce_flash)
     {
-        return player->effect_left / (float)EFFECT_MAX_TIME;
+        return player->effect_left_ / (float)kMaximumEffectTime;
     }
 
-    return (player->effect_left & 8) ? 1.0f : 0.0f;
+    return (player->effect_left_ & 8) ? 1.0f : 0.0f;
 }
 
 //
@@ -56,10 +56,10 @@ static inline float EffectStrength(player_t *player)
 //
 // Effects that modify all colours, e.g. nightvision green.
 //
-void RendererRainbowEffect(player_t *player)
+void RendererRainbowEffect(Player *player)
 {
     render_view_extra_light = debug_fullbright.d_ ? 255
-                              : player            ? player->extralight * 4
+                              : player            ? player->extra_light_ * 4
                                                   : 0;
 
     render_view_red_multiplier      = render_view_green_multiplier =
@@ -71,12 +71,12 @@ void RendererRainbowEffect(player_t *player)
 
     float s = EffectStrength(player);
 
-    if (s > 0 && player->powers[kPowerTypeInvulnerable] > 0 &&
-        (player->effect_left & 8) && !reduce_flash)
+    if (s > 0 && player->powers_[kPowerTypeInvulnerable] > 0 &&
+        (player->effect_left_ & 8) && !reduce_flash)
     {
         if (invulnerability_effect == INVULFX_Textured && !reduce_flash)
         {
-            render_view_effect_colormap = player->effect_colourmap;
+            render_view_effect_colormap = player->effect_colourmap_;
         }
         else
         {
@@ -92,12 +92,12 @@ void RendererRainbowEffect(player_t *player)
         return;
     }
 
-    if (s > 0 && player->powers[kPowerTypeNightVision] > 0 &&
-        player->effect_colourmap && !debug_fullbright.d_)
+    if (s > 0 && player->powers_[kPowerTypeNightVision] > 0 &&
+        player->effect_colourmap_ && !debug_fullbright.d_)
     {
         float r, g, b;
 
-        GetColormapRgb(player->effect_colourmap, &r, &g, &b);
+        GetColormapRgb(player->effect_colourmap_, &r, &g, &b);
 
         render_view_red_multiplier   = 1.0f - (1.0f - r) * s;
         render_view_green_multiplier = 1.0f - (1.0f - g) * s;
@@ -107,19 +107,19 @@ void RendererRainbowEffect(player_t *player)
         return;
     }
 
-    if (s > 0 && player->powers[kPowerTypeInfrared] > 0 && !debug_fullbright.d_)
+    if (s > 0 && player->powers_[kPowerTypeInfrared] > 0 && !debug_fullbright.d_)
     {
         render_view_extra_light = int(s * 255);
         return;
     }
 
     // Lobo 2021: un-hardcode berserk color tint
-    if (s > 0 && player->powers[kPowerTypeBerserk] > 0 &&
-        player->effect_colourmap && !debug_fullbright.d_)
+    if (s > 0 && player->powers_[kPowerTypeBerserk] > 0 &&
+        player->effect_colourmap_ && !debug_fullbright.d_)
     {
         float r, g, b;
 
-        GetColormapRgb(player->effect_colourmap, &r, &g, &b);
+        GetColormapRgb(player->effect_colourmap_, &r, &g, &b);
 
         render_view_red_multiplier   = 1.0f - (1.0f - r) * s;
         render_view_green_multiplier = 1.0f - (1.0f - g) * s;
@@ -129,7 +129,7 @@ void RendererRainbowEffect(player_t *player)
     }
 
     // AJA 2022: handle BOOM colormaps (linetype 242)
-    Sector *sector = player->mo->subsector_->sector;
+    Sector *sector = player->map_object_->subsector_->sector;
 
     if (sector->height_sector != nullptr)
     {
@@ -152,15 +152,15 @@ void RendererRainbowEffect(player_t *player)
 //
 // For example: all white for invulnerability.
 //
-void RendererColourmapEffect(player_t *player)
+void RendererColourmapEffect(Player *player)
 {
     int x1, y1;
     int x2, y2;
 
     float s = EffectStrength(player);
 
-    if (s > 0 && player->powers[kPowerTypeInvulnerable] > 0 &&
-        player->effect_colourmap && (player->effect_left & 8 || reduce_flash))
+    if (s > 0 && player->powers_[kPowerTypeInvulnerable] > 0 &&
+        player->effect_colourmap_ && (player->effect_left_ & 8 || reduce_flash))
     {
         if (invulnerability_effect == INVULFX_Textured && !reduce_flash) return;
 
@@ -210,7 +210,7 @@ void RendererColourmapEffect(player_t *player)
 //
 // For example: red wash for pain.
 //
-void RendererPaletteEffect(player_t *player)
+void RendererPaletteEffect(Player *player)
 {
     uint8_t rgb_data[3];
 
@@ -218,16 +218,16 @@ void RendererPaletteEffect(player_t *player)
 
     float old_alpha = HudGetAlpha();
 
-    if (s > 0 && player->powers[kPowerTypeInvulnerable] > 0 &&
-        player->effect_colourmap && (player->effect_left & 8 || reduce_flash))
+    if (s > 0 && player->powers_[kPowerTypeInvulnerable] > 0 &&
+        player->effect_colourmap_ && (player->effect_left_ & 8 || reduce_flash))
     {
         return;
     }
-    else if (s > 0 && player->powers[kPowerTypeNightVision] > 0 &&
-             player->effect_colourmap)
+    else if (s > 0 && player->powers_[kPowerTypeNightVision] > 0 &&
+             player->effect_colourmap_)
     {
         float r, g, b;
-        GetColormapRgb(player->effect_colourmap, &r, &g, &b);
+        GetColormapRgb(player->effect_colourmap_, &r, &g, &b);
         if (!reduce_flash)
             glColor4f(r, g, b, 0.20f * s);
         else
@@ -242,8 +242,8 @@ void RendererPaletteEffect(player_t *player)
     }
     else
     {
-        PalettedColourToRGB(playpal_black, rgb_data, player->last_damage_colour,
-                           player->damagecount);
+        PalettedColourToRGB(playpal_black, rgb_data, player->last_damage_colour_,
+                           player->damage_count_);
 
         int rgb_max = HMM_MAX(rgb_data[0], HMM_MAX(rgb_data[1], rgb_data[2]));
 

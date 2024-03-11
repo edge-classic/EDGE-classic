@@ -704,7 +704,7 @@ BotPath *BotNavigateFindThing(DeathBot *bot, float radius, MapObject *&best)
     // each nearby thing (limited roughly by `radius') will be passed to the
     // EvalThing() method of the bot.  returns nullptr if nothing was found.
 
-    Position pos{bot->pl_->mo->x, bot->pl_->mo->y, bot->pl_->mo->z};
+    Position pos{bot->pl_->map_object_->x, bot->pl_->map_object_->y, bot->pl_->map_object_->z};
 
     Subsector *start    = RendererPointInSubsector(pos.x, pos.y);
     int          start_id = (int)(start - level_subsectors);
@@ -779,8 +779,8 @@ static void BotNavigateEnemiesInSubsector(const Subsector *sub, DeathBot *bot,
     {
         if (bot->EvalEnemy(mo) < 0) continue;
 
-        float dx = fabs(bot->pl_->mo->x - mo->x);
-        float dy = fabs(bot->pl_->mo->y - mo->y);
+        float dx = fabs(bot->pl_->map_object_->x - mo->x);
+        float dy = fabs(bot->pl_->map_object_->y - mo->y);
 
         if (dx > radius || dy > radius) continue;
 
@@ -809,7 +809,7 @@ static void BotNavigateEnemiesInNode(unsigned int bspnum, DeathBot *bot,
 
     const BspNode *node = &level_nodes[bspnum];
 
-    Position pos{bot->pl_->mo->x, bot->pl_->mo->y, bot->pl_->mo->z};
+    Position pos{bot->pl_->map_object_->x, bot->pl_->map_object_->y, bot->pl_->map_object_->z};
 
     for (int c = 0; c < 2; c++)
     {

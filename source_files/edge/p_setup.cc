@@ -557,7 +557,7 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x,
     // count deathmatch start positions
     if (info->playernum_ < 0)
     {
-        GameAddDeathmatchStart(point);
+        AddDeathmatchStart(point);
         return nullptr;
     }
 
@@ -573,19 +573,19 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x,
 
             point.tag = sec->tag;
 
-            GameAddHubStart(point);
+            AddHubStart(point);
             return nullptr;
         }
 
         // -AJA- 2004/12/30: for duplicate players, the LAST one must
         //       be used (so levels with Voodoo dolls work properly).
-        SpawnPoint *prev = GameFindCoopPlayer(info->playernum_);
+        SpawnPoint *prev = FindCoopPlayer(info->playernum_);
 
         if (!prev)
-            GameAddCoopStart(point);
+            AddCoopStart(point);
         else
         {
-            GameAddVoodooDoll(*prev);
+            AddVoodooDoll(*prev);
 
             // overwrite one in the Coop list with new location
             memcpy(prev, &point, sizeof(point));
@@ -655,7 +655,7 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x,
         /*
         player_t *player;
         player = players[0];
-        mo->SetSupportObj(player->mo);
+        mo->SetSupportObj(player->map_object_);
         P_LookForPlayers(mo, mo->info_->sight_angle_);
         */
     }
@@ -3650,14 +3650,14 @@ void LevelSetup(void)
     for (int j = 0; j < total_level_sectors; j++)
         RecomputeGapsAroundSector(level_sectors + j);
 
-    GameClearBodyQueue();
+    ClearBodyQueue();
 
     // set up world state
     // (must be before loading things to create Extrafloors)
     SpawnMapSpecials1();
 
     // -AJA- 1999/10/21: Clear out player starts (ready to load).
-    GameClearPlayerStarts();
+    ClearPlayerStarts();
 
     unknown_thing_map.clear();
 
@@ -3706,9 +3706,9 @@ void PlayerStateInit(void)
     E_ProgressMessage(language["PlayState"]);
 
     // There should not yet exist a player
-    SYS_ASSERT(numplayers == 0);
+    SYS_ASSERT(total_players == 0);
 
-    GameClearPlayerStarts();
+    ClearPlayerStarts();
 }
 
 LineType *P_LookupLineType(int num)

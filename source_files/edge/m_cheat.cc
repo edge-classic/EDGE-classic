@@ -131,7 +131,7 @@ void M_ChangeLevelCheat(const char *string)
 
     params.random_seed_ = PureRandomNumber();
 
-    params.SinglePlayer(numbots);
+    params.SinglePlayer(total_bots);
 
     params.level_skip_ = true;
 
@@ -158,7 +158,7 @@ static void M_ChangeMusicCheat(const char *string)
     ConsoleMessageLDF("MusChange");
 }
 
-static void CheatGiveWeapons(player_t *pl, int key = -2)
+static void CheatGiveWeapons(Player *pl, int key = -2)
 {
     for (auto info : weapondefs)
     {
@@ -172,7 +172,7 @@ static void CheatGiveWeapons(player_t *pl, int key = -2)
     {
         for (int slot = 0; slot < kMaximumWeapons; slot++)
         {
-            if (pl->weapons[slot].info) FillWeapon(pl, slot);
+            if (pl->weapons_[slot].info) FillWeapon(pl, slot);
         }
     }
 
@@ -186,7 +186,7 @@ bool CheatResponder(InputEvent *ev)
 #endif
 
     int       i;
-    player_t *pl = players[consoleplayer];
+    Player *pl = players[console_player];
 
     // disable cheats while in RTS menu
     if (rts_menu_active) return false;
@@ -202,10 +202,10 @@ bool CheatResponder(InputEvent *ev)
     // 'dqd' cheat for toggleable god mode
     if (CheatCheckSequence(&cheat_god, key))
     {
-        pl->cheats ^= CF_GODMODE;
-        if (pl->cheats & CF_GODMODE)
+        pl->cheats_ ^= kCheatingGodMode;
+        if (pl->cheats_ & kCheatingGodMode)
         {
-            if (pl->mo) { pl->health = pl->mo->health_ = pl->mo->spawn_health_; }
+            if (pl->map_object_) { pl->health_ = pl->map_object_->health_ = pl->map_object_->spawn_health_; }
             ConsoleMessageLDF("GodModeOn");
         }
         else
@@ -218,12 +218,12 @@ bool CheatResponder(InputEvent *ev)
     //
     else if (CheatCheckSequence(&cheat_ammo_no_keys, key))
     {
-        pl->armours[CHEATARMOURTYPE] = CHEATARMOUR;
+        pl->armours_[CHEATARMOURTYPE] = CHEATARMOUR;
 
         UpdateTotalArmour(pl);
 
         for (i = 0; i < kTotalAmmunitionTypes; i++)
-            pl->ammo[i].num = pl->ammo[i].max;
+            pl->ammo_[i].count = pl->ammo_[i].maximum;
 
         CheatGiveWeapons(pl);
 
@@ -236,14 +236,14 @@ bool CheatResponder(InputEvent *ev)
     //
     else if (CheatCheckSequence(&cheat_ammo, key))
     {
-        pl->armours[CHEATARMOURTYPE] = CHEATARMOUR;
+        pl->armours_[CHEATARMOURTYPE] = CHEATARMOUR;
 
         UpdateTotalArmour(pl);
 
         for (i = 0; i < kTotalAmmunitionTypes; i++)
-            pl->ammo[i].num = pl->ammo[i].max;
+            pl->ammo_[i].count = pl->ammo_[i].maximum;
 
-        pl->cards = kDoorKeyBitmask;
+        pl->cards_ = kDoorKeyBitmask;
 
         CheatGiveWeapons(pl);
 
@@ -251,21 +251,21 @@ bool CheatResponder(InputEvent *ev)
     }
     else if (CheatCheckSequence(&cheat_keys, key))
     {
-        pl->cards = kDoorKeyBitmask;
+        pl->cards_ = kDoorKeyBitmask;
 
         ConsoleMessageLDF("UnlockCheat");
     }
     else if (CheatCheckSequence(&cheat_loaded, key))
     {
         for (i = 0; i < kTotalAmmunitionTypes; i++)
-            pl->ammo[i].num = pl->ammo[i].max;
+            pl->ammo_[i].count = pl->ammo_[i].maximum;
 
         ConsoleMessageLDF("LoadedCheat");
     }
 #if 0  // FIXME: this crashes ?
 	else if (CheatCheckSequence(&cheat_take_all, key))
 	{
-		P_GiveInitialBenefits(pl, pl->mo->info_);
+		P_GiveInitialBenefits(pl, pl->map_object_->info_);
 
 		// -ACB- 1998/08/26 Stuff removed language reference
 		ConsoleMessageLDF("StuffRemoval");
@@ -273,7 +273,7 @@ bool CheatResponder(InputEvent *ev)
 #endif
     else if (CheatCheckSequence(&cheat_suicide, key))
     {
-        TelefragMapObject(pl->mo, pl->mo, nullptr);
+        TelefragMapObject(pl->map_object_, pl->map_object_, nullptr);
 
         // -ACB- 1998/08/26 Suicide language reference
         ConsoleMessageLDF("SuicideCheat");
@@ -304,9 +304,9 @@ bool CheatResponder(InputEvent *ev)
     else if (CheatCheckSequence(&cheat_no_clipping, key) ||
              CheatCheckSequence(&cheat_no_clipping2, key))
     {
-        pl->cheats ^= CF_NOCLIP;
+        pl->cheats_ ^= kCheatingNoClip;
 
-        if (pl->cheats & CF_NOCLIP)
+        if (pl->cheats_ & kCheatingNoClip)
             ConsoleMessageLDF("ClipOn");
         else
             ConsoleMessageLDF("ClipOff");
@@ -326,13 +326,13 @@ bool CheatResponder(InputEvent *ev)
     {
         if (CheatCheckSequence(&cheat_powerup[i], key))
         {
-            if (!pl->powers[i])
-                pl->powers[i] = 60 * kTicRate;
+            if (!pl->powers_[i])
+                pl->powers_[i] = 60 * kTicRate;
             else
-                pl->powers[i] = 0;
+                pl->powers_[i] = 0;
 
             if (i == kPowerTypeBerserk)
-                pl->keep_powers |= (1 << kPowerTypeBerserk);
+                pl->keep_powers_ |= (1 << kPowerTypeBerserk);
 
             ConsoleMessageLDF("BeholdUsed");
         }
@@ -353,7 +353,7 @@ bool CheatResponder(InputEvent *ev)
         if (w)
         {
             AddWeapon(pl, w, nullptr);
-            pl->powers[kPowerTypeInvulnerable] = 1;
+            pl->powers_[kPowerTypeInvulnerable] = 1;
             ConsoleMessageLDF("CHOPPERSNote");
         }
     }
@@ -361,8 +361,8 @@ bool CheatResponder(InputEvent *ev)
     // 'mypos' for player position
     else if (CheatCheckSequence(&cheat_my_position, key))
     {
-        ConsoleMessage("ang=%f;x,y=(%f,%f)", epi::DegreesFromBAM(pl->mo->angle_),
-                       pl->mo->x, pl->mo->y);
+        ConsoleMessage("ang=%f;x,y=(%f,%f)", epi::DegreesFromBAM(pl->map_object_->angle_),
+                       pl->map_object_->x, pl->map_object_->y);
     }
 
     if (CheatCheckSequence(&cheat_change_level, key))

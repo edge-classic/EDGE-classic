@@ -176,8 +176,8 @@ static void DoStartFinale(void)
             break;
     }
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
-        if (players[pnum]) players[pnum]->cmd.buttons = 0;
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
+        if (players[pnum]) players[pnum]->command_.buttons = 0;
 }
 
 static void DoBumpFinale(void)

@@ -481,23 +481,23 @@ void PaletteTicker(void)
     int   palette = kPaletteNormal;
     float amount  = 0;
 
-    player_t *p = players[displayplayer];
+    Player *p = players[display_player];
     SYS_ASSERT(p);
 
-    int cnt = p->damagecount;
+    int cnt = p->damage_count_;
 
     if (cnt)
     {
         palette = kPalettePain;
         amount  = (cnt + 7) / 160.0f;  // 64.0f;
     }
-    else if (p->bonuscount)
+    else if (p->bonus_count_)
     {
         palette = kPaletteBonus;
-        amount  = (p->bonuscount + 7) / 32.0f;
+        amount  = (p->bonus_count_ + 7) / 32.0f;
     }
-    else if (p->powers[kPowerTypeAcidSuit] > 4 * 32 ||
-             fmod(p->powers[kPowerTypeAcidSuit], 16) >= 8)
+    else if (p->powers_[kPowerTypeAcidSuit] > 4 * 32 ||
+             fmod(p->powers_[kPowerTypeAcidSuit], 16) >= 8)
     {
         palette = kPaletteSuit;
         amount  = 1.0f;

@@ -1330,7 +1330,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special,
             // Players can only trigger if the kTriggerActivatorPlayer is set
             if (!(special->obj_ & kTriggerActivatorPlayer)) return false;
 
-            if (thing->player_->isBot() &&
+            if (thing->player_->IsBot() &&
                 (special->obj_ & kTriggerActivatorNoBot))
                 return false;
         }
@@ -1391,7 +1391,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special,
             //
             // -AJA- Reworked this for the 10 new keys.
             //
-            cards = thing->player_->cards;
+            cards = thing->player_->cards_;
 
             bool failedsecurity = false;
 
@@ -1413,7 +1413,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special,
             if (failedsecurity)
             {
                 if (special->failedmessage_ != "")
-                    ConsolePlayerMessageLDF(thing->player_->pnum,
+                    ConsolePlayerMessageLDF(thing->player_->player_number_,
                                             special->failedmessage_.c_str());
 
                 if (special->failed_sfx_)
@@ -1769,7 +1769,7 @@ void RemoteActivation(MapObject *thing, int typenum, int tag, int side,
                           (thing == nullptr));
 }
 
-static inline void PlayerInProperties(player_t *player, float bz, float tz,
+static inline void PlayerInProperties(Player *player, float bz, float tz,
                                       float floor_height, float ceiling_height,
                                       RegionProperties *props,
                                       const SectorType   **swim_special,
@@ -1787,48 +1787,48 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz,
     // breathing support
     // (Mouth is where the eye is !)
     //
-    float mouth_z = player->mo->z + player->view_z;
+    float mouth_z = player->map_object_->z + player->view_z_;
 
     if ((special->special_flags_ & kSectorFlagAirLess) && mouth_z >= floor_height &&
-        mouth_z <= ceiling_height && player->powers[kPowerTypeScuba] <= 0)
+        mouth_z <= ceiling_height && player->powers_[kPowerTypeScuba] <= 0)
     {
         int subtract = 1;
         if ((double_framerate.d_ && extra_tic) || !should_choke) subtract = 0;
-        player->air_in_lungs -= subtract;
-        player->underwater = true;
+        player->air_in_lungs_ -= subtract;
+        player->underwater_ = true;
 
-        if (subtract && player->air_in_lungs <= 0 &&
+        if (subtract && player->air_in_lungs_ <= 0 &&
             (level_time_elapsed %
-             (1 + player->mo->info_->choke_damage_.delay_)) == 0)
+             (1 + player->map_object_->info_->choke_damage_.delay_)) == 0)
         {
-            DAMAGE_COMPUTE(damage, &player->mo->info_->choke_damage_);
+            DAMAGE_COMPUTE(damage, &player->map_object_->info_->choke_damage_);
 
             if (damage)
-                DamageMapObject(player->mo, nullptr, nullptr, damage,
-                                &player->mo->info_->choke_damage_);
+                DamageMapObject(player->map_object_, nullptr, nullptr, damage,
+                                &player->map_object_->info_->choke_damage_);
         }
     }
 
     if ((special->special_flags_ & kSectorFlagAirLess) && mouth_z >= floor_height &&
         mouth_z <= ceiling_height)
     {
-        player->airless = true;
+        player->airless_ = true;
     }
 
     if ((special->special_flags_ & kSectorFlagSwimming) && mouth_z >= floor_height &&
         mouth_z <= ceiling_height)
     {
-        player->swimming = true;
+        player->swimming_ = true;
         *swim_special    = special;
         if (special->special_flags_ & kSectorFlagSubmergedSFX)
             submerged_sound_effects = true;
     }
 
     if ((special->special_flags_ & kSectorFlagSwimming) &&
-        player->mo->z >= floor_height && player->mo->z <= ceiling_height)
+        player->map_object_->z >= floor_height && player->map_object_->z <= ceiling_height)
     {
-        player->wet_feet = true;
-        P_HitLiquidFloor(player->mo);
+        player->wet_feet_ = true;
+        P_HitLiquidFloor(player->map_object_);
     }
 
     if (special->special_flags_ & kSectorFlagVacuumSFX) vacuum_sound_effects = true;
@@ -1864,7 +1864,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz,
     else
     {
         // Not touching the floor ?
-        if (player->mo->z > floor_height + 2.0f) return;
+        if (player->map_object_->z > floor_height + 2.0f) return;
     }
 
     // Check for DAMAGE_UNLESS/DAMAGE_IF DDF specials
@@ -1881,7 +1881,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz,
         if (!unless_damage && !if_damage && !special->damage_.bypass_all_)
             factor = 0;
     }
-    else if (player->powers[kPowerTypeAcidSuit] &&
+    else if (player->powers_[kPowerTypeAcidSuit] &&
              !special->damage_.bypass_all_)
         factor = 0;
 
@@ -1892,22 +1892,22 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz,
         DAMAGE_COMPUTE(damage, &special->damage_);
 
         if (damage || special->damage_.instakill_)
-            DamageMapObject(player->mo, nullptr, nullptr, damage * factor,
+            DamageMapObject(player->map_object_, nullptr, nullptr, damage * factor,
                             &special->damage_);
     }
 
     if (special->secret_ && !props->secret_found)
     {
-        player->secretcount++;
+        player->secret_count_++;
 
         if (!DEATHMATCH())
         {
             ConsoleImportantMessageLDF(
                 "FoundSecret");  // Lobo: get text from language.ddf
 
-            StartSoundEffect(player->mo->info_->secretsound_, kCategoryUi, player->mo);
-            // StartSoundEffect(player->mo->info_->secretsound_,
-            //		P_MobjGetSfxCategory(player->mo), player->mo);
+            StartSoundEffect(player->map_object_->info_->secretsound_, kCategoryUi, player->map_object_);
+            // StartSoundEffect(player->map_object_->info_->secretsound_,
+            //		P_MobjGetSfxCategory(player->map_object_), player->map_object_);
         }
 
         props->secret_found = true;
@@ -1915,9 +1915,9 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz,
 
     if (special->e_exit_ != kExitTypeNone)
     {
-        player->cheats &= ~CF_GODMODE;
+        player->cheats_ &= ~kCheatingGodMode;
 
-        if (player->health < (player->mo->spawn_health_ * 0.11f))
+        if (player->health_ < (player->map_object_->spawn_health_ * 0.11f))
         {
             // -KM- 1998/12/16 We don't want to alter the special type,
             //   modify the sector's attributes instead.
@@ -1937,25 +1937,25 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz,
 // -KM- 1998/09/27 Generalised for sectors.ddf
 // -AJA- 1999/10/09: Updated for new sector handling.
 //
-void PlayerInSpecialSector(player_t *player, Sector *sec, bool should_choke)
+void PlayerInSpecialSector(Player *player, Sector *sec, bool should_choke)
 {
     Extrafloor *S, *L, *C;
     float         floor_h;
     float         ceil_h;
 
-    float bz = player->mo->z;
-    float tz = player->mo->z + player->mo->height_;
+    float bz = player->map_object_->z;
+    float tz = player->map_object_->z + player->map_object_->height_;
 
-    bool was_underwater = player->underwater;
-    bool was_airless    = player->airless;
-    bool was_swimming   = player->swimming;
+    bool was_underwater = player->underwater_;
+    bool was_airless    = player->airless_;
+    bool was_swimming   = player->swimming_;
 
     const SectorType *swim_special = nullptr;
 
-    player->swimming   = false;
-    player->underwater = false;
-    player->airless    = false;
-    player->wet_feet   = false;
+    player->swimming_   = false;
+    player->underwater_ = false;
+    player->airless_    = false;
+    player->wet_feet_   = false;
 
     // traverse extrafloor list
     floor_h = sec->floor_height;
@@ -1988,47 +1988,47 @@ void PlayerInSpecialSector(player_t *player, Sector *sec, bool should_choke)
         floor_h = C->top_height;
     }
 
-    if (sec->floor_vertex_slope) floor_h = player->mo->floor_z_;
+    if (sec->floor_vertex_slope) floor_h = player->map_object_->floor_z_;
 
-    if (sec->ceiling_vertex_slope) ceil_h = player->mo->ceiling_z_;
+    if (sec->ceiling_vertex_slope) ceil_h = player->map_object_->ceiling_z_;
 
     PlayerInProperties(player, bz, tz, floor_h, ceil_h, sec->active_properties, &swim_special,
                        should_choke);
 
     // breathing support: handle gasping when leaving the water
-    if ((was_underwater && !player->underwater) ||
-        (was_airless && !player->airless))
+    if ((was_underwater && !player->underwater_) ||
+        (was_airless && !player->airless_))
     {
-        if (player->air_in_lungs <= (player->mo->info_->lung_capacity_ -
-                                     player->mo->info_->gasp_start_))
+        if (player->air_in_lungs_ <= (player->map_object_->info_->lung_capacity_ -
+                                     player->map_object_->info_->gasp_start_))
         {
-            if (player->mo->info_->gasp_sound_)
+            if (player->map_object_->info_->gasp_sound_)
             {
-                StartSoundEffect(player->mo->info_->gasp_sound_,
-                          P_MobjGetSfxCategory(player->mo), player->mo);
+                StartSoundEffect(player->map_object_->info_->gasp_sound_,
+                          P_MobjGetSfxCategory(player->map_object_), player->map_object_);
             }
         }
 
-        player->air_in_lungs = player->mo->info_->lung_capacity_;
+        player->air_in_lungs_ = player->map_object_->info_->lung_capacity_;
     }
 
     // -AJA- 2008/01/20: water splash sounds for players
-    if (!was_swimming && player->swimming)
+    if (!was_swimming && player->swimming_)
     {
         SYS_ASSERT(swim_special);
 
-        if (player->splashwait == 0 && swim_special->splash_sfx_)
+        if (player->splash_wait_ == 0 && swim_special->splash_sfx_)
         {
-            // StartSoundEffect(swim_special->splash_sfx, kCategoryUi, player->mo);
+            // StartSoundEffect(swim_special->splash_sfx, kCategoryUi, player->map_object_);
             StartSoundEffect(swim_special->splash_sfx_,
-                      P_MobjGetSfxCategory(player->mo), player->mo);
+                      P_MobjGetSfxCategory(player->map_object_), player->map_object_);
 
-            P_HitLiquidFloor(player->mo);
+            P_HitLiquidFloor(player->map_object_);
         }
     }
-    else if (was_swimming && !player->swimming)
+    else if (was_swimming && !player->swimming_)
     {
-        player->splashwait = kTicRate;
+        player->splash_wait_ = kTicRate;
     }
 }
 

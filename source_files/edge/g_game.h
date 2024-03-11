@@ -70,8 +70,7 @@ class NewGameParameters
     int random_seed_;
     int total_players_;
 
-    playerflag_e players_[MAXPLAYERS];
-    net_node_c  *nodes_[MAXPLAYERS];
+    PlayerFlag players_[kMaximumPlayers];
 
     gameflags_t *flags_;  // can be nullptr
 

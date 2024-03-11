@@ -170,7 +170,7 @@ bool CrossSpecialLine(Line *ld, int side, MapObject *thing);
 void ShootSpecialLine(Line *ld, int side, MapObject *thing);
 void RemoteActivation(MapObject *thing, int typenum, int tag, int side,
                       LineTrigger method);
-void PlayerInSpecialSector(struct player_s *pl, Sector *sec,
+void PlayerInSpecialSector(class Player *pl, Sector *sec,
                            bool should_choke = true);
 
 // Utilities...

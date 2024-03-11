@@ -68,7 +68,7 @@ enum BotFollowPathResult
 };
 
 // This describes what action the bot wants to do.
-// It will be translated to a TicCommand by P_BotPlayerBuilder.
+// It will be translated to a TicCommand by BotPlayerBuilder.
 
 struct BotCommand
 {
@@ -90,7 +90,7 @@ struct BotCommand
 class DeathBot
 {
    public:
-    struct player_s *pl_ = nullptr;
+    class Player *pl_ = nullptr;
 
     BotTask task_ = kBotTaskNone;
 
@@ -208,7 +208,7 @@ class DeathBot
     float EvalEnemy(const MapObject *mo);
 };
 
-void P_BotCreate(struct player_s *pl, bool recreate);
+void P_BotCreate(class Player *pl, bool recreate);
 
 void BotBeginLevel(void);
 void BotEndLevel(void);

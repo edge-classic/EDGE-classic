@@ -241,7 +241,7 @@ struct SaveGlobals
     const char **wad_names;
 
     // [PLYR] info, for DEMO FILES only!
-    void *players[MAXPLAYERS];
+    void *players[kMaximumPlayers];
 };
 
 SaveGlobals *SaveGlobalsNew(void);
@@ -293,7 +293,7 @@ void SaveGamePutMapObject(void *storage, int index, void *extra);
 int   SaveGameMapObjectGetIndex(MapObject *elem);
 void *SaveGameMapObjectFindByIndex(int index);
 
-int   SaveGamePlayerGetIndex(player_t *elem);
+int   SaveGamePlayerGetIndex(Player *elem);
 void *SaveGamePlayerFindByIndex(int index);
 
 bool SaveGameLevelGetImage(void *storage, int index, void *extra);

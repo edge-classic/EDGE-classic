@@ -32,9 +32,9 @@
 void RendererWalkThing(DrawSubsector *dsub, MapObject *mo);
 void RendererDrawSortThings(DrawFloor *dfloor);
 
-void RendererDrawWeaponSprites(player_t *p);
-void RendererDrawWeaponModel(player_t *p);
-void RendererDrawCrosshair(player_t *p);
+void RendererDrawWeaponSprites(Player *p);
+void RendererDrawWeaponModel(Player *p);
+void RendererDrawCrosshair(Player *p);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

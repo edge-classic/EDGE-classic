@@ -479,11 +479,11 @@ static int RAD_AlivePlayers(void)
 {
     int result = 0;
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
+        Player *p = players[pnum];
 
-        if (p && p->playerstate != PST_DEAD)
+        if (p && p->player_state_ != kPlayerDead)
             result |= (1 << pnum);
     }
 
@@ -494,11 +494,11 @@ static int RAD_AllPlayersInRadius(rad_script_t *r, int mask)
 {
     int result = 0;
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
+        Player *p = players[pnum];
 
-        if (p && (mask & (1 << pnum)) && RAD_WithinRadius(p->mo, r))
+        if (p && (mask & (1 << pnum)) && RAD_WithinRadius(p->map_object_, r))
             result |= (1 << pnum);
     }
 
@@ -509,11 +509,11 @@ static int RAD_AllPlayersUsing(int mask)
 {
     int result = 0;
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
+        Player *p = players[pnum];
 
-        if (p && p->usedown)
+        if (p && p->use_button_down_)
             result |= (1 << pnum);
     }
 
@@ -524,11 +524,11 @@ static int RAD_AllPlayersCheckCond(rad_script_t *r, int mask)
 {
     int result = 0;
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
+        Player *p = players[pnum];
 
-        if (p && (mask & (1 << pnum)) && GameCheckConditions(p->mo, r->cond_trig))
+        if (p && (mask & (1 << pnum)) && GameCheckConditions(p->map_object_, r->cond_trig))
             result |= (1 << pnum);
     }
 
@@ -905,7 +905,7 @@ void RAD_SpawnTriggers(const char *map_name)
             continue;
 
         // -AJA- 2000/02/03: Added player num checks.
-        if (numplayers < scr->min_players || numplayers > scr->max_players)
+        if (total_players < scr->min_players || total_players > scr->max_players)
             continue;
 
         // ignore empty scripts (e.g. path nodes)

@@ -2224,7 +2224,7 @@ bool MenuResponder(InputEvent *ev)
                 }
 
                 if (!msg.empty())
-                    ConsolePlayerMessage(consoleplayer, "%s", msg.c_str());
+                    ConsolePlayerMessage(console_player, "%s", msg.c_str());
 
                 // -AJA- 1999/07/03: removed PLAYPAL reference.
                 return true;

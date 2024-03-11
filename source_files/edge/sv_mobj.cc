@@ -878,18 +878,18 @@ void SV_ItemqFinaliseElems(void)
 
 bool SaveGameMapObjectGetPlayer(void *storage, int index, void *extra)
 {
-    player_t **dest = (player_t **)storage + index;
+    Player **dest = (Player **)storage + index;
 
     int swizzle = SaveChunkGetInteger();
 
     *dest = (swizzle == 0) ? nullptr
-                           : (player_t *)SaveGamePlayerFindByIndex(swizzle - 1);
+                           : (Player *)SaveGamePlayerFindByIndex(swizzle - 1);
     return true;
 }
 
 void SaveGameMapObjectPutPlayer(void *storage, int index, void *extra)
 {
-    player_t *elem = ((player_t **)storage)[index];
+    Player *elem = ((Player **)storage)[index];
 
     int swizzle = (elem == nullptr) ? 0 : SaveGamePlayerGetIndex(elem) + 1;
 

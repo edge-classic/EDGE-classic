@@ -78,8 +78,8 @@ extern game_state_e game_state;
 extern int make_tic;
 
 #define DEATHMATCH() (deathmatch > 0)
-#define COOP_MATCH() (deathmatch == 0 && numplayers > 1)
-#define SP_MATCH()   (deathmatch == 0 && numplayers <= 1)
+#define COOP_MATCH() (deathmatch == 0 && total_players > 1)
+#define SP_MATCH()   (deathmatch == 0 && total_players <= 1)
 
 #define MAXHEALTH 200
 #define MAXARMOUR 200

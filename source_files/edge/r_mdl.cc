@@ -807,7 +807,7 @@ void MdlRenderModel(MdlModel *md, const Image *skin_img, bool is_weapon,
         int mdlSkin = 0;
 
         if (is_weapon == true)
-            mdlSkin = mo->player_->weapons[mo->player_->ready_wp].model_skin;
+            mdlSkin = mo->player_->weapons_[mo->player_->ready_weapon_].model_skin;
         else
             mdlSkin = mo->model_skin_;
 

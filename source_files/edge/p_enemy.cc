@@ -98,10 +98,10 @@ static void RecurseSound(Sector *sec, int soundblocks, int player)
             {
                 float distance;
                 distance =
-                    ApproximateDistance(players[player]->mo->x - nd->map_object->x,
-                                        players[player]->mo->y - nd->map_object->y);
+                    ApproximateDistance(players[player]->map_object_->x - nd->map_object->x,
+                                        players[player]->map_object_->y - nd->map_object->y);
                 distance = ApproximateDistance(
-                    players[player]->mo->z - nd->map_object->z, distance);
+                    players[player]->map_object_->z - nd->map_object->z, distance);
                 if (distance < nd->map_object->info_->hear_distance_)
                 {
                     nd->map_object->last_heard_ = player;
@@ -143,11 +143,11 @@ static void RecurseSound(Sector *sec, int soundblocks, int player)
     }
 }
 
-void NoiseAlert(player_t *p)
+void NoiseAlert(Player *p)
 {
     valid_count++;
 
-    RecurseSound(p->mo->subsector_->sector, 0, p->pnum);
+    RecurseSound(p->map_object_->subsector_->sector, 0, p->player_number_);
 }
 
 // Called by new NOISE_ALERT ddf action
@@ -439,52 +439,52 @@ bool P_LookForPlayers(MapObject *actor, BAMAngle range)
 {
     int       c;
     int       stop;
-    player_t *player;
+    Player *player;
     BAMAngle  an;
     float     dist;
 
     c    = 0;
-    stop = (actor->last_look_ - 1 + MAXPLAYERS) % MAXPLAYERS;
+    stop = (actor->last_look_ - 1 + kMaximumPlayers) % kMaximumPlayers;
 
     for (; actor->last_look_ != stop;
-         actor->last_look_ = (actor->last_look_ + 1) % MAXPLAYERS)
+         actor->last_look_ = (actor->last_look_ + 1) % kMaximumPlayers)
     {
         player = players[actor->last_look_];
 
         if (!player) continue;
 
-        SYS_ASSERT(player->mo);
+        SYS_ASSERT(player->map_object_);
 
         // done looking ?
         if (c++ >= 2) break;
 
         // dead ?
-        if (player->health <= 0) continue;
+        if (player->health_ <= 0) continue;
 
         // on the same team ?
-        if ((actor->side_ & player->mo->side_) != 0) continue;
+        if ((actor->side_ & player->map_object_->side_) != 0) continue;
 
         if (range < kBAMAngle180)
         {
-            an = RendererPointToAngle(actor->x, actor->y, player->mo->x,
-                                player->mo->y) -
+            an = RendererPointToAngle(actor->x, actor->y, player->map_object_->x,
+                                player->map_object_->y) -
                  actor->angle_;
 
             if (range <= an && an <= (range * -1))
             {
                 // behind back.
                 // if real close, react anyway
-                dist = ApproximateDistance(player->mo->x - actor->x,
-                                           player->mo->y - actor->y);
+                dist = ApproximateDistance(player->map_object_->x - actor->x,
+                                           player->map_object_->y - actor->y);
 
                 if (dist > MELEERANGE) continue;
             }
         }
 
         // out of sight ?
-        if (!P_CheckSight(actor, player->mo)) continue;
+        if (!P_CheckSight(actor, player->map_object_)) continue;
 
-        actor->SetTarget(player->mo);
+        actor->SetTarget(player->map_object_);
         return true;
     }
 

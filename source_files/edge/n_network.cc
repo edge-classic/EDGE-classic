@@ -65,7 +65,7 @@ HANDLE windows_timer = nullptr;
 //         we cannot run a physics step without a ticcmd for each player.
 //
 // NOTE 2: make_tic - game_tic is number of buffered (un-run) ticcmds,
-//         and it must be <= BACKUPTICS (the maximum buffered ticcmds).
+//         and it must be <= kBackupTics (the maximum buffered ticcmds).
 
 int game_tic;
 int make_tic;
@@ -119,19 +119,19 @@ static bool NetworkBuildTicCommands(void)
     // returns false if players cannot hold any more ticcmds.
     // NOTE: this is the only place allowed to bump `make_tics`.
 
-    if (numplayers == 0) return false;
+    if (total_players == 0) return false;
 
-    if (make_tic >= game_tic + BACKUPTICS) return false;
+    if (make_tic >= game_tic + kBackupTics) return false;
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
+        Player *p = players[pnum];
         if (!p) continue;
-        if (!p->builder) continue;
+        if (!p->Builder) continue;
 
-        int buf = make_tic % BACKUPTICS;
+        int buf = make_tic % kBackupTics;
 
-        p->builder(p, p->build_data, &p->in_cmds[buf]);
+        p->Builder(p, p->build_data_, &p->input_commands_[buf]);
     }
 
     make_tic++;
@@ -153,14 +153,14 @@ void NetworkGrabTicCommands(void)
 
     if (game_tic == make_tic) return;
 
-    int buf = game_tic % BACKUPTICS;
+    int buf = game_tic % kBackupTics;
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
+        Player *p = players[pnum];
         if (!p) continue;
 
-        memcpy(&p->cmd, p->in_cmds + buf, sizeof(EventTicCommand));
+        memcpy(&p->command_, p->input_commands_ + buf, sizeof(EventTicCommand));
     }
     if (LuaUseLuaHud())
         LuaSetFloat(LuaGetGlobalVM(), "sys", "gametic",
@@ -225,7 +225,7 @@ int NetworkTryRunTicCommands()
 #endif
 
     // simpler handling when no game in progress
-    if (numplayers == 0)
+    if (total_players == 0)
     {
         while (real_tics <= 0)
         {

@@ -51,9 +51,9 @@ extern ImageData *ReadAsEpiBlock(Image *rim);
 extern ImageData *RgbFromPalettised(ImageData *src, const uint8_t *palette,
                                     int opacity);
 
-player_t *ui_hud_who = nullptr;
+Player *ui_hud_who = nullptr;
 
-extern player_t *ui_player_who;
+extern Player *ui_player_who;
 
 extern std::string current_map_title;
 
@@ -571,7 +571,7 @@ static void HD_render_world(coal::vm_c *vm, int argc)
 
     double *flags = vm->AccessParam(4);
 
-    HudRenderWorld(x, y, w, h, ui_hud_who->mo, flags ? (int)*flags : 0);
+    HudRenderWorld(x, y, w, h, ui_hud_who->map_object_, flags ? (int)*flags : 0);
 }
 
 // hud.render_automap(x, y, w, h, [flags])
@@ -601,7 +601,7 @@ static void HD_render_automap(coal::vm_c *vm, int argc)
 
     AutomapSetState(new_state, new_zoom);
 
-    HudRenderAutomap(x, y, w, h, ui_hud_who->mo, flags ? (int)*flags : 0);
+    HudRenderAutomap(x, y, w, h, ui_hud_who->map_object_, flags ? (int)*flags : 0);
 
     AutomapSetState(old_state, old_zoom);
 }
@@ -675,22 +675,22 @@ static void HD_set_render_who(coal::vm_c *vm, int argc)
 
     int index = (int)*vm->AccessParam(0);
 
-    if (index < 0 || index >= numplayers)
+    if (index < 0 || index >= total_players)
         FatalError("hud.set_render_who: bad index value: %d (numplayers=%d)\n",
-                   index, numplayers);
+                   index, total_players);
 
     if (index == 0)
     {
-        ui_hud_who = players[consoleplayer];
+        ui_hud_who = players[console_player];
         return;
     }
 
-    int who = displayplayer;
+    int who = display_player;
 
     for (; index > 1; index--)
     {
         do {
-            who = (who + 1) % MAXPLAYERS;
+            who = (who + 1) % kMaximumPlayers;
         } while (players[who] == nullptr);
     }
 
@@ -1021,8 +1021,8 @@ void CoalLoadGame(void)
 {
     // Need to set these to prevent nullptr references if using any player.xxx
     // in the load_level hook
-    ui_hud_who    = players[displayplayer];
-    ui_player_who = players[displayplayer];
+    ui_hud_who    = players[display_player];
+    ui_player_who = players[display_player];
 
     CoalCallFunction(ui_vm, "load_game");
 }
@@ -1033,8 +1033,8 @@ void CoalBeginLevel(void)
 {
     // Need to set these to prevent nullptr references if using player.xxx in
     // the begin_level hook
-    ui_hud_who    = players[displayplayer];
-    ui_player_who = players[displayplayer];
+    ui_hud_who    = players[display_player];
+    ui_player_who = players[display_player];
     CoalCallFunction(ui_vm, "begin_level");
 }
 
@@ -1044,8 +1044,8 @@ void CoalRunHud(void)
 {
     HudReset();
 
-    ui_hud_who    = players[displayplayer];
-    ui_player_who = players[displayplayer];
+    ui_hud_who    = players[display_player];
+    ui_player_who = players[display_player];
 
     ui_hud_automap_flags[0] = 0;
     ui_hud_automap_flags[1] = 0;

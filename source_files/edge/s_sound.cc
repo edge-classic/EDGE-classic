@@ -518,9 +518,9 @@ void SoundTicker(void)
     {
         if (game_state == GS_LEVEL)
         {
-            SYS_ASSERT(::numplayers > 0);
+            SYS_ASSERT(::total_players > 0);
 
-            MapObject *pmo = ::players[displayplayer]->mo;
+            MapObject *pmo = ::players[display_player]->map_object_;
             SYS_ASSERT(pmo);
 
             UpdateSounds(pmo, pmo->angle_);

@@ -410,9 +410,9 @@ bool AutomapResponder(InputEvent *ev)
 
         // -ACB- 1998/08/10 Use DDF Lang Reference
         if (follow_player)
-            ConsolePlayerMessageLDF(consoleplayer, "AutoMapFollowOn");
+            ConsolePlayerMessageLDF(console_player, "AutoMapFollowOn");
         else
-            ConsolePlayerMessageLDF(consoleplayer, "AutoMapFollowOff");
+            ConsolePlayerMessageLDF(console_player, "AutoMapFollowOff");
 
         return true;
     }
@@ -422,9 +422,9 @@ bool AutomapResponder(InputEvent *ev)
         grid = !grid;
         // -ACB- 1998/08/10 Use DDF Lang Reference
         if (grid)
-            ConsolePlayerMessageLDF(consoleplayer, "AutoMapGridOn");
+            ConsolePlayerMessageLDF(console_player, "AutoMapGridOn");
         else
-            ConsolePlayerMessageLDF(consoleplayer, "AutoMapGridOff");
+            ConsolePlayerMessageLDF(console_player, "AutoMapGridOff");
 
         return true;
     }
@@ -432,7 +432,7 @@ bool AutomapResponder(InputEvent *ev)
     if (EventMatchesKey(key_automap_mark, sym))
     {
         // -ACB- 1998/08/10 Use DDF Lang Reference
-        ConsolePlayerMessage(consoleplayer, "%s %d", language["AutoMapMarkedSpot"],
+        ConsolePlayerMessage(console_player, "%s %d", language["AutoMapMarkedSpot"],
                           mark_point_number + 1);
         AddMark();
         return true;
@@ -441,7 +441,7 @@ bool AutomapResponder(InputEvent *ev)
     if (EventMatchesKey(key_automap_clear, sym))
     {
         // -ACB- 1998/08/10 Use DDF Lang Reference
-        ConsolePlayerMessageLDF(consoleplayer, "AutoMapMarksClear");
+        ConsolePlayerMessageLDF(console_player, "AutoMapMarksClear");
         ClearMarks();
         return true;
     }
@@ -982,7 +982,7 @@ static void AutomapWalkSeg(Seg *seg)
     }
     else if (frame_focus->player_ &&
              (show_allmap ||
-              !AlmostEquals(frame_focus->player_->powers[kPowerTypeAllMap],
+              !AlmostEquals(frame_focus->player_->powers_[kPowerTypeAllMap],
                             0.0f)))
     {
         if (!(line->flags & MLF_DontDraw))
@@ -1118,7 +1118,7 @@ static void AutomapDrawPlayer(MapObject *mo)
     }
 
     DrawLineCharacter(player_arrow, kAutomapPlayerArrowLines, mo->radius_,
-                      mo->angle_, player_colors[mo->player_->pnum & 0x07], mo->x,
+                      mo->angle_, player_colors[mo->player_->player_number_ & 0x07], mo->x,
                       mo->y);
 }
 
@@ -1126,7 +1126,7 @@ static void AutomapWalkThing(MapObject *mo)
 {
     int index = kAutomapColorScenery;
 
-    if (mo->player_ && mo->player_->mo == mo)
+    if (mo->player_ && mo->player_->map_object_ == mo)
     {
         AutomapDrawPlayer(mo);
         return;

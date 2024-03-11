@@ -57,7 +57,7 @@ void MapObjectTicker(bool extra_tic)
 
     // pause if in menu and at least one tic has been run
     if (!network_game && (menu_active || rts_menu_active) &&
-        !AlmostEquals(players[consoleplayer]->view_z, kFloatUnused))
+        !AlmostEquals(players[console_player]->view_z_, kFloatUnused))
     {
         return;
     }
@@ -66,7 +66,7 @@ void MapObjectTicker(bool extra_tic)
 
     if (erraticism.d_)
     {
-        bool keep_thinking = P_PlayerThink(players[consoleplayer], extra_tic);
+        bool keep_thinking = P_PlayerThink(players[console_player], extra_tic);
 
         if (!keep_thinking)
         {
@@ -74,15 +74,15 @@ void MapObjectTicker(bool extra_tic)
             return;
         }
 
-        for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+        for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
         {
-            if (players[pnum] && players[pnum] != players[consoleplayer])
+            if (players[pnum] && players[pnum] != players[console_player])
                 P_PlayerThink(players[pnum], extra_tic);
         }
     }
     else
     {
-        for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+        for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
             if (players[pnum]) P_PlayerThink(players[pnum], extra_tic);
     }
 

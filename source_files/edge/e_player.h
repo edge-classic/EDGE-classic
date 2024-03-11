@@ -23,360 +23,320 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __E_PLAYER_H__
-#define __E_PLAYER_H__
+#pragma once
 
-// The player data structure depends on a number
-// of other structs: items (internal inventory),
-// animation states (closely tied to the sprites
-// used to represent them, unfortunately).
-#include "p_weapon.h"
-
-// In addition, the player is just a special
-// case of the generic moving object/actor.
-#include "p_mobj.h"
-
-// Finally, for odd reasons, the player input
-// is buffered within the player data struct,
-// as commands per game tick.
-#include "e_ticcmd.h"
+#include <stdint.h>
 
 #include "colormap.h"
+#include "e_ticcmd.h"
+#include "p_mobj.h"
+#include "p_weapon.h"
 
-// Networking and tick handling related.
-#define BACKUPTICS 12
+constexpr uint8_t kBackupTics = 12;
 
-#define MAX_PLAYNAME 32
+constexpr uint8_t kPlayerNameCharacterLimit = 32;
 
-#define EFFECT_MAX_TIME (5 * kTicRate)
+constexpr uint16_t kMaximumEffectTime = (5 * kTicRate);
 
 // The maximum number of players, multiplayer/networking.
-#define MAXPLAYERS 16
+constexpr uint8_t kMaximumPlayers = 16;
 
-#define PLAYER_kStopSpeed 1.0
-
-class net_node_c;
+constexpr float kPlayerStopSpeed = 1.0f;
 
 // Pointer to each player in the game.
-extern struct player_s *players[MAXPLAYERS];
-extern int              numplayers;
-extern int              numbots;
+extern class Player *players[kMaximumPlayers];
+extern int           total_players;
+extern int           total_bots;
 
 // Player taking events, and displaying.
-extern int consoleplayer;
-extern int displayplayer;
+extern int console_player;
+extern int display_player;
 
 //
 // Player states.
 //
-typedef enum
+enum PlayerState
 {
     // Playing or camping.
-    PST_LIVE,
+    kPlayerAlive,
 
     // Dead on the ground, view follows killer.
-    PST_DEAD,
+    kPlayerDead,
 
     // Waiting to be respawned in the level.
-    PST_REBORN
-} playerstate_e;
+    kPlayerAwaitingRespawn
+};
 
 //
 // Player flags
-typedef enum
+enum PlayerFlag
 {
-    PFL_Zero = 0,
+    kPlayerFlagNone = 0,
 
-    PFL_Console = 0x0001,
-    PFL_Display = 0x0002,
-    PFL_Bot     = 0x0004,
-    PFL_Network = 0x0008,
-    PFL_Demo    = 0x0010,
+    kPlayerFlagConsole = 0x0001,
+    kPlayerFlagDisplay = 0x0002,
+    kPlayerFlagBot     = 0x0004,
+    kPlayerFlagNetwork = 0x0008,
 
     // this not used in player_t, only in newgame_params_c
-    PFL_NOPLAYER = 0xFFFF
-} playerflag_e;
+    kPlayerFlagNoPlayer = 0xFFFF
+};
 
 //
 // Player internal flags, for cheats and debug.
 //
-typedef enum
+enum CheatFlag
 {
     // No clipping, walk through barriers.
-    CF_NOCLIP = 1,
+    kCheatingNoClip = 1,
 
     // No damage, no health loss.
-    CF_GODMODE = 2,
-} cheat_t;
+    kCheatingGodMode = 2,
+};
 
-typedef struct
+// Consolidated struct for ammo/inventory/counters,
+// basically a thing that has a finite quantity
+// and some kind of upper limit to how many
+// a player can have
+struct PlayerStock
 {
-    // amount of ammo available
-    int num;
+    int count;
+    int maximum;
+};
 
-    // maximum ammo carryable
-    int max;
-} playerammo_t;
-
-typedef struct
-{
-    // amount of stock available
-    int num;
-
-    // maximum stock carryable
-    int max;
-} playerinv_t;
-
-typedef struct
-{
-    // current counter value
-    int num;
-
-    // max counter value
-    int max;
-} playercounter_t;
-
-typedef enum
+enum WeaponSelection
 {
     // (for pending_wp only) no change is occuring
-    WPSEL_NoChange = -2,
+    KWeaponSelectionNoChange = -2,
 
     // absolutely no weapon at all
-    WPSEL_None = -1
-} weapon_selection_e;
+    KWeaponSelectionNone = -1
+};
 
 //
 // Extended player object info: player_t
 //
-typedef struct player_s
+class Player
 {
+   public:
     // player number.  Starts at 0.
-    int pnum;
+    int player_number_;
 
     // actions to perform.  Comes either from the local computer or over
     // the network in multiplayer mode.
-    EventTicCommand cmd;
+    EventTicCommand command_;
 
-    playerstate_e playerstate;
+    PlayerState player_state_;
 
     // miscellaneous flags
-    int playerflags;
+    int player_flags_;
 
     // map object that this player controls.  Will be nullptr outside of a
     // level (e.g. on the intermission screen).
-    MapObject *mo;
+    MapObject *map_object_;
 
     // player's name
-    char playername[MAX_PLAYNAME];
+    char player_name_[kPlayerNameCharacterLimit];
 
     // a measure of how fast we are actually moving, based on how far
     // the player thing moves on the 2D map.
-    float actual_speed;
+    float actual_speed_;
 
     // Determine POV, including viewpoint bobbing during movement.
     // Focal origin above r.z
     // will be kFloatUnused until the first think.
-    float view_z;
+    float view_z_;
 
     // Base height above floor for view_z.  Tracks `std_viewheight' but
     // is different when squatting (i.e. after a fall).
-    float viewheight;
+    float view_height_;
 
     // Bob/squat speed.
-    float deltaviewheight;
+    float delta_view_height_;
 
     // standard viewheight, usually 75% of height.
-    float std_viewheight;
+    float standard_view_height_;
 
     // bounded/scaled total momentum.
-    float bob;
-    int   e_bob_ticker = 0; // Erraticism bob timer to prevent weapon bob jumps
+    float bob_factor_;
+    int   erraticism_bob_ticker_ =
+        0;  // Erraticism bob timer to prevent weapon bob jumps
 
     // Kick offset for vertangle (in mobj_t)
-    float kick_offset;
+    float kick_offset_;
 
     // when > 0, the player has activated zoom
-    int zoom_fov;
+    int zoom_field_of_view_;
 
     // This is only used between levels,
     // mo->health_ is used during levels.
-    float health;
+    float health_;
 
     // Armour points for each type
-    float             armours[kTotalArmourTypes];
-    const MapObjectDefinition *armour_types[kTotalArmourTypes];
-    float             totalarmour; // needed for status bar
+    float                      armours_[kTotalArmourTypes];
+    const MapObjectDefinition *armour_types_[kTotalArmourTypes];
+    float                      total_armour_;  // needed for status bar
 
     // Power ups. invinc and invis are tic counters.
-    float powers[kTotalPowerTypes];
+    float powers_[kTotalPowerTypes];
 
     // bitflag of powerups to be kept (esp. BERSERK)
-    int keep_powers;
+    int keep_powers_;
 
     // Set of keys held
-    DoorKeyType cards;
+    DoorKeyType cards_;
 
-    // weapons, either an index into the player->weapons[] array, or one
-    // of the WPSEL_* values.
-    weapon_selection_e ready_wp;
-    weapon_selection_e pending_wp;
+    // weapons, either an index into the player->weapons_[] array, or one
+    // of the KWeaponSelection* values.
+    WeaponSelection ready_weapon_;
+    WeaponSelection pending_weapon_;
 
     // -AJA- 1999/08/11: Now uses playerweapon_t.
-    PlayerWeapon weapons[kMaximumWeapons];
+    PlayerWeapon weapons_[kMaximumWeapons];
 
     // current weapon choice for each key (1..9 and 0)
-    weapon_selection_e key_choices[10];
+    WeaponSelection key_choices_[10];
 
     // for status bar: which numbers to light up
-    int avail_weapons[10];
+    int available_weapons_[10];
 
     // ammunition, one for each AmmunitionType (except AM_NoAmmo)
-    playerammo_t ammo[kTotalAmmunitionTypes];
+    PlayerStock ammo_[kTotalAmmunitionTypes];
 
-    // inventory stock, one for each invtype_e
-    playerinv_t inventory[kTotalInventoryTypes];
+    // inventory stock, one for each InventoryType
+    PlayerStock inventory_[kTotalInventoryTypes];
 
-    // counters, one for each countertype_e
-    playercounter_t counters[kTotalCounterTypes];
+    // counters, one for each CounterType
+    PlayerStock counters_[kTotalCounterTypes];
 
     // True if button down last tic.
-    bool attackdown[4];
-    bool usedown;
-    bool actiondown[2];
+    bool attack_button_down_[4];
+    bool use_button_down_;
+    bool action_button_down_[2];
 
     // Bit flags, for cheats and debug.
     // See cheat_t, above.
-    int cheats;
+    int cheats_;
 
     // Refired shots are less accurate.
-    int refire;
+    int refire_;
 
     // Frags, kills of other players.
-    int frags;
-    int totalfrags;
+    int frags_;
+    int total_frags_;
 
     // For intermission stats.
-    int killcount;
-    int itemcount;
-    int secretcount;
-    int leveltime;
+    int kill_count_;
+    int item_count_;
+    int secret_count_;
+    int level_time_;
 
     // For screen flashing (red or bright).
-    int damagecount;
-    int bonuscount;
+    int damage_count_;
+    int bonus_count_;
 
     // Who did damage (nullptr for floors/ceilings).
-    MapObject *attacker;
+    MapObject *attacker_;
 
     // how much damage was done (used for status bar)
-    float damage_pain;
+    float damage_pain_;
 
     // damage flash colour of last damage type inflicted
-    RGBAColor last_damage_colour;
+    RGBAColor last_damage_colour_;
 
     // So gun flashes light up the screen.
-    int  extralight;
-    bool flash;
+    int  extra_light_;
+    bool flash_;
 
     // -AJA- 1999/07/10: changed for colmap.ddf.
-    const Colormap *effect_colourmap;
-    int                effect_left; // tics remaining, maxed to EFFECT_MAX_TIME
+    const Colormap *effect_colourmap_;
+    int effect_left_;  // tics remaining, maxed to kMaximumEffectTime
 
     // Overlay view sprites (gun, etc).
-    PlayerSprite psprites[kTotalPlayerSpriteTypes];
+    PlayerSprite player_sprites_[kTotalPlayerSpriteTypes];
 
     // Current PSP for action
-    int action_psp;
+    int action_player_sprite_;
 
     // Implements a wait counter to prevent use jumping again
     // -ACB- 1998/08/09
-    int jumpwait;
+    int jump_wait_;
 
     // counter used to determine when to enter weapon idle states
-    int idlewait;
+    int idle_wait_;
 
-    int splashwait;
+    int splash_wait_;
 
     // breathing support.  In air-less sectors, this is decremented on
     // each tic.  When it reaches zero, the player starts choking (which
     // hurts), and player drowns when health drops to zero.
-    int  air_in_lungs;
-    bool underwater;
-    bool airless;
-    bool swimming;
-    bool wet_feet;
+    int  air_in_lungs_;
+    bool underwater_;
+    bool airless_;
+    bool swimming_;
+    bool wet_feet_;
 
     // how many tics to grin :-)
-    int grin_count;
+    int grin_count_;
 
     // how many tics player has been attacking (for rampage face)
-    int attackdown_count;
+    int attack_sustained_count_;
 
     // status bar: used to choose which face to show
-    int face_index;
-    int face_count;
+    int face_index_;
+    int face_count_;
 
     // -AJA- 1999/08/10: This field is the state number which is
     // remembered for WEAPON_NOFIRE_RETURN when the player lets go of
     // the button.  Holds -1 if not fired or after changing weapons.
-    int remember_atk[4];
+    int remember_attack_state_[4];
 
     // last frame for weapon models
-    int weapon_last_frame;
+    int weapon_last_frame_;
 
-    EventTicCommand in_cmds[BACKUPTICS];
+    EventTicCommand input_commands_[kBackupTics];
 
-    int in_tic; /* tic number of next input command expected */
-
-    // node is nullptr for players and bots on the same computer,
-    // otherwise is the networking info for the remote computer.
-    net_node_c *node;
+    int in_tic_; /* tic number of next input command expected */
 
     // This function will be called to initialise the ticcmd_t.
-    void (*builder)(const struct player_s *, void *data, EventTicCommand *dest);
-    void *build_data;
+    void (*Builder)(const class Player *, void *data, EventTicCommand *dest);
+    void *build_data_;
 
-  public:
+   public:
     void Reborn();
 
-    bool isBot() const
-    {
-        return (playerflags & PFL_Bot) != 0;
-    }
-} player_t;
+    bool IsBot() const { return (player_flags_ & kPlayerFlagBot) != 0; }
+};
 
 // Player ticcmd builders
-void P_ConsolePlayerBuilder(const player_t *p, void *data, EventTicCommand *dest);
-void P_BotPlayerBuilder(const player_t *p, void *data, EventTicCommand *dest);
+void ConsolePlayerBuilder(const Player *p, void *data, EventTicCommand *dest);
+void BotPlayerBuilder(const Player *p, void *data, EventTicCommand *dest);
 
-void GameClearBodyQueue(void);
-void GameDeathMatchSpawnPlayer(player_t *p);
-void GameCoopSpawnPlayer(player_t *p);
-void GameHubSpawnPlayer(player_t *p, int tag);
-void GameSpawnVoodooDolls(player_t *p);
-void GameSpawnHelper(int pnum);
+void ClearBodyQueue(void);
+void DeathMatchSpawnPlayer(Player *p);
+void CoopSpawnPlayer(Player *p);
+void GameHubSpawnPlayer(Player *p, int tag);
+void SpawnVoodooDolls(Player *p);
+void SpawnHelper(int pnum);
 
-void GameSetConsolePlayer(int pnum);
-void GameSetDisplayPlayer(int pnum);
-void GameToggleDisplayPlayer(void);
+void SetConsolePlayer(int pnum);
+void SetDisplayPlayer(int pnum);
+void ToggleDisplayPlayer(void);
 
-void GamePlayerReborn(player_t *player, const MapObjectDefinition *info);
-void GamePlayerFinishLevel(player_t *p, bool keep_cards);
-void GameMarkPlayerAvatars(void);
-void GameRemoveOldAvatars(void);
+void PlayerFinishLevel(Player *p, bool keep_cards);
+void MarkPlayerAvatars(void);
+void RemoveOldAvatars(void);
 
 bool GameCheckConditions(MapObject *mo, ConditionCheck *cond);
 
-void GameClearPlayerStarts(void);
+void ClearPlayerStarts(void);
 
-void GameAddDeathmatchStart(const SpawnPoint &point);
-void GameAddCoopStart(const SpawnPoint &point);
-void GameAddHubStart(const SpawnPoint &point);
-void GameAddVoodooDoll(const SpawnPoint &point);
+void AddDeathmatchStart(const SpawnPoint &point);
+void AddCoopStart(const SpawnPoint &point);
+void AddHubStart(const SpawnPoint &point);
+void AddVoodooDoll(const SpawnPoint &point);
 
-SpawnPoint *GameFindCoopPlayer(int pnum);
-
-#endif // __E_PLAYER_H__
+SpawnPoint *FindCoopPlayer(int pnum);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

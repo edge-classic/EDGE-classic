@@ -974,7 +974,7 @@ static void SortRanks(int *rank, int *score)
     {
         done = true;
 
-        for (int i = 0; i < MAXPLAYERS - 1; i++)
+        for (int i = 0; i < kMaximumPlayers - 1; i++)
         {
             if (score[i] < score[i + 1])
             {
@@ -994,14 +994,14 @@ static void SortRanks(int *rank, int *score)
 
 static int DeathmatchScore(int pl)
 {
-    if (pl >= 0) { return players[pl]->totalfrags * 2 + players[pl]->frags; }
+    if (pl >= 0) { return players[pl]->total_frags_ * 2 + players[pl]->frags_; }
 
     return -999;
 }
 
 static void InitDeathmatchStats(void)
 {
-    SYS_ASSERT(kNumberOfPlayersShown <= MAXPLAYERS);
+    SYS_ASSERT(kNumberOfPlayersShown <= kMaximumPlayers);
 
     state            = kIntermissionStateStatScreen;
     accelerate_stage = false;
@@ -1009,12 +1009,12 @@ static void InitDeathmatchStats(void)
 
     count_pause = kTicRate;
 
-    int rank[MAXPLAYERS];
-    int score[MAXPLAYERS];
+    int rank[kMaximumPlayers];
+    int score[kMaximumPlayers];
 
     int i;
 
-    for (i = 0; i < MAXPLAYERS; i++)
+    for (i = 0; i < kMaximumPlayers; i++)
     {
         rank[i]  = players[i] ? i : -1;
         score[i] = DeathmatchScore(rank[i]);
@@ -1045,8 +1045,8 @@ static void UpdateDeathmatchStats(void)
 
             if (p < 0) break;
 
-            deathmatch_frags[i]  = players[p]->frags;
-            deathmatch_totals[i] = players[p]->totalfrags;
+            deathmatch_frags[i]  = players[p]->frags_;
+            deathmatch_totals[i] = players[p]->total_frags_;
         }
 
         StartSoundEffect(gd->done_);
@@ -1065,12 +1065,12 @@ static void UpdateDeathmatchStats(void)
 
                 if (p < 0) break;
 
-                if (deathmatch_frags[i] < players[p]->frags)
+                if (deathmatch_frags[i] < players[p]->frags_)
                 {
                     deathmatch_frags[i]++;
                     stillticking = true;
                 }
-                if (deathmatch_totals[i] < players[p]->totalfrags)
+                if (deathmatch_totals[i] < players[p]->total_frags_)
                 {
                     deathmatch_totals[i]++;
                     stillticking = true;
@@ -1131,14 +1131,14 @@ static void DrawDeathmatchStats(void)
 
         // hightlight the console player
 #if 1
-        if (p == consoleplayer) t_type = StyleDefinition::kTextSectionAlternate;
+        if (p == console_player) t_type = StyleDefinition::kTextSectionAlternate;
 #else
         if (p == consoleplayer && ((background_count & 31) < 16)) continue;
 #endif
 
         char temp[40];
 
-        sprintf(temp, "%s", players[p]->playername);
+        sprintf(temp, "%s", players[p]->player_name_);
         HudWriteText(multiplayer_intermission_style, t_type, 20, y, temp);
 
         sprintf(temp, "%5d", deathmatch_frags[i]);
@@ -1155,12 +1155,12 @@ static int CoopScore(int pl)
     if (pl >= 0)
     {
         int coop_kills =
-            players[pl]->killcount * 400 / intermission_stats.kills;
+            players[pl]->kill_count_ * 400 / intermission_stats.kills;
         int coop_items =
-            players[pl]->itemcount * 100 / intermission_stats.items;
+            players[pl]->item_count_ * 100 / intermission_stats.items;
         int coop_secret =
-            players[pl]->secretcount * 200 / intermission_stats.secrets;
-        int coop_frags = (players[pl]->frags + players[pl]->totalfrags) * 25;
+            players[pl]->secret_count_ * 200 / intermission_stats.secrets;
+        int coop_frags = (players[pl]->frags_ + players[pl]->total_frags_) * 25;
 
         return coop_kills + coop_items + coop_secret - coop_frags;
     }
@@ -1170,7 +1170,7 @@ static int CoopScore(int pl)
 
 static void InitCoopStats(void)
 {
-    SYS_ASSERT(kNumberOfPlayersShown <= MAXPLAYERS);
+    SYS_ASSERT(kNumberOfPlayersShown <= kMaximumPlayers);
 
     state              = kIntermissionStateStatScreen;
     accelerate_stage   = false;
@@ -1178,12 +1178,12 @@ static void InitCoopStats(void)
 
     count_pause = kTicRate;
 
-    int rank[MAXPLAYERS];
-    int score[MAXPLAYERS];
+    int rank[kMaximumPlayers];
+    int score[kMaximumPlayers];
 
     int i;
 
-    for (i = 0; i < MAXPLAYERS; i++)
+    for (i = 0; i < kMaximumPlayers; i++)
     {
         rank[i]  = players[i] ? i : -1;
         score[i] = CoopScore(rank[i]);
@@ -1202,8 +1202,8 @@ static void InitCoopStats(void)
         count_kills[i] = count_items[i] = count_secrets[i] = count_frags[i] =
             count_totals[i]                                = 0;
 
-        do_frags += players[deathmatch_rank[i]]->frags +
-                    players[deathmatch_rank[i]]->totalfrags;
+        do_frags += players[deathmatch_rank[i]]->frags_ +
+                    players[deathmatch_rank[i]]->total_frags_;
     }
 }
 
@@ -1224,16 +1224,16 @@ static void UpdateCoopStats(void)
             if (p < 0) break;
 
             count_kills[i] =
-                (players[p]->killcount * 100) / intermission_stats.kills;
+                (players[p]->kill_count_ * 100) / intermission_stats.kills;
             count_items[i] =
-                (players[p]->itemcount * 100) / intermission_stats.items;
+                (players[p]->item_count_ * 100) / intermission_stats.items;
             count_secrets[i] =
-                (players[p]->secretcount * 100) / intermission_stats.secrets;
+                (players[p]->secret_count_ * 100) / intermission_stats.secrets;
 
             if (do_frags)
             {
-                count_frags[i]  = players[p]->frags;
-                count_totals[i] = players[p]->totalfrags;
+                count_frags[i]  = players[p]->frags_;
+                count_totals[i] = players[p]->total_frags_;
             }
         }
 
@@ -1257,8 +1257,8 @@ static void UpdateCoopStats(void)
                 count_kills[i] += 2;
 
                 if (count_kills[i] >=
-                    (players[p]->killcount * 100) / intermission_stats.kills)
-                    count_kills[i] = (players[p]->killcount * 100) /
+                    (players[p]->kill_count_ * 100) / intermission_stats.kills)
+                    count_kills[i] = (players[p]->kill_count_ * 100) /
                                      intermission_stats.kills;
                 else
                     stillticking = true;
@@ -1284,8 +1284,8 @@ static void UpdateCoopStats(void)
 
                 count_items[i] += 2;
                 if (count_items[i] >=
-                    (players[p]->itemcount * 100) / intermission_stats.items)
-                    count_items[i] = (players[p]->itemcount * 100) /
+                    (players[p]->item_count_ * 100) / intermission_stats.items)
+                    count_items[i] = (players[p]->item_count_ * 100) /
                                      intermission_stats.items;
                 else
                     stillticking = true;
@@ -1311,9 +1311,9 @@ static void UpdateCoopStats(void)
 
                 count_secrets[i] += 2;
 
-                if (count_secrets[i] >= (players[p]->secretcount * 100) /
+                if (count_secrets[i] >= (players[p]->secret_count_ * 100) /
                                             intermission_stats.secrets)
-                    count_secrets[i] = (players[p]->secretcount * 100) /
+                    count_secrets[i] = (players[p]->secret_count_ * 100) /
                                        intermission_stats.secrets;
                 else
                     stillticking = true;
@@ -1340,10 +1340,10 @@ static void UpdateCoopStats(void)
                 count_frags[i]++;
                 count_totals[i]++;
 
-                if (count_frags[i] >= players[p]->frags)
-                    count_frags[i] = players[p]->frags;
-                else if (count_totals[i] >= players[p]->totalfrags)
-                    count_totals[i] = players[p]->totalfrags;
+                if (count_frags[i] >= players[p]->frags_)
+                    count_frags[i] = players[p]->frags_;
+                else if (count_totals[i] >= players[p]->total_frags_)
+                    count_totals[i] = players[p]->total_frags_;
                 else
                     stillticking = true;
             }
@@ -1409,14 +1409,14 @@ static void DrawCoopStats(void)
 
         // highlight the console player
 #if 1
-        if (p == consoleplayer) t_type = StyleDefinition::kTextSectionAlternate;
+        if (p == console_player) t_type = StyleDefinition::kTextSectionAlternate;
 #else
         if (p == consoleplayer && ((background_count & 31) < 16)) continue;
 #endif
 
         char temp[40];
 
-        sprintf(temp, "%s", players[p]->playername);
+        sprintf(temp, "%s", players[p]->player_name_);
         HudWriteText(multiplayer_intermission_style, t_type, 6, y, temp);
 
         sprintf(temp, "%3d%%", count_kills[i]);
@@ -1461,18 +1461,18 @@ static void InitSinglePlayerStats(void)
 
 static void UpdateSinglePlayerStats(void)
 {
-    player_t *con_plyr = players[consoleplayer];
+    Player *con_plyr = players[console_player];
 
     const GameDefinition *gd = intermission_stats.current_level->episode_;
 
     if (accelerate_stage && single_player_state != kSinglePlayerStateEnd)
     {
         accelerate_stage = false;
-        count_kills[0] = (con_plyr->killcount * 100) / intermission_stats.kills;
-        count_items[0] = (con_plyr->itemcount * 100) / intermission_stats.items;
+        count_kills[0] = (con_plyr->kill_count_ * 100) / intermission_stats.kills;
+        count_items[0] = (con_plyr->item_count_ * 100) / intermission_stats.items;
         count_secrets[0] =
-            (con_plyr->secretcount * 100) / intermission_stats.secrets;
-        count_time = con_plyr->leveltime / kTicRate;
+            (con_plyr->secret_count_ * 100) / intermission_stats.secrets;
+        count_time = con_plyr->level_time_ / kTicRate;
         count_par  = intermission_stats.par_time / kTicRate;
         StartSoundEffect(gd->done_);
         single_player_state = kSinglePlayerStateEnd;
@@ -1485,10 +1485,10 @@ static void UpdateSinglePlayerStats(void)
         if (!(background_count & 3)) StartSoundEffect(gd->percent_);
 
         if (count_kills[0] >=
-            (con_plyr->killcount * 100) / intermission_stats.kills)
+            (con_plyr->kill_count_ * 100) / intermission_stats.kills)
         {
             count_kills[0] =
-                (con_plyr->killcount * 100) / intermission_stats.kills;
+                (con_plyr->kill_count_ * 100) / intermission_stats.kills;
             StartSoundEffect(gd->done_);
             single_player_state++;
         }
@@ -1500,10 +1500,10 @@ static void UpdateSinglePlayerStats(void)
         if (!(background_count & 3)) StartSoundEffect(gd->percent_);
 
         if (count_items[0] >=
-            (con_plyr->itemcount * 100) / intermission_stats.items)
+            (con_plyr->item_count_ * 100) / intermission_stats.items)
         {
             count_items[0] =
-                (con_plyr->itemcount * 100) / intermission_stats.items;
+                (con_plyr->item_count_ * 100) / intermission_stats.items;
             StartSoundEffect(gd->done_);
             single_player_state++;
         }
@@ -1515,10 +1515,10 @@ static void UpdateSinglePlayerStats(void)
         if (!(background_count & 3)) StartSoundEffect(gd->percent_);
 
         if (count_secrets[0] >=
-            (con_plyr->secretcount * 100) / intermission_stats.secrets)
+            (con_plyr->secret_count_ * 100) / intermission_stats.secrets)
         {
             count_secrets[0] =
-                (con_plyr->secretcount * 100) / intermission_stats.secrets;
+                (con_plyr->secret_count_ * 100) / intermission_stats.secrets;
             StartSoundEffect(gd->done_);
             single_player_state++;
         }
@@ -1530,8 +1530,8 @@ static void UpdateSinglePlayerStats(void)
 
         count_time += 3;
 
-        if (count_time >= con_plyr->leveltime / kTicRate)
-            count_time = con_plyr->leveltime / kTicRate;
+        if (count_time >= con_plyr->level_time_ / kTicRate)
+            count_time = con_plyr->level_time_ / kTicRate;
 
         count_par += 3;
 
@@ -1539,7 +1539,7 @@ static void UpdateSinglePlayerStats(void)
         {
             count_par = intermission_stats.par_time / kTicRate;
 
-            if (count_time >= con_plyr->leveltime / kTicRate)
+            if (count_time >= con_plyr->level_time_ / kTicRate)
             {
                 StartSoundEffect(gd->done_);
                 single_player_state++;
@@ -1726,32 +1726,32 @@ bool IntermissionCheckForAccelerate(void)
     bool do_accel = false;
 
     // check for button presses to skip delays
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *player = players[pnum];
+        Player *player = players[pnum];
         if (!player) continue;
 
-        if (player->cmd.buttons & kButtonCodeAttack)
+        if (player->command_.buttons & kButtonCodeAttack)
         {
-            if (!player->attackdown[0])
+            if (!player->attack_button_down_[0])
             {
-                player->attackdown[0] = true;
+                player->attack_button_down_[0] = true;
                 do_accel              = true;
             }
         }
         else
-            player->attackdown[0] = false;
+            player->attack_button_down_[0] = false;
 
-        if (player->cmd.buttons & kButtonCodeUse)
+        if (player->command_.buttons & kButtonCodeUse)
         {
-            if (!player->usedown)
+            if (!player->use_button_down_)
             {
-                player->usedown = true;
+                player->use_button_down_ = true;
                 do_accel        = true;
             }
         }
         else
-            player->usedown = false;
+            player->use_button_down_ = false;
     }
 
     return do_accel;
@@ -2073,12 +2073,12 @@ void IntermissionStart(void)
             background_camera_map_object = mo;
 
             // we don't want to see players
-            for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+            for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
             {
-                player_t *p = players[pnum];
+                Player *p = players[pnum];
 
-                if (p && p->mo)
-                    p->mo->visibility_ = p->mo->target_visibility_ = INVISIBLE;
+                if (p && p->map_object_)
+                    p->map_object_->visibility_ = p->map_object_->target_visibility_ = INVISIBLE;
             }
 
             break;

@@ -135,9 +135,9 @@ void SoundChannel::ComputeVolume()
                                        listen_y - position_->y,
                                        listen_z - position_->z);
 
-            if (players[consoleplayer] && players[consoleplayer]->mo)
+            if (players[console_player] && players[console_player]->map_object_)
             {
-                if (CheckSightToPoint(players[consoleplayer]->mo, position_->x,
+                if (CheckSightToPoint(players[console_player]->map_object_, position_->x,
                                       position_->y, position_->z))
                     dist = HMM_MAX(1.25f, dist / 100.0f);
                 else

@@ -963,8 +963,8 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props,
 
             // -AJA- 2008/01/20: Jumping out of Water
             if (block_line && block_line->back_sector && mo->player_ &&
-                mo->player_->mo == mo && mo->player_->wet_feet &&
-                !mo->player_->swimming && mo->player_->jumpwait == 0 &&
+                mo->player_->map_object_ == mo && mo->player_->wet_feet_ &&
+                !mo->player_->swimming_ && mo->player_->jump_wait_ == 0 &&
                 mo->z > mo->floor_z_ + 0.5f && mo->momentum_.Z >= 0.0f)
             {
                 float ground_h;
@@ -1049,7 +1049,7 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props,
     float friction = props->friction;
 
     if ((mo->z > mo->floor_z_) && !(mo->on_ladder_ >= 0) &&
-        !(mo->player_ && mo->player_->powers[kPowerTypeJetpack] > 0) &&
+        !(mo->player_ && mo->player_->powers_[kPowerTypeJetpack] > 0) &&
         !mo->on_slope_)
     {
         // apply drag when airborne
@@ -1075,15 +1075,15 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props,
 
         float speed = FastApproximateDistance(x_diff, y_diff);
 
-        mo->player_->actual_speed =
-            (mo->player_->actual_speed * 0.8 + speed * 0.2);
+        mo->player_->actual_speed_ =
+            (mo->player_->actual_speed_ * 0.8 + speed * 0.2);
 
-        // LogDebug("Actual speed = %1.4f\n", mo->player_->actual_speed);
+        // LogDebug("Actual speed = %1.4f\n", mo->player_->actual_speed_);
 
         if (fabs(mo->momentum_.X) < kStopSpeed &&
             fabs(mo->momentum_.Y) < kStopSpeed &&
-            mo->player_->cmd.forward_move == 0 &&
-            mo->player_->cmd.side_move == 0)
+            mo->player_->command_.forward_move == 0 &&
+            mo->player_->command_.side_move == 0)
         {
             mo->momentum_.X = mo->momentum_.Y = 0;
         }
@@ -1112,12 +1112,12 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
                     gravity_factor.f_;  // New global gravity menu item
 
     // check for smooth step up
-    if (mo->player_ && mo->player_->mo == mo && mo->z < mo->floor_z_)
+    if (mo->player_ && mo->player_->map_object_ == mo && mo->z < mo->floor_z_)
     {
-        mo->player_->viewheight -= (mo->floor_z_ - mo->z);
-        mo->player_->view_z -= (mo->floor_z_ - mo->z);
-        mo->player_->deltaviewheight =
-            (mo->player_->std_viewheight - mo->player_->viewheight) / 8.0f;
+        mo->player_->view_height_ -= (mo->floor_z_ - mo->z);
+        mo->player_->view_z_ -= (mo->floor_z_ - mo->z);
+        mo->player_->delta_view_height_ =
+            (mo->player_->standard_view_height_ - mo->player_->view_height_) / 8.0f;
     }
 
     zmove = mo->momentum_.Z * (1.0f - props->viscosity);
@@ -1170,8 +1170,8 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
         {
             float hurt_momz = gravity * mo->info_->maxfall_;
             bool  fly_or_swim =
-                mo->player_ && (mo->player_->swimming ||
-                                mo->player_->powers[kPowerTypeJetpack] > 0 ||
+                mo->player_ && (mo->player_->swimming_ ||
+                                mo->player_->powers_[kPowerTypeJetpack] > 0 ||
                                 mo->on_ladder_ >= 0);
 
             if (mo->player_ && gravity > 0 &&
@@ -1180,12 +1180,12 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
             {
                 // Squat down. Decrease viewheight for a moment after hitting
                 // the ground (hard), and utter appropriate sound.
-                mo->player_->deltaviewheight =
+                mo->player_->delta_view_height_ =
                     zmove / 8.0f * (double_framerate.d_ ? 2.0 : 1.0);  // 70Hz
                 if (mo->info_->maxfall_ > 0 && -mo->momentum_.Z > hurt_momz)
                 {
-                    if (!(mo->player_->cheats & CF_GODMODE) &&
-                        mo->player_->powers[kPowerTypeInvulnerable] < 1)
+                    if (!(mo->player_->cheats_ & kCheatingGodMode) &&
+                        mo->player_->powers_[kPowerTypeInvulnerable] < 1)
                         StartSoundEffect(mo->info_->fallpain_sound_,
                                   P_MobjGetSfxCategory(mo), mo);
                     else
@@ -1274,7 +1274,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
         //                   (nearly forgot this one:-)
 
         if (!(mo->flags_ & kMapObjectFlagNoGravity) &&
-            !(mo->player_ && mo->player_->powers[kPowerTypeJetpack] > 0) &&
+            !(mo->player_ && mo->player_->powers_[kPowerTypeJetpack] > 0) &&
             !(mo->on_ladder_ >= 0))
         {
             // 70 Hz: apply gravity only on real tics
@@ -1299,15 +1299,15 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
         {
             float hurt_momz = gravity * mo->info_->maxfall_;
             bool  fly_or_swim =
-                mo->player_ && (mo->player_->swimming ||
-                                mo->player_->powers[kPowerTypeJetpack] > 0 ||
+                mo->player_ && (mo->player_->swimming_ ||
+                                mo->player_->powers_[kPowerTypeJetpack] > 0 ||
                                 mo->on_ladder_ >= 0);
 
             if (mo->player_ && gravity < 0 &&
                 zmove > (kOofSpeed / (double_framerate.d_ ? 2 : 1)) &&
                 !fly_or_swim)
             {
-                mo->player_->deltaviewheight = zmove / 8.0f;
+                mo->player_->delta_view_height_ = zmove / 8.0f;
                 StartSoundEffect(mo->info_->oof_sound_, P_MobjGetSfxCategory(mo), mo);
             }
             if (mo->info_->maxfall_ > 0 && gravity < 0 &&
@@ -1374,7 +1374,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
         //                   (nearly forgot this one:-)
 
         if (!(mo->flags_ & kMapObjectFlagNoGravity) &&
-            !(mo->player_ && mo->player_->powers[kPowerTypeJetpack] > 0) &&
+            !(mo->player_ && mo->player_->powers_[kPowerTypeJetpack] > 0) &&
             !(mo->on_ladder_ >= 0))
         {
             // 70 Hz: apply gravity only on real tics
@@ -1396,7 +1396,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
     // ladders have friction
     if (mo->on_ladder_ >= 0)
         mo->momentum_.Z *= kLadderFriction;
-    else if (mo->player_ && mo->player_->powers[kPowerTypeJetpack] > 0)
+    else if (mo->player_ && mo->player_->powers_[kPowerTypeJetpack] > 0)
         mo->momentum_.Z *= props->friction;
     else
         mo->momentum_.Z *= props->drag;
@@ -1404,7 +1404,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
     if (mo->player_)
     {
         if (fabs(mo->momentum_.Z) < kStopSpeed &&
-            mo->player_->cmd.upward_move == 0)
+            mo->player_->command_.upward_move == 0)
         {
             mo->momentum_.Z = 0;
         }
@@ -1815,10 +1815,10 @@ static void RemoveMobjFromList(MapObject *mo)
 //
 void P_RemoveMobj(MapObject *mo)
 {
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
-        if (p && p->attacker == mo) p->attacker = nullptr;
+        Player *p = players[pnum];
+        if (p && p->attacker_ == mo) p->attacker_ = nullptr;
     }
 
     if (mo->IsRemoved())
@@ -1907,9 +1907,9 @@ void RunMobjThinkers(bool extra_tic)
 
     time_stop_active = false;
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        if (players[pnum] && players[pnum]->powers[kPowerTypeTimeStop] > 0)
+        if (players[pnum] && players[pnum]->powers_[kPowerTypeTimeStop] > 0)
         {
             time_stop_active = true;
             break;
@@ -1942,8 +1942,8 @@ void RunMobjThinkers(bool extra_tic)
                 if (!distance_cull_thinkers.d_ ||
                     (game_tic / 2 %
                          RoundToInteger(
-                             1 + RendererPointToDistance(players[consoleplayer]->mo->x,
-                                               players[consoleplayer]->mo->y,
+                             1 + RendererPointToDistance(players[console_player]->map_object_->x,
+                                               players[console_player]->map_object_->y,
                                                mo->x, mo->y) /
                                      1500) ==
                      0))
@@ -1959,8 +1959,8 @@ void RunMobjThinkers(bool extra_tic)
                              ((game_tic / 4) %
                                   RoundToInteger(
                                       1 + RendererPointToDistance(
-                                              players[consoleplayer]->mo->x,
-                                              players[consoleplayer]->mo->y,
+                                              players[console_player]->map_object_->x,
+                                              players[console_player]->map_object_->y,
                                               mo->x, mo->y) /
                                               1500) ==
                               0))
@@ -1970,8 +1970,8 @@ void RunMobjThinkers(bool extra_tic)
                          ((game_tic / 4) %
                               RoundToInteger(
                                   1 +
-                                  RendererPointToDistance(players[consoleplayer]->mo->x,
-                                                players[consoleplayer]->mo->y,
+                                  RendererPointToDistance(players[console_player]->map_object_->x,
+                                                players[console_player]->map_object_->y,
                                                 mo->x, mo->y) /
                                       1500) ==
                           0))
@@ -2310,7 +2310,7 @@ MapObject *P_MobjCreateObject(float x, float y, float z,
 
     if (game_skill != sk_nightmare) mobj->reaction_time_ = info->reaction_time_;
 
-    mobj->last_look_ = RandomByteDeterministic() % MAXPLAYERS;
+    mobj->last_look_ = RandomByteDeterministic() % kMaximumPlayers;
 
     //
     // Do not set the state with P_SetMobjState,
@@ -2421,7 +2421,7 @@ int P_MobjGetSfxCategory(const MapObject *mo)
 {
     if (mo->player_)
     {
-        if (mo->player_ == players[displayplayer]) return kCategoryPlayer;
+        if (mo->player_ == players[display_player]) return kCategoryPlayer;
 
         return kCategoryOpponent;
     }

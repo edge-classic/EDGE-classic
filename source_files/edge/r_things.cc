@@ -142,7 +142,7 @@ static int GetMulticolMaxRGB(ColorMixer *cols, int num, bool additive)
     return result;
 }
 
-static void RendererDrawPSprite(PlayerSprite *psp, int which, player_t *player,
+static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
                                 RegionProperties *props, const State *state)
 {
     if (state->flags & kStateFrameFlagModel) return;
@@ -165,13 +165,13 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, player_t *player,
     float top   = image->Top();
     float ratio = 1.0f;
 
-    bool is_fuzzy = (player->mo->flags_ & kMapObjectFlagFuzzy) ? true : false;
+    bool is_fuzzy = (player->map_object_->flags_ & kMapObjectFlagFuzzy) ? true : false;
 
-    float trans = player->mo->visibility_;
+    float trans = player->map_object_->visibility_;
 
     if (which == kPlayerSpriteCrosshair)
     {
-        if (!player->weapons[player->ready_wp].info->ignore_crosshair_scaling_)
+        if (!player->weapons_[player->ready_weapon_].info->ignore_crosshair_scaling_)
             ratio = crosshair_size.f_ / w;
 
         w *= ratio;
@@ -182,7 +182,7 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, player_t *player,
 
     // Lobo: no sense having the zoom crosshair fuzzy
     if (which == kPlayerSpriteWeapon && view_is_zoomed &&
-        player->weapons[player->ready_wp].info->zoom_state_ > 0)
+        player->weapons_[player->ready_weapon_].info->zoom_state_ > 0)
     {
         is_fuzzy = false;
         trans    = 1.0f;
@@ -216,17 +216,17 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, player_t *player,
     if (LuaUseLuaHud())
     {
         // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
-        if ((state->flags & kStateFrameFlagWeapon) && (player->ready_wp >= 0))
+        if ((state->flags & kStateFrameFlagWeapon) && (player->ready_weapon_ >= 0))
             ty1 +=
                 LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") +
-                player->weapons[player->ready_wp].info->y_adjust_;
+                player->weapons_[player->ready_weapon_].info->y_adjust_;
     }
     else
     {
         // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
-        if ((state->flags & kStateFrameFlagWeapon) && (player->ready_wp >= 0))
+        if ((state->flags & kStateFrameFlagWeapon) && (player->ready_weapon_ >= 0))
             ty1 += CoalGetFloat(ui_vm, "hud", "universal_y_adjust") +
-                   player->weapons[player->ready_wp].info->y_adjust_;
+                   player->weapons_[player->ready_weapon_].info->y_adjust_;
     }
 
     float ty2 = ty1 + h;
@@ -268,10 +268,10 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, player_t *player,
 
     float away = 120.0;
 
-    data.light_position.X = player->mo->x + view_cosine * away;
-    data.light_position.Y = player->mo->y + view_sine * away;
+    data.light_position.X = player->map_object_->x + view_cosine * away;
+    data.light_position.Y = player->map_object_->y + view_sine * away;
     data.light_position.Z =
-        player->mo->z + player->mo->height_ * player->mo->info_->shotheight_;
+        player->map_object_->z + player->map_object_->height_ * player->map_object_->info_->shotheight_;
 
     data.colors[0].Clear();
 
@@ -289,12 +289,12 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, player_t *player,
         trans    = 1.0f;
     }
 
-    RGBAColor fc_to_use = player->mo->subsector_->sector->properties.fog_color;
-    float fd_to_use = player->mo->subsector_->sector->properties.fog_density;
+    RGBAColor fc_to_use = player->map_object_->subsector_->sector->properties.fog_color;
+    float fd_to_use = player->map_object_->subsector_->sector->properties.fog_density;
     // check for DDFLEVL fog
     if (fc_to_use == kRGBANoValue)
     {
-        if (IS_SKY(player->mo->subsector_->sector->ceiling))
+        if (IS_SKY(player->map_object_->subsector_->sector->ceiling))
         {
             fc_to_use = current_map->outdoor_fog_color_;
             fd_to_use = 0.01f * current_map->outdoor_fog_density_;
@@ -309,7 +309,7 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, player_t *player,
     if (!is_fuzzy)
     {
         AbstractShader *shader = GetColormapShader(
-            props, state->bright, player->mo->subsector_->sector);
+            props, state->bright, player->map_object_->subsector_->sector);
 
         shader->Sample(data.colors + 0, data.light_position.X,
                        data.light_position.Y, data.light_position.Z);
@@ -335,22 +335,22 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, player_t *player,
 
         if (use_dynamic_lights && render_view_extra_light < 250)
         {
-            data.light_position.X = player->mo->x + view_cosine * 24;
-            data.light_position.Y = player->mo->y + view_sine * 24;
+            data.light_position.X = player->map_object_->x + view_cosine * 24;
+            data.light_position.Y = player->map_object_->y + view_sine * 24;
 
             float r = 96;
 
             DynamicLightIterator(
                 data.light_position.X - r, data.light_position.Y - r,
-                player->mo->z, data.light_position.X + r,
-                data.light_position.Y + r, player->mo->z + player->mo->height_,
+                player->map_object_->z, data.light_position.X + r,
+                data.light_position.Y + r, player->map_object_->z + player->map_object_->height_,
                 DLIT_PSprite, &data);
 
             SectorGlowIterator(
-                player->mo->subsector_->sector, data.light_position.X - r,
-                data.light_position.Y - r, player->mo->z,
+                player->map_object_->subsector_->sector, data.light_position.X - r,
+                data.light_position.Y - r, player->map_object_->z,
                 data.light_position.X + r, data.light_position.Y + r,
-                player->mo->z + player->mo->height_, DLIT_PSprite, &data);
+                player->map_object_->z + player->map_object_->height_, DLIT_PSprite, &data);
         }
     }
 
@@ -409,7 +409,7 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, player_t *player,
                 dest->texture_coordinates[1].Y =
                     dest->position.Y / (float)current_screen_height;
 
-                FuzzAdjust(&dest->texture_coordinates[1], player->mo);
+                FuzzAdjust(&dest->texture_coordinates[1], player->map_object_);
 
                 dest->rgba_color[0]     = dest->rgba_color[1] =
                     dest->rgba_color[2] = 0;
@@ -519,16 +519,16 @@ static void DrawStdCrossHair(void)
     glDisable(GL_BLEND);
 }
 
-void RendererDrawWeaponSprites(player_t *p)
+void RendererDrawWeaponSprites(Player *p)
 {
     // special handling for zoom: show viewfinder
     if (view_is_zoomed)
     {
-        PlayerSprite *psp = &p->psprites[kPlayerSpriteWeapon];
+        PlayerSprite *psp = &p->player_sprites_[kPlayerSpriteWeapon];
 
-        if ((p->ready_wp < 0) || (psp->state == 0)) return;
+        if ((p->ready_weapon_ < 0) || (psp->state == 0)) return;
 
-        WeaponDefinition *w = p->weapons[p->ready_wp].info;
+        WeaponDefinition *w = p->weapons_[p->ready_weapon_].info;
 
         // 2023.06.13 - If zoom state missing but weapon can zoom, allow the
         // regular psprite drawing routines to occur (old EDGE behavior)
@@ -540,7 +540,7 @@ void RendererDrawWeaponSprites(player_t *p)
         }
     }
 
-    // add all active psprites
+    // add all active player_sprites_
     // Note: order is significant
 
     // Lobo 2022:
@@ -548,18 +548,18 @@ void RendererDrawWeaponSprites(player_t *p)
     // rendering so that FLASH states are
     // drawn in front of the WEAPON states
     bool FlashFirst = false;
-    if (p->ready_wp >= 0)
+    if (p->ready_weapon_ >= 0)
     {
-        FlashFirst = p->weapons[p->ready_wp].info->render_invert_;
+        FlashFirst = p->weapons_[p->ready_weapon_].info->render_invert_;
     }
 
     if (FlashFirst == false)
     {
         for (int i = 0; i < kTotalPlayerSpriteTypes; i++)  // normal
         {
-            PlayerSprite *psp = &p->psprites[i];
+            PlayerSprite *psp = &p->player_sprites_[i];
 
-            if ((p->ready_wp < 0) || (psp->state == 0)) continue;
+            if ((p->ready_weapon_ < 0) || (psp->state == 0)) continue;
 
             RendererDrawPSprite(psp, i, p, view_properties, psp->state);
         }
@@ -568,18 +568,18 @@ void RendererDrawWeaponSprites(player_t *p)
     {
         for (int i = kTotalPlayerSpriteTypes - 1; i >= 0; i--)  // go backwards
         {
-            PlayerSprite *psp = &p->psprites[i];
+            PlayerSprite *psp = &p->player_sprites_[i];
 
-            if ((p->ready_wp < 0) || (psp->state == 0)) continue;
+            if ((p->ready_weapon_ < 0) || (psp->state == 0)) continue;
 
             RendererDrawPSprite(psp, i, p, view_properties, psp->state);
         }
     }
 }
 
-void RendererDrawCrosshair(player_t *p)
+void RendererDrawCrosshair(Player *p)
 {
-    if (view_is_zoomed && p->weapons[p->ready_wp].info->zoom_state_ > 0)
+    if (view_is_zoomed && p->weapons_[p->ready_weapon_].info->zoom_state_ > 0)
     {
         // Only skip crosshair if there is a dedicated zoom state, which
         // should be providing its own
@@ -587,31 +587,31 @@ void RendererDrawCrosshair(player_t *p)
     }
     else
     {
-        PlayerSprite *psp = &p->psprites[kPlayerSpriteCrosshair];
+        PlayerSprite *psp = &p->player_sprites_[kPlayerSpriteCrosshair];
 
-        if (p->ready_wp >= 0 && psp->state != 0) return;
+        if (p->ready_weapon_ >= 0 && psp->state != 0) return;
     }
 
-    if (p->health > 0) DrawStdCrossHair();
+    if (p->health_ > 0) DrawStdCrossHair();
 }
 
-void RendererDrawWeaponModel(player_t *p)
+void RendererDrawWeaponModel(Player *p)
 {
-    if (view_is_zoomed && p->weapons[p->ready_wp].info->zoom_state_ > 0) return;
+    if (view_is_zoomed && p->weapons_[p->ready_weapon_].info->zoom_state_ > 0) return;
 
-    PlayerSprite *psp = &p->psprites[kPlayerSpriteWeapon];
+    PlayerSprite *psp = &p->player_sprites_[kPlayerSpriteWeapon];
 
-    if (p->ready_wp < 0) return;
+    if (p->ready_weapon_ < 0) return;
 
     if (psp->state == 0) return;
 
     if (!(psp->state->flags & kStateFrameFlagModel)) return;
 
-    WeaponDefinition *w = p->weapons[p->ready_wp].info;
+    WeaponDefinition *w = p->weapons_[p->ready_weapon_].info;
 
     ModelDefinition *md = GetModel(psp->state->sprite);
 
-    int skin_num = p->weapons[p->ready_wp].model_skin;
+    int skin_num = p->weapons_[p->ready_weapon_].model_skin;
 
     const Image *skin_img = md->skins_[skin_num];
 
@@ -636,12 +636,12 @@ void RendererDrawWeaponModel(player_t *p)
     int   last_frame = psp->state->frame;
     float lerp       = 0.0;
 
-    if (p->weapon_last_frame >= 0)
+    if (p->weapon_last_frame_ >= 0)
     {
         SYS_ASSERT(psp->state);
         SYS_ASSERT(psp->state->tics > 1);
 
-        last_frame = p->weapon_last_frame;
+        last_frame = p->weapon_last_frame_;
 
         lerp = (psp->state->tics - psp->tics + 1) / (float)(psp->state->tics);
         lerp = HMM_Clamp(0, lerp, 1);
@@ -652,12 +652,12 @@ void RendererDrawWeaponModel(player_t *p)
     if (LuaUseLuaHud())
     {
         bias = LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") +
-               p->weapons[p->ready_wp].info->y_adjust_;
+               p->weapons_[p->ready_weapon_].info->y_adjust_;
     }
     else
     {
         bias = CoalGetFloat(ui_vm, "hud", "universal_y_adjust") +
-               p->weapons[p->ready_wp].info->y_adjust_;
+               p->weapons_[p->ready_weapon_].info->y_adjust_;
     }
 
     bias /= 5;
@@ -665,12 +665,12 @@ void RendererDrawWeaponModel(player_t *p)
 
     if (md->md2_model_)
         Md2RenderModel(md->md2_model_, skin_img, true, last_frame,
-                        psp->state->frame, lerp, x, y, z, p->mo, view_properties,
+                        psp->state->frame, lerp, x, y, z, p->map_object_, view_properties,
                         1.0f /* scale */, w->model_aspect_, bias,
                         w->model_rotate_);
     else if (md->mdl_model_)
         MdlRenderModel(md->mdl_model_, skin_img, true, last_frame,
-                        psp->state->frame, lerp, x, y, z, p->mo, view_properties,
+                        psp->state->frame, lerp, x, y, z, p->map_object_, view_properties,
                         1.0f /* scale */, w->model_aspect_, bias,
                         w->model_rotate_);
 }

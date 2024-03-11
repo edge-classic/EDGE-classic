@@ -266,9 +266,9 @@ void RAD_Ticker(void)
 
 // --- Radius Trigger Actions -----------------------------------------------
 
-static player_t *GetWhoDunnit(rad_trigger_t *R)
+static Player *GetWhoDunnit(rad_trigger_t *R)
 {
-    return players[consoleplayer];
+    return players[console_player];
 
     /*
     // this IS NOT CORRECT, but matches old behavior
@@ -280,7 +280,7 @@ static player_t *GetWhoDunnit(rad_trigger_t *R)
 
     // does the activator list have only one player?
     // if so, return that one.
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
         if (R->acti_players == (1 << pnum))
             return players[pnum];
 
@@ -289,7 +289,7 @@ static player_t *GetWhoDunnit(rad_trigger_t *R)
     // However the following is probably more correct.
     //return nullptr;
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
         if (R->acti_players & (1 << pnum))
             return players[pnum];
     */
@@ -307,7 +307,7 @@ void RAD_ActTip(rad_trigger_t *R, void *param)
     // Only display the tip to the player that stepped into the radius
     // trigger.
 
-    if (numplayers > 1 && (R->acti_players & (1 << consoleplayer)) == 0)
+    if (total_players > 1 && (R->acti_players & (1 << console_player)) == 0)
         return;
 
     SendTip(R, tip, R->tip_slot);
@@ -318,7 +318,7 @@ void RAD_ActTipProps(rad_trigger_t *R, void *param)
     s_tip_prop_t *tp = (s_tip_prop_t *)param;
     drawtip_t    *current;
 
-    if (numplayers > 1 && (R->acti_players & (1 << consoleplayer)) == 0)
+    if (total_players > 1 && (R->acti_players & (1 << console_player)) == 0)
         return;
 
     if (tp->slot_num >= 0)
@@ -437,16 +437,16 @@ void RAD_ActDamagePlayers(rad_trigger_t *R, void *param)
 
     // Make sure these can happen to everyone within the radius.
     // Damage the player(s)
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
+        Player *p = players[pnum];
         if (!p)
             continue;
 
-        if (!RAD_WithinRadius(p->mo, R->info))
+        if (!RAD_WithinRadius(p->map_object_, R->info))
             continue;
 
-        DamageMapObject(p->mo, nullptr, nullptr, damage->damage_amount, nullptr);
+        DamageMapObject(p->map_object_, nullptr, nullptr, damage->damage_amount, nullptr);
     }
 }
 
@@ -455,24 +455,24 @@ void RAD_ActHealPlayers(rad_trigger_t *R, void *param)
     s_healp_t *heal = (s_healp_t *)param;
 
     // Heal the player(s)
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
+        Player *p = players[pnum];
         if (!p)
             continue;
 
-        if (!RAD_WithinRadius(p->mo, R->info))
+        if (!RAD_WithinRadius(p->map_object_, R->info))
             continue;
 
-        if (p->health >= heal->limit)
+        if (p->health_ >= heal->limit)
             continue;
 
-        if (p->health + heal->heal_amount >= heal->limit)
-            p->health = heal->limit;
+        if (p->health_ + heal->heal_amount >= heal->limit)
+            p->health_ = heal->limit;
         else
-            p->health += heal->heal_amount;
+            p->health_ += heal->heal_amount;
 
-        p->mo->health_ = p->health;
+        p->map_object_->health_ = p->health_;
     }
 }
 
@@ -481,24 +481,24 @@ void RAD_ActArmourPlayers(rad_trigger_t *R, void *param)
     s_armour_t *armour = (s_armour_t *)param;
 
     // Armour for player(s)
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
+        Player *p = players[pnum];
         if (!p)
             continue;
 
-        if (!RAD_WithinRadius(p->mo, R->info))
+        if (!RAD_WithinRadius(p->map_object_, R->info))
             continue;
 
-        float slack = armour->limit - p->totalarmour;
+        float slack = armour->limit - p->total_armour_;
 
         if (slack <= 0)
             continue;
 
-        p->armours[armour->type] += armour->armour_amount;
+        p->armours_[armour->type] += armour->armour_amount;
 
-        if (p->armours[armour->type] > slack)
-            p->armours[armour->type] = slack;
+        if (p->armours_[armour->type] > slack)
+            p->armours_[armour->type] = slack;
 
         UpdateTotalArmour(p);
     }
@@ -508,13 +508,13 @@ void RAD_ActBenefitPlayers(rad_trigger_t *R, void *param)
 {
     s_benefit_t *be = (s_benefit_t *)param;
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
+        Player *p = players[pnum];
         if (!p)
             continue;
 
-        if (!RAD_WithinRadius(p->mo, R->info))
+        if (!RAD_WithinRadius(p->map_object_, R->info))
             continue;
 
         GiveBenefitList(p, nullptr, be->benefit, be->lose_it);
@@ -546,7 +546,7 @@ void RAD_ActDamageMonsters(rad_trigger_t *R, void *param)
     MapObject *mo;
     MapObject *next;
 
-    player_t *player = GetWhoDunnit(R);
+    Player *player = GetWhoDunnit(R);
 
     for (mo = map_object_list_head; mo != nullptr; mo = next)
     {
@@ -564,7 +564,7 @@ void RAD_ActDamageMonsters(rad_trigger_t *R, void *param)
         if (!RAD_WithinRadius(mo, R->info))
             continue;
 
-        DamageMapObject(mo, nullptr, player ? player->mo : nullptr, mon->damage_amount, nullptr);
+        DamageMapObject(mo, nullptr, player ? player->map_object_ : nullptr, mon->damage_amount, nullptr);
     }
 }
 
@@ -667,8 +667,8 @@ void RAD_ActPlaySound(rad_trigger_t *R, void *param)
 
     if (ambient->kind == PSOUND_BossMan)
     { // Lobo: want BOSSMAN to sound from the player
-        player_t *player = GetWhoDunnit(R);
-        StartSoundEffect(ambient->sfx, kCategoryPlayer, player->mo);
+        Player *player = GetWhoDunnit(R);
+        StartSoundEffect(ambient->sfx, kCategoryPlayer, player->map_object_);
     }
     else
     {
@@ -974,9 +974,9 @@ void RAD_ActActivateLinetype(rad_trigger_t *R, void *param)
 {
     s_lineactivator_t *t = (s_lineactivator_t *)param;
 
-    player_t *player = GetWhoDunnit(R);
+    Player *player = GetWhoDunnit(R);
 
-    RemoteActivation(player ? player->mo : nullptr, t->typenum, t->tag, 0, kLineTriggerAny);
+    RemoteActivation(player ? player->map_object_ : nullptr, t->typenum, t->tag, 0, kLineTriggerAny);
 }
 
 void RAD_ActUnblockLines(rad_trigger_t *R, void *param)
@@ -1059,7 +1059,7 @@ void RAD_ActShowMenu(rad_trigger_t *R, void *param)
 {
     s_show_menu_t *menu = (s_show_menu_t *)param;
 
-    if (numplayers > 1 && (R->acti_players & (1 << consoleplayer)) == 0)
+    if (total_players > 1 && (R->acti_players & (1 << console_player)) == 0)
         return;
 
     if (rts_menu_active)
@@ -1185,7 +1185,7 @@ void RAD_ActSwitchWeapon(rad_trigger_t *R, void *param)
 {
     s_weapon_t *weaparg = (s_weapon_t *)param;
 
-    player_t    *player = GetWhoDunnit(R);
+    Player    *player = GetWhoDunnit(R);
     WeaponDefinition *weap   = weapondefs.Lookup(weaparg->name);
 
     if (weap)
@@ -1196,22 +1196,22 @@ void RAD_ActSwitchWeapon(rad_trigger_t *R, void *param)
 
 void RAD_ActTeleportToStart(rad_trigger_t *R, void *param)
 {
-    player_t *p = GetWhoDunnit(R);
+    Player *p = GetWhoDunnit(R);
 
-    SpawnPoint *point = GameFindCoopPlayer(1); // start 1
+    SpawnPoint *point = FindCoopPlayer(1); // start 1
 
     if (!point)
         return; // should never happen but who knows...
 
     // 1. Stop the player movement and turn him
-    p->mo->momentum_.X = p->mo->momentum_.Y = p->mo->momentum_.Z = 0;
-    p->actual_speed                            = 0;
-    p->mo->angle_                               = point->angle;
+    p->map_object_->momentum_.X = p->map_object_->momentum_.Y = p->map_object_->momentum_.Z = 0;
+    p->actual_speed_                            = 0;
+    p->map_object_->angle_                               = point->angle;
 
     // 2. Don't move for a bit
     int waitAbit = 30;
 
-    p->mo->reaction_time_ = waitAbit;
+    p->map_object_->reaction_time_ = waitAbit;
 
     // 3. Do our teleport fog effect
     float x = point->x;
@@ -1231,12 +1231,12 @@ void RAD_ActTeleportToStart(rad_trigger_t *R, void *param)
 
     // 4. Teleport him
     //  Don't get stuck spawned in things: telefrag them.
-    TeleportMove(p->mo, point->x, point->y, point->z);
+    TeleportMove(p->map_object_, point->x, point->y, point->z);
 }
 
-static void RAD_SetPlayerSprite(player_t *p, int position, int stnum, WeaponDefinition *info = nullptr)
+static void RAD_SetPlayerSprite(Player *p, int position, int stnum, WeaponDefinition *info = nullptr)
 {
-    PlayerSprite *psp = &p->psprites[position];
+    PlayerSprite *psp = &p->player_sprites_[position];
 
     if (stnum == 0)
     {
@@ -1264,10 +1264,10 @@ static void RAD_SetPlayerSprite(player_t *p, int position, int stnum, WeaponDefi
     if (psp->state && (st->flags & kStateFrameFlagModel) && (psp->state->flags & kStateFrameFlagModel) &&
         (st->sprite == psp->state->sprite) && st->tics > 1)
     {
-        p->weapon_last_frame = psp->state->frame;
+        p->weapon_last_frame_ = psp->state->frame;
     }
     else
-        p->weapon_last_frame = -1;
+        p->weapon_last_frame_ = -1;
 
     psp->state      = st;
     psp->tics       = st->tics;
@@ -1275,10 +1275,10 @@ static void RAD_SetPlayerSprite(player_t *p, int position, int stnum, WeaponDefi
 
     // call action routine
 
-    p->action_psp = position;
+    p->action_player_sprite_ = position;
 
     if (st->action)
-        (*st->action)(p->mo);
+        (*st->action)(p->map_object_);
 }
 
 //
@@ -1287,9 +1287,9 @@ static void RAD_SetPlayerSprite(player_t *p, int position, int stnum, WeaponDefi
 // -AJA- 2004/11/05: This is preferred method, doesn't run any actions,
 //       which (ideally) should only happen during MovePlayerSprites().
 //
-void RAD_SetPlayerSpriteDeferred(player_t *p, int position, int stnum)
+void RAD_SetPlayerSpriteDeferred(Player *p, int position, int stnum)
 {
-    PlayerSprite *psp = &p->psprites[position];
+    PlayerSprite *psp = &p->player_sprites_[position];
 
     if (stnum == 0 || psp->state == nullptr)
     {
@@ -1307,7 +1307,7 @@ void RAD_ActReplaceWeapon(rad_trigger_t *R, void *param)
 {
     s_weapon_replace_t *weaparg = (s_weapon_replace_t *)param;
 
-    player_t    *p      = GetWhoDunnit(R);
+    Player    *p      = GetWhoDunnit(R);
     WeaponDefinition *oldWep = weapondefs.Lookup(weaparg->old_weapon);
     WeaponDefinition *newWep = weapondefs.Lookup(weaparg->new_weapon);
 
@@ -1323,18 +1323,18 @@ void RAD_ActReplaceWeapon(rad_trigger_t *R, void *param)
     int i;
     for (i = 0; i < kMaximumWeapons; i++)
     {
-        if (p->weapons[i].info == oldWep)
+        if (p->weapons_[i].info == oldWep)
         {
-            p->weapons[i].info = newWep;
+            p->weapons_[i].info = newWep;
         }
     }
 
     // refresh the sprite
-    if (p->weapons[p->ready_wp].info == newWep)
+    if (p->weapons_[p->ready_weapon_].info == newWep)
     {
-        RAD_SetPlayerSpriteDeferred(p, kPlayerSpriteWeapon, p->weapons[p->ready_wp].info->ready_state_);
+        RAD_SetPlayerSpriteDeferred(p, kPlayerSpriteWeapon, p->weapons_[p->ready_weapon_].info->ready_state_);
 
-        P_FixWeaponClip(p, p->ready_wp); // handle the potential clip_size difference
+        P_FixWeaponClip(p, p->ready_weapon_); // handle the potential clip_size difference
         UpdateAvailWeapons(p);
     }
 }
@@ -1345,7 +1345,7 @@ void RAD_ActWeaponEvent(rad_trigger_t *R, void *param)
 {
     s_weapon_event_t *tev = (s_weapon_event_t *)param;
 
-    player_t    *p      = GetWhoDunnit(R);
+    Player    *p      = GetWhoDunnit(R);
     WeaponDefinition *oldWep = weapondefs.Lookup(tev->weapon_name);
 
     if (!oldWep)
@@ -1358,17 +1358,17 @@ void RAD_ActWeaponEvent(rad_trigger_t *R, void *param)
     // see if player owns this kind of weapon
     for (pw_index = 0; pw_index < kMaximumWeapons; pw_index++)
     {
-        if (!p->weapons[pw_index].owned)
+        if (!p->weapons_[pw_index].owned)
             continue;
 
-        if (p->weapons[pw_index].info == oldWep)
+        if (p->weapons_[pw_index].info == oldWep)
             break;
     }
 
     if (pw_index == kMaximumWeapons) // we dont have the weapon
         return;
 
-    p->ready_wp = (weapon_selection_e)pw_index; // insta-switch to it
+    p->ready_weapon_ = (WeaponSelection)pw_index; // insta-switch to it
 
     int state = DDF_StateFindLabel(oldWep->state_grp_, tev->label, true /* quiet */);
     if (state == 0)

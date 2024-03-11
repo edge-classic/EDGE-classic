@@ -53,7 +53,7 @@ struct PickupInfo
     Benefit *list;       // full list of benefits
     bool     lose_them;  // lose stuff if true
 
-    player_t  *player;   // player picking it up
+    Player  *player;   // player picking it up
     MapObject *special;  // object to pick up
     bool       dropped;  // object was dropped by a monster
 
@@ -92,26 +92,26 @@ static void GiveCounter(PickupInfo *pu, Benefit *be)
 
     if (pu->lose_them)
     {
-        if (pu->player->counters[cntr].num == 0) return;
+        if (pu->player->counters_[cntr].count == 0) return;
 
-        pu->player->counters[cntr].num -= num;
+        pu->player->counters_[cntr].count -= num;
 
-        if (pu->player->counters[cntr].num < 0)
-            pu->player->counters[cntr].num = 0;
+        if (pu->player->counters_[cntr].count < 0)
+            pu->player->counters_[cntr].count = 0;
 
         pu->got_it = true;
         return;
     }
 
-    if (pu->player->counters[cntr].num == pu->player->counters[cntr].max)
+    if (pu->player->counters_[cntr].count == pu->player->counters_[cntr].maximum)
     {
         return;
     }
 
-    pu->player->counters[cntr].num += num;
+    pu->player->counters_[cntr].count += num;
 
-    if (pu->player->counters[cntr].num > pu->player->counters[cntr].max)
-        pu->player->counters[cntr].num = pu->player->counters[cntr].max;
+    if (pu->player->counters_[cntr].count > pu->player->counters_[cntr].maximum)
+        pu->player->counters_[cntr].count = pu->player->counters_[cntr].maximum;
 
     pu->got_it = true;
 }
@@ -127,17 +127,17 @@ static void GiveCounterLimit(PickupInfo *pu, Benefit *be)
     if (cntr < 0 || cntr >= kTotalCounterTypes)
         FatalError("GiveCounterLimit: bad type %i", cntr);
 
-    if ((!pu->lose_them && limit < pu->player->counters[cntr].max) ||
-        (pu->lose_them && limit > pu->player->counters[cntr].max))
+    if ((!pu->lose_them && limit < pu->player->counters_[cntr].maximum) ||
+        (pu->lose_them && limit > pu->player->counters_[cntr].maximum))
     {
         return;
     }
 
-    pu->player->counters[cntr].max = limit;
+    pu->player->counters_[cntr].maximum = limit;
 
     // new limit could be lower...
-    if (pu->player->counters[cntr].num > pu->player->counters[cntr].max)
-        pu->player->counters[cntr].num = pu->player->counters[cntr].max;
+    if (pu->player->counters_[cntr].count > pu->player->counters_[cntr].maximum)
+        pu->player->counters_[cntr].count = pu->player->counters_[cntr].maximum;
 
     pu->got_it = true;
 }
@@ -158,26 +158,26 @@ static void GiveInventory(PickupInfo *pu, Benefit *be)
 
     if (pu->lose_them)
     {
-        if (pu->player->inventory[inv].num == 0) return;
+        if (pu->player->inventory_[inv].count == 0) return;
 
-        pu->player->inventory[inv].num -= num;
+        pu->player->inventory_[inv].count -= num;
 
-        if (pu->player->inventory[inv].num < 0)
-            pu->player->inventory[inv].num = 0;
+        if (pu->player->inventory_[inv].count < 0)
+            pu->player->inventory_[inv].count = 0;
 
         pu->got_it = true;
         return;
     }
 
-    if (pu->player->inventory[inv].num == pu->player->inventory[inv].max)
+    if (pu->player->inventory_[inv].count == pu->player->inventory_[inv].maximum)
     {
         return;
     }
 
-    pu->player->inventory[inv].num += num;
+    pu->player->inventory_[inv].count += num;
 
-    if (pu->player->inventory[inv].num > pu->player->inventory[inv].max)
-        pu->player->inventory[inv].num = pu->player->inventory[inv].max;
+    if (pu->player->inventory_[inv].count > pu->player->inventory_[inv].maximum)
+        pu->player->inventory_[inv].count = pu->player->inventory_[inv].maximum;
 
     pu->got_it = true;
 }
@@ -193,17 +193,17 @@ static void GiveInventoryLimit(PickupInfo *pu, Benefit *be)
     if (inv < 0 || inv >= kTotalInventoryTypes)
         FatalError("GiveInventoryLimit: bad type %i", inv);
 
-    if ((!pu->lose_them && limit < pu->player->inventory[inv].max) ||
-        (pu->lose_them && limit > pu->player->inventory[inv].max))
+    if ((!pu->lose_them && limit < pu->player->inventory_[inv].maximum) ||
+        (pu->lose_them && limit > pu->player->inventory_[inv].maximum))
     {
         return;
     }
 
-    pu->player->inventory[inv].max = limit;
+    pu->player->inventory_[inv].maximum = limit;
 
     // new limit could be lower...
-    if (pu->player->inventory[inv].num > pu->player->inventory[inv].max)
-        pu->player->inventory[inv].num = pu->player->inventory[inv].max;
+    if (pu->player->inventory_[inv].count > pu->player->inventory_[inv].maximum)
+        pu->player->inventory_[inv].count = pu->player->inventory_[inv].maximum;
 
     pu->got_it = true;
 }
@@ -237,11 +237,11 @@ static void GiveAmmo(PickupInfo *pu, Benefit *be)
 
     if (pu->lose_them)
     {
-        if (pu->player->ammo[ammo].num == 0) return;
+        if (pu->player->ammo_[ammo].count == 0) return;
 
-        pu->player->ammo[ammo].num -= num;
+        pu->player->ammo_[ammo].count -= num;
 
-        if (pu->player->ammo[ammo].num < 0) pu->player->ammo[ammo].num = 0;
+        if (pu->player->ammo_[ammo].count < 0) pu->player->ammo_[ammo].count = 0;
 
         pu->got_it = true;
         return;
@@ -273,19 +273,19 @@ static void GiveAmmo(PickupInfo *pu, Benefit *be)
     // clip weapons is not affected by the kMapObjectFlagDropped flag.
     if (num > 1 && pu->dropped) num /= 2;
 
-    if (pu->player->ammo[ammo].num == pu->player->ammo[ammo].max)
+    if (pu->player->ammo_[ammo].count == pu->player->ammo_[ammo].maximum)
     {
         if (did_pickup) pu->got_it = true;
         return;
     }
 
     // if there is some fresh ammo, we should change weapons
-    if (pu->player->ammo[ammo].num == 0) pu->new_ammo = ammo;
+    if (pu->player->ammo_[ammo].count == 0) pu->new_ammo = ammo;
 
-    pu->player->ammo[ammo].num += num;
+    pu->player->ammo_[ammo].count += num;
 
-    if (pu->player->ammo[ammo].num > pu->player->ammo[ammo].max)
-        pu->player->ammo[ammo].num = pu->player->ammo[ammo].max;
+    if (pu->player->ammo_[ammo].count > pu->player->ammo_[ammo].maximum)
+        pu->player->ammo_[ammo].count = pu->player->ammo_[ammo].maximum;
 
     pu->got_it = true;
 }
@@ -303,17 +303,17 @@ static void GiveAmmoLimit(PickupInfo *pu, Benefit *be)
     if (ammo < 0 || ammo >= kTotalAmmunitionTypes)
         FatalError("GiveAmmoLimit: bad type %i", ammo);
 
-    if ((!pu->lose_them && limit < pu->player->ammo[ammo].max) ||
-        (pu->lose_them && limit > pu->player->ammo[ammo].max))
+    if ((!pu->lose_them && limit < pu->player->ammo_[ammo].maximum) ||
+        (pu->lose_them && limit > pu->player->ammo_[ammo].maximum))
     {
         return;
     }
 
-    pu->player->ammo[ammo].max = limit;
+    pu->player->ammo_[ammo].maximum = limit;
 
     // new limit could be lower...
-    if (pu->player->ammo[ammo].num > pu->player->ammo[ammo].max)
-        pu->player->ammo[ammo].num = pu->player->ammo[ammo].max;
+    if (pu->player->ammo_[ammo].count > pu->player->ammo_[ammo].maximum)
+        pu->player->ammo_[ammo].count = pu->player->ammo_[ammo].maximum;
 
     pu->got_it = true;
 }
@@ -339,7 +339,7 @@ static void GiveWeapon(PickupInfo *pu, Benefit *be)
     }
 
     // special handling for CO-OP and OLD DeathMatch
-    if (numplayers > 1 && deathmatch != 2 && pu->special && !pu->dropped)
+    if (total_players > 1 && deathmatch != 2 && pu->special && !pu->dropped)
     {
         if (!AddWeapon(pu->player, info, &pw_index))
         {
@@ -370,16 +370,16 @@ static void GiveHealth(PickupInfo *pu, Benefit *be)
 {
     if (pu->lose_them)
     {
-        // DamageMapObject(pu->player->mo, pu->special, nullptr, be->amount,
+        // DamageMapObject(pu->player->map_object_, pu->special, nullptr, be->amount,
         // nullptr);
-        if (pu->player->health <= 0) return;
+        if (pu->player->health_ <= 0) return;
 
-        pu->player->health -= be->amount;
-        pu->player->mo->health_ = pu->player->health;
+        pu->player->health_ -= be->amount;
+        pu->player->map_object_->health_ = pu->player->health_;
 
-        if (pu->player->mo->health_ <= 0)
+        if (pu->player->map_object_->health_ <= 0)
         {
-            KillMapObject(nullptr, pu->player->mo);
+            KillMapObject(nullptr, pu->player->map_object_);
             // return;
         }
 
@@ -387,13 +387,13 @@ static void GiveHealth(PickupInfo *pu, Benefit *be)
         return;
     }
 
-    if (pu->player->health >= be->limit) return;
+    if (pu->player->health_ >= be->limit) return;
 
-    pu->player->health += be->amount;
+    pu->player->health_ += be->amount;
 
-    if (pu->player->health > be->limit) pu->player->health = be->limit;
+    if (pu->player->health_ > be->limit) pu->player->health_ = be->limit;
 
-    pu->player->mo->health_ = pu->player->health;
+    pu->player->map_object_->health_ = pu->player->health_;
 
     pu->got_it = true;
 }
@@ -411,10 +411,10 @@ static void GiveArmour(PickupInfo *pu, Benefit *be)
 
     if (pu->lose_them)
     {
-        if (AlmostEquals(pu->player->armours[a_class], 0.0f)) return;
+        if (AlmostEquals(pu->player->armours_[a_class], 0.0f)) return;
 
-        pu->player->armours[a_class] -= be->amount;
-        if (pu->player->armours[a_class] < 0) pu->player->armours[a_class] = 0;
+        pu->player->armours_[a_class] -= be->amount;
+        if (pu->player->armours_[a_class] < 0) pu->player->armours_[a_class] = 0;
 
         UpdateTotalArmour(pu->player);
 
@@ -428,7 +428,7 @@ static void GiveArmour(PickupInfo *pu, Benefit *be)
     if (!pu->special ||
         (pu->special->extended_flags_ & kExtendedFlagSimpleArmour))
     {
-        float slack = be->limit - pu->player->armours[a_class];
+        float slack = be->limit - pu->player->armours_[a_class];
 
         if (amount > slack) amount = slack;
 
@@ -436,14 +436,14 @@ static void GiveArmour(PickupInfo *pu, Benefit *be)
     }
     else /* Doom emulation */
     {
-        float slack = be->limit - pu->player->totalarmour;
+        float slack = be->limit - pu->player->total_armour_;
 
         if (slack < 0) return;
 
         // we try to Upgrade any lower class armour with this armour.
         for (int cl = a_class - 1; cl >= 0; cl--)
         {
-            upgrade += pu->player->armours[cl];
+            upgrade += pu->player->armours_[cl];
         }
 
         // cannot upgrade more than the specified amount
@@ -459,27 +459,27 @@ static void GiveArmour(PickupInfo *pu, Benefit *be)
         if (AlmostEquals(amount, 0.0f) && AlmostEquals(upgrade, 0.0f)) return;
     }
 
-    pu->player->armours[a_class] += amount;
+    pu->player->armours_[a_class] += amount;
 
     // -AJA- 2007/08/22: armor associations
     if (pu->special && pu->special->info_->armour_protect_ >= 0)
     {
-        pu->player->armour_types[a_class] = pu->special->info_;
+        pu->player->armour_types_[a_class] = pu->special->info_;
     }
 
     if (upgrade > 0)
     {
         for (int cl = a_class - 1; (cl >= 0) && (upgrade > 0); cl--)
         {
-            if (pu->player->armours[cl] >= upgrade)
+            if (pu->player->armours_[cl] >= upgrade)
             {
-                pu->player->armours[cl] -= upgrade;
+                pu->player->armours_[cl] -= upgrade;
                 break;
             }
-            else if (pu->player->armours[cl] > 0)
+            else if (pu->player->armours_[cl] > 0)
             {
-                upgrade -= pu->player->armours[cl];
-                pu->player->armours[cl] = 0;
+                upgrade -= pu->player->armours_[cl];
+                pu->player->armours_[cl] = 0;
             }
         }
     }
@@ -498,15 +498,15 @@ static void GiveKey(PickupInfo *pu, Benefit *be)
 
     if (pu->lose_them)
     {
-        if (!(pu->player->cards & key)) return;
+        if (!(pu->player->cards_ & key)) return;
 
-        pu->player->cards = (DoorKeyType)(pu->player->cards & ~key);
+        pu->player->cards_ = (DoorKeyType)(pu->player->cards_ & ~key);
     }
     else
     {
-        if (pu->player->cards & key) return;
+        if (pu->player->cards_ & key) return;
 
-        pu->player->cards = (DoorKeyType)(pu->player->cards | key);
+        pu->player->cards_ = (DoorKeyType)(pu->player->cards_ | key);
     }
 
     // -AJA- leave keys in Co-op games
@@ -533,28 +533,28 @@ static void GivePower(PickupInfo *pu, Benefit *be)
 
     if (pu->lose_them)
     {
-        if (AlmostEquals(pu->player->powers[be->sub.type], 0.0f)) return;
+        if (AlmostEquals(pu->player->powers_[be->sub.type], 0.0f)) return;
 
-        pu->player->powers[be->sub.type] -= duration;
+        pu->player->powers_[be->sub.type] -= duration;
 
-        if (pu->player->powers[be->sub.type] < 0)
-            pu->player->powers[be->sub.type] = 0;
+        if (pu->player->powers_[be->sub.type] < 0)
+            pu->player->powers_[be->sub.type] = 0;
 
         pu->got_it = true;
         return;
     }
 
-    if (pu->player->powers[be->sub.type] >= limit) return;
+    if (pu->player->powers_[be->sub.type] >= limit) return;
 
-    pu->player->powers[be->sub.type] += duration;
+    pu->player->powers_[be->sub.type] += duration;
 
-    if (pu->player->powers[be->sub.type] > limit)
-        pu->player->powers[be->sub.type] = limit;
+    if (pu->player->powers_[be->sub.type] > limit)
+        pu->player->powers_[be->sub.type] = limit;
 
     // special handling for scuba...
     if (be->sub.type == kPowerTypeScuba)
     {
-        pu->player->air_in_lungs = pu->player->mo->info_->lung_capacity_;
+        pu->player->air_in_lungs_ = pu->player->map_object_->info_->lung_capacity_;
     }
 
     pu->got_it = true;
@@ -635,7 +635,7 @@ static void DoGiveBenefitList(PickupInfo *pu)
 // otherwise return any information about which benefits matched or what their
 // amounts are.
 //
-bool HasBenefitInList(player_t *player, Benefit *list)
+bool HasBenefitInList(Player *player, Benefit *list)
 {
     SYS_ASSERT(player && list);
     for (Benefit *be = list; be; be = be->next)
@@ -648,53 +648,53 @@ bool HasBenefitInList(player_t *player, Benefit *list)
             case kBenefitTypeWeapon:
                 for (int i = 0; i < kMaximumWeapons; i++)
                 {
-                    WeaponDefinition *cur_info = player->weapons[i].info;
+                    WeaponDefinition *cur_info = player->weapons_[i].info;
                     if (cur_info == be->sub.weap) return true;
                 }
                 break;
 
             case kBenefitTypeAmmo:
-                if (player->ammo[be->sub.type].num > be->amount) return true;
+                if (player->ammo_[be->sub.type].count > be->amount) return true;
                 break;
 
             case kBenefitTypeAmmoLimit:
-                if (player->ammo[be->sub.type].max > be->amount) return true;
+                if (player->ammo_[be->sub.type].maximum > be->amount) return true;
                 break;
 
             case kBenefitTypeKey:
-                if (player->cards & (DoorKeyType)be->sub.type) return true;
+                if (player->cards_ & (DoorKeyType)be->sub.type) return true;
                 break;
 
             case kBenefitTypeHealth:
-                if (player->health > be->amount) return true;
+                if (player->health_ > be->amount) return true;
                 break;
 
             case kBenefitTypeArmour:
-                if (player->armours[be->sub.type] > be->amount) return true;
+                if (player->armours_[be->sub.type] > be->amount) return true;
                 break;
 
             case kBenefitTypePowerup:
-                if (!AlmostEquals(player->powers[be->sub.type], 0.0f))
+                if (!AlmostEquals(player->powers_[be->sub.type], 0.0f))
                     return true;
                 break;
 
             case kBenefitTypeInventory:
-                if (player->inventory[be->sub.type].num > be->amount)
+                if (player->inventory_[be->sub.type].count > be->amount)
                     return true;
                 break;
 
             case kBenefitTypeInventoryLimit:
-                if (player->inventory[be->sub.type].max > be->amount)
+                if (player->inventory_[be->sub.type].maximum > be->amount)
                     return true;
                 break;
 
             case kBenefitTypeCounter:
-                if (player->counters[be->sub.type].num > be->amount)
+                if (player->counters_[be->sub.type].count > be->amount)
                     return true;
                 break;
 
             case kBenefitTypeCounterLimit:
-                if (player->counters[be->sub.type].max > be->amount)
+                if (player->counters_[be->sub.type].maximum > be->amount)
                     return true;
                 break;
 
@@ -714,7 +714,7 @@ bool HasBenefitInList(player_t *player, Benefit *list)
 // benefits should be taken away instead.  Returns true if _any_
 // benefit was picked up (or lost), or false if none of them were.
 //
-bool GiveBenefitList(player_t *player, MapObject *special, Benefit *list,
+bool GiveBenefitList(Player *player, MapObject *special, Benefit *list,
                      bool lose_them)
 {
     PickupInfo info;
@@ -742,7 +742,7 @@ bool GiveBenefitList(player_t *player, MapObject *special, Benefit *list,
 //
 // RunPickupEffects
 //
-static void RunPickupEffects(player_t *player, MapObject *special,
+static void RunPickupEffects(Player *player, MapObject *special,
                              PickupEffect *list)
 {
     for (; list; list = list->next_)
@@ -754,7 +754,7 @@ static void RunPickupEffects(player_t *player, MapObject *special,
                 break;
 
             case kPickupEffectTypeKeepPowerup:
-                player->keep_powers |= (1 << list->sub_.type);
+                player->keep_powers_ |= (1 << list->sub_.type);
                 break;
 
             case kPickupEffectTypePowerupEffect:
@@ -826,7 +826,7 @@ void TouchSpecialThing(MapObject *special, MapObject *toucher)
 
     if (special->flags_ & kMapObjectFlagCountItem)
     {
-        info.player->itemcount++;
+        info.player->item_count_++;
         info.got_it = true;
     }
     else if (special->hyper_flags_ & kHyperFlagForcePickup)
@@ -843,20 +843,20 @@ void TouchSpecialThing(MapObject *special, MapObject *toucher)
         if (time_stop_active)  // Hide pickup after gaining benefit while time
                                // stop is still active
             special->visibility_ = INVISIBLE;
-        KillMapObject(info.player->mo, special, nullptr);
+        KillMapObject(info.player->map_object_, special, nullptr);
     }
 
     // do all the special effects, lights & sound etc...
     if (!info.silent)
     {
-        info.player->bonuscount += kBonusAddMinimum;
-        if (info.player->bonuscount > kBonusLimit)
-            info.player->bonuscount = kBonusLimit;
+        info.player->bonus_count_ += kBonusAddMinimum;
+        if (info.player->bonus_count_ > kBonusLimit)
+            info.player->bonus_count_ = kBonusLimit;
 
         if (special->info_->pickup_message_ != "" &&
             language.IsValidRef(special->info_->pickup_message_.c_str()))
         {
-            ConsolePlayerMessage(info.player->pnum, "%s",
+            ConsolePlayerMessage(info.player->player_number_, "%s",
                                  language[special->info_->pickup_message_]);
         }
 
@@ -864,12 +864,12 @@ void TouchSpecialThing(MapObject *special, MapObject *toucher)
         {
             int sfx_cat;
 
-            if (info.player == players[consoleplayer])
+            if (info.player == players[console_player])
                 sfx_cat = kCategoryPlayer;
             else
                 sfx_cat = kCategoryOpponent;
 
-            StartSoundEffect(sound, sfx_cat, info.player->mo);
+            StartSoundEffect(sound, sfx_cat, info.player->map_object_);
         }
 
         if (info.new_weapon >= 0 || info.new_ammo >= 0)
@@ -943,7 +943,7 @@ static void DoObituary(const char *format, MapObject *victim, MapObject *killer)
 
     std::string msg = PatternSubstitution(format, keywords);
 
-    ConsolePlayerMessage(victim->player_->pnum, "%s", msg.c_str());
+    ConsolePlayerMessage(victim->player_->player_number_, "%s", msg.c_str());
 }
 
 void ObituaryMessage(MapObject *victim, MapObject *killer,
@@ -987,9 +987,9 @@ void KillMapObject(MapObject *source, MapObject *target,
                    const DamageClass *damtype, bool weak_spot)
 {
     // -AJA- 2006/09/10: Voodoo doll handling for coop
-    if (target->player_ && target->player_->mo != target)
+    if (target->player_ && target->player_->map_object_ != target)
     {
-        KillMapObject(source, target->player_->mo, damtype, weak_spot);
+        KillMapObject(source, target->player_->map_object_, damtype, weak_spot);
         target->player_ = nullptr;
     }
 
@@ -1014,7 +1014,7 @@ void KillMapObject(MapObject *source, MapObject *target,
     {
         // count for intermission
         if (target->flags_ & kMapObjectFlagCountKill)
-            source->player_->killcount++;
+            source->player_->kill_count_++;
 
         if (target->info_->kill_benefits_)
         {
@@ -1042,13 +1042,13 @@ void KillMapObject(MapObject *source, MapObject *target,
             // Killed a team mate?
             if (target->side_ & source->side_)
             {
-                source->player_->frags--;
-                source->player_->totalfrags--;
+                source->player_->frags_--;
+                source->player_->total_frags_--;
             }
             else
             {
-                source->player_->frags++;
-                source->player_->totalfrags++;
+                source->player_->frags_++;
+                source->player_->total_frags_++;
             }
         }
     }
@@ -1056,7 +1056,7 @@ void KillMapObject(MapObject *source, MapObject *target,
     {
         // count all monster deaths,
         // even those caused by other monsters
-        players[consoleplayer]->killcount++;
+        players[console_player]->kill_count_++;
     }
 
     if (target->player_)
@@ -1066,24 +1066,24 @@ void KillMapObject(MapObject *source, MapObject *target,
         // count environment kills against you
         if (!source)
         {
-            target->player_->frags--;
-            target->player_->totalfrags--;
+            target->player_->frags_--;
+            target->player_->total_frags_--;
         }
 
         target->flags_ &= ~kMapObjectFlagSolid;
-        target->player_->playerstate = PST_DEAD;
-        target->player_->std_viewheight =
+        target->player_->player_state_ = kPlayerDead;
+        target->player_->standard_view_height_ =
             HMM_MIN(DEATHVIEWHEIGHT, target->height_ / 3);
-        target->player_->actual_speed = 0;
+        target->player_->actual_speed_ = 0;
 
         DropWeapon(target->player_);
 
         // don't die in auto map, switch view prior to dying
-        if (target->player_ == players[consoleplayer] && automap_active)
+        if (target->player_ == players[console_player] && automap_active)
             AutomapStop();
 
         // don't immediately restart when USE key was pressed
-        if (target->player_ == players[consoleplayer]) EventClearInput();
+        if (target->player_ == players[console_player]) EventClearInput();
     }
 
     int  state    = 0;
@@ -1333,15 +1333,15 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
         target->flags_ &= ~kMapObjectFlagSkullFly;
     }
 
-    player_t *player = target->player_;
+    Player *player = target->player_;
 
     // Some close combat weapons should not
     // inflict thrust and push the victim out of reach,
     // thus kick away unless using the chainsaw.
 
     if (inflictor && !(target->flags_ & kMapObjectFlagNoClip) &&
-        !(source && source->player_ && source->player_->ready_wp >= 0 &&
-          source->player_->weapons[source->player_->ready_wp].info->nothrust_))
+        !(source && source->player_ && source->player_->ready_weapon_ >= 0 &&
+          source->player_->weapons_[source->player_->ready_weapon_].info->nothrust_))
     {
         // make fall forwards sometimes
         if (damage < 40 && damage > target->health_ &&
@@ -1363,8 +1363,8 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
         if (damtype && damtype->grounded_monsters_) return;
 
         // ignore damage in GOD mode, or with INVUL powerup
-        if ((player->cheats & CF_GODMODE) ||
-            player->powers[kPowerTypeInvulnerable] > 0)
+        if ((player->cheats_ & kCheatingGodMode) ||
+            player->powers_[kPowerTypeInvulnerable] > 0)
         {
             if (!damtype)
                 return;
@@ -1394,9 +1394,9 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
         {
             if (damtype && damtype->no_armour_) continue;
 
-            if (player->armours[i] <= 0) continue;
+            if (player->armours_[i] <= 0) continue;
 
-            const MapObjectDefinition *arm_info = player->armour_types[i];
+            const MapObjectDefinition *arm_info = player->armour_types_[i];
 
             if (!arm_info || !inflictor || !inflictor->current_attack_)
                 continue;
@@ -1419,8 +1419,8 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
         }
 
         // Bot Deathmatch Damange Resistance check
-        if (DEATHMATCH() && !player->isBot() && source && source->player_ &&
-            source->player_->isBot())
+        if (DEATHMATCH() && !player->IsBot() && source && source->player_ &&
+            source->player_->IsBot())
         {
             if (player_deathmatch_damage_resistance.d_ < 9)
             {
@@ -1442,9 +1442,9 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
         {
             if (damtype && damtype->no_armour_) continue;
 
-            if (player->armours[i] <= 0) continue;
+            if (player->armours_[i] <= 0) continue;
 
-            const MapObjectDefinition *arm_info = player->armour_types[i];
+            const MapObjectDefinition *arm_info = player->armour_types_[i];
 
             // this armor does not provide any protection for this attack
             if (arm_info && inflictor && inflictor->current_attack_ &&
@@ -1486,52 +1486,52 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
                 }
             }
 
-            if (player->armours[i] <= saved)
+            if (player->armours_[i] <= saved)
             {
                 // armour is used up
-                saved = player->armours[i];
+                saved = player->armours_[i];
             }
 
             damage -= saved;
 
             if (arm_info) saved *= arm_info->armour_deplete_;
 
-            player->armours[i] -= saved;
+            player->armours_[i] -= saved;
 
             // don't apply inner armour unless outer is finished
-            if (player->armours[i] > 0) break;
+            if (player->armours_[i] > 0) break;
 
-            player->armours[i] = 0;
+            player->armours_[i] = 0;
         }
 
         UpdateTotalArmour(player);
 
-        player->attacker = source;
+        player->attacker_ = source;
 
         // instakill sectors
         if (damtype && damtype->instakill_)
-            damage = target->player_->health + 1;
+            damage = target->player_->health_ + 1;
 
         // add damage after armour / invuln detection
         if (damage > 0)
         {
             // Change damage color if new inflicted damage is greater than
             // current processed damage
-            if (damage >= player->damagecount)
+            if (damage >= player->damage_count_)
             {
                 if (damtype)
-                    player->last_damage_colour = damtype->damage_flash_colour_;
+                    player->last_damage_colour_ = damtype->damage_flash_colour_;
                 else
-                    player->last_damage_colour = SG_RED_RGBA32;
+                    player->last_damage_colour_ = SG_RED_RGBA32;
             }
 
-            player->damagecount += (int)HMM_MAX(damage, kDamageAddMinimum);
-            player->damage_pain += damage;
+            player->damage_count_ += (int)HMM_MAX(damage, kDamageAddMinimum);
+            player->damage_pain_ += damage;
         }
 
         // teleport stomp does 10k points...
-        if (player->damagecount > kDamageLimit)
-            player->damagecount = kDamageLimit;
+        if (player->damage_count_ > kDamageLimit)
+            player->damage_count_ = kDamageLimit;
     }
     else
     {
@@ -1545,13 +1545,13 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
     if (player)
     {
         // mirror mobj health here for Dave
-        // player->health = HMM_MAX(0, target->health);
+        // player->health_ = HMM_MAX(0, target->health);
 
         // Dasho 2023.09.05: The above behavior caused inconsistencies when
         // multiple voodoo dolls were present in a level (i.e., heavily damaging
         // one and then lightly damaging another one that was previously at full
         // health would "heal" the player)
-        player->health = HMM_MAX(0, player->health - damage);
+        player->health_ = HMM_MAX(0, player->health_ - damage);
     }
 
     // Lobo 2023: Handle attack flagged with the "PLAYER_ATTACK" special.
@@ -1561,10 +1561,10 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
     if (inflictor && inflictor->current_attack_ &&
         (inflictor->current_attack_->flags_ & kAttackFlagPlayer))
     {
-        player_t *CurrentPlayer;
-        CurrentPlayer = players[consoleplayer];
+        Player *current_player;
+        current_player = players[console_player];
 
-        source = CurrentPlayer->mo;
+        source = current_player->map_object_;
 
         if (source && source->IsRemoved())  // Sanity check?
             source = nullptr;
@@ -1581,8 +1581,8 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
         source->health_ = HMM_MIN(source->health_ + qty, source->spawn_health_);
 
         if (source->player_)
-            source->player_->health =
-                HMM_MIN(source->player_->health + qty, source->spawn_health_);
+            source->player_->health_ =
+                HMM_MIN(source->player_->health_ + qty, source->spawn_health_);
     }
 
     if (target->health_ <= 0)
@@ -1676,9 +1676,9 @@ void TelefragMapObject(MapObject *target, MapObject *inflictor,
 
     if (target->player_)
     {
-        target->player_->attacker    = inflictor;
-        target->player_->damagecount = kDamageLimit;
-        target->player_->damage_pain = target->spawn_health_;
+        target->player_->attacker_    = inflictor;
+        target->player_->damage_count_ = kDamageLimit;
+        target->player_->damage_pain_ = target->spawn_health_;
     }
 
     KillMapObject(inflictor, target, damtype);

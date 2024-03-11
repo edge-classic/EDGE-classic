@@ -3129,7 +3129,7 @@ static void RendererDrawSubsector(DrawSubsector *dsub, bool mirror_sub)
 
 static void DoWeaponModel(void)
 {
-    player_t *pl = view_camera_map_object->player_;
+    Player *pl = view_camera_map_object->player_;
 
     if (!pl) return;
 
@@ -3225,7 +3225,7 @@ static void RenderTrueBsp(void)
 
     draw_subsector_list.clear();
 
-    player_t *v_player = view_camera_map_object->player_;
+    Player *v_player = view_camera_map_object->player_;
 
     // handle powerup effects and BOOM colormaps
     RendererRainbowEffect(v_player);
@@ -3261,10 +3261,10 @@ static void RenderTrueBsp(void)
 
     if (v_player)
     {
-        if (v_player->ready_wp >= 0)
+        if (v_player->ready_weapon_ >= 0)
         {
             FlashFirst =
-                v_player->weapons[v_player->ready_wp].info->render_invert_;
+                v_player->weapons_[v_player->ready_weapon_].info->render_invert_;
         }
     }
 
@@ -3326,11 +3326,11 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
 
     view_is_zoomed = false;
 
-    if (mo->player_ && mo->player_->zoom_fov > 0)
+    if (mo->player_ && mo->player_->zoom_field_of_view_ > 0)
     {
         view_is_zoomed = true;
 
-        float new_slope = tan(mo->player_->zoom_fov * HMM_PI / 360.0);
+        float new_slope = tan(mo->player_->zoom_field_of_view_ * HMM_PI / 360.0);
 
         view_y_slope *= new_slope / view_x_slope;
         view_x_slope = new_slope;
@@ -3347,7 +3347,7 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
     view_angle = mo->angle_;
 
     if (mo->player_)
-        view_z += mo->player_->view_z;
+        view_z += mo->player_->view_z_;
     else
         view_z += mo->height_ * 9 / 10;
 
@@ -3359,15 +3359,15 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
     {
         if (!level_flags.mlook) view_vertical_angle = 0;
 
-        view_vertical_angle += epi::BAMFromATan(mo->player_->kick_offset);
+        view_vertical_angle += epi::BAMFromATan(mo->player_->kick_offset_);
 
         // No heads above the ceiling
-        if (view_z > mo->player_->mo->ceiling_z_ - 2)
-            view_z = mo->player_->mo->ceiling_z_ - 2;
+        if (view_z > mo->player_->map_object_->ceiling_z_ - 2)
+            view_z = mo->player_->map_object_->ceiling_z_ - 2;
 
         // No heads below the floor, please
-        if (view_z < mo->player_->mo->floor_z_ + 2)
-            view_z = mo->player_->mo->floor_z_ + 2;
+        if (view_z < mo->player_->map_object_->floor_z_ + 2)
+            view_z = mo->player_->map_object_->floor_z_ + 2;
     }
 
     // do some more stuff

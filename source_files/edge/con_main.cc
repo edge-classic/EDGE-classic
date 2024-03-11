@@ -649,7 +649,7 @@ void ConsolePlayerMessage(int plyr, const char *message, ...)
     va_list argptr;
     char    buffer[256];
 
-    if (consoleplayer != plyr) return;
+    if (console_player != plyr) return;
 
     va_start(argptr, message);
     vsnprintf(buffer, sizeof(buffer), message, argptr);
@@ -672,7 +672,7 @@ void ConsolePlayerMessageLDF(int plyr, const char *message, ...)
     va_list argptr;
     char    buffer[256];
 
-    if (consoleplayer != plyr) return;
+    if (console_player != plyr) return;
 
     message = language[message];
 

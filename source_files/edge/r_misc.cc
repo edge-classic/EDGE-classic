@@ -82,7 +82,7 @@ float view_z;
 float view_cosine;
 float view_sine;
 
-player_t *view_player;
+Player *view_player;
 
 MapObject *background_camera_map_object = nullptr;
 

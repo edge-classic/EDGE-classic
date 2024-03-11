@@ -21,9 +21,9 @@ extern ImageData *ReadAsEpiBlock(Image *rim);
 extern ImageData *RgbFromPalettised(ImageData *src, const uint8_t *palette,
                                     int opacity);
 
-extern player_t *ui_player_who;
+extern Player *ui_player_who;
 
-extern player_t *ui_hud_who;
+extern Player *ui_hud_who;
 
 static int   ui_hud_automap_flags[2];  // 0 = disabled, 1 = enabled
 static float ui_hud_automap_zoom;
@@ -530,7 +530,7 @@ static int HD_render_world(lua_State *L)
     float h     = (float)luaL_checknumber(L, 4);
     int   flags = (int)luaL_optnumber(L, 5, 0);
 
-    HudRenderWorld(x, y, w, h, ui_hud_who->mo, flags);
+    HudRenderWorld(x, y, w, h, ui_hud_who->map_object_, flags);
 
     return 0;
 }
@@ -559,7 +559,7 @@ static int HD_render_automap(lua_State *L)
 
     AutomapSetState(new_state, new_zoom);
 
-    HudRenderAutomap(x, y, w, h, ui_hud_who->mo, flags);
+    HudRenderAutomap(x, y, w, h, ui_hud_who->map_object_, flags);
 
     AutomapSetState(old_state, old_zoom);
 
@@ -633,22 +633,22 @@ static int HD_set_render_who(lua_State *L)
 {
     int index = (int)luaL_checknumber(L, 1);
 
-    if (index < 0 || index >= numplayers)
+    if (index < 0 || index >= total_players)
         FatalError("hud.set_render_who: bad index value: %d (numplayers=%d)\n",
-                   index, numplayers);
+                   index, total_players);
 
     if (index == 0)
     {
-        ui_hud_who = players[consoleplayer];
+        ui_hud_who = players[console_player];
         return 0;
     }
 
-    int who = displayplayer;
+    int who = display_player;
 
     for (; index > 1; index--)
     {
         do {
-            who = (who + 1) % MAXPLAYERS;
+            who = (who + 1) % kMaximumPlayers;
         } while (players[who] == nullptr);
     }
 
@@ -974,8 +974,8 @@ void LuaRunHud(void)
 {
     HudReset();
 
-    ui_hud_who    = players[displayplayer];
-    ui_player_who = players[displayplayer];
+    ui_hud_who    = players[display_player];
+    ui_player_who = players[display_player];
 
     ui_hud_automap_flags[0] = 0;
     ui_hud_automap_flags[1] = 0;

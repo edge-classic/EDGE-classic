@@ -43,7 +43,7 @@ class MapObjectDefinition;
 class Image;
 class AbstractShader;
 
-struct player_s;
+class Player;
 struct rad_script_s;
 struct RegionProperties;
 struct State;
@@ -267,7 +267,7 @@ class MapObject : public Position
     int threshold_ = 0;
 
     // Additional info record for player avatars only.
-    struct player_s *player_ = nullptr;
+    class Player *player_ = nullptr;
 
     // Player number last looked for.
     int last_look_ = 0;

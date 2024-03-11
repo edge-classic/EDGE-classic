@@ -766,7 +766,7 @@ static void RAD_ParseRadiusTrigger(param_set_t &pars)
     this_rad->sector_index         = -1;
     this_rad->appear               = kAppearsWhenDefault;
     this_rad->min_players          = 0;
-    this_rad->max_players          = MAXPLAYERS;
+    this_rad->max_players          = kMaximumPlayers;
     this_rad->absolute_req_players = 1;
     this_rad->repeat_count         = -1;
     this_rad->repeat_delay         = 0;
@@ -875,7 +875,7 @@ static void RAD_ParseSectorTrigger(param_set_t &pars)
     this_rad->sector_index         = -1;
     this_rad->appear               = kAppearsWhenDefault;
     this_rad->min_players          = 0;
-    this_rad->max_players          = MAXPLAYERS;
+    this_rad->max_players          = kMaximumPlayers;
     this_rad->absolute_req_players = 1;
     this_rad->repeat_count         = -1;
     this_rad->repeat_delay         = 0;
@@ -1010,7 +1010,7 @@ static void RAD_ParseWhenPlayerNum(param_set_t &pars)
 
     RAD_CheckForInt(pars[1], &this_rad->min_players);
 
-    this_rad->max_players = MAXPLAYERS;
+    this_rad->max_players = kMaximumPlayers;
 
     if (pars.size() >= 3)
         RAD_CheckForInt(pars[2], &this_rad->max_players);

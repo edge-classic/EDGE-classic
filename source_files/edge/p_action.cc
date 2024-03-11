@@ -462,9 +462,9 @@ void BringCorpseToLife(MapObject *corpse)
 
     if (corpse->player_)
     {
-        corpse->player_->playerstate    = PST_LIVE;
-        corpse->player_->health         = corpse->health_;
-        corpse->player_->std_viewheight = corpse->height_ * info->viewheight_;
+        corpse->player_->player_state_    = kPlayerAlive;
+        corpse->player_->health_         = corpse->health_;
+        corpse->player_->standard_view_height_ = corpse->height_ * info->viewheight_;
     }
 
     if (info->overkill_sound_)
@@ -1101,7 +1101,7 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty,
     Sector *cur_source_sec = source->subsector_->sector;
 
     if (source->player_)
-        projz += (source->player_->view_z - source->player_->std_viewheight);
+        projz += (source->player_->view_z_ - source->player_->standard_view_height_);
     else if (cur_source_sec->sink_depth > 0 && !cur_source_sec->extrafloor_used &&
              !cur_source_sec->height_sector &&
              abs(source->z - cur_source_sec->floor_height) < 1)
@@ -1196,7 +1196,7 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty,
     slope += attack->slope_offset_;
 
     // is the attack not accurate?
-    if (!source->player_ || source->player_->refire > 0)
+    if (!source->player_ || source->player_->refire_ > 0)
     {
         if (attack->accuracy_angle_ > 0.0f)
             angle += (attack->accuracy_angle_ >> 8) *
@@ -1471,7 +1471,7 @@ int P_MissileContact(MapObject *object, MapObject *target)
     {
         // Berserk handling
         if (source->player_ && object->current_attack_ &&
-            !AlmostEquals(source->player_->powers[kPowerTypeBerserk], 0.0f))
+            !AlmostEquals(source->player_->powers_[kPowerTypeBerserk], 0.0f))
         {
             damage *= object->current_attack_->berserk_mul_;
         }
@@ -1535,8 +1535,8 @@ int P_BulletContact(MapObject *source, MapObject *target, float damage,
     // ignore damage in GOD mode, or with INVUL powerup
     if (target->player_)
     {
-        if ((target->player_->cheats & CF_GODMODE) ||
-            target->player_->powers[kPowerTypeInvulnerable] > 0)
+        if ((target->player_->cheats_ & kCheatingGodMode) ||
+            target->player_->powers_[kPowerTypeInvulnerable] > 0)
         {
             // emulate the thrust that DamageMapObject() would have done
             if (source && damage > 0 &&
@@ -1873,7 +1873,7 @@ static void ShotAttack(MapObject *mo)
         float    slope = objslope;
 
         // is the attack not accurate?
-        if (!mo->player_ || mo->player_->refire > 0)
+        if (!mo->player_ || mo->player_->refire_ > 0)
         {
             if (attack->accuracy_angle_ > 0)
                 angle += (attack->accuracy_angle_ >> 8) *
@@ -1888,7 +1888,7 @@ static void ShotAttack(MapObject *mo)
         DAMAGE_COMPUTE(damage, &attack->damage_);
 
         if (mo->player_ &&
-            !AlmostEquals(mo->player_->powers[kPowerTypeBerserk], 0.0f))
+            !AlmostEquals(mo->player_->powers_[kPowerTypeBerserk], 0.0f))
             damage *= attack->berserk_mul_;
 
         P_LineAttack(mo, angle, range, slope, damage, &attack->damage_,
@@ -1932,7 +1932,7 @@ static void SprayAttack(MapObject *mo)
         DAMAGE_COMPUTE(damage, &attack->damage_);
 
         if (mo->player_ &&
-            !AlmostEquals(mo->player_->powers[kPowerTypeBerserk], 0.0f))
+            !AlmostEquals(mo->player_->powers_[kPowerTypeBerserk], 0.0f))
             damage *= attack->berserk_mul_;
 
         if (damage)
@@ -1953,7 +1953,7 @@ static void DoMeleeAttack(MapObject *mo)
     // -KM- 1998/11/25 Berserk ability
     // -ACB- 2004/02/04 Only zero is off
     if (mo->player_ &&
-        !AlmostEquals(mo->player_->powers[kPowerTypeBerserk], 0.0f))
+        !AlmostEquals(mo->player_->powers_[kPowerTypeBerserk], 0.0f))
         damage *= attack->berserk_mul_;
 
     // -KM- 1998/12/21 Use Line attack so bullet puffs are spawned.
@@ -2284,7 +2284,7 @@ static void ObjectSpawning(MapObject *parent, BAMAngle angle)
         {
             KillMapObject(parent, child, nullptr);
             if (child->flags_ & kMapObjectFlagCountKill)
-                players[consoleplayer]->killcount--;
+                players[console_player]->kill_count_--;
         }
         else
             P_RemoveMobj(child);
@@ -2303,7 +2303,7 @@ static void ObjectSpawning(MapObject *parent, BAMAngle angle)
         {
             KillMapObject(parent, child, nullptr);
             if (child->flags_ & kMapObjectFlagCountKill)
-                players[consoleplayer]->killcount--;
+                players[console_player]->kill_count_--;
         }
         else
             P_RemoveMobj(child);
@@ -3142,9 +3142,9 @@ void P_ActStandardLook(MapObject *object)
     else
         targ_pnum = object->last_heard_;  // new way
 
-    if (targ_pnum >= 0 && targ_pnum < MAXPLAYERS && players[targ_pnum])
+    if (targ_pnum >= 0 && targ_pnum < kMaximumPlayers && players[targ_pnum])
     {
-        targ = players[targ_pnum]->mo;
+        targ = players[targ_pnum]->map_object_;
     }
 
     // -AJA- 2004/09/02: ignore the sound of a friend
@@ -3497,11 +3497,11 @@ void P_ActCheckMoving(MapObject *mo)
 {
     // -KM- 1999/01/31 Returns a player to spawnstate when not moving.
 
-    player_t *pl = mo->player_;
+    Player *pl = mo->player_;
 
     if (pl)
     {
-        if (pl->actual_speed < PLAYER_kStopSpeed)
+        if (pl->actual_speed_ < kPlayerStopSpeed)
         {
             P_SetMobjStateDeferred(mo, mo->info_->idle_state_, 0);
 
@@ -3523,28 +3523,28 @@ void P_ActCheckMoving(MapObject *mo)
 
 void P_ActCheckActivity(MapObject *mo)
 {
-    player_t *pl = mo->player_;
+    Player *pl = mo->player_;
 
     if (!pl) return;
 
-    if (pl->swimming)
+    if (pl->swimming_)
     {
         // enter the SWIM states (if present)
-        int swim_st = P_MobjFindLabel(pl->mo, "SWIM");
+        int swim_st = P_MobjFindLabel(pl->map_object_, "SWIM");
 
-        if (swim_st == 0) swim_st = pl->mo->info_->chase_state_;
+        if (swim_st == 0) swim_st = pl->map_object_->info_->chase_state_;
 
-        if (swim_st != 0) P_SetMobjStateDeferred(pl->mo, swim_st, 0);
+        if (swim_st != 0) P_SetMobjStateDeferred(pl->map_object_, swim_st, 0);
 
         return;
     }
 
-    if (pl->powers[kPowerTypeJetpack] > 0)
+    if (pl->powers_[kPowerTypeJetpack] > 0)
     {
         // enter the FLY states (if present)
-        int fly_st = P_MobjFindLabel(pl->mo, "FLY");
+        int fly_st = P_MobjFindLabel(pl->map_object_, "FLY");
 
-        if (fly_st != 0) P_SetMobjStateDeferred(pl->mo, fly_st, 0);
+        if (fly_st != 0) P_SetMobjStateDeferred(pl->map_object_, fly_st, 0);
 
         return;
     }
@@ -3552,21 +3552,21 @@ void P_ActCheckActivity(MapObject *mo)
     if (mo->on_ladder_ >= 0)
     {
         // enter the CLIMB states (if present)
-        int climb_st = P_MobjFindLabel(pl->mo, "CLIMB");
+        int climb_st = P_MobjFindLabel(pl->map_object_, "CLIMB");
 
-        if (climb_st != 0) P_SetMobjStateDeferred(pl->mo, climb_st, 0);
+        if (climb_st != 0) P_SetMobjStateDeferred(pl->map_object_, climb_st, 0);
 
         return;
     }
 
     // Lobo 2022: use crouch states if we have them and we are, you know,
     // crouching ;)
-    if (pl->mo->extended_flags_ & kExtendedFlagCrouching)
+    if (pl->map_object_->extended_flags_ & kExtendedFlagCrouching)
     {
         // enter the CROUCH states (if present)
-        int crouch_st = P_MobjFindLabel(pl->mo, "CROUCH");
+        int crouch_st = P_MobjFindLabel(pl->map_object_, "CROUCH");
 
-        if (crouch_st != 0) P_SetMobjStateDeferred(pl->mo, crouch_st, 0);
+        if (crouch_st != 0) P_SetMobjStateDeferred(pl->map_object_, crouch_st, 0);
 
         return;
     }
@@ -4032,7 +4032,7 @@ void P_PlayerAttack(MapObject *p_obj, const AttackDefinition *attack)
 
         P_DoAttack(p_obj);
         // restore the previous target for bots
-        if (p_obj->player_ && (p_obj->player_->playerflags & PFL_Bot))
+        if (p_obj->player_ && (p_obj->player_->player_flags_ & kPlayerFlagBot))
             p_obj->SetTarget(old_target);
     }
     else
@@ -4069,7 +4069,7 @@ void P_PlayerAttack(MapObject *p_obj, const AttackDefinition *attack)
 
             P_DoAttack(p_obj);
             // restore the previous target for bots
-            if (p_obj->player_ && (p_obj->player_->playerflags & PFL_Bot))
+            if (p_obj->player_ && (p_obj->player_->player_flags_ & kPlayerFlagBot))
                 p_obj->SetTarget(old_target);
         }
 
@@ -4103,7 +4103,7 @@ void P_PlayerAttack(MapObject *p_obj, const AttackDefinition *attack)
 
             P_DoAttack(p_obj);
             // restore the previous target for bots
-            if (p_obj->player_ && (p_obj->player_->playerflags & PFL_Bot))
+            if (p_obj->player_ && (p_obj->player_->player_flags_ & kPlayerFlagBot))
                 p_obj->SetTarget(old_target);
         }
     }

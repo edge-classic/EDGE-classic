@@ -1667,7 +1667,7 @@ void ConsoleShowPosition(void)
 
     ConsoleSetupFont();
 
-    player_t *p = players[displayplayer];
+    Player *p = players[display_player];
     if (p == nullptr) return;
 
     char textbuf[128];
@@ -1679,39 +1679,39 @@ void ConsoleShowPosition(void)
 
     x += XMUL;
     y -= FNSZ * (console_font->definition_->type_ == kFontTypeTrueType ? 0.25 : 1.25);
-    sprintf(textbuf, "    x: %d", (int)p->mo->x);
+    sprintf(textbuf, "    x: %d", (int)p->map_object_->x);
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "    y: %d", (int)p->mo->y);
+    sprintf(textbuf, "    y: %d", (int)p->map_object_->y);
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "    z: %d", (int)p->mo->z);
+    sprintf(textbuf, "    z: %d", (int)p->map_object_->z);
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "angle: %d", (int)epi::DegreesFromBAM(p->mo->angle_));
+    sprintf(textbuf, "angle: %d", (int)epi::DegreesFromBAM(p->map_object_->angle_));
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "x mom: %.4f", p->mo->momentum_.X);
+    sprintf(textbuf, "x mom: %.4f", p->map_object_->momentum_.X);
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "y mom: %.4f", p->mo->momentum_.Y);
+    sprintf(textbuf, "y mom: %.4f", p->map_object_->momentum_.Y);
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "z mom: %.4f", p->mo->momentum_.Z);
+    sprintf(textbuf, "z mom: %.4f", p->map_object_->momentum_.Z);
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "  sec: %d", (int)(p->mo->subsector_->sector - level_sectors));
+    sprintf(textbuf, "  sec: %d", (int)(p->map_object_->subsector_->sector - level_sectors));
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "  sub: %d", (int)(p->mo->subsector_ - level_subsectors));
+    sprintf(textbuf, "  sub: %d", (int)(p->map_object_->subsector_ - level_subsectors));
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 }
 

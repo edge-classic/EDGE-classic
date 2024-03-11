@@ -414,7 +414,7 @@ static bool CheckSightSameSubsector(MapObject *src, MapObject *dest)
 bool P_CheckSight(MapObject *src, MapObject *dest)
 {
     // -ACB- 1998/07/20 t2 is Invisible, t1 cannot possibly see it.
-    if (dest->visibility_ == INVISIBLE) return false;
+    if (AlmostEquals(dest->visibility_, 0.0f)) return false;
 
     int n, num_div;
 

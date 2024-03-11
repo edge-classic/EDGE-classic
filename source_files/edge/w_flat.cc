@@ -391,9 +391,9 @@ static void PrecacheTextures(void)
 
     // Sort the images, so we can ignore the duplicates
 
-#define CMP(a, b) (a < b)
-    QSORT(const Image *, images, count, CUTOFF);
-#undef CMP
+#define EDGE_CMP(a, b) (a < b)
+    EDGE_QSORT(const Image *, images, count, 10);
+#undef EDGE_CMP
 
     for (int i = 0; i < count; i++)
     {
@@ -401,7 +401,7 @@ static void PrecacheTextures(void)
 
         if (i + 1 < count && images[i] == images[i + 1]) continue;
 
-        if (images[i] == skyflatimage) continue;
+        if (images[i] == sky_flat_image) continue;
 
         ImagePrecache(images[i]);
     }

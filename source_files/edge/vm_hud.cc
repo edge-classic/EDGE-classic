@@ -107,9 +107,9 @@ static void HD_game_mode(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    if (DEATHMATCH())
+    if (InDeathmatch())
         vm->ReturnString("dm");
-    else if (COOP_MATCH())
+    else if (InCooperativeMatch())
         vm->ReturnString("coop");
     else
         vm->ReturnString("sp");

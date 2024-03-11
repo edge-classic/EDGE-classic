@@ -1761,7 +1761,7 @@ void IntermissionTicker(void)
 {
     // Updates stuff each tick
 
-    SYS_ASSERT(game_state == GS_INTERMISSION);
+    SYS_ASSERT(game_state == kGameStateIntermission);
 
     int i;
 
@@ -1797,9 +1797,9 @@ void IntermissionTicker(void)
     switch (state)
     {
         case kIntermissionStateStatScreen:
-            if (SP_MATCH())
+            if (InSinglePlayerMatch())
                 UpdateSinglePlayerStats();
-            else if (DEATHMATCH())
+            else if (InDeathmatch())
                 UpdateDeathmatchStats();
             else
                 UpdateCoopStats();
@@ -1817,7 +1817,7 @@ void IntermissionTicker(void)
 
 void IntermissionDrawer(void)
 {
-    SYS_ASSERT(game_state == GS_INTERMISSION);
+    SYS_ASSERT(game_state == kGameStateIntermission);
 
     HudReset();
 
@@ -1874,9 +1874,9 @@ void IntermissionDrawer(void)
     switch (state)
     {
         case kIntermissionStateStatScreen:
-            if (SP_MATCH())
+            if (InSinglePlayerMatch())
                 DrawSinglePlayerStats();
-            else if (DEATHMATCH())
+            else if (InDeathmatch())
                 DrawDeathmatchStats();
             else
                 DrawCoopStats();
@@ -2052,9 +2052,9 @@ void IntermissionStart(void)
     const GameDefinition *gd = intermission_stats.current_level->episode_;
     SYS_ASSERT(gd);
 
-    if (SP_MATCH())
+    if (InSinglePlayerMatch())
         InitSinglePlayerStats();
-    else if (DEATHMATCH())
+    else if (InDeathmatch())
         InitDeathmatchStats();
     else
         InitCoopStats();
@@ -2078,7 +2078,7 @@ void IntermissionStart(void)
                 Player *p = players[pnum];
 
                 if (p && p->map_object_)
-                    p->map_object_->visibility_ = p->map_object_->target_visibility_ = INVISIBLE;
+                    p->map_object_->visibility_ = p->map_object_->target_visibility_ = 0.0f;
             }
 
             break;

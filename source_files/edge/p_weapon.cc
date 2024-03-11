@@ -770,7 +770,7 @@ void SetupPlayerSprites(Player *p)
         psp->state      = nullptr;
         psp->next_state = nullptr;
         psp->screen_x = psp->screen_y = 0;
-        psp->visibility = psp->target_visibility = VISIBLE;
+        psp->visibility = psp->target_visibility = 1.0f;
     }
 
     // choose highest priority FREE weapon as the default
@@ -1632,7 +1632,7 @@ void A_WeaponTransSet(MapObject *mo)
 {
     Player     *p     = mo->player_;
     PlayerSprite *psp   = &p->player_sprites_[p->action_player_sprite_];
-    float         value = VISIBLE;
+    float         value = 1.0f;
 
     if (psp->state && psp->state->action_par)
     {
@@ -1648,7 +1648,7 @@ void A_WeaponTransFade(MapObject *mo)
     Player     *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
-    float value = INVISIBLE;
+    float value = 0.0f;
 
     if (psp->state && psp->state->action_par)
     {

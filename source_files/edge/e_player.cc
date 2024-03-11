@@ -383,13 +383,13 @@ static void P_SpawnPlayer(Player *p, const SpawnPoint *point, bool is_hub)
     p->action_button_down_[0] = p->action_button_down_[1] = false;
 
     // setup gun psprite
-    if (!is_hub || !SP_MATCH()) SetupPlayerSprites(p);
+    if (!is_hub || !InSinglePlayerMatch()) SetupPlayerSprites(p);
 
     // give all cards in death match mode
-    if (DEATHMATCH()) p->cards_ = kDoorKeyBitmask;
+    if (InDeathmatch()) p->cards_ = kDoorKeyBitmask;
 
     // -AJA- in COOP, all players are on the same side
-    if (COOP_MATCH()) mobj->side_ = ~0;
+    if (InCooperativeMatch()) mobj->side_ = ~0;
 
     // Don't get stuck spawned in things: telefrag them.
 
@@ -402,7 +402,7 @@ static void P_SpawnPlayer(Player *p, const SpawnPoint *point, bool is_hub)
 
     // TeleportMove(mobj, mobj->x, mobj->y, mobj->z);
 
-    if (COOP_MATCH() && !level_flags.team_damage)
+    if (InCooperativeMatch() && !level_flags.team_damage)
         mobj->hyper_flags_ |= kHyperFlagFriendlyFireImmune;
 
     if (p->IsBot())
@@ -433,7 +433,7 @@ static void P_SpawnVoodooDoll(Player *p, const SpawnPoint *point)
 
     mobj->is_voodoo_ = true;
 
-    if (COOP_MATCH()) mobj->side_ = ~0;
+    if (InCooperativeMatch()) mobj->side_ = ~0;
 }
 
 //

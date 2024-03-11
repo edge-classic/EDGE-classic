@@ -203,7 +203,7 @@ struct SaveGlobals
 
     const char *game;
     const char *level;
-    gameflags_t flags;
+    GameFlags flags;
     int         hub_tag;
     const char *hub_first;
 

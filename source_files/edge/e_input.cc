@@ -144,7 +144,7 @@ static constexpr float kJoystickAxisPeak = 32767.0f / 32768.0f;
 
 static int joy_last_raw[4];
 
-// The last one is ignored (AXIS_DISABLE)
+// The last one is ignored (kAxisDisable)
 static float ball_deltas[6] = {0, 0, 0, 0, 0, 0};
 static float joy_forces[6]  = {0, 0, 0, 0, 0, 0};
 
@@ -199,7 +199,7 @@ static float JoystickAxisFromRaw(int raw, float dead)
 
 static void UpdateJoystickAxis(int n)
 {
-    if (joystick_axis[n] == AXIS_DISABLE) return;
+    if (joystick_axis[n] == kAxisDisable) return;
 
     int raw = JoystickGetAxis(n);
     int old = joy_last_raw[n];
@@ -259,12 +259,12 @@ static void UpdateForces(void)
     for (int j = 0; j < 4; j++) UpdateJoystickAxis(j);
 
     // ---Keyboard---
-    AddKeyForce(AXIS_TURN, key_right, key_left);
-    AddKeyForce(AXIS_MLOOK, key_look_up, key_look_down);
-    AddKeyForce(AXIS_FORWARD, key_up, key_down);
+    AddKeyForce(kAxisTurn, key_right, key_left);
+    AddKeyForce(kAxisMouselook, key_look_up, key_look_down);
+    AddKeyForce(kAxisForward, key_up, key_down);
     // -MH- 1998/08/18 Fly down
-    AddKeyForce(AXIS_FLY, key_fly_up, key_fly_down);
-    AddKeyForce(AXIS_STRAFE, key_strafe_right, key_strafe_left);
+    AddKeyForce(kAxisFly, key_fly_up, key_fly_down);
+    AddKeyForce(kAxisStrafe, key_strafe_right, key_strafe_left);
 }
 
 //
@@ -302,7 +302,7 @@ void EventBuildTicCommand(EventTicCommand *cmd)
     //
     int t_speed = speed;
 
-    if (fabs(joy_forces[AXIS_TURN]) > 0.2f)
+    if (fabs(joy_forces[kAxisTurn]) > 0.2f)
         turn_held++;
     else
         turn_held = 0;
@@ -312,7 +312,7 @@ void EventBuildTicCommand(EventTicCommand *cmd)
 
     int m_speed = speed;
 
-    if (fabs(joy_forces[AXIS_MLOOK]) > 0.2f)
+    if (fabs(joy_forces[kAxisMouselook]) > 0.2f)
         mouselook_held++;
     else
         mouselook_held = 0;
@@ -324,12 +324,12 @@ void EventBuildTicCommand(EventTicCommand *cmd)
     if (!strafe)
     {
         float turn = angle_turn[t_speed] / (double_framerate.d_ ? 2 : 1) *
-                     joy_forces[AXIS_TURN];
+                     joy_forces[kAxisTurn];
 
         turn *= turn_speed.f_;
 
         // -ACB- 1998/09/06 Angle Turn Speed Control
-        turn += angle_turn[t_speed] * ball_deltas[AXIS_TURN] / 64.0;
+        turn += angle_turn[t_speed] * ball_deltas[kAxisTurn] / 64.0;
 
         cmd->angle_turn = RoundToInteger(turn);
     }
@@ -337,23 +337,23 @@ void EventBuildTicCommand(EventTicCommand *cmd)
     // MLook
     {
         // -ACB- 1998/07/02 Use VertAngle for Look/up down.
-        float mlook = mouselook_turn[m_speed] * joy_forces[AXIS_MLOOK];
+        float mlook = mouselook_turn[m_speed] * joy_forces[kAxisMouselook];
 
         mlook *= vertical_look_speed.f_;
 
-        mlook += mouselook_turn[m_speed] * ball_deltas[AXIS_MLOOK] / 64.0;
+        mlook += mouselook_turn[m_speed] * ball_deltas[kAxisMouselook] / 64.0;
 
         cmd->mouselook_turn = RoundToInteger(mlook);
     }
 
     // Forward [ no change for 70Hz ]
     {
-        float forward = forward_move[speed] * joy_forces[AXIS_FORWARD];
+        float forward = forward_move[speed] * joy_forces[kAxisForward];
 
         forward *= forward_speed.f_;
 
         // -ACB- 1998/09/06 Forward Move Speed Control
-        forward += forward_move[speed] * ball_deltas[AXIS_FORWARD] / 64.0;
+        forward += forward_move[speed] * ball_deltas[kAxisForward] / 64.0;
 
         forward = HMM_Clamp(-forward_move[1], forward, forward_move[1]);
 
@@ -362,16 +362,16 @@ void EventBuildTicCommand(EventTicCommand *cmd)
 
     // Sideways [ no change for 70Hz ]
     {
-        float side = side_move[speed] * joy_forces[AXIS_STRAFE];
+        float side = side_move[speed] * joy_forces[kAxisStrafe];
 
-        if (strafe) side += side_move[speed] * joy_forces[AXIS_TURN];
+        if (strafe) side += side_move[speed] * joy_forces[kAxisTurn];
 
         side *= side_speed.f_;
 
         // -ACB- 1998/09/06 Side Move Speed Control
-        side += side_move[speed] * ball_deltas[AXIS_STRAFE] / 64.0;
+        side += side_move[speed] * ball_deltas[kAxisStrafe] / 64.0;
 
-        if (strafe) side += side_move[speed] * ball_deltas[AXIS_TURN] / 64.0;
+        if (strafe) side += side_move[speed] * ball_deltas[kAxisTurn] / 64.0;
 
         side = HMM_Clamp(-forward_move[1], side, forward_move[1]);
 
@@ -380,11 +380,11 @@ void EventBuildTicCommand(EventTicCommand *cmd)
 
     // Upwards  -MH- 1998/08/18 Fly Up/Down movement
     {
-        float upward = upward_move[speed] * joy_forces[AXIS_FLY];
+        float upward = upward_move[speed] * joy_forces[kAxisFly];
 
         upward *= fly_speed.f_;
 
-        upward += upward_move[speed] * ball_deltas[AXIS_FLY] / 64.0;
+        upward += upward_move[speed] * ball_deltas[kAxisFly] / 64.0;
 
         upward = HMM_Clamp(-forward_move[1], upward, forward_move[1]);
 
@@ -563,8 +563,8 @@ bool EventInputResponderResponder(InputEvent *ev)
             // -AJA- 1999/07/27: Mlook key like quake's.
             if (EventIsKeyPressed(key_mouselook))
             {
-                ball_deltas[AXIS_TURN] += dx;
-                ball_deltas[AXIS_MLOOK] += dy;
+                ball_deltas[kAxisTurn] += dx;
+                ball_deltas[kAxisMouselook] += dy;
             }
             else
             {
@@ -683,103 +683,103 @@ struct EventSpecialKey
 };
 
 static EventSpecialKey special_keys[] = {
-    {KEYD_RIGHTARROW, "Right Arrow"},
-    {KEYD_LEFTARROW, "Left Arrow"},
-    {KEYD_UPARROW, "Up Arrow"},
-    {KEYD_DOWNARROW, "Down Arrow"},
-    {KEYD_ESCAPE, "Escape"},
-    {KEYD_ENTER, "Enter"},
-    {KEYD_TAB, "Tab"},
+    {kRightArrow, "Right Arrow"},
+    {kLeftArrow, "Left Arrow"},
+    {kUpArrow, "Up Arrow"},
+    {kDownArrow, "Down Arrow"},
+    {kEscape, "Escape"},
+    {kEnter, "Enter"},
+    {kTab, "Tab"},
 
-    {KEYD_BACKSPACE, "Backspace"},
-    {KEYD_EQUALS, "Equals"},
-    {KEYD_MINUS, "Minus"},
-    {KEYD_RSHIFT, "Shift"},
-    {KEYD_RCTRL, "Ctrl"},
-    {KEYD_RALT, "Alt"},
-    {KEYD_INSERT, "Insert"},
-    {KEYD_DELETE, "Delete"},
-    {KEYD_PGDN, "PageDown"},
-    {KEYD_PGUP, "PageUp"},
-    {KEYD_HOME, "Home"},
-    {KEYD_END, "End"},
-    {KEYD_SCRLOCK, "ScrollLock"},
-    {KEYD_NUMLOCK, "NumLock"},
-    {KEYD_CAPSLOCK, "CapsLock"},
-    {KEYD_END, "End"},
+    {kBackspace, "Backspace"},
+    {kEquals, "Equals"},
+    {kMinus, "Minus"},
+    {kRightShift, "Shift"},
+    {kRightControl, "Ctrl"},
+    {kRightAlt, "Alt"},
+    {kInsert, "Insert"},
+    {kDelete, "Delete"},
+    {kPageDown, "PageDown"},
+    {kPageUp, "PageUp"},
+    {kHome, "Home"},
+    {kEnd, "End"},
+    {kScrollLock, "ScrollLock"},
+    {kNumberLock, "NumLock"},
+    {kCapsLock, "CapsLock"},
+    {kEnd, "End"},
     {'\'', "\'"},
-    {KEYD_SPACE, "Space"},
-    {KEYD_TILDE, "`"},
-    {KEYD_PAUSE, "Pause"},
+    {kSpace, "Space"},
+    {kTilde, "`"},
+    {kPause, "Pause"},
 
     // function keys
-    {KEYD_F1, "F1"},
-    {KEYD_F2, "F2"},
-    {KEYD_F3, "F3"},
-    {KEYD_F4, "F4"},
-    {KEYD_F5, "F5"},
-    {KEYD_F6, "F6"},
-    {KEYD_F7, "F7"},
-    {KEYD_F8, "F8"},
-    {KEYD_F9, "F9"},
-    {KEYD_F10, "F10"},
-    {KEYD_F11, "F11"},
-    {KEYD_F12, "F12"},
+    {kFunction1, "F1"},
+    {kFunction2, "F2"},
+    {kFunction3, "F3"},
+    {kFunction4, "F4"},
+    {kFunction5, "F5"},
+    {kFunction6, "F6"},
+    {kFunction7, "F7"},
+    {kFunction8, "F8"},
+    {kFunction9, "F9"},
+    {kFunction10, "F10"},
+    {kFunction11, "F11"},
+    {kFunction12, "F12"},
 
     // numeric keypad
-    {KEYD_KP0, "KP_0"},
-    {KEYD_KP1, "KP_1"},
-    {KEYD_KP2, "KP_2"},
-    {KEYD_KP3, "KP_3"},
-    {KEYD_KP4, "KP_4"},
-    {KEYD_KP5, "KP_5"},
-    {KEYD_KP6, "KP_6"},
-    {KEYD_KP7, "KP_7"},
-    {KEYD_KP8, "KP_8"},
-    {KEYD_KP9, "KP_9"},
+    {kKeypad0, "KP_0"},
+    {kKeypad1, "KP_1"},
+    {kKeypad2, "KP_2"},
+    {kKeypad3, "KP_3"},
+    {kKeypad4, "KP_4"},
+    {kKeypad5, "KP_5"},
+    {kKeypad6, "KP_6"},
+    {kKeypad7, "KP_7"},
+    {kKeypad8, "KP_8"},
+    {kKeypad9, "KP_9"},
 
-    {KEYD_KP_DOT, "KP_DOT"},
-    {KEYD_KP_PLUS, "KP_PLUS"},
-    {KEYD_KP_MINUS, "KP_MINUS"},
-    {KEYD_KP_STAR, "KP_STAR"},
-    {KEYD_KP_SLASH, "KP_SLASH"},
-    {KEYD_KP_EQUAL, "KP_EQUAL"},
-    {KEYD_KP_ENTER, "KP_ENTER"},
+    {kKeypadDot, "KP_DOT"},
+    {kKeypadPlus, "KP_PLUS"},
+    {kKeypadMinus, "KP_MINUS"},
+    {kKeypadStar, "KP_STAR"},
+    {kKeypadSlash, "KP_SLASH"},
+    {kKeypadEquals, "KP_EQUAL"},
+    {kKeypadEnter, "KP_ENTER"},
 
     // mouse buttons
-    {KEYD_MOUSE1, "Mouse1"},
-    {KEYD_MOUSE2, "Mouse2"},
-    {KEYD_MOUSE3, "Mouse3"},
-    {KEYD_MOUSE4, "Mouse4"},
-    {KEYD_MOUSE5, "Mouse5"},
-    {KEYD_MOUSE6, "Mouse6"},
-    {KEYD_WHEEL_UP, "Wheel Up"},
-    {KEYD_WHEEL_DN, "Wheel Down"},
+    {kMouse1, "Mouse1"},
+    {kMouse2, "Mouse2"},
+    {kMouse3, "Mouse3"},
+    {kMouse4, "Mouse4"},
+    {kMouse5, "Mouse5"},
+    {kMouse6, "Mouse6"},
+    {kMouseWheelUp, "Wheel Up"},
+    {kMouseWheelDown, "Wheel Down"},
 
     // gamepad buttons
-    {KEYD_GP_A, "A Button"},
-    {KEYD_GP_B, "B Button"},
-    {KEYD_GP_X, "X Button"},
-    {KEYD_GP_Y, "Y Button"},
-    {KEYD_GP_BACK, "Back Button"},
-    {KEYD_GP_GUIDE, "Guide Button"},  // ???
-    {KEYD_GP_START, "Start Button"},
-    {KEYD_GP_LSTICK, "Left Stick"},
-    {KEYD_GP_RSTICK, "Right Stick"},
-    {KEYD_GP_LSHLD, "Left Shoulder"},
-    {KEYD_GP_RSHLD, "Right Shoulder"},
-    {KEYD_GP_UP, "DPad Up"},
-    {KEYD_GP_DOWN, "DPad Down"},
-    {KEYD_GP_LEFT, "DPad Left"},
-    {KEYD_GP_RIGHT, "DPad Right"},
-    {KEYD_GP_MISC1, "Misc1 Button"},  // ???
-    {KEYD_GP_PADDLE1, "Paddle 1"},
-    {KEYD_GP_PADDLE2, "Paddle 2"},
-    {KEYD_GP_PADDLE3, "Paddle 3"},
-    {KEYD_GP_PADDLE4, "Paddle 4"},
-    {KEYD_GP_TOUCHPAD, "Touchpad"},
-    {KEYD_TRIGGER_LEFT, "Left Trigger"},
-    {KEYD_TRIGGER_RIGHT, "Right Trigger"},
+    {kGamepadA, "A Button"},
+    {kGamepadB, "B Button"},
+    {kGamepadX, "X Button"},
+    {kGamepadY, "Y Button"},
+    {kGamepadBack, "Back Button"},
+    {kGamepadGuide, "Guide Button"},  // ???
+    {kGamepadStart, "Start Button"},
+    {kGamepadLeftStick, "Left Stick"},
+    {kGamepadRightStick, "Right Stick"},
+    {kGamepadLeftShoulder, "Left Shoulder"},
+    {kGamepadRightShoulder, "Right Shoulder"},
+    {kGamepadUp, "DPad Up"},
+    {kGamepadDown, "DPad Down"},
+    {kGamepadLeft, "DPad Left"},
+    {kGamepadRight, "DPad Right"},
+    {kGamepadMisc1, "Misc1 Button"},  // ???
+    {kGamepadPaddle1, "Paddle 1"},
+    {kGamepadPaddle2, "Paddle 2"},
+    {kGamepadPaddle3, "Paddle 3"},
+    {kGamepadPaddle4, "Paddle 4"},
+    {kGamepadTouchpad, "Touchpad"},
+    {kGamepadTriggerLeft, "Left Trigger"},
+    {kGamepadTriggerRight, "Right Trigger"},
 
     // THE END
     {-1, nullptr}};

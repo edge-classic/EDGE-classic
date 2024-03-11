@@ -843,7 +843,7 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1,
     // Note: tex_x1 and tex_x2 are in world coordinates.
     //       top, bottom and tex_top_h as well.
 
-    ecframe_stats.draw_wall_parts++;
+    ec_frame_stats.draw_wall_parts++;
 
     (void)opaque;
 
@@ -1378,7 +1378,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum,
     // check for DDFLEVL fog
     if (sec_fc == kRGBANoValue)
     {
-        if (IS_SKY(seg->sidedef->sector->ceiling))
+        if (EDGE_IMAGE_IS_SKY(seg->sidedef->sector->ceiling))
         {
             sec_fc = current_map->outdoor_fog_color_;
             sec_fd = 0.01f * current_map->outdoor_fog_density_;
@@ -1395,7 +1395,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum,
     {
         if (other)
         {
-            if (IS_SKY(other->ceiling))
+            if (EDGE_IMAGE_IS_SKY(other->ceiling))
             {
                 other_fc = current_map->outdoor_fog_color_;
                 other_fd = 0.01f * current_map->outdoor_fog_density_;
@@ -1526,7 +1526,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum,
 
     if ((slope_ch > other->ceiling_height ||
          (sec->ceiling_vertex_slope || other->ceiling_vertex_slope)) &&
-        !(IS_SKY(sec->ceiling) && IS_SKY(other->ceiling)))
+        !(EDGE_IMAGE_IS_SKY(sec->ceiling) && EDGE_IMAGE_IS_SKY(other->ceiling)))
     {
         if (!sec->ceiling_vertex_slope && other->ceiling_vertex_slope)
         {
@@ -1843,7 +1843,7 @@ static void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref,
     if (!surf->image) return;
 
     // ignore sky and invisible planes
-    if (IS_SKY(*surf) || surf->translucency < 0.01f) return;
+    if (EDGE_IMAGE_IS_SKY(*surf) || surf->translucency < 0.01f) return;
 
     // ignore transparent doors (TNT MAP02)
     if (flood_ref->floor_height >= flood_ref->ceiling_height) return;
@@ -2254,7 +2254,7 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
 
     // --- handle sky (using the depth buffer) ---
 
-    if (bsector && IS_SKY(fsector->floor) && IS_SKY(bsector->floor))
+    if (bsector && EDGE_IMAGE_IS_SKY(fsector->floor) && EDGE_IMAGE_IS_SKY(bsector->floor))
     {
         if (fsector->floor_height < bsector->floor_height)
         {
@@ -2263,16 +2263,16 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
         }
     }
 
-    if (IS_SKY(fsector->ceiling))
+    if (EDGE_IMAGE_IS_SKY(fsector->ceiling))
     {
         if (fsector->ceiling_height < fsector->sky_height &&
-            (!bsector || !IS_SKY(bsector->ceiling) ||
+            (!bsector || !EDGE_IMAGE_IS_SKY(bsector->ceiling) ||
              bsector->floor_height >= fsector->ceiling_height))
         {
             RendererDrawSkyWall(seg, fsector->ceiling_height,
                                 fsector->sky_height);
         }
-        else if (bsector && IS_SKY(bsector->ceiling) &&
+        else if (bsector && EDGE_IMAGE_IS_SKY(bsector->ceiling) &&
                  fsector->height_sector == nullptr &&
                  bsector->height_sector == nullptr)
         {
@@ -2285,7 +2285,7 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
         }
     }
     // -AJA- 2004/08/29: Emulate Sky-Flooding TRICK
-    else if (!debug_hall_of_mirrors.d_ && bsector && IS_SKY(bsector->ceiling) &&
+    else if (!debug_hall_of_mirrors.d_ && bsector && EDGE_IMAGE_IS_SKY(bsector->ceiling) &&
              seg->sidedef->top.image == nullptr &&
              bsector->ceiling_height < fsector->ceiling_height)
     {
@@ -2427,9 +2427,9 @@ static void RendererDrawPlane(DrawFloor *dfloor, float h, MapSurface *surf,
     if (!surf->image) return;
 
     // ignore sky
-    if (IS_SKY(*surf)) return;
+    if (EDGE_IMAGE_IS_SKY(*surf)) return;
 
-    ecframe_stats.draw_planes++;
+    ec_frame_stats.draw_planes++;
 
     RegionProperties *props = dfloor->properties;
 
@@ -2729,12 +2729,12 @@ static void RendererWalkSubsector(int num)
 
     // --- handle sky (using the depth buffer) ---
 
-    if (IS_SKY(sub->sector->floor) && view_z > sub->sector->floor_height)
+    if (EDGE_IMAGE_IS_SKY(sub->sector->floor) && view_z > sub->sector->floor_height)
     {
         RendererDrawSkyPlane(sub, sub->sector->floor_height);
     }
 
-    if (IS_SKY(sub->sector->ceiling) && view_z < sub->sector->sky_height)
+    if (EDGE_IMAGE_IS_SKY(sub->sector->ceiling) && view_z < sub->sector->sky_height)
     {
         RendererDrawSkyPlane(sub, sub->sector->sky_height);
     }
@@ -3357,7 +3357,7 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
 
     if (mo->player_)
     {
-        if (!level_flags.mlook) view_vertical_angle = 0;
+        if (!level_flags.mouselook) view_vertical_angle = 0;
 
         view_vertical_angle += epi::BAMFromATan(mo->player_->kick_offset_);
 

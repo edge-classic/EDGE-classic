@@ -384,7 +384,7 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
         return;
 
     // -AJA- 1999/10/02: -nomonsters check.
-    if (level_flags.nomonsters && (minfo->extended_flags_ & kExtendedFlagMonster))
+    if (level_flags.no_monsters && (minfo->extended_flags_ & kExtendedFlagMonster))
         return;
 
     // -AJA- 1999/10/07: -noextra check.
@@ -770,7 +770,7 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param)
             else
                 tsec->ceiling.image = image;
 
-            if (image == skyflatimage)
+            if (image == sky_flat_image)
                 must_recompute_sky = true;
         }
 
@@ -821,12 +821,12 @@ void RAD_ActSkill(rad_trigger_t *R, void *param)
 
     // Skill selection trigger function
     // -ACB- 1998/07/30 replaced respawnmonsters with respawnsetting.
-    // -ACB- 1998/08/27 removed fastparm temporaryly.
+    // -ACB- 1998/08/27 removed fast_monsters temporaryly.
 
     game_skill = skill->skill;
 
-    level_flags.fastparm = skill->fastmonsters;
-    level_flags.respawn  = skill->respawn;
+    level_flags.fast_monsters = skill->fastmonsters;
+    level_flags.enemies_respawn  = skill->respawn;
 }
 
 static void MoveOneSector(Sector *sec, s_movesector_t *t)
@@ -1389,7 +1389,7 @@ void P_ActReplace(MapObject *mo, const MapObjectDefinition *newThing)
 
         mo->radius_ = mo->info_->radius_;
         mo->height_ = mo->info_->height_;
-        if (mo->info_->fast_speed_ > -1 && level_flags.fastparm)
+        if (mo->info_->fast_speed_ > -1 && level_flags.fast_monsters)
             mo->speed_ = mo->info_->fast_speed_;
         else
             mo->speed_ = mo->info_->speed_;

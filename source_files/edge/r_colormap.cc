@@ -629,7 +629,7 @@ class ColormapShader : public AbstractShader
         // check for DDFLEVL fog
         if (fc_to_use == kRGBANoValue)
         {
-            if (IS_SKY(sector_->ceiling))
+            if (EDGE_IMAGE_IS_SKY(sector_->ceiling))
             {
                 fc_to_use = current_map->outdoor_fog_color_;
                 fd_to_use = 0.01f * current_map->outdoor_fog_density_;

@@ -272,7 +272,7 @@ static int BotNavigateCheckDoorOrLift(const Seg *seg)
     }
 
     // don't open single-use doors in COOP -- a human should do it
-    if (!DEATHMATCH() && spec->count_ > 0) return kBotPathNodeNormal;
+    if (!InDeathmatch() && spec->count_ > 0) return kBotPathNodeNormal;
 
     if (spec->c_.type_ == kPlaneMoverOnce ||
         spec->c_.type_ == kPlaneMoverMoveWaitReturn)
@@ -282,7 +282,7 @@ static int BotNavigateCheckDoorOrLift(const Seg *seg)
             return kBotPathNodeNormal;
 
         // ignore locked doors in COOP, since bots don't puzzle solve (yet)
-        if (!DEATHMATCH() && spec->keys_ != kDoorKeyNone)
+        if (!InDeathmatch() && spec->keys_ != kDoorKeyNone)
             return kBotPathNodeNormal;
 
         return kBotPathNodeDoor;

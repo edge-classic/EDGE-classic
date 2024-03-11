@@ -23,31 +23,25 @@
 //
 //----------------------------------------------------------------------------
 //
-// -MH- 1998/07/02 "lookupdown" --> "true3dgameplay"
+// -MH- 1998/07/02 "lookupdown" --> "true_3d_gameplay"
 //
 // -ACB- 1999/10/07 Removed Sound Parameters - New Sound API
 //
 
-#ifndef __D_STATE_H__
-#define __D_STATE_H__
-
-#include "types.h"
+#pragma once
 
 #include "con_var.h"
-// We need globally shared data structures,
-//  for defining the global state variables.
 #include "dm_data.h"
+#include "e_player.h"
 
 class Image;
 
-extern bool devparm; // DEBUG: launched with -devparm
+extern GameFlags global_flags;
 
-extern gameflags_t global_flags;
-
-extern gameflags_t level_flags;
+extern GameFlags level_flags;
 
 // Selected by user.
-extern skill_t game_skill;
+extern SkillLevel game_skill;
 
 // Flag: true only if started as net deathmatch.
 // An enum might handle altdeath/cooperative better.
@@ -60,48 +54,48 @@ extern int deathmatch;
 // Depending on view size - no status bar?
 // Note that there is no way to disable the
 //  status bar explicitely.
-extern bool statusbaractive;
-extern bool menu_active; // Menu overlayed?
+extern bool menu_active;  // Menu overlayed?
 extern bool rts_menu_active;
-extern bool paused; // Game Pause?
-extern bool viewactive;
-extern bool nodrawers;
-extern bool noblit;
+extern bool paused;  // Game Pause?
 
 // Timer, for scores.
-extern int  level_time_elapsed; // tics in game play for par
+extern int  level_time_elapsed;  // tics in game play for par
 extern bool fast_forward_active;
 
 //?
-extern game_state_e game_state;
+extern GameState game_state;
 
 extern int make_tic;
 
-#define DEATHMATCH() (deathmatch > 0)
-#define COOP_MATCH() (deathmatch == 0 && total_players > 1)
-#define SP_MATCH()   (deathmatch == 0 && total_players <= 1)
+inline bool InDeathmatch(void) { return (deathmatch > 0); }
+inline bool InCooperativeMatch(void)
+{
+    return (deathmatch == 0 && total_players > 1);
+}
+inline bool InSinglePlayerMatch(void)
+{
+    return (deathmatch == 0 && total_players <= 1);
+}
 
-#define MAXHEALTH 200
-#define MAXARMOUR 200
-
-#define CHEATARMOUR     MAXARMOUR
-#define CHEATARMOURTYPE kArmourTypeBlue
+// Dasho - Should this truly be hard capped at 200 ?
+constexpr uint8_t kMaximumHealth = 200;
+constexpr uint8_t kMaximumArmor  = 200;
 
 //-----------------------------------------
 // Internal parameters, used for engine.
 //
 
 // File handling stuff.
-extern std::string cfgfile;
-extern std::string brandingfile;
+extern std::string configuration_file;
+extern std::string branding_file;
 
 extern std::string game_base;
 
 extern std::string cache_dir;
 extern std::string game_directory;
 extern std::string home_directory;
-extern std::string save_dir;
-extern std::string shot_dir;
+extern std::string save_directory;
+extern std::string screenshot_directory;
 
 // if true, load all graphics at level load
 extern bool precache;
@@ -116,36 +110,28 @@ extern int quicksave_slot;
 // debug flag to cancel adaptiveness
 extern bool single_tics;
 
-extern int bodyqueslot;
-
 // Needed to store the number of the dummy sky flat.
 // Used for rendering, as well as tracking projectiles etc.
 
-extern const Image *skyflatimage;
+extern const Image *sky_flat_image;
 
-#define IS_SKY(plane) ((plane).image == skyflatimage)
+#define EDGE_IMAGE_IS_SKY(plane) ((plane).image == sky_flat_image)
 
 // misc stuff
-extern bool swapstereo;
-extern bool png_scrshots;
-
-#define NUMHUD 120
+extern bool png_screenshots;
 
 extern int screen_hud;
 
 extern int reduce_flash;
 
-typedef enum
+enum InvulnerabilityEffectType
 {
-    INVULFX_Simple = 0, // plain inverse blending
-    INVULFX_Textured,   // upload new textures
-
-    NUM_INVULFX
-} invulfx_type_e;
+    kInvulnerabilitySimple = 0,  // plain inverse blending
+    kInvulnerabilityTextured,    // upload new textures
+    kTotalInvulnerabilityEffects
+};
 
 extern int invulnerability_effect;
-
-#endif /*__D_STATE_H__*/
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

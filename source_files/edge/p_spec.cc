@@ -1900,7 +1900,7 @@ static inline void PlayerInProperties(Player *player, float bz, float tz,
     {
         player->secret_count_++;
 
-        if (!DEATHMATCH())
+        if (!InDeathmatch())
         {
             ConsoleImportantMessageLDF(
                 "FoundSecret");  // Lobo: get text from language.ddf
@@ -2605,7 +2605,7 @@ void SpawnMapSpecials1(void)
     level_timer = false;
 
     i = ArgumentFind("avg");
-    if (i > 0 && DEATHMATCH())
+    if (i > 0 && InDeathmatch())
     {
         level_timer      = true;
         level_time_count = 20 * 60 * kTicRate;
@@ -2613,7 +2613,7 @@ void SpawnMapSpecials1(void)
 
     std::string s = ArgumentValue("timer");
 
-    if (!s.empty() && DEATHMATCH())
+    if (!s.empty() && InDeathmatch())
     {
         int time;
 

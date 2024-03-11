@@ -79,25 +79,25 @@ EDGE_DEFINE_CONSOLE_VARIABLE(udmf_strict_namespace, "0",
 // Store VERTEXES, LINEDEFS, SIDEDEFS, etc.
 //
 
-int              total_level_vertexes;
-vertex_t        *level_vertexes = nullptr;
-static vertex_t *level_gl_vertexes;
-int              total_level_segs;
-Seg           *level_segs;
-int              total_level_sectors;
-Sector        *level_sectors;
-int              total_level_subsectors;
-Subsector     *level_subsectors;
-int              total_level_extrafloors;
-Extrafloor    *level_extrafloors;
-int              total_level_nodes;
-BspNode          *level_nodes;
-int              total_level_lines;
-Line          *level_lines;
-int              total_level_sides;
-Side          *level_sides;
-static int       total_level_vertical_gaps;
-static VerticalGap   *level_vertical_gaps;
+int                 total_level_vertexes;
+vertex_t           *level_vertexes = nullptr;
+static vertex_t    *level_gl_vertexes;
+int                 total_level_segs;
+Seg                *level_segs;
+int                 total_level_sectors;
+Sector             *level_sectors;
+int                 total_level_subsectors;
+Subsector          *level_subsectors;
+int                 total_level_extrafloors;
+Extrafloor         *level_extrafloors;
+int                 total_level_nodes;
+BspNode            *level_nodes;
+int                 total_level_lines;
+Line               *level_lines;
+int                 total_level_sides;
+Side               *level_sides;
+static int          total_level_vertical_gaps;
+static VerticalGap *level_vertical_gaps;
 
 VertexSectorList *level_vertex_sector_lists;
 
@@ -123,6 +123,27 @@ static std::string udmf_lump;
 static int *temp_line_sides;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(goobers, "0", kConsoleVariableFlagNone)
+
+enum ThingFlag
+{
+    kThingFlagEasy   = 1,
+    kThingFlagNormal = 2,
+    kThingFlagHard   = 4,
+    // Deaf monsters/do not react to sound.
+    kThingFlagAmbush = 8,
+    // Multiplayer only.
+    kThingFlagNotSinglePlayer = 16,
+    // -AJA- 1999/09/22: Boom compatibility.
+    kThingFlagNotDeathmatch  = 32,
+    kThingFlagNotCooperative = 64,
+    // -AJA- 2000/07/31: Friend flag, from MBF
+    kThingFlagFriend = 128,
+    // -AJA- 2004/11/04: This bit should be zero (otherwise old WAD).
+    kThingFlagReserved = 256,
+    // -AJA- 2008/03/08: Extrafloor placement
+    kThingFlagExtrafloorMask  = 0x3C00,
+    kThingFlagExtrafloorShift = 10
+};
 
 // "Musinfo" is used here to refer to the traditional MUSINFO lump
 struct MusinfoMapping
@@ -226,7 +247,7 @@ static void CheckEvilutionBug(uint8_t *data, int length)
 
     LogPrint("Detected TNT MAP31 bug, adding fix.\n");
 
-    data[8] &= ~MTF_NOT_SINGLE;
+    data[8] &= ~kThingFlagNotSinglePlayer;
 }
 
 static void CheckDoom2Map05Bug(uint8_t *data, int length)
@@ -323,10 +344,13 @@ static void SegCommonStuff(Seg *seg, int linedef_in)
         seg->miniseg = false;
         seg->linedef = &level_lines[linedef_in];
 
-        float sx = seg->side ? seg->linedef->vertex_2->X : seg->linedef->vertex_1->X;
-        float sy = seg->side ? seg->linedef->vertex_2->Y : seg->linedef->vertex_1->Y;
+        float sx =
+            seg->side ? seg->linedef->vertex_2->X : seg->linedef->vertex_1->X;
+        float sy =
+            seg->side ? seg->linedef->vertex_2->Y : seg->linedef->vertex_1->Y;
 
-        seg->offset = RendererPointToDistance(sx, sy, seg->vertex_1->X, seg->vertex_1->Y);
+        seg->offset =
+            RendererPointToDistance(sx, sy, seg->vertex_1->X, seg->vertex_1->Y);
 
         seg->sidedef = seg->linedef->side[seg->side];
 
@@ -366,7 +390,7 @@ static void GroupSectorTags(Sector *dest, Sector *seclist, int numsecs)
 
         if (src->tag == dest->tag)
         {
-            src->tag_next  = dest;
+            src->tag_next      = dest;
             dest->tag_previous = src;
             return;
         }
@@ -378,7 +402,7 @@ static void LoadSectors(int lump)
     const uint8_t      *data;
     int                 i;
     const raw_sector_t *ms;
-    Sector           *ss;
+    Sector             *ss;
 
     if (!VerifyLump(lump, "SECTORS"))
     {
@@ -410,23 +434,23 @@ static void LoadSectors(int lump)
     {
         char buffer[10];
 
-        ss->floor_height = AlignedLittleEndianS16(ms->floor_h);
+        ss->floor_height   = AlignedLittleEndianS16(ms->floor_h);
         ss->ceiling_height = AlignedLittleEndianS16(ms->ceil_h);
 
         // return to wolfenstein?
         if (goobers.d_)
         {
-            ss->floor_height = 0;
+            ss->floor_height   = 0;
             ss->ceiling_height = (ms->floor_h == ms->ceil_h) ? 0 : 128.0f;
         }
 
         ss->original_height = (ss->floor_height + ss->ceiling_height);
 
-        ss->floor.translucency = VISIBLE;
-        ss->floor.x_matrix.X      = 1;
-        ss->floor.x_matrix.Y      = 0;
-        ss->floor.y_matrix.X      = 0;
-        ss->floor.y_matrix.Y      = 1;
+        ss->floor.translucency = 1.0f;
+        ss->floor.x_matrix.X   = 1;
+        ss->floor.x_matrix.Y   = 0;
+        ss->floor.y_matrix.X   = 0;
+        ss->floor.y_matrix.Y   = 1;
 
         ss->ceiling = ss->floor;
 
@@ -478,10 +502,12 @@ static void LoadSectors(int lump)
         ss->properties.viscosity = kViscosityDefault;
         ss->properties.drag      = kDragDefault;
 
-        if (ss->properties.special && ss->properties.special->fog_color_ != kRGBANoValue)
+        if (ss->properties.special &&
+            ss->properties.special->fog_color_ != kRGBANoValue)
         {
-            ss->properties.fog_color   = ss->properties.special->fog_color_;
-            ss->properties.fog_density = 0.01f * ss->properties.special->fog_density_;
+            ss->properties.fog_color = ss->properties.special->fog_color_;
+            ss->properties.fog_density =
+                0.01f * ss->properties.special->fog_density_;
         }
         else
         {
@@ -510,13 +536,15 @@ static void SetupRootNode(void)
         // compute bbox for the single subsector
         BoundingBoxClear(dummy_bounding_box);
 
-        int    i;
+        int  i;
         Seg *seg;
 
         for (i = 0, seg = level_segs; i < total_level_segs; i++, seg++)
         {
-            BoundingBoxAddPoint(dummy_bounding_box, seg->vertex_1->X, seg->vertex_1->Y);
-            BoundingBoxAddPoint(dummy_bounding_box, seg->vertex_2->X, seg->vertex_2->Y);
+            BoundingBoxAddPoint(dummy_bounding_box, seg->vertex_1->X,
+                                seg->vertex_1->Y);
+            BoundingBoxAddPoint(dummy_bounding_box, seg->vertex_2->X,
+                                seg->vertex_2->Y);
         }
     }
 }
@@ -596,22 +624,22 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x,
     // check for apropriate skill level
     // -ES- 1999/04/13 Implemented Kester's Bugfix.
     // -AJA- 1999/10/21: Reworked again.
-    if (SP_MATCH() && (options & MTF_NOT_SINGLE)) return nullptr;
+    if (InSinglePlayerMatch() && (options & kThingFlagNotSinglePlayer)) return nullptr;
 
     // Disable deathmatch weapons for vanilla coop...should probably be in the
     // Gameplay Options menu - Dasho
-    if (COOP_MATCH() && (options & MTF_NOT_SINGLE)) return nullptr;
+    if (InCooperativeMatch() && (options & kThingFlagNotSinglePlayer)) return nullptr;
 
     // -AJA- 1999/09/22: Boom compatibility flags.
-    if (COOP_MATCH() && (options & MTF_NOT_COOP)) return nullptr;
+    if (InCooperativeMatch() && (options & kThingFlagNotCooperative)) return nullptr;
 
-    if (DEATHMATCH() && (options & MTF_NOT_DM)) return nullptr;
+    if (InDeathmatch() && (options & kThingFlagNotDeathmatch)) return nullptr;
 
     int bit;
 
-    if (game_skill == sk_baby)
+    if (game_skill == kSkillBaby)
         bit = 1;
-    else if (game_skill == sk_nightmare)
+    else if (game_skill == kSkillNightmare)
         bit = 4;
     else
         bit = 1 << (game_skill - 1);
@@ -619,11 +647,11 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x,
     if ((options & bit) == 0) return nullptr;
 
     // don't spawn keycards in deathmatch
-    if (DEATHMATCH() && (info->flags_ & kMapObjectFlagNotDeathmatch))
+    if (InDeathmatch() && (info->flags_ & kMapObjectFlagNotDeathmatch))
         return nullptr;
 
     // don't spawn any monsters if -nomonsters
-    if (level_flags.nomonsters &&
+    if (level_flags.no_monsters &&
         (info->extended_flags_ & kExtendedFlagMonster))
         return nullptr;
 
@@ -641,14 +669,14 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x,
     if (mo->state_ && mo->state_->tics > 1)
         mo->tics_ = 1 + (RandomByteDeterministic() % mo->state_->tics);
 
-    if (options & MTF_AMBUSH)
+    if (options & kThingFlagAmbush)
     {
         mo->flags_ |= kMapObjectFlagAmbush;
         mo->spawnpoint_.flags |= kMapObjectFlagAmbush;
     }
 
     // -AJA- 2000/09/22: MBF compatibility flag
-    if (options & MTF_FRIEND)
+    if (options & kThingFlagFriend)
     {
         mo->side_ = 1;  //~0;
         mo->hyper_flags_ |= kHyperFlagUltraLoyal;
@@ -704,7 +732,7 @@ static void LoadThings(int lump)
     {
         options = AlignedLittleEndianU16(mt[i].options);
 
-        if (options & MTF_RESERVED) limit_options = true;
+        if (options & kThingFlagReserved) limit_options = true;
     }
 
     for (i = 0; i < total_map_things; i++, mt++)
@@ -770,9 +798,11 @@ static void LoadThings(int lump)
         if (objtype->flags_ & kMapObjectFlagSpawnCeiling)
             z = sec->ceiling_height - objtype->height_;
 
-        if ((options & MTF_RESERVED) == 0 && (options & MTF_EXFLOOR_MASK))
+        if ((options & kThingFlagReserved) == 0 &&
+            (options & kThingFlagExtrafloorMask))
         {
-            int floor_num = (options & MTF_EXFLOOR_MASK) >> MTF_EXFLOOR_SHIFT;
+            int floor_num = (options & kThingFlagExtrafloorMask) >>
+                            kThingFlagExtrafloorShift;
 
             for (Extrafloor *ef = sec->bottom_extrafloor; ef; ef = ef->higher)
             {
@@ -950,18 +980,18 @@ static void LoadLineDefs(int lump)
     const uint8_t *data = LoadLumpIntoMemory(lump);
     map_lines_crc.AddBlock((const uint8_t *)data, GetLumpLength(lump));
 
-    Line              *ld  = level_lines;
+    Line                *ld  = level_lines;
     const raw_linedef_t *mld = (const raw_linedef_t *)data;
 
     for (int i = 0; i < total_level_lines; i++, mld++, ld++)
     {
-        ld->flags = AlignedLittleEndianU16(mld->flags);
-        ld->tag   = HMM_MAX(0, AlignedLittleEndianS16(mld->tag));
-        ld->vertex_1    = &level_vertexes[AlignedLittleEndianU16(mld->start)];
-        ld->vertex_2    = &level_vertexes[AlignedLittleEndianU16(mld->end)];
+        ld->flags    = AlignedLittleEndianU16(mld->flags);
+        ld->tag      = HMM_MAX(0, AlignedLittleEndianS16(mld->tag));
+        ld->vertex_1 = &level_vertexes[AlignedLittleEndianU16(mld->start)];
+        ld->vertex_2 = &level_vertexes[AlignedLittleEndianU16(mld->end)];
 
         // Check for BoomClear flag bit and clear applicable specials
-        // (PassThru may still be intentionally readded further down)
+        // (PassThru may still be intentionally added further down)
         if (ld->flags & MLF_ClearBoom)
             ld->flags &= ~(MLF_PassThru | MLF_BlockGrounded | MLF_BlockPlayers);
 
@@ -1036,15 +1066,15 @@ static void LoadHexenLineDefs(int lump)
     const uint8_t *data = LoadLumpIntoMemory(lump);
     map_lines_crc.AddBlock((const uint8_t *)data, GetLumpLength(lump));
 
-    Line                    *ld  = level_lines;
+    Line                      *ld  = level_lines;
     const raw_hexen_linedef_t *mld = (const raw_hexen_linedef_t *)data;
 
     for (int i = 0; i < total_level_lines; i++, mld++, ld++)
     {
-        ld->flags = AlignedLittleEndianU16(mld->flags) & 0x00FF;
-        ld->tag   = 0;
-        ld->vertex_1    = &level_vertexes[AlignedLittleEndianU16(mld->start)];
-        ld->vertex_2    = &level_vertexes[AlignedLittleEndianU16(mld->end)];
+        ld->flags    = AlignedLittleEndianU16(mld->flags) & 0x00FF;
+        ld->tag      = 0;
+        ld->vertex_1 = &level_vertexes[AlignedLittleEndianU16(mld->start)];
+        ld->vertex_2 = &level_vertexes[AlignedLittleEndianU16(mld->end)];
 
         // this ignores the activation bits -- oh well
         ld->special = (mld->args[0] == 0)
@@ -1129,7 +1159,7 @@ static bool AssignSubsectorsPass(int pass)
 
                 // link subsector into parent sector's list.
                 // order is not important, so add it to the head of the list.
-                ss->sector_next           = ss->sector->subsectors;
+                ss->sector_next        = ss->sector->subsectors;
                 ss->sector->subsectors = ss;
             }
         }
@@ -1337,7 +1367,7 @@ static void LoadXGL3Nodes(int lumpnum)
     LogDebug("LoadXGL3Nodes: Post-process subsectors\n");
     // go back and fill in subsectors
     Subsector *ss = level_subsectors;
-    xglSegs         = 0;
+    xglSegs       = 0;
     for (i = 0; i < total_level_subsectors; i++, ss++)
     {
         int countsegs = ss_temp[i];
@@ -1349,14 +1379,17 @@ static void LoadXGL3Nodes(int lumpnum)
         seg = &level_segs[firstseg];
         for (int j = 0; j < countsegs; j++, seg++)
         {
-            seg->vertex_2 = j == (countsegs - 1) ? level_segs[firstseg].vertex_1
-                                           : level_segs[firstseg + j + 1].vertex_1;
+            seg->vertex_2 = j == (countsegs - 1)
+                                ? level_segs[firstseg].vertex_1
+                                : level_segs[firstseg + j + 1].vertex_1;
 
             seg->angle =
-                RendererPointToAngle(seg->vertex_1->X, seg->vertex_1->Y, seg->vertex_2->X, seg->vertex_2->Y);
+                RendererPointToAngle(seg->vertex_1->X, seg->vertex_1->Y,
+                                     seg->vertex_2->X, seg->vertex_2->Y);
 
             seg->length =
-                RendererPointToDistance(seg->vertex_1->X, seg->vertex_1->Y, seg->vertex_2->X, seg->vertex_2->Y);
+                RendererPointToDistance(seg->vertex_1->X, seg->vertex_1->Y,
+                                        seg->vertex_2->X, seg->vertex_2->Y);
         }
 
         // -AJA- 1999/09/23: New linked list for the segs of a subsector
@@ -1367,7 +1400,7 @@ static void LoadXGL3Nodes(int lumpnum)
             FatalError("LoadXGL3Nodes: level %s has invalid SSECTORS.\n",
                        current_map->lump_.c_str());
 
-        ss->sector    = nullptr;
+        ss->sector     = nullptr;
         ss->thing_list = nullptr;
 
         // this is updated when the nodes are loaded
@@ -1410,17 +1443,21 @@ static void LoadXGL3Nodes(int lumpnum)
         td += 4;
         nd->divider.y = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
         td += 4;
-        nd->divider.delta_x = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
+        nd->divider.delta_x =
+            (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
         td += 4;
-        nd->divider.delta_y = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
+        nd->divider.delta_y =
+            (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
         td += 4;
 
-        nd->divider_length = RendererPointToDistance(0, 0, nd->divider.delta_x, nd->divider.delta_y);
+        nd->divider_length = RendererPointToDistance(0, 0, nd->divider.delta_x,
+                                                     nd->divider.delta_y);
 
         for (int j = 0; j < 2; j++)
             for (int k = 0; k < 4; k++)
             {
-                nd->bounding_boxes[j][k] = (float)epi::UnalignedLittleEndianS16(td);
+                nd->bounding_boxes[j][k] =
+                    (float)epi::UnalignedLittleEndianS16(td);
                 td += 2;
             }
 
@@ -1689,24 +1726,24 @@ static void LoadUDMFSectors()
                         break;
                 }
             }
-            Sector *ss = level_sectors + cur_sector;
-            ss->floor_height      = fz;
-            ss->ceiling_height      = cz;
+            Sector *ss         = level_sectors + cur_sector;
+            ss->floor_height   = fz;
+            ss->ceiling_height = cz;
 
             // return to wolfenstein?
             if (goobers.d_)
             {
-                ss->floor_height = 0;
+                ss->floor_height   = 0;
                 ss->ceiling_height = (AlmostEquals(fz, cz)) ? 0 : 128.0f;
             }
 
             ss->original_height = (ss->floor_height + ss->ceiling_height);
 
-            ss->floor.translucency = VISIBLE;
-            ss->floor.x_matrix.X      = 1;
-            ss->floor.x_matrix.Y      = 0;
-            ss->floor.y_matrix.X      = 0;
-            ss->floor.y_matrix.Y      = 1;
+            ss->floor.translucency = 1.0f;
+            ss->floor.x_matrix.X   = 1;
+            ss->floor.x_matrix.Y   = 0;
+            ss->floor.y_matrix.X   = 0;
+            ss->floor.y_matrix.Y   = 1;
 
             ss->ceiling = ss->floor;
 
@@ -1724,10 +1761,10 @@ static void LoadUDMFSectors()
                 ss->ceiling.rotation = epi::BAMFromDegrees(rc);
 
             // granular scaling
-            ss->floor.x_matrix.X = fx_sc;
-            ss->floor.y_matrix.Y = fy_sc;
-            ss->ceiling.x_matrix.X  = cx_sc;
-            ss->ceiling.y_matrix.Y  = cy_sc;
+            ss->floor.x_matrix.X   = fx_sc;
+            ss->floor.y_matrix.Y   = fy_sc;
+            ss->ceiling.x_matrix.X = cx_sc;
+            ss->ceiling.y_matrix.Y = cy_sc;
 
             ss->floor.image = ImageLookup(floor_tex, kImageNamespaceFlat);
 
@@ -1795,8 +1832,9 @@ static void LoadUDMFSectors()
             else if (ss->properties.special &&
                      ss->properties.special->fog_color_ != kRGBANoValue)
             {
-                ss->properties.fog_color   = ss->properties.special->fog_color_;
-                ss->properties.fog_density = 0.01f * ss->properties.special->fog_density_;
+                ss->properties.fog_color = ss->properties.special->fog_color_;
+                ss->properties.fog_density =
+                    0.01f * ss->properties.special->fog_density_;
             }
             else
             {
@@ -1822,7 +1860,7 @@ static void LoadUDMFSectors()
                     Colormap *ad_hoc = new Colormap;
                     ad_hoc->name_ =
                         epi::StringFormat("UDMF_%d", light_color);  // Internal
-                    ad_hoc->gl_color_   = light_color;
+                    ad_hoc->gl_color_        = light_color;
                     ss->properties.colourmap = ad_hoc;
                     colormaps.push_back(ad_hoc);
                 }
@@ -1990,13 +2028,13 @@ static void LoadUDMFSideDefs()
 
             Side *sd = level_sides + nummapsides - 1;
 
-            sd->top.translucency = VISIBLE;
+            sd->top.translucency = 1.0f;
             sd->top.offset.X     = x;
             sd->top.offset.Y     = y;
-            sd->top.x_matrix.X      = 1;
-            sd->top.x_matrix.Y      = 0;
-            sd->top.y_matrix.X      = 0;
-            sd->top.y_matrix.Y      = 1;
+            sd->top.x_matrix.X   = 1;
+            sd->top.x_matrix.Y   = 0;
+            sd->top.y_matrix.X   = 0;
+            sd->top.y_matrix.Y   = 1;
 
             sd->middle = sd->top;
             sd->bottom = sd->top;
@@ -2016,10 +2054,8 @@ static void LoadUDMFSideDefs()
                         ImageLookup(top_tex, kImageNamespaceTexture);
             }
 
-            sd->middle.image =
-                ImageLookup(middle_tex, kImageNamespaceTexture);
-            sd->bottom.image =
-                ImageLookup(bottom_tex, kImageNamespaceTexture);
+            sd->middle.image = ImageLookup(middle_tex, kImageNamespaceTexture);
+            sd->bottom.image = ImageLookup(bottom_tex, kImageNamespaceTexture);
 
             // granular offsets
             sd->bottom.offset.X += lowx;
@@ -2044,18 +2080,20 @@ static void LoadUDMFSideDefs()
 
             if (sd->top.image &&
                 fabs(sd->top.offset.Y) > sd->top.image->ScaledHeightActual())
-                sd->top.offset.Y =
-                    fmodf(sd->top.offset.Y, sd->top.image->ScaledHeightActual());
+                sd->top.offset.Y = fmodf(sd->top.offset.Y,
+                                         sd->top.image->ScaledHeightActual());
 
-            if (sd->middle.image &&
-                fabs(sd->middle.offset.Y) > sd->middle.image->ScaledHeightActual())
+            if (sd->middle.image && fabs(sd->middle.offset.Y) >
+                                        sd->middle.image->ScaledHeightActual())
                 sd->middle.offset.Y =
-                    fmodf(sd->middle.offset.Y, sd->middle.image->ScaledHeightActual());
+                    fmodf(sd->middle.offset.Y,
+                          sd->middle.image->ScaledHeightActual());
 
-            if (sd->bottom.image &&
-                fabs(sd->bottom.offset.Y) > sd->bottom.image->ScaledHeightActual())
+            if (sd->bottom.image && fabs(sd->bottom.offset.Y) >
+                                        sd->bottom.image->ScaledHeightActual())
                 sd->bottom.offset.Y =
-                    fmodf(sd->bottom.offset.Y, sd->bottom.image->ScaledHeightActual());
+                    fmodf(sd->bottom.offset.Y,
+                          sd->bottom.image->ScaledHeightActual());
         }
         else  // consume other blocks
         {
@@ -2101,8 +2139,8 @@ static void LoadUDMFSideDefs()
         ld->side[0] = sd;
         if (sd->middle.image && (side1 != -1))
         {
-            sd->middle_mask_offset  = sd->middle.offset.Y;
-            sd->middle.offset.Y = 0;
+            sd->middle_mask_offset = sd->middle.offset.Y;
+            sd->middle.offset.Y    = 0;
         }
         ld->front_sector = sd->sector;
         sd++;
@@ -2112,8 +2150,8 @@ static void LoadUDMFSideDefs()
             ld->side[1] = sd;
             if (sd->middle.image)
             {
-                sd->middle_mask_offset  = sd->middle.offset.Y;
-                sd->middle.offset.Y = 0;
+                sd->middle_mask_offset = sd->middle.offset.Y;
+                sd->middle.offset.Y    = 0;
             }
             ld->back_sector = sd->sector;
             sd++;
@@ -2256,10 +2294,10 @@ static void LoadUDMFLineDefs()
             }
             Line *ld = level_lines + cur_line;
 
-            ld->flags = flags;
-            ld->tag   = HMM_MAX(0, tag);
-            ld->vertex_1    = &level_vertexes[v1];
-            ld->vertex_2    = &level_vertexes[v2];
+            ld->flags    = flags;
+            ld->tag      = HMM_MAX(0, tag);
+            ld->vertex_1 = &level_vertexes[v1];
+            ld->vertex_2 = &level_vertexes[v2];
 
             ld->special = P_LookupLineType(HMM_MAX(0, special));
 
@@ -2345,13 +2383,14 @@ static void LoadUDMFThings()
         if (section == "thing")
         {
             float    x = 0.0f, y = 0.0f, z = 0.0f;
-            BAMAngle angle     = kBAMAngle0;
-            int      options   = MTF_NOT_SINGLE | MTF_NOT_DM | MTF_NOT_COOP;
-            int      typenum   = -1;
-            int      tag       = 0;
-            float    healthfac = 1.0f;
-            float    alpha     = 1.0f;
-            float    scale = 0.0f, scalex = 0.0f, scaley = 0.0f;
+            BAMAngle angle = kBAMAngle0;
+            int options = kThingFlagNotSinglePlayer | kThingFlagNotDeathmatch |
+                          kThingFlagNotCooperative;
+            int   typenum   = -1;
+            int   tag       = 0;
+            float healthfac = 1.0f;
+            float alpha     = 1.0f;
+            float scale = 0.0f, scalex = 0.0f, scaley = 0.0f;
             const MapObjectDefinition *objtype;
             for (;;)
             {
@@ -2402,37 +2441,47 @@ static void LoadUDMFThings()
                         typenum = epi::LexInteger(value);
                         break;
                     case epi::kENameSkill1:
-                        options |= (epi::LexBoolean(value) ? MTF_EASY : 0);
+                        options |=
+                            (epi::LexBoolean(value) ? kThingFlagEasy : 0);
                         break;
                     case epi::kENameSkill2:
-                        options |= (epi::LexBoolean(value) ? MTF_EASY : 0);
+                        options |=
+                            (epi::LexBoolean(value) ? kThingFlagEasy : 0);
                         break;
                     case epi::kENameSkill3:
-                        options |= (epi::LexBoolean(value) ? MTF_NORMAL : 0);
+                        options |=
+                            (epi::LexBoolean(value) ? kThingFlagNormal : 0);
                         break;
                     case epi::kENameSkill4:
-                        options |= (epi::LexBoolean(value) ? MTF_HARD : 0);
+                        options |=
+                            (epi::LexBoolean(value) ? kThingFlagHard : 0);
                         break;
                     case epi::kENameSkill5:
-                        options |= (epi::LexBoolean(value) ? MTF_HARD : 0);
+                        options |=
+                            (epi::LexBoolean(value) ? kThingFlagHard : 0);
                         break;
                     case epi::kENameAmbush:
-                        options |= (epi::LexBoolean(value) ? MTF_AMBUSH : 0);
+                        options |=
+                            (epi::LexBoolean(value) ? kThingFlagAmbush : 0);
                         break;
                     case epi::kENameSingle:
-                        options &= (epi::LexBoolean(value) ? ~MTF_NOT_SINGLE
-                                                           : options);
+                        options &=
+                            (epi::LexBoolean(value) ? ~kThingFlagNotSinglePlayer
+                                                    : options);
                         break;
                     case epi::kENameDm:
                         options &=
-                            (epi::LexBoolean(value) ? ~MTF_NOT_DM : options);
+                            (epi::LexBoolean(value) ? ~kThingFlagNotDeathmatch
+                                                    : options);
                         break;
                     case epi::kENameCoop:
                         options &=
-                            (epi::LexBoolean(value) ? ~MTF_NOT_COOP : options);
+                            (epi::LexBoolean(value) ? ~kThingFlagNotCooperative
+                                                    : options);
                         break;
                     case epi::kENameFriend:
-                        options |= (epi::LexBoolean(value) ? MTF_FRIEND : 0);
+                        options |=
+                            (epi::LexBoolean(value) ? kThingFlagFriend : 0);
                         break;
                     case epi::kENameHealth:
                         healthfac = epi::LexDouble(value);
@@ -2657,13 +2706,13 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, Side *sd,
 
     int sec_num = AlignedLittleEndianS16(msd->sector);
 
-    sd->top.translucency = VISIBLE;
+    sd->top.translucency = 1.0f;
     sd->top.offset.X     = AlignedLittleEndianS16(msd->x_offset);
     sd->top.offset.Y     = AlignedLittleEndianS16(msd->y_offset);
-    sd->top.x_matrix.X      = 1;
-    sd->top.x_matrix.Y      = 0;
-    sd->top.y_matrix.X      = 0;
-    sd->top.y_matrix.Y      = 1;
+    sd->top.x_matrix.X   = 1;
+    sd->top.x_matrix.Y   = 0;
+    sd->top.y_matrix.X   = 0;
+    sd->top.y_matrix.Y   = 1;
 
     sd->middle = sd->top;
     sd->bottom = sd->top;
@@ -2680,7 +2729,8 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, Side *sd,
     epi::CStringCopyMax(middle_tex, msd->mid_tex, 8);
     epi::CStringCopyMax(lower_tex, msd->lower_tex, 8);
 
-    sd->top.image = ImageLookup(upper_tex, kImageNamespaceTexture, kImageLookupNull);
+    sd->top.image =
+        ImageLookup(upper_tex, kImageNamespaceTexture, kImageLookupNull);
 
     if (sd->top.image == nullptr)
     {
@@ -2700,12 +2750,14 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, Side *sd,
 
     if (sd->middle.image && two_sided)
     {
-        sd->middle_mask_offset  = sd->middle.offset.Y;
-        sd->middle.offset.Y = 0;
+        sd->middle_mask_offset = sd->middle.offset.Y;
+        sd->middle.offset.Y    = 0;
     }
 
-    if (sd->top.image && fabs(sd->top.offset.Y) > sd->top.image->ScaledHeightActual())
-        sd->top.offset.Y = fmodf(sd->top.offset.Y, sd->top.image->ScaledHeightActual());
+    if (sd->top.image &&
+        fabs(sd->top.offset.Y) > sd->top.image->ScaledHeightActual())
+        sd->top.offset.Y =
+            fmodf(sd->top.offset.Y, sd->top.image->ScaledHeightActual());
 
     if (sd->middle.image &&
         fabs(sd->middle.offset.Y) > sd->middle.image->ScaledHeightActual())
@@ -2723,7 +2775,7 @@ static void LoadSideDefs(int lump)
     int                  i;
     const uint8_t       *data;
     const raw_sidedef_t *msd;
-    Side              *sd;
+    Side                *sd;
 
     int nummapsides;
 
@@ -2805,7 +2857,7 @@ static void LoadSideDefs(int lump)
 //
 static void SetupExtrafloors(void)
 {
-    int       i, ef_index = 0;
+    int     i, ef_index = 0;
     Sector *ss;
 
     if (total_level_extrafloors == 0) return;
@@ -2873,7 +2925,8 @@ static void SetupVertGaps(void)
         // factor in extrafloors
         ld->maximum_gaps += ld->front_sector->extrafloor_maximum;
 
-        if (ld->back_sector) ld->maximum_gaps += ld->back_sector->extrafloor_maximum;
+        if (ld->back_sector)
+            ld->maximum_gaps += ld->back_sector->extrafloor_maximum;
 
         line_gaps += ld->maximum_gaps;
     }
@@ -2977,9 +3030,10 @@ static void DetectDeepWaterTrick(void)
 
             if (Xseg)
             {
-                sub->deep_water_reference = Xseg->back_subsector->deep_water_reference
-                                    ? Xseg->back_subsector->deep_water_reference
-                                    : Xseg->back_subsector->sector;
+                sub->deep_water_reference =
+                    Xseg->back_subsector->deep_water_reference
+                        ? Xseg->back_subsector->deep_water_reference
+                        : Xseg->back_subsector->sector;
                 self_subs[j] = 3;
 
                 count++;
@@ -3021,13 +3075,13 @@ static void DoBlockMap()
 //
 void GroupLines(void)
 {
-    int       i;
-    int       j;
-    int       total;
+    int     i;
+    int     j;
+    int     total;
     Line   *li;
     Sector *sector;
     Seg    *seg;
-    float     bbox[4];
+    float   bbox[4];
     Line  **line_p;
 
     // setup remaining seg information
@@ -3035,7 +3089,8 @@ void GroupLines(void)
     {
         if (seg->partner) seg->back_subsector = seg->partner->front_subsector;
 
-        if (!seg->front_sector) seg->front_sector = seg->front_subsector->sector;
+        if (!seg->front_sector)
+            seg->front_sector = seg->front_subsector->sector;
 
         if (!seg->back_sector && seg->back_subsector)
             seg->back_sector = seg->back_subsector->sector;
@@ -3084,8 +3139,8 @@ void GroupLines(void)
         // and the other two have it unset
         if (sector->line_count == 3 && udmf_level)
         {
-            sector->floor_vertex_slope_high_low = {{-40000, 40000}};
-            sector->ceiling_vertex_slope_high_low  = {{-40000, 40000}};
+            sector->floor_vertex_slope_high_low   = {{-40000, 40000}};
+            sector->ceiling_vertex_slope_high_low = {{-40000, 40000}};
             for (j = 0; j < 3; j++)
             {
                 vertex_t *vert   = sector->lines[j]->vertex_1;
@@ -3166,30 +3221,39 @@ void GroupLines(void)
                 sector->floor_vertex_slope_normal = MathTripleCrossProduct(
                     sector->floor_z_vertices[0], sector->floor_z_vertices[1],
                     sector->floor_z_vertices[2]);
-                if (sector->floor_height > sector->floor_vertex_slope_high_low.X)
-                    sector->floor_vertex_slope_high_low.X = sector->floor_height;
-                if (sector->floor_height < sector->floor_vertex_slope_high_low.Y)
-                    sector->floor_vertex_slope_high_low.Y = sector->floor_height;
+                if (sector->floor_height >
+                    sector->floor_vertex_slope_high_low.X)
+                    sector->floor_vertex_slope_high_low.X =
+                        sector->floor_height;
+                if (sector->floor_height <
+                    sector->floor_vertex_slope_high_low.Y)
+                    sector->floor_vertex_slope_high_low.Y =
+                        sector->floor_height;
             }
             if (!sector->ceiling_vertex_slope)
                 sector->ceiling_z_vertices.clear();
             else
             {
-                sector->ceiling_vertex_slope_normal = MathTripleCrossProduct(
-                    sector->ceiling_z_vertices[0], sector->ceiling_z_vertices[1],
-                    sector->ceiling_z_vertices[2]);
-                if (sector->ceiling_height < sector->ceiling_vertex_slope_high_low.Y)
-                    sector->ceiling_vertex_slope_high_low.Y = sector->ceiling_height;
-                if (sector->ceiling_height > sector->ceiling_vertex_slope_high_low.X)
-                    sector->ceiling_vertex_slope_high_low.X = sector->ceiling_height;
+                sector->ceiling_vertex_slope_normal =
+                    MathTripleCrossProduct(sector->ceiling_z_vertices[0],
+                                           sector->ceiling_z_vertices[1],
+                                           sector->ceiling_z_vertices[2]);
+                if (sector->ceiling_height <
+                    sector->ceiling_vertex_slope_high_low.Y)
+                    sector->ceiling_vertex_slope_high_low.Y =
+                        sector->ceiling_height;
+                if (sector->ceiling_height >
+                    sector->ceiling_vertex_slope_high_low.X)
+                    sector->ceiling_vertex_slope_high_low.X =
+                        sector->ceiling_height;
             }
         }
         if (sector->line_count == 4 && udmf_level)
         {
-            int floor_z_lines     = 0;
-            int ceil_z_lines      = 0;
-            sector->floor_vertex_slope_high_low = {{-40000, 40000}};
-            sector->ceiling_vertex_slope_high_low  = {{-40000, 40000}};
+            int floor_z_lines                     = 0;
+            int ceil_z_lines                      = 0;
+            sector->floor_vertex_slope_high_low   = {{-40000, 40000}};
+            sector->ceiling_vertex_slope_high_low = {{-40000, 40000}};
             for (j = 0; j < 4; j++)
             {
                 vertex_t *vert      = sector->lines[j]->vertex_1;
@@ -3273,27 +3337,36 @@ void GroupLines(void)
             }
             if (floor_z_lines == 1 && sector->floor_z_vertices.size() == 4)
             {
-                sector->floor_vertex_slope = true;
-                sector->floor_vertex_slope_normal    = MathTripleCrossProduct(
+                sector->floor_vertex_slope        = true;
+                sector->floor_vertex_slope_normal = MathTripleCrossProduct(
                     sector->floor_z_vertices[0], sector->floor_z_vertices[1],
                     sector->floor_z_vertices[2]);
-                if (sector->floor_height > sector->floor_vertex_slope_high_low.X)
-                    sector->floor_vertex_slope_high_low.X = sector->floor_height;
-                if (sector->floor_height < sector->floor_vertex_slope_high_low.Y)
-                    sector->floor_vertex_slope_high_low.Y = sector->floor_height;
+                if (sector->floor_height >
+                    sector->floor_vertex_slope_high_low.X)
+                    sector->floor_vertex_slope_high_low.X =
+                        sector->floor_height;
+                if (sector->floor_height <
+                    sector->floor_vertex_slope_high_low.Y)
+                    sector->floor_vertex_slope_high_low.Y =
+                        sector->floor_height;
             }
             else
                 sector->floor_z_vertices.clear();
             if (ceil_z_lines == 1 && sector->ceiling_z_vertices.size() == 4)
             {
                 sector->ceiling_vertex_slope = true;
-                sector->ceiling_vertex_slope_normal    = MathTripleCrossProduct(
-                    sector->ceiling_z_vertices[0], sector->ceiling_z_vertices[1],
-                    sector->ceiling_z_vertices[2]);
-                if (sector->ceiling_height < sector->ceiling_vertex_slope_high_low.Y)
-                    sector->ceiling_vertex_slope_high_low.Y = sector->ceiling_height;
-                if (sector->ceiling_height > sector->ceiling_vertex_slope_high_low.X)
-                    sector->ceiling_vertex_slope_high_low.X = sector->ceiling_height;
+                sector->ceiling_vertex_slope_normal =
+                    MathTripleCrossProduct(sector->ceiling_z_vertices[0],
+                                           sector->ceiling_z_vertices[1],
+                                           sector->ceiling_z_vertices[2]);
+                if (sector->ceiling_height <
+                    sector->ceiling_vertex_slope_high_low.Y)
+                    sector->ceiling_vertex_slope_high_low.Y =
+                        sector->ceiling_height;
+                if (sector->ceiling_height >
+                    sector->ceiling_vertex_slope_high_low.X)
+                    sector->ceiling_vertex_slope_high_low.X =
+                        sector->ceiling_height;
             }
             else
                 sector->ceiling_z_vertices.clear();
@@ -3304,7 +3377,8 @@ void GroupLines(void)
             (bbox[kBoundingBoxRight] + bbox[kBoundingBoxLeft]) / 2;
         sector->sound_effects_origin.y =
             (bbox[kBoundingBoxTop] + bbox[kBoundingBoxBottom]) / 2;
-        sector->sound_effects_origin.z = (sector->floor_height + sector->ceiling_height) / 2;
+        sector->sound_effects_origin.z =
+            (sector->floor_height + sector->ceiling_height) / 2;
     }
 }
 
@@ -3419,10 +3493,12 @@ static void CreateVertexSeclists(void)
             Extrafloor *ef;
 
             for (ef = sec->bottom_extrafloor; ef; ef = ef->higher)
-                AddSectorToVertices(branches, ld, ef->extrafloor_line->front_sector);
+                AddSectorToVertices(branches, ld,
+                                    ef->extrafloor_line->front_sector);
 
             for (ef = sec->bottom_liquid; ef; ef = ef->higher)
-                AddSectorToVertices(branches, ld, ef->extrafloor_line->front_sector);
+                AddSectorToVertices(branches, ld,
+                                    ef->extrafloor_line->front_sector);
         }
     }
 
@@ -3440,7 +3516,8 @@ static void CreateVertexSeclists(void)
 
             if (branches[v_idx] < 0) continue;
 
-            sg->vertex_sectors[vert] = level_vertex_sector_lists + branches[v_idx];
+            sg->vertex_sectors[vert] =
+                level_vertex_sector_lists + branches[v_idx];
         }
     }
 

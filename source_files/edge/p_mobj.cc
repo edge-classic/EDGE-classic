@@ -23,7 +23,7 @@
 //
 //----------------------------------------------------------------------------
 //
-// -MH- 1998/07/02  "shootupdown" --> "true3dgameplay"
+// -MH- 1998/07/02  "shootupdown" --> "true_3d_gameplay"
 //
 // -ACB- 1998/07/30 Took an axe to the item respawn code: now uses a
 //                  double-linked list to store to individual items;
@@ -100,7 +100,7 @@ bool time_stop_active = false;
 static void AddItemToQueue(const MapObject *mo)
 {
     // only respawn items in deathmatch or forced by level flags
-    if (!(deathmatch >= 2 || level_flags.itemrespawn)) return;
+    if (!(deathmatch >= 2 || level_flags.items_respawn)) return;
 
     RespawnQueueItem *newbie = new RespawnQueueItem;
 
@@ -1107,7 +1107,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
 
     // -KM- 1998/11/25 Gravity is now not precalculated so that
     //  menu changes affect instantly.
-    float gravity = props->gravity / 8.0f * (float)level_flags.menu_grav /
+    float gravity = props->gravity / 8.0f * (float)level_flags.menu_gravity_factor /
                     kGravityDefault *
                     gravity_factor.f_;  // New global gravity menu item
 
@@ -1253,7 +1253,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
             }
 
             // if the floor is sky, don't explode missile -ACB- 1998/07/31
-            if (IS_SKY(mo->subsector_->sector->floor) &&
+            if (EDGE_IMAGE_IS_SKY(mo->subsector_->sector->floor) &&
                 mo->subsector_->sector->floor_height >= mo->floor_z_)
             {
                 P_MobjRemoveMissile(mo);
@@ -1353,7 +1353,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
             }
 
             // if the ceiling is sky, don't explode missile -ACB- 1998/07/31
-            if (IS_SKY(mo->subsector_->sector->ceiling) &&
+            if (EDGE_IMAGE_IS_SKY(mo->subsector_->sector->ceiling) &&
                 mo->subsector_->sector->ceiling_height <= mo->ceiling_z_)
             {
                 P_MobjRemoveMissile(mo);
@@ -1587,7 +1587,7 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
 
         // replaced respawnmonsters & newnmrespawn with respawnsetting
         // -ACB- 1998/07/30
-        if (!level_flags.respawn) return;
+        if (!level_flags.enemies_respawn) return;
 
         mobj->move_count_++;
 
@@ -1607,7 +1607,7 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
 
         // replaced respawnmonsters & newnmrespawn with respawnsetting
         // -ACB- 1998/07/30
-        if (level_flags.res_respawn)
+        if (level_flags.enemy_respawn_mode)
             ResurrectRespawn(mobj);
         else
             TeleportRespawn(mobj);
@@ -1621,7 +1621,7 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
 
     for (int loop_count = 0; loop_count < kMaxThinkLoop; loop_count++)
     {
-        if (level_flags.fastparm)
+        if (level_flags.fast_monsters)
             mobj->tics_ -= (1 * mobj->info_->fast_ + mobj->tic_skip_);
         else
             mobj->tics_ -= (1 + mobj->tic_skip_);
@@ -1811,7 +1811,7 @@ static void RemoveMobjFromList(MapObject *mo)
 // Removes the object from the play simulation: no longer thinks, if
 // the mobj is kMapObjectFlagSpecial: i.e. item can be picked up, it is added to
 // the item-respawn-que, so it gets respawned if needed; The respawning
-// only happens if itemrespawn is set or the deathmatch mode is altdeath.
+// only happens if items_respawn is set or the deathmatch mode is altdeath.
 //
 void P_RemoveMobj(MapObject *mo)
 {
@@ -2172,7 +2172,7 @@ bool P_HitLiquidFloor(MapObject *thing)
 void P_MobjItemRespawn(void)
 {
     // only respawn items in deathmatch or forced by level flags
-    if (!(deathmatch >= 2 || level_flags.itemrespawn)) return;
+    if (!(deathmatch >= 2 || level_flags.items_respawn)) return;
 
     float                      x, y, z;
     MapObject                 *mo;
@@ -2296,7 +2296,7 @@ MapObject *P_MobjCreateObject(float x, float y, float z,
 
     mobj->morph_timeout_ = info->morphtimeout_;
 
-    if (level_flags.fastparm && info->fast_speed_ > -1)
+    if (level_flags.fast_monsters && info->fast_speed_ > -1)
         mobj->speed_ = info->fast_speed_;
 
     // -ACB- 1998/06/25 new mobj Stuff (1998/07/11 - invisibility added)
@@ -2308,7 +2308,7 @@ MapObject *P_MobjCreateObject(float x, float y, float z,
     mobj->current_attack_ = nullptr;
     mobj->on_ladder_      = -1;
 
-    if (game_skill != sk_nightmare) mobj->reaction_time_ = info->reaction_time_;
+    if (game_skill != kSkillNightmare) mobj->reaction_time_ = info->reaction_time_;
 
     mobj->last_look_ = RandomByteDeterministic() % kMaximumPlayers;
 

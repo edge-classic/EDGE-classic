@@ -250,7 +250,7 @@ static void GiveAmmo(PickupInfo *pu, Benefit *be)
     // In Nightmare you need the extra ammo, in "baby" you are given double
     if (pu->special)
     {
-        if ((game_skill == sk_baby) || (game_skill == sk_nightmare)) num <<= 1;
+        if ((game_skill == kSkillBaby) || (game_skill == kSkillNightmare)) num <<= 1;
     }
 
     bool did_pickup = false;
@@ -510,7 +510,7 @@ static void GiveKey(PickupInfo *pu, Benefit *be)
     }
 
     // -AJA- leave keys in Co-op games
-    if (COOP_MATCH()) pu->keep_it = true;
+    if (InCooperativeMatch()) pu->keep_it = true;
 
     pu->got_it = true;
 }
@@ -842,7 +842,7 @@ void TouchSpecialThing(MapObject *special, MapObject *toucher)
         special->health_ = 0;
         if (time_stop_active)  // Hide pickup after gaining benefit while time
                                // stop is still active
-            special->visibility_ = INVISIBLE;
+            special->visibility_ = 0.0f;
         KillMapObject(info.player->map_object_, special, nullptr);
     }
 
@@ -1052,7 +1052,7 @@ void KillMapObject(MapObject *source, MapObject *target,
             }
         }
     }
-    else if (SP_MATCH() && (target->flags_ & kMapObjectFlagCountKill))
+    else if (InSinglePlayerMatch() && (target->flags_ & kMapObjectFlagCountKill))
     {
         // count all monster deaths,
         // even those caused by other monsters
@@ -1207,7 +1207,7 @@ void ThrustMapObject(MapObject *target, MapObject *inflictor, float thrust)
     target->momentum_.X += push * epi::BAMCos(angle);
     target->momentum_.Y += push * epi::BAMSin(angle);
 
-    if (level_flags.true3dgameplay)
+    if (level_flags.true_3d_gameplay)
     {
         float dz    = MapObjectMidZ(target) - MapObjectMidZ(inflictor);
         float slope = ApproximateSlope(dx, dy, dz);
@@ -1258,7 +1258,7 @@ void PushMapObject(MapObject *target, MapObject *inflictor, float thrust)
     target->momentum_.X += push * epi::BAMCos(angle);
     target->momentum_.Y += push * epi::BAMSin(angle);
 
-    if (level_flags.true3dgameplay)
+    if (level_flags.true_3d_gameplay)
     {
         float dz    = MapObjectMidZ(target) - MapObjectMidZ(inflictor);
         float slope = ApproximateSlope(dx, dy, dz);
@@ -1325,7 +1325,7 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
     // -ACB- 1998/07/12 Use Visibility Enum
     // A Damaged Stealth Creature becomes more visible
     if (target->flags_ & kMapObjectFlagStealth)
-        target->target_visibility_ = VISIBLE;
+        target->target_visibility_ = 1.0f;
 
     if (target->flags_ & kMapObjectFlagSkullFly)
     {
@@ -1387,7 +1387,7 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
         }
 
         // take half damage in trainer mode
-        if (game_skill == sk_baby) damage /= 2.0f;
+        if (game_skill == kSkillBaby) damage /= 2.0f;
 
         // preliminary check: immunity and resistance
         for (i = kTotalArmourTypes - 1; i >= kArmourTypeGreen; i--)
@@ -1419,7 +1419,7 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
         }
 
         // Bot Deathmatch Damange Resistance check
-        if (DEATHMATCH() && !player->IsBot() && source && source->player_ &&
+        if (InDeathmatch() && !player->IsBot() && source && source->player_ &&
             source->player_->IsBot())
         {
             if (player_deathmatch_damage_resistance.d_ < 9)
@@ -1666,7 +1666,7 @@ void TelefragMapObject(MapObject *target, MapObject *inflictor,
     target->health_ = -1000;
 
     if (target->flags_ & kMapObjectFlagStealth)
-        target->target_visibility_ = VISIBLE;
+        target->target_visibility_ = 1.0f;
 
     if (target->flags_ & kMapObjectFlagSkullFly)
     {

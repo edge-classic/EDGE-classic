@@ -218,7 +218,7 @@ bool CheatResponder(InputEvent *ev)
     //
     else if (CheatCheckSequence(&cheat_ammo_no_keys, key))
     {
-        pl->armours_[CHEATARMOURTYPE] = CHEATARMOUR;
+        pl->armours_[kArmourTypeBlue] = kMaximumArmor;
 
         UpdateTotalArmour(pl);
 
@@ -236,7 +236,7 @@ bool CheatResponder(InputEvent *ev)
     //
     else if (CheatCheckSequence(&cheat_ammo, key))
     {
-        pl->armours_[CHEATARMOURTYPE] = CHEATARMOUR;
+        pl->armours_[kArmourTypeBlue] = kMaximumArmor;
 
         UpdateTotalArmour(pl);
 

@@ -69,9 +69,9 @@ static int HD_coord_sys(lua_State *L)
 //
 static int HD_game_mode(lua_State *L)
 {
-    if (DEATHMATCH())
+    if (InDeathmatch())
         lua_pushstring(L, "dm");
-    else if (COOP_MATCH())
+    else if (InCooperativeMatch())
         lua_pushstring(L, "coop");
     else
         lua_pushstring(L, "sp");

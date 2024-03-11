@@ -464,14 +464,14 @@ static OptionMenuItem vidoptions[] = {
     {kOptionMenuItemTypeBoolean, "Map Rotation", YesNo, 2, &rotate_map, nullptr,
      nullptr},
     {kOptionMenuItemTypeSwitch, "Invulnerability", "Simple/Textured",
-     NUM_INVULFX, &invulnerability_effect, nullptr, nullptr},
+     kTotalInvulnerabilityEffects, &invulnerability_effect, nullptr, nullptr},
 #ifndef EDGE_WEB
     {kOptionMenuItemTypeSwitch, "Wipe method",
      "None/Melt/Crossfade/Pixelfade/Top/Bottom/Left/Right/Spooky/Doors",
      kTotalScreenWipeTypes, &wipe_method, nullptr, nullptr},
 #endif
     {kOptionMenuItemTypeBoolean, "Screenshot Format", "JPEG/PNG", 2,
-     &png_scrshots, nullptr, nullptr},
+     &png_screenshots, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Animated Liquid Type",
      "Vanilla/SMMU/SMMU+Swirl/Parallax", 4, &swirling_flats, nullptr, nullptr},
 };
@@ -669,7 +669,7 @@ static OptionMenuItem playoptions[] = {
     {kOptionMenuItemTypeBoolean, "Pistol Starts", YesNo, 2, &pistol_starts,
      nullptr, nullptr},
 
-    {kOptionMenuItemTypeBoolean, "Mouse Look", YesNo, 2, &global_flags.mlook,
+    {kOptionMenuItemTypeBoolean, "Mouse Look", YesNo, 2, &global_flags.mouselook,
      OptionMenuChangeMLook, nullptr},
 
     {kOptionMenuItemTypeSwitch, "Autoaim", "Off/On/Mlook", 3,
@@ -697,7 +697,7 @@ static OptionMenuItem playoptions[] = {
      OptionMenuChangeExtra, nullptr},
 
     {kOptionMenuItemTypeBoolean, "True 3D Gameplay", YesNo, 2,
-     &global_flags.true3dgameplay, OptionMenuChangeTrue3d, "True3d"},
+     &global_flags.true_3d_gameplay, OptionMenuChangeTrue3d, "True3d"},
 
     {kOptionMenuItemTypeBoolean, "Shoot-thru Scenery", YesNo, 2,
      &global_flags.pass_missile, OptionMenuChangePassMissile, nullptr},
@@ -711,16 +711,16 @@ static OptionMenuItem playoptions[] = {
      0.0f, 2.0f, "%gx"},
 
     {kOptionMenuItemTypeBoolean, "Respawn Enemies", YesNo, 2,
-     &global_flags.respawn, OptionMenuChangeRespawn, nullptr},
+     &global_flags.enemies_respawn, OptionMenuChangeRespawn, nullptr},
 
     {kOptionMenuItemTypeBoolean, "Enemy Respawn Mode", "Teleport/Resurrect", 2,
-     &global_flags.res_respawn, OptionMenuChangeMonsterRespawn, nullptr},
+     &global_flags.enemy_respawn_mode, OptionMenuChangeMonsterRespawn, nullptr},
 
     {kOptionMenuItemTypeBoolean, "Item Respawn", YesNo, 2,
-     &global_flags.itemrespawn, OptionMenuChangeItemRespawn, nullptr},
+     &global_flags.items_respawn, OptionMenuChangeItemRespawn, nullptr},
 
     {kOptionMenuItemTypeBoolean, "Fast Monsters", YesNo, 2,
-     &global_flags.fastparm, OptionMenuChangeFastparm, nullptr}};
+     &global_flags.fast_monsters, OptionMenuChangeFastparm, nullptr}};
 
 static OptionMenuDefinition gameplay_optmenu = {
     playoptions,
@@ -1108,7 +1108,7 @@ static char keystring2[] = "Press a key for this action";
 //
 void OptionMenuCheckNetworkGame(void)
 {
-    if (game_state >= GS_LEVEL)
+    if (game_state >= kGameStateLevel)
     {
         strcpy(mainoptions[kOptionMenuNetworkHostPosition + 0].name,
                "Leave Game");
@@ -1596,7 +1596,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
 
         // Eat the gamepad's "Start" button here to keep the user from
         // binding their menu opening key to an action
-        if (ch == KEYD_ESCAPE || ch == KEYD_GP_START) return true;
+        if (ch == kEscape || ch == kGamepadStart) return true;
 
         blah = (int *)(current_item->switch_variable);
         if (((*blah) >> 16) == key)
@@ -1624,16 +1624,16 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
 
     switch (ch)
     {
-        case KEYD_BACKSPACE:
-        case KEYD_GP_BACK:
+        case kBackspace:
+        case kGamepadBack:
         {
             if (current_item->type == kOptionMenuItemTypeKeyConfig)
                 *(int *)(current_item->switch_variable) = 0;
             return true;
         }
 
-        case KEYD_DOWNARROW:
-        case KEYD_GP_DOWN:
+        case kDownArrow:
+        case kGamepadDown:
         {
             do {
                 current_menu->pos++;
@@ -1657,7 +1657,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             return true;
         }
 
-        case KEYD_WHEEL_DN:
+        case kMouseWheelDown:
         {
             do {
                 current_menu->pos++;
@@ -1689,8 +1689,8 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             return true;
         }
 
-        case KEYD_UPARROW:
-        case KEYD_GP_UP:
+        case kUpArrow:
+        case kGamepadUp:
         {
             do {
                 current_menu->pos--;
@@ -1714,7 +1714,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             return true;
         }
 
-        case KEYD_WHEEL_UP:
+        case kMouseWheelUp:
         {
             do {
                 current_menu->pos--;
@@ -1746,8 +1746,8 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             return true;
         }
 
-        case KEYD_LEFTARROW:
-        case KEYD_GP_LEFT:
+        case kLeftArrow:
+        case kGamepadLeft:
         {
             if (current_menu->key_page[0])
             {
@@ -1830,8 +1830,8 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             }
         }
 
-        case KEYD_RIGHTARROW:
-        case KEYD_GP_RIGHT:
+        case kRightArrow:
+        case kGamepadRight:
             if (current_menu->key_page[0])
             {
                 KeyMenu_Next();
@@ -1840,9 +1840,9 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
 
             /* FALL THROUGH... */
 
-        case KEYD_ENTER:
-        case KEYD_MOUSE1:
-        case KEYD_GP_A:
+        case kEnter:
+        case kMouse1:
+        case kGamepadA:
         {
             switch (current_item->type)
             {
@@ -1923,10 +1923,10 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             }
             FatalError("Invalid menu type!");
         }
-        case KEYD_ESCAPE:
-        case KEYD_MOUSE2:
-        case KEYD_MOUSE3:
-        case KEYD_GP_B:
+        case kEscape:
+        case kMouse2:
+        case kMouse3:
+        case kGamepadB:
         {
             if (current_menu == &f4sound_optmenu)
             {
@@ -2129,7 +2129,7 @@ static void OptionMenuChangeMLook(int              key_pressed,
         ((current_map->force_on_ | current_map->force_off_) & kMapFlagMlook))
         return;
 
-    level_flags.mlook = global_flags.mlook;
+    level_flags.mouselook = global_flags.mouselook;
 }
 
 static void OptionMenuChangeJumping(int              key_pressed,
@@ -2174,7 +2174,7 @@ static void OptionMenuChangeMonsterRespawn(int              key_pressed,
                         kMapFlagResRespawn))
         return;
 
-    level_flags.res_respawn = global_flags.res_respawn;
+    level_flags.enemy_respawn_mode = global_flags.enemy_respawn_mode;
 }
 
 static void OptionMenuChangeItemRespawn(int              key_pressed,
@@ -2184,7 +2184,7 @@ static void OptionMenuChangeItemRespawn(int              key_pressed,
                         kMapFlagItemRespawn))
         return;
 
-    level_flags.itemrespawn = global_flags.itemrespawn;
+    level_flags.items_respawn = global_flags.items_respawn;
 }
 
 static void OptionMenuChangeTrue3d(int              key_pressed,
@@ -2194,7 +2194,7 @@ static void OptionMenuChangeTrue3d(int              key_pressed,
         ((current_map->force_on_ | current_map->force_off_) & kMapFlagTrue3D))
         return;
 
-    level_flags.true3dgameplay = global_flags.true3dgameplay;
+    level_flags.true_3d_gameplay = global_flags.true_3d_gameplay;
 }
 
 static void OptionMenuChangeAutoAim(int              key_pressed,
@@ -2210,25 +2210,25 @@ static void OptionMenuChangeAutoAim(int              key_pressed,
 static void OptionMenuChangeRespawn(int              key_pressed,
                                     ConsoleVariable *console_variable)
 {
-    if (game_skill == sk_nightmare) return;
+    if (game_skill == kSkillNightmare) return;
 
     if (current_map &&
         ((current_map->force_on_ | current_map->force_off_) & kMapFlagRespawn))
         return;
 
-    level_flags.respawn = global_flags.respawn;
+    level_flags.enemies_respawn = global_flags.enemies_respawn;
 }
 
 static void OptionMenuChangeFastparm(int              key_pressed,
                                      ConsoleVariable *console_variable)
 {
-    if (game_skill == sk_nightmare) return;
+    if (game_skill == kSkillNightmare) return;
 
     if (current_map &&
         ((current_map->force_on_ | current_map->force_off_) & kMapFlagFastParm))
         return;
 
-    level_flags.fastparm = global_flags.fastparm;
+    level_flags.fast_monsters = global_flags.fast_monsters;
 }
 
 static void OptionMenuChangePassMissile(int              key_pressed,
@@ -2312,7 +2312,7 @@ static void OptionMenuChangePCSpeakerMode(int              key_pressed,
 static void OptionMenuChangeLanguage(int              key_pressed,
                                      ConsoleVariable *console_variable)
 {
-    if (key_pressed == KEYD_LEFTARROW || key_pressed == KEYD_GP_LEFT)
+    if (key_pressed == kLeftArrow || key_pressed == kGamepadLeft)
     {
         int idx, max;
 
@@ -2324,7 +2324,7 @@ static void OptionMenuChangeLanguage(int              key_pressed,
 
         language.Select(idx);
     }
-    else if (key_pressed == KEYD_RIGHTARROW || key_pressed == KEYD_GP_RIGHT)
+    else if (key_pressed == kRightArrow || key_pressed == kGamepadRight)
     {
         int idx, max;
 
@@ -2387,14 +2387,14 @@ static void OptionMenuChangeSoundfont(int              key_pressed,
         return;
     }
 
-    if (key_pressed == KEYD_LEFTARROW || key_pressed == KEYD_GP_LEFT)
+    if (key_pressed == kLeftArrow || key_pressed == kGamepadLeft)
     {
         if (sf_pos - 1 >= 0)
             sf_pos--;
         else
             sf_pos = available_soundfonts.size() - 1;
     }
-    else if (key_pressed == KEYD_RIGHTARROW || key_pressed == KEYD_GP_RIGHT)
+    else if (key_pressed == kRightArrow || key_pressed == kGamepadRight)
     {
         if (sf_pos + 1 >= (int)available_soundfonts.size())
             sf_pos = 0;
@@ -2435,14 +2435,14 @@ static void OptionMenuChangeOplInstrumentBank(int              key_pressed,
         return;
     }
 
-    if (key_pressed == KEYD_LEFTARROW || key_pressed == KEYD_GP_LEFT)
+    if (key_pressed == kLeftArrow || key_pressed == kGamepadLeft)
     {
         if (op2_pos - 1 >= 0)
             op2_pos--;
         else
             op2_pos = available_opl_banks.size() - 1;
     }
-    else if (key_pressed == KEYD_RIGHTARROW || key_pressed == KEYD_GP_RIGHT)
+    else if (key_pressed == kRightArrow || key_pressed == kGamepadRight)
     {
         if (op2_pos + 1 >= (int)available_opl_banks.size())
             op2_pos = 0;
@@ -2463,11 +2463,11 @@ static void OptionMenuChangeOplInstrumentBank(int              key_pressed,
 static void OptionMenuChangeResSize(int              key_pressed,
                                     ConsoleVariable *console_variable)
 {
-    if (key_pressed == KEYD_LEFTARROW || key_pressed == KEYD_GP_LEFT)
+    if (key_pressed == kLeftArrow || key_pressed == kGamepadLeft)
     {
         IncrementResolution(&new_window_mode, kIncrementSize, -1);
     }
-    else if (key_pressed == KEYD_RIGHTARROW || key_pressed == KEYD_GP_RIGHT)
+    else if (key_pressed == kRightArrow || key_pressed == kGamepadRight)
     {
         IncrementResolution(&new_window_mode, kIncrementSize, +1);
     }
@@ -2481,11 +2481,11 @@ static void OptionMenuChangeResSize(int              key_pressed,
 static void OptionMenuChangeResFull(int              key_pressed,
                                     ConsoleVariable *console_variable)
 {
-    if (key_pressed == KEYD_LEFTARROW || key_pressed == KEYD_GP_LEFT)
+    if (key_pressed == kLeftArrow || key_pressed == kGamepadLeft)
     {
         IncrementResolution(&new_window_mode, kIncrementWindowMode, -1);
     }
-    else if (key_pressed == KEYD_RIGHTARROW || key_pressed == KEYD_GP_RIGHT)
+    else if (key_pressed == kRightArrow || key_pressed == kGamepadRight)
     {
         IncrementResolution(&new_window_mode, kIncrementWindowMode, +1);
     }

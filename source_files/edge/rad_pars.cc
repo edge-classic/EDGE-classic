@@ -1651,11 +1651,11 @@ static void RAD_ParseHealPlayer(param_set_t &pars)
     RAD_CheckForFloat(pars[1], &heal->heal_amount);
 
     if (pars.size() < 3)
-        heal->limit = MAXHEALTH;
+        heal->limit = kMaximumHealth;
     else
         RAD_CheckForFloat(pars[2], &heal->limit);
 
-    if (heal->limit < 0 || heal->limit > MAXHEALTH)
+    if (heal->limit < 0 || heal->limit > kMaximumHealth)
         RAD_Error("Health limit out of range: %1.1f\n", heal->limit);
 
     if (heal->heal_amount < 0 || heal->heal_amount > heal->limit)
@@ -1677,11 +1677,11 @@ static void RAD_ParseGiveArmour(param_set_t &pars)
     RAD_CheckForFloat(pars[2], &armour->armour_amount);
 
     if (pars.size() < 4)
-        armour->limit = MAXARMOUR;
+        armour->limit = kMaximumArmor;
     else
         RAD_CheckForFloat(pars[3], &armour->limit);
 
-    if (armour->limit < 0 || armour->limit > MAXARMOUR)
+    if (armour->limit < 0 || armour->limit > kMaximumArmor)
         RAD_Error("Armour limit out of range: %1.1f\n", armour->limit);
 
     if (armour->armour_amount < 0 || armour->armour_amount > armour->limit)
@@ -1799,7 +1799,7 @@ static void RAD_ParseSkill(param_set_t &pars)
 
     RAD_CheckForInt(pars[1], &val);
 
-    skill->skill        = (skill_t)(val - 1);
+    skill->skill        = (SkillLevel)(val - 1);
     skill->respawn      = CheckForBoolean(pars[2]);
     skill->fastmonsters = CheckForBoolean(pars[3]);
 

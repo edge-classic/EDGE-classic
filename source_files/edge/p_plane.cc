@@ -100,7 +100,7 @@ static const Image *SECPIC(Sector *sec, bool is_ceiling,
             }
         }
 
-        if (new_image == skyflatimage) ComputeSkyHeights();
+        if (new_image == sky_flat_image) ComputeSkyHeights();
     }
 
     return is_ceiling ? sec->ceiling.image : sec->floor.image;

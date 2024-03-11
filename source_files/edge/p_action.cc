@@ -230,7 +230,7 @@ static bool DecideMeleeAttack(MapObject *object, const AttackDefinition *attack)
     distance =
         ApproximateDistance(target->x - object->x, target->y - object->y);
 
-    if (level_flags.true3dgameplay)
+    if (level_flags.true_3d_gameplay)
         distance = ApproximateDistance(target->z - object->z, distance);
 
     if (attack)
@@ -343,7 +343,7 @@ void P_ActFaceTarget(MapObject *object)
     if (!target) return;
 
     if (object->flags_ & kMapObjectFlagStealth)
-        object->target_visibility_ = VISIBLE;
+        object->target_visibility_ = 1.0f;
 
     object->flags_ &= ~kMapObjectFlagAmbush;
 
@@ -366,9 +366,9 @@ void P_ActFaceTarget(MapObject *object)
             epi::BAMFromATan(RandomByteSkewToZeroDeterministic() / 1024.0f);
     }
 
-    if (target->visibility_ < VISIBLE)
+    if (target->visibility_ < 1.0f)
     {
-        float amount = (VISIBLE - target->visibility_);
+        float amount = (1.0f - target->visibility_);
 
         object->angle_ += (BAMAngle)(RandomByteSkewToZeroDeterministic() *
                                      (kBAMAngleBits - 12) * amount);
@@ -398,7 +398,7 @@ void P_ForceFaceTarget(MapObject *object)
     if (!target) return;
 
     if (object->flags_ & kMapObjectFlagStealth)
-        object->target_visibility_ = VISIBLE;
+        object->target_visibility_ = 1.0f;
 
     object->flags_ &= ~kMapObjectFlagAmbush;
 
@@ -428,7 +428,7 @@ void P_ActMakeIntoCorpse(MapObject *mo)
     // Gives the effect of the object being a corpse....
 
     if (mo->flags_ & kMapObjectFlagStealth)
-        mo->target_visibility_ = VISIBLE;  // dead and very visible
+        mo->target_visibility_ = 1.0f;  // dead and very visible
 
     // object is on ground, it can be walked over
     mo->flags_ &= ~kMapObjectFlagSolid;
@@ -495,7 +495,7 @@ void P_ActResetSpreadCount(MapObject *mo)
 
 void P_ActTransSet(MapObject *mo)
 {
-    float value = VISIBLE;
+    float value = 1.0f;
 
     const State *st = mo->state_;
 
@@ -510,7 +510,7 @@ void P_ActTransSet(MapObject *mo)
 
 void P_ActTransFade(MapObject *mo)
 {
-    float value = INVISIBLE;
+    float value = 0.0f;
 
     const State *st = mo->state_;
 
@@ -537,7 +537,7 @@ void P_ActTransLess(MapObject *mo)
 
     mo->target_visibility_ -= value;
 
-    if (mo->target_visibility_ < INVISIBLE) mo->target_visibility_ = INVISIBLE;
+    if (mo->target_visibility_ < 0.0f) mo->target_visibility_ = 0.0f;
 }
 
 void P_ActTransMore(MapObject *mo)
@@ -554,7 +554,7 @@ void P_ActTransMore(MapObject *mo)
 
     mo->target_visibility_ += value;
 
-    if (mo->target_visibility_ > VISIBLE) mo->target_visibility_ = VISIBLE;
+    if (mo->target_visibility_ > 1.0f) mo->target_visibility_ = 1.0f;
 }
 
 //
@@ -583,18 +583,18 @@ void P_ActTransAlternate(MapObject *object)
     if (object->extended_flags_ & kExtendedFlagLessVisible)
     {
         object->target_visibility_ -= value;
-        if (object->target_visibility_ <= INVISIBLE)
+        if (object->target_visibility_ <= 0.0f)
         {
-            object->target_visibility_ = INVISIBLE;
+            object->target_visibility_ = 0.0f;
             object->extended_flags_ &= ~kExtendedFlagLessVisible;
         }
     }
     else
     {
         object->target_visibility_ += value;
-        if (object->target_visibility_ >= VISIBLE)
+        if (object->target_visibility_ >= 1.0f)
         {
-            object->target_visibility_ = VISIBLE;
+            object->target_visibility_ = 1.0f;
             object->extended_flags_ |= kExtendedFlagLessVisible;
         }
     }
@@ -1175,9 +1175,9 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty,
                 angle += RandomByteSkewToZeroDeterministic()
                          << (kBAMAngleBits - 12);
 
-            if (target->visibility_ < VISIBLE)
+            if (target->visibility_ < 1.0f)
                 angle += (BAMAngle)(RandomByteSkewToZeroDeterministic() * 64 *
-                                    (VISIBLE - target->visibility_));
+                                    (1.0f - target->visibility_));
         }
 
         Sector *cur_target_sec = target->subsector_->sector;
@@ -1260,7 +1260,7 @@ static void LaunchSmartProjectile(MapObject *source, MapObject *target,
         float dy = source->y - target->y;
 
         float s = type->speed_;
-        if (level_flags.fastparm && type->fast_speed_ > -1)
+        if (level_flags.fast_monsters && type->fast_speed_ > -1)
             s = type->fast_speed_;
 
         float a = mx * mx + my * my - s * s;
@@ -2993,7 +2993,7 @@ void P_ActRefireCheck(MapObject *object)
     }
     else if (object->flags_ & kMapObjectFlagStealth)
     {
-        object->target_visibility_ = VISIBLE;
+        object->target_visibility_ = 1.0f;
     }
 }
 
@@ -3159,7 +3159,7 @@ void P_ActStandardLook(MapObject *object)
     }
 
     if (object->flags_ & kMapObjectFlagStealth)
-        object->target_visibility_ = VISIBLE;
+        object->target_visibility_ = 1.0f;
 
     if (g_aggression.d_)
         if (CreateAggression(object) || CreateAggression(object)) return;
@@ -3203,7 +3203,7 @@ void P_ActPlayerSupportLook(MapObject *object)
     object->threshold_ = 0;  // any shot will wake up
 
     if (object->flags_ & kMapObjectFlagStealth)
-        object->target_visibility_ = VISIBLE;
+        object->target_visibility_ = 1.0f;
 
     if (!object->support_object_)
     {
@@ -3315,7 +3315,7 @@ void P_ActStandardChase(MapObject *object)
 
     // A Chasing Stealth Creature becomes less visible
     if (object->flags_ & kMapObjectFlagStealth)
-        object->target_visibility_ = INVISIBLE;
+        object->target_visibility_ = 0.0f;
 
     // turn towards movement direction if not there yet
     if (object->move_direction_ < 8)
@@ -3347,7 +3347,7 @@ void P_ActStandardChase(MapObject *object)
         object->flags_ &= ~kMapObjectFlagJustAttacked;
 
         // -KM- 1998/12/16 Nightmare mode set the fast parm.
-        if (!level_flags.fastparm) NewChaseDir(object);
+        if (!level_flags.fast_monsters) NewChaseDir(object);
 
         return;
     }
@@ -3368,8 +3368,8 @@ void P_ActStandardChase(MapObject *object)
     // check for missile attack
     if (object->info_->missile_state_)
     {
-        // -KM- 1998/12/16 Nightmare set the fastparm.
-        if (!(!level_flags.fastparm && object->move_count_))
+        // -KM- 1998/12/16 Nightmare set the fast_monsters.
+        if (!(!level_flags.fast_monsters && object->move_count_))
         {
             if (DecideRangeAttack(object))
             {
@@ -3652,7 +3652,7 @@ void P_ActJumpSky(MapObject *mo)
     //
     // Note: nothing to do with monsters physically jumping.
 
-    if (mo->subsector_->sector->ceiling.image != skyflatimage)  // is it outdoors?
+    if (mo->subsector_->sector->ceiling.image != sky_flat_image)  // is it outdoors?
     {
         return;
     }
@@ -3716,7 +3716,7 @@ void P_ActBecome(MapObject *mo)
         // Note: health is not changed
         mo->radius_ = mo->info_->radius_;
         mo->height_ = mo->info_->height_;
-        if (mo->info_->fast_speed_ > -1 && level_flags.fastparm)
+        if (mo->info_->fast_speed_ > -1 && level_flags.fast_monsters)
             mo->speed_ = mo->info_->fast_speed_;
         else
             mo->speed_ = mo->info_->speed_;
@@ -3788,7 +3788,7 @@ void P_ActUnBecome(MapObject *mo)
 
         mo->radius_ = mo->info_->radius_;
         mo->height_ = mo->info_->height_;
-        if (mo->info_->fast_speed_ > -1 && level_flags.fastparm)
+        if (mo->info_->fast_speed_ > -1 && level_flags.fast_monsters)
             mo->speed_ = mo->info_->fast_speed_;
         else
             mo->speed_ = mo->info_->speed_;
@@ -3872,7 +3872,7 @@ void P_ActMorph(MapObject *mo)
 
         mo->radius_ = mo->info_->radius_;
         mo->height_ = mo->info_->height_;
-        if (mo->info_->fast_speed_ > -1 && level_flags.fastparm)
+        if (mo->info_->fast_speed_ > -1 && level_flags.fast_monsters)
             mo->speed_ = mo->info_->fast_speed_;
         else
             mo->speed_ = mo->info_->speed_;
@@ -3947,7 +3947,7 @@ void P_ActUnMorph(MapObject *mo)
 
         mo->radius_ = mo->info_->radius_;
         mo->height_ = mo->info_->height_;
-        if (mo->info_->fast_speed_ > -1 && level_flags.fastparm)
+        if (mo->info_->fast_speed_ > -1 && level_flags.fast_monsters)
             mo->speed_ = mo->info_->fast_speed_;
         else
             mo->speed_ = mo->info_->speed_;

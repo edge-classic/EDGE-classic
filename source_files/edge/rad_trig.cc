@@ -220,24 +220,24 @@ class rts_menu_c
         HudSetTextColor();
     }
 
-    int CheckKey(int key)
+    int Check(int key)
     {
-        if (key == KEYD_DOWNARROW || key == KEYD_GP_DOWN || key == KEYD_WHEEL_DN)
+        if (key == kDownArrow || key == kGamepadDown || key == kMouseWheelDown)
             ChoiceDown();
 
-        if (key == KEYD_UPARROW || key == KEYD_GP_UP || key == KEYD_WHEEL_UP)
+        if (key == kUpArrow || key == kGamepadUp || key == kMouseWheelUp)
             ChoiceUp();
 
         if ('a' <= key && key <= 'z')
             key = epi::ToUpperASCII(key);
 
-        if (key == 'Q' || key == 'X' || key == KEYD_GP_B || key == KEYD_MOUSE2 || key == KEYD_MOUSE3)
+        if (key == 'Q' || key == 'X' || key == kGamepadB || key == kMouse2 || key == kMouse3)
             return 0;
 
         if ('1' <= key && key <= ('0' + NumChoices()))
             return key - '0';
 
-        if (key == KEYD_SPACE || key == KEYD_ENTER || key == 'Y' || key == KEYD_GP_A || key == KEYD_MOUSE1 ||
+        if (key == kSpace || key == kEnter || key == 'Y' || key == kGamepadA || key == kMouse1 ||
             EventMatchesKey(key_use, key))
             return current_choice + 1;
 
@@ -1047,7 +1047,7 @@ bool RAD_Responder(InputEvent *ev)
 
     SYS_ASSERT(rts_curr_menu);
 
-    int check = rts_curr_menu->CheckKey(ev->value.key.sym);
+    int check = rts_curr_menu->Check(ev->value.key.sym);
 
     if (check >= 0)
     {

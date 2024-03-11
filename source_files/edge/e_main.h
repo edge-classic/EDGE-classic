@@ -23,11 +23,9 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __E_MAIN__
-#define __E_MAIN__
+#pragma once
 
 #include "con_var.h"
-#include "e_event.h"
 
 void E_Main(int argc, const char **argv);
 void E_Idle(void);
@@ -45,11 +43,11 @@ void E_Display(void);
 
 void E_ProgressMessage(const char *message);
 
-typedef enum
+enum ApplicationStateFlag
 {
-    APP_STATE_ACTIVE       = 0x1,
-    APP_STATE_PENDING_QUIT = 0x2
-} app_state_flags_e;
+    kApplicationActive      = 0x1,
+    kApplicationPendingQuit = 0x2
+};
 
 extern int app_state;
 
@@ -61,8 +59,6 @@ extern bool custom_MenuEpisode;
 extern bool custom_MenuDifficulty;
 
 extern ConsoleVariable r_titlescaling;
-
-#endif // __E_MAIN__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

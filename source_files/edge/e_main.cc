@@ -27,7 +27,7 @@
 //      EDGE main program (E_Main),
 //      game loop (E_Loop) and startup functions.
 //
-// -MH- 1998/07/02 "shootupdown" --> "true3dgameplay"
+// -MH- 1998/07/02 "shootupdown" --> "true_3d_gameplay"
 // -MH- 1998/08/19 added up/down movement variables
 //
 
@@ -93,14 +93,14 @@
 #include "w_wad.h"
 
 extern ConsoleVariable double_framerate;
-extern ConsoleVariable n_busywait;
+extern ConsoleVariable busy_wait;
 
 extern ConsoleVariable gamma_correction;
 
-ECFrameStats ecframe_stats;
+ECFrameStats ec_frame_stats;
 
 // Application active?
-int app_state = APP_STATE_ACTIVE;
+int app_state = kApplicationActive;
 
 bool single_tics = false;  // debug flag to cancel adaptiveness
 
@@ -119,12 +119,12 @@ bool custom_MenuDifficulty = false;
 FILE *log_file   = nullptr;
 FILE *debug_file = nullptr;
 
-gameflags_t default_game_flags = {
+GameFlags default_game_flags = {
     false,  // nomonsters
-    false,  // fastparm
+    false,  // fast_monsters
 
     false,  // respawn
-    false,  // res_respawn
+    false,  // enemy_respawn_mode
     false,  // item respawn
 
     false,  // true 3d gameplay
@@ -134,7 +134,7 @@ gameflags_t default_game_flags = {
     true,   // jump
     true,   // crouch
     true,   // mlook
-    AA_ON,  // autoaim
+    kAutoAimOn,  // autoaim
 
     true,   // cheats
     true,   // have_extra
@@ -151,24 +151,21 @@ gameflags_t default_game_flags = {
 // -AJA- 2000/02/02: Removed initialisation (done in code using
 //       `default_game_flags').
 
-gameflags_t global_flags;
+GameFlags global_flags;
 
-int newnmrespawn = 0;
-
-bool swapstereo     = false;
 bool mus_pause_stop = false;
-bool png_scrshots   = false;
+bool png_screenshots   = false;
 
-std::string brandingfile;
-std::string cfgfile;
+std::string branding_file;
+std::string configuration_file;
 std::string epkfile;
 std::string game_base;
 
 std::string cache_dir;
 std::string game_directory;
 std::string home_directory;
-std::string save_dir;
-std::string shot_dir;
+std::string save_directory;
+std::string screenshot_directory;
 
 // not using EDGE_DEFINE_CONSOLE_VARIABLE here since var name != cvar name
 ConsoleVariable m_language("language", "ENGLISH", kConsoleVariableFlagArchive);
@@ -207,24 +204,24 @@ const Image        *menu_backdrop = nullptr;
 
 static void E_TitleDrawer(void);
 
-class startup_progress_c
+class StartupProgress
 {
    private:
-    std::vector<std::string> startup_messages;
+    std::vector<std::string> startup_messages_;
 
    public:
-    startup_progress_c() {}
+    StartupProgress() {}
 
-    ~startup_progress_c() {}
+    ~StartupProgress() {}
 
-    void addMessage(const char *message)
+    void AddMessage(const char *message)
     {
-        if (startup_messages.size() >= 15)
-            startup_messages.erase(startup_messages.begin());
-        startup_messages.push_back(message);
+        if (startup_messages_.size() >= 15)
+            startup_messages_.erase(startup_messages_.begin());
+        startup_messages_.push_back(message);
     }
 
-    void drawIt()
+    void DrawIt()
     {
         StartFrame();
         HudFrameSetup();
@@ -241,14 +238,14 @@ class startup_progress_c
             HudSolidBox(25, 25, 295, 175, SG_BLACK_RGBA32);
         }
         int y = 26;
-        for (int i = 0; i < (int)startup_messages.size(); i++)
+        for (int i = 0; i < (int)startup_messages_.size(); i++)
         {
-            if (startup_messages[i].size() > 32)
+            if (startup_messages_[i].size() > 32)
                 HudDrawText(
                     26, y,
-                    startup_messages[i].substr(0, 29).append("...").c_str());
+                    startup_messages_[i].substr(0, 29).append("...").c_str());
             else
-                HudDrawText(26, y, startup_messages[i].c_str());
+                HudDrawText(26, y, startup_messages_[i].c_str());
             y += 10;
         }
 
@@ -256,7 +253,7 @@ class startup_progress_c
         {
             const Image *overlay =
                 ImageLookup(hud_overlays.at(r_overlay.d_).c_str(),
-                              kImageNamespaceGraphic, kImageLookupNull);
+                            kImageNamespaceGraphic, kImageLookupNull);
             if (overlay)
                 HudRawImage(
                     0, 0, current_screen_width, current_screen_height, overlay,
@@ -289,12 +286,12 @@ class startup_progress_c
     }
 };
 
-static startup_progress_c s_progress;
+static StartupProgress s_progress;
 
 void E_ProgressMessage(const char *message)
 {
-    s_progress.addMessage(message);
-    s_progress.drawIt();
+    s_progress.AddMessage(message);
+    s_progress.DrawIt();
 }
 
 //
@@ -398,15 +395,15 @@ static void SetGlobalVars(void)
     ArgumentCheckBooleanParameter("rotate_map", &rotate_map, false);
     ArgumentCheckBooleanParameter("sound", &no_sound, true);
     ArgumentCheckBooleanParameter("music", &no_music, true);
-    ArgumentCheckBooleanParameter("itemrespawn", &global_flags.itemrespawn,
+    ArgumentCheckBooleanParameter("items_respawn", &global_flags.items_respawn,
                                   false);
-    ArgumentCheckBooleanParameter("mlook", &global_flags.mlook, false);
-    ArgumentCheckBooleanParameter("monsters", &global_flags.nomonsters, true);
-    ArgumentCheckBooleanParameter("fast", &global_flags.fastparm, false);
+    ArgumentCheckBooleanParameter("mlook", &global_flags.mouselook, false);
+    ArgumentCheckBooleanParameter("monsters", &global_flags.no_monsters, true);
+    ArgumentCheckBooleanParameter("fast", &global_flags.fast_monsters, false);
     ArgumentCheckBooleanParameter("extras", &global_flags.have_extra, false);
     ArgumentCheckBooleanParameter("kick", &global_flags.kicking, false);
     ArgumentCheckBooleanParameter("single_tics", &single_tics, false);
-    ArgumentCheckBooleanParameter("true3d", &global_flags.true3dgameplay,
+    ArgumentCheckBooleanParameter("true3d", &global_flags.true_3d_gameplay,
                                   false);
     ArgumentCheckBooleanParameter("blood", &global_flags.more_blood, false);
     ArgumentCheckBooleanParameter("cheats", &global_flags.cheats, false);
@@ -425,14 +422,14 @@ static void SetGlobalVars(void)
     else if (ArgumentFind("nodlights") > 0)
         use_dynamic_lights = 0;
 
-    if (!global_flags.respawn)
+    if (!global_flags.enemies_respawn)
     {
         if (ArgumentFind("newnmrespawn") > 0)
         {
-            global_flags.res_respawn = true;
-            global_flags.respawn     = true;
+            global_flags.enemy_respawn_mode = true;
+            global_flags.enemies_respawn     = true;
         }
-        else if (ArgumentFind("respawn") > 0) { global_flags.respawn = true; }
+        else if (ArgumentFind("respawn") > 0) { global_flags.enemies_respawn = true; }
     }
 
     // check for strict and no-warning options
@@ -568,7 +565,7 @@ void E_ForceWipe(void)
     // tick Disabled on the platform until can be better integrated
     return;
 #endif
-    if (game_state == GS_NOTHING) return;
+    if (game_state == kGameStateNothing) return;
 
     if (wipe_method == kScreenWipeNone) return;
 
@@ -591,8 +588,6 @@ void E_Display(void)
 {
     EDGE_ZoneScoped;
 
-    if (nodrawers) return;  // for comparative timing / profiling
-
     // Start the frame - should we need to.
     StartFrame();
 
@@ -600,7 +595,7 @@ void E_Display(void)
 
     switch (game_state)
     {
-        case GS_LEVEL:
+        case kGameStateLevel:
             PaletteTicker();
 
             if (LuaUseLuaHud())
@@ -618,19 +613,19 @@ void E_Display(void)
             RAD_Drawer();
             break;
 
-        case GS_INTERMISSION:
+        case kGameStateIntermission:
             IntermissionDrawer();
             break;
 
-        case GS_FINALE:
+        case kGameStateFinale:
             FinaleDrawer();
             break;
 
-        case GS_TITLESCREEN:
+        case kGameStateTitleScreen:
             E_TitleDrawer();
             break;
 
-        case GS_NOTHING:
+        case kGameStateNothing:
             break;
     }
 
@@ -669,7 +664,7 @@ void E_Display(void)
     {
         const Image *overlay =
             ImageLookup(hud_overlays.at(r_overlay.d_).c_str(),
-                          kImageNamespaceGraphic, kImageLookupNull);
+                        kImageNamespaceGraphic, kImageLookupNull);
         if (overlay)
             HudRawImage(0, 0, current_screen_width, current_screen_height,
                         overlay, 0, 0,
@@ -703,7 +698,7 @@ void E_Display(void)
         m_screenshot_required = false;
         TakeScreenshot(true);
     }
-    else if (screenshot_rate && (game_state >= GS_LEVEL))
+    else if (screenshot_rate && (game_state >= kGameStateLevel))
     {
         SYS_ASSERT(single_tics);
 
@@ -728,8 +723,7 @@ static void E_TitleDrawer(void)
     {
         if (r_titlescaling.d_)  // Fill Border
         {
-            if (!title_image->blurred_version_)
-                ImageStoreBlurred(title_image);
+            if (!title_image->blurred_version_) ImageStoreBlurred(title_image);
             HudStretchImage(-320, -200, 960, 600, title_image->blurred_version_,
                             0, 0);
         }
@@ -773,7 +767,7 @@ void E_PickLoadingScreen(void)
 
         // ignore non-existing images
         loading_image = ImageLookup(g->titlepics_[title_pic].c_str(),
-                                      kImageNamespaceGraphic, kImageLookupNull);
+                                    kImageNamespaceGraphic, kImageLookupNull);
 
         if (!loading_image)
         {
@@ -818,8 +812,9 @@ void E_PickMenuScreen(void)
         }
 
         // ignore non-existing episodes.
-        if (title_pic == 0 && (g->firstmap_ == "" ||
-                               CheckLumpNumberForName(g->firstmap_.c_str()) == -1))
+        if (title_pic == 0 &&
+            (g->firstmap_ == "" ||
+             CheckLumpNumberForName(g->firstmap_.c_str()) == -1))
         {
             title_game = (title_game + 1) % gamedefs.size();
             title_pic  = 0;
@@ -829,7 +824,7 @@ void E_PickMenuScreen(void)
         // ignore non-existing images
         const Image *menu_image =
             ImageLookup(g->titlepics_[title_pic].c_str(),
-                          kImageNamespaceGraphic, kImageLookupNull);
+                        kImageNamespaceGraphic, kImageLookupNull);
 
         if (!menu_image)
         {
@@ -945,7 +940,7 @@ void E_AdvanceTitle(void)
 
         // ignore non-existing images
         title_image = ImageLookup(g->titlepics_[title_pic].c_str(),
-                                    kImageNamespaceGraphic, kImageLookupNull);
+                                  kImageNamespaceGraphic, kImageLookupNull);
 
         if (!title_image)
         {
@@ -970,7 +965,7 @@ void E_AdvanceTitle(void)
 void E_StartTitle(void)
 {
     game_action = kGameActionNothing;
-    game_state  = GS_TITLESCREEN;
+    game_state  = kGameStateTitleScreen;
 
     paused = false;
 
@@ -1005,7 +1000,7 @@ void InitDirectories(void)
     s              = ArgumentValue("game");
     if (!s.empty()) game_directory = s;
 
-    brandingfile = epi::PathAppend(game_directory, kBrandingFileName);
+    branding_file = epi::PathAppend(game_directory, kBrandingFileName);
 
     ConfigurationLoadBranding();
 
@@ -1020,14 +1015,14 @@ void InitDirectories(void)
 
     // config file - check for portable config
     s = ArgumentValue("config");
-    if (!s.empty()) { cfgfile = s; }
+    if (!s.empty()) { configuration_file = s; }
     else
     {
-        cfgfile = epi::PathAppend(game_directory, configfilename.s_);
-        if (epi::TestFileAccess(cfgfile) || ArgumentFind("portable") > 0)
+        configuration_file = epi::PathAppend(game_directory, configfilename.s_);
+        if (epi::TestFileAccess(configuration_file) || ArgumentFind("portable") > 0)
             home_directory = game_directory;
         else
-            cfgfile.clear();
+            configuration_file.clear();
     }
 
     if (home_directory.empty())
@@ -1051,8 +1046,8 @@ void InitDirectories(void)
                        home_directory.c_str());
     }
 
-    if (cfgfile.empty())
-        cfgfile = epi::PathAppend(home_directory, configfilename.s_);
+    if (configuration_file.empty())
+        configuration_file = epi::PathAppend(home_directory, configfilename.s_);
 
     // edge_defs.epk file
     s = ArgumentValue("defs");
@@ -1072,16 +1067,16 @@ void InitDirectories(void)
     if (!epi::IsDirectory(cache_dir)) epi::MakeDirectory(cache_dir);
 
     // savegame directory
-    save_dir = epi::PathAppend(home_directory, kSaveGameDirectory);
+    save_directory = epi::PathAppend(home_directory, kSaveGameDirectory);
 
-    if (!epi::IsDirectory(save_dir)) epi::MakeDirectory(save_dir);
+    if (!epi::IsDirectory(save_directory)) epi::MakeDirectory(save_directory);
 
     SaveClearSlot("current");
 
     // screenshot directory
-    shot_dir = epi::PathAppend(home_directory, kScreenshotDirectory);
+    screenshot_directory = epi::PathAppend(home_directory, kScreenshotDirectory);
 
-    if (!epi::IsDirectory(shot_dir)) epi::MakeDirectory(shot_dir);
+    if (!epi::IsDirectory(screenshot_directory)) epi::MakeDirectory(screenshot_directory);
 }
 
 // Get rid of legacy GWA/HWA files
@@ -1186,7 +1181,7 @@ static void IdentifyVersion(void)
         // In the absence of the -iwad parameter, check files/dirs added via
         // drag-and-drop for valid IWADs Remove them from the arg list if they
         // are valid to avoid them potentially being added as PWADs
-        std::vector<SDL_MessageBoxButtonData> game_buttons;
+        std::vector<SDL_MessageBoxButtonData>                     game_buttons;
         std::unordered_map<int, std::pair<std::string, FileKind>> game_paths;
         for (size_t p = 1;
              p < program_argument_list.size() && !ArgumentIsOption(p); p++)
@@ -1220,8 +1215,8 @@ static void IdentifyVersion(void)
                 {
                     if (!game_paths.count(test_index))
                     {
-                        game_paths.try_emplace(test_index,
-                                               std::make_pair(dnd, kFileKindIpk));
+                        game_paths.try_emplace(
+                            test_index, std::make_pair(dnd, kFileKindIpk));
                         SDL_MessageBoxButtonData temp_button;
                         temp_button.buttonid = test_index;
                         temp_button.text =
@@ -1261,7 +1256,7 @@ static void IdentifyVersion(void)
             auto selected_game = game_paths.begin();
             game_base          = game_checker[selected_game->first].base;
             AddDataFile(selected_game->second.first,
-                          selected_game->second.second);
+                        selected_game->second.second);
             LogDebug("GAME BASE = [%s]\n", game_base.c_str());
             return;
         }
@@ -1416,7 +1411,7 @@ static void IdentifyVersion(void)
     {
         std::string location;
 
-        std::vector<SDL_MessageBoxButtonData> game_buttons;
+        std::vector<SDL_MessageBoxButtonData>                     game_buttons;
         std::unordered_map<int, std::pair<std::string, FileKind>> game_paths;
 
         int max = 1;
@@ -1566,15 +1561,16 @@ static void IdentifyVersion(void)
                     {
                         if (!fsd[j].is_dir)
                         {
-                            int test_score =
-                                CheckPackForGameFiles(fsd[j].name, kFileKindIpk);
+                            int test_score = CheckPackForGameFiles(
+                                fsd[j].name, kFileKindIpk);
                             if (test_score >= 0)
                             {
                                 if (!game_paths.count(test_score))
                                 {
                                     game_paths.try_emplace(
-                                        test_score, std::make_pair(fsd[j].name,
-                                                                   kFileKindIpk));
+                                        test_score,
+                                        std::make_pair(fsd[j].name,
+                                                       kFileKindIpk));
                                     SDL_MessageBoxButtonData temp_button;
                                     temp_button.buttonid = test_score;
                                     temp_button.text =
@@ -1597,7 +1593,7 @@ static void IdentifyVersion(void)
             auto selected_game = game_paths.begin();
             game_base          = game_checker[selected_game->first].base;
             AddDataFile(selected_game->second.first,
-                          selected_game->second.second);
+                        selected_game->second.second);
         }
         else
         {
@@ -2059,7 +2055,7 @@ static void E_Startup(void)
     SaveSystemInitialize();
     PrecacheSounds();
     InitializeSprites();
-   ProcessTxHiNamespaces();
+    ProcessTxHiNamespaces();
     InitializeModels();
 
     MenuInitialize();
@@ -2113,7 +2109,7 @@ static void E_InitialState(void)
 
     // get skill / episode / map from parms
     std::string warp_map;
-    skill_t     warp_skill      = sk_medium;
+    SkillLevel     warp_skill      = kSkillMedium;
     int         warp_deathmatch = 0;
 
     int bots = 0;
@@ -2133,7 +2129,7 @@ static void E_InitialState(void)
     if (!ps.empty())
     {
         warp       = true;
-        warp_skill = (skill_t)(atoi(ps.c_str()) - 1);
+        warp_skill = (SkillLevel)(atoi(ps.c_str()) - 1);
     }
 
     // deathmatch check...
@@ -2221,15 +2217,15 @@ void E_Main(int argc, const char **argv)
     LogDebug("- Entering game loop...\n");
 
 #ifndef EDGE_WEB
-    while (!(app_state & APP_STATE_PENDING_QUIT))
+    while (!(app_state & kApplicationPendingQuit))
     {
         // We always do this once here, although the engine may
         // makes in own calls to keep on top of the event processing
         ControlGetEvents();
 
-        if (app_state & APP_STATE_ACTIVE)
+        if (app_state & kApplicationActive)
             E_Tick();
-        else if (!n_busywait.d_) { SleepForMilliseconds(5); }
+        else if (!busy_wait.d_) { SleepForMilliseconds(5); }
     }
 #else
     return;

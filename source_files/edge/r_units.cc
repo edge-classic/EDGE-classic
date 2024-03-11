@@ -329,7 +329,7 @@ void RendererDrawUnits(void)
 
     for (int j = 0; j < current_render_unit; j++)
     {
-        ecframe_stats.draw_render_units++;
+        ec_frame_stats.draw_render_units++;
 
         RendererUnit *unit = local_unit_map[j];
 

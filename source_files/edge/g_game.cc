@@ -65,7 +65,7 @@
 
 extern ConsoleVariable double_framerate;
 
-game_state_e game_state = GS_NOTHING;
+GameState game_state = kGameStateNothing;
 
 GameAction game_action = kGameActionNothing;
 
@@ -73,10 +73,6 @@ bool paused        = false;
 bool pistol_starts = false;
 
 int key_pause;
-
-// for comparative timing purposes
-bool nodrawers;
-bool noblit;
 
 // if true, load all graphics at start
 bool precache = true;
@@ -102,7 +98,7 @@ int key_show_players;
 
 int deathmatch;
 
-skill_t game_skill = sk_medium;
+SkillLevel game_skill = kSkillMedium;
 
 // -ACB- 2004/05/25 We need to store our current/next mapdefs
 const MapDefinition *current_map = nullptr;
@@ -112,7 +108,7 @@ int                  current_hub_tag = 0;  // affects where players are spawned
 const MapDefinition *current_hub_first;    // first map in group of hubs
 
 // -KM- 1998/12/16 These flags hold everything needed about a level
-gameflags_t level_flags;
+GameFlags level_flags;
 
 //--------------------------------------------
 
@@ -156,7 +152,7 @@ void LoadLevel_Bits(void)
     sky_image =
         ImageLookup(current_map->sky_.c_str(), kImageNamespaceTexture);
 
-    game_state = GS_NOTHING;  // FIXME: needed ???
+    game_state = kGameStateNothing;  // FIXME: needed ???
 
     // -AJA- FIXME: this background camera stuff is a mess
     background_camera_map_object = nullptr;
@@ -186,14 +182,14 @@ void LoadLevel_Bits(void)
 
     HANDLE_FLAG(level_flags.jump, kMapFlagJumping);
     HANDLE_FLAG(level_flags.crouch, kMapFlagCrouching);
-    HANDLE_FLAG(level_flags.mlook, kMapFlagMlook);
-    HANDLE_FLAG(level_flags.itemrespawn, kMapFlagItemRespawn);
-    HANDLE_FLAG(level_flags.fastparm, kMapFlagFastParm);
-    HANDLE_FLAG(level_flags.true3dgameplay, kMapFlagTrue3D);
+    HANDLE_FLAG(level_flags.mouselook, kMapFlagMlook);
+    HANDLE_FLAG(level_flags.items_respawn, kMapFlagItemRespawn);
+    HANDLE_FLAG(level_flags.fast_monsters, kMapFlagFastParm);
+    HANDLE_FLAG(level_flags.true_3d_gameplay, kMapFlagTrue3D);
     HANDLE_FLAG(level_flags.more_blood, kMapFlagMoreBlood);
     HANDLE_FLAG(level_flags.cheats, kMapFlagCheats);
-    HANDLE_FLAG(level_flags.respawn, kMapFlagRespawn);
-    HANDLE_FLAG(level_flags.res_respawn, kMapFlagResRespawn);
+    HANDLE_FLAG(level_flags.enemies_respawn, kMapFlagRespawn);
+    HANDLE_FLAG(level_flags.enemy_respawn_mode, kMapFlagResRespawn);
     HANDLE_FLAG(level_flags.have_extra, kMapFlagExtras);
     HANDLE_FLAG(level_flags.limit_zoom, kMapFlagLimitZoom);
     HANDLE_FLAG(level_flags.kicking, kMapFlagKicking);
@@ -206,12 +202,12 @@ void LoadLevel_Bits(void)
     if (current_map->force_on_ & kMapFlagAutoAim)
     {
         if (current_map->force_on_ & kMapFlagAutoAimMlook)
-            level_flags.autoaim = AA_MLOOK;
+            level_flags.autoaim = kAutoAimMouselook;
         else
-            level_flags.autoaim = AA_ON;
+            level_flags.autoaim = kAutoAimOn;
     }
     else if (current_map->force_off_ & kMapFlagAutoAim)
-        level_flags.autoaim = AA_OFF;
+        level_flags.autoaim = kAutoAimOff;
 
     //
     // Note: It should be noted that only the game_skill is
@@ -252,7 +248,7 @@ void LoadLevel_Bits(void)
 
     BotBeginLevel();
 
-    game_state = GS_LEVEL;
+    game_state = kGameStateLevel;
 
     ConsoleSetVisible(kConsoleVisibilityNotVisible);
 
@@ -325,7 +321,7 @@ void GameDoLoadLevel(void)
 bool GameResponder(InputEvent *ev)
 {
     // any other key pops up menu
-    if (game_action == kGameActionNothing && (game_state == GS_TITLESCREEN))
+    if (game_action == kGameActionNothing && (game_state == kGameStateTitleScreen))
     {
         if (ev->type == kInputEventKeyDown)
         {
@@ -340,7 +336,7 @@ bool GameResponder(InputEvent *ev)
     if (ev->type == kInputEventKeyDown &&
         EventMatchesKey(key_show_players, ev->value.key.sym))
     {
-        if (game_state == GS_LEVEL)  //!!!! && !DEATHMATCH())
+        if (game_state == kGameStateLevel)  //!!!! && !InDeathmatch())
         {
             ToggleDisplayPlayer();
             return true;
@@ -370,7 +366,7 @@ bool GameResponder(InputEvent *ev)
         return true;
     }
 
-    if (game_state == GS_LEVEL)
+    if (game_state == kGameStateLevel)
     {
         if (RAD_Responder(ev)) return true;  // RTS system ate it
 
@@ -379,7 +375,7 @@ bool GameResponder(InputEvent *ev)
         if (CheatResponder(ev)) return true;  // cheat code at it
     }
 
-    if (game_state == GS_FINALE)
+    if (game_state == kGameStateFinale)
     {
         if (FinaleResponder(ev)) return true;  // finale ate the event
     }
@@ -395,7 +391,7 @@ static void CheckPlayersReborn(void)
 
         if (!p || p->player_state_ != kPlayerAwaitingRespawn) continue;
 
-        if (SP_MATCH())
+        if (InSinglePlayerMatch())
         {
             // reload the level
             E_ForceWipe();
@@ -473,7 +469,7 @@ void GameTicker(void)
     {
         switch (game_state)
         {
-            case GS_LEVEL:
+            case kGameStateLevel:
                 // get commands
                 NetworkGrabTicCommands();
 
@@ -481,8 +477,8 @@ void GameTicker(void)
                 MapObjectTicker(true);
                 break;
 
-            case GS_INTERMISSION:
-            case GS_FINALE:
+            case kGameStateIntermission:
+            case kGameStateFinale:
                 NetworkGrabTicCommands();
                 break;
             default:
@@ -499,11 +495,11 @@ void GameTicker(void)
     // do main actions
     switch (game_state)
     {
-        case GS_TITLESCREEN:
+        case kGameStateTitleScreen:
             E_TitleTicker();
             break;
 
-        case GS_LEVEL:
+        case kGameStateLevel:
             // get commands
             NetworkGrabTicCommands();
 
@@ -516,12 +512,12 @@ void GameTicker(void)
             CheckPlayersReborn();
             break;
 
-        case GS_INTERMISSION:
+        case kGameStateIntermission:
             NetworkGrabTicCommands();
             IntermissionTicker();
             break;
 
-        case GS_FINALE:
+        case kGameStateFinale:
             NetworkGrabTicCommands();
             FinaleTicker();
             break;
@@ -539,7 +535,7 @@ static void RespawnPlayer(Player *p)
     p->map_object_ = nullptr;
 
     // spawn at random spot if in death match
-    if (DEATHMATCH())
+    if (InDeathmatch())
         DeathMatchSpawnPlayer(p);
     else if (current_hub_tag > 0)
         GameHubSpawnPlayer(p, current_hub_tag);
@@ -564,7 +560,7 @@ static void SpawnInitialPlayers(void)
 
         RespawnPlayer(p);
 
-        if (!DEATHMATCH()) SpawnVoodooDolls(p);
+        if (!InDeathmatch()) SpawnVoodooDolls(p);
     }
 
     // check for missing player start.
@@ -712,7 +708,7 @@ static void GameDoCompleted(void)
     intermission_stats.current_level = current_map;
     intermission_stats.next_level    = next_map;
 
-    game_state = GS_INTERMISSION;
+    game_state = kGameStateIntermission;
 
     IntermissionStart();
 }
@@ -771,7 +767,7 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
 
         SYS_ASSERT(params.map_->episode_);
 
-        params.skill_      = (skill_t)globs->skill;
+        params.skill_      = (SkillLevel)globs->skill;
         params.deathmatch_ = (globs->netgame >= 2) ? (globs->netgame - 1) : 0;
 
         params.random_seed_ = globs->p_random;
@@ -999,7 +995,7 @@ static void GameDoSaveGame(void)
 //---> newgame_params_c class
 
 NewGameParameters::NewGameParameters()
-    : skill_(sk_medium),
+    : skill_(kSkillMedium),
       deathmatch_(0),
       map_(nullptr),
       random_seed_(0),
@@ -1048,13 +1044,13 @@ void NewGameParameters::SinglePlayer(int num_bots)
     }
 }
 
-void NewGameParameters::CopyFlags(const gameflags_t *F)
+void NewGameParameters::CopyFlags(const GameFlags *F)
 {
     if (flags_) delete flags_;
 
-    flags_ = new gameflags_t;
+    flags_ = new GameFlags;
 
-    memcpy(flags_, F, sizeof(gameflags_t));
+    memcpy(flags_, F, sizeof(GameFlags));
 }
 
 //
@@ -1163,7 +1159,7 @@ static void InitNew(NewGameParameters &params)
     current_hub_tag   = 0;
     current_hub_first = nullptr;
 
-    if (params.skill_ > sk_nightmare) params.skill_ = sk_nightmare;
+    if (params.skill_ > kSkillNightmare) params.skill_ = kSkillNightmare;
 
     RandomStateWrite(params.random_seed_);
 
@@ -1181,10 +1177,10 @@ static void InitNew(NewGameParameters &params)
     else
         level_flags = global_flags;
 
-    if (params.skill_ == sk_nightmare)
+    if (params.skill_ == kSkillNightmare)
     {
-        level_flags.fastparm = true;
-        level_flags.respawn  = true;
+        level_flags.fast_monsters = true;
+        level_flags.enemies_respawn  = true;
     }
 
     NetworkResetTics();
@@ -1192,8 +1188,8 @@ static void InitNew(NewGameParameters &params)
 
 void GameDeferredEndGame(void)
 {
-    if (game_state == GS_LEVEL || game_state == GS_INTERMISSION ||
-        game_state == GS_FINALE)
+    if (game_state == kGameStateLevel || game_state == kGameStateIntermission ||
+        game_state == kGameStateFinale)
     {
         game_action = kGameActionEndGame;
     }
@@ -1211,14 +1207,14 @@ static void GameDoEndGame(void)
 
     SaveClearSlot("current");
 
-    if (game_state == GS_LEVEL)
+    if (game_state == kGameStateLevel)
     {
         BotEndLevel();
 
         // FIXME: LevelShutdownLevel()
     }
 
-    game_state = GS_NOTHING;
+    game_state = kGameStateNothing;
 
     SetPalette(kPaletteNormal, 0);
 
@@ -1233,11 +1229,11 @@ bool GameCheckWhenAppear(AppearsFlag appear)
 {
     if (!(appear & (1 << game_skill))) return false;
 
-    if (SP_MATCH() && !(appear & kAppearsWhenSingle)) return false;
+    if (InSinglePlayerMatch() && !(appear & kAppearsWhenSingle)) return false;
 
-    if (COOP_MATCH() && !(appear & kAppearsWhenCoop)) return false;
+    if (InCooperativeMatch() && !(appear & kAppearsWhenCoop)) return false;
 
-    if (DEATHMATCH() && !(appear & kAppearsWhenDeathMatch)) return false;
+    if (InDeathmatch() && !(appear & kAppearsWhenDeathMatch)) return false;
 
     return true;
 }

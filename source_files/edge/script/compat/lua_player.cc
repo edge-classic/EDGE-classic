@@ -1449,7 +1449,7 @@ static void CreateLuaTable_Benefits(lua_State *L, MapObject *obj,
                 BenefitName   = "AMMO";
                 BenefitType   = (int)list->sub.type + 1;
                 BenefitAmount = (int)list->amount;
-                if ((game_skill == sk_baby) || (game_skill == sk_nightmare))
+                if ((game_skill == kSkillBaby) || (game_skill == kSkillNightmare))
                     BenefitAmount <<= 1;  // double the ammo
                 if (BenefitAmount > 1 && obj->flags_ & kMapObjectFlagDropped)
                     BenefitAmount /= 2;  // dropped ammo gives half
@@ -2007,7 +2007,7 @@ static int PL_is_outside(lua_State *L)
     // Doesn't account for extrafloors by design. Reasoning is that usually
     //  extrafloors will be platforms, not roofs...
     if (ui_player_who->map_object_->subsector_->sector->ceiling.image !=
-        skyflatimage)  // is it outdoors?
+        sky_flat_image)  // is it outdoors?
         lua_pushboolean(L, 0);
     else
         lua_pushboolean(L, 1);
@@ -2046,9 +2046,9 @@ static int Game_info(lua_State *L)
 
     //---------------
     // game.mode
-    if (DEATHMATCH())
+    if (InDeathmatch())
         lua_pushstring(L, "dm");
-    else if (COOP_MATCH())
+    else if (InCooperativeMatch())
         lua_pushstring(L, "coop");
     else
         lua_pushstring(L, "sp");
@@ -2218,7 +2218,7 @@ static int Sector_info(lua_State *L)
     // Doesn't account for extrafloors by design. Reasoning is that usually
     //  extrafloors will be platforms, not roofs...
     if (ui_player_who->map_object_->subsector_->sector->ceiling.image !=
-        skyflatimage)  // is it outdoors?
+        sky_flat_image)  // is it outdoors?
         lua_pushboolean(L, 0);
     else
         lua_pushboolean(L, 1);

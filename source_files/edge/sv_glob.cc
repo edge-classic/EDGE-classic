@@ -73,7 +73,7 @@ static const GlobalCommand global_commands[] = {
      offsetof(SaveGlobals, hub_first)},
 
     {"GRAVITY", SaveGlobalGetInteger, SaveGlobalPutInteger,
-     offsetof(SaveGlobals, flags.menu_grav)},
+     offsetof(SaveGlobals, flags.menu_gravity_factor)},
     {"LEVEL_TIME", SaveGlobalGetInteger, SaveGlobalPutInteger,
      offsetof(SaveGlobals, level_time)},
     {"EXIT_TIME", SaveGlobalGetInteger, SaveGlobalPutInteger,
@@ -167,25 +167,25 @@ static void SaveGlobalGetCheckCRC(const char *info, void *storage)
 
 static void SaveGlobalGetLevelFlags(const char *info, void *storage)
 {
-    gameflags_t *dest = (gameflags_t *)storage;
+    GameFlags *dest = (GameFlags *)storage;
     int          flags;
 
     SYS_ASSERT(info && storage);
 
     flags = strtol(info, nullptr, 0);
 
-    Z_Clear(dest, gameflags_t, 1);
+    Z_Clear(dest, GameFlags, 1);
 
     dest->jump           = (flags & kMapFlagJumping) ? true : false;
     dest->crouch         = (flags & kMapFlagCrouching) ? true : false;
-    dest->mlook          = (flags & kMapFlagMlook) ? true : false;
-    dest->itemrespawn    = (flags & kMapFlagItemRespawn) ? true : false;
-    dest->fastparm       = (flags & kMapFlagFastParm) ? true : false;
-    dest->true3dgameplay = (flags & kMapFlagTrue3D) ? true : false;
+    dest->mouselook          = (flags & kMapFlagMlook) ? true : false;
+    dest->items_respawn    = (flags & kMapFlagItemRespawn) ? true : false;
+    dest->fast_monsters       = (flags & kMapFlagFastParm) ? true : false;
+    dest->true_3d_gameplay = (flags & kMapFlagTrue3D) ? true : false;
     dest->more_blood     = (flags & kMapFlagMoreBlood) ? true : false;
     dest->cheats         = (flags & kMapFlagCheats) ? true : false;
-    dest->respawn        = (flags & kMapFlagRespawn) ? true : false;
-    dest->res_respawn    = (flags & kMapFlagResRespawn) ? true : false;
+    dest->enemies_respawn        = (flags & kMapFlagRespawn) ? true : false;
+    dest->enemy_respawn_mode    = (flags & kMapFlagResRespawn) ? true : false;
     dest->have_extra     = (flags & kMapFlagExtras) ? true : false;
     dest->limit_zoom     = (flags & kMapFlagLimitZoom) ? true : false;
     dest->kicking        = (flags & kMapFlagKicking) ? true : false;
@@ -193,8 +193,8 @@ static void SaveGlobalGetLevelFlags(const char *info, void *storage)
     dest->pass_missile   = (flags & kMapFlagPassMissile) ? true : false;
     dest->team_damage    = (flags & kMapFlagTeamDamage) ? true : false;
     dest->autoaim        = (flags & kMapFlagAutoAim)
-                               ? ((flags & kMapFlagAutoAimMlook) ? AA_MLOOK : AA_ON)
-                               : AA_OFF;
+                               ? ((flags & kMapFlagAutoAimMlook) ? kAutoAimMouselook : kAutoAimOn)
+                               : kAutoAimOff;
 }
 
 static void SaveGlobalGetImage(const char *info, void *storage)
@@ -259,7 +259,7 @@ static const char *SaveGlobalPutCheckCRC(void *storage)
 
 static const char *SaveGlobalPutLevelFlags(void *storage)
 {
-    gameflags_t *src = (gameflags_t *)storage;
+    GameFlags *src = (GameFlags *)storage;
     int          flags;
 
     SYS_ASSERT(storage);
@@ -268,22 +268,22 @@ static const char *SaveGlobalPutLevelFlags(void *storage)
 
     if (src->jump) flags |= kMapFlagJumping;
     if (src->crouch) flags |= kMapFlagCrouching;
-    if (src->mlook) flags |= kMapFlagMlook;
-    if (src->itemrespawn) flags |= kMapFlagItemRespawn;
-    if (src->fastparm) flags |= kMapFlagFastParm;
-    if (src->true3dgameplay) flags |= kMapFlagTrue3D;
+    if (src->mouselook) flags |= kMapFlagMlook;
+    if (src->items_respawn) flags |= kMapFlagItemRespawn;
+    if (src->fast_monsters) flags |= kMapFlagFastParm;
+    if (src->true_3d_gameplay) flags |= kMapFlagTrue3D;
     if (src->more_blood) flags |= kMapFlagMoreBlood;
     if (src->cheats) flags |= kMapFlagCheats;
-    if (src->respawn) flags |= kMapFlagRespawn;
-    if (src->res_respawn) flags |= kMapFlagResRespawn;
+    if (src->enemies_respawn) flags |= kMapFlagRespawn;
+    if (src->enemy_respawn_mode) flags |= kMapFlagResRespawn;
     if (src->have_extra) flags |= kMapFlagExtras;
     if (src->limit_zoom) flags |= kMapFlagLimitZoom;
     if (src->kicking) flags |= kMapFlagKicking;
     if (src->weapon_switch) flags |= kMapFlagWeaponSwitch;
     if (src->pass_missile) flags |= kMapFlagPassMissile;
     if (src->team_damage) flags |= kMapFlagTeamDamage;
-    if (src->autoaim != AA_OFF) flags |= kMapFlagAutoAim;
-    if (src->autoaim == AA_MLOOK) flags |= kMapFlagAutoAimMlook;
+    if (src->autoaim != kAutoAimOff) flags |= kMapFlagAutoAim;
+    if (src->autoaim == kAutoAimMouselook) flags |= kMapFlagAutoAimMlook;
 
     return SaveGlobalPutInteger(&flags);
 }

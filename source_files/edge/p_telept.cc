@@ -330,7 +330,7 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing,
 
             if (player == players[display_player] && reduce_flash)
             {
-                fog->target_visibility_ = fog->visibility_ = INVISIBLE;
+                fog->target_visibility_ = fog->visibility_ = 0.0f;
                 ConsoleImportantMessageLDF("Teleporting...");
             }
         }

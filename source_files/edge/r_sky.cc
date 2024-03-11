@@ -91,7 +91,7 @@ void ComputeSkyHeights(void)
 
     for (i = 0, sec = level_sectors; i < total_level_sectors; i++, sec++)
     {
-        if (!IS_SKY(sec->ceiling)) continue;
+        if (!EDGE_IMAGE_IS_SKY(sec->ceiling)) continue;
 
         rings[i].group = (i + 1);
         rings[i].next = rings[i].previous = rings + i;
@@ -395,7 +395,7 @@ static void RendererDrawSkyCylinder(void)
 
     if (current_map->forced_skystretch_ > kSkyStretchUnset)
         current_sky_stretch = current_map->forced_skystretch_;
-    else if (!level_flags.mlook)
+    else if (!level_flags.mouselook)
         current_sky_stretch = kSkyStretchVanilla;
     else
         current_sky_stretch = (SkyStretch)sky_stretch_mode.d_;

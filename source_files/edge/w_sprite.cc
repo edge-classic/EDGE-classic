@@ -651,9 +651,9 @@ void InitializeSprites(void)
 
     for (int n = 0; n < sprite_map_length; n++) sprite_map[n] = sprites[n + 1];
 
-#define CMP(a, b) (epi::StringCompare(a->name_, b->name_) < 0)
-    QSORT(SpriteDefinition *, sprite_map, sprite_map_length, CUTOFF);
-#undef CMP
+#define EDGE_CMP(a, b) (epi::StringCompare(a->name_, b->name_) < 0)
+    EDGE_QSORT(SpriteDefinition *, sprite_map, sprite_map_length, 10);
+#undef EDGE_CMP
 
     // iterate over each file.  Order is important, we must go from
     // newest wad to oldest, so that new sprites override the old ones.

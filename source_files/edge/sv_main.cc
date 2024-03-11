@@ -326,12 +326,12 @@ std::string SaveFilename(const char *slot_name, const char *map_name)
     std::string temp(
         epi::StringFormat("%s/%s.%s", slot_name, map_name, kSaveGameExtension));
 
-    return epi::PathAppend(save_dir, temp);
+    return epi::PathAppend(save_directory, temp);
 }
 
 std::string SV_DirName(const char *slot_name)
 {
-    return epi::PathAppend(save_dir, slot_name);
+    return epi::PathAppend(save_directory, slot_name);
 }
 
 void SaveClearSlot(const char *slot_name)

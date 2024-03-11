@@ -50,7 +50,7 @@ bool network_game = false;
 EDGE_DEFINE_CONSOLE_VARIABLE(double_framerate, "1",
                              kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(
-    n_busywait, "1",
+    busy_wait, "1",
     kConsoleVariableFlagReadOnly)  // Not sure what to rename this yet - Dasho
 
 #if !defined(__MINGW32__) && \
@@ -88,7 +88,7 @@ void NetworkInitialize(void)
     windows_timer = CreateWaitableTimerExW(
         nullptr, nullptr, CREATE_WAITABLE_TIMER_HIGH_RESOLUTION,
         TIMER_ALL_ACCESS);
-    if (windows_timer != nullptr) { n_busywait = 0; }
+    if (windows_timer != nullptr) { busy_wait = 0; }
 #endif
 }
 
@@ -233,7 +233,7 @@ int NetworkTryRunTicCommands()
             real_tics        = now_time - last_try_run_tic;
             last_try_run_tic = now_time;
 
-            if (!n_busywait.d_ && real_tics <= 0) { SleepForMilliseconds(5); }
+            if (!busy_wait.d_ && real_tics <= 0) { SleepForMilliseconds(5); }
         }
 
         // this limit is rather arbitrary
@@ -265,7 +265,7 @@ int NetworkTryRunTicCommands()
     {
         NetworkUpdate();
 
-        if (!n_busywait.d_ && (make_tic < game_tic + tics))
+        if (!busy_wait.d_ && (make_tic < game_tic + tics))
         {
             SleepForMilliseconds(5);
         }

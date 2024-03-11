@@ -393,7 +393,7 @@ bool SetScreenSize(DisplayMode *mode)
 
 void StartFrame(void)
 {
-    ecframe_stats.Clear();
+    ec_frame_stats.Clear();
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (draw_culling.d_)
@@ -406,14 +406,14 @@ void FinishFrame(void)
 {
     SDL_GL_SwapWindow(program_window);
 
-    EDGE_TracyPlot("draw_render_units", (int64_t)ecframe_stats.draw_render_units);
-    EDGE_TracyPlot("draw_wall_parts", (int64_t)ecframe_stats.draw_wall_parts);
-    EDGE_TracyPlot("draw_planes", (int64_t)ecframe_stats.draw_planes);
-    EDGE_TracyPlot("draw_things", (int64_t)ecframe_stats.draw_things);
+    EDGE_TracyPlot("draw_render_units", (int64_t)ec_frame_stats.draw_render_units);
+    EDGE_TracyPlot("draw_wall_parts", (int64_t)ec_frame_stats.draw_wall_parts);
+    EDGE_TracyPlot("draw_planes", (int64_t)ec_frame_stats.draw_planes);
+    EDGE_TracyPlot("draw_things", (int64_t)ec_frame_stats.draw_things);
     EDGE_TracyPlot("draw_light_iterator",
-                   (int64_t)ecframe_stats.draw_light_iterator);
+                   (int64_t)ec_frame_stats.draw_light_iterator);
     EDGE_TracyPlot("draw_sector_glow_iterator",
-                   (int64_t)ecframe_stats.draw_sector_glow_iterator);
+                   (int64_t)ec_frame_stats.draw_sector_glow_iterator);
 
     EDGE_FrameMark;
 

@@ -1534,7 +1534,7 @@ static void PL_is_outside(coal::vm_c *vm, int argc)
     // Doesn't account for extrafloors by design. Reasoning is that usually
     //  extrafloors will be platforms, not roofs...
     if (ui_player_who->map_object_->subsector_->sector->ceiling.image !=
-        skyflatimage)  // is it outdoors?
+        sky_flat_image)  // is it outdoors?
         vm->ReturnFloat(0);
     else
         vm->ReturnFloat(1);

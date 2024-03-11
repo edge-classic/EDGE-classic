@@ -27,7 +27,7 @@ struct ECFrameStats
 	}	
 };
 
-extern ECFrameStats ecframe_stats;
+extern ECFrameStats ec_frame_stats;
 
 #ifdef EDGE_PROFILING
 	

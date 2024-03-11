@@ -74,7 +74,7 @@ void RendererRainbowEffect(Player *player)
     if (s > 0 && player->powers_[kPowerTypeInvulnerable] > 0 &&
         (player->effect_left_ & 8) && !reduce_flash)
     {
-        if (invulnerability_effect == INVULFX_Textured && !reduce_flash)
+        if (invulnerability_effect == kInvulnerabilityTextured && !reduce_flash)
         {
             render_view_effect_colormap = player->effect_colourmap_;
         }
@@ -162,7 +162,7 @@ void RendererColourmapEffect(Player *player)
     if (s > 0 && player->powers_[kPowerTypeInvulnerable] > 0 &&
         player->effect_colourmap_ && (player->effect_left_ & 8 || reduce_flash))
     {
-        if (invulnerability_effect == INVULFX_Textured && !reduce_flash) return;
+        if (invulnerability_effect == kInvulnerabilityTextured && !reduce_flash) return;
 
         glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
 

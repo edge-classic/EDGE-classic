@@ -23,8 +23,9 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DEFINITIONS__
-#define __DEFINITIONS__
+#pragma once
+
+#include <stdint.h>
 
 //
 // Global parameters/defines.
@@ -33,83 +34,58 @@
 // The current state of the game: whether we are
 // playing, or gazing at the intermission screen/final animation
 
-typedef enum
+enum GameState
 {
-    GS_NOTHING = 0,
-    GS_TITLESCREEN,
-    GS_LEVEL,
-    GS_INTERMISSION,
-    GS_FINALE,
-} game_state_e;
+    kGameStateNothing = 0,
+    kGameStateTitleScreen,
+    kGameStateLevel,
+    kGameStateIntermission,
+    kGameStateFinale,
+};
 
 //
 // Difficulty/skill settings/filters.
 //
 
-// Skill flags.
-#define MTF_EASY   1
-#define MTF_NORMAL 2
-#define MTF_HARD   4
-
-// Deaf monsters/do not react to sound.
-#define MTF_AMBUSH 8
-
-// Multiplayer only.
-#define MTF_NOT_SINGLE 16
-
-// -AJA- 1999/09/22: Boom compatibility.
-#define MTF_NOT_DM   32
-#define MTF_NOT_COOP 64
-
-// -AJA- 2000/07/31: Friend flag, from MBF
-#define MTF_FRIEND 128
-
-// -AJA- 2004/11/04: This bit should be zero (otherwise old WAD).
-#define MTF_RESERVED 256
-
-// -AJA- 2008/03/08: Extrafloor placement
-#define MTF_EXFLOOR_MASK  0x3C00
-#define MTF_EXFLOOR_SHIFT 10
-
-typedef enum
+enum SkillLevel
 {
-    sk_invalid   = -1,
-    sk_baby      = 0,
-    sk_easy      = 1,
-    sk_medium    = 2,
-    sk_hard      = 3,
-    sk_nightmare = 4,
-    sk_numtypes  = 5
-} skill_t;
+    kSkillInvalid     = -1,
+    kSkillBaby        = 0,
+    kSkillEasy        = 1,
+    kSkillMedium      = 2,
+    kSkillHard        = 3,
+    kSkillNightmare   = 4,
+    kTotalSkillLevels = 5
+};
 
 // -KM- 1998/12/16 Added gameflags typedef here.
-typedef enum
+enum AutoAimState
 {
-    AA_OFF,
-    AA_ON,
-    AA_MLOOK
-} autoaim_t;
+    kAutoAimOff,
+    kAutoAimOn,
+    kAutoAimMouselook
+};
 
-typedef struct gameflags_s
+struct GameFlags
 {
     // checkparm of -nomonsters
-    bool nomonsters;
+    bool no_monsters;
 
     // checkparm of -fast
-    bool fastparm;
+    bool fast_monsters;
 
-    bool respawn;
-    bool res_respawn;
-    bool itemrespawn;
+    bool enemies_respawn;
+    bool enemy_respawn_mode;
+    bool items_respawn;
 
-    bool true3dgameplay;
-    int  menu_grav;
+    bool true_3d_gameplay;
+    int  menu_gravity_factor;
     bool more_blood;
 
-    bool      jump;
-    bool      crouch;
-    bool      mlook;
-    autoaim_t autoaim;
+    bool         jump;
+    bool         crouch;
+    bool         mouselook;
+    AutoAimState autoaim;
 
     bool cheats;
     bool have_extra;
@@ -119,137 +95,132 @@ typedef struct gameflags_s
     bool weapon_switch;
     bool pass_missile;
     bool team_damage;
-} gameflags_t;
-
-#define VISIBLE   (1.0f)
-#define VISSTEP   (1.0f / 256.0f)
-#define INVISIBLE (0.0f)
+};
 
 //
 // DOOM keyboard definition.
 // This is the stuff configured by Setup.Exe.
 // Most key data are simple ascii (uppercased).
 //
-#define KEYD_TAB       9
-#define KEYD_ENTER     13
-#define KEYD_ESCAPE    27
-#define KEYD_SPACE     32
-#define KEYD_BACKSPACE 127
 
-#define KEYD_TILDE      ('`')
-#define KEYD_EQUALS     ('=')
-#define KEYD_MINUS      ('-')
-#define KEYD_RIGHTARROW (0x80 + 0x2e)
-#define KEYD_LEFTARROW  (0x80 + 0x2c)
-#define KEYD_UPARROW    (0x80 + 0x2d)
-#define KEYD_DOWNARROW  (0x80 + 0x2f)
+constexpr uint8_t kTab       = 9;
+constexpr uint8_t kEnter     = 13;
+constexpr uint8_t kEscape    = 27;
+constexpr uint8_t kSpace     = 32;
+constexpr uint8_t kBackspace = 127;
 
-#define KEYD_RCTRL  (0x80 + 0x1d)
-#define KEYD_RSHIFT (0x80 + 0x36)
-#define KEYD_RALT   (0x80 + 0x38)
-#define KEYD_LALT   KEYD_RALT
-#define KEYD_HOME   (0x80 + 0x47)
-#define KEYD_PGUP   (0x80 + 0x49)
-#define KEYD_END    (0x80 + 0x4f)
-#define KEYD_PGDN   (0x80 + 0x51)
-#define KEYD_INSERT (0x80 + 0x52)
-#define KEYD_DELETE (0x80 + 0x53)
+constexpr uint8_t kTilde      = ('`');
+constexpr uint8_t kEquals     = ('=');
+constexpr uint8_t kMinus      = ('-');
+constexpr uint8_t kRightArrow = (0x80 + 0x2e);
+constexpr uint8_t kLeftArrow  = (0x80 + 0x2c);
+constexpr uint8_t kUpArrow    = (0x80 + 0x2d);
+constexpr uint8_t kDownArrow  = (0x80 + 0x2f);
 
-#define KEYD_F1  (0x80 + 0x3b)
-#define KEYD_F2  (0x80 + 0x3c)
-#define KEYD_F3  (0x80 + 0x3d)
-#define KEYD_F4  (0x80 + 0x3e)
-#define KEYD_F5  (0x80 + 0x3f)
-#define KEYD_F6  (0x80 + 0x40)
-#define KEYD_F7  (0x80 + 0x41)
-#define KEYD_F8  (0x80 + 0x42)
-#define KEYD_F9  (0x80 + 0x43)
-#define KEYD_F10 (0x80 + 0x44)
-#define KEYD_F11 (0x80 + 0x57)
-#define KEYD_F12 (0x80 + 0x58)
+constexpr uint8_t kRightControl = (0x80 + 0x1d);
+constexpr uint8_t kRightShift   = (0x80 + 0x36);
+constexpr uint8_t kRightAlt     = (0x80 + 0x38);
+constexpr uint8_t kLeftAlt      = kRightAlt;
+constexpr uint8_t kHome         = (0x80 + 0x47);
+constexpr uint8_t kPageUp       = (0x80 + 0x49);
+constexpr uint8_t kEnd          = (0x80 + 0x4f);
+constexpr uint8_t kPageDown     = (0x80 + 0x51);
+constexpr uint8_t kInsert       = (0x80 + 0x52);
+constexpr uint8_t kDelete       = (0x80 + 0x53);
 
-#define KEYD_KP0      (0x80 + 0x60)
-#define KEYD_KP1      (0x80 + 0x61)
-#define KEYD_KP2      (0x80 + 0x62)
-#define KEYD_KP3      (0x80 + 0x63)
-#define KEYD_KP4      (0x80 + 0x64)
-#define KEYD_KP5      (0x80 + 0x65)
-#define KEYD_KP6      (0x80 + 0x66)
-#define KEYD_KP7      (0x80 + 0x67)
-#define KEYD_KP8      (0x80 + 0x68)
-#define KEYD_KP9      (0x80 + 0x69)
-#define KEYD_KP_DOT   (0x80 + 0x6a)
-#define KEYD_KP_PLUS  (0x80 + 0x6b)
-#define KEYD_KP_MINUS (0x80 + 0x6c)
-#define KEYD_KP_STAR  (0x80 + 0x6d)
-#define KEYD_KP_SLASH (0x80 + 0x6e)
-#define KEYD_KP_EQUAL (0x80 + 0x6f)
-#define KEYD_KP_ENTER (0x80 + 0x70)
+constexpr uint8_t kFunction1  = (0x80 + 0x3b);
+constexpr uint8_t kFunction2  = (0x80 + 0x3c);
+constexpr uint8_t kFunction3  = (0x80 + 0x3d);
+constexpr uint8_t kFunction4  = (0x80 + 0x3e);
+constexpr uint8_t kFunction5  = (0x80 + 0x3f);
+constexpr uint8_t kFunction6  = (0x80 + 0x40);
+constexpr uint8_t kFunction7  = (0x80 + 0x41);
+constexpr uint8_t kFunction8  = (0x80 + 0x42);
+constexpr uint8_t kFunction9  = (0x80 + 0x43);
+constexpr uint8_t kFunction10 = (0x80 + 0x44);
+constexpr uint8_t kFunction11 = (0x80 + 0x57);
+constexpr uint8_t kFunction12 = (0x80 + 0x58);
 
-#define KEYD_PRTSCR   (0x80 + 0x54)
-#define KEYD_NUMLOCK  (0x80 + 0x45)
-#define KEYD_SCRLOCK  (0x80 + 0x46)
-#define KEYD_CAPSLOCK (0x80 + 0x7e)
-#define KEYD_PAUSE    (0x80 + 0x7f)
+constexpr uint8_t kKeypad0      = (0x80 + 0x60);
+constexpr uint8_t kKeypad1      = (0x80 + 0x61);
+constexpr uint8_t kKeypad2      = (0x80 + 0x62);
+constexpr uint8_t kKeypad3      = (0x80 + 0x63);
+constexpr uint8_t kKeypad4      = (0x80 + 0x64);
+constexpr uint8_t kKeypad5      = (0x80 + 0x65);
+constexpr uint8_t kKeypad6      = (0x80 + 0x66);
+constexpr uint8_t kKeypad7      = (0x80 + 0x67);
+constexpr uint8_t kKeypad8      = (0x80 + 0x68);
+constexpr uint8_t kKeypad9      = (0x80 + 0x69);
+constexpr uint8_t kKeypadDot    = (0x80 + 0x6a);
+constexpr uint8_t kKeypadPlus   = (0x80 + 0x6b);
+constexpr uint8_t kKeypadMinus  = (0x80 + 0x6c);
+constexpr uint8_t kKeypadStar   = (0x80 + 0x6d);
+constexpr uint8_t kKeypadSlash  = (0x80 + 0x6e);
+constexpr uint8_t kKeypadEquals = (0x80 + 0x6f);
+constexpr uint8_t kKeypadEnter  = (0x80 + 0x70);
+
+constexpr uint8_t kPrintScreen = (0x80 + 0x54);
+constexpr uint8_t kNumberLock  = (0x80 + 0x45);
+constexpr uint8_t kScrollLock  = (0x80 + 0x46);
+constexpr uint8_t kCapsLock    = (0x80 + 0x7e);
+constexpr uint8_t kPause       = (0x80 + 0x7f);
 
 // Values from here on aren't actually keyboard keys, but buttons
 // on joystick or mice.
 
-#define KEYD_MOUSE1   (0x100)
-#define KEYD_MOUSE2   (0x101)
-#define KEYD_MOUSE3   (0x102)
-#define KEYD_MOUSE4   (0x103)
-#define KEYD_MOUSE5   (0x104)
-#define KEYD_MOUSE6   (0x105)
-#define KEYD_WHEEL_UP (0x10e)
-#define KEYD_WHEEL_DN (0x10f)
+constexpr uint16_t kMouse1         = (0x100);
+constexpr uint16_t kMouse2         = (0x101);
+constexpr uint16_t kMouse3         = (0x102);
+constexpr uint16_t kMouse4         = (0x103);
+constexpr uint16_t kMouse5         = (0x104);
+constexpr uint16_t kMouse6         = (0x105);
+constexpr uint16_t kMouseWheelUp   = (0x10e);
+constexpr uint16_t kMouseWheelDown = (0x10f);
 
-#define KEYD_GP_A          (0x110 + 1)
-#define KEYD_GP_B          (0x110 + 2)
-#define KEYD_GP_X          (0x110 + 3)
-#define KEYD_GP_Y          (0x110 + 4)
-#define KEYD_GP_BACK       (0x110 + 5)
-#define KEYD_GP_GUIDE      (0x110 + 6)
-#define KEYD_GP_START      (0x110 + 7)
-#define KEYD_GP_LSTICK     (0x110 + 8)
-#define KEYD_GP_RSTICK     (0x110 + 9)
-#define KEYD_GP_LSHLD      (0x110 + 10)
-#define KEYD_GP_RSHLD      (0x110 + 11)
-#define KEYD_GP_UP         (0x110 + 12)
-#define KEYD_GP_DOWN       (0x110 + 13)
-#define KEYD_GP_LEFT       (0x110 + 14)
-#define KEYD_GP_RIGHT      (0x110 + 15)
-#define KEYD_GP_MISC1      (0x110 + 12)
-#define KEYD_GP_PADDLE1    (0x110 + 13)
-#define KEYD_GP_PADDLE2    (0x110 + 14)
-#define KEYD_GP_PADDLE3    (0x110 + 15)
-#define KEYD_GP_PADDLE4    (0x110 + 16)
-#define KEYD_GP_TOUCHPAD   (0x110 + 17)
-#define KEYD_TRIGGER_LEFT  (0x110 + 18)
-#define KEYD_TRIGGER_RIGHT (0x110 + 19)
+constexpr uint16_t kGamepadA             = (0x110 + 1);
+constexpr uint16_t kGamepadB             = (0x110 + 2);
+constexpr uint16_t kGamepadX             = (0x110 + 3);
+constexpr uint16_t kGamepadY             = (0x110 + 4);
+constexpr uint16_t kGamepadBack          = (0x110 + 5);
+constexpr uint16_t kGamepadGuide         = (0x110 + 6);
+constexpr uint16_t kGamepadStart         = (0x110 + 7);
+constexpr uint16_t kGamepadLeftStick     = (0x110 + 8);
+constexpr uint16_t kGamepadRightStick    = (0x110 + 9);
+constexpr uint16_t kGamepadLeftShoulder  = (0x110 + 10);
+constexpr uint16_t kGamepadRightShoulder = (0x110 + 11);
+constexpr uint16_t kGamepadUp            = (0x110 + 12);
+constexpr uint16_t kGamepadDown          = (0x110 + 13);
+constexpr uint16_t kGamepadLeft          = (0x110 + 14);
+constexpr uint16_t kGamepadRight         = (0x110 + 15);
+constexpr uint16_t kGamepadMisc1         = (0x110 + 12);
+constexpr uint16_t kGamepadPaddle1       = (0x110 + 13);
+constexpr uint16_t kGamepadPaddle2       = (0x110 + 14);
+constexpr uint16_t kGamepadPaddle3       = (0x110 + 15);
+constexpr uint16_t kGamepadPaddle4       = (0x110 + 16);
+constexpr uint16_t kGamepadTouchpad      = (0x110 + 17);
+constexpr uint16_t kGamepadTriggerLeft   = (0x110 + 18);
+constexpr uint16_t kGamepadTriggerRight  = (0x110 + 19);
 
-// Pseudo-keycodes for program functions - Dasho
-#define KEYD_SCREENSHOT    (0x110 + 29)
-#define KEYD_SAVEGAME      (0x110 + 30)
-#define KEYD_LOADGAME      (0x110 + 31)
-#define KEYD_SOUNDCONTROLS (0x110 + 32)
-#define KEYD_OPTIONSMENU   (0x110 + 33)
-#define KEYD_QUICKSAVE     (0x110 + 34)
-#define KEYD_ENDGAME       (0x110 + 35)
-#define KEYD_MESSAGETOGGLE (0x110 + 36)
-#define KEYD_QUICKLOAD     (0x110 + 37)
-#define KEYD_QUITEDGE      (0x110 + 38)
-#define KEYD_GAMMATOGGLE   (0x110 + 39)
+// Pseudo-keycodes for program functions - Dasho;
+constexpr uint16_t kScreenshot    = (0x110 + 29);
+constexpr uint16_t kSaveGame      = (0x110 + 30);
+constexpr uint16_t kLoadGame      = (0x110 + 31);
+constexpr uint16_t kSoundControls = (0x110 + 32);
+constexpr uint16_t kOptionsMenu   = (0x110 + 33);
+constexpr uint16_t kQuickSave     = (0x110 + 34);
+constexpr uint16_t kEndGame       = (0x110 + 35);
+constexpr uint16_t kMessageToggle = (0x110 + 36);
+constexpr uint16_t kQuickLoad     = (0x110 + 37);
+constexpr uint16_t kQuitEdge      = (0x110 + 38);
+constexpr uint16_t kGammaToggle   = (0x110 + 39);
 
 // -KM- 1998/09/27 Analogue binding, added a fly axis
-#define AXIS_DISABLE 0
-#define AXIS_TURN    1
-#define AXIS_MLOOK   2
-#define AXIS_FORWARD 3
-#define AXIS_STRAFE  4
-#define AXIS_FLY     5 // includes SWIM up/down
-
-#endif // __DEFINITIONS__
+constexpr uint8_t kAxisDisable   = 0;
+constexpr uint8_t kAxisTurn      = 1;
+constexpr uint8_t kAxisMouselook = 2;
+constexpr uint8_t kAxisForward   = 3;
+constexpr uint8_t kAxisStrafe    = 4;
+constexpr uint8_t kAxisFly       = 5;  // includes SWIM up/down
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

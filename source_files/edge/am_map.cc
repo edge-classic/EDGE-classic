@@ -447,12 +447,12 @@ bool AutomapResponder(InputEvent *ev)
     }
 
     // -AJA- 2007/04/18: mouse-wheel support
-    if (sym == KEYD_WHEEL_DN)
+    if (sym == kMouseWheelDown)
     {
         ChangeWindowScale(1.0 / kAutomapMouseWheelZoomIncrement);
         return true;
     }
-    else if (sym == KEYD_WHEEL_UP)
+    else if (sym == kMouseWheelUp)
     {
         ChangeWindowScale(kAutomapMouseWheelZoomIncrement);
         return true;

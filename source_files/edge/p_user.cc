@@ -77,10 +77,10 @@ static bool P_RoomPath(PathIntercept *in, void *dataptr)
 
         if (ld->back_sector && ld->front_sector)
         {
-            if ((IS_SKY(ld->back_sector->ceiling) &&
-                 !IS_SKY(ld->front_sector->ceiling)) ||
-                (!IS_SKY(ld->back_sector->ceiling) &&
-                 IS_SKY(ld->front_sector->ceiling)))
+            if ((EDGE_IMAGE_IS_SKY(ld->back_sector->ceiling) &&
+                 !EDGE_IMAGE_IS_SKY(ld->front_sector->ceiling)) ||
+                (!EDGE_IMAGE_IS_SKY(ld->back_sector->ceiling) &&
+                 EDGE_IMAGE_IS_SKY(ld->front_sector->ceiling)))
             {
                 blocker->X = (ld->vertex_1->X + ld->vertex_2->X) / 2;
                 blocker->Y = (ld->vertex_1->Y + ld->vertex_2->Y) / 2;
@@ -289,7 +289,7 @@ static void MovePlayer(Player *player, bool extra_tic)
     // -ACB- 1998/07/02 New Code used, rerouted via Ticcmd
     // -ACB- 1998/07/27 Used defines for look limits.
     //
-    if (level_flags.mlook)
+    if (level_flags.mouselook)
     {
         if (player->zoom_field_of_view_ > 0) cmd->mouselook_turn /= kZoomAngleDivisor;
 
@@ -832,7 +832,7 @@ bool P_PlayerThink(Player *player, bool extra_tic)
                               should_think);
     }
 
-    if (IS_SKY(player->map_object_->subsector_->sector->ceiling)) outdoor_reverb = true;
+    if (EDGE_IMAGE_IS_SKY(player->map_object_->subsector_->sector->ceiling)) outdoor_reverb = true;
 
     // Check for weapon change.
     if (cmd->buttons & kButtonCodeChangeWeapon)

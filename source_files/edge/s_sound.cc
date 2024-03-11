@@ -94,12 +94,12 @@ static int category_counts[kTotalCategories];
 
 static void SetupCategoryLimits(void)
 {
-    // Assumes: num_chan to be already set, and the DEATHMATCH()
-    //          and COOP_MATCH() macros are working.
+    // Assumes: num_chan to be already set, and the InDeathmatch()
+    //          and InCooperativeMatch() macros are working.
 
     int mode = 0;
-    if (COOP_MATCH()) mode = 1;
-    if (DEATHMATCH()) mode = 2;
+    if (InCooperativeMatch()) mode = 1;
+    if (InDeathmatch()) mode = 2;
 
     int idx = 0;
     if (total_channels >= 16) idx = 1;
@@ -516,7 +516,7 @@ void SoundTicker(void)
 
     LockAudio();
     {
-        if (game_state == GS_LEVEL)
+        if (game_state == kGameStateLevel)
         {
             SYS_ASSERT(::total_players > 0);
 

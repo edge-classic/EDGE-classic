@@ -468,11 +468,11 @@ void InitializeTextures(void)
 
     numtextures = cur - textures;
 
-#define CMP(a, b)                    \
+#define EDGE_CMP(a, b)                    \
     (strcmp(a->name, b->name) < 0 || \
      (strcmp(a->name, b->name) == 0 && a->file < b->file))
-    QSORT(TextureDefinition *, textures, numtextures, CUTOFF);
-#undef CMP
+    EDGE_QSORT(TextureDefinition *, textures, numtextures, 10);
+#undef EDGE_CMP
 
     // remove duplicate names.  Because the QSORT took newness into
     // account, only the last entry in a run of identically named

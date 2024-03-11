@@ -53,7 +53,7 @@
 #include "sv_main.h"
 #include "w_wad.h"
 
-extern gameflags_t default_game_flags;
+extern GameFlags default_game_flags;
 
 extern ConsoleVariable bot_skill;
 
@@ -136,19 +136,19 @@ static const char *GetModeName(char mode)
     }
 }
 
-static const char *GetSkillName(skill_t skill)
+static const char *GetSkillName(SkillLevel skill)
 {
     switch (skill)
     {
-        case sk_baby:
+        case kSkillBaby:
             return language["MenuDifficulty1"];
-        case sk_easy:
+        case kSkillEasy:
             return language["MenuDifficulty2"];
-        case sk_medium:
+        case kSkillMedium:
             return language["MenuDifficulty3"];
-        case sk_hard:
+        case kSkillHard:
             return language["MenuDifficulty4"];
-        case sk_nightmare:
+        case kSkillNightmare:
             return language["MenuDifficulty5"];
 
         default:
@@ -339,7 +339,7 @@ static void ChangeLevel(NewGameParameters *param, int dir)
 
 static void HostChangeOption(int opt, int key)
 {
-    int dir = (key == KEYD_LEFTARROW || key == KEYD_GP_LEFT) ? -1 : +1;
+    int dir = (key == kLeftArrow || key == kGamepadLeft) ? -1 : +1;
 
     switch (opt)
     {
@@ -365,12 +365,12 @@ static void HostChangeOption(int opt, int key)
 
         case 3:  // Skill
             network_game_parameters->skill_ =
-                (skill_t)((int)network_game_parameters->skill_ + dir);
-            if ((int)network_game_parameters->skill_ < (int)sk_baby ||
+                (SkillLevel)((int)network_game_parameters->skill_ + dir);
+            if ((int)network_game_parameters->skill_ < (int)kSkillBaby ||
                 (int)network_game_parameters->skill_ > 250)
-                network_game_parameters->skill_ = sk_nightmare;
-            else if ((int)network_game_parameters->skill_ > (int)sk_nightmare)
-                network_game_parameters->skill_ = sk_baby;
+                network_game_parameters->skill_ = kSkillNightmare;
+            else if ((int)network_game_parameters->skill_ > (int)kSkillNightmare)
+                network_game_parameters->skill_ = kSkillBaby;
 
             break;
 
@@ -399,24 +399,24 @@ static void HostChangeOption(int opt, int key)
             break;
 
         case 7:  // Monsters
-            if (network_game_parameters->flags_->fastparm)
+            if (network_game_parameters->flags_->fast_monsters)
             {
-                network_game_parameters->flags_->fastparm   = false;
-                network_game_parameters->flags_->nomonsters = (dir > 0);
+                network_game_parameters->flags_->fast_monsters   = false;
+                network_game_parameters->flags_->no_monsters = (dir > 0);
             }
-            else if (network_game_parameters->flags_->nomonsters == (dir < 0))
+            else if (network_game_parameters->flags_->no_monsters == (dir < 0))
             {
-                network_game_parameters->flags_->fastparm   = true;
-                network_game_parameters->flags_->nomonsters = false;
+                network_game_parameters->flags_->fast_monsters   = true;
+                network_game_parameters->flags_->no_monsters = false;
             }
             else
-                network_game_parameters->flags_->nomonsters = (dir < 0);
+                network_game_parameters->flags_->no_monsters = (dir < 0);
 
             break;
 
         case 8:  // Item-Respawn
-            network_game_parameters->flags_->itemrespawn =
-                !network_game_parameters->flags_->itemrespawn;
+            network_game_parameters->flags_->items_respawn =
+                !network_game_parameters->flags_->items_respawn;
             break;
 
         case 9:  // Team-Damage
@@ -529,14 +529,14 @@ void OptionMenuDrawHostMenu(void)
     y += deltay;
 
     DrawKeyword(idx, network_game_host_style, y, "Monsters",
-                network_game_parameters->flags_->nomonsters ? "OFF"
-                : network_game_parameters->flags_->fastparm ? "FAST"
+                network_game_parameters->flags_->no_monsters ? "OFF"
+                : network_game_parameters->flags_->fast_monsters ? "FAST"
                                                             : "ON");
     y += deltay;
     idx++;
 
     DrawKeyword(idx, network_game_host_style, y, "Item Respawn",
-                network_game_parameters->flags_->itemrespawn ? "ON" : "OFF");
+                network_game_parameters->flags_->items_respawn ? "ON" : "OFF");
     y += deltay;
     idx++;
 
@@ -562,7 +562,7 @@ void OptionMenuDrawHostMenu(void)
 
 bool OptionMenuNetworkHostResponder(InputEvent *ev, int ch)
 {
-    if (ch == KEYD_ENTER || ch == KEYD_GP_A || ch == KEYD_MOUSE1)
+    if (ch == kEnter || ch == kGamepadA || ch == kMouse1)
     {
         if (host_position == (HOST_OPTIONS - 1))
         {
@@ -572,22 +572,22 @@ bool OptionMenuNetworkHostResponder(InputEvent *ev, int ch)
         }
     }
 
-    if (ch == KEYD_DOWNARROW || ch == KEYD_WHEEL_DN || ch == KEYD_GP_DOWN)
+    if (ch == kDownArrow || ch == kMouseWheelDown || ch == kGamepadDown)
     {
         host_position = (host_position + 1) % HOST_OPTIONS;
         StartSoundEffect(sound_effect_pstop);
         return true;
     }
-    else if (ch == KEYD_UPARROW || ch == KEYD_WHEEL_UP || ch == KEYD_GP_UP)
+    else if (ch == kUpArrow || ch == kMouseWheelUp || ch == kGamepadUp)
     {
         host_position = (host_position + HOST_OPTIONS - 1) % HOST_OPTIONS;
         StartSoundEffect(sound_effect_pstop);
         return true;
     }
 
-    if (ch == KEYD_LEFTARROW || ch == KEYD_RIGHTARROW || ch == KEYD_GP_LEFT ||
-        ch == KEYD_GP_RIGHT || ch == KEYD_ENTER || ch == KEYD_GP_A ||
-        ch == KEYD_MOUSE1)
+    if (ch == kLeftArrow || ch == kRightArrow || ch == kGamepadLeft ||
+        ch == kGamepadRight || ch == kEnter || ch == kGamepadA ||
+        ch == kMouse1)
     {
         HostChangeOption(host_position, ch);
         StartSoundEffect(sound_effect_stnmov);
@@ -671,7 +671,7 @@ static void ListAccept()
 
 bool OptionMenuNetListResponder(InputEvent *ev, int ch)
 {
-    if (ch == KEYD_ENTER || ch == KEYD_GP_A)
+    if (ch == kEnter || ch == kGamepadA)
     {
         ListAccept();
         return true;
@@ -728,10 +728,10 @@ bool NetworkGameResponder(InputEvent *ev, int ch)
 {
     switch (ch)
     {
-        case KEYD_MOUSE2:
-        case KEYD_MOUSE3:
-        case KEYD_ESCAPE:
-        case KEYD_GP_B:
+        case kMouse2:
+        case kMouse3:
+        case kEscape:
+        case kGamepadB:
         {
             network_game_menu_on = 0;
             MenuClear();

@@ -61,7 +61,7 @@ extern GameAction game_action;
 class NewGameParameters
 {
    public:
-    skill_t skill_;
+    SkillLevel skill_;
     int     deathmatch_;
 
     const MapDefinition *map_;
@@ -72,7 +72,7 @@ class NewGameParameters
 
     PlayerFlag players_[kMaximumPlayers];
 
-    gameflags_t *flags_;  // can be nullptr
+    GameFlags *flags_;  // can be nullptr
 
     bool level_skip_ = false;
 
@@ -87,7 +87,7 @@ class NewGameParameters
     void SinglePlayer(int num_bots = 0);
     // setup for single player (no netgame) and possibly some bots.
 
-    void CopyFlags(const gameflags_t *F);
+    void CopyFlags(const GameFlags *F);
 };
 
 //

@@ -24,7 +24,7 @@
 //----------------------------------------------------------------------------
 //
 // -MH- 1998/07/02  Added key_fly_up and key_fly_down
-// -MH- 1998/07/02 "shootupdown" --> "true3dgameplay"
+// -MH- 1998/07/02 "shootupdown" --> "true_3d_gameplay"
 // -ACB- 2000/06/02 Removed Control Defaults
 //
 
@@ -96,13 +96,13 @@ static ConfigurationDefault defaults[] = {
     {kConfigInteger, "invuln_fx", &invulnerability_effect, CFGDEF_INVUL_FX},
     {kConfigEnum, "wipe_method", &wipe_method, CFGDEF_WIPE_METHOD},
     {kConfigBoolean, "rotate_map", &rotate_map, CFGDEF_ROTATEMAP},
-    {kConfigBoolean, "respawnsetting", &global_flags.res_respawn,
+    {kConfigBoolean, "respawnsetting", &global_flags.enemy_respawn_mode,
      CFGDEF_RES_RESPAWN},
-    {kConfigBoolean, "itemrespawn", &global_flags.itemrespawn,
+    {kConfigBoolean, "items_respawn", &global_flags.items_respawn,
      CFGDEF_ITEMRESPAWN},
-    {kConfigBoolean, "respawn", &global_flags.respawn, CFGDEF_RESPAWN},
-    {kConfigBoolean, "fastparm", &global_flags.fastparm, CFGDEF_FASTPARM},
-    {kConfigBoolean, "true3dgameplay", &global_flags.true3dgameplay,
+    {kConfigBoolean, "respawn", &global_flags.enemies_respawn, CFGDEF_RESPAWN},
+    {kConfigBoolean, "fast_monsters", &global_flags.fast_monsters, CFGDEF_FASTPARM},
+    {kConfigBoolean, "true_3d_gameplay", &global_flags.true_3d_gameplay,
      CFGDEF_TRUE3DGAMEPLAY},
     {kConfigEnum, "autoaim", &global_flags.autoaim, CFGDEF_AUTOAIM},
     {kConfigBoolean, "shootthru_scenery", &global_flags.pass_missile,
@@ -119,7 +119,7 @@ static ConfigurationDefault defaults[] = {
     {kConfigBoolean, "weaponkick", &global_flags.kicking, CFGDEF_KICKING},
     {kConfigBoolean, "weaponswitch", &global_flags.weapon_switch,
      CFGDEF_WEAPON_SWITCH},
-    {kConfigBoolean, "mlook", &global_flags.mlook, CFGDEF_MLOOK},
+    {kConfigBoolean, "mlook", &global_flags.mouselook, CFGDEF_MLOOK},
     {kConfigBoolean, "jumping", &global_flags.jump, CFGDEF_JUMP},
     {kConfigBoolean, "crouching", &global_flags.crouch, CFGDEF_CROUCH},
     {kConfigInteger, "smoothing", &image_smoothing, CFGDEF_USE_SMOOTHING},
@@ -139,7 +139,7 @@ static ConfigurationDefault defaults[] = {
 
     {kConfigInteger, "screen_hud", &screen_hud, CFGDEF_SCREEN_HUD},
     {kConfigInteger, "save_page", &save_page, 0},
-    {kConfigBoolean, "png_scrshots", &png_scrshots, CFGDEF_PNG_SCRSHOTS},
+    {kConfigBoolean, "png_screenshots", &png_screenshots, CFGDEF_PNG_SCRSHOTS},
 
     // -------------------- VARS --------------------
 
@@ -179,7 +179,7 @@ static ConfigurationDefault defaults[] = {
     {kConfigKey, "key_talk", &key_talk, CFGDEF_KEY_TALK},
     {kConfigKey, "key_console", &key_console,
      CFGDEF_KEY_CONSOLE},                               // -AJA- 2007/08/15.
-    {kConfigKey, "key_pause", &key_pause, KEYD_PAUSE},  // -AJA- 2010/06/13.
+    {kConfigKey, "key_pause", &key_pause, kPause},  // -AJA- 2010/06/13.
 
     {kConfigKey, "key_mouselook", &key_mouselook,
      CFGDEF_KEY_MLOOK},  // -AJA- 1999/07/27.
@@ -206,10 +206,10 @@ static ConfigurationDefault defaults[] = {
     {kConfigKey, "key_weapon9", &key_weapons[9], '9'},
     {kConfigKey, "key_weapon0", &key_weapons[0], '0'},
 
-    {kConfigKey, "key_automap_up", &key_automap_up, KEYD_UPARROW},
-    {kConfigKey, "key_automap_down", &key_automap_down, KEYD_DOWNARROW},
-    {kConfigKey, "key_automap_left", &key_automap_left, KEYD_LEFTARROW},
-    {kConfigKey, "key_automap_right", &key_automap_right, KEYD_RIGHTARROW},
+    {kConfigKey, "key_automap_up", &key_automap_up, kUpArrow},
+    {kConfigKey, "key_automap_down", &key_automap_down, kDownArrow},
+    {kConfigKey, "key_automap_left", &key_automap_left, kLeftArrow},
+    {kConfigKey, "key_automap_right", &key_automap_right, kRightArrow},
     {kConfigKey, "key_automap_zoom_in", &key_automap_zoom_in, '='},
     {kConfigKey, "key_automap_zoom_out", &key_automap_zoom_out, '-'},
     {kConfigKey, "key_automap_follow", &key_automap_follow, 'f'},
@@ -222,18 +222,18 @@ static ConfigurationDefault defaults[] = {
     {kConfigKey, "key_inventory_use", &key_inventory_use, CFGDEF_KEY_USEINV},
     {kConfigKey, "key_inventory_next", &key_inventory_next, CFGDEF_KEY_NEXTINV},
 
-    {kConfigKey, "key_screenshot", &key_screenshot, KEYD_F1},
-    {kConfigKey, "key_save_game", &key_save_game, KEYD_F2},
-    {kConfigKey, "key_load_game", &key_load_game, KEYD_F3},
-    {kConfigKey, "key_sound_controls", &key_sound_controls, KEYD_F4},
-    {kConfigKey, "key_options_menu", &key_options_menu, KEYD_F5},
-    {kConfigKey, "key_quick_save", &key_quick_save, KEYD_F6},
-    {kConfigKey, "key_end_game", &key_end_game, KEYD_F7},
-    {kConfigKey, "key_message_toggle", &key_message_toggle, KEYD_F8},
-    {kConfigKey, "key_quick_load", &key_quick_load, KEYD_F9},
-    {kConfigKey, "key_quit_edge", &key_quit_edge, KEYD_F10},
-    {kConfigKey, "key_gamma_toggle", &key_gamma_toggle, KEYD_F11},
-    {kConfigKey, "key_show_players", &key_show_players, KEYD_F12},
+    {kConfigKey, "key_screenshot", &key_screenshot, kFunction1},
+    {kConfigKey, "key_save_game", &key_save_game, kFunction2},
+    {kConfigKey, "key_load_game", &key_load_game, kFunction3},
+    {kConfigKey, "key_sound_controls", &key_sound_controls, kFunction4},
+    {kConfigKey, "key_options_menu", &key_options_menu, kFunction5},
+    {kConfigKey, "key_quick_save", &key_quick_save, kFunction6},
+    {kConfigKey, "key_end_game", &key_end_game, kFunction7},
+    {kConfigKey, "key_message_toggle", &key_message_toggle, kFunction8},
+    {kConfigKey, "key_quick_load", &key_quick_load, kFunction9},
+    {kConfigKey, "key_quit_edge", &key_quit_edge, kFunction10},
+    {kConfigKey, "key_gamma_toggle", &key_gamma_toggle, kFunction11},
+    {kConfigKey, "key_show_players", &key_show_players, kFunction12},
 };
 
 static int total_defaults = sizeof(defaults) / sizeof(defaults[0]);
@@ -241,14 +241,14 @@ static int total_defaults = sizeof(defaults) / sizeof(defaults[0]);
 void ConfigurationSaveDefaults(void)
 {
     // -ACB- 1999/09/24 idiot proof checking as required by MSVC
-    SYS_ASSERT(!cfgfile.empty());
+    SYS_ASSERT(!configuration_file.empty());
 
-    FILE *f = epi::FileOpenRaw(cfgfile,
+    FILE *f = epi::FileOpenRaw(configuration_file,
                                epi::kFileAccessWrite | epi::kFileAccessBinary);
     if (!f)
     {
         LogWarning("Couldn't open config file %s for writing.",
-                   cfgfile.c_str());
+                   configuration_file.c_str());
         return;  // can't write the file, but don't complain
     }
 
@@ -402,14 +402,14 @@ void ConfigurationLoadDefaults(void)
     // set everything to base values
     ConfigurationResetDefaults(0);
 
-    LogPrint("ConfigurationLoadDefaults from %s\n", cfgfile.c_str());
+    LogPrint("ConfigurationLoadDefaults from %s\n", configuration_file.c_str());
 
-    epi::File *file = epi::FileOpen(cfgfile, epi::kFileAccessRead);
+    epi::File *file = epi::FileOpen(configuration_file, epi::kFileAccessRead);
 
     if (!file)
     {
         LogWarning("Couldn't open config file %s for reading.\n",
-                   cfgfile.c_str());
+                   configuration_file.c_str());
         LogWarning("Resetting config to RECOMMENDED values...\n");
         return;
     }
@@ -425,7 +425,7 @@ void ConfigurationLoadDefaults(void)
 
 void ConfigurationLoadBranding(void)
 {
-    epi::File *file = FileOpen(brandingfile, epi::kFileAccessRead);
+    epi::File *file = FileOpen(branding_file, epi::kFileAccessRead);
 
     // Just use hardcoded values if no branding file present
     if (!file) return;
@@ -446,7 +446,7 @@ void TakeScreenshot(bool show_msg)
 {
     const char *extension;
 
-    if (png_scrshots)
+    if (png_screenshots)
         extension = "png";
     else
         extension = "jpg";
@@ -458,7 +458,7 @@ void TakeScreenshot(bool show_msg)
     {
         std::string base(epi::StringFormat("shot%02d.%s", i, extension));
 
-        fn = epi::PathAppend(shot_dir, base);
+        fn = epi::PathAppend(screenshot_directory, base);
 
         if (!epi::TestFileAccess(fn))
         {
@@ -475,7 +475,7 @@ void TakeScreenshot(bool show_msg)
 
     bool result;
 
-    if (png_scrshots) { result = ImageSavePng(fn, img); }
+    if (png_screenshots) { result = ImageSavePng(fn, img); }
     else { result = ImageSaveJpeg(fn, img); }
 
     if (show_msg)
@@ -495,7 +495,7 @@ void CreateSaveScreenshot(void)
 
     std::string temp(
         epi::StringFormat("%s/%s.%s", "current", "head", extension));
-    std::string filename = epi::PathAppend(save_dir, temp);
+    std::string filename = epi::PathAppend(save_directory, temp);
 
     epi::FileDelete(filename);
 

@@ -172,7 +172,7 @@ std::list<Image *> real_textures;
 std::list<Image *> real_flats;
 std::list<Image *> real_sprites;
 
-const Image *skyflatimage;
+const Image *sky_flat_image;
 
 static const Image *dummy_sprite;
 static const Image *dummy_skin;
@@ -1122,9 +1122,9 @@ const Image **GetUserSprites(int *count)
             array[pos++] = rim;
     }
 
-#define CMP(a, b) (strcmp(a->name_.c_str(), b->name_.c_str()) < 0)
-    QSORT(const Image *, array, (*count), CUTOFF);
-#undef CMP
+#define EDGE_CMP(a, b) (strcmp(a->name_.c_str(), b->name_.c_str()) < 0)
+    EDGE_QSORT(const Image *, array, (*count), 10);
+#undef EDGE_CMP
 
     return array;
 }
@@ -1566,7 +1566,7 @@ const Image *ImageLookup(const char *name, ImageNamespace type, int flags)
         (epi::StringCaseCompareASCII(name, "F_SKY1") == 0 ||
          epi::StringCaseCompareASCII(name, "F_SKY") == 0))
     {
-        return skyflatimage;
+        return sky_flat_image;
     }
 
     // compatibility hack (first texture in IWAD is a dummy)
@@ -1634,13 +1634,13 @@ const Image *ImageParseSaveString(char type, const char *name)
     // this name represents the sky (historical reasons)
     if (type == 'd' && epi::StringCaseCompareASCII(name, "DUMMY__2") == 0)
     {
-        return skyflatimage;
+        return sky_flat_image;
     }
 
     switch (type)
     {
         case 'K':
-            return skyflatimage;
+            return sky_flat_image;
 
         case 'F':
             return ImageLookup(name, kImageNamespaceFlat);
@@ -1665,7 +1665,7 @@ void ImageMakeSaveString(const Image *image, char *type, char *namebuf)
 {
     // Used by the savegame code
 
-    if (image == skyflatimage)
+    if (image == sky_flat_image)
     {
         *type = 'K';
         strcpy(namebuf, "F_SKY1");
@@ -1868,7 +1868,7 @@ static void W_CreateDummyImages(void)
         CreateDummyImage("DUMMY_SPRITE", 0xFFFF00, kTransparentPixelIndex);
     dummy_skin = CreateDummyImage("DUMMY_SKIN", 0xFF77FF, 0x993399);
 
-    skyflatimage = CreateDummyImage("DUMMY_SKY", 0x0000AA, 0x55AADD);
+    sky_flat_image = CreateDummyImage("DUMMY_SKY", 0x0000AA, 0x55AADD);
 
     dummy_hom[0] = CreateDummyImage("DUMMY_HOM1", 0xFF3333, 0x000000);
     dummy_hom[1] = CreateDummyImage("DUMMY_HOM2", 0x000000, 0xFF3333);
@@ -1910,7 +1910,7 @@ bool InitializeImages(void)
 void AnimationTicker(void)
 {
     do_Animate(real_graphics);
-    if (game_state < GS_LEVEL)
+    if (game_state < kGameStateLevel)
     {
         do_Animate(real_textures);
         do_Animate(real_flats);

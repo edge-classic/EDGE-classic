@@ -29,7 +29,7 @@
 
 #include <vector>
 
-#include "dm_state.h"  // IS_SKY
+#include "dm_state.h"  // EDGE_IMAGE_IS_SKY
 #include "endianess.h"
 #include "g_game.h"  //current_map
 #include "i_defs_gl.h"
@@ -1171,7 +1171,7 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_,
     // check for DDFLEVL fog
     if (fc_to_use == kRGBANoValue)
     {
-        if (IS_SKY(mo->subsector_->sector->ceiling))
+        if (EDGE_IMAGE_IS_SKY(mo->subsector_->sector->ceiling))
         {
             fc_to_use = current_map->outdoor_fog_color_;
             fd_to_use = 0.01f * current_map->outdoor_fog_density_;

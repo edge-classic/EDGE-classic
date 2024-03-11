@@ -294,7 +294,7 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
     // check for DDFLEVL fog
     if (fc_to_use == kRGBANoValue)
     {
-        if (IS_SKY(player->map_object_->subsector_->sector->ceiling))
+        if (EDGE_IMAGE_IS_SKY(player->map_object_->subsector_->sector->ceiling))
         {
             fc_to_use = current_map->outdoor_fog_color_;
             fd_to_use = 0.01f * current_map->outdoor_fog_density_;
@@ -804,7 +804,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     if (mo == view_camera_map_object && total_active_mirrors == 0) return;
 
     // ignore invisible things
-    if (mo->visibility_ == INVISIBLE) return;
+    if (AlmostEquals(mo->visibility_, 0.0f)) return;
 
     // ignore things that are mid-teleport
     if (mo->teleport_tic_-- > 0) return;
@@ -1110,7 +1110,7 @@ void RendererDrawThing(DrawFloor *dfloor, DrawThing *dthing)
 {
     EDGE_ZoneScoped;
 
-    ecframe_stats.draw_things++;
+    ec_frame_stats.draw_things++;
 
     if (dthing->is_model)
     {
@@ -1280,7 +1280,7 @@ void RendererDrawThing(DrawFloor *dfloor, DrawThing *dthing)
     // check for DDFLEVL fog
     if (fc_to_use == kRGBANoValue)
     {
-        if (IS_SKY(mo->subsector_->sector->ceiling))
+        if (EDGE_IMAGE_IS_SKY(mo->subsector_->sector->ceiling))
         {
             fc_to_use = current_map->outdoor_fog_color_;
             fd_to_use = 0.01f * current_map->outdoor_fog_density_;
@@ -1369,12 +1369,12 @@ void RendererDrawSortThings(DrawFloor *dfloor)
     //
     // As part my move to strip out Z_Zone usage and replace
     // it with array classes and more standard new and delete
-    // calls, I've removed the QSORT() here and the array.
+    // calls, I've removed the EDGE_QSORT() here and the array.
     // My main reason for doing that is that since I have to
     // modify the code here anyway, it is prudent to re-evaluate
     // their usage.
     //
-    // The QSORT() mechanism used does an
+    // The EDGE_QSORT() mechanism used does an
     // allocation each time it is used and this is called
     // for each floor drawn in each subsector drawn, it is
     // reasonable to assume that removing it will give

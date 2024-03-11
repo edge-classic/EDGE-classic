@@ -204,6 +204,8 @@ static SaveSlotExtendedInformation
 static constexpr int8_t kSliderLeft  = -1;
 static constexpr int8_t kSliderRight = -2;
 
+static constexpr uint8_t kTotalScreenHuds = 120;
+
 //
 // MENU TYPEDEFS
 //
@@ -363,14 +365,14 @@ static MenuItem SkillMenu[] = {
     {1, "M_NMARE", nullptr, MenuChooseSkill, 'n', language["MenuDifficulty5"]}};
 
 static Menu SkillMenuDefinition = {
-    sk_numtypes,             // # of menu items
+    kTotalSkillLevels,             // # of menu items
     &EpisodeMenuDefinition,  // previous menu
     SkillMenu,               // menuitem_t ->
     &skill_style,
     MenuDrawNewGame,  // drawing routine ->
     48,
     63,        // x,y
-    sk_medium  // last_on
+    kSkillMedium  // last_on
 };
 
 //
@@ -1116,7 +1118,7 @@ void MenuSaveSelect(int choice)
 //
 void MenuSaveGame(int choice)
 {
-    if (game_state != GS_LEVEL)
+    if (game_state != kGameStateLevel)
     {
         MenuStartMessage(language["SaveWhenNotPlaying"], nullptr, false);
         return;
@@ -1143,7 +1145,7 @@ void MenuSaveGame(int choice)
 
 static void QuickSaveResponse(int ch)
 {
-    if (ch == 'y' || ch == KEYD_GP_A || ch == KEYD_MOUSE1)
+    if (ch == 'y' || ch == kGamepadA || ch == kMouse1)
     {
         M_DoSave(quicksave_page, quicksave_slot);
         StartSoundEffect(sound_effect_swtchx);
@@ -1152,7 +1154,7 @@ static void QuickSaveResponse(int ch)
 
 void MenuQuickSave(void)
 {
-    if (game_state != GS_LEVEL)
+    if (game_state != kGameStateLevel)
     {
         StartSoundEffect(sound_effect_oof);
         return;
@@ -1180,7 +1182,7 @@ void MenuQuickSave(void)
 
 static void QuickLoadResponse(int ch)
 {
-    if (ch == 'y' || ch == KEYD_GP_A || ch == KEYD_MOUSE1)
+    if (ch == 'y' || ch == kGamepadA || ch == kMouse1)
     {
         int tempsavepage = save_page;
 
@@ -1449,7 +1451,7 @@ void MenuDrawEpisode(void)
     HudSetAlpha(old_alpha);
 }
 
-static void ReallyDoStartLevel(skill_t skill, GameDefinition *g)
+static void ReallyDoStartLevel(SkillLevel skill, GameDefinition *g)
 {
     NewGameParameters params;
 
@@ -1478,7 +1480,7 @@ static void ReallyDoStartLevel(skill_t skill, GameDefinition *g)
     MenuClear();
 }
 
-static void DoStartLevel(skill_t skill)
+static void DoStartLevel(SkillLevel skill)
 {
     // -KM- 1998/12/17 Clear the intermission.
     IntermissionClear();
@@ -1546,27 +1548,27 @@ static void DoStartLevel(skill_t skill)
 
 static void VerifyNightmare(int ch)
 {
-    if (ch != 'y' && ch != KEYD_GP_A && ch != KEYD_MOUSE1) return;
+    if (ch != 'y' && ch != kGamepadA && ch != kMouse1) return;
 
-    DoStartLevel(sk_nightmare);
+    DoStartLevel(kSkillNightmare);
 }
 
 void MenuChooseSkill(int choice)
 {
-    if (choice == sk_nightmare)
+    if (choice == kSkillNightmare)
     {
         MenuStartMessage(language["NightMareCheck"], VerifyNightmare, true);
         return;
     }
 
-    DoStartLevel((skill_t)choice);
+    DoStartLevel((SkillLevel)choice);
 }
 
 void MenuEpisode(int choice)
 {
     chosen_episode = choice;
     if (EpisodeMenuSkipSkill[chosen_episode])
-        DoStartLevel((skill_t)2);
+        DoStartLevel((SkillLevel)2);
     else
         MenuSetupNextMenu(&SkillMenuDefinition);
 }
@@ -1589,7 +1591,7 @@ void MenuChangeMessages(int choice)
 
 static void EndGameResponse(int ch)
 {
-    if (ch != 'y' && ch != KEYD_GP_A && ch != KEYD_MOUSE1) return;
+    if (ch != 'y' && ch != kGamepadA && ch != kMouse1) return;
 
     GameDeferredEndGame();
 
@@ -1599,7 +1601,7 @@ static void EndGameResponse(int ch)
 
 void MenuEndGame(int choice, ConsoleVariable *cvar)
 {
-    if (game_state != GS_LEVEL)
+    if (game_state != kGameStateLevel)
     {
         StartSoundEffect(sound_effect_oof);
         return;
@@ -1629,7 +1631,7 @@ void MenuFinishReadThis(int choice) { MenuSetupNextMenu(&MainMenuDefinition); }
 //
 static void QuitResponse(int ch)
 {
-    if (ch != 'y' && ch != KEYD_GP_A && ch != KEYD_MOUSE1) return;
+    if (ch != 'y' && ch != kGamepadA && ch != kMouse1) return;
 
     if (!network_game)
     {
@@ -1929,7 +1931,7 @@ bool MenuResponder(InputEvent *ev)
     SDL_Keymod mod = SDL_GetModState();
 
     // -ACB- 1999/10/11 F1 is responsible for print screen at any time
-    if (ch == KEYD_F1 || ch == KEYD_PRTSCR)
+    if (ch == kFunction1 || ch == kPrintScreen)
     {
         GameDeferredScreenShot();
         return true;
@@ -1940,9 +1942,9 @@ bool MenuResponder(InputEvent *ev)
     if (message_mode == 1)
     {
         if (message_needs_input == true &&
-            !(ch == ' ' || ch == 'n' || ch == 'y' || ch == KEYD_ESCAPE ||
-              ch == KEYD_GP_B || ch == KEYD_GP_A || ch == KEYD_MOUSE1 ||
-              ch == KEYD_MOUSE2 || ch == KEYD_MOUSE3))
+            !(ch == ' ' || ch == 'n' || ch == 'y' || ch == kEscape ||
+              ch == kGamepadB || ch == kGamepadA || ch == kMouse1 ||
+              ch == kMouse2 || ch == kMouse3))
             return false;
 
         message_mode = 0;
@@ -1956,7 +1958,7 @@ bool MenuResponder(InputEvent *ev)
     }
     else if (message_mode == 2)
     {
-        if (ch == KEYD_ENTER || ch == KEYD_GP_A || ch == KEYD_MOUSE1)
+        if (ch == kEnter || ch == kGamepadA || ch == kMouse1)
         {
             menu_active  = message_last_menu ? true : false;
             message_mode = 0;
@@ -1971,8 +1973,8 @@ bool MenuResponder(InputEvent *ev)
             return true;
         }
 
-        if (ch == KEYD_ESCAPE || ch == KEYD_GP_B || ch == KEYD_MOUSE2 ||
-            ch == KEYD_MOUSE3)
+        if (ch == kEscape || ch == kGamepadB || ch == kMouse2 ||
+            ch == kMouse3)
         {
             menu_active  = message_last_menu ? true : false;
             message_mode = 0;
@@ -1986,7 +1988,7 @@ bool MenuResponder(InputEvent *ev)
             return true;
         }
 
-        if ((ch == KEYD_BACKSPACE || ch == KEYD_DELETE) &&
+        if ((ch == kBackspace || ch == kDelete) &&
             !input_string.empty())
         {
             std::string s = input_string.c_str();
@@ -2021,7 +2023,7 @@ bool MenuResponder(InputEvent *ev)
     {
         switch (ch)
         {
-            case KEYD_BACKSPACE:
+            case kBackspace:
                 if (save_string_character_index > 0)
                 {
                     save_string_character_index--;
@@ -2030,18 +2032,18 @@ bool MenuResponder(InputEvent *ev)
                 }
                 break;
 
-            case KEYD_ESCAPE:
-            case KEYD_GP_B:
-            case KEYD_MOUSE2:
-            case KEYD_MOUSE3:
+            case kEscape:
+            case kGamepadB:
+            case kMouse2:
+            case kMouse3:
                 entering_save_string = 0;
                 strcpy(save_extended_information_slots[save_slot].description,
                        old_save_string);
                 break;
 
-            case KEYD_ENTER:
-            case KEYD_GP_A:
-            case KEYD_MOUSE1:
+            case kEnter:
+            case kGamepadA:
+            case kMouse1:
                 entering_save_string = 0;
                 if (save_extended_information_slots[save_slot].description[0])
                 {
@@ -2088,66 +2090,66 @@ bool MenuResponder(InputEvent *ev)
     // F-Keys
     if (!menu_active)
     {
-        if (EventMatchesKey(key_screenshot, ch)) { ch = KEYD_SCREENSHOT; }
-        if (EventMatchesKey(key_save_game, ch)) { ch = KEYD_SAVEGAME; }
-        if (EventMatchesKey(key_load_game, ch)) { ch = KEYD_LOADGAME; }
+        if (EventMatchesKey(key_screenshot, ch)) { ch = kScreenshot; }
+        if (EventMatchesKey(key_save_game, ch)) { ch = kSaveGame; }
+        if (EventMatchesKey(key_load_game, ch)) { ch = kLoadGame; }
         if (EventMatchesKey(key_sound_controls, ch))
         {
-            ch = KEYD_SOUNDCONTROLS;
+            ch = kSoundControls;
         }
-        if (EventMatchesKey(key_options_menu, ch)) { ch = KEYD_OPTIONSMENU; }
-        if (EventMatchesKey(key_quick_save, ch)) { ch = KEYD_QUICKSAVE; }
-        if (EventMatchesKey(key_end_game, ch)) { ch = KEYD_ENDGAME; }
+        if (EventMatchesKey(key_options_menu, ch)) { ch = kOptionsMenu; }
+        if (EventMatchesKey(key_quick_save, ch)) { ch = kQuickSave; }
+        if (EventMatchesKey(key_end_game, ch)) { ch = kEndGame; }
         if (EventMatchesKey(key_message_toggle, ch))
         {
-            ch = KEYD_MESSAGETOGGLE;
+            ch = kMessageToggle;
         }
-        if (EventMatchesKey(key_quick_load, ch)) { ch = KEYD_QUICKLOAD; }
-        if (EventMatchesKey(key_quit_edge, ch)) { ch = KEYD_QUITEDGE; }
-        if (EventMatchesKey(key_gamma_toggle, ch)) { ch = KEYD_GAMMATOGGLE; }
+        if (EventMatchesKey(key_quick_load, ch)) { ch = kQuickLoad; }
+        if (EventMatchesKey(key_quit_edge, ch)) { ch = kQuitEdge; }
+        if (EventMatchesKey(key_gamma_toggle, ch)) { ch = kGammaToggle; }
 
         switch (ch)
         {
-            case KEYD_MINUS:  // Screen size down
+            case kMinus:  // Screen size down
 
                 if (automap_active) return false;
 
-                screen_hud = (screen_hud - 1 + NUMHUD) % NUMHUD;
+                screen_hud = (screen_hud - 1 + kTotalScreenHuds) % kTotalScreenHuds;
 
                 StartSoundEffect(sound_effect_stnmov);
                 return true;
 
-            case KEYD_EQUALS:  // Screen size up
+            case kEquals:  // Screen size up
 
                 if (automap_active) return false;
 
-                screen_hud = (screen_hud + 1) % NUMHUD;
+                screen_hud = (screen_hud + 1) % kTotalScreenHuds;
 
                 StartSoundEffect(sound_effect_stnmov);
                 return true;
 
-            case KEYD_SAVEGAME:  // Save
+            case kSaveGame:  // Save
 
                 MenuStartControlPanel();
                 StartSoundEffect(sound_effect_swtchn);
                 MenuSaveGame(0);
                 return true;
 
-            case KEYD_LOADGAME:  // Load
+            case kLoadGame:  // Load
 
                 MenuStartControlPanel();
                 StartSoundEffect(sound_effect_swtchn);
                 MenuLoadGame(0);
                 return true;
 
-            case KEYD_SOUNDCONTROLS:  // Sound Volume
+            case kSoundControls:  // Sound Volume
 
                 StartSoundEffect(sound_effect_swtchn);
                 MenuStartControlPanel();
                 MenuF4SoundOptions(0);
                 return true;
 
-            case KEYD_OPTIONSMENU:  // Detail toggle, now loads MainMenuOptions
+            case kOptionsMenu:  // Detail toggle, now loads MainMenuOptions
                                     // menu
                 // -KM- 1998/07/31 F5 now loads MainMenuOptions menu, detail is
                 // obsolete.
@@ -2157,37 +2159,37 @@ bool MenuResponder(InputEvent *ev)
                 MenuOptions(1);
                 return true;
 
-            case KEYD_QUICKSAVE:  // Quicksave
+            case kQuickSave:  // Quicksave
 
                 StartSoundEffect(sound_effect_swtchn);
                 MenuQuickSave();
                 return true;
 
-            case KEYD_ENDGAME:  // End game
+            case kEndGame:  // End game
 
                 StartSoundEffect(sound_effect_swtchn);
                 MenuEndGame(0);
                 return true;
 
-            case KEYD_MESSAGETOGGLE:  // Toggle messages
+            case kMessageToggle:  // Toggle messages
 
                 MenuChangeMessages(0);
                 StartSoundEffect(sound_effect_swtchn);
                 return true;
 
-            case KEYD_QUICKLOAD:  // Quickload
+            case kQuickLoad:  // Quickload
 
                 StartSoundEffect(sound_effect_swtchn);
                 MenuQuickLoad();
                 return true;
 
-            case KEYD_QUITEDGE:  // Quit DOOM
+            case kQuitEdge:  // Quit DOOM
 
                 StartSoundEffect(sound_effect_swtchn);
                 MenuQuitEdge(0);
                 return true;
 
-            case KEYD_GAMMATOGGLE:  // gamma toggle
+            case kGammaToggle:  // gamma toggle
 
                 sector_brightness_correction.d_++;
                 if (sector_brightness_correction.d_ > 10) sector_brightness_correction.d_ = 0;
@@ -2231,7 +2233,7 @@ bool MenuResponder(InputEvent *ev)
         }
 
         // Pop-up menu?
-        if (ch == KEYD_ESCAPE || ch == KEYD_GP_START)
+        if (ch == kEscape || ch == kGamepadStart)
         {
             MenuStartControlPanel();
             StartSoundEffect(sound_effect_swtchn);
@@ -2243,7 +2245,7 @@ bool MenuResponder(InputEvent *ev)
     // Keys usable within menu
     switch (ch)
     {
-        case KEYD_WHEEL_DN:
+        case kMouseWheelDown:
             do {
                 if (item_on + 1 > current_menu->total_items - 1)
                 {
@@ -2266,7 +2268,7 @@ bool MenuResponder(InputEvent *ev)
             } while (current_menu->menu_items[item_on].status == -1);
             return true;
 
-        case KEYD_WHEEL_UP:
+        case kMouseWheelUp:
             do {
                 if (item_on == 0)
                 {
@@ -2289,8 +2291,8 @@ bool MenuResponder(InputEvent *ev)
             } while (current_menu->menu_items[item_on].status == -1);
             return true;
 
-        case KEYD_DOWNARROW:
-        case KEYD_GP_DOWN:
+        case kDownArrow:
+        case kGamepadDown:
             do {
                 if (item_on + 1 > current_menu->total_items - 1)
                     item_on = 0;
@@ -2300,8 +2302,8 @@ bool MenuResponder(InputEvent *ev)
             } while (current_menu->menu_items[item_on].status == -1);
             return true;
 
-        case KEYD_UPARROW:
-        case KEYD_GP_UP:
+        case kUpArrow:
+        case kGamepadUp:
             do {
                 if (item_on == 0)
                     item_on = current_menu->total_items - 1;
@@ -2311,9 +2313,9 @@ bool MenuResponder(InputEvent *ev)
             } while (current_menu->menu_items[item_on].status == -1);
             return true;
 
-        case KEYD_PGUP:
-        case KEYD_LEFTARROW:
-        case KEYD_GP_LEFT:
+        case kPageUp:
+        case kLeftArrow:
+        case kGamepadLeft:
             if (current_menu->menu_items[item_on].select_function &&
                 current_menu->menu_items[item_on].status == 2)
             {
@@ -2324,9 +2326,9 @@ bool MenuResponder(InputEvent *ev)
             }
             return true;
 
-        case KEYD_PGDN:
-        case KEYD_RIGHTARROW:
-        case KEYD_GP_RIGHT:
+        case kPageDown:
+        case kRightArrow:
+        case kGamepadRight:
             if (current_menu->menu_items[item_on].select_function &&
                 current_menu->menu_items[item_on].status == 2)
             {
@@ -2337,9 +2339,9 @@ bool MenuResponder(InputEvent *ev)
             }
             return true;
 
-        case KEYD_ENTER:
-        case KEYD_MOUSE1:
-        case KEYD_GP_A:
+        case kEnter:
+        case kMouse1:
+        case kGamepadA:
             if (current_menu->menu_items[item_on].select_function &&
                 current_menu->menu_items[item_on].status)
             {
@@ -2349,17 +2351,17 @@ bool MenuResponder(InputEvent *ev)
             }
             return true;
 
-        case KEYD_ESCAPE:
-        case KEYD_MOUSE2:
-        case KEYD_MOUSE3:
-        case KEYD_GP_START:
+        case kEscape:
+        case kMouse2:
+        case kMouse3:
+        case kGamepadStart:
             current_menu->last_on = item_on;
             MenuClear();
             StartSoundEffect(sound_effect_swtchx);
             return true;
 
-        case KEYD_BACKSPACE:
-        case KEYD_GP_B:
+        case kBackspace:
+        case kGamepadB:
             current_menu->last_on = item_on;
             if (current_menu->previous_menu)
             {

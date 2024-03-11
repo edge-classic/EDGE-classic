@@ -72,7 +72,7 @@ void WebTick(void)
     // makes in own calls to keep on top of the event processing
     ControlGetEvents();
 
-    if (app_state & APP_STATE_ACTIVE) E_Tick();
+    if (app_state & kApplicationActive) E_Tick();
 }
 
 extern "C"

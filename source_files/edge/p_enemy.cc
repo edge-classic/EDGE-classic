@@ -582,7 +582,7 @@ void P_ActBrainSpit(MapObject *shooter)
 
     easy ^= 1;
 
-    if (game_skill <= sk_easy && (!easy)) return;
+    if (game_skill <= kSkillEasy && (!easy)) return;
 
     // shoot out a cube
     P_ActRangeAttack(shooter);

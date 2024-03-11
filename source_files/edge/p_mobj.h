@@ -219,7 +219,7 @@ class MapObject : public Position
     float dropoff_z_ = 0;
 
     // This is the current speed of the object.
-    // if fastparm, it is already calculated.
+    // if fast_monsters, it is already calculated.
     float speed_ = 0;
     int   fuse_  = 0;
 

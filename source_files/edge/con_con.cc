@@ -1182,17 +1182,17 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
 {
     switch (key)
     {
-        case KEYD_RALT:
-        case KEYD_RCTRL:
+        case kRightAlt:
+        case kRightControl:
             // Do nothing
             break;
 
-        case KEYD_RSHIFT:
+        case kRightShift:
             // SHIFT was pressed
             keys_shifted = true;
             break;
 
-        case KEYD_PGUP:
+        case kPageUp:
             if (shift)
                 // Move to top of console buffer
                 bottom_row = HMM_MAX(-1, console_used_lines - 10);
@@ -1201,7 +1201,7 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
                 scroll_direction = +1;
             break;
 
-        case KEYD_PGDN:
+        case kPageDown:
             if (shift)
                 // Move to bottom of console buffer
                 bottom_row = -1;
@@ -1210,29 +1210,29 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
                 scroll_direction = -1;
             break;
 
-        case KEYD_WHEEL_UP:
+        case kMouseWheelUp:
             bottom_row += 4;
             if (bottom_row > HMM_MAX(-1, console_used_lines - 10))
                 bottom_row = HMM_MAX(-1, console_used_lines - 10);
             break;
 
-        case KEYD_WHEEL_DN:
+        case kMouseWheelDown:
             bottom_row -= 4;
             if (bottom_row < -1) bottom_row = -1;
             break;
 
-        case KEYD_HOME:
+        case kHome:
             // Move cursor to start of line
             input_position = 0;
             console_cursor = 0;
             break;
 
-        case KEYD_END:
+        case kEnd:
             // Move cursor to end of line
             GotoEndOfLine();
             break;
 
-        case KEYD_UPARROW:
+        case kUpArrow:
             // Move to previous entry in the command history
             if (command_history_position < command_used_history - 1)
             {
@@ -1242,7 +1242,7 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
             tabbed_last = false;
             break;
 
-        case KEYD_DOWNARROW:
+        case kDownArrow:
             // Move to next entry in the command history
             if (command_history_position > -1)
             {
@@ -1252,14 +1252,14 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
             tabbed_last = false;
             break;
 
-        case KEYD_LEFTARROW:
+        case kLeftArrow:
             // Move cursor left one character
             if (input_position > 0) input_position--;
 
             console_cursor = 0;
             break;
 
-        case KEYD_RIGHTARROW:
+        case kRightArrow:
             // Move cursor right one character
             if (command_history_position < 0)
             {
@@ -1274,7 +1274,7 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
             console_cursor = 0;
             break;
 
-        case KEYD_ENTER:
+        case kEnter:
             EditHistory();
 
             // Execute command line (ENTER)
@@ -1306,7 +1306,7 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
             tabbed_last = false;
             break;
 
-        case KEYD_BACKSPACE:
+        case kBackspace:
             // Erase character to left of cursor
             EditHistory();
 
@@ -1323,7 +1323,7 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
             console_cursor = 0;
             break;
 
-        case KEYD_DELETE:
+        case kDelete:
             // Erase charater under cursor
             EditHistory();
 
@@ -1338,12 +1338,12 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
             console_cursor = 0;
             break;
 
-        case KEYD_TAB:
+        case kTab:
             // Try to do tab-completion
             TabComplete();
             break;
 
-        case KEYD_ESCAPE:
+        case kEscape:
             // Close console, clear command line, but if we're in the
             // fullscreen console mode, there's nothing to fall back on
             // if it's closed.
@@ -1356,8 +1356,8 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
             break;
 
         // Allow screenshotting of console too - Dasho
-        case KEYD_F1:
-        case KEYD_PRTSCR:
+        case kFunction1:
+        case kPrintScreen:
             GameDeferredScreenShot();
             break;
 
@@ -1387,24 +1387,24 @@ static int GetKeycode(InputEvent *ev)
 
     switch (sym)
     {
-        case KEYD_TAB:
-        case KEYD_PGUP:
-        case KEYD_PGDN:
-        case KEYD_HOME:
-        case KEYD_END:
-        case KEYD_LEFTARROW:
-        case KEYD_RIGHTARROW:
-        case KEYD_BACKSPACE:
-        case KEYD_DELETE:
-        case KEYD_UPARROW:
-        case KEYD_DOWNARROW:
-        case KEYD_WHEEL_UP:
-        case KEYD_WHEEL_DN:
-        case KEYD_ENTER:
-        case KEYD_ESCAPE:
-        case KEYD_RSHIFT:
-        case KEYD_F1:
-        case KEYD_PRTSCR:
+        case kTab:
+        case kPageUp:
+        case kPageDown:
+        case kHome:
+        case kEnd:
+        case kLeftArrow:
+        case kRightArrow:
+        case kBackspace:
+        case kDelete:
+        case kUpArrow:
+        case kDownArrow:
+        case kMouseWheelUp:
+        case kMouseWheelDown:
+        case kEnter:
+        case kEscape:
+        case kRightShift:
+        case kFunction1:
+        case kPrintScreen:
             return sym;
 
         default:
@@ -1438,11 +1438,11 @@ bool ConsoleResponder(InputEvent *ev)
 
         switch (key)
         {
-            case KEYD_PGUP:
-            case KEYD_PGDN:
+            case kPageUp:
+            case kPageDown:
                 scroll_direction = 0;
                 break;
-            case KEYD_RSHIFT:
+            case kRightShift:
                 keys_shifted = false;
                 break;
             default:
@@ -1454,13 +1454,13 @@ bool ConsoleResponder(InputEvent *ev)
         // Okay, fine. Most keys don't repeat
         switch (key)
         {
-            case KEYD_RIGHTARROW:
-            case KEYD_LEFTARROW:
-            case KEYD_UPARROW:
-            case KEYD_DOWNARROW:
-            case KEYD_SPACE:
-            case KEYD_BACKSPACE:
-            case KEYD_DELETE:
+            case kRightArrow:
+            case kLeftArrow:
+            case kUpArrow:
+            case kDownArrow:
+            case kSpace:
+            case kBackspace:
+            case kDelete:
                 repeat_countdown =
                     kConsoleKeyRepeatDelay * (double_framerate.d_? 2 : 1);
                 break;
@@ -1641,22 +1641,22 @@ void ConsoleShowFPS(void)
     if (abs(debug_fps.d_) >= 3)
     {
         y -= FNSZ;
-        sprintf(textbuf, "%i runit", ecframe_stats.draw_render_units);
+        sprintf(textbuf, "%i runit", ec_frame_stats.draw_render_units);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
         y -= FNSZ;
-        sprintf(textbuf, "%i wall", ecframe_stats.draw_wall_parts);
+        sprintf(textbuf, "%i wall", ec_frame_stats.draw_wall_parts);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
         y -= FNSZ;
-        sprintf(textbuf, "%i plane", ecframe_stats.draw_planes);
+        sprintf(textbuf, "%i plane", ec_frame_stats.draw_planes);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
         y -= FNSZ;
-        sprintf(textbuf, "%i thing", ecframe_stats.draw_things);
+        sprintf(textbuf, "%i thing", ec_frame_stats.draw_things);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
         y -= FNSZ;
-        sprintf(textbuf, "%i state", ecframe_stats.draw_state_change);
+        sprintf(textbuf, "%i state", ec_frame_stats.draw_state_change);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
         y -= FNSZ;
-        sprintf(textbuf, "%i texture", ecframe_stats.draw_texture_change);
+        sprintf(textbuf, "%i texture", ec_frame_stats.draw_texture_change);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
     }
 }

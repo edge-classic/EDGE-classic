@@ -138,9 +138,9 @@ float DeathBot::EvalEnemy(const MapObject *mo)
 
     if (pl_->map_object_->support_object_ == mo) return -1;
 
-    if (!DEATHMATCH() && mo->player_) return -1;
+    if (!InDeathmatch() && mo->player_) return -1;
 
-    if (!DEATHMATCH() && mo->support_object_ && mo->support_object_->player_) return -1;
+    if (!InDeathmatch() && mo->support_object_ && mo->support_object_->player_) return -1;
 
     // EXTERMINATE !!
 
@@ -178,7 +178,7 @@ float DeathBot::EvalItem(const MapObject *mo)
 
         // ignore powerups, backpacks and armor in COOP.
         // [ leave them for the human players ]
-        if (!DEATHMATCH())
+        if (!InDeathmatch())
         {
             switch (B->type)
             {
@@ -247,7 +247,7 @@ float DeathBot::EvalItem(const MapObject *mo)
                 int max  = pl_->ammo_[ammo].maximum;
 
                 // in COOP mode, leave some ammo for others
-                if (!DEATHMATCH()) max = max / 4;
+                if (!InDeathmatch()) max = max / 4;
 
                 if (pl_->ammo_[ammo].count >= max) continue;
 
@@ -301,7 +301,7 @@ float DeathBot::EvaluateWeapon(int w_num, int &key) const
 
     // prefer smaller weapons for smaller monsters.
     // when not fighting, prefer biggest non-dangerous weapon.
-    if (pl_->map_object_->target_ == nullptr || DEATHMATCH())
+    if (pl_->map_object_->target_ == nullptr || InDeathmatch())
     {
         if (!weapon->dangerous_) score += 1000.0f;
     }
@@ -339,7 +339,7 @@ void DeathBot::PainResponse()
     if (pl_->attacker_ == pl_->map_object_) return;
 
     // ignore friendly fire -- shit happens
-    if (!DEATHMATCH() && pl_->attacker_->player_) return;
+    if (!InDeathmatch() && pl_->attacker_->player_) return;
 
     if (pl_->attacker_->health_ <= 0)
     {
@@ -362,7 +362,7 @@ void DeathBot::PainResponse()
 
 void DeathBot::LookForLeader()
 {
-    if (DEATHMATCH()) return;
+    if (InDeathmatch()) return;
 
     if (pl_->map_object_->support_object_ != nullptr) return;
 
@@ -692,7 +692,7 @@ void DeathBot::ShootTarget()
     if (sl_diff > (8.0f / adjust)) return;
 
     // in COOP, check if other players might be hit
-    if (!DEATHMATCH())
+    if (!InDeathmatch())
     {
         // TODO
     }
@@ -1448,7 +1448,7 @@ void BotPlayerBuilder(const Player *p, void *data, EventTicCommand *cmd)
 {
     memset(cmd, 0, sizeof(EventTicCommand));
 
-    if (game_state != GS_LEVEL) return;
+    if (game_state != kGameStateLevel) return;
 
     DeathBot *bot = (DeathBot *)data;
     SYS_ASSERT(bot);

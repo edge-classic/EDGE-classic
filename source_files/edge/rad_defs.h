@@ -170,7 +170,7 @@ typedef struct s_damage_monsters_s
 // Set Skill
 typedef struct s_skill_s
 {
-    skill_t skill        = sk_baby;
+    SkillLevel skill        = kSkillBaby;
     bool    respawn      = false;
     bool    fastmonsters = false;
 } s_skill_t;

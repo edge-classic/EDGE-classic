@@ -61,127 +61,127 @@ int TranslateSDLKey(SDL_Scancode key)
     switch (key)
     {
         case SDL_SCANCODE_GRAVE:
-            return KEYD_TILDE;
+            return kTilde;
         case SDL_SCANCODE_MINUS:
-            return KEYD_MINUS;
+            return kMinus;
         case SDL_SCANCODE_EQUALS:
-            return KEYD_EQUALS;
+            return kEquals;
 
         case SDL_SCANCODE_TAB:
-            return KEYD_TAB;
+            return kTab;
         case SDL_SCANCODE_RETURN:
-            return KEYD_ENTER;
+            return kEnter;
         case SDL_SCANCODE_ESCAPE:
-            return KEYD_ESCAPE;
+            return kEscape;
         case SDL_SCANCODE_BACKSPACE:
-            return KEYD_BACKSPACE;
+            return kBackspace;
 
         case SDL_SCANCODE_UP:
-            return KEYD_UPARROW;
+            return kUpArrow;
         case SDL_SCANCODE_DOWN:
-            return KEYD_DOWNARROW;
+            return kDownArrow;
         case SDL_SCANCODE_LEFT:
-            return KEYD_LEFTARROW;
+            return kLeftArrow;
         case SDL_SCANCODE_RIGHT:
-            return KEYD_RIGHTARROW;
+            return kRightArrow;
 
         case SDL_SCANCODE_HOME:
-            return KEYD_HOME;
+            return kHome;
         case SDL_SCANCODE_END:
-            return KEYD_END;
+            return kEnd;
         case SDL_SCANCODE_INSERT:
-            return KEYD_INSERT;
+            return kInsert;
         case SDL_SCANCODE_DELETE:
-            return KEYD_DELETE;
+            return kDelete;
         case SDL_SCANCODE_PAGEUP:
-            return KEYD_PGUP;
+            return kPageUp;
         case SDL_SCANCODE_PAGEDOWN:
-            return KEYD_PGDN;
+            return kPageDown;
 
         case SDL_SCANCODE_F1:
-            return KEYD_F1;
+            return kFunction1;
         case SDL_SCANCODE_F2:
-            return KEYD_F2;
+            return kFunction2;
         case SDL_SCANCODE_F3:
-            return KEYD_F3;
+            return kFunction3;
         case SDL_SCANCODE_F4:
-            return KEYD_F4;
+            return kFunction4;
         case SDL_SCANCODE_F5:
-            return KEYD_F5;
+            return kFunction5;
         case SDL_SCANCODE_F6:
-            return KEYD_F6;
+            return kFunction6;
         case SDL_SCANCODE_F7:
-            return KEYD_F7;
+            return kFunction7;
         case SDL_SCANCODE_F8:
-            return KEYD_F8;
+            return kFunction8;
         case SDL_SCANCODE_F9:
-            return KEYD_F9;
+            return kFunction9;
         case SDL_SCANCODE_F10:
-            return KEYD_F10;
+            return kFunction10;
         case SDL_SCANCODE_F11:
-            return KEYD_F11;
+            return kFunction11;
         case SDL_SCANCODE_F12:
-            return KEYD_F12;
+            return kFunction12;
 
         case SDL_SCANCODE_KP_0:
-            return KEYD_KP0;
+            return kKeypad0;
         case SDL_SCANCODE_KP_1:
-            return KEYD_KP1;
+            return kKeypad1;
         case SDL_SCANCODE_KP_2:
-            return KEYD_KP2;
+            return kKeypad2;
         case SDL_SCANCODE_KP_3:
-            return KEYD_KP3;
+            return kKeypad3;
         case SDL_SCANCODE_KP_4:
-            return KEYD_KP4;
+            return kKeypad4;
         case SDL_SCANCODE_KP_5:
-            return KEYD_KP5;
+            return kKeypad5;
         case SDL_SCANCODE_KP_6:
-            return KEYD_KP6;
+            return kKeypad6;
         case SDL_SCANCODE_KP_7:
-            return KEYD_KP7;
+            return kKeypad7;
         case SDL_SCANCODE_KP_8:
-            return KEYD_KP8;
+            return kKeypad8;
         case SDL_SCANCODE_KP_9:
-            return KEYD_KP9;
+            return kKeypad9;
 
         case SDL_SCANCODE_KP_PERIOD:
-            return KEYD_KP_DOT;
+            return kKeypadDot;
         case SDL_SCANCODE_KP_PLUS:
-            return KEYD_KP_PLUS;
+            return kKeypadPlus;
         case SDL_SCANCODE_KP_MINUS:
-            return KEYD_KP_MINUS;
+            return kKeypadMinus;
         case SDL_SCANCODE_KP_MULTIPLY:
-            return KEYD_KP_STAR;
+            return kKeypadStar;
         case SDL_SCANCODE_KP_DIVIDE:
-            return KEYD_KP_SLASH;
+            return kKeypadSlash;
         case SDL_SCANCODE_KP_EQUALS:
-            return KEYD_KP_EQUAL;
+            return kKeypadEquals;
         case SDL_SCANCODE_KP_ENTER:
-            return KEYD_KP_ENTER;
+            return kKeypadEnter;
 
         case SDL_SCANCODE_PRINTSCREEN:
-            return KEYD_PRTSCR;
+            return kPrintScreen;
         case SDL_SCANCODE_CAPSLOCK:
-            return KEYD_CAPSLOCK;
+            return kCapsLock;
         case SDL_SCANCODE_NUMLOCKCLEAR:
-            return KEYD_NUMLOCK;
+            return kNumberLock;
         case SDL_SCANCODE_SCROLLLOCK:
-            return KEYD_SCRLOCK;
+            return kScrollLock;
         case SDL_SCANCODE_PAUSE:
-            return KEYD_PAUSE;
+            return kPause;
 
         case SDL_SCANCODE_LSHIFT:
         case SDL_SCANCODE_RSHIFT:
-            return KEYD_RSHIFT;
+            return kRightShift;
         case SDL_SCANCODE_LCTRL:
         case SDL_SCANCODE_RCTRL:
-            return KEYD_RCTRL;
+            return kRightControl;
         case SDL_SCANCODE_LGUI:
         case SDL_SCANCODE_LALT:
-            return KEYD_LALT;
+            return kLeftAlt;
         case SDL_SCANCODE_RGUI:
         case SDL_SCANCODE_RALT:
-            return KEYD_RALT;
+            return kRightAlt;
 
         default:
             break;
@@ -201,7 +201,7 @@ void HandleFocusGain(void)
     eat_mouse_motion = true;
 
     // Now active again
-    app_state |= APP_STATE_ACTIVE;
+    app_state |= kApplicationActive;
 }
 
 void HandleFocusLost(void)
@@ -211,7 +211,7 @@ void HandleFocusLost(void)
     E_Idle();
 
     // No longer active
-    app_state &= ~APP_STATE_ACTIVE;
+    app_state &= ~kApplicationActive;
 }
 
 void HandleKeyEvent(SDL_Event *ev)
@@ -244,14 +244,14 @@ void HandleKeyEvent(SDL_Event *ev)
         return;
     }
 
-    if (event.value.key.sym == KEYD_TAB && alt_is_down)
+    if (event.value.key.sym == kTab && alt_is_down)
     {
         alt_is_down = false;
         return;
     }
 
 #ifndef EDGE_WEB  // Not sure if this is desired on the web build
-    if (event.value.key.sym == KEYD_ENTER && alt_is_down)
+    if (event.value.key.sym == kEnter && alt_is_down)
     {
         alt_is_down = false;
         ToggleFullscreen();
@@ -264,7 +264,7 @@ void HandleKeyEvent(SDL_Event *ev)
     }
 #endif
 
-    if (event.value.key.sym == KEYD_LALT)
+    if (event.value.key.sym == kLeftAlt)
         alt_is_down = (event.type == kInputEventKeyDown);
 
     EventPostEvent(&event);
@@ -284,22 +284,22 @@ void HandleMouseButtonEvent(SDL_Event *ev)
     switch (ev->button.button)
     {
         case 1:
-            event.value.key.sym = KEYD_MOUSE1;
+            event.value.key.sym = kMouse1;
             break;
         case 2:
-            event.value.key.sym = KEYD_MOUSE2;
+            event.value.key.sym = kMouse2;
             break;
         case 3:
-            event.value.key.sym = KEYD_MOUSE3;
+            event.value.key.sym = kMouse3;
             break;
         case 4:
-            event.value.key.sym = KEYD_MOUSE4;
+            event.value.key.sym = kMouse4;
             break;
         case 5:
-            event.value.key.sym = KEYD_MOUSE5;
+            event.value.key.sym = kMouse5;
             break;
         case 6:
-            event.value.key.sym = KEYD_MOUSE6;
+            event.value.key.sym = kMouse6;
             break;
 
         default:
@@ -319,13 +319,13 @@ void HandleMouseWheelEvent(SDL_Event *ev)
 
     if (ev->wheel.y > 0)
     {
-        event.value.key.sym   = KEYD_WHEEL_UP;
-        release.value.key.sym = KEYD_WHEEL_UP;
+        event.value.key.sym   = kMouseWheelUp;
+        release.value.key.sym = kMouseWheelUp;
     }
     else if (ev->wheel.y < 0)
     {
-        event.value.key.sym   = KEYD_WHEEL_DN;
-        release.value.key.sym = KEYD_WHEEL_DN;
+        event.value.key.sym   = kMouseWheelDown;
+        release.value.key.sym = kMouseWheelDown;
     }
     else { return; }
     EventPostEvent(&event);
@@ -350,7 +350,7 @@ static void HandleGamepadButtonEvent(SDL_Event *ev)
         SDL_CONTROLLER_BUTTON_MAX)  // How would this happen? - Dasho
         return;
 
-    event.value.key.sym = KEYD_GP_A + ev->cbutton.button;
+    event.value.key.sym = kGamepadA + ev->cbutton.button;
 
     EventPostEvent(&event);
 }
@@ -374,7 +374,7 @@ static void HandleGamepadTriggerEvent(SDL_Event *ev)
 
     if (current_axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)
     {
-        event.value.key.sym = KEYD_TRIGGER_LEFT;
+        event.value.key.sym = kGamepadTriggerLeft;
         if (input < thresh)
         {
             if (!left_trigger_pulled) return;
@@ -390,7 +390,7 @@ static void HandleGamepadTriggerEvent(SDL_Event *ev)
     }
     else
     {
-        event.value.key.sym = KEYD_TRIGGER_RIGHT;
+        event.value.key.sym = kGamepadTriggerRight;
         if (input < thresh)
         {
             if (!right_trigger_pulled) return;
@@ -646,7 +646,7 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
         case SDL_QUIT:
             // Note we deliberate clear all other flags here. Its our method of
             // ensuring nothing more is done with events.
-            app_state = APP_STATE_PENDING_QUIT;
+            app_state = kApplicationPendingQuit;
             break;
 
         case SDL_CONTROLLERDEVICEADDED:
@@ -667,7 +667,7 @@ void InactiveEventProcess(SDL_Event *sdl_ev)
     switch (sdl_ev->type)
     {
         case SDL_WINDOWEVENT:
-            if (app_state & APP_STATE_PENDING_QUIT)
+            if (app_state & kApplicationPendingQuit)
                 break;  // Don't care: we're going to exit
 
             if (sdl_ev->window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
@@ -677,7 +677,7 @@ void InactiveEventProcess(SDL_Event *sdl_ev)
         case SDL_QUIT:
             // Note we deliberate clear all other flags here. Its our method of
             // ensuring nothing more is done with events.
-            app_state = APP_STATE_PENDING_QUIT;
+            app_state = kApplicationPendingQuit;
             break;
 
         case SDL_CONTROLLERDEVICEADDED:
@@ -766,7 +766,7 @@ void ControlGetEvents(void)
 
     while (SDL_PollEvent(&sdl_ev))
     {
-        if (app_state & APP_STATE_ACTIVE)
+        if (app_state & kApplicationActive)
             ActiveEventProcess(&sdl_ev);
         else
             InactiveEventProcess(&sdl_ev);

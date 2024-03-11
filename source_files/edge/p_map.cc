@@ -23,7 +23,7 @@
 //
 //----------------------------------------------------------------------------
 //
-// -MH- 1998/07/02 "shootupdown" --> "true3dgameplay"
+// -MH- 1998/07/02 "shootupdown" --> "true_3d_gameplay"
 //
 // -AJA- 1999/07/19: Removed P_LineOpening.  Gaps are now stored
 //       in line_t, and updated whenever sector heights change.
@@ -182,7 +182,7 @@ static bool StompThingCallback(MapObject *thing, void *data)
         return true;  // no, we did not
 
     // -AJA- 1999/07/30: True 3d gameplay checks.
-    if (level_flags.true3dgameplay)
+    if (level_flags.true_3d_gameplay)
     {
         if (move_check.z >= thing->z + thing->height_)
         {
@@ -349,7 +349,7 @@ static bool CheckAbsoluteThingCallback(MapObject *thing, void *data)
     {
         // -KM- 1998/9/19 True 3d gameplay checks.
         if ((move_check.flags & kMapObjectFlagMissile) ||
-            level_flags.true3dgameplay)
+            level_flags.true_3d_gameplay)
         {
             // overhead ?
             if (move_check.z >= thing->z + thing->height_) return true;
@@ -556,14 +556,14 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
         f2 = ld->back_sector->floor_height;
         c2 = ld->back_sector->ceiling_height;
 
-        if (!AlmostEquals(c1, c2) && IS_SKY(ld->front_sector->ceiling) &&
-            IS_SKY(ld->back_sector->ceiling) && move_check.z > HMM_MIN(c1, c2))
+        if (!AlmostEquals(c1, c2) && EDGE_IMAGE_IS_SKY(ld->front_sector->ceiling) &&
+            EDGE_IMAGE_IS_SKY(ld->back_sector->ceiling) && move_check.z > HMM_MIN(c1, c2))
         {
             map_object_hit_sky = true;
         }
 
-        if (!AlmostEquals(f1, f2) && IS_SKY(ld->front_sector->floor) &&
-            IS_SKY(ld->back_sector->floor) &&
+        if (!AlmostEquals(f1, f2) && EDGE_IMAGE_IS_SKY(ld->front_sector->floor) &&
+            EDGE_IMAGE_IS_SKY(ld->back_sector->floor) &&
             move_check.z + move_check.mover->height_ < HMM_MAX(f1, f2))
         {
             map_object_hit_sky = true;
@@ -899,7 +899,7 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
         return true;  // no we missed this thing
 
     // -KM- 1998/9/19 True 3d gameplay checks.
-    if (level_flags.true3dgameplay && !(thing->flags_ & kMapObjectFlagSpecial))
+    if (level_flags.true_3d_gameplay && !(thing->flags_ & kMapObjectFlagSpecial))
     {
         float top_z = thing->z + thing->height_;
 
@@ -1977,7 +1977,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
     }
 
     // don't shoot the sky!
-    if (IS_SKY(floor[0])) return false;
+    if (EDGE_IMAGE_IS_SKY(floor[0])) return false;
 
     float along =
         (floor_height - shoot_check.start_z) / (shoot_check.slope * shoot_check.range);
@@ -2229,7 +2229,7 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
         // check if bullet hit a sky hack line...
         if (ld->front_sector && ld->back_sector)
         {
-            if (IS_SKY(ld->front_sector->ceiling) && IS_SKY(ld->back_sector->ceiling))
+            if (EDGE_IMAGE_IS_SKY(ld->front_sector->ceiling) && EDGE_IMAGE_IS_SKY(ld->back_sector->ceiling))
             {
                 float c1 = ld->front_sector->ceiling_height;
                 float c2 = ld->back_sector->ceiling_height;
@@ -2237,7 +2237,7 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
                 if (HMM_MIN(c1, c2) <= z && z <= HMM_MAX(c1, c2)) return false;
             }
 
-            if (IS_SKY(ld->front_sector->floor) && IS_SKY(ld->back_sector->floor))
+            if (EDGE_IMAGE_IS_SKY(ld->front_sector->floor) && EDGE_IMAGE_IS_SKY(ld->back_sector->floor))
             {
                 float f1 = ld->front_sector->floor_height;
                 float f2 = ld->back_sector->floor_height;
@@ -2598,7 +2598,7 @@ MapObject *DoMapTargetAutoAim(MapObject *source, BAMAngle angle, float distance,
 
     // -KM- 1999/01/31 Look at the thing you aimed at.  Is sometimes
     //   useful, sometimes annoying :-)
-    if (source->player_ && level_flags.autoaim == AA_MLOOK)
+    if (source->player_ && level_flags.autoaim == kAutoAimMouselook)
     {
         float slope = ApproximateSlope(source->x - aim_check.target->x,
                                        source->y - aim_check.target->y,
@@ -2859,7 +2859,7 @@ void RadiusAttack(MapObject *spot, MapObject *source, float radius,
     radius_attack_check.damage      = damage;
     radius_attack_check.damage_type = damtype;
     radius_attack_check.thrust      = thrust_only;
-    radius_attack_check.use_3d      = level_flags.true3dgameplay;
+    radius_attack_check.use_3d      = level_flags.true_3d_gameplay;
 
     //
     // -ACB- 1998/07/15 This normally does damage to everything within

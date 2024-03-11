@@ -189,7 +189,7 @@ static void DoBumpFinale(void)
 
     if (stage != kFinaleStageDone)
     {
-        if (game_state != GS_INTERMISSION) E_ForceWipe();
+        if (game_state != kGameStateIntermission) E_ForceWipe();
 
         finale_stage = stage;
 
@@ -204,7 +204,7 @@ static void DoBumpFinale(void)
         game_action = new_game_action;
     }
 
-    game_state = GS_NOTHING;  // hack ???  (cannot leave as GS_FINALE)
+    game_state = kGameStateNothing;  // hack ???  (cannot leave as GS_FINALE)
 }
 
 static void LookupFinaleStuff(void)
@@ -260,14 +260,14 @@ void FinaleStart(const FinaleDefinition *F, GameAction newaction)
 
     LookupFinaleStuff();
 
-    game_state = GS_FINALE;
+    game_state = kGameStateFinale;
 
     DoStartFinale();
 }
 
 bool FinaleResponder(InputEvent *event)
 {
-    SYS_ASSERT(game_state == GS_FINALE);
+    SYS_ASSERT(game_state == kGameStateFinale);
 
     // FIXME: use WI_CheckAccelerate() in netgames
     if (event->type != kInputEventKeyDown) return false;
@@ -286,7 +286,7 @@ bool FinaleResponder(InputEvent *event)
 
 void FinaleTicker(void)
 {
-    SYS_ASSERT(game_state == GS_FINALE);
+    SYS_ASSERT(game_state == kGameStateFinale);
 
     // advance animation
     finale_count++;
@@ -353,7 +353,7 @@ void FinaleTicker(void)
             // don't come here again (for E_ForceWipe)
             new_game_action = kGameActionNothing;
 
-            if (game_state == GS_FINALE) E_ForceWipe();
+            if (game_state == kGameStateFinale) E_ForceWipe();
         }
     }
 }
@@ -876,7 +876,7 @@ static void BunnyScroll(void)
 
 void FinaleDrawer(void)
 {
-    SYS_ASSERT(game_state == GS_FINALE);
+    SYS_ASSERT(game_state == kGameStateFinale);
 
     switch (finale_stage)
     {

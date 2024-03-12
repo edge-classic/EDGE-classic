@@ -131,9 +131,9 @@ GameFlags default_game_flags = {
     8,      // gravity
     false,  // more blood
 
-    true,   // jump
-    true,   // crouch
-    true,   // mlook
+    true,        // jump
+    true,        // crouch
+    true,        // mlook
     kAutoAimOn,  // autoaim
 
     true,   // cheats
@@ -153,8 +153,8 @@ GameFlags default_game_flags = {
 
 GameFlags global_flags;
 
-bool mus_pause_stop = false;
-bool png_screenshots   = false;
+bool mus_pause_stop  = false;
+bool png_screenshots = false;
 
 std::string branding_file;
 std::string configuration_file;
@@ -172,7 +172,7 @@ ConsoleVariable m_language("language", "ENGLISH", kConsoleVariableFlagArchive);
 
 EDGE_DEFINE_CONSOLE_VARIABLE(log_filename, "edge-classic.log",
                              kConsoleVariableFlagNoReset)
-EDGE_DEFINE_CONSOLE_VARIABLE(configfilename, "edge-classic.cfg",
+EDGE_DEFINE_CONSOLE_VARIABLE(config_filename, "edge-classic.cfg",
                              kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(debug_filename, "debug.txt",
                              kConsoleVariableFlagNoReset)
@@ -185,10 +185,10 @@ EDGE_DEFINE_CONSOLE_VARIABLE(appname, "EDGE-Classic",
 EDGE_DEFINE_CONSOLE_VARIABLE(homepage, "https://edge-classic.github.io",
                              kConsoleVariableFlagNoReset)
 
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(r_overlay, "0",
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(video_overlay, "0",
                                      kConsoleVariableFlagArchive, 0, 6)
 
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(r_titlescaling, "0",
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(title_scaling, "0",
                                      kConsoleVariableFlagArchive, 0, 1)
 
 EDGE_DEFINE_CONSOLE_VARIABLE(force_infighting, "0", kConsoleVariableFlagArchive)
@@ -202,7 +202,7 @@ EDGE_DEFINE_CONSOLE_VARIABLE(skip_intros, "0", kConsoleVariableFlagArchive)
 static const Image *loading_image = nullptr;
 const Image        *menu_backdrop = nullptr;
 
-static void E_TitleDrawer(void);
+static void TitleDrawer(void);
 
 class StartupProgress
 {
@@ -227,7 +227,7 @@ class StartupProgress
         HudFrameSetup();
         if (loading_image)
         {
-            if (r_titlescaling.d_)  // Fill Border
+            if (title_scaling.d_)  // Fill Border
             {
                 if (!loading_image->blurred_version_)
                     ImageStoreBlurred(loading_image);
@@ -249,10 +249,10 @@ class StartupProgress
             y += 10;
         }
 
-        if (!hud_overlays.at(r_overlay.d_).empty())
+        if (!hud_overlays.at(video_overlay.d_).empty())
         {
             const Image *overlay =
-                ImageLookup(hud_overlays.at(r_overlay.d_).c_str(),
+                ImageLookup(hud_overlays.at(video_overlay.d_).c_str(),
                             kImageNamespaceGraphic, kImageLookupNull);
             if (overlay)
                 HudRawImage(
@@ -288,7 +288,7 @@ class StartupProgress
 
 static StartupProgress s_progress;
 
-void E_ProgressMessage(const char *message)
+void StartupProgressMessage(const char *message)
 {
     s_progress.AddMessage(message);
     s_progress.DrawIt();
@@ -297,7 +297,7 @@ void E_ProgressMessage(const char *message)
 //
 // -ACB- 1999/09/20 Created. Sets Global Stuff.
 //
-static void SetGlobalVars(void)
+static void SetGlobalVariables(void)
 {
     int         p;
     std::string s;
@@ -427,9 +427,12 @@ static void SetGlobalVars(void)
         if (ArgumentFind("newnmrespawn") > 0)
         {
             global_flags.enemy_respawn_mode = true;
-            global_flags.enemies_respawn     = true;
+            global_flags.enemies_respawn    = true;
         }
-        else if (ArgumentFind("respawn") > 0) { global_flags.enemies_respawn = true; }
+        else if (ArgumentFind("respawn") > 0)
+        {
+            global_flags.enemies_respawn = true;
+        }
     }
 
     // check for strict and no-warning options
@@ -464,7 +467,7 @@ void SetLanguage(void)
 //
 static void SpecialWadVerify(void)
 {
-    E_ProgressMessage("Verifying EDGE_DEFS version...");
+    StartupProgressMessage("Verifying EDGE_DEFS version...");
 
     epi::File *data = OpenFileFromPack("/version.txt");
 
@@ -537,7 +540,7 @@ static void DoSystemStartup(void)
     LogDebug("- System startup done.\n");
 }
 
-static void M_DisplayPause(void)
+static void DisplayPauseImage(void)
 {
     static const Image *pause_image = nullptr;
 
@@ -558,7 +561,7 @@ ScreenWipe wipe_method = kScreenWipeMelt;
 
 static bool need_wipe = false;
 
-void E_ForceWipe(void)
+void ForceWipe(void)
 {
 #ifdef EDGE_WEB
     // Wiping blocks the main thread while rendering outside of the main loop
@@ -572,7 +575,7 @@ void E_ForceWipe(void)
     need_wipe = true;
 
     // capture screen now (before new level is loaded etc..)
-    E_Display();
+    EdgeDisplay();
 }
 
 //
@@ -584,7 +587,7 @@ void E_ForceWipe(void)
 
 static bool wipe_gl_active = false;
 
-void E_Display(void)
+void EdgeDisplay(void)
 {
     EDGE_ZoneScoped;
 
@@ -622,7 +625,7 @@ void E_Display(void)
             break;
 
         case kGameStateTitleScreen:
-            E_TitleDrawer();
+            TitleDrawer();
             break;
 
         case kGameStateNothing:
@@ -650,7 +653,7 @@ void E_Display(void)
         RendererInitializeWipe(wipe_method);
     }
 
-    if (paused) M_DisplayPause();
+    if (paused) DisplayPauseImage();
 
     // menus go directly to the screen
     MenuDrawer();  // menu is drawn even on top of everything (except console)
@@ -660,10 +663,10 @@ void E_Display(void)
 
     ConsoleDrawer();
 
-    if (!hud_overlays.at(r_overlay.d_).empty())
+    if (!hud_overlays.at(video_overlay.d_).empty())
     {
         const Image *overlay =
-            ImageLookup(hud_overlays.at(r_overlay.d_).c_str(),
+            ImageLookup(hud_overlays.at(video_overlay.d_).c_str(),
                         kImageNamespaceGraphic, kImageLookupNull);
         if (overlay)
             HudRawImage(0, 0, current_screen_width, current_screen_height,
@@ -717,11 +720,11 @@ static int title_countdown;
 
 static const Image *title_image = nullptr;
 
-static void E_TitleDrawer(void)
+static void TitleDrawer(void)
 {
     if (title_image)
     {
-        if (r_titlescaling.d_)  // Fill Border
+        if (title_scaling.d_)  // Fill Border
         {
             if (!title_image->blurred_version_) ImageStoreBlurred(title_image);
             HudStretchImage(-320, -200, 960, 600, title_image->blurred_version_,
@@ -736,7 +739,7 @@ static void E_TitleDrawer(void)
 // This cycles through the title sequences.
 // -KM- 1998/12/16 Fixed for DDF.
 //
-void E_PickLoadingScreen(void)
+void PickLoadingScreen(void)
 {
     // force pic overflow -> first available titlepic
     title_game = gamedefs.size() - 1;
@@ -792,7 +795,7 @@ void E_PickLoadingScreen(void)
 // titlepic corresponding to a gamedef with actual maps.
 // This is used as the menu backdrop
 //
-void E_PickMenuScreen(void)
+static void PickMenuBackdrop(void)
 {
     // force pic overflow -> first available titlepic
     title_game = gamedefs.size() - 1;
@@ -898,7 +901,7 @@ void E_PickMenuScreen(void)
 // This cycles through the title sequences.
 // -KM- 1998/12/16 Fixed for DDF.
 //
-void E_AdvanceTitle(void)
+void AdvanceTitle(void)
 {
     title_pic++;
 
@@ -962,7 +965,7 @@ void E_AdvanceTitle(void)
     title_countdown = kTicRate * (double_framerate.d_ ? 2 : 1);
 }
 
-void E_StartTitle(void)
+void StartTitle(void)
 {
     game_action = kGameActionNothing;
     game_state  = kGameStateTitleScreen;
@@ -971,16 +974,16 @@ void E_StartTitle(void)
 
     title_countdown = 1;
 
-    E_AdvanceTitle();
+    AdvanceTitle();
 }
 
-void E_TitleTicker(void)
+void TitleTicker(void)
 {
     if (title_countdown > 0)
     {
         title_countdown--;
 
-        if (title_countdown == 0) E_AdvanceTitle();
+        if (title_countdown == 0) AdvanceTitle();
     }
 }
 
@@ -989,7 +992,7 @@ void E_TitleTicker(void)
 //
 // -ES- 2000/01/01 Written.
 //
-void InitDirectories(void)
+static void InitializeDirectories(void)
 {
     // Get the App Directory from parameter.
 
@@ -1018,8 +1021,10 @@ void InitDirectories(void)
     if (!s.empty()) { configuration_file = s; }
     else
     {
-        configuration_file = epi::PathAppend(game_directory, configfilename.s_);
-        if (epi::TestFileAccess(configuration_file) || ArgumentFind("portable") > 0)
+        configuration_file =
+            epi::PathAppend(game_directory, config_filename.s_);
+        if (epi::TestFileAccess(configuration_file) ||
+            ArgumentFind("portable") > 0)
             home_directory = game_directory;
         else
             configuration_file.clear();
@@ -1042,12 +1047,14 @@ void InitDirectories(void)
     if (!epi::IsDirectory(home_directory))
     {
         if (!epi::MakeDirectory(home_directory))
-            FatalError("InitDirectories: Could not create directory at %s!\n",
-                       home_directory.c_str());
+            FatalError(
+                "InitializeDirectories: Could not create directory at %s!\n",
+                home_directory.c_str());
     }
 
     if (configuration_file.empty())
-        configuration_file = epi::PathAppend(home_directory, configfilename.s_);
+        configuration_file =
+            epi::PathAppend(home_directory, config_filename.s_);
 
     // edge_defs.epk file
     s = ArgumentValue("defs");
@@ -1074,9 +1081,11 @@ void InitDirectories(void)
     SaveClearSlot("current");
 
     // screenshot directory
-    screenshot_directory = epi::PathAppend(home_directory, kScreenshotDirectory);
+    screenshot_directory =
+        epi::PathAppend(home_directory, kScreenshotDirectory);
 
-    if (!epi::IsDirectory(screenshot_directory)) epi::MakeDirectory(screenshot_directory);
+    if (!epi::IsDirectory(screenshot_directory))
+        epi::MakeDirectory(screenshot_directory);
 }
 
 // Get rid of legacy GWA/HWA files
@@ -1624,7 +1633,7 @@ static void IdentifyVersion(void)
 }
 
 // Add game-specific base EPKs (widepix, skyboxes, etc) - Dasho
-static void Add_Base(void)
+static void AddBasePack(void)
 {
     if (epi::StringCaseCompareASCII("CUSTOM", game_base) == 0)
         return;  // Standalone EDGE IWADs/EPKs should already contain their
@@ -1709,7 +1718,7 @@ static void SetupLogAndDebugFiles(void)
     {
         log_file = epi::FileOpenRaw(log_fn, epi::kFileAccessWrite);
 
-        if (!log_file) FatalError("[E_Startup] Unable to create log file\n");
+        if (!log_file) FatalError("[EdgeStartup] Unable to create log file\n");
     }
 
     //
@@ -1728,11 +1737,12 @@ static void SetupLogAndDebugFiles(void)
     {
         debug_file = epi::FileOpenRaw(debug_fn, epi::kFileAccessWrite);
 
-        if (!debug_file) FatalError("[E_Startup] Unable to create debug_file");
+        if (!debug_file)
+            FatalError("[EdgeStartup] Unable to create debug_file");
     }
 }
 
-static void AddSingleCmdLineFile(std::string name, bool ignore_unknown)
+static void AddSingleCommandLineFile(std::string name, bool ignore_unknown)
 {
     if (epi::IsDirectory(name))
     {
@@ -1778,7 +1788,7 @@ static void AddCommandLineFiles(void)
     for (p = 1; p < int(program_argument_list.size()) && !ArgumentIsOption(p);
          p++)
     {
-        AddSingleCmdLineFile(program_argument_list[p], false);
+        AddSingleCommandLineFile(program_argument_list[p], false);
     }
 
     // next handle the -file option (we allow multiple uses)
@@ -1792,7 +1802,7 @@ static void AddCommandLineFiles(void)
         // the parms after p are wadfile/lump names,
         // go until end of parms or another '-' preceded parm
         if (!ArgumentIsOption(p))
-            AddSingleCmdLineFile(program_argument_list[p], false);
+            AddSingleCommandLineFile(program_argument_list[p], false);
 
         p++;
     }
@@ -1897,7 +1907,7 @@ static void AddCommandLineFiles(void)
     }
 }
 
-static void Add_Autoload(void)
+static void AddAutoload(void)
 {
     std::vector<epi::DirectoryEntry> fsd;
     std::string folder = epi::PathAppend(game_directory, "autoload");
@@ -1910,7 +1920,7 @@ static void Add_Autoload(void)
     {
         for (size_t i = 0; i < fsd.size(); i++)
         {
-            if (!fsd[i].is_dir) AddSingleCmdLineFile(fsd[i].name, true);
+            if (!fsd[i].is_dir) AddSingleCommandLineFile(fsd[i].name, true);
         }
     }
     fsd.clear();
@@ -1923,7 +1933,7 @@ static void Add_Autoload(void)
     {
         for (size_t i = 0; i < fsd.size(); i++)
         {
-            if (!fsd[i].is_dir) AddSingleCmdLineFile(fsd[i].name, true);
+            if (!fsd[i].is_dir) AddSingleCommandLineFile(fsd[i].name, true);
         }
     }
     fsd.clear();
@@ -1941,7 +1951,7 @@ static void Add_Autoload(void)
     {
         for (size_t i = 0; i < fsd.size(); i++)
         {
-            if (!fsd[i].is_dir) AddSingleCmdLineFile(fsd[i].name, true);
+            if (!fsd[i].is_dir) AddSingleCommandLineFile(fsd[i].name, true);
         }
     }
     fsd.clear();
@@ -1955,19 +1965,19 @@ static void Add_Autoload(void)
     {
         for (size_t i = 0; i < fsd.size(); i++)
         {
-            if (!fsd[i].is_dir) AddSingleCmdLineFile(fsd[i].name, true);
+            if (!fsd[i].is_dir) AddSingleCommandLineFile(fsd[i].name, true);
         }
     }
 }
 
-static void InitDDF(void)
+static void InitializeDdf(void)
 {
     LogDebug("- Initialising DDF\n");
 
     DDF_Init();
 }
 
-void E_EngineShutdown(void)
+void EdgeShutdown(void)
 {
     StopMusic();
 
@@ -1984,18 +1994,14 @@ void E_EngineShutdown(void)
     NetworkShutdown();
 }
 
-// Local Prototypes
-static void E_Startup();
-static void E_Shutdown(void);
-
-static void E_Startup(void)
+static void EdgeStartup(void)
 {
     ConsoleInit();
 
     // -AJA- 2000/02/02: initialise global gameflags to defaults
     global_flags = default_game_flags;
 
-    InitDirectories();
+    InitializeDirectories();
 
     // Version check ?
     if (ArgumentFind("version") > 0)
@@ -2014,14 +2020,14 @@ static void E_Startup(void)
     ConfigurationLoadDefaults();
 
     ConsoleHandleProgramArguments();
-    SetGlobalVars();
+    SetGlobalVariables();
 
     DoSystemStartup();
 
-    InitDDF();
+    InitializeDdf();
     IdentifyVersion();
-    Add_Base();
-    Add_Autoload();
+    AddBasePack();
+    AddAutoload();
     AddCommandLineFiles();
     CheckTurbo();
 
@@ -2042,8 +2048,8 @@ static void E_Startup(void)
     InitializeFlats();
     InitializeTextures();
     CreateUserImages();
-    E_PickLoadingScreen();
-    E_PickMenuScreen();
+    PickLoadingScreen();
+    PickMenuBackdrop();
 
     HudInit();
     ConsoleStart();
@@ -2078,11 +2084,7 @@ static void E_Startup(void)
     }
 }
 
-static void E_Shutdown(void)
-{ /* TODO: E_Shutdown */
-}
-
-static void E_InitialState(void)
+static void InitialState(void)
 {
     LogDebug("- Setting up Initial State...\n");
 
@@ -2108,7 +2110,7 @@ static void E_InitialState(void)
 
     // get skill / episode / map from parms
     std::string warp_map;
-    SkillLevel     warp_skill      = kSkillMedium;
+    SkillLevel  warp_skill      = kSkillMedium;
     int         warp_deathmatch = 0;
 
     int bots = 0;
@@ -2155,7 +2157,7 @@ static void E_InitialState(void)
     if (!warp)
     {
         LogDebug("- Startup: showing title screen.\n");
-        E_StartTitle();
+        StartTitle();
         return;
     }
 
@@ -2196,7 +2198,7 @@ static void E_InitialState(void)
 //
 // -ACB- 2004/05/31 Moved into a namespace, the c++ revolution begins....
 //
-void E_Main(int argc, const char **argv)
+void EdgeMain(int argc, const char **argv)
 {
     // Seed RandomByte RNG
     RandomInit();
@@ -2205,9 +2207,9 @@ void E_Main(int argc, const char **argv)
     // -ACB- 2004/05/31
     ArgumentParse(argc, argv);
 
-    E_Startup();
+    EdgeStartup();
 
-    E_InitialState();
+    InitialState();
 
     ConsoleMessageColor(SG_YELLOW_RGBA32);
     LogPrint("%s v%s initialisation complete.\n", appname.c_str(),
@@ -2223,20 +2225,18 @@ void E_Main(int argc, const char **argv)
         ControlGetEvents();
 
         if (app_state & kApplicationActive)
-            E_Tick();
+            EdgeTicker();
         else if (!busy_wait.d_) { SleepForMilliseconds(5); }
     }
 #else
     return;
 #endif
-
-    E_Shutdown();  // Shutdown whatever at this point
 }
 
 //
 // Called when this application has lost focus (i.e. an ALT+TAB event)
 //
-void E_Idle(void) { EventReleaseAllKeys(); }
+void EdgeIdle(void) { EventReleaseAllKeys(); }
 
 //
 // This Function is called for a single loop in the system.
@@ -2244,14 +2244,14 @@ void E_Idle(void) { EventReleaseAllKeys(); }
 // -ACB- 1999/09/24 Written
 // -ACB- 2004/05/31 Namespace'd
 //
-void E_Tick(void)
+void EdgeTicker(void)
 {
     EDGE_ZoneScoped;
 
     GameBigStuff();
 
     // Update display, next frame, with current state.
-    E_Display();
+    EdgeDisplay();
 
     // this also runs the responder chain via EventProcessEvents
     int counts = NetworkTryRunTicCommands();

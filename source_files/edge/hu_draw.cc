@@ -38,7 +38,7 @@ static constexpr float kVerticalSpacing = 2.0f;
 extern ConsoleLine    *quit_lines[kEndoomLines];
 extern int             console_cursor;
 extern Font         *endoom_font;
-extern ConsoleVariable r_overlay;
+extern ConsoleVariable video_overlay;
 extern ConsoleVariable double_framerate;
 
 static Font *default_font;
@@ -489,7 +489,7 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2,
     }
 
     if (epi::StringCaseCompareASCII(image->name_,
-                                    hud_overlays.at(r_overlay.d_)) == 0)
+                                    hud_overlays.at(video_overlay.d_)) == 0)
     {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);

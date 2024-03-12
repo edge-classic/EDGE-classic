@@ -39,7 +39,7 @@
 #define DEBUG_BSP  0
 
 // Startup Messages
-extern void E_ProgressMessage(const char *message);
+extern void StartupProgressMessage(const char *message);
 
 namespace ajbsp
 {
@@ -1075,7 +1075,7 @@ void LoadLevel()
     level_current_name = LEV->Name();
     level_long_name    = false;
 
-    E_ProgressMessage(
+    StartupProgressMessage(
         epi::StringFormat("Building nodes for %s\n", level_current_name)
             .c_str());
 

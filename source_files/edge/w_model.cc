@@ -294,7 +294,7 @@ void InitializeModels(void)
 
     SYS_ASSERT(total_models >= 1);  // at least SPR_NULL
 
-    E_ProgressMessage("Setting up models...");
+    StartupProgressMessage("Setting up models...");
 
     LogPrint("InitializeModels: Setting up\n");
 

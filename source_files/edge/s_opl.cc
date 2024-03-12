@@ -24,6 +24,7 @@
 #include "i_system.h"
 #include "m_misc.h"
 // clang-format off
+#define MidiFraction OPLFraction
 #define MidiSequencer OPLSequencer
 typedef struct MidiRealTimeInterface OPLInterface;
 #include "midi_sequencer_impl.hpp"

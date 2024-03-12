@@ -378,7 +378,7 @@ static void DrawLevelFinished(void)
             HudTileImage(-240, 0, 820, 200, leaving_background_image);
         else
         {
-            if (r_titlescaling.d_)  // Fill Border
+            if (title_scaling.d_)  // Fill Border
             {
                 if (!leaving_background_image->blurred_version_)
                     ImageStoreBlurred(leaving_background_image);
@@ -557,7 +557,7 @@ static void DrawEnteringLevel(void)
             HudTileImage(-240, 0, 820, 200, entering_background_image);
         else
         {
-            if (r_titlescaling.d_)  // Fill Border
+            if (title_scaling.d_)  // Fill Border
             {
                 if (!entering_background_image->blurred_version_)
                     ImageStoreBlurred(entering_background_image);
@@ -891,7 +891,7 @@ static void DrawTime(float x, float y, int t, bool drawText = false)
 
 static void IntermissionEnd(void)
 {
-    E_ForceWipe();
+    ForceWipe();
 
     background_camera_map_object = nullptr;
 
@@ -1835,7 +1835,7 @@ void IntermissionDrawer(void)
                               background_image);  // Lobo: Widescreen support
             else
             {
-                if (r_titlescaling.d_)  // Fill Border
+                if (title_scaling.d_)  // Fill Border
                 {
                     if (!background_image->blurred_version_)
                         ImageStoreBlurred(background_image);

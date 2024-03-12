@@ -394,7 +394,7 @@ static void CheckPlayersReborn(void)
         if (InSinglePlayerMatch())
         {
             // reload the level
-            E_ForceWipe();
+            ForceWipe();
             game_action = kGameActionLoadLevel;
 
             // -AJA- if we are on a HUB map, then we must go all the
@@ -496,7 +496,7 @@ void GameTicker(void)
     switch (game_state)
     {
         case kGameStateTitleScreen:
-            E_TitleTicker();
+            TitleTicker();
             break;
 
         case kGameStateLevel:
@@ -642,7 +642,7 @@ static void GameDoCompleted(void)
 {
     SYS_ASSERT(current_map);
 
-    E_ForceWipe();
+    ForceWipe();
 
     exit_time = INT_MAX;
 
@@ -843,7 +843,7 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
 //
 static void GameDoLoadGame(void)
 {
-    E_ForceWipe();
+    ForceWipe();
 
     const char *dir_name = SaveSlotName(defer_load_slot);
     LogDebug("GameDoLoadGame : %s\n", dir_name);
@@ -1083,7 +1083,7 @@ static void GameDoNewGame(void)
 {
     SYS_ASSERT(defer_params);
 
-    E_ForceWipe();
+    ForceWipe();
 
     SaveClearSlot("current");
     quicksave_slot = -1;
@@ -1201,7 +1201,7 @@ void GameDeferredEndGame(void)
 //
 static void GameDoEndGame(void)
 {
-    E_ForceWipe();
+    ForceWipe();
 
     DestroyAllPlayers();
 
@@ -1220,9 +1220,9 @@ static void GameDoEndGame(void)
 
     StopMusic();
 
-    E_PickLoadingScreen();
+    PickLoadingScreen();
 
-    E_StartTitle();
+    StartTitle();
 }
 
 bool GameCheckWhenAppear(AppearsFlag appear)

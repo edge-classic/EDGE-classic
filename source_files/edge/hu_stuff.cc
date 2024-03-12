@@ -69,7 +69,7 @@ Style *important_message_style;
 void HudInit(void)
 {
     // should use language["HeadsUpInit"], but LDF hasn't been loaded yet
-    E_ProgressMessage("Setting up HUD...\n");
+    StartupProgressMessage("Setting up HUD...\n");
     hud_tic = 0;
 }
 

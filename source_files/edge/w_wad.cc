@@ -2329,7 +2329,7 @@ void ProcessTxHiNamespaces(void)
 
     // TODO: collect names, remove duplicates
 
-    E_ProgressMessage("Adding standalone textures...");
+    StartupProgressMessage("Adding standalone textures...");
 
     for (int file = 0; file < (int)data_files.size(); file++)
     {
@@ -2345,7 +2345,7 @@ void ProcessTxHiNamespaces(void)
         }
     }
 
-    E_ProgressMessage("Adding high-resolution textures...");
+    StartupProgressMessage("Adding high-resolution textures...");
 
     // Add the textures that occur in between HI_START/HI_END markers
 

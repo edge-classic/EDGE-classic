@@ -3780,7 +3780,7 @@ void LevelSetup(void)
 
 void PlayerStateInit(void)
 {
-    E_ProgressMessage(language["PlayState"]);
+    StartupProgressMessage(language["PlayState"]);
 
     // There should not yet exist a player
     SYS_ASSERT(total_players == 0);

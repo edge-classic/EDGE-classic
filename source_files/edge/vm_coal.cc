@@ -447,7 +447,7 @@ static std::vector<PendingCoalScript> unread_scripts;
 
 void CoalInitialize()
 {
-    E_ProgressMessage("Starting COAL VM...");
+    StartupProgressMessage("Starting COAL VM...");
 
     ui_vm = coal::CreateVM();
 

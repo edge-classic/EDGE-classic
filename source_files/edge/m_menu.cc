@@ -1674,7 +1674,6 @@ static void QuitResponse(int ch)
 
     LogPrint("Exiting...\n");
 
-    E_EngineShutdown();
     SystemShutdown();
 
     CloseProgram(EXIT_SUCCESS);
@@ -1745,7 +1744,6 @@ void MenuImmediateQuit()
 
     LogPrint("Exiting...\n");
 
-    E_EngineShutdown();
     SystemShutdown();
 
     CloseProgram(EXIT_SUCCESS);
@@ -3126,7 +3124,7 @@ void MenuDrawer(void)
                           (current_menu->draw_function == MenuDrawLoad ||
                            current_menu->draw_function == MenuDrawSave)))
     {
-        if (r_titlescaling.d_)  // Fill Border
+        if (title_scaling.d_)  // Fill Border
         {
             if (!menu_backdrop->blurred_version_)
             {
@@ -3235,7 +3233,7 @@ void MenuTicker(void)
 
 void MenuInitialize(void)
 {
-    E_ProgressMessage(language["MiscInfo"]);
+    StartupProgressMessage(language["MiscInfo"]);
 
     current_menu = &MainMenuDefinition;
     menu_active  = false;

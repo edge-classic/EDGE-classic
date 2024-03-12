@@ -35,8 +35,8 @@
 #include <memory>
 #include <set>
 
-#include "cvt_mus2mid.hpp"
-#include "cvt_xmi2mid.hpp"
+#include "midi_convert_mus.hpp"
+#include "midi_convert_xmi.hpp"
 #include "midi_sequencer.hpp"
 
 /**
@@ -776,7 +776,7 @@ void MidiSequencer::BuildTimeLine(const std::vector<MidiEvent> &tempos,
     /********************************************************************************/
     for (size_t tk = 0; tk < track_count; ++tk)
     {
-        fraction<uint64_t>       currentTempo       = midi_tempo_;
+        MidiFraction             currentTempo       = midi_tempo_;
         double                   time               = 0.0;
         size_t                   tempo_change_index = 0;
         std::list<MidiTrackRow> &track              = midi_track_data_[tk];
@@ -799,7 +799,7 @@ void MidiSequencer::BuildTimeLine(const std::vector<MidiEvent> &tempos,
                     // Stop points: begin point and tempo change points are
                     // before end point
                     std::vector<TempoChangePoint> points;
-                    fraction<uint64_t>            t;
+                    MidiFraction                  t;
                     TempoChangePoint firstPoint = {posPrev->absolute_position_,
                                                    currentTempo};
                     points.push_back(firstPoint);
@@ -813,7 +813,7 @@ void MidiSequencer::BuildTimeLine(const std::vector<MidiEvent> &tempos,
                         tempoMarker.absolute_position =
                             tempoPoint.absolute_tick_position;
                         tempoMarker.tempo = midi_individual_tick_delta_ *
-                                            fraction<uint64_t>(ReadIntBigEndian(
+                                            MidiFraction(ReadIntBigEndian(
                                                 tempoPoint.data.data(),
                                                 tempoPoint.data.size()));
                         points.push_back(tempoMarker);
@@ -838,7 +838,7 @@ void MidiSequencer::BuildTimeLine(const std::vector<MidiEvent> &tempos,
                                    points[i].absolute_position;
                         // Time delay between points
                         t = midDelay * currentTempo;
-                        posPrev->time_delay_ += t.value();
+                        posPrev->time_delay_ += t.Value();
 
                         // Apply next tempo
                         currentTempo = points[j].tempo;
@@ -849,7 +849,7 @@ void MidiSequencer::BuildTimeLine(const std::vector<MidiEvent> &tempos,
                     uint64_t         postDelay =
                         pos.absolute_position_ - tailTempo.absolute_position;
                     t = postDelay * currentTempo;
-                    posPrev->time_delay_ += t.value();
+                    posPrev->time_delay_ += t.Value();
 
                     // Store Common time delay
                     posPrev->time_ = time;
@@ -857,9 +857,9 @@ void MidiSequencer::BuildTimeLine(const std::vector<MidiEvent> &tempos,
                 }
             }
 
-            fraction<uint64_t> t = pos.delay_ * currentTempo;
-            pos.time_delay_      = t.value();
-            pos.time_            = time;
+            MidiFraction t  = pos.delay_ * currentTempo;
+            pos.time_delay_ = t.Value();
+            pos.time_       = time;
             time += pos.time_delay_;
 
             // Capture markers after time value calculation
@@ -1092,9 +1092,9 @@ bool MidiSequencer::ProcessEvents(bool is_seek)
     for (size_t tk = 0; tk < track_count; ++tk)
         midi_current_position_.track[tk].delay -= shortestDelay;
 
-    fraction<uint64_t> t = shortestDelay * midi_tempo_;
+    MidiFraction t = shortestDelay * midi_tempo_;
 
-    midi_current_position_.wait += t.value();
+    midi_current_position_.wait += t.Value();
 
     if (caughLoopStart > 0 &&
         midi_loop_begin_position_.absolute_time_position <= 0.0)
@@ -1669,8 +1669,8 @@ void MidiSequencer::handleEvent(size_t                          track,
         if (evtype == MidiEvent::kTempoChange)  // Tempo change
         {
             midi_tempo_ = midi_individual_tick_delta_ *
-                          fraction<uint64_t>(ReadIntBigEndian(evt.data.data(),
-                                                              evt.data.size()));
+                          MidiFraction(ReadIntBigEndian(evt.data.data(),
+                                                        evt.data.size()));
             return;
         }
 
@@ -2198,8 +2198,8 @@ bool MidiSequencer::ParseImf(epi::MemFile *mfr, uint16_t rate)
     BuildSmfSetupReset(track_count);
 
     midi_individual_tick_delta_ =
-        fraction<uint64_t>(1, 1000000l * (uint64_t)(deltaTicks));
-    midi_tempo_ = fraction<uint64_t>(1, (uint64_t)(deltaTicks) * 2);
+        MidiFraction(1, 1000000l * (uint64_t)(deltaTicks));
+    midi_tempo_ = MidiFraction(1, (uint64_t)(deltaTicks) * 2);
 
     mfr->Seek(0, epi::File::kSeekpointStart);
     if (mfr->Read(imfRaw, 2) != 2)
@@ -2316,8 +2316,8 @@ bool MidiSequencer::ParseRsxx(epi::MemFile *mfr)
     rawTrackData.clear();
     rawTrackData.resize(track_count, std::vector<uint8_t>());
     midi_individual_tick_delta_ =
-        fraction<uint64_t>(1, 1000000l * (uint64_t)(deltaTicks));
-    midi_tempo_ = fraction<uint64_t>(1, (uint64_t)(deltaTicks));
+        MidiFraction(1, 1000000l * (uint64_t)(deltaTicks));
+    midi_tempo_ = MidiFraction(1, (uint64_t)(deltaTicks));
 
     size_t totalGotten = 0;
 
@@ -2405,8 +2405,8 @@ bool MidiSequencer::ParseGmf(epi::MemFile *mfr)
     rawTrackData.clear();
     rawTrackData.resize(track_count, std::vector<uint8_t>());
     midi_individual_tick_delta_ =
-        fraction<uint64_t>(1, 1000000l * (uint64_t)(deltaTicks));
-    midi_tempo_ = fraction<uint64_t>(1, (uint64_t)(deltaTicks) * 2);
+        MidiFraction(1, 1000000l * (uint64_t)(deltaTicks));
+    midi_tempo_ = MidiFraction(1, (uint64_t)(deltaTicks) * 2);
     static const unsigned char EndTag[4]   = {0xFF, 0x2F, 0x00, 0x00};
     size_t                     totalGotten = 0;
 
@@ -2494,8 +2494,8 @@ bool MidiSequencer::ParseSmf(epi::MemFile *mfr)
     rawTrackData.clear();
     rawTrackData.resize(TrackCount, std::vector<uint8_t>());
     midi_individual_tick_delta_ =
-        fraction<uint64_t>(1, 1000000l * (uint64_t)(deltaTicks));
-    midi_tempo_ = fraction<uint64_t>(1, (uint64_t)(deltaTicks) * 2);
+        MidiFraction(1, 1000000l * (uint64_t)(deltaTicks));
+    midi_tempo_ = MidiFraction(1, (uint64_t)(deltaTicks) * 2);
 
     size_t totalGotten = 0;
 

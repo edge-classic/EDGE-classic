@@ -189,7 +189,7 @@ static void DoBumpFinale(void)
 
     if (stage != kFinaleStageDone)
     {
-        if (game_state != kGameStateIntermission) E_ForceWipe();
+        if (game_state != kGameStateIntermission) ForceWipe();
 
         finale_stage = stage;
 
@@ -200,7 +200,7 @@ static void DoBumpFinale(void)
     // capture the screen _before_ changing any global state
     if (new_game_action != kGameActionNothing)
     {
-        E_ForceWipe();
+        ForceWipe();
         game_action = new_game_action;
     }
 
@@ -353,7 +353,7 @@ void FinaleTicker(void)
             // don't come here again (for E_ForceWipe)
             new_game_action = kGameActionNothing;
 
-            if (game_state == kGameStateFinale) E_ForceWipe();
+            if (game_state == kGameStateFinale) ForceWipe();
         }
     }
 }
@@ -376,7 +376,7 @@ static void TextWrite(void)
         }
         else
         {
-            if (r_titlescaling.d_)  // Fill Border
+            if (title_scaling.d_)  // Fill Border
             {
                 if (!finale_text_background->blurred_version_)
                     ImageStoreBlurred(finale_text_background);
@@ -704,7 +704,7 @@ static void CastDrawer(void)
     else
     {
         image = ImageLookup("BOSSBACK");
-        if (r_titlescaling.d_)  // Fill Border
+        if (title_scaling.d_)  // Fill Border
         {
             if (!image->blurred_version_) ImageStoreBlurred(image);
             HudStretchImage(-320, -200, 960, 600, image->blurred_version_, 0,
@@ -896,7 +896,7 @@ void FinaleDrawer(void)
                                   ->pics_[HMM_MIN((size_t)picture_number,
                                                   finale->pics_.size() - 1)]
                                   .c_str());
-            if (r_titlescaling.d_)  // Fill Border
+            if (title_scaling.d_)  // Fill Border
             {
                 if (!image->blurred_version_) ImageStoreBlurred(image);
                 HudStretchImage(-320, -200, 960, 600, image->blurred_version_,

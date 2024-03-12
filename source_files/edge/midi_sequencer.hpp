@@ -30,8 +30,81 @@
 #include <vector>
 
 #include "file.h"
-#include "fraction.hpp"
 #include "midi_sequencer.h"
+
+// MidiFraction is a stripped down version of
+// Bisqwit's Fraction class with the following
+// copyright:
+/*
+ * Fraction number handling.
+ * Copyright (C) 1992,2001 Bisqwit (http://iki.fi/bisqwit/)
+ *
+ * The license of this file is in Public Domain:
+ * https://bisqwit.iki.fi/src/index.html
+ *
+ * "... and orphan source code files are copyrighted public domain."
+ */
+
+class MidiFraction
+{
+    uint64_t num1_, num2_;
+    void     Optim();
+
+   public:
+    MidiFraction() : num1_(0), num2_(1) {}
+    MidiFraction(uint64_t value) : num1_(value), num2_(1) {}
+    MidiFraction(uint64_t n, uint64_t d) : num1_(n), num2_(d) {}
+    inline double Value() const { return Nom() / (double)Denom(); }
+    MidiFraction &operator*=(const MidiFraction &b)
+    {
+        num1_ *= b.Nom();
+        num2_ *= b.Denom();
+        Optim();
+        return *this;
+    }
+    MidiFraction operator*(const MidiFraction &b) const
+    {
+        MidiFraction tmp(*this);
+        tmp *= b;
+        return tmp;
+    }
+    const uint64_t &Nom() const { return num1_; }
+    const uint64_t &Denom() const { return num2_; }
+};
+
+void MidiFraction::Optim()
+{
+    /* Euclidean algorithm */
+    uint64_t n1, n2, nn1, nn2;
+
+    nn1 = num1_;
+    nn2 = num2_;
+
+    if (nn1 < nn2)
+        n1 = num1_, n2 = num2_;
+    else
+        n1 = num2_, n2 = num1_;
+
+    if (!num1_)
+    {
+        num2_ = 1;
+        return;
+    }
+    for (;;)
+    {
+        uint64_t tmp = n2 % n1;
+        if (!tmp) break;
+        n2 = n1;
+        n1 = tmp;
+    }
+    num1_ /= n1;
+    num2_ /= n1;
+}
+
+MidiFraction operator*(const uint64_t bla, const MidiFraction &b)
+{
+    return MidiFraction(bla) * b;
+}
 
 class MidiSequencer
 {
@@ -189,8 +262,8 @@ class MidiSequencer
      */
     struct TempoChangePoint
     {
-        uint64_t           absolute_position;
-        fraction<uint64_t> tempo;
+        uint64_t     absolute_position;
+        MidiFraction tempo;
     };
 
     /**
@@ -358,9 +431,9 @@ class MidiSequencer
     std::vector<MidiMarkerEntry> midi_music_markers_;
 
     //! Time of one tick
-    fraction<uint64_t> midi_individual_tick_delta_;
+    MidiFraction midi_individual_tick_delta_;
     //! Current tempo
-    fraction<uint64_t> midi_tempo_;
+    MidiFraction midi_tempo_;
 
     //! Tempo multiplier factor
     double midi_tempo_multiplier_;

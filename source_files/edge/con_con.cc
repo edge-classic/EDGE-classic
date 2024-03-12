@@ -68,7 +68,7 @@ static Style *console_style;
 
 static RGBAColor current_color;
 
-extern void E_ProgressMessage(const char *message);
+extern void StartupProgressMessage(const char *message);
 
 extern ConsoleVariable pixel_aspect_ratio;
 
@@ -1554,7 +1554,7 @@ void ConsoleStart(void)
 {
     console_visible = kConsoleVisibilityNotVisible;
     console_cursor  = 0;
-    E_ProgressMessage("Starting console...");
+    StartupProgressMessage("Starting console...");
 }
 
 void ConsoleShowFPS(void)

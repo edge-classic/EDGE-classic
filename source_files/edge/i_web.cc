@@ -72,7 +72,7 @@ void WebTick(void)
     // makes in own calls to keep on top of the event processing
     ControlGetEvents();
 
-    if (app_state & kApplicationActive) E_Tick();
+    if (app_state & kApplicationActive) EdgeTicker();
 }
 
 extern "C"
@@ -148,7 +148,7 @@ extern "C"
 
         executable_path = SDL_GetBasePath();
 
-        E_Main(argc, argv);
+        EdgeMain(argc, argv);
 
         EM_ASM_({
             if (Module.edgePostInit) { Module.edgePostInit(); }

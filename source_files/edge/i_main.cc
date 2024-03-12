@@ -44,7 +44,7 @@ extern "C"
 #endif
 
         // Run EDGE. it never returns
-        E_Main(argc, (const char **)argv);
+        EdgeMain(argc, (const char **)argv);
 
         return 0;
     }

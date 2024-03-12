@@ -583,7 +583,7 @@ void InitializeSprites(void)
 
     if (sprite_count <= 1) FatalError("Missing sprite definitions !!\n");
 
-    E_ProgressMessage("Finding sprite patches...");
+    StartupProgressMessage("Finding sprite patches...");
 
     LogPrint("InitializeSprites: Finding sprite patches\n");
 

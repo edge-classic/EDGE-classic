@@ -26,7 +26,7 @@
 #include "epi.h"
 #include "math_color.h"
 #include "sokol_color.h"
-#include "tables.h"
+#include "swirl_table.h"
 
 ImageData::ImageData(int width, int height, int depth)
     : width_(width),
@@ -665,15 +665,15 @@ void ImageData::Swirl(int leveltime, int thickness)
             sinvalue  = (y * swirlfactor + leveltime * speed * 5 + 900) & 8191;
             sinvalue2 = (x * swirlfactor2 + leveltime * speed * 4 + 300) & 8191;
             x1        = x + width_ + height_ +
-                 ((finesine[sinvalue] * amp) >> FRACBITS) +
-                 ((finesine[sinvalue2] * amp) >> FRACBITS);
+                 ((finesine[sinvalue] * amp) >> 16) +
+                 ((finesine[sinvalue2] * amp) >> 16);
 
             sinvalue = (x * swirlfactor + leveltime * speed * 3 + 700) & 8191;
             sinvalue2 =
                 (y * swirlfactor2 + leveltime * speed * 4 + 1200) & 8191;
             y1 = y + width_ + height_ +
-                 ((finesine[sinvalue] * amp) >> FRACBITS) +
-                 ((finesine[sinvalue2] * amp) >> FRACBITS);
+                 ((finesine[sinvalue] * amp) >> 16) +
+                 ((finesine[sinvalue2] * amp) >> 16);
 
             x1 &= width_ - 1;
             y1 &= height_ - 1;

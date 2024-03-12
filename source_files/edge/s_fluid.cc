@@ -26,6 +26,7 @@
 #include "i_system.h"
 #include "m_misc.h"
 // clang-format off
+#define MidiFraction FluidFraction
 #define MidiSequencer FluidSequencer
 typedef struct MidiRealTimeInterface FluidInterface;
 #include "midi_sequencer_impl.hpp"

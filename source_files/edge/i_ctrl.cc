@@ -208,7 +208,7 @@ void HandleFocusLost(void)
 {
     GrabCursor(false);
 
-    E_Idle();
+    EdgeIdle();
 
     // No longer active
     app_state &= ~kApplicationActive;

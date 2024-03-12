@@ -35,7 +35,7 @@
 
 extern float room_area;
 
-extern void E_ProgressMessage(const char *message);
+extern void StartupProgressMessage(const char *message);
 
 static bool allow_hogs = true;
 
@@ -247,7 +247,7 @@ void SoundInitialize(void)
 {
     if (no_sound) return;
 
-    E_ProgressMessage("Initializing sound device...");
+    StartupProgressMessage("Initializing sound device...");
 
     int want_chan = channel_counts[sound_mixing_channels];
 
@@ -549,7 +549,7 @@ void PrecacheSounds(void)
 {
     if (precache_sound_effects)
     {
-        E_ProgressMessage("Precaching SFX...");
+        StartupProgressMessage("Precaching SFX...");
         for (int i = 0; i < sfxdefs.size(); i++) { SoundCacheLoad(sfxdefs[i]); }
     }
 }

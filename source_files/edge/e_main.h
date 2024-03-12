@@ -27,21 +27,18 @@
 
 #include "con_var.h"
 
-void E_Main(int argc, const char **argv);
-void E_Idle(void);
-void E_Tick(void);
+void EdgeMain(int argc, const char **argv);
+void EdgeIdle(void);
+void EdgeTicker(void);
+void EdgeDisplay(void);
 
-void E_TitleTicker(void);
-void E_PickLoadingScreen(void);
-void E_AdvanceTitle(void);
-void E_StartTitle(void);
-void E_EngineShutdown(void);
-void E_ForceWipe(void);
-void E_Display(void);
+void TitleTicker(void);
+void PickLoadingScreen(void);
+void AdvanceTitle(void);
+void StartTitle(void);
+void ForceWipe(void);
 
-// startup progress stuff
-
-void E_ProgressMessage(const char *message);
+void StartupProgressMessage(const char *message);
 
 enum ApplicationStateFlag
 {
@@ -58,7 +55,7 @@ extern bool custom_MenuMain;
 extern bool custom_MenuEpisode;
 extern bool custom_MenuDifficulty;
 
-extern ConsoleVariable r_titlescaling;
+extern ConsoleVariable title_scaling;
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

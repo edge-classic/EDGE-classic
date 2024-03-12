@@ -121,7 +121,7 @@ extern ConsoleVariable crosshair_color;
 extern ConsoleVariable crosshair_size;
 extern ConsoleVariable opl_instrument_bank;
 extern ConsoleVariable midi_soundfont;
-extern ConsoleVariable r_overlay;
+extern ConsoleVariable video_overlay;
 extern ConsoleVariable erraticism;
 extern ConsoleVariable double_framerate;
 extern ConsoleVariable draw_culling;
@@ -137,7 +137,7 @@ extern ConsoleVariable gore_level;
 
 extern ConsoleVariable sector_brightness_correction;
 extern ConsoleVariable gamma_correction;
-extern ConsoleVariable r_titlescaling;
+extern ConsoleVariable title_scaling;
 extern ConsoleVariable sky_stretch_mode;
 extern ConsoleVariable force_flat_lighting;
 
@@ -440,8 +440,8 @@ static OptionMenuItem vidoptions[] = {
      "Off/UI Only/UI & Sprites/All", 4, &hq2x_scaling, OptionMenuChangeMipMap,
      "Only affects paletted (Doom format) textures"},
     {kOptionMenuItemTypeSwitch, "Title/Intermission Scaling",
-     "Normal/Fill Border", 2, &r_titlescaling.d_,
-     OptionMenuUpdateConsoleVariableFromInt, nullptr, &r_titlescaling},
+     "Normal/Fill Border", 2, &title_scaling.d_,
+     OptionMenuUpdateConsoleVariableFromInt, nullptr, &title_scaling},
     {kOptionMenuItemTypeSwitch, "Sky Scaling", "Mirror/Repeat/Stretch/Vanilla",
      4, &sky_stretch_mode.d_, OptionMenuUpdateConsoleVariableFromInt,
      "Vanilla will be forced when Mouselook is Off", &sky_stretch_mode},
@@ -449,8 +449,8 @@ static OptionMenuItem vidoptions[] = {
      nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Overlay",
      "None/Lines 1x/Lines 2x/Vertical 1x/Vertical 2x/Grill 1x/Grill 2x", 7,
-     &r_overlay.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr,
-     &r_overlay},
+     &video_overlay.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr,
+     &video_overlay},
     {kOptionMenuItemTypeSwitch, "Crosshair",
      "None/Dot/Angle/Plus/Spiked/Thin/Cross/Carat/Circle/Double", 10,
      &crosshair_style.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr,

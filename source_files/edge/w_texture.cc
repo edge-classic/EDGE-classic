@@ -433,7 +433,7 @@ void InitializeTextures(void)
 
         if (WT.texture1 < 0) continue;
 
-        if (game_base == "STRIFE")
+        if (game_base == "strife")
             InstallTextureLumpsStrife(file, &WT);
         else
             InstallTextureLumps(file, &WT);

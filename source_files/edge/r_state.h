@@ -38,7 +38,7 @@
 // Lookup tables for map data.
 //
 extern int       total_level_vertexes;
-extern vertex_t *level_vertexes;
+extern Vertex *level_vertexes;
 
 extern int     total_level_sectors;
 extern Sector *level_sectors;

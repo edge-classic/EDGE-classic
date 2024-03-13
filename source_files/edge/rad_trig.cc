@@ -32,51 +32,50 @@
 // -AJA- 2000/01/04: Split off parsing code into rad_pars.c.
 //
 
+#include "rad_trig.h"
 
-
-#include "file.h"
-#include "filesystem.h"
-#include "str_util.h"
-#include "str_compare.h"
+#include "am_map.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_input.h"
 #include "e_main.h"
-#include "hu_draw.h"
-#include "hu_style.h"
-#include "hu_stuff.h"
+#include "file.h"
+#include "filesystem.h"
 #include "g_game.h"
+#include "hu_draw.h"
+#include "hu_stuff.h"
+#include "hu_style.h"
 #include "m_argv.h"
 #include "m_menu.h"
 #include "m_misc.h"
 #include "m_random.h"
 #include "p_local.h"
 #include "p_spec.h"
-#include "rad_trig.h"
-#include "rad_act.h"
-#include "r_defs.h"
-#include "r_misc.h"
-#include "am_map.h"
 #include "r_colormap.h"
+#include "r_defs.h"
 #include "r_draw.h"
+#include "r_misc.h"
 #include "r_modes.h"
+#include "rad_act.h"
 #include "s_sound.h"
 #include "sokol_color.h"
+#include "str_compare.h"
+#include "str_util.h"
 #include "w_wad.h"
 
 // Static Scripts.  Never change once all scripts have been read in.
-rad_script_t *r_scripts = nullptr;
+TriggerScript *current_scripts = nullptr;
 
 // Dynamic Triggers.  These only exist for the current level.
-rad_trigger_t *active_triggers = nullptr;
+TriggerScriptTrigger *active_triggers = nullptr;
 
 class rts_menu_c
 {
-  private:
+   private:
     static const int MAX_TITLE  = 24;
     static const int MAX_CHOICE = 9;
 
-    rad_trigger_t *trigger;
+    TriggerScriptTrigger *trigger;
 
     Style *style;
 
@@ -84,41 +83,38 @@ class rts_menu_c
 
     std::vector<std::string> choices;
 
-  public:
+   public:
     int current_choice;
 
-  public:
-    rts_menu_c(s_show_menu_t *menu, rad_trigger_t *_trigger, Style *_style)
+   public:
+    rts_menu_c(ScriptShowMenuParameter *menu, TriggerScriptTrigger *_trigger,
+               Style *_style)
         : trigger(_trigger), style(_style), title(), choices()
     {
         const char *text = menu->title;
-        if (menu->use_ldf)
-            text = language[text];
+        if (menu->use_ldf) text = language[text];
 
         title = text;
 
         bool no_choices = (!menu->options[0] || !menu->options[1]);
 
         for (int idx = 0; (idx < 9) && menu->options[idx]; idx++)
-            AddChoice(no_choices ? 0 : ('1' + idx), menu->options[idx], menu->use_ldf);
+            AddChoice(no_choices ? 0 : ('1' + idx), menu->options[idx],
+                      menu->use_ldf);
 
         current_choice = 0;
 
-        if (choices.size() > 1)
-        {
-            choices[0].replace(0, 1, ">");
-        }
+        if (choices.size() > 1) { choices[0].replace(0, 1, ">"); }
     }
 
     ~rts_menu_c()
     { /* nothing to do */
     }
 
-  private:
+   private:
     void AddChoice(char key, const char *text, bool use_ldf)
     {
-        if (use_ldf)
-            text = language[text];
+        if (use_ldf) text = language[text];
 
         std::string choice_line = text;
 
@@ -133,16 +129,10 @@ class rts_menu_c
         choices.push_back(choice_line);
     }
 
-  public:
-    int NumChoices() const
-    {
-        return (int)choices.size();
-    }
+   public:
+    int NumChoices() const { return (int)choices.size(); }
 
-    void NotifyResult(int result)
-    {
-        trigger->menu_result = result;
-    }
+    void NotifyResult(int result) { trigger->menu_result = result; }
 
     void ChoiceDown()
     {
@@ -172,8 +162,9 @@ class rts_menu_c
 
         HudSetAlignment(0, -1);
 
-        HudSetScale(style->definition_->text_[2].scale_); // LOBO: Use TITLE.SCALE from styles.ddf
-        HudSetFont(style->fonts_[2]);            // LOBO: Use TITLE.FONT from styles.ddf
+        HudSetScale(style->definition_->text_[2]
+                        .scale_);      // LOBO: Use TITLE.SCALE from styles.ddf
+        HudSetFont(style->fonts_[2]);  // LOBO: Use TITLE.FONT from styles.ddf
 
         float total_h = HudStringHeight(title.c_str());
         total_h += HudFontHeight() * (NumChoices() + 1);
@@ -182,12 +173,11 @@ class rts_menu_c
 
         if (style->definition_->text_[2].colmap_)
         {
-            HudSetTextColor(GetFontColor(style->definition_->text_[2].colmap_)); // LOBO: Use TITLE.COLOURMAP from styles.ddf
+            HudSetTextColor(GetFontColor(
+                style->definition_->text_[2]
+                    .colmap_));  // LOBO: Use TITLE.COLOURMAP from styles.ddf
         }
-        else
-        {
-            HudSetTextColor(SG_WHITE_RGBA32);
-        }
+        else { HudSetTextColor(SG_WHITE_RGBA32); }
 
         HudDrawText(160, y, title.c_str());
 
@@ -195,20 +185,20 @@ class rts_menu_c
         HudSetFont();
         HudSetTextColor();
 
-        HudSetScale(style->definition_->text_[0].scale_); // LOBO: Use TEXT.SCALE from styles.ddf
-        HudSetFont(style->fonts_[0]);            // LOBO: Use TEXT.FONT from styles.ddf
+        HudSetScale(style->definition_->text_[0]
+                        .scale_);      // LOBO: Use TEXT.SCALE from styles.ddf
+        HudSetFont(style->fonts_[0]);  // LOBO: Use TEXT.FONT from styles.ddf
 
         y += HudStringHeight(title.c_str());
         y += HudFontHeight();
 
         if (style->definition_->text_[0].colmap_)
         {
-            HudSetTextColor(GetFontColor(style->definition_->text_[0].colmap_)); // LOBO: Use TEXT.COLOURMAP from styles.ddf
+            HudSetTextColor(GetFontColor(
+                style->definition_->text_[0]
+                    .colmap_));  // LOBO: Use TEXT.COLOURMAP from styles.ddf
         }
-        else
-        {
-            HudSetTextColor(SG_LIGHT_BLUE_RGBA32);
-        }
+        else { HudSetTextColor(SG_LIGHT_BLUE_RGBA32); }
 
         for (int c = 0; c < NumChoices(); c++, y += HudFontHeight())
         {
@@ -228,17 +218,16 @@ class rts_menu_c
         if (key == kUpArrow || key == kGamepadUp || key == kMouseWheelUp)
             ChoiceUp();
 
-        if ('a' <= key && key <= 'z')
-            key = epi::ToUpperASCII(key);
+        if ('a' <= key && key <= 'z') key = epi::ToUpperASCII(key);
 
-        if (key == 'Q' || key == 'X' || key == kGamepadB || key == kMouse2 || key == kMouse3)
+        if (key == 'Q' || key == 'X' || key == kGamepadB || key == kMouse2 ||
+            key == kMouse3)
             return 0;
 
-        if ('1' <= key && key <= ('0' + NumChoices()))
-            return key - '0';
+        if ('1' <= key && key <= ('0' + NumChoices())) return key - '0';
 
-        if (key == kSpace || key == kEnter || key == 'Y' || key == kGamepadA || key == kMouse1 ||
-            EventMatchesKey(key_use, key))
+        if (key == kSpace || key == kEnter || key == 'Y' || key == kGamepadA ||
+            key == kMouse1 || EventMatchesKey(key_use, key))
             return current_choice + 1;
 
         return -1; /* invalid */
@@ -247,89 +236,82 @@ class rts_menu_c
 
 // RTS menu active ?
 bool               rts_menu_active = false;
-static rts_menu_c *rts_curr_menu  = nullptr;
+static rts_menu_c *rts_curr_menu   = nullptr;
 
-rad_script_t *RAD_FindScriptByName(const char *map_name, const char *name)
+TriggerScript *FindScriptByName(const char *map_name, const char *name)
 {
-    rad_script_t *scr;
+    TriggerScript *scr;
 
-    for (scr = r_scripts; scr; scr = scr->next)
+    for (scr = current_scripts; scr; scr = scr->next)
     {
-        if (scr->script_name == nullptr)
-            continue;
+        if (scr->script_name == nullptr) continue;
 
-        if (strcmp(scr->mapid, map_name) != 0)
-            continue;
+        if (strcmp(scr->mapid, map_name) != 0) continue;
 
-        if (DDF_CompareName(scr->script_name, name) == 0)
-            return scr;
+        if (DDF_CompareName(scr->script_name, name) == 0) return scr;
     }
 
     FatalError("RTS: No such script `%s' on map %s.\n", name, map_name);
     return nullptr;
 }
 
-rad_trigger_t *RAD_FindTriggerByName(const char *name)
+TriggerScriptTrigger *FindScriptTriggerByName(const char *name)
 {
-    rad_trigger_t *trig;
+    TriggerScriptTrigger *trig;
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
-        if (trig->info->script_name == nullptr)
-            continue;
+        if (trig->info->script_name == nullptr) continue;
 
-        if (DDF_CompareName(trig->info->script_name, name) == 0)
-            return trig;
+        if (DDF_CompareName(trig->info->script_name, name) == 0) return trig;
     }
 
     LogWarning("RTS: No such trigger `%s'.\n", name);
     return nullptr;
 }
 
-rad_trigger_t *RAD_FindTriggerByScript(const rad_script_t *scr)
+static TriggerScriptTrigger *FindTriggerByScript(const TriggerScript *scr)
 {
-    rad_trigger_t *trig;
+    TriggerScriptTrigger *trig;
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
-        if (trig->info == scr)
-            return trig;
+        if (trig->info == scr) return trig;
     }
 
-    return nullptr; // no worries if none.
+    return nullptr;  // no worries if none.
 }
 
-rts_state_t *RAD_FindStateByLabel(rad_script_t *scr, char *label)
+TriggerScriptState *FindScriptStateByLabel(TriggerScript *scr, char *label)
 {
-    rts_state_t *st;
+    TriggerScriptState *st;
 
     for (st = scr->first_state; st; st = st->next)
     {
-        if (st->label == nullptr)
-            continue;
+        if (st->label == nullptr) continue;
 
-        if (DDF_CompareName(st->label, label) == 0)
-            return st;
+        if (DDF_CompareName(st->label, label) == 0) return st;
     }
 
     // NOTE: no error message, unlike the other Find funcs
     return nullptr;
 }
 
-void RAD_ClearWUDsByMap(const std::string &mapname)
+void ClearDeathTriggersByMap(const std::string &mapname)
 {
-    for (rad_script_t *scr = r_scripts; scr; scr = scr->next)
+    for (TriggerScript *scr = current_scripts; scr; scr = scr->next)
     {
         if (epi::StringCaseCompareASCII(scr->mapid, mapname) == 0)
         {
-            for (rts_state_t *state = scr->first_state; state; state = state->next)
+            for (TriggerScriptState *state = scr->first_state; state;
+                 state                     = state->next)
             {
-                if (state->action == RAD_ActWaitUntilDead)
+                if (state->action == ScriptWaitUntilDead)
                 {
-                    s_wait_until_dead_t *wud = (s_wait_until_dead_t *)state->param;
-                    wud->tag                 = 0;
-                    for (int n = 0; n < 10; n++)
-                        delete wud->mon_names[n];
+                    ScriptWaitUntilDeadParameter *wud =
+                        (ScriptWaitUntilDeadParameter *)state->param;
+                    wud->tag = 0;
+                    for (int n = 0; n < 10; n++) delete wud->mon_names[n];
                 }
             }
         }
@@ -341,22 +323,18 @@ void RAD_ClearWUDsByMap(const std::string &mapname)
 // either enables them or disables them (based on `disable').
 // Actor can be nullptr.
 //
-void RAD_EnableByTag(MapObject *actor, uint32_t tag, bool disable, s_tagtype_e tagtype)
+void ScriptEnableByTag(MapObject *actor, uint32_t tag, bool disable,
+                       TriggerScriptTag tagtype)
 {
-    rad_trigger_t *trig;
-
-    // if (tag <= 0)
-    // FatalError("INTERNAL ERROR: RAD_EnableByTag: bad tag %d\n", tag);
+    TriggerScriptTrigger *trig;
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
-        if (trig->info->tag[tagtype] == tag)
-            break;
+        if (trig->info->tag[tagtype] == tag) break;
     }
 
     // were there any ?
-    if (!trig)
-        return;
+    if (!trig) return;
 
     for (; trig; trig = trig->tag_next)
     {
@@ -372,24 +350,19 @@ void RAD_EnableByTag(MapObject *actor, uint32_t tag, bool disable, s_tagtype_e t
 // either enables them or disables them (based on `disable').
 // Actor can be nullptr.
 //
-void RAD_EnableByTag(MapObject *actor, const char *name, bool disable)
+void ScriptEnableByTag(MapObject *actor, const char *name, bool disable)
 {
-    rad_trigger_t *trig;
+    TriggerScriptTrigger *trig;
 
     uint32_t tag = epi::StringHash32(name);
 
-    // if (tag <= 0)
-    // FatalError("INTERNAL ERROR: RAD_EnableByTag: bad tag %d\n", tag);
-
     for (trig = active_triggers; trig; trig = trig->next)
     {
-        if (trig->info->tag[RTS_TAG_HASH] == tag)
-            break;
+        if (trig->info->tag[kTriggerTagHash] == tag) break;
     }
 
     // were there any ?
-    if (!trig)
-        return;
+    if (!trig) return;
 
     for (; trig; trig = trig->tag_next)
     {
@@ -405,27 +378,21 @@ void RAD_EnableByTag(MapObject *actor, const char *name, bool disable)
 // check if it is active).
 // Actor can be nullptr.
 //
-bool RAD_IsActiveByTag(MapObject *actor, const char *name)
+bool CheckActiveScriptByTag(MapObject *actor, const char *name)
 {
-    rad_trigger_t *trig;
+    TriggerScriptTrigger *trig;
 
     uint32_t tag = epi::StringHash32(name);
 
-    // if (tag <= 0)
-    // FatalError("INTERNAL ERROR: RAD_IsActiveByTag: bad tag %d\n", tag);
-
     for (trig = active_triggers; trig; trig = trig->next)
     {
-        if (trig->info->tag[1] == tag)
-            break;
+        if (trig->info->tag[1] == tag) break;
     }
 
     // were there any ?
-    if (!trig)
-        return false;
+    if (!trig) return false;
 
-    if (trig->disabled == false)
-        return true;
+    if (trig->disabled == false) return true;
 
     return false;
     /*
@@ -439,14 +406,14 @@ bool RAD_IsActiveByTag(MapObject *actor, const char *name)
     */
 }
 
-bool RAD_WithinRadius(MapObject *mo, rad_script_t *r)
+bool ScriptRadiusCheck(MapObject *mo, TriggerScript *r)
 {
     int sec_tag = r->sector_tag;
     if (sec_tag > 0)
     {
-        if (mo->subsector_->sector->tag != sec_tag)
-            return false;
-        if (r->rad_z >= 0 && fabs(r->z - MapObjectMidZ(mo)) > r->rad_z + mo->height_ / 2)
+        if (mo->subsector_->sector->tag != sec_tag) return false;
+        if (r->rad_z >= 0 &&
+            fabs(r->z - MapObjectMidZ(mo)) > r->rad_z + mo->height_ / 2)
             return false;
         return true;
     }
@@ -454,9 +421,9 @@ bool RAD_WithinRadius(MapObject *mo, rad_script_t *r)
     int sec_ind = r->sector_index;
     if (sec_ind >= 0 && sec_ind <= total_level_sectors)
     {
-        if (mo->subsector_->sector - level_sectors != sec_ind)
-            return false;
-        if (r->rad_z >= 0 && fabs(r->z - MapObjectMidZ(mo)) > r->rad_z + mo->height_ / 2)
+        if (mo->subsector_->sector - level_sectors != sec_ind) return false;
+        if (r->rad_z >= 0 &&
+            fabs(r->z - MapObjectMidZ(mo)) > r->rad_z + mo->height_ / 2)
             return false;
         return true;
     }
@@ -467,7 +434,8 @@ bool RAD_WithinRadius(MapObject *mo, rad_script_t *r)
     if (r->rad_y >= 0 && fabs(r->y - mo->y) > r->rad_y + mo->radius_)
         return false;
 
-    if (r->rad_z >= 0 && fabs(r->z - MapObjectMidZ(mo)) > r->rad_z + mo->height_ / 2)
+    if (r->rad_z >= 0 &&
+        fabs(r->z - MapObjectMidZ(mo)) > r->rad_z + mo->height_ / 2)
     {
         return false;
     }
@@ -475,7 +443,7 @@ bool RAD_WithinRadius(MapObject *mo, rad_script_t *r)
     return true;
 }
 
-static int RAD_AlivePlayers(void)
+static int ScriptAlivePlayers(void)
 {
     int result = 0;
 
@@ -483,14 +451,28 @@ static int RAD_AlivePlayers(void)
     {
         Player *p = players[pnum];
 
-        if (p && p->player_state_ != kPlayerDead)
+        if (p && p->player_state_ != kPlayerDead) result |= (1 << pnum);
+    }
+
+    return result;
+}
+
+static int ScriptAllPlayersInRadius(TriggerScript *r, int mask)
+{
+    int result = 0;
+
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
+    {
+        Player *p = players[pnum];
+
+        if (p && (mask & (1 << pnum)) && ScriptRadiusCheck(p->map_object_, r))
             result |= (1 << pnum);
     }
 
     return result;
 }
 
-static int RAD_AllPlayersInRadius(rad_script_t *r, int mask)
+static int ScriptAllPlayersUsing(int mask)
 {
     int result = 0;
 
@@ -498,29 +480,13 @@ static int RAD_AllPlayersInRadius(rad_script_t *r, int mask)
     {
         Player *p = players[pnum];
 
-        if (p && (mask & (1 << pnum)) && RAD_WithinRadius(p->map_object_, r))
-            result |= (1 << pnum);
-    }
-
-    return result;
-}
-
-static int RAD_AllPlayersUsing(int mask)
-{
-    int result = 0;
-
-    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
-    {
-        Player *p = players[pnum];
-
-        if (p && p->use_button_down_)
-            result |= (1 << pnum);
+        if (p && p->use_button_down_) result |= (1 << pnum);
     }
 
     return result & mask;
 }
 
-static int RAD_AllPlayersCheckCond(rad_script_t *r, int mask)
+static int ScriptAllPlayersCheckCondition(TriggerScript *r, int mask)
 {
     int result = 0;
 
@@ -528,14 +494,16 @@ static int RAD_AllPlayersCheckCond(rad_script_t *r, int mask)
     {
         Player *p = players[pnum];
 
-        if (p && (mask & (1 << pnum)) && GameCheckConditions(p->map_object_, r->cond_trig))
+        if (p && (mask & (1 << pnum)) &&
+            GameCheckConditions(p->map_object_, r->cond_trig))
             result |= (1 << pnum);
     }
 
     return result;
 }
 
-static bool RAD_CheckBossTrig(rad_trigger_t *trig, s_ondeath_t *cond)
+static bool ScriptCheckBossTrigger(TriggerScriptTrigger   *trig,
+                                   ScriptOnDeathParameter *cond)
 {
     MapObject *mo;
 
@@ -551,7 +519,8 @@ static bool RAD_CheckBossTrig(rad_trigger_t *trig, s_ondeath_t *cond)
             cond->cached_info = mobjtypes.Lookup(cond->thing_type);
 
             if (cond->cached_info == nullptr)
-                FatalError("RTS ONDEATH: Unknown thing type %d.\n", cond->thing_type);
+                FatalError("RTS ONDEATH: Unknown thing type %d.\n",
+                           cond->thing_type);
         }
     }
 
@@ -559,21 +528,21 @@ static bool RAD_CheckBossTrig(rad_trigger_t *trig, s_ondeath_t *cond)
     for (mo = map_object_list_head; mo != nullptr; mo = mo->next_)
     {
         if (seen_monsters.count(cond->cached_info) == 0)
-            return false; // Never on map?
+            return false;  // Never on map?
 
         if (mo->info_ == cond->cached_info && mo->health_ > 0)
         {
             count++;
 
-            if (count > cond->threshhold)
-                return false;
+            if (count > cond->threshhold) return false;
         }
     }
 
     return true;
 }
 
-static bool RAD_CheckHeightTrig(rad_trigger_t *trig, s_onheight_t *cond)
+static bool ScriptCheckHeightTrigger(TriggerScriptTrigger    *trig,
+                                     ScriptOnHeightParameter *cond)
 {
     float h;
 
@@ -589,7 +558,8 @@ static bool RAD_CheckHeightTrig(rad_trigger_t *trig, s_onheight_t *cond)
         }
         else
         {
-            cond->cached_sector = RendererPointInSubsector(trig->info->x, trig->info->y)->sector;
+            cond->cached_sector =
+                RendererPointInSubsector(trig->info->x, trig->info->y)->sector;
         }
     }
 
@@ -601,25 +571,23 @@ static bool RAD_CheckHeightTrig(rad_trigger_t *trig, s_onheight_t *cond)
     return (cond->z1 <= h && h <= cond->z2);
 }
 
-bool RAD_CheckReachedTrigger(MapObject *thing)
+bool ScriptUpdatePath(MapObject *thing)
 {
-    rad_script_t  *scr = (rad_script_t *)thing->path_trigger_;
-    rad_trigger_t *trig;
+    TriggerScript        *scr = (TriggerScript *)thing->path_trigger_;
+    TriggerScriptTrigger *trig;
 
-    rts_path_t *path;
-    int         choice;
+    TriggerScriptPath *path;
+    int                choice;
 
-    if (!RAD_WithinRadius(thing, scr))
-        return false;
+    if (!ScriptRadiusCheck(thing, scr)) return false;
 
     // Thing has reached this path node. Update so it starts following
     // the next node.  Handle any PATH_EVENT too.  Enable the associated
     // trigger (could be none if there were no states).
 
-    trig = RAD_FindTriggerByScript(scr);
+    trig = FindTriggerByScript(scr);
 
-    if (trig)
-        trig->disabled = false;
+    if (trig) trig->disabled = false;
 
     if (scr->path_event_label)
     {
@@ -649,7 +617,7 @@ bool RAD_CheckReachedTrigger(MapObject *thing)
     }
 
     if (!path->cached_scr)
-        path->cached_scr = RAD_FindScriptByName(scr->mapid, path->name);
+        path->cached_scr = FindScriptByName(scr->mapid, path->name);
 
     SYS_ASSERT(path->cached_scr);
 
@@ -657,18 +625,15 @@ bool RAD_CheckReachedTrigger(MapObject *thing)
     return true;
 }
 
-static void DoRemoveTrigger(rad_trigger_t *trig)
+static void DoRemoveTrigger(TriggerScriptTrigger *trig)
 {
     // handle tag linkage
-    if (trig->tag_next)
-        trig->tag_next->tag_previous = trig->tag_previous;
+    if (trig->tag_next) trig->tag_next->tag_previous = trig->tag_previous;
 
-    if (trig->tag_previous)
-        trig->tag_previous->tag_next = trig->tag_next;
+    if (trig->tag_previous) trig->tag_previous->tag_next = trig->tag_next;
 
     // unlink and free it
-    if (trig->next)
-        trig->next->prev = trig->prev;
+    if (trig->next) trig->next->prev = trig->prev;
 
     if (trig->prev)
         trig->prev->next = trig->next;
@@ -683,9 +648,9 @@ static void DoRemoveTrigger(rad_trigger_t *trig)
 //
 // Radius Trigger Event handler.
 //
-void RAD_RunTriggers(void)
+void RunScriptTriggers(void)
 {
-    rad_trigger_t *trig, *next;
+    TriggerScriptTrigger *trig, *next;
 
     // Start looking through the trigger list.
     for (trig = active_triggers; trig; trig = next)
@@ -693,12 +658,10 @@ void RAD_RunTriggers(void)
         next = trig->next;
 
         // stop running all triggers when an RTS menu becomes active
-        if (rts_menu_active)
-            break;
+        if (rts_menu_active) break;
 
         // Don't process, if disabled
-        if (trig->disabled)
-            continue;
+        if (trig->disabled) continue;
 
         // Handle repeat delay (from TAGGED_REPEATABLE).  This must be
         // done *before* all the condition checks, and that's what makes
@@ -715,60 +678,53 @@ void RAD_RunTriggers(void)
 
         if (!(trig->info->tagged_independent && trig->activated))
         {
-            int mask = RAD_AlivePlayers();
+            int mask = ScriptAlivePlayers();
 
             // Immediate triggers are just that. Immediate.
             // Not within range so skip it.
             //
             if (!trig->info->tagged_immediate)
             {
-                mask = RAD_AllPlayersInRadius(trig->info, mask);
-                if (mask == 0)
-                    continue;
+                mask = ScriptAllPlayersInRadius(trig->info, mask);
+                if (mask == 0) continue;
             }
 
             // Check for use key trigger.
             if (trig->info->tagged_use)
             {
-                mask = RAD_AllPlayersUsing(mask);
-                if (mask == 0)
-                    continue;
+                mask = ScriptAllPlayersUsing(mask);
+                if (mask == 0) continue;
             }
 
             // height check...
             if (trig->info->height_trig)
             {
-                s_onheight_t *cur;
+                ScriptOnHeightParameter *cur;
 
                 for (cur = trig->info->height_trig; cur; cur = cur->next)
-                    if (!RAD_CheckHeightTrig(trig, cur))
-                        break;
+                    if (!ScriptCheckHeightTrigger(trig, cur)) break;
 
                 // if they all succeeded, then cur will be nullptr...
-                if (cur)
-                    continue;
+                if (cur) continue;
             }
 
             // ondeath check...
             if (trig->info->boss_trig)
             {
-                s_ondeath_t *cur;
+                ScriptOnDeathParameter *cur;
 
                 for (cur = trig->info->boss_trig; cur; cur = cur->next)
-                    if (!RAD_CheckBossTrig(trig, cur))
-                        break;
+                    if (!ScriptCheckBossTrigger(trig, cur)) break;
 
                 // if they all succeeded, then cur will be nullptr...
-                if (cur)
-                    continue;
+                if (cur) continue;
             }
 
             // condition check...
             if (trig->info->cond_trig)
             {
-                mask = RAD_AllPlayersCheckCond(trig->info, mask);
-                if (mask == 0)
-                    continue;
+                mask = ScriptAllPlayersCheckCondition(trig->info, mask);
+                if (mask == 0) continue;
             }
 
             trig->activated    = true;
@@ -788,7 +744,7 @@ void RAD_RunTriggers(void)
         while (trig->wait_tics == 0 && trig->wud_count <= 0)
         {
             // Execute current command
-            rts_state_t *state = trig->state;
+            TriggerScriptState *state = trig->state;
             SYS_ASSERT(state);
 
             // move to next state.  We do this NOW since the action itself
@@ -799,23 +755,19 @@ void RAD_RunTriggers(void)
 
             (*state->action)(trig, state->param);
 
-            if (!trig->state)
-                break;
+            if (!trig->state) break;
 
             trig->wait_tics += trig->state->tics;
 
-            if (trig->disabled || rts_menu_active)
-                break;
+            if (trig->disabled || rts_menu_active) break;
         }
 
-        if (trig->state)
-            continue;
+        if (trig->state) continue;
 
         // we've reached the end of the states.  Delete the trigger unless
         // it is Tagged_Repeatable and has some more repeats left.
         //
-        if (trig->info->repeat_count != REPEAT_FOREVER)
-            trig->repeats_left--;
+        if (trig->info->repeat_count != 0) trig->repeats_left--;
 
         if (trig->repeats_left > 0)
         {
@@ -829,100 +781,98 @@ void RAD_RunTriggers(void)
     }
 }
 
-void RAD_MonsterIsDead(MapObject *mo)
+void ScriptUpdateMonsterDeaths(MapObject *mo)
 {
     if (mo->hyper_flags_ & kHyperFlagWaitUntilDead)
     {
         mo->hyper_flags_ &= ~kHyperFlagWaitUntilDead;
 
-        rad_trigger_t *trig;
+        TriggerScriptTrigger *trig;
 
         for (trig = active_triggers; trig; trig = trig->next)
         {
-            for (auto tag : epi::SeparatedStringVector(mo->wait_until_dead_tags_, ','))
+            for (auto tag :
+                 epi::SeparatedStringVector(mo->wait_until_dead_tags_, ','))
             {
-                if (trig->wud_tag == atoi(tag.c_str()))
-                    trig->wud_count--;
+                if (trig->wud_tag == atoi(tag.c_str())) trig->wud_count--;
             }
         }
     }
 }
 
 //
-// Called from RAD_SpawnTriggers to set the tag_next & tag_previous fields
+// Called from SpawnScriptTriggers to set the tag_next & tag_previous fields
 // of each rad_trigger_t, keeping all triggers with the same tag in a
 // linked list for faster handling.
 //
-void RAD_GroupTriggerTags(rad_trigger_t *trig)
+void GroupTriggerTags(TriggerScriptTrigger *trig)
 {
-    rad_trigger_t *cur;
+    TriggerScriptTrigger *cur;
 
     trig->tag_next = trig->tag_previous = nullptr;
 
     // find first trigger with the same tag #
     for (cur = active_triggers; cur; cur = cur->next)
     {
-        if (cur == trig)
-            continue;
+        if (cur == trig) continue;
 
         if ((cur->info->tag[0] && (cur->info->tag[0] == trig->info->tag[0])) ||
             (cur->info->tag[1] && (cur->info->tag[1] == trig->info->tag[1])))
             break;
     }
 
-    if (!cur)
-        return;
+    if (!cur) return;
 
     // link it in
 
-    trig->tag_next = cur;
+    trig->tag_next     = cur;
     trig->tag_previous = cur->tag_previous;
 
-    if (cur->tag_previous)
-        cur->tag_previous->tag_next = trig;
+    if (cur->tag_previous) cur->tag_previous->tag_next = trig;
 
     cur->tag_previous = trig;
 }
 
-void RAD_SpawnTriggers(const char *map_name)
+void SpawnScriptTriggers(const char *map_name)
 {
-    rad_script_t  *scr;
-    rad_trigger_t *trig;
+    TriggerScript        *scr;
+    TriggerScriptTrigger *trig;
 
 #ifdef DEVELOPERS
     if (active_triggers)
-        FatalError("RAD_SpawnTriggers without RAD_ClearTriggers\n");
+        FatalError("SpawnScriptTriggers without ScriptClearTriggers\n");
 #endif
 
-    for (scr = r_scripts; scr; scr = scr->next)
+    for (scr = current_scripts; scr; scr = scr->next)
     {
         // This is from a different map!
         if (strcmp(map_name, scr->mapid) != 0 && strcmp(scr->mapid, "ALL") != 0)
             continue;
 
         // -AJA- 1999/09/25: Added skill checks.
-        if (!GameCheckWhenAppear(scr->appear))
-            continue;
+        if (!GameCheckWhenAppear(scr->appear)) continue;
 
         // -AJA- 2000/02/03: Added player num checks.
-        if (total_players < scr->min_players || total_players > scr->max_players)
+        if (total_players < scr->min_players ||
+            total_players > scr->max_players)
             continue;
 
         // ignore empty scripts (e.g. path nodes)
-        if (!scr->first_state)
-            continue;
+        if (!scr->first_state) continue;
 
         // OK, spawn new dynamic trigger
-        trig = new rad_trigger_t;
+        trig = new TriggerScriptTrigger;
 
         trig->info         = scr;
         trig->disabled     = scr->tagged_disabled;
-        trig->repeats_left = (scr->repeat_count < 0 || scr->repeat_count == REPEAT_FOREVER) ? 1 : scr->repeat_count;
+        trig->repeats_left = (scr->repeat_count < 0 || scr->repeat_count == 0)
+                                 ? 1
+                                 : scr->repeat_count;
         trig->repeat_delay = 0;
         trig->tip_slot     = 0;
         trig->wud_tag = trig->wud_count = 0;
 
-        RAD_GroupTriggerTags(trig);
+        GroupTriggerTags(trig);
 
         // initialise state machine
         trig->state     = scr->first_state;
@@ -932,20 +882,19 @@ void RAD_SpawnTriggers(const char *map_name)
         trig->next = active_triggers;
         trig->prev = nullptr;
 
-        if (active_triggers)
-            active_triggers->prev = trig;
+        if (active_triggers) active_triggers->prev = trig;
 
         active_triggers = trig;
     }
 }
 
-static void RAD_ClearCachedInfo(void)
+static void ScriptClearCachedInfo(void)
 {
-    rad_script_t *scr;
-    s_ondeath_t  *d_cur;
-    s_onheight_t *h_cur;
+    TriggerScript           *scr;
+    ScriptOnDeathParameter  *d_cur;
+    ScriptOnHeightParameter *h_cur;
 
-    for (scr = r_scripts; scr; scr = scr->next)
+    for (scr = current_scripts; scr; scr = scr->next)
     {
         // clear ONDEATH cached info
         for (d_cur = scr->boss_trig; d_cur; d_cur = d_cur->next)
@@ -961,89 +910,76 @@ static void RAD_ClearCachedInfo(void)
     }
 }
 
-void RAD_ClearTriggers(void)
+void ClearScriptTriggers(void)
 {
     // remove all dynamic triggers
     while (active_triggers)
     {
-        rad_trigger_t *trig = active_triggers;
-        active_triggers     = trig->next;
+        TriggerScriptTrigger *trig = active_triggers;
+        active_triggers            = trig->next;
 
         delete trig;
     }
 
-    RAD_ClearCachedInfo();
-    RAD_ResetTips();
+    ScriptClearCachedInfo();
+    ResetScriptTips();
 }
 
-void RAD_Init(void)
-{
-    RAD_InitTips();
-}
+void InitializeTriggerScripts(void) { InitializeScriptTips(); }
 
-void RAD_StartMenu(rad_trigger_t *R, s_show_menu_t *menu)
+void ScriptMenuStart(TriggerScriptTrigger *R, ScriptShowMenuParameter *menu)
 {
     SYS_ASSERT(!rts_menu_active);
 
     // find the right style
     StyleDefinition *def = nullptr;
 
-    if (R->menu_style_name)
-        def = styledefs.Lookup(R->menu_style_name);
+    if (R->menu_style_name) def = styledefs.Lookup(R->menu_style_name);
 
-    if (!def)
-        def = styledefs.Lookup("RTS MENU");
-    if (!def)
-        def = styledefs.Lookup("MENU");
-    if (!def)
-        def = default_style;
+    if (!def) def = styledefs.Lookup("RTS MENU");
+    if (!def) def = styledefs.Lookup("MENU");
+    if (!def) def = default_style;
 
-    rts_curr_menu  = new rts_menu_c(menu, R, hud_styles.Lookup(def));
+    rts_curr_menu   = new rts_menu_c(menu, R, hud_styles.Lookup(def));
     rts_menu_active = true;
 }
 
-void RAD_FinishMenu(int result)
+void ScriptMenuFinish(int result)
 {
-    if (!rts_menu_active)
-        return;
+    if (!rts_menu_active) return;
 
     SYS_ASSERT(rts_curr_menu);
 
     // zero is cancelled, otherwise result is 1..N
-    if (result < 0 || result > HMM_MAX(1, rts_curr_menu->NumChoices()))
-        return;
+    if (result < 0 || result > HMM_MAX(1, rts_curr_menu->NumChoices())) return;
 
     rts_curr_menu->NotifyResult(result);
 
     delete rts_curr_menu;
 
-    rts_curr_menu  = nullptr;
+    rts_curr_menu   = nullptr;
     rts_menu_active = false;
 }
 
-static void RAD_MenuDrawer(void)
+static void ScriptMenuDrawer(void)
 {
     SYS_ASSERT(rts_curr_menu);
 
     rts_curr_menu->Drawer();
 }
 
-void RAD_Drawer(void)
+void ScriptDrawer(void)
 {
-    if (!automap_active)
-        RAD_DisplayTips();
+    if (!automap_active) DisplayScriptTips();
 
-    if (rts_menu_active)
-        RAD_MenuDrawer();
+    if (rts_menu_active) ScriptMenuDrawer();
 }
 
-bool RAD_Responder(InputEvent *ev)
+bool ScriptResponder(InputEvent *ev)
 {
-    if (ev->type != kInputEventKeyDown)
-        return false;
+    if (ev->type != kInputEventKeyDown) return false;
 
-    if (!rts_menu_active)
-        return false;
+    if (!rts_menu_active) return false;
 
     SYS_ASSERT(rts_curr_menu);
 
@@ -1051,7 +987,7 @@ bool RAD_Responder(InputEvent *ev)
 
     if (check >= 0)
     {
-        RAD_FinishMenu(check);
+        ScriptMenuFinish(check);
         return true;
     }
 

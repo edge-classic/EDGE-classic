@@ -42,7 +42,7 @@ class Image;
 // Note: transformed values not buffered locally, like some
 // DOOM-alikes ("wt", "WebView") did.
 // Dasho: Changed to HMM_Vec4
-typedef HMM_Vec4 vertex_t;
+typedef HMM_Vec4 Vertex;
 
 // Forward of LineDefs, for Sectors.
 struct Line;
@@ -377,8 +377,8 @@ struct VertexSectorList
 struct Line
 {
     // Vertices, from v1 to v2.
-    vertex_t *vertex_1;
-    vertex_t *vertex_2;
+    Vertex *vertex_1;
+    Vertex *vertex_2;
 
     // Precalculated v2 - v1 for side checking.
     float delta_x;
@@ -471,8 +471,8 @@ struct Subsector
 //
 struct Seg
 {
-    vertex_t *vertex_1;
-    vertex_t *vertex_2;
+    Vertex *vertex_1;
+    Vertex *vertex_2;
 
     BAMAngle angle;
 

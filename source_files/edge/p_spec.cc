@@ -1123,7 +1123,7 @@ static SlopePlane *DetailSlope_BoundIt(Line *ld, Sector *sec, float dz1,
     {
         for (int vert = 0; vert < 2; vert++)
         {
-            vertex_t *V = (vert == 0) ? sec->lines[k]->vertex_1 : sec->lines[k]->vertex_2;
+            Vertex *V = (vert == 0) ? sec->lines[k]->vertex_1 : sec->lines[k]->vertex_2;
 
             float dist = nx * (V->X - ld->vertex_1->X) + ny * (V->Y - ld->vertex_1->Y);
 
@@ -1650,8 +1650,8 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special,
 
     if (special->trigger_effect_ && tag > 0)
     {
-        RAD_EnableByTag(thing, tag, special->trigger_effect_ < 0,
-                        RTS_TAG_NUMBER);
+        ScriptEnableByTag(thing, tag, special->trigger_effect_ < 0,
+                        kTriggerTagNumber);
         texSwitch = true;
     }
 

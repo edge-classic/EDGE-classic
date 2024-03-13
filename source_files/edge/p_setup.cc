@@ -80,8 +80,8 @@ EDGE_DEFINE_CONSOLE_VARIABLE(udmf_strict_namespace, "0",
 //
 
 int                 total_level_vertexes;
-vertex_t           *level_vertexes = nullptr;
-static vertex_t    *level_gl_vertexes;
+Vertex           *level_vertexes = nullptr;
+static Vertex    *level_gl_vertexes;
 int                 total_level_segs;
 Seg                *level_segs;
 int                 total_level_sectors;
@@ -271,7 +271,7 @@ static void LoadVertexes(int lump)
     const uint8_t      *data;
     int                 i;
     const RawVertex *ml;
-    vertex_t           *li;
+    Vertex           *li;
 
     if (!VerifyLump(lump, "VERTEXES"))
         FatalError("Bad WAD: level %s missing VERTEXES.\n",
@@ -285,7 +285,7 @@ static void LoadVertexes(int lump)
         FatalError("Bad WAD: level %s contains 0 vertexes.\n",
                    current_map->lump_.c_str());
 
-    level_vertexes = new vertex_t[total_level_vertexes];
+    level_vertexes = new Vertex[total_level_vertexes];
 
     // Load data into cache.
     data = LoadLumpIntoMemory(lump);
@@ -768,7 +768,7 @@ static void LoadThings(int lump)
                     mus_rts.append("    RETRIGGER\n");
                     mus_rts.append("  END_SECTOR_TRIGGER\n");
                     mus_rts.append("END_MAP\n\n");
-                    RAD_ReadScript(mus_rts, "MUSINFO");
+                    ReadTriggerScript(mus_rts, "MUSINFO");
                 }
             }
         }
@@ -805,8 +805,8 @@ static void LoadThings(int lump)
 
 static inline void ComputeLinedefData(Line *ld, int side0, int side1)
 {
-    vertex_t *v1 = ld->vertex_1;
-    vertex_t *v2 = ld->vertex_2;
+    Vertex *v1 = ld->vertex_1;
+    Vertex *v2 = ld->vertex_2;
 
     ld->delta_x = v2->X - v1->X;
     ld->delta_y = v2->Y - v1->Y;
@@ -1145,10 +1145,10 @@ static void LoadXGL3Nodes(int lumpnum)
     LogDebug("LoadXGL3Nodes: Orig Verts = %d, New Verts = %d, Map Verts = %d\n",
              oVerts, nVerts, total_level_vertexes);
 
-    level_gl_vertexes = new vertex_t[nVerts];
+    level_gl_vertexes = new Vertex[nVerts];
 
     // fill in new vertexes
-    vertex_t *vv = level_gl_vertexes;
+    Vertex *vv = level_gl_vertexes;
     for (i = 0; i < nVerts; i++, vv++)
     {
         // convert signed 16.16 fixed point to float
@@ -2419,7 +2419,7 @@ static void LoadUDMFThings()
                         mus_rts.append("    RETRIGGER\n");
                         mus_rts.append("  END_SECTOR_TRIGGER\n");
                         mus_rts.append("END_MAP\n\n");
-                        RAD_ReadScript(mus_rts, "MUSINFO");
+                        ReadTriggerScript(mus_rts, "MUSINFO");
                     }
                 }
             }
@@ -2560,7 +2560,7 @@ static void LoadUDMFCounts()
     }
 
     // initialize arrays
-    level_vertexes = new vertex_t[total_level_vertexes];
+    level_vertexes = new Vertex[total_level_vertexes];
     level_sectors  = new Sector[total_level_sectors];
     Z_Clear(level_sectors, Sector, total_level_sectors);
     level_lines = new Line[total_level_lines];
@@ -2925,7 +2925,7 @@ static void DoBlockMap()
 
     for (int i = 1; i < total_level_vertexes; i++)
     {
-        vertex_t *v = level_vertexes + i;
+        Vertex *v = level_vertexes + i;
 
         min_x = HMM_MIN((int)v->X, min_x);
         min_y = HMM_MIN((int)v->Y, min_y);
@@ -3014,7 +3014,7 @@ void GroupLines(void)
             sector->ceiling_vertex_slope_high_low = {{-40000, 40000}};
             for (j = 0; j < 3; j++)
             {
-                vertex_t *vert   = sector->lines[j]->vertex_1;
+                Vertex *vert   = sector->lines[j]->vertex_1;
                 bool      add_it = true;
                 for (HMM_Vec3 v : sector->floor_z_vertices)
                     if (AlmostEquals(v.X, vert->X) &&
@@ -3127,8 +3127,8 @@ void GroupLines(void)
             sector->ceiling_vertex_slope_high_low = {{-40000, 40000}};
             for (j = 0; j < 4; j++)
             {
-                vertex_t *vert      = sector->lines[j]->vertex_1;
-                vertex_t *vert2     = sector->lines[j]->vertex_2;
+                Vertex *vert      = sector->lines[j]->vertex_1;
+                Vertex *vert2     = sector->lines[j]->vertex_2;
                 bool      add_it_v1 = true;
                 bool      add_it_v2 = true;
                 for (HMM_Vec3 v : sector->floor_z_vertices)

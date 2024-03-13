@@ -1013,7 +1013,7 @@ void KillMapObject(MapObject *source, MapObject *target,
     target->height_ /=
         (4 / (target->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1));
 
-    RAD_MonsterIsDead(target);
+    ScriptUpdateMonsterDeaths(target);
 
     if (source && source->player_)
     {

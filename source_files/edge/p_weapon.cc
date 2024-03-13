@@ -1672,7 +1672,7 @@ void A_WeaponEnableRadTrig(MapObject *mo)
     if (psp->state && psp->state->action_par)
     {
         int tag = *(int *)psp->state->action_par;
-        RAD_EnableByTag(mo, tag, false, (s_tagtype_e)psp->state->rts_tag_type);
+        ScriptEnableByTag(mo, tag, false, (TriggerScriptTag)psp->state->rts_tag_type);
     }
 }
 
@@ -1684,7 +1684,7 @@ void A_WeaponDisableRadTrig(MapObject *mo)
     if (psp->state && psp->state->action_par)
     {
         int tag = *(int *)psp->state->action_par;
-        RAD_EnableByTag(mo, tag, true, (s_tagtype_e)psp->state->rts_tag_type);
+        ScriptEnableByTag(mo, tag, true, (TriggerScriptTag)psp->state->rts_tag_type);
     }
 }
 

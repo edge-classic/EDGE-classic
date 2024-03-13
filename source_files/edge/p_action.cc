@@ -120,7 +120,7 @@ void P_ActEnableRadTrig(MapObject *mo)
 
     int *value = (int *)mo->state_->action_par;
 
-    RAD_EnableByTag(mo, value[0], false, (s_tagtype_e)mo->state_->rts_tag_type);
+    ScriptEnableByTag(mo, value[0], false, (TriggerScriptTag)mo->state_->rts_tag_type);
 }
 
 void P_ActDisableRadTrig(MapObject *mo)
@@ -129,7 +129,7 @@ void P_ActDisableRadTrig(MapObject *mo)
 
     int *value = (int *)mo->state_->action_par;
 
-    RAD_EnableByTag(mo, value[0], true, (s_tagtype_e)mo->state_->rts_tag_type);
+    ScriptEnableByTag(mo, value[0], true, (TriggerScriptTag)mo->state_->rts_tag_type);
 }
 
 //
@@ -2605,7 +2605,7 @@ void P_ActPathFollow(MapObject *mo)
 
     if (!mo->path_trigger_) return;
 
-    if (RAD_CheckReachedTrigger(mo))
+    if (ScriptUpdatePath(mo))
     {
         // reached the very last one ?
         if (!mo->path_trigger_)

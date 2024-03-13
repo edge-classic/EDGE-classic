@@ -85,7 +85,7 @@ inline int ToUpperASCII(int character)
 void StringLowerASCII(std::string &s);
 void StringUpperASCII(std::string &s);
 
-// These are for AJBSP/Dehacked, just de-duplicated
+// These are for AJBSP/Dehacked/RTS, just de-duplicated
 // CStringCopyMax also replaces the old Z_StrNCpy macro
 void  CStringCopyMax(char *destination, const char *source, int max);
 char *CStringNew(int length);

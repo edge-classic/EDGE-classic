@@ -1690,14 +1690,14 @@ void ReadUmapinfoLumps(void)
                 temp_level->partime_ = Maps.maps[i].partime;
 
             if (Maps.maps[i].numbossactions == -1)  // "clear" directive
-                RAD_ClearWUDsByMap(Maps.maps[i].mapname);
+                ClearDeathTriggersByMap(Maps.maps[i].mapname);
             else if (Maps.maps[i].bossactions &&
                      Maps.maps[i].numbossactions >= 1)
             {
                 // The UMAPINFO spec seems to suggest that any custom actions
                 // should invalidate previous death triggers for the map in
                 // question
-                RAD_ClearWUDsByMap(Maps.maps[i].mapname);
+                ClearDeathTriggersByMap(Maps.maps[i].mapname);
                 std::string ba_rts = "// UMAPINFO SCRIPTS\n\n";
                 for (int a = 0; a < Maps.maps[i].numbossactions; a++)
                 {
@@ -1721,7 +1721,7 @@ void ReadUmapinfoLumps(void)
                         }
                     }
                 }
-                RAD_ReadScript(ba_rts, "UMAPINFO");
+                ReadTriggerScript(ba_rts, "UMAPINFO");
             }
 
             // If a TEMPEPI gamedef had to be created, grab some details from

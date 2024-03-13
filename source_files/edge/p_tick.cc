@@ -86,7 +86,7 @@ void MapObjectTicker(bool extra_tic)
             if (players[pnum]) PlayerThink(players[pnum], extra_tic);
     }
 
-    if (!extra_tic || !double_framerate.d_) RAD_RunTriggers();
+    if (!extra_tic || !double_framerate.d_) RunScriptTriggers();
 
     RunForces(extra_tic);
     RunMapObjectThinkers(extra_tic);

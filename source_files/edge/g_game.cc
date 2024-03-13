@@ -218,8 +218,8 @@ void LoadLevel_Bits(void)
     // -ACB- 1998/08/09 New LevelSetup
     // -KM- 1998/11/25 LevelSetup accepts the autotag
     //
-    RAD_ClearTriggers();
-    RAD_FinishMenu(0);
+    ClearScriptTriggers();
+    ScriptMenuFinish(0);
 
     intermission_stats.kills       = intermission_stats.items =
         intermission_stats.secrets = 0;
@@ -240,7 +240,7 @@ void LoadLevel_Bits(void)
 
     LevelSetup();
 
-    RAD_SpawnTriggers(current_map->name_.c_str());
+    SpawnScriptTriggers(current_map->name_.c_str());
 
     exit_time     = INT_MAX;
     exit_skip_all = false;
@@ -368,7 +368,7 @@ bool GameResponder(InputEvent *ev)
 
     if (game_state == kGameStateLevel)
     {
-        if (RAD_Responder(ev)) return true;  // RTS system ate it
+        if (ScriptResponder(ev)) return true;  // RTS system ate it
 
         if (AutomapResponder(ev)) return true;  // automap ate it
 
@@ -506,7 +506,7 @@ void GameTicker(void)
             MapObjectTicker(false);
             AutomapTicker();
             HudTicker();
-            RAD_Ticker();
+            ScriptTicker();
 
             // do player reborns if needed
             CheckPlayersReborn();
@@ -659,7 +659,7 @@ static void GameDoCompleted(void)
 
     if (automap_active) AutomapStop();
 
-    if (rts_menu_active) RAD_FinishMenu(0);
+    if (rts_menu_active) ScriptMenuFinish(0);
 
     BotEndLevel();
 

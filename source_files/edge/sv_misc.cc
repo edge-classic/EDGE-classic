@@ -53,13 +53,13 @@ void  SV_LightCreateElems(int num_elems);
 void  SV_LightFinaliseElems(void);
 
 int   SV_TriggerCountElems(void);
-int   SV_TriggerGetIndex(rad_trigger_t *elem);
+int   SV_TriggerGetIndex(TriggerScriptTrigger *elem);
 void *SV_TriggerFindByIndex(int index);
 void  SV_TriggerCreateElems(int num_elems);
 void  SV_TriggerFinaliseElems(void);
 
 int   SV_TipCountElems(void);
-int   SV_TipGetIndex(drawtip_t *elem);
+int   SV_TipGetIndex(ScriptDrawTip *elem);
 void *SV_TipFindByIndex(int index);
 void  SV_TipCreateElems(int num_elems);
 void  SV_TipFinaliseElems(void);
@@ -261,7 +261,7 @@ SaveArray sv_array_light = {
 //
 
 static SaveField sv_fields_trigger[] = {
-    {offsetof(rad_trigger_t, info),
+    {offsetof(TriggerScriptTrigger, info),
      "info",
      1,
      {kSaveFieldString, 0, nullptr},
@@ -269,35 +269,35 @@ static SaveField sv_fields_trigger[] = {
      SaveGamePutTriggerScript,
      nullptr},
 
-    {offsetof(rad_trigger_t, disabled),
+    {offsetof(TriggerScriptTrigger, disabled),
      "disabled",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetBoolean,
      SaveGamePutBoolean,
      nullptr},
-    {offsetof(rad_trigger_t, activated),
+    {offsetof(TriggerScriptTrigger, activated),
      "activated",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetBoolean,
      SaveGamePutBoolean,
      nullptr},
-    {offsetof(rad_trigger_t, acti_players),
+    {offsetof(TriggerScriptTrigger, acti_players),
      "acti_players",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(rad_trigger_t, repeats_left),
+    {offsetof(TriggerScriptTrigger, repeats_left),
      "repeats_left",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(rad_trigger_t, repeat_delay),
+    {offsetof(TriggerScriptTrigger, repeat_delay),
      "repeat_delay",
      1,
      {kSaveFieldNumeric, 4, nullptr},
@@ -305,49 +305,49 @@ static SaveField sv_fields_trigger[] = {
      SaveGamePutInteger,
      nullptr},
 
-    {offsetof(rad_trigger_t, state),
+    {offsetof(TriggerScriptTrigger, state),
      "state",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameTriggerGetState,
      SaveGameTriggerPutState,
      nullptr},
-    {offsetof(rad_trigger_t, wait_tics),
+    {offsetof(TriggerScriptTrigger, wait_tics),
      "wait_tics",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(rad_trigger_t, tip_slot),
+    {offsetof(TriggerScriptTrigger, tip_slot),
      "tip_slot",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(rad_trigger_t, menu_style_name),
+    {offsetof(TriggerScriptTrigger, menu_style_name),
      "menu_style_name",
      1,
      {kSaveFieldString, 0, nullptr},
      SR_TipGetString,
      SR_TipPutString,
      nullptr},
-    {offsetof(rad_trigger_t, menu_result),
+    {offsetof(TriggerScriptTrigger, menu_result),
      "menu_result",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(rad_trigger_t, wud_tag),
+    {offsetof(TriggerScriptTrigger, wud_tag),
      "wud_tag",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(rad_trigger_t, wud_count),
+    {offsetof(TriggerScriptTrigger, wud_count),
      "wud_count",
      1,
      {kSaveFieldNumeric, 4, nullptr},
@@ -403,28 +403,28 @@ static SaveField sv_fields_drawtip[] = {
     // treating the `p' sub-struct here as if the fields were directly
     // in drawtip_t.
 
-    {offsetof(drawtip_t, p.x_pos),
+    {offsetof(ScriptDrawTip, p.x_pos),
      "x_pos",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetFloat,
      SaveGamePutFloat,
      nullptr},
-    {offsetof(drawtip_t, p.y_pos),
+    {offsetof(ScriptDrawTip, p.y_pos),
      "y_pos",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetFloat,
      SaveGamePutFloat,
      nullptr},
-    {offsetof(drawtip_t, p.left_just),
+    {offsetof(ScriptDrawTip, p.left_just),
      "left_just",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(drawtip_t, p.translucency),
+    {offsetof(ScriptDrawTip, p.translucency),
      "translucency",
      1,
      {kSaveFieldNumeric, 4, nullptr},
@@ -432,49 +432,49 @@ static SaveField sv_fields_drawtip[] = {
      SaveGamePutFloat,
      nullptr},
 
-    {offsetof(drawtip_t, delay),
+    {offsetof(ScriptDrawTip, delay),
      "delay",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(drawtip_t, tip_text),
+    {offsetof(ScriptDrawTip, tip_text),
      "tip_text",
      1,
      {kSaveFieldString, 0, nullptr},
      SR_TipGetString,
      SR_TipPutString,
      nullptr},
-    {offsetof(drawtip_t, tip_graphic),
+    {offsetof(ScriptDrawTip, tip_graphic),
      "tip_graphic",
      1,
      {kSaveFieldString, 0, nullptr},
      SaveGameLevelGetImage,
      SaveGameLevelPutImage,
      nullptr},
-    {offsetof(drawtip_t, playsound),
+    {offsetof(ScriptDrawTip, playsound),
      "playsound",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetBoolean,
      SaveGamePutBoolean,
      nullptr},
-    {offsetof(drawtip_t, fade_time),
+    {offsetof(ScriptDrawTip, fade_time),
      "fade_time",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetInteger,
      SaveGamePutInteger,
      nullptr},
-    {offsetof(drawtip_t, fade_target),
+    {offsetof(ScriptDrawTip, fade_target),
      "fade_target",
      1,
      {kSaveFieldNumeric, 4, nullptr},
      SaveGameGetFloat,
      SaveGamePutFloat,
      nullptr},
-    {offsetof(drawtip_t, color),
+    {offsetof(ScriptDrawTip, color),
      "color",
      1,
      {kSaveFieldNumeric, 4, nullptr},
@@ -887,7 +887,7 @@ void SV_LightFinaliseElems(void)
 
 int SV_TriggerCountElems(void)
 {
-    rad_trigger_t *cur;
+    TriggerScriptTrigger *cur;
     int            count;
 
     for (cur = active_triggers, count = 0; cur; cur = cur->next, count++)
@@ -899,7 +899,7 @@ int SV_TriggerCountElems(void)
 
 void *SV_TriggerFindByIndex(int index)
 {
-    rad_trigger_t *cur;
+    TriggerScriptTrigger *cur;
 
     for (cur = active_triggers; cur && index > 0; cur = cur->next) index--;
 
@@ -909,9 +909,9 @@ void *SV_TriggerFindByIndex(int index)
     return cur;
 }
 
-int SV_TriggerGetIndex(rad_trigger_t *elem)
+int SV_TriggerGetIndex(TriggerScriptTrigger *elem)
 {
-    rad_trigger_t *cur;
+    TriggerScriptTrigger *cur;
     int            index;
 
     for (cur = active_triggers, index = 0; cur && cur != elem; cur = cur->next)
@@ -924,11 +924,11 @@ int SV_TriggerGetIndex(rad_trigger_t *elem)
 
 void SV_TriggerCreateElems(int num_elems)
 {
-    RAD_ClearTriggers();
+    ClearScriptTriggers();
 
     for (; num_elems > 0; num_elems--)
     {
-        rad_trigger_t *cur = new rad_trigger_t;
+        TriggerScriptTrigger *cur = new TriggerScriptTrigger;
 
         // link it in
         cur->next = active_triggers;
@@ -939,8 +939,8 @@ void SV_TriggerCreateElems(int num_elems)
         active_triggers = cur;
 
         // initialise defaults
-        cur->info     = r_scripts;
-        cur->state    = r_scripts ? r_scripts->first_state : nullptr;
+        cur->info     = current_scripts;
+        cur->state    = current_scripts ? current_scripts->first_state : nullptr;
         cur->disabled = true;
     }
 }
@@ -959,34 +959,34 @@ void SV_TriggerFinaliseElems(void)
 
 //----------------------------------------------------------------------------
 
-int SV_TipCountElems(void) { return MAXTIPSLOT; }
+int SV_TipCountElems(void) { return kMaximumTipSlots; }
 
 void *SV_TipFindByIndex(int index)
 {
-    if (index < 0 || index >= MAXTIPSLOT)
+    if (index < 0 || index >= kMaximumTipSlots)
     {
         LogWarning("LOADGAME: Invalid Tip: %d\n", index);
-        index = MAXTIPSLOT - 1;
+        index = kMaximumTipSlots - 1;
     }
 
     return tip_slots + index;
 }
 
-int SV_TipGetIndex(drawtip_t *elem)
+int SV_TipGetIndex(ScriptDrawTip *elem)
 {
-    SYS_ASSERT(tip_slots <= elem && elem < (tip_slots + MAXTIPSLOT));
+    SYS_ASSERT(tip_slots <= elem && elem < (tip_slots + kMaximumTipSlots));
 
     return elem - tip_slots;
 }
 
-void SV_TipCreateElems(int num_elems) { RAD_ResetTips(); }
+void SV_TipCreateElems(int num_elems) { ResetScriptTips(); }
 
 void SV_TipFinaliseElems(void)
 {
     int i;
 
     // mark all active tip slots as dirty
-    for (i = 0; i < MAXTIPSLOT; i++)
+    for (i = 0; i < kMaximumTipSlots; i++)
     {
         if (tip_slots[i].delay > 0) tip_slots[i].dirty = true;
     }
@@ -1207,11 +1207,11 @@ void SR_LightPutType(void *storage, int index, void *extra)
 
 bool SaveGameTriggerGetState(void *storage, int index, void *extra)
 {
-    const rts_state_t **dest = (const rts_state_t **)storage + index;
-    const rts_state_t  *temp;
+    const TriggerScriptState **dest = (const TriggerScriptState **)storage + index;
+    const TriggerScriptState  *temp;
 
     int                  value;
-    const rad_trigger_t *trig = (rad_trigger_t *)sv_current_elem;
+    const TriggerScriptTrigger *trig = (TriggerScriptTrigger *)sv_current_elem;
 
     value = SaveChunkGetInteger();
 
@@ -1238,11 +1238,11 @@ bool SaveGameTriggerGetState(void *storage, int index, void *extra)
 
 void SaveGameTriggerPutState(void *storage, int index, void *extra)
 {
-    const rts_state_t *src = ((const rts_state_t **)storage)[index];
-    const rts_state_t *temp;
+    const TriggerScriptState *src = ((const TriggerScriptState **)storage)[index];
+    const TriggerScriptState *temp;
 
     int                  value;
-    const rad_trigger_t *trig = (rad_trigger_t *)sv_current_elem;
+    const TriggerScriptTrigger *trig = (TriggerScriptTrigger *)sv_current_elem;
 
     if (!src)
     {
@@ -1264,8 +1264,8 @@ void SaveGameTriggerPutState(void *storage, int index, void *extra)
 
 bool SaveGameGetTriggerScript(void *storage, int index, void *extra)
 {
-    const rad_script_t **dest = (const rad_script_t **)storage + index;
-    const rad_script_t  *temp;
+    const TriggerScript **dest = (const TriggerScript **)storage + index;
+    const TriggerScript  *temp;
 
     const char *swizzle;
     char        buffer[256];
@@ -1320,7 +1320,7 @@ bool SaveGameGetTriggerScript(void *storage, int index, void *extra)
     // now find the bugger !
     // FIXME: move into RTS code
 
-    for (temp = r_scripts; temp; temp = temp->next)
+    for (temp = current_scripts; temp; temp = temp->next)
     {
         if (DDF_CompareName(temp->mapid, map_name) != 0) continue;
 
@@ -1334,7 +1334,7 @@ bool SaveGameGetTriggerScript(void *storage, int index, void *extra)
     if (!temp)
     {
         LogWarning("LOADGAME: No such RTS script !!\n");
-        temp = r_scripts;
+        temp = current_scripts;
     }
 
     (*dest) = temp;
@@ -1356,8 +1356,8 @@ bool SaveGameGetTriggerScript(void *storage, int index, void *extra)
 //
 void SaveGamePutTriggerScript(void *storage, int index, void *extra)
 {
-    const rad_script_t *src = ((const rad_script_t **)storage)[index];
-    const rad_script_t *temp;
+    const TriggerScript *src = ((const TriggerScript **)storage)[index];
+    const TriggerScript *temp;
 
     int  idx_val;
     char buffer[256];
@@ -1370,7 +1370,7 @@ void SaveGamePutTriggerScript(void *storage, int index, void *extra)
 
     // determine index idx_val
     // FIXME: move into RTS code
-    for (temp = r_scripts, idx_val = 1; temp; temp = temp->next)
+    for (temp = current_scripts, idx_val = 1; temp; temp = temp->next)
     {
         if (DDF_CompareName(src->mapid, temp->mapid) != 0) continue;
 

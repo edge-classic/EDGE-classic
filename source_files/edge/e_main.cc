@@ -613,7 +613,7 @@ void EdgeDisplay(void)
             }
 
             HudDrawer();
-            RAD_Drawer();
+            ScriptDrawer();
             break;
 
         case kGameStateIntermission:
@@ -2031,7 +2031,7 @@ static void EdgeStartup(void)
     AddCommandLineFiles();
     CheckTurbo();
 
-    RAD_Init();
+    InitializeTriggerScripts();
     ProcessMultipleFiles();
     DDF_ParseEverything();
     // Must be done after WAD and DDF loading to check for potential

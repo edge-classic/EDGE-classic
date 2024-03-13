@@ -37,7 +37,7 @@
 // EDGE
 #include "p_action.h"
 
-void RAD_ReadScript(const std::string &_data, const std::string &source);
+void ReadTriggerScript(const std::string &_data, const std::string &source);
 
 enum DDFReadStatus
 {
@@ -2070,7 +2070,7 @@ static void DDF_ParseUnreadFile(size_t d)
 
             if (it.type == kDDFTypeRadScript)
             {
-                RAD_ReadScript(it.data, it.source);
+                ReadTriggerScript(it.data, it.source);
             }
             else
             {

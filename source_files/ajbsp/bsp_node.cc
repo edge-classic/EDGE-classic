@@ -795,15 +795,15 @@ static void FindLimits2(Seg *list, BoundingBox *bbox)
     // empty list?
     if (list == nullptr)
     {
-        bbox->minx = 0;
-        bbox->miny = 0;
-        bbox->maxx = 4;
-        bbox->maxy = 4;
+        bbox->minimum_x = 0;
+        bbox->minimum_y = 0;
+        bbox->maximum_x = 4;
+        bbox->maximum_y = 4;
         return;
     }
 
-    bbox->minx = bbox->miny = SHRT_MAX;
-    bbox->maxx = bbox->maxy = SHRT_MIN;
+    bbox->minimum_x = bbox->minimum_y = SHRT_MAX;
+    bbox->maximum_x = bbox->maximum_y = SHRT_MIN;
 
     for (; list != nullptr; list = list->next_)
     {
@@ -817,10 +817,10 @@ static void FindLimits2(Seg *list, BoundingBox *bbox)
         int hx = (int)ceil(HMM_MAX(x1, x2) + 0.2);
         int hy = (int)ceil(HMM_MAX(y1, y2) + 0.2);
 
-        if (lx < bbox->minx) bbox->minx = lx;
-        if (ly < bbox->miny) bbox->miny = ly;
-        if (hx > bbox->maxx) bbox->maxx = hx;
-        if (hy > bbox->maxy) bbox->maxy = hy;
+        if (lx < bbox->minimum_x) bbox->minimum_x = lx;
+        if (ly < bbox->minimum_y) bbox->minimum_y = ly;
+        if (hx > bbox->maximum_x) bbox->maximum_x = hx;
+        if (hy > bbox->maximum_y) bbox->maximum_y = hy;
     }
 }
 
@@ -854,7 +854,7 @@ static void AddMinisegs(Intersection *cut_list, Seg *part, Seg **left_list,
         if (len < -0.001)
         {
             FatalError("AJBSP: Bad order in intersect list: %1.3f > %1.3f\n",
-                    cut->along_dist, next->along_dist);
+                       cut->along_dist, next->along_dist);
         }
 
         bool A = cut->open_after;
@@ -1245,7 +1245,7 @@ Seg *CreateSegs()
 static QuadTree *TreeFromSegList(Seg *list, const BoundingBox *bounds)
 {
     QuadTree *tree =
-        new QuadTree(bounds->minx, bounds->miny, bounds->maxx, bounds->maxy);
+        new QuadTree(bounds->minimum_x, bounds->minimum_y, bounds->maximum_x, bounds->maximum_y);
 
     tree->AddList(list);
 
@@ -1424,7 +1424,7 @@ void Subsector::SanityCheckHasRealSeg() const
         if (seg->linedef_ != nullptr) return;
 
     FatalError("AJBSP: Subsector #%d near (%1.1f,%1.1f) has no real seg!\n",
-            index_, mid_x_, mid_y_);
+               index_, mid_x_, mid_y_);
 }
 
 void Subsector::RenumberSegs(int &cur_seg_index)

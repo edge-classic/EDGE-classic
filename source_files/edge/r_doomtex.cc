@@ -33,6 +33,7 @@
 
 #include <limits.h>
 
+#include "common_doomdefs.h"
 #include "dm_state.h"
 #include "e_main.h"
 #include "e_search.h"
@@ -225,7 +226,7 @@ static ImageData *ReadTextureAsEpiBlock(Image *rim)
     // Composite the columns into the block.
     for (i = 0, patch = tdef->patches; i < tdef->patch_count; i++, patch++)
     {
-        const patch_t *realpatch = (const patch_t *)LoadLumpIntoMemory(patch->patch);
+        const Patch *realpatch = (const Patch *)LoadLumpIntoMemory(patch->patch);
 
         int realsize = GetLumpLength(patch->patch);
 
@@ -239,7 +240,7 @@ static ImageData *ReadTextureAsEpiBlock(Image *rim)
 
         for (; x < x2; x++)
         {
-            int offset = AlignedLittleEndianS32(realpatch->columnofs[x - x1]);
+            int offset = AlignedLittleEndianS32(realpatch->column_offset[x - x1]);
 
             if (offset < 0 || offset >= realsize)
                 FatalError("Bad image offset 0x%08x in image [%s]\n", offset,
@@ -321,7 +322,7 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
         img->Clear(kTransparentPixelIndex);
 
     // Composite the columns into the block.
-    const patch_t *realpatch = nullptr;
+    const Patch *realpatch = nullptr;
     int            realsize  = 0;
 
     if (packfile_name)
@@ -329,7 +330,7 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
         epi::File *f = OpenFileFromPack(packfile_name);
         if (f)
         {
-            realpatch = (const patch_t *)f->LoadIntoMemory();
+            realpatch = (const Patch *)f->LoadIntoMemory();
             realsize  = f->GetLength();
         }
         else
@@ -339,7 +340,7 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
     }
     else
     {
-        realpatch = (const patch_t *)LoadLumpIntoMemory(lump);
+        realpatch = (const Patch *)LoadLumpIntoMemory(lump);
         realsize  = GetLumpLength(lump);
     }
 
@@ -355,7 +356,7 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
 
     for (int x = 0; x < rim->actual_width_; x++)
     {
-        int offset = AlignedLittleEndianS32(realpatch->columnofs[x]);
+        int offset = AlignedLittleEndianS32(realpatch->column_offset[x]);
 
         if (offset < 0 || offset >= realsize)
             FatalError("Bad image offset 0x%08x in image [%s]\n", offset,

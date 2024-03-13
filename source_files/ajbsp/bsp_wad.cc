@@ -25,11 +25,12 @@
 
 #include "HandmadeMath.h"
 #include "bsp_local.h"
-#include "bsp_raw_def.h"
 #include "bsp_utility.h"
+#include "common_doomdefs.h"
 #include "endianess.h"
 #include "filesystem.h"
 #include "str_compare.h"
+
 #define DEBUG_WAD 0
 
 namespace ajbsp
@@ -66,7 +67,7 @@ Lump::Lump(WadFile *parent, const RawWadEntry *entry) : parent_(parent)
 
     name_ = epi::CStringDuplicate(buffer);
 
-    lump_start_  = AlignedLittleEndianU32(entry->pos);
+    lump_start_  = AlignedLittleEndianU32(entry->position);
     lump_length_ = AlignedLittleEndianU32(entry->size);
 
 #if DEBUG_WAD
@@ -82,7 +83,7 @@ void Lump::MakeEntry(struct RawWadEntry *entry)
     memset(entry->name, 0, 8);
     memcpy(entry->name, name_, strlen(name_));
 
-    entry->pos  = AlignedLittleEndianU32(lump_start_);
+    entry->position  = AlignedLittleEndianU32(lump_start_);
     entry->size = AlignedLittleEndianU32(lump_length_);
 }
 
@@ -332,7 +333,7 @@ WadFile *WadFile::Create(std::string filename, char mode)
     RawWadHeader header;
 
     memset(&header, 0, sizeof(header));
-    memcpy(header.ident, "PWAD", 4);
+    memcpy(header.magic, "PWAD", 4);
 
     fwrite(&header, sizeof(header), 1, fp);
     fflush(fp);
@@ -577,16 +578,14 @@ void WadFile::ReadDirectory()
              fread(&header, sizeof(header), 1, file_pointer_) != 1)
         FatalError("AJBSP: Error reading WAD header.\n");
 
-    // WISH: check ident for PWAD or IWAD
+    kind_ = header.magic[0];
 
-    kind_ = header.ident[0];
-
-    directory_start_ = AlignedLittleEndianS32(header.dir_start);
-    directory_count_ = AlignedLittleEndianS32(header.num_entries);
+    directory_start_ = AlignedLittleEndianS32(header.directory_start);
+    directory_count_ = AlignedLittleEndianS32(header.total_entries);
 
     if (directory_count_ < 0 || directory_count_ > 32000)
         FatalError("AJBSP: Bad WAD header, too many entries (%d)\n",
-                directory_count_);
+                   directory_count_);
 
     if (memory_file_pointer_ &&
         !memory_file_pointer_->Seek(directory_start_,
@@ -802,7 +801,7 @@ void WadFile::ProcessNamespaces()
 
                 default:
                     FatalError("AJBSP: ProcessNamespaces: active = 0x%02x\n",
-                            (int)active);
+                               (int)active);
             }
         }
     }
@@ -1052,8 +1051,9 @@ bool WadFile::FinishLump(int final_size)
     // sanity check
     if (begun_max_size_ >= 0)
         if (final_size > begun_max_size_)
-            FatalError("AJBSP: Internal Error: wrote too much in lump (%d > %d)\n",
-                    final_size, begun_max_size_);
+            FatalError(
+                "AJBSP: Internal Error: wrote too much in lump (%d > %d)\n",
+                final_size, begun_max_size_);
 
     int pos = (int)ftell(file_pointer_);
 
@@ -1126,10 +1126,10 @@ void WadFile::WriteDirectory()
 
     RawWadHeader header;
 
-    memcpy(header.ident, (kind_ == 'I') ? "IWAD" : "PWAD", 4);
+    memcpy(header.magic, (kind_ == 'I') ? "IWAD" : "PWAD", 4);
 
-    header.dir_start   = AlignedLittleEndianU32(directory_start_);
-    header.num_entries = AlignedLittleEndianU32(directory_count_);
+    header.directory_start   = AlignedLittleEndianU32(directory_start_);
+    header.total_entries = AlignedLittleEndianU32(directory_count_);
 
     if (fwrite(&header, sizeof(header), 1, file_pointer_) != 1)
         FatalError("AJBSP: Error writing WAD header.\n");

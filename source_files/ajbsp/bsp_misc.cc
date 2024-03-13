@@ -21,9 +21,10 @@
 #include <vector>
 
 #include "bsp_local.h"
-#include "bsp_raw_def.h"
 #include "bsp_utility.h"
 #include "bsp_wad.h"
+#include "common_doomdefs.h"
+
 #define DEBUG_WALLTIPS  0
 #define DEBUG_POLYOBJ   0
 #define DEBUG_WINDOW_FX 0
@@ -263,7 +264,7 @@ void MarkPolyobjPoint(double x, double y)
 //
 // Based on code courtesy of Janis Legzdinsh.
 //
-void DetectPolyobjSectors(bool is_udmf)
+void DetectPolyobjSectors()
 {
     int i;
 
@@ -300,29 +301,6 @@ void DetectPolyobjSectors(bool is_udmf)
         return;
     }
 
-    // -JL- Detect what polyobj thing types are used - Hexen ones or ZDoom ones
-    bool hexen_style = true;
-
-    if (is_udmf) hexen_style = false;
-
-    for (i = 0; i < level_things.size(); i++)
-    {
-        Thing *T = level_things[i];
-
-        if (T->type == kZDoomPolyobjectSpawnType ||
-            T->type == kZDoomPolyobjectSpawnCrushType)
-        {
-            // -JL- A ZDoom style polyobj thing found
-            hexen_style = false;
-            break;
-        }
-    }
-
-#if DEBUG_POLYOBJ
-    LogDebug("Using %s style polyobj things\n",
-             hexen_style ? "HEXEN" : "ZDOOM");
-#endif
-
     for (i = 0; i < level_things.size(); i++)
     {
         Thing *T = level_things[i];
@@ -331,20 +309,9 @@ void DetectPolyobjSectors(bool is_udmf)
         double y = (double)T->y;
 
         // ignore everything except polyobj start spots
-        if (hexen_style)
-        {
-            // -JL- Hexen style polyobj things
-            if (T->type != kPolyobjectSpawnType &&
-                T->type != kPolyobjectSpawnCrushType)
-                continue;
-        }
-        else
-        {
-            // -JL- ZDoom style polyobj things
-            if (T->type != kZDoomPolyobjectSpawnType &&
-                T->type != kZDoomPolyobjectSpawnCrushType)
-                continue;
-        }
+        if (T->type != kZDoomPolyobjectSpawnType &&
+            T->type != kZDoomPolyobjectSpawnCrushType)
+            continue;
 
 #if DEBUG_POLYOBJ
         LogDebug("Thing %d at (%1.0f,%1.0f) is a polyobj spawner.\n", i, x, y);

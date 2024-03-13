@@ -30,7 +30,7 @@
 #include <vector>
 
 #include "AlmostEquals.h"
-#include "dm_data.h"
+#include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "edge_profiling.h"
@@ -238,7 +238,7 @@ static void SetPositionBSP(BspThingPosition *info, int nodenum)
     Subsector  *sub;
     Seg        *seg;
 
-    while (!(nodenum & NF_V5_SUBSECTOR))
+    while (!(nodenum & kLeafSubsector))
     {
         BspNode *nd = level_nodes + nodenum;
 
@@ -261,7 +261,7 @@ static void SetPositionBSP(BspThingPosition *info, int nodenum)
     // we don't actually split the thing's BBOX when it intersects with
     // a partition line.
 
-    sub = level_subsectors + (nodenum & ~NF_V5_SUBSECTOR);
+    sub = level_subsectors + (nodenum & ~kLeafSubsector);
 
     for (seg = sub->segs; seg; seg = seg->subsector_next)
     {

@@ -37,7 +37,7 @@
 
 #include <list>
 
-#include "dm_data.h"
+#include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_main.h"
@@ -333,7 +333,7 @@ Image *AddPackImageSmart(const char *name, ImageSource type,
         // close it
         delete f;
 
-        // check for Heretic/Hexen images, which are raw 320x200
+        // check for Heretic images, which are raw 320x200
         if (packfile_len == 320 * 200 && type == kImageSourceGraphic)
         {
             width  = 320;
@@ -350,8 +350,7 @@ Image *AddPackImageSmart(const char *name, ImageSource type,
             type   = kImageSourceRawBlock;
         }
         // check for flats
-        else if ((packfile_len == 64 * 64 || packfile_len == 64 * 65 ||
-                  packfile_len == 64 * 128) &&
+        else if ((packfile_len == 64 * 64 || packfile_len == 64 * 65) &&
                  type == kImageSourceGraphic)
         {
             width  = 64;
@@ -370,12 +369,12 @@ Image *AddPackImageSmart(const char *name, ImageSource type,
         // close it
         delete f;
 
-        const patch_t *pat = (patch_t *)header;
+        const Patch *pat = (Patch *)header;
 
         width    = AlignedLittleEndianS16(pat->width);
         height   = AlignedLittleEndianS16(pat->height);
-        offset_x = AlignedLittleEndianS16(pat->leftoffset);
-        offset_y = AlignedLittleEndianS16(pat->topoffset);
+        offset_x = AlignedLittleEndianS16(pat->left_offset);
+        offset_y = AlignedLittleEndianS16(pat->top_offset);
 
         is_patch = true;
     }
@@ -484,7 +483,7 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump,
         // close it
         delete f;
 
-        // check for Heretic/Hexen images, which are raw 320x200
+        // check for Heretic images, which are raw 320x200
         if (lump_len == 320 * 200 && type == kImageSourceGraphic)
         {
             width  = 320;
@@ -501,8 +500,7 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump,
             type   = kImageSourceRawBlock;
         }
         // check for flats
-        else if ((lump_len == 64 * 64 || lump_len == 64 * 65 ||
-                  lump_len == 64 * 128) &&
+        else if ((lump_len == 64 * 64 || lump_len == 64 * 65) &&
                  type == kImageSourceGraphic)
         {
             width  = 64;
@@ -521,12 +519,12 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump,
         // close it
         delete f;
 
-        const patch_t *pat = (patch_t *)header;
+        const Patch *pat = (Patch *)header;
 
         width    = AlignedLittleEndianS16(pat->width);
         height   = AlignedLittleEndianS16(pat->height);
-        offset_x = AlignedLittleEndianS16(pat->leftoffset);
-        offset_y = AlignedLittleEndianS16(pat->topoffset);
+        offset_x = AlignedLittleEndianS16(pat->left_offset);
+        offset_y = AlignedLittleEndianS16(pat->top_offset);
 
         is_patch = true;
     }
@@ -626,11 +624,6 @@ static Image *AddImageFlat(const char *name, int lump)
 
         // support for odd-size Heretic flats
         case 64 * 65:
-            size = 64;
-            break;
-
-        // support for odd-size Hexen flats
-        case 64 * 128:
             size = 64;
             break;
 

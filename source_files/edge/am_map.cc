@@ -30,9 +30,9 @@
 #include <stdio.h>
 
 #include "AlmostEquals.h"
+#include "common_doomdefs.h"
 #include "con_main.h"
 #include "con_var.h"
-#include "dm_data.h"
 #include "e_input.h"
 #include "hu_draw.h"
 #include "hu_style.h"
@@ -856,9 +856,9 @@ static void AutomapWalkSeg(Seg *seg)
     GetRotatedCoords(seg->vertex_1->X, seg->vertex_1->Y, l.a.x, l.a.y);
     GetRotatedCoords(seg->vertex_2->X, seg->vertex_2->Y, l.b.x, l.b.y);
 
-    if ((line->flags & MLF_Mapped) || show_walls)
+    if ((line->flags & kLineFlagMapped) || show_walls)
     {
-        if ((line->flags & MLF_DontDraw) && !show_walls) return;
+        if ((line->flags & kLineFlagDontDraw) && !show_walls) return;
 
         if (!front || !back) { DrawMLine(&l, am_colors[kAutomapColorWall]); }
         else
@@ -940,7 +940,7 @@ static void AutomapWalkSeg(Seg *seg)
                     return;
                 }
             }
-            if (line->flags & MLF_Secret)
+            if (line->flags & kLineFlagSecret)
             {
                 // secret door
                 if (show_walls)
@@ -985,7 +985,7 @@ static void AutomapWalkSeg(Seg *seg)
               !AlmostEquals(frame_focus->player_->powers_[kPowerTypeAllMap],
                             0.0f)))
     {
-        if (!(line->flags & MLF_DontDraw))
+        if (!(line->flags & kLineFlagDontDraw))
             DrawMLine(&l, am_colors[kAutomapColorAllmap]);
     }
 }
@@ -1223,9 +1223,9 @@ static void AutomapWalkBSPNode(unsigned int bspnum)
     int     side;
 
     // Found a subsector?
-    if (bspnum & NF_V5_SUBSECTOR)
+    if (bspnum & kLeafSubsector)
     {
-        AutomapWalkSubsector(bspnum & (~NF_V5_SUBSECTOR));
+        AutomapWalkSubsector(bspnum & (~kLeafSubsector));
         return;
     }
 

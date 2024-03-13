@@ -534,7 +534,7 @@ struct BspNode
     DividingLine divider;
     float        divider_length;
 
-    // bit NF_V5_SUBSECTOR set for a subsector.
+    // bit kLeafSubsector set for a subsector.
     unsigned int children[2];
 
     // Bounding boxes for this node.

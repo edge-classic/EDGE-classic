@@ -32,7 +32,7 @@
 
 #include <algorithm>  // sort
 
-#include "dm_data.h"  // patch_t
+#include "common_doomdefs.h"
 #include "e_main.h"
 #include "e_search.h"
 #include "endianess.h"
@@ -451,9 +451,9 @@ static void FillSpriteFramesUser()
                 offset_check->Read(header, sizeof(header));
                 delete offset_check;
 
-                const patch_t *pat    = (patch_t *)header;
-                change_img->offset_x_ = AlignedLittleEndianS16(pat->leftoffset);
-                change_img->offset_y_ = AlignedLittleEndianS16(pat->topoffset);
+                const Patch *pat    = (Patch *)header;
+                change_img->offset_x_ = AlignedLittleEndianS16(pat->left_offset);
+                change_img->offset_y_ = AlignedLittleEndianS16(pat->top_offset);
                 // adjust sprite offsets so that (0,0) is normal
                 if (sprite_map[S]->HasWeapon())
                 {

@@ -31,7 +31,7 @@
 #pragma once
 
 #include "con_var.h"
-#include "dm_data.h"
+#include "dm_defs.h"
 #include "e_player.h"
 
 class Image;
@@ -91,7 +91,7 @@ extern std::string branding_file;
 
 extern std::string game_base;
 
-extern std::string cache_dir;
+extern std::string cache_directory;
 extern std::string game_directory;
 extern std::string home_directory;
 extern std::string save_directory;

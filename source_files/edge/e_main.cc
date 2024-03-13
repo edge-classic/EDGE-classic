@@ -161,7 +161,7 @@ std::string configuration_file;
 std::string epkfile;
 std::string game_base;
 
-std::string cache_dir;
+std::string cache_directory;
 std::string game_directory;
 std::string home_directory;
 std::string save_directory;
@@ -1069,9 +1069,9 @@ static void InitializeDirectories(void)
     }
 
     // cache directory
-    cache_dir = epi::PathAppend(home_directory, kCacheDirectory);
+    cache_directory = epi::PathAppend(home_directory, kCacheDirectory);
 
-    if (!epi::IsDirectory(cache_dir)) epi::MakeDirectory(cache_dir);
+    if (!epi::IsDirectory(cache_directory)) epi::MakeDirectory(cache_directory);
 
     // savegame directory
     save_directory = epi::PathAppend(home_directory, kSaveGameDirectory);
@@ -1094,10 +1094,10 @@ static void PurgeCache(void)
 {
     std::vector<epi::DirectoryEntry> fsd;
 
-    if (!ReadDirectory(fsd, cache_dir, "*.*"))
+    if (!ReadDirectory(fsd, cache_directory, "*.*"))
     {
         FatalError("PurgeCache: Failed to read '%s' directory!\n",
-                   cache_dir.c_str());
+                   cache_directory.c_str());
     }
     else
     {

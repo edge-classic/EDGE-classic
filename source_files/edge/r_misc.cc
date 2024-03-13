@@ -31,6 +31,7 @@
 #include <math.h>
 
 #include "AlmostEquals.h"
+#include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_main.h"
@@ -211,14 +212,14 @@ Subsector *RendererPointInSubsector(float x, float y)
 
     nodenum = root_node;
 
-    while (!(nodenum & NF_V5_SUBSECTOR))
+    while (!(nodenum & kLeafSubsector))
     {
         node    = &level_nodes[nodenum];
         side    = PointOnDividingLineSide(x, y, &node->divider);
         nodenum = node->children[side];
     }
 
-    return &level_subsectors[nodenum & ~NF_V5_SUBSECTOR];
+    return &level_subsectors[nodenum & ~kLeafSubsector];
 }
 
 RegionProperties *RendererPointGetProps(Subsector *sub, float z)

@@ -36,6 +36,7 @@
 
 #include <vector>
 
+#include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "m_random.h"
@@ -122,7 +123,7 @@ static void DoForce(Force *f)
 {
     Sector *sec = f->sector;
 
-    if (sec->properties.type & MSF_Push)
+    if (sec->properties.type & kBoomSectorFlagPush)
     {
         if (f->is_point)
         {

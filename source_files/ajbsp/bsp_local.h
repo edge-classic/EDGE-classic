@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "bsp.h"
+
 namespace ajbsp
 {
 
@@ -153,7 +154,7 @@ struct Thing
     int x, y;
     int type;
 
-    // other info (angle, and hexen stuff) omitted.  We don't need to
+    // other info (angle, etc) omitted.  We don't need to
     // write the THINGS lump, only read it.
 
     // Always valid (thing indices never change).
@@ -265,8 +266,8 @@ class Subsector
 
 struct BoundingBox
 {
-    int minx, miny;
-    int maxx, maxy;
+    int minimum_x, minimum_y;
+    int maximum_x, maximum_y;
 };
 
 struct Child
@@ -386,7 +387,7 @@ void ZLibFinishLump(void);
 // detection routines
 void DetectOverlappingVertices(void);
 void DetectOverlappingLines(void);
-void DetectPolyobjSectors(bool is_udmf);
+void DetectPolyobjSectors(void);
 
 // pruning routines
 void PruneVerticesAtEnd(void);

@@ -23,6 +23,7 @@
 
 #include <limits.h>
 
+#include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "con_main.h"
@@ -996,10 +997,10 @@ void RAD_ActUnblockLines(rad_trigger_t *R, void *param)
             continue;
 
         // clear standard flags
-        ld->flags &= ~(MLF_Blocking | MLF_BlockMonsters | MLF_BlockGrounded | MLF_BlockPlayers);
+        ld->flags &= ~(kLineFlagBlocking | kLineFlagBlockMonsters | kLineFlagBlockGroundedMonsters | kLineFlagBlockPlayers);
 
         // clear EDGE's extended lineflags too
-        ld->flags &= ~(MLF_SightBlock | MLF_ShootBlock);
+        ld->flags &= ~(kLineFlagSightBlock | kLineFlagShootBlock);
     }
 }
 
@@ -1017,7 +1018,7 @@ void RAD_ActBlockLines(rad_trigger_t *R, void *param)
             continue;
 
         // set standard flags
-        ld->flags |= (MLF_Blocking | MLF_BlockMonsters);
+        ld->flags |= (kLineFlagBlocking | kLineFlagBlockMonsters);
     }
 }
 

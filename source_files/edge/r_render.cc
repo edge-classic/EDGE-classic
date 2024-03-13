@@ -29,7 +29,7 @@
 #include <unordered_set>
 
 #include "AlmostEquals.h"
-#include "dm_data.h"
+#include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "g_game.h"
@@ -1438,7 +1438,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum,
 
         AddWallTile(
             seg, dfloor, &sd->middle, slope_fh, slope_ch,
-            (ld->flags & MLF_LowerUnpegged)
+            (ld->flags & kLineFlagLowerUnpegged)
                 ? sec->floor_height + (SafeImageHeight(sd->middle.image) /
                                        sd->middle.y_matrix.Y)
                 : sec->ceiling_height,
@@ -1462,7 +1462,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum,
                 (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->floor_height,
                 sec->floor_height,
                 (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->floor_height,
-                (ld->flags & MLF_LowerUnpegged)
+                (ld->flags & kLineFlagLowerUnpegged)
                     ? sec->ceiling_height
                     : HMM_MAX(sec->floor_height, HMM_MAX(zv1, zv2)),
                 0);
@@ -1478,7 +1478,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum,
                 other->floor_height,
                 (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : other->floor_height,
                 other->floor_height,
-                (ld->flags & MLF_LowerUnpegged)
+                (ld->flags & kLineFlagLowerUnpegged)
                     ? other->ceiling_height
                     : HMM_MAX(other->floor_height, HMM_MAX(zv1, zv2)),
                 0);
@@ -1511,14 +1511,14 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum,
             }
 
             AddWallTile2(seg, dfloor, &sd->bottom, lz1, lz2, rz1, rz2,
-                         (ld->flags & MLF_LowerUnpegged) ? sec->ceiling_height
+                         (ld->flags & kLineFlagLowerUnpegged) ? sec->ceiling_height
                                                          : other->floor_height,
                          0);
         }
         else
         {
             AddWallTile(seg, dfloor, &sd->bottom, slope_fh, other->floor_height,
-                        (ld->flags & MLF_LowerUnpegged) ? sec->ceiling_height
+                        (ld->flags & kLineFlagLowerUnpegged) ? sec->ceiling_height
                                                         : other->floor_height,
                         0, f_min, c_max);
         }
@@ -1539,7 +1539,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum,
                 (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->ceiling_height,
                 sec->ceiling_height,
                 (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->ceiling_height,
-                (ld->flags & MLF_UpperUnpegged) ? sec->floor_height
+                (ld->flags & kLineFlagUpperUnpegged) ? sec->floor_height
                                                 : HMM_MIN(zv1, zv2),
                 0);
         }
@@ -1556,7 +1556,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum,
                 other->ceiling_height,
                 (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2
                                                     : other->ceiling_height,
-                (ld->flags & MLF_UpperUnpegged) ? other->floor_height
+                (ld->flags & kLineFlagUpperUnpegged) ? other->floor_height
                                                 : HMM_MIN(zv1, zv2),
                 0);
         }
@@ -1578,7 +1578,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum,
 
             AddWallTile2(
                 seg, dfloor, &sd->top, lz1, lz2, rz1, rz2,
-                (ld->flags & MLF_UpperUnpegged)
+                (ld->flags & kLineFlagUpperUnpegged)
                     ? sec->ceiling_height
                     : other->ceiling_height + SafeImageHeight(sd->top.image),
                 0);
@@ -1587,7 +1587,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum,
         {
             AddWallTile(
                 seg, dfloor, &sd->top, other->ceiling_height, slope_ch,
-                (ld->flags & MLF_UpperUnpegged)
+                (ld->flags & kLineFlagUpperUnpegged)
                     ? sec->ceiling_height
                     : other->ceiling_height + SafeImageHeight(sd->top.image),
                 0, f_min, c_max);
@@ -1628,7 +1628,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum,
             }
             c2 = c1 = HMM_MIN(HMM_MAX(sec->ceiling_height, slope_ch), och);
         }
-        else if (ld->flags & MLF_LowerUnpegged)
+        else if (ld->flags & kLineFlagLowerUnpegged)
         {
             f2 = f1 + sd->middle_mask_offset;
             c2 = f2 + (sd->middle.image->ScaledHeightActual() /
@@ -1718,7 +1718,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum,
 
             if (!surf->image && !debug_hall_of_mirrors.d_) continue;
 
-            tex_z = (C->extrafloor_line->flags & MLF_LowerUnpegged)
+            tex_z = (C->extrafloor_line->flags & kLineFlagLowerUnpegged)
                         ? C->bottom_height +
                               (SafeImageHeight(surf->image) / surf->y_matrix.Y)
                         : C->top_height;
@@ -1989,7 +1989,7 @@ static void RendererDrawSeg(DrawFloor *dfloor, Seg *seg,
     SYS_ASSERT(!seg->miniseg && seg->linedef);
 
     // mark the segment on the automap
-    seg->linedef->flags |= MLF_Mapped;
+    seg->linedef->flags |= kLineFlagMapped;
 
     front_sector = seg->front_subsector->sector;
     back_sector  = nullptr;
@@ -2167,7 +2167,7 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
     if (!precise && seg->linedef)
     {
         precise =
-            (seg->linedef->flags & MLF_Mirror) || (seg->linedef->portal_pair);
+            (seg->linedef->flags & kLineFlagMirror) || (seg->linedef->portal_pair);
     }
 
     BAMAngle angle_L = RendererPointToAngle(view_x, view_y, sx1, sy1, precise);
@@ -2224,7 +2224,7 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
 
     if (total_active_mirrors < kMaximumMirrors)
     {
-        if (seg->linedef->flags & MLF_Mirror)
+        if (seg->linedef->flags & kLineFlagMirror)
         {
             RendererWalkMirror(dsub, seg, angle_L, angle_R, false);
             RendererOcclusionSet(angle_R, angle_L);
@@ -3054,7 +3054,7 @@ static void DrawPortalPolygon(DrawMirror *mir)
 static void RendererDrawMirror(DrawMirror *mir)
 {
     // mark the segment on the automap
-    mir->seg->linedef->flags |= MLF_Mapped;
+    mir->seg->linedef->flags |= kLineFlagMapped;
 
     RendererFinishUnits();
 
@@ -3162,9 +3162,9 @@ static void RendererWalkBspNode(unsigned int bspnum)
     int      side;
 
     // Found a subsector?
-    if (bspnum & NF_V5_SUBSECTOR)
+    if (bspnum & kLeafSubsector)
     {
-        RendererWalkSubsector(bspnum & (~NF_V5_SUBSECTOR));
+        RendererWalkSubsector(bspnum & (~kLeafSubsector));
         return;
     }
 

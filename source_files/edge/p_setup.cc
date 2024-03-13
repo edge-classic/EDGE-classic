@@ -31,9 +31,9 @@
 #include "AlmostEquals.h"
 #include "am_map.h"
 #include "colormap.h"
+#include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
-#include "dm_structs.h"
 #include "e_main.h"
 #include "endianess.h"
 #include "g_game.h"
@@ -112,8 +112,6 @@ epi::CRC32 map_things_crc;
 
 int total_map_things;
 
-static bool hexen_level;
-
 static bool        udmf_level;
 static int         udmf_lump_number;
 static std::string udmf_lump;
@@ -123,27 +121,6 @@ static std::string udmf_lump;
 static int *temp_line_sides;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(goobers, "0", kConsoleVariableFlagNone)
-
-enum ThingFlag
-{
-    kThingFlagEasy   = 1,
-    kThingFlagNormal = 2,
-    kThingFlagHard   = 4,
-    // Deaf monsters/do not react to sound.
-    kThingFlagAmbush = 8,
-    // Multiplayer only.
-    kThingFlagNotSinglePlayer = 16,
-    // -AJA- 1999/09/22: Boom compatibility.
-    kThingFlagNotDeathmatch  = 32,
-    kThingFlagNotCooperative = 64,
-    // -AJA- 2000/07/31: Friend flag, from MBF
-    kThingFlagFriend = 128,
-    // -AJA- 2004/11/04: This bit should be zero (otherwise old WAD).
-    kThingFlagReserved = 256,
-    // -AJA- 2008/03/08: Extrafloor placement
-    kThingFlagExtrafloorMask  = 0x3C00,
-    kThingFlagExtrafloorShift = 10
-};
 
 // "Musinfo" is used here to refer to the traditional MUSINFO lump
 struct MusinfoMapping
@@ -247,7 +224,7 @@ static void CheckEvilutionBug(uint8_t *data, int length)
 
     LogPrint("Detected TNT MAP31 bug, adding fix.\n");
 
-    data[8] &= ~kThingFlagNotSinglePlayer;
+    data[8] &= ~kThingNotSinglePlayer;
 }
 
 static void CheckDoom2Map05Bug(uint8_t *data, int length)
@@ -293,7 +270,7 @@ static void LoadVertexes(int lump)
 {
     const uint8_t      *data;
     int                 i;
-    const raw_vertex_t *ml;
+    const RawVertex *ml;
     vertex_t           *li;
 
     if (!VerifyLump(lump, "VERTEXES"))
@@ -302,7 +279,7 @@ static void LoadVertexes(int lump)
 
     // Determine number of lumps:
     //  total lump length / vertex record length.
-    total_level_vertexes = GetLumpLength(lump) / sizeof(raw_vertex_t);
+    total_level_vertexes = GetLumpLength(lump) / sizeof(RawVertex);
 
     if (total_level_vertexes == 0)
         FatalError("Bad WAD: level %s contains 0 vertexes.\n",
@@ -313,7 +290,7 @@ static void LoadVertexes(int lump)
     // Load data into cache.
     data = LoadLumpIntoMemory(lump);
 
-    ml = (const raw_vertex_t *)data;
+    ml = (const RawVertex *)data;
     li = level_vertexes;
 
     // Copy and convert vertex coordinates,
@@ -360,7 +337,7 @@ static void SegCommonStuff(Seg *seg, int linedef_in)
 
         seg->front_sector = seg->sidedef->sector;
 
-        if (seg->linedef->flags & MLF_TwoSided)
+        if (seg->linedef->flags & kLineFlagTwoSided)
         {
             Side *other = seg->linedef->side[seg->side ^ 1];
 
@@ -401,7 +378,7 @@ static void LoadSectors(int lump)
 {
     const uint8_t      *data;
     int                 i;
-    const raw_sector_t *ms;
+    const RawSector *ms;
     Sector             *ss;
 
     if (!VerifyLump(lump, "SECTORS"))
@@ -414,7 +391,7 @@ static void LoadSectors(int lump)
                        current_map->lump_.c_str());
     }
 
-    total_level_sectors = GetLumpLength(lump) / sizeof(raw_sector_t);
+    total_level_sectors = GetLumpLength(lump) / sizeof(RawSector);
 
     if (total_level_sectors == 0)
         FatalError("Bad WAD: level %s contains 0 sectors.\n",
@@ -428,20 +405,20 @@ static void LoadSectors(int lump)
 
     CheckDoom2Map05Bug((uint8_t *)data, GetLumpLength(lump));  // Lobo: 2023
 
-    ms = (const raw_sector_t *)data;
+    ms = (const RawSector *)data;
     ss = level_sectors;
     for (i = 0; i < total_level_sectors; i++, ss++, ms++)
     {
         char buffer[10];
 
-        ss->floor_height   = AlignedLittleEndianS16(ms->floor_h);
-        ss->ceiling_height = AlignedLittleEndianS16(ms->ceil_h);
+        ss->floor_height   = AlignedLittleEndianS16(ms->floor_height);
+        ss->ceiling_height = AlignedLittleEndianS16(ms->ceiling_height);
 
         // return to wolfenstein?
         if (goobers.d_)
         {
             ss->floor_height   = 0;
-            ss->ceiling_height = (ms->floor_h == ms->ceil_h) ? 0 : 128.0f;
+            ss->ceiling_height = (ms->floor_height == ms->ceiling_height) ? 0 : 128.0f;
         }
 
         ss->original_height = (ss->floor_height + ss->ceiling_height);
@@ -454,7 +431,7 @@ static void LoadSectors(int lump)
 
         ss->ceiling = ss->floor;
 
-        epi::CStringCopyMax(buffer, ms->floor_tex, 8);
+        epi::CStringCopyMax(buffer, ms->floor_texture, 8);
         ss->floor.image = ImageLookup(buffer, kImageNamespaceFlat);
 
         if (ss->floor.image)
@@ -468,7 +445,7 @@ static void LoadSectors(int lump)
             }
         }
 
-        epi::CStringCopyMax(buffer, ms->ceil_tex, 8);
+        epi::CStringCopyMax(buffer, ms->ceil_texture, 8);
         ss->ceiling.image = ImageLookup(buffer, kImageNamespaceFlat);
 
         if (!ss->floor.image)
@@ -488,7 +465,7 @@ static void LoadSectors(int lump)
 
         ss->properties.light_level = AlignedLittleEndianS16(ms->light);
 
-        int type = AlignedLittleEndianS16(ms->special);
+        int type = AlignedLittleEndianS16(ms->type);
 
         ss->properties.type    = HMM_MAX(0, type);
         ss->properties.special = LookupSectorType(ss->properties.type);
@@ -531,7 +508,7 @@ static void SetupRootNode(void)
     if (total_level_nodes > 0) { root_node = total_level_nodes - 1; }
     else
     {
-        root_node = NF_V5_SUBSECTOR | 0;
+        root_node = kLeafSubsector | 0;
 
         // compute bbox for the single subsector
         BoundingBoxClear(dummy_bounding_box);
@@ -624,16 +601,19 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x,
     // check for apropriate skill level
     // -ES- 1999/04/13 Implemented Kester's Bugfix.
     // -AJA- 1999/10/21: Reworked again.
-    if (InSinglePlayerMatch() && (options & kThingFlagNotSinglePlayer)) return nullptr;
+    if (InSinglePlayerMatch() && (options & kThingNotSinglePlayer))
+        return nullptr;
 
     // Disable deathmatch weapons for vanilla coop...should probably be in the
     // Gameplay Options menu - Dasho
-    if (InCooperativeMatch() && (options & kThingFlagNotSinglePlayer)) return nullptr;
+    if (InCooperativeMatch() && (options & kThingNotSinglePlayer))
+        return nullptr;
 
     // -AJA- 1999/09/22: Boom compatibility flags.
-    if (InCooperativeMatch() && (options & kThingFlagNotCooperative)) return nullptr;
+    if (InCooperativeMatch() && (options & kThingNotCooperative))
+        return nullptr;
 
-    if (InDeathmatch() && (options & kThingFlagNotDeathmatch)) return nullptr;
+    if (InDeathmatch() && (options & kThingNotDeathmatch)) return nullptr;
 
     int bit;
 
@@ -669,14 +649,14 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x,
     if (mo->state_ && mo->state_->tics > 1)
         mo->tics_ = 1 + (RandomByteDeterministic() % mo->state_->tics);
 
-    if (options & kThingFlagAmbush)
+    if (options & kThingAmbush)
     {
         mo->flags_ |= kMapObjectFlagAmbush;
         mo->spawnpoint_.flags |= kMapObjectFlagAmbush;
     }
 
     // -AJA- 2000/09/22: MBF compatibility flag
-    if (options & kThingFlagFriend)
+    if (options & kThingFriend)
     {
         mo->side_ = 1;  //~0;
         mo->hyper_flags_ |= kHyperFlagUltraLoyal;
@@ -701,14 +681,14 @@ static void LoadThings(int lump)
     int      i;
 
     const uint8_t             *data;
-    const raw_thing_t         *mt;
+    const RawThing         *mt;
     const MapObjectDefinition *objtype;
 
     if (!VerifyLump(lump, "THINGS"))
         FatalError("Bad WAD: level %s missing THINGS.\n",
                    current_map->lump_.c_str());
 
-    total_map_things = GetLumpLength(lump) / sizeof(raw_thing_t);
+    total_map_things = GetLumpLength(lump) / sizeof(RawThing);
 
     if (total_map_things == 0)
         FatalError("Bad WAD: level %s contains 0 things.\n",
@@ -726,13 +706,13 @@ static void LoadThings(int lump)
 
     bool limit_options = false;
 
-    mt = (const raw_thing_t *)data;
+    mt = (const RawThing *)data;
 
     for (i = 0; i < total_map_things; i++)
     {
         options = AlignedLittleEndianU16(mt[i].options);
 
-        if (options & kThingFlagReserved) limit_options = true;
+        if (options & kThingReserved) limit_options = true;
     }
 
     for (i = 0; i < total_map_things; i++, mt++)
@@ -798,11 +778,11 @@ static void LoadThings(int lump)
         if (objtype->flags_ & kMapObjectFlagSpawnCeiling)
             z = sec->ceiling_height - objtype->height_;
 
-        if ((options & kThingFlagReserved) == 0 &&
-            (options & kThingFlagExtrafloorMask))
+        if ((options & kThingReserved) == 0 &&
+            (options & kExtrafloorMask))
         {
-            int floor_num = (options & kThingFlagExtrafloorMask) >>
-                            kThingFlagExtrafloorShift;
+            int floor_num = (options & kExtrafloorMask) >>
+                            kExtrafloorBitShift;
 
             for (Extrafloor *ef = sec->bottom_extrafloor; ef; ef = ef->higher)
             {
@@ -819,68 +799,6 @@ static void LoadThings(int lump)
     // Mark MUSINFO for this level as done processing, even if it was empty,
     // so we can avoid re-checks
     musinfo_tracks[current_map->name_].processed = true;
-
-    delete[] data;
-}
-
-static void LoadHexenThings(int lump)
-{
-    // -AJA- 2001/08/04: wrote this, based on the Hexen specs.
-
-    float    x, y, z;
-    BAMAngle angle;
-    int      options, typenum;
-    int      tag;
-    int      i;
-
-    const uint8_t             *data;
-    const raw_hexen_thing_t   *mt;
-    const MapObjectDefinition *objtype;
-
-    if (!VerifyLump(lump, "THINGS"))
-        FatalError("Bad WAD: level %s missing THINGS.\n",
-                   current_map->lump_.c_str());
-
-    total_map_things = GetLumpLength(lump) / sizeof(raw_hexen_thing_t);
-
-    if (total_map_things == 0)
-        FatalError("Bad WAD: level %s contains 0 things.\n",
-                   current_map->lump_.c_str());
-
-    data = LoadLumpIntoMemory(lump);
-    map_things_crc.AddBlock((const uint8_t *)data, GetLumpLength(lump));
-
-    mt = (const raw_hexen_thing_t *)data;
-    for (i = 0; i < total_map_things; i++, mt++)
-    {
-        x     = (float)AlignedLittleEndianS16(mt->x);
-        y     = (float)AlignedLittleEndianS16(mt->y);
-        z     = (float)AlignedLittleEndianS16(mt->height);
-        angle = epi::BAMFromDegrees((float)AlignedLittleEndianS16(mt->angle));
-
-        tag     = AlignedLittleEndianS16(mt->tid);
-        typenum = AlignedLittleEndianU16(mt->type);
-        options = AlignedLittleEndianU16(mt->options) & 0x000F;
-
-        objtype = mobjtypes.Lookup(typenum);
-
-        // MOBJTYPE not found, don't crash out: JDS Compliance.
-        // -ACB- 1998/07/21
-        if (objtype == nullptr)
-        {
-            UnknownThingWarning(typenum, x, y);
-            continue;
-        }
-
-        Sector *sec = RendererPointInSubsector(x, y)->sector;
-
-        z += sec->floor_height;
-
-        if (objtype->flags_ & kMapObjectFlagSpawnCeiling)
-            z = sec->ceiling_height - objtype->height_;
-
-        SpawnMapThing(objtype, x, y, z, sec, angle, options, tag);
-    }
 
     delete[] data;
 }
@@ -937,14 +855,14 @@ static inline void ComputeLinedefData(Line *ld, int side0, int side1)
         side0 = 0;
     }
 
-    if ((ld->flags & MLF_TwoSided) && ((side0 == -1) || (side1 == -1)))
+    if ((ld->flags & kLineFlagTwoSided) && ((side0 == -1) || (side1 == -1)))
     {
         LogWarning(
             "Bad WAD: level %s has linedef #%d marked TWOSIDED, "
             "but it has only one side.\n",
             current_map->lump_.c_str(), (int)(ld - level_lines));
 
-        ld->flags &= ~MLF_TwoSided;
+        ld->flags &= ~kLineFlagTwoSided;
     }
 
     temp_line_sides[(ld - level_lines) * 2 + 0] = side0;
@@ -965,7 +883,7 @@ static void LoadLineDefs(int lump)
         FatalError("Bad WAD: level %s missing LINEDEFS.\n",
                    current_map->lump_.c_str());
 
-    total_level_lines = GetLumpLength(lump) / sizeof(raw_linedef_t);
+    total_level_lines = GetLumpLength(lump) / sizeof(RawLinedef);
 
     if (total_level_lines == 0)
         FatalError("Bad WAD: level %s contains 0 linedefs.\n",
@@ -981,7 +899,7 @@ static void LoadLineDefs(int lump)
     map_lines_crc.AddBlock((const uint8_t *)data, GetLumpLength(lump));
 
     Line                *ld  = level_lines;
-    const raw_linedef_t *mld = (const raw_linedef_t *)data;
+    const RawLinedef *mld = (const RawLinedef *)data;
 
     for (int i = 0; i < total_level_lines; i++, mld++, ld++)
     {
@@ -992,14 +910,14 @@ static void LoadLineDefs(int lump)
 
         // Check for BoomClear flag bit and clear applicable specials
         // (PassThru may still be intentionally added further down)
-        if (ld->flags & MLF_ClearBoom)
-            ld->flags &= ~(MLF_PassThru | MLF_BlockGrounded | MLF_BlockPlayers);
+        if (ld->flags & kLineFlagClearBoomFlags)
+            ld->flags &= ~(kLineFlagBoomPassThrough | kLineFlagBlockGroundedMonsters | kLineFlagBlockPlayers);
 
         ld->special =
-            LookupLineType(HMM_MAX(0, AlignedLittleEndianS16(mld->special)));
+            LookupLineType(HMM_MAX(0, AlignedLittleEndianS16(mld->type)));
 
         if (ld->special && ld->special->type_ == kLineTriggerWalkable)
-            ld->flags |= MLF_PassThru;
+            ld->flags |= kLineFlagBoomPassThrough;
 
         if (ld->special && ld->special->type_ == kLineTriggerNone &&
             (ld->special->s_xspeed_ || ld->special->s_yspeed_ ||
@@ -1007,21 +925,21 @@ static void LoadLineDefs(int lump)
              ld->special->line_effect_ == kLineEffectTypeVectorScroll ||
              ld->special->line_effect_ == kLineEffectTypeOffsetScroll ||
              ld->special->line_effect_ == kLineEffectTypeTaggedOffsetScroll))
-            ld->flags |= MLF_PassThru;
+            ld->flags |= kLineFlagBoomPassThrough;
 
         if (ld->special && ld->special->slope_type_ & kSlopeTypeDetailFloor)
-            ld->flags |= MLF_PassThru;
+            ld->flags |= kLineFlagBoomPassThrough;
 
         if (ld->special && ld->special->slope_type_ & kSlopeTypeDetailCeiling)
-            ld->flags |= MLF_PassThru;
+            ld->flags |= kLineFlagBoomPassThrough;
 
         if (ld->special &&
             ld->special ==
                 linetypes.Lookup(0))  // Add passthru to unknown/templated
-            ld->flags |= MLF_PassThru;
+            ld->flags |= kLineFlagBoomPassThrough;
 
-        int side0 = AlignedLittleEndianU16(mld->side_R);
-        int side1 = AlignedLittleEndianU16(mld->side_L);
+        int side0 = AlignedLittleEndianU16(mld->right);
+        int side1 = AlignedLittleEndianU16(mld->left);
 
         ComputeLinedefData(ld, side0, side1);
 
@@ -1038,53 +956,6 @@ static void LoadLineDefs(int lump)
                 total_level_extrafloors++;
             }
         }
-    }
-
-    delete[] data;
-}
-
-static void LoadHexenLineDefs(int lump)
-{
-    // -AJA- 2001/08/04: wrote this, based on the Hexen specs.
-
-    if (!VerifyLump(lump, "LINEDEFS"))
-        FatalError("Bad WAD: level %s missing LINEDEFS.\n",
-                   current_map->lump_.c_str());
-
-    total_level_lines = GetLumpLength(lump) / sizeof(raw_hexen_linedef_t);
-
-    if (total_level_lines == 0)
-        FatalError("Bad WAD: level %s contains 0 linedefs.\n",
-                   current_map->lump_.c_str());
-
-    level_lines = new Line[total_level_lines];
-
-    Z_Clear(level_lines, Line, total_level_lines);
-
-    temp_line_sides = new int[total_level_lines * 2];
-
-    const uint8_t *data = LoadLumpIntoMemory(lump);
-    map_lines_crc.AddBlock((const uint8_t *)data, GetLumpLength(lump));
-
-    Line                      *ld  = level_lines;
-    const raw_hexen_linedef_t *mld = (const raw_hexen_linedef_t *)data;
-
-    for (int i = 0; i < total_level_lines; i++, mld++, ld++)
-    {
-        ld->flags    = AlignedLittleEndianU16(mld->flags) & 0x00FF;
-        ld->tag      = 0;
-        ld->vertex_1 = &level_vertexes[AlignedLittleEndianU16(mld->start)];
-        ld->vertex_2 = &level_vertexes[AlignedLittleEndianU16(mld->end)];
-
-        // this ignores the activation bits -- oh well
-        ld->special = (mld->args[0] == 0)
-                          ? nullptr
-                          : linetypes.Lookup(1000 + mld->args[0]);
-
-        int side0 = AlignedLittleEndianU16(mld->side_R);
-        int side1 = AlignedLittleEndianU16(mld->side_L);
-
-        ComputeLinedefData(ld, side0, side1);
     }
 
     delete[] data;
@@ -1467,10 +1338,10 @@ static void LoadXGL3Nodes(int lumpnum)
             td += 4;
 
             // update bbox pointers in subsector
-            if (nd->children[j] & NF_V5_SUBSECTOR)
+            if (nd->children[j] & kLeafSubsector)
             {
                 Subsector *sss =
-                    level_subsectors + (nd->children[j] & ~NF_V5_SUBSECTOR);
+                    level_subsectors + (nd->children[j] & ~kLeafSubsector);
                 sss->bounding_box = &nd->bounding_boxes[j][0];
             }
         }
@@ -2249,44 +2120,44 @@ static void LoadUDMFLineDefs()
                         side1 = epi::LexInteger(value);
                         break;
                     case epi::kENameBlocking:
-                        flags |= (epi::LexBoolean(value) ? MLF_Blocking : 0);
+                        flags |= (epi::LexBoolean(value) ? kLineFlagBlocking : 0);
                         break;
                     case epi::kENameBlockmonsters:
                         flags |=
-                            (epi::LexBoolean(value) ? MLF_BlockMonsters : 0);
+                            (epi::LexBoolean(value) ? kLineFlagBlockMonsters : 0);
                         break;
                     case epi::kENameTwosided:
-                        flags |= (epi::LexBoolean(value) ? MLF_TwoSided : 0);
+                        flags |= (epi::LexBoolean(value) ? kLineFlagTwoSided : 0);
                         break;
                     case epi::kENameDontpegtop:
                         flags |=
-                            (epi::LexBoolean(value) ? MLF_UpperUnpegged : 0);
+                            (epi::LexBoolean(value) ? kLineFlagUpperUnpegged : 0);
                         break;
                     case epi::kENameDontpegbottom:
                         flags |=
-                            (epi::LexBoolean(value) ? MLF_LowerUnpegged : 0);
+                            (epi::LexBoolean(value) ? kLineFlagLowerUnpegged : 0);
                         break;
                     case epi::kENameSecret:
-                        flags |= (epi::LexBoolean(value) ? MLF_Secret : 0);
+                        flags |= (epi::LexBoolean(value) ? kLineFlagSecret : 0);
                         break;
                     case epi::kENameBlocksound:
-                        flags |= (epi::LexBoolean(value) ? MLF_SoundBlock : 0);
+                        flags |= (epi::LexBoolean(value) ? kLineFlagSoundBlock : 0);
                         break;
                     case epi::kENameDontdraw:
-                        flags |= (epi::LexBoolean(value) ? MLF_DontDraw : 0);
+                        flags |= (epi::LexBoolean(value) ? kLineFlagDontDraw : 0);
                         break;
                     case epi::kENameMapped:
-                        flags |= (epi::LexBoolean(value) ? MLF_Mapped : 0);
+                        flags |= (epi::LexBoolean(value) ? kLineFlagMapped : 0);
                         break;
                     case epi::kENamePassuse:
-                        flags |= (epi::LexBoolean(value) ? MLF_PassThru : 0);
+                        flags |= (epi::LexBoolean(value) ? kLineFlagBoomPassThrough : 0);
                         break;
                     case epi::kENameBlockplayers:
                         flags |=
-                            (epi::LexBoolean(value) ? MLF_BlockPlayers : 0);
+                            (epi::LexBoolean(value) ? kLineFlagBlockPlayers : 0);
                         break;
                     case epi::kENameBlocksight:
-                        flags |= (epi::LexBoolean(value) ? MLF_SightBlock : 0);
+                        flags |= (epi::LexBoolean(value) ? kLineFlagSightBlock : 0);
                         break;
                     default:
                         break;
@@ -2302,7 +2173,7 @@ static void LoadUDMFLineDefs()
             ld->special = LookupLineType(HMM_MAX(0, special));
 
             if (ld->special && ld->special->type_ == kLineTriggerWalkable)
-                ld->flags |= MLF_PassThru;
+                ld->flags |= kLineFlagBoomPassThrough;
 
             if (ld->special && ld->special->type_ == kLineTriggerNone &&
                 (ld->special->s_xspeed_ || ld->special->s_yspeed_ ||
@@ -2311,19 +2182,19 @@ static void LoadUDMFLineDefs()
                  ld->special->line_effect_ == kLineEffectTypeOffsetScroll ||
                  ld->special->line_effect_ ==
                      kLineEffectTypeTaggedOffsetScroll))
-                ld->flags |= MLF_PassThru;
+                ld->flags |= kLineFlagBoomPassThrough;
 
             if (ld->special && ld->special->slope_type_ & kSlopeTypeDetailFloor)
-                ld->flags |= MLF_PassThru;
+                ld->flags |= kLineFlagBoomPassThrough;
 
             if (ld->special &&
                 ld->special->slope_type_ & kSlopeTypeDetailCeiling)
-                ld->flags |= MLF_PassThru;
+                ld->flags |= kLineFlagBoomPassThrough;
 
             if (ld->special &&
                 ld->special ==
                     linetypes.Lookup(0))  // Add passthru to unknown/templated
-                ld->flags |= MLF_PassThru;
+                ld->flags |= kLineFlagBoomPassThrough;
 
             ComputeLinedefData(ld, side0, side1);
 
@@ -2384,8 +2255,8 @@ static void LoadUDMFThings()
         {
             float    x = 0.0f, y = 0.0f, z = 0.0f;
             BAMAngle angle = kBAMAngle0;
-            int options = kThingFlagNotSinglePlayer | kThingFlagNotDeathmatch |
-                          kThingFlagNotCooperative;
+            int options = kThingNotSinglePlayer | kThingNotDeathmatch |
+                          kThingNotCooperative;
             int   typenum   = -1;
             int   tag       = 0;
             float healthfac = 1.0f;
@@ -2442,46 +2313,46 @@ static void LoadUDMFThings()
                         break;
                     case epi::kENameSkill1:
                         options |=
-                            (epi::LexBoolean(value) ? kThingFlagEasy : 0);
+                            (epi::LexBoolean(value) ? kThingEasy : 0);
                         break;
                     case epi::kENameSkill2:
                         options |=
-                            (epi::LexBoolean(value) ? kThingFlagEasy : 0);
+                            (epi::LexBoolean(value) ? kThingEasy : 0);
                         break;
                     case epi::kENameSkill3:
                         options |=
-                            (epi::LexBoolean(value) ? kThingFlagNormal : 0);
+                            (epi::LexBoolean(value) ? kThingMedium : 0);
                         break;
                     case epi::kENameSkill4:
                         options |=
-                            (epi::LexBoolean(value) ? kThingFlagHard : 0);
+                            (epi::LexBoolean(value) ? kThingHard : 0);
                         break;
                     case epi::kENameSkill5:
                         options |=
-                            (epi::LexBoolean(value) ? kThingFlagHard : 0);
+                            (epi::LexBoolean(value) ? kThingHard : 0);
                         break;
                     case epi::kENameAmbush:
                         options |=
-                            (epi::LexBoolean(value) ? kThingFlagAmbush : 0);
+                            (epi::LexBoolean(value) ? kThingAmbush : 0);
                         break;
                     case epi::kENameSingle:
                         options &=
-                            (epi::LexBoolean(value) ? ~kThingFlagNotSinglePlayer
+                            (epi::LexBoolean(value) ? ~kThingNotSinglePlayer
                                                     : options);
                         break;
                     case epi::kENameDm:
                         options &=
-                            (epi::LexBoolean(value) ? ~kThingFlagNotDeathmatch
+                            (epi::LexBoolean(value) ? ~kThingNotDeathmatch
                                                     : options);
                         break;
                     case epi::kENameCoop:
                         options &=
-                            (epi::LexBoolean(value) ? ~kThingFlagNotCooperative
+                            (epi::LexBoolean(value) ? ~kThingNotCooperative
                                                     : options);
                         break;
                     case epi::kENameFriend:
                         options |=
-                            (epi::LexBoolean(value) ? kThingFlagFriend : 0);
+                            (epi::LexBoolean(value) ? kThingFriend : 0);
                         break;
                     case epi::kENameHealth:
                         healthfac = epi::LexDouble(value);
@@ -2697,7 +2568,7 @@ static void LoadUDMFCounts()
     temp_line_sides = new int[total_level_lines * 2];
 }
 
-static void TransferMapSideDef(const raw_sidedef_t *msd, Side *sd,
+static void TransferMapSideDef(const RawSidedef *msd, Side *sd,
                                bool two_sided)
 {
     char upper_tex[10];
@@ -2725,9 +2596,9 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, Side *sd,
     }
     sd->sector = &level_sectors[sec_num];
 
-    epi::CStringCopyMax(upper_tex, msd->upper_tex, 8);
-    epi::CStringCopyMax(middle_tex, msd->mid_tex, 8);
-    epi::CStringCopyMax(lower_tex, msd->lower_tex, 8);
+    epi::CStringCopyMax(upper_tex, msd->upper_texture, 8);
+    epi::CStringCopyMax(middle_tex, msd->mid_texture, 8);
+    epi::CStringCopyMax(lower_tex, msd->lower_texture, 8);
 
     sd->top.image =
         ImageLookup(upper_tex, kImageNamespaceTexture, kImageLookupNull);
@@ -2774,7 +2645,7 @@ static void LoadSideDefs(int lump)
 {
     int                  i;
     const uint8_t       *data;
-    const raw_sidedef_t *msd;
+    const RawSidedef *msd;
     Side                *sd;
 
     int nummapsides;
@@ -2783,7 +2654,7 @@ static void LoadSideDefs(int lump)
         FatalError("Bad WAD: level %s missing SIDEDEFS.\n",
                    current_map->lump_.c_str());
 
-    nummapsides = GetLumpLength(lump) / sizeof(raw_sidedef_t);
+    nummapsides = GetLumpLength(lump) / sizeof(RawSidedef);
 
     if (nummapsides == 0)
         FatalError("Bad WAD: level %s contains 0 sidedefs.\n",
@@ -2794,7 +2665,7 @@ static void LoadSideDefs(int lump)
     Z_Clear(level_sides, Side, total_level_sides);
 
     data = LoadLumpIntoMemory(lump);
-    msd  = (const raw_sidedef_t *)data;
+    msd  = (const RawSidedef *)data;
 
     sd = level_sides;
 
@@ -3676,25 +3547,16 @@ void LevelSetup(void)
 
     if (!udmf_level)
     {
-        // check if the level is for Hexen
-        hexen_level = false;
-
-        if (IsLumpIndexValid(lumpnum + ML_BEHAVIOR) &&
-            VerifyLump(lumpnum + ML_BEHAVIOR, "BEHAVIOR"))
+        if (IsLumpIndexValid(lumpnum + kLumpBehavior) &&
+            VerifyLump(lumpnum + kLumpBehavior, "BEHAVIOR"))
         {
-            LogDebug("Detected Hexen level.\n");
-            hexen_level = true;
+            FatalError("Level %s is Hexen format (not supported).\n",
+                       current_map->lump_.c_str());
         }
-
-        LoadVertexes(lumpnum + ML_VERTEXES);
-        LoadSectors(lumpnum + ML_SECTORS);
-
-        if (hexen_level)
-            LoadHexenLineDefs(lumpnum + ML_LINEDEFS);
-        else
-            LoadLineDefs(lumpnum + ML_LINEDEFS);
-
-        LoadSideDefs(lumpnum + ML_SIDEDEFS);
+        LoadVertexes(lumpnum + kLumpVertexes);
+        LoadSectors(lumpnum + kLumpSectors);
+        LoadLineDefs(lumpnum + kLumpLinedefs);
+        LoadSideDefs(lumpnum + kLumpSidedefs);
     }
     else
     {
@@ -3742,12 +3604,7 @@ void LevelSetup(void)
     GetMusinfoTracksForLevel();
 
     if (!udmf_level)
-    {
-        if (hexen_level)
-            LoadHexenThings(lumpnum + ML_THINGS);
-        else
-            LoadThings(lumpnum + ML_THINGS);
-    }
+        LoadThings(lumpnum + kLumpThings);
     else
         LoadUDMFThings();
 

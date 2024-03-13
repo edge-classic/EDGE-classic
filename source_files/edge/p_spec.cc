@@ -32,8 +32,8 @@
 #include <limits.h>
 
 #include "AlmostEquals.h"
+#include "common_doomdefs.h"
 #include "con_main.h"
-#include "dm_data.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "f_interm.h"
@@ -117,7 +117,7 @@ Sector *GetLineSector(int currentSector, int line, int side)
 //
 int LineIsTwoSided(int sector, int line)
 {
-    return (level_sectors[sector].lines[line])->flags & MLF_TwoSided;
+    return (level_sectors[sector].lines[line])->flags & kLineFlagTwoSided;
 }
 
 //
@@ -126,7 +126,7 @@ int LineIsTwoSided(int sector, int line)
 Sector *GetLineSectorAdjacent(const Line *line, const Sector *sec,
                                 bool ignore_selfref)
 {
-    if (!(line->flags & MLF_TwoSided)) return nullptr;
+    if (!(line->flags & kLineFlagTwoSided)) return nullptr;
 
     // -AJA- 2011/03/31: follow BOOM's logic for self-ref linedefs, which
     //                   fixes the red door of MAP01 of 1024CLAU.wad
@@ -522,19 +522,19 @@ static void P_LineEffectDebris(Line *TheLine, const LineType *special)
         // block bullets/missiles
         if (special->line_effect_ & kLineEffectTypeBlockShots)
         {
-            TheLine->flags |= MLF_ShootBlock;
+            TheLine->flags |= kLineFlagShootBlock;
         }
 
         // block monster sight
         if (special->line_effect_ & kLineEffectTypeBlockSight)
         {
-            TheLine->flags |= MLF_SightBlock;
+            TheLine->flags |= kLineFlagSightBlock;
         }
 
         // It should be set in the map editor like this
         // anyway, but force it just in case
-        TheLine->flags |= MLF_Blocking;
-        TheLine->flags |= MLF_BlockMonsters;
+        TheLine->flags |= kLineFlagBlocking;
+        TheLine->flags |= kLineFlagBlockMonsters;
     }
 }
 
@@ -595,7 +595,7 @@ static void P_LineEffect(Line *target, Line *source,
     float factor = 64.0 / length;
 
     if ((special->line_effect_ & kLineEffectTypeTranslucency) &&
-        (target->flags & MLF_TwoSided))
+        (target->flags & kLineFlagTwoSided))
     {
         target->side[0]->middle.translucency = 0.5f;
         target->side[1]->middle.translucency = 0.5f;
@@ -722,20 +722,20 @@ static void P_LineEffect(Line *target, Line *source,
     if (special->line_effect_ & kLineEffectTypeUnblockThings)
     {
         if (target->side[0] && target->side[1] && (target != source))
-            target->flags &= ~(MLF_Blocking | MLF_BlockMonsters |
-                               MLF_BlockGrounded | MLF_BlockPlayers);
+            target->flags &= ~(kLineFlagBlocking | kLineFlagBlockMonsters |
+                               kLineFlagBlockGroundedMonsters | kLineFlagBlockPlayers);
     }
 
     // experimental: block bullets/missiles
     if (special->line_effect_ & kLineEffectTypeBlockShots)
     {
-        if (target->side[0] && target->side[1]) target->flags |= MLF_ShootBlock;
+        if (target->side[0] && target->side[1]) target->flags |= kLineFlagShootBlock;
     }
 
     // experimental: block monster sight
     if (special->line_effect_ & kLineEffectTypeBlockSight)
     {
-        if (target->side[0] && target->side[1]) target->flags |= MLF_SightBlock;
+        if (target->side[0] && target->side[1]) target->flags |= kLineFlagSightBlock;
     }
 
     // experimental: scale wall texture(s) by line length
@@ -869,7 +869,7 @@ static void SectorEffect(Sector *target, Line *source,
         // TODO: this is not 100% correct, because the MSF_Friction flag is
         //       supposed to turn the custom friction on/off, but with this
         //       code, the custom value is either permanent or forgotten.
-        if (target->properties.type & MSF_Friction)
+        if (target->properties.type & kBoomSectorFlagFriction)
         {
             if (length > 100)
                 target->properties.friction =
@@ -983,7 +983,7 @@ static void SectorEffect(Sector *target, Line *source,
                              seg != nullptr; seg = seg->subsector_next)
                         {
                             if (seg->linedef == target->lines[i])
-                                seg->linedef->flags |= MLF_LowerUnpegged;
+                                seg->linedef->flags |= kLineFlagLowerUnpegged;
                         }
                     }
                 }
@@ -1014,7 +1014,7 @@ static void P_PortalEffect(Line *ld)
 
     if (ld->special->portal_effect_ & kPortalEffectTypeMirror)
     {
-        ld->flags |= MLF_Mirror;
+        ld->flags |= kLineFlagMirror;
         return;
     }
 
@@ -1342,7 +1342,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special,
             if (!(special->obj_ & kTriggerActivatorMonster)) return false;
 
             // Monsters don't trigger secrets
-            if (line && (line->flags & MLF_Secret)) return false;
+            if (line && (line->flags & kLineFlagSecret)) return false;
 
             // Monster is not allowed to trigger lines
             if (thing->info_->hyper_flags_ & kHyperFlagNoTriggerLines)
@@ -1354,7 +1354,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special,
             if (!(special->obj_ & kTriggerActivatorOther)) return false;
 
             // Other stuff doesn't trigger secrets
-            if (line && (line->flags & MLF_Secret)) return false;
+            if (line && (line->flags & kLineFlagSecret)) return false;
         }
     }
 

@@ -41,7 +41,7 @@
 #include <vector>
 
 #include "AlmostEquals.h"
-#include "dm_data.h"
+#include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "m_bbox.h"
@@ -937,7 +937,7 @@ static bool TraverseSubsector(unsigned int bspnum, float *bbox,
     MapObject   *obj;
 
     // just a normal node ?
-    if (!(bspnum & NF_V5_SUBSECTOR))
+    if (!(bspnum & kLeafSubsector))
     {
         node = level_nodes + bspnum;
 
@@ -959,7 +959,7 @@ static bool TraverseSubsector(unsigned int bspnum, float *bbox,
 
     // the sharp end: check all things in the subsector
 
-    sub = level_subsectors + (bspnum & ~NF_V5_SUBSECTOR);
+    sub = level_subsectors + (bspnum & ~kLeafSubsector);
 
     for (obj = sub->thing_list; obj; obj = obj->subsector_next_)
     {

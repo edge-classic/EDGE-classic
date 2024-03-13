@@ -40,9 +40,8 @@
 #include <vector>
 
 #include "AlmostEquals.h"
-#include "dm_data.h"
+#include "common_doomdefs.h"
 #include "dm_defs.h"
-#include "dm_structs.h"
 #include "m_bbox.h"
 #include "p_local.h"
 #include "r_misc.h"
@@ -183,10 +182,10 @@ static bool CrossSubsector(Subsector *sub)
         if (s1 == s2) continue;
 
         // stop because it is not two sided anyway
-        if (!(ld->flags & MLF_TwoSided) || ld->blocked) { return false; }
+        if (!(ld->flags & kLineFlagTwoSided) || ld->blocked) { return false; }
 
         // line explicitly blocks sight ?  (XDoom compatibility)
-        if (ld->flags & MLF_SightBlock) return false;
+        if (ld->flags & kLineFlagSightBlock) return false;
 
         // -AJA- 2001/11/11: closed Sliding door ?
         if (ld->slide_door && !ld->slide_door->s_.see_through_ &&
@@ -256,7 +255,7 @@ static bool CrossSubsector(Subsector *sub)
 //
 static bool CheckSightBSP(unsigned int bspnum)
 {
-    while (!(bspnum & NF_V5_SUBSECTOR))
+    while (!(bspnum & kLeafSubsector))
     {
         BspNode *node = level_nodes + bspnum;
         int     s1, s2;
@@ -288,7 +287,7 @@ static bool CheckSightBSP(unsigned int bspnum)
         bspnum = node->children[s2];
     }
 
-    bspnum &= ~NF_V5_SUBSECTOR;
+    bspnum &= ~kLeafSubsector;
 
     SYS_ASSERT(bspnum < (unsigned int)total_level_subsectors);
 

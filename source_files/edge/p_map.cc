@@ -40,6 +40,7 @@
 #include <float.h>
 
 #include "AlmostEquals.h"
+#include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "g_game.h"
@@ -269,18 +270,18 @@ static bool CheckAbsoluteLineCallback(Line *ld, void *data)
 
     if (move_check.extended_flags & kExtendedFlagCrossBlockingLines)
     {
-        if ((ld->flags & MLF_ShootBlock) &&
+        if ((ld->flags & kLineFlagShootBlock) &&
             (move_check.flags & kMapObjectFlagMissile))
             return false;
     }
     else
     {
         // explicitly blocking everything ?
-        if (ld->flags & MLF_Blocking) return false;
+        if (ld->flags & kLineFlagBlocking) return false;
 
         // block players ?
         if (move_check.mover->player_ &&
-            ((ld->flags & MLF_BlockPlayers) ||
+            ((ld->flags & kLineFlagBlockPlayers) ||
              (ld->special &&
               (ld->special->line_effect_ & kLineEffectTypeBlockPlayers))))
         {
@@ -289,7 +290,7 @@ static bool CheckAbsoluteLineCallback(Line *ld, void *data)
 
         // block grounded monsters ?
         if ((move_check.extended_flags & kExtendedFlagMonster) &&
-            ((ld->flags & MLF_BlockGrounded) ||
+            ((ld->flags & kLineFlagBlockGroundedMonsters) ||
              (ld->special && (ld->special->line_effect_ &
                               kLineEffectTypeBlockGroundedMonsters))) &&
             (move_check.mover->z <= move_check.mover->floor_z_ + 1.0f))
@@ -299,7 +300,7 @@ static bool CheckAbsoluteLineCallback(Line *ld, void *data)
 
         // block monsters ?
         if ((move_check.extended_flags & kExtendedFlagMonster) &&
-            (ld->flags & MLF_BlockMonsters))
+            (ld->flags & kLineFlagBlockMonsters))
         {
             return false;
         }
@@ -476,7 +477,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
 
     if (move_check.extended_flags & kExtendedFlagCrossBlockingLines)
     {
-        if ((ld->flags & MLF_ShootBlock) &&
+        if ((ld->flags & kLineFlagShootBlock) &&
             (move_check.flags & kMapObjectFlagMissile))
         {
             block_line = ld;
@@ -488,17 +489,17 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
         // explicitly blocking everything ?
         // or just blocking monsters ?
 
-        if ((ld->flags & MLF_Blocking) ||
-            ((ld->flags & MLF_BlockMonsters) &&
+        if ((ld->flags & kLineFlagBlocking) ||
+            ((ld->flags & kLineFlagBlockMonsters) &&
              (move_check.extended_flags & kExtendedFlagMonster)) ||
             (((ld->special && (ld->special->line_effect_ &
                                kLineEffectTypeBlockGroundedMonsters)) ||
-              (ld->flags & MLF_BlockGrounded)) &&
+              (ld->flags & kLineFlagBlockGroundedMonsters)) &&
              (move_check.extended_flags & kExtendedFlagMonster) &&
              (move_check.mover->z <= move_check.mover->floor_z_ + 1.0f)) ||
             (((ld->special &&
                (ld->special->line_effect_ & kLineEffectTypeBlockPlayers)) ||
-              (ld->flags & MLF_BlockPlayers)) &&
+              (ld->flags & kLineFlagBlockPlayers)) &&
              (move_check.mover->player_)))
         {
             block_line = ld;
@@ -1375,7 +1376,7 @@ static bool PTR_SlideTraverse(PathIntercept *in, void *dataptr)
 
     SYS_ASSERT(ld);
 
-    if (!(ld->flags & MLF_TwoSided))
+    if (!(ld->flags & kLineFlagTwoSided))
     {
         // hit the back side ?
         if (PointOnLineSide(slide_map_object->x, slide_map_object->y, ld) != 0)
@@ -1387,7 +1388,7 @@ static bool PTR_SlideTraverse(PathIntercept *in, void *dataptr)
 
     if (slide_map_object->player_ != nullptr)
     {
-        if (0 != (ld->flags & (MLF_Blocking | MLF_BlockPlayers)))
+        if (0 != (ld->flags & (kLineFlagBlocking | kLineFlagBlockPlayers)))
             is_blocking = true;
     }
 
@@ -1535,7 +1536,7 @@ static bool PTR_AimTraverse(PathIntercept *in, void *dataptr)
     {
         Line *ld = in->line;
 
-        if (!(ld->flags & MLF_TwoSided) || ld->gap_number == 0)
+        if (!(ld->flags & kLineFlagTwoSided) || ld->gap_number == 0)
             return false;  // stop
 
         // Crosses a two sided line.
@@ -1624,7 +1625,7 @@ static bool PTR_AimTraverse2(PathIntercept *in, void *dataptr)
     {
         Line *ld = in->line;
 
-        if (!(ld->flags & MLF_TwoSided) || ld->gap_number == 0)
+        if (!(ld->flags & kLineFlagTwoSided) || ld->gap_number == 0)
             return false;  // stop
 
         // Crosses a two sided line.
@@ -2132,11 +2133,11 @@ void UnblockLineEffectDebris(Line *TheLine, const LineType *special)
         if (TwoSided)
         {
             // clear standard flags
-            TheLine->flags &= ~(MLF_Blocking | MLF_BlockMonsters |
-                                MLF_BlockGrounded | MLF_BlockPlayers);
+            TheLine->flags &= ~(kLineFlagBlocking | kLineFlagBlockMonsters |
+                                kLineFlagBlockGroundedMonsters | kLineFlagBlockPlayers);
 
             // clear EDGE's extended lineflags too
-            TheLine->flags &= ~(MLF_SightBlock | MLF_ShootBlock);
+            TheLine->flags &= ~(kLineFlagSightBlock | kLineFlagShootBlock);
         }
     }
 }
@@ -2210,8 +2211,8 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
         // shot doesn't go through a one-sided line, since one sided lines
         // do not have a sector on the other side.
 
-        if ((ld->flags & MLF_TwoSided) && ld->gap_number > 0 &&
-            !(ld->flags & MLF_ShootBlock))
+        if ((ld->flags & kLineFlagTwoSided) && ld->gap_number > 0 &&
+            !(ld->flags & kLineFlagShootBlock))
         {
             SYS_ASSERT(ld->back_sector);
 
@@ -2705,7 +2706,7 @@ static bool PTR_UseTraverse(PathIntercept *in, void *dataptr)
     ld->special->slope_type & kSlopeTypeDetailCeiling) return true;
     }
     */
-    return (ld->flags & MLF_PassThru) ? true : false;
+    return (ld->flags & kLineFlagBoomPassThrough) ? true : false;
 }
 
 //
@@ -3345,17 +3346,17 @@ static bool CheckBlockingLineCallback(Line *line, void *data)
         return true;
 
     // -KM- 1999/01/31 Save ceilingline for bounce.
-    if ((crosser && (line->flags & MLF_ShootBlock)) ||
+    if ((crosser && (line->flags & kLineFlagShootBlock)) ||
         (!crosser && (line->flags &
-                      (MLF_Blocking |
-                       MLF_BlockMonsters))))  // How to handle MLF_BlockGrounded
-                                              // and MLF_BlockPlayer?
+                      (kLineFlagBlocking |
+                       kLineFlagBlockMonsters))))  // How to handle kLineFlagBlockGrounded
+                                              // and kLineFlagBlockPlayer?
     {
         block_line = line;
         return false;
     }
 
-    if (!(line->flags & MLF_TwoSided) || line->gap_number == 0)
+    if (!(line->flags & kLineFlagTwoSided) || line->gap_number == 0)
     {
         block_line = line;
         return false;
@@ -3406,7 +3407,7 @@ static bool CheckBlockingLineCallback(Line *line, void *data)
 //
 // Checks for a blocking line between thing and the spawnthing coordinates
 // given. Return true if there is a line; crossable indicates whether or not
-// whether the MLF_BLOCKING & MLF_BLOCKMONSTERS should be ignored or not.
+// whether the kLineFlagBLOCKING & kLineFlagBLOCKMONSTERS should be ignored or not.
 //
 // -ACB- 1998/08/23
 //

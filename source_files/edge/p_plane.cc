@@ -26,6 +26,7 @@
 #include <algorithm>
 
 #include "AlmostEquals.h"
+#include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "m_random.h"
@@ -958,7 +959,7 @@ static bool EV_BuildOneStair(Sector *sec, const PlaneMoverDefinition *def)
         //
         for (i = 0; i < sec->line_count; i++)
         {
-            if (!(sec->lines[i]->flags & MLF_TwoSided)) continue;
+            if (!(sec->lines[i]->flags & kLineFlagTwoSided)) continue;
 
             if (sec != sec->lines[i]->front_sector) continue;
 
@@ -1185,7 +1186,7 @@ bool RunDonutSpecial(Sector *s1, SoundEffect *sfx[4])
 
     for (i = 0; i < s2->line_count; i++)
     {
-        if (!(s2->lines[i]->flags & MLF_TwoSided) ||
+        if (!(s2->lines[i]->flags & kLineFlagTwoSided) ||
             (s2->lines[i]->back_sector == s1))
             continue;
 
@@ -1425,7 +1426,7 @@ bool RunSlidingDoor(Line *door, Line *act_line, MapObject *thing,
     // work-around for RTS-triggered doors, which cannot setup
     // the 'slide_door' field at level load and hence the code
     // which normally blocks the door does not kick in.
-    door->flags &= ~MLF_Blocking;
+    door->flags &= ~kLineFlagBlocking;
 
     AddActiveSlider(smov);
 

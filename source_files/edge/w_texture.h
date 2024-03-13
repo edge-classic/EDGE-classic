@@ -63,7 +63,7 @@ struct TexturePatch
 
 //
 // A TextureDefinition describes a rectangular texture, which is composed of
-// one or more mappatch_t structures that arrange graphic patches.
+// one or more mapPatch structures that arrange graphic patches.
 //
 struct TextureDefinition
 {

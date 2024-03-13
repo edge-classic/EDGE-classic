@@ -68,7 +68,7 @@ constexpr float kStopSpeed = 0.07f;
 //
 // The refresh uses the next and prev links to follow
 // lists of things in sectors as they are being drawn.
-// The sprite, frame, and angle elements determine which patch_t
+// The sprite, frame, and angle elements determine which Patch
 // is used to draw the sprite if it is visible.
 // The sprite and frame values are allmost always set
 // from State structures.
@@ -79,7 +79,7 @@ constexpr float kStopSpeed = 0.07f;
 //
 // The xyz origin point represents a point at the bottom middle
 // of the sprite (between the feet of a biped).
-// This is the default origin position for patch_ts grabbed
+// This is the default origin position for Patchs grabbed
 // with lumpy.exe.
 // A walking creature will have its z equal to the floor
 // it is standing on.
@@ -161,7 +161,7 @@ struct SpawnPoint
     // certain flags (mainly kMapObjectFlagAmbush).
     int flags;
 
-    // tag number (from Hexen map format)
+    // tag number
     int tag;
 };
 

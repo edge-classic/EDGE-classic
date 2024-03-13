@@ -44,10 +44,9 @@
 #include "anim.h"
 #include "bsp.h"
 #include "colormap.h"
-#include "dm_data.h"
+#include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
-#include "dm_structs.h"
 #include "dstrings.h"
 #include "e_main.h"
 #include "e_search.h"
@@ -765,7 +764,7 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size,
 // order is fixed (e.g. THINGS is always first).
 //
 static void CheckForLevel(WadFile *wad, int lump, const char *name,
-                          const raw_wad_entry_t *raw, int remaining)
+                          const RawWadEntry *raw, int remaining)
 {
     // we only test four lumps (it is enough), but fewer definitely
     // means this is not a level marker.
@@ -817,7 +816,7 @@ static void CheckForLevel(WadFile *wad, int lump, const char *name,
 int CheckForUniqueGameLumps(epi::File *file)
 {
     int              length;
-    raw_wad_header_t header;
+    RawWadHeader header;
 
     if (!file)
     {
@@ -827,12 +826,12 @@ int CheckForUniqueGameLumps(epi::File *file)
 
     // WAD file
     // TODO: handle Read failure
-    file->Read(&header, sizeof(raw_wad_header_t));
-    header.num_entries        = AlignedLittleEndianS32(header.num_entries);
-    header.dir_start          = AlignedLittleEndianS32(header.dir_start);
-    length                    = header.num_entries * sizeof(raw_wad_entry_t);
-    raw_wad_entry_t *raw_info = new raw_wad_entry_t[header.num_entries];
-    file->Seek(header.dir_start, epi::File::kSeekpointStart);
+    file->Read(&header, sizeof(RawWadHeader));
+    header.total_entries        = AlignedLittleEndianS32(header.total_entries);
+    header.directory_start          = AlignedLittleEndianS32(header.directory_start);
+    length                    = header.total_entries * sizeof(RawWadEntry);
+    RawWadEntry *raw_info = new RawWadEntry[header.total_entries];
+    file->Seek(header.directory_start, epi::File::kSeekpointStart);
     file->Read(raw_info, length);
 
     for (size_t check = 0; check < game_checker.size(); check++)
@@ -841,7 +840,7 @@ int CheckForUniqueGameLumps(epi::File *file)
 
         // Do not require IWAD header if loading Harmony, REKKR, BFG Edition
         // WADs, Chex Quest or a custom standalone IWAD
-        if (epi::StringPrefixCompare(header.identification, "IWAD") != 0 &&
+        if (epi::StringPrefixCompare(header.magic, "IWAD") != 0 &&
             epi::StringCaseCompareASCII(gamecheck.unique_lumps[0],
                                         "DMENUPIC") != 0 &&
             epi::StringCaseCompareASCII(gamecheck.unique_lumps[0],
@@ -859,9 +858,9 @@ int CheckForUniqueGameLumps(epi::File *file)
         bool lump1_found = false;
         bool lump2_found = false;
 
-        for (size_t i = 0; i < header.num_entries; i++)
+        for (size_t i = 0; i < header.total_entries; i++)
         {
-            raw_wad_entry_t &entry = raw_info[i];
+            RawWadEntry &entry = raw_info[i];
 
             if (epi::StringCompareMax(gamecheck.unique_lumps[0], entry.name,
                                       gamecheck.unique_lumps[0].size() < 8
@@ -882,7 +881,7 @@ int CheckForUniqueGameLumps(epi::File *file)
                                                      "ENDOOM") == 0)
                 {
                     SYS_ASSERT(entry.size == 4000);
-                    file->Seek(entry.pos, epi::File::kSeekpointStart);
+                    file->Seek(entry.position, epi::File::kSeekpointStart);
                     uint8_t *endoom = new uint8_t[entry.size];
                     file->Read(endoom, entry.size);
                     if (endoom[1026] == 'c' && endoom[1028] == 'h' &&
@@ -1115,39 +1114,39 @@ void ProcessWad(DataFile *df, size_t file_index)
     within_tex_list = within_hires_list = false;
     within_xgl_list                     = false;
 
-    raw_wad_header_t header;
+    RawWadHeader header;
 
     epi::File *file = df->file_;
 
     // TODO: handle Read failure
-    file->Read(&header, sizeof(raw_wad_header_t));
+    file->Read(&header, sizeof(RawWadHeader));
 
-    if (strncmp(header.identification, "IWAD", 4) != 0)
+    if (strncmp(header.magic, "IWAD", 4) != 0)
     {
         // Homebrew levels?
-        if (strncmp(header.identification, "PWAD", 4) != 0)
+        if (strncmp(header.magic, "PWAD", 4) != 0)
         {
             FatalError("Wad file %s doesn't have IWAD or PWAD id\n",
                        df->name_.c_str());
         }
     }
 
-    header.num_entries = AlignedLittleEndianS32(header.num_entries);
-    header.dir_start   = AlignedLittleEndianS32(header.dir_start);
+    header.total_entries = AlignedLittleEndianS32(header.total_entries);
+    header.directory_start   = AlignedLittleEndianS32(header.directory_start);
 
-    size_t length = header.num_entries * sizeof(raw_wad_entry_t);
+    size_t length = header.total_entries * sizeof(RawWadEntry);
 
-    raw_wad_entry_t *raw_info = new raw_wad_entry_t[header.num_entries];
+    RawWadEntry *raw_info = new RawWadEntry[header.total_entries];
 
-    file->Seek(header.dir_start, epi::File::kSeekpointStart);
+    file->Seek(header.directory_start, epi::File::kSeekpointStart);
     // TODO: handle Read failure
     file->Read(raw_info, length);
 
     int startlump = (int)lump_info.size();
 
-    for (size_t i = 0; i < header.num_entries; i++)
+    for (size_t i = 0; i < header.total_entries; i++)
     {
-        raw_wad_entry_t &entry = raw_info[i];
+        RawWadEntry &entry = raw_info[i];
 
         bool allow_ddf =
             (df->kind_ == kFileKindEWad ||
@@ -1156,14 +1155,14 @@ void ProcessWad(DataFile *df, size_t file_index)
              df->kind_ == kFileKindPWad || df->kind_ == kFileKindPackWad ||
              df->kind_ == kFileKindIpk || df->kind_ == kFileKindIFolder);
 
-        AddLump(df, entry.name, AlignedLittleEndianS32(entry.pos),
+        AddLump(df, entry.name, AlignedLittleEndianS32(entry.position),
                 AlignedLittleEndianS32(entry.size), (int)file_index, allow_ddf);
 
         // this will be uppercase
         const char *level_name = lump_info[startlump + i].name;
 
         CheckForLevel(wad, startlump + i, level_name, &entry,
-                      header.num_entries - 1 - i);
+                      header.total_entries - 1 - i);
     }
 
     // check for unclosed sprite/flat/patch lists
@@ -1211,7 +1210,7 @@ std::string BuildXglNodesForWad(DataFile *df)
     cache_name += df->wad_->md5_string_;
     cache_name += ".xwa";
 
-    std::string xwa_filename = epi::PathAppend(cache_dir, cache_name);
+    std::string xwa_filename = epi::PathAppend(cache_directory, cache_name);
 
     LogDebug("XWA filename: %s\n", xwa_filename.c_str());
 

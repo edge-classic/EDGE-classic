@@ -18,14 +18,12 @@
 //
 //------------------------------------------------------------------------
 
-#include "bsp_local.h"
-#include "bsp_raw_def.h"
-#include "bsp_utility.h"
-#include "bsp_wad.h"
-
-// EPI
 #include <algorithm>
 
+#include "bsp_local.h"
+#include "bsp_utility.h"
+#include "bsp_wad.h"
+#include "common_doomdefs.h"
 #include "endianess.h"
 #include "miniz.h"
 #include "str_ename.h"
@@ -364,37 +362,6 @@ void GetThings()
     }
 }
 
-void GetThingsHexen()
-{
-    int count = 0;
-
-    Lump *lump = FindLevelLump("THINGS");
-
-    if (lump) count = lump->Length() / (int)sizeof(RawHexenThing);
-
-    if (lump == nullptr || count == 0) return;
-
-    if (!lump->Seek(0)) FatalError("AJBSP: Error seeking to things.\n");
-
-#if DEBUG_LOAD
-    LogDebug("GetThingsHexen: num = %d\n", count);
-#endif
-
-    for (int i = 0; i < count; i++)
-    {
-        RawHexenThing raw;
-
-        if (!lump->Read(&raw, sizeof(raw)))
-            FatalError("AJBSP: Error reading things.\n");
-
-        Thing *thing = NewThing();
-
-        thing->x    = AlignedLittleEndianS16(raw.x);
-        thing->y    = AlignedLittleEndianS16(raw.y);
-        thing->type = AlignedLittleEndianU16(raw.type);
-    }
-}
-
 void GetSidedefs()
 {
     int count = 0;
@@ -472,64 +439,6 @@ void GetLinedefs()
         line->is_precious =
             (tag >= 900 &&
              tag < 1000);  // Why is this the case? Need to investigate - Dasho
-
-        line->right = SafeLookupSidedef(AlignedLittleEndianU16(raw.right));
-        line->left  = SafeLookupSidedef(AlignedLittleEndianU16(raw.left));
-
-        if (line->right || line->left) num_real_lines++;
-
-        line->self_referencing = (line->left && line->right &&
-                                  (line->left->sector == line->right->sector));
-
-        if (line->self_referencing) line->is_precious = true;
-    }
-}
-
-void GetLinedefsHexen()
-{
-    int count = 0;
-
-    Lump *lump = FindLevelLump("LINEDEFS");
-
-    if (lump) count = lump->Length() / (int)sizeof(RawHexenLinedef);
-
-    if (lump == nullptr || count == 0) return;
-
-    if (!lump->Seek(0)) FatalError("AJBSP: Error seeking to linedefs.\n");
-
-#if DEBUG_LOAD
-    LogDebug("GetLinedefsHexen: num = %d\n", count);
-#endif
-
-    for (int i = 0; i < count; i++)
-    {
-        RawHexenLinedef raw;
-
-        if (!lump->Read(&raw, sizeof(raw)))
-            FatalError("AJBSP: Error reading linedefs.\n");
-
-        Linedef *line;
-
-        Vertex *start = SafeLookupVertex(AlignedLittleEndianU16(raw.start));
-        Vertex *end   = SafeLookupVertex(AlignedLittleEndianU16(raw.end));
-
-        start->is_used_ = true;
-        end->is_used_   = true;
-
-        line = NewLinedef();
-
-        line->start = start;
-        line->end   = end;
-
-        // check for zero-length line
-        line->zero_length = (fabs(start->x_ - end->x_) < kEpsilon) &&
-                            (fabs(start->y_ - end->y_) < kEpsilon);
-
-        line->type     = (uint8_t)raw.type;
-        uint16_t flags = AlignedLittleEndianU16(raw.flags);
-
-        // -JL- Added missing twosided flag handling that caused a broken reject
-        line->two_sided = (flags & kLineFlagTwoSided) != 0;
 
         line->right = SafeLookupSidedef(AlignedLittleEndianU16(raw.right));
         line->left  = SafeLookupSidedef(AlignedLittleEndianU16(raw.left));
@@ -702,7 +611,8 @@ void ParseUDMF_Block(epi::Lexer &lex, int cur_type)
     if (line != nullptr)
     {
         if (line->start == nullptr || line->end == nullptr)
-            FatalError("AJBSP: Linedef #%d is missing a vertex!\n", line->index);
+            FatalError("AJBSP: Linedef #%d is missing a vertex!\n",
+                       line->index);
 
         if (line->right || line->left) num_real_lines++;
 
@@ -869,7 +779,7 @@ void PutZVertices()
 
     if (count != num_new_vert)
         FatalError("AJBSP: PutZVertices miscounted (%d != %d)\n", count,
-                num_new_vert);
+                   num_new_vert);
 }
 
 void PutZSubsecs()
@@ -908,7 +818,7 @@ void PutZSubsecs()
 
     if (cur_seg_index != level_segs.size())
         FatalError("AJBSP: PutZSubsecs miscounted segs (%d != %d)\n",
-                cur_seg_index, level_segs.size());
+                   cur_seg_index, level_segs.size());
 }
 
 void PutZSegs()
@@ -922,7 +832,7 @@ void PutZSegs()
 
         if (seg->index_ != i)
             FatalError("AJBSP: PutZSegs: seg index mismatch (%d != %d)\n",
-                    seg->index_, i);
+                       seg->index_, i);
 
         uint32_t v1 = AlignedLittleEndianU32(VertexIndex_XNOD(seg->start_));
         uint32_t v2 = AlignedLittleEndianU32(VertexIndex_XNOD(seg->end_));
@@ -948,7 +858,7 @@ void PutXGL3Segs()
 
         if (seg->index_ != i)
             FatalError("AJBSP: PutXGL3Segs: seg index mismatch (%d != %d)\n",
-                    seg->index_, i);
+                       seg->index_, i);
 
         uint32_t v1 = AlignedLittleEndianU32(VertexIndex_XNOD(seg->start_));
         uint32_t partner =
@@ -991,18 +901,18 @@ static void PutOneZNode(Node *node)
     ZLibAppendLump(&dx, 4);
     ZLibAppendLump(&dy, 4);
 
-    raw.b1.minx = AlignedLittleEndianS16(node->r_.bounds.minx);
-    raw.b1.miny = AlignedLittleEndianS16(node->r_.bounds.miny);
-    raw.b1.maxx = AlignedLittleEndianS16(node->r_.bounds.maxx);
-    raw.b1.maxy = AlignedLittleEndianS16(node->r_.bounds.maxy);
+    raw.bounding_box_1.minimum_x = AlignedLittleEndianS16(node->r_.bounds.minimum_x);
+    raw.bounding_box_1.minimum_y = AlignedLittleEndianS16(node->r_.bounds.minimum_y);
+    raw.bounding_box_1.maximum_x = AlignedLittleEndianS16(node->r_.bounds.maximum_x);
+    raw.bounding_box_1.maximum_y = AlignedLittleEndianS16(node->r_.bounds.maximum_y);
 
-    raw.b2.minx = AlignedLittleEndianS16(node->l_.bounds.minx);
-    raw.b2.miny = AlignedLittleEndianS16(node->l_.bounds.miny);
-    raw.b2.maxx = AlignedLittleEndianS16(node->l_.bounds.maxx);
-    raw.b2.maxy = AlignedLittleEndianS16(node->l_.bounds.maxy);
+    raw.bounding_box_2.minimum_x = AlignedLittleEndianS16(node->l_.bounds.minimum_x);
+    raw.bounding_box_2.minimum_y = AlignedLittleEndianS16(node->l_.bounds.minimum_y);
+    raw.bounding_box_2.maximum_x = AlignedLittleEndianS16(node->l_.bounds.maximum_x);
+    raw.bounding_box_2.maximum_y = AlignedLittleEndianS16(node->l_.bounds.maximum_y);
 
-    ZLibAppendLump(&raw.b1, sizeof(raw.b1));
-    ZLibAppendLump(&raw.b2, sizeof(raw.b2));
+    ZLibAppendLump(&raw.bounding_box_1, sizeof(raw.bounding_box_1));
+    ZLibAppendLump(&raw.bounding_box_2, sizeof(raw.bounding_box_2));
 
     if (node->r_.node)
         raw.right = AlignedLittleEndianU32(node->r_.node->index_);
@@ -1044,7 +954,7 @@ void PutZNodes(Node *root)
 
     if (node_cur_index != level_nodes.size())
         FatalError("AJBSP: PutZNodes miscounted (%d != %d)\n", node_cur_index,
-                level_nodes.size());
+                   level_nodes.size());
 }
 
 void SaveXGL3Format(Lump *lump, Node *root_node)
@@ -1091,8 +1001,8 @@ void LoadLevel()
 
         if (level_format == kMapFormatHexen)
         {
-            GetLinedefsHexen();
-            GetThingsHexen();
+            FatalError("AJBSP: Level %s is Hexen format (not supported).\n",
+                       level_current_name);
         }
         else
         {
@@ -1116,17 +1026,7 @@ void LoadLevel()
     CalculateWallTips();
 
     // -JL- Find sectors containing polyobjs
-    switch (level_format)
-    {
-        case kMapFormatHexen:
-            DetectPolyobjSectors(false);
-            break;
-        case kMapFormatUDMF:
-            DetectPolyobjSectors(true);
-            break;
-        default:
-            break;
-    }
+    if (level_format == kMapFormatUDMF) DetectPolyobjSectors();
 }
 
 void FreeLevel()
@@ -1294,7 +1194,8 @@ void OpenMem(std::string filename, uint8_t *Rawdata, int Rawlength)
 {
     cur_wad = WadFile::OpenMem(filename, Rawdata, Rawlength);
     if (cur_wad == nullptr)
-        FatalError("AJBSP: Cannot open file from memory: %s\n", filename.c_str());
+        FatalError("AJBSP: Cannot open file from memory: %s\n",
+                   filename.c_str());
 }
 
 void CreateXWA(std::string filename)

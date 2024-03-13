@@ -33,7 +33,7 @@
 #include <float.h>
 
 #include "AlmostEquals.h"
-#include "dm_data.h"
+#include "common_doomdefs.h"
 #include "dm_state.h"
 #include "g_game.h"
 #include "m_random.h"
@@ -118,7 +118,7 @@ static void RecurseSound(Sector *sec, int soundblocks, int player)
     {
         check = sec->lines[i];
 
-        if (!(check->flags & MLF_TwoSided)) continue;
+        if (!(check->flags & kLineFlagTwoSided)) continue;
 
         // -AJA- 1999/07/19: Gaps are now stored in line_t.
         if (check->gap_number == 0) continue;  // closed door
@@ -135,7 +135,7 @@ static void RecurseSound(Sector *sec, int soundblocks, int player)
         else
             other = check->front_sector;
 
-        if (check->flags & MLF_SoundBlock)
+        if (check->flags & kLineFlagSoundBlock)
         {
             if (!soundblocks) RecurseSound(other, 1, player);
         }

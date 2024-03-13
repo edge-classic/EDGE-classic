@@ -23,8 +23,8 @@
 
 #include "AlmostEquals.h"
 #include "bot_think.h"
+#include "common_doomdefs.h"
 #include "con_main.h"
-#include "dm_data.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "m_bbox.h"
@@ -365,7 +365,7 @@ static void BotNavigateCreateLinks()
             // ignore player-blocking lines
             if (!seg->miniseg)
                 if (0 !=
-                    (seg->linedef->flags & (MLF_Blocking | MLF_BlockPlayers)))
+                    (seg->linedef->flags & (kLineFlagBlocking | kLineFlagBlockPlayers)))
                     continue;
 
             // NOTE: a big height difference is allowed here, it is checked
@@ -799,9 +799,9 @@ static void BotNavigateEnemiesInNode(unsigned int bspnum, DeathBot *bot,
                                      float radius, MapObject *&best_mo,
                                      float &best_score)
 {
-    if (bspnum & NF_V5_SUBSECTOR)
+    if (bspnum & kLeafSubsector)
     {
-        bspnum &= ~NF_V5_SUBSECTOR;
+        bspnum &= ~kLeafSubsector;
         BotNavigateEnemiesInSubsector(&level_subsectors[bspnum], bot, radius, best_mo,
                                       best_score);
         return;

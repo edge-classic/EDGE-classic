@@ -1,6 +1,8 @@
 //------------------------------------------------------------------------
+//  Common Doom Engine/Format Definitions
+//----------------------------------------------------------------------------
 //
-//  AJ-BSP  Copyright (C) 2007-2023  Andrew Apted
+//  Copyright (C) 2007-2024  The EDGE Team
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -14,9 +16,15 @@
 //
 //------------------------------------------------------------------------
 
+// This is here to provide a shared file for both AJBSP and the main program
+// instead of defining the same structures twice - Dasho
+
 #pragma once
 
 #include <stdint.h>
+
+// Indicate a leaf.
+constexpr uint32_t kLeafSubsector = (uint32_t)(1 << 31);
 
 /* ----- The wad structures ---------------------- */
 
@@ -24,10 +32,10 @@
 #pragma pack(push, 1)
 struct RawWadHeader
 {
-    char ident[4];
+    char magic[4];
 
-    uint32_t num_entries;
-    uint32_t dir_start;
+    uint32_t total_entries;
+    uint32_t directory_start;
 };
 #pragma pack(pop)
 
@@ -35,7 +43,7 @@ struct RawWadHeader
 #pragma pack(push, 1)
 struct RawWadEntry
 {
-    uint32_t pos;
+    uint32_t position;
     uint32_t size;
 
     char name[8];
@@ -89,27 +97,14 @@ struct RawLinedef
 #pragma pack(pop)
 
 #pragma pack(push, 1)
-struct RawHexenLinedef
-{
-    uint16_t start;    // from this vertex...
-    uint16_t end;      // ... to this vertex
-    uint16_t flags;    // linedef flags (impassible, etc)
-    uint8_t  type;     // special type
-    uint8_t  args[5];  // special arguments
-    uint16_t right;    // right sidedef
-    uint16_t left;     // left sidedef
-};
-#pragma pack(pop)
-
-#pragma pack(push, 1)
 struct RawSidedef
 {
     int16_t x_offset;  // X offset for texture
     int16_t y_offset;  // Y offset for texture
 
-    char upper_tex[8];  // texture name for the part above
-    char lower_tex[8];  // texture name for the part below
-    char mid_tex[8];    // texture name for the regular part
+    char upper_texture[8];  // texture name for the part above
+    char lower_texture[8];  // texture name for the part below
+    char mid_texture[8];    // texture name for the regular part
 
     uint16_t sector;  // adjacent sector
 };
@@ -118,11 +113,11 @@ struct RawSidedef
 #pragma pack(push, 1)
 struct RawSector
 {
-    int16_t floorh;  // floor height
-    int16_t ceilh;   // ceiling height
+    int16_t floor_height;  // floor height
+    int16_t ceiling_height;   // ceiling height
 
-    char floor_tex[8];  // floor texture
-    char ceil_tex[8];   // ceiling texture
+    char floor_texture[8];  // floor texture
+    char ceil_texture[8];   // ceiling texture
 
     uint16_t light;  // light level (0-255)
     uint16_t type;   // special type (0 = normal, 9 = secret, ...)
@@ -140,110 +135,12 @@ struct RawThing
 };
 #pragma pack(pop)
 
-#pragma pack(push, 1)
-// -JL- Hexen thing definition
-struct RawHexenThing
-{
-    int16_t  tid;      // tag id (for scripts/specials)
-    int16_t  x, y;     // position
-    int16_t  height;   // start height above floor
-    int16_t  angle;    // angle thing faces
-    uint16_t type;     // type of thing
-    uint16_t options;  // when appears, deaf, dormant, etc..
-
-    uint8_t special;  // special type
-    uint8_t args[5];  // special arguments
-};
-#pragma pack(pop)
-
 /* ----- The BSP tree structures ----------------------- */
-#pragma pack(push, 1)
-struct RawSeg
-{
-    uint16_t start;    // from this vertex...
-    uint16_t end;      // ... to this vertex
-    uint16_t angle;    // angle (0 = east, 16384 = north, ...)
-    uint16_t linedef;  // linedef that this seg goes along
-    uint16_t flip;     // true if not the same direction as linedef
-    uint16_t dist;     // distance from starting point
-};
-#pragma pack(pop)
-
-#pragma pack(push, 1)
-struct RawGLSeg
-{
-    uint16_t start;    // from this vertex...
-    uint16_t end;      // ... to this vertex
-    uint16_t linedef;  // linedef that this seg goes along, or -1
-    uint16_t side;     // 0 if on right of linedef, 1 if on left
-    uint16_t partner;  // partner seg number, or -1
-};
-#pragma pack(pop)
-
-#pragma pack(push, 1)
-struct RawV5Seg
-{
-    uint32_t start;    // from this vertex...
-    uint32_t end;      // ... to this vertex
-    uint16_t linedef;  // linedef that this seg goes along, or -1
-    uint16_t side;     // 0 if on right of linedef, 1 if on left
-    uint32_t partner;  // partner seg number, or -1
-};
-#pragma pack(pop)
-
-#pragma pack(push, 1)
-struct RawZDoomSeg
-{
-    uint32_t start;    // from this vertex...
-    uint32_t end;      // ... to this vertex
-    uint16_t linedef;  // linedef that this seg goes along, or -1
-    uint8_t  side;     // 0 if on right of linedef, 1 if on left
-};
-#pragma pack(pop)
-
 #pragma pack(push, 1)
 struct RawBoundingBox
 {
-    int16_t maxy, miny;
-    int16_t minx, maxx;
-};
-#pragma pack(pop)
-
-#pragma pack(push, 1)
-struct RawNode
-{
-    int16_t        x, y;    // starting point
-    int16_t        dx, dy;  // offset to ending point
-    RawBoundingBox b1, b2;  // bounding rectangles
-    uint16_t right, left;   // children: Node or SSector (if high bit is set)
-};
-#pragma pack(pop)
-
-#pragma pack(push, 1)
-struct RawSubsector
-{
-    uint16_t num;    // number of Segs in this Sub-Sector
-    uint16_t first;  // first Seg
-};
-#pragma pack(pop)
-
-#pragma pack(push, 1)
-struct RawV5Subsector
-{
-    uint32_t num;    // number of Segs in this Sub-Sector
-    uint32_t first;  // first Seg
-};
-#pragma pack(pop)
-
-#pragma pack(push, 1)
-struct RawZDoomSubsector
-{
-    uint32_t segnum;
-
-    // NOTE : no "first" value, segs must be contiguous and appear
-    //        in an order dictated by the subsector list, e.g. all
-    //        segs of the second subsector must appear directly after
-    //        all segs of the first subsector.
+    int16_t maximum_y, minimum_y;
+    int16_t minimum_x, maximum_x;
 };
 #pragma pack(pop)
 
@@ -253,17 +150,9 @@ struct RawV5Node
     // this structure used by ZDoom nodes too
 
     int16_t        x, y;    // starting point
-    int16_t        dx, dy;  // offset to ending point
-    RawBoundingBox b1, b2;  // bounding rectangles
+    int16_t        delta_x, delta_y;  // offset to ending point
+    RawBoundingBox bounding_box_1, bounding_box_2;  // bounding rectangles
     uint32_t right, left;   // children: Node or SSector (if high bit is set)
-};
-#pragma pack(pop)
-
-#pragma pack(push, 1)
-struct RawBlockmapHeader
-{
-    int16_t x_origin, y_origin;
-    int16_t x_blocks, y_blocks;
 };
 #pragma pack(pop)
 
@@ -299,10 +188,12 @@ struct RawTexture
 {
     char name[8];
 
-    uint32_t masked;  // NOT USED
+    uint16_t masked;  // NOT USED
+    uint8_t  scale_x;
+    uint8_t  scale_y;
     uint16_t width;
     uint16_t height;
-    uint16_t column_dir[2];  // NOT USED
+    uint32_t column_dir;  // NOT USED
     uint16_t patch_count;
 
     RawPatchDefinition patches[1];
@@ -314,7 +205,9 @@ struct RawStrifeTexture
 {
     char name[8];
 
-    uint32_t masked;  // NOT USED
+    uint16_t masked;  // NOT USED
+    uint8_t  scale_x;
+    uint8_t  scale_y;
     uint16_t width;
     uint16_t height;
     uint16_t patch_count;
@@ -338,12 +231,12 @@ struct Patch
     int16_t height;
 
     // pixels to the left of origin
-    int16_t leftoffset;
+    int16_t left_offset;
 
     // pixels below the origin
-    int16_t topoffset;
+    int16_t top_offset;
 
-    uint32_t columnofs[1];  // only [width] used
+    uint32_t column_offset[1];  // only [width] used
 };
 #pragma pack(pop)
 
@@ -393,35 +286,28 @@ enum LineFlag
     // -AJA- this one is from Boom. Allows multiple lines to
     //       be pushed simultaneously.
     kLineFlagBoomPassThrough = 0x0200,
-};
 
-enum LineFlagEternity
-{
-    kLineFlagEternity3DMidTex = 0x0400,
-};
+    // 0x0400 is Eternity's 3DMidTex flag - Dasho
 
-enum LineFlagXDoom
-{
-    // -AJA- these three are from XDoom
-    kLineFlagXDoomTranslucent = 0x0400,
-    kLineFlagXDoomShootBlock  = 0x0800,
-    kLineFlagXDoomSightBlock  = 0x1000,
-};
+    // Clear extended line flags (BOOM or later spec); needed to repair mapping/editor errors
+    // with historical maps (i.e., E2M7)
+    kLineFlagClearBoomFlags = 0x0800,
 
-enum LineFlagHexen
-{
-    // flags 0x001 .. 0x200 are same as DOOM above
+    // MBF21
+    kLineFlagBlockGroundedMonsters = 0x1000,
 
-    kLineFlagHexenRepeatable = 0x0200,
-    kLineFlagHexenActivation = 0x1c00,
-};
+    // MBF21
+    kLineFlagBlockPlayers  = 0x2000,
 
-enum LineFlagZDoom
-{
-    // these are supported by ZDoom (and derived ports)
-    kLineFlagZDoomMonstersCanActivate = 0x2000,
-    kLineFlagZDoomBlockPlayers        = 0x4000,
-    kLineFlagZDoomBlockEverything     = 0x8000,
+    // ----- internal flags -----
+
+    kLineFlagMirror = (1 << 16),
+
+    // -AJA- These two from XDoom.
+    // Dasho - Moved to internal flag range to make room for MBF21 stuff
+    kLineFlagShootBlock = (1 << 17),
+
+    kLineFlagSightBlock = (1 << 18),
 };
 
 constexpr int16_t kBoomGeneralizedLineFirst = 0x2f80;
@@ -433,16 +319,6 @@ inline bool IsBoomGeneralizedLine(int16_t line)
             line <= kBoomGeneralizedLineLast);
 }
 
-enum HexenActivation
-{
-    kSpecialActivationCross   = 0,  // when line is crossed (W1 / WR)
-    kSpecialActivationUse     = 1,  // when line is used    (S1 / SR)
-    kSpecialActivationMonster = 2,  // when monster walks over line
-    kSpecialActivationImpact = 3,  // when bullet/projectile hits line (G1 / GR)
-    kSpecialActivationPush   = 4,  // when line is bumped (player is stopped)
-    kSpecialActivationPCross = 5,  // when projectile crosses the line
-};
-
 //
 // Sector attributes.
 //
@@ -453,7 +329,7 @@ enum BoomSectorFlag
     kBoomSectorFlagDamageMask = 0x0060,
     kBoomSectorFlagSecret     = 0x0080,
     kBoomSectorFlagFriction   = 0x0100,
-    kBoomSectorFlagWind       = 0x0200,
+    kBoomSectorFlagPush       = 0x0200,
     kBoomSectorFlagNoSounds   = 0x0400,
     kBoomSectorFlagQuietPlane = 0x0800
 };
@@ -466,7 +342,6 @@ constexpr int16_t kBoomFlagBits = 0x0FE0;
 
 enum ThingOption
 {
-    // these four used in Hexen too
     kThingEasy            = 1,
     kThingMedium          = 2,
     kThingHard            = 4,
@@ -478,30 +353,14 @@ enum ThingOption
     kThingReserved        = 256,
 };
 
-constexpr int16_t kExtraFloorMask     = 0x3C00;
-constexpr uint8_t kExtraFloorBitShift = 10;
-
-enum HexenOption
-{
-    kThingHexenDormant      = 16,
-    kThingHexenFighter      = 32,
-    kThingHexenCleric       = 64,
-    kThingHexenMage         = 128,
-    kThingHexenSinglePlayer = 256,
-    kThingHexenCooperative  = 512,
-    kThingHexenDeathmatch   = 1024,
-};
+constexpr int16_t kExtrafloorMask     = 0x3C00;
+constexpr uint8_t kExtrafloorBitShift = 10;
 
 //
 // Polyobject stuff
 //
 constexpr uint8_t kHexenPolyobjectStart    = 1;
 constexpr uint8_t kHexenPolyobjectExplicit = 5;
-
-// -JL- Hexen polyobj thing types
-constexpr int16_t kPolyobjectAnchorType     = 3000;
-constexpr int16_t kPolyobjectSpawnType      = 3001;
-constexpr int16_t kPolyobjectSpawnCrushType = 3002;
 
 // -JL- ZDoom polyobj thing types
 constexpr int16_t kZDoomPolyobjectAnchorType     = 9300;

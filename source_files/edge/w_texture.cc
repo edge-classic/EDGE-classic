@@ -23,7 +23,7 @@
 
 #include "w_texture.h"
 
-#include "dm_structs.h"
+#include "common_doomdefs.h"
 #include "e_main.h"
 #include "e_search.h"
 #include "endianess.h"
@@ -138,8 +138,8 @@ static void InstallTextureLumps(int file, const WadTextureResource *WT)
         if (offset < 0 || offset > maxoff)
             FatalError("InitializeTextures: bad texture directory");
 
-        const raw_texture_t *mtexture =
-            (const raw_texture_t *)((const uint8_t *)maptex + offset);
+        const RawTexture *mtexture =
+            (const RawTexture *)((const uint8_t *)maptex + offset);
 
         // -ES- 2000/02/10 Texture must have patches.
         int patchcount = AlignedLittleEndianS16(mtexture->patch_count);
@@ -186,7 +186,7 @@ static void InstallTextureLumps(int file, const WadTextureResource *WT)
             texture->name[j] = epi::ToUpperASCII(texture->name[j]);
         }
 
-        const raw_patchdef_t *mpatch = &mtexture->patches[0];
+        const RawPatchDefinition *mpatch = &mtexture->patches[0];
         TexturePatch         *patch  = &texture->patches[0];
 
         bool is_sky =
@@ -306,8 +306,8 @@ static void InstallTextureLumpsStrife(int file, const WadTextureResource *WT)
         if (offset < 0 || offset > maxoff)
             FatalError("InitializeTextures: bad texture directory");
 
-        const raw_strife_texture_t *mtexture =
-            (const raw_strife_texture_t *)((const uint8_t *)maptex + offset);
+        const RawStrifeTexture *mtexture =
+            (const RawStrifeTexture *)((const uint8_t *)maptex + offset);
 
         // -ES- 2000/02/10 Texture must have patches.
         int patchcount = AlignedLittleEndianS16(mtexture->patch_count);
@@ -354,7 +354,7 @@ static void InstallTextureLumpsStrife(int file, const WadTextureResource *WT)
             texture->name[j] = epi::ToUpperASCII(texture->name[j]);
         }
 
-        const raw_strife_patchdef_t *mpatch = &mtexture->patches[0];
+        const RawStrifePatchDefinition *mpatch = &mtexture->patches[0];
         TexturePatch                *patch  = &texture->patches[0];
 
         bool is_sky =

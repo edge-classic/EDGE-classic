@@ -21,10 +21,10 @@
 #include <string>
 #include <vector>
 
-#include "bsp_raw_def.h"
-// EPI
+#include "common_doomdefs.h"
 #include "file.h"
 #include "str_compare.h"
+
 namespace ajbsp
 {
 

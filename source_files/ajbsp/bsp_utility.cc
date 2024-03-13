@@ -22,6 +22,7 @@
 #include "HandmadeMath.h"
 #include "bsp_local.h"
 #include "str_util.h"
+
 namespace ajbsp
 {
 
@@ -60,7 +61,8 @@ void *UtilRealloc(void *old, int size)
 //
 void UtilFree(void *data)
 {
-    if (data == nullptr) FatalError("AJBSP: Trying to free a nullptr pointer\n");
+    if (data == nullptr)
+        FatalError("AJBSP: Trying to free a nullptr pointer\n");
 
     free(data);
 }

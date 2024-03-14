@@ -16,18 +16,11 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __M4P_PLAYER_H__
-#define __M4P_PLAYER_H__
+#pragma once
 
-#include "i_defs.h"
+#include "s_music.h"
 
-#include "sound_data.h"
-
-/* FUNCTIONS */
-
-abstract_music_c *S_PlayM4PMusic(uint8_t *data, int length, bool looping);
-
-#endif /* __M4P_PLAYER_H__ */
+AbstractMusicPlayer *S_PlayM4PMusic(uint8_t *data, int length, bool looping);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

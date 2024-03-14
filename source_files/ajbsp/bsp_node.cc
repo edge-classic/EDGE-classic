@@ -18,6 +18,7 @@
 //
 //------------------------------------------------------------------------
 
+#include "HandmadeMath.h"
 #include "bsp_local.h"
 #include "bsp_utility.h"
 #include "bsp_wad.h"
@@ -31,7 +32,7 @@
 #define DEBUG_SUBSEC  0
 
 static constexpr uint8_t kPreciousCostMultiplier = 100;
-static constexpr uint8_t kSegFastModeThreshold = 200;
+static constexpr uint8_t kSegFastModeThreshold   = 200;
 
 //
 // To be able to divide the nodes down, this routine must decide which
@@ -54,9 +55,9 @@ static constexpr uint8_t kSegFastModeThreshold = 200;
 namespace ajbsp
 {
 
-class eval_info_t
+class EvalInfo
 {
-  public:
+   public:
     double cost;
     int    splits;
     int    iffy;
@@ -67,10 +68,10 @@ class eval_info_t
     int mini_left;
     int mini_right;
 
-  public:
+   public:
     void BumpLeft(const Linedef *linedef)
     {
-        if (linedef != NULL)
+        if (linedef != nullptr)
             real_left++;
         else
             mini_left++;
@@ -78,7 +79,7 @@ class eval_info_t
 
     void BumpRight(const Linedef *linedef)
     {
-        if (linedef != NULL)
+        if (linedef != nullptr)
             real_right++;
         else
             mini_right++;
@@ -98,8 +99,7 @@ Intersection *NewIntersection()
 
 void FreeIntersections(void)
 {
-    for (size_t i = 0; i < alloc_cuts.size(); i++)
-        delete alloc_cuts[i];
+    for (size_t i = 0; i < alloc_cuts.size(); i++) delete alloc_cuts[i];
 
     alloc_cuts.clear();
 }
@@ -118,8 +118,7 @@ void Seg::Recompute()
 
     p_length_ = hypot(pdx_, pdy_);
 
-    if (p_length_ <= 0)
-        I_Error("AJBSP: Seg %p has zero p_length_.\n", this);
+    if (p_length_ <= 0) FatalError("AJBSP: Seg %p has zero p_length_.\n", this);
 
     p_perp_ = psy_ * pdx_ - psx_ * pdy_;
     p_para_ = -psx_ * pdx_ - psy_ * pdy_;
@@ -141,17 +140,18 @@ Seg *SplitSeg(Seg *old_seg, double x, double y)
 {
 #if DEBUG_SPLIT
     if (old_seg->linedef)
-        I_Debugf("Splitting Linedef %d (%p) at (%1.1f,%1.1f)\n", old_seg->linedef->index, old_seg, x, y);
+        LogDebug("Splitting Linedef %d (%p) at (%1.1f,%1.1f)\n",
+                 old_seg->linedef->index, old_seg, x, y);
     else
-        I_Debugf("Splitting Miniseg %p at (%1.1f,%1.1f)\n", old_seg, x, y);
+        LogDebug("Splitting Miniseg %p at (%1.1f,%1.1f)\n", old_seg, x, y);
 #endif
 
     Vertex *new_vert = NewVertexFromSplitSeg(old_seg, x, y);
     Seg    *new_seg  = NewSeg();
 
     // copy seg info
-    new_seg[0]    = old_seg[0];
-    new_seg->next_ = NULL;
+    new_seg[0]     = old_seg[0];
+    new_seg->next_ = nullptr;
 
     old_seg->end_   = new_vert;
     new_seg->start_ = new_vert;
@@ -160,7 +160,8 @@ Seg *SplitSeg(Seg *old_seg, double x, double y)
     new_seg->Recompute();
 
 #if DEBUG_SPLIT
-    I_Debugf("Splitting Vertex is %04X at (%1.1f,%1.1f)\n", new_vert->index, new_vert->x, new_vert->y);
+    LogDebug("Splitting Vertex is %04X at (%1.1f,%1.1f)\n", new_vert->index,
+             new_vert->x, new_vert->y);
 #endif
 
     // handle partners
@@ -168,7 +169,7 @@ Seg *SplitSeg(Seg *old_seg, double x, double y)
     if (old_seg->partner_)
     {
 #if DEBUG_SPLIT
-        I_Debugf("Splitting partner %p\n", old_seg->partner_);
+        LogDebug("Splitting partner %p\n", old_seg->partner_);
 #endif
 
         new_seg->partner_ = NewSeg();
@@ -199,7 +200,8 @@ Seg *SplitSeg(Seg *old_seg, double x, double y)
 //       and the partitioning seg, and takes advantage of some common
 //       situations like horizontal/vertical lines.
 //
-inline void ComputeIntersection(Seg *seg, Seg *part, double perp_c, double perp_d, double *x, double *y)
+inline void ComputeIntersection(Seg *seg, Seg *part, double perp_c,
+                                double perp_d, double *x, double *y)
 {
     // horizontal partition against vertical seg
     if (AlmostEquals(part->pdy_, 0.0) && AlmostEquals(seg->pdx_, 0.0))
@@ -231,7 +233,8 @@ inline void ComputeIntersection(Seg *seg, Seg *part, double perp_c, double perp_
         *y = seg->psy_ + (seg->pdy_ * ds);
 }
 
-void AddIntersection(Intersection **cut_list, Vertex *vert, Seg *part, bool self_ref)
+void AddIntersection(Intersection **cut_list, Vertex *vert, Seg *part,
+                     bool self_ref)
 {
     bool open_before = vert->CheckOpen(-part->pdx_, -part->pdy_);
     bool open_after  = vert->CheckOpen(part->pdx_, part->pdy_);
@@ -244,8 +247,7 @@ void AddIntersection(Intersection **cut_list, Vertex *vert, Seg *part, bool self
     /* merge with any existing vertex? */
     for (cut = (*cut_list); cut; cut = cut->next)
     {
-        if (vert->Overlaps(cut->vertex))
-            return;
+        if (vert->Overlaps(cut->vertex)) return;
     }
 
     /* create new intersection */
@@ -259,12 +261,9 @@ void AddIntersection(Intersection **cut_list, Vertex *vert, Seg *part, bool self
 
     /* insert the new intersection into the list */
 
-    for (after = (*cut_list); after && after->next; after = after->next)
-    {
-    }
+    for (after = (*cut_list); after && after->next; after = after->next) {}
 
-    while (after && cut->along_dist < after->along_dist)
-        after = after->prev;
+    while (after && cut->along_dist < after->along_dist) after = after->prev;
 
     /* link it in */
     cut->next = after ? after->next : (*cut_list);
@@ -272,15 +271,13 @@ void AddIntersection(Intersection **cut_list, Vertex *vert, Seg *part, bool self
 
     if (after)
     {
-        if (after->next)
-            after->next->prev = cut;
+        if (after->next) after->next->prev = cut;
 
         after->next = cut;
     }
     else
     {
-        if (*cut_list)
-            (*cut_list)->prev = cut;
+        if (*cut_list) (*cut_list)->prev = cut;
 
         (*cut_list) = cut;
     }
@@ -289,7 +286,8 @@ void AddIntersection(Intersection **cut_list, Vertex *vert, Seg *part, bool self
 //
 // Returns true if a "bad seg" was found early.
 //
-bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost, eval_info_t *info)
+bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost,
+                         EvalInfo *info)
 {
     double split_cost = current_build_info.split_cost;
 
@@ -326,8 +324,7 @@ bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost, eval_info_
         // This is the heart of my pruning idea - it catches
         // bad segs early on. Killough
 
-        if (info->cost > best_cost)
-            return true;
+        if (info->cost > best_cost) return true;
 
         double qnty;
 
@@ -366,7 +363,7 @@ bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost, eval_info_
 
         if (fa <= kEpsilon || fb <= kEpsilon)
         {
-            if (check->linedef_ != NULL && check->linedef_->is_precious)
+            if (check->linedef_ != nullptr && check->linedef_->is_precious)
                 info->cost += 40.0 * split_cost * kPreciousCostMultiplier;
         }
 
@@ -376,7 +373,8 @@ bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost, eval_info_
             info->BumpRight(check->linedef_);
 
             /* check for a near miss */
-            if ((a >= kIffySegLength && b >= kIffySegLength) || (a <= kEpsilon && b >= kIffySegLength) ||
+            if ((a >= kIffySegLength && b >= kIffySegLength) ||
+                (a <= kEpsilon && b >= kIffySegLength) ||
                 (b <= kEpsilon && a >= kIffySegLength))
             {
                 continue;
@@ -404,7 +402,8 @@ bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost, eval_info_
             info->BumpLeft(check->linedef_);
 
             /* check for a near miss */
-            if ((a <= -kIffySegLength && b <= -kIffySegLength) || (a >= -kEpsilon && b <= -kIffySegLength) ||
+            if ((a <= -kIffySegLength && b <= -kIffySegLength) ||
+                (a >= -kEpsilon && b <= -kIffySegLength) ||
                 (b >= -kEpsilon && a <= -kIffySegLength))
             {
                 continue;
@@ -456,10 +455,9 @@ bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost, eval_info_
 
     for (int c = 0; c < 2; c++)
     {
-        if (info->cost > best_cost)
-            return true;
+        if (info->cost > best_cost) return true;
 
-        if (tree->subs_[c] != NULL && !tree->subs_[c]->Empty())
+        if (tree->subs_[c] != nullptr && !tree->subs_[c]->Empty())
         {
             if (EvalPartitionWorker(tree->subs_[c], part, best_cost, info))
                 return true;
@@ -480,7 +478,7 @@ bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost, eval_info_
 //
 double EvalPartition(QuadTree *tree, Seg *part, double best_cost)
 {
-    eval_info_t info;
+    EvalInfo info;
 
     /* initialise info structure */
     info.cost      = 0;
@@ -493,15 +491,15 @@ double EvalPartition(QuadTree *tree, Seg *part, double best_cost)
     info.mini_left  = 0;
     info.mini_right = 0;
 
-    if (EvalPartitionWorker(tree, part, best_cost, &info))
-        return -1.0;
+    if (EvalPartitionWorker(tree, part, best_cost, &info)) return -1.0;
 
     /* make sure there is at least one real seg on each side */
     if (info.real_left == 0 || info.real_right == 0)
     {
 #if DEBUG_PICKNODE
-        I_Debugf("Eval : No real segs on %s%sside\n", info.real_left ? "" : "left ",
-                        info.real_right ? "" : "right ");
+        LogDebug("Eval : No real segs on %s%sside\n",
+                 info.real_left ? "" : "left ",
+                 info.real_right ? "" : "right ");
 #endif
 
         return -1;
@@ -525,48 +523,39 @@ double EvalPartition(QuadTree *tree, Seg *part, double best_cost)
     return info.cost;
 }
 
-void EvaluateFastWorker(QuadTree *tree, Seg **best_H, Seg **best_V, int mid_x, int mid_y)
+void EvaluateFastWorker(QuadTree *tree, Seg **best_H, Seg **best_V, int mid_x,
+                        int mid_y)
 {
     for (Seg *part = tree->list_; part; part = part->next_)
     {
         /* ignore minisegs as partition candidates */
-        if (part->linedef_ == NULL)
-            continue;
+        if (part->linedef_ == nullptr) continue;
 
         /* ignore self-ref and polyobj stuff as partition candidates */
-        if (part->linedef_->is_precious)
-            continue;
+        if (part->linedef_->is_precious) continue;
 
         if (AlmostEquals(part->pdy_, 0.0))
         {
             // horizontal seg
-            if (!*best_H)
-            {
-                *best_H = part;
-            }
+            if (!*best_H) { *best_H = part; }
             else
             {
                 double old_dist = fabs((*best_H)->psy_ - mid_y);
                 double new_dist = fabs((part)->psy_ - mid_y);
 
-                if (new_dist < old_dist)
-                    *best_H = part;
+                if (new_dist < old_dist) *best_H = part;
             }
         }
         else if (AlmostEquals(part->pdx_, 0.0))
         {
             // vertical seg
-            if (!*best_V)
-            {
-                *best_V = part;
-            }
+            if (!*best_V) { *best_V = part; }
             else
             {
                 double old_dist = fabs((*best_V)->psx_ - mid_x);
                 double new_dist = fabs((part)->psx_ - mid_x);
 
-                if (new_dist < old_dist)
-                    *best_V = part;
+                if (new_dist < old_dist) *best_V = part;
             }
         }
     }
@@ -575,7 +564,7 @@ void EvaluateFastWorker(QuadTree *tree, Seg **best_H, Seg **best_V, int mid_x, i
 
     for (int c = 0; c < 2; c++)
     {
-        if (tree->subs_[c] != NULL && !tree->subs_[c]->Empty())
+        if (tree->subs_[c] != nullptr && !tree->subs_[c]->Empty())
         {
             EvaluateFastWorker(tree->subs_[c], best_H, best_V, mid_x, mid_y);
         }
@@ -584,8 +573,8 @@ void EvaluateFastWorker(QuadTree *tree, Seg **best_H, Seg **best_V, int mid_x, i
 
 Seg *FindFastSeg(QuadTree *tree)
 {
-    Seg *best_H = NULL;
-    Seg *best_V = NULL;
+    Seg *best_H = nullptr;
+    Seg *best_V = nullptr;
 
     int mid_x = (tree->x1_ + tree->x2_) / 2;
     int mid_y = (tree->y1_ + tree->y2_) / 2;
@@ -595,43 +584,38 @@ Seg *FindFastSeg(QuadTree *tree)
     double H_cost = -1.0;
     double V_cost = -1.0;
 
-    if (best_H)
-        H_cost = EvalPartition(tree, best_H, 1.0e99);
+    if (best_H) H_cost = EvalPartition(tree, best_H, 1.0e99);
 
-    if (best_V)
-        V_cost = EvalPartition(tree, best_V, 1.0e99);
+    if (best_V) V_cost = EvalPartition(tree, best_V, 1.0e99);
 
-    if (H_cost < 0 && V_cost < 0)
-        return NULL;
+    if (H_cost < 0 && V_cost < 0) return nullptr;
 
-    if (H_cost < 0)
-        return best_V;
-    if (V_cost < 0)
-        return best_H;
+    if (H_cost < 0) return best_V;
+    if (V_cost < 0) return best_H;
 
     return (V_cost < H_cost) ? best_V : best_H;
 }
 
 /* returns false if cancelled */
-bool PickNodeWorker(QuadTree *part_list, QuadTree *tree, Seg **best, double *best_cost)
+bool PickNodeWorker(QuadTree *part_list, QuadTree *tree, Seg **best,
+                    double *best_cost)
 {
     /* try each Seg as partition */
     for (Seg *part = part_list->list_; part; part = part->next_)
     {
 #if DEBUG_PICKNODE
-        I_Debugf("PickNode:   %sSEG %p  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", part->linedef ? "" : "MINI", part,
-                        part->start->x, part->start->y, part->end->x, part->end->y);
+        LogDebug("PickNode:   %sSEG %p  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+                 part->linedef ? "" : "MINI", part, part->start->x,
+                 part->start->y, part->end->x, part->end->y);
 #endif
 
         /* ignore minisegs as partition candidates */
-        if (part->linedef_ == NULL)
-            continue;
+        if (part->linedef_ == nullptr) continue;
 
         double cost = EvalPartition(tree, part, *best_cost);
 
         /* seg unsuitable or too costly ? */
-        if (cost < 0 || cost >= *best_cost)
-            continue;
+        if (cost < 0 || cost >= *best_cost) continue;
 
         /* we have a new better choice */
         (*best_cost) = cost;
@@ -644,7 +628,7 @@ bool PickNodeWorker(QuadTree *part_list, QuadTree *tree, Seg **best, double *bes
 
     for (int c = 0; c < 2; c++)
     {
-        if (part_list->subs_[c] != NULL && !part_list->subs_[c]->Empty())
+        if (part_list->subs_[c] != nullptr && !part_list->subs_[c]->Empty())
         {
             if (!PickNodeWorker(part_list->subs_[c], tree, best, best_cost))
                 return false;
@@ -659,12 +643,12 @@ bool PickNodeWorker(QuadTree *part_list, QuadTree *tree, Seg **best, double *bes
 //
 static Seg *PickNode(QuadTree *tree)
 {
-    Seg *best = NULL;
+    Seg *best = nullptr;
 
     double best_cost = 1.0e99;
 
 #if DEBUG_PICKNODE
-    I_Debugf("PickNode: BEGUN (depth %d)\n", depth);
+    LogDebug("PickNode: BEGUN (depth %d)\n", depth);
 #endif
 
     /* -AJA- here is the logic for "fast mode".  We look for segs which
@@ -674,16 +658,17 @@ static Seg *PickNode(QuadTree *tree)
     if (tree->real_num_ >= kSegFastModeThreshold)
     {
 #if DEBUG_PICKNODE
-        I_Debugf("PickNode: Looking for Fast node...\n");
+        LogDebug("PickNode: Looking for Fast node...\n");
 #endif
 
         best = FindFastSeg(tree);
 
-        if (best != NULL)
+        if (best != nullptr)
         {
 #if DEBUG_PICKNODE
-            I_Debugf("PickNode: Using Fast node (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", best->start->x,
-                            best->start->y, best->end->x, best->end->y);
+            LogDebug(
+                "PickNode: Using Fast node (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+                best->start->x, best->start->y, best->end->x, best->end->y);
 #endif
             return best;
         }
@@ -692,7 +677,7 @@ static Seg *PickNode(QuadTree *tree)
     if (!PickNodeWorker(tree, tree, &best, &best_cost))
     {
         /* hack here : BuildNodes will detect the cancellation */
-        return NULL;
+        return nullptr;
     }
 
     return best;
@@ -709,7 +694,8 @@ static Seg *PickNode(QuadTree *tree)
 //       same logic when determining which segs should go left, right
 //       or be split.
 //
-static void DivideOneSeg(Seg *seg, Seg *part, Seg **left_list, Seg **right_list, Intersection **cut_list)
+static void DivideOneSeg(Seg *seg, Seg *part, Seg **left_list, Seg **right_list,
+                         Intersection **cut_list)
 {
     /* get state of lines' relation to each other */
     double a = part->PerpendicularDistance(seg->psx_, seg->psy_);
@@ -717,8 +703,7 @@ static void DivideOneSeg(Seg *seg, Seg *part, Seg **left_list, Seg **right_list,
 
     bool self_ref = seg->linedef_ ? seg->linedef_->self_referencing : false;
 
-    if (seg->source_line_ == part->source_line_)
-        a = b = 0;
+    if (seg->source_line_ == part->source_line_) a = b = 0;
 
     /* check for being on the same line */
     if (fabs(a) <= kEpsilon && fabs(b) <= kEpsilon)
@@ -783,19 +768,20 @@ static void DivideOneSeg(Seg *seg, Seg *part, Seg **left_list, Seg **right_list,
     }
 }
 
-static void SeparateSegs(QuadTree *tree, Seg *part, Seg **left_list, Seg **right_list, Intersection **cut_list)
+static void SeparateSegs(QuadTree *tree, Seg *part, Seg **left_list,
+                         Seg **right_list, Intersection **cut_list)
 {
-    while (tree->list_ != NULL)
+    while (tree->list_ != nullptr)
     {
-        Seg *seg = tree->list_;
+        Seg *seg    = tree->list_;
         tree->list_ = seg->next_;
 
-        seg->quad_ = NULL;
+        seg->quad_ = nullptr;
         DivideOneSeg(seg, part, left_list, right_list, cut_list);
     }
 
     // recursively handle sub-blocks
-    if (tree->subs_[0] != NULL)
+    if (tree->subs_[0] != nullptr)
     {
         SeparateSegs(tree->subs_[0], part, left_list, right_list, cut_list);
         SeparateSegs(tree->subs_[1], part, left_list, right_list, cut_list);
@@ -807,19 +793,19 @@ static void SeparateSegs(QuadTree *tree, Seg *part, Seg **left_list, Seg **right
 static void FindLimits2(Seg *list, BoundingBox *bbox)
 {
     // empty list?
-    if (list == NULL)
+    if (list == nullptr)
     {
-        bbox->minx = 0;
-        bbox->miny = 0;
-        bbox->maxx = 4;
-        bbox->maxy = 4;
+        bbox->minimum_x = 0;
+        bbox->minimum_y = 0;
+        bbox->maximum_x = 4;
+        bbox->maximum_y = 4;
         return;
     }
 
-    bbox->minx = bbox->miny = SHRT_MAX;
-    bbox->maxx = bbox->maxy = SHRT_MIN;
+    bbox->minimum_x = bbox->minimum_y = SHRT_MAX;
+    bbox->maximum_x = bbox->maximum_y = SHRT_MIN;
 
-    for (; list != NULL; list = list->next_)
+    for (; list != nullptr; list = list->next_)
     {
         double x1 = list->start_->x_;
         double y1 = list->start_->y_;
@@ -831,30 +817,29 @@ static void FindLimits2(Seg *list, BoundingBox *bbox)
         int hx = (int)ceil(HMM_MAX(x1, x2) + 0.2);
         int hy = (int)ceil(HMM_MAX(y1, y2) + 0.2);
 
-        if (lx < bbox->minx)
-            bbox->minx = lx;
-        if (ly < bbox->miny)
-            bbox->miny = ly;
-        if (hx > bbox->maxx)
-            bbox->maxx = hx;
-        if (hy > bbox->maxy)
-            bbox->maxy = hy;
+        if (lx < bbox->minimum_x) bbox->minimum_x = lx;
+        if (ly < bbox->minimum_y) bbox->minimum_y = ly;
+        if (hx > bbox->maximum_x) bbox->maximum_x = hx;
+        if (hy > bbox->maximum_y) bbox->maximum_y = hy;
     }
 }
 
-static void AddMinisegs(Intersection *cut_list, Seg *part, Seg **left_list, Seg **right_list)
+static void AddMinisegs(Intersection *cut_list, Seg *part, Seg **left_list,
+                        Seg **right_list)
 {
     Intersection *cut, *next;
 
 #if DEBUG_CUTLIST
-    I_Debugf("CUT LIST:\n");
-    I_Debugf("PARTITION: (%1.1f,%1.1f) += (%1.1f,%1.1f)\n", part->psx_, part->psy_, part->pdx_, part->pdy_);
+    LogDebug("CUT LIST:\n");
+    LogDebug("PARTITION: (%1.1f,%1.1f) += (%1.1f,%1.1f)\n", part->psx_,
+             part->psy_, part->pdx_, part->pdy_);
 
     for (cut = cut_list; cut; cut = cut->next)
     {
-        I_Debugf("  Vertex %8X (%1.1f,%1.1f)  Along %1.2f  [%d/%d]  %s\n", cut->vertex->index, cut->vertex->x,
-                        cut->vertex->y, cut->along_dist, cut->open_before ? 1 : 0, cut->open_after ? 1 : 0,
-                        cut->self_ref ? "SELFREF" : "");
+        LogDebug("  Vertex %8X (%1.1f,%1.1f)  Along %1.2f  [%d/%d]  %s\n",
+                 cut->vertex->index, cut->vertex->x, cut->vertex->y,
+                 cut->along_dist, cut->open_before ? 1 : 0,
+                 cut->open_after ? 1 : 0, cut->self_ref ? "SELFREF" : "");
     }
 #endif
 
@@ -868,15 +853,15 @@ static void AddMinisegs(Intersection *cut_list, Seg *part, Seg **left_list, Seg 
         double len = next->along_dist - cut->along_dist;
         if (len < -0.001)
         {
-            I_Error("AJBSP: Bad order in intersect list: %1.3f > %1.3f\n", cut->along_dist, next->along_dist);
+            FatalError("AJBSP: Bad order in intersect list: %1.3f > %1.3f\n",
+                       cut->along_dist, next->along_dist);
         }
 
         bool A = cut->open_after;
         bool B = next->open_before;
 
         // nothing possible when both ends are CLOSED
-        if (!(A || B))
-            continue;
+        if (!(A || B)) continue;
 
         if (A != B)
         {
@@ -901,7 +886,7 @@ static void AddMinisegs(Intersection *cut_list, Seg *part, Seg **left_list, Seg 
         buddy->end_   = cut->vertex;
 
         seg->index_ = buddy->index_ = -1;
-        seg->linedef_ = buddy->linedef_ = NULL;
+        seg->linedef_ = buddy->linedef_ = nullptr;
         seg->side_ = buddy->side_ = 0;
 
         seg->source_line_ = buddy->source_line_ = part->linedef_;
@@ -914,11 +899,12 @@ static void AddMinisegs(Intersection *cut_list, Seg *part, Seg **left_list, Seg 
         ListAddSeg(left_list, buddy);
 
 #if DEBUG_CUTLIST
-        I_Debugf("AddMiniseg: %p RIGHT  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->start_->x, seg->start_->y,
-                        seg->end_->x, seg->end_->y);
+        LogDebug("AddMiniseg: %p RIGHT  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+                 seg->start_->x, seg->start_->y, seg->end_->x, seg->end_->y);
 
-        I_Debugf("AddMiniseg: %p LEFT   (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", buddy->start->x, buddy->start->y,
-                        buddy->end->x, buddy->end->y);
+        LogDebug("AddMiniseg: %p LEFT   (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+                 buddy->start->x, buddy->start->y, buddy->end->x,
+                 buddy->end->y);
 #endif
     }
 }
@@ -945,7 +931,7 @@ static void AddMinisegs(Intersection *cut_list, Seg *part, Seg **left_list, Seg 
 
 void Node::SetPartition(const Seg *part)
 {
-    SYS_ASSERT(part->linedef_);
+    EPI_ASSERT(part->linedef_);
 
     if (part->side_ == 0)
     {
@@ -980,8 +966,7 @@ int Seg::PointOnLineSide(double x, double y) const
 {
     double perp = PerpendicularDistance(x, y);
 
-    if (fabs(perp) <= kEpsilon)
-        return 0;
+    if (fabs(perp) <= kEpsilon) return 0;
 
     return (perp < 0) ? -1 : +1;
 }
@@ -989,7 +974,13 @@ int Seg::PointOnLineSide(double x, double y) const
 /* ----- quad-tree routines ------------------------------------ */
 
 QuadTree::QuadTree(int x1, int y1, int x2, int y2)
-    : x1_(x1), y1_(y1), x2_(x2), y2_(y2), real_num_(0), mini_num_(0), list_(NULL)
+    : x1_(x1),
+      y1_(y1),
+      x2_(x2),
+      y2_(y2),
+      real_num_(0),
+      mini_num_(0),
+      list_(nullptr)
 {
     int dx = x2 - x1;
     int dy = y2 - y1;
@@ -997,8 +988,8 @@ QuadTree::QuadTree(int x1, int y1, int x2, int y2)
     if (dx <= 320 && dy <= 320)
     {
         // leaf node
-        subs_[0] = NULL;
-        subs_[1] = NULL;
+        subs_[0] = nullptr;
+        subs_[1] = nullptr;
     }
     else if (dx >= dy)
     {
@@ -1014,21 +1005,19 @@ QuadTree::QuadTree(int x1, int y1, int x2, int y2)
 
 QuadTree::~QuadTree()
 {
-    if (subs_[0] != NULL)
-        delete subs_[0];
-    if (subs_[1] != NULL)
-        delete subs_[1];
+    if (subs_[0] != nullptr) delete subs_[0];
+    if (subs_[1] != nullptr) delete subs_[1];
 }
 
 void QuadTree::AddSeg(Seg *seg)
 {
     // update seg counts
-    if (seg->linedef_ != NULL)
+    if (seg->linedef_ != nullptr)
         real_num_++;
     else
         mini_num_++;
 
-    if (subs_[0] != NULL)
+    if (subs_[0] != nullptr)
     {
         double x_min = HMM_MIN(seg->start_->x_, seg->end_->x_);
         double y_min = HMM_MIN(seg->start_->y_, seg->end_->y_);
@@ -1073,10 +1062,10 @@ void QuadTree::AddSeg(Seg *seg)
 
 void QuadTree::AddList(Seg *new_list)
 {
-    while (new_list != NULL)
+    while (new_list != nullptr)
     {
         Seg *seg = new_list;
-        new_list   = seg->next_;
+        new_list = seg->next_;
 
         AddSeg(seg);
     }
@@ -1084,15 +1073,15 @@ void QuadTree::AddList(Seg *new_list)
 
 void QuadTree::ConvertToList(Seg **list)
 {
-    while (list_ != NULL)
+    while (list_ != nullptr)
     {
         Seg *seg = list_;
-        list_       = seg->next_;
+        list_    = seg->next_;
 
         ListAddSeg(list, seg);
     }
 
-    if (subs_[0] != NULL)
+    if (subs_[0] != nullptr)
     {
         subs_[0]->ConvertToList(list);
         subs_[1]->ConvertToList(list);
@@ -1140,41 +1129,40 @@ int QuadTree::OnLineSide(const Seg *part) const
         p1 = part->PointOnLineSide(tx1, ty2);
         p2 = part->PointOnLineSide(tx2, ty1);
     }
-    else // NEGATIVE
+    else  // NEGATIVE
     {
         p1 = part->PointOnLineSide(tx1, ty1);
         p2 = part->PointOnLineSide(tx2, ty2);
     }
 
     // line goes through or touches the box?
-    if (p1 != p2)
-        return 0;
+    if (p1 != p2) return 0;
 
     return p1;
 }
 
-Seg *CreateOneSeg(Linedef *line, Vertex *start, Vertex *end, Sidedef *side, int what_side)
+Seg *CreateOneSeg(Linedef *line, Vertex *start, Vertex *end, Sidedef *side,
+                  int what_side)
 {
     Seg *seg = NewSeg();
 
     // check for bad sidedef
-    if (side->sector == NULL)
+    if (side->sector == nullptr)
     {
-        I_Printf("Bad sidedef on linedef #%d (Z_CheckHeap error)\n", line->index);
+        LogPrint("Bad sidedef on linedef #%d (Z_CheckHeap error)\n",
+                 line->index);
         current_build_info.total_warnings++;
     }
 
     // handle overlapping vertices, pick a nominal one
-    if (start->overlap_)
-        start = start->overlap_;
-    if (end->overlap_)
-        end = end->overlap_;
+    if (start->overlap_) start = start->overlap_;
+    if (end->overlap_) end = end->overlap_;
 
     seg->start_   = start;
     seg->end_     = end;
     seg->linedef_ = line;
     seg->side_    = what_side;
-    seg->partner_ = NULL;
+    seg->partner_ = nullptr;
 
     seg->source_line_ = seg->linedef_;
     seg->index_       = -1;
@@ -1189,47 +1177,47 @@ Seg *CreateOneSeg(Linedef *line, Vertex *start, Vertex *end, Sidedef *side, int 
 //
 Seg *CreateSegs()
 {
-    Seg *list = NULL;
+    Seg *list = nullptr;
 
     for (int i = 0; i < level_linedefs.size(); i++)
     {
         Linedef *line = level_linedefs[i];
 
-        Seg *left  = NULL;
-        Seg *right = NULL;
+        Seg *left  = nullptr;
+        Seg *right = nullptr;
 
         // ignore zero-length lines
-        if (line->zero_length)
-            continue;
+        if (line->zero_length) continue;
 
         // ignore overlapping lines
-        if (line->overlap != NULL)
-            continue;
+        if (line->overlap != nullptr) continue;
 
         // check for extremely long lines
-        if (hypot(line->start->x_ - line->end->x_, line->start->y_ - line->end->y_) >= 32000)
+        if (hypot(line->start->x_ - line->end->x_,
+                  line->start->y_ - line->end->y_) >= 32000)
         {
-            I_Printf("Linedef #%d is VERY long, it may cause problems\n", line->index);
+            LogPrint("Linedef #%d is VERY long, it may cause problems\n",
+                     line->index);
             current_build_info.total_warnings++;
         }
 
-        if (line->right != NULL)
+        if (line->right != nullptr)
         {
             right = CreateOneSeg(line, line->start, line->end, line->right, 0);
             ListAddSeg(&list, right);
         }
         else
         {
-            I_Printf("Linedef #%d has no right sidedef!\n", line->index);
+            LogPrint("Linedef #%d has no right sidedef!\n", line->index);
             current_build_info.total_warnings++;
         }
 
-        if (line->left != NULL)
+        if (line->left != nullptr)
         {
             left = CreateOneSeg(line, line->end, line->start, line->left, 1);
             ListAddSeg(&list, left);
 
-            if (right != NULL)
+            if (right != nullptr)
             {
                 // -AJA- partner_ segs.  These always maintain a one-to-one
                 //       correspondence, so if one of the gets split, the
@@ -1243,7 +1231,8 @@ Seg *CreateSegs()
         {
             if (line->two_sided)
             {
-                I_Printf("Linedef #%d is 2s but has no left sidedef\n", line->index);
+                LogPrint("Linedef #%d is 2s but has no left sidedef\n",
+                         line->index);
                 current_build_info.total_warnings++;
                 line->two_sided = false;
             }
@@ -1255,7 +1244,8 @@ Seg *CreateSegs()
 
 static QuadTree *TreeFromSegList(Seg *list, const BoundingBox *bounds)
 {
-    QuadTree *tree = new QuadTree(bounds->minx, bounds->miny, bounds->maxx, bounds->maxy);
+    QuadTree *tree = new QuadTree(bounds->minimum_x, bounds->minimum_y,
+                                  bounds->maximum_x, bounds->maximum_y);
 
     tree->AddList(list);
 
@@ -1287,17 +1277,16 @@ void Subsector::DetermineMiddle()
 
 void Subsector::AddToTail(Seg *seg)
 {
-    seg->next_ = NULL;
+    seg->next_ = nullptr;
 
-    if (seg_list_ == NULL)
+    if (seg_list_ == nullptr)
     {
         seg_list_ = seg;
         return;
     }
 
     Seg *tail = seg_list_;
-    while (tail->next_ != NULL)
-        tail = tail->next_;
+    while (tail->next_ != nullptr) tail = tail->next_;
 
     tail->next_ = seg;
 }
@@ -1307,7 +1296,7 @@ void Subsector::ClockwiseOrder()
     Seg *seg;
 
 #if DEBUG_SUBSEC
-    I_Debugf("Subsec: Clockwising %d\n", index);
+    LogDebug("Subsec: Clockwising %d\n", index);
 #endif
 
     std::vector<Seg *> array;
@@ -1315,7 +1304,8 @@ void Subsector::ClockwiseOrder()
     for (seg = seg_list_; seg; seg = seg->next_)
     {
         // compute angles now
-        seg->cmp_angle_ = ComputeAngle(seg->start_->x_ - mid_x_, seg->start_->y_ - mid_y_);
+        seg->cmp_angle_ =
+            ComputeAngle(seg->start_->x_ - mid_x_, seg->start_->y_ - mid_y_);
 
         array.push_back(seg);
     }
@@ -1338,8 +1328,7 @@ void Subsector::ClockwiseOrder()
             array[i + 1] = A;
 
             // bubble down
-            if (i > 0)
-                i--;
+            if (i > 0) i--;
         }
         else
         {
@@ -1371,7 +1360,7 @@ void Subsector::ClockwiseOrder()
     }
 
     // transfer sorted array back into sub
-    seg_list_ = NULL;
+    seg_list_ = nullptr;
 
     for (i = 0; i < array.size(); i++)
     {
@@ -1380,12 +1369,13 @@ void Subsector::ClockwiseOrder()
     }
 
 #if DEBUG_SORTER
-    I_Debugf("Sorted SEGS around (%1.1f,%1.1f)\n", mid_x, mid_y);
+    LogDebug("Sorted SEGS around (%1.1f,%1.1f)\n", mid_x, mid_y);
 
     for (seg = seg_list; seg; seg = seg->next)
     {
-        I_Debugf("  Seg %p: Angle %1.6f  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg, seg->cmp_angle, seg->start_->x,
-                        seg->start_->y, seg->end_->x, seg->end_->y);
+        LogDebug("  Seg %p: Angle %1.6f  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg,
+                 seg->cmp_angle, seg->start_->x, seg->start_->y, seg->end_->x,
+                 seg->end_->y);
     }
 #endif
 }
@@ -1404,24 +1394,25 @@ void Subsector::SanityCheckClosed() const
         double dx = seg->end_->x_ - next->start_->x_;
         double dy = seg->end_->y_ - next->start_->y_;
 
-        if (fabs(dx) > kEpsilon || fabs(dy) > kEpsilon)
-            gaps++;
+        if (fabs(dx) > kEpsilon || fabs(dy) > kEpsilon) gaps++;
 
         total++;
     }
 
     if (gaps > 0)
     {
-        I_Printf("Subsector #%d near (%1.1f,%1.1f) is not closed "
-                   "(%d gaps, %d segs)\n",
-                   index_, mid_x_, mid_y_, gaps, total);
+        LogPrint(
+            "Subsector #%d near (%1.1f,%1.1f) is not closed "
+            "(%d gaps, %d segs)\n",
+            index_, mid_x_, mid_y_, gaps, total);
         current_build_info.total_minor_issues++;
 
 #if DEBUG_SUBSEC
         for (seg = seg_list; seg; seg = seg->next)
         {
-            I_Debugf("  SEG %p  (%1.1f,%1.1f) --> (%1.1f,%1.1f)\n", seg, seg->start_->x, seg->start_->y,
-                            seg->end_->x, seg->end_->y);
+            LogDebug("  SEG %p  (%1.1f,%1.1f) --> (%1.1f,%1.1f)\n", seg,
+                     seg->start_->x, seg->start_->y, seg->end_->x,
+                     seg->end_->y);
         }
 #endif
     }
@@ -1430,16 +1421,16 @@ void Subsector::SanityCheckClosed() const
 void Subsector::SanityCheckHasRealSeg() const
 {
     for (Seg *seg = seg_list_; seg; seg = seg->next_)
-        if (seg->linedef_ != NULL)
-            return;
+        if (seg->linedef_ != nullptr) return;
 
-    I_Error("AJBSP: Subsector #%d near (%1.1f,%1.1f) has no real seg!\n", index_, mid_x_, mid_y_);
+    FatalError("AJBSP: Subsector #%d near (%1.1f,%1.1f) has no real seg!\n",
+               index_, mid_x_, mid_y_);
 }
 
 void Subsector::RenumberSegs(int &cur_seg_index)
 {
 #if DEBUG_SUBSEC
-    I_Debugf("Subsec: Renumbering %d\n", index);
+    LogDebug("Subsec: Renumbering %d\n", index);
 #endif
 
     seg_count_ = 0;
@@ -1452,7 +1443,8 @@ void Subsector::RenumberSegs(int &cur_seg_index)
         seg_count_++;
 
 #if DEBUG_SUBSEC
-        I_Debugf("Subsec:   %d: Seg %p  Index %d\n", seg_count, seg, seg->index);
+        LogDebug("Subsec:   %d: Seg %p  Index %d\n", seg_count, seg,
+                 seg->index);
 #endif
     }
 }
@@ -1468,13 +1460,13 @@ Subsector *CreateSubsec(QuadTree *tree)
     sub->index_ = level_subsecs.size() - 1;
 
     // copy segs into subsector
-    sub->seg_list_ = NULL;
+    sub->seg_list_ = nullptr;
     tree->ConvertToList(&sub->seg_list_);
 
     sub->DetermineMiddle();
 
 #if DEBUG_SUBSEC
-    I_Debugf("Subsec: Creating %d\n", sub->index);
+    LogDebug("Subsec: Creating %d\n", sub->index);
 #endif
 
     return sub;
@@ -1482,8 +1474,7 @@ Subsector *CreateSubsec(QuadTree *tree)
 
 int ComputeBspHeight(const Node *node)
 {
-    if (node == NULL)
-        return 1;
+    if (node == nullptr) return 1;
 
     int right = ComputeBspHeight(node->r_.node);
     int left  = ComputeBspHeight(node->l_.node);
@@ -1496,19 +1487,21 @@ void DebugShowSegs(const Seg *list)
 {
     for (const Seg *seg = list; seg; seg = seg->next)
     {
-        I_Debugf("Build:   %sSEG %p  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->linedef ? "" : "MINI", seg,
-                        seg->start_->x, seg->start_->y, seg->end_->x, seg->end_->y);
+        LogDebug("Build:   %sSEG %p  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+                 seg->linedef ? "" : "MINI", seg, seg->start_->x,
+                 seg->start_->y, seg->end_->x, seg->end_->y);
     }
 }
 #endif
 
-BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */, Node **N, Subsector **S)
+BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */,
+                       Node **N, Subsector **S)
 {
-    *N = NULL;
-    *S = NULL;
+    *N = nullptr;
+    *S = nullptr;
 
 #if DEBUG_BUILDER
-    I_Debugf("Build: BEGUN @ %d\n", depth);
+    LogDebug("Build: BEGUN @ %d\n", depth);
     DebugShowSegs(list);
 #endif
 
@@ -1520,10 +1513,10 @@ BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */, N
     /* pick partition line, NONE indicates convexicity */
     Seg *part = PickNode(tree);
 
-    if (part == NULL)
+    if (part == nullptr)
     {
 #if DEBUG_BUILDER
-        I_Debugf("Build: CONVEX\n");
+        LogDebug("Build: CONVEX\n");
 #endif
 
         *S = CreateSubsec(tree);
@@ -1533,57 +1526,56 @@ BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */, N
     }
 
 #if DEBUG_BUILDER
-    I_Debugf("Build: PARTITION %p (%1.0f,%1.0f) -> (%1.0f,%1.0f)\n", part, part->start->x, part->start->y,
-                    part->end->x, part->end->y);
+    LogDebug("Build: PARTITION %p (%1.0f,%1.0f) -> (%1.0f,%1.0f)\n", part,
+             part->start->x, part->start->y, part->end->x, part->end->y);
 #endif
 
     Node *node = NewNode();
-    *N           = node;
+    *N         = node;
 
     /* divide the segs into two lists: left & right */
-    Seg          *lefts    = NULL;
-    Seg          *rights   = NULL;
-    Intersection *cut_list = NULL;
+    Seg          *lefts    = nullptr;
+    Seg          *rights   = nullptr;
+    Intersection *cut_list = nullptr;
 
     SeparateSegs(tree, part, &lefts, &rights, &cut_list);
 
     delete tree;
-    tree = NULL;
+    tree = nullptr;
 
     /* sanity checks... */
-    if (rights == NULL)
-        I_Error("AJBSP: Separated seg-list has empty RIGHT side\n");
+    if (rights == nullptr)
+        FatalError("AJBSP: Separated seg-list has empty RIGHT side\n");
 
-    if (lefts == NULL)
-        I_Error("AJBSP: Separated seg-list has empty LEFT side\n");
+    if (lefts == nullptr)
+        FatalError("AJBSP: Separated seg-list has empty LEFT side\n");
 
-    if (cut_list != NULL)
-        AddMinisegs(cut_list, part, &lefts, &rights);
+    if (cut_list != nullptr) AddMinisegs(cut_list, part, &lefts, &rights);
 
     node->SetPartition(part);
 
 #if DEBUG_BUILDER
-    I_Debugf("Build: Going LEFT\n");
+    LogDebug("Build: Going LEFT\n");
 #endif
 
     BuildResult ret;
 
     // recursively build the left side
-    ret = BuildNodes(lefts, depth + 1, &node->l_.bounds, &node->l_.node, &node->l_.subsec);
-    if (ret != kBuildOK)
-        return ret;
+    ret = BuildNodes(lefts, depth + 1, &node->l_.bounds, &node->l_.node,
+                     &node->l_.subsec);
+    if (ret != kBuildOK) return ret;
 
 #if DEBUG_BUILDER
-    I_Debugf("Build: Going RIGHT\n");
+    LogDebug("Build: Going RIGHT\n");
 #endif
 
     // recursively build the right side
-    ret = BuildNodes(rights, depth + 1, &node->r_.bounds, &node->r_.node, &node->r_.subsec);
-    if (ret != kBuildOK)
-        return ret;
+    ret = BuildNodes(rights, depth + 1, &node->r_.bounds, &node->r_.node,
+                     &node->r_.subsec);
+    if (ret != kBuildOK) return ret;
 
 #if DEBUG_BUILDER
-    I_Debugf("Build: DONE\n");
+    LogDebug("Build: DONE\n");
 #endif
 
     return kBuildOK;
@@ -1606,7 +1598,7 @@ void ClockwiseBspTree()
     }
 }
 
-} // namespace ajbsp
+}  // namespace ajbsp
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

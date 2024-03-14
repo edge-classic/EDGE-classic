@@ -16,104 +16,91 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __R_SHADER_H__
-#define __R_SHADER_H__
+#pragma once
 
+#include "i_defs_gl.h"
+#include "p_mobj.h"
 #include "types.h"
 
-/// #include "r_units.h"
-
-class multi_color_c
+class ColorMixer
 {
-  public:
-    int mod_R, mod_G, mod_B;
-    int add_R, add_G, add_B;
+   public:
+    int modulate_red_, modulate_green_, modulate_blue_;
+    int add_red_, add_green_, add_blue_;
 
-  public:
-    multi_color_c()
-    {
-    }
-    ~multi_color_c()
-    {
-    }
+   public:
+    ColorMixer() {}
+    ~ColorMixer() {}
 
     void Clear()
     {
-        mod_R = mod_G = mod_B = 0;
-        add_R = add_G = add_B = 0;
+        modulate_red_ = modulate_green_ = modulate_blue_ = 0;
+        add_red_ = add_green_ = add_blue_ = 0;
     }
 
-    void operator+=(const multi_color_c &rhs)
+    void operator+=(const ColorMixer &rhs)
     {
-        mod_R += rhs.mod_R;
-        mod_G += rhs.mod_G;
-        mod_B += rhs.mod_B;
+        modulate_red_ += rhs.modulate_red_;
+        modulate_green_ += rhs.modulate_green_;
+        modulate_blue_ += rhs.modulate_blue_;
 
-        add_R += rhs.add_R;
-        add_G += rhs.add_G;
-        add_B += rhs.add_B;
+        add_red_ += rhs.add_red_;
+        add_green_ += rhs.add_green_;
+        add_blue_ += rhs.add_blue_;
     }
 
     int mod_MAX() const
     {
-        return HMM_MAX(mod_R, HMM_MAX(mod_G, mod_B));
+        return HMM_MAX(modulate_red_, HMM_MAX(modulate_green_, modulate_blue_));
     }
 
     int add_MAX() const
     {
-        return HMM_MAX(add_R, HMM_MAX(add_G, add_B));
+        return HMM_MAX(add_red_, HMM_MAX(add_green_, add_blue_));
     }
 
-    void mod_Give(RGBAColor rgb, float qty)
+    void modulate_green_ive(RGBAColor rgb, float qty)
     {
-        if (qty > 1.0f)
-            qty = 1.0f;
+        if (qty > 1.0f) qty = 1.0f;
 
-        mod_R += (int)(epi::GetRGBARed(rgb) * qty);
-        mod_G += (int)(epi::GetRGBAGreen(rgb) * qty);
-        mod_B += (int)(epi::GetRGBABlue(rgb) * qty);
+        modulate_red_ += (int)(epi::GetRGBARed(rgb) * qty);
+        modulate_green_ += (int)(epi::GetRGBAGreen(rgb) * qty);
+        modulate_blue_ += (int)(epi::GetRGBABlue(rgb) * qty);
     }
 
-    void add_Give(RGBAColor rgb, float qty)
+    void add_green_ive(RGBAColor rgb, float qty)
     {
-        if (qty > 1.0f)
-            qty = 1.0f;
+        if (qty > 1.0f) qty = 1.0f;
 
-        add_R += (int)(epi::GetRGBARed(rgb) * qty);
-        add_G += (int)(epi::GetRGBAGreen(rgb) * qty);
-        add_B += (int)(epi::GetRGBABlue(rgb) * qty);
+        add_red_ += (int)(epi::GetRGBARed(rgb) * qty);
+        add_green_ += (int)(epi::GetRGBAGreen(rgb) * qty);
+        add_blue_ += (int)(epi::GetRGBABlue(rgb) * qty);
     }
 };
 
-typedef void (*shader_coord_func_t)(void *data, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc, HMM_Vec3 *normal,
-                                    HMM_Vec3 *lit_pos);
+typedef void (*ShaderCoordinateFunction)(void *data, int v_idx, HMM_Vec3 *pos,
+                                         float *rgb, HMM_Vec2 *texc,
+                                         HMM_Vec3 *normal, HMM_Vec3 *lit_pos);
 
 /* abstract base class */
-class abstract_shader_c
+class AbstractShader
 {
-  public:
-    abstract_shader_c()
-    {
-    }
-    virtual ~abstract_shader_c()
-    {
-    }
+   public:
+    AbstractShader() {}
+    virtual ~AbstractShader() {}
 
     // used for arbitrary points in the world (sprites)
-    virtual void Sample(multi_color_c *col, float x, float y, float z) = 0;
+    virtual void Sample(ColorMixer *col, float x, float y, float z) = 0;
 
     // used for normal-based lighting (MD2 models)
-    virtual void Corner(multi_color_c *col, float nx, float ny, float nz, struct mobj_s *mod_pos,
-                        bool is_weapon = false) = 0;
+    virtual void Corner(ColorMixer *col, float nx, float ny, float nz,
+                        MapObject *mod_pos, bool is_weapon = false) = 0;
 
     // used to render overlay textures (world polygons)
-    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
-                          void *data, shader_coord_func_t func) = 0;
+    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha,
+                          int *pass_var, int blending, bool masked, void *data,
+                          ShaderCoordinateFunction func) = 0;
 };
-
-/* FUNCTIONS */
-
-#endif /* __R_SHADER_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -23,20 +23,14 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
 #include "l_deh.h"
 
-// EPI
-#include "file.h"
-#include "filesystem.h"
-
-// DDF
+#include "con_var.h"
+#include "deh_edge.h"
+#include "i_system.h"
 #include "main.h"
 
-// DEH_EDGE
-#include "deh_edge.h"
-
-DEF_CVAR(debug_dehacked, "0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(debug_dehacked, "0", kConsoleVariableFlagArchive)
 
 void ConvertDehacked(const uint8_t *data, int length, const std::string &source)
 {
@@ -46,15 +40,15 @@ void ConvertDehacked(const uint8_t *data, int length, const std::string &source)
 
     if (ret != kDehackedConversionOK)
     {
-        I_Printf("Dehacked: FAILED to add lump:\n");
-        I_Printf("- %s\n", DehackedGetError());
+        LogPrint("Dehacked: FAILED to add lump:\n");
+        LogPrint("- %s\n", DehackedGetError());
 
         DehackedShutdown();
 
-        I_Error("Failed to convert Dehacked file: %s\n", source.c_str());
+        FatalError("Failed to convert Dehacked file: %s\n", source.c_str());
     }
 
-    ddf_collection_c col;
+    std::vector<DDFFile> col;
 
     ret = DehackedRunConversion(&col);
 
@@ -62,13 +56,12 @@ void ConvertDehacked(const uint8_t *data, int length, const std::string &source)
 
     if (ret != kDehackedConversionOK)
     {
-        I_Error("Failed to convert Dehacked file: %s\n", source.c_str());
+        FatalError("Failed to convert Dehacked file: %s\n", source.c_str());
     }
 
-    if (debug_dehacked.d > 0)
-        DDF_DumpCollection(&col);
+    if (debug_dehacked.d_ > 0) DDF_DumpCollection(col);
 
-    DDF_AddCollection(&col, source);
+    DDF_AddCollection(col, source);
 }
 
 //--- editor settings ---

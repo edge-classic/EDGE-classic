@@ -16,18 +16,11 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __FLACPLAYER_H__
-#define __FLACPLAYER_H__
+#pragma once
 
-#include "i_defs.h"
+#include "s_music.h"
 
-#include "sound_data.h"
-
-/* FUNCTIONS */
-
-abstract_music_c *S_PlayFLACMusic(uint8_t *data, int length, bool looping);
-
-#endif /* __FLACPLAYER_H__ */
+AbstractMusicPlayer *PlayFlacMusic(uint8_t *data, int length, bool looping);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

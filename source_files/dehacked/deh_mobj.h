@@ -26,7 +26,7 @@ constexpr int kFracUnit = 65536;
 // This file diverges slightly from the style guide with enum member naming
 // as these reflect the historical code pointer/state/flag/etc names - Dasho
 
-enum MobjFlag
+enum DehackedMapObjectFlag
 {
     // Call P_SpecialThing when touched.
     kMF_SPECIAL = 1,
@@ -152,7 +152,7 @@ enum MobjFlag
 //
 // MBF21 mobj flags
 //
-enum MobjFlagMBF21
+enum DehackedMapObjectFlagMBF21
 {
     // Lower gravity (1/8)
     kMBF21_LOGRAV = 1,
@@ -172,7 +172,8 @@ enum MobjFlagMBF21
     // Higher missile attack prob (cyberdemon)
     kMBF21_HIGHERMPROB = 32,
 
-    // Use half distance for missile attack prob (cyberdemon, mastermind, revvie, lost soul)
+    // Use half distance for missile attack prob (cyberdemon, mastermind,
+    // revvie, lost soul)
     kMBF21_RANGEHALF = 64,
 
     // Has no targeting threshold (archvile)
@@ -213,10 +214,11 @@ enum MobjFlagMBF21
 };
 
 #define kMF_TRANSLATION (kMF_TRANSLATION1 | kMF_TRANSLATION2)
-#define ALL_BEX_FLAGS                                                                                                  \
-    (kMF_TRANSLUCENT | kMF_TOUCHY | kMF_BOUNCES | kMF_FRIEND) // Also housed kMF_STEALTH, but this is not a BEX flag
+#define ALL_BEX_FLAGS                             \
+    (kMF_TRANSLUCENT | kMF_TOUCHY | kMF_BOUNCES | \
+     kMF_FRIEND)  // Also housed kMF_STEALTH, but this is not a BEX flag
 
-enum MobjType
+enum DehackedMapObjectType
 {
     kMT_PLAYER,
     kMT_POSSESSED,
@@ -357,10 +359,10 @@ enum MobjType
     kMT_MISC85,
     kMT_MISC86,
 
-    kTotalMobjTypes,
+    kTotalDehackedMapObjectTypes,
 
     // BOOM and MBF things:
-    kMT_PUSH = kTotalMobjTypes,
+    kMT_PUSH = kTotalDehackedMapObjectTypes,
     kMT_PULL,
     kMT_DOGS,
 
@@ -377,16 +379,16 @@ enum MobjType
     // There used to be 12 `kMT_STEALTHXXX` monsters, but DEHEXTRA
     // spoiled them :-(
 
-    kTotalMobjTypesPortCompatibility,
+    kTotalDehackedMapObjectTypesPortCompatibility,
 
     // DEHEXTRA : 150..249
     kMT_EXTRA00 = 150,
     kMT_EXTRA99 = 249,
 
-    kTotalMobjTypesDEHEXTRA
+    kTotalDehackedMapObjectTypesDEHEXTRA
 };
 
-struct MobjInfo
+struct DehackedMapObjectDefinition
 {
     const char *name;
 
@@ -427,4 +429,4 @@ struct MobjInfo
     int raisestate;
 };
 
-} // namespace dehacked
+}  // namespace dehacked

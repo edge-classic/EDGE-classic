@@ -25,15 +25,14 @@
 //
 //------------------------------------------------------------------------
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-
-#include "deh_edge.h"
 
 #include "deh_ammo.h"
 #include "deh_buffer.h"
+#include "deh_edge.h"
 #include "deh_frames.h"
 #include "deh_info.h"
 #include "deh_misc.h"
@@ -43,10 +42,11 @@
 #include "deh_sounds.h"
 #include "deh_sprites.h"
 #include "deh_system.h"
-#include "deh_things.h"
 #include "deh_text.h"
+#include "deh_things.h"
 #include "deh_wad.h"
 #include "deh_weapons.h"
+#include "epi.h"
 
 namespace dehacked
 {
@@ -96,8 +96,7 @@ DehackedResult Convert(void)
     {
         result = patch::Load(input_buffers[i]);
 
-        if (result != kDehackedConversionOK)
-            return result;
+        if (result != kDehackedConversionOK) return result;
     }
 
     // do conversions into DDF...
@@ -119,7 +118,7 @@ DehackedResult Convert(void)
     sounds::ConvertSFX();
     music ::ConvertMUS();
 
-    I_Printf("\n");
+    LogPrint("\n");
 
     return kDehackedConversionOK;
 }
@@ -140,7 +139,7 @@ void Shutdown()
     FreeInputBuffers();
 }
 
-} // namespace dehacked
+}  // namespace dehacked
 
 //------------------------------------------------------------------------
 
@@ -148,13 +147,10 @@ void DehackedStartup()
 {
     dehacked::Init();
 
-    I_Printf("*** DeHackEd -> EDGE Conversion ***\n");
+    LogPrint("*** DeHackEd -> EDGE Conversion ***\n");
 }
 
-const char *DehackedGetError(void)
-{
-    return dehacked::GetErrorMsg();
-}
+const char *DehackedGetError(void) { return dehacked::GetErrorMsg(); }
 
 DehackedResult DehackedSetQuiet(int quiet)
 {
@@ -172,7 +168,7 @@ DehackedResult DehackedAddLump(const char *data, int length)
     return kDehackedConversionOK;
 }
 
-DehackedResult DehackedRunConversion(ddf_collection_c *dest)
+DehackedResult DehackedRunConversion(std::vector<DDFFile> *dest)
 {
     dehacked::wad::dest_container = dest;
 
@@ -182,5 +178,5 @@ DehackedResult DehackedRunConversion(ddf_collection_c *dest)
 void DehackedShutdown(void)
 {
     dehacked::Shutdown();
-    dehacked::wad::dest_container = NULL;
+    dehacked::wad::dest_container = nullptr;
 }

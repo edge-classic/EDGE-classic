@@ -20,8 +20,11 @@
 //
 //------------------------------------------------------------------------
 
-#include "epi.h"
 #include "math_crc.h"
+
+#include <math.h>
+
+#include "epi.h"
 
 namespace epi
 {
@@ -95,15 +98,12 @@ CRC32 &CRC32::operator+=(float value)
 
 CRC32 &CRC32::AddCString(const char *str)
 {
-    for (; *str; str++)
-    {
-        *this += (uint8_t)(*str);
-    }
+    for (; *str; str++) { *this += (uint8_t)(*str); }
 
     return *this;
 }
 
-} // namespace epi
+}  // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -111,7 +111,7 @@ void bgroup_c::reset()
             if (blocks[i]->used > 4096)
             {
                 delete[] blocks[i];
-                blocks[i] = NULL;
+                blocks[i] = nullptr;
             }
             else
                 blocks[i]->used = 0;

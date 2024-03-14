@@ -23,25 +23,24 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
 #include "m_random.h"
+
 #include <random>
 
-std::ranlux24_base                            m_rand;
-std::ranlux24_base                            p_rand;
-std::uniform_int_distribution<unsigned short> rand_roll(0, 255);
-std::uniform_int_distribution<unsigned short> coal_roll(0, 0xFFFF);
+#include "i_system.h"
 
-static int p_index = 0;
-static int p_step  = 1;
+std::ranlux24_base                            stateless_ranlux24_generator;
+std::ranlux24_base                            stateful_ranlux24_generator;
+std::uniform_int_distribution<unsigned short> unsigned_8_bit_roll(0, 255);
+std::uniform_int_distribution<unsigned short> unsigned_16_bit_roll(0, 0xFFFF);
 
-void M_Random_Init(void)
-{
-    m_rand.seed(I_GetMicros());
-}
+static int state_index = 0;
+static int state_step  = 1;
+
+void RandomInit(void) { stateless_ranlux24_generator.seed(GetMicroseconds()); }
 
 //
-// M_Random
+// RandomByte
 //
 // Returns a number from 0 to 255.
 //
@@ -49,31 +48,32 @@ void M_Random_Init(void)
 // that do not interfere with netgame synchronisation (for example,
 // selection of a random sound).
 //
-int M_Random(void)
+int RandomByte(void)
 {
-    return rand_roll(m_rand);
+    return unsigned_8_bit_roll(stateless_ranlux24_generator);
 }
 
 //
-// M_RandomNegPos
+// RandomByteSkewToZero
 //
 // Returns a number between -255 and 255, but skewed so that values near
-// zero have a higher probability.  Replaces "P_Random()-P_Random()" in
-// the code, which as Lee Killough points out can produce different
-// results depending upon the order of evaluation.
+// zero have a higher probability.  Replaces
+// "RandomByteDeterministic()-RandomByteDeterministic()" in the code,
+// which as Lee Killough points out can produce different results depending upon
+// the order of evaluation.
 //
-// -AJA- Note: same usage rules as P_Random.
+// -AJA- Note: same usage rules as RandomByteDeterministic.
 //
-int M_RandomNegPos(void)
+int RandomByteSkewToZero(void)
 {
-    int r1 = M_Random();
-    int r2 = M_Random();
+    int r1 = RandomByte();
+    int r2 = RandomByte();
 
     return r1 - r2;
 }
 
 //
-// P_Random
+// RandomByteDeterministic
 //
 // Returns a number from 0 to 255.
 //
@@ -81,80 +81,86 @@ int M_RandomNegPos(void)
 // values that determine netgame synchronisation (for example,
 // which way a monster should travel).
 //
-int P_Random(void)
+int RandomByteDeterministic(void)
 {
-    p_index += p_step;
-    p_index &= 0xff;
+    state_index += state_step;
+    state_index &= 0xff;
 
-    if (p_index == 0)
-        p_step += (47 * 2);
+    if (state_index == 0) state_step += (47 * 2);
 
-    p_rand.seed(p_index + p_step);
+    stateful_ranlux24_generator.seed(state_index + state_step);
 
-    return rand_roll(p_rand);
+    return unsigned_8_bit_roll(stateful_ranlux24_generator);
 }
 
 //
-// C_Random
+// RandomShort
 //
 // Returns a number from 0 to 65535 for COALAPI usage
 //
-int C_Random(void)
+int RandomShort(void)
 {
-    return coal_roll(m_rand);
+    return unsigned_16_bit_roll(stateless_ranlux24_generator);
 }
 
 //
-// P_RandomNegPos
+// RandomByteSkewToZeroDeterministic
 //
 // Returns a number between -255 and 255, but skewed so that values near
-// zero have a higher probability.  Replaces "P_Random()-P_Random()" in
-// the code, which as Lee Killough points out can produce different
-// results depending upon the order of evaluation.
+// zero have a higher probability.  Replaces
+// "RandomByteDeterministic()-RandomByteDeterministic()" in the code,
+// which as Lee Killough points out can produce different results depending upon
+// the order of evaluation.
 //
-// -AJA- Note: same usage rules as P_Random.
+// -AJA- Note: same usage rules as RandomByteDeterministic.
 //
-int P_RandomNegPos(void)
+int RandomByteSkewToZeroDeterministic(void)
 {
-    int r1 = P_Random();
-    int r2 = P_Random();
+    int r1 = RandomByteDeterministic();
+    int r2 = RandomByteDeterministic();
 
     return r1 - r2;
 }
 
 //
-// M_RandomTest
+// RandomByteTest
 //
-bool M_RandomTest(percent_t chance)
+bool RandomByteTest(float chance)
 {
-    return (chance <= 0) ? false : (chance >= 1) ? true : (M_Random() / 255.0f < chance) ? true : false;
+    return (chance <= 0)                      ? false
+           : (chance >= 1)                    ? true
+           : (RandomByte() / 255.0f < chance) ? true
+                                              : false;
 }
 
 //
-// P_RandomTest
+// RandomByteTestDeterministic
 //
-bool P_RandomTest(percent_t chance)
+bool RandomByteTestDeterministic(float chance)
 {
-    return (chance <= 0) ? false : (chance >= 1) ? true : (P_Random() / 255.0f < chance) ? true : false;
+    return (chance <= 0)                                   ? false
+           : (chance >= 1)                                 ? true
+           : (RandomByteDeterministic() / 255.0f < chance) ? true
+                                                           : false;
 }
 
 //
-// P_ReadRandomState
+// RandomStateRead
 //
 // These two routines are used for savegames.
 //
-int P_ReadRandomState(void)
+int RandomStateRead(void)
 {
-    return (p_index & 0xff) | ((p_step & 0xff) << 8);
+    return (state_index & 0xff) | ((state_step & 0xff) << 8);
 }
 
 //
-// P_WriteRandomState
+// RandomStateWrite
 //
-void P_WriteRandomState(int value)
+void RandomStateWrite(int value)
 {
-    p_index = (value & 0xff);
-    p_step  = 1 + ((value >> 8) & 0xfe);
+    state_index = (value & 0xff);
+    state_step  = 1 + ((value >> 8) & 0xfe);
 }
 
 //--- editor settings ---

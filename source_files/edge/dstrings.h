@@ -23,25 +23,18 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DOOM_STRINGS__
-#define __DOOM_STRINGS__
+#pragma once
 
 // Misc. other strings.
-#define REQUIREDEPK      "edge_defs"
-#define EDGEBRANDINGFILE "branding.cfg"
+constexpr const char *kRequiredEPK      = "edge_defs";
+constexpr const char *kBrandingFileName = "branding.cfg";
 
-#define SAVEGAMEBASE "save"
-#define SAVEGAMEEXT  "esg"
-#define SAVEGAMEMODE 0755
+constexpr const char *kSaveGameBase      = "save";
+constexpr const char *kSaveGameExtension = "esg";
 
-#define CACHEDIR    "cache"
-#define SAVEGAMEDIR "savegame"
-#define SCRNSHOTDIR "screenshot"
-
-#define HUBDIR  "hubs"
-#define HUBBASE "hub"
-
-#endif // __DOOM_STRINGS__
+constexpr const char *kCacheDirectory      = "cache";
+constexpr const char *kSaveGameDirectory   = "savegame";
+constexpr const char *kScreenshotDirectory = "screenshot";
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

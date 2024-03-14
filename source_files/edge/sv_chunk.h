@@ -26,69 +26,60 @@
 // -AJA- 2000/07/13: Wrote this file.
 //
 
-#ifndef __SV_CHUNK_H__
-#define __SV_CHUNK_H__
+#pragma once
 
-#include "i_defs.h"
 #include "p_local.h"
 
-#define DATA_END_MARKER "ENDE"
+constexpr const char *kDataEndMarker = "ENDE";
 
-void SV_ChunkInit(void);
-void SV_ChunkShutdown(void);
-
-int SV_GetError(void);
+int SaveGetError(void);
 
 //
 //  READING
 //
 
-extern int savegame_version;
+bool SaveFileOpenRead(std::string filename);
+bool SaveFileCloseRead(void);
+bool SaveFileVerifyHeader(int *version);
+bool SaveFileVerifyContents(void);
 
-bool SV_OpenReadFile(std::string filename);
-bool SV_CloseReadFile(void);
-bool SV_VerifyHeader(int *version);
-bool SV_VerifyContents(void);
+bool SavePushReadChunk(const char *id);
+bool SavePopReadChunk(void);
+int  SaveRemainingChunkSize(void);
+bool SaveSkipReadChunk(const char *id);
 
-bool SV_PushReadChunk(const char *id);
-bool SV_PopReadChunk(void);
-int  SV_RemainingChunkSize(void);
-bool SV_SkipReadChunk(const char *id);
+uint8_t  SaveChunkGetByte(void);
+uint16_t SaveChunkGetShort(void);
+uint32_t SaveChunkGetInteger(void);
 
-unsigned char  SV_GetByte(void);
-unsigned short SV_GetShort(void);
-unsigned int   SV_GetInt(void);
+BAMAngle SaveChunkGetAngle(void);
+float    SaveChunkGetFloat(void);
 
-BAMAngle SV_GetAngle(void);
-float   SV_GetFloat(void);
+const char *SaveChunkGetString(void);
+const char *SaveChunkCopyString(const char *old);
+void        SaveChunkFreeString(const char *str);
 
-const char *SV_GetString(void);
-const char *SV_DupString(const char *old);
-void        SV_FreeString(const char *str);
-
-bool SV_GetMarker(char id[5]);
+bool SaveChunkGetMarker(char id[5]);
 
 //
 //  WRITING
 //
 
-bool SV_OpenWriteFile(std::string filename, int version);
-bool SV_CloseWriteFile(void);
+bool SaveFileOpenWrite(std::string filename, int version);
+bool SaveFileCloseWrite(void);
 
-bool SV_PushWriteChunk(const char *id);
-bool SV_PopWriteChunk(void);
+bool SavePushWriteChunk(const char *id);
+bool SavePopWriteChunk(void);
 
-void SV_PutByte(unsigned char value);
-void SV_PutShort(unsigned short value);
-void SV_PutInt(unsigned int value);
+void SaveChunkPutByte(uint8_t value);
+void SaveChunkPutShort(uint16_t value);
+void SaveChunkPutInteger(uint32_t value);
 
-void SV_PutAngle(BAMAngle value);
-void SV_PutFloat(float value);
+void SaveChunkPutAngle(BAMAngle value);
+void SaveChunkPutFloat(float value);
 
-void SV_PutString(const char *str);
-void SV_PutMarker(const char *id);
-
-#endif /* __SV_CHUNK_H__ */
+void SaveChunkPutString(const char *str);
+void SaveChunkPutMarker(const char *id);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -16,155 +16,145 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_IMAGE_H__
-#define __DDF_IMAGE_H__
-
-#include "epi.h"
+#pragma once
 
 #include "types.h"
 
-typedef enum
+enum ImageNamespace
 {
-    INS_Graphic = 0,
-    INS_Texture,
-    INS_Flat,
-    INS_Sprite,
-    INS_Patch,
-} image_namespace_e;
+    kImageNamespaceGraphic = 0,
+    kImageNamespaceTexture,
+    kImageNamespaceFlat,
+    kImageNamespaceSprite,
+    kImageNamespacePatch,
+};
 
 //
 // -AJA- 2004/11/16 Images.ddf
 //
-typedef enum
+enum ImageDataType
 {
-    IMGDT_Colour = 0, // solid colour
-    IMGDT_File,       // load from an image file
-    IMGDT_Lump,       // load from lump in a WAD
-    IMGDT_Package,    // load from an EPK package
-    IMGDT_Compose     // compose from patches
-} imagedata_type_e;
+    kImageDataColor = 0,  // solid colour
+    kImageDataFile,       // load from an image file
+    kImageDataLump,       // load from lump in a WAD
+    kImageDataPackage,    // load from an EPK package
+    kImageDataCompose     // compose from patches
+};
 
-typedef enum
+enum ImageSpecial
 {
-    IMGSP_None = 0,
+    kImageSpecialNone      = 0,
+    kImageSpecialNoAlpha   = 0x0001,  // image does not require an alpha channel
+    kImageSpecialMip       = 0x0002,  // force   mip-mapping
+    kImageSpecialNoMip     = 0x0004,  // disable mip-mapping
+    kImageSpecialClamp     = 0x0008,  // clamp image
+    kImageSpecialSmooth    = 0x0010,  // force smoothing
+    kImageSpecialNoSmooth  = 0x0020,  // disable smoothing
+    kImageSpecialCrosshair = 0x0040,  // weapon crosshair (center vertically)
+    kImageSpecialGrayscale =
+        0x0080,  // forces image to be grayscaled upon creation
+    kImageSpecialPrecache =
+        0x0100,  // forces image to be precached upon creation
+};
 
-    IMGSP_NoAlpha   = 0x0001, // image does not require an alpha channel
-    IMGSP_Mip       = 0x0002, // force   mip-mapping
-    IMGSP_NoMip     = 0x0004, // disable mip-mapping
-    IMGSP_Clamp     = 0x0008, // clamp image
-    IMGSP_Smooth    = 0x0010, // force smoothing
-    IMGSP_NoSmooth  = 0x0020, // disable smoothing
-    IMGSP_Crosshair = 0x0040, // weapon crosshair (center vertically)
-    IMGSP_Grayscale = 0x0080, // forces image to be grayscaled upon creation
-    IMGSP_Precache  = 0x0100, // forces image to be precached upon creation
-} image_special_e;
-
-typedef enum
+enum ImageTransparencyFix
 {
-    FIXTRN_None    = 0, // no modification (the default)
-    FIXTRN_Blacken = 1, // make 100% transparent pixels Black
-} image_fix_trans_e;
+    kTransparencyFixNone    = 0,  // no modification (the default)
+    kTransparencyFixBlacken = 1,  // make 100% transparent pixels Black
+};
 
-typedef enum
+enum LumpImageFormat
 {
-    LIF_STANDARD = 0, // something standard, e.g. PNG, TGA or JPEG
-    LIF_DOOM     = 1, // the DOOM "patch" format (in a wad lump)
-} L_image_format_e;
+    kLumpImageFormatStandard = 0,  // something standard, e.g. PNG, TGA or JPEG
+    kLumpImageFormatDoom     = 1,  // the DOOM "patch" format (in a wad lump)
+};
 
-class compose_patch_c
+struct ComposePatch
 {
-  public:
     std::string name;
     int         x = 0;
     int         y = 0;
 };
 
-class imagedef_c
+class ImageDefinition
 {
-  public:
-    imagedef_c();
-    ~imagedef_c(){};
+   public:
+    ImageDefinition();
+    ~ImageDefinition(){};
 
-  public:
+   public:
     void Default(void);
-    void CopyDetail(const imagedef_c &src);
+    void CopyDetail(const ImageDefinition &src);
 
-    // Member vars....
-    std::string       name;
-    image_namespace_e belong;
+    std::string    name_;
+    ImageNamespace belong_;
 
-    imagedata_type_e type;
+    ImageDataType type_;
 
-    RGBAColor colour; // IMGDT_Colour
+    RGBAColor colour_;  // kImageDataColor
 
-    std::string      info;   // IMGDT_Package, IMGDT_File, IMGDT_Lump
-    L_image_format_e format; //
+    std::string     info_;  // kImageDataPackage, kImageDataFile, kImageDataLump
+    LumpImageFormat format_;  //
 
-    int                          compose_w, compose_h; // IMGDT_Compose
-    std::vector<compose_patch_c> patches;              //
+    int                       compose_w_, compose_h_;  // kImageDataCompose
+    std::vector<ComposePatch> patches_;                //
 
-    image_special_e special;
+    ImageSpecial special_;
 
     // offsets for sprites (mainly)
-    float x_offset, y_offset;
+    float x_offset_, y_offset_;
 
-    int fix_trans; // FIXTRN_XXX value
+    int fix_trans_;  // kTransparencyFixXXX value
 
-    bool is_font;
+    bool is_font_;
 
     // RENDERING specifics:
-    float scale, aspect;
+    float scale_, aspect_;
 
-    int hsv_rotation;
-    int hsv_saturation;
-    int hsv_value;
+    int hsv_rotation_;
+    int hsv_saturation_;
+    int hsv_value_;
 
     // Gaussian blurring
-    float blur_factor;
+    float blur_factor_;
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit imagedef_c(imagedef_c &rhs)
-    {
-        (void)rhs;
-    }
-    imagedef_c &operator=(imagedef_c &rhs)
+    explicit ImageDefinition(ImageDefinition &rhs) { (void)rhs; }
+    ImageDefinition &operator=(ImageDefinition &rhs)
     {
         (void)rhs;
         return *this;
     }
 };
 
-// Our imagedefs container
-class imagedef_container_c : public std::vector<imagedef_c *>
+class ImageDefinitionContainer : public std::vector<ImageDefinition *>
 {
-  public:
-    imagedef_container_c()
+   public:
+    ImageDefinitionContainer() {}
+    ~ImageDefinitionContainer()
     {
-    }
-    ~imagedef_container_c()
-    {
-      for (auto iter = begin(); iter != end(); iter++)
-      {
-          imagedef_c *img = *iter;
-          delete img;
-          img = nullptr;
-      }
+        for (std::vector<ImageDefinition *>::iterator iter     = begin(),
+                                                      iter_end = end();
+             iter != iter_end; iter++)
+        {
+            ImageDefinition *img = *iter;
+            delete img;
+            img = nullptr;
+        }
     }
 
-  private:
+   private:
     void CleanupObject(void *obj);
 
-  public:
+   public:
     // Search Functions
-    imagedef_c *Lookup(const char *refname, image_namespace_e belong);
+    ImageDefinition *Lookup(const char *refname, ImageNamespace belong);
 };
 
-extern imagedef_container_c imagedefs;
+extern ImageDefinitionContainer imagedefs;
 
 void DDF_ReadImages(const std::string &data);
-
-#endif /*__DDF_IMAGE_H__*/
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

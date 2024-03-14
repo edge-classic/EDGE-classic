@@ -16,12 +16,13 @@
 //
 //----------------------------------------------------------------------------
 
-#include "epi.h"
 #include "str_lexer.h"
-#include "str_util.h"
 
-#include <stdlib.h>
 #include <ctype.h>
+#include <stdlib.h>
+
+#include "epi.h"
+#include "str_util.h"
 
 namespace epi
 {
@@ -32,19 +33,15 @@ TokenKind Lexer::Next(std::string &s)
 
     SkipToNext();
 
-    if (pos_ >= data_.size())
-        return kTokenEOF;
+    if (pos_ >= data_.size()) return kTokenEOF;
 
     unsigned char ch = (unsigned char)data_[pos_];
 
-    if (ch == '"')
-        return ParseString(s);
+    if (ch == '"') return ParseString(s);
 
-    if (ch == '-' || ch == '+' || IsDigitASCII(ch))
-        return ParseNumber(s);
+    if (ch == '-' || ch == '+' || IsDigitASCII(ch)) return ParseNumber(s);
 
-    if (IsAlphaASCII(ch) || ch == '_' || ch >= 128)
-        return ParseIdentifier(s);
+    if (IsAlphaASCII(ch) || ch == '_' || ch >= 128) return ParseIdentifier(s);
 
     // anything else is a single-character symbol
     s.push_back(data_[pos_++]);
@@ -54,8 +51,8 @@ TokenKind Lexer::Next(std::string &s)
 
 bool Lexer::Match(const char *s)
 {
-    SYS_ASSERT(s);
-    SYS_ASSERT(s[0]);
+    EPI_ASSERT(s);
+    EPI_ASSERT(s[0]);
 
     bool is_keyword = IsAlphanumericASCII(s[0]);
 
@@ -65,20 +62,16 @@ bool Lexer::Match(const char *s)
 
     for (; *s != 0; s++, ofs++)
     {
-        if (pos_ + ofs >= data_.size())
-            return false;
+        if (pos_ + ofs >= data_.size()) return false;
 
         unsigned char A = (unsigned char)data_[pos_ + ofs];
         unsigned char B = (unsigned char)s[0];
 
         // don't change a char when high-bit is set (for UTF-8)
-        if (A < 128)
-            A = ToLowerASCII(A);
-        if (B < 128)
-            B = ToLowerASCII(B);
+        if (A < 128) A = ToLowerASCII(A);
+        if (B < 128) B = ToLowerASCII(B);
 
-        if (A != B)
-            return false;
+        if (A != B) return false;
     }
 
     pos_ += ofs;
@@ -88,8 +81,7 @@ bool Lexer::Match(const char *s)
     {
         unsigned char ch = (unsigned char)data_[pos_];
 
-        if (IsAlphanumericASCII(ch) || ch >= 128)
-            return false;
+        if (IsAlphanumericASCII(ch) || ch >= 128) return false;
     }
 
     return true;
@@ -97,8 +89,8 @@ bool Lexer::Match(const char *s)
 
 bool Lexer::MatchKeep(const char *s)
 {
-    SYS_ASSERT(s);
-    SYS_ASSERT(s[0]);
+    EPI_ASSERT(s);
+    EPI_ASSERT(s[0]);
 
     bool is_keyword = IsAlphanumericASCII(s[0]);
 
@@ -108,20 +100,16 @@ bool Lexer::MatchKeep(const char *s)
 
     for (; *s != 0; s++, ofs++)
     {
-        if (pos_ + ofs >= data_.size())
-            return false;
+        if (pos_ + ofs >= data_.size()) return false;
 
         unsigned char A = (unsigned char)data_[pos_ + ofs];
         unsigned char B = (unsigned char)s[0];
 
         // don't change a char when high-bit is set (for UTF-8)
-        if (A < 128)
-            A = ToLowerASCII(A);
-        if (B < 128)
-            B = ToLowerASCII(B);
+        if (A < 128) A = ToLowerASCII(A);
+        if (B < 128) B = ToLowerASCII(B);
 
-        if (A != B)
-            return false;
+        if (A != B) return false;
     }
 
     // for a keyword, require a non-alphanumeric char after it.
@@ -129,17 +117,13 @@ bool Lexer::MatchKeep(const char *s)
     {
         unsigned char ch = (unsigned char)data_[pos_ + ofs];
 
-        if (IsAlphanumericASCII(ch) || ch >= 128)
-            return false;
+        if (IsAlphanumericASCII(ch) || ch >= 128) return false;
     }
 
     return true;
 }
 
-int Lexer::LastLine()
-{
-    return line_;
-}
+int Lexer::LastLine() { return line_; }
 
 void Lexer::Rewind()
 {
@@ -147,27 +131,23 @@ void Lexer::Rewind()
     line_ = 1;
 }
 
-size_t Lexer::GetPos()
-{
-    return pos_;
-}
+size_t Lexer::GetPos() { return pos_; }
 
 int LexInteger(const std::string &s)
 {
     // strtol handles all the integer sequences of the UDMF spec
-    return (int)strtol(s.c_str(), NULL, 0);
+    return (int)strtol(s.c_str(), nullptr, 0);
 }
 
 double LexDouble(const std::string &s)
 {
     // strtod handles all the floating-point sequences of the UDMF spec
-    return strtod(s.c_str(), NULL);
+    return strtod(s.c_str(), nullptr);
 }
 
 bool LexBoolean(const std::string &s)
 {
-    if (s.empty())
-        return false;
+    if (s.empty()) return false;
 
     return (s[0] == 't' || s[0] == 'T');
 }
@@ -179,8 +159,7 @@ void Lexer::SkipToNext()
         unsigned char ch = (unsigned char)data_[pos_];
 
         // bump line number at end of a line
-        if (ch == '\n')
-            line_ += 1;
+        if (ch == '\n') line_ += 1;
 
         // skip whitespace and control chars
         if (ch <= 32 || ch == 127)
@@ -196,8 +175,7 @@ void Lexer::SkipToNext()
             {
                 pos_ += 2;
 
-                while (pos_ < data_.size() && data_[pos_] != '\n')
-                    pos_++;
+                while (pos_ < data_.size() && data_[pos_] != '\n') pos_++;
 
                 continue;
             }
@@ -209,14 +187,14 @@ void Lexer::SkipToNext()
 
                 while (pos_ < data_.size())
                 {
-                    if (pos_ + 1 < data_.size() && data_[pos_] == '*' && data_[pos_ + 1] == '/')
+                    if (pos_ + 1 < data_.size() && data_[pos_] == '*' &&
+                        data_[pos_ + 1] == '/')
                     {
                         pos_ += 2;
                         break;
                     }
 
-                    if (data_[pos_] == '\n')
-                        line_ += 1;
+                    if (data_[pos_] == '\n') line_ += 1;
 
                     pos_++;
                 }
@@ -239,17 +217,15 @@ TokenKind Lexer::ParseIdentifier(std::string &s)
         unsigned char ch = (unsigned char)data_[pos_];
 
         // don't change a char when high-bit is set (for UTF-8)
-        if (ch < 128)
-            ch = ToLowerASCII(ch);
+        if (ch < 128) ch = ToLowerASCII(ch);
 
-        if (!(IsAlphanumericASCII(ch) || ch == '_' || ch >= 128))
-            break;
+        if (!(IsAlphanumericASCII(ch) || ch == '_' || ch >= 128)) break;
 
         s.push_back((char)ch);
         pos_++;
     }
 
-    SYS_ASSERT(s.size() > 0);
+    EPI_ASSERT(s.size() > 0);
 
     return kTokenIdentifier;
 }
@@ -270,8 +246,7 @@ TokenKind Lexer::ParseNumber(std::string &s)
     {
         s.push_back(data_[pos_++]);
 
-        if (pos_ >= data_.size())
-            break;
+        if (pos_ >= data_.size()) break;
 
         unsigned char ch = (unsigned char)data_[pos_];
 
@@ -294,8 +269,7 @@ TokenKind Lexer::ParseString(std::string &s)
     {
         unsigned char ch = (unsigned char)data_[pos_++];
 
-        if (ch == '"')
-            break;
+        if (ch == '"') break;
 
         if (ch == '\\')
         {
@@ -304,14 +278,12 @@ TokenKind Lexer::ParseString(std::string &s)
         }
 
         // bump line number at end of a line
-        if (ch == '\n')
-            line_ += 1;
+        if (ch == '\n') line_ += 1;
 
         // skip all control characters except TAB and NEWLINE
-        if (ch < 32 && !(ch == '\t' || ch == '\n'))
-            continue;
+        if (ch < 32 && !(ch == '\t' || ch == '\n')) continue;
 
-        if (ch == 127) // DEL
+        if (ch == 127)  // DEL
             continue;
 
         s.push_back((char)ch);
@@ -388,43 +360,43 @@ void Lexer::ParseEscape(std::string &s)
 
         *p = 0;
 
-        int val = (int)strtol(buffer, NULL, 0);
+        int val = (int)strtol(buffer, nullptr, 0);
         s.push_back((char)val);
         return;
     }
 
     switch (ch)
     {
-    case 'a':
-        s.push_back('\a');
-        break; // bell
-    case 'b':
-        s.push_back('\b');
-        break; // backspace
-    case 'f':
-        s.push_back('\f');
-        break; // form feed
-    case 'n':
-        s.push_back('\n');
-        break; // newline
-    case 't':
-        s.push_back('\t');
-        break; // tab
-    case 'r':
-        s.push_back('\r');
-        break; // carriage return
-    case 'v':
-        s.push_back('\v');
-        break; // vertical tab
+        case 'a':
+            s.push_back('\a');
+            break;  // bell
+        case 'b':
+            s.push_back('\b');
+            break;  // backspace
+        case 'f':
+            s.push_back('\f');
+            break;  // form feed
+        case 'n':
+            s.push_back('\n');
+            break;  // newline
+        case 't':
+            s.push_back('\t');
+            break;  // tab
+        case 'r':
+            s.push_back('\r');
+            break;  // carriage return
+        case 'v':
+            s.push_back('\v');
+            break;  // vertical tab
 
-    // the default is to reproduce the same character
-    default:
-        s.push_back(ch);
-        break;
+        // the default is to reproduce the same character
+        default:
+            s.push_back(ch);
+            break;
     }
 }
 
-} // namespace epi
+}  // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

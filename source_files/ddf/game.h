@@ -16,225 +16,213 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_GAME_H__
-#define __DDF_GAME_H__
-
-#include "epi.h"
+#pragma once
 
 #include "types.h"
 
-// ------------------------------------------------------------------
-// -----------------------GAME DEFINITIONS---------------------------
-// ------------------------------------------------------------------
-
-class wi_mapposdef_c
+class IntermissionMapPositionInfo
 {
-  public:
-    std::string name;
+   public:
+    std::string name_;
 
-    int x, y;
+    int x_, y_;
 
-  public:
-    wi_mapposdef_c();
-    wi_mapposdef_c(wi_mapposdef_c &rhs);
-    ~wi_mapposdef_c();
+   public:
+    IntermissionMapPositionInfo();
+    IntermissionMapPositionInfo(IntermissionMapPositionInfo &rhs);
+    ~IntermissionMapPositionInfo();
 
-  public:
-    wi_mapposdef_c &operator=(wi_mapposdef_c &rhs);
+   public:
+    IntermissionMapPositionInfo &operator=(IntermissionMapPositionInfo &rhs);
 
-  private:
-    void Copy(wi_mapposdef_c &src);
+   private:
+    void Copy(IntermissionMapPositionInfo &src);
 };
 
-class wi_mapposdef_container_c : public std::vector<wi_mapposdef_c *>
+class IntermissionMapPositionInfoContainer
+    : public std::vector<IntermissionMapPositionInfo *>
 {
-  public:
-    wi_mapposdef_container_c();
-    wi_mapposdef_container_c(wi_mapposdef_container_c &rhs);
-    ~wi_mapposdef_container_c();
+   public:
+    IntermissionMapPositionInfoContainer();
+    IntermissionMapPositionInfoContainer(
+        IntermissionMapPositionInfoContainer &rhs);
+    ~IntermissionMapPositionInfoContainer();
 
-  private:
-    void Copy(wi_mapposdef_container_c &src);
+   private:
+    void Copy(IntermissionMapPositionInfoContainer &src);
 
-  public:
-    wi_mapposdef_container_c &operator=(wi_mapposdef_container_c &rhs);
+   public:
+    IntermissionMapPositionInfoContainer &operator=(
+        IntermissionMapPositionInfoContainer &rhs);
 };
 
-class wi_framedef_c
+class IntermissionFrameInfo
 {
-  public:
-    std::string pic;  // Name of pic to display.
-    int         tics; // Tics on this frame
-    int         x, y; // Position on screen where this goes
+   public:
+    std::string pic_;    // Name of pic to display.
+    int         tics_;   // Tics on this frame
+    int         x_, y_;  // Position on screen where this goes
 
-  public:
-    wi_framedef_c();
-    wi_framedef_c(wi_framedef_c &rhs);
-    ~wi_framedef_c();
+   public:
+    IntermissionFrameInfo();
+    IntermissionFrameInfo(IntermissionFrameInfo &rhs);
+    ~IntermissionFrameInfo();
 
-  public:
-    void           Default(void);
-    wi_framedef_c &operator=(wi_framedef_c &rhs);
+   public:
+    void                   Default(void);
+    IntermissionFrameInfo &operator=(IntermissionFrameInfo &rhs);
 
-  private:
-    void Copy(wi_framedef_c &src);
+   private:
+    void Copy(IntermissionFrameInfo &src);
 };
 
-class wi_framedef_container_c : public std::vector<wi_framedef_c *>
+class IntermissionFrameInfoContainer
+    : public std::vector<IntermissionFrameInfo *>
 {
-  public:
-    wi_framedef_container_c();
-    wi_framedef_container_c(wi_framedef_container_c &rhs);
-    ~wi_framedef_container_c();
+   public:
+    IntermissionFrameInfoContainer();
+    IntermissionFrameInfoContainer(IntermissionFrameInfoContainer &rhs);
+    ~IntermissionFrameInfoContainer();
 
-  private:
-    void Copy(wi_framedef_container_c &rhs);
+   private:
+    void Copy(IntermissionFrameInfoContainer &rhs);
 
-  public:
-    wi_framedef_container_c &operator=(wi_framedef_container_c &rhs);
+   public:
+    IntermissionFrameInfoContainer &operator=(
+        IntermissionFrameInfoContainer &rhs);
 };
 
-class wi_animdef_c
+class IntermissionAnimationInfo
 {
-  public:
-    enum animtype_e
+   public:
+    enum AnimationType
     {
-        WI_NORMAL,
-        WI_LEVEL
+        kIntermissionAnimationInfoNormal,
+        kIntermissionAnimationInfoLevel
     };
 
-    animtype_e type;
+    AnimationType type_;
 
-    std::string level;
+    std::string level_;
 
-    wi_framedef_container_c frames;
+    IntermissionFrameInfoContainer frames_;
 
-  public:
-    wi_animdef_c();
-    wi_animdef_c(wi_animdef_c &rhs);
-    ~wi_animdef_c();
+   public:
+    IntermissionAnimationInfo();
+    IntermissionAnimationInfo(IntermissionAnimationInfo &rhs);
+    ~IntermissionAnimationInfo();
 
-  public:
-    wi_animdef_c &operator=(wi_animdef_c &rhs);
-    void          Default(void);
+   public:
+    IntermissionAnimationInfo &operator=(IntermissionAnimationInfo &rhs);
+    void                       Default(void);
 
-  private:
-    void Copy(wi_animdef_c &rhs);
+   private:
+    void Copy(IntermissionAnimationInfo &rhs);
 };
 
-class wi_animdef_container_c : public std::vector<wi_animdef_c *>
+class IntermissionAnimationInfoContainer
+    : public std::vector<IntermissionAnimationInfo *>
 {
-  public:
-    wi_animdef_container_c();
-    wi_animdef_container_c(wi_animdef_container_c &rhs);
-    ~wi_animdef_container_c();
+   public:
+    IntermissionAnimationInfoContainer();
+    IntermissionAnimationInfoContainer(IntermissionAnimationInfoContainer &rhs);
+    ~IntermissionAnimationInfoContainer();
 
-  private:
-    void Copy(wi_animdef_container_c &src);
+   private:
+    void Copy(IntermissionAnimationInfoContainer &src);
 
-  public:
-    wi_animdef_container_c &operator=(wi_animdef_container_c &rhs);
+   public:
+    IntermissionAnimationInfoContainer &operator=(
+        IntermissionAnimationInfoContainer &rhs);
 };
 
-typedef enum
+enum LightingModel
 {
     // standard Doom shading
-    LMODEL_Doom = 0,
-
+    kLightingModelDoom = 0,
     // Doom shading without the brighter N/S, darker E/W walls
-    LMODEL_Doomish = 1,
-
+    kLightingModelDoomish = 1,
     // flat lighting (no shading at all)
-    LMODEL_Flat = 2,
-
+    kLightingModelFlat = 2,
     // vertex lighting
-    LMODEL_Vertex = 3,
+    kLightingModelVertex = 3,
+    // Invalid (-ACB- 2003/10/06: MSVC wants the invalid value as part of the
+    // enum)
+    kLightingModelInvalid = 999
+};
 
-    // Invalid (-ACB- 2003/10/06: MSVC wants the invalid value as part of the enum)
-    LMODEL_Invalid = 999
-} lighting_model_e;
-
-// Game definition file
-class gamedef_c
+class GameDefinition
 {
-  public:
-    gamedef_c();
-    ~gamedef_c();
+   public:
+    GameDefinition();
+    ~GameDefinition();
 
-  public:
+   public:
     void Default(void);
-    void CopyDetail(gamedef_c &src);
+    void CopyDetail(GameDefinition &src);
 
-    // Member vars....
-    std::string name;
+    std::string name_;
 
-    wi_animdef_container_c   anims;
-    wi_mapposdef_container_c mappos;
+    IntermissionAnimationInfoContainer   anims_;
+    IntermissionMapPositionInfoContainer mappos_;
 
-    std::string background;
-    std::string splatpic;
-    std::string yah[2];
+    std::string background_;
+    std::string splatpic_;
+    std::string you_are_here_[2];
 
     // -AJA- 1999/10/22: background cameras.
-    std::string bg_camera;
+    std::string bg_camera_;
 
-    int           music;
-    bool          no_skill_menu;
-    struct sfx_s *percent;
-    struct sfx_s *done;
-    struct sfx_s *endmap;
-    struct sfx_s *nextmap;
-    struct sfx_s *accel_snd;
-    struct sfx_s *frag_snd;
+    int                 music_;
+    bool                no_skill_menu_;
+    struct SoundEffect *percent_;
+    struct SoundEffect *done_;
+    struct SoundEffect *endmap_;
+    struct SoundEffect *next_map_;
+    struct SoundEffect *accel_snd_;
+    struct SoundEffect *frag_snd_;
 
-    std::string firstmap;
-    std::string namegraphic;
+    std::string firstmap_;
+    std::string namegraphic_;
 
-    std::string titlemovie;
-    bool movie_played;
+    std::string titlemovie_;
+    bool        movie_played_;
 
-    std::vector<std::string> titlepics;
+    std::vector<std::string> titlepics_;
 
-    int titlemusic;
-    int titletics;
-    int special_music;
+    int titlemusic_;
+    int titletics_;
+    int special_music_;
 
-    lighting_model_e lighting;
+    LightingModel lighting_;
 
     // Episode description, a reference to languages.ldf
-    std::string description;
+    std::string description_;
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit gamedef_c(gamedef_c &rhs)
-    {
-        (void)rhs;
-    }
-    gamedef_c &operator=(gamedef_c &rhs)
+    explicit GameDefinition(GameDefinition &rhs) { (void)rhs; }
+    GameDefinition &operator=(GameDefinition &rhs)
     {
         (void)rhs;
         return *this;
     }
 };
 
-class gamedef_container_c : public std::vector<gamedef_c *>
+class GameDefinitionContainer : public std::vector<GameDefinition *>
 {
-  public:
-    gamedef_container_c();
-    ~gamedef_container_c();
+   public:
+    GameDefinitionContainer();
+    ~GameDefinitionContainer();
 
-  public:
+   public:
     // Search Functions
-    gamedef_c *Lookup(const char *refname);
+    GameDefinition *Lookup(const char *refname);
 };
 
-// -------EXTERNALISATIONS-------
-
-extern gamedef_container_c gamedefs; // -ACB- 2004/06/21 Implemented
+extern GameDefinitionContainer gamedefs;  // -ACB- 2004/06/21 Implemented
 
 void DDF_ReadGames(const std::string &data);
-
-#endif // __DDF_GAME_H__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

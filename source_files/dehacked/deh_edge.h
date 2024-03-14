@@ -27,11 +27,9 @@
 
 #pragma once
 
-// DDF
-#include "collection.h"
-
 #include <vector>
-#include <string>
+
+#include "collection.h"
 
 enum DehackedResult
 {
@@ -49,7 +47,7 @@ enum DehackedResult
 void DehackedStartup();
 
 // return the message for the last error, or an empty string if there
-// was none.  Also clears the current error.  Never returns NULL.
+// was none.  Also clears the current error.  Never returns nullptr.
 const char *DehackedGetError(void);
 
 // set quiet mode (disables warnings).
@@ -59,7 +57,7 @@ DehackedResult DehackedSetQuiet(int quiet);
 DehackedResult DehackedAddLump(const char *data, int length);
 
 // convert all the DeHackEd patch files into DDF.
-DehackedResult DehackedRunConversion(ddf_collection_c *dest);
+DehackedResult DehackedRunConversion(std::vector<DDFFile> *dest);
 
 // shut down: free all memory, close all files, etc..
 void DehackedShutdown(void);

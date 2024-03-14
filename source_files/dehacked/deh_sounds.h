@@ -181,6 +181,6 @@ void AlterSound(int new_val);
 const char *GetSound(int sound_id);
 
 void ConvertSFX(void);
-} // namespace sounds
+}  // namespace sounds
 
-} // namespace dehacked
+}  // namespace dehacked

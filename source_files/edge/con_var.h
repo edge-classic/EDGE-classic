@@ -16,103 +16,107 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __CON_VAR_H__
-#define __CON_VAR_H__
+#pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
-#define DEF_CVAR(name, value, flags)                   cvar_c name(#name, value, flags);
-#define DEF_CVAR_CLAMPED(name, value, flags, min, max) cvar_c name(#name, value, flags, nullptr, min, max);
-#define DEF_CVAR_CB(name, value, flags, cb)                                                                            \
-    cvar_c name(#name, value, flags, cb);
-#define DEF_CVAR_CB_CLAMPED(name, value, flags, cb, min, max)                                                                            \
-    cvar_c name(#name, value, flags, cb, min, max);
+#define EDGE_DEFINE_CONSOLE_VARIABLE(name, value, flags) \
+    ConsoleVariable name(#name, value, flags);
+#define EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(name, value, flags, min, max) \
+    ConsoleVariable name(#name, value, flags, nullptr, min, max);
+#define EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK(name, value, flags, cb) \
+    ConsoleVariable name(#name, value, flags, cb);
+#define EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK_CLAMPED(name, value, flags, \
+                                                           cb, min, max)       \
+    ConsoleVariable name(#name, value, flags, cb, min, max);
 
-class cvar_c
+enum ConsoleVariableFlag
 {
-  public:
+    kConsoleVariableFlagNone     = 0,
+    kConsoleVariableFlagArchive  = (1 << 0),  // saved in the config file
+    kConsoleVariableFlagCheat    = (1 << 1),  // disabled in multi-player games
+    kConsoleVariableFlagNoReset  = (1 << 2),  // do not reset to default
+    kConsoleVariableFlagReadOnly = (1 << 3),  // read-only
+    kConsoleVariableFlagFilepath =
+        (1 << 4),  // a filesystem path and needs to be sanitized for
+                   // certain characters
+};
+
+class ConsoleVariable
+{
+   public:
     // current value
-    int         d;
-    float       f;
-    std::string s;
-    typedef void (*cvar_callback)(cvar_c *self);
+    int         d_;
+    float       f_;
+    std::string s_;
+    typedef void (*ConsoleVariableCallback)(ConsoleVariable *self);
 
     // name of variable
-    const char *name;
+    const char *name_;
 
     // default value
-    const char *def;
+    const char *def_;
 
     // a combination of CVAR_XXX bits
-    int flags;
+    ConsoleVariableFlag flags_;
 
-    float min;
-    float max;
+    float min_;
+    float max_;
 
     // link in list
-    cvar_c *next;
+    ConsoleVariable *next_;
 
-    cvar_callback cvar_cb;
+    ConsoleVariableCallback callback_;
 
-  private:
+   private:
     // this is incremented each time a value is set.
     // (Note: whether the value is different is not checked)
-    int modified;
+    int modified_;
 
-  public:
-    cvar_c(const char *_name, const char *_def, int _flags = 0, cvar_callback _cb = nullptr,
-      float _min = -256000.0f, float _max = 256000.0f);
+   public:
+    ConsoleVariable(const char *name, const char *def,
+                    ConsoleVariableFlag     flags = kConsoleVariableFlagNone,
+                    ConsoleVariableCallback cb    = nullptr,
+                    float min = -256000.0f, float max = 256000.0f);
 
-    ~cvar_c();
+    ~ConsoleVariable();
 
-    cvar_c &operator=(int value);
-    cvar_c &operator=(float value);
-    cvar_c &operator=(const char *value);
-    cvar_c &operator=(std::string value);
+    ConsoleVariable &operator=(int value);
+    ConsoleVariable &operator=(float value);
+    ConsoleVariable &operator=(const char *value);
+    ConsoleVariable &operator=(std::string value);
 
-    inline const char *c_str() const
-    {
-        return s.c_str();
-    }
+    inline const char *c_str() const { return s_.c_str(); }
 
     // this checks and clears the 'modified' value
     inline bool CheckModified()
     {
-        if (modified)
+        if (modified_)
         {
-            modified = 0;
+            modified_ = 0;
             return true;
         }
         return false;
     }
 
-  private:
-    void FmtInt(int value);
-    void FmtFloat(float value);
+   private:
+    void FormatInteger(int value);
+    void FormatFloat(float value);
 
     void ParseString();
 };
 
-enum
-{
-    CVAR_ARCHIVE  = (1 << 0), // saved in the config file
-    CVAR_CHEAT    = (1 << 1), // disabled in multi-player games
-    CVAR_NO_RESET = (1 << 2), // do not reset to default
-    CVAR_ROM      = (1 << 3), // read-only
-    CVAR_PATH     = (1 << 4), // a filesystem path and needs to be sanitized for certain characters
-};
-
-// called by CON_InitConsole.
-void CON_SortVars();
+// called by ConsoleInitConsole.
+void ConsoleSortVariables();
 
 // sets all cvars to their default value.
-void CON_ResetAllVars();
+void ConsoleResetAllVariables();
 
 // look for a CVAR with the given name.
-cvar_c *CON_FindVar(const char *name);
+ConsoleVariable *ConsoleFindVariable(const char *name);
 
-bool CON_MatchPattern(const char *name, const char *pat);
+bool ConsoleMatchPattern(const char *name, const char *pat);
 
 // find all cvars which match the pattern, and copy pointers to
 // them into the given list.  The flags parameter, if present,
@@ -120,18 +124,17 @@ bool CON_MatchPattern(const char *name, const char *pat);
 // and/or uppercase letters to require the flag to be absent.
 //
 // Returns number of matches found.
-int CON_MatchAllVars(std::vector<const char *> &list, const char *pattern);
+int ConsoleMatchAllVariables(std::vector<const char *> &list,
+                             const char                *pattern);
 
 // scan the program arguments and set matching cvars.
-void CON_HandleProgramArgs(void);
+void ConsoleHandleProgramArguments(void);
 
-// display value of matching cvars.  match can be NULL to match everything.
-int CON_PrintVars(const char *match, bool show_default);
+// display value of matching cvars.  match can be nullptr to match everything.
+int ConsolePrintVariables(const char *match, bool show_default);
 
 // write all cvars to the config file.
-void CON_WriteVars(FILE *f);
-
-#endif // __CON_VAR_H__
+void ConsoleWriteVariables(FILE *f);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

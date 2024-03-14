@@ -16,38 +16,37 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __EPI_IMAGEDATA_H__
-#define __EPI_IMAGEDATA_H__
+#pragma once
 
 #include "math_color.h"
 
-class image_data_c
+class ImageData
 {
-  public:
-    short width;
-    short height;
+   public:
+    short width_;
+    short height_;
 
     // Bytes Per Pixel, determines image mode:
     // 1 = palettised
     // 3 = format is RGB
     // 4 = format is RGBA
-    short bpp;
+    short depth_;
 
     // for image loading, these will be the actual image size
-    short used_w;
-    short used_h;
+    short used_width_;
+    short used_height_;
 
     // in case offset/scaling from a parent image_c need to be stored (atlases)
-    float offset_x;
-    float offset_y;
-    float scale_x;
-    float scale_y;
+    float offset_x_;
+    float offset_y_;
+    float scale_x_;
+    float scale_y_;
 
-    uint8_t *pixels;
+    uint8_t *pixels_;
 
-  public:
-    image_data_c(int _w, int _h, int _bpp = 3);
-    ~image_data_c();
+   public:
+    ImageData(int width, int height, int depth = 3);
+    ~ImageData();
 
     void Clear(uint8_t val = 0);
 
@@ -55,7 +54,7 @@ class image_data_c
     {
         // Note: DOES NOT CHECK COORDS
 
-        return pixels + (y * width + x) * bpp;
+        return pixels_ + (y * width_ + x) * depth_;
     }
 
     inline void CopyPixel(int sx, int sy, int dx, int dy)
@@ -63,8 +62,7 @@ class image_data_c
         uint8_t *src  = PixelAt(sx, sy);
         uint8_t *dest = PixelAt(dx, dy);
 
-        for (int i = 0; i < bpp; i++)
-            *dest++ = *src++;
+        for (int i = 0; i < depth_; i++) *dest++ = *src++;
     }
 
     // convert all RGB(A) pixels to a greyscale equivalent.
@@ -78,17 +76,17 @@ class image_data_c
     // For RGB(A) images the pixel values are averaged.
     // Palettised images are not averaged, instead the bottom
     // left pixel in each group becomes the final pixel.
-    void Shrink(int new_w, int new_h);
+    void Shrink(int new_width, int new_height);
 
     // like Shrink(), but for RGBA images the source alpha is
     // used as a weighting factor for the shrunken color, hence
     // purely transparent pixels never affect the final color
     // of a pixel group.
-    void ShrinkMasked(int new_w, int new_h);
+    void ShrinkMasked(int new_width, int new_height);
 
     // scale the image up to a larger size.
     // The old size and the new size must be powers of two.
-    void Grow(int new_w, int new_h);
+    void Grow(int new_width, int new_height);
 
     // convert an RGBA image to RGB.  Partially transparent colors
     // (alpha < 255) are blended with black.
@@ -96,7 +94,7 @@ class image_data_c
 
     // Set uniform alpha value for all pixels in an image
     // If RGB, will convert to RGBA
-    void SetAlpha(int alphaness);
+    void SetAlpha(int alpha);
 
     // test each alpha value in the RGBA image against the threshold:
     // lesser values become 0, and greater-or-equal values become 255.
@@ -126,33 +124,34 @@ class image_data_c
 
     // compute the average Hue of the RGB(A) image, storing the
     // result in the 'hue' array (r, g, b).  The average intensity
-    // will be stored in 'ity' when given.
-    void AverageHue(uint8_t *hue, uint8_t *ity = NULL, int from_x = -1, int to_x = 1000000, int from_y = -1,
-                    int to_y = 1000000);
+    // will be stored in 'intensity' when given.
+    void AverageHue(uint8_t *hue, uint8_t *intensity = nullptr, int from_x = -1,
+                    int to_x = 1000000, int from_y = -1, int to_y = 1000000);
 
     // compute the average color of the RGB image, based on modal average
-    RGBAColor AverageColor(int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
+    RGBAColor AverageColor(int from_x = -1, int to_x = 1000000, int from_y = -1,
+                           int to_y = 1000000);
 
     // compute the lightest color in the RGB image
-    RGBAColor LightestColor(int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
+    RGBAColor LightestColor(int from_x = -1, int to_x = 1000000,
+                            int from_y = -1, int to_y = 1000000);
 
     // compute the darkest color in the RGB image
-    RGBAColor DarkestColor(int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
+    RGBAColor DarkestColor(int from_x = -1, int to_x = 1000000, int from_y = -1,
+                           int to_y = 1000000);
 
     // SMMU-style swirling
-    void Swirl(int leveltime, int thickness);
+    void Swirl(int level_time, int thickness);
 
     // fill the margins of non-power-of-two images with a copy of the
     // left and/or top parts of the image.  This doesn't make it tile
     // properly, but it looks better than having areas of black.
-    void FillMarginX(int actual_w);
-    void FillMarginY(int actual_h);
+    void FillMarginX(int actual_width);
+    void FillMarginY(int actual_height);
 
     // Change various HSV color values if needed
-    void SetHSV(int rotation, int saturation, int value);
+    void SetHsv(int rotation, int saturation, int value);
 };
-
-#endif /* __EPI_IMAGEDATA_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

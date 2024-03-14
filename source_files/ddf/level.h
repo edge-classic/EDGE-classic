@@ -16,215 +16,192 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_LEVEL_H__
-#define __DDF_LEVEL_H__
+#pragma once
 
-#include "epi.h"
-
+#include "colormap.h"
 #include "types.h"
 
-class gamedef_c;
+class GameDefinition;
 
-// ------------------------------------------------------------------
-// ---------------MAP STRUCTURES AND CONFIGURATION-------------------
-// ------------------------------------------------------------------
-
-// -KM- 1998/11/25 Added generalised Finale type.
-class map_finaledef_c
+class FinaleDefinition
 {
-  public:
-    map_finaledef_c();
-    map_finaledef_c(map_finaledef_c &rhs);
-    ~map_finaledef_c();
+   public:
+    FinaleDefinition();
+    FinaleDefinition(FinaleDefinition &rhs);
+    ~FinaleDefinition();
 
-  private:
-    void Copy(map_finaledef_c &src);
+   private:
+    void Copy(FinaleDefinition &src);
 
-  public:
-    void             Default(void);
-    map_finaledef_c &operator=(map_finaledef_c &rhs);
+   public:
+    void              Default(void);
+    FinaleDefinition &operator=(FinaleDefinition &rhs);
 
     // Text
-    std::string        text;
-    std::string        text_back;
-    std::string        text_flat;
-    float              text_speed;
-    unsigned int       text_wait;
-    const colourmap_c *text_colmap;
+    std::string     text_;
+    std::string     text_back_;
+    std::string     text_flat_;
+    float           text_speed_;
+    unsigned int    text_wait_;
+    const Colormap *text_colmap_;
 
-    // Movie (pack file reference)
-    std::string        movie;
+    // Movie
+    std::string movie_;
 
     // Pic
-    std::vector<std::string> pics;
-    unsigned int             picwait;
+    std::vector<std::string> pics_;
+    unsigned int             picwait_;
 
     // Cast
-    bool docast;
+    bool docast_;
 
     // Bunny
-    bool dobunny;
+    bool dobunny_;
 
     // Music
-    int music;
+    int music_;
 };
 
-typedef enum
+enum MapFlag
 {
-    MPF_None = 0x0,
+    kMapFlagNone         = 0x0,
+    kMapFlagJumping      = (1 << 0),
+    kMapFlagMlook        = (1 << 1),
+    kMapFlagCheats       = (1 << 2),
+    kMapFlagItemRespawn  = (1 << 3),
+    kMapFlagFastParm     = (1 << 4),  // Fast Monsters
+    kMapFlagResRespawn   = (1 << 5),  // Resurrect Monsters (else Teleport)
+    kMapFlagTrue3D       = (1 << 6),  // True 3D Gameplay
+    kMapFlagStomp        = (1 << 7),  // Monsters can stomp players
+    kMapFlagMoreBlood    = (1 << 8),  // Make a bloody mess
+    kMapFlagRespawn      = (1 << 9),
+    kMapFlagAutoAim      = (1 << 10),
+    kMapFlagAutoAimMlook = (1 << 11),
+    kMapFlagResetPlayer  = (1 << 12),  // Force player back to square #1
+    kMapFlagExtras       = (1 << 13),
+    kMapFlagLimitZoom    = (1 << 14),  // Limit zoom to certain weapons
+    kMapFlagCrouching    = (1 << 15),
+    kMapFlagKicking      = (1 << 16),  // Weapon recoil
+    kMapFlagWeaponSwitch = (1 << 17),
+    kMapFlagPassMissile  = (1 << 18),
+    kMapFlagTeamDamage   = (1 << 19),
+};
 
-    MPF_Jumping     = (1 << 0),
-    MPF_Mlook       = (1 << 1),
-    MPF_Cheats      = (1 << 2),
-    MPF_ItemRespawn = (1 << 3),
-    MPF_FastParm    = (1 << 4), // Fast Monsters
-    MPF_ResRespawn  = (1 << 5), // Resurrect Monsters (else Teleport)
-
-    MPF_True3D       = (1 << 6), // True 3D Gameplay
-    MPF_Stomp        = (1 << 7), // Monsters can stomp players
-    MPF_MoreBlood    = (1 << 8), // Make a bloody mess
-    MPF_Respawn      = (1 << 9),
-    MPF_AutoAim      = (1 << 10),
-    MPF_AutoAimMlook = (1 << 11),
-    MPF_ResetPlayer  = (1 << 12), // Force player back to square #1
-    MPF_Extras       = (1 << 13),
-
-    MPF_LimitZoom    = (1 << 14), // Limit zoom to certain weapons
-    MPF_Crouching    = (1 << 15),
-    MPF_Kicking      = (1 << 16), // Weapon recoil
-    MPF_WeaponSwitch = (1 << 17),
-
-    MPF_PassMissile = (1 << 18),
-    MPF_TeamDamage  = (1 << 19),
-} mapsettings_e;
-
-typedef enum
+enum SkyStretch
 {
-    SKS_Unset   = -1,
-    SKS_Mirror  = 0,
-    SKS_Repeat  = 1,
-    SKS_Stretch = 2,
-    SKS_Vanilla = 3,
-} skystretch_e;
+    kSkyStretchUnset   = -1,
+    kSkyStretchMirror  = 0,
+    kSkyStretchRepeat  = 1,
+    kSkyStretchStretch = 2,
+    kSkyStretchVanilla = 3,
+};
 
-typedef enum
+enum IntermissionStyle
 {
     // standard Doom intermission stats
-    WISTYLE_Doom = 0,
-
+    kIntermissionStyleDoom = 0,
     // no stats at all
-    WISTYLE_None = 1
-} intermission_style_e;
+    kIntermissionStyleNone = 1
+};
 
-class mapdef_c
+class MapDefinition
 {
-  public:
-    mapdef_c();
-    ~mapdef_c();
+   public:
+    MapDefinition();
+    ~MapDefinition();
 
-  public:
+   public:
     void Default(void);
-    void CopyDetail(mapdef_c &src);
+    void CopyDetail(MapDefinition &src);
 
     // Member vars....
-    std::string name;
-
-    ///---	// next in the list
-    ///---	mapdef_c *next;				// FIXME!! Gamestate information
+    std::string name_;
 
     // level description, a reference to languages.ldf
-    std::string description;
+    std::string description_;
 
-    std::string namegraphic;
-    std::string leavingbggraphic;
-    std::string enteringbggraphic;
-    std::string lump;
-    std::string sky;
-    std::string surround;
+    std::string namegraphic_;
+    std::string leavingbggraphic_;
+    std::string enteringbggraphic_;
+    std::string lump_;
+    std::string sky_;
+    std::string surround_;
 
-    int music;
+    int music_;
 
-    int partime;
+    int partime_;
 
-    gamedef_c  *episode; // set during DDF_CleanUp
-    std::string episode_name;
+    GameDefinition *episode_;  // set during DDF_CleanUp
+    std::string     episode_name_;
 
     // flags come in two flavours: "force on" and "force off".  When not
     // forced, then the user is allowed to control it (not applicable to
     // all the flags, e.g. RESET_PLAYER).
-    int force_on;
-    int force_off;
+    int force_on_;
+    int force_off_;
 
     // name of the next normal level
-    std::string nextmapname;
+    std::string next_mapname_;
 
     // name of the secret level
-    std::string secretmapname;
+    std::string secretmapname_;
 
     // -KM- 1998/11/25 All lines with this trigger will be activated at
     // the level start. (MAP07)
-    int autotag;
+    int autotag_;
 
-    intermission_style_e wistyle;
+    IntermissionStyle wistyle_;
 
     // -KM- 1998/11/25 Generalised finales.
-    map_finaledef_c f_pre;
-    map_finaledef_c f_end;
+    FinaleDefinition f_pre_;
+    FinaleDefinition f_end_;
 
     // optional *MAPINFO field
-    std::string author;
+    std::string author_;
 
     // sky stretch override
-    skystretch_e forced_skystretch;
+    SkyStretch forced_skystretch_;
 
-    colourmap_c *indoor_fog_cmap;
-    RGBAColor     indoor_fog_color;
-    float        indoor_fog_density;
-    colourmap_c *outdoor_fog_cmap;
-    RGBAColor     outdoor_fog_color;
-    float        outdoor_fog_density;
+    Colormap *indoor_fog_cmap_;
+    RGBAColor indoor_fog_color_;
+    float     indoor_fog_density_;
+    Colormap *outdoor_fog_cmap_;
+    RGBAColor outdoor_fog_color_;
+    float     outdoor_fog_density_;
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit mapdef_c(mapdef_c &rhs)
-    {
-        (void)rhs;
-    }
-    mapdef_c &operator=(mapdef_c &rhs)
+    explicit MapDefinition(MapDefinition &rhs) { (void)rhs; }
+    MapDefinition &operator=(MapDefinition &rhs)
     {
         (void)rhs;
         return *this;
     }
 };
 
-// Our mapdefs container
-class mapdef_container_c : public std::vector<mapdef_c *>
+class MapDefinitionContainer : public std::vector<MapDefinition *>
 {
-  public:
-    mapdef_container_c()
+   public:
+    MapDefinitionContainer() {}
+    ~MapDefinitionContainer()
     {
-    }
-    ~mapdef_container_c()
-    {
-      for (auto iter = begin(); iter != end(); iter++)
-      {
-          mapdef_c *map = *iter;
-          delete map;
-          map = nullptr;
-      }
+        for (std::vector<MapDefinition *>::iterator iter     = begin(),
+                                                    iter_end = end();
+             iter != iter_end; iter++)
+        {
+            MapDefinition *map = *iter;
+            delete map;
+            map = nullptr;
+        }
     }
 
-  public:
-    mapdef_c *Lookup(const char *name);
+   public:
+    MapDefinition *Lookup(const char *name);
 };
 
-// -------EXTERNALISATIONS-------
-
-extern mapdef_container_c mapdefs; // -ACB- 2004/06/29 Implemented
+extern MapDefinitionContainer mapdefs;  // -ACB- 2004/06/29 Implemented
 
 void DDF_ReadLevels(const std::string &data);
-
-#endif // __DDF_LEVEL_H__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

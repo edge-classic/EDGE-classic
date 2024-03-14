@@ -18,37 +18,37 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef M_ARGV_H_
-#define M_ARGV_H_
+#pragma once
 
 #include <string>
 #include <vector>
 
-namespace argv
-{
+#include "con_var.h"
 
-extern std::vector<std::string> list;
+extern std::vector<std::string> program_argument_list;
 
-void Init(int argc, const char *const *argv);
+void ArgumentParse(int argc, const char *const *argv);
 
 // Return position in arg list, if found
-int Find(std::string longName, int *numParams = nullptr);
+int ArgumentFind(std::string_view long_name, int *total_parameters = nullptr);
 
-//  Same as above, but return the value of position + 1 if valid, else an empty string
-std::string Value(std::string longName, int *numParams = nullptr);
+//  Same as above, but return the value of position + 1 if valid, else an empty
+//  string
+std::string ArgumentValue(std::string_view long_name,
+                          int             *total_parameters = nullptr);
 
-void CheckBooleanParm(std::string parm, bool *boolval, bool reverse);
-void CheckBooleanCVar(std::string parm, cvar_c *var, bool reverse);
+void ArgumentCheckBooleanParameter(const std::string &parameter,
+                                   bool *boolean_value, bool reverse);
 
-void ApplyResponseFile(std::string name);
+void ArgumentCheckBooleanConsoleVariable(const std::string &parameter,
+                                         ConsoleVariable   *variable,
+                                         bool               reverse);
 
-void DebugDumpArgs(void);
+void ArgumentApplyResponseFile(std::string_view name);
 
-bool IsOption(int index);
+void ArgumentDebugDump(void);
 
-} // namespace argv
-
-#endif /* __LIB_ARGV_H__ */
+bool ArgumentIsOption(int index);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

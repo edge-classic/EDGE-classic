@@ -16,32 +16,33 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __EPI_SOUND_TYPES_H__
-#define __EPI_SOUND_TYPES_H__
+#pragma once
 
-typedef enum
+#include <stdint.h>
+
+#include <string>
+
+enum SoundFormat
 {
-    kUnknownImage = 0,
-    FMT_WAV,
-    FMT_FLAC,
-    FMT_OGG,
-    FMT_MP3,
-    FMT_M4P,
-    FMT_RAD,
-    FMT_MUS,
-    FMT_MIDI,
-    FMT_IMF, // Used with DDFPLAY; not in auto-detection
-    FMT_DOOM,
-    FMT_SPK
-} sound_format_e;
+    kSoundUnknown = 0,
+    kSoundWav,
+    kSoundFlac,
+    kSoundOgg,
+    kSoundMp3,
+    kSoundM4p,
+    kSoundRad,
+    kSoundMus,
+    kSoundMidi,
+    kSoundImf,  // Used with DDFPLAY; not in auto-detection
+    kSoundDoom,
+    kSoundPcSpeaker
+};
 
 // determine sound format from the file.
-sound_format_e Sound_DetectFormat(uint8_t *data, int song_len);
+SoundFormat DetectSoundFormat(uint8_t *data, int song_len);
 
 // determine sound format from the filename (by its extension).
-sound_format_e Sound_FilenameToFormat(const std::string &filename);
-
-#endif /* __EPI_SOUND_TYPES_H__ */
+SoundFormat SoundFilenameToFormat(std::string_view filename);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

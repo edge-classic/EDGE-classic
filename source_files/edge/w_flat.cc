@@ -27,32 +27,34 @@
 // -KM- 1998/09/27 Colourmaps can be dynamically changed.
 // -ES- 2000/02/12 Moved most of this module to w_texture.c.
 
-#include "i_defs.h"
+#include "w_flat.h"
 
-#include <vector>
 #include <algorithm>
+#include <vector>
 
-#include "e_search.h"
-#include "dm_state.h"
+#include "anim.h"
 #include "dm_defs.h"
+#include "dm_state.h"
+#include "e_search.h"
+#include "epi.h"
 #include "m_argv.h"
 #include "m_misc.h"
 #include "p_local.h"
 #include "r_image.h"
 #include "r_sky.h"
-#include "w_flat.h"
+#include "w_files.h"
 #include "w_model.h"
 #include "w_sprite.h"
-#include "w_files.h"
-#include "w_wad.h"
 #include "w_texture.h"
+#include "w_wad.h"
 
-DEF_CVAR(r_precache_tex, "1", CVAR_ARCHIVE)
-DEF_CVAR(r_precache_sprite, "1", CVAR_ARCHIVE)
-DEF_CVAR(r_precache_model, "1", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(precache_textures, "1",
+                             kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(precache_sprites, "1", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(precache_models, "1", kConsoleVariableFlagArchive)
 
 //
-// R_AddFlatAnim
+// AddFlatAnimation
 //
 // Here are the rules for flats, they get a bit hairy, but are the
 // simplest thing which achieves expected behaviour:
@@ -71,12 +73,12 @@ DEF_CVAR(r_precache_model, "1", CVAR_ARCHIVE)
 //
 // -AJA- 2001/01/28: reworked flat animations.
 //
-void R_AddFlatAnim(animdef_c *anim)
+static void AddFlatAnimation(AnimationDefinition *anim)
 {
-    if (anim->pics.empty()) // old way
+    if (anim->pics_.empty())  // old way
     {
-        int start = W_CheckNumForName(anim->startname.c_str());
-        int end   = W_CheckNumForName(anim->endname.c_str());
+        int start = CheckLumpNumberForName(anim->start_name_.c_str());
+        int end   = CheckLumpNumberForName(anim->end_name_.c_str());
 
         int file;
         int s_offset, e_offset;
@@ -89,66 +91,68 @@ void R_AddFlatAnim(animdef_c *anim)
             return;
         }
 
-        file = W_FindFlatSequence(anim->startname.c_str(), anim->endname.c_str(), &s_offset, &e_offset);
+        file = FindFlatSequence(anim->start_name_.c_str(),
+                                anim->end_name_.c_str(), &s_offset, &e_offset);
 
         if (file < 0)
         {
-            I_Warning("Missing flat animation: %s-%s not in any wad.\n", anim->startname.c_str(),
-                      anim->endname.c_str());
+            LogWarning("Missing flat animation: %s-%s not in any wad.\n",
+                       anim->start_name_.c_str(), anim->end_name_.c_str());
             return;
         }
 
-        std::vector<int> *lumps = W_GetFlatList(file);
-        if (lumps == NULL)
-            return;
+        std::vector<int> *lumps = GetFlatListForWad(file);
+        if (lumps == nullptr) return;
 
         int total = (int)lumps->size();
 
-        SYS_ASSERT(s_offset <= e_offset);
-        SYS_ASSERT(e_offset < total);
+        EPI_ASSERT(s_offset <= e_offset);
+        EPI_ASSERT(e_offset < total);
 
         // determine animation sequence
         total = e_offset - s_offset + 1;
 
-        const image_c **flats = new const image_c *[total];
+        const Image **flats = new const Image *[total];
 
         // lookup each flat
         for (i = 0; i < total; i++)
         {
-            const char *name = W_GetLumpName((*lumps)[s_offset + i]);
+            const char *name = GetLumpNameFromIndex((*lumps)[s_offset + i]);
 
-            // Note we use W_ImageFromFlat() here.  It might seem like a good
+            // Note we use ImageFromFlat() here.  It might seem like a good
             // optimisation to use the lump number directly, but we can't do
             // that -- the lump list does NOT take overriding flats (in newer
             // pwads) into account.
 
-            flats[i] = W_ImageLookup(name, INS_Flat, ILF_Null | ILF_Exact | ILF_NoNew);
+            flats[i] = ImageLookup(
+                name, kImageNamespaceFlat,
+                kImageLookupNull | kImageLookupExact | kImageLookupNoNew);
         }
 
-        W_AnimateImageSet(flats, total, anim->speed);
+        AnimateImageSet(flats, total, anim->speed_);
         delete[] flats;
     }
 
     // -AJA- 2004/10/27: new SEQUENCE command for anims
 
-    int total = (int)anim->pics.size();
+    int total = (int)anim->pics_.size();
 
-    if (total == 1)
-        return;
+    if (total == 1) return;
 
-    const image_c **flats = new const image_c *[total];
+    const Image **flats = new const Image *[total];
 
     for (int i = 0; i < total; i++)
     {
-        flats[i] = W_ImageLookup(anim->pics[i].c_str(), INS_Flat, ILF_Null | ILF_Exact);
+        flats[i] = ImageLookup(anim->pics_[i].c_str(), kImageNamespaceFlat,
+                               kImageLookupNull | kImageLookupExact);
     }
 
-    W_AnimateImageSet(flats, total, anim->speed);
+    AnimateImageSet(flats, total, anim->speed_);
     delete[] flats;
 }
 
 //
-// R_AddTextureAnim
+// AddTextureAnimation
 //
 // Here are the rules for textures:
 //
@@ -171,13 +175,15 @@ void R_AddFlatAnim(animdef_c *anim)
 //
 // -AJA- 2001/06/17: reworked texture animations.
 //
-void R_AddTextureAnim(animdef_c *anim)
+static void AddTextureAnimation(AnimationDefinition *anim)
 {
-    if (anim->pics.empty()) // old way
+    if (anim->pics_.empty())  // old way
     {
         int set, s_offset, e_offset;
 
-        set = W_FindTextureSequence(anim->startname.c_str(), anim->endname.c_str(), &s_offset, &e_offset);
+        set =
+            FindTextureSequence(anim->start_name_.c_str(),
+                                anim->end_name_.c_str(), &s_offset, &e_offset);
 
         if (set < 0)
         {
@@ -185,19 +191,21 @@ void R_AddTextureAnim(animdef_c *anim)
             return;
         }
 
-        SYS_ASSERT(s_offset <= e_offset);
+        EPI_ASSERT(s_offset <= e_offset);
 
-        int             total = e_offset - s_offset + 1;
-        const image_c **texs  = new const image_c *[total];
+        int           total = e_offset - s_offset + 1;
+        const Image **texs  = new const Image *[total];
 
         // lookup each texture
         for (int i = 0; i < total; i++)
         {
-            const char *name = W_TextureNameInSet(set, s_offset + i);
-            texs[i]          = W_ImageLookup(name, INS_Texture, ILF_Null | ILF_Exact | ILF_NoNew);
+            const char *name = TextureNameInSet(set, s_offset + i);
+            texs[i]          = ImageLookup(
+                name, kImageNamespaceTexture,
+                kImageLookupNull | kImageLookupExact | kImageLookupNoNew);
         }
 
-        W_AnimateImageSet(texs, total, anim->speed);
+        AnimateImageSet(texs, total, anim->speed_);
         delete[] texs;
 
         return;
@@ -205,97 +213,91 @@ void R_AddTextureAnim(animdef_c *anim)
 
     // -AJA- 2004/10/27: new SEQUENCE command for anims
 
-    int total = (int)anim->pics.size();
+    int total = (int)anim->pics_.size();
 
-    if (total == 1)
-        return;
+    if (total == 1) return;
 
-    const image_c **texs = new const image_c *[total];
+    const Image **texs = new const Image *[total];
 
     for (int i = 0; i < total; i++)
     {
-        texs[i] = W_ImageLookup(anim->pics[i].c_str(), INS_Texture, ILF_Null | ILF_Exact);
+        texs[i] = ImageLookup(anim->pics_[i].c_str(), kImageNamespaceTexture,
+                              kImageLookupNull | kImageLookupExact);
     }
 
-    W_AnimateImageSet(texs, total, anim->speed);
+    AnimateImageSet(texs, total, anim->speed_);
     delete[] texs;
 }
 
 //
-// R_AddGraphicAnim
+// AddGraphicAnimation
 //
-void R_AddGraphicAnim(animdef_c *anim)
+static void AddGraphicAnimation(AnimationDefinition *anim)
 {
-    int total = (int)anim->pics.size();
+    int total = (int)anim->pics_.size();
 
-    SYS_ASSERT(total != 0);
+    EPI_ASSERT(total != 0);
 
-    if (total == 1)
-        return;
+    if (total == 1) return;
 
-    const image_c **users = new const image_c *[total];
+    const Image **users = new const Image *[total];
 
     for (int i = 0; i < total; i++)
     {
-        users[i] = W_ImageLookup(anim->pics[i].c_str(), INS_Graphic, ILF_Null | ILF_Exact);
+        users[i] = ImageLookup(anim->pics_[i].c_str(), kImageNamespaceGraphic,
+                               kImageLookupNull | kImageLookupExact);
     }
 
-    W_AnimateImageSet(users, total, anim->speed);
+    AnimateImageSet(users, total, anim->speed_);
     delete[] users;
 }
 
-struct Compare_flat_pred
+struct CompareFlatPredicate
 {
     inline bool operator()(const int &A, const int &B) const
     {
-        int cmp = strcmp(W_GetLumpName(A), W_GetLumpName(B));
-        if (cmp < 0)
-            return true;
-        if (cmp > 0)
-            return false;
+        int cmp = strcmp(GetLumpNameFromIndex(A), GetLumpNameFromIndex(B));
+        if (cmp < 0) return true;
+        if (cmp > 0) return false;
         return A < B;
     }
 };
 
 //
-// W_InitFlats
+// InitializeFlats
 //
-void W_InitFlats(void)
+void InitializeFlats(void)
 {
-    int max_file = W_GetNumFiles();
+    int max_file = GetTotalFiles();
     int j, file;
 
     std::vector<int> flats;
 
-    I_Printf("W_InitFlats...\n");
+    LogPrint("InitializeFlats...\n");
 
     // iterate over each file, creating our big array of flats
 
     for (file = 0; file < max_file; file++)
     {
-        std::vector<int> *lumps = W_GetFlatList(file);
-        if (lumps == NULL)
-            continue;
+        std::vector<int> *lumps = GetFlatListForWad(file);
+        if (lumps == nullptr) continue;
 
         int lumpnum = (int)lumps->size();
 
-        for (j = 0; j < lumpnum; j++)
-        {
-            flats.push_back((int)(*lumps)[j]);
-        }
+        for (j = 0; j < lumpnum; j++) { flats.push_back((int)(*lumps)[j]); }
     }
 
     if (flats.size() == 0)
     {
-        I_Warning("No flats found! Generating fallback flat!\n");
-        W_MakeEdgeFlat();
+        LogWarning("No flats found! Generating fallback flat!\n");
+        CreateFallbackFlat();
         return;
     }
 
     // now sort the flats, primarily by increasing name, secondarily by
     // increasing lump number (a measure of newness).
 
-    std::sort(flats.begin(), flats.end(), Compare_flat_pred());
+    std::sort(flats.begin(), flats.end(), CompareFlatPredicate());
 
     // remove duplicate names.  We rely on the fact that newer lumps
     // have greater lump values than older ones.  Because the QSORT took
@@ -307,132 +309,122 @@ void W_InitFlats(void)
         int a = flats[j - 1];
         int b = flats[j];
 
-        if (strcmp(W_GetLumpName(a), W_GetLumpName(b)) == 0)
+        if (strcmp(GetLumpNameFromIndex(a), GetLumpNameFromIndex(b)) == 0)
         {
             flats[j - 1] = -1;
         }
     }
 
-#if 0 // DEBUGGING
-	for (j=0; j < numflats; j++)
-	{
-		L_WriteDebug("FLAT #%d:  lump=%d  name=[%s]\n", j,
-				flats[j], W_GetLumpName(flats[j]));
-	}
-#endif
-
-    W_ImageCreateFlats(flats);
+    CreateFlats(flats);
 }
 
 //
-// W_InitPicAnims
+// InitializeAnimations
 //
-void W_InitPicAnims(void)
+void InitializeAnimations(void)
 {
     // loop through animdefs, and add relevant anims.
     // Note: reverse order, give priority to newer anims.
-    for (auto iter = animdefs.rbegin(); iter != animdefs.rend(); iter++)
+    for (std::vector<AnimationDefinition *>::reverse_iterator
+             iter     = animdefs.rbegin(),
+             iter_end = animdefs.rend();
+         iter != iter_end; iter++)
     {
-        animdef_c *A = *iter;
+        AnimationDefinition *A = *iter;
 
-        SYS_ASSERT(A);
+        EPI_ASSERT(A);
 
-        switch (A->type)
+        switch (A->type_)
         {
-        case animdef_c::A_Texture:
-            R_AddTextureAnim(A);
-            break;
+            case AnimationDefinition::kAnimationTypeTexture:
+                AddTextureAnimation(A);
+                break;
 
-        case animdef_c::A_Flat:
-            R_AddFlatAnim(A);
-            break;
+            case AnimationDefinition::kAnimationTypeFlat:
+                AddFlatAnimation(A);
+                break;
 
-        case animdef_c::A_Graphic:
-            R_AddGraphicAnim(A);
-            break;
+            case AnimationDefinition::kAnimationTypeGraphic:
+                AddGraphicAnimation(A);
+                break;
         }
     }
 }
 
-void W_PrecacheTextures(void)
+static void PrecacheTextures(void)
 {
     // maximum possible images
-    int max_image = 1 + 3 * numsides + 2 * numsectors;
+    int max_image = 1 + 3 * total_level_sides + 2 * total_level_sectors;
     int count     = 0;
 
-    const image_c **images = new const image_c *[max_image];
+    const Image **images = new const Image *[max_image];
 
     // Sky texture is always present.
     images[count++] = sky_image;
 
     // add in sidedefs
-    for (int i = 0; i < numsides; i++)
+    for (int i = 0; i < total_level_sides; i++)
     {
-        if (sides[i].top.image)
-            images[count++] = sides[i].top.image;
+        if (level_sides[i].top.image)
+            images[count++] = level_sides[i].top.image;
 
-        if (sides[i].middle.image)
-            images[count++] = sides[i].middle.image;
+        if (level_sides[i].middle.image)
+            images[count++] = level_sides[i].middle.image;
 
-        if (sides[i].bottom.image)
-            images[count++] = sides[i].bottom.image;
+        if (level_sides[i].bottom.image)
+            images[count++] = level_sides[i].bottom.image;
     }
 
-    SYS_ASSERT(count <= max_image);
+    EPI_ASSERT(count <= max_image);
 
     // add in planes
-    for (int i = 0; i < numsectors; i++)
+    for (int i = 0; i < total_level_sectors; i++)
     {
-        if (sectors[i].floor.image)
-            images[count++] = sectors[i].floor.image;
+        if (level_sectors[i].floor.image)
+            images[count++] = level_sectors[i].floor.image;
 
-        if (sectors[i].ceil.image)
-            images[count++] = sectors[i].ceil.image;
+        if (level_sectors[i].ceiling.image)
+            images[count++] = level_sectors[i].ceiling.image;
     }
 
-    SYS_ASSERT(count <= max_image);
+    EPI_ASSERT(count <= max_image);
 
     // Sort the images, so we can ignore the duplicates
 
-#define CMP(a, b) (a < b)
-    QSORT(const image_c *, images, count, CUTOFF);
-#undef CMP
+#define EDGE_CMP(a, b) (a < b)
+    EDGE_QSORT(const Image *, images, count, 10);
+#undef EDGE_CMP
 
     for (int i = 0; i < count; i++)
     {
-        SYS_ASSERT(images[i]);
+        EPI_ASSERT(images[i]);
 
-        if (i + 1 < count && images[i] == images[i + 1])
-            continue;
+        if (i + 1 < count && images[i] == images[i + 1]) continue;
 
-        if (images[i] == skyflatimage)
-            continue;
+        if (images[i] == sky_flat_image) continue;
 
-        W_ImagePreCache(images[i]);
+        ImagePrecache(images[i]);
     }
 
     delete[] images;
 }
 
 //
-// W_PrecacheLevel
+// PrecacheLevelGraphics
 //
 // Preloads all relevant graphics for the level.
 //
 // -AJA- 2001/06/18: Reworked for image system.
 //
-void W_PrecacheLevel(void)
+void PrecacheLevelGraphics(void)
 {
-    if (r_precache_sprite.d)
-        W_PrecacheSprites();
+    if (precache_sprites.d_) PrecacheSprites();
 
-    if (r_precache_tex.d)
-        W_PrecacheTextures();
+    if (precache_textures.d_) PrecacheTextures();
 
-    if (r_precache_model.d)
-        W_PrecacheModels();
+    if (precache_models.d_) PrecacheModels();
 
-    RGL_PreCacheSky();
+    RendererPreCacheSky();
 }
 
 //--- editor settings ---

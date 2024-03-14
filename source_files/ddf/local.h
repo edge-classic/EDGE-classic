@@ -16,23 +16,21 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_LOCAL_H__
-#define __DDF_LOCAL_H__
-
-#include "epi.h"
-
-#include "types.h"
-#include "main.h"
-#include "states.h"
+#pragma once
 
 #include <stddef.h>
 
+#include "epi.h"
+#include "main.h"
+#include "states.h"
+#include "types.h"
+
 //
 // This structure forms the basis for the command checking, it hands back a code
-// pointer and sometimes a pointer to a (int) numeric value. (used for info that gets
-// its value directly from the file).
+// pointer and sometimes a pointer to a (int) numeric value. (used for info that
+// gets its value directly from the file).
 //
-typedef struct commandlist_s
+struct DDFCommandList
 {
     // command name
     const char *name;
@@ -42,41 +40,30 @@ typedef struct commandlist_s
 
     ptrdiff_t offset;
 
-    const struct commandlist_s *sub_comms;
-} commandlist_t;
+    const struct DDFCommandList *sub_comms;
+};
 
-// NOTE: requires DDF_CMD_BASE to be defined as the dummy struct
-
-#define DDF_FIELD(name, field, parser)                                                                                 \
-    {                                                                                                                  \
-        name, parser, ((char *)&DDF_CMD_BASE.field - (char *)&DDF_CMD_BASE), NULL                                      \
+// NOTE: requires an instantiated base struct
+#define DDF_FIELD(name, base, field, parser)                         \
+    {                                                                \
+        name, parser, ((char *)&base.field - (char *)&base), nullptr \
     }
 
-#define DDF_SUB_LIST(name, field, subcomms)                                                                            \
-    {                                                                                                                  \
-        "*" name, NULL, ((char *)&DDF_CMD_BASE.field - (char *)&DDF_CMD_BASE), subcomms                                \
+#define DDF_SUB_LIST(name, base, field, subcomms)                          \
+    {                                                                      \
+        "*" name, nullptr, ((char *)&base.field - (char *)&base), subcomms \
     }
 
-#define DDF_CMD_END                                                                                                    \
-    {                                                                                                                  \
-        NULL, NULL, 0, NULL                                                                                            \
-    }
-
-#define DDF_STATE(name, redir, field)                                                                                  \
-    {                                                                                                                  \
-        name, redir, ((char *)&DDF_CMD_BASE.field - (char *)&DDF_CMD_BASE)                                             \
-    }
-
-#define DDF_STATE_END                                                                                                  \
-    {                                                                                                                  \
-        NULL, NULL, 0                                                                                                  \
+#define DDF_STATE(name, redir, base, field)                \
+    {                                                      \
+        name, redir, ((char *)&base.field - (char *)&base) \
     }
 
 //
 // This structure passes the information needed to DDF_MainReadFile, so that
 // the reader uses the correct procedures when reading a file.
 //
-typedef struct readinfo_s
+struct DDFReadInfo
 {
     // name of the lump, for error messages
     const char *lumpname;
@@ -113,7 +100,8 @@ typedef struct readinfo_s
     // be called multiple times, once for each element, and `index' is
     // used to indicate which element (starting at 0).
     //
-    void (*parse_field)(const char *field, const char *contents, int index, bool is_last);
+    void (*parse_field)(const char *field, const char *contents, int index,
+                        bool is_last);
 
     // when the entry has finished, this routine can perform any
     // necessary operations here (such as updating a number -> entry
@@ -129,12 +117,12 @@ typedef struct readinfo_s
     // this is never called in the middle of an entry.
     //
     void (*clear_all)(void);
-} readinfo_t;
+};
 
 //
 // This structure forms the basis for referencing specials.
 //
-typedef struct
+struct DDFSpecialFlags
 {
     // name of special
     const char *name;
@@ -145,39 +133,39 @@ typedef struct
     // this is true if the DDF name (e.g. "GRAVITY") is opposite to the
     // code's flag name (e.g. MF_NoGravity).
     bool negative;
-} specflags_t;
+};
 
-typedef enum
+enum DDFCheckFlagResult
 {
     // special flag is unknown
-    CHKF_Unknown,
+    kDDFCheckFlagUnknown,
 
     // the flag should be set (i.e. forced on)
-    CHKF_Positive,
+    kDDFCheckFlagPositive,
 
     // the flag should be cleared (i.e. forced off)
-    CHKF_Negative,
+    kDDFCheckFlagNegative,
 
     // the flag should be made user-definable
-    CHKF_User
-} checkflag_result_e;
+    kDDFCheckFlagUser
+};
 
 //
 // This is a reference table, that determines what code pointer is placed in the
 // states table entry.
 //
-typedef struct
+struct DDFActionCode
 {
     const char *actionname;
-    void (*action)(struct mobj_s *mo);
+    void (*action)(MapObject *mo);
 
     // -AJA- 1999/08/09: This function handles the argument when brackets
-    // are present (e.g. "WEAPON_SHOOT(FIREBALL)").  NULL if unused.
-    void (*handle_arg)(const char *arg, state_t *curstate);
-} actioncode_t;
+    // are present (e.g. "WEAPON_SHOOT(FIREBALL)").  nullptr if unused.
+    void (*handle_arg)(const char *arg, State *curstate);
+};
 
 // This structure is used for parsing states
-typedef struct
+struct DDFStateStarter
 {
     // state label
     const char *label;
@@ -187,20 +175,27 @@ typedef struct
 
     // pointer to state_num storage
     ptrdiff_t offset;
-} state_starter_t;
+};
 
 // DDF_MAIN Code (Reading all files, main init & generic functions).
-void DDF_MainReadFile(readinfo_t *readinfo, const std::string &data);
+void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data);
 
 extern int         cur_ddf_line_num;
 extern std::string cur_ddf_filename;
 extern std::string cur_ddf_entryname;
 extern std::string cur_ddf_linedata;
 
-void DDF_Error(const char *err, ...) GCCATTR((format(printf, 1, 2)));
-void DDF_Debug(const char *err, ...) GCCATTR((format(printf, 1, 2)));
-void DDF_Warning(const char *err, ...) GCCATTR((format(printf, 1, 2)));
-void DDF_WarnError(const char *err, ...) GCCATTR((format(printf, 1, 2)));
+#ifdef __GNUC__
+void DDF_Error(const char *err, ...) __attribute__((format(printf, 1, 2)));
+void DDF_Debug(const char *err, ...) __attribute__((format(printf, 1, 2)));
+void DDF_Warning(const char *err, ...) __attribute__((format(printf, 1, 2)));
+void DDF_WarnError(const char *err, ...) __attribute__((format(printf, 1, 2)));
+#else
+void DDF_Error(const char *err, ...);
+void DDF_Debug(const char *err, ...);
+void DDF_Warning(const char *err, ...);
+void DDF_WarnError(const char *err, ...);
+#endif
 
 void DDF_MainGetPercent(const char *info, void *storage);
 void DDF_MainGetPercentAny(const char *info, void *storage);
@@ -217,16 +212,20 @@ void DDF_MainGetRGB(const char *info, void *storage);
 void DDF_MainGetWhenAppear(const char *info, void *storage);
 void DDF_MainGetBitSet(const char *info, void *storage);
 
-bool DDF_MainParseField(const commandlist_t *commands, const char *field, const char *contents, uint8_t *obj_base);
+bool DDF_MainParseField(const DDFCommandList *commands, const char *field,
+                        const char *contents, uint8_t *obj_base);
 void DDF_MainLookupSound(const char *info, void *storage);
 void DDF_MainRefAttack(const char *info, void *storage);
 
 void DDF_DummyFunction(const char *info, void *storage);
 
-checkflag_result_e DDF_MainCheckSpecialFlag(const char *name, const specflags_t *flag_set, int *flag_value,
-                                            bool allow_prefixes, bool allow_user);
+DDFCheckFlagResult DDF_MainCheckSpecialFlag(const char            *name,
+                                            const DDFSpecialFlags *flag_set,
+                                            int                   *flag_value,
+                                            bool allow_prefixes,
+                                            bool allow_user);
 
-int DDF_MainLookupDirector(const mobjtype_c *obj, const char *info);
+int DDF_MainLookupDirector(const MapObjectDefinition *obj, const char *info);
 
 // DDF_ANIM Code
 void DDF_AnimInit(void);
@@ -241,7 +240,6 @@ void DDF_GameInit(void);
 void DDF_GameCleanUp(void);
 
 // DDF_LANG Code
-void DDF_LanguageInit(void);
 void DDF_LanguageCleanUp(void);
 
 // DDF_LEVL Code
@@ -252,8 +250,8 @@ void DDF_LevelCleanUp(void);
 void DDF_LinedefInit(void);
 void DDF_LinedefCleanUp(void);
 
-#define EMPTY_COLMAP_NAME "_NONE_"
-#define EMPTY_COLMAP_NUM  -777
+constexpr const char *kEmptyColormapName   = "_NONE_";
+constexpr int16_t     kEmptyColormapNumber = -777;
 
 // DDF_MOBJ Code  (Moving Objects)
 void DDF_MobjInit(void);
@@ -267,7 +265,8 @@ void DDF_MobjGetBpKeys(const char *info, void *storage);
 void DDF_MobjGetBpWeapon(const char *info, void *storage);
 void DDF_MobjGetPlayer(const char *info, void *storage);
 
-void ThingParseField(const char *field, const char *contents, int index, bool is_last);
+void ThingParseField(const char *field, const char *contents, int index,
+                     bool is_last);
 
 // DDF_MUS Code
 void DDF_MusicPlaylistInit(void);
@@ -275,27 +274,30 @@ void DDF_MusicPlaylistCleanUp(void);
 
 // DDF_STAT Code
 void DDF_StateInit(void);
-void DDF_StateGetAttack(const char *arg, state_t *cur_state);
-void DDF_StateGetMobj(const char *arg, state_t *cur_state);
-void DDF_StateGetSound(const char *arg, state_t *cur_state);
-void DDF_StateGetInteger(const char *arg, state_t *cur_state);
-void DDF_StateGetIntPair(const char *arg, state_t *cur_state);
-void DDF_StateGetFloat(const char *arg, state_t *cur_state);
-void DDF_StateGetPercent(const char *arg, state_t *cur_state);
-void DDF_StateGetJump(const char *arg, state_t *cur_state);
-void DDF_StateGetBecome(const char *arg, state_t *cur_state);
-void DDF_StateGetMorph(const char *arg, state_t *cur_state);
-void DDF_StateGetBecomeWeapon(const char *arg, state_t *cur_state);
-void DDF_StateGetFrame(const char *arg, state_t *cur_state);
-void DDF_StateGetAngle(const char *arg, state_t *cur_state);
-void DDF_StateGetSlope(const char *arg, state_t *cur_state);
-void DDF_StateGetRGB(const char *arg, state_t *cur_state);
+void DDF_StateGetAttack(const char *arg, State *cur_state);
+void DDF_StateGetMobj(const char *arg, State *cur_state);
+void DDF_StateGetSound(const char *arg, State *cur_state);
+void DDF_StateGetInteger(const char *arg, State *cur_state);
+void DDF_StateGetIntPair(const char *arg, State *cur_state);
+void DDF_StateGetFloat(const char *arg, State *cur_state);
+void DDF_StateGetPercent(const char *arg, State *cur_state);
+void DDF_StateGetJump(const char *arg, State *cur_state);
+void DDF_StateGetBecome(const char *arg, State *cur_state);
+void DDF_StateGetMorph(const char *arg, State *cur_state);
+void DDF_StateGetBecomeWeapon(const char *arg, State *cur_state);
+void DDF_StateGetFrame(const char *arg, State *cur_state);
+void DDF_StateGetAngle(const char *arg, State *cur_state);
+void DDF_StateGetSlope(const char *arg, State *cur_state);
+void DDF_StateGetRGB(const char *arg, State *cur_state);
 
-bool DDF_MainParseState(uint8_t *object, state_group_t &group, const char *field, const char *contents, int index,
-                        bool is_last, bool is_weapon, const state_starter_t *starters, const actioncode_t *actions);
+bool DDF_MainParseState(uint8_t *object, std::vector<StateRange> &group,
+                        const char *field, const char *contents, int index,
+                        bool is_last, bool is_weapon,
+                        const DDFStateStarter *starters,
+                        const DDFActionCode   *actions);
 
-void DDF_StateBeginRange(state_group_t &group);
-void DDF_StateFinishRange(state_group_t &group);
+void DDF_StateBeginRange(std::vector<StateRange> &group);
+void DDF_StateFinishRange(std::vector<StateRange> &group);
 void DDF_StateCleanUp(void);
 
 // DDF_SECT Code
@@ -316,9 +318,9 @@ void DDF_SwitchInit(void);
 void DDF_SwitchCleanUp(void);
 
 // DDF_WEAP Code
-void                     DDF_WeaponInit(void);
-void                     DDF_WeaponCleanUp(void);
-extern const specflags_t ammo_types[];
+void                         DDF_WeaponInit(void);
+void                         DDF_WeaponCleanUp(void);
+extern const DDFSpecialFlags ammo_types[];
 
 // DDF_COLM Code -AJA- 1999/07/09.
 void DDF_ColmapInit(void);
@@ -348,12 +350,9 @@ void DDF_FixCleanUp(void);
 void DDF_MovieInit(void);
 void DDF_MovieCleanUp(void);
 
-
 // Miscellaneous stuff needed here & there
-extern const commandlist_t floor_commands[];
-extern const commandlist_t damage_commands[];
-
-#endif //__DDF_LOCAL_H__*/
+extern const DDFCommandList floor_commands[];
+extern const DDFCommandList damage_commands[];
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

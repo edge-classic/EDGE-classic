@@ -25,15 +25,16 @@
 //
 //------------------------------------------------------------------------
 
+#include "deh_wad.h"
+
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <string.h>
 
 #include "deh_edge.h"
-
 #include "deh_system.h"
-#include "deh_wad.h"
+#include "epi.h"
 
 namespace dehacked
 {
@@ -41,26 +42,26 @@ namespace dehacked
 namespace wad
 {
 
-ddf_collection_c *dest_container = NULL;
+std::vector<DDFFile> *dest_container = nullptr;
 
-ddf_file_c *cur_lump = NULL;
+DDFFile *cur_lump = nullptr;
 
 char wad_msg_buf[1024];
 
-void NewLump(ddf_type_e type)
+void NewLump(DDFType type)
 {
-    if (dest_container == NULL)
-        I_Error("Dehacked: Error - WAD_NewLump: no container!\n");
+    if (dest_container == nullptr)
+        FatalError("Dehacked: Error - WAD_NewLump: no container!\n");
 
-    dest_container->files.push_back(ddf_file_c(type, ""));
+    dest_container->push_back({type, "", ""});
 
-    cur_lump = &dest_container->files.back();
+    cur_lump = &dest_container->back();
 }
 
 void Printf(const char *str, ...)
 {
-    if (cur_lump == NULL)
-        I_Error("Dehacked: Error - WAD_Printf: not started.\n");
+    if (cur_lump == nullptr)
+        FatalError("Dehacked: Error - WAD_Printf: not started.\n");
 
     va_list args;
 
@@ -71,6 +72,6 @@ void Printf(const char *str, ...)
     cur_lump->data += (const char *)wad_msg_buf;
 }
 
-} // namespace wad
+}  // namespace wad
 
-} // namespace dehacked
+}  // namespace dehacked

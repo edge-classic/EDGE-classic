@@ -16,95 +16,81 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_COLORMAP_H__
-#define __DDF_COLORMAP_H__
-
-#include "epi.h"
+#pragma once
 
 #include "types.h"
 
-// -AJA- 1999/07/09: colmap.ddf structures.
-
-typedef enum
+enum ColorSpecial
 {
     // Default value
-    COLSP_None = 0x0000,
-
+    kColorSpecialNone = 0x0000,
     // don't apply gun-flash type effects (looks silly for fog)
-    COLSP_NoFlash = 0x0001,
-
+    kColorSpecialNoFlash = 0x0001,
     // for fonts, apply the FONTWHITEN mapping first
-    COLSP_Whiten = 0x0002
-} colourspecial_e;
+    kColorSpecialWhiten = 0x0002
+};
 
-typedef struct colmapcache_s
+struct ColormapCache
 {
     uint8_t *data;
-    int   size;
-} colmapcache_t;
+    int      size;
+};
 
-class colourmap_c
+class Colormap
 {
-  public:
-    colourmap_c();
-    ~colourmap_c();
+   public:
+    Colormap();
+    ~Colormap();
 
-  public:
-    void CopyDetail(colourmap_c &src);
+   public:
+    void CopyDetail(Colormap &src);
     void Default();
 
     // Member vars...
-    std::string name;
+    std::string name_;
 
-    std::string lump_name;
-    std::string pack_name;
+    std::string lump_name_;
+    std::string pack_name_;
 
-    int start;
-    int length;
+    int start_;
+    int length_;
 
-    colourspecial_e special;
+    ColorSpecial special_;
 
     // colours for GL renderer
-    RGBAColor gl_colour;
+    RGBAColor gl_color_;
 
-    RGBAColor font_colour; // (computed only, not in DDF)
+    RGBAColor font_colour_;  // (computed only, not in DDF)
 
-    colmapcache_t cache;
+    ColormapCache cache_;
 
-    void *analysis;
+    void *analysis_;
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit colourmap_c(colourmap_c &rhs)
-    {
-        (void)rhs;
-    }
-    colourmap_c &operator=(colourmap_c &rhs)
+    explicit Colormap(Colormap &rhs) { (void)rhs; }
+    Colormap &operator=(Colormap &rhs)
     {
         (void)rhs;
         return *this;
     }
 };
 
-// Colourmap container
-class colourmap_container_c : public std::vector<colourmap_c *>
+class ColormapContainer : public std::vector<Colormap *>
 {
-  public:
-    colourmap_container_c();
-    ~colourmap_container_c();
+   public:
+    ColormapContainer();
+    ~ColormapContainer();
 
-  public:
-    // Search Functions
-    colourmap_c *Lookup(const char *refname);
+   public:
+    Colormap *Lookup(const char *refname);
 };
 
-extern colourmap_container_c colourmaps; // -ACB- 2004/06/10 Implemented
+extern ColormapContainer colormaps;  // -ACB- 2004/06/10 Implemented
 
 void DDF_ReadColourMaps(const std::string &data);
 
 void DDF_AddRawColourmap(const char *name, int size, const char *pack_name);
-
-#endif /* __DDF_COLORMAP_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

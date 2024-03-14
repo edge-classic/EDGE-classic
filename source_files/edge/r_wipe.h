@@ -27,51 +27,48 @@
 //   Mission start screen wipe/melt, special effects.
 //
 
-#ifndef __R_WIPE__
-#define __R_WIPE__
+#pragma once
 
 //
 // SCREEN WIPE PACKAGE
 //
 
-typedef enum
+enum ScreenWipe
 {
     // no wiping
-    WIPE_None,
+    kScreenWipeNone,
     // weird screen melt
-    WIPE_Melt,
+    kScreenWipeMelt,
     // cross-fading
-    WIPE_Crossfade,
+    kScreenWipeCrossfade,
     // pixel fading
-    WIPE_Pixelfade,
+    kScreenWipePixelfade,
 
     // new screen simply scrolls in from the given side of the screen
     // (or if reversed, the old one scrolls out to the given side)
-    WIPE_Top,
-    WIPE_Bottom,
-    WIPE_Left,
-    WIPE_Right,
+    kScreenWipeTop,
+    kScreenWipeBottom,
+    kScreenWipeLeft,
+    kScreenWipeRight,
 
-    WIPE_Spooky,
+    kScreenWipeSpooky,
 
     // Opens like doors
-    WIPE_Doors,
+    kScreenWipeDoors,
 
-    WIPE_NUMWIPES
-} wipetype_e;
+    kTotalScreenWipeTypes
+};
 
-extern wipetype_e wipe_method;
+extern ScreenWipe wipe_method;
 
 // for enum cvars
-extern const char WIPE_EnumStr[];
+extern const char kScreenWipeEnumStr[];
 
-void RGL_InitWipe(wipetype_e effect);
-void RGL_StopWipe(void);
-bool RGL_DoWipe(void);
+void RendererInitializeWipe(ScreenWipe effect);
+void RendererStopWipe(void);
+bool RendererDoWipe(void);
 // Primarily for movie use; replaces the initial wipe texture with all black
-void RGL_BlackoutWipeTex(void);
-
-#endif // __R_WIPE__
+void RendererBlackoutWipeTexture(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

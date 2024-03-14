@@ -16,10 +16,10 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __EPI_FILESYSTEM_H__
-#define __EPI_FILESYSTEM_H__
+#pragma once
 
 #include <vector>
+
 #include "str_util.h"
 
 namespace epi
@@ -40,9 +40,9 @@ class File;
 // A Filesystem directory entry
 struct DirectoryEntry
 {
-    std::string           name;
-    size_t                size   = 0;
-    bool                  is_dir = false;
+    std::string name;
+    size_t      size   = 0;
+    bool        is_dir = false;
 };
 
 // Path and Filename Functions
@@ -52,23 +52,27 @@ std::string GetDirectory(std::string_view path);
 std::string GetExtension(std::string_view path);
 std::string MakePathRelative(std::string_view parent, std::string_view child);
 std::string PathAppend(std::string_view parent, std::string_view child);
+std::string PathAppendIfNotAbsolute(std::string_view parent,
+                                    std::string_view child);
 std::string SanitizePath(std::string_view path);
-bool IsPathAbsolute(std::string_view path);
-void ReplaceExtension(std::string &path, std::string_view ext);
+bool        IsPathAbsolute(std::string_view path);
+void        ReplaceExtension(std::string &path, std::string_view ext);
 
 // Directory Functions
 bool CurrentDirectorySet(std::string_view dir);
 bool IsDirectory(std::string_view dir);
 bool MakeDirectory(std::string_view dir);
-bool ReadDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir, const char *mask);
+bool ReadDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir,
+                   const char *mask);
 bool WalkDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir);
-bool OpenDirectory(const std::string &src); // Opens a directory in explorer, finder, etc
+bool OpenDirectory(
+    const std::string &src);  // Opens a directory in explorer, finder, etc
 
 // File Functions
-bool    FileExists(std::string_view name);
-bool    TestFileAccess(std::string_view name);
+bool  FileExists(std::string_view name);
+bool  TestFileAccess(std::string_view name);
 File *FileOpen(std::string_view name, unsigned int flags);
-FILE   *FileOpenRaw(std::string_view name, unsigned int flags);
+FILE *FileOpenRaw(std::string_view name, unsigned int flags);
 // NOTE: there's no CloseFile function, just delete the object.
 bool FileCopy(std::string_view src, std::string_view dest);
 bool FileDelete(std::string_view name);
@@ -77,9 +81,7 @@ bool FileDelete(std::string_view name);
 // Performs a sync for platforms with virtualized file systems
 void SyncFilesystem(bool populate = false);
 
-} // namespace epi
-
-#endif /*__EPI_FILESYSTEM_H__*/
+}  // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

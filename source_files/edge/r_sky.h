@@ -23,41 +23,37 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __R_SKY__
-#define __R_SKY__
+#pragma once
 
-// The sky map is 256*4 wide (10 bits), and angles have 32 bits
-#define ANGLETOSKYSHIFT (32 - 10)
+#include "r_image.h"
 
-extern const image_c *sky_image;
+extern const Image *sky_image;
 
 // true when a custom sky box is present
-extern bool custom_sky_box;
+extern bool custom_skybox;
 
 extern bool need_to_draw_sky;
 
-typedef enum
+enum SkyboxFace
 {
-    WSKY_North = 0,
-    WSKY_East,
-    WSKY_South,
-    WSKY_West,
-    WSKY_Top,
-    WSKY_Bottom
-} sky_box_face_e;
+    kSkyboxNorth = 0,
+    kSkyboxEast,
+    kSkyboxSouth,
+    kSkyboxWest,
+    kSkyboxTop,
+    kSkyboxBottom
+};
 
-void R_ComputeSkyHeights(void);
+void ComputeSkyHeights(void);
 
-void RGL_BeginSky(void);
-void RGL_FinishSky(void);
+void RendererBeginSky(void);
+void RendererFinishSky(void);
 
-void RGL_DrawSkyPlane(subsector_t *sub, float h);
-void RGL_DrawSkyWall(seg_t *seg, float h1, float h2);
+void RendererDrawSkyPlane(Subsector *sub, float h);
+void RendererDrawSkyWall(Seg *seg, float h1, float h2);
 
-int  RGL_UpdateSkyBoxTextures(void);
-void RGL_PreCacheSky(void);
-
-#endif /* __R_SKY__ */
+int  RendererUpdateSkyBoxTextures(void);
+void RendererPreCacheSky(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

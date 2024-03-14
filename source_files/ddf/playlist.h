@@ -16,10 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_MUS_H__
-#define __DDF_MUS_H__
-
-#include "epi.h"
+#pragma once
 
 #include "types.h"
 
@@ -29,93 +26,86 @@
 
 // Playlist entry class
 
-// FIXME: Move enums in pl_entry_c class?
-typedef enum
+enum DDFMusicType
 {
-    MUS_UNKNOWN = 0,
-    MUS_MIDI,
-    MUS_MUS,
-    MUS_OGG,
-    MUS_MP3,
-    MUS_FLAC,
-    MUS_M4P,
-    MUS_RAD,
-    MUS_IMF280,
-    MUS_IMF560,
-    MUS_IMF700,
-    ENDOFMUSTYPES
-} musictype_t;
+    kDDFMusicUnknown = 0,
+    kDDFMusicMIDI,
+    kDDFMusicMUS,
+    kDDFMusicOGG,
+    kDDFMusicMP3,
+    kDDFMusicFLAC,
+    kDDFMusicM4P,
+    kDDFMusicRAD,
+    kDDFMusicIMF280,
+    kDDFMusicIMF560,
+    kDDFMusicIMF700,
+    kTotalDDFMusicTypes
+};
 
-typedef enum
+enum DDFMusicDataType
 {
-    MUSINF_UNKNOWN   = 0,
-    MUSINF_LUMP      = 1,
-    MUSINF_FILE      = 2,
-    MUSINF_PACKAGE   = 3,
-    ENDOFMUSINFTYPES = 4
-} musicinftype_e;
+    kDDFMusicDataUnknown    = 0,
+    kDDFMusicDataLump       = 1,
+    kDDFMusicDataFile       = 2,
+    kDDFMusicDataPackage    = 3,
+    kTotalDDFMusicDataTypes = 4
+};
 
-class pl_entry_c
+class PlaylistEntry
 {
-  public:
-    pl_entry_c();
-    ~pl_entry_c();
+   public:
+    PlaylistEntry();
+    ~PlaylistEntry();
 
-  public:
+   public:
     void Default(void);
-    void CopyDetail(pl_entry_c &src);
+    void CopyDetail(PlaylistEntry &src);
 
     // Member vars....
-    int number;
+    int number_;
 
-    musictype_t    type;
-    musicinftype_e infotype;
+    DDFMusicType     type_;
+    DDFMusicDataType infotype_;
 
-    std::string info;
+    std::string info_;
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit pl_entry_c(pl_entry_c &rhs)
-    {
-        (void)rhs;
-    }
-    pl_entry_c &operator=(pl_entry_c &rhs)
+    explicit PlaylistEntry(PlaylistEntry &rhs) { (void)rhs; }
+    PlaylistEntry &operator=(PlaylistEntry &rhs)
     {
         (void)rhs;
         return *this;
     }
 };
 
-// Our playlist entry container
-class pl_entry_container_c : public std::vector<pl_entry_c *>
+class PlaylistEntryContainer : public std::vector<PlaylistEntry *>
 {
-  public:
-    pl_entry_container_c()
+   public:
+    PlaylistEntryContainer() {}
+    ~PlaylistEntryContainer()
     {
-    }
-    ~pl_entry_container_c()
-    {
-      for (auto iter = begin(); iter != end(); iter++)
-      {
-          pl_entry_c *pl = *iter;
-          delete pl;
-          pl = nullptr;
-      }
+        for (std::vector<PlaylistEntry *>::iterator iter     = begin(),
+                                                    iter_end = end();
+             iter != iter_end; iter++)
+        {
+            PlaylistEntry *pl = *iter;
+            delete pl;
+            pl = nullptr;
+        }
     }
 
-  public:
-    pl_entry_c *Find(int number);
-    int         FindLast(const char *name);
-    int         FindFree();
+   public:
+    PlaylistEntry *Find(int number);
+    int            FindLast(const char *name);
+    int            FindFree();
 };
 
 // -------EXTERNALISATIONS-------
 
-extern pl_entry_container_c playlist; // -ACB- 2004/06/04 Implemented
+extern PlaylistEntryContainer playlist;  // -ACB- 2004/06/04 Implemented
 
 void DDF_ReadMusicPlaylist(const std::string &data);
-
-#endif // __DDF_MUS_H__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

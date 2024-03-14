@@ -23,210 +23,207 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __P_ACTION_H__
-#define __P_ACTION_H__
+#pragma once
 
-struct mobj_s;
+class MapObject;
+
+// Function names in this file deviate from the style guide in order to reflect
+// historical code pointer names and make the Dehacked->DDF->EDGE pipeline
+// easier to track - Dasho
 
 // Weapon Action Routine pointers
-void A_Light0(struct mobj_s *mo);
-void A_Light1(struct mobj_s *mo);
-void A_Light2(struct mobj_s *mo);
+void A_Light0(MapObject *mo);
+void A_Light1(MapObject *mo);
+void A_Light2(MapObject *mo);
 
-void A_WeaponReady(struct mobj_s *mo);
-void A_WeaponEmpty(struct mobj_s *mo);
-void A_WeaponShoot(struct mobj_s *mo);
-void A_WeaponEject(struct mobj_s *mo);
-void A_WeaponJump(struct mobj_s *mo);
-void A_WeaponDJNE(struct mobj_s *mo);
-void A_Lower(struct mobj_s *mo);
-void A_Raise(struct mobj_s *mo);
-void A_ReFire(struct mobj_s *mo);
-void A_ReFireTo(struct mobj_s *mo);
-void A_NoFire(struct mobj_s *mo);
-void A_NoFireReturn(struct mobj_s *mo);
-void A_CheckReload(struct mobj_s *mo);
-void A_SFXWeapon1(struct mobj_s *mo);
-void A_SFXWeapon2(struct mobj_s *mo);
-void A_SFXWeapon3(struct mobj_s *mo);
-void A_WeaponPlaySound(struct mobj_s *mo);
-void A_WeaponKillSound(struct mobj_s *mo);
-void A_WeaponTransSet(struct mobj_s *mo);
-void A_WeaponTransFade(struct mobj_s *mo);
-void A_WeaponEnableRadTrig(struct mobj_s *mo);
-void A_WeaponDisableRadTrig(struct mobj_s *mo);
+void A_WeaponReady(MapObject *mo);
+void A_WeaponEmpty(MapObject *mo);
+void A_WeaponShoot(MapObject *mo);
+void A_WeaponEject(MapObject *mo);
+void A_WeaponJump(MapObject *mo);
+void A_WeaponDJNE(MapObject *mo);
+void A_Lower(MapObject *mo);
+void A_Raise(MapObject *mo);
+void A_ReFire(MapObject *mo);
+void A_ReFireTo(MapObject *mo);
+void A_NoFire(MapObject *mo);
+void A_NoFireReturn(MapObject *mo);
+void A_CheckReload(MapObject *mo);
+void A_SFXWeapon1(MapObject *mo);
+void A_SFXWeapon2(MapObject *mo);
+void A_SFXWeapon3(MapObject *mo);
+void A_WeaponPlaySound(MapObject *mo);
+void A_WeaponKillSound(MapObject *mo);
+void A_WeaponTransSet(MapObject *mo);
+void A_WeaponTransFade(MapObject *mo);
+void A_WeaponEnableRadTrig(MapObject *mo);
+void A_WeaponDisableRadTrig(MapObject *mo);
 
-void A_SetCrosshair(struct mobj_s *mo);
-void A_TargetJump(struct mobj_s *mo);
-void A_FriendJump(struct mobj_s *mo);
-void A_GunFlash(struct mobj_s *mo);
-void A_WeaponKick(struct mobj_s *mo);
-void A_WeaponSetSkin(struct mobj_s *mo);
-void A_WeaponUnzoom(struct mobj_s *mo);
-void A_WeaponBecome(struct mobj_s *mo);
+void A_SetCrosshair(MapObject *mo);
+void A_TargetJump(MapObject *mo);
+void A_FriendJump(MapObject *mo);
+void A_GunFlash(MapObject *mo);
+void A_WeaponKick(MapObject *mo);
+void A_WeaponSetSkin(MapObject *mo);
+void A_WeaponUnzoom(MapObject *mo);
+void A_WeaponBecome(MapObject *mo);
 
-void A_WeaponShootSA(struct mobj_s *mo);
-void A_ReFireSA(struct mobj_s *mo);
-void A_ReFireToSA(struct mobj_s *mo);
-void A_NoFireSA(struct mobj_s *mo);
-void A_NoFireReturnSA(struct mobj_s *mo);
-void A_CheckReloadSA(struct mobj_s *mo);
-void A_GunFlashSA(struct mobj_s *mo);
+void A_WeaponShootSA(MapObject *mo);
+void A_ReFireSA(MapObject *mo);
+void A_ReFireToSA(MapObject *mo);
+void A_NoFireSA(MapObject *mo);
+void A_NoFireReturnSA(MapObject *mo);
+void A_CheckReloadSA(MapObject *mo);
+void A_GunFlashSA(MapObject *mo);
 
-void A_WeaponShootTA(struct mobj_s *mo);
-void A_ReFireTA(struct mobj_s *mo);
-void A_ReFireToTA(struct mobj_s *mo);
-void A_NoFireTA(struct mobj_s *mo);
-void A_NoFireReturnTA(struct mobj_s *mo);
-void A_CheckReloadTA(struct mobj_s *mo);
-void A_GunFlashTA(struct mobj_s *mo);
+void A_WeaponShootTA(MapObject *mo);
+void A_ReFireTA(MapObject *mo);
+void A_ReFireToTA(MapObject *mo);
+void A_NoFireTA(MapObject *mo);
+void A_NoFireReturnTA(MapObject *mo);
+void A_CheckReloadTA(MapObject *mo);
+void A_GunFlashTA(MapObject *mo);
 
-void A_WeaponShootFA(struct mobj_s *mo);
-void A_ReFireFA(struct mobj_s *mo);
-void A_ReFireToFA(struct mobj_s *mo);
-void A_NoFireFA(struct mobj_s *mo);
-void A_NoFireReturnFA(struct mobj_s *mo);
-void A_CheckReloadFA(struct mobj_s *mo);
-void A_GunFlashFA(struct mobj_s *mo);
+void A_WeaponShootFA(MapObject *mo);
+void A_ReFireFA(MapObject *mo);
+void A_ReFireToFA(MapObject *mo);
+void A_NoFireFA(MapObject *mo);
+void A_NoFireReturnFA(MapObject *mo);
+void A_CheckReloadFA(MapObject *mo);
+void A_GunFlashFA(MapObject *mo);
+void A_WeaponZoom(MapObject *mo);
 
-void A_WeaponZoom(struct mobj_s *mo);
-void A_SetInvuln(struct mobj_s *mo);
-void A_ClearInvuln(struct mobj_s *mo);
-void A_MoveFwd(struct mobj_s *mo);
-void A_MoveRight(struct mobj_s *mo);
-void A_MoveUp(struct mobj_s *mo);
-void A_StopMoving(struct mobj_s *mo);
-void A_TurnDir(struct mobj_s *mo);
-void A_TurnRandom(struct mobj_s *mo);
-void A_MlookTurn(struct mobj_s *mo);
+// These are weapon actions; the WA_ prefix
+// is to avoid collision with the A_ variants - Dasho
+void WA_MoveFwd(MapObject *mo);
+void WA_MoveRight(MapObject *mo);
+void WA_MoveUp(MapObject *mo);
+void WA_TurnDir(MapObject *mo);
+void WA_TurnRandom(MapObject *mo);
+void WA_MlookTurn(MapObject *mo);
 
 // Needed for the bossbrain.
-void P_ActBrainScream(struct mobj_s *mo);
-void P_ActBrainDie(struct mobj_s *mo);
-void P_ActBrainSpit(struct mobj_s *mo);
-void P_ActCubeSpawn(struct mobj_s *mo);
-void P_ActBrainMissileExplode(struct mobj_s *mo);
+void A_BrainScream(MapObject *mo);
+void A_BrainDie(MapObject *mo);
+void A_BrainSpit(MapObject *mo);
+void A_CubeSpawn(MapObject *mo);
+void A_BrainMissileExplode(MapObject *mo);
 
 // Visibility Actions
-void P_ActTransSet(struct mobj_s *mo);
-void P_ActTransFade(struct mobj_s *mo);
-void P_ActTransMore(struct mobj_s *mo);
-void P_ActTransLess(struct mobj_s *mo);
-void P_ActTransAlternate(struct mobj_s *mo);
+void A_TransSet(MapObject *mo);
+void A_TransFade(MapObject *mo);
+void A_TransMore(MapObject *mo);
+void A_TransLess(MapObject *mo);
+void A_TransAlternate(MapObject *mo);
 
 // Sound Actions
-void P_ActPlaySound(struct mobj_s *mo);
-void P_ActPlaySoundBoss(struct mobj_s *mo);
-void P_ActKillSound(struct mobj_s *mo);
-void P_ActMakeAmbientSound(struct mobj_s *mo);
-void P_ActMakeAmbientSoundRandom(struct mobj_s *mo);
-void P_ActMakeCloseAttemptSound(struct mobj_s *mo);
-void P_ActMakeDyingSound(struct mobj_s *mo);
-void P_ActMakeOverKillSound(struct mobj_s *mo);
-void P_ActMakePainSound(struct mobj_s *mo);
-void P_ActMakeRangeAttemptSound(struct mobj_s *mo);
-void P_ActMakeActiveSound(struct mobj_s *mo);
-void P_ActPlayerScream(struct mobj_s *mo);
+void A_PlaySound(MapObject *mo);
+void A_PlaySoundBoss(MapObject *mo);
+void A_KillSound(MapObject *mo);
+void A_MakeAmbientSound(MapObject *mo);
+void A_MakeAmbientSoundRandom(MapObject *mo);
+void A_MakeCloseAttemptSound(MapObject *mo);
+void A_MakeDyingSound(MapObject *mo);
+void A_MakeOverKillSound(MapObject *mo);
+void A_MakePainSound(MapObject *mo);
+void A_MakeRangeAttemptSound(MapObject *mo);
+void A_MakeActiveSound(MapObject *mo);
+void A_PlayerScream(MapObject *mo);
 
 // Explosion Damage Actions
-void P_ActDamageExplosion(struct mobj_s *mo);
-void P_ActThrust(struct mobj_s *mo);
+void A_DamageExplosion(MapObject *mo);
+void A_Thrust(MapObject *mo);
 
 // Stand-by / Looking Actions
-void P_ActStandardLook(struct mobj_s *mo);
-void P_ActPlayerSupportLook(struct mobj_s *mo);
+void A_StandardLook(MapObject *mo);
+void A_PlayerSupportLook(MapObject *mo);
 
 // Meander, aimless movement actions.
-void P_ActStandardMeander(struct mobj_s *mo);
-void P_ActPlayerSupportMeander(struct mobj_s *mo);
+void A_StandardMeander(MapObject *mo);
+void A_PlayerSupportMeander(MapObject *mo);
 
 // Chasing Actions
-void P_ActResurrectChase(struct mobj_s *mo);
-void P_ActStandardChase(struct mobj_s *mo);
-void P_ActWalkSoundChase(struct mobj_s *mo);
+void A_ResurrectChase(MapObject *mo);
+void A_StandardChase(MapObject *mo);
+void A_WalkSoundChase(MapObject *mo);
 
 // Attacking Actions
-void P_ActComboAttack(struct mobj_s *mo);
-void P_ActMeleeAttack(struct mobj_s *mo);
-void P_ActRangeAttack(struct mobj_s *mo);
-void P_ActSpareAttack(struct mobj_s *mo);
-void P_ActRefireCheck(struct mobj_s *mo);
-void P_ActReloadCheck(struct mobj_s *mo);
-void P_ActReloadReset(struct mobj_s *mo);
+void A_ComboAttack(MapObject *mo);
+void A_MeleeAttack(MapObject *mo);
+void A_RangeAttack(MapObject *mo);
+void A_SpareAttack(MapObject *mo);
+void A_RefireCheck(MapObject *mo);
+void A_ReloadCheck(MapObject *mo);
+void A_ReloadReset(MapObject *mo);
 
 // Miscellanous
-void P_ActFaceTarget(struct mobj_s *mo);
-void P_ActMakeIntoCorpse(struct mobj_s *mo);
-void P_ActResetSpreadCount(struct mobj_s *mo);
-void P_ActExplode(struct mobj_s *mo);
-void P_ActActivateLineType(struct mobj_s *mo);
-void P_ActEnableRadTrig(struct mobj_s *mo);
-void P_ActDisableRadTrig(struct mobj_s *mo);
-void P_ActTouchyRearm(struct mobj_s *mo);
-void P_ActTouchyDisarm(struct mobj_s *mo);
-void P_ActBounceRearm(struct mobj_s *mo);
-void P_ActBounceDisarm(struct mobj_s *mo);
-void P_ActPathCheck(struct mobj_s *mo);
-void P_ActPathFollow(struct mobj_s *mo);
+void A_FaceTarget(MapObject *mo);
+void A_MakeIntoCorpse(MapObject *mo);
+void A_ResetSpreadCount(MapObject *mo);
+void A_Explode(MapObject *mo);
+void A_ActivateLineType(MapObject *mo);
+void A_EnableRadTrig(MapObject *mo);
+void A_DisableRadTrig(MapObject *mo);
+void A_TouchyRearm(MapObject *mo);
+void A_TouchyDisarm(MapObject *mo);
+void A_BounceRearm(MapObject *mo);
+void A_BounceDisarm(MapObject *mo);
+void A_PathCheck(MapObject *mo);
+void A_PathFollow(MapObject *mo);
 
-void P_ActDropItem(struct mobj_s *mo);
-void P_ActSpawn(struct mobj_s *mo);
-void P_ActDLightSet(struct mobj_s *mo);
-void P_ActDLightSet2(struct mobj_s *mo);
-void P_ActDLightFade(struct mobj_s *mo);
-void P_ActDLightRandom(struct mobj_s *mo);
-void P_ActDLightColour(struct mobj_s *mo);
-void P_ActSetSkin(struct mobj_s *mo);
-void P_ActDie(struct mobj_s *mo);
-void P_ActKeenDie(struct mobj_s *mo);
-void P_ActCheckBlood(struct mobj_s *mo);
-void P_ActJump(struct mobj_s *mo);
-void P_ActJumpLiquid(struct mobj_s *mo);
-void P_ActJumpSky(struct mobj_s *mo);
-// void P_ActJumpStuck(struct mobj_s *mo);
-void P_ActBecome(struct mobj_s *mo);
-void P_ActUnBecome(struct mobj_s *mo);
+void A_DropItem(MapObject *mo);
+void A_Spawn(MapObject *mo);
+void A_DLightSet(MapObject *mo);
+void A_DLightFade(MapObject *mo);
+void A_DLightRandom(MapObject *mo);
+void A_DLightColour(MapObject *mo);
+void A_SetSkin(MapObject *mo);
+void A_Die(MapObject *mo);
+void A_KeenDie(MapObject *mo);
+void A_CheckBlood(MapObject *mo);
+void A_Jump(MapObject *mo);
+void A_JumpLiquid(MapObject *mo);
+void A_JumpSky(MapObject *mo);
+// void A_JumpStuck(MapObject *mo);
+void A_Become(MapObject *mo);
+void A_UnBecome(MapObject *mo);
 
-void P_ActMorph(struct mobj_s *mo);
-void P_ActUnMorph(struct mobj_s *mo);
+void A_Morph(MapObject *mo);
+void A_UnMorph(MapObject *mo);
 
-void P_ActSetInvuln(struct mobj_s *mo);
-void P_ActClearInvuln(struct mobj_s *mo);
+void A_SetInvuln(MapObject *mo);
+void A_ClearInvuln(MapObject *mo);
 
-void P_ActPainChanceSet(struct mobj_s *mo);
+void A_PainChanceSet(MapObject *mo);
 
 // Movement actions
-void P_ActFaceDir(struct mobj_s *mo);
-void P_ActTurnDir(struct mobj_s *mo);
-void P_ActTurnRandom(struct mobj_s *mo);
-void P_ActMlookFace(struct mobj_s *mo);
-void P_ActMlookTurn(struct mobj_s *mo);
-void P_ActMoveFwd(struct mobj_s *mo);
-void P_ActMoveRight(struct mobj_s *mo);
-void P_ActMoveUp(struct mobj_s *mo);
-void P_ActStopMoving(struct mobj_s *mo);
-void P_ActCheckMoving(struct mobj_s *mo);
-void P_ActCheckActivity(struct mobj_s *mo);
+void A_FaceDir(MapObject *mo);
+void A_TurnDir(MapObject *mo);
+void A_TurnRandom(MapObject *mo);
+void A_MlookFace(MapObject *mo);
+void A_MlookTurn(MapObject *mo);
+void A_MoveFwd(MapObject *mo);
+void A_MoveRight(MapObject *mo);
+void A_MoveUp(MapObject *mo);
+void A_StopMoving(MapObject *mo);
+void A_CheckMoving(MapObject *mo);
+void A_CheckActivity(MapObject *mo);
 
 // Projectiles
-void P_ActHomingProjectile(struct mobj_s *mo);
-void P_ActLaunchOrderedSpread(struct mobj_s *mo);
-void P_ActLaunchRandomSpread(struct mobj_s *mo);
-void P_ActCreateSmokeTrail(struct mobj_s *mo);
-void P_ActHomeToSpot(struct mobj_s *mo);
-bool P_ActLookForTargets(struct mobj_s *mo);
+void A_HomingProjectile(MapObject *mo);
+void A_CreateSmokeTrail(MapObject *mo);
+void A_HomeToSpot(MapObject *mo);
+bool A_LookForTargets(MapObject *mo);
 
 // Trackers
-void P_ActEffectTracker(struct mobj_s *mo);
-void P_ActTrackerActive(struct mobj_s *mo);
-void P_ActTrackerFollow(struct mobj_s *mo);
-void P_ActTrackerStart(struct mobj_s *mo);
+void A_EffectTracker(MapObject *mo);
+void A_TrackerActive(MapObject *mo);
+void A_TrackerFollow(MapObject *mo);
+void A_TrackerStart(MapObject *mo);
 
 // MBF / MBF21
-void P_ActMushroom(struct mobj_s *mo);
-void P_ActNoiseAlert(struct mobj_s *mo);
-
-#endif /* __P_ACTION_H__ */
+void A_Mushroom(MapObject *mo);
+void A_NoiseAlert(MapObject *mo);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

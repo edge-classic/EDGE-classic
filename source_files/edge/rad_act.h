@@ -16,56 +16,55 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __RAD_ACT_H__
-#define __RAD_ACT_H__
+#pragma once
+
+#include "rad_defs.h"
 
 //
 //  ACTIONS
 //
 
-void RAD_ActNOP(rad_trigger_t *R, void *param);
-void RAD_ActTip(rad_trigger_t *R, void *param);
-void RAD_ActTipProps(rad_trigger_t *R, void *param);
-void RAD_ActSpawnThing(rad_trigger_t *R, void *param);
-void RAD_ActPlaySound(rad_trigger_t *R, void *param);
-void RAD_ActKillSound(rad_trigger_t *R, void *param);
-void RAD_ActChangeMusic(rad_trigger_t *R, void *param);
-void RAD_ActPlayMovie(rad_trigger_t *R, void *param);
-void RAD_ActChangeTex(rad_trigger_t *R, void *param);
+void ScriptNoOperation(TriggerScriptTrigger *R, void *param);
+void ScriptShowTip(TriggerScriptTrigger *R, void *param);
+void ScriptUpdateTipProperties(TriggerScriptTrigger *R, void *param);
+void ScriptSpawnThing(TriggerScriptTrigger *R, void *param);
+void ScriptPlaySound(TriggerScriptTrigger *R, void *param);
+void ScriptKillSound(TriggerScriptTrigger *R, void *param);
+void ScriptChangeMusic(TriggerScriptTrigger *R, void *param);
+void ScriptPlayMovie(TriggerScriptTrigger *R, void *param);
+void ScriptChangeTexture(TriggerScriptTrigger *R, void *param);
 
-void RAD_ActMoveSector(rad_trigger_t *R, void *param);
-void RAD_ActLightSector(rad_trigger_t *R, void *param);
-void RAD_ActFogSector(rad_trigger_t *R, void *param);
-void RAD_ActEnableScript(rad_trigger_t *R, void *param);
-void RAD_ActActivateLinetype(rad_trigger_t *R, void *param);
-void RAD_ActUnblockLines(rad_trigger_t *R, void *param);
-void RAD_ActBlockLines(rad_trigger_t *R, void *param);
-void RAD_ActJump(rad_trigger_t *R, void *param);
-void RAD_ActSleep(rad_trigger_t *R, void *param);
-void RAD_ActRetrigger(rad_trigger_t *R, void *param);
+void ScriptMoveSector(TriggerScriptTrigger *R, void *param);
+void ScriptLightSector(TriggerScriptTrigger *R, void *param);
+void ScriptFogSector(TriggerScriptTrigger *R, void *param);
+void ScriptEnableScript(TriggerScriptTrigger *R, void *param);
+void ScriptActivateLinetype(TriggerScriptTrigger *R, void *param);
+void ScriptUnblockLines(TriggerScriptTrigger *R, void *param);
+void ScriptBlockLines(TriggerScriptTrigger *R, void *param);
+void ScriptJump(TriggerScriptTrigger *R, void *param);
+void ScriptSleep(TriggerScriptTrigger *R, void *param);
+void ScriptRetrigger(TriggerScriptTrigger *R, void *param);
 
-void RAD_ActDamagePlayers(rad_trigger_t *R, void *param);
-void RAD_ActHealPlayers(rad_trigger_t *R, void *param);
-void RAD_ActArmourPlayers(rad_trigger_t *R, void *param);
-void RAD_ActBenefitPlayers(rad_trigger_t *R, void *param);
-void RAD_ActDamageMonsters(rad_trigger_t *R, void *param);
-void RAD_ActThingEvent(rad_trigger_t *R, void *param);
-void RAD_ActSkill(rad_trigger_t *R, void *param);
-void RAD_ActGotoMap(rad_trigger_t *R, void *param);
-void RAD_ActExitLevel(rad_trigger_t *R, void *param);
-void RAD_ActExitGame(rad_trigger_t *R, void *param);
-void RAD_ActShowMenu(rad_trigger_t *R, void *param);
-void RAD_ActMenuStyle(rad_trigger_t *R, void *param);
-void RAD_ActJumpOn(rad_trigger_t *R, void *param);
-void RAD_ActWaitUntilDead(rad_trigger_t *R, void *param);
+void ScriptDamagePlayers(TriggerScriptTrigger *R, void *param);
+void ScriptHealPlayers(TriggerScriptTrigger *R, void *param);
+void ScriptArmourPlayers(TriggerScriptTrigger *R, void *param);
+void ScriptBenefitPlayers(TriggerScriptTrigger *R, void *param);
+void ScriptDamageMonsters(TriggerScriptTrigger *R, void *param);
+void ScriptThingEvent(TriggerScriptTrigger *R, void *param);
+void ScriptSkill(TriggerScriptTrigger *R, void *param);
+void ScriptGotoMap(TriggerScriptTrigger *R, void *param);
+void ScriptExitLevel(TriggerScriptTrigger *R, void *param);
+void ScriptExitGame(TriggerScriptTrigger *R, void *param);
+void ScriptShowMenu(TriggerScriptTrigger *R, void *param);
+void ScriptUpdateMenuStyle(TriggerScriptTrigger *R, void *param);
+void ScriptJumpOn(TriggerScriptTrigger *R, void *param);
+void ScriptWaitUntilDead(TriggerScriptTrigger *R, void *param);
 
-void RAD_ActSwitchWeapon(rad_trigger_t *R, void *param);
-void RAD_ActTeleportToStart(rad_trigger_t *R, void *param);
-void RAD_ActReplaceWeapon(rad_trigger_t *R, void *param);
-void RAD_ActWeaponEvent(rad_trigger_t *R, void *param);
-void RAD_ActReplaceThing(rad_trigger_t *R, void *param);
-
-#endif /*__RAD_ACT_H__*/
+void ScriptSwitchWeapon(TriggerScriptTrigger *R, void *param);
+void ScriptTeleportToStart(TriggerScriptTrigger *R, void *param);
+void ScriptReplaceWeapon(TriggerScriptTrigger *R, void *param);
+void ScriptWeaponEvent(TriggerScriptTrigger *R, void *param);
+void ScriptReplaceThing(TriggerScriptTrigger *R, void *param);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

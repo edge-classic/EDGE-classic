@@ -23,19 +23,20 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __M_MATH_H__
-#define __M_MATH_H__
+#pragma once
 
+#include "HandmadeMath.h"
 #include "math_bam.h"
 
-float  M_PointToSegDistance(HMM_Vec2 seg_a, HMM_Vec2 seg_b, HMM_Vec2 point);
-HMM_Vec3  M_TripleCrossProduct(HMM_Vec3 v1, HMM_Vec3 v2, HMM_Vec3 v3);
-HMM_Vec3  M_LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_c, HMM_Vec3 plane_normal);
-HMM_Vec3  M_LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_a, HMM_Vec3 plane_b, HMM_Vec3 plane_c);
-void    M_Angle2Matrix(BAMAngle ang, HMM_Vec2 *x, HMM_Vec2 *y);
-int     M_PointInTri(HMM_Vec2 v1, HMM_Vec2 v2, HMM_Vec2 v3, HMM_Vec2 test);
-
-#endif //__M_MATH_H__
+float    MathPointToSegDistance(HMM_Vec2 seg_a, HMM_Vec2 seg_b, HMM_Vec2 point);
+HMM_Vec3 MathTripleCrossProduct(HMM_Vec3 v1, HMM_Vec3 v2, HMM_Vec3 v3);
+HMM_Vec3 MathLinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b,
+                                   HMM_Vec3 plane_c, HMM_Vec3 plane_normal);
+HMM_Vec3 MathLinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b,
+                                   HMM_Vec3 plane_a, HMM_Vec3 plane_b,
+                                   HMM_Vec3 plane_c);
+void     MathBAMAngleToMatrix(BAMAngle ang, HMM_Vec2 *x, HMM_Vec2 *y);
+int MathPointInTriangle(HMM_Vec2 v1, HMM_Vec2 v2, HMM_Vec2 v3, HMM_Vec2 test);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

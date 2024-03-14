@@ -23,96 +23,81 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __RGL_DEFS__
-#define __RGL_DEFS__
-
-#include "main.h"
-#include "image.h"
-
-#include "r_defs.h"
+#pragma once
 
 #include <list>
 #include <vector>
 
-#define BUFFER_OFFSET(i) ((void *)(i))
+#include "con_var.h"
+#include "image.h"
+#include "main.h"
+#include "r_defs.h"
 
-extern cvar_c r_colorlighting;
-extern cvar_c r_colormaterial;
-
-extern cvar_c r_dumbsky;
-extern cvar_c r_dumbmulti;
-extern cvar_c r_dumbcombine;
-extern cvar_c r_dumbclamp;
+extern ConsoleVariable renderer_dumb_sky;
+extern ConsoleVariable renderer_dumb_clamp;
 
 //
-//  RGL_MAIN
+//  RendererMAIN
 //
 
-extern int glmax_lights;
-extern int glmax_clip_planes;
-extern int glmax_tex_size;
-extern int glmax_tex_units;
+extern int maximum_texture_size;
 
-void RGL_Init(void);
-void RGL_SoftInit(void);
-void RGL_SetupMatrices2D(void);
-void RGL_SetupMatricesWorld2D(void);
-void RGL_SetupMatrices3D(void);
-
-#define LT_RED(light) (HMM_MIN(255, light) * ren_red_mul / 255.0f)
-#define LT_GRN(light) (HMM_MIN(255, light) * ren_grn_mul / 255.0f)
-#define LT_BLU(light) (HMM_MIN(255, light) * ren_blu_mul / 255.0f)
+void RendererInit(void);
+void RendererSoftInit(void);
+void RendererSetupMatrices2D(void);
+void RendererSetupMatricesWorld2D(void);
+void RendererSetupMatrices3d(void);
 
 //
-//  RGL_BSP
+//  RendererBSP
 //
 
-extern int ren_extralight;
+extern int render_view_extra_light;
 
-extern float ren_red_mul;
-extern float ren_grn_mul;
-extern float ren_blu_mul;
+extern float render_view_red_multiplier;
+extern float render_view_green_multiplier;
+extern float render_view_blue_multiplier;
 
-extern const colourmap_c *ren_fx_colmap;
+extern const Colormap *render_view_effect_colormap;
 
-extern cvar_c r_nearclip;
-extern cvar_c r_farclip;
+extern ConsoleVariable renderer_near_clip;
+extern ConsoleVariable renderer_far_clip;
 
-#define APPROX_DIST2(dx, dy) ((dx) + (dy)-0.5f * HMM_MIN((dx), (dy)))
-
-#define APPROX_DIST3(dx, dy, dz) APPROX_DIST2(APPROX_DIST2(dx, dy), dz)
+inline float FastApproximateDistance(float delta_x, float delta_y)
+{
+    return ((delta_x) + (delta_y)-0.5f * HMM_MIN((delta_x), (delta_y)));
+}
 
 //----------------------------------------------------------------------------
 
-struct drawfloor_s;
+struct DrawFloor;
 
-class drawsub_c;
+struct DrawSubsector;
 
-typedef enum
+enum VerticalClipMode
 {
-    YCLIP_Never = 0,
-    YCLIP_Soft  = 1, // only clip at translucent water
-    YCLIP_Hard  = 2, // vertically clip sprites at all solid surfaces
-} y_clip_mode_e;
+    kVerticalClipNever = 0,
+    kVerticalClipSoft  = 1,  // only clip at translucent water
+    kVerticalClipHard  = 2,  // vertically clip sprites at all solid surfaces
+};
 
 //
 // DrawThing
 //
 // Stores the info about a single visible sprite in a subsector.
 //
-typedef struct drawthing_s
+struct DrawThing
 {
-  public:
     // link for list
-    struct drawthing_s *next;
-    struct drawthing_s *prev;
+    DrawThing *next;
+    DrawThing *previous;
 
     // actual map object
-    mobj_t *mo;
+    MapObject *map_object;
 
     bool is_model;
 
-    float mx, my, mz; // mz only used for models
+    float map_x, map_y, map_z;  // map_z only used for models
 
     // vertical extent of sprite (world coords)
     float top;
@@ -121,33 +106,23 @@ typedef struct drawthing_s
     int y_clipping;
 
     // sprite image to use
-    const image_c *image;
-    bool           flip;
+    const Image *image;
+    bool         flip;
 
     // translated coords
-    float tx, tz;
+    float translated_z;
 
     // colourmap/lighting
-    region_properties_t *props;
+    RegionProperties *properties;
 
     // world offsets for GL
-    float left_dx, left_dy;
-    float right_dx, right_dy;
-    float orig_top, orig_bottom;
+    float left_delta_x, left_delta_y;
+    float right_delta_x, right_delta_y;
+    float original_top, original_bottom;
 
     // Rendering order
-    struct drawthing_s *rd_l, *rd_r, *rd_prev, *rd_next;
-
-  public:
-    void Clear()
-    {
-        next = prev = NULL;
-        mo          = NULL;
-        image       = NULL;
-        props       = NULL;
-        rd_l = rd_r = rd_prev = rd_next = NULL;
-    }
-} drawthing_t;
+    DrawThing *render_left, *render_right, *render_previous, *render_next;
+};
 
 //
 // DrawFloor
@@ -155,156 +130,95 @@ typedef struct drawthing_s
 // Stores all the information needed to draw a single on-screen
 // floor of a subsector.
 //
-class drawfloor_t
+struct DrawFloor
 {
-  public:
     short is_lowest;
     short is_highest;
 
     // link for list, rendering order
-    drawfloor_t *next_R, *prev_R;
+    DrawFloor *render_next, *render_previous;
 
     // heights for this floor
-    float f_h, c_h, top_h;
+    float floor_height, ceiling_height, top_height;
 
-    surface_t *floor, *ceil;
+    MapSurface *floor, *ceiling;
 
-    extrafloor_t *ef;
+    Extrafloor *extrafloor;
 
     // properties used herein
-    region_properties_t *props;
+    RegionProperties *properties;
 
     // list of things
-    // (not sorted until R2_DrawFloor is called).
-    drawthing_t *things;
-
-  public:
-    void Clear()
-    {
-        is_highest = is_lowest = false;
-        next_R = prev_R = NULL;
-        floor = ceil = NULL;
-        ef           = NULL;
-        props        = NULL;
-        things       = NULL;
-    }
+    // (not sorted until RendererDrawFloor is called).
+    DrawThing *things;
 };
 
-class drawmirror_c
+struct DrawMirror
 {
-  public:
-    seg_t *seg;
+    Seg *seg = nullptr;
 
     BAMAngle left, right;
 
-    bool is_portal;
+    bool is_portal = false;
 
-    std::list<drawsub_c *> drawsubs;
-
-  public:
-    drawmirror_c() : seg(NULL), is_portal(false), drawsubs()
-    {
-    }
-
-    ~drawmirror_c()
-    { /* FIXME !!!! */
-    }
-
-    void Clear(seg_t *ss)
-    {
-        seg = ss;
-
-        drawsubs.clear();
-    }
+    std::list<DrawSubsector *> draw_subsectors;
 };
 
-class drawseg_c // HOPEFULLY this can go away
+struct DrawSeg  // HOPEFULLY this can go away
 {
-  public:
-    seg_t *seg;
+    Seg *seg;
 };
 
-class drawsub_c
+struct DrawSubsector
 {
-  public:
-    subsector_t *sub;
+    Subsector *subsector = nullptr;
 
     // floors, sorted in height order (lowest to highest).
-    std::vector<drawfloor_t *> floors;
+    std::vector<DrawFloor *> floors;
 
     // link list of floors, render order (furthest to closest)
-    drawfloor_t *floors_R;
+    DrawFloor *render_floors;
 
-    std::list<drawseg_c *> segs;
+    std::list<DrawSeg *> segs;
 
-    std::list<drawmirror_c *> mirrors;
+    std::list<DrawMirror *> mirrors;
 
     bool visible;
     bool sorted;
-
-  public:
-    drawsub_c() : sub(NULL), floors(), segs(), mirrors()
-    {
-    }
-
-    ~drawsub_c()
-    { /* !!!! FIXME */
-    }
-
-    void Clear(subsector_t *ss)
-    {
-        sub      = ss;
-        visible  = false;
-        sorted   = false;
-        floors_R = NULL;
-
-        floors.clear();
-        segs.clear();
-        mirrors.clear();
-    }
 };
 
 extern int detail_level;
-extern int use_dlights;
+extern int use_dynamic_lights;
 extern int sprite_kludge;
 
-const image_c *R2_GetThingSprite(mobj_t *mo, bool *flip);
-const image_c *R2_GetOtherSprite(int sprite, int frame, bool *flip);
+const Image *RendererGetOtherSprite(int sprite, int frame, bool *flip);
 
 //
-//  R2_UTIL
+//  RendererUTIL
 //
 
-void R2_InitUtil(void);
-void R2_ClearBSP(void);
+void RendererInitialize(void);
+void RendererClearBsp(void);
 
-drawthing_t  *R_GetDrawThing();
-drawfloor_t  *R_GetDrawFloor();
-drawseg_c    *R_GetDrawSeg();
-drawsub_c    *R_GetDrawSub();
-drawmirror_c *R_GetDrawMirror();
-
-//
-//  R2_DRAW
-//
-
-void R2_Init(void);
+DrawThing     *RendererGetDrawThing();
+DrawFloor     *RendererGetDrawFloor();
+DrawSeg       *RendererGetDrawSeg();
+DrawSubsector *RendererGetDrawSub();
+DrawMirror    *RendererGetDrawMirror();
 
 //
 //  MIRRORS
 //
 
-extern int num_active_mirrors;
+extern int total_active_mirrors;
 
-void MIR_Coordinate(float &x, float &y);
-void MIR_Height(float &z);
-void MIR_Angle(BAMAngle &ang);
+void MirrorCoordinate(float &x, float &y);
+void MirrorHeight(float &z);
+void MirrorAngle(BAMAngle &ang);
 
-bool  MIR_Reflective(void);
-float MIR_XYScale(void);
-float MIR_ZScale(void);
-
-#endif /* __RGL_DEFS_H__ */
+bool  MirrorReflective(void);
+float MirrorXYScale(void);
+float MirrorZScale(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -20,12 +20,12 @@
 // new savegame system.
 //
 
-#include "i_defs.h"
-#include "sv_chunk.h"
-
 #include "dm_state.h"
 #include "e_main.h"
+#include "epi.h"
+#include "f_interm.h"
 #include "g_game.h"
+#include "i_system.h"
 #include "m_math.h"
 #include "m_misc.h"
 #include "m_random.h"
@@ -35,36 +35,31 @@
 #include "sv_chunk.h"
 #include "sv_main.h"
 #include "w_wad.h"
-#include "f_interm.h"
 
-void SV_BeginSave(void)
+void BeginSaveGameSave(void)
 {
-    L_WriteDebug("SV_BeginSave...\n");
+    LogDebug("SV_BeginSave...\n");
 
-    P_ClearAllStaleRefs();
+    ClearAllStaleReferences();
 }
 
-void SV_FinishSave(void)
+void FinishSaveGameSave(void) { LogDebug("SV_FinishSave...\n"); }
+
+void SaveGameStructSave(void *base, SaveStruct *info)
 {
-    L_WriteDebug("SV_FinishSave...\n");
-}
+    SaveField *cur;
+    char      *storage;
+    int        offset;
+    int        i;
 
-void SV_SaveStruct(void *base, savestruct_t *info)
-{
-    savefield_t *cur;
-    char        *storage;
-    int          offset;
-    int          i;
+    SavePushWriteChunk(info->marker);
 
-    SV_PushWriteChunk(info->marker);
-
-    for (cur = info->fields; cur->type.kind != SFKIND_Invalid; cur++)
+    for (cur = info->fields; cur->type.kind != kSaveFieldInvalid; cur++)
     {
         // ignore read-only (fudging) fields
-        if (!cur->field_put)
-            continue;
+        if (!cur->field_put) continue;
 
-        offset = cur->offset_p - info->dummy_base;
+        offset = cur->offset_pointer - info->dummy_base;
 
         storage = ((char *)base) + offset;
 
@@ -72,115 +67,112 @@ void SV_SaveStruct(void *base, savestruct_t *info)
         {
             switch (cur->type.kind)
             {
-            case SFKIND_Struct:
-            case SFKIND_Index:
-                (*cur->field_put)(storage, i, (char *)cur->type.name);
-                break;
+                case kSaveFieldStruct:
+                case kSaveFieldIndex:
+                    (*cur->field_put)(storage, i, (char *)cur->type.name);
+                    break;
 
-            default:
-                (*cur->field_put)(storage, i, NULL);
-                break;
+                default:
+                    (*cur->field_put)(storage, i, nullptr);
+                    break;
             }
         }
     }
 
-    SV_PopWriteChunk();
+    SavePopWriteChunk();
 }
 
-static void SV_SaveSTRU(savestruct_t *S)
+static void SV_SaveSTRU(SaveStruct *S)
 {
-    int          i, num;
-    savefield_t *F;
+    int        i, num;
+    SaveField *F;
 
     // count number of fields
-    for (num = 0; S->fields[num].type.kind != SFKIND_Invalid; num++)
+    for (num = 0; S->fields[num].type.kind != kSaveFieldInvalid; num++)
     { /* nothing here */
     }
 
-    SV_PutInt(num);
+    SaveChunkPutInteger(num);
 
-    SV_PutString(S->struct_name);
-    SV_PutString(S->marker);
+    SaveChunkPutString(S->struct_name);
+    SaveChunkPutString(S->marker);
 
     // write out the fields
 
     for (i = 0, F = S->fields; i < num; i++, F++)
     {
-        SV_PutByte((unsigned char)F->type.kind);
-        SV_PutByte((unsigned char)F->type.size);
-        SV_PutShort((unsigned short)F->count);
-        SV_PutString(F->field_name);
+        SaveChunkPutByte((uint8_t)F->type.kind);
+        SaveChunkPutByte((uint8_t)F->type.size);
+        SaveChunkPutShort((uint16_t)F->count);
+        SaveChunkPutString(F->field_name);
 
-        if (F->type.kind == SFKIND_Struct || F->type.kind == SFKIND_Index)
+        if (F->type.kind == kSaveFieldStruct || F->type.kind == kSaveFieldIndex)
         {
-            SV_PutString(F->type.name);
+            SaveChunkPutString(F->type.name);
         }
     }
 }
 
-static void SV_SaveARRY(savearray_t *A)
+static void SV_SaveARRY(SaveArray *A)
 {
     int num_elem = (*A->count_elems)();
 
-    SV_PutInt(num_elem);
+    SaveChunkPutInteger(num_elem);
 
-    SV_PutString(A->array_name);
-    SV_PutString(A->sdef->struct_name);
+    SaveChunkPutString(A->array_name);
+    SaveChunkPutString(A->sdef->struct_name);
 }
 
-static void SV_SaveDATA(savearray_t *A)
+static void SV_SaveDATA(SaveArray *A)
 {
     int num_elem = (*A->count_elems)();
     int i;
 
-    SV_PutString(A->array_name);
+    SaveChunkPutString(A->array_name);
 
     for (i = 0; i < num_elem; i++)
     {
         sv_current_elem = (*A->get_elem)(i);
 
-        SYS_ASSERT(sv_current_elem);
+        EPI_ASSERT(sv_current_elem);
 
-        SV_SaveStruct(sv_current_elem, A->sdef);
+        SaveGameStructSave(sv_current_elem, A->sdef);
     }
 }
 
-void SV_SaveEverything(void)
+void SaveAllSaveChunks(void)
 {
-    savestruct_t *stru;
-    savearray_t  *arry;
+    SaveStruct *stru;
+    SaveArray  *arry;
 
     // Structure Area
     for (stru = sv_known_structs; stru; stru = stru->next)
     {
-        if (!stru->define_me)
-            continue;
+        if (!stru->define_me) continue;
 
-        SV_PushWriteChunk("Stru");
+        SavePushWriteChunk("Stru");
         SV_SaveSTRU(stru);
-        SV_PopWriteChunk();
+        SavePopWriteChunk();
     }
 
     // Array Area
     for (arry = sv_known_arrays; arry; arry = arry->next)
     {
-        if (!arry->define_me)
-            continue;
+        if (!arry->define_me) continue;
 
-        SV_PushWriteChunk("Arry");
+        SavePushWriteChunk("Arry");
         SV_SaveARRY(arry);
-        SV_PopWriteChunk();
+        SavePopWriteChunk();
     }
 
     // Data Area
     for (arry = sv_known_arrays; arry; arry = arry->next)
     {
-        if (!arry->define_me)
-            continue;
+        if (!arry->define_me) continue;
 
-        SV_PushWriteChunk("Data");
+        SavePushWriteChunk("Data");
         SV_SaveDATA(arry);
-        SV_PopWriteChunk();
+        SavePopWriteChunk();
     }
 }
 

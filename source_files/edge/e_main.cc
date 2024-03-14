@@ -27,25 +27,18 @@
 //      EDGE main program (E_Main),
 //      game loop (E_Loop) and startup functions.
 //
-// -MH- 1998/07/02 "shootupdown" --> "true3dgameplay"
+// -MH- 1998/07/02 "shootupdown" --> "true_3d_gameplay"
 // -MH- 1998/08/19 added up/down movement variables
 //
 
-#include "i_defs.h"
-#include "epi_sdl.h"
 #include "e_main.h"
-#include "i_defs_gl.h"
-#include "i_movie.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
+
 #include <algorithm>
 #include <vector>
-
-#include "file.h"
-#include "filesystem.h"
-#include "str_util.h"
 
 #include "am_map.h"
 #include "con_gui.h"
@@ -55,57 +48,64 @@
 #include "dm_state.h"
 #include "dstrings.h"
 #include "e_input.h"
+#include "edge_profiling.h"
+#include "epi_sdl.h"
 #include "f_finale.h"
 #include "f_interm.h"
+#include "file.h"
+#include "filesystem.h"
 #include "g_game.h"
 #include "hu_draw.h"
 #include "hu_stuff.h"
+#include "i_defs_gl.h"
+#include "i_movie.h"
+#include "i_system.h"
 #include "m_argv.h"
 #include "m_bbox.h"
 #include "m_cheat.h"
-#include "m_misc.h"
 #include "m_menu.h"
+#include "m_misc.h"
 #include "m_random.h"
 #include "n_network.h"
 #include "p_setup.h"
 #include "p_spec.h"
-#include "r_local.h"
-#include "rad_trig.h"
-#include "r_gldefs.h"
-#include "r_wipe.h"
-#include "s_sound.h"
-#include "s_music.h"
-#include "sv_chunk.h"
-#include "sv_main.h"
 #include "r_colormap.h"
 #include "r_draw.h"
-#include "r_modes.h"
+#include "r_gldefs.h"
 #include "r_image.h"
+#include "r_misc.h"
+#include "r_modes.h"
+#include "r_wipe.h"
+#include "rad_trig.h"
+#include "s_music.h"
+#include "s_sound.h"
+#include "script/compat/lua_compat.h"
+#include "str_compare.h"
+#include "str_util.h"
+#include "sv_chunk.h"
+#include "sv_main.h"
+#include "version.h"
+#include "vm_coal.h"
 #include "w_files.h"
 #include "w_model.h"
 #include "w_sprite.h"
 #include "w_texture.h"
 #include "w_wad.h"
-#include "version.h"
 
-#include "vm_coal.h"
-#include "script/compat/lua_compat.h"
-#include "edge_profiling.h"
+extern ConsoleVariable double_framerate;
+extern ConsoleVariable busy_wait;
 
-extern cvar_c r_doubleframes;
-extern cvar_c n_busywait;
+extern ConsoleVariable gamma_correction;
 
-extern cvar_c v_gamma;
-
-ECFrameStats ecframe_stats;
+ECFrameStats ec_frame_stats;
 
 // Application active?
-int app_state = APP_STATE_ACTIVE;
+int app_state = kApplicationActive;
 
-bool singletics = false; // debug flag to cancel adaptiveness
+bool single_tics = false;  // debug flag to cancel adaptiveness
 
 // -ES- 2000/02/13 Takes screenshot every screenshot_rate tics.
-// Must be used in conjunction with singletics.
+// Must be used in conjunction with single_tics.
 static int screenshot_rate;
 
 // For screenies...
@@ -116,316 +116,333 @@ bool custom_MenuMain       = false;
 bool custom_MenuEpisode    = false;
 bool custom_MenuDifficulty = false;
 
-FILE *logfile   = NULL;
-FILE *debugfile = NULL;
+FILE *log_file   = nullptr;
+FILE *debug_file = nullptr;
 
-gameflags_t default_gameflags = {
-    false, // nomonsters
-    false, // fastparm
+GameFlags default_game_flags = {
+    false,  // nomonsters
+    false,  // fast_monsters
 
-    false, // respawn
-    false, // res_respawn
-    false, // item respawn
+    false,  // respawn
+    false,  // enemy_respawn_mode
+    false,  // item respawn
 
-    false, // true 3d gameplay
-    8,     // gravity
-    false, // more blood
+    false,  // true 3d gameplay
+    8,      // gravity
+    false,  // more blood
 
-    true,  // jump
-    true,  // crouch
-    true,  // mlook
-    AA_ON, // autoaim
+    true,        // jump
+    true,        // crouch
+    true,        // mlook
+    kAutoAimOn,  // autoaim
 
-    true,  // cheats
-    true,  // have_extra
-    false, // limit_zoom
+    true,   // cheats
+    true,   // have_extra
+    false,  // limit_zoom
 
-    true,  // kicking
-    true,  // weapon_switch
-    true,  // pass_missile
-    false, // team_damage
+    true,   // kicking
+    true,   // weapon_switch
+    true,   // pass_missile
+    false,  // team_damage
 };
 
 // -KM- 1998/12/16 These flags are the users prefs and are copied to
 //   gameflags when a new level is started.
 // -AJA- 2000/02/02: Removed initialisation (done in code using
-//       `default_gameflags').
+//       `default_game_flags').
 
-gameflags_t global_flags;
+GameFlags global_flags;
 
-int newnmrespawn = 0;
+bool mus_pause_stop  = false;
+bool png_screenshots = false;
 
-bool swapstereo     = false;
-bool mus_pause_stop = false;
-bool png_scrshots   = false;
-bool autoquickload  = false;
-
-std::string brandingfile;
-std::string cfgfile;
+std::string branding_file;
+std::string configuration_file;
 std::string epkfile;
-std::string           game_base;
+std::string game_base;
 
-std::string cache_dir;
-std::string game_dir;
-std::string home_dir;
-std::string save_dir;
-std::string shot_dir;
+std::string cache_directory;
+std::string game_directory;
+std::string home_directory;
+std::string save_directory;
+std::string screenshot_directory;
 
-// not using DEF_CVAR here since var name != cvar name
-cvar_c m_language("language", "ENGLISH", CVAR_ARCHIVE);
+// not using EDGE_DEFINE_CONSOLE_VARIABLE here since var name != cvar name
+ConsoleVariable m_language("language", "ENGLISH", kConsoleVariableFlagArchive);
 
-DEF_CVAR(logfilename, "edge-classic.log", CVAR_NO_RESET)
-DEF_CVAR(configfilename, "edge-classic.cfg", CVAR_NO_RESET)
-DEF_CVAR(debugfilename, "debug.txt", CVAR_NO_RESET)
-DEF_CVAR(windowtitle, "EDGE-Classic", CVAR_NO_RESET)
-DEF_CVAR(edgeversion, "1.37", CVAR_NO_RESET)
-DEF_CVAR(orgname, "EDGE Team", CVAR_NO_RESET)
-DEF_CVAR(appname, "EDGE-Classic", CVAR_NO_RESET)
-DEF_CVAR(homepage, "https://edge-classic.github.io", CVAR_NO_RESET)
+EDGE_DEFINE_CONSOLE_VARIABLE(log_filename, "edge-classic.log",
+                             kConsoleVariableFlagNoReset)
+EDGE_DEFINE_CONSOLE_VARIABLE(config_filename, "edge-classic.cfg",
+                             kConsoleVariableFlagNoReset)
+EDGE_DEFINE_CONSOLE_VARIABLE(debug_filename, "debug.txt",
+                             kConsoleVariableFlagNoReset)
+EDGE_DEFINE_CONSOLE_VARIABLE(windowtitle, "EDGE-Classic",
+                             kConsoleVariableFlagNoReset)
+EDGE_DEFINE_CONSOLE_VARIABLE(edgeversion, "1.37", kConsoleVariableFlagNoReset)
+EDGE_DEFINE_CONSOLE_VARIABLE(orgname, "EDGE Team", kConsoleVariableFlagNoReset)
+EDGE_DEFINE_CONSOLE_VARIABLE(appname, "EDGE-Classic",
+                             kConsoleVariableFlagNoReset)
+EDGE_DEFINE_CONSOLE_VARIABLE(homepage, "https://edge-classic.github.io",
+                             kConsoleVariableFlagNoReset)
 
-DEF_CVAR_CLAMPED(r_overlay, "0", CVAR_ARCHIVE, 0, 6)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(video_overlay, "0",
+                                     kConsoleVariableFlagArchive, 0, 6)
 
-DEF_CVAR_CLAMPED(r_titlescaling, "0", CVAR_ARCHIVE, 0, 1)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(title_scaling, "0",
+                                     kConsoleVariableFlagArchive, 0, 1)
 
-DEF_CVAR(g_aggression, "0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(force_infighting, "0", kConsoleVariableFlagArchive)
 
-DEF_CVAR(ddf_strict, "0", CVAR_ARCHIVE)
-DEF_CVAR(ddf_lax, "0", CVAR_ARCHIVE)
-DEF_CVAR(ddf_quiet, "0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(ddf_strict, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(ddf_lax, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(ddf_quiet, "0", kConsoleVariableFlagArchive)
 
-DEF_CVAR(skip_intros, "0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(skip_intros, "0", kConsoleVariableFlagArchive)
 
-static const image_c *loading_image = nullptr;
-const image_c        *menu_backdrop = nullptr;
+static const Image *loading_image = nullptr;
+const Image        *menu_backdrop = nullptr;
 
-static void E_TitleDrawer(void);
+static void TitleDrawer(void);
 
-class startup_progress_c
+class StartupProgress
 {
-  private:
-    std::vector<std::string> startup_messages;
+   private:
+    std::vector<std::string> startup_messages_;
 
-  public:
-    startup_progress_c()
+   public:
+    StartupProgress() {}
+
+    ~StartupProgress() {}
+
+    void AddMessage(const char *message)
     {
+        if (startup_messages_.size() >= 15)
+            startup_messages_.erase(startup_messages_.begin());
+        startup_messages_.push_back(message);
     }
 
-    ~startup_progress_c()
+    void DrawIt()
     {
-    }
-
-    void addMessage(const char *message)
-    {
-        if (startup_messages.size() >= 15)
-            startup_messages.erase(startup_messages.begin());
-        startup_messages.push_back(message);
-    }
-
-    void drawIt()
-    {
-        I_StartFrame();
-        HUD_FrameSetup();
+        StartFrame();
+        HudFrameSetup();
         if (loading_image)
         {
-            if (r_titlescaling.d) // Fill Border
+            if (title_scaling.d_)  // Fill Border
             {
-                if (!loading_image->blurred_version)
-                    W_ImageStoreBlurred(loading_image, 0.75f);
-                HUD_StretchImage(-320, -200, 960, 600, loading_image->blurred_version, 0, 0);
+                if (!loading_image->blurred_version_)
+                    ImageStoreBlurred(loading_image);
+                HudStretchImage(-320, -200, 960, 600,
+                                loading_image->blurred_version_, 0, 0);
             }
-            HUD_DrawImageTitleWS(loading_image);
-            HUD_SolidBox(25, 25, 295, 175, SG_BLACK_RGBA32);
+            HudDrawImageTitleWS(loading_image);
+            HudSolidBox(25, 25, 295, 175, SG_BLACK_RGBA32);
         }
         int y = 26;
-        for (int i = 0; i < (int)startup_messages.size(); i++)
+        for (int i = 0; i < (int)startup_messages_.size(); i++)
         {
-            if (startup_messages[i].size() > 32)
-                HUD_DrawText(26, y, startup_messages[i].substr(0, 29).append("...").c_str());
+            if (startup_messages_[i].size() > 32)
+                HudDrawText(
+                    26, y,
+                    startup_messages_[i].substr(0, 29).append("...").c_str());
             else
-                HUD_DrawText(26, y, startup_messages[i].c_str());
+                HudDrawText(26, y, startup_messages_[i].c_str());
             y += 10;
         }
 
-        if (!hud_overlays.at(r_overlay.d).empty())
+        if (!hud_overlays.at(video_overlay.d_).empty())
         {
-            const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d).c_str(), INS_Graphic, ILF_Null);
+            const Image *overlay =
+                ImageLookup(hud_overlays.at(video_overlay.d_).c_str(),
+                            kImageNamespaceGraphic, kImageLookupNull);
             if (overlay)
-                HUD_RawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay),
-                             SCREENHEIGHT / IM_HEIGHT(overlay));
+                HudRawImage(
+                    0, 0, current_screen_width, current_screen_height, overlay,
+                    0, 0, current_screen_width / overlay->ScaledWidthActual(),
+                    current_screen_height / overlay->ScaledHeightActual());
         }
 
-        if (v_gamma.f < 0)
+        if (gamma_correction.f_ < 0)
         {
-            int col = (1.0f + v_gamma.f) * 255;
+            int col = (1.0f + gamma_correction.f_) * 255;
             glEnable(GL_BLEND);
             glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-            HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
+            HudSolidBox(hud_x_left, 0, hud_x_right, 200,
+                        epi::MakeRGBA(col, col, col));
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDisable(GL_BLEND);
         }
-        else if (v_gamma.f > 0)
+        else if (gamma_correction.f_ > 0)
         {
-            int col = v_gamma.f * 255;
+            int col = gamma_correction.f_ * 255;
             glEnable(GL_BLEND);
             glBlendFunc(GL_DST_COLOR, GL_ONE);
-            HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
+            HudSolidBox(hud_x_left, 0, hud_x_right, 200,
+                        epi::MakeRGBA(col, col, col));
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDisable(GL_BLEND);
         }
 
-        I_FinishFrame();
+        FinishFrame();
     }
 };
 
-static startup_progress_c s_progress;
+static StartupProgress s_progress;
 
-void E_ProgressMessage(const char *message)
+void StartupProgressMessage(const char *message)
 {
-    s_progress.addMessage(message);
-    s_progress.drawIt();
+    s_progress.AddMessage(message);
+    s_progress.DrawIt();
 }
 
 //
 // -ACB- 1999/09/20 Created. Sets Global Stuff.
 //
-static void SetGlobalVars(void)
+static void SetGlobalVariables(void)
 {
     int         p;
     std::string s;
 
     // Screen Resolution Check...
-    if (argv::Find("borderless") > 0)
-        DISPLAYMODE = 2;
-    else if (argv::Find("fullscreen") > 0)
-        DISPLAYMODE = 1;
-    else if (argv::Find("windowed") > 0)
-        DISPLAYMODE = 0;
+    if (ArgumentFind("borderless") > 0)
+        current_window_mode = 2;
+    else if (ArgumentFind("fullscreen") > 0)
+        current_window_mode = 1;
+    else if (ArgumentFind("windowed") > 0)
+        current_window_mode = 0;
 
-    s = argv::Value("width");
+    s = ArgumentValue("width");
     if (!s.empty())
     {
-        if (DISPLAYMODE == 2)
-            I_Warning("Current display mode set to borderless fullscreen. Provided width of %d will be ignored!\n",
-                      atoi(s.c_str()));
+        if (current_window_mode == 2)
+            LogWarning(
+                "Current display mode set to borderless fullscreen. Provided "
+                "width of %d will be ignored!\n",
+                atoi(s.c_str()));
         else
-            SCREENWIDTH = atoi(s.c_str());
+            current_screen_width = atoi(s.c_str());
     }
 
-    s = argv::Value("height");
+    s = ArgumentValue("height");
     if (!s.empty())
     {
-        if (DISPLAYMODE == 2)
-            I_Warning("Current display mode set to borderless fullscreen. Provided height of %d will be ignored!\n",
-                      atoi(s.c_str()));
+        if (current_window_mode == 2)
+            LogWarning(
+                "Current display mode set to borderless fullscreen. Provided "
+                "height of %d will be ignored!\n",
+                atoi(s.c_str()));
         else
-            SCREENHEIGHT = atoi(s.c_str());
+            current_screen_height = atoi(s.c_str());
     }
 
-    p = argv::Find("res");
-    if (p > 0 && p + 2 < int(argv::list.size()) && !argv::IsOption(p + 1) && !argv::IsOption(p + 2))
+    p = ArgumentFind("res");
+    if (p > 0 && p + 2 < int(program_argument_list.size()) &&
+        !ArgumentIsOption(p + 1) && !ArgumentIsOption(p + 2))
     {
-        if (DISPLAYMODE == 2)
-            I_Warning(
-                "Current display mode set to borderless fullscreen. Provided resolution of %dx%d will be ignored!\n",
-                atoi(argv::list[p + 1].c_str()), atoi(argv::list[p + 2].c_str()));
+        if (current_window_mode == 2)
+            LogWarning(
+                "Current display mode set to borderless fullscreen. Provided "
+                "resolution of %dx%d will be ignored!\n",
+                atoi(program_argument_list[p + 1].c_str()),
+                atoi(program_argument_list[p + 2].c_str()));
         else
         {
-            SCREENWIDTH  = atoi(argv::list[p + 1].c_str());
-            SCREENHEIGHT = atoi(argv::list[p + 2].c_str());
+            current_screen_width  = atoi(program_argument_list[p + 1].c_str());
+            current_screen_height = atoi(program_argument_list[p + 2].c_str());
         }
     }
 
     // Bits per pixel check....
-    s = argv::Value("bpp");
+    s = ArgumentValue("bpp");
     if (!s.empty())
     {
-        SCREENBITS = atoi(s.c_str());
+        current_screen_depth = atoi(s.c_str());
 
-        if (SCREENBITS <= 4) // backwards compat
-            SCREENBITS *= 8;
+        if (current_screen_depth <= 4)  // backwards compat
+            current_screen_depth *= 8;
     }
 
     // restrict depth to allowable values
-    if (SCREENBITS < 15)
-        SCREENBITS = 15;
-    if (SCREENBITS > 32)
-        SCREENBITS = 32;
+    if (current_screen_depth < 15) current_screen_depth = 15;
+    if (current_screen_depth > 32) current_screen_depth = 32;
 
-    // If borderless fullscreen mode, override any provided dimensions so I_StartupGraphics will scale to native res
-    if (DISPLAYMODE == 2)
+    // If borderless fullscreen mode, override any provided dimensions so
+    // StartupGraphics will scale to native res
+    if (current_window_mode == 2)
     {
-        SCREENWIDTH  = 100000;
-        SCREENHEIGHT = 100000;
+        current_screen_width  = 100000;
+        current_screen_height = 100000;
     }
 
     // sprite kludge (TrueBSP)
-    p = argv::Find("spritekludge");
+    p = ArgumentFind("spritekludge");
     if (p > 0)
     {
-        if (p + 1 < int(argv::list.size()) && !argv::IsOption(p + 1))
-            sprite_kludge = atoi(argv::list[p + 1].c_str());
+        if (p + 1 < int(program_argument_list.size()) &&
+            !ArgumentIsOption(p + 1))
+            sprite_kludge = atoi(program_argument_list[p + 1].c_str());
 
-        if (!sprite_kludge)
-            sprite_kludge = 1;
+        if (!sprite_kludge) sprite_kludge = 1;
     }
 
-    s = argv::Value("screenshot");
+    s = ArgumentValue("screenshot");
     if (!s.empty())
     {
         screenshot_rate = atoi(s.c_str());
-        singletics      = true;
+        single_tics     = true;
     }
 
-    // -AJA- 1999/10/18: Reworked these with argv::CheckBooleanParm
-    argv::CheckBooleanParm("rotatemap", &rotatemap, false);
-    argv::CheckBooleanParm("sound", &nosound, true);
-    argv::CheckBooleanParm("music", &nomusic, true);
-    argv::CheckBooleanParm("itemrespawn", &global_flags.itemrespawn, false);
-    argv::CheckBooleanParm("mlook", &global_flags.mlook, false);
-    argv::CheckBooleanParm("monsters", &global_flags.nomonsters, true);
-    argv::CheckBooleanParm("fast", &global_flags.fastparm, false);
-    argv::CheckBooleanParm("extras", &global_flags.have_extra, false);
-    argv::CheckBooleanParm("kick", &global_flags.kicking, false);
-    argv::CheckBooleanParm("singletics", &singletics, false);
-    argv::CheckBooleanParm("true3d", &global_flags.true3dgameplay, false);
-    argv::CheckBooleanParm("blood", &global_flags.more_blood, false);
-    argv::CheckBooleanParm("cheats", &global_flags.cheats, false);
-    argv::CheckBooleanParm("jumping", &global_flags.jump, false);
-    argv::CheckBooleanParm("crouching", &global_flags.crouch, false);
-    argv::CheckBooleanParm("weaponswitch", &global_flags.weapon_switch, false);
-    argv::CheckBooleanParm("autoload", &autoquickload, false);
+    // -AJA- 1999/10/18: Reworked these with ArgumentCheckBooleanParameter
+    ArgumentCheckBooleanParameter("rotate_map", &rotate_map, false);
+    ArgumentCheckBooleanParameter("sound", &no_sound, true);
+    ArgumentCheckBooleanParameter("music", &no_music, true);
+    ArgumentCheckBooleanParameter("items_respawn", &global_flags.items_respawn,
+                                  false);
+    ArgumentCheckBooleanParameter("mlook", &global_flags.mouselook, false);
+    ArgumentCheckBooleanParameter("monsters", &global_flags.no_monsters, true);
+    ArgumentCheckBooleanParameter("fast", &global_flags.fast_monsters, false);
+    ArgumentCheckBooleanParameter("extras", &global_flags.have_extra, false);
+    ArgumentCheckBooleanParameter("kick", &global_flags.kicking, false);
+    ArgumentCheckBooleanParameter("single_tics", &single_tics, false);
+    ArgumentCheckBooleanParameter("true3d", &global_flags.true_3d_gameplay,
+                                  false);
+    ArgumentCheckBooleanParameter("blood", &global_flags.more_blood, false);
+    ArgumentCheckBooleanParameter("cheats", &global_flags.cheats, false);
+    ArgumentCheckBooleanParameter("jumping", &global_flags.jump, false);
+    ArgumentCheckBooleanParameter("crouching", &global_flags.crouch, false);
+    ArgumentCheckBooleanParameter("weaponswitch", &global_flags.weapon_switch,
+                                  false);
 
-    argv::CheckBooleanParm("am_keydoorblink", &am_keydoorblink, false);
+    ArgumentCheckBooleanParameter("automap_keydoor_blink",
+                                  &automap_keydoor_blink, false);
 
-    if (argv::Find("infight") > 0)
-        g_aggression = 1;
+    if (ArgumentFind("infight") > 0) force_infighting = 1;
 
-    if (argv::Find("dlights") > 0)
-        use_dlights = 1;
-    else if (argv::Find("nodlights") > 0)
-        use_dlights = 0;
+    if (ArgumentFind("dlights") > 0)
+        use_dynamic_lights = 1;
+    else if (ArgumentFind("nodlights") > 0)
+        use_dynamic_lights = 0;
 
-    if (!global_flags.respawn)
+    if (!global_flags.enemies_respawn)
     {
-        if (argv::Find("newnmrespawn") > 0)
+        if (ArgumentFind("newnmrespawn") > 0)
         {
-            global_flags.res_respawn = true;
-            global_flags.respawn     = true;
+            global_flags.enemy_respawn_mode = true;
+            global_flags.enemies_respawn    = true;
         }
-        else if (argv::Find("respawn") > 0)
+        else if (ArgumentFind("respawn") > 0)
         {
-            global_flags.respawn = true;
+            global_flags.enemies_respawn = true;
         }
     }
 
     // check for strict and no-warning options
-    argv::CheckBooleanCVar("strict", &ddf_strict, false);
-    argv::CheckBooleanCVar("lax", &ddf_lax, false);
-    argv::CheckBooleanCVar("warn", &ddf_quiet, true);
+    ArgumentCheckBooleanConsoleVariable("strict", &ddf_strict, false);
+    ArgumentCheckBooleanConsoleVariable("lax", &ddf_lax, false);
+    ArgumentCheckBooleanConsoleVariable("warn", &ddf_quiet, true);
 
-    strict_errors = ddf_strict.d ? true : false;
-    lax_errors    = ddf_lax.d ? true : false;
-    no_warnings   = ddf_quiet.d ? true : false;
+    strict_errors = ddf_strict.d_ ? true : false;
+    lax_errors    = ddf_lax.d_ ? true : false;
+    no_warnings   = ddf_quiet.d_ ? true : false;
 }
 
 //
@@ -433,17 +450,14 @@ static void SetGlobalVars(void)
 //
 void SetLanguage(void)
 {
-    std::string want_lang = argv::Value("lang");
-    if (!want_lang.empty())
-        m_language = want_lang;
+    std::string want_lang = ArgumentValue("lang");
+    if (!want_lang.empty()) m_language = want_lang;
 
-    if (language.Select(m_language.c_str()))
-        return;
+    if (language.Select(m_language.c_str())) return;
 
-    I_Warning("Invalid language: '%s'\n", m_language.c_str());
+    LogWarning("Invalid language: '%s'\n", m_language.c_str());
 
-    if (!language.Select(0))
-        I_Error("Unable to select any language!");
+    if (!language.Select(0)) FatalError("Unable to select any language!");
 
     m_language = language.GetName();
 }
@@ -453,20 +467,21 @@ void SetLanguage(void)
 //
 static void SpecialWadVerify(void)
 {
-    E_ProgressMessage("Verifying EDGE_DEFS version...");
+    StartupProgressMessage("Verifying EDGE_DEFS version...");
 
-    epi::File *data = W_OpenPackFile("/version.txt");
+    epi::File *data = OpenFileFromPack("/version.txt");
 
     if (!data)
-        I_Error("Version file not found. Get edge_defs.epk at https://github.com/edge-classic/EDGE-classic");
+        FatalError(
+            "Version file not found. Get edge_defs.epk at "
+            "https://github.com/edge-classic/EDGE-classic");
 
     // parse version number
     std::string verstring = data->ReadText();
     const char *s         = verstring.data();
     int         epk_ver   = atoi(s) * 100;
 
-    while (epi::IsDigitASCII(*s))
-        s++;
+    while (epi::IsDigitASCII(*s)) s++;
     s++;
     epk_ver += atoi(s);
 
@@ -474,15 +489,19 @@ static void SpecialWadVerify(void)
 
     float real_ver = epk_ver / 100.0;
 
-    I_Printf("EDGE_DEFS.EPK version %1.2f found.\n", real_ver);
+    LogPrint("EDGE_DEFS.EPK version %1.2f found.\n", real_ver);
 
-    if (real_ver < edgeversion.f)
+    if (real_ver < edgeversion.f_)
     {
-        I_Error("EDGE_DEFS.EPK is an older version (got %1.2f, expected %1.2f)\n", real_ver, edgeversion.f);
+        FatalError(
+            "EDGE_DEFS.EPK is an older version (got %1.2f, expected %1.2f)\n",
+            real_ver, edgeversion.f_);
     }
-    else if (real_ver > edgeversion.f)
+    else if (real_ver > edgeversion.f_)
     {
-        I_Warning("EDGE_DEFS.EPK is a newer version (got %1.2f, expected %1.2f)\n", real_ver, edgeversion.f);
+        LogWarning(
+            "EDGE_DEFS.EPK is a newer version (got %1.2f, expected %1.2f)\n",
+            real_ver, edgeversion.f_);
     }
 }
 
@@ -491,76 +510,72 @@ static void SpecialWadVerify(void)
 //
 static void ShowNotice(void)
 {
-    CON_MessageColor(epi::MakeRGBA(64, 192, 255));
+    ConsoleMessageColor(epi::MakeRGBA(64, 192, 255));
 
-    I_Printf("%s", language["Notice"]);
+    LogPrint("%s", language["Notice"]);
 }
 
 static void DoSystemStartup(void)
 {
     // startup the system now
-    W_InitImages();
+    InitializeImages();
 
-    I_Debugf("- System startup begun.\n");
+    LogDebug("- System startup begun.\n");
 
-    I_SystemStartup();
+    SystemStartup();
 
-    // -ES- 1998/09/11 Use R_ChangeResolution to enter gfx mode
+    // -ES- 1998/09/11 Use ChangeResolution to enter gfx mode
 
-    R_DumpResList();
+    DumpResolutionList();
 
     // -KM- 1998/09/27 Change res now, so music doesn't start before
     // screen.  Reset clock too.
-    I_Debugf("- Changing Resolution...\n");
+    LogDebug("- Changing Resolution...\n");
 
-    R_InitialResolution();
+    SetInitialResolution();
 
-    RGL_Init();
-    R_SoftInitResolution();
+    RendererInit();
+    SoftInitializeResolution();
 
-    I_Debugf("- System startup done.\n");
+    LogDebug("- System startup done.\n");
 }
 
-static void M_DisplayPause(void)
+static void DisplayPauseImage(void)
 {
-    static const image_c *pause_image = NULL;
+    static const Image *pause_image = nullptr;
 
-    if (!pause_image)
-        pause_image = W_ImageLookup("M_PAUSE");
+    if (!pause_image) pause_image = ImageLookup("M_PAUSE");
 
     // make sure image is centered horizontally
 
-    float w = IM_WIDTH(pause_image);
-    float h = IM_HEIGHT(pause_image);
+    float w = pause_image->ScaledWidthActual();
+    float h = pause_image->ScaledHeightActual();
 
     float x = 160 - w / 2;
     float y = 10;
 
-    HUD_StretchImage(x, y, w, h, pause_image, 0.0, 0.0);
+    HudStretchImage(x, y, w, h, pause_image, 0.0, 0.0);
 }
 
-wipetype_e wipe_method = WIPE_Melt;
+ScreenWipe wipe_method = kScreenWipeMelt;
 
 static bool need_wipe = false;
 
-void E_ForceWipe(void)
+void ForceWipe(void)
 {
-
 #ifdef EDGE_WEB
-    // Wiping blocks the main thread while rendering outside of the main loop tick
-    // Disabled on the platform until can be better integrated
+    // Wiping blocks the main thread while rendering outside of the main loop
+    // tick Disabled on the platform until can be better integrated
     return;
 #endif
-    if (gamestate == GS_NOTHING)
-        return;
+    if (game_state == kGameStateNothing) return;
 
-    if (wipe_method == WIPE_None)
-        return;
+    if (wipe_method == kScreenWipeNone) return;
 
     need_wipe = true;
 
     // capture screen now (before new level is loaded etc..)
-    E_Display();
+    EdgeDisplay();
 }
 
 //
@@ -572,52 +587,49 @@ void E_ForceWipe(void)
 
 static bool wipe_gl_active = false;
 
-void E_Display(void)
+void EdgeDisplay(void)
 {
     EDGE_ZoneScoped;
 
-    if (nodrawers)
-        return; // for comparative timing / profiling
-
     // Start the frame - should we need to.
-    I_StartFrame();
+    StartFrame();
 
-    HUD_FrameSetup();
+    HudFrameSetup();
 
-    switch (gamestate)
+    switch (game_state)
     {
-    case GS_LEVEL:
-        R_PaletteStuff();
+        case kGameStateLevel:
+            PaletteTicker();
 
-        if (LUA_UseLuaHud())
-            LUA_RunHud();            
-        else
-            VM_RunHud();
-            
-        if (need_save_screenshot)
-        {
-            M_MakeSaveScreenShot();
-            need_save_screenshot = false;
-        }
+            if (LuaUseLuaHud())
+                LuaRunHud();
+            else
+                CoalRunHud();
 
-        HU_Drawer();
-        RAD_Drawer();
-        break;
+            if (need_save_screenshot)
+            {
+                CreateSaveScreenshot();
+                need_save_screenshot = false;
+            }
 
-    case GS_INTERMISSION:
-        WI_Drawer();
-        break;
+            HudDrawer();
+            ScriptDrawer();
+            break;
 
-    case GS_FINALE:
-        F_Drawer();
-        break;
+        case kGameStateIntermission:
+            IntermissionDrawer();
+            break;
 
-    case GS_TITLESCREEN:
-        E_TitleDrawer();
-        break;
+        case kGameStateFinale:
+            FinaleDrawer();
+            break;
 
-    case GS_NOTHING:
-        break;
+        case kGameStateTitleScreen:
+            TitleDrawer();
+            break;
+
+        case kGameStateNothing:
+            break;
     }
 
     if (wipe_gl_active)
@@ -625,9 +637,9 @@ void E_Display(void)
         // -AJA- Wipe code for GL.  Sorry for all this ugliness, but it just
         //       didn't fit into the existing wipe framework.
         //
-        if (RGL_DoWipe())
+        if (RendererDoWipe())
         {
-            RGL_StopWipe();
+            RendererStopWipe();
             wipe_gl_active = false;
         }
     }
@@ -638,43 +650,48 @@ void E_Display(void)
         need_wipe      = false;
         wipe_gl_active = true;
 
-        RGL_InitWipe(wipe_method);
+        RendererInitializeWipe(wipe_method);
     }
 
-    if (paused)
-        M_DisplayPause();
+    if (paused) DisplayPauseImage();
 
     // menus go directly to the screen
-    M_Drawer(); // menu is drawn even on top of everything (except console)
+    MenuDrawer();  // menu is drawn even on top of everything (except console)
 
     // process mouse and keyboard events
-    N_NetUpdate();
+    NetworkUpdate();
 
-    CON_Drawer();
+    ConsoleDrawer();
 
-    if (!hud_overlays.at(r_overlay.d).empty())
+    if (!hud_overlays.at(video_overlay.d_).empty())
     {
-        const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d).c_str(), INS_Graphic, ILF_Null);
+        const Image *overlay =
+            ImageLookup(hud_overlays.at(video_overlay.d_).c_str(),
+                        kImageNamespaceGraphic, kImageLookupNull);
         if (overlay)
-            HUD_RawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay),
-                         SCREENHEIGHT / IM_HEIGHT(overlay));
+            HudRawImage(0, 0, current_screen_width, current_screen_height,
+                        overlay, 0, 0,
+                        current_screen_width / overlay->ScaledWidthActual(),
+                        current_screen_height / overlay->ScaledHeightActual());
     }
 
-    if (v_gamma.f < 0)
+    if (gamma_correction.f_ < 0)
     {
-        int col = (1.0f + v_gamma.f) * 255;
+        int col = (1.0f + gamma_correction.f_) * 255;
         glEnable(GL_BLEND);
         glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-        HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
+        HudSolidBox(hud_x_left, 0, hud_x_right, 200,
+                    epi::MakeRGBA(col, col, col));
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_BLEND);
     }
-    else if (v_gamma.f > 0)
+    else if (gamma_correction.f_ > 0)
     {
-        int col = v_gamma.f * 255;
+        int col = gamma_correction.f_ * 255;
         glEnable(GL_BLEND);
         glBlendFunc(GL_DST_COLOR, GL_ONE);
-        HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
+        HudSolidBox(hud_x_left, 0, hud_x_right, 200,
+                    epi::MakeRGBA(col, col, col));
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_BLEND);
     }
@@ -682,17 +699,16 @@ void E_Display(void)
     if (m_screenshot_required)
     {
         m_screenshot_required = false;
-        M_ScreenShot(true);
+        TakeScreenshot(true);
     }
-    else if (screenshot_rate && (gamestate >= GS_LEVEL))
+    else if (screenshot_rate && (game_state >= kGameStateLevel))
     {
-        SYS_ASSERT(singletics);
+        EPI_ASSERT(single_tics);
 
-        if (leveltime % screenshot_rate == 0)
-            M_ScreenShot(false);
+        if (level_time_elapsed % screenshot_rate == 0) TakeScreenshot(false);
     }
 
-    I_FinishFrame(); // page flip or blit buffer
+    FinishFrame();  // page flip or blit buffer
 }
 
 //
@@ -702,31 +718,28 @@ static int title_game;
 static int title_pic;
 static int title_countdown;
 
-static const image_c *title_image = NULL;
+static const Image *title_image = nullptr;
 
-static void E_TitleDrawer(void)
+static void TitleDrawer(void)
 {
     if (title_image)
     {
-        if (r_titlescaling.d) // Fill Border
+        if (title_scaling.d_)  // Fill Border
         {
-            if (!title_image->blurred_version)
-                W_ImageStoreBlurred(title_image, 0.75f);
-            HUD_StretchImage(-320, -200, 960, 600, title_image->blurred_version, 0, 0);
+            if (!title_image->blurred_version_) ImageStoreBlurred(title_image);
+            HudStretchImage(-320, -200, 960, 600, title_image->blurred_version_,
+                            0, 0);
         }
-        HUD_DrawImageTitleWS(title_image);
+        HudDrawImageTitleWS(title_image);
     }
-    else
-    {
-        HUD_SolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
-    }
+    else { HudSolidBox(0, 0, 320, 200, SG_BLACK_RGBA32); }
 }
 
 //
 // This cycles through the title sequences.
 // -KM- 1998/12/16 Fixed for DDF.
 //
-void E_PickLoadingScreen(void)
+void PickLoadingScreen(void)
 {
     // force pic overflow -> first available titlepic
     title_game = gamedefs.size() - 1;
@@ -735,10 +748,10 @@ void E_PickLoadingScreen(void)
     // prevent an infinite loop
     for (int loop = 0; loop < 100; loop++)
     {
-        gamedef_c *g = gamedefs[title_game];
-        SYS_ASSERT(g);
+        GameDefinition *g = gamedefs[title_game];
+        EPI_ASSERT(g);
 
-        if (title_pic >= (int)g->titlepics.size())
+        if (title_pic >= (int)g->titlepics_.size())
         {
             title_game = (title_game + 1) % (int)gamedefs.size();
             title_pic  = 0;
@@ -747,7 +760,8 @@ void E_PickLoadingScreen(void)
 
         // ignore non-existing episodes.  Doesn't include title-only ones
         // like [EDGE].
-        if (title_pic == 0 && g->firstmap != "" && W_CheckNumForName(g->firstmap.c_str()) == -1)
+        if (title_pic == 0 && g->firstmap_ != "" &&
+            CheckLumpNumberForName(g->firstmap_.c_str()) == -1)
         {
             title_game = (title_game + 1) % gamedefs.size();
             title_pic  = 0;
@@ -755,7 +769,8 @@ void E_PickLoadingScreen(void)
         }
 
         // ignore non-existing images
-        loading_image = W_ImageLookup(g->titlepics[title_pic].c_str(), INS_Graphic, ILF_Null);
+        loading_image = ImageLookup(g->titlepics_[title_pic].c_str(),
+                                    kImageNamespaceGraphic, kImageLookupNull);
 
         if (!loading_image)
         {
@@ -772,7 +787,7 @@ void E_PickLoadingScreen(void)
     // not found
     title_game    = gamedefs.size() - 1;
     title_pic     = 29999;
-    loading_image = NULL;
+    loading_image = nullptr;
 }
 
 //
@@ -780,7 +795,7 @@ void E_PickLoadingScreen(void)
 // titlepic corresponding to a gamedef with actual maps.
 // This is used as the menu backdrop
 //
-void E_PickMenuScreen(void)
+static void PickMenuBackdrop(void)
 {
     // force pic overflow -> first available titlepic
     title_game = gamedefs.size() - 1;
@@ -789,10 +804,10 @@ void E_PickMenuScreen(void)
     // prevent an infinite loop
     for (int loop = 0; loop < 100; loop++)
     {
-        gamedef_c *g = gamedefs[title_game];
-        SYS_ASSERT(g);
+        GameDefinition *g = gamedefs[title_game];
+        EPI_ASSERT(g);
 
-        if (title_pic >= (int)g->titlepics.size())
+        if (title_pic >= (int)g->titlepics_.size())
         {
             title_game = (title_game + 1) % (int)gamedefs.size();
             title_pic  = 0;
@@ -800,7 +815,9 @@ void E_PickMenuScreen(void)
         }
 
         // ignore non-existing episodes.
-        if (title_pic == 0 && (g->firstmap == "" || W_CheckNumForName(g->firstmap.c_str()) == -1))
+        if (title_pic == 0 &&
+            (g->firstmap_ == "" ||
+             CheckLumpNumberForName(g->firstmap_.c_str()) == -1))
         {
             title_game = (title_game + 1) % gamedefs.size();
             title_pic  = 0;
@@ -808,7 +825,9 @@ void E_PickMenuScreen(void)
         }
 
         // ignore non-existing images
-        const image_c *menu_image = W_ImageLookup(g->titlepics[title_pic].c_str(), INS_Graphic, ILF_Null);
+        const Image *menu_image =
+            ImageLookup(g->titlepics_[title_pic].c_str(),
+                        kImageNamespaceGraphic, kImageLookupNull);
 
         if (!menu_image)
         {
@@ -817,31 +836,31 @@ void E_PickMenuScreen(void)
         }
 
         // found one !!
-        title_game                   = gamedefs.size() - 1;
-        title_pic                    = 29999;
-        image_c *new_backdrop        = new image_c;
-        new_backdrop->name           = menu_image->name;
-        new_backdrop->actual_h       = menu_image->actual_h;
-        new_backdrop->actual_w       = menu_image->actual_w;
-        new_backdrop->cache          = menu_image->cache;
-        new_backdrop->is_empty       = menu_image->is_empty;
-        new_backdrop->is_font        = menu_image->is_font;
-        new_backdrop->liquid_type    = menu_image->liquid_type;
-        new_backdrop->offset_x       = menu_image->offset_x;
-        new_backdrop->offset_y       = menu_image->offset_y;
-        new_backdrop->opacity        = menu_image->opacity;
-        new_backdrop->ratio_h        = menu_image->ratio_h;
-        new_backdrop->ratio_w        = menu_image->ratio_w;
-        new_backdrop->scale_x        = menu_image->scale_x;
-        new_backdrop->scale_y        = menu_image->scale_y;
-        new_backdrop->source         = menu_image->source;
-        new_backdrop->source_palette = menu_image->source_palette;
-        new_backdrop->source_type    = menu_image->source_type;
-        new_backdrop->total_h        = menu_image->total_h;
-        new_backdrop->total_w        = menu_image->total_w;
-        new_backdrop->anim.cur       = new_backdrop;
-        new_backdrop->grayscale      = true;
-        menu_backdrop                = new_backdrop;
+        title_game                       = gamedefs.size() - 1;
+        title_pic                        = 29999;
+        Image *new_backdrop              = new Image;
+        new_backdrop->name_              = menu_image->name_;
+        new_backdrop->actual_height_     = menu_image->actual_height_;
+        new_backdrop->actual_width_      = menu_image->actual_width_;
+        new_backdrop->cache_             = menu_image->cache_;
+        new_backdrop->is_empty_          = menu_image->is_empty_;
+        new_backdrop->is_font_           = menu_image->is_font_;
+        new_backdrop->liquid_type_       = menu_image->liquid_type_;
+        new_backdrop->offset_x_          = menu_image->offset_x_;
+        new_backdrop->offset_y_          = menu_image->offset_y_;
+        new_backdrop->opacity_           = menu_image->opacity_;
+        new_backdrop->height_ratio_      = menu_image->height_ratio_;
+        new_backdrop->width_ratio_       = menu_image->width_ratio_;
+        new_backdrop->scale_x_           = menu_image->scale_x_;
+        new_backdrop->scale_y_           = menu_image->scale_y_;
+        new_backdrop->source_            = menu_image->source_;
+        new_backdrop->source_palette_    = menu_image->source_palette_;
+        new_backdrop->source_type_       = menu_image->source_type_;
+        new_backdrop->total_height_      = menu_image->total_height_;
+        new_backdrop->total_width_       = menu_image->total_width_;
+        new_backdrop->animation_.current = new_backdrop;
+        new_backdrop->grayscale_         = true;
+        menu_backdrop                    = new_backdrop;
         return;
     }
 
@@ -850,29 +869,29 @@ void E_PickMenuScreen(void)
     title_pic  = 29999;
     if (loading_image)
     {
-        image_c *new_backdrop        = new image_c;
-        new_backdrop->name           = loading_image->name;
-        new_backdrop->actual_h       = loading_image->actual_h;
-        new_backdrop->actual_w       = loading_image->actual_w;
-        new_backdrop->cache          = loading_image->cache;
-        new_backdrop->is_empty       = loading_image->is_empty;
-        new_backdrop->is_font        = loading_image->is_font;
-        new_backdrop->liquid_type    = loading_image->liquid_type;
-        new_backdrop->offset_x       = loading_image->offset_x;
-        new_backdrop->offset_y       = loading_image->offset_y;
-        new_backdrop->opacity        = loading_image->opacity;
-        new_backdrop->ratio_h        = loading_image->ratio_h;
-        new_backdrop->ratio_w        = loading_image->ratio_w;
-        new_backdrop->scale_x        = loading_image->scale_x;
-        new_backdrop->scale_y        = loading_image->scale_y;
-        new_backdrop->source         = loading_image->source;
-        new_backdrop->source_palette = loading_image->source_palette;
-        new_backdrop->source_type    = loading_image->source_type;
-        new_backdrop->total_h        = loading_image->total_h;
-        new_backdrop->total_w        = loading_image->total_w;
-        new_backdrop->anim.cur       = new_backdrop;
-        new_backdrop->grayscale      = true;
-        menu_backdrop                = new_backdrop;
+        Image *new_backdrop              = new Image;
+        new_backdrop->name_              = loading_image->name_;
+        new_backdrop->actual_height_     = loading_image->actual_height_;
+        new_backdrop->actual_width_      = loading_image->actual_width_;
+        new_backdrop->cache_             = loading_image->cache_;
+        new_backdrop->is_empty_          = loading_image->is_empty_;
+        new_backdrop->is_font_           = loading_image->is_font_;
+        new_backdrop->liquid_type_       = loading_image->liquid_type_;
+        new_backdrop->offset_x_          = loading_image->offset_x_;
+        new_backdrop->offset_y_          = loading_image->offset_y_;
+        new_backdrop->opacity_           = loading_image->opacity_;
+        new_backdrop->height_ratio_      = loading_image->height_ratio_;
+        new_backdrop->width_ratio_       = loading_image->width_ratio_;
+        new_backdrop->scale_x_           = loading_image->scale_x_;
+        new_backdrop->scale_y_           = loading_image->scale_y_;
+        new_backdrop->source_            = loading_image->source_;
+        new_backdrop->source_palette_    = loading_image->source_palette_;
+        new_backdrop->source_type_       = loading_image->source_type_;
+        new_backdrop->total_height_      = loading_image->total_height_;
+        new_backdrop->total_width_       = loading_image->total_width_;
+        new_backdrop->animation_.current = new_backdrop;
+        new_backdrop->grayscale_         = true;
+        menu_backdrop                    = new_backdrop;
     }
     else
         menu_backdrop = nullptr;
@@ -882,30 +901,30 @@ void E_PickMenuScreen(void)
 // This cycles through the title sequences.
 // -KM- 1998/12/16 Fixed for DDF.
 //
-void E_AdvanceTitle(void)
+void AdvanceTitle(void)
 {
     title_pic++;
 
     // prevent an infinite loop
     for (int loop = 0; loop < 100; loop++)
     {
-        gamedef_c *g = gamedefs[title_game];
-        SYS_ASSERT(g);
+        GameDefinition *g = gamedefs[title_game];
+        EPI_ASSERT(g);
 
         // Only play title movies once
-        if (!g->titlemovie.empty() && !g->movie_played)
+        if (!g->titlemovie_.empty() && !g->movie_played_)
         {
-            if (skip_intros.d)
-                g->movie_played = true;
+            if (skip_intros.d_)
+                g->movie_played_ = true;
             else
             {
-                E_PlayMovie(g->titlemovie);
-                g->movie_played = true;
+                PlayMovie(g->titlemovie_);
+                g->movie_played_ = true;
             }
             continue;
         }
 
-        if (title_pic >= (int)g->titlepics.size())
+        if (title_pic >= (int)g->titlepics_.size())
         {
             title_game = (title_game + 1) % (int)gamedefs.size();
             title_pic  = 0;
@@ -914,7 +933,8 @@ void E_AdvanceTitle(void)
 
         // ignore non-existing episodes.  Doesn't include title-only ones
         // like [EDGE].
-        if (title_pic == 0 && g->firstmap != "" && W_CheckNumForName(g->firstmap.c_str()) == -1)
+        if (title_pic == 0 && g->firstmap_ != "" &&
+            CheckLumpNumberForName(g->firstmap_.c_str()) == -1)
         {
             title_game = (title_game + 1) % gamedefs.size();
             title_pic  = 0;
@@ -922,7 +942,8 @@ void E_AdvanceTitle(void)
         }
 
         // ignore non-existing images
-        title_image = W_ImageLookup(g->titlepics[title_pic].c_str(), INS_Graphic, ILF_Null);
+        title_image = ImageLookup(g->titlepics_[title_pic].c_str(),
+                                  kImageNamespaceGraphic, kImageLookupNull);
 
         if (!title_image)
         {
@@ -931,39 +952,38 @@ void E_AdvanceTitle(void)
         }
 
         // found one !!
-        if (title_pic == 0 && g->titlemusic > 0)
-            S_ChangeMusic(g->titlemusic, false);
+        if (title_pic == 0 && g->titlemusic_ > 0)
+            ChangeMusic(g->titlemusic_, false);
 
-        title_countdown = g->titletics * (r_doubleframes.d ? 2 : 1);
+        title_countdown = g->titletics_ * (double_framerate.d_ ? 2 : 1);
         return;
     }
 
     // not found
 
-    title_image     = NULL;
-    title_countdown = TICRATE * (r_doubleframes.d ? 2 : 1);
+    title_image     = nullptr;
+    title_countdown = kTicRate * (double_framerate.d_ ? 2 : 1);
 }
 
-void E_StartTitle(void)
+void StartTitle(void)
 {
-    gameaction = ga_nothing;
-    gamestate  = GS_TITLESCREEN;
+    game_action = kGameActionNothing;
+    game_state  = kGameStateTitleScreen;
 
     paused = false;
 
     title_countdown = 1;
 
-    E_AdvanceTitle();
+    AdvanceTitle();
 }
 
-void E_TitleTicker(void)
+void TitleTicker(void)
 {
     if (title_countdown > 0)
     {
         title_countdown--;
 
-        if (title_countdown == 0)
-            E_AdvanceTitle();
+        if (title_countdown == 0) AdvanceTitle();
     }
 }
 
@@ -972,79 +992,76 @@ void E_TitleTicker(void)
 //
 // -ES- 2000/01/01 Written.
 //
-void InitDirectories(void)
+static void InitializeDirectories(void)
 {
     // Get the App Directory from parameter.
 
     // Note: This might need adjusting for Apple
     std::string s = SDL_GetBasePath();
 
-    game_dir = s;
-    s        = argv::Value("game");
-    if (!s.empty())
-        game_dir = s;
+    game_directory = s;
+    s              = ArgumentValue("game");
+    if (!s.empty()) game_directory = s;
 
-    brandingfile = epi::PathAppend(game_dir, EDGEBRANDINGFILE);
+    branding_file = epi::PathAppend(game_directory, kBrandingFileName);
 
-    M_LoadBranding();
+    ConfigurationLoadBranding();
 
     // add parameter file "appdir/parms" if it exists.
-    std::string parms = epi::PathAppend(game_dir, "parms");
+    std::string parms = epi::PathAppend(game_directory, "parms");
 
     if (epi::TestFileAccess(parms))
     {
         // Insert it right after the app parameter
-        argv::ApplyResponseFile(parms);
+        ArgumentApplyResponseFile(parms);
     }
 
     // config file - check for portable config
-    s = argv::Value("config");
-    if (!s.empty())
-    {
-        cfgfile = s;
-    }
+    s = ArgumentValue("config");
+    if (!s.empty()) { configuration_file = s; }
     else
     {
-        cfgfile = epi::PathAppend(game_dir, configfilename.s);
-        if (epi::TestFileAccess(cfgfile) || argv::Find("portable") > 0)
-            home_dir = game_dir;
+        configuration_file =
+            epi::PathAppend(game_directory, config_filename.s_);
+        if (epi::TestFileAccess(configuration_file) ||
+            ArgumentFind("portable") > 0)
+            home_directory = game_directory;
         else
-            cfgfile.clear();
+            configuration_file.clear();
     }
 
-    if (home_dir.empty())
+    if (home_directory.empty())
     {
-        s = argv::Value("home");
-        if (!s.empty())
-            home_dir = s;
+        s = ArgumentValue("home");
+        if (!s.empty()) home_directory = s;
     }
 
 #ifdef _WIN32
-    if (home_dir.empty())
-        home_dir = SDL_GetPrefPath(nullptr, appname.c_str());
+    if (home_directory.empty())
+        home_directory = SDL_GetPrefPath(nullptr, appname.c_str());
 #else
-    if (home_dir.empty())
-        home_dir = SDL_GetPrefPath(orgname.c_str(), appname.c_str());
+    if (home_directory.empty())
+        home_directory = SDL_GetPrefPath(orgname.c_str(), appname.c_str());
 #endif
 
-    if (!epi::IsDirectory(home_dir))
+    if (!epi::IsDirectory(home_directory))
     {
-        if (!epi::MakeDirectory(home_dir))
-            I_Error("InitDirectories: Could not create directory at %s!\n", home_dir.c_str());
+        if (!epi::MakeDirectory(home_directory))
+            FatalError(
+                "InitializeDirectories: Could not create directory at %s!\n",
+                home_directory.c_str());
     }
 
-    if (cfgfile.empty())
-        cfgfile = epi::PathAppend(home_dir, configfilename.s);
+    if (configuration_file.empty())
+        configuration_file =
+            epi::PathAppend(home_directory, config_filename.s_);
 
     // edge_defs.epk file
-    s = argv::Value("defs");
-    if (!s.empty())
-    {
-        epkfile = s;
-    }
+    s = ArgumentValue("defs");
+    if (!s.empty()) { epkfile = s; }
     else
     {
-        std::string defs_test = epi::PathAppend(game_dir, "edge_defs");
+        std::string defs_test = epi::PathAppend(game_directory, "edge_defs");
         if (epi::IsDirectory(defs_test))
             epkfile = defs_test;
         else
@@ -1052,24 +1069,23 @@ void InitDirectories(void)
     }
 
     // cache directory
-    cache_dir = epi::PathAppend(home_dir, CACHEDIR);
+    cache_directory = epi::PathAppend(home_directory, kCacheDirectory);
 
-    if (!epi::IsDirectory(cache_dir))
-        epi::MakeDirectory(cache_dir);
+    if (!epi::IsDirectory(cache_directory)) epi::MakeDirectory(cache_directory);
 
     // savegame directory
-    save_dir = epi::PathAppend(home_dir, SAVEGAMEDIR);
+    save_directory = epi::PathAppend(home_directory, kSaveGameDirectory);
 
-    if (!epi::IsDirectory(save_dir))
-        epi::MakeDirectory(save_dir);
+    if (!epi::IsDirectory(save_directory)) epi::MakeDirectory(save_directory);
 
-    SV_ClearSlot("current");
+    SaveClearSlot("current");
 
     // screenshot directory
-    shot_dir = epi::PathAppend(home_dir, SCRNSHOTDIR);
+    screenshot_directory =
+        epi::PathAppend(home_directory, kScreenshotDirectory);
 
-    if (!epi::IsDirectory(shot_dir))
-        epi::MakeDirectory(shot_dir);
+    if (!epi::IsDirectory(screenshot_directory))
+        epi::MakeDirectory(screenshot_directory);
 }
 
 // Get rid of legacy GWA/HWA files
@@ -1078,9 +1094,10 @@ static void PurgeCache(void)
 {
     std::vector<epi::DirectoryEntry> fsd;
 
-    if (!ReadDirectory(fsd, cache_dir, "*.*"))
+    if (!ReadDirectory(fsd, cache_directory, "*.*"))
     {
-        I_Error("PurgeCache: Failed to read '%s' directory!\n", cache_dir.c_str());
+        FatalError("PurgeCache: Failed to read '%s' directory!\n",
+                   cache_directory.c_str());
     }
     else
     {
@@ -1097,20 +1114,21 @@ static void PurgeCache(void)
     }
 }
 
-// If a valid IWAD (or EDGEGAME) is found, return the appopriate game_base string ("doom2", "heretic", etc)
-static int CheckPackForGameFiles(std::string check_pack, filekind_e check_kind)
+// If a valid IWAD (or EDGEGAME) is found, return the appopriate game_base
+// string ("doom2", "heretic", etc)
+static int CheckPackForGameFiles(std::string check_pack, FileKind check_kind)
 {
-    data_file_c *check_pack_df = new data_file_c(check_pack, check_kind);
-    SYS_ASSERT(check_pack_df);
-    Pack_PopulateOnly(check_pack_df);
-    if (Pack_FindStem(check_pack_df->pack, "EDGEGAME"))
+    DataFile *check_pack_df = new DataFile(check_pack, check_kind);
+    EPI_ASSERT(check_pack_df);
+    PackPopulateOnly(check_pack_df);
+    if (PackFindStem(check_pack_df->pack_, "EDGEGAME"))
     {
         delete check_pack_df;
-        return 0; // Custom game index value in game_checker vector
+        return 0;  // Custom game index value in game_checker vector
     }
     else
     {
-        int check_base = Pack_CheckForIWADs(check_pack_df);
+        int check_base = PackCheckForIwads(check_pack_df);
         delete check_pack_df;
         return check_base;
     }
@@ -1125,15 +1143,16 @@ static void IdentifyVersion(void)
     const char *check = nullptr;
 
     if (epi::IsDirectory(epkfile))
-        W_AddFilename(epkfile, FLKIND_EFolder);
+        AddDataFile(epkfile, kFileKindEFolder);
     else
     {
         if (!epi::TestFileAccess(epkfile))
-            I_Error("IdentifyVersion: Could not find required %s.%s!\n", REQUIREDEPK, "epk");
-        W_AddFilename(epkfile, FLKIND_EEPK);
+            FatalError("IdentifyVersion: Could not find required %s.%s!\n",
+                       kRequiredEPK, "epk");
+        AddDataFile(epkfile, kFileKindEEpk);
     }
 
-    I_Debugf("- Identify Version\n");
+    LogDebug("- Identify Version\n");
 
     // Check -iwad parameter, find out if it is the IWADs directory
     std::string              iwad_par;
@@ -1141,118 +1160,137 @@ static void IdentifyVersion(void)
     std::string              iwad_dir;
     std::vector<std::string> iwad_dir_vector;
 
-    std::string s = argv::Value("iwad");
+    std::string s = ArgumentValue("iwad");
 
     iwad_par = s;
 
     if (!iwad_par.empty())
     {
-        // Treat directories passed via -iwad as a pack file and check accordingly
+        // Treat directories passed via -iwad as a pack file and check
+        // accordingly
         if (epi::IsDirectory(iwad_par))
         {
-            int game_check = CheckPackForGameFiles(iwad_par, FLKIND_IFolder);
+            int game_check = CheckPackForGameFiles(iwad_par, kFileKindIFolder);
             if (game_check < 0)
-                I_Error("Folder %s passed via -iwad parameter, but no IWAD or EDGEGAME file detected!\n",
-                        iwad_par.c_str());
+                FatalError(
+                    "Folder %s passed via -iwad parameter, but no IWAD or "
+                    "EDGEGAME file detected!\n",
+                    iwad_par.c_str());
             else
             {
                 game_base = game_checker[game_check].base;
-                W_AddFilename(iwad_par, FLKIND_IFolder);
-                I_Debugf("GAME BASE = [%s]\n", game_base.c_str());
+                AddDataFile(iwad_par, kFileKindIFolder);
+                LogDebug("GAME BASE = [%s]\n", game_base.c_str());
                 return;
             }
         }
     }
     else
     {
-        // In the absence of the -iwad parameter, check files/dirs added via drag-and-drop for valid IWADs
-        // Remove them from the arg list if they are valid to avoid them potentially being added as PWADs
-        std::vector<SDL_MessageBoxButtonData> game_buttons;
-        std::unordered_map<int, std::pair<std::string, filekind_e>> game_paths;
-        for (size_t p = 1; p < argv::list.size() && !argv::IsOption(p); p++)
+        // In the absence of the -iwad parameter, check files/dirs added via
+        // drag-and-drop for valid IWADs Remove them from the arg list if they
+        // are valid to avoid them potentially being added as PWADs
+        std::vector<SDL_MessageBoxButtonData>                     game_buttons;
+        std::unordered_map<int, std::pair<std::string, FileKind>> game_paths;
+        for (size_t p = 1;
+             p < program_argument_list.size() && !ArgumentIsOption(p); p++)
         {
-            std::string dnd = argv::list[p];
-            int test_index = -1;
+            std::string dnd        = program_argument_list[p];
+            int         test_index = -1;
             if (epi::IsDirectory(dnd))
             {
-                test_index = CheckPackForGameFiles(dnd, FLKIND_IFolder);
+                test_index = CheckPackForGameFiles(dnd, kFileKindIFolder);
                 if (test_index >= 0)
                 {
                     if (!game_paths.count(test_index))
                     {
-                        game_paths.try_emplace(test_index, std::make_pair(dnd, FLKIND_IFolder));
+                        game_paths.try_emplace(
+                            test_index, std::make_pair(dnd, kFileKindIFolder));
                         SDL_MessageBoxButtonData temp_button;
                         temp_button.buttonid = test_index;
-                        temp_button.text = game_checker[test_index].display_name.c_str();
+                        temp_button.text =
+                            game_checker[test_index].display_name.c_str();
                         game_buttons.push_back(temp_button);
                     }
-                    argv::list.erase(argv::list.begin()+p--);
+                    program_argument_list.erase(program_argument_list.begin() +
+                                                p--);
                 }
             }
-            else if (epi::StringCaseCompareASCII(epi::GetExtension(dnd), ".epk") == 0)
+            else if (epi::StringCaseCompareASCII(epi::GetExtension(dnd),
+                                                 ".epk") == 0)
             {
-                test_index = CheckPackForGameFiles(dnd, FLKIND_IPK);
+                test_index = CheckPackForGameFiles(dnd, kFileKindIpk);
                 if (test_index >= 0)
                 {
                     if (!game_paths.count(test_index))
                     {
-                        game_paths.try_emplace(test_index, std::make_pair(dnd, FLKIND_IPK));
+                        game_paths.try_emplace(
+                            test_index, std::make_pair(dnd, kFileKindIpk));
                         SDL_MessageBoxButtonData temp_button;
                         temp_button.buttonid = test_index;
-                        temp_button.text = game_checker[test_index].display_name.c_str();
+                        temp_button.text =
+                            game_checker[test_index].display_name.c_str();
                         game_buttons.push_back(temp_button);
                     }
-                    argv::list.erase(argv::list.begin()+p--);
-                }  
+                    program_argument_list.erase(program_argument_list.begin() +
+                                                p--);
+                }
             }
-            else if (epi::StringCaseCompareASCII(epi::GetExtension(dnd), ".wad") == 0)
+            else if (epi::StringCaseCompareASCII(epi::GetExtension(dnd),
+                                                 ".wad") == 0)
             {
-                epi::File *game_test =
-                    epi::FileOpen(dnd, epi::kFileAccessRead | epi::kFileAccessBinary);
-                test_index  = W_CheckForUniqueLumps(game_test);
+                epi::File *game_test = epi::FileOpen(
+                    dnd, epi::kFileAccessRead | epi::kFileAccessBinary);
+                test_index = CheckForUniqueGameLumps(game_test);
                 delete game_test;
                 if (test_index >= 0)
                 {
                     if (!game_paths.count(test_index))
                     {
-                        game_paths.try_emplace(test_index, std::make_pair(dnd, FLKIND_IWad));
+                        game_paths.try_emplace(
+                            test_index, std::make_pair(dnd, kFileKindIWad));
                         SDL_MessageBoxButtonData temp_button;
                         temp_button.buttonid = test_index;
-                        temp_button.text = game_checker[test_index].display_name.c_str();
+                        temp_button.text =
+                            game_checker[test_index].display_name.c_str();
                         game_buttons.push_back(temp_button);
                     }
-                    argv::list.erase(argv::list.begin()+p--);
+                    program_argument_list.erase(program_argument_list.begin() +
+                                                p--);
                 }
             }
         }
         if (game_paths.size() == 1)
         {
             auto selected_game = game_paths.begin();
-            game_base = game_checker[selected_game->first].base;
-            W_AddFilename(selected_game->second.first, selected_game->second.second);
-            I_Debugf("GAME BASE = [%s]\n", game_base.c_str());
+            game_base          = game_checker[selected_game->first].base;
+            AddDataFile(selected_game->second.first,
+                        selected_game->second.second);
+            LogDebug("GAME BASE = [%s]\n", game_base.c_str());
             return;
         }
         else if (!game_paths.empty())
         {
-            SYS_ASSERT(game_paths.size() == game_buttons.size());
+            EPI_ASSERT(game_paths.size() == game_buttons.size());
             SDL_MessageBoxData picker_data;
             SDL_memset(&picker_data, 0, sizeof(SDL_MessageBoxData));
             picker_data.title = "EDGE-Classic Game Selector";
-            picker_data.message = "No game was specified, but EDGE-Classic found multiple valid game files. Please select one or press Escape to cancel.";
+            picker_data.message =
+                "No game was specified, but EDGE-Classic found multiple valid "
+                "game files. Please select one or press Escape to cancel.";
             picker_data.numbuttons = game_buttons.size();
-            picker_data.buttons = game_buttons.data();
-            int button_hit = 0;
+            picker_data.buttons    = game_buttons.data();
+            int button_hit         = 0;
             if (SDL_ShowMessageBox(&picker_data, &button_hit) != 0)
-                I_Error("Error in game selection dialog!\n");
+                FatalError("Error in game selection dialog!\n");
             else if (button_hit == -1)
-                I_Error("Game selection cancelled.\n");
+                FatalError("Game selection cancelled.\n");
             else
             {
-                game_base = game_checker[button_hit].base;
+                game_base          = game_checker[button_hit].base;
                 auto selected_game = game_paths.at(button_hit);
-                W_AddFilename(selected_game.first, selected_game.second);
-                I_Debugf("GAME BASE = [%s]\n", game_base.c_str());
+                AddDataFile(selected_game.first, selected_game.second);
+                LogDebug("GAME BASE = [%s]\n", game_base.c_str());
                 return;
             }
         }
@@ -1263,13 +1301,13 @@ static void IdentifyVersion(void)
     check = SDL_getenv("DOOMWADDIR");
     if (check) s = check;
 
-    if (!s.empty() && epi::IsDirectory(s))
-        iwad_dir_vector.push_back(s);
+    if (!s.empty() && epi::IsDirectory(s)) iwad_dir_vector.push_back(s);
 
     // Should the IWAD directory not be set by now, then we
     // use our standby option of the current directory.
     if (iwad_dir.empty())
-        iwad_dir = "."; // should this be hardcoded to the game or home directory instead? - Dasho
+        iwad_dir = ".";  // should this be hardcoded to the game or home
+                         // directory instead? - Dasho
 
     // Add DOOMWADPATH directories if they exist
     s.clear();
@@ -1292,7 +1330,8 @@ static void IdentifyVersion(void)
         // Is it missing the extension?
         if (epi::GetExtension(fn).empty())
         {
-            // We will still be checking EPKs if needed; but by the numbers .wad is a good initial search
+            // We will still be checking EPKs if needed; but by the numbers .wad
+            // is a good initial search
             epi::ReplaceExtension(fn, ".wad");
         }
 
@@ -1311,15 +1350,15 @@ static void IdentifyVersion(void)
                 for (size_t i = 0; i < iwad_dir_vector.size(); i++)
                 {
                     iwad_file = epi::PathAppend(iwad_dir_vector[i], fn);
-                    if (epi::TestFileAccess(iwad_file))
-                        goto foundindoomwadpath;
+                    if (epi::TestFileAccess(iwad_file)) goto foundindoomwadpath;
                 }
             }
         }
         else
             goto foundindoomwadpath;
 
-        // If we get here, try .epk and error out if we still can't access what was passed to us
+        // If we get here, try .epk and error out if we still can't access what
+        // was passed to us
         epi::ReplaceExtension(iwad_file, ".epk");
 
         if (!epi::TestFileAccess(iwad_file))
@@ -1330,54 +1369,63 @@ static void IdentifyVersion(void)
                 for (size_t i = 0; i < iwad_dir_vector.size(); i++)
                 {
                     iwad_file = epi::PathAppend(iwad_dir_vector[i], fn);
-                    if (epi::TestFileAccess(iwad_file))
-                        goto foundindoomwadpath;
+                    if (epi::TestFileAccess(iwad_file)) goto foundindoomwadpath;
                 }
-                I_Error("IdentifyVersion: Unable to access specified '%s'", fn.c_str());
+                FatalError("IdentifyVersion: Unable to access specified '%s'",
+                           fn.c_str());
             }
             else
-                I_Error("IdentifyVersion: Unable to access specified '%s'", fn.c_str());
+                FatalError("IdentifyVersion: Unable to access specified '%s'",
+                           fn.c_str());
         }
 
     foundindoomwadpath:
 
         int test_score = -1;
 
-        if (epi::StringCaseCompareASCII(epi::GetExtension(iwad_file), ".wad") == 0)
+        if (epi::StringCaseCompareASCII(epi::GetExtension(iwad_file), ".wad") ==
+            0)
         {
-            epi::File *game_test = epi::FileOpen(iwad_file, epi::kFileAccessRead | epi::kFileAccessBinary);
-            test_score              = W_CheckForUniqueLumps(game_test);
+            epi::File *game_test = epi::FileOpen(
+                iwad_file, epi::kFileAccessRead | epi::kFileAccessBinary);
+            test_score = CheckForUniqueGameLumps(game_test);
             delete game_test;
             if (test_score >= 0)
             {
                 game_base = game_checker[test_score].base;
-                W_AddFilename(iwad_file, FLKIND_IWad);
+                AddDataFile(iwad_file, kFileKindIWad);
             }
             else
-                I_Error("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.c_str());
+                FatalError(
+                    "IdentifyVersion: Could not identify '%s' as a valid "
+                    "IWAD!\n",
+                    fn.c_str());
         }
         else
         {
-            test_score = CheckPackForGameFiles(iwad_file, FLKIND_IPK);
+            test_score = CheckPackForGameFiles(iwad_file, kFileKindIpk);
             if (test_score >= 0)
             {
                 game_base = game_checker[test_score].base;
-                W_AddFilename(iwad_file, FLKIND_IPK);
+                AddDataFile(iwad_file, kFileKindIpk);
             }
             else
-                I_Error("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.c_str());
+                FatalError(
+                    "IdentifyVersion: Could not identify '%s' as a valid "
+                    "IWAD!\n",
+                    fn.c_str());
         }
     }
     else
     {
         std::string location;
 
-        std::vector<SDL_MessageBoxButtonData> game_buttons;
-        std::unordered_map<int, std::pair<std::string, filekind_e>> game_paths;
+        std::vector<SDL_MessageBoxButtonData>                     game_buttons;
+        std::unordered_map<int, std::pair<std::string, FileKind>> game_paths;
 
         int max = 1;
 
-        if (iwad_dir.compare(game_dir) != 0)
+        if (iwad_dir.compare(game_directory) != 0)
         {
             // IWAD directory & game directory differ
             // therefore do a second loop which will
@@ -1387,7 +1435,7 @@ static void IdentifyVersion(void)
 
         for (int i = 0; i < max; i++)
         {
-            location = (i == 0 ? iwad_dir : game_dir);
+            location = (i == 0 ? iwad_dir : game_directory);
 
             //
             // go through the available *.wad files, attempting IWAD
@@ -1400,7 +1448,8 @@ static void IdentifyVersion(void)
 
             if (!ReadDirectory(fsd, location, "*.wad"))
             {
-                I_Debugf("IdentifyVersion: No WADs found in '%s' directory!\n", location.c_str());
+                LogDebug("IdentifyVersion: No WADs found in '%s' directory!\n",
+                         location.c_str());
             }
             else
             {
@@ -1408,18 +1457,22 @@ static void IdentifyVersion(void)
                 {
                     if (!fsd[j].is_dir)
                     {
-                        epi::File *game_test =
-                            epi::FileOpen(fsd[j].name, epi::kFileAccessRead | epi::kFileAccessBinary);
-                        int         test_score = W_CheckForUniqueLumps(game_test);
+                        epi::File *game_test = epi::FileOpen(
+                            fsd[j].name,
+                            epi::kFileAccessRead | epi::kFileAccessBinary);
+                        int test_score = CheckForUniqueGameLumps(game_test);
                         delete game_test;
                         if (test_score >= 0)
                         {
                             if (!game_paths.count(test_score))
                             {
-                                game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, FLKIND_IWad));
+                                game_paths.try_emplace(
+                                    test_score,
+                                    std::make_pair(fsd[j].name, kFileKindIWad));
                                 SDL_MessageBoxButtonData temp_button;
                                 temp_button.buttonid = test_score;
-                                temp_button.text = game_checker[test_score].display_name.c_str();
+                                temp_button.text     = game_checker[test_score]
+                                                       .display_name.c_str();
                                 game_buttons.push_back(temp_button);
                             }
                         }
@@ -1428,7 +1481,8 @@ static void IdentifyVersion(void)
             }
             if (!ReadDirectory(fsd, location, "*.epk"))
             {
-                I_Debugf("IdentifyVersion: No EPKs found in '%s' directory!\n", location.c_str());
+                LogDebug("IdentifyVersion: No EPKs found in '%s' directory!\n",
+                         location.c_str());
             }
             else
             {
@@ -1436,15 +1490,19 @@ static void IdentifyVersion(void)
                 {
                     if (!fsd[j].is_dir)
                     {
-                        int         test_score = CheckPackForGameFiles(fsd[j].name, FLKIND_IPK);
+                        int test_score =
+                            CheckPackForGameFiles(fsd[j].name, kFileKindIpk);
                         if (test_score >= 0)
                         {
                             if (!game_paths.count(test_score))
                             {
-                                game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, FLKIND_IPK));
+                                game_paths.try_emplace(
+                                    test_score,
+                                    std::make_pair(fsd[j].name, kFileKindIpk));
                                 SDL_MessageBoxButtonData temp_button;
                                 temp_button.buttonid = test_score;
-                                temp_button.text = game_checker[test_score].display_name.c_str();
+                                temp_button.text     = game_checker[test_score]
+                                                       .display_name.c_str();
                                 game_buttons.push_back(temp_button);
                             }
                         }
@@ -1453,7 +1511,8 @@ static void IdentifyVersion(void)
             }
         }
 
-        // Separate check for DOOMWADPATH stuff if it exists - didn't want to mess with the existing stuff above
+        // Separate check for DOOMWADPATH stuff if it exists - didn't want to
+        // mess with the existing stuff above
 
         if (!iwad_dir_vector.empty())
         {
@@ -1465,7 +1524,9 @@ static void IdentifyVersion(void)
 
                 if (!ReadDirectory(fsd, location, "*.wad"))
                 {
-                    I_Debugf("IdentifyVersion: No WADs found in '%s' directory!\n", location.c_str());
+                    LogDebug(
+                        "IdentifyVersion: No WADs found in '%s' directory!\n",
+                        location.c_str());
                 }
                 else
                 {
@@ -1473,18 +1534,24 @@ static void IdentifyVersion(void)
                     {
                         if (!fsd[j].is_dir)
                         {
-                            epi::File *game_test =
-                            epi::FileOpen(fsd[j].name, epi::kFileAccessRead | epi::kFileAccessBinary);
-                            int         test_score = W_CheckForUniqueLumps(game_test);
+                            epi::File *game_test = epi::FileOpen(
+                                fsd[j].name,
+                                epi::kFileAccessRead | epi::kFileAccessBinary);
+                            int test_score = CheckForUniqueGameLumps(game_test);
                             delete game_test;
                             if (test_score >= 0)
                             {
                                 if (!game_paths.count(test_score))
                                 {
-                                    game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, FLKIND_IWad));
+                                    game_paths.try_emplace(
+                                        test_score,
+                                        std::make_pair(fsd[j].name,
+                                                       kFileKindIWad));
                                     SDL_MessageBoxButtonData temp_button;
                                     temp_button.buttonid = test_score;
-                                    temp_button.text = game_checker[test_score].display_name.c_str();
+                                    temp_button.text =
+                                        game_checker[test_score]
+                                            .display_name.c_str();
                                     game_buttons.push_back(temp_button);
                                 }
                             }
@@ -1493,7 +1560,9 @@ static void IdentifyVersion(void)
                 }
                 if (!ReadDirectory(fsd, location, "*.epk"))
                 {
-                    I_Debugf("IdentifyVersion: No EPKs found in '%s' directory!\n", location.c_str());
+                    LogDebug(
+                        "IdentifyVersion: No EPKs found in '%s' directory!\n",
+                        location.c_str());
                 }
                 else
                 {
@@ -1501,15 +1570,21 @@ static void IdentifyVersion(void)
                     {
                         if (!fsd[j].is_dir)
                         {
-                            int         test_score = CheckPackForGameFiles(fsd[j].name, FLKIND_IPK);
+                            int test_score = CheckPackForGameFiles(
+                                fsd[j].name, kFileKindIpk);
                             if (test_score >= 0)
                             {
                                 if (!game_paths.count(test_score))
                                 {
-                                    game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, FLKIND_IPK));
+                                    game_paths.try_emplace(
+                                        test_score,
+                                        std::make_pair(fsd[j].name,
+                                                       kFileKindIpk));
                                     SDL_MessageBoxButtonData temp_button;
                                     temp_button.buttonid = test_score;
-                                    temp_button.text = game_checker[test_score].display_name.c_str();
+                                    temp_button.text =
+                                        game_checker[test_score]
+                                            .display_name.c_str();
                                     game_buttons.push_back(temp_button);
                                 }
                             }
@@ -1520,59 +1595,67 @@ static void IdentifyVersion(void)
         }
 
         if (game_paths.empty())
-            I_Error("IdentifyVersion: No IWADs or standalone packs found!\n");
+            FatalError(
+                "IdentifyVersion: No IWADs or standalone packs found!\n");
         else if (game_paths.size() == 1)
         {
             auto selected_game = game_paths.begin();
-            game_base = game_checker[selected_game->first].base;
-            W_AddFilename(selected_game->second.first, selected_game->second.second);
+            game_base          = game_checker[selected_game->first].base;
+            AddDataFile(selected_game->second.first,
+                        selected_game->second.second);
         }
         else
         {
-            SYS_ASSERT(game_paths.size() == game_buttons.size());
+            EPI_ASSERT(game_paths.size() == game_buttons.size());
             SDL_MessageBoxData picker_data;
             SDL_memset(&picker_data, 0, sizeof(SDL_MessageBoxData));
             picker_data.title = "EDGE-Classic Game Selector";
-            picker_data.message = "No game was specified, but EDGE-Classic found multiple valid game files. Please select one or press Escape to cancel.";
+            picker_data.message =
+                "No game was specified, but EDGE-Classic found multiple valid "
+                "game files. Please select one or press Escape to cancel.";
             picker_data.numbuttons = game_buttons.size();
-            picker_data.buttons = game_buttons.data();
-            int button_hit = 0;
+            picker_data.buttons    = game_buttons.data();
+            int button_hit         = 0;
             if (SDL_ShowMessageBox(&picker_data, &button_hit) != 0)
-                I_Error("Error in game selection dialog!\n");
+                FatalError("Error in game selection dialog!\n");
             else if (button_hit == -1)
-                I_Error("Game selection cancelled.\n");
+                FatalError("Game selection cancelled.\n");
             else
             {
-                game_base = game_checker[button_hit].base;
+                game_base          = game_checker[button_hit].base;
                 auto selected_game = game_paths.at(button_hit);
-                W_AddFilename(selected_game.first, selected_game.second);
+                AddDataFile(selected_game.first, selected_game.second);
             }
         }
     }
 
-    I_Debugf("GAME BASE = [%s]\n", game_base.c_str());
+    LogDebug("GAME BASE = [%s]\n", game_base.c_str());
 }
 
 // Add game-specific base EPKs (widepix, skyboxes, etc) - Dasho
-static void Add_Base(void)
+static void AddBasePack(void)
 {
     if (epi::StringCaseCompareASCII("CUSTOM", game_base) == 0)
-        return; // Standalone EDGE IWADs/EPKs should already contain their necessary resources and definitions - Dasho
-    std::string base_path = epi::PathAppend(game_dir, "edge_base");
+        return;  // Standalone EDGE IWADs/EPKs should already contain their
+                 // necessary resources and definitions - Dasho
+    std::string base_path = epi::PathAppend(game_directory, "edge_base");
     std::string base_wad  = game_base;
     epi::StringLowerASCII(base_wad);
     base_path = epi::PathAppend(base_path, base_wad);
     if (epi::IsDirectory(base_path))
-        W_AddFilename(base_path, FLKIND_EFolder);
+        AddDataFile(base_path, kFileKindEFolder);
     else
     {
         epi::ReplaceExtension(base_path, ".epk");
         if (epi::TestFileAccess(base_path))
-            W_AddFilename(base_path, FLKIND_EEPK);
+            AddDataFile(base_path, kFileKindEEpk);
         else
         {
-            I_Error("%s not found for the %s IWAD! Check the /edge_base folder of your %s install!\n",
-                epi::GetFilename(base_path).c_str(), game_base.c_str(), appname.c_str());
+            FatalError(
+                "%s not found for the %s IWAD! Check the /edge_base folder of "
+                "your %s install!\n",
+                epi::GetFilename(base_path).c_str(), game_base.c_str(),
+                appname.c_str());
         }
     }
 }
@@ -1581,24 +1664,23 @@ static void CheckTurbo(void)
 {
     int turbo_scale = 100;
 
-    int p = argv::Find("turbo");
+    int p = ArgumentFind("turbo");
 
     if (p > 0)
     {
-        if (p + 1 < int(argv::list.size()) && !argv::IsOption(p + 1))
-            turbo_scale = atoi(argv::list[p + 1].c_str());
+        if (p + 1 < int(program_argument_list.size()) &&
+            !ArgumentIsOption(p + 1))
+            turbo_scale = atoi(program_argument_list[p + 1].c_str());
         else
             turbo_scale = 200;
 
-        if (turbo_scale < 10)
-            turbo_scale = 10;
-        if (turbo_scale > 400)
-            turbo_scale = 400;
+        if (turbo_scale < 10) turbo_scale = 10;
+        if (turbo_scale > 400) turbo_scale = 400;
 
-        CON_MessageLDF("TurboScale", turbo_scale);
+        ConsoleMessageLDF("TurboScale", turbo_scale);
     }
 
-    E_SetTurboScale(turbo_scale);
+    EventSetTurboScale(turbo_scale);
 }
 
 static void ShowDateAndVersion(void)
@@ -1609,35 +1691,34 @@ static void ShowDateAndVersion(void)
     time(&cur_time);
     strftime(timebuf, 99, "%I:%M %p on %d/%b/%Y", localtime(&cur_time));
 
-    I_Debugf("[Log file created at %s]\n\n", timebuf);
-    I_Debugf("[Debug file created at %s]\n\n", timebuf);
+    LogDebug("[Log file created at %s]\n\n", timebuf);
+    LogDebug("[Debug file created at %s]\n\n", timebuf);
 
-    I_Printf("%s v%s compiled on " __DATE__ " at " __TIME__ "\n", appname.c_str(), edgeversion.c_str());
-    I_Printf("%s homepage is at %s\n", appname.c_str(), homepage.c_str());
+    LogPrint("%s v%s compiled on " __DATE__ " at " __TIME__ "\n",
+             appname.c_str(), edgeversion.c_str());
+    LogPrint("%s homepage is at %s\n", appname.c_str(), homepage.c_str());
 
-    I_Printf("Executable path: '%s'\n", exe_path.c_str());
+    LogPrint("Executable path: '%s'\n", executable_path.c_str());
 
-    argv::DebugDumpArgs();
+    ArgumentDebugDump();
 }
 
 static void SetupLogAndDebugFiles(void)
 {
-    // -AJA- 2003/11/08 The log file gets all CON_Printfs, I_Printfs,
-    //                  I_Warnings and I_Errors.
+    // -AJA- 2003/11/08 The log file gets all ConsolePrints, LogPrints,
+    //                  LogWarnings and FatalErrors.
 
-    std::string log_fn = epi::PathAppend(home_dir, logfilename.s);
-    std::string debug_fn = epi::PathAppend(home_dir, debugfilename.s);
+    std::string log_fn   = epi::PathAppend(home_directory, log_filename.s_);
+    std::string debug_fn = epi::PathAppend(home_directory, debug_filename.s_);
 
+    log_file   = nullptr;
+    debug_file = nullptr;
 
-    logfile   = NULL;
-    debugfile = NULL;
-
-    if (argv::Find("nolog") < 0)
+    if (ArgumentFind("nolog") < 0)
     {
-        logfile = epi::FileOpenRaw(log_fn, epi::kFileAccessWrite);
+        log_file = epi::FileOpenRaw(log_fn, epi::kFileAccessWrite);
 
-        if (!logfile)
-            I_Error("[E_Startup] Unable to create log file\n");
+        if (!log_file) FatalError("[EdgeStartup] Unable to create log file\n");
     }
 
     //
@@ -1645,25 +1726,27 @@ static void SetupLogAndDebugFiles(void)
     //                  Moved here to setup debug file for DDF Parsing...
     //
     // -ES- 1999/08/01 Debugfiles can now be used without -DDEVELOPERS, and
-    //                 then logs all the CON_Printfs, I_Printfs and I_Errors.
+    //                 then logs all the ConsolePrints, LogPrints and
+    //                 FatalErrors.
     //
-    // -ACB- 1999/10/02 Don't print to console, since we don't have a console yet.
+    // -ACB- 1999/10/02 Don't print to console, since we don't have a console
+    // yet.
 
-    /// int p = argv::Find("debug");
+    /// int p = ArgumentFind("debug");
     if (true)
     {
-        debugfile = epi::FileOpenRaw(debug_fn, epi::kFileAccessWrite);
+        debug_file = epi::FileOpenRaw(debug_fn, epi::kFileAccessWrite);
 
-        if (!debugfile)
-            I_Error("[E_Startup] Unable to create debugfile");
+        if (!debug_file)
+            FatalError("[EdgeStartup] Unable to create debug_file");
     }
 }
 
-static void AddSingleCmdLineFile(std::string name, bool ignore_unknown)
+static void AddSingleCommandLineFile(std::string name, bool ignore_unknown)
 {
     if (epi::IsDirectory(name))
     {
-        W_AddFilename(name, FLKIND_Folder);
+        AddDataFile(name, kFileKindFolder);
         return;
     }
 
@@ -1671,30 +1754,29 @@ static void AddSingleCmdLineFile(std::string name, bool ignore_unknown)
 
     epi::StringLowerASCII(ext);
 
-    if (ext == ".edm")
-        I_Error("Demos are not supported\n");
+    if (ext == ".edm") FatalError("Demos are not supported\n");
 
-    filekind_e kind;
+    FileKind kind;
 
     if (ext == ".wad")
-        kind = FLKIND_PWad;
+        kind = kFileKindPWad;
     else if (ext == ".pk3" || ext == ".epk" || ext == ".zip" || ext == ".vwad")
-        kind = FLKIND_EPK;
+        kind = kFileKindEpk;
     else if (ext == ".rts")
-        kind = FLKIND_RTS;
+        kind = kFileKindRts;
     else if (ext == ".ddf" || ext == ".ldf")
-        kind = FLKIND_DDF;
+        kind = kFileKindDdf;
     else if (ext == ".deh" || ext == ".bex")
-        kind = FLKIND_Deh;
+        kind = kFileKindDehacked;
     else
     {
         if (!ignore_unknown)
-            I_Error("unknown file type: %s\n", name.c_str());
+            FatalError("unknown file type: %s\n", name.c_str());
         return;
     }
 
-    std::string filename = M_ComposeFileName(game_dir, name);
-    W_AddFilename(filename, kind);
+    std::string filename = epi::PathAppendIfNotAbsolute(game_directory, name);
+    AddDataFile(filename, kind);
 }
 
 static void AddCommandLineFiles(void)
@@ -1703,46 +1785,58 @@ static void AddCommandLineFiles(void)
 
     int p;
 
-    for (p = 1; p < int(argv::list.size()) && !argv::IsOption(p); p++)
+    for (p = 1; p < int(program_argument_list.size()) && !ArgumentIsOption(p);
+         p++)
     {
-        AddSingleCmdLineFile(argv::list[p], false);
+        AddSingleCommandLineFile(program_argument_list[p], false);
     }
 
     // next handle the -file option (we allow multiple uses)
 
-    p = argv::Find("file");
+    p = ArgumentFind("file");
 
-    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::StringCompare(argv::list[p], "-file") == 0))
+    while (p > 0 && p < int(program_argument_list.size()) &&
+           (!ArgumentIsOption(p) ||
+            epi::StringCompare(program_argument_list[p], "-file") == 0))
     {
         // the parms after p are wadfile/lump names,
         // go until end of parms or another '-' preceded parm
-        if (!argv::IsOption(p))
-            AddSingleCmdLineFile(argv::list[p], false);
+        if (!ArgumentIsOption(p))
+            AddSingleCommandLineFile(program_argument_list[p], false);
 
         p++;
     }
 
     // scripts....
 
-    p = argv::Find("script");
+    p = ArgumentFind("script");
 
-    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::StringCompare(argv::list[p], "-script") == 0))
+    while (p > 0 && p < int(program_argument_list.size()) &&
+           (!ArgumentIsOption(p) ||
+            epi::StringCompare(program_argument_list[p], "-script") == 0))
     {
         // the parms after p are script filenames,
         // go until end of parms or another '-' preceded parm
-        if (!argv::IsOption(p))
+        if (!ArgumentIsOption(p))
         {
-            std::string ext = epi::GetExtension(argv::list[p]);
+            std::string ext = epi::GetExtension(program_argument_list[p]);
             // sanity check...
-            if (epi::StringCaseCompareASCII(ext, ".wad") == 0 || epi::StringCaseCompareASCII(ext, ".pk3") == 0 || epi::StringCaseCompareASCII(ext, ".zip") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".epk") == 0 || epi::StringCaseCompareASCII(ext, ".vwad") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".ddf") == 0 || epi::StringCaseCompareASCII(ext, ".deh") == 0 || epi::StringCaseCompareASCII(ext, ".bex") == 0)
+            if (epi::StringCaseCompareASCII(ext, ".wad") == 0 ||
+                epi::StringCaseCompareASCII(ext, ".pk3") == 0 ||
+                epi::StringCaseCompareASCII(ext, ".zip") == 0 ||
+                epi::StringCaseCompareASCII(ext, ".epk") == 0 ||
+                epi::StringCaseCompareASCII(ext, ".vwad") == 0 ||
+                epi::StringCaseCompareASCII(ext, ".ddf") == 0 ||
+                epi::StringCaseCompareASCII(ext, ".deh") == 0 ||
+                epi::StringCaseCompareASCII(ext, ".bex") == 0)
             {
-                I_Error("Illegal filename for -script: %s\n", argv::list[p].c_str());
+                FatalError("Illegal filename for -script: %s\n",
+                           program_argument_list[p].c_str());
             }
 
-            std::string filename = M_ComposeFileName(game_dir, argv::list[p]);
-            W_AddFilename(filename, FLKIND_RTS);
+            std::string filename = epi::PathAppendIfNotAbsolute(
+                game_directory, program_argument_list[p]);
+            AddDataFile(filename, kFileKindRts);
         }
 
         p++;
@@ -1750,25 +1844,33 @@ static void AddCommandLineFiles(void)
 
     // dehacked/bex....
 
-    p = argv::Find("deh");
+    p = ArgumentFind("deh");
 
-    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::StringCompare(argv::list[p], "-deh") == 0))
+    while (p > 0 && p < int(program_argument_list.size()) &&
+           (!ArgumentIsOption(p) ||
+            epi::StringCompare(program_argument_list[p], "-deh") == 0))
     {
         // the parms after p are Dehacked/BEX filenames,
         // go until end of parms or another '-' preceded parm
-        if (!argv::IsOption(p))
+        if (!ArgumentIsOption(p))
         {
-            std::string ext = epi::GetExtension(argv::list[p]);
+            std::string ext = epi::GetExtension(program_argument_list[p]);
             // sanity check...
-            if (epi::StringCaseCompareASCII(ext, ".wad") == 0 || epi::StringCaseCompareASCII(ext, ".epk") == 0 || epi::StringCaseCompareASCII(ext, ".pk3") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".zip") == 0 || epi::StringCaseCompareASCII(ext, ".vwad") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".ddf") == 0 || epi::StringCaseCompareASCII(ext, ".rts") == 0)
+            if (epi::StringCaseCompareASCII(ext, ".wad") == 0 ||
+                epi::StringCaseCompareASCII(ext, ".epk") == 0 ||
+                epi::StringCaseCompareASCII(ext, ".pk3") == 0 ||
+                epi::StringCaseCompareASCII(ext, ".zip") == 0 ||
+                epi::StringCaseCompareASCII(ext, ".vwad") == 0 ||
+                epi::StringCaseCompareASCII(ext, ".ddf") == 0 ||
+                epi::StringCaseCompareASCII(ext, ".rts") == 0)
             {
-                I_Error("Illegal filename for -deh: %s\n", argv::list[p].c_str());
+                FatalError("Illegal filename for -deh: %s\n",
+                           program_argument_list[p].c_str());
             }
 
-            std::string filename = M_ComposeFileName(game_dir, argv::list[p]);
-            W_AddFilename(filename, FLKIND_Deh);
+            std::string filename = epi::PathAppendIfNotAbsolute(
+                game_directory, program_argument_list[p]);
+            AddDataFile(filename, kFileKindDehacked);
         }
 
         p++;
@@ -1776,16 +1878,19 @@ static void AddCommandLineFiles(void)
 
     // directories....
 
-    p = argv::Find("dir");
+    p = ArgumentFind("dir");
 
-    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::StringCompare(argv::list[p], "-dir") == 0))
+    while (p > 0 && p < int(program_argument_list.size()) &&
+           (!ArgumentIsOption(p) ||
+            epi::StringCompare(program_argument_list[p], "-dir") == 0))
     {
         // the parms after p are directory names,
         // go until end of parms or another '-' preceded parm
-        if (!argv::IsOption(p))
+        if (!ArgumentIsOption(p))
         {
-            std::string dirname = M_ComposeFileName(game_dir, argv::list[p]);
-            W_AddFilename(dirname, FLKIND_Folder);
+            std::string dirname = epi::PathAppendIfNotAbsolute(
+                game_directory, program_argument_list[p]);
+            AddDataFile(dirname, kFileKindFolder);
         }
 
         p++;
@@ -1793,128 +1898,117 @@ static void AddCommandLineFiles(void)
 
     // handle -ddf option (backwards compatibility)
 
-    std::string ps = argv::Value("ddf");
+    std::string ps = ArgumentValue("ddf");
 
     if (!ps.empty())
     {
-        std::string filename = M_ComposeFileName(game_dir, ps);
-        W_AddFilename(filename, FLKIND_Folder);
+        std::string filename = epi::PathAppendIfNotAbsolute(game_directory, ps);
+        AddDataFile(filename, kFileKindFolder);
     }
 }
 
-static void Add_Autoload(void)
+static void AddAutoload(void)
 {
-
     std::vector<epi::DirectoryEntry> fsd;
-    std::string folder = epi::PathAppend(game_dir, "autoload");
+    std::string folder = epi::PathAppend(game_directory, "autoload");
 
     if (!ReadDirectory(fsd, folder, "*.*"))
     {
-        I_Warning("Failed to read %s directory!\n", folder.c_str());
+        LogWarning("Failed to read %s directory!\n", folder.c_str());
     }
     else
     {
         for (size_t i = 0; i < fsd.size(); i++)
         {
-            if (!fsd[i].is_dir)
-                AddSingleCmdLineFile(fsd[i].name, true);
+            if (!fsd[i].is_dir) AddSingleCommandLineFile(fsd[i].name, true);
         }
     }
     fsd.clear();
     folder = epi::PathAppend(folder, game_base);
     if (!ReadDirectory(fsd, folder, "*.*"))
     {
-        I_Warning("Failed to read %s directory!\n", folder.c_str());
+        LogWarning("Failed to read %s directory!\n", folder.c_str());
     }
     else
     {
         for (size_t i = 0; i < fsd.size(); i++)
         {
-            if (!fsd[i].is_dir)
-                AddSingleCmdLineFile(fsd[i].name, true);
+            if (!fsd[i].is_dir) AddSingleCommandLineFile(fsd[i].name, true);
         }
     }
     fsd.clear();
 
-    // Check if autoload folder stuff is in home_dir as well, make the folder/subfolder if they don't exist (in home_dir
-    // only)
-    folder = epi::PathAppend(home_dir, "autoload");
-    if (!epi::IsDirectory(folder))
-        epi::MakeDirectory(folder);
+    // Check if autoload folder stuff is in home_directory as well, make the
+    // folder/subfolder if they don't exist (in home_directory only)
+    folder = epi::PathAppend(home_directory, "autoload");
+    if (!epi::IsDirectory(folder)) epi::MakeDirectory(folder);
 
     if (!ReadDirectory(fsd, folder, "*.*"))
     {
-        I_Warning("Failed to read %s directory!\n", folder.c_str());
+        LogWarning("Failed to read %s directory!\n", folder.c_str());
     }
     else
     {
         for (size_t i = 0; i < fsd.size(); i++)
         {
-            if (!fsd[i].is_dir)
-                AddSingleCmdLineFile(fsd[i].name, true);
+            if (!fsd[i].is_dir) AddSingleCommandLineFile(fsd[i].name, true);
         }
     }
     fsd.clear();
     folder = epi::PathAppend(folder, game_base);
-    if (!epi::IsDirectory(folder))
-        epi::MakeDirectory(folder);
+    if (!epi::IsDirectory(folder)) epi::MakeDirectory(folder);
     if (!ReadDirectory(fsd, folder, "*.*"))
     {
-        I_Warning("Failed to read %s directory!\n", folder.c_str());
+        LogWarning("Failed to read %s directory!\n", folder.c_str());
     }
     else
     {
         for (size_t i = 0; i < fsd.size(); i++)
         {
-            if (!fsd[i].is_dir)
-                AddSingleCmdLineFile(fsd[i].name, true);
+            if (!fsd[i].is_dir) AddSingleCommandLineFile(fsd[i].name, true);
         }
     }
 }
 
-static void InitDDF(void)
+static void InitializeDdf(void)
 {
-    I_Debugf("- Initialising DDF\n");
+    LogDebug("- Initialising DDF\n");
 
     DDF_Init();
 }
 
-void E_EngineShutdown(void)
+void EdgeShutdown(void)
 {
-    S_StopMusic();
+    StopMusic();
 
     // Pause to allow sounds to finish
     for (int loop = 0; loop < 30; loop++)
     {
-        S_SoundTicker();
-        I_Sleep(50);
+        SoundTicker();
+        SleepForMilliseconds(50);
     }
 
-    P_Shutdown();
-
-    S_Shutdown();
-    R_Shutdown();
-    N_Shutdown();
+    LevelShutdown();
+    SoundShutdown();
+    RendererShutdown();
+    NetworkShutdown();
 }
 
-// Local Prototypes
-static void E_Startup();
-static void E_Shutdown(void);
-
-static void E_Startup(void)
+static void EdgeStartup(void)
 {
-    CON_InitConsole();
+    ConsoleInit();
 
     // -AJA- 2000/02/02: initialise global gameflags to defaults
-    global_flags = default_gameflags;
+    global_flags = default_game_flags;
 
-    InitDirectories();
+    InitializeDirectories();
 
     // Version check ?
-    if (argv::Find("version") > 0)
+    if (ArgumentFind("version") > 0)
     {
-        // -AJA- using I_Error here, since I_Printf crashes this early on
-        I_Error("\n%s version is %s\n", appname.c_str(), edgeversion.c_str());
+        // -AJA- using FatalError here, since LogPrint crashes this early on
+        FatalError("\n%s version is %s\n", appname.c_str(),
+                   edgeversion.c_str());
     }
 
     SetupLogAndDebugFiles();
@@ -1923,97 +2017,92 @@ static void E_Startup(void)
 
     ShowDateAndVersion();
 
-    M_LoadDefaults();
+    ConfigurationLoadDefaults();
 
-    CON_HandleProgramArgs();
-    SetGlobalVars();
+    ConsoleHandleProgramArguments();
+    SetGlobalVariables();
 
     DoSystemStartup();
 
-    InitDDF();
+    InitializeDdf();
     IdentifyVersion();
-    Add_Base();
-    Add_Autoload();
+    AddBasePack();
+    AddAutoload();
     AddCommandLineFiles();
     CheckTurbo();
 
-    RAD_Init();
-    W_ProcessMultipleFiles();
+    InitializeTriggerScripts();
+    ProcessMultipleFiles();
     DDF_ParseEverything();
     // Must be done after WAD and DDF loading to check for potential
     // overrides of lump-specific image/sound/DDF defines
-    W_DoPackSubstitutions();
-    I_StartupMusic(); // Must be done after all files loaded to locate appropriate GENMIDI lump
-    V_InitPalette();
+    DoPackSubstitutions();
+    StartupMusic();  // Must be done after all files loaded to locate
+                     // appropriate GENMIDI lump
+    InitializePalette();
 
     DDF_CleanUp();
     SetLanguage();
-    W_ReadUMAPINFOLumps();
+    ReadUmapinfoLumps();
 
-    W_InitFlats();
-    W_InitTextures();
-    W_ImageCreateUser();
-    E_PickLoadingScreen();
-    E_PickMenuScreen();
+    InitializeFlats();
+    InitializeTextures();
+    CreateUserImages();
+    PickLoadingScreen();
+    PickMenuBackdrop();
 
-    HU_Init();
-    CON_Start();
-    CON_CreateQuitScreen();
+    HudInit();
+    ConsoleStart();
+    ConsoleCreateQuitScreen();
     SpecialWadVerify();
-    W_BuildNodes();
-    M_InitMiscConVars();
+    BuildXglNodes();
     ShowNotice();
 
-    SV_MainInit();
-    S_PrecacheSounds();
-    W_InitSprites();
-    W_ProcessTX_HI();
-    W_InitModels();
+    SaveSystemInitialize();
+    PrecacheSounds();
+    InitializeSprites();
+    ProcessTxHiNamespaces();
+    InitializeModels();
 
-    M_Init();
-    R_Init();
-    P_Init();
-    P_MapInit();
-    P_InitSwitchList();
-    W_InitPicAnims();
-    S_Init();
-    N_InitNetwork();
-    M_CheatInit();
-    if (LUA_UseLuaHud())
+    MenuInitialize();
+    RendererStartup();
+    PlayerStateInit();
+    InitializeSwitchList();
+    InitializeAnimations();
+    SoundInitialize();
+    NetworkInitialize();
+    CheatInitialize();
+    if (LuaUseLuaHud())
     {
-        LUA_Init();
-        LUA_LoadScripts();
+        LuaInit();
+        LuaLoadScripts();
     }
     else
     {
-        VM_InitCoal();
-        VM_LoadScripts();
+        CoalInitialize();
+        CoalLoadScripts();
     }
 }
 
-static void E_Shutdown(void)
+static void InitialState(void)
 {
-    /* TODO: E_Shutdown */
-}
-
-static void E_InitialState(void)
-{
-    I_Debugf("- Setting up Initial State...\n");
+    LogDebug("- Setting up Initial State...\n");
 
     std::string ps;
 
     // do loadgames first, as they contain all of the
     // necessary state already (in the savegame).
 
-    if (argv::Find("playdemo") > 0 || argv::Find("timedemo") > 0 || argv::Find("record") > 0)
+    if (ArgumentFind("playdemo") > 0 || ArgumentFind("timedemo") > 0 ||
+        ArgumentFind("record") > 0)
     {
-        I_Error("Demos are no longer supported\n");
+        FatalError("Demos are no longer supported\n");
     }
 
-    ps = argv::Value("loadgame");
+    ps = ArgumentValue("loadgame");
     if (!ps.empty())
     {
-        G_DeferredLoadGame(atoi(ps.c_str()));
+        GameDeferredLoadGame(atoi(ps.c_str()));
         return;
     }
 
@@ -2021,16 +2110,15 @@ static void E_InitialState(void)
 
     // get skill / episode / map from parms
     std::string warp_map;
-    skill_t     warp_skill      = sk_medium;
+    SkillLevel  warp_skill      = kSkillMedium;
     int         warp_deathmatch = 0;
 
     int bots = 0;
 
-    ps = argv::Value("bots");
-    if (!ps.empty())
-        bots = atoi(ps.c_str());
+    ps = ArgumentValue("bots");
+    if (!ps.empty()) bots = atoi(ps.c_str());
 
-    ps = argv::Value("warp");
+    ps = ArgumentValue("warp");
     if (!ps.empty())
     {
         warp     = true;
@@ -2038,25 +2126,27 @@ static void E_InitialState(void)
     }
 
     // -KM- 1999/01/29 Use correct skill: 1 is easiest, not 0
-    ps = argv::Value("skill");
+    ps = ArgumentValue("skill");
     if (!ps.empty())
     {
         warp       = true;
-        warp_skill = (skill_t)(atoi(ps.c_str()) - 1);
+        warp_skill = (SkillLevel)(atoi(ps.c_str()) - 1);
     }
 
     // deathmatch check...
-    int pp = argv::Find("deathmatch");
+    int pp = ArgumentFind("deathmatch");
     if (pp > 0)
     {
         warp_deathmatch = 1;
 
-        if (pp + 1 < int(argv::list.size()) && !argv::IsOption(pp + 1))
-            warp_deathmatch = HMM_MAX(1, atoi(argv::list[pp + 1].c_str()));
+        if (pp + 1 < int(program_argument_list.size()) &&
+            !ArgumentIsOption(pp + 1))
+            warp_deathmatch =
+                HMM_MAX(1, atoi(program_argument_list[pp + 1].c_str()));
 
         warp = true;
     }
-    else if (argv::Find("altdeath") > 0)
+    else if (ArgumentFind("altdeath") > 0)
     {
         warp_deathmatch = 2;
 
@@ -2066,33 +2156,33 @@ static void E_InitialState(void)
     // start the appropriate game based on parms
     if (!warp)
     {
-        I_Debugf("- Startup: showing title screen.\n");
-        E_StartTitle();
+        LogDebug("- Startup: showing title screen.\n");
+        StartTitle();
         return;
     }
 
-    newgame_params_c params;
+    NewGameParameters params;
 
-    params.skill      = warp_skill;
-    params.deathmatch = warp_deathmatch;
-    params.level_skip = true;
+    params.skill_      = warp_skill;
+    params.deathmatch_ = warp_deathmatch;
+    params.level_skip_ = true;
 
     if (warp_map.length() > 0)
-        params.map = G_LookupMap(warp_map.c_str());
+        params.map_ = GameLookupMap(warp_map.c_str());
     else
-        params.map = G_LookupMap("1");
+        params.map_ = GameLookupMap("1");
 
-    if (!params.map)
-        I_Error("-warp: no such level '%s'\n", warp_map.c_str());
+    if (!params.map_)
+        FatalError("-warp: no such level '%s'\n", warp_map.c_str());
 
-    SYS_ASSERT(G_MapExists(params.map));
-    SYS_ASSERT(params.map->episode);
+    EPI_ASSERT(GameMapExists(params.map_));
+    EPI_ASSERT(params.map_->episode_);
 
-    params.random_seed = I_PureRandom();
+    params.random_seed_ = PureRandomNumber();
 
     params.SinglePlayer(bots);
 
-    G_DeferredNewGame(params);
+    GameDeferredNewGame(params);
 }
 
 //
@@ -2108,52 +2198,45 @@ static void E_InitialState(void)
 //
 // -ACB- 2004/05/31 Moved into a namespace, the c++ revolution begins....
 //
-void E_Main(int argc, const char **argv)
+void EdgeMain(int argc, const char **argv)
 {
-    // Seed M_Random RNG
-    M_Random_Init();
+    // Seed RandomByte RNG
+    RandomInit();
 
     // Implemented here - since we need to bring the memory manager up first
     // -ACB- 2004/05/31
-    argv::Init(argc, argv);
+    ArgumentParse(argc, argv);
 
-    E_Startup();
+    EdgeStartup();
 
-    E_InitialState();
+    InitialState();
 
-    CON_MessageColor(SG_YELLOW_RGBA32);
-    I_Printf("%s v%s initialisation complete.\n", appname.c_str(), edgeversion.c_str());
+    ConsoleMessageColor(SG_YELLOW_RGBA32);
+    LogPrint("%s v%s initialisation complete.\n", appname.c_str(),
+             edgeversion.c_str());
 
-    I_Debugf("- Entering game loop...\n");
+    LogDebug("- Entering game loop...\n");
 
 #ifndef EDGE_WEB
-    while (!(app_state & APP_STATE_PENDING_QUIT))
+    while (!(app_state & kApplicationPendingQuit))
     {
         // We always do this once here, although the engine may
         // makes in own calls to keep on top of the event processing
-        I_ControlGetEvents();
+        ControlGetEvents();
 
-        if (app_state & APP_STATE_ACTIVE)
-            E_Tick();
-        else if (!n_busywait.d)
-        {
-            I_Sleep(5);
-        }
+        if (app_state & kApplicationActive)
+            EdgeTicker();
+        else if (!busy_wait.d_) { SleepForMilliseconds(5); }
     }
 #else
     return;
 #endif
-
-    E_Shutdown(); // Shutdown whatever at this point
 }
 
 //
 // Called when this application has lost focus (i.e. an ALT+TAB event)
 //
-void E_Idle(void)
-{
-    E_ReleaseAllKeys();
-}
+void EdgeIdle(void) { EventReleaseAllKeys(); }
 
 //
 // This Function is called for a single loop in the system.
@@ -2161,39 +2244,32 @@ void E_Idle(void)
 // -ACB- 1999/09/24 Written
 // -ACB- 2004/05/31 Namespace'd
 //
-void E_Tick(void)
+void EdgeTicker(void)
 {
     EDGE_ZoneScoped;
-    
-    G_BigStuff();
+
+    GameBigStuff();
 
     // Update display, next frame, with current state.
-    E_Display();
+    EdgeDisplay();
 
-    // this also runs the responder chain via E_ProcessEvents
-    int counts = N_TryRunTics();
-
-    // ignore this assertion if in a menu; switching between 35/70FPS
-    // in Video Options can occasionally produce a 'valid'
-    // zero count for N_TryRunTics()
-
-    if (!menuactive)
-        SYS_ASSERT(counts > 0);
+    // this also runs the responder chain via EventProcessEvents
+    int counts = NetworkTryRunTicCommands();
 
     // run the tics
     for (; counts > 0; counts--)
     {
         // run a step in the physics (etc)
-        G_Ticker();
+        GameTicker();
 
         // user interface stuff (skull anim, etc)
-        CON_Ticker();
-        M_Ticker();
-        S_SoundTicker();
-        S_MusicTicker();
+        ConsoleTicker();
+        MenuTicker();
+        SoundTicker();
+        MusicTicker();
 
         // process mouse and keyboard events
-        N_NetUpdate();
+        NetworkUpdate();
     }
 }
 

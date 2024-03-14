@@ -24,242 +24,232 @@
 //----------------------------------------------------------------------------
 //
 // -KM- 1998/07/21 Clear the background behind those end pics.
-// -KM- 1998/09/27 sounds.ddf stuff: seesound -> DDF_LookupSound(seesound)
+// -KM- 1998/09/27 sounds.ddf stuff: seesound_ -> DDF_LookupSound(seesound_)
 // -KM- 1998/11/25 Finale generalised.
 //
 
-#include "i_defs.h"
-#include "i_defs_gl.h"
+#include "f_finale.h"
 
-#include "main.h"
-
+#include "am_map.h"
 #include "dm_defs.h"
 #include "dm_state.h"
-#include "g_game.h"
 #include "dstrings.h"
 #include "e_main.h"
-#include "f_finale.h"
+#include "epi.h"
 #include "f_interm.h"
+#include "g_game.h"
 #include "hu_draw.h"
 #include "hu_stuff.h"
+#include "hu_style.h"
+#include "i_defs_gl.h"
 #include "i_movie.h"
 #include "m_menu.h"
 #include "m_random.h"
+#include "main.h"
 #include "p_action.h"
-#include "am_map.h"
 #include "r_colormap.h"
 #include "r_draw.h"
-#include "r_mdl.h"
+#include "r_gldefs.h"
 #include "r_md2.h"
+#include "r_mdl.h"
 #include "r_modes.h"
 #include "r_state.h"
-#include "r_gldefs.h"
-#include "s_sound.h"
 #include "s_music.h"
-#include "w_wad.h"
+#include "s_sound.h"
+#include "sokol_color.h"
 #include "w_model.h"
-#include "hu_style.h"
+#include "w_wad.h"
 
-typedef enum
+enum FinaleStage
 {
-    f_text,
-    f_movie,
-    f_pic,
-    f_bunny,
-    f_cast,
-    f_done
-} finalestage_e;
+    kFinaleStageText,
+    kFinaleStageMovie,
+    kFinaleStagePicture,
+    kFinaleStageBunny,
+    kFinaleStageCast,
+    kFinaleStageDone
+};
 
-void operator++(finalestage_e &f, int blah)
-{
-    (void)blah;
-    f = (finalestage_e)(f + 1);
-}
-
-// Stage of animation:
-//  0 = text, 1 = art screen, 2 = character cast
-static finalestage_e finalestage;
+// Stage of animation
+static FinaleStage finale_stage;
 
 // -ES- 2000/03/11 skip to the next finale stage
 static bool skip_finale;
-static int  finalecount;
-static int  picnum;
+static int  finale_count;
+static int  picture_number;
 
-#define TEXTSPEED 3
-#define TEXTWAIT  250
+static constexpr uint8_t kFinaleTextSpeed    = 3;
+static constexpr uint8_t kFinaleTextWaitTime = 250;
 
-static const char *finaletext;
+static const char *finale_text;
 
-static gameaction_e           newgameaction;
-static const map_finaledef_c *finale;
+static GameAction              new_game_action;
+static const FinaleDefinition *finale;
 
 static void CastInitNew(int num);
 static void CastTicker(void);
 static void CastSkip(void);
 
-static const image_c *finale_textback;
-static float          finale_textbackscale = 1.0f;
-static RGBAColor       finale_textcol;
+static const Image *finale_text_background;
+static float        finale_text_background_scale = 1.0f;
+static RGBAColor    finale_text_color;
 
-static style_c *wi_leveltext_style;
-static style_c *wi_cast_style;
+static Style *finale_level_text_style;
+static Style *finale_cast_style;
 
 // forward dec
 static void DoBumpFinale(void);
 
-static bool HasFinale(const map_finaledef_c *F, finalestage_e cur)
+static bool HasFinale(const FinaleDefinition *F, FinaleStage cur)
 {
-    SYS_ASSERT(F);
+    EPI_ASSERT(F);
 
     switch (cur)
     {
-    case f_text:
-        return F->text != "";
+        case kFinaleStageText:
+            return F->text_ != "";
 
-    case f_movie:
-        return F->movie!= "";
+        case kFinaleStageMovie:
+            return F->movie_ != "";
 
-    case f_pic:
-        return (F->pics.size() > 0);
+        case kFinaleStagePicture:
+            return (F->pics_.size() > 0);
 
-    case f_bunny:
-        return F->dobunny;
+        case kFinaleStageBunny:
+            return F->dobunny_;
 
-    case f_cast:
-        return F->docast;
+        case kFinaleStageCast:
+            return F->docast_;
 
-    default:
-        I_Error("Bad parameter passed to HasFinale().\n");
+        default:
+            FatalError("Bad parameter passed to HasFinale().\n");
     }
 
     return false; /* NOT REACHED */
 }
 
-// returns f_done if nothing found
-static finalestage_e FindValidFinale(const map_finaledef_c *F, finalestage_e cur)
+// returns kFinaleStageDone if nothing found
+static FinaleStage FindValidFinale(const FinaleDefinition *F, FinaleStage cur)
 {
-    SYS_ASSERT(F);
+    EPI_ASSERT(F);
 
-    for (; cur != f_done; cur++)
+    for (; cur != kFinaleStageDone; cur = (FinaleStage)(cur + 1))
     {
-        if (HasFinale(F, cur))
-            return cur;
+        if (HasFinale(F, cur)) return cur;
     }
 
-    return f_done;
+    return kFinaleStageDone;
 }
 
 static void DoStartFinale(void)
 {
-    finalecount = 0;
+    finale_count = 0;
 
-    switch (finalestage)
+    switch (finale_stage)
     {
-    case f_text:
-        finaletext = language[finale->text];
-        S_ChangeMusic(finale->music, true);
-        break;
+        case kFinaleStageText:
+            finale_text = language[finale->text_];
+            ChangeMusic(finale->music_, true);
+            break;
 
-    case f_movie:
-        E_PlayMovie(finale->movie);
-        DoBumpFinale();
-        break;
+        case kFinaleStageMovie:
+            PlayMovie(finale->movie_);
+            DoBumpFinale();
+            break;
 
-    case f_pic:
-        picnum = 0;
-        break;
+        case kFinaleStagePicture:
+            picture_number = 0;
+            break;
 
-    case f_bunny:
-        if (currmap->episode)
-            S_ChangeMusic(currmap->episode->special_music, true);
-        break;
+        case kFinaleStageBunny:
+            if (current_map->episode_)
+                ChangeMusic(current_map->episode_->special_music_, true);
+            break;
 
-    case f_cast:
-        CastInitNew(2);
-        if (currmap->episode)
-            S_ChangeMusic(currmap->episode->special_music, true);
-        break;
+        case kFinaleStageCast:
+            CastInitNew(2);
+            if (current_map->episode_)
+                ChangeMusic(current_map->episode_->special_music_, true);
+            break;
 
-    default:
-        I_Error("DoStartFinale: bad stage #%d\n", (int)finalestage);
-        break;
+        default:
+            FatalError("DoStartFinale: bad stage #%d\n", (int)finale_stage);
+            break;
     }
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
-        if (players[pnum])
-            players[pnum]->cmd.buttons = 0;
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
+        if (players[pnum]) players[pnum]->command_.buttons = 0;
 }
 
 static void DoBumpFinale(void)
 {
     // find next valid Finale stage
-    finalestage_e stage = finalestage;
-    stage++;
-    stage = FindValidFinale(finale, stage);
+    FinaleStage stage = finale_stage;
+    stage             = (FinaleStage)(stage + 1);
+    stage             = FindValidFinale(finale, stage);
 
-    if (stage != f_done)
+    if (stage != kFinaleStageDone)
     {
-        if (gamestate != GS_INTERMISSION)
-            E_ForceWipe();
+        if (game_state != kGameStateIntermission) ForceWipe();
 
-        finalestage = stage;
+        finale_stage = stage;
 
         DoStartFinale();
         return;
     }
 
     // capture the screen _before_ changing any global state
-    if (newgameaction != ga_nothing)
+    if (new_game_action != kGameActionNothing)
     {
-        E_ForceWipe();
-        gameaction = newgameaction;
+        ForceWipe();
+        game_action = new_game_action;
     }
 
-    gamestate = GS_NOTHING; // hack ???  (cannot leave as GS_FINALE)
+    game_state = kGameStateNothing;  // hack ???  (cannot leave as GS_FINALE)
 }
 
 static void LookupFinaleStuff(void)
 {
     // here is where we lookup the required images
 
-    if (finale->text_flat != "")
-        finale_textback = W_ImageLookup(finale->text_flat.c_str(), INS_Flat);
-    else if (finale->text_back != "")
-        finale_textback = W_ImageLookup(finale->text_back.c_str(), INS_Graphic);
+    if (finale->text_flat_ != "")
+        finale_text_background =
+            ImageLookup(finale->text_flat_.c_str(), kImageNamespaceFlat);
+    else if (finale->text_back_ != "")
+        finale_text_background =
+            ImageLookup(finale->text_back_.c_str(), kImageNamespaceGraphic);
     else
-        finale_textback = NULL;
+        finale_text_background = nullptr;
 
-    finale_textcol = V_GetFontColor(finale->text_colmap);
+    finale_text_color = GetFontColor(finale->text_colmap_);
 
-    if (!wi_leveltext_style)
+    if (!finale_level_text_style)
     {
-        styledef_c *def = styledefs.Lookup("INTERLEVEL TEXT");
-        if (!def)
-            def = default_style;
-        wi_leveltext_style = hu_styles.Lookup(def);
+        StyleDefinition *def = styledefs.Lookup("INTERLEVEL TEXT");
+        if (!def) def = default_style;
+        finale_level_text_style = hud_styles.Lookup(def);
     }
-    if (!wi_cast_style)
+    if (!finale_cast_style)
     {
-        styledef_c *def = styledefs.Lookup("CAST_SCREEN");
-        if (!def)
-            def = default_style;
-        wi_cast_style = hu_styles.Lookup(def);
+        StyleDefinition *def = styledefs.Lookup("CAST_SCREEN");
+        if (!def) def = default_style;
+        finale_cast_style = hud_styles.Lookup(def);
     }
 }
 
-void F_StartFinale(const map_finaledef_c *F, gameaction_e newaction)
+void FinaleStart(const FinaleDefinition *F, GameAction newaction)
 {
-    SYS_ASSERT(F);
+    EPI_ASSERT(F);
 
-    newgameaction = newaction;
-    automapactive = false;
+    new_game_action = newaction;
+    automap_active  = false;
 
-    finalestage_e stage = FindValidFinale(F, f_text);
+    FinaleStage stage = FindValidFinale(F, kFinaleStageText);
 
-    if (stage == f_done)
+    if (stage == kFinaleStageDone)
     {
-        if (newgameaction != ga_nothing)
-            gameaction = newgameaction;
+        if (new_game_action != kGameActionNothing)
+            game_action = new_game_action;
 
         return /* false */;
     }
@@ -267,27 +257,26 @@ void F_StartFinale(const map_finaledef_c *F, gameaction_e newaction)
     // capture the screen _before_ changing any global state
     //--- E_ForceWipe();   // CRASH with IDCLEV
 
-    finale      = F;
-    finalestage = stage;
+    finale       = F;
+    finale_stage = stage;
 
     LookupFinaleStuff();
 
-    gamestate = GS_FINALE;
+    game_state = kGameStateFinale;
 
     DoStartFinale();
 }
 
-bool F_Responder(event_t *event)
+bool FinaleResponder(InputEvent *event)
 {
-    SYS_ASSERT(gamestate == GS_FINALE);
+    EPI_ASSERT(game_state == kGameStateFinale);
 
     // FIXME: use WI_CheckAccelerate() in netgames
-    if (event->type != ev_keydown)
-        return false;
+    if (event->type != kInputEventKeyDown) return false;
 
-    if (finalecount > TICRATE)
+    if (finale_count > kTicRate)
     {
-        if (finalestage == f_pic && finale->picwait == INT_MAX)
+        if (finale_stage == kFinaleStagePicture && finale->picwait_ == INT_MAX)
             return false;
 
         skip_finale = true;
@@ -297,76 +286,77 @@ bool F_Responder(event_t *event)
     return false;
 }
 
-void F_Ticker(void)
+void FinaleTicker(void)
 {
-    SYS_ASSERT(gamestate == GS_FINALE);
+    EPI_ASSERT(game_state == kGameStateFinale);
 
     // advance animation
-    finalecount++;
+    finale_count++;
 
-    switch (finalestage)
+    switch (finale_stage)
     {
-    case f_text:
-        if (skip_finale && finalecount < (int)strlen(finaletext) * TEXTSPEED)
-        {
-            finalecount = TEXTSPEED * strlen(finaletext);
-            skip_finale = false;
-        }
-        else if (skip_finale || finalecount > TEXTWAIT + (int)strlen(finaletext) * TEXTSPEED)
-        {
-            DoBumpFinale();
-            skip_finale = false;
-        }
-        break;
+        case kFinaleStageText:
+            if (skip_finale &&
+                finale_count < (int)strlen(finale_text) * kFinaleTextSpeed)
+            {
+                finale_count = kFinaleTextSpeed * strlen(finale_text);
+                skip_finale  = false;
+            }
+            else if (skip_finale ||
+                     finale_count >
+                         kFinaleTextWaitTime +
+                             (int)strlen(finale_text) * kFinaleTextSpeed)
+            {
+                DoBumpFinale();
+                skip_finale = false;
+            }
+            break;
 
-    case f_pic:
-        if (skip_finale || finalecount > (int)finale->picwait)
-        {
-            picnum++;
-            finalecount = 0;
-            skip_finale = false;
-        }
-        if (picnum >= (int)finale->pics.size())
-        {
-            DoBumpFinale();
-        }
-        break;
+        case kFinaleStagePicture:
+            if (skip_finale || finale_count > (int)finale->picwait_)
+            {
+                picture_number++;
+                finale_count = 0;
+                skip_finale  = false;
+            }
+            if (picture_number >= (int)finale->pics_.size()) { DoBumpFinale(); }
+            break;
 
-    case f_bunny:
-        if (skip_finale && finalecount < 1100)
-        {
-            finalecount = 1100;
-            skip_finale = false;
-        }
-        break;
+        case kFinaleStageBunny:
+            if (skip_finale && finale_count < 1100)
+            {
+                finale_count = 1100;
+                skip_finale  = false;
+            }
+            break;
 
-    case f_cast:
-        if (skip_finale)
-        {
-            CastSkip();
-            skip_finale = false;
-        }
-        else
-            CastTicker();
+        case kFinaleStageCast:
+            if (skip_finale)
+            {
+                CastSkip();
+                skip_finale = false;
+            }
+            else
+                CastTicker();
 
-        break;
+            break;
 
-    default:
-        I_Error("F_Ticker: bad finalestage #%d\n", (int)finalestage);
-        break;
+        default:
+            FatalError("FinaleTicker: bad finale_stage #%d\n",
+                       (int)finale_stage);
+            break;
     }
 
-    if (finalestage == f_done)
+    if (finale_stage == kFinaleStageDone)
     {
-        if (newgameaction != ga_nothing)
+        if (new_game_action != kGameActionNothing)
         {
-            gameaction = newgameaction;
+            game_action = new_game_action;
 
             // don't come here again (for E_ForceWipe)
-            newgameaction = ga_nothing;
+            new_game_action = kGameActionNothing;
 
-            if (gamestate == GS_FINALE)
-                E_ForceWipe();
+            if (game_state == kGameStateFinale) ForceWipe();
         }
     }
 }
@@ -374,72 +364,73 @@ void F_Ticker(void)
 static void TextWrite(void)
 {
     // 98-7-10 KM erase the entire screen to a tiled background
-    if (finale_textback)
+    if (finale_text_background)
     {
-        HUD_SetScale(finale_textbackscale);
+        HudSetScale(finale_text_background_scale);
 
-        if (finale->text_flat[0])
+        if (finale->text_flat_[0])
         {
             // AJA 2022: make the flats be square, not squished
-            HUD_SetCoordSys(266, 200);
+            HudSetCoordinateSystem(266, 200);
 
             // Lobo: if it's a flat, tile it
-            HUD_TileImage(hud_x_left, 0, hud_x_right - hud_x_left, 200, finale_textback); // Lobo: Widescreen support
+            HudTileImage(hud_x_left, 0, hud_x_right - hud_x_left, 200,
+                         finale_text_background);  // Lobo: Widescreen support
         }
         else
         {
-            if (r_titlescaling.d) // Fill Border
+            if (title_scaling.d_)  // Fill Border
             {
-                if (!finale_textback->blurred_version)
-                    W_ImageStoreBlurred(finale_textback, 0.75f);
-                HUD_StretchImage(-320, -200, 960, 600, finale_textback->blurred_version, 0, 0);
+                if (!finale_text_background->blurred_version_)
+                    ImageStoreBlurred(finale_text_background);
+                HudStretchImage(-320, -200, 960, 600,
+                                finale_text_background->blurred_version_, 0, 0);
             }
-            HUD_DrawImageTitleWS(finale_textback);
+            HudDrawImageTitleWS(finale_text_background);
         }
 
         // reset coordinate system
-        HUD_Reset();
+        HudReset();
     }
 
-    style_c *style;
-    style      = wi_leveltext_style;
-    int t_type = styledef_c::T_TEXT;
+    Style *style;
+    style      = finale_level_text_style;
+    int t_type = StyleDefinition::kTextSectionText;
 
     // draw some of the text onto the screen
     int cx = 10;
     // int cy = 10;
 
-    const char *ch = finaletext;
+    const char *ch = finale_text;
 
-    int count = (int)((finalecount - 10) / finale->text_speed);
-    if (count < 0)
-        count = 0;
+    int count = (int)((finale_count - 10) / finale->text_speed_);
+    if (count < 0) count = 0;
 
-    SYS_ASSERT(finale);
+    EPI_ASSERT(finale);
 
-    // HUD_SetFont();
-    // HUD_SetScale();
-    HUD_SetTextColor(finale_textcol); // set a default
+    // HudSetFont();
+    // HudSetScale();
+    HudSetTextColor(finale_text_color);  // set a default
 
-    float txtscale = 0.9; // set a default
-    if (style->def->text[t_type].scale)
+    float txtscale = 0.9;  // set a default
+    if (style->definition_->text_[t_type].scale_)
     {
-        txtscale = style->def->text[t_type].scale;
-        HUD_SetScale(txtscale);
+        txtscale = style->definition_->text_[t_type].scale_;
+        HudSetScale(txtscale);
     }
 
-    if (style->def->text[t_type].colmap)
+    if (style->definition_->text_[t_type].colmap_)
     {
-        const colourmap_c *colmap = style->def->text[t_type].colmap;
-        HUD_SetTextColor(V_GetFontColor(colmap));
+        const Colormap *colmap = style->definition_->text_[t_type].colmap_;
+        HudSetTextColor(GetFontColor(colmap));
     }
 
-    int h = 11; // set a default
-    if (style->fonts[t_type])
+    int h = 11;  // set a default
+    if (style->fonts_[t_type])
     {
-        HUD_SetFont(style->fonts[t_type]);
-        h = style->fonts[t_type]->NominalHeight();
-        h = h + (3 * txtscale); // bit of spacing
+        HudSetFont(style->fonts_[t_type]);
+        h = style->fonts_[t_type]->NominalHeight();
+        h = h + (3 * txtscale);  // bit of spacing
         h = h * txtscale;
     }
 
@@ -454,7 +445,7 @@ static void TextWrite(void)
     {
         if (count == 0 || *ch == 0)
         {
-            HUD_DrawText(cx, cy, line);
+            HudDrawText(cx, cy, line);
             break;
         }
 
@@ -463,12 +454,12 @@ static void TextWrite(void)
 
         if (c == '\n' || pos > (int)sizeof(line) - 4)
         {
-            HUD_DrawText(cx, cy, line);
+            HudDrawText(cx, cy, line);
 
             pos     = 0;
             line[0] = 0;
 
-            cy += h; // 11;
+            cy += h;  // 11;
             continue;
         }
 
@@ -477,9 +468,9 @@ static void TextWrite(void)
     }
 
     // set back to defaults
-    HUD_SetFont();
-    HUD_SetScale();
-    HUD_SetTextColor();
+    HudSetFont();
+    HudSetScale();
+    HudSetTextColor();
 }
 
 //
@@ -488,129 +479,121 @@ static void TextWrite(void)
 //   in order of appearance
 //
 
-static const mobjtype_c *castorder;
-static const char       *casttitle;
-static int               casttics;
-static state_t          *caststate;
-static bool              castdeath;
-static int               castframes;
-static int               castonmelee;
-static bool              castattacking;
+static const MapObjectDefinition *cast_order;
+static const char                *cast_title;
+static int                        cast_tics;
+static State                     *cast_state;
+static bool                       cast_death;
+static int                        cast_frames;
+static int                        cast_on_melee;
+static bool                       cast_attacking;
 
 //
 // CastSetState, CastPerformAction
 //
 // -AJA- 2001/05/28: separated this out from CastTicker
 //
-static void CastSetState(statenum_t st)
+static void CastSetState(int st)
 {
-    if (st == S_NULL)
-        return;
+    if (st == 0) return;
 
-    caststate = &states[st];
+    cast_state = &states[st];
 
-    casttics = caststate->tics;
-    if (casttics < 0)
-        casttics = 15;
+    cast_tics = cast_state->tics;
+    if (cast_tics < 0) cast_tics = 15;
 }
 
-static void CAST_RangeAttack(const atkdef_c *range)
+static void CAST_RangeAttack(const AttackDefinition *range)
 {
-    sfx_t *sfx = NULL;
+    SoundEffect *sfx = nullptr;
 
-    SYS_ASSERT(range);
+    EPI_ASSERT(range);
 
-    if (range->attackstyle == ATK_SHOT)
+    if (range->attackstyle_ == kAttackStyleShot) { sfx = range->sound_; }
+    else if (range->attackstyle_ == kAttackStyleSkullFly)
     {
-        sfx = range->sound;
+        sfx = range->initsound_;
     }
-    else if (range->attackstyle == ATK_SKULLFLY)
+    else if (range->attackstyle_ == kAttackStyleSpawner)
     {
-        sfx = range->initsound;
+        if (range->spawnedobj_ && range->spawnedobj_->rangeattack_)
+            sfx = range->spawnedobj_->rangeattack_->initsound_;
     }
-    else if (range->attackstyle == ATK_SPAWNER)
+    else if (range->attackstyle_ == kAttackStyleTracker)
     {
-        if (range->spawnedobj && range->spawnedobj->rangeattack)
-            sfx = range->spawnedobj->rangeattack->initsound;
+        sfx = range->initsound_;
     }
-    else if (range->attackstyle == ATK_TRACKER)
-    {
-        sfx = range->initsound;
-    }
-    else if (range->atk_mobj)
-    {
-        sfx = range->atk_mobj->seesound;
-    }
+    else if (range->atk_mobj_) { sfx = range->atk_mobj_->seesound_; }
 
-    S_StartFX(sfx);
+    StartSoundEffect(sfx);
 }
 
 static void CastPerformAction(void)
 {
-    sfx_t *sfx = NULL;
+    SoundEffect *sfx = nullptr;
 
     // Yuk, handles sounds
 
-    if (caststate->action == P_ActMakeCloseAttemptSound)
+    if (cast_state->action == A_MakeCloseAttemptSound)
     {
-        if (castorder->closecombat)
-            sfx = castorder->closecombat->initsound;
+        if (cast_order->closecombat_)
+            sfx = cast_order->closecombat_->initsound_;
     }
-    else if (caststate->action == P_ActMeleeAttack)
+    else if (cast_state->action == A_MeleeAttack)
     {
-        if (castorder->closecombat)
-            sfx = castorder->closecombat->sound;
+        if (cast_order->closecombat_) sfx = cast_order->closecombat_->sound_;
     }
-    else if (caststate->action == P_ActMakeRangeAttemptSound)
+    else if (cast_state->action == A_MakeRangeAttemptSound)
     {
-        if (castorder->rangeattack)
-            sfx = castorder->rangeattack->initsound;
+        if (cast_order->rangeattack_)
+            sfx = cast_order->rangeattack_->initsound_;
     }
-    else if (caststate->action == P_ActRangeAttack)
+    else if (cast_state->action == A_RangeAttack)
     {
-        if (castorder->rangeattack)
-            CAST_RangeAttack(castorder->rangeattack);
+        if (cast_order->rangeattack_)
+            CAST_RangeAttack(cast_order->rangeattack_);
     }
-    else if (caststate->action == P_ActComboAttack)
+    else if (cast_state->action == A_ComboAttack)
     {
-        if (castonmelee && castorder->closecombat)
+        if (cast_on_melee && cast_order->closecombat_)
         {
-            sfx = castorder->closecombat->sound;
+            sfx = cast_order->closecombat_->sound_;
         }
-        else if (castorder->rangeattack)
+        else if (cast_order->rangeattack_)
         {
-            CAST_RangeAttack(castorder->rangeattack);
+            CAST_RangeAttack(cast_order->rangeattack_);
         }
     }
-    else if (castorder->activesound && (M_Random() < 2) && !castdeath)
+    else if (cast_order->activesound_ && (RandomByte() < 2) && !cast_death)
     {
-        sfx = castorder->activesound;
+        sfx = cast_order->activesound_;
     }
-    else if (caststate->action == P_ActWalkSoundChase)
+    else if (cast_state->action == A_WalkSoundChase)
     {
-        sfx = castorder->walksound;
+        sfx = cast_order->walksound_;
     }
 
-    S_StartFX(sfx);
+    StartSoundEffect(sfx);
 }
 
 static void CastInitNew(int num)
 {
-    castorder = mobjtypes.LookupCastMember(num);
+    cast_order = mobjtypes.LookupCastMember(num);
 
     // FIXME!!! Better handling of the finale
-    if (!castorder)
-        castorder = mobjtypes.Lookup(0);
+    if (!cast_order) cast_order = mobjtypes.Lookup(0);
 
-    casttitle = castorder->cast_title != "" ? language[castorder->cast_title] : castorder->name.c_str();
+    cast_title = cast_order->cast_title_ != ""
+                     ? language[cast_order->cast_title_]
+                     : cast_order->name_.c_str();
 
-    castdeath     = false;
-    castframes    = 0;
-    castonmelee   = 0;
-    castattacking = false;
+    cast_death     = false;
+    cast_frames    = 0;
+    cast_on_melee  = 0;
+    cast_attacking = false;
 
-    SYS_ASSERT(castorder->chase_state); // checked in ddf_mobj.c
-    CastSetState(castorder->chase_state);
+    EPI_ASSERT(cast_order->chase_state_);  // checked in ddf_mobj.c
+    CastSetState(cast_order->chase_state_);
 }
 
 //
@@ -624,17 +607,16 @@ static void CastTicker(void)
     int st;
 
     // time to change state yet ?
-    casttics--;
-    if (casttics > 0)
-        return;
+    cast_tics--;
+    if (cast_tics > 0) return;
 
     // switch from deathstate to next monster
-    if (caststate->tics == -1 || caststate->nextstate == S_NULL || (castdeath && castframes >= 30))
+    if (cast_state->tics == -1 || cast_state->nextstate == 0 ||
+        (cast_death && cast_frames >= 30))
     {
-        CastInitNew(castorder->castorder + 1);
+        CastInitNew(cast_order->castorder_ + 1);
 
-        if (castorder->seesound)
-            S_StartFX(castorder->seesound);
+        if (cast_order->seesound_) StartSoundEffect(cast_order->seesound_);
 
         return;
     }
@@ -644,43 +626,47 @@ static void CastTicker(void)
     // advance to next state in animation
     // -AJA- if there's a jumpstate, enter it occasionally
 
-    if (caststate->action == P_ActJump && caststate->jumpstate && (M_Random() < 64))
-        st = caststate->jumpstate;
+    if (cast_state->action == A_Jump && cast_state->jumpstate &&
+        (RandomByte() < 64))
+        st = cast_state->jumpstate;
     else
-        st = caststate->nextstate;
+        st = cast_state->nextstate;
 
     CastSetState(st);
-    castframes++;
+    cast_frames++;
 
     // go into attack frame
-    if (castframes == 24 && !castdeath)
+    if (cast_frames == 24 && !cast_death)
     {
-        castonmelee ^= 1;
-        st = castonmelee ? castorder->melee_state : castorder->missile_state;
+        cast_on_melee ^= 1;
+        st = cast_on_melee ? cast_order->melee_state_
+                           : cast_order->missile_state_;
 
-        if (st == S_NULL)
+        if (st == 0)
         {
-            castonmelee ^= 1;
-            st = castonmelee ? castorder->melee_state : castorder->missile_state;
+            cast_on_melee ^= 1;
+            st = cast_on_melee ? cast_order->melee_state_
+                               : cast_order->missile_state_;
         }
 
         // check if missing both melee and missile states
-        if (st != S_NULL)
+        if (st != 0)
         {
-            castattacking = true;
+            cast_attacking = true;
             CastSetState(st);
 
-            if (castorder->attacksound)
-                S_StartFX(castorder->attacksound);
+            if (cast_order->attacksound_)
+                StartSoundEffect(cast_order->attacksound_);
         }
     }
 
     // leave attack frames after a certain time
-    if (castattacking && (castframes == 48 || caststate == &states[castorder->chase_state]))
+    if (cast_attacking &&
+        (cast_frames == 48 || cast_state == &states[cast_order->chase_state_]))
     {
-        castattacking = false;
-        castframes    = 0;
-        CastSetState(castorder->chase_state);
+        cast_attacking = false;
+        cast_frames    = 0;
+        CastSetState(cast_order->chase_state_);
     }
 }
 
@@ -689,26 +675,24 @@ static void CastTicker(void)
 //
 static void CastSkip(void)
 {
-    if (castdeath)
-        return; // already in dying frames
+    if (cast_death) return;  // already in dying frames
 
     // go into death frame
-    castdeath = true;
+    cast_death = true;
 
-    if (castorder->overkill_state && (M_Random() < 32))
-        caststate = &states[castorder->overkill_state];
+    if (cast_order->overkill_state_ && (RandomByte() < 32))
+        cast_state = &states[cast_order->overkill_state_];
     else
     {
-        SYS_ASSERT(castorder->death_state); // checked in ddf_mobj.c
-        caststate = &states[castorder->death_state];
+        EPI_ASSERT(cast_order->death_state_);  // checked in ddf_mobj.c
+        cast_state = &states[cast_order->death_state_];
     }
 
-    casttics      = caststate->tics;
-    castframes    = 0;
-    castattacking = false;
+    cast_tics      = cast_state->tics;
+    cast_frames    = 0;
+    cast_attacking = false;
 
-    if (castorder->deathsound)
-        S_StartFX(castorder->deathsound);
+    if (cast_order->deathsound_) StartSoundEffect(cast_order->deathsound_);
 }
 
 //
@@ -718,100 +702,108 @@ static void CastDrawer(void)
 {
     float TempScale = 1.0;
 
-    const image_c *image;
+    const Image *image;
 
-    if (wi_cast_style->bg_image)
+    if (finale_cast_style->background_image_)
     {
-        wi_cast_style->DrawBackground();
+        finale_cast_style->DrawBackground();
     }
     else
     {
-        image = W_ImageLookup("BOSSBACK");
-        if (r_titlescaling.d) // Fill Border
+        image = ImageLookup("BOSSBACK");
+        if (title_scaling.d_)  // Fill Border
         {
-            if (!image->blurred_version)
-                W_ImageStoreBlurred(image, 0.75f);
-            HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
+            if (!image->blurred_version_) ImageStoreBlurred(image);
+            HudStretchImage(-320, -200, 960, 600, image->blurred_version_, 0,
+                            0);
         }
-        HUD_DrawImageTitleWS(image);
+        HudDrawImageTitleWS(image);
     }
 
-    HUD_SetAlignment(0, -1);
+    HudSetAlignment(0, -1);
 
-    if (wi_cast_style->def->text[styledef_c::T_TEXT].colmap)
+    if (finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText]
+            .colmap_)
     {
-        HUD_SetTextColor(V_GetFontColor(wi_cast_style->def->text[styledef_c::T_TEXT].colmap));
+        HudSetTextColor(
+            GetFontColor(finale_cast_style->definition_
+                             ->text_[StyleDefinition::kTextSectionText]
+                             .colmap_));
     }
-    else
+    else { HudSetTextColor(SG_YELLOW_RGBA32); }
+
+    TempScale =
+        finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText]
+            .scale_;
+    HudSetScale(TempScale);
+
+    if (finale_cast_style->fonts_[StyleDefinition::kTextSectionText])
     {
-        HUD_SetTextColor(SG_YELLOW_RGBA32);
+        HudSetFont(
+            finale_cast_style->fonts_[StyleDefinition::kTextSectionText]);
     }
 
-    TempScale = wi_cast_style->def->text[styledef_c::T_TEXT].scale;
-    HUD_SetScale(TempScale);
+    HudDrawText(160, 180, cast_title);
 
-    if (wi_cast_style->fonts[styledef_c::T_TEXT])
-    {
-        HUD_SetFont(wi_cast_style->fonts[styledef_c::T_TEXT]);
-    }
-
-    HUD_DrawText(160, 180, casttitle);
-
-    HUD_Reset();
+    HudReset();
 
     bool flip;
 
     float pos_x, pos_y;
     float scale_x, scale_y;
 
-    TempScale = wi_cast_style->def->text[styledef_c::T_HEADER].scale;
+    TempScale = finale_cast_style->definition_
+                    ->text_[StyleDefinition::kTextSectionHeader]
+                    .scale_;
     if (TempScale < 1.0 || TempScale > 1.0)
     {
-        scale_y = wi_cast_style->def->text[styledef_c::T_HEADER].scale;
+        scale_y = finale_cast_style->definition_
+                      ->text_[StyleDefinition::kTextSectionHeader]
+                      .scale_;
     }
     else
         scale_y = 3;
 
-    HUD_GetCastPosition(&pos_x, &pos_y, &scale_x, &scale_y);
+    HudGetCastPosition(&pos_x, &pos_y, &scale_x, &scale_y);
 
-    if (caststate->flags & SFF_Model)
+    if (cast_state->flags & kStateFrameFlagModel)
     {
-        modeldef_c *md = W_GetModel(caststate->sprite);
+        ModelDefinition *md = GetModel(cast_state->sprite);
 
-        const image_c *skin_img = md->skins[castorder->model_skin];
+        const Image *skin_img = md->skins_[cast_order->model_skin_];
 
-        if (!skin_img)
-            skin_img = W_ImageForDummySkin();
+        if (!skin_img) skin_img = ImageForDummySkin();
 
         glClear(GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
 
-        if (md->md2_model)
-            MD2_RenderModel_2D(md->md2_model, skin_img, caststate->frame, pos_x, pos_y, scale_x, scale_y, castorder);
-        else if (md->mdl_model)
-            MDL_RenderModel_2D(md->mdl_model, skin_img, caststate->frame, pos_x, pos_y, scale_x, scale_y, castorder);
+        if (md->md2_model_)
+            Md2RenderModel2d(md->md2_model_, skin_img, cast_state->frame, pos_x,
+                             pos_y, scale_x, scale_y, cast_order);
+        else if (md->mdl_model_)
+            MdlRenderModel2d(md->mdl_model_, skin_img, cast_state->frame, pos_x,
+                             pos_y, scale_x, scale_y, cast_order);
 
         glDisable(GL_DEPTH_TEST);
         return;
     }
 
     // draw the current frame in the middle of the screen
-    image = R2_GetOtherSprite(caststate->sprite, caststate->frame, &flip);
+    image =
+        RendererGetOtherSprite(cast_state->sprite, cast_state->frame, &flip);
 
-    if (!image)
-        return;
+    if (!image) return;
 
-    scale_x *= castorder->scale * castorder->aspect;
-    scale_y *= castorder->scale;
+    scale_x *= cast_order->scale_ * cast_order->aspect_;
+    scale_y *= cast_order->scale_;
 
-    float width  = IM_WIDTH(image);
-    float height = IM_HEIGHT(image);
+    float width  = image->ScaledWidthActual();
+    float height = image->ScaledHeightActual();
 
-    float offset_x = IM_OFFSETX(image);
-    float offset_y = IM_OFFSETY(image);
+    float offset_x = image->ScaledOffsetX();
+    float offset_y = image->ScaledOffsetY();
 
-    if (flip)
-        offset_x = -offset_x;
+    if (flip) offset_x = -offset_x;
 
     offset_x = (width / 2.0f + offset_x) * scale_x;
     offset_y *= scale_y;
@@ -819,8 +811,9 @@ static void CastDrawer(void)
     width *= scale_x;
     height *= scale_y;
 
-    RGL_DrawImage(pos_x - offset_x, pos_y + offset_y, width, height, image, flip ? IM_RIGHT(image) : 0, 0,
-                  flip ? 0 : IM_RIGHT(image), IM_TOP(image), NULL, 1.0f, castorder->palremap);
+    RendererDrawImage(pos_x - offset_x, pos_y + offset_y, width, height, image,
+                      flip ? image->Right() : 0, 0, flip ? 0 : image->Right(),
+                      image->Top(), nullptr, 1.0f, cast_order->palremap_);
 }
 
 //
@@ -831,15 +824,15 @@ static void CastDrawer(void)
 // -Lobo- 2021/11/02 Widescreen support: both images must be the same size
 static void BunnyScroll(void)
 {
-    int            scrolled;
-    const image_c *p1;
-    const image_c *p2;
-    char           name[10];
-    int            stage;
-    static int     laststage;
+    int          scrolled;
+    const Image *p1;
+    const Image *p2;
+    char         name[10];
+    int          stage;
+    static int   laststage;
 
-    p1 = W_ImageLookup("PFUB2");
-    p2 = W_ImageLookup("PFUB1");
+    p1 = ImageLookup("PFUB2");
+    p2 = ImageLookup("PFUB1");
 
     float TempWidth  = 0;
     float TempHeight = 0;
@@ -847,90 +840,93 @@ static void BunnyScroll(void)
     float CenterX    = 0;
     // 1. Calculate scaling to apply.
     TempScale = 200;
-    TempScale /= p1->actual_h;
-    TempWidth  = p1->actual_w * TempScale;
-    TempHeight = p1->actual_h * TempScale;
+    TempScale /= p1->actual_height_;
+    TempWidth  = p1->actual_width_ * TempScale;
+    TempHeight = p1->actual_height_ * TempScale;
     // 2. Calculate centering on screen.
     CenterX = 160;
-    CenterX -= (p1->actual_w * TempScale) / 2;
+    CenterX -= (p1->actual_width_ * TempScale) / 2;
 
-    scrolled = (TempWidth + CenterX) - (finalecount - 230) / 2;
-    if (scrolled > (TempWidth + CenterX))
-        scrolled = (TempWidth + CenterX);
-    if (scrolled < 0)
-        scrolled = 0;
+    scrolled = (TempWidth + CenterX) - (finale_count - 230) / 2;
+    if (scrolled > (TempWidth + CenterX)) scrolled = (TempWidth + CenterX);
+    if (scrolled < 0) scrolled = 0;
 
-    HUD_StretchImage(CenterX - scrolled, 0, TempWidth, TempHeight, p1, 0.0, 0.0);
-    HUD_StretchImage((CenterX + TempWidth) - (scrolled + 1), 0, TempWidth, TempHeight, p2, 0.0, 0.0);
+    HudStretchImage(CenterX - scrolled, 0, TempWidth, TempHeight, p1, 0.0, 0.0);
+    HudStretchImage((CenterX + TempWidth) - (scrolled + 1), 0, TempWidth,
+                    TempHeight, p2, 0.0, 0.0);
 
-    if (finalecount < 1130)
-        return;
+    if (finale_count < 1130) return;
 
-    if (finalecount < 1180)
+    if (finale_count < 1180)
     {
-        p1 = W_ImageLookup("END0");
+        p1 = ImageLookup("END0");
 
-        HUD_DrawImage((320 - 13 * 8) / 2, (200 - 8 * 8) / 2, p1);
+        HudDrawImage((320 - 13 * 8) / 2, (200 - 8 * 8) / 2, p1);
         laststage = 0;
         return;
     }
 
-    stage = (finalecount - 1180) / 5;
+    stage = (finale_count - 1180) / 5;
 
-    if (stage > 6)
-        stage = 6;
+    if (stage > 6) stage = 6;
 
     if (stage > laststage)
     {
-        S_StartFX(sfx_pistol);
+        StartSoundEffect(sound_effect_pistol);
         laststage = stage;
     }
 
     sprintf(name, "END%i", stage);
 
-    p1 = W_ImageLookup(name);
+    p1 = ImageLookup(name);
 
-    HUD_DrawImage((320 - 13 * 8) / 2, (200 - 8 * 8) / 2, p1);
+    HudDrawImage((320 - 13 * 8) / 2, (200 - 8 * 8) / 2, p1);
 }
 
-void F_Drawer(void)
+void FinaleDrawer(void)
 {
-    SYS_ASSERT(gamestate == GS_FINALE);
+    EPI_ASSERT(game_state == kGameStateFinale);
 
-    switch (finalestage)
+    switch (finale_stage)
     {
-    case f_text:
-        TextWrite();
-        break;
+        case kFinaleStageText:
+            TextWrite();
+            break;
 
-    // Shouldn't get here, but just in case don't allow to fall through to default (error)
-    case f_movie:
-        break;
+        // Shouldn't get here, but just in case don't allow to fall through to
+        // default (error)
+        case kFinaleStageMovie:
+            break;
 
-    case f_pic:
+        case kFinaleStagePicture:
         {
-            const image_c *image = W_ImageLookup(finale->pics[HMM_MIN((size_t)picnum, finale->pics.size() - 1)].c_str());
-            if (r_titlescaling.d) // Fill Border
+            const Image *image =
+                ImageLookup(finale
+                                ->pics_[HMM_MIN((size_t)picture_number,
+                                                finale->pics_.size() - 1)]
+                                .c_str());
+            if (title_scaling.d_)  // Fill Border
             {
-                if (!image->blurred_version)
-                    W_ImageStoreBlurred(image, 0.75f);
-                HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
+                if (!image->blurred_version_) ImageStoreBlurred(image);
+                HudStretchImage(-320, -200, 960, 600, image->blurred_version_,
+                                0, 0);
             }
-            HUD_DrawImageTitleWS(image);
+            HudDrawImageTitleWS(image);
             break;
         }
 
-    case f_bunny:
-        BunnyScroll();
-        break;
+        case kFinaleStageBunny:
+            BunnyScroll();
+            break;
 
-    case f_cast:
-        CastDrawer();
-        break;
+        case kFinaleStageCast:
+            CastDrawer();
+            break;
 
-    default:
-        I_Error("F_Drawer: bad finalestage #%d\n", (int)finalestage);
-        break;
+        default:
+            FatalError("FinaleDrawer: bad finale_stage #%d\n",
+                       (int)finale_stage);
+            break;
     }
 }
 

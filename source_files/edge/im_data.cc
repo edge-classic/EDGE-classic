@@ -16,42 +16,49 @@
 //
 //----------------------------------------------------------------------------
 
-#include "epi.h"
+#include "im_data.h"
 
-#include "image_data.h"
-
-#include "tables.h"
-
-#include "math_color.h"
+#include <string.h>
 
 #include <unordered_map>
 
-image_data_c::image_data_c(int _w, int _h, int _bpp) : width(_w), height(_h), bpp(_bpp), used_w(_w), used_h(_h)
+#include "HandmadeMath.h"
+#include "epi.h"
+#include "math_color.h"
+#include "sokol_color.h"
+#include "swirl_table.h"
+
+ImageData::ImageData(int width, int height, int depth)
+    : width_(width),
+      height_(height),
+      depth_(depth),
+      used_width_(width),
+      used_height_(height)
 {
-    pixels = new uint8_t[width * height * bpp];
-    offset_x = offset_y = 0;
-    scale_x = scale_y = 1.0f;
+    pixels_   = new uint8_t[width * height * depth];
+    offset_x_ = offset_y_ = 0;
+    scale_x_ = scale_y_ = 1.0f;
 }
 
-image_data_c::~image_data_c()
+ImageData::~ImageData()
 {
-    delete[] pixels;
+    delete[] pixels_;
 
-    pixels = NULL;
-    width = height = 0;
+    pixels_ = nullptr;
+    width_ = height_ = 0;
 }
 
-void image_data_c::Clear(uint8_t val)
+void ImageData::Clear(uint8_t value)
 {
-    memset(pixels, val, width * height * bpp);
+    memset(pixels_, value, width_ * height_ * depth_);
 }
 
-void image_data_c::Whiten()
+void ImageData::Whiten()
 {
-    SYS_ASSERT(bpp >= 3);
+    EPI_ASSERT(depth_ >= 3);
 
-    for (int y = 0; y < height; y++)
-        for (int x = 0; x < width; x++)
+    for (int y = 0; y < height_; y++)
+        for (int x = 0; x < width_; x++)
         {
             uint8_t *src = PixelAt(x, y);
 
@@ -64,15 +71,15 @@ void image_data_c::Whiten()
         }
 }
 
-void image_data_c::Invert()
+void ImageData::Invert()
 {
-    int line_size = used_w * bpp;
+    int line_size = used_width_ * depth_;
 
     uint8_t *line_data = new uint8_t[line_size + 1];
 
-    for (int y = 0; y < used_h / 2; y++)
+    for (int y = 0; y < used_height_ / 2; y++)
     {
-        int y2 = used_h - 1 - y;
+        int y2 = used_height_ - 1 - y;
 
         memcpy(line_data, PixelAt(0, y), line_size);
         memcpy(PixelAt(0, y), PixelAt(0, y2), line_size);
@@ -82,20 +89,20 @@ void image_data_c::Invert()
     delete[] line_data;
 }
 
-void image_data_c::Shrink(int new_w, int new_h)
+void ImageData::Shrink(int new_w, int new_h)
 {
-    SYS_ASSERT(new_w <= width && new_h <= height);
+    EPI_ASSERT(new_w <= width_ && new_h <= height_);
 
-    int step_x = width / new_w;
-    int step_y = height / new_h;
+    int step_x = width_ / new_w;
+    int step_y = height_ / new_h;
     int total  = step_x * step_y;
 
-    if (bpp == 1)
+    if (depth_ == 1)
     {
         for (int dy = 0; dy < new_h; dy++)
             for (int dx = 0; dx < new_w; dx++)
             {
-                uint8_t *dest_pix = pixels + (dy * new_w + dx) * 3;
+                uint8_t *dest_pix = pixels_ + (dy * new_w + dx) * 3;
 
                 int sx = dx * step_x;
                 int sy = dy * step_y;
@@ -105,12 +112,12 @@ void image_data_c::Shrink(int new_w, int new_h)
                 *dest_pix = *src_pix;
             }
     }
-    else if (bpp == 3)
+    else if (depth_ == 3)
     {
         for (int dy = 0; dy < new_h; dy++)
             for (int dx = 0; dx < new_w; dx++)
             {
-                uint8_t *dest_pix = pixels + (dy * new_w + dx) * 3;
+                uint8_t *dest_pix = pixels_ + (dy * new_w + dx) * 3;
 
                 int sx = dx * step_x;
                 int sy = dy * step_y;
@@ -133,12 +140,12 @@ void image_data_c::Shrink(int new_w, int new_h)
                 dest_pix[2] = b / total;
             }
     }
-    else /* bpp == 4 */
+    else /* depth_ == 4 */
     {
         for (int dy = 0; dy < new_h; dy++)
             for (int dx = 0; dx < new_w; dx++)
             {
-                uint8_t *dest_pix = pixels + (dy * new_w + dx) * 4;
+                uint8_t *dest_pix = pixels_ + (dy * new_w + dx) * 4;
 
                 int sx = dx * step_x;
                 int sy = dy * step_y;
@@ -164,31 +171,31 @@ void image_data_c::Shrink(int new_w, int new_h)
             }
     }
 
-    used_w = HMM_MAX(1, used_w * new_w / width);
-    used_h = HMM_MAX(1, used_h * new_h / height);
+    used_width_  = HMM_MAX(1, used_width_ * new_w / width_);
+    used_height_ = HMM_MAX(1, used_height_ * new_h / height_);
 
-    width  = new_w;
-    height = new_h;
+    width_  = new_w;
+    height_ = new_h;
 }
 
-void image_data_c::ShrinkMasked(int new_w, int new_h)
+void ImageData::ShrinkMasked(int new_w, int new_h)
 {
-    if (bpp != 4)
+    if (depth_ != 4)
     {
         Shrink(new_w, new_h);
         return;
     }
 
-    SYS_ASSERT(new_w <= width && new_h <= height);
+    EPI_ASSERT(new_w <= width_ && new_h <= height_);
 
-    int step_x = width / new_w;
-    int step_y = height / new_h;
+    int step_x = width_ / new_w;
+    int step_y = height_ / new_h;
     int total  = step_x * step_y;
 
     for (int dy = 0; dy < new_h; dy++)
         for (int dx = 0; dx < new_w; dx++)
         {
-            uint8_t *dest_pix = pixels + (dy * new_w + dx) * 4;
+            uint8_t *dest_pix = pixels_ + (dy * new_w + dx) * 4;
 
             int sx = dx * step_x;
             int sy = dy * step_y;
@@ -226,51 +233,49 @@ void image_data_c::ShrinkMasked(int new_w, int new_h)
             }
         }
 
-    used_w = HMM_MAX(1, used_w * new_w / width);
-    used_h = HMM_MAX(1, used_h * new_h / height);
+    used_width_  = HMM_MAX(1, used_width_ * new_w / width_);
+    used_height_ = HMM_MAX(1, used_height_ * new_h / height_);
 
-    width  = new_w;
-    height = new_h;
+    width_  = new_w;
+    height_ = new_h;
 }
 
-void image_data_c::Grow(int new_w, int new_h)
+void ImageData::Grow(int new_w, int new_h)
 {
-    SYS_ASSERT(new_w >= width && new_h >= height);
+    EPI_ASSERT(new_w >= width_ && new_h >= height_);
 
-    uint8_t *new_pixels = new uint8_t[new_w * new_h * bpp];
+    uint8_t *new_pixels_ = new uint8_t[new_w * new_h * depth_];
 
     for (int dy = 0; dy < new_h; dy++)
         for (int dx = 0; dx < new_w; dx++)
         {
-            int sx = dx * width / new_w;
-            int sy = dy * height / new_h;
+            int sx = dx * width_ / new_w;
+            int sy = dy * height_ / new_h;
 
             const uint8_t *src = PixelAt(sx, sy);
 
-            uint8_t *dest = new_pixels + (dy * new_w + dx) * bpp;
+            uint8_t *dest = new_pixels_ + (dy * new_w + dx) * depth_;
 
-            for (int i = 0; i < bpp; i++)
-                *dest++ = *src++;
+            for (int i = 0; i < depth_; i++) *dest++ = *src++;
         }
 
-    delete[] pixels;
+    delete[] pixels_;
 
-    used_w = used_w * new_w / width;
-    used_h = used_h * new_h / height;
+    used_width_  = used_width_ * new_w / width_;
+    used_height_ = used_height_ * new_h / height_;
 
-    pixels = new_pixels;
-    width  = new_w;
-    height = new_h;
+    pixels_ = new_pixels_;
+    width_  = new_w;
+    height_ = new_h;
 }
 
-void image_data_c::RemoveAlpha()
+void ImageData::RemoveAlpha()
 {
-    if (bpp != 4)
-        return;
+    if (depth_ != 4) return;
 
-    uint8_t *src   = pixels;
-    uint8_t *s_end = src + (width * height * bpp);
-    uint8_t *dest  = pixels;
+    uint8_t *src   = pixels_;
+    uint8_t *s_end = src + (width_ * height_ * depth_);
+    uint8_t *dest  = pixels_;
 
     for (; src < s_end; src += 4)
     {
@@ -281,20 +286,19 @@ void image_data_c::RemoveAlpha()
         *dest++ = (int)src[2] * (int)src[3] / 255;
     }
 
-    bpp = 3;
+    depth_ = 3;
 }
 
-void image_data_c::SetAlpha(int alphaness)
+void ImageData::SetAlpha(int alphaness)
 {
-    if (bpp < 3)
-        return;
+    if (depth_ < 3) return;
 
-    if (bpp == 3)
+    if (depth_ == 3)
     {
-        uint8_t *new_pixels = new uint8_t[width * height * 4];
-        uint8_t *src        = pixels;
-        uint8_t *s_end      = src + (width * height * 3);
-        uint8_t *dest       = new_pixels;
+        uint8_t *new_pixels_ = new uint8_t[width_ * height_ * 4];
+        uint8_t *src         = pixels_;
+        uint8_t *s_end       = src + (width_ * height_ * 3);
+        uint8_t *dest        = new_pixels_;
         for (; src < s_end; src += 3)
         {
             *dest++ = src[0];
@@ -302,43 +306,39 @@ void image_data_c::SetAlpha(int alphaness)
             *dest++ = src[2];
             *dest++ = alphaness;
         }
-        delete[] pixels;
-        pixels = new_pixels;
-        bpp    = 4;
+        delete[] pixels_;
+        pixels_ = new_pixels_;
+        depth_  = 4;
     }
     else
     {
-        for (int i = 3; i < width * height * 4; i += 4)
+        for (int i = 3; i < width_ * height_ * 4; i += 4)
         {
-            pixels[i] = alphaness;
+            pixels_[i] = alphaness;
         }
     }
 }
 
-void image_data_c::ThresholdAlpha(uint8_t alpha)
+void ImageData::ThresholdAlpha(uint8_t alpha)
 {
-    if (bpp != 4)
-        return;
+    if (depth_ != 4) return;
 
-    uint8_t *src   = pixels;
-    uint8_t *s_end = src + (width * height * bpp);
+    uint8_t *src   = pixels_;
+    uint8_t *s_end = src + (width_ * height_ * depth_);
 
-    for (; src < s_end; src += 4)
-    {
-        src[3] = (src[3] < alpha) ? 0 : 255;
-    }
+    for (; src < s_end; src += 4) { src[3] = (src[3] < alpha) ? 0 : 255; }
 }
 
-void image_data_c::FourWaySymmetry()
+void ImageData::FourWaySymmetry()
 {
-    int w2 = (width + 1) / 2;
-    int h2 = (height + 1) / 2;
+    int w2 = (width_ + 1) / 2;
+    int h2 = (height_ + 1) / 2;
 
     for (int y = 0; y < h2; y++)
         for (int x = 0; x < w2; x++)
         {
-            int ix = width - 1 - x;
-            int iy = height - 1 - y;
+            int ix = width_ - 1 - x;
+            int iy = height_ - 1 - y;
 
             CopyPixel(x, y, ix, y);
             CopyPixel(x, y, x, iy);
@@ -346,62 +346,62 @@ void image_data_c::FourWaySymmetry()
         }
 }
 
-void image_data_c::RemoveBackground()
+void ImageData::RemoveBackground()
 {
-    if (bpp < 3)
-        return;
+    if (depth_ < 3) return;
 
-    if (bpp == 3)
+    if (depth_ == 3)
     {
-        uint8_t *new_pixels = new uint8_t[width * height * 4];
-        uint8_t *src        = pixels;
-        uint8_t *s_end      = src + (width * height * 3);
-        uint8_t *dest       = new_pixels;
+        uint8_t *new_pixels_ = new uint8_t[width_ * height_ * 4];
+        uint8_t *src         = pixels_;
+        uint8_t *s_end       = src + (width_ * height_ * 3);
+        uint8_t *dest        = new_pixels_;
         for (; src < s_end; src += 3)
         {
             *dest++ = src[0];
             *dest++ = src[1];
             *dest++ = src[2];
-            *dest++ = (src[0] == pixels[0] && src[1] == pixels[1] && src[2] == pixels[2]) ? 0 : 255;
+            *dest++ = (src[0] == pixels_[0] && src[1] == pixels_[1] &&
+                       src[2] == pixels_[2])
+                          ? 0
+                          : 255;
         }
-        delete[] pixels;
-        pixels = new_pixels;
-        bpp    = 4;
+        delete[] pixels_;
+        pixels_ = new_pixels_;
+        depth_  = 4;
     }
     else
     {
-        // If first pixel is fully transparent, assume that image background is already transparent
-        if (pixels[3] == 0)
-            return;
+        // If first pixel is fully transparent, assume that image background is
+        // already transparent
+        if (pixels_[3] == 0) return;
 
-        for (int i = 4; i < width * height * 4; i += 4)
+        for (int i = 4; i < width_ * height_ * 4; i += 4)
         {
-            if (pixels[i] == pixels[0] && pixels[i + 1] == pixels[1] && pixels[i + 2] == pixels[2])
-                pixels[i + 3] = 0;
+            if (pixels_[i] == pixels_[0] && pixels_[i + 1] == pixels_[1] &&
+                pixels_[i + 2] == pixels_[2])
+                pixels_[i + 3] = 0;
         }
     }
 }
 
-void image_data_c::EightWaySymmetry()
+void ImageData::EightWaySymmetry()
 {
-    SYS_ASSERT(width == height);
+    EPI_ASSERT(width_ == height_);
 
-    int hw = (width + 1) / 2;
+    int hw = (width_ + 1) / 2;
 
     for (int y = 0; y < hw; y++)
-        for (int x = y + 1; x < hw; x++)
-        {
-            CopyPixel(x, y, y, x);
-        }
+        for (int x = y + 1; x < hw; x++) { CopyPixel(x, y, y, x); }
 
     FourWaySymmetry();
 }
 
-int image_data_c::ImageCharacterWidth(int x1, int y1, int x2, int y2)
+int ImageData::ImageCharacterWidth(int x1, int y1, int x2, int y2)
 {
-    uint8_t *src         = pixels;
-    int   last_last   = x1;
-    int   first_first = x2;
+    uint8_t *src         = pixels_;
+    int      last_last   = x1;
+    int      first_first = x2;
     for (int i = y1; i < y2; i++)
     {
         bool found_first = false;
@@ -411,7 +411,8 @@ int image_data_c::ImageCharacterWidth(int x1, int y1, int x2, int y2)
         for (int j = x1; j < x2; j++)
         {
             uint8_t *checker = PixelAt(j, i);
-            if (src[0] != checker[0] || src[1] != checker[1] || src[2] != checker[2])
+            if (src[0] != checker[0] || src[1] != checker[1] ||
+                src[2] != checker[2])
             {
                 if (!found_first)
                 {
@@ -427,16 +428,17 @@ int image_data_c::ImageCharacterWidth(int x1, int y1, int x2, int y2)
         }
         if (found_first && first >= x1 && first < first_first)
             first_first = first;
-        if (found_last && last <= x2 && last > last_last)
-            last_last = last;
+        if (found_last && last <= x2 && last > last_last) last_last = last;
     }
-    return HMM_MAX(last_last - first_first, 0) + 3; // Some padding on each side of the letter
+    return HMM_MAX(last_last - first_first, 0) +
+           3;  // Some padding on each side of the letter
 }
 
-void image_data_c::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x, int from_y, int to_y)
+void ImageData::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x,
+                           int from_y, int to_y)
 {
     // make sure we don't overflow
-    SYS_ASSERT(used_w * used_h <= 2048 * 2048);
+    EPI_ASSERT(used_width_ * used_height_ <= 2048 * 2048);
 
     int r_sum = 0;
     int g_sum = 0;
@@ -446,21 +448,21 @@ void image_data_c::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x, 
     int weight = 0;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = HMM_Clamp(0, from_x, used_w - 1);
-    to_x   = HMM_Clamp(1, to_x, used_h);
-    from_y = HMM_Clamp(0, from_y, used_h - 1);
-    to_y   = HMM_Clamp(1, to_y, used_h);
+    from_x = HMM_Clamp(0, from_x, used_width_ - 1);
+    to_x   = HMM_Clamp(1, to_x, used_height_);
+    from_y = HMM_Clamp(0, from_y, used_height_ - 1);
+    to_y   = HMM_Clamp(1, to_y, used_height_);
 
     for (int y = from_y; y < to_y; y++)
     {
         const uint8_t *src = PixelAt(0, y);
 
-        for (int x = from_x; x < to_x; x++, src += bpp)
+        for (int x = from_x; x < to_x; x++, src += depth_)
         {
             int r = src[0];
             int g = src[1];
             int b = src[2];
-            int a = (bpp == 4) ? src[3] : 255;
+            int a = (depth_ == 4) ? src[3] : 255;
 
             int v = HMM_MAX(r, HMM_MAX(g, b));
 
@@ -512,65 +514,59 @@ void image_data_c::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x, 
 
     if (ity)
     {
-        weight = (used_w * used_h + 1) / 2;
+        weight = (used_width_ * used_height_ + 1) / 2;
 
         *ity = i_sum / weight;
     }
 }
 
-RGBAColor image_data_c::AverageColor(int from_x, int to_x, int from_y, int to_y)
+RGBAColor ImageData::AverageColor(int from_x, int to_x, int from_y, int to_y)
 {
     // make sure we don't overflow
-    SYS_ASSERT(used_w * used_h <= 2048 * 2048);
+    EPI_ASSERT(used_width_ * used_height_ <= 2048 * 2048);
 
     std::unordered_map<RGBAColor, unsigned int> seen_colors;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = HMM_Clamp(0, from_x, used_w - 1);
-    to_x   = HMM_Clamp(1, to_x, used_h);
-    from_y = HMM_Clamp(0, from_y, used_h - 1);
-    to_y   = HMM_Clamp(1, to_y, used_h);
+    from_x = HMM_Clamp(0, from_x, used_width_ - 1);
+    to_x   = HMM_Clamp(1, to_x, used_height_);
+    from_y = HMM_Clamp(0, from_y, used_height_ - 1);
+    to_y   = HMM_Clamp(1, to_y, used_height_);
 
     for (int y = from_y; y < to_y; y++)
     {
         const uint8_t *src = PixelAt(0, y);
 
-        for (int x = from_x; x < to_x; x++, src += bpp)
+        for (int x = from_x; x < to_x; x++, src += depth_)
         {
-            if (bpp == 4 && src[3] == 0)
-                continue;
+            if (depth_ == 4 && src[3] == 0) continue;
             RGBAColor color = epi::MakeRGBA(src[0], src[1], src[2]);
-            auto         res   = seen_colors.try_emplace(color, 0);
+            auto      res   = seen_colors.try_emplace(color, 0);
             // If color already seen, increment the hit counter
-            if (!res.second)
-                res.first->second++;
+            if (!res.second) res.first->second++;
         }
     }
 
     unsigned int highest_count = 0;
-    RGBAColor average_color = SG_BLACK_RGBA32;
+    RGBAColor    average_color = SG_BLACK_RGBA32;
     for (auto color : seen_colors)
     {
-        if (color.second > highest_count)
-            highest_count = color.second;
+        if (color.second > highest_count) highest_count = color.second;
     }
 
     // If multiple colors were seen "the most", just use the last one spotted
     for (auto color : seen_colors)
     {
-        if (color.second == highest_count)
-        {
-            average_color = color.first;
-        }
+        if (color.second == highest_count) { average_color = color.first; }
     }
 
     return average_color;
 }
 
-RGBAColor image_data_c::LightestColor(int from_x, int to_x, int from_y, int to_y)
+RGBAColor ImageData::LightestColor(int from_x, int to_x, int from_y, int to_y)
 {
     // make sure we don't overflow
-    SYS_ASSERT(used_w * used_h <= 2048 * 2048);
+    EPI_ASSERT(used_width_ * used_height_ <= 2048 * 2048);
 
     int lightest_total = 0;
     int lightest_r     = 0;
@@ -578,19 +574,18 @@ RGBAColor image_data_c::LightestColor(int from_x, int to_x, int from_y, int to_y
     int lightest_b     = 0;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = HMM_Clamp(0, from_x, used_w - 1);
-    to_x   = HMM_Clamp(1, to_x, used_h);
-    from_y = HMM_Clamp(0, from_y, used_h - 1);
-    to_y   = HMM_Clamp(1, to_y, used_h);
+    from_x = HMM_Clamp(0, from_x, used_width_ - 1);
+    to_x   = HMM_Clamp(1, to_x, used_height_);
+    from_y = HMM_Clamp(0, from_y, used_height_ - 1);
+    to_y   = HMM_Clamp(1, to_y, used_height_);
 
     for (int y = from_y; y < to_y; y++)
     {
         const uint8_t *src = PixelAt(0, y);
 
-        for (int x = from_x; x < to_x; x++, src += bpp)
+        for (int x = from_x; x < to_x; x++, src += depth_)
         {
-            if (bpp == 4 && src[3] == 0)
-                continue;
+            if (depth_ == 4 && src[3] == 0) continue;
             int current_total = src[0] + src[1] + src[2];
             if (current_total > lightest_total)
             {
@@ -605,10 +600,10 @@ RGBAColor image_data_c::LightestColor(int from_x, int to_x, int from_y, int to_y
     return epi::MakeRGBA(lightest_r, lightest_g, lightest_b);
 }
 
-RGBAColor image_data_c::DarkestColor(int from_x, int to_x, int from_y, int to_y)
+RGBAColor ImageData::DarkestColor(int from_x, int to_x, int from_y, int to_y)
 {
     // make sure we don't overflow
-    SYS_ASSERT(used_w * used_h <= 2048 * 2048);
+    EPI_ASSERT(used_width_ * used_height_ <= 2048 * 2048);
 
     int darkest_total = 765;
     int darkest_r     = 0;
@@ -616,19 +611,18 @@ RGBAColor image_data_c::DarkestColor(int from_x, int to_x, int from_y, int to_y)
     int darkest_b     = 0;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = HMM_Clamp(0, from_x, used_w - 1);
-    to_x   = HMM_Clamp(1, to_x, used_h);
-    from_y = HMM_Clamp(0, from_y, used_h - 1);
-    to_y   = HMM_Clamp(1, to_y, used_h);
+    from_x = HMM_Clamp(0, from_x, used_width_ - 1);
+    to_x   = HMM_Clamp(1, to_x, used_height_);
+    from_y = HMM_Clamp(0, from_y, used_height_ - 1);
+    to_y   = HMM_Clamp(1, to_y, used_height_);
 
     for (int y = from_y; y < to_y; y++)
     {
         const uint8_t *src = PixelAt(0, y);
 
-        for (int x = from_x; x < to_x; x++, src += bpp)
+        for (int x = from_x; x < to_x; x++, src += depth_)
         {
-            if (bpp == 4 && src[3] == 0)
-                continue;
+            if (depth_ == 4 && src[3] == 0) continue;
             int current_total = src[0] + src[1] + src[2];
             if (current_total < darkest_total)
             {
@@ -643,106 +637,102 @@ RGBAColor image_data_c::DarkestColor(int from_x, int to_x, int from_y, int to_y)
     return epi::MakeRGBA(darkest_r, darkest_g, darkest_b);
 }
 
-void image_data_c::Swirl(int leveltime, int thickness)
+void ImageData::Swirl(int leveltime, int thickness)
 {
     const int swirlfactor  = 8192 / 64;
     const int swirlfactor2 = 8192 / 32;
     const int amp          = 2;
     int       speed;
 
-    if (thickness == 1) // Thin liquid
+    if (thickness == 1)  // Thin liquid
     {
         speed = 40;
     }
-    else
-    {
-        speed = 10;
-    }
+    else { speed = 10; }
 
-    uint8_t *new_pixels = new uint8_t[width * height * bpp];
+    uint8_t *new_pixels_ = new uint8_t[width_ * height_ * depth_];
 
     int x, y;
 
     // SMMU swirling algorithm
-    for (x = 0; x < width; x++)
+    for (x = 0; x < width_; x++)
     {
-        for (y = 0; y < height; y++)
+        for (y = 0; y < height_; y++)
         {
             int x1, y1;
             int sinvalue, sinvalue2;
 
             sinvalue  = (y * swirlfactor + leveltime * speed * 5 + 900) & 8191;
             sinvalue2 = (x * swirlfactor2 + leveltime * speed * 4 + 300) & 8191;
-            x1        = x + width + height + ((finesine[sinvalue] * amp) >> FRACBITS) +
-                 ((finesine[sinvalue2] * amp) >> FRACBITS);
+            x1 = x + width_ + height_ + ((finesine[sinvalue] * amp) >> 16) +
+                 ((finesine[sinvalue2] * amp) >> 16);
 
-            sinvalue  = (x * swirlfactor + leveltime * speed * 3 + 700) & 8191;
-            sinvalue2 = (y * swirlfactor2 + leveltime * speed * 4 + 1200) & 8191;
-            y1        = y + width + height + ((finesine[sinvalue] * amp) >> FRACBITS) +
-                 ((finesine[sinvalue2] * amp) >> FRACBITS);
+            sinvalue = (x * swirlfactor + leveltime * speed * 3 + 700) & 8191;
+            sinvalue2 =
+                (y * swirlfactor2 + leveltime * speed * 4 + 1200) & 8191;
+            y1 = y + width_ + height_ + ((finesine[sinvalue] * amp) >> 16) +
+                 ((finesine[sinvalue2] * amp) >> 16);
 
-            x1 &= width - 1;
-            y1 &= height - 1;
+            x1 &= width_ - 1;
+            y1 &= height_ - 1;
 
-            uint8_t *src  = pixels + (y1 * width + x1) * bpp;
-            uint8_t *dest = new_pixels + (y * width + x) * bpp;
+            uint8_t *src  = pixels_ + (y1 * width_ + x1) * depth_;
+            uint8_t *dest = new_pixels_ + (y * width_ + x) * depth_;
 
-            memcpy(dest, src, bpp);
+            memcpy(dest, src, depth_);
         }
     }
-    delete[] pixels;
-    pixels = new_pixels;
+    delete[] pixels_;
+    pixels_ = new_pixels_;
 }
 
-void image_data_c::FillMarginX(int actual_w)
+void ImageData::FillMarginX(int actual_w)
 {
-    if (actual_w >= width)
-        return;
+    if (actual_w >= width_) return;
 
-    for (int x = 0; x < (width - actual_w); x++)
+    for (int x = 0; x < (width_ - actual_w); x++)
     {
-        for (int y = 0; y < height; y++)
+        for (int y = 0; y < height_; y++)
         {
-            memcpy(pixels + (y * width + x + actual_w) * bpp, pixels + (y * width + x) * bpp, bpp);
+            memcpy(pixels_ + (y * width_ + x + actual_w) * depth_,
+                   pixels_ + (y * width_ + x) * depth_, depth_);
         }
     }
 }
 
-void image_data_c::FillMarginY(int actual_h)
+void ImageData::FillMarginY(int actual_h)
 {
-    if (actual_h >= height)
-        return;
+    if (actual_h >= height_) return;
 
-    for (int y = 0; y < (height - actual_h); y++)
+    for (int y = 0; y < (height_ - actual_h); y++)
     {
-        memcpy(pixels + (y + actual_h) * width * bpp, pixels + y * width * bpp, width * bpp);
+        memcpy(pixels_ + (y + actual_h) * width_ * depth_,
+               pixels_ + y * width_ * depth_, width_ * depth_);
     }
 }
 
-void image_data_c::SetHSV(int rotation, int saturation, int value)
+void ImageData::SetHsv(int rotation, int saturation, int value)
 {
-    SYS_ASSERT(bpp >= 3);
+    EPI_ASSERT(depth_ >= 3);
 
     rotation   = HMM_Clamp(-1800, rotation, 1800);
     saturation = HMM_Clamp(-1, saturation, 255);
 
-    for (int y = 0; y < height; y++)
-        for (int x = 0; x < width; x++)
+    for (int y = 0; y < height_; y++)
+        for (int x = 0; x < width_; x++)
         {
             uint8_t *src = PixelAt(x, y);
 
-            RGBAColor col = epi::MakeRGBA(src[0], src[1], src[2], bpp == 4 ? src[3] : 255);
+            RGBAColor col = epi::MakeRGBA(src[0], src[1], src[2],
+                                          depth_ == 4 ? src[3] : 255);
 
             epi::HSVColor hue(col);
 
-            if (rotation)
-                hue.Rotate(rotation);
+            if (rotation) hue.Rotate(rotation);
 
-            if (saturation > -1)
-                hue.SetSaturation(saturation);
+            if (saturation > -1) hue.SetSaturation(saturation);
 
-            if (value)
-                hue.SetValue(HMM_Clamp(0, hue.v_+value, 255));
+            if (value) hue.SetValue(HMM_Clamp(0, hue.v_ + value, 255));
 
             col = hue.ToRGBA();
 

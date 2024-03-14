@@ -1,8 +1,8 @@
-//----------------------------------------------------------------------------
-//  EDGE System Specific Header
+//------------------------------------------------------------------------
+//  EPI Alphabetical Bit Set
 //----------------------------------------------------------------------------
 //
-//  Copyright (c) 1999-2024 The EDGE Team.
+//  Copyright (c) 2004-2024  The EDGE Team.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -16,15 +16,31 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __SYSTEM_SPECIFIC_DEFS__
-#define __SYSTEM_SPECIFIC_DEFS__
+#pragma once
 
-#include "epi.h"
+#include <string>
 
-#include "con_var.h"
-#include "i_system.h"
+// a bitset is a set of named bits, from `A' to `Z'.
+typedef int BitSet;
 
-#endif /*__SYSTEM_SPECIFIC_DEFS__*/
+constexpr int kBitSetFull = 0x7FFFFFFF;
+
+namespace epi
+{
+
+// Case-insensitive, i.e. 'a' will return the same bit as 'A'
+// Returns 0 if not an ASCII alphabetical character
+inline BitSet BitSetFromChar(char ch)
+{
+    if (ch > '@' && ch < '[')
+        return (1 << ((ch) - 'A'));
+    else if (ch > '`' && ch < '{')
+        return (1 << ((ch ^ 0x20) - 'A'));
+    else
+        return 0;
+}
+
+}  // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

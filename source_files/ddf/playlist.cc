@@ -16,13 +16,13 @@
 //
 //----------------------------------------------------------------------------
 
-#include "local.h"
-
 #include "playlist.h"
 
-static pl_entry_c *dynamic_plentry;
+#include "local.h"
+#include "str_compare.h"
+static PlaylistEntry *dynamic_plentry;
 
-pl_entry_container_c playlist;
+PlaylistEntryContainer playlist;
 
 //
 // DDF_MusicParseInfo
@@ -31,9 +31,11 @@ pl_entry_container_c playlist;
 //
 static void DDF_MusicParseInfo(const char *info)
 {
-    static const char *const musstrtype[] = {"UNKNOWN", "MIDI", "MUS", "OGG", "MP3", "FLAC",
-                                             "M4P", "RAD",  "IMF280", "IMF560", "IMF700", NULL};
-    static const char *const musinftype[] = {"UNKNOWN", "LUMP", "FILE", "PACK", NULL};
+    static const char *const musstrtype[] = {
+        "UNKNOWN", "MIDI", "MUS",    "OGG",    "MP3",    "FLAC",
+        "M4P",     "RAD",  "IMF280", "IMF560", "IMF700", nullptr};
+    static const char *const musinftype[] = {"UNKNOWN", "LUMP", "FILE", "PACK",
+                                             nullptr};
 
     char charbuff[256];
     int  pos, i;
@@ -53,34 +55,36 @@ static void DDF_MusicParseInfo(const char *info)
         pos++;
     }
 
-    if (i == 255)
-        DDF_Error("DDF_MusicParseInfo: Music info too big\n");
+    if (i == 255) DDF_Error("DDF_MusicParseInfo: Music info too big\n");
 
     // -AJA- terminate charbuff with trailing \0.
     charbuff[i] = 0;
 
-    i = MUS_UNKNOWN;
-    while (i != ENDOFMUSTYPES && epi::StringCaseCompareASCII(charbuff, musstrtype[i]) != 0)
+    i = kDDFMusicUnknown;
+    while (i != kTotalDDFMusicTypes &&
+           epi::StringCaseCompareASCII(charbuff, musstrtype[i]) != 0)
         i++;
 
-    if (i == ENDOFMUSTYPES)
+    if (i == kTotalDDFMusicTypes)
     {
-        i = MUSINF_UNKNOWN;
-        while (musinftype[i] != NULL && epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
+        i = kDDFMusicDataUnknown;
+        while (musinftype[i] != nullptr &&
+               epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
             i++;
-        if (i == ENDOFMUSINFTYPES)
-            DDF_Warning("DDF_MusicParseInfo: Unknown music type: '%s'\n", charbuff);
+        if (i == kTotalDDFMusicDataTypes)
+            DDF_Warning("DDF_MusicParseInfo: Unknown music type: '%s'\n",
+                        charbuff);
         else
         {
-            dynamic_plentry->infotype = (musicinftype_e)i;
+            dynamic_plentry->infotype_ = (DDFMusicDataType)i;
             // Remained is the string reference: filename/lumpname
             pos++;
-            dynamic_plentry->info = &info[pos];
+            dynamic_plentry->info_ = &info[pos];
             return;
         }
     }
     else
-        dynamic_plentry->type = (musictype_t)i;
+        dynamic_plentry->type_ = (DDFMusicType)i;
 
     // Data Type
     i = 0;
@@ -96,24 +100,25 @@ static void DDF_MusicParseInfo(const char *info)
         i++;
     }
 
-    if (i == 255)
-        DDF_Error("DDF_MusicParseInfo: Music info too big\n");
+    if (i == 255) DDF_Error("DDF_MusicParseInfo: Music info too big\n");
 
     // -AJA- terminate charbuff with trailing \0.
     charbuff[i] = 0;
 
-    i = MUSINF_UNKNOWN;
-    while (musinftype[i] != NULL && epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
+    i = kDDFMusicDataUnknown;
+    while (musinftype[i] != nullptr &&
+           epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
         i++;
 
-    if (i == ENDOFMUSINFTYPES)
+    if (i == kTotalDDFMusicDataTypes)
         DDF_Warning("DDF_MusicParseInfo: Unknown music info: '%s'\n", charbuff);
     else
-        dynamic_plentry->infotype = (musicinftype_e)i; // technically speaking this is proper
+        dynamic_plentry->infotype_ =
+            (DDFMusicDataType)i;  // technically speaking this is proper
 
     // Remained is the string reference: filename/lumpname
     pos++;
-    dynamic_plentry->info = &info[pos];
+    dynamic_plentry->info_ = &info[pos];
 
     return;
 }
@@ -126,8 +131,7 @@ static void PlaylistStartEntry(const char *name, bool extend)
 {
     int number = HMM_MAX(0, atoi(name));
 
-    if (number == 0)
-        DDF_Error("Bad music number in playlist.ddf: %s\n", name);
+    if (number == 0) DDF_Error("Bad music number in playlist.ddf: %s\n", name);
 
     dynamic_plentry = playlist.Find(number);
 
@@ -146,17 +150,18 @@ static void PlaylistStartEntry(const char *name, bool extend)
     }
 
     // not found, create a new entry
-    dynamic_plentry = new pl_entry_c;
+    dynamic_plentry = new PlaylistEntry;
 
-    dynamic_plentry->number = number;
+    dynamic_plentry->number_ = number;
 
     playlist.push_back(dynamic_plentry);
 }
 
-static void PlaylistParseField(const char *field, const char *contents, int index, bool is_last)
+static void PlaylistParseField(const char *field, const char *contents,
+                               int index, bool is_last)
 {
 #if (DEBUG_DDF)
-    I_Debugf("PLAYLIST_PARSE: %s = %s;\n", field, contents);
+    LogDebug("PLAYLIST_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (DDF_CompareName(field, "MUSICINFO") == 0)
@@ -176,7 +181,7 @@ static void PlaylistFinishEntry(void)
 static void PlaylistClearAll(void)
 {
     // 100% safe to just remove all entries
-    for (auto pl : playlist)
+    for (PlaylistEntry *pl : playlist)
     {
         delete pl;
         pl = nullptr;
@@ -186,7 +191,7 @@ static void PlaylistClearAll(void)
 
 void DDF_ReadMusicPlaylist(const std::string &data)
 {
-    readinfo_t playlistinfo;
+    DDFReadInfo playlistinfo;
 
     playlistinfo.tag      = "PLAYLISTS";
     playlistinfo.lumpname = "DDFPLAY";
@@ -211,85 +216,81 @@ void DDF_MusicPlaylistCleanUp(void)
     playlist.shrink_to_fit();
 }
 
-// --> pl_entry_c class
+// --> PlaylistEntry class
 
 //
-// pl_entry_c constructor
+// PlaylistEntry constructor
 //
-pl_entry_c::pl_entry_c() : number(0)
-{
-    Default();
-}
+PlaylistEntry::PlaylistEntry() : number_(0) { Default(); }
 
 //
-// pl_entry_c destructor
+// PlaylistEntry destructor
 //
-pl_entry_c::~pl_entry_c()
-{
-}
+PlaylistEntry::~PlaylistEntry() {}
 
 //
-// pl_entry_c::CopyDetail()
+// PlaylistEntry::CopyDetail()
 //
 // Copy everything with exception ddf identifier
 //
-void pl_entry_c::CopyDetail(pl_entry_c &src)
+void PlaylistEntry::CopyDetail(PlaylistEntry &src)
 {
-    type     = src.type;
-    infotype = src.infotype;
-    info     = src.info;
+    type_     = src.type_;
+    infotype_ = src.infotype_;
+    info_     = src.info_;
 }
 
 //
-// pl_entry_c::Default()
+// PlaylistEntry::Default()
 //
-void pl_entry_c::Default()
+void PlaylistEntry::Default()
 {
-    type     = MUS_UNKNOWN;
-    infotype = MUSINF_UNKNOWN;
-    info.clear();
+    type_     = kDDFMusicUnknown;
+    infotype_ = kDDFMusicDataUnknown;
+    info_.clear();
 }
 
-// --> pl_entry_containter_c class
+// --> PlaylistEntryontainter_c class
 
 //
-// pl_entry_c* pl_entry_container_c::Find()
+// PlaylistEntry* PlaylistEntryContainer::Find()
 //
-pl_entry_c *pl_entry_container_c::Find(int number)
+PlaylistEntry *PlaylistEntryContainer::Find(int number)
 {
-    for (auto iter = begin(); iter != end(); iter++)
+    for (std::vector<PlaylistEntry *>::iterator iter     = begin(),
+                                                iter_end = end();
+         iter != iter_end; iter++)
     {
-        pl_entry_c *p = *iter;
-        if (p->number == number)
-            return p;
+        PlaylistEntry *p = *iter;
+        if (p->number_ == number) return p;
     }
 
-    return NULL;
+    return nullptr;
 }
 
-int pl_entry_container_c::FindLast(const char *name)
+int PlaylistEntryContainer::FindLast(const char *name)
 {
-    for (auto iter = rbegin(); iter != rend(); iter++)
+    for (std::vector<PlaylistEntry *>::reverse_iterator iter     = rbegin(),
+                                                        iter_end = rend();
+         iter != iter_end; iter++)
     {
-        pl_entry_c *p = *iter;
-        if (DDF_CompareName(p->info.c_str(), name) == 0)
-            return p->number;
+        PlaylistEntry *p = *iter;
+        if (DDF_CompareName(p->info_.c_str(), name) == 0) return p->number_;
     }
 
     return -1;
 }
 
-int pl_entry_container_c::FindFree()
+int PlaylistEntryContainer::FindFree()
 {
-    int                   HighestNum = 0;
+    int HighestNum = 0;
 
-    for (auto iter = begin(); iter != end(); iter++)
+    for (std::vector<PlaylistEntry *>::iterator iter     = begin(),
+                                                iter_end = end();
+         iter != iter_end; iter++)
     {
-        pl_entry_c *p = *iter;
-        if (p->number > HighestNum)
-        {
-            HighestNum = p->number;
-        }
+        PlaylistEntry *p = *iter;
+        if (p->number_ > HighestNum) { HighestNum = p->number_; }
     }
     HighestNum = HighestNum + 1;
     return HighestNum;

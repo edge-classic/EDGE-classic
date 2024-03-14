@@ -23,98 +23,102 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
-
+#include "AlmostEquals.h"
 #include "am_map.h"
 #include "con_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
-#include "e_input.h"
 #include "dstrings.h"
+#include "e_input.h"
+#include "epi.h"
 #include "m_random.h"
 #include "p_local.h"
+#include "r_misc.h"
 #include "rad_trig.h"
 #include "s_sound.h"
+#include "str_util.h"
 
-#include "AlmostEquals.h"
+static constexpr uint8_t kBonusAddMinimum = 6;
+static constexpr uint8_t kBonusLimit      = 100;
 
-#define BONUS_ADD   6
-#define BONUS_LIMIT 100
+static constexpr uint8_t kDamageAddMinimum = 3;
+static constexpr uint8_t kDamageLimit      = 100;
 
-#define DAMAGE_ADD_MIN 3
-#define DAMAGE_LIMIT   100
+// follow a player exlusively for 3 seconds
+static constexpr uint8_t kBaseThreshold = 100;
 
-bool var_obituaries = true;
+static constexpr float kDeathViewHeight = 6.0f;
 
-extern cvar_c g_gore;
-extern cvar_c player_dm_dr;
+bool show_obituaries = true;
 
-typedef struct
+extern ConsoleVariable gore_level;
+extern ConsoleVariable player_deathmatch_damage_resistance;
+
+struct PickupInfo
 {
-    benefit_t *list;    // full list of benefits
-    bool       lose_em; // lose stuff if true
+    Benefit *list;       // full list of benefits
+    bool     lose_them;  // lose stuff if true
 
-    player_t *player;  // player picking it up
-    mobj_t   *special; // object to pick up
-    bool      dropped; // object was dropped by a monster
+    Player    *player;   // player picking it up
+    MapObject *special;  // object to pick up
+    bool       dropped;  // object was dropped by a monster
 
-    int new_weap; // index (for player) of a new weapon, -1 = none
-    int new_ammo; // ammotype of new ammo, -1 = none
+    int new_weapon;  // index (for player) of a new weapon, -1 = none
+    int new_ammo;    // ammotype of new ammo, -1 = none
 
-    bool got_it;  // player actually got the benefit
-    bool keep_it; // don't remove the thing from map
-    bool silent;  // don't make sound/flash/effects
-    bool no_ammo; // skip ammo
-} pickup_info_t;
+    bool got_it;   // player actually got the benefit
+    bool keep_it;  // don't remove the thing from map
+    bool silent;   // don't make sound/flash/effects
+    bool no_ammo;  // skip ammo
+};
 
-static bool P_CheckForBenefit(benefit_t *list, int kind)
+static bool CheckForBenefit(Benefit *list, int kind)
 {
-    for (benefit_t *be = list; be != NULL; be = be->next)
+    for (Benefit *be = list; be != nullptr; be = be->next)
     {
-        if (be->type == kind)
-            return true;
+        if (be->type == kind) return true;
     }
 
     return false;
 }
 
 //
-// P_GiveCounter
+// GiveCounter
 //
 // Returns false if the "counter" item can't be picked up at all
 //
 //
-static void GiveCounter(pickup_info_t *pu, benefit_t *be)
+static void GiveCounter(PickupInfo *pu, Benefit *be)
 {
     int cntr = be->sub.type;
-    int num  = I_ROUND(be->amount);
+    int num  = RoundToInteger(be->amount);
 
-    if (cntr < 0 || cntr >= NUMCOUNTER)
-        I_Error("GiveCounter: bad type %i", cntr);
+    if (cntr < 0 || cntr >= kTotalCounterTypes)
+        FatalError("GiveCounter: bad type %i", cntr);
 
-    if (pu->lose_em)
+    if (pu->lose_them)
     {
-        if (pu->player->counters[cntr].num == 0)
-            return;
+        if (pu->player->counters_[cntr].count == 0) return;
 
-        pu->player->counters[cntr].num -= num;
+        pu->player->counters_[cntr].count -= num;
 
-        if (pu->player->counters[cntr].num < 0)
-            pu->player->counters[cntr].num = 0;
+        if (pu->player->counters_[cntr].count < 0)
+            pu->player->counters_[cntr].count = 0;
 
         pu->got_it = true;
         return;
     }
 
-    if (pu->player->counters[cntr].num == pu->player->counters[cntr].max)
+    if (pu->player->counters_[cntr].count ==
+        pu->player->counters_[cntr].maximum)
     {
         return;
     }
 
-    pu->player->counters[cntr].num += num;
+    pu->player->counters_[cntr].count += num;
 
-    if (pu->player->counters[cntr].num > pu->player->counters[cntr].max)
-        pu->player->counters[cntr].num = pu->player->counters[cntr].max;
+    if (pu->player->counters_[cntr].count > pu->player->counters_[cntr].maximum)
+        pu->player->counters_[cntr].count = pu->player->counters_[cntr].maximum;
 
     pu->got_it = true;
 }
@@ -122,66 +126,66 @@ static void GiveCounter(pickup_info_t *pu, benefit_t *be)
 //
 // GiveCounterLimit
 //
-static void GiveCounterLimit(pickup_info_t *pu, benefit_t *be)
+static void GiveCounterLimit(PickupInfo *pu, Benefit *be)
 {
     int cntr  = be->sub.type;
-    int limit = I_ROUND(be->amount);
+    int limit = RoundToInteger(be->amount);
 
-    if (cntr < 0 || cntr >= NUMCOUNTER)
-        I_Error("GiveCounterLimit: bad type %i", cntr);
+    if (cntr < 0 || cntr >= kTotalCounterTypes)
+        FatalError("GiveCounterLimit: bad type %i", cntr);
 
-    if ((!pu->lose_em && limit < pu->player->counters[cntr].max) ||
-        (pu->lose_em && limit > pu->player->counters[cntr].max))
+    if ((!pu->lose_them && limit < pu->player->counters_[cntr].maximum) ||
+        (pu->lose_them && limit > pu->player->counters_[cntr].maximum))
     {
         return;
     }
 
-    pu->player->counters[cntr].max = limit;
+    pu->player->counters_[cntr].maximum = limit;
 
     // new limit could be lower...
-    if (pu->player->counters[cntr].num > pu->player->counters[cntr].max)
-        pu->player->counters[cntr].num = pu->player->counters[cntr].max;
+    if (pu->player->counters_[cntr].count > pu->player->counters_[cntr].maximum)
+        pu->player->counters_[cntr].count = pu->player->counters_[cntr].maximum;
 
     pu->got_it = true;
 }
 
 //
-// P_GiveInventory
+// GiveInventory
 //
 // Returns false if the inventory item can't be picked up at all
 //
 //
-static void GiveInventory(pickup_info_t *pu, benefit_t *be)
+static void GiveInventory(PickupInfo *pu, Benefit *be)
 {
     int inv = be->sub.type;
-    int num = I_ROUND(be->amount);
+    int num = RoundToInteger(be->amount);
 
-    if (inv < 0 || inv >= NUMINV)
-        I_Error("GiveInventory: bad type %i", inv);
+    if (inv < 0 || inv >= kTotalInventoryTypes)
+        FatalError("GiveInventory: bad type %i", inv);
 
-    if (pu->lose_em)
+    if (pu->lose_them)
     {
-        if (pu->player->inventory[inv].num == 0)
-            return;
+        if (pu->player->inventory_[inv].count == 0) return;
 
-        pu->player->inventory[inv].num -= num;
+        pu->player->inventory_[inv].count -= num;
 
-        if (pu->player->inventory[inv].num < 0)
-            pu->player->inventory[inv].num = 0;
+        if (pu->player->inventory_[inv].count < 0)
+            pu->player->inventory_[inv].count = 0;
 
         pu->got_it = true;
         return;
     }
 
-    if (pu->player->inventory[inv].num == pu->player->inventory[inv].max)
+    if (pu->player->inventory_[inv].count ==
+        pu->player->inventory_[inv].maximum)
     {
         return;
     }
 
-    pu->player->inventory[inv].num += num;
+    pu->player->inventory_[inv].count += num;
 
-    if (pu->player->inventory[inv].num > pu->player->inventory[inv].max)
-        pu->player->inventory[inv].num = pu->player->inventory[inv].max;
+    if (pu->player->inventory_[inv].count > pu->player->inventory_[inv].maximum)
+        pu->player->inventory_[inv].count = pu->player->inventory_[inv].maximum;
 
     pu->got_it = true;
 }
@@ -189,66 +193,64 @@ static void GiveInventory(pickup_info_t *pu, benefit_t *be)
 //
 // GiveInventoryLimit
 //
-static void GiveInventoryLimit(pickup_info_t *pu, benefit_t *be)
+static void GiveInventoryLimit(PickupInfo *pu, Benefit *be)
 {
     int inv   = be->sub.type;
-    int limit = I_ROUND(be->amount);
+    int limit = RoundToInteger(be->amount);
 
-    if (inv < 0 || inv >= NUMINV)
-        I_Error("GiveInventoryLimit: bad type %i", inv);
+    if (inv < 0 || inv >= kTotalInventoryTypes)
+        FatalError("GiveInventoryLimit: bad type %i", inv);
 
-    if ((!pu->lose_em && limit < pu->player->inventory[inv].max) ||
-        (pu->lose_em && limit > pu->player->inventory[inv].max))
+    if ((!pu->lose_them && limit < pu->player->inventory_[inv].maximum) ||
+        (pu->lose_them && limit > pu->player->inventory_[inv].maximum))
     {
         return;
     }
 
-    pu->player->inventory[inv].max = limit;
+    pu->player->inventory_[inv].maximum = limit;
 
     // new limit could be lower...
-    if (pu->player->inventory[inv].num > pu->player->inventory[inv].max)
-        pu->player->inventory[inv].num = pu->player->inventory[inv].max;
+    if (pu->player->inventory_[inv].count > pu->player->inventory_[inv].maximum)
+        pu->player->inventory_[inv].count = pu->player->inventory_[inv].maximum;
 
     pu->got_it = true;
 }
 
 //
-// P_GiveAmmo
+// GiveAmmo
 //
 // Returns false if the ammo can't be picked up at all
 //
 // -ACB- 1998/06/19 DDF Change: Number passed is the exact amount of ammo given.
 // -KM- 1998/11/25 Handles weapon change from priority.
 //
-static void GiveAmmo(pickup_info_t *pu, benefit_t *be)
+static void GiveAmmo(PickupInfo *pu, Benefit *be)
 {
-    if (pu->no_ammo)
-        return;
+    if (pu->no_ammo) return;
 
     int ammo = be->sub.type;
-    int num  = I_ROUND(be->amount);
+    int num  = RoundToInteger(be->amount);
 
     // -AJA- in old deathmatch, weapons give 2.5 times more ammo
-    if (deathmatch == 1 && P_CheckForBenefit(pu->list, BENEFIT_Weapon) && pu->special && !pu->dropped)
+    if (deathmatch == 1 && CheckForBenefit(pu->list, kBenefitTypeWeapon) &&
+        pu->special && !pu->dropped)
     {
-        num = I_ROUND(be->amount * 2.5);
+        num = RoundToInteger(be->amount * 2.5);
     }
 
-    if (ammo == AM_NoAmmo || num <= 0)
-        return;
+    if (ammo == kAmmunitionTypeNoAmmo || num <= 0) return;
 
-    if (ammo < 0 || ammo >= NUMAMMO)
-        I_Error("GiveAmmo: bad type %i", ammo);
+    if (ammo < 0 || ammo >= kTotalAmmunitionTypes)
+        FatalError("GiveAmmo: bad type %i", ammo);
 
-    if (pu->lose_em)
+    if (pu->lose_them)
     {
-        if (pu->player->ammo[ammo].num == 0)
-            return;
+        if (pu->player->ammo_[ammo].count == 0) return;
 
-        pu->player->ammo[ammo].num -= num;
+        pu->player->ammo_[ammo].count -= num;
 
-        if (pu->player->ammo[ammo].num < 0)
-            pu->player->ammo[ammo].num = 0;
+        if (pu->player->ammo_[ammo].count < 0)
+            pu->player->ammo_[ammo].count = 0;
 
         pu->got_it = true;
         return;
@@ -257,7 +259,7 @@ static void GiveAmmo(pickup_info_t *pu, benefit_t *be)
     // In Nightmare you need the extra ammo, in "baby" you are given double
     if (pu->special)
     {
-        if ((gameskill == sk_baby) || (gameskill == sk_nightmare))
+        if ((game_skill == kSkillBaby) || (game_skill == kSkillNightmare))
             num <<= 1;
     }
 
@@ -265,9 +267,10 @@ static void GiveAmmo(pickup_info_t *pu, benefit_t *be)
 
     // for newly acquired weapons (in the same benefit list) which have
     // a clip, try to "bundle" this ammo inside that clip.
-    if (pu->new_weap >= 0)
+    if (pu->new_weapon >= 0)
     {
-        did_pickup = P_TryFillNewWeapon(pu->player, pu->new_weap, (ammotype_e)ammo, &num);
+        did_pickup = TryFillNewWeapon(pu->player, pu->new_weapon,
+                                      (AmmunitionType)ammo, &num);
 
         if (num == 0)
         {
@@ -277,25 +280,22 @@ static void GiveAmmo(pickup_info_t *pu, benefit_t *be)
     }
 
     // divide by two _here_, which means that the ammo for filling
-    // clip weapons is not affected by the MF_DROPPED flag.
-    if (num > 1 && pu->dropped)
-        num /= 2;
+    // clip weapons is not affected by the kMapObjectFlagDropped flag.
+    if (num > 1 && pu->dropped) num /= 2;
 
-    if (pu->player->ammo[ammo].num == pu->player->ammo[ammo].max)
+    if (pu->player->ammo_[ammo].count == pu->player->ammo_[ammo].maximum)
     {
-        if (did_pickup)
-            pu->got_it = true;
+        if (did_pickup) pu->got_it = true;
         return;
     }
 
     // if there is some fresh ammo, we should change weapons
-    if (pu->player->ammo[ammo].num == 0)
-        pu->new_ammo = ammo;
+    if (pu->player->ammo_[ammo].count == 0) pu->new_ammo = ammo;
 
-    pu->player->ammo[ammo].num += num;
+    pu->player->ammo_[ammo].count += num;
 
-    if (pu->player->ammo[ammo].num > pu->player->ammo[ammo].max)
-        pu->player->ammo[ammo].num = pu->player->ammo[ammo].max;
+    if (pu->player->ammo_[ammo].count > pu->player->ammo_[ammo].maximum)
+        pu->player->ammo_[ammo].count = pu->player->ammo_[ammo].maximum;
 
     pu->got_it = true;
 }
@@ -303,27 +303,27 @@ static void GiveAmmo(pickup_info_t *pu, benefit_t *be)
 //
 // GiveAmmoLimit
 //
-static void GiveAmmoLimit(pickup_info_t *pu, benefit_t *be)
+static void GiveAmmoLimit(PickupInfo *pu, Benefit *be)
 {
     int ammo  = be->sub.type;
-    int limit = I_ROUND(be->amount);
+    int limit = RoundToInteger(be->amount);
 
-    if (ammo == AM_NoAmmo)
-        return;
+    if (ammo == kAmmunitionTypeNoAmmo) return;
 
-    if (ammo < 0 || ammo >= NUMAMMO)
-        I_Error("GiveAmmoLimit: bad type %i", ammo);
+    if (ammo < 0 || ammo >= kTotalAmmunitionTypes)
+        FatalError("GiveAmmoLimit: bad type %i", ammo);
 
-    if ((!pu->lose_em && limit < pu->player->ammo[ammo].max) || (pu->lose_em && limit > pu->player->ammo[ammo].max))
+    if ((!pu->lose_them && limit < pu->player->ammo_[ammo].maximum) ||
+        (pu->lose_them && limit > pu->player->ammo_[ammo].maximum))
     {
         return;
     }
 
-    pu->player->ammo[ammo].max = limit;
+    pu->player->ammo_[ammo].maximum = limit;
 
     // new limit could be lower...
-    if (pu->player->ammo[ammo].num > pu->player->ammo[ammo].max)
-        pu->player->ammo[ammo].num = pu->player->ammo[ammo].max;
+    if (pu->player->ammo_[ammo].count > pu->player->ammo_[ammo].maximum)
+        pu->player->ammo_[ammo].count = pu->player->ammo_[ammo].maximum;
 
     pu->got_it = true;
 }
@@ -331,44 +331,42 @@ static void GiveAmmoLimit(pickup_info_t *pu, benefit_t *be)
 //
 // GiveWeapon
 //
-// The weapon thing may have a MF_DROPPED flag or'ed in.
+// The weapon thing may have a kMapObjectFlagDropped flag or'ed in.
 //
-// -AJA- 2000/03/02: Reworked for new benefit_t stuff.
+// -AJA- 2000/03/02: Reworked for new Benefit stuff.
 //
-static void GiveWeapon(pickup_info_t *pu, benefit_t *be)
+static void GiveWeapon(PickupInfo *pu, Benefit *be)
 {
-    weapondef_c *info = be->sub.weap;
-    int          pw_index;
+    WeaponDefinition *info = be->sub.weap;
+    int               pw_index;
 
-    SYS_ASSERT(info);
+    EPI_ASSERT(info);
 
-    if (pu->lose_em)
+    if (pu->lose_them)
     {
-        if (P_RemoveWeapon(pu->player, info))
-            pu->got_it = true;
+        if (RemoveWeapon(pu->player, info)) pu->got_it = true;
         return;
     }
 
     // special handling for CO-OP and OLD DeathMatch
-    if (numplayers > 1 && deathmatch != 2 && pu->special && !pu->dropped)
+    if (total_players > 1 && deathmatch != 2 && pu->special && !pu->dropped)
     {
-        if (!P_AddWeapon(pu->player, info, &pw_index))
+        if (!AddWeapon(pu->player, info, &pw_index))
         {
             pu->no_ammo = true;
             return;
         }
 
-        pu->new_weap = pw_index;
-        pu->keep_it  = true;
-        pu->got_it   = true;
+        pu->new_weapon = pw_index;
+        pu->keep_it    = true;
+        pu->got_it     = true;
         return;
     }
 
-    if (!P_AddWeapon(pu->player, info, &pw_index))
-        return;
+    if (!AddWeapon(pu->player, info, &pw_index)) return;
 
-    pu->new_weap = pw_index;
-    pu->got_it   = true;
+    pu->new_weapon = pw_index;
+    pu->got_it     = true;
 }
 
 //
@@ -378,20 +376,20 @@ static void GiveWeapon(pickup_info_t *pu, benefit_t *be)
 //
 // New Procedure: -ACB- 1998/06/21
 //
-static void GiveHealth(pickup_info_t *pu, benefit_t *be)
+static void GiveHealth(PickupInfo *pu, Benefit *be)
 {
-    if (pu->lose_em)
+    if (pu->lose_them)
     {
-        // P_DamageMobj(pu->player->mo, pu->special, NULL, be->amount, NULL);
-        if (pu->player->health <= 0)
-            return;
+        // DamageMapObject(pu->player->map_object_, pu->special, nullptr,
+        // be->amount, nullptr);
+        if (pu->player->health_ <= 0) return;
 
-        pu->player->health -= be->amount;
-        pu->player->mo->health = pu->player->health;
+        pu->player->health_ -= be->amount;
+        pu->player->map_object_->health_ = pu->player->health_;
 
-        if (pu->player->mo->health <= 0)
+        if (pu->player->map_object_->health_ <= 0)
         {
-            P_KillMobj(NULL, pu->player->mo);
+            KillMapObject(nullptr, pu->player->map_object_);
             // return;
         }
 
@@ -399,15 +397,13 @@ static void GiveHealth(pickup_info_t *pu, benefit_t *be)
         return;
     }
 
-    if (pu->player->health >= be->limit)
-        return;
+    if (pu->player->health_ >= be->limit) return;
 
-    pu->player->health += be->amount;
+    pu->player->health_ += be->amount;
 
-    if (pu->player->health > be->limit)
-        pu->player->health = be->limit;
+    if (pu->player->health_ > be->limit) pu->player->health_ = be->limit;
 
-    pu->player->mo->health = pu->player->health;
+    pu->player->map_object_->health_ = pu->player->health_;
 
     pu->got_it = true;
 }
@@ -417,22 +413,21 @@ static void GiveHealth(pickup_info_t *pu, benefit_t *be)
 //
 // Returns false if the new armour would not benefit
 //
-static void GiveArmour(pickup_info_t *pu, benefit_t *be)
+static void GiveArmour(PickupInfo *pu, Benefit *be)
 {
-    armour_type_e a_class = (armour_type_e)be->sub.type;
+    ArmourType a_class = (ArmourType)be->sub.type;
 
-    SYS_ASSERT(0 <= a_class && a_class < NUMARMOUR);
+    EPI_ASSERT(0 <= a_class && a_class < kTotalArmourTypes);
 
-    if (pu->lose_em)
+    if (pu->lose_them)
     {
-        if (AlmostEquals(pu->player->armours[a_class], 0.0f))
-            return;
+        if (AlmostEquals(pu->player->armours_[a_class], 0.0f)) return;
 
-        pu->player->armours[a_class] -= be->amount;
-        if (pu->player->armours[a_class] < 0)
-            pu->player->armours[a_class] = 0;
+        pu->player->armours_[a_class] -= be->amount;
+        if (pu->player->armours_[a_class] < 0)
+            pu->player->armours_[a_class] = 0;
 
-        P_UpdateTotalArmour(pu->player);
+        UpdateTotalArmour(pu->player);
 
         pu->got_it = true;
         return;
@@ -441,71 +436,66 @@ static void GiveArmour(pickup_info_t *pu, benefit_t *be)
     float amount  = be->amount;
     float upgrade = 0;
 
-    if (!pu->special || (pu->special->extendedflags & EF_SIMPLEARMOUR))
+    if (!pu->special ||
+        (pu->special->extended_flags_ & kExtendedFlagSimpleArmour))
     {
-        float slack = be->limit - pu->player->armours[a_class];
+        float slack = be->limit - pu->player->armours_[a_class];
 
-        if (amount > slack)
-            amount = slack;
+        if (amount > slack) amount = slack;
 
-        if (amount <= 0)
-            return;
+        if (amount <= 0) return;
     }
     else /* Doom emulation */
     {
-        float slack = be->limit - pu->player->totalarmour;
+        float slack = be->limit - pu->player->total_armour_;
 
-        if (slack < 0)
-            return;
+        if (slack < 0) return;
 
         // we try to Upgrade any lower class armour with this armour.
         for (int cl = a_class - 1; cl >= 0; cl--)
         {
-            upgrade += pu->player->armours[cl];
+            upgrade += pu->player->armours_[cl];
         }
 
         // cannot upgrade more than the specified amount
-        if (upgrade > amount)
-            upgrade = amount;
+        if (upgrade > amount) upgrade = amount;
 
         slack += upgrade;
 
-        if (amount > slack)
-            amount = slack;
+        if (amount > slack) amount = slack;
 
-        SYS_ASSERT(amount >= 0);
-        SYS_ASSERT(upgrade >= 0);
+        EPI_ASSERT(amount >= 0);
+        EPI_ASSERT(upgrade >= 0);
 
-        if (AlmostEquals(amount, 0.0f) && AlmostEquals(upgrade, 0.0f))
-            return;
+        if (AlmostEquals(amount, 0.0f) && AlmostEquals(upgrade, 0.0f)) return;
     }
 
-    pu->player->armours[a_class] += amount;
+    pu->player->armours_[a_class] += amount;
 
     // -AJA- 2007/08/22: armor associations
-    if (pu->special && pu->special->info->armour_protect >= 0)
+    if (pu->special && pu->special->info_->armour_protect_ >= 0)
     {
-        pu->player->armour_types[a_class] = pu->special->info;
+        pu->player->armour_types_[a_class] = pu->special->info_;
     }
 
     if (upgrade > 0)
     {
         for (int cl = a_class - 1; (cl >= 0) && (upgrade > 0); cl--)
         {
-            if (pu->player->armours[cl] >= upgrade)
+            if (pu->player->armours_[cl] >= upgrade)
             {
-                pu->player->armours[cl] -= upgrade;
+                pu->player->armours_[cl] -= upgrade;
                 break;
             }
-            else if (pu->player->armours[cl] > 0)
+            else if (pu->player->armours_[cl] > 0)
             {
-                upgrade -= pu->player->armours[cl];
-                pu->player->armours[cl] = 0;
+                upgrade -= pu->player->armours_[cl];
+                pu->player->armours_[cl] = 0;
             }
         }
     }
 
-    P_UpdateTotalArmour(pu->player);
+    UpdateTotalArmour(pu->player);
 
     pu->got_it = true;
 }
@@ -513,28 +503,25 @@ static void GiveArmour(pickup_info_t *pu, benefit_t *be)
 //
 // GiveKey
 //
-static void GiveKey(pickup_info_t *pu, benefit_t *be)
+static void GiveKey(PickupInfo *pu, Benefit *be)
 {
-    keys_e key = (keys_e)be->sub.type;
+    DoorKeyType key = (DoorKeyType)be->sub.type;
 
-    if (pu->lose_em)
+    if (pu->lose_them)
     {
-        if (!(pu->player->cards & key))
-            return;
+        if (!(pu->player->cards_ & key)) return;
 
-        pu->player->cards = (keys_e)(pu->player->cards & ~key);
+        pu->player->cards_ = (DoorKeyType)(pu->player->cards_ & ~key);
     }
     else
     {
-        if (pu->player->cards & key)
-            return;
+        if (pu->player->cards_ & key) return;
 
-        pu->player->cards = (keys_e)(pu->player->cards | key);
+        pu->player->cards_ = (DoorKeyType)(pu->player->cards_ | key);
     }
 
     // -AJA- leave keys in Co-op games
-    if (COOP_MATCH())
-        pu->keep_it = true;
+    if (InCooperativeMatch()) pu->keep_it = true;
 
     pu->got_it = true;
 }
@@ -549,220 +536,211 @@ static void GiveKey(pickup_info_t *pu, benefit_t *be)
 // included is the use of limit, which gives a maxmium amount of protection
 // for this item. -ACB- 1998/06/20
 //
-static void GivePower(pickup_info_t *pu, benefit_t *be)
+static void GivePower(PickupInfo *pu, Benefit *be)
 {
     // -ACB- 1998/06/20 - calculate duration in seconds
-    float duration = be->amount * TICRATE;
-    float limit    = be->limit * TICRATE;
+    float duration = be->amount * kTicRate;
+    float limit    = be->limit * kTicRate;
 
-    if (pu->lose_em)
+    if (pu->lose_them)
     {
-        if (AlmostEquals(pu->player->powers[be->sub.type], 0.0f))
-            return;
+        if (AlmostEquals(pu->player->powers_[be->sub.type], 0.0f)) return;
 
-        pu->player->powers[be->sub.type] -= duration;
+        pu->player->powers_[be->sub.type] -= duration;
 
-        if (pu->player->powers[be->sub.type] < 0)
-            pu->player->powers[be->sub.type] = 0;
+        if (pu->player->powers_[be->sub.type] < 0)
+            pu->player->powers_[be->sub.type] = 0;
 
         pu->got_it = true;
         return;
     }
 
-    if (pu->player->powers[be->sub.type] >= limit)
-        return;
+    if (pu->player->powers_[be->sub.type] >= limit) return;
 
-    pu->player->powers[be->sub.type] += duration;
+    pu->player->powers_[be->sub.type] += duration;
 
-    if (pu->player->powers[be->sub.type] > limit)
-        pu->player->powers[be->sub.type] = limit;
+    if (pu->player->powers_[be->sub.type] > limit)
+        pu->player->powers_[be->sub.type] = limit;
 
     // special handling for scuba...
-    if (be->sub.type == PW_Scuba)
+    if (be->sub.type == kPowerTypeScuba)
     {
-        pu->player->air_in_lungs = pu->player->mo->info->lung_capacity;
+        pu->player->air_in_lungs_ =
+            pu->player->map_object_->info_->lung_capacity_;
     }
 
     pu->got_it = true;
 }
 
-static void DoGiveBenefitList(pickup_info_t *pu)
+static void DoGiveBenefitList(PickupInfo *pu)
 {
     // handle weapons first, since this affects ammo handling
 
-    for (benefit_t *be = pu->list; be; be = be->next)
+    for (Benefit *be = pu->list; be; be = be->next)
     {
-        if (be->type == BENEFIT_Weapon && be->amount >= 0.0)
+        if (be->type == kBenefitTypeWeapon && be->amount >= 0.0)
             GiveWeapon(pu, be);
     }
 
-    for (benefit_t *be = pu->list; be; be = be->next)
+    for (Benefit *be = pu->list; be; be = be->next)
     {
-        // Put the checking in for neg amounts at benefit level. Powerups can be neg
-        // if they last all level. -ACB- 2004/02/04
+        // Put the checking in for neg amounts at benefit level. Powerups can be
+        // neg if they last all level. -ACB- 2004/02/04
 
         switch (be->type)
         {
-        case BENEFIT_None:
-        case BENEFIT_Weapon:
-            break;
+            case kBenefitTypeNone:
+            case kBenefitTypeWeapon:
+                break;
 
-        case BENEFIT_Ammo:
-            if (be->amount >= 0.0)
-                GiveAmmo(pu, be);
-            break;
+            case kBenefitTypeAmmo:
+                if (be->amount >= 0.0) GiveAmmo(pu, be);
+                break;
 
-        case BENEFIT_AmmoLimit:
-            if (be->amount >= 0.0)
-                GiveAmmoLimit(pu, be);
-            break;
+            case kBenefitTypeAmmoLimit:
+                if (be->amount >= 0.0) GiveAmmoLimit(pu, be);
+                break;
 
-        case BENEFIT_Key:
-            if (be->amount >= 0.0)
-                GiveKey(pu, be);
-            break;
+            case kBenefitTypeKey:
+                if (be->amount >= 0.0) GiveKey(pu, be);
+                break;
 
-        case BENEFIT_Health:
-            if (be->amount >= 0.0)
-                GiveHealth(pu, be);
-            break;
+            case kBenefitTypeHealth:
+                if (be->amount >= 0.0) GiveHealth(pu, be);
+                break;
 
-        case BENEFIT_Armour:
-            if (be->amount >= 0.0)
-                GiveArmour(pu, be);
-            break;
+            case kBenefitTypeArmour:
+                if (be->amount >= 0.0) GiveArmour(pu, be);
+                break;
 
-        case BENEFIT_Powerup:
-            GivePower(pu, be);
-            break;
+            case kBenefitTypePowerup:
+                GivePower(pu, be);
+                break;
 
-        case BENEFIT_Inventory:
-            GiveInventory(pu, be);
-            break;
+            case kBenefitTypeInventory:
+                GiveInventory(pu, be);
+                break;
 
-        case BENEFIT_InventoryLimit:
-            GiveInventoryLimit(pu, be);
-            break;
+            case kBenefitTypeInventoryLimit:
+                GiveInventoryLimit(pu, be);
+                break;
 
-        case BENEFIT_Counter:
-            GiveCounter(pu, be);
-            break;
+            case kBenefitTypeCounter:
+                GiveCounter(pu, be);
+                break;
 
-        case BENEFIT_CounterLimit:
-            GiveCounterLimit(pu, be);
-            break;
+            case kBenefitTypeCounterLimit:
+                GiveCounterLimit(pu, be);
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 }
 
 //
-// P_HasBenefitInList
+// HasBenefitInList
 //
 // Check if the player has at least one of the benefits in the provided list.
-// Returns true if any of them are present for the player, but does not otherwise
-// return any information about which benefits matched or what their amounts are.
+// Returns true if any of them are present for the player, but does not
+// otherwise return any information about which benefits matched or what their
+// amounts are.
 //
-bool P_HasBenefitInList(player_t *player, benefit_t *list)
+bool HasBenefitInList(Player *player, Benefit *list)
 {
-    SYS_ASSERT(player && list);
-    for (benefit_t *be = list; be; be = be->next)
+    EPI_ASSERT(player && list);
+    for (Benefit *be = list; be; be = be->next)
     {
         switch (be->type)
         {
-        case BENEFIT_None:
-            break;
+            case kBenefitTypeNone:
+                break;
 
-        case BENEFIT_Weapon:
-            for (int i = 0; i < MAXWEAPONS; i++)
-            {
-                weapondef_c *cur_info = player->weapons[i].info;
-                if (cur_info == be->sub.weap)
+            case kBenefitTypeWeapon:
+                for (int i = 0; i < kMaximumWeapons; i++)
+                {
+                    WeaponDefinition *cur_info = player->weapons_[i].info;
+                    if (cur_info == be->sub.weap) return true;
+                }
+                break;
+
+            case kBenefitTypeAmmo:
+                if (player->ammo_[be->sub.type].count > be->amount) return true;
+                break;
+
+            case kBenefitTypeAmmoLimit:
+                if (player->ammo_[be->sub.type].maximum > be->amount)
                     return true;
-            }
-            break;
+                break;
 
-        case BENEFIT_Ammo:
-            if (player->ammo[be->sub.type].num > be->amount)
-                return true;
-            break;
+            case kBenefitTypeKey:
+                if (player->cards_ & (DoorKeyType)be->sub.type) return true;
+                break;
 
-        case BENEFIT_AmmoLimit:
-            if (player->ammo[be->sub.type].max > be->amount)
-                return true;
-            break;
+            case kBenefitTypeHealth:
+                if (player->health_ > be->amount) return true;
+                break;
 
-        case BENEFIT_Key:
-            if (player->cards & (keys_e)be->sub.type)
-                return true;
-            break;
+            case kBenefitTypeArmour:
+                if (player->armours_[be->sub.type] > be->amount) return true;
+                break;
 
-        case BENEFIT_Health:
-            if (player->health > be->amount)
-                return true;
-            break;
+            case kBenefitTypePowerup:
+                if (!AlmostEquals(player->powers_[be->sub.type], 0.0f))
+                    return true;
+                break;
 
-        case BENEFIT_Armour:
-            if (player->armours[be->sub.type] > be->amount)
-                return true;
-            break;
+            case kBenefitTypeInventory:
+                if (player->inventory_[be->sub.type].count > be->amount)
+                    return true;
+                break;
 
-        case BENEFIT_Powerup:
-            if (!AlmostEquals(player->powers[be->sub.type], 0.0f))
-                return true;
-            break;
+            case kBenefitTypeInventoryLimit:
+                if (player->inventory_[be->sub.type].maximum > be->amount)
+                    return true;
+                break;
 
-        case BENEFIT_Inventory:
-            if (player->inventory[be->sub.type].num > be->amount)
-                return true;
-            break;
+            case kBenefitTypeCounter:
+                if (player->counters_[be->sub.type].count > be->amount)
+                    return true;
+                break;
 
-        case BENEFIT_InventoryLimit:
-            if (player->inventory[be->sub.type].max > be->amount)
-                return true;
-            break;
+            case kBenefitTypeCounterLimit:
+                if (player->counters_[be->sub.type].maximum > be->amount)
+                    return true;
+                break;
 
-        case BENEFIT_Counter:
-            if (player->counters[be->sub.type].num > be->amount)
-                return true;
-            break;
-
-        case BENEFIT_CounterLimit:
-            if (player->counters[be->sub.type].max > be->amount)
-                return true;
-            break;
-
-        default:
-            break;
+            default:
+                break;
         }
     }
     return false;
 }
 
 //
-// P_GiveBenefitList
+// GiveBenefitList
 //
 // Give all the benefits in the list to the player.  `special' is the
-// special object that all these benefits came from, or NULL if they
-// came from the initial_benefits list.  When `lose_em' is true, the
+// special object that all these benefits came from, or nullptr if they
+// came from the initial_benefits list.  When `lose_them' is true, the
 // benefits should be taken away instead.  Returns true if _any_
 // benefit was picked up (or lost), or false if none of them were.
 //
-bool P_GiveBenefitList(player_t *player, mobj_t *special, benefit_t *list, bool lose_em)
+bool GiveBenefitList(Player *player, MapObject *special, Benefit *list,
+                     bool lose_them)
 {
-    pickup_info_t info;
+    PickupInfo info;
 
-    info.list    = list;
-    info.lose_em = lose_em;
+    info.list      = list;
+    info.lose_them = lose_them;
 
     info.player  = player;
     info.special = special;
     info.dropped = false;
 
-    info.new_weap = -1;
-    info.new_ammo = -1;
+    info.new_weapon = -1;
+    info.new_ammo   = -1;
 
     info.got_it  = false;
     info.keep_it = false;
@@ -777,72 +755,72 @@ bool P_GiveBenefitList(player_t *player, mobj_t *special, benefit_t *list, bool 
 //
 // RunPickupEffects
 //
-static void RunPickupEffects(player_t *player, mobj_t *special, pickup_effect_c *list)
+static void RunPickupEffects(Player *player, MapObject *special,
+                             PickupEffect *list)
 {
-    for (; list; list = list->next)
+    for (; list; list = list->next_)
     {
-        switch (list->type)
+        switch (list->type_)
         {
-        case PUFX_SwitchWeapon:
-            P_PlayerSwitchWeapon(player, list->sub.weap);
-            break;
+            case kPickupEffectTypeSwitchWeapon:
+                PlayerSwitchWeapon(player, list->sub_.weap);
+                break;
 
-        case PUFX_KeepPowerup:
-            player->keep_powers |= (1 << list->sub.type);
-            break;
+            case kPickupEffectTypeKeepPowerup:
+                player->keep_powers_ |= (1 << list->sub_.type);
+                break;
 
-        case PUFX_PowerupEffect:
-            // FIXME
-            break;
+            case kPickupEffectTypePowerupEffect:
+                // FIXME
+                break;
 
-        case PUFX_ScreenEffect:
-            // FIXME
-            break;
+            case kPickupEffectTypeScreenEffect:
+                // FIXME
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 }
 
 //
-// P_TouchSpecialThing
+// TouchSpecialThing
 //
 // -KM- 1999/01/31 Things that give you item bonus are always
 //  picked up.  Picked up object is set to death frame instead
 //  of removed so that effects can happen.
 //
-void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
+void TouchSpecialThing(MapObject *special, MapObject *toucher)
 {
     float delta = special->z - toucher->z;
 
     // out of reach
-    if (delta > toucher->height || delta < -special->height)
-        return;
+    if (delta > toucher->height_ || delta < -special->height_) return;
 
-    if (!toucher->player)
-        return;
+    if (!toucher->player_) return;
 
     // Dead thing touching. Can happen with a sliding player corpse.
-    if (toucher->health <= 0)
-        return;
+    if (toucher->health_ <= 0) return;
 
     // VOODOO DOLLS: Do not pick up the item if completely still
-    if (toucher->is_voodoo && AlmostEquals(toucher->mom.X, 0.0f) && AlmostEquals(toucher->mom.Y, 0.0f) &&
-        AlmostEquals(toucher->mom.Z, 0.0f))
+    if (toucher->is_voodoo_ && AlmostEquals(toucher->momentum_.X, 0.0f) &&
+        AlmostEquals(toucher->momentum_.Y, 0.0f) &&
+        AlmostEquals(toucher->momentum_.Z, 0.0f))
         return;
 
     // -KM- 1998/09/27 Sounds.ddf
-    sfx_t *sound = special->info->activesound;
+    SoundEffect *sound = special->info_->activesound_;
 
-    pickup_info_t info;
+    PickupInfo info;
 
-    info.player  = toucher->player;
+    info.player  = toucher->player_;
     info.special = special;
-    info.dropped = (special && (special->flags & MF_DROPPED)) ? true : false;
+    info.dropped =
+        (special && (special->flags_ & kMapObjectFlagDropped)) ? true : false;
 
-    info.new_weap = -1; // the most recently added weapon (must be new)
-    info.new_ammo = -1; // got fresh ammo (old count was zero).
+    info.new_weapon = -1;  // the most recently added weapon (must be new)
+    info.new_ammo   = -1;  // got fresh ammo (old count was zero).
 
     info.got_it  = false;
     info.keep_it = false;
@@ -850,70 +828,74 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
     info.no_ammo = false;
 
     // First handle lost benefits
-    info.list    = special->info->lose_benefits;
-    info.lose_em = true;
+    info.list      = special->info_->lose_benefits_;
+    info.lose_them = true;
     DoGiveBenefitList(&info);
 
     // Run through the list of all pickup benefits...
-    info.list    = special->info->pickup_benefits;
-    info.lose_em = false;
+    info.list      = special->info_->pickup_benefits_;
+    info.lose_them = false;
     DoGiveBenefitList(&info);
 
-    if (special->flags & MF_COUNTITEM)
+    if (special->flags_ & kMapObjectFlagCountItem)
     {
-        info.player->itemcount++;
+        info.player->item_count_++;
         info.got_it = true;
     }
-    else if (special->hyperflags & HF_FORCEPICKUP)
+    else if (special->hyper_flags_ & kHyperFlagForcePickup)
     {
         info.got_it  = true;
         info.keep_it = false;
     }
 
-    if (!info.got_it)
-        return;
+    if (!info.got_it) return;
 
     if (!info.keep_it)
     {
-        special->health = 0;
-        if (time_stop_active) // Hide pickup after gaining benefit while time stop is still active
-            special->visibility = INVISIBLE;
-        P_KillMobj(info.player->mo, special, NULL);
+        special->health_ = 0;
+        if (time_stop_active)  // Hide pickup after gaining benefit while time
+                               // stop is still active
+            special->visibility_ = 0.0f;
+        KillMapObject(info.player->map_object_, special, nullptr);
     }
 
     // do all the special effects, lights & sound etc...
     if (!info.silent)
     {
-        info.player->bonuscount += BONUS_ADD;
-        if (info.player->bonuscount > BONUS_LIMIT)
-            info.player->bonuscount = BONUS_LIMIT;
+        info.player->bonus_count_ += kBonusAddMinimum;
+        if (info.player->bonus_count_ > kBonusLimit)
+            info.player->bonus_count_ = kBonusLimit;
 
-        if (special->info->pickup_message != "" && language.IsValidRef(special->info->pickup_message.c_str()))
+        if (special->info_->pickup_message_ != "" &&
+            language.IsValidRef(special->info_->pickup_message_.c_str()))
         {
-            CON_PlayerMessage(info.player->pnum, "%s", language[special->info->pickup_message]);
+            ConsolePlayerMessage(info.player->player_number_, "%s",
+                                 language[special->info_->pickup_message_]);
         }
 
         if (sound)
         {
             int sfx_cat;
 
-            if (info.player == players[consoleplayer])
-                sfx_cat = SNCAT_Player;
+            if (info.player == players[console_player])
+                sfx_cat = kCategoryPlayer;
             else
-                sfx_cat = SNCAT_Opponent;
+                sfx_cat = kCategoryOpponent;
 
-            S_StartFX(sound, sfx_cat, info.player->mo);
+            StartSoundEffect(sound, sfx_cat, info.player->map_object_);
         }
 
-        if (info.new_weap >= 0 || info.new_ammo >= 0)
-            P_TrySwitchNewWeapon(info.player, info.new_weap, (ammotype_e)info.new_ammo);
+        if (info.new_weapon >= 0 || info.new_ammo >= 0)
+            TrySwitchNewWeapon(info.player, info.new_weapon,
+                               (AmmunitionType)info.new_ammo);
     }
 
-    RunPickupEffects(info.player, special, special->info->pickup_effects);
+    RunPickupEffects(info.player, special, special->info_->pickup_effects_);
 }
 
 // FIXME: move this into utility code
-static std::string PatternSubst(const char *format, const std::vector<std::string> &keywords)
+static std::string PatternSubstitution(const char                     *format,
+                                       const std::vector<std::string> &keywords)
 {
     std::string result;
 
@@ -927,8 +909,7 @@ static std::string PatternSubst(const char *format, const std::vector<std::strin
             break;
         }
 
-        if (pos > format)
-            result = result + std::string(format, pos - format);
+        if (pos > format) result = result + std::string(format, pos - format);
 
         pos++;
 
@@ -937,8 +918,7 @@ static std::string PatternSubst(const char *format, const std::vector<std::strin
         key[0] = *pos++;
         key[1] = 0;
 
-        if (!key[0])
-            break;
+        if (!key[0]) break;
 
         if (epi::IsAlphaASCII(key[0]))
         {
@@ -951,10 +931,7 @@ static std::string PatternSubst(const char *format, const std::vector<std::strin
                 }
             }
         }
-        else if (key[0] == '%')
-        {
-            result = result + std::string("%");
-        }
+        else if (key[0] == '%') { result = result + std::string("%"); }
         else
         {
             result = result + std::string("%");
@@ -967,7 +944,7 @@ static std::string PatternSubst(const char *format, const std::vector<std::strin
     return result;
 }
 
-static void DoObituary(const char *format, mobj_t *victim, mobj_t *killer)
+static void DoObituary(const char *format, MapObject *victim, MapObject *killer)
 {
     std::vector<std::string> keywords;
 
@@ -977,19 +954,19 @@ static void DoObituary(const char *format, mobj_t *victim, mobj_t *killer)
     keywords.push_back("k");
     keywords.push_back("a foe");
 
-    std::string msg = PatternSubst(format, keywords);
+    std::string msg = PatternSubstitution(format, keywords);
 
-    CON_PlayerMessage(victim->player->pnum, "%s", msg.c_str());
+    ConsolePlayerMessage(victim->player_->player_number_, "%s", msg.c_str());
 }
 
-void P_ObituaryMessage(mobj_t *victim, mobj_t *killer, const damage_c *damtype)
+void ObituaryMessage(MapObject *victim, MapObject *killer,
+                     const DamageClass *damtype)
 {
-    if (!var_obituaries)
-        return;
+    if (!show_obituaries) return;
 
-    if (damtype && !damtype->obituary.empty())
+    if (damtype && !damtype->obituary_.empty())
     {
-        const char *ref = damtype->obituary.c_str();
+        const char *ref = damtype->obituary_.c_str();
 
         if (language.IsValidRef(ref))
         {
@@ -997,7 +974,7 @@ void P_ObituaryMessage(mobj_t *victim, mobj_t *killer, const damage_c *damtype)
             return;
         }
 
-        I_Debugf("Missing obituary entry in LDF: '%s'\n", ref);
+        LogDebug("Missing obituary entry in LDF: '%s'\n", ref);
     }
 
     if (killer)
@@ -1007,191 +984,199 @@ void P_ObituaryMessage(mobj_t *victim, mobj_t *killer, const damage_c *damtype)
 }
 
 //
-// P_KillMobj
+// KillMapObject
 //
 // Altered to reflect the fact that the dropped item is a pointer to
-// mobjtype_c, uses new procedure: P_MobjCreateObject.
+// MapObjectDefinition, uses new procedure: P_MobjCreateObject.
 //
-// Note: Damtype can be NULL here.
+// Note: Damtype can be nullptr here.
 //
 // -ACB- 1998/08/01
 //
 // -AJA- 1999/09/12: Now uses P_SetMobjStateDeferred, since this
-//       routine can be called by TryMove/PIT_CheckRelThing/etc.
+//       routine can be called by TryMove/CheckRelativeThingCallback/etc.
 //
-void P_KillMobj(mobj_t *source, mobj_t *target, const damage_c *damtype, bool weak_spot)
+void KillMapObject(MapObject *source, MapObject *target,
+                   const DamageClass *damtype, bool weak_spot)
 {
     // -AJA- 2006/09/10: Voodoo doll handling for coop
-    if (target->player && target->player->mo != target)
+    if (target->player_ && target->player_->map_object_ != target)
     {
-        P_KillMobj(source, target->player->mo, damtype, weak_spot);
-        target->player = NULL;
+        KillMapObject(source, target->player_->map_object_, damtype, weak_spot);
+        target->player_ = nullptr;
     }
 
-    bool nofog = (target->flags & MF_SPECIAL);
+    bool nofog = (target->flags_ & kMapObjectFlagSpecial);
 
-    target->flags &= ~(MF_SPECIAL | MF_SHOOTABLE | MF_FLOAT | MF_SKULLFLY | MF_TOUCHY);
-    target->extendedflags &= ~(EF_BOUNCE | EF_USABLE | EF_CLIMBABLE);
+    target->flags_ &=
+        ~(kMapObjectFlagSpecial | kMapObjectFlagShootable |
+          kMapObjectFlagFloat | kMapObjectFlagSkullFly | kMapObjectFlagTouchy);
+    target->extended_flags_ &=
+        ~(kExtendedFlagBounce | kExtendedFlagUsable | kExtendedFlagClimbable);
 
-    if (!(target->extendedflags & EF_NOGRAVKILL))
-        target->flags &= ~MF_NOGRAVITY;
+    if (!(target->extended_flags_ & kExtendedFlagNoGravityOnKill))
+        target->flags_ &= ~kMapObjectFlagNoGravity;
 
-    target->flags |= MF_CORPSE | MF_DROPOFF;
-    target->height /= (4 / (target->mbf21flags & MBF21_LOGRAV ? 8 : 1));
+    target->flags_ |= kMapObjectFlagCorpse | kMapObjectFlagDropOff;
+    target->height_ /=
+        (4 / (target->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1));
 
-    RAD_MonsterIsDead(target);
+    ScriptUpdateMonsterDeaths(target);
 
-    if (source && source->player)
+    if (source && source->player_)
     {
         // count for intermission
-        if (target->flags & MF_COUNTKILL)
-            source->player->killcount++;
+        if (target->flags_ & kMapObjectFlagCountKill)
+            source->player_->kill_count_++;
 
-        if (target->info->kill_benefits)
+        if (target->info_->kill_benefits_)
         {
-            pickup_info_t info;
-            info.player  = source->player;
-            info.special = NULL;
+            PickupInfo info;
+            info.player  = source->player_;
+            info.special = nullptr;
             info.dropped = false;
 
-            info.new_weap = -1; // the most recently added weapon (must be new)
-            info.new_ammo = -1; // got fresh ammo (old count was zero).
+            info.new_weapon =
+                -1;              // the most recently added weapon (must be new)
+            info.new_ammo = -1;  // got fresh ammo (old count was zero).
 
             info.got_it  = false;
             info.keep_it = false;
             info.silent  = false;
             info.no_ammo = false;
 
-            info.list    = target->info->kill_benefits;
-            info.lose_em = false;
+            info.list      = target->info_->kill_benefits_;
+            info.lose_them = false;
             DoGiveBenefitList(&info);
         }
 
-        if (target->player)
+        if (target->player_)
         {
             // Killed a team mate?
-            if (target->side & source->side)
+            if (target->side_ & source->side_)
             {
-                source->player->frags--;
-                source->player->totalfrags--;
+                source->player_->frags_--;
+                source->player_->total_frags_--;
             }
             else
             {
-                source->player->frags++;
-                source->player->totalfrags++;
+                source->player_->frags_++;
+                source->player_->total_frags_++;
             }
         }
     }
-    else if (SP_MATCH() && (target->flags & MF_COUNTKILL))
+    else if (InSinglePlayerMatch() &&
+             (target->flags_ & kMapObjectFlagCountKill))
     {
         // count all monster deaths,
         // even those caused by other monsters
-        players[consoleplayer]->killcount++;
+        players[console_player]->kill_count_++;
     }
 
-    if (target->player)
+    if (target->player_)
     {
-        P_ObituaryMessage(target, source, damtype);
+        ObituaryMessage(target, source, damtype);
 
         // count environment kills against you
         if (!source)
         {
-            target->player->frags--;
-            target->player->totalfrags--;
+            target->player_->frags_--;
+            target->player_->total_frags_--;
         }
 
-        target->flags &= ~MF_SOLID;
-        target->player->playerstate    = PST_DEAD;
-        target->player->std_viewheight = HMM_MIN(DEATHVIEWHEIGHT, target->height / 3);
-        target->player->actual_speed   = 0;
+        target->flags_ &= ~kMapObjectFlagSolid;
+        target->player_->player_state_ = kPlayerDead;
+        target->player_->standard_view_height_ =
+            HMM_MIN(kDeathViewHeight, target->height_ / 3);
+        target->player_->actual_speed_ = 0;
 
-        P_DropWeapon(target->player);
+        DropWeapon(target->player_);
 
         // don't die in auto map, switch view prior to dying
-        if (target->player == players[consoleplayer] && automapactive)
-            AM_Stop();
+        if (target->player_ == players[console_player] && automap_active)
+            AutomapStop();
 
         // don't immediately restart when USE key was pressed
-        if (target->player == players[consoleplayer])
-            E_ClearInput();
+        if (target->player_ == players[console_player]) EventClearInput();
     }
 
-    statenum_t state    = S_NULL;
-    bool       overkill = false;
+    int  state    = 0;
+    bool overkill = false;
 
-    if (target->info->gib_health < 0 && target->health < target->info->gib_health)
+    if (target->info_->gib_health_ < 0 &&
+        target->health_ < target->info_->gib_health_)
         overkill = true;
-    else if (target->health < -target->spawnhealth)
+    else if (target->health_ < -target->spawn_health_)
         overkill = true;
 
     if (weak_spot)
     {
-        state = P_MobjFindLabel(target, "WEAKDEATH");
-        if (state == S_NULL)
-            overkill = true;
+        state = MapObjectFindLabel(target, "WEAKDEATH");
+        if (state == 0) overkill = true;
     }
 
-    if (state == S_NULL && overkill && damtype && damtype->overkill.label != "")
+    if (state == 0 && overkill && damtype && damtype->overkill_.label_ != "")
     {
-        state = P_MobjFindLabel(target, damtype->overkill.label.c_str());
-        if (state != S_NULL)
-            state += damtype->overkill.offset;
+        state = MapObjectFindLabel(target, damtype->overkill_.label_.c_str());
+        if (state != 0) state += damtype->overkill_.offset_;
     }
 
-    if (state == S_NULL && overkill && target->info->overkill_state)
-        state = target->info->overkill_state;
+    if (state == 0 && overkill && target->info_->overkill_state_)
+        state = target->info_->overkill_state_;
 
-    if (state == S_NULL && damtype && damtype->death.label != "")
+    if (state == 0 && damtype && damtype->death_.label_ != "")
     {
-        state = P_MobjFindLabel(target, damtype->death.label.c_str());
-        if (state != S_NULL)
-            state += damtype->death.offset;
+        state = MapObjectFindLabel(target, damtype->death_.label_.c_str());
+        if (state != 0) state += damtype->death_.offset_;
     }
 
-    if (state == S_NULL)
-        state = target->info->death_state;
+    if (state == 0) state = target->info_->death_state_;
 
-    if (g_gore.d == 2 &&
-        (target->flags & MF_COUNTKILL)) // Hopefully the only things with blood/gore are monsters and not "barrels", etc
+    if (gore_level.d_ == 2 &&
+        (target->flags_ &
+         kMapObjectFlagCountKill))  // Hopefully the only things with
+                                    // blood/gore_level are monsters and not
+                                    // "barrels", etc
     {
-        state = S_NULL;
+        state = 0;
         if (!nofog)
         {
-            mobj_t *fog = P_MobjCreateObject(target->x, target->y, target->z, mobjtypes.Lookup("TELEPORT_FLASH"));
-            if (fog && fog->info->chase_state)
-                P_SetMobjStateDeferred(fog, fog->info->chase_state, 0);
+            MapObject *fog =
+                CreateMapObject(target->x, target->y, target->z,
+                                mobjtypes.Lookup("TELEPORT_FLASH"));
+            if (fog && fog->info_->chase_state_)
+                MapObjectSetStateDeferred(fog, fog->info_->chase_state_, 0);
         }
     }
 
-    if (target->hyperflags & HF_DEHACKED_COMPAT)
+    if (target->hyper_flags_ & kHyperFlagDehackedCompatibility)
     {
-        P_SetMobjState(target, state);
-        target->tics -= P_Random() & 3;
-        if (target->tics < 1)
-            target->tics = 1;
+        MapObjectSetState(target, state);
+        target->tics_ -= RandomByteDeterministic() & 3;
+        if (target->tics_ < 1) target->tics_ = 1;
     }
     else
     {
-        P_SetMobjStateDeferred(target, state, P_Random() & 3);
+        MapObjectSetStateDeferred(target, state, RandomByteDeterministic() & 3);
     }
 
     // Drop stuff. This determines the kind of object spawned
     // during the death frame of a thing.
-    const mobjtype_c *item = target->info->dropitem;
+    const MapObjectDefinition *item = target->info_->dropitem_;
     if (item)
     {
-        mobj_t *mo = P_MobjCreateObject(target->x, target->y, target->floorz, item);
+        MapObject *mo =
+            CreateMapObject(target->x, target->y, target->floor_z_, item);
 
-        // -ES- 1998/07/18 NULL check to prevent crashing
-        if (mo)
-            mo->flags |= MF_DROPPED;
+        // -ES- 1998/07/18 nullptr check to prevent crashing
+        if (mo) mo->flags_ |= kMapObjectFlagDropped;
     }
 }
 
 //
-// P_ThrustMobj
+// ThrustMapObject
 //
-// Like P_DamageMobj, but only pushes the target object around
+// Like DamageMapObject, but only pushes the target object around
 // (doesn't inflict any damage).  Parameters are:
 //
 // * target    - mobj to be thrust.
@@ -1201,18 +1186,17 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const damage_c *damtype, bool we
 //
 // -AJA- 1999/11/06: Wrote this routine.
 //
-void P_ThrustMobj(mobj_t *target, mobj_t *inflictor, float thrust)
+void ThrustMapObject(MapObject *target, MapObject *inflictor, float thrust)
 {
     // check for immunity against the attack
-    if (target->hyperflags & HF_INVULNERABLE)
-        return;
+    if (target->hyper_flags_ & kHyperFlagInvulnerable) return;
 
     // check for lead feet ;)
-    if (target->hyperflags & HF_IMMOVABLE)
-        return;
+    if (target->hyper_flags_ & kHyperFlagImmovable) return;
 
-    if (inflictor && inflictor->currentattack &&
-        BITSET_EMPTY == (inflictor->currentattack->attack_class & ~target->info->immunity))
+    if (inflictor && inflictor->current_attack_ &&
+        0 == (inflictor->current_attack_->attack_class_ &
+              ~target->info_->immunity_))
     {
         return;
     }
@@ -1221,38 +1205,35 @@ void P_ThrustMobj(mobj_t *target, mobj_t *inflictor, float thrust)
     float dy = target->y - inflictor->y;
 
     // don't thrust if at the same location (no angle)
-    if (fabs(dx) < 1.0f && fabs(dy) < 1.0f)
-        return;
+    if (fabs(dx) < 1.0f && fabs(dy) < 1.0f) return;
 
-    BAMAngle angle = R_PointToAngle(0, 0, dx, dy);
+    BAMAngle angle = RendererPointToAngle(0, 0, dx, dy);
 
     // -ACB- 2000/03/11 Div-by-zero check...
-    SYS_ASSERT(!AlmostEquals(target->info->mass, 0.0f));
+    EPI_ASSERT(!AlmostEquals(target->info_->mass_, 0.0f));
 
-    float push = 12.0f * thrust / target->info->mass;
+    float push = 12.0f * thrust / target->info_->mass_;
 
     // limit thrust to reasonable values
-    if (push < -40.0f)
-        push = -40.0f;
-    if (push > 40.0f)
-        push = 40.0f;
+    if (push < -40.0f) push = -40.0f;
+    if (push > 40.0f) push = 40.0f;
 
-    target->mom.X += push * epi::BAMCos(angle);
-    target->mom.Y += push * epi::BAMSin(angle);
+    target->momentum_.X += push * epi::BAMCos(angle);
+    target->momentum_.Y += push * epi::BAMSin(angle);
 
-    if (level_flags.true3dgameplay)
+    if (level_flags.true_3d_gameplay)
     {
-        float dz    = MO_MIDZ(target) - MO_MIDZ(inflictor);
-        float slope = P_ApproxSlope(dx, dy, dz);
+        float dz    = MapObjectMidZ(target) - MapObjectMidZ(inflictor);
+        float slope = ApproximateSlope(dx, dy, dz);
 
-        target->mom.Z += push * slope / 2;
+        target->momentum_.Z += push * slope / 2;
     }
 }
 
 //
-// P_PushMobj
+// PushMapObject
 //
-// Like P_DamageMobj, but only pushes the target object around
+// Like DamageMapObject, but only pushes the target object around
 // (doesn't inflict any damage).  Parameters are:
 //
 // * target    - mobj to be thrust.
@@ -1262,49 +1243,46 @@ void P_ThrustMobj(mobj_t *target, mobj_t *inflictor, float thrust)
 //
 // -Lobo- 2022/07/07: Created this routine.
 //
-void P_PushMobj(mobj_t *target, mobj_t *inflictor, float thrust)
+void PushMapObject(MapObject *target, MapObject *inflictor, float thrust)
 {
     /*
-    if(tm_I.mover->mom.x > tm_I.mover->mom.y)
-        ThrustSpeed = fabsf(tm_I.mover->mom.x);
+    if(tm_I.mover->momentum_.x > tm_I.mover->momentum_.y)
+        ThrustSpeed = fabsf(tm_I.mover->momentum_.x);
     else
-        ThrustSpeed = fabsf(tm_I.mover->mom.y);
+        ThrustSpeed = fabsf(tm_I.mover->momentum_.y);
     */
 
     float dx = target->x - inflictor->x;
     float dy = target->y - inflictor->y;
 
     // don't thrust if at the same location (no angle)
-    if (fabs(dx) < 1.0f && fabs(dy) < 1.0f)
-        return;
+    if (fabs(dx) < 1.0f && fabs(dy) < 1.0f) return;
 
-    BAMAngle angle = R_PointToAngle(0, 0, dx, dy);
+    BAMAngle angle = RendererPointToAngle(0, 0, dx, dy);
 
     // -ACB- 2000/03/11 Div-by-zero check...
-    SYS_ASSERT(!AlmostEquals(target->info->mass, 0.0f));
+    EPI_ASSERT(!AlmostEquals(target->info_->mass_, 0.0f));
 
-    float push = 12.0f * thrust / target->info->mass;
+    float push = 12.0f * thrust / target->info_->mass_;
 
     // limit thrust to reasonable values
-    if (push < -40.0f)
-        push = -40.0f;
-    if (push > 40.0f)
-        push = 40.0f;
+    if (push < -40.0f) push = -40.0f;
+    if (push > 40.0f) push = 40.0f;
 
-    target->mom.X += push * epi::BAMCos(angle);
-    target->mom.Y += push * epi::BAMSin(angle);
+    target->momentum_.X += push * epi::BAMCos(angle);
+    target->momentum_.Y += push * epi::BAMSin(angle);
 
-    if (level_flags.true3dgameplay)
+    if (level_flags.true_3d_gameplay)
     {
-        float dz    = MO_MIDZ(target) - MO_MIDZ(inflictor);
-        float slope = P_ApproxSlope(dx, dy, dz);
+        float dz    = MapObjectMidZ(target) - MapObjectMidZ(inflictor);
+        float slope = ApproximateSlope(dx, dy, dz);
 
-        target->mom.Z += push * slope / 2;
+        target->momentum_.Z += push * slope / 2;
     }
 }
 
 //
-// P_DamageMobj
+// DamageMapObject
 //
 // Damages both enemies and players, decreases the amount of health
 // an mobj has and "kills" an mobj in the event of health being 0 or
@@ -1312,83 +1290,82 @@ void P_PushMobj(mobj_t *target, mobj_t *inflictor, float thrust)
 //
 // * Target    - mobj to be damaged.
 // * Inflictor - mobj which is causing the damage.
-// * Source    - mobj who is responsible for doing the damage. Can be NULL
+// * Source    - mobj who is responsible for doing the damage. Can be nullptr
 // * Amount    - amount of damage done.
-// * Damtype   - type of damage (for override states).  Can be NULL
+// * Damtype   - type of damage (for override states).  Can be nullptr
 //
-// Both source and inflictor can be NULL, slime damage and barrel
+// Both source and inflictor can be nullptr, slime damage and barrel
 // explosions etc....
 //
 // -AJA- 1999/09/12: Now uses P_SetMobjStateDeferred, since this
-//       routine can be called by TryMove/PIT_CheckRelThing/etc.
+//       routine can be called by TryMove/CheckRelativeThingCallback/etc.
 //
-void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damage, const damage_c *damtype,
-                  bool weak_spot)
+void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
+                     float damage, const DamageClass *damtype, bool weak_spot)
 {
-    if (target->isRemoved())
-        return;
+    if (target->IsRemoved()) return;
 
-    if (!(target->flags & MF_SHOOTABLE))
-        return;
+    if (!(target->flags_ & kMapObjectFlagShootable)) return;
 
-    if (target->health <= 0)
-        return;
+    if (target->health_ <= 0) return;
 
     // check for immunity against the attack
-    if (target->hyperflags & HF_INVULNERABLE)
-        return;
+    if (target->hyper_flags_ & kHyperFlagInvulnerable) return;
 
-    if (!weak_spot && inflictor && inflictor->currentattack &&
-        BITSET_EMPTY == (inflictor->currentattack->attack_class & ~target->info->immunity))
+    if (!weak_spot && inflictor && inflictor->current_attack_ &&
+        0 == (inflictor->current_attack_->attack_class_ &
+              ~target->info_->immunity_))
     {
         return;
     }
 
     // sanity check : don't produce references to removed objects
-    if (inflictor && inflictor->isRemoved())
-        inflictor = NULL;
-    if (source && source->isRemoved())
-        source = NULL;
+    if (inflictor && inflictor->IsRemoved()) inflictor = nullptr;
+    if (source && source->IsRemoved()) source = nullptr;
 
     // check for immortality
-    if (target->hyperflags & HF_IMMORTAL)
-        damage = 0.0f; // do no damage
+    if (target->hyper_flags_ & kHyperFlagImmortal)
+        damage = 0.0f;  // do no damage
 
     // check for partial resistance against the attack
-    if (!weak_spot && damage >= 0.1f && inflictor && inflictor->currentattack &&
-        BITSET_EMPTY == (inflictor->currentattack->attack_class & ~target->info->resistance))
+    if (!weak_spot && damage >= 0.1f && inflictor &&
+        inflictor->current_attack_ &&
+        0 == (inflictor->current_attack_->attack_class_ &
+              ~target->info_->resistance_))
     {
-        damage = HMM_MAX(0.1f, damage * target->info->resist_multiply);
+        damage = HMM_MAX(0.1f, damage * target->info_->resist_multiply_);
     }
 
     // -ACB- 1998/07/12 Use Visibility Enum
     // A Damaged Stealth Creature becomes more visible
-    if (target->flags & MF_STEALTH)
-        target->vis_target = VISIBLE;
+    if (target->flags_ & kMapObjectFlagStealth)
+        target->target_visibility_ = 1.0f;
 
-    if (target->flags & MF_SKULLFLY)
+    if (target->flags_ & kMapObjectFlagSkullFly)
     {
-        target->mom.X = target->mom.Y = target->mom.Z = 0;
-        target->flags &= ~MF_SKULLFLY;
+        target->momentum_.X = target->momentum_.Y = target->momentum_.Z = 0;
+        target->flags_ &= ~kMapObjectFlagSkullFly;
     }
 
-    player_t *player = target->player;
+    Player *player = target->player_;
 
     // Some close combat weapons should not
     // inflict thrust and push the victim out of reach,
     // thus kick away unless using the chainsaw.
 
-    if (inflictor && !(target->flags & MF_NOCLIP) &&
-        !(source && source->player && source->player->ready_wp >= 0 &&
-          source->player->weapons[source->player->ready_wp].info->nothrust))
+    if (inflictor && !(target->flags_ & kMapObjectFlagNoClip) &&
+        !(source && source->player_ && source->player_->ready_weapon_ >= 0 &&
+          source->player_->weapons_[source->player_->ready_weapon_]
+              .info->nothrust_))
     {
         // make fall forwards sometimes
-        if (damage < 40 && damage > target->health && target->z - inflictor->z > 64 && (P_Random() & 1))
+        if (damage < 40 && damage > target->health_ &&
+            target->z - inflictor->z > 64 && (RandomByteDeterministic() & 1))
         {
-            P_ThrustMobj(target, inflictor, -damage * 4);
+            ThrustMapObject(target, inflictor, -damage * 4);
         }
         else
-            P_ThrustMobj(target, inflictor, damage);
+            ThrustMapObject(target, inflictor, damage);
     }
 
     // player specific
@@ -1396,93 +1373,98 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
     {
         int i;
 
-        // Don't damage player if sector type should only affect grounded monsters
-        // Note: flesh this out be be more versatile - Dasho
-        if (damtype && damtype->grounded_monsters)
-            return;
+        // Don't damage player if sector type should only affect grounded
+        // monsters Note: flesh this out be be more versatile - Dasho
+        if (damtype && damtype->grounded_monsters_) return;
 
         // ignore damage in GOD mode, or with INVUL powerup
-        if ((player->cheats & CF_GODMODE) || player->powers[PW_Invulnerable] > 0)
+        if ((player->cheats_ & kCheatingGodMode) ||
+            player->powers_[kPowerTypeInvulnerable] > 0)
         {
             if (!damtype)
                 return;
-            else if (!damtype->bypass_all && !damtype->damage_if)
+            else if (!damtype->bypass_all_ && !damtype->damage_if_)
                 return;
         }
 
         // Check for DAMAGE_UNLESS/DAMAGE_IF DDF specials
-        if (damtype && (damtype->damage_unless || damtype->damage_if))
+        if (damtype && (damtype->damage_unless_ || damtype->damage_if_))
         {
-            bool unless_damage = (damtype->damage_unless != nullptr);
+            bool unless_damage = (damtype->damage_unless_ != nullptr);
             bool if_damage     = false;
-            if (damtype->damage_unless && P_HasBenefitInList(player, damtype->damage_unless))
+            if (damtype->damage_unless_ &&
+                HasBenefitInList(player, damtype->damage_unless_))
                 unless_damage = false;
-            if (damtype->damage_if && P_HasBenefitInList(player, damtype->damage_if))
+            if (damtype->damage_if_ &&
+                HasBenefitInList(player, damtype->damage_if_))
                 if_damage = true;
-            if (!unless_damage && !if_damage && !damtype->bypass_all)
-                return;
+            if (!unless_damage && !if_damage && !damtype->bypass_all_) return;
         }
 
         // take half damage in trainer mode
-        if (gameskill == sk_baby)
-            damage /= 2.0f;
+        if (game_skill == kSkillBaby) damage /= 2.0f;
 
         // preliminary check: immunity and resistance
-        for (i = NUMARMOUR - 1; i >= ARMOUR_Green; i--)
+        for (i = kTotalArmourTypes - 1; i >= kArmourTypeGreen; i--)
         {
-            if (damtype && damtype->no_armour)
-                continue;
+            if (damtype && damtype->no_armour_) continue;
 
-            if (player->armours[i] <= 0)
-                continue;
+            if (player->armours_[i] <= 0) continue;
 
-            const mobjtype_c *arm_info = player->armour_types[i];
+            const MapObjectDefinition *arm_info = player->armour_types_[i];
 
-            if (!arm_info || !inflictor || !inflictor->currentattack)
+            if (!arm_info || !inflictor || !inflictor->current_attack_)
                 continue;
 
             // this armor does not provide any protection for this attack
-            if (BITSET_EMPTY != (inflictor->currentattack->attack_class & ~arm_info->armour_class))
+            if (0 != (inflictor->current_attack_->attack_class_ &
+                      ~arm_info->armour_class_))
                 continue;
 
-            if (BITSET_EMPTY == (inflictor->currentattack->attack_class & ~arm_info->immunity))
+            if (0 == (inflictor->current_attack_->attack_class_ &
+                      ~arm_info->immunity_))
                 return; /* immune : we can go home early! */
 
-            if (damage > 0.1f && BITSET_EMPTY == (inflictor->currentattack->attack_class & ~arm_info->resistance))
+            if (damage > 0.1f &&
+                0 == (inflictor->current_attack_->attack_class_ &
+                      ~arm_info->resistance_))
             {
-                damage = HMM_MAX(0.1f, damage * arm_info->resist_multiply);
+                damage = HMM_MAX(0.1f, damage * arm_info->resist_multiply_);
             }
         }
 
         // Bot Deathmatch Damange Resistance check
-        if (DEATHMATCH() && !player->isBot() && source && source->player && source->player->isBot())
+        if (InDeathmatch() && !player->IsBot() && source && source->player_ &&
+            source->player_->IsBot())
         {
-            if (player_dm_dr.d < 9)
+            if (player_deathmatch_damage_resistance.d_ < 9)
             {
-                float mul = 1.90f - (player_dm_dr.d * 0.10f);
+                float mul =
+                    1.90f - (player_deathmatch_damage_resistance.d_ * 0.10f);
                 damage *= mul;
             }
-            else if (player_dm_dr.d > 9)
+            else if (player_deathmatch_damage_resistance.d_ > 9)
             {
-                float mul = 0.10f + ((18 - player_dm_dr.d) * 0.10f);
-                damage    = HMM_MAX(0.1f, damage * mul);
+                float mul =
+                    0.10f +
+                    ((18 - player_deathmatch_damage_resistance.d_) * 0.10f);
+                damage = HMM_MAX(0.1f, damage * mul);
             }
         }
 
         // check which armour can take some damage
-        for (i = NUMARMOUR - 1; i >= ARMOUR_Green; i--)
+        for (i = kTotalArmourTypes - 1; i >= kArmourTypeGreen; i--)
         {
-            if (damtype && damtype->no_armour)
-                continue;
+            if (damtype && damtype->no_armour_) continue;
 
-            if (player->armours[i] <= 0)
-                continue;
+            if (player->armours_[i] <= 0) continue;
 
-            const mobjtype_c *arm_info = player->armour_types[i];
+            const MapObjectDefinition *arm_info = player->armour_types_[i];
 
             // this armor does not provide any protection for this attack
-            if (arm_info && inflictor && inflictor->currentattack &&
-                BITSET_EMPTY != (inflictor->currentattack->attack_class & ~arm_info->armour_class))
+            if (arm_info && inflictor && inflictor->current_attack_ &&
+                0 != (inflictor->current_attack_->attack_class_ &
+                      ~arm_info->armour_class_))
             {
                 continue;
             }
@@ -1490,187 +1472,198 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
             float saved = 0;
 
             if (arm_info)
-                saved = damage * PERCENT_2_FLOAT(arm_info->armour_protect);
+                saved = damage * arm_info->armour_protect_;
             else
             {
                 switch (i)
                 {
-                case ARMOUR_Green:
-                    saved = damage * 0.33;
-                    break;
-                case ARMOUR_Blue:
-                    saved = damage * 0.50;
-                    break;
-                case ARMOUR_Purple:
-                    saved = damage * 0.66;
-                    break;
-                case ARMOUR_Yellow:
-                    saved = damage * 0.75;
-                    break;
-                case ARMOUR_Red:
-                    saved = damage * 0.90;
-                    break;
+                    case kArmourTypeGreen:
+                        saved = damage * 0.33;
+                        break;
+                    case kArmourTypeBlue:
+                        saved = damage * 0.50;
+                        break;
+                    case kArmourTypePurple:
+                        saved = damage * 0.66;
+                        break;
+                    case kArmourTypeYellow:
+                        saved = damage * 0.75;
+                        break;
+                    case kArmourTypeRed:
+                        saved = damage * 0.90;
+                        break;
 
-                default:
-                    I_Error("INTERNAL ERROR in P_DamageMobj: bad armour %d\n", i);
+                    default:
+                        FatalError(
+                            "INTERNAL ERROR in DamageMapObject: bad armour "
+                            "%d\n",
+                            i);
                 }
             }
 
-            if (player->armours[i] <= saved)
+            if (player->armours_[i] <= saved)
             {
                 // armour is used up
-                saved = player->armours[i];
+                saved = player->armours_[i];
             }
 
             damage -= saved;
 
-            if (arm_info)
-                saved *= PERCENT_2_FLOAT(arm_info->armour_deplete);
+            if (arm_info) saved *= arm_info->armour_deplete_;
 
-            player->armours[i] -= saved;
+            player->armours_[i] -= saved;
 
             // don't apply inner armour unless outer is finished
-            if (player->armours[i] > 0)
-                break;
+            if (player->armours_[i] > 0) break;
 
-            player->armours[i] = 0;
+            player->armours_[i] = 0;
         }
 
-        P_UpdateTotalArmour(player);
+        UpdateTotalArmour(player);
 
-        player->attacker = source;
+        player->attacker_ = source;
 
         // instakill sectors
-        if (damtype && damtype->instakill)
-            damage = target->player->health + 1;
+        if (damtype && damtype->instakill_)
+            damage = target->player_->health_ + 1;
 
         // add damage after armour / invuln detection
         if (damage > 0)
         {
-            // Change damage color if new inflicted damage is greater than current processed damage
-            if (damage >= player->damagecount)
+            // Change damage color if new inflicted damage is greater than
+            // current processed damage
+            if (damage >= player->damage_count_)
             {
                 if (damtype)
-                    player->last_damage_colour = damtype->damage_flash_colour;
+                    player->last_damage_colour_ = damtype->damage_flash_colour_;
                 else
-                    player->last_damage_colour = SG_RED_RGBA32;
+                    player->last_damage_colour_ = SG_RED_RGBA32;
             }
 
-            player->damagecount += (int)HMM_MAX(damage, DAMAGE_ADD_MIN);
-            player->damage_pain += damage;
+            player->damage_count_ += (int)HMM_MAX(damage, kDamageAddMinimum);
+            player->damage_pain_ += damage;
         }
 
         // teleport stomp does 10k points...
-        if (player->damagecount > DAMAGE_LIMIT)
-            player->damagecount = DAMAGE_LIMIT;
+        if (player->damage_count_ > kDamageLimit)
+            player->damage_count_ = kDamageLimit;
     }
     else
     {
         // instakill sectors
-        if (damtype && damtype->instakill)
-            damage = target->health + 1;
+        if (damtype && damtype->instakill_) damage = target->health_ + 1;
     }
 
     // do the damage
-    target->health -= damage;
+    target->health_ -= damage;
 
     if (player)
     {
         // mirror mobj health here for Dave
-        // player->health = HMM_MAX(0, target->health);
+        // player->health_ = HMM_MAX(0, target->health);
 
-        // Dasho 2023.09.05: The above behavior caused inconsistencies when multiple
-        // voodoo dolls were present in a level (i.e., heavily damaging one and then
-        // lightly damaging another one that was previously at full health would "heal" the player)
-        player->health = HMM_MAX(0, player->health - damage);
+        // Dasho 2023.09.05: The above behavior caused inconsistencies when
+        // multiple voodoo dolls were present in a level (i.e., heavily damaging
+        // one and then lightly damaging another one that was previously at full
+        // health would "heal" the player)
+        player->health_ = HMM_MAX(0, player->health_ - damage);
     }
 
     // Lobo 2023: Handle attack flagged with the "PLAYER_ATTACK" special.
-    //  This attack will always be treated as originating from the player, even if it's an indirect secondary attack.
-    //  This way the player gets his VAMPIRE health and KillBenefits.
-    if (inflictor && inflictor->currentattack && (inflictor->currentattack->flags & AF_Player))
+    //  This attack will always be treated as originating from the player, even
+    //  if it's an indirect secondary attack. This way the player gets his
+    //  VAMPIRE health and KillBenefits.
+    if (inflictor && inflictor->current_attack_ &&
+        (inflictor->current_attack_->flags_ & kAttackFlagPlayer))
     {
-        player_t *CurrentPlayer;
-        CurrentPlayer = players[consoleplayer];
+        Player *current_player;
+        current_player = players[console_player];
 
-        source = CurrentPlayer->mo;
+        source = current_player->map_object_;
 
-        if (source && source->isRemoved()) // Sanity check?
-            source = NULL;
+        if (source && source->IsRemoved())  // Sanity check?
+            source = nullptr;
     }
 
     // -AJA- 2007/11/06: vampire mode!
-    if (source && source != target && source->health < source->spawnhealth &&
-        ((source->hyperflags & HF_VAMPIRE) ||
-         (inflictor && inflictor->currentattack && (inflictor->currentattack->flags & AF_Vampire))))
+    if (source && source != target && source->health_ < source->spawn_health_ &&
+        ((source->hyper_flags_ & kHyperFlagVampire) ||
+         (inflictor && inflictor->current_attack_ &&
+          (inflictor->current_attack_->flags_ & kAttackFlagVampire))))
     {
-        float qty = (target->player ? 0.5 : 0.25) * damage;
+        float qty = (target->player_ ? 0.5 : 0.25) * damage;
 
-        source->health = HMM_MIN(source->health + qty, source->spawnhealth);
+        source->health_ = HMM_MIN(source->health_ + qty, source->spawn_health_);
 
-        if (source->player)
-            source->player->health = HMM_MIN(source->player->health + qty, source->spawnhealth);
+        if (source->player_)
+            source->player_->health_ =
+                HMM_MIN(source->player_->health_ + qty, source->spawn_health_);
     }
 
-    if (target->health <= 0)
+    if (target->health_ <= 0)
     {
-        P_KillMobj(source, target, damtype, weak_spot);
+        KillMapObject(source, target, damtype, weak_spot);
         return;
     }
 
     // enter pain states
     float pain_chance;
 
-    if (target->flags & MF_SKULLFLY)
+    if (target->flags_ & kMapObjectFlagSkullFly)
         pain_chance = 0;
-    else if (weak_spot && target->info->weak.painchance >= 0)
-        pain_chance = target->info->weak.painchance;
-    else if (target->info->resist_painchance >= 0 && inflictor && inflictor->currentattack &&
-             BITSET_EMPTY == (inflictor->currentattack->attack_class & ~target->info->resistance))
-        pain_chance = target->info->resist_painchance;
+    else if (weak_spot && target->info_->weak_.painchance_ >= 0)
+        pain_chance = target->info_->weak_.painchance_;
+    else if (target->info_->resist_painchance_ >= 0 && inflictor &&
+             inflictor->current_attack_ &&
+             0 == (inflictor->current_attack_->attack_class_ &
+                   ~target->info_->resistance_))
+        pain_chance = target->info_->resist_painchance_;
     else
-        pain_chance = target->painchance; // Lobo 2023: use dynamic painchance
-    // pain_chance = target->info->painchance;
+        pain_chance =
+            target->pain_chance_;  // Lobo 2023: use dynamic painchance
+    // pain_chance = target->info->painchance_;
 
-    if (pain_chance > 0 && P_RandomTest(pain_chance))
+    if (pain_chance > 0 && RandomByteTestDeterministic(pain_chance))
     {
         // setup to hit back
-        target->flags |= MF_JUSTHIT;
+        target->flags_ |= kMapObjectFlagJustHit;
 
-        statenum_t state = S_NULL;
+        int state = 0;
 
-        if (weak_spot)
-            state = P_MobjFindLabel(target, "WEAKPAIN");
+        if (weak_spot) state = MapObjectFindLabel(target, "WEAKPAIN");
 
-        if (state == S_NULL && damtype && damtype->pain.label != "")
+        if (state == 0 && damtype && damtype->pain_.label_ != "")
         {
-            state = P_MobjFindLabel(target, damtype->pain.label.c_str());
-            if (state != S_NULL)
-                state += damtype->pain.offset;
+            state = MapObjectFindLabel(target, damtype->pain_.label_.c_str());
+            if (state != 0) state += damtype->pain_.offset_;
         }
 
-        if (state == S_NULL)
-            state = target->info->pain_state;
+        if (state == 0) state = target->info_->pain_state_;
 
-        if (state != S_NULL)
-            P_SetMobjStateDeferred(target, state, 0);
+        if (state != 0) MapObjectSetStateDeferred(target, state, 0);
     }
 
     // we're awake now...
-    target->reactiontime = 0;
+    target->reaction_time_ = 0;
 
-    bool ultra_loyal = (source && (target->hyperflags & HF_ULTRALOYAL) && (source->side & target->side) != 0);
+    bool ultra_loyal =
+        (source && (target->hyper_flags_ & kHyperFlagUltraLoyal) &&
+         (source->side_ & target->side_) != 0);
 
-    if ((!target->threshold || target->extendedflags & EF_NOGRUDGE) && source && source != target &&
-        (!(source->extendedflags & EF_NEVERTARGET)) && !target->player && !ultra_loyal)
+    if ((!target->threshold_ ||
+         target->extended_flags_ & kExtendedFlagNoGrudge) &&
+        source && source != target &&
+        (!(source->extended_flags_ & kExtendedFlagNeverTarget)) &&
+        !target->player_ && !ultra_loyal)
     {
         // if not intent on another player, chase after this one
         target->SetTarget(source);
-        target->threshold = BASETHRESHOLD;
+        target->threshold_ = kBaseThreshold;
 
-        if (target->state == &states[target->info->idle_state] && target->info->chase_state)
+        if (target->state_ == &states[target->info_->idle_state_] &&
+            target->info_->chase_state_)
         {
-            P_SetMobjStateDeferred(target, target->info->chase_state, 0);
+            MapObjectSetStateDeferred(target, target->info_->chase_state_, 0);
         }
     }
 }
@@ -1678,32 +1671,32 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
 //
 // For killing monsters and players when something teleports on top
 // of them.  Even the invulnerability powerup doesn't stop it.  Also
-// used for the kill-all cheat.  Inflictor and damtype can be NULL.
+// used for the kill-all cheat.  Inflictor and damtype can be nullptr.
 //
-void P_TelefragMobj(mobj_t *target, mobj_t *inflictor, const damage_c *damtype)
+void TelefragMapObject(MapObject *target, MapObject *inflictor,
+                       const DamageClass *damtype)
 {
-    if (target->health <= 0)
-        return;
+    if (target->health_ <= 0) return;
 
-    target->health = -1000;
+    target->health_ = -1000;
 
-    if (target->flags & MF_STEALTH)
-        target->vis_target = VISIBLE;
+    if (target->flags_ & kMapObjectFlagStealth)
+        target->target_visibility_ = 1.0f;
 
-    if (target->flags & MF_SKULLFLY)
+    if (target->flags_ & kMapObjectFlagSkullFly)
     {
-        target->mom.X = target->mom.Y = target->mom.Z = 0;
-        target->flags &= ~MF_SKULLFLY;
+        target->momentum_.X = target->momentum_.Y = target->momentum_.Z = 0;
+        target->flags_ &= ~kMapObjectFlagSkullFly;
     }
 
-    if (target->player)
+    if (target->player_)
     {
-        target->player->attacker    = inflictor;
-        target->player->damagecount = DAMAGE_LIMIT;
-        target->player->damage_pain = target->spawnhealth;
+        target->player_->attacker_     = inflictor;
+        target->player_->damage_count_ = kDamageLimit;
+        target->player_->damage_pain_  = target->spawn_health_;
     }
 
-    P_KillMobj(inflictor, target, damtype);
+    KillMapObject(inflictor, target, damtype);
 }
 
 //--- editor settings ---

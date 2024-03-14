@@ -2,6 +2,7 @@
 /build/
 cache/
 /.vscode/settings.json
+/.vscode/cmake-kits.json
 
 # MacOS
 .DS_Store
@@ -18,7 +19,6 @@ edge-classic.log
 debug.txt
 /*.dll
 edge-classic.cfg
-edge-classic-portable.cfg
 
 #EPKs
 edge-defs.epk

@@ -23,71 +23,87 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __P_BLOCKMAP_H__
-#define __P_BLOCKMAP_H__
+#pragma once
 
-// mapblocks are used to check movement
-// against lines and things
-#define BLOCKMAP_UNIT 128
-#define LIGHTMAP_UNIT 512
+#include "r_defs.h"
 
-#define BMAP_END ((unsigned short)0xFFFF)
+extern int blockmap_width;  // in mapblocks
+extern int blockmap_height;
 
-extern int bmap_width; // in mapblocks
-extern int bmap_height;
+extern float blockmap_origin_x;  // origin of block map
+extern float blockmap_origin_y;
 
-extern float bmap_orgx; // origin of block map
-extern float bmap_orgy;
+constexpr uint8_t  kBlockmapUnitSize = 128;
+constexpr uint16_t kLightmapUnitSize = 512;
 
-#define BLOCKMAP_GET_X(x) ((int)((x)-bmap_orgx) / BLOCKMAP_UNIT)
-#define BLOCKMAP_GET_Y(y) ((int)((y)-bmap_orgy) / BLOCKMAP_UNIT)
-
-#define LIGHTMAP_GET_X(x) ((int)((x)-bmap_orgx) / LIGHTMAP_UNIT)
-#define LIGHTMAP_GET_Y(y) ((int)((y)-bmap_orgy) / LIGHTMAP_UNIT)
-
-#define PT_ADDLINES  1
-#define PT_ADDTHINGS 2
-
-typedef struct intercept_s
+inline int BlockmapGetX(float raw_x)
 {
-    float frac; // along trace line
+    return ((int)((raw_x)-blockmap_origin_x) / kBlockmapUnitSize);
+}
 
-    // one of these will be NULL
-    mobj_t *thing;
-    line_t *line;
-} intercept_t;
+inline int BlockmapGetY(float raw_y)
+{
+    return ((int)((raw_y)-blockmap_origin_y) / kBlockmapUnitSize);
+}
 
-extern divline_t trace;
+inline int LightmapGetX(float raw_x)
+{
+    return ((int)((raw_x)-blockmap_origin_x) / kLightmapUnitSize);
+}
+
+inline int LightmapGetY(float raw_y)
+{
+    return ((int)((raw_y)-blockmap_origin_y) / kLightmapUnitSize);
+}
+
+enum PathInterceptFlags
+{
+    kPathAddLines  = 1,
+    kPathAddThings = 2
+};
+
+struct PathIntercept
+{
+    float along;  // along trace line
+    // one of these will be nullptr
+    MapObject *thing;
+    Line      *line;
+};
+
+extern DividingLine trace;
 
 /* FUNCTIONS */
 
-void P_CreateThingBlockMap(void);
-void P_DestroyBlockMap(void);
+void CreateThingBlockmap(void);
+void DestroyBlockmap(void);
 
-void P_SetThingPosition(mobj_t *mo);
-void P_UnsetThingPosition(mobj_t *mo);
-void P_UnsetThingFinally(mobj_t *mo);
-void P_ChangeThingPosition(mobj_t *mo, float x, float y, float z);
-void P_FreeSectorTouchNodes(sector_t *sec);
+void SetThingPosition(MapObject *mo);
+void UnsetThingPosition(MapObject *mo);
+void UnsetThingFinal(MapObject *mo);
+void ChangeThingPosition(MapObject *mo, float x, float y, float z);
+void FreeSectorTouchNodes(Sector *sec);
 
-void P_GenerateBlockMap(int min_x, int min_y, int max_x, int max_y);
+void GenerateBlockmap(int min_x, int min_y, int max_x, int max_y);
 
-bool P_BlockLinesIterator(float x1, float y1, float x2, float y2, bool (*func)(line_t *, void *), void *data = NULL);
+bool BlockmapLineIterator(float x1, float y1, float x2, float y2,
+                          bool (*func)(Line *, void *), void *data = nullptr);
 
-bool P_BlockThingsIterator(float x1, float y1, float x2, float y2, bool (*func)(mobj_t *, void *), void *data = NULL);
+bool BlockmapThingIterator(float x1, float y1, float x2, float y2,
+                           bool (*func)(MapObject *, void *),
+                           void *data = nullptr);
 
-void P_DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, float z2, void (*func)(mobj_t *, void *),
-                            void *data = NULL);
+void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2,
+                          float z2, void (*func)(MapObject *, void *),
+                          void *data = nullptr);
 
-void P_SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2, float y2, float z2,
-                          void (*func)(mobj_t *, void *), void *data = NULL);
+void SectorGlowIterator(Sector *sec, float x1, float y1, float z1, float x2,
+                        float y2, float z2, void (*func)(MapObject *, void *),
+                        void *data = nullptr);
 
-float P_InterceptVector(divline_t *v2, divline_t *v1);
+float PathInterceptVector(DividingLine *v2, DividingLine *v1);
 
-bool P_PathTraverse(float x1, float y1, float x2, float y2, int flags, bool (*func)(intercept_t *, void *),
-                    void *data = NULL);
-
-#endif // __P_BLOCKMAP_H__
+bool PathTraverse(float x1, float y1, float x2, float y2, int flags,
+                  bool (*func)(PathIntercept *, void *), void *data = nullptr);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

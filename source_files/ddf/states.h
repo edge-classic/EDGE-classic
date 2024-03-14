@@ -16,29 +16,25 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_STAT_H__
-#define __DDF_STAT_H__
+#pragma once
 
-#include "epi.h"
+#include <string>
+#include <vector>
+
+#include "types.h"
 
 //-------------------------------------------------------------------------
 //-----------------------  THING STATE STUFF   ----------------------------
 //-------------------------------------------------------------------------
 
-typedef int statenum_t;
-
-#define S_NULL   0 // state
-#define SPR_NULL 0 // sprite
-
-typedef enum
+enum StateFrameFlag
 {
-    SFF_Weapon   = (1 << 0),
-    SFF_Model    = (1 << 1),
-    SFF_Unmapped = (1 << 2), // model_frame not yet looked up
-} state_frame_flag_e;
+    kStateFrameFlagWeapon   = (1 << 0),
+    kStateFrameFlagModel    = (1 << 1),
+    kStateFrameFlagUnmapped = (1 << 2),  // model_frame not yet looked up
+};
 
-// State Struct
-typedef struct state_s
+struct State
 {
     // sprite ref
     short sprite;
@@ -57,44 +53,36 @@ typedef struct state_s
     // model frame name like "run2", normally NULL
     const char *model_frame;
 
-    // label for state, or NULL
+    // label for state, or nullptr
     const char *label;
 
     // routine to be performed
-    void (*action)(struct mobj_s *object);
+    void (*action)(class MapObject *object);
 
-    // parameter for routine, or NULL
+    // parameter for routine, or nullptr
     void *action_par;
 
     int rts_tag_type;
 
-    // next state ref.  S_NULL means "remove me"
+    // next state ref.  0 means "remove me"
     int nextstate;
 
-    // jump state ref.  S_NULL not valid
+    // jump state ref.  0 not valid
     int jumpstate;
-} state_t;
-
-typedef struct
-{
-    statenum_t first, last;
-} state_range_t;
-
-typedef std::vector<state_range_t> state_group_t;
+};
 
 // -------EXTERNALISATIONS-------
 
-extern state_t *states;
-extern int      num_states;
+extern State *states;
+extern int    num_states;
 
 extern std::vector<std::string> ddf_sprite_names;
 extern std::vector<std::string> ddf_model_names;
 
-statenum_t DDF_StateFindLabel(const state_group_t &group, const char *label, bool quiet = false);
+int DDF_StateFindLabel(const std::vector<StateRange> &group, const char *label,
+                       bool quiet = false);
 
-bool DDF_StateGroupHasState(const state_group_t &group, statenum_t st);
-
-#endif // __DDF_STAT_H__
+bool DDF_StateGroupHasState(const std::vector<StateRange> &group, int st);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

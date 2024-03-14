@@ -16,107 +16,97 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_MAIN_H__
-#define __DDF_MAIN_H__
-
-#include "epi.h"
-#include "file.h"
-#include "filesystem.h"
-
-#include "types.h"
+#pragma once
 
 #define DEBUG_DDF 0
 
+#include <string>
+#include <vector>
+
+#include "collection.h"
+#include "file.h"
+#include "types.h"
+
 // Forward declarations
-struct mobj_s;
+class MapObject;
 struct sfx_s;
 
-class atkdef_c;
-class colourmap_c;
-class gamedef_c;
-class mapdef_c;
-class mobjtype_c;
-class pl_entry_c;
-class weapondef_c;
+class AttackDefinition;
+class Colormap;
+class GameDefinition;
+class MapDefinition;
+class MapObjectDefinition;
+class PlaylistEntry;
+class WeaponDefinition;
 
-#include "thing.h"
 #include "attack.h"
-#include "states.h"
-#include "weapon.h"
-
-#include "line.h"
-#include "level.h"
+#include "flat.h"
 #include "game.h"
-
+#include "language.h"
+#include "level.h"
+#include "line.h"
+#include "movie.h"
 #include "playlist.h"
 #include "sfx.h"
-#include "language.h"
-
-#include "flat.h"
-#include "movie.h"
+#include "states.h"
+#include "thing.h"
+#include "weapon.h"
 
 // State updates, number of tics / second.
-#define TICRATE 35
+constexpr uint8_t kTicRate = 35;
 
 // Misc playsim constants
-#define CEILSPEED  1.0f
-#define FLOORSPEED 1.0f
+constexpr float kCeilingSpeedDefault = 1.0f;
+constexpr float kFloorSpeedDefault   = 1.0f;
+constexpr float kGravityDefault      = 8.0f;
+constexpr float kFrictionDefault     = 0.9063f;
+constexpr float kViscosityDefault    = 0.0f;
+constexpr float kDragDefault         = 0.99f;
+constexpr float kRideFrictionDefault = 0.7f;
 
-#define GRAVITY       8.0f
-#define FRICTION      0.9063f
-#define VISCOSITY     0.0f
-#define DRAG          0.99f
-#define RIDE_FRICTION 0.7f
-
-// Info for the JUMP action
-typedef struct act_jump_info_s
+struct JumpActionInfo
 {
-    // chance value
-    percent_t chance;
+    float chance = 1.0f;
+};
 
-  public:
-    act_jump_info_s();
-    ~act_jump_info_s();
-} act_jump_info_t;
-
-// Info for the BECOME action
-typedef struct act_become_info_s
+class BecomeActionInfo
 {
-    const mobjtype_c *info;
-    std::string       info_ref;
+   public:
+    const MapObjectDefinition *info_;
+    std::string                info_ref_;
 
-    label_offset_c start;
+    LabelOffset start_;
 
-  public:
-    act_become_info_s();
-    ~act_become_info_s();
-} act_become_info_t;
+   public:
+    BecomeActionInfo();
+    ~BecomeActionInfo();
+};
 
-// Info for the MORPH action
-typedef struct act_morph_info_s
+class MorphActionInfo
 {
-    const mobjtype_c *info;
-    std::string       info_ref;
+   public:
+    const MapObjectDefinition *info_;
+    std::string                info_ref_;
 
-    label_offset_c start;
+    LabelOffset start_;
 
-  public:
-    act_morph_info_s();
-    ~act_morph_info_s();
-} act_morph_info_t;
+   public:
+    MorphActionInfo();
+    ~MorphActionInfo();
+};
 
-// Info for the weapon BECOME action
-typedef struct wep_become_info_s
+class WeaponBecomeActionInfo
 {
-    const weapondef_c *info;
-    std::string        info_ref;
+   public:
+    const WeaponDefinition *info_;
+    std::string             info_ref_;
 
-    label_offset_c start;
+    LabelOffset start_;
 
-  public:
-    wep_become_info_s();
-    ~wep_become_info_s();
-} wep_become_info_t;
+   public:
+    WeaponBecomeActionInfo();
+    ~WeaponBecomeActionInfo();
+};
 
 // ------------------------------------------------------------------
 // -------------------------EXTERNALISATIONS-------------------------
@@ -134,41 +124,38 @@ extern bool no_warnings;
 void DDF_Init();
 void DDF_CleanUp();
 
-void DDF_Load(epi::File *f);
-
-bool        DDF_MainParseCondition(const char *str, condition_check_t *cond);
+bool        DDF_MainParseCondition(const char *str, ConditionCheck *cond);
 void        DDF_MainGetWhenAppear(const char *info, void *storage);
 void        DDF_MainGetRGB(const char *info, void *storage);
-bool        DDF_MainDecodeBrackets(const char *info, char *outer, char *inner, int buf_len);
+bool        DDF_MainDecodeBrackets(const char *info, char *outer, char *inner,
+                                   int buf_len);
 const char *DDF_MainDecodeList(const char *info, char divider, bool simple);
 void        DDF_GetLumpNameForFile(const char *filename, char *lumpname);
 
 int DDF_CompareName(const char *A, const char *B);
 
-void        DDF_MainAddDefine(const char *name, const char *value);
-void        DDF_MainAddDefine(const std::string &name, const std::string &value);
+void DDF_MainAddDefine(const char *name, const char *value);
+void DDF_MainAddDefine(const std::string &name, const std::string &value);
 const char *DDF_MainGetDefine(const char *name);
 void        DDF_MainFreeDefines();
 
-bool DDF_WeaponIsUpgrade(weapondef_c *weap, weapondef_c *old);
+bool DDF_WeaponIsUpgrade(WeaponDefinition *weap, WeaponDefinition *old);
 
-bool          DDF_IsBoomLineType(int num);
-bool          DDF_IsBoomSectorType(int num);
-void          DDF_BoomClearGenTypes(void);
-linetype_c   *DDF_BoomGetGenLine(int number);
-sectortype_c *DDF_BoomGetGenSector(int number);
+bool        DDF_IsBoomLineType(int num);
+bool        DDF_IsBoomSectorType(int num);
+void        DDF_BoomClearGenTypes(void);
+LineType   *DDF_BoomGetGenLine(int number);
+SectorType *DDF_BoomGetGenSector(int number);
 
-ddf_type_e DDF_LumpToType(const std::string &name);
-ddf_type_e DDF_FilenameToType(const std::string &path);
+DDFType DDF_LumpToType(const std::string &name);
+DDFType DDF_FilenameToType(const std::string &path);
 
-void DDF_AddFile(ddf_type_e type, std::string &data, const std::string &source);
-void DDF_AddCollection(ddf_collection_c *col, const std::string &source);
+void DDF_AddFile(DDFType type, std::string &data, const std::string &source);
+void DDF_AddCollection(std::vector<DDFFile> &col, const std::string &source);
 void DDF_ParseEverything();
 
 void DDF_DumpFile(const std::string &data);
-void DDF_DumpCollection(ddf_collection_c *col);
-
-#endif /* __DDF_MAIN_H__ */
+void DDF_DumpCollection(const std::vector<DDFFile> &col);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

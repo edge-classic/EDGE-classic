@@ -23,119 +23,110 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __G_GAME__
-#define __G_GAME__
+#pragma once
 
-#include "main.h"
 #include "dm_defs.h"
 #include "e_event.h"
 #include "e_player.h"
 
 extern bool pistol_starts;
-
-extern int random_seed;
-
-extern int exittime; // for savegame code
-
-extern int key_show_players;
+extern int  random_seed;
+extern int  exit_time;  // for savegame code
+extern int  key_show_players;
 
 // -KM- 1998/11/25 Added support for finales before levels
-typedef enum
+enum GameAction
 {
-    ga_nothing = 0,
-    ga_newgame,
-    ga_loadlevel,
-    ga_loadgame,
-    ga_savegame,
-    ga_intermission,
-    ga_finale,
-    ga_endgame
-} gameaction_e;
+    kGameActionNothing = 0,
+    kGameActionNewGame,
+    kGameActionLoadLevel,
+    kGameActionLoadGame,
+    kGameActionSaveGame,
+    kGameActionIntermission,
+    kGameActionFinale,
+    kGameActionEndGame
+};
 
-extern gameaction_e gameaction;
+extern GameAction game_action;
 
 //  Game action variables:
-//    ga_newgame     : defer_params
-//    ga_loadgame    : defer_load_slot
-//    ga_savegame    : defer_save_slot, defer_save_desc
+//    kGameActionNewGame     : defer_params
+//    kGameActionLoadGame    : defer_load_slot
+//    kGameActionSaveGame    : defer_save_slot, defer_save_description
 //
-//    ga_loadlevel   : currmap, players, gameskill+dm+level_flags ETC
-//    ga_intermission: currmap, nextmap, players, wi_stats ETC
-//    ga_finale      : nextmap, players
+//    kGameActionLoadLevel   : current_map, players, game_skill+dm+level_flags
+//    ETC kGameActionIntermission: current_map, next_map, players,
+//    intermission_stats ETC kGameActionFinale      : next_map, players
 
-class newgame_params_c
+class NewGameParameters
 {
-  public:
-    skill_t skill;
-    int     deathmatch;
+   public:
+    SkillLevel skill_;
+    int        deathmatch_;
 
-    const mapdef_c *map;
+    const MapDefinition *map_;
     // gamedef_c is implied (== map->episode)
 
-    int random_seed;
-    int total_players;
+    int random_seed_;
+    int total_players_;
 
-    playerflag_e players[MAXPLAYERS];
-    net_node_c  *nodes[MAXPLAYERS];
+    PlayerFlag players_[kMaximumPlayers];
 
-    gameflags_t *flags; // can be NULL
+    GameFlags *flags_;  // can be nullptr
 
-    bool level_skip = false;
+    bool level_skip_ = false;
 
-  public:
-    newgame_params_c();
-    newgame_params_c(const newgame_params_c &src);
-    ~newgame_params_c();
+   public:
+    NewGameParameters();
+    NewGameParameters(const NewGameParameters &src);
+    ~NewGameParameters();
 
-  public:
+   public:
     /* methods */
 
     void SinglePlayer(int num_bots = 0);
     // setup for single player (no netgame) and possibly some bots.
 
-    void CopyFlags(const gameflags_t *F);
+    void CopyFlags(const GameFlags *F);
 };
 
 //
-// Called by the Startup code & M_Responder; A normal game
+// Called by the Startup code & MenuResponder; A normal game
 // is started by calling the beginning map. The level jump
 // cheat can get us anywhere.
 //
 // -ACB- 1998/08/10 New DDF Structure, Use map reference name.
 //
-void G_DeferredNewGame(newgame_params_c &params);
+void GameDeferredNewGame(NewGameParameters &params);
 
-// Can be called by the startup code or M_Responder,
-// calls P_SetupLevel or W_EnterWorld.
-void G_DeferredLoadGame(int slot);
-void G_DeferredSaveGame(int slot, const char *description);
-void G_DeferredScreenShot(void);
-void G_DeferredEndGame(void);
+// Can be called by the startup code or MenuResponder,
+// calls LevelSetup or W_EnterWorld.
+void GameDeferredLoadGame(int slot);
+void GameDeferredSaveGame(int slot, const char *description);
+void GameDeferredScreenShot(void);
+void GameDeferredEndGame(void);
 
-bool G_MapExists(const mapdef_c *map);
+bool GameMapExists(const MapDefinition *map);
 
 // -KM- 1998/11/25 Added Time param
-void G_ExitLevel(int time);
-void G_SecretExitLevel(int time);
-void G_ExitToLevel(char *name, int time, bool skip_all);
-void G_ExitToHub(const char *map_name, int tag);
-void G_ExitToHub(int map_number, int tag);
+void GameExitLevel(int time);
+void GameSecretExitLevel(int time);
+void GameExitToLevel(char *name, int time, bool skip_all);
+void GameExitToHub(const char *map_name, int tag);
+void GameExitToHub(int map_number, int tag);
 
-void G_BigStuff(void);
-void G_Ticker(void);
-bool G_Responder(event_t *ev);
+void GameBigStuff(void);
+void GameTicker(void);
+bool GameResponder(InputEvent *ev);
 
-bool G_CheckWhenAppear(when_appear_e appear);
+bool GameCheckWhenAppear(AppearsFlag appear);
 
-extern const mapdef_c *currmap;
-extern const mapdef_c *nextmap;
+extern const MapDefinition *current_map;
+extern const MapDefinition *next_map;
 
-mapdef_c *G_LookupMap(const char *refname);
+MapDefinition *GameLookupMap(const char *refname);
 
-void G_DoLoadLevel(void);
-void G_SpawnInitialPlayers(void); //
-
-#endif /* __G_GAME__ */
+void GameDoLoadLevel(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

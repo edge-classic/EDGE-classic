@@ -30,7 +30,7 @@
 		luaL_openlibs(lua);
 		
 		// Register the debuggr module as "util.debugger" and store it in the global variable "dbg".
-		dbg_setup(lua, "debugger", "dbg", NULL, NULL);
+		dbg_setup(lua, "debugger", "dbg", nullptr, nullptr);
 		
 		// Load some lua code and prepare to call the MyBuggyFunction() defined below...
 		
@@ -68,12 +68,12 @@ typedef int (*lua_CFunction)(lua_State *L);
 
 // This function must be called before calling dbg_pcall() to set up the debugger module.
 // 'name' must be the name of the module to register the debugger as. (ex: to use with 'require(name)')
-// 'globalName' can either be NULL or a global variable name to assign the debugger to. (I use "dbg")
-// 'readFunc' is a lua_CFunction that returns a line of input when called. Pass NULL if you want to read from stdin.
-// 'writeFunc' is a lua_CFunction that takes a single string as an argument. Pass NULL if you want to write to stdout.
+// 'globalName' can either be nullptr or a global variable name to assign the debugger to. (I use "dbg")
+// 'readFunc' is a lua_CFunction that returns a line of input when called. Pass nullptr if you want to read from stdin.
+// 'writeFunc' is a lua_CFunction that takes a single string as an argument. Pass nullptr if you want to write to stdout.
 void dbg_setup(lua_State *lua, const char *name, const char *globalName, lua_CFunction readFunc, lua_CFunction writeFunc);
 
-// Same as 'dbg_setup(lua, "debugger", "dbg", NULL, NULL)'
+// Same as 'dbg_setup(lua, "debugger", "dbg", nullptr, nullptr)'
 void dbg_setup_default(lua_State *lua);
 
 // Drop in replacement for lua_pcall() that attaches the debugger on an error if 'msgh' is 0.

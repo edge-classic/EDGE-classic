@@ -16,43 +16,38 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __W_MODEL_H__
-#define __W_MODEL_H__
+#pragma once
 
 #include "r_defs.h"
 
-class md2_model_c;
-class mdl_model_c;
+class Md2Model;
+class MdlModel;
 
-#define MAX_MODEL_SKINS 10
+constexpr uint8_t kMaximumModelSkins = 10;
 
-class modeldef_c
+class ModelDefinition
 {
-  public:
+   public:
     // four letter model name (e.g. "TROO").
-    char name[6];
+    char name_[6];
 
-    md2_model_c *md2_model;
-    mdl_model_c *mdl_model;
+    Md2Model *md2_model_;
+    MdlModel *mdl_model_;
 
-    const image_c *skins[MAX_MODEL_SKINS];
+    const Image *skins_[kMaximumModelSkins];
 
-  public:
-    modeldef_c(const char *_prefix);
-    ~modeldef_c();
+   public:
+    ModelDefinition(const char *prefix);
+    ~ModelDefinition();
 };
 
 /* Functions */
 
-void W_InitModels(void);
+void InitializeModels(void);
 
-void W_PrecacheModels(void);
+void PrecacheModels(void);
 
-modeldef_c *W_GetModel(int model_num);
-
-// XXX W_GetModelSkin(int model_num, int skin_num);
-
-#endif // __W_MODEL_H__
+ModelDefinition *GetModel(int model_num);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-//  EDGE OpenGL Texture Upload
+//  EDGE GPU Texture Upload
 //----------------------------------------------------------------------------
 //
 //  Copyright (c) 1999-2024 The EDGE Team.
@@ -16,34 +16,33 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __RGL_TEXGL_H__
-#define __RGL_TEXGL_H__
+#pragma once
 
-#include "image_data.h"
+#include "i_defs_gl.h"
+#include "im_data.h"
 
-typedef enum
+enum TextureUploadFlag
 {
-    UPL_NONE = 0,
+    kUploadNone = 0,
 
-    UPL_Smooth = (1 << 0),
-    UPL_Clamp  = (1 << 1),
-    UPL_MipMap = (1 << 2),
-    UPL_Thresh = (1 << 3), // threshhold alpha (to 0 or 255)
-} upload_texture_flag_e;
+    kUploadSmooth = (1 << 0),
+    kUploadClamp  = (1 << 1),
+    kUploadMipMap = (1 << 2),
+    kUploadThresh = (1 << 3),  // threshhold alpha (to 0 or 255)
+};
 
-GLuint R_UploadTexture(image_data_c *img, int flags = UPL_NONE, int max_pix = (1 << 30));
+GLuint RendererUploadTexture(ImageData *img, int flags = kUploadNone,
+                             int max_pix = (1 << 30));
 
-image_data_c *R_PalettisedToRGB(image_data_c *src, const uint8_t *palette, int opacity);
+ImageData *RgbFromPalettised(ImageData *src, const uint8_t *palette,
+                             int opacity);
 
-void R_PaletteRemapRGBA(image_data_c *img, const uint8_t *new_pal, const uint8_t *old_pal);
+void PaletteRemapRgba(ImageData *img, const uint8_t *new_pal,
+                      const uint8_t *old_pal);
 
-int R_DetermineOpacity(image_data_c *img, bool *is_empty);
+int DetermineOpacity(ImageData *img, bool *is_empty_);
 
-void R_BlackenClearAreas(image_data_c *img);
-
-void R_DumpImage(image_data_c *img);
-
-#endif /* __RGL_TEXGL_H__ */
+void BlackenClearAreas(ImageData *img);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

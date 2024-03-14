@@ -16,77 +16,42 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_COLLECTION_H__
-#define __DDF_COLLECTION_H__
+#pragma once
 
 #include <string>
-#include <vector>
 
-// types of DDF lumps / files
-enum ddf_type_e
+enum DDFType
 {
-    DDF_UNKNOWN = -1,
-
-    DDF_Anim = 0,
-    DDF_Attack,
-    DDF_ColourMap,
-    DDF_Flat,
-    DDF_Font,
-    DDF_Game,
-    DDF_Image,
-    DDF_Language,
-    DDF_Level,
-    DDF_Line,
-    DDF_Movie,
-    DDF_Playlist,
-    DDF_SFX,
-    DDF_Sector,
-    DDF_Style,
-    DDF_Switch,
-    DDF_Thing,
-    DDF_Weapon,
-
+    kDDFTypeUNKNOWN = -1,
+    kDDFTypeAnim    = 0,
+    kDDFTypeAttack,
+    kDDFTypeColourMap,
+    kDDFTypeFlat,
+    kDDFTypeFont,
+    kDDFTypeGame,
+    kDDFTypeImage,
+    kDDFTypeLanguage,
+    kDDFTypeLevel,
+    kDDFTypeLine,
+    kDDFTypeMovie,
+    kDDFTypePlaylist,
+    kDDFTypeSFX,
+    kDDFTypeSector,
+    kDDFTypeStyle,
+    kDDFTypeSwitch,
+    kDDFTypeThing,
+    kDDFTypeWeapon,
     // not strictly DDF, but useful sometimes
-    DDF_RadScript,
-
-    DDF_NUM_TYPES
+    kDDFTypeRadScript,
+    kTotalDDFTypes
 };
 
-class ddf_file_c
+struct DDFFile
 {
-  public:
-    ddf_type_e  type;
+    DDFType     type;
     std::string source;
     std::string data;
-
-    ddf_file_c(ddf_type_e _t, const std::string &_s) : type(_t), source(_s), data()
-    {
-    }
-
-    ddf_file_c(ddf_type_e _t, const std::string &_s, std::string &_d) : type(_t), source(_s), data(_d)
-    {
-    }
-
-    ~ddf_file_c()
-    {
-    }
 };
-
-class ddf_collection_c
-{
-  public:
-    std::vector<ddf_file_c> files;
-
-    ddf_collection_c() : files()
-    {
-    }
-
-    ~ddf_collection_c()
-    {
-    }
-};
-
-#endif /*__DDF_COLLECTION_H__*/
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

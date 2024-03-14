@@ -18,8 +18,9 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __AJBSP_LOCAL_H__
-#define __AJBSP_LOCAL_H__
+#pragma once
+
+#include <vector>
 
 #include "bsp.h"
 
@@ -60,7 +61,7 @@ struct WallTip
 
 class Vertex
 {
-  public:
+   public:
     // coordinates
     double x_, y_;
 
@@ -74,14 +75,14 @@ class Vertex
     // when building normal nodes, unused vertices will be pruned.
     bool is_used_;
 
-    // usually NULL, unless this vertex occupies the same location as a
+    // usually nullptr, unless this vertex occupies the same location as a
     // previous vertex.
     Vertex *overlap_;
 
     // list of wall-tips
     WallTip *tip_set_;
 
-  public:
+   public:
     // check whether a line with the given delta coordinates from this
     // vertex is open or closed.  If there exists a walltip at same
     // angle, it is closed, likewise if line is in void space.
@@ -106,7 +107,7 @@ struct Sector
 
 struct Sidedef
 {
-    // adjacent sector.  Can be NULL (invalid sidedef)
+    // adjacent sector.  Can be nullptr (invalid sidedef)
     Sector *sector;
 
     // sidedef index.  Always valid after loading & pruning.
@@ -118,11 +119,11 @@ struct Linedef
     // link for list
     Linedef *next;
 
-    Vertex *start; // from this vertex...
-    Vertex *end;   // ... to this vertex
+    Vertex *start;  // from this vertex...
+    Vertex *end;    // ... to this vertex
 
-    Sidedef *right; // right sidedef
-    Sidedef *left;  // left sidede, or NULL if none
+    Sidedef *right;  // right sidedef
+    Sidedef *left;   // left sidede, or nullptr if none
 
     int type;
 
@@ -138,7 +139,7 @@ struct Linedef
     // sector is the same on both sides
     bool self_referencing;
 
-    // normally NULL, except when this linedef directly overlaps an earlier
+    // normally nullptr, except when this linedef directly overlaps an earlier
     // one (a rarely-used trick to create higher mid-masked textures).
     // No segs should be created for these overlapping linedefs.
     Linedef *overlap;
@@ -153,7 +154,7 @@ struct Thing
     int x, y;
     int type;
 
-    // other info (angle, and hexen stuff) omitted.  We don't need to
+    // other info (angle, etc) omitted.  We don't need to
     // write the THINGS lump, only read it.
 
     // Always valid (thing indices never change).
@@ -162,20 +163,20 @@ struct Thing
 
 class Seg
 {
-  public:
+   public:
     // link for list
     Seg *next_;
 
-    Vertex *start_; // from this vertex...
-    Vertex *end_;   // ... to this vertex
+    Vertex *start_;  // from this vertex...
+    Vertex *end_;    // ... to this vertex
 
-    // linedef that this seg goes along, or NULL if miniseg
+    // linedef that this seg goes along, or nullptr if miniseg
     Linedef *linedef_;
 
     // 0 for right, 1 for left
     int side_;
 
-    // seg on other side, or NULL if one-sided.  This relationship is
+    // seg on other side, or nullptr if one-sided.  This relationship is
     // always one-to-one -- if one of the segs is split, the partner seg
     // must also be split.
     Seg *partner_;
@@ -191,7 +192,7 @@ class Seg
     // won't be any of these when writing the V2 GL_SEGS lump].
     bool is_degenerate_;
 
-    // the quad-tree node that contains this seg, or NULL if the seg
+    // the quad-tree node that contains this seg, or nullptr if the seg
     // is now in a subsector.
     QuadTree *quad_;
 
@@ -212,7 +213,7 @@ class Seg
     // this only used by ClockwiseOrder()
     double cmp_angle_;
 
-  public:
+   public:
     // compute the seg private info (psx/y, pex/y, pdx/y, etc).
     void Recompute();
 
@@ -237,7 +238,7 @@ constexpr uint32_t kSegIsGarbage = (1 << 29);
 
 class Subsector
 {
-  public:
+   public:
     // list of segs
     Seg *seg_list_;
 
@@ -252,7 +253,7 @@ class Subsector
     double mid_x_;
     double mid_y_;
 
-  public:
+   public:
     void AddToTail(Seg *seg);
 
     void DetermineMiddle();
@@ -265,14 +266,14 @@ class Subsector
 
 struct BoundingBox
 {
-    int minx, miny;
-    int maxx, maxy;
+    int minimum_x, minimum_y;
+    int maximum_x, maximum_y;
 };
 
 struct Child
 {
-    // child node or subsector (one must be NULL)
-    Node   *node;
+    // child node or subsector (one must be nullptr)
+    Node      *node;
     Subsector *subsec;
 
     // child bounding box
@@ -281,13 +282,13 @@ struct Child
 
 class Node
 {
-  public:
+   public:
     // these coordinates are high precision to support UDMF.
     // in non-UDMF maps, they will actually be integral since a
     // partition line *always* comes from a normal linedef.
 
-    double x_, y_;   // starting point
-    double dx_, dy_; // offset to ending point
+    double x_, y_;    // starting point
+    double dx_, dy_;  // offset to ending point
 
     // right & left children
     Child r_;
@@ -297,7 +298,7 @@ class Node
     // created.
     int index_;
 
-  public:
+   public:
     void SetPartition(const Seg *part);
 };
 
@@ -305,16 +306,17 @@ class QuadTree
 {
     // NOTE: not a real quadtree, division is always binary.
 
-  public:
+   public:
     // coordinates on map for this block, from lower-left corner to
     // upper-right corner.  Fully inclusive, i.e (x,y) is inside this
     // block when x1 < x < x2 and y1 < y < y2.
     int x1_, y1_;
     int x2_, y2_;
 
-    // sub-trees.  NULL for leaf nodes.
+    // sub-trees.  nullptr for leaf nodes.
     // [0] has the lower coordinates, and [1] has the higher coordinates.
-    // Division of a square always occurs horizontally (e.g. 512x512 -> 256x512).
+    // Division of a square always occurs horizontally (e.g. 512x512 ->
+    // 256x512).
     QuadTree *subs_[2];
 
     // count of real/mini segs contained in this node AND ALL CHILDREN.
@@ -324,17 +326,14 @@ class QuadTree
     // list of segs completely contained in this node.
     Seg *list_;
 
-  public:
+   public:
     QuadTree(int _x1, int _y1, int _x2, int _y2);
     ~QuadTree();
 
     void AddSeg(Seg *seg);
     void AddList(Seg *list);
 
-    inline bool Empty() const
-    {
-        return (real_num_ + mini_num_) == 0;
-    }
+    inline bool Empty() const { return (real_num_ + mini_num_) == 0; }
 
     void ConvertToList(Seg **list);
 
@@ -352,10 +351,10 @@ extern std::vector<Sidedef *> level_sidedefs;
 extern std::vector<Sector *>  level_sectors;
 extern std::vector<Thing *>   level_things;
 
-extern std::vector<Seg *>     level_segs;
-extern std::vector<Subsector *>  level_subsecs;
-extern std::vector<Node *>    level_nodes;
-extern std::vector<WallTip *> level_walltips;
+extern std::vector<Seg *>       level_segs;
+extern std::vector<Subsector *> level_subsecs;
+extern std::vector<Node *>      level_nodes;
+extern std::vector<WallTip *>   level_walltips;
 
 extern int num_old_vert;
 extern int num_new_vert;
@@ -369,10 +368,10 @@ Sidedef *NewSidedef();
 Sector  *NewSector();
 Thing   *NewThing();
 
-Seg     *NewSeg();
-Subsector  *NewSubsec();
-Node    *NewNode();
-WallTip *NewWallTip();
+Seg       *NewSeg();
+Subsector *NewSubsec();
+Node      *NewNode();
+WallTip   *NewWallTip();
 
 Lump *FindLevelLump(const char *name);
 
@@ -388,7 +387,7 @@ void ZLibFinishLump(void);
 // detection routines
 void DetectOverlappingVertices(void);
 void DetectOverlappingLines(void);
-void DetectPolyobjSectors(bool is_udmf);
+void DetectPolyobjSectors(void);
 
 // pruning routines
 void PruneVerticesAtEnd(void);
@@ -418,7 +417,7 @@ constexpr double kEpsilon = (1.0 / 1024.0);
 inline void ListAddSeg(Seg **list_ptr, Seg *seg)
 {
     seg->next_ = *list_ptr;
-    *list_ptr = seg;
+    *list_ptr  = seg;
 }
 
 // an "intersection" remembers the vertex that touches a BSP divider
@@ -463,11 +462,12 @@ Seg *CreateSegs(void);
 
 // takes the seg list and determines if it is convex.  When it is, the
 // segs are converted to a subsector, and '*S' is the new subsector
-// (and '*N' is set to NULL).  Otherwise the seg list is divided into
+// (and '*N' is set to nullptr).  Otherwise the seg list is divided into
 // two halves, a node is created by calling this routine recursively,
-// and '*N' is the new node (and '*S' is set to NULL).  Normally
+// and '*N' is the new node (and '*S' is set to nullptr).  Normally
 // returns kBuildOK, or BUILD_Cancelled if user stopped it.
-BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */, Node **N, Subsector **S);
+BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */,
+                       Node **N, Subsector **S);
 
 // compute the height of the bsp tree, starting at 'node'.
 int ComputeBspHeight(const Node *node);
@@ -480,9 +480,7 @@ int ComputeBspHeight(const Node *node);
 //   in the wrong place order-wise. ]
 void ClockwiseBspTree();
 
-} // namespace ajbsp
-
-#endif /* __AJBSP_LOCAL_H__ */
+}  // namespace ajbsp
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

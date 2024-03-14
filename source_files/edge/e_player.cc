@@ -23,306 +23,302 @@
 //
 //----------------------------------------------------------------------------
 //
-// -MH- 1998/07/02 Added key_flyup and key_flydown variables (no logic yet)
+// -MH- 1998/07/02 Added key_fly_up and key_fly_down variables (no logic yet)
 // -MH- 1998/08/18 Flyup and flydown logic
 //
 
-#include "i_defs.h"
+#include "e_player.h"
 
-#include "endianess.h"
+#include <string.h>
 
+#include "bot_think.h"
 #include "dm_defs.h"
 #include "dm_state.h"
-#include "e_player.h"
+#include "endianess.h"
 #include "g_game.h"
 #include "hu_stuff.h"
+#include "i_system.h"
 #include "m_argv.h"
 #include "m_random.h"
-#include "bot_think.h"
 #include "p_local.h"
-
-#include "str_util.h"
-
-#include "vm_coal.h" // For VM_EndLevel()
 #include "script/compat/lua_compat.h"
+#include "sokol_color.h"
+#include "str_util.h"
+#include "vm_coal.h"  // For CoalEndLevel()
 
 //
 // PLAYER ARRAY
 //
 // Main rule is that players[p->num] == p (for all players p).
 // The array only holds players "in game", the remaining fields
-// are NULL.  There may be NULL entries in-between valid entries
-// (e.g. player #2 left the game, so players[2] becomes NULL).
+// are nullptr.  There may be nullptr entries in-between valid entries
+// (e.g. player #2 left the game, so players[2] becomes nullptr).
 // This means that numplayers is NOT an index to last entry + 1.
 //
 // The consoleplayer and displayplayer variables must be valid
 // indices at all times.
 //
-player_t *players[MAXPLAYERS];
-int       numplayers;
-int       numbots;
+Player *players[kMaximumPlayers];
+int     total_players;
+int     total_bots;
 
-int consoleplayer = -1; // player taking events
-int displayplayer = -1; // view being displayed
+int console_player = -1;  // player taking events
+int display_player = -1;  // view being displayed
 
-#define MAX_BODIES 50
+static constexpr uint8_t kMaximumBodies = 50;
 
-static mobj_t *bodyqueue[MAX_BODIES];
-static int     bodyqueue_size = 0;
+static MapObject *body_queue[kMaximumBodies];
+static int        body_queue_size = 0;
 
 // Maintain single and multi player starting spots.
-static std::vector<spawnpoint_t> dm_starts;
-static std::vector<spawnpoint_t> coop_starts;
-static std::vector<spawnpoint_t> voodoo_dolls;
-static std::vector<spawnpoint_t> hub_starts;
+static std::vector<SpawnPoint> deathmatch_starts;
+static std::vector<SpawnPoint> coop_starts;
+static std::vector<SpawnPoint> voodoo_dolls;
+static std::vector<SpawnPoint> hub_starts;
 
-static void P_SpawnPlayer(player_t *p, const spawnpoint_t *point, bool is_hub);
+static void P_SpawnPlayer(Player *p, const SpawnPoint *point, bool is_hub);
 
-void G_ClearPlayerStarts(void)
+void ClearPlayerStarts(void)
 {
-    dm_starts.clear();
+    deathmatch_starts.clear();
     coop_starts.clear();
     voodoo_dolls.clear();
     hub_starts.clear();
 }
 
-void G_ClearBodyQueue(void)
+void ClearBodyQueue(void)
 {
-    memset(bodyqueue, 0, sizeof(bodyqueue));
+    memset(body_queue, 0, sizeof(body_queue));
 
-    bodyqueue_size = 0;
+    body_queue_size = 0;
 }
 
-void G_AddBodyToQueue(mobj_t *mo)
+void GameAddBodyToQueue(MapObject *mo)
 {
     // flush an old corpse if needed
-    if (bodyqueue_size >= MAX_BODIES)
+    if (body_queue_size >= kMaximumBodies)
     {
-        mobj_t *rotten = bodyqueue[bodyqueue_size % MAX_BODIES];
-        rotten->refcount--;
+        MapObject *rotten = body_queue[body_queue_size % kMaximumBodies];
+        rotten->reference_count_--;
 
-        P_RemoveMobj(rotten);
+        RemoveMapObject(rotten);
     }
 
     // prevent accidental re-use
-    mo->refcount++;
+    mo->reference_count_++;
 
-    bodyqueue[bodyqueue_size % MAX_BODIES] = mo;
-    bodyqueue_size++;
+    body_queue[body_queue_size % kMaximumBodies] = mo;
+    body_queue_size++;
 }
 
 //
 // Called when a player completes a level.
 // For HUB changes, we keep powerups and keycards
 //
-void G_PlayerFinishLevel(player_t *p, bool keep_cards)
+void PlayerFinishLevel(Player *p, bool keep_cards)
 {
     if (!keep_cards)
     {
-        for (int i = 0; i < NUMPOWERS; i++)
-            p->powers[i] = 0;
+        for (int i = 0; i < kTotalPowerTypes; i++) p->powers_[i] = 0;
 
-        p->keep_powers = 0;
+        p->keep_powers_ = 0;
 
-        p->cards = KF_NONE;
+        p->cards_ = kDoorKeyNone;
 
-        p->mo->flags &= ~MF_FUZZY; // cancel invisibility
+        p->map_object_->flags_ &= ~kMapObjectFlagFuzzy;  // cancel invisibility
     }
 
-    p->extralight = 0; // cancel gun flashes
+    p->extra_light_ = 0;  // cancel gun flashes
 
     // cancel colourmap effects
-    p->effect_colourmap = NULL;
+    p->effect_colourmap_ = nullptr;
 
     // no palette changes
-    p->damagecount        = 0;
-    p->damage_pain        = 0;
-    p->bonuscount         = 0;
-    p->grin_count         = 0;
-    p->last_damage_colour = SG_RED_RGBA32;
+    p->damage_count_       = 0;
+    p->damage_pain_        = 0;
+    p->bonus_count_        = 0;
+    p->grin_count_         = 0;
+    p->last_damage_colour_ = SG_RED_RGBA32;
 
     // Lobo 2023: uncomment if still getting
     //  "INTERNAL ERROR: player has a removed attacker"
-    p->attacker = NULL;
+    p->attacker_ = nullptr;
 
-    if (LUA_UseLuaHud())
-        LUA_EndLevel();        
+    if (LuaUseLuaHud())
+        LuaEndLevel();
     else
-        VM_EndLevel();        
+        CoalEndLevel();
 }
 
 //
-// player_s::Reborn
+// Player::Reborn
 //
 // Called after a player dies.
 // Almost everything is cleared and initialised.
 //
-void player_s::Reborn()
+void Player::Reborn()
 {
-    I_Debugf("player_s::Reborn\n");
+    LogDebug("Player::Reborn\n");
 
-    playerstate = PST_LIVE;
+    player_state_ = kPlayerAlive;
 
-    mo     = NULL;
-    health = 0;
+    map_object_ = nullptr;
+    health_     = 0;
 
-    memset(armours, 0, sizeof(armours));
-    memset(armour_types, 0, sizeof(armour_types));
-    memset(powers, 0, sizeof(powers));
+    memset(armours_, 0, sizeof(armours_));
+    memset(armour_types_, 0, sizeof(armour_types_));
+    memset(powers_, 0, sizeof(powers_));
 
-    keep_powers = 0;
-    totalarmour = 0;
-    cards       = KF_NONE;
+    keep_powers_  = 0;
+    total_armour_ = 0;
+    cards_        = kDoorKeyNone;
 
-    ready_wp   = WPSEL_None;
-    pending_wp = WPSEL_NoChange;
+    ready_weapon_   = KWeaponSelectionNone;
+    pending_weapon_ = KWeaponSelectionNoChange;
 
-    memset(weapons, 0, sizeof(weapons));
-    memset(avail_weapons, 0, sizeof(avail_weapons));
-    memset(ammo, 0, sizeof(ammo));
-    memset(inventory, 0, sizeof(inventory));
-    memset(counters, 0, sizeof(counters));
+    memset(weapons_, 0, sizeof(weapons_));
+    memset(available_weapons_, 0, sizeof(available_weapons_));
+    memset(ammo_, 0, sizeof(ammo_));
+    memset(inventory_, 0, sizeof(inventory_));
+    memset(counters_, 0, sizeof(counters_));
 
-    for (int w = 0; w <= 9; w++)
-        key_choices[w] = WPSEL_None;
+    for (int w = 0; w <= 9; w++) key_choices_[w] = KWeaponSelectionNone;
 
-    cheats             = 0;
-    refire             = 0;
-    bob                = 0;
-    kick_offset        = 0;
-    zoom_fov           = 0;
-    bonuscount         = 0;
-    damagecount        = 0;
-    damage_pain        = 0;
-    extralight         = 0;
-    flash              = false;
-    last_damage_colour = SG_RED_RGBA32;
+    cheats_             = 0;
+    refire_             = 0;
+    bob_factor_         = 0;
+    kick_offset_        = 0;
+    zoom_field_of_view_ = 0;
+    bonus_count_        = 0;
+    damage_count_       = 0;
+    damage_pain_        = 0;
+    extra_light_        = 0;
+    flash_              = false;
+    last_damage_colour_ = SG_RED_RGBA32;
 
-    attacker = NULL;
+    attacker_ = nullptr;
 
-    effect_colourmap = NULL;
-    effect_left      = 0;
+    effect_colourmap_ = nullptr;
+    effect_left_      = 0;
 
-    memset(psprites, 0, sizeof(psprites));
+    memset(player_sprites_, 0, sizeof(player_sprites_));
 
-    jumpwait     = 0;
-    idlewait     = 0;
-    splashwait   = 0;
-    air_in_lungs = 0;
-    underwater   = false;
-    airless   = false;
-    swimming     = false;
-    wet_feet     = false;
+    jump_wait_    = 0;
+    idle_wait_    = 0;
+    splash_wait_  = 0;
+    air_in_lungs_ = 0;
+    underwater_   = false;
+    airless_      = false;
+    swimming_     = false;
+    wet_feet_     = false;
 
-    grin_count       = 0;
-    attackdown_count = 0;
-    face_index       = 0;
-    face_count       = 0;
+    grin_count_             = 0;
+    attack_sustained_count_ = 0;
+    face_index_             = 0;
+    face_count_             = 0;
 
-    remember_atk[0]   = -1;
-    remember_atk[1]   = -1;
-    remember_atk[2]   = -1;
-    remember_atk[3]   = -1;
-    weapon_last_frame = -1;
+    remember_attack_state_[0] = -1;
+    remember_attack_state_[1] = -1;
+    remember_attack_state_[2] = -1;
+    remember_attack_state_[3] = -1;
+    weapon_last_frame_        = -1;
 }
 
 //
 // Returns false if the player cannot be respawned at the given spot
 // because something is occupying it.
 //
-static bool G_CheckSpot(player_t *player, const spawnpoint_t *point)
+static bool GameCheckSpot(Player *player, const SpawnPoint *point)
 {
     float x = point->x;
     float y = point->y;
     float z = point->z;
 
-    if (!player->mo)
+    if (!player->map_object_)
     {
         // first spawn of level, before corpses
-        for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+        for (int player_number_ = 0; player_number_ < kMaximumPlayers;
+             player_number_++)
         {
-            player_t *p = players[pnum];
+            Player *p = players[player_number_];
 
-            if (!p || !p->mo || p == player)
-                continue;
+            if (!p || !p->map_object_ || p == player) continue;
 
-            if (fabs(p->mo->x - x) < 8.0f && fabs(p->mo->y - y) < 8.0f)
+            if (fabs(p->map_object_->x - x) < 8.0f &&
+                fabs(p->map_object_->y - y) < 8.0f)
                 return false;
         }
 
         P_SpawnPlayer(player, point, false);
-        return true; // OK
+        return true;  // OK
     }
 
-    if (!P_CheckAbsPosition(player->mo, x, y, z))
-        return false;
+    if (!CheckAbsolutePosition(player->map_object_, x, y, z)) return false;
 
-    G_AddBodyToQueue(player->mo);
+    GameAddBodyToQueue(player->map_object_);
 
     // spawn a teleport fog
     // (temp fix for teleport effect)
     x += 20 * epi::BAMCos(point->angle);
     y += 20 * epi::BAMSin(point->angle);
-    P_MobjCreateObject(x, y, z, mobjtypes.Lookup("TELEPORT_FLASH"));
+    CreateMapObject(x, y, z, mobjtypes.Lookup("TELEPORT_FLASH"));
 
     P_SpawnPlayer(player, point, false);
-    return true; // OK
+    return true;  // OK
 }
 
 //
-// G_SetConsolePlayer
+// GameSetConsolePlayer
 //
 // Note: we don't rely on current value being valid, hence can use
 //       these functions during initialisation.
 //
-void G_SetConsolePlayer(int pnum)
+void SetConsolePlayer(int player_number_)
 {
-    consoleplayer = pnum;
+    console_player = player_number_;
 
-    SYS_ASSERT(players[consoleplayer]);
+    EPI_ASSERT(players[console_player]);
 
-    for (int i = 0; i < MAXPLAYERS; i++)
-        if (players[i])
-            players[i]->playerflags &= ~PFL_Console;
+    for (int i = 0; i < kMaximumPlayers; i++)
+        if (players[i]) players[i]->player_flags_ &= ~kPlayerFlagConsole;
 
-    players[pnum]->playerflags |= PFL_Console;
+    players[player_number_]->player_flags_ |= kPlayerFlagConsole;
 
-    if (argv::Find("testbot") > 0)
+    if (ArgumentFind("testbot") > 0)
     {
-        P_BotCreate(players[pnum], false);
+        P_BotCreate(players[player_number_], false);
     }
     else
     {
-        players[pnum]->builder    = P_ConsolePlayerBuilder;
-        players[pnum]->build_data = NULL;
+        players[player_number_]->Builder     = ConsolePlayerBuilder;
+        players[player_number_]->build_data_ = nullptr;
     }
 }
 
 //
-// G_SetDisplayPlayer
+// GameSetDisplayPlayer
 //
-void G_SetDisplayPlayer(int pnum)
+void SetDisplayPlayer(int player_number_)
 {
-    displayplayer = pnum;
+    display_player = player_number_;
 
-    SYS_ASSERT(players[displayplayer]);
+    EPI_ASSERT(players[display_player]);
 
-    for (int i = 0; i < MAXPLAYERS; i++)
-        if (players[i])
-            players[i]->playerflags &= ~PFL_Display;
+    for (int i = 0; i < kMaximumPlayers; i++)
+        if (players[i]) players[i]->player_flags_ &= ~kPlayerFlagDisplay;
 
-    players[pnum]->playerflags |= PFL_Display;
+    players[player_number_]->player_flags_ |= kPlayerFlagDisplay;
 }
 
-void G_ToggleDisplayPlayer(void)
+void ToggleDisplayPlayer(void)
 {
-    for (int i = 1; i <= MAXPLAYERS; i++)
+    for (int i = 1; i <= kMaximumPlayers; i++)
     {
-        int pnum = (displayplayer + i) % MAXPLAYERS;
+        int player_number_ = (display_player + i) % kMaximumPlayers;
 
-        if (players[pnum])
+        if (players[player_number_])
         {
-            G_SetDisplayPlayer(pnum);
+            SetDisplayPlayer(player_number_);
             break;
         }
     }
@@ -337,132 +333,130 @@ void G_ToggleDisplayPlayer(void)
 // -KM- 1998/12/21 Cleaned this up a bit.
 // -KM- 1999/01/31 Removed all those nasty cases for doomednum (1/4001)
 //
-static void P_SpawnPlayer(player_t *p, const spawnpoint_t *point, bool is_hub)
+static void P_SpawnPlayer(Player *p, const SpawnPoint *point, bool is_hub)
 {
     // -KM- 1998/11/25 This is in preparation for skins.  The creatures.ddf
     //   will hold player start objects, sprite will be taken for skin.
     // -AJA- 2004/04/14: Use DDF entry from level thing.
 
-    if (point->info == NULL)
-        I_Error("P_SpawnPlayer: No such item type!");
+    if (point->info == nullptr) FatalError("P_SpawnPlayer: No such item type!");
 
-    const mobjtype_c *info = point->info;
+    const MapObjectDefinition *info = point->info;
 
-    L_WriteDebug("* P_SpawnPlayer %d @ %1.0f,%1.0f\n", point->info->playernum, point->x, point->y);
+    LogDebug("* P_SpawnPlayer %d @ %1.0f,%1.0f\n", point->info->playernum_,
+             point->x, point->y);
 
-    if (info->playernum <= 0)
-        info = mobjtypes.LookupPlayer(p->pnum + 1);
+    if (info->playernum_ <= 0)
+        info = mobjtypes.LookupPlayer(p->player_number_ + 1);
 
-    if (p->playerstate == PST_REBORN)
+    if (p->player_state_ == kPlayerAwaitingRespawn)
     {
         p->Reborn();
 
-        P_GiveInitialBenefits(p, info);
+        GiveInitialBenefits(p, info);
     }
 
-    mobj_t *mobj = P_MobjCreateObject(point->x, point->y, point->z, info);
+    MapObject *mobj = CreateMapObject(point->x, point->y, point->z, info);
 
-    mobj->angle     = point->angle;
-    mobj->vertangle = point->vertangle;
-    mobj->player    = p;
-    mobj->health    = p->health;
+    mobj->angle_          = point->angle;
+    mobj->vertical_angle_ = point->vertical_angle;
+    mobj->player_         = p;
+    mobj->health_         = p->health_;
 
-    p->mo               = mobj;
-    p->playerstate      = PST_LIVE;
-    p->refire           = 0;
-    p->damagecount      = 0;
-    p->damage_pain      = 0;
-    p->bonuscount       = 0;
-    p->extralight       = 0;
-    p->effect_colourmap = NULL;
-    p->std_viewheight   = mobj->height * PERCENT_2_FLOAT(info->viewheight);
-    p->viewheight       = p->std_viewheight;
-    p->zoom_fov         = 0;
-    p->jumpwait         = 0;
+    p->map_object_           = mobj;
+    p->player_state_         = kPlayerAlive;
+    p->refire_               = 0;
+    p->damage_count_         = 0;
+    p->damage_pain_          = 0;
+    p->bonus_count_          = 0;
+    p->extra_light_          = 0;
+    p->effect_colourmap_     = nullptr;
+    p->standard_view_height_ = mobj->height_ * info->viewheight_;
+    p->view_height_          = p->standard_view_height_;
+    p->zoom_field_of_view_   = 0;
+    p->jump_wait_            = 0;
 
     // don't do anything immediately
-    p->attackdown[0] = p->attackdown[1] = false;
-    p->usedown                          = false;
-    p->actiondown[0] = p->actiondown[1] = false;
+    p->attack_button_down_[0] = p->attack_button_down_[1] = false;
+    p->attack_button_down_[2] = p->attack_button_down_[3] = false;
+    p->use_button_down_                                   = false;
+    p->action_button_down_[0] = p->action_button_down_[1] = false;
 
     // setup gun psprite
-    if (!is_hub || !SP_MATCH())
-        P_SetupPsprites(p);
+    if (!is_hub || !InSinglePlayerMatch()) SetupPlayerSprites(p);
 
     // give all cards in death match mode
-    if (DEATHMATCH())
-        p->cards = KF_MASK;
+    if (InDeathmatch()) p->cards_ = kDoorKeyBitmask;
 
     // -AJA- in COOP, all players are on the same side
-    if (COOP_MATCH())
-        mobj->side = ~0;
+    if (InCooperativeMatch()) mobj->side_ = ~0;
 
     // Don't get stuck spawned in things: telefrag them.
 
     /* Dasho 2023.10.09 - Ran into a map where having the player stuck inside
     a thing next to it with a sufficiently large radius was an intentional
     mechanic (The All-Ghosts Forest). Telefragging in this scenario seems
-    to diverge from reasonably 'correct' behavior compared to ports with good vanilla/Boom
-    compat, so I'm commenting this out. I had to do this previously for voodoo dolls
-    because it would break certain maps. */
+    to diverge from reasonably 'correct' behavior compared to ports with good
+    vanilla/Boom compat, so I'm commenting this out. I had to do this previously
+    for voodoo dolls because it would break certain maps. */
 
-    // P_TeleportMove(mobj, mobj->x, mobj->y, mobj->z);
+    // TeleportMove(mobj, mobj->x, mobj->y, mobj->z);
 
-    if (COOP_MATCH() && !level_flags.team_damage)
-        mobj->hyperflags |= HF_SIDEIMMUNE;
+    if (InCooperativeMatch() && !level_flags.team_damage)
+        mobj->hyper_flags_ |= kHyperFlagFriendlyFireImmune;
 
-    if (p->isBot())
+    if (p->IsBot())
     {
-        bot_t *bot = (bot_t *)p->build_data;
-        SYS_ASSERT(bot);
+        DeathBot *bot = (DeathBot *)p->build_data_;
+        EPI_ASSERT(bot);
 
         bot->Respawn();
     }
 }
 
-static void P_SpawnVoodooDoll(player_t *p, const spawnpoint_t *point)
+static void P_SpawnVoodooDoll(Player *p, const SpawnPoint *point)
 {
-    const mobjtype_c *info = point->info;
+    const MapObjectDefinition *info = point->info;
 
-    SYS_ASSERT(info);
-    SYS_ASSERT(info->playernum > 0);
+    EPI_ASSERT(info);
+    EPI_ASSERT(info->playernum_ > 0);
 
-    L_WriteDebug("* P_SpawnVoodooDoll %d @ %1.0f,%1.0f\n", p->pnum + 1, point->x, point->y);
+    LogDebug("* P_SpawnVoodooDoll %d @ %1.0f,%1.0f\n", p->player_number_ + 1,
+             point->x, point->y);
 
-    mobj_t *mobj = P_MobjCreateObject(point->x, point->y, point->z, info);
+    MapObject *mobj = CreateMapObject(point->x, point->y, point->z, info);
 
-    mobj->angle     = point->angle;
-    mobj->vertangle = point->vertangle;
-    mobj->player    = p;
-    mobj->health    = p->health;
+    mobj->angle_          = point->angle;
+    mobj->vertical_angle_ = point->vertical_angle;
+    mobj->player_         = p;
+    mobj->health_         = p->health_;
 
-    mobj->is_voodoo = true;
+    mobj->is_voodoo_ = true;
 
-    if (COOP_MATCH())
-        mobj->side = ~0;
+    if (InCooperativeMatch()) mobj->side_ = ~0;
 }
 
 //
-// G_DeathMatchSpawnPlayer
+// GameDeathMatchSpawnPlayer
 //
 // Spawns a player at one of the random deathmatch spots.
 // Called at level load and each death.
 //
-void G_DeathMatchSpawnPlayer(player_t *p)
+void DeathMatchSpawnPlayer(Player *p)
 {
-    if (p->pnum >= (int)dm_starts.size())
-        I_Warning("Few deathmatch spots, %d recommended.\n", p->pnum + 1);
+    if (p->player_number_ >= (int)deathmatch_starts.size())
+        LogWarning("Few deathmatch spots, %d recommended.\n",
+                   p->player_number_ + 1);
 
-    int begin = P_Random();
+    int begin = RandomByteDeterministic();
 
-    if (dm_starts.size() > 0)
+    if (deathmatch_starts.size() > 0)
     {
-        for (int j = 0; j < (int)dm_starts.size(); j++)
+        for (int j = 0; j < (int)deathmatch_starts.size(); j++)
         {
-            int i = (begin + j) % (int)dm_starts.size();
+            int i = (begin + j) % (int)deathmatch_starts.size();
 
-            if (G_CheckSpot(p, &dm_starts[i]))
-                return;
+            if (GameCheckSpot(p, &deathmatch_starts[i])) return;
         }
     }
 
@@ -473,123 +467,114 @@ void G_DeathMatchSpawnPlayer(player_t *p)
         {
             int i = (begin + j) % (int)coop_starts.size();
 
-            if (G_CheckSpot(p, &coop_starts[i]))
-                return;
+            if (GameCheckSpot(p, &coop_starts[i])) return;
         }
     }
 
-    I_Error("No usable DM start found!");
+    FatalError("No usable DM start found!");
 }
 
 //
-// G_CoopSpawnPlayer
+// GameCoopSpawnPlayer
 //
 // Spawns a player at one of the single player spots.
 // Called at level load and each death.
 //
-void G_CoopSpawnPlayer(player_t *p)
+void CoopSpawnPlayer(Player *p)
 {
-    spawnpoint_t *point = G_FindCoopPlayer(p->pnum + 1);
+    SpawnPoint *point = FindCoopPlayer(p->player_number_ + 1);
 
-    if (point && G_CheckSpot(p, point))
-        return;
+    if (point && GameCheckSpot(p, point)) return;
 
-    I_Warning("Player %d start is invalid.\n", p->pnum + 1);
+    LogWarning("Player %d start is invalid.\n", p->player_number_ + 1);
 
-    int begin = p->pnum;
+    int begin = p->player_number_;
 
     // try to spawn at one of the other players spots
     for (int j = 0; j < (int)coop_starts.size(); j++)
     {
         int i = (begin + j) % (int)coop_starts.size();
 
-        if (G_CheckSpot(p, &coop_starts[i]))
-            return;
+        if (GameCheckSpot(p, &coop_starts[i])) return;
     }
 
-    I_Error("No usable player start found!\n");
+    FatalError("No usable player start found!\n");
 }
 
-static spawnpoint_t *G_FindHubPlayer(int pnum, int tag)
+static SpawnPoint *GameFindHubPlayer(int player_number_, int tag)
 {
     int count = 0;
 
     for (int i = 0; i < (int)hub_starts.size(); i++)
     {
-        spawnpoint_t *point = &hub_starts[i];
-        SYS_ASSERT(point->info);
+        SpawnPoint *point = &hub_starts[i];
+        EPI_ASSERT(point->info);
 
-        if (point->tag != tag)
-            continue;
+        if (point->tag != tag) continue;
 
         count++;
 
-        if (point->info->playernum == pnum)
-            return point;
+        if (point->info->playernum_ == player_number_) return point;
     }
 
     if (count == 0)
-        I_Error("Missing hub starts with tag %d\n", tag);
+        FatalError("Missing hub starts with tag %d\n", tag);
     else
-        I_Error("No usable hub start for player %d (tag %d)\n", pnum + 1, tag);
+        FatalError("No usable hub start for player %d (tag %d)\n",
+                   player_number_ + 1, tag);
 
-    return NULL; /* NOT REACHED */
+    return nullptr; /* NOT REACHED */
 }
 
-void G_HubSpawnPlayer(player_t *p, int tag)
+void GameHubSpawnPlayer(Player *p, int tag)
 {
-    SYS_ASSERT(!p->mo);
+    EPI_ASSERT(!p->map_object_);
 
-    spawnpoint_t *point = G_FindHubPlayer(p->pnum + 1, tag);
+    SpawnPoint *point = GameFindHubPlayer(p->player_number_ + 1, tag);
 
     // assume player will fit (too bad otherwise)
     P_SpawnPlayer(p, point, true);
 }
 
-void G_SpawnVoodooDolls(player_t *p)
+void SpawnVoodooDolls(Player *p)
 {
     for (int i = 0; i < (int)voodoo_dolls.size(); i++)
     {
-        spawnpoint_t *point = &voodoo_dolls[i];
+        SpawnPoint *point = &voodoo_dolls[i];
 
-        if (point->info->playernum != p->pnum + 1)
-            continue;
+        if (point->info->playernum_ != p->player_number_ + 1) continue;
 
         P_SpawnVoodooDoll(p, point);
     }
 }
 
 // number of wanted dogs (1-3)
-DEF_CVAR(dogs, "0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(dogs, "0", kConsoleVariableFlagArchive)
 
-void G_SpawnHelper(int pnum)
+void SpawnHelper(int player_number_)
 {
-    if (pnum == 0)
-        return;
+    if (player_number_ == 0) return;
 
-    if (pnum > dogs.d)
-        return;
+    if (player_number_ > dogs.d_) return;
 
-    spawnpoint_t *point = G_FindCoopPlayer(pnum + 1);
-    if (point == NULL)
-        return;
+    SpawnPoint *point = FindCoopPlayer(player_number_ + 1);
+    if (point == nullptr) return;
 
-    const mobjtype_c *info = mobjtypes.Lookup(888);
-    if (info == NULL)
-        return;
+    const MapObjectDefinition *info = mobjtypes.Lookup(888);
+    if (info == nullptr) return;
 
-    mobj_t *mo = P_MobjCreateObject(point->x, point->y, point->z, info);
+    MapObject *mo = CreateMapObject(point->x, point->y, point->z, info);
 
-    mo->angle      = point->angle;
-    mo->spawnpoint = *point;
+    mo->angle_      = point->angle;
+    mo->spawnpoint_ = *point;
 
-    mo->side = ~0;
+    mo->side_ = ~0;
 }
 
-bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
+bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
 {
-    player_t *p = mo->player;
-    bool      temp;
+    Player *p = mo->player_;
+    bool    temp;
 
     for (; cond; cond = cond->next)
     {
@@ -597,229 +582,217 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 
         switch (cond->cond_type)
         {
-        case COND_Health:
-            if (cond->exact)
-                return (mo->health == cond->amount);
+            case kConditionCheckTypeHealth:
+                if (cond->exact) return (mo->health_ == cond->amount);
 
-            temp = (mo->health >= cond->amount);
+                temp = (mo->health_ >= cond->amount);
 
-            if ((!cond->negate && !temp) || (cond->negate && temp))
-                return false;
+                if ((!cond->negate && !temp) || (cond->negate && temp))
+                    return false;
 
-            break;
+                break;
 
-        case COND_Armour:
-            if (!p)
-                return false;
+            case kConditionCheckTypeArmour:
+                if (!p) return false;
 
-            if (cond->exact)
-            {
-                if (cond->sub.type == ARMOUR_Total)
-                    return (p->totalarmour == i_amount);
-                else
-                    return (p->armours[cond->sub.type] == i_amount);
-            }
-
-            if (cond->sub.type == ARMOUR_Total)
-                temp = (p->totalarmour >= i_amount);
-            else
-                temp = (p->armours[cond->sub.type] >= i_amount);
-
-            if ((!cond->negate && !temp) || (cond->negate && temp))
-                return false;
-
-            break;
-
-        case COND_Key:
-            if (!p)
-                return false;
-
-            temp = ((p->cards & cond->sub.type) != 0);
-
-            if ((!cond->negate && !temp) || (cond->negate && temp))
-                return false;
-
-            break;
-
-        case COND_Weapon:
-            if (!p)
-                return false;
-
-            temp = false;
-
-            for (int i = 0; i < MAXWEAPONS; i++)
-            {
-                if (p->weapons[i].owned && p->weapons[i].info == cond->sub.weap)
+                if (cond->exact)
                 {
-                    temp = true;
-                    break;
+                    if (cond->sub.type == kTotalArmourTypes)
+                        return (p->total_armour_ == i_amount);
+                    else
+                        return (p->armours_[cond->sub.type] == i_amount);
                 }
-            }
 
-            if ((!cond->negate && !temp) || (cond->negate && temp))
-                return false;
+                if (cond->sub.type == kTotalArmourTypes)
+                    temp = (p->total_armour_ >= i_amount);
+                else
+                    temp = (p->armours_[cond->sub.type] >= i_amount);
 
-            break;
+                if ((!cond->negate && !temp) || (cond->negate && temp))
+                    return false;
 
-        case COND_Powerup:
-            if (!p)
-                return false;
+                break;
 
-            if (cond->exact)
-                return (p->powers[cond->sub.type] == cond->amount);
+            case kConditionCheckTypeKey:
+                if (!p) return false;
 
-            temp = (p->powers[cond->sub.type] > cond->amount);
+                temp = ((p->cards_ & cond->sub.type) != 0);
 
-            if ((!cond->negate && !temp) || (cond->negate && temp))
-                return false;
+                if ((!cond->negate && !temp) || (cond->negate && temp))
+                    return false;
 
-            break;
+                break;
 
-        case COND_Ammo:
-            if (!p)
-                return false;
+            case kConditionCheckTypeWeapon:
+                if (!p) return false;
 
-            if (cond->exact)
-                return (p->ammo[cond->sub.type].num == i_amount);
+                temp = false;
 
-            temp = (p->ammo[cond->sub.type].num >= i_amount);
+                for (int i = 0; i < kMaximumWeapons; i++)
+                {
+                    if (p->weapons_[i].owned &&
+                        p->weapons_[i].info == cond->sub.weap)
+                    {
+                        temp = true;
+                        break;
+                    }
+                }
 
-            if ((!cond->negate && !temp) || (cond->negate && temp))
-                return false;
+                if ((!cond->negate && !temp) || (cond->negate && temp))
+                    return false;
 
-            break;
+                break;
 
-        case COND_Inventory:
-            if (!p)
-                return false;
+            case kConditionCheckTypePowerup:
+                if (!p) return false;
 
-            if (cond->exact)
-                return (p->inventory[cond->sub.type].num == i_amount);
+                if (cond->exact)
+                    return (p->powers_[cond->sub.type] == cond->amount);
 
-            temp = (p->inventory[cond->sub.type].num >= i_amount);
+                temp = (p->powers_[cond->sub.type] > cond->amount);
 
-            if ((!cond->negate && !temp) || (cond->negate && temp))
-                return false;
+                if ((!cond->negate && !temp) || (cond->negate && temp))
+                    return false;
 
-            break;
+                break;
 
-        case COND_Counter:
-            if (!p)
-                return false;
+            case kConditionCheckTypeAmmo:
+                if (!p) return false;
 
-            if (cond->exact)
-                return (p->counters[cond->sub.type].num == i_amount);
+                if (cond->exact)
+                    return (p->ammo_[cond->sub.type].count == i_amount);
 
-            temp = (p->counters[cond->sub.type].num >= i_amount);
+                temp = (p->ammo_[cond->sub.type].count >= i_amount);
 
-            if ((!cond->negate && !temp) || (cond->negate && temp))
-                return false;
+                if ((!cond->negate && !temp) || (cond->negate && temp))
+                    return false;
 
-            break;
+                break;
 
-        case COND_Jumping:
-            if (!p)
-                return false;
+            case kConditionCheckTypeInventory:
+                if (!p) return false;
 
-            temp = (p->jumpwait > 0);
+                if (cond->exact)
+                    return (p->inventory_[cond->sub.type].count == i_amount);
 
-            if ((!cond->negate && !temp) || (cond->negate && temp))
-                return false;
+                temp = (p->inventory_[cond->sub.type].count >= i_amount);
 
-            break;
+                if ((!cond->negate && !temp) || (cond->negate && temp))
+                    return false;
 
-        case COND_Crouching:
-            if (!p)
-                return false;
+                break;
 
-            temp = (mo->extendedflags & EF_CROUCHING) ? true : false;
+            case kConditionCheckTypeCounter:
+                if (!p) return false;
 
-            if ((!cond->negate && !temp) || (cond->negate && temp))
-                return false;
+                if (cond->exact)
+                    return (p->counters_[cond->sub.type].count == i_amount);
 
-            break;
+                temp = (p->counters_[cond->sub.type].count >= i_amount);
 
-        case COND_Swimming:
-            if (!p)
-                return false;
+                if ((!cond->negate && !temp) || (cond->negate && temp))
+                    return false;
 
-            temp = p->swimming;
+                break;
 
-            if ((!cond->negate && !temp) || (cond->negate && temp))
-                return false;
+            case kConditionCheckTypeJumping:
+                if (!p) return false;
 
-            break;
+                temp = (p->jump_wait_ > 0);
 
-        case COND_Attacking:
-            if (!p)
-                return false;
+                if ((!cond->negate && !temp) || (cond->negate && temp))
+                    return false;
 
-            temp = p->attackdown[0] || p->attackdown[1];
+                break;
 
-            if ((!cond->negate && !temp) || (cond->negate && temp))
-                return false;
+            case kConditionCheckTypeCrouching:
+                if (!p) return false;
 
-            break;
+                temp = (mo->extended_flags_ & kExtendedFlagCrouching) ? true
+                                                                      : false;
 
-        case COND_Rampaging:
-            if (!p)
-                return false;
+                if ((!cond->negate && !temp) || (cond->negate && temp))
+                    return false;
 
-            temp = (p->attackdown_count >= 70);
+                break;
 
-            if ((!cond->negate && !temp) || (cond->negate && temp))
-                return false;
+            case kConditionCheckTypeSwimming:
+                if (!p) return false;
 
-            break;
+                temp = p->swimming_;
 
-        case COND_Using:
-            if (!p)
-                return false;
+                if ((!cond->negate && !temp) || (cond->negate && temp))
+                    return false;
 
-            temp = p->usedown;
+                break;
 
-            if ((!cond->negate && !temp) || (cond->negate && temp))
-                return false;
+            case kConditionCheckTypeAttacking:
+                if (!p) return false;
 
-            break;
+                temp =
+                    (p->attack_button_down_[0] || p->attack_button_down_[1] ||
+                     p->attack_button_down_[2] || p->attack_button_down_[3]);
 
-        case COND_Action1:
-            if (!p)
-                return false;
+                if ((!cond->negate && !temp) || (cond->negate && temp))
+                    return false;
 
-            temp = p->actiondown[0];
+                break;
 
-            if ((!cond->negate && !temp) || (cond->negate && temp))
-                return false;
+            case kConditionCheckTypeRampaging:
+                if (!p) return false;
 
-            break;
+                temp = (p->attack_sustained_count_ >= 70);
 
-        case COND_Action2:
-            if (!p)
-                return false;
+                if ((!cond->negate && !temp) || (cond->negate && temp))
+                    return false;
 
-            temp = p->actiondown[1];
+                break;
 
-            if ((!cond->negate && !temp) || (cond->negate && temp))
-                return false;
+            case kConditionCheckTypeUsing:
+                if (!p) return false;
 
-            break;
+                temp = p->use_button_down_;
 
-        case COND_Walking:
-            if (!p)
-                return false;
+                if ((!cond->negate && !temp) || (cond->negate && temp))
+                    return false;
 
-            temp = (p->actual_speed > PLAYER_STOPSPEED) && (p->mo->z <= p->mo->floorz);
+                break;
 
-            if ((!cond->negate && !temp) || (cond->negate && temp))
-                return false;
+            case kConditionCheckTypeAction1:
+                if (!p) return false;
 
-            break;
+                temp = p->action_button_down_[0];
 
-        case COND_NONE:
-        default:
-            // unknown condition -- play it safe and succeed
-            break;
+                if ((!cond->negate && !temp) || (cond->negate && temp))
+                    return false;
+
+                break;
+
+            case kConditionCheckTypeAction2:
+                if (!p) return false;
+
+                temp = p->action_button_down_[1];
+
+                if ((!cond->negate && !temp) || (cond->negate && temp))
+                    return false;
+
+                break;
+
+            case kConditionCheckTypeWalking:
+                if (!p) return false;
+
+                temp = (p->actual_speed_ > kPlayerStopSpeed) &&
+                       (p->map_object_->z <= p->map_object_->floor_z_);
+
+                if ((!cond->negate && !temp) || (cond->negate && temp))
+                    return false;
+
+                break;
+
+            case kConditionCheckTypeNone:
+            default:
+                // unknown condition -- play it safe and succeed
+                break;
         }
     }
 
@@ -827,99 +800,94 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
     return true;
 }
 
-void G_AddDeathmatchStart(const spawnpoint_t &point)
+void AddDeathmatchStart(const SpawnPoint &point)
 {
-    dm_starts.push_back(point);
+    deathmatch_starts.push_back(point);
 }
 
-void G_AddHubStart(const spawnpoint_t &point)
-{
-    hub_starts.push_back(point);
-}
+void AddHubStart(const SpawnPoint &point) { hub_starts.push_back(point); }
 
-void G_AddCoopStart(const spawnpoint_t &point)
-{
-    coop_starts.push_back(point);
-}
+void AddCoopStart(const SpawnPoint &point) { coop_starts.push_back(point); }
 
-void G_AddVoodooDoll(const spawnpoint_t &point)
-{
-    voodoo_dolls.push_back(point);
-}
+void AddVoodooDoll(const SpawnPoint &point) { voodoo_dolls.push_back(point); }
 
-spawnpoint_t *G_FindCoopPlayer(int pnum)
+SpawnPoint *FindCoopPlayer(int player_number_)
 {
     for (int i = 0; i < (int)coop_starts.size(); i++)
     {
-        spawnpoint_t *point = &coop_starts[i];
-        SYS_ASSERT(point->info);
+        SpawnPoint *point = &coop_starts[i];
+        EPI_ASSERT(point->info);
 
-        if (point->info->playernum == pnum)
-            return point;
+        if (point->info->playernum_ == player_number_) return point;
     }
 
-    return NULL; // not found
+    return nullptr;  // not found
 }
 
-void G_MarkPlayerAvatars(void)
+void MarkPlayerAvatars(void)
 {
-    for (int i = 0; i < MAXPLAYERS; i++)
+    for (int i = 0; i < kMaximumPlayers; i++)
     {
-        player_t *p = players[i];
+        Player *p = players[i];
 
-        if (p && p->mo)
-            p->mo->hyperflags |= HF_OLD_AVATAR;
+        if (p && p->map_object_)
+            p->map_object_->hyper_flags_ |= kHyperFlagRememberOldAvatars;
     }
 }
 
-void G_RemoveOldAvatars(void)
+void RemoveOldAvatars(void)
 {
-    mobj_t *mo;
-    mobj_t *next;
+    MapObject *mo;
+    MapObject *next;
 
     // first fix up any references
-    for (mo = mobjlisthead; mo; mo = next)
+    for (mo = map_object_list_head; mo; mo = next)
     {
-        next = mo->next;
+        next = mo->next_;
 
         // update any mobj_t pointer which referred to the old avatar
         // (the one which was saved in the savegame) to refer to the
         // new avatar (the one spawned after loading).
 
-        if (mo->target && (mo->target->hyperflags & HF_OLD_AVATAR))
+        if (mo->target_ &&
+            (mo->target_->hyper_flags_ & kHyperFlagRememberOldAvatars))
         {
-            SYS_ASSERT(mo->target->player);
-            SYS_ASSERT(mo->target->player->mo);
+            EPI_ASSERT(mo->target_->player_);
+            EPI_ASSERT(mo->target_->player_->map_object_);
 
-            // I_Debugf("Updating avatar reference: %p --> %p\n", mo->target, mo->target->player->mo);
+            // LogDebug("Updating avatar reference: %p --> %p\n", mo->target_,
+            // mo->target_->player_->map_object_);
 
-            mo->SetTarget(mo->target->player->mo);
+            mo->SetTarget(mo->target_->player_->map_object_);
         }
 
-        if (mo->source && (mo->source->hyperflags & HF_OLD_AVATAR))
+        if (mo->source_ &&
+            (mo->source_->hyper_flags_ & kHyperFlagRememberOldAvatars))
         {
-            mo->SetSource(mo->source->player->mo);
+            mo->SetSource(mo->source_->player_->map_object_);
         }
 
-        if (mo->supportobj && (mo->supportobj->hyperflags & HF_OLD_AVATAR))
+        if (mo->support_object_ &&
+            (mo->support_object_->hyper_flags_ & kHyperFlagRememberOldAvatars))
         {
-            mo->SetSupportObj(mo->supportobj->player->mo);
+            mo->SetSupportObject(mo->support_object_->player_->map_object_);
         }
 
-        // the other three fields don't matter (tracer, above_mo, below_mo)
-        // because the will be nulled by the P_RemoveMobj() below.
+        // the other three fields don't matter (tracer, above_object_,
+        // below_object_) because the will be nulled by the P_RemoveMobj()
+        // below.
     }
 
     // now actually remove the old avatars
-    for (mo = mobjlisthead; mo; mo = next)
+    for (mo = map_object_list_head; mo; mo = next)
     {
-        next = mo->next;
+        next = mo->next_;
 
-        if (mo->hyperflags & HF_OLD_AVATAR)
+        if (mo->hyper_flags_ & kHyperFlagRememberOldAvatars)
         {
-            I_Debugf("Removing old avatar: %p\n", mo);
+            LogDebug("Removing old avatar: %p\n", mo);
 
-            P_RemoveMobj(mo);
+            RemoveMapObject(mo);
         }
     }
 }

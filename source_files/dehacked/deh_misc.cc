@@ -25,18 +25,19 @@
 //
 //------------------------------------------------------------------------
 
-#include "deh_edge.h"
+#include "deh_misc.h"
 
 #include "deh_buffer.h"
+#include "deh_edge.h"
 #include "deh_info.h"
-#include "deh_misc.h"
 #include "deh_mobj.h"
 #include "deh_patch.h"
 #include "deh_sounds.h"
 #include "deh_system.h"
 #include "deh_things.h"
 #include "deh_weapons.h"
-
+#include "epi.h"
+#include "str_compare.h"
 namespace dehacked
 {
 
@@ -55,7 +56,7 @@ int soul_limit;
 int mega_health;
 
 int monster_infight;
-} // namespace miscellaneous
+}  // namespace miscellaneous
 
 struct MiscellaneousInfo
 {
@@ -86,15 +87,15 @@ const MiscellaneousInfo misc_info[] = {
     {"Soulsphere Health", 1, &soul_health, soulsphere_mobj},
     {"Megasphere Health", 1, &mega_health, megasphere_mobj},
 
-    {"God Mode Health", 0, NULL, NULL},
-    {"IDFA Armor", 0, NULL, NULL},
-    {"IDFA Armor Class", 0, NULL, NULL},
-    {"IDKFA Armor", 0, NULL, NULL},
-    {"IDKFA Armor Class", 0, NULL, NULL},
+    {"God Mode Health", 0, nullptr, nullptr},
+    {"IDFA Armor", 0, nullptr, nullptr},
+    {"IDFA Armor Class", 0, nullptr, nullptr},
+    {"IDKFA Armor", 0, nullptr, nullptr},
+    {"IDKFA Armor Class", 0, nullptr, nullptr},
 
-    {NULL, 0, NULL, 0} // End sentinel
+    {nullptr, 0, nullptr, 0}  // End sentinel
 };
-} // namespace miscellaneous
+}  // namespace miscellaneous
 
 void miscellaneous::Init()
 {
@@ -113,9 +114,7 @@ void miscellaneous::Init()
     monster_infight = 202;
 }
 
-void miscellaneous::Shutdown()
-{
-}
+void miscellaneous::Shutdown() {}
 
 void miscellaneous::AlterMisc(int new_val)
 {
@@ -127,7 +126,8 @@ void miscellaneous::AlterMisc(int new_val)
     {
         if (new_val < 1)
         {
-            I_Debugf("Dehacked: Warning - Bad value '%d' for MISC field: %s\n", new_val, misc_name);
+            LogDebug("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
+                     new_val, misc_name);
             return;
         }
 
@@ -139,7 +139,8 @@ void miscellaneous::AlterMisc(int new_val)
     {
         if (new_val < 1)
         {
-            I_Debugf("Dehacked: Warning - Bad value '%d' for MISC field: %s\n", new_val, misc_name);
+            LogDebug("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
+                     new_val, misc_name);
             return;
         }
 
@@ -153,14 +154,14 @@ void miscellaneous::AlterMisc(int new_val)
     {
         if (new_val != 202 && new_val != 221)
         {
-            I_Debugf("Dehacked: Warning - Bad value '%d' for MISC field: %s\n", new_val, misc_name);
+            LogDebug("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
+                     new_val, misc_name);
             return;
         }
 
         monster_infight = new_val;
 
-        if (monster_infight == 221)
-            things::MarkAllMonsters();
+        if (monster_infight == 221) things::MarkAllMonsters();
 
         return;
     }
@@ -179,19 +180,20 @@ void miscellaneous::AlterMisc(int new_val)
 
     if (!info->deh_name)
     {
-        I_Debugf("Dehacked: Warning - UNKNOWN MISC FIELD: %s\n", misc_name);
+        LogDebug("Dehacked: Warning - UNKNOWN MISC FIELD: %s\n", misc_name);
         return;
     }
 
     if (!info->var)
     {
-        I_Debugf("Dehacked: Warning - Ignoring MISC field: %s\n", misc_name);
+        LogDebug("Dehacked: Warning - Ignoring MISC field: %s\n", misc_name);
         return;
     }
 
-    if (new_val < info->minimum) // mainly here to disallow negative values
+    if (new_val < info->minimum)  // mainly here to disallow negative values
     {
-        I_Debugf("Dehacked: Warning - Bad value '%d' for MISC field: %s\n", new_val, misc_name);
+        LogDebug("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
+                 new_val, misc_name);
         new_val = info->minimum;
     }
 
@@ -200,12 +202,9 @@ void miscellaneous::AlterMisc(int new_val)
     // mark mobjs that have been modified
 
     const int *affect = info->affected_mobjs;
-    SYS_ASSERT(affect);
+    EPI_ASSERT(affect);
 
-    for (; *affect >= 0; affect++)
-    {
-        things::MarkThing(*affect);
-    }
+    for (; *affect >= 0; affect++) { things::MarkThing(*affect); }
 }
 
-} // namespace dehacked
+}  // namespace dehacked

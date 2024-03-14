@@ -19,150 +19,156 @@
 // -ACB- 1999/11/13 Written
 //
 
-#include "i_defs.h"
+#include "s_music.h"
 
 #include <stdlib.h>
 
+#include "dm_state.h"
 #include "file.h"
 #include "filesystem.h"
-#include "sound_types.h"
-#include "str_util.h"
-
+#include "i_system.h"
+#include "m_misc.h"
 #include "main.h"
-
-#include "dm_state.h"
-#include "s_sound.h"
-#include "s_music.h"
-#include "s_ogg.h"
-#include "s_mp3.h"
+#include "s_flac.h"
 #include "s_fluid.h"
 #include "s_m4p.h"
+#include "s_mp3.h"
+#include "s_ogg.h"
 #include "s_opl.h"
-#include "s_flac.h"
 #include "s_rad.h"
-#include "m_misc.h"
+#include "s_sound.h"
+#include "snd_types.h"
+#include "str_util.h"
 #include "w_files.h"
 #include "w_wad.h"
 
 // music slider value
-DEF_CVAR(mus_volume, "0.15", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(music_volume, "0.15", kConsoleVariableFlagArchive)
 
-bool nomusic = false;
+bool no_music = false;
 
 // Current music handle
-static abstract_music_c *music_player;
+static AbstractMusicPlayer *music_player;
 
 int         entry_playing = -1;
 static bool entry_looped;
-bool        var_pc_speaker_mode = false;
+bool        pc_speaker_mode = false;
 
-void S_ChangeMusic(int entrynum, bool loop)
+void ChangeMusic(int entry_number, bool loop)
 {
-    if (nomusic)
-        return;
+    if (no_music) return;
 
     // -AJA- playlist number 0 reserved to mean "no music"
-    if (entrynum <= 0)
+    if (entry_number <= 0)
     {
-        S_StopMusic();
+        StopMusic();
         return;
     }
 
     // -AJA- don't restart the current song (DOOM compatibility)
-    if (entrynum == entry_playing && entry_looped)
-        return;
+    if (entry_number == entry_playing && entry_looped) return;
 
-    S_StopMusic();
+    StopMusic();
 
-    entry_playing = entrynum;
+    entry_playing = entry_number;
     entry_looped  = loop;
 
     // when we cannot find the music entry, no music will play
-    const pl_entry_c *play = playlist.Find(entrynum);
+    const PlaylistEntry *play = playlist.Find(entry_number);
     if (!play)
     {
-        I_Warning("Could not find music entry [%d]\n", entrynum);
+        LogWarning("Could not find music entry [%d]\n", entry_number);
         return;
     }
 
     // open the file or lump, and read it into memory
     epi::File *F;
 
-    switch (play->infotype)
+    switch (play->infotype_)
     {
-    case MUSINF_FILE: {
-        std::string fn = M_ComposeFileName(game_dir, play->info);
-
-        F = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
-        if (!F)
+        case kDDFMusicDataFile:
         {
-            I_Warning("S_ChangeMusic: Can't Find File '%s'\n", fn.c_str());
-            return;
-        }
-        break;
-    }
+            std::string fn =
+                epi::PathAppendIfNotAbsolute(game_directory, play->info_);
 
-    case MUSINF_PACKAGE: {
-        F = W_OpenPackFile(play->info);
-        if (!F)
-        {
-            I_Warning("S_ChangeMusic: PK3 entry '%s' not found.\n", play->info.c_str());
-            return;
-        }
-        break;
-    }
-
-    case MUSINF_LUMP: {
-        int lump = W_CheckNumForName(play->info.c_str());
-        if (lump < 0)
-        {
-            I_Warning("S_ChangeMusic: LUMP '%s' not found.\n", play->info.c_str());
-            return;
+            F = epi::FileOpen(fn,
+                              epi::kFileAccessRead | epi::kFileAccessBinary);
+            if (!F)
+            {
+                LogWarning("ChangeMusic: Can't Find File '%s'\n", fn.c_str());
+                return;
+            }
+            break;
         }
 
-        F = W_OpenLump(lump);
-        break;
+        case kDDFMusicDataPackage:
+        {
+            F = OpenFileFromPack(play->info_);
+            if (!F)
+            {
+                LogWarning("ChangeMusic: PK3 entry '%s' not found.\n",
+                           play->info_.c_str());
+                return;
+            }
+            break;
+        }
+
+        case kDDFMusicDataLump:
+        {
+            int lump = CheckLumpNumberForName(play->info_.c_str());
+            if (lump < 0)
+            {
+                LogWarning("ChangeMusic: LUMP '%s' not found.\n",
+                           play->info_.c_str());
+                return;
+            }
+
+            F = LoadLumpAsFile(lump);
+            break;
+        }
+
+        default:
+            LogPrint("ChangeMusic: invalid method %d for MUS/MIDI\n",
+                     play->infotype_);
+            return;
     }
 
-    default:
-        I_Printf("S_ChangeMusic: invalid method %d for MUS/MIDI\n", play->infotype);
-        return;
-    }
-
-    int   length = F->GetLength();
+    int      length = F->GetLength();
     uint8_t *data   = F->LoadIntoMemory();
 
     if (!data)
     {
         delete F;
-        I_Warning("S_ChangeMusic: Error loading data.\n");
+        LogWarning("ChangeMusic: Error loading data.\n");
         return;
     }
     if (length < 4)
     {
         delete F;
         delete data;
-        I_Printf("S_ChangeMusic: ignored short data (%d bytes)\n", length);
+        LogPrint("ChangeMusic: ignored short data (%d bytes)\n", length);
         return;
     }
 
-    sound_format_e fmt = kUnknownImage;
+    SoundFormat fmt = kSoundUnknown;
 
-    // IMF Music is the outlier in that it must be predefined in DDFPLAY with the appropriate
-    // IMF frequency, as there is no way of determining this from file information alone
-    if (play->type == MUS_IMF280 || play->type == MUS_IMF560 || play->type == MUS_IMF700)
-        fmt = FMT_IMF;
+    // IMF Music is the outlier in that it must be predefined in DDFPLAY with
+    // the appropriate IMF frequency, as there is no way of determining this
+    // from file information alone
+    if (play->type_ == kDDFMusicIMF280 || play->type_ == kDDFMusicIMF560 ||
+        play->type_ == kDDFMusicIMF700)
+        fmt = kSoundImf;
     else
     {
-        if (play->infotype == MUSINF_LUMP)
+        if (play->infotype_ == kDDFMusicDataLump)
         {
             // lumps must use auto-detection based on their contents
-            fmt = Sound_DetectFormat(data, length);
+            fmt = DetectSoundFormat(data, length);
         }
         else
         {
             // for FILE and PACK, use the file extension
-            fmt = Sound_FilenameToFormat(play->info);
+            fmt = SoundFilenameToFormat(play->info_);
         }
     }
 
@@ -170,72 +176,71 @@ void S_ChangeMusic(int entrynum, bool loop)
 
     switch (fmt)
     {
-    case FMT_OGG:
-        delete F;
-        music_player = S_PlayOGGMusic(data, length, loop);
-        break;
+        case kSoundOgg:
+            delete F;
+            music_player = PlayOggMusic(data, length, loop);
+            break;
 
-    case FMT_MP3:
-        delete F;
-        music_player = S_PlayMP3Music(data, length, loop);
-        break;
+        case kSoundMp3:
+            delete F;
+            music_player = PlayMp3Music(data, length, loop);
+            break;
 
-    case FMT_FLAC:
-        delete F;
-        music_player = S_PlayFLACMusic(data, length, loop);
-        break;
+        case kSoundFlac:
+            delete F;
+            music_player = PlayFlacMusic(data, length, loop);
+            break;
 
-    case FMT_M4P:
-        delete F;
-        music_player = S_PlayM4PMusic(data, length, loop);
-        break;
+        case kSoundM4p:
+            delete F;
+            music_player = S_PlayM4PMusic(data, length, loop);
+            break;
 
-    case FMT_RAD:
-        delete F;
-        music_player = S_PlayRADMusic(data, length, loop);
-        break;
+        case kSoundRad:
+            delete F;
+            music_player = PlayRadMusic(data, length, loop);
+            break;
 
-    // IMF writes raw OPL registers, so must use the OPL player unconditionally
-    case FMT_IMF:
-        delete F;
-        music_player = S_PlayOPL(data, length, loop, play->type);
-        break;
+        // IMF writes raw OPL registers, so must use the OPL player
+        // unconditionally
+        case kSoundImf:
+            delete F;
+            music_player = PlayOplMusic(data, length, loop, play->type_);
+            break;
 
-    case FMT_MIDI:
-    case FMT_MUS:
-    case FMT_WAV: // RIFF MIDI has the same header as WAV
-        delete F;
-        if (var_midi_player == 0)
-        {
-            music_player = S_PlayFluid(data, length, loop);
-        }
-        else
-        {
-            music_player = S_PlayOPL(data, length, loop, play->type);
-        }
-        break;
+        case kSoundMidi:
+        case kSoundMus:
+        case kSoundWav:  // RIFF MIDI has the same header as WAV
+            delete F;
+            if (var_midi_player == 0)
+            {
+                music_player = PlayFluidMusic(data, length, loop);
+            }
+            else
+            {
+                music_player = PlayOplMusic(data, length, loop, play->type_);
+            }
+            break;
 
-    default:
-        delete F;
-        delete data;
-        I_Printf("S_ChangeMusic: unknown format\n");
-        break;
+        default:
+            delete F;
+            delete data;
+            LogPrint("ChangeMusic: unknown format\n");
+            break;
     }
 }
 
-void S_ResumeMusic(void)
+void ResumeMusic(void)
 {
-    if (music_player)
-        music_player->Resume();
+    if (music_player) music_player->Resume();
 }
 
-void S_PauseMusic(void)
+void PauseMusic(void)
 {
-    if (music_player)
-        music_player->Pause();
+    if (music_player) music_player->Pause();
 }
 
-void S_StopMusic(void)
+void StopMusic(void)
 {
     // You can't stop the rock!! This does...
 
@@ -243,17 +248,16 @@ void S_StopMusic(void)
     {
         music_player->Stop();
         delete music_player;
-        music_player = NULL;
+        music_player = nullptr;
     }
 
     entry_playing = -1;
     entry_looped  = false;
 }
 
-void S_MusicTicker(void)
+void MusicTicker(void)
 {
-    if (music_player)
-        music_player->Ticker();
+    if (music_player) music_player->Ticker();
 }
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

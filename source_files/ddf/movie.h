@@ -16,95 +16,89 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_MOVIE_H__
-#define __DDF_MOVIE_H__
-
-#include "epi.h"
+#pragma once
 
 #include "types.h"
 
-typedef enum
+enum MovieDataType
 {
-    MOVDT_None,       // Default/dummy value
-    MOVDT_Lump,       // load from lump in a WAD
-    MOVDT_Package,    // load from an EPK
-} moviedata_type_e;
+    kMovieDataNone,     // Default/dummy value
+    kMovieDataLump,     // load from lump in a WAD
+    kMovieDataPackage,  // load from an EPK
+};
 
-typedef enum
+enum MovieScaling
 {
-    MOVSC_Autofit, // fit movie to screen as best as possible
-    MOVSC_NoScale, // force movie to play at original size regardless of display
-    MOVSC_Zoom, // movie will be scaled to fit display height; sides may be clipped
-    MOVSC_Stretch, // movie will stretch to fit display; disregards aspect ratio
-} moviescale_type_e;
+    kMovieScalingAutofit,  // fit movie to screen as best as possible
+    kMovieScalingNoScale,  // force movie to play at original size regardless of
+                           // display
+    kMovieScalingZoom,  // movie will be scaled to fit display height; sides may
+                        // be clipped
+    kMovieScalingStretch,  // movie will stretch to fit display; disregards
+                           // aspect ratio
+};
 
-typedef enum
+enum MovieSpecial
 {
-    MOVSP_None = 0,
-    MOVSP_Mute = 0x0001, // do not play associated audio track
-} movie_special_e;
+    kMovieSpecialNone = 0,
+    kMovieSpecialMute = 0x0001,  // do not play associated audio track
+};
 
-class moviedef_c
+class MovieDefinition
 {
-  public:
-    moviedef_c();
-    ~moviedef_c(){};
+   public:
+    MovieDefinition();
+    ~MovieDefinition(){};
 
-  public:
+   public:
     void Default(void);
-    void CopyDetail(const moviedef_c &src);
+    void CopyDetail(const MovieDefinition &src);
 
     // Member vars....
-    std::string       name;
+    std::string name_;
 
-    moviedata_type_e type;
+    MovieDataType type_;
 
-    std::string      info;
+    std::string info_;
 
-    moviescale_type_e scaling;
+    MovieScaling scaling_;
 
-    movie_special_e special;
+    MovieSpecial special_;
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit moviedef_c(moviedef_c &rhs)
-    {
-        (void)rhs;
-    }
-    moviedef_c &operator=(moviedef_c &rhs)
+    explicit MovieDefinition(MovieDefinition &rhs) { (void)rhs; }
+    MovieDefinition &operator=(MovieDefinition &rhs)
     {
         (void)rhs;
         return *this;
     }
 };
 
-// Our moviedefs container
-class moviedef_container_c : public std::vector<moviedef_c *>
+class MovieDefinitionContainer : public std::vector<MovieDefinition *>
 {
-  public:
-    moviedef_container_c()
+   public:
+    MovieDefinitionContainer() {}
+    ~MovieDefinitionContainer()
     {
-    }
-    ~moviedef_container_c()
-    {
-      for (auto iter = begin(); iter != end(); iter++)
-      {
-          moviedef_c *mov = *iter;
-          delete mov;
-          mov = nullptr;
-      }
+        for (std::vector<MovieDefinition *>::iterator iter     = begin(),
+                                                      iter_end = end();
+             iter != iter_end; iter++)
+        {
+            MovieDefinition *mov = *iter;
+            delete mov;
+            mov = nullptr;
+        }
     }
 
-  public:
+   public:
     // Search Functions
-    moviedef_c *Lookup(const char *refname);
+    MovieDefinition *Lookup(const char *refname);
 };
 
-extern moviedef_container_c moviedefs;
+extern MovieDefinitionContainer moviedefs;
 
 void DDF_ReadMovies(const std::string &data);
-
-#endif /*__DDF_MOVIE_H__*/
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

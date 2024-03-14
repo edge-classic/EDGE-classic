@@ -16,18 +16,11 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __WAVLOADER_H__
-#define __WAVLOADER_H__
+#pragma once
 
-#include "i_defs.h"
+#include "snd_data.h"
 
-#include "sound_data.h"
-
-/* FUNCTIONS */
-
-bool S_LoadWAVSound(sound_data_c *buf, uint8_t *data, int length, bool pc_speaker);
-
-#endif /* __WAVLOADER_H__ */
+bool SoundLoadWAV(SoundData *buf, uint8_t *data, int length, bool pc_speaker);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -83,8 +83,6 @@ extern float      widescreen_view_width_multiplier;
 // The minimum distance between player and a visible sprite.
 static constexpr float kMinimumSpriteDistance = 4.0f;
 
-static constexpr uint8_t kSpriteYFudge = 2;
-
 static const Image *crosshair_image;
 static int            crosshair_which;
 

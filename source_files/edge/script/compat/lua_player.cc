@@ -244,7 +244,7 @@ static int PL_is_attacking(lua_State *L)
 {
     lua_pushboolean(
         L,
-        (ui_player_who->action_button_down_[0] || ui_player_who->action_button_down_[1] || ui_player_who->attack_button_down_[2] || ui_player_who->action_button_down_[3]) ? 1 : 0);
+        (ui_player_who->attack_button_down_[0] || ui_player_who->attack_button_down_[1] || ui_player_who->attack_button_down_[2] || ui_player_who->attack_button_down_[3]) ? 1 : 0);
     return 1;
 }
 

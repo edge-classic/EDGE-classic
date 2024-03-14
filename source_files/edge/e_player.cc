@@ -729,8 +729,8 @@ bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
             case kConditionCheckTypeAttacking:
                 if (!p) return false;
 
-                temp = p->attack_button_down_[0] || p->attack_button_down_[1] ||
-                       p->action_button_down_[2] || p->action_button_down_[3];
+                temp = (p->attack_button_down_[0] || p->attack_button_down_[1] ||
+                       p->attack_button_down_[2] || p->attack_button_down_[3]);
 
                 if ((!cond->negate && !temp) || (cond->negate && temp))
                     return false;

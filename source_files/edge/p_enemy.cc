@@ -152,7 +152,7 @@ void NoiseAlert(Player *p)
 }
 
 // Called by new NOISE_ALERT ddf action
-void P_ActNoiseAlert(MapObject *actor)
+void A_NoiseAlert(MapObject *actor)
 {
     valid_count++;
 
@@ -537,7 +537,7 @@ static void SpawnDeathMissile(MapObject *source, float x, float y, float z)
     if (th->tics_ < 1) th->tics_ = 1;
 }
 
-void P_ActBrainScream(MapObject *bossbrain)
+void A_BrainScream(MapObject *bossbrain)
 {
     // The brain and his pain...
 
@@ -560,7 +560,7 @@ void P_ActBrainScream(MapObject *bossbrain)
                   GetSoundEffectCategory(bossbrain), bossbrain);
 }
 
-void P_ActBrainMissileExplode(MapObject *mo)
+void A_BrainMissileExplode(MapObject *mo)
 {
     float x, y, z;
 
@@ -573,9 +573,9 @@ void P_ActBrainMissileExplode(MapObject *mo)
     SpawnDeathMissile(mo->source_, x, y, z);
 }
 
-void P_ActBrainDie(MapObject *bossbrain) { GameExitLevel(kTicRate); }
+void A_BrainDie(MapObject *bossbrain) { GameExitLevel(kTicRate); }
 
-void P_ActBrainSpit(MapObject *shooter)
+void A_BrainSpit(MapObject *shooter)
 {
     static int easy = 0;
 
@@ -586,10 +586,10 @@ void P_ActBrainSpit(MapObject *shooter)
     if (game_skill <= kSkillEasy && (!easy)) return;
 
     // shoot out a cube
-    P_ActRangeAttack(shooter);
+    A_RangeAttack(shooter);
 }
 
-void P_ActCubeSpawn(MapObject *cube)
+void A_CubeSpawn(MapObject *cube)
 {
     MapObject                 *targ;
     MapObject                 *newmobj;
@@ -645,7 +645,7 @@ void P_ActCubeSpawn(MapObject *cube)
     TeleportMove(newmobj, newmobj->x, newmobj->y, newmobj->z);
 }
 
-void P_ActPlayerScream(MapObject *mo)
+void A_PlayerScream(MapObject *mo)
 {
     SoundEffect *sound;
 

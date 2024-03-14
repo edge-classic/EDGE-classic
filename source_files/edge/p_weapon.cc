@@ -1810,14 +1810,7 @@ void A_WeaponZoom(MapObject *mo)
     p->zoom_field_of_view_ = fov;
 }
 
-void A_SetInvuln(MapObject *mo) { mo->hyper_flags_ |= kHyperFlagInvulnerable; }
-
-void A_ClearInvuln(MapObject *mo)
-{
-    mo->hyper_flags_ &= ~kHyperFlagInvulnerable;
-}
-
-void A_MoveFwd(MapObject *mo)
+void WA_MoveFwd(MapObject *mo)
 {
     Player     *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
@@ -1836,7 +1829,7 @@ void A_MoveFwd(MapObject *mo)
     }
 }
 
-void A_MoveRight(MapObject *mo)
+void WA_MoveRight(MapObject *mo)
 {
     Player     *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
@@ -1855,7 +1848,7 @@ void A_MoveRight(MapObject *mo)
     }
 }
 
-void A_MoveUp(MapObject *mo)
+void WA_MoveUp(MapObject *mo)
 {
     Player     *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
@@ -1865,12 +1858,7 @@ void A_MoveUp(MapObject *mo)
     if (st && st->action_par) mo->momentum_.Z += *(float *)st->action_par;
 }
 
-void A_StopMoving(MapObject *mo)
-{
-    mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
-}
-
-void A_TurnDir(MapObject *mo)
+void WA_TurnDir(MapObject *mo)
 {
     Player     *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
@@ -1880,7 +1868,7 @@ void A_TurnDir(MapObject *mo)
     if (st && st->action_par) mo->angle_ += *(BAMAngle *)st->action_par;
 }
 
-void A_TurnRandom(MapObject *mo)
+void WA_TurnRandom(MapObject *mo)
 {
     Player     *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
@@ -1906,7 +1894,7 @@ void A_TurnRandom(MapObject *mo)
     mo->angle_ = epi::BAMFromDegrees(turn);
 }
 
-void A_MlookTurn(MapObject *mo)
+void WA_MlookTurn(MapObject *mo)
 {
     Player     *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];

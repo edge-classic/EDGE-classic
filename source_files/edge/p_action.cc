@@ -25,9 +25,9 @@
 //
 // Notes:
 //  All Procedures here are never called directly, except possibly
-//  by another P_Act* Routine. Otherwise the procedure is called
+//  by another A_* Routine. Otherwise the procedure is called
 //  by referencing an code pointer from the states[] table. The only
-//  exception to these rules are P_ActMissileContact and
+//  exception to these rules are A_MissileContact and
 //  SlammedIntoObject that requiring "acting" on the part
 //  of an obj.
 //
@@ -62,8 +62,10 @@
 
 extern FlatDefinition *P_IsThingOnLiquidFloor(MapObject *thing);
 
-static constexpr float kLongMeleeRange = 128.0f; // For kMBF21FlagLongMeleeRange
-static constexpr float kShortMissileRange = 896.0f;  // For kMBF21FlagShortMissileRange
+static constexpr float kLongMeleeRange =
+    128.0f;  // For kMBF21FlagLongMeleeRange
+static constexpr float kShortMissileRange =
+    896.0f;  // For kMBF21FlagShortMissileRange
 
 static int AttackSfxCat(const MapObject *mo)
 {
@@ -78,7 +80,8 @@ static int SfxFlags(const MapObjectDefinition *info)
 {
     int flags = 0;
 
-    if (info->extended_flags_ & kExtendedFlagAlwaysLoud) flags |= kSoundEffectBoss;
+    if (info->extended_flags_ & kExtendedFlagAlwaysLoud)
+        flags |= kSoundEffectBoss;
 
     return flags;
 }
@@ -88,14 +91,14 @@ static int SfxFlags(const MapObjectDefinition *info)
 //-----------------------------------------
 
 //
-// P_ActActivateLineType
+// A_ActivateLineType
 //
 // Allows things to also activate linetypes, bringing them into the
 // fold with radius triggers, which can also do it.  There's only two
 // parameters needed: linetype number & tag number, which are stored
 // in the state's `action_par' field as a pointer to two integers.
 //
-void P_ActActivateLineType(MapObject *mo)
+void A_ActivateLineType(MapObject *mo)
 {
     int *values;
 
@@ -109,32 +112,34 @@ void P_ActActivateLineType(MapObject *mo)
 }
 
 //
-// P_ActEnableRadTrig
-// P_ActDisableRadTrig
+// A_EnableRadTrig
+// A_DisableRadTrig
 //
 // Allows things to enable or disable radius triggers (by tag number),
 // like linetypes can do already.
 //
-void P_ActEnableRadTrig(MapObject *mo)
+void A_EnableRadTrig(MapObject *mo)
 {
     if (!mo->state_ || !mo->state_->action_par) return;
 
     int *value = (int *)mo->state_->action_par;
 
-    ScriptEnableByTag(mo, value[0], false, (TriggerScriptTag)mo->state_->rts_tag_type);
+    ScriptEnableByTag(mo, value[0], false,
+                      (TriggerScriptTag)mo->state_->rts_tag_type);
 }
 
-void P_ActDisableRadTrig(MapObject *mo)
+void A_DisableRadTrig(MapObject *mo)
 {
     if (!mo->state_ || !mo->state_->action_par) return;
 
     int *value = (int *)mo->state_->action_par;
 
-    ScriptEnableByTag(mo, value[0], true, (TriggerScriptTag)mo->state_->rts_tag_type);
+    ScriptEnableByTag(mo, value[0], true,
+                      (TriggerScriptTag)mo->state_->rts_tag_type);
 }
 
 //
-// P_ActLookForTargets
+// A_LookForTargets
 //
 // Looks for targets: used in the same way as enemy things look
 // for players
@@ -147,7 +152,7 @@ void P_ActDisableRadTrig(MapObject *mo)
 // NOTE: a better way might be: do a mini "BSP render", use a small 1D
 //       occlusion buffer (e.g. 64 bits).
 //
-bool P_ActLookForTargets(MapObject *we)
+bool A_LookForTargets(MapObject *we)
 {
     MapObject *them;
 
@@ -168,8 +173,7 @@ bool P_ActLookForTargets(MapObject *we)
 
         if (same_side && !we->support_object_ && them->support_object_ != we)
         {
-            if (them->support_object_ &&
-                CheckSight(we, them->support_object_))
+            if (them->support_object_ && CheckSight(we, them->support_object_))
                 them = them->support_object_;
             else if (!CheckSight(we, them))
                 continue;  // OK since same side
@@ -187,7 +191,7 @@ bool P_ActLookForTargets(MapObject *we)
 
         /// if (them == we->support_object_ || we == them->support_object_ ||
         ///	(them->support_object_ && them->support_object_ ==
-        ///we->support_object_)) 	continue;
+        /// we->support_object_)) 	continue;
 
         if ((we->info_ == them->info_) &&
             !(we->extended_flags_ & kExtendedFlagDisloyalToOwnType))
@@ -336,11 +340,11 @@ static bool DecideRangeAttack(MapObject *object)
 }
 
 //
-// P_ActFaceTarget
+// A_FaceTarget
 //
 // Look at the prey......
 //
-void P_ActFaceTarget(MapObject *object)
+void A_FaceTarget(MapObject *object)
 {
     MapObject *target = object->target_;
 
@@ -351,9 +355,11 @@ void P_ActFaceTarget(MapObject *object)
 
     object->flags_ &= ~kMapObjectFlagAmbush;
 
-    object->angle_ = RendererPointToAngle(object->x, object->y, target->x, target->y);
+    object->angle_ =
+        RendererPointToAngle(object->x, object->y, target->x, target->y);
 
-    float dist = RendererPointToDistance(object->x, object->y, target->x, target->y);
+    float dist =
+        RendererPointToDistance(object->x, object->y, target->x, target->y);
 
     if (dist >= 0.1f)
     {
@@ -406,9 +412,11 @@ void P_ForceFaceTarget(MapObject *object)
 
     object->flags_ &= ~kMapObjectFlagAmbush;
 
-    object->angle_ = RendererPointToAngle(object->x, object->y, target->x, target->y);
+    object->angle_ =
+        RendererPointToAngle(object->x, object->y, target->x, target->y);
 
-    float dist = RendererPointToDistance(object->x, object->y, target->x, target->y);
+    float dist =
+        RendererPointToDistance(object->x, object->y, target->x, target->y);
 
     if (dist >= 0.1f)
     {
@@ -427,7 +435,7 @@ void P_ForceFaceTarget(MapObject *object)
         object->vertical_angle_ = kBAMAngle315;
 }
 
-void P_ActMakeIntoCorpse(MapObject *mo)
+void A_MakeIntoCorpse(MapObject *mo)
 {
     // Gives the effect of the object being a corpse....
 
@@ -466,13 +474,15 @@ void BringCorpseToLife(MapObject *corpse)
 
     if (corpse->player_)
     {
-        corpse->player_->player_state_    = kPlayerAlive;
-        corpse->player_->health_         = corpse->health_;
-        corpse->player_->standard_view_height_ = corpse->height_ * info->viewheight_;
+        corpse->player_->player_state_ = kPlayerAlive;
+        corpse->player_->health_       = corpse->health_;
+        corpse->player_->standard_view_height_ =
+            corpse->height_ * info->viewheight_;
     }
 
     if (info->overkill_sound_)
-        StartSoundEffect(info->overkill_sound_, GetSoundEffectCategory(corpse), corpse);
+        StartSoundEffect(info->overkill_sound_, GetSoundEffectCategory(corpse),
+                         corpse);
 
     if (info->raise_state_)
         MapObjectSetState(corpse, info->raise_state_);
@@ -484,7 +494,7 @@ void BringCorpseToLife(MapObject *corpse)
         FatalError("Object %s has no RESURRECT states.\n", info->name_.c_str());
 }
 
-void P_ActResetSpreadCount(MapObject *mo)
+void A_ResetSpreadCount(MapObject *mo)
 {
     // Resets the spreader count for fixed-order spreaders, normally used
     // at the beginning of a set of missile states to ensure that an object
@@ -497,7 +507,7 @@ void P_ActResetSpreadCount(MapObject *mo)
 //-------------------VISIBILITY HANDLING ROUTINES--------------------
 //-------------------------------------------------------------------
 
-void P_ActTransSet(MapObject *mo)
+void A_TransSet(MapObject *mo)
 {
     float value = 1.0f;
 
@@ -512,7 +522,7 @@ void P_ActTransSet(MapObject *mo)
     mo->visibility_ = mo->target_visibility_ = value;
 }
 
-void P_ActTransFade(MapObject *mo)
+void A_TransFade(MapObject *mo)
 {
     float value = 0.0f;
 
@@ -527,7 +537,7 @@ void P_ActTransFade(MapObject *mo)
     mo->target_visibility_ = value;
 }
 
-void P_ActTransLess(MapObject *mo)
+void A_TransLess(MapObject *mo)
 {
     float value = 0.05f;
 
@@ -544,7 +554,7 @@ void P_ActTransLess(MapObject *mo)
     if (mo->target_visibility_ < 0.0f) mo->target_visibility_ = 0.0f;
 }
 
-void P_ActTransMore(MapObject *mo)
+void A_TransMore(MapObject *mo)
 {
     float value = 0.05f;
 
@@ -562,7 +572,7 @@ void P_ActTransMore(MapObject *mo)
 }
 
 //
-// P_ActTransAlternate
+// A_TransAlternate
 //
 // Alters the translucency of an item, kExtendedFlagLessVisible is used
 // internally to tell the object if it should be getting
@@ -571,7 +581,7 @@ void P_ActTransMore(MapObject *mo)
 // to a level of lowest translucency) and the flag is unset
 // if the object has become as highly translucent as possible.
 //
-void P_ActTransAlternate(MapObject *object)
+void A_TransAlternate(MapObject *object)
 {
     const State *st;
     float        value = 0.05f;
@@ -604,7 +614,7 @@ void P_ActTransAlternate(MapObject *object)
     }
 }
 
-void P_ActDLightSet(MapObject *mo)
+void A_DLightSet(MapObject *mo)
 {
     const State *st = mo->state_;
 
@@ -620,7 +630,7 @@ void P_ActDLightSet(MapObject *mo)
     }
 }
 
-void P_ActDLightFade(MapObject *mo)
+void A_DLightFade(MapObject *mo)
 {
     const State *st = mo->state_;
 
@@ -634,7 +644,7 @@ void P_ActDLightFade(MapObject *mo)
     }
 }
 
-void P_ActDLightRandom(MapObject *mo)
+void A_DLightRandom(MapObject *mo)
 {
     const State *st = mo->state_;
 
@@ -654,7 +664,7 @@ void P_ActDLightRandom(MapObject *mo)
     }
 }
 
-void P_ActDLightColour(MapObject *mo)
+void A_DLightColour(MapObject *mo)
 {
     const State *st = mo->state_;
 
@@ -664,7 +674,7 @@ void P_ActDLightColour(MapObject *mo)
     }
 }
 
-void P_ActSetSkin(MapObject *mo)
+void A_SetSkin(MapObject *mo)
 {
     const State *st = mo->state_;
 
@@ -684,7 +694,7 @@ void P_ActSetSkin(MapObject *mo)
 //------------------- MOVEMENT ROUTINES -----------------------------
 //-------------------------------------------------------------------
 
-void P_ActFaceDir(MapObject *mo)
+void A_FaceDir(MapObject *mo)
 {
     const State *st = mo->state_;
 
@@ -694,7 +704,7 @@ void P_ActFaceDir(MapObject *mo)
         mo->angle_ = 0;
 }
 
-void P_ActTurnDir(MapObject *mo)
+void A_TurnDir(MapObject *mo)
 {
     const State *st = mo->state_;
 
@@ -705,7 +715,7 @@ void P_ActTurnDir(MapObject *mo)
     mo->angle_ += turn;
 }
 
-void P_ActTurnRandom(MapObject *mo)
+void A_TurnRandom(MapObject *mo)
 {
     const State *st   = mo->state_;
     int          turn = 359;
@@ -723,7 +733,7 @@ void P_ActTurnRandom(MapObject *mo)
         mo->angle_ += (BAMAngle)(turn << (kBAMAngleBits - 10));
 }
 
-void P_ActMlookFace(MapObject *mo)
+void A_MlookFace(MapObject *mo)
 {
     const State *st = mo->state_;
 
@@ -733,7 +743,7 @@ void P_ActMlookFace(MapObject *mo)
         mo->vertical_angle_ = 0;
 }
 
-void P_ActMlookTurn(MapObject *mo)
+void A_MlookTurn(MapObject *mo)
 {
     const State *st = mo->state_;
 
@@ -741,7 +751,7 @@ void P_ActMlookTurn(MapObject *mo)
         mo->vertical_angle_ = epi::BAMFromATan(*(float *)st->action_par);
 }
 
-void P_ActMoveFwd(MapObject *mo)
+void A_MoveFwd(MapObject *mo)
 {
     const State *st = mo->state_;
 
@@ -757,7 +767,7 @@ void P_ActMoveFwd(MapObject *mo)
     }
 }
 
-void P_ActMoveRight(MapObject *mo)
+void A_MoveRight(MapObject *mo)
 {
     const State *st = mo->state_;
 
@@ -773,14 +783,14 @@ void P_ActMoveRight(MapObject *mo)
     }
 }
 
-void P_ActMoveUp(MapObject *mo)
+void A_MoveUp(MapObject *mo)
 {
     const State *st = mo->state_;
 
     if (st && st->action_par) mo->momentum_.Z += *(float *)st->action_par;
 }
 
-void P_ActStopMoving(MapObject *mo)
+void A_StopMoving(MapObject *mo)
 {
     mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
 }
@@ -789,7 +799,7 @@ void P_ActStopMoving(MapObject *mo)
 //-------------------SOUND CAUSING ROUTINES--------------------------
 //-------------------------------------------------------------------
 
-void P_ActPlaySound(MapObject *mo)
+void A_PlaySound(MapObject *mo)
 {
     // Generate an arbitrary sound.
 
@@ -800,17 +810,18 @@ void P_ActPlaySound(MapObject *mo)
 
     if (!sound)
     {
-        PrintWarningOrError("P_ActPlaySound: missing sound name in %s.\n",
+        PrintWarningOrError("A_PlaySound: missing sound name in %s.\n",
                             mo->info_->name_.c_str());
         return;
     }
 
-    // StartSoundEffect(sound, P_MobjGetSfxCategory(mo), mo, SfxFlags(mo->info_));
+    // StartSoundEffect(sound, P_MobjGetSfxCategory(mo), mo,
+    // SfxFlags(mo->info_));
     StartSoundEffect(sound, GetSoundEffectCategory(mo), mo);
 }
 
 // Same as above but always loud
-void P_ActPlaySoundBoss(MapObject *mo)
+void A_PlaySoundBoss(MapObject *mo)
 {
     // Generate an arbitrary sound.
 
@@ -821,7 +832,7 @@ void P_ActPlaySoundBoss(MapObject *mo)
 
     if (!sound)
     {
-        PrintWarningOrError("P_ActPlaySoundBoss: missing sound name in %s.\n",
+        PrintWarningOrError("A_PlaySoundBoss: missing sound name in %s.\n",
                             mo->info_->name_.c_str());
         return;
     }
@@ -832,14 +843,14 @@ void P_ActPlaySoundBoss(MapObject *mo)
     StartSoundEffect(sound, GetSoundEffectCategory(mo), mo, flags);
 }
 
-void P_ActKillSound(MapObject *mo)
+void A_KillSound(MapObject *mo)
 {
     // Kill any current sounds from this thing.
 
     StopSoundEffect(mo);
 }
 
-void P_ActMakeAmbientSound(MapObject *mo)
+void A_MakeAmbientSound(MapObject *mo)
 {
     // Just a sound generating procedure that cause the sound ref
     // in seesound_ to be generated.
@@ -850,7 +861,7 @@ void P_ActMakeAmbientSound(MapObject *mo)
         LogDebug("%s has no ambient sound\n", mo->info_->name_.c_str());
 }
 
-void P_ActMakeAmbientSoundRandom(MapObject *mo)
+void A_MakeAmbientSoundRandom(MapObject *mo)
 {
     // Give a small "random" chance that this object will make its
     // ambient sound. Currently this is a set value of 50, however
@@ -860,13 +871,14 @@ void P_ActMakeAmbientSoundRandom(MapObject *mo)
     if (mo->info_->seesound_)
     {
         if (RandomByte() < 50)
-            StartSoundEffect(mo->info_->seesound_, GetSoundEffectCategory(mo), mo);
+            StartSoundEffect(mo->info_->seesound_, GetSoundEffectCategory(mo),
+                             mo);
     }
     else
         LogDebug("%s has no ambient sound\n", mo->info_->name_.c_str());
 }
 
-void P_ActMakeActiveSound(MapObject *mo)
+void A_MakeActiveSound(MapObject *mo)
 {
     // Just a sound generating procedure that cause the sound ref
     // in activesound_ to be generated.
@@ -874,12 +886,13 @@ void P_ActMakeActiveSound(MapObject *mo)
     // -KM- 1999/01/31
 
     if (mo->info_->activesound_)
-        StartSoundEffect(mo->info_->activesound_, GetSoundEffectCategory(mo), mo);
+        StartSoundEffect(mo->info_->activesound_, GetSoundEffectCategory(mo),
+                         mo);
     else
         LogDebug("%s has no ambient sound\n", mo->info_->name_.c_str());
 }
 
-void P_ActMakeDyingSound(MapObject *mo)
+void A_MakeDyingSound(MapObject *mo)
 {
     // This procedure is like every other sound generating
     // procedure with the exception that if the object is
@@ -889,32 +902,33 @@ void P_ActMakeDyingSound(MapObject *mo)
     SoundEffect *sound = mo->info_->deathsound_;
 
     if (sound)
-        StartSoundEffect(sound, GetSoundEffectCategory(mo), mo, SfxFlags(mo->info_));
+        StartSoundEffect(sound, GetSoundEffectCategory(mo), mo,
+                         SfxFlags(mo->info_));
     else
         LogDebug("%s has no death sound\n", mo->info_->name_.c_str());
 }
 
-void P_ActMakePainSound(MapObject *mo)
+void A_MakePainSound(MapObject *mo)
 {
     // Ow!! it hurts!
 
     if (mo->info_->painsound_)
         StartSoundEffect(mo->info_->painsound_, GetSoundEffectCategory(mo), mo,
-                  SfxFlags(mo->info_));
+                         SfxFlags(mo->info_));
     else
         LogDebug("%s has no pain sound\n", mo->info_->name_.c_str());
 }
 
-void P_ActMakeOverKillSound(MapObject *mo)
+void A_MakeOverKillSound(MapObject *mo)
 {
     if (mo->info_->overkill_sound_)
-        StartSoundEffect(mo->info_->overkill_sound_, GetSoundEffectCategory(mo), mo,
-                  SfxFlags(mo->info_));
+        StartSoundEffect(mo->info_->overkill_sound_, GetSoundEffectCategory(mo),
+                         mo, SfxFlags(mo->info_));
     else
         LogDebug("%s has no overkill sound\n", mo->info_->name_.c_str());
 }
 
-void P_ActMakeCloseAttemptSound(MapObject *mo)
+void A_MakeCloseAttemptSound(MapObject *mo)
 {
     // Attempting close combat sound
 
@@ -933,7 +947,7 @@ void P_ActMakeCloseAttemptSound(MapObject *mo)
                  mo->info_->name_.c_str());
 }
 
-void P_ActMakeRangeAttemptSound(MapObject *mo)
+void A_MakeRangeAttemptSound(MapObject *mo)
 {
     // Attempting range attack sound
 
@@ -957,11 +971,11 @@ void P_ActMakeRangeAttemptSound(MapObject *mo)
 //-------------------------------------------------------------------
 
 //
-// P_ActDamageExplosion
+// A_DamageExplosion
 //
 // Radius Attack damage set by info->damage. Used for the original Barrels
 //
-void P_ActDamageExplosion(MapObject *object)
+void A_DamageExplosion(MapObject *object)
 {
     float damage;
 
@@ -985,11 +999,11 @@ void P_ActDamageExplosion(MapObject *object)
 }
 
 //
-// P_ActThrust
+// A_Thrust
 //
 // Thrust set by info->damage.
 //
-void P_ActThrust(MapObject *object)
+void A_Thrust(MapObject *object)
 {
     float damage;
 
@@ -1015,17 +1029,17 @@ void P_ActThrust(MapObject *object)
 //-------------------------------------------------------------------
 
 //
-// P_ActExplode
+// A_Explode
 //
 // The object blows up, like a missile.
 //
-// -AJA- 1999/08/21: Replaced P_ActExplodeMissile (which was identical
+// -AJA- 1999/08/21: Replaced A_ExplodeMissile (which was identical
 //       to p_mobj's P_ExplodeMissile) with this.
 //
-void P_ActExplode(MapObject *object) { ExplodeMissile(object); }
+void A_Explode(MapObject *object) { ExplodeMissile(object); }
 
 //
-// P_ActCheckMissileSpawn
+// A_CheckMissileSpawn
 //
 // This procedure handles a newly spawned missile, it moved
 // by half the amount of momentum and then checked to see
@@ -1105,8 +1119,10 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty,
     Sector *cur_source_sec = source->subsector_->sector;
 
     if (source->player_)
-        projz += (source->player_->view_z_ - source->player_->standard_view_height_);
-    else if (cur_source_sec->sink_depth > 0 && !cur_source_sec->extrafloor_used &&
+        projz +=
+            (source->player_->view_z_ - source->player_->standard_view_height_);
+    else if (cur_source_sec->sink_depth > 0 &&
+             !cur_source_sec->extrafloor_used &&
              !cur_source_sec->height_sector &&
              abs(source->z - cur_source_sec->floor_height) < 1)
         projz -= (source->height_ * 0.5 * cur_source_sec->sink_depth);
@@ -1155,7 +1171,8 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty,
         if (category == kCategoryPlayer || category == kCategoryWeapon)
             sfx_source = source;
 
-        StartSoundEffect(projectile->info_->seesound_, category, sfx_source, flags);
+        StartSoundEffect(projectile->info_->seesound_, category, sfx_source,
+                         flags);
     }
 
     angle = RendererPointToAngle(projx, projy, tx, ty);
@@ -1186,7 +1203,8 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty,
 
         Sector *cur_target_sec = target->subsector_->sector;
 
-        if (cur_target_sec->sink_depth > 0 && !cur_target_sec->extrafloor_used &&
+        if (cur_target_sec->sink_depth > 0 &&
+            !cur_target_sec->extrafloor_used &&
             !cur_target_sec->height_sector &&
             abs(target->z - cur_target_sec->floor_height) < 1)
             tz -= (target->height_ * 0.5 * cur_target_sec->sink_depth);
@@ -1468,7 +1486,8 @@ int MissileContact(MapObject *object, MapObject *target)
         object->tunnel_hash_[0] = object->tunnel_hash_[1];
         object->tunnel_hash_[1] = hash;
         if (object->info_->rip_sound_)
-            StartSoundEffect(object->info_->rip_sound_, kCategoryObject, object, 0);
+            StartSoundEffect(object->info_->rip_sound_, kCategoryObject, object,
+                             0);
     }
 
     if (source)
@@ -1508,7 +1527,7 @@ int MissileContact(MapObject *object, MapObject *target)
 //          +1 if hit and damage was done.
 //
 int BulletContact(MapObject *source, MapObject *target, float damage,
-                    const DamageClass *damtype, float x, float y, float z)
+                  const DamageClass *damtype, float x, float y, float z)
 {
     // check for ghosts (attack passes through)
     if (source->current_attack_ &&
@@ -1584,7 +1603,7 @@ int BulletContact(MapObject *source, MapObject *target, float damage,
 }
 
 //
-// P_ActCreateSmokeTrail
+// A_CreateSmokeTrail
 //
 // Just spawns smoke behind an mobj: the smoke is
 // risen by giving it z momentum, in order to
@@ -1596,7 +1615,7 @@ int BulletContact(MapObject *source, MapObject *target, float damage,
 // -ACB- 1998/08/10 Written
 // -ACB- 1999/10/01 Check thing's current attack has a smoke projectile
 //
-void P_ActCreateSmokeTrail(MapObject *projectile)
+void A_CreateSmokeTrail(MapObject *projectile)
 {
     const AttackDefinition *attack = projectile->current_attack_;
 
@@ -1605,7 +1624,7 @@ void P_ActCreateSmokeTrail(MapObject *projectile)
     if (attack->puff_ == nullptr)
     {
         PrintWarningOrError(
-            "P_ActCreateSmokeTrail: attack %s has no PUFF object\n",
+            "A_CreateSmokeTrail: attack %s has no PUFF object\n",
             attack->name_.c_str());
         return;
     }
@@ -1613,8 +1632,8 @@ void P_ActCreateSmokeTrail(MapObject *projectile)
     // spawn a puff of smoke behind the rocket
     MapObject *smoke =
         CreateMapObject(projectile->x - projectile->momentum_.X / 2.0f,
-                           projectile->y - projectile->momentum_.Y / 2.0f,
-                           projectile->z, attack->puff_);
+                        projectile->y - projectile->momentum_.Y / 2.0f,
+                        projectile->z, attack->puff_);
 
     smoke->momentum_.Z = smoke->info_->float_speed_;
     smoke->tics_ -= RandomByte() & 3;
@@ -1623,7 +1642,7 @@ void P_ActCreateSmokeTrail(MapObject *projectile)
 }
 
 //
-// P_ActHomingProjectile
+// A_HomingProjectile
 //
 // This projectile will alter its course to intercept its
 // target, if is possible for this procedure to be called
@@ -1649,14 +1668,14 @@ void P_ActCreateSmokeTrail(MapObject *projectile)
 //
 // -ACB- 1998/08/10
 //
-void P_ActHomingProjectile(MapObject *projectile)
+void A_HomingProjectile(MapObject *projectile)
 {
     const AttackDefinition *attack = projectile->current_attack_;
 
     if (attack == nullptr) return;
 
     if (attack->flags_ & kAttackFlagSmokingTracer)
-        P_ActCreateSmokeTrail(projectile);
+        A_CreateSmokeTrail(projectile);
 
     if (projectile->extended_flags_ & kExtendedFlagFirstTracerCheck)
     {
@@ -1675,7 +1694,7 @@ void P_ActHomingProjectile(MapObject *projectile)
 
     // change angle
     BAMAngle exact = RendererPointToAngle(projectile->x, projectile->y,
-                                    destination->x, destination->y);
+                                          destination->x, destination->y);
 
     if (exact != projectile->angle_)
     {
@@ -1714,12 +1733,12 @@ void P_ActHomingProjectile(MapObject *projectile)
 }
 
 //
-// P_ActHomeToSpot
+// A_HomeToSpot
 //
 // This projectile will alter its course to intercept its target,
 // or explode if it has reached it.  Used by the bossbrain cube.
 //
-void P_ActHomeToSpot(MapObject *projectile)
+void A_HomeToSpot(MapObject *projectile)
 {
     MapObject *target = projectile->target_;
 
@@ -1896,7 +1915,7 @@ static void ShotAttack(MapObject *mo)
             damage *= attack->berserk_mul_;
 
         LineAttack(mo, angle, range, slope, damage, &attack->damage_,
-                     attack->puff_);
+                   attack->puff_);
     }
 }
 
@@ -1921,9 +1940,9 @@ static void SprayAttack(MapObject *mo)
 
         if (!target) continue;
 
-        MapObject *ball = CreateMapObject(target->x, target->y,
-                                             target->z + target->height_ / 4,
-                                             attack->atk_mobj_);
+        MapObject *ball =
+            CreateMapObject(target->x, target->y,
+                            target->z + target->height_ / 4, attack->atk_mobj_);
 
         ball->SetTarget(mo->target_);
 
@@ -1965,7 +1984,7 @@ static void DoMeleeAttack(MapObject *mo)
     if (!DecideMeleeAttack(mo, attack))
     {
         LineAttack(mo, mo->angle_, range, epi::BAMTan(mo->vertical_angle_),
-                     damage, &attack->damage_, attack->puff_);
+                   damage, &attack->damage_, attack->puff_);
         return;
     }
 
@@ -1976,7 +1995,7 @@ static void DoMeleeAttack(MapObject *mo)
     AimLineAttack(mo, mo->angle_, range, &slope);
 
     LineAttack(mo, mo->angle_, range, slope, damage, &attack->damage_,
-                 attack->puff_);
+               attack->puff_);
 }
 
 //-------------------------------------------------------------------
@@ -1991,13 +2010,13 @@ static void DoMeleeAttack(MapObject *mo)
 //
 
 //
-// P_ActTrackerFollow
+// A_TrackerFollow
 //
 // Called by the tracker to follow its target.
 //
 // -ACB- 1998/08/22
 //
-void P_ActTrackerFollow(MapObject *tracker)
+void A_TrackerFollow(MapObject *tracker)
 {
     MapObject *destination = tracker->target_;
 
@@ -2014,35 +2033,35 @@ void P_ActTrackerFollow(MapObject *tracker)
 }
 
 //
-// P_ActTrackerActive
+// A_TrackerActive
 //
 // Called by the tracker to make its active sound: also tracks
 //
 // -ACB- 1998/08/22
 //
-void P_ActTrackerActive(MapObject *tracker)
+void A_TrackerActive(MapObject *tracker)
 {
     if (tracker->info_->activesound_)
-        StartSoundEffect(tracker->info_->activesound_, GetSoundEffectCategory(tracker),
-                  tracker);
+        StartSoundEffect(tracker->info_->activesound_,
+                         GetSoundEffectCategory(tracker), tracker);
 
-    P_ActTrackerFollow(tracker);
+    A_TrackerFollow(tracker);
 }
 
 //
-// P_ActTrackerStart
+// A_TrackerStart
 //
 // Called by the tracker to make its launch (see) sound: also tracks
 //
 // -ACB- 1998/08/22
 //
-void P_ActTrackerStart(MapObject *tracker)
+void A_TrackerStart(MapObject *tracker)
 {
     if (tracker->info_->seesound_)
-        StartSoundEffect(tracker->info_->seesound_, GetSoundEffectCategory(tracker),
-                  tracker);
+        StartSoundEffect(tracker->info_->seesound_,
+                         GetSoundEffectCategory(tracker), tracker);
 
-    P_ActTrackerFollow(tracker);
+    A_TrackerFollow(tracker);
 }
 
 //
@@ -2072,11 +2091,11 @@ static void LaunchTracker(MapObject *object)
     // tracker's target is the object's target
     tracker->SetTarget(target);
 
-    P_ActTrackerFollow(tracker);
+    A_TrackerFollow(tracker);
 }
 
 //
-// P_ActEffectTracker
+// A_EffectTracker
 //
 // Called by the object that launched the tracker to
 // cause damage to its target and a radius attack
@@ -2084,7 +2103,7 @@ static void LaunchTracker(MapObject *object)
 //
 // -ACB- 1998/08/22
 //
-void P_ActEffectTracker(MapObject *object)
+void A_EffectTracker(MapObject *object)
 {
     MapObject              *tracker;
     MapObject              *target;
@@ -2097,7 +2116,7 @@ void P_ActEffectTracker(MapObject *object)
     attack = object->current_attack_;
     target = object->target_;
 
-    if (attack->flags_ & kAttackFlagFaceTarget) P_ActFaceTarget(object);
+    if (attack->flags_ & kAttackFlagFaceTarget) A_FaceTarget(object);
 
     if (attack->flags_ & kAttackFlagNeedSight)
     {
@@ -2105,7 +2124,8 @@ void P_ActEffectTracker(MapObject *object)
     }
 
     if (attack->sound_)
-        StartSoundEffect(attack->sound_, GetSoundEffectCategory(object), object);
+        StartSoundEffect(attack->sound_, GetSoundEffectCategory(object),
+                         object);
 
     angle   = object->angle_;
     tracker = object->tracer_;
@@ -2149,12 +2169,12 @@ void P_ActEffectTracker(MapObject *object)
 }
 
 //
-// P_ActPsychicEffect
+// A_PsychicEffect
 //
 // Same as above, but with a single non-explosive damage instance and no lifting
 // of the target
 //
-void P_ActPsychicEffect(MapObject *object)
+void A_PsychicEffect(MapObject *object)
 {
     MapObject              *target;
     const AttackDefinition *attack;
@@ -2165,7 +2185,7 @@ void P_ActPsychicEffect(MapObject *object)
     attack = object->current_attack_;
     target = object->target_;
 
-    if (attack->flags_ & kAttackFlagFaceTarget) P_ActFaceTarget(object);
+    if (attack->flags_ & kAttackFlagFaceTarget) A_FaceTarget(object);
 
     if (attack->flags_ & kAttackFlagNeedSight)
     {
@@ -2173,7 +2193,8 @@ void P_ActPsychicEffect(MapObject *object)
     }
 
     if (attack->sound_)
-        StartSoundEffect(attack->sound_, GetSoundEffectCategory(object), object);
+        StartSoundEffect(attack->sound_, GetSoundEffectCategory(object),
+                         object);
 
     EDGE_DAMAGE_COMPUTE(damage, &attack->damage_);
 
@@ -2221,7 +2242,7 @@ static void ShootToSpot(MapObject *object)
 //-------------------------------------------------------------------
 
 //
-// P_ActObjectSpawning
+// A_ObjectSpawning
 //
 // An Object spawns another object and is spawned in the state specificed
 // by attack->objinitstate. The procedure is based on the A_PainShootSkull
@@ -2296,7 +2317,8 @@ static void ObjectSpawning(MapObject *parent, BAMAngle angle)
         return;
     }
 
-    if (attack->sound_) StartSoundEffect(attack->sound_, AttackSfxCat(parent), parent);
+    if (attack->sound_)
+        StartSoundEffect(attack->sound_, AttackSfxCat(parent), parent);
 
     // If the object cannot move from its position, remove it or kill it.
     if (!TryMove(child, child->x, child->y))
@@ -2328,13 +2350,14 @@ static void ObjectSpawning(MapObject *parent, BAMAngle angle)
     // -AJA- 1999/09/25: Set the initial direction & momentum when
     //       the ANGLED_SPAWN attack special is used.
     if (attack->flags_ & kAttackFlagAngledSpawn)
-        MapObjectSetDirectionAndSpeed(child, angle, slope, attack->assault_speed_);
+        MapObjectSetDirectionAndSpeed(child, angle, slope,
+                                      attack->assault_speed_);
 
     MapObjectSetStateDeferred(child, attack->objinitstate_, 0);
 }
 
 //
-// P_ActObjectTripleSpawn
+// A_ObjectTripleSpawn
 //
 // Spawns three objects at 90, 180 and 270 degrees. This is essentially
 // another purist function to support the death sequence of the Pain
@@ -2352,7 +2375,7 @@ static void ObjectTripleSpawn(MapObject *object)
 }
 
 //
-// P_ActObjectDoubleSpawn
+// A_ObjectDoubleSpawn
 //
 // Spawns two objects at 90 and 270 degrees.
 // Like the death sequence of the Pain
@@ -2444,7 +2467,8 @@ void SlammedIntoObject(MapObject *object, MapObject *target)
         }
 
         SoundEffect *sound = object->current_attack_->sound_;
-        if (sound) StartSoundEffect(sound, GetSoundEffectCategory(object), object);
+        if (sound)
+            StartSoundEffect(sound, GetSoundEffectCategory(object), object);
     }
 
     object->flags_ &= ~kMapObjectFlagSkullFly;
@@ -2454,7 +2478,7 @@ void SlammedIntoObject(MapObject *object, MapObject *target)
 }
 
 bool UseThing(MapObject *user, MapObject *thing, float open_bottom,
-                float open_top)
+              float open_top)
 {
     // Called when this thing is attempted to be used (i.e. by pressing
     // the spacebar near it) by the player.  Returns true if successfully
@@ -2502,27 +2526,27 @@ void TouchyContact(MapObject *touchy, MapObject *victim)
         ExplodeMissile(touchy);
 }
 
-void P_ActTouchyRearm(MapObject *touchy)
+void A_TouchyRearm(MapObject *touchy)
 {
     touchy->flags_ |= kMapObjectFlagTouchy;
 }
 
-void P_ActTouchyDisarm(MapObject *touchy)
+void A_TouchyDisarm(MapObject *touchy)
 {
     touchy->flags_ &= ~kMapObjectFlagTouchy;
 }
 
-void P_ActBounceRearm(MapObject *mo)
+void A_BounceRearm(MapObject *mo)
 {
     mo->extended_flags_ &= ~kExtendedFlagJustBounced;
 }
 
-void P_ActBounceDisarm(MapObject *mo)
+void A_BounceDisarm(MapObject *mo)
 {
     mo->extended_flags_ |= kExtendedFlagJustBounced;
 }
 
-void P_ActDropItem(MapObject *mo)
+void A_DropItem(MapObject *mo)
 {
     const MapObjectDefinition *info = mo->info_->dropitem_;
 
@@ -2536,7 +2560,7 @@ void P_ActDropItem(MapObject *mo)
 
     if (!info)
     {
-        PrintWarningOrError("P_ActDropItem: %s specifies no item to drop.\n",
+        PrintWarningOrError("A_DropItem: %s specifies no item to drop.\n",
                             mo->info_->name_.c_str());
         return;
     }
@@ -2567,7 +2591,7 @@ void P_ActDropItem(MapObject *mo)
     item->spawnpoint_.flags          = 0;
 }
 
-void P_ActSpawn(MapObject *mo)
+void A_Spawn(MapObject *mo)
 {
     if (!mo->state_ || !mo->state_->action_par)
         FatalError("SPAWN() action used without a object name!\n");
@@ -2586,7 +2610,7 @@ void P_ActSpawn(MapObject *mo)
     item->SetSource(mo);
 }
 
-void P_ActPathCheck(MapObject *mo)
+void A_PathCheck(MapObject *mo)
 {
     // Checks if the creature is a path follower, and if so enters the
     // meander states.
@@ -2599,7 +2623,7 @@ void P_ActPathCheck(MapObject *mo)
     mo->move_count_     = 0;
 }
 
-void P_ActPathFollow(MapObject *mo)
+void A_PathFollow(MapObject *mo)
 {
     // For path-following creatures (spawned via RTS), makes the creature
     // follow the path by trying to get to the next node.
@@ -2767,7 +2791,7 @@ static void P_DoAttack(MapObject *object)
         case kAttackStylePsychic:
         {
             LaunchTracker(object);
-            P_ActPsychicEffect(object);
+            A_PsychicEffect(object);
             break;
         }
 
@@ -2802,7 +2826,7 @@ static void P_DoAttack(MapObject *object)
 }
 
 //
-// P_ActComboAttack
+// A_ComboAttack
 //
 // This is called at end of a set of states that can result in
 // either a closecombat_ or ranged attack. The procedure checks
@@ -2811,7 +2835,7 @@ static void P_DoAttack(MapObject *object)
 //
 // -ACB- 1998/08/07
 //
-void P_ActComboAttack(MapObject *object)
+void A_ComboAttack(MapObject *object)
 {
     const AttackDefinition *attack;
 
@@ -2824,7 +2848,7 @@ void P_ActComboAttack(MapObject *object)
 
     if (attack)
     {
-        if (attack->flags_ & kAttackFlagFaceTarget) P_ActFaceTarget(object);
+        if (attack->flags_ & kAttackFlagFaceTarget) A_FaceTarget(object);
 
         if (attack->flags_ & kAttackFlagNeedSight)
         {
@@ -2848,13 +2872,13 @@ void P_ActComboAttack(MapObject *object)
 }
 
 //
-// P_ActMeleeAttack
+// A_MeleeAttack
 //
 // Setup a close combat assault
 //
 // -ACB- 1998/08/07
 //
-void P_ActMeleeAttack(MapObject *object)
+void A_MeleeAttack(MapObject *object)
 {
     const AttackDefinition *attack;
 
@@ -2866,13 +2890,12 @@ void P_ActMeleeAttack(MapObject *object)
 
     if (!attack)
     {
-        PrintWarningOrError(
-            "P_ActMeleeAttack: %s has no close combat attack.\n",
-            object->info_->name_.c_str());
+        PrintWarningOrError("A_MeleeAttack: %s has no close combat attack.\n",
+                            object->info_->name_.c_str());
         return;
     }
 
-    if (attack->flags_ & kAttackFlagFaceTarget) P_ActFaceTarget(object);
+    if (attack->flags_ & kAttackFlagFaceTarget) A_FaceTarget(object);
 
     if (attack->flags_ & kAttackFlagNeedSight)
     {
@@ -2884,13 +2907,13 @@ void P_ActMeleeAttack(MapObject *object)
 }
 
 //
-// P_ActRangeAttack
+// A_RangeAttack
 //
 // Setup an attack at range
 //
 // -ACB- 1998/08/07
 //
-void P_ActRangeAttack(MapObject *object)
+void A_RangeAttack(MapObject *object)
 {
     const AttackDefinition *attack;
 
@@ -2902,12 +2925,12 @@ void P_ActRangeAttack(MapObject *object)
 
     if (!attack)
     {
-        PrintWarningOrError("P_ActRangeAttack: %s hasn't got a range attack.\n",
+        PrintWarningOrError("A_RangeAttack: %s hasn't got a range attack.\n",
                             object->info_->name_.c_str());
         return;
     }
 
-    if (attack->flags_ & kAttackFlagFaceTarget) P_ActFaceTarget(object);
+    if (attack->flags_ & kAttackFlagFaceTarget) A_FaceTarget(object);
 
     if (attack->flags_ & kAttackFlagNeedSight)
     {
@@ -2919,7 +2942,7 @@ void P_ActRangeAttack(MapObject *object)
 }
 
 //
-// P_ActSpareAttack
+// A_SpareAttack
 //
 // Setup an attack that is not defined as close or range. can be
 // used to act as a follow attack for close or range, if you want one to
@@ -2927,7 +2950,7 @@ void P_ActRangeAttack(MapObject *object)
 //
 // -ACB- 1998/08/24
 //
-void P_ActSpareAttack(MapObject *object)
+void A_SpareAttack(MapObject *object)
 {
     const AttackDefinition *attack;
 
@@ -2940,7 +2963,7 @@ void P_ActSpareAttack(MapObject *object)
     if (attack)
     {
         if ((attack->flags_ & kAttackFlagFaceTarget) && object->target_)
-            P_ActFaceTarget(object);
+            A_FaceTarget(object);
 
         if ((attack->flags_ & kAttackFlagNeedSight) && object->target_)
         {
@@ -2953,7 +2976,7 @@ void P_ActSpareAttack(MapObject *object)
 #ifdef DEVELOPERS
     else
     {
-        PrintWarningOrError("P_ActSpareAttack: %s hasn't got a spare attack\n",
+        PrintWarningOrError("A_SpareAttack: %s hasn't got a spare attack\n",
                             object->info_->name.c_str());
         return;
     }
@@ -2961,7 +2984,7 @@ void P_ActSpareAttack(MapObject *object)
 }
 
 //
-// P_ActRefireCheck
+// A_RefireCheck
 //
 // This procedure will be called inbetween firing on an object
 // that will fire repeatly (Chaingunner/Arachontron etc...), the
@@ -2974,7 +2997,7 @@ void P_ActSpareAttack(MapObject *object)
 //
 // -ACB- 1998/08/10
 //
-void P_ActRefireCheck(MapObject *object)
+void A_RefireCheck(MapObject *object)
 {
     MapObject              *target;
     const AttackDefinition *attack;
@@ -2983,7 +3006,7 @@ void P_ActRefireCheck(MapObject *object)
 
     if (!attack) return;
 
-    if (attack->flags_ & kAttackFlagFaceTarget) P_ActFaceTarget(object);
+    if (attack->flags_ & kAttackFlagFaceTarget) A_FaceTarget(object);
 
     // Random chance that object will keep firing regardless
     if (RandomByteTestDeterministic(attack->keepfirechance_)) return;
@@ -3002,14 +3025,14 @@ void P_ActRefireCheck(MapObject *object)
 }
 
 //
-// P_ActReloadCheck
+// A_ReloadCheck
 //
 // Enter reload states if the monster has shot a certain number of
 // shots (given by RELOAD_SHOTS command).
 //
 // -AJA- 2004/11/15: added this.
 //
-void P_ActReloadCheck(MapObject *object)
+void A_ReloadCheck(MapObject *object)
 {
     object->shot_count_++;
 
@@ -3022,7 +3045,7 @@ void P_ActReloadCheck(MapObject *object)
     }
 }
 
-void P_ActReloadReset(MapObject *object) { object->shot_count_ = 0; }
+void A_ReloadReset(MapObject *object) { object->shot_count_ = 0; }
 
 //---------------------------------------------
 //-----------LOOKING AND CHASING---------------
@@ -3112,8 +3135,8 @@ static bool CreateAggression(MapObject *mo)
                  other->info_->name_.c_str());
 
         if (mo->info_->seesound_)
-            StartSoundEffect(mo->info_->seesound_, GetSoundEffectCategory(mo), mo,
-                      SfxFlags(mo->info_));
+            StartSoundEffect(mo->info_->seesound_, GetSoundEffectCategory(mo),
+                             mo, SfxFlags(mo->info_));
 
         if (mo->info_->chase_state_)
             MapObjectSetStateDeferred(mo, mo->info_->chase_state_, 0);
@@ -3125,13 +3148,13 @@ static bool CreateAggression(MapObject *mo)
 }
 
 //
-// P_ActStandardLook
+// A_StandardLook
 //
 // Standard Lookout procedure
 //
 // -ACB- 1998/08/22
 //
-void P_ActStandardLook(MapObject *object)
+void A_StandardLook(MapObject *object)
 {
     int        targ_pnum;
     MapObject *targ = nullptr;
@@ -3157,8 +3180,8 @@ void P_ActStandardLook(MapObject *object)
     if (object->side_ != 0)
     {
         // targ = nullptr;
-        // P_ActPlayerSupportLook(object);
-        P_ActPlayerSupportMeander(object);
+        // A_PlayerSupportLook(object);
+        A_PlayerSupportMeander(object);
         return;
     }
 
@@ -3186,8 +3209,9 @@ void P_ActStandardLook(MapObject *object)
 
     if (object->info_->seesound_)
     {
-        StartSoundEffect(object->info_->seesound_, GetSoundEffectCategory(object),
-                  object, SfxFlags(object->info_));
+        StartSoundEffect(object->info_->seesound_,
+                         GetSoundEffectCategory(object), object,
+                         SfxFlags(object->info_));
     }
 
     // -AJA- this will remove objects which have no chase states.
@@ -3196,13 +3220,13 @@ void P_ActStandardLook(MapObject *object)
 }
 
 //
-// P_ActPlayerSupportLook
+// A_PlayerSupportLook
 //
 // Player Support Lookout procedure
 //
 // -ACB- 1998/09/05
 //
-void P_ActPlayerSupportLook(MapObject *object)
+void A_PlayerSupportLook(MapObject *object)
 {
     object->threshold_ = 0;  // any shot will wake up
 
@@ -3211,15 +3235,16 @@ void P_ActPlayerSupportLook(MapObject *object)
 
     if (!object->support_object_)
     {
-        if (!P_ActLookForTargets(object)) return;
+        if (!A_LookForTargets(object)) return;
 
         // -AJA- 2004/09/02: join the player's side
         if (object->side_ == 0) object->side_ = object->target_->side_;
 
         if (object->info_->seesound_)
         {
-            StartSoundEffect(object->info_->seesound_, GetSoundEffectCategory(object),
-                      object, SfxFlags(object->info_));
+            StartSoundEffect(object->info_->seesound_,
+                             GetSoundEffectCategory(object), object,
+                             SfxFlags(object->info_));
         }
     }
 
@@ -3228,9 +3253,9 @@ void P_ActPlayerSupportLook(MapObject *object)
 }
 
 //
-// P_ActStandardMeander
+// A_StandardMeander
 //
-void P_ActStandardMeander(MapObject *object)
+void A_StandardMeander(MapObject *object)
 {
     int delta;
 
@@ -3254,9 +3279,9 @@ void P_ActStandardMeander(MapObject *object)
 }
 
 //
-// P_ActPlayerSupportMeander
+// A_PlayerSupportMeander
 //
-void P_ActPlayerSupportMeander(MapObject *object)
+void A_PlayerSupportMeander(MapObject *object)
 {
     int delta;
 
@@ -3285,22 +3310,22 @@ void P_ActPlayerSupportMeander(MapObject *object)
     //
     /*  if (!object->support_object_)
         {
-        P_ActPlayerSupportLook(object);
+        A_PlayerSupportLook(object);
         return;
         } */
 
-    P_ActLookForTargets(object);
+    A_LookForTargets(object);
 }
 
 //
-// P_ActStandardChase
+// A_StandardChase
 //
 // Standard AI Chase Procedure
 //
 // -ACB- 1998/08/22 Procedure Written
 // -ACB- 1998/09/05 Added Support Object Check
 //
-void P_ActStandardChase(MapObject *object)
+void A_StandardChase(MapObject *object)
 {
     int          delta;
     SoundEffect *sound;
@@ -3336,7 +3361,7 @@ void P_ActStandardChase(MapObject *object)
     if (!object->target_ ||
         !(object->target_->flags_ & kMapObjectFlagShootable))
     {
-        if (P_ActLookForTargets(object)) return;
+        if (A_LookForTargets(object)) return;
 
         // -ACB- 1998/09/06 Target is not relevant: nullptrify.
         object->SetTarget(nullptr);
@@ -3362,7 +3387,8 @@ void P_ActStandardChase(MapObject *object)
     if (object->info_->melee_state_ &&
         DecideMeleeAttack(object, object->info_->closecombat_))
     {
-        if (sound) StartSoundEffect(sound, GetSoundEffectCategory(object), object);
+        if (sound)
+            StartSoundEffect(sound, GetSoundEffectCategory(object), object);
 
         if (object->info_->melee_state_)
             MapObjectSetStateDeferred(object, object->info_->melee_state_, 0);
@@ -3379,7 +3405,7 @@ void P_ActStandardChase(MapObject *object)
             {
                 if (object->info_->missile_state_)
                     MapObjectSetStateDeferred(object,
-                                           object->info_->missile_state_, 0);
+                                              object->info_->missile_state_, 0);
                 object->flags_ |= kMapObjectFlagJustAttacked;
                 return;
             }
@@ -3390,7 +3416,7 @@ void P_ActStandardChase(MapObject *object)
     // -ACB- 1998/09/05 Object->support->object check, go for new targets
     if (!CheckSight(object, object->target_) && !object->threshold_)
     {
-        if (P_ActLookForTargets(object)) return;
+        if (A_LookForTargets(object)) return;
     }
 
     // chase towards player
@@ -3399,19 +3425,19 @@ void P_ActStandardChase(MapObject *object)
 
     // make active sound
     if (object->info_->activesound_ && RandomByte() < 3)
-        StartSoundEffect(object->info_->activesound_, GetSoundEffectCategory(object),
-                  object);
+        StartSoundEffect(object->info_->activesound_,
+                         GetSoundEffectCategory(object), object);
 }
 
 //
-// P_ActResurrectChase
+// A_ResurrectChase
 //
 // Before undertaking the standard chase procedure, the object
 // will check for a nearby corpse and raises one if it exists.
 //
 // -ACB- 1998/09/05 Support Check: Raised object supports raiser's supportobj
 //
-void P_ActResurrectChase(MapObject *object)
+void A_ResurrectChase(MapObject *object)
 {
     MapObject *corpse;
 
@@ -3446,29 +3472,30 @@ void P_ActResurrectChase(MapObject *object)
         return;
     }
 
-    P_ActStandardChase(object);
+    A_StandardChase(object);
 }
 
 //
-// P_ActWalkSoundChase
+// A_WalkSoundChase
 //
 // Make a sound and then chase...
 //
-void P_ActWalkSoundChase(MapObject *object)
+void A_WalkSoundChase(MapObject *object)
 {
     if (!object->info_->walksound_)
     {
         if (strict_errors)
             FatalError("WALKSOUND_CHASE: %s hasn't got a walksound_.\n",
-                                object->info_->name_.c_str());
+                       object->info_->name_.c_str());
         return;
     }
 
-    StartSoundEffect(object->info_->walksound_, GetSoundEffectCategory(object), object);
-    P_ActStandardChase(object);
+    StartSoundEffect(object->info_->walksound_, GetSoundEffectCategory(object),
+                     object);
+    A_StandardChase(object);
 }
 
-void P_ActDie(MapObject *mo)
+void A_Die(MapObject *mo)
 {
     // Boom/MBF compatibility.
 
@@ -3476,9 +3503,9 @@ void P_ActDie(MapObject *mo)
     KillMapObject(nullptr, mo);
 }
 
-void P_ActKeenDie(MapObject *mo)
+void A_KeenDie(MapObject *mo)
 {
-    P_ActMakeIntoCorpse(mo);
+    A_MakeIntoCorpse(mo);
 
     // see if all other Keens are dead
     for (MapObject *cur = map_object_list_head; cur != nullptr;
@@ -3491,13 +3518,13 @@ void P_ActKeenDie(MapObject *mo)
         if (cur->health_ > 0) return;  // other Keen not dead
     }
 
-    LogDebug("P_ActKeenDie: ALL DEAD, activating...\n");
+    LogDebug("A_KeenDie: ALL DEAD, activating...\n");
 
     RemoteActivation(nullptr, 2 /* door type */, 666 /* tag */, 0,
                      kLineTriggerAny);
 }
 
-void P_ActCheckMoving(MapObject *mo)
+void A_CheckMoving(MapObject *mo)
 {
     // -KM- 1999/01/31 Returns a player to spawnstate when not moving.
 
@@ -3525,7 +3552,7 @@ void P_ActCheckMoving(MapObject *mo)
     }
 }
 
-void P_ActCheckActivity(MapObject *mo)
+void A_CheckActivity(MapObject *mo)
 {
     Player *pl = mo->player_;
 
@@ -3538,7 +3565,8 @@ void P_ActCheckActivity(MapObject *mo)
 
         if (swim_st == 0) swim_st = pl->map_object_->info_->chase_state_;
 
-        if (swim_st != 0) MapObjectSetStateDeferred(pl->map_object_, swim_st, 0);
+        if (swim_st != 0)
+            MapObjectSetStateDeferred(pl->map_object_, swim_st, 0);
 
         return;
     }
@@ -3558,7 +3586,8 @@ void P_ActCheckActivity(MapObject *mo)
         // enter the CLIMB states (if present)
         int climb_st = MapObjectFindLabel(pl->map_object_, "CLIMB");
 
-        if (climb_st != 0) MapObjectSetStateDeferred(pl->map_object_, climb_st, 0);
+        if (climb_st != 0)
+            MapObjectSetStateDeferred(pl->map_object_, climb_st, 0);
 
         return;
     }
@@ -3570,7 +3599,8 @@ void P_ActCheckActivity(MapObject *mo)
         // enter the CROUCH states (if present)
         int crouch_st = MapObjectFindLabel(pl->map_object_, "CROUCH");
 
-        if (crouch_st != 0) MapObjectSetStateDeferred(pl->map_object_, crouch_st, 0);
+        if (crouch_st != 0)
+            MapObjectSetStateDeferred(pl->map_object_, crouch_st, 0);
 
         return;
     }
@@ -3578,7 +3608,7 @@ void P_ActCheckActivity(MapObject *mo)
     /* Otherwise: do nothing */
 }
 
-void P_ActCheckBlood(MapObject *mo)
+void A_CheckBlood(MapObject *mo)
 {
     // -KM- 1999/01/31 Part of the extra blood option, makes blood stick
     // around... -AJA- 1999/10/02: ...but not indefinitely.
@@ -3592,7 +3622,7 @@ void P_ActCheckBlood(MapObject *mo)
     }
 }
 
-void P_ActJump(MapObject *mo)
+void A_Jump(MapObject *mo)
 {
     // Jumps to the given label, possibly randomly.
     //
@@ -3618,7 +3648,7 @@ void P_ActJump(MapObject *mo)
     }
 }
 
-void P_ActJumpLiquid(MapObject *mo)
+void A_JumpLiquid(MapObject *mo)
 {
     // Jumps to the given label, possibly randomly.
     //
@@ -3650,13 +3680,14 @@ void P_ActJumpLiquid(MapObject *mo)
     }
 }
 
-void P_ActJumpSky(MapObject *mo)
+void A_JumpSky(MapObject *mo)
 {
     // Jumps to the given label, possibly randomly.
     //
     // Note: nothing to do with monsters physically jumping.
 
-    if (mo->subsector_->sector->ceiling.image != sky_flat_image)  // is it outdoors?
+    if (mo->subsector_->sector->ceiling.image !=
+        sky_flat_image)  // is it outdoors?
     {
         return;
     }
@@ -3680,17 +3711,14 @@ void P_ActJumpSky(MapObject *mo)
     }
 }
 
-void P_ActSetInvuln(MapObject *mo)
-{
-    mo->hyper_flags_ |= kHyperFlagInvulnerable;
-}
+void A_SetInvuln(MapObject *mo) { mo->hyper_flags_ |= kHyperFlagInvulnerable; }
 
-void P_ActClearInvuln(MapObject *mo)
+void A_ClearInvuln(MapObject *mo)
 {
     mo->hyper_flags_ &= ~kHyperFlagInvulnerable;
 }
 
-void P_ActBecome(MapObject *mo)
+void A_Become(MapObject *mo)
 {
     if (!mo->state_ || !mo->state_->action_par)
     {
@@ -3774,7 +3802,7 @@ void P_ActBecome(MapObject *mo)
     MapObjectSetStateDeferred(mo, state, 0);
 }
 
-void P_ActUnBecome(MapObject *mo)
+void A_UnBecome(MapObject *mo)
 {
     if (!mo->pre_become_) { return; }
 
@@ -3845,8 +3873,8 @@ void P_ActUnBecome(MapObject *mo)
     MapObjectSetStateDeferred(mo, state, 0);
 }
 
-// Same as P_ActBecome, but health is set to max
-void P_ActMorph(MapObject *mo)
+// Same as A_Become, but health is set to max
+void A_Morph(MapObject *mo)
 {
     if (!mo->state_ || !mo->state_->action_par)
     {
@@ -3930,8 +3958,8 @@ void P_ActMorph(MapObject *mo)
     MapObjectSetStateDeferred(mo, state, 0);
 }
 
-// Same as P_ActUnBecome, but health is set to max
-void P_ActUnMorph(MapObject *mo)
+// Same as A_UnBecome, but health is set to max
+void A_UnMorph(MapObject *mo)
 {
     if (!mo->pre_become_) { return; }
 
@@ -4031,7 +4059,7 @@ void PlayerAttack(MapObject *p_obj, const AttackDefinition *attack)
             if (attack->flags_ & kAttackFlagForceAim)
                 P_ForceFaceTarget(p_obj);
             else
-                P_ActFaceTarget(p_obj);
+                A_FaceTarget(p_obj);
         }
 
         P_DoAttack(p_obj);
@@ -4068,12 +4096,13 @@ void PlayerAttack(MapObject *p_obj, const AttackDefinition *attack)
                 if (p_obj->current_attack_->flags_ & kAttackFlagForceAim)
                     P_ForceFaceTarget(p_obj);
                 else
-                    P_ActFaceTarget(p_obj);
+                    A_FaceTarget(p_obj);
             }
 
             P_DoAttack(p_obj);
             // restore the previous target for bots
-            if (p_obj->player_ && (p_obj->player_->player_flags_ & kPlayerFlagBot))
+            if (p_obj->player_ &&
+                (p_obj->player_->player_flags_ & kPlayerFlagBot))
                 p_obj->SetTarget(old_target);
         }
 
@@ -4102,12 +4131,13 @@ void PlayerAttack(MapObject *p_obj, const AttackDefinition *attack)
                 if (p_obj->current_attack_->flags_ & kAttackFlagForceAim)
                     P_ForceFaceTarget(p_obj);
                 else
-                    P_ActFaceTarget(p_obj);
+                    A_FaceTarget(p_obj);
             }
 
             P_DoAttack(p_obj);
             // restore the previous target for bots
-            if (p_obj->player_ && (p_obj->player_->player_flags_ & kPlayerFlagBot))
+            if (p_obj->player_ &&
+                (p_obj->player_->player_flags_ & kPlayerFlagBot))
                 p_obj->SetTarget(old_target);
         }
     }
@@ -4121,13 +4151,13 @@ void PlayerAttack(MapObject *p_obj, const AttackDefinition *attack)
 // killough 9/98: a mushroom explosion effect, sorta :)
 // Original idea: Linguica
 //
-void P_ActMushroom(MapObject *mo)
+void A_Mushroom(MapObject *mo)
 {
     float height = 4.0;
     int   spread = 32;
 
     // First make normal explosion damage
-    P_ActDamageExplosion(mo);
+    A_DamageExplosion(mo);
 
     // Now launch mushroom cloud
     const AttackDefinition *atk = mo->info_->spareattack_;
@@ -4152,7 +4182,7 @@ void P_ActMushroom(MapObject *mo)
     }
 }
 
-void P_ActPainChanceSet(MapObject *mo)
+void A_PainChanceSet(MapObject *mo)
 {
     float value = 0;
 

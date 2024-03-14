@@ -532,26 +532,26 @@ static void CastPerformAction(void)
 
     // Yuk, handles sounds
 
-    if (cast_state->action == P_ActMakeCloseAttemptSound)
+    if (cast_state->action == A_MakeCloseAttemptSound)
     {
         if (cast_order->closecombat_)
             sfx = cast_order->closecombat_->initsound_;
     }
-    else if (cast_state->action == P_ActMeleeAttack)
+    else if (cast_state->action == A_MeleeAttack)
     {
         if (cast_order->closecombat_) sfx = cast_order->closecombat_->sound_;
     }
-    else if (cast_state->action == P_ActMakeRangeAttemptSound)
+    else if (cast_state->action == A_MakeRangeAttemptSound)
     {
         if (cast_order->rangeattack_)
             sfx = cast_order->rangeattack_->initsound_;
     }
-    else if (cast_state->action == P_ActRangeAttack)
+    else if (cast_state->action == A_RangeAttack)
     {
         if (cast_order->rangeattack_)
             CAST_RangeAttack(cast_order->rangeattack_);
     }
-    else if (cast_state->action == P_ActComboAttack)
+    else if (cast_state->action == A_ComboAttack)
     {
         if (cast_on_melee && cast_order->closecombat_)
         {
@@ -566,7 +566,7 @@ static void CastPerformAction(void)
     {
         sfx = cast_order->activesound_;
     }
-    else if (cast_state->action == P_ActWalkSoundChase)
+    else if (cast_state->action == A_WalkSoundChase)
     {
         sfx = cast_order->walksound_;
     }
@@ -624,7 +624,7 @@ static void CastTicker(void)
     // advance to next state in animation
     // -AJA- if there's a jumpstate, enter it occasionally
 
-    if (cast_state->action == P_ActJump && cast_state->jumpstate &&
+    if (cast_state->action == A_Jump && cast_state->jumpstate &&
         (RandomByte() < 64))
         st = cast_state->jumpstate;
     else

@@ -27,6 +27,10 @@
 
 class MapObject;
 
+// Function names in this file deviate from the style guide in order to reflect
+// historical code pointer names and make the Dehacked->DDF->EDGE pipeline
+// easier to track - Dasho
+
 // Weapon Action Routine pointers
 void A_Light0(MapObject *mo);
 void A_Light1(MapObject *mo);
@@ -87,143 +91,139 @@ void A_NoFireFA(MapObject *mo);
 void A_NoFireReturnFA(MapObject *mo);
 void A_CheckReloadFA(MapObject *mo);
 void A_GunFlashFA(MapObject *mo);
-
 void A_WeaponZoom(MapObject *mo);
+
+// These are weapon actions; the WA_ prefix
+// is to avoid collision with the A_ variants - Dasho
+void WA_MoveFwd(MapObject *mo);
+void WA_MoveRight(MapObject *mo);
+void WA_MoveUp(MapObject *mo);
+void WA_TurnDir(MapObject *mo);
+void WA_TurnRandom(MapObject *mo);
+void WA_MlookTurn(MapObject *mo);
+
+// Needed for the bossbrain.
+void A_BrainScream(MapObject *mo);
+void A_BrainDie(MapObject *mo);
+void A_BrainSpit(MapObject *mo);
+void A_CubeSpawn(MapObject *mo);
+void A_BrainMissileExplode(MapObject *mo);
+
+// Visibility Actions
+void A_TransSet(MapObject *mo);
+void A_TransFade(MapObject *mo);
+void A_TransMore(MapObject *mo);
+void A_TransLess(MapObject *mo);
+void A_TransAlternate(MapObject *mo);
+
+// Sound Actions
+void A_PlaySound(MapObject *mo);
+void A_PlaySoundBoss(MapObject *mo);
+void A_KillSound(MapObject *mo);
+void A_MakeAmbientSound(MapObject *mo);
+void A_MakeAmbientSoundRandom(MapObject *mo);
+void A_MakeCloseAttemptSound(MapObject *mo);
+void A_MakeDyingSound(MapObject *mo);
+void A_MakeOverKillSound(MapObject *mo);
+void A_MakePainSound(MapObject *mo);
+void A_MakeRangeAttemptSound(MapObject *mo);
+void A_MakeActiveSound(MapObject *mo);
+void A_PlayerScream(MapObject *mo);
+
+// Explosion Damage Actions
+void A_DamageExplosion(MapObject *mo);
+void A_Thrust(MapObject *mo);
+
+// Stand-by / Looking Actions
+void A_StandardLook(MapObject *mo);
+void A_PlayerSupportLook(MapObject *mo);
+
+// Meander, aimless movement actions.
+void A_StandardMeander(MapObject *mo);
+void A_PlayerSupportMeander(MapObject *mo);
+
+// Chasing Actions
+void A_ResurrectChase(MapObject *mo);
+void A_StandardChase(MapObject *mo);
+void A_WalkSoundChase(MapObject *mo);
+
+// Attacking Actions
+void A_ComboAttack(MapObject *mo);
+void A_MeleeAttack(MapObject *mo);
+void A_RangeAttack(MapObject *mo);
+void A_SpareAttack(MapObject *mo);
+void A_RefireCheck(MapObject *mo);
+void A_ReloadCheck(MapObject *mo);
+void A_ReloadReset(MapObject *mo);
+
+// Miscellanous
+void A_FaceTarget(MapObject *mo);
+void A_MakeIntoCorpse(MapObject *mo);
+void A_ResetSpreadCount(MapObject *mo);
+void A_Explode(MapObject *mo);
+void A_ActivateLineType(MapObject *mo);
+void A_EnableRadTrig(MapObject *mo);
+void A_DisableRadTrig(MapObject *mo);
+void A_TouchyRearm(MapObject *mo);
+void A_TouchyDisarm(MapObject *mo);
+void A_BounceRearm(MapObject *mo);
+void A_BounceDisarm(MapObject *mo);
+void A_PathCheck(MapObject *mo);
+void A_PathFollow(MapObject *mo);
+
+void A_DropItem(MapObject *mo);
+void A_Spawn(MapObject *mo);
+void A_DLightSet(MapObject *mo);
+void A_DLightFade(MapObject *mo);
+void A_DLightRandom(MapObject *mo);
+void A_DLightColour(MapObject *mo);
+void A_SetSkin(MapObject *mo);
+void A_Die(MapObject *mo);
+void A_KeenDie(MapObject *mo);
+void A_CheckBlood(MapObject *mo);
+void A_Jump(MapObject *mo);
+void A_JumpLiquid(MapObject *mo);
+void A_JumpSky(MapObject *mo);
+// void A_JumpStuck(MapObject *mo);
+void A_Become(MapObject *mo);
+void A_UnBecome(MapObject *mo);
+
+void A_Morph(MapObject *mo);
+void A_UnMorph(MapObject *mo);
+
 void A_SetInvuln(MapObject *mo);
 void A_ClearInvuln(MapObject *mo);
+
+void A_PainChanceSet(MapObject *mo);
+
+// Movement actions
+void A_FaceDir(MapObject *mo);
+void A_TurnDir(MapObject *mo);
+void A_TurnRandom(MapObject *mo);
+void A_MlookFace(MapObject *mo);
+void A_MlookTurn(MapObject *mo);
 void A_MoveFwd(MapObject *mo);
 void A_MoveRight(MapObject *mo);
 void A_MoveUp(MapObject *mo);
 void A_StopMoving(MapObject *mo);
-void A_TurnDir(MapObject *mo);
-void A_TurnRandom(MapObject *mo);
-void A_MlookTurn(MapObject *mo);
-
-// Needed for the bossbrain.
-void P_ActBrainScream(MapObject *mo);
-void P_ActBrainDie(MapObject *mo);
-void P_ActBrainSpit(MapObject *mo);
-void P_ActCubeSpawn(MapObject *mo);
-void P_ActBrainMissileExplode(MapObject *mo);
-
-// Visibility Actions
-void P_ActTransSet(MapObject *mo);
-void P_ActTransFade(MapObject *mo);
-void P_ActTransMore(MapObject *mo);
-void P_ActTransLess(MapObject *mo);
-void P_ActTransAlternate(MapObject *mo);
-
-// Sound Actions
-void P_ActPlaySound(MapObject *mo);
-void P_ActPlaySoundBoss(MapObject *mo);
-void P_ActKillSound(MapObject *mo);
-void P_ActMakeAmbientSound(MapObject *mo);
-void P_ActMakeAmbientSoundRandom(MapObject *mo);
-void P_ActMakeCloseAttemptSound(MapObject *mo);
-void P_ActMakeDyingSound(MapObject *mo);
-void P_ActMakeOverKillSound(MapObject *mo);
-void P_ActMakePainSound(MapObject *mo);
-void P_ActMakeRangeAttemptSound(MapObject *mo);
-void P_ActMakeActiveSound(MapObject *mo);
-void P_ActPlayerScream(MapObject *mo);
-
-// Explosion Damage Actions
-void P_ActDamageExplosion(MapObject *mo);
-void P_ActThrust(MapObject *mo);
-
-// Stand-by / Looking Actions
-void P_ActStandardLook(MapObject *mo);
-void P_ActPlayerSupportLook(MapObject *mo);
-
-// Meander, aimless movement actions.
-void P_ActStandardMeander(MapObject *mo);
-void P_ActPlayerSupportMeander(MapObject *mo);
-
-// Chasing Actions
-void P_ActResurrectChase(MapObject *mo);
-void P_ActStandardChase(MapObject *mo);
-void P_ActWalkSoundChase(MapObject *mo);
-
-// Attacking Actions
-void P_ActComboAttack(MapObject *mo);
-void P_ActMeleeAttack(MapObject *mo);
-void P_ActRangeAttack(MapObject *mo);
-void P_ActSpareAttack(MapObject *mo);
-void P_ActRefireCheck(MapObject *mo);
-void P_ActReloadCheck(MapObject *mo);
-void P_ActReloadReset(MapObject *mo);
-
-// Miscellanous
-void P_ActFaceTarget(MapObject *mo);
-void P_ActMakeIntoCorpse(MapObject *mo);
-void P_ActResetSpreadCount(MapObject *mo);
-void P_ActExplode(MapObject *mo);
-void P_ActActivateLineType(MapObject *mo);
-void P_ActEnableRadTrig(MapObject *mo);
-void P_ActDisableRadTrig(MapObject *mo);
-void P_ActTouchyRearm(MapObject *mo);
-void P_ActTouchyDisarm(MapObject *mo);
-void P_ActBounceRearm(MapObject *mo);
-void P_ActBounceDisarm(MapObject *mo);
-void P_ActPathCheck(MapObject *mo);
-void P_ActPathFollow(MapObject *mo);
-
-void P_ActDropItem(MapObject *mo);
-void P_ActSpawn(MapObject *mo);
-void P_ActDLightSet(MapObject *mo);
-void P_ActDLightSet2(MapObject *mo);
-void P_ActDLightFade(MapObject *mo);
-void P_ActDLightRandom(MapObject *mo);
-void P_ActDLightColour(MapObject *mo);
-void P_ActSetSkin(MapObject *mo);
-void P_ActDie(MapObject *mo);
-void P_ActKeenDie(MapObject *mo);
-void P_ActCheckBlood(MapObject *mo);
-void P_ActJump(MapObject *mo);
-void P_ActJumpLiquid(MapObject *mo);
-void P_ActJumpSky(MapObject *mo);
-// void P_ActJumpStuck(MapObject *mo);
-void P_ActBecome(MapObject *mo);
-void P_ActUnBecome(MapObject *mo);
-
-void P_ActMorph(MapObject *mo);
-void P_ActUnMorph(MapObject *mo);
-
-void P_ActSetInvuln(MapObject *mo);
-void P_ActClearInvuln(MapObject *mo);
-
-void P_ActPainChanceSet(MapObject *mo);
-
-// Movement actions
-void P_ActFaceDir(MapObject *mo);
-void P_ActTurnDir(MapObject *mo);
-void P_ActTurnRandom(MapObject *mo);
-void P_ActMlookFace(MapObject *mo);
-void P_ActMlookTurn(MapObject *mo);
-void P_ActMoveFwd(MapObject *mo);
-void P_ActMoveRight(MapObject *mo);
-void P_ActMoveUp(MapObject *mo);
-void P_ActStopMoving(MapObject *mo);
-void P_ActCheckMoving(MapObject *mo);
-void P_ActCheckActivity(MapObject *mo);
+void A_CheckMoving(MapObject *mo);
+void A_CheckActivity(MapObject *mo);
 
 // Projectiles
-void P_ActHomingProjectile(MapObject *mo);
-void P_ActLaunchOrderedSpread(MapObject *mo);
-void P_ActLaunchRandomSpread(MapObject *mo);
-void P_ActCreateSmokeTrail(MapObject *mo);
-void P_ActHomeToSpot(MapObject *mo);
-bool P_ActLookForTargets(MapObject *mo);
+void A_HomingProjectile(MapObject *mo);
+void A_CreateSmokeTrail(MapObject *mo);
+void A_HomeToSpot(MapObject *mo);
+bool A_LookForTargets(MapObject *mo);
 
 // Trackers
-void P_ActEffectTracker(MapObject *mo);
-void P_ActTrackerActive(MapObject *mo);
-void P_ActTrackerFollow(MapObject *mo);
-void P_ActTrackerStart(MapObject *mo);
+void A_EffectTracker(MapObject *mo);
+void A_TrackerActive(MapObject *mo);
+void A_TrackerFollow(MapObject *mo);
+void A_TrackerStart(MapObject *mo);
 
 // MBF / MBF21
-void P_ActMushroom(MapObject *mo);
-void P_ActNoiseAlert(MapObject *mo);
+void A_Mushroom(MapObject *mo);
+void A_NoiseAlert(MapObject *mo);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

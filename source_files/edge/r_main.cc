@@ -32,7 +32,7 @@
 static int maximum_lights;
 static int maximum_clip_planes;
 static int maximum_texture_units;
-int maximum_texture_size;
+int        maximum_texture_size;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(renderer_near_clip, "4",
                              kConsoleVariableFlagArchive)
@@ -72,12 +72,13 @@ void RendererSetupMatrices2D(void)
 //
 void RendererSetupMatricesWorld2D(void)
 {
-    glViewport(view_window_x, view_window_y, view_window_width, view_window_height);
+    glViewport(view_window_x, view_window_y, view_window_width,
+               view_window_height);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho((float)view_window_x, (float)view_window_width, (float)view_window_y,
-            (float)view_window_height, -1.0f, 1.0f);
+    glOrtho((float)view_window_x, (float)view_window_width,
+            (float)view_window_y, (float)view_window_height, -1.0f, 1.0f);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -94,7 +95,8 @@ void RendererSetupMatrices3d(void)
 {
     GLfloat ambient[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
-    glViewport(view_window_x, view_window_y, view_window_width, view_window_height);
+    glViewport(view_window_x, view_window_y, view_window_width,
+               view_window_height);
 
     // calculate perspective matrix
 
@@ -113,7 +115,8 @@ void RendererSetupMatrices3d(void)
     glMatrixMode(GL_MODELVIEW);
 
     glLoadIdentity();
-    glRotatef(270.0f - epi::DegreesFromBAM(view_vertical_angle), 1.0f, 0.0f, 0.0f);
+    glRotatef(270.0f - epi::DegreesFromBAM(view_vertical_angle), 1.0f, 0.0f,
+              0.0f);
     glRotatef(90.0f - epi::DegreesFromBAM(view_angle), 0.0f, 0.0f, 1.0f);
     glTranslatef(-view_x, -view_y, -view_z);
 }
@@ -211,10 +214,10 @@ void RendererInit(void)
         glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_tex_size);
         glGetIntegerv(GL_MAX_TEXTURE_UNITS, &max_tex_units);
 
-        maximum_lights         = max_lights;
-        maximum_clip_planes    = max_clip_planes;
-        maximum_texture_size = max_tex_size;
-        maximum_texture_units      = max_tex_units;
+        maximum_lights        = max_lights;
+        maximum_clip_planes   = max_clip_planes;
+        maximum_texture_size  = max_tex_size;
+        maximum_texture_units = max_tex_units;
     }
 
     LogPrint("OpenGL: Lights: %d  Clips: %d  Tex: %d  Units: %d\n",

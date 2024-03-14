@@ -59,7 +59,7 @@
 
 extern coal::vm_c *ui_vm;
 extern double      CoalGetFloat(coal::vm_c *vm, const char *mod_name,
-                               const char *var_name);
+                                const char *var_name);
 
 extern bool erraticism_active;
 
@@ -84,7 +84,7 @@ extern float      widescreen_view_width_multiplier;
 static constexpr float kMinimumSpriteDistance = 4.0f;
 
 static const Image *crosshair_image;
-static int            crosshair_which;
+static int          crosshair_which;
 
 static float GetHoverDeltaZ(MapObject *mo, float bob_mult = 0)
 {
@@ -145,16 +145,16 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
     if (state->flags & kStateFrameFlagModel) return;
 
     // determine sprite patch
-    bool           flip;
+    bool         flip;
     const Image *image =
         RendererGetOtherSprite(state->sprite, state->frame, &flip);
 
     if (!image) return;
 
     GLuint tex_id = ImageCache(image, false,
-                                 (which == kPlayerSpriteCrosshair)
-                                     ? nullptr
-                                     : render_view_effect_colormap);
+                               (which == kPlayerSpriteCrosshair)
+                                   ? nullptr
+                                   : render_view_effect_colormap);
 
     float w     = image->ScaledWidthActual();
     float h     = image->ScaledHeightActual();
@@ -162,13 +162,15 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
     float top   = image->Top();
     float ratio = 1.0f;
 
-    bool is_fuzzy = (player->map_object_->flags_ & kMapObjectFlagFuzzy) ? true : false;
+    bool is_fuzzy =
+        (player->map_object_->flags_ & kMapObjectFlagFuzzy) ? true : false;
 
     float trans = player->map_object_->visibility_;
 
     if (which == kPlayerSpriteCrosshair)
     {
-        if (!player->weapons_[player->ready_weapon_].info->ignore_crosshair_scaling_)
+        if (!player->weapons_[player->ready_weapon_]
+                 .info->ignore_crosshair_scaling_)
             ratio = crosshair_size.f_ / w;
 
         w *= ratio;
@@ -207,21 +209,22 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
     float tx1 = (coord_W - w) / 2.0 + psp->screen_x - image->ScaledOffsetX();
     float tx2 = tx1 + w;
 
-    float ty1 =
-        -psp->screen_y + image->ScaledOffsetY() - ((h - image->ScaledHeightActual()) * 0.5f);
+    float ty1 = -psp->screen_y + image->ScaledOffsetY() -
+                ((h - image->ScaledHeightActual()) * 0.5f);
 
     if (LuaUseLuaHud())
     {
         // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
-        if ((state->flags & kStateFrameFlagWeapon) && (player->ready_weapon_ >= 0))
-            ty1 +=
-                LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") +
-                player->weapons_[player->ready_weapon_].info->y_adjust_;
+        if ((state->flags & kStateFrameFlagWeapon) &&
+            (player->ready_weapon_ >= 0))
+            ty1 += LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") +
+                   player->weapons_[player->ready_weapon_].info->y_adjust_;
     }
     else
     {
         // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
-        if ((state->flags & kStateFrameFlagWeapon) && (player->ready_weapon_ >= 0))
+        if ((state->flags & kStateFrameFlagWeapon) &&
+            (player->ready_weapon_ >= 0))
             ty1 += CoalGetFloat(ui_vm, "hud", "universal_y_adjust") +
                    player->weapons_[player->ready_weapon_].info->y_adjust_;
     }
@@ -239,7 +242,8 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
     // clip psprite to view window
     glEnable(GL_SCISSOR_TEST);
 
-    glScissor(view_window_x, view_window_y, view_window_width, view_window_height);
+    glScissor(view_window_x, view_window_y, view_window_width,
+              view_window_height);
 
     x1b = (float)view_window_x + x1b;
     x1t = (float)view_window_x + x1t;
@@ -268,7 +272,8 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
     data.light_position.X = player->map_object_->x + view_cosine * away;
     data.light_position.Y = player->map_object_->y + view_sine * away;
     data.light_position.Z =
-        player->map_object_->z + player->map_object_->height_ * player->map_object_->info_->shotheight_;
+        player->map_object_->z +
+        player->map_object_->height_ * player->map_object_->info_->shotheight_;
 
     data.colors[0].Clear();
 
@@ -286,8 +291,10 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
         trans    = 1.0f;
     }
 
-    RGBAColor fc_to_use = player->map_object_->subsector_->sector->properties.fog_color;
-    float fd_to_use = player->map_object_->subsector_->sector->properties.fog_density;
+    RGBAColor fc_to_use =
+        player->map_object_->subsector_->sector->properties.fog_color;
+    float fd_to_use =
+        player->map_object_->subsector_->sector->properties.fog_density;
     // check for DDFLEVL fog
     if (fc_to_use == kRGBANoValue)
     {
@@ -314,20 +321,21 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
         if (fc_to_use != kRGBANoValue)
         {
             int       mix_factor = RoundToInteger(255.0f * (fd_to_use * 75));
-            RGBAColor mixme      = epi::MixRGBA(
-                epi::MakeRGBA(data.colors[0].modulate_red_, data.colors[0].modulate_green_,
-                                   data.colors[0].modulate_blue_),
-                fc_to_use, mix_factor);
-            data.colors[0].modulate_red_ = epi::GetRGBARed(mixme);
+            RGBAColor mixme =
+                epi::MixRGBA(epi::MakeRGBA(data.colors[0].modulate_red_,
+                                           data.colors[0].modulate_green_,
+                                           data.colors[0].modulate_blue_),
+                             fc_to_use, mix_factor);
+            data.colors[0].modulate_red_   = epi::GetRGBARed(mixme);
             data.colors[0].modulate_green_ = epi::GetRGBAGreen(mixme);
-            data.colors[0].modulate_blue_ = epi::GetRGBABlue(mixme);
-            mixme                = epi::MixRGBA(
-                epi::MakeRGBA(data.colors[0].add_red_, data.colors[0].add_green_,
-                                             data.colors[0].add_blue_),
-                fc_to_use, mix_factor);
-            data.colors[0].add_red_ = epi::GetRGBARed(mixme);
+            data.colors[0].modulate_blue_  = epi::GetRGBABlue(mixme);
+            mixme = epi::MixRGBA(epi::MakeRGBA(data.colors[0].add_red_,
+                                               data.colors[0].add_green_,
+                                               data.colors[0].add_blue_),
+                                 fc_to_use, mix_factor);
+            data.colors[0].add_red_   = epi::GetRGBARed(mixme);
             data.colors[0].add_green_ = epi::GetRGBAGreen(mixme);
-            data.colors[0].add_blue_ = epi::GetRGBABlue(mixme);
+            data.colors[0].add_blue_  = epi::GetRGBABlue(mixme);
         }
 
         if (use_dynamic_lights && render_view_extra_light < 250)
@@ -340,14 +348,17 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
             DynamicLightIterator(
                 data.light_position.X - r, data.light_position.Y - r,
                 player->map_object_->z, data.light_position.X + r,
-                data.light_position.Y + r, player->map_object_->z + player->map_object_->height_,
+                data.light_position.Y + r,
+                player->map_object_->z + player->map_object_->height_,
                 DLIT_PSprite, &data);
 
             SectorGlowIterator(
-                player->map_object_->subsector_->sector, data.light_position.X - r,
-                data.light_position.Y - r, player->map_object_->z,
-                data.light_position.X + r, data.light_position.Y + r,
-                player->map_object_->z + player->map_object_->height_, DLIT_PSprite, &data);
+                player->map_object_->subsector_->sector,
+                data.light_position.X - r, data.light_position.Y - r,
+                player->map_object_->z, data.light_position.X + r,
+                data.light_position.Y + r,
+                player->map_object_->z + player->map_object_->height_,
+                DLIT_PSprite, &data);
         }
     }
 
@@ -414,7 +425,8 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
             else if (!is_additive)
             {
                 dest->rgba_color[0] = data.colors[v_idx].modulate_red_ / 255.0;
-                dest->rgba_color[1] = data.colors[v_idx].modulate_green_ / 255.0;
+                dest->rgba_color[1] =
+                    data.colors[v_idx].modulate_green_ / 255.0;
                 dest->rgba_color[2] = data.colors[v_idx].modulate_blue_ / 255.0;
 
                 data.colors[v_idx].modulate_red_ -= 256;
@@ -594,7 +606,8 @@ void RendererDrawCrosshair(Player *p)
 
 void RendererDrawWeaponModel(Player *p)
 {
-    if (view_is_zoomed && p->weapons_[p->ready_weapon_].info->zoom_state_ > 0) return;
+    if (view_is_zoomed && p->weapons_[p->ready_weapon_].info->zoom_state_ > 0)
+        return;
 
     PlayerSprite *psp = &p->player_sprites_[kPlayerSpriteWeapon];
 
@@ -662,14 +675,14 @@ void RendererDrawWeaponModel(Player *p)
 
     if (md->md2_model_)
         Md2RenderModel(md->md2_model_, skin_img, true, last_frame,
-                        psp->state->frame, lerp, x, y, z, p->map_object_, view_properties,
-                        1.0f /* scale */, w->model_aspect_, bias,
-                        w->model_rotate_);
+                       psp->state->frame, lerp, x, y, z, p->map_object_,
+                       view_properties, 1.0f /* scale */, w->model_aspect_,
+                       bias, w->model_rotate_);
     else if (md->mdl_model_)
         MdlRenderModel(md->mdl_model_, skin_img, true, last_frame,
-                        psp->state->frame, lerp, x, y, z, p->map_object_, view_properties,
-                        1.0f /* scale */, w->model_aspect_, bias,
-                        w->model_rotate_);
+                       psp->state->frame, lerp, x, y, z, p->map_object_,
+                       view_properties, 1.0f /* scale */, w->model_aspect_,
+                       bias, w->model_rotate_);
 }
 
 // ============================================================================
@@ -691,7 +704,7 @@ static inline void LinkDrawThingIntoDrawFloor(DrawFloor *dfloor,
 }
 
 static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my,
-                                              bool *flip)
+                                            bool *flip)
 {
     // Note: can return nullptr for no image.
 
@@ -700,8 +713,7 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my,
 
     if (mo->state_->sprite == 0) return nullptr;
 
-    SpriteFrame *frame =
-        GetSpriteFrame(mo->state_->sprite, mo->state_->frame);
+    SpriteFrame *frame = GetSpriteFrame(mo->state_->sprite, mo->state_->frame);
 
     if (!frame)
     {
@@ -864,7 +876,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
 
     if (sink_mult > 0) hover_dz -= (mo->height_ * 0.5 * sink_mult);
 
-    bool           spr_flip = false;
+    bool         spr_flip = false;
     const Image *image    = nullptr;
 
     float gzt = 0, gzb = 0;
@@ -1063,16 +1075,16 @@ static void RendererDrawModel(DrawThing *dthing)
 
     if (md->md2_model_)
         Md2RenderModel(md->md2_model_, skin_img, false, last_frame,
-                        mo->state_->frame, lerp, dthing->map_x, dthing->map_y,
-                        z, mo, mo->region_properties_, mo->model_scale_,
-                        mo->model_aspect_, mo->info_->model_bias_,
-                        mo->info_->model_rotate_);
+                       mo->state_->frame, lerp, dthing->map_x, dthing->map_y, z,
+                       mo, mo->region_properties_, mo->model_scale_,
+                       mo->model_aspect_, mo->info_->model_bias_,
+                       mo->info_->model_rotate_);
     else if (md->mdl_model_)
         MdlRenderModel(md->mdl_model_, skin_img, false, last_frame,
-                        mo->state_->frame, lerp, dthing->map_x, dthing->map_y,
-                        z, mo, mo->region_properties_, mo->model_scale_,
-                        mo->model_aspect_, mo->info_->model_bias_,
-                        mo->info_->model_rotate_);
+                       mo->state_->frame, lerp, dthing->map_x, dthing->map_y, z,
+                       mo, mo->region_properties_, mo->model_scale_,
+                       mo->model_aspect_, mo->info_->model_bias_,
+                       mo->info_->model_rotate_);
 }
 
 struct ThingCoordinateData
@@ -1128,9 +1140,9 @@ void RendererDrawThing(DrawFloor *dfloor, DrawThing *dthing)
     const Image *image = dthing->image;
 
     GLuint tex_id = ImageCache(image, false,
-                                 render_view_effect_colormap
-                                     ? render_view_effect_colormap
-                                     : dthing->map_object->info_->palremap_);
+                               render_view_effect_colormap
+                                   ? render_view_effect_colormap
+                                   : dthing->map_object->info_->palremap_);
 
     float h     = image->ScaledHeightActual();
     float right = image->Right();
@@ -1340,7 +1352,8 @@ void RendererDrawThing(DrawFloor *dfloor, DrawThing *dthing)
             else if (!is_additive)
             {
                 dest->rgba_color[0] = data.colors[v_idx].modulate_red_ / 255.0;
-                dest->rgba_color[1] = data.colors[v_idx].modulate_green_ / 255.0;
+                dest->rgba_color[1] =
+                    data.colors[v_idx].modulate_green_ / 255.0;
                 dest->rgba_color[2] = data.colors[v_idx].modulate_blue_ / 255.0;
 
                 data.colors[v_idx].modulate_red_ -= 256;

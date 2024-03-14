@@ -81,7 +81,7 @@ static void DoLight(LightSpecial *light)
                 light->minimum_light += type->step_;
 
             light->sector->properties.light_level = light->minimum_light;
-            light->count                    = type->brighttime_;
+            light->count                          = type->brighttime_;
             break;
         }
 
@@ -94,7 +94,8 @@ static void DoLight(LightSpecial *light)
                     light->sector->properties.light_level =
                         (light->maximum_light + light->minimum_light) / 2;
                 else
-                    light->sector->properties.light_level = light->minimum_light;
+                    light->sector->properties.light_level =
+                        light->minimum_light;
                 light->count = type->darktime_;
             }
             else
@@ -103,7 +104,8 @@ static void DoLight(LightSpecial *light)
                     light->sector->properties.light_level =
                         (light->maximum_light + light->minimum_light) / 2;
                 else
-                    light->sector->properties.light_level = light->maximum_light;
+                    light->sector->properties.light_level =
+                        light->maximum_light;
                 light->count = type->brighttime_;
             }
             break;
@@ -117,7 +119,8 @@ static void DoLight(LightSpecial *light)
                     light->sector->properties.light_level =
                         (light->maximum_light + light->minimum_light) / 2;
                 else
-                    light->sector->properties.light_level = light->minimum_light;
+                    light->sector->properties.light_level =
+                        light->minimum_light;
                 light->count = type->darktime_;
             }
             else
@@ -127,7 +130,8 @@ static void DoLight(LightSpecial *light)
                     light->sector->properties.light_level =
                         (light->maximum_light + light->minimum_light) / 2;
                 else
-                    light->sector->properties.light_level = light->maximum_light;
+                    light->sector->properties.light_level =
+                        light->maximum_light;
                 light->count = type->brighttime_;
             }
             break;
@@ -137,11 +141,13 @@ static void DoLight(LightSpecial *light)
             {
                 // Go dark
                 light->sector->properties.light_level -= type->step_;
-                if (light->sector->properties.light_level <= light->minimum_light)
+                if (light->sector->properties.light_level <=
+                    light->minimum_light)
                 {
-                    light->sector->properties.light_level = light->minimum_light;
-                    light->count                    = type->brighttime_;
-                    light->direction                = +1;
+                    light->sector->properties.light_level =
+                        light->minimum_light;
+                    light->count     = type->brighttime_;
+                    light->direction = +1;
                 }
                 else { light->count = type->darktime_; }
             }
@@ -149,11 +155,13 @@ static void DoLight(LightSpecial *light)
             {
                 // Go Bright
                 light->sector->properties.light_level += type->step_;
-                if (light->sector->properties.light_level >= light->maximum_light)
+                if (light->sector->properties.light_level >=
+                    light->maximum_light)
                 {
-                    light->sector->properties.light_level = light->maximum_light;
-                    light->count                    = type->darktime_;
-                    light->direction                = -1;
+                    light->sector->properties.light_level =
+                        light->maximum_light;
+                    light->count     = type->darktime_;
+                    light->direction = -1;
                 }
                 else { light->count = type->brighttime_; }
             }
@@ -164,13 +172,15 @@ static void DoLight(LightSpecial *light)
             // -ES- 2000/02/13 Changed this to original DOOM style flicker
             int amount = (RandomByte() & 7) * type->step_;
 
-            if (light->sector->properties.light_level - amount < light->minimum_light)
+            if (light->sector->properties.light_level - amount <
+                light->minimum_light)
             {
                 if (reduce_flash)
                     light->sector->properties.light_level =
                         (light->maximum_light + light->minimum_light) / 2;
                 else
-                    light->sector->properties.light_level = light->minimum_light;
+                    light->sector->properties.light_level =
+                        light->minimum_light;
                 light->count = type->darktime_;
             }
             else
@@ -395,7 +405,8 @@ void RunAmbientSounds(void)
         {
             amb->count = SECSFX_TIME;
 
-            StartSoundEffect(amb->sfx, kCategoryLevel, &amb->sector->sound_effects_origin);
+            StartSoundEffect(amb->sfx, kCategoryLevel,
+                             &amb->sector->sound_effects_origin);
         }
     }
 }

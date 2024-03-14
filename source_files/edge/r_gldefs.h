@@ -107,7 +107,7 @@ struct DrawThing
 
     // sprite image to use
     const Image *image;
-    bool           flip;
+    bool         flip;
 
     // translated coords
     float translated_z;

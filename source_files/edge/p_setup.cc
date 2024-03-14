@@ -80,8 +80,8 @@ EDGE_DEFINE_CONSOLE_VARIABLE(udmf_strict_namespace, "0",
 //
 
 int                 total_level_vertexes;
-Vertex           *level_vertexes = nullptr;
-static Vertex    *level_gl_vertexes;
+Vertex             *level_vertexes = nullptr;
+static Vertex      *level_gl_vertexes;
 int                 total_level_segs;
 Seg                *level_segs;
 int                 total_level_sectors;
@@ -268,10 +268,10 @@ static void CheckDoom2Map05Bug(uint8_t *data, int length)
 
 static void LoadVertexes(int lump)
 {
-    const uint8_t      *data;
-    int                 i;
+    const uint8_t   *data;
+    int              i;
     const RawVertex *ml;
-    Vertex           *li;
+    Vertex          *li;
 
     if (!VerifyLump(lump, "VERTEXES"))
         FatalError("Bad WAD: level %s missing VERTEXES.\n",
@@ -376,10 +376,10 @@ static void GroupSectorTags(Sector *dest, Sector *seclist, int numsecs)
 
 static void LoadSectors(int lump)
 {
-    const uint8_t      *data;
-    int                 i;
+    const uint8_t   *data;
+    int              i;
     const RawSector *ms;
-    Sector             *ss;
+    Sector          *ss;
 
     if (!VerifyLump(lump, "SECTORS"))
     {
@@ -417,8 +417,9 @@ static void LoadSectors(int lump)
         // return to wolfenstein?
         if (goobers.d_)
         {
-            ss->floor_height   = 0;
-            ss->ceiling_height = (ms->floor_height == ms->ceiling_height) ? 0 : 128.0f;
+            ss->floor_height = 0;
+            ss->ceiling_height =
+                (ms->floor_height == ms->ceiling_height) ? 0 : 128.0f;
         }
 
         ss->original_height = (ss->floor_height + ss->ceiling_height);
@@ -681,7 +682,7 @@ static void LoadThings(int lump)
     int      i;
 
     const uint8_t             *data;
-    const RawThing         *mt;
+    const RawThing            *mt;
     const MapObjectDefinition *objtype;
 
     if (!VerifyLump(lump, "THINGS"))
@@ -778,11 +779,9 @@ static void LoadThings(int lump)
         if (objtype->flags_ & kMapObjectFlagSpawnCeiling)
             z = sec->ceiling_height - objtype->height_;
 
-        if ((options & kThingReserved) == 0 &&
-            (options & kExtrafloorMask))
+        if ((options & kThingReserved) == 0 && (options & kExtrafloorMask))
         {
-            int floor_num = (options & kExtrafloorMask) >>
-                            kExtrafloorBitShift;
+            int floor_num = (options & kExtrafloorMask) >> kExtrafloorBitShift;
 
             for (Extrafloor *ef = sec->bottom_extrafloor; ef; ef = ef->higher)
             {
@@ -898,7 +897,7 @@ static void LoadLineDefs(int lump)
     const uint8_t *data = LoadLumpIntoMemory(lump);
     map_lines_crc.AddBlock((const uint8_t *)data, GetLumpLength(lump));
 
-    Line                *ld  = level_lines;
+    Line             *ld  = level_lines;
     const RawLinedef *mld = (const RawLinedef *)data;
 
     for (int i = 0; i < total_level_lines; i++, mld++, ld++)
@@ -911,7 +910,9 @@ static void LoadLineDefs(int lump)
         // Check for BoomClear flag bit and clear applicable specials
         // (PassThru may still be intentionally added further down)
         if (ld->flags & kLineFlagClearBoomFlags)
-            ld->flags &= ~(kLineFlagBoomPassThrough | kLineFlagBlockGroundedMonsters | kLineFlagBlockPlayers);
+            ld->flags &=
+                ~(kLineFlagBoomPassThrough | kLineFlagBlockGroundedMonsters |
+                  kLineFlagBlockPlayers);
 
         ld->special =
             LookupLineType(HMM_MAX(0, AlignedLittleEndianS16(mld->type)));
@@ -2120,44 +2121,54 @@ static void LoadUDMFLineDefs()
                         side1 = epi::LexInteger(value);
                         break;
                     case epi::kENameBlocking:
-                        flags |= (epi::LexBoolean(value) ? kLineFlagBlocking : 0);
+                        flags |=
+                            (epi::LexBoolean(value) ? kLineFlagBlocking : 0);
                         break;
                     case epi::kENameBlockmonsters:
                         flags |=
-                            (epi::LexBoolean(value) ? kLineFlagBlockMonsters : 0);
+                            (epi::LexBoolean(value) ? kLineFlagBlockMonsters
+                                                    : 0);
                         break;
                     case epi::kENameTwosided:
-                        flags |= (epi::LexBoolean(value) ? kLineFlagTwoSided : 0);
+                        flags |=
+                            (epi::LexBoolean(value) ? kLineFlagTwoSided : 0);
                         break;
                     case epi::kENameDontpegtop:
                         flags |=
-                            (epi::LexBoolean(value) ? kLineFlagUpperUnpegged : 0);
+                            (epi::LexBoolean(value) ? kLineFlagUpperUnpegged
+                                                    : 0);
                         break;
                     case epi::kENameDontpegbottom:
                         flags |=
-                            (epi::LexBoolean(value) ? kLineFlagLowerUnpegged : 0);
+                            (epi::LexBoolean(value) ? kLineFlagLowerUnpegged
+                                                    : 0);
                         break;
                     case epi::kENameSecret:
                         flags |= (epi::LexBoolean(value) ? kLineFlagSecret : 0);
                         break;
                     case epi::kENameBlocksound:
-                        flags |= (epi::LexBoolean(value) ? kLineFlagSoundBlock : 0);
+                        flags |=
+                            (epi::LexBoolean(value) ? kLineFlagSoundBlock : 0);
                         break;
                     case epi::kENameDontdraw:
-                        flags |= (epi::LexBoolean(value) ? kLineFlagDontDraw : 0);
+                        flags |=
+                            (epi::LexBoolean(value) ? kLineFlagDontDraw : 0);
                         break;
                     case epi::kENameMapped:
                         flags |= (epi::LexBoolean(value) ? kLineFlagMapped : 0);
                         break;
                     case epi::kENamePassuse:
-                        flags |= (epi::LexBoolean(value) ? kLineFlagBoomPassThrough : 0);
+                        flags |=
+                            (epi::LexBoolean(value) ? kLineFlagBoomPassThrough
+                                                    : 0);
                         break;
                     case epi::kENameBlockplayers:
-                        flags |=
-                            (epi::LexBoolean(value) ? kLineFlagBlockPlayers : 0);
+                        flags |= (epi::LexBoolean(value) ? kLineFlagBlockPlayers
+                                                         : 0);
                         break;
                     case epi::kENameBlocksight:
-                        flags |= (epi::LexBoolean(value) ? kLineFlagSightBlock : 0);
+                        flags |=
+                            (epi::LexBoolean(value) ? kLineFlagSightBlock : 0);
                         break;
                     default:
                         break;
@@ -2254,8 +2265,8 @@ static void LoadUDMFThings()
         if (section == "thing")
         {
             float    x = 0.0f, y = 0.0f, z = 0.0f;
-            BAMAngle angle = kBAMAngle0;
-            int options = kThingNotSinglePlayer | kThingNotDeathmatch |
+            BAMAngle angle   = kBAMAngle0;
+            int      options = kThingNotSinglePlayer | kThingNotDeathmatch |
                           kThingNotCooperative;
             int   typenum   = -1;
             int   tag       = 0;
@@ -2312,28 +2323,22 @@ static void LoadUDMFThings()
                         typenum = epi::LexInteger(value);
                         break;
                     case epi::kENameSkill1:
-                        options |=
-                            (epi::LexBoolean(value) ? kThingEasy : 0);
+                        options |= (epi::LexBoolean(value) ? kThingEasy : 0);
                         break;
                     case epi::kENameSkill2:
-                        options |=
-                            (epi::LexBoolean(value) ? kThingEasy : 0);
+                        options |= (epi::LexBoolean(value) ? kThingEasy : 0);
                         break;
                     case epi::kENameSkill3:
-                        options |=
-                            (epi::LexBoolean(value) ? kThingMedium : 0);
+                        options |= (epi::LexBoolean(value) ? kThingMedium : 0);
                         break;
                     case epi::kENameSkill4:
-                        options |=
-                            (epi::LexBoolean(value) ? kThingHard : 0);
+                        options |= (epi::LexBoolean(value) ? kThingHard : 0);
                         break;
                     case epi::kENameSkill5:
-                        options |=
-                            (epi::LexBoolean(value) ? kThingHard : 0);
+                        options |= (epi::LexBoolean(value) ? kThingHard : 0);
                         break;
                     case epi::kENameAmbush:
-                        options |=
-                            (epi::LexBoolean(value) ? kThingAmbush : 0);
+                        options |= (epi::LexBoolean(value) ? kThingAmbush : 0);
                         break;
                     case epi::kENameSingle:
                         options &=
@@ -2351,8 +2356,7 @@ static void LoadUDMFThings()
                                                     : options);
                         break;
                     case epi::kENameFriend:
-                        options |=
-                            (epi::LexBoolean(value) ? kThingFriend : 0);
+                        options |= (epi::LexBoolean(value) ? kThingFriend : 0);
                         break;
                     case epi::kENameHealth:
                         healthfac = epi::LexDouble(value);
@@ -2568,8 +2572,7 @@ static void LoadUDMFCounts()
     temp_line_sides = new int[total_level_lines * 2];
 }
 
-static void TransferMapSideDef(const RawSidedef *msd, Side *sd,
-                               bool two_sided)
+static void TransferMapSideDef(const RawSidedef *msd, Side *sd, bool two_sided)
 {
     char upper_tex[10];
     char middle_tex[10];
@@ -2643,10 +2646,10 @@ static void TransferMapSideDef(const RawSidedef *msd, Side *sd,
 
 static void LoadSideDefs(int lump)
 {
-    int                  i;
-    const uint8_t       *data;
+    int               i;
+    const uint8_t    *data;
     const RawSidedef *msd;
-    Side                *sd;
+    Side             *sd;
 
     int nummapsides;
 
@@ -2821,7 +2824,8 @@ static void SetupVertGaps(void)
 
     level_vertical_gaps = new VerticalGap[total_level_vertical_gaps];
 
-    EPI_CLEAR_MEMORY(level_vertical_gaps, VerticalGap, total_level_vertical_gaps);
+    EPI_CLEAR_MEMORY(level_vertical_gaps, VerticalGap,
+                     total_level_vertical_gaps);
 
     for (i = 0, cur_gap = level_vertical_gaps; i < total_level_lines; i++)
     {
@@ -3015,7 +3019,7 @@ void GroupLines(void)
             for (j = 0; j < 3; j++)
             {
                 Vertex *vert   = sector->lines[j]->vertex_1;
-                bool      add_it = true;
+                bool    add_it = true;
                 for (HMM_Vec3 v : sector->floor_z_vertices)
                     if (AlmostEquals(v.X, vert->X) &&
                         AlmostEquals(v.Y, vert->Y))
@@ -3129,8 +3133,8 @@ void GroupLines(void)
             {
                 Vertex *vert      = sector->lines[j]->vertex_1;
                 Vertex *vert2     = sector->lines[j]->vertex_2;
-                bool      add_it_v1 = true;
-                bool      add_it_v2 = true;
+                bool    add_it_v1 = true;
+                bool    add_it_v2 = true;
                 for (HMM_Vec3 v : sector->floor_z_vertices)
                     if (AlmostEquals(v.X, vert->X) &&
                         AlmostEquals(v.Y, vert->Y))

@@ -163,7 +163,7 @@ uint8_t *ConvertPcSpeakerSound(const uint8_t *data, int *length)
 
     // --- Write WAV ---
 
-    WavChunk    whdr, wdhdr;
+    WavChunk       whdr, wdhdr;
     WavFormatChunk fmtchunk;
 
     // Setup data header
@@ -189,7 +189,7 @@ uint8_t *ConvertPcSpeakerSound(const uint8_t *data, int *length)
 
     // Write chunks
 
-    *length                = 20 + sizeof(WavFormatChunk) + (numsamples * FACTOR);
+    *length = 20 + sizeof(WavFormatChunk) + (numsamples * FACTOR);
     int      write_counter = 0;
     uint8_t *new_data      = new uint8_t[*length];
     memcpy(new_data + write_counter, &whdr, 8);

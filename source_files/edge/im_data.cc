@@ -664,15 +664,13 @@ void ImageData::Swirl(int leveltime, int thickness)
 
             sinvalue  = (y * swirlfactor + leveltime * speed * 5 + 900) & 8191;
             sinvalue2 = (x * swirlfactor2 + leveltime * speed * 4 + 300) & 8191;
-            x1        = x + width_ + height_ +
-                 ((finesine[sinvalue] * amp) >> 16) +
+            x1 = x + width_ + height_ + ((finesine[sinvalue] * amp) >> 16) +
                  ((finesine[sinvalue2] * amp) >> 16);
 
             sinvalue = (x * swirlfactor + leveltime * speed * 3 + 700) & 8191;
             sinvalue2 =
                 (y * swirlfactor2 + leveltime * speed * 4 + 1200) & 8191;
-            y1 = y + width_ + height_ +
-                 ((finesine[sinvalue] * amp) >> 16) +
+            y1 = y + width_ + height_ + ((finesine[sinvalue] * amp) >> 16) +
                  ((finesine[sinvalue2] * amp) >> 16);
 
             x1 &= width_ - 1;

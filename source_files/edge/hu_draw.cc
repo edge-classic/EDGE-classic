@@ -38,7 +38,7 @@ static constexpr float kVerticalSpacing = 2.0f;
 
 extern ConsoleLine    *quit_lines[kEndoomLines];
 extern int             console_cursor;
-extern Font         *endoom_font;
+extern Font           *endoom_font;
 extern ConsoleVariable video_overlay;
 extern ConsoleVariable double_framerate;
 
@@ -60,7 +60,7 @@ float hud_y_top;
 float hud_y_bottom;
 
 // current state
-static Font   *current_font;
+static Font     *current_font;
 static RGBAColor current_color;
 
 static float current_scale, current_alpha;
@@ -73,7 +73,7 @@ static float margin_y;
 static float margin_x_multiplier;
 static float margin_y_multiplier;
 
-static constexpr float kDoomPixelAspectRatio = (5.0f/6.0f);
+static constexpr float kDoomPixelAspectRatio = (5.0f / 6.0f);
 
 std::vector<std::string> hud_overlays = {
     "",
@@ -364,10 +364,10 @@ void HudCalcTurbulentTexCoords(float *tx, float *ty, float x, float y)
 
 //----------------------------------------------------------------------------
 
-void HudRawImage(float hx1, float hy1, float hx2, float hy2,
-                 const Image *image, float tx1, float ty1, float tx2,
-                 float ty2, float alpha, RGBAColor text_col,
-                 const Colormap *palremap, float sx, float sy, char ch)
+void HudRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
+                 float tx1, float ty1, float tx2, float ty2, float alpha,
+                 RGBAColor text_col, const Colormap *palremap, float sx,
+                 float sy, char ch)
 {
     int x1 = RoundToInteger(hx1);
     int y1 = RoundToInteger(hy1);
@@ -376,7 +376,9 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2,
 
     if (x1 >= x2 || y1 >= y2) return;
 
-    if (x2 < 0 || x1 > current_screen_width || y2 < 0 || y1 > current_screen_height) return;
+    if (x2 < 0 || x1 > current_screen_width || y2 < 0 ||
+        y1 > current_screen_height)
+        return;
 
     sg_color sgcol = sg_white;
 
@@ -403,10 +405,12 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2,
                     FontDefinition::kTrueTypeSmoothAlways)
                 glBindTexture(
                     GL_TEXTURE_2D,
-                    current_font->truetype_smoothed_texture_id_[current_font_size]);
+                    current_font
+                        ->truetype_smoothed_texture_id_[current_font_size]);
             else
-                glBindTexture(GL_TEXTURE_2D,
-                              current_font->truetype_texture_id_[current_font_size]);
+                glBindTexture(
+                    GL_TEXTURE_2D,
+                    current_font->truetype_texture_id_[current_font_size]);
         }
         else  // patch font
         {
@@ -422,21 +426,24 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2,
                     FontDefinition::kTrueTypeSmoothAlways)
             {
                 if (do_whiten)
-                    glBindTexture(
-                        GL_TEXTURE_2D,
-                        current_font->patch_font_cache_.atlas_whitened_smoothed_texture_id);
+                    glBindTexture(GL_TEXTURE_2D,
+                                  current_font->patch_font_cache_
+                                      .atlas_whitened_smoothed_texture_id);
                 else
                     glBindTexture(GL_TEXTURE_2D,
-                                  current_font->patch_font_cache_.atlas_smoothed_texture_id);
+                                  current_font->patch_font_cache_
+                                      .atlas_smoothed_texture_id);
             }
             else
             {
                 if (do_whiten)
                     glBindTexture(GL_TEXTURE_2D,
-                                  current_font->patch_font_cache_.atlas_whitened_texture_id);
+                                  current_font->patch_font_cache_
+                                      .atlas_whitened_texture_id);
                 else
-                    glBindTexture(GL_TEXTURE_2D,
-                                  current_font->patch_font_cache_.atlas_texture_id);
+                    glBindTexture(
+                        GL_TEXTURE_2D,
+                        current_font->patch_font_cache_.atlas_texture_id);
             }
         }
         glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
@@ -498,7 +505,8 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2,
 
     bool hud_swirl = false;
 
-    if (image->liquid_type_ > kLiquidImageNone && swirling_flats > kLiquidSwirlSmmu)
+    if (image->liquid_type_ > kLiquidImageNone &&
+        swirling_flats > kLiquidSwirlSmmu)
     {
         hud_swirl_pass = 1;
         hud_swirl      = true;
@@ -587,7 +595,9 @@ void HudRawFromTexID(float hx1, float hy1, float hx2, float hy2,
 
     if (x1 >= x2 || y1 >= y2) return;
 
-    if (x2 < 0 || x1 > current_screen_width || y2 < 0 || y1 > current_screen_height) return;
+    if (x2 < 0 || x1 > current_screen_width || y2 < 0 ||
+        y1 > current_screen_height)
+        return;
 
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, tex_id);
@@ -990,12 +1000,14 @@ void HudDrawChar(float left_x, float top_y, const Image *img, char ch,
     {
         if (current_font->definition_->type_ == kFontTypeTrueType)
         {
-            stbtt_aligned_quad *q = current_font->truetype_glyph_map_.at((uint8_t)ch)
-                                        .character_quad[current_font_size];
+            stbtt_aligned_quad *q =
+                current_font->truetype_glyph_map_.at((uint8_t)ch)
+                    .character_quad[current_font_size];
             y = top_y +
                 (current_font->truetype_glyph_map_.at((uint8_t)ch)
                      .y_shift[current_font_size] *
-                 (size > 0 ? (size / current_font->definition_->default_size_) : 1.0) *
+                 (size > 0 ? (size / current_font->definition_->default_size_)
+                           : 1.0) *
                  sc_y);
             w = ((size > 0 ? (current_font->CharWidth(ch) *
                               (size / current_font->definition_->default_size_))
@@ -1004,7 +1016,8 @@ void HudDrawChar(float left_x, float top_y, const Image *img, char ch,
                 sc_x;
             h = (current_font->truetype_glyph_map_.at((uint8_t)ch)
                      .height[current_font_size] *
-                 (size > 0 ? (size / current_font->definition_->default_size_) : 1.0)) *
+                 (size > 0 ? (size / current_font->definition_->default_size_)
+                           : 1.0)) *
                 sc_y;
             tx1 = q->s0;
             ty1 = q->t0;
@@ -1016,12 +1029,13 @@ void HudDrawChar(float left_x, float top_y, const Image *img, char ch,
             w = (size > 0 ? (size * current_font->patch_font_cache_.ratio)
                           : current_font->CharWidth(ch)) *
                 sc_x;
-            h = (size > 0 ? size
-                          : (current_font->definition_->default_size_ > 0.0
-                                 ? current_font->definition_->default_size_
-                                 : current_font->patch_font_cache_.atlas_rectangles
-                                       .at(kCP437UnicodeValues[(uint8_t)ch])
-                                       .image_height)) *
+            h = (size > 0
+                     ? size
+                     : (current_font->definition_->default_size_ > 0.0
+                            ? current_font->definition_->default_size_
+                            : current_font->patch_font_cache_.atlas_rectangles
+                                  .at(kCP437UnicodeValues[(uint8_t)ch])
+                                  .image_height)) *
                 sc_y;
             x -= (current_font->patch_font_cache_.atlas_rectangles
                       .at(kCP437UnicodeValues[(uint8_t)ch])
@@ -1031,10 +1045,18 @@ void HudDrawChar(float left_x, float top_y, const Image *img, char ch,
                       .at(kCP437UnicodeValues[(uint8_t)ch])
                       .offset_y *
                   sc_y);
-            tx1 = current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch).texture_coordinate_x;
-            ty2 = current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch).texture_coordinate_y;
-            tx2 = tx1 + current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch).texture_coordinate_width;
-            ty1 = ty2 + current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch).texture_coordinate_height;
+            tx1 =
+                current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch)
+                    .texture_coordinate_x;
+            ty2 =
+                current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch)
+                    .texture_coordinate_y;
+            tx2 = tx1 + current_font->patch_font_cache_.atlas_rectangles
+                            .at((uint8_t)ch)
+                            .texture_coordinate_width;
+            ty1 = ty2 + current_font->patch_font_cache_.atlas_rectangles
+                            .at((uint8_t)ch)
+                            .texture_coordinate_height;
         }
     }
     else  // spritesheet font
@@ -1043,14 +1065,15 @@ void HudDrawChar(float left_x, float top_y, const Image *img, char ch,
                        : current_font->CharWidth(ch)) -
              current_font->spacing_) *
             sc_x;
-        h      = (size > 0 ? size : current_font->image_character_height_) * sc_y;
+        h = (size > 0 ? size : current_font->image_character_height_) * sc_y;
         int px = (uint8_t)ch % 16;
         int py = 15 - (uint8_t)ch / 16;
         tx1    = (px)*current_font->font_image_->width_ratio_;
         tx2    = (px + 1) * current_font->font_image_->width_ratio_;
         float char_texcoord_adjust =
-            ((tx2 - tx1) - ((tx2 - tx1) * (current_font->CharWidth(ch) /
-                                           current_font->image_character_width_))) /
+            ((tx2 - tx1) -
+             ((tx2 - tx1) * (current_font->CharWidth(ch) /
+                             current_font->image_character_width_))) /
             2;
         tx1 += char_texcoord_adjust;
         tx2 -= char_texcoord_adjust;
@@ -1185,17 +1208,20 @@ void HudDrawText(float x, float y, const char *str, float size)
             if (current_font->definition_->type_ == kFontTypeTrueType)
             {
                 float factor =
-                    size > 0 ? (size / current_font->definition_->default_size_) : 1;
+                    size > 0 ? (size / current_font->definition_->default_size_)
+                             : 1;
                 total_w +=
                     current_font->CharWidth(str[i]) * factor * current_scale;
                 if (str[i + 1])
                 {
-                    total_w += stbtt_GetGlyphKernAdvance(
-                                   current_font->truetype_info_,
-                                   current_font->GetGlyphIndex(str[i]),
-                                   current_font->GetGlyphIndex(str[i + 1])) *
-                               current_font->truetype_kerning_scale_[current_font_size] *
-                               factor * current_scale;
+                    total_w +=
+                        stbtt_GetGlyphKernAdvance(
+                            current_font->truetype_info_,
+                            current_font->GetGlyphIndex(str[i]),
+                            current_font->GetGlyphIndex(str[i + 1])) *
+                        current_font
+                            ->truetype_kerning_scale_[current_font_size] *
+                        factor * current_scale;
                 }
             }
             else if (current_font->definition_->type_ == kFontTypeImage)
@@ -1204,10 +1230,11 @@ void HudDrawText(float x, float y, const char *str, float size)
                                      : current_font->CharWidth(str[i])) *
                            current_scale;
             else
-                total_w += (size > 0 ? size * current_font->patch_font_cache_.ratio +
-                                           current_font->spacing_
-                                     : current_font->CharWidth(str[i])) *
-                           current_scale;
+                total_w +=
+                    (size > 0 ? size * current_font->patch_font_cache_.ratio +
+                                    current_font->spacing_
+                              : current_font->CharWidth(str[i])) *
+                    current_scale;
         }
 
         if (current_x_alignment >= 0)
@@ -1228,7 +1255,8 @@ void HudDrawText(float x, float y, const char *str, float size)
             if (current_font->definition_->type_ == kFontTypeTrueType)
             {
                 float factor =
-                    size > 0 ? (size / current_font->definition_->default_size_) : 1;
+                    size > 0 ? (size / current_font->definition_->default_size_)
+                             : 1;
                 cx += current_font->CharWidth(ch) * factor * current_scale;
                 if (str[k + 1])
                 {
@@ -1236,7 +1264,8 @@ void HudDrawText(float x, float y, const char *str, float size)
                               current_font->truetype_info_,
                               current_font->GetGlyphIndex(str[k]),
                               current_font->GetGlyphIndex(str[k + 1])) *
-                          current_font->truetype_kerning_scale_[current_font_size] *
+                          current_font
+                              ->truetype_kerning_scale_[current_font_size] *
                           factor * current_scale;
                 }
             }
@@ -1291,11 +1320,12 @@ void HudDrawQuitScreen()
 
     if (quit_lines[0])
     {
-        float FNX =
-            HMM_MIN((float)current_screen_width / 80.0f,
-                    320.0f / 80.0f * ((float)current_screen_height * 0.90f / 200.0f));
+        float FNX = HMM_MIN(
+            (float)current_screen_width / 80.0f,
+            320.0f / 80.0f * ((float)current_screen_height * 0.90f / 200.0f));
         float FNY = FNX * 2;
-        float cx  = HMM_MAX(0, (((float)current_screen_width - (FNX * 80.0f)) / 2.0f));
+        float cx =
+            HMM_MAX(0, (((float)current_screen_width - (FNX * 80.0f)) / 2.0f));
         for (int i = 0; i < kEndoomLines; i++)
         {
             HudDrawQuitText(i, FNX, FNY, cx);

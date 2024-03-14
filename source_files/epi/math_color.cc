@@ -17,8 +17,9 @@
 //----------------------------------------------------------------------------
 
 #include "math_color.h"
-#include "epi.h"
+
 #include "HandmadeMath.h"
+#include "epi.h"
 namespace epi
 {
 

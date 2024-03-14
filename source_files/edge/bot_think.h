@@ -126,22 +126,22 @@ class DeathBot
     // used for DM roaming, COOP follow-the-leader, and getting items.
     // main_goal is final target.  travel_time detects losing the path.
     // path_wait is when we need a path, but are waiting a bit.
-    BotPath   *path_ = nullptr;
+    BotPath *path_ = nullptr;
     Position roam_goal_{0, 0, 0};
-    int        travel_time_ = 0;
-    int        path_wait_   = 0;
+    int      travel_time_ = 0;
+    int      path_wait_   = 0;
 
     // information for kBotTaskGetItem (+ the pathing info)
     int item_time_ = 0;
 
     // information for kBotTaskOpenDoor
-    int          door_stage_ = 0;
-    int          door_time_  = 0;
+    int        door_stage_ = 0;
+    int        door_time_  = 0;
     const Seg *door_seg_   = nullptr;
 
     // information for kBotTaskUseLift
-    int          lift_stage_ = 0;
-    int          lift_time_  = 0;
+    int        lift_stage_ = 0;
+    int        lift_time_  = 0;
     const Seg *lift_seg_   = nullptr;
 
     BotCommand cmd_;

@@ -44,7 +44,7 @@ std::wstring UTF8ToWString(std::string_view instring)
             utf8proc_iterate(utf8ptr + utf8pos, utf8len - utf8pos, &u32c);
         if (res < 0)
             FatalError("Failed to convert %s to a wide string!\n",
-                    std::string(instring).c_str());
+                       std::string(instring).c_str());
         else
             utf8pos += res;
         if (u32c < 0x10000)
@@ -82,7 +82,7 @@ std::string WStringToUTF8(std::wstring_view instring)
                 // print what was safely converted if present
                 if (!outstring.empty())
                     FatalError("Failure to convert %s from a wide string!\n",
-                            outstring.c_str());
+                               outstring.c_str());
                 else
                     FatalError("Wide string to UTF-8 conversion failure!\n");
             }
@@ -98,7 +98,7 @@ std::string WStringToUTF8(std::wstring_view instring)
             // print what was safely converted if present
             if (!outstring.empty())
                 FatalError("Failure to convert %s from a wide string!\n",
-                        outstring.c_str());
+                           outstring.c_str());
             else
                 FatalError("Wide string to UTF-8 conversion failure!\n");
         }

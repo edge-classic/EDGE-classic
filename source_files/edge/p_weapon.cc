@@ -46,10 +46,10 @@ extern ConsoleVariable erraticism;
 
 static constexpr uint8_t kMaximumPlayerSpriteLoop = 10;
 
-static constexpr float kWeaponSwapSpeed = 6.0f;
-static constexpr uint8_t kWeaponBottom = 128;
-static constexpr uint8_t kWeaponTop = 32;
-static constexpr uint8_t kGrinTime = (kTicRate * 2);
+static constexpr float   kWeaponSwapSpeed = 6.0f;
+static constexpr uint8_t kWeaponBottom    = 128;
+static constexpr uint8_t kWeaponTop       = 32;
+static constexpr uint8_t kGrinTime        = (kTicRate * 2);
 
 static void BobWeapon(Player *p, WeaponDefinition *info);
 
@@ -151,7 +151,8 @@ static bool ButtonDown(Player *p, int ATK)
         if (ATK == 0)
             return (p->command_.buttons & kButtonCodeAttack);
         else
-            return (p->command_.extended_buttons & kExtendedButtonCodeSecondAttack);
+            return (p->command_.extended_buttons &
+       kExtendedButtonCodeSecondAttack);
 
     */
 
@@ -304,7 +305,7 @@ static void GotoAttackState(Player *p, int ATK, bool can_warmup)
 
     if (p->remember_attack_state_[ATK] >= 0)
     {
-        newstate             = p->remember_attack_state_[ATK];
+        newstate                       = p->remember_attack_state_[ATK];
         p->remember_attack_state_[ATK] = -1;
     }
     else if (can_warmup && info->warmup_state_[ATK])
@@ -370,7 +371,8 @@ static void GotoReloadState(Player *p, int ATK)
 
     // if player has reload states, use 'em baby
     if (p->map_object_->info_->reload_state_)
-        MapObjectSetStateDeferred(p->map_object_, p->map_object_->info_->reload_state_, 0);
+        MapObjectSetStateDeferred(p->map_object_,
+                                  p->map_object_->info_->reload_state_, 0);
 }
 
 //
@@ -409,15 +411,16 @@ static void BringUpWeapon(Player *p)
 
     p->ready_weapon_ = sel;
 
-    p->pending_weapon_                             = KWeaponSelectionNoChange;
-    p->player_sprites_[kPlayerSpriteWeapon].screen_y = kWeaponBottom - kWeaponTop;
+    p->pending_weapon_ = KWeaponSelectionNoChange;
+    p->player_sprites_[kPlayerSpriteWeapon].screen_y =
+        kWeaponBottom - kWeaponTop;
 
-    p->remember_attack_state_[0]   = -1;
-    p->remember_attack_state_[1]   = -1;
-    p->remember_attack_state_[2]   = -1;
-    p->remember_attack_state_[3]   = -1;
-    p->idle_wait_          = 0;
-    p->weapon_last_frame_ = -1;
+    p->remember_attack_state_[0] = -1;
+    p->remember_attack_state_[1] = -1;
+    p->remember_attack_state_[2] = -1;
+    p->remember_attack_state_[3] = -1;
+    p->idle_wait_                = 0;
+    p->weapon_last_frame_        = -1;
 
     if (sel == KWeaponSelectionNone)
     {
@@ -451,7 +454,8 @@ static void BringUpWeapon(Player *p)
     }
 
     if (info->start_)
-        StartSoundEffect(info->start_, WeaponSoundEffectCategory(p), p->map_object_);
+        StartSoundEffect(info->start_, WeaponSoundEffectCategory(p),
+                         p->map_object_);
 
     SetPlayerSpriteDeferred(p, kPlayerSpriteWeapon, info->up_state_);
     SetPlayerSprite(p, kPlayerSpriteFlash, 0);
@@ -631,15 +635,16 @@ void SelectNewWeapon(Player *p, int priority, AmmunitionType ammo)
         if (!CheckWeaponSprite(info)) continue;
 
         p->pending_weapon_ = (WeaponSelection)i;
-        priority      = info->priority_;
+        priority           = info->priority_;
         // key = info->bind_key;
     }
 
     // all out of choices ?
     if (priority < 0)
     {
-        p->pending_weapon_ =
-            (ammo == kAmmunitionTypeDontCare) ? KWeaponSelectionNone : KWeaponSelectionNoChange;
+        p->pending_weapon_ = (ammo == kAmmunitionTypeDontCare)
+                                 ? KWeaponSelectionNone
+                                 : KWeaponSelectionNoChange;
         return;
     }
 
@@ -657,7 +662,8 @@ void TrySwitchNewWeapon(Player *p, int new_weap, AmmunitionType new_ammo)
 
     if (p->pending_weapon_ != KWeaponSelectionNoChange) return;
 
-    if (!level_flags.weapon_switch && p->ready_weapon_ != KWeaponSelectionNone &&
+    if (!level_flags.weapon_switch &&
+        p->ready_weapon_ != KWeaponSelectionNone &&
         (WeaponCouldAutoFire(p, p->ready_weapon_, 0) ||
          WeaponCouldAutoFire(p, p->ready_weapon_, 1) ||
          WeaponCouldAutoFire(p, p->ready_weapon_, 2) ||
@@ -793,7 +799,8 @@ void MovePlayerSprites(Player *p)
     // --- Called every tic by player thinking routine ---
 
     // check if player has NO weapon but wants to change
-    if (p->ready_weapon_ == KWeaponSelectionNone && p->pending_weapon_ != KWeaponSelectionNoChange)
+    if (p->ready_weapon_ == KWeaponSelectionNone &&
+        p->pending_weapon_ != KWeaponSelectionNoChange)
     {
         BringUpWeapon(p);
     }
@@ -824,7 +831,8 @@ void MovePlayerSprites(Player *p)
             }
 
             WeaponDefinition *info = nullptr;
-            if (p->ready_weapon_ >= 0) info = p->weapons_[p->ready_weapon_].info;
+            if (p->ready_weapon_ >= 0)
+                info = p->weapons_[p->ready_weapon_].info;
 
             SetPlayerSprite(
                 p, i, psp->next_state ? (psp->next_state - states) : 0, info);
@@ -851,7 +859,8 @@ void MovePlayerSprites(Player *p)
 static void BobWeapon(Player *p, WeaponDefinition *info)
 {
     if (view_bobbing.d_ == 1 || view_bobbing.d_ == 3 ||
-        (erraticism.d_ && (!p->command_.forward_move && !p->command_.side_move)))
+        (erraticism.d_ &&
+         (!p->command_.forward_move && !p->command_.side_move)))
         return;
 
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
@@ -862,9 +871,9 @@ static void BobWeapon(Player *p, WeaponDefinition *info)
     // bob the weapon based on movement speed
     if (p->powers_[kPowerTypeJetpack] <= 0)  // Don't bob when using jetpack
     {
-        BAMAngle angle =
-            (128 * (erraticism.d_ ? p->erraticism_bob_ticker_++ : level_time_elapsed))
-            << 19;
+        BAMAngle angle = (128 * (erraticism.d_ ? p->erraticism_bob_ticker_++
+                                               : level_time_elapsed))
+                         << 19;
         new_sx = p->bob_factor_ * info->swaying_ * epi::BAMCos(angle);
 
         angle &= (kBAMAngle180 - 1);
@@ -885,7 +894,7 @@ static void BobWeapon(Player *p, WeaponDefinition *info)
 //
 void A_WeaponReady(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     EPI_ASSERT(p->ready_weapon_ != KWeaponSelectionNone);
@@ -936,7 +945,7 @@ void A_WeaponReady(MapObject *mo)
             if (!p->attack_button_down_[ATK] || info->autofire_[ATK])
             {
                 p->attack_button_down_[ATK] = true;
-                p->flash_           = false;
+                p->flash_                   = false;
 
                 if (WeaponCanFire(p, p->ready_weapon_, ATK))
                     GotoAttackState(p, ATK, true);
@@ -1077,7 +1086,7 @@ void A_ReFireFA(MapObject *mo) { DoReFire(mo, 3); }
 //
 static void DoReFireTo(MapObject *mo, int ATK)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     if (p->pending_weapon_ >= 0 || p->health_ <= 0)
@@ -1134,7 +1143,7 @@ void A_ReFireToFA(MapObject *mo) { DoReFireTo(mo, 3); }
 //
 static void DoNoFire(MapObject *mo, int ATK, bool does_return)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     if (p->pending_weapon_ >= 0 || p->health_ <= 0)
@@ -1165,7 +1174,7 @@ static void DoNoFire(MapObject *mo, int ATK, bool does_return)
         }
     }
 
-    p->refire_            = info->refire_inacc_ ? 0 : 1;
+    p->refire_                     = info->refire_inacc_ ? 0 : 1;
     p->remember_attack_state_[ATK] = does_return ? psp->state->nextstate : -1;
 
     if (WeaponCouldAutoFire(p, p->ready_weapon_, ATK))
@@ -1185,7 +1194,7 @@ void A_NoFireReturnFA(MapObject *mo) { DoNoFire(mo, 3, true); }
 
 void A_WeaponKick(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     float kick = 0.05f;
@@ -1242,7 +1251,7 @@ void A_Lower(MapObject *mo)
 {
     // Lowers current weapon, and changes weapon at bottom
 
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     WeaponDefinition *info = p->weapons_[p->ready_weapon_].info;
@@ -1276,7 +1285,8 @@ void A_Lower(MapObject *mo)
         p->weapons_[p->ready_weapon_].info = nullptr;
 
         // this should not happen, but handle it just in case
-        if (p->pending_weapon_ == p->ready_weapon_) p->pending_weapon_ = KWeaponSelectionNoChange;
+        if (p->pending_weapon_ == p->ready_weapon_)
+            p->pending_weapon_ = KWeaponSelectionNoChange;
 
         p->ready_weapon_ = KWeaponSelectionNone;
     }
@@ -1295,7 +1305,7 @@ void A_Lower(MapObject *mo)
 
 void A_Raise(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     WeaponDefinition *info = p->weapons_[p->ready_weapon_].info;
@@ -1316,7 +1326,7 @@ void A_Raise(MapObject *mo)
 
 void A_SetCrosshair(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     if (psp->state->jumpstate == 0) return;  // show warning ??
@@ -1326,7 +1336,7 @@ void A_SetCrosshair(MapObject *mo)
 
 void A_TargetJump(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     if (psp->state->jumpstate == 0) return;  // show warning ?? error ???
@@ -1346,7 +1356,7 @@ void A_TargetJump(MapObject *mo)
 
 void A_FriendJump(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     if (psp->state->jumpstate == 0) return;  // show warning ?? error ???
@@ -1389,7 +1399,7 @@ void A_GunFlashFA(MapObject *mo) { DoGunFlash(mo, 3); }
 
 static void DoWeaponShoot(MapObject *mo, int ATK)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     EPI_ASSERT(p->ready_weapon_ >= 0);
@@ -1438,7 +1448,8 @@ static void DoWeaponShoot(MapObject *mo, int ATK)
 
     if (mo->target_)
     {
-        if (info->hit_) StartSoundEffect(info->hit_, WeaponSoundEffectCategory(p), mo);
+        if (info->hit_)
+            StartSoundEffect(info->hit_, WeaponSoundEffectCategory(p), mo);
 
         if (info->feedback_) mo->flags_ |= kMapObjectFlagJustAttacked;
     }
@@ -1489,7 +1500,7 @@ void A_WeaponShootFA(MapObject *mo) { DoWeaponShoot(mo, 3); }
 //
 void A_WeaponEject(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     WeaponDefinition *info   = p->weapons_[p->ready_weapon_].info;
@@ -1509,7 +1520,7 @@ void A_WeaponPlaySound(MapObject *mo)
 {
     // Generate an arbitrary sound from this weapon.
 
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     SoundEffect *sound = nullptr;
@@ -1537,21 +1548,21 @@ void A_SFXWeapon1(MapObject *mo)
 {
     Player *p = mo->player_;
     StartSoundEffect(p->weapons_[p->ready_weapon_].info->sound1_,
-              WeaponSoundEffectCategory(p), mo);
+                     WeaponSoundEffectCategory(p), mo);
 }
 
 void A_SFXWeapon2(MapObject *mo)
 {
     Player *p = mo->player_;
     StartSoundEffect(p->weapons_[p->ready_weapon_].info->sound2_,
-              WeaponSoundEffectCategory(p), mo);
+                     WeaponSoundEffectCategory(p), mo);
 }
 
 void A_SFXWeapon3(MapObject *mo)
 {
     Player *p = mo->player_;
     StartSoundEffect(p->weapons_[p->ready_weapon_].info->sound3_,
-              WeaponSoundEffectCategory(p), mo);
+                     WeaponSoundEffectCategory(p), mo);
 }
 
 //
@@ -1575,7 +1586,7 @@ void A_Light2(MapObject *mo)
 
 void A_WeaponJump(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     WeaponDefinition *info = p->weapons_[p->ready_weapon_].info;
@@ -1605,7 +1616,7 @@ void A_WeaponJump(MapObject *mo)
 // Lobo: what the hell is this function for?
 void A_WeaponDJNE(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     WeaponDefinition *info = p->weapons_[p->ready_weapon_].info;
@@ -1636,7 +1647,7 @@ void A_WeaponDJNE(MapObject *mo)
 
 void A_WeaponTransSet(MapObject *mo)
 {
-    Player     *p     = mo->player_;
+    Player       *p     = mo->player_;
     PlayerSprite *psp   = &p->player_sprites_[p->action_player_sprite_];
     float         value = 1.0f;
 
@@ -1651,7 +1662,7 @@ void A_WeaponTransSet(MapObject *mo)
 
 void A_WeaponTransFade(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     float value = 0.0f;
@@ -1667,31 +1678,33 @@ void A_WeaponTransFade(MapObject *mo)
 
 void A_WeaponEnableRadTrig(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     if (psp->state && psp->state->action_par)
     {
         int tag = *(int *)psp->state->action_par;
-        ScriptEnableByTag(mo, tag, false, (TriggerScriptTag)psp->state->rts_tag_type);
+        ScriptEnableByTag(mo, tag, false,
+                          (TriggerScriptTag)psp->state->rts_tag_type);
     }
 }
 
 void A_WeaponDisableRadTrig(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     if (psp->state && psp->state->action_par)
     {
         int tag = *(int *)psp->state->action_par;
-        ScriptEnableByTag(mo, tag, true, (TriggerScriptTag)psp->state->rts_tag_type);
+        ScriptEnableByTag(mo, tag, true,
+                          (TriggerScriptTag)psp->state->rts_tag_type);
     }
 }
 
 void A_WeaponSetSkin(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     EPI_ASSERT(p->ready_weapon_ >= 0);
@@ -1749,7 +1762,7 @@ void FixWeaponClip(Player *p, int slot)
 
 void A_WeaponBecome(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     WeaponDefinition *oldWep = p->weapons_[p->ready_weapon_].info;
@@ -1785,8 +1798,9 @@ void A_WeaponBecome(MapObject *mo)
     SetPlayerSpriteDeferred(p, kPlayerSpriteWeapon,
                             state);  // refresh the sprite
 
-    FixWeaponClip(p,
-                    p->ready_weapon_);  // handle the potential clip_size difference
+    FixWeaponClip(
+        p,
+        p->ready_weapon_);  // handle the potential clip_size difference
 
     UpdateAvailWeapons(p);
 
@@ -1812,7 +1826,7 @@ void A_WeaponZoom(MapObject *mo)
 
 void WA_MoveFwd(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     const State *st = psp->state;
@@ -1831,7 +1845,7 @@ void WA_MoveFwd(MapObject *mo)
 
 void WA_MoveRight(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     const State *st = psp->state;
@@ -1850,7 +1864,7 @@ void WA_MoveRight(MapObject *mo)
 
 void WA_MoveUp(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     const State *st = psp->state;
@@ -1860,7 +1874,7 @@ void WA_MoveUp(MapObject *mo)
 
 void WA_TurnDir(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     const State *st = psp->state;
@@ -1870,7 +1884,7 @@ void WA_TurnDir(MapObject *mo)
 
 void WA_TurnRandom(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     const State *st            = psp->state;
@@ -1896,7 +1910,7 @@ void WA_TurnRandom(MapObject *mo)
 
 void WA_MlookTurn(MapObject *mo)
 {
-    Player     *p   = mo->player_;
+    Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
     const State *st = psp->state;

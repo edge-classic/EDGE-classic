@@ -37,10 +37,7 @@ std::uniform_int_distribution<unsigned short> unsigned_16_bit_roll(0, 0xFFFF);
 static int state_index = 0;
 static int state_step  = 1;
 
-void RandomInit(void)
-{
-    stateless_ranlux24_generator.seed(GetMicroseconds());
-}
+void RandomInit(void) { stateless_ranlux24_generator.seed(GetMicroseconds()); }
 
 //
 // RandomByte
@@ -130,10 +127,10 @@ int RandomByteSkewToZeroDeterministic(void)
 //
 bool RandomByteTest(float chance)
 {
-    return (chance <= 0)                               ? false
-           : (chance >= 1)                             ? true
+    return (chance <= 0)                      ? false
+           : (chance >= 1)                    ? true
            : (RandomByte() / 255.0f < chance) ? true
-                                                       : false;
+                                              : false;
 }
 
 //
@@ -141,10 +138,10 @@ bool RandomByteTest(float chance)
 //
 bool RandomByteTestDeterministic(float chance)
 {
-    return (chance <= 0)                              ? false
-           : (chance >= 1)                            ? true
+    return (chance <= 0)                                   ? false
+           : (chance >= 1)                                 ? true
            : (RandomByteDeterministic() / 255.0f < chance) ? true
-                                                      : false;
+                                                           : false;
 }
 
 //

@@ -64,8 +64,8 @@ extern bool            need_to_draw_sky;
 // struct member naming deviates from the style guide to reflect
 // MD2 format documentation
 
-static constexpr const char   *kMd2Identifier = "IDP2";
-static constexpr uint8_t kMd2Version    = 8;
+static constexpr const char *kMd2Identifier = "IDP2";
+static constexpr uint8_t     kMd2Version    = 8;
 
 struct RawMd2Header
 {
@@ -131,8 +131,8 @@ struct RawMd2Skin
 // struct member naming deviates from the style guide to reflect
 // MD3 format documentation
 
-static constexpr const char   *kMd3Identifier = "IDP3";
-static constexpr uint8_t kMd3Version    = 15;
+static constexpr const char *kMd3Identifier = "IDP3";
+static constexpr uint8_t     kMd3Version    = 15;
 
 struct RawMd3Header
 {
@@ -1135,17 +1135,17 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_,
     }
     else /* (! data.is_fuzzy_) */
     {
-        skin_tex = ImageCache(skin_img, false,
-                                render_view_effect_colormap
-                                    ? render_view_effect_colormap
-                                : is_weapon_ ? nullptr
-                                             : mo->info_->palremap_);
+        skin_tex =
+            ImageCache(skin_img, false,
+                       render_view_effect_colormap ? render_view_effect_colormap
+                       : is_weapon_                ? nullptr
+                                                   : mo->info_->palremap_);
 
         data.image_right_ = skin_img->Right();
         data.image_top_   = skin_img->Top();
 
         AbstractShader *shader = GetColormapShader(props, mo->state_->bright,
-                                                     mo->subsector_->sector);
+                                                   mo->subsector_->sector);
 
         ShadeNormals(shader, &data, true);
 

@@ -162,8 +162,9 @@ EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_4, "0.30",
 EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_5, "0.30",
                                      kConsoleVariableFlagArchive, 0.01f, 0.99f)
 float *joystick_deadzones[6] = {
-    &joystick_deadzone_axis_0.f_, &joystick_deadzone_axis_1.f_, &joystick_deadzone_axis_2.f_,
-    &joystick_deadzone_axis_3.f_, &joystick_deadzone_axis_4.f_, &joystick_deadzone_axis_5.f_,
+    &joystick_deadzone_axis_0.f_, &joystick_deadzone_axis_1.f_,
+    &joystick_deadzone_axis_2.f_, &joystick_deadzone_axis_3.f_,
+    &joystick_deadzone_axis_4.f_, &joystick_deadzone_axis_5.f_,
 };
 
 EDGE_DEFINE_CONSOLE_VARIABLE(in_running, "1", kConsoleVariableFlagArchive)
@@ -398,8 +399,8 @@ void EventBuildTicCommand(EventTicCommand *cmd)
 
     if (EventIsKeyPressed(key_use) &&
         players[cmd->player_index]->player_state_ !=
-            kPlayerAwaitingRespawn)  // Prevent passing use action when hitting 'use' to
-                         // respawn
+            kPlayerAwaitingRespawn)  // Prevent passing use action when hitting
+                                     // 'use' to respawn
         cmd->buttons |= kButtonCodeUse;
 
     if (EventIsKeyPressed(key_second_attack))

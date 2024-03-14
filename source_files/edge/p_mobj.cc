@@ -81,8 +81,8 @@ static constexpr float kOofSpeed =
 
 static constexpr uint8_t kMaxThinkLoop = 8;
 
-static constexpr float kMaximumMove = 200.0f;
-static constexpr float kStepMove = 16.0f;
+static constexpr float   kMaximumMove  = 200.0f;
+static constexpr float   kStepMove     = 16.0f;
 static constexpr uint8_t kRespawnDelay = (kTicRate / 2);
 
 extern ConsoleVariable double_framerate;
@@ -165,8 +165,8 @@ static inline int PointOnLineSide(float x, float y, Line *ld)
 {
     DividingLine div;
 
-    div.x  = ld->vertex_1->X;
-    div.y  = ld->vertex_1->Y;
+    div.x       = ld->vertex_1->X;
+    div.y       = ld->vertex_1->Y;
     div.delta_x = ld->delta_x;
     div.delta_y = ld->delta_y;
 
@@ -209,7 +209,7 @@ static void BounceOffWall(MapObject *mo, Line *wall)
     BAMAngle diff;
 
     DividingLine div;
-    float     dest_x, dest_y;
+    float        dest_x, dest_y;
 
     angle      = RendererPointToAngle(0, 0, mo->momentum_.X, mo->momentum_.Y);
     wall_angle = RendererPointToAngle(0, 0, wall->delta_x, wall->delta_y);
@@ -225,8 +225,8 @@ static void BounceOffWall(MapObject *mo, Line *wall)
     dest_y =
         mo->y + epi::BAMSin(angle) * (mo->speed_ + mo->info_->radius_) * 4.0f;
 
-    div.x  = wall->vertex_1->X;
-    div.y  = wall->vertex_1->Y;
+    div.x       = wall->vertex_1->X;
+    div.y       = wall->vertex_1->Y;
     div.delta_x = wall->delta_x;
     div.delta_y = wall->delta_y;
 
@@ -285,7 +285,7 @@ static bool CorpseShouldSlide(MapObject *mo)
         return false;
     }
 
-    float floor_slope_z = 0;
+    float floor_slope_z   = 0;
     float ceiling_slope_z = 0;
 
     // Vertex slope check here?
@@ -294,11 +294,12 @@ static bool CorpseShouldSlide(MapObject *mo)
         HMM_Vec3 line_a{{mo->x, mo->y, -40000}};
         HMM_Vec3 line_b{{mo->x, mo->y, 40000}};
         float    z_test =
-            MathLinePlaneIntersection(line_a, line_b,
-                                      mo->subsector_->sector->floor_z_vertices[2],
-                                      mo->subsector_->sector->floor_vertex_slope_normal)
+            MathLinePlaneIntersection(
+                line_a, line_b, mo->subsector_->sector->floor_z_vertices[2],
+                mo->subsector_->sector->floor_vertex_slope_normal)
                 .Z;
-        if (isfinite(z_test)) floor_slope_z = z_test - mo->subsector_->sector->floor_height;
+        if (isfinite(z_test))
+            floor_slope_z = z_test - mo->subsector_->sector->floor_height;
     }
 
     if (mo->subsector_->sector->ceiling_vertex_slope)
@@ -306,15 +307,16 @@ static bool CorpseShouldSlide(MapObject *mo)
         HMM_Vec3 line_a{{mo->x, mo->y, -40000}};
         HMM_Vec3 line_b{{mo->x, mo->y, 40000}};
         float    z_test =
-            MathLinePlaneIntersection(line_a, line_b,
-                                      mo->subsector_->sector->ceiling_z_vertices[2],
-                                      mo->subsector_->sector->ceiling_vertex_slope_normal)
+            MathLinePlaneIntersection(
+                line_a, line_b, mo->subsector_->sector->ceiling_z_vertices[2],
+                mo->subsector_->sector->ceiling_vertex_slope_normal)
                 .Z;
-        if (isfinite(z_test)) ceiling_slope_z = mo->subsector_->sector->ceiling_height - z_test;
+        if (isfinite(z_test))
+            ceiling_slope_z = mo->subsector_->sector->ceiling_height - z_test;
     }
 
-    ComputeThingGap(mo, mo->subsector_->sector, mo->z, &floor, &ceil, floor_slope_z,
-                    ceiling_slope_z);
+    ComputeThingGap(mo, mo->subsector_->sector, mo->z, &floor, &ceil,
+                    floor_slope_z, ceiling_slope_z);
 
     return (!AlmostEquals(mo->floor_z_, floor));
 }
@@ -440,7 +442,8 @@ static void ResurrectRespawn(MapObject *mobj)
 
     // Resurrect monster
     if (info->overkill_sound_)
-        StartSoundEffect(info->overkill_sound_, GetSoundEffectCategory(mobj), mobj);
+        StartSoundEffect(info->overkill_sound_, GetSoundEffectCategory(mobj),
+                         mobj);
 
     MapObjectSetState(mobj, info->raise_state_);
 
@@ -582,7 +585,7 @@ int MapObjectFindLabel(MapObject *mobj, const char *label)
 // P_SetMobjDirAndSpeed
 //
 void MapObjectSetDirectionAndSpeed(MapObject *mo, BAMAngle angle, float slope,
-                          float speed)
+                                   float speed)
 {
     mo->angle_          = angle;
     mo->vertical_angle_ = epi::BAMFromATan(slope);
@@ -612,13 +615,14 @@ void ExplodeMissile(MapObject *mo)
 
     // mobjdef used -ACB- 1998/08/06
     MapObjectSetStateDeferred(mo, mo->info_->death_state_,
-                           RandomByteDeterministic() & 3);
+                              RandomByteDeterministic() & 3);
 }
 
 static inline void AddRegionProperties(const MapObject *mo, float bz, float tz,
-                                       RegionProperties *new_p, float floor_height,
-                                       float ceiling_height, const RegionProperties *p,
-                                       bool iterate_pushers)
+                                       RegionProperties *new_p,
+                                       float floor_height, float ceiling_height,
+                                       const RegionProperties *p,
+                                       bool                    iterate_pushers)
 {
     int flags =
         p->special ? p->special->special_flags_ : kSectorFlagPushConstant;
@@ -628,7 +632,8 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz,
 
     EPI_ASSERT(tz > bz);
 
-    if (tz > ceiling_height) factor -= factor * (tz - ceiling_height) / (tz - bz);
+    if (tz > ceiling_height)
+        factor -= factor * (tz - ceiling_height) / (tz - bz);
 
     if (bz < floor_height) factor -= factor * (floor_height - bz) / (tz - bz);
 
@@ -693,7 +698,8 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz,
     {
         if (p->push.X || p->push.Y || p->push.Z)
         {
-            if (!(flags & kSectorFlagWholeRegion) && bz > floor_height + 1) return;
+            if (!(flags & kSectorFlagWholeRegion) && bz > floor_height + 1)
+                return;
 
             push_mul = 1.0f;
 
@@ -727,7 +733,7 @@ void CalculateFullRegionProperties(const MapObject *mo, RegionProperties *new_p)
     Sector *sector = mo->subsector_->sector;
 
     Extrafloor *S, *L, *C;
-    float         floor_h;
+    float       floor_h;
 
     float bz = mo->z;
     float tz = bz + mo->height_;
@@ -767,17 +773,20 @@ void CalculateFullRegionProperties(const MapObject *mo, RegionProperties *new_p)
         EPI_ASSERT(C);
 
         // ignore "hidden" liquids
-        if (C->bottom_height < floor_h || C->bottom_height > sector->ceiling_height) continue;
+        if (C->bottom_height < floor_h ||
+            C->bottom_height > sector->ceiling_height)
+            continue;
 
         if (bz < C->bottom_height) new_p->friction = C->properties->friction;
 
-        AddRegionProperties(mo, bz, tz, new_p, floor_h, C->top_height, C->properties, false);
+        AddRegionProperties(mo, bz, tz, new_p, floor_h, C->top_height,
+                            C->properties, false);
 
         floor_h = C->top_height;
     }
 
-    AddRegionProperties(mo, bz, tz, new_p, floor_h, sector->ceiling_height, sector->active_properties,
-                        true);
+    AddRegionProperties(mo, bz, tz, new_p, floor_h, sector->ceiling_height,
+                        sector->active_properties, true);
 }
 
 //
@@ -959,8 +968,7 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props,
                         {
                             DebrisThing = tempspecial->effectobject_;
                             SpawnDebris(mo->x, mo->y, mo->z,
-                                          mo->angle_ + kBAMAngle180,
-                                          DebrisThing);
+                                        mo->angle_ + kBAMAngle180, DebrisThing);
                         }
                     }
                 }
@@ -990,7 +998,7 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props,
                     mo->z > ground_h - mo->height_ * 1.4)
                 {
                     PlayerJump(mo->player_, mo->info_->jumpheight_,
-                                 2 * kTicRate);
+                               2 * kTicRate);
                 }
             }
 
@@ -1112,8 +1120,8 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
 
     // -KM- 1998/11/25 Gravity is now not precalculated so that
     //  menu changes affect instantly.
-    float gravity = props->gravity / 8.0f * (float)level_flags.menu_gravity_factor /
-                    kGravityDefault *
+    float gravity = props->gravity / 8.0f *
+                    (float)level_flags.menu_gravity_factor / kGravityDefault *
                     gravity_factor.f_;  // New global gravity menu item
 
     // check for smooth step up
@@ -1122,7 +1130,8 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
         mo->player_->view_height_ -= (mo->floor_z_ - mo->z);
         mo->player_->view_z_ -= (mo->floor_z_ - mo->z);
         mo->player_->delta_view_height_ =
-            (mo->player_->standard_view_height_ - mo->player_->view_height_) / 8.0f;
+            (mo->player_->standard_view_height_ - mo->player_->view_height_) /
+            8.0f;
     }
 
     zmove = mo->momentum_.Z * (1.0f - props->viscosity);
@@ -1192,14 +1201,14 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
                     if (!(mo->player_->cheats_ & kCheatingGodMode) &&
                         mo->player_->powers_[kPowerTypeInvulnerable] < 1)
                         StartSoundEffect(mo->info_->fallpain_sound_,
-                                  GetSoundEffectCategory(mo), mo);
+                                         GetSoundEffectCategory(mo), mo);
                     else
                         StartSoundEffect(mo->info_->oof_sound_,
-                                  GetSoundEffectCategory(mo), mo);
+                                         GetSoundEffectCategory(mo), mo);
                 }
                 else
-                    StartSoundEffect(mo->info_->oof_sound_, GetSoundEffectCategory(mo),
-                              mo);
+                    StartSoundEffect(mo->info_->oof_sound_,
+                                     GetSoundEffectCategory(mo), mo);
 
                 HitLiquidFloor(mo);
             }
@@ -1313,7 +1322,8 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
                 !fly_or_swim)
             {
                 mo->player_->delta_view_height_ = zmove / 8.0f;
-                StartSoundEffect(mo->info_->oof_sound_, GetSoundEffectCategory(mo), mo);
+                StartSoundEffect(mo->info_->oof_sound_,
+                                 GetSoundEffectCategory(mo), mo);
             }
             if (mo->info_->maxfall_ > 0 && gravity < 0 &&
                 mo->momentum_.Z > hurt_momz && (!mo->player_ || !fly_or_swim))
@@ -1947,9 +1957,10 @@ void RunMapObjectThinkers(bool extra_tic)
                 if (!distance_cull_thinkers.d_ ||
                     (game_tic / 2 %
                          RoundToInteger(
-                             1 + RendererPointToDistance(players[console_player]->map_object_->x,
-                                               players[console_player]->map_object_->y,
-                                               mo->x, mo->y) /
+                             1 + RendererPointToDistance(
+                                     players[console_player]->map_object_->x,
+                                     players[console_player]->map_object_->y,
+                                     mo->x, mo->y) /
                                      1500) ==
                      0))
                     P_MobjThinker(mo, extra_tic);
@@ -1962,12 +1973,13 @@ void RunMapObjectThinkers(bool extra_tic)
                         continue;
                     else if (!distance_cull_thinkers.d_ ||
                              ((game_tic / 4) %
-                                  RoundToInteger(
-                                      1 + RendererPointToDistance(
-                                              players[console_player]->map_object_->x,
-                                              players[console_player]->map_object_->y,
-                                              mo->x, mo->y) /
-                                              1500) ==
+                                  RoundToInteger(1 + RendererPointToDistance(
+                                                         players[console_player]
+                                                             ->map_object_->x,
+                                                         players[console_player]
+                                                             ->map_object_->y,
+                                                         mo->x, mo->y) /
+                                                         1500) ==
                               0))
                         P_MobjThinker(mo, extra_tic);
                 }
@@ -1975,9 +1987,10 @@ void RunMapObjectThinkers(bool extra_tic)
                          ((game_tic / 4) %
                               RoundToInteger(
                                   1 +
-                                  RendererPointToDistance(players[console_player]->map_object_->x,
-                                                players[console_player]->map_object_->y,
-                                                mo->x, mo->y) /
+                                  RendererPointToDistance(
+                                      players[console_player]->map_object_->x,
+                                      players[console_player]->map_object_->y,
+                                      mo->x, mo->y) /
                                       1500) ==
                           0))
                     P_MobjThinker(mo, extra_tic);
@@ -1995,7 +2008,7 @@ void RunMapObjectThinkers(bool extra_tic)
 // P_SpawnDebris
 //
 void SpawnDebris(float x, float y, float z, BAMAngle angle,
-                   const MapObjectDefinition *debris)
+                 const MapObjectDefinition *debris)
 {
     // if (!level_flags.have_extra && (splash->extended_flags_ &
     // kExtendedFlagExtra)) return; if (! (splash->extended_flags_ &
@@ -2014,7 +2027,7 @@ void SpawnDebris(float x, float y, float z, BAMAngle angle,
 // P_SpawnPuff
 //
 void SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff,
-                 BAMAngle angle)
+               BAMAngle angle)
 {
     MapObject *th;
 
@@ -2041,7 +2054,7 @@ void SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff,
 // -KM- 1999/01/31 Different blood objects for different mobjs.
 //
 void SpawnBlood(float x, float y, float z, float damage, BAMAngle angle,
-                  const MapObjectDefinition *blood)
+                const MapObjectDefinition *blood)
 {
     int        num;
     MapObject *th;
@@ -2063,7 +2076,7 @@ void SpawnBlood(float x, float y, float z, float damage, BAMAngle angle,
         th = CreateMapObject(x, y, z, blood);
 
         MapObjectSetDirectionAndSpeed(th, angle, ((float)num + 12.0f) / 6.0f,
-                             (float)num / 4.0f);
+                                      (float)num / 4.0f);
 
         th->tics_ -= RandomByteDeterministic() & 3;
 
@@ -2090,27 +2103,30 @@ FlatDefinition *P_IsThingOnLiquidFloor(MapObject *thing)
     // If no 3D floors, just return the flat
     if (thing->subsector_->sector->extrafloor_used == 0)
     {
-        current_flatdef =
-            flatdefs.Find(thing->subsector_->sector->floor.image->name_.c_str());
+        current_flatdef = flatdefs.Find(
+            thing->subsector_->sector->floor.image->name_.c_str());
     }
     // Start from the lowest exfloor and check if the player is standing on it,
     // then return the control sector's flat
     else
     {
-        float         player_floor_height = thing->floor_z_;
-        Extrafloor *floor_checker  = thing->subsector_->sector->bottom_extrafloor;
+        float       player_floor_height = thing->floor_z_;
+        Extrafloor *floor_checker =
+            thing->subsector_->sector->bottom_extrafloor;
         Extrafloor *liquid_checker = thing->subsector_->sector->bottom_liquid;
         for (Extrafloor *ef = floor_checker; ef; ef = ef->higher)
         {
             if (AlmostEquals(player_floor_height, ef->top_height))
-                current_flatdef = flatdefs.Find(
-                    ef->extrafloor_line->front_sector->floor.image->name_.c_str());
+                current_flatdef =
+                    flatdefs.Find(ef->extrafloor_line->front_sector->floor
+                                      .image->name_.c_str());
         }
         for (Extrafloor *ef = liquid_checker; ef; ef = ef->higher)
         {
             if (AlmostEquals(player_floor_height, ef->top_height))
-                current_flatdef = flatdefs.Find(
-                    ef->extrafloor_line->front_sector->floor.image->name_.c_str());
+                current_flatdef =
+                    flatdefs.Find(ef->extrafloor_line->front_sector->floor
+                                      .image->name_.c_str());
         }
         // if (!current_flatdef)
         //	current_flatdef =
@@ -2138,7 +2154,8 @@ bool HitLiquidFloor(MapObject *thing)
     if (thing->subsector_->sector->floor_vertex_slope &&
         thing->z > thing->floor_z_)
         return false;
-    else if (!AlmostEquals(thing->floor_z_, thing->subsector_->sector->floor_height))
+    else if (!AlmostEquals(thing->floor_z_,
+                           thing->subsector_->sector->floor_height))
         return false;
 
     FlatDefinition *current_flatdef = P_IsThingOnLiquidFloor(thing);
@@ -2152,10 +2169,10 @@ bool HitLiquidFloor(MapObject *thing)
                                 (int)(kBAMAngle1 / 2));
 
             SpawnDebris(thing->x, thing->y, thing->z, angle,
-                          current_flatdef->impactobject_);
+                        current_flatdef->impactobject_);
 
-            StartSoundEffect(current_flatdef->footstep_, GetSoundEffectCategory(thing),
-                      thing);
+            StartSoundEffect(current_flatdef->footstep_,
+                             GetSoundEffectCategory(thing), thing);
         }
         if (current_flatdef->liquid_.empty()) { return false; }
         else
@@ -2269,7 +2286,7 @@ void RemoveMissile(MapObject *missile)
 // -ACB- 1998/08/02 Procedure written.
 //
 MapObject *CreateMapObject(float x, float y, float z,
-                              const MapObjectDefinition *info)
+                           const MapObjectDefinition *info)
 {
     MapObject *mobj = new MapObject;
 
@@ -2313,7 +2330,8 @@ MapObject *CreateMapObject(float x, float y, float z,
     mobj->current_attack_ = nullptr;
     mobj->on_ladder_      = -1;
 
-    if (game_skill != kSkillNightmare) mobj->reaction_time_ = info->reaction_time_;
+    if (game_skill != kSkillNightmare)
+        mobj->reaction_time_ = info->reaction_time_;
 
     mobj->last_look_ = RandomByteDeterministic() % kMaximumPlayers;
 
@@ -2367,7 +2385,7 @@ MapObject *CreateMapObject(float x, float y, float z,
 
     Sector *sec = mobj->subsector_->sector;
 
-    float floor_slope_z = 0;
+    float floor_slope_z   = 0;
     float ceiling_slope_z = 0;
 
     if (sec->floor_vertex_slope)
@@ -2380,10 +2398,10 @@ MapObject *CreateMapObject(float x, float y, float z,
     }
     if (sec->ceiling_vertex_slope)
     {
-        float sz =
-            MathLinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}},
-                                      sec->ceiling_z_vertices[2], sec->ceiling_vertex_slope_normal)
-                .Z;
+        float sz = MathLinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}},
+                                             sec->ceiling_z_vertices[2],
+                                             sec->ceiling_vertex_slope_normal)
+                       .Z;
         if (isfinite(sz)) ceiling_slope_z = sec->ceiling_height - sz;
     }
 

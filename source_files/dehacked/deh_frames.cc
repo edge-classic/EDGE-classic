@@ -872,7 +872,8 @@ const char *frames::GroupToName(char group)
             return "FLASH";
 
         default:
-            FatalError("Dehacked: Error - GroupToName: BAD GROUP '%c'\n", group);
+            FatalError("Dehacked: Error - GroupToName: BAD GROUP '%c'\n",
+                       group);
     }
 
     return nullptr;

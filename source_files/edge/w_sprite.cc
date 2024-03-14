@@ -380,9 +380,9 @@ static void FillSpriteFrames(int file)
                                       spritebase, packsprites[L], spr_len, 0);
 
                     if (spritebase.size() == spr_len + 4)
-                        InstallSpritePack(sprite_map[S], data_files[file]->pack_,
-                                          spritebase, packsprites[L],
-                                          spr_len + 2, 1);
+                        InstallSpritePack(sprite_map[S],
+                                          data_files[file]->pack_, spritebase,
+                                          packsprites[L], spr_len + 2, 1);
                 }
                 L = 0;
             }
@@ -441,7 +441,8 @@ static void FillSpriteFramesUser()
                     offset_check = OpenFileFromPack(
                         images[L]->source_.graphic.packfile_name);
                 else
-                    offset_check = LoadLumpAsFile(images[L]->source_.graphic.lump);
+                    offset_check =
+                        LoadLumpAsFile(images[L]->source_.graphic.lump);
 
                 if (!offset_check)
                     FatalError("FillSpriteFramesUser: Error loading %s!\n",
@@ -452,8 +453,9 @@ static void FillSpriteFramesUser()
                 offset_check->Read(header, sizeof(header));
                 delete offset_check;
 
-                const Patch *pat    = (Patch *)header;
-                change_img->offset_x_ = AlignedLittleEndianS16(pat->left_offset);
+                const Patch *pat = (Patch *)header;
+                change_img->offset_x_ =
+                    AlignedLittleEndianS16(pat->left_offset);
                 change_img->offset_y_ = AlignedLittleEndianS16(pat->top_offset);
                 // adjust sprite offsets so that (0,0) is normal
                 if (sprite_map[S]->HasWeapon())

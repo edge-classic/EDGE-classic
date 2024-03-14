@@ -685,7 +685,8 @@ static void PlaneCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb,
 
     HMM_Vec2 rxy = {{(data->tx0 + pos->X), (data->ty0 + pos->Y)}};
 
-    if (data->rotation) rxy = HMM_RotateV2(rxy, epi::RadiansFromBAM(data->rotation));
+    if (data->rotation)
+        rxy = HMM_RotateV2(rxy, epi::RadiansFromBAM(data->rotation));
 
     rxy.X /= data->image_w;
     rxy.Y /= data->image_h;
@@ -901,7 +902,8 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1,
     {
         if (AlmostEquals(current_seg->vertex_1->Y, current_seg->vertex_2->Y))
             lit_adjust -= 16;
-        else if (AlmostEquals(current_seg->vertex_1->X, current_seg->vertex_2->X))
+        else if (AlmostEquals(current_seg->vertex_1->X,
+                              current_seg->vertex_2->X))
             lit_adjust += 16;
     }
 
@@ -942,7 +944,8 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1,
     if (solid_mode && !mid_masked)
     {
         GreetNeighbourSector(left_h, left_num, current_seg->vertex_sectors[0]);
-        GreetNeighbourSector(right_h, right_num, current_seg->vertex_sectors[1]);
+        GreetNeighbourSector(right_h, right_num,
+                             current_seg->vertex_sectors[1]);
     }
 
     HMM_Vec3 vertices[kMaximumEdgeVertices * 2];
@@ -1512,15 +1515,17 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum,
             }
 
             AddWallTile2(seg, dfloor, &sd->bottom, lz1, lz2, rz1, rz2,
-                         (ld->flags & kLineFlagLowerUnpegged) ? sec->ceiling_height
-                                                         : other->floor_height,
+                         (ld->flags & kLineFlagLowerUnpegged)
+                             ? sec->ceiling_height
+                             : other->floor_height,
                          0);
         }
         else
         {
             AddWallTile(seg, dfloor, &sd->bottom, slope_fh, other->floor_height,
-                        (ld->flags & kLineFlagLowerUnpegged) ? sec->ceiling_height
-                                                        : other->floor_height,
+                        (ld->flags & kLineFlagLowerUnpegged)
+                            ? sec->ceiling_height
+                            : other->floor_height,
                         0, f_min, c_max);
         }
     }
@@ -1541,7 +1546,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum,
                 sec->ceiling_height,
                 (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->ceiling_height,
                 (ld->flags & kLineFlagUpperUnpegged) ? sec->floor_height
-                                                : HMM_MIN(zv1, zv2),
+                                                     : HMM_MIN(zv1, zv2),
                 0);
         }
         else if (sec->ceiling_vertex_slope && !other->ceiling_vertex_slope)
@@ -1558,7 +1563,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum,
                 (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2
                                                     : other->ceiling_height,
                 (ld->flags & kLineFlagUpperUnpegged) ? other->floor_height
-                                                : HMM_MIN(zv1, zv2),
+                                                     : HMM_MIN(zv1, zv2),
                 0);
         }
         else if (!sd->top.image && !debug_hall_of_mirrors.d_)
@@ -1923,7 +1928,8 @@ static void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref,
     data.h1        = h1;
     data.dh        = dh;
 
-    AbstractShader *cmap_shader = GetColormapShader(props, 0, current_subsector->sector);
+    AbstractShader *cmap_shader =
+        GetColormapShader(props, 0, current_subsector->sector);
 
     data.v_count = (piece_col + 1) * 2;
 
@@ -2167,8 +2173,8 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
     bool precise = total_active_mirrors > 0;
     if (!precise && seg->linedef)
     {
-        precise =
-            (seg->linedef->flags & kLineFlagMirror) || (seg->linedef->portal_pair);
+        precise = (seg->linedef->flags & kLineFlagMirror) ||
+                  (seg->linedef->portal_pair);
     }
 
     BAMAngle angle_L = RendererPointToAngle(view_x, view_y, sx1, sy1, precise);
@@ -2255,7 +2261,8 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
 
     // --- handle sky (using the depth buffer) ---
 
-    if (bsector && EDGE_IMAGE_IS_SKY(fsector->floor) && EDGE_IMAGE_IS_SKY(bsector->floor))
+    if (bsector && EDGE_IMAGE_IS_SKY(fsector->floor) &&
+        EDGE_IMAGE_IS_SKY(bsector->floor))
     {
         if (fsector->floor_height < bsector->floor_height)
         {
@@ -2286,7 +2293,8 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
         }
     }
     // -AJA- 2004/08/29: Emulate Sky-Flooding TRICK
-    else if (!debug_hall_of_mirrors.d_ && bsector && EDGE_IMAGE_IS_SKY(bsector->ceiling) &&
+    else if (!debug_hall_of_mirrors.d_ && bsector &&
+             EDGE_IMAGE_IS_SKY(bsector->ceiling) &&
              seg->sidedef->top.image == nullptr &&
              bsector->ceiling_height < fsector->ceiling_height)
     {
@@ -2446,7 +2454,8 @@ static void RendererDrawPlane(DrawFloor *dfloor, float h, MapSurface *surf,
 
     SlopePlane *slope = nullptr;
 
-    if (face_dir > 0 && dfloor->is_lowest) slope = current_subsector->sector->floor_slope;
+    if (face_dir > 0 && dfloor->is_lowest)
+        slope = current_subsector->sector->floor_slope;
 
     if (face_dir < 0 && dfloor->is_highest)
         slope = current_subsector->sector->ceiling_slope;
@@ -2500,8 +2509,8 @@ static void RendererDrawPlane(DrawFloor *dfloor, float h, MapSurface *surf,
 
     int v_count = 0;
 
-    for (seg = current_subsector->segs, i = 0; seg && (i < kMaximumPolygonVertices);
-         seg = seg->subsector_next, i++)
+    for (seg = current_subsector->segs, i = 0;
+         seg && (i < kMaximumPolygonVertices); seg = seg->subsector_next, i++)
     {
         if (v_count < kMaximumPolygonVertices)
         {
@@ -2582,9 +2591,11 @@ static void RendererDrawPlane(DrawFloor *dfloor, float h, MapSurface *surf,
     if (current_subsector->sector->properties.special)
     {
         if (face_dir > 0)
-            data.bob_amount = current_subsector->sector->properties.special->floor_bob_;
+            data.bob_amount =
+                current_subsector->sector->properties.special->floor_bob_;
         else
-            data.bob_amount = current_subsector->sector->properties.special->ceiling_bob_;
+            data.bob_amount =
+                current_subsector->sector->properties.special->ceiling_bob_;
     }
 
     if (surf->image->liquid_type_ == kLiquidImageThick)
@@ -2596,7 +2607,8 @@ static void RendererDrawPlane(DrawFloor *dfloor, float h, MapSurface *surf,
         swirling_flats > kLiquidSwirlSmmu)
         swirl_pass = 1;
 
-    AbstractShader *cmap_shader = GetColormapShader(props, 0, current_subsector->sector);
+    AbstractShader *cmap_shader =
+        GetColormapShader(props, 0, current_subsector->sector);
 
     cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id, trans,
                           &data.pass, data.blending, false /* masked */, &data,
@@ -2730,12 +2742,14 @@ static void RendererWalkSubsector(int num)
 
     // --- handle sky (using the depth buffer) ---
 
-    if (EDGE_IMAGE_IS_SKY(sub->sector->floor) && view_z > sub->sector->floor_height)
+    if (EDGE_IMAGE_IS_SKY(sub->sector->floor) &&
+        view_z > sub->sector->floor_height)
     {
         RendererDrawSkyPlane(sub, sub->sector->floor_height);
     }
 
-    if (EDGE_IMAGE_IS_SKY(sub->sector->ceiling) && view_z < sub->sector->sky_height)
+    if (EDGE_IMAGE_IS_SKY(sub->sector->ceiling) &&
+        view_z < sub->sector->sky_height)
     {
         RendererDrawSkyPlane(sub, sub->sector->sky_height);
     }
@@ -3264,8 +3278,8 @@ static void RenderTrueBsp(void)
     {
         if (v_player->ready_weapon_ >= 0)
         {
-            FlashFirst =
-                v_player->weapons_[v_player->ready_weapon_].info->render_invert_;
+            FlashFirst = v_player->weapons_[v_player->ready_weapon_]
+                             .info->render_invert_;
         }
     }
 
@@ -3331,7 +3345,8 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
     {
         view_is_zoomed = true;
 
-        float new_slope = tan(mo->player_->zoom_field_of_view_ * HMM_PI / 360.0);
+        float new_slope =
+            tan(mo->player_->zoom_field_of_view_ * HMM_PI / 360.0);
 
         view_y_slope *= new_slope / view_x_slope;
         view_x_slope = new_slope;

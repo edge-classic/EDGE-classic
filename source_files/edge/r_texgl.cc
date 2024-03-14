@@ -316,7 +316,7 @@ int DetermineOpacity(ImageData *img, bool *is_empty_)
     if (img->depth_ == 1)
     {
         ImageOpacity opacity = kOpacitySolid;
-        bool            empty   = true;
+        bool         empty   = true;
 
         for (int y = 0; y < img->used_height_; y++)
             for (int x = 0; x < img->used_width_; x++)
@@ -337,8 +337,8 @@ int DetermineOpacity(ImageData *img, bool *is_empty_)
         EPI_ASSERT(img->depth_ == 4);
 
         ImageOpacity opacity   = kOpacitySolid;
-        bool            is_masked = false;
-        bool            empty     = true;
+        bool         is_masked = false;
+        bool         empty     = true;
 
         for (int y = 0; y < img->used_height_; y++)
             for (int x = 0; x < img->used_width_; x++)

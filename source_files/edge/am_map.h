@@ -29,9 +29,9 @@
 #include "e_event.h"
 #include "p_mobj.h"
 
-extern bool   automap_active;
-extern bool   rotate_map;
-extern bool   automap_keydoor_blink;
+extern bool            automap_active;
+extern bool            rotate_map;
+extern bool            automap_keydoor_blink;
 extern ConsoleVariable automap_keydoor_text;
 
 struct AutomapPoint

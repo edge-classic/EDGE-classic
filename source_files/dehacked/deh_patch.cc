@@ -454,7 +454,8 @@ void ReadBinaryThing(int mt_num)
     LogPrint("\n--- ReadBinaryThing %d ---\n", mt_num);
 
     if (file_error)
-        FatalError("Dehacked: Error - File error reading binary thing table.\n");
+        FatalError(
+            "Dehacked: Error - File error reading binary thing table.\n");
 
     DehackedMapObjectDefinition *mobj = things::GetModifiedMobj(mt_num);
 
@@ -509,7 +510,8 @@ void ReadBinaryWeapon(int wp_num)
     LogPrint("\n--- ReadBinaryWeapon %d ---\n", wp_num);
 
     if (file_error)
-        FatalError("Dehacked: Error - File error reading binary weapon table.\n");
+        FatalError(
+            "Dehacked: Error - File error reading binary weapon table.\n");
 
     WeaponInfo *weap = weapon_info + wp_num;
 
@@ -527,7 +529,8 @@ void ReadBinaryFrame(int st_num)
     LogPrint("\n--- ReadBinaryFrame %d ---\n", st_num);
 
     if (file_error)
-        FatalError("Dehacked: Error - File error reading binary frame table.\n");
+        FatalError(
+            "Dehacked: Error - File error reading binary frame table.\n");
 
     State *state = frames::GetModifiedState(st_num);
 
@@ -548,7 +551,8 @@ void ReadBinarySound(int s_num)
     LogPrint("\n--- ReadBinarySound %d ---\n", s_num);
 
     if (file_error)
-        FatalError("Dehacked: Error - File error reading binary sound table.\n");
+        FatalError(
+            "Dehacked: Error - File error reading binary sound table.\n");
 
     GetRawInt();  // ignore sound name pointer
     GetRawInt();  // ignore singularity
@@ -568,7 +572,8 @@ void ReadBinarySprite(int spr_num)
     LogPrint("\n--- ReadBinarySprite %d ---\n", spr_num);
 
     if (file_error)
-        FatalError("Dehacked: Error - File error reading binary sprite table.\n");
+        FatalError(
+            "Dehacked: Error - File error reading binary sprite table.\n");
 
     GetRawInt();  // ignore sprite name pointer
 }
@@ -873,7 +878,7 @@ bool ValidateObject(void)
 
             default:
                 FatalError("Dehacked: Error - Bad active_section value %d\n",
-                        active_section);
+                           active_section);
         }
     }
     else /* patch_fmt == 6, allow BOOM/MBF stuff */
@@ -904,7 +909,7 @@ bool ValidateObject(void)
 
             default:
                 FatalError("Dehacked: Error - Bad active_section value %d\n",
-                        active_section);
+                           active_section);
         }
     }
 
@@ -1109,8 +1114,9 @@ void ProcessBexString(void)
     LogPrint("BEX STRING REPLACE: %s\n", line_buf);
 
     if (strlen(line_buf) >= 100)
-        FatalError("Dehacked: Error - Bex string name too long !\nLine %d: %s\n",
-                line_num, line_buf);
+        FatalError(
+            "Dehacked: Error - Bex string name too long !\nLine %d: %s\n",
+            line_num, line_buf);
 
     char bex_field[104];
 
@@ -1251,7 +1257,7 @@ void ProcessLine(void)
 
         default:
             FatalError("Dehacked: Error - Bad active_section value %d\n",
-                    active_section);
+                       active_section);
     }
 }
 

@@ -30,9 +30,9 @@
 // EPI
 #include "epi.h"
 #include "filesystem.h"
+#include "sokol_color.h"
 #include "str_compare.h"
 #include "str_util.h"
-#include "sokol_color.h"
 
 // EDGE
 #include "p_action.h"
@@ -378,7 +378,8 @@ void DDF_GetLumpNameForFile(const char *filename, char *lumpname)
             }
 
             fclose(fp);
-            FatalError("Unknown marker <%s> in DDF file: %s\n", tag_buf, filename);
+            FatalError("Unknown marker <%s> in DDF file: %s\n", tag_buf,
+                       filename);
         }
         break;
     }

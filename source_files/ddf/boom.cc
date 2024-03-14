@@ -156,15 +156,16 @@ void DDF_BoomMakeGenSector(SectorType *sec, int number)
         switch ((number >> 5) & 0x3)
         {
             case 0:  // Kill player if no radsuit or invul status
-                sec->damage_.delay_                         = 0;
-                sec->damage_.instakill_                     = true;
-                sec->damage_.damage_unless_                 = new Benefit;
-                sec->damage_.damage_unless_->type           = kBenefitTypePowerup;
-                sec->damage_.damage_unless_->sub.type       = kPowerTypeAcidSuit;
-                sec->damage_.damage_unless_->next           = new Benefit;
-                sec->damage_.damage_unless_->next->type     = kBenefitTypePowerup;
-                sec->damage_.damage_unless_->next->sub.type = kPowerTypeInvulnerable;
-                sec->damage_.damage_unless_->next->next     = nullptr;
+                sec->damage_.delay_                     = 0;
+                sec->damage_.instakill_                 = true;
+                sec->damage_.damage_unless_             = new Benefit;
+                sec->damage_.damage_unless_->type       = kBenefitTypePowerup;
+                sec->damage_.damage_unless_->sub.type   = kPowerTypeAcidSuit;
+                sec->damage_.damage_unless_->next       = new Benefit;
+                sec->damage_.damage_unless_->next->type = kBenefitTypePowerup;
+                sec->damage_.damage_unless_->next->sub.type =
+                    kPowerTypeInvulnerable;
+                sec->damage_.damage_unless_->next->next = nullptr;
                 break;
 
             case 1:  // Kill player
@@ -178,7 +179,7 @@ void DDF_BoomMakeGenSector(SectorType *sec, int number)
                 sec->damage_.all_players_ = true;
                 sec->damage_.instakill_   = true;
                 sec->damage_.bypass_all_  = true;
-                sec->e_exit_             = kExitTypeNormal;
+                sec->e_exit_              = kExitTypeNormal;
                 break;
 
             case 3:  // Kill all players and exit map (secret)
@@ -186,7 +187,7 @@ void DDF_BoomMakeGenSector(SectorType *sec, int number)
                 sec->damage_.all_players_ = true;
                 sec->damage_.instakill_   = true;
                 sec->damage_.bypass_all_  = true;
-                sec->e_exit_             = kExitTypeSecret;
+                sec->e_exit_              = kExitTypeSecret;
                 break;
         }
     }

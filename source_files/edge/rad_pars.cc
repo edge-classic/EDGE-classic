@@ -68,7 +68,7 @@ static std::string current_script_line;
 static int current_script_level = 0;
 
 static constexpr const char *rad_level_names[3] = {"outer area", "map area",
-                                             "trigger area"};
+                                                   "trigger area"};
 
 // Location of current script
 static TriggerScript *this_script;

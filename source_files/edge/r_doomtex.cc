@@ -161,7 +161,8 @@ static ImageData *ReadFlatAsEpiBlock(Image *rim)
     img->Clear(playpal_black);
 
     // read in pixels
-    const uint8_t *src = (const uint8_t *)LoadLumpIntoMemory(rim->source_.flat.lump);
+    const uint8_t *src =
+        (const uint8_t *)LoadLumpIntoMemory(rim->source_.flat.lump);
 
     for (int y = 0; y < h; y++)
         for (int x = 0; x < w; x++)
@@ -170,8 +171,8 @@ static ImageData *ReadFlatAsEpiBlock(Image *rim)
 
             uint8_t *dest_pix = &dest[(h - 1 - y) * tw + x];
 
-            // make sure kTransparentPixelIndex values (which do not occur naturally in
-            // Doom images) are properly remapped.
+            // make sure kTransparentPixelIndex values (which do not occur
+            // naturally in Doom images) are properly remapped.
             if (src_pix == kTransparentPixelIndex)
                 dest_pix[0] = playpal_black;
             else
@@ -221,13 +222,14 @@ static ImageData *ReadTextureAsEpiBlock(Image *rim)
     else
         img->Clear(kTransparentPixelIndex);
 
-    int         i;
+    int           i;
     TexturePatch *patch;
 
     // Composite the columns into the block.
     for (i = 0, patch = tdef->patches; i < tdef->patch_count; i++, patch++)
     {
-        const Patch *realpatch = (const Patch *)LoadLumpIntoMemory(patch->patch);
+        const Patch *realpatch =
+            (const Patch *)LoadLumpIntoMemory(patch->patch);
 
         int realsize = GetLumpLength(patch->patch);
 
@@ -241,7 +243,8 @@ static ImageData *ReadTextureAsEpiBlock(Image *rim)
 
         for (; x < x2; x++)
         {
-            int offset = AlignedLittleEndianS32(realpatch->column_offset[x - x1]);
+            int offset =
+                AlignedLittleEndianS32(realpatch->column_offset[x - x1]);
 
             if (offset < 0 || offset >= realsize)
                 FatalError("Bad image offset 0x%08x in image [%s]\n", offset,
@@ -299,8 +302,9 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
         delete f;
 
         if (!img)
-            FatalError("Error loading image in lump: %s\n",
-                       packfile_name ? packfile_name : GetLumpNameFromIndex(lump));
+            FatalError(
+                "Error loading image in lump: %s\n",
+                packfile_name ? packfile_name : GetLumpNameFromIndex(lump));
 
         return img;
     }
@@ -324,7 +328,7 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
 
     // Composite the columns into the block.
     const Patch *realpatch = nullptr;
-    int            realsize  = 0;
+    int          realsize  = 0;
 
     if (packfile_name)
     {
@@ -347,7 +351,8 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
 
     EPI_ASSERT(realpatch);
     EPI_ASSERT(rim->actual_width_ == AlignedLittleEndianS16(realpatch->width));
-    EPI_ASSERT(rim->actual_height_ == AlignedLittleEndianS16(realpatch->height));
+    EPI_ASSERT(rim->actual_height_ ==
+               AlignedLittleEndianS16(realpatch->height));
 
     // 2023.11.07 - These were previously left as total_w/h, which accounts
     // for power-of-two sizing and was messing up patch font atlas generation.

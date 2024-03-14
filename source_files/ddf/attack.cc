@@ -49,12 +49,16 @@ const DDFCommandList damage_commands[] = {
 
     DDF_FIELD("BYPASS_ALL", dummy_damage, bypass_all_, DDF_MainGetBoolean),
     DDF_FIELD("INSTAKILL", dummy_damage, instakill_, DDF_MainGetBoolean),
-    DDF_FIELD("DAMAGE_UNLESS_BENEFIT", dummy_damage, damage_unless_, DDF_MobjGetBenefit),
-    DDF_FIELD("DAMAGE_IF_BENEFIT", dummy_damage, damage_if_, DDF_MobjGetBenefit),
+    DDF_FIELD("DAMAGE_UNLESS_BENEFIT", dummy_damage, damage_unless_,
+              DDF_MobjGetBenefit),
+    DDF_FIELD("DAMAGE_IF_BENEFIT", dummy_damage, damage_if_,
+              DDF_MobjGetBenefit),
     DDF_FIELD("ALL_PLAYERS", dummy_damage, all_players_,
-       DDF_MainGetBoolean),  // Doesn't do anything (yet)
-    DDF_FIELD("GROUNDED_MONSTERS_ONLY", dummy_damage, grounded_monsters_, DDF_MainGetBoolean),
-    DDF_FIELD("FLASH_COLOUR", dummy_damage, damage_flash_colour_, DDF_MainGetRGB),
+              DDF_MainGetBoolean),  // Doesn't do anything (yet)
+    DDF_FIELD("GROUNDED_MONSTERS_ONLY", dummy_damage, grounded_monsters_,
+              DDF_MainGetBoolean),
+    DDF_FIELD("FLASH_COLOUR", dummy_damage, damage_flash_colour_,
+              DDF_MainGetRGB),
 
     DDF_FIELD("OBITUARY", dummy_damage, obituary_, DDF_MainGetString),
     DDF_FIELD("PAIN_STATE", dummy_damage, pain_, DDF_AtkGetLabel),
@@ -92,13 +96,15 @@ static const DDFCommandList attack_commands[] = {
     DDF_FIELD("TOO_CLOSE_RANGE", dummy_atk, tooclose_, DDF_MainGetNumeric),
     DDF_FIELD("BERSERK_MULTIPLY", dummy_atk, berserk_mul_, DDF_MainGetFloat),
     DDF_FIELD("NO_TRACE_CHANCE", dummy_atk, notracechance_, DDF_MainGetPercent),
-    DDF_FIELD("KEEP_FIRING_CHANCE", dummy_atk, keepfirechance_, DDF_MainGetPercent),
+    DDF_FIELD("KEEP_FIRING_CHANCE", dummy_atk, keepfirechance_,
+              DDF_MainGetPercent),
     DDF_FIELD("TRACE_ANGLE", dummy_atk, trace_angle_, DDF_MainGetAngle),
     DDF_FIELD("ASSAULT_SPEED", dummy_atk, assault_speed_, DDF_MainGetFloat),
     DDF_FIELD("ATTEMPT_SOUND", dummy_atk, initsound_, DDF_MainLookupSound),
     DDF_FIELD("ENGAGED_SOUND", dummy_atk, sound_, DDF_MainLookupSound),
     DDF_FIELD("SPAWNED_OBJECT", dummy_atk, spawnedobj_ref_, DDF_MainGetString),
-    DDF_FIELD("SPAWN_OBJECT_STATE", dummy_atk, objinitstate_ref_, DDF_MainGetString),
+    DDF_FIELD("SPAWN_OBJECT_STATE", dummy_atk, objinitstate_ref_,
+              DDF_MainGetString),
     DDF_FIELD("SPAWN_LIMIT", dummy_atk, spawn_limit_, DDF_MainGetNumeric),
     DDF_FIELD("PUFF", dummy_atk, puff_ref_, DDF_MainGetString),
     DDF_FIELD("ATTACK_CLASS", dummy_atk, attack_class_, DDF_MainGetBitSet),
@@ -166,7 +172,7 @@ static void AttackStartEntry(const char *name, bool extend)
     }
 
     // not found, create a new one
-    dynamic_atk       = new AttackDefinition;
+    dynamic_atk        = new AttackDefinition;
     dynamic_atk->name_ = name;
 
     atkdefs.push_back(dynamic_atk);
@@ -295,7 +301,7 @@ static void AttackFinishEntry(void)
     // Create a minimal mobj for psychic attacks for their tracker
     else if (dynamic_atk->attackstyle_ == kAttackStylePsychic && !dynamic_mobj)
     {
-        dynamic_mobj          = CreateAtkMobj(dynamic_atk->name_.c_str());
+        dynamic_mobj           = CreateAtkMobj(dynamic_atk->name_.c_str());
         dynamic_mobj->radius_  = 1;
         dynamic_atk->atk_mobj_ = dynamic_mobj;
     }
@@ -369,12 +375,13 @@ void DDF_AttackCleanUp(void)
 
         // lookup thing references
 
-        a->puff_ = a->puff_ref_.empty() ? nullptr
-                                      : mobjtypes.Lookup(a->puff_ref_.c_str());
+        a->puff_ = a->puff_ref_.empty()
+                       ? nullptr
+                       : mobjtypes.Lookup(a->puff_ref_.c_str());
 
         a->spawnedobj_ = a->spawnedobj_ref_.empty()
-                            ? nullptr
-                            : mobjtypes.Lookup(a->spawnedobj_ref_.c_str());
+                             ? nullptr
+                             : mobjtypes.Lookup(a->spawnedobj_ref_.c_str());
 
         if (a->spawnedobj_)
         {
@@ -543,8 +550,8 @@ void AttackDefinition::Default()
 {
     attackstyle_    = kAttackStyleNone;
     flags_          = kAttackFlagNone;
-    initsound_     = nullptr;
-    sound_         = nullptr;
+    initsound_      = nullptr;
+    sound_          = nullptr;
     accuracy_slope_ = 0;
     accuracy_angle_ = 0;
     xoffset_        = 0;
@@ -588,7 +595,8 @@ AttackDefinitionContainer::AttackDefinitionContainer() {}
 //
 AttackDefinitionContainer::~AttackDefinitionContainer()
 {
-    for (std::vector<AttackDefinition *>::iterator iter = begin(), iter_end = end();
+    for (std::vector<AttackDefinition *>::iterator iter     = begin(),
+                                                   iter_end = end();
          iter != iter_end; iter++)
     {
         AttackDefinition *atk = *iter;
@@ -606,7 +614,8 @@ AttackDefinition *AttackDefinitionContainer::Lookup(const char *refname)
 {
     if (!refname || !refname[0]) return nullptr;
 
-    for (std::vector<AttackDefinition *>::iterator iter = begin(), iter_end = end();
+    for (std::vector<AttackDefinition *>::iterator iter     = begin(),
+                                                   iter_end = end();
          iter != iter_end; iter++)
     {
         AttackDefinition *atk = *iter;

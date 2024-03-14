@@ -46,7 +46,8 @@ static TextStyle dummy_textstyle;
 
 static const DDFCommandList text_commands[] = {
     DDF_FIELD("COLOURMAP", dummy_textstyle, colmap_, DDF_MainGetColourmap),
-    DDF_FIELD("TRANSLUCENCY", dummy_textstyle, translucency_, DDF_MainGetPercent),
+    DDF_FIELD("TRANSLUCENCY", dummy_textstyle, translucency_,
+              DDF_MainGetPercent),
     DDF_FIELD("FONT", dummy_textstyle, font_, DDF_MainLookupFont),
     DDF_FIELD("SCALE", dummy_textstyle, scale_, DDF_MainGetFloat),
     DDF_FIELD("ASPECT", dummy_textstyle, aspect_, DDF_MainGetFloat),
@@ -59,12 +60,14 @@ static CursorStyle dummy_cursorstyle;
 
 static const DDFCommandList cursor_commands[] = {
     DDF_FIELD("POSITION", dummy_cursorstyle, pos_string_, DDF_MainGetString),
-    DDF_FIELD("TRANSLUCENCY", dummy_cursorstyle, translucency_, DDF_MainGetPercent),
+    DDF_FIELD("TRANSLUCENCY", dummy_cursorstyle, translucency_,
+              DDF_MainGetPercent),
     DDF_FIELD("IMAGE", dummy_cursorstyle, alt_cursor_, DDF_MainGetString),
     DDF_FIELD("STRING", dummy_cursorstyle, cursor_string_, DDF_MainGetString),
     DDF_FIELD("BORDER", dummy_cursorstyle, border_, DDF_MainGetBoolean),
     DDF_FIELD("SCALING", dummy_cursorstyle, scaling_, DDF_MainGetBoolean),
-    DDF_FIELD("FORCE_OFFSETS", dummy_cursorstyle, force_offsets_, DDF_MainGetBoolean),
+    DDF_FIELD("FORCE_OFFSETS", dummy_cursorstyle, force_offsets_,
+              DDF_MainGetBoolean),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -98,7 +101,8 @@ static const DDFCommandList style_commands[] = {
     DDF_SUB_LIST("SOUND", dummy_style, sounds_, sound_commands),
     DDF_FIELD("X_OFFSET", dummy_style, x_offset_, DDF_MainGetNumeric),
     DDF_FIELD("Y_OFFSET", dummy_style, y_offset_, DDF_MainGetNumeric),
-    DDF_FIELD("ENTRY_ALIGNMENT", dummy_style, entry_align_string_, DDF_MainGetString),
+    DDF_FIELD("ENTRY_ALIGNMENT", dummy_style, entry_align_string_,
+              DDF_MainGetString),
     DDF_FIELD("ENTRY_SPACING", dummy_style, entry_spacing_, DDF_MainGetNumeric),
 
     DDF_FIELD("SPECIAL", dummy_style, special_, DDF_StyleGetSpecials),

@@ -72,15 +72,16 @@ bool save_screenshot_valid = false;
 
 extern ConsoleVariable midi_soundfont;
 extern bool            pc_speaker_mode;
-int                    var_midi_player  = 0;
-int                    var_sound_stereo = 0;
+int                    var_midi_player       = 0;
+int                    var_sound_stereo      = 0;
 int                    sound_mixing_channels = 0;
 
 static bool done_first_init = false;
 
 static ConfigurationDefault defaults[] = {
     {kConfigInteger, "screenwidth", &current_screen_width, CFGDEF_SCREENWIDTH},
-    {kConfigInteger, "screenheight", &current_screen_height, CFGDEF_SCREENHEIGHT},
+    {kConfigInteger, "screenheight", &current_screen_height,
+     CFGDEF_SCREENHEIGHT},
     {kConfigInteger, "screendepth", &current_screen_depth, CFGDEF_SCREENBITS},
     {kConfigInteger, "displaymode", &current_window_mode, CFGDEF_DISPLAYMODE},
 
@@ -88,7 +89,8 @@ static ConfigurationDefault defaults[] = {
     {kConfigBoolean, "pc_speaker_mode", &pc_speaker_mode, 0},
     {kConfigInteger, "midi_player", &var_midi_player, 0},
     {kConfigBoolean, "dynamic_reverb", &dynamic_reverb, 0},
-    {kConfigInteger, "mix_channels", &sound_mixing_channels, CFGDEF_MIX_CHANNELS},
+    {kConfigInteger, "mix_channels", &sound_mixing_channels,
+     CFGDEF_MIX_CHANNELS},
 
     {kConfigInteger, "show_messages", &show_messages, CFGDEF_SHOWMESSAGES},
 
@@ -102,7 +104,8 @@ static ConfigurationDefault defaults[] = {
     {kConfigBoolean, "items_respawn", &global_flags.items_respawn,
      CFGDEF_ITEMRESPAWN},
     {kConfigBoolean, "respawn", &global_flags.enemies_respawn, CFGDEF_RESPAWN},
-    {kConfigBoolean, "fast_monsters", &global_flags.fast_monsters, CFGDEF_FASTPARM},
+    {kConfigBoolean, "fast_monsters", &global_flags.fast_monsters,
+     CFGDEF_FASTPARM},
     {kConfigBoolean, "true_3d_gameplay", &global_flags.true_3d_gameplay,
      CFGDEF_TRUE3DGAMEPLAY},
     {kConfigEnum, "autoaim", &global_flags.autoaim, CFGDEF_AUTOAIM},
@@ -179,7 +182,7 @@ static ConfigurationDefault defaults[] = {
     {kConfigKey, "key_map", &key_map, CFGDEF_KEY_MAP},
     {kConfigKey, "key_talk", &key_talk, CFGDEF_KEY_TALK},
     {kConfigKey, "key_console", &key_console,
-     CFGDEF_KEY_CONSOLE},                               // -AJA- 2007/08/15.
+     CFGDEF_KEY_CONSOLE},                           // -AJA- 2007/08/15.
     {kConfigKey, "key_pause", &key_pause, kPause},  // -AJA- 2010/06/13.
 
     {kConfigKey, "key_mouselook", &key_mouselook,
@@ -467,9 +470,11 @@ void TakeScreenshot(bool show_msg)
         }
     }
 
-    ImageData *img = new ImageData(current_screen_width, current_screen_height, 3);
+    ImageData *img =
+        new ImageData(current_screen_width, current_screen_height, 3);
 
-    RendererReadScreen(0, 0, current_screen_width, current_screen_height, img->PixelAt(0, 0));
+    RendererReadScreen(0, 0, current_screen_width, current_screen_height,
+                       img->PixelAt(0, 0));
 
     // ReadScreen produces a bottom-up image, need to invert it
     img->Invert();
@@ -500,9 +505,11 @@ void CreateSaveScreenshot(void)
 
     epi::FileDelete(filename);
 
-    ImageData *img = new ImageData(current_screen_width, current_screen_height, 3);
+    ImageData *img =
+        new ImageData(current_screen_width, current_screen_height, 3);
 
-    RendererReadScreen(0, 0, current_screen_width, current_screen_height, img->PixelAt(0, 0));
+    RendererReadScreen(0, 0, current_screen_width, current_screen_height,
+                       img->PixelAt(0, 0));
 
     // ReadScreen produces a bottom-up image, need to invert it
     img->Invert();

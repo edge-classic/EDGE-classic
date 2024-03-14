@@ -370,7 +370,8 @@ static void HostChangeOption(int opt, int key)
             if ((int)network_game_parameters->skill_ < (int)kSkillBaby ||
                 (int)network_game_parameters->skill_ > 250)
                 network_game_parameters->skill_ = kSkillNightmare;
-            else if ((int)network_game_parameters->skill_ > (int)kSkillNightmare)
+            else if ((int)network_game_parameters->skill_ >
+                     (int)kSkillNightmare)
                 network_game_parameters->skill_ = kSkillBaby;
 
             break;
@@ -402,13 +403,13 @@ static void HostChangeOption(int opt, int key)
         case 7:  // Monsters
             if (network_game_parameters->flags_->fast_monsters)
             {
-                network_game_parameters->flags_->fast_monsters   = false;
-                network_game_parameters->flags_->no_monsters = (dir > 0);
+                network_game_parameters->flags_->fast_monsters = false;
+                network_game_parameters->flags_->no_monsters   = (dir > 0);
             }
             else if (network_game_parameters->flags_->no_monsters == (dir < 0))
             {
-                network_game_parameters->flags_->fast_monsters   = true;
-                network_game_parameters->flags_->no_monsters = false;
+                network_game_parameters->flags_->fast_monsters = true;
+                network_game_parameters->flags_->no_monsters   = false;
             }
             else
                 network_game_parameters->flags_->no_monsters = (dir < 0);
@@ -530,9 +531,9 @@ void OptionMenuDrawHostMenu(void)
     y += deltay;
 
     DrawKeyword(idx, network_game_host_style, y, "Monsters",
-                network_game_parameters->flags_->no_monsters ? "OFF"
+                network_game_parameters->flags_->no_monsters     ? "OFF"
                 : network_game_parameters->flags_->fast_monsters ? "FAST"
-                                                            : "ON");
+                                                                 : "ON");
     y += deltay;
     idx++;
 
@@ -587,8 +588,7 @@ bool OptionMenuNetworkHostResponder(InputEvent *ev, int ch)
     }
 
     if (ch == kLeftArrow || ch == kRightArrow || ch == kGamepadLeft ||
-        ch == kGamepadRight || ch == kEnter || ch == kGamepadA ||
-        ch == kMouse1)
+        ch == kGamepadRight || ch == kEnter || ch == kGamepadA || ch == kMouse1)
     {
         HostChangeOption(host_position, ch);
         StartSoundEffect(sound_effect_stnmov);
@@ -646,13 +646,15 @@ void OptionMenuDrawPlayerList(void)
                 bots_here++;
         }
 
-        HudWriteText(network_game_list_style, (flags & kPlayerFlagNetwork) ? 0 : 3, 20,
-                     y, epi::StringFormat("PLAYER %d", humans).c_str());
+        HudWriteText(network_game_list_style,
+                     (flags & kPlayerFlagNetwork) ? 0 : 3, 20, y,
+                     epi::StringFormat("PLAYER %d", humans).c_str());
 
         HudWriteText(network_game_list_style, 1, 100, y, "Local");
 
-        HudWriteText(network_game_list_style, (flags & kPlayerFlagNetwork) ? 0 : 3,
-                     200, y, epi::StringFormat("%d BOTS", bots_here).c_str());
+        HudWriteText(network_game_list_style,
+                     (flags & kPlayerFlagNetwork) ? 0 : 3, 200, y,
+                     epi::StringFormat("%d BOTS", bots_here).c_str());
         y += 10;
     }
 

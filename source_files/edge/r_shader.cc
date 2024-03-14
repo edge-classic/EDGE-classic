@@ -48,10 +48,7 @@ class LightImage
     RGBAColor curve_[kLightImageCurveSize];
 
    public:
-    LightImage(const char *name, const Image *img)
-        : name_(name), image_(img)
-    {
-    }
+    LightImage(const char *name, const Image *img) : name_(name), image_(img) {}
 
     ~LightImage() {}
 
@@ -81,7 +78,8 @@ class LightImage
 
         d *= (float)kLightImageCurveSize;
 
-        if (d >= kLightImageCurveSize - 1.01) return curve_[kLightImageCurveSize - 1];
+        if (d >= kLightImageCurveSize - 1.01)
+            return curve_[kLightImageCurveSize - 1];
 
         // linearly interpolate between curve points
 

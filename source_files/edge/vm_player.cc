@@ -129,7 +129,8 @@ static void PL_get_angle(coal::vm_c *vm, int argc)
 //
 static void PL_get_mlook(coal::vm_c *vm, int argc)
 {
-    float value = epi::DegreesFromBAM(ui_player_who->map_object_->vertical_angle_);
+    float value =
+        epi::DegreesFromBAM(ui_player_who->map_object_->vertical_angle_);
 
     if (value > 180.0f) value -= 360.0f;
 
@@ -140,7 +141,8 @@ static void PL_get_mlook(coal::vm_c *vm, int argc)
 //
 static void PL_health(coal::vm_c *vm, int argc)
 {
-    float h = ui_player_who->health_ * 100 / ui_player_who->map_object_->spawn_health_;
+    float h = ui_player_who->health_ * 100 /
+              ui_player_who->map_object_->spawn_health_;
 
     if (h < 98) h += 0.99f;
 
@@ -207,7 +209,8 @@ static void PL_on_ground(coal::vm_c *vm, int argc)
         else
         {
             // touching the floor? Handles jumping or flying
-            if (ui_player_who->map_object_->z <= ui_player_who->map_object_->floor_z_)
+            if (ui_player_who->map_object_->z <=
+                ui_player_who->map_object_->floor_z_)
                 vm->ReturnFloat(1);
             else
                 vm->ReturnFloat(0);
@@ -215,7 +218,8 @@ static void PL_on_ground(coal::vm_c *vm, int argc)
     }
     else
     {
-        if (ui_player_who->map_object_->z <= ui_player_who->map_object_->floor_z_)
+        if (ui_player_who->map_object_->z <=
+            ui_player_who->map_object_->floor_z_)
             vm->ReturnFloat(1);
         else
             vm->ReturnFloat(0);
@@ -241,15 +245,21 @@ static void PL_is_jumping(coal::vm_c *vm, int argc)
 static void PL_is_crouching(coal::vm_c *vm, int argc)
 {
     vm->ReturnFloat(
-        (ui_player_who->map_object_->extended_flags_ & kExtendedFlagCrouching) ? 1 : 0);
+        (ui_player_who->map_object_->extended_flags_ & kExtendedFlagCrouching)
+            ? 1
+            : 0);
 }
 
 // player.is_attacking()
 //
 static void PL_is_attacking(coal::vm_c *vm, int argc)
 {
-    vm->ReturnFloat(
-        (ui_player_who->attack_button_down_[0] || ui_player_who->attack_button_down_[1] || ui_player_who->attack_button_down_[2] || ui_player_who->attack_button_down_[3]) ? 1 : 0);
+    vm->ReturnFloat((ui_player_who->attack_button_down_[0] ||
+                     ui_player_who->attack_button_down_[1] ||
+                     ui_player_who->attack_button_down_[2] ||
+                     ui_player_who->attack_button_down_[3])
+                        ? 1
+                        : 0);
 }
 
 // player.is_rampaging()
@@ -349,7 +359,8 @@ static void PL_has_power(coal::vm_c *vm, int argc)
     int value = (ui_player_who->powers_[power] > 0) ? 1 : 0;
 
     // special check for GOD mode
-    if (power == kPowerTypeInvulnerable && (ui_player_who->cheats_ & kCheatingGodMode))
+    if (power == kPowerTypeInvulnerable &&
+        (ui_player_who->cheats_ & kCheatingGodMode))
         value = 1;
 
     vm->ReturnFloat(value);
@@ -396,7 +407,8 @@ static void PL_cur_weapon_slot(coal::vm_c *vm, int argc)
     if (ui_player_who->ready_weapon_ < 0)
         slot = -1;
     else
-        slot = ui_player_who->weapons_[ui_player_who->ready_weapon_].info->bind_key_;
+        slot = ui_player_who->weapons_[ui_player_who->ready_weapon_]
+                   .info->bind_key_;
 
     vm->ReturnFloat(slot);
 }
@@ -691,7 +703,8 @@ static void PL_main_ammo(coal::vm_c *vm, int argc)
 
     if (ui_player_who->ready_weapon_ >= 0)
     {
-        PlayerWeapon *pw = &ui_player_who->weapons_[ui_player_who->ready_weapon_];
+        PlayerWeapon *pw =
+            &ui_player_who->weapons_[ui_player_who->ready_weapon_];
 
         if (pw->info->ammo_[0] != kAmmunitionTypeNoAmmo)
         {
@@ -728,7 +741,8 @@ static void PL_ammo_type(coal::vm_c *vm, int argc)
 
     if (ui_player_who->ready_weapon_ >= 0)
     {
-        PlayerWeapon *pw = &ui_player_who->weapons_[ui_player_who->ready_weapon_];
+        PlayerWeapon *pw =
+            &ui_player_who->weapons_[ui_player_who->ready_weapon_];
 
         value = 1 + (int)pw->info->ammo_[ATK];
     }
@@ -751,7 +765,8 @@ static void PL_ammo_pershot(coal::vm_c *vm, int argc)
 
     if (ui_player_who->ready_weapon_ >= 0)
     {
-        PlayerWeapon *pw = &ui_player_who->weapons_[ui_player_who->ready_weapon_];
+        PlayerWeapon *pw =
+            &ui_player_who->weapons_[ui_player_who->ready_weapon_];
 
         value = pw->info->ammopershot_[ATK];
     }
@@ -774,7 +789,8 @@ static void PL_clip_ammo(coal::vm_c *vm, int argc)
 
     if (ui_player_who->ready_weapon_ >= 0)
     {
-        PlayerWeapon *pw = &ui_player_who->weapons_[ui_player_who->ready_weapon_];
+        PlayerWeapon *pw =
+            &ui_player_who->weapons_[ui_player_who->ready_weapon_];
 
         value = pw->clip_size[ATK];
     }
@@ -797,7 +813,8 @@ static void PL_clip_size(coal::vm_c *vm, int argc)
 
     if (ui_player_who->ready_weapon_ >= 0)
     {
-        PlayerWeapon *pw = &ui_player_who->weapons_[ui_player_who->ready_weapon_];
+        PlayerWeapon *pw =
+            &ui_player_who->weapons_[ui_player_who->ready_weapon_];
 
         value = pw->info->clip_size_[ATK];
     }
@@ -813,7 +830,8 @@ static void PL_clip_is_shared(coal::vm_c *vm, int argc)
 
     if (ui_player_who->ready_weapon_ >= 0)
     {
-        PlayerWeapon *pw = &ui_player_who->weapons_[ui_player_who->ready_weapon_];
+        PlayerWeapon *pw =
+            &ui_player_who->weapons_[ui_player_who->ready_weapon_];
 
         if (pw->info->shared_clip_) value = 1;
     }
@@ -834,8 +852,8 @@ static void PL_hurt_by(coal::vm_c *vm, int argc)
     // getting hurt because of your own damn stupidity
     if (ui_player_who->attacker_ == ui_player_who->map_object_)
         vm->ReturnString("self");
-    else if (ui_player_who->attacker_ &&
-             (ui_player_who->attacker_->side_ & ui_player_who->map_object_->side_))
+    else if (ui_player_who->attacker_ && (ui_player_who->attacker_->side_ &
+                                          ui_player_who->map_object_->side_))
         vm->ReturnString("friend");
     else if (ui_player_who->attacker_)
         vm->ReturnString("enemy");
@@ -870,7 +888,8 @@ static void PL_hurt_dir(coal::vm_c *vm, int argc)
 {
     int dir = 0;
 
-    if (ui_player_who->attacker_ && ui_player_who->attacker_ != ui_player_who->map_object_)
+    if (ui_player_who->attacker_ &&
+        ui_player_who->attacker_ != ui_player_who->map_object_)
     {
         MapObject *badguy = ui_player_who->attacker_;
         MapObject *pmo    = ui_player_who->map_object_;
@@ -892,7 +911,8 @@ static void PL_hurt_angle(coal::vm_c *vm, int argc)
 {
     float value = 0;
 
-    if (ui_player_who->attacker_ && ui_player_who->attacker_ != ui_player_who->map_object_)
+    if (ui_player_who->attacker_ &&
+        ui_player_who->attacker_ != ui_player_who->map_object_)
     {
         MapObject *badguy = ui_player_who->attacker_;
         MapObject *pmo    = ui_player_who->map_object_;
@@ -959,8 +979,8 @@ static void PL_floor_flat(coal::vm_c *vm, int argc)
     // If no 3D floors, just return the flat
     if (ui_player_who->map_object_->subsector_->sector->extrafloor_used == 0)
     {
-        vm->ReturnString(
-            ui_player_who->map_object_->subsector_->sector->floor.image->name_.c_str());
+        vm->ReturnString(ui_player_who->map_object_->subsector_->sector->floor
+                             .image->name_.c_str());
     }
     else
     {
@@ -978,8 +998,8 @@ static void PL_floor_flat(coal::vm_c *vm, int argc)
             }
         }
         // Fallback if nothing else satisfies these conditions
-        vm->ReturnString(
-            ui_player_who->map_object_->subsector_->sector->floor.image->name_.c_str());
+        vm->ReturnString(ui_player_who->map_object_->subsector_->sector->floor
+                             .image->name_.c_str());
     }
 }
 
@@ -1319,8 +1339,9 @@ static void PL_query_object(coal::vm_c *vm, int argc)
     if (whatinfo < 1 || whatinfo > 5)
         FatalError("player.query_object: bad whatInfo number: %d\n", whatinfo);
 
-    MapObject *obj = GetMapTargetAimInfo(
-        ui_player_who->map_object_, ui_player_who->map_object_->angle_, maxdistance);
+    MapObject *obj =
+        GetMapTargetAimInfo(ui_player_who->map_object_,
+                            ui_player_who->map_object_->angle_, maxdistance);
     if (!obj)
     {
         vm->ReturnString("");
@@ -1428,8 +1449,9 @@ static void PL_query_weapon(coal::vm_c *vm, int argc)
         FatalError("player.query_weapon: bad secAttackInfo number: %d\n",
                    whatinfo);
 
-    MapObject *obj = GetMapTargetAimInfo(
-        ui_player_who->map_object_, ui_player_who->map_object_->angle_, maxdistance);
+    MapObject *obj =
+        GetMapTargetAimInfo(ui_player_who->map_object_,
+                            ui_player_who->map_object_->angle_, maxdistance);
     if (!obj)
     {
         vm->ReturnString("");
@@ -1465,7 +1487,8 @@ static void PL_sector_floor_height(coal::vm_c *vm, int argc)
     // If no 3D floors, just return the current sector floor height
     if (ui_player_who->map_object_->subsector_->sector->extrafloor_used == 0)
     {
-        vm->ReturnFloat(ui_player_who->map_object_->subsector_->sector->floor_height);
+        vm->ReturnFloat(
+            ui_player_who->map_object_->subsector_->sector->floor_height);
     }
     else
     {
@@ -1500,7 +1523,8 @@ static void PL_sector_ceiling_height(coal::vm_c *vm, int argc)
     // If no 3D floors, just return the current sector ceiling height
     if (ui_player_who->map_object_->subsector_->sector->extrafloor_used == 0)
     {
-        vm->ReturnFloat(ui_player_who->map_object_->subsector_->sector->ceiling_height);
+        vm->ReturnFloat(
+            ui_player_who->map_object_->subsector_->sector->ceiling_height);
     }
     else
     {
@@ -1524,7 +1548,8 @@ static void PL_sector_ceiling_height(coal::vm_c *vm, int argc)
             }
         }
         // Fallback if nothing else satisfies these conditions
-        vm->ReturnFloat(ui_player_who->map_object_->subsector_->sector->ceiling_height);
+        vm->ReturnFloat(
+            ui_player_who->map_object_->subsector_->sector->ceiling_height);
     }
 }
 

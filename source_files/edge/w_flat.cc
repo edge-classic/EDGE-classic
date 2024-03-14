@@ -91,9 +91,8 @@ static void AddFlatAnimation(AnimationDefinition *anim)
             return;
         }
 
-        file =
-            FindFlatSequence(anim->start_name_.c_str(),
-                               anim->end_name_.c_str(), &s_offset, &e_offset);
+        file = FindFlatSequence(anim->start_name_.c_str(),
+                                anim->end_name_.c_str(), &s_offset, &e_offset);
 
         if (file < 0)
         {

@@ -59,7 +59,7 @@ class CRC32
     uint32_t GetCRC(void) const { return crc_; }
 };
 
-};     // namespace epi
+};  // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

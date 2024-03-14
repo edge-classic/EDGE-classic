@@ -68,7 +68,8 @@ static constexpr char kExtraFlagNoItemBk     = 'I';
 
 static constexpr uint8_t kCastMaximum = 20;
 
-extern DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibility];
+extern DehackedMapObjectDefinition
+    mobjinfo[kTotalDehackedMapObjectTypesPortCompatibility];
 
 extern DehackedMapObjectDefinition brain_explode_mobj;
 
@@ -185,7 +186,8 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
 
         int count = 0;
 
-        const DehackedMapObjectDefinition *spawnfire = things::NewMobjElseOld(kMT_SPAWNFIRE);
+        const DehackedMapObjectDefinition *spawnfire =
+            things::NewMobjElseOld(kMT_SPAWNFIRE);
         EPI_ASSERT(spawnfire);
 
         count += frames::BeginGroup('D', spawnfire->spawnstate);
@@ -250,8 +252,8 @@ void AddAtkSpecial(const char *name)
     wad::Printf("%s", name);
 }
 
-void HandleAtkSpecials(const DehackedMapObjectDefinition *info, int mt_num, const ExtraAttack *ext,
-                       bool plr_rocket)
+void HandleAtkSpecials(const DehackedMapObjectDefinition *info, int mt_num,
+                       const ExtraAttack *ext, bool plr_rocket)
 {
     flag_got_one = false;
 
@@ -275,7 +277,8 @@ void CheckPainElemental(void)
     // (ELEMENTAL_SPAWNER and ELEMENTAL_DEATHSPAWN).  check if
     // those states are still valid, recreate attacks if not.
 
-    const DehackedMapObjectDefinition *skull = things::NewMobjElseOld(kMT_SKULL);
+    const DehackedMapObjectDefinition *skull =
+        things::NewMobjElseOld(kMT_SKULL);
     EPI_ASSERT(skull);
 
     if (frames::CheckMissileState(skull->missilestate)) return;
@@ -317,7 +320,8 @@ void CheckPainElemental(void)
     wad::Printf("SPAWN_OBJECT_STATE = %s;\n", spawn_at);
 }
 
-void ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num, bool plr_rocket);
+void ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num,
+                   bool plr_rocket);
 void ConvertScratch(const ScratchAttack *atk);
 }  // namespace Attacks
 
@@ -375,7 +379,8 @@ void Attacks::ConvertScratch(const ScratchAttack *atk)
     wad::Printf("\n");
 }
 
-void Attacks::ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num, bool plr_rocket)
+void Attacks::ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num,
+                            bool plr_rocket)
 {
     if (info->name[0] != '*')  // thing?
         return;
@@ -406,7 +411,7 @@ void Attacks::ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num,
 
     if (!ext)
         FatalError("Dehacked: Error - Missing attack %s in extra table.\n",
-                things::GetMobjName(mt_num) + 1);
+                   things::GetMobjName(mt_num) + 1);
 
     wad::Printf("ATTACKTYPE = %s;\n", ext->atk_type);
 
@@ -519,8 +524,8 @@ int cast_mobjs[kCastMaximum];
 void BeginLump();
 void FinishLump();
 
-bool CheckIsMonster(const DehackedMapObjectDefinition *info, int mt_num, int player,
-                    bool use_act_flags);
+bool CheckIsMonster(const DehackedMapObjectDefinition *info, int mt_num,
+                    int player, bool use_act_flags);
 }  // namespace things
 
 void things::Init()
@@ -567,8 +572,8 @@ void things::MarkThing(int mt_num)
     if (new_mobjinfo[mt_num] != nullptr) return;
 
     // create new entry, copy original info if we have it
-    DehackedMapObjectDefinition *entry      = new DehackedMapObjectDefinition;
-    new_mobjinfo[mt_num] = entry;
+    DehackedMapObjectDefinition *entry = new DehackedMapObjectDefinition;
+    new_mobjinfo[mt_num]               = entry;
 
     if (mt_num < kTotalDehackedMapObjectTypesPortCompatibility)
     {
@@ -618,7 +623,8 @@ const char *things::GetMobjName(int mt_num)
 {
     EPI_ASSERT(mt_num >= 0);
 
-    if (mt_num < kTotalDehackedMapObjectTypesPortCompatibility) return mobjinfo[mt_num].name;
+    if (mt_num < kTotalDehackedMapObjectTypesPortCompatibility)
+        return mobjinfo[mt_num].name;
 
     static char buffer[64];
 
@@ -639,7 +645,8 @@ void things::SetPlayerHealth(int new_value)
 
 const DehackedMapObjectDefinition *things::OldMobj(int mt_num)
 {
-    if (mt_num < kTotalDehackedMapObjectTypesPortCompatibility) return &mobjinfo[mt_num];
+    if (mt_num < kTotalDehackedMapObjectTypesPortCompatibility)
+        return &mobjinfo[mt_num];
 
     return nullptr;
 }
@@ -688,9 +695,10 @@ namespace things
 {
 struct FlagName
 {
-    long long int flag;  // flag in DehackedMapObjectDefinition (kMF_XXX), 0 if ignored
-    const char   *bex;   // name in a DEHACKED or BEX file
-    const char   *conv;  // edge name, nullptr if none, can be multiple
+    long long int
+        flag;  // flag in DehackedMapObjectDefinition (kMF_XXX), 0 if ignored
+    const char *bex;   // name in a DEHACKED or BEX file
+    const char *conv;  // edge name, nullptr if none, can be multiple
 };
 
 const FlagName flag_list[] = {
@@ -826,8 +834,8 @@ int ParseBits(const FlagName *list, char *bit_str)
     return new_flags;
 }
 
-bool CheckIsMonster(const DehackedMapObjectDefinition *info, int mt_num, int player,
-                    bool use_act_flags)
+bool CheckIsMonster(const DehackedMapObjectDefinition *info, int mt_num,
+                    int player, bool use_act_flags)
 {
     if (player > 0) return false;
 
@@ -917,7 +925,8 @@ const char *GetExtFlags(int mt_num, int player)
     return "";
 }
 
-void AddOneFlag(const DehackedMapObjectDefinition *info, const char *name, bool &got_a_flag)
+void AddOneFlag(const DehackedMapObjectDefinition *info, const char *name,
+                bool &got_a_flag)
 {
     if (!got_a_flag)
     {
@@ -934,7 +943,8 @@ void AddOneFlag(const DehackedMapObjectDefinition *info, const char *name, bool 
     wad::Printf("%s", name);
 }
 
-void HandleFlags(const DehackedMapObjectDefinition *info, int mt_num, int player)
+void HandleFlags(const DehackedMapObjectDefinition *info, int mt_num,
+                 int player)
 {
     int  i;
     int  cur_f      = info->flags;
@@ -1045,7 +1055,8 @@ void CollectTheCast()
 {
     for (int i = 0; i < kCastMaximum; i++) cast_mobjs[i] = -1;
 
-    for (int mt_num = 0; mt_num < kTotalDehackedMapObjectTypesPortCompatibility; mt_num++)
+    for (int mt_num = 0; mt_num < kTotalDehackedMapObjectTypesPortCompatibility;
+         mt_num++)
     {
         int order = 0;
 
@@ -1513,7 +1524,8 @@ const char *cast_titles[17] = {
     "RevenantName",         "MancubusName",    "ArchVileName",
     "SpiderMastermindName", "CyberdemonName"};
 
-void HandleCastOrder(const DehackedMapObjectDefinition *info, int mt_num, int player)
+void HandleCastOrder(const DehackedMapObjectDefinition *info, int mt_num,
+                     int player)
 {
     if (player >= 2) return;
 
@@ -1539,8 +1551,8 @@ void HandleCastOrder(const DehackedMapObjectDefinition *info, int mt_num, int pl
 
 void HandleDropItem(const DehackedMapObjectDefinition *info, int mt_num);
 void HandleAttacks(const DehackedMapObjectDefinition *info, int mt_num);
-void ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num, int player,
-                 bool brain_missile, bool &got_one);
+void ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num,
+                 int player, bool brain_missile, bool &got_one);
 }  // namespace things
 
 void things::HandleDropItem(const DehackedMapObjectDefinition *info, int mt_num)
@@ -1609,8 +1621,8 @@ void things::HandleAttacks(const DehackedMapObjectDefinition *info, int mt_num)
                     frames::attack_slot[frames::kAttackMethodSpare]);
 }
 
-void things::ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num, int player,
-                         bool brain_missile, bool &got_one)
+void things::ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num,
+                         int player, bool brain_missile, bool &got_one)
 {
     if (info->name[0] == '*')  // attack
         return;
@@ -1699,7 +1711,8 @@ void things::ConvertTHING(void)
 
     if (all_mode)
     {
-        for (int i = 0; i < kTotalDehackedMapObjectTypesPortCompatibility; i++) MarkThing(i);
+        for (int i = 0; i < kTotalDehackedMapObjectTypesPortCompatibility; i++)
+            MarkThing(i);
 
         /* this is debatable...
         for (int i = kMT_EXTRA00 ; i <= kMT_EXTRA99 ; i++)
@@ -1765,45 +1778,74 @@ namespace things
 {
 const FieldReference mobj_field[] = {
     {"ID #", offsetof(DehackedMapObjectDefinition, doomednum), kFieldTypeAny},
-    {"Initial frame", offsetof(DehackedMapObjectDefinition, spawnstate), kFieldTypeFrameNumber},
-    {"Hit points", offsetof(DehackedMapObjectDefinition, spawnhealth), kFieldTypeOneOrGreater},
-    {"First moving frame", offsetof(DehackedMapObjectDefinition, seestate), kFieldTypeFrameNumber},
-    {"Alert sound", offsetof(DehackedMapObjectDefinition, seesound), kFieldTypeSoundNumber},
+    {"Initial frame", offsetof(DehackedMapObjectDefinition, spawnstate),
+     kFieldTypeFrameNumber},
+    {"Hit points", offsetof(DehackedMapObjectDefinition, spawnhealth),
+     kFieldTypeOneOrGreater},
+    {"First moving frame", offsetof(DehackedMapObjectDefinition, seestate),
+     kFieldTypeFrameNumber},
+    {"Alert sound", offsetof(DehackedMapObjectDefinition, seesound),
+     kFieldTypeSoundNumber},
     {"Reaction time", offsetof(DehackedMapObjectDefinition, reactiontime),
      kFieldTypeZeroOrGreater},
-    {"Attack sound", offsetof(DehackedMapObjectDefinition, attacksound), kFieldTypeSoundNumber},
-    {"Injury frame", offsetof(DehackedMapObjectDefinition, painstate), kFieldTypeFrameNumber},
-    {"Pain chance", offsetof(DehackedMapObjectDefinition, painchance), kFieldTypeZeroOrGreater},
-    {"Pain sound", offsetof(DehackedMapObjectDefinition, painsound), kFieldTypeSoundNumber},
+    {"Attack sound", offsetof(DehackedMapObjectDefinition, attacksound),
+     kFieldTypeSoundNumber},
+    {"Injury frame", offsetof(DehackedMapObjectDefinition, painstate),
+     kFieldTypeFrameNumber},
+    {"Pain chance", offsetof(DehackedMapObjectDefinition, painchance),
+     kFieldTypeZeroOrGreater},
+    {"Pain sound", offsetof(DehackedMapObjectDefinition, painsound),
+     kFieldTypeSoundNumber},
     {"Close attack frame", offsetof(DehackedMapObjectDefinition, meleestate),
      kFieldTypeFrameNumber},
     {"Far attack frame", offsetof(DehackedMapObjectDefinition, missilestate),
      kFieldTypeFrameNumber},
-    {"Death frame", offsetof(DehackedMapObjectDefinition, deathstate), kFieldTypeFrameNumber},
-    {"Exploding frame", offsetof(DehackedMapObjectDefinition, xdeathstate), kFieldTypeFrameNumber},
-    {"Death sound", offsetof(DehackedMapObjectDefinition, deathsound), kFieldTypeSoundNumber},
-    {"Speed", offsetof(DehackedMapObjectDefinition, speed), kFieldTypeZeroOrGreater},
-    {"Width", offsetof(DehackedMapObjectDefinition, radius), kFieldTypeZeroOrGreater},
-    {"Height", offsetof(DehackedMapObjectDefinition, height), kFieldTypeZeroOrGreater},
-    {"Mass", offsetof(DehackedMapObjectDefinition, mass), kFieldTypeZeroOrGreater},
-    {"Missile damage", offsetof(DehackedMapObjectDefinition, damage), kFieldTypeZeroOrGreater},
-    {"Action sound", offsetof(DehackedMapObjectDefinition, activesound), kFieldTypeSoundNumber},
+    {"Death frame", offsetof(DehackedMapObjectDefinition, deathstate),
+     kFieldTypeFrameNumber},
+    {"Exploding frame", offsetof(DehackedMapObjectDefinition, xdeathstate),
+     kFieldTypeFrameNumber},
+    {"Death sound", offsetof(DehackedMapObjectDefinition, deathsound),
+     kFieldTypeSoundNumber},
+    {"Speed", offsetof(DehackedMapObjectDefinition, speed),
+     kFieldTypeZeroOrGreater},
+    {"Width", offsetof(DehackedMapObjectDefinition, radius),
+     kFieldTypeZeroOrGreater},
+    {"Height", offsetof(DehackedMapObjectDefinition, height),
+     kFieldTypeZeroOrGreater},
+    {"Mass", offsetof(DehackedMapObjectDefinition, mass),
+     kFieldTypeZeroOrGreater},
+    {"Missile damage", offsetof(DehackedMapObjectDefinition, damage),
+     kFieldTypeZeroOrGreater},
+    {"Action sound", offsetof(DehackedMapObjectDefinition, activesound),
+     kFieldTypeSoundNumber},
     {"Bits", offsetof(DehackedMapObjectDefinition, flags), kFieldTypeBitflags},
-    {"MBF21 Bits", offsetof(DehackedMapObjectDefinition, mbf21_flags), kFieldTypeBitflags},
+    {"MBF21 Bits", offsetof(DehackedMapObjectDefinition, mbf21_flags),
+     kFieldTypeBitflags},
     {"Infighting group", offsetof(DehackedMapObjectDefinition, infight_group),
      kFieldTypeZeroOrGreater},
-    {"Projectile group", offsetof(DehackedMapObjectDefinition, proj_group), kFieldTypeAny},
-    {"Splash group", offsetof(DehackedMapObjectDefinition, splash_group), kFieldTypeZeroOrGreater},
-    {"Rip sound", offsetof(DehackedMapObjectDefinition, rip_sound), kFieldTypeSoundNumber},
-    {"Fast speed", offsetof(DehackedMapObjectDefinition, fast_speed), kFieldTypeZeroOrGreater},
-    {"Melee range", offsetof(DehackedMapObjectDefinition, melee_range), kFieldTypeZeroOrGreater},
-    {"Gib health", offsetof(DehackedMapObjectDefinition, gib_health), kFieldTypeAny},
-    {"Dropped item", offsetof(DehackedMapObjectDefinition, dropped_item), kFieldTypeZeroOrGreater},
-    {"Pickup width", offsetof(DehackedMapObjectDefinition, pickup_width), kFieldTypeZeroOrGreater},
-    {"Projectile pass height", offsetof(DehackedMapObjectDefinition, projectile_pass_height),
+    {"Projectile group", offsetof(DehackedMapObjectDefinition, proj_group),
+     kFieldTypeAny},
+    {"Splash group", offsetof(DehackedMapObjectDefinition, splash_group),
      kFieldTypeZeroOrGreater},
-    {"Fullbright", offsetof(DehackedMapObjectDefinition, fullbright), kFieldTypeZeroOrGreater},
-    {"Respawn frame", offsetof(DehackedMapObjectDefinition, raisestate), kFieldTypeFrameNumber},
+    {"Rip sound", offsetof(DehackedMapObjectDefinition, rip_sound),
+     kFieldTypeSoundNumber},
+    {"Fast speed", offsetof(DehackedMapObjectDefinition, fast_speed),
+     kFieldTypeZeroOrGreater},
+    {"Melee range", offsetof(DehackedMapObjectDefinition, melee_range),
+     kFieldTypeZeroOrGreater},
+    {"Gib health", offsetof(DehackedMapObjectDefinition, gib_health),
+     kFieldTypeAny},
+    {"Dropped item", offsetof(DehackedMapObjectDefinition, dropped_item),
+     kFieldTypeZeroOrGreater},
+    {"Pickup width", offsetof(DehackedMapObjectDefinition, pickup_width),
+     kFieldTypeZeroOrGreater},
+    {"Projectile pass height",
+     offsetof(DehackedMapObjectDefinition, projectile_pass_height),
+     kFieldTypeZeroOrGreater},
+    {"Fullbright", offsetof(DehackedMapObjectDefinition, fullbright),
+     kFieldTypeZeroOrGreater},
+    {"Respawn frame", offsetof(DehackedMapObjectDefinition, raisestate),
+     kFieldTypeFrameNumber},
 
     {nullptr, 0, kFieldTypeAny}  // End sentinel
 };

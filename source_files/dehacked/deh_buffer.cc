@@ -42,7 +42,7 @@ InputBuffer::InputBuffer(const char *data, int length)
 {
     if (length_ < 0)
         FatalError("Dehacked: Error - Illegal length of lump (%d bytes)\n",
-                length_);
+                   length_);
 }
 
 InputBuffer::~InputBuffer() {}

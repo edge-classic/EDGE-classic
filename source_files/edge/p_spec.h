@@ -65,9 +65,9 @@ enum ButtonPosition
 
 struct Button
 {
-    Line             *line;
+    Line               *line;
     ButtonPosition      where;
-    const Image      *button_image;
+    const Image        *button_image;
     int                 button_timer;
     struct SoundEffect *off_sound;
 };
@@ -83,7 +83,7 @@ enum PlaneDirection
 struct PlaneMover
 {
     const PlaneMoverDefinition *type;
-    Sector                   *sector;
+    Sector                     *sector;
 
     bool is_ceiling;
     bool is_elevator;
@@ -105,7 +105,7 @@ struct PlaneMover
 
     bool sound_effect_started;
 
-    int            new_special;
+    int          new_special;
     const Image *new_image;
 
     bool nuke_me = false;  // for changers already at their dest height
@@ -114,7 +114,7 @@ struct PlaneMover
 struct SlidingDoorMover
 {
     const SlidingDoor *info;
-    Line            *line;
+    Line              *line;
 
     // current distance it has opened
     float opening;
@@ -174,19 +174,18 @@ void PlayerInSpecialSector(class Player *pl, Sector *sec,
                            bool should_choke = true);
 
 // Utilities...
-int       LineIsTwoSided(int sector, int line);
+int     LineIsTwoSided(int sector, int line);
 Side   *GetLineSidedef(int currentSector, int line, int side);
 Sector *GetLineSector(int currentSector, int line, int side);
 Sector *GetLineSectorAdjacent(const Line *line, const Sector *sec,
-                                bool ignore_selfref = false);
+                              bool ignore_selfref = false);
 
 // Info Needs....
 float FindSurroundingHeight(const TriggerHeightReference ref,
-                            const Sector              *sec);
-float FindRaiseToTexture(
-    Sector *sec);  // -KM- 1998/09/01 New func, old inline
+                            const Sector                *sec);
+float FindRaiseToTexture(Sector *sec);  // -KM- 1998/09/01 New func, old inline
 Sector *FindSectorFromTag(int tag);
-int       FindMinimumSurroundingLight(Sector *sector, int max);
+int     FindMinimumSurroundingLight(Sector *sector, int max);
 
 // start an action...
 bool RunSectorLight(Sector *sec, const LightSpecialDefinition *type);

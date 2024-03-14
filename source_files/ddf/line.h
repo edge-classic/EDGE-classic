@@ -396,11 +396,11 @@ class TeleportDefinition
 
     // effect object spawned when going in...
     const MapObjectDefinition *inspawnobj_;  // FIXME! Do mobjtypes.Lookup()?
-    std::string       inspawnobj_ref_;
+    std::string                inspawnobj_ref_;
 
     // effect object spawned when going out...
     const MapObjectDefinition *outspawnobj_;  // FIXME! Do mobjtypes.Lookup()?
-    std::string       outspawnobj_ref_;
+    std::string                outspawnobj_ref_;
 
     // Teleport delay
     int delay_;
@@ -652,7 +652,7 @@ class LineType
     // after
     //  DDF_MobjCleanUp() has been called.
     const MapObjectDefinition *effectobject_;
-    std::string       effectobject_ref_;
+    std::string                effectobject_ref_;
 
     // Handle this line differently
     bool glass_;

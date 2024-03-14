@@ -37,7 +37,9 @@ Style::Style(StyleDefinition *definition)
         fonts_[T] = nullptr;
 }
 
-Style::~Style() { /* nothing to do */ }
+Style::~Style()
+{ /* nothing to do */
+}
 
 void Style::Load()
 {
@@ -45,7 +47,8 @@ void Style::Load()
     {
         const char *name = definition_->bg_.image_name_.c_str();
 
-        background_image_ = ImageLookup(name, kImageNamespaceFlat, kImageLookupNull);
+        background_image_ =
+            ImageLookup(name, kImageNamespaceFlat, kImageLookupNull);
 
         if (!background_image_)
             background_image_ = ImageLookup(name, kImageNamespaceGraphic);
@@ -115,7 +118,8 @@ void Style::DrawBackground()
 
         CenterX = 160;
         CenterX -=
-            (background_image_->actual_width_ * background_image_->scale_x_) / 2;
+            (background_image_->actual_width_ * background_image_->scale_x_) /
+            2;
 
         HudSetScale(definition_->bg_.scale_);
         // HudStretchImage(0, 0, 320, 200, background_image_);

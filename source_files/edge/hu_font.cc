@@ -97,8 +97,8 @@ void Font::LoadPatches()
     // range of characters
     int              first = 9999;
     int              last  = 0;
-    const Image  **images;
-    const Image   *missing;
+    const Image    **images;
+    const Image     *missing;
     const FontPatch *pat;
 
     // determine full range
@@ -121,10 +121,11 @@ void Font::LoadPatches()
     std::unordered_map<int, ImageData *> patch_data;
     std::vector<ImageData *>             temp_imdata;
 
-    missing                      = definition_->missing_patch_ != ""
-                                       ? ImageLookup(definition_->missing_patch_.c_str(),
-                                                       kImageNamespaceGraphic, kImageLookupFont | kImageLookupNull)
-                                       : nullptr;
+    missing                   = definition_->missing_patch_ != ""
+                                    ? ImageLookup(definition_->missing_patch_.c_str(),
+                                                  kImageNamespaceGraphic,
+                                                  kImageLookupFont | kImageLookupNull)
+                                    : nullptr;
     ImageData *missing_imdata = nullptr;
 
     if (missing)
@@ -160,12 +161,11 @@ void Font::LoadPatches()
             EPI_ASSERT(0 <= idx && idx < total);
 
             images[idx] = ImageLookup(pname, kImageNamespaceGraphic,
-                                        kImageLookupFont | kImageLookupNull);
+                                      kImageLookupFont | kImageLookupNull);
 
             if (images[idx])
             {
-                ImageData *tmp_img =
-                    ReadAsEpiBlock((Image *)(images[idx]));
+                ImageData *tmp_img = ReadAsEpiBlock((Image *)(images[idx]));
                 if (tmp_img->depth_ == 1)
                 {
                     ImageData *rgb_img = RgbFromPalettised(
@@ -251,12 +251,12 @@ void Font::LoadPatches()
     }
     else
         FatalError("Failed to create atlas for patch font %s!\n",
-                definition_->name_.c_str());
+                   definition_->name_.c_str());
 
     if (patch_font_cache_.atlas_rectangles.empty())
     {
         LogWarning("Font [%s] has no loaded patches !\n",
-                  definition_->name_.c_str());
+                   definition_->name_.c_str());
         patch_font_cache_.width = patch_font_cache_.height = 7;
         return;
     }
@@ -300,16 +300,17 @@ void Font::LoadFontImage()
     if (!font_image_)
     {
         if (!definition_->image_name_.empty())
-            font_image_ =
-                ImageLookup(definition_->image_name_.c_str(),
-                              kImageNamespaceGraphic, kImageLookupExact | kImageLookupNull);
+            font_image_ = ImageLookup(definition_->image_name_.c_str(),
+                                      kImageNamespaceGraphic,
+                                      kImageLookupExact | kImageLookupNull);
         else
-            FatalError("LoadFontImage: nullptr image name provided for font %s!",
-                    definition_->name_.c_str());
+            FatalError(
+                "LoadFontImage: nullptr image name provided for font %s!",
+                definition_->name_.c_str());
         if (!font_image_)
             FatalError("LoadFontImage: Image %s not found for font %s!",
-                    definition_->image_name_.c_str(),
-                    definition_->name_.c_str());
+                       definition_->image_name_.c_str(),
+                       definition_->name_.c_str());
         int char_height = font_image_->actual_height_ / 16;
         int char_width  = font_image_->actual_width_ / 16;
         image_character_height_ =
@@ -325,7 +326,7 @@ void Font::LoadFontImage()
         // Determine individual character widths and ratios
         individual_char_widths_ = new float[256];
         individual_char_ratios_ = new float[256];
-        ImageData *char_data = ReadAsEpiBlock((Image *)font_image_);
+        ImageData *char_data    = ReadAsEpiBlock((Image *)font_image_);
         for (int i = 0; i < 256; i++)
         {
             int px                     = i % 16;
@@ -353,8 +354,9 @@ void Font::LoadFontTTF()
     {
         if (definition_->truetype_name_.empty())
         {
-            FatalError("LoadFontTTF: No TTF file/lump name provided for font %s!",
-                    definition_->name_.c_str());
+            FatalError(
+                "LoadFontTTF: No TTF file/lump name provided for font %s!",
+                definition_->name_.c_str());
         }
 
         for (size_t i = 0; i < hud_fonts.size(); i++)
@@ -378,13 +380,13 @@ void Font::LoadFontTTF()
                      .empty())  // check for pack file
                 F = OpenFileFromPack(definition_->truetype_name_);
             else
-                F = LoadLumpAsFile(
-                    CheckLumpNumberForName(definition_->truetype_name_.c_str()));
+                F = LoadLumpAsFile(CheckLumpNumberForName(
+                    definition_->truetype_name_.c_str()));
 
             if (!F)
                 FatalError("LoadFontTTF: '%s' not found for font %s.\n",
-                        definition_->truetype_name_.c_str(),
-                        definition_->name_.c_str());
+                           definition_->truetype_name_.c_str(),
+                           definition_->name_.c_str());
 
             truetype_buffer_ = F->LoadIntoMemory();
 
@@ -396,7 +398,7 @@ void Font::LoadFontTTF()
             truetype_info_ = new stbtt_fontinfo;
             if (!stbtt_InitFont(truetype_info_, truetype_buffer_, 0))
                 FatalError("LoadFontTTF: Could not initialize font %s.\n",
-                        definition_->name_.c_str());
+                           definition_->name_.c_str());
         }
 
         TrueTypeCharacter ref;
@@ -443,7 +445,7 @@ void Font::LoadFontTTF()
 
         if (ref.glyph_index == 0)
             FatalError("LoadFontTTF: No suitable characters in font %s.\n",
-                    definition_->name_.c_str());
+                       definition_->name_.c_str());
 
         for (int i = 0; i < 3; i++)
         {
@@ -543,7 +545,8 @@ void Font::Load()
             break;
 
         default:
-            FatalError("Coding error, unknown font type %d\n", definition_->type_);
+            FatalError("Coding error, unknown font type %d\n",
+                       definition_->type_);
             break; /* NOT REACHED */
     }
 }
@@ -560,7 +563,7 @@ float Font::NominalWidth() const
         return truetype_character_width_[current_font_size] + spacing_;
 
     FatalError("font_c::NominalWidth : unknown FONT type %d\n",
-            definition_->type_);
+               definition_->type_);
     return 1; /* NOT REACHED */
 }
 
@@ -574,7 +577,7 @@ float Font::NominalHeight() const
         return truetype_character_height_[current_font_size];
 
     FatalError("font_c::NominalHeight : unknown FONT type %d\n",
-            definition_->type_);
+               definition_->type_);
     return 1; /* NOT REACHED */
 }
 
@@ -587,7 +590,7 @@ const Image *Font::CharImage(char ch) const
         if (truetype_glyph_map_.find((uint8_t)ch) != truetype_glyph_map_.end())
             // Create or return dummy image
             return ImageLookup("FONT_DUMMY_IMAGE", kImageNamespaceGraphic,
-                                 kImageLookupFont);
+                               kImageLookupFont);
         else
             return nullptr;
     }
@@ -599,7 +602,7 @@ const Image *Font::CharImage(char ch) const
     if (patch_font_cache_.atlas_rectangles.count(
             kCP437UnicodeValues[(uint8_t)ch]))
         return ImageLookup("FONT_DUMMY_IMAGE", kImageNamespaceGraphic,
-                             kImageLookupFont);
+                           kImageLookupFont);
     else
         return nullptr;
 }
@@ -683,7 +686,8 @@ float Font::CharWidth(char ch)
         patch_font_cache_.atlas_rectangles.at(kCP437UnicodeValues[(uint8_t)ch]);
 
     if (definition_->default_size_ > 0.0)
-        return (definition_->default_size_ * ((float)rect.image_width) / rect.image_height) +
+        return (definition_->default_size_ * ((float)rect.image_width) /
+                rect.image_height) +
                spacing_;
     else
         return rect.image_width + spacing_;

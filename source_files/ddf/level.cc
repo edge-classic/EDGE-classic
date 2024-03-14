@@ -67,7 +67,8 @@ static const DDFCommandList level_commands[] = {
     DDF_FIELD("AUTHOR", dummy_level, author_, DDF_MainGetString),
     DDF_FIELD("NAME_GRAPHIC", dummy_level, namegraphic_, DDF_MainGetLumpName),
     DDF_FIELD("SKY_TEXTURE", dummy_level, sky_, DDF_MainGetLumpName),
-    DDF_FIELD("SKY_STRETCH", dummy_level, forced_skystretch_, DDF_LevelGetSkyStretch),
+    DDF_FIELD("SKY_STRETCH", dummy_level, forced_skystretch_,
+              DDF_LevelGetSkyStretch),
     DDF_FIELD("MUSIC_ENTRY", dummy_level, music_, DDF_MainGetNumeric),
     DDF_FIELD("SURROUND_FLAT", dummy_level, surround_, DDF_MainGetLumpName),
     DDF_FIELD("NEXT_MAP", dummy_level, next_mapname_, DDF_MainGetLumpName),
@@ -76,12 +77,18 @@ static const DDFCommandList level_commands[] = {
     DDF_FIELD("PARTIME", dummy_level, partime_, DDF_MainGetTime),
     DDF_FIELD("EPISODE", dummy_level, episode_name_, DDF_MainGetString),
     DDF_FIELD("STATS", dummy_level, wistyle_, DDF_LevelGetWistyle),
-    DDF_FIELD("LEAVING_BACKGROUND", dummy_level, leavingbggraphic_, DDF_MainGetLumpName),
-    DDF_FIELD("ENTERING_BACKGROUND", dummy_level, enteringbggraphic_, DDF_MainGetLumpName),
-    DDF_FIELD("INDOOR_FOG_COLOR", dummy_level, indoor_fog_cmap_, DDF_MainGetColourmap),
-    DDF_FIELD("INDOOR_FOG_DENSITY", dummy_level, indoor_fog_density_, DDF_MainGetPercent),
-    DDF_FIELD("OUTDOOR_FOG_COLOR", dummy_level, outdoor_fog_cmap_, DDF_MainGetColourmap),
-    DDF_FIELD("OUTDOOR_FOG_DENSITY", dummy_level, outdoor_fog_density_, DDF_MainGetPercent),
+    DDF_FIELD("LEAVING_BACKGROUND", dummy_level, leavingbggraphic_,
+              DDF_MainGetLumpName),
+    DDF_FIELD("ENTERING_BACKGROUND", dummy_level, enteringbggraphic_,
+              DDF_MainGetLumpName),
+    DDF_FIELD("INDOOR_FOG_COLOR", dummy_level, indoor_fog_cmap_,
+              DDF_MainGetColourmap),
+    DDF_FIELD("INDOOR_FOG_DENSITY", dummy_level, indoor_fog_density_,
+              DDF_MainGetPercent),
+    DDF_FIELD("OUTDOOR_FOG_COLOR", dummy_level, outdoor_fog_cmap_,
+              DDF_MainGetColourmap),
+    DDF_FIELD("OUTDOOR_FOG_DENSITY", dummy_level, outdoor_fog_density_,
+              DDF_MainGetPercent),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -316,15 +323,16 @@ void DDF_LevelGetSkyStretch(const char *info, void *storage)
 }
 
 static DDFSpecialFlags wistyle_names[] = {{"DOOM", kIntermissionStyleDoom, 0},
-                                      {"NONE", kIntermissionStyleNone, 0},
-                                      {nullptr, 0, 0}};
+                                          {"NONE", kIntermissionStyleNone, 0},
+                                          {nullptr, 0, 0}};
 
 void DDF_LevelGetWistyle(const char *info, void *storage)
 {
     int flag_value;
 
     if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(info, wistyle_names,
-                                                  &flag_value, false, false))
+                                                          &flag_value, false,
+                                                          false))
     {
         DDF_WarnError("DDF_LevelGetWistyle: Unknown stats: %s", info);
         return;
@@ -415,7 +423,7 @@ void MapDefinition::CopyDetail(MapDefinition &src)
     force_on_  = src.force_on_;
     force_off_ = src.force_off_;
 
-    next_mapname_   = src.next_mapname_;
+    next_mapname_  = src.next_mapname_;
     secretmapname_ = src.secretmapname_;
 
     autotag_ = src.autotag_;

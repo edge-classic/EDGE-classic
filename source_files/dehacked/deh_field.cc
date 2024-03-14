@@ -99,7 +99,7 @@ static bool FieldValidateValue(const FieldReference *reference, int new_val)
 
             default:
                 FatalError("Dehacked: Error - Bad field type %d\n",
-                        reference->field_type);
+                           reference->field_type);
         }
     }
     else /* patch_fmt == 6, allow BOOM/MBF stuff */
@@ -126,7 +126,7 @@ static bool FieldValidateValue(const FieldReference *reference, int new_val)
 
             default:
                 FatalError("Dehacked: Error - Bad field type %d\n",
-                        reference->field_type);
+                           reference->field_type);
         }
     }
 

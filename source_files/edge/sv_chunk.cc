@@ -34,10 +34,10 @@
 #define EDGE_DEBUG_SAVE_PUT_BYTE       0
 #define EDGE_DEBUG_SAVE_CHUNK_COMPRESS 0
 
-static constexpr uint8_t kStringMarker     = 0xAA;
-static constexpr uint8_t kNullStringMarker = 0xDE;
+static constexpr uint8_t     kStringMarker     = 0xAA;
+static constexpr uint8_t     kNullStringMarker = 0xDE;
 static constexpr const char *kEdgeSaveMagic    = "EdgeSave";
-static constexpr uint8_t kFirstChunkOffset = 16;
+static constexpr uint8_t     kFirstChunkOffset = 16;
 // The chunk stack will never get any deeper than this
 static constexpr uint8_t kMaximumChunkDepth = 16;
 

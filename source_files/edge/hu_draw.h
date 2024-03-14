@@ -60,9 +60,8 @@ void HudPushScissor(float x1, float y1, float x2, float y2,
                     bool expand = false);
 void HudPopScissor();
 
-void HudRawImage(float hx1, float hy1, float hx2, float hy2,
-                 const Image *image, float tx1, float ty1, float tx2,
-                 float ty2, float alpha = 1.0f,
+void HudRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
+                 float tx1, float ty1, float tx2, float ty2, float alpha = 1.0f,
                  RGBAColor       text_col = kRGBANoValue,
                  const Colormap *palremap = nullptr, float sx = 0.0,
                  float sy = 0.0, char ch = -1);

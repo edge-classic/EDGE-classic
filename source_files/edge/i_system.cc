@@ -45,7 +45,7 @@ extern HANDLE windows_timer;
 
 // output string buffer
 static constexpr int16_t kMessageBufferSize = 4096;
-static char message_buffer[kMessageBufferSize];
+static char              message_buffer[kMessageBufferSize];
 
 void SystemStartup(void)
 {

@@ -37,15 +37,15 @@ class FlatDefinition
                           // and shader params - Dasho
 
     struct SoundEffect *footstep_;
-    std::string   splash_;
+    std::string         splash_;
     // Lobo: item to spawn (or nullptr).  The mobjdef pointer is only valid
     // after
     //  DDF_flatCleanUp() has been called.
     const MapObjectDefinition *impactobject_;
-    std::string       impactobject_ref_;
+    std::string                impactobject_ref_;
 
     const MapObjectDefinition *glowobject_;
-    std::string       glowobject_ref_;
+    std::string                glowobject_ref_;
 
     float sink_depth_;
     float bob_depth_;

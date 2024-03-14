@@ -39,7 +39,7 @@ std::string ArgumentValue(std::string_view long_name,
 
 void ArgumentCheckBooleanParameter(const std::string &parameter,
                                    bool *boolean_value, bool reverse);
-                                   
+
 void ArgumentCheckBooleanConsoleVariable(const std::string &parameter,
                                          ConsoleVariable   *variable,
                                          bool               reverse);

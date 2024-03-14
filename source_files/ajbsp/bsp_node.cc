@@ -1244,8 +1244,8 @@ Seg *CreateSegs()
 
 static QuadTree *TreeFromSegList(Seg *list, const BoundingBox *bounds)
 {
-    QuadTree *tree =
-        new QuadTree(bounds->minimum_x, bounds->minimum_y, bounds->maximum_x, bounds->maximum_y);
+    QuadTree *tree = new QuadTree(bounds->minimum_x, bounds->minimum_y,
+                                  bounds->maximum_x, bounds->maximum_y);
 
     tree->AddList(list);
 

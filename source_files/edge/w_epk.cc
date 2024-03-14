@@ -907,7 +907,8 @@ void PackProcessSubstitutions(PackFile *pack, int pack_index)
                     if (song->infotype_ == kDDFMusicDataLump &&
                         epi::StringCaseCompareASCII(epi::GetStem(entry.name_),
                                                     song->info_) == 0 &&
-                        CheckDataFileIndexForName(song->info_.c_str()) < pack_index)
+                        CheckDataFileIndexForName(song->info_.c_str()) <
+                            pack_index)
                     {
                         song->info_     = entry.pack_path_;
                         song->infotype_ = kDDFMusicDataPackage;
@@ -972,7 +973,8 @@ void PackProcessHiresSubstitutions(PackFile *pack, int pack_index)
             epi::TextureNameFromFilename(texname, stem);
 
             // See if a bare lump with the same name comes later
-            if (CheckDataFileIndexForName(texname.c_str()) > pack_index) continue;
+            if (CheckDataFileIndexForName(texname.c_str()) > pack_index)
+                continue;
 
             LogDebug("- Adding Hires substitute from EPK: %s\n",
                      entry.pack_path_.c_str());

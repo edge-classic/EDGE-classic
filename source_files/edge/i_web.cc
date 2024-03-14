@@ -44,8 +44,8 @@ static void WebSyncScreenSize(int width, int height)
     SDL_SetWindowSize(program_window, width, height);
     current_screen_width  = (int)width;
     current_screen_height = (int)height;
-    current_screen_depth   = 24;
-    current_window_mode  = 0;
+    current_screen_depth  = 24;
+    current_window_mode   = 0;
     DeterminePixelAspect();
 
     SoftInitializeResolution();
@@ -56,7 +56,7 @@ void WebTick(void)
     if (web_deferred_screen_width != -1)
     {
         WebSyncScreenSize(web_deferred_screen_width,
-                            web_deferred_screen_height);
+                          web_deferred_screen_height);
         web_deferred_screen_width = web_deferred_screen_height = -1;
     }
 
@@ -87,9 +87,8 @@ extern "C"
         return 0;
     }
 
-    static EM_BOOL WebWindowResizedCallback(int         eventType,
-                                              const void *reserved,
-                                              void       *userData)
+    static EM_BOOL WebWindowResizedCallback(int eventType, const void *reserved,
+                                            void *userData)
     {
         double width, height;
         emscripten_get_element_css_size("canvas", &width, &height);

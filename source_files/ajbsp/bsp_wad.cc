@@ -83,8 +83,8 @@ void Lump::MakeEntry(struct RawWadEntry *entry)
     memset(entry->name, 0, 8);
     memcpy(entry->name, name_, strlen(name_));
 
-    entry->position  = AlignedLittleEndianU32(lump_start_);
-    entry->size = AlignedLittleEndianU32(lump_length_);
+    entry->position = AlignedLittleEndianU32(lump_start_);
+    entry->size     = AlignedLittleEndianU32(lump_length_);
 }
 
 void Lump::Rename(const char *new_name)
@@ -1128,8 +1128,8 @@ void WadFile::WriteDirectory()
 
     memcpy(header.magic, (kind_ == 'I') ? "IWAD" : "PWAD", 4);
 
-    header.directory_start   = AlignedLittleEndianU32(directory_start_);
-    header.total_entries = AlignedLittleEndianU32(directory_count_);
+    header.directory_start = AlignedLittleEndianU32(directory_start_);
+    header.total_entries   = AlignedLittleEndianU32(directory_count_);
 
     if (fwrite(&header, sizeof(header), 1, file_pointer_) != 1)
         FatalError("AJBSP: Error writing WAD header.\n");

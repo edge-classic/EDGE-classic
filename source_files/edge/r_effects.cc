@@ -83,7 +83,7 @@ void RendererRainbowEffect(Player *player)
         {
             render_view_red_multiplier = 0.90f;
             ///???		render_view_red_multiplier += (1.0f -
-            ///render_view_red_multiplier) * (1.0f - s);
+            /// render_view_red_multiplier) * (1.0f - s);
 
             render_view_green_multiplier = render_view_red_multiplier;
             render_view_blue_multiplier  = render_view_red_multiplier;
@@ -108,7 +108,8 @@ void RendererRainbowEffect(Player *player)
         return;
     }
 
-    if (s > 0 && player->powers_[kPowerTypeInfrared] > 0 && !debug_fullbright.d_)
+    if (s > 0 && player->powers_[kPowerTypeInfrared] > 0 &&
+        !debug_fullbright.d_)
     {
         render_view_extra_light = int(s * 255);
         return;
@@ -163,7 +164,8 @@ void RendererColourmapEffect(Player *player)
     if (s > 0 && player->powers_[kPowerTypeInvulnerable] > 0 &&
         player->effect_colourmap_ && (player->effect_left_ & 8 || reduce_flash))
     {
-        if (invulnerability_effect == kInvulnerabilityTextured && !reduce_flash) return;
+        if (invulnerability_effect == kInvulnerabilityTextured && !reduce_flash)
+            return;
 
         glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
 
@@ -243,8 +245,8 @@ void RendererPaletteEffect(Player *player)
     }
     else
     {
-        PalettedColourToRGB(playpal_black, rgb_data, player->last_damage_colour_,
-                           player->damage_count_);
+        PalettedColourToRGB(playpal_black, rgb_data,
+                            player->last_damage_colour_, player->damage_count_);
 
         int rgb_max = HMM_MAX(rgb_data[0], HMM_MAX(rgb_data[1], rgb_data[2]));
 
@@ -302,7 +304,7 @@ void FuzzUpdate(void)
     if (!fuzz_image)
     {
         fuzz_image = ImageLookup("FUZZ_MAP", kImageNamespaceTexture,
-                                   kImageLookupExact | kImageLookupNull);
+                                 kImageLookupExact | kImageLookupNull);
         if (!fuzz_image) FatalError("Cannot find essential image: FUZZ_MAP\n");
     }
 

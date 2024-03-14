@@ -64,8 +64,8 @@ extern bool            need_to_draw_sky;
 // struct member naming deviates from the style guide to reflect
 // MDL format documentation
 
-static constexpr const char   *kMdlIdentifier = "IDPO";
-static constexpr uint8_t kMdlVersion    = 6;
+static constexpr const char *kMdlIdentifier = "IDPO";
+static constexpr uint8_t     kMdlVersion    = 6;
 
 struct RawMdlHeader
 {
@@ -808,7 +808,8 @@ void MdlRenderModel(MdlModel *md, const Image *skin_img, bool is_weapon,
         int mdlSkin = 0;
 
         if (is_weapon == true)
-            mdlSkin = mo->player_->weapons_[mo->player_->ready_weapon_].model_skin;
+            mdlSkin =
+                mo->player_->weapons_[mo->player_->ready_weapon_].model_skin;
         else
             mdlSkin = mo->model_skin_;
 

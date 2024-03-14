@@ -41,10 +41,10 @@ void InitializeSwitchList(void)
     // only called at game initialization.
     for (SwitchDefinition *sw : switchdefs)
     {
-        sw->cache_.image[0] = ImageLookup(sw->on_name_.c_str(),
-                                            kImageNamespaceTexture, kImageLookupNull);
-        sw->cache_.image[1] = ImageLookup(sw->off_name_.c_str(),
-                                            kImageNamespaceTexture, kImageLookupNull);
+        sw->cache_.image[0] = ImageLookup(
+            sw->on_name_.c_str(), kImageNamespaceTexture, kImageLookupNull);
+        sw->cache_.image[1] = ImageLookup(
+            sw->off_name_.c_str(), kImageNamespaceTexture, kImageLookupNull);
     }
 }
 
@@ -113,7 +113,8 @@ void ChangeSwitchTexture(Line *line, bool useAgain, LineSpecial specials,
 
         Side *side = level_lines[j].side[0];
 
-        Position *sound_effects_origin = &level_lines[j].front_sector->sound_effects_origin;
+        Position *sound_effects_origin =
+            &level_lines[j].front_sector->sound_effects_origin;
 
         ButtonPosition pos = kButtonNone;
 
@@ -158,7 +159,8 @@ void ChangeSwitchTexture(Line *line, bool useAgain, LineSpecial specials,
                 if (!noSound && sw->on_sfx_)
                 {
                     EPI_ASSERT(sound_effects_origin);
-                    StartSoundEffect(sw->on_sfx_, kCategoryLevel, sound_effects_origin);
+                    StartSoundEffect(sw->on_sfx_, kCategoryLevel,
+                                     sound_effects_origin);
                     noSound = true;
                 }
 
@@ -236,7 +238,7 @@ void UpdateButtons(void)
             if (b->off_sound)
             {
                 StartSoundEffect(b->off_sound, kCategoryLevel,
-                          &b->line->front_sector->sound_effects_origin);
+                                 &b->line->front_sector->sound_effects_origin);
             }
 
             EPI_CLEAR_MEMORY(b, Button, 1);

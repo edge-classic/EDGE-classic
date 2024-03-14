@@ -472,8 +472,8 @@ void RendererDrawUnits(void)
                     // This is very expensive, thus the map
                     // glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
                     // &old_clamp);
-                    state->TextureWrapT(renderer_dumb_clamp.d_ ? GL_CLAMP
-                                                           : GL_CLAMP_TO_EDGE);
+                    state->TextureWrapT(
+                        renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE);
                 }
             }
 

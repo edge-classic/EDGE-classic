@@ -59,7 +59,8 @@ EDGE_DEFINE_CONSOLE_VARIABLE(bot_skill, "2", kConsoleVariableFlagArchive)
 bool DeathBot::HasWeapon(const WeaponDefinition *info) const
 {
     for (int i = 0; i < kMaximumWeapons; i++)
-        if (pl_->weapons_[i].owned && pl_->weapons_[i].info == info) return true;
+        if (pl_->weapons_[i].owned && pl_->weapons_[i].info == info)
+            return true;
 
     return false;
 }
@@ -141,7 +142,8 @@ float DeathBot::EvalEnemy(const MapObject *mo)
 
     if (!InDeathmatch() && mo->player_) return -1;
 
-    if (!InDeathmatch() && mo->support_object_ && mo->support_object_->player_) return -1;
+    if (!InDeathmatch() && mo->support_object_ && mo->support_object_->player_)
+        return -1;
 
     // EXTERMINATE !!
 
@@ -433,8 +435,8 @@ void DeathBot::LookForEnemies(float radius)
 
 void DeathBot::LookForItems(float radius)
 {
-    MapObject  *item      = nullptr;
-    BotPath *item_path = BotNavigateFindThing(this, radius, item);
+    MapObject *item      = nullptr;
+    BotPath   *item_path = BotNavigateFindThing(this, radius, item);
 
     if (item_path == nullptr) return;
 
@@ -498,13 +500,15 @@ void DeathBot::SelectWeapon()
 void DeathBot::MoveToward(const Position &pos)
 {
     cmd_.speed     = MOVE_SPEED + (6.25 * bot_skill.d_);
-    cmd_.direction = RendererPointToAngle(pl_->map_object_->x, pl_->map_object_->y, pos.x, pos.y);
+    cmd_.direction = RendererPointToAngle(pl_->map_object_->x,
+                                          pl_->map_object_->y, pos.x, pos.y);
 }
 
 void DeathBot::WalkToward(const Position &pos)
 {
     cmd_.speed     = (MOVE_SPEED + (3.125 * bot_skill.d_));
-    cmd_.direction = RendererPointToAngle(pl_->map_object_->x, pl_->map_object_->y, pos.x, pos.y);
+    cmd_.direction = RendererPointToAngle(pl_->map_object_->x,
+                                          pl_->map_object_->y, pos.x, pos.y);
 }
 
 void DeathBot::TurnToward(BAMAngle want_angle, float want_slope, bool fast)
@@ -598,8 +602,9 @@ void DeathBot::RetreatFrom(const MapObject *enemy)
 
 void DeathBot::Strafe(bool right)
 {
-    cmd_.speed     = MOVE_SPEED + (6.25 * bot_skill.d_);
-    cmd_.direction = pl_->map_object_->angle_ + (right ? kBAMAngle270 : kBAMAngle90);
+    cmd_.speed = MOVE_SPEED + (6.25 * bot_skill.d_);
+    cmd_.direction =
+        pl_->map_object_->angle_ + (right ? kBAMAngle270 : kBAMAngle90);
 }
 
 void DeathBot::DetectObstacle()
@@ -652,7 +657,7 @@ void DeathBot::StrafeAroundEnemy()
         else
             strafe_dir_ = (r & 16) ? -1 : +1;
 
-        uint8_t wait = 60 - (bot_skill.d_* 10);
+        uint8_t wait = 60 - (bot_skill.d_ * 10);
 
         strafe_time_ = wait + r % wait;
         return;
@@ -664,7 +669,8 @@ void DeathBot::StrafeAroundEnemy()
 void DeathBot::ShootTarget()
 {
     // no weapon to shoot?
-    if (pl_->ready_weapon_ == KWeaponSelectionNone || pl_->pending_weapon_ != KWeaponSelectionNoChange)
+    if (pl_->ready_weapon_ == KWeaponSelectionNone ||
+        pl_->pending_weapon_ != KWeaponSelectionNoChange)
         return;
 
     // TODO: ammo check
@@ -677,8 +683,9 @@ void DeathBot::ShootTarget()
     if (weapon->dangerous_ && enemy_dist_ < 208) return;
 
     // check that we are facing the enemy
-    BAMAngle delta   = enemy_angle_ - pl_->map_object_->angle_;
-    float    sl_diff = fabs(enemy_slope_ - epi::BAMTan(pl_->map_object_->vertical_angle_));
+    BAMAngle delta = enemy_angle_ - pl_->map_object_->angle_;
+    float    sl_diff =
+        fabs(enemy_slope_ - epi::BAMTan(pl_->map_object_->vertical_angle_));
 
     if (delta > kBAMAngle180) delta = kBAMAngle360 - delta;
 
@@ -824,7 +831,7 @@ void DeathBot::ThinkHelp()
     bool cur_near = false;
 
     Position pos  = {leader->x, leader->y, leader->z};
-    float      dist = DistTo(pos);
+    float    dist = DistTo(pos);
 
     // allow a bit of "hysteresis"
     float check_dist = near_leader_ ? 224.0 : 160.0;
@@ -1223,7 +1230,8 @@ void DeathBot::ThinkUseLift()
             }
 
             // already lowered?
-            if (sector->floor_height < lift_seg_->front_subsector->sector->floor_height + 24.0f)
+            if (sector->floor_height <
+                lift_seg_->front_subsector->sector->floor_height + 24.0f)
             {
                 // navigation code added a place to stand
                 path_->along_ += 1;
@@ -1387,13 +1395,15 @@ void DeathBot::ConvertTiccmd(EventTicCommand *dest)
     if (cmd_.weapon != -1)
     {
         dest->buttons |= kButtonCodeChangeWeapon;
-        dest->buttons |= (cmd_.weapon << kButtonCodeWeaponMaskShift) & kButtonCodeWeaponMask;
+        dest->buttons |=
+            (cmd_.weapon << kButtonCodeWeaponMaskShift) & kButtonCodeWeaponMask;
     }
 
     dest->player_index = pl_->player_number_;
 
     dest->angle_turn = (mo->angle_ - look_angle_) >> 16;
-    dest->mouselook_turn = (epi::BAMFromATan(look_slope_) - mo->vertical_angle_) >> 16;
+    dest->mouselook_turn =
+        (epi::BAMFromATan(look_slope_) - mo->vertical_angle_) >> 16;
 
     if (cmd_.speed != 0)
     {
@@ -1438,7 +1448,7 @@ void P_BotCreate(Player *p, bool recreate)
 
     bot->pl_ = p;
 
-    p->Builder    = BotPlayerBuilder;
+    p->Builder     = BotPlayerBuilder;
     p->build_data_ = (void *)bot;
     p->player_flags_ |= kPlayerFlagBot;
 

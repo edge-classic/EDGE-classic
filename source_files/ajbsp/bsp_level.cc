@@ -901,15 +901,23 @@ static void PutOneZNode(Node *node)
     ZLibAppendLump(&dx, 4);
     ZLibAppendLump(&dy, 4);
 
-    raw.bounding_box_1.minimum_x = AlignedLittleEndianS16(node->r_.bounds.minimum_x);
-    raw.bounding_box_1.minimum_y = AlignedLittleEndianS16(node->r_.bounds.minimum_y);
-    raw.bounding_box_1.maximum_x = AlignedLittleEndianS16(node->r_.bounds.maximum_x);
-    raw.bounding_box_1.maximum_y = AlignedLittleEndianS16(node->r_.bounds.maximum_y);
+    raw.bounding_box_1.minimum_x =
+        AlignedLittleEndianS16(node->r_.bounds.minimum_x);
+    raw.bounding_box_1.minimum_y =
+        AlignedLittleEndianS16(node->r_.bounds.minimum_y);
+    raw.bounding_box_1.maximum_x =
+        AlignedLittleEndianS16(node->r_.bounds.maximum_x);
+    raw.bounding_box_1.maximum_y =
+        AlignedLittleEndianS16(node->r_.bounds.maximum_y);
 
-    raw.bounding_box_2.minimum_x = AlignedLittleEndianS16(node->l_.bounds.minimum_x);
-    raw.bounding_box_2.minimum_y = AlignedLittleEndianS16(node->l_.bounds.minimum_y);
-    raw.bounding_box_2.maximum_x = AlignedLittleEndianS16(node->l_.bounds.maximum_x);
-    raw.bounding_box_2.maximum_y = AlignedLittleEndianS16(node->l_.bounds.maximum_y);
+    raw.bounding_box_2.minimum_x =
+        AlignedLittleEndianS16(node->l_.bounds.minimum_x);
+    raw.bounding_box_2.minimum_y =
+        AlignedLittleEndianS16(node->l_.bounds.minimum_y);
+    raw.bounding_box_2.maximum_x =
+        AlignedLittleEndianS16(node->l_.bounds.maximum_x);
+    raw.bounding_box_2.maximum_y =
+        AlignedLittleEndianS16(node->l_.bounds.maximum_y);
 
     ZLibAppendLump(&raw.bounding_box_1, sizeof(raw.bounding_box_1));
     ZLibAppendLump(&raw.bounding_box_2, sizeof(raw.bounding_box_2));

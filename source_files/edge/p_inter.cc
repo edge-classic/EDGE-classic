@@ -59,7 +59,7 @@ struct PickupInfo
     Benefit *list;       // full list of benefits
     bool     lose_them;  // lose stuff if true
 
-    Player  *player;   // player picking it up
+    Player    *player;   // player picking it up
     MapObject *special;  // object to pick up
     bool       dropped;  // object was dropped by a monster
 
@@ -109,7 +109,8 @@ static void GiveCounter(PickupInfo *pu, Benefit *be)
         return;
     }
 
-    if (pu->player->counters_[cntr].count == pu->player->counters_[cntr].maximum)
+    if (pu->player->counters_[cntr].count ==
+        pu->player->counters_[cntr].maximum)
     {
         return;
     }
@@ -175,7 +176,8 @@ static void GiveInventory(PickupInfo *pu, Benefit *be)
         return;
     }
 
-    if (pu->player->inventory_[inv].count == pu->player->inventory_[inv].maximum)
+    if (pu->player->inventory_[inv].count ==
+        pu->player->inventory_[inv].maximum)
     {
         return;
     }
@@ -247,7 +249,8 @@ static void GiveAmmo(PickupInfo *pu, Benefit *be)
 
         pu->player->ammo_[ammo].count -= num;
 
-        if (pu->player->ammo_[ammo].count < 0) pu->player->ammo_[ammo].count = 0;
+        if (pu->player->ammo_[ammo].count < 0)
+            pu->player->ammo_[ammo].count = 0;
 
         pu->got_it = true;
         return;
@@ -256,7 +259,8 @@ static void GiveAmmo(PickupInfo *pu, Benefit *be)
     // In Nightmare you need the extra ammo, in "baby" you are given double
     if (pu->special)
     {
-        if ((game_skill == kSkillBaby) || (game_skill == kSkillNightmare)) num <<= 1;
+        if ((game_skill == kSkillBaby) || (game_skill == kSkillNightmare))
+            num <<= 1;
     }
 
     bool did_pickup = false;
@@ -376,8 +380,8 @@ static void GiveHealth(PickupInfo *pu, Benefit *be)
 {
     if (pu->lose_them)
     {
-        // DamageMapObject(pu->player->map_object_, pu->special, nullptr, be->amount,
-        // nullptr);
+        // DamageMapObject(pu->player->map_object_, pu->special, nullptr,
+        // be->amount, nullptr);
         if (pu->player->health_ <= 0) return;
 
         pu->player->health_ -= be->amount;
@@ -420,7 +424,8 @@ static void GiveArmour(PickupInfo *pu, Benefit *be)
         if (AlmostEquals(pu->player->armours_[a_class], 0.0f)) return;
 
         pu->player->armours_[a_class] -= be->amount;
-        if (pu->player->armours_[a_class] < 0) pu->player->armours_[a_class] = 0;
+        if (pu->player->armours_[a_class] < 0)
+            pu->player->armours_[a_class] = 0;
 
         UpdateTotalArmour(pu->player);
 
@@ -560,7 +565,8 @@ static void GivePower(PickupInfo *pu, Benefit *be)
     // special handling for scuba...
     if (be->sub.type == kPowerTypeScuba)
     {
-        pu->player->air_in_lungs_ = pu->player->map_object_->info_->lung_capacity_;
+        pu->player->air_in_lungs_ =
+            pu->player->map_object_->info_->lung_capacity_;
     }
 
     pu->got_it = true;
@@ -664,7 +670,8 @@ bool HasBenefitInList(Player *player, Benefit *list)
                 break;
 
             case kBenefitTypeAmmoLimit:
-                if (player->ammo_[be->sub.type].maximum > be->amount) return true;
+                if (player->ammo_[be->sub.type].maximum > be->amount)
+                    return true;
                 break;
 
             case kBenefitTypeKey:
@@ -1058,7 +1065,8 @@ void KillMapObject(MapObject *source, MapObject *target,
             }
         }
     }
-    else if (InSinglePlayerMatch() && (target->flags_ & kMapObjectFlagCountKill))
+    else if (InSinglePlayerMatch() &&
+             (target->flags_ & kMapObjectFlagCountKill))
     {
         // count all monster deaths,
         // even those caused by other monsters
@@ -1135,7 +1143,7 @@ void KillMapObject(MapObject *source, MapObject *target,
         {
             MapObject *fog =
                 CreateMapObject(target->x, target->y, target->z,
-                                   mobjtypes.Lookup("TELEPORT_FLASH"));
+                                mobjtypes.Lookup("TELEPORT_FLASH"));
             if (fog && fog->info_->chase_state_)
                 MapObjectSetStateDeferred(fog, fog->info_->chase_state_, 0);
         }
@@ -1347,7 +1355,8 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
 
     if (inflictor && !(target->flags_ & kMapObjectFlagNoClip) &&
         !(source && source->player_ && source->player_->ready_weapon_ >= 0 &&
-          source->player_->weapons_[source->player_->ready_weapon_].info->nothrust_))
+          source->player_->weapons_[source->player_->ready_weapon_]
+              .info->nothrust_))
     {
         // make fall forwards sometimes
         if (damage < 40 && damage > target->health_ &&
@@ -1682,9 +1691,9 @@ void TelefragMapObject(MapObject *target, MapObject *inflictor,
 
     if (target->player_)
     {
-        target->player_->attacker_    = inflictor;
+        target->player_->attacker_     = inflictor;
         target->player_->damage_count_ = kDamageLimit;
-        target->player_->damage_pain_ = target->spawn_health_;
+        target->player_->damage_pain_  = target->spawn_health_;
     }
 
     KillMapObject(inflictor, target, damtype);

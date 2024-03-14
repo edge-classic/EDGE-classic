@@ -23,9 +23,9 @@
 //
 //----------------------------------------------------------------------------
 
-#include <float.h>
-
 #include "m_bbox.h"
+
+#include <float.h>
 
 void BoundingBoxClear(float *box)
 {

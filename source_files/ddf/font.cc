@@ -40,7 +40,8 @@ static const DDFCommandList font_commands[] = {
     DDF_FIELD("IMAGE", dummy_font, image_name_, DDF_MainGetString),
     DDF_FIELD("TTF", dummy_font, truetype_name_, DDF_MainGetString),
     DDF_FIELD("DEFAULT_SIZE", dummy_font, default_size_, DDF_MainGetFloat),
-    DDF_FIELD("TTF_SMOOTHING", dummy_font, truetype_smoothing_string_, DDF_MainGetString),
+    DDF_FIELD("TTF_SMOOTHING", dummy_font, truetype_smoothing_string_,
+              DDF_MainGetString),
     DDF_FIELD("MISSING_PATCH", dummy_font, missing_patch_, DDF_MainGetString),
     DDF_FIELD("SPACING", dummy_font, spacing_, DDF_MainGetFloat),
 
@@ -116,14 +117,17 @@ static void FontFinishEntry(void)
     if (dynamic_font->type_ == kFontTypeTrueType &&
         !dynamic_font->truetype_smoothing_string_.empty())
     {
-        if (epi::StringCaseCompareASCII(dynamic_font->truetype_smoothing_string_,
-                                        "NEVER") == 0)
-            dynamic_font->truetype_smoothing_ = dynamic_font->kTrueTypeSmoothNever;
+        if (epi::StringCaseCompareASCII(
+                dynamic_font->truetype_smoothing_string_, "NEVER") == 0)
+            dynamic_font->truetype_smoothing_ =
+                dynamic_font->kTrueTypeSmoothNever;
         else if (epi::StringCaseCompareASCII(
                      dynamic_font->truetype_smoothing_string_, "ALWAYS") == 0)
-            dynamic_font->truetype_smoothing_ = dynamic_font->kTrueTypeSmoothAlways;
+            dynamic_font->truetype_smoothing_ =
+                dynamic_font->kTrueTypeSmoothAlways;
         else if (epi::StringCaseCompareASCII(
-                     dynamic_font->truetype_smoothing_string_, "ON_DEMAND") == 0)
+                     dynamic_font->truetype_smoothing_string_, "ON_DEMAND") ==
+                 0)
             dynamic_font->truetype_smoothing_ =
                 dynamic_font->kTrueTypeSmoothOnDemand;
     }
@@ -245,13 +249,13 @@ FontDefinition::FontDefinition() : name_() { Default(); }
 
 void FontDefinition::CopyDetail(const FontDefinition &src)
 {
-    type_                 = src.type_;
-    patches_              = src.patches_;  // FIXME: copy list
-    image_name_           = src.image_name_;
-    missing_patch_        = src.missing_patch_;
-    spacing_              = src.spacing_;
+    type_                      = src.type_;
+    patches_                   = src.patches_;  // FIXME: copy list
+    image_name_                = src.image_name_;
+    missing_patch_             = src.missing_patch_;
+    spacing_                   = src.spacing_;
     truetype_name_             = src.truetype_name_;
-    default_size_         = src.default_size_;
+    default_size_              = src.default_size_;
     truetype_smoothing_        = src.truetype_smoothing_;
     truetype_smoothing_string_ = src.truetype_smoothing_string_;
 }
@@ -261,10 +265,10 @@ void FontDefinition::CopyDetail(const FontDefinition &src)
 //
 void FontDefinition::Default()
 {
-    type_          = kFontTypePatch;
-    patches_       = nullptr;
-    default_size_  = 0.0;
-    spacing_       = 0.0;
+    type_               = kFontTypePatch;
+    patches_            = nullptr;
+    default_size_       = 0.0;
+    spacing_            = 0.0;
     truetype_smoothing_ = kTrueTypeSmoothOnDemand;
     truetype_smoothing_string_.clear();
     image_name_.clear();

@@ -262,24 +262,24 @@ class AttackDefinition
     // Member vars
     std::string name_;
 
-    AttackStyle   attackstyle_;
-    AttackFlags   flags_;
+    AttackStyle         attackstyle_;
+    AttackFlags         flags_;
     struct SoundEffect *initsound_;
     struct SoundEffect *sound_;
-    float         accuracy_slope_;
-    BAMAngle      accuracy_angle_;
-    float         xoffset_;
-    float         yoffset_;
-    BAMAngle      angle_offset_;  // -AJA- 1999/09/10.
-    float         slope_offset_;  //
-    BAMAngle      trace_angle_;   // -AJA- 2005/02/08.
-    float         assault_speed_;
-    float         height_;
-    float         range_;
-    int           count_;
-    int           tooclose_;
-    float         berserk_mul_;  // -AJA- 2005/08/06.
-    DamageClass   damage_;
+    float               accuracy_slope_;
+    BAMAngle            accuracy_angle_;
+    float               xoffset_;
+    float               yoffset_;
+    BAMAngle            angle_offset_;  // -AJA- 1999/09/10.
+    float               slope_offset_;  //
+    BAMAngle            trace_angle_;   // -AJA- 2005/02/08.
+    float               assault_speed_;
+    float               height_;
+    float               range_;
+    int                 count_;
+    int                 tooclose_;
+    float               berserk_mul_;  // -AJA- 2005/08/06.
+    DamageClass         damage_;
 
     // class of the attack.
     BitSet attack_class_;
@@ -298,13 +298,13 @@ class AttackDefinition
     // spawned object (for spawners).  The mobjdef pointer only becomes
     // valid after DDF_AttackCleanUp().  Can be nullptr.
     const MapObjectDefinition *spawnedobj_;
-    std::string     spawnedobj_ref_;
-    int             spawn_limit_;
+    std::string                spawnedobj_ref_;
+    int                        spawn_limit_;
 
     // puff object.  The mobjdef pointer only becomes valid after
     // DDF_AttackCleanUp() has been called.  Can be nullptr.
     const MapObjectDefinition *puff_;
-    std::string     puff_ref_;
+    std::string                puff_ref_;
 
     // For DUALATTACK type only
     AttackDefinition *dualattack1_;
@@ -447,7 +447,9 @@ enum WeaponFlag
         (1 << 12),  // Do not fire if switched to while trigger is held
 };
 
-constexpr WeaponFlag kDefaultWeaponFlags = (WeaponFlag)(WeaponFlagReloadWhileTrigger | WeaponFlagManualReload | WeaponFlagSwitchAway | WeaponFlagPartialReload);
+constexpr WeaponFlag kDefaultWeaponFlags =
+    (WeaponFlag)(WeaponFlagReloadWhileTrigger | WeaponFlagManualReload |
+                 WeaponFlagSwitchAway | WeaponFlagPartialReload);
 
 class WeaponDefinition
 {
@@ -476,7 +478,7 @@ class WeaponDefinition
 
     int up_state_;     // State to use when raising the weapon
     int down_state_;   // State to use when lowering the weapon (if changing
-                      // weapon)
+                       // weapon)
     int ready_state_;  // State that the weapon is ready to fire in
     int empty_state_;  // State when weapon is empty.  Usually zero
     int idle_state_;   // State to use when polishing weapon

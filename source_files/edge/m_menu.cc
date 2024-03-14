@@ -85,7 +85,8 @@ extern bool EventMatchesKey(int keyvar, int key);
 
 extern ConsoleVariable sector_brightness_correction;
 
-extern unsigned int RendererUploadTexture(ImageData *img, int flags, int max_pix);
+extern unsigned int RendererUploadTexture(ImageData *img, int flags,
+                                          int max_pix);
 
 extern const Image *menu_backdrop;
 
@@ -192,9 +193,9 @@ struct SaveSlotExtendedInformation
     float y;
     float width;
 
-    ImageData *save_image_data = nullptr;
-    unsigned int  save_texture_id = 0;
-    int           save_image_page = 0;
+    ImageData   *save_image_data = nullptr;
+    unsigned int save_texture_id = 0;
+    int          save_image_page = 0;
 };
 
 static SaveSlotExtendedInformation
@@ -216,7 +217,7 @@ struct MenuItem
     int status = 0;
 
     // image for menu entry
-    char           patch_name[10] = {0};
+    char         patch_name[10] = {0};
     const Image *image          = nullptr;
 
     // choice = menu item #.
@@ -366,13 +367,13 @@ static MenuItem SkillMenu[] = {
     {1, "M_NMARE", nullptr, MenuChooseSkill, 'n', language["MenuDifficulty5"]}};
 
 static Menu SkillMenuDefinition = {
-    kTotalSkillLevels,             // # of menu items
+    kTotalSkillLevels,       // # of menu items
     &EpisodeMenuDefinition,  // previous menu
     SkillMenu,               // menuitem_t ->
     &skill_style,
     MenuDrawNewGame,  // drawing routine ->
     48,
-    63,        // x,y
+    63,           // x,y
     kSkillMedium  // last_on
 };
 
@@ -1296,8 +1297,8 @@ void MenuDrawNewGame(void)
 
         HudStretchImage(x, 14 + style->definition_->text_[fontType].y_offset_,
                         menu_new_game->ScaledWidthActual() * txtscale,
-                        menu_new_game->ScaledHeightActual() * txtscale, menu_new_game, 0.0,
-                        0.0, colmap);
+                        menu_new_game->ScaledHeightActual() * txtscale,
+                        menu_new_game, 0.0, 0.0, colmap);
 
         // HudDrawImage(x + style->definition_->text[fontType].x_offset,
         //	14 + style->definition_->text[fontType].y_offset, menu_new_game,
@@ -1312,7 +1313,8 @@ void MenuDrawNewGame(void)
         if (style->definition_->entry_alignment_ ==
             StyleDefinition::kAlignmentCenter)
         {
-            if (menu_skill->offset_x_ != 0.0f)  // Only auto-center if no Xoffset
+            if (menu_skill->offset_x_ !=
+                0.0f)    // Only auto-center if no Xoffset
                 x = 54;  // cannot get away from the damn hardcoded value
             else
                 x = CenterMenuImage2(style, fontType, menu_skill);
@@ -1320,8 +1322,8 @@ void MenuDrawNewGame(void)
         colmap = style->definition_->text_[fontType].colmap_;
         HudStretchImage(x, 38 + style->definition_->text_[fontType].y_offset_,
                         menu_skill->ScaledWidthActual() * txtscale,
-                        menu_skill->ScaledHeightActual() * txtscale, menu_skill, 0.0, 0.0,
-                        colmap);
+                        menu_skill->ScaledHeightActual() * txtscale, menu_skill,
+                        0.0, 0.0, colmap);
 
         // HudDrawImage(x + style->definition_->text[fontType].x_offset,
         //	38 + style->definition_->text[fontType].y_offset, menu_skill,
@@ -1441,8 +1443,8 @@ void MenuDrawEpisode(void)
         const Colormap *colmap = style->definition_->text_[fontType].colmap_;
         HudStretchImage(x, 38 + style->definition_->text_[fontType].y_offset_,
                         menu_episode->ScaledWidthActual() * txtscale,
-                        menu_episode->ScaledHeightActual() * txtscale, menu_episode, 0.0,
-                        0.0, colmap);
+                        menu_episode->ScaledHeightActual() * txtscale,
+                        menu_episode, 0.0, 0.0, colmap);
 
         // HudDrawImage(x + episode_style->definition_->text[fontType].x_offset,
         //	38 + episode_style->definition_->text[fontType].y_offset,
@@ -1608,7 +1610,7 @@ void MenuEndGame(int choice, ConsoleVariable *cvar)
         return;
     }
 
-    option_menu_on  = 0;
+    option_menu_on       = 0;
     network_game_menu_on = 0;
 
     if (network_game)
@@ -1686,9 +1688,9 @@ static void QuitResponse(int ch)
 //
 // -KM- 1998/07/21 Reinstated counting quit messages, so adding them to
 // dstrings.c
-//                   is all you have to do.  Using RandomByteDeterministic for the random
-//                   number automatically kills the sync... (hence RandomByte()...
-//                   -AJA-).
+//                   is all you have to do.  Using RandomByteDeterministic for
+//                   the random number automatically kills the sync... (hence
+//                   RandomByte()... -AJA-).
 //
 // -KM- 1998/07/31 Removed Limit. So there.
 // -KM- 1999/01/31 Load quit messages from default.ldf
@@ -1837,17 +1839,17 @@ void MenuDrawSlider(int x, int y, float slider_position, float increment,
 
         int i = 0;
 
-        HudStretchImage(x, y, step + 1, therm_l->ScaledHeightActual() / div, therm_l, 0.0,
-                        0.0);
+        HudStretchImage(x, y, step + 1, therm_l->ScaledHeightActual() / div,
+                        therm_l, 0.0, 0.0);
 
         for (x += step; i < (50 / step); i++, x += step)
         {
-            HudStretchImage(x, y, step + 1, therm_m->ScaledHeightActual() / div, therm_m,
-                            0.0, 0.0);
+            HudStretchImage(x, y, step + 1, therm_m->ScaledHeightActual() / div,
+                            therm_m, 0.0, 0.0);
         }
 
-        HudStretchImage(x, y, step + 1, therm_r->ScaledHeightActual() / div, therm_r, 0.0,
-                        0.0);
+        HudStretchImage(x, y, step + 1, therm_r->ScaledHeightActual() / div,
+                        therm_r, 0.0, 0.0);
 
         HudStretchImage(
             basex + ((slider_position - min) / increment) * scale_step + 1, y,
@@ -1972,8 +1974,7 @@ bool MenuResponder(InputEvent *ev)
             return true;
         }
 
-        if (ch == kEscape || ch == kGamepadB || ch == kMouse2 ||
-            ch == kMouse3)
+        if (ch == kEscape || ch == kGamepadB || ch == kMouse2 || ch == kMouse3)
         {
             menu_active  = message_last_menu ? true : false;
             message_mode = 0;
@@ -1987,8 +1988,7 @@ bool MenuResponder(InputEvent *ev)
             return true;
         }
 
-        if ((ch == kBackspace || ch == kDelete) &&
-            !input_string.empty())
+        if ((ch == kBackspace || ch == kDelete) && !input_string.empty())
         {
             std::string s = input_string.c_str();
 
@@ -2092,17 +2092,11 @@ bool MenuResponder(InputEvent *ev)
         if (EventMatchesKey(key_screenshot, ch)) { ch = kScreenshot; }
         if (EventMatchesKey(key_save_game, ch)) { ch = kSaveGame; }
         if (EventMatchesKey(key_load_game, ch)) { ch = kLoadGame; }
-        if (EventMatchesKey(key_sound_controls, ch))
-        {
-            ch = kSoundControls;
-        }
+        if (EventMatchesKey(key_sound_controls, ch)) { ch = kSoundControls; }
         if (EventMatchesKey(key_options_menu, ch)) { ch = kOptionsMenu; }
         if (EventMatchesKey(key_quick_save, ch)) { ch = kQuickSave; }
         if (EventMatchesKey(key_end_game, ch)) { ch = kEndGame; }
-        if (EventMatchesKey(key_message_toggle, ch))
-        {
-            ch = kMessageToggle;
-        }
+        if (EventMatchesKey(key_message_toggle, ch)) { ch = kMessageToggle; }
         if (EventMatchesKey(key_quick_load, ch)) { ch = kQuickLoad; }
         if (EventMatchesKey(key_quit_edge, ch)) { ch = kQuitEdge; }
         if (EventMatchesKey(key_gamma_toggle, ch)) { ch = kGammaToggle; }
@@ -2113,7 +2107,8 @@ bool MenuResponder(InputEvent *ev)
 
                 if (automap_active) return false;
 
-                screen_hud = (screen_hud - 1 + kTotalScreenHuds) % kTotalScreenHuds;
+                screen_hud =
+                    (screen_hud - 1 + kTotalScreenHuds) % kTotalScreenHuds;
 
                 StartSoundEffect(sound_effect_stnmov);
                 return true;
@@ -2149,7 +2144,7 @@ bool MenuResponder(InputEvent *ev)
                 return true;
 
             case kOptionsMenu:  // Detail toggle, now loads MainMenuOptions
-                                    // menu
+                                // menu
                 // -KM- 1998/07/31 F5 now loads MainMenuOptions menu, detail is
                 // obsolete.
 
@@ -2191,7 +2186,8 @@ bool MenuResponder(InputEvent *ev)
             case kGammaToggle:  // gamma toggle
 
                 sector_brightness_correction.d_++;
-                if (sector_brightness_correction.d_ > 10) sector_brightness_correction.d_ = 0;
+                if (sector_brightness_correction.d_ > 10)
+                    sector_brightness_correction.d_ = 0;
 
                 sector_brightness_correction = sector_brightness_correction.d_;
 
@@ -2206,7 +2202,8 @@ bool MenuResponder(InputEvent *ev)
                     case 3:
                     case 4:
                         msg.append("-");
-                        msg.append(std::to_string((5 - sector_brightness_correction.d_) * 10));
+                        msg.append(std::to_string(
+                            (5 - sector_brightness_correction.d_) * 10));
                         break;
                     case 5:
                         msg.append("Default");
@@ -2217,7 +2214,8 @@ bool MenuResponder(InputEvent *ev)
                     case 9:
                     case 10:
                         msg.append("+");
-                        msg.append(std::to_string((5 - sector_brightness_correction.d_) * -10));
+                        msg.append(std::to_string(
+                            (5 - sector_brightness_correction.d_) * -10));
                         break;
                     default:
                         msg.clear();
@@ -2440,8 +2438,8 @@ static void DrawMessage(void)
         {
             HudSetTextColor(
                 GetFontColor(exit_style->definition_
-                                   ->text_[StyleDefinition::kTextSectionText]
-                                   .colmap_));
+                                 ->text_[StyleDefinition::kTextSectionText]
+                                 .colmap_));
         }
 
         if (exit_style->fonts_[StyleDefinition::kTextSectionText])
@@ -2604,8 +2602,8 @@ void MenuDrawCursor(Style *style, bool graphical_item)
     }
     else  // We're going graphical cursor
     {
-        old_offset_x     = cursor->offset_x_;
-        old_offset_y     = cursor->offset_y_;
+        old_offset_x      = cursor->offset_x_;
+        old_offset_y      = cursor->offset_y_;
         cursor->offset_x_ = 0;
         cursor->offset_y_ = 0;
 
@@ -2654,7 +2652,8 @@ void MenuDrawCursor(Style *style, bool graphical_item)
                         ->StringWidth(current_menu->menu_items[item_on].name) *
                     txtscale;
             else
-                txtWidth = current_menu->menu_items[item_on].image->ScaledWidthActual() *
+                txtWidth = current_menu->menu_items[item_on]
+                               .image->ScaledWidthActual() *
                            txtscale;
 
             TempX =
@@ -2754,7 +2753,8 @@ void MenuDrawCursor(Style *style, bool graphical_item)
                         ->StringWidth(current_menu->menu_items[item_on].name) *
                     txtscale;
             else
-                txtWidth = current_menu->menu_items[item_on].image->ScaledWidthActual() *
+                txtWidth = current_menu->menu_items[item_on]
+                               .image->ScaledWidthActual() *
                            txtscale;
 
             TempX = current_menu->menu_items[item_on].x + txtWidth + TempSpacer;
@@ -2838,7 +2838,8 @@ void MenuDrawCursor(Style *style, bool graphical_item)
                         ->StringWidth(current_menu->menu_items[item_on].name) *
                     txtscale;
             else
-                txtWidth = current_menu->menu_items[item_on].image->ScaledWidthActual() *
+                txtWidth = current_menu->menu_items[item_on]
+                               .image->ScaledWidthActual() *
                            txtscale;
 
             TempX = current_menu->menu_items[item_on].x + txtWidth + TempSpacer;
@@ -2850,9 +2851,9 @@ void MenuDrawCursor(Style *style, bool graphical_item)
         TempY = current_menu->menu_items[item_on].y + y_shift;
         if (graphical_item == true)
         {
-            TempX -=
-                (current_menu->menu_items[item_on].image->offset_x_ * txtscale) *
-                2;
+            TempX -= (current_menu->menu_items[item_on].image->offset_x_ *
+                      txtscale) *
+                     2;
             TempY -=
                 (current_menu->menu_items[item_on].image->offset_y_ * txtscale);
         }
@@ -2877,9 +2878,9 @@ void MenuDrawCursor(Style *style, bool graphical_item)
         TempY = current_menu->menu_items[item_on].y + y_shift;
         if (graphical_item == true)
         {
-            TempX -=
-                (current_menu->menu_items[item_on].image->offset_x_ * txtscale) *
-                2;
+            TempX -= (current_menu->menu_items[item_on].image->offset_x_ *
+                      txtscale) *
+                     2;
             TempY -=
                 (current_menu->menu_items[item_on].image->offset_y_ * txtscale);
         }
@@ -2986,8 +2987,10 @@ void MenuDrawItems(Style *style, bool graphical_item)
 
             const Image *image = current_menu->menu_items[i].image;
 
-            current_menu->menu_items[i].height = image->ScaledHeightActual() * txtscale;
-            current_menu->menu_items[i].width  = image->ScaledWidthActual() * txtscale;
+            current_menu->menu_items[i].height =
+                image->ScaledHeightActual() * txtscale;
+            current_menu->menu_items[i].width =
+                image->ScaledWidthActual() * txtscale;
 
             if (!image->is_empty_)
             {
@@ -3024,7 +3027,8 @@ void MenuDrawItems(Style *style, bool graphical_item)
                 y += 15 + style->definition_->entry_spacing_;
             }
         }
-        if (AlmostEquals(ShortestLine, 10000.0f) && AlmostEquals(TallestLine, 0.0f))
+        if (AlmostEquals(ShortestLine, 10000.0f) &&
+            AlmostEquals(TallestLine, 0.0f))
         {
             ShortestLine = 20.0f;
             TallestLine  = 20.0f;
@@ -3203,7 +3207,7 @@ void MenuClear(void)
 
     menu_active           = false;
     save_screenshot_valid = false;
-    option_menu_on         = 0;
+    option_menu_on        = 0;
 }
 
 void MenuSetupNextMenu(Menu *menudef)

@@ -240,12 +240,9 @@ void ImageStoreBlurred(const Image *image)
         img->blurred_version_->animation_.speed   = 0;
         if (img->blur_sigma_ > 0.0f)
         {
-            img->blurred_version_->blur_sigma_        = img->blur_sigma_;
+            img->blurred_version_->blur_sigma_ = img->blur_sigma_;
         }
-        else
-        {
-            img->blurred_version_->blur_sigma_ = -1.0f;
-        }
+        else { img->blurred_version_->blur_sigma_ = -1.0f; }
     }
 }
 
@@ -709,19 +706,23 @@ static Image *AddImage_DOOM(ImageDefinition *def, bool user_defined = false)
         {
             case kImageNamespaceGraphic:
                 rim = AddImage_Smart(name, kImageSourceGraphic,
-                                     GetLumpNumberForName(lump_name), real_graphics);
+                                     GetLumpNumberForName(lump_name),
+                                     real_graphics);
                 break;
             case kImageNamespaceTexture:
                 rim = AddImage_Smart(name, kImageSourceTexture,
-                                     GetLumpNumberForName(lump_name), real_textures);
+                                     GetLumpNumberForName(lump_name),
+                                     real_textures);
                 break;
             case kImageNamespaceFlat:
-                rim = AddImage_Smart(name, kImageSourceFlat,
-                                     GetLumpNumberForName(lump_name), real_flats);
+                rim =
+                    AddImage_Smart(name, kImageSourceFlat,
+                                   GetLumpNumberForName(lump_name), real_flats);
                 break;
             case kImageNamespaceSprite:
                 rim = AddImage_Smart(name, kImageSourceSprite,
-                                     GetLumpNumberForName(lump_name), real_sprites);
+                                     GetLumpNumberForName(lump_name),
+                                     real_sprites);
                 break;
 
             default:
@@ -1287,7 +1288,8 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
     }
     else if (rim->source_palette_ >= 0)
     {
-        what_palette    = (const uint8_t *)LoadLumpIntoMemory(rim->source_palette_);
+        what_palette =
+            (const uint8_t *)LoadLumpIntoMemory(rim->source_palette_);
         what_pal_cached = true;
     }
 

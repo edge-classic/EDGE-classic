@@ -55,13 +55,13 @@ extern unsigned int root_node;
 struct LineOfSight
 {
     // source position (dx/dy is vector to dest)
-    DividingLine    source;
+    DividingLine source;
     float        source_z;
-    Subsector *source_subsector;
+    Subsector   *source_subsector;
 
     // dest position
-    HMM_Vec2     destination;
-    float        destination_z;
+    HMM_Vec2   destination;
+    float      destination_z;
     Subsector *destination_subsector;
 
     // angle from src->dest, for fast seg check
@@ -126,8 +126,8 @@ static bool CrossSubsector(Subsector *sub)
 
     int s1, s2;
 
-    Sector *front;
-    Sector *back;
+    Sector      *front;
+    Sector      *back;
     DividingLine divl;
 
     float frac;
@@ -162,16 +162,18 @@ static bool CrossSubsector(Subsector *sub)
             continue;
 
         // does linedef cross LOS ?
-        s1 = PointOnDividingLineSide(ld->vertex_1->X, ld->vertex_1->Y, &sight_check.source);
-        s2 = PointOnDividingLineSide(ld->vertex_2->X, ld->vertex_2->Y, &sight_check.source);
+        s1 = PointOnDividingLineSide(ld->vertex_1->X, ld->vertex_1->Y,
+                                     &sight_check.source);
+        s2 = PointOnDividingLineSide(ld->vertex_2->X, ld->vertex_2->Y,
+                                     &sight_check.source);
 
         if (s1 == s2) continue;
 
         // linedef crosses LOS (extended to infinity), now check if the
         // cross point lies within the finite LOS range.
         //
-        divl.x  = ld->vertex_1->X;
-        divl.y  = ld->vertex_1->Y;
+        divl.x       = ld->vertex_1->X;
+        divl.y       = ld->vertex_1->Y;
         divl.delta_x = ld->delta_x;
         divl.delta_y = ld->delta_y;
 
@@ -222,16 +224,17 @@ static bool CrossSubsector(Subsector *sub)
 
         if (!AlmostEquals(front->floor_height, back->floor_height))
         {
-            float openbottom =
-                HMM_MAX(ld->front_sector->floor_height, ld->back_sector->floor_height);
-            slope = (openbottom - sight_check.source_z) / frac;
+            float openbottom = HMM_MAX(ld->front_sector->floor_height,
+                                       ld->back_sector->floor_height);
+            slope            = (openbottom - sight_check.source_z) / frac;
             if (slope > sight_check.bottom_slope)
                 sight_check.bottom_slope = slope;
         }
 
         if (!AlmostEquals(front->ceiling_height, back->ceiling_height))
         {
-            float opentop = HMM_MIN(ld->front_sector->ceiling_height, ld->back_sector->ceiling_height);
+            float opentop = HMM_MIN(ld->front_sector->ceiling_height,
+                                    ld->back_sector->ceiling_height);
             slope         = (opentop - sight_check.source_z) / frac;
             if (slope < sight_check.top_slope) sight_check.top_slope = slope;
         }
@@ -259,11 +262,12 @@ static bool CheckSightBSP(unsigned int bspnum)
     while (!(bspnum & kLeafSubsector))
     {
         BspNode *node = level_nodes + bspnum;
-        int     s1, s2;
+        int      s1, s2;
 
 #if (DEBUG_SIGHT >= 2)
         LogDebug("CheckSightBSP: node %d (%1.1f,%1.1f) + (%1.1f,%1.1f)\n",
-                 bspnum, node->div.x, node->div.y, node->div.delta_x, node->div.delta_y);
+                 bspnum, node->div.x, node->div.y, node->div.delta_x,
+                 node->div.delta_y);
 #endif
 
         // decide which side the src and dest points are on
@@ -299,9 +303,11 @@ static bool CheckSightBSP(unsigned int bspnum)
         LogDebug("  Subsec %d  SEC %d\n", bspnum, sub->sector - sectors);
 #endif
 
-        if (sub->sector->extrafloor_used > 0) sight_check.saw_extrafloors = true;
+        if (sub->sector->extrafloor_used > 0)
+            sight_check.saw_extrafloors = true;
 
-        if (sub->sector->floor_vertex_slope || sub->sector->ceiling_vertex_slope)
+        if (sub->sector->floor_vertex_slope ||
+            sub->sector->ceiling_vertex_slope)
             sight_check.saw_vertex_slopes = true;
 
         // when target subsector is reached, there are no more lines to
@@ -324,7 +330,7 @@ static bool CheckSightBSP(unsigned int bspnum)
 //
 static bool CheckSightIntercepts(float slope)
 {
-    int       i, j;
+    int     i, j;
     Sector *sec;
 
     float last_h = sight_check.source_z;
@@ -379,7 +385,7 @@ static bool CheckSightIntercepts(float slope)
 //
 static bool CheckSightSameSubsector(MapObject *src, MapObject *dest)
 {
-    int       j;
+    int     j;
     Sector *sec;
 
     float lower_z;
@@ -437,8 +443,8 @@ bool CheckSight(MapObject *src, MapObject *dest)
 
     sight_check.source.x         = src->x;
     sight_check.source.y         = src->y;
-    sight_check.source.delta_x        = dest->x - src->x;
-    sight_check.source.delta_y        = dest->y - src->y;
+    sight_check.source.delta_x   = dest->x - src->x;
+    sight_check.source.delta_y   = dest->y - src->y;
     sight_check.source_subsector = src->subsector_;
 
     sight_check.destination.X         = dest->x;
@@ -449,7 +455,8 @@ bool CheckSight(MapObject *src, MapObject *dest)
     sight_check.top_slope    = sight_check.bottom_slope + dest->height_;
 
     // destination out of object's DDF slope range ?
-    dist_a = ApproximateDistance(sight_check.source.delta_x, sight_check.source.delta_y);
+    dist_a = ApproximateDistance(sight_check.source.delta_x,
+                                 sight_check.source.delta_y);
 
     if (src->info_->sight_distance_ > -1)  // if we have sight_distance set
     {
@@ -484,9 +491,9 @@ bool CheckSight(MapObject *src, MapObject *dest)
         return CheckSightSameSubsector(src, dest);
     }
 
-    sight_check.angle =
-        RendererPointToAngle(sight_check.source.x, sight_check.source.y,
-                       sight_check.destination.X, sight_check.destination.Y);
+    sight_check.angle = RendererPointToAngle(
+        sight_check.source.x, sight_check.source.y, sight_check.destination.X,
+        sight_check.destination.Y);
 
     sight_check.bounding_box[kBoundingBoxLeft] =
         HMM_MIN(sight_check.source.x, sight_check.destination.X);
@@ -518,7 +525,7 @@ bool CheckSight(MapObject *src, MapObject *dest)
         float objslope;
         AimLineAttack(src, sight_check.angle, 64000, &objslope);
         LineAttack(src, sight_check.angle, 64000, objslope, 0, nullptr,
-                     nullptr);
+                   nullptr);
         bool slope_sight_good = dest->slope_sight_hit_;
         if (slope_sight_good)
         {
@@ -580,11 +587,11 @@ bool CheckSightToPoint(MapObject *src, float x, float y, float z)
 
     valid_count++;
 
-    sight_check.source.x  = src->x;
-    sight_check.source.y  = src->y;
-    sight_check.source_z  = src->z + src->height_ * src->info_->viewheight_;
-    sight_check.source.delta_x = x - src->x;
-    sight_check.source.delta_y = y - src->y;
+    sight_check.source.x = src->x;
+    sight_check.source.y = src->y;
+    sight_check.source_z = src->z + src->height_ * src->info_->viewheight_;
+    sight_check.source.delta_x   = x - src->x;
+    sight_check.source.delta_y   = y - src->y;
     sight_check.source_subsector = src->subsector_;
 
     sight_check.destination.X         = x;
@@ -595,9 +602,9 @@ bool CheckSightToPoint(MapObject *src, float x, float y, float z)
     sight_check.bottom_slope = z - 1.0f - sight_check.source_z;
     sight_check.top_slope    = z + 1.0f - sight_check.source_z;
 
-    sight_check.angle =
-        RendererPointToAngle(sight_check.source.x, sight_check.source.y,
-                       sight_check.destination.X, sight_check.destination.Y);
+    sight_check.angle = RendererPointToAngle(
+        sight_check.source.x, sight_check.source.y, sight_check.destination.X,
+        sight_check.destination.Y);
 
     sight_check.bounding_box[kBoundingBoxLeft] =
         HMM_MIN(sight_check.source.x, sight_check.destination.X);

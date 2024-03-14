@@ -275,7 +275,8 @@ enum ImageSource
     // Source was a graphic name
     kImageSourceGraphic = 0,
 
-    // INTERNAL ONLY: Source was a raw block of 320x200 or 320x158 bytes (Heretic)
+    // INTERNAL ONLY: Source was a raw block of 320x200 or 320x158 bytes
+    // (Heretic)
     kImageSourceRawBlock,
 
     // Source was a sprite name

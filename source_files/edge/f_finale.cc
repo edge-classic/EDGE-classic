@@ -83,7 +83,7 @@ static constexpr uint8_t kFinaleTextWaitTime = 250;
 
 static const char *finale_text;
 
-static GameAction            new_game_action;
+static GameAction              new_game_action;
 static const FinaleDefinition *finale;
 
 static void CastInitNew(int num);
@@ -91,8 +91,8 @@ static void CastTicker(void);
 static void CastSkip(void);
 
 static const Image *finale_text_background;
-static float          finale_text_background_scale = 1.0f;
-static RGBAColor      finale_text_color;
+static float        finale_text_background_scale = 1.0f;
+static RGBAColor    finale_text_color;
 
 static Style *finale_level_text_style;
 static Style *finale_cast_style;
@@ -248,7 +248,8 @@ void FinaleStart(const FinaleDefinition *F, GameAction newaction)
 
     if (stage == kFinaleStageDone)
     {
-        if (new_game_action != kGameActionNothing) game_action = new_game_action;
+        if (new_game_action != kGameActionNothing)
+            game_action = new_game_action;
 
         return /* false */;
     }
@@ -341,7 +342,8 @@ void FinaleTicker(void)
             break;
 
         default:
-            FatalError("FinaleTicker: bad finale_stage #%d\n", (int)finale_stage);
+            FatalError("FinaleTicker: bad finale_stage #%d\n",
+                       (int)finale_stage);
             break;
     }
 
@@ -373,7 +375,7 @@ static void TextWrite(void)
 
             // Lobo: if it's a flat, tile it
             HudTileImage(hud_x_left, 0, hud_x_right - hud_x_left, 200,
-                          finale_text_background);  // Lobo: Widescreen support
+                         finale_text_background);  // Lobo: Widescreen support
         }
         else
         {
@@ -382,7 +384,7 @@ static void TextWrite(void)
                 if (!finale_text_background->blurred_version_)
                     ImageStoreBlurred(finale_text_background);
                 HudStretchImage(-320, -200, 960, 600,
-                                 finale_text_background->blurred_version_, 0, 0);
+                                finale_text_background->blurred_version_, 0, 0);
             }
             HudDrawImageTitleWS(finale_text_background);
         }
@@ -653,7 +655,8 @@ static void CastTicker(void)
             cast_attacking = true;
             CastSetState(st);
 
-            if (cast_order->attacksound_) StartSoundEffect(cast_order->attacksound_);
+            if (cast_order->attacksound_)
+                StartSoundEffect(cast_order->attacksound_);
         }
     }
 
@@ -701,7 +704,10 @@ static void CastDrawer(void)
 
     const Image *image;
 
-    if (finale_cast_style->background_image_) { finale_cast_style->DrawBackground(); }
+    if (finale_cast_style->background_image_)
+    {
+        finale_cast_style->DrawBackground();
+    }
     else
     {
         image = ImageLookup("BOSSBACK");
@@ -709,7 +715,7 @@ static void CastDrawer(void)
         {
             if (!image->blurred_version_) ImageStoreBlurred(image);
             HudStretchImage(-320, -200, 960, 600, image->blurred_version_, 0,
-                             0);
+                            0);
         }
         HudDrawImageTitleWS(image);
     }
@@ -719,14 +725,16 @@ static void CastDrawer(void)
     if (finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText]
             .colmap_)
     {
-        HudSetTextColor(GetFontColor(
-            finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText]
-                .colmap_));
+        HudSetTextColor(
+            GetFontColor(finale_cast_style->definition_
+                             ->text_[StyleDefinition::kTextSectionText]
+                             .colmap_));
     }
     else { HudSetTextColor(SG_YELLOW_RGBA32); }
 
     TempScale =
-        finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
+        finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText]
+            .scale_;
     HudSetScale(TempScale);
 
     if (finale_cast_style->fonts_[StyleDefinition::kTextSectionText])
@@ -744,14 +752,14 @@ static void CastDrawer(void)
     float pos_x, pos_y;
     float scale_x, scale_y;
 
-    TempScale =
-        finale_cast_style->definition_->text_[StyleDefinition::kTextSectionHeader]
-            .scale_;
+    TempScale = finale_cast_style->definition_
+                    ->text_[StyleDefinition::kTextSectionHeader]
+                    .scale_;
     if (TempScale < 1.0 || TempScale > 1.0)
     {
-        scale_y =
-            finale_cast_style->definition_->text_[StyleDefinition::kTextSectionHeader]
-                .scale_;
+        scale_y = finale_cast_style->definition_
+                      ->text_[StyleDefinition::kTextSectionHeader]
+                      .scale_;
     }
     else
         scale_y = 3;
@@ -770,18 +778,19 @@ static void CastDrawer(void)
         glEnable(GL_DEPTH_TEST);
 
         if (md->md2_model_)
-            Md2RenderModel2d(md->md2_model_, skin_img, cast_state->frame,
-                               pos_x, pos_y, scale_x, scale_y, cast_order);
+            Md2RenderModel2d(md->md2_model_, skin_img, cast_state->frame, pos_x,
+                             pos_y, scale_x, scale_y, cast_order);
         else if (md->mdl_model_)
-            MdlRenderModel2d(md->mdl_model_, skin_img, cast_state->frame,
-                               pos_x, pos_y, scale_x, scale_y, cast_order);
+            MdlRenderModel2d(md->mdl_model_, skin_img, cast_state->frame, pos_x,
+                             pos_y, scale_x, scale_y, cast_order);
 
         glDisable(GL_DEPTH_TEST);
         return;
     }
 
     // draw the current frame in the middle of the screen
-    image = RendererGetOtherSprite(cast_state->sprite, cast_state->frame, &flip);
+    image =
+        RendererGetOtherSprite(cast_state->sprite, cast_state->frame, &flip);
 
     if (!image) return;
 
@@ -803,8 +812,8 @@ static void CastDrawer(void)
     height *= scale_y;
 
     RendererDrawImage(pos_x - offset_x, pos_y + offset_y, width, height, image,
-                  flip ? image->Right() : 0, 0, flip ? 0 : image->Right(),
-                  image->Top(), nullptr, 1.0f, cast_order->palremap_);
+                      flip ? image->Right() : 0, 0, flip ? 0 : image->Right(),
+                      image->Top(), nullptr, 1.0f, cast_order->palremap_);
 }
 
 //
@@ -815,12 +824,12 @@ static void CastDrawer(void)
 // -Lobo- 2021/11/02 Widescreen support: both images must be the same size
 static void BunnyScroll(void)
 {
-    int            scrolled;
+    int          scrolled;
     const Image *p1;
     const Image *p2;
-    char           name[10];
-    int            stage;
-    static int     laststage;
+    char         name[10];
+    int          stage;
+    static int   laststage;
 
     p1 = ImageLookup("PFUB2");
     p2 = ImageLookup("PFUB1");
@@ -842,10 +851,9 @@ static void BunnyScroll(void)
     if (scrolled > (TempWidth + CenterX)) scrolled = (TempWidth + CenterX);
     if (scrolled < 0) scrolled = 0;
 
-    HudStretchImage(CenterX - scrolled, 0, TempWidth, TempHeight, p1, 0.0,
-                     0.0);
+    HudStretchImage(CenterX - scrolled, 0, TempWidth, TempHeight, p1, 0.0, 0.0);
     HudStretchImage((CenterX + TempWidth) - (scrolled + 1), 0, TempWidth,
-                     TempHeight, p2, 0.0, 0.0);
+                    TempHeight, p2, 0.0, 0.0);
 
     if (finale_count < 1130) return;
 
@@ -894,14 +902,14 @@ void FinaleDrawer(void)
         {
             const Image *image =
                 ImageLookup(finale
-                                  ->pics_[HMM_MIN((size_t)picture_number,
-                                                  finale->pics_.size() - 1)]
-                                  .c_str());
+                                ->pics_[HMM_MIN((size_t)picture_number,
+                                                finale->pics_.size() - 1)]
+                                .c_str());
             if (title_scaling.d_)  // Fill Border
             {
                 if (!image->blurred_version_) ImageStoreBlurred(image);
                 HudStretchImage(-320, -200, 960, 600, image->blurred_version_,
-                                 0, 0);
+                                0, 0);
             }
             HudDrawImageTitleWS(image);
             break;
@@ -916,7 +924,8 @@ void FinaleDrawer(void)
             break;
 
         default:
-            FatalError("FinaleDrawer: bad finale_stage #%d\n", (int)finale_stage);
+            FatalError("FinaleDrawer: bad finale_stage #%d\n",
+                       (int)finale_stage);
             break;
     }
 }

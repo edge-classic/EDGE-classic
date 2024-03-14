@@ -815,7 +815,7 @@ static void CheckForLevel(WadFile *wad, int lump, const char *name,
 
 int CheckForUniqueGameLumps(epi::File *file)
 {
-    int              length;
+    int          length;
     RawWadHeader header;
 
     if (!file)
@@ -827,10 +827,10 @@ int CheckForUniqueGameLumps(epi::File *file)
     // WAD file
     // TODO: handle Read failure
     file->Read(&header, sizeof(RawWadHeader));
-    header.total_entries        = AlignedLittleEndianS32(header.total_entries);
-    header.directory_start          = AlignedLittleEndianS32(header.directory_start);
-    length                    = header.total_entries * sizeof(RawWadEntry);
-    RawWadEntry *raw_info = new RawWadEntry[header.total_entries];
+    header.total_entries   = AlignedLittleEndianS32(header.total_entries);
+    header.directory_start = AlignedLittleEndianS32(header.directory_start);
+    length                 = header.total_entries * sizeof(RawWadEntry);
+    RawWadEntry *raw_info  = new RawWadEntry[header.total_entries];
     file->Seek(header.directory_start, epi::File::kSeekpointStart);
     file->Read(raw_info, length);
 
@@ -1131,8 +1131,8 @@ void ProcessWad(DataFile *df, size_t file_index)
         }
     }
 
-    header.total_entries = AlignedLittleEndianS32(header.total_entries);
-    header.directory_start   = AlignedLittleEndianS32(header.directory_start);
+    header.total_entries   = AlignedLittleEndianS32(header.total_entries);
+    header.directory_start = AlignedLittleEndianS32(header.directory_start);
 
     size_t length = header.total_entries * sizeof(RawWadEntry);
 

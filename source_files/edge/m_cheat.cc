@@ -186,7 +186,7 @@ bool CheatResponder(InputEvent *ev)
     return false;
 #endif
 
-    int       i;
+    int     i;
     Player *pl = players[console_player];
 
     // disable cheats while in RTS menu
@@ -206,7 +206,11 @@ bool CheatResponder(InputEvent *ev)
         pl->cheats_ ^= kCheatingGodMode;
         if (pl->cheats_ & kCheatingGodMode)
         {
-            if (pl->map_object_) { pl->health_ = pl->map_object_->health_ = pl->map_object_->spawn_health_; }
+            if (pl->map_object_)
+            {
+                pl->health_ = pl->map_object_->health_ =
+                    pl->map_object_->spawn_health_;
+            }
             ConsoleMessageLDF("GodModeOn");
         }
         else
@@ -291,7 +295,8 @@ bool CheatResponder(InputEvent *ev)
         {
             next = mo->next_;
 
-            if ((mo->extended_flags_ & kExtendedFlagMonster) && (mo->health_ > 0))
+            if ((mo->extended_flags_ & kExtendedFlagMonster) &&
+                (mo->health_ > 0))
             {
                 TelefragMapObject(mo, nullptr, nullptr);
                 killcount++;
@@ -362,7 +367,8 @@ bool CheatResponder(InputEvent *ev)
     // 'mypos' for player position
     else if (CheatCheckSequence(&cheat_my_position, key))
     {
-        ConsoleMessage("ang=%f;x,y=(%f,%f)", epi::DegreesFromBAM(pl->map_object_->angle_),
+        ConsoleMessage("ang=%f;x,y=(%f,%f)",
+                       epi::DegreesFromBAM(pl->map_object_->angle_),
                        pl->map_object_->x, pl->map_object_->y);
     }
 

@@ -188,7 +188,7 @@ static void InstallTextureLumps(int file, const WadTextureResource *WT)
         }
 
         const RawPatchDefinition *mpatch = &mtexture->patches[0];
-        TexturePatch         *patch  = &texture->patches[0];
+        TexturePatch             *patch  = &texture->patches[0];
 
         bool is_sky =
             (epi::StringPrefixCaseCompareASCII(texture->name, "SKY") == 0);
@@ -356,7 +356,7 @@ static void InstallTextureLumpsStrife(int file, const WadTextureResource *WT)
         }
 
         const RawStrifePatchDefinition *mpatch = &mtexture->patches[0];
-        TexturePatch                *patch  = &texture->patches[0];
+        TexturePatch                   *patch  = &texture->patches[0];
 
         bool is_sky =
             (epi::StringPrefixCaseCompareASCII(texture->name, "SKY") == 0);
@@ -469,7 +469,7 @@ void InitializeTextures(void)
 
     numtextures = cur - textures;
 
-#define EDGE_CMP(a, b)                    \
+#define EDGE_CMP(a, b)               \
     (strcmp(a->name, b->name) < 0 || \
      (strcmp(a->name, b->name) == 0 && a->file < b->file))
     EDGE_QSORT(TextureDefinition *, textures, numtextures, 10);

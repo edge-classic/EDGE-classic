@@ -427,14 +427,15 @@ static OptionMenuItem vidoptions[] = {
      &gamma_correction.f_, OptionMenuUpdateConsoleVariableFromFloat, nullptr,
      &gamma_correction, 0.10f, -1.0f, 1.0f, "%0.2f"},
     {kOptionMenuItemTypeSwitch, "Sector Brightness",
-     "-50/-40/-30/-20/-10/Default/+10/+20/+30/+40/+50", 11, &sector_brightness_correction.d_,
-     OptionMenuUpdateConsoleVariableFromInt, nullptr, &sector_brightness_correction},
+     "-50/-40/-30/-20/-10/Default/+10/+20/+30/+40/+50", 11,
+     &sector_brightness_correction.d_, OptionMenuUpdateConsoleVariableFromInt,
+     nullptr, &sector_brightness_correction},
     {kOptionMenuItemTypeBoolean, "Lighting Mode", "Indexed/Flat", 2,
      &force_flat_lighting.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr,
      &force_flat_lighting},
     {kOptionMenuItemTypeSwitch, "Framerate Target", "35 FPS/70 FPS", 2,
-     &double_framerate.d_, OptionMenuUpdateConsoleVariableFromInt,
-     nullptr, &double_framerate},
+     &double_framerate.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr,
+     &double_framerate},
     {kOptionMenuItemTypeSwitch, "Smoothing", YesNo, 2, &image_smoothing,
      OptionMenuChangeMipMap, nullptr},
     {kOptionMenuItemTypeSwitch, "Upscale Textures",
@@ -446,8 +447,8 @@ static OptionMenuItem vidoptions[] = {
     {kOptionMenuItemTypeSwitch, "Sky Scaling", "Mirror/Repeat/Stretch/Vanilla",
      4, &sky_stretch_mode.d_, OptionMenuUpdateConsoleVariableFromInt,
      "Vanilla will be forced when Mouselook is Off", &sky_stretch_mode},
-    {kOptionMenuItemTypeSwitch, "Dynamic Lighting", YesNo, 2, &use_dynamic_lights,
-     nullptr, nullptr},
+    {kOptionMenuItemTypeSwitch, "Dynamic Lighting", YesNo, 2,
+     &use_dynamic_lights, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Overlay",
      "None/Lines 1x/Lines 2x/Vertical 1x/Vertical 2x/Grill 1x/Grill 2x", 7,
      &video_overlay.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr,
@@ -459,9 +460,9 @@ static OptionMenuItem vidoptions[] = {
     {kOptionMenuItemTypeSwitch, "Crosshair Color",
      "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange", 8, &crosshair_color.d_,
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &crosshair_color},
-    {kOptionMenuItemTypeSlider, "Crosshair Size", nullptr, 0, &crosshair_size.f_,
-     OptionMenuUpdateConsoleVariableFromFloat, nullptr, &crosshair_size, 1.0f,
-     2.0f, 64.0f, "%g Pixels"},
+    {kOptionMenuItemTypeSlider, "Crosshair Size", nullptr, 0,
+     &crosshair_size.f_, OptionMenuUpdateConsoleVariableFromFloat, nullptr,
+     &crosshair_size, 1.0f, 2.0f, 64.0f, "%g Pixels"},
     {kOptionMenuItemTypeBoolean, "Map Rotation", YesNo, 2, &rotate_map, nullptr,
      nullptr},
     {kOptionMenuItemTypeSwitch, "Invulnerability", "Simple/Textured",
@@ -597,9 +598,9 @@ static OptionMenuDefinition analogue_optmenu = {
 // -AJA- 2007/03/14 Added new sound menu
 //
 static OptionMenuItem soundoptions[] = {
-    {kOptionMenuItemTypeSlider, "Sound Volume", nullptr, 0, &sound_effect_volume.f_,
-     OptionMenuUpdateConsoleVariableFromFloat, nullptr, &sound_effect_volume, 0.05f,
-     0.0f, 1.0f, "%0.2f"},
+    {kOptionMenuItemTypeSlider, "Sound Volume", nullptr, 0,
+     &sound_effect_volume.f_, OptionMenuUpdateConsoleVariableFromFloat, nullptr,
+     &sound_effect_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
     {kOptionMenuItemTypeSlider, "Movie/Music Volume", nullptr, 0,
      &music_volume.f_, OptionMenuUpdateConsoleVariableFromFloat, nullptr,
      &music_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
@@ -613,17 +614,16 @@ static OptionMenuItem soundoptions[] = {
      OptionMenuChangeSoundfont, nullptr},
     {kOptionMenuItemTypeFunction, "Opal Instrument Bank", nullptr, 0, nullptr,
      OptionMenuChangeOplInstrumentBank, nullptr},
-    {kOptionMenuItemTypeBoolean, "PC Speaker Mode", YesNo, 2,
-     &pc_speaker_mode, OptionMenuChangePCSpeakerMode,
-     "Music will be Off while this is enabled"},
+    {kOptionMenuItemTypeBoolean, "PC Speaker Mode", YesNo, 2, &pc_speaker_mode,
+     OptionMenuChangePCSpeakerMode, "Music will be Off while this is enabled"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeBoolean, "Dynamic Reverb", YesNo, 2, &dynamic_reverb,
      nullptr, nullptr},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Mix Channels", "32/64/96/128/160/192/224/256",
      8, &sound_mixing_channels, OptionMenuChangeMixChan, nullptr},
-    {kOptionMenuItemTypeBoolean, "Precache SFX", YesNo, 2, &precache_sound_effects,
-     nullptr, "NeedRestart"},
+    {kOptionMenuItemTypeBoolean, "Precache SFX", YesNo, 2,
+     &precache_sound_effects, nullptr, "NeedRestart"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
 };
 
@@ -642,9 +642,9 @@ static OptionMenuDefinition sound_optmenu = {
 //
 //
 static OptionMenuItem f4soundoptions[] = {
-    {kOptionMenuItemTypeSlider, "Sound Volume", nullptr, 0, &sound_effect_volume.f_,
-     OptionMenuUpdateConsoleVariableFromFloat, nullptr, &sound_effect_volume, 0.05f,
-     0.0f, 1.0f, "%0.2f"},
+    {kOptionMenuItemTypeSlider, "Sound Volume", nullptr, 0,
+     &sound_effect_volume.f_, OptionMenuUpdateConsoleVariableFromFloat, nullptr,
+     &sound_effect_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
     {kOptionMenuItemTypeSlider, "Music Volume", nullptr, 0, &music_volume.f_,
      OptionMenuUpdateConsoleVariableFromFloat, nullptr, &music_volume, 0.05f,
      0.0f, 1.0f, "%0.2f"},
@@ -670,8 +670,8 @@ static OptionMenuItem playoptions[] = {
     {kOptionMenuItemTypeBoolean, "Pistol Starts", YesNo, 2, &pistol_starts,
      nullptr, nullptr},
 
-    {kOptionMenuItemTypeBoolean, "Mouse Look", YesNo, 2, &global_flags.mouselook,
-     OptionMenuChangeMLook, nullptr},
+    {kOptionMenuItemTypeBoolean, "Mouse Look", YesNo, 2,
+     &global_flags.mouselook, OptionMenuChangeMLook, nullptr},
 
     {kOptionMenuItemTypeSwitch, "Autoaim", "Off/On/Mlook", 3,
      &global_flags.autoaim, OptionMenuChangeAutoAim, nullptr},
@@ -688,11 +688,12 @@ static OptionMenuItem playoptions[] = {
     {kOptionMenuItemTypeBoolean, "Weapon Auto-Switch", YesNo, 2,
      &global_flags.weapon_switch, OptionMenuChangeWeaponSwitch, nullptr},
 
-    {kOptionMenuItemTypeBoolean, "Obituary Messages", YesNo, 2, &show_obituaries,
-     nullptr, nullptr},
+    {kOptionMenuItemTypeBoolean, "Obituary Messages", YesNo, 2,
+     &show_obituaries, nullptr, nullptr},
 
     {kOptionMenuItemTypeSwitch, "Blood Level", "Normal/Extra/None", 3,
-     &gore_level.d_, OptionMenuUpdateConsoleVariableFromInt, "Blood", &gore_level},
+     &gore_level.d_, OptionMenuUpdateConsoleVariableFromInt, "Blood",
+     &gore_level},
 
     {kOptionMenuItemTypeBoolean, "Extras", YesNo, 2, &global_flags.have_extra,
      OptionMenuChangeExtra, nullptr},
@@ -708,8 +709,8 @@ static OptionMenuItem playoptions[] = {
      "Time only advances when you move or fire", &erraticism},
 
     {kOptionMenuItemTypeSlider, "Gravity", nullptr, 0, &gravity_factor.f_,
-     OptionMenuUpdateConsoleVariableFromFloat, "Gravity", &gravity_factor, 0.10f,
-     0.0f, 2.0f, "%gx"},
+     OptionMenuUpdateConsoleVariableFromFloat, "Gravity", &gravity_factor,
+     0.10f, 0.0f, 2.0f, "%gx"},
 
     {kOptionMenuItemTypeBoolean, "Respawn Enemies", YesNo, 2,
      &global_flags.enemies_respawn, OptionMenuChangeRespawn, nullptr},
@@ -753,11 +754,13 @@ static OptionMenuItem perfoptions[] = {
      "Only effective when Draw Distance Culling is On", &cull_fog_color},
     {kOptionMenuItemTypeBoolean, "Slow Thinkers Over Distance", YesNo, 2,
      &distance_cull_thinkers.d_, OptionMenuUpdateConsoleVariableFromInt,
-     "Only recommended for extreme monster/projectile counts", &distance_cull_thinkers},
+     "Only recommended for extreme monster/projectile counts",
+     &distance_cull_thinkers},
     {kOptionMenuItemTypeSwitch, "Maximum Dynamic Lights",
      "Unlimited/20/40/60/80/100", 6, &max_dynamic_lights.d_,
      OptionMenuUpdateConsoleVariableFromInt,
-     "Control how many dynamic lights are rendered per tick", &max_dynamic_lights},
+     "Control how many dynamic lights are rendered per tick",
+     &max_dynamic_lights},
 };
 
 static OptionMenuDefinition perf_optmenu = {
@@ -1318,10 +1321,11 @@ void OptionMenuDrawer()
         {
             fontType  = StyleDefinition::kTextSectionAlternate;
             TEXTscale = style->definition_->text_[fontType].scale_;
-            HudWriteText(
-                style, fontType, (current_menu->menu_center) + 15, curry,
-                opl_instrument_bank.s_.empty() ? "Default"
-                                     : epi::GetStem(opl_instrument_bank.s_).c_str());
+            HudWriteText(style, fontType, (current_menu->menu_center) + 15,
+                         curry,
+                         opl_instrument_bank.s_.empty()
+                             ? "Default"
+                             : epi::GetStem(opl_instrument_bank.s_).c_str());
         }
 
         // -ACB- 1998/07/15 Menu Cursor is colour indexed.
@@ -1520,7 +1524,8 @@ static void OptionMenuResOptDrawer(Style *style, int topy, int bottomy, int dy,
     if (current_window_mode == 2)
         sprintf(tempstring, "%s", "Borderless Fullscreen");
     else
-        sprintf(tempstring, "%d x %d %s", current_screen_width, current_screen_height,
+        sprintf(tempstring, "%d x %d %s", current_screen_width,
+                current_screen_height,
                 current_window_mode == 1 ? "Exclusive Fullscreen" : "Windowed");
 
     HudWriteText(style, fontType,
@@ -1977,9 +1982,9 @@ static void OptionMenuVideoOptions(int              key_pressed,
 static void OptionMenuResolutionOptions(int              key_pressed,
                                         ConsoleVariable *console_variable)
 {
-    new_window_mode.width        = current_screen_width;
-    new_window_mode.height       = current_screen_height;
-    new_window_mode.depth        = current_screen_depth;
+    new_window_mode.width       = current_screen_width;
+    new_window_mode.height      = current_screen_height;
+    new_window_mode.depth       = current_screen_depth;
     new_window_mode.window_mode = current_window_mode;
 
     current_menu = &res_optmenu;
@@ -2248,12 +2253,13 @@ static void OptionMenuChangeMipMap(int              key_pressed,
 static void OptionMenuChangeBobbing(int              key_pressed,
                                     ConsoleVariable *console_variable)
 {
-    view_bobbing        = view_bobbing.d_;
+    view_bobbing   = view_bobbing.d_;
     Player *player = players[console_player];
     if (player)
     {
-        player->bob_factor_   = 0;
-        PlayerSprite *psp = &player->player_sprites_[player->action_player_sprite_];
+        player->bob_factor_ = 0;
+        PlayerSprite *psp =
+            &player->player_sprites_[player->action_player_sprite_];
         if (psp)
         {
             psp->screen_x = 0;
@@ -2502,17 +2508,17 @@ static void OptionMenuionSetResolution(int              key_pressed,
     {
         if (new_window_mode.window_mode > kWindowModeWindowed)
         {
-            toggle_fullscreen_depth  = new_window_mode.depth;
-            toggle_fullscreen_height = new_window_mode.height;
-            toggle_fullscreen_width  = new_window_mode.width;
-            toggle_fullscreen_window_mode  = new_window_mode.window_mode;
+            toggle_fullscreen_depth       = new_window_mode.depth;
+            toggle_fullscreen_height      = new_window_mode.height;
+            toggle_fullscreen_width       = new_window_mode.width;
+            toggle_fullscreen_window_mode = new_window_mode.window_mode;
         }
         else
         {
-            toggle_windowed_depth  = new_window_mode.depth;
-            toggle_windowed_height = new_window_mode.height;
-            toggle_windowed_width  = new_window_mode.width;
-            toggle_windowed_window_mode  = new_window_mode.window_mode;
+            toggle_windowed_depth       = new_window_mode.depth;
+            toggle_windowed_height      = new_window_mode.height;
+            toggle_windowed_width       = new_window_mode.width;
+            toggle_windowed_window_mode = new_window_mode.window_mode;
         }
         SoftInitializeResolution();
     }

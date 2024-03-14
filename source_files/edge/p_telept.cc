@@ -42,7 +42,7 @@ MapObject *FindTeleportMan(int tag, const MapObjectDefinition *info)
         if (level_sectors[i].tag != tag) continue;
 
         for (Subsector *sub = level_sectors[i].subsectors; sub;
-             sub              = sub->sector_next)
+             sub            = sub->sector_next)
         {
             for (MapObject *mo = sub->thing_list; mo; mo = mo->subsector_next_)
                 if (mo->info_ == info &&
@@ -122,10 +122,11 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing,
 
     BAMAngle dest_ang;
     BAMAngle source_ang =
-        kBAMAngle90 + (line ? RendererPointToAngle(0, 0, line->delta_x, line->delta_y) : 0);
+        kBAMAngle90 +
+        (line ? RendererPointToAngle(0, 0, line->delta_x, line->delta_y) : 0);
 
     MapObject *currmobj = nullptr;
-    Line    *currline = nullptr;
+    Line      *currline = nullptr;
 
     bool flipped = (def->special_ & kTeleportSpecialFlipped) ? true : false;
 
@@ -144,13 +145,15 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing,
         new_x = currline->vertex_1->X + currline->delta_x / 2.0f;
         new_y = currline->vertex_1->Y + currline->delta_y / 2.0f;
 
-        new_z = currline->front_sector ? currline->front_sector->floor_height : -32000;
+        new_z = currline->front_sector ? currline->front_sector->floor_height
+                                       : -32000;
 
         if (currline->back_sector)
             new_z = HMM_MAX(new_z, currline->back_sector->floor_height);
 
         dest_ang =
-            RendererPointToAngle(0, 0, currline->delta_x, currline->delta_y) + kBAMAngle90;
+            RendererPointToAngle(0, 0, currline->delta_x, currline->delta_y) +
+            kBAMAngle90;
 
         flipped = !flipped;  // match Boom's logic
     }
@@ -246,8 +249,8 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing,
 
     if (player)
     {
-        player->view_height_      = player->standard_view_height_;
-        player->view_z_           = player->standard_view_height_;
+        player->view_height_       = player->standard_view_height_;
+        player->view_z_            = player->standard_view_height_;
         player->delta_view_height_ = 0;
     }
     else
@@ -319,8 +322,8 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing,
             // -ES- 1998/10/29 When fading, we don't want to see the fog.
             //
             fog = CreateMapObject(new_x + 20.0f * epi::BAMCos(thing->angle_),
-                                     new_y + 20.0f * epi::BAMSin(thing->angle_),
-                                     new_z, def->outspawnobj_);
+                                  new_y + 20.0f * epi::BAMSin(thing->angle_),
+                                  new_z, def->outspawnobj_);
 
             // never use this object as a teleport destination
             fog->extended_flags_ |= kExtendedFlagNeverTarget;

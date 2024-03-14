@@ -54,15 +54,15 @@ extern GameAction game_action;
 //    kGameActionLoadGame    : defer_load_slot
 //    kGameActionSaveGame    : defer_save_slot, defer_save_description
 //
-//    kGameActionLoadLevel   : current_map, players, game_skill+dm+level_flags ETC
-//    kGameActionIntermission: current_map, next_map, players, intermission_stats ETC
-//    kGameActionFinale      : next_map, players
+//    kGameActionLoadLevel   : current_map, players, game_skill+dm+level_flags
+//    ETC kGameActionIntermission: current_map, next_map, players,
+//    intermission_stats ETC kGameActionFinale      : next_map, players
 
 class NewGameParameters
 {
    public:
     SkillLevel skill_;
-    int     deathmatch_;
+    int        deathmatch_;
 
     const MapDefinition *map_;
     // gamedef_c is implied (== map->episode)

@@ -32,9 +32,9 @@ void UseThing(int mt_num);
 void MarkThing(int mt_num);  // attacks too
 void MarkAllMonsters();
 
-DehackedMapObjectDefinition   *GetModifiedMobj(int mt_num);
-const char *GetMobjName(int mt_num);
-int         GetMobjMBF21Flags(int mt_num);
+DehackedMapObjectDefinition *GetModifiedMobj(int mt_num);
+const char                  *GetMobjName(int mt_num);
+int                          GetMobjMBF21Flags(int mt_num);
 
 bool IsSpawnable(int mt_num);
 
@@ -44,7 +44,8 @@ const char *AddScratchAttack(int damage, const char *sfx);
 void ConvertTHING();
 void ConvertATK();
 
-void HandleFlags(const DehackedMapObjectDefinition *info, int mt_num, int player);
+void HandleFlags(const DehackedMapObjectDefinition *info, int mt_num,
+                 int player);
 void HandleAttacks(const DehackedMapObjectDefinition *info, int mt_num);
 
 const char *GetSpeed(int speed);

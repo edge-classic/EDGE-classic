@@ -412,7 +412,8 @@ static void RendererDrawSkyCylinder(void)
                       // projection Calculate some stuff based on sky height
     float sky_h_ratio;
     float solid_sky_h;
-    if (sky_image->ScaledHeightActual() > 128 && current_sky_stretch != kSkyStretchStretch)
+    if (sky_image->ScaledHeightActual() > 128 &&
+        current_sky_stretch != kSkyStretchStretch)
         sky_h_ratio = (float)sky_image->ScaledHeightActual() / 256;
     else if (current_sky_stretch == kSkyStretchVanilla)
         sky_h_ratio = 0.5f;
@@ -873,7 +874,7 @@ int RendererUpdateSkyBoxTextures(void)
     // check for custom sky boxes
     info->face[kSkyboxNorth] =
         ImageLookup(UserSkyFaceName(sky_image->name_.c_str(), kSkyboxNorth),
-                      kImageNamespaceTexture, kImageLookupNull);
+                    kImageNamespaceTexture, kImageLookupNull);
 
     // LOBO 2022:
     // If we do nothing, our EWAD skybox will be used for all maps.
@@ -888,7 +889,8 @@ int RendererUpdateSkyBoxTextures(void)
     // Set colors for culling fog and faux skybox caps - Dasho
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
     if (sky_image->source_palette_ >= 0)
-        what_palette = (const uint8_t *)LoadLumpIntoMemory(sky_image->source_palette_);
+        what_palette =
+            (const uint8_t *)LoadLumpIntoMemory(sky_image->source_palette_);
     ImageData *tmp_img_data = RgbFromPalettised(
         ReadAsEpiBlock((Image *)sky_image), what_palette, sky_image->opacity_);
     culling_fog_color = sg_make_color_1i(tmp_img_data->AverageColor(
@@ -907,7 +909,7 @@ int RendererUpdateSkyBoxTextures(void)
         for (int i = kSkyboxEast; i < 6; i++)
             info->face[i] =
                 ImageLookup(UserSkyFaceName(sky_image->name_.c_str(), i),
-                              kImageNamespaceTexture);
+                            kImageNamespaceTexture);
 
         for (int k = 0; k < 6; k++)
             info->texture[k] =

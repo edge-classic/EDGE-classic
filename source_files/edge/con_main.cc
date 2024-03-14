@@ -275,7 +275,7 @@ int ConsoleCommandCrc(char **argv, int argc)
             delete[] data;
 
             ConsolePrint("  %s  %d bytes  crc = %08x\n", argv[i], length,
-                          result.GetCRC());
+                         result.GetCRC());
         }
     }
 

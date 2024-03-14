@@ -44,7 +44,8 @@ class IntermissionMapPositionInfoContainer
 {
    public:
     IntermissionMapPositionInfoContainer();
-    IntermissionMapPositionInfoContainer(IntermissionMapPositionInfoContainer &rhs);
+    IntermissionMapPositionInfoContainer(
+        IntermissionMapPositionInfoContainer &rhs);
     ~IntermissionMapPositionInfoContainer();
 
    private:
@@ -68,14 +69,15 @@ class IntermissionFrameInfo
     ~IntermissionFrameInfo();
 
    public:
-    void               Default(void);
+    void                   Default(void);
     IntermissionFrameInfo &operator=(IntermissionFrameInfo &rhs);
 
    private:
     void Copy(IntermissionFrameInfo &src);
 };
 
-class IntermissionFrameInfoContainer : public std::vector<IntermissionFrameInfo *>
+class IntermissionFrameInfoContainer
+    : public std::vector<IntermissionFrameInfo *>
 {
    public:
     IntermissionFrameInfoContainer();
@@ -86,7 +88,8 @@ class IntermissionFrameInfoContainer : public std::vector<IntermissionFrameInfo 
     void Copy(IntermissionFrameInfoContainer &rhs);
 
    public:
-    IntermissionFrameInfoContainer &operator=(IntermissionFrameInfoContainer &rhs);
+    IntermissionFrameInfoContainer &operator=(
+        IntermissionFrameInfoContainer &rhs);
 };
 
 class IntermissionAnimationInfo
@@ -111,7 +114,7 @@ class IntermissionAnimationInfo
 
    public:
     IntermissionAnimationInfo &operator=(IntermissionAnimationInfo &rhs);
-    void                   Default(void);
+    void                       Default(void);
 
    private:
     void Copy(IntermissionAnimationInfo &rhs);
@@ -170,8 +173,8 @@ class GameDefinition
     // -AJA- 1999/10/22: background cameras.
     std::string bg_camera_;
 
-    int           music_;
-    bool          no_skill_menu_;
+    int                 music_;
+    bool                no_skill_menu_;
     struct SoundEffect *percent_;
     struct SoundEffect *done_;
     struct SoundEffect *endmap_;

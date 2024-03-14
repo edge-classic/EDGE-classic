@@ -113,8 +113,8 @@ struct RawSidedef
 #pragma pack(push, 1)
 struct RawSector
 {
-    int16_t floor_height;  // floor height
-    int16_t ceiling_height;   // ceiling height
+    int16_t floor_height;    // floor height
+    int16_t ceiling_height;  // ceiling height
 
     char floor_texture[8];  // floor texture
     char ceil_texture[8];   // ceiling texture
@@ -149,10 +149,10 @@ struct RawV5Node
 {
     // this structure used by ZDoom nodes too
 
-    int16_t        x, y;    // starting point
-    int16_t        delta_x, delta_y;  // offset to ending point
+    int16_t        x, y;                            // starting point
+    int16_t        delta_x, delta_y;                // offset to ending point
     RawBoundingBox bounding_box_1, bounding_box_2;  // bounding rectangles
-    uint32_t right, left;   // children: Node or SSector (if high bit is set)
+    uint32_t right, left;  // children: Node or SSector (if high bit is set)
 };
 #pragma pack(pop)
 
@@ -289,15 +289,15 @@ enum LineFlag
 
     // 0x0400 is Eternity's 3DMidTex flag - Dasho
 
-    // Clear extended line flags (BOOM or later spec); needed to repair mapping/editor errors
-    // with historical maps (i.e., E2M7)
+    // Clear extended line flags (BOOM or later spec); needed to repair
+    // mapping/editor errors with historical maps (i.e., E2M7)
     kLineFlagClearBoomFlags = 0x0800,
 
     // MBF21
     kLineFlagBlockGroundedMonsters = 0x1000,
 
     // MBF21
-    kLineFlagBlockPlayers  = 0x2000,
+    kLineFlagBlockPlayers = 0x2000,
 
     // ----- internal flags -----
 

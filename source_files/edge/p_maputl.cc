@@ -93,8 +93,8 @@ float ApproximateSlope(float dx, float dy, float dz)
     return dz / dist;
 }
 
-void ComputeIntersection(DividingLine *div, float x1, float y1, float x2, float y2,
-                         float *ix, float *iy)
+void ComputeIntersection(DividingLine *div, float x1, float y1, float x2,
+                         float y2, float *ix, float *iy)
 {
     if (AlmostEquals(div->delta_x, 0.0f))
     {
@@ -129,9 +129,11 @@ int PointOnDividingLineSide(float x, float y, DividingLine *div)
     float dx, dy;
     float left, right;
 
-    if (AlmostEquals(div->delta_x, 0.0f)) return ((x <= div->x) ^ (div->delta_y > 0)) ? 0 : 1;
+    if (AlmostEquals(div->delta_x, 0.0f))
+        return ((x <= div->x) ^ (div->delta_y > 0)) ? 0 : 1;
 
-    if (AlmostEquals(div->delta_y, 0.0f)) return ((y <= div->y) ^ (div->delta_x < 0)) ? 0 : 1;
+    if (AlmostEquals(div->delta_y, 0.0f))
+        return ((y <= div->y) ^ (div->delta_x < 0)) ? 0 : 1;
 
     dx = x - div->x;
     dy = y - div->y;
@@ -203,8 +205,8 @@ int BoxOnLineSide(const float *tmbox, Line *ld)
 
     DividingLine div;
 
-    div.x  = ld->vertex_1->X;
-    div.y  = ld->vertex_1->Y;
+    div.x       = ld->vertex_1->X;
+    div.y       = ld->vertex_1->Y;
     div.delta_x = ld->delta_x;
     div.delta_y = ld->delta_y;
 
@@ -322,8 +324,8 @@ int ThingOnLineSide(const MapObject *mo, Line *ld)
 
 static int GapRemoveSolid(VerticalGap *dest, int d_num, float z1, float z2)
 {
-    int    d;
-    int    new_num = 0;
+    int         d;
+    int         new_num = 0;
     VerticalGap new_gaps[100];
 
 #ifdef DEVELOPERS
@@ -341,7 +343,7 @@ static int GapRemoveSolid(VerticalGap *dest, int d_num, float z1, float z2)
         {
             // no intersection.
 
-            new_gaps[new_num].floor = dest[d].floor;
+            new_gaps[new_num].floor   = dest[d].floor;
             new_gaps[new_num].ceiling = dest[d].ceiling;
             new_num++;
             continue;
@@ -351,14 +353,14 @@ static int GapRemoveSolid(VerticalGap *dest, int d_num, float z1, float z2)
 
         if (z1 > dest[d].floor)
         {
-            new_gaps[new_num].floor = dest[d].floor;
+            new_gaps[new_num].floor   = dest[d].floor;
             new_gaps[new_num].ceiling = z1;
             new_num++;
         }
 
         if (z2 < dest[d].ceiling)
         {
-            new_gaps[new_num].floor = z2;
+            new_gaps[new_num].floor   = z2;
             new_gaps[new_num].ceiling = dest[d].ceiling;
             new_num++;
         }
@@ -379,7 +381,7 @@ static int GapConstruct(VerticalGap *gaps, Sector *sec, MapObject *thing,
     // early out for FUBAR sectors
     if (sec->floor_height >= sec->ceiling_height) return 0;
 
-    gaps[0].floor = sec->floor_height + floor_slope_z;
+    gaps[0].floor   = sec->floor_height + floor_slope_z;
     gaps[0].ceiling = sec->ceiling_height - ceiling_slope_z;
 
     for (ef = sec->bottom_extrafloor; ef; ef = ef->higher)
@@ -394,7 +396,8 @@ static int GapConstruct(VerticalGap *gaps, Sector *sec, MapObject *thing,
 
     for (ef = sec->bottom_liquid; ef; ef = ef->higher)
     {
-        if (ef->extrafloor_definition && (ef->extrafloor_definition->type_ & kExtraFloorTypeWater))
+        if (ef->extrafloor_definition &&
+            (ef->extrafloor_definition->type_ & kExtraFloorTypeWater))
         {
             num = GapRemoveSolid(gaps, num, ef->bottom_height, ef->top_height);
         }
@@ -412,30 +415,33 @@ static int GapSightConstruct(VerticalGap *gaps, Sector *sec)
     // early out for closed or FUBAR sectors
     if (sec->ceiling_height <= sec->floor_height) return 0;
 
-    gaps[0].floor = sec->floor_height;
+    gaps[0].floor   = sec->floor_height;
     gaps[0].ceiling = sec->ceiling_height;
 
     for (ef = sec->bottom_extrafloor; ef; ef = ef->higher)
     {
-        if (!ef->extrafloor_definition || !(ef->extrafloor_definition->type_ & kExtraFloorTypeSeeThrough))
+        if (!ef->extrafloor_definition ||
+            !(ef->extrafloor_definition->type_ & kExtraFloorTypeSeeThrough))
             num = GapRemoveSolid(gaps, num, ef->bottom_height, ef->top_height);
     }
 
     for (ef = sec->bottom_liquid; ef; ef = ef->higher)
     {
-        if (!ef->extrafloor_definition || !(ef->extrafloor_definition->type_ & kExtraFloorTypeSeeThrough))
+        if (!ef->extrafloor_definition ||
+            !(ef->extrafloor_definition->type_ & kExtraFloorTypeSeeThrough))
             num = GapRemoveSolid(gaps, num, ef->bottom_height, ef->top_height);
     }
 
     return num;
 }
 
-static int GapRestrict(VerticalGap *dest, int d_num, VerticalGap *src, int s_num)
+static int GapRestrict(VerticalGap *dest, int d_num, VerticalGap *src,
+                       int s_num)
 {
     int   d, s;
     float f, c;
 
-    int    new_num = 0;
+    int         new_num = 0;
     VerticalGap new_gaps[100];
 
     for (s = 0; s < s_num; s++)
@@ -454,7 +460,7 @@ static int GapRestrict(VerticalGap *dest, int d_num, VerticalGap *src, int s_num
             if (f < c)
             {
                 new_gaps[new_num].ceiling = c;
-                new_gaps[new_num].floor = f;
+                new_gaps[new_num].floor   = f;
                 new_num++;
             }
         }
@@ -555,9 +561,10 @@ float ComputeThingGap(MapObject *thing, Sector *sec, float z, float *f,
                       float *c, float floor_slope_z, float ceiling_slope_z)
 {
     VerticalGap temp_gaps[100];
-    int    temp_num;
+    int         temp_num;
 
-    temp_num = GapConstruct(temp_gaps, sec, thing, floor_slope_z, ceiling_slope_z);
+    temp_num =
+        GapConstruct(temp_gaps, sec, thing, floor_slope_z, ceiling_slope_z);
 
     if (AlmostEquals(z, kOnFloorZ)) z = sec->floor_height;
 
@@ -591,10 +598,10 @@ void ComputeGaps(Line *ld)
     Sector *front = ld->front_sector;
     Sector *back  = ld->back_sector;
 
-    int    temp_num;
+    int         temp_num;
     VerticalGap temp_gaps[100];
 
-    ld->blocked = true;
+    ld->blocked    = true;
     ld->gap_number = 0;
 
     if (!front || !back)
@@ -608,12 +615,14 @@ void ComputeGaps(Line *ld)
     // In particular, the blocked flag can be clear even when one of the
     // sectors is closed (has ceiling <= floor).
 
-    if (back->ceiling_height <= front->floor_height || front->ceiling_height <= back->floor_height)
+    if (back->ceiling_height <= front->floor_height ||
+        front->ceiling_height <= back->floor_height)
     {
         // closed door.
 
         // -AJA- MUNDO HACK for slopes!!!!
-        if (front->floor_slope || back->floor_slope || front->ceiling_slope || back->ceiling_slope)
+        if (front->floor_slope || back->floor_slope || front->ceiling_slope ||
+            back->ceiling_slope)
         {
             ld->blocked = false;
         }
@@ -641,7 +650,7 @@ void ComputeGaps(Line *ld)
     // handle normal gaps ("movement" gaps)
 
     ld->gap_number = GapConstruct(ld->gaps, front, nullptr);
-    temp_num    = GapConstruct(temp_gaps, back, nullptr);
+    temp_num       = GapConstruct(temp_gaps, back, nullptr);
 
     ld->gap_number = GapRestrict(ld->gaps, ld->gap_number, temp_gaps, temp_num);
 }
@@ -655,21 +664,27 @@ void DumpExtraFloors(const sector_t *sec)
     const extrafloor_t *ef;
 
     LogDebug("EXTRAFLOORS IN Sector %d  (%d used, %d max)\n",
-             (int)(sec - sectors), sec->extrafloor_used, sec->extrafloor_maximum);
+             (int)(sec - sectors), sec->extrafloor_used,
+             sec->extrafloor_maximum);
 
-    LogDebug("  Basic height: %1.1f .. %1.1f\n", sec->floor_height, sec->ceiling_height);
+    LogDebug("  Basic height: %1.1f .. %1.1f\n", sec->floor_height,
+             sec->ceiling_height);
 
     for (ef = sec->bottom_extrafloor; ef; ef = ef->higher)
     {
         LogDebug("  Solid %s: %1.1f .. %1.1f\n",
-                 (ef->extrafloor_definition->type & kExtraFloorTypeThick) ? "Thick" : "Thin",
+                 (ef->extrafloor_definition->type & kExtraFloorTypeThick)
+                     ? "Thick"
+                     : "Thin",
                  ef->bottom_height, ef->top_height);
     }
 
     for (ef = sec->bottom_liquid; ef; ef = ef->higher)
     {
         LogDebug("  Liquid %s: %1.1f .. %1.1f\n",
-                 (ef->extrafloor_definition->type & kExtraFloorTypeThick) ? "Thick" : "Thin",
+                 (ef->extrafloor_definition->type & kExtraFloorTypeThick)
+                     ? "Thick"
+                     : "Thin",
                  ef->bottom_height, ef->top_height);
     }
 }
@@ -704,10 +719,10 @@ ExtrafloorFit CheckExtrafloorFit(Sector *sec, float z1, float z2)
 
 void AddExtraFloor(Sector *sec, Line *line)
 {
-    Sector                   *ctrl = line->front_sector;
+    Sector                     *ctrl = line->front_sector;
     const ExtraFloorDefinition *ef_info;
 
-    MapSurface    *top, *bottom;
+    MapSurface *top, *bottom;
     Extrafloor *newbie, *cur;
 
     bool          liquid;
@@ -744,26 +759,28 @@ void AddExtraFloor(Sector *sec, Line *line)
     }
 
     newbie->bottom_height = ctrl->floor_height;
-    newbie->top_height =
-        (ef_info->type_ & kExtraFloorTypeThick) ? ctrl->ceiling_height : newbie->bottom_height;
+    newbie->top_height    = (ef_info->type_ & kExtraFloorTypeThick)
+                                ? ctrl->ceiling_height
+                                : newbie->bottom_height;
 
     if (newbie->top_height < newbie->bottom_height)
         FatalError(
             "Bad Extrafloor in sector #%d: "
             "z range is %1.0f / %1.0f\n",
-            (int)(sec - level_sectors), newbie->bottom_height, newbie->top_height);
+            (int)(sec - level_sectors), newbie->bottom_height,
+            newbie->top_height);
 
     newbie->sector = sec;
     newbie->top    = top;
     newbie->bottom = bottom;
 
-    newbie->properties       = &ctrl->properties;
+    newbie->properties            = &ctrl->properties;
     newbie->extrafloor_definition = ef_info;
-    newbie->extrafloor_line = line;
+    newbie->extrafloor_line       = line;
 
     // Insert into the dummy's linked list
-    newbie->control_sector_next    = ctrl->control_floors;
-    ctrl->control_floors = newbie;
+    newbie->control_sector_next = ctrl->control_floors;
+    ctrl->control_floors        = newbie;
 
     //
     // -- handle liquid extrafloors --
@@ -802,7 +819,8 @@ void AddExtraFloor(Sector *sec, Line *line)
     //
 
     // check if fits
-    errcode = CheckExtrafloorFit(sec, newbie->bottom_height, newbie->top_height);
+    errcode =
+        CheckExtrafloorFit(sec, newbie->bottom_height, newbie->top_height);
 
     switch (errcode)
     {
@@ -813,19 +831,22 @@ void AddExtraFloor(Sector *sec, Line *line)
             LogWarning(
                 "Extrafloor with z range of %1.0f / %1.0f is stuck "
                 "in sector #%d's ceiling.\n",
-                newbie->bottom_height, newbie->top_height, (int)(sec - level_sectors));
+                newbie->bottom_height, newbie->top_height,
+                (int)(sec - level_sectors));
 
         case kFitStuckInFloor:
             LogWarning(
                 "Extrafloor with z range of %1.0f / %1.0f is stuck "
                 "in sector #%d's floor.\n",
-                newbie->bottom_height, newbie->top_height, (int)(sec - level_sectors));
+                newbie->bottom_height, newbie->top_height,
+                (int)(sec - level_sectors));
 
         default:
             LogWarning(
                 "Extrafloor with z range of %1.0f / %1.0f is stuck "
                 "in sector #%d in another extrafloor.\n",
-                newbie->bottom_height, newbie->top_height, (int)(sec - level_sectors));
+                newbie->bottom_height, newbie->top_height,
+                (int)(sec - level_sectors));
     }
 
     // find place to link into.  cur will be the next higher extrafloor,
@@ -899,7 +920,7 @@ void FloodExtraFloors(Sector *sector)
             continue;
         }
 
-        C->properties= last_p = flood_p ? flood_p : props;
+        C->properties = last_p = flood_p ? flood_p : props;
     }
 }
 
@@ -934,8 +955,8 @@ static bool TraverseSubsector(unsigned int bspnum, float *bbox,
                               bool (*func)(MapObject *mo))
 {
     Subsector *sub;
-    BspNode      *node;
-    MapObject   *obj;
+    BspNode   *node;
+    MapObject *obj;
 
     // just a normal node ?
     if (!(bspnum & kLeafSubsector))
@@ -984,7 +1005,7 @@ bool SubsectorThingIterator(float *bbox, bool (*func)(MapObject *mo))
     return TraverseSubsector(root_node, bbox, func);
 }
 
-static float   checkempty_bbox[4];
+static float checkempty_bbox[4];
 static Line *checkempty_line;
 
 static bool CheckThingInArea(MapObject *mo)

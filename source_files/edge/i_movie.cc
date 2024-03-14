@@ -41,22 +41,23 @@ extern int  sound_device_frequency;
 bool                    playing_movie;
 static bool             need_canvas_update;
 static bool             skip_bar_active;
-static GLuint           canvas            = 0;
-static uint8_t         *rgb_data          = nullptr;
-static plm_t           *decoder           = nullptr;
+static GLuint           canvas             = 0;
+static uint8_t         *rgb_data           = nullptr;
+static plm_t           *decoder            = nullptr;
 static SDL_AudioStream *movie_audio_stream = nullptr;
-static int              movie_sample_rate = 0;
+static int              movie_sample_rate  = 0;
 static float            skip_time;
 
 static bool MovieSetupAudioStream(int rate)
 {
-    movie_audio_stream = SDL_NewAudioStream(AUDIO_F32, 2, rate, AUDIO_S16,
-                                           sound_device_stereo ? 2 : 1, sound_device_frequency);
+    movie_audio_stream =
+        SDL_NewAudioStream(AUDIO_F32, 2, rate, AUDIO_S16,
+                           sound_device_stereo ? 2 : 1, sound_device_frequency);
 
     if (!movie_audio_stream)
     {
         LogWarning("PlayMovie: Failed to setup audio stream: %s\n",
-                  SDL_GetError());
+                   SDL_GetError());
         return false;
     }
 
@@ -84,9 +85,10 @@ void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
             avail / 2, sound_device_stereo ? kMixInterleaved : kMixMono);
         if (movie_buf)
         {
-            movie_buf->length_ = SDL_AudioStreamGet(movie_audio_stream,
-                                                   movie_buf->data_left_, avail) /
-                                (sound_device_stereo ? 4 : 2);
+            movie_buf->length_ =
+                SDL_AudioStreamGet(movie_audio_stream, movie_buf->data_left_,
+                                   avail) /
+                (sound_device_stereo ? 4 : 2);
             if (movie_buf->length_ > 0)
                 SoundQueueAddBuffer(movie_buf, sound_device_frequency);
             else
@@ -114,8 +116,7 @@ void PlayMovie(const std::string &name)
 
     if (!movie)
     {
-        LogWarning("PlayMovie: Movie definition %s not found!\n",
-                  name.c_str());
+        LogWarning("PlayMovie: Movie definition %s not found!\n", name.c_str());
         return;
     }
 
@@ -204,8 +205,9 @@ void PlayMovie(const std::string &name)
     if (movie->scaling_ == kMovieScalingAutofit)
     {
         // If movie and display ratios match (ish), stretch it
-        if (fabs((float)current_screen_width / current_screen_height / movie_ratio - 1.0f) <=
-            0.10f)
+        if (fabs((float)current_screen_width / current_screen_height /
+                     movie_ratio -
+                 1.0f) <= 0.10f)
         {
             frame_height = current_screen_height;
             frame_width  = current_screen_width;
@@ -213,7 +215,8 @@ void PlayMovie(const std::string &name)
         else  // Zoom
         {
             frame_height = current_screen_height;
-            frame_width  = RoundToInteger((float)current_screen_height * movie_ratio);
+            frame_width =
+                RoundToInteger((float)current_screen_height * movie_ratio);
         }
     }
     else if (movie->scaling_ == kMovieScalingNoScale)
@@ -224,7 +227,8 @@ void PlayMovie(const std::string &name)
     else if (movie->scaling_ == kMovieScalingZoom)
     {
         frame_height = current_screen_height;
-        frame_width  = RoundToInteger((float)current_screen_height * movie_ratio);
+        frame_width =
+            RoundToInteger((float)current_screen_height * movie_ratio);
     }
     else  // Stretch, aspect ratio gets BTFO potentially
     {

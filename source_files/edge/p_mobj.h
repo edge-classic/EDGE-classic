@@ -167,12 +167,12 @@ struct SpawnPoint
 
 struct DynamicLightState
 {
-    float              r;       // radius
-    float              target;  // target radius
-    RGBAColor          color;
+    float           r;       // radius
+    float           target;  // target radius
+    RGBAColor       color;
     AbstractShader *shader;
-    Line            *glow_wall     = nullptr;
-    bool               bad_wall_glow = false;
+    Line           *glow_wall     = nullptr;
+    bool            bad_wall_glow = false;
 };
 
 // Map Object definition.

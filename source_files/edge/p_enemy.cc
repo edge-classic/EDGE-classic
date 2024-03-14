@@ -74,7 +74,7 @@ float yspeed[8] = {0.0f, 0.7071067812f,  1.0f,  0.7071067812f,
 //
 static void RecurseSound(Sector *sec, int soundblocks, int player)
 {
-    int       i;
+    int     i;
     Line   *check;
     Sector *other;
 
@@ -86,7 +86,7 @@ static void RecurseSound(Sector *sec, int soundblocks, int player)
     // wake up all monsters in this sector
     sec->valid_count     = valid_count;
     sec->sound_traversed = soundblocks + 1;
-    sec->sound_player   = player;
+    sec->sound_player    = player;
 
     // Set any nearby monsters to have heard the player
     TouchNode *nd;
@@ -98,11 +98,12 @@ static void RecurseSound(Sector *sec, int soundblocks, int player)
                               -1.0f))  // if we have hear_distance set
             {
                 float distance;
-                distance =
-                    ApproximateDistance(players[player]->map_object_->x - nd->map_object->x,
-                                        players[player]->map_object_->y - nd->map_object->y);
                 distance = ApproximateDistance(
-                    players[player]->map_object_->z - nd->map_object->z, distance);
+                    players[player]->map_object_->x - nd->map_object->x,
+                    players[player]->map_object_->y - nd->map_object->y);
+                distance = ApproximateDistance(
+                    players[player]->map_object_->z - nd->map_object->z,
+                    distance);
                 if (distance < nd->map_object->info_->hear_distance_)
                 {
                     nd->map_object->last_heard_ = player;
@@ -438,11 +439,11 @@ void NewChaseDir(MapObject *object)
 //
 bool LookForPlayers(MapObject *actor, BAMAngle range)
 {
-    int       c;
-    int       stop;
-    Player *player;
-    BAMAngle  an;
-    float     dist;
+    int      c;
+    int      stop;
+    Player  *player;
+    BAMAngle an;
+    float    dist;
 
     c    = 0;
     stop = (actor->last_look_ - 1 + kMaximumPlayers) % kMaximumPlayers;
@@ -467,9 +468,10 @@ bool LookForPlayers(MapObject *actor, BAMAngle range)
 
         if (range < kBAMAngle180)
         {
-            an = RendererPointToAngle(actor->x, actor->y, player->map_object_->x,
-                                player->map_object_->y) -
-                 actor->angle_;
+            an =
+                RendererPointToAngle(actor->x, actor->y, player->map_object_->x,
+                                     player->map_object_->y) -
+                actor->angle_;
 
             if (range <= an && an <= (range * -1))
             {
@@ -557,7 +559,7 @@ void A_BrainScream(MapObject *bossbrain)
 
     if (bossbrain->info_->deathsound_)
         StartSoundEffect(bossbrain->info_->deathsound_,
-                  GetSoundEffectCategory(bossbrain), bossbrain);
+                         GetSoundEffectCategory(bossbrain), bossbrain);
 }
 
 void A_BrainMissileExplode(MapObject *mo)

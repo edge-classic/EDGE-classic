@@ -67,7 +67,7 @@ struct PathIntercept
     float along;  // along trace line
     // one of these will be nullptr
     MapObject *thing;
-    Line    *line;
+    Line      *line;
 };
 
 extern DividingLine trace;

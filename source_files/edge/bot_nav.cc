@@ -39,7 +39,7 @@
 #include "thing.h"
 
 extern MapObject *FindTeleportMan(int tag, const MapObjectDefinition *info);
-extern Line *p_FindTeleportLine(int tag, Line *original);
+extern Line      *p_FindTeleportLine(int tag, Line *original);
 
 extern unsigned int root_node;
 
@@ -126,7 +126,8 @@ static void BotNavigateCollectBigItems()
     // items (e.g. weapons) tend to be well distributed around a map.
     // it will also be useful for finding a weapon after spawning.
 
-    for (const MapObject *mo = map_object_list_head; mo != nullptr; mo = mo->next_)
+    for (const MapObject *mo = map_object_list_head; mo != nullptr;
+         mo                  = mo->next_)
     {
         if ((mo->flags_ & kMapObjectFlagSpecial) == 0) continue;
 
@@ -205,9 +206,9 @@ class nav_area_c
 class nav_link_c
 {
    public:
-    int          dest_id = -1;
-    float        length  = 0;
-    int          flags   = kBotPathNodeNormal;
+    int        dest_id = -1;
+    float      length  = 0;
+    int        flags   = kBotPathNodeNormal;
     const Seg *seg     = nullptr;
 };
 
@@ -233,7 +234,7 @@ void nav_area_c::compute_middle(const Subsector &sub)
     int total = 0;
 
     for (const Seg *seg = sub.segs; seg != nullptr;
-         seg              = seg->subsector_next, total += 1)
+         seg            = seg->subsector_next, total += 1)
     {
         sum_x += seg->vertex_1->X;
         sum_y += seg->vertex_1->Y;
@@ -264,7 +265,8 @@ static int BotNavigateCheckDoorOrLift(const Seg *seg)
         // require tag to match the back sector
         if (ld->tag <= 0) return kBotPathNodeNormal;
 
-        if (seg->back_subsector->sector->tag != ld->tag) return kBotPathNodeNormal;
+        if (seg->back_subsector->sector->tag != ld->tag)
+            return kBotPathNodeNormal;
     }
     else
     {
@@ -279,7 +281,8 @@ static int BotNavigateCheckDoorOrLift(const Seg *seg)
         spec->c_.type_ == kPlaneMoverMoveWaitReturn)
     {
         // determine "front" of door by ceiling heights
-        if (seg->back_subsector->sector->ceiling_height >= seg->front_subsector->sector->ceiling_height)
+        if (seg->back_subsector->sector->ceiling_height >=
+            seg->front_subsector->sector->ceiling_height)
             return kBotPathNodeNormal;
 
         // ignore locked doors in COOP, since bots don't puzzle solve (yet)
@@ -295,7 +298,8 @@ static int BotNavigateCheckDoorOrLift(const Seg *seg)
         spec->f_.type_ == kPlaneMoverElevator)
     {
         // determine "front" of lift by floor heights
-        if (seg->back_subsector->sector->floor_height <= seg->front_subsector->sector->floor_height)
+        if (seg->back_subsector->sector->floor_height <=
+            seg->front_subsector->sector->floor_height)
             return kBotPathNodeNormal;
 
         return kBotPathNodeLift;
@@ -356,7 +360,8 @@ static void BotNavigateCreateLinks()
         nav_area_c &area = nav_areas[i];
         area.first_link  = (int)nav_links.size();
 
-        for (const Seg *seg = sub.segs; seg != nullptr; seg = seg->subsector_next)
+        for (const Seg *seg = sub.segs; seg != nullptr;
+             seg            = seg->subsector_next)
         {
             // no link for a one-sided wall
             if (seg->back_subsector == nullptr) continue;
@@ -365,8 +370,8 @@ static void BotNavigateCreateLinks()
 
             // ignore player-blocking lines
             if (!seg->miniseg)
-                if (0 !=
-                    (seg->linedef->flags & (kLineFlagBlocking | kLineFlagBlockPlayers)))
+                if (0 != (seg->linedef->flags &
+                          (kLineFlagBlocking | kLineFlagBlockPlayers)))
                     continue;
 
             // NOTE: a big height difference is allowed here, it is checked
@@ -434,7 +439,8 @@ static float BotNavigateTraverseLinkCost(int cur, const nav_link_c &link,
     else
     {
         // check for travelling THROUGH a door
-        if ((link.flags & kBotPathNodeDoor) || (s1->ceiling_height < s1->floor_height + 56.0f))
+        if ((link.flags & kBotPathNodeDoor) ||
+            (s1->ceiling_height < s1->floor_height + 56.0f))
         {
             // okay
         }
@@ -459,7 +465,8 @@ static float BotNavigateEstimateH(const Subsector *cur_sub)
     int  id = (int)(cur_sub - level_subsectors);
     auto p  = nav_areas[id].get_middle();
 
-    float dist = RendererPointToDistance(p.x, p.y, nav_finish_mid.x, nav_finish_mid.y);
+    float dist =
+        RendererPointToDistance(p.x, p.y, nav_finish_mid.x, nav_finish_mid.y);
     float time = dist / RUNNING_SPEED;
 
     // over-estimate, to account for height changes, obstacles etc
@@ -509,8 +516,7 @@ static void BotNavigateTryOpenArea(int idx, int parent, float cost)
     }
 }
 
-static void BotNavigateStoreSegMiddle(BotPath *path, int flags,
-                                      const Seg *seg)
+static void BotNavigateStoreSegMiddle(BotPath *path, int flags, const Seg *seg)
 {
     EPI_ASSERT(seg);
 
@@ -579,7 +585,7 @@ static BotPath *BotNavigateStorePath(Position start, int start_id,
         // this should never happen
         if (link == nullptr)
             FatalError("could not find link in path (%d -> %d)\n", prev_id,
-                    cur_id);
+                       cur_id);
 
         BotNavigateStoreSegMiddle(path, link->flags, link->seg);
 
@@ -672,11 +678,12 @@ BotPath *BotNavigateFindPath(const Position *start, const Position *finish,
 //----------------------------------------------------------------------------
 
 static void BotNavigateItemsInSubsector(Subsector *sub, DeathBot *bot,
-                                        Position &pos, float radius,
-                                        int sub_id, int &best_id,
-                                        float &best_score, MapObject *&best_mo)
+                                        Position &pos, float radius, int sub_id,
+                                        int &best_id, float &best_score,
+                                        MapObject *&best_mo)
 {
-    for (MapObject *mo = sub->thing_list; mo != nullptr; mo = mo->subsector_next_)
+    for (MapObject *mo = sub->thing_list; mo != nullptr;
+         mo            = mo->subsector_next_)
     {
         float score = bot->EvalItem(mo);
         if (score < 0) continue;
@@ -705,10 +712,11 @@ BotPath *BotNavigateFindThing(DeathBot *bot, float radius, MapObject *&best)
     // each nearby thing (limited roughly by `radius') will be passed to the
     // EvalThing() method of the bot.  returns nullptr if nothing was found.
 
-    Position pos{bot->pl_->map_object_->x, bot->pl_->map_object_->y, bot->pl_->map_object_->z};
+    Position pos{bot->pl_->map_object_->x, bot->pl_->map_object_->y,
+                 bot->pl_->map_object_->z};
 
     Subsector *start    = RendererPointInSubsector(pos.x, pos.y);
-    int          start_id = (int)(start - level_subsectors);
+    int        start_id = (int)(start - level_subsectors);
 
     // the best thing so far...
     best             = nullptr;
@@ -743,8 +751,8 @@ BotPath *BotNavigateFindThing(DeathBot *bot, float radius, MapObject *&best)
         area.open        = false;
 
         // visit the things
-        BotNavigateItemsInSubsector(&level_subsectors[cur], bot, pos, radius, cur,
-                                    best_id, best_score, best);
+        BotNavigateItemsInSubsector(&level_subsectors[cur], bot, pos, radius,
+                                    cur, best_id, best_score, best);
 
         // visit each neighbor node
         for (int k = 0; k < area.num_links; k++)
@@ -776,7 +784,8 @@ static void BotNavigateEnemiesInSubsector(const Subsector *sub, DeathBot *bot,
                                           float radius, MapObject *&best_mo,
                                           float &best_score)
 {
-    for (MapObject *mo = sub->thing_list; mo != nullptr; mo = mo->subsector_next_)
+    for (MapObject *mo = sub->thing_list; mo != nullptr;
+         mo            = mo->subsector_next_)
     {
         if (bot->EvalEnemy(mo) < 0) continue;
 
@@ -803,21 +812,25 @@ static void BotNavigateEnemiesInNode(unsigned int bspnum, DeathBot *bot,
     if (bspnum & kLeafSubsector)
     {
         bspnum &= ~kLeafSubsector;
-        BotNavigateEnemiesInSubsector(&level_subsectors[bspnum], bot, radius, best_mo,
-                                      best_score);
+        BotNavigateEnemiesInSubsector(&level_subsectors[bspnum], bot, radius,
+                                      best_mo, best_score);
         return;
     }
 
     const BspNode *node = &level_nodes[bspnum];
 
-    Position pos{bot->pl_->map_object_->x, bot->pl_->map_object_->y, bot->pl_->map_object_->z};
+    Position pos{bot->pl_->map_object_->x, bot->pl_->map_object_->y,
+                 bot->pl_->map_object_->z};
 
     for (int c = 0; c < 2; c++)
     {
         // reject children outside of the bounds
-        if (node->bounding_boxes[c][kBoundingBoxLeft] > pos.x + radius) continue;
-        if (node->bounding_boxes[c][kBoundingBoxRight] < pos.x - radius) continue;
-        if (node->bounding_boxes[c][kBoundingBoxBottom] > pos.y + radius) continue;
+        if (node->bounding_boxes[c][kBoundingBoxLeft] > pos.x + radius)
+            continue;
+        if (node->bounding_boxes[c][kBoundingBoxRight] < pos.x - radius)
+            continue;
+        if (node->bounding_boxes[c][kBoundingBoxBottom] > pos.y + radius)
+            continue;
         if (node->bounding_boxes[c][kBoundingBoxTop] < pos.y - radius) continue;
 
         BotNavigateEnemiesInNode(node->children[c], bot, radius, best_mo,
@@ -832,7 +845,7 @@ MapObject *BotNavigateFindEnemy(DeathBot *bot, float radius)
     // radius is the size of a square box (not a circle).
 
     MapObject *best_mo    = nullptr;
-    float   best_score = 0;
+    float      best_score = 0;
 
     BotNavigateEnemiesInNode(root_node, bot, radius, best_mo, best_score);
 

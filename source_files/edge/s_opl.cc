@@ -152,7 +152,7 @@ void RestartOpal(void)
     }
 
     ChangeMusic(old_entry,
-                  true);  // Restart track that was playing when switched
+                true);  // Restart track that was playing when switched
 
     return;  // OK!
 }

@@ -40,7 +40,7 @@ extern "C"
         // -AJA- change current dir to match executable
         if (!epi::CurrentDirectorySet(executable_path))
             FatalError("Couldn't set program directory to %s!!\n",
-                    executable_path.c_str());
+                       executable_path.c_str());
 #endif
 
         // Run EDGE. it never returns

@@ -38,12 +38,16 @@ static void DDF_GameGetLighting(const char *info, void *storage);
 static GameDefinition dummy_gamedef;
 
 static const DDFCommandList gamedef_commands[] = {
-    DDF_FIELD("INTERMISSION_GRAPHIC", dummy_gamedef, background_, DDF_MainGetLumpName),
-    DDF_FIELD("INTERMISSION_CAMERA", dummy_gamedef, bg_camera_, DDF_MainGetString),
+    DDF_FIELD("INTERMISSION_GRAPHIC", dummy_gamedef, background_,
+              DDF_MainGetLumpName),
+    DDF_FIELD("INTERMISSION_CAMERA", dummy_gamedef, bg_camera_,
+              DDF_MainGetString),
     DDF_FIELD("INTERMISSION_MUSIC", dummy_gamedef, music_, DDF_MainGetNumeric),
     DDF_FIELD("SPLAT_GRAPHIC", dummy_gamedef, splatpic_, DDF_MainGetLumpName),
-    DDF_FIELD("YAH1_GRAPHIC", dummy_gamedef, you_are_here_[0], DDF_MainGetLumpName),
-    DDF_FIELD("YAH2_GRAPHIC", dummy_gamedef, you_are_here_[1], DDF_MainGetLumpName),
+    DDF_FIELD("YAH1_GRAPHIC", dummy_gamedef, you_are_here_[0],
+              DDF_MainGetLumpName),
+    DDF_FIELD("YAH2_GRAPHIC", dummy_gamedef, you_are_here_[1],
+              DDF_MainGetLumpName),
     DDF_FIELD("PERCENT_SOUND", dummy_gamedef, percent_, DDF_MainLookupSound),
     DDF_FIELD("DONE_SOUND", dummy_gamedef, done_, DDF_MainLookupSound),
     DDF_FIELD("ENDMAP_SOUND", dummy_gamedef, endmap_, DDF_MainLookupSound),
@@ -55,10 +59,12 @@ static const DDFCommandList gamedef_commands[] = {
     DDF_FIELD("TITLE_MOVIE", dummy_gamedef, titlemovie_, DDF_MainGetString),
     DDF_FIELD("TITLE_MUSIC", dummy_gamedef, titlemusic_, DDF_MainGetNumeric),
     DDF_FIELD("TITLE_TIME", dummy_gamedef, titletics_, DDF_MainGetTime),
-    DDF_FIELD("SPECIAL_MUSIC", dummy_gamedef, special_music_, DDF_MainGetNumeric),
+    DDF_FIELD("SPECIAL_MUSIC", dummy_gamedef, special_music_,
+              DDF_MainGetNumeric),
     DDF_FIELD("LIGHTING", dummy_gamedef, lighting_, DDF_GameGetLighting),
     DDF_FIELD("DESCRIPTION", dummy_gamedef, description_, DDF_MainGetString),
-    DDF_FIELD("NO_SKILL_MENU", dummy_gamedef, no_skill_menu_, DDF_MainGetBoolean),
+    DDF_FIELD("NO_SKILL_MENU", dummy_gamedef, no_skill_menu_,
+              DDF_MainGetBoolean),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -196,7 +202,8 @@ static void DDF_GameAddFrame(void)
 
 static void DDF_GameAddAnim(void)
 {
-    IntermissionAnimationInfo *a = new IntermissionAnimationInfo(buffer_animdef);
+    IntermissionAnimationInfo *a =
+        new IntermissionAnimationInfo(buffer_animdef);
 
     if (a->level_[0])
         a->type_ = IntermissionAnimationInfo::kIntermissionAnimationInfoLevel;
@@ -281,18 +288,20 @@ static void DDF_GameGetPic(const char *info, void *storage)
     dynamic_gamedef->titlepics_.push_back(info);
 }
 
-static DDFSpecialFlags lighting_names[] = {{"DOOM", kLightingModelDoom, 0},
-                                       {"DOOMISH", kLightingModelDoomish, 0},
-                                       {"FLAT", kLightingModelFlat, 0},
-                                       {"VERTEX", kLightingModelVertex, 0},
-                                       {nullptr, 0, 0}};
+static DDFSpecialFlags lighting_names[] = {
+    {"DOOM", kLightingModelDoom, 0},
+    {"DOOMISH", kLightingModelDoomish, 0},
+    {"FLAT", kLightingModelFlat, 0},
+    {"VERTEX", kLightingModelVertex, 0},
+    {nullptr, 0, 0}};
 
 void DDF_GameGetLighting(const char *info, void *storage)
 {
     int flag_value;
 
     if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(info, lighting_names,
-                                                  &flag_value, false, false))
+                                                          &flag_value, false,
+                                                          false))
     {
         DDF_WarnError("GAMES.DDF LIGHTING: Unknown model: %s", info);
         return;
@@ -311,7 +320,8 @@ IntermissionMapPositionInfo::IntermissionMapPositionInfo() {}
 //
 // wi_mapposdef_c Copy constructor
 //
-IntermissionMapPositionInfo::IntermissionMapPositionInfo(IntermissionMapPositionInfo &rhs)
+IntermissionMapPositionInfo::IntermissionMapPositionInfo(
+    IntermissionMapPositionInfo &rhs)
 {
     Copy(rhs);
 }
@@ -363,8 +373,8 @@ IntermissionMapPositionInfoContainer::IntermissionMapPositionInfoContainer(
 //
 IntermissionMapPositionInfoContainer::~IntermissionMapPositionInfoContainer()
 {
-    for (std::vector<IntermissionMapPositionInfo *>::iterator iter     = begin(),
-                                                          iter_end = end();
+    for (std::vector<IntermissionMapPositionInfo *>::iterator iter = begin(),
+                                                              iter_end = end();
          iter != iter_end; iter++)
     {
         IntermissionMapPositionInfo *wi = *iter;
@@ -383,7 +393,8 @@ void IntermissionMapPositionInfoContainer::Copy(
     {
         if (wi)
         {
-            IntermissionMapPositionInfo *wi2 = new IntermissionMapPositionInfo(*wi);
+            IntermissionMapPositionInfo *wi2 =
+                new IntermissionMapPositionInfo(*wi);
             push_back(wi2);
         }
     }
@@ -392,13 +403,15 @@ void IntermissionMapPositionInfoContainer::Copy(
 //
 // wi_mapposdef_container_c assignment operator
 //
-IntermissionMapPositionInfoContainer &IntermissionMapPositionInfoContainer::operator=(
+IntermissionMapPositionInfoContainer &
+IntermissionMapPositionInfoContainer::operator=(
     IntermissionMapPositionInfoContainer &rhs)
 {
     if (&rhs != this)
     {
-        for (std::vector<IntermissionMapPositionInfo *>::iterator iter = begin(),
-                                                              iter_end = end();
+        for (std::vector<IntermissionMapPositionInfo *>::iterator
+                 iter     = begin(),
+                 iter_end = end();
              iter != iter_end; iter++)
         {
             IntermissionMapPositionInfo *wi = *iter;
@@ -422,7 +435,10 @@ IntermissionFrameInfo::IntermissionFrameInfo() { Default(); }
 //
 // wi_framedef_c Copy constructor
 //
-IntermissionFrameInfo::IntermissionFrameInfo(IntermissionFrameInfo &rhs) { Copy(rhs); }
+IntermissionFrameInfo::IntermissionFrameInfo(IntermissionFrameInfo &rhs)
+{
+    Copy(rhs);
+}
 
 //
 // wi_framedef_c Destructor
@@ -453,7 +469,8 @@ void IntermissionFrameInfo::Default()
 //
 // wi_framedef_c assignment operator
 //
-IntermissionFrameInfo &IntermissionFrameInfo::operator=(IntermissionFrameInfo &rhs)
+IntermissionFrameInfo &IntermissionFrameInfo::operator=(
+    IntermissionFrameInfo &rhs)
 {
     if (&rhs != this) Copy(rhs);
 
@@ -482,7 +499,7 @@ IntermissionFrameInfoContainer::IntermissionFrameInfoContainer(
 IntermissionFrameInfoContainer::~IntermissionFrameInfoContainer()
 {
     for (std::vector<IntermissionFrameInfo *>::iterator iter     = begin(),
-                                                    iter_end = end();
+                                                        iter_end = end();
          iter != iter_end; iter++)
     {
         IntermissionFrameInfo *wi = *iter;
@@ -515,7 +532,7 @@ IntermissionFrameInfoContainer &IntermissionFrameInfoContainer::operator=(
     if (&rhs != this)
     {
         for (std::vector<IntermissionFrameInfo *>::iterator iter     = begin(),
-                                                        iter_end = end();
+                                                            iter_end = end();
              iter != iter_end; iter++)
         {
             IntermissionFrameInfo *wi = *iter;
@@ -539,7 +556,8 @@ IntermissionAnimationInfo::IntermissionAnimationInfo() { Default(); }
 //
 // wi_animdef_c Copy constructor
 //
-IntermissionAnimationInfo::IntermissionAnimationInfo(IntermissionAnimationInfo &rhs)
+IntermissionAnimationInfo::IntermissionAnimationInfo(
+    IntermissionAnimationInfo &rhs)
 {
     Copy(rhs);
 }
@@ -608,7 +626,7 @@ IntermissionAnimationInfoContainer::IntermissionAnimationInfoContainer(
 IntermissionAnimationInfoContainer::~IntermissionAnimationInfoContainer()
 {
     for (std::vector<IntermissionAnimationInfo *>::iterator iter     = begin(),
-                                                        iter_end = end();
+                                                            iter_end = end();
          iter != iter_end; iter++)
     {
         IntermissionAnimationInfo *wi = *iter;
@@ -620,7 +638,8 @@ IntermissionAnimationInfoContainer::~IntermissionAnimationInfoContainer()
 //
 // wi_animdef_container_c::Copy()
 //
-void IntermissionAnimationInfoContainer::Copy(IntermissionAnimationInfoContainer &src)
+void IntermissionAnimationInfoContainer::Copy(
+    IntermissionAnimationInfoContainer &src)
 {
     for (IntermissionAnimationInfo *a : src)
     {
@@ -635,13 +654,15 @@ void IntermissionAnimationInfoContainer::Copy(IntermissionAnimationInfoContainer
 //
 // wi_animdef_container_c assignment operator
 //
-IntermissionAnimationInfoContainer &IntermissionAnimationInfoContainer::operator=(
+IntermissionAnimationInfoContainer &
+IntermissionAnimationInfoContainer::operator=(
     IntermissionAnimationInfoContainer &rhs)
 {
     if (&rhs != this)
     {
-        for (std::vector<IntermissionAnimationInfo *>::iterator iter     = begin(),
-                                                            iter_end = end();
+        for (std::vector<IntermissionAnimationInfo *>::iterator
+                 iter     = begin(),
+                 iter_end = end();
              iter != iter_end; iter++)
         {
             IntermissionAnimationInfo *wi = *iter;
@@ -687,7 +708,7 @@ void GameDefinition::CopyDetail(GameDefinition &src)
     percent_       = src.percent_;
     done_          = src.done_;
     endmap_        = src.endmap_;
-    next_map_       = src.next_map_;
+    next_map_      = src.next_map_;
     accel_snd_     = src.accel_snd_;
     frag_snd_      = src.frag_snd_;
     no_skill_menu_ = src.no_skill_menu_;
@@ -736,7 +757,7 @@ void GameDefinition::Default()
     percent_   = nullptr;
     done_      = nullptr;
     endmap_    = nullptr;
-    next_map_   = nullptr;
+    next_map_  = nullptr;
     accel_snd_ = nullptr;
     frag_snd_  = nullptr;
 

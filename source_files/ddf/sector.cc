@@ -50,12 +50,14 @@ static const DDFCommandList sect_commands[] = {
     DDF_FIELD("LIGHT_TYPE", dummy_sector, l_.type_, DDF_SectGetLighttype),
     DDF_FIELD("LIGHT_LEVEL", dummy_sector, l_.level_, DDF_MainGetNumeric),
     DDF_FIELD("LIGHT_DARKTIME", dummy_sector, l_.darktime_, DDF_MainGetTime),
-    DDF_FIELD("LIGHT_BRIGHTTIME", dummy_sector, l_.brighttime_, DDF_MainGetTime),
+    DDF_FIELD("LIGHT_BRIGHTTIME", dummy_sector, l_.brighttime_,
+              DDF_MainGetTime),
     DDF_FIELD("LIGHT_CHANCE", dummy_sector, l_.chance_, DDF_MainGetPercent),
     DDF_FIELD("LIGHT_SYNC", dummy_sector, l_.sync_, DDF_MainGetTime),
     DDF_FIELD("LIGHT_STEP", dummy_sector, l_.step_, DDF_MainGetNumeric),
     DDF_FIELD("EXIT", dummy_sector, e_exit_, DDF_SectGetExit),
-    DDF_FIELD("USE_COLOURMAP", dummy_sector, use_colourmap_, DDF_MainGetColourmap),
+    DDF_FIELD("USE_COLOURMAP", dummy_sector, use_colourmap_,
+              DDF_MainGetColourmap),
     DDF_FIELD("GRAVITY", dummy_sector, gravity_, DDF_MainGetFloat),
     DDF_FIELD("FRICTION", dummy_sector, friction_, DDF_MainGetFloat),
     DDF_FIELD("VISCOSITY", dummy_sector, viscosity_, DDF_MainGetFloat),
@@ -260,12 +262,12 @@ void DDF_SectGetSpecialFlags(const char *info, void *storage)
 }
 
 static DDFSpecialFlags exit_types[] = {{"NONE", kExitTypeNone, 0},
-                                   {"NORMAL", kExitTypeNormal, 0},
-                                   {"SECRET", kExitTypeSecret, 0},
+                                       {"NORMAL", kExitTypeNormal, 0},
+                                       {"SECRET", kExitTypeSecret, 0},
 
-                                   // -AJA- backwards compatibility cruft...
-                                   {"!EXIT", kExitTypeNormal, 0},
-                                   {nullptr, 0, 0}};
+                                       // -AJA- backwards compatibility cruft...
+                                       {"!EXIT", kExitTypeNormal, 0},
+                                       {nullptr, 0, 0}};
 
 //
 // DDF_SectGetExit

@@ -155,7 +155,8 @@ static int DDF_MainSplitIntoState(const char *info)
 
     strcpy(infobuf, info);
 
-    for (cur = 0; cur < kMaximumStateSplits + 1; cur++) stateinfo[cur] = std::string();
+    for (cur = 0; cur < kMaximumStateSplits + 1; cur++)
+        stateinfo[cur] = std::string();
 
     first = temp = infobuf;
 
@@ -880,7 +881,10 @@ void DDF_StateGetBecome(const char *arg, State *cur_state)
     cur_state->action_par = become;
 }
 
-WeaponBecomeActionInfo::WeaponBecomeActionInfo() : info_(nullptr), info_ref_(), start_() {}
+WeaponBecomeActionInfo::WeaponBecomeActionInfo()
+    : info_(nullptr), info_ref_(), start_()
+{
+}
 
 WeaponBecomeActionInfo::~WeaponBecomeActionInfo() {}
 

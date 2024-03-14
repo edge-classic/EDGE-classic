@@ -3,7 +3,4 @@
 
 static RenderState state;
 
-RenderState *RendererGetState()
-{
-    return &state;
-}
+RenderState *RendererGetState() { return &state; }

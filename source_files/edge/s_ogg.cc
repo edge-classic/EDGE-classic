@@ -48,8 +48,8 @@ extern bool sound_device_stereo;  // FIXME: encapsulation
 struct OggDataLump
 {
     const uint8_t *data;
-    size_t position;
-    size_t size;
+    size_t         position;
+    size_t         size;
 };
 
 class OggPlayer : public AbstractMusicPlayer
@@ -72,7 +72,7 @@ class OggPlayer : public AbstractMusicPlayer
     bool looping_;
     bool is_stereo_;
 
-    OggDataLump    *ogg_lump_ = nullptr;
+    OggDataLump   *ogg_lump_ = nullptr;
     OggVorbis_File ogg_stream_;
     vorbis_info   *vorbis_info_ = nullptr;
 
@@ -107,7 +107,7 @@ class OggPlayer : public AbstractMusicPlayer
 size_t oggplayer_memread(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
     OggDataLump *d  = (OggDataLump *)datasource;
-    size_t      rb = size * nmemb;
+    size_t       rb = size * nmemb;
 
     if (d->position >= d->size) return 0;
 
@@ -122,7 +122,7 @@ size_t oggplayer_memread(void *ptr, size_t size, size_t nmemb, void *datasource)
 int oggplayer_memseek(void *datasource, ogg_int64_t offset, int whence)
 {
     OggDataLump *d = (OggDataLump *)datasource;
-    size_t      newpos;
+    size_t       newpos;
 
     switch (whence)
     {
@@ -294,9 +294,9 @@ bool OggPlayer::OpenMemory(uint8_t *data, int length)
 
     ogg_lump_ = new OggDataLump;
 
-    ogg_lump_->data = data;
-    ogg_lump_->size = length;
-    ogg_lump_->position  = 0;
+    ogg_lump_->data     = data;
+    ogg_lump_->size     = length;
+    ogg_lump_->position = 0;
 
     ov_callbacks CB;
 
@@ -391,7 +391,10 @@ void OggPlayer::Ticker()
 
         if (!buf) break;
 
-        if (StreamIntoBuffer(buf)) { SoundQueueAddBuffer(buf, vorbis_info_->rate); }
+        if (StreamIntoBuffer(buf))
+        {
+            SoundQueueAddBuffer(buf, vorbis_info_->rate);
+        }
         else
         {
             // finished playing
@@ -423,9 +426,9 @@ bool LoadOggSound(SoundData *buf, const uint8_t *data, int length)
 {
     OggDataLump ogg_lump;
 
-    ogg_lump.data = data;
-    ogg_lump.size = length;
-    ogg_lump.position  = 0;
+    ogg_lump.data     = data;
+    ogg_lump.size     = length;
+    ogg_lump.position = 0;
 
     ov_callbacks CB;
 

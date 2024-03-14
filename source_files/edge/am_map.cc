@@ -52,10 +52,14 @@
 #include "str_compare.h"
 
 EDGE_DEFINE_CONSOLE_VARIABLE(automap_debug_bsp, "0", kConsoleVariableFlagNone)
-EDGE_DEFINE_CONSOLE_VARIABLE(automap_debug_collisions, "0", kConsoleVariableFlagNone)
-EDGE_DEFINE_CONSOLE_VARIABLE(automap_gridsize, "128", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(automap_keydoor_text, "0", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(automap_smoothing, "1", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(automap_debug_collisions, "0",
+                             kConsoleVariableFlagNone)
+EDGE_DEFINE_CONSOLE_VARIABLE(automap_gridsize, "128",
+                             kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(automap_keydoor_text, "0",
+                             kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(automap_smoothing, "1",
+                             kConsoleVariableFlagArchive)
 
 extern unsigned int root_node;
 
@@ -433,8 +437,9 @@ bool AutomapResponder(InputEvent *ev)
     if (EventMatchesKey(key_automap_mark, sym))
     {
         // -ACB- 1998/08/10 Use DDF Lang Reference
-        ConsolePlayerMessage(console_player, "%s %d", language["AutoMapMarkedSpot"],
-                          mark_point_number + 1);
+        ConsolePlayerMessage(console_player, "%s %d",
+                             language["AutoMapMarkedSpot"],
+                             mark_point_number + 1);
         AddMark();
         return true;
     }
@@ -701,7 +706,7 @@ static void DrawKeyOnLine(AutomapLine *ml, int theKey,
                 if (!(idlestate->flags &
                       kStateFrameFlagModel))  // Can't handle 3d models...yet
                 {
-                    bool           flip;
+                    bool         flip;
                     const Image *img = RendererGetOtherSprite(
                         idlestate->sprite, idlestate->frame, &flip);
 
@@ -830,7 +835,7 @@ static bool CheckSimiliarRegions(Sector *front, Sector *back)
 static void AutomapWalkSeg(Seg *seg)
 {
     AutomapLine l;
-    Line     *line;
+    Line       *line;
 
     Sector *front = seg->front_sector;
     Sector *back  = seg->back_sector;
@@ -964,7 +969,8 @@ static void AutomapWalkSeg(Seg *seg)
                 // ceiling level change
                 DrawMLine(&l, am_colors[kAutomapColorCeil]);
             }
-            else if ((front->extrafloor_used > 0 || back->extrafloor_used > 0) &&
+            else if ((front->extrafloor_used > 0 ||
+                      back->extrafloor_used > 0) &&
                      (front->extrafloor_used != back->extrafloor_used ||
                       !CheckSimiliarRegions(front, back)))
             {
@@ -1104,10 +1110,10 @@ static void AutomapDrawPlayer(MapObject *mo)
             case kAutomapArrowStyleDoom:
             default:
                 if (cheating)
-                    DrawLineCharacter(cheat_player_arrow,
-                                      kAutomapCheatPlayerArrowLines, mo->radius_,
-                                      mo->angle_, am_colors[kAutomapColorPlayer],
-                                      mo->x, mo->y);
+                    DrawLineCharacter(
+                        cheat_player_arrow, kAutomapCheatPlayerArrowLines,
+                        mo->radius_, mo->angle_, am_colors[kAutomapColorPlayer],
+                        mo->x, mo->y);
                 else
                     DrawLineCharacter(player_arrow, kAutomapPlayerArrowLines,
                                       mo->radius_, mo->angle_,
@@ -1118,9 +1124,9 @@ static void AutomapDrawPlayer(MapObject *mo)
         return;
     }
 
-    DrawLineCharacter(player_arrow, kAutomapPlayerArrowLines, mo->radius_,
-                      mo->angle_, player_colors[mo->player_->player_number_ & 0x07], mo->x,
-                      mo->y);
+    DrawLineCharacter(
+        player_arrow, kAutomapPlayerArrowLines, mo->radius_, mo->angle_,
+        player_colors[mo->player_->player_number_ & 0x07], mo->x, mo->y);
 }
 
 static void AutomapWalkThing(MapObject *mo)
@@ -1221,7 +1227,7 @@ static bool AutomapCheckBBox(float *bspcoord)
 static void AutomapWalkBSPNode(unsigned int bspnum)
 {
     BspNode *node;
-    int     side;
+    int      side;
 
     // Found a subsector?
     if (bspnum & kLeafSubsector)
@@ -1263,7 +1269,7 @@ static void DrawMarks(void)
         buffer[1] = 0;
 
         HudDrawText(MapToFrameCoordinatesX(mx, map_center_x),
-                     MapToFrameCoordinatesY(my, map_center_y), buffer);
+                    MapToFrameCoordinatesY(my, map_center_y), buffer);
     }
 
     HudSetFont();
@@ -1293,17 +1299,19 @@ void AutomapRender(float x, float y, float w, float h, MapObject *focus)
         float old_alpha = HudGetAlpha();
         HudSetAlpha(automap_style->definition_->bg_.translucency_);
         if (automap_style->definition_->special_ == 0)
-            HudStretchImage(-90, 0, 500, 200, automap_style->background_image_, 0.0,
-                             0.0);
+            HudStretchImage(-90, 0, 500, 200, automap_style->background_image_,
+                            0.0, 0.0);
         else
-            HudTileImage(-90, 0, 500, 200, automap_style->background_image_, 0.0, 0.0);
+            HudTileImage(-90, 0, 500, 200, automap_style->background_image_,
+                         0.0, 0.0);
         HudSetAlpha(old_alpha);
     }
     else if (automap_style->definition_->bg_.colour_ != kRGBANoValue)
     {
         float old_alpha = HudGetAlpha();
         HudSetAlpha(automap_style->definition_->bg_.translucency_);
-        HudSolidBox(x, y, x + w, y + h, automap_style->definition_->bg_.colour_);
+        HudSolidBox(x, y, x + w, y + h,
+                    automap_style->definition_->bg_.colour_);
         HudSetAlpha(old_alpha);
     }
 

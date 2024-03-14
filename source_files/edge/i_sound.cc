@@ -107,8 +107,7 @@ void StartupAudio(void)
 
     if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0)
     {
-        LogPrint("StartupSound: Couldn't init SDL AUDIO! %s\n",
-                 SDL_GetError());
+        LogPrint("StartupSound: Couldn't init SDL AUDIO! %s\n", SDL_GetError());
         no_sound = true;
         return;
     }
@@ -233,7 +232,7 @@ void StartupMusic(void)
     if (!ReadDirectory(sfd, soundfont_dir, "*.*"))
     {
         LogWarning("StartupMusic: Failed to read '%s' directory!\n",
-                  soundfont_dir.c_str());
+                   soundfont_dir.c_str());
     }
     else
     {
@@ -267,7 +266,7 @@ void StartupMusic(void)
         if (!ReadDirectory(sfd, soundfont_dir, "*.*"))
         {
             LogWarning("StartupMusic: Failed to read '%s' directory!\n",
-                      soundfont_dir.c_str());
+                       soundfont_dir.c_str());
         }
         else
         {

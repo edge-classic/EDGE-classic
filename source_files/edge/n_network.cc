@@ -41,14 +41,13 @@
 
 extern coal::vm_c *ui_vm;
 extern void        CoalSetFloat(coal::vm_c *vm, const char *mod_name,
-                               const char *var_name, double value);
+                                const char *var_name, double value);
 
 // only true if packets are exchanged with a server
 bool network_game = false;
 
 // 70Hz
-EDGE_DEFINE_CONSOLE_VARIABLE(double_framerate, "1",
-                             kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(double_framerate, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(
     busy_wait, "1",
     kConsoleVariableFlagReadOnly)  // Not sure what to rename this yet - Dasho
@@ -164,10 +163,10 @@ void NetworkGrabTicCommands(void)
     }
     if (LuaUseLuaHud())
         LuaSetFloat(LuaGetGlobalVM(), "sys", "gametic",
-                     game_tic / (double_framerate.d_ ? 2 : 1));
+                    game_tic / (double_framerate.d_ ? 2 : 1));
     else
         CoalSetFloat(ui_vm, "sys", "gametic",
-                    game_tic / (double_framerate.d_ ? 2 : 1));
+                     game_tic / (double_framerate.d_ ? 2 : 1));
 
     game_tic++;
 }

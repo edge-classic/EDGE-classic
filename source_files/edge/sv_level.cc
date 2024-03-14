@@ -89,70 +89,31 @@ void SR_SidePutSide(void *storage, int index, void *extra);
 //
 //  SURFACE STRUCTURE
 //
+static MapSurface dummy_map_surface;
+
 static SaveField sv_fields_surface[] = {
-    {offsetof(MapSurface, image),
-     "image",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SaveGameLevelGetImage,
-     SaveGameLevelPutImage,
-     nullptr},
-    {offsetof(MapSurface, translucency),
-     "translucency",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(MapSurface, offset),
-     "offset",
-     1,
-     {kSaveFieldNumeric, 8, nullptr},
-     SaveGameGetVec2,
-     SaveGamePutVec2,
-     nullptr},
-    {offsetof(MapSurface, scroll),
-     "scroll",
-     1,
-     {kSaveFieldNumeric, 8, nullptr},
-     SaveGameGetVec2,
-     SaveGamePutVec2,
-     nullptr},
-    {offsetof(MapSurface, x_matrix),
-     "x_mat",
-     1,
-     {kSaveFieldNumeric, 8, nullptr},
-     SaveGameGetVec2,
-     SaveGamePutVec2,
-     nullptr},
-    {offsetof(MapSurface, y_matrix),
-     "y_mat",
-     1,
-     {kSaveFieldNumeric, 8, nullptr},
-     SaveGameGetVec2,
-     SaveGamePutVec2,
-     nullptr},
-    {offsetof(MapSurface, net_scroll),
-     "net_scroll",
-     1,
-     {kSaveFieldNumeric, 8, nullptr},
-     SaveGameGetVec2,
-     SaveGamePutVec2,
-     nullptr},
-    {offsetof(MapSurface, old_scroll),
-     "old_scroll",
-     1,
-     {kSaveFieldNumeric, 8, nullptr},
-     SaveGameGetVec2,
-     SaveGamePutVec2,
-     nullptr},
-    {offsetof(MapSurface, override_properties),
-     "override_p",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SaveGameSectorGetPropRef,
-     SaveGameSectorPutPropRef,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_map_surface, image, "image", 1, kSaveFieldString, 0,
+                    nullptr, SaveGameLevelGetImage, SaveGameLevelPutImage),
+    EDGE_SAVE_FIELD(dummy_map_surface, translucency, "translucency", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_map_surface, offset, "offset", 1, kSaveFieldNumeric,
+                    8, nullptr, SaveGameGetVec2, SaveGamePutVec2),
+    EDGE_SAVE_FIELD(dummy_map_surface, scroll, "scroll", 1, kSaveFieldNumeric,
+                    8, nullptr, SaveGameGetVec2, SaveGamePutVec2),
+    EDGE_SAVE_FIELD(dummy_map_surface, x_matrix, "x_mat", 1, kSaveFieldNumeric,
+                    8, nullptr, SaveGameGetVec2, SaveGamePutVec2),
+    EDGE_SAVE_FIELD(dummy_map_surface, y_matrix, "y_mat", 1, kSaveFieldNumeric,
+                    8, nullptr, SaveGameGetVec2, SaveGamePutVec2),
+    EDGE_SAVE_FIELD(dummy_map_surface, net_scroll, "net_scroll", 1,
+                    kSaveFieldNumeric, 8, nullptr, SaveGameGetVec2,
+                    SaveGamePutVec2),
+    EDGE_SAVE_FIELD(dummy_map_surface, old_scroll, "old_scroll", 1,
+                    kSaveFieldNumeric, 8, nullptr, SaveGameGetVec2,
+                    SaveGamePutVec2),
+    EDGE_SAVE_FIELD(dummy_map_surface, override_properties, "override_p", 1,
+                    kSaveFieldString, 0, nullptr, SaveGameSectorGetPropRef,
+                    SaveGameSectorPutPropRef),
     {0,
      nullptr,
      0,
@@ -162,62 +123,51 @@ static SaveField sv_fields_surface[] = {
      nullptr}};
 
 SaveStruct sv_struct_surface = {
-    nullptr,            // link in list
-    "surface_t",        // structure name
-    "surf",             // start marker
-    sv_fields_surface,  // field descriptions
-    true,               // define_me
-    nullptr             // pointer to known struct
+    nullptr,                           // link in list
+    "surface_t",                       // structure name
+    "surf",                            // start marker
+    sv_fields_surface,                 // field descriptions
+    (const char *)&dummy_map_surface,  // dummy base
+    true,                              // define_me
+    nullptr                            // pointer to known struct
 };
 
 //----------------------------------------------------------------------------
 //
 //  SIDE STRUCTURE
 //
+static Side dummy_side;
 
-static SaveField sv_fields_side[] = {{offsetof(Side, top),
-                                      "top",
-                                      1,
-                                      {kSaveFieldStruct, 0, "surface_t"},
-                                      SaveGameLevelGetSurface,
-                                      SaveGameLevelPutSurface,
-                                      nullptr},
-                                     {offsetof(Side, middle),
-                                      "middle",
-                                      1,
-                                      {kSaveFieldStruct, 0, "surface_t"},
-                                      SaveGameLevelGetSurface,
-                                      SaveGameLevelPutSurface,
-                                      nullptr},
-                                     {offsetof(Side, bottom),
-                                      "bottom",
-                                      1,
-                                      {kSaveFieldStruct, 0, "surface_t"},
-                                      SaveGameLevelGetSurface,
-                                      SaveGameLevelPutSurface,
-                                      nullptr},
+static SaveField sv_fields_side[] = {
+    EDGE_SAVE_FIELD(dummy_side, top, "top", 1, kSaveFieldStruct, 0, "surface_t",
+                    SaveGameLevelGetSurface, SaveGameLevelPutSurface),
+    EDGE_SAVE_FIELD(dummy_side, middle, "middle", 1, kSaveFieldStruct, 0,
+                    "surface_t", SaveGameLevelGetSurface,
+                    SaveGameLevelPutSurface),
+    EDGE_SAVE_FIELD(dummy_side, bottom, "bottom", 1, kSaveFieldStruct, 0,
+                    "surface_t", SaveGameLevelGetSurface,
+                    SaveGameLevelPutSurface),
 
-                                     // NOT HERE:
-                                     //   sector: value is kept from level load.
+    // NOT HERE:
+    //   sector: value is kept from level load.
 
-                                     {0,
-                                      nullptr,
-                                      0,
-                                      {kSaveFieldInvalid, 0, nullptr},
-                                      nullptr,
-                                      nullptr,
-                                      nullptr}};
+    {0,
+     nullptr,
+     0,
+     {kSaveFieldInvalid, 0, nullptr},
+     nullptr,
+     nullptr,
+     nullptr}};
 
 SaveStruct sv_struct_side = {
-    nullptr,         // link in list
-    "side_t",        // structure name
-    "side",          // start marker
-    sv_fields_side,  // field descriptions
-    true,            // define_me
-    nullptr          // pointer to known struct
+    nullptr,                    // link in list
+    "side_t",                   // structure name
+    "side",                     // start marker
+    sv_fields_side,             // field descriptions
+    (const char *)&dummy_side,  // dummy base
+    true,                       // define_me
+    nullptr                     // pointer to known struct
 };
-
-#undef SV_F_BASE
 
 SaveArray sv_array_side = {
     nullptr,          // link in list
@@ -239,57 +189,23 @@ SaveArray sv_array_side = {
 //
 //  LINE STRUCTURE
 //
+static Line dummy_line;
 
 static SaveField sv_fields_line[] = {
-    {offsetof(Line, flags),
-     "flags",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Line, tag),
-     "tag",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Line, count),
-     "count",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Line, side),
-     "side",
-     1,
-     {kSaveFieldIndex, 4, "sides"},
-     SR_SideGetSide,
-     SR_SidePutSide,
-     nullptr},
-    {offsetof(Line, special),
-     "special",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SaveGameLineGetSpecial,
-     SaveGameLinePutSpecial,
-     nullptr},
-    {offsetof(Line, slide_door),
-     "slide_door",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SaveGameLineGetSpecial,
-     SaveGameLinePutSpecial,
-     nullptr},
-    {offsetof(Line, old_stored),
-     "old_stored",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetBoolean,
-     SaveGamePutBoolean,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_line, flags, "flags", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_line, tag, "tag", 1, kSaveFieldNumeric, 4, nullptr,
+                    SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_line, count, "count", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_line, side, "side", 1, kSaveFieldIndex, 4, "sides",
+                    SR_SideGetSide, SR_SidePutSide),
+    EDGE_SAVE_FIELD(dummy_line, special, "special", 1, kSaveFieldString, 0,
+                    nullptr, SaveGameLineGetSpecial, SaveGameLinePutSpecial),
+    EDGE_SAVE_FIELD(dummy_line, slide_door, "slide_door", 1, kSaveFieldString,
+                    0, nullptr, SaveGameLineGetSpecial, SaveGameLinePutSpecial),
+    EDGE_SAVE_FIELD(dummy_line, old_stored, "old_stored", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetBoolean, SaveGamePutBoolean),
 
     // NOT HERE:
     //   (many): values are kept from level load.
@@ -306,12 +222,13 @@ static SaveField sv_fields_line[] = {
      nullptr}};
 
 SaveStruct sv_struct_line = {
-    nullptr,         // link in list
-    "line_t",        // structure name
-    "line",          // start marker
-    sv_fields_line,  // field descriptions
-    true,            // define_me
-    nullptr          // pointer to known struct
+    nullptr,                    // link in list
+    "line_t",                   // structure name
+    "line",                     // start marker
+    sv_fields_line,             // field descriptions
+    (const char *)&dummy_line,  // dummy base
+    true,                       // define_me
+    nullptr                     // pointer to known struct
 };
 
 SaveArray sv_array_line = {
@@ -334,106 +251,48 @@ SaveArray sv_array_line = {
 //
 //  REGION_PROPERTIES STRUCTURE
 //
+static RegionProperties dummy_region_properties;
 
 static SaveField sv_fields_regprops[] = {
-    {offsetof(RegionProperties, light_level),
-     "lightlevel_i",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(RegionProperties, colourmap),
-     "colourmap",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SaveGameLevelGetColormap,
-     SaveGameLevelPutColormap,
-     nullptr},
-    {offsetof(RegionProperties, type),
-     "type",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(RegionProperties, special),
-     "special",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SaveGameSectorGetSpecial,
-     SaveGameSectorPutSpecial,
-     nullptr},
-    {offsetof(RegionProperties, secret_found),
-     "secret_found",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetBoolean,
-     SaveGamePutBoolean,
-     nullptr},
-    {offsetof(RegionProperties, gravity),
-     "gravity",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(RegionProperties, friction),
-     "friction",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(RegionProperties, viscosity),
-     "viscosity",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(RegionProperties, drag),
-     "drag",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(RegionProperties, push),
-     "push",
-     1,
-     {kSaveFieldNumeric, 12, nullptr},
-     SaveGameGetVec3,
-     SaveGamePutVec3,
-     nullptr},
-    {offsetof(RegionProperties, net_push),
-     "net_push",
-     1,
-     {kSaveFieldNumeric, 12, nullptr},
-     SaveGameGetVec3,
-     SaveGamePutVec3,
-     nullptr},
-    {offsetof(RegionProperties, old_push),
-     "old_push",
-     1,
-     {kSaveFieldNumeric, 12, nullptr},
-     SaveGameGetVec3,
-     SaveGamePutVec3,
-     nullptr},
-    {offsetof(RegionProperties, fog_color),
-     "fog_color",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(RegionProperties, fog_density),
-     "fog_density",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_region_properties, light_level, "lightlevel_i", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_region_properties, colourmap, "colourmap", 1,
+                    kSaveFieldString, 0, nullptr, SaveGameLevelGetColormap,
+                    SaveGameLevelPutColormap),
+    EDGE_SAVE_FIELD(dummy_region_properties, type, "type", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_region_properties, special, "special", 1,
+                    kSaveFieldString, 0, nullptr, SaveGameSectorGetSpecial,
+                    SaveGameSectorPutSpecial),
+    EDGE_SAVE_FIELD(dummy_region_properties, secret_found, "secret_found", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetBoolean,
+                    SaveGamePutBoolean),
+    EDGE_SAVE_FIELD(dummy_region_properties, gravity, "gravity", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_region_properties, friction, "friction", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_region_properties, viscosity, "viscosity", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_region_properties, drag, "drag", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetFloat, SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_region_properties, push, "push", 1, kSaveFieldNumeric,
+                    12, nullptr, SaveGameGetVec3, SaveGamePutVec3),
+    EDGE_SAVE_FIELD(dummy_region_properties, net_push, "net_push", 1,
+                    kSaveFieldNumeric, 12, nullptr, SaveGameGetVec3,
+                    SaveGamePutVec3),
+    EDGE_SAVE_FIELD(dummy_region_properties, old_push, "old_push", 1,
+                    kSaveFieldNumeric, 12, nullptr, SaveGameGetVec3,
+                    SaveGamePutVec3),
+    EDGE_SAVE_FIELD(dummy_region_properties, fog_color, "fog_color", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_region_properties, fog_density, "fog_density", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
 
     {0,
      nullptr,
@@ -444,90 +303,48 @@ static SaveField sv_fields_regprops[] = {
      nullptr}};
 
 SaveStruct sv_struct_regprops = {
-    nullptr,                // link in list
-    "region_properties_t",  // structure name
-    "rprp",                 // start marker
-    sv_fields_regprops,     // field descriptions
-    true,                   // define_me
-    nullptr                 // pointer to known struct
+    nullptr,                                 // link in list
+    "region_properties_t",                   // structure name
+    "rprp",                                  // start marker
+    sv_fields_regprops,                      // field descriptions
+    (const char *)&dummy_region_properties,  // dummy base
+    true,                                    // define_me
+    nullptr                                  // pointer to known struct
 };
 
 //----------------------------------------------------------------------------
 //
 //  EXTRAFLOOR STRUCTURE
 //
+static Extrafloor dummy_extrafloor;
 
 static SaveField sv_fields_exfloor[] = {
-    {offsetof(Extrafloor, higher),
-     "higher",
-     1,
-     {kSaveFieldIndex, 4, "extrafloors"},
-     SaveGameSectorGetExtrafloor,
-     SaveGameSectorPutExtrafloor,
-     nullptr},
-    {offsetof(Extrafloor, lower),
-     "lower",
-     1,
-     {kSaveFieldIndex, 4, "extrafloors"},
-     SaveGameSectorGetExtrafloor,
-     SaveGameSectorPutExtrafloor,
-     nullptr},
-    {offsetof(Extrafloor, sector),
-     "sector",
-     1,
-     {kSaveFieldIndex, 4, "sectors"},
-     SaveGameGetSector,
-     SaveGamePutSector,
-     nullptr},
-    {offsetof(Extrafloor, top_height),
-     "top_h",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(Extrafloor, bottom_height),
-     "bottom_h",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(Extrafloor, top),
-     "top",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SaveGameLevelGetSurfPtr,
-     SaveGameLevelPutSurfPtr,
-     nullptr},
-    {offsetof(Extrafloor, bottom),
-     "bottom",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SaveGameLevelGetSurfPtr,
-     SaveGameLevelPutSurfPtr,
-     nullptr},
-    {offsetof(Extrafloor, properties),
-     "p",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SaveGameSectorGetPropRef,
-     SaveGameSectorPutPropRef,
-     nullptr},
-    {offsetof(Extrafloor, extrafloor_line),
-     "ef_line",
-     1,
-     {kSaveFieldIndex, 4, "lines"},
-     SaveGameGetLine,
-     SaveGamePutLine,
-     nullptr},
-    {offsetof(Extrafloor, control_sector_next),
-     "ctrl_next",
-     1,
-     {kSaveFieldIndex, 4, "extrafloors"},
-     SaveGameSectorGetExtrafloor,
-     SaveGameSectorPutExtrafloor,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_extrafloor, higher, "higher", 1, kSaveFieldIndex, 4,
+                    "extrafloors", SaveGameSectorGetExtrafloor,
+                    SaveGameSectorPutExtrafloor),
+    EDGE_SAVE_FIELD(dummy_extrafloor, lower, "lower", 1, kSaveFieldIndex, 4,
+                    "extrafloors", SaveGameSectorGetExtrafloor,
+                    SaveGameSectorPutExtrafloor),
+    EDGE_SAVE_FIELD(dummy_extrafloor, sector, "sector", 1, kSaveFieldIndex, 4,
+                    "sectors", SaveGameGetSector, SaveGamePutSector),
+    EDGE_SAVE_FIELD(dummy_extrafloor, top_height, "top_h", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetFloat, SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_extrafloor, bottom_height, "bottom_h", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_extrafloor, top, "top", 1, kSaveFieldString, 0,
+                    nullptr, SaveGameLevelGetSurfPtr, SaveGameLevelPutSurfPtr),
+    EDGE_SAVE_FIELD(dummy_extrafloor, bottom, "bottom", 1, kSaveFieldString, 0,
+                    nullptr, SaveGameLevelGetSurfPtr, SaveGameLevelPutSurfPtr),
+    EDGE_SAVE_FIELD(dummy_extrafloor, properties, "p", 1, kSaveFieldString, 0,
+                    nullptr, SaveGameSectorGetPropRef,
+                    SaveGameSectorPutPropRef),
+    EDGE_SAVE_FIELD(dummy_extrafloor, extrafloor_line, "ef_line", 1,
+                    kSaveFieldIndex, 4, "lines", SaveGameGetLine,
+                    SaveGamePutLine),
+    EDGE_SAVE_FIELD(dummy_extrafloor, control_sector_next, "ctrl_next", 1,
+                    kSaveFieldIndex, 4, "extrafloors",
+                    SaveGameSectorGetExtrafloor, SaveGameSectorPutExtrafloor),
 
     // NOT HERE:
     //   - sector: can be regenerated.
@@ -542,12 +359,13 @@ static SaveField sv_fields_exfloor[] = {
      nullptr}};
 
 SaveStruct sv_struct_exfloor = {
-    nullptr,            // link in list
-    "extrafloor_t",     // structure name
-    "exfl",             // start marker
-    sv_fields_exfloor,  // field descriptions
-    true,               // define_me
-    nullptr             // pointer to known struct
+    nullptr,                          // link in list
+    "extrafloor_t",                   // structure name
+    "exfl",                           // start marker
+    sv_fields_exfloor,                // field descriptions
+    (const char *)&dummy_extrafloor,  // dummy base
+    true,                             // define_me
+    nullptr                           // pointer to known struct
 };
 
 SaveArray sv_array_exfloor = {
@@ -570,109 +388,52 @@ SaveArray sv_array_exfloor = {
 //
 //  SECTOR STRUCTURE
 //
+static Sector dummy_sector;
 
 static SaveField sv_fields_sector[] = {
-    {offsetof(Sector, floor),
-     "floor",
-     1,
-     {kSaveFieldStruct, 0, "surface_t"},
-     SaveGameLevelGetSurface,
-     SaveGameLevelPutSurface,
-     nullptr},
-    {offsetof(Sector, ceiling),
-     "ceil",
-     1,
-     {kSaveFieldStruct, 0, "surface_t"},
-     SaveGameLevelGetSurface,
-     SaveGameLevelPutSurface,
-     nullptr},
-    {offsetof(Sector, floor_height),
-     "f_h",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(Sector, ceiling_height),
-     "c_h",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_sector, floor, "floor", 1, kSaveFieldStruct, 0,
+                    "surface_t", SaveGameLevelGetSurface,
+                    SaveGameLevelPutSurface),
+    EDGE_SAVE_FIELD(dummy_sector, ceiling, "ceil", 1, kSaveFieldStruct, 0,
+                    "surface_t", SaveGameLevelGetSurface,
+                    SaveGameLevelPutSurface),
+    EDGE_SAVE_FIELD(dummy_sector, floor_height, "f_h", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetFloat, SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_sector, ceiling_height, "c_h", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetFloat, SaveGamePutFloat),
 
-    {offsetof(Sector, properties),
-     "props",
-     1,
-     {kSaveFieldStruct, 0, "region_properties_t"},
-     SaveGameSectorGetProps,
-     SaveGameSectorPutProps,
-     nullptr},
-    {offsetof(Sector, active_properties),
-     "p",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SaveGameSectorGetPropRef,
-     SaveGameSectorPutPropRef,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_sector, properties, "props", 1, kSaveFieldStruct, 0,
+                    "region_properties_t", SaveGameSectorGetProps,
+                    SaveGameSectorPutProps),
+    EDGE_SAVE_FIELD(dummy_sector, active_properties, "p", 1, kSaveFieldString,
+                    0, nullptr, SaveGameSectorGetPropRef,
+                    SaveGameSectorPutPropRef),
 
-    {offsetof(Sector, extrafloor_used),
-     "exfloor_used",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Sector, control_floors),
-     "control_floors",
-     1,
-     {kSaveFieldIndex, 4, "extrafloors"},
-     SaveGameSectorGetExtrafloor,
-     SaveGameSectorPutExtrafloor,
-     nullptr},
-    {offsetof(Sector, sound_player),
-     "sound_player",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_sector, extrafloor_used, "exfloor_used", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_sector, control_floors, "control_floors", 1,
+                    kSaveFieldIndex, 4, "extrafloors",
+                    SaveGameSectorGetExtrafloor, SaveGameSectorPutExtrafloor),
+    EDGE_SAVE_FIELD(dummy_sector, sound_player, "sound_player", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
 
-    {offsetof(Sector, bottom_extrafloor),
-     "bottom_ef",
-     1,
-     {kSaveFieldIndex, 4, "extrafloors"},
-     SaveGameSectorGetExtrafloor,
-     SaveGameSectorPutExtrafloor,
-     nullptr},
-    {offsetof(Sector, top_extrafloor),
-     "top_ef",
-     1,
-     {kSaveFieldIndex, 4, "extrafloors"},
-     SaveGameSectorGetExtrafloor,
-     SaveGameSectorPutExtrafloor,
-     nullptr},
-    {offsetof(Sector, bottom_liquid),
-     "bottom_liq",
-     1,
-     {kSaveFieldIndex, 4, "extrafloors"},
-     SaveGameSectorGetExtrafloor,
-     SaveGameSectorPutExtrafloor,
-     nullptr},
-    {offsetof(Sector, top_liquid),
-     "top_liq",
-     1,
-     {kSaveFieldIndex, 4, "extrafloors"},
-     SaveGameSectorGetExtrafloor,
-     SaveGameSectorPutExtrafloor,
-     nullptr},
-    {offsetof(Sector, old_stored),
-     "old_stored",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetBoolean,
-     SaveGamePutBoolean,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_sector, bottom_extrafloor, "bottom_ef", 1,
+                    kSaveFieldIndex, 4, "extrafloors",
+                    SaveGameSectorGetExtrafloor, SaveGameSectorPutExtrafloor),
+    EDGE_SAVE_FIELD(dummy_sector, top_extrafloor, "top_ef", 1, kSaveFieldIndex,
+                    4, "extrafloors", SaveGameSectorGetExtrafloor,
+                    SaveGameSectorPutExtrafloor),
+    EDGE_SAVE_FIELD(dummy_sector, bottom_liquid, "bottom_liq", 1,
+                    kSaveFieldIndex, 4, "extrafloors",
+                    SaveGameSectorGetExtrafloor, SaveGameSectorPutExtrafloor),
+    EDGE_SAVE_FIELD(dummy_sector, top_liquid, "top_liq", 1, kSaveFieldIndex, 4,
+                    "extrafloors", SaveGameSectorGetExtrafloor,
+                    SaveGameSectorPutExtrafloor),
+    EDGE_SAVE_FIELD(dummy_sector, old_stored, "old_stored", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetBoolean,
+                    SaveGamePutBoolean),
 
     // NOT HERE:
     //   - floor_move, ceiling_move: can be regenerated
@@ -688,12 +449,13 @@ static SaveField sv_fields_sector[] = {
      nullptr}};
 
 SaveStruct sv_struct_sector = {
-    nullptr,           // link in list
-    "sector_t",        // structure name
-    "sect",            // start marker
-    sv_fields_sector,  // field descriptions
-    true,              // define_me
-    nullptr            // pointer to known struct
+    nullptr,                      // link in list
+    "sector_t",                   // structure name
+    "sect",                       // start marker
+    sv_fields_sector,             // field descriptions
+    (const char *)&dummy_sector,  // dummy base
+    true,                         // define_me
+    nullptr                       // pointer to known struct
 };
 
 SaveArray sv_array_sector = {

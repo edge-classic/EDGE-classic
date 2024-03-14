@@ -213,7 +213,9 @@ bool SaveGameStructLoad(void *base, SaveStruct *info)
         SYS_ASSERT(actual->field_get);
         SYS_ASSERT(info->counterpart);
 
-        char *storage = ((char *)base) + actual->pointer_offset;
+        int offset = actual->offset_pointer - info->counterpart->dummy_base;
+
+        char *storage = ((char *)base) + offset;
 
         for (int i = 0; i < F->count; i++)
         {

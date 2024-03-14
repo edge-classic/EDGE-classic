@@ -70,8 +70,8 @@ struct SaveFieldType
 // This describes a single field
 struct SaveField
 {
-    // offset of field in structure
-    size_t pointer_offset;
+    // offset of field in structure (actually a ptr into dummy struct)
+    const char *offset_pointer;
 
     // name of field in savegame system
     const char *field_name;
@@ -94,6 +94,14 @@ struct SaveField
     SaveField *known_field;
 };
 
+// NOTE: requires an instantiated dummy struct for "base"
+#define EDGE_SAVE_FIELD(base, field, name, num, fkind, fsize, fname, getter, \
+                        putter)                                              \
+    {                                                                        \
+        (const char *)&base.field, name, num, {fkind, fsize, fname}, getter, \
+            putter, nullptr                                                  \
+    }
+
 // This describes a single structure
 struct SaveStruct
 {
@@ -108,6 +116,9 @@ struct SaveStruct
 
     // array of field definitions
     SaveField *fields;
+
+    // address of dummy struct (used to compute field offsets)
+    const char *dummy_base;
 
     // this must be true to put the definition into the savegame file.
     // Allows compatibility structures that are read-only.
@@ -203,7 +214,7 @@ struct SaveGlobals
 
     const char *game;
     const char *level;
-    GameFlags flags;
+    GameFlags   flags;
     int         hub_tag;
     const char *hub_first;
 

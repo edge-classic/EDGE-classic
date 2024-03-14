@@ -98,53 +98,36 @@ void SR_SliderPutInfo(void *storage, int index, void *extra);
 //
 //  BUTTON STRUCTURE
 //
+static Button dummy_button;
 
-static SaveField sv_fields_button[] = {{offsetof(Button, line),
-                                        "line",
-                                        1,
-                                        {kSaveFieldIndex, 4, "lines"},
-                                        SaveGameGetLine,
-                                        SaveGamePutLine,
-                                        nullptr},
-                                       {offsetof(Button, where),
-                                        "where",
-                                        1,
-                                        {kSaveFieldNumeric, 4, nullptr},
-                                        SaveGameGetInteger,
-                                        SaveGamePutInteger,
-                                        nullptr},
-                                       {offsetof(Button, button_image),
-                                        "bimage",
-                                        1,
-                                        {kSaveFieldString, 0, nullptr},
-                                        SaveGameLevelGetImage,
-                                        SaveGameLevelPutImage,
-                                        nullptr},
-                                       {offsetof(Button, button_timer),
-                                        "btimer",
-                                        1,
-                                        {kSaveFieldNumeric, 4, nullptr},
-                                        SaveGameGetInteger,
-                                        SaveGamePutInteger,
-                                        nullptr},
+static SaveField sv_fields_button[] = {
+    EDGE_SAVE_FIELD(dummy_button, line, "line", 1, kSaveFieldIndex, 4, "lines",
+                    SaveGameGetLine, SaveGamePutLine),
+    EDGE_SAVE_FIELD(dummy_button, where, "where", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_button, button_image, "bimage", 1, kSaveFieldString,
+                    0, nullptr, SaveGameLevelGetImage, SaveGameLevelPutImage),
+    EDGE_SAVE_FIELD(dummy_button, button_timer, "btimer", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetInteger, SaveGamePutInteger),
 
-                                       // FIXME: off_sound
+    // FIXME: off_sound
 
-                                       {0,
-                                        nullptr,
-                                        0,
-                                        {kSaveFieldInvalid, 0, nullptr},
-                                        nullptr,
-                                        nullptr,
-                                        nullptr}};
+    {0,
+     nullptr,
+     0,
+     {kSaveFieldInvalid, 0, nullptr},
+     nullptr,
+     nullptr,
+     nullptr}};
 
 SaveStruct sv_struct_button = {
-    nullptr,           // link in list
-    "button_t",        // structure name
-    "butn",            // start marker
-    sv_fields_button,  // field descriptions
-    true,              // define_me
-    nullptr            // pointer to known struct
+    nullptr,                      // link in list
+    "button_t",                   // structure name
+    "butn",                       // start marker
+    sv_fields_button,             // field descriptions
+    (const char *)&dummy_button,  // dummy base
+    true,                         // define_me
+    nullptr                       // pointer to known struct
 };
 
 SaveArray sv_array_button = {
@@ -167,57 +150,25 @@ SaveArray sv_array_button = {
 //
 //  LIGHT STRUCTURE
 //
+static LightSpecial dummy_light;
 
 static SaveField sv_fields_light[] = {
-    {offsetof(LightSpecial, type),
-     "type",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SR_LightGetType,
-     SR_LightPutType,
-     nullptr},
-    {offsetof(LightSpecial, sector),
-     "sector",
-     1,
-     {kSaveFieldIndex, 4, "sectors"},
-     SaveGameGetSector,
-     SaveGamePutSector,
-     nullptr},
-    {offsetof(LightSpecial, count),
-     "count",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(LightSpecial, minimum_light),
-     "minlight",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(LightSpecial, maximum_light),
-     "maxlight",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(LightSpecial, direction),
-     "direction",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(LightSpecial, fade_count),
-     "fade_count",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_light, type, "type", 1, kSaveFieldString, 0, nullptr,
+                    SR_LightGetType, SR_LightPutType),
+    EDGE_SAVE_FIELD(dummy_light, sector, "sector", 1, kSaveFieldIndex, 4,
+                    "sectors", SaveGameGetSector, SaveGamePutSector),
+    EDGE_SAVE_FIELD(dummy_light, count, "count", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_light, minimum_light, "minlight", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_light, maximum_light, "maxlight", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_light, direction, "direction", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_light, fade_count, "fade_count", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetInteger, SaveGamePutInteger),
 
     // NOT HERE:
     //   - prev & next: automatically regenerated
@@ -231,12 +182,13 @@ static SaveField sv_fields_light[] = {
      nullptr}};
 
 SaveStruct sv_struct_light = {
-    nullptr,          // link in list
-    "light_t",        // structure name
-    "lite",           // start marker
-    sv_fields_light,  // field descriptions
-    true,             // define_me
-    nullptr           // pointer to known struct
+    nullptr,                     // link in list
+    "light_t",                   // structure name
+    "lite",                      // start marker
+    sv_fields_light,             // field descriptions
+    (const char *)&dummy_light,  // dummy base
+    true,                        // define_me
+    nullptr                      // pointer to known struct
 };
 
 SaveArray sv_array_light = {
@@ -259,101 +211,43 @@ SaveArray sv_array_light = {
 //
 //  TRIGGER STRUCTURE
 //
+static TriggerScriptTrigger dummy_trigger;
 
 static SaveField sv_fields_trigger[] = {
-    {offsetof(TriggerScriptTrigger, info),
-     "info",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SaveGameGetTriggerScript,
-     SaveGamePutTriggerScript,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_trigger, info, "info", 1, kSaveFieldString, 0,
+                    nullptr, SaveGameGetTriggerScript,
+                    SaveGamePutTriggerScript),
 
-    {offsetof(TriggerScriptTrigger, disabled),
-     "disabled",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetBoolean,
-     SaveGamePutBoolean,
-     nullptr},
-    {offsetof(TriggerScriptTrigger, activated),
-     "activated",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetBoolean,
-     SaveGamePutBoolean,
-     nullptr},
-    {offsetof(TriggerScriptTrigger, acti_players),
-     "acti_players",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(TriggerScriptTrigger, repeats_left),
-     "repeats_left",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(TriggerScriptTrigger, repeat_delay),
-     "repeat_delay",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_trigger, disabled, "disabled", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetBoolean, SaveGamePutBoolean),
+    EDGE_SAVE_FIELD(dummy_trigger, activated, "activated", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetBoolean, SaveGamePutBoolean),
+    EDGE_SAVE_FIELD(dummy_trigger, acti_players, "acti_players", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_trigger, repeats_left, "repeats_left", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_trigger, repeat_delay, "repeat_delay", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
 
-    {offsetof(TriggerScriptTrigger, state),
-     "state",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameTriggerGetState,
-     SaveGameTriggerPutState,
-     nullptr},
-    {offsetof(TriggerScriptTrigger, wait_tics),
-     "wait_tics",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(TriggerScriptTrigger, tip_slot),
-     "tip_slot",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(TriggerScriptTrigger, menu_style_name),
-     "menu_style_name",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SR_TipGetString,
-     SR_TipPutString,
-     nullptr},
-    {offsetof(TriggerScriptTrigger, menu_result),
-     "menu_result",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(TriggerScriptTrigger, wud_tag),
-     "wud_tag",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(TriggerScriptTrigger, wud_count),
-     "wud_count",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_trigger, state, "state", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameTriggerGetState, SaveGameTriggerPutState),
+    EDGE_SAVE_FIELD(dummy_trigger, wait_tics, "wait_tics", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_trigger, tip_slot, "tip_slot", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_trigger, menu_style_name, "menu_style_name", 1,
+                    kSaveFieldString, 0, nullptr, SR_TipGetString,
+                    SR_TipPutString),
+    EDGE_SAVE_FIELD(dummy_trigger, menu_result, "menu_result", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_trigger, wud_tag, "wud_tag", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_trigger, wud_count, "wud_count", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetInteger, SaveGamePutInteger),
 
     // NOT HERE
     //   - next & prev: can be regenerated.
@@ -370,12 +264,13 @@ static SaveField sv_fields_trigger[] = {
      nullptr}};
 
 SaveStruct sv_struct_trigger = {
-    nullptr,            // link in list
-    "rad_trigger_t",    // structure name
-    "trig",             // start marker
-    sv_fields_trigger,  // field descriptions
-    true,               // define_me
-    nullptr             // pointer to known struct
+    nullptr,                       // link in list
+    "rad_trigger_t",               // structure name
+    "trig",                        // start marker
+    sv_fields_trigger,             // field descriptions
+    (const char *)&dummy_trigger,  // dummy base
+    true,                          // define_me
+    nullptr                        // pointer to known struct
 };
 
 SaveArray sv_array_trigger = {
@@ -398,89 +293,39 @@ SaveArray sv_array_trigger = {
 //
 //  DRAWTIP STRUCTURE
 //
+static ScriptDrawTip dummy_draw_tip;
 
 static SaveField sv_fields_drawtip[] = {
     // treating the `p' sub-struct here as if the fields were directly
     // in drawtip_t.
-
-    {offsetof(ScriptDrawTip, p.x_pos),
-     "x_pos",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(ScriptDrawTip, p.y_pos),
-     "y_pos",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(ScriptDrawTip, p.left_just),
-     "left_just",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(ScriptDrawTip, p.translucency),
-     "translucency",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-
-    {offsetof(ScriptDrawTip, delay),
-     "delay",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(ScriptDrawTip, tip_text),
-     "tip_text",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SR_TipGetString,
-     SR_TipPutString,
-     nullptr},
-    {offsetof(ScriptDrawTip, tip_graphic),
-     "tip_graphic",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SaveGameLevelGetImage,
-     SaveGameLevelPutImage,
-     nullptr},
-    {offsetof(ScriptDrawTip, playsound),
-     "playsound",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetBoolean,
-     SaveGamePutBoolean,
-     nullptr},
-    {offsetof(ScriptDrawTip, fade_time),
-     "fade_time",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(ScriptDrawTip, fade_target),
-     "fade_target",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(ScriptDrawTip, color),
-     "color",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_draw_tip, p.x_pos, "x_pos", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetFloat, SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_draw_tip, p.y_pos, "y_pos", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetFloat, SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_draw_tip, p.left_just, "left_just", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_draw_tip, p.translucency, "translucency", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_draw_tip, delay, "delay", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_draw_tip, tip_text, "tip_text", 1, kSaveFieldString,
+                    0, nullptr, SR_TipGetString, SR_TipPutString),
+    EDGE_SAVE_FIELD(dummy_draw_tip, tip_graphic, "tip_graphic", 1,
+                    kSaveFieldString, 0, nullptr, SaveGameLevelGetImage,
+                    SaveGameLevelPutImage),
+    EDGE_SAVE_FIELD(dummy_draw_tip, playsound, "playsound", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetBoolean,
+                    SaveGamePutBoolean),
+    EDGE_SAVE_FIELD(dummy_draw_tip, fade_time, "fade_time", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_draw_tip, fade_target, "fade_target", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_draw_tip, color, "color", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
 
     // NOT HERE:
     //    p.slot_num, p.time: not used withing drawtip_t
@@ -497,12 +342,13 @@ static SaveField sv_fields_drawtip[] = {
      nullptr}};
 
 SaveStruct sv_struct_drawtip = {
-    nullptr,            // link in list
-    "drawtip_t",        // structure name
-    "dtip",             // start marker
-    sv_fields_drawtip,  // field descriptions
-    true,               // define_me
-    nullptr             // pointer to known struct
+    nullptr,                        // link in list
+    "drawtip_t",                    // structure name
+    "dtip",                         // start marker
+    sv_fields_drawtip,              // field descriptions
+    (const char *)&dummy_draw_tip,  // dummy base
+    true,                           // define_me
+    nullptr                         // pointer to known struct
 };
 
 SaveArray sv_array_drawtip = {
@@ -525,123 +371,54 @@ SaveArray sv_array_drawtip = {
 //
 //  PLANEMOVE STRUCTURE
 //
+static PlaneMover dummy_plane_mover;
 
 static SaveField sv_fields_plane_move[] = {
-    {offsetof(PlaneMover, type),
-     "type",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SR_PlaneMoveGetType,
-     SR_PlaneMovePutType,
-     nullptr},
-    {offsetof(PlaneMover, sector),
-     "sector",
-     1,
-     {kSaveFieldIndex, 4, "sectors"},
-     SaveGameGetSector,
-     SaveGamePutSector,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_plane_mover, type, "type", 1, kSaveFieldString, 0,
+                    nullptr, SR_PlaneMoveGetType, SR_PlaneMovePutType),
+    EDGE_SAVE_FIELD(dummy_plane_mover, sector, "sector", 1, kSaveFieldIndex, 4,
+                    "sectors", SaveGameGetSector, SaveGamePutSector),
 
-    {offsetof(PlaneMover, is_ceiling),
-     "is_ceiling",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetBoolean,
-     SaveGamePutBoolean,
-     nullptr},
-    {offsetof(PlaneMover, is_elevator),
-     "is_elevator",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetBoolean,
-     SaveGamePutBoolean,
-     nullptr},
-    {offsetof(PlaneMover, start_height),
-     "startheight",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(PlaneMover, destination_height),
-     "destheight",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(PlaneMover, elevator_height),
-     "elevheight",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(PlaneMover, speed),
-     "speed",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(PlaneMover, crush),
-     "crush",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetBoolean,
-     SaveGamePutBoolean,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_plane_mover, is_ceiling, "is_ceiling", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetBoolean,
+                    SaveGamePutBoolean),
+    EDGE_SAVE_FIELD(dummy_plane_mover, is_elevator, "is_elevator", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetBoolean,
+                    SaveGamePutBoolean),
+    EDGE_SAVE_FIELD(dummy_plane_mover, start_height, "startheight", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_plane_mover, destination_height, "destheight", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_plane_mover, elevator_height, "elevheight", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_plane_mover, speed, "speed", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetFloat, SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_plane_mover, crush, "crush", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetBoolean, SaveGamePutBoolean),
 
-    {offsetof(PlaneMover, direction),
-     "direction",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(PlaneMover, old_direction),
-     "olddirection",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(PlaneMover, tag),
-     "tag",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(PlaneMover, waited),
-     "waited",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(PlaneMover, sound_effect_started),
-     "sfxstarted",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetBoolean,
-     SaveGamePutBoolean,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_plane_mover, direction, "direction", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_plane_mover, old_direction, "olddirection", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_plane_mover, tag, "tag", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_plane_mover, waited, "waited", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_plane_mover, sound_effect_started, "sfxstarted", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetBoolean,
+                    SaveGamePutBoolean),
 
-    {offsetof(PlaneMover, new_special),
-     "newspecial",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(PlaneMover, new_image),
-     "new_image",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SaveGameLevelGetImage,
-     SaveGameLevelPutImage,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_plane_mover, new_special, "newspecial", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_plane_mover, new_image, "new_image", 1,
+                    kSaveFieldString, 0, nullptr, SaveGameLevelGetImage,
+                    SaveGameLevelPutImage),
 
     {0,
      nullptr,
@@ -652,12 +429,13 @@ static SaveField sv_fields_plane_move[] = {
      nullptr}};
 
 SaveStruct sv_struct_plane_move = {
-    nullptr,               // link in list
-    "plane_move_t",        // structure name
-    "pmov",                // start marker
-    sv_fields_plane_move,  // field descriptions
-    true,                  // define_me
-    nullptr                // pointer to known struct
+    nullptr,                           // link in list
+    "plane_move_t",                    // structure name
+    "pmov",                            // start marker
+    sv_fields_plane_move,              // field descriptions
+    (const char *)&dummy_plane_mover,  // dummy base
+    true,                              // define_me
+    nullptr                            // pointer to known struct
 };
 
 SaveArray sv_array_plane_move = {
@@ -680,67 +458,30 @@ SaveArray sv_array_plane_move = {
 //
 //  SLIDERMOVE STRUCTURE
 //
+static SlidingDoorMover dummy_slider;
 
 static SaveField sv_fields_slider_move[] = {
-    {offsetof(SlidingDoorMover, info),
-     "info",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SR_SliderGetInfo,
-     SR_SliderPutInfo,
-     nullptr},
-    {offsetof(SlidingDoorMover, line),
-     "line",
-     1,
-     {kSaveFieldIndex, 4, "lines"},
-     SaveGameGetLine,
-     SaveGamePutLine,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_slider, info, "info", 1, kSaveFieldString, 0, nullptr,
+                    SR_SliderGetInfo, SR_SliderPutInfo),
+    EDGE_SAVE_FIELD(dummy_slider, line, "line", 1, kSaveFieldIndex, 4, "lines",
+                    SaveGameGetLine, SaveGamePutLine),
 
-    {offsetof(SlidingDoorMover, opening),
-     "opening",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(SlidingDoorMover, target),
-     "target",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_slider, opening, "opening", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetFloat, SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_slider, target, "target", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetFloat, SaveGamePutFloat),
 
-    {offsetof(SlidingDoorMover, direction),
-     "direction",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(SlidingDoorMover, waited),
-     "waited",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_slider, direction, "direction", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_slider, waited, "waited", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
 
-    {offsetof(SlidingDoorMover, sound_effect_started),
-     "sfxstarted",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetBoolean,
-     SaveGamePutBoolean,
-     nullptr},
-    {offsetof(SlidingDoorMover, final_open),
-     "final_open",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetBoolean,
-     SaveGamePutBoolean,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_slider, sound_effect_started, "sfxstarted", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetBoolean,
+                    SaveGamePutBoolean),
+    EDGE_SAVE_FIELD(dummy_slider, final_open, "final_open", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetBoolean,
+                    SaveGamePutBoolean),
 
     // NOT HERE:
     //   - line_length (can recreate)
@@ -754,12 +495,13 @@ static SaveField sv_fields_slider_move[] = {
      nullptr}};
 
 SaveStruct sv_struct_slider_move = {
-    nullptr,                // link in list
-    "slider_move_t",        // structure name
-    "pmov",                 // start marker
-    sv_fields_slider_move,  // field descriptions
-    true,                   // define_me
-    nullptr                 // pointer to known struct
+    nullptr,                      // link in list
+    "slider_move_t",              // structure name
+    "pmov",                       // start marker
+    sv_fields_slider_move,        // field descriptions
+    (const char *)&dummy_slider,  // dummy base
+    true,                         // define_me
+    nullptr                       // pointer to known struct
 };
 
 SaveArray sv_array_slider_move = {
@@ -888,7 +630,7 @@ void SV_LightFinaliseElems(void)
 int SV_TriggerCountElems(void)
 {
     TriggerScriptTrigger *cur;
-    int            count;
+    int                   count;
 
     for (cur = active_triggers, count = 0; cur; cur = cur->next, count++)
     { /* nothing here */
@@ -912,7 +654,7 @@ void *SV_TriggerFindByIndex(int index)
 int SV_TriggerGetIndex(TriggerScriptTrigger *elem)
 {
     TriggerScriptTrigger *cur;
-    int            index;
+    int                   index;
 
     for (cur = active_triggers, index = 0; cur && cur != elem; cur = cur->next)
         index++;
@@ -939,8 +681,8 @@ void SV_TriggerCreateElems(int num_elems)
         active_triggers = cur;
 
         // initialise defaults
-        cur->info     = current_scripts;
-        cur->state    = current_scripts ? current_scripts->first_state : nullptr;
+        cur->info  = current_scripts;
+        cur->state = current_scripts ? current_scripts->first_state : nullptr;
         cur->disabled = true;
     }
 }
@@ -1207,10 +949,11 @@ void SR_LightPutType(void *storage, int index, void *extra)
 
 bool SaveGameTriggerGetState(void *storage, int index, void *extra)
 {
-    const TriggerScriptState **dest = (const TriggerScriptState **)storage + index;
-    const TriggerScriptState  *temp;
+    const TriggerScriptState **dest =
+        (const TriggerScriptState **)storage + index;
+    const TriggerScriptState *temp;
 
-    int                  value;
+    int                         value;
     const TriggerScriptTrigger *trig = (TriggerScriptTrigger *)sv_current_elem;
 
     value = SaveChunkGetInteger();
@@ -1238,10 +981,11 @@ bool SaveGameTriggerGetState(void *storage, int index, void *extra)
 
 void SaveGameTriggerPutState(void *storage, int index, void *extra)
 {
-    const TriggerScriptState *src = ((const TriggerScriptState **)storage)[index];
+    const TriggerScriptState *src =
+        ((const TriggerScriptState **)storage)[index];
     const TriggerScriptState *temp;
 
-    int                  value;
+    int                         value;
     const TriggerScriptTrigger *trig = (TriggerScriptTrigger *)sv_current_elem;
 
     if (!src)

@@ -29,14 +29,10 @@
 //
 
 #include "bot_think.h"
+#include "main.h"
+#include "str_util.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
-
-// EPI
-#include "str_util.h"
-
-// DDF
-#include "main.h"
 
 // forward decls.
 int   SaveGamePlayerCountElems(void);
@@ -70,267 +66,108 @@ extern void SaveGameMapObjectPutType(void *storage, int index, void *extra);
 //
 //  PLAYER STRUCTURE AND ARRAY
 //
+static Player dummy_player;
 
 static SaveField sv_fields_player[] = {
-    {offsetof(Player, player_number_),
-     "pnum",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Player, player_state_),
-     "playerstate",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Player, player_flags_),
-     "playerflags",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Player, player_name_[0]),
-     "playername",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SR_PlayerGetName,
-     SR_PlayerPutName,
-     nullptr},
-    {offsetof(Player, map_object_),
-     "mo",
-     1,
-     {kSaveFieldIndex, 4, "mobjs"},
-     SaveGameGetMapObject,
-     SaveGamePutMapObject,
-     nullptr},
-    {offsetof(Player, view_z_),
-     "viewz",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(Player, view_height_),
-     "viewheight",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(Player, delta_view_height_),
-     "deltaviewheight",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(Player, standard_view_height_),
-     "std_viewheight",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(Player, zoom_field_of_view_),
-     "zoom_fov",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Player, actual_speed_),
-     "actual_speed",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(Player, health_),
-     "health",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(Player, armours_[0]),
-     "armours",
-     kTotalArmourTypes,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(Player, armour_types_[0]),
-     "armour_types",
-     kTotalArmourTypes,
-     {kSaveFieldString, 0, nullptr},
-     SaveGameMapObjectGetType,
-     SaveGameMapObjectPutType,
-     nullptr},
-    {offsetof(Player, powers_[0]),
-     "powers",
-     kTotalPowerTypes,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(Player, keep_powers_),
-     "keep_powers",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Player, cards_),
-     "cards_ke",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Player, frags_),
-     "frags",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Player, total_frags_),
-     "totalfrags",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Player, ready_weapon_),
-     "ready_wp",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Player, pending_weapon_),
-     "pending_wp",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Player, weapons_[0]),
-     "weapons",
-     kMaximumWeapons,
-     {kSaveFieldStruct, 0, "playerweapon_t"},
-     SR_PlayerGetWeapon,
-     SR_PlayerPutWeapon,
-     nullptr},
-    {offsetof(Player, ammo_[0]),
-     "ammo",
-     kTotalAmmunitionTypes,
-     {kSaveFieldStruct, 0, "playerammo_t"},
-     SR_PlayerGetAmmo,
-     SR_PlayerPutAmmo,
-     nullptr},
-    {offsetof(Player, inventory_[0]),
-     "inventory",
-     kTotalInventoryTypes,
-     {kSaveFieldStruct, 0, "playerinv_t"},
-     SR_PlayerGetInv,
-     SR_PlayerPutInv,
-     nullptr},
-    {offsetof(Player, counters_[0]),
-     "counters",
-     kTotalCounterTypes,
-     {kSaveFieldStruct, 0, "playercounter_t"},
-     SR_PlayerGetCounter,
-     SR_PlayerPutCounter,
-     nullptr},
-    {offsetof(Player, cheats_),
-     "cheats",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Player, refire_),
-     "refire",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Player, kill_count_),
-     "killcount",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Player, item_count_),
-     "itemcount",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Player, secret_count_),
-     "secretcount",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Player, jump_wait_),
-     "jumpwait",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Player, idle_wait_),
-     "idlewait",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Player, air_in_lungs_),
-     "air_in_lungs",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(Player, underwater_),
-     "underwater",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetBoolean,
-     SaveGamePutBoolean,
-     nullptr},
-    {offsetof(Player, airless_),
-     "airless",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetBoolean,
-     SaveGamePutBoolean,
-     nullptr},
-    {offsetof(Player, flash_),
-     "flash_b",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetBoolean,
-     SaveGamePutBoolean,
-     nullptr},
-    {offsetof(Player, player_sprites_[0]),
-     "psprites",
-     kTotalPlayerSpriteTypes,
-     {kSaveFieldStruct, 0, "psprite_t"},
-     SR_PlayerGetPSprite,
-     SR_PlayerPutPSprite,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_player, player_number_, "pnum", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_player, player_state_, "playerstate", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_player, player_flags_, "playerflags", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_player, player_name_[0], "playername", 1,
+                    kSaveFieldString, 0, nullptr, SR_PlayerGetName,
+                    SR_PlayerPutName),
+    EDGE_SAVE_FIELD(dummy_player, map_object_, "mo", 1, kSaveFieldIndex, 4,
+                    "mobjs", SaveGameGetMapObject, SaveGamePutMapObject),
+    EDGE_SAVE_FIELD(dummy_player, view_z_, "viewz", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetFloat, SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_player, view_height_, "viewheight", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_player, delta_view_height_, "deltaviewheight", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_player, standard_view_height_, "std_viewheight", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_player, zoom_field_of_view_, "zoom_fov", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_player, actual_speed_, "actual_speed", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_player, health_, "health", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetFloat, SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_player, armours_[0], "armours", kTotalArmourTypes,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_player, armour_types_[0], "armour_types",
+                    kTotalArmourTypes, kSaveFieldString, 0, nullptr,
+                    SaveGameMapObjectGetType, SaveGameMapObjectPutType),
+    EDGE_SAVE_FIELD(dummy_player, powers_[0], "powers", kTotalPowerTypes,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_player, keep_powers_, "keep_powers", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_player, cards_, "cards_ke", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_player, frags_, "frags", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_player, total_frags_, "totalfrags", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_player, ready_weapon_, "ready_wp", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_player, pending_weapon_, "pending_wp", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_player, weapons_[0], "weapons", kMaximumWeapons,
+                    kSaveFieldStruct, 0, "playerweapon_t", SR_PlayerGetWeapon,
+                    SR_PlayerPutWeapon),
+    EDGE_SAVE_FIELD(dummy_player, ammo_[0], "ammo", kTotalAmmunitionTypes,
+                    kSaveFieldStruct, 0, "playerammo_t", SR_PlayerGetAmmo,
+                    SR_PlayerPutAmmo),
+    EDGE_SAVE_FIELD(dummy_player, inventory_[0], "inventory",
+                    kTotalInventoryTypes, kSaveFieldStruct, 0, "playerinv_t",
+                    SR_PlayerGetInv, SR_PlayerPutInv),
+    EDGE_SAVE_FIELD(dummy_player, counters_[0], "counters", kTotalCounterTypes,
+                    kSaveFieldStruct, 0, "playercounter_t", SR_PlayerGetCounter,
+                    SR_PlayerPutCounter),
+    EDGE_SAVE_FIELD(dummy_player, cheats_, "cheats", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_player, refire_, "refire", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_player, kill_count_, "killcount", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_player, item_count_, "itemcount", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_player, secret_count_, "secretcount", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_player, jump_wait_, "jumpwait", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_player, idle_wait_, "idlewait", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_player, air_in_lungs_, "air_in_lungs", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_player, underwater_, "underwater", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetBoolean,
+                    SaveGamePutBoolean),
+    EDGE_SAVE_FIELD(dummy_player, airless_, "airless", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetBoolean, SaveGamePutBoolean),
+    EDGE_SAVE_FIELD(dummy_player, flash_, "flash_b", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetBoolean, SaveGamePutBoolean),
+    EDGE_SAVE_FIELD(dummy_player, player_sprites_[0], "psprites",
+                    kTotalPlayerSpriteTypes, kSaveFieldStruct, 0, "psprite_t",
+                    SR_PlayerGetPSprite, SR_PlayerPutPSprite),
 
     // FIXME: swimming & wet_feet ???
 
@@ -351,12 +188,13 @@ static SaveField sv_fields_player[] = {
      nullptr}};
 
 SaveStruct sv_struct_player = {
-    nullptr,           // link in list
-    "player_t",        // structure name
-    "play",            // start marker
-    sv_fields_player,  // field descriptions
-    true,              // define_me
-    nullptr            // pointer to known struct
+    nullptr,                      // link in list
+    "player_t",                   // structure name
+    "play",                       // start marker
+    sv_fields_player,             // field descriptions
+    (const char *)&dummy_player,  // dummy base
+    true,                         // define_me
+    nullptr                       // pointer to known struct
 };
 
 SaveArray sv_array_player = {
@@ -379,64 +217,30 @@ SaveArray sv_array_player = {
 //
 //  WEAPON STRUCTURE
 //
+static PlayerWeapon dummy_weapon;
 
 static SaveField sv_fields_playerweapon[] = {
-    {offsetof(PlayerWeapon, info),
-     "info",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SR_WeaponGetInfo,
-     SR_WeaponPutInfo,
-     nullptr},
-    {offsetof(PlayerWeapon, owned),
-     "owned",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetBoolean,
-     SaveGamePutBoolean,
-     nullptr},
-    {offsetof(PlayerWeapon, flags),
-     "flags",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(PlayerWeapon, clip_size[0]),
-     "clip_size",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(PlayerWeapon, clip_size[1]),
-     "sa_clip_size",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(PlayerWeapon, clip_size[2]),
-     "ta_clip_size",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(PlayerWeapon, clip_size[3]),
-     "fa_clip_size",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(PlayerWeapon, model_skin),
-     "model_skin",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_weapon, info, "info", 1, kSaveFieldString, 0, nullptr,
+                    SR_WeaponGetInfo, SR_WeaponPutInfo),
+    EDGE_SAVE_FIELD(dummy_weapon, owned, "owned", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetBoolean, SaveGamePutBoolean),
+    EDGE_SAVE_FIELD(dummy_weapon, flags, "flags", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_weapon, clip_size[0], "clip_size", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_weapon, clip_size[1], "sa_clip_size", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_weapon, clip_size[2], "ta_clip_size", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_weapon, clip_size[3], "fa_clip_size", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_weapon, model_skin, "model_skin", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
 
     {0,
      nullptr,
@@ -447,49 +251,45 @@ static SaveField sv_fields_playerweapon[] = {
      nullptr}};
 
 SaveStruct sv_struct_playerweapon = {
-    nullptr,                 // link in list
-    "playerweapon_t",        // structure name
-    "weap",                  // start marker
-    sv_fields_playerweapon,  // field descriptions
-    true,                    // define_me
-    nullptr                  // pointer to known struct
+    nullptr,                      // link in list
+    "playerweapon_t",             // structure name
+    "weap",                       // start marker
+    sv_fields_playerweapon,       // field descriptions
+    (const char *)&dummy_weapon,  // dummy base
+    true,                         // define_me
+    nullptr                       // pointer to known struct
 };
+
+static PlayerStock
+    dummy_stock;  // this works for the following 3 (counter/inv/ammo)
 
 //----------------------------------------------------------------------------
 //
 //  COUNTER STRUCTURE
 //
 
-static SaveField sv_fields_playercounter[] = {{offsetof(PlayerStock, count),
-                                               "num",
-                                               1,
-                                               {kSaveFieldNumeric, 4, nullptr},
-                                               SaveGameGetInteger,
-                                               SaveGamePutInteger,
-                                               nullptr},
-                                              {offsetof(PlayerStock, maximum),
-                                               "max",
-                                               1,
-                                               {kSaveFieldNumeric, 4, nullptr},
-                                               SaveGameGetInteger,
-                                               SaveGamePutInteger,
-                                               nullptr},
+static SaveField sv_fields_playercounter[] = {
+    EDGE_SAVE_FIELD(dummy_stock, count, "num", 1, kSaveFieldNumeric, 4, nullptr,
+                    SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_stock, maximum, "max", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
 
-                                              {0,
-                                               nullptr,
-                                               0,
-                                               {kSaveFieldInvalid, 0, nullptr},
-                                               nullptr,
-                                               nullptr,
-                                               nullptr}};
+    {0,
+     nullptr,
+     0,
+     {kSaveFieldInvalid, 0, nullptr},
+     nullptr,
+     nullptr,
+     nullptr}};
 
 SaveStruct sv_struct_playercounter = {
-    nullptr,                  // link in list
-    "playercounter_t",        // structure name
-    "cntr",                   // start marker
-    sv_fields_playercounter,  // field descriptions
-    true,                     // define_me
-    nullptr                   // pointer to known struct
+    nullptr,                     // link in list
+    "playercounter_t",           // structure name
+    "cntr",                      // start marker
+    sv_fields_playercounter,     // field descriptions
+    (const char *)&dummy_stock,  // dummy base
+    true,                        // define_me
+    nullptr                      // pointer to known struct
 };
 
 //----------------------------------------------------------------------------
@@ -497,36 +297,28 @@ SaveStruct sv_struct_playercounter = {
 //  INVENTORY STRUCTURE
 //
 
-static SaveField sv_fields_playerinv[] = {{offsetof(PlayerStock, count),
-                                           "num",
-                                           1,
-                                           {kSaveFieldNumeric, 4, nullptr},
-                                           SaveGameGetInteger,
-                                           SaveGamePutInteger,
-                                           nullptr},
-                                          {offsetof(PlayerStock, maximum),
-                                           "max",
-                                           1,
-                                           {kSaveFieldNumeric, 4, nullptr},
-                                           SaveGameGetInteger,
-                                           SaveGamePutInteger,
-                                           nullptr},
+static SaveField sv_fields_playerinv[] = {
+    EDGE_SAVE_FIELD(dummy_stock, count, "num", 1, kSaveFieldNumeric, 4, nullptr,
+                    SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_stock, maximum, "max", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
 
-                                          {0,
-                                           nullptr,
-                                           0,
-                                           {kSaveFieldInvalid, 0, nullptr},
-                                           nullptr,
-                                           nullptr,
-                                           nullptr}};
+    {0,
+     nullptr,
+     0,
+     {kSaveFieldInvalid, 0, nullptr},
+     nullptr,
+     nullptr,
+     nullptr}};
 
 SaveStruct sv_struct_playerinv = {
-    nullptr,              // link in list
-    "playerinv_t",        // structure name
-    "invy",               // start marker
-    sv_fields_playerinv,  // field descriptions
-    true,                 // define_me
-    nullptr               // pointer to known struct
+    nullptr,                     // link in list
+    "playerinv_t",               // structure name
+    "invy",                      // start marker
+    sv_fields_playerinv,         // field descriptions
+    (const char *)&dummy_stock,  // dummy base
+    true,                        // define_me
+    nullptr                      // pointer to known struct
 };
 
 //----------------------------------------------------------------------------
@@ -534,79 +326,50 @@ SaveStruct sv_struct_playerinv = {
 //  AMMO STRUCTURE
 //
 
-static SaveField sv_fields_playerammo[] = {{offsetof(PlayerStock, count),
-                                            "num",
-                                            1,
-                                            {kSaveFieldNumeric, 4, nullptr},
-                                            SaveGameGetInteger,
-                                            SaveGamePutInteger,
-                                            nullptr},
-                                           {offsetof(PlayerStock, maximum),
-                                            "max",
-                                            1,
-                                            {kSaveFieldNumeric, 4, nullptr},
-                                            SaveGameGetInteger,
-                                            SaveGamePutInteger,
-                                            nullptr},
+static SaveField sv_fields_playerammo[] = {
+    EDGE_SAVE_FIELD(dummy_stock, count, "num", 1, kSaveFieldNumeric, 4, nullptr,
+                    SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_stock, maximum, "max", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
 
-                                           {0,
-                                            nullptr,
-                                            0,
-                                            {kSaveFieldInvalid, 0, nullptr},
-                                            nullptr,
-                                            nullptr,
-                                            nullptr}};
+    {0,
+     nullptr,
+     0,
+     {kSaveFieldInvalid, 0, nullptr},
+     nullptr,
+     nullptr,
+     nullptr}};
 
 SaveStruct sv_struct_playerammo = {
-    nullptr,               // link in list
-    "playerammo_t",        // structure name
-    "ammo",                // start marker
-    sv_fields_playerammo,  // field descriptions
-    true,                  // define_me
-    nullptr                // pointer to known struct
+    nullptr,                     // link in list
+    "playerammo_t",              // structure name
+    "ammo",                      // start marker
+    sv_fields_playerammo,        // field descriptions
+    (const char *)&dummy_stock,  // dummy base
+    true,                        // define_me
+    nullptr                      // pointer to known struct
 };
 
 //----------------------------------------------------------------------------
 //
 //  PSPRITE STRUCTURE
 //
+static PlayerSprite dummy_player_sprite;
 
 static SaveField sv_fields_psprite[] = {
-    {offsetof(PlayerSprite, state),
-     "state",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SR_PlayerGetState,
-     SR_PlayerPutState,
-     nullptr},
-    {offsetof(PlayerSprite, next_state),
-     "next_state",
-     1,
-     {kSaveFieldString, 0, nullptr},
-     SR_PlayerGetState,
-     SR_PlayerPutState,
-     nullptr},
-    {offsetof(PlayerSprite, tics),
-     "tics",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetInteger,
-     SaveGamePutInteger,
-     nullptr},
-    {offsetof(PlayerSprite, visibility),
-     "visibility",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
-    {offsetof(PlayerSprite, target_visibility),
-     "vis_target",
-     1,
-     {kSaveFieldNumeric, 4, nullptr},
-     SaveGameGetFloat,
-     SaveGamePutFloat,
-     nullptr},
+    EDGE_SAVE_FIELD(dummy_player_sprite, state, "state", 1, kSaveFieldString, 0,
+                    nullptr, SR_PlayerGetState, SR_PlayerPutState),
+    EDGE_SAVE_FIELD(dummy_player_sprite, next_state, "next_state", 1,
+                    kSaveFieldString, 0, nullptr, SR_PlayerGetState,
+                    SR_PlayerPutState),
+    EDGE_SAVE_FIELD(dummy_player_sprite, tics, "tics", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_player_sprite, visibility, "visibility", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_player_sprite, target_visibility, "vis_target", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
 
     // NOT HERE:
     //   sx, sy: they can be regenerated.
@@ -620,12 +383,13 @@ static SaveField sv_fields_psprite[] = {
      nullptr}};
 
 SaveStruct sv_struct_psprite = {
-    nullptr,            // link in list
-    "pspdef_t",         // structure name
-    "pspr",             // start marker
-    sv_fields_psprite,  // field descriptions
-    true,               // define_me
-    nullptr             // pointer to known struct
+    nullptr,                             // link in list
+    "pspdef_t",                          // structure name
+    "pspr",                              // start marker
+    sv_fields_psprite,                   // field descriptions
+    (const char *)&dummy_player_sprite,  // dummy base
+    true,                                // define_me
+    nullptr                              // pointer to known struct
 };
 
 //----------------------------------------------------------------------------
@@ -716,11 +480,11 @@ void SaveGamePlayerCreateElems(int num_elems)
         p->player_number_ = -1;  // checked during finalisation.
         sprintf(p->player_name_, "Player%d", 1 + p->player_number_);
 
-        p->remember_attack_state_[0]   = -1;
-        p->remember_attack_state_[1]   = -1;
-        p->remember_attack_state_[2]   = -1;
-        p->remember_attack_state_[3]   = -1;
-        p->weapon_last_frame_ = -1;
+        p->remember_attack_state_[0] = -1;
+        p->remember_attack_state_[1] = -1;
+        p->remember_attack_state_[2] = -1;
+        p->remember_attack_state_[3] = -1;
+        p->weapon_last_frame_        = -1;
 
         for (int j = 0; j < kTotalPlayerSpriteTypes; j++)
         {
@@ -759,9 +523,12 @@ void SaveGamePlayerFinaliseElems(void)
             FatalError("LOADGAME: player did not load (index %d) !\n", pnum);
 
         if (p->player_number_ >= kMaximumPlayers)
-            FatalError("LOADGAME: player with bad index (%d) !\n", p->player_number_);
+            FatalError("LOADGAME: player with bad index (%d) !\n",
+                       p->player_number_);
 
-        if (!p->map_object_) FatalError("LOADGAME: Player %d has no mobj !\n", p->player_number_);
+        if (!p->map_object_)
+            FatalError("LOADGAME: Player %d has no mobj !\n",
+                       p->player_number_);
 
         if (players[p->player_number_])
             FatalError("LOADGAME: Two players with same number !\n");
@@ -770,9 +537,11 @@ void SaveGamePlayerFinaliseElems(void)
 
         if (first < 0) first = p->player_number_;
 
-        if (p->player_flags_ & kPlayerFlagConsole) console_player = p->player_number_;
+        if (p->player_flags_ & kPlayerFlagConsole)
+            console_player = p->player_number_;
 
-        if (p->player_flags_ & kPlayerFlagDisplay) display_player = p->player_number_;
+        if (p->player_flags_ & kPlayerFlagDisplay)
+            display_player = p->player_number_;
 
         if (p->player_flags_ & kPlayerFlagBot)
         {

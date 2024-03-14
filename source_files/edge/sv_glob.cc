@@ -125,7 +125,7 @@ static const GlobalCommand global_commands[] = {
     {"DDFWEAP", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
      offsetof(SaveGlobals, ddfweap)},
 
-    {nullptr, nullptr, 0}};
+    {nullptr, nullptr, nullptr, 0}};
 
 //----------------------------------------------------------------------------
 //
@@ -168,7 +168,7 @@ static void SaveGlobalGetCheckCRC(const char *info, void *storage)
 static void SaveGlobalGetLevelFlags(const char *info, void *storage)
 {
     GameFlags *dest = (GameFlags *)storage;
-    int          flags;
+    int        flags;
 
     SYS_ASSERT(info && storage);
 
@@ -176,25 +176,26 @@ static void SaveGlobalGetLevelFlags(const char *info, void *storage)
 
     Z_Clear(dest, GameFlags, 1);
 
-    dest->jump           = (flags & kMapFlagJumping) ? true : false;
-    dest->crouch         = (flags & kMapFlagCrouching) ? true : false;
+    dest->jump               = (flags & kMapFlagJumping) ? true : false;
+    dest->crouch             = (flags & kMapFlagCrouching) ? true : false;
     dest->mouselook          = (flags & kMapFlagMlook) ? true : false;
-    dest->items_respawn    = (flags & kMapFlagItemRespawn) ? true : false;
-    dest->fast_monsters       = (flags & kMapFlagFastParm) ? true : false;
-    dest->true_3d_gameplay = (flags & kMapFlagTrue3D) ? true : false;
-    dest->more_blood     = (flags & kMapFlagMoreBlood) ? true : false;
-    dest->cheats         = (flags & kMapFlagCheats) ? true : false;
-    dest->enemies_respawn        = (flags & kMapFlagRespawn) ? true : false;
-    dest->enemy_respawn_mode    = (flags & kMapFlagResRespawn) ? true : false;
-    dest->have_extra     = (flags & kMapFlagExtras) ? true : false;
-    dest->limit_zoom     = (flags & kMapFlagLimitZoom) ? true : false;
-    dest->kicking        = (flags & kMapFlagKicking) ? true : false;
-    dest->weapon_switch  = (flags & kMapFlagWeaponSwitch) ? true : false;
-    dest->pass_missile   = (flags & kMapFlagPassMissile) ? true : false;
-    dest->team_damage    = (flags & kMapFlagTeamDamage) ? true : false;
-    dest->autoaim        = (flags & kMapFlagAutoAim)
-                               ? ((flags & kMapFlagAutoAimMlook) ? kAutoAimMouselook : kAutoAimOn)
-                               : kAutoAimOff;
+    dest->items_respawn      = (flags & kMapFlagItemRespawn) ? true : false;
+    dest->fast_monsters      = (flags & kMapFlagFastParm) ? true : false;
+    dest->true_3d_gameplay   = (flags & kMapFlagTrue3D) ? true : false;
+    dest->more_blood         = (flags & kMapFlagMoreBlood) ? true : false;
+    dest->cheats             = (flags & kMapFlagCheats) ? true : false;
+    dest->enemies_respawn    = (flags & kMapFlagRespawn) ? true : false;
+    dest->enemy_respawn_mode = (flags & kMapFlagResRespawn) ? true : false;
+    dest->have_extra         = (flags & kMapFlagExtras) ? true : false;
+    dest->limit_zoom         = (flags & kMapFlagLimitZoom) ? true : false;
+    dest->kicking            = (flags & kMapFlagKicking) ? true : false;
+    dest->weapon_switch      = (flags & kMapFlagWeaponSwitch) ? true : false;
+    dest->pass_missile       = (flags & kMapFlagPassMissile) ? true : false;
+    dest->team_damage        = (flags & kMapFlagTeamDamage) ? true : false;
+    dest->autoaim =
+        (flags & kMapFlagAutoAim)
+            ? ((flags & kMapFlagAutoAimMlook) ? kAutoAimMouselook : kAutoAimOn)
+            : kAutoAimOff;
 }
 
 static void SaveGlobalGetImage(const char *info, void *storage)
@@ -260,7 +261,7 @@ static const char *SaveGlobalPutCheckCRC(void *storage)
 static const char *SaveGlobalPutLevelFlags(void *storage)
 {
     GameFlags *src = (GameFlags *)storage;
-    int          flags;
+    int        flags;
 
     SYS_ASSERT(storage);
 

@@ -58,7 +58,7 @@ void SaveGameStructSave(void *base, SaveStruct *info)
         // ignore read-only (fudging) fields
         if (!cur->field_put) continue;
 
-        offset = cur->pointer_offset;
+        offset = cur->offset_pointer - info->dummy_base;
 
         storage = ((char *)base) + offset;
 

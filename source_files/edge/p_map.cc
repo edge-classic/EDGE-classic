@@ -43,6 +43,7 @@
 #include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "epi.h"
 #include "g_game.h"
 #include "m_bbox.h"
 #include "m_math.h"  // Vert slope intercept check
@@ -1374,7 +1375,7 @@ static bool PTR_SlideTraverse(PathIntercept *in, void *dataptr)
 {
     Line *ld = in->line;
 
-    SYS_ASSERT(ld);
+    EPI_ASSERT(ld);
 
     if (!(ld->flags & kLineFlagTwoSided))
     {
@@ -1571,7 +1572,7 @@ static bool PTR_AimTraverse(PathIntercept *in, void *dataptr)
     // shoot a thing
     MapObject *mo = in->thing;
 
-    SYS_ASSERT(mo);
+    EPI_ASSERT(mo);
 
     if (mo == aim_check.source) return true;  // can't shoot self
 
@@ -1660,7 +1661,7 @@ static bool PTR_AimTraverse2(PathIntercept *in, void *dataptr)
     // shoot a thing
     MapObject *mo = in->thing;
 
-    SYS_ASSERT(mo);
+    EPI_ASSERT(mo);
 
     if (mo == aim_check.source) return true;  // can't shoot self
 
@@ -2214,7 +2215,7 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
         if ((ld->flags & kLineFlagTwoSided) && ld->gap_number > 0 &&
             !(ld->flags & kLineFlagShootBlock))
         {
-            SYS_ASSERT(ld->back_sector);
+            EPI_ASSERT(ld->back_sector);
 
             // check all line gaps
             for (int i = 0; i < ld->gap_number; i++)
@@ -2320,7 +2321,7 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
     // shoot a thing
     MapObject *mo = in->thing;
 
-    SYS_ASSERT(mo);
+    EPI_ASSERT(mo);
 
     // don't shoot self
     if (mo == shoot_check.source) return true;
@@ -2396,7 +2397,7 @@ MapObject *AimLineAttack(MapObject *t1, BAMAngle angle, float distance,
     float x2 = t1->x + distance * epi::BAMCos(angle);
     float y2 = t1->y + distance * epi::BAMSin(angle);
 
-    Z_Clear(&aim_check, ShootAttempt, 1);
+    EPI_CLEAR_MEMORY(&aim_check, ShootAttempt, 1);
 
     if (t1->info_)
         aim_check.start_z = t1->z + t1->height_ * t1->info_->shotheight_;
@@ -2439,7 +2440,7 @@ void LineAttack(MapObject *t1, BAMAngle angle, float distance, float slope,
     float x2 = t1->x + distance * epi::BAMCos(angle);
     float y2 = t1->y + distance * epi::BAMSin(angle);
 
-    Z_Clear(&shoot_check, ShootAttempt, 1);
+    EPI_CLEAR_MEMORY(&shoot_check, ShootAttempt, 1);
 
     if (t1->info_)
         shoot_check.start_z = t1->z + t1->height_ * t1->info_->shotheight_;
@@ -2496,7 +2497,7 @@ MapObject *GetMapTargetAimInfo(MapObject *source, BAMAngle angle,
 {
     float x2, y2;
 
-    Z_Clear(&aim_check, ShootAttempt, 1);
+    EPI_CLEAR_MEMORY(&aim_check, ShootAttempt, 1);
 
     aim_check.source = source;
     aim_check.forced = false;
@@ -2562,7 +2563,7 @@ MapObject *DoMapTargetAutoAim(MapObject *source, BAMAngle angle, float distance,
         return nullptr;
     }
 
-    Z_Clear(&aim_check, ShootAttempt, 1);
+    EPI_CLEAR_MEMORY(&aim_check, ShootAttempt, 1);
 
     aim_check.source = source;
     aim_check.forced = force_aim;
@@ -2662,7 +2663,7 @@ static bool PTR_UseTraverse(PathIntercept *in, void *dataptr)
 
     Line *ld = in->line;
 
-    SYS_ASSERT(ld);
+    EPI_ASSERT(ld);
 
     int sidenum = PointOnLineSide(use_thing->x, use_thing->y, ld);
     sidenum     = (sidenum == 1) ? 1 : 0;
@@ -2827,7 +2828,7 @@ static bool RadiusAttackCallback(MapObject *thing, void *data)
     if (dist >= radius_attack_check.range) return true;  // out of range
 
     // recompute dist to be in range 0.0 (far away) to 1.0 (close)
-    SYS_ASSERT(radius_attack_check.range > 0);
+    EPI_ASSERT(radius_attack_check.range > 0);
     dist = (radius_attack_check.range - dist) / radius_attack_check.range;
 
     if (CheckSight(radius_attack_check.spot, thing))
@@ -2982,7 +2983,7 @@ static void ChangeSectorHeights(Sector *sec, float floor_height, float ceiling_h
         next = tn->sector_next;
 
         mo = tn->map_object;
-        SYS_ASSERT(mo);
+        EPI_ASSERT(mo);
 
         ChangeSectorCallback(mo, widening);
     }

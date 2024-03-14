@@ -28,24 +28,22 @@ static SoundEffectDefinition *dynamic_sfx;
 
 SoundEffectDefinitionContainer sfxdefs;
 
-#define DDF_CMD_BASE dummy_sfx
 static SoundEffectDefinition dummy_sfx;
 
 static const DDFCommandList sfx_commands[] = {
-    DDF_FIELD("LUMP_NAME", lump_name_, DDF_MainGetLumpName),
-    DDF_FIELD("PACK_NAME", pack_name_, DDF_MainGetString),
-    DDF_FIELD("FILE_NAME", file_name_, DDF_MainGetString),
-    DDF_FIELD("PC_SPEAKER_LUMP", pc_speaker_sound_,
-              DDF_MainGetString),  // Kept for backwards compat
-    DDF_FIELD("PC_SPEAKER_SOUND", pc_speaker_sound_, DDF_MainGetString),
-    DDF_FIELD("SINGULAR", singularity_, DDF_MainGetNumeric),
-    DDF_FIELD("PRIORITY", priority_, DDF_MainGetNumeric),
-    DDF_FIELD("VOLUME", volume_, DDF_MainGetPercent),
-    DDF_FIELD("LOOP", looping_, DDF_MainGetBoolean),
-    DDF_FIELD("PRECIOUS", precious_, DDF_MainGetBoolean),
-    DDF_FIELD("MAX_DISTANCE", max_distance_, DDF_MainGetFloat),
+    DDF_FIELD("LUMP_NAME", dummy_sfx, lump_name_, DDF_MainGetLumpName),
+    DDF_FIELD("PACK_NAME", dummy_sfx, pack_name_, DDF_MainGetString),
+    DDF_FIELD("FILE_NAME", dummy_sfx, file_name_, DDF_MainGetString),
+    DDF_FIELD("PC_SPEAKER_LUMP", dummy_sfx, pc_speaker_sound_, DDF_MainGetString),  // Kept for backwards compat
+    DDF_FIELD("PC_SPEAKER_SOUND", dummy_sfx, pc_speaker_sound_, DDF_MainGetString),
+    DDF_FIELD("SINGULAR", dummy_sfx, singularity_, DDF_MainGetNumeric),
+    DDF_FIELD("PRIORITY", dummy_sfx, priority_, DDF_MainGetNumeric),
+    DDF_FIELD("VOLUME", dummy_sfx, volume_, DDF_MainGetPercent),
+    DDF_FIELD("LOOP", dummy_sfx, looping_, DDF_MainGetBoolean),
+    DDF_FIELD("PRECIOUS", dummy_sfx, precious_, DDF_MainGetBoolean),
+    DDF_FIELD("MAX_DISTANCE", dummy_sfx, max_distance_, DDF_MainGetFloat),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 //
 //  DDF PARSE ROUTINES
@@ -166,7 +164,7 @@ void DDF_MainLookupSound(const char *info, void *storage)
 {
     SoundEffect **dest = (SoundEffect **)storage;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     *dest = sfxdefs.GetEffect(info);
 }
@@ -292,7 +290,7 @@ SoundEffect *SoundEffectDefinitionContainer::GetEffect(const char *name,
         si = last;
         r  = &si->normal_;
 
-        SYS_ASSERT(r->num == 1);
+        EPI_ASSERT(r->num == 1);
 
         return r;
     }
@@ -314,7 +312,7 @@ SoundEffect *SoundEffectDefinitionContainer::GetEffect(const char *name,
             r->sounds[r->num++] = i;
     }
 
-    SYS_ASSERT(r->num == count);
+    EPI_ASSERT(r->num == count);
 
     return r;
 }

@@ -35,9 +35,6 @@
 #include "str_util.h"
 #include "types.h"
 
-#undef DF
-#define DF DDF_FIELD
-
 const char *TemplateThing = nullptr;  // Lobo 2022: TEMPLATE inheritance fix
 
 MapObjectDefinitionContainer mobjtypes;
@@ -59,181 +56,175 @@ static void AddPickupEffect(PickupEffect **list, PickupEffect *cur);
 
 static int dlight_radius_warnings = 0;
 
-#undef DDF_CMD_BASE
-#define DDF_CMD_BASE dummy_dlight
 static DynamicLightDefinition dummy_dlight;
 
 const DDFCommandList dlight_commands[] = {
-    DF("TYPE", type_, DDF_MobjGetDLight),
-    DF("GRAPHIC", shape_, DDF_MainGetString),
-    DF("RADIUS", radius_, DDF_MainGetFloat),
-    DF("COLOUR", colour_, DDF_MainGetRGB),
-    DF("HEIGHT", height_, DDF_MainGetPercent),
-    DF("LEAKY", leaky_, DDF_MainGetBoolean),
+    DDF_FIELD("TYPE", dummy_dlight, type_, DDF_MobjGetDLight),
+    DDF_FIELD("GRAPHIC", dummy_dlight, shape_, DDF_MainGetString),
+    DDF_FIELD("RADIUS", dummy_dlight, radius_, DDF_MainGetFloat),
+    DDF_FIELD("COLOUR", dummy_dlight, colour_, DDF_MainGetRGB),
+    DDF_FIELD("HEIGHT", dummy_dlight, height_, DDF_MainGetPercent),
+    DDF_FIELD("LEAKY", dummy_dlight, leaky_, DDF_MainGetBoolean),
 
     // backwards compatibility
-    DF("INTENSITY", radius_, DDF_MainGetFloat),
+    DDF_FIELD("INTENSITY", dummy_dlight, radius_, DDF_MainGetFloat),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
-#undef DDF_CMD_BASE
-#define DDF_CMD_BASE dummy_weakness
 static WeaknessDefinition dummy_weakness;
 
 const DDFCommandList weakness_commands[] = {
-    DF("CLASS", classes_, DDF_MainGetBitSet),
-    DF("HEIGHTS", height_, DDF_MobjGetPercentRange),
-    DF("ANGLES", angle_, DDF_MobjGetAngleRange),
-    DF("MULTIPLY", multiply_, DDF_MainGetFloat),
-    DF("PAINCHANCE", painchance_, DDF_MainGetPercent),
+    DDF_FIELD("CLASS", dummy_weakness, classes_, DDF_MainGetBitSet),
+    DDF_FIELD("HEIGHTS", dummy_weakness, height_, DDF_MobjGetPercentRange),
+    DDF_FIELD("ANGLES", dummy_weakness, angle_, DDF_MobjGetAngleRange),
+    DDF_FIELD("MULTIPLY", dummy_weakness, multiply_, DDF_MainGetFloat),
+    DDF_FIELD("PAINCHANCE", dummy_weakness, painchance_, DDF_MainGetPercent),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 MapObjectDefinition *dynamic_mobj;
 
-#undef DDF_CMD_BASE
-#define DDF_CMD_BASE dummy_mobj
 static MapObjectDefinition dummy_mobj;
 
 const DDFCommandList thing_commands[] = {
     // sub-commands
-    DDF_SUB_LIST("DLIGHT", dlight_[0], dlight_commands),
-    DDF_SUB_LIST("DLIGHT2", dlight_[1], dlight_commands),
-    DDF_SUB_LIST("WEAKNESS", weak_, weakness_commands),
-    DDF_SUB_LIST("EXPLODE_DAMAGE", explode_damage_, damage_commands),
-    DDF_SUB_LIST("CHOKE_DAMAGE", choke_damage_, damage_commands),
+    DDF_SUB_LIST("DLIGHT", dummy_mobj, dlight_[0], dlight_commands),
+    DDF_SUB_LIST("DLIGHT2", dummy_mobj, dlight_[1], dlight_commands),
+    DDF_SUB_LIST("WEAKNESS", dummy_mobj, weak_, weakness_commands),
+    DDF_SUB_LIST("EXPLODE_DAMAGE", dummy_mobj, explode_damage_, damage_commands),
+    DDF_SUB_LIST("CHOKE_DAMAGE", dummy_mobj, choke_damage_, damage_commands),
 
-    DF("SPAWNHEALTH", spawn_health_, DDF_MainGetFloat),
-    DF("RADIUS", radius_, DDF_MainGetFloat),
-    DF("HEIGHT", height_, DDF_MainGetFloat),
-    DF("MASS", mass_, DDF_MainGetFloat), DF("SPEED", speed_, DDF_MainGetFloat),
-    DF("FAST", fast_, DDF_MainGetFloat),
-    DF("EXTRA", extended_flags_, DDF_MobjGetExtra),
-    DF("RESPAWN_TIME", respawntime_, DDF_MainGetTime),
-    DF("FUSE", fuse_, DDF_MainGetTime), DF("LIFESPAN", fuse_, DDF_MainGetTime),
-    DF("PALETTE_REMAP", palremap_, DDF_MainGetColourmap),
-    DF("TRANSLUCENCY", translucency_, DDF_MainGetPercent),
+    DDF_FIELD("SPAWNHEALTH", dummy_mobj, spawn_health_, DDF_MainGetFloat),
+    DDF_FIELD("RADIUS", dummy_mobj, radius_, DDF_MainGetFloat),
+    DDF_FIELD("HEIGHT", dummy_mobj, height_, DDF_MainGetFloat),
+    DDF_FIELD("MASS", dummy_mobj, mass_, DDF_MainGetFloat), DDF_FIELD("SPEED", dummy_mobj, speed_, DDF_MainGetFloat),
+    DDF_FIELD("FAST", dummy_mobj, fast_, DDF_MainGetFloat),
+    DDF_FIELD("EXTRA", dummy_mobj, extended_flags_, DDF_MobjGetExtra),
+    DDF_FIELD("RESPAWN_TIME", dummy_mobj, respawntime_, DDF_MainGetTime),
+    DDF_FIELD("FUSE", dummy_mobj, fuse_, DDF_MainGetTime), DDF_FIELD("LIFESPAN", dummy_mobj, fuse_, DDF_MainGetTime),
+    DDF_FIELD("PALETTE_REMAP", dummy_mobj, palremap_, DDF_MainGetColourmap),
+    DDF_FIELD("TRANSLUCENCY", dummy_mobj, translucency_, DDF_MainGetPercent),
 
-    DF("INITIAL_BENEFIT", initial_benefits_, DDF_MobjGetBenefit),
-    DF("LOSE_BENEFIT", lose_benefits_, DDF_MobjGetBenefit),
-    DF("PICKUP_BENEFIT", pickup_benefits_, DDF_MobjGetBenefit),
-    DF("KILL_BENEFIT", kill_benefits_, DDF_MobjGetBenefit),
-    DF("PICKUP_MESSAGE", pickup_message_, DDF_MainGetString),
-    DF("PICKUP_EFFECT", pickup_effects_, DDF_MobjGetPickupEffect),
+    DDF_FIELD("INITIAL_BENEFIT", dummy_mobj, initial_benefits_, DDF_MobjGetBenefit),
+    DDF_FIELD("LOSE_BENEFIT", dummy_mobj, lose_benefits_, DDF_MobjGetBenefit),
+    DDF_FIELD("PICKUP_BENEFIT", dummy_mobj, pickup_benefits_, DDF_MobjGetBenefit),
+    DDF_FIELD("KILL_BENEFIT", dummy_mobj, kill_benefits_, DDF_MobjGetBenefit),
+    DDF_FIELD("PICKUP_MESSAGE", dummy_mobj, pickup_message_, DDF_MainGetString),
+    DDF_FIELD("PICKUP_EFFECT", dummy_mobj, pickup_effects_, DDF_MobjGetPickupEffect),
 
-    DF("PAINCHANCE", pain_chance_, DDF_MainGetPercent),
-    DF("MINATTACK_CHANCE", minatkchance_, DDF_MainGetPercent),
-    DF("REACTION_TIME", reaction_time_, DDF_MainGetTime),
-    DF("JUMP_DELAY", jump_delay_, DDF_MainGetTime),
-    DF("JUMP_HEIGHT", jumpheight_, DDF_MainGetFloat),
-    DF("CROUCH_HEIGHT", crouchheight_, DDF_MainGetFloat),
-    DF("VIEW_HEIGHT", viewheight_, DDF_MainGetPercent),
-    DF("SHOT_HEIGHT", shotheight_, DDF_MainGetPercent),
-    DF("MAX_FALL", maxfall_, DDF_MainGetFloat),
-    DF("CASTORDER", castorder_, DDF_MainGetNumeric),
-    DF("CAST_TITLE", cast_title_, DDF_MainGetString),
-    DF("PLAYER", playernum_, DDF_MobjGetPlayer),
-    DF("SIDE", side_, DDF_MainGetBitSet),
-    DF("CLOSE_ATTACK", closecombat_, DDF_MainRefAttack),
-    DF("RANGE_ATTACK", rangeattack_, DDF_MainRefAttack),
-    DF("SPARE_ATTACK", spareattack_, DDF_MainRefAttack),
-    DF("DROPITEM", dropitem_ref_, DDF_MainGetString),
-    DF("BLOOD", blood_ref_, DDF_MainGetString),
-    DF("RESPAWN_EFFECT", respawneffect_ref_, DDF_MainGetString),
-    DF("SPIT_SPOT", spitspot_ref_, DDF_MainGetString),
+    DDF_FIELD("PAINCHANCE", dummy_mobj, pain_chance_, DDF_MainGetPercent),
+    DDF_FIELD("MINATTACK_CHANCE", dummy_mobj, minatkchance_, DDF_MainGetPercent),
+    DDF_FIELD("REACTION_TIME", dummy_mobj, reaction_time_, DDF_MainGetTime),
+    DDF_FIELD("JUMP_DELAY", dummy_mobj, jump_delay_, DDF_MainGetTime),
+    DDF_FIELD("JUMP_HEIGHT", dummy_mobj, jumpheight_, DDF_MainGetFloat),
+    DDF_FIELD("CROUCH_HEIGHT", dummy_mobj, crouchheight_, DDF_MainGetFloat),
+    DDF_FIELD("VIEW_HEIGHT", dummy_mobj, viewheight_, DDF_MainGetPercent),
+    DDF_FIELD("SHOT_HEIGHT", dummy_mobj, shotheight_, DDF_MainGetPercent),
+    DDF_FIELD("MAX_FALL", dummy_mobj, maxfall_, DDF_MainGetFloat),
+    DDF_FIELD("CASTORDER", dummy_mobj, castorder_, DDF_MainGetNumeric),
+    DDF_FIELD("CAST_TITLE", dummy_mobj, cast_title_, DDF_MainGetString),
+    DDF_FIELD("PLAYER", dummy_mobj, playernum_, DDF_MobjGetPlayer),
+    DDF_FIELD("SIDE", dummy_mobj, side_, DDF_MainGetBitSet),
+    DDF_FIELD("CLOSE_ATTACK", dummy_mobj, closecombat_, DDF_MainRefAttack),
+    DDF_FIELD("RANGE_ATTACK", dummy_mobj, rangeattack_, DDF_MainRefAttack),
+    DDF_FIELD("SPARE_ATTACK", dummy_mobj, spareattack_, DDF_MainRefAttack),
+    DDF_FIELD("DROPITEM", dummy_mobj, dropitem_ref_, DDF_MainGetString),
+    DDF_FIELD("BLOOD", dummy_mobj, blood_ref_, DDF_MainGetString),
+    DDF_FIELD("RESPAWN_EFFECT", dummy_mobj, respawneffect_ref_, DDF_MainGetString),
+    DDF_FIELD("SPIT_SPOT", dummy_mobj, spitspot_ref_, DDF_MainGetString),
 
-    DF("PICKUP_SOUND", activesound_, DDF_MainLookupSound),
-    DF("ACTIVE_SOUND", activesound_, DDF_MainLookupSound),
-    DF("LAUNCH_SOUND", seesound_, DDF_MainLookupSound),
-    DF("AMBIENT_SOUND", seesound_, DDF_MainLookupSound),
-    DF("SIGHTING_SOUND", seesound_, DDF_MainLookupSound),
-    DF("DEATH_SOUND", deathsound_, DDF_MainLookupSound),
-    DF("OVERKILL_SOUND", overkill_sound_, DDF_MainLookupSound),
-    DF("PAIN_SOUND", painsound_, DDF_MainLookupSound),
-    DF("STARTCOMBAT_SOUND", attacksound_, DDF_MainLookupSound),
-    DF("WALK_SOUND", walksound_, DDF_MainLookupSound),
-    DF("JUMP_SOUND", jump_sound_, DDF_MainLookupSound),
-    DF("NOWAY_SOUND", noway_sound_, DDF_MainLookupSound),
-    DF("OOF_SOUND", oof_sound_, DDF_MainLookupSound),
-    DF("FALLPAIN_SOUND", fallpain_sound_, DDF_MainLookupSound),
-    DF("GASP_SOUND", gasp_sound_, DDF_MainLookupSound),
-    DF("SECRET_SOUND", secretsound_, DDF_MainLookupSound),
-    DF("FALLING_SOUND", falling_sound_, DDF_MainLookupSound),
-    DF("RIP_SOUND", rip_sound_, DDF_MainLookupSound),
+    DDF_FIELD("PICKUP_SOUND", dummy_mobj, activesound_, DDF_MainLookupSound),
+    DDF_FIELD("ACTIVE_SOUND", dummy_mobj, activesound_, DDF_MainLookupSound),
+    DDF_FIELD("LAUNCH_SOUND", dummy_mobj, seesound_, DDF_MainLookupSound),
+    DDF_FIELD("AMBIENT_SOUND", dummy_mobj, seesound_, DDF_MainLookupSound),
+    DDF_FIELD("SIGHTING_SOUND", dummy_mobj, seesound_, DDF_MainLookupSound),
+    DDF_FIELD("DEATH_SOUND", dummy_mobj, deathsound_, DDF_MainLookupSound),
+    DDF_FIELD("OVERKILL_SOUND", dummy_mobj, overkill_sound_, DDF_MainLookupSound),
+    DDF_FIELD("PAIN_SOUND", dummy_mobj, painsound_, DDF_MainLookupSound),
+    DDF_FIELD("STARTCOMBAT_SOUND", dummy_mobj, attacksound_, DDF_MainLookupSound),
+    DDF_FIELD("WALK_SOUND", dummy_mobj, walksound_, DDF_MainLookupSound),
+    DDF_FIELD("JUMP_SOUND", dummy_mobj, jump_sound_, DDF_MainLookupSound),
+    DDF_FIELD("NOWAY_SOUND", dummy_mobj, noway_sound_, DDF_MainLookupSound),
+    DDF_FIELD("OOF_SOUND", dummy_mobj, oof_sound_, DDF_MainLookupSound),
+    DDF_FIELD("FALLPAIN_SOUND", dummy_mobj, fallpain_sound_, DDF_MainLookupSound),
+    DDF_FIELD("GASP_SOUND", dummy_mobj, gasp_sound_, DDF_MainLookupSound),
+    DDF_FIELD("SECRET_SOUND", dummy_mobj, secretsound_, DDF_MainLookupSound),
+    DDF_FIELD("FALLING_SOUND", dummy_mobj, falling_sound_, DDF_MainLookupSound),
+    DDF_FIELD("RIP_SOUND", dummy_mobj, rip_sound_, DDF_MainLookupSound),
 
-    DF("FLOAT_SPEED", float_speed_, DDF_MainGetFloat),
-    DF("STEP_SIZE", step_size_, DDF_MainGetFloat),
-    DF("SPRITE_SCALE", scale_, DDF_MainGetFloat),
-    DF("SPRITE_ASPECT", aspect_, DDF_MainGetFloat),
-    DF("SPRITE_YALIGN", yalign_, DDF_MobjGetYAlign),    // -AJA- 2007/08/08
-    DF("MODEL_SKIN", model_skin_, DDF_MainGetNumeric),  // -AJA- 2007/10/16
-    DF("MODEL_SCALE", model_scale_, DDF_MainGetFloat),
-    DF("MODEL_ASPECT", model_aspect_, DDF_MainGetFloat),
-    DF("MODEL_BIAS", model_bias_, DDF_MainGetFloat),
-    DF("MODEL_ROTATE", model_rotate_, DDF_MainGetNumeric),
-    DF("BOUNCE_SPEED", bounce_speed_, DDF_MainGetFloat),
-    DF("BOUNCE_UP", bounce_up_, DDF_MainGetFloat),
-    DF("SIGHT_SLOPE", sight_slope_, DDF_MainGetSlope),
-    DF("SIGHT_ANGLE", sight_angle_, DDF_MainGetAngle),
-    DF("RIDE_FRICTION", ride_friction_, DDF_MainGetFloat),
-    DF("BOBBING", bobbing_, DDF_MainGetPercent),
-    DF("IMMUNITY_CLASS", immunity_, DDF_MainGetBitSet),
-    DF("RESISTANCE_CLASS", resistance_, DDF_MainGetBitSet),
-    DF("RESISTANCE_MULTIPLY", resist_multiply_, DDF_MainGetFloat),
-    DF("RESISTANCE_PAINCHANCE", resist_painchance_, DDF_MainGetPercent),
-    DF("GHOST_CLASS", ghost_, DDF_MainGetBitSet),  // -AJA- 2005/05/15
-    DF("SHADOW_TRANSLUCENCY", shadow_trans_, DDF_MainGetPercent),
-    DF("LUNG_CAPACITY", lung_capacity_, DDF_MainGetTime),
-    DF("GASP_START", gasp_start_, DDF_MainGetTime),
-    DF("EXPLODE_RADIUS", explode_radius_, DDF_MainGetFloat),
-    DF("RELOAD_SHOTS", reload_shots_, DDF_MainGetNumeric),  // -AJA- 2004/11/15
-    DF("GLOW_TYPE", glow_type_, DDF_MobjGetGlowType),       // -AJA- 2007/08/19
-    DF("ARMOUR_PROTECTION", armour_protect_,
+    DDF_FIELD("FLOAT_SPEED", dummy_mobj, float_speed_, DDF_MainGetFloat),
+    DDF_FIELD("STEP_SIZE", dummy_mobj, step_size_, DDF_MainGetFloat),
+    DDF_FIELD("SPRITE_SCALE", dummy_mobj, scale_, DDF_MainGetFloat),
+    DDF_FIELD("SPRITE_ASPECT", dummy_mobj, aspect_, DDF_MainGetFloat),
+    DDF_FIELD("SPRITE_YALIGN", dummy_mobj, yalign_, DDF_MobjGetYAlign),    // -AJA- 2007/08/08
+    DDF_FIELD("MODEL_SKIN", dummy_mobj, model_skin_, DDF_MainGetNumeric),  // -AJA- 2007/10/16
+    DDF_FIELD("MODEL_SCALE", dummy_mobj, model_scale_, DDF_MainGetFloat),
+    DDF_FIELD("MODEL_ASPECT", dummy_mobj, model_aspect_, DDF_MainGetFloat),
+    DDF_FIELD("MODEL_BIAS", dummy_mobj, model_bias_, DDF_MainGetFloat),
+    DDF_FIELD("MODEL_ROTATE", dummy_mobj, model_rotate_, DDF_MainGetNumeric),
+    DDF_FIELD("BOUNCE_SPEED", dummy_mobj, bounce_speed_, DDF_MainGetFloat),
+    DDF_FIELD("BOUNCE_UP", dummy_mobj, bounce_up_, DDF_MainGetFloat),
+    DDF_FIELD("SIGHT_SLOPE", dummy_mobj, sight_slope_, DDF_MainGetSlope),
+    DDF_FIELD("SIGHT_ANGLE", dummy_mobj, sight_angle_, DDF_MainGetAngle),
+    DDF_FIELD("RIDE_FRICTION", dummy_mobj, ride_friction_, DDF_MainGetFloat),
+    DDF_FIELD("BOBBING", dummy_mobj, bobbing_, DDF_MainGetPercent),
+    DDF_FIELD("IMMUNITY_CLASS", dummy_mobj, immunity_, DDF_MainGetBitSet),
+    DDF_FIELD("RESISTANCE_CLASS", dummy_mobj, resistance_, DDF_MainGetBitSet),
+    DDF_FIELD("RESISTANCE_MULTIPLY", dummy_mobj, resist_multiply_, DDF_MainGetFloat),
+    DDF_FIELD("RESISTANCE_PAINCHANCE", dummy_mobj, resist_painchance_, DDF_MainGetPercent),
+    DDF_FIELD("GHOST_CLASS", dummy_mobj, ghost_, DDF_MainGetBitSet),  // -AJA- 2005/05/15
+    DDF_FIELD("SHADOW_TRANSLUCENCY", dummy_mobj, shadow_trans_, DDF_MainGetPercent),
+    DDF_FIELD("LUNG_CAPACITY", dummy_mobj, lung_capacity_, DDF_MainGetTime),
+    DDF_FIELD("GASP_START", dummy_mobj, gasp_start_, DDF_MainGetTime),
+    DDF_FIELD("EXPLODE_RADIUS", dummy_mobj, explode_radius_, DDF_MainGetFloat),
+    DDF_FIELD("RELOAD_SHOTS", dummy_mobj, reload_shots_, DDF_MainGetNumeric),  // -AJA- 2004/11/15
+    DDF_FIELD("GLOW_TYPE", dummy_mobj, glow_type_, DDF_MobjGetGlowType),       // -AJA- 2007/08/19
+    DDF_FIELD("ARMOUR_PROTECTION", dummy_mobj, armour_protect_,
        DDF_MainGetPercent),  // -AJA- 2007/08/22
-    DF("ARMOUR_DEPLETION", armour_deplete_,
+    DDF_FIELD("ARMOUR_DEPLETION", dummy_mobj, armour_deplete_,
        DDF_MainGetPercentAny),                             // -AJA- 2007/08/22
-    DF("ARMOUR_CLASS", armour_class_, DDF_MainGetBitSet),  // -AJA- 2007/08/22
+    DDF_FIELD("ARMOUR_CLASS", dummy_mobj, armour_class_, DDF_MainGetBitSet),  // -AJA- 2007/08/22
 
-    DF("SIGHT_DISTANCE", sight_distance_, DDF_MainGetFloat),  // Lobo 2022
-    DF("HEAR_DISTANCE", hear_distance_, DDF_MainGetFloat),    // Lobo 2022
+    DDF_FIELD("SIGHT_DISTANCE", dummy_mobj, sight_distance_, DDF_MainGetFloat),  // Lobo 2022
+    DDF_FIELD("HEAR_DISTANCE", dummy_mobj, hear_distance_, DDF_MainGetFloat),    // Lobo 2022
 
-    DF("MORPH_TIMEOUT", morphtimeout_, DDF_MainGetTime),  // Lobo 2023
+    DDF_FIELD("MORPH_TIMEOUT", dummy_mobj, morphtimeout_, DDF_MainGetTime),  // Lobo 2023
 
     // DEHEXTRA
-    DF("GIB_HEALTH", gib_health_, DDF_MainGetFloat),
+    DDF_FIELD("GIB_HEALTH", dummy_mobj, gib_health_, DDF_MainGetFloat),
 
-    DF("INFIGHTING_GROUP", infight_group_, DDF_MainGetNumeric),
-    DF("PROJECTILE_GROUP", proj_group_, DDF_MainGetNumeric),
-    DF("SPLASH_GROUP", splash_group_, DDF_MainGetNumeric),
-    DF("FAST_SPEED", fast_speed_, DDF_MainGetNumeric),
-    DF("MELEE_RANGE", melee_range_, DDF_MainGetNumeric),
+    DDF_FIELD("INFIGHTING_GROUP", dummy_mobj, infight_group_, DDF_MainGetNumeric),
+    DDF_FIELD("PROJECTILE_GROUP", dummy_mobj, proj_group_, DDF_MainGetNumeric),
+    DDF_FIELD("SPLASH_GROUP", dummy_mobj, splash_group_, DDF_MainGetNumeric),
+    DDF_FIELD("FAST_SPEED", dummy_mobj, fast_speed_, DDF_MainGetNumeric),
+    DDF_FIELD("MELEE_RANGE", dummy_mobj, melee_range_, DDF_MainGetNumeric),
 
     // -AJA- backwards compatibility cruft...
-    DF("EXPLOD_DAMAGE", explode_damage_.nominal_, DDF_MainGetFloat),
-    DF("EXPLOSION_DAMAGE", explode_damage_.nominal_, DDF_MainGetFloat),
-    DF("EXPLOD_DAMAGERANGE", explode_damage_.nominal_, DDF_MainGetFloat),
+    DDF_FIELD("EXPLOD_DAMAGE", dummy_mobj, explode_damage_.nominal_, DDF_MainGetFloat),
+    DDF_FIELD("EXPLOSION_DAMAGE", dummy_mobj, explode_damage_.nominal_, DDF_MainGetFloat),
+    DDF_FIELD("EXPLOD_DAMAGERANGE", dummy_mobj, explode_damage_.nominal_, DDF_MainGetFloat),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 const DDFStateStarter thing_starters[] = {
-    DDF_STATE("SPAWN", "IDLE", spawn_state_),
-    DDF_STATE("IDLE", "IDLE", idle_state_),
-    DDF_STATE("CHASE", "CHASE", chase_state_),
-    DDF_STATE("PAIN", "IDLE", pain_state_),
-    DDF_STATE("MISSILE", "IDLE", missile_state_),
-    DDF_STATE("MELEE", "IDLE", melee_state_),
-    DDF_STATE("DEATH", "REMOVE", death_state_),
-    DDF_STATE("OVERKILL", "REMOVE", overkill_state_),
-    DDF_STATE("RESPAWN", "IDLE", raise_state_),
-    DDF_STATE("RESURRECT", "IDLE", res_state_),
-    DDF_STATE("MEANDER", "MEANDER", meander_state_),
-    DDF_STATE("MORPH", "MORPH", morph_state_),
-    DDF_STATE("BOUNCE", "IDLE", bounce_state_),
-    DDF_STATE("TOUCH", "IDLE", touch_state_),
-    DDF_STATE("RELOAD", "IDLE", reload_state_),
-    DDF_STATE("GIB", "REMOVE", gib_state_),
+    DDF_STATE("SPAWN", "IDLE", dummy_mobj, spawn_state_),
+    DDF_STATE("IDLE", "IDLE", dummy_mobj, idle_state_),
+    DDF_STATE("CHASE", "CHASE", dummy_mobj, chase_state_),
+    DDF_STATE("PAIN", "IDLE", dummy_mobj, pain_state_),
+    DDF_STATE("MISSILE", "IDLE", dummy_mobj, missile_state_),
+    DDF_STATE("MELEE", "IDLE", dummy_mobj, melee_state_),
+    DDF_STATE("DEATH", "REMOVE", dummy_mobj, death_state_),
+    DDF_STATE("OVERKILL", "REMOVE", dummy_mobj, overkill_state_),
+    DDF_STATE("RESPAWN", "IDLE", dummy_mobj, raise_state_),
+    DDF_STATE("RESURRECT", "IDLE", dummy_mobj, res_state_),
+    DDF_STATE("MEANDER", "MEANDER", dummy_mobj, meander_state_),
+    DDF_STATE("MORPH", "MORPH", dummy_mobj, morph_state_),
+    DDF_STATE("BOUNCE", "IDLE", dummy_mobj, bounce_state_),
+    DDF_STATE("TOUCH", "IDLE", dummy_mobj, touch_state_),
+    DDF_STATE("RELOAD", "IDLE", dummy_mobj, reload_state_),
+    DDF_STATE("GIB", "REMOVE", dummy_mobj, gib_state_),
 
-    DDF_STATE_END};
+    {nullptr, nullptr, 0}};
 
 // -KM- 1998/11/25 Added weapon functions.
 // -AJA- 1999/08/09: Moved this here from p_action.h, and added an extra
@@ -686,7 +677,7 @@ static void ThingDoTemplate(const char *contents)
     if (idx < 0) DDF_Error("Unknown thing template: '%s'\n", contents);
 
     MapObjectDefinition *other = mobjtypes[idx];
-    SYS_ASSERT(other);
+    EPI_ASSERT(other);
 
     if (other == dynamic_mobj)
         DDF_Error("Bad thing template: '%s'\n", contents);
@@ -1386,7 +1377,7 @@ void DDF_MobjGetBenefit(const char *info, void *storage)
 
     Benefit temp;
 
-    SYS_ASSERT(storage);
+    EPI_ASSERT(storage);
 
     num_vals =
         ParseBenefitString(info, namebuf, parambuf, &temp.amount, &temp.limit);
@@ -1449,7 +1440,7 @@ void BA_ParsePowerupEffect(PickupEffect **list, int pnum, float par1,
     int p_up = (int)par1;
     int slot = (int)par2;
 
-    SYS_ASSERT(0 <= p_up && p_up < kTotalPowerTypes);
+    EPI_ASSERT(0 <= p_up && p_up < kTotalPowerTypes);
 
     if (slot < 0 || slot >= kTotalEffectsSlots)
         DDF_Error("POWERUP_EFFECT: bad FX slot #%d\n", p_up);
@@ -1477,7 +1468,7 @@ void BA_ParseSwitchWeapon(PickupEffect **list, int pnum, float par1, float par2,
 {
     if (pnum != -1) DDF_Error("SWITCH_WEAPON: missing weapon name !\n");
 
-    SYS_ASSERT(word_par && word_par[0]);
+    EPI_ASSERT(word_par && word_par[0]);
 
     WeaponDefinition *weap = weapondefs.Lookup(word_par);
 
@@ -1490,7 +1481,7 @@ void BA_ParseKeepPowerup(PickupEffect **list, int pnum, float par1, float par2,
 {
     if (pnum != -1) DDF_Error("KEEP_POWERUP: missing powerup name !\n");
 
-    SYS_ASSERT(word_par && word_par[0]);
+    EPI_ASSERT(word_par && word_par[0]);
 
     if (DDF_CompareName(word_par, "BERSERK") != 0)
         DDF_Error("KEEP_POWERUP: %s is not supported\n", word_par);
@@ -1527,7 +1518,7 @@ void DDF_MobjGetPickupEffect(const char *info, void *storage)
     char parambuf[200];
     int  num_vals;
 
-    SYS_ASSERT(storage);
+    EPI_ASSERT(storage);
 
     PickupEffect **fx_list = (PickupEffect **)storage;
 
@@ -1760,7 +1751,7 @@ void DDF_MobjGetDLight(const char *info, void *storage)
     DynamicLightType *dtype = (DynamicLightType *)storage;
     int               flag_value;
 
-    SYS_ASSERT(dtype);
+    EPI_ASSERT(dtype);
 
     if (kDDFCheckFlagPositive !=
         DDF_MainCheckSpecialFlag(info, dlight_type_names, &flag_value, false,
@@ -1837,7 +1828,7 @@ static void DDF_MobjGetYAlign(const char *info, void *storage)
 
 static void DDF_MobjGetPercentRange(const char *info, void *storage)
 {
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     float *dest = (float *)storage;
 
@@ -1853,7 +1844,7 @@ static void DDF_MobjGetPercentRange(const char *info, void *storage)
 
 static void DDF_MobjGetAngleRange(const char *info, void *storage)
 {
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     BAMAngle *dest = (BAMAngle *)storage;
 

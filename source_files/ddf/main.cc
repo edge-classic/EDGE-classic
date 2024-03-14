@@ -212,7 +212,6 @@ void DDF_WarnError(const char *err, ...)
 void DDF_Init()
 {
     DDF_StateInit();
-    DDF_LanguageInit();
     DDF_SFXInit();
     DDF_ColmapInit();
     DDF_ImageInit();
@@ -836,7 +835,7 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
                 else
                     current_cmd.clear();
 
-                SYS_ASSERT(current_index == 0);
+                EPI_ASSERT(current_index == 0);
 
                 token.clear();
                 status = kDDFReadStatusReadingData;
@@ -1023,7 +1022,7 @@ void DDF_MainGetNumeric(const char *info, void *storage)
 {
     int *dest = (int *)storage;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     if (epi::IsAlphaASCII(info[0]))
     {
@@ -1046,7 +1045,7 @@ void DDF_MainGetBoolean(const char *info, void *storage)
 {
     bool *dest = (bool *)storage;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     if ((epi::StringCaseCompareASCII(info, "TRUE") == 0) ||
         (epi::StringCaseCompareASCII(info, "1") == 0))
@@ -1074,7 +1073,7 @@ void DDF_MainGetString(const char *info, void *storage)
 {
     std::string *dest = (std::string *)storage;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     *dest = info;
 }
@@ -1088,7 +1087,7 @@ void DDF_MainGetString(const char *info, void *storage)
 bool DDF_MainParseField(const DDFCommandList *commands, const char *field,
                         const char *contents, uint8_t *obj_base)
 {
-    SYS_ASSERT(obj_base);
+    EPI_ASSERT(obj_base);
 
     for (int i = 0; commands[i].name; i++)
     {
@@ -1102,7 +1101,7 @@ bool DDF_MainParseField(const DDFCommandList *commands, const char *field,
             name++;
 
             int len = strlen(name);
-            SYS_ASSERT(len > 0);
+            EPI_ASSERT(len > 0);
 
             if (strncmp(field, name, len) == 0 && field[len] == '.' &&
                 epi::IsAlphanumericASCII(field[len + 1]))
@@ -1119,7 +1118,7 @@ bool DDF_MainParseField(const DDFCommandList *commands, const char *field,
         if (DDF_CompareName(field, name) != 0) continue;
 
         // found it, so call parse routine
-        SYS_ASSERT(commands[i].parse_command);
+        EPI_ASSERT(commands[i].parse_command);
 
         (*commands[i].parse_command)(contents, obj_base + commands[i].offset);
 
@@ -1133,7 +1132,7 @@ void DDF_MainGetLumpName(const char *info, void *storage)
 {
     // Gets the string and checks the length is valid for a lump.
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     std::string *LN = (std::string *)storage;
 
@@ -1150,7 +1149,7 @@ void DDF_MainRefAttack(const char *info, void *storage)
 {
     AttackDefinition **dest = (AttackDefinition **)storage;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     *dest = (AttackDefinition *)atkdefs.Lookup(info);
     if (*dest == nullptr) DDF_WarnError("Unknown Attack: %s\n", info);
@@ -1177,7 +1176,7 @@ void DDF_MainGetFloat(const char *info, void *storage)
 {
     float *dest = (float *)storage;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     if (strchr(info, '%') != nullptr)
     {
@@ -1193,7 +1192,7 @@ void DDF_MainGetFloat(const char *info, void *storage)
 
 void DDF_MainGetAngle(const char *info, void *storage)
 {
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     BAMAngle *dest = (BAMAngle *)storage;
 
@@ -1209,7 +1208,7 @@ void DDF_MainGetSlope(const char *info, void *storage)
     float  val;
     float *dest = (float *)storage;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     if (sscanf(info, "%f", &val) != 1) DDF_Error("Bad slope value: %s\n", info);
 
@@ -1223,7 +1222,7 @@ static void DoGetFloat(const char *info, void *storage)
 {
     float *dest = (float *)storage;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     if (sscanf(info, "%f", dest) != 1)
         DDF_Error("Bad floating point value: %s\n", info);
@@ -1313,7 +1312,7 @@ void DDF_MainGetTime(const char *info, void *storage)
     float val;
     int  *dest = (int *)storage;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     // -ES- 1999/09/14 MAXT means that time should be maximal.
     if (epi::StringCaseCompareASCII(info, "maxt") == 0)
@@ -1365,7 +1364,7 @@ void DDF_MainGetRGB(const char *info, void *storage)
     int        g      = 0;
     int        b      = 0;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     if (DDF_CompareName(info, "NONE") == 0)
     {
@@ -1468,7 +1467,7 @@ void DDF_MainGetBitSet(const char *info, void *storage)
     BitSet *result = (BitSet *)storage;
     int     start, end;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     // allow a numeric value
     if (sscanf(info, " %i ", result) == 1) return;

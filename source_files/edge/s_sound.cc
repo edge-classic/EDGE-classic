@@ -21,6 +21,7 @@
 #endif
 
 #include "dm_state.h"
+#include "epi.h"
 #include "epi_sdl.h"
 #include "i_sound.h"
 #include "i_system.h"
@@ -170,7 +171,7 @@ static int FindBiggestHog(int real_cat)
         }
     }
 
-    SYS_ASSERT(biggest_hog >= 0);
+    EPI_ASSERT(biggest_hog >= 0);
 
     return biggest_hog;
 }
@@ -195,7 +196,7 @@ static int ChannelScore(SoundEffectDefinition *def, int category, Position *pos,
     if (category <= kCategoryWeapon) { return 200 - def->priority_; }
 
     // for stuff in the level, use the distance
-    SYS_ASSERT(pos);
+    EPI_ASSERT(pos);
 
     float dist = boss
                      ? 0
@@ -232,7 +233,7 @@ static int FindChannelToKill(int kill_cat, int real_cat, int new_score)
         }
     }
     // LogPrint("kill_idx = %d\n", kill_idx);
-    SYS_ASSERT(kill_idx >= 0);
+    EPI_ASSERT(kill_idx >= 0);
 
     if (kill_cat != real_cat) return kill_idx;
 
@@ -282,7 +283,7 @@ void SoundShutdown(void)
 // Not-rejigged-yet stuff..
 SoundEffectDefinition *LookupEffectDef(const SoundEffect *s)
 {
-    SYS_ASSERT(s->num >= 1);
+    EPI_ASSERT(s->num >= 1);
 
     int num;
 
@@ -291,7 +292,7 @@ SoundEffectDefinition *LookupEffectDef(const SoundEffect *s)
     else
         num = s->sounds[0];
 
-    SYS_ASSERT(0 <= num && num < sfxdefs.size());
+    EPI_ASSERT(0 <= num && num < sfxdefs.size());
 
     return sfxdefs[num];
 }
@@ -382,7 +383,7 @@ static void DoStartFX(SoundEffectDefinition *def, int category, Position *pos,
             // LogPrint("@ biggest hog: %d\n", kill_cat);
         }
 
-        SYS_ASSERT(category_counts[kill_cat] >= category_limits[kill_cat]);
+        EPI_ASSERT(category_counts[kill_cat] >= category_limits[kill_cat]);
 
         k = FindChannelToKill(kill_cat, category, new_score);
 
@@ -403,14 +404,14 @@ void StartSoundEffect(SoundEffect *sfx, int category, Position *pos, int flags)
 
     if (fast_forward_active) return;
 
-    SYS_ASSERT(0 <= category && category < kTotalCategories);
+    EPI_ASSERT(0 <= category && category < kTotalCategories);
 
     if (category >= kCategoryOpponent && !pos)
         FatalError("StartSoundEffect: position missing for category: %d\n",
                    category);
 
     SoundEffectDefinition *def = LookupEffectDef(sfx);
-    SYS_ASSERT(def);
+    EPI_ASSERT(def);
 
     // ignore very far away sounds
     if (category >= kCategoryOpponent && !(flags & kSoundEffectBoss))
@@ -518,10 +519,10 @@ void SoundTicker(void)
     {
         if (game_state == kGameStateLevel)
         {
-            SYS_ASSERT(::total_players > 0);
+            EPI_ASSERT(::total_players > 0);
 
             MapObject *pmo = ::players[display_player]->map_object_;
-            SYS_ASSERT(pmo);
+            EPI_ASSERT(pmo);
 
             UpdateSounds(pmo, pmo->angle_);
         }

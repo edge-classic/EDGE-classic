@@ -120,7 +120,7 @@ static void DLIT_PSprite(MapObject *mo, void *dataptr)
 {
     PlayerSpriteCoordinateData *data = (PlayerSpriteCoordinateData *)dataptr;
 
-    SYS_ASSERT(mo->dynamic_light_.shader);
+    EPI_ASSERT(mo->dynamic_light_.shader);
 
     mo->dynamic_light_.shader->Sample(data->colors + 0, data->light_position.X,
                                       data->light_position.Y,
@@ -637,8 +637,8 @@ void RendererDrawWeaponModel(Player *p)
 
     if (p->weapon_last_frame_ >= 0)
     {
-        SYS_ASSERT(psp->state);
-        SYS_ASSERT(psp->state->tics > 1);
+        EPI_ASSERT(psp->state);
+        EPI_ASSERT(psp->state->tics > 1);
 
         last_frame = p->weapon_last_frame_;
 
@@ -698,7 +698,7 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my,
     // Note: can return nullptr for no image.
 
     // decide which patch to use for sprite relative to player
-    SYS_ASSERT(mo->state_);
+    EPI_ASSERT(mo->state_);
 
     if (mo->state_->sprite == 0) return nullptr;
 
@@ -732,7 +732,7 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my,
             rot = (ang + (kBAMAngle45 / 2)) >> (kBAMAngleBits - 3);
     }
 
-    SYS_ASSERT(0 <= rot && rot < 16);
+    EPI_ASSERT(0 <= rot && rot < 16);
 
     (*flip) = frame->flip_[rot] ? true : false;
 
@@ -785,7 +785,7 @@ static void RendererClipSpriteVertically(DrawSubsector *dsub, DrawThing *dthing)
         if (z <= dfloor->top_height) break;
     }
 
-    SYS_ASSERT(dfloor);
+    EPI_ASSERT(dfloor);
 
     // link in sprite.  We'll shrink it if it gets clipped.
     LinkDrawThingIntoDrawFloor(dfloor, dthing);
@@ -797,7 +797,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
 
     /* Visit a single thing that exists in the current subsector */
 
-    SYS_ASSERT(mo->state_);
+    EPI_ASSERT(mo->state_);
 
     // ignore the camera itself
     if (mo == view_camera_map_object && total_active_mirrors == 0) return;
@@ -1057,7 +1057,7 @@ static void RendererDrawModel(DrawThing *dthing)
     {
         last_frame = mo->model_last_frame_;
 
-        SYS_ASSERT(mo->state_->tics > 1);
+        EPI_ASSERT(mo->state_->tics > 1);
 
         lerp = (mo->state_->tics - mo->tics_ + 1) / (float)(mo->state_->tics);
         lerp = HMM_Clamp(0, lerp, 1);
@@ -1095,7 +1095,7 @@ static void DLIT_Thing(MapObject *mo, void *dataptr)
     // dynamic lights do not light themselves up!
     if (mo == data->mo) return;
 
-    SYS_ASSERT(mo->dynamic_light_.shader);
+    EPI_ASSERT(mo->dynamic_light_.shader);
 
     for (int v = 0; v < 4; v++)
     {
@@ -1182,7 +1182,7 @@ void RendererDrawThing(DrawFloor *dfloor, DrawThing *dthing)
 
     float yscale = mo->scale_ * MirrorZScale();
 
-    SYS_ASSERT(h > 0);
+    EPI_ASSERT(h > 0);
     tex_y1 = top * tex_y1 / (h * yscale);
     tex_y2 = top * tex_y2 / (h * yscale);
 

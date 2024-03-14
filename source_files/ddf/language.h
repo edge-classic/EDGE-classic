@@ -16,38 +16,37 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_LANG_H__
-#define __DDF_LANG_H__
+#pragma once
 
-#include "epi.h"
-#include "types.h"
+#include <string>
+#include <vector>
 
 // ------------------------------------------------------------------
 // ---------------------------LANGUAGES------------------------------
 // ------------------------------------------------------------------
 
-class lang_choice_c;
+class LanguageChoice;
 
-class language_c
+class Language
 {
    public:
-    language_c();
-    ~language_c();
+    Language();
+    ~Language();
 
    private:
-    std::vector<lang_choice_c *> choices;
+    std::vector<LanguageChoice *> choices_;
 
     // UMAPINFO strings
-    lang_choice_c *umap;
+    LanguageChoice *umapinfo_choice_;
 
     // the current language choice
-    int current;
+    int current_choice_;
 
    public:
     void Clear();
 
-    int GetChoiceCount() { return (int)choices.size(); }
-    int GetChoice() { return current; }
+    int GetChoiceCount() { return (int)choices_.size(); }
+    int GetChoice() { return current_choice_; }
 
     const char *GetName(int idx = -1);
     bool        IsValidRef(const char *refname);
@@ -63,17 +62,15 @@ class language_c
 
     // this is for UMAPINFO strings
     void        AddOrReplace(const char *ref, const char *value);
-    const char *GetRefOrNull(const char *refname);
+    const char *GetReferenceOrNull(const char *refname);
 
     // private (except for code in language.cc)
-    lang_choice_c *AddChoice(const char *name);
+    LanguageChoice *AddChoice(const char *name);
 };
 
-extern language_c language;  // -ACB- 2004/06/27 Implemented
+extern Language language;  // -ACB- 2004/06/27 Implemented
 
 void DDF_ReadLangs(const std::string &data);
-
-#endif /* __DDF_LANG_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -127,7 +127,7 @@ bool got_one;
 
 void MarkWeapon(int wp_num)
 {
-    SYS_ASSERT(0 <= wp_num && wp_num < kTotalWeapons);
+    EPI_ASSERT(0 <= wp_num && wp_num < kTotalWeapons);
 
     weapon_modified[wp_num] = true;
 }
@@ -264,7 +264,7 @@ void HandleAttacks(const WeaponInfo *info, int w_num)
 
     if (!atk) atk = frames::attack_slot[2];
 
-    SYS_ASSERT(atk != nullptr);
+    EPI_ASSERT(atk != nullptr);
 
     wad::Printf("ATTACK = %s;\n", atk);
 
@@ -332,7 +332,7 @@ void weapons::AlterWeapon(int new_val)
     int         wp_num     = patch::active_obj;
     const char *field_name = patch::line_buf;
 
-    SYS_ASSERT(0 <= wp_num && wp_num < kTotalWeapons);
+    EPI_ASSERT(0 <= wp_num && wp_num < kTotalWeapons);
 
     int *raw_obj = (int *)&weapon_info[wp_num];
 

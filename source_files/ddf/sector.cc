@@ -26,11 +26,6 @@
 #include "line.h"
 #include "local.h"
 
-#undef DF
-#define DF DDF_FIELD
-
-#define DDF_SectHashFunc(x) (((x) + kLookupCacheSize) % kLookupCacheSize)
-
 static SectorType *dynamic_sector;
 
 SectorTypeContainer sectortypes;  // <-- User-defined
@@ -40,55 +35,53 @@ static SectorType *default_sector;
 void        DDF_SectGetSpecialFlags(const char *info, void *storage);
 static void DDF_SectMakeCrush(const char *info);
 
-#undef DDF_CMD_BASE
-#define DDF_CMD_BASE dummy_sector
 static SectorType dummy_sector;
 
 static const DDFCommandList sect_commands[] = {
     // sub-commands
-    DDF_SUB_LIST("FLOOR", f_, floor_commands),
-    DDF_SUB_LIST("CEILING", c_, floor_commands),
-    DDF_SUB_LIST("DAMAGE", damage_, damage_commands),
+    DDF_SUB_LIST("FLOOR", dummy_sector, f_, floor_commands),
+    DDF_SUB_LIST("CEILING", dummy_sector, c_, floor_commands),
+    DDF_SUB_LIST("DAMAGE", dummy_sector, damage_, damage_commands),
 
-    DF("SECRET", secret_, DDF_MainGetBoolean),
-    DF("HUB", hub_, DDF_MainGetBoolean),
-    DF("SPECIAL", special_flags_, DDF_SectGetSpecialFlags),
+    DDF_FIELD("SECRET", dummy_sector, secret_, DDF_MainGetBoolean),
+    DDF_FIELD("HUB", dummy_sector, hub_, DDF_MainGetBoolean),
+    DDF_FIELD("SPECIAL", dummy_sector, special_flags_, DDF_SectGetSpecialFlags),
 
-    DF("LIGHT_TYPE", l_.type_, DDF_SectGetLighttype),
-    DF("LIGHT_LEVEL", l_.level_, DDF_MainGetNumeric),
-    DF("LIGHT_DARKTIME", l_.darktime_, DDF_MainGetTime),
-    DF("LIGHT_BRIGHTTIME", l_.brighttime_, DDF_MainGetTime),
-    DF("LIGHT_CHANCE", l_.chance_, DDF_MainGetPercent),
-    DF("LIGHT_SYNC", l_.sync_, DDF_MainGetTime),
-    DF("LIGHT_STEP", l_.step_, DDF_MainGetNumeric),
-    DF("EXIT", e_exit_, DDF_SectGetExit),
-    DF("USE_COLOURMAP", use_colourmap_, DDF_MainGetColourmap),
-    DF("GRAVITY", gravity_, DDF_MainGetFloat),
-    DF("FRICTION", friction_, DDF_MainGetFloat),
-    DF("VISCOSITY", viscosity_, DDF_MainGetFloat),
-    DF("DRAG", drag_, DDF_MainGetFloat),
-    DF("AMBIENT_SOUND", ambient_sfx_, DDF_MainLookupSound),
-    DF("SPLASH_SOUND", splash_sfx_, DDF_MainLookupSound),
-    DF("WHEN_APPEAR", appear_, DDF_MainGetWhenAppear),
-    DF("PUSH_ANGLE", push_angle_, DDF_MainGetAngle),
-    DF("PUSH_SPEED", push_speed_, DDF_MainGetFloat),
-    DF("PUSH_ZSPEED", push_zspeed_, DDF_MainGetFloat),
+    DDF_FIELD("LIGHT_TYPE", dummy_sector, l_.type_, DDF_SectGetLighttype),
+    DDF_FIELD("LIGHT_LEVEL", dummy_sector, l_.level_, DDF_MainGetNumeric),
+    DDF_FIELD("LIGHT_DARKTIME", dummy_sector, l_.darktime_, DDF_MainGetTime),
+    DDF_FIELD("LIGHT_BRIGHTTIME", dummy_sector, l_.brighttime_, DDF_MainGetTime),
+    DDF_FIELD("LIGHT_CHANCE", dummy_sector, l_.chance_, DDF_MainGetPercent),
+    DDF_FIELD("LIGHT_SYNC", dummy_sector, l_.sync_, DDF_MainGetTime),
+    DDF_FIELD("LIGHT_STEP", dummy_sector, l_.step_, DDF_MainGetNumeric),
+    DDF_FIELD("EXIT", dummy_sector, e_exit_, DDF_SectGetExit),
+    DDF_FIELD("USE_COLOURMAP", dummy_sector, use_colourmap_, DDF_MainGetColourmap),
+    DDF_FIELD("GRAVITY", dummy_sector, gravity_, DDF_MainGetFloat),
+    DDF_FIELD("FRICTION", dummy_sector, friction_, DDF_MainGetFloat),
+    DDF_FIELD("VISCOSITY", dummy_sector, viscosity_, DDF_MainGetFloat),
+    DDF_FIELD("DRAG", dummy_sector, drag_, DDF_MainGetFloat),
+    DDF_FIELD("AMBIENT_SOUND", dummy_sector, ambient_sfx_, DDF_MainLookupSound),
+    DDF_FIELD("SPLASH_SOUND", dummy_sector, splash_sfx_, DDF_MainLookupSound),
+    DDF_FIELD("WHEN_APPEAR", dummy_sector, appear_, DDF_MainGetWhenAppear),
+    DDF_FIELD("PUSH_ANGLE", dummy_sector, push_angle_, DDF_MainGetAngle),
+    DDF_FIELD("PUSH_SPEED", dummy_sector, push_speed_, DDF_MainGetFloat),
+    DDF_FIELD("PUSH_ZSPEED", dummy_sector, push_zspeed_, DDF_MainGetFloat),
 
     // -AJA- backwards compatibility cruft...
-    DF("DAMAGE", damage_.nominal_, DDF_MainGetFloat),
-    DF("DAMAGETIME", damage_.delay_, DDF_MainGetTime),
+    DDF_FIELD("DAMAGE", dummy_sector, damage_.nominal_, DDF_MainGetFloat),
+    DDF_FIELD("DAMAGETIME", dummy_sector, damage_.delay_, DDF_MainGetTime),
 
-    DF("REVERB TYPE", reverb_type_, DDF_MainGetString),
-    DF("REVERB RATIO", reverb_ratio_, DDF_MainGetFloat),
-    DF("REVERB DELAY", reverb_delay_, DDF_MainGetFloat),
+    DDF_FIELD("REVERB_TYPE", dummy_sector, reverb_type_, DDF_MainGetString),
+    DDF_FIELD("REVERB_RATIO", dummy_sector, reverb_ratio_, DDF_MainGetFloat),
+    DDF_FIELD("REVERB_DELAY", dummy_sector, reverb_delay_, DDF_MainGetFloat),
 
-    DF("FLOOR_BOB", floor_bob_, DDF_MainGetFloat),
-    DF("CEILING_BOB", ceiling_bob_, DDF_MainGetFloat),
+    DDF_FIELD("FLOOR_BOB", dummy_sector, floor_bob_, DDF_MainGetFloat),
+    DDF_FIELD("CEILING_BOB", dummy_sector, ceiling_bob_, DDF_MainGetFloat),
 
-    DF("FOG_COLOR", fog_cmap_, DDF_MainGetColourmap),
-    DF("FOG_DENSITY", fog_density_, DDF_MainGetPercent),
+    DDF_FIELD("FOG_COLOR", dummy_sector, fog_cmap_, DDF_MainGetColourmap),
+    DDF_FIELD("FOG_DENSITY", dummy_sector, fog_density_, DDF_MainGetPercent),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 //
 //  DDF PARSE ROUTINES
@@ -584,7 +577,7 @@ SectorType *SectorTypeContainer::Lookup(const int id)
 {
     if (id == 0) return default_sector;
 
-    int slot = DDF_SectHashFunc(id);
+    int slot = (((id) + kLookupCacheSize) % kLookupCacheSize);
 
     // check the cache
     if (lookup_cache_[slot] && lookup_cache_[slot]->number_ == id)

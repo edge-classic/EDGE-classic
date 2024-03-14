@@ -57,7 +57,7 @@ int StringCompare(std::string_view A, std::string_view B)
 
 int StringCompareMax(std::string_view A, std::string_view B, size_t n)
 {
-    SYS_ASSERT(n != 0);
+    EPI_ASSERT(n != 0);
     size_t        A_pos = 0;
     size_t        B_pos = 0;
     size_t        A_end = A.size();
@@ -124,7 +124,7 @@ int StringCaseCompareASCII(std::string_view A, std::string_view B)
 
 int StringCaseCompareMaxASCII(std::string_view A, std::string_view B, size_t n)
 {
-    SYS_ASSERT(n != 0);
+    EPI_ASSERT(n != 0);
     size_t        A_pos = 0;
     size_t        B_pos = 0;
     size_t        A_end = A.size();

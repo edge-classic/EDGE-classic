@@ -21,6 +21,7 @@
 #include <math.h>
 
 #include "dm_state.h"
+#include "epi.h"
 #include "g_game.h"  // current_map
 #include "i_defs_gl.h"
 #include "im_data.h"
@@ -120,7 +121,7 @@ void ComputeSkyHeights(void)
         sec1 = ld->front_sector;
         sec2 = ld->back_sector;
 
-        SYS_ASSERT(sec1 && sec2);
+        EPI_ASSERT(sec1 && sec2);
 
         if (sec1 == sec2) continue;
 
@@ -580,7 +581,7 @@ static void RendererDrawSkyBox(void)
 
     int SK = RendererUpdateSkyBoxTextures();
 
-    SYS_ASSERT(SK >= 0);
+    EPI_ASSERT(SK >= 0);
 
     RendererSetupSkyMatrices();
 

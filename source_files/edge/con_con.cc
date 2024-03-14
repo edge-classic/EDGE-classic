@@ -31,6 +31,7 @@
 #include "con_var.h"
 #include "e_input.h"
 #include "e_player.h"
+#include "epi.h"
 #include "edge_profiling.h"
 #include "font.h"
 #include "g_game.h"
@@ -127,7 +128,7 @@ static void ConsoleAddLine(const char *s, bool partial)
 {
     if (console_partial_last_line)
     {
-        SYS_ASSERT(console_lines[0]);
+        EPI_ASSERT(console_lines[0]);
 
         console_lines[0]->Append(s);
 
@@ -160,7 +161,7 @@ static void ConsoleEndoomAddLine(uint8_t endoom_byte, const char *s,
 {
     if (console_partial_last_line)
     {
-        SYS_ASSERT(console_lines[0]);
+        EPI_ASSERT(console_lines[0]);
 
         console_lines[0]->Append(s);
 
@@ -196,7 +197,7 @@ static void ConsoleQuitAddLine(const char *s, bool partial)
 {
     if (quit_partial_last_line)
     {
-        SYS_ASSERT(quit_lines[0]);
+        EPI_ASSERT(quit_lines[0]);
 
         quit_lines[0]->Append(s);
 
@@ -225,7 +226,7 @@ static void ConsoleQuitEndoomAddLine(uint8_t endoom_byte, const char *s,
 {
     if (quit_partial_last_line)
     {
-        SYS_ASSERT(quit_lines[0]);
+        EPI_ASSERT(quit_lines[0]);
 
         quit_lines[0]->Append(s);
 
@@ -798,7 +799,7 @@ void ConsoleSetupFont(void)
         FontDefinition *DEF = fontdefs.Lookup("CON_FONT_2");
         if (!DEF) FatalError("CON_FONT_2 definition missing from DDFFONT!\n");
         console_font = hud_fonts.Lookup(DEF);
-        SYS_ASSERT(console_font);
+        EPI_ASSERT(console_font);
         console_font->Load();
     }
 
@@ -807,7 +808,7 @@ void ConsoleSetupFont(void)
         FontDefinition *DEF = fontdefs.Lookup("ENDFONT");
         if (!DEF) FatalError("ENDFONT definition missing from DDFFONT!\n");
         endoom_font = hud_fonts.Lookup(DEF);
-        SYS_ASSERT(endoom_font);
+        EPI_ASSERT(endoom_font);
         endoom_font->Load();
     }
 
@@ -1109,7 +1110,7 @@ static void TabComplete(void)
                            : (num_key > 0) ? match_keys[0]
                                            : match_cmds[0];
 
-        SYS_ASSERT((int)strlen(name) >= input_position);
+        EPI_ASSERT((int)strlen(name) >= input_position);
 
         for (name += input_position; *name; name++) InsertChar(*name);
 

@@ -931,7 +931,7 @@ static void AddMinisegs(Intersection *cut_list, Seg *part, Seg **left_list,
 
 void Node::SetPartition(const Seg *part)
 {
-    SYS_ASSERT(part->linedef_);
+    EPI_ASSERT(part->linedef_);
 
     if (part->side_ == 0)
     {

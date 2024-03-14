@@ -176,7 +176,7 @@ void ConsoleVariable::ParseString()
 
 static ConsoleVariable *MergeSort(ConsoleVariable *list)
 {
-    SYS_ASSERT(list != nullptr);
+    EPI_ASSERT(list != nullptr);
 
     // only a single item?  done!
     if (list->next_ == nullptr) return list;

@@ -40,6 +40,7 @@
 #include "e_input.h"
 #include "e_player.h"
 #include "endianess.h"
+#include "epi.h"
 #include "file.h"
 #include "filesystem.h"
 #include "g_game.h"
@@ -241,7 +242,7 @@ static int total_defaults = sizeof(defaults) / sizeof(defaults[0]);
 void ConfigurationSaveDefaults(void)
 {
     // -ACB- 1999/09/24 idiot proof checking as required by MSVC
-    SYS_ASSERT(!configuration_file.empty());
+    EPI_ASSERT(!configuration_file.empty());
 
     FILE *f = epi::FileOpenRaw(configuration_file,
                                epi::kFileAccessWrite | epi::kFileAccessBinary);
@@ -539,7 +540,7 @@ void PrintWarningOrError(const char *error, ...)
     va_end(argptr);
 
     // I hope nobody is printing strings longer than 4096 chars...
-    SYS_ASSERT(message_buf[4095] == 0);
+    EPI_ASSERT(message_buf[4095] == 0);
 
     if (strict_errors)
         FatalError("%s", message_buf);
@@ -563,7 +564,7 @@ void PrintDebugOrError(const char *error, ...)
     va_end(argptr);
 
     // I hope nobody is printing strings longer than 4096 chars...
-    SYS_ASSERT(message_buf[4095] == 0);
+    EPI_ASSERT(message_buf[4095] == 0);
 
     if (strict_errors)
         FatalError("%s", message_buf);
@@ -594,7 +595,7 @@ void LogDebug(const char *message, ...)
     va_end(argptr);
 
     // I hope nobody is printing strings longer than 4096 chars...
-    SYS_ASSERT(message_buf[4095] == 0);
+    EPI_ASSERT(message_buf[4095] == 0);
 
     fprintf(debug_file, "%s", message_buf);
     fflush(debug_file);

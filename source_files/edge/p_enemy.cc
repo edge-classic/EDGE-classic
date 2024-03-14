@@ -35,6 +35,7 @@
 #include "AlmostEquals.h"
 #include "common_doomdefs.h"
 #include "dm_state.h"
+#include "epi.h"
 #include "g_game.h"
 #include "m_random.h"
 #include "p_action.h"
@@ -453,7 +454,7 @@ bool LookForPlayers(MapObject *actor, BAMAngle range)
 
         if (!player) continue;
 
-        SYS_ASSERT(player->map_object_);
+        EPI_ASSERT(player->map_object_);
 
         // done looking ?
         if (c++ >= 2) break;

@@ -115,8 +115,8 @@ void sprites::SpriteDependencies()
 
 bool sprites::ReplaceSprite(const char *before, const char *after)
 {
-    SYS_ASSERT(strlen(before) == 4);
-    SYS_ASSERT(strlen(after) == 4);
+    EPI_ASSERT(strlen(before) == 4);
+    EPI_ASSERT(strlen(after) == 4);
 
     for (int i = 0; i < kTotalSpritesDEHEXTRA; i++)
     {

@@ -436,7 +436,7 @@ int JoystickGetAxis(int n)  // n begins at 0
 
 static void I_OpenJoystick(int index)
 {
-    SYS_ASSERT(1 <= index && index <= total_joysticks);
+    EPI_ASSERT(1 <= index && index <= total_joysticks);
 
     joystick_info = SDL_JoystickOpen(index - 1);
     if (!joystick_info)

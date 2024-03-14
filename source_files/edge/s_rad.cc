@@ -155,7 +155,7 @@ bool RadPlayer::StreamIntoBuffer(SoundData *buf)
 
 bool RadPlayer::OpenMemory(uint8_t *data, int length)
 {
-    SYS_ASSERT(data);
+    EPI_ASSERT(data);
 
     const char *err = RADValidate(data, length);
 

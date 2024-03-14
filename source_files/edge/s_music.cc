@@ -26,6 +26,7 @@
 #include "dm_state.h"
 #include "file.h"
 #include "filesystem.h"
+#include "i_system.h"
 #include "m_misc.h"
 #include "main.h"
 #include "s_flac.h"

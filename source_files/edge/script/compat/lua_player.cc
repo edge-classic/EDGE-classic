@@ -714,7 +714,7 @@ static int PL_main_ammo(lua_State *L)
         {
             if (pw->info->show_clip_)
             {
-                SYS_ASSERT(pw->info->ammopershot_[0] > 0);
+                EPI_ASSERT(pw->info->ammopershot_[0] > 0);
 
                 value = pw->clip_size[0] / pw->info->ammopershot_[0];
             }
@@ -2027,7 +2027,7 @@ static int Game_info(lua_State *L)
     //---------------
     // game.name
     GameDefinition *g = current_map->episode_;
-    SYS_ASSERT(g);
+    EPI_ASSERT(g);
 
     if (g->description_.empty())
     {

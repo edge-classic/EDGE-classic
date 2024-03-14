@@ -81,6 +81,7 @@
 #include "defaults.h"
 #include "dm_state.h"
 #include "e_input.h"
+#include "epi.h"
 #include "epi_sdl.h"
 #include "filesystem.h"
 #include "font.h"
@@ -1175,7 +1176,7 @@ void OptionMenuDrawer()
     unsigned int k;
 
     Style *style = current_menu->style_var[0];
-    SYS_ASSERT(style);
+    EPI_ASSERT(style);
 
     style->DrawBackground();
 
@@ -2264,14 +2265,14 @@ static void OptionMenuChangeBobbing(int              key_pressed,
 static void OptionMenuUpdateConsoleVariableFromFloat(
     int key_pressed, ConsoleVariable *console_variable)
 {
-    SYS_ASSERT(console_variable);
+    EPI_ASSERT(console_variable);
     console_variable->operator=(console_variable->f_);
 }
 
 static void OptionMenuUpdateConsoleVariableFromInt(
     int key_pressed, ConsoleVariable *console_variable)
 {
-    SYS_ASSERT(console_variable);
+    EPI_ASSERT(console_variable);
     console_variable->operator=(console_variable->d_);
 }
 

@@ -26,6 +26,7 @@
 #include "e_input.h"
 #include "filesystem.h"
 #include "g_game.h"
+#include "i_system.h"
 #include "language.h"
 #include "m_menu.h"
 #include "m_misc.h"

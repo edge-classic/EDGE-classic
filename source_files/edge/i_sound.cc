@@ -168,8 +168,8 @@ void StartupAudio(void)
     sound_device_samples_per_buffer =
         sound_device_check.size / sound_device_bytes_per_sample;
 
-    SYS_ASSERT(sound_device_bytes_per_sample > 0);
-    SYS_ASSERT(sound_device_samples_per_buffer > 0);
+    EPI_ASSERT(sound_device_bytes_per_sample > 0);
+    EPI_ASSERT(sound_device_samples_per_buffer > 0);
 
     sound_device_frequency = sound_device_check.freq;
     sound_device_stereo    = (sound_device_check.channels == 2);

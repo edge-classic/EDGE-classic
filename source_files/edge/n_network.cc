@@ -149,7 +149,7 @@ void NetworkGrabTicCommands(void)
     // game_tic <= make_tic is a system-wide invariant.  However, new levels
     // levels are loaded during G_Ticker(), which resets them both to zero,
     // hence we need to handle that particular case here.
-    SYS_ASSERT(game_tic <= make_tic);
+    EPI_ASSERT(game_tic <= make_tic);
 
     if (game_tic == make_tic) return;
 
@@ -242,7 +242,7 @@ int NetworkTryRunTicCommands()
         return real_tics;
     }
 
-    SYS_ASSERT(game_tic <= make_tic);
+    EPI_ASSERT(game_tic <= make_tic);
 
     // decide how many tics to run...
     int tics = make_tic - game_tic;

@@ -398,7 +398,7 @@ static void LoadSectors(int lump)
                    current_map->lump_.c_str());
 
     level_sectors = new Sector[total_level_sectors];
-    Z_Clear(level_sectors, Sector, total_level_sectors);
+    EPI_CLEAR_MEMORY(level_sectors, Sector, total_level_sectors);
 
     data = LoadLumpIntoMemory(lump);
     map_sectors_crc.AddBlock((const uint8_t *)data, GetLumpLength(lump));
@@ -891,7 +891,7 @@ static void LoadLineDefs(int lump)
 
     level_lines = new Line[total_level_lines];
 
-    Z_Clear(level_lines, Line, total_level_lines);
+    EPI_CLEAR_MEMORY(level_lines, Line, total_level_lines);
 
     temp_line_sides = new int[total_level_lines * 2];
 
@@ -1171,7 +1171,7 @@ static void LoadXGL3Nodes(int lumpnum)
     LogDebug("LoadXGL3Nodes: Num SSECTORS = %d\n", total_level_subsectors);
 
     level_subsectors = new Subsector[total_level_subsectors];
-    Z_Clear(level_subsectors, Subsector, total_level_subsectors);
+    EPI_CLEAR_MEMORY(level_subsectors, Subsector, total_level_subsectors);
 
     int *ss_temp = new int[total_level_subsectors];
     int  xglSegs = 0;
@@ -1194,7 +1194,7 @@ static void LoadXGL3Nodes(int lumpnum)
     LogDebug("LoadXGL3Nodes: Num SEGS = %d\n", total_level_segs);
 
     level_segs = new Seg[total_level_segs];
-    Z_Clear(level_segs, Seg, total_level_segs);
+    EPI_CLEAR_MEMORY(level_segs, Seg, total_level_segs);
     Seg *seg = level_segs;
 
     for (i = 0; i < total_level_segs; i++, seg++)
@@ -1222,7 +1222,7 @@ static void LoadXGL3Nodes(int lumpnum)
             seg->partner = nullptr;
         else
         {
-            SYS_ASSERT(partner < total_level_segs);  // sanity check
+            EPI_ASSERT(partner < total_level_segs);  // sanity check
             seg->partner = &level_segs[partner];
         }
 
@@ -1305,7 +1305,7 @@ static void LoadXGL3Nodes(int lumpnum)
     LogDebug("LoadXGL3Nodes: Num nodes = %d\n", total_level_nodes);
 
     level_nodes = new BspNode[total_level_nodes + 1];
-    Z_Clear(level_nodes, BspNode, total_level_nodes);
+    EPI_CLEAR_MEMORY(level_nodes, BspNode, total_level_nodes);
     BspNode *nd = level_nodes;
 
     for (i = 0; i < total_level_nodes; i++, nd++)
@@ -1448,7 +1448,7 @@ static void LoadUDMFVertexes()
             }
         }
     }
-    SYS_ASSERT(cur_vertex == total_level_vertexes);
+    EPI_ASSERT(cur_vertex == total_level_vertexes);
 
     LogDebug("LoadUDMFVertexes: finished parsing TEXTMAP\n");
 }
@@ -1754,7 +1754,7 @@ static void LoadUDMFSectors()
             }
         }
     }
-    SYS_ASSERT(cur_sector == total_level_sectors);
+    EPI_ASSERT(cur_sector == total_level_sectors);
 
     LogDebug("LoadUDMFSectors: finished parsing TEXTMAP\n");
 }
@@ -1766,7 +1766,7 @@ static void LoadUDMFSideDefs()
     LogDebug("LoadUDMFSectors: parsing TEXTMAP\n");
 
     level_sides = new Side[total_level_sides];
-    Z_Clear(level_sides, Side, total_level_sides);
+    EPI_CLEAR_MEMORY(level_sides, Side, total_level_sides);
 
     int nummapsides = 0;
 
@@ -1895,7 +1895,7 @@ static void LoadUDMFSideDefs()
                         break;
                 }
             }
-            SYS_ASSERT(nummapsides <= total_level_sides);  // sanity check
+            EPI_ASSERT(nummapsides <= total_level_sides);  // sanity check
 
             Side *sd = level_sides + nummapsides - 1;
 
@@ -1980,7 +1980,7 @@ static void LoadUDMFSideDefs()
 
     // post-process linedefs & sidedefs
 
-    SYS_ASSERT(temp_line_sides);
+    EPI_ASSERT(temp_line_sides);
 
     Side *sd = level_sides;
 
@@ -1991,7 +1991,7 @@ static void LoadUDMFSideDefs()
         int side0 = temp_line_sides[i * 2 + 0];
         int side1 = temp_line_sides[i * 2 + 1];
 
-        SYS_ASSERT(side0 != -1);
+        EPI_ASSERT(side0 != -1);
 
         if (side0 >= nummapsides)
         {
@@ -2028,10 +2028,10 @@ static void LoadUDMFSideDefs()
             sd++;
         }
 
-        SYS_ASSERT(sd <= level_sides + total_level_sides);
+        EPI_ASSERT(sd <= level_sides + total_level_sides);
     }
 
-    SYS_ASSERT(sd == level_sides + total_level_sides);
+    EPI_ASSERT(sd == level_sides + total_level_sides);
 
     LogDebug("LoadUDMFSideDefs: finished parsing TEXTMAP\n");
 }
@@ -2219,7 +2219,7 @@ static void LoadUDMFLineDefs()
             }
         }
     }
-    SYS_ASSERT(cur_line == total_level_lines);
+    EPI_ASSERT(cur_line == total_level_lines);
 
     LogDebug("LoadUDMFLineDefs: finished parsing TEXTMAP\n");
 }
@@ -2562,9 +2562,9 @@ static void LoadUDMFCounts()
     // initialize arrays
     level_vertexes = new Vertex[total_level_vertexes];
     level_sectors  = new Sector[total_level_sectors];
-    Z_Clear(level_sectors, Sector, total_level_sectors);
+    EPI_CLEAR_MEMORY(level_sectors, Sector, total_level_sectors);
     level_lines = new Line[total_level_lines];
-    Z_Clear(level_lines, Line, total_level_lines);
+    EPI_CLEAR_MEMORY(level_lines, Line, total_level_lines);
     temp_line_sides = new int[total_level_lines * 2];
 }
 
@@ -2662,14 +2662,14 @@ static void LoadSideDefs(int lump)
 
     level_sides = new Side[total_level_sides];
 
-    Z_Clear(level_sides, Side, total_level_sides);
+    EPI_CLEAR_MEMORY(level_sides, Side, total_level_sides);
 
     data = LoadLumpIntoMemory(lump);
     msd  = (const RawSidedef *)data;
 
     sd = level_sides;
 
-    SYS_ASSERT(temp_line_sides);
+    EPI_ASSERT(temp_line_sides);
 
     for (i = 0; i < total_level_lines; i++)
     {
@@ -2678,7 +2678,7 @@ static void LoadSideDefs(int lump)
         int side0 = temp_line_sides[i * 2 + 0];
         int side1 = temp_line_sides[i * 2 + 1];
 
-        SYS_ASSERT(side0 != -1);
+        EPI_ASSERT(side0 != -1);
 
         if (side0 >= nummapsides)
         {
@@ -2707,10 +2707,10 @@ static void LoadSideDefs(int lump)
             sd++;
         }
 
-        SYS_ASSERT(sd <= level_sides + total_level_sides);
+        EPI_ASSERT(sd <= level_sides + total_level_sides);
     }
 
-    SYS_ASSERT(sd == level_sides + total_level_sides);
+    EPI_ASSERT(sd == level_sides + total_level_sides);
 
     delete[] data;
 }
@@ -2735,7 +2735,7 @@ static void SetupExtrafloors(void)
 
     level_extrafloors = new Extrafloor[total_level_extrafloors];
 
-    Z_Clear(level_extrafloors, Extrafloor, total_level_extrafloors);
+    EPI_CLEAR_MEMORY(level_extrafloors, Extrafloor, total_level_extrafloors);
 
     for (i = 0, ss = level_sectors; i < total_level_sectors; i++, ss++)
     {
@@ -2743,10 +2743,10 @@ static void SetupExtrafloors(void)
 
         ef_index += ss->extrafloor_maximum;
 
-        SYS_ASSERT(ef_index <= total_level_extrafloors);
+        EPI_ASSERT(ef_index <= total_level_extrafloors);
     }
 
-    SYS_ASSERT(ef_index == total_level_extrafloors);
+    EPI_ASSERT(ef_index == total_level_extrafloors);
 }
 
 static void SetupSlidingDoors(void)
@@ -2817,11 +2817,11 @@ static void SetupVertGaps(void)
     //    sizeof(vgap_t) + 1023) / 1024);
 
     // zero is now impossible
-    SYS_ASSERT(total_level_vertical_gaps > 0);
+    EPI_ASSERT(total_level_vertical_gaps > 0);
 
     level_vertical_gaps = new VerticalGap[total_level_vertical_gaps];
 
-    Z_Clear(level_vertical_gaps, VerticalGap, total_level_vertical_gaps);
+    EPI_CLEAR_MEMORY(level_vertical_gaps, VerticalGap, total_level_vertical_gaps);
 
     for (i = 0, cur_gap = level_vertical_gaps; i < total_level_lines; i++)
     {
@@ -2833,7 +2833,7 @@ static void SetupVertGaps(void)
         cur_gap += ld->maximum_gaps;
     }
 
-    SYS_ASSERT(cur_gap == (level_vertical_gaps + line_gaps));
+    EPI_ASSERT(cur_gap == (level_vertical_gaps + line_gaps));
 
     for (i = 0; i < total_level_sectors; i++)
     {
@@ -2845,7 +2845,7 @@ static void SetupVertGaps(void)
         cur_gap += sec->maximum_gaps;
     }
 
-    SYS_ASSERT(cur_gap == (level_vertical_gaps + total_level_vertical_gaps));
+    EPI_ASSERT(cur_gap == (level_vertical_gaps + total_level_vertical_gaps));
 }
 
 static void DetectDeepWaterTrick(void)
@@ -2860,7 +2860,7 @@ static void DetectDeepWaterTrick(void)
 
         if (seg->miniseg) continue;
 
-        SYS_ASSERT(seg->front_subsector);
+        EPI_ASSERT(seg->front_subsector);
 
         if (seg->linedef->back_sector &&
             seg->linedef->front_sector == seg->linedef->back_sector)
@@ -2889,7 +2889,7 @@ static void DetectDeepWaterTrick(void)
 
             for (seg = sub->segs; seg; seg = seg->subsector_next)
             {
-                SYS_ASSERT(seg->back_subsector);
+                EPI_ASSERT(seg->back_subsector);
 
                 int k = seg->back_subsector - level_subsectors;
 
@@ -3263,7 +3263,7 @@ static inline void AddSectorToVertices(int *branches, Line *ld, Sector *sec)
     {
         int v_idx = (vert ? ld->vertex_2 : ld->vertex_1) - level_vertexes;
 
-        SYS_ASSERT(0 <= v_idx && v_idx < total_level_vertexes);
+        EPI_ASSERT(0 <= v_idx && v_idx < total_level_vertexes);
 
         if (branches[v_idx] < 0) continue;
 
@@ -3287,7 +3287,7 @@ static void CreateVertexSeclists(void)
     // step 1: determine number of linedef branches at each vertex
     int *branches = new int[total_level_vertexes];
 
-    Z_Clear(branches, int, total_level_vertexes);
+    EPI_CLEAR_MEMORY(branches, int, total_level_vertexes);
 
     int i;
 
@@ -3296,8 +3296,8 @@ static void CreateVertexSeclists(void)
         int v1_idx = level_lines[i].vertex_1 - level_vertexes;
         int v2_idx = level_lines[i].vertex_2 - level_vertexes;
 
-        SYS_ASSERT(0 <= v1_idx && v1_idx < total_level_vertexes);
-        SYS_ASSERT(0 <= v2_idx && v2_idx < total_level_vertexes);
+        EPI_ASSERT(0 <= v1_idx && v1_idx < total_level_vertexes);
+        EPI_ASSERT(0 <= v2_idx && v2_idx < total_level_vertexes);
 
         branches[v1_idx] += 1;
         branches[v2_idx] += 1;
@@ -3326,7 +3326,7 @@ static void CreateVertexSeclists(void)
     // step 3: create a vertex_seclist for those multi-branches
     level_vertex_sector_lists = new VertexSectorList[num_triples];
 
-    Z_Clear(level_vertex_sector_lists, VertexSectorList, num_triples);
+    EPI_CLEAR_MEMORY(level_vertex_sector_lists, VertexSectorList, num_triples);
 
     LogDebug("Created %d seclists from %d vertices (%1.1f%%)\n", num_triples,
              total_level_vertexes,
@@ -3640,7 +3640,7 @@ void PlayerStateInit(void)
     StartupProgressMessage(language["PlayState"]);
 
     // There should not yet exist a player
-    SYS_ASSERT(total_players == 0);
+    EPI_ASSERT(total_players == 0);
 
     ClearPlayerStarts();
 }

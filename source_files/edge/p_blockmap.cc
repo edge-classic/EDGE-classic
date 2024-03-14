@@ -34,6 +34,7 @@
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "edge_profiling.h"
+#include "epi.h"
 #include "i_defs_gl.h"  // needed for r_shader.h
 #include "i_system.h"
 #include "m_bbox.h"
@@ -89,7 +90,7 @@ void CreateThingBlockmap(void)
 {
     blockmap_things = new MapObject *[blockmap_width * blockmap_height];
 
-    Z_Clear(blockmap_things, MapObject *, blockmap_width * blockmap_height);
+    EPI_CLEAR_MEMORY(blockmap_things, MapObject *, blockmap_width * blockmap_height);
 
     // compute size of dynamic light blockmap
     dynamic_light_blockmap_width =
@@ -106,7 +107,7 @@ void CreateThingBlockmap(void)
     dynamic_light_blockmap_things = new MapObject
         *[dynamic_light_blockmap_width * dynamic_light_blockmap_height];
 
-    Z_Clear(dynamic_light_blockmap_things, MapObject *,
+    EPI_CLEAR_MEMORY(dynamic_light_blockmap_things, MapObject *,
             dynamic_light_blockmap_width * dynamic_light_blockmap_height);
 }
 
@@ -251,7 +252,7 @@ static void SetPositionBSP(BspThingPosition *info, int nodenum)
             side = 1;
         }
 
-        SYS_ASSERT(side == 0 || side == 1);
+        EPI_ASSERT(side == 0 || side == 1);
 
         nodenum = nd->children[side];
     }
@@ -308,7 +309,7 @@ static void SetPositionBSP(BspThingPosition *info, int nodenum)
             return;
         }
 
-        SYS_ASSERT(tn->map_object == info->thing);
+        EPI_ASSERT(tn->map_object == info->thing);
 
         // sector already present ?
         if (tn->sector == sec) return;
@@ -349,7 +350,7 @@ void UnsetThingPosition(MapObject *mo)
         {
             if (mo->subsector_next_->subsector_previous_)
             {
-                SYS_ASSERT(mo->subsector_next_->subsector_previous_ == mo);
+                EPI_ASSERT(mo->subsector_next_->subsector_previous_ == mo);
 
                 mo->subsector_next_->subsector_previous_ =
                     mo->subsector_previous_;
@@ -360,7 +361,7 @@ void UnsetThingPosition(MapObject *mo)
         {
             if (mo->subsector_previous_->subsector_next_)
             {
-                SYS_ASSERT(mo->subsector_previous_->subsector_next_ == mo);
+                EPI_ASSERT(mo->subsector_previous_->subsector_next_ == mo);
 
                 mo->subsector_previous_->subsector_next_ = mo->subsector_next_;
             }
@@ -369,7 +370,7 @@ void UnsetThingPosition(MapObject *mo)
         {
             if (mo->subsector_->thing_list)
             {
-                SYS_ASSERT(mo->subsector_->thing_list == mo);
+                EPI_ASSERT(mo->subsector_->thing_list == mo);
 
                 mo->subsector_->thing_list = mo->subsector_next_;
             }
@@ -392,7 +393,7 @@ void UnsetThingPosition(MapObject *mo)
         {
             if (mo->blockmap_next_->blockmap_previous_)
             {
-                SYS_ASSERT(mo->blockmap_next_->blockmap_previous_ == mo);
+                EPI_ASSERT(mo->blockmap_next_->blockmap_previous_ == mo);
 
                 mo->blockmap_next_->blockmap_previous_ = mo->blockmap_previous_;
             }
@@ -402,7 +403,7 @@ void UnsetThingPosition(MapObject *mo)
         {
             if (mo->blockmap_previous_->blockmap_next_)
             {
-                SYS_ASSERT(mo->blockmap_previous_->blockmap_next_ == mo);
+                EPI_ASSERT(mo->blockmap_previous_->blockmap_next_ == mo);
 
                 mo->blockmap_previous_->blockmap_next_ = mo->blockmap_next_;
             }
@@ -417,7 +418,7 @@ void UnsetThingPosition(MapObject *mo)
             {
                 bnum = blocky * blockmap_width + blockx;
 
-                SYS_ASSERT(blockmap_things[bnum] == mo);
+                EPI_ASSERT(blockmap_things[bnum] == mo);
 
                 blockmap_things[bnum] = mo->blockmap_next_;
             }
@@ -435,7 +436,7 @@ void UnsetThingPosition(MapObject *mo)
         {
             if (mo->dynamic_light_next_->dynamic_light_previous_)
             {
-                SYS_ASSERT(mo->dynamic_light_next_->dynamic_light_previous_ ==
+                EPI_ASSERT(mo->dynamic_light_next_->dynamic_light_previous_ ==
                            mo);
 
                 mo->dynamic_light_next_->dynamic_light_previous_ =
@@ -447,7 +448,7 @@ void UnsetThingPosition(MapObject *mo)
         {
             if (mo->dynamic_light_previous_->dynamic_light_next_)
             {
-                SYS_ASSERT(mo->dynamic_light_previous_->dynamic_light_next_ ==
+                EPI_ASSERT(mo->dynamic_light_previous_->dynamic_light_next_ ==
                            mo);
 
                 mo->dynamic_light_previous_->dynamic_light_next_ =
@@ -464,7 +465,7 @@ void UnsetThingPosition(MapObject *mo)
             {
                 bnum = blocky * dynamic_light_blockmap_width + blockx;
 
-                SYS_ASSERT(dynamic_light_blockmap_things[bnum] == mo);
+                EPI_ASSERT(dynamic_light_blockmap_things[bnum] == mo);
                 dynamic_light_blockmap_things[bnum] = mo->dynamic_light_next_;
             }
         }
@@ -483,7 +484,7 @@ void UnsetThingPosition(MapObject *mo)
         {
             if (mo->dynamic_light_next_->dynamic_light_previous_)
             {
-                SYS_ASSERT(mo->dynamic_light_next_->dynamic_light_previous_ ==
+                EPI_ASSERT(mo->dynamic_light_next_->dynamic_light_previous_ ==
                            mo);
 
                 mo->dynamic_light_next_->dynamic_light_previous_ =
@@ -495,7 +496,7 @@ void UnsetThingPosition(MapObject *mo)
         {
             if (mo->dynamic_light_previous_->dynamic_light_next_)
             {
-                SYS_ASSERT(mo->dynamic_light_previous_->dynamic_light_next_ ==
+                EPI_ASSERT(mo->dynamic_light_previous_->dynamic_light_next_ ==
                            mo);
 
                 mo->dynamic_light_previous_->dynamic_light_next_ =
@@ -506,7 +507,7 @@ void UnsetThingPosition(MapObject *mo)
         {
             if (sec->glow_things)
             {
-                SYS_ASSERT(sec->glow_things == mo);
+                EPI_ASSERT(sec->glow_things == mo);
 
                 sec->glow_things = mo->dynamic_light_next_;
             }
@@ -561,7 +562,7 @@ void SetThingPosition(MapObject *mo)
         mo->blockmap_previous_)
         FatalError("INTERNAL ERROR: Double SetThingPosition call.");
 
-    SYS_ASSERT(!(mo->dynamic_light_next_ || mo->dynamic_light_previous_));
+    EPI_ASSERT(!(mo->dynamic_light_next_ || mo->dynamic_light_previous_));
 
     // link into subsector
     ss             = RendererPointInSubsector(mo->x, mo->y);
@@ -612,7 +613,7 @@ void SetThingPosition(MapObject *mo)
             TouchNode *cur = tn;
             tn                = tn->map_object_next;
 
-            SYS_ASSERT(!cur->map_object);
+            EPI_ASSERT(!cur->map_object);
 
             TouchNodeUnlinkFromSector(cur);
             TouchNodeFree(cur);
@@ -847,7 +848,7 @@ void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2,
                      [by * dynamic_light_blockmap_width + bx];
                  mo; mo = mo->dynamic_light_next_)
             {
-                SYS_ASSERT(mo->state_);
+                EPI_ASSERT(mo->state_);
 
                 // skip "off" lights
                 if (mo->state_->bright <= 0 || mo->dynamic_light_.r <= 0)
@@ -892,7 +893,7 @@ void SectorGlowIterator(Sector *sec, float x1, float y1, float z1, float x2,
 
     for (MapObject *mo = sec->glow_things; mo; mo = mo->dynamic_light_next_)
     {
-        SYS_ASSERT(mo->state_);
+        EPI_ASSERT(mo->state_);
 
         // skip "off" lights
         if (mo->state_->bright <= 0 || mo->dynamic_light_.r <= 0) continue;
@@ -1316,10 +1317,10 @@ static void BlockAddLine(int line_num)
         y1   = temp;
     }
 
-    SYS_ASSERT(0 <= x0 && (x0 / kBlockmapUnitSize) < blockmap_width);
-    SYS_ASSERT(0 <= y0 && (y0 / kBlockmapUnitSize) < blockmap_height);
-    SYS_ASSERT(0 <= x1 && (x1 / kBlockmapUnitSize) < blockmap_width);
-    SYS_ASSERT(0 <= y1 && (y1 / kBlockmapUnitSize) < blockmap_height);
+    EPI_ASSERT(0 <= x0 && (x0 / kBlockmapUnitSize) < blockmap_width);
+    EPI_ASSERT(0 <= y0 && (y0 / kBlockmapUnitSize) < blockmap_height);
+    EPI_ASSERT(0 <= x1 && (x1 / kBlockmapUnitSize) < blockmap_width);
+    EPI_ASSERT(0 <= y1 && (y1 / kBlockmapUnitSize) < blockmap_height);
 
     // check if this line spans multiple blocks.
 
@@ -1350,7 +1351,7 @@ static void BlockAddLine(int line_num)
 
     // -AJA- 2000/12/09: rewrote the general case
 
-    SYS_ASSERT(x1 > x0);
+    EPI_ASSERT(x1 > x0);
 
     slope = (float)(y1 - y0) / (float)(x1 - x0);
 
@@ -1364,7 +1365,7 @@ static void BlockAddLine(int line_num)
         int sy = y0 + (int)(slope * (sx - x0));
         int ey = y0 + (int)(slope * (ex - x0));
 
-        SYS_ASSERT(sx <= ex);
+        EPI_ASSERT(sx <= ex);
 
         y_dist = HMM_ABS((ey / 128) - (sy / 128));
 
@@ -1396,7 +1397,7 @@ void GenerateBlockmap(int min_x, int min_y, int max_x, int max_y)
 
     blockmap_lines = new std::list<Line *> *[btotal];
 
-    Z_Clear(blockmap_lines, std::list<Line *> *, btotal);
+    EPI_CLEAR_MEMORY(blockmap_lines, std::list<Line *> *, btotal);
 
     // process each linedef of the map
     for (int i = 0; i < total_level_lines; i++) BlockAddLine(i);

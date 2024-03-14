@@ -23,6 +23,7 @@
 
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "epi.h"
 #include "g_game.h"
 #include "m_argv.h"
 #include "m_math.h"
@@ -66,7 +67,7 @@ static std::string current_script_line;
 // Determine whether the code blocks are started and terminated.
 static int current_script_level = 0;
 
-static constexpr char *rad_level_names[3] = {"outer area", "map area",
+static constexpr const char *rad_level_names[3] = {"outer area", "map area",
                                              "trigger area"};
 
 // Location of current script
@@ -241,7 +242,7 @@ static void ScriptCheckForTime(const char *info, void *storage)
 {
     int *dest = (int *)storage;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     // -ES- 1999/09/14 MAXT means that time should be maximal.
     if (!epi::StringCaseCompareASCII(info, "maxt"))
@@ -518,29 +519,23 @@ static void ScriptComputeScriptCRC(TriggerScript *scr)
 
     // lastly handle miscellaneous parts
 
-#undef M_FLAG
-#define M_FLAG(bit, cond) \
-    if cond { flags |= (1 << (bit)); }
-
     int flags = 0;
 
-    M_FLAG(0, (scr->tagged_disabled));
-    M_FLAG(1, (scr->tagged_use));
-    M_FLAG(2, (scr->tagged_independent));
-    M_FLAG(3, (scr->tagged_immediate));
+    if ((scr->tagged_disabled)) { flags |= (1 << (0)); }
+    if ((scr->tagged_use)) { flags |= (1 << (1)); }
+    if ((scr->tagged_independent)) { flags |= (1 << (2)); }
+    if ((scr->tagged_immediate)) { flags |= (1 << (3)); }
 
-    M_FLAG(4, (scr->boss_trig != nullptr));
-    M_FLAG(5, (scr->height_trig != nullptr));
-    M_FLAG(6, (scr->cond_trig != nullptr));
-    M_FLAG(7, (scr->next_in_path != nullptr));
+    if ((scr->boss_trig != nullptr)) { flags |= (1 << (4)); }
+    if ((scr->height_trig != nullptr)) { flags |= (1 << (5)); }
+    if ((scr->cond_trig != nullptr)) { flags |= (1 << (6)); }
+    if ((scr->next_in_path != nullptr)) { flags |= (1 << (7)); }
 
     scr->crc += (int)flags;
 
     // Q/ add in states ?
     // A/ Nah.
 }
-
-#undef M_FLAG
 
 // ScriptTokenizeLine
 //
@@ -574,7 +569,7 @@ static void ScriptTokenizeLine(std::vector<const char *> &pars)
 
         if (want_token)  // looking for a new token
         {
-            SYS_ASSERT(!in_expr && !in_string);
+            EPI_ASSERT(!in_expr && !in_string);
 
             // end of line ?
             if (ch == 0 || comment) return;
@@ -1576,7 +1571,7 @@ static void ScriptParsePlayMovie(std::vector<const char *> &pars)
 {
     // PlayMovie <lump or packfile name>
 
-    SYS_ASSERT(pars[1]);
+    EPI_ASSERT(pars[1]);
 
     ScriptMovieParameter *mov = new ScriptMovieParameter;
 
@@ -2061,7 +2056,7 @@ static void ScriptParseShowMenu(std::vector<const char *> &pars)
 
     if (DDF_CompareName(pars[0], "SHOW_MENU_LDF") == 0) menu->use_ldf = true;
 
-    SYS_ASSERT(2 <= pars.size() && pars.size() <= 11);
+    EPI_ASSERT(2 <= pars.size() && pars.size() <= 11);
 
     menu->title = ScriptUnquoteString(pars[1]);
 
@@ -2101,7 +2096,7 @@ static void ScriptParseJumpOn(std::vector<const char *> &pars)
                     pars[1]);
     }
 
-    SYS_ASSERT(2 <= pars.size() && pars.size() <= 11);
+    EPI_ASSERT(2 <= pars.size() && pars.size() <= 11);
 
     for (size_t p = 2; p < pars.size(); p++)
         jump->labels[p - 2] = epi::CStringDuplicate(pars[p]);

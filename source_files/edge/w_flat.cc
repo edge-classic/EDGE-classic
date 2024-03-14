@@ -36,6 +36,7 @@
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_search.h"
+#include "epi.h"
 #include "m_argv.h"
 #include "m_misc.h"
 #include "p_local.h"
@@ -106,8 +107,8 @@ static void AddFlatAnimation(AnimationDefinition *anim)
 
         int total = (int)lumps->size();
 
-        SYS_ASSERT(s_offset <= e_offset);
-        SYS_ASSERT(e_offset < total);
+        EPI_ASSERT(s_offset <= e_offset);
+        EPI_ASSERT(e_offset < total);
 
         // determine animation sequence
         total = e_offset - s_offset + 1;
@@ -191,7 +192,7 @@ static void AddTextureAnimation(AnimationDefinition *anim)
             return;
         }
 
-        SYS_ASSERT(s_offset <= e_offset);
+        EPI_ASSERT(s_offset <= e_offset);
 
         int           total = e_offset - s_offset + 1;
         const Image **texs  = new const Image *[total];
@@ -236,7 +237,7 @@ static void AddGraphicAnimation(AnimationDefinition *anim)
 {
     int total = (int)anim->pics_.size();
 
-    SYS_ASSERT(total != 0);
+    EPI_ASSERT(total != 0);
 
     if (total == 1) return;
 
@@ -332,7 +333,7 @@ void InitializeAnimations(void)
     {
         AnimationDefinition *A = *iter;
 
-        SYS_ASSERT(A);
+        EPI_ASSERT(A);
 
         switch (A->type_)
         {
@@ -375,7 +376,7 @@ static void PrecacheTextures(void)
             images[count++] = level_sides[i].bottom.image;
     }
 
-    SYS_ASSERT(count <= max_image);
+    EPI_ASSERT(count <= max_image);
 
     // add in planes
     for (int i = 0; i < total_level_sectors; i++)
@@ -387,7 +388,7 @@ static void PrecacheTextures(void)
             images[count++] = level_sectors[i].ceiling.image;
     }
 
-    SYS_ASSERT(count <= max_image);
+    EPI_ASSERT(count <= max_image);
 
     // Sort the images, so we can ignore the duplicates
 
@@ -397,7 +398,7 @@ static void PrecacheTextures(void)
 
     for (int i = 0; i < count; i++)
     {
-        SYS_ASSERT(images[i]);
+        EPI_ASSERT(images[i]);
 
         if (i + 1 < count && images[i] == images[i + 1]) continue;
 

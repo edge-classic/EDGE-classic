@@ -28,8 +28,10 @@
 #include <vector>
 
 #include "dm_state.h"  // game_directory
+#include "epi.h"
 #include "file.h"
 #include "filesystem.h"
+#include "i_system.h"
 #include "m_argv.h"
 #include "m_misc.h"
 #include "m_random.h"
@@ -153,7 +155,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
                 return false;
             }
             F = LoadLumpAsFile(lump);
-            SYS_ASSERT(F);
+            EPI_ASSERT(F);
         }
     }
     else
@@ -197,7 +199,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
                 return false;
             }
             F = LoadLumpAsFile(lump);
-            SYS_ASSERT(F);
+            EPI_ASSERT(F);
         }
     }
 

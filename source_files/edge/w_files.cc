@@ -35,10 +35,12 @@
 #include "deh_edge.h"
 #include "dm_state.h"
 #include "dstrings.h"
+#include "epi.h"
 #include "file.h"
 #include "filesystem.h"
 #include "flat.h"
 #include "font.h"
+#include "i_system.h"
 #include "image.h"
 #include "l_deh.h"
 #include "main.h"
@@ -190,7 +192,7 @@ void ProcessFile(DataFile *df)
     }
     else if (df->kind_ == kFileKindPackWad || df->kind_ == kFileKindIPackWad)
     {
-        SYS_ASSERT(df->file_);  // This should already be handled by the pack
+        EPI_ASSERT(df->file_);  // This should already be handled by the pack
                                 // processing
         ProcessWad(df, file_index);
     }

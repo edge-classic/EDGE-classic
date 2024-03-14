@@ -32,6 +32,7 @@
 #include "con_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "epi.h"
 #include "g_game.h"
 #include "m_bbox.h"
 #include "m_random.h"
@@ -283,7 +284,7 @@ float DeathBot::EvaluateWeapon(int w_num, int &key) const
     if (!wp->owned) return -1;
 
     WeaponDefinition *weapon = wp->info;
-    SYS_ASSERT(weapon);
+    EPI_ASSERT(weapon);
 
     AttackDefinition *attack = weapon->attack_[0];
     if (!attack) return -1;
@@ -795,7 +796,7 @@ void DeathBot::WeaveNearLeader(const MapObject *leader)
 void DeathBot::PathToLeader()
 {
     MapObject *leader = pl_->map_object_->support_object_;
-    SYS_ASSERT(leader);
+    EPI_ASSERT(leader);
 
     DeletePath();
 
@@ -890,8 +891,8 @@ BotFollowPathResult DeathBot::FollowPath(bool do_look)
 {
     // returns a kBotFollowPathResultXXX enum constant.
 
-    SYS_ASSERT(path_ != nullptr);
-    SYS_ASSERT(!path_->Finished());
+    EPI_ASSERT(path_ != nullptr);
+    EPI_ASSERT(!path_->Finished());
 
     // handle doors and lifts
     int flags = path_->nodes_[path_->along_].flags;
@@ -902,7 +903,7 @@ BotFollowPathResult DeathBot::FollowPath(bool do_look)
         door_stage_ = kBotOpenDoorTaskApproach;
         door_seg_   = path_->nodes_[path_->along_].seg;
         door_time_  = 5 * kTicRate;
-        SYS_ASSERT(door_seg_ != nullptr);
+        EPI_ASSERT(door_seg_ != nullptr);
         return kBotFollowPathResultOK;
     }
     else if (flags & kBotPathNodeLift)
@@ -911,7 +912,7 @@ BotFollowPathResult DeathBot::FollowPath(bool do_look)
         lift_stage_ = kBotUseLiftTaskApproach;
         lift_seg_   = path_->nodes_[path_->along_].seg;
         lift_time_  = 5 * kTicRate;
-        SYS_ASSERT(lift_seg_ != nullptr);
+        EPI_ASSERT(lift_seg_ != nullptr);
         return kBotFollowPathResultOK;
     }
     else if (flags & kBotPathNodeLift)
@@ -1283,8 +1284,8 @@ void DeathBot::DeletePath()
 
 void DeathBot::Think()
 {
-    SYS_ASSERT(pl_ != nullptr);
-    SYS_ASSERT(pl_->map_object_ != nullptr);
+    EPI_ASSERT(pl_ != nullptr);
+    EPI_ASSERT(pl_->map_object_ != nullptr);
 
     // initialize the BotCommand
     memset(&cmd_, 0, sizeof(BotCommand));
@@ -1451,7 +1452,7 @@ void BotPlayerBuilder(const Player *p, void *data, EventTicCommand *cmd)
     if (game_state != kGameStateLevel) return;
 
     DeathBot *bot = (DeathBot *)data;
-    SYS_ASSERT(bot);
+    EPI_ASSERT(bot);
 
     bot->Think();
     bot->ConvertTiccmd(cmd);
@@ -1474,7 +1475,7 @@ void BotEndLevel(void)
         if (pl != nullptr && pl->IsBot())
         {
             DeathBot *bot = (DeathBot *)pl->build_data_;
-            SYS_ASSERT(bot);
+            EPI_ASSERT(bot);
 
             bot->EndLevel();
         }

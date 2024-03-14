@@ -27,6 +27,7 @@
 #include "con_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "epi.h"
 #include "m_bbox.h"
 #include "m_random.h"
 #include "main.h"
@@ -511,7 +512,7 @@ static void BotNavigateTryOpenArea(int idx, int parent, float cost)
 static void BotNavigateStoreSegMiddle(BotPath *path, int flags,
                                       const Seg *seg)
 {
-    SYS_ASSERT(seg);
+    EPI_ASSERT(seg);
 
     // calc middle of the adjoining seg
     Position pos;
@@ -606,8 +607,8 @@ BotPath *BotNavigateFindPath(const Position *start, const Position *finish,
     // the path may include manual lifts and doors, but more complicated
     // things (e.g. a door activated by a nearby switch) will fail.
 
-    SYS_ASSERT(start);
-    SYS_ASSERT(finish);
+    EPI_ASSERT(start);
+    EPI_ASSERT(finish);
 
     Subsector *start_sub  = RendererPointInSubsector(start->x, start->y);
     Subsector *finish_sub = RendererPointInSubsector(finish->x, finish->y);

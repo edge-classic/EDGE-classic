@@ -387,8 +387,8 @@ bool WadFile::HasLevel(const char *name) const
 
 void GetTextureLumpsForWad(int file, WadTextureResource *res)
 {
-    SYS_ASSERT(0 <= file && file < (int)data_files.size());
-    SYS_ASSERT(res);
+    EPI_ASSERT(0 <= file && file < (int)data_files.size());
+    EPI_ASSERT(res);
 
     DataFile *df  = data_files[file];
     WadFile  *wad = df->wad_;
@@ -880,7 +880,7 @@ int CheckForUniqueGameLumps(epi::File *file)
                 else if (epi::StringCaseCompareASCII(gamecheck.unique_lumps[0],
                                                      "ENDOOM") == 0)
                 {
-                    SYS_ASSERT(entry.size == 4000);
+                    EPI_ASSERT(entry.size == 4000);
                     file->Seek(entry.position, epi::File::kSeekpointStart);
                     uint8_t *endoom = new uint8_t[entry.size];
                     file->Read(endoom, entry.size);
@@ -1842,13 +1842,13 @@ void ReadUmapinfoLumps(void)
 
 epi::File *LoadLumpAsFile(int lump)
 {
-    SYS_ASSERT(IsLumpIndexValid(lump));
+    EPI_ASSERT(IsLumpIndexValid(lump));
 
     LumpInfo *l = &lump_info[lump];
 
     DataFile *df = data_files[l->file];
 
-    SYS_ASSERT(df->file_);
+    EPI_ASSERT(df->file_);
 
     return new epi::SubFile(df->file_, l->position, l->size);
 }
@@ -1875,7 +1875,7 @@ epi::File *LoadLumpAsFile(const char *name)
 //
 int GetPaletteForLump(int lump)
 {
-    SYS_ASSERT(IsLumpIndexValid(lump));
+    EPI_ASSERT(IsLumpIndexValid(lump));
 
     return CheckLumpNumberForName("PLAYPAL");
 }
@@ -2205,7 +2205,7 @@ int FindFlatSequence(const char *start, const char *end, int *s_offset,
 // returns nullptr for an empty list.
 std::vector<int> *GetFlatListForWad(int file)
 {
-    SYS_ASSERT(0 <= file && file < (int)data_files.size());
+    EPI_ASSERT(0 <= file && file < (int)data_files.size());
 
     DataFile *df  = data_files[file];
     WadFile  *wad = df->wad_;
@@ -2217,7 +2217,7 @@ std::vector<int> *GetFlatListForWad(int file)
 
 std::vector<int> *GetSpriteListForWad(int file)
 {
-    SYS_ASSERT(0 <= file && file < (int)data_files.size());
+    EPI_ASSERT(0 <= file && file < (int)data_files.size());
 
     DataFile *df  = data_files[file];
     WadFile  *wad = df->wad_;
@@ -2229,7 +2229,7 @@ std::vector<int> *GetSpriteListForWad(int file)
 
 std::vector<int> *GetPatchListForWad(int file)
 {
-    SYS_ASSERT(0 <= file && file < (int)data_files.size());
+    EPI_ASSERT(0 <= file && file < (int)data_files.size());
 
     DataFile *df  = data_files[file];
     WadFile  *wad = df->wad_;
@@ -2241,14 +2241,14 @@ std::vector<int> *GetPatchListForWad(int file)
 
 int GetDataFileIndexForLump(int lump)
 {
-    SYS_ASSERT(IsLumpIndexValid(lump));
+    EPI_ASSERT(IsLumpIndexValid(lump));
 
     return lump_info[lump].file;
 }
 
 int GetKindForLump(int lump)
 {
-    SYS_ASSERT(IsLumpIndexValid(lump));
+    EPI_ASSERT(IsLumpIndexValid(lump));
 
     return lump_info[lump].kind;
 }

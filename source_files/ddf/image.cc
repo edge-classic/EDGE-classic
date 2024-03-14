@@ -37,25 +37,24 @@ static void DDF_ImageGetPatches(const char *info, void *storage);
 // -ACB- 1998/08/10 Use DDF_MainGetLumpName for getting the..lump name.
 // -KM- 1998/09/27 Use DDF_MainGetTime for getting tics
 
-#define DDF_CMD_BASE dummy_image
 static ImageDefinition dummy_image;
 
 static const DDFCommandList image_commands[] = {
-    DDF_FIELD("IMAGE_DATA", type_, DDF_ImageGetType),
-    DDF_FIELD("PATCHES", patches_, DDF_ImageGetPatches),
-    DDF_FIELD("SPECIAL", special_, DDF_ImageGetSpecial),
-    DDF_FIELD("X_OFFSET", x_offset_, DDF_MainGetFloat),
-    DDF_FIELD("Y_OFFSET", y_offset_, DDF_MainGetFloat),
-    DDF_FIELD("SCALE", scale_, DDF_MainGetFloat),
-    DDF_FIELD("ASPECT", aspect_, DDF_MainGetFloat),
-    DDF_FIELD("FIX_TRANS", fix_trans_, DDF_ImageGetFixTrans),
-    DDF_FIELD("IS_FONT", is_font_, DDF_MainGetBoolean),
-    DDF_FIELD("ROTATE_HUE", hsv_rotation_, DDF_MainGetNumeric),
-    DDF_FIELD("SATURATION", hsv_saturation_, DDF_MainGetNumeric),
-    DDF_FIELD("BRIGHTNESS", hsv_value_, DDF_MainGetNumeric),
-    DDF_FIELD("BLUR_FACTOR", blur_factor_, DDF_MainGetFloat),
+    DDF_FIELD("IMAGE_DATA", dummy_image, type_, DDF_ImageGetType),
+    DDF_FIELD("PATCHES", dummy_image, patches_, DDF_ImageGetPatches),
+    DDF_FIELD("SPECIAL", dummy_image, special_, DDF_ImageGetSpecial),
+    DDF_FIELD("X_OFFSET", dummy_image, x_offset_, DDF_MainGetFloat),
+    DDF_FIELD("Y_OFFSET", dummy_image, y_offset_, DDF_MainGetFloat),
+    DDF_FIELD("SCALE", dummy_image, scale_, DDF_MainGetFloat),
+    DDF_FIELD("ASPECT", dummy_image, aspect_, DDF_MainGetFloat),
+    DDF_FIELD("FIX_TRANS", dummy_image, fix_trans_, DDF_ImageGetFixTrans),
+    DDF_FIELD("IS_FONT", dummy_image, is_font_, DDF_MainGetBoolean),
+    DDF_FIELD("ROTATE_HUE", dummy_image, hsv_rotation_, DDF_MainGetNumeric),
+    DDF_FIELD("SATURATION", dummy_image, hsv_saturation_, DDF_MainGetNumeric),
+    DDF_FIELD("BRIGHTNESS", dummy_image, hsv_value_, DDF_MainGetNumeric),
+    DDF_FIELD("BLUR_FACTOR", dummy_image, blur_factor_, DDF_MainGetFloat),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 ImageDefinitionContainer imagedefs;
 

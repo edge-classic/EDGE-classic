@@ -220,7 +220,7 @@ ImageAtlas *ImagePack(
     int atlas_h = 1;
     for (std::pair<const int, ImageData *> im : image_pack_data)
     {
-        SYS_ASSERT(im.second->depth_ >= 3);
+        EPI_ASSERT(im.second->depth_ >= 3);
         if (im.second->depth_ == 3) im.second->SetAlpha(255);
         stbrp_rect rect;
         rect.id = im.first;
@@ -299,14 +299,14 @@ bool ImageGetInfo(epi::File *file, int *width, int *height, int *depth)
 
 static void StbImageEpiFileWrite(void *context, void *data, int size)
 {
-    SYS_ASSERT(context && data && size);
+    EPI_ASSERT(context && data && size);
     epi::File *dest = (epi::File *)context;
     dest->Write(data, size);
 }
 
 bool ImageSaveJpeg(std::string filename, ImageData *image)
 {
-    SYS_ASSERT(image->depth_ == 3);
+    EPI_ASSERT(image->depth_ == 3);
 
     epi::File *dest =
         epi::FileOpen(filename, epi::kFileAccessBinary | epi::kFileAccessWrite);
@@ -331,7 +331,7 @@ bool ImageSaveJpeg(std::string filename, ImageData *image)
 
 bool ImageSavePng(std::string filename, ImageData *image)
 {
-    SYS_ASSERT(image->depth_ >= 3);
+    EPI_ASSERT(image->depth_ >= 3);
 
     epi::File *dest =
         epi::FileOpen(filename, epi::kFileAccessBinary | epi::kFileAccessWrite);

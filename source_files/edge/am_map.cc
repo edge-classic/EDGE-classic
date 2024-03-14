@@ -34,6 +34,7 @@
 #include "con_main.h"
 #include "con_var.h"
 #include "e_input.h"
+#include "epi.h"
 #include "hu_draw.h"
 #include "hu_style.h"
 #include "i_defs_gl.h"
@@ -848,7 +849,7 @@ static void AutomapWalkSeg(Seg *seg)
     }
 
     line = seg->linedef;
-    SYS_ASSERT(line);
+    EPI_ASSERT(line);
 
     // only draw segs on the _right_ side of linedefs
     if (line->side[1] == seg->sidedef) return;
@@ -1285,7 +1286,7 @@ void AutomapRender(float x, float y, float w, float h, MapObject *focus)
         map_center_y = frame_focus->y;
     }
 
-    SYS_ASSERT(automap_style);
+    EPI_ASSERT(automap_style);
 
     if (automap_style->background_image_)
     {
@@ -1316,7 +1317,7 @@ void AutomapRender(float x, float y, float w, float h, MapObject *focus)
 
 void AutomapSetColor(int which, RGBAColor color)
 {
-    SYS_ASSERT(0 <= which && which < kTotalAutomapColors);
+    EPI_ASSERT(0 <= which && which < kTotalAutomapColors);
 
     am_colors[which] = color;
 }

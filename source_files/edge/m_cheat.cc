@@ -40,6 +40,7 @@
 #include "con_main.h"
 #include "dm_state.h"
 #include "dstrings.h"
+#include "epi.h"
 #include "g_game.h"
 #include "i_system.h"
 #include "m_menu.h"
@@ -126,8 +127,8 @@ void M_ChangeLevelCheat(const char *string)
         return;
     }
 
-    SYS_ASSERT(GameMapExists(params.map_));
-    SYS_ASSERT(params.map_->episode_);
+    EPI_ASSERT(GameMapExists(params.map_));
+    EPI_ASSERT(params.map_->episode_);
 
     params.random_seed_ = PureRandomNumber();
 

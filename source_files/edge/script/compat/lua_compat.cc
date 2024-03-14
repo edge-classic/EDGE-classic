@@ -19,7 +19,7 @@ static std::vector<pending_lua_script_c> pending_scripts;
 
 void LuaInit()
 {
-    SYS_ASSERT(!global_lua_state);
+    EPI_ASSERT(!global_lua_state);
     global_lua_state = LuaCreateVM();
 
     LuaRegisterCoreLibraries(global_lua_state);
@@ -54,7 +54,7 @@ void LuaLoadScripts()
         LuaSetBoolean(global_lua_state, "hud", "custom_stbar", true);
     }
 
-    SYS_ASSERT(lua_gettop(global_lua_state) == top);
+    EPI_ASSERT(lua_gettop(global_lua_state) == top);
 }
 
 lua_State *LuaGetGlobalVM() { return global_lua_state; }

@@ -39,6 +39,7 @@
 #include "dm_state.h"
 #include "e_input.h"
 #include "e_main.h"
+#include "epi.h"
 #include "file.h"
 #include "filesystem.h"
 #include "g_game.h"
@@ -608,18 +609,18 @@ bool ScriptUpdatePath(MapObject *thing)
         choice = RandomByteDeterministic() % scr->next_path_total;
 
     path = scr->next_in_path;
-    SYS_ASSERT(path);
+    EPI_ASSERT(path);
 
     for (; choice > 0; choice--)
     {
         path = path->next;
-        SYS_ASSERT(path);
+        EPI_ASSERT(path);
     }
 
     if (!path->cached_scr)
         path->cached_scr = FindScriptByName(scr->mapid, path->name);
 
-    SYS_ASSERT(path->cached_scr);
+    EPI_ASSERT(path->cached_scr);
 
     thing->path_trigger_ = path->cached_scr;
     return true;
@@ -745,7 +746,7 @@ void RunScriptTriggers(void)
         {
             // Execute current command
             TriggerScriptState *state = trig->state;
-            SYS_ASSERT(state);
+            EPI_ASSERT(state);
 
             // move to next state.  We do this NOW since the action itself
             // may want to change the trigger's state (to support GOTO type
@@ -929,7 +930,7 @@ void InitializeTriggerScripts(void) { InitializeScriptTips(); }
 
 void ScriptMenuStart(TriggerScriptTrigger *R, ScriptShowMenuParameter *menu)
 {
-    SYS_ASSERT(!rts_menu_active);
+    EPI_ASSERT(!rts_menu_active);
 
     // find the right style
     StyleDefinition *def = nullptr;
@@ -948,7 +949,7 @@ void ScriptMenuFinish(int result)
 {
     if (!rts_menu_active) return;
 
-    SYS_ASSERT(rts_curr_menu);
+    EPI_ASSERT(rts_curr_menu);
 
     // zero is cancelled, otherwise result is 1..N
     if (result < 0 || result > HMM_MAX(1, rts_curr_menu->NumChoices())) return;
@@ -963,7 +964,7 @@ void ScriptMenuFinish(int result)
 
 static void ScriptMenuDrawer(void)
 {
-    SYS_ASSERT(rts_curr_menu);
+    EPI_ASSERT(rts_curr_menu);
 
     rts_curr_menu->Drawer();
 }
@@ -981,7 +982,7 @@ bool ScriptResponder(InputEvent *ev)
 
     if (!rts_menu_active) return false;
 
-    SYS_ASSERT(rts_curr_menu);
+    EPI_ASSERT(rts_curr_menu);
 
     int check = rts_curr_menu->Check(ev->value.key.sym);
 

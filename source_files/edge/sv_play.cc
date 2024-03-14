@@ -29,6 +29,7 @@
 //
 
 #include "bot_think.h"
+#include "epi.h"
 #include "main.h"
 #include "str_util.h"
 #include "sv_chunk.h"
@@ -406,7 +407,7 @@ int SaveGamePlayerCountElems(void)
         count++;
     }
 
-    SYS_ASSERT(count > 0);
+    EPI_ASSERT(count > 0);
 
     return count;
 }
@@ -468,7 +469,7 @@ void SaveGamePlayerCreateElems(int num_elems)
     {
         Player *p = new Player;
 
-        Z_Clear(p, Player, 1);
+        EPI_CLEAR_MEMORY(p, Player, 1);
 
         // Note: while loading, we don't follow the normal principle
         //       where players[p->player_number_] == p.  This is fixed in the
@@ -688,7 +689,7 @@ bool SR_PlayerGetName(void *storage, int index, void *extra)
     char       *dest = (char *)storage;
     const char *str;
 
-    SYS_ASSERT(index == 0);
+    EPI_ASSERT(index == 0);
 
     str = SaveChunkGetString();
     epi::CStringCopyMax(dest, str, kPlayerNameCharacterLimit - 1);
@@ -704,7 +705,7 @@ void SR_PlayerPutName(void *storage, int index, void *extra)
 {
     char *src = (char *)storage;
 
-    SYS_ASSERT(index == 0);
+    EPI_ASSERT(index == 0);
 
     SaveChunkPutString(src);
 }

@@ -33,6 +33,7 @@
 //   -  Button off_sound field.
 //
 
+#include "epi.h"
 #include "r_misc.h"
 #include "rad_trig.h"
 #include "str_util.h"
@@ -565,7 +566,7 @@ void SV_ButtonCreateElems(int num_elems)
     {
         Button *b = new Button;
 
-        Z_Clear(b, Button, 1);
+        EPI_CLEAR_MEMORY(b, Button, 1);
 
         active_buttons.push_back(b);
     }
@@ -647,7 +648,7 @@ void *SV_TriggerFindByIndex(int index)
 
     if (!cur) FatalError("LOADGAME: Invalid Trigger: %d\n", index);
 
-    SYS_ASSERT(index == 0);
+    EPI_ASSERT(index == 0);
     return cur;
 }
 
@@ -716,7 +717,7 @@ void *SV_TipFindByIndex(int index)
 
 int SV_TipGetIndex(ScriptDrawTip *elem)
 {
-    SYS_ASSERT(tip_slots <= elem && elem < (tip_slots + kMaximumTipSlots));
+    EPI_ASSERT(tip_slots <= elem && elem < (tip_slots + kMaximumTipSlots));
 
     return elem - tip_slots;
 }
@@ -778,7 +779,7 @@ void SV_PlaneMoveCreateElems(int num_elems)
     {
         PlaneMover *pmov = new PlaneMover;
 
-        Z_Clear(pmov, PlaneMover, 1);
+        EPI_CLEAR_MEMORY(pmov, PlaneMover, 1);
 
         // link it in
         AddActivePlane(pmov);
@@ -834,7 +835,7 @@ void SV_SliderMoveCreateElems(int num_elems)
     {
         SlidingDoorMover *smov = new SlidingDoorMover;
 
-        Z_Clear(smov, SlidingDoorMover, 1);
+        EPI_CLEAR_MEMORY(smov, SlidingDoorMover, 1);
 
         // link it in
         AddActiveSlider(smov);
@@ -1055,7 +1056,7 @@ bool SaveGameGetTriggerScript(void *storage, int index, void *extra)
     *base_p++ = 0;
 
     idx_val = strtol(use_p, nullptr, 0);
-    SYS_ASSERT(idx_val >= 1);
+    EPI_ASSERT(idx_val >= 1);
 
     // get CRC value
 

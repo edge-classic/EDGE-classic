@@ -277,7 +277,7 @@ void SetConsolePlayer(int player_number_)
 {
     console_player = player_number_;
 
-    SYS_ASSERT(players[console_player]);
+    EPI_ASSERT(players[console_player]);
 
     for (int i = 0; i < kMaximumPlayers; i++)
         if (players[i]) players[i]->player_flags_ &= ~kPlayerFlagConsole;
@@ -302,7 +302,7 @@ void SetDisplayPlayer(int player_number_)
 {
     display_player = player_number_;
 
-    SYS_ASSERT(players[display_player]);
+    EPI_ASSERT(players[display_player]);
 
     for (int i = 0; i < kMaximumPlayers; i++)
         if (players[i]) players[i]->player_flags_ &= ~kPlayerFlagDisplay;
@@ -408,7 +408,7 @@ static void P_SpawnPlayer(Player *p, const SpawnPoint *point, bool is_hub)
     if (p->IsBot())
     {
         DeathBot *bot = (DeathBot *)p->build_data_;
-        SYS_ASSERT(bot);
+        EPI_ASSERT(bot);
 
         bot->Respawn();
     }
@@ -418,8 +418,8 @@ static void P_SpawnVoodooDoll(Player *p, const SpawnPoint *point)
 {
     const MapObjectDefinition *info = point->info;
 
-    SYS_ASSERT(info);
-    SYS_ASSERT(info->playernum_ > 0);
+    EPI_ASSERT(info);
+    EPI_ASSERT(info->playernum_ > 0);
 
     LogDebug("* P_SpawnVoodooDoll %d @ %1.0f,%1.0f\n", p->player_number_ + 1,
              point->x, point->y);
@@ -508,7 +508,7 @@ static SpawnPoint *GameFindHubPlayer(int player_number_, int tag)
     for (int i = 0; i < (int)hub_starts.size(); i++)
     {
         SpawnPoint *point = &hub_starts[i];
-        SYS_ASSERT(point->info);
+        EPI_ASSERT(point->info);
 
         if (point->tag != tag) continue;
 
@@ -528,7 +528,7 @@ static SpawnPoint *GameFindHubPlayer(int player_number_, int tag)
 
 void GameHubSpawnPlayer(Player *p, int tag)
 {
-    SYS_ASSERT(!p->map_object_);
+    EPI_ASSERT(!p->map_object_);
 
     SpawnPoint *point = GameFindHubPlayer(p->player_number_ + 1, tag);
 
@@ -815,7 +815,7 @@ SpawnPoint *FindCoopPlayer(int player_number_)
     for (int i = 0; i < (int)coop_starts.size(); i++)
     {
         SpawnPoint *point = &coop_starts[i];
-        SYS_ASSERT(point->info);
+        EPI_ASSERT(point->info);
 
         if (point->info->playernum_ == player_number_) return point;
     }
@@ -851,8 +851,8 @@ void RemoveOldAvatars(void)
         if (mo->target_ &&
             (mo->target_->hyper_flags_ & kHyperFlagRememberOldAvatars))
         {
-            SYS_ASSERT(mo->target_->player_);
-            SYS_ASSERT(mo->target_->player_->map_object_);
+            EPI_ASSERT(mo->target_->player_);
+            EPI_ASSERT(mo->target_->player_->map_object_);
 
             // LogDebug("Updating avatar reference: %p --> %p\n", mo->target_,
             // mo->target_->player_->map_object_);

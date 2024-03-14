@@ -24,6 +24,7 @@
 #include "con_main.h"
 #include "dm_defs.h"
 #include "e_main.h"
+#include "epi.h"
 #include "epi_sdl.h"
 #include "epi_windows.h"
 #include "g_game.h"
@@ -104,7 +105,7 @@ void LogPrint(const char *message, ...)
     vsnprintf(printbuf, sizeof(printbuf), message, argptr);
     va_end(argptr);
 
-    SYS_ASSERT(printbuf[kMessageBufferSize - 1] == 0);
+    EPI_ASSERT(printbuf[kMessageBufferSize - 1] == 0);
 
     if (log_file)
     {

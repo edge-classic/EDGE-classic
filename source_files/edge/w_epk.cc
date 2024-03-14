@@ -490,7 +490,7 @@ class epk_file_c : public epi::File
             length = (mz_uint)stat.m_uncomp_size;
 
         iter = mz_zip_reader_extract_iter_new(pack->archive_, zip_idx, 0);
-        SYS_ASSERT(iter);
+        EPI_ASSERT(iter);
     }
 
     ~epk_file_c()
@@ -566,7 +566,7 @@ class epk_file_c : public epi::File
     {
         mz_zip_reader_extract_iter_free(iter);
         iter = mz_zip_reader_extract_iter_new(pack->archive_, zip_idx, 0);
-        SYS_ASSERT(iter);
+        EPI_ASSERT(iter);
 
         pos = 0;
     }
@@ -1030,7 +1030,7 @@ bool PackFindFile(PackFile *pack, const std::string &name)
 {
     // when file does not exist, this returns false.
 
-    SYS_ASSERT(!name.empty());
+    EPI_ASSERT(!name.empty());
 
     // disallow absolute (real filesystem) paths,
     // although we have to let a leading '/' slide to be caught later
@@ -1101,7 +1101,7 @@ epi::File *PackOpenFile(PackFile *pack, const std::string &name)
 {
     // when file does not exist, this returns nullptr.
 
-    SYS_ASSERT(!name.empty());
+    EPI_ASSERT(!name.empty());
 
     // disallow absolute (real filesystem) paths,
     // although we have to let a leading '/' slide to be caught later

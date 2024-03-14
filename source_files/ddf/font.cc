@@ -32,20 +32,19 @@ static FontDefinition *dynamic_font;
 static void DDF_FontGetType(const char *info, void *storage);
 static void DDF_FontGetPatch(const char *info, void *storage);
 
-#define DDF_CMD_BASE dummy_font
 static FontDefinition dummy_font;
 
 static const DDFCommandList font_commands[] = {
-    DDF_FIELD("TYPE", type_, DDF_FontGetType),
-    DDF_FIELD("PATCHES", patches_, DDF_FontGetPatch),
-    DDF_FIELD("IMAGE", image_name_, DDF_MainGetString),
-    DDF_FIELD("TTF", truetype_name_, DDF_MainGetString),
-    DDF_FIELD("DEFAULT_SIZE", default_size_, DDF_MainGetFloat),
-    DDF_FIELD("TTF_SMOOTHING", truetype_smoothing_string_, DDF_MainGetString),
-    DDF_FIELD("MISSING_PATCH", missing_patch_, DDF_MainGetString),
-    DDF_FIELD("SPACING", spacing_, DDF_MainGetFloat),
+    DDF_FIELD("TYPE", dummy_font, type_, DDF_FontGetType),
+    DDF_FIELD("PATCHES", dummy_font, patches_, DDF_FontGetPatch),
+    DDF_FIELD("IMAGE", dummy_font, image_name_, DDF_MainGetString),
+    DDF_FIELD("TTF", dummy_font, truetype_name_, DDF_MainGetString),
+    DDF_FIELD("DEFAULT_SIZE", dummy_font, default_size_, DDF_MainGetFloat),
+    DDF_FIELD("TTF_SMOOTHING", dummy_font, truetype_smoothing_string_, DDF_MainGetString),
+    DDF_FIELD("MISSING_PATCH", dummy_font, missing_patch_, DDF_MainGetString),
+    DDF_FIELD("SPACING", dummy_font, spacing_, DDF_MainGetFloat),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 // -ACB- 2004/06/03 Replaced array and size with purpose-built class
 FontDefinitionContainer fontdefs;
@@ -172,7 +171,7 @@ void DDF_FontCleanUp(void)
 //
 static void DDF_FontGetType(const char *info, void *storage)
 {
-    SYS_ASSERT(storage);
+    EPI_ASSERT(storage);
 
     FontType *type = (FontType *)storage;
 

@@ -55,7 +55,7 @@ void ImageData::Clear(uint8_t value)
 
 void ImageData::Whiten()
 {
-    SYS_ASSERT(depth_ >= 3);
+    EPI_ASSERT(depth_ >= 3);
 
     for (int y = 0; y < height_; y++)
         for (int x = 0; x < width_; x++)
@@ -91,7 +91,7 @@ void ImageData::Invert()
 
 void ImageData::Shrink(int new_w, int new_h)
 {
-    SYS_ASSERT(new_w <= width_ && new_h <= height_);
+    EPI_ASSERT(new_w <= width_ && new_h <= height_);
 
     int step_x = width_ / new_w;
     int step_y = height_ / new_h;
@@ -186,7 +186,7 @@ void ImageData::ShrinkMasked(int new_w, int new_h)
         return;
     }
 
-    SYS_ASSERT(new_w <= width_ && new_h <= height_);
+    EPI_ASSERT(new_w <= width_ && new_h <= height_);
 
     int step_x = width_ / new_w;
     int step_y = height_ / new_h;
@@ -242,7 +242,7 @@ void ImageData::ShrinkMasked(int new_w, int new_h)
 
 void ImageData::Grow(int new_w, int new_h)
 {
-    SYS_ASSERT(new_w >= width_ && new_h >= height_);
+    EPI_ASSERT(new_w >= width_ && new_h >= height_);
 
     uint8_t *new_pixels_ = new uint8_t[new_w * new_h * depth_];
 
@@ -387,7 +387,7 @@ void ImageData::RemoveBackground()
 
 void ImageData::EightWaySymmetry()
 {
-    SYS_ASSERT(width_ == height_);
+    EPI_ASSERT(width_ == height_);
 
     int hw = (width_ + 1) / 2;
 
@@ -438,7 +438,7 @@ void ImageData::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x,
                            int from_y, int to_y)
 {
     // make sure we don't overflow
-    SYS_ASSERT(used_width_ * used_height_ <= 2048 * 2048);
+    EPI_ASSERT(used_width_ * used_height_ <= 2048 * 2048);
 
     int r_sum = 0;
     int g_sum = 0;
@@ -523,7 +523,7 @@ void ImageData::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x,
 RGBAColor ImageData::AverageColor(int from_x, int to_x, int from_y, int to_y)
 {
     // make sure we don't overflow
-    SYS_ASSERT(used_width_ * used_height_ <= 2048 * 2048);
+    EPI_ASSERT(used_width_ * used_height_ <= 2048 * 2048);
 
     std::unordered_map<RGBAColor, unsigned int> seen_colors;
 
@@ -566,7 +566,7 @@ RGBAColor ImageData::AverageColor(int from_x, int to_x, int from_y, int to_y)
 RGBAColor ImageData::LightestColor(int from_x, int to_x, int from_y, int to_y)
 {
     // make sure we don't overflow
-    SYS_ASSERT(used_width_ * used_height_ <= 2048 * 2048);
+    EPI_ASSERT(used_width_ * used_height_ <= 2048 * 2048);
 
     int lightest_total = 0;
     int lightest_r     = 0;
@@ -603,7 +603,7 @@ RGBAColor ImageData::LightestColor(int from_x, int to_x, int from_y, int to_y)
 RGBAColor ImageData::DarkestColor(int from_x, int to_x, int from_y, int to_y)
 {
     // make sure we don't overflow
-    SYS_ASSERT(used_width_ * used_height_ <= 2048 * 2048);
+    EPI_ASSERT(used_width_ * used_height_ <= 2048 * 2048);
 
     int darkest_total = 765;
     int darkest_r     = 0;
@@ -715,7 +715,7 @@ void ImageData::FillMarginY(int actual_h)
 
 void ImageData::SetHsv(int rotation, int saturation, int value)
 {
-    SYS_ASSERT(depth_ >= 3);
+    EPI_ASSERT(depth_ >= 3);
 
     rotation   = HMM_Clamp(-1800, rotation, 1800);
     saturation = HMM_Clamp(-1, saturation, 255);

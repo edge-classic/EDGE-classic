@@ -292,7 +292,7 @@ lua_State *LuaCreateVM()
         lua_setglobal(L, "dbg");
     }
 
-    SYS_ASSERT(!lua_gettop(L));
+    EPI_ASSERT(!lua_gettop(L));
 
     return L;
 }

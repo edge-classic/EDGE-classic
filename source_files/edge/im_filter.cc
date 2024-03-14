@@ -177,7 +177,7 @@ static void BoxBlurRgb(uint8_t *&in, uint8_t *&out, int w, int h, int c, int r)
 
 ImageData *ImageBlur(ImageData *image, float sigma)
 {
-    SYS_ASSERT(image->depth_ >= 3);
+    EPI_ASSERT(image->depth_ >= 3);
 
     int w = image->width_;
     int h = image->height_;

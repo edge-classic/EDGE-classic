@@ -31,6 +31,7 @@
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_event.h"
+#include "epi.h"
 #include "m_misc.h"
 #include "m_random.h"
 #include "p_action.h"
@@ -336,7 +337,7 @@ static void ReloadWeapon(Player *p, int idx, int ATK)
     if (qty > p->ammo_[info->ammo_[ATK]].count)
         qty = p->ammo_[info->ammo_[ATK]].count;
 
-    SYS_ASSERT(qty > 0);
+    EPI_ASSERT(qty > 0);
 
     p->weapons_[idx].reload_count[ATK] = qty;
     p->weapons_[idx].clip_size[ATK] += qty;
@@ -404,7 +405,7 @@ static void BringUpWeapon(Player *p)
 {
     WeaponSelection sel = p->pending_weapon_;
 
-    SYS_ASSERT(sel != KWeaponSelectionNoChange);
+    EPI_ASSERT(sel != KWeaponSelectionNoChange);
 
     p->ready_weapon_ = sel;
 
@@ -467,7 +468,7 @@ void DesireWeaponChange(Player *p, int key)
     {
         WeaponDefinition *info = p->weapons_[p->pending_weapon_].info;
 
-        SYS_ASSERT(info);
+        EPI_ASSERT(info);
 
         if (info->bind_key_ == key) return;
     }
@@ -672,7 +673,7 @@ void TrySwitchNewWeapon(Player *p, int new_weap, AmmunitionType new_ammo)
         return;
     }
 
-    SYS_ASSERT(new_ammo >= 0);
+    EPI_ASSERT(new_ammo >= 0);
 
     // We were down to zero ammo, so select a new weapon.
     // Choose the next highest priority weapon than the current one.
@@ -717,7 +718,7 @@ bool TryFillNewWeapon(Player *p, int idx, AmmunitionType ammo, int *qty)
         if (ammo == kAmmunitionTypeDontCare)
             qty = &p->ammo_[info->ammo_[ATK]].count;
 
-        SYS_ASSERT(qty);
+        EPI_ASSERT(qty);
 
         if (info->clip_size_[ATK] <= *qty)
         {
@@ -887,7 +888,7 @@ void A_WeaponReady(MapObject *mo)
     Player     *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
-    SYS_ASSERT(p->ready_weapon_ != KWeaponSelectionNone);
+    EPI_ASSERT(p->ready_weapon_ != KWeaponSelectionNone);
 
     WeaponDefinition *info = p->weapons_[p->ready_weapon_].info;
 
@@ -1222,7 +1223,7 @@ static void DoCheckReload(MapObject *mo, int ATK)
         return;
     }
 
-    //	SYS_ASSERT(p->ready_weapon_ >= 0);
+    //	EPI_ASSERT(p->ready_weapon_ >= 0);
     //
     //	WeaponDefinition *info = p->weapons_[p->ready_weapon_].info;
 
@@ -1369,7 +1370,7 @@ static void DoGunFlash(MapObject *mo, int ATK)
 {
     Player *p = mo->player_;
 
-    SYS_ASSERT(p->ready_weapon_ >= 0);
+    EPI_ASSERT(p->ready_weapon_ >= 0);
 
     WeaponDefinition *info = p->weapons_[p->ready_weapon_].info;
 
@@ -1391,7 +1392,7 @@ static void DoWeaponShoot(MapObject *mo, int ATK)
     Player     *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
-    SYS_ASSERT(p->ready_weapon_ >= 0);
+    EPI_ASSERT(p->ready_weapon_ >= 0);
 
     WeaponDefinition *info   = p->weapons_[p->ready_weapon_].info;
     AttackDefinition *attack = info->attack_[ATK];
@@ -1419,12 +1420,12 @@ static void DoWeaponShoot(MapObject *mo, int ATK)
     if (info->clip_size_[ATK] > 0)
     {
         p->weapons_[p->ready_weapon_].clip_size[ATK] -= count;
-        SYS_ASSERT(p->weapons_[p->ready_weapon_].clip_size[ATK] >= 0);
+        EPI_ASSERT(p->weapons_[p->ready_weapon_].clip_size[ATK] >= 0);
     }
     else if (ammo != kAmmunitionTypeNoAmmo)
     {
         p->ammo_[ammo].count -= count;
-        SYS_ASSERT(p->ammo_[ammo].count >= 0);
+        EPI_ASSERT(p->ammo_[ammo].count >= 0);
     }
 
     PlayerAttack(mo, attack);
@@ -1590,8 +1591,8 @@ void A_WeaponJump(MapObject *mo)
 
     jump = (JumpActionInfo *)psp->state->action_par;
 
-    SYS_ASSERT(jump->chance >= 0);
-    SYS_ASSERT(jump->chance <= 1);
+    EPI_ASSERT(jump->chance >= 0);
+    EPI_ASSERT(jump->chance <= 1);
 
     if (RandomByteTestDeterministic(jump->chance))
     {
@@ -1620,8 +1621,8 @@ void A_WeaponDJNE(MapObject *mo)
 
     jump = (JumpActionInfo *)psp->state->action_par;
 
-    SYS_ASSERT(jump->chance >= 0);
-    SYS_ASSERT(jump->chance <= 1);
+    EPI_ASSERT(jump->chance >= 0);
+    EPI_ASSERT(jump->chance <= 1);
 
     int ATK = jump->chance > 0 ? 1 : 0;  // Lobo: fixme for 3rd and 4th attack?
 
@@ -1693,7 +1694,7 @@ void A_WeaponSetSkin(MapObject *mo)
     Player     *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 
-    SYS_ASSERT(p->ready_weapon_ >= 0);
+    EPI_ASSERT(p->ready_weapon_ >= 0);
     WeaponDefinition *info = p->weapons_[p->ready_weapon_].info;
 
     const State *st = psp->state;
@@ -1766,7 +1767,7 @@ void A_WeaponBecome(MapObject *mo)
     if (!become->info_)
     {
         become->info_ = weapondefs.Lookup(become->info_ref_.c_str());
-        SYS_ASSERT(
+        EPI_ASSERT(
             become->info_);  // lookup should be OK (fatal error if not found)
     }
 

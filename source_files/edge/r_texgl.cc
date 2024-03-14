@@ -24,6 +24,7 @@
 
 #include "e_main.h"
 #include "e_search.h"
+#include "epi.h"
 #include "i_defs_gl.h"
 #include "i_system.h"
 #include "im_data.h"
@@ -43,7 +44,7 @@ extern std::unordered_map<GLuint, GLint> texture_clamp;
 
 int MakeValidTextureSize(int value)
 {
-    SYS_ASSERT(value > 0);
+    EPI_ASSERT(value > 0);
 
     if (value <= 1) return 1;
     if (value <= 2) return 2;
@@ -106,7 +107,7 @@ GLuint RendererUploadTexture(ImageData *img, int flags, int max_pix)
      * assigned to it.
      */
 
-    SYS_ASSERT(img->depth_ == 3 || img->depth_ == 4);
+    EPI_ASSERT(img->depth_ == 3 || img->depth_ == 4);
 
     bool clamp  = (flags & kUploadClamp) ? true : false;
     bool nomip  = (flags & kUploadMipMap) ? false : true;
@@ -333,7 +334,7 @@ int DetermineOpacity(ImageData *img, bool *is_empty_)
     }
     else
     {
-        SYS_ASSERT(img->depth_ == 4);
+        EPI_ASSERT(img->depth_ == 4);
 
         ImageOpacity opacity   = kOpacitySolid;
         bool            is_masked = false;

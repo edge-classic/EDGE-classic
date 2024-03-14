@@ -44,6 +44,7 @@
 #include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "epi.h"
 #include "m_bbox.h"
 #include "p_local.h"
 #include "p_spec.h"
@@ -692,7 +693,7 @@ ExtrafloorFit CheckExtrafloorFit(Sector *sec, float z1, float z2)
         float bottom = ef->bottom_height;
         float top    = ef->top_height;
 
-        SYS_ASSERT(top >= bottom);
+        EPI_ASSERT(top >= bottom);
 
         // here is another solid extrafloor, check for overlap
         if (z2 > bottom && z1 < top) return kFitStuckInExtraFloor;
@@ -712,8 +713,8 @@ void AddExtraFloor(Sector *sec, Line *line)
     bool          liquid;
     ExtrafloorFit errcode;
 
-    SYS_ASSERT(line->special);
-    SYS_ASSERT(line->special->ef_.type_ & kExtraFloorTypePresent);
+    EPI_ASSERT(line->special);
+    EPI_ASSERT(line->special->ef_.type_ & kExtraFloorTypePresent);
 
     ef_info = &line->special->ef_;
 
@@ -721,7 +722,7 @@ void AddExtraFloor(Sector *sec, Line *line)
     // -- create new extrafloor --
     //
 
-    SYS_ASSERT(sec->extrafloor_used <= sec->extrafloor_maximum);
+    EPI_ASSERT(sec->extrafloor_used <= sec->extrafloor_maximum);
 
     if (sec->extrafloor_used == sec->extrafloor_maximum)
         FatalError("INTERNAL ERROR: extrafloor overflow in sector %d\n",
@@ -730,7 +731,7 @@ void AddExtraFloor(Sector *sec, Line *line)
     newbie = sec->extrafloor_first + sec->extrafloor_used;
     sec->extrafloor_used++;
 
-    Z_Clear(newbie, Extrafloor, 1);
+    EPI_CLEAR_MEMORY(newbie, Extrafloor, 1);
 
     bottom = &ctrl->floor;
     top    = (ef_info->type_ & kExtraFloorTypeThick) ? &ctrl->ceiling : bottom;
@@ -875,7 +876,7 @@ void FloodExtraFloors(Sector *sector)
             L = L->lower;
         }
 
-        SYS_ASSERT(C);
+        EPI_ASSERT(C);
 
         props = &C->extrafloor_line->front_sector->properties;
 

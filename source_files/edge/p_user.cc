@@ -726,7 +726,7 @@ bool PlayerThink(Player *player, bool extra_tic)
 {
     EventTicCommand *cmd = &player->command_;
 
-    SYS_ASSERT(player->map_object_);
+    EPI_ASSERT(player->map_object_);
 
     bool should_think = true;
 
@@ -961,12 +961,12 @@ bool PlayerThink(Player *player, bool extra_tic)
 
 void CreatePlayer(int pnum, bool is_bot)
 {
-    SYS_ASSERT(0 <= pnum && pnum < kMaximumPlayers);
-    SYS_ASSERT(players[pnum] == nullptr);
+    EPI_ASSERT(0 <= pnum && pnum < kMaximumPlayers);
+    EPI_ASSERT(players[pnum] == nullptr);
 
     Player *p = new Player;
 
-    Z_Clear(p, Player, 1);
+    EPI_CLEAR_MEMORY(p, Player, 1);
 
     p->player_number_        = pnum;
     p->player_state_ = kPlayerDead;
@@ -1037,7 +1037,7 @@ void UpdateAvailWeapons(Player *p)
     {
         if (!p->weapons_[i].owned) continue;
 
-        SYS_ASSERT(p->weapons_[i].info);
+        EPI_ASSERT(p->weapons_[i].info);
 
         key = p->weapons_[i].info->bind_key_;
 
@@ -1208,7 +1208,7 @@ bool RemoveWeapon(Player *player, WeaponDefinition *info)
     if (player->pending_weapon_ == slot)
         SelectNewWeapon(player, -100, kAmmunitionTypeDontCare);
 
-    SYS_ASSERT(player->pending_weapon_ != slot);
+    EPI_ASSERT(player->pending_weapon_ != slot);
 
     return true;
 }

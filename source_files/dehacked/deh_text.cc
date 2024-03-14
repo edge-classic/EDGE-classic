@@ -456,7 +456,7 @@ void text_strings::Shutdown()
 
 bool text_strings::ReplaceString(const char *before, const char *after)
 {
-    SYS_ASSERT(after[0]);
+    EPI_ASSERT(after[0]);
 
     for (int i = 0; lang_list[i].orig_text; i++)
     {
@@ -478,7 +478,7 @@ bool text_strings::ReplaceString(const char *before, const char *after)
 
 bool text_strings::ReplaceBexString(const char *bex_name, const char *after)
 {
-    SYS_ASSERT(after[0]);
+    EPI_ASSERT(after[0]);
 
     for (int i = 0; lang_list[i].orig_text; i++)
     {
@@ -499,7 +499,7 @@ bool text_strings::ReplaceBexString(const char *bex_name, const char *after)
 
 void text_strings::ReplaceBinaryString(int v166_index, const char *str)
 {
-    SYS_ASSERT(str[0]);
+    EPI_ASSERT(str[0]);
 
     for (int i = 0; lang_list[i].orig_text; i++)
     {
@@ -524,7 +524,7 @@ void text_strings::ReplaceBinaryString(int v166_index, const char *str)
 
 bool text_strings::ReplaceCheat(const char *deh_name, const char *str)
 {
-    SYS_ASSERT(str[0]);
+    EPI_ASSERT(str[0]);
 
     // DOOM cheats were terminated with an 0xff byte
     int eoln = 0xff;

@@ -32,8 +32,8 @@
 #include "am_map.h"
 #include "bot_think.h"
 #include "con_main.h"
-#include "dstrings.h"
 #include "dm_state.h"
+#include "dstrings.h"
 #include "e_input.h"
 #include "e_main.h"
 #include "endianess.h"
@@ -132,6 +132,14 @@ static void SpawnInitialPlayers(void);
 static bool GameLoadGameFromFile(std::string filename, bool is_hub = false);
 static bool GameSaveGameToFile(std::string filename, const char *description);
 
+static void HandleLevelFlag(bool *special, MapFlag flag)
+{
+    if (current_map->force_on_ & (flag))
+        *special = true;
+    else if (current_map->force_off_ & (flag))
+        *special = false;
+}
+
 void LoadLevel_Bits(void)
 {
     if (current_map == nullptr)
@@ -149,8 +157,7 @@ void LoadLevel_Bits(void)
     //
     // -ACB- 1998/08/09 Reference current map for sky name.
 
-    sky_image =
-        ImageLookup(current_map->sky_.c_str(), kImageNamespaceTexture);
+    sky_image = ImageLookup(current_map->sky_.c_str(), kImageNamespaceTexture);
 
     game_state = kGameStateNothing;  // FIXME: needed ???
 
@@ -173,31 +180,22 @@ void LoadLevel_Bits(void)
 
     // -KM- 1998/12/16 Make map flags actually do stuff.
     // -AJA- 2000/02/02: Made it more generic.
-
-#define HANDLE_FLAG(var, specflag)                 \
-    if (current_map->force_on_ & (specflag))       \
-        (var) = true;                              \
-    else if (current_map->force_off_ & (specflag)) \
-        (var) = false;
-
-    HANDLE_FLAG(level_flags.jump, kMapFlagJumping);
-    HANDLE_FLAG(level_flags.crouch, kMapFlagCrouching);
-    HANDLE_FLAG(level_flags.mouselook, kMapFlagMlook);
-    HANDLE_FLAG(level_flags.items_respawn, kMapFlagItemRespawn);
-    HANDLE_FLAG(level_flags.fast_monsters, kMapFlagFastParm);
-    HANDLE_FLAG(level_flags.true_3d_gameplay, kMapFlagTrue3D);
-    HANDLE_FLAG(level_flags.more_blood, kMapFlagMoreBlood);
-    HANDLE_FLAG(level_flags.cheats, kMapFlagCheats);
-    HANDLE_FLAG(level_flags.enemies_respawn, kMapFlagRespawn);
-    HANDLE_FLAG(level_flags.enemy_respawn_mode, kMapFlagResRespawn);
-    HANDLE_FLAG(level_flags.have_extra, kMapFlagExtras);
-    HANDLE_FLAG(level_flags.limit_zoom, kMapFlagLimitZoom);
-    HANDLE_FLAG(level_flags.kicking, kMapFlagKicking);
-    HANDLE_FLAG(level_flags.weapon_switch, kMapFlagWeaponSwitch);
-    HANDLE_FLAG(level_flags.pass_missile, kMapFlagPassMissile);
-    HANDLE_FLAG(level_flags.team_damage, kMapFlagTeamDamage);
-
-#undef HANDLE_FLAG
+    HandleLevelFlag(&level_flags.jump, kMapFlagJumping);
+    HandleLevelFlag(&level_flags.crouch, kMapFlagCrouching);
+    HandleLevelFlag(&level_flags.mouselook, kMapFlagMlook);
+    HandleLevelFlag(&level_flags.items_respawn, kMapFlagItemRespawn);
+    HandleLevelFlag(&level_flags.fast_monsters, kMapFlagFastParm);
+    HandleLevelFlag(&level_flags.true_3d_gameplay, kMapFlagTrue3D);
+    HandleLevelFlag(&level_flags.more_blood, kMapFlagMoreBlood);
+    HandleLevelFlag(&level_flags.cheats, kMapFlagCheats);
+    HandleLevelFlag(&level_flags.enemies_respawn, kMapFlagRespawn);
+    HandleLevelFlag(&level_flags.enemy_respawn_mode, kMapFlagResRespawn);
+    HandleLevelFlag(&level_flags.have_extra, kMapFlagExtras);
+    HandleLevelFlag(&level_flags.limit_zoom, kMapFlagLimitZoom);
+    HandleLevelFlag(&level_flags.kicking, kMapFlagKicking);
+    HandleLevelFlag(&level_flags.weapon_switch, kMapFlagWeaponSwitch);
+    HandleLevelFlag(&level_flags.pass_missile, kMapFlagPassMissile);
+    HandleLevelFlag(&level_flags.team_damage, kMapFlagTeamDamage);
 
     if (current_map->force_on_ & kMapFlagAutoAim)
     {
@@ -230,7 +228,7 @@ void LoadLevel_Bits(void)
         if (!p) continue;
 
         p->kill_count_ = p->secret_count_ = p->item_count_ = 0;
-        p->map_object_                                        = nullptr;
+        p->map_object_                                     = nullptr;
     }
 
     // Initial height of PointOfView will be set by player think.
@@ -294,8 +292,8 @@ void GameDoLoadLevel(void)
 
             SpawnInitialPlayers();
 
-            // Need to investigate if CoalBeginLevel() needs to go here too now -
-            // Dasho
+            // Need to investigate if CoalBeginLevel() needs to go here too now
+            // - Dasho
 
             RemoveOldAvatars();
 
@@ -321,7 +319,8 @@ void GameDoLoadLevel(void)
 bool GameResponder(InputEvent *ev)
 {
     // any other key pops up menu
-    if (game_action == kGameActionNothing && (game_state == kGameStateTitleScreen))
+    if (game_action == kGameActionNothing &&
+        (game_state == kGameStateTitleScreen))
     {
         if (ev->type == kInputEventKeyDown)
         {
@@ -443,7 +442,7 @@ void GameBigStuff(void)
                 break;
 
             case kGameActionFinale:
-                SYS_ASSERT(next_map);
+                EPI_ASSERT(next_map);
                 current_map       = next_map;
                 current_hub_tag   = 0;
                 current_hub_first = nullptr;
@@ -614,7 +613,7 @@ void GameExitToHub(const char *map_name, int tag)
 
 void GameExitToHub(int map_number, int tag)
 {
-    SYS_ASSERT(current_map);
+    EPI_ASSERT(current_map);
 
     char name_buf[32];
 
@@ -640,7 +639,7 @@ void GameExitToHub(int map_number, int tag)
 //
 static void GameDoCompleted(void)
 {
-    SYS_ASSERT(current_map);
+    EPI_ASSERT(current_map);
 
     ForceWipe();
 
@@ -686,7 +685,8 @@ static void GameDoCompleted(void)
                 std::string fn(SaveFilename("current", mapname));
 
                 if (!GameSaveGameToFile(fn, "__HUB_SAVE__"))
-                    FatalError("SAVE-HUB failed with filename: %s\n", fn.c_str());
+                    FatalError("SAVE-HUB failed with filename: %s\n",
+                               fn.c_str());
 
                 if (!current_hub_first) current_hub_first = current_map;
             }
@@ -750,7 +750,8 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
     {
         current_map = GameLookupMap(globs->level);
         if (!current_map)
-            FatalError("LOAD-HUB: No such map %s !  Check WADS\n", globs->level);
+            FatalError("LOAD-HUB: No such map %s !  Check WADS\n",
+                       globs->level);
 
         SetDisplayPlayer(console_player);
         automap_active = false;
@@ -763,9 +764,10 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
 
         params.map_ = GameLookupMap(globs->level);
         if (!params.map_)
-            FatalError("LOAD-GAME: No such map %s !  Check WADS\n", globs->level);
+            FatalError("LOAD-GAME: No such map %s !  Check WADS\n",
+                       globs->level);
 
-        SYS_ASSERT(params.map_->episode_);
+        EPI_ASSERT(params.map_->episode_);
 
         params.skill_      = (SkillLevel)globs->skill;
         params.deathmatch_ = (globs->netgame >= 2) ? (globs->netgame - 1) : 0;
@@ -803,7 +805,7 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
     if (!is_hub)
     {
         level_time_elapsed = globs->level_time;
-        exit_time = globs->exit_time;
+        exit_time          = globs->exit_time;
 
         intermission_stats.kills   = globs->total_kills;
         intermission_stats.items   = globs->total_items;
@@ -904,13 +906,14 @@ static bool GameSaveGameToFile(std::string filename, const char *description)
     // --- fill in global structure ---
 
     // globs->game  = SV_DupString(game_base.c_str());
-    globs->game      = SaveChunkCopyString(current_map->episode_name_.c_str());
-    globs->level     = SaveChunkCopyString(current_map->name_.c_str());
-    globs->flags     = level_flags;
-    globs->hub_tag   = current_hub_tag;
-    globs->hub_first = current_hub_first
-                           ? SaveChunkCopyString(current_hub_first->name_.c_str())
-                           : nullptr;
+    globs->game    = SaveChunkCopyString(current_map->episode_name_.c_str());
+    globs->level   = SaveChunkCopyString(current_map->name_.c_str());
+    globs->flags   = level_flags;
+    globs->hub_tag = current_hub_tag;
+    globs->hub_first =
+        current_hub_first
+            ? SaveChunkCopyString(current_hub_first->name_.c_str())
+            : nullptr;
 
     globs->skill    = game_skill;
     globs->netgame  = network_game ? (1 + deathmatch) : 0;
@@ -1018,10 +1021,7 @@ NewGameParameters::NewGameParameters(const NewGameParameters &src)
     random_seed_   = src.random_seed_;
     total_players_ = src.total_players_;
 
-    for (int i = 0; i < kMaximumPlayers; i++)
-    {
-        players_[i] = src.players_[i];
-    }
+    for (int i = 0; i < kMaximumPlayers; i++) { players_[i] = src.players_[i]; }
 
     flags_ = nullptr;
 
@@ -1061,7 +1061,7 @@ void NewGameParameters::CopyFlags(const GameFlags *F)
 //
 void GameDeferredNewGame(NewGameParameters &params)
 {
-    SYS_ASSERT(params.map_);
+    EPI_ASSERT(params.map_);
 
     defer_params = new NewGameParameters(params);
 
@@ -1081,7 +1081,7 @@ bool GameMapExists(const MapDefinition *map)
 //
 static void GameDoNewGame(void)
 {
-    SYS_ASSERT(defer_params);
+    EPI_ASSERT(defer_params);
 
     ForceWipe();
 
@@ -1130,7 +1130,8 @@ static void InitNew(NewGameParameters &params)
     {
         if (params.players_[pnum] == kPlayerFlagNoPlayer) continue;
 
-        CreatePlayer(pnum, (params.players_[pnum] & kPlayerFlagBot) ? true : false);
+        CreatePlayer(pnum,
+                     (params.players_[pnum] & kPlayerFlagBot) ? true : false);
 
         if (console_player < 0 && !(params.players_[pnum] & kPlayerFlagBot) &&
             !(params.players_[pnum] & kPlayerFlagNetwork))
@@ -1141,7 +1142,7 @@ static void InitNew(NewGameParameters &params)
 
     if (total_players != params.total_players_)
         FatalError("Internal Error: InitNew: player miscount (%d != %d)\n",
-                total_players, params.total_players_);
+                   total_players, params.total_players_);
 
     if (console_player < 0)
         FatalError("Internal Error: InitNew: no local players!\n");
@@ -1179,8 +1180,8 @@ static void InitNew(NewGameParameters &params)
 
     if (params.skill_ == kSkillNightmare)
     {
-        level_flags.fast_monsters = true;
-        level_flags.enemies_respawn  = true;
+        level_flags.fast_monsters   = true;
+        level_flags.enemies_respawn = true;
     }
 
     NetworkResetTics();

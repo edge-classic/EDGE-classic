@@ -127,7 +127,7 @@ void EName::NameManager::InitBuckets()
     // Register built-in names. 'None' must be name 0.
     for (size_t i = 0; i < known_name_count_; ++i)
     {
-        SYS_ASSERT((0 == FindName(predefined_names[i], true)) &&
+        EPI_ASSERT((0 == FindName(predefined_names[i], true)) &&
                    "Predefined name already inserted");
         FindName(predefined_names[i], false);
     }

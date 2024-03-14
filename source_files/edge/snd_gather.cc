@@ -33,7 +33,7 @@ class GatherChunk
     GatherChunk(int count, bool stereo)
         : total_samples_(count), is_stereo_(stereo)
     {
-        SYS_ASSERT(total_samples_ > 0);
+        EPI_ASSERT(total_samples_ > 0);
 
         samples_ = new int16_t[total_samples_ * (is_stereo_ ? 2 : 1)];
     }
@@ -56,8 +56,8 @@ SoundGatherer::~SoundGatherer()
 
 int16_t *SoundGatherer::MakeChunk(int max_samples, bool _stereo)
 {
-    SYS_ASSERT(!request_);
-    SYS_ASSERT(max_samples > 0);
+    EPI_ASSERT(!request_);
+    EPI_ASSERT(max_samples > 0);
 
     request_ = new GatherChunk(max_samples, _stereo);
 
@@ -66,8 +66,8 @@ int16_t *SoundGatherer::MakeChunk(int max_samples, bool _stereo)
 
 void SoundGatherer::CommitChunk(int actual_samples)
 {
-    SYS_ASSERT(request_);
-    SYS_ASSERT(actual_samples >= 0);
+    EPI_ASSERT(request_);
+    EPI_ASSERT(actual_samples >= 0);
 
     if (actual_samples == 0)
     {
@@ -75,7 +75,7 @@ void SoundGatherer::CommitChunk(int actual_samples)
         return;
     }
 
-    SYS_ASSERT(actual_samples <= request_->total_samples_);
+    EPI_ASSERT(actual_samples <= request_->total_samples_);
 
     request_->total_samples_ = actual_samples;
     total_samples_ += actual_samples;
@@ -86,7 +86,7 @@ void SoundGatherer::CommitChunk(int actual_samples)
 
 void SoundGatherer::DiscardChunk()
 {
-    SYS_ASSERT(request_);
+    EPI_ASSERT(request_);
 
     delete request_;
     request_ = nullptr;
@@ -110,7 +110,7 @@ bool SoundGatherer::Finalise(SoundData *buf, bool want_stereo)
         pos += chunks_[i]->total_samples_;
     }
 
-    SYS_ASSERT(pos == total_samples_);
+    EPI_ASSERT(pos == total_samples_);
 
     return true;
 }

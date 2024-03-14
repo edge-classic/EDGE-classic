@@ -31,6 +31,7 @@
 
 #include "dm_state.h"  // EDGE_IMAGE_IS_SKY
 #include "endianess.h"
+#include "epi.h"
 #include "g_game.h"  //current_map
 #include "i_defs_gl.h"
 #include "p_blockmap.h"
@@ -63,7 +64,7 @@ extern bool            need_to_draw_sky;
 // struct member naming deviates from the style guide to reflect
 // MD2 format documentation
 
-static constexpr char   *kMd2Identifier = "IDP2";
+static constexpr const char   *kMd2Identifier = "IDP2";
 static constexpr uint8_t kMd2Version    = 8;
 
 struct RawMd2Header
@@ -130,7 +131,7 @@ struct RawMd2Skin
 // struct member naming deviates from the style guide to reflect
 // MD3 format documentation
 
-static constexpr char   *kMd3Identifier = "IDP3";
+static constexpr const char   *kMd3Identifier = "IDP3";
 static constexpr uint8_t kMd3Version    = 15;
 
 struct RawMd3Header
@@ -399,8 +400,8 @@ Md2Model *Md2Load(epi::File *f)
 
     for (i = 0; i < total_triangles_; i++)
     {
-        SYS_ASSERT(tri < md->triangles_ + md->total_triangles_);
-        SYS_ASSERT(point < md->points_ + md->total_points_);
+        EPI_ASSERT(tri < md->triangles_ + md->total_triangles_);
+        EPI_ASSERT(point < md->points_ + md->total_points_);
 
         tri->first = point - md->points_;
 
@@ -415,13 +416,13 @@ Md2Model *Md2Load(epi::File *f)
                 1.0f - ((float)md2_sts[t.index_st[j]].t / header.skin_height);
             point->vert_idx = t.index_xyz[j];
 
-            SYS_ASSERT(point->vert_idx >= 0);
-            SYS_ASSERT(point->vert_idx < md->vertices_per_frame_);
+            EPI_ASSERT(point->vert_idx >= 0);
+            EPI_ASSERT(point->vert_idx < md->vertices_per_frame_);
         }
     }
 
-    SYS_ASSERT(tri == md->triangles_ + md->total_triangles_);
-    SYS_ASSERT(point == md->points_ + md->total_points_);
+    EPI_ASSERT(tri == md->triangles_ + md->total_triangles_);
+    EPI_ASSERT(point == md->points_ + md->total_points_);
 
     delete[] md2_triangles_;
     delete[] md2_sts;
@@ -495,8 +496,8 @@ Md2Model *Md2Load(epi::File *f)
 #endif
             good_V->normal_idx = raw_V->light_normal;
 
-            SYS_ASSERT(good_V->normal_idx >= 0);
-            // SYS_ASSERT(good_V->normal_idx < kTotalMdFormatNormals);
+            EPI_ASSERT(good_V->normal_idx >= 0);
+            // EPI_ASSERT(good_V->normal_idx < kTotalMdFormatNormals);
             //  Dasho: Maybe try to salvage bad MD2 models?
             if (good_V->normal_idx >= kTotalMdFormatNormals)
             {
@@ -528,7 +529,7 @@ Md2Model *Md2Load(epi::File *f)
 
 short Md2FindFrame(Md2Model *md, const char *name)
 {
-    SYS_ASSERT(strlen(name) > 0);
+    EPI_ASSERT(strlen(name) > 0);
 
     for (int f = 0; f < md->total_frames_; f++)
     {
@@ -714,9 +715,9 @@ Md2Model *Md3Load(epi::File *f)
         int b = AlignedLittleEndianU32(tri.index_xyz[1]);
         int c = AlignedLittleEndianU32(tri.index_xyz[2]);
 
-        SYS_ASSERT(a < num_verts);
-        SYS_ASSERT(b < num_verts);
-        SYS_ASSERT(c < num_verts);
+        EPI_ASSERT(a < num_verts);
+        EPI_ASSERT(b < num_verts);
+        EPI_ASSERT(c < num_verts);
 
         md->triangles_[i].first = i * 3;
 
@@ -920,7 +921,7 @@ static void DLIT_Model(MapObject *mo, void *dataptr)
     // dynamic lights do not light themselves up!
     if (mo == data->map_object_) return;
 
-    SYS_ASSERT(mo->dynamic_light_.shader);
+    EPI_ASSERT(mo->dynamic_light_.shader);
 
     ShadeNormals(mo->dynamic_light_.shader, data, false);
 }
@@ -972,8 +973,8 @@ static inline void ModelCoordFunc(Md2CoordinateData *data, int v_idx,
     const Md2Frame    *frame2 = data->frame2_;
     const Md2Triangle *tri    = data->triangles_;
 
-    SYS_ASSERT(tri->first + v_idx >= 0);
-    SYS_ASSERT(tri->first + v_idx < md->total_points_);
+    EPI_ASSERT(tri->first + v_idx >= 0);
+    EPI_ASSERT(tri->first + v_idx < md->total_points_);
 
     const Md2Point *point = &md->points_[tri->first + v_idx];
 
@@ -1420,8 +1421,8 @@ void Md2RenderModel2d(Md2Model *md, const Image *skin_img, int frame, float x,
         {
             const Md2Frame *frame_ptr = &md->frames_[frame];
 
-            SYS_ASSERT(tri->first + v_idx >= 0);
-            SYS_ASSERT(tri->first + v_idx < md->total_points_);
+            EPI_ASSERT(tri->first + v_idx >= 0);
+            EPI_ASSERT(tri->first + v_idx < md->total_points_);
 
             const Md2Point  *point = &md->points_[tri->first + v_idx];
             const Md2Vertex *vert  = &frame_ptr->vertices[point->vert_idx];

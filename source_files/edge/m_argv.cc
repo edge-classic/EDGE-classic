@@ -72,7 +72,7 @@ void ArgumentParse(const int argc, const char *const *argv)
 
     for (i = 0; i < win_argc; i++)
     {
-        SYS_ASSERT(win_argv[i] != nullptr);
+        EPI_ASSERT(win_argv[i] != nullptr);
         argv_block.push_back(epi::WStringToUTF8(win_argv[i]));
     }
 
@@ -99,12 +99,12 @@ void ArgumentParse(const int argc, const char *const *argv)
 #else
 void ArgumentParse(const int argc, const char *const *argv)
 {
-    SYS_ASSERT(argc >= 0);
+    EPI_ASSERT(argc >= 0);
     program_argument_list.reserve(argc);
 
     for (int i = 0; i < argc; i++)
     {
-        SYS_ASSERT(argv[i] != nullptr);
+        EPI_ASSERT(argv[i] != nullptr);
 
 #ifdef __APPLE__
         // ignore MacOS X rubbish
@@ -130,7 +130,7 @@ void ArgumentParse(const int argc, const char *const *argv)
 
 int ArgumentFind(std::string_view long_name, int *total_parameters)
 {
-    SYS_ASSERT(!long_name.empty());
+    EPI_ASSERT(!long_name.empty());
 
     if (total_parameters) *total_parameters = 0;
 
@@ -161,7 +161,7 @@ int ArgumentFind(std::string_view long_name, int *total_parameters)
 
 std::string ArgumentValue(std::string_view long_name, int *total_parameters)
 {
-    SYS_ASSERT(!long_name.empty());
+    EPI_ASSERT(!long_name.empty());
 
     int pos = ArgumentFind(long_name, total_parameters);
 

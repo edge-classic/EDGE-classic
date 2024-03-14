@@ -27,6 +27,7 @@
 
 #include <string.h>
 
+#include "epi.h"
 #include "p_setup.h"
 #include "str_compare.h"
 #include "str_util.h"
@@ -395,7 +396,7 @@ void *SaveGameMapObjectFindByIndex(int index)
 
     if (!cur) FatalError("LOADGAME: Invalid Mobj: %d\n", index);
 
-    SYS_ASSERT(index == 0);
+    EPI_ASSERT(index == 0);
 
     return cur;
 }
@@ -424,7 +425,7 @@ void SaveGameMapObjectCreateElems(int num_elems)
     // free existing mobjs
     if (map_object_list_head) RemoveAllMapObjects(true);
 
-    SYS_ASSERT(map_object_list_head == nullptr);
+    EPI_ASSERT(map_object_list_head == nullptr);
 
     for (; num_elems > 0; num_elems--)
     {
@@ -501,7 +502,7 @@ void *SV_ItemqFindByIndex(int index)
 
     if (!cur) FatalError("LOADGAME: Invalid ItemInQue: %d\n", index);
 
-    SYS_ASSERT(index == 0);
+    EPI_ASSERT(index == 0);
     return cur;
 }
 
@@ -700,7 +701,7 @@ bool SaveGameMapObjectGetWUDs(void *storage, int index, void *extra)
 {
     std::string *dest = (std::string *)storage;
 
-    SYS_ASSERT(index == 0);
+    EPI_ASSERT(index == 0);
 
     const char *tags = SaveChunkGetString();
 
@@ -721,7 +722,7 @@ void SaveGameMapObjectPutWUDs(void *storage, int index, void *extra)
 {
     std::string *src = (std::string *)storage;
 
-    SYS_ASSERT(index == 0);
+    EPI_ASSERT(index == 0);
 
     SaveChunkPutString(src->empty() ? nullptr : src->c_str());
 }
@@ -743,7 +744,7 @@ bool SaveGameMapObjectGetState(void *storage, int index, void *extra)
     const MapObject           *mo = (MapObject *)sv_current_elem;
     const MapObjectDefinition *actual;
 
-    SYS_ASSERT(mo);
+    EPI_ASSERT(mo);
 
     swizzle = SaveChunkGetString();
 
@@ -844,7 +845,7 @@ void SaveGameMapObjectPutState(void *storage, int index, void *extra)
     const MapObject           *mo = (MapObject *)sv_current_elem;
     const MapObjectDefinition *actual;
 
-    SYS_ASSERT(mo);
+    EPI_ASSERT(mo);
 
     if (S == nullptr || !mo->info_)
     {

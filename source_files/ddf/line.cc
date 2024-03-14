@@ -39,9 +39,6 @@
 #include "str_util.h"
 #include "sokol_color.h"
 
-#undef DF
-#define DF DDF_FIELD
-
 // -KM- 1999/01/29 Improved scrolling.
 // Scrolling
 enum ScrollDirections
@@ -76,55 +73,49 @@ static void DDF_LineGetSlopeType(const char *info, void *storage);
 
 static void DDF_LineMakeCrush(const char *info);
 
-#undef DDF_CMD_BASE
-#define DDF_CMD_BASE dummy_floor
 static PlaneMoverDefinition dummy_floor;
 
 const DDFCommandList floor_commands[] = {
-    DF("TYPE", type_, DDF_SectGetMType),
-    DF("SPEED_UP", speed_up_, DDF_MainGetFloat),
-    DF("SPEED_DOWN", speed_down_, DDF_MainGetFloat),
-    DF("DEST_REF", destref_, DDF_SectGetDestRef),
-    DF("DEST_OFFSET", dest_, DDF_MainGetFloat),
-    DF("OTHER_REF", otherref_, DDF_SectGetDestRef),
-    DF("OTHER_OFFSET", other_, DDF_MainGetFloat),
-    DF("CRUSH_DAMAGE", crush_damage_, DDF_MainGetNumeric),
-    DF("TEXTURE", tex_, DDF_MainGetLumpName),
-    DF("PAUSE_TIME", wait_, DDF_MainGetTime),
-    DF("WAIT_TIME", prewait_, DDF_MainGetTime),
-    DF("SFX_START", sfxstart_, DDF_MainLookupSound),
-    DF("SFX_UP", sfxup_, DDF_MainLookupSound),
-    DF("SFX_DOWN", sfxdown_, DDF_MainLookupSound),
-    DF("SFX_STOP", sfxstop_, DDF_MainLookupSound),
-    DF("SCROLL_ANGLE", scroll_angle_, DDF_MainGetAngle),
-    DF("SCROLL_SPEED", scroll_speed_, DDF_MainGetFloat),
-    DF("IGNORE_TEXTURE", ignore_texture_, DDF_MainGetBoolean),
+    DDF_FIELD("TYPE", dummy_floor, type_, DDF_SectGetMType),
+    DDF_FIELD("SPEED_UP", dummy_floor, speed_up_, DDF_MainGetFloat),
+    DDF_FIELD("SPEED_DOWN", dummy_floor, speed_down_, DDF_MainGetFloat),
+    DDF_FIELD("DEST_REF", dummy_floor, destref_, DDF_SectGetDestRef),
+    DDF_FIELD("DEST_OFFSET", dummy_floor, dest_, DDF_MainGetFloat),
+    DDF_FIELD("OTHER_REF", dummy_floor, otherref_, DDF_SectGetDestRef),
+    DDF_FIELD("OTHER_OFFSET", dummy_floor, other_, DDF_MainGetFloat),
+    DDF_FIELD("CRUSH_DAMAGE", dummy_floor, crush_damage_, DDF_MainGetNumeric),
+    DDF_FIELD("TEXTURE", dummy_floor, tex_, DDF_MainGetLumpName),
+    DDF_FIELD("PAUSE_TIME", dummy_floor, wait_, DDF_MainGetTime),
+    DDF_FIELD("WAIT_TIME", dummy_floor, prewait_, DDF_MainGetTime),
+    DDF_FIELD("SFX_START", dummy_floor, sfxstart_, DDF_MainLookupSound),
+    DDF_FIELD("SFX_UP", dummy_floor, sfxup_, DDF_MainLookupSound),
+    DDF_FIELD("SFX_DOWN", dummy_floor, sfxdown_, DDF_MainLookupSound),
+    DDF_FIELD("SFX_STOP", dummy_floor, sfxstop_, DDF_MainLookupSound),
+    DDF_FIELD("SCROLL_ANGLE", dummy_floor, scroll_angle_, DDF_MainGetAngle),
+    DDF_FIELD("SCROLL_SPEED", dummy_floor, scroll_speed_, DDF_MainGetFloat),
+    DDF_FIELD("IGNORE_TEXTURE", dummy_floor, ignore_texture_, DDF_MainGetBoolean),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
-#undef DDF_CMD_BASE
-#define DDF_CMD_BASE dummy_ladder
 static LadderDefinition dummy_ladder;
 
 const DDFCommandList ladder_commands[] = {
-    DF("HEIGHT", height_, DDF_MainGetFloat), DDF_CMD_END};
+    DDF_FIELD("HEIGHT", dummy_ladder, height_, DDF_MainGetFloat), {nullptr, nullptr, 0, nullptr}};
 
-#undef DDF_CMD_BASE
-#define DDF_CMD_BASE dummy_slider
 static SlidingDoor dummy_slider;
 
 const DDFCommandList slider_commands[] = {
-    DF("TYPE", type_, DDF_LineGetSlideType),
-    DF("SPEED", speed_, DDF_MainGetFloat),
-    DF("PAUSE_TIME", wait_, DDF_MainGetTime),
-    DF("SEE_THROUGH", see_through_, DDF_MainGetBoolean),
-    DF("DISTANCE", distance_, DDF_MainGetPercent),
-    DF("SFX_START", sfx_start_, DDF_MainLookupSound),
-    DF("SFX_OPEN", sfx_open_, DDF_MainLookupSound),
-    DF("SFX_CLOSE", sfx_close_, DDF_MainLookupSound),
-    DF("SFX_STOP", sfx_stop_, DDF_MainLookupSound),
+    DDF_FIELD("TYPE", dummy_slider, type_, DDF_LineGetSlideType),
+    DDF_FIELD("SPEED", dummy_slider, speed_, DDF_MainGetFloat),
+    DDF_FIELD("PAUSE_TIME", dummy_slider, wait_, DDF_MainGetTime),
+    DDF_FIELD("SEE_THROUGH", dummy_slider, see_through_, DDF_MainGetBoolean),
+    DDF_FIELD("DISTANCE", dummy_slider, distance_, DDF_MainGetPercent),
+    DDF_FIELD("SFX_START", dummy_slider, sfx_start_, DDF_MainLookupSound),
+    DDF_FIELD("SFX_OPEN", dummy_slider, sfx_open_, DDF_MainLookupSound),
+    DDF_FIELD("SFX_CLOSE", dummy_slider, sfx_close_, DDF_MainLookupSound),
+    DDF_FIELD("SFX_STOP", dummy_slider, sfx_stop_, DDF_MainLookupSound),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 static LineType *dynamic_line;
 
@@ -132,83 +123,81 @@ static LineType *dynamic_line;
 static float            scrolling_speed;
 static ScrollDirections scrolling_dir;
 
-#undef DDF_CMD_BASE
-#define DDF_CMD_BASE dummy_line
 static LineType dummy_line;
 
 static const DDFCommandList linedef_commands[] = {
     // sub-commands
-    DDF_SUB_LIST("FLOOR", f_, floor_commands),
-    DDF_SUB_LIST("CEILING", c_, floor_commands),
-    DDF_SUB_LIST("SLIDER", s_, slider_commands),
-    DDF_SUB_LIST("LADDER", ladder_, ladder_commands),
+    DDF_SUB_LIST("FLOOR", dummy_line, f_, floor_commands),
+    DDF_SUB_LIST("CEILING", dummy_line, c_, floor_commands),
+    DDF_SUB_LIST("SLIDER", dummy_line, s_, slider_commands),
+    DDF_SUB_LIST("LADDER", dummy_line, ladder_, ladder_commands),
 
-    DF("NEWTRIGGER", newtrignum_, DDF_MainGetNumeric),
-    DF("ACTIVATORS", obj_, DDF_LineGetActivators),
-    DF("TYPE", type_, DDF_LineGetTrigType),
-    DF("KEYS", keys_, DDF_LineGetSecurity),
-    DF("FAILED_MESSAGE", failedmessage_, DDF_MainGetString),
-    DF("FAILED_SFX", failed_sfx_, DDF_MainLookupSound),
-    DF("COUNT", count_, DDF_MainGetNumeric),
+    DDF_FIELD("NEWTRIGGER", dummy_line, newtrignum_, DDF_MainGetNumeric),
+    DDF_FIELD("ACTIVATORS", dummy_line, obj_, DDF_LineGetActivators),
+    DDF_FIELD("TYPE", dummy_line, type_, DDF_LineGetTrigType),
+    DDF_FIELD("KEYS", dummy_line, keys_, DDF_LineGetSecurity),
+    DDF_FIELD("FAILED_MESSAGE", dummy_line, failedmessage_, DDF_MainGetString),
+    DDF_FIELD("FAILED_SFX", dummy_line, failed_sfx_, DDF_MainLookupSound),
+    DDF_FIELD("COUNT", dummy_line, count_, DDF_MainGetNumeric),
 
-    DF("DONUT", d_.dodonut_, DDF_MainGetBoolean),
-    DF("DONUT_IN_SFX", d_.d_sfxin_, DDF_MainLookupSound),
-    DF("DONUT_IN_SFXSTOP", d_.d_sfxinstop_, DDF_MainLookupSound),
-    DF("DONUT_OUT_SFX", d_.d_sfxout_, DDF_MainLookupSound),
-    DF("DONUT_OUT_SFXSTOP", d_.d_sfxoutstop_, DDF_MainLookupSound),
+    DDF_FIELD("DONUT", dummy_line, d_.dodonut_, DDF_MainGetBoolean),
+    DDF_FIELD("DONUT_IN_SFX", dummy_line, d_.d_sfxin_, DDF_MainLookupSound),
+    DDF_FIELD("DONUT_IN_SFXSTOP", dummy_line, d_.d_sfxinstop_, DDF_MainLookupSound),
+    DDF_FIELD("DONUT_OUT_SFX", dummy_line, d_.d_sfxout_, DDF_MainLookupSound),
+    DDF_FIELD("DONUT_OUT_SFXSTOP", dummy_line, d_.d_sfxoutstop_, DDF_MainLookupSound),
 
-    DF("TELEPORT", t_.teleport_, DDF_MainGetBoolean),
-    DF("TELEPORT_DELAY", t_.delay_, DDF_MainGetTime),
-    DF("TELEIN_EFFECTOBJ", t_.inspawnobj_ref_, DDF_MainGetString),
-    DF("TELEOUT_EFFECTOBJ", t_.outspawnobj_ref_, DDF_MainGetString),
-    DF("TELEPORT_SPECIAL", t_.special_, DDF_LineGetTeleportSpecial),
+    DDF_FIELD("TELEPORT", dummy_line, t_.teleport_, DDF_MainGetBoolean),
+    DDF_FIELD("TELEPORT_DELAY", dummy_line, t_.delay_, DDF_MainGetTime),
+    DDF_FIELD("TELEIN_EFFECTOBJ", dummy_line, t_.inspawnobj_ref_, DDF_MainGetString),
+    DDF_FIELD("TELEOUT_EFFECTOBJ", dummy_line, t_.outspawnobj_ref_, DDF_MainGetString),
+    DDF_FIELD("TELEPORT_SPECIAL", dummy_line, t_.special_, DDF_LineGetTeleportSpecial),
 
-    DF("LIGHT_TYPE", l_.type_, DDF_SectGetLighttype),
-    DF("LIGHT_LEVEL", l_.level_, DDF_MainGetNumeric),
-    DF("LIGHT_DARK_TIME", l_.darktime_, DDF_MainGetTime),
-    DF("LIGHT_BRIGHT_TIME", l_.brighttime_, DDF_MainGetTime),
-    DF("LIGHT_CHANCE", l_.chance_, DDF_MainGetPercent),
-    DF("LIGHT_SYNC", l_.sync_, DDF_MainGetTime),
-    DF("LIGHT_STEP", l_.step_, DDF_MainGetNumeric),
-    DF("EXIT", e_exit_, DDF_SectGetExit),
-    DF("HUB_EXIT", hub_exit_, DDF_MainGetNumeric),
+    DDF_FIELD("LIGHT_TYPE", dummy_line, l_.type_, DDF_SectGetLighttype),
+    DDF_FIELD("LIGHT_LEVEL", dummy_line, l_.level_, DDF_MainGetNumeric),
+    DDF_FIELD("LIGHT_DARK_TIME", dummy_line, l_.darktime_, DDF_MainGetTime),
+    DDF_FIELD("LIGHT_BRIGHT_TIME", dummy_line, l_.brighttime_, DDF_MainGetTime),
+    DDF_FIELD("LIGHT_CHANCE", dummy_line, l_.chance_, DDF_MainGetPercent),
+    DDF_FIELD("LIGHT_SYNC", dummy_line, l_.sync_, DDF_MainGetTime),
+    DDF_FIELD("LIGHT_STEP", dummy_line, l_.step_, DDF_MainGetNumeric),
+    DDF_FIELD("EXIT", dummy_line, e_exit_, DDF_SectGetExit),
+    DDF_FIELD("HUB_EXIT", dummy_line, hub_exit_, DDF_MainGetNumeric),
 
-    DF("SCROLL_XSPEED", s_xspeed_, DDF_MainGetFloat),
-    DF("SCROLL_YSPEED", s_yspeed_, DDF_MainGetFloat),
-    DF("SCROLL_PARTS", scroll_parts_, DDF_LineGetScrollPart),
-    DF("USE_COLOURMAP", use_colourmap_, DDF_MainGetColourmap),
-    DF("GRAVITY", gravity_, DDF_MainGetFloat),
-    DF("FRICTION", friction_, DDF_MainGetFloat),
-    DF("VISCOSITY", viscosity_, DDF_MainGetFloat),
-    DF("DRAG", drag_, DDF_MainGetFloat),
-    DF("AMBIENT_SOUND", ambient_sfx_, DDF_MainLookupSound),
-    DF("ACTIVATE_SOUND", activate_sfx_, DDF_MainLookupSound),
-    DF("MUSIC", music_, DDF_MainGetNumeric),
-    DF("AUTO", autoline_, DDF_MainGetBoolean),
-    DF("SINGLESIDED", singlesided_, DDF_MainGetBoolean),
-    DF("EXTRAFLOOR_TYPE", ef_.type_, DDF_LineGetExtraFloor),
-    DF("EXTRAFLOOR_CONTROL", ef_.control_, DDF_LineGetEFControl),
-    DF("TRANSLUCENCY", translucency_, DDF_MainGetPercent),
-    DF("WHEN_APPEAR", appear_, DDF_MainGetWhenAppear),
-    DF("SPECIAL", special_flags_, DDF_LineGetSpecialFlags),
-    DF("RADIUS_TRIGGER", trigger_effect_, DDF_LineGetRadTrig),
-    DF("LINE_EFFECT", line_effect_, DDF_LineGetLineEffect),
-    DF("SCROLL_TYPE", scroll_type_, DDF_LineGetScrollType),
-    DF("LINE_PARTS", line_parts_, DDF_LineGetScrollPart),
-    DF("SECTOR_EFFECT", sector_effect_, DDF_LineGetSectorEffect),
-    DF("PORTAL_TYPE", portal_effect_, DDF_LineGetPortalEffect),
-    DF("SLOPE_TYPE", slope_type_, DDF_LineGetSlopeType),
-    DF("COLOUR", fx_color_, DDF_MainGetRGB),
+    DDF_FIELD("SCROLL_XSPEED", dummy_line, s_xspeed_, DDF_MainGetFloat),
+    DDF_FIELD("SCROLL_YSPEED", dummy_line, s_yspeed_, DDF_MainGetFloat),
+    DDF_FIELD("SCROLL_PARTS", dummy_line, scroll_parts_, DDF_LineGetScrollPart),
+    DDF_FIELD("USE_COLOURMAP", dummy_line, use_colourmap_, DDF_MainGetColourmap),
+    DDF_FIELD("GRAVITY", dummy_line, gravity_, DDF_MainGetFloat),
+    DDF_FIELD("FRICTION", dummy_line, friction_, DDF_MainGetFloat),
+    DDF_FIELD("VISCOSITY", dummy_line, viscosity_, DDF_MainGetFloat),
+    DDF_FIELD("DRAG", dummy_line, drag_, DDF_MainGetFloat),
+    DDF_FIELD("AMBIENT_SOUND", dummy_line, ambient_sfx_, DDF_MainLookupSound),
+    DDF_FIELD("ACTIVATE_SOUND", dummy_line, activate_sfx_, DDF_MainLookupSound),
+    DDF_FIELD("MUSIC", dummy_line, music_, DDF_MainGetNumeric),
+    DDF_FIELD("AUTO", dummy_line, autoline_, DDF_MainGetBoolean),
+    DDF_FIELD("SINGLESIDED", dummy_line, singlesided_, DDF_MainGetBoolean),
+    DDF_FIELD("EXTRAFLOOR_TYPE", dummy_line, ef_.type_, DDF_LineGetExtraFloor),
+    DDF_FIELD("EXTRAFLOOR_CONTROL", dummy_line, ef_.control_, DDF_LineGetEFControl),
+    DDF_FIELD("TRANSLUCENCY", dummy_line, translucency_, DDF_MainGetPercent),
+    DDF_FIELD("WHEN_APPEAR", dummy_line, appear_, DDF_MainGetWhenAppear),
+    DDF_FIELD("SPECIAL", dummy_line, special_flags_, DDF_LineGetSpecialFlags),
+    DDF_FIELD("RADIUS_TRIGGER", dummy_line, trigger_effect_, DDF_LineGetRadTrig),
+    DDF_FIELD("LINE_EFFECT", dummy_line, line_effect_, DDF_LineGetLineEffect),
+    DDF_FIELD("SCROLL_TYPE", dummy_line, scroll_type_, DDF_LineGetScrollType),
+    DDF_FIELD("LINE_PARTS", dummy_line, line_parts_, DDF_LineGetScrollPart),
+    DDF_FIELD("SECTOR_EFFECT", dummy_line, sector_effect_, DDF_LineGetSectorEffect),
+    DDF_FIELD("PORTAL_TYPE", dummy_line, portal_effect_, DDF_LineGetPortalEffect),
+    DDF_FIELD("SLOPE_TYPE", dummy_line, slope_type_, DDF_LineGetSlopeType),
+    DDF_FIELD("COLOUR", dummy_line, fx_color_, DDF_MainGetRGB),
 
     // -AJA- backwards compatibility cruft...
-    DF("EXTRAFLOOR_TRANSLUCENCY", translucency_, DDF_MainGetPercent),
+    DDF_FIELD("EXTRAFLOOR_TRANSLUCENCY", dummy_line, translucency_, DDF_MainGetPercent),
 
     // Lobo: 2022
-    DF("EFFECT_OBJECT", effectobject_ref_, DDF_MainGetString),
-    DF("GLASS", glass_, DDF_MainGetBoolean),
-    DF("BROKEN_TEXTURE", brokentex_, DDF_MainGetLumpName),
+    DDF_FIELD("EFFECT_OBJECT", dummy_line, effectobject_ref_, DDF_MainGetString),
+    DDF_FIELD("GLASS", dummy_line, glass_, DDF_MainGetBoolean),
+    DDF_FIELD("BROKEN_TEXTURE", dummy_line, brokentex_, DDF_MainGetLumpName),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 struct ScrollKludge
 {

@@ -29,6 +29,7 @@
 #include "dm_state.h"
 #include "e_player.h"
 #include "edge_profiling.h"
+#include "epi.h"
 #include "i_defs_gl.h"
 #include "im_data.h"
 #include "m_argv.h"
@@ -135,10 +136,10 @@ RendererVertex *RendererBeginUnit(GLuint shape, int max_vert, GLuint env1,
 {
     RendererUnit *unit;
 
-    SYS_ASSERT(max_vert > 0);
-    SYS_ASSERT(pass >= 0);
+    EPI_ASSERT(max_vert > 0);
+    EPI_ASSERT(pass >= 0);
 
-    SYS_ASSERT((blending & (kBlendingCullBack | kBlendingCullFront)) !=
+    EPI_ASSERT((blending & (kBlendingCullBack | kBlendingCullFront)) !=
                (kBlendingCullBack | kBlendingCullFront));
 
     // check we have enough space left
@@ -176,7 +177,7 @@ void RendererEndUnit(int actual_vert)
 {
     RendererUnit *unit;
 
-    SYS_ASSERT(actual_vert > 0);
+    EPI_ASSERT(actual_vert > 0);
 
     unit = local_units + current_render_unit;
 
@@ -195,8 +196,8 @@ void RendererEndUnit(int actual_vert)
     current_render_vert += actual_vert;
     current_render_unit++;
 
-    SYS_ASSERT(current_render_vert <= kMaximumLocalVertices);
-    SYS_ASSERT(current_render_unit <= kMaximumLocalUnits);
+    EPI_ASSERT(current_render_vert <= kMaximumLocalVertices);
+    EPI_ASSERT(current_render_unit <= kMaximumLocalUnits);
 }
 
 struct Compare_Unit_pred
@@ -333,7 +334,7 @@ void RendererDrawUnits(void)
 
         RendererUnit *unit = local_unit_map[j];
 
-        SYS_ASSERT(unit->count > 0);
+        EPI_ASSERT(unit->count > 0);
 
         // detect changes in texture/alpha/blending state
 

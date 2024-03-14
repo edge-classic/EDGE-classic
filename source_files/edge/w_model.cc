@@ -19,6 +19,7 @@
 #include "w_model.h"
 
 #include "e_main.h"
+#include "epi.h"
 #include "i_defs_gl.h"
 #include "p_local.h"  // map_object_list_head
 #include "r_image.h"
@@ -66,7 +67,7 @@ static void FindModelFrameNames(Md2Model *md, int model_num)
 
         if (!(st->flags & kStateFrameFlagUnmapped)) continue;
 
-        SYS_ASSERT(st->model_frame);
+        EPI_ASSERT(st->model_frame);
 
         st->frame = Md2FindFrame(md, st->model_frame);
 
@@ -100,7 +101,7 @@ static void FindModelFrameNames(MdlModel *md, int model_num)
 
         if (!(st->flags & kStateFrameFlagUnmapped)) continue;
 
-        SYS_ASSERT(st->model_frame);
+        EPI_ASSERT(st->model_frame);
 
         st->frame = MdlFindFrame(md, st->model_frame);
 
@@ -236,7 +237,7 @@ ModelDefinition *LoadModelFromLump(int model_num)
 
     if (!f) FatalError("Missing model lump for: %s\n!", basename.c_str());
 
-    SYS_ASSERT(def->md2_model_ || def->mdl_model_);
+    EPI_ASSERT(def->md2_model_ || def->mdl_model_);
 
     // close the lump/packfile
     delete f;
@@ -292,7 +293,7 @@ void InitializeModels(void)
 {
     total_models = (int)ddf_model_names.size();
 
-    SYS_ASSERT(total_models >= 1);  // at least SPR_NULL
+    EPI_ASSERT(total_models >= 1);  // at least SPR_NULL
 
     StartupProgressMessage("Setting up models...");
 
@@ -308,8 +309,8 @@ ModelDefinition *GetModel(int model_num)
     // model_num comes from the 'sprite' field of State, and
     // is also an index into ddf_model_names vector.
 
-    SYS_ASSERT(model_num > 0);
-    SYS_ASSERT(model_num < total_models);
+    EPI_ASSERT(model_num > 0);
+    EPI_ASSERT(model_num < total_models);
 
     if (!models[model_num])
     {
@@ -329,7 +330,7 @@ void PrecacheModels(void)
     // mark all monsters (etc) in the level
     for (MapObject *mo = map_object_list_head; mo; mo = mo->next_)
     {
-        SYS_ASSERT(mo->state_);
+        EPI_ASSERT(mo->state_);
 
         if (!(mo->state_->flags & kStateFrameFlagModel)) continue;
 

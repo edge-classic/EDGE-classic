@@ -23,6 +23,7 @@
 #include "dm_state.h"
 #include "e_main.h"
 #include "e_player.h"
+#include "epi.h"
 #include "font.h"
 #include "g_game.h"
 #include "hu_draw.h"
@@ -122,7 +123,7 @@ static void HD_game_name(coal::vm_c *vm, int argc)
     (void)argc;
 
     GameDefinition *g = current_map->episode_;
-    SYS_ASSERT(g);
+    EPI_ASSERT(g);
 
     vm->ReturnString(g->name_.c_str());
 }
@@ -191,12 +192,12 @@ static void HD_text_font(coal::vm_c *vm, int argc)
     const char *font_name = vm->AccessParamString(0);
 
     FontDefinition *DEF = fontdefs.Lookup(font_name);
-    SYS_ASSERT(DEF);
+    EPI_ASSERT(DEF);
 
     if (!DEF) FatalError("hud.text_font: Bad font name: %s\n", font_name);
 
     Font *font = hud_fonts.Lookup(DEF);
-    SYS_ASSERT(font);
+    EPI_ASSERT(font);
 
     if (!font) FatalError("hud.text_font: Bad font name: %s\n", font_name);
 

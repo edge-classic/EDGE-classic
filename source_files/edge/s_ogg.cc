@@ -212,7 +212,7 @@ const char *OggPlayer::GetError(int code)
 void OggPlayer::PostOpen()
 {
     vorbis_info_ = ov_info(&ogg_stream_, -1);
-    SYS_ASSERT(vorbis_info_);
+    EPI_ASSERT(vorbis_info_);
 
     if (vorbis_info_->channels == 1) { is_stereo_ = false; }
     else { is_stereo_ = true; }
@@ -448,7 +448,7 @@ bool LoadOggSound(SoundData *buf, const uint8_t *data, int length)
     }
 
     vorbis_info *vorbis_inf = ov_info(&ogg_stream, -1);
-    SYS_ASSERT(vorbis_inf);
+    EPI_ASSERT(vorbis_inf);
 
     LogDebug("OGG SFX Loader: freq %d Hz, %d channels\n", (int)vorbis_inf->rate,
              (int)vorbis_inf->channels);

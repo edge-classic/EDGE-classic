@@ -703,7 +703,7 @@ void EdgeDisplay(void)
     }
     else if (screenshot_rate && (game_state >= kGameStateLevel))
     {
-        SYS_ASSERT(single_tics);
+        EPI_ASSERT(single_tics);
 
         if (level_time_elapsed % screenshot_rate == 0) TakeScreenshot(false);
     }
@@ -749,7 +749,7 @@ void PickLoadingScreen(void)
     for (int loop = 0; loop < 100; loop++)
     {
         GameDefinition *g = gamedefs[title_game];
-        SYS_ASSERT(g);
+        EPI_ASSERT(g);
 
         if (title_pic >= (int)g->titlepics_.size())
         {
@@ -805,7 +805,7 @@ static void PickMenuBackdrop(void)
     for (int loop = 0; loop < 100; loop++)
     {
         GameDefinition *g = gamedefs[title_game];
-        SYS_ASSERT(g);
+        EPI_ASSERT(g);
 
         if (title_pic >= (int)g->titlepics_.size())
         {
@@ -909,7 +909,7 @@ void AdvanceTitle(void)
     for (int loop = 0; loop < 100; loop++)
     {
         GameDefinition *g = gamedefs[title_game];
-        SYS_ASSERT(g);
+        EPI_ASSERT(g);
 
         // Only play title movies once
         if (!g->titlemovie_.empty() && !g->movie_played_)
@@ -1119,7 +1119,7 @@ static void PurgeCache(void)
 static int CheckPackForGameFiles(std::string check_pack, FileKind check_kind)
 {
     DataFile *check_pack_df = new DataFile(check_pack, check_kind);
-    SYS_ASSERT(check_pack_df);
+    EPI_ASSERT(check_pack_df);
     PackPopulateOnly(check_pack_df);
     if (PackFindStem(check_pack_df->pack_, "EDGEGAME"))
     {
@@ -1271,7 +1271,7 @@ static void IdentifyVersion(void)
         }
         else if (!game_paths.empty())
         {
-            SYS_ASSERT(game_paths.size() == game_buttons.size());
+            EPI_ASSERT(game_paths.size() == game_buttons.size());
             SDL_MessageBoxData picker_data;
             SDL_memset(&picker_data, 0, sizeof(SDL_MessageBoxData));
             picker_data.title = "EDGE-Classic Game Selector";
@@ -1606,7 +1606,7 @@ static void IdentifyVersion(void)
         }
         else
         {
-            SYS_ASSERT(game_paths.size() == game_buttons.size());
+            EPI_ASSERT(game_paths.size() == game_buttons.size());
             SDL_MessageBoxData picker_data;
             SDL_memset(&picker_data, 0, sizeof(SDL_MessageBoxData));
             picker_data.title = "EDGE-Classic Game Selector";
@@ -2175,8 +2175,8 @@ static void InitialState(void)
     if (!params.map_)
         FatalError("-warp: no such level '%s'\n", warp_map.c_str());
 
-    SYS_ASSERT(GameMapExists(params.map_));
-    SYS_ASSERT(params.map_->episode_);
+    EPI_ASSERT(GameMapExists(params.map_));
+    EPI_ASSERT(params.map_->episode_);
 
     params.random_seed_ = PureRandomNumber();
 

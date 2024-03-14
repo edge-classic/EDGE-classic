@@ -84,7 +84,7 @@ static int HD_game_mode(lua_State *L)
 static int HD_game_name(lua_State *L)
 {
     GameDefinition *g = current_map->episode_;
-    SYS_ASSERT(g);
+    EPI_ASSERT(g);
 
     lua_pushstring(L, g->name_.c_str());
 
@@ -155,12 +155,12 @@ static int HD_text_font(lua_State *L)
     const char *font_name = luaL_checkstring(L, 1);
 
     FontDefinition *DEF = fontdefs.Lookup(font_name);
-    SYS_ASSERT(DEF);
+    EPI_ASSERT(DEF);
 
     if (!DEF) FatalError("hud.text_font: Bad font name: %s\n", font_name);
 
     Font *font = hud_fonts.Lookup(DEF);
-    SYS_ASSERT(font);
+    EPI_ASSERT(font);
 
     if (!font) FatalError("hud.text_font: Bad font name: %s\n", font_name);
 

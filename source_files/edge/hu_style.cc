@@ -20,6 +20,7 @@
 
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "epi.h"
 #include "hu_draw.h"
 #include "r_colormap.h"
 #include "r_draw.h"
@@ -135,7 +136,7 @@ void Style::DrawBackground()
 //
 Style *StyleContainer::Lookup(StyleDefinition *definition)
 {
-    SYS_ASSERT(definition);
+    EPI_ASSERT(definition);
 
     for (std::vector<Style *>::iterator iter = begin(), iter_end = end();
          iter != iter_end; iter++)

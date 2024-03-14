@@ -30,7 +30,7 @@
 
 #include "p_local.h"
 
-constexpr char *kDataEndMarker = "ENDE";
+constexpr const char *kDataEndMarker = "ENDE";
 
 int SaveGetError(void);
 

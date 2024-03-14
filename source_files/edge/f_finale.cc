@@ -35,6 +35,7 @@
 #include "dm_state.h"
 #include "dstrings.h"
 #include "e_main.h"
+#include "epi.h"
 #include "f_interm.h"
 #include "g_game.h"
 #include "hu_draw.h"
@@ -101,7 +102,7 @@ static void DoBumpFinale(void);
 
 static bool HasFinale(const FinaleDefinition *F, FinaleStage cur)
 {
-    SYS_ASSERT(F);
+    EPI_ASSERT(F);
 
     switch (cur)
     {
@@ -130,7 +131,7 @@ static bool HasFinale(const FinaleDefinition *F, FinaleStage cur)
 // returns kFinaleStageDone if nothing found
 static FinaleStage FindValidFinale(const FinaleDefinition *F, FinaleStage cur)
 {
-    SYS_ASSERT(F);
+    EPI_ASSERT(F);
 
     for (; cur != kFinaleStageDone; cur = (FinaleStage)(cur + 1))
     {
@@ -238,7 +239,7 @@ static void LookupFinaleStuff(void)
 
 void FinaleStart(const FinaleDefinition *F, GameAction newaction)
 {
-    SYS_ASSERT(F);
+    EPI_ASSERT(F);
 
     new_game_action = newaction;
     automap_active  = false;
@@ -267,7 +268,7 @@ void FinaleStart(const FinaleDefinition *F, GameAction newaction)
 
 bool FinaleResponder(InputEvent *event)
 {
-    SYS_ASSERT(game_state == kGameStateFinale);
+    EPI_ASSERT(game_state == kGameStateFinale);
 
     // FIXME: use WI_CheckAccelerate() in netgames
     if (event->type != kInputEventKeyDown) return false;
@@ -286,7 +287,7 @@ bool FinaleResponder(InputEvent *event)
 
 void FinaleTicker(void)
 {
-    SYS_ASSERT(game_state == kGameStateFinale);
+    EPI_ASSERT(game_state == kGameStateFinale);
 
     // advance animation
     finale_count++;
@@ -403,7 +404,7 @@ static void TextWrite(void)
     int count = (int)((finale_count - 10) / finale->text_speed_);
     if (count < 0) count = 0;
 
-    SYS_ASSERT(finale);
+    EPI_ASSERT(finale);
 
     // HudSetFont();
     // HudSetScale();
@@ -504,7 +505,7 @@ static void CAST_RangeAttack(const AttackDefinition *range)
 {
     SoundEffect *sfx = nullptr;
 
-    SYS_ASSERT(range);
+    EPI_ASSERT(range);
 
     if (range->attackstyle_ == kAttackStyleShot) { sfx = range->sound_; }
     else if (range->attackstyle_ == kAttackStyleSkullFly)
@@ -589,7 +590,7 @@ static void CastInitNew(int num)
     cast_on_melee  = 0;
     cast_attacking = false;
 
-    SYS_ASSERT(cast_order->chase_state_);  // checked in ddf_mobj.c
+    EPI_ASSERT(cast_order->chase_state_);  // checked in ddf_mobj.c
     CastSetState(cast_order->chase_state_);
 }
 
@@ -680,7 +681,7 @@ static void CastSkip(void)
         cast_state = &states[cast_order->overkill_state_];
     else
     {
-        SYS_ASSERT(cast_order->death_state_);  // checked in ddf_mobj.c
+        EPI_ASSERT(cast_order->death_state_);  // checked in ddf_mobj.c
         cast_state = &states[cast_order->death_state_];
     }
 
@@ -876,7 +877,7 @@ static void BunnyScroll(void)
 
 void FinaleDrawer(void)
 {
-    SYS_ASSERT(game_state == kGameStateFinale);
+    EPI_ASSERT(game_state == kGameStateFinale);
 
     switch (finale_stage)
     {

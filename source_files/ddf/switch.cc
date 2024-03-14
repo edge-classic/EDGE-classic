@@ -29,20 +29,19 @@ static SwitchDefinition *dynamic_switchdef;
 
 SwitchDefinitionContainer switchdefs;
 
-#define DDF_CMD_BASE dummy_switchdef
 static SwitchDefinition dummy_switchdef;
 
 static const DDFCommandList switch_commands[] = {
-    DDF_FIELD("ON_TEXTURE", on_name_, DDF_MainGetLumpName),
-    DDF_FIELD("OFF_TEXTURE", off_name_, DDF_MainGetLumpName),
-    DDF_FIELD("ON_SOUND", on_sfx_, DDF_MainLookupSound),
-    DDF_FIELD("OFF_SOUND", off_sfx_, DDF_MainLookupSound),
-    DDF_FIELD("TIME", time_, DDF_MainGetTime),
+    DDF_FIELD("ON_TEXTURE", dummy_switchdef, on_name_, DDF_MainGetLumpName),
+    DDF_FIELD("OFF_TEXTURE", dummy_switchdef, off_name_, DDF_MainGetLumpName),
+    DDF_FIELD("ON_SOUND", dummy_switchdef, on_sfx_, DDF_MainLookupSound),
+    DDF_FIELD("OFF_SOUND", dummy_switchdef, off_sfx_, DDF_MainLookupSound),
+    DDF_FIELD("TIME", dummy_switchdef, time_, DDF_MainGetTime),
 
     // -AJA- backwards compatibility cruft...
-    DDF_FIELD("SOUND", on_sfx_, DDF_MainLookupSound),
+    DDF_FIELD("SOUND", dummy_switchdef, on_sfx_, DDF_MainLookupSound),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 //
 //  DDF PARSE ROUTINES

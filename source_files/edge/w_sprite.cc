@@ -36,6 +36,7 @@
 #include "e_main.h"
 #include "e_search.h"
 #include "endianess.h"
+#include "epi.h"
 #include "filesystem.h"
 #include "p_local.h"  // map_object_list_head
 #include "r_image.h"
@@ -134,7 +135,7 @@ static SpriteFrame *WhatFrame(SpriteDefinition *def, const char *name, int pos)
                 return nullptr;
         }
 
-    SYS_ASSERT(index >= 0);
+    EPI_ASSERT(index >= 0);
 
     // ignore frames larger than what is used in DDF
     if (index >= def->total_frames_) return nullptr;
@@ -216,7 +217,7 @@ static void InstallSpriteLump(SpriteDefinition *def, int lump,
     int rot = WhatRot(frame, lumpname, pos + 1);
     if (rot < 0) return;
 
-    SYS_ASSERT(0 <= rot && rot < 16);
+    EPI_ASSERT(0 <= rot && rot < 16);
 
     if (frame->images_[rot])
     {
@@ -243,7 +244,7 @@ static void InstallSpritePack(SpriteDefinition *def, PackFile *pack,
     int rot = WhatRot(frame, spritebase.c_str(), pos + 1);
     if (rot < 0) return;
 
-    SYS_ASSERT(0 <= rot && rot < 16);
+    EPI_ASSERT(0 <= rot && rot < 16);
 
     if (frame->images_[rot])
     {
@@ -401,7 +402,7 @@ static void FillSpriteFramesUser()
 
     if (img_num == 0) return;
 
-    SYS_ASSERT(images);
+    EPI_ASSERT(images);
 
     int S = 0, L = 0;
 
@@ -621,7 +622,7 @@ void InitializeSprites(void)
     {
         SpriteDefinition *def = sprites[k];
 
-        SYS_ASSERT(def->total_frames_ > 0);
+        EPI_ASSERT(def->total_frames_ > 0);
 
         def->frames_ = new SpriteFrame[def->total_frames_];
     }
@@ -703,9 +704,9 @@ SpriteFrame *GetSpriteFrame(int spr_num, int framenum)
     // spr_num comes from the 'sprite' field of State, and
     // is also an index into ddf_sprite_names vector.
 
-    SYS_ASSERT(spr_num > 0);
-    SYS_ASSERT(spr_num < sprite_count);
-    SYS_ASSERT(framenum >= 0);
+    EPI_ASSERT(spr_num > 0);
+    EPI_ASSERT(spr_num < sprite_count);
+    EPI_ASSERT(framenum >= 0);
 
     SpriteDefinition *def = sprites[spr_num];
 
@@ -720,14 +721,14 @@ SpriteFrame *GetSpriteFrame(int spr_num, int framenum)
 
 void PrecacheSprites(void)
 {
-    SYS_ASSERT(sprite_count > 1);
+    EPI_ASSERT(sprite_count > 1);
 
     uint8_t *sprite_present = new uint8_t[sprite_count];
     memset(sprite_present, 0, sprite_count);
 
     for (MapObject *mo = map_object_list_head; mo; mo = mo->next_)
     {
-        SYS_ASSERT(mo->state_);
+        EPI_ASSERT(mo->state_);
 
         if (mo->state_->sprite < 1 || mo->state_->sprite >= sprite_count)
             continue;
@@ -752,7 +753,7 @@ void PrecacheSprites(void)
                 LogDebug("Precaching sprite: %s\n", def->name);
         */
 
-        SYS_ASSERT(def->frames_);
+        EPI_ASSERT(def->frames_);
 
         for (int fr = 0; fr < def->total_frames_; fr++)
         {

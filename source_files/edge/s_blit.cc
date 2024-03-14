@@ -28,6 +28,7 @@
 #include <list>
 
 #include "dm_state.h"
+#include "epi.h"
 #include "epi_sdl.h"
 #include "i_system.h"
 #include "m_misc.h"
@@ -198,7 +199,7 @@ static void BlitToS16(const int *src, int16_t *dest, int length)
 
 static void MixMono(SoundChannel *chan, int *dest, int pairs)
 {
-    SYS_ASSERT(pairs > 0);
+    EPI_ASSERT(pairs > 0);
 
     int16_t *src_L;
 
@@ -227,12 +228,12 @@ static void MixMono(SoundChannel *chan, int *dest, int pairs)
 
     chan->offset_ = offset;
 
-    SYS_ASSERT(offset - chan->delta_ < chan->length_);
+    EPI_ASSERT(offset - chan->delta_ < chan->length_);
 }
 
 static void MixStereo(SoundChannel *chan, int *dest, int pairs)
 {
-    SYS_ASSERT(pairs > 0);
+    EPI_ASSERT(pairs > 0);
 
     int16_t *src_L;
     int16_t *src_R;
@@ -272,7 +273,7 @@ static void MixStereo(SoundChannel *chan, int *dest, int pairs)
 
     chan->offset_ = offset;
 
-    SYS_ASSERT(offset - chan->delta_ < chan->length_);
+    EPI_ASSERT(offset - chan->delta_ < chan->length_);
 }
 
 static void MixInterleaved(SoundChannel *chan, int *dest, int pairs)
@@ -282,7 +283,7 @@ static void MixInterleaved(SoundChannel *chan, int *dest, int pairs)
             "INTERNAL ERROR: tried to mix an interleaved buffer in MONO "
             "mode.\n");
 
-    SYS_ASSERT(pairs > 0);
+    EPI_ASSERT(pairs > 0);
 
     int16_t *src_L;
 
@@ -314,7 +315,7 @@ static void MixInterleaved(SoundChannel *chan, int *dest, int pairs)
 
     chan->offset_ = offset;
 
-    SYS_ASSERT(offset - chan->delta_ < chan->length_);
+    EPI_ASSERT(offset - chan->delta_ < chan->length_);
 }
 
 static void MixOneChannel(SoundChannel *chan, int pairs)
@@ -323,7 +324,7 @@ static void MixOneChannel(SoundChannel *chan, int pairs)
 
     if (chan->volume_left_ == 0 && chan->volume_right_ == 0) return;
 
-    SYS_ASSERT(chan->offset_ < chan->length_);
+    EPI_ASSERT(chan->offset_ < chan->length_);
 
     int *dest = mix_buffer;
 
@@ -340,10 +341,10 @@ static void MixOneChannel(SoundChannel *chan, int pairs)
 
             count = (int)floor(avail);
 
-            SYS_ASSERT(count > 0);
-            SYS_ASSERT(count <= pairs);
+            EPI_ASSERT(count > 0);
+            EPI_ASSERT(count <= pairs);
 
-            SYS_ASSERT(chan->offset_ + count * chan->delta_ >= chan->length_);
+            EPI_ASSERT(chan->offset_ + count * chan->delta_ >= chan->length_);
         }
 
         if (chan->data_->mode_ == kMixInterleaved)
@@ -403,7 +404,7 @@ static void MixQueues(int pairs)
 
     if (chan->volume_left_ == 0 && chan->volume_right_ == 0) return;
 
-    SYS_ASSERT(chan->offset_ < chan->length_);
+    EPI_ASSERT(chan->offset_ < chan->length_);
 
     int *dest = mix_buffer;
 
@@ -420,10 +421,10 @@ static void MixQueues(int pairs)
 
             count = (int)floor(avail);
 
-            SYS_ASSERT(count > 0);
-            SYS_ASSERT(count <= pairs);
+            EPI_ASSERT(count > 0);
+            EPI_ASSERT(count <= pairs);
 
-            SYS_ASSERT(chan->offset_ + count * chan->delta_ >= chan->length_);
+            EPI_ASSERT(chan->offset_ + count * chan->delta_ >= chan->length_);
         }
 
         if (chan->data_->mode_ == kMixInterleaved)
@@ -439,7 +440,7 @@ static void MixQueues(int pairs)
             // Place current buffer onto free list,
             // and enqueue the next buffer to play.
 
-            SYS_ASSERT(!playing_queue_buffers.empty());
+            EPI_ASSERT(!playing_queue_buffers.empty());
 
             SoundData *buf = playing_queue_buffers.front();
             playing_queue_buffers.pop_front();
@@ -464,9 +465,9 @@ void SoundMixAllChannels(void *stream, int len)
     if (sound_device_stereo) samples *= 2;
 
     // check that we're not getting too much data
-    SYS_ASSERT(pairs <= sound_device_samples_per_buffer);
+    EPI_ASSERT(pairs <= sound_device_samples_per_buffer);
 
-    SYS_ASSERT(mix_buffer && samples <= mix_buffer_length);
+    EPI_ASSERT(mix_buffer && samples <= mix_buffer_length);
 
     // clear mixer buffer
     memset(mix_buffer, 0, mix_buffer_length * sizeof(int));
@@ -492,8 +493,8 @@ void SoundInitializeChannels(int total)
 {
     // NOTE: assumes audio is locked!
 
-    SYS_ASSERT(total >= kMinimumSoundChannels);
-    SYS_ASSERT(total <= kMaximumSoundChannels);
+    EPI_ASSERT(total >= kMinimumSoundChannels);
+    EPI_ASSERT(total <= kMaximumSoundChannels);
 
     total_channels = total;
 
@@ -537,8 +538,8 @@ void SoundReallocateChannels(int total)
 {
     // NOTE: assumes audio is locked!
 
-    SYS_ASSERT(total >= kMinimumSoundChannels);
-    SYS_ASSERT(total <= kMaximumSoundChannels);
+    EPI_ASSERT(total >= kMinimumSoundChannels);
+    EPI_ASSERT(total <= kMaximumSoundChannels);
 
     if (total > total_channels)
     {
@@ -675,7 +676,7 @@ void SoundQueueStop(void)
 {
     if (no_sound) return;
 
-    SYS_ASSERT(queue_channel);
+    EPI_ASSERT(queue_channel);
 
     LockAudio();
     {
@@ -714,8 +715,8 @@ SoundData *SoundQueueGetFreeBuffer(int samples, int buf_mode)
 
 void SoundQueueAddBuffer(SoundData *buf, int freq)
 {
-    SYS_ASSERT(!no_sound);
-    SYS_ASSERT(buf);
+    EPI_ASSERT(!no_sound);
+    EPI_ASSERT(buf);
 
     LockAudio();
     {
@@ -730,8 +731,8 @@ void SoundQueueAddBuffer(SoundData *buf, int freq)
 
 void SoundQueueReturnBuffer(SoundData *buf)
 {
-    SYS_ASSERT(!no_sound);
-    SYS_ASSERT(buf);
+    EPI_ASSERT(!no_sound);
+    EPI_ASSERT(buf);
 
     LockAudio();
     {

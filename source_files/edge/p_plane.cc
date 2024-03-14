@@ -29,6 +29,7 @@
 #include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "epi.h"
 #include "m_random.h"
 #include "n_network.h"
 #include "p_local.h"
@@ -1384,7 +1385,7 @@ static bool MoveSlider(SlidingDoorMover *smov)
 bool RunSlidingDoor(Line *door, Line *act_line, MapObject *thing,
                     const LineType *special)
 {
-    SYS_ASSERT(door);
+    EPI_ASSERT(door);
 
     Sector *sec = door->front_sector;
 

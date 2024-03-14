@@ -18,6 +18,9 @@
 
 #pragma once
 
+#include <math.h>
+#include <string.h>
+
 /* Important functions provided by Engine code */
 #ifdef __GNUC__
 void FatalError(const char *error, ...) __attribute__((format(printf, 1, 2)));
@@ -31,26 +34,20 @@ void LogPrint(const char *message, ...);
 void LogDebug(const char *message, ...);
 #endif
 
-// basic macros
-
 // Move these to dedicated EPI math file - Dasho
-#include <math.h>
 inline int RoundToInteger(float x) { return (int)roundf(x); }
 inline int RoundToInteger(double x) { return (int)round(x); }
 
 // assertion macro
-#define SYS_ASSERT(cond)                                                   \
-    ((cond) ? (void)0                                                      \
+#define EPI_ASSERT(cond)                                                      \
+    ((cond) ? (void)0                                                         \
             : FatalError("Assertion '%s' failed (%s:%d).\n", #cond, __FILE__, \
-                      __LINE__))
+                         __LINE__))
 
-//
-// Z_Clear
 //
 // Clears memory to zero.
 //
-#include <string.h>
-#define Z_Clear(ptr, type, num) \
+#define EPI_CLEAR_MEMORY(ptr, type, num) \
     memset((void *)(ptr), ((ptr) - ((type *)(ptr))), (num) * sizeof(type))
 
 //--- editor settings ---

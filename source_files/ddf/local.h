@@ -43,33 +43,20 @@ struct DDFCommandList
     const struct DDFCommandList *sub_comms;
 };
 
-// NOTE: requires DDF_CMD_BASE to be defined as the dummy struct
-
-#define DDF_FIELD(name, field, parser)                                       \
-    {                                                                        \
-        name, parser, ((char *)&DDF_CMD_BASE.field - (char *)&DDF_CMD_BASE), \
-            nullptr                                                          \
+// NOTE: requires an instantiated base struct
+#define DDF_FIELD(name, base, field, parser)                         \
+    {                                                                \
+        name, parser, ((char *)&base.field - (char *)&base), nullptr \
     }
 
-#define DDF_SUB_LIST(name, field, subcomms)                                 \
-    {                                                                       \
-        "*" name, nullptr,                                                  \
-            ((char *)&DDF_CMD_BASE.field - (char *)&DDF_CMD_BASE), subcomms \
-    }
-
-#define DDF_CMD_END                  \
-    {                                \
-        nullptr, nullptr, 0, nullptr \
-    }
-
-#define DDF_STATE(name, redir, field)                                      \
+#define DDF_SUB_LIST(name, base, field, subcomms)                          \
     {                                                                      \
-        name, redir, ((char *)&DDF_CMD_BASE.field - (char *)&DDF_CMD_BASE) \
+        "*" name, nullptr, ((char *)&base.field - (char *)&base), subcomms \
     }
 
-#define DDF_STATE_END       \
-    {                       \
-        nullptr, nullptr, 0 \
+#define DDF_STATE(name, redir, base, field)                \
+    {                                                      \
+        name, redir, ((char *)&base.field - (char *)&base) \
     }
 
 //
@@ -253,7 +240,6 @@ void DDF_GameInit(void);
 void DDF_GameCleanUp(void);
 
 // DDF_LANG Code
-void DDF_LanguageInit(void);
 void DDF_LanguageCleanUp(void);
 
 // DDF_LEVL Code

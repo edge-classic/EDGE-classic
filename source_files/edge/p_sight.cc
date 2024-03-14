@@ -42,6 +42,7 @@
 #include "AlmostEquals.h"
 #include "common_doomdefs.h"
 #include "dm_defs.h"
+#include "epi.h"
 #include "m_bbox.h"
 #include "p_local.h"
 #include "r_misc.h"
@@ -197,7 +198,7 @@ static bool CrossSubsector(Subsector *sub)
         front = seg->front_sector;
         back  = seg->back_sector;
 
-        SYS_ASSERT(back);
+        EPI_ASSERT(back);
 
         // compute intercept vector (fraction from 0 to 1)
         {
@@ -289,7 +290,7 @@ static bool CheckSightBSP(unsigned int bspnum)
 
     bspnum &= ~kLeafSubsector;
 
-    SYS_ASSERT(bspnum < (unsigned int)total_level_subsectors);
+    EPI_ASSERT(bspnum < (unsigned int)total_level_subsectors);
 
     {
         Subsector *sub = level_subsectors + bspnum;
@@ -422,8 +423,8 @@ bool CheckSight(MapObject *src, MapObject *dest)
 
     // First check for trivial rejection.
 
-    SYS_ASSERT(src->subsector_);
-    SYS_ASSERT(dest->subsector_);
+    EPI_ASSERT(src->subsector_);
+    EPI_ASSERT(dest->subsector_);
 
     // An unobstructed LOS is possible.
     // Now look from eyes of t1 to any part of t2.
@@ -431,7 +432,7 @@ bool CheckSight(MapObject *src, MapObject *dest)
     valid_count++;
 
     // The "eyes" of a thing is 75% of its height.
-    SYS_ASSERT(src->info_);
+    EPI_ASSERT(src->info_);
     sight_check.source_z = src->z + src->height_ * src->info_->viewheight_;
 
     sight_check.source.x         = src->x;
@@ -635,7 +636,7 @@ bool CheckSightToPoint(MapObject *src, float x, float y, float z)
 //
 bool QuickVerticalSightCheck(MapObject *src, MapObject *dest)
 {
-    SYS_ASSERT(src->info_);
+    EPI_ASSERT(src->info_);
 
     sight_check.source_z = src->z + src->height_ * src->info_->viewheight_;
 

@@ -134,7 +134,7 @@ bool M4pPlayer::StreamIntoBuffer(SoundData *buf)
 
 bool M4pPlayer::OpenMemory(uint8_t *data, int length)
 {
-    SYS_ASSERT(data);
+    EPI_ASSERT(data);
 
     if (!m4p_LoadFromData(data, length, sound_device_frequency, M4P_BUFFER))
     {

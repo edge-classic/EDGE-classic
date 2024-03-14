@@ -51,8 +51,8 @@ TokenKind Lexer::Next(std::string &s)
 
 bool Lexer::Match(const char *s)
 {
-    SYS_ASSERT(s);
-    SYS_ASSERT(s[0]);
+    EPI_ASSERT(s);
+    EPI_ASSERT(s[0]);
 
     bool is_keyword = IsAlphanumericASCII(s[0]);
 
@@ -89,8 +89,8 @@ bool Lexer::Match(const char *s)
 
 bool Lexer::MatchKeep(const char *s)
 {
-    SYS_ASSERT(s);
-    SYS_ASSERT(s[0]);
+    EPI_ASSERT(s);
+    EPI_ASSERT(s[0]);
 
     bool is_keyword = IsAlphanumericASCII(s[0]);
 
@@ -225,7 +225,7 @@ TokenKind Lexer::ParseIdentifier(std::string &s)
         pos_++;
     }
 
-    SYS_ASSERT(s.size() > 0);
+    EPI_ASSERT(s.size() > 0);
 
     return kTokenIdentifier;
 }

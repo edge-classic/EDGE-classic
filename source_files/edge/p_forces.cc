@@ -39,6 +39,7 @@
 #include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "epi.h"
 #include "m_random.h"
 #include "p_local.h"
 #include "r_state.h"
@@ -164,7 +165,7 @@ static Force *NewForce(void)
 {
     Force *f = new Force;
 
-    Z_Clear(f, Force, 1);
+    EPI_CLEAR_MEMORY(f, Force, 1);
 
     active_forces.push_back(f);
     return f;

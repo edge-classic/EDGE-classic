@@ -70,7 +70,7 @@ void ammo::Shutdown() {}
 
 void ammo::MarkAmmo(int a_num)
 {
-    SYS_ASSERT(0 <= a_num && a_num < kTotalAmmoTypes &&
+    EPI_ASSERT(0 <= a_num && a_num < kTotalAmmoTypes &&
                a_num != kAmmoTypeUnused);
 
     ammo_modified[a_num] = true;
@@ -137,7 +137,7 @@ void ammo::AlterAmmo(int new_val)
     int         a_num     = patch::active_obj;
     const char *deh_field = patch::line_buf;
 
-    SYS_ASSERT(0 <= a_num && a_num < kTotalAmmoTypes &&
+    EPI_ASSERT(0 <= a_num && a_num < kTotalAmmoTypes &&
                a_num != kAmmoTypeUnused);
 
     bool max_m = (0 == epi::StringCaseCompareASCII(deh_field, "Max ammo"));

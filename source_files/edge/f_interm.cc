@@ -34,6 +34,7 @@
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_main.h"
+#include "epi.h"
 #include "f_finale.h"
 #include "g_game.h"
 #include "hu_draw.h"
@@ -369,7 +370,7 @@ void IntermissionClear(void) { world_intermission.Init(nullptr); }
 static void DrawLevelFinished(void)
 {
     // draw <LevelName>
-    // SYS_ASSERT(level_names[0]);
+    // EPI_ASSERT(level_names[0]);
 
     // Lobo 2022: if we have a per level image defined, use that instead
     if (leaving_background_image)
@@ -1001,7 +1002,7 @@ static int DeathmatchScore(int pl)
 
 static void InitDeathmatchStats(void)
 {
-    SYS_ASSERT(kNumberOfPlayersShown <= kMaximumPlayers);
+    EPI_ASSERT(kNumberOfPlayersShown <= kMaximumPlayers);
 
     state            = kIntermissionStateStatScreen;
     accelerate_stage = false;
@@ -1170,7 +1171,7 @@ static int CoopScore(int pl)
 
 static void InitCoopStats(void)
 {
-    SYS_ASSERT(kNumberOfPlayersShown <= kMaximumPlayers);
+    EPI_ASSERT(kNumberOfPlayersShown <= kMaximumPlayers);
 
     state              = kIntermissionStateStatScreen;
     accelerate_stage   = false;
@@ -1761,7 +1762,7 @@ void IntermissionTicker(void)
 {
     // Updates stuff each tick
 
-    SYS_ASSERT(game_state == kGameStateIntermission);
+    EPI_ASSERT(game_state == kGameStateIntermission);
 
     int i;
 
@@ -1817,7 +1818,7 @@ void IntermissionTicker(void)
 
 void IntermissionDrawer(void)
 {
-    SYS_ASSERT(game_state == kGameStateIntermission);
+    EPI_ASSERT(game_state == kGameStateIntermission);
 
     HudReset();
 
@@ -2038,7 +2039,7 @@ static void InitVariables(void)
 
     GameDefinition *def = intermission_stats.current_level->episode_;
 
-    SYS_ASSERT(def);
+    EPI_ASSERT(def);
 
     world_intermission.Init(def);
 
@@ -2050,7 +2051,7 @@ void IntermissionStart(void)
     InitVariables();
 
     const GameDefinition *gd = intermission_stats.current_level->episode_;
-    SYS_ASSERT(gd);
+    EPI_ASSERT(gd);
 
     if (InSinglePlayerMatch())
         InitSinglePlayerStats();

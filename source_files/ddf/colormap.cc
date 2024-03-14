@@ -27,18 +27,17 @@ ColormapContainer colormaps;
 
 void DDF_ColmapGetSpecial(const char *info, void *storage);
 
-#define DDF_CMD_BASE dummy_colmap
 static Colormap dummy_colmap;
 
 static const DDFCommandList colmap_commands[] = {
-    DDF_FIELD("LUMP", lump_name_, DDF_MainGetLumpName),
-    DDF_FIELD("PACK", pack_name_, DDF_MainGetString),
-    DDF_FIELD("START", start_, DDF_MainGetNumeric),
-    DDF_FIELD("LENGTH", length_, DDF_MainGetNumeric),
-    DDF_FIELD("SPECIAL", special_, DDF_ColmapGetSpecial),
-    DDF_FIELD("GL_COLOUR", gl_color_, DDF_MainGetRGB),
+    DDF_FIELD("LUMP", dummy_colmap, lump_name_, DDF_MainGetLumpName),
+    DDF_FIELD("PACK", dummy_colmap, pack_name_, DDF_MainGetString),
+    DDF_FIELD("START", dummy_colmap, start_, DDF_MainGetNumeric),
+    DDF_FIELD("LENGTH", dummy_colmap, length_, DDF_MainGetNumeric),
+    DDF_FIELD("SPECIAL", dummy_colmap, special_, DDF_ColmapGetSpecial),
+    DDF_FIELD("GL_COLOUR", dummy_colmap, gl_color_, DDF_MainGetRGB),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 //
 //  DDF PARSE ROUTINES

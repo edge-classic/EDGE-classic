@@ -97,7 +97,7 @@ void Lump::Rename(const char *new_name)
 
 bool Lump::Seek(int offset)
 {
-    SYS_ASSERT(offset >= 0);
+    EPI_ASSERT(offset >= 0);
 
     if (parent_->memory_file_pointer_)
         return (parent_->memory_file_pointer_->Seek(
@@ -109,7 +109,7 @@ bool Lump::Seek(int offset)
 
 bool Lump::Read(void *data, size_t length)
 {
-    SYS_ASSERT(data && length > 0);
+    EPI_ASSERT(data && length > 0);
 
     if (parent_->memory_file_pointer_)
         return (parent_->memory_file_pointer_->Read(data, length) == length);
@@ -163,7 +163,7 @@ bool Lump::GetLine(char *buffer, size_t buffer_size)
 
 bool Lump::Write(const void *data, int length)
 {
-    SYS_ASSERT(data && length > 0);
+    EPI_ASSERT(data && length > 0);
 
     lump_length_ += length;
 
@@ -234,7 +234,7 @@ WadFile::~WadFile()
 
 WadFile *WadFile::Open(std::string filename, char mode)
 {
-    SYS_ASSERT(mode == 'r' || mode == 'w' || mode == 'a');
+    EPI_ASSERT(mode == 'r' || mode == 'w' || mode == 'a');
 
     if (mode == 'w') return Create(filename, mode);
 
@@ -293,7 +293,7 @@ retry:
 WadFile *WadFile::OpenMem(std::string filename, uint8_t *raw_wad,
                           int raw_length)
 {
-    SYS_ASSERT(raw_wad);
+    EPI_ASSERT(raw_wad);
 
     FileMessage("Opening WAD from memory: %s\n", filename.c_str());
 
@@ -376,8 +376,8 @@ static bool IsGLNodeLump(const char *name)
 
 Lump *WadFile::GetLump(int index)
 {
-    SYS_ASSERT(0 <= index && index < NumLumps());
-    SYS_ASSERT(directory_[index]);
+    EPI_ASSERT(0 <= index && index < NumLumps());
+    EPI_ASSERT(directory_[index]);
 
     return directory_[index];
 }
@@ -407,7 +407,7 @@ int WadFile::LevelLookupLump(int level_number, const char *name)
 
     for (int k = start + 1; k <= finish; k++)
     {
-        SYS_ASSERT(0 <= k && k < NumLumps());
+        EPI_ASSERT(0 <= k && k < NumLumps());
 
         if (epi::StringCaseCompareASCII(directory_[k]->name_, name) == 0)
             return k;
@@ -422,8 +422,8 @@ int WadFile::LevelFind(const char *name)
     {
         int index = levels_[k];
 
-        SYS_ASSERT(0 <= index && index < NumLumps());
-        SYS_ASSERT(directory_[index]);
+        EPI_ASSERT(0 <= index && index < NumLumps());
+        EPI_ASSERT(directory_[index]);
 
         if (epi::StringCaseCompareASCII(directory_[index]->name_, name) == 0)
             return k;
@@ -498,7 +498,7 @@ int WadFile::LevelFindFirst()
 
 int WadFile::LevelHeader(int level_number)
 {
-    SYS_ASSERT(0 <= level_number && level_number < LevelCount());
+    EPI_ASSERT(0 <= level_number && level_number < LevelCount());
 
     return levels_[level_number];
 }
@@ -871,7 +871,7 @@ void WadFile::FixGroup(std::vector<int> &group, int index, int number_added,
 
 Lump *WadFile::AddLump(const char *name, int max_size)
 {
-    SYS_ASSERT(begun_write_);
+    EPI_ASSERT(begun_write_);
 
     begun_max_size_ = max_size;
 
@@ -905,7 +905,7 @@ Lump *WadFile::AddLump(const char *name, int max_size)
 
 void WadFile::RecreateLump(Lump *lump, int max_size)
 {
-    SYS_ASSERT(begun_write_);
+    EPI_ASSERT(begun_write_);
 
     begun_max_size_ = max_size;
 
@@ -1024,7 +1024,7 @@ int WadFile::PositionForWrite(int max_size)
 
     if (want_pos > total_size_)
     {
-        SYS_ASSERT(want_pos < total_size_ + 8);
+        EPI_ASSERT(want_pos < total_size_ + 8);
 
         WritePadding(want_pos - total_size_);
     }
@@ -1067,7 +1067,7 @@ int WadFile::WritePadding(int count)
 {
     static uint8_t zeros[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
-    SYS_ASSERT(1 <= count && count <= 8);
+    EPI_ASSERT(1 <= count && count <= 8);
 
     fwrite(zeros, count, 1, file_pointer_);
 
@@ -1100,7 +1100,7 @@ void WadFile::WriteDirectory()
     for (int k = 0; k < directory_count_; k++)
     {
         Lump *lump = directory_[k];
-        SYS_ASSERT(lump);
+        EPI_ASSERT(lump);
 
         RawWadEntry entry;
 

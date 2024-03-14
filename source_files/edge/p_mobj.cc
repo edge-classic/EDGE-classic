@@ -57,6 +57,7 @@
 #include "con_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "epi.h"
 #include "f_interm.h"
 #include "g_game.h"
 #include "hu_stuff.h"
@@ -443,7 +444,7 @@ static void ResurrectRespawn(MapObject *mobj)
 
     MapObjectSetState(mobj, info->raise_state_);
 
-    SYS_ASSERT(!mobj->IsRemoved());
+    EPI_ASSERT(!mobj->IsRemoved());
 
     mobj->flags_          = info->flags_;
     mobj->extended_flags_ = info->extended_flags_;
@@ -517,7 +518,7 @@ bool P_SetMobjState2(MapObject *mobj, int state)
 
     if (state == 0) return MapObjectSetState(mobj, state);
 
-    SYS_ASSERT(!mobj->info_->state_grp_.empty());
+    EPI_ASSERT(!mobj->info_->state_grp_.empty());
 
     // state is old?
     if (state < mobj->info_->state_grp_.back().first)
@@ -625,7 +626,7 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz,
     float factor = 1.0f;
     float push_mul;
 
-    SYS_ASSERT(tz > bz);
+    EPI_ASSERT(tz > bz);
 
     if (tz > ceiling_height) factor -= factor * (tz - ceiling_height) / (tz - bz);
 
@@ -662,7 +663,7 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz,
 
                     if (!(tn_flags & kSectorFlagPushConstant))
                     {
-                        SYS_ASSERT(mo->info_->mass_ > 0);
+                        EPI_ASSERT(mo->info_->mass_ > 0);
                         push_mul = 100.0f / mo->info_->mass_;
                     }
 
@@ -698,7 +699,7 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz,
 
             if (!(flags & kSectorFlagPushConstant))
             {
-                SYS_ASSERT(mo->info_->mass_ > 0);
+                EPI_ASSERT(mo->info_->mass_ > 0);
                 push_mul = 100.0f / mo->info_->mass_;
             }
 
@@ -763,7 +764,7 @@ void CalculateFullRegionProperties(const MapObject *mo, RegionProperties *new_p)
             L = L->higher;
         }
 
-        SYS_ASSERT(C);
+        EPI_ASSERT(C);
 
         // ignore "hidden" liquids
         if (C->bottom_height < floor_h || C->bottom_height > sector->ceiling_height) continue;
@@ -1436,8 +1437,8 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
 
     if (!extra_tic || !double_framerate.d_)
     {
-        SYS_ASSERT(mobj->state_);
-        SYS_ASSERT(mobj->reference_count_ >= 0);
+        EPI_ASSERT(mobj->state_);
+        EPI_ASSERT(mobj->reference_count_ >= 0);
 
         mobj->visibility_ =
             (15 * mobj->visibility_ + mobj->target_visibility_) / 16;
@@ -1472,7 +1473,7 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
 
     // determine properties, & handle push sectors
 
-    SYS_ASSERT(mobj->region_properties_);
+    EPI_ASSERT(mobj->region_properties_);
 
     if (mobj->player_)
     {
@@ -1510,7 +1511,7 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
                         {
                             float push_mul = 1.0f;
 
-                            SYS_ASSERT(mobj->info_->mass_ > 0);
+                            EPI_ASSERT(mobj->info_->mass_ > 0);
                             if (!(flags & kSectorFlagPushConstant))
                                 push_mul = 100.0f / mobj->info_->mass_;
 
@@ -1770,7 +1771,7 @@ static void AddMobjToList(MapObject *mo)
 
     if (mo->next_ != nullptr)
     {
-        SYS_ASSERT(mo->next_->previous_ == nullptr);
+        EPI_ASSERT(mo->next_->previous_ == nullptr);
         mo->next_->previous_ = mo;
     }
 
@@ -1793,18 +1794,18 @@ static void RemoveMobjFromList(MapObject *mo)
 
     if (mo->previous_ != nullptr)
     {
-        SYS_ASSERT(mo->previous_->next_ == mo);
+        EPI_ASSERT(mo->previous_->next_ == mo);
         mo->previous_->next_ = mo->next_;
     }
     else  // no previous, must be first item
     {
-        SYS_ASSERT(map_object_list_head == mo);
+        EPI_ASSERT(map_object_list_head == mo);
         map_object_list_head = mo->next_;
     }
 
     if (mo->next_ != nullptr)
     {
-        SYS_ASSERT(mo->next_->previous_ == mo);
+        EPI_ASSERT(mo->next_->previous_ == mo);
         mo->next_->previous_ = mo->previous_;
     }
 }
@@ -2208,7 +2209,7 @@ void ItemRespawn(void)
         }
 
         // spawn a teleport fog at the new spot
-        SYS_ASSERT(objtype->respawneffect_);
+        EPI_ASSERT(objtype->respawneffect_);
         CreateMapObject(x, y, z, objtype->respawneffect_);
 
         // -ACB- 1998/08/06 Use MobjCreateObject
@@ -2339,7 +2340,7 @@ MapObject *CreateMapObject(float x, float y, float z,
     mobj->tics_       = 0;
     mobj->next_state_ = st;
 
-    SYS_ASSERT(!mobj->IsRemoved());
+    EPI_ASSERT(!mobj->IsRemoved());
 
     // enable usable items
     if (mobj->extended_flags_ & kExtendedFlagUsable)

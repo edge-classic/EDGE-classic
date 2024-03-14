@@ -31,15 +31,14 @@ static void DDF_MovieGetType(const char *info, void *storage);
 static void DDF_MovieGetSpecial(const char *info, void *storage);
 static void DDF_MovieGetScaling(const char *info, void *storage);
 
-#define DDF_CMD_BASE dummy_movie
 static MovieDefinition dummy_movie;
 
 static const DDFCommandList movie_commands[] = {
-    DDF_FIELD("MOVIE_DATA", type_, DDF_MovieGetType),
-    DDF_FIELD("SPECIAL", special_, DDF_MovieGetSpecial),
-    DDF_FIELD("SCALING", scaling_, DDF_MovieGetScaling),
+    DDF_FIELD("MOVIE_DATA", dummy_movie, type_, DDF_MovieGetType),
+    DDF_FIELD("SPECIAL", dummy_movie, special_, DDF_MovieGetSpecial),
+    DDF_FIELD("SCALING", dummy_movie, scaling_, DDF_MovieGetScaling),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 MovieDefinitionContainer moviedefs;
 

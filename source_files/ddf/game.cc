@@ -23,9 +23,6 @@
 
 #include "local.h"
 
-#undef DF
-#define DF DDF_FIELD
-
 GameDefinitionContainer gamedefs;
 
 static GameDefinition *dynamic_gamedef;
@@ -38,33 +35,32 @@ static void DDF_GameGetAnim(const char *info, void *storage);
 static void DDF_GameGetMap(const char *info, void *storage);
 static void DDF_GameGetLighting(const char *info, void *storage);
 
-#define DDF_CMD_BASE dummy_gamedef
 static GameDefinition dummy_gamedef;
 
 static const DDFCommandList gamedef_commands[] = {
-    DF("INTERMISSION_GRAPHIC", background_, DDF_MainGetLumpName),
-    DF("INTERMISSION_CAMERA", bg_camera_, DDF_MainGetString),
-    DF("INTERMISSION_MUSIC", music_, DDF_MainGetNumeric),
-    DF("SPLAT_GRAPHIC", splatpic_, DDF_MainGetLumpName),
-    DF("YAH1_GRAPHIC", you_are_here_[0], DDF_MainGetLumpName),
-    DF("YAH2_GRAPHIC", you_are_here_[1], DDF_MainGetLumpName),
-    DF("PERCENT_SOUND", percent_, DDF_MainLookupSound),
-    DF("DONE_SOUND", done_, DDF_MainLookupSound),
-    DF("ENDMAP_SOUND", endmap_, DDF_MainLookupSound),
-    DF("NEXTMAP_SOUND", next_map_, DDF_MainLookupSound),
-    DF("ACCEL_SOUND", accel_snd_, DDF_MainLookupSound),
-    DF("FRAG_SOUND", frag_snd_, DDF_MainLookupSound),
-    DF("FIRSTMAP", firstmap_, DDF_MainGetLumpName),
-    DF("NAME_GRAPHIC", namegraphic_, DDF_MainGetLumpName),
-    DF("TITLE_MOVIE", titlemovie_, DDF_MainGetString),
-    DF("TITLE_MUSIC", titlemusic_, DDF_MainGetNumeric),
-    DF("TITLE_TIME", titletics_, DDF_MainGetTime),
-    DF("SPECIAL_MUSIC", special_music_, DDF_MainGetNumeric),
-    DF("LIGHTING", lighting_, DDF_GameGetLighting),
-    DF("DESCRIPTION", description_, DDF_MainGetString),
-    DF("NO_SKILL_MENU", no_skill_menu_, DDF_MainGetBoolean),
+    DDF_FIELD("INTERMISSION_GRAPHIC", dummy_gamedef, background_, DDF_MainGetLumpName),
+    DDF_FIELD("INTERMISSION_CAMERA", dummy_gamedef, bg_camera_, DDF_MainGetString),
+    DDF_FIELD("INTERMISSION_MUSIC", dummy_gamedef, music_, DDF_MainGetNumeric),
+    DDF_FIELD("SPLAT_GRAPHIC", dummy_gamedef, splatpic_, DDF_MainGetLumpName),
+    DDF_FIELD("YAH1_GRAPHIC", dummy_gamedef, you_are_here_[0], DDF_MainGetLumpName),
+    DDF_FIELD("YAH2_GRAPHIC", dummy_gamedef, you_are_here_[1], DDF_MainGetLumpName),
+    DDF_FIELD("PERCENT_SOUND", dummy_gamedef, percent_, DDF_MainLookupSound),
+    DDF_FIELD("DONE_SOUND", dummy_gamedef, done_, DDF_MainLookupSound),
+    DDF_FIELD("ENDMAP_SOUND", dummy_gamedef, endmap_, DDF_MainLookupSound),
+    DDF_FIELD("NEXTMAP_SOUND", dummy_gamedef, next_map_, DDF_MainLookupSound),
+    DDF_FIELD("ACCEL_SOUND", dummy_gamedef, accel_snd_, DDF_MainLookupSound),
+    DDF_FIELD("FRAG_SOUND", dummy_gamedef, frag_snd_, DDF_MainLookupSound),
+    DDF_FIELD("FIRSTMAP", dummy_gamedef, firstmap_, DDF_MainGetLumpName),
+    DDF_FIELD("NAME_GRAPHIC", dummy_gamedef, namegraphic_, DDF_MainGetLumpName),
+    DDF_FIELD("TITLE_MOVIE", dummy_gamedef, titlemovie_, DDF_MainGetString),
+    DDF_FIELD("TITLE_MUSIC", dummy_gamedef, titlemusic_, DDF_MainGetNumeric),
+    DDF_FIELD("TITLE_TIME", dummy_gamedef, titletics_, DDF_MainGetTime),
+    DDF_FIELD("SPECIAL_MUSIC", dummy_gamedef, special_music_, DDF_MainGetNumeric),
+    DDF_FIELD("LIGHTING", dummy_gamedef, lighting_, DDF_GameGetLighting),
+    DDF_FIELD("DESCRIPTION", dummy_gamedef, description_, DDF_MainGetString),
+    DDF_FIELD("NO_SKILL_MENU", dummy_gamedef, no_skill_menu_, DDF_MainGetBoolean),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 //
 //  DDF PARSE ROUTINES

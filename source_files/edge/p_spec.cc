@@ -36,6 +36,7 @@
 #include "con_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "epi.h"
 #include "f_interm.h"
 #include "g_game.h"
 #include "m_argv.h"
@@ -1977,7 +1978,7 @@ void PlayerInSpecialSector(Player *player, Sector *sec, bool should_choke)
             L = L->higher;
         }
 
-        SYS_ASSERT(C);
+        EPI_ASSERT(C);
 
         // ignore "hidden" liquids
         if (C->bottom_height < floor_h || C->bottom_height > sec->ceiling_height) continue;
@@ -2015,7 +2016,7 @@ void PlayerInSpecialSector(Player *player, Sector *sec, bool should_choke)
     // -AJA- 2008/01/20: water splash sounds for players
     if (!was_swimming && player->swimming_)
     {
-        SYS_ASSERT(swim_special);
+        EPI_ASSERT(swim_special);
 
         if (player->splash_wait_ == 0 && swim_special->splash_sfx_)
         {

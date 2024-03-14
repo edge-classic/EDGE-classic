@@ -30,6 +30,7 @@
 #include "dm_state.h"
 #include "dstrings.h"
 #include "e_main.h"
+#include "epi.h"
 #include "f_interm.h"
 #include "font.h"
 #include "g_game.h"
@@ -284,7 +285,7 @@ static void ChangeGame(NewGameParameters *param, int dir)
     if (closest)
     {
         param->map_ = mapdefs.Lookup(closest->firstmap_.c_str());
-        SYS_ASSERT(param->map_);
+        EPI_ASSERT(param->map_);
         return;
     }
 
@@ -292,7 +293,7 @@ static void ChangeGame(NewGameParameters *param, int dir)
     if (furthest)
     {
         param->map_ = mapdefs.Lookup(furthest->firstmap_.c_str());
-        SYS_ASSERT(param->map_);
+        EPI_ASSERT(param->map_);
         return;
     }
 }
@@ -445,7 +446,7 @@ static void HostAccept(void)
 
 void OptionMenuDrawHostMenu(void)
 {
-    SYS_ASSERT(network_game_host_style);
+    EPI_ASSERT(network_game_host_style);
 
     network_game_host_style->DrawBackground();
 

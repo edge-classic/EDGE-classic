@@ -28,6 +28,7 @@
 #include "con_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "epi.h"
 #include "g_game.h"
 #include "hu_draw.h"
 #include "hu_stuff.h"
@@ -89,7 +90,7 @@ void InitializeScriptTips(void)
         ScriptDrawTip *current = tip_slots + i;
 
         // initial properties
-        Z_Clear(current, ScriptDrawTip, 1);
+        EPI_CLEAR_MEMORY(current, ScriptDrawTip, 1);
 
         current->p = fixed_props[i % kFixedSlots];
 
@@ -128,7 +129,7 @@ static void SendTip(TriggerScriptTrigger *R, ScriptTip *tip, int slot)
 {
     ScriptDrawTip *current;
 
-    SYS_ASSERT(0 <= slot && slot < kMaximumTipSlots);
+    EPI_ASSERT(0 <= slot && slot < kMaximumTipSlots);
 
     current = tip_slots + slot;
 
@@ -324,7 +325,7 @@ void ScriptUpdateTipProperties(TriggerScriptTrigger *R, void *param)
 
     if (tp->slot_num >= 0) R->tip_slot = tp->slot_num;
 
-    SYS_ASSERT(0 <= R->tip_slot && R->tip_slot < kMaximumTipSlots);
+    EPI_ASSERT(0 <= R->tip_slot && R->tip_slot < kMaximumTipSlots);
 
     current = tip_slots + R->tip_slot;
 
@@ -686,7 +687,7 @@ void ScriptChangeTexture(TriggerScriptTrigger *R, void *param)
 
     const Image *image = nullptr;
 
-    SYS_ASSERT(param);
+    EPI_ASSERT(param);
 
     // find texture or flat
     if (ctex->what >= kChangeTextureFloor)
@@ -765,7 +766,7 @@ void ScriptChangeTexture(TriggerScriptTrigger *R, void *param)
     }
 
     // handle the line changers
-    SYS_ASSERT(ctex->what < kChangeTextureSky);
+    EPI_ASSERT(ctex->what < kChangeTextureSky);
 
     for (int i = 0; i < total_level_lines; i++)
     {

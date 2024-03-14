@@ -524,8 +524,8 @@ bool frames::DependRangeWasModified(int low, int high)
 {
     if (high < 0) return false;
 
-    SYS_ASSERT(low <= high);
-    SYS_ASSERT(low > kS_NULL);
+    EPI_ASSERT(low <= high);
+    EPI_ASSERT(low > kS_NULL);
 
     if (high >= (int)new_states.size()) high = (int)new_states.size() - 1;
 
@@ -711,7 +711,7 @@ bool frames::CheckWeaponFlash(int first)
 
         int act = st->action;
 
-        SYS_ASSERT(0 <= act && act < kTotalMBF21Actions);
+        EPI_ASSERT(0 <= act && act < kTotalMBF21Actions);
 
         if (action_info[act].act_flags & kActionFlagFlash) return true;
 
@@ -735,16 +735,16 @@ void frames::UpdateAttacks(char group, char *act_name, int action)
     if (!atk1) { return; }
     else if (IS_WEAPON(group))
     {
-        SYS_ASSERT(strlen(atk1) >= 3);
-        SYS_ASSERT(atk1[1] == ':');
-        SYS_ASSERT(!atk2);
+        EPI_ASSERT(strlen(atk1) >= 3);
+        EPI_ASSERT(atk1[1] == ':');
+        EPI_ASSERT(!atk2);
 
         kind1 = kAttackMethodRanged;
     }
     else
     {
-        SYS_ASSERT(strlen(atk1) >= 3);
-        SYS_ASSERT(atk1[1] == ':');
+        EPI_ASSERT(strlen(atk1) >= 3);
+        EPI_ASSERT(atk1[1] == ':');
 
         kind1 = (atk1[0] == 'R')   ? kAttackMethodRanged
                 : (atk1[0] == 'C') ? kAttackMethodCombat
@@ -758,8 +758,8 @@ void frames::UpdateAttacks(char group, char *act_name, int action)
 
     if (atk2)
     {
-        SYS_ASSERT(strlen(atk2) >= 3);
-        SYS_ASSERT(atk2[1] == ':');
+        EPI_ASSERT(strlen(atk2) >= 3);
+        EPI_ASSERT(atk2[1] == ':');
 
         kind2 = (atk2[0] == 'R')   ? kAttackMethodRanged
                 : (atk2[0] == 'C') ? kAttackMethodCombat
@@ -836,7 +836,7 @@ void frames::UpdateAttacks(char group, char *act_name, int action)
 
 const char *frames::GroupToName(char group)
 {
-    SYS_ASSERT(group != 0);
+    EPI_ASSERT(group != 0);
 
     switch (group)
     {
@@ -894,8 +894,8 @@ const char *frames::RedirectorName(int next_st)
     char next_group = group_for_state[next_st];
     int  next_ofs   = offset_for_state[next_st];
 
-    SYS_ASSERT(next_group != 0);
-    SYS_ASSERT(next_ofs > 0);
+    EPI_ASSERT(next_group != 0);
+    EPI_ASSERT(next_ofs > 0);
 
     if (next_ofs == 1)
         snprintf(name_buf, sizeof(name_buf), "%s", GroupToName(next_group));
@@ -1037,14 +1037,14 @@ void frames::SpecialAction(char *act_name, const State *st)
 
 void frames::OutputState(char group, int cur, bool do_action)
 {
-    SYS_ASSERT(cur > 0);
+    EPI_ASSERT(cur > 0);
 
     const State *st = NewStateElseOld(cur);
     if (st == nullptr) st = &states_orig[kS_TNT1];
 
     int action = do_action ? st->action : kA_NULL;
 
-    SYS_ASSERT(action >= 0 && action < kTotalMBF21Actions);
+    EPI_ASSERT(action >= 0 && action < kTotalMBF21Actions);
 
     const char *bex_name = action_info[action].bex_name;
 
@@ -1227,7 +1227,7 @@ void frames::OutputGroup(char group)
         OutputState(group, cur, true);
 
         const State *st = NewStateElseOld(cur);
-        SYS_ASSERT(st);
+        EPI_ASSERT(st);
 
         int next = st->next_state;
 
@@ -1270,7 +1270,7 @@ void frames::AlterFrame(int new_val)
     int         st_num     = patch::active_obj;
     const char *field_name = patch::line_buf;
 
-    SYS_ASSERT(st_num >= 0);
+    EPI_ASSERT(st_num >= 0);
 
     // the kS_NULL state is never output, no need to change it
     if (st_num == kS_NULL) return;
@@ -1278,7 +1278,7 @@ void frames::AlterFrame(int new_val)
     MarkState(st_num);
 
     State *st = new_states[st_num];
-    SYS_ASSERT(st);
+    EPI_ASSERT(st);
 
     if (epi::StringCaseCompareASCII(field_name, "Action pointer") == 0)
     {
@@ -1324,7 +1324,7 @@ void frames::AlterPointer(int new_val)
     int         st_num    = patch::active_obj;
     const char *deh_field = patch::line_buf;
 
-    SYS_ASSERT(st_num >= 0);
+    EPI_ASSERT(st_num >= 0);
 
     // the kS_NULL state is never output, no need to change it
     if (st_num == kS_NULL) return;
@@ -1332,7 +1332,7 @@ void frames::AlterPointer(int new_val)
     MarkState(st_num);
 
     State *st = new_states[st_num];
-    SYS_ASSERT(st);
+    EPI_ASSERT(st);
 
     if (epi::StringCaseCompareASCII(deh_field, "Codep Frame") != 0)
     {
@@ -1386,7 +1386,7 @@ void frames::AlterBexCodePtr(const char *new_action)
     MarkState(st_num);
 
     State *st = new_states[st_num];
-    SYS_ASSERT(st);
+    EPI_ASSERT(st);
 
     int action;
 

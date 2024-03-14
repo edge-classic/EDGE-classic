@@ -20,6 +20,7 @@
 
 #include "am_map.h"
 #include "con_main.h"
+#include "epi.h"
 #include "font.h"
 #include "g_game.h"
 #include "i_defs_gl.h"
@@ -165,10 +166,10 @@ void HudFrameSetup(void)
     {
         // FIXME: get default font from DDF gamedef
         FontDefinition *DEF = fontdefs.Lookup("DOOM");
-        SYS_ASSERT(DEF);
+        EPI_ASSERT(DEF);
 
         default_font = hud_fonts.Lookup(DEF);
-        SYS_ASSERT(default_font);
+        EPI_ASSERT(default_font);
     }
 
     HudReset();
@@ -182,7 +183,7 @@ static int               scissor_stack_top = 0;
 
 void HudPushScissor(float x1, float y1, float x2, float y2, bool expand)
 {
-    SYS_ASSERT(scissor_stack_top < kScissorStackMaximum);
+    EPI_ASSERT(scissor_stack_top < kScissorStackMaximum);
 
     // expand rendered view to cover whole screen
     if (expand && x1 < 1 && x2 > hud_x_middle * 2 - 1)
@@ -228,8 +229,8 @@ void HudPushScissor(float x1, float y1, float x2, float y2, bool expand)
         sy2 = HMM_MIN(sy2, xy[3]);
     }
 
-    SYS_ASSERT(sx2 >= sx1);
-    SYS_ASSERT(sy2 >= sy1);
+    EPI_ASSERT(sx2 >= sx1);
+    EPI_ASSERT(sy2 >= sy1);
 
     glScissor(sx1, sy1, sx2 - sx1, sy2 - sy1);
 
@@ -246,7 +247,7 @@ void HudPushScissor(float x1, float y1, float x2, float y2, bool expand)
 
 void HudPopScissor()
 {
-    SYS_ASSERT(scissor_stack_top > 0);
+    EPI_ASSERT(scissor_stack_top > 0);
 
     scissor_stack_top--;
 
@@ -1153,7 +1154,7 @@ void HudDrawEndoomChar(float left_x, float top_y, float FNX, const Image *img,
 //
 void HudDrawText(float x, float y, const char *str, float size)
 {
-    SYS_ASSERT(current_font);
+    EPI_ASSERT(current_font);
 
     float cy = y;
 
@@ -1260,13 +1261,13 @@ void HudDrawText(float x, float y, const char *str, float size)
 
 void HudDrawQuitText(int line, float FNX, float FNY, float cx)
 {
-    SYS_ASSERT(quit_lines[line]);
+    EPI_ASSERT(quit_lines[line]);
 
     float cy = (float)current_screen_height - ((25 - line) * FNY);
 
     const Image *img = endoom_font->font_image_;
 
-    SYS_ASSERT(img);
+    EPI_ASSERT(img);
 
     for (int i = 0; i < 80; i++)
     {
@@ -1286,7 +1287,7 @@ void HudDrawQuitText(int line, float FNX, float FNY, float cx)
 
 void HudDrawQuitScreen()
 {
-    SYS_ASSERT(endoom_font);
+    EPI_ASSERT(endoom_font);
 
     if (quit_lines[0])
     {

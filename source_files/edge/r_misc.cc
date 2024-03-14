@@ -35,6 +35,7 @@
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_main.h"
+#include "epi.h"
 #include "i_defs_gl.h"
 #include "m_misc.h"
 #include "n_network.h"
@@ -247,7 +248,7 @@ RegionProperties *RendererPointGetProps(Subsector *sub, float z)
             L = L->higher;
         }
 
-        SYS_ASSERT(C);
+        EPI_ASSERT(C);
 
         // ignore liquids in the middle of THICK solids, or below real
         // floor or above real ceiling

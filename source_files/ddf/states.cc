@@ -60,9 +60,9 @@ std::vector<std::string> ddf_model_names;
 // fixup routine is called.
 static std::vector<std::string> redirs;
 
-#define NUM_SPLIT 10  // Max Number of sections a state is split info
+static constexpr uint8_t kMaximumStateSplits = 10;
 
-static std::string stateinfo[NUM_SPLIT + 1];
+static std::string stateinfo[kMaximumStateSplits + 1];
 
 // a little caching makes a big difference here
 // (because DDF entries are usually limited to a single sprite)
@@ -155,11 +155,11 @@ static int DDF_MainSplitIntoState(const char *info)
 
     strcpy(infobuf, info);
 
-    for (cur = 0; cur < NUM_SPLIT + 1; cur++) stateinfo[cur] = std::string();
+    for (cur = 0; cur < kMaximumStateSplits + 1; cur++) stateinfo[cur] = std::string();
 
     first = temp = infobuf;
 
-    for (cur = 0; !done && cur < NUM_SPLIT; temp++)
+    for (cur = 0; !done && cur < kMaximumStateSplits; temp++)
     {
         if (*temp == '(')
         {
@@ -288,7 +288,7 @@ void DDF_StateReadState(const char *info, const char *label,
                         int index, const char *redir,
                         const DDFActionCode *action_list, bool is_weapon)
 {
-    SYS_ASSERT(group.size() > 0);
+    EPI_ASSERT(group.size() > 0);
 
     StateRange &range = group.back();
 
@@ -329,7 +329,7 @@ void DDF_StateReadState(const char *info, const char *label,
 
         cur = &states[range.last];
 
-        SYS_ASSERT(!stateinfo[0].empty());
+        EPI_ASSERT(!stateinfo[0].empty());
 
         if (DDF_CompareName(stateinfo[0].c_str(), "REMOVE") == 0)
         {
@@ -549,7 +549,7 @@ void DDF_StateBeginRange(std::vector<StateRange> &group)
 //
 void DDF_StateFinishRange(std::vector<StateRange> &group)
 {
-    SYS_ASSERT(!group.empty());
+    EPI_ASSERT(!group.empty());
 
     StateRange &range = group.back();
 

@@ -30,10 +30,12 @@
 #include "dm_state.h"
 #include "e_input.h"
 #include "e_main.h"
+#include "epi.h"
 #include "f_interm.h"
 #include "g_game.h"
 #include "hu_draw.h"
 #include "hu_style.h"
+#include "i_system.h"
 #include "m_menu.h"
 #include "n_network.h"
 #include "s_sound.h"
@@ -78,7 +80,7 @@ void HudStart(void)
 {
     const char *string;
 
-    SYS_ASSERT(current_map);
+    EPI_ASSERT(current_map);
 
     StyleDefinition *map_styledef = styledefs.Lookup("AUTOMAP");
     if (!map_styledef) map_styledef = default_style;

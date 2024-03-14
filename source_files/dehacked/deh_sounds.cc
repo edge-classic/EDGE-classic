@@ -338,7 +338,7 @@ void sounds::AlterSound(int new_val)
     int         s_num     = patch::active_obj;
     const char *deh_field = patch::line_buf;
 
-    SYS_ASSERT(s_num >= 0);
+    EPI_ASSERT(s_num >= 0);
 
     if (epi::StringPrefixCaseCompareASCII(deh_field, "Zero") == 0 ||
         epi::StringPrefixCaseCompareASCII(deh_field, "Neg. One") == 0)
@@ -530,8 +530,8 @@ void sounds::ConvertSFX(void)
 
 bool sounds::ReplaceSound(const char *before, const char *after)
 {
-    SYS_ASSERT(strlen(before) <= 6);
-    SYS_ASSERT(strlen(after) <= 6);
+    EPI_ASSERT(strlen(before) <= 6);
+    EPI_ASSERT(strlen(after) <= 6);
 
     for (int i = 1; i < kTotalSoundEffectsDEHEXTRA; i++)
     {

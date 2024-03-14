@@ -59,12 +59,12 @@ HSVColor::HSVColor(const RGBAColor &col)
     else
         h_ = 300 - r1;
 
-    SYS_ASSERT(0 <= h_ && h_ <= 360);
+    EPI_ASSERT(0 <= h_ && h_ <= 360);
 }
 
 RGBAColor HSVColor::ToRGBA() const
 {
-    SYS_ASSERT(0 <= h_ && h_ <= 360);
+    EPI_ASSERT(0 <= h_ && h_ <= 360);
 
     int sextant = (h_ % 360) / 60;
     int frac    = h_ % 60;
@@ -79,7 +79,7 @@ RGBAColor HSVColor::ToRGBA() const
 
     int r, g, b;
 
-    SYS_ASSERT(0 <= sextant && sextant <= 5);
+    EPI_ASSERT(0 <= sextant && sextant <= 5);
 
     switch (sextant)
     {
@@ -103,9 +103,9 @@ RGBAColor HSVColor::ToRGBA() const
             break;
     }
 
-    SYS_ASSERT(0 <= r && r <= 255);
-    SYS_ASSERT(0 <= g && g <= 255);
-    SYS_ASSERT(0 <= b && b <= 255);
+    EPI_ASSERT(0 <= r && r <= 255);
+    EPI_ASSERT(0 <= g && g <= 255);
+    EPI_ASSERT(0 <= b && b <= 255);
 
     return MakeRGBA(r, g, b);
 }

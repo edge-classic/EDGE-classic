@@ -31,6 +31,7 @@
 
 #include "dm_state.h"  // EDGE_IMAGE_IS_SKY
 #include "endianess.h"
+#include "epi.h"
 #include "g_game.h"  //current_map
 #include "i_defs_gl.h"
 #include "im_data.h"
@@ -63,7 +64,7 @@ extern bool            need_to_draw_sky;
 // struct member naming deviates from the style guide to reflect
 // MDL format documentation
 
-static constexpr char   *kMdlIdentifier = "IDPO";
+static constexpr const char   *kMdlIdentifier = "IDPO";
 static constexpr uint8_t kMdlVersion    = 6;
 
 struct RawMdlHeader
@@ -348,8 +349,8 @@ MdlModel *MdlLoad(epi::File *f)
 
     for (int i = 0; i < total_triangles_; i++)
     {
-        SYS_ASSERT(tri < md->triangles_ + md->total_triangles_);
-        SYS_ASSERT(point < md->points_ + md->total_points_);
+        EPI_ASSERT(tri < md->triangles_ + md->total_triangles_);
+        EPI_ASSERT(point < md->points_ + md->total_points_);
 
         tri->first = point - md->points_;
 
@@ -368,13 +369,13 @@ MdlModel *MdlLoad(epi::File *f)
                 s += (float)swidth * 0.5f;
             point->skin_s = (s + 0.5f) / (float)swidth;
             point->skin_t = (t + 0.5f) / (float)sheight;
-            SYS_ASSERT(point->vert_idx >= 0);
-            SYS_ASSERT(point->vert_idx < md->vertices_per_frame_);
+            EPI_ASSERT(point->vert_idx >= 0);
+            EPI_ASSERT(point->vert_idx < md->vertices_per_frame_);
         }
     }
 
-    SYS_ASSERT(tri == md->triangles_ + md->total_triangles_);
-    SYS_ASSERT(point == md->points_ + md->total_points_);
+    EPI_ASSERT(tri == md->triangles_ + md->total_triangles_);
+    EPI_ASSERT(point == md->points_ + md->total_points_);
 
     /* PARSE FRAMES */
 
@@ -426,8 +427,8 @@ MdlModel *MdlLoad(epi::File *f)
 
             good_V->normal_idx = raw_V->light_normal;
 
-            SYS_ASSERT(good_V->normal_idx >= 0);
-            // SYS_ASSERT(good_V->normal_idx < kTotalMdFormatNormals);
+            EPI_ASSERT(good_V->normal_idx >= 0);
+            // EPI_ASSERT(good_V->normal_idx < kTotalMdFormatNormals);
             //  Dasho: Maybe try to salvage bad MDL models?
             if (good_V->normal_idx >= kTotalMdFormatNormals)
             {
@@ -459,7 +460,7 @@ MdlModel *MdlLoad(epi::File *f)
 
 short MdlFindFrame(MdlModel *md, const char *name)
 {
-    SYS_ASSERT(strlen(name) > 0);
+    EPI_ASSERT(strlen(name) > 0);
 
     for (int f = 0; f < md->total_frames_; f++)
     {
@@ -601,7 +602,7 @@ static void MdlDynamicLightCallback(MapObject *mo, void *dataptr)
     // dynamic lights do not light themselves up!
     if (mo == data->map_object_) return;
 
-    SYS_ASSERT(mo->dynamic_light_.shader);
+    EPI_ASSERT(mo->dynamic_light_.shader);
 
     ShadeNormals(mo->dynamic_light_.shader, data, false);
 }
@@ -653,8 +654,8 @@ static inline void ModelCoordFunc(MdlCoordinateData *data, int v_idx,
     const MdlFrame    *frame2 = data->frame2_;
     const MdlTriangle *strip  = data->strip_;
 
-    SYS_ASSERT(strip->first + v_idx >= 0);
-    SYS_ASSERT(strip->first + v_idx < md->total_points_);
+    EPI_ASSERT(strip->first + v_idx >= 0);
+    EPI_ASSERT(strip->first + v_idx < md->total_points_);
 
     const MdlPoint *point = &md->points_[strip->first + v_idx];
 
@@ -1102,8 +1103,8 @@ void MdlRenderModel2d(MdlModel *md, const Image *skin_img, int frame, float x,
         {
             const MdlFrame *frame_ptr = &md->frames_[frame];
 
-            SYS_ASSERT(strip->first + v_idx >= 0);
-            SYS_ASSERT(strip->first + v_idx < md->total_points_);
+            EPI_ASSERT(strip->first + v_idx >= 0);
+            EPI_ASSERT(strip->first + v_idx < md->total_points_);
 
             const MdlPoint  *point = &md->points_[strip->first + v_idx];
             const MdlVertex *vert  = &frame_ptr->vertices[point->vert_idx];

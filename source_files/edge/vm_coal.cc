@@ -24,6 +24,7 @@
 #include "dm_state.h"
 #include "e_main.h"
 #include "e_player.h"
+#include "epi.h"
 #include "file.h"
 #include "filesystem.h"
 #include "g_game.h"
@@ -378,7 +379,7 @@ static void STRINGS_sub(coal::vm_c *vm, int argc)
         return;
     }
 
-    SYS_ASSERT(end >= 1 && start <= len);
+    EPI_ASSERT(end >= 1 && start <= len);
 
     // translate into C talk
     start--;

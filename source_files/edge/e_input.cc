@@ -35,6 +35,7 @@
 #include "e_event.h"
 #include "e_main.h"
 #include "e_player.h"
+#include "epi.h"
 #include "epi_sdl.h"
 #include "hu_stuff.h"
 #include "m_math.h"
@@ -186,7 +187,7 @@ EDGE_DEFINE_CONSOLE_VARIABLE(fly_speed, "1.0", kConsoleVariableFlagArchive)
 
 static float JoystickAxisFromRaw(int raw, float dead)
 {
-    SYS_ASSERT(abs(raw) <= 32768);
+    EPI_ASSERT(abs(raw) <= 32768);
 
     float v = raw / 32768.0f;
 

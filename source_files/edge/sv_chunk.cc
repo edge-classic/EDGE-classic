@@ -24,6 +24,7 @@
 
 #include "sv_chunk.h"
 
+#include "epi.h"
 #include "filesystem.h"
 #include "i_system.h"
 #include "math_crc.h"
@@ -35,7 +36,7 @@
 
 static constexpr uint8_t kStringMarker     = 0xAA;
 static constexpr uint8_t kNullStringMarker = 0xDE;
-static constexpr char   *kEdgeSaveMagic    = "EdgeSave";
+static constexpr const char *kEdgeSaveMagic    = "EdgeSave";
 static constexpr uint8_t kFirstChunkOffset = 16;
 // The chunk stack will never get any deeper than this
 static constexpr uint8_t kMaximumChunkDepth = 16;
@@ -127,7 +128,7 @@ bool SaveFileOpenRead(std::string filename)
 
 bool SaveFileCloseRead(void)
 {
-    SYS_ASSERT(current_file_pointer);
+    EPI_ASSERT(current_file_pointer);
 
     if (chunk_stack_size > 0)
         FatalError(
@@ -174,8 +175,8 @@ bool SaveFileVerifyHeader(int *version)
 
 bool SaveFileVerifyContents(void)
 {
-    SYS_ASSERT(current_file_pointer);
-    SYS_ASSERT(chunk_stack_size == 0);
+    EPI_ASSERT(current_file_pointer);
+    EPI_ASSERT(chunk_stack_size == 0);
 
     // skip top-level chunks until end...
     for (;;)
@@ -291,9 +292,9 @@ uint8_t SaveChunkGetByte(void)
 
     cur = &chunk_stack[chunk_stack_size - 1];
 
-    SYS_ASSERT(cur->start);
-    SYS_ASSERT(cur->position >= cur->start);
-    SYS_ASSERT(cur->position <= cur->end);
+    EPI_ASSERT(cur->start);
+    EPI_ASSERT(cur->position >= cur->start);
+    EPI_ASSERT(cur->position <= cur->end);
 
     if (cur->position == cur->end)
     {
@@ -351,14 +352,14 @@ bool SavePushReadChunk(const char *id)
         // read uncompressed size
         orig_len = SaveChunkGetInteger();
 
-        SYS_ASSERT(file_len <= (compressBound(orig_len) + 4));
+        EPI_ASSERT(file_len <= (compressBound(orig_len) + 4));
 
         uint8_t *file_data = new uint8_t[file_len + 1];
 
         for (i = 0; (i < file_len) && !last_error; i++)
             file_data[i] = SaveChunkGetByte();
 
-        SYS_ASSERT(!last_error);
+        EPI_ASSERT(!last_error);
 
         cur->start = new uint8_t[orig_len + 1];
         cur->end   = cur->start + orig_len;
@@ -374,8 +375,8 @@ bool SavePushReadChunk(const char *id)
         }
         else  // use ZLIB
         {
-            SYS_ASSERT(file_len > 0);
-            SYS_ASSERT(file_len < orig_len);
+            EPI_ASSERT(file_len > 0);
+            EPI_ASSERT(file_len < orig_len);
 
             uLongf out_len = orig_len;
 
@@ -389,7 +390,7 @@ bool SavePushReadChunk(const char *id)
             decomp_len = (uint32_t)out_len;
         }
 
-        SYS_ASSERT(decomp_len == orig_len);
+        EPI_ASSERT(decomp_len == orig_len);
 
         delete[] file_data;
     }
@@ -403,8 +404,8 @@ bool SavePushReadChunk(const char *id)
         // skip data in parent
         parent->position += file_len;
 
-        SYS_ASSERT(parent->position >= parent->start);
-        SYS_ASSERT(parent->position <= parent->end);
+        EPI_ASSERT(parent->position >= parent->start);
+        EPI_ASSERT(parent->position <= parent->end);
     }
 
     cur->position = cur->start;
@@ -440,12 +441,12 @@ int SaveRemainingChunkSize(void)
 {
     SaveChunk *cur;
 
-    SYS_ASSERT(chunk_stack_size > 0);
+    EPI_ASSERT(chunk_stack_size > 0);
 
     cur = &chunk_stack[chunk_stack_size - 1];
 
-    SYS_ASSERT(cur->position >= cur->start);
-    SYS_ASSERT(cur->position <= cur->end);
+    EPI_ASSERT(cur->position >= cur->start);
+    EPI_ASSERT(cur->position <= cur->end);
 
     return (cur->end - cur->position);
 }
@@ -490,7 +491,7 @@ bool SaveFileOpenWrite(std::string filename, int version)
 
 bool SaveFileCloseWrite(void)
 {
-    SYS_ASSERT(current_file_pointer);
+    EPI_ASSERT(current_file_pointer);
 
     if (chunk_stack_size != 0)
         FatalError(
@@ -551,9 +552,9 @@ bool SavePopWriteChunk(void)
 
     cur = &chunk_stack[chunk_stack_size - 1];
 
-    SYS_ASSERT(cur->start);
-    SYS_ASSERT(cur->position >= cur->start);
-    SYS_ASSERT(cur->position <= cur->end);
+    EPI_ASSERT(cur->start);
+    EPI_ASSERT(cur->position >= cur->start);
+    EPI_ASSERT(cur->position <= cur->end);
 
     len = cur->position - cur->start;
 
@@ -595,7 +596,7 @@ bool SavePopWriteChunk(void)
         }
 #endif
 
-        SYS_ASSERT((int)out_len <= (int)(compressBound(len) + 4));
+        EPI_ASSERT((int)out_len <= (int)(compressBound(len) + 4));
 
         // write compressed length
         SaveChunkPutInteger((int)out_len);
@@ -606,7 +607,7 @@ bool SavePopWriteChunk(void)
         for (i = 0; i < (int)out_len && !last_error; i++)
             SaveChunkPutByte(out_buf[i]);
 
-        SYS_ASSERT(!last_error);
+        EPI_ASSERT(!last_error);
 
         delete[] out_buf;
     }
@@ -659,9 +660,9 @@ void SaveChunkPutByte(uint8_t value)
 
     cur = &chunk_stack[chunk_stack_size - 1];
 
-    SYS_ASSERT(cur->start);
-    SYS_ASSERT(cur->position >= cur->start);
-    SYS_ASSERT(cur->position <= cur->end);
+    EPI_ASSERT(cur->start);
+    EPI_ASSERT(cur->position >= cur->start);
+    EPI_ASSERT(cur->position <= cur->end);
 
     // space left in chunk ?  If not, resize it.
     if (cur->position == cur->end)
@@ -787,8 +788,8 @@ void SaveChunkPutMarker(const char *id)
 
     // LogPrint("ID: %s\n", id);
 
-    SYS_ASSERT(id);
-    SYS_ASSERT(strlen(id) == 4);
+    EPI_ASSERT(id);
+    EPI_ASSERT(strlen(id) == 4);
 
     for (i = 0; i < 4; i++) SaveChunkPutByte((uint8_t)id[i]);
 }

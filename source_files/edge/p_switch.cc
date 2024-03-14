@@ -25,6 +25,7 @@
 
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "epi.h"
 #include "g_game.h"
 #include "main.h"
 #include "p_local.h"
@@ -63,7 +64,7 @@ static void StartButton(SwitchDefinition *sw, Line *line, ButtonPosition w,
          iter != iter_end; iter++)
     {
         b = *iter;
-        SYS_ASSERT(b);
+        EPI_ASSERT(b);
         if (b->button_timer == 0) { break; }
         else { b = nullptr; }
     }
@@ -156,7 +157,7 @@ void ChangeSwitchTexture(Line *line, bool useAgain, LineSpecial specials,
                 // -KM- 98/07/31 Implement sounds
                 if (!noSound && sw->on_sfx_)
                 {
-                    SYS_ASSERT(sound_effects_origin);
+                    EPI_ASSERT(sound_effects_origin);
                     StartSoundEffect(sw->on_sfx_, kCategoryLevel, sound_effects_origin);
                     noSound = true;
                 }
@@ -192,7 +193,7 @@ bool ButtonIsPressed(Line *ld)
          iter != iter_end; iter++)
     {
         Button *b = *iter;
-        SYS_ASSERT(b);
+        EPI_ASSERT(b);
         if (b->button_timer > 0 && b->line == ld) return true;
     }
 
@@ -206,7 +207,7 @@ void UpdateButtons(void)
          iter != iter_end; iter++)
     {
         Button *b = *iter;
-        SYS_ASSERT(b);
+        EPI_ASSERT(b);
 
         if (b->button_timer == 0) continue;
 
@@ -238,7 +239,7 @@ void UpdateButtons(void)
                           &b->line->front_sector->sound_effects_origin);
             }
 
-            Z_Clear(b, Button, 1);
+            EPI_CLEAR_MEMORY(b, Button, 1);
         }
     }
 }

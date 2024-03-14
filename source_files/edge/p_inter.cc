@@ -30,6 +30,7 @@
 #include "dm_state.h"
 #include "dstrings.h"
 #include "e_input.h"
+#include "epi.h"
 #include "m_random.h"
 #include "p_local.h"
 #include "r_misc.h"
@@ -335,7 +336,7 @@ static void GiveWeapon(PickupInfo *pu, Benefit *be)
     WeaponDefinition *info = be->sub.weap;
     int               pw_index;
 
-    SYS_ASSERT(info);
+    EPI_ASSERT(info);
 
     if (pu->lose_them)
     {
@@ -412,7 +413,7 @@ static void GiveArmour(PickupInfo *pu, Benefit *be)
 {
     ArmourType a_class = (ArmourType)be->sub.type;
 
-    SYS_ASSERT(0 <= a_class && a_class < kTotalArmourTypes);
+    EPI_ASSERT(0 <= a_class && a_class < kTotalArmourTypes);
 
     if (pu->lose_them)
     {
@@ -458,8 +459,8 @@ static void GiveArmour(PickupInfo *pu, Benefit *be)
 
         if (amount > slack) amount = slack;
 
-        SYS_ASSERT(amount >= 0);
-        SYS_ASSERT(upgrade >= 0);
+        EPI_ASSERT(amount >= 0);
+        EPI_ASSERT(upgrade >= 0);
 
         if (AlmostEquals(amount, 0.0f) && AlmostEquals(upgrade, 0.0f)) return;
     }
@@ -642,7 +643,7 @@ static void DoGiveBenefitList(PickupInfo *pu)
 //
 bool HasBenefitInList(Player *player, Benefit *list)
 {
-    SYS_ASSERT(player && list);
+    EPI_ASSERT(player && list);
     for (Benefit *be = list; be; be = be->next)
     {
         switch (be->type)
@@ -1201,7 +1202,7 @@ void ThrustMapObject(MapObject *target, MapObject *inflictor, float thrust)
     BAMAngle angle = RendererPointToAngle(0, 0, dx, dy);
 
     // -ACB- 2000/03/11 Div-by-zero check...
-    SYS_ASSERT(!AlmostEquals(target->info_->mass_, 0.0f));
+    EPI_ASSERT(!AlmostEquals(target->info_->mass_, 0.0f));
 
     float push = 12.0f * thrust / target->info_->mass_;
 
@@ -1252,7 +1253,7 @@ void PushMapObject(MapObject *target, MapObject *inflictor, float thrust)
     BAMAngle angle = RendererPointToAngle(0, 0, dx, dy);
 
     // -ACB- 2000/03/11 Div-by-zero check...
-    SYS_ASSERT(!AlmostEquals(target->info_->mass_, 0.0f));
+    EPI_ASSERT(!AlmostEquals(target->info_->mass_, 0.0f));
 
     float push = 12.0f * thrust / target->info_->mass_;
 

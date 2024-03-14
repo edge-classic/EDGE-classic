@@ -32,6 +32,7 @@
 #include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "epi.h"
 #include "g_game.h"
 #include "i_defs_gl.h"
 #include "m_bbox.h"
@@ -204,7 +205,7 @@ class MirrorInfo
         Seg  *seg   = draw_mirror_->seg;
         Line *other = seg->linedef->portal_pair;
 
-        SYS_ASSERT(other);
+        EPI_ASSERT(other);
 
         float ax1 = seg->vertex_1->X;
         float ay1 = seg->vertex_1->Y;
@@ -425,10 +426,10 @@ static void MirrorSetClippers()
 
 static void MirrorPush(DrawMirror *mir)
 {
-    SYS_ASSERT(mir);
-    SYS_ASSERT(mir->seg);
+    EPI_ASSERT(mir);
+    EPI_ASSERT(mir->seg);
 
-    SYS_ASSERT(total_active_mirrors < kMaximumMirrors);
+    EPI_ASSERT(total_active_mirrors < kMaximumMirrors);
 
     active_mirrors[total_active_mirrors].draw_mirror_ = mir;
     active_mirrors[total_active_mirrors].Compute();
@@ -440,7 +441,7 @@ static void MirrorPush(DrawMirror *mir)
 
 static void MirrorPop()
 {
-    SYS_ASSERT(total_active_mirrors > 0);
+    EPI_ASSERT(total_active_mirrors > 0);
 
     total_active_mirrors--;
 
@@ -719,7 +720,7 @@ static void DLIT_Wall(MapObject *mo, void *dataptr)
         if (dist < 0) return;
     }
 
-    SYS_ASSERT(mo->dynamic_light_.shader);
+    EPI_ASSERT(mo->dynamic_light_.shader);
 
     int blending = (data->blending & ~kBlendingAlpha) | kBlendingAdd;
 
@@ -732,7 +733,7 @@ static void GLOWLIT_Wall(MapObject *mo, void *dataptr)
 {
     WallCoordinateData *data = (WallCoordinateData *)dataptr;
 
-    SYS_ASSERT(mo->dynamic_light_.shader);
+    EPI_ASSERT(mo->dynamic_light_.shader);
 
     int blending = (data->blending & ~kBlendingAlpha) | kBlendingAdd;
 
@@ -759,7 +760,7 @@ static void DLIT_Plane(MapObject *mo, void *dataptr)
 
     // NOTE: distance already checked in DynamicLightIterator
 
-    SYS_ASSERT(mo->dynamic_light_.shader);
+    EPI_ASSERT(mo->dynamic_light_.shader);
 
     int blending = (data->blending & ~kBlendingAlpha) | kBlendingAdd;
 
@@ -772,7 +773,7 @@ static void GLOWLIT_Plane(MapObject *mo, void *dataptr)
 {
     PlaneCoordinateData *data = (PlaneCoordinateData *)dataptr;
 
-    SYS_ASSERT(mo->dynamic_light_.shader);
+    EPI_ASSERT(mo->dynamic_light_.shader);
 
     int blending = (data->blending & ~kBlendingAlpha) | kBlendingAdd;
 
@@ -856,7 +857,7 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1,
 
     float trans = surf->translucency;
 
-    SYS_ASSERT(image);
+    EPI_ASSERT(image);
 
     // (need to load the image to know the opacity)
     GLuint tex_id = R_ImageCache(image, true, render_view_effect_colormap);
@@ -889,7 +890,7 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1,
         tex_x2 = tmp_x;
     }
 
-    SYS_ASSERT(current_map);
+    EPI_ASSERT(current_map);
 
     int lit_adjust = 0;
 
@@ -1688,7 +1689,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum,
             L = L->higher;
         }
 
-        SYS_ASSERT(C);
+        EPI_ASSERT(C);
 
         // ignore liquids in the middle of THICK solids, or below real
         // floor or above real ceiling
@@ -1798,7 +1799,7 @@ static void DLIT_Flood(MapObject *mo, void *dataptr)
 
     // NOTE: distance already checked in DynamicLightIterator
 
-    SYS_ASSERT(mo->dynamic_light_.shader);
+    EPI_ASSERT(mo->dynamic_light_.shader);
 
     float sx = current_seg->vertex_1->X;
     float sy = current_seg->vertex_1->Y;
@@ -1857,7 +1858,7 @@ static void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref,
                                         ? surf->override_properties
                                         : &flood_ref->properties;
 
-    SYS_ASSERT(props);
+    EPI_ASSERT(props);
 
     FloodEmulationData data;
 
@@ -1908,7 +1909,7 @@ static void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref,
         }
     }
 
-    SYS_ASSERT(piece_col <= kMaximumFloodVertices);
+    EPI_ASSERT(piece_col <= kMaximumFloodVertices);
 
     float sx = current_seg->vertex_1->X;
     float sy = current_seg->vertex_1->Y;
@@ -1986,7 +1987,7 @@ static void RendererDrawSeg(DrawFloor *dfloor, Seg *seg,
     //
     current_seg = seg;
 
-    SYS_ASSERT(!seg->miniseg && seg->linedef);
+    EPI_ASSERT(!seg->miniseg && seg->linedef);
 
     // mark the segment on the automap
     seg->linedef->flags |= kLineFlagMapped;
@@ -2808,7 +2809,7 @@ static void RendererWalkSubsector(int num)
             L = L->higher;
         }
 
-        SYS_ASSERT(C);
+        EPI_ASSERT(C);
 
         // ignore liquids in the middle of THICK solids, or below real
         // floor or above real ceiling
@@ -2934,7 +2935,7 @@ static void DrawMirrorPolygon(DrawMirror *mir)
     float alpha = 0.15 + 0.10 * total_active_mirrors;
 
     Line *ld = mir->seg->linedef;
-    SYS_ASSERT(ld);
+    EPI_ASSERT(ld);
 
     if (ld->special)
     {
@@ -2978,7 +2979,7 @@ static void DrawMirrorPolygon(DrawMirror *mir)
 static void DrawPortalPolygon(DrawMirror *mir)
 {
     Line *ld = mir->seg->linedef;
-    SYS_ASSERT(ld);
+    EPI_ASSERT(ld);
 
     const MapSurface *surf = &mir->seg->sidedef->middle;
 

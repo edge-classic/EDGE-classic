@@ -20,6 +20,7 @@
 
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "epi.h"
 #include "filesystem.h"
 #include "font.h"
 #include "i_defs_gl.h"
@@ -55,9 +56,9 @@ Font::Font(FontDefinition *definition) : definition_(definition)
     font_image_      = nullptr;
     truetype_info_   = nullptr;
     truetype_buffer_ = nullptr;
-    Z_Clear(truetype_kerning_scale_, float, 3);
-    Z_Clear(truetype_reference_yshift_, float, 3);
-    Z_Clear(truetype_reference_height_, float, 3);
+    EPI_CLEAR_MEMORY(truetype_kerning_scale_, float, 3);
+    EPI_CLEAR_MEMORY(truetype_reference_yshift_, float, 3);
+    EPI_CLEAR_MEMORY(truetype_reference_height_, float, 3);
 }
 
 Font::~Font() {}
@@ -110,8 +111,8 @@ void Font::LoadPatches()
 
     int total = last - first + 1;
 
-    SYS_ASSERT(definition_->patches_);
-    SYS_ASSERT(total >= 1);
+    EPI_ASSERT(definition_->patches_);
+    EPI_ASSERT(total >= 1);
 
     images = new const Image *[total];
     memset(images, 0, sizeof(const Image *) * total);
@@ -150,13 +151,13 @@ void Font::LoadPatches()
         // patch name
         char pname[40];
 
-        SYS_ASSERT(strlen(pat->patch1.c_str()) < 36);
+        EPI_ASSERT(strlen(pat->patch1.c_str()) < 36);
         strcpy(pname, pat->patch1.c_str());
 
         for (int ch = pat->char1; ch <= pat->char2; ch++, BumpPatchName(pname))
         {
             int idx = ch - first;
-            SYS_ASSERT(0 <= idx && idx < total);
+            EPI_ASSERT(0 <= idx && idx < total);
 
             images[idx] = ImageLookup(pname, kImageNamespaceGraphic,
                                         kImageLookupFont | kImageLookupNull);
@@ -591,7 +592,7 @@ const Image *Font::CharImage(char ch) const
             return nullptr;
     }
 
-    SYS_ASSERT(definition_->type_ == kFontTypePatch);
+    EPI_ASSERT(definition_->type_ == kFontTypePatch);
 
     if (ch == ' ') return nullptr;
 
@@ -605,7 +606,7 @@ const Image *Font::CharImage(char ch) const
 
 float Font::CharRatio(char ch)
 {
-    SYS_ASSERT(definition_->type_ == kFontTypeImage);
+    EPI_ASSERT(definition_->type_ == kFontTypeImage);
 
     if (ch == ' ')
         return 0.4f;
@@ -670,7 +671,7 @@ float Font::CharWidth(char ch)
         }
     }
 
-    SYS_ASSERT(definition_->type_ == kFontTypePatch);
+    EPI_ASSERT(definition_->type_ == kFontTypePatch);
 
     if (ch == ' ') return patch_font_cache_.width * 3 / 5 + spacing_;
 
@@ -811,7 +812,7 @@ int Font::StringLines(const char *str) const
 //
 Font *FontContainer::Lookup(FontDefinition *definition)
 {
-    SYS_ASSERT(definition);
+    EPI_ASSERT(definition);
 
     for (std::vector<Font *>::iterator iter = begin(), iter_end = end();
          iter != iter_end; iter++)

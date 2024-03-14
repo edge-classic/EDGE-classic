@@ -27,9 +27,6 @@
 #include "math_bitset.h"
 #include "str_util.h"
 
-#undef DF
-#define DF DDF_FIELD
-
 AttackDefinitionContainer atkdefs;
 
 extern MapObjectDefinition *dynamic_mobj;
@@ -42,31 +39,29 @@ static void DDF_AtkGetType(const char *info, void *storage);
 static void DDF_AtkGetSpecial(const char *info, void *storage);
 static void DDF_AtkGetLabel(const char *info, void *storage);
 
-#undef DDF_CMD_BASE
-#define DDF_CMD_BASE dummy_damage
 DamageClass dummy_damage;
 
 const DDFCommandList damage_commands[] = {
-    DF("VAL", nominal_, DDF_MainGetFloat),
-    DF("MAX", linear_max_, DDF_MainGetFloat),
-    DF("ERROR", error_, DDF_MainGetFloat),
-    DF("DELAY", delay_, DDF_MainGetTime),
+    DDF_FIELD("VAL", dummy_damage, nominal_, DDF_MainGetFloat),
+    DDF_FIELD("MAX", dummy_damage, linear_max_, DDF_MainGetFloat),
+    DDF_FIELD("ERROR", dummy_damage, error_, DDF_MainGetFloat),
+    DDF_FIELD("DELAY", dummy_damage, delay_, DDF_MainGetTime),
 
-    DF("BYPASS_ALL", bypass_all_, DDF_MainGetBoolean),
-    DF("INSTAKILL", instakill_, DDF_MainGetBoolean),
-    DF("DAMAGE_UNLESS_BENEFIT", damage_unless_, DDF_MobjGetBenefit),
-    DF("DAMAGE_IF_BENEFIT", damage_if_, DDF_MobjGetBenefit),
-    DF("ALL_PLAYERS", all_players_,
+    DDF_FIELD("BYPASS_ALL", dummy_damage, bypass_all_, DDF_MainGetBoolean),
+    DDF_FIELD("INSTAKILL", dummy_damage, instakill_, DDF_MainGetBoolean),
+    DDF_FIELD("DAMAGE_UNLESS_BENEFIT", dummy_damage, damage_unless_, DDF_MobjGetBenefit),
+    DDF_FIELD("DAMAGE_IF_BENEFIT", dummy_damage, damage_if_, DDF_MobjGetBenefit),
+    DDF_FIELD("ALL_PLAYERS", dummy_damage, all_players_,
        DDF_MainGetBoolean),  // Doesn't do anything (yet)
-    DF("GROUNDED_MONSTERS_ONLY", grounded_monsters_, DDF_MainGetBoolean),
-    DF("FLASH_COLOUR", damage_flash_colour_, DDF_MainGetRGB),
+    DDF_FIELD("GROUNDED_MONSTERS_ONLY", dummy_damage, grounded_monsters_, DDF_MainGetBoolean),
+    DDF_FIELD("FLASH_COLOUR", dummy_damage, damage_flash_colour_, DDF_MainGetRGB),
 
-    DF("OBITUARY", obituary_, DDF_MainGetString),
-    DF("PAIN_STATE", pain_, DDF_AtkGetLabel),
-    DF("DEATH_STATE", death_, DDF_AtkGetLabel),
-    DF("OVERKILL_STATE", overkill_, DDF_AtkGetLabel),
+    DDF_FIELD("OBITUARY", dummy_damage, obituary_, DDF_MainGetString),
+    DDF_FIELD("PAIN_STATE", dummy_damage, pain_, DDF_AtkGetLabel),
+    DDF_FIELD("DEATH_STATE", dummy_damage, death_, DDF_AtkGetLabel),
+    DDF_FIELD("OVERKILL_STATE", dummy_damage, overkill_, DDF_AtkGetLabel),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 // -KM- 1998/09/27 Major changes to sound handling
 // -KM- 1998/11/25 Accuracy + Translucency are now fraction.  Added a spare
@@ -77,45 +72,43 @@ const DDFCommandList damage_commands[] = {
 
 static AttackDefinition *dynamic_atk;
 
-#undef DDF_CMD_BASE
-#define DDF_CMD_BASE dummy_atk
 static AttackDefinition dummy_atk;
 
 static const DDFCommandList attack_commands[] = {
     // sub-commands
-    DDF_SUB_LIST("DAMAGE", damage_, damage_commands),
+    DDF_SUB_LIST("DAMAGE", dummy_atk, damage_, damage_commands),
 
-    DF("ATTACKTYPE", attackstyle_, DDF_AtkGetType),
-    DF("ATTACK_SPECIAL", flags_, DDF_AtkGetSpecial),
-    DF("ACCURACY_SLOPE", accuracy_slope_, DDF_MainGetSlope),
-    DF("ACCURACY_ANGLE", accuracy_angle_, DDF_MainGetAngle),
-    DF("ATTACK_HEIGHT", height_, DDF_MainGetFloat),
-    DF("SHOTCOUNT", count_, DDF_MainGetNumeric),
-    DF("X_OFFSET", xoffset_, DDF_MainGetFloat),
-    DF("Y_OFFSET", yoffset_, DDF_MainGetFloat),
-    DF("ANGLE_OFFSET", angle_offset_, DDF_MainGetAngle),
-    DF("SLOPE_OFFSET", slope_offset_, DDF_MainGetSlope),
-    DF("ATTACKRANGE", range_, DDF_MainGetFloat),
-    DF("TOO_CLOSE_RANGE", tooclose_, DDF_MainGetNumeric),
-    DF("BERSERK_MULTIPLY", berserk_mul_, DDF_MainGetFloat),
-    DF("NO_TRACE_CHANCE", notracechance_, DDF_MainGetPercent),
-    DF("KEEP_FIRING_CHANCE", keepfirechance_, DDF_MainGetPercent),
-    DF("TRACE_ANGLE", trace_angle_, DDF_MainGetAngle),
-    DF("ASSAULT_SPEED", assault_speed_, DDF_MainGetFloat),
-    DF("ATTEMPT_SOUND", initsound_, DDF_MainLookupSound),
-    DF("ENGAGED_SOUND", sound_, DDF_MainLookupSound),
-    DF("SPAWNED_OBJECT", spawnedobj_ref_, DDF_MainGetString),
-    DF("SPAWN_OBJECT_STATE", objinitstate_ref_, DDF_MainGetString),
-    DF("SPAWN_LIMIT", spawn_limit_, DDF_MainGetNumeric),
-    DF("PUFF", puff_ref_, DDF_MainGetString),
-    DF("ATTACK_CLASS", attack_class_, DDF_MainGetBitSet),
-    DF("DUALATTACK1", dualattack1_, DDF_MainRefAttack),
-    DF("DUALATTACK2", dualattack2_, DDF_MainRefAttack),
+    DDF_FIELD("ATTACKTYPE", dummy_atk, attackstyle_, DDF_AtkGetType),
+    DDF_FIELD("ATTACK_SPECIAL", dummy_atk, flags_, DDF_AtkGetSpecial),
+    DDF_FIELD("ACCURACY_SLOPE", dummy_atk, accuracy_slope_, DDF_MainGetSlope),
+    DDF_FIELD("ACCURACY_ANGLE", dummy_atk, accuracy_angle_, DDF_MainGetAngle),
+    DDF_FIELD("ATTACK_HEIGHT", dummy_atk, height_, DDF_MainGetFloat),
+    DDF_FIELD("SHOTCOUNT", dummy_atk, count_, DDF_MainGetNumeric),
+    DDF_FIELD("X_OFFSET", dummy_atk, xoffset_, DDF_MainGetFloat),
+    DDF_FIELD("Y_OFFSET", dummy_atk, yoffset_, DDF_MainGetFloat),
+    DDF_FIELD("ANGLE_OFFSET", dummy_atk, angle_offset_, DDF_MainGetAngle),
+    DDF_FIELD("SLOPE_OFFSET", dummy_atk, slope_offset_, DDF_MainGetSlope),
+    DDF_FIELD("ATTACKRANGE", dummy_atk, range_, DDF_MainGetFloat),
+    DDF_FIELD("TOO_CLOSE_RANGE", dummy_atk, tooclose_, DDF_MainGetNumeric),
+    DDF_FIELD("BERSERK_MULTIPLY", dummy_atk, berserk_mul_, DDF_MainGetFloat),
+    DDF_FIELD("NO_TRACE_CHANCE", dummy_atk, notracechance_, DDF_MainGetPercent),
+    DDF_FIELD("KEEP_FIRING_CHANCE", dummy_atk, keepfirechance_, DDF_MainGetPercent),
+    DDF_FIELD("TRACE_ANGLE", dummy_atk, trace_angle_, DDF_MainGetAngle),
+    DDF_FIELD("ASSAULT_SPEED", dummy_atk, assault_speed_, DDF_MainGetFloat),
+    DDF_FIELD("ATTEMPT_SOUND", dummy_atk, initsound_, DDF_MainLookupSound),
+    DDF_FIELD("ENGAGED_SOUND", dummy_atk, sound_, DDF_MainLookupSound),
+    DDF_FIELD("SPAWNED_OBJECT", dummy_atk, spawnedobj_ref_, DDF_MainGetString),
+    DDF_FIELD("SPAWN_OBJECT_STATE", dummy_atk, objinitstate_ref_, DDF_MainGetString),
+    DDF_FIELD("SPAWN_LIMIT", dummy_atk, spawn_limit_, DDF_MainGetNumeric),
+    DDF_FIELD("PUFF", dummy_atk, puff_ref_, DDF_MainGetString),
+    DDF_FIELD("ATTACK_CLASS", dummy_atk, attack_class_, DDF_MainGetBitSet),
+    DDF_FIELD("DUALATTACK1", dummy_atk, dualattack1_, DDF_MainRefAttack),
+    DDF_FIELD("DUALATTACK2", dummy_atk, dualattack2_, DDF_MainRefAttack),
 
     // -AJA- backward compatibility cruft...
-    DF("DAMAGE", damage_.nominal_, DDF_MainGetFloat),
+    DDF_FIELD("DAMAGE", dummy_atk, damage_.nominal_, DDF_MainGetFloat),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 static MapObjectDefinition *CreateAtkMobj(const char *atk_name)
 {

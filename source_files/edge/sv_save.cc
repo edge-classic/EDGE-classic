@@ -22,6 +22,7 @@
 
 #include "dm_state.h"
 #include "e_main.h"
+#include "epi.h"
 #include "f_interm.h"
 #include "g_game.h"
 #include "i_system.h"
@@ -133,7 +134,7 @@ static void SV_SaveDATA(SaveArray *A)
     {
         sv_current_elem = (*A->get_elem)(i);
 
-        SYS_ASSERT(sv_current_elem);
+        EPI_ASSERT(sv_current_elem);
 
         SaveGameStructSave(sv_current_elem, A->sdef);
     }

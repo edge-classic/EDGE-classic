@@ -202,7 +202,7 @@ void miscellaneous::AlterMisc(int new_val)
     // mark mobjs that have been modified
 
     const int *affect = info->affected_mobjs;
-    SYS_ASSERT(affect);
+    EPI_ASSERT(affect);
 
     for (; *affect >= 0; affect++) { things::MarkThing(*affect); }
 }

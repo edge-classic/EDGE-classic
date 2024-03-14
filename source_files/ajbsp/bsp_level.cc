@@ -235,7 +235,7 @@ void FreeWallTips()
 
 static const char *GetLevelName(int level_index)
 {
-    SYS_ASSERT(cur_wad != nullptr);
+    EPI_ASSERT(cur_wad != nullptr);
 
     int lump_idx = cur_wad->LevelHeader(level_index);
 

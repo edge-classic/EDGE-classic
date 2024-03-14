@@ -150,7 +150,7 @@ bool FlacPlayer::StreamIntoBuffer(SoundData *buf)
 
 bool FlacPlayer::OpenMemory(uint8_t *data, int length)
 {
-    SYS_ASSERT(data);
+    EPI_ASSERT(data);
 
     flac_track_ = drflac_open_memory(data, length, nullptr);
 

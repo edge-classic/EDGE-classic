@@ -38,6 +38,7 @@
 #include "e_main.h"
 #include "e_search.h"
 #include "endianess.h"
+#include "epi.h"
 #include "file.h"
 #include "filesystem.h"
 #include "i_defs_gl.h"
@@ -88,7 +89,7 @@ static constexpr uint8_t dummy_graphic[kDummyImageSize * kDummyImageSize] = {
 static void DrawColumnIntoEpiBlock(Image *rim, ImageData *img,
                                    const TexturePost *patchcol, int x, int y)
 {
-    SYS_ASSERT(patchcol);
+    EPI_ASSERT(patchcol);
 
     int w1 = rim->actual_width_;
     int h1 = rim->actual_height_;
@@ -143,7 +144,7 @@ static void DrawColumnIntoEpiBlock(Image *rim, ImageData *img,
 //
 static ImageData *ReadFlatAsEpiBlock(Image *rim)
 {
-    SYS_ASSERT(rim->source_type_ == kImageSourceFlat ||
+    EPI_ASSERT(rim->source_type_ == kImageSourceFlat ||
                rim->source_type_ == kImageSourceRawBlock);
 
     int tw = HMM_MAX(rim->total_width_, 1);
@@ -198,10 +199,10 @@ static ImageData *ReadFlatAsEpiBlock(Image *rim)
 //
 static ImageData *ReadTextureAsEpiBlock(Image *rim)
 {
-    SYS_ASSERT(rim->source_type_ == kImageSourceTexture);
+    EPI_ASSERT(rim->source_type_ == kImageSourceTexture);
 
     TextureDefinition *tdef = rim->source_.texture.tdef;
-    SYS_ASSERT(tdef);
+    EPI_ASSERT(tdef);
 
     int tw = rim->total_width_;
     int th = rim->total_height_;
@@ -275,7 +276,7 @@ static ImageData *ReadTextureAsEpiBlock(Image *rim)
 //
 static ImageData *ReadPatchAsEpiBlock(Image *rim)
 {
-    SYS_ASSERT(rim->source_type_ == kImageSourceGraphic ||
+    EPI_ASSERT(rim->source_type_ == kImageSourceGraphic ||
                rim->source_type_ == kImageSourceSprite ||
                rim->source_type_ == kImageSourceTxHi);
 
@@ -344,9 +345,9 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
         realsize  = GetLumpLength(lump);
     }
 
-    SYS_ASSERT(realpatch);
-    SYS_ASSERT(rim->actual_width_ == AlignedLittleEndianS16(realpatch->width));
-    SYS_ASSERT(rim->actual_height_ == AlignedLittleEndianS16(realpatch->height));
+    EPI_ASSERT(realpatch);
+    EPI_ASSERT(rim->actual_width_ == AlignedLittleEndianS16(realpatch->width));
+    EPI_ASSERT(rim->actual_height_ == AlignedLittleEndianS16(realpatch->height));
 
     // 2023.11.07 - These were previously left as total_w/h, which accounts
     // for power-of-two sizing and was messing up patch font atlas generation.
@@ -380,11 +381,11 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
 //
 static ImageData *ReadDummyAsEpiBlock(Image *rim)
 {
-    SYS_ASSERT(rim->source_type_ == kImageSourceDummy);
-    SYS_ASSERT(rim->actual_width_ == rim->total_width_);
-    SYS_ASSERT(rim->actual_height_ == rim->total_height_);
-    SYS_ASSERT(rim->total_width_ == kDummyImageSize);
-    SYS_ASSERT(rim->total_height_ == kDummyImageSize);
+    EPI_ASSERT(rim->source_type_ == kImageSourceDummy);
+    EPI_ASSERT(rim->actual_width_ == rim->total_width_);
+    EPI_ASSERT(rim->actual_height_ == rim->total_height_);
+    EPI_ASSERT(rim->total_width_ == kDummyImageSize);
+    EPI_ASSERT(rim->total_height_ == kDummyImageSize);
 
     ImageData *img = new ImageData(kDummyImageSize, kDummyImageSize, 4);
 
@@ -490,8 +491,8 @@ static ImageData *CreateUserFileImage(Image *rim, ImageDefinition *def)
 
     if (def->fix_trans_ == kTransparencyFixBlacken) BlackenClearAreas(img);
 
-    SYS_ASSERT(rim->total_width_ == img->width_);
-    SYS_ASSERT(rim->total_height_ == img->height_);
+    EPI_ASSERT(rim->total_width_ == img->width_);
+    EPI_ASSERT(rim->total_height_ == img->height_);
 
     // CW: Textures MUST tile! If actual size not total size, manually tile
     // [ AJA: this does not make them tile, just fills in the black gaps ]
@@ -512,7 +513,7 @@ static ImageData *CreateUserFileImage(Image *rim, ImageDefinition *def)
 //
 static ImageData *ReadUserAsEpiBlock(Image *rim)
 {
-    SYS_ASSERT(rim->source_type_ == kImageSourceUser);
+    EPI_ASSERT(rim->source_type_ == kImageSourceUser);
 
     // clear initial image to black / transparent
     /// ALREADY DONE: memset(dest, playpal_black, tw * th * bpp);

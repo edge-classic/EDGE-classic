@@ -22,6 +22,7 @@
 
 #include "dm_state.h"
 #include "e_main.h"
+#include "epi.h"
 #include "f_interm.h"
 #include "g_game.h"
 #include "i_system.h"
@@ -210,8 +211,8 @@ bool SaveGameStructLoad(void *base, SaveStruct *info)
             continue;
         }
 
-        SYS_ASSERT(actual->field_get);
-        SYS_ASSERT(info->counterpart);
+        EPI_ASSERT(actual->field_get);
+        EPI_ASSERT(info->counterpart);
 
         int offset = actual->offset_pointer - info->counterpart->dummy_base;
 
@@ -248,7 +249,7 @@ static bool SV_LoadSTRU(void)
 {
     SaveStruct *S = new SaveStruct;
 
-    Z_Clear(S, SaveStruct, 1);
+    EPI_CLEAR_MEMORY(S, SaveStruct, 1);
 
     int numfields = SaveChunkGetInteger();
 
@@ -258,7 +259,7 @@ static bool SV_LoadSTRU(void)
     // make the counterparts refer to each other
     if (S->counterpart)
     {
-        SYS_ASSERT(S->counterpart->counterpart == nullptr);
+        EPI_ASSERT(S->counterpart->counterpart == nullptr);
         S->counterpart->counterpart = S;
     }
 
@@ -269,7 +270,7 @@ static bool SV_LoadSTRU(void)
 
     S->fields = new SaveField[numfields + 1];
 
-    Z_Clear(S->fields, SaveField, numfields + 1);
+    EPI_CLEAR_MEMORY(S->fields, SaveField, numfields + 1);
 
     //
     // -- now load in all the fields --
@@ -310,7 +311,7 @@ static bool SV_LoadARRY(void)
 {
     SaveArray *A = new SaveArray;
 
-    Z_Clear(A, SaveArray, 1);
+    EPI_CLEAR_MEMORY(A, SaveArray, 1);
 
     A->loaded_size = SaveChunkGetInteger();
 
@@ -320,7 +321,7 @@ static bool SV_LoadARRY(void)
     // make the counterparts refer to each other
     if (A->counterpart)
     {
-        SYS_ASSERT(A->counterpart->counterpart == nullptr);
+        EPI_ASSERT(A->counterpart->counterpart == nullptr);
         A->counterpart->counterpart = A;
     }
 

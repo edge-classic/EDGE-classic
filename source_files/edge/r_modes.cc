@@ -31,6 +31,7 @@
 #include <vector>
 
 #include "am_map.h"
+#include "epi.h"
 #include "hu_font.h"  // current_font_size
 #include "i_defs_gl.h"
 #include "i_system.h"
@@ -160,7 +161,7 @@ bool IncrementResolution(DisplayMode *mode, int what, int dir)
     //   and the *next* closest size (ignoring the same size or
     //   sizes that are in opposite direction to 'dir' param).
 
-    SYS_ASSERT(dir == 1 || dir == -1);
+    EPI_ASSERT(dir == 1 || dir == -1);
 
     int depth       = mode->depth;
     int window_mode = mode->window_mode;

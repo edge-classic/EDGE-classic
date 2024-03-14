@@ -27,6 +27,7 @@
 #include "e_main.h"
 #include "e_search.h"
 #include "endianess.h"
+#include "epi.h"
 #include "r_image.h"
 #include "str_compare.h"
 #include "str_util.h"
@@ -411,7 +412,7 @@ void InitializeTextures(void)
 
     LogPrint("Initializing Textures...\n");
 
-    SYS_ASSERT(texture_sets.empty());
+    EPI_ASSERT(texture_sets.empty());
 
     // iterate over each file, creating our sets of textures
     // -ACB- 1998/09/09 Removed the Doom II SkyName change: unnecessary and not
@@ -540,8 +541,8 @@ int FindTextureSequence(const char *start, const char *end, int *s_offset,
 //
 const char *TextureNameInSet(int set, int offset)
 {
-    SYS_ASSERT(0 <= set && set < (int)texture_sets.size());
-    SYS_ASSERT(0 <= offset && offset < texture_sets[set]->total_textures_);
+    EPI_ASSERT(0 <= set && set < (int)texture_sets.size());
+    EPI_ASSERT(0 <= offset && offset < texture_sets[set]->total_textures_);
 
     return texture_sets[set]->textures_[offset]->name;
 }

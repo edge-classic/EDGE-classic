@@ -46,7 +46,7 @@ static inline bool IsDirectorySeparator(const char c)
 }
 bool IsPathAbsolute(std::string_view path)
 {
-    SYS_ASSERT(!path.empty());
+    EPI_ASSERT(!path.empty());
 
     // Check for Drive letter, colon and slash...
     if (path.size() > 2 && path[1] == ':' &&
@@ -97,13 +97,13 @@ FILE *FileOpenRaw(std::string_view name, unsigned int flags)
 }
 bool FileDelete(std::string_view name)
 {
-    SYS_ASSERT(!name.empty());
+    EPI_ASSERT(!name.empty());
     std::wstring wname = epi::UTF8ToWString(name);
     return _wremove(wname.c_str()) == 0;
 }
 bool IsDirectory(std::string_view dir)
 {
-    SYS_ASSERT(!dir.empty());
+    EPI_ASSERT(!dir.empty());
     std::wstring wide_dir = epi::UTF8ToWString(dir);
     struct _stat dircheck;
     if (_wstat(wide_dir.c_str(), &dircheck) != 0) return false;
@@ -118,19 +118,19 @@ static std::string CurrentDirectoryGet()
 }
 bool CurrentDirectorySet(std::string_view dir)
 {
-    SYS_ASSERT(!dir.empty());
+    EPI_ASSERT(!dir.empty());
     std::wstring wdir = epi::UTF8ToWString(dir);
     return _wchdir(wdir.c_str()) == 0;
 }
 bool MakeDirectory(std::string_view dir)
 {
-    SYS_ASSERT(!dir.empty());
+    EPI_ASSERT(!dir.empty());
     std::wstring wdirectory = epi::UTF8ToWString(dir);
     return _wmkdir(wdirectory.c_str()) == 0;
 }
 bool FileExists(std::string_view name)
 {
-    SYS_ASSERT(!name.empty());
+    EPI_ASSERT(!name.empty());
     std::wstring wname = epi::UTF8ToWString(name);
     return _waccess(wname.c_str(), 0) == 0;
 }
@@ -138,7 +138,7 @@ bool TestFileAccess(std::string_view name)
 {
     // The codebase only seems to use this to test read access, so we
     // shouldn't need to pass any modes as a parameter
-    SYS_ASSERT(!name.empty());
+    EPI_ASSERT(!name.empty());
     std::wstring wname = epi::UTF8ToWString(name);
     if (_waccess(wname.c_str(), 4) == 0)  // Read-only
         return true;
@@ -251,7 +251,7 @@ static inline bool IsDirectorySeparator(const char c)
 }
 bool IsPathAbsolute(std::string_view path)
 {
-    SYS_ASSERT(!path.empty());
+    EPI_ASSERT(!path.empty());
 
     if (IsDirectorySeparator(path[0]))
         return true;
@@ -290,17 +290,17 @@ FILE *FileOpenRaw(std::string_view name, unsigned int flags)
 {
     const char *mode = FlagsToANSIMode(flags);
     if (!mode) return nullptr;
-    SYS_ASSERT(!name.empty());
+    EPI_ASSERT(!name.empty());
     return fopen(std::string(name).c_str(), mode);
 }
 bool FileDelete(std::string_view name)
 {
-    SYS_ASSERT(!name.empty());
+    EPI_ASSERT(!name.empty());
     return remove(std::string(name).c_str()) == 0;
 }
 bool IsDirectory(std::string_view dir)
 {
-    SYS_ASSERT(!dir.empty());
+    EPI_ASSERT(!dir.empty());
     struct stat dircheck;
     if (stat(std::string(dir).c_str(), &dircheck) == -1) return false;
     return S_ISDIR(dircheck.st_mode);
@@ -314,24 +314,24 @@ static std::string CurrentDirectoryGet()
 }
 bool CurrentDirectorySet(std::string_view dir)
 {
-    SYS_ASSERT(!dir.empty());
+    EPI_ASSERT(!dir.empty());
     return chdir(std::string(dir).c_str()) == 0;
 }
 bool MakeDirectory(std::string_view dir)
 {
-    SYS_ASSERT(!dir.empty());
+    EPI_ASSERT(!dir.empty());
     return (mkdir(std::string(dir).c_str(), 0664) == 0);
 }
 bool FileExists(std::string_view name)
 {
-    SYS_ASSERT(!name.empty());
+    EPI_ASSERT(!name.empty());
     return access(std::string(name).c_str(), F_OK) == 0;
 }
 bool TestFileAccess(std::string_view name)
 {
     // The codebase only seems to use this to test read access, so we
     // shouldn't need to pass any modes as a parameter
-    SYS_ASSERT(!name.empty());
+    EPI_ASSERT(!name.empty());
     return access(std::string(name).c_str(), R_OK) == 0;
 }
 bool ReadDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir,
@@ -449,7 +449,7 @@ bool WalkDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir)
 
 std::string GetStem(std::string_view path)
 {
-    SYS_ASSERT(!path.empty());
+    EPI_ASSERT(!path.empty());
     // back up until a slash or the start
     for (int p = path.size() - 1; p > 1; p--)
     {
@@ -481,7 +481,7 @@ std::string GetStem(std::string_view path)
 
 std::string GetFilename(std::string_view path)
 {
-    SYS_ASSERT(!path.empty());
+    EPI_ASSERT(!path.empty());
     // back up until a slash or the start
     for (int p = path.size() - 1; p > 0; p--)
     {
@@ -499,7 +499,7 @@ std::string GetFilename(std::string_view path)
 // path from the child path assuming the parent is actually in the child path
 std::string MakePathRelative(std::string_view parent, std::string_view child)
 {
-    SYS_ASSERT(!parent.empty() && !child.empty() &&
+    EPI_ASSERT(!parent.empty() && !child.empty() &&
                child.size() > parent.size());
     size_t parent_check = child.find(parent);
     if (parent_check != std::string_view::npos)
@@ -526,7 +526,7 @@ std::string SanitizePath(std::string_view path)
 
 std::string PathAppend(std::string_view parent, std::string_view child)
 {
-    SYS_ASSERT(!parent.empty() && !child.empty());
+    EPI_ASSERT(!parent.empty() && !child.empty());
 
     if (IsDirectorySeparator(parent.back())) parent.remove_suffix(1);
 
@@ -544,7 +544,7 @@ std::string PathAppend(std::string_view parent, std::string_view child)
 std::string PathAppendIfNotAbsolute(std::string_view parent,
                                     std::string_view child)
 {
-    SYS_ASSERT(!parent.empty() && !child.empty());
+    EPI_ASSERT(!parent.empty() && !child.empty());
 
     std::string new_path;
 
@@ -564,7 +564,7 @@ std::string PathAppendIfNotAbsolute(std::string_view parent,
 
 std::string GetDirectory(std::string_view path)
 {
-    SYS_ASSERT(!path.empty());
+    EPI_ASSERT(!path.empty());
     std::string directory;
     // back up until a slash or the start
     for (int p = path.size() - 1; p >= 0; p--)
@@ -581,7 +581,7 @@ std::string GetDirectory(std::string_view path)
 
 std::string GetExtension(std::string_view path)
 {
-    SYS_ASSERT(!path.empty());
+    EPI_ASSERT(!path.empty());
     std::string extension;
     // back up until a dot
     for (int p = path.size() - 1; p >= 0; p--)
@@ -604,7 +604,7 @@ std::string GetExtension(std::string_view path)
 
 void ReplaceExtension(std::string &path, std::string_view ext)
 {
-    SYS_ASSERT(!path.empty() && !ext.empty());
+    EPI_ASSERT(!path.empty() && !ext.empty());
     int extpos = -1;
     // back up until a dot
     for (int p = path.size() - 1; p >= 0; p--)
@@ -633,7 +633,7 @@ void ReplaceExtension(std::string &path, std::string_view ext)
 
 File *FileOpen(std::string_view name, unsigned int flags)
 {
-    SYS_ASSERT(!name.empty());
+    EPI_ASSERT(!name.empty());
     FILE *fp = FileOpenRaw(name, flags);
     if (!fp) return nullptr;
     return new ANSIFile(fp);
@@ -656,7 +656,7 @@ bool OpenDirectory(const std::string &src)
 
 bool FileCopy(std::string_view src, std::string_view dest)
 {
-    SYS_ASSERT(!src.empty() && !dest.empty());
+    EPI_ASSERT(!src.empty() && !dest.empty());
 
     if (!epi::TestFileAccess(src)) return false;
 

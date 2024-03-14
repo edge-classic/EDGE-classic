@@ -30,6 +30,7 @@
 #include "dm_state.h"
 #include "e_main.h"
 #include "e_player.h"
+#include "epi.h"
 #include "g_game.h"  // current_map
 #include "game.h"
 #include "i_defs_gl.h"
@@ -343,7 +344,7 @@ void TransformColourmap(Colormap *colmap)
             colmap->font_colour_ = colmap->gl_color_;
         else
         {
-            SYS_ASSERT(table);
+            EPI_ASSERT(table);
 
             // for fonts, we only care about the GRAY colour
             int r = playpal_data[0][table[playpal_gray]][0] * 255 / 239;
@@ -360,7 +361,7 @@ void TransformColourmap(Colormap *colmap)
 
     if (colmap->gl_color_ == kRGBANoValue)
     {
-        SYS_ASSERT(table);
+        EPI_ASSERT(table);
 
         int r, g, b;
 
@@ -482,7 +483,7 @@ void PaletteTicker(void)
     float amount  = 0;
 
     Player *p = players[display_player];
-    SYS_ASSERT(p);
+    EPI_ASSERT(p);
 
     int cnt = p->damage_count_;
 
@@ -819,7 +820,7 @@ AbstractShader *GetColormapShader(const struct RegionProperties *props,
         }
     }
 
-    SYS_ASSERT(shader);
+    EPI_ASSERT(shader);
 
     shader->Update();
 

@@ -25,6 +25,7 @@
 #include "dm_state.h"
 #include "dstrings.h"
 #include "e_main.h"
+#include "epi.h"
 #include "f_interm.h"
 #include "filesystem.h"
 #include "g_game.h"
@@ -200,7 +201,7 @@ void SaveGamePutAngleToSlope(void *storage, int index, void *extra)
 {
     BAMAngle val = ((BAMAngle *)storage)[index];
 
-    SYS_ASSERT(val < kBAMAngle90 || val > kBAMAngle270);
+    EPI_ASSERT(val < kBAMAngle90 || val > kBAMAngle270);
 
     SaveChunkPutFloat(epi::BAMTan(val));
 }
@@ -300,7 +301,7 @@ SaveArray *SaveArrayLookup(const char *name)
 
 const char *SaveSlotName(int slot)
 {
-    SYS_ASSERT(slot < 1000);
+    EPI_ASSERT(slot < 1000);
 
     static char buffer[256];
 

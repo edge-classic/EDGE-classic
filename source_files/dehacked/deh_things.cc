@@ -186,7 +186,7 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
         int count = 0;
 
         const DehackedMapObjectDefinition *spawnfire = things::NewMobjElseOld(kMT_SPAWNFIRE);
-        SYS_ASSERT(spawnfire);
+        EPI_ASSERT(spawnfire);
 
         count += frames::BeginGroup('D', spawnfire->spawnstate);
         count += frames::BeginGroup('S', info->spawnstate);
@@ -276,7 +276,7 @@ void CheckPainElemental(void)
     // those states are still valid, recreate attacks if not.
 
     const DehackedMapObjectDefinition *skull = things::NewMobjElseOld(kMT_SKULL);
-    SYS_ASSERT(skull);
+    EPI_ASSERT(skull);
 
     if (frames::CheckMissileState(skull->missilestate)) return;
 
@@ -550,7 +550,7 @@ void things::FinishLump(void) { wad::Printf("\n"); }
 
 void things::MarkThing(int mt_num)
 {
-    SYS_ASSERT(mt_num >= 0);
+    EPI_ASSERT(mt_num >= 0);
 
     // handle merged things/attacks
     if (mt_num == kMT_TFOG) MarkThing(kMT_TELEPORTMAN);
@@ -616,7 +616,7 @@ DehackedMapObjectDefinition *things::GetModifiedMobj(int mt_num)
 
 const char *things::GetMobjName(int mt_num)
 {
-    SYS_ASSERT(mt_num >= 0);
+    EPI_ASSERT(mt_num >= 0);
 
     if (mt_num < kTotalDehackedMapObjectTypesPortCompatibility) return mobjinfo[mt_num].name;
 
@@ -792,7 +792,7 @@ int ParseBits(const FlagName *list, char *bit_str)
          token       = strtok(nullptr, delims))
     {
         // tokens should be non-empty
-        SYS_ASSERT(token[0] != 0);
+        EPI_ASSERT(token[0] != 0);
 
         if (epi::IsDigitASCII(token[0]) || token[0] == '-')
         {
@@ -1022,7 +1022,7 @@ void FixHeights()
         int mt_num = height_fixes[i];
         int new_h  = height_fixes[i + 1];
 
-        SYS_ASSERT(mt_num < kTotalDehackedMapObjectTypesPortCompatibility);
+        EPI_ASSERT(mt_num < kTotalDehackedMapObjectTypesPortCompatibility);
 
         // if the thing was not modified, nothing to do here
         if (mt_num >= (int)new_mobjinfo.size()) continue;
@@ -1188,7 +1188,7 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
         // used to find the destination in the target sector).
 
         const DehackedMapObjectDefinition *tfog = NewMobjElseOld(kMT_TFOG);
-        SYS_ASSERT(tfog);
+        EPI_ASSERT(tfog);
 
         if (0 == frames::BeginGroup('E', tfog->spawnstate))
         {
@@ -1275,7 +1275,7 @@ void HandlePlayer(const DehackedMapObjectDefinition *info, int player)
 {
     if (player <= 0) return;
 
-    SYS_ASSERT(player <= NUMPLAYERS);
+    EPI_ASSERT(player <= NUMPLAYERS);
 
     const PlayerInfo *pi = player_info + (player - 1);
 
@@ -1577,7 +1577,7 @@ void things::HandleDropItem(const DehackedMapObjectDefinition *info, int mt_num)
         }
     }
 
-    SYS_ASSERT(item);
+    EPI_ASSERT(item);
 
     wad::Printf("DROPITEM = \"%s\";\n", item);
 }
@@ -1812,14 +1812,14 @@ const FieldReference mobj_field[] = {
 void things::AlterThing(int new_val)
 {
     int mt_num = patch::active_obj - 1;  // NOTE WELL
-    SYS_ASSERT(mt_num >= 0);
+    EPI_ASSERT(mt_num >= 0);
 
     const char *field_name = patch::line_buf;
 
     MarkThing(mt_num);
 
     int *raw_obj = (int *)new_mobjinfo[mt_num];
-    SYS_ASSERT(raw_obj != nullptr);
+    EPI_ASSERT(raw_obj != nullptr);
 
     if (!FieldAlter(mobj_field, field_name, raw_obj, new_val))
     {
@@ -1830,7 +1830,7 @@ void things::AlterThing(int new_val)
 void things::AlterBexBits(char *bit_str)
 {
     int mt_num = patch::active_obj - 1; /* NOTE WELL */
-    SYS_ASSERT(mt_num >= 0);
+    EPI_ASSERT(mt_num >= 0);
 
     MarkThing(mt_num);
 
@@ -1840,7 +1840,7 @@ void things::AlterBexBits(char *bit_str)
 void things::AlterMBF21Bits(char *bit_str)
 {
     int mt_num = patch::active_obj - 1; /* NOTE WELL */
-    SYS_ASSERT(mt_num >= 0);
+    EPI_ASSERT(mt_num >= 0);
 
     MarkThing(mt_num);
 

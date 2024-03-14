@@ -43,6 +43,7 @@
 #include "e_main.h"
 #include "e_search.h"
 #include "endianess.h"
+#include "epi.h"
 #include "file.h"
 #include "filesystem.h"
 #include "flat.h"
@@ -148,7 +149,7 @@ static void do_Animate(std::list<Image *> &bucket)
             swirling_flats > kLiquidSwirlVanilla)
             continue;
 
-        SYS_ASSERT(rim->animation_.count > 0);
+        EPI_ASSERT(rim->animation_.count > 0);
 
         rim->animation_.count -=
             (!double_framerate.d_ || !(hud_tic & 1)) ? 1 : 0;
@@ -301,7 +302,7 @@ Image *AddPackImageSmart(const char *name, ImageSource type,
 {
     /* used for Graphics, Sprites and TX/HI stuff */
     epi::File *f = OpenFileFromPack(packfile_name);
-    SYS_ASSERT(f);
+    EPI_ASSERT(f);
     int packfile_len = f->GetLength();
 
     // determine format and size information
@@ -451,7 +452,7 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump,
     int lump_len = GetLumpLength(lump);
 
     epi::File *f = LoadLumpAsFile(lump);
-    SYS_ASSERT(f);
+    EPI_ASSERT(f);
 
     // determine format and size information
     uint8_t header[32];
@@ -948,7 +949,7 @@ void CreateTextures(struct TextureDefinition **defs, int number)
 {
     int i;
 
-    SYS_ASSERT(defs);
+    EPI_ASSERT(defs);
 
     for (i = 0; i < number; i++)
     {
@@ -968,7 +969,7 @@ void CreateTextures(struct TextureDefinition **defs, int number)
 //
 const Image *CreateSprite(const char *name, int lump, bool is_weapon)
 {
-    SYS_ASSERT(lump >= 0);
+    EPI_ASSERT(lump >= 0);
 
     Image *rim = AddImage_Smart(name, kImageSourceSprite, lump, real_sprites);
     if (!rim) return nullptr;
@@ -994,7 +995,7 @@ const Image *CreateSprite(const char *name, int lump, bool is_weapon)
 const Image *CreatePackSprite(std::string packname, PackFile *pack,
                               bool is_weapon)
 {
-    SYS_ASSERT(pack);
+    EPI_ASSERT(pack);
 
     Image *rim =
         AddPackImageSmart(epi::GetStem(packname).c_str(), kImageSourceSprite,
@@ -1778,7 +1779,7 @@ static CachedImage *ImageCacheOGL(Image *rim, const Colormap *trans,
             rim->cache_.push_back(rc);
     }
 
-    SYS_ASSERT(rc);
+    EPI_ASSERT(rc);
 
     if (rim->liquid_type_ > kLiquidImageNone &&
         (swirling_flats == kLiquidSwirlSmmu ||
@@ -1826,7 +1827,7 @@ GLuint ImageCache(const Image *image, bool anim, const Colormap *trans,
 
     CachedImage *rc = ImageCacheOGL(rim, trans, do_whiten);
 
-    SYS_ASSERT(rc->parent);
+    EPI_ASSERT(rc->parent);
 
     return rc->texture_id;
 }
@@ -1922,7 +1923,7 @@ void DeleteAllImages(void)
     for (CI = image_cache.begin(); CI != image_cache.end(); CI++)
     {
         CachedImage *rc = *CI;
-        SYS_ASSERT(rc);
+        EPI_ASSERT(rc);
 
         if (rc->texture_id != 0)
         {
@@ -1948,8 +1949,8 @@ void AnimateImageSet(const Image **images, int number, int speed)
     int    i, total;
     Image *rim, *other;
 
-    SYS_ASSERT(images);
-    SYS_ASSERT(speed > 0);
+    EPI_ASSERT(images);
+    EPI_ASSERT(speed > 0);
 
     // ignore images that are already animating
     for (i = 0, total = 0; i < number; i++)

@@ -46,6 +46,7 @@
 #include "con_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "epi.h"
 #include "f_interm.h"  // intermission_stats
 #include "g_game.h"
 #include "i_system.h"
@@ -2471,7 +2472,7 @@ bool UseThing(MapObject *user, MapObject *thing, float open_bottom,
         return false;
 
     // OK, disarm and put into touch states
-    SYS_ASSERT(thing->info_->touch_state_ > 0);
+    EPI_ASSERT(thing->info_->touch_state_ > 0);
 
     thing->flags_ &= ~kMapObjectFlagTouchy;
     MapObjectSetStateDeferred(thing, thing->info_->touch_state_, 0);
@@ -2549,7 +2550,7 @@ void P_ActDropItem(MapObject *mo)
 
     MapObject *item =
         CreateMapObject(mo->x + dx, mo->y + dy, mo->floor_z_, info);
-    SYS_ASSERT(item);
+    EPI_ASSERT(item);
 
     item->flags_ |= kMapObjectFlagDropped;
     item->flags_ &= ~kMapObjectFlagSolid;
@@ -2574,10 +2575,10 @@ void P_ActSpawn(MapObject *mo)
     MobjStringReference *ref = (MobjStringReference *)mo->state_->action_par;
 
     const MapObjectDefinition *info = ref->GetRef();
-    SYS_ASSERT(info);
+    EPI_ASSERT(info);
 
     MapObject *item = CreateMapObject(mo->x, mo->y, mo->z, info);
-    SYS_ASSERT(item);
+    EPI_ASSERT(item);
 
     item->angle_ = mo->angle_;
     item->side_  = mo->side_;
@@ -2699,7 +2700,7 @@ static void P_DoAttack(MapObject *object)
 {
     const AttackDefinition *attack = object->current_attack_;
 
-    SYS_ASSERT(attack);
+    EPI_ASSERT(attack);
 
     switch (attack->attackstyle_)
     {
@@ -3424,7 +3425,7 @@ void P_ActResurrectChase(MapObject *object)
             MapObjectSetStateDeferred(object, object->info_->res_state_, 0);
 
         // corpses without raise states should be skipped
-        SYS_ASSERT(corpse->info_->raise_state_);
+        EPI_ASSERT(corpse->info_->raise_state_);
 
         BringCorpseToLife(corpse);
 
@@ -3606,8 +3607,8 @@ void P_ActJump(MapObject *mo)
 
     JumpActionInfo *jump = (JumpActionInfo *)mo->state_->action_par;
 
-    SYS_ASSERT(jump->chance >= 0);
-    SYS_ASSERT(jump->chance <= 1);
+    EPI_ASSERT(jump->chance >= 0);
+    EPI_ASSERT(jump->chance <= 1);
 
     if (RandomByteTestDeterministic(jump->chance))
     {
@@ -3638,8 +3639,8 @@ void P_ActJumpLiquid(MapObject *mo)
 
     JumpActionInfo *jump = (JumpActionInfo *)mo->state_->action_par;
 
-    SYS_ASSERT(jump->chance >= 0);
-    SYS_ASSERT(jump->chance <= 1);
+    EPI_ASSERT(jump->chance >= 0);
+    EPI_ASSERT(jump->chance <= 1);
 
     if (RandomByteTestDeterministic(jump->chance))
     {
@@ -3668,8 +3669,8 @@ void P_ActJumpSky(MapObject *mo)
 
     JumpActionInfo *jump = (JumpActionInfo *)mo->state_->action_par;
 
-    SYS_ASSERT(jump->chance >= 0);
-    SYS_ASSERT(jump->chance <= 1);
+    EPI_ASSERT(jump->chance >= 0);
+    EPI_ASSERT(jump->chance <= 1);
 
     if (RandomByteTestDeterministic(jump->chance))
     {
@@ -3703,7 +3704,7 @@ void P_ActBecome(MapObject *mo)
     if (!become->info_)
     {
         become->info_ = mobjtypes.Lookup(become->info_ref_.c_str());
-        SYS_ASSERT(
+        EPI_ASSERT(
             become->info_);  // lookup should be OK (fatal error if not found)
     }
 
@@ -3859,7 +3860,7 @@ void P_ActMorph(MapObject *mo)
     if (!morph->info_)
     {
         morph->info_ = mobjtypes.Lookup(morph->info_ref_.c_str());
-        SYS_ASSERT(
+        EPI_ASSERT(
             morph->info_);  // lookup should be OK (fatal error if not found)
     }
 
@@ -4008,7 +4009,7 @@ void P_ActUnMorph(MapObject *mo)
 //
 void PlayerAttack(MapObject *p_obj, const AttackDefinition *attack)
 {
-    SYS_ASSERT(attack);
+    EPI_ASSERT(attack);
 
     p_obj->current_attack_ = attack;
 
@@ -4040,7 +4041,7 @@ void PlayerAttack(MapObject *p_obj, const AttackDefinition *attack)
     }
     else
     {
-        SYS_ASSERT(attack->dualattack1_ && attack->dualattack2_);
+        EPI_ASSERT(attack->dualattack1_ && attack->dualattack2_);
 
         if (attack->dualattack1_->attackstyle_ == kAttackStyleDualAttack)
             PlayerAttack(p_obj, attack->dualattack1_);

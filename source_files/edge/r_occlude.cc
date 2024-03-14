@@ -42,23 +42,23 @@ static void ValidateBuffer(void)
 {
     if (!occlusion_buffer_head)
     {
-        SYS_ASSERT(!occlusion_buffer_tail);
+        EPI_ASSERT(!occlusion_buffer_tail);
         return;
     }
 
     for (AngleRange *AR = occlusion_buffer_head; AR; AR = AR->next)
     {
-        SYS_ASSERT(AR->low <= AR->high);
+        EPI_ASSERT(AR->low <= AR->high);
 
         if (AR->next)
         {
-            SYS_ASSERT(AR->next->previous == AR);
-            SYS_ASSERT(AR->next->low > AR->high);
+            EPI_ASSERT(AR->next->previous == AR);
+            EPI_ASSERT(AR->next->low > AR->high);
         }
-        else { SYS_ASSERT(AR == occlusion_buffer_tail); }
+        else { EPI_ASSERT(AR == occlusion_buffer_tail); }
 
-        if (AR->prev) { SYS_ASSERT(AR->prev->next == AR); }
-        else { SYS_ASSERT(AR == occlusion_buffer_head); }
+        if (AR->prev) { EPI_ASSERT(AR->prev->next == AR); }
+        else { EPI_ASSERT(AR == occlusion_buffer_head); }
     }
 }
 #endif  // DEBUG_OCCLUSION
@@ -175,7 +175,7 @@ static void DoSet(BAMAngle low, BAMAngle high)
         AR->high = HMM_MAX(AR->high, high);
 
 #ifdef EDGE_DEBUG_OCCLUSION
-        if (AR->prev) { SYS_ASSERT(AR->low > AR->prev->high); }
+        if (AR->prev) { EPI_ASSERT(AR->low > AR->prev->high); }
 #endif
         while (AR->next && AR->high >= AR->next->low)
         {
@@ -197,7 +197,7 @@ void RendererOcclusionSet(BAMAngle low, BAMAngle high)
     // Set all angles in the given range, i.e. mark them as blocking.
     // The angles are relative to the VIEW angle.
 
-    SYS_ASSERT((BAMAngle)(high - low) < kBAMAngle180);
+    EPI_ASSERT((BAMAngle)(high - low) < kBAMAngle180);
 
     if (low <= high)
         DoSet(low, high);
@@ -230,7 +230,7 @@ bool RendererOcclusionTest(BAMAngle low, BAMAngle high)
     // Returns true if the entire range is blocked, false otherwise.
     // Angles are relative to the VIEW angle.
 
-    SYS_ASSERT((BAMAngle)(high - low) < kBAMAngle180);
+    EPI_ASSERT((BAMAngle)(high - low) < kBAMAngle180);
 
     if (low <= high)
         return DoTest(low, high);

@@ -23,8 +23,7 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __P_ACTION_H__
-#define __P_ACTION_H__
+#pragma once
 
 class MapObject;
 
@@ -225,8 +224,6 @@ void P_ActTrackerStart(MapObject *mo);
 // MBF / MBF21
 void P_ActMushroom(MapObject *mo);
 void P_ActNoiseAlert(MapObject *mo);
-
-#endif /* __P_ACTION_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

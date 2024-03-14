@@ -977,7 +977,7 @@ bool CheckNewSection(void)
 
 void ReadTextString(char *dest, int len)
 {
-    SYS_ASSERT(cur_txt_ptr);
+    EPI_ASSERT(cur_txt_ptr);
 
     char *begin = dest;
 
@@ -1051,7 +1051,7 @@ void ProcessTextSection(int len1, int len2)
 
 void ReadBexTextString(char *dest)  // upto kMaximumTextStringLength chars
 {
-    SYS_ASSERT(cur_txt_ptr);
+    EPI_ASSERT(cur_txt_ptr);
 
     char *begin = dest;
 
@@ -1131,7 +1131,7 @@ void ProcessBexString(void)
 
 void ProcessLine(void)
 {
-    SYS_ASSERT(active_section >= 0);
+    EPI_ASSERT(active_section >= 0);
 
     LogPrint("Section %d Object %d : <%s>\n", active_section, active_obj,
              line_buf);
@@ -1413,7 +1413,7 @@ DehackedResult LoadNormal(void)
 DehackedResult patch::Load(InputBuffer *buf)
 {
     pat_buf = buf;
-    SYS_ASSERT(pat_buf);
+    EPI_ASSERT(pat_buf);
 
     DehackedResult result = kDehackedConversionOK;
 

@@ -18,6 +18,7 @@
 
 #include "r_shader.h"
 
+#include "epi.h"
 #include "i_defs_gl.h"
 #include "im_data.h"
 #include "main.h"
@@ -119,7 +120,7 @@ static LightImage *GetLightImage(const MapObjectDefinition *info, int DL)
 
         const char *shape = D_info->shape_.c_str();
 
-        SYS_ASSERT(shape && strlen(shape) > 0);
+        EPI_ASSERT(shape && strlen(shape) > 0);
 
         const Image *image =
             ImageLookup(shape, kImageNamespaceGraphic, kImageLookupNull);
@@ -611,7 +612,7 @@ class wall_glow_c : public AbstractShader
    public:
     wall_glow_c(MapObject *_glower) : mo(_glower)
     {
-        SYS_ASSERT(mo->dynamic_light_.glow_wall);
+        EPI_ASSERT(mo->dynamic_light_.glow_wall);
         ld     = mo->dynamic_light_.glow_wall;
         norm_x = (ld->vertex_1->Y - ld->vertex_2->Y) / ld->length;
         norm_y = (ld->vertex_2->X - ld->vertex_1->X) / ld->length;

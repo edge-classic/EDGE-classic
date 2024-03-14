@@ -33,6 +33,7 @@
 #include <stdlib.h>
 
 #include "colormap.h"
+#include "epi.h"
 #include "r_image.h"
 #include "str_compare.h"
 #include "str_util.h"
@@ -491,7 +492,7 @@ void *SV_SideFindByIndex(int index)
 
 int SV_SideGetIndex(Side *elem)
 {
-    SYS_ASSERT(level_sides <= elem && elem < (level_sides + total_level_sides));
+    EPI_ASSERT(level_sides <= elem && elem < (level_sides + total_level_sides));
 
     return elem - level_sides;
 }
@@ -530,7 +531,7 @@ void *SV_LineFindByIndex(int index)
 
 int SV_LineGetIndex(Line *elem)
 {
-    SYS_ASSERT(level_lines <= elem && elem < (level_lines + total_level_lines));
+    EPI_ASSERT(level_lines <= elem && elem < (level_lines + total_level_lines));
 
     return elem - level_lines;
 }
@@ -591,7 +592,7 @@ void SV_LineFinaliseElems(void)
 
     for (SMI = active_sliders.begin(); SMI != active_sliders.end(); SMI++)
     {
-        SYS_ASSERT((*SMI)->line);
+        EPI_ASSERT((*SMI)->line);
 
         (*SMI)->line->slider_move = (*SMI);
     }
@@ -614,7 +615,7 @@ void *SV_ExfloorFindByIndex(int index)
 
 int SV_ExfloorGetIndex(Extrafloor *elem)
 {
-    SYS_ASSERT(level_extrafloors <= elem &&
+    EPI_ASSERT(level_extrafloors <= elem &&
                elem < (level_extrafloors + total_level_extrafloors));
 
     return elem - level_extrafloors;
@@ -674,7 +675,7 @@ void *SV_SectorFindByIndex(int index)
 
 int SV_SectorGetIndex(Sector *elem)
 {
-    SYS_ASSERT(level_sectors <= elem &&
+    EPI_ASSERT(level_sectors <= elem &&
                elem < (level_sectors + total_level_sectors));
 
     return elem - level_sectors;
@@ -742,7 +743,7 @@ void SV_SectorFinaliseElems(void)
     {
         PlaneMover *pmov = *PMI;
 
-        SYS_ASSERT(pmov->sector);
+        EPI_ASSERT(pmov->sector);
 
         if (pmov->is_ceiling)
             pmov->sector->ceiling_move = pmov;

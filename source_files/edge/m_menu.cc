@@ -38,6 +38,7 @@
 #include "dm_state.h"
 #include "dstrings.h"
 #include "e_main.h"
+#include "epi.h"
 #include "epi_sdl.h"
 #include "f_interm.h"
 #include "filesystem.h"
@@ -716,7 +717,7 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style,
         HudWriteText(style, text_type, x, y, "NEXT >");
 
     info = save_extended_information_slots + item_on;
-    SYS_ASSERT(0 <= item_on && item_on < kTotalSaveSlots);
+    EPI_ASSERT(0 <= item_on && item_on < kTotalSaveSlots);
 
     // show some info about the MainMenuSaveGame
 
@@ -742,7 +743,7 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style,
         ' ')  // Remove beginning space that legacy behavior had sometimes
         temp_string = temp_string.substr(1);
     size_t timesplit = temp_string.find("  ");
-    SYS_ASSERT(timesplit != std::string::npos &&
+    EPI_ASSERT(timesplit != std::string::npos &&
                temp_string.size() > timesplit + 2);
     HudWriteText(style, text_type, x, y,
                  temp_string.substr(0, timesplit).c_str());
@@ -819,7 +820,7 @@ void MenuDrawLoad(void)
 
     Style *style = LoadMenuDefinition.style_variable[0];
 
-    SYS_ASSERT(style);
+    EPI_ASSERT(style);
     style->DrawBackground();
 
     if (!style->fonts_[StyleDefinition::kTextSectionHeader])
@@ -945,7 +946,7 @@ void MenuDrawSave(void)
 
     Style *style = SaveMenuDefinition.style_variable[0];
 
-    SYS_ASSERT(style);
+    EPI_ASSERT(style);
     style->DrawBackground();
 
     if (!style->fonts_[StyleDefinition::kTextSectionHeader])
@@ -1472,8 +1473,8 @@ static void ReallyDoStartLevel(SkillLevel skill, GameDefinition *g)
         return;
     }
 
-    SYS_ASSERT(GameMapExists(params.map_));
-    SYS_ASSERT(params.map_->episode_);
+    EPI_ASSERT(GameMapExists(params.map_));
+    EPI_ASSERT(params.map_->episode_);
 
     GameDeferredNewGame(params);
 
@@ -2068,7 +2069,7 @@ bool MenuResponder(InputEvent *ev)
             default:
                 if (mod & KMOD_SHIFT || mod & KMOD_CAPS)
                     ch = epi::ToUpperASCII(ch);
-                SYS_ASSERT(save_style);
+                EPI_ASSERT(save_style);
                 if (ch >= 32 && ch <= 127 &&
                     save_string_character_index < kSaveStringSize - 1 &&
                     save_style->fonts_[1]->StringWidth(
@@ -2406,7 +2407,7 @@ void MenuStartControlPanel(void)
 
 static int FindChar(std::string &str, char ch, int pos)
 {
-    SYS_ASSERT(pos <= (int)str.size());
+    EPI_ASSERT(pos <= (int)str.size());
 
     const char *scan = strchr(str.c_str() + pos, ch);
 
@@ -2417,8 +2418,8 @@ static int FindChar(std::string &str, char ch, int pos)
 
 static std::string GetMiddle(std::string &str, int pos, int len)
 {
-    SYS_ASSERT(pos >= 0 && len >= 0);
-    SYS_ASSERT(pos + len <= (int)str.size());
+    EPI_ASSERT(pos >= 0 && len >= 0);
+    EPI_ASSERT(pos + len <= (int)str.size());
 
     if (len == 0) return std::string();
 
@@ -2458,7 +2459,7 @@ static void DrawMessage(void)
     // short x; // Seems unused for now - Dasho
     short y;
 
-    SYS_ASSERT(exit_style);
+    EPI_ASSERT(exit_style);
 
     exit_style->DrawBackground();
 
@@ -3175,7 +3176,7 @@ void MenuDrawer(void)
         custom_menu = true;
 
     Style *style = current_menu->style_variable[0];
-    SYS_ASSERT(style);
+    EPI_ASSERT(style);
 
     style->DrawBackground();
 

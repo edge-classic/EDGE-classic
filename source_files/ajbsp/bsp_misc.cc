@@ -518,7 +518,7 @@ void DetectOverlappingLines(void)
 
 void Vertex::AddWallTip(double dx, double dy, bool open_left, bool open_right)
 {
-    SYS_ASSERT(overlap_ == nullptr);
+    EPI_ASSERT(overlap_ == nullptr);
 
     WallTip *tip = NewWallTip();
     WallTip *after;

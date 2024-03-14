@@ -34,7 +34,7 @@ static int luaopen_debugger(lua_State *lua){
 
     epi::File *file = OpenFileFromPack("scripts/lua/core/debugger.lua");
 
-    SYS_ASSERT(file);
+    EPI_ASSERT(file);
 
     std::string debugger_source = file->ReadText();
 

@@ -27,19 +27,18 @@ static FlatDefinition *dynamic_flatdef;
 
 FlatDefinitionContainer flatdefs;
 
-#define DDF_CMD_BASE dummy_flatdef
 static FlatDefinition dummy_flatdef;
 
 static const DDFCommandList flat_commands[] = {
-    DDF_FIELD("LIQUID", liquid_, DDF_MainGetString),
-    DDF_FIELD("FOOTSTEP", footstep_, DDF_MainLookupSound),
-    DDF_FIELD("SPLASH", splash_, DDF_MainGetLumpName),
-    DDF_FIELD("IMPACT_OBJECT", impactobject_ref_, DDF_MainGetString),
-    DDF_FIELD("GLOW_OBJECT", glowobject_ref_, DDF_MainGetString),
-    DDF_FIELD("SINK_DEPTH", sink_depth_, DDF_MainGetPercent),
-    DDF_FIELD("BOB_DEPTH", bob_depth_, DDF_MainGetPercent),
+    DDF_FIELD("LIQUID", dummy_flatdef, liquid_, DDF_MainGetString),
+    DDF_FIELD("FOOTSTEP", dummy_flatdef, footstep_, DDF_MainLookupSound),
+    DDF_FIELD("SPLASH", dummy_flatdef, splash_, DDF_MainGetLumpName),
+    DDF_FIELD("IMPACT_OBJECT", dummy_flatdef, impactobject_ref_, DDF_MainGetString),
+    DDF_FIELD("GLOW_OBJECT", dummy_flatdef, glowobject_ref_, DDF_MainGetString),
+    DDF_FIELD("SINK_DEPTH", dummy_flatdef, sink_depth_, DDF_MainGetPercent),
+    DDF_FIELD("BOB_DEPTH", dummy_flatdef, bob_depth_, DDF_MainGetPercent),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 //
 //  DDF PARSE ROUTINES

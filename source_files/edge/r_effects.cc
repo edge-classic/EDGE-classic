@@ -18,6 +18,7 @@
 
 #include "dm_state.h"
 #include "e_player.h"
+#include "epi.h"
 #include "hu_draw.h"  // HUD* functions
 #include "i_defs_gl.h"
 #include "m_misc.h"

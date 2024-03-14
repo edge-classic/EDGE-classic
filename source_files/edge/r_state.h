@@ -30,6 +30,7 @@
 #include "AlmostEquals.h"
 #include "edge_profiling.h"
 #include "i_defs_gl.h"
+#include "i_system.h"
 #include "m_math.h"
 #include "r_defs.h"
 #include "w_flat.h"

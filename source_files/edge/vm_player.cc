@@ -21,6 +21,7 @@
 #include "dm_state.h"
 #include "e_main.h"
 #include "e_player.h"
+#include "epi.h"
 #include "f_interm.h"  //Lobo: need this to get access to intermission_stats
 #include "flat.h"      // DDFFLAT - Dasho
 #include "g_game.h"
@@ -696,7 +697,7 @@ static void PL_main_ammo(coal::vm_c *vm, int argc)
         {
             if (pw->info->show_clip_)
             {
-                SYS_ASSERT(pw->info->ammopershot_[0] > 0);
+                EPI_ASSERT(pw->info->ammopershot_[0] > 0);
 
                 value = pw->clip_size[0] / pw->info->ammopershot_[0];
             }

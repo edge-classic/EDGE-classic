@@ -24,11 +24,7 @@
 #include "colormap.h"
 #include "local.h"
 #include "str_compare.h"
-// engine code (FIXME don't do wad shit here)
 #include "w_wad.h"
-
-#undef DF
-#define DF DDF_FIELD
 
 static void DDF_LevelGetSpecials(const char *info);
 static void DDF_LevelGetPic(const char *info, void *storage);
@@ -37,61 +33,57 @@ static void DDF_LevelGetWistyle(const char *info, void *storage);
 
 MapDefinitionContainer mapdefs;
 
-#undef DDF_CMD_BASE
-#define DDF_CMD_BASE dummy_finale
 static FinaleDefinition dummy_finale;
 
 static const DDFCommandList finale_commands[] = {
-    DF("TEXT", text_, DDF_MainGetString),
-    DF("TEXT_GRAPHIC", text_back_, DDF_MainGetLumpName),
-    DF("TEXT_FLAT", text_flat_, DDF_MainGetLumpName),
-    DF("TEXT_SPEED", text_speed_, DDF_MainGetFloat),
-    DF("TEXT_WAIT", text_wait_, DDF_MainGetNumeric),
-    DF("COLOURMAP", text_colmap_, DDF_MainGetColourmap),
-    DF("GRAPHIC", pics_, DDF_LevelGetPic),
-    DF("GRAPHIC_WAIT", picwait_, DDF_MainGetTime),
-    DF("MOVIE", movie_, DDF_MainGetString),
-    DF("CAST", docast_, DDF_MainGetBoolean),
-    DF("BUNNY", dobunny_, DDF_MainGetBoolean),
-    DF("MUSIC", music_, DDF_MainGetNumeric),
+    DDF_FIELD("TEXT", dummy_finale, text_, DDF_MainGetString),
+    DDF_FIELD("TEXT_GRAPHIC", dummy_finale, text_back_, DDF_MainGetLumpName),
+    DDF_FIELD("TEXT_FLAT", dummy_finale, text_flat_, DDF_MainGetLumpName),
+    DDF_FIELD("TEXT_SPEED", dummy_finale, text_speed_, DDF_MainGetFloat),
+    DDF_FIELD("TEXT_WAIT", dummy_finale, text_wait_, DDF_MainGetNumeric),
+    DDF_FIELD("COLOURMAP", dummy_finale, text_colmap_, DDF_MainGetColourmap),
+    DDF_FIELD("GRAPHIC", dummy_finale, pics_, DDF_LevelGetPic),
+    DDF_FIELD("GRAPHIC_WAIT", dummy_finale, picwait_, DDF_MainGetTime),
+    DDF_FIELD("MOVIE", dummy_finale, movie_, DDF_MainGetString),
+    DDF_FIELD("CAST", dummy_finale, docast_, DDF_MainGetBoolean),
+    DDF_FIELD("BUNNY", dummy_finale, dobunny_, DDF_MainGetBoolean),
+    DDF_FIELD("MUSIC", dummy_finale, music_, DDF_MainGetNumeric),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 // -KM- 1998/11/25 Finales are all go.
 
 static MapDefinition *dynamic_level;
 
-#undef DDF_CMD_BASE
-#define DDF_CMD_BASE dummy_level
 static MapDefinition dummy_level;
 
 static const DDFCommandList level_commands[] = {
     // sub-commands
-    DDF_SUB_LIST("PRE", f_pre_, finale_commands),
-    DDF_SUB_LIST("END", f_end_, finale_commands),
+    DDF_SUB_LIST("PRE", dummy_level, f_pre_, finale_commands),
+    DDF_SUB_LIST("END", dummy_level, f_end_, finale_commands),
 
-    DF("LUMPNAME", lump_, DDF_MainGetLumpName),
-    DF("DESCRIPTION", description_, DDF_MainGetString),
-    DF("AUTHOR", author_, DDF_MainGetString),
-    DF("NAME_GRAPHIC", namegraphic_, DDF_MainGetLumpName),
-    DF("SKY_TEXTURE", sky_, DDF_MainGetLumpName),
-    DF("SKY_STRETCH", forced_skystretch_, DDF_LevelGetSkyStretch),
-    DF("MUSIC_ENTRY", music_, DDF_MainGetNumeric),
-    DF("SURROUND_FLAT", surround_, DDF_MainGetLumpName),
-    DF("NEXT_MAP", next_mapname_, DDF_MainGetLumpName),
-    DF("SECRET_MAP", secretmapname_, DDF_MainGetLumpName),
-    DF("AUTOTAG", autotag_, DDF_MainGetNumeric),
-    DF("PARTIME", partime_, DDF_MainGetTime),
-    DF("EPISODE", episode_name_, DDF_MainGetString),
-    DF("STATS", wistyle_, DDF_LevelGetWistyle),
-    DF("LEAVING_BACKGROUND", leavingbggraphic_, DDF_MainGetLumpName),
-    DF("ENTERING_BACKGROUND", enteringbggraphic_, DDF_MainGetLumpName),
-    DF("INDOOR_FOG_COLOR", indoor_fog_cmap_, DDF_MainGetColourmap),
-    DF("INDOOR_FOG_DENSITY", indoor_fog_density_, DDF_MainGetPercent),
-    DF("OUTDOOR_FOG_COLOR", outdoor_fog_cmap_, DDF_MainGetColourmap),
-    DF("OUTDOOR_FOG_DENSITY", outdoor_fog_density_, DDF_MainGetPercent),
+    DDF_FIELD("LUMPNAME", dummy_level, lump_, DDF_MainGetLumpName),
+    DDF_FIELD("DESCRIPTION", dummy_level, description_, DDF_MainGetString),
+    DDF_FIELD("AUTHOR", dummy_level, author_, DDF_MainGetString),
+    DDF_FIELD("NAME_GRAPHIC", dummy_level, namegraphic_, DDF_MainGetLumpName),
+    DDF_FIELD("SKY_TEXTURE", dummy_level, sky_, DDF_MainGetLumpName),
+    DDF_FIELD("SKY_STRETCH", dummy_level, forced_skystretch_, DDF_LevelGetSkyStretch),
+    DDF_FIELD("MUSIC_ENTRY", dummy_level, music_, DDF_MainGetNumeric),
+    DDF_FIELD("SURROUND_FLAT", dummy_level, surround_, DDF_MainGetLumpName),
+    DDF_FIELD("NEXT_MAP", dummy_level, next_mapname_, DDF_MainGetLumpName),
+    DDF_FIELD("SECRET_MAP", dummy_level, secretmapname_, DDF_MainGetLumpName),
+    DDF_FIELD("AUTOTAG", dummy_level, autotag_, DDF_MainGetNumeric),
+    DDF_FIELD("PARTIME", dummy_level, partime_, DDF_MainGetTime),
+    DDF_FIELD("EPISODE", dummy_level, episode_name_, DDF_MainGetString),
+    DDF_FIELD("STATS", dummy_level, wistyle_, DDF_LevelGetWistyle),
+    DDF_FIELD("LEAVING_BACKGROUND", dummy_level, leavingbggraphic_, DDF_MainGetLumpName),
+    DDF_FIELD("ENTERING_BACKGROUND", dummy_level, enteringbggraphic_, DDF_MainGetLumpName),
+    DDF_FIELD("INDOOR_FOG_COLOR", dummy_level, indoor_fog_cmap_, DDF_MainGetColourmap),
+    DDF_FIELD("INDOOR_FOG_DENSITY", dummy_level, indoor_fog_density_, DDF_MainGetPercent),
+    DDF_FIELD("OUTDOOR_FOG_COLOR", dummy_level, outdoor_fog_cmap_, DDF_MainGetColourmap),
+    DDF_FIELD("OUTDOOR_FOG_DENSITY", dummy_level, outdoor_fog_density_, DDF_MainGetPercent),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 static DDFSpecialFlags map_specials[] = {
     {"JUMPING", kMapFlagJumping, 0},

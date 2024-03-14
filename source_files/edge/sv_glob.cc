@@ -26,6 +26,7 @@
 #include <limits.h>
 #include <stddef.h>
 
+#include "epi.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
 
@@ -136,7 +137,7 @@ static void SaveGlobalGetInteger(const char *info, void *storage)
 {
     int *dest = (int *)storage;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     *dest = strtol(info, nullptr, 0);
 }
@@ -145,7 +146,7 @@ static void SaveGlobalGetString(const char *info, void *storage)
 {
     char **dest = (char **)storage;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     // free any previous string
     SaveChunkFreeString(*dest);
@@ -160,7 +161,7 @@ static void SaveGlobalGetCheckCRC(const char *info, void *storage)
 {
     CrcCheck *dest = (CrcCheck *)storage;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     sscanf(info, "%d %u", &dest->count, &dest->crc);
 }
@@ -170,11 +171,11 @@ static void SaveGlobalGetLevelFlags(const char *info, void *storage)
     GameFlags *dest = (GameFlags *)storage;
     int        flags;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     flags = strtol(info, nullptr, 0);
 
-    Z_Clear(dest, GameFlags, 1);
+    EPI_CLEAR_MEMORY(dest, GameFlags, 1);
 
     dest->jump               = (flags & kMapFlagJumping) ? true : false;
     dest->crouch             = (flags & kMapFlagCrouching) ? true : false;
@@ -204,7 +205,7 @@ static void SaveGlobalGetImage(const char *info, void *storage)
 
     const Image **dest = (const Image **)storage;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     if (info[0] == 0)
     {
@@ -228,7 +229,7 @@ static const char *SaveGlobalPutInteger(void *storage)
     int *src = (int *)storage;
     char buffer[40];
 
-    SYS_ASSERT(storage);
+    EPI_ASSERT(storage);
 
     sprintf(buffer, "%d", *src);
 
@@ -239,7 +240,7 @@ static const char *SaveGlobalPutString(void *storage)
 {
     char **src = (char **)storage;
 
-    SYS_ASSERT(storage);
+    EPI_ASSERT(storage);
 
     if (*src == nullptr) return SaveChunkCopyString("");
 
@@ -251,7 +252,7 @@ static const char *SaveGlobalPutCheckCRC(void *storage)
     CrcCheck *src = (CrcCheck *)storage;
     char      buffer[80];
 
-    SYS_ASSERT(storage);
+    EPI_ASSERT(storage);
 
     sprintf(buffer, "%d %u", src->count, src->crc);
 
@@ -263,7 +264,7 @@ static const char *SaveGlobalPutLevelFlags(void *storage)
     GameFlags *src = (GameFlags *)storage;
     int        flags;
 
-    SYS_ASSERT(storage);
+    EPI_ASSERT(storage);
 
     flags = 0;
 
@@ -296,7 +297,7 @@ static const char *SaveGlobalPutImage(void *storage)
     const Image **src = (const Image **)storage;
     char          buffer[64];
 
-    SYS_ASSERT(storage);
+    EPI_ASSERT(storage);
 
     if (*src == nullptr) return SaveChunkCopyString("");
 
@@ -317,7 +318,7 @@ SaveGlobals *SaveGlobalsNew(void)
 
     globs = new SaveGlobals;
 
-    Z_Clear(globs, SaveGlobals, 1);
+    EPI_CLEAR_MEMORY(globs, SaveGlobals, 1);
 
     globs->exit_time = INT_MAX;
 
@@ -453,7 +454,7 @@ static void GlobalWriteVariables(SaveGlobals *globs)
         void *storage = ((char *)globs) + global_commands[i].pointer_offset;
 
         const char *data = (*global_commands[i].stringify_function)(storage);
-        SYS_ASSERT(data);
+        EPI_ASSERT(data);
 
         SavePushWriteChunk("Vari");
         SaveChunkPutString(global_commands[i].name);
@@ -470,7 +471,7 @@ static void GlobalWriteWads(SaveGlobals *globs)
 
     if (!globs->wad_names) return;
 
-    SYS_ASSERT(globs->wad_num > 0);
+    EPI_ASSERT(globs->wad_num > 0);
 
     SavePushWriteChunk("Wads");
     SaveChunkPutInteger(globs->wad_num);

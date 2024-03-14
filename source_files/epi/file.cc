@@ -38,7 +38,7 @@ ANSIFile::~ANSIFile()
 
 int ANSIFile::GetLength()
 {
-    SYS_ASSERT(fp_);
+    EPI_ASSERT(fp_);
 
     long cur_pos = ftell(fp_);  // Get existing position
 
@@ -51,23 +51,23 @@ int ANSIFile::GetLength()
 
 int ANSIFile::GetPosition()
 {
-    SYS_ASSERT(fp_);
+    EPI_ASSERT(fp_);
 
     return (int)ftell(fp_);
 }
 
 unsigned int ANSIFile::Read(void *dest, unsigned int size)
 {
-    SYS_ASSERT(fp_);
-    SYS_ASSERT(dest);
+    EPI_ASSERT(fp_);
+    EPI_ASSERT(dest);
 
     return fread(dest, 1, size, fp_);
 }
 
 unsigned int ANSIFile::Write(const void *src, unsigned int size)
 {
-    SYS_ASSERT(fp_);
-    SYS_ASSERT(src);
+    EPI_ASSERT(fp_);
+    EPI_ASSERT(src);
 
     return fwrite(src, 1, size, fp_);
 }
@@ -119,7 +119,7 @@ std::string File::ReadText()
 
 uint8_t *File::LoadIntoMemory(int max_size)
 {
-    SYS_ASSERT(max_size >= 0);
+    EPI_ASSERT(max_size >= 0);
 
     int cur_pos     = GetPosition();
     int actual_size = GetLength();
@@ -149,9 +149,9 @@ uint8_t *File::LoadIntoMemory(int max_size)
 SubFile::SubFile(File *parent, int start, int len)
     : parent_(parent), start_(start), length_(len), pos_(0)
 {
-    SYS_ASSERT(parent_ != nullptr);
-    SYS_ASSERT(start_ >= 0);
-    SYS_ASSERT(length_ >= 0);
+    EPI_ASSERT(parent_ != nullptr);
+    EPI_ASSERT(start_ >= 0);
+    EPI_ASSERT(length_ >= 0);
 }
 
 SubFile::~SubFile() { parent_ = nullptr; }
@@ -222,8 +222,8 @@ unsigned int SubFile::Write(const void *src, unsigned int size)
 
 MemFile::MemFile(const uint8_t *block, int len, bool copy_it)
 {
-    SYS_ASSERT(block);
-    SYS_ASSERT(len >= 0);
+    EPI_ASSERT(block);
+    EPI_ASSERT(len >= 0);
 
     pos_    = 0;
     copied_ = false;
@@ -263,7 +263,7 @@ MemFile::~MemFile()
 
 unsigned int MemFile::Read(void *dest, unsigned int size)
 {
-    SYS_ASSERT(dest);
+    EPI_ASSERT(dest);
 
     unsigned int avail = length_ - pos_;
 

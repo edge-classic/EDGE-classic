@@ -395,7 +395,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
             break;
             case epi::kENameNext:
             {
-                Z_Clear(val->next_map, char, 9);
+                EPI_CLEAR_MEMORY(val->next_map, char, 9);
                 if (value.size() > 8)
                     FatalError(
                         "UMAPINFO: Mapname for \"next\" over 8 characters!\n");
@@ -404,7 +404,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
             break;
             case epi::kENameNextsecret:
             {
-                Z_Clear(val->nextsecret, char, 9);
+                EPI_CLEAR_MEMORY(val->nextsecret, char, 9);
                 if (value.size() > 8)
                     FatalError(
                         "UMAPINFO: Mapname for \"nextsecret\" over 8 "
@@ -414,7 +414,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
             break;
             case epi::kENameLevelpic:
             {
-                Z_Clear(val->levelpic, char, 9);
+                EPI_CLEAR_MEMORY(val->levelpic, char, 9);
                 if (value.size() > 8)
                     FatalError(
                         "UMAPINFO: Entry for \"levelpic\" over 8 "
@@ -424,7 +424,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
             break;
             case epi::kENameSkytexture:
             {
-                Z_Clear(val->skytexture, char, 9);
+                EPI_CLEAR_MEMORY(val->skytexture, char, 9);
                 if (value.size() > 8)
                     FatalError(
                         "UMAPINFO: Entry for \"skytexture\" over 8 "
@@ -434,7 +434,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
             break;
             case epi::kENameMusic:
             {
-                Z_Clear(val->music, char, 9);
+                EPI_CLEAR_MEMORY(val->music, char, 9);
                 if (value.size() > 8)
                     FatalError(
                         "UMAPINFO: Entry for \"music\" over 8 characters!\n");
@@ -443,7 +443,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
             break;
             case epi::kENameEndpic:
             {
-                Z_Clear(val->endpic, char, 9);
+                EPI_CLEAR_MEMORY(val->endpic, char, 9);
                 if (value.size() > 8)
                     FatalError(
                         "UMAPINFO: Entry for \"endpic\" over 8 characters!\n");
@@ -461,7 +461,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 break;
             case epi::kENameExitpic:
             {
-                Z_Clear(val->exitpic, char, 9);
+                EPI_CLEAR_MEMORY(val->exitpic, char, 9);
                 if (value.size() > 8)
                     FatalError(
                         "UMAPINFO: Entry for \"exitpic\" over 8 characters!\n");
@@ -470,7 +470,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
             break;
             case epi::kENameEnterpic:
             {
-                Z_Clear(val->enterpic, char, 9);
+                EPI_CLEAR_MEMORY(val->enterpic, char, 9);
                 if (value.size() > 8)
                     FatalError(
                         "UMAPINFO: Entry for \"enterpic\" over 8 "
@@ -518,7 +518,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
             break;
             case epi::kENameInterbackdrop:
             {
-                Z_Clear(val->interbackdrop, char, 9);
+                EPI_CLEAR_MEMORY(val->interbackdrop, char, 9);
                 if (value.size() > 8)
                     FatalError(
                         "UMAPINFO: Entry for \"interbackdrop\" over 8 "
@@ -528,7 +528,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
             break;
             case epi::kENameIntermusic:
             {
-                Z_Clear(val->intermusic, char, 9);
+                EPI_CLEAR_MEMORY(val->intermusic, char, 9);
                 if (value.size() > 8)
                     FatalError(
                         "UMAPINFO: Entry for \"intermusic\" over 8 "

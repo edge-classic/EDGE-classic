@@ -33,17 +33,16 @@ static void DDF_AnimGetPic(const char *info, void *storage);
 // -ACB- 1998/08/10 Use DDF_MainGetLumpName for getting the..lump name.
 // -KM- 1998/09/27 Use DDF_MainGetTime for getting tics
 
-#define DDF_CMD_BASE dummy_anim
 static AnimationDefinition dummy_anim;
 
 static const DDFCommandList anim_commands[] = {
-    DDF_FIELD("TYPE", type_, DDF_AnimGetType),
-    DDF_FIELD("SEQUENCE", pics_, DDF_AnimGetPic),
-    DDF_FIELD("SPEED", speed_, DDF_MainGetTime),
-    DDF_FIELD("FIRST", start_name_, DDF_MainGetLumpName),
-    DDF_FIELD("LAST", end_name_, DDF_MainGetLumpName),
+    DDF_FIELD("TYPE", dummy_anim, type_, DDF_AnimGetType),
+    DDF_FIELD("SEQUENCE", dummy_anim, pics_, DDF_AnimGetPic),
+    DDF_FIELD("SPEED", dummy_anim, speed_, DDF_MainGetTime),
+    DDF_FIELD("FIRST", dummy_anim, start_name_, DDF_MainGetLumpName),
+    DDF_FIELD("LAST", dummy_anim, end_name_, DDF_MainGetLumpName),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 // Floor/ceiling animation sequences, defined by first and last frame,
 // i.e. the flat (64x64 tile) name or texture name to be used.
@@ -184,7 +183,7 @@ void DDF_AnimCleanUp(void)
 //
 static void DDF_AnimGetType(const char *info, void *storage)
 {
-    SYS_ASSERT(storage);
+    EPI_ASSERT(storage);
 
     int *type = (int *)storage;
 

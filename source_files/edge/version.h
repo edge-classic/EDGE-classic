@@ -20,9 +20,9 @@
 
 #include "con_var.h"
 
-extern ConsoleVariable windowtitle;
-extern ConsoleVariable edgeversion;
-extern ConsoleVariable appname;
+extern ConsoleVariable window_title;
+extern ConsoleVariable edge_version;
+extern ConsoleVariable application_name;
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

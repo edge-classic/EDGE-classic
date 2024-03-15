@@ -52,7 +52,7 @@ static int SYS_debug_print(lua_State *L)
 //
 static int SYS_edge_version(lua_State *L)
 {
-    lua_pushnumber(L, edgeversion.f_);
+    lua_pushnumber(L, edge_version.f_);
     return 1;
 }
 

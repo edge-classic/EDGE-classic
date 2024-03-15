@@ -68,7 +68,8 @@
 //
 // DEFAULTS
 //
-bool save_screenshot_valid = false;
+bool save_screenshot_valid   = false;
+bool show_old_config_warning = false;
 
 extern ConsoleVariable midi_soundfont;
 extern bool            pc_speaker_mode;
@@ -249,12 +250,15 @@ void ConfigurationSaveDefaults(void)
 
     FILE *f = epi::FileOpenRaw(configuration_file,
                                epi::kFileAccessWrite | epi::kFileAccessBinary);
+
     if (!f)
     {
         LogWarning("Couldn't open config file %s for writing.",
                    configuration_file.c_str());
         return;  // can't write the file, but don't complain
     }
+
+    fprintf(f, "#VERSION %g\n", kInternalVersion);
 
     // console variables
     ConsoleWriteVariables(f);
@@ -385,9 +389,37 @@ static void ParseConfigBlock(epi::Lexer &lex)
     }
 }
 
-static void ParseConfig(const std::string &data)
+static void ParseConfig(const std::string &data, bool check_config_version)
 {
     epi::Lexer lex(data);
+
+    // Check the first line of a config file for the #VERSION entry. If not
+    // present, assume it is from a version that predates this concept
+    if (check_config_version)
+    {
+        std::string    version;
+        epi::TokenKind tok = lex.Next(version);
+
+        if (tok != epi::kTokenSymbol || version != "#")
+        {
+            show_old_config_warning = true;
+        }
+
+        tok = lex.Next(version);
+
+        if (tok != epi::kTokenIdentifier || version != "version")
+        {
+            show_old_config_warning = true;
+        }
+
+        tok = lex.Next(version);
+
+        if (tok != epi::kTokenNumber ||
+            epi::LexDouble(version) < kInternalVersion)
+        {
+            show_old_config_warning = true;
+        }
+    }
 
     for (;;)
     {
@@ -422,7 +454,7 @@ void ConfigurationLoadDefaults(void)
 
     delete file;
 
-    ParseConfig(data);
+    ParseConfig(data, true);
 
     return;
 }
@@ -439,7 +471,7 @@ void ConfigurationLoadBranding(void)
 
     delete file;
 
-    ParseConfig(data);
+    ParseConfig(data, false);
 }
 
 #define PIXEL_RED(pix) (playpal_data[0][pix][0])

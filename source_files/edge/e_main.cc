@@ -179,7 +179,8 @@ EDGE_DEFINE_CONSOLE_VARIABLE(debug_filename, "debug.txt",
 EDGE_DEFINE_CONSOLE_VARIABLE(window_title, "EDGE-Classic",
                              kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(edge_version, "1.37", kConsoleVariableFlagNoReset)
-EDGE_DEFINE_CONSOLE_VARIABLE(team_name, "EDGE Team", kConsoleVariableFlagNoReset)
+EDGE_DEFINE_CONSOLE_VARIABLE(team_name, "EDGE Team",
+                             kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(application_name, "EDGE-Classic",
                              kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(homepage, "https://edge-classic.github.io",
@@ -924,6 +925,16 @@ void AdvanceTitle(void)
             continue;
         }
 
+        if (show_old_config_warning)
+        {
+            MenuStartMessage(
+                "A config from a previous version\nof EDGE-Classic was "
+                "loaded.\nSome values may be changed\nor reset to their "
+                "defaults.",
+                nullptr, false);
+            show_old_config_warning = false;
+        }
+
         if (title_pic >= (int)g->titlepics_.size())
         {
             title_game = (title_game + 1) % (int)gamedefs.size();
@@ -1041,7 +1052,8 @@ static void InitializeDirectories(void)
         home_directory = SDL_GetPrefPath(nullptr, application_name.c_str());
 #else
     if (home_directory.empty())
-        home_directory = SDL_GetPrefPath(team_name.c_str(), application_name.c_str());
+        home_directory =
+            SDL_GetPrefPath(team_name.c_str(), application_name.c_str());
 #endif
 
     if (!epi::IsDirectory(home_directory))
@@ -1696,7 +1708,8 @@ static void ShowDateAndVersion(void)
 
     LogPrint("%s v%s compiled on " __DATE__ " at " __TIME__ "\n",
              application_name.c_str(), edge_version.c_str());
-    LogPrint("%s homepage is at %s\n", application_name.c_str(), homepage.c_str());
+    LogPrint("%s homepage is at %s\n", application_name.c_str(),
+             homepage.c_str());
 
     LogPrint("Executable path: '%s'\n", executable_path.c_str());
 

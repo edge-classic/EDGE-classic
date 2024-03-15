@@ -193,7 +193,7 @@ static void SYS_edge_version(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    vm->ReturnFloat(edgeversion.f_);
+    vm->ReturnFloat(edge_version.f_);
 }
 
 //------------------------------------------------------------------------

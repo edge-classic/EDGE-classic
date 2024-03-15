@@ -176,11 +176,11 @@ EDGE_DEFINE_CONSOLE_VARIABLE(config_filename, "edge-classic.cfg",
                              kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(debug_filename, "debug.txt",
                              kConsoleVariableFlagNoReset)
-EDGE_DEFINE_CONSOLE_VARIABLE(windowtitle, "EDGE-Classic",
+EDGE_DEFINE_CONSOLE_VARIABLE(window_title, "EDGE-Classic",
                              kConsoleVariableFlagNoReset)
-EDGE_DEFINE_CONSOLE_VARIABLE(edgeversion, "1.37", kConsoleVariableFlagNoReset)
-EDGE_DEFINE_CONSOLE_VARIABLE(orgname, "EDGE Team", kConsoleVariableFlagNoReset)
-EDGE_DEFINE_CONSOLE_VARIABLE(appname, "EDGE-Classic",
+EDGE_DEFINE_CONSOLE_VARIABLE(edge_version, "1.37", kConsoleVariableFlagNoReset)
+EDGE_DEFINE_CONSOLE_VARIABLE(team_name, "EDGE Team", kConsoleVariableFlagNoReset)
+EDGE_DEFINE_CONSOLE_VARIABLE(application_name, "EDGE-Classic",
                              kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(homepage, "https://edge-classic.github.io",
                              kConsoleVariableFlagNoReset)
@@ -491,17 +491,17 @@ static void SpecialWadVerify(void)
 
     LogPrint("EDGE_DEFS.EPK version %1.2f found.\n", real_ver);
 
-    if (real_ver < edgeversion.f_)
+    if (real_ver < edge_version.f_)
     {
         FatalError(
             "EDGE_DEFS.EPK is an older version (got %1.2f, expected %1.2f)\n",
-            real_ver, edgeversion.f_);
+            real_ver, edge_version.f_);
     }
-    else if (real_ver > edgeversion.f_)
+    else if (real_ver > edge_version.f_)
     {
         LogWarning(
             "EDGE_DEFS.EPK is a newer version (got %1.2f, expected %1.2f)\n",
-            real_ver, edgeversion.f_);
+            real_ver, edge_version.f_);
     }
 }
 
@@ -1038,10 +1038,10 @@ static void InitializeDirectories(void)
 
 #ifdef _WIN32
     if (home_directory.empty())
-        home_directory = SDL_GetPrefPath(nullptr, appname.c_str());
+        home_directory = SDL_GetPrefPath(nullptr, application_name.c_str());
 #else
     if (home_directory.empty())
-        home_directory = SDL_GetPrefPath(orgname.c_str(), appname.c_str());
+        home_directory = SDL_GetPrefPath(team_name.c_str(), application_name.c_str());
 #endif
 
     if (!epi::IsDirectory(home_directory))
@@ -1655,7 +1655,7 @@ static void AddBasePack(void)
                 "%s not found for the %s IWAD! Check the /edge_base folder of "
                 "your %s install!\n",
                 epi::GetFilename(base_path).c_str(), game_base.c_str(),
-                appname.c_str());
+                application_name.c_str());
         }
     }
 }
@@ -1695,8 +1695,8 @@ static void ShowDateAndVersion(void)
     LogDebug("[Debug file created at %s]\n\n", timebuf);
 
     LogPrint("%s v%s compiled on " __DATE__ " at " __TIME__ "\n",
-             appname.c_str(), edgeversion.c_str());
-    LogPrint("%s homepage is at %s\n", appname.c_str(), homepage.c_str());
+             application_name.c_str(), edge_version.c_str());
+    LogPrint("%s homepage is at %s\n", application_name.c_str(), homepage.c_str());
 
     LogPrint("Executable path: '%s'\n", executable_path.c_str());
 
@@ -2007,8 +2007,8 @@ static void EdgeStartup(void)
     if (ArgumentFind("version") > 0)
     {
         // -AJA- using FatalError here, since LogPrint crashes this early on
-        FatalError("\n%s version is %s\n", appname.c_str(),
-                   edgeversion.c_str());
+        FatalError("\n%s version is %s\n", application_name.c_str(),
+                   edge_version.c_str());
     }
 
     SetupLogAndDebugFiles();
@@ -2212,8 +2212,8 @@ void EdgeMain(int argc, const char **argv)
     InitialState();
 
     ConsoleMessageColor(SG_YELLOW_RGBA32);
-    LogPrint("%s v%s initialisation complete.\n", appname.c_str(),
-             edgeversion.c_str());
+    LogPrint("%s v%s initialisation complete.\n", application_name.c_str(),
+             edge_version.c_str());
 
     LogDebug("- Entering game loop...\n");
 

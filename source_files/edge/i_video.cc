@@ -250,8 +250,8 @@ void StartupGraphics(void)
 
 static bool InitializeWindow(DisplayMode *mode)
 {
-    std::string temp_title = windowtitle.s_;
-    temp_title.append(" ").append(edgeversion.s_);
+    std::string temp_title = window_title.s_;
+    temp_title.append(" ").append(edge_version.s_);
 
 #if EDGE_WEB
     int resizeable = SDL_WINDOW_RESIZABLE;

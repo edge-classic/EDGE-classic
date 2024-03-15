@@ -432,7 +432,7 @@ int ConsoleCommandHelp(char **argv, int argc)
 
 int ConsoleCommandVersion(char **argv, int argc)
 {
-    LogPrint("%s v%s\n", appname.c_str(), edgeversion.c_str());
+    LogPrint("%s v%s\n", application_name.c_str(), edge_version.c_str());
     return 0;
 }
 

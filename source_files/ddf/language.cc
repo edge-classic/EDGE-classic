@@ -61,21 +61,6 @@ std::string DDF_SanitizeName(const std::string &s)
     return out;
 }
 
-// Until Unicode is truly implemented, restrict characters to printable ASCII
-std::string DDF_SanitizePrintString(const std::string &s)
-{
-    std::string out;
-
-    for (char ch : s)
-    {
-        if (!epi::IsPrintASCII((int)ch)) continue;
-
-        out.push_back(ch);
-    }
-
-    return out;
-}
-
 class LanguageChoice
 {
    public:
@@ -96,9 +81,7 @@ class LanguageChoice
         // ensure ref name is uppercase, with no spaces
         std::string ref = DDF_SanitizeName(refname);
 
-        std::string val = DDF_SanitizePrintString(value);
-
-        refs[ref] = val;
+        refs[ref] = value;
     }
 };
 

@@ -1684,8 +1684,8 @@ void DDF_MobjGetSpecial(const char *info)
 {
     int flag_value;
 
-    // handle the "IN1.0f" tag
-    if (DDF_CompareName(info, "IN1.0f") == 0)
+    // handle the "INVISIBLE" tag
+    if (DDF_CompareName(info, "INVISIBLE") == 0)
     {
         dynamic_mobj->translucency_ = 0.0f;
         return;

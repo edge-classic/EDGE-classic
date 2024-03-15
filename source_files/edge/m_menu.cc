@@ -1677,6 +1677,7 @@ static void QuitResponse(int ch)
 
     LogPrint("Exiting...\n");
 
+    EdgeShutdown();
     SystemShutdown();
 
     CloseProgram(EXIT_SUCCESS);

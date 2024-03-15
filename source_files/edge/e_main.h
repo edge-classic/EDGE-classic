@@ -31,6 +31,7 @@ void EdgeMain(int argc, const char **argv);
 void EdgeIdle(void);
 void EdgeTicker(void);
 void EdgeDisplay(void);
+void EdgeShutdown(void);
 
 void TitleTicker(void);
 void PickLoadingScreen(void);

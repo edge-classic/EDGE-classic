@@ -1935,7 +1935,7 @@ static void LoadData(void)
         splat[0] = ImageLookup(gd->splatpic_.c_str());
 
     wiminus = ImageLookup("WIMINUS"); //!!! FIXME: use the style!
-    percent = ImageLookup("WIPCOUNT");
+    percent = ImageLookup("WIPCNT");
     colon   = ImageLookup("WICOLON");
 
     finished = ImageLookup("WIF");

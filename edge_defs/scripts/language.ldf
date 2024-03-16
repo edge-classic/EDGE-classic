@@ -48,6 +48,9 @@ MenuDifficulty5="Nightmare!";
 IntermissionEntering="Entering";
 IntermissionFinished="Finished";
 
+OldConfig="A config from a previous version\nof EDGE-Classic was "
+          "loaded.\nSome values may be changed\nor reset to their "
+          "defaults.\n\nPress a key";
 
 FoundSecret="You found a secret!";
 

@@ -931,11 +931,7 @@ void AdvanceTitle(void)
 
         if (show_old_config_warning && startup_progress.IsEmpty())
         {
-            MenuStartMessage(
-                "A config from a previous version\nof EDGE-Classic was "
-                "loaded.\nSome values may be changed\nor reset to their "
-                "defaults.",
-                nullptr, false);
+            MenuStartMessage(language["OldConfig"], nullptr, false);
             show_old_config_warning = false;
         }
 

@@ -1129,7 +1129,7 @@ void MenuSaveGame(int choice)
     // -AJA- big cop-out here (add RTS menu stuff to MainMenuSaveGame ?)
     if (rts_menu_active)
     {
-        MenuStartMessage("You can't save during an RTS menu.\n\npress a key.",
+        MenuStartMessage("You can't save during an RTS menu.\npress a key.",
                          nullptr, false);
         return;
     }
@@ -1903,18 +1903,6 @@ void MenuStartMessageInput(const char *string,
     return;
 }
 
-#if 0
-void M_StopMessage(void)
-{
-	menu_active = message_last_menu?true:false;
-	message_string.Clear();
-	message_mode = 0;
-  
-	if (!menu_active)
-		save_screenshot_valid = false;
-}
-#endif
-
 //
 // CONTROL PANEL
 //
@@ -2479,8 +2467,8 @@ static void DrawMessage(void)
         (exit_style->fonts_[StyleDefinition::kTextSectionText]->StringLines(
              s.c_str()) *
          exit_style->fonts_[StyleDefinition::kTextSectionText]
-             ->NominalHeight() /
-         2);
+             ->NominalHeight() *
+         1.5f / 2);
 
     if (!msg.empty())
     {
@@ -2504,7 +2492,8 @@ static void DrawMessage(void)
             }
 
             y += exit_style->fonts_[StyleDefinition::kTextSectionText]
-                     ->NominalHeight();
+                     ->NominalHeight() *
+                 1.5f;
 
             oldpos = pos + 1;
         } while (pos >= 0 && oldpos < (int)msg.size());

@@ -215,6 +215,10 @@ class StartupProgress
 
     ~StartupProgress() {}
 
+    bool IsEmpty() { return startup_messages_.empty(); }
+
+    void Clear() { startup_messages_.clear(); }
+
     void AddMessage(const char *message)
     {
         if (startup_messages_.size() >= 15)
@@ -287,12 +291,12 @@ class StartupProgress
     }
 };
 
-static StartupProgress s_progress;
+static StartupProgress startup_progress;
 
 void StartupProgressMessage(const char *message)
 {
-    s_progress.AddMessage(message);
-    s_progress.DrawIt();
+    startup_progress.AddMessage(message);
+    startup_progress.DrawIt();
 }
 
 //
@@ -925,7 +929,7 @@ void AdvanceTitle(void)
             continue;
         }
 
-        if (show_old_config_warning)
+        if (show_old_config_warning && startup_progress.IsEmpty())
         {
             MenuStartMessage(
                 "A config from a previous version\nof EDGE-Classic was "
@@ -2171,6 +2175,7 @@ static void InitialState(void)
     {
         LogDebug("- Startup: showing title screen.\n");
         StartTitle();
+        startup_progress.Clear();
         return;
     }
 

@@ -258,7 +258,7 @@ void ConfigurationSaveDefaults(void)
         return;  // can't write the file, but don't complain
     }
 
-    fprintf(f, "#VERSION %g\n", kInternalVersion);
+    fprintf(f, "#VERSION %d\n", kInternalConfigVersion);
 
     // console variables
     ConsoleWriteVariables(f);
@@ -415,7 +415,7 @@ static void ParseConfig(const std::string &data, bool check_config_version)
         tok = lex.Next(version);
 
         if (tok != epi::kTokenNumber ||
-            epi::LexDouble(version) < kInternalVersion)
+            epi::LexInteger(version) < kInternalConfigVersion)
         {
             show_old_config_warning = true;
         }

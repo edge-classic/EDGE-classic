@@ -33,8 +33,8 @@
 #include "i_system.h"
 #include "m_misc.h"
 #include "p_blockmap.h"
-#include "p_local.h"  // ApproximateDistance
-#include "r_misc.h"   // RendererPointToAngle
+#include "p_local.h" // ApproximateDistance
+#include "r_misc.h"  // RendererPointToAngle
 #include "s_cache.h"
 #include "s_music.h"
 #include "s_sound.h"
@@ -46,9 +46,8 @@
 // The more safe bits there are, the less likely the final
 // output sum will overflow into white noise, but the less
 // precision you have left for the volume multiplier.
-static constexpr uint8_t kSafeClippingBits = 4;
-static constexpr int32_t kSoundClipThreshold =
-    ((1 << (31 - kSafeClippingBits)) - 1);
+static constexpr uint8_t kSafeClippingBits   = 4;
+static constexpr int32_t kSoundClipThreshold = ((1 << (31 - kSafeClippingBits)) - 1);
 
 static constexpr uint8_t  kMinimumSoundChannels = 32;
 static constexpr uint16_t kMaximumSoundChannels = 256;
@@ -76,8 +75,7 @@ static std::list<SoundData *> playing_queue_buffers;
 
 static SoundChannel *queue_channel;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(sound_effect_volume, "0.15",
-                             kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(sound_effect_volume, "0.15", kConsoleVariableFlagArchive)
 
 static bool sound_effects_paused = false;
 
@@ -93,24 +91,25 @@ extern int sound_device_samples_per_buffer;
 
 extern bool sound_device_stereo;
 
-SoundChannel::SoundChannel() : state_(kChannelEmpty), data_(nullptr) {}
+SoundChannel::SoundChannel() : state_(kChannelEmpty), data_(nullptr)
+{
+}
 
-SoundChannel::~SoundChannel() {}
+SoundChannel::~SoundChannel()
+{
+}
 
 void SoundChannel::ComputeDelta()
 {
     // frequency close enough ?
-    if (data_->frequency_ >
-            (sound_device_frequency - sound_device_frequency / 100) &&
-        data_->frequency_ <
-            (sound_device_frequency + sound_device_frequency / 100))
+    if (data_->frequency_ > (sound_device_frequency - sound_device_frequency / 100) &&
+        data_->frequency_ < (sound_device_frequency + sound_device_frequency / 100))
     {
         delta_ = (1 << 10);
     }
     else
     {
-        delta_ = (uint32_t)floor((float)data_->frequency_ * 1024.0f /
-                                 sound_device_frequency);
+        delta_ = (uint32_t)floor((float)data_->frequency_ * 1024.0f / sound_device_frequency);
     }
 }
 
@@ -123,8 +122,7 @@ void SoundChannel::ComputeVolume()
     {
         if (sound_device_stereo)
         {
-            BAMAngle angle = RendererPointToAngle(listen_x, listen_y,
-                                                  position_->x, position_->y);
+            BAMAngle angle = RendererPointToAngle(listen_x, listen_y, position_->x, position_->y);
 
             // same equation from original DOOM
             sep = 0.5f - 0.38f * epi::BAMSin(angle - listen_angle);
@@ -132,14 +130,11 @@ void SoundChannel::ComputeVolume()
 
         if (!boss_)
         {
-            dist = ApproximateDistance(listen_x - position_->x,
-                                       listen_y - position_->y,
-                                       listen_z - position_->z);
+            dist = ApproximateDistance(listen_x - position_->x, listen_y - position_->y, listen_z - position_->z);
 
             if (players[console_player] && players[console_player]->map_object_)
             {
-                if (CheckSightToPoint(players[console_player]->map_object_,
-                                      position_->x, position_->y, position_->z))
+                if (CheckSightToPoint(players[console_player]->map_object_, position_->x, position_->y, position_->z))
                     dist = HMM_MAX(1.25f, dist / 100.0f);
                 else
                     dist = HMM_MAX(1.25f, dist / 75.0f);
@@ -151,7 +146,8 @@ void SoundChannel::ComputeVolume()
 
     MAX_VOL = (boss_ ? MAX_VOL : MAX_VOL / dist) * sound_effect_volume.f_;
 
-    if (definition_) MAX_VOL *= definition_->volume_;
+    if (definition_)
+        MAX_VOL *= definition_->volume_;
 
     // strictly linear equations
     volume_left_  = (int)(MAX_VOL * (1.0 - sep));
@@ -169,10 +165,8 @@ void SoundChannel::ComputeMusicVolume()
 {
     float MAX_VOL = (1 << (16 - kSafeClippingBits)) - 3;
 
-    MAX_VOL =
-        MAX_VOL * music_volume.f_ *
-        music_player_gain;  // This last one is an internal value and won't
-                            // exceed 1.0, so MAX_VOL should be consistent
+    MAX_VOL = MAX_VOL * music_volume.f_ * music_player_gain; // This last one is an internal value and won't
+                                                             // exceed 1.0, so MAX_VOL should be consistent
 
     volume_left_  = (int)MAX_VOL;
     volume_right_ = (int)MAX_VOL;
@@ -279,9 +273,8 @@ static void MixStereo(SoundChannel *chan, int *dest, int pairs)
 static void MixInterleaved(SoundChannel *chan, int *dest, int pairs)
 {
     if (!sound_device_stereo)
-        FatalError(
-            "INTERNAL ERROR: tried to mix an interleaved buffer in MONO "
-            "mode.\n");
+        FatalError("INTERNAL ERROR: tried to mix an interleaved buffer in MONO "
+                   "mode.\n");
 
     EPI_ASSERT(pairs > 0);
 
@@ -320,9 +313,11 @@ static void MixInterleaved(SoundChannel *chan, int *dest, int pairs)
 
 static void MixOneChannel(SoundChannel *chan, int pairs)
 {
-    if (sound_effects_paused && chan->category_ >= kCategoryPlayer) return;
+    if (sound_effects_paused && chan->category_ >= kCategoryPlayer)
+        return;
 
-    if (chan->volume_left_ == 0 && chan->volume_right_ == 0) return;
+    if (chan->volume_left_ == 0 && chan->volume_right_ == 0)
+        return;
 
     EPI_ASSERT(chan->offset_ < chan->length_);
 
@@ -336,8 +331,7 @@ static void MixOneChannel(SoundChannel *chan, int pairs)
         if (chan->offset_ + count * chan->delta_ >= chan->length_)
         {
             // find minimum number of samples we can play
-            double avail = (chan->length_ - chan->offset_ + chan->delta_ - 1) /
-                           (double)chan->delta_;
+            double avail = (chan->length_ - chan->offset_ + chan->delta_ - 1) / (double)chan->delta_;
 
             count = (int)floor(avail);
 
@@ -400,9 +394,11 @@ static void MixQueues(int pairs)
 {
     SoundChannel *chan = queue_channel;
 
-    if (!chan || !chan->data_ || chan->state_ != kChannelPlaying) return;
+    if (!chan || !chan->data_ || chan->state_ != kChannelPlaying)
+        return;
 
-    if (chan->volume_left_ == 0 && chan->volume_right_ == 0) return;
+    if (chan->volume_left_ == 0 && chan->volume_right_ == 0)
+        return;
 
     EPI_ASSERT(chan->offset_ < chan->length_);
 
@@ -416,8 +412,7 @@ static void MixQueues(int pairs)
         if (chan->offset_ + count * chan->delta_ >= chan->length_)
         {
             // find minimum number of samples we can play
-            double avail = (chan->length_ - chan->offset_ + chan->delta_ - 1) /
-                           (double)chan->delta_;
+            double avail = (chan->length_ - chan->offset_ + chan->delta_ - 1) / (double)chan->delta_;
 
             count = (int)floor(avail);
 
@@ -447,7 +442,8 @@ static void MixQueues(int pairs)
 
             free_queue_buffers.push_back(buf);
 
-            if (!QueueNextBuffer()) break;
+            if (!QueueNextBuffer())
+                break;
         }
 
         dest += count * (sound_device_stereo ? 2 : 1);
@@ -457,12 +453,14 @@ static void MixQueues(int pairs)
 
 void SoundMixAllChannels(void *stream, int len)
 {
-    if (no_sound || len <= 0) return;
+    if (no_sound || len <= 0)
+        return;
 
     int pairs = len / sound_device_bytes_per_sample;
 
     int samples = pairs;
-    if (sound_device_stereo) samples *= 2;
+    if (sound_device_stereo)
+        samples *= 2;
 
     // check that we're not getting too much data
     EPI_ASSERT(pairs <= sound_device_samples_per_buffer);
@@ -502,9 +500,8 @@ void SoundInitializeChannels(int total)
         mix_channels[i] = new SoundChannel();
 
     // allocate mixer buffer
-    mix_buffer_length =
-        sound_device_samples_per_buffer * (sound_device_stereo ? 2 : 1);
-    mix_buffer = new int[mix_buffer_length];
+    mix_buffer_length = sound_device_samples_per_buffer * (sound_device_stereo ? 2 : 1);
+    mix_buffer        = new int[mix_buffer_length];
 }
 
 void SoundFreeChannels(void)
@@ -515,7 +512,10 @@ void SoundFreeChannels(void)
     {
         SoundChannel *chan = mix_channels[i];
 
-        if (chan && chan->data_) { chan->data_ = nullptr; }
+        if (chan && chan->data_)
+        {
+            chan->data_ = nullptr;
+        }
 
         delete chan;
     }
@@ -560,7 +560,8 @@ void SoundReallocateChannels(int total)
 
             if (chan->state_ == kChannelPlaying)
             {
-                if (chan->category_ != kCategoryUi) SoundKillChannel(i);
+                if (chan->category_ != kCategoryUi)
+                    SoundKillChannel(i);
             }
         }
 
@@ -578,7 +579,8 @@ void SoundReallocateChannels(int total)
 
         for (i = total; i < total_channels; i++)
         {
-            if (mix_channels[i]->state_ == kChannelPlaying) SoundKillChannel(i);
+            if (mix_channels[i]->state_ == kChannelPlaying)
+                SoundKillChannel(i);
 
             delete mix_channels[i];
             mix_channels[i] = nullptr;
@@ -609,18 +611,26 @@ void UpdateSounds(Position *listener, BAMAngle angle)
             SoundKillChannel(i);
     }
 
-    if (queue_channel) queue_channel->ComputeMusicVolume();
+    if (queue_channel)
+        queue_channel->ComputeMusicVolume();
 }
 
-void PauseSound(void) { sound_effects_paused = true; }
+void PauseSound(void)
+{
+    sound_effects_paused = true;
+}
 
-void ResumeSound(void) { sound_effects_paused = false; }
+void ResumeSound(void)
+{
+    sound_effects_paused = false;
+}
 
 //----------------------------------------------------------------------------
 
 void SoundQueueInitialize(void)
 {
-    if (no_sound) return;
+    if (no_sound)
+        return;
 
     LockAudio();
     {
@@ -632,7 +642,8 @@ void SoundQueueInitialize(void)
             }
         }
 
-        if (!queue_channel) queue_channel = new SoundChannel();
+        if (!queue_channel)
+            queue_channel = new SoundChannel();
 
         queue_channel->state_ = kChannelEmpty;
         queue_channel->data_  = nullptr;
@@ -644,7 +655,8 @@ void SoundQueueInitialize(void)
 
 void SoundQueueShutdown(void)
 {
-    if (no_sound) return;
+    if (no_sound)
+        return;
 
     LockAudio();
     {
@@ -653,8 +665,7 @@ void SoundQueueShutdown(void)
             // free all data on the playing / free lists.
             // The SoundData destructor takes care of data_left_/R.
 
-            for (; !playing_queue_buffers.empty();
-                 playing_queue_buffers.pop_front())
+            for (; !playing_queue_buffers.empty(); playing_queue_buffers.pop_front())
             {
                 delete playing_queue_buffers.front();
             }
@@ -674,14 +685,14 @@ void SoundQueueShutdown(void)
 
 void SoundQueueStop(void)
 {
-    if (no_sound) return;
+    if (no_sound)
+        return;
 
     EPI_ASSERT(queue_channel);
 
     LockAudio();
     {
-        for (; !playing_queue_buffers.empty();
-             playing_queue_buffers.pop_front())
+        for (; !playing_queue_buffers.empty(); playing_queue_buffers.pop_front())
         {
             free_queue_buffers.push_back(playing_queue_buffers.front());
         }
@@ -694,7 +705,8 @@ void SoundQueueStop(void)
 
 SoundData *SoundQueueGetFreeBuffer(int samples, int buf_mode)
 {
-    if (no_sound) return nullptr;
+    if (no_sound)
+        return nullptr;
 
     SoundData *buf = nullptr;
 
@@ -724,7 +736,10 @@ void SoundQueueAddBuffer(SoundData *buf, int freq)
 
         playing_queue_buffers.push_back(buf);
 
-        if (queue_channel->state_ != kChannelPlaying) { QueueNextBuffer(); }
+        if (queue_channel->state_ != kChannelPlaying)
+        {
+            QueueNextBuffer();
+        }
     }
     UnlockAudio();
 }

@@ -35,7 +35,7 @@ extern int bfg_cells_per_shot;
 
 extern int soul_health;
 extern int soul_limit;
-extern int mega_health;  // and limit
+extern int mega_health; // and limit
 
 extern int monster_infight;
 
@@ -46,6 +46,6 @@ void Init();
 void Shutdown();
 
 void AlterMisc(int new_val);
-}  // namespace miscellaneous
+} // namespace miscellaneous
 
-}  // namespace dehacked
+} // namespace dehacked

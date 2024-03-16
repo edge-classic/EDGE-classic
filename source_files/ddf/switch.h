@@ -29,11 +29,11 @@ struct SwitchCache
 
 class SwitchDefinition
 {
-   public:
+  public:
     SwitchDefinition();
     ~SwitchDefinition(){};
 
-   public:
+  public:
     void Default(void);
     void CopyDetail(SwitchDefinition &src);
 
@@ -50,22 +50,27 @@ class SwitchDefinition
 
     SwitchCache cache_;
 
-   private:
+  private:
     // disable copy construct and assignment operator
-    explicit SwitchDefinition(SwitchDefinition &rhs) {}
-    SwitchDefinition &operator=(SwitchDefinition &rhs) { return *this; }
+    explicit SwitchDefinition(SwitchDefinition &rhs)
+    {
+    }
+    SwitchDefinition &operator=(SwitchDefinition &rhs)
+    {
+        return *this;
+    }
 };
 
 // Our switchdefs container
 class SwitchDefinitionContainer : public std::vector<SwitchDefinition *>
 {
-   public:
-    SwitchDefinitionContainer() {}
+  public:
+    SwitchDefinitionContainer()
+    {
+    }
     ~SwitchDefinitionContainer()
     {
-        for (std::vector<SwitchDefinition *>::iterator iter     = begin(),
-                                                       iter_end = end();
-             iter != iter_end; iter++)
+        for (std::vector<SwitchDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
         {
             SwitchDefinition *s = *iter;
             delete s;
@@ -73,11 +78,11 @@ class SwitchDefinitionContainer : public std::vector<SwitchDefinition *>
         }
     }
 
-   public:
+  public:
     SwitchDefinition *Find(const char *name);
 };
 
-extern SwitchDefinitionContainer switchdefs;  // -ACB- 2004/06/04 Implemented
+extern SwitchDefinitionContainer switchdefs; // -ACB- 2004/06/04 Implemented
 
 void DDF_ReadSwitch(const std::string &data);
 

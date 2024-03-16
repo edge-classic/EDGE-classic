@@ -22,11 +22,11 @@
 
 class AnimationDefinition
 {
-   public:
+  public:
     AnimationDefinition();
     ~AnimationDefinition(){};
 
-   public:
+  public:
     void Default(void);
     void CopyDetail(AnimationDefinition &src);
 
@@ -51,9 +51,12 @@ class AnimationDefinition
     // how many 1/35s ticks each frame lasts
     int speed_;
 
-   private:
+  private:
     // disable copy construct and assignment operator
-    explicit AnimationDefinition(AnimationDefinition &rhs) { (void)rhs; }
+    explicit AnimationDefinition(AnimationDefinition &rhs)
+    {
+        (void)rhs;
+    }
     AnimationDefinition &operator=(AnimationDefinition &rhs)
     {
         (void)rhs;
@@ -63,13 +66,13 @@ class AnimationDefinition
 
 class AnimationDefinitionContainer : public std::vector<AnimationDefinition *>
 {
-   public:
-    AnimationDefinitionContainer() {}
+  public:
+    AnimationDefinitionContainer()
+    {
+    }
     ~AnimationDefinitionContainer()
     {
-        for (std::vector<AnimationDefinition *>::iterator iter     = begin(),
-                                                          iter_end = end();
-             iter != iter_end; iter++)
+        for (std::vector<AnimationDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
         {
             AnimationDefinition *anim = *iter;
             delete anim;
@@ -77,11 +80,11 @@ class AnimationDefinitionContainer : public std::vector<AnimationDefinition *>
         }
     }
 
-   public:
+  public:
     AnimationDefinition *Lookup(const char *refname);
 };
 
-extern AnimationDefinitionContainer animdefs;  // -ACB- 2004/06/03 Implemented
+extern AnimationDefinitionContainer animdefs; // -ACB- 2004/06/03 Implemented
 
 void DDF_ReadAnims(const std::string &data);
 

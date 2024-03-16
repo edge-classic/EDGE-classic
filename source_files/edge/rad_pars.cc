@@ -67,8 +67,7 @@ static std::string current_script_line;
 // Determine whether the code blocks are started and terminated.
 static int current_script_level = 0;
 
-static constexpr const char *rad_level_names[3] = { "outer area", "map area",
-                                                    "trigger area" };
+static constexpr const char *rad_level_names[3] = { "outer area", "map area", "trigger area" };
 
 // Location of current script
 static TriggerScript *this_script;
@@ -79,9 +78,7 @@ static int   pending_wait_tics = 0;
 static char *pending_label     = nullptr;
 
 // Default tip properties (position, colour, etc)
-static constexpr ScriptTipProperties default_tip_properties = {
-    -1, -1, -1, -1, nullptr, -1.0f, 0
-};
+static constexpr ScriptTipProperties default_tip_properties = { -1, -1, -1, -1, nullptr, -1.0f, 0 };
 
 void ScriptError(const char *err, ...)
 {
@@ -98,15 +95,15 @@ void ScriptError(const char *err, ...)
 
     pos = buffer + strlen(buffer);
 
-    sprintf(pos, "Error occurred near line %d of %s\n",
-            current_script_line_number, current_script_filename);
+    sprintf(pos, "Error occurred near line %d of %s\n", current_script_line_number, current_script_filename);
     pos += strlen(pos);
 
     sprintf(pos, "Line contents: %s\n", current_script_line.c_str());
     pos += strlen(pos);
 
     // check for buffer overflow
-    if (buffer[2047] != 0) FatalError("Buffer overflow in ScriptError.\n");
+    if (buffer[2047] != 0)
+        FatalError("Buffer overflow in ScriptError.\n");
 
     // add a blank line for readability in the log file
     LogPrint("\n");
@@ -116,7 +113,8 @@ void ScriptError(const char *err, ...)
 
 void ScriptWarning(const char *err, ...)
 {
-    if (no_warnings) return;
+    if (no_warnings)
+        return;
 
     va_list argptr;
     char    buffer[1024];
@@ -126,8 +124,7 @@ void ScriptWarning(const char *err, ...)
     va_end(argptr);
 
     LogWarning("\n");
-    LogWarning("Found problem near line %d of %s\n", current_script_line_number,
-               current_script_filename);
+    LogWarning("Found problem near line %d of %s\n", current_script_line_number, current_script_filename);
     LogWarning("Line contents: %s\n", current_script_line.c_str());
     LogWarning("%s", buffer);
 }
@@ -162,7 +159,8 @@ static void ScriptCheckForInt(const char *value, int *retvalue)
         count++;
         pos++;
     }
-    while (epi::IsDigitASCII(*pos++)) count++;
+    while (epi::IsDigitASCII(*pos++))
+        count++;
 
     // Is the value an integer?
     if (length != count)
@@ -248,13 +246,14 @@ static void ScriptCheckForTime(const char *info, void *storage)
     // -ES- 1999/09/14 MAXT means that time should be maximal.
     if (!epi::StringCaseCompareASCII(info, "maxt"))
     {
-        *dest = INT_MAX;  // -ACB- 1999/09/22 Standards, Please.
+        *dest = INT_MAX; // -ACB- 1999/09/22 Standards, Please.
         return;
     }
 
     const char *p = strchr(info, 'T');
 
-    if (!p) p = strchr(info, 't');
+    if (!p)
+        p = strchr(info, 't');
 
     if (p)
     {
@@ -276,11 +275,16 @@ static void ScriptCheckForTime(const char *info, void *storage)
 
 static ArmourType ScriptCheckForArmourType(const char *info)
 {
-    if (DDF_CompareName(info, "GREEN") == 0) return kArmourTypeGreen;
-    if (DDF_CompareName(info, "BLUE") == 0) return kArmourTypeBlue;
-    if (DDF_CompareName(info, "PURPLE") == 0) return kArmourTypePurple;
-    if (DDF_CompareName(info, "YELLOW") == 0) return kArmourTypeYellow;
-    if (DDF_CompareName(info, "RED") == 0) return kArmourTypeRed;
+    if (DDF_CompareName(info, "GREEN") == 0)
+        return kArmourTypeGreen;
+    if (DDF_CompareName(info, "BLUE") == 0)
+        return kArmourTypeBlue;
+    if (DDF_CompareName(info, "PURPLE") == 0)
+        return kArmourTypePurple;
+    if (DDF_CompareName(info, "YELLOW") == 0)
+        return kArmourTypeYellow;
+    if (DDF_CompareName(info, "RED") == 0)
+        return kArmourTypeRed;
 
     // this never returns
     ScriptError("Unknown armour type: %s\n", info);
@@ -289,27 +293,24 @@ static ArmourType ScriptCheckForArmourType(const char *info)
 
 static ScriptChangeTexturetureType ScriptCheckForChangetexType(const char *info)
 {
-    if (DDF_CompareName(info, "LEFT_UPPER") == 0 ||
-        DDF_CompareName(info, "BACK_UPPER") == 0)
+    if (DDF_CompareName(info, "LEFT_UPPER") == 0 || DDF_CompareName(info, "BACK_UPPER") == 0)
         return kChangeTextureLeftUpper;
-    if (DDF_CompareName(info, "LEFT_MIDDLE") == 0 ||
-        DDF_CompareName(info, "BACK_MIDDLE") == 0)
+    if (DDF_CompareName(info, "LEFT_MIDDLE") == 0 || DDF_CompareName(info, "BACK_MIDDLE") == 0)
         return kChangeTextureLeftMiddle;
-    if (DDF_CompareName(info, "LEFT_LOWER") == 0 ||
-        DDF_CompareName(info, "BACK_LOWER") == 0)
+    if (DDF_CompareName(info, "LEFT_LOWER") == 0 || DDF_CompareName(info, "BACK_LOWER") == 0)
         return kChangeTextureLeftLower;
-    if (DDF_CompareName(info, "RIGHT_UPPER") == 0 ||
-        DDF_CompareName(info, "FRONT_UPPER") == 0)
+    if (DDF_CompareName(info, "RIGHT_UPPER") == 0 || DDF_CompareName(info, "FRONT_UPPER") == 0)
         return kChangeTextureRightUpper;
-    if (DDF_CompareName(info, "RIGHT_MIDDLE") == 0 ||
-        DDF_CompareName(info, "FRONT_MIDDLE") == 0)
+    if (DDF_CompareName(info, "RIGHT_MIDDLE") == 0 || DDF_CompareName(info, "FRONT_MIDDLE") == 0)
         return kChangeTextureRightMiddle;
-    if (DDF_CompareName(info, "RIGHT_LOWER") == 0 ||
-        DDF_CompareName(info, "FRONT_LOWER") == 0)
+    if (DDF_CompareName(info, "RIGHT_LOWER") == 0 || DDF_CompareName(info, "FRONT_LOWER") == 0)
         return kChangeTextureRightLower;
-    if (DDF_CompareName(info, "FLOOR") == 0) return kChangeTextureFloor;
-    if (DDF_CompareName(info, "CEILING") == 0) return kChangeTextureCeiling;
-    if (DDF_CompareName(info, "SKY") == 0) return kChangeTextureSky;
+    if (DDF_CompareName(info, "FLOOR") == 0)
+        return kChangeTextureFloor;
+    if (DDF_CompareName(info, "CEILING") == 0)
+        return kChangeTextureCeiling;
+    if (DDF_CompareName(info, "SKY") == 0)
+        return kChangeTextureSky;
 
     // this never returns
     ScriptError("Unknown ChangeTex type '%s'\n", info);
@@ -324,7 +325,8 @@ static ScriptChangeTexturetureType ScriptCheckForChangetexType(const char *info)
 //
 static char *ScriptUnquoteString(const char *s)
 {
-    if (s[0] != '"') return epi::CStringDuplicate(s);
+    if (s[0] != '"')
+        return epi::CStringDuplicate(s);
 
     // skip initial quote
     s++;
@@ -334,7 +336,8 @@ static char *ScriptUnquoteString(const char *s)
     while (s[0] != '"')
     {
 #ifdef DEVELOPERS
-        if (s[0] == 0) FatalError("INTERNAL ERROR: bad string.\n");
+        if (s[0] == 0)
+            FatalError("INTERNAL ERROR: bad string.\n");
 #endif
 
         // -AJA- 1999/09/07: check for \n
@@ -354,12 +357,10 @@ static char *ScriptUnquoteString(const char *s)
 
 static bool CheckForBoolean(const char *s)
 {
-    if (epi::StringCaseCompareASCII(s, "TRUE") == 0 ||
-        epi::StringCaseCompareASCII(s, "1") == 0)
+    if (epi::StringCaseCompareASCII(s, "TRUE") == 0 || epi::StringCaseCompareASCII(s, "1") == 0)
         return true;
 
-    if (epi::StringCaseCompareASCII(s, "FALSE") == 0 ||
-        epi::StringCaseCompareASCII(s, "0") == 0)
+    if (epi::StringCaseCompareASCII(s, "FALSE") == 0 || epi::StringCaseCompareASCII(s, "0") == 0)
         return false;
 
     // Nope, it's an error.
@@ -372,9 +373,7 @@ static bool CheckForBoolean(const char *s)
 // Adds a new action state to the tail of the current set of states
 // for the given radius trigger.
 //
-static void AddStateToScript(TriggerScript *R, int tics,
-                             void (*action)(struct TriggerScriptTrigger *R,
-                                            void                        *param),
+static void AddStateToScript(TriggerScript *R, int tics, void (*action)(struct TriggerScriptTrigger *R, void *param),
                              void *param)
 {
     TriggerScriptState *state = new TriggerScriptState;
@@ -434,7 +433,8 @@ static void ClearOneScript(TriggerScript *scr)
         TriggerScriptState *cur = scr->first_state;
         scr->first_state        = cur->next;
 
-        if (cur->param) delete cur->param;
+        if (cur->param)
+            delete cur->param;
 
         delete cur;
     }
@@ -449,7 +449,8 @@ static void ClearOneScript(TriggerScript *scr)
 static void ClearPreviousScripts(const char *mapid)
 {
     // the "ALL" keyword is not a valid map name
-    if (DDF_CompareName(mapid, "ALL") == 0) return;
+    if (DDF_CompareName(mapid, "ALL") == 0)
+        return;
 
     TriggerScript *scr, *next;
 
@@ -460,7 +461,8 @@ static void ClearPreviousScripts(const char *mapid)
         if (epi::StringCaseCompareASCII(scr->mapid, mapid) == 0)
         {
             // unlink and free it
-            if (scr->next) scr->next->prev = scr->prev;
+            if (scr->next)
+                scr->next->prev = scr->prev;
 
             if (scr->prev)
                 scr->prev->next = scr->next;
@@ -500,7 +502,8 @@ static void ScriptComputeScriptCRC(TriggerScript *scr)
 
     // Note: the mapid doesn't belong in the CRC
 
-    if (scr->script_name) scr->crc.AddCString(scr->script_name);
+    if (scr->script_name)
+        scr->crc.AddCString(scr->script_name);
 
     scr->crc += (int)scr->tag[0];
     scr->crc += (int)scr->tag[1];
@@ -522,15 +525,39 @@ static void ScriptComputeScriptCRC(TriggerScript *scr)
 
     int flags = 0;
 
-    if ((scr->tagged_disabled)) { flags |= (1 << (0)); }
-    if ((scr->tagged_use)) { flags |= (1 << (1)); }
-    if ((scr->tagged_independent)) { flags |= (1 << (2)); }
-    if ((scr->tagged_immediate)) { flags |= (1 << (3)); }
+    if ((scr->tagged_disabled))
+    {
+        flags |= (1 << (0));
+    }
+    if ((scr->tagged_use))
+    {
+        flags |= (1 << (1));
+    }
+    if ((scr->tagged_independent))
+    {
+        flags |= (1 << (2));
+    }
+    if ((scr->tagged_immediate))
+    {
+        flags |= (1 << (3));
+    }
 
-    if ((scr->boss_trig != nullptr)) { flags |= (1 << (4)); }
-    if ((scr->height_trig != nullptr)) { flags |= (1 << (5)); }
-    if ((scr->cond_trig != nullptr)) { flags |= (1 << (6)); }
-    if ((scr->next_in_path != nullptr)) { flags |= (1 << (7)); }
+    if ((scr->boss_trig != nullptr))
+    {
+        flags |= (1 << (4));
+    }
+    if ((scr->height_trig != nullptr))
+    {
+        flags |= (1 << (5));
+    }
+    if ((scr->cond_trig != nullptr))
+    {
+        flags |= (1 << (6));
+    }
+    if ((scr->next_in_path != nullptr))
+    {
+        flags |= (1 << (7));
+    }
 
     scr->crc += (int)flags;
 
@@ -553,7 +580,7 @@ static void ScriptTokenizeLine(std::vector<const char *> &pars)
 
     bool want_token = true;
     bool in_string  = false;
-    int  in_expr    = 0;  // add one for each open bracket.
+    int  in_expr    = 0; // add one for each open bracket.
 
     for (;;)
     {
@@ -561,21 +588,25 @@ static void ScriptTokenizeLine(std::vector<const char *> &pars)
 
         bool comment = (ch == ';' || (ch == '/' && *line == '/'));
 
-        if (in_string) comment = false;
+        if (in_string)
+            comment = false;
 
-        if (ch == 0 && in_string) ScriptError("Nonterminated string found.\n");
+        if (ch == 0 && in_string)
+            ScriptError("Nonterminated string found.\n");
 
         if ((ch == 0 || comment) && in_expr)
             ScriptError("Nonterminated expression found.\n");
 
-        if (want_token)  // looking for a new token
+        if (want_token) // looking for a new token
         {
             EPI_ASSERT(!in_expr && !in_string);
 
             // end of line ?
-            if (ch == 0 || comment) return;
+            if (ch == 0 || comment)
+                return;
 
-            if (epi::IsSpaceASCII(ch)) continue;
+            if (epi::IsSpaceASCII(ch))
+                continue;
 
             // string ? or expression ?
             if (ch == '"')
@@ -605,7 +636,10 @@ static void ScriptTokenizeLine(std::vector<const char *> &pars)
                 end_token = true;
             }
         }
-        else if (ch == '(' && in_expr) { in_expr++; }
+        else if (ch == '(' && in_expr)
+        {
+            in_expr++;
+        }
         else if (ch == ')' && in_expr)
         {
             in_expr--;
@@ -616,8 +650,7 @@ static void ScriptTokenizeLine(std::vector<const char *> &pars)
                 end_token = true;
             }
         }
-        else if (!in_expr && !in_string &&
-                 (ch == 0 || comment || epi::IsSpaceASCII(ch)))
+        else if (!in_expr && !in_string && (ch == 0 || comment || epi::IsSpaceASCII(ch)))
         {
             end_token = true;
         }
@@ -632,13 +665,13 @@ static void ScriptTokenizeLine(std::vector<const char *> &pars)
         want_token = true;
 
         // check for defines
-        const char *par_str =
-            epi::CStringDuplicate(DDF_MainGetDefine(tokenbuf.c_str()));
+        const char *par_str = epi::CStringDuplicate(DDF_MainGetDefine(tokenbuf.c_str()));
 
         pars.push_back(par_str);
 
         // end of line ?
-        if (ch == 0 || comment) break;
+        if (ch == 0 || comment)
+            break;
     }
 }
 
@@ -648,7 +681,10 @@ static void ScriptTokenizeLine(std::vector<const char *> &pars)
 //
 static void ScriptFreeParameters(std::vector<const char *> &pars)
 {
-    for (size_t i = 0; i < pars.size(); i++) { epi::CStringFree(pars[i]); }
+    for (size_t i = 0; i < pars.size(); i++)
+    {
+        epi::CStringFree(pars[i]);
+    }
 }
 
 // ---- Primitive Parsers ----------------------------------------------
@@ -711,8 +747,7 @@ static void ScriptParseRadiusTrigger(std::vector<const char *> &pars)
     // -AJA- 1999/09/12: Reworked for having Z-restricted triggers.
 
     if (current_script_level == 2)
-        ScriptError("%s found, but previous END_RADIUS_TRIGGER missing !\n",
-                    pars[0]);
+        ScriptError("%s found, but previous END_RADIUS_TRIGGER missing !\n", pars[0]);
 
     if (current_script_level == 0)
         ScriptError("%s found, but without any START_MAP !\n", pars[0]);
@@ -753,11 +788,9 @@ static void ScriptParseRadiusTrigger(std::vector<const char *> &pars)
         ScriptCheckForFloat(pars[4], &y2);
 
         if (x1 > x2)
-            ScriptWarnError("%s: bad X range %1.1f to %1.1f\n", pars[0], x1,
-                            x2);
+            ScriptWarnError("%s: bad X range %1.1f to %1.1f\n", pars[0], x1, x2);
         if (y1 > y2)
-            ScriptWarnError("%s: bad Y range %1.1f to %1.1f\n", pars[0], y1,
-                            y2);
+            ScriptWarnError("%s: bad Y range %1.1f to %1.1f\n", pars[0], y1, y2);
 
         this_script->x     = (float)(x1 + x2) / 2.0f;
         this_script->y     = (float)(y1 + y2) / 2.0f;
@@ -770,8 +803,7 @@ static void ScriptParseRadiusTrigger(std::vector<const char *> &pars)
             ScriptCheckForFloat(pars[6], &z2);
 
             if (z1 > z2 + 1)
-                ScriptWarnError("%s: bad height range %1.1f to %1.1f\n",
-                                pars[0], z1, z2);
+                ScriptWarnError("%s: bad height range %1.1f to %1.1f\n", pars[0], z1, z2);
 
             this_script->z     = (z1 + z2) / 2.0f;
             this_script->rad_z = fabs(z1 - z2) / 2.0f;
@@ -796,8 +828,7 @@ static void ScriptParseRadiusTrigger(std::vector<const char *> &pars)
             ScriptCheckForFloat(pars[5], &z2);
 
             if (z1 > z2)
-                ScriptWarnError("%s: bad height range %1.1f to %1.1f\n",
-                                pars[0], z1, z2);
+                ScriptWarnError("%s: bad height range %1.1f to %1.1f\n", pars[0], z1, z2);
 
             this_script->z     = (z1 + z2) / 2.0f;
             this_script->rad_z = fabs(z1 - z2) / 2.0f;
@@ -808,7 +839,8 @@ static void ScriptParseRadiusTrigger(std::vector<const char *> &pars)
     this_script->next = current_scripts;
     this_script->prev = nullptr;
 
-    if (current_scripts) current_scripts->prev = this_script;
+    if (current_scripts)
+        current_scripts->prev = this_script;
 
     current_scripts = this_script;
 
@@ -824,8 +856,7 @@ static void ScriptParseSectorTrigger(std::vector<const char *> &pars)
     // SectorTriggerIndex <sector index> <low z> <high z>
 
     if (current_script_level == 2)
-        ScriptError("%s found, but previous END_RADIUS_TRIGGER missing !\n",
-                    pars[0]);
+        ScriptError("%s found, but previous END_RADIUS_TRIGGER missing !\n", pars[0]);
 
     if (current_script_level == 0)
         ScriptError("%s found, but without any START_MAP !\n", pars[0]);
@@ -869,8 +900,7 @@ static void ScriptParseSectorTrigger(std::vector<const char *> &pars)
         ScriptCheckForFloat(pars[3], &z2);
 
         if (z1 > z2)
-            ScriptWarnError("%s: bad height range %1.1f to %1.1f\n", pars[0],
-                            z1, z2);
+            ScriptWarnError("%s: bad height range %1.1f to %1.1f\n", pars[0], z1, z2);
 
         this_script->z     = (z1 + z2) / 2.0f;
         this_script->rad_z = fabs(z1 - z2) / 2.0f;
@@ -880,7 +910,8 @@ static void ScriptParseSectorTrigger(std::vector<const char *> &pars)
     this_script->next = current_scripts;
     this_script->prev = nullptr;
 
-    if (current_scripts) current_scripts->prev = this_script;
+    if (current_scripts)
+        current_scripts->prev = this_script;
 
     current_scripts = this_script;
 
@@ -892,9 +923,7 @@ static void ScriptParseEndRadiusTrigger(std::vector<const char *> &pars)
     // End_RadiusTrigger
 
     if (current_script_level != 2)
-        ScriptError(
-            "%s found, but without any SECTOR_TRIGGER or RADIUS_TRIGGER !\n",
-            pars[0]);
+        ScriptError("%s found, but without any SECTOR_TRIGGER or RADIUS_TRIGGER !\n", pars[0]);
 
     // --- check stuff ---
 
@@ -916,8 +945,7 @@ static void ScriptParseEndMap(std::vector<const char *> &pars)
     // End_Map
 
     if (current_script_level == 2)
-        ScriptError("%s found, but previous END_RADIUS_TRIGGER missing !\n",
-                    pars[0]);
+        ScriptError("%s found, but previous END_RADIUS_TRIGGER missing !\n", pars[0]);
 
     if (current_script_level == 0)
         ScriptError("%s found, but without any START_MAP !\n", pars[0]);
@@ -932,8 +960,7 @@ static void ScriptParseName(std::vector<const char *> &pars)
     // Name <name>
 
     if (this_script->script_name)
-        ScriptError("Script already has a name: '%s'\n",
-                    this_script->script_name);
+        ScriptError("Script already has a name: '%s'\n", this_script->script_name);
 
     this_script->script_name = epi::CStringDuplicate(pars[1]);
 }
@@ -947,13 +974,10 @@ static void ScriptParseTag(std::vector<const char *> &pars)
 
     if (this_script->tag[1] != 0)
     {
-        if (parsed_string_tags.find(this_script->tag[1]) !=
-            parsed_string_tags.end())
-            ScriptError("Script already has a tag: '%s'\n",
-                        parsed_string_tags[this_script->tag[1]].c_str());
+        if (parsed_string_tags.find(this_script->tag[1]) != parsed_string_tags.end())
+            ScriptError("Script already has a tag: '%s'\n", parsed_string_tags[this_script->tag[1]].c_str());
         else
-            ScriptError("Script already has a tag: '%d'\n",
-                        this_script->tag[1]);
+            ScriptError("Script already has a tag: '%d'\n", this_script->tag[1]);
     }
 
     // Modified ScriptCheckForInt
@@ -961,7 +985,8 @@ static void ScriptParseTag(std::vector<const char *> &pars)
     int         count  = 0;
     int         length = strlen(pars[1]);
 
-    while (epi::IsDigitASCII(*pos++)) count++;
+    while (epi::IsDigitASCII(*pos++))
+        count++;
 
     // Is the value an integer?
     if (length != count)
@@ -988,13 +1013,12 @@ static void ScriptParseWhenPlayerNum(std::vector<const char *> &pars)
 
     this_script->max_players = kMaximumPlayers;
 
-    if (pars.size() >= 3) ScriptCheckForInt(pars[2], &this_script->max_players);
+    if (pars.size() >= 3)
+        ScriptCheckForInt(pars[2], &this_script->max_players);
 
-    if (this_script->min_players < 0 ||
-        this_script->min_players > this_script->max_players)
+    if (this_script->min_players < 0 || this_script->min_players > this_script->max_players)
     {
-        ScriptError("%s: Illegal range: %d..%d\n", pars[0],
-                    this_script->min_players, this_script->max_players);
+        ScriptError("%s: Illegal range: %d..%d\n", pars[0], this_script->min_players, this_script->max_players);
     }
 }
 
@@ -1090,7 +1114,8 @@ static void ScriptParsePathEvent(std::vector<const char *> &pars)
 
     i = div ? (div - pars[1]) : strlen(pars[1]);
 
-    if (i <= 0) ScriptError("%s: Bad label '%s'.\n", pars[0], pars[2]);
+    if (i <= 0)
+        ScriptError("%s: Bad label '%s'.\n", pars[0], pars[2]);
 
     this_script->path_event_label = new char[i + 1];
     epi::CStringCopyMax((char *)this_script->path_event_label, pars[1], i);
@@ -1113,7 +1138,10 @@ static void ScriptParseOnDeath(std::vector<const char *> &pars)
     else
         cond->thing_name = epi::CStringDuplicate(pars[1]);
 
-    if (pars.size() >= 3) { ScriptCheckForInt(pars[2], &cond->threshhold); }
+    if (pars.size() >= 3)
+    {
+        ScriptCheckForInt(pars[2], &cond->threshhold);
+    }
 
     // link it into list of ONDEATH conditions
     cond->next             = this_script->boss_trig;
@@ -1136,11 +1164,13 @@ static void ScriptParseOnHeight(std::vector<const char *> &pars)
     ScriptCheckForFloat(pars[2], &cond->z2);
 
     if (cond->z1 > cond->z2)
-        ScriptError("%s: bad height range %1.1f..%1.1f\n", pars[0], cond->z1,
-                    cond->z2);
+        ScriptError("%s: bad height range %1.1f..%1.1f\n", pars[0], cond->z1, cond->z2);
 
     // get sector reference
-    if (pars.size() >= 4) { ScriptCheckForInt(pars[3], &cond->sec_num); }
+    if (pars.size() >= 4)
+    {
+        ScriptCheckForInt(pars[3], &cond->sec_num);
+    }
 
     cond->is_ceil = (DDF_CompareName("ONCEILINGHEIGHT", pars[0]) == 0);
 
@@ -1205,7 +1235,8 @@ static void ScriptParseEnableTagged(std::vector<const char *> &pars)
     int         count  = 0;
     int         length = strlen(pars[1]);
 
-    while (epi::IsDigitASCII(*pos++)) count++;
+    while (epi::IsDigitASCII(*pos++))
+        count++;
 
     // Is the value an integer?
     if (length != count)
@@ -1234,7 +1265,10 @@ static void ScriptParseExitLevel(std::vector<const char *> &pars)
     exit->exit_time = 10;
     exit->is_secret = DDF_CompareName("SECRETEXIT", pars[0]) == 0;
 
-    if (pars.size() >= 2) { ScriptCheckForTime(pars[1], &exit->exit_time); }
+    if (pars.size() >= 2)
+    {
+        ScriptCheckForTime(pars[1], &exit->exit_time);
+    }
 
     AddStateToScript(this_script, 0, ScriptExitLevel, exit);
 }
@@ -1278,9 +1312,11 @@ static void ScriptParseTip(std::vector<const char *> &pars)
     else
         ScriptError("Needed string for TIP command.\n");
 
-    if (pars.size() >= 3) ScriptCheckForTime(pars[2], &tip->display_time);
+    if (pars.size() >= 3)
+        ScriptCheckForTime(pars[2], &tip->display_time);
 
-    if (pars.size() >= 4) tip->playsound = CheckForBoolean(pars[3]);
+    if (pars.size() >= 4)
+        tip->playsound = CheckForBoolean(pars[3]);
 
     if (pars.size() >= 5)
     {
@@ -1306,8 +1342,7 @@ static void ScriptParseTipSlot(std::vector<const char *> &pars)
     ScriptCheckForInt(pars[1], &tp->slot_num);
 
     if (tp->slot_num < 1 || tp->slot_num > kMaximumTipSlots)
-        ScriptError("Bad tip slot '%d' -- must be between 1-%d\n", tp->slot_num,
-                    kMaximumTipSlots);
+        ScriptError("Bad tip slot '%d' -- must be between 1-%d\n", tp->slot_num, kMaximumTipSlots);
 
     tp->slot_num--;
 
@@ -1327,7 +1362,8 @@ static void ScriptParseTipPos(std::vector<const char *> &pars)
     ScriptCheckForPercentAny(pars[1], &tp->x_pos);
     ScriptCheckForPercentAny(pars[2], &tp->y_pos);
 
-    if (pars.size() >= 4) ScriptCheckForTime(pars[3], &tp->time);
+    if (pars.size() >= 4)
+        ScriptCheckForTime(pars[3], &tp->time);
 
     AddStateToScript(this_script, 0, ScriptUpdateTipProperties, tp);
 }
@@ -1344,7 +1380,8 @@ static void ScriptParseTipColour(std::vector<const char *> &pars)
 
     tp->color_name = epi::CStringDuplicate(pars[1]);
 
-    if (pars.size() >= 3) ScriptCheckForTime(pars[2], &tp->time);
+    if (pars.size() >= 3)
+        ScriptCheckForTime(pars[2], &tp->time);
 
     AddStateToScript(this_script, 0, ScriptUpdateTipProperties, tp);
 }
@@ -1361,7 +1398,8 @@ static void ScriptParseTipTrans(std::vector<const char *> &pars)
 
     ScriptCheckForPercent(pars[1], &tp->translucency);
 
-    if (pars.size() >= 3) ScriptCheckForTime(pars[2], &tp->time);
+    if (pars.size() >= 3)
+        ScriptCheckForTime(pars[2], &tp->time);
 
     AddStateToScript(this_script, 0, ScriptUpdateTipProperties, tp);
 }
@@ -1375,13 +1413,18 @@ static void ScriptParseTipAlign(std::vector<const char *> &pars)
     tp    = new ScriptTipProperties;
     tp[0] = default_tip_properties;
 
-    if (DDF_CompareName(pars[1], "CENTER") == 0 ||
-        DDF_CompareName(pars[1], "CENTRE") == 0)
+    if (DDF_CompareName(pars[1], "CENTER") == 0 || DDF_CompareName(pars[1], "CENTRE") == 0)
     {
         tp->left_just = 0;
     }
-    else if (DDF_CompareName(pars[1], "LEFT") == 0) { tp->left_just = 1; }
-    else { ScriptWarnError("TIP_POS: unknown justify method '%s'\n", pars[1]); }
+    else if (DDF_CompareName(pars[1], "LEFT") == 0)
+    {
+        tp->left_just = 1;
+    }
+    else
+    {
+        ScriptWarnError("TIP_POS: unknown justify method '%s'\n", pars[1]);
+    }
 
     AddStateToScript(this_script, 0, ScriptUpdateTipProperties, tp);
 }
@@ -1415,7 +1458,10 @@ static void HandleSpawnKeyword(const char *par, ScriptThingParameter *t)
     {
         DDF_MainGetWhenAppear(par + 5, &t->appear);
     }
-    else { ScriptError("SPAWN_THING: unknown keyword parameter: %s\n", par); }
+    else
+    {
+        ScriptError("SPAWN_THING: unknown keyword parameter: %s\n", par);
+    }
 }
 
 static void ScriptParseSpawnThing(std::vector<const char *> &pars)
@@ -1476,9 +1522,7 @@ static void ScriptParseSpawnThing(std::vector<const char *> &pars)
     }
 
     // get angle
-    const char *angle_str = (pars.size() == 3)   ? pars[2]
-                            : (pars.size() >= 5) ? pars[4]
-                                                 : nullptr;
+    const char *angle_str = (pars.size() == 3) ? pars[2] : (pars.size() >= 5) ? pars[4] : nullptr;
 
     if (angle_str)
     {
@@ -1499,7 +1543,10 @@ static void ScriptParseSpawnThing(std::vector<const char *> &pars)
         ScriptCheckForFloat(pars[2], &t->x);
         ScriptCheckForFloat(pars[3], &t->y);
     }
-    if (pars.size() >= 6) { ScriptCheckForFloat(pars[5], &t->z); }
+    if (pars.size() >= 6)
+    {
+        ScriptCheckForFloat(pars[5], &t->z);
+    }
     if (pars.size() >= 7)
     {
         ScriptCheckForFloat(pars[6], &t->slope);
@@ -1543,7 +1590,10 @@ static void ScriptParsePlaySound(std::vector<const char *> &pars)
         ScriptCheckForFloat(pars[3], &t->y);
     }
 
-    if (pars.size() >= 5) { ScriptCheckForFloat(pars[4], &t->z); }
+    if (pars.size() >= 5)
+    {
+        ScriptCheckForFloat(pars[4], &t->z);
+    }
 
     AddStateToScript(this_script, 0, ScriptPlaySound, t);
 }
@@ -1637,8 +1687,7 @@ static void ScriptParseGiveArmour(std::vector<const char *> &pars)
         ScriptError("Armour limit out of range: %1.1f\n", armour->limit);
 
     if (armour->armour_amount < 0 || armour->armour_amount > armour->limit)
-        ScriptError("Armour value out of range: %1.1f\n",
-                    armour->armour_amount);
+        ScriptError("Armour value out of range: %1.1f\n", armour->armour_amount);
 
     AddStateToScript(this_script, 0, ScriptArmourPlayers, armour);
 }
@@ -1651,7 +1700,8 @@ static void ScriptParseGiveLoseBenefit(std::vector<const char *> &pars)
 
     ScriptBenefitParameter *sb = new ScriptBenefitParameter;
 
-    if (DDF_CompareName(pars[0], "LOSE_BENEFIT") == 0) sb->lose_it = true;
+    if (DDF_CompareName(pars[0], "LOSE_BENEFIT") == 0)
+        sb->lose_it = true;
 
     DDF_MobjGetBenefit(pars[1], &sb->benefit);
 
@@ -1720,7 +1770,8 @@ static void ScriptParseThingEvent(std::vector<const char *> &pars)
 
     i = div ? (div - pars[2]) : strlen(pars[2]);
 
-    if (i <= 0) ScriptError("%s: Bad label '%s'.\n", pars[0], pars[2]);
+    if (i <= 0)
+        ScriptError("%s: Bad label '%s'.\n", pars[0], pars[2]);
 
     tev->label = new char[i + 1];
     epi::CStringCopyMax((char *)tev->label, pars[2], i);
@@ -1769,7 +1820,10 @@ static void ScriptParseGotoMap(std::vector<const char *> &pars)
 
     if (pars.size() >= 3)
     {
-        if (DDF_CompareName(pars[2], "SKIP_ALL") == 0) { go->skip_all = true; }
+        if (DDF_CompareName(pars[2], "SKIP_ALL") == 0)
+        {
+            go->skip_all = true;
+        }
         else
             ScriptWarnError("%s: unknown flag '%s'.\n", pars[0], pars[2]);
     }
@@ -1820,7 +1874,7 @@ static void ScriptParseMoveSector(std::vector<const char *> &pars)
         secv->secnum = secv->tag;
         secv->tag    = 0;
     }
-    else  // MOVE_SECTOR
+    else // MOVE_SECTOR
     {
         if (secv->tag == 0)
             ScriptError("%s: Invalid tag number: %d\n", pars[0], secv->tag);
@@ -1830,8 +1884,7 @@ static void ScriptParseMoveSector(std::vector<const char *> &pars)
             if (DDF_CompareName(pars[4], "ABSOLUTE") == 0)
                 secv->relative = false;
             else
-                ScriptWarnError("%s: expected 'ABSOLUTE' but got '%s'.\n",
-                                pars[0], pars[4]);
+                ScriptWarnError("%s: expected 'ABSOLUTE' but got '%s'.\n", pars[0], pars[4]);
         }
     }
 
@@ -1860,7 +1913,7 @@ static void ScriptParseLightSector(std::vector<const char *> &pars)
         secl->secnum = secl->tag;
         secl->tag    = 0;
     }
-    else  // LIGHT_SECTOR
+    else // LIGHT_SECTOR
     {
         if (secl->tag == 0)
             ScriptError("%s: Invalid tag number: %d\n", pars[0], secl->tag);
@@ -1870,8 +1923,7 @@ static void ScriptParseLightSector(std::vector<const char *> &pars)
             if (DDF_CompareName(pars[3], "ABSOLUTE") == 0)
                 secl->relative = false;
             else
-                ScriptWarnError("%s: expected 'ABSOLUTE' but got '%s'.\n",
-                                pars[0], pars[3]);
+                ScriptWarnError("%s: expected 'ABSOLUTE' but got '%s'.\n", pars[0], pars[3]);
         }
     }
 
@@ -1893,7 +1945,7 @@ static void ScriptParseFogSector(std::vector<const char *> &pars)
     if (secf->tag == 0)
         ScriptError("%s: Invalid tag number: %d\n", pars[0], secf->tag);
 
-    if (pars.size() == 4)  // color + relative density change
+    if (pars.size() == 4) // color + relative density change
     {
         if (DDF_CompareName(pars[2], "SAME") == 0)
             secf->leave_color = true;
@@ -1913,8 +1965,7 @@ static void ScriptParseFogSector(std::vector<const char *> &pars)
             ScriptCheckForPercentAny(pars[3], &secf->density);
         AddStateToScript(this_script, 0, ScriptFogSector, secf);
     }
-    else if (DDF_CompareName(pars[4], "ABSOLUTE") ==
-             0)  // color + absolute density change
+    else if (DDF_CompareName(pars[4], "ABSOLUTE") == 0) // color + absolute density change
     {
         secf->relative = false;
         if (DDF_CompareName(pars[2], "SAME") == 0)
@@ -1932,7 +1983,7 @@ static void ScriptParseFogSector(std::vector<const char *> &pars)
             ScriptCheckForPercent(pars[3], &secf->density);
         AddStateToScript(this_script, 0, ScriptFogSector, secf);
     }
-    else  // shouldn't get here
+    else // shouldn't get here
         ScriptError("%s: Malformed FOG_SECTOR command\n");
 }
 
@@ -1984,7 +2035,8 @@ static void ScriptParseWait(std::vector<const char *> &pars)
 
     ScriptCheckForTime(pars[1], &tics);
 
-    if (tics <= 0) ScriptError("%s: Invalid time: %d\n", pars[0], tics);
+    if (tics <= 0)
+        ScriptError("%s: Invalid time: %d\n", pars[0], tics);
 
     pending_wait_tics += tics;
 }
@@ -1999,7 +2051,8 @@ static void ScriptParseJump(std::vector<const char *> &pars)
     jump->label         = epi::CStringDuplicate(pars[1]);
     jump->random_chance = 1.0f;
 
-    if (pars.size() >= 3) ScriptCheckForPercent(pars[2], &jump->random_chance);
+    if (pars.size() >= 3)
+        ScriptCheckForPercent(pars[2], &jump->random_chance);
 
     AddStateToScript(this_script, 0, ScriptJump, jump);
 }
@@ -2038,9 +2091,11 @@ static void ScriptParseChangeTex(std::vector<const char *> &pars)
 
     strcpy(ctex->texname, pars[2]);
 
-    if (pars.size() >= 4) ScriptCheckForInt(pars[3], &ctex->tag);
+    if (pars.size() >= 4)
+        ScriptCheckForInt(pars[3], &ctex->tag);
 
-    if (pars.size() >= 5) ScriptCheckForInt(pars[4], &ctex->subtag);
+    if (pars.size() >= 5)
+        ScriptCheckForInt(pars[4], &ctex->subtag);
 
     AddStateToScript(this_script, 0, ScriptChangeTexture, ctex);
 }
@@ -2055,7 +2110,8 @@ static void ScriptParseShowMenu(std::vector<const char *> &pars)
     if (pars.size() > 11)
         ScriptError("%s: too many option strings (limit is 9)\n", pars[0]);
 
-    if (DDF_CompareName(pars[0], "SHOW_MENU_LDF") == 0) menu->use_ldf = true;
+    if (DDF_CompareName(pars[0], "SHOW_MENU_LDF") == 0)
+        menu->use_ldf = true;
 
     EPI_ASSERT(2 <= pars.size() && pars.size() <= 11);
 
@@ -2093,8 +2149,7 @@ static void ScriptParseJumpOn(std::vector<const char *> &pars)
 
     if (DDF_CompareName(pars[1], "MENU") != 0)
     {
-        ScriptError("%s: Unknown variable '%s' (should be MENU)\n", pars[0],
-                    pars[1]);
+        ScriptError("%s: Unknown variable '%s' (should be MENU)\n", pars[0], pars[1]);
     }
 
     EPI_ASSERT(2 <= pars.size() && pars.size() <= 11);
@@ -2182,7 +2237,8 @@ static void ScriptParseWeaponEvent(std::vector<const char *> &pars)
 
     i = div ? (div - pars[2]) : strlen(pars[2]);
 
-    if (i <= 0) ScriptError("%s: Bad label '%s'.\n", pars[0], pars[2]);
+    if (i <= 0)
+        ScriptError("%s: Bad label '%s'.\n", pars[0], pars[2]);
 
     tev->label = new char[i + 1];
     epi::CStringCopyMax((char *)tev->label, pars[2], i);
@@ -2329,25 +2385,24 @@ void ScriptParseLine()
     ScriptTokenizeLine(pars);
 
     // simply ignore blank lines
-    if (pars.empty()) return;
+    if (pars.empty())
+        return;
 
-    for (const TriggerScriptParser *cur = radtrig_parsers; cur->name != nullptr;
-         cur++)
+    for (const TriggerScriptParser *cur = radtrig_parsers; cur->name != nullptr; cur++)
     {
         const char *cur_name = cur->name;
 
-        if (DDF_CompareName(pars[0], cur_name) != 0) continue;
+        if (DDF_CompareName(pars[0], cur_name) != 0)
+            continue;
 
         // check level
         if (cur->level >= 0)
         {
             if (cur->level != current_script_level)
             {
-                ScriptError(
-                    "RTS command '%s' used in wrong place "
-                    "(found in %s, should be in %s).\n",
-                    pars[0], rad_level_names[current_script_level],
-                    rad_level_names[cur->level]);
+                ScriptError("RTS command '%s' used in wrong place "
+                            "(found in %s, should be in %s).\n",
+                            pars[0], rad_level_names[current_script_level], rad_level_names[cur->level]);
 
                 // NOT REACHED
                 return;
@@ -2377,14 +2432,14 @@ void ScriptParseLine()
 
 //----------------------------------------------------------------------------
 
-static int ReadScriptLine(const std::string &data, size_t &pos,
-                          std::string &out_line)
+static int ReadScriptLine(const std::string &data, size_t &pos, std::string &out_line)
 {
     out_line.clear();
 
     // reached the end of file?
     size_t limit = data.size();
-    if (pos >= limit) return 0;
+    if (pos >= limit)
+        return 0;
 
     int real_num = 1;
 
@@ -2407,8 +2462,7 @@ static int ReadScriptLine(const std::string &data, size_t &pos,
         // line concatenation
         if (data[pos] == '\\' && pos + 3 < limit)
         {
-            if (data[pos + 1] == '\n' ||
-                (data[pos + 1] == '\r' && data[pos + 2] == '\n'))
+            if (data[pos + 1] == '\n' || (data[pos + 1] == '\r' && data[pos + 2] == '\n'))
             {
                 pos += (data[pos + 1] == '\n') ? 2 : 3;
                 real_num++;
@@ -2451,7 +2505,8 @@ void ReadTriggerScript(const std::string &data, const std::string &source)
     for (;;)
     {
         int real_num = ReadScriptLine(data, pos, current_script_line);
-        if (real_num == 0) break;
+        if (real_num == 0)
+            break;
 
 #if (DEBUG_RTS)
         LogDebug("RTS LINE: '%s'\n", current_script_line.c_str());

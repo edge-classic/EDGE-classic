@@ -30,16 +30,16 @@
 
 #define M4P_BUFFER 1024
 
-extern bool sound_device_stereo;  // FIXME: encapsulation
+extern bool sound_device_stereo; // FIXME: encapsulation
 extern int  sound_device_frequency;
 
 class M4pPlayer : public AbstractMusicPlayer
 {
-   public:
+  public:
     M4pPlayer();
     ~M4pPlayer();
 
-   private:
+  private:
     enum Status
     {
         kNotLoaded,
@@ -53,7 +53,7 @@ class M4pPlayer : public AbstractMusicPlayer
 
     int16_t *mono_buffer_;
 
-   public:
+  public:
     bool OpenMemory(uint8_t *data, int length);
 
     virtual void Close(void);
@@ -66,7 +66,7 @@ class M4pPlayer : public AbstractMusicPlayer
 
     virtual void Ticker(void);
 
-   private:
+  private:
     void PostOpen(void);
 
     bool StreamIntoBuffer(SoundData *buf);
@@ -83,7 +83,8 @@ M4pPlayer::~M4pPlayer()
 {
     Close();
 
-    if (mono_buffer_) delete[] mono_buffer_;
+    if (mono_buffer_)
+        delete[] mono_buffer_;
 }
 
 void M4pPlayer::PostOpen()
@@ -123,7 +124,8 @@ bool M4pPlayer::StreamIntoBuffer(SoundData *buf)
 
     if (song_done) /* EOF */
     {
-        if (!looping_) return false;
+        if (!looping_)
+            return false;
         m4p_Stop();
         m4p_PlaySong();
         return true;
@@ -148,10 +150,12 @@ bool M4pPlayer::OpenMemory(uint8_t *data, int length)
 
 void M4pPlayer::Close()
 {
-    if (status_ == kNotLoaded) return;
+    if (status_ == kNotLoaded)
+        return;
 
     // Stop playback
-    if (status_ != kStopped) Stop();
+    if (status_ != kStopped)
+        Stop();
 
     m4p_Close();
     m4p_FreeSong();
@@ -161,21 +165,24 @@ void M4pPlayer::Close()
 
 void M4pPlayer::Pause()
 {
-    if (status_ != kPlaying) return;
+    if (status_ != kPlaying)
+        return;
 
     status_ = kPaused;
 }
 
 void M4pPlayer::Resume()
 {
-    if (status_ != kPaused) return;
+    if (status_ != kPaused)
+        return;
 
     status_ = kPlaying;
 }
 
 void M4pPlayer::Play(bool loop)
 {
-    if (status_ != kNotLoaded && status_ != kStopped) return;
+    if (status_ != kNotLoaded && status_ != kStopped)
+        return;
 
     status_  = kPlaying;
     looping_ = loop;
@@ -188,7 +195,8 @@ void M4pPlayer::Play(bool loop)
 
 void M4pPlayer::Stop()
 {
-    if (status_ != kPlaying && status_ != kPaused) return;
+    if (status_ != kPlaying && status_ != kPaused)
+        return;
 
     SoundQueueStop();
 
@@ -201,10 +209,10 @@ void M4pPlayer::Ticker()
 {
     while (status_ == kPlaying && !pc_speaker_mode)
     {
-        SoundData *buf = SoundQueueGetFreeBuffer(
-            M4P_BUFFER, (sound_device_stereo) ? kMixInterleaved : kMixMono);
+        SoundData *buf = SoundQueueGetFreeBuffer(M4P_BUFFER, (sound_device_stereo) ? kMixInterleaved : kMixMono);
 
-        if (!buf) break;
+        if (!buf)
+            break;
 
         if (StreamIntoBuffer(buf))
         {
@@ -212,7 +220,10 @@ void M4pPlayer::Ticker()
             {
                 SoundQueueAddBuffer(buf, sound_device_frequency);
             }
-            else { SoundQueueReturnBuffer(buf); }
+            else
+            {
+                SoundQueueReturnBuffer(buf);
+            }
         }
         else
         {

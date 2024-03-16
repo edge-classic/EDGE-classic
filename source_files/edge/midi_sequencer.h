@@ -29,8 +29,8 @@
 #include <stdint.h>
 
 /*! Raw MIDI event hook */
-typedef void (*RawEventHook)(void *userdata, uint8_t type, uint8_t subtype,
-                             uint8_t channel, const uint8_t *data, size_t len);
+typedef void (*RawEventHook)(void *userdata, uint8_t type, uint8_t subtype, uint8_t channel, const uint8_t *data,
+                             size_t len);
 /*! PCM render */
 typedef void (*PcmRender)(void *userdata, uint8_t *stream, size_t length);
 /*! Library internal debug messages */
@@ -42,35 +42,27 @@ typedef void (*LoopEndHook)(void *userdata);
 typedef void (*SongStartHook)(void *userdata);
 
 /*! Note-On MIDI event */
-typedef void (*RtNoteOn)(void *userdata, uint8_t channel, uint8_t note,
-                         uint8_t velocity);
+typedef void (*RtNoteOn)(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity);
 /*! Note-Off MIDI event */
 typedef void (*RtNoteOff)(void *userdata, uint8_t channel, uint8_t note);
 /*! Note-Off MIDI event with a velocity */
-typedef void (*RtNoteOffVel)(void *userdata, uint8_t channel, uint8_t note,
-                             uint8_t velocity);
+typedef void (*RtNoteOffVel)(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity);
 /*! Note aftertouch MIDI event */
-typedef void (*RtNoteAfterTouch)(void *userdata, uint8_t channel, uint8_t note,
-                                 uint8_t atVal);
+typedef void (*RtNoteAfterTouch)(void *userdata, uint8_t channel, uint8_t note, uint8_t atVal);
 /*! Channel aftertouch MIDI event */
-typedef void (*RtChannelAfterTouch)(void *userdata, uint8_t channel,
-                                    uint8_t atVal);
+typedef void (*RtChannelAfterTouch)(void *userdata, uint8_t channel, uint8_t atVal);
 /*! Controller change MIDI event */
-typedef void (*RtControllerChange)(void *userdata, uint8_t channel,
-                                   uint8_t type, uint8_t value);
+typedef void (*RtControllerChange)(void *userdata, uint8_t channel, uint8_t type, uint8_t value);
 /*! Patch change MIDI event */
 typedef void (*RtPatchChange)(void *userdata, uint8_t channel, uint8_t patch);
 /*! Pitch bend MIDI event */
-typedef void (*RtPitchBend)(void *userdata, uint8_t channel, uint8_t msb,
-                            uint8_t lsb);
+typedef void (*RtPitchBend)(void *userdata, uint8_t channel, uint8_t msb, uint8_t lsb);
 /*! System Exclusive MIDI event */
 typedef void (*RtSysEx)(void *userdata, const uint8_t *msg, size_t size);
 /*! Meta event hook */
-typedef void (*MetaEventHook)(void *userdata, uint8_t type, const uint8_t *data,
-                              size_t len);
+typedef void (*MetaEventHook)(void *userdata, uint8_t type, const uint8_t *data, size_t len);
 /*! Device Switch MIDI event */
-typedef void (*RtDeviceSwitch)(void *userdata, size_t track, const char *data,
-                               size_t length);
+typedef void (*RtDeviceSwitch)(void *userdata, size_t track, const char *data, size_t length);
 /*! Get the channels offset for current MIDI device */
 typedef size_t (*RtCurrentDevice)(void *userdata, size_t track);
 /*! [Non-Standard] Pass raw OPL3 data to the chip (when playing IMF files)

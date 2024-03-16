@@ -49,8 +49,7 @@ struct ConfigurationDefault
     int         default_value;
 };
 
-void ConfigurationResetDefaults(int              dummy,
-                                ConsoleVariable *dummy_cvar = nullptr);
+void ConfigurationResetDefaults(int dummy, ConsoleVariable *dummy_cvar = nullptr);
 void ConfigurationLoadDefaults(void);
 void ConfigurationLoadBranding(void);
 void ConfigurationSaveDefaults(void);
@@ -59,10 +58,8 @@ void TakeScreenshot(bool show_msg);
 void CreateSaveScreenshot(void);
 
 #ifdef __GNUC__
-void PrintWarningOrError(const char *error, ...)
-    __attribute__((format(printf, 1, 2)));
-void PrintDebugOrError(const char *error, ...)
-    __attribute__((format(printf, 1, 2)));
+void PrintWarningOrError(const char *error, ...) __attribute__((format(printf, 1, 2)));
+void PrintDebugOrError(const char *error, ...) __attribute__((format(printf, 1, 2)));
 #else
 void PrintWarningOrError(const char *error, ...);
 void PrintDebugOrError(const char *error, ...);

@@ -44,7 +44,7 @@
 #include "script/compat/lua_compat.h"
 #include "sokol_color.h"
 #include "str_util.h"
-#include "vm_coal.h"  // For CoalEndLevel()
+#include "vm_coal.h" // For CoalEndLevel()
 
 //
 // PLAYER ARRAY
@@ -62,8 +62,8 @@ Player *players[kMaximumPlayers];
 int     total_players;
 int     total_bots;
 
-int console_player = -1;  // player taking events
-int display_player = -1;  // view being displayed
+int console_player = -1; // player taking events
+int display_player = -1; // view being displayed
 
 static constexpr uint8_t kMaximumBodies = 50;
 
@@ -119,16 +119,17 @@ void PlayerFinishLevel(Player *p, bool keep_cards)
 {
     if (!keep_cards)
     {
-        for (int i = 0; i < kTotalPowerTypes; i++) p->powers_[i] = 0;
+        for (int i = 0; i < kTotalPowerTypes; i++)
+            p->powers_[i] = 0;
 
         p->keep_powers_ = 0;
 
         p->cards_ = kDoorKeyNone;
 
-        p->map_object_->flags_ &= ~kMapObjectFlagFuzzy;  // cancel invisibility
+        p->map_object_->flags_ &= ~kMapObjectFlagFuzzy; // cancel invisibility
     }
 
-    p->extra_light_ = 0;  // cancel gun flashes
+    p->extra_light_ = 0;                                // cancel gun flashes
 
     // cancel colourmap effects
     p->effect_colourmap_ = nullptr;
@@ -182,7 +183,8 @@ void Player::Reborn()
     memset(inventory_, 0, sizeof(inventory_));
     memset(counters_, 0, sizeof(counters_));
 
-    for (int w = 0; w <= 9; w++) key_choices_[w] = KWeaponSelectionNone;
+    for (int w = 0; w <= 9; w++)
+        key_choices_[w] = KWeaponSelectionNone;
 
     cheats_             = 0;
     refire_             = 0;
@@ -237,23 +239,23 @@ static bool GameCheckSpot(Player *player, const SpawnPoint *point)
     if (!player->map_object_)
     {
         // first spawn of level, before corpses
-        for (int player_number_ = 0; player_number_ < kMaximumPlayers;
-             player_number_++)
+        for (int player_number_ = 0; player_number_ < kMaximumPlayers; player_number_++)
         {
             Player *p = players[player_number_];
 
-            if (!p || !p->map_object_ || p == player) continue;
+            if (!p || !p->map_object_ || p == player)
+                continue;
 
-            if (fabs(p->map_object_->x - x) < 8.0f &&
-                fabs(p->map_object_->y - y) < 8.0f)
+            if (fabs(p->map_object_->x - x) < 8.0f && fabs(p->map_object_->y - y) < 8.0f)
                 return false;
         }
 
         P_SpawnPlayer(player, point, false);
-        return true;  // OK
+        return true; // OK
     }
 
-    if (!CheckAbsolutePosition(player->map_object_, x, y, z)) return false;
+    if (!CheckAbsolutePosition(player->map_object_, x, y, z))
+        return false;
 
     GameAddBodyToQueue(player->map_object_);
 
@@ -264,7 +266,7 @@ static bool GameCheckSpot(Player *player, const SpawnPoint *point)
     CreateMapObject(x, y, z, mobjtypes.Lookup("TELEPORT_FLASH"));
 
     P_SpawnPlayer(player, point, false);
-    return true;  // OK
+    return true; // OK
 }
 
 //
@@ -280,7 +282,8 @@ void SetConsolePlayer(int player_number_)
     EPI_ASSERT(players[console_player]);
 
     for (int i = 0; i < kMaximumPlayers; i++)
-        if (players[i]) players[i]->player_flags_ &= ~kPlayerFlagConsole;
+        if (players[i])
+            players[i]->player_flags_ &= ~kPlayerFlagConsole;
 
     players[player_number_]->player_flags_ |= kPlayerFlagConsole;
 
@@ -305,7 +308,8 @@ void SetDisplayPlayer(int player_number_)
     EPI_ASSERT(players[display_player]);
 
     for (int i = 0; i < kMaximumPlayers; i++)
-        if (players[i]) players[i]->player_flags_ &= ~kPlayerFlagDisplay;
+        if (players[i])
+            players[i]->player_flags_ &= ~kPlayerFlagDisplay;
 
     players[player_number_]->player_flags_ |= kPlayerFlagDisplay;
 }
@@ -339,12 +343,12 @@ static void P_SpawnPlayer(Player *p, const SpawnPoint *point, bool is_hub)
     //   will hold player start objects, sprite will be taken for skin.
     // -AJA- 2004/04/14: Use DDF entry from level thing.
 
-    if (point->info == nullptr) FatalError("P_SpawnPlayer: No such item type!");
+    if (point->info == nullptr)
+        FatalError("P_SpawnPlayer: No such item type!");
 
     const MapObjectDefinition *info = point->info;
 
-    LogDebug("* P_SpawnPlayer %d @ %1.0f,%1.0f\n", point->info->playernum_,
-             point->x, point->y);
+    LogDebug("* P_SpawnPlayer %d @ %1.0f,%1.0f\n", point->info->playernum_, point->x, point->y);
 
     if (info->playernum_ <= 0)
         info = mobjtypes.LookupPlayer(p->player_number_ + 1);
@@ -383,13 +387,16 @@ static void P_SpawnPlayer(Player *p, const SpawnPoint *point, bool is_hub)
     p->action_button_down_[0] = p->action_button_down_[1] = false;
 
     // setup gun psprite
-    if (!is_hub || !InSinglePlayerMatch()) SetupPlayerSprites(p);
+    if (!is_hub || !InSinglePlayerMatch())
+        SetupPlayerSprites(p);
 
     // give all cards in death match mode
-    if (InDeathmatch()) p->cards_ = kDoorKeyBitmask;
+    if (InDeathmatch())
+        p->cards_ = kDoorKeyBitmask;
 
     // -AJA- in COOP, all players are on the same side
-    if (InCooperativeMatch()) mobj->side_ = ~0;
+    if (InCooperativeMatch())
+        mobj->side_ = ~0;
 
     // Don't get stuck spawned in things: telefrag them.
 
@@ -421,8 +428,7 @@ static void P_SpawnVoodooDoll(Player *p, const SpawnPoint *point)
     EPI_ASSERT(info);
     EPI_ASSERT(info->playernum_ > 0);
 
-    LogDebug("* P_SpawnVoodooDoll %d @ %1.0f,%1.0f\n", p->player_number_ + 1,
-             point->x, point->y);
+    LogDebug("* P_SpawnVoodooDoll %d @ %1.0f,%1.0f\n", p->player_number_ + 1, point->x, point->y);
 
     MapObject *mobj = CreateMapObject(point->x, point->y, point->z, info);
 
@@ -433,7 +439,8 @@ static void P_SpawnVoodooDoll(Player *p, const SpawnPoint *point)
 
     mobj->is_voodoo_ = true;
 
-    if (InCooperativeMatch()) mobj->side_ = ~0;
+    if (InCooperativeMatch())
+        mobj->side_ = ~0;
 }
 
 //
@@ -445,8 +452,7 @@ static void P_SpawnVoodooDoll(Player *p, const SpawnPoint *point)
 void DeathMatchSpawnPlayer(Player *p)
 {
     if (p->player_number_ >= (int)deathmatch_starts.size())
-        LogWarning("Few deathmatch spots, %d recommended.\n",
-                   p->player_number_ + 1);
+        LogWarning("Few deathmatch spots, %d recommended.\n", p->player_number_ + 1);
 
     int begin = RandomByteDeterministic();
 
@@ -456,7 +462,8 @@ void DeathMatchSpawnPlayer(Player *p)
         {
             int i = (begin + j) % (int)deathmatch_starts.size();
 
-            if (GameCheckSpot(p, &deathmatch_starts[i])) return;
+            if (GameCheckSpot(p, &deathmatch_starts[i]))
+                return;
         }
     }
 
@@ -467,7 +474,8 @@ void DeathMatchSpawnPlayer(Player *p)
         {
             int i = (begin + j) % (int)coop_starts.size();
 
-            if (GameCheckSpot(p, &coop_starts[i])) return;
+            if (GameCheckSpot(p, &coop_starts[i]))
+                return;
         }
     }
 
@@ -484,7 +492,8 @@ void CoopSpawnPlayer(Player *p)
 {
     SpawnPoint *point = FindCoopPlayer(p->player_number_ + 1);
 
-    if (point && GameCheckSpot(p, point)) return;
+    if (point && GameCheckSpot(p, point))
+        return;
 
     LogWarning("Player %d start is invalid.\n", p->player_number_ + 1);
 
@@ -495,7 +504,8 @@ void CoopSpawnPlayer(Player *p)
     {
         int i = (begin + j) % (int)coop_starts.size();
 
-        if (GameCheckSpot(p, &coop_starts[i])) return;
+        if (GameCheckSpot(p, &coop_starts[i]))
+            return;
     }
 
     FatalError("No usable player start found!\n");
@@ -510,18 +520,19 @@ static SpawnPoint *GameFindHubPlayer(int player_number_, int tag)
         SpawnPoint *point = &hub_starts[i];
         EPI_ASSERT(point->info);
 
-        if (point->tag != tag) continue;
+        if (point->tag != tag)
+            continue;
 
         count++;
 
-        if (point->info->playernum_ == player_number_) return point;
+        if (point->info->playernum_ == player_number_)
+            return point;
     }
 
     if (count == 0)
         FatalError("Missing hub starts with tag %d\n", tag);
     else
-        FatalError("No usable hub start for player %d (tag %d)\n",
-                   player_number_ + 1, tag);
+        FatalError("No usable hub start for player %d (tag %d)\n", player_number_ + 1, tag);
 
     return nullptr; /* NOT REACHED */
 }
@@ -542,7 +553,8 @@ void SpawnVoodooDolls(Player *p)
     {
         SpawnPoint *point = &voodoo_dolls[i];
 
-        if (point->info->playernum_ != p->player_number_ + 1) continue;
+        if (point->info->playernum_ != p->player_number_ + 1)
+            continue;
 
         P_SpawnVoodooDoll(p, point);
     }
@@ -553,15 +565,19 @@ EDGE_DEFINE_CONSOLE_VARIABLE(dogs, "0", kConsoleVariableFlagArchive)
 
 void SpawnHelper(int player_number_)
 {
-    if (player_number_ == 0) return;
+    if (player_number_ == 0)
+        return;
 
-    if (player_number_ > dogs.d_) return;
+    if (player_number_ > dogs.d_)
+        return;
 
     SpawnPoint *point = FindCoopPlayer(player_number_ + 1);
-    if (point == nullptr) return;
+    if (point == nullptr)
+        return;
 
     const MapObjectDefinition *info = mobjtypes.Lookup(888);
-    if (info == nullptr) return;
+    if (info == nullptr)
+        return;
 
     MapObject *mo = CreateMapObject(point->x, point->y, point->z, info);
 
@@ -582,217 +598,230 @@ bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
 
         switch (cond->cond_type)
         {
-            case kConditionCheckTypeHealth:
-                if (cond->exact) return (mo->health_ == cond->amount);
+        case kConditionCheckTypeHealth:
+            if (cond->exact)
+                return (mo->health_ == cond->amount);
 
-                temp = (mo->health_ >= cond->amount);
+            temp = (mo->health_ >= cond->amount);
 
-                if ((!cond->negate && !temp) || (cond->negate && temp))
-                    return false;
+            if ((!cond->negate && !temp) || (cond->negate && temp))
+                return false;
 
-                break;
+            break;
 
-            case kConditionCheckTypeArmour:
-                if (!p) return false;
+        case kConditionCheckTypeArmour:
+            if (!p)
+                return false;
 
-                if (cond->exact)
-                {
-                    if (cond->sub.type == kTotalArmourTypes)
-                        return (p->total_armour_ == i_amount);
-                    else
-                        return (p->armours_[cond->sub.type] == i_amount);
-                }
-
+            if (cond->exact)
+            {
                 if (cond->sub.type == kTotalArmourTypes)
-                    temp = (p->total_armour_ >= i_amount);
+                    return (p->total_armour_ == i_amount);
                 else
-                    temp = (p->armours_[cond->sub.type] >= i_amount);
+                    return (p->armours_[cond->sub.type] == i_amount);
+            }
 
-                if ((!cond->negate && !temp) || (cond->negate && temp))
-                    return false;
+            if (cond->sub.type == kTotalArmourTypes)
+                temp = (p->total_armour_ >= i_amount);
+            else
+                temp = (p->armours_[cond->sub.type] >= i_amount);
 
-                break;
+            if ((!cond->negate && !temp) || (cond->negate && temp))
+                return false;
 
-            case kConditionCheckTypeKey:
-                if (!p) return false;
+            break;
 
-                temp = ((p->cards_ & cond->sub.type) != 0);
+        case kConditionCheckTypeKey:
+            if (!p)
+                return false;
 
-                if ((!cond->negate && !temp) || (cond->negate && temp))
-                    return false;
+            temp = ((p->cards_ & cond->sub.type) != 0);
 
-                break;
+            if ((!cond->negate && !temp) || (cond->negate && temp))
+                return false;
 
-            case kConditionCheckTypeWeapon:
-                if (!p) return false;
+            break;
 
-                temp = false;
+        case kConditionCheckTypeWeapon:
+            if (!p)
+                return false;
 
-                for (int i = 0; i < kMaximumWeapons; i++)
+            temp = false;
+
+            for (int i = 0; i < kMaximumWeapons; i++)
+            {
+                if (p->weapons_[i].owned && p->weapons_[i].info == cond->sub.weap)
                 {
-                    if (p->weapons_[i].owned &&
-                        p->weapons_[i].info == cond->sub.weap)
-                    {
-                        temp = true;
-                        break;
-                    }
+                    temp = true;
+                    break;
                 }
+            }
 
-                if ((!cond->negate && !temp) || (cond->negate && temp))
-                    return false;
+            if ((!cond->negate && !temp) || (cond->negate && temp))
+                return false;
 
-                break;
+            break;
 
-            case kConditionCheckTypePowerup:
-                if (!p) return false;
+        case kConditionCheckTypePowerup:
+            if (!p)
+                return false;
 
-                if (cond->exact)
-                    return (p->powers_[cond->sub.type] == cond->amount);
+            if (cond->exact)
+                return (p->powers_[cond->sub.type] == cond->amount);
 
-                temp = (p->powers_[cond->sub.type] > cond->amount);
+            temp = (p->powers_[cond->sub.type] > cond->amount);
 
-                if ((!cond->negate && !temp) || (cond->negate && temp))
-                    return false;
+            if ((!cond->negate && !temp) || (cond->negate && temp))
+                return false;
 
-                break;
+            break;
 
-            case kConditionCheckTypeAmmo:
-                if (!p) return false;
+        case kConditionCheckTypeAmmo:
+            if (!p)
+                return false;
 
-                if (cond->exact)
-                    return (p->ammo_[cond->sub.type].count == i_amount);
+            if (cond->exact)
+                return (p->ammo_[cond->sub.type].count == i_amount);
 
-                temp = (p->ammo_[cond->sub.type].count >= i_amount);
+            temp = (p->ammo_[cond->sub.type].count >= i_amount);
 
-                if ((!cond->negate && !temp) || (cond->negate && temp))
-                    return false;
+            if ((!cond->negate && !temp) || (cond->negate && temp))
+                return false;
 
-                break;
+            break;
 
-            case kConditionCheckTypeInventory:
-                if (!p) return false;
+        case kConditionCheckTypeInventory:
+            if (!p)
+                return false;
 
-                if (cond->exact)
-                    return (p->inventory_[cond->sub.type].count == i_amount);
+            if (cond->exact)
+                return (p->inventory_[cond->sub.type].count == i_amount);
 
-                temp = (p->inventory_[cond->sub.type].count >= i_amount);
+            temp = (p->inventory_[cond->sub.type].count >= i_amount);
 
-                if ((!cond->negate && !temp) || (cond->negate && temp))
-                    return false;
+            if ((!cond->negate && !temp) || (cond->negate && temp))
+                return false;
 
-                break;
+            break;
 
-            case kConditionCheckTypeCounter:
-                if (!p) return false;
+        case kConditionCheckTypeCounter:
+            if (!p)
+                return false;
 
-                if (cond->exact)
-                    return (p->counters_[cond->sub.type].count == i_amount);
+            if (cond->exact)
+                return (p->counters_[cond->sub.type].count == i_amount);
 
-                temp = (p->counters_[cond->sub.type].count >= i_amount);
+            temp = (p->counters_[cond->sub.type].count >= i_amount);
 
-                if ((!cond->negate && !temp) || (cond->negate && temp))
-                    return false;
+            if ((!cond->negate && !temp) || (cond->negate && temp))
+                return false;
 
-                break;
+            break;
 
-            case kConditionCheckTypeJumping:
-                if (!p) return false;
+        case kConditionCheckTypeJumping:
+            if (!p)
+                return false;
 
-                temp = (p->jump_wait_ > 0);
+            temp = (p->jump_wait_ > 0);
 
-                if ((!cond->negate && !temp) || (cond->negate && temp))
-                    return false;
+            if ((!cond->negate && !temp) || (cond->negate && temp))
+                return false;
 
-                break;
+            break;
 
-            case kConditionCheckTypeCrouching:
-                if (!p) return false;
+        case kConditionCheckTypeCrouching:
+            if (!p)
+                return false;
 
-                temp = (mo->extended_flags_ & kExtendedFlagCrouching) ? true
-                                                                      : false;
+            temp = (mo->extended_flags_ & kExtendedFlagCrouching) ? true : false;
 
-                if ((!cond->negate && !temp) || (cond->negate && temp))
-                    return false;
+            if ((!cond->negate && !temp) || (cond->negate && temp))
+                return false;
 
-                break;
+            break;
 
-            case kConditionCheckTypeSwimming:
-                if (!p) return false;
+        case kConditionCheckTypeSwimming:
+            if (!p)
+                return false;
 
-                temp = p->swimming_;
+            temp = p->swimming_;
 
-                if ((!cond->negate && !temp) || (cond->negate && temp))
-                    return false;
+            if ((!cond->negate && !temp) || (cond->negate && temp))
+                return false;
 
-                break;
+            break;
 
-            case kConditionCheckTypeAttacking:
-                if (!p) return false;
+        case kConditionCheckTypeAttacking:
+            if (!p)
+                return false;
 
-                temp =
-                    (p->attack_button_down_[0] || p->attack_button_down_[1] ||
-                     p->attack_button_down_[2] || p->attack_button_down_[3]);
+            temp = (p->attack_button_down_[0] || p->attack_button_down_[1] || p->attack_button_down_[2] ||
+                    p->attack_button_down_[3]);
 
-                if ((!cond->negate && !temp) || (cond->negate && temp))
-                    return false;
+            if ((!cond->negate && !temp) || (cond->negate && temp))
+                return false;
 
-                break;
+            break;
 
-            case kConditionCheckTypeRampaging:
-                if (!p) return false;
+        case kConditionCheckTypeRampaging:
+            if (!p)
+                return false;
 
-                temp = (p->attack_sustained_count_ >= 70);
+            temp = (p->attack_sustained_count_ >= 70);
 
-                if ((!cond->negate && !temp) || (cond->negate && temp))
-                    return false;
+            if ((!cond->negate && !temp) || (cond->negate && temp))
+                return false;
 
-                break;
+            break;
 
-            case kConditionCheckTypeUsing:
-                if (!p) return false;
+        case kConditionCheckTypeUsing:
+            if (!p)
+                return false;
 
-                temp = p->use_button_down_;
+            temp = p->use_button_down_;
 
-                if ((!cond->negate && !temp) || (cond->negate && temp))
-                    return false;
+            if ((!cond->negate && !temp) || (cond->negate && temp))
+                return false;
 
-                break;
+            break;
 
-            case kConditionCheckTypeAction1:
-                if (!p) return false;
+        case kConditionCheckTypeAction1:
+            if (!p)
+                return false;
 
-                temp = p->action_button_down_[0];
+            temp = p->action_button_down_[0];
 
-                if ((!cond->negate && !temp) || (cond->negate && temp))
-                    return false;
+            if ((!cond->negate && !temp) || (cond->negate && temp))
+                return false;
 
-                break;
+            break;
 
-            case kConditionCheckTypeAction2:
-                if (!p) return false;
+        case kConditionCheckTypeAction2:
+            if (!p)
+                return false;
 
-                temp = p->action_button_down_[1];
+            temp = p->action_button_down_[1];
 
-                if ((!cond->negate && !temp) || (cond->negate && temp))
-                    return false;
+            if ((!cond->negate && !temp) || (cond->negate && temp))
+                return false;
 
-                break;
+            break;
 
-            case kConditionCheckTypeWalking:
-                if (!p) return false;
+        case kConditionCheckTypeWalking:
+            if (!p)
+                return false;
 
-                temp = (p->actual_speed_ > kPlayerStopSpeed) &&
-                       (p->map_object_->z <= p->map_object_->floor_z_);
+            temp = (p->actual_speed_ > kPlayerStopSpeed) && (p->map_object_->z <= p->map_object_->floor_z_);
 
-                if ((!cond->negate && !temp) || (cond->negate && temp))
-                    return false;
+            if ((!cond->negate && !temp) || (cond->negate && temp))
+                return false;
 
-                break;
+            break;
 
-            case kConditionCheckTypeNone:
-            default:
-                // unknown condition -- play it safe and succeed
-                break;
+        case kConditionCheckTypeNone:
+        default:
+            // unknown condition -- play it safe and succeed
+            break;
         }
     }
 
@@ -805,11 +834,20 @@ void AddDeathmatchStart(const SpawnPoint &point)
     deathmatch_starts.push_back(point);
 }
 
-void AddHubStart(const SpawnPoint &point) { hub_starts.push_back(point); }
+void AddHubStart(const SpawnPoint &point)
+{
+    hub_starts.push_back(point);
+}
 
-void AddCoopStart(const SpawnPoint &point) { coop_starts.push_back(point); }
+void AddCoopStart(const SpawnPoint &point)
+{
+    coop_starts.push_back(point);
+}
 
-void AddVoodooDoll(const SpawnPoint &point) { voodoo_dolls.push_back(point); }
+void AddVoodooDoll(const SpawnPoint &point)
+{
+    voodoo_dolls.push_back(point);
+}
 
 SpawnPoint *FindCoopPlayer(int player_number_)
 {
@@ -818,10 +856,11 @@ SpawnPoint *FindCoopPlayer(int player_number_)
         SpawnPoint *point = &coop_starts[i];
         EPI_ASSERT(point->info);
 
-        if (point->info->playernum_ == player_number_) return point;
+        if (point->info->playernum_ == player_number_)
+            return point;
     }
 
-    return nullptr;  // not found
+    return nullptr; // not found
 }
 
 void MarkPlayerAvatars(void)
@@ -849,8 +888,7 @@ void RemoveOldAvatars(void)
         // (the one which was saved in the savegame) to refer to the
         // new avatar (the one spawned after loading).
 
-        if (mo->target_ &&
-            (mo->target_->hyper_flags_ & kHyperFlagRememberOldAvatars))
+        if (mo->target_ && (mo->target_->hyper_flags_ & kHyperFlagRememberOldAvatars))
         {
             EPI_ASSERT(mo->target_->player_);
             EPI_ASSERT(mo->target_->player_->map_object_);
@@ -861,14 +899,12 @@ void RemoveOldAvatars(void)
             mo->SetTarget(mo->target_->player_->map_object_);
         }
 
-        if (mo->source_ &&
-            (mo->source_->hyper_flags_ & kHyperFlagRememberOldAvatars))
+        if (mo->source_ && (mo->source_->hyper_flags_ & kHyperFlagRememberOldAvatars))
         {
             mo->SetSource(mo->source_->player_->map_object_);
         }
 
-        if (mo->support_object_ &&
-            (mo->support_object_->hyper_flags_ & kHyperFlagRememberOldAvatars))
+        if (mo->support_object_ && (mo->support_object_->hyper_flags_ & kHyperFlagRememberOldAvatars))
         {
             mo->SetSupportObject(mo->support_object_->player_->map_object_);
         }

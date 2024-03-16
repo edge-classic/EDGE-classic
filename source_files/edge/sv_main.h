@@ -47,7 +47,7 @@ class MapDefinition;
 
 enum SaveFieldKind
 {
-    kSaveFieldInvalid = 0,  // invalid values can be helpful
+    kSaveFieldInvalid = 0, // invalid values can be helpful
     kSaveFieldNumeric,
     kSaveFieldIndex,
     kSaveFieldString,
@@ -95,11 +95,9 @@ struct SaveField
 };
 
 // NOTE: requires an instantiated dummy struct for "base"
-#define EDGE_SAVE_FIELD(base, field, name, num, fkind, fsize, fname, getter,   \
-                        putter)                                                \
-    {                                                                          \
-        (const char *)&base.field, name, num, { fkind, fsize, fname }, getter, \
-            putter, nullptr                                                    \
+#define EDGE_SAVE_FIELD(base, field, name, num, fkind, fsize, fname, getter, putter)                                   \
+    {                                                                                                                  \
+        (const char *)&base.field, name, num, { fkind, fsize, fname }, getter, putter, nullptr                         \
     }
 
 // This describes a single structure
@@ -229,7 +227,7 @@ struct SaveGlobals
     int skill;
     int netgame;
 
-    const Image *sky_image;  // -AJA- added 2003/12/19
+    const Image *sky_image; // -AJA- added 2003/12/19
 
     const char *description;
     const char *desc_date;

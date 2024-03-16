@@ -29,7 +29,7 @@ void LuaInit()
 
 void LuaAddScript(const std::string &data, const std::string &source)
 {
-    pending_scripts.push_back(pending_lua_script_c{data, source});
+    pending_scripts.push_back(pending_lua_script_c{ data, source });
 }
 
 void LuaLoadScripts()
@@ -44,9 +44,11 @@ void LuaLoadScripts()
     {
         LogPrint("Compiling: %s\n", info.source.c_str());
 
-        int results =
-            LuaDoFile(global_lua_state, info.source.c_str(), info.data.c_str());
-        if (results) { lua_pop(global_lua_state, results); }
+        int results = LuaDoFile(global_lua_state, info.source.c_str(), info.data.c_str());
+        if (results)
+        {
+            lua_pop(global_lua_state, results);
+        }
     }
 
     if (IsLumpInPwad("STBAR"))
@@ -57,17 +59,29 @@ void LuaLoadScripts()
     EPI_ASSERT(lua_gettop(global_lua_state) == top);
 }
 
-lua_State *LuaGetGlobalVM() { return global_lua_state; }
+lua_State *LuaGetGlobalVM()
+{
+    return global_lua_state;
+}
 
 static bool lua_detected = false;
 void        LuaSetLuaHudDetected(bool detected)
 {
     // check whether redundant call, once enabled stays enabled
-    if (lua_detected) { return; }
+    if (lua_detected)
+    {
+        return;
+    }
 
     lua_detected = detected;
 }
 
-bool LuaGetLuaHudDetected() { return lua_detected; }
+bool LuaGetLuaHudDetected()
+{
+    return lua_detected;
+}
 
-bool LuaUseLuaHud() { return lua_detected || !GetCoalDetected(); }
+bool LuaUseLuaHud()
+{
+    return lua_detected || !GetCoalDetected();
+}

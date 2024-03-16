@@ -70,7 +70,8 @@ static bool CheckMagic(void)
     int len = strlen(kEdgeSaveMagic);
 
     for (i = 0; i < len; i++)
-        if (SaveChunkGetByte() != kEdgeSaveMagic[i]) return false;
+        if (SaveChunkGetByte() != kEdgeSaveMagic[i])
+            return false;
 
     return true;
 }
@@ -80,7 +81,8 @@ static void PutMagic(void)
     int i;
     int len = strlen(kEdgeSaveMagic);
 
-    for (i = 0; i < len; i++) SaveChunkPutByte(kEdgeSaveMagic[i]);
+    for (i = 0; i < len; i++)
+        SaveChunkPutByte(kEdgeSaveMagic[i]);
 }
 
 static void PutPadding(void)
@@ -93,8 +95,8 @@ static void PutPadding(void)
 
 static inline bool VerifyMarker(const char *id)
 {
-    return epi::IsAlphanumericASCII(id[0]) && epi::IsAlphanumericASCII(id[1]) &&
-           epi::IsAlphanumericASCII(id[2]) && epi::IsAlphanumericASCII(id[3]);
+    return epi::IsAlphanumericASCII(id[0]) && epi::IsAlphanumericASCII(id[1]) && epi::IsAlphanumericASCII(id[2]) &&
+           epi::IsAlphanumericASCII(id[3]);
 }
 
 int SaveGetError(void)
@@ -118,10 +120,10 @@ bool SaveFileOpenRead(std::string filename)
 
     current_crc.Reset();
 
-    current_file_pointer = epi::FileOpenRaw(
-        filename, epi::kFileAccessRead | epi::kFileAccessBinary);
+    current_file_pointer = epi::FileOpenRaw(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
 
-    if (!current_file_pointer) return false;
+    if (!current_file_pointer)
+        return false;
 
     return true;
 }
@@ -131,12 +133,12 @@ bool SaveFileCloseRead(void)
     EPI_ASSERT(current_file_pointer);
 
     if (chunk_stack_size > 0)
-        FatalError(
-            "SV_CloseReadFile: Too many Pushes (missing Pop somewhere).\n");
+        FatalError("SV_CloseReadFile: Too many Pushes (missing Pop somewhere).\n");
 
     fclose(current_file_pointer);
 
-    if (last_error) LogWarning("LOADGAME: Error(s) occurred during reading.\n");
+    if (last_error)
+        LogWarning("LOADGAME: Error(s) occurred during reading.\n");
 
     return true;
 }
@@ -190,15 +192,14 @@ bool SaveFileVerifyContents(void)
 
         if (!VerifyMarker(start_marker))
         {
-            LogWarning(
-                "LOADGAME: Verify failed: Invalid start marker: "
-                "%02X %02X %02X %02X\n",
-                start_marker[0], start_marker[1], start_marker[2],
-                start_marker[3]);
+            LogWarning("LOADGAME: Verify failed: Invalid start marker: "
+                       "%02X %02X %02X %02X\n",
+                       start_marker[0], start_marker[1], start_marker[2], start_marker[3]);
             return false;
         }
 
-        if (strcmp(start_marker, kDataEndMarker) == 0) break;
+        if (strcmp(start_marker, kDataEndMarker) == 0)
+            break;
 
         // read chunk length
         file_len = SaveChunkGetInteger();
@@ -208,22 +209,21 @@ bool SaveFileVerifyContents(void)
 
         if ((orig_len & 3) != 0 || file_len > (compressBound(orig_len) + 4))
         {
-            LogWarning(
-                "LOADGAME: Verify failed: Chunk has bad size: "
-                "(file=%d orig=%d)\n",
-                file_len, orig_len);
+            LogWarning("LOADGAME: Verify failed: Chunk has bad size: "
+                       "(file=%d orig=%d)\n",
+                       file_len, orig_len);
             return false;
         }
 
         // skip data bytes (merely compute the CRC)
-        for (; (file_len > 0) && !last_error; file_len--) SaveChunkGetByte();
+        for (; (file_len > 0) && !last_error; file_len--)
+            SaveChunkGetByte();
 
         // run out of data ?
         if (last_error)
         {
-            LogWarning(
-                "LOADGAME: Verify failed: Chunk corrupt or "
-                "File truncated.\n");
+            LogWarning("LOADGAME: Verify failed: Chunk corrupt or "
+                       "File truncated.\n");
             return false;
         }
     }
@@ -243,8 +243,7 @@ bool SaveFileVerifyContents(void)
 
     if (read_crc != final_crc.GetCRC())
     {
-        LogWarning("LOADGAME: Verify failed: Bad CRC: %08X != %08X\n",
-                   current_crc.GetCRC(), read_crc);
+        LogWarning("LOADGAME: Verify failed: Bad CRC: %08X != %08X\n", current_crc.GetCRC(), read_crc);
         return false;
     }
 
@@ -260,7 +259,8 @@ uint8_t SaveChunkGetByte(void)
     SaveChunk *cur;
     uint8_t    result;
 
-    if (last_error) return 0;
+    if (last_error)
+        return 0;
 
     // read directly from file when no chunks are on the stack
     if (chunk_stack_size == 0)
@@ -298,8 +298,7 @@ uint8_t SaveChunkGetByte(void)
 
     if (cur->position == cur->end)
     {
-        FatalError("LOADGAME: Corrupt Savegame (reached end of [%s] chunk).\n",
-                   cur->start_marker);
+        FatalError("LOADGAME: Corrupt Savegame (reached end of [%s] chunk).\n", cur->start_marker);
         last_error = 2;
         return 0;
     }
@@ -311,8 +310,7 @@ uint8_t SaveChunkGetByte(void)
     {
         static int position = 0;
         position++;
-        LogDebug("%d.%02X%s", chunk_stack_size, result,
-                 ((position % 10) == 0) ? "\n" : " ");
+        LogDebug("%d.%02X%s", chunk_stack_size, result, ((position % 10) == 0) ? "\n" : " ");
     }
 #endif
 
@@ -325,8 +323,7 @@ bool SavePushReadChunk(const char *id)
     uint32_t   file_len;
 
     if (chunk_stack_size >= kMaximumChunkDepth)
-        FatalError(
-            "SV_PushReadChunk: Too many Pushes (missing Pop somewhere).\n");
+        FatalError("SV_PushReadChunk: Too many Pushes (missing Pop somewhere).\n");
 
     // read chunk length
     file_len = SaveChunkGetInteger();
@@ -373,7 +370,7 @@ bool SavePushReadChunk(const char *id)
             memcpy(cur->start, file_data, file_len);
             decomp_len = file_len;
         }
-        else  // use ZLIB
+        else // use ZLIB
         {
             EPI_ASSERT(file_len > 0);
             EPI_ASSERT(file_len < orig_len);
@@ -383,9 +380,7 @@ bool SavePushReadChunk(const char *id)
             int res = uncompress(cur->start, &out_len, file_data, file_len);
 
             if (res != Z_OK)
-                FatalError(
-                    "LOADGAME: ReadChunk [%s] failed: ZLIB uncompress error.\n",
-                    id);
+                FatalError("LOADGAME: ReadChunk [%s] failed: ZLIB uncompress error.\n", id);
 
             decomp_len = (uint32_t)out_len;
         }
@@ -420,8 +415,7 @@ bool SavePopReadChunk(void)
     SaveChunk *cur;
 
     if (chunk_stack_size == 0)
-        FatalError(
-            "SV_PopReadChunk: Too many Pops (missing Push somewhere).\n");
+        FatalError("SV_PopReadChunk: Too many Pops (missing Push somewhere).\n");
 
     cur = &chunk_stack[chunk_stack_size - 1];
 
@@ -453,7 +447,8 @@ int SaveRemainingChunkSize(void)
 
 bool SaveSkipReadChunk(const char *id)
 {
-    if (!SavePushReadChunk(id)) return false;
+    if (!SavePushReadChunk(id))
+        return false;
 
     return SavePopReadChunk();
 }
@@ -471,8 +466,7 @@ bool SaveFileOpenWrite(std::string filename, int version)
 
     current_crc.Reset();
 
-    current_file_pointer = epi::FileOpenRaw(
-        filename, epi::kFileAccessWrite | epi::kFileAccessBinary);
+    current_file_pointer = epi::FileOpenRaw(filename, epi::kFileAccessWrite | epi::kFileAccessBinary);
 
     if (!current_file_pointer)
     {
@@ -494,8 +488,7 @@ bool SaveFileCloseWrite(void)
     EPI_ASSERT(current_file_pointer);
 
     if (chunk_stack_size != 0)
-        FatalError(
-            "SV_CloseWriteFile: Too many Pushes (missing Pop somewhere).\n");
+        FatalError("SV_CloseWriteFile: Too many Pushes (missing Pop somewhere).\n");
 
     // write trailer
 
@@ -506,7 +499,8 @@ bool SaveFileCloseWrite(void)
 
     SaveChunkPutInteger(final_crc.GetCRC());
 
-    if (last_error) LogWarning("SAVEGAME: Error(s) occurred during writing.\n");
+    if (last_error)
+        LogWarning("SAVEGAME: Error(s) occurred during writing.\n");
 
     fclose(current_file_pointer);
 
@@ -518,8 +512,7 @@ bool SavePushWriteChunk(const char *id)
     SaveChunk *cur;
 
     if (chunk_stack_size >= kMaximumChunkDepth)
-        FatalError(
-            "SV_PushWriteChunk: Too many Pushes (missing Pop somewhere).\n");
+        FatalError("SV_PushWriteChunk: Too many Pushes (missing Pop somewhere).\n");
 
     // create new chunk_t
     cur = &chunk_stack[chunk_stack_size];
@@ -547,8 +540,7 @@ bool SavePopWriteChunk(void)
     int        len;
 
     if (chunk_stack_size == 0)
-        FatalError(
-            "SV_PopWriteChunk: Too many Pops (missing Push somewhere).\n");
+        FatalError("SV_PopWriteChunk: Too many Pops (missing Push somewhere).\n");
 
     cur = &chunk_stack[chunk_stack_size - 1];
 
@@ -559,7 +551,8 @@ bool SavePopWriteChunk(void)
     len = cur->position - cur->start;
 
     // pad chunk to multiple of 4 characters
-    for (; len & 3; len++) SaveChunkPutByte(0);
+    for (; len & 3; len++)
+        SaveChunkPutByte(0);
 
     // decrement stack size, so future PutBytes go where they should
     chunk_stack_size--;
@@ -580,9 +573,7 @@ bool SavePopWriteChunk(void)
         if (res != Z_OK || (int)out_len >= len)
         {
 #if (EDGE_DEBUG_SAVE_CHUNK_COMPRESS)
-            LogDebug(
-                "WriteChunk UNCOMPRESSED (res %d != %d, out_len %d >= %d)\n",
-                res, Z_OK, (int)out_len, len);
+            LogDebug("WriteChunk UNCOMPRESSED (res %d != %d, out_len %d >= %d)\n", res, Z_OK, (int)out_len, len);
 #endif
             // compression failed, so write uncompressed
             memcpy(out_buf, cur->start, len);
@@ -591,8 +582,7 @@ bool SavePopWriteChunk(void)
 #if (EDGE_DEBUG_SAVE_CHUNK_COMPRESS)
         else
         {
-            LogDebug("WriteChunk compress (res %d == %d, out_len %d < %d)\n",
-                     res, Z_OK, (int)out_len, len);
+            LogDebug("WriteChunk compress (res %d == %d, out_len %d < %d)\n", res, Z_OK, (int)out_len, len);
         }
 #endif
 
@@ -617,7 +607,8 @@ bool SavePopWriteChunk(void)
         SaveChunkPutInteger(len);
 
         // FIXME: optimise this (transfer data directly into parent)
-        for (i = 0; i < len; i++) SaveChunkPutByte(cur->start[i]);
+        for (i = 0; i < len; i++)
+            SaveChunkPutByte(cur->start[i]);
     }
 
     // all done, free stuff
@@ -635,12 +626,12 @@ void SaveChunkPutByte(uint8_t value)
     {
         static int position = 0;
         position++;
-        LogDebug("%d.%02x%s", chunk_stack_size, value,
-                 ((position % 10) == 0) ? "\n" : " ");
+        LogDebug("%d.%02x%s", chunk_stack_size, value, ((position % 10) == 0) ? "\n" : " ");
     }
 #endif
 
-    if (last_error) return;
+    if (last_error)
+        return;
 
     // write directly to the file when chunk stack is empty
     if (chunk_stack_size == 0)
@@ -726,9 +717,15 @@ uint32_t SaveChunkGetInteger(void)
 //  ANGLES
 //
 
-void SaveChunkPutAngle(BAMAngle value) { SaveChunkPutInteger((uint32_t)value); }
+void SaveChunkPutAngle(BAMAngle value)
+{
+    SaveChunkPutInteger((uint32_t)value);
+}
 
-BAMAngle SaveChunkGetAngle(void) { return (BAMAngle)SaveChunkGetInteger(); }
+BAMAngle SaveChunkGetAngle(void)
+{
+    return (BAMAngle)SaveChunkGetInteger();
+}
 
 //----------------------------------------------------------------------------
 
@@ -743,7 +740,8 @@ void SaveChunkPutFloat(float value)
     bool neg;
 
     neg = (value < 0.0f);
-    if (neg) value = -value;
+    if (neg)
+        value = -value;
 
     mant = (int)ldexp(frexp(value, &exp), 30);
 
@@ -779,7 +777,8 @@ void SaveChunkPutString(const char *str)
     SaveChunkPutByte(kStringMarker);
     SaveChunkPutShort(strlen(str));
 
-    for (; *str; str++) SaveChunkPutByte(*str);
+    for (; *str; str++)
+        SaveChunkPutByte(*str);
 }
 
 void SaveChunkPutMarker(const char *id)
@@ -791,14 +790,16 @@ void SaveChunkPutMarker(const char *id)
     EPI_ASSERT(id);
     EPI_ASSERT(strlen(id) == 4);
 
-    for (i = 0; i < 4; i++) SaveChunkPutByte((uint8_t)id[i]);
+    for (i = 0; i < 4; i++)
+        SaveChunkPutByte((uint8_t)id[i]);
 }
 
 const char *SaveChunkGetString(void)
 {
     int type = SaveChunkGetByte();
 
-    if (type == kNullStringMarker) return nullptr;
+    if (type == kNullStringMarker)
+        return nullptr;
 
     if (type != kStringMarker)
         FatalError("Corrupt savegame (invalid string).\n");
@@ -808,14 +809,16 @@ const char *SaveChunkGetString(void)
     char *result = new char[len + 1];
     result[len]  = 0;
 
-    for (int i = 0; i < len; i++) result[i] = (char)SaveChunkGetByte();
+    for (int i = 0; i < len; i++)
+        result[i] = (char)SaveChunkGetByte();
 
     return result;
 }
 
 const char *SaveChunkCopyString(const char *old)
 {
-    if (!old) return nullptr;
+    if (!old)
+        return nullptr;
 
     char *result = new char[strlen(old) + 1];
 
@@ -826,14 +829,16 @@ const char *SaveChunkCopyString(const char *old)
 
 void SaveChunkFreeString(const char *str)
 {
-    if (str) delete[] str;
+    if (str)
+        delete[] str;
 }
 
 bool SaveChunkGetMarker(char id[5])
 {
     int i;
 
-    for (i = 0; i < 4; i++) id[i] = (char)SaveChunkGetByte();
+    for (i = 0; i < 4; i++)
+        id[i] = (char)SaveChunkGetByte();
 
     id[4] = 0;
 

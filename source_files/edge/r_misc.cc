@@ -116,7 +116,7 @@ static float ApproximateAtan2(float y, float x)
     const float ONEQTR_PI = HMM_PI / 4.0;
     const float THRQTR_PI = 3.0 * HMM_PI / 4.0;
     float       r, angle;
-    float       abs_y = fabs(y) + 1e-10f;  // kludge to prevent 0/0 condition
+    float       abs_y = fabs(y) + 1e-10f; // kludge to prevent 0/0 condition
     if (x < 0.0f)
     {
         r     = (x + abs_y) / (abs_y - x);
@@ -129,22 +129,19 @@ static float ApproximateAtan2(float y, float x)
     }
     angle += (0.1963f * r * r - 0.9817f) * r;
     if (y < 0.0f)
-        return (-angle);  // negate if in quad III or IV
+        return (-angle); // negate if in quad III or IV
     else
         return (angle);
 }
 //
-BAMAngle RendererPointToAngle(float x1, float y1, float x, float y,
-                              bool precise)
+BAMAngle RendererPointToAngle(float x1, float y1, float x, float y, bool precise)
 {
     x -= x1;
     y -= y1;
 
     if (precise)
     {
-        return (AlmostEquals(x, 0.0f) && AlmostEquals(y, 0.0f))
-                   ? 0
-                   : epi::BAMFromDegrees(atan2(y, x) * (180 / HMM_PI));
+        return (AlmostEquals(x, 0.0f) && AlmostEquals(y, 0.0f)) ? 0 : epi::BAMFromDegrees(atan2(y, x) * (180 / HMM_PI));
     }
 
     return epi::BAMFromDegrees(ApproximateAtan2(y, x) * (180 / HMM_PI));
@@ -193,8 +190,7 @@ void RendererStartup(void)
 
     for (int i = 0; i < kSineTableSize; i++)
     {
-        sine_table[i] =
-            HMM_SINF(HMM_AngleDeg(i * 360.0f / ((float)(kSineTableMask))));
+        sine_table[i] = HMM_SINF(HMM_AngleDeg(i * 360.0f / ((float)(kSineTableMask))));
     }
 
     render_frame_count = 0;
@@ -203,7 +199,10 @@ void RendererStartup(void)
 //
 // Called at shutdown
 //
-void RendererShutdown(void) { RendererFreeupBSP(); }
+void RendererShutdown(void)
+{
+    RendererFreeupBSP();
+}
 
 Subsector *RendererPointInSubsector(float x, float y)
 {
@@ -253,11 +252,11 @@ RegionProperties *RendererPointGetProps(Subsector *sub, float z)
         // ignore liquids in the middle of THICK solids, or below real
         // floor or above real ceiling
         //
-        if (C->bottom_height < floor_h ||
-            C->bottom_height > sub->sector->ceiling_height)
+        if (C->bottom_height < floor_h || C->bottom_height > sub->sector->ceiling_height)
             continue;
 
-        if (z < C->top_height) return C->properties;
+        if (z < C->top_height)
+            return C->properties;
 
         floor_h = C->top_height;
     }

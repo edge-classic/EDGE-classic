@@ -30,7 +30,7 @@
 
 #include "con_var.h"
 #include "e_player.h"
-#include "p_blockmap.h"  // HACK!
+#include "p_blockmap.h" // HACK!
 #include "p_spec.h"
 
 constexpr float kBoomCarryFactor = 0.09375f;
@@ -42,18 +42,17 @@ constexpr float kOnFloorZ        = (float)INT_MIN;
 constexpr float kOnCeilingZ      = (float)INT_MAX;
 
 // -ACB- 2004/07/22 Moved here since its playsim related
-#define EDGE_DAMAGE_COMPUTE(var, dam)                                          \
-    {                                                                          \
-        (var) = (dam)->nominal_;                                               \
-                                                                               \
-        if ((dam)->error_ > 0)                                                 \
-            (var) +=                                                           \
-                (dam)->error_ * RandomByteSkewToZeroDeterministic() / 255.0f;  \
-        else if ((dam)->linear_max_ > 0)                                       \
-            (var) += ((dam)->linear_max_ - (var)) *                            \
-                     RandomByteDeterministic() / 255.0f;                       \
-                                                                               \
-        if ((var) < 0) (var) = 0;                                              \
+#define EDGE_DAMAGE_COMPUTE(var, dam)                                                                                  \
+    {                                                                                                                  \
+        (var) = (dam)->nominal_;                                                                                       \
+                                                                                                                       \
+        if ((dam)->error_ > 0)                                                                                         \
+            (var) += (dam)->error_ * RandomByteSkewToZeroDeterministic() / 255.0f;                                     \
+        else if ((dam)->linear_max_ > 0)                                                                               \
+            (var) += ((dam)->linear_max_ - (var)) * RandomByteDeterministic() / 255.0f;                                \
+                                                                                                                       \
+        if ((var) < 0)                                                                                                 \
+            (var) = 0;                                                                                                 \
     }
 
 //
@@ -64,11 +63,10 @@ extern ConsoleVariable force_infighting;
 void PlayerAttack(MapObject *playerobj, const AttackDefinition *attack);
 void SlammedIntoObject(MapObject *object, MapObject *objecthit);
 int  MissileContact(MapObject *object, MapObject *objecthit);
-int  BulletContact(MapObject *object, MapObject *objecthit, float damage,
-                   const DamageClass *damtype, float x, float y, float z);
+int  BulletContact(MapObject *object, MapObject *objecthit, float damage, const DamageClass *damtype, float x, float y,
+                   float z);
 void TouchyContact(MapObject *touchy, MapObject *victim);
-bool UseThing(MapObject *user, MapObject *thing, float open_bottom,
-              float open_top);
+bool UseThing(MapObject *user, MapObject *thing, float open_bottom, float open_top);
 void BringCorpseToLife(MapObject *corpse);
 
 //
@@ -117,25 +115,19 @@ void RemoveMapObject(MapObject *th);
 int  MapObjectFindLabel(MapObject *mobj, const char *label);
 bool MapObjectSetState(MapObject *mobj, int state);
 bool MapObjectSetStateDeferred(MapObject *mobj, int state, int tic_skip);
-void MapObjectSetDirectionAndSpeed(MapObject *mobj, BAMAngle angle, float slope,
-                                   float speed);
+void MapObjectSetDirectionAndSpeed(MapObject *mobj, BAMAngle angle, float slope, float speed);
 void RunMapObjectThinkers(bool extra_tic);
-void SpawnDebris(float x, float y, float z, BAMAngle angle,
-                 const MapObjectDefinition *debris);
-void SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff,
-               BAMAngle angle);
-void SpawnBlood(float x, float y, float z, float damage, BAMAngle angle,
-                const MapObjectDefinition *blood);
-void CalculateFullRegionProperties(const MapObject  *mo,
-                                   RegionProperties *newregp);
+void SpawnDebris(float x, float y, float z, BAMAngle angle, const MapObjectDefinition *debris);
+void SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff, BAMAngle angle);
+void SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const MapObjectDefinition *blood);
+void CalculateFullRegionProperties(const MapObject *mo, RegionProperties *newregp);
 bool HitLiquidFloor(MapObject *thing);
 
 // -ACB- 1998/08/02 New procedures for DDF etc...
 void       ItemRespawn(void);
 void       RemoveMissile(MapObject *missile);
 void       ExplodeMissile(MapObject *missile);
-MapObject *CreateMapObject(float x, float y, float z,
-                           const MapObjectDefinition *type);
+MapObject *CreateMapObject(float x, float y, float z, const MapObjectDefinition *type);
 
 // -ACB- 2005/05/06 Sound Effect Category Support
 int GetSoundEffectCategory(const MapObject *mo);
@@ -167,18 +159,15 @@ float ApproximateDistance(float dx, float dy);
 float ApproximateDistance(float dx, float dy, float dz);
 float ApproximateSlope(float dx, float dy, float dz);
 int   PointOnDividingLineSide(float x, float y, DividingLine *div);
-int PointOnDividingLineThick(float x, float y, DividingLine *div, float div_len,
-                             float thickness);
-void ComputeIntersection(DividingLine *div, float x1, float y1, float x2,
-                         float y2, float *ix, float *iy);
-int  BoxOnLineSide(const float *tmbox, Line *ld);
-int  BoxOnDividingLineSide(const float *tmbox, DividingLine *div);
-int  ThingOnLineSide(const MapObject *mo, Line *ld);
+int   PointOnDividingLineThick(float x, float y, DividingLine *div, float div_len, float thickness);
+void  ComputeIntersection(DividingLine *div, float x1, float y1, float x2, float y2, float *ix, float *iy);
+int   BoxOnLineSide(const float *tmbox, Line *ld);
+int   BoxOnDividingLineSide(const float *tmbox, DividingLine *div);
+int   ThingOnLineSide(const MapObject *mo, Line *ld);
 
 int   FindThingGap(VerticalGap *gaps, int gap_num, float z1, float z2);
 void  ComputeGaps(Line *ld);
-float ComputeThingGap(MapObject *thing, Sector *sec, float z, float *f,
-                      float *c, float floor_slope_z = 0.0f,
+float ComputeThingGap(MapObject *thing, Sector *sec, float z, float *f, float *c, float floor_slope_z = 0.0f,
                       float ceiling_slope_z = 0.0f);
 void  AddExtraFloor(Sector *sec, Line *line);
 void  RecomputeGapsAroundSector(Sector *sec);
@@ -212,37 +201,30 @@ extern std::vector<Line *> special_lines_hit;
 
 bool       MapCheckBlockingLine(MapObject *thing, MapObject *spawnthing);
 MapObject *FindCorpseForResurrection(MapObject *thing);
-MapObject *MapTargetAutoAim(MapObject *source, BAMAngle angle, float distance,
-                            bool force_aim);
-MapObject *DoMapTargetAutoAim(MapObject *source, BAMAngle angle, float distance,
-                              bool force_aim);
-void TargetTheory(MapObject *source, MapObject *target, float *x, float *y,
-                  float *z);
+MapObject *MapTargetAutoAim(MapObject *source, BAMAngle angle, float distance, bool force_aim);
+MapObject *DoMapTargetAutoAim(MapObject *source, BAMAngle angle, float distance, bool force_aim);
+void       TargetTheory(MapObject *source, MapObject *target, float *x, float *y, float *z);
 
-MapObject *AimLineAttack(MapObject *t1, BAMAngle angle, float distance,
-                         float *slope);
+MapObject *AimLineAttack(MapObject *t1, BAMAngle angle, float distance, float *slope);
 bool       CheckSolidSectorMove(Sector *sec, bool is_ceiling, float dh);
-bool SolidSectorMove(Sector *sec, bool is_ceiling, float dh, int crush = 10,
-                     bool nocarething = false);
-bool CheckAbsolutePosition(MapObject *thing, float x, float y, float z);
-bool CheckSight(MapObject *src, MapObject *dest);
-bool CheckSightToPoint(MapObject *src, float x, float y, float z);
-bool QuickVerticalSightCheck(MapObject *src, MapObject *dest);
-void RadiusAttack(MapObject *spot, MapObject *source, float radius,
-                  float damage, const DamageClass *damtype, bool thrust_only);
+bool       SolidSectorMove(Sector *sec, bool is_ceiling, float dh, int crush = 10, bool nocarething = false);
+bool       CheckAbsolutePosition(MapObject *thing, float x, float y, float z);
+bool       CheckSight(MapObject *src, MapObject *dest);
+bool       CheckSightToPoint(MapObject *src, float x, float y, float z);
+bool       QuickVerticalSightCheck(MapObject *src, MapObject *dest);
+void       RadiusAttack(MapObject *spot, MapObject *source, float radius, float damage, const DamageClass *damtype,
+                        bool thrust_only);
 
 bool TeleportMove(MapObject *thing, float x, float y, float z);
 bool TryMove(MapObject *thing, float x, float y);
 void SlideMove(MapObject *mo, float x, float y);
 void UseLines(Player *player);
-void LineAttack(MapObject *t1, BAMAngle angle, float distance, float slope,
-                float damage, const DamageClass *damtype,
+void LineAttack(MapObject *t1, BAMAngle angle, float distance, float slope, float damage, const DamageClass *damtype,
                 const MapObjectDefinition *puff);
 
 void UnblockLineEffectDebris(Line *TheLine, const LineType *special);
 
-MapObject *GetMapTargetAimInfo(MapObject *source, BAMAngle angle,
-                               float distance);
+MapObject *GetMapTargetAimInfo(MapObject *source, BAMAngle angle, float distance);
 
 bool ReplaceMidTexFromPart(Line *TheLine, ScrollingPart parts);
 
@@ -260,16 +242,11 @@ bool ReplaceMidTexFromPart(Line *TheLine, ScrollingPart parts);
 void TouchSpecialThing(MapObject *special, MapObject *toucher);
 void ThrustMapObject(MapObject *target, MapObject *inflictor, float thrust);
 void PushMapObject(MapObject *target, MapObject *inflictor, float thrust);
-void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
-                     float amount, const DamageClass *damtype = nullptr,
-                     bool weak_spot = false);
-void TelefragMapObject(MapObject *target, MapObject *inflictor,
-                       const DamageClass *damtype = nullptr);
-void KillMapObject(MapObject *source, MapObject *target,
-                   const DamageClass *damtype   = nullptr,
-                   bool               weak_spot = false);
-bool GiveBenefitList(Player *player, MapObject *special, Benefit *list,
-                     bool lose_them);
+void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source, float amount,
+                     const DamageClass *damtype = nullptr, bool weak_spot = false);
+void TelefragMapObject(MapObject *target, MapObject *inflictor, const DamageClass *damtype = nullptr);
+void KillMapObject(MapObject *source, MapObject *target, const DamageClass *damtype = nullptr, bool weak_spot = false);
+bool GiveBenefitList(Player *player, MapObject *special, Benefit *list, bool lose_them);
 bool HasBenefitInList(Player *player, Benefit *list);
 
 //

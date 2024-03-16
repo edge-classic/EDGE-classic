@@ -52,14 +52,10 @@
 #include "str_compare.h"
 
 EDGE_DEFINE_CONSOLE_VARIABLE(automap_debug_bsp, "0", kConsoleVariableFlagNone)
-EDGE_DEFINE_CONSOLE_VARIABLE(automap_debug_collisions, "0",
-                             kConsoleVariableFlagNone)
-EDGE_DEFINE_CONSOLE_VARIABLE(automap_gridsize, "128",
-                             kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(automap_keydoor_text, "0",
-                             kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(automap_smoothing, "1",
-                             kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(automap_debug_collisions, "0", kConsoleVariableFlagNone)
+EDGE_DEFINE_CONSOLE_VARIABLE(automap_gridsize, "128", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(automap_keydoor_text, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(automap_smoothing, "1", kConsoleVariableFlagArchive)
 
 extern unsigned int root_node;
 
@@ -67,20 +63,20 @@ extern unsigned int root_node;
 
 // NOTE: this order must match the one in the COAL API script
 static RGBAColor am_colors[kTotalAutomapColors] = {
-    epi::MakeRGBA(40, 40, 112),    // kAutomapColorGrid
-    epi::MakeRGBA(112, 112, 112),  // kAutomapColorAllmap
-    epi::MakeRGBA(255, 0, 0),      // kAutomapColorWall
-    epi::MakeRGBA(192, 128, 80),   // kAutomapColorStep
-    epi::MakeRGBA(192, 128, 80),   // kAutomapColorLedge
-    epi::MakeRGBA(220, 220, 0),    // kAutomapColorCeil
-    epi::MakeRGBA(0, 200, 200),    // kAutomapColorSecret
+    epi::MakeRGBA(40, 40, 112),   // kAutomapColorGrid
+    epi::MakeRGBA(112, 112, 112), // kAutomapColorAllmap
+    epi::MakeRGBA(255, 0, 0),     // kAutomapColorWall
+    epi::MakeRGBA(192, 128, 80),  // kAutomapColorStep
+    epi::MakeRGBA(192, 128, 80),  // kAutomapColorLedge
+    epi::MakeRGBA(220, 220, 0),   // kAutomapColorCeil
+    epi::MakeRGBA(0, 200, 200),   // kAutomapColorSecret
 
-    epi::MakeRGBA(255, 255, 255),  // kAutomapColorPlayer
-    epi::MakeRGBA(0, 255, 0),      // kAutomapColorMonster
-    epi::MakeRGBA(220, 0, 0),      // kAutomapColorCorpse
-    epi::MakeRGBA(0, 0, 255),      // kAutomapColorItem
-    epi::MakeRGBA(255, 188, 0),    // kAutomapColorMissile
-    epi::MakeRGBA(120, 60, 30)     // kAutomapColorScenery
+    epi::MakeRGBA(255, 255, 255), // kAutomapColorPlayer
+    epi::MakeRGBA(0, 255, 0),     // kAutomapColorMonster
+    epi::MakeRGBA(220, 0, 0),     // kAutomapColorCorpse
+    epi::MakeRGBA(0, 0, 255),     // kAutomapColorItem
+    epi::MakeRGBA(255, 188, 0),   // kAutomapColorMissile
+    epi::MakeRGBA(120, 60, 30)    // kAutomapColorScenery
 };
 
 // Automap keys
@@ -183,7 +179,7 @@ bool automap_keydoor_blink = false;
 
 extern ConsoleVariable double_framerate;
 
-extern Style *automap_style;  // FIXME: put in header
+extern Style *automap_style; // FIXME: put in header
 
 // translates between frame-buffer and map distances
 static inline float MapToFrameDistanceX(float x)
@@ -266,7 +262,10 @@ void AutomapSetArrow(AutomapArrowStyle type)
 
 void AutomapInitLevel(void)
 {
-    if (!cheat_automap.sequence) { cheat_automap.sequence = language["iddt"]; }
+    if (!cheat_automap.sequence)
+    {
+        cheat_automap.sequence = language["iddt"];
+    }
 
     ClearMarks();
 
@@ -338,22 +337,20 @@ bool AutomapResponder(InputEvent *ev)
         return true;
     }
 
-    if (!automap_active) return false;
+    if (!automap_active)
+        return false;
 
     // --- handle key releases ---
 
     if (ev->type == kInputEventKeyUp)
     {
-        if (EventMatchesKey(key_automap_left, sym) ||
-            EventMatchesKey(key_automap_right, sym))
+        if (EventMatchesKey(key_automap_left, sym) || EventMatchesKey(key_automap_right, sym))
             panning_x = 0;
 
-        if (EventMatchesKey(key_automap_up, sym) ||
-            EventMatchesKey(key_automap_down, sym))
+        if (EventMatchesKey(key_automap_up, sym) || EventMatchesKey(key_automap_down, sym))
             panning_y = 0;
 
-        if (EventMatchesKey(key_automap_zoom_in, sym) ||
-            EventMatchesKey(key_automap_zoom_out, sym))
+        if (EventMatchesKey(key_automap_zoom_in, sym) || EventMatchesKey(key_automap_zoom_out, sym))
             zooming = -1;
 
         return false;
@@ -361,7 +358,8 @@ bool AutomapResponder(InputEvent *ev)
 
     // --- handle key presses ---
 
-    if (ev->type != kInputEventKeyDown) return false;
+    if (ev->type != kInputEventKeyDown)
+        return false;
 
     // Had to move the automap cheat check up here thanks to Heretic's 'ravmap'
     // cheat - Dasho -ACB- 1999/09/28 Proper casting -AJA- 2022: allow this in
@@ -437,9 +435,7 @@ bool AutomapResponder(InputEvent *ev)
     if (EventMatchesKey(key_automap_mark, sym))
     {
         // -ACB- 1998/08/10 Use DDF Lang Reference
-        ConsolePlayerMessage(console_player, "%s %d",
-                             language["AutoMapMarkedSpot"],
-                             mark_point_number + 1);
+        ConsolePlayerMessage(console_player, "%s %d", language["AutoMapMarkedSpot"], mark_point_number + 1);
         AddMark();
         return true;
     }
@@ -472,7 +468,8 @@ bool AutomapResponder(InputEvent *ev)
 //
 void AutomapTicker(void)
 {
-    if (!automap_active) return;
+    if (!automap_active)
+        return;
 
     // Change x,y location
     if (!follow_player)
@@ -489,7 +486,8 @@ void AutomapTicker(void)
     }
 
     // Change the zoom if necessary
-    if (zooming > 0) ChangeWindowScale(zooming);
+    if (zooming > 0)
+        ChangeWindowScale(zooming);
 }
 
 //
@@ -527,7 +525,8 @@ static void GetRotatedCoords(float sx, float sy, float &dx, float &dy)
 
 static inline BAMAngle GetRotatedAngle(BAMAngle src)
 {
-    if (rotate_map) return src + kBAMAngle90 - frame_focus->angle_;
+    if (rotate_map)
+        return src + kBAMAngle90 - frame_focus->angle_;
 
     return src;
 }
@@ -537,9 +536,11 @@ static inline BAMAngle GetRotatedAngle(BAMAngle src)
 //
 static void DrawMLine(AutomapLine *ml, RGBAColor rgb, bool thick = true)
 {
-    if (hide_lines) return;
+    if (hide_lines)
+        return;
 
-    if (!automap_smoothing.d_) thick = false;
+    if (!automap_smoothing.d_)
+        thick = false;
 
     float x1 = MapToFrameCoordinatesX(ml->a.x, 0);
     float y1 = MapToFrameCoordinatesY(ml->a.y, 0);
@@ -557,7 +558,8 @@ static void DrawMLine(AutomapLine *ml, RGBAColor rgb, bool thick = true)
 // Lobo 2022: keyed doors automap colouring
 static void DrawMLineDoor(AutomapLine *ml, RGBAColor rgb)
 {
-    if (hide_lines) return;
+    if (hide_lines)
+        return;
 
     float x1 = MapToFrameCoordinatesX(ml->a.x, 0);
     float y1 = MapToFrameCoordinatesY(ml->a.y, 0);
@@ -585,25 +587,20 @@ static void DrawMLineDoor(AutomapLine *ml, RGBAColor rgb)
 }
 
 static AutomapLine player_dagger[] = {
-    { { -0.75f, 0.0f }, { 0.0f, 0.0f } },  // center line
+    { { -0.75f, 0.0f }, { 0.0f, 0.0f } },                                                // center line
 
-    { { -0.75f, 0.125f }, { 1.0f, 0.0f } },  // blade
+    { { -0.75f, 0.125f }, { 1.0f, 0.0f } },                                              // blade
     { { -0.75f, -0.125f }, { 1.0f, 0.0f } },
 
-    { { -0.75, -0.25 }, { -0.75, 0.25 } },  // crosspiece
-    { { -0.875, -0.25 }, { -0.875, 0.25 } },
-    { { -0.875, -0.25 }, { -0.75, -0.25 } },  // crosspiece connectors
-    { { -0.875, 0.25 }, { -0.75, 0.25 } },
-    { { -1.125, 0.125 }, { -1.125, -0.125 } },  // pommel
-    { { -1.125, 0.125 }, { -0.875, 0.125 } },
-    { { -1.125, -0.125 }, { -0.875, -0.125 } }
+    { { -0.75, -0.25 }, { -0.75, 0.25 } },                                               // crosspiece
+    { { -0.875, -0.25 }, { -0.875, 0.25 } },  { { -0.875, -0.25 }, { -0.75, -0.25 } },   // crosspiece connectors
+    { { -0.875, 0.25 }, { -0.75, 0.25 } },    { { -1.125, 0.125 }, { -1.125, -0.125 } }, // pommel
+    { { -1.125, 0.125 }, { -0.875, 0.125 } }, { { -1.125, -0.125 }, { -0.875, -0.125 } }
 };
 
-static constexpr uint8_t kAutomapPlayerDaggerLines =
-    (sizeof(player_dagger) / sizeof(AutomapLine));
+static constexpr uint8_t kAutomapPlayerDaggerLines = (sizeof(player_dagger) / sizeof(AutomapLine));
 
-static void DrawLineCharacter(AutomapLine *lineguy, int lineguylines,
-                              float radius, BAMAngle angle, RGBAColor rgb,
+static void DrawLineCharacter(AutomapLine *lineguy, int lineguylines, float radius, BAMAngle angle, RGBAColor rgb,
                               float x, float y)
 {
     float cx, cy;
@@ -613,7 +610,8 @@ static void DrawLineCharacter(AutomapLine *lineguy, int lineguylines,
     cx = MapToFrameCoordinatesX(cx, map_center_x);
     cy = MapToFrameCoordinatesY(cy, map_center_y);
 
-    if (radius < FrameToMapScale(2)) radius = FrameToMapScale(2);
+    if (radius < FrameToMapScale(2))
+        radius = FrameToMapScale(2);
 
     angle = GetRotatedAngle(angle);
 
@@ -622,12 +620,14 @@ static void DrawLineCharacter(AutomapLine *lineguy, int lineguylines,
         float ax = lineguy[i].a.x;
         float ay = lineguy[i].a.y;
 
-        if (angle) Rotate(ax, ay, angle);
+        if (angle)
+            Rotate(ax, ay, angle);
 
         float bx = lineguy[i].b.x;
         float by = lineguy[i].b.y;
 
-        if (angle) Rotate(bx, by, angle);
+        if (angle)
+            Rotate(bx, by, angle);
 
         ax = ax * MapToFrameDistanceX(radius);
         ay = ay * MapToFrameDistanceY(radius);
@@ -640,40 +640,40 @@ static void DrawLineCharacter(AutomapLine *lineguy, int lineguylines,
 
 // Aux2StringReplaceAll("Our_String", std::string("_"), std::string(" "));
 //
-std::string Aux2StringReplaceAll(std::string str, const std::string &from,
-                                 const std::string &to)
+std::string Aux2StringReplaceAll(std::string str, const std::string &from, const std::string &to)
 {
     size_t start_pos = 0;
     while ((start_pos = str.find(from, start_pos)) != std::string::npos)
     {
         str.replace(start_pos, from.length(), to);
-        start_pos +=
-            to.length();  // Handles case where 'to' is a substring of 'from'
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
     }
     return str;
 }
 
 // Lobo 2023: draw some key info in the middle of a line
-static void DrawKeyOnLine(AutomapLine *ml, int theKey,
-                          RGBAColor rgb = SG_WHITE_RGBA32)
+static void DrawKeyOnLine(AutomapLine *ml, int theKey, RGBAColor rgb = SG_WHITE_RGBA32)
 {
-    if (hide_lines) return;
+    if (hide_lines)
+        return;
 
-    if (automap_keydoor_text.d_ ==
-        0)  // Only if we have Keyed Doors Named turned on
+    if (automap_keydoor_text.d_ == 0) // Only if we have Keyed Doors Named turned on
         return;
 
     static const MapObjectDefinition *TheObject;
     std::string                       CleanName;
     CleanName.clear();
 
-    if (theKey == kDoorKeyStrictlyAllKeys) { CleanName = "All keys"; }
+    if (theKey == kDoorKeyStrictlyAllKeys)
+    {
+        CleanName = "All keys";
+    }
     else
     {
         TheObject = mobjtypes.LookupDoorKey(theKey);
-        if (!TheObject) return;  // Very rare, only zombiesTC hits this so far
-        CleanName = Aux2StringReplaceAll(TheObject->name_, std::string("_"),
-                                         std::string(" "));
+        if (!TheObject)
+            return; // Very rare, only zombiesTC hits this so far
+        CleanName = Aux2StringReplaceAll(TheObject->name_, std::string("_"), std::string(" "));
     }
 
     // *********************
@@ -689,7 +689,7 @@ static void DrawKeyOnLine(AutomapLine *ml, int theKey,
     Font *am_font = automap_style->fonts_[0];
 
     HudSetFont(am_font);
-    HudSetAlignment(0, 0);  // centre the characters
+    HudSetAlignment(0, 0); // centre the characters
     HudSetTextColor(rgb);
     float TextSize = 0.4f * map_scale;
     if (map_scale > 5.0f)  // only draw the text if we're zoomed in?
@@ -704,15 +704,12 @@ static void DrawKeyOnLine(AutomapLine *ml, int theKey,
             {
                 static State *idlestate;
                 idlestate = &states[TheObject->idle_state_];
-                if (!(idlestate->flags &
-                      kStateFrameFlagModel))  // Can't handle 3d models...yet
+                if (!(idlestate->flags & kStateFrameFlagModel)) // Can't handle 3d models...yet
                 {
                     bool         flip;
-                    const Image *img = RendererGetOtherSprite(
-                        idlestate->sprite, idlestate->frame, &flip);
+                    const Image *img = RendererGetOtherSprite(idlestate->sprite, idlestate->frame, &flip);
 
-                    if (epi::StringCaseCompareASCII("DUMMY_SPRITE",
-                                                    img->name_) != 0)
+                    if (epi::StringCaseCompareASCII("DUMMY_SPRITE", img->name_) != 0)
                         HudDrawImageNoOffset(x1, y1, img);
                     // HudStretchImage(x1, y1, 16, 16, img, 0.0, 0.0);
                 }
@@ -767,7 +764,8 @@ static void DrawGrid()
         float x1 = MapToFrameCoordinatesX(mx0 - jx * grid_size, map_center_x);
         float x2 = MapToFrameCoordinatesX(mx0 + jx * grid_size, map_center_x);
 
-        if (x1 < frame_x && x2 >= frame_x + frame_width) break;
+        if (x1 < frame_x && x2 >= frame_x + frame_width)
+            break;
 
         ml.a.x = mx0 + jx * ((j & 1) ? -grid_size : grid_size);
         ml.b.x = ml.a.x;
@@ -786,7 +784,8 @@ static void DrawGrid()
         float y1 = MapToFrameCoordinatesY(my0 + ky * grid_size, map_center_y);
         float y2 = MapToFrameCoordinatesY(my0 - ky * grid_size, map_center_y);
 
-        if (y1 < frame_y && y2 >= frame_y + frame_height) break;
+        if (y1 < frame_y && y2 >= frame_y + frame_height)
+            break;
 
         ml.a.x = -9e6;
         ml.b.x = +9e6;
@@ -808,7 +807,8 @@ static bool CheckSimiliarRegions(Sector *front, Sector *back)
 {
     Extrafloor *F, *B;
 
-    if (front->tag == back->tag) return true;
+    if (front->tag == back->tag)
+        return true;
 
     // Note: doesn't worry about liquids
 
@@ -817,9 +817,11 @@ static bool CheckSimiliarRegions(Sector *front, Sector *back)
 
     while (F && B)
     {
-        if (!AlmostEquals(F->top_height, B->top_height)) return false;
+        if (!AlmostEquals(F->top_height, B->top_height))
+            return false;
 
-        if (!AlmostEquals(F->bottom_height, B->bottom_height)) return false;
+        if (!AlmostEquals(F->bottom_height, B->bottom_height))
+            return false;
 
         F = F->higher;
         B = B->higher;
@@ -845,7 +847,8 @@ static void AutomapWalkSeg(Seg *seg)
     {
         if (automap_debug_bsp.d_)
         {
-            if (seg->partner && seg > seg->partner) return;
+            if (seg->partner && seg > seg->partner)
+                return;
 
             GetRotatedCoords(seg->vertex_1->X, seg->vertex_1->Y, l.a.x, l.a.y);
             GetRotatedCoords(seg->vertex_2->X, seg->vertex_2->Y, l.b.x, l.b.y);
@@ -858,16 +861,21 @@ static void AutomapWalkSeg(Seg *seg)
     EPI_ASSERT(line);
 
     // only draw segs on the _right_ side of linedefs
-    if (line->side[1] == seg->sidedef) return;
+    if (line->side[1] == seg->sidedef)
+        return;
 
     GetRotatedCoords(seg->vertex_1->X, seg->vertex_1->Y, l.a.x, l.a.y);
     GetRotatedCoords(seg->vertex_2->X, seg->vertex_2->Y, l.b.x, l.b.y);
 
     if ((line->flags & kLineFlagMapped) || show_walls)
     {
-        if ((line->flags & kLineFlagDontDraw) && !show_walls) return;
+        if ((line->flags & kLineFlagDontDraw) && !show_walls)
+            return;
 
-        if (!front || !back) { DrawMLine(&l, am_colors[kAutomapColorWall]); }
+        if (!front || !back)
+        {
+            DrawMLine(&l, am_colors[kAutomapColorWall]);
+        }
         else
         {
             // Lobo 2022: give keyed doors the colour of the required key
@@ -877,15 +885,13 @@ static void AutomapWalkSeg(Seg *seg)
                 {
                     if (line->special->keys_ & kDoorKeyStrictlyAllKeys)
                     {
-                        DrawMLineDoor(&l, SG_PURPLE_RGBA32);  // purple
+                        DrawMLineDoor(&l, SG_PURPLE_RGBA32); // purple
                         DrawKeyOnLine(&l, kDoorKeyStrictlyAllKeys);
                     }
-                    else if (line->special->keys_ & kDoorKeyBlueCard ||
-                             line->special->keys_ & kDoorKeyBlueSkull)
+                    else if (line->special->keys_ & kDoorKeyBlueCard || line->special->keys_ & kDoorKeyBlueSkull)
                     {
-                        DrawMLineDoor(&l, SG_BLUE_RGBA32);  // blue
-                        if (line->special->keys_ &
-                            (kDoorKeyBlueSkull | kDoorKeyBlueCard))
+                        DrawMLineDoor(&l, SG_BLUE_RGBA32); // blue
+                        if (line->special->keys_ & (kDoorKeyBlueSkull | kDoorKeyBlueCard))
                         {
                             DrawKeyOnLine(&l, kDoorKeyBlueCard);
                             DrawKeyOnLine(&l, kDoorKeyBlueSkull);
@@ -895,12 +901,10 @@ static void AutomapWalkSeg(Seg *seg)
                         else
                             DrawKeyOnLine(&l, kDoorKeyBlueSkull);
                     }
-                    else if (line->special->keys_ & kDoorKeyYellowCard ||
-                             line->special->keys_ & kDoorKeyYellowSkull)
+                    else if (line->special->keys_ & kDoorKeyYellowCard || line->special->keys_ & kDoorKeyYellowSkull)
                     {
-                        DrawMLineDoor(&l, SG_YELLOW_RGBA32);  // yellow
-                        if (line->special->keys_ &
-                            (kDoorKeyYellowSkull | kDoorKeyYellowCard))
+                        DrawMLineDoor(&l, SG_YELLOW_RGBA32); // yellow
+                        if (line->special->keys_ & (kDoorKeyYellowSkull | kDoorKeyYellowCard))
                         {
                             DrawKeyOnLine(&l, kDoorKeyYellowCard);
                             DrawKeyOnLine(&l, kDoorKeyYellowSkull);
@@ -910,12 +914,10 @@ static void AutomapWalkSeg(Seg *seg)
                         else
                             DrawKeyOnLine(&l, kDoorKeyYellowSkull);
                     }
-                    else if (line->special->keys_ & kDoorKeyRedCard ||
-                             line->special->keys_ & kDoorKeyRedSkull)
+                    else if (line->special->keys_ & kDoorKeyRedCard || line->special->keys_ & kDoorKeyRedSkull)
                     {
-                        DrawMLineDoor(&l, SG_RED_RGBA32);  // red
-                        if (line->special->keys_ &
-                            (kDoorKeyRedSkull | kDoorKeyRedCard))
+                        DrawMLineDoor(&l, SG_RED_RGBA32); // red
+                        if (line->special->keys_ & (kDoorKeyRedSkull | kDoorKeyRedCard))
                         {
                             DrawKeyOnLine(&l, kDoorKeyRedCard);
                             DrawKeyOnLine(&l, kDoorKeyRedSkull);
@@ -925,12 +927,10 @@ static void AutomapWalkSeg(Seg *seg)
                         else
                             DrawKeyOnLine(&l, kDoorKeyRedSkull);
                     }
-                    else if (line->special->keys_ & kDoorKeyGreenCard ||
-                             line->special->keys_ & kDoorKeyGreenSkull)
+                    else if (line->special->keys_ & kDoorKeyGreenCard || line->special->keys_ & kDoorKeyGreenSkull)
                     {
-                        DrawMLineDoor(&l, SG_GREEN_RGBA32);  // green
-                        if (line->special->keys_ &
-                            (kDoorKeyGreenSkull | kDoorKeyGreenCard))
+                        DrawMLineDoor(&l, SG_GREEN_RGBA32); // green
+                        if (line->special->keys_ & (kDoorKeyGreenSkull | kDoorKeyGreenCard))
                         {
                             DrawKeyOnLine(&l, kDoorKeyGreenCard);
                             DrawKeyOnLine(&l, kDoorKeyGreenSkull);
@@ -942,7 +942,7 @@ static void AutomapWalkSeg(Seg *seg)
                     }
                     else
                     {
-                        DrawMLineDoor(&l, SG_PURPLE_RGBA32);  // purple
+                        DrawMLineDoor(&l, SG_PURPLE_RGBA32); // purple
                     }
                     return;
                 }
@@ -970,10 +970,8 @@ static void AutomapWalkSeg(Seg *seg)
                 // ceiling level change
                 DrawMLine(&l, am_colors[kAutomapColorCeil]);
             }
-            else if ((front->extrafloor_used > 0 ||
-                      back->extrafloor_used > 0) &&
-                     (front->extrafloor_used != back->extrafloor_used ||
-                      !CheckSimiliarRegions(front, back)))
+            else if ((front->extrafloor_used > 0 || back->extrafloor_used > 0) &&
+                     (front->extrafloor_used != back->extrafloor_used || !CheckSimiliarRegions(front, back)))
             {
                 // -AJA- 1999/10/09: extra floor change.
                 DrawMLine(&l, am_colors[kAutomapColorLedge]);
@@ -983,15 +981,13 @@ static void AutomapWalkSeg(Seg *seg)
                 DrawMLine(&l, am_colors[kAutomapColorAllmap]);
             }
             else if (line->slide_door)
-            {  // Lobo: draw sliding doors on automap
+            { // Lobo: draw sliding doors on automap
                 DrawMLine(&l, am_colors[kAutomapColorCeil]);
             }
         }
     }
     else if (frame_focus->player_ &&
-             (show_allmap ||
-              !AlmostEquals(frame_focus->player_->powers_[kPowerTypeAllMap],
-                            0.0f)))
+             (show_allmap || !AlmostEquals(frame_focus->player_->powers_[kPowerTypeAllMap], 0.0f)))
     {
         if (!(line->flags & kLineFlagDontDraw))
             DrawMLine(&l, am_colors[kAutomapColorAllmap]);
@@ -1002,7 +998,8 @@ static void DrawObjectBounds(MapObject *mo, RGBAColor rgb)
 {
     float R = mo->radius_;
 
-    if (R < 2) R = 2;
+    if (R < 2)
+        R = 2;
 
     float lx = mo->x - R;
     float ly = mo->y - R;
@@ -1029,14 +1026,14 @@ static void DrawObjectBounds(MapObject *mo, RGBAColor rgb)
 }
 
 static RGBAColor player_colors[8] = {
-    epi::MakeRGBA(5, 255, 5),      // GREEN,
-    epi::MakeRGBA(80, 80, 80),     // GRAY + GRAY_LEN*2/3,
-    epi::MakeRGBA(160, 100, 50),   // BROWN,
-    epi::MakeRGBA(255, 255, 255),  // RED + RED_LEN/2,
-    epi::MakeRGBA(255, 176, 5),    // ORANGE,
-    epi::MakeRGBA(170, 170, 170),  // GRAY + GRAY_LEN*1/3,
-    epi::MakeRGBA(255, 5, 5),      // RED,
-    epi::MakeRGBA(255, 185, 225),  // PINK
+    epi::MakeRGBA(5, 255, 5),     // GREEN,
+    epi::MakeRGBA(80, 80, 80),    // GRAY + GRAY_LEN*2/3,
+    epi::MakeRGBA(160, 100, 50),  // BROWN,
+    epi::MakeRGBA(255, 255, 255), // RED + RED_LEN/2,
+    epi::MakeRGBA(255, 176, 5),   // ORANGE,
+    epi::MakeRGBA(170, 170, 170), // GRAY + GRAY_LEN*1/3,
+    epi::MakeRGBA(255, 5, 5),     // RED,
+    epi::MakeRGBA(255, 185, 225), // PINK
 };
 
 //
@@ -1045,57 +1042,49 @@ static RGBAColor player_colors[8] = {
 // A line drawing of the player pointing right, starting from the
 // middle.
 
-static AutomapLine player_arrow[] = {
-    { { -0.875f, 0.0f }, { 1.0f, 0.0f } },  // -----
+static AutomapLine player_arrow[] = { { { -0.875f, 0.0f }, { 1.0f, 0.0f } },     // -----
 
-    { { 1.0f, 0.0f }, { 0.5f, 0.25f } },  // ----->
-    { { 1.0f, 0.0f }, { 0.5f, -0.25f } },
+                                      { { 1.0f, 0.0f }, { 0.5f, 0.25f } },       // ----->
+                                      { { 1.0f, 0.0f }, { 0.5f, -0.25f } },
 
-    { { -0.875f, 0.0f }, { -1.125f, 0.25f } },  // >---->
-    { { -0.875f, 0.0f }, { -1.125f, -0.25f } },
+                                      { { -0.875f, 0.0f }, { -1.125f, 0.25f } }, // >---->
+                                      { { -0.875f, 0.0f }, { -1.125f, -0.25f } },
 
-    { { -0.625f, 0.0f }, { -0.875f, 0.25f } },  // >>--->
-    { { -0.625f, 0.0f }, { -0.875f, -0.25f } }
-};
+                                      { { -0.625f, 0.0f }, { -0.875f, 0.25f } }, // >>--->
+                                      { { -0.625f, 0.0f }, { -0.875f, -0.25f } } };
 
-static constexpr uint8_t kAutomapPlayerArrowLines =
-    (sizeof(player_arrow) / sizeof(AutomapLine));
+static constexpr uint8_t kAutomapPlayerArrowLines = (sizeof(player_arrow) / sizeof(AutomapLine));
 
-static AutomapLine cheat_player_arrow[] = {
-    { { -0.875f, 0.0f }, { 1.0f, 0.0f } },  // -----
+static AutomapLine cheat_player_arrow[] = { { { -0.875f, 0.0f }, { 1.0f, 0.0f } },      // -----
 
-    { { 1.0f, 0.0f }, { 0.5f, 0.167f } },  // ----->
-    { { 1.0f, 0.0f }, { 0.5f, -0.167f } },
+                                            { { 1.0f, 0.0f }, { 0.5f, 0.167f } },       // ----->
+                                            { { 1.0f, 0.0f }, { 0.5f, -0.167f } },
 
-    { { -0.875f, 0.0f }, { -1.125f, 0.167f } },  // >----->
-    { { -0.875f, 0.0f }, { -1.125f, -0.167f } },
+                                            { { -0.875f, 0.0f }, { -1.125f, 0.167f } }, // >----->
+                                            { { -0.875f, 0.0f }, { -1.125f, -0.167f } },
 
-    { { -0.625f, 0.0f }, { -0.875f, 0.167f } },  // >>----->
-    { { -0.625f, 0.0f }, { -0.875f, -0.167f } },
+                                            { { -0.625f, 0.0f }, { -0.875f, 0.167f } }, // >>----->
+                                            { { -0.625f, 0.0f }, { -0.875f, -0.167f } },
 
-    { { -0.5f, 0.0f }, { -0.5f, -0.167f } },  // >>-d--->
-    { { -0.5f, -0.167f }, { -0.5f + 0.167f, -0.167f } },
-    { { -0.5f + 0.167f, -0.167f }, { -0.5f + 0.167f, 0.25f } },
+                                            { { -0.5f, 0.0f }, { -0.5f, -0.167f } },    // >>-d--->
+                                            { { -0.5f, -0.167f }, { -0.5f + 0.167f, -0.167f } },
+                                            { { -0.5f + 0.167f, -0.167f }, { -0.5f + 0.167f, 0.25f } },
 
-    { { -0.167f, 0.0f }, { -0.167f, -0.167f } },  // >>-dd-->
-    { { -0.167f, -0.167f }, { 0.0f, -0.167f } },
-    { { 0.0f, -0.167f }, { 0.0f, 0.25f } },
+                                            { { -0.167f, 0.0f }, { -0.167f, -0.167f } }, // >>-dd-->
+                                            { { -0.167f, -0.167f }, { 0.0f, -0.167f } },
+                                            { { 0.0f, -0.167f }, { 0.0f, 0.25f } },
 
-    { { 0.167f, 0.25f }, { 0.167f, -0.143f } },  // >>-ddt->
-    { { 0.167f, -0.143f }, { 0.167f + 0.031f, -0.143f - 0.031f } },
-    { { 0.167f + 0.031f, -0.143f - 0.031f }, { 0.167f + 0.1f, -0.143f } }
-};
+                                            { { 0.167f, 0.25f }, { 0.167f, -0.143f } }, // >>-ddt->
+                                            { { 0.167f, -0.143f }, { 0.167f + 0.031f, -0.143f - 0.031f } },
+                                            { { 0.167f + 0.031f, -0.143f - 0.031f }, { 0.167f + 0.1f, -0.143f } } };
 
-static constexpr uint8_t kAutomapCheatPlayerArrowLines =
-    (sizeof(cheat_player_arrow) / sizeof(AutomapLine));
+static constexpr uint8_t kAutomapCheatPlayerArrowLines = (sizeof(cheat_player_arrow) / sizeof(AutomapLine));
 
 static AutomapLine thin_triangle_guy[] = { { { -0.5f, -0.7f }, { 1.0f, 0.0f } },
                                            { { 1.0f, 0.0f }, { -0.5f, 0.7f } },
-                                           { { -0.5f, 0.7f },
-                                             { -0.5f, -0.7f } } };
+                                           { { -0.5f, 0.7f }, { -0.5f, -0.7f } } };
 
-static constexpr uint8_t kAutomapThinTriangleGuyLines =
-    (sizeof(thin_triangle_guy) / sizeof(AutomapLine));
+static constexpr uint8_t kAutomapThinTriangleGuyLines = (sizeof(thin_triangle_guy) / sizeof(AutomapLine));
 
 static void AutomapDrawPlayer(MapObject *mo)
 {
@@ -1106,31 +1095,25 @@ static void AutomapDrawPlayer(MapObject *mo)
     {
         switch (current_arrow_type)
         {
-            case kAutomapArrowStyleHeretic:
-                DrawLineCharacter(player_dagger, kAutomapPlayerDaggerLines,
-                                  mo->radius_, mo->angle_,
+        case kAutomapArrowStyleHeretic:
+            DrawLineCharacter(player_dagger, kAutomapPlayerDaggerLines, mo->radius_, mo->angle_,
+                              am_colors[kAutomapColorPlayer], mo->x, mo->y);
+            break;
+        case kAutomapArrowStyleDoom:
+        default:
+            if (cheating)
+                DrawLineCharacter(cheat_player_arrow, kAutomapCheatPlayerArrowLines, mo->radius_, mo->angle_,
                                   am_colors[kAutomapColorPlayer], mo->x, mo->y);
-                break;
-            case kAutomapArrowStyleDoom:
-            default:
-                if (cheating)
-                    DrawLineCharacter(
-                        cheat_player_arrow, kAutomapCheatPlayerArrowLines,
-                        mo->radius_, mo->angle_, am_colors[kAutomapColorPlayer],
-                        mo->x, mo->y);
-                else
-                    DrawLineCharacter(player_arrow, kAutomapPlayerArrowLines,
-                                      mo->radius_, mo->angle_,
-                                      am_colors[kAutomapColorPlayer], mo->x,
-                                      mo->y);
-                break;
+            else
+                DrawLineCharacter(player_arrow, kAutomapPlayerArrowLines, mo->radius_, mo->angle_,
+                                  am_colors[kAutomapColorPlayer], mo->x, mo->y);
+            break;
         }
         return;
     }
 
-    DrawLineCharacter(
-        player_arrow, kAutomapPlayerArrowLines, mo->radius_, mo->angle_,
-        player_colors[mo->player_->player_number_ & 0x07], mo->x, mo->y);
+    DrawLineCharacter(player_arrow, kAutomapPlayerArrowLines, mo->radius_, mo->angle_,
+                      player_colors[mo->player_->player_number_ & 0x07], mo->x, mo->y);
 }
 
 static void AutomapWalkThing(MapObject *mo)
@@ -1143,7 +1126,8 @@ static void AutomapWalkThing(MapObject *mo)
         return;
     }
 
-    if (!show_things) return;
+    if (!show_things)
+        return;
 
     // -AJA- more colourful things
     if (mo->flags_ & kMapObjectFlagSpecial)
@@ -1161,8 +1145,8 @@ static void AutomapWalkThing(MapObject *mo)
         return;
     }
 
-    DrawLineCharacter(thin_triangle_guy, kAutomapThinTriangleGuyLines,
-                      mo->radius_, mo->angle_, am_colors[index], mo->x, mo->y);
+    DrawLineCharacter(thin_triangle_guy, kAutomapThinTriangleGuyLines, mo->radius_, mo->angle_, am_colors[index], mo->x,
+                      mo->y);
 }
 
 //
@@ -1220,8 +1204,7 @@ static bool AutomapCheckBBox(float *bspcoord)
     float y1 = MapToFrameCoordinatesY(T, map_center_y);
     float y2 = MapToFrameCoordinatesY(B, map_center_y);
 
-    return !(x2 < frame_x - 1 || x1 > frame_x + frame_width + 1 ||
-             y2 < frame_y - 1 || y1 > frame_y + frame_height + 1);
+    return !(x2 < frame_x - 1 || x1 > frame_x + frame_width + 1 || y2 < frame_y - 1 || y1 > frame_y + frame_height + 1);
 }
 
 //
@@ -1257,13 +1240,14 @@ static void DrawMarks(void)
     Font *am_font = automap_style->fonts_[0];
 
     HudSetFont(am_font);
-    HudSetAlignment(0, 0);  // centre the characters
+    HudSetAlignment(0, 0); // centre the characters
 
     char buffer[4];
 
     for (int i = 0; i < kAutomapTotalMarkPoints; i++)
     {
-        if (AlmostEquals(mark_points[i].x, (float)kAutomapNoMarkX)) continue;
+        if (AlmostEquals(mark_points[i].x, (float)kAutomapNoMarkX))
+            continue;
 
         float mx, my;
 
@@ -1272,8 +1256,7 @@ static void DrawMarks(void)
         buffer[0] = ('1' + i);
         buffer[1] = 0;
 
-        HudDrawText(MapToFrameCoordinatesX(mx, map_center_x),
-                    MapToFrameCoordinatesY(my, map_center_y), buffer);
+        HudDrawText(MapToFrameCoordinatesX(mx, map_center_x), MapToFrameCoordinatesY(my, map_center_y), buffer);
     }
 
     HudSetFont();
@@ -1303,23 +1286,21 @@ void AutomapRender(float x, float y, float w, float h, MapObject *focus)
         float old_alpha = HudGetAlpha();
         HudSetAlpha(automap_style->definition_->bg_.translucency_);
         if (automap_style->definition_->special_ == 0)
-            HudStretchImage(-90, 0, 500, 200, automap_style->background_image_,
-                            0.0, 0.0);
+            HudStretchImage(-90, 0, 500, 200, automap_style->background_image_, 0.0, 0.0);
         else
-            HudTileImage(-90, 0, 500, 200, automap_style->background_image_,
-                         0.0, 0.0);
+            HudTileImage(-90, 0, 500, 200, automap_style->background_image_, 0.0, 0.0);
         HudSetAlpha(old_alpha);
     }
     else if (automap_style->definition_->bg_.colour_ != kRGBANoValue)
     {
         float old_alpha = HudGetAlpha();
         HudSetAlpha(automap_style->definition_->bg_.translucency_);
-        HudSolidBox(x, y, x + w, y + h,
-                    automap_style->definition_->bg_.colour_);
+        HudSolidBox(x, y, x + w, y + h, automap_style->definition_->bg_.colour_);
         HudSetAlpha(old_alpha);
     }
 
-    if (grid && !rotate_map) DrawGrid();
+    if (grid && !rotate_map)
+        DrawGrid();
 
     // walk the bsp tree
     AutomapWalkBSPNode(root_node);
@@ -1338,17 +1319,23 @@ void AutomapGetState(int *state, float *zoom)
 {
     *state = 0;
 
-    if (grid) *state |= kAutomapStateGrid;
+    if (grid)
+        *state |= kAutomapStateGrid;
 
-    if (follow_player) *state |= kAutomapStateFollow;
+    if (follow_player)
+        *state |= kAutomapStateFollow;
 
-    if (rotate_map) *state |= kAutomapStateRotate;
+    if (rotate_map)
+        *state |= kAutomapStateRotate;
 
-    if (show_things) *state |= kAutomapStateThings;
+    if (show_things)
+        *state |= kAutomapStateThings;
 
-    if (show_walls) *state |= kAutomapStateWalls;
+    if (show_walls)
+        *state |= kAutomapStateWalls;
 
-    if (hide_lines) *state |= kAutomapStateHideLines;
+    if (hide_lines)
+        *state |= kAutomapStateHideLines;
 
     // nothing required for kAutomapStateAllmap flag (no actual state)
 

@@ -52,8 +52,7 @@ std::string GetDirectory(std::string_view path);
 std::string GetExtension(std::string_view path);
 std::string MakePathRelative(std::string_view parent, std::string_view child);
 std::string PathAppend(std::string_view parent, std::string_view child);
-std::string PathAppendIfNotAbsolute(std::string_view parent,
-                                    std::string_view child);
+std::string PathAppendIfNotAbsolute(std::string_view parent, std::string_view child);
 std::string SanitizePath(std::string_view path);
 bool        IsPathAbsolute(std::string_view path);
 void        ReplaceExtension(std::string &path, std::string_view ext);
@@ -62,11 +61,9 @@ void        ReplaceExtension(std::string &path, std::string_view ext);
 bool CurrentDirectorySet(std::string_view dir);
 bool IsDirectory(std::string_view dir);
 bool MakeDirectory(std::string_view dir);
-bool ReadDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir,
-                   const char *mask);
+bool ReadDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir, const char *mask);
 bool WalkDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir);
-bool OpenDirectory(
-    const std::string &src);  // Opens a directory in explorer, finder, etc
+bool OpenDirectory(const std::string &src); // Opens a directory in explorer, finder, etc
 
 // File Functions
 bool  FileExists(std::string_view name);
@@ -81,7 +78,7 @@ bool FileDelete(std::string_view name);
 // Performs a sync for platforms with virtualized file systems
 void SyncFilesystem(bool populate = false);
 
-}  // namespace epi
+} // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

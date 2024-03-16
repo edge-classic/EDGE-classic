@@ -31,12 +31,9 @@ PlaylistEntryContainer playlist;
 //
 static void DDF_MusicParseInfo(const char *info)
 {
-    static const char *const musstrtype[] = { "UNKNOWN", "MIDI",   "MUS",
-                                              "OGG",     "MP3",    "FLAC",
-                                              "M4P",     "RAD",    "IMF280",
-                                              "IMF560",  "IMF700", nullptr };
-    static const char *const musinftype[] = { "UNKNOWN", "LUMP", "FILE", "PACK",
-                                              nullptr };
+    static const char *const musstrtype[] = { "UNKNOWN", "MIDI", "MUS",    "OGG",    "MP3",    "FLAC",
+                                              "M4P",     "RAD",  "IMF280", "IMF560", "IMF700", nullptr };
+    static const char *const musinftype[] = { "UNKNOWN", "LUMP", "FILE", "PACK", nullptr };
 
     char charbuff[256];
     int  pos, i;
@@ -56,25 +53,23 @@ static void DDF_MusicParseInfo(const char *info)
         pos++;
     }
 
-    if (i == 255) DDF_Error("DDF_MusicParseInfo: Music info too big\n");
+    if (i == 255)
+        DDF_Error("DDF_MusicParseInfo: Music info too big\n");
 
     // -AJA- terminate charbuff with trailing \0.
     charbuff[i] = 0;
 
     i = kDDFMusicUnknown;
-    while (i != kTotalDDFMusicTypes &&
-           epi::StringCaseCompareASCII(charbuff, musstrtype[i]) != 0)
+    while (i != kTotalDDFMusicTypes && epi::StringCaseCompareASCII(charbuff, musstrtype[i]) != 0)
         i++;
 
     if (i == kTotalDDFMusicTypes)
     {
         i = kDDFMusicDataUnknown;
-        while (musinftype[i] != nullptr &&
-               epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
+        while (musinftype[i] != nullptr && epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
             i++;
         if (i == kTotalDDFMusicDataTypes)
-            DDF_Warning("DDF_MusicParseInfo: Unknown music type: '%s'\n",
-                        charbuff);
+            DDF_Warning("DDF_MusicParseInfo: Unknown music type: '%s'\n", charbuff);
         else
         {
             dynamic_plentry->infotype_ = (DDFMusicDataType)i;
@@ -101,21 +96,20 @@ static void DDF_MusicParseInfo(const char *info)
         i++;
     }
 
-    if (i == 255) DDF_Error("DDF_MusicParseInfo: Music info too big\n");
+    if (i == 255)
+        DDF_Error("DDF_MusicParseInfo: Music info too big\n");
 
     // -AJA- terminate charbuff with trailing \0.
     charbuff[i] = 0;
 
     i = kDDFMusicDataUnknown;
-    while (musinftype[i] != nullptr &&
-           epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
+    while (musinftype[i] != nullptr && epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
         i++;
 
     if (i == kTotalDDFMusicDataTypes)
         DDF_Warning("DDF_MusicParseInfo: Unknown music info: '%s'\n", charbuff);
     else
-        dynamic_plentry->infotype_ =
-            (DDFMusicDataType)i;  // technically speaking this is proper
+        dynamic_plentry->infotype_ = (DDFMusicDataType)i; // technically speaking this is proper
 
     // Remained is the string reference: filename/lumpname
     pos++;
@@ -132,7 +126,8 @@ static void PlaylistStartEntry(const char *name, bool extend)
 {
     int number = HMM_MAX(0, atoi(name));
 
-    if (number == 0) DDF_Error("Bad music number in playlist.ddf: %s\n", name);
+    if (number == 0)
+        DDF_Error("Bad music number in playlist.ddf: %s\n", name);
 
     dynamic_plentry = playlist.Find(number);
 
@@ -158,8 +153,7 @@ static void PlaylistStartEntry(const char *name, bool extend)
     playlist.push_back(dynamic_plentry);
 }
 
-static void PlaylistParseField(const char *field, const char *contents,
-                               int index, bool is_last)
+static void PlaylistParseField(const char *field, const char *contents, int index, bool is_last)
 {
 #if (DEBUG_DDF)
     LogDebug("PLAYLIST_PARSE: %s = %s;\n", field, contents);
@@ -222,12 +216,17 @@ void DDF_MusicPlaylistCleanUp(void)
 //
 // PlaylistEntry constructor
 //
-PlaylistEntry::PlaylistEntry() : number_(0) { Default(); }
+PlaylistEntry::PlaylistEntry() : number_(0)
+{
+    Default();
+}
 
 //
 // PlaylistEntry destructor
 //
-PlaylistEntry::~PlaylistEntry() {}
+PlaylistEntry::~PlaylistEntry()
+{
+}
 
 //
 // PlaylistEntry::CopyDetail()
@@ -258,12 +257,11 @@ void PlaylistEntry::Default()
 //
 PlaylistEntry *PlaylistEntryContainer::Find(int number)
 {
-    for (std::vector<PlaylistEntry *>::iterator iter     = begin(),
-                                                iter_end = end();
-         iter != iter_end; iter++)
+    for (std::vector<PlaylistEntry *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
     {
         PlaylistEntry *p = *iter;
-        if (p->number_ == number) return p;
+        if (p->number_ == number)
+            return p;
     }
 
     return nullptr;
@@ -271,12 +269,11 @@ PlaylistEntry *PlaylistEntryContainer::Find(int number)
 
 int PlaylistEntryContainer::FindLast(const char *name)
 {
-    for (std::vector<PlaylistEntry *>::reverse_iterator iter     = rbegin(),
-                                                        iter_end = rend();
-         iter != iter_end; iter++)
+    for (std::vector<PlaylistEntry *>::reverse_iterator iter = rbegin(), iter_end = rend(); iter != iter_end; iter++)
     {
         PlaylistEntry *p = *iter;
-        if (DDF_CompareName(p->info_.c_str(), name) == 0) return p->number_;
+        if (DDF_CompareName(p->info_.c_str(), name) == 0)
+            return p->number_;
     }
 
     return -1;
@@ -286,12 +283,13 @@ int PlaylistEntryContainer::FindFree()
 {
     int HighestNum = 0;
 
-    for (std::vector<PlaylistEntry *>::iterator iter     = begin(),
-                                                iter_end = end();
-         iter != iter_end; iter++)
+    for (std::vector<PlaylistEntry *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
     {
         PlaylistEntry *p = *iter;
-        if (p->number_ > HighestNum) { HighestNum = p->number_; }
+        if (p->number_ > HighestNum)
+        {
+            HighestNum = p->number_;
+        }
     }
     HighestNum = HighestNum + 1;
     return HighestNum;

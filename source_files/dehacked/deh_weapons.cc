@@ -27,7 +27,7 @@
 
 #include "deh_weapons.h"
 
-#include <stddef.h>  // offsetof
+#include <stddef.h> // offsetof
 #include <stdio.h>
 #include <string.h>
 
@@ -55,33 +55,32 @@ static constexpr char kWeaponFlagNoThrust         = 't';
 static constexpr char kWeaponFlagFeedback         = 'b';
 
 WeaponInfo weapon_info[kTotalWeapons] = {
-    { "FIST", kAmmoTypeNoAmmo, 0, 1, 0, "f", kS_PUNCHUP, kS_PUNCHDOWN, kS_PUNCH,
-      kS_PUNCH1, kS_NULL, 0 },
-    { "PISTOL", kAmmoTypeBullet, 1, 2, 2, "fr", kS_PISTOLUP, kS_PISTOLDOWN,
-      kS_PISTOL, kS_PISTOL1, kS_PISTOLFLASH, 0 },
-    { "SHOTGUN", kAmmoTypeShell, 1, 3, 3, nullptr, kS_SGUNUP, kS_SGUNDOWN,
-      kS_SGUN, kS_SGUN1, kS_SGUNFLASH1, 0 },
-    { "CHAINGUN", kAmmoTypeBullet, 1, 4, 5, "r", kS_CHAINUP, kS_CHAINDOWN,
-      kS_CHAIN, kS_CHAIN1, kS_CHAINFLASH1, 0 },
-    { "ROCKET_LAUNCHER", kAmmoTypeRocket, 1, 5, 6, "d", kS_MISSILEUP,
-      kS_MISSILEDOWN, kS_MISSILE, kS_MISSILE1, kS_MISSILEFLASH1, 0 },
-    { "PLASMA_RIFLE", kAmmoTypeCell, 1, 6, 7, nullptr, kS_PLASMAUP,
-      kS_PLASMADOWN, kS_PLASMA, kS_PLASMA1, kS_PLASMAFLASH1, 0 },
-    { "BFG_9000", kAmmoTypeCell, 40, 7, 8, "d", kS_BFGUP, kS_BFGDOWN, kS_BFG,
-      kS_BFG1, kS_BFGFLASH1, 0 },
-    { "CHAINSAW", kAmmoTypeNoAmmo, 0, 1, 1, "bt", kS_SAWUP, kS_SAWDOWN, kS_SAW,
-      kS_SAW1, kS_NULL, 0 },
-    { "SUPER_SHOTGUN", kAmmoTypeShell, 2, 3, 4, nullptr, kS_DSGUNUP,
-      kS_DSGUNDOWN, kS_DSGUN, kS_DSGUN1, kS_DSGUNFLASH1, 0 },
+    { "FIST", kAmmoTypeNoAmmo, 0, 1, 0, "f", kS_PUNCHUP, kS_PUNCHDOWN, kS_PUNCH, kS_PUNCH1, kS_NULL, 0 },
+    { "PISTOL", kAmmoTypeBullet, 1, 2, 2, "fr", kS_PISTOLUP, kS_PISTOLDOWN, kS_PISTOL, kS_PISTOL1, kS_PISTOLFLASH, 0 },
+    { "SHOTGUN", kAmmoTypeShell, 1, 3, 3, nullptr, kS_SGUNUP, kS_SGUNDOWN, kS_SGUN, kS_SGUN1, kS_SGUNFLASH1, 0 },
+    { "CHAINGUN", kAmmoTypeBullet, 1, 4, 5, "r", kS_CHAINUP, kS_CHAINDOWN, kS_CHAIN, kS_CHAIN1, kS_CHAINFLASH1, 0 },
+    { "ROCKET_LAUNCHER", kAmmoTypeRocket, 1, 5, 6, "d", kS_MISSILEUP, kS_MISSILEDOWN, kS_MISSILE, kS_MISSILE1,
+      kS_MISSILEFLASH1, 0 },
+    { "PLASMA_RIFLE", kAmmoTypeCell, 1, 6, 7, nullptr, kS_PLASMAUP, kS_PLASMADOWN, kS_PLASMA, kS_PLASMA1,
+      kS_PLASMAFLASH1, 0 },
+    { "BFG_9000", kAmmoTypeCell, 40, 7, 8, "d", kS_BFGUP, kS_BFGDOWN, kS_BFG, kS_BFG1, kS_BFGFLASH1, 0 },
+    { "CHAINSAW", kAmmoTypeNoAmmo, 0, 1, 1, "bt", kS_SAWUP, kS_SAWDOWN, kS_SAW, kS_SAW1, kS_NULL, 0 },
+    { "SUPER_SHOTGUN", kAmmoTypeShell, 2, 3, 4, nullptr, kS_DSGUNUP, kS_DSGUNDOWN, kS_DSGUN, kS_DSGUN1, kS_DSGUNFLASH1,
+      0 },
 };
 
 bool weapon_modified[kTotalWeapons];
 
 //----------------------------------------------------------------------------
 
-void weapons::Init() { memset(weapon_modified, 0, sizeof(weapon_modified)); }
+void weapons::Init()
+{
+    memset(weapon_modified, 0, sizeof(weapon_modified));
+}
 
-void weapons::Shutdown() {}
+void weapons::Shutdown()
+{
+}
 
 namespace weapons
 {
@@ -89,25 +88,23 @@ namespace weapons
 struct FlagName
 {
     int         flag;
-    const char *name;  // for EDGE
-    const char *bex;   // nullptr if same as EDGE name
+    const char *name; // for EDGE
+    const char *bex;  // nullptr if same as EDGE name
 };
 
 const FieldReference weapon_field[] = {
     { "Ammo type", offsetof(WeaponInfo, ammo), kFieldTypeAmmoNumber },
-    { "Ammo per shot", offsetof(WeaponInfo, ammo_per_shot),
-      kFieldTypeZeroOrGreater },
+    { "Ammo per shot", offsetof(WeaponInfo, ammo_per_shot), kFieldTypeZeroOrGreater },
 
     // -AJA- these first two fields have misleading dehacked names
     { "Deselect frame", offsetof(WeaponInfo, upstate), kFieldTypeFrameNumber },
     { "Select frame", offsetof(WeaponInfo, downstate), kFieldTypeFrameNumber },
-    { "Bobbing frame", offsetof(WeaponInfo, readystate),
-      kFieldTypeFrameNumber },
+    { "Bobbing frame", offsetof(WeaponInfo, readystate), kFieldTypeFrameNumber },
     { "Shooting frame", offsetof(WeaponInfo, atkstate), kFieldTypeFrameNumber },
     { "Firing frame", offsetof(WeaponInfo, flashstate), kFieldTypeFrameNumber },
     { "MBF21 Bits", offsetof(WeaponInfo, mbf21_flags), kFieldTypeBitflags },
 
-    { nullptr, 0, kFieldTypeAny }  // End sentinel
+    { nullptr, 0, kFieldTypeAny } // End sentinel
 };
 
 const FlagName mbf21flagnamelist[] = {
@@ -118,9 +115,9 @@ const FlagName mbf21flagnamelist[] = {
     { kMBF21_AUTOSWITCHFROM, "SWITCH", "AUTOSWITCHFROM" },
     { kMBF21_NOAUTOSWITCHTO, "DANGEROUS", "NOAUTOSWITCHTO" },
 
-    { 0, nullptr, nullptr }  // End sentinel
+    { 0, nullptr, nullptr } // End sentinel
 };
-}  // namespace weapons
+} // namespace weapons
 
 namespace weapons
 {
@@ -140,13 +137,18 @@ void BeginLump(void)
     wad::Printf("<WEAPONS>\n\n");
 }
 
-void FinishLump(void) { wad::Printf("\n"); }
+void FinishLump(void)
+{
+    wad::Printf("\n");
+}
 
 void HandleFlags(const WeaponInfo *info, int w_num)
 {
-    if (!info->flags) return;
+    if (!info->flags)
+        return;
 
-    if (strchr(info->flags, kWeaponFlagFree)) wad::Printf("FREE = TRUE;\n");
+    if (strchr(info->flags, kWeaponFlagFree))
+        wad::Printf("FREE = TRUE;\n");
 
     if (strchr(info->flags, kWeaponFlagRefireInaccurate))
         wad::Printf("REFIRE_INACCURATE = TRUE;\n");
@@ -183,19 +185,19 @@ void HandleMBF21Flags(const WeaponInfo *info, int w_num)
 
     for (i = 0; mbf21flagnamelist[i].name != nullptr; i++)
     {
-        if (0 == (cur_f & mbf21flagnamelist[i].flag)) continue;
+        if (0 == (cur_f & mbf21flagnamelist[i].flag))
+            continue;
 
         cur_f &= ~mbf21flagnamelist[i].flag;
 
         AddOneFlag(info, mbf21flagnamelist[i].name, got_a_flag);
     }
 
-    if (got_a_flag) wad::Printf(";\n");
+    if (got_a_flag)
+        wad::Printf(";\n");
 
     if (cur_f != 0)
-        LogDebug(
-            "Dehacked: Warning - Unconverted flags 0x%08x in weapontype %d\n",
-            cur_f, w_num);
+        LogDebug("Dehacked: Warning - Unconverted flags 0x%08x in weapontype %d\n", cur_f, w_num);
 }
 
 void HandleSounds(const WeaponInfo *info, int w_num)
@@ -221,7 +223,8 @@ void HandleFrames(const WeaponInfo *info, int w_num)
 
     int count = 0;
 
-    if (has_flash) count += frames::BeginGroup('f', info->flashstate);
+    if (has_flash)
+        count += frames::BeginGroup('f', info->flashstate);
 
     count += frames::BeginGroup('a', info->atkstate);
     count += frames::BeginGroup('r', info->readystate);
@@ -230,8 +233,7 @@ void HandleFrames(const WeaponInfo *info, int w_num)
 
     if (count == 0)
     {
-        LogDebug("Dehacked: Warning - Weapon [%s] has no states.\n",
-                 info->ddf_name);
+        LogDebug("Dehacked: Warning - Weapon [%s] has no states.\n", info->ddf_name);
         return;
     }
 
@@ -242,28 +244,29 @@ void HandleFrames(const WeaponInfo *info, int w_num)
     frames::OutputGroup('r');
     frames::OutputGroup('a');
 
-    if (has_flash) frames::OutputGroup('f');
+    if (has_flash)
+        frames::OutputGroup('f');
 }
 
 void HandleAttacks(const WeaponInfo *info, int w_num)
 {
-    int count = (frames::attack_slot[0] ? 1 : 0) +
-                (frames::attack_slot[1] ? 1 : 0) +
-                (frames::attack_slot[2] ? 1 : 0);
+    int count = (frames::attack_slot[0] ? 1 : 0) + (frames::attack_slot[1] ? 1 : 0) + (frames::attack_slot[2] ? 1 : 0);
 
-    if (count == 0) return;
+    if (count == 0)
+        return;
 
     if (count > 1)
-        LogDebug("Dehacked: Warning - Multiple attacks used in weapon [%s]\n",
-                 info->ddf_name);
+        LogDebug("Dehacked: Warning - Multiple attacks used in weapon [%s]\n", info->ddf_name);
 
     wad::Printf("\n");
 
     const char *atk = frames::attack_slot[0];
 
-    if (!atk) atk = frames::attack_slot[1];
+    if (!atk)
+        atk = frames::attack_slot[1];
 
-    if (!atk) atk = frames::attack_slot[2];
+    if (!atk)
+        atk = frames::attack_slot[2];
 
     EPI_ASSERT(atk != nullptr);
 
@@ -272,8 +275,7 @@ void HandleAttacks(const WeaponInfo *info, int w_num)
     // 2023.11.17 - Added SAWFUL ENGAGE_SOUND for non-chainsaw attacks using the
     // chainsaw attack Fixes, for instance, the Harmony Compatible knife swing
     // being silent
-    if (epi::StringCaseCompareASCII(atk, "PLAYER_SAW") == 0 &&
-        w_num != kwp_chainsaw)
+    if (epi::StringCaseCompareASCII(atk, "PLAYER_SAW") == 0 && w_num != kwp_chainsaw)
         wad::Printf("ENGAGED_SOUND = \"%s\";\n", sounds::GetSound(ksfx_sawful));
 }
 
@@ -310,7 +312,7 @@ void ConvertWeapon(int w_num)
 
     wad::Printf("\n");
 }
-}  // namespace weapons
+} // namespace weapons
 
 void weapons::ConvertWEAP(void)
 {
@@ -318,12 +320,14 @@ void weapons::ConvertWEAP(void)
 
     for (int i = 0; i < kTotalWeapons; i++)
     {
-        if (!all_mode && !weapon_modified[i]) continue;
+        if (!all_mode && !weapon_modified[i])
+            continue;
 
         ConvertWeapon(i);
     }
 
-    if (got_one) FinishLump();
+    if (got_one)
+        FinishLump();
 }
 
 //------------------------------------------------------------------------
@@ -346,4 +350,4 @@ void weapons::AlterWeapon(int new_val)
     MarkWeapon(wp_num);
 }
 
-}  // namespace dehacked
+} // namespace dehacked

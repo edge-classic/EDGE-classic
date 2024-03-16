@@ -19,7 +19,7 @@
 #include "dm_state.h"
 #include "e_player.h"
 #include "epi.h"
-#include "hu_draw.h"  // HUD* functions
+#include "hu_draw.h" // HUD* functions
 #include "i_defs_gl.h"
 #include "m_misc.h"
 #include "r_colormap.h"
@@ -42,7 +42,8 @@ EDGE_DEFINE_CONSOLE_VARIABLE(debug_fullbright, "0", kConsoleVariableFlagCheat)
 
 static inline float EffectStrength(Player *player)
 {
-    if (player->effect_left_ >= kMaximumEffectTime) return 1.0f;
+    if (player->effect_left_ >= kMaximumEffectTime)
+        return 1.0f;
 
     if (power_fade_out.d_ || reduce_flash)
     {
@@ -59,21 +60,18 @@ static inline float EffectStrength(Player *player)
 //
 void RendererRainbowEffect(Player *player)
 {
-    render_view_extra_light = debug_fullbright.d_ ? 255
-                              : player            ? player->extra_light_ * 4
-                                                  : 0;
+    render_view_extra_light = debug_fullbright.d_ ? 255 : player ? player->extra_light_ * 4 : 0;
 
-    render_view_red_multiplier      = render_view_green_multiplier =
-        render_view_blue_multiplier = 1.0f;
+    render_view_red_multiplier = render_view_green_multiplier = render_view_blue_multiplier = 1.0f;
 
     render_view_effect_colormap = nullptr;
 
-    if (!player) return;
+    if (!player)
+        return;
 
     float s = EffectStrength(player);
 
-    if (s > 0 && player->powers_[kPowerTypeInvulnerable] > 0 &&
-        (player->effect_left_ & 8) && !reduce_flash)
+    if (s > 0 && player->powers_[kPowerTypeInvulnerable] > 0 && (player->effect_left_ & 8) && !reduce_flash)
     {
         if (invulnerability_effect == kInvulnerabilityTextured && !reduce_flash)
         {
@@ -93,8 +91,7 @@ void RendererRainbowEffect(Player *player)
         return;
     }
 
-    if (s > 0 && player->powers_[kPowerTypeNightVision] > 0 &&
-        player->effect_colourmap_ && !debug_fullbright.d_)
+    if (s > 0 && player->powers_[kPowerTypeNightVision] > 0 && player->effect_colourmap_ && !debug_fullbright.d_)
     {
         float r, g, b;
 
@@ -108,16 +105,14 @@ void RendererRainbowEffect(Player *player)
         return;
     }
 
-    if (s > 0 && player->powers_[kPowerTypeInfrared] > 0 &&
-        !debug_fullbright.d_)
+    if (s > 0 && player->powers_[kPowerTypeInfrared] > 0 && !debug_fullbright.d_)
     {
         render_view_extra_light = int(s * 255);
         return;
     }
 
     // Lobo 2021: un-hardcode berserk color tint
-    if (s > 0 && player->powers_[kPowerTypeBerserk] > 0 &&
-        player->effect_colourmap_ && !debug_fullbright.d_)
+    if (s > 0 && player->powers_[kPowerTypeBerserk] > 0 && player->effect_colourmap_ && !debug_fullbright.d_)
     {
         float r, g, b;
 
@@ -161,8 +156,8 @@ void RendererColourmapEffect(Player *player)
 
     float s = EffectStrength(player);
 
-    if (s > 0 && player->powers_[kPowerTypeInvulnerable] > 0 &&
-        player->effect_colourmap_ && (player->effect_left_ & 8 || reduce_flash))
+    if (s > 0 && player->powers_[kPowerTypeInvulnerable] > 0 && player->effect_colourmap_ &&
+        (player->effect_left_ & 8 || reduce_flash))
     {
         if (invulnerability_effect == kInvulnerabilityTextured && !reduce_flash)
             return;
@@ -197,11 +192,8 @@ void RendererColourmapEffect(Player *player)
             float old_alpha = HudGetAlpha();
             HudSetAlpha(0.0f);
             s = HMM_MAX(0.5f, s);
-            HudThinBox(
-                hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                epi::MakeRGBA(RoundToInteger(s * 255), RoundToInteger(s * 255),
-                              RoundToInteger(s * 255)),
-                25.0f);
+            HudThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
+                       epi::MakeRGBA(RoundToInteger(s * 255), RoundToInteger(s * 255), RoundToInteger(s * 255)), 25.0f);
             HudSetAlpha(old_alpha);
         }
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -221,13 +213,12 @@ void RendererPaletteEffect(Player *player)
 
     float old_alpha = HudGetAlpha();
 
-    if (s > 0 && player->powers_[kPowerTypeInvulnerable] > 0 &&
-        player->effect_colourmap_ && (player->effect_left_ & 8 || reduce_flash))
+    if (s > 0 && player->powers_[kPowerTypeInvulnerable] > 0 && player->effect_colourmap_ &&
+        (player->effect_left_ & 8 || reduce_flash))
     {
         return;
     }
-    else if (s > 0 && player->powers_[kPowerTypeNightVision] > 0 &&
-             player->effect_colourmap_)
+    else if (s > 0 && player->powers_[kPowerTypeNightVision] > 0 && player->effect_colourmap_)
     {
         float r, g, b;
         GetColormapRgb(player->effect_colourmap_, &r, &g, &b);
@@ -236,38 +227,31 @@ void RendererPaletteEffect(Player *player)
         else
         {
             HudSetAlpha(0.20f * s);
-            HudThinBox(
-                hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                epi::MakeRGBA(RoundToInteger(r * 255), RoundToInteger(g * 255),
-                              RoundToInteger(b * 255)),
-                25.0f);
+            HudThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
+                       epi::MakeRGBA(RoundToInteger(r * 255), RoundToInteger(g * 255), RoundToInteger(b * 255)), 25.0f);
         }
     }
     else
     {
-        PalettedColourToRGB(playpal_black, rgb_data,
-                            player->last_damage_colour_, player->damage_count_);
+        PalettedColourToRGB(playpal_black, rgb_data, player->last_damage_colour_, player->damage_count_);
 
         int rgb_max = HMM_MAX(rgb_data[0], HMM_MAX(rgb_data[1], rgb_data[2]));
 
-        if (rgb_max == 0) return;
+        if (rgb_max == 0)
+            return;
 
         rgb_max = HMM_MIN(200, rgb_max);
 
         if (!reduce_flash)
-            glColor4f((float)rgb_data[0] / (float)rgb_max,
-                      (float)rgb_data[1] / (float)rgb_max,
-                      (float)rgb_data[2] / (float)rgb_max,
-                      (float)rgb_max / 255.0f);
+            glColor4f((float)rgb_data[0] / (float)rgb_max, (float)rgb_data[1] / (float)rgb_max,
+                      (float)rgb_data[2] / (float)rgb_max, (float)rgb_max / 255.0f);
         else
         {
             HudSetAlpha((float)rgb_max / 255.0f);
-            HudThinBox(hud_x_left, hud_visible_top, hud_x_right,
-                       hud_visible_bottom,
-                       epi::MakeRGBA(
-                           RoundToInteger((float)rgb_data[0] / rgb_max * 255),
-                           RoundToInteger((float)rgb_data[1] / rgb_max * 255),
-                           RoundToInteger((float)rgb_data[2] / rgb_max * 255)),
+            HudThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
+                       epi::MakeRGBA(RoundToInteger((float)rgb_data[0] / rgb_max * 255),
+                                     RoundToInteger((float)rgb_data[1] / rgb_max * 255),
+                                     RoundToInteger((float)rgb_data[2] / rgb_max * 255)),
                        25.0f);
         }
     }
@@ -303,9 +287,9 @@ void FuzzUpdate(void)
 {
     if (!fuzz_image)
     {
-        fuzz_image = ImageLookup("FUZZ_MAP", kImageNamespaceTexture,
-                                 kImageLookupExact | kImageLookupNull);
-        if (!fuzz_image) FatalError("Cannot find essential image: FUZZ_MAP\n");
+        fuzz_image = ImageLookup("FUZZ_MAP", kImageNamespaceTexture, kImageLookupExact | kImageLookupNull);
+        if (!fuzz_image)
+            FatalError("Cannot find essential image: FUZZ_MAP\n");
     }
 
     fuzz_y_offset = ((render_frame_count * 3) & 1023) / 256.0;

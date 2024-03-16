@@ -79,16 +79,18 @@ double ComputeAngle(double dx, double dy)
 {
     double angle;
 
-    if (AlmostEquals(dx, 0.0)) return (dy > 0) ? 90.0 : 270.0;
+    if (AlmostEquals(dx, 0.0))
+        return (dy > 0) ? 90.0 : 270.0;
 
     angle = atan2((double)dy, (double)dx) * 180.0 / HMM_PI;
 
-    if (angle < 0) angle += 360.0;
+    if (angle < 0)
+        angle += 360.0;
 
     return angle;
 }
 
-}  // namespace ajbsp
+} // namespace ajbsp
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

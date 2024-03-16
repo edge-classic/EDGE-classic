@@ -36,30 +36,24 @@ int graphics_shutdown = 0;
 // user need to adjust this on the fly? - Dasho
 EDGE_DEFINE_CONSOLE_VARIABLE(grab_mouse, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(vsync, "0", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(gamma_correction, "0",
-                                     kConsoleVariableFlagArchive, -1.0, 1.0)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(gamma_correction, "0", kConsoleVariableFlagArchive, -1.0, 1.0)
 
 // this is the Monitor Size setting, really an aspect ratio.
 // it defaults to 16:9, as that is the most common monitor size nowadays.
-EDGE_DEFINE_CONSOLE_VARIABLE(monitor_aspect_ratio, "1.77777",
-                             kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(monitor_aspect_ratio, "1.77777", kConsoleVariableFlagArchive)
 
 // these are zero until StartupGraphics is called.
 // after that they never change (we assume the desktop won't become other
 // resolutions while EC is running).
-EDGE_DEFINE_CONSOLE_VARIABLE(desktop_resolution_width, "0",
-                             kConsoleVariableFlagReadOnly)
-EDGE_DEFINE_CONSOLE_VARIABLE(desktop_resolution_height, "0",
-                             kConsoleVariableFlagReadOnly)
+EDGE_DEFINE_CONSOLE_VARIABLE(desktop_resolution_width, "0", kConsoleVariableFlagReadOnly)
+EDGE_DEFINE_CONSOLE_VARIABLE(desktop_resolution_height, "0", kConsoleVariableFlagReadOnly)
 
-EDGE_DEFINE_CONSOLE_VARIABLE(pixel_aspect_ratio, "1.0",
-                             kConsoleVariableFlagReadOnly);
+EDGE_DEFINE_CONSOLE_VARIABLE(pixel_aspect_ratio, "1.0", kConsoleVariableFlagReadOnly);
 
 // when > 0, this will force the pixel_aspect to a particular value, for
 // cases where a normal logic fails.  however, it will apply to *all* modes,
 // including windowed mode.
-EDGE_DEFINE_CONSOLE_VARIABLE(forced_pixel_aspect_ratio, "0",
-                             kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(forced_pixel_aspect_ratio, "0", kConsoleVariableFlagArchive)
 
 static bool grab_state;
 
@@ -74,12 +68,19 @@ void GrabCursor(bool enable)
     return;
 #endif
 
-    if (!program_window || graphics_shutdown) return;
+    if (!program_window || graphics_shutdown)
+        return;
 
     grab_state = enable;
 
-    if (grab_state && grab_mouse.d_) { SDL_SetRelativeMouseMode(SDL_TRUE); }
-    else { SDL_SetRelativeMouseMode(SDL_FALSE); }
+    if (grab_state && grab_mouse.d_)
+    {
+        SDL_SetRelativeMouseMode(SDL_TRUE);
+    }
+    else
+    {
+        SDL_SetRelativeMouseMode(SDL_FALSE);
+    }
 }
 
 void DeterminePixelAspect()
@@ -99,13 +100,11 @@ void DeterminePixelAspect()
 
     // if not a fullscreen mode, check for a modern LCD (etc) monitor -- they
     // will have square pixels (1:1 aspect).
-    bool is_crt =
-        (desktop_resolution_width.d_ < desktop_resolution_height.d_ * 7 / 5);
+    bool is_crt = (desktop_resolution_width.d_ < desktop_resolution_height.d_ * 7 / 5);
 
     bool is_fullscreen = (current_window_mode > 0);
     if (is_fullscreen && current_screen_width == desktop_resolution_width.d_ &&
-        current_screen_height == desktop_resolution_height.d_ &&
-        graphics_shutdown)
+        current_screen_height == desktop_resolution_height.d_ && graphics_shutdown)
         is_fullscreen = false;
 
     if (!is_fullscreen && !is_crt)
@@ -119,9 +118,7 @@ void DeterminePixelAspect()
     // video mode is filling the whole monitor (i.e. the monitor is not doing
     // any letter-boxing or pillar-boxing).  DPI setting does not matter here.
 
-    pixel_aspect_ratio = monitor_aspect_ratio.f_ *
-                         (float)current_screen_height /
-                         (float)current_screen_width;
+    pixel_aspect_ratio = monitor_aspect_ratio.f_ * (float)current_screen_height / (float)current_screen_width;
 }
 
 void StartupGraphics(void)
@@ -131,10 +128,12 @@ void StartupGraphics(void)
     if (driver.empty())
     {
         const char *check = SDL_getenv("SDL_VIDEODRIVER");
-        if (check) driver = check;
+        if (check)
+            driver = check;
     }
 
-    if (driver.empty()) driver = "default";
+    if (driver.empty())
+        driver = "default";
 
     if (epi::StringCaseCompareASCII(driver, "default") != 0)
     {
@@ -146,7 +145,8 @@ void StartupGraphics(void)
     if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
         FatalError("Couldn't init SDL VIDEO!\n%s\n", SDL_GetError());
 
-    if (ArgumentFind("nograb") > 0) grab_mouse = 0;
+    if (ArgumentFind("nograb") > 0)
+        grab_mouse = 0;
 
     // -AJA- FIXME these are wrong (probably ignored though)
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
@@ -174,8 +174,7 @@ void StartupGraphics(void)
     if (current_screen_height > desktop_resolution_height.d_)
         current_screen_height = desktop_resolution_height.d_;
 
-    LogPrint("Desktop resolution: %dx%d\n", desktop_resolution_width.d_,
-             desktop_resolution_height.d_);
+    LogPrint("Desktop resolution: %dx%d\n", desktop_resolution_width.d_, desktop_resolution_height.d_);
 
     int num_modes = SDL_GetNumDisplayModes(0);
 
@@ -184,8 +183,7 @@ void StartupGraphics(void)
         SDL_DisplayMode possible_mode;
         SDL_GetDisplayMode(0, i, &possible_mode);
 
-        if (possible_mode.w > desktop_resolution_width.d_ ||
-            possible_mode.h > desktop_resolution_height.d_)
+        if (possible_mode.w > desktop_resolution_width.d_ || possible_mode.h > desktop_resolution_height.d_)
             continue;
 
         DisplayMode test_mode;
@@ -195,15 +193,14 @@ void StartupGraphics(void)
         test_mode.depth       = SDL_BITSPERPIXEL(possible_mode.format);
         test_mode.window_mode = kWindowModeFullscreen;
 
-        if ((test_mode.width & 15) != 0) continue;
+        if ((test_mode.width & 15) != 0)
+            continue;
 
-        if (test_mode.depth == 15 || test_mode.depth == 16 ||
-            test_mode.depth == 24 || test_mode.depth == 32)
+        if (test_mode.depth == 15 || test_mode.depth == 16 || test_mode.depth == 24 || test_mode.depth == 32)
         {
             AddDisplayResolution(&test_mode);
 
-            if (test_mode.width < desktop_resolution_width.d_ &&
-                test_mode.height < desktop_resolution_height.d_)
+            if (test_mode.width < desktop_resolution_width.d_ && test_mode.height < desktop_resolution_height.d_)
             {
                 DisplayMode win_mode = test_mode;
                 win_mode.window_mode = kWindowModeWindowed;
@@ -260,14 +257,11 @@ static bool InitializeWindow(DisplayMode *mode)
 #endif
 
     program_window =
-        SDL_CreateWindow(temp_title.c_str(), SDL_WINDOWPOS_CENTERED,
-                         SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
+        SDL_CreateWindow(temp_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
                          SDL_WINDOW_OPENGL |
                              (mode->window_mode == kWindowModeBorderless
                                   ? (SDL_WINDOW_FULLSCREEN_DESKTOP)
-                                  : (mode->window_mode == kWindowModeFullscreen
-                                         ? SDL_WINDOW_FULLSCREEN
-                                         : 0)) |
+                                  : (mode->window_mode == kWindowModeFullscreen ? SDL_WINDOW_FULLSCREEN : 0)) |
                              resizeable);
 
     if (program_window == nullptr)
@@ -277,8 +271,7 @@ static bool InitializeWindow(DisplayMode *mode)
     }
 
     if (mode->window_mode == kWindowModeBorderless)
-        SDL_GetWindowSize(program_window, &borderless_mode.width,
-                          &borderless_mode.height);
+        SDL_GetWindowSize(program_window, &borderless_mode.width, &borderless_mode.height);
 
     if (mode->window_mode == kWindowModeWindowed)
     {
@@ -328,25 +321,24 @@ bool SetScreenSize(DisplayMode *mode)
 {
     GrabCursor(false);
 
-    LogPrint("SetScreenSize: trying %dx%d %dbpp (%s)\n", mode->width,
-             mode->height, mode->depth,
+    LogPrint("SetScreenSize: trying %dx%d %dbpp (%s)\n", mode->width, mode->height, mode->depth,
              mode->window_mode == kWindowModeBorderless
                  ? "borderless"
-                 : (mode->window_mode == kWindowModeFullscreen ? "fullscreen"
-                                                               : "windowed"));
+                 : (mode->window_mode == kWindowModeFullscreen ? "fullscreen" : "windowed"));
 
     if (program_window == nullptr)
     {
-        if (!InitializeWindow(mode)) { return false; }
+        if (!InitializeWindow(mode))
+        {
+            return false;
+        }
     }
     else if (mode->window_mode == kWindowModeBorderless)
     {
         SDL_SetWindowFullscreen(program_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-        SDL_GetWindowSize(program_window, &borderless_mode.width,
-                          &borderless_mode.height);
+        SDL_GetWindowSize(program_window, &borderless_mode.width, &borderless_mode.height);
 
-        LogPrint("SetScreenSize: mode now %dx%d %dbpp\n", mode->width,
-                 mode->height, mode->depth);
+        LogPrint("SetScreenSize: mode now %dx%d %dbpp\n", mode->width, mode->height, mode->depth);
     }
     else if (mode->window_mode == kWindowModeFullscreen)
     {
@@ -359,18 +351,15 @@ bool SetScreenSize(DisplayMode *mode)
         delete new_mode;
         new_mode = nullptr;
 
-        LogPrint("SetScreenSize: mode now %dx%d %dbpp\n", mode->width,
-                 mode->height, mode->depth);
+        LogPrint("SetScreenSize: mode now %dx%d %dbpp\n", mode->width, mode->height, mode->depth);
     }
     else /* kWindowModeWindowed */
     {
         SDL_SetWindowFullscreen(program_window, 0);
         SDL_SetWindowSize(program_window, mode->width, mode->height);
-        SDL_SetWindowPosition(program_window, SDL_WINDOWPOS_CENTERED,
-                              SDL_WINDOWPOS_CENTERED);
+        SDL_SetWindowPosition(program_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 
-        LogPrint("SetScreenSize: mode now %dx%d %dbpp\n", mode->width,
-                 mode->height, mode->depth);
+        LogPrint("SetScreenSize: mode now %dx%d %dbpp\n", mode->width, mode->height, mode->depth);
     }
 
     // -AJA- turn off cursor -- BIG performance increase.
@@ -407,19 +396,17 @@ void FinishFrame(void)
 {
     SDL_GL_SwapWindow(program_window);
 
-    EDGE_TracyPlot("draw_render_units",
-                   (int64_t)ec_frame_stats.draw_render_units);
+    EDGE_TracyPlot("draw_render_units", (int64_t)ec_frame_stats.draw_render_units);
     EDGE_TracyPlot("draw_wall_parts", (int64_t)ec_frame_stats.draw_wall_parts);
     EDGE_TracyPlot("draw_planes", (int64_t)ec_frame_stats.draw_planes);
     EDGE_TracyPlot("draw_things", (int64_t)ec_frame_stats.draw_things);
-    EDGE_TracyPlot("draw_light_iterator",
-                   (int64_t)ec_frame_stats.draw_light_iterator);
-    EDGE_TracyPlot("draw_sector_glow_iterator",
-                   (int64_t)ec_frame_stats.draw_sector_glow_iterator);
+    EDGE_TracyPlot("draw_light_iterator", (int64_t)ec_frame_stats.draw_light_iterator);
+    EDGE_TracyPlot("draw_sector_glow_iterator", (int64_t)ec_frame_stats.draw_sector_glow_iterator);
 
     EDGE_FrameMark;
 
-    if (grab_mouse.CheckModified()) GrabCursor(grab_state);
+    if (grab_mouse.CheckModified())
+        GrabCursor(grab_state);
 
     if (vsync.CheckModified())
     {
@@ -436,14 +423,14 @@ void FinishFrame(void)
             SDL_GL_SetSwapInterval(vsync.d_);
     }
 
-    if (monitor_aspect_ratio.CheckModified() ||
-        forced_pixel_aspect_ratio.CheckModified())
+    if (monitor_aspect_ratio.CheckModified() || forced_pixel_aspect_ratio.CheckModified())
         DeterminePixelAspect();
 }
 
 void ShutdownGraphics(void)
 {
-    if (graphics_shutdown) return;
+    if (graphics_shutdown)
+        return;
 
     graphics_shutdown = 1;
 

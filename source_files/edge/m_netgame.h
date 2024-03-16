@@ -27,7 +27,7 @@
 
 #include "e_event.h"
 
-extern int network_game_menu_on;  // 1 = HOST, 2 = JOIN, 3 = PLAYERS
+extern int network_game_menu_on; // 1 = HOST, 2 = JOIN, 3 = PLAYERS
 
 void NetworkGameInitialize(void);
 void NetworkGameDrawer(void);

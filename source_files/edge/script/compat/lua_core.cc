@@ -62,7 +62,10 @@ static bool console_allocated = false;
 static int SYS_AllocConsole(lua_State *L)
 {
 #ifdef WIN32
-    if (console_allocated) { return 0; }
+    if (console_allocated)
+    {
+        return 0;
+    }
 
     console_allocated = true;
     AllocConsole();
@@ -87,12 +90,12 @@ static int MATH_rint(lua_State *L)
 }
 
 // SYSTEM
-static const luaL_Reg syslib[] = {{"error", SYS_error},
-                                  {"print", SYS_print},
-                                  {"debug_print", SYS_debug_print},
-                                  {"edge_version", SYS_edge_version},
-                                  {"allocate_console", SYS_AllocConsole},
-                                  {nullptr, nullptr}};
+static const luaL_Reg syslib[] = { { "error", SYS_error },
+                                   { "print", SYS_print },
+                                   { "debug_print", SYS_debug_print },
+                                   { "edge_version", SYS_edge_version },
+                                   { "allocate_console", SYS_AllocConsole },
+                                   { nullptr, nullptr } };
 
 static int luaopen_sys(lua_State *L)
 {
@@ -100,7 +103,7 @@ static int luaopen_sys(lua_State *L)
     return 1;
 }
 
-const luaL_Reg loadlibs[] = {{"sys", luaopen_sys}, {nullptr, nullptr}};
+const luaL_Reg loadlibs[] = { { "sys", luaopen_sys }, { nullptr, nullptr } };
 
 void LuaRegisterCoreLibraries(lua_State *L)
 {

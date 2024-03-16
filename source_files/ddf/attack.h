@@ -20,15 +20,15 @@
 
 class AttackDefinitionContainer : public std::vector<AttackDefinition *>
 {
-   public:
+  public:
     AttackDefinitionContainer();
     ~AttackDefinitionContainer();
 
-   public:
+  public:
     AttackDefinition *Lookup(const char *refname);
 };
 
-extern AttackDefinitionContainer atkdefs;  // -ACB- 2004/06/09 Implemented
+extern AttackDefinitionContainer atkdefs; // -ACB- 2004/06/09 Implemented
 
 void DDF_ReadAtks(const std::string &data);
 

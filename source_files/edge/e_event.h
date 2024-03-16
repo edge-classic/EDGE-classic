@@ -42,8 +42,7 @@ struct InputEvent
 {
     InputEventType type;
 
-    union
-    {
+    union {
         struct
         {
             int sym;

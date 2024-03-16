@@ -53,9 +53,8 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
     }
 
     // XMI MIDI
-    if (song_len > 12 && data[0] == 'F' && data[1] == 'O' && data[2] == 'R' &&
-        data[3] == 'M' && data[8] == 'X' && data[9] == 'D' && data[10] == 'I' &&
-        data[11] == 'R')
+    if (song_len > 12 && data[0] == 'F' && data[1] == 'O' && data[2] == 'R' && data[3] == 'M' && data[8] == 'X' &&
+        data[9] == 'D' && data[10] == 'I' && data[11] == 'R')
     {
         return kSoundMidi;
     }
@@ -70,8 +69,7 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
     if (song_len > data[0] && data[0] >= 0x5D)
     {
         int offset = data[0] - 0x10;
-        if (data[offset] == 'r' && data[offset + 1] == 's' &&
-            data[offset + 2] == 'x' && data[offset + 3] == 'x' &&
+        if (data[offset] == 'r' && data[offset + 1] == 's' && data[offset + 2] == 'x' && data[offset + 3] == 'x' &&
             data[offset + 4] == '}' && data[offset + 5] == 'u')
             return kSoundMidi;
     }
@@ -89,22 +87,31 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
                 break;
             }
         }
-        if (is_rad) return kSoundRad;
+        if (is_rad)
+            return kSoundRad;
     }
 
     // Moving on to more specialized or less reliable detections
 
-    if (m4p_TestFromData(data, song_len)) { return kSoundM4p; }
+    if (m4p_TestFromData(data, song_len))
+    {
+        return kSoundM4p;
+    }
 
-    if ((data[0] == 'I' && data[1] == 'D' && data[2] == '3') ||
-        (data[0] == 0xFF && ((data[1] >> 4 & 0xF) == 0xF)))
+    if ((data[0] == 'I' && data[1] == 'D' && data[2] == '3') || (data[0] == 0xFF && ((data[1] >> 4 & 0xF) == 0xF)))
     {
         return kSoundMp3;
     }
 
-    if (data[0] == 0x3) { return kSoundDoom; }
+    if (data[0] == 0x3)
+    {
+        return kSoundDoom;
+    }
 
-    if (data[0] == 0x0) { return kSoundPcSpeaker; }
+    if (data[0] == 0x0)
+    {
+        return kSoundPcSpeaker;
+    }
 
     return kSoundUnknown;
 }
@@ -115,25 +122,30 @@ SoundFormat SoundFilenameToFormat(std::string_view filename)
 
     epi::StringLowerASCII(ext);
 
-    if (ext == ".wav" || ext == ".wave") return kSoundWav;
+    if (ext == ".wav" || ext == ".wave")
+        return kSoundWav;
 
-    if (ext == ".flac") return kSoundFlac;
+    if (ext == ".flac")
+        return kSoundFlac;
 
-    if (ext == ".ogg") return kSoundOgg;
+    if (ext == ".ogg")
+        return kSoundOgg;
 
-    if (ext == ".mp3") return kSoundMp3;
+    if (ext == ".mp3")
+        return kSoundMp3;
 
     // Test MUS vs EA-MIDI MUS ?
-    if (ext == ".mus") return kSoundMus;
+    if (ext == ".mus")
+        return kSoundMus;
 
-    if (ext == ".mid" || ext == ".midi" || ext == ".xmi" || ext == ".rmi" ||
-        ext == ".rmid")
+    if (ext == ".mid" || ext == ".midi" || ext == ".xmi" || ext == ".rmi" || ext == ".rmid")
         return kSoundMidi;
 
     if (ext == ".mod" || ext == ".s3m" || ext == ".xm" || ext == ".it")
         return kSoundM4p;
 
-    if (ext == ".rad") return kSoundRad;
+    if (ext == ".rad")
+        return kSoundRad;
 
     // Not sure if these will ever be encountered in the wild, but according to
     // the VGMPF Wiki they are valid DMX file extensions
@@ -143,7 +155,8 @@ SoundFormat SoundFilenameToFormat(std::string_view filename)
     // Will actually result in checking the first byte to further determine if
     // it's Doom or PC Speaker format; the above kSoundDoom stuff is
     // unconditional which is why I didn't throw it up there
-    if (ext == ".lmp") return kSoundPcSpeaker;
+    if (ext == ".lmp")
+        return kSoundPcSpeaker;
 
     return kSoundUnknown;
 }

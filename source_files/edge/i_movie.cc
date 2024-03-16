@@ -51,13 +51,11 @@ static float            skip_time;
 static bool MovieSetupAudioStream(int rate)
 {
     movie_audio_stream =
-        SDL_NewAudioStream(AUDIO_F32, 2, rate, AUDIO_S16,
-                           sound_device_stereo ? 2 : 1, sound_device_frequency);
+        SDL_NewAudioStream(AUDIO_F32, 2, rate, AUDIO_S16, sound_device_stereo ? 2 : 1, sound_device_frequency);
 
     if (!movie_audio_stream)
     {
-        LogWarning("PlayMovie: Failed to setup audio stream: %s\n",
-                   SDL_GetError());
+        LogWarning("PlayMovie: Failed to setup audio stream: %s\n", SDL_GetError());
         return false;
     }
 
@@ -76,19 +74,15 @@ void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
 {
     (void)mpeg;
     (void)user;
-    SDL_AudioStreamPut(movie_audio_stream, samples->interleaved,
-                       sizeof(float) * samples->count * 2);
+    SDL_AudioStreamPut(movie_audio_stream, samples->interleaved, sizeof(float) * samples->count * 2);
     int avail = SDL_AudioStreamAvailable(movie_audio_stream);
     if (avail)
     {
-        SoundData *movie_buf = SoundQueueGetFreeBuffer(
-            avail / 2, sound_device_stereo ? kMixInterleaved : kMixMono);
+        SoundData *movie_buf = SoundQueueGetFreeBuffer(avail / 2, sound_device_stereo ? kMixInterleaved : kMixMono);
         if (movie_buf)
         {
             movie_buf->length_ =
-                SDL_AudioStreamGet(movie_audio_stream, movie_buf->data_left_,
-                                   avail) /
-                (sound_device_stereo ? 4 : 2);
+                SDL_AudioStreamGet(movie_audio_stream, movie_buf->data_left_, avail) / (sound_device_stereo ? 4 : 2);
             if (movie_buf->length_ > 0)
                 SoundQueueAddBuffer(movie_buf, sound_device_frequency);
             else
@@ -105,8 +99,7 @@ void MovieVideoCallback(plm_t *mpeg, plm_frame_t *frame, void *user)
     plm_frame_to_rgb(frame, rgb_data, frame->width * 3);
 
     glBindTexture(GL_TEXTURE_2D, canvas);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame->width, frame->height, 0,
-                 GL_RGB, GL_UNSIGNED_BYTE, rgb_data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame->width, frame->height, 0, GL_RGB, GL_UNSIGNED_BYTE, rgb_data);
     need_canvas_update = true;
 }
 
@@ -168,8 +161,7 @@ void PlayMovie(const std::string &name)
         return;
     }
 
-    if (!no_sound && !(movie->special_ & kMovieSpecialMute) &&
-        plm_get_num_audio_streams(decoder) > 0)
+    if (!no_sound && !(movie->special_ & kMovieSpecialMute) && plm_get_num_audio_streams(decoder) > 0)
     {
         movie_sample_rate = plm_get_samplerate(decoder);
         if (!MovieSetupAudioStream(movie_sample_rate))
@@ -180,7 +172,8 @@ void PlayMovie(const std::string &name)
         }
     }
 
-    if (canvas) glDeleteTextures(1, &canvas);
+    if (canvas)
+        glDeleteTextures(1, &canvas);
 
     glGenTextures(1, &canvas);
 
@@ -205,18 +198,15 @@ void PlayMovie(const std::string &name)
     if (movie->scaling_ == kMovieScalingAutofit)
     {
         // If movie and display ratios match (ish), stretch it
-        if (fabs((float)current_screen_width / current_screen_height /
-                     movie_ratio -
-                 1.0f) <= 0.10f)
+        if (fabs((float)current_screen_width / current_screen_height / movie_ratio - 1.0f) <= 0.10f)
         {
             frame_height = current_screen_height;
             frame_width  = current_screen_width;
         }
-        else  // Zoom
+        else // Zoom
         {
             frame_height = current_screen_height;
-            frame_width =
-                RoundToInteger((float)current_screen_height * movie_ratio);
+            frame_width  = RoundToInteger((float)current_screen_height * movie_ratio);
         }
     }
     else if (movie->scaling_ == kMovieScalingNoScale)
@@ -227,10 +217,9 @@ void PlayMovie(const std::string &name)
     else if (movie->scaling_ == kMovieScalingZoom)
     {
         frame_height = current_screen_height;
-        frame_width =
-            RoundToInteger((float)current_screen_height * movie_ratio);
+        frame_width  = RoundToInteger((float)current_screen_height * movie_ratio);
     }
-    else  // Stretch, aspect ratio gets BTFO potentially
+    else // Stretch, aspect ratio gets BTFO potentially
     {
         frame_height = current_screen_height;
         frame_width  = current_screen_width;
@@ -278,7 +267,8 @@ void PlayMovie(const std::string &name)
 
         double current_time = (double)SDL_GetTicks() / 1000.0;
         double elapsed_time = current_time - last_time;
-        if (elapsed_time > 1.0 / 30.0) elapsed_time = 1.0 / 30.0;
+        if (elapsed_time > 1.0 / 30.0)
+            elapsed_time = 1.0 / 30.0;
         last_time = current_time;
 
         plm_decode(decoder, elapsed_time);
@@ -338,8 +328,7 @@ void PlayMovie(const std::string &name)
                 HudSolidBox(hud_x_left, 196, hud_x_right, 200, SG_BLACK_RGBA32);
 
                 // Draw progress
-                HudSolidBox(hud_x_left, 197, hud_x_right * (skip_time / 0.9f),
-                            199, SG_WHITE_RGBA32);
+                HudSolidBox(hud_x_left, 197, hud_x_right * (skip_time / 0.9f), 199, SG_WHITE_RGBA32);
             }
 
             FinishFrame();
@@ -353,27 +342,28 @@ void PlayMovie(const std::string &name)
         {
             switch (sdl_ev.type)
             {
-                case SDL_KEYDOWN:
-                case SDL_MOUSEBUTTONDOWN:
-                case SDL_CONTROLLERBUTTONDOWN:
-                    skip_bar_active = true;
-                    break;
+            case SDL_KEYDOWN:
+            case SDL_MOUSEBUTTONDOWN:
+            case SDL_CONTROLLERBUTTONDOWN:
+                skip_bar_active = true;
+                break;
 
-                case SDL_KEYUP:
-                case SDL_MOUSEBUTTONUP:
-                case SDL_CONTROLLERBUTTONUP:
-                    skip_bar_active = false;
-                    skip_time       = 0;
-                    break;
+            case SDL_KEYUP:
+            case SDL_MOUSEBUTTONUP:
+            case SDL_CONTROLLERBUTTONUP:
+                skip_bar_active = false;
+                skip_time       = 0;
+                break;
 
-                default:
-                    break;
+            default:
+                break;
             }
         }
         if (skip_bar_active)
         {
             skip_time += elapsed_time;
-            if (skip_time > 1) playing_movie = false;
+            if (skip_time > 1)
+                playing_movie = false;
         }
     }
     last_time      = (double)SDL_GetTicks() / 1000.0;

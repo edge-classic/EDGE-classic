@@ -51,15 +51,15 @@ enum BlendingMode
 {
     kBlendingNone = 0,
 
-    kBlendingMasked = (1 << 0),  // drop fragments when alpha == 0
-    kBlendingLess   = (1 << 1),  // drop fragments when alpha < color.a
-    kBlendingAlpha  = (1 << 2),  // alpha-blend with the framebuffer
-    kBlendingAdd    = (1 << 3),  // additive-blend with the framebuffer
+    kBlendingMasked = (1 << 0),    // drop fragments when alpha == 0
+    kBlendingLess   = (1 << 1),    // drop fragments when alpha < color.a
+    kBlendingAlpha  = (1 << 2),    // alpha-blend with the framebuffer
+    kBlendingAdd    = (1 << 3),    // additive-blend with the framebuffer
 
-    kBlendingCullBack  = (1 << 4),  // enable back-face culling
-    kBlendingCullFront = (1 << 5),  // enable front-face culling
-    kBlendingNoZBuffer = (1 << 6),  // don't update the Z buffer
-    kBlendingClampY    = (1 << 7),  // force texture to be Y clamped
+    kBlendingCullBack  = (1 << 4), // enable back-face culling
+    kBlendingCullFront = (1 << 5), // enable front-face culling
+    kBlendingNoZBuffer = (1 << 6), // don't update the Z buffer
+    kBlendingClampY    = (1 << 7), // force texture to be Y clamped
 };
 
 enum CustomTextureEnvironment
@@ -74,11 +74,8 @@ enum CustomTextureEnvironment
     // normally, i.e. passed on to next texture unit.
 };
 
-RendererVertex *RendererBeginUnit(GLuint shape, int max_vert, GLuint env1,
-                                  GLuint tex1, GLuint env2, GLuint tex2,
-                                  int pass, int blending,
-                                  RGBAColor fog_color   = kRGBANoValue,
-                                  float     fog_density = 0);
+RendererVertex *RendererBeginUnit(GLuint shape, int max_vert, GLuint env1, GLuint tex1, GLuint env2, GLuint tex2,
+                                  int pass, int blending, RGBAColor fog_color = kRGBANoValue, float fog_density = 0);
 void            RendererEndUnit(int actual_vert);
 
 //--- editor settings ---

@@ -45,13 +45,13 @@
 #include "m_random.h"
 #include "main.h"
 #include "math_crc.h"
-#include "miniz.h"  // ZGL3 nodes
+#include "miniz.h" // ZGL3 nodes
 #include "p_local.h"
 #include "r_gldefs.h"
 #include "r_image.h"
 #include "r_misc.h"
 #include "r_sky.h"
-#include "rad_trig.h"  // MUSINFO changers
+#include "rad_trig.h" // MUSINFO changers
 #include "s_music.h"
 #include "s_sound.h"
 #include "sokol_color.h"
@@ -71,8 +71,7 @@ extern unsigned int root_node;
 
 static bool level_active = false;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(udmf_strict_namespace, "0",
-                             kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(udmf_strict_namespace, "0", kConsoleVariableFlagArchive)
 
 //
 // MAP related Lookup tables.
@@ -136,13 +135,12 @@ static std::unordered_map<std::string, MusinfoMapping> musinfo_tracks;
 
 static void GetMusinfoTracksForLevel(void)
 {
-    if (musinfo_tracks.count(current_map->name_) &&
-        musinfo_tracks[current_map->name_].processed)
+    if (musinfo_tracks.count(current_map->name_) && musinfo_tracks[current_map->name_].processed)
         return;
-    int      raw_length = 0;
-    uint8_t *raw_musinfo =
-        OpenPackOrLumpInMemory("MUSINFO", { ".txt" }, &raw_length);
-    if (!raw_musinfo) return;
+    int      raw_length  = 0;
+    uint8_t *raw_musinfo = OpenPackOrLumpInMemory("MUSINFO", { ".txt" }, &raw_length);
+    if (!raw_musinfo)
+        return;
     std::string musinfo;
     musinfo.resize(raw_length);
     memcpy(musinfo.data(), raw_musinfo, raw_length);
@@ -155,7 +153,8 @@ static void GetMusinfoTracksForLevel(void)
         std::string    section;
         epi::TokenKind tok = lex.Next(section);
 
-        if (tok != epi::kTokenNumber && tok != epi::kTokenIdentifier) break;
+        if (tok != epi::kTokenNumber && tok != epi::kTokenIdentifier)
+            break;
 
         if (epi::StringCaseCompareASCII(section, current_map->name_) != 0)
             continue;
@@ -167,12 +166,12 @@ static void GetMusinfoTracksForLevel(void)
             std::string    value;
             epi::TokenKind block_tok = lex.Next(value);
 
-            if (block_tok != epi::kTokenNumber &&
-                block_tok != epi::kTokenIdentifier)
+            if (block_tok != epi::kTokenNumber && block_tok != epi::kTokenIdentifier)
                 return;
 
             // A valid map name should be the end of this block
-            if (mapdefs.Lookup(value.c_str())) return;
+            if (mapdefs.Lookup(value.c_str()))
+                return;
 
             // This does have a bit of faith that the MUSINFO lump isn't
             // malformed
@@ -182,10 +181,9 @@ static void GetMusinfoTracksForLevel(void)
             {
                 // This mimics Lobo's ad-hoc playlist stuff for UMAPINFO
                 int ddf_track = playlist.FindLast(value.c_str());
-                if (ddf_track != -1)  // Entry exists
+                if (ddf_track != -1) // Entry exists
                 {
-                    musinfo_tracks[current_map->name_].mappings.try_emplace(
-                        mus_number, ddf_track);
+                    musinfo_tracks[current_map->name_].mappings.try_emplace(mus_number, ddf_track);
                 }
                 else
                 {
@@ -196,8 +194,7 @@ static void GetMusinfoTracksForLevel(void)
                     dynamic_plentry->type_     = kDDFMusicUnknown;
                     dynamic_plentry->infotype_ = kDDFMusicDataLump;
                     playlist.push_back(dynamic_plentry);
-                    musinfo_tracks[current_map->name_].mappings.try_emplace(
-                        mus_number, dynamic_plentry->number_);
+                    musinfo_tracks[current_map->name_].mappings.try_emplace(mus_number, dynamic_plentry->number_);
                 }
                 mus_number = -1;
             }
@@ -211,16 +208,17 @@ static void CheckEvilutionBug(uint8_t *data, int length)
     // the yellow keycard from appearing (the "Multiplayer Only" flag
     // is set), and the level cannot be completed.  This fixes it.
 
-    static const uint8_t Y_key_data[] = { 0x59, 0xf5, 0x48, 0xf8, 0,
-                                          0,    6,    0,    0x17, 0 };
+    static const uint8_t Y_key_data[] = { 0x59, 0xf5, 0x48, 0xf8, 0, 0, 6, 0, 0x17, 0 };
 
     static const int Y_key_offset = 0x125C;
 
-    if (length < Y_key_offset + 10) return;
+    if (length < Y_key_offset + 10)
+        return;
 
     data += Y_key_offset;
 
-    if (memcmp(data, Y_key_data, 10) != 0) return;
+    if (memcmp(data, Y_key_data, 10) != 0)
+        return;
 
     LogPrint("Detected TNT MAP31 bug, adding fix.\n");
 
@@ -232,38 +230,38 @@ static void CheckDoom2Map05Bug(uint8_t *data, int length)
     // The IWAD for Doom2 has a bug in MAP05 where 2 sectors
     // are incorrectly tagged 9.  This fixes it.
 
-    static const uint8_t sector_4_data[] = {
-        0x60, 0,    0xc8, 0,    0x46, 0x4c, 0x41, 0x54, 0x31, 0, 0, 0, 0x46,
-        0x4c, 0x41, 0x54, 0x31, 0x30, 0,    0,    0x70, 0,    0, 0, 9, 0
-    };
+    static const uint8_t sector_4_data[] = { 0x60, 0,    0xc8, 0,    0x46, 0x4c, 0x41, 0x54, 0x31, 0, 0, 0, 0x46,
+                                             0x4c, 0x41, 0x54, 0x31, 0x30, 0,    0,    0x70, 0,    0, 0, 9, 0 };
 
-    static const uint8_t sector_153_data[] = {
-        0x98, 0,    0xe8, 0,    0x46, 0x4c, 0x41, 0x54, 0x31, 0, 0, 0, 0x46,
-        0x4c, 0x41, 0x54, 0x31, 0x30, 0,    0,    0x70, 0,    9, 0, 9, 0
-    };
+    static const uint8_t sector_153_data[] = { 0x98, 0,    0xe8, 0,    0x46, 0x4c, 0x41, 0x54, 0x31, 0, 0, 0, 0x46,
+                                               0x4c, 0x41, 0x54, 0x31, 0x30, 0,    0,    0x70, 0,    9, 0, 9, 0 };
 
-    static const int sector_4_offset   = 0x68;  // 104
-    static const int sector_153_offset = 3978;  // 0xf8a; //3978
+    static const int sector_4_offset   = 0x68; // 104
+    static const int sector_153_offset = 3978; // 0xf8a; //3978
 
-    if (length < sector_4_offset + 26) return;
+    if (length < sector_4_offset + 26)
+        return;
 
-    if (length < sector_153_offset + 26) return;
+    if (length < sector_153_offset + 26)
+        return;
 
     // Sector 4 first
     data += sector_4_offset;
 
-    if (memcmp(data, sector_4_data, 26) != 0) return;
+    if (memcmp(data, sector_4_data, 26) != 0)
+        return;
 
-    if (data[24] == 9)  // check just in case
-        data[24] = 0;   // set tag to 0 instead of 9
+    if (data[24] == 9) // check just in case
+        data[24] = 0;  // set tag to 0 instead of 9
 
     // now sector 153
     data += (sector_153_offset - sector_4_offset);
 
-    if (memcmp(data, sector_153_data, 26) != 0) return;
+    if (memcmp(data, sector_153_data, 26) != 0)
+        return;
 
-    if (data[24] == 9)  // check just in case
-        data[24] = 0;   // set tag to 0 instead of 9
+    if (data[24] == 9) // check just in case
+        data[24] = 0;  // set tag to 0 instead of 9
 
     LogPrint("Detected Doom2 MAP05 bug, adding fix.\n");
 }
@@ -276,16 +274,14 @@ static void LoadVertexes(int lump)
     Vertex          *li;
 
     if (!VerifyLump(lump, "VERTEXES"))
-        FatalError("Bad WAD: level %s missing VERTEXES.\n",
-                   current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s missing VERTEXES.\n", current_map->lump_.c_str());
 
     // Determine number of lumps:
     //  total lump length / vertex record length.
     total_level_vertexes = GetLumpLength(lump) / sizeof(RawVertex);
 
     if (total_level_vertexes == 0)
-        FatalError("Bad WAD: level %s contains 0 vertexes.\n",
-                   current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s contains 0 vertexes.\n", current_map->lump_.c_str());
 
     level_vertexes = new Vertex[total_level_vertexes];
 
@@ -313,29 +309,27 @@ static void SegCommonStuff(Seg *seg, int linedef_in)
 {
     seg->front_sector = seg->back_sector = nullptr;
 
-    if (linedef_in == -1) { seg->miniseg = true; }
+    if (linedef_in == -1)
+    {
+        seg->miniseg = true;
+    }
     else
     {
-        if (linedef_in >= total_level_lines)  // sanity check
-            FatalError("Bad GWA file: seg #%d has invalid linedef.\n",
-                       (int)(seg - level_segs));
+        if (linedef_in >= total_level_lines) // sanity check
+            FatalError("Bad GWA file: seg #%d has invalid linedef.\n", (int)(seg - level_segs));
 
         seg->miniseg = false;
         seg->linedef = &level_lines[linedef_in];
 
-        float sx =
-            seg->side ? seg->linedef->vertex_2->X : seg->linedef->vertex_1->X;
-        float sy =
-            seg->side ? seg->linedef->vertex_2->Y : seg->linedef->vertex_1->Y;
+        float sx = seg->side ? seg->linedef->vertex_2->X : seg->linedef->vertex_1->X;
+        float sy = seg->side ? seg->linedef->vertex_2->Y : seg->linedef->vertex_1->Y;
 
-        seg->offset =
-            RendererPointToDistance(sx, sy, seg->vertex_1->X, seg->vertex_1->Y);
+        seg->offset = RendererPointToDistance(sx, sy, seg->vertex_1->X, seg->vertex_1->Y);
 
         seg->sidedef = seg->linedef->side[seg->side];
 
         if (!seg->sidedef)
-            FatalError("Bad GWA file: missing side for seg #%d\n",
-                       (int)(seg - level_segs));
+            FatalError("Bad GWA file: missing side for seg #%d\n", (int)(seg - level_segs));
 
         seg->front_sector = seg->sidedef->sector;
 
@@ -343,7 +337,8 @@ static void SegCommonStuff(Seg *seg, int linedef_in)
         {
             Side *other = seg->linedef->side[seg->side ^ 1];
 
-            if (other) seg->back_sector = other->sector;
+            if (other)
+                seg->back_sector = other->sector;
         }
     }
 }
@@ -389,15 +384,13 @@ static void LoadSectors(int lump)
         // THINGS/LINEDEFS/SIDEDEFS/VERTEXES
         lump -= 3;
         if (!VerifyLump(lump, "SECTORS"))
-            FatalError("Bad WAD: level %s missing SECTORS.\n",
-                       current_map->lump_.c_str());
+            FatalError("Bad WAD: level %s missing SECTORS.\n", current_map->lump_.c_str());
     }
 
     total_level_sectors = GetLumpLength(lump) / sizeof(RawSector);
 
     if (total_level_sectors == 0)
-        FatalError("Bad WAD: level %s contains 0 sectors.\n",
-                   current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s contains 0 sectors.\n", current_map->lump_.c_str());
 
     level_sectors = new Sector[total_level_sectors];
     EPI_CLEAR_MEMORY(level_sectors, Sector, total_level_sectors);
@@ -405,7 +398,7 @@ static void LoadSectors(int lump)
     data = LoadLumpIntoMemory(lump);
     map_sectors_crc.AddBlock((const uint8_t *)data, GetLumpLength(lump));
 
-    CheckDoom2Map05Bug((uint8_t *)data, GetLumpLength(lump));  // Lobo: 2023
+    CheckDoom2Map05Bug((uint8_t *)data, GetLumpLength(lump)); // Lobo: 2023
 
     ms = (const RawSector *)data;
     ss = level_sectors;
@@ -419,9 +412,8 @@ static void LoadSectors(int lump)
         // return to wolfenstein?
         if (goobers.d_)
         {
-            ss->floor_height = 0;
-            ss->ceiling_height =
-                (ms->floor_height == ms->ceiling_height) ? 0 : 128.0f;
+            ss->floor_height   = 0;
+            ss->ceiling_height = (ms->floor_height == ms->ceiling_height) ? 0 : 128.0f;
         }
 
         ss->original_height = (ss->floor_height + ss->ceiling_height);
@@ -439,8 +431,7 @@ static void LoadSectors(int lump)
 
         if (ss->floor.image)
         {
-            FlatDefinition *current_flatdef =
-                flatdefs.Find(ss->floor.image->name_.c_str());
+            FlatDefinition *current_flatdef = flatdefs.Find(ss->floor.image->name_.c_str());
             if (current_flatdef)
             {
                 ss->bob_depth  = current_flatdef->bob_depth_;
@@ -458,8 +449,7 @@ static void LoadSectors(int lump)
         }
         if (!ss->ceiling.image)
         {
-            LogWarning("Bad Level: sector #%d has missing ceiling texture.\n",
-                       i);
+            LogWarning("Bad Level: sector #%d has missing ceiling texture.\n", i);
             ss->ceiling.image = ss->floor.image;
         }
 
@@ -482,12 +472,10 @@ static void LoadSectors(int lump)
         ss->properties.viscosity = kViscosityDefault;
         ss->properties.drag      = kDragDefault;
 
-        if (ss->properties.special &&
-            ss->properties.special->fog_color_ != kRGBANoValue)
+        if (ss->properties.special && ss->properties.special->fog_color_ != kRGBANoValue)
         {
-            ss->properties.fog_color = ss->properties.special->fog_color_;
-            ss->properties.fog_density =
-                0.01f * ss->properties.special->fog_density_;
+            ss->properties.fog_color   = ss->properties.special->fog_color_;
+            ss->properties.fog_density = 0.01f * ss->properties.special->fog_density_;
         }
         else
         {
@@ -508,7 +496,10 @@ static void LoadSectors(int lump)
 
 static void SetupRootNode(void)
 {
-    if (total_level_nodes > 0) { root_node = total_level_nodes - 1; }
+    if (total_level_nodes > 0)
+    {
+        root_node = total_level_nodes - 1;
+    }
     else
     {
         root_node = kLeafSubsector | 0;
@@ -521,10 +512,8 @@ static void SetupRootNode(void)
 
         for (i = 0, seg = level_segs; i < total_level_segs; i++, seg++)
         {
-            BoundingBoxAddPoint(dummy_bounding_box, seg->vertex_1->X,
-                                seg->vertex_1->Y);
-            BoundingBoxAddPoint(dummy_bounding_box, seg->vertex_2->X,
-                                seg->vertex_2->Y);
+            BoundingBoxAddPoint(dummy_bounding_box, seg->vertex_1->X, seg->vertex_1->Y);
+            BoundingBoxAddPoint(dummy_bounding_box, seg->vertex_2->X, seg->vertex_2->Y);
         }
     }
 }
@@ -546,8 +535,7 @@ static void UnknownThingWarning(int type, float x, float y)
     unknown_thing_map[type] = count + 1;
 }
 
-static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x,
-                                float y, float z, Sector *sec, BAMAngle angle,
+static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x, float y, float z, Sector *sec, BAMAngle angle,
                                 int options, int tag)
 {
     SpawnPoint point;
@@ -576,8 +564,7 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x,
         if (sec->properties.special && sec->properties.special->hub_)
         {
             if (sec->tag <= 0)
-                LogWarning("HUB_START in sector without tag @ (%1.0f %1.0f)\n",
-                           x, y);
+                LogWarning("HUB_START in sector without tag @ (%1.0f %1.0f)\n", x, y);
 
             point.tag = sec->tag;
 
@@ -616,7 +603,8 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x,
     if (InCooperativeMatch() && (options & kThingNotCooperative))
         return nullptr;
 
-    if (InDeathmatch() && (options & kThingNotDeathmatch)) return nullptr;
+    if (InDeathmatch() && (options & kThingNotDeathmatch))
+        return nullptr;
 
     int bit;
 
@@ -627,15 +615,15 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x,
     else
         bit = 1 << (game_skill - 1);
 
-    if ((options & bit) == 0) return nullptr;
+    if ((options & bit) == 0)
+        return nullptr;
 
     // don't spawn keycards in deathmatch
     if (InDeathmatch() && (info->flags_ & kMapObjectFlagNotDeathmatch))
         return nullptr;
 
     // don't spawn any monsters if -nomonsters
-    if (level_flags.no_monsters &&
-        (info->extended_flags_ & kExtendedFlagMonster))
+    if (level_flags.no_monsters && (info->extended_flags_ & kExtendedFlagMonster))
         return nullptr;
 
     // -AJA- 1999/10/07: don't spawn extra things if -noextra.
@@ -661,7 +649,7 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x,
     // -AJA- 2000/09/22: MBF compatibility flag
     if (options & kThingFriend)
     {
-        mo->side_ = 1;  //~0;
+        mo->side_ = 1; //~0;
         mo->hyper_flags_ |= kHyperFlagUltraLoyal;
         /*
         player_t *player;
@@ -671,7 +659,8 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x,
         */
     }
     // Lobo 2022: added tagged mobj support ;)
-    if (tag > 0) mo->tag_ = tag;
+    if (tag > 0)
+        mo->tag_ = tag;
 
     return mo;
 }
@@ -688,14 +677,12 @@ static void LoadThings(int lump)
     const MapObjectDefinition *objtype;
 
     if (!VerifyLump(lump, "THINGS"))
-        FatalError("Bad WAD: level %s missing THINGS.\n",
-                   current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s missing THINGS.\n", current_map->lump_.c_str());
 
     total_map_things = GetLumpLength(lump) / sizeof(RawThing);
 
     if (total_map_things == 0)
-        FatalError("Bad WAD: level %s contains 0 things.\n",
-                   current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s contains 0 things.\n", current_map->lump_.c_str());
 
     data = LoadLumpIntoMemory(lump);
     map_things_crc.AddBlock((const uint8_t *)data, GetLumpLength(lump));
@@ -715,7 +702,8 @@ static void LoadThings(int lump)
     {
         options = AlignedLittleEndianU16(mt[i].options);
 
-        if (options & kThingReserved) limit_options = true;
+        if (options & kThingReserved)
+            limit_options = true;
     }
 
     for (i = 0; i < total_map_things; i++, mt++)
@@ -726,7 +714,8 @@ static void LoadThings(int lump)
         typenum = AlignedLittleEndianU16(mt->type);
         options = AlignedLittleEndianU16(mt->options);
 
-        if (limit_options) options &= 0x001F;
+        if (limit_options)
+            options &= 0x001F;
 
         objtype = mobjtypes.Lookup(typenum);
 
@@ -740,8 +729,7 @@ static void LoadThings(int lump)
 
         Sector *sec = RendererPointInSubsector(x, y)->sector;
 
-        if ((objtype->hyper_flags_ & kHyperFlagMusicChanger) &&
-            !musinfo_tracks[current_map->name_].processed)
+        if ((objtype->hyper_flags_ & kHyperFlagMusicChanger) && !musinfo_tracks[current_map->name_].processed)
         {
             // This really should only be used with the original DoomEd number
             // range
@@ -749,25 +737,20 @@ static void LoadThings(int lump)
             {
                 int mus_number = -1;
 
-                if (objtype->number_ == 14100)  // Default for level
+                if (objtype->number_ == 14100) // Default for level
                     mus_number = current_map->music_;
-                else if (musinfo_tracks[current_map->name_].mappings.count(
-                             objtype->number_ - 14100))
-                    mus_number = musinfo_tracks[current_map->name_]
-                                     .mappings[objtype->number_ - 14100];
+                else if (musinfo_tracks[current_map->name_].mappings.count(objtype->number_ - 14100))
+                    mus_number = musinfo_tracks[current_map->name_].mappings[objtype->number_ - 14100];
                 // Track found; make ad-hoc RTS script for music changing
                 if (mus_number != -1)
                 {
                     std::string mus_rts = "// MUSINFO SCRIPTS\n\n";
-                    mus_rts.append(epi::StringFormat(
-                        "START_MAP %s\n", current_map->name_.c_str()));
-                    mus_rts.append(epi::StringFormat(
-                        "  SECTOR_TRIGGER_INDEX %d\n", sec - level_sectors));
+                    mus_rts.append(epi::StringFormat("START_MAP %s\n", current_map->name_.c_str()));
+                    mus_rts.append(epi::StringFormat("  SECTOR_TRIGGER_INDEX %d\n", sec - level_sectors));
                     mus_rts.append("    TAGGED_INDEPENDENT\n");
                     mus_rts.append("    TAGGED_REPEATABLE\n");
                     mus_rts.append("    WAIT 30T\n");
-                    mus_rts.append(
-                        epi::StringFormat("    CHANGE_MUSIC %d\n", mus_number));
+                    mus_rts.append(epi::StringFormat("    CHANGE_MUSIC %d\n", mus_number));
                     mus_rts.append("    RETRIGGER\n");
                     mus_rts.append("  END_SECTOR_TRIGGER\n");
                     mus_rts.append("END_MAP\n\n");
@@ -790,7 +773,8 @@ static void LoadThings(int lump)
                 z = ef->top_height;
 
                 floor_num--;
-                if (floor_num == 0) break;
+                if (floor_num == 0)
+                    break;
             }
         }
 
@@ -845,23 +829,24 @@ static inline void ComputeLinedefData(Line *ld, int side0, int side1)
         ld->bounding_box[kBoundingBoxTop]    = v1->Y;
     }
 
-    if (!udmf_level && side0 == 0xFFFF) side0 = -1;
-    if (!udmf_level && side1 == 0xFFFF) side1 = -1;
+    if (!udmf_level && side0 == 0xFFFF)
+        side0 = -1;
+    if (!udmf_level && side1 == 0xFFFF)
+        side1 = -1;
 
     // handle missing RIGHT sidedef (idea taken from MBF)
     if (side0 == -1)
     {
-        LogWarning("Bad WAD: level %s linedef #%d is missing RIGHT side\n",
-                   current_map->lump_.c_str(), (int)(ld - level_lines));
+        LogWarning("Bad WAD: level %s linedef #%d is missing RIGHT side\n", current_map->lump_.c_str(),
+                   (int)(ld - level_lines));
         side0 = 0;
     }
 
     if ((ld->flags & kLineFlagTwoSided) && ((side0 == -1) || (side1 == -1)))
     {
-        LogWarning(
-            "Bad WAD: level %s has linedef #%d marked TWOSIDED, "
-            "but it has only one side.\n",
-            current_map->lump_.c_str(), (int)(ld - level_lines));
+        LogWarning("Bad WAD: level %s has linedef #%d marked TWOSIDED, "
+                   "but it has only one side.\n",
+                   current_map->lump_.c_str(), (int)(ld - level_lines));
 
         ld->flags &= ~kLineFlagTwoSided;
     }
@@ -881,14 +866,12 @@ static void LoadLineDefs(int lump)
     //       "wall tiles" properly.
 
     if (!VerifyLump(lump, "LINEDEFS"))
-        FatalError("Bad WAD: level %s missing LINEDEFS.\n",
-                   current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s missing LINEDEFS.\n", current_map->lump_.c_str());
 
     total_level_lines = GetLumpLength(lump) / sizeof(RawLinedef);
 
     if (total_level_lines == 0)
-        FatalError("Bad WAD: level %s contains 0 linedefs.\n",
-                   current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s contains 0 linedefs.\n", current_map->lump_.c_str());
 
     level_lines = new Line[total_level_lines];
 
@@ -912,19 +895,15 @@ static void LoadLineDefs(int lump)
         // Check for BoomClear flag bit and clear applicable specials
         // (PassThru may still be intentionally added further down)
         if (ld->flags & kLineFlagClearBoomFlags)
-            ld->flags &=
-                ~(kLineFlagBoomPassThrough | kLineFlagBlockGroundedMonsters |
-                  kLineFlagBlockPlayers);
+            ld->flags &= ~(kLineFlagBoomPassThrough | kLineFlagBlockGroundedMonsters | kLineFlagBlockPlayers);
 
-        ld->special =
-            LookupLineType(HMM_MAX(0, AlignedLittleEndianS16(mld->type)));
+        ld->special = LookupLineType(HMM_MAX(0, AlignedLittleEndianS16(mld->type)));
 
         if (ld->special && ld->special->type_ == kLineTriggerWalkable)
             ld->flags |= kLineFlagBoomPassThrough;
 
         if (ld->special && ld->special->type_ == kLineTriggerNone &&
-            (ld->special->s_xspeed_ || ld->special->s_yspeed_ ||
-             ld->special->scroll_type_ > BoomScrollerTypeNone ||
+            (ld->special->s_xspeed_ || ld->special->s_yspeed_ || ld->special->scroll_type_ > BoomScrollerTypeNone ||
              ld->special->line_effect_ == kLineEffectTypeVectorScroll ||
              ld->special->line_effect_ == kLineEffectTypeOffsetScroll ||
              ld->special->line_effect_ == kLineEffectTypeTaggedOffsetScroll))
@@ -936,9 +915,7 @@ static void LoadLineDefs(int lump)
         if (ld->special && ld->special->slope_type_ & kSlopeTypeDetailCeiling)
             ld->flags |= kLineFlagBoomPassThrough;
 
-        if (ld->special &&
-            ld->special ==
-                linetypes.Lookup(0))  // Add passthru to unknown/templated
+        if (ld->special && ld->special == linetypes.Lookup(0)) // Add passthru to unknown/templated
             ld->flags |= kLineFlagBoomPassThrough;
 
         int side0 = AlignedLittleEndianU16(mld->right);
@@ -953,7 +930,8 @@ static void LoadLineDefs(int lump)
         {
             for (int j = 0; j < total_level_sectors; j++)
             {
-                if (level_sectors[j].tag != ld->tag) continue;
+                if (level_sectors[j].tag != ld->tag)
+                    continue;
 
                 level_sectors[j].extrafloor_maximum++;
                 total_level_extrafloors++;
@@ -970,26 +948,27 @@ static Sector *DetermineSubsectorSector(Subsector *ss, int pass)
 
     for (seg = ss->segs; seg != nullptr; seg = seg->subsector_next)
     {
-        if (seg->miniseg) continue;
+        if (seg->miniseg)
+            continue;
 
         // ignore self-referencing linedefs
-        if (seg->front_sector == seg->back_sector) continue;
+        if (seg->front_sector == seg->back_sector)
+            continue;
 
         return seg->front_sector;
     }
 
     for (seg = ss->segs; seg != nullptr; seg = seg->subsector_next)
     {
-        if (seg->partner == nullptr) continue;
+        if (seg->partner == nullptr)
+            continue;
 
         // only do this for self-referencing linedefs if the original sector
         // isn't tagged, otherwise save it for the next pass
-        if (seg->front_sector == seg->back_sector && seg->front_sector &&
-            seg->front_sector->tag == 0)
+        if (seg->front_sector == seg->back_sector && seg->front_sector && seg->front_sector->tag == 0)
             return seg->front_sector;
 
-        if (seg->front_sector != seg->back_sector &&
-            seg->partner->front_subsector->sector != nullptr)
+        if (seg->front_sector != seg->back_sector && seg->partner->front_subsector->sector != nullptr)
             return seg->partner->front_subsector->sector;
     }
 
@@ -997,11 +976,13 @@ static Sector *DetermineSubsectorSector(Subsector *ss, int pass)
     {
         for (seg = ss->segs; seg != nullptr; seg = seg->subsector_next)
         {
-            if (!seg->miniseg) return seg->front_sector;
+            if (!seg->miniseg)
+                return seg->front_sector;
         }
     }
 
-    if (pass == 2) return &level_sectors[0];
+    if (pass == 2)
+        return &level_sectors[0];
 
     return nullptr;
 }
@@ -1054,9 +1035,13 @@ static void AssignSubsectorsToSectors()
     //           touching such lines should NOT be assigned to that line's
     //           sector, but rather to the "outer" sector.
 
-    while (AssignSubsectorsPass(0)) {}
+    while (AssignSubsectorsPass(0))
+    {
+    }
 
-    while (AssignSubsectorsPass(1)) {}
+    while (AssignSubsectorsPass(1))
+    {
+    }
 
     // the above *should* handle everything, so this pass is only needed
     // for extremely broken nodes or maps.
@@ -1076,7 +1061,8 @@ static void LoadXGL3Nodes(int lumpnum)
 
     xglen   = GetLumpLength(lumpnum);
     xgldata = (uint8_t *)LoadLumpIntoMemory(lumpnum);
-    if (!xgldata) FatalError("LoadXGL3Nodes: Couldn't load lump\n");
+    if (!xgldata)
+        FatalError("LoadXGL3Nodes: Couldn't load lump\n");
 
     if (xglen < 12)
     {
@@ -1101,8 +1087,7 @@ static void LoadXGL3Nodes(int lumpnum)
         for (;;)
         {
             inflate_status = inflate(&zgl_stream, Z_NO_FLUSH);
-            if (inflate_status == MZ_OK ||
-                inflate_status == MZ_BUF_ERROR)  // Need to resize output buffer
+            if (inflate_status == MZ_OK || inflate_status == MZ_BUF_ERROR) // Need to resize output buffer
             {
                 zgldata.resize(zgldata.size() * 2);
                 zgl_stream.next_out  = &zgldata[zgl_stream.total_out];
@@ -1145,8 +1130,7 @@ static void LoadXGL3Nodes(int lumpnum)
     // 2nd u32 is the number of extra vertexes added by ajbsp
     int nVerts = epi::UnalignedLittleEndianU32(td);
     td += 4;
-    LogDebug("LoadXGL3Nodes: Orig Verts = %d, New Verts = %d, Map Verts = %d\n",
-             oVerts, nVerts, total_level_vertexes);
+    LogDebug("LoadXGL3Nodes: Orig Verts = %d, New Verts = %d, Map Verts = %d\n", oVerts, nVerts, total_level_vertexes);
 
     level_gl_vertexes = new Vertex[nVerts];
 
@@ -1225,7 +1209,7 @@ static void LoadXGL3Nodes(int lumpnum)
             seg->partner = nullptr;
         else
         {
-            EPI_ASSERT(partner < total_level_segs);  // sanity check
+            EPI_ASSERT(partner < total_level_segs); // sanity check
             seg->partner = &level_segs[partner];
         }
 
@@ -1253,17 +1237,13 @@ static void LoadXGL3Nodes(int lumpnum)
         seg = &level_segs[firstseg];
         for (int j = 0; j < countsegs; j++, seg++)
         {
-            seg->vertex_2 = j == (countsegs - 1)
-                                ? level_segs[firstseg].vertex_1
-                                : level_segs[firstseg + j + 1].vertex_1;
+            seg->vertex_2 =
+                j == (countsegs - 1) ? level_segs[firstseg].vertex_1 : level_segs[firstseg + j + 1].vertex_1;
 
-            seg->angle =
-                RendererPointToAngle(seg->vertex_1->X, seg->vertex_1->Y,
-                                     seg->vertex_2->X, seg->vertex_2->Y);
+            seg->angle = RendererPointToAngle(seg->vertex_1->X, seg->vertex_1->Y, seg->vertex_2->X, seg->vertex_2->Y);
 
             seg->length =
-                RendererPointToDistance(seg->vertex_1->X, seg->vertex_1->Y,
-                                        seg->vertex_2->X, seg->vertex_2->Y);
+                RendererPointToDistance(seg->vertex_1->X, seg->vertex_1->Y, seg->vertex_2->X, seg->vertex_2->Y);
         }
 
         // -AJA- 1999/09/23: New linked list for the segs of a subsector
@@ -1271,8 +1251,7 @@ static void LoadXGL3Nodes(int lumpnum)
         Seg **prevptr = &ss->segs;
 
         if (countsegs == 0)
-            FatalError("LoadXGL3Nodes: level %s has invalid SSECTORS.\n",
-                       current_map->lump_.c_str());
+            FatalError("LoadXGL3Nodes: level %s has invalid SSECTORS.\n", current_map->lump_.c_str());
 
         ss->sector     = nullptr;
         ss->thing_list = nullptr;
@@ -1297,8 +1276,8 @@ static void LoadXGL3Nodes(int lumpnum)
 
         *prevptr = nullptr;
     }
-    delete[] ss_temp;  // CA 9.30.18: allocated with new but released using
-                       // delete, added [] between delete and ss_temp
+    delete[] ss_temp; // CA 9.30.18: allocated with new but released using
+                      // delete, added [] between delete and ss_temp
 
     LogDebug("LoadXGL3Nodes: Read GL nodes\n");
     // finally, read the nodes
@@ -1317,21 +1296,17 @@ static void LoadXGL3Nodes(int lumpnum)
         td += 4;
         nd->divider.y = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
         td += 4;
-        nd->divider.delta_x =
-            (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
+        nd->divider.delta_x = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
         td += 4;
-        nd->divider.delta_y =
-            (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
+        nd->divider.delta_y = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
         td += 4;
 
-        nd->divider_length = RendererPointToDistance(0, 0, nd->divider.delta_x,
-                                                     nd->divider.delta_y);
+        nd->divider_length = RendererPointToDistance(0, 0, nd->divider.delta_x, nd->divider.delta_y);
 
         for (int j = 0; j < 2; j++)
             for (int k = 0; k < 4; k++)
             {
-                nd->bounding_boxes[j][k] =
-                    (float)epi::UnalignedLittleEndianS16(td);
+                nd->bounding_boxes[j][k] = (float)epi::UnalignedLittleEndianS16(td);
                 td += 2;
             }
 
@@ -1343,8 +1318,7 @@ static void LoadXGL3Nodes(int lumpnum)
             // update bbox pointers in subsector
             if (nd->children[j] & kLeafSubsector)
             {
-                Subsector *sss =
-                    level_subsectors + (nd->children[j] & ~kLeafSubsector);
+                Subsector *sss    = level_subsectors + (nd->children[j] & ~kLeafSubsector);
                 sss->bounding_box = &nd->bounding_boxes[j][0];
             }
         }
@@ -1372,7 +1346,8 @@ static void LoadUDMFVertexes()
         std::string    section;
         epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF) break;
+        if (tok == epi::kTokenEOF)
+            break;
 
         if (tok != epi::kTokenIdentifier)
             FatalError("Malformed TEXTMAP lump.\n");
@@ -1395,7 +1370,8 @@ static void LoadUDMFVertexes()
             float zf = -40000.0f, zc = 40000.0f;
             for (;;)
             {
-                if (lex.Match("}")) break;
+                if (lex.Match("}"))
+                    break;
 
                 std::string    key;
                 std::string    value;
@@ -1412,8 +1388,7 @@ static void LoadUDMFVertexes()
 
                 block_tok = lex.Next(value);
 
-                if (block_tok == epi::kTokenEOF ||
-                    block_tok == epi::kTokenError || value == "}")
+                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
                     FatalError("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
@@ -1423,31 +1398,32 @@ static void LoadUDMFVertexes()
 
                 switch (key_ename.GetIndex())
                 {
-                    case epi::kENameX:
-                        x = epi::LexDouble(value);
-                        break;
-                    case epi::kENameY:
-                        y = epi::LexDouble(value);
-                        break;
-                    case epi::kENameZfloor:
-                        zf = epi::LexDouble(value);
-                        break;
-                    case epi::kENameZceiling:
-                        zc = epi::LexDouble(value);
-                        break;
-                    default:
-                        break;
+                case epi::kENameX:
+                    x = epi::LexDouble(value);
+                    break;
+                case epi::kENameY:
+                    y = epi::LexDouble(value);
+                    break;
+                case epi::kENameZfloor:
+                    zf = epi::LexDouble(value);
+                    break;
+                case epi::kENameZceiling:
+                    zc = epi::LexDouble(value);
+                    break;
+                default:
+                    break;
                 }
             }
             level_vertexes[cur_vertex] = { { { { { x, y, zf } } }, zc } };
             cur_vertex++;
         }
-        else  // consume other blocks
+        else // consume other blocks
         {
             for (;;)
             {
                 tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::kTokenEOF) break;
+                if (lex.Match("}") || tok == epi::kTokenEOF)
+                    break;
             }
         }
     }
@@ -1468,7 +1444,8 @@ static void LoadUDMFSectors()
         std::string    section;
         epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF) break;
+        if (tok == epi::kTokenEOF)
+            break;
 
         if (tok != epi::kTokenIdentifier)
             FatalError("Malformed TEXTMAP lump.\n");
@@ -1502,7 +1479,8 @@ static void LoadUDMFSectors()
             strcpy(ceil_tex, "-");
             for (;;)
             {
-                if (lex.Match("}")) break;
+                if (lex.Match("}"))
+                    break;
 
                 std::string    key;
                 std::string    value;
@@ -1519,8 +1497,7 @@ static void LoadUDMFSectors()
 
                 block_tok = lex.Next(value);
 
-                if (block_tok == epi::kTokenEOF ||
-                    block_tok == epi::kTokenError || value == "}")
+                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
                     FatalError("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
@@ -1530,74 +1507,71 @@ static void LoadUDMFSectors()
 
                 switch (key_ename.GetIndex())
                 {
-                    case epi::kENameHeightfloor:
-                        fz = epi::LexInteger(value);
-                        break;
-                    case epi::kENameHeightceiling:
-                        cz = epi::LexInteger(value);
-                        break;
-                    case epi::kENameTexturefloor:
-                        epi::CStringCopyMax(floor_tex, value.c_str(), 8);
-                        break;
-                    case epi::kENameTextureceiling:
-                        epi::CStringCopyMax(ceil_tex, value.c_str(), 8);
-                        break;
-                    case epi::kENameLightlevel:
-                        light = epi::LexInteger(value);
-                        break;
-                    case epi::kENameSpecial:
-                        type = epi::LexInteger(value);
-                        break;
-                    case epi::kENameId:
-                        tag = epi::LexInteger(value);
-                        break;
-                    case epi::kENameLightcolor:
-                        light_color =
-                            ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
-                        break;
-                    case epi::kENameFadecolor:
-                        fog_color =
-                            ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
-                        break;
-                    case epi::kENameFogdensity:
-                        fog_density =
-                            HMM_Clamp(0, epi::LexInteger(value), 1020);
-                        break;
-                    case epi::kENameXpanningfloor:
-                        fx = epi::LexDouble(value);
-                        break;
-                    case epi::kENameYpanningfloor:
-                        fy = epi::LexDouble(value);
-                        break;
-                    case epi::kENameXpanningceiling:
-                        cx = epi::LexDouble(value);
-                        break;
-                    case epi::kENameYpanningceiling:
-                        cy = epi::LexDouble(value);
-                        break;
-                    case epi::kENameXscalefloor:
-                        fx_sc = epi::LexDouble(value);
-                        break;
-                    case epi::kENameYscalefloor:
-                        fy_sc = epi::LexDouble(value);
-                        break;
-                    case epi::kENameXscaleceiling:
-                        cx_sc = epi::LexDouble(value);
-                        break;
-                    case epi::kENameYscaleceiling:
-                        cy_sc = epi::LexDouble(value);
-                        break;
-                    case epi::kENameRotationfloor:
-                        rf = epi::LexDouble(value);
-                        break;
-                    case epi::kENameRotationceiling:
-                        rc = epi::LexDouble(value);
-                        break;
-                    case epi::kENameGravity:
-                        gravfactor = epi::LexDouble(value);
-                        break;
-                    default:
-                        break;
+                case epi::kENameHeightfloor:
+                    fz = epi::LexInteger(value);
+                    break;
+                case epi::kENameHeightceiling:
+                    cz = epi::LexInteger(value);
+                    break;
+                case epi::kENameTexturefloor:
+                    epi::CStringCopyMax(floor_tex, value.c_str(), 8);
+                    break;
+                case epi::kENameTextureceiling:
+                    epi::CStringCopyMax(ceil_tex, value.c_str(), 8);
+                    break;
+                case epi::kENameLightlevel:
+                    light = epi::LexInteger(value);
+                    break;
+                case epi::kENameSpecial:
+                    type = epi::LexInteger(value);
+                    break;
+                case epi::kENameId:
+                    tag = epi::LexInteger(value);
+                    break;
+                case epi::kENameLightcolor:
+                    light_color = ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
+                    break;
+                case epi::kENameFadecolor:
+                    fog_color = ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
+                    break;
+                case epi::kENameFogdensity:
+                    fog_density = HMM_Clamp(0, epi::LexInteger(value), 1020);
+                    break;
+                case epi::kENameXpanningfloor:
+                    fx = epi::LexDouble(value);
+                    break;
+                case epi::kENameYpanningfloor:
+                    fy = epi::LexDouble(value);
+                    break;
+                case epi::kENameXpanningceiling:
+                    cx = epi::LexDouble(value);
+                    break;
+                case epi::kENameYpanningceiling:
+                    cy = epi::LexDouble(value);
+                    break;
+                case epi::kENameXscalefloor:
+                    fx_sc = epi::LexDouble(value);
+                    break;
+                case epi::kENameYscalefloor:
+                    fy_sc = epi::LexDouble(value);
+                    break;
+                case epi::kENameXscaleceiling:
+                    cx_sc = epi::LexDouble(value);
+                    break;
+                case epi::kENameYscaleceiling:
+                    cy_sc = epi::LexDouble(value);
+                    break;
+                case epi::kENameRotationfloor:
+                    rf = epi::LexDouble(value);
+                    break;
+                case epi::kENameRotationceiling:
+                    rc = epi::LexDouble(value);
+                    break;
+                case epi::kENameGravity:
+                    gravfactor = epi::LexDouble(value);
+                    break;
+                default:
+                    break;
                 }
             }
             Sector *ss         = level_sectors + cur_sector;
@@ -1644,8 +1618,7 @@ static void LoadUDMFSectors()
 
             if (ss->floor.image)
             {
-                FlatDefinition *current_flatdef =
-                    flatdefs.Find(ss->floor.image->name_.c_str());
+                FlatDefinition *current_flatdef = flatdefs.Find(ss->floor.image->name_.c_str());
                 if (current_flatdef)
                 {
                     ss->bob_depth  = current_flatdef->bob_depth_;
@@ -1657,15 +1630,12 @@ static void LoadUDMFSectors()
 
             if (!ss->floor.image)
             {
-                LogWarning("Bad Level: sector #%d has missing floor texture.\n",
-                           cur_sector);
+                LogWarning("Bad Level: sector #%d has missing floor texture.\n", cur_sector);
                 ss->floor.image = ImageLookup("FLAT1", kImageNamespaceFlat);
             }
             if (!ss->ceiling.image)
             {
-                LogWarning(
-                    "Bad Level: sector #%d has missing ceiling texture.\n",
-                    cur_sector);
+                LogWarning("Bad Level: sector #%d has missing ceiling texture.\n", cur_sector);
                 ss->ceiling.image = ss->floor.image;
             }
 
@@ -1688,27 +1658,25 @@ static void LoadUDMFSectors()
             ss->properties.drag      = kDragDefault;
 
             // Allow UDMF sector light/fog information to override DDFSECT types
-            if (fog_color != SG_BLACK_RGBA32)  // All black is the established
-                                               // UDMF "no fog" color
+            if (fog_color != SG_BLACK_RGBA32) // All black is the established
+                                              // UDMF "no fog" color
             {
                 // Prevent UDMF-specified fog color from having our internal 'no
                 // value'...uh...value
-                if (fog_color == kRGBANoValue) fog_color ^= 0x00010100;
+                if (fog_color == kRGBANoValue)
+                    fog_color ^= 0x00010100;
                 ss->properties.fog_color = fog_color;
                 // Best-effort match for GZDoom's fogdensity values so that UDB,
                 // etc give predictable results
                 if (fog_density < 2)
                     ss->properties.fog_density = 0.002f;
                 else
-                    ss->properties.fog_density =
-                        0.01f * ((float)fog_density / 1020.0f);
+                    ss->properties.fog_density = 0.01f * ((float)fog_density / 1020.0f);
             }
-            else if (ss->properties.special &&
-                     ss->properties.special->fog_color_ != kRGBANoValue)
+            else if (ss->properties.special && ss->properties.special->fog_color_ != kRGBANoValue)
             {
-                ss->properties.fog_color = ss->properties.special->fog_color_;
-                ss->properties.fog_density =
-                    0.01f * ss->properties.special->fog_density_;
+                ss->properties.fog_color   = ss->properties.special->fog_color_;
+                ss->properties.fog_density = 0.01f * ss->properties.special->fog_density_;
             }
             else
             {
@@ -1717,23 +1685,21 @@ static void LoadUDMFSectors()
             }
             if (light_color != SG_WHITE_RGBA32)
             {
-                if (light_color == kRGBANoValue) light_color ^= 0x00010100;
+                if (light_color == kRGBANoValue)
+                    light_color ^= 0x00010100;
                 // Make colormap if necessary
                 for (Colormap *cmap : colormaps)
                 {
-                    if (cmap->gl_color_ != kRGBANoValue &&
-                        cmap->gl_color_ == light_color)
+                    if (cmap->gl_color_ != kRGBANoValue && cmap->gl_color_ == light_color)
                     {
                         ss->properties.colourmap = cmap;
                         break;
                     }
                 }
-                if (!ss->properties.colourmap ||
-                    ss->properties.colourmap->gl_color_ != light_color)
+                if (!ss->properties.colourmap || ss->properties.colourmap->gl_color_ != light_color)
                 {
-                    Colormap *ad_hoc = new Colormap;
-                    ad_hoc->name_ =
-                        epi::StringFormat("UDMF_%d", light_color);  // Internal
+                    Colormap *ad_hoc         = new Colormap;
+                    ad_hoc->name_            = epi::StringFormat("UDMF_%d", light_color); // Internal
                     ad_hoc->gl_color_        = light_color;
                     ss->properties.colourmap = ad_hoc;
                     colormaps.push_back(ad_hoc);
@@ -1748,12 +1714,13 @@ static void LoadUDMFSectors()
             GroupSectorTags(ss, level_sectors, cur_sector);
             cur_sector++;
         }
-        else  // consume other blocks
+        else // consume other blocks
         {
             for (;;)
             {
                 tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::kTokenEOF) break;
+                if (lex.Match("}") || tok == epi::kTokenEOF)
+                    break;
             }
         }
     }
@@ -1778,7 +1745,8 @@ static void LoadUDMFSideDefs()
         std::string    section;
         epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF) break;
+        if (tok == epi::kTokenEOF)
+            break;
 
         if (tok != epi::kTokenIdentifier)
             FatalError("Malformed TEXTMAP lump.\n");
@@ -1812,7 +1780,8 @@ static void LoadUDMFSideDefs()
             strcpy(middle_tex, "-");
             for (;;)
             {
-                if (lex.Match("}")) break;
+                if (lex.Match("}"))
+                    break;
 
                 std::string    key;
                 std::string    value;
@@ -1829,8 +1798,7 @@ static void LoadUDMFSideDefs()
 
                 block_tok = lex.Next(value);
 
-                if (block_tok == epi::kTokenEOF ||
-                    block_tok == epi::kTokenError || value == "}")
+                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
                     FatalError("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
@@ -1840,65 +1808,65 @@ static void LoadUDMFSideDefs()
 
                 switch (key_ename.GetIndex())
                 {
-                    case epi::kENameOffsetx:
-                        x = epi::LexInteger(value);
-                        break;
-                    case epi::kENameOffsety:
-                        y = epi::LexInteger(value);
-                        break;
-                    case epi::kENameOffsetx_bottom:
-                        lowx = epi::LexDouble(value);
-                        break;
-                    case epi::kENameOffsetx_mid:
-                        midx = epi::LexDouble(value);
-                        break;
-                    case epi::kENameOffsetx_top:
-                        highx = epi::LexDouble(value);
-                        break;
-                    case epi::kENameOffsety_bottom:
-                        lowy = epi::LexDouble(value);
-                        break;
-                    case epi::kENameOffsety_mid:
-                        midy = epi::LexDouble(value);
-                        break;
-                    case epi::kENameOffsety_top:
-                        highy = epi::LexDouble(value);
-                        break;
-                    case epi::kENameScalex_bottom:
-                        low_scx = epi::LexDouble(value);
-                        break;
-                    case epi::kENameScalex_mid:
-                        mid_scx = epi::LexDouble(value);
-                        break;
-                    case epi::kENameScalex_top:
-                        high_scx = epi::LexDouble(value);
-                        break;
-                    case epi::kENameScaley_bottom:
-                        low_scy = epi::LexDouble(value);
-                        break;
-                    case epi::kENameScaley_mid:
-                        mid_scy = epi::LexDouble(value);
-                        break;
-                    case epi::kENameScaley_top:
-                        high_scy = epi::LexDouble(value);
-                        break;
-                    case epi::kENameTexturetop:
-                        epi::CStringCopyMax(top_tex, value.c_str(), 8);
-                        break;
-                    case epi::kENameTexturebottom:
-                        epi::CStringCopyMax(bottom_tex, value.c_str(), 8);
-                        break;
-                    case epi::kENameTexturemiddle:
-                        epi::CStringCopyMax(middle_tex, value.c_str(), 8);
-                        break;
-                    case epi::kENameSector:
-                        sec_num = epi::LexInteger(value);
-                        break;
-                    default:
-                        break;
+                case epi::kENameOffsetx:
+                    x = epi::LexInteger(value);
+                    break;
+                case epi::kENameOffsety:
+                    y = epi::LexInteger(value);
+                    break;
+                case epi::kENameOffsetx_bottom:
+                    lowx = epi::LexDouble(value);
+                    break;
+                case epi::kENameOffsetx_mid:
+                    midx = epi::LexDouble(value);
+                    break;
+                case epi::kENameOffsetx_top:
+                    highx = epi::LexDouble(value);
+                    break;
+                case epi::kENameOffsety_bottom:
+                    lowy = epi::LexDouble(value);
+                    break;
+                case epi::kENameOffsety_mid:
+                    midy = epi::LexDouble(value);
+                    break;
+                case epi::kENameOffsety_top:
+                    highy = epi::LexDouble(value);
+                    break;
+                case epi::kENameScalex_bottom:
+                    low_scx = epi::LexDouble(value);
+                    break;
+                case epi::kENameScalex_mid:
+                    mid_scx = epi::LexDouble(value);
+                    break;
+                case epi::kENameScalex_top:
+                    high_scx = epi::LexDouble(value);
+                    break;
+                case epi::kENameScaley_bottom:
+                    low_scy = epi::LexDouble(value);
+                    break;
+                case epi::kENameScaley_mid:
+                    mid_scy = epi::LexDouble(value);
+                    break;
+                case epi::kENameScaley_top:
+                    high_scy = epi::LexDouble(value);
+                    break;
+                case epi::kENameTexturetop:
+                    epi::CStringCopyMax(top_tex, value.c_str(), 8);
+                    break;
+                case epi::kENameTexturebottom:
+                    epi::CStringCopyMax(bottom_tex, value.c_str(), 8);
+                    break;
+                case epi::kENameTexturemiddle:
+                    epi::CStringCopyMax(middle_tex, value.c_str(), 8);
+                    break;
+                case epi::kENameSector:
+                    sec_num = epi::LexInteger(value);
+                    break;
+                default:
+                    break;
                 }
             }
-            EPI_ASSERT(nummapsides <= total_level_sides);  // sanity check
+            EPI_ASSERT(nummapsides <= total_level_sides); // sanity check
 
             Side *sd = level_sides + nummapsides - 1;
 
@@ -1915,17 +1883,14 @@ static void LoadUDMFSideDefs()
 
             sd->sector = &level_sectors[sec_num];
 
-            sd->top.image =
-                ImageLookup(top_tex, kImageNamespaceTexture, kImageLookupNull);
+            sd->top.image = ImageLookup(top_tex, kImageNamespaceTexture, kImageLookupNull);
 
             if (sd->top.image == nullptr)
             {
                 if (goobers.d_)
-                    sd->top.image =
-                        ImageLookup(bottom_tex, kImageNamespaceTexture);
+                    sd->top.image = ImageLookup(bottom_tex, kImageNamespaceTexture);
                 else
-                    sd->top.image =
-                        ImageLookup(top_tex, kImageNamespaceTexture);
+                    sd->top.image = ImageLookup(top_tex, kImageNamespaceTexture);
             }
 
             sd->middle.image = ImageLookup(middle_tex, kImageNamespaceTexture);
@@ -1952,29 +1917,22 @@ static void LoadUDMFSideDefs()
             sd->middle.boom_colormap = colormaps.Lookup(middle_tex);
             sd->bottom.boom_colormap = colormaps.Lookup(bottom_tex);
 
-            if (sd->top.image &&
-                fabs(sd->top.offset.Y) > sd->top.image->ScaledHeightActual())
-                sd->top.offset.Y = fmodf(sd->top.offset.Y,
-                                         sd->top.image->ScaledHeightActual());
+            if (sd->top.image && fabs(sd->top.offset.Y) > sd->top.image->ScaledHeightActual())
+                sd->top.offset.Y = fmodf(sd->top.offset.Y, sd->top.image->ScaledHeightActual());
 
-            if (sd->middle.image && fabs(sd->middle.offset.Y) >
-                                        sd->middle.image->ScaledHeightActual())
-                sd->middle.offset.Y =
-                    fmodf(sd->middle.offset.Y,
-                          sd->middle.image->ScaledHeightActual());
+            if (sd->middle.image && fabs(sd->middle.offset.Y) > sd->middle.image->ScaledHeightActual())
+                sd->middle.offset.Y = fmodf(sd->middle.offset.Y, sd->middle.image->ScaledHeightActual());
 
-            if (sd->bottom.image && fabs(sd->bottom.offset.Y) >
-                                        sd->bottom.image->ScaledHeightActual())
-                sd->bottom.offset.Y =
-                    fmodf(sd->bottom.offset.Y,
-                          sd->bottom.image->ScaledHeightActual());
+            if (sd->bottom.image && fabs(sd->bottom.offset.Y) > sd->bottom.image->ScaledHeightActual())
+                sd->bottom.offset.Y = fmodf(sd->bottom.offset.Y, sd->bottom.image->ScaledHeightActual());
         }
-        else  // consume other blocks
+        else // consume other blocks
         {
             for (;;)
             {
                 tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::kTokenEOF) break;
+                if (lex.Match("}") || tok == epi::kTokenEOF)
+                    break;
             }
         }
     }
@@ -1998,15 +1956,13 @@ static void LoadUDMFSideDefs()
 
         if (side0 >= nummapsides)
         {
-            LogWarning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n",
-                       current_map->lump_.c_str(), i);
+            LogWarning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n", current_map->lump_.c_str(), i);
             side0 = nummapsides - 1;
         }
 
         if (side1 != -1 && side1 >= nummapsides)
         {
-            LogWarning("Bad WAD: level %s linedef #%d has bad LEFT side.\n",
-                       current_map->lump_.c_str(), i);
+            LogWarning("Bad WAD: level %s linedef #%d has bad LEFT side.\n", current_map->lump_.c_str(), i);
             side1 = nummapsides - 1;
         }
 
@@ -2052,7 +2008,8 @@ static void LoadUDMFLineDefs()
         std::string    section;
         epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF) break;
+        if (tok == epi::kTokenEOF)
+            break;
 
         if (tok != epi::kTokenIdentifier)
             FatalError("Malformed TEXTMAP lump.\n");
@@ -2076,7 +2033,8 @@ static void LoadUDMFLineDefs()
             int special = 0;
             for (;;)
             {
-                if (lex.Match("}")) break;
+                if (lex.Match("}"))
+                    break;
 
                 std::string    key;
                 std::string    value;
@@ -2093,8 +2051,7 @@ static void LoadUDMFLineDefs()
 
                 block_tok = lex.Next(value);
 
-                if (block_tok == epi::kTokenEOF ||
-                    block_tok == epi::kTokenError || value == "}")
+                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
                     FatalError("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
@@ -2104,76 +2061,62 @@ static void LoadUDMFLineDefs()
 
                 switch (key_ename.GetIndex())
                 {
-                    case epi::kENameId:
-                        tag = epi::LexInteger(value);
-                        break;
-                    case epi::kENameV1:
-                        v1 = epi::LexInteger(value);
-                        break;
-                    case epi::kENameV2:
-                        v2 = epi::LexInteger(value);
-                        break;
-                    case epi::kENameSpecial:
-                        special = epi::LexInteger(value);
-                        break;
-                    case epi::kENameSidefront:
-                        side0 = epi::LexInteger(value);
-                        break;
-                    case epi::kENameSideback:
-                        side1 = epi::LexInteger(value);
-                        break;
-                    case epi::kENameBlocking:
-                        flags |=
-                            (epi::LexBoolean(value) ? kLineFlagBlocking : 0);
-                        break;
-                    case epi::kENameBlockmonsters:
-                        flags |=
-                            (epi::LexBoolean(value) ? kLineFlagBlockMonsters
-                                                    : 0);
-                        break;
-                    case epi::kENameTwosided:
-                        flags |=
-                            (epi::LexBoolean(value) ? kLineFlagTwoSided : 0);
-                        break;
-                    case epi::kENameDontpegtop:
-                        flags |=
-                            (epi::LexBoolean(value) ? kLineFlagUpperUnpegged
-                                                    : 0);
-                        break;
-                    case epi::kENameDontpegbottom:
-                        flags |=
-                            (epi::LexBoolean(value) ? kLineFlagLowerUnpegged
-                                                    : 0);
-                        break;
-                    case epi::kENameSecret:
-                        flags |= (epi::LexBoolean(value) ? kLineFlagSecret : 0);
-                        break;
-                    case epi::kENameBlocksound:
-                        flags |=
-                            (epi::LexBoolean(value) ? kLineFlagSoundBlock : 0);
-                        break;
-                    case epi::kENameDontdraw:
-                        flags |=
-                            (epi::LexBoolean(value) ? kLineFlagDontDraw : 0);
-                        break;
-                    case epi::kENameMapped:
-                        flags |= (epi::LexBoolean(value) ? kLineFlagMapped : 0);
-                        break;
-                    case epi::kENamePassuse:
-                        flags |=
-                            (epi::LexBoolean(value) ? kLineFlagBoomPassThrough
-                                                    : 0);
-                        break;
-                    case epi::kENameBlockplayers:
-                        flags |= (epi::LexBoolean(value) ? kLineFlagBlockPlayers
-                                                         : 0);
-                        break;
-                    case epi::kENameBlocksight:
-                        flags |=
-                            (epi::LexBoolean(value) ? kLineFlagSightBlock : 0);
-                        break;
-                    default:
-                        break;
+                case epi::kENameId:
+                    tag = epi::LexInteger(value);
+                    break;
+                case epi::kENameV1:
+                    v1 = epi::LexInteger(value);
+                    break;
+                case epi::kENameV2:
+                    v2 = epi::LexInteger(value);
+                    break;
+                case epi::kENameSpecial:
+                    special = epi::LexInteger(value);
+                    break;
+                case epi::kENameSidefront:
+                    side0 = epi::LexInteger(value);
+                    break;
+                case epi::kENameSideback:
+                    side1 = epi::LexInteger(value);
+                    break;
+                case epi::kENameBlocking:
+                    flags |= (epi::LexBoolean(value) ? kLineFlagBlocking : 0);
+                    break;
+                case epi::kENameBlockmonsters:
+                    flags |= (epi::LexBoolean(value) ? kLineFlagBlockMonsters : 0);
+                    break;
+                case epi::kENameTwosided:
+                    flags |= (epi::LexBoolean(value) ? kLineFlagTwoSided : 0);
+                    break;
+                case epi::kENameDontpegtop:
+                    flags |= (epi::LexBoolean(value) ? kLineFlagUpperUnpegged : 0);
+                    break;
+                case epi::kENameDontpegbottom:
+                    flags |= (epi::LexBoolean(value) ? kLineFlagLowerUnpegged : 0);
+                    break;
+                case epi::kENameSecret:
+                    flags |= (epi::LexBoolean(value) ? kLineFlagSecret : 0);
+                    break;
+                case epi::kENameBlocksound:
+                    flags |= (epi::LexBoolean(value) ? kLineFlagSoundBlock : 0);
+                    break;
+                case epi::kENameDontdraw:
+                    flags |= (epi::LexBoolean(value) ? kLineFlagDontDraw : 0);
+                    break;
+                case epi::kENameMapped:
+                    flags |= (epi::LexBoolean(value) ? kLineFlagMapped : 0);
+                    break;
+                case epi::kENamePassuse:
+                    flags |= (epi::LexBoolean(value) ? kLineFlagBoomPassThrough : 0);
+                    break;
+                case epi::kENameBlockplayers:
+                    flags |= (epi::LexBoolean(value) ? kLineFlagBlockPlayers : 0);
+                    break;
+                case epi::kENameBlocksight:
+                    flags |= (epi::LexBoolean(value) ? kLineFlagSightBlock : 0);
+                    break;
+                default:
+                    break;
                 }
             }
             Line *ld = level_lines + cur_line;
@@ -2189,24 +2132,19 @@ static void LoadUDMFLineDefs()
                 ld->flags |= kLineFlagBoomPassThrough;
 
             if (ld->special && ld->special->type_ == kLineTriggerNone &&
-                (ld->special->s_xspeed_ || ld->special->s_yspeed_ ||
-                 ld->special->scroll_type_ > BoomScrollerTypeNone ||
+                (ld->special->s_xspeed_ || ld->special->s_yspeed_ || ld->special->scroll_type_ > BoomScrollerTypeNone ||
                  ld->special->line_effect_ == kLineEffectTypeVectorScroll ||
                  ld->special->line_effect_ == kLineEffectTypeOffsetScroll ||
-                 ld->special->line_effect_ ==
-                     kLineEffectTypeTaggedOffsetScroll))
+                 ld->special->line_effect_ == kLineEffectTypeTaggedOffsetScroll))
                 ld->flags |= kLineFlagBoomPassThrough;
 
             if (ld->special && ld->special->slope_type_ & kSlopeTypeDetailFloor)
                 ld->flags |= kLineFlagBoomPassThrough;
 
-            if (ld->special &&
-                ld->special->slope_type_ & kSlopeTypeDetailCeiling)
+            if (ld->special && ld->special->slope_type_ & kSlopeTypeDetailCeiling)
                 ld->flags |= kLineFlagBoomPassThrough;
 
-            if (ld->special &&
-                ld->special ==
-                    linetypes.Lookup(0))  // Add passthru to unknown/templated
+            if (ld->special && ld->special == linetypes.Lookup(0)) // Add passthru to unknown/templated
                 ld->flags |= kLineFlagBoomPassThrough;
 
             ComputeLinedefData(ld, side0, side1);
@@ -2215,7 +2153,8 @@ static void LoadUDMFLineDefs()
             {
                 for (int j = 0; j < total_level_sectors; j++)
                 {
-                    if (level_sectors[j].tag != ld->tag) continue;
+                    if (level_sectors[j].tag != ld->tag)
+                        continue;
 
                     level_sectors[j].extrafloor_maximum++;
                     total_level_extrafloors++;
@@ -2223,12 +2162,13 @@ static void LoadUDMFLineDefs()
             }
             cur_line++;
         }
-        else  // consume other blocks
+        else // consume other blocks
         {
             for (;;)
             {
                 tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::kTokenEOF) break;
+                if (lex.Match("}") || tok == epi::kTokenEOF)
+                    break;
             }
         }
     }
@@ -2247,7 +2187,8 @@ static void LoadUDMFThings()
         std::string    section;
         epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF) break;
+        if (tok == epi::kTokenEOF)
+            break;
 
         if (tok != epi::kTokenIdentifier)
             FatalError("Malformed TEXTMAP lump.\n");
@@ -2266,19 +2207,19 @@ static void LoadUDMFThings()
 
         if (section == "thing")
         {
-            float    x = 0.0f, y = 0.0f, z = 0.0f;
-            BAMAngle angle   = kBAMAngle0;
-            int      options = kThingNotSinglePlayer | kThingNotDeathmatch |
-                          kThingNotCooperative;
-            int   typenum   = -1;
-            int   tag       = 0;
-            float healthfac = 1.0f;
-            float alpha     = 1.0f;
-            float scale = 0.0f, scalex = 0.0f, scaley = 0.0f;
+            float                      x = 0.0f, y = 0.0f, z = 0.0f;
+            BAMAngle                   angle     = kBAMAngle0;
+            int                        options   = kThingNotSinglePlayer | kThingNotDeathmatch | kThingNotCooperative;
+            int                        typenum   = -1;
+            int                        tag       = 0;
+            float                      healthfac = 1.0f;
+            float                      alpha     = 1.0f;
+            float                      scale = 0.0f, scalex = 0.0f, scaley = 0.0f;
             const MapObjectDefinition *objtype;
             for (;;)
             {
-                if (lex.Match("}")) break;
+                if (lex.Match("}"))
+                    break;
 
                 std::string    key;
                 std::string    value;
@@ -2295,8 +2236,7 @@ static void LoadUDMFThings()
 
                 block_tok = lex.Next(value);
 
-                if (block_tok == epi::kTokenEOF ||
-                    block_tok == epi::kTokenError || value == "}")
+                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
                     FatalError("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
@@ -2306,77 +2246,71 @@ static void LoadUDMFThings()
 
                 switch (key_ename.GetIndex())
                 {
-                    case epi::kENameId:
-                        tag = epi::LexInteger(value);
-                        break;
-                    case epi::kENameX:
-                        x = epi::LexDouble(value);
-                        break;
-                    case epi::kENameY:
-                        y = epi::LexDouble(value);
-                        break;
-                    case epi::kENameHeight:
-                        z = epi::LexDouble(value);
-                        break;
-                    case epi::kENameAngle:
-                        angle = epi::BAMFromDegrees(epi::LexInteger(value));
-                        break;
-                    case epi::kENameType:
-                        typenum = epi::LexInteger(value);
-                        break;
-                    case epi::kENameSkill1:
-                        options |= (epi::LexBoolean(value) ? kThingEasy : 0);
-                        break;
-                    case epi::kENameSkill2:
-                        options |= (epi::LexBoolean(value) ? kThingEasy : 0);
-                        break;
-                    case epi::kENameSkill3:
-                        options |= (epi::LexBoolean(value) ? kThingMedium : 0);
-                        break;
-                    case epi::kENameSkill4:
-                        options |= (epi::LexBoolean(value) ? kThingHard : 0);
-                        break;
-                    case epi::kENameSkill5:
-                        options |= (epi::LexBoolean(value) ? kThingHard : 0);
-                        break;
-                    case epi::kENameAmbush:
-                        options |= (epi::LexBoolean(value) ? kThingAmbush : 0);
-                        break;
-                    case epi::kENameSingle:
-                        options &=
-                            (epi::LexBoolean(value) ? ~kThingNotSinglePlayer
-                                                    : options);
-                        break;
-                    case epi::kENameDm:
-                        options &=
-                            (epi::LexBoolean(value) ? ~kThingNotDeathmatch
-                                                    : options);
-                        break;
-                    case epi::kENameCoop:
-                        options &=
-                            (epi::LexBoolean(value) ? ~kThingNotCooperative
-                                                    : options);
-                        break;
-                    case epi::kENameFriend:
-                        options |= (epi::LexBoolean(value) ? kThingFriend : 0);
-                        break;
-                    case epi::kENameHealth:
-                        healthfac = epi::LexDouble(value);
-                        break;
-                    case epi::kENameAlpha:
-                        alpha = epi::LexDouble(value);
-                        break;
-                    case epi::kENameScale:
-                        scale = epi::LexDouble(value);
-                        break;
-                    case epi::kENameScalex:
-                        scalex = epi::LexDouble(value);
-                        break;
-                    case epi::kENameScaley:
-                        scaley = epi::LexDouble(value);
-                        break;
-                    default:
-                        break;
+                case epi::kENameId:
+                    tag = epi::LexInteger(value);
+                    break;
+                case epi::kENameX:
+                    x = epi::LexDouble(value);
+                    break;
+                case epi::kENameY:
+                    y = epi::LexDouble(value);
+                    break;
+                case epi::kENameHeight:
+                    z = epi::LexDouble(value);
+                    break;
+                case epi::kENameAngle:
+                    angle = epi::BAMFromDegrees(epi::LexInteger(value));
+                    break;
+                case epi::kENameType:
+                    typenum = epi::LexInteger(value);
+                    break;
+                case epi::kENameSkill1:
+                    options |= (epi::LexBoolean(value) ? kThingEasy : 0);
+                    break;
+                case epi::kENameSkill2:
+                    options |= (epi::LexBoolean(value) ? kThingEasy : 0);
+                    break;
+                case epi::kENameSkill3:
+                    options |= (epi::LexBoolean(value) ? kThingMedium : 0);
+                    break;
+                case epi::kENameSkill4:
+                    options |= (epi::LexBoolean(value) ? kThingHard : 0);
+                    break;
+                case epi::kENameSkill5:
+                    options |= (epi::LexBoolean(value) ? kThingHard : 0);
+                    break;
+                case epi::kENameAmbush:
+                    options |= (epi::LexBoolean(value) ? kThingAmbush : 0);
+                    break;
+                case epi::kENameSingle:
+                    options &= (epi::LexBoolean(value) ? ~kThingNotSinglePlayer : options);
+                    break;
+                case epi::kENameDm:
+                    options &= (epi::LexBoolean(value) ? ~kThingNotDeathmatch : options);
+                    break;
+                case epi::kENameCoop:
+                    options &= (epi::LexBoolean(value) ? ~kThingNotCooperative : options);
+                    break;
+                case epi::kENameFriend:
+                    options |= (epi::LexBoolean(value) ? kThingFriend : 0);
+                    break;
+                case epi::kENameHealth:
+                    healthfac = epi::LexDouble(value);
+                    break;
+                case epi::kENameAlpha:
+                    alpha = epi::LexDouble(value);
+                    break;
+                case epi::kENameScale:
+                    scale = epi::LexDouble(value);
+                    break;
+                case epi::kENameScalex:
+                    scalex = epi::LexDouble(value);
+                    break;
+                case epi::kENameScaley:
+                    scaley = epi::LexDouble(value);
+                    break;
+                default:
+                    break;
                 }
             }
             objtype = mobjtypes.Lookup(typenum);
@@ -2391,8 +2325,7 @@ static void LoadUDMFThings()
 
             Sector *sec = RendererPointInSubsector(x, y)->sector;
 
-            if ((objtype->hyper_flags_ & kHyperFlagMusicChanger) &&
-                !musinfo_tracks[current_map->name_].processed)
+            if ((objtype->hyper_flags_ & kHyperFlagMusicChanger) && !musinfo_tracks[current_map->name_].processed)
             {
                 // This really should only be used with the original DoomEd
                 // number range
@@ -2400,28 +2333,22 @@ static void LoadUDMFThings()
                 {
                     int mus_number = -1;
 
-                    if (objtype->number_ == 14100)  // Default for level
+                    if (objtype->number_ == 14100) // Default for level
                         mus_number = current_map->music_;
-                    else if (musinfo_tracks[current_map->name_].mappings.count(
-                                 objtype->number_ - 14100))
+                    else if (musinfo_tracks[current_map->name_].mappings.count(objtype->number_ - 14100))
                     {
-                        mus_number = musinfo_tracks[current_map->name_]
-                                         .mappings[objtype->number_ - 14100];
+                        mus_number = musinfo_tracks[current_map->name_].mappings[objtype->number_ - 14100];
                     }
                     // Track found; make ad-hoc RTS script for music changing
                     if (mus_number != -1)
                     {
                         std::string mus_rts = "// MUSINFO SCRIPTS\n\n";
-                        mus_rts.append(epi::StringFormat(
-                            "START_MAP %s\n", current_map->name_.c_str()));
-                        mus_rts.append(
-                            epi::StringFormat("  SECTOR_TRIGGER_INDEX %d\n",
-                                              sec - level_sectors));
+                        mus_rts.append(epi::StringFormat("START_MAP %s\n", current_map->name_.c_str()));
+                        mus_rts.append(epi::StringFormat("  SECTOR_TRIGGER_INDEX %d\n", sec - level_sectors));
                         mus_rts.append("    TAGGED_INDEPENDENT\n");
                         mus_rts.append("    TAGGED_REPEATABLE\n");
                         mus_rts.append("    WAIT 30T\n");
-                        mus_rts.append(epi::StringFormat(
-                            "    CHANGE_MUSIC %d\n", mus_number));
+                        mus_rts.append(epi::StringFormat("    CHANGE_MUSIC %d\n", mus_number));
                         mus_rts.append("    RETRIGGER\n");
                         mus_rts.append("  END_SECTOR_TRIGGER\n");
                         mus_rts.append("END_MAP\n\n");
@@ -2435,8 +2362,7 @@ static void LoadUDMFThings()
             else
                 z += sec->floor_height;
 
-            MapObject *udmf_thing =
-                SpawnMapThing(objtype, x, y, z, sec, angle, options, tag);
+            MapObject *udmf_thing = SpawnMapThing(objtype, x, y, z, sec, angle, options, tag);
 
             // check for UDMF-specific thing stuff
             if (udmf_thing)
@@ -2464,11 +2390,10 @@ static void LoadUDMFThings()
                     udmf_thing->height_ *= scale;
                     udmf_thing->radius_ *= scale;
                 }
-                else if (!AlmostEquals(scalex, 0.0f) ||
-                         !AlmostEquals(scaley, 0.0f))
+                else if (!AlmostEquals(scalex, 0.0f) || !AlmostEquals(scaley, 0.0f))
                 {
-                    float sx = AlmostEquals(scalex, 0.0f) ? 1.0f : scalex;
-                    float sy = AlmostEquals(scaley, 0.0f) ? 1.0f : scaley;
+                    float sx           = AlmostEquals(scalex, 0.0f) ? 1.0f : scalex;
+                    float sy           = AlmostEquals(scaley, 0.0f) ? 1.0f : scaley;
                     udmf_thing->scale_ = udmf_thing->model_scale_ = sy;
                     udmf_thing->aspect_ = udmf_thing->model_aspect_ = (sx / sy);
                     udmf_thing->height_ *= sy;
@@ -2478,12 +2403,13 @@ static void LoadUDMFThings()
 
             total_map_things++;
         }
-        else  // consume other blocks
+        else // consume other blocks
         {
             for (;;)
             {
                 tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::kTokenEOF) break;
+                if (lex.Match("}") || tok == epi::kTokenEOF)
+                    break;
             }
         }
     }
@@ -2504,7 +2430,8 @@ static void LoadUDMFCounts()
         std::string    section;
         epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF) break;
+        if (tok == epi::kTokenEOF)
+            break;
 
         if (tok != epi::kTokenIdentifier)
             FatalError("Malformed TEXTMAP lump.\n");
@@ -2516,15 +2443,14 @@ static void LoadUDMFCounts()
 
             if (udmf_strict_namespace.d_)
             {
-                if (section != "doom" && section != "heretic" &&
-                    section != "edge-classic" && section != "zdoomtranslated")
+                if (section != "doom" && section != "heretic" && section != "edge-classic" &&
+                    section != "zdoomtranslated")
                 {
-                    LogWarning(
-                        "UDMF: %s uses unsupported namespace "
-                        "\"%s\"!\nSupported namespaces are \"doom\", "
-                        "\"heretic\", \"edge-classic\", or "
-                        "\"zdoomtranslated\"!\n",
-                        current_map->lump_.c_str(), section.c_str());
+                    LogWarning("UDMF: %s uses unsupported namespace "
+                               "\"%s\"!\nSupported namespaces are \"doom\", "
+                               "\"heretic\", \"edge-classic\", or "
+                               "\"zdoomtranslated\"!\n",
+                               current_map->lump_.c_str(), section.c_str());
                 }
             }
 
@@ -2541,27 +2467,28 @@ static void LoadUDMFCounts()
         // side counts are computed during linedef loading
         switch (section_ename.GetIndex())
         {
-            case epi::kENameThing:
-                total_map_things++;
-                break;
-            case epi::kENameVertex:
-                total_level_vertexes++;
-                break;
-            case epi::kENameSector:
-                total_level_sectors++;
-                break;
-            case epi::kENameLinedef:
-                total_level_lines++;
-                break;
-            default:
-                break;
+        case epi::kENameThing:
+            total_map_things++;
+            break;
+        case epi::kENameVertex:
+            total_level_vertexes++;
+            break;
+        case epi::kENameSector:
+            total_level_sectors++;
+            break;
+        case epi::kENameLinedef:
+            total_level_lines++;
+            break;
+        default:
+            break;
         }
 
         // ignore block contents
         for (;;)
         {
             tok = lex.Next(section);
-            if (lex.Match("}") || tok == epi::kTokenEOF) break;
+            if (lex.Match("}") || tok == epi::kTokenEOF)
+                break;
         }
     }
 
@@ -2595,8 +2522,7 @@ static void TransferMapSideDef(const RawSidedef *msd, Side *sd, bool two_sided)
 
     if (sec_num < 0)
     {
-        LogWarning("Level %s has sidedef with bad sector ref (%d)\n",
-                   current_map->lump_.c_str(), sec_num);
+        LogWarning("Level %s has sidedef with bad sector ref (%d)\n", current_map->lump_.c_str(), sec_num);
         sec_num = 0;
     }
     sd->sector = &level_sectors[sec_num];
@@ -2605,8 +2531,7 @@ static void TransferMapSideDef(const RawSidedef *msd, Side *sd, bool two_sided)
     epi::CStringCopyMax(middle_tex, msd->mid_texture, 8);
     epi::CStringCopyMax(lower_tex, msd->lower_texture, 8);
 
-    sd->top.image =
-        ImageLookup(upper_tex, kImageNamespaceTexture, kImageLookupNull);
+    sd->top.image = ImageLookup(upper_tex, kImageNamespaceTexture, kImageLookupNull);
 
     if (sd->top.image == nullptr)
     {
@@ -2630,20 +2555,14 @@ static void TransferMapSideDef(const RawSidedef *msd, Side *sd, bool two_sided)
         sd->middle.offset.Y    = 0;
     }
 
-    if (sd->top.image &&
-        fabs(sd->top.offset.Y) > sd->top.image->ScaledHeightActual())
-        sd->top.offset.Y =
-            fmodf(sd->top.offset.Y, sd->top.image->ScaledHeightActual());
+    if (sd->top.image && fabs(sd->top.offset.Y) > sd->top.image->ScaledHeightActual())
+        sd->top.offset.Y = fmodf(sd->top.offset.Y, sd->top.image->ScaledHeightActual());
 
-    if (sd->middle.image &&
-        fabs(sd->middle.offset.Y) > sd->middle.image->ScaledHeightActual())
-        sd->middle.offset.Y =
-            fmodf(sd->middle.offset.Y, sd->middle.image->ScaledHeightActual());
+    if (sd->middle.image && fabs(sd->middle.offset.Y) > sd->middle.image->ScaledHeightActual())
+        sd->middle.offset.Y = fmodf(sd->middle.offset.Y, sd->middle.image->ScaledHeightActual());
 
-    if (sd->bottom.image &&
-        fabs(sd->bottom.offset.Y) > sd->bottom.image->ScaledHeightActual())
-        sd->bottom.offset.Y =
-            fmodf(sd->bottom.offset.Y, sd->bottom.image->ScaledHeightActual());
+    if (sd->bottom.image && fabs(sd->bottom.offset.Y) > sd->bottom.image->ScaledHeightActual())
+        sd->bottom.offset.Y = fmodf(sd->bottom.offset.Y, sd->bottom.image->ScaledHeightActual());
 }
 
 static void LoadSideDefs(int lump)
@@ -2656,14 +2575,12 @@ static void LoadSideDefs(int lump)
     int nummapsides;
 
     if (!VerifyLump(lump, "SIDEDEFS"))
-        FatalError("Bad WAD: level %s missing SIDEDEFS.\n",
-                   current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s missing SIDEDEFS.\n", current_map->lump_.c_str());
 
     nummapsides = GetLumpLength(lump) / sizeof(RawSidedef);
 
     if (nummapsides == 0)
-        FatalError("Bad WAD: level %s contains 0 sidedefs.\n",
-                   current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s contains 0 sidedefs.\n", current_map->lump_.c_str());
 
     level_sides = new Side[total_level_sides];
 
@@ -2687,15 +2604,13 @@ static void LoadSideDefs(int lump)
 
         if (side0 >= nummapsides)
         {
-            LogWarning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n",
-                       current_map->lump_.c_str(), i);
+            LogWarning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n", current_map->lump_.c_str(), i);
             side0 = nummapsides - 1;
         }
 
         if (side1 != -1 && side1 >= nummapsides)
         {
-            LogWarning("Bad WAD: level %s linedef #%d has bad LEFT side.\n",
-                       current_map->lump_.c_str(), i);
+            LogWarning("Bad WAD: level %s linedef #%d has bad LEFT side.\n", current_map->lump_.c_str(), i);
             side1 = nummapsides - 1;
         }
 
@@ -2736,7 +2651,8 @@ static void SetupExtrafloors(void)
     int     i, ef_index = 0;
     Sector *ss;
 
-    if (total_level_extrafloors == 0) return;
+    if (total_level_extrafloors == 0)
+        return;
 
     level_extrafloors = new Extrafloor[total_level_extrafloors];
 
@@ -2771,7 +2687,8 @@ static void SetupSlidingDoors(void)
             {
                 Line *other = level_lines + k;
 
-                if (other->tag != ld->tag || other == ld) continue;
+                if (other->tag != ld->tag || other == ld)
+                    continue;
 
                 other->slide_door = ld->special;
             }
@@ -2826,14 +2743,14 @@ static void SetupVertGaps(void)
 
     level_vertical_gaps = new VerticalGap[total_level_vertical_gaps];
 
-    EPI_CLEAR_MEMORY(level_vertical_gaps, VerticalGap,
-                     total_level_vertical_gaps);
+    EPI_CLEAR_MEMORY(level_vertical_gaps, VerticalGap, total_level_vertical_gaps);
 
     for (i = 0, cur_gap = level_vertical_gaps; i < total_level_lines; i++)
     {
         Line *ld = level_lines + i;
 
-        if (ld->maximum_gaps == 0) continue;
+        if (ld->maximum_gaps == 0)
+            continue;
 
         ld->gaps = cur_gap;
         cur_gap += ld->maximum_gaps;
@@ -2845,7 +2762,8 @@ static void SetupVertGaps(void)
     {
         Sector *sec = level_sectors + i;
 
-        if (sec->maximum_gaps == 0) continue;
+        if (sec->maximum_gaps == 0)
+            continue;
 
         sec->sight_gaps = cur_gap;
         cur_gap += sec->maximum_gaps;
@@ -2864,22 +2782,26 @@ static void DetectDeepWaterTrick(void)
     {
         const Seg *seg = level_segs + i;
 
-        if (seg->miniseg) continue;
+        if (seg->miniseg)
+            continue;
 
         EPI_ASSERT(seg->front_subsector);
 
-        if (seg->linedef->back_sector &&
-            seg->linedef->front_sector == seg->linedef->back_sector)
+        if (seg->linedef->back_sector && seg->linedef->front_sector == seg->linedef->back_sector)
         {
             self_subs[seg->front_subsector - level_subsectors] |= 1;
         }
-        else { self_subs[seg->front_subsector - level_subsectors] |= 2; }
+        else
+        {
+            self_subs[seg->front_subsector - level_subsectors] |= 2;
+        }
     }
 
     int count;
     int pass = 0;
 
-    do {
+    do
+    {
         pass++;
 
         count = 0;
@@ -2889,7 +2811,8 @@ static void DetectDeepWaterTrick(void)
             Subsector *sub = level_subsectors + j;
             const Seg *seg;
 
-            if (self_subs[j] != 1) continue;
+            if (self_subs[j] != 1)
+                continue;
 
             const Seg *Xseg = 0;
 
@@ -2901,17 +2824,17 @@ static void DetectDeepWaterTrick(void)
 
                 if (self_subs[k] & 2)
                 {
-                    if (!Xseg) Xseg = seg;
+                    if (!Xseg)
+                        Xseg = seg;
                 }
             }
 
             if (Xseg)
             {
-                sub->deep_water_reference =
-                    Xseg->back_subsector->deep_water_reference
-                        ? Xseg->back_subsector->deep_water_reference
-                        : Xseg->back_subsector->sector;
-                self_subs[j] = 3;
+                sub->deep_water_reference = Xseg->back_subsector->deep_water_reference
+                                                ? Xseg->back_subsector->deep_water_reference
+                                                : Xseg->back_subsector->sector;
+                self_subs[j]              = 3;
 
                 count++;
             }
@@ -2964,7 +2887,8 @@ void GroupLines(void)
     // setup remaining seg information
     for (i = 0, seg = level_segs; i < total_level_segs; i++, seg++)
     {
-        if (seg->partner) seg->back_subsector = seg->partner->front_subsector;
+        if (seg->partner)
+            seg->back_subsector = seg->partner->front_subsector;
 
         if (!seg->front_sector)
             seg->front_sector = seg->front_subsector->sector;
@@ -3023,72 +2947,62 @@ void GroupLines(void)
                 Vertex *vert   = sector->lines[j]->vertex_1;
                 bool    add_it = true;
                 for (HMM_Vec3 v : sector->floor_z_vertices)
-                    if (AlmostEquals(v.X, vert->X) &&
-                        AlmostEquals(v.Y, vert->Y))
+                    if (AlmostEquals(v.X, vert->X) && AlmostEquals(v.Y, vert->Y))
                         add_it = false;
                 if (add_it)
                 {
                     if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
                         sector->floor_vertex_slope = true;
-                        sector->floor_z_vertices.push_back(
-                            { { vert->X, vert->Y, vert->Z } });
+                        sector->floor_z_vertices.push_back({ { vert->X, vert->Y, vert->Z } });
                         if (vert->Z > sector->floor_vertex_slope_high_low.X)
                             sector->floor_vertex_slope_high_low.X = vert->Z;
                         if (vert->Z < sector->floor_vertex_slope_high_low.Y)
                             sector->floor_vertex_slope_high_low.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_vertices.push_back(
-                            { { vert->X, vert->Y, sector->floor_height } });
+                        sector->floor_z_vertices.push_back({ { vert->X, vert->Y, sector->floor_height } });
                     if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
                         sector->ceiling_vertex_slope = true;
-                        sector->ceiling_z_vertices.push_back(
-                            { { vert->X, vert->Y, vert->W } });
+                        sector->ceiling_z_vertices.push_back({ { vert->X, vert->Y, vert->W } });
                         if (vert->W > sector->ceiling_vertex_slope_high_low.X)
                             sector->ceiling_vertex_slope_high_low.X = vert->W;
                         if (vert->W < sector->ceiling_vertex_slope_high_low.Y)
                             sector->ceiling_vertex_slope_high_low.Y = vert->W;
                     }
                     else
-                        sector->ceiling_z_vertices.push_back(
-                            { { vert->X, vert->Y, sector->ceiling_height } });
+                        sector->ceiling_z_vertices.push_back({ { vert->X, vert->Y, sector->ceiling_height } });
                 }
                 vert   = sector->lines[j]->vertex_2;
                 add_it = true;
                 for (HMM_Vec3 v : sector->floor_z_vertices)
-                    if (AlmostEquals(v.X, vert->X) &&
-                        AlmostEquals(v.Y, vert->Y))
+                    if (AlmostEquals(v.X, vert->X) && AlmostEquals(v.Y, vert->Y))
                         add_it = false;
                 if (add_it)
                 {
                     if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
                         sector->floor_vertex_slope = true;
-                        sector->floor_z_vertices.push_back(
-                            { { vert->X, vert->Y, vert->Z } });
+                        sector->floor_z_vertices.push_back({ { vert->X, vert->Y, vert->Z } });
                         if (vert->Z > sector->floor_vertex_slope_high_low.X)
                             sector->floor_vertex_slope_high_low.X = vert->Z;
                         if (vert->Z < sector->floor_vertex_slope_high_low.Y)
                             sector->floor_vertex_slope_high_low.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_vertices.push_back(
-                            { { vert->X, vert->Y, sector->floor_height } });
+                        sector->floor_z_vertices.push_back({ { vert->X, vert->Y, sector->floor_height } });
                     if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
                         sector->ceiling_vertex_slope = true;
-                        sector->ceiling_z_vertices.push_back(
-                            { { vert->X, vert->Y, vert->W } });
+                        sector->ceiling_z_vertices.push_back({ { vert->X, vert->Y, vert->W } });
                         if (vert->W > sector->ceiling_vertex_slope_high_low.X)
                             sector->ceiling_vertex_slope_high_low.X = vert->W;
                         if (vert->W < sector->ceiling_vertex_slope_high_low.Y)
                             sector->ceiling_vertex_slope_high_low.Y = vert->W;
                     }
                     else
-                        sector->ceiling_z_vertices.push_back(
-                            { { vert->X, vert->Y, sector->ceiling_height } });
+                        sector->ceiling_z_vertices.push_back({ { vert->X, vert->Y, sector->ceiling_height } });
                 }
             }
             if (!sector->floor_vertex_slope)
@@ -3096,33 +3010,22 @@ void GroupLines(void)
             else
             {
                 sector->floor_vertex_slope_normal = MathTripleCrossProduct(
-                    sector->floor_z_vertices[0], sector->floor_z_vertices[1],
-                    sector->floor_z_vertices[2]);
-                if (sector->floor_height >
-                    sector->floor_vertex_slope_high_low.X)
-                    sector->floor_vertex_slope_high_low.X =
-                        sector->floor_height;
-                if (sector->floor_height <
-                    sector->floor_vertex_slope_high_low.Y)
-                    sector->floor_vertex_slope_high_low.Y =
-                        sector->floor_height;
+                    sector->floor_z_vertices[0], sector->floor_z_vertices[1], sector->floor_z_vertices[2]);
+                if (sector->floor_height > sector->floor_vertex_slope_high_low.X)
+                    sector->floor_vertex_slope_high_low.X = sector->floor_height;
+                if (sector->floor_height < sector->floor_vertex_slope_high_low.Y)
+                    sector->floor_vertex_slope_high_low.Y = sector->floor_height;
             }
             if (!sector->ceiling_vertex_slope)
                 sector->ceiling_z_vertices.clear();
             else
             {
-                sector->ceiling_vertex_slope_normal =
-                    MathTripleCrossProduct(sector->ceiling_z_vertices[0],
-                                           sector->ceiling_z_vertices[1],
-                                           sector->ceiling_z_vertices[2]);
-                if (sector->ceiling_height <
-                    sector->ceiling_vertex_slope_high_low.Y)
-                    sector->ceiling_vertex_slope_high_low.Y =
-                        sector->ceiling_height;
-                if (sector->ceiling_height >
-                    sector->ceiling_vertex_slope_high_low.X)
-                    sector->ceiling_vertex_slope_high_low.X =
-                        sector->ceiling_height;
+                sector->ceiling_vertex_slope_normal = MathTripleCrossProduct(
+                    sector->ceiling_z_vertices[0], sector->ceiling_z_vertices[1], sector->ceiling_z_vertices[2]);
+                if (sector->ceiling_height < sector->ceiling_vertex_slope_high_low.Y)
+                    sector->ceiling_vertex_slope_high_low.Y = sector->ceiling_height;
+                if (sector->ceiling_height > sector->ceiling_vertex_slope_high_low.X)
+                    sector->ceiling_vertex_slope_high_low.X = sector->ceiling_height;
             }
         }
         if (sector->line_count == 4 && udmf_level)
@@ -3138,75 +3041,63 @@ void GroupLines(void)
                 bool    add_it_v1 = true;
                 bool    add_it_v2 = true;
                 for (HMM_Vec3 v : sector->floor_z_vertices)
-                    if (AlmostEquals(v.X, vert->X) &&
-                        AlmostEquals(v.Y, vert->Y))
+                    if (AlmostEquals(v.X, vert->X) && AlmostEquals(v.Y, vert->Y))
                         add_it_v1 = false;
                 for (HMM_Vec3 v : sector->floor_z_vertices)
-                    if (AlmostEquals(v.X, vert2->X) &&
-                        AlmostEquals(v.Y, vert2->Y))
+                    if (AlmostEquals(v.X, vert2->X) && AlmostEquals(v.Y, vert2->Y))
                         add_it_v2 = false;
                 if (add_it_v1)
                 {
                     if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
-                        sector->floor_z_vertices.push_back(
-                            { { vert->X, vert->Y, vert->Z } });
+                        sector->floor_z_vertices.push_back({ { vert->X, vert->Y, vert->Z } });
                         if (vert->Z > sector->floor_vertex_slope_high_low.X)
                             sector->floor_vertex_slope_high_low.X = vert->Z;
                         if (vert->Z < sector->floor_vertex_slope_high_low.Y)
                             sector->floor_vertex_slope_high_low.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_vertices.push_back(
-                            { { vert->X, vert->Y, sector->floor_height } });
+                        sector->floor_z_vertices.push_back({ { vert->X, vert->Y, sector->floor_height } });
                     if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
-                        sector->ceiling_z_vertices.push_back(
-                            { { vert->X, vert->Y, vert->W } });
+                        sector->ceiling_z_vertices.push_back({ { vert->X, vert->Y, vert->W } });
                         if (vert->W > sector->ceiling_vertex_slope_high_low.X)
                             sector->ceiling_vertex_slope_high_low.X = vert->W;
                         if (vert->W < sector->ceiling_vertex_slope_high_low.Y)
                             sector->ceiling_vertex_slope_high_low.Y = vert->W;
                     }
                     else
-                        sector->ceiling_z_vertices.push_back(
-                            { { vert->X, vert->Y, sector->ceiling_height } });
+                        sector->ceiling_z_vertices.push_back({ { vert->X, vert->Y, sector->ceiling_height } });
                 }
                 if (add_it_v2)
                 {
                     if (vert2->Z < 32767.0f && vert2->Z > -32768.0f)
                     {
-                        sector->floor_z_vertices.push_back(
-                            { { vert2->X, vert2->Y, vert2->Z } });
+                        sector->floor_z_vertices.push_back({ { vert2->X, vert2->Y, vert2->Z } });
                         if (vert2->Z > sector->floor_vertex_slope_high_low.X)
                             sector->floor_vertex_slope_high_low.X = vert2->Z;
                         if (vert2->Z < sector->floor_vertex_slope_high_low.Y)
                             sector->floor_vertex_slope_high_low.Y = vert2->Z;
                     }
                     else
-                        sector->floor_z_vertices.push_back(
-                            { { vert2->X, vert2->Y, sector->floor_height } });
+                        sector->floor_z_vertices.push_back({ { vert2->X, vert2->Y, sector->floor_height } });
                     if (vert2->W < 32767.0f && vert2->W > -32768.0f)
                     {
-                        sector->ceiling_z_vertices.push_back(
-                            { { vert2->X, vert2->Y, vert2->W } });
+                        sector->ceiling_z_vertices.push_back({ { vert2->X, vert2->Y, vert2->W } });
                         if (vert2->W > sector->ceiling_vertex_slope_high_low.X)
                             sector->ceiling_vertex_slope_high_low.X = vert2->W;
                         if (vert2->W < sector->ceiling_vertex_slope_high_low.Y)
                             sector->ceiling_vertex_slope_high_low.Y = vert2->W;
                     }
                     else
-                        sector->ceiling_z_vertices.push_back(
-                            { { vert2->X, vert2->Y, sector->ceiling_height } });
+                        sector->ceiling_z_vertices.push_back({ { vert2->X, vert2->Y, sector->ceiling_height } });
                 }
-                if ((vert->Z < 32767.0f && vert->Z > -32768.0f) &&
-                    (vert2->Z < 32767.0f && vert2->Z > -32768.0f) &&
+                if ((vert->Z < 32767.0f && vert->Z > -32768.0f) && (vert2->Z < 32767.0f && vert2->Z > -32768.0f) &&
                     AlmostEquals(vert->Z, vert2->Z))
                 {
                     floor_z_lines++;
                 }
-                if ((vert->W < 32767.0f && vert->W > -32768.0f) &&
-                    (vert2->W < 32767.0f && vert2->W > -32768.0f) &&
+                if ((vert->W < 32767.0f && vert->W > -32768.0f) && (vert2->W < 32767.0f && vert2->W > -32768.0f) &&
                     AlmostEquals(vert->W, vert2->W))
                 {
                     ceil_z_lines++;
@@ -3216,52 +3107,39 @@ void GroupLines(void)
             {
                 sector->floor_vertex_slope        = true;
                 sector->floor_vertex_slope_normal = MathTripleCrossProduct(
-                    sector->floor_z_vertices[0], sector->floor_z_vertices[1],
-                    sector->floor_z_vertices[2]);
-                if (sector->floor_height >
-                    sector->floor_vertex_slope_high_low.X)
-                    sector->floor_vertex_slope_high_low.X =
-                        sector->floor_height;
-                if (sector->floor_height <
-                    sector->floor_vertex_slope_high_low.Y)
-                    sector->floor_vertex_slope_high_low.Y =
-                        sector->floor_height;
+                    sector->floor_z_vertices[0], sector->floor_z_vertices[1], sector->floor_z_vertices[2]);
+                if (sector->floor_height > sector->floor_vertex_slope_high_low.X)
+                    sector->floor_vertex_slope_high_low.X = sector->floor_height;
+                if (sector->floor_height < sector->floor_vertex_slope_high_low.Y)
+                    sector->floor_vertex_slope_high_low.Y = sector->floor_height;
             }
             else
                 sector->floor_z_vertices.clear();
             if (ceil_z_lines == 1 && sector->ceiling_z_vertices.size() == 4)
             {
-                sector->ceiling_vertex_slope = true;
-                sector->ceiling_vertex_slope_normal =
-                    MathTripleCrossProduct(sector->ceiling_z_vertices[0],
-                                           sector->ceiling_z_vertices[1],
-                                           sector->ceiling_z_vertices[2]);
-                if (sector->ceiling_height <
-                    sector->ceiling_vertex_slope_high_low.Y)
-                    sector->ceiling_vertex_slope_high_low.Y =
-                        sector->ceiling_height;
-                if (sector->ceiling_height >
-                    sector->ceiling_vertex_slope_high_low.X)
-                    sector->ceiling_vertex_slope_high_low.X =
-                        sector->ceiling_height;
+                sector->ceiling_vertex_slope        = true;
+                sector->ceiling_vertex_slope_normal = MathTripleCrossProduct(
+                    sector->ceiling_z_vertices[0], sector->ceiling_z_vertices[1], sector->ceiling_z_vertices[2]);
+                if (sector->ceiling_height < sector->ceiling_vertex_slope_high_low.Y)
+                    sector->ceiling_vertex_slope_high_low.Y = sector->ceiling_height;
+                if (sector->ceiling_height > sector->ceiling_vertex_slope_high_low.X)
+                    sector->ceiling_vertex_slope_high_low.X = sector->ceiling_height;
             }
             else
                 sector->ceiling_z_vertices.clear();
         }
 
         // set the degenmobj_t to the middle of the bounding box
-        sector->sound_effects_origin.x =
-            (bbox[kBoundingBoxRight] + bbox[kBoundingBoxLeft]) / 2;
-        sector->sound_effects_origin.y =
-            (bbox[kBoundingBoxTop] + bbox[kBoundingBoxBottom]) / 2;
-        sector->sound_effects_origin.z =
-            (sector->floor_height + sector->ceiling_height) / 2;
+        sector->sound_effects_origin.x = (bbox[kBoundingBoxRight] + bbox[kBoundingBoxLeft]) / 2;
+        sector->sound_effects_origin.y = (bbox[kBoundingBoxTop] + bbox[kBoundingBoxBottom]) / 2;
+        sector->sound_effects_origin.z = (sector->floor_height + sector->ceiling_height) / 2;
     }
 }
 
 static inline void AddSectorToVertices(int *branches, Line *ld, Sector *sec)
 {
-    if (!sec) return;
+    if (!sec)
+        return;
 
     unsigned short sec_idx = sec - level_sectors;
 
@@ -3271,18 +3149,22 @@ static inline void AddSectorToVertices(int *branches, Line *ld, Sector *sec)
 
         EPI_ASSERT(0 <= v_idx && v_idx < total_level_vertexes);
 
-        if (branches[v_idx] < 0) continue;
+        if (branches[v_idx] < 0)
+            continue;
 
         VertexSectorList *L = level_vertex_sector_lists + branches[v_idx];
 
-        if (L->total >= kVertexSectorListMaximum) continue;
+        if (L->total >= kVertexSectorListMaximum)
+            continue;
 
         int pos;
 
         for (pos = 0; pos < L->total; pos++)
-            if (L->sectors[pos] == sec_idx) break;
+            if (L->sectors[pos] == sec_idx)
+                break;
 
-        if (pos < L->total) continue;  // already in there
+        if (pos < L->total)
+            continue; // already in there
 
         L->sectors[L->total++] = sec_idx;
     }
@@ -3334,8 +3216,7 @@ static void CreateVertexSeclists(void)
 
     EPI_CLEAR_MEMORY(level_vertex_sector_lists, VertexSectorList, num_triples);
 
-    LogDebug("Created %d seclists from %d vertices (%1.1f%%)\n", num_triples,
-             total_level_vertexes,
+    LogDebug("Created %d seclists from %d vertices (%1.1f%%)\n", num_triples, total_level_vertexes,
              num_triples * 100 / (float)total_level_vertexes);
 
     // multiple passes for each linedef:
@@ -3365,17 +3246,16 @@ static void CreateVertexSeclists(void)
         {
             Sector *sec = side ? ld->back_sector : ld->front_sector;
 
-            if (!sec) continue;
+            if (!sec)
+                continue;
 
             Extrafloor *ef;
 
             for (ef = sec->bottom_extrafloor; ef; ef = ef->higher)
-                AddSectorToVertices(branches, ld,
-                                    ef->extrafloor_line->front_sector);
+                AddSectorToVertices(branches, ld, ef->extrafloor_line->front_sector);
 
             for (ef = sec->bottom_liquid; ef; ef = ef->higher)
-                AddSectorToVertices(branches, ld,
-                                    ef->extrafloor_line->front_sector);
+                AddSectorToVertices(branches, ld, ef->extrafloor_line->front_sector);
         }
     }
 
@@ -3389,12 +3269,13 @@ static void CreateVertexSeclists(void)
             int v_idx = (vert ? sg->vertex_2 : sg->vertex_1) - level_vertexes;
 
             // skip GL vertices
-            if (v_idx < 0 || v_idx >= total_level_vertexes) continue;
+            if (v_idx < 0 || v_idx >= total_level_vertexes)
+                continue;
 
-            if (branches[v_idx] < 0) continue;
+            if (branches[v_idx] < 0)
+                continue;
 
-            sg->vertex_sectors[vert] =
-                level_vertex_sector_lists + branches[v_idx];
+            sg->vertex_sectors[vert] = level_vertex_sector_lists + branches[v_idx];
         }
     }
 
@@ -3419,7 +3300,8 @@ void ShutdownLevel(void)
     // Destroys everything on the level.
 
 #ifdef DEVELOPERS
-    if (!level_active) FatalError("ShutdownLevel: no level to shut down!");
+    if (!level_active)
+        FatalError("ShutdownLevel: no level to shut down!");
 #endif
 
     level_active = false;
@@ -3490,7 +3372,8 @@ void LevelSetup(void)
     //
     // -ACB- 1998/08/09 Use current_map to ref lump and par time
 
-    if (level_active) ShutdownLevel();
+    if (level_active)
+        ShutdownLevel();
 
     // -ACB- 1998/08/27 nullptr the head pointers for the linked lists....
     respawn_queue_head   = nullptr;
@@ -3507,10 +3390,12 @@ void LevelSetup(void)
 
     // ignore XGL nodes if it occurs _before_ the normal level marker.
     // [ something has gone horribly wrong if this happens! ]
-    if (xgl_lump < lumpnum) xgl_lump = -1;
+    if (xgl_lump < lumpnum)
+        xgl_lump = -1;
 
     // shouldn't happen (as during startup we checked for XWA files)
-    if (xgl_lump < 0) FatalError("Internal error: missing XGL nodes.\n");
+    if (xgl_lump < 0)
+        FatalError("Internal error: missing XGL nodes.\n");
 
     // -CW- 2017/01/29: check for UDMF map lump
     if (VerifyLump(lumpnum + 1, "TEXTMAP"))
@@ -3553,11 +3438,9 @@ void LevelSetup(void)
 
     if (!udmf_level)
     {
-        if (IsLumpIndexValid(lumpnum + kLumpBehavior) &&
-            VerifyLump(lumpnum + kLumpBehavior, "BEHAVIOR"))
+        if (IsLumpIndexValid(lumpnum + kLumpBehavior) && VerifyLump(lumpnum + kLumpBehavior, "BEHAVIOR"))
         {
-            FatalError("Level %s is Hexen format (not supported).\n",
-                       current_map->lump_.c_str());
+            FatalError("Level %s is Hexen format (not supported).\n", current_map->lump_.c_str());
         }
         LoadVertexes(lumpnum + kLumpVertexes);
         LoadSectors(lumpnum + kLumpSectors);
@@ -3616,8 +3499,7 @@ void LevelSetup(void)
 
         // OK, CRC values have now been computed
 #ifdef DEVELOPERS
-    LogDebug("MAP CRCS: S=%08x L=%08x T=%08x\n", map_sectors_crc.crc,
-             map_lines_crc.crc, map_things_crc.crc);
+    LogDebug("MAP CRCS: S=%08x L=%08x T=%08x\n", map_sectors_crc.crc, map_lines_crc.crc, map_things_crc.crc);
 #endif
 
     CreateVertexSeclists();
@@ -3629,14 +3511,15 @@ void LevelSetup(void)
     RendererUpdateSkyBoxTextures();
 
     // preload graphics
-    if (precache) PrecacheLevelGraphics();
+    if (precache)
+        PrecacheLevelGraphics();
 
     // setup categories based on game mode (SP/COOP/DM)
     UpdateSoundCategoryLimits();
 
     // FIXME: cache sounds (esp. for player)
 
-    ChangeMusic(current_map->music_, true);  // start level music
+    ChangeMusic(current_map->music_, true); // start level music
 
     level_active = true;
 }
@@ -3653,39 +3536,48 @@ void PlayerStateInit(void)
 
 LineType *LookupLineType(int num)
 {
-    if (num <= 0) return nullptr;
+    if (num <= 0)
+        return nullptr;
 
     LineType *def = linetypes.Lookup(num);
 
     // DDF types always override
-    if (def) return def;
+    if (def)
+        return def;
 
-    if (DDF_IsBoomLineType(num)) return DDF_BoomGetGenLine(num);
+    if (DDF_IsBoomLineType(num))
+        return DDF_BoomGetGenLine(num);
 
     LogWarning("P_LookupLineType(): Unknown linedef type %d\n", num);
 
-    return linetypes.Lookup(0);  // template line
+    return linetypes.Lookup(0); // template line
 }
 
 SectorType *LookupSectorType(int num)
 {
-    if (num <= 0) return nullptr;
+    if (num <= 0)
+        return nullptr;
 
     SectorType *def = sectortypes.Lookup(num);
 
     // DDF types always override
-    if (def) return def;
+    if (def)
+        return def;
 
-    if (DDF_IsBoomSectorType(num)) return DDF_BoomGetGenSector(num);
+    if (DDF_IsBoomSectorType(num))
+        return DDF_BoomGetGenSector(num);
 
     LogWarning("P_LookupSectorType(): Unknown sector type %d\n", num);
 
-    return sectortypes.Lookup(0);  // template sector
+    return sectortypes.Lookup(0); // template sector
 }
 
 void LevelShutdown(void)
 {
-    if (level_active) { ShutdownLevel(); }
+    if (level_active)
+    {
+        ShutdownLevel();
+    }
 }
 
 //--- editor settings ---

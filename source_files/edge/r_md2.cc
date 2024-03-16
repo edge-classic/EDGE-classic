@@ -29,10 +29,10 @@
 
 #include <vector>
 
-#include "dm_state.h"  // EDGE_IMAGE_IS_SKY
+#include "dm_state.h" // EDGE_IMAGE_IS_SKY
 #include "endianess.h"
 #include "epi.h"
-#include "g_game.h"  //current_map
+#include "g_game.h"   //current_map
 #include "i_defs_gl.h"
 #include "p_blockmap.h"
 #include "r_colormap.h"
@@ -79,7 +79,7 @@ struct RawMd2Header
     int32_t frame_size;
 
     int32_t num_skins;
-    int32_t num_vertices;  // per frame
+    int32_t num_vertices; // per frame
     int32_t num_st;
     int32_t total_triangles_;
     int32_t num_glcmds;
@@ -167,7 +167,7 @@ struct RawMd3Mesh
 
     int32_t ofs_triangles_;
     int32_t ofs_shaders;
-    int32_t ofs_texcoords;  // one texcoord per vertex
+    int32_t ofs_texcoords; // one texcoord per vertex
     int32_t ofs_verts;
     int32_t ofs_next_mesh;
 };
@@ -235,7 +235,7 @@ struct Md2Triangle
 
 class Md2Model
 {
-   public:
+  public:
     int total_frames_;
     int total_points_;
     int total_triangles_;
@@ -250,14 +250,10 @@ class Md2Model
 
     RendererVertex *gl_vertices_;
 
-   public:
+  public:
     Md2Model(int nframe, int npoint, int ntriangles_)
-        : total_frames_(nframe),
-          total_points_(npoint),
-          total_triangles_(ntriangles_),
-          vertices_per_frame_(0),
-          vertex_buffer_object_(0),
-          gl_vertices_(nullptr)
+        : total_frames_(nframe), total_points_(npoint), total_triangles_(ntriangles_), vertices_per_frame_(0),
+          vertex_buffer_object_(0), gl_vertices_(nullptr)
     {
         frames_      = new Md2Frame[total_frames_];
         points_      = new Md2Point[total_points_];
@@ -305,14 +301,16 @@ static short *CreateNormalList(uint8_t *which_normals)
     int i;
 
     for (i = 0; i < kTotalMdFormatNormals; i++)
-        if (which_normals[i]) count++;
+        if (which_normals[i])
+            count++;
 
     short *n_list = new short[count + 1];
 
     count = 0;
 
     for (i = 0; i < kTotalMdFormatNormals; i++)
-        if (which_normals[i]) n_list[count++] = i;
+        if (which_normals[i])
+            n_list[count++] = i;
 
     n_list[count] = -1;
 
@@ -330,8 +328,8 @@ Md2Model *Md2Load(epi::File *f)
 
     int version = AlignedLittleEndianS32(header.version);
 
-    LogDebug("MODEL IDENT: [%c%c%c%c] VERSION: %d", header.ident[0],
-             header.ident[1], header.ident[2], header.ident[3], version);
+    LogDebug("MODEL IDENT: [%c%c%c%c] VERSION: %d", header.ident[0], header.ident[1], header.ident[2], header.ident[3],
+             version);
 
     if (epi::StringPrefixCompare(header.ident, kMd2Identifier) != 0)
     {
@@ -354,22 +352,16 @@ Md2Model *Md2Load(epi::File *f)
 
     RawMd2Triangle *md2_triangles_ = new RawMd2Triangle[total_triangles_];
 
-    f->Seek(AlignedLittleEndianS32(header.ofs_triangles_),
-            epi::File::kSeekpointStart);
+    f->Seek(AlignedLittleEndianS32(header.ofs_triangles_), epi::File::kSeekpointStart);
     f->Read(md2_triangles_, total_triangles_ * sizeof(RawMd2Triangle));
 
     for (int tri = 0; tri < total_triangles_; tri++)
     {
-        md2_triangles_[tri].index_xyz[0] =
-            AlignedLittleEndianU16(md2_triangles_[tri].index_xyz[0]);
-        md2_triangles_[tri].index_xyz[1] =
-            AlignedLittleEndianU16(md2_triangles_[tri].index_xyz[1]);
-        md2_triangles_[tri].index_xyz[2] =
-            AlignedLittleEndianU16(md2_triangles_[tri].index_xyz[2]);
-        md2_triangles_[tri].index_st[0] =
-            AlignedLittleEndianU16(md2_triangles_[tri].index_st[0]);
-        md2_triangles_[tri].index_st[1] =
-            AlignedLittleEndianU16(md2_triangles_[tri].index_st[1]);
+        md2_triangles_[tri].index_xyz[0] = AlignedLittleEndianU16(md2_triangles_[tri].index_xyz[0]);
+        md2_triangles_[tri].index_xyz[1] = AlignedLittleEndianU16(md2_triangles_[tri].index_xyz[1]);
+        md2_triangles_[tri].index_xyz[2] = AlignedLittleEndianU16(md2_triangles_[tri].index_xyz[2]);
+        md2_triangles_[tri].index_st[0]  = AlignedLittleEndianU16(md2_triangles_[tri].index_st[0]);
+        md2_triangles_[tri].index_st[1]  = AlignedLittleEndianU16(md2_triangles_[tri].index_st[1]);
     }
 
     /* PARSE TEXCOORDS */
@@ -385,8 +377,7 @@ Md2Model *Md2Load(epi::File *f)
         md2_sts[st].t = AlignedLittleEndianU16(md2_sts[st].t);
     }
 
-    LogDebug("  frames:%d  points:%d  triangles: %d\n", num_frames,
-             total_triangles_ * 3, total_triangles_);
+    LogDebug("  frames:%d  points:%d  triangles: %d\n", num_frames, total_triangles_ * 3, total_triangles_);
 
     Md2Model *md = new Md2Model(num_frames, total_points_, total_triangles_);
 
@@ -411,9 +402,8 @@ Md2Model *Md2Load(epi::File *f)
         {
             RawMd2Triangle t = md2_triangles_[i];
 
-            point->skin_s = (float)md2_sts[t.index_st[j]].s / header.skin_width;
-            point->skin_t =
-                1.0f - ((float)md2_sts[t.index_st[j]].t / header.skin_height);
+            point->skin_s   = (float)md2_sts[t.index_st[j]].s / header.skin_width;
+            point->skin_t   = 1.0f - ((float)md2_sts[t.index_st[j]].t / header.skin_height);
             point->vert_idx = t.index_xyz[j];
 
             EPI_ASSERT(point->vert_idx >= 0);
@@ -433,8 +423,7 @@ Md2Model *Md2Load(epi::File *f)
 
     RawMd2Vertex *raw_verts = new RawMd2Vertex[md->vertices_per_frame_];
 
-    f->Seek(AlignedLittleEndianS32(header.ofs_frames),
-            epi::File::kSeekpointStart);
+    f->Seek(AlignedLittleEndianS32(header.ofs_frames), epi::File::kSeekpointStart);
 
     for (i = 0; i < num_frames; i++)
     {
@@ -444,9 +433,8 @@ Md2Model *Md2Load(epi::File *f)
 
         for (int j = 0; j < 3; j++)
         {
-            raw_frame.scale[j] = AlignedLittleEndianU32(raw_frame.scale[j]);
-            raw_frame.translate[j] =
-                AlignedLittleEndianU32(raw_frame.translate[j]);
+            raw_frame.scale[j]     = AlignedLittleEndianU32(raw_frame.scale[j]);
+            raw_frame.translate[j] = AlignedLittleEndianU32(raw_frame.translate[j]);
         }
 
         float *f_ptr = (float *)raw_frame.scale;
@@ -466,10 +454,8 @@ Md2Model *Md2Load(epi::File *f)
 
 #ifdef EDGE_DEBUG_Md2LOAD
         LogDebug("  __FRAME_%d__[%s]\n", i + 1, md->frames_[i].name);
-        LogDebug("    scale: %1.2f, %1.2f, %1.2f\n", scale[0], scale[1],
-                 scale[2]);
-        LogDebug("    translate: %1.2f, %1.2f, %1.2f\n", translate[0],
-                 translate[1], translate[2]);
+        LogDebug("    scale: %1.2f, %1.2f, %1.2f\n", scale[0], scale[1], scale[2]);
+        LogDebug("    translate: %1.2f, %1.2f, %1.2f\n", translate[0], translate[1], translate[2]);
 #endif
 
         f->Read(raw_verts, md->vertices_per_frame_ * sizeof(RawMd2Vertex));
@@ -491,8 +477,7 @@ Md2Model *Md2Load(epi::File *f)
             LogDebug("    __VERT_%d__\n", v);
             LogDebug("      raw: %d,%d,%d\n", raw_V->x, raw_V->y, raw_V->z);
             LogDebug("      normal: %d\n", raw_V->light_normal);
-            LogDebug("      good: %1.2f, %1.2f, %1.2f\n", good_V->x, good_V->y,
-                     good_V->z);
+            LogDebug("      good: %1.2f, %1.2f, %1.2f\n", good_V->x, good_V->y, good_V->z);
 #endif
             good_V->normal_idx = raw_V->light_normal;
 
@@ -501,11 +486,8 @@ Md2Model *Md2Load(epi::File *f)
             //  Dasho: Maybe try to salvage bad MD2 models?
             if (good_V->normal_idx >= kTotalMdFormatNormals)
             {
-                LogDebug(
-                    "Vert %d of Frame %d has an invalid normal index: %d\n", v,
-                    i, good_V->normal_idx);
-                good_V->normal_idx =
-                    (good_V->normal_idx % kTotalMdFormatNormals);
+                LogDebug("Vert %d of Frame %d has an invalid normal index: %d\n", v, i, good_V->normal_idx);
+                good_V->normal_idx = (good_V->normal_idx % kTotalMdFormatNormals);
             }
 
             which_normals[good_V->normal_idx] = 1;
@@ -520,9 +502,7 @@ Md2Model *Md2Load(epi::File *f)
     if (md->vertex_buffer_object_ == 0)
         FatalError("Md2LoadModel: Failed to bind VBO!\n");
     glBindBuffer(GL_ARRAY_BUFFER, md->vertex_buffer_object_);
-    glBufferData(GL_ARRAY_BUFFER,
-                 md->total_triangles_ * 3 * sizeof(RendererVertex), nullptr,
-                 GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, md->total_triangles_ * 3 * sizeof(RendererVertex), nullptr, GL_STREAM_DRAW);
 
     return md;
 }
@@ -535,10 +515,11 @@ short Md2FindFrame(Md2Model *md, const char *name)
     {
         Md2Frame *frame = &md->frames_[f];
 
-        if (DDF_CompareName(name, frame->name) == 0) return f;
+        if (DDF_CompareName(name, frame->name) == 0)
+            return f;
     }
 
-    return -1;  // NOT FOUND
+    return -1; // NOT FOUND
 }
 
 /*============== MD3 LOADING CODE ====================*/
@@ -601,7 +582,8 @@ static void Md3CreateNormalMap(void)
     // build a sine table for even faster calcs
     float sintab[160];
 
-    for (int i = 0; i < 160; i++) sintab[i] = sin(i * HMM_PI / 64.0);
+    for (int i = 0; i < 160; i++)
+        sintab[i] = sin(i * HMM_PI / 64.0);
 
     for (int pitch = 0; pitch < 128; pitch++)
     {
@@ -627,7 +609,8 @@ Md2Model *Md3Load(epi::File *f)
     int    i;
     float *ff;
 
-    if (!md3_normal_map_built) Md3CreateNormalMap();
+    if (!md3_normal_map_built)
+        Md3CreateNormalMap();
 
     RawMd3Header header;
 
@@ -636,8 +619,8 @@ Md2Model *Md3Load(epi::File *f)
 
     int version = AlignedLittleEndianS32(header.version);
 
-    LogDebug("MODEL IDENT: [%c%c%c%c] VERSION: %d", header.ident[0],
-             header.ident[1], header.ident[2], header.ident[3], version);
+    LogDebug("MODEL IDENT: [%c%c%c%c] VERSION: %d", header.ident[0], header.ident[1], header.ident[2], header.ident[3],
+             version);
 
     if (strncmp(header.ident, kMd3Identifier, 4) != 0)
     {
@@ -668,11 +651,9 @@ Md2Model *Md3Load(epi::File *f)
     int num_verts        = AlignedLittleEndianS32(mesh.num_verts);
     int total_triangles_ = AlignedLittleEndianS32(mesh.total_triangles_);
 
-    LogDebug("  frames:%d  verts:%d  triangles: %d\n", num_frames, num_verts,
-             total_triangles_);
+    LogDebug("  frames:%d  verts:%d  triangles: %d\n", num_frames, num_verts, total_triangles_);
 
-    Md2Model *md =
-        new Md2Model(num_frames, total_triangles_ * 3, total_triangles_);
+    Md2Model *md = new Md2Model(num_frames, total_triangles_ * 3, total_triangles_);
 
     md->vertices_per_frame_ = num_verts;
 
@@ -680,8 +661,7 @@ Md2Model *Md3Load(epi::File *f)
 
     Md2Point *temp_TEXC = new Md2Point[num_verts];
 
-    f->Seek(mesh_base + AlignedLittleEndianS32(mesh.ofs_texcoords),
-            epi::File::kSeekpointStart);
+    f->Seek(mesh_base + AlignedLittleEndianS32(mesh.ofs_texcoords), epi::File::kSeekpointStart);
 
     for (i = 0; i < num_verts; i++)
     {
@@ -702,8 +682,7 @@ Md2Model *Md3Load(epi::File *f)
 
     /* PARSE TRIANGLES */
 
-    f->Seek(mesh_base + AlignedLittleEndianS32(mesh.ofs_triangles_),
-            epi::File::kSeekpointStart);
+    f->Seek(mesh_base + AlignedLittleEndianS32(mesh.ofs_triangles_), epi::File::kSeekpointStart);
 
     for (i = 0; i < total_triangles_; i++)
     {
@@ -732,8 +711,7 @@ Md2Model *Md3Load(epi::File *f)
 
     /* PARSE VERTEX FRAMES */
 
-    f->Seek(mesh_base + AlignedLittleEndianS32(mesh.ofs_verts),
-            epi::File::kSeekpointStart);
+    f->Seek(mesh_base + AlignedLittleEndianS32(mesh.ofs_verts), epi::File::kSeekpointStart);
 
     uint8_t which_normals[kTotalMdFormatNormals];
 
@@ -755,8 +733,7 @@ Md2Model *Md3Load(epi::File *f)
             good_V->y = AlignedLittleEndianS16(vert.y) / 64.0;
             good_V->z = AlignedLittleEndianS16(vert.z) / 64.0;
 
-            good_V->normal_idx =
-                md3_normal_to_md2[vert.pitch >> 1][vert.yaw >> 1];
+            good_V->normal_idx = md3_normal_to_md2[vert.pitch >> 1][vert.yaw >> 1];
 
             which_normals[good_V->normal_idx] = 1;
         }
@@ -766,8 +743,7 @@ Md2Model *Md3Load(epi::File *f)
 
     /* PARSE FRAME INFO */
 
-    f->Seek(AlignedLittleEndianS32(header.ofs_frames),
-            epi::File::kSeekpointStart);
+    f->Seek(AlignedLittleEndianS32(header.ofs_frames), epi::File::kSeekpointStart);
 
     for (i = 0; i < num_frames; i++)
     {
@@ -785,9 +761,7 @@ Md2Model *Md3Load(epi::File *f)
     if (md->vertex_buffer_object_ == 0)
         FatalError("Md3LoadModel: Failed to create VBO!\n");
     glBindBuffer(GL_ARRAY_BUFFER, md->vertex_buffer_object_);
-    glBufferData(GL_ARRAY_BUFFER,
-                 md->total_triangles_ * 3 * sizeof(RendererVertex), nullptr,
-                 GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, md->total_triangles_ * 3 * sizeof(RendererVertex), nullptr, GL_STREAM_DRAW);
     return md;
 }
 
@@ -795,7 +769,7 @@ Md2Model *Md3Load(epi::File *f)
 
 class Md2CoordinateData
 {
-   public:
+  public:
     MapObject *map_object_;
 
     Md2Model *model_;
@@ -837,7 +811,7 @@ class Md2CoordinateData
 
     bool is_additive_;
 
-   public:
+  public:
     void CalcPos(HMM_Vec3 *pos, float x1, float y1, float z1) const
     {
         x1 *= xy_scale_;
@@ -875,11 +849,13 @@ static void InitNormalColors(Md2CoordinateData *data)
 {
     short *n_list = data->used_normals_;
 
-    for (; *n_list >= 0; n_list++) { data->normal_colors_[*n_list].Clear(); }
+    for (; *n_list >= 0; n_list++)
+    {
+        data->normal_colors_[*n_list].Clear();
+    }
 }
 
-static void ShadeNormals(AbstractShader *shader, Md2CoordinateData *data,
-                         bool skip_calc)
+static void ShadeNormals(AbstractShader *shader, Md2CoordinateData *data, bool skip_calc)
 {
     short *n_list = data->used_normals_;
 
@@ -896,21 +872,16 @@ static void ShadeNormals(AbstractShader *shader, Md2CoordinateData *data,
             float ny1 = md_normals[n].Y;
             float nz1 = md_normals[n].Z;
 
-            float nx2 = nx1 * data->mouselook_x_matrix_.X +
-                        nz1 * data->mouselook_x_matrix_.Y;
-            float nz2 = nx1 * data->mouselook_z_matrix_.X +
-                        nz1 * data->mouselook_z_matrix_.Y;
+            float nx2 = nx1 * data->mouselook_x_matrix_.X + nz1 * data->mouselook_x_matrix_.Y;
+            float nz2 = nx1 * data->mouselook_z_matrix_.X + nz1 * data->mouselook_z_matrix_.Y;
             float ny2 = ny1;
 
-            nx = nx2 * data->rotation_x_matrix_.X +
-                 ny2 * data->rotation_x_matrix_.Y;
-            ny = nx2 * data->rotation_y_matrix_.X +
-                 ny2 * data->rotation_y_matrix_.Y;
+            nx = nx2 * data->rotation_x_matrix_.X + ny2 * data->rotation_x_matrix_.Y;
+            ny = nx2 * data->rotation_y_matrix_.X + ny2 * data->rotation_y_matrix_.Y;
             nz = nz2;
         }
 
-        shader->Corner(data->normal_colors_ + n, nx, ny, nz, data->map_object_,
-                       data->is_weapon_);
+        shader->Corner(data->normal_colors_ + n, nx, ny, nz, data->map_object_, data->is_weapon_);
     }
 }
 
@@ -919,7 +890,8 @@ static void DLIT_Model(MapObject *mo, void *dataptr)
     Md2CoordinateData *data = (Md2CoordinateData *)dataptr;
 
     // dynamic lights do not light themselves up!
-    if (mo == data->map_object_) return;
+    if (mo == data->map_object_)
+        return;
 
     EPI_ASSERT(mo->dynamic_light_.shader);
 
@@ -963,8 +935,7 @@ static inline float LerpIt(float v1, float v2, float lerp)
     return v1 * (1.0f - lerp) + v2 * lerp;
 }
 
-static inline void ModelCoordFunc(Md2CoordinateData *data, int v_idx,
-                                  HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc,
+static inline void ModelCoordFunc(Md2CoordinateData *data, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc,
                                   HMM_Vec3 *normal)
 {
     const Md2Model *md = data->model_;
@@ -985,7 +956,8 @@ static inline void ModelCoordFunc(Md2CoordinateData *data, int v_idx,
     float y1 = LerpIt(vert1->y, vert2->y, data->lerp_);
     float z1 = LerpIt(vert1->z, vert2->z, data->lerp_) + data->bias_;
 
-    if (MirrorReflective()) y1 = -y1;
+    if (MirrorReflective())
+        y1 = -y1;
 
     data->CalcPos(pos, x1, y1, z1);
 
@@ -1002,8 +974,7 @@ static inline void ModelCoordFunc(Md2CoordinateData *data, int v_idx,
         return;
     }
 
-    *texc = { { point->skin_s * data->image_right_,
-                point->skin_t * data->image_top_ } };
+    *texc = { { point->skin_s * data->image_right_, point->skin_t * data->image_top_ } };
 
     ColorMixer *col = &data->normal_colors_[n_vert->normal_idx];
 
@@ -1025,10 +996,9 @@ static inline void ModelCoordFunc(Md2CoordinateData *data, int v_idx,
     rgb[2] *= render_view_blue_multiplier;
 }
 
-void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_,
-                    int frame1, int frame2, float lerp, float x, float y,
-                    float z, MapObject *mo, RegionProperties *props,
-                    float scale, float aspect, float bias_, int rotation)
+void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_, int frame1, int frame2, float lerp, float x,
+                    float y, float z, MapObject *mo, RegionProperties *props, float scale, float aspect, float bias_,
+                    int rotation)
 {
     // check if frames are valid
     if (frame1 < 0 || frame1 >= md->total_frames_)
@@ -1048,7 +1018,8 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_,
 
     float trans = mo->visibility_;
 
-    if (trans <= 0) return;
+    if (trans <= 0)
+        return;
 
     int blending;
 
@@ -1088,21 +1059,17 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_,
     data.z_scale_  = scale * MirrorZScale();
     data.bias_     = bias_;
 
-    bool tilt = is_weapon_ || (mo->flags_ & kMapObjectFlagMissile) ||
-                (mo->hyper_flags_ & kHyperFlagForceModelTilt);
+    bool tilt = is_weapon_ || (mo->flags_ & kMapObjectFlagMissile) || (mo->hyper_flags_ & kHyperFlagForceModelTilt);
 
-    MathBAMAngleToMatrix(tilt ? ~mo->vertical_angle_ : 0,
-                         &data.mouselook_x_matrix_, &data.mouselook_z_matrix_);
+    MathBAMAngleToMatrix(tilt ? ~mo->vertical_angle_ : 0, &data.mouselook_x_matrix_, &data.mouselook_z_matrix_);
 
     BAMAngle ang = mo->angle_ + rotation;
 
     MirrorAngle(ang);
 
-    MathBAMAngleToMatrix(~ang, &data.rotation_x_matrix_,
-                         &data.rotation_y_matrix_);
+    MathBAMAngleToMatrix(~ang, &data.rotation_x_matrix_, &data.rotation_y_matrix_);
 
-    data.used_normals_ = (lerp < 0.5) ? data.frame1_->used_normals_
-                                      : data.frame2_->used_normals_;
+    data.used_normals_ = (lerp < 0.5) ? data.frame1_->used_normals_ : data.frame2_->used_normals_;
 
     InitNormalColors(&data);
 
@@ -1120,8 +1087,7 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_,
 
         if (!data.is_weapon_ && !view_is_zoomed)
         {
-            float dist = ApproximateDistance(mo->x - view_x, mo->y - view_y,
-                                             mo->z - view_z);
+            float dist = ApproximateDistance(mo->x - view_x, mo->y - view_y, mo->z - view_z);
 
             data.fuzz_multiplier_ = 70.0 / HMM_Clamp(35, dist, 700);
         }
@@ -1135,17 +1101,15 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_,
     }
     else /* (! data.is_fuzzy_) */
     {
-        skin_tex =
-            ImageCache(skin_img, false,
-                       render_view_effect_colormap ? render_view_effect_colormap
-                       : is_weapon_                ? nullptr
-                                                   : mo->info_->palremap_);
+        skin_tex = ImageCache(skin_img, false,
+                              render_view_effect_colormap ? render_view_effect_colormap
+                              : is_weapon_                ? nullptr
+                                                          : mo->info_->palremap_);
 
         data.image_right_ = skin_img->Right();
         data.image_top_   = skin_img->Top();
 
-        AbstractShader *shader = GetColormapShader(props, mo->state_->bright,
-                                                   mo->subsector_->sector);
+        AbstractShader *shader = GetColormapShader(props, mo->state_->bright, mo->subsector_->sector);
 
         ShadeNormals(shader, &data, true);
 
@@ -1153,13 +1117,11 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_,
         {
             float r = mo->radius_;
 
-            DynamicLightIterator(mo->x - r, mo->y - r, mo->z, mo->x + r,
-                                 mo->y + r, mo->z + mo->height_, DLIT_Model,
+            DynamicLightIterator(mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r, mo->z + mo->height_, DLIT_Model,
                                  &data);
 
-            SectorGlowIterator(mo->subsector_->sector, mo->x - r, mo->y - r,
-                               mo->z, mo->x + r, mo->y + r, mo->z + mo->height_,
-                               DLIT_Model, &data);
+            SectorGlowIterator(mo->subsector_->sector, mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r,
+                               mo->z + mo->height_, DLIT_Model, &data);
         }
     }
 
@@ -1204,25 +1166,28 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_,
         {
             switch (cull_fog_color.d_)
             {
-                case 0:
-                    fogColor = culling_fog_color;
-                    break;
-                case 1:
-                    // Not pure white, but 1.0f felt like a little much - Dasho
-                    fogColor = sg_silver;
-                    break;
-                case 2:
-                    fogColor = { 0.25f, 0.25f, 0.25f, 1.0f };
-                    break;
-                case 3:
-                    fogColor = sg_black;
-                    break;
-                default:
-                    fogColor = culling_fog_color;
-                    break;
+            case 0:
+                fogColor = culling_fog_color;
+                break;
+            case 1:
+                // Not pure white, but 1.0f felt like a little much - Dasho
+                fogColor = sg_silver;
+                break;
+            case 2:
+                fogColor = { 0.25f, 0.25f, 0.25f, 1.0f };
+                break;
+            case 3:
+                fogColor = sg_black;
+                break;
+            default:
+                fogColor = culling_fog_color;
+                break;
             }
         }
-        else { fogColor = sg_black; }
+        else
+        {
+            fogColor = sg_black;
+        }
         glClearColor(fogColor.r, fogColor.g, fogColor.b, 1.0f);
         glFogi(GL_FOG_MODE, GL_LINEAR);
         glFogfv(GL_FOG_COLOR, &fogColor.r);
@@ -1247,18 +1212,23 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_,
         if (pass > 0 && pass < num_pass - 1)
         {
             UpdateMulticols(&data);
-            if (Md2MulticolMaxRGB(&data, false) <= 0) continue;
+            if (Md2MulticolMaxRGB(&data, false) <= 0)
+                continue;
         }
         else if (data.is_additive_)
         {
-            if (Md2MulticolMaxRGB(&data, true) <= 0) continue;
+            if (Md2MulticolMaxRGB(&data, true) <= 0)
+                continue;
         }
 
         glPolygonOffset(0, -pass);
 
         if (blending & (kBlendingMasked | kBlendingLess))
         {
-            if (blending & kBlendingLess) { glEnable(GL_ALPHA_TEST); }
+            if (blending & kBlendingLess)
+            {
+                glEnable(GL_ALPHA_TEST);
+            }
             else if (blending & kBlendingMasked)
             {
                 glEnable(GL_ALPHA_TEST);
@@ -1289,8 +1259,7 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_,
             if (blending & (kBlendingCullBack | kBlendingCullFront))
             {
                 glEnable(GL_CULL_FACE);
-                glCullFace((blending & kBlendingCullFront) ? GL_FRONT
-                                                           : GL_BACK);
+                glCullFace((blending & kBlendingCullFront) ? GL_FRONT : GL_BACK);
             }
             else
                 glDisable(GL_CULL_FACE);
@@ -1332,9 +1301,7 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_,
         {
             glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &old_clamp);
 
-            glTexParameteri(
-                GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
-                renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE);
         }
 
         RendererVertex *start = md->gl_vertices_;
@@ -1347,8 +1314,8 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_,
             {
                 RendererVertex *dest = start + (i * 3) + v_idx;
 
-                ModelCoordFunc(&data, v_idx, &dest->position, dest->rgba_color,
-                               &dest->texture_coordinates[0], &dest->normal);
+                ModelCoordFunc(&data, v_idx, &dest->position, dest->rgba_color, &dest->texture_coordinates[0],
+                               &dest->normal);
 
                 dest->rgba_color[3] = trans;
             }
@@ -1356,23 +1323,18 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_,
 
         // setup client state
         glBindBuffer(GL_ARRAY_BUFFER, md->vertex_buffer_object_);
-        glBufferData(GL_ARRAY_BUFFER,
-                     md->total_triangles_ * 3 * sizeof(RendererVertex),
-                     md->gl_vertices_, GL_STREAM_DRAW);
-        glVertexPointer(3, GL_FLOAT, sizeof(RendererVertex),
-                        (void *)(offsetof(RendererVertex, position.X)));
-        glColorPointer(4, GL_FLOAT, sizeof(RendererVertex),
-                       (void *)(offsetof(RendererVertex, rgba_color)));
-        glNormalPointer(GL_FLOAT, sizeof(RendererVertex),
-                        (void *)(offsetof(RendererVertex, normal.Y)));
+        glBufferData(GL_ARRAY_BUFFER, md->total_triangles_ * 3 * sizeof(RendererVertex), md->gl_vertices_,
+                     GL_STREAM_DRAW);
+        glVertexPointer(3, GL_FLOAT, sizeof(RendererVertex), (void *)(offsetof(RendererVertex, position.X)));
+        glColorPointer(4, GL_FLOAT, sizeof(RendererVertex), (void *)(offsetof(RendererVertex, rgba_color)));
+        glNormalPointer(GL_FLOAT, sizeof(RendererVertex), (void *)(offsetof(RendererVertex, normal.Y)));
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_COLOR_ARRAY);
         glEnableClientState(GL_NORMAL_ARRAY);
         glClientActiveTexture(GL_TEXTURE0);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        glTexCoordPointer(
-            2, GL_FLOAT, sizeof(RendererVertex),
-            (void *)(offsetof(RendererVertex, texture_coordinates[0])));
+        glTexCoordPointer(2, GL_FLOAT, sizeof(RendererVertex),
+                          (void *)(offsetof(RendererVertex, texture_coordinates[0])));
 
         glDrawArrays(GL_TRIANGLES, 0, md->total_triangles_ * 3);
 
@@ -1385,12 +1347,12 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_,
     state->SetDefaultStateFull();
 }
 
-void Md2RenderModel2d(Md2Model *md, const Image *skin_img, int frame, float x,
-                      float y, float xscale, float yscale,
+void Md2RenderModel2d(Md2Model *md, const Image *skin_img, int frame, float x, float y, float xscale, float yscale,
                       const MapObjectDefinition *info)
 {
     // check if frame is valid
-    if (frame < 0 || frame >= md->total_frames_) return;
+    if (frame < 0 || frame >= md->total_frames_)
+        return;
 
     GLuint skin_tex = ImageCache(skin_img, false, info->palremap_);
 

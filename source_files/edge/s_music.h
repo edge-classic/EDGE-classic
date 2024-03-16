@@ -30,9 +30,13 @@
 /* abstract base class */
 class AbstractMusicPlayer
 {
-   public:
-    AbstractMusicPlayer() {}
-    virtual ~AbstractMusicPlayer() {}
+  public:
+    AbstractMusicPlayer()
+    {
+    }
+    virtual ~AbstractMusicPlayer()
+    {
+    }
 
     virtual void Close(void) = 0;
 

@@ -29,6 +29,6 @@ void Shutdown();
 void MarkKeenDie(int mt_num);
 
 void ConvertRAD();
-}  // namespace rscript
+} // namespace rscript
 
-}  // namespace dehacked
+} // namespace dehacked

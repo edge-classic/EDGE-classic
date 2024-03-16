@@ -72,13 +72,12 @@ static int LuaMsgHandler(lua_State *L)
 {
     const char *msg = lua_tostring(L, 1);
     if (msg == nullptr)
-    { /* is error object not a string? */
+    {                                            /* is error object not a string? */
         if (luaL_callmeta(L, 1, "__tostring") && /* does it have a metamethod */
             lua_type(L, -1) == LUA_TSTRING)      /* that produces a string? */
             return 1;                            /* that is the message */
         else
-            msg = lua_pushfstring(L, "(error object is a %s value)",
-                                  luaL_typename(L, 1));
+            msg = lua_pushfstring(L, "(error object is a %s value)", luaL_typename(L, 1));
     }
     luaL_traceback(L, L, msg, 1); /* append a standard traceback */
     return 1;                     /* return the traceback */
@@ -102,33 +101,30 @@ int LuaDoFile(lua_State *L, const char *filename, const char *source)
         lua_pop(L, 1);
     }
     int top    = lua_gettop(L);
-    int status = luaL_loadbuffer(L, source, strlen(source),
-                                 (std::string("@") + filename).c_str());
+    int status = luaL_loadbuffer(L, source, strlen(source), (std::string("@") + filename).c_str());
 
     if (status != LUA_OK)
     {
-        LuaError(epi::StringFormat("LUA: Error compiling %s\n",
-                                   filename ? filename : "???")
-                     .c_str(),
+        LuaError(epi::StringFormat("LUA: Error compiling %s\n", filename ? filename : "???").c_str(),
                  lua_tostring(L, -1));
     }
 
-    if (lua_debug.d_) { status = dbg_pcall(L, 0, LUA_MULTRET, 0); }
+    if (lua_debug.d_)
+    {
+        status = dbg_pcall(L, 0, LUA_MULTRET, 0);
+    }
     else
     {
-        int base = lua_gettop(L);             // function index
-        lua_pushcfunction(L, LuaMsgHandler);  // push message handler */
-        lua_insert(L, base);  // put it under function and args */
+        int base = lua_gettop(L);            // function index
+        lua_pushcfunction(L, LuaMsgHandler); // push message handler */
+        lua_insert(L, base);                 // put it under function and args */
         status = lua_pcall(L, 0, LUA_MULTRET, base);
         lua_remove(L, base);
     }
 
     if (status != LUA_OK)
     {
-        LuaError(
-            epi::StringFormat("LUA: Error in %s\n", filename ? filename : "???")
-                .c_str(),
-            lua_tostring(L, -1));
+        LuaError(epi::StringFormat("LUA: Error in %s\n", filename ? filename : "???").c_str(), lua_tostring(L, -1));
     }
 
     return lua_gettop(L) - top;
@@ -142,10 +138,9 @@ static int  LuaDbgNOP(lua_State *L)
     if (!dbg_nop_warn)
     {
         dbg_nop_warn = true;
-        LogWarning(
-            "LUA: dbg() called without lua_debug being set.  Please check that "
-            "a stray dbg call didn't get left "
-            "in source.");
+        LogWarning("LUA: dbg() called without lua_debug being set.  Please check that "
+                   "a stray dbg call didn't get left "
+                   "in source.");
     }
     return 0;
 }
@@ -157,22 +152,22 @@ void LuaCallGlobalFunction(lua_State *L, const char *function_name)
     int top = lua_gettop(L);
     lua_getglobal(L, function_name);
     int status = 0;
-    if (lua_debug.d_) { status = dbg_pcall(L, 0, 0, 0); }
+    if (lua_debug.d_)
+    {
+        status = dbg_pcall(L, 0, 0, 0);
+    }
     else
     {
-        int base = lua_gettop(L);             // function index
-        lua_pushcfunction(L, LuaMsgHandler);  // push message handler */
-        lua_insert(L, base);  // put it under function and args */
+        int base = lua_gettop(L);            // function index
+        lua_pushcfunction(L, LuaMsgHandler); // push message handler */
+        lua_insert(L, base);                 // put it under function and args */
 
         status = lua_pcall(L, 0, 0, base);
     }
 
     if (status != LUA_OK)
     {
-        LuaError(epi::StringFormat("Error calling global function %s\n",
-                                   function_name)
-                     .c_str(),
-                 lua_tostring(L, -1));
+        LuaError(epi::StringFormat("Error calling global function %s\n", function_name).c_str(), lua_tostring(L, -1));
     }
 
     lua_settop(L, top);
@@ -187,8 +182,7 @@ static int LuaSandbox_Warning(lua_State *L)
     return 0;
 }
 
-static void LuaSandbox_Module(lua_State *L, const char *module_name,
-                              const char **functions)
+static void LuaSandbox_Module(lua_State *L, const char *module_name, const char **functions)
 {
     int i = 0;
     lua_getglobal(L, module_name);
@@ -213,12 +207,11 @@ static void LuaSandbox(lua_State *L)
     lua_pop(L, 1);
 
     // os module
-    const char *os_functions[] = {"execute", "exit",      "getenv",  "remove",
-                                  "rename",  "setlocale", "tmpname", nullptr};
+    const char *os_functions[] = { "execute", "exit", "getenv", "remove", "rename", "setlocale", "tmpname", nullptr };
     LuaSandbox_Module(L, "os", os_functions);
 
     // base/global functions
-    const char *base_functions[] = {"dofile", "loadfile", nullptr};
+    const char *base_functions[] = { "dofile", "loadfile", nullptr };
     LuaSandbox_Module(L, "_G", base_functions);
 
     // if debugging is enabled, load debug/io libs and sandbox
@@ -229,9 +222,9 @@ static void LuaSandbox(lua_State *L)
         luaL_requiref(L, LUA_IOLIBNAME, luaopen_io, 1);
         lua_pop(L, 2);
 
-        const char *io_functions[] = {"close",   "input",  "lines",
-                                      "open",    "output", "popen",
-                                      "tmpfile", "type",   nullptr};
+        const char *io_functions[] = {
+            "close", "input", "lines", "open", "output", "popen", "tmpfile", "type", nullptr
+        };
         LuaSandbox_Module(L, "io", io_functions);
     }
 }
@@ -248,15 +241,11 @@ lua_State *LuaCreateVM()
     ** these libs are loaded by lua.c and are readily available to any Lua
     ** program
     */
-    const luaL_Reg loadedlibs[] = {{LUA_GNAME, luaopen_base},
-                                   {LUA_LOADLIBNAME, luaopen_package},
-                                   {LUA_OSLIBNAME, luaopen_os},
-                                   {LUA_COLIBNAME, luaopen_coroutine},
-                                   {LUA_TABLIBNAME, luaopen_table},
-                                   {LUA_STRLIBNAME, luaopen_string},
-                                   {LUA_MATHLIBNAME, luaopen_math},
-                                   {LUA_UTF8LIBNAME, luaopen_utf8},
-                                   {nullptr, nullptr}};
+    const luaL_Reg loadedlibs[] = {
+        { LUA_GNAME, luaopen_base },          { LUA_LOADLIBNAME, luaopen_package }, { LUA_OSLIBNAME, luaopen_os },
+        { LUA_COLIBNAME, luaopen_coroutine }, { LUA_TABLIBNAME, luaopen_table },    { LUA_STRLIBNAME, luaopen_string },
+        { LUA_MATHLIBNAME, luaopen_math },    { LUA_UTF8LIBNAME, luaopen_utf8 },    { nullptr, nullptr }
+    };
 
     const luaL_Reg *lib;
     /* "require" functions from 'loadedlibs' and set results to global table */

@@ -61,15 +61,20 @@ ImageDefinitionContainer imagedefs;
 
 static ImageNamespace GetImageNamespace(const char *prefix)
 {
-    if (DDF_CompareName(prefix, "gfx") == 0) return kImageNamespaceGraphic;
+    if (DDF_CompareName(prefix, "gfx") == 0)
+        return kImageNamespaceGraphic;
 
-    if (DDF_CompareName(prefix, "tex") == 0) return kImageNamespaceTexture;
+    if (DDF_CompareName(prefix, "tex") == 0)
+        return kImageNamespaceTexture;
 
-    if (DDF_CompareName(prefix, "flat") == 0) return kImageNamespaceFlat;
+    if (DDF_CompareName(prefix, "flat") == 0)
+        return kImageNamespaceFlat;
 
-    if (DDF_CompareName(prefix, "spr") == 0) return kImageNamespaceSprite;
+    if (DDF_CompareName(prefix, "spr") == 0)
+        return kImageNamespaceSprite;
 
-    if (DDF_CompareName(prefix, "patch") == 0) return kImageNamespacePatch;
+    if (DDF_CompareName(prefix, "patch") == 0)
+        return kImageNamespacePatch;
 
     DDF_Error("Invalid image prefix '%s' (use: gfx,tex,flat,spr)\n", prefix);
     return kImageNamespaceFlat; /* NOT REACHED */
@@ -81,7 +86,8 @@ static ImageNamespace GetImageNamespace(const char *prefix)
 
 static void ImageStartEntry(const char *name, bool extend)
 {
-    if (!name || !name[0]) DDF_Error("New image entry is missing a name!\n");
+    if (!name || !name[0])
+        DDF_Error("New image entry is missing a name!\n");
 
     //	LogDebug("ImageStartEntry [%s]\n", name);
 
@@ -89,26 +95,30 @@ static void ImageStartEntry(const char *name, bool extend)
 
     const char *pos = strchr(name, ':');
 
-    if (!pos) DDF_Error("Missing image prefix.\n");
+    if (!pos)
+        DDF_Error("Missing image prefix.\n");
 
     if (pos)
     {
         std::string nspace(name, pos - name);
 
-        if (nspace.empty()) DDF_Error("Missing image prefix.\n");
+        if (nspace.empty())
+            DDF_Error("Missing image prefix.\n");
 
         belong = GetImageNamespace(nspace.c_str());
 
         name = pos + 1;
 
-        if (!name[0]) DDF_Error("Missing image name.\n");
+        if (!name[0])
+            DDF_Error("Missing image name.\n");
     }
 
     dynamic_image = imagedefs.Lookup(name, belong);
 
     if (extend)
     {
-        if (!dynamic_image) DDF_Error("Unknown image to extend: %s\n", name);
+        if (!dynamic_image)
+            DDF_Error("Unknown image to extend: %s\n", name);
         return;
     }
 
@@ -128,8 +138,7 @@ static void ImageStartEntry(const char *name, bool extend)
     imagedefs.push_back(dynamic_image);
 }
 
-static void ImageParseField(const char *field, const char *contents, int index,
-                            bool is_last)
+static void ImageParseField(const char *field, const char *contents, int index, bool is_last)
 {
 #if (DEBUG_DDF)
     LogDebug("IMAGE_PARSE: %s = %s;\n", field, contents);
@@ -139,17 +148,15 @@ static void ImageParseField(const char *field, const char *contents, int index,
     if (DDF_CompareName(field, "PATCHES") == 0 && index == 0)
         dynamic_image->patches_.clear();
 
-    if (DDF_MainParseField(image_commands, field, contents,
-                           (uint8_t *)dynamic_image))
-        return;  // OK
+    if (DDF_MainParseField(image_commands, field, contents, (uint8_t *)dynamic_image))
+        return; // OK
 
     DDF_Error("Unknown images.ddf command: %s\n", field);
 }
 
 static void ImageFinishEntry(void)
 {
-    if (dynamic_image->type_ == kImageDataFile ||
-        dynamic_image->type_ == kImageDataPackage)
+    if (dynamic_image->type_ == kImageDataFile || dynamic_image->type_ == kImageDataPackage)
     {
         if (epi::GetExtension(dynamic_image->info_) == ".lmp")
             dynamic_image->format_ = kLumpImageFormatDoom;
@@ -160,10 +167,8 @@ static void ImageFinishEntry(void)
     // Add these automatically so modders don't have to remember them
     if (dynamic_image->is_font_)
     {
-        dynamic_image->special_ =
-            (ImageSpecial)(dynamic_image->special_ | kImageSpecialClamp);
-        dynamic_image->special_ =
-            (ImageSpecial)(dynamic_image->special_ | kImageSpecialNoMip);
+        dynamic_image->special_ = (ImageSpecial)(dynamic_image->special_ | kImageSpecialClamp);
+        dynamic_image->special_ = (ImageSpecial)(dynamic_image->special_ | kImageSpecialNoMip);
     }
 
     // TODO: check more stuff...
@@ -201,7 +206,7 @@ void DDF_ImageInit(void)
 
 void DDF_ImageCleanUp(void)
 {
-    imagedefs.shrink_to_fit();  // <-- Reduce to allocated size
+    imagedefs.shrink_to_fit(); // <-- Reduce to allocated size
 }
 
 static void ImageParseColour(const char *value)
@@ -209,7 +214,10 @@ static void ImageParseColour(const char *value)
     DDF_MainGetRGB(value, &dynamic_image->colour_);
 }
 
-static void ImageParseInfo(const char *value) { dynamic_image->info_ = value; }
+static void ImageParseInfo(const char *value)
+{
+    dynamic_image->info_ = value;
+}
 
 static void ImageParseLump(const char *spec)
 {
@@ -236,13 +244,10 @@ static void ImageParseLump(const char *spec)
         // store the lump name
         dynamic_image->info_ = (colon + 1);
 
-        if (DDF_CompareName(keyword, "PNG") == 0 ||
-            DDF_CompareName(keyword, "TGA") == 0 ||
-            DDF_CompareName(keyword, "JPG") == 0 ||
-            DDF_CompareName(keyword, "JPEG") == 0 ||
-            DDF_CompareName(keyword, "EXT") ==
-                0)  // 2.x used this for auto-detection of regular images, but
-                    // we do this regardless of the extension
+        if (DDF_CompareName(keyword, "PNG") == 0 || DDF_CompareName(keyword, "TGA") == 0 ||
+            DDF_CompareName(keyword, "JPG") == 0 || DDF_CompareName(keyword, "JPEG") == 0 ||
+            DDF_CompareName(keyword, "EXT") == 0) // 2.x used this for auto-detection of regular images, but
+                                                  // we do this regardless of the extension
         {
             dynamic_image->format_ = kLumpImageFormatStandard;
         }
@@ -252,8 +257,7 @@ static void ImageParseLump(const char *spec)
         }
         else
         {
-            DDF_Error("Unknown image format: %s (use PNG,JPEG,TGA or DOOM)\n",
-                      keyword);
+            DDF_Error("Unknown image format: %s (use PNG,JPEG,TGA or DOOM)\n", keyword);
         }
     }
 }
@@ -269,16 +273,14 @@ static void ImageParseCompose(const char *info)
     dynamic_image->compose_h_ = atoi(colon + 1);
 
     if (dynamic_image->compose_w_ <= 0 || dynamic_image->compose_h_ <= 0)
-        DDF_Error("Illegal image compose size: %d x %d\n",
-                  dynamic_image->compose_w_, dynamic_image->compose_h_);
+        DDF_Error("Illegal image compose size: %d x %d\n", dynamic_image->compose_w_, dynamic_image->compose_h_);
 }
 
 static void DDF_ImageGetType(const char *info, void *storage)
 {
     const char *colon = DDF_MainDecodeList(info, ':', true);
 
-    if (colon == nullptr || colon == info || (colon - info) >= 16 ||
-        colon[1] == 0)
+    if (colon == nullptr || colon == info || (colon - info) >= 16 || colon[1] == 0)
         DDF_Error("Malformed image type spec: %s\n", info);
 
     char keyword[20];
@@ -322,16 +324,11 @@ static void DDF_ImageGetType(const char *info, void *storage)
 }
 
 static DDFSpecialFlags image_specials[] = {
-    { "NOALPHA", kImageSpecialNoAlpha, 0 },
-    { "FORCE_MIP", kImageSpecialMip, 0 },
-    { "FORCE_NOMIP", kImageSpecialNoMip, 0 },
-    { "FORCE_CLAMP", kImageSpecialClamp, 0 },
-    { "FORCE_SMOOTH", kImageSpecialSmooth, 0 },
-    { "FORCE_NOSMOOTH", kImageSpecialNoSmooth, 0 },
-    { "CROSSHAIR", kImageSpecialCrosshair, 0 },
-    { "GRAYSCALE", kImageSpecialGrayscale, 0 },
-    { "FORCE_PRECACHE", kImageSpecialPrecache, 0 },
-    { nullptr, 0, 0 }
+    { "NOALPHA", kImageSpecialNoAlpha, 0 },         { "FORCE_MIP", kImageSpecialMip, 0 },
+    { "FORCE_NOMIP", kImageSpecialNoMip, 0 },       { "FORCE_CLAMP", kImageSpecialClamp, 0 },
+    { "FORCE_SMOOTH", kImageSpecialSmooth, 0 },     { "FORCE_NOSMOOTH", kImageSpecialNoSmooth, 0 },
+    { "CROSSHAIR", kImageSpecialCrosshair, 0 },     { "GRAYSCALE", kImageSpecialGrayscale, 0 },
+    { "FORCE_PRECACHE", kImageSpecialPrecache, 0 }, { nullptr, 0, 0 }
 };
 
 static void DDF_ImageGetSpecial(const char *info, void *storage)
@@ -340,21 +337,20 @@ static void DDF_ImageGetSpecial(const char *info, void *storage)
 
     int flag_value;
 
-    switch (DDF_MainCheckSpecialFlag(info, image_specials, &flag_value,
-                                     false /* allow_prefixes */, false))
+    switch (DDF_MainCheckSpecialFlag(info, image_specials, &flag_value, false /* allow_prefixes */, false))
     {
-        case kDDFCheckFlagPositive:
-            *dest = (ImageSpecial)(*dest | flag_value);
-            break;
+    case kDDFCheckFlagPositive:
+        *dest = (ImageSpecial)(*dest | flag_value);
+        break;
 
-        case kDDFCheckFlagNegative:
-            *dest = (ImageSpecial)(*dest & ~flag_value);
-            break;
+    case kDDFCheckFlagNegative:
+        *dest = (ImageSpecial)(*dest & ~flag_value);
+        break;
 
-        case kDDFCheckFlagUser:
-        case kDDFCheckFlagUnknown:
-            DDF_WarnError("Unknown image special: %s\n", info);
-            break;
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDF_WarnError("Unknown image special: %s\n", info);
+        break;
     }
 }
 
@@ -362,7 +358,10 @@ static void DDF_ImageGetFixTrans(const char *info, void *storage)
 {
     ImageTransparencyFix *var = (ImageTransparencyFix *)storage;
 
-    if (DDF_CompareName(info, "NONE") == 0) { *var = kTransparencyFixNone; }
+    if (DDF_CompareName(info, "NONE") == 0)
+    {
+        *var = kTransparencyFixNone;
+    }
     else if (DDF_CompareName(info, "BLACKEN") == 0)
     {
         *var = kTransparencyFixBlacken;
@@ -395,8 +394,7 @@ static void DDF_ImageGetPatches(const char *info, void *storage)
 
 // ---> imagedef_c class
 
-ImageDefinition::ImageDefinition()
-    : name_(), belong_(kImageNamespaceGraphic), info_()
+ImageDefinition::ImageDefinition() : name_(), belong_(kImageNamespaceGraphic), info_()
 {
     Default();
 }
@@ -458,22 +456,20 @@ void ImageDefinitionContainer::CleanupObject(void *obj)
 {
     ImageDefinition *a = *(ImageDefinition **)obj;
 
-    if (a) delete a;
+    if (a)
+        delete a;
 }
 
-ImageDefinition *ImageDefinitionContainer::Lookup(const char    *refname,
-                                                  ImageNamespace belong)
+ImageDefinition *ImageDefinitionContainer::Lookup(const char *refname, ImageNamespace belong)
 {
-    if (!refname || !refname[0]) return nullptr;
+    if (!refname || !refname[0])
+        return nullptr;
 
-    for (std::vector<ImageDefinition *>::iterator iter     = begin(),
-                                                  iter_end = end();
-         iter != iter_end; iter++)
+    for (std::vector<ImageDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
     {
         ImageDefinition *g = *iter;
 
-        if (DDF_CompareName(g->name_.c_str(), refname) == 0 &&
-            g->belong_ == belong)
+        if (DDF_CompareName(g->name_.c_str(), refname) == 0 && g->belong_ == belong)
             return g;
     }
 

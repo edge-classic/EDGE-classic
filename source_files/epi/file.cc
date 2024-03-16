@@ -25,7 +25,9 @@
 namespace epi
 {
 
-ANSIFile::ANSIFile(FILE *filep) : fp_(filep) {}
+ANSIFile::ANSIFile(FILE *filep) : fp_(filep)
+{
+}
 
 ANSIFile::~ANSIFile()
 {
@@ -40,12 +42,12 @@ int ANSIFile::GetLength()
 {
     EPI_ASSERT(fp_);
 
-    long cur_pos = ftell(fp_);  // Get existing position
+    long cur_pos = ftell(fp_);     // Get existing position
 
-    fseek(fp_, 0, SEEK_END);  // Seek to the end of file
-    long len = ftell(fp_);    // Get the position - it our length
+    fseek(fp_, 0, SEEK_END);       // Seek to the end of file
+    long len = ftell(fp_);         // Get the position - it our length
 
-    fseek(fp_, cur_pos, SEEK_SET);  // Reset existing position
+    fseek(fp_, cur_pos, SEEK_SET); // Reset existing position
     return (int)len;
 }
 
@@ -78,25 +80,22 @@ bool ANSIFile::Seek(int offset, int seekpoint)
 
     switch (seekpoint)
     {
-        case kSeekpointStart:
-        {
-            whence = SEEK_SET;
-            break;
-        }
-        case kSeekpointCurrent:
-        {
-            whence = SEEK_CUR;
-            break;
-        }
-        case kSeekpointEnd:
-        {
-            whence = SEEK_END;
-            break;
-        }
+    case kSeekpointStart: {
+        whence = SEEK_SET;
+        break;
+    }
+    case kSeekpointCurrent: {
+        whence = SEEK_CUR;
+        break;
+    }
+    case kSeekpointEnd: {
+        whence = SEEK_END;
+        break;
+    }
 
-        default:
-            FatalError("ANSIFile::Seek : illegal seekpoint value.\n");
-            return false; /* NOT REACHED */
+    default:
+        FatalError("ANSIFile::Seek : illegal seekpoint value.\n");
+        return false; /* NOT REACHED */
     }
 
     int result = fseek(fp_, offset, whence);
@@ -132,7 +131,8 @@ uint8_t *File::LoadIntoMemory(int max_size)
         actual_size = 0;
     }
 
-    if (actual_size > max_size) actual_size = max_size;
+    if (actual_size > max_size)
+        actual_size = max_size;
 
     uint8_t *buffer     = new uint8_t[actual_size + 1];
     buffer[actual_size] = 0;
@@ -143,23 +143,26 @@ uint8_t *File::LoadIntoMemory(int max_size)
         return nullptr;
     }
 
-    return buffer;  // success!
+    return buffer; // success!
 }
 
-SubFile::SubFile(File *parent, int start, int len)
-    : parent_(parent), start_(start), length_(len), pos_(0)
+SubFile::SubFile(File *parent, int start, int len) : parent_(parent), start_(start), length_(len), pos_(0)
 {
     EPI_ASSERT(parent_ != nullptr);
     EPI_ASSERT(start_ >= 0);
     EPI_ASSERT(length_ >= 0);
 }
 
-SubFile::~SubFile() { parent_ = nullptr; }
+SubFile::~SubFile()
+{
+    parent_ = nullptr;
+}
 
 unsigned int SubFile::Read(void *dest, unsigned int size)
 {
     // EOF ?
-    if (pos_ >= length_) return 0;
+    if (pos_ >= length_)
+        return 0;
 
     size = HMM_MIN(size, (unsigned int)(length_ - pos_));
 
@@ -180,30 +183,28 @@ bool SubFile::Seek(int offset, int seekpoint)
 
     switch (seekpoint)
     {
-        case kSeekpointStart:
-        {
-            new_pos = 0;
-            break;
-        }
-        case kSeekpointCurrent:
-        {
-            new_pos = pos_;
-            break;
-        }
-        case kSeekpointEnd:
-        {
-            new_pos = length_;
-            break;
-        }
+    case kSeekpointStart: {
+        new_pos = 0;
+        break;
+    }
+    case kSeekpointCurrent: {
+        new_pos = pos_;
+        break;
+    }
+    case kSeekpointEnd: {
+        new_pos = length_;
+        break;
+    }
 
-        default:
-            return false;
+    default:
+        return false;
     }
 
     new_pos += offset;
 
     // NOTE: we allow position at the very end (last byte + 1).
-    if (new_pos < 0 || new_pos > length_) return false;
+    if (new_pos < 0 || new_pos > length_)
+        return false;
 
     pos_ = new_pos;
 
@@ -267,9 +268,11 @@ unsigned int MemFile::Read(void *dest, unsigned int size)
 
     unsigned int avail = length_ - pos_;
 
-    if (size > avail) size = avail;
+    if (size > avail)
+        size = avail;
 
-    if (size == 0) return 0;  // EOF
+    if (size == 0)
+        return 0; // EOF
 
     memcpy(dest, data_ + pos_, size);
     pos_ += size;
@@ -283,30 +286,28 @@ bool MemFile::Seek(int offset, int seekpoint)
 
     switch (seekpoint)
     {
-        case kSeekpointStart:
-        {
-            new_pos = 0;
-            break;
-        }
-        case kSeekpointCurrent:
-        {
-            new_pos = pos_;
-            break;
-        }
-        case kSeekpointEnd:
-        {
-            new_pos = length_;
-            break;
-        }
+    case kSeekpointStart: {
+        new_pos = 0;
+        break;
+    }
+    case kSeekpointCurrent: {
+        new_pos = pos_;
+        break;
+    }
+    case kSeekpointEnd: {
+        new_pos = length_;
+        break;
+    }
 
-        default:
-            return false;
+    default:
+        return false;
     }
 
     new_pos += offset;
 
     // Note: allow position at the very end (last byte + 1).
-    if (new_pos < 0 || new_pos > length_) return false;
+    if (new_pos < 0 || new_pos > length_)
+        return false;
 
     pos_ = new_pos;
     return true;
@@ -322,7 +323,7 @@ unsigned int MemFile::Write(const void *src, unsigned int size)
     return 0; /* read only, cobber */
 }
 
-}  // namespace epi
+} // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

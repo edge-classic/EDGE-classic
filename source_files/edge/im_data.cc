@@ -29,11 +29,7 @@
 #include "swirl_table.h"
 
 ImageData::ImageData(int width, int height, int depth)
-    : width_(width),
-      height_(height),
-      depth_(depth),
-      used_width_(width),
-      used_height_(height)
+    : width_(width), height_(height), depth_(depth), used_width_(width), used_height_(height)
 {
     pixels_   = new uint8_t[width * height * depth];
     offset_x_ = offset_y_ = 0;
@@ -256,7 +252,8 @@ void ImageData::Grow(int new_w, int new_h)
 
             uint8_t *dest = new_pixels_ + (dy * new_w + dx) * depth_;
 
-            for (int i = 0; i < depth_; i++) *dest++ = *src++;
+            for (int i = 0; i < depth_; i++)
+                *dest++ = *src++;
         }
 
     delete[] pixels_;
@@ -271,7 +268,8 @@ void ImageData::Grow(int new_w, int new_h)
 
 void ImageData::RemoveAlpha()
 {
-    if (depth_ != 4) return;
+    if (depth_ != 4)
+        return;
 
     uint8_t *src   = pixels_;
     uint8_t *s_end = src + (width_ * height_ * depth_);
@@ -291,7 +289,8 @@ void ImageData::RemoveAlpha()
 
 void ImageData::SetAlpha(int alphaness)
 {
-    if (depth_ < 3) return;
+    if (depth_ < 3)
+        return;
 
     if (depth_ == 3)
     {
@@ -321,12 +320,16 @@ void ImageData::SetAlpha(int alphaness)
 
 void ImageData::ThresholdAlpha(uint8_t alpha)
 {
-    if (depth_ != 4) return;
+    if (depth_ != 4)
+        return;
 
     uint8_t *src   = pixels_;
     uint8_t *s_end = src + (width_ * height_ * depth_);
 
-    for (; src < s_end; src += 4) { src[3] = (src[3] < alpha) ? 0 : 255; }
+    for (; src < s_end; src += 4)
+    {
+        src[3] = (src[3] < alpha) ? 0 : 255;
+    }
 }
 
 void ImageData::FourWaySymmetry()
@@ -348,7 +351,8 @@ void ImageData::FourWaySymmetry()
 
 void ImageData::RemoveBackground()
 {
-    if (depth_ < 3) return;
+    if (depth_ < 3)
+        return;
 
     if (depth_ == 3)
     {
@@ -361,10 +365,7 @@ void ImageData::RemoveBackground()
             *dest++ = src[0];
             *dest++ = src[1];
             *dest++ = src[2];
-            *dest++ = (src[0] == pixels_[0] && src[1] == pixels_[1] &&
-                       src[2] == pixels_[2])
-                          ? 0
-                          : 255;
+            *dest++ = (src[0] == pixels_[0] && src[1] == pixels_[1] && src[2] == pixels_[2]) ? 0 : 255;
         }
         delete[] pixels_;
         pixels_ = new_pixels_;
@@ -374,12 +375,12 @@ void ImageData::RemoveBackground()
     {
         // If first pixel is fully transparent, assume that image background is
         // already transparent
-        if (pixels_[3] == 0) return;
+        if (pixels_[3] == 0)
+            return;
 
         for (int i = 4; i < width_ * height_ * 4; i += 4)
         {
-            if (pixels_[i] == pixels_[0] && pixels_[i + 1] == pixels_[1] &&
-                pixels_[i + 2] == pixels_[2])
+            if (pixels_[i] == pixels_[0] && pixels_[i + 1] == pixels_[1] && pixels_[i + 2] == pixels_[2])
                 pixels_[i + 3] = 0;
         }
     }
@@ -392,7 +393,10 @@ void ImageData::EightWaySymmetry()
     int hw = (width_ + 1) / 2;
 
     for (int y = 0; y < hw; y++)
-        for (int x = y + 1; x < hw; x++) { CopyPixel(x, y, y, x); }
+        for (int x = y + 1; x < hw; x++)
+        {
+            CopyPixel(x, y, y, x);
+        }
 
     FourWaySymmetry();
 }
@@ -411,8 +415,7 @@ int ImageData::ImageCharacterWidth(int x1, int y1, int x2, int y2)
         for (int j = x1; j < x2; j++)
         {
             uint8_t *checker = PixelAt(j, i);
-            if (src[0] != checker[0] || src[1] != checker[1] ||
-                src[2] != checker[2])
+            if (src[0] != checker[0] || src[1] != checker[1] || src[2] != checker[2])
             {
                 if (!found_first)
                 {
@@ -428,14 +431,13 @@ int ImageData::ImageCharacterWidth(int x1, int y1, int x2, int y2)
         }
         if (found_first && first >= x1 && first < first_first)
             first_first = first;
-        if (found_last && last <= x2 && last > last_last) last_last = last;
+        if (found_last && last <= x2 && last > last_last)
+            last_last = last;
     }
-    return HMM_MAX(last_last - first_first, 0) +
-           3;  // Some padding on each side of the letter
+    return HMM_MAX(last_last - first_first, 0) + 3; // Some padding on each side of the letter
 }
 
-void ImageData::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x,
-                           int from_y, int to_y)
+void ImageData::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x, int from_y, int to_y)
 {
     // make sure we don't overflow
     EPI_ASSERT(used_width_ * used_height_ <= 2048 * 2048);
@@ -539,11 +541,13 @@ RGBAColor ImageData::AverageColor(int from_x, int to_x, int from_y, int to_y)
 
         for (int x = from_x; x < to_x; x++, src += depth_)
         {
-            if (depth_ == 4 && src[3] == 0) continue;
+            if (depth_ == 4 && src[3] == 0)
+                continue;
             RGBAColor color = epi::MakeRGBA(src[0], src[1], src[2]);
             auto      res   = seen_colors.try_emplace(color, 0);
             // If color already seen, increment the hit counter
-            if (!res.second) res.first->second++;
+            if (!res.second)
+                res.first->second++;
         }
     }
 
@@ -551,13 +555,17 @@ RGBAColor ImageData::AverageColor(int from_x, int to_x, int from_y, int to_y)
     RGBAColor    average_color = SG_BLACK_RGBA32;
     for (auto color : seen_colors)
     {
-        if (color.second > highest_count) highest_count = color.second;
+        if (color.second > highest_count)
+            highest_count = color.second;
     }
 
     // If multiple colors were seen "the most", just use the last one spotted
     for (auto color : seen_colors)
     {
-        if (color.second == highest_count) { average_color = color.first; }
+        if (color.second == highest_count)
+        {
+            average_color = color.first;
+        }
     }
 
     return average_color;
@@ -585,7 +593,8 @@ RGBAColor ImageData::LightestColor(int from_x, int to_x, int from_y, int to_y)
 
         for (int x = from_x; x < to_x; x++, src += depth_)
         {
-            if (depth_ == 4 && src[3] == 0) continue;
+            if (depth_ == 4 && src[3] == 0)
+                continue;
             int current_total = src[0] + src[1] + src[2];
             if (current_total > lightest_total)
             {
@@ -622,7 +631,8 @@ RGBAColor ImageData::DarkestColor(int from_x, int to_x, int from_y, int to_y)
 
         for (int x = from_x; x < to_x; x++, src += depth_)
         {
-            if (depth_ == 4 && src[3] == 0) continue;
+            if (depth_ == 4 && src[3] == 0)
+                continue;
             int current_total = src[0] + src[1] + src[2];
             if (current_total < darkest_total)
             {
@@ -644,11 +654,14 @@ void ImageData::Swirl(int leveltime, int thickness)
     const int amp          = 2;
     int       speed;
 
-    if (thickness == 1)  // Thin liquid
+    if (thickness == 1) // Thin liquid
     {
         speed = 40;
     }
-    else { speed = 10; }
+    else
+    {
+        speed = 10;
+    }
 
     uint8_t *new_pixels_ = new uint8_t[width_ * height_ * depth_];
 
@@ -664,14 +677,11 @@ void ImageData::Swirl(int leveltime, int thickness)
 
             sinvalue  = (y * swirlfactor + leveltime * speed * 5 + 900) & 8191;
             sinvalue2 = (x * swirlfactor2 + leveltime * speed * 4 + 300) & 8191;
-            x1 = x + width_ + height_ + ((finesine[sinvalue] * amp) >> 16) +
-                 ((finesine[sinvalue2] * amp) >> 16);
+            x1        = x + width_ + height_ + ((finesine[sinvalue] * amp) >> 16) + ((finesine[sinvalue2] * amp) >> 16);
 
-            sinvalue = (x * swirlfactor + leveltime * speed * 3 + 700) & 8191;
-            sinvalue2 =
-                (y * swirlfactor2 + leveltime * speed * 4 + 1200) & 8191;
-            y1 = y + width_ + height_ + ((finesine[sinvalue] * amp) >> 16) +
-                 ((finesine[sinvalue2] * amp) >> 16);
+            sinvalue  = (x * swirlfactor + leveltime * speed * 3 + 700) & 8191;
+            sinvalue2 = (y * swirlfactor2 + leveltime * speed * 4 + 1200) & 8191;
+            y1        = y + width_ + height_ + ((finesine[sinvalue] * amp) >> 16) + ((finesine[sinvalue2] * amp) >> 16);
 
             x1 &= width_ - 1;
             y1 &= height_ - 1;
@@ -688,26 +698,26 @@ void ImageData::Swirl(int leveltime, int thickness)
 
 void ImageData::FillMarginX(int actual_w)
 {
-    if (actual_w >= width_) return;
+    if (actual_w >= width_)
+        return;
 
     for (int x = 0; x < (width_ - actual_w); x++)
     {
         for (int y = 0; y < height_; y++)
         {
-            memcpy(pixels_ + (y * width_ + x + actual_w) * depth_,
-                   pixels_ + (y * width_ + x) * depth_, depth_);
+            memcpy(pixels_ + (y * width_ + x + actual_w) * depth_, pixels_ + (y * width_ + x) * depth_, depth_);
         }
     }
 }
 
 void ImageData::FillMarginY(int actual_h)
 {
-    if (actual_h >= height_) return;
+    if (actual_h >= height_)
+        return;
 
     for (int y = 0; y < (height_ - actual_h); y++)
     {
-        memcpy(pixels_ + (y + actual_h) * width_ * depth_,
-               pixels_ + y * width_ * depth_, width_ * depth_);
+        memcpy(pixels_ + (y + actual_h) * width_ * depth_, pixels_ + y * width_ * depth_, width_ * depth_);
     }
 }
 
@@ -723,16 +733,18 @@ void ImageData::SetHsv(int rotation, int saturation, int value)
         {
             uint8_t *src = PixelAt(x, y);
 
-            RGBAColor col = epi::MakeRGBA(src[0], src[1], src[2],
-                                          depth_ == 4 ? src[3] : 255);
+            RGBAColor col = epi::MakeRGBA(src[0], src[1], src[2], depth_ == 4 ? src[3] : 255);
 
             epi::HSVColor hue(col);
 
-            if (rotation) hue.Rotate(rotation);
+            if (rotation)
+                hue.Rotate(rotation);
 
-            if (saturation > -1) hue.SetSaturation(saturation);
+            if (saturation > -1)
+                hue.SetSaturation(saturation);
 
-            if (value) hue.SetValue(HMM_Clamp(0, hue.v_ + value, 255));
+            if (value)
+                hue.SetValue(HMM_Clamp(0, hue.v_ + value, 255));
 
             col = hue.ToRGBA();
 

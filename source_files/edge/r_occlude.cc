@@ -55,13 +55,22 @@ static void ValidateBuffer(void)
             EPI_ASSERT(AR->next->previous == AR);
             EPI_ASSERT(AR->next->low > AR->high);
         }
-        else { EPI_ASSERT(AR == occlusion_buffer_tail); }
+        else
+        {
+            EPI_ASSERT(AR == occlusion_buffer_tail);
+        }
 
-        if (AR->prev) { EPI_ASSERT(AR->prev->next == AR); }
-        else { EPI_ASSERT(AR == occlusion_buffer_head); }
+        if (AR->prev)
+        {
+            EPI_ASSERT(AR->prev->next == AR);
+        }
+        else
+        {
+            EPI_ASSERT(AR == occlusion_buffer_head);
+        }
     }
 }
-#endif  // DEBUG_OCCLUSION
+#endif // DEBUG_OCCLUSION
 
 void RendererOcclusionClear(void)
 {
@@ -160,7 +169,8 @@ static void DoSet(BAMAngle low, BAMAngle high)
             return;
         }
 
-        if (low > AR->high) continue;
+        if (low > AR->high)
+            continue;
 
         // the new range overlaps the old range.
         //
@@ -175,7 +185,10 @@ static void DoSet(BAMAngle low, BAMAngle high)
         AR->high = HMM_MAX(AR->high, high);
 
 #ifdef EDGE_DEBUG_OCCLUSION
-        if (AR->prev) { EPI_ASSERT(AR->low > AR->prev->high); }
+        if (AR->prev)
+        {
+            EPI_ASSERT(AR->low > AR->prev->high);
+        }
 #endif
         while (AR->next && AR->high >= AR->next->low)
         {
@@ -216,9 +229,11 @@ static inline bool DoTest(BAMAngle low, BAMAngle high)
 {
     for (AngleRange *AR = occlusion_buffer_head; AR; AR = AR->next)
     {
-        if (AR->low <= low && high <= AR->high) return true;
+        if (AR->low <= low && high <= AR->high)
+            return true;
 
-        if (AR->high > low) break;
+        if (AR->high > low)
+            break;
     }
 
     return false;

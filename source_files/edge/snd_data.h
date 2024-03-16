@@ -45,10 +45,10 @@ enum ReverbRoomSize
 
 class SoundData
 {
-   public:
-    int length_;     // number of samples
-    int frequency_;  // frequency
-    int mode_;       // one of the kMixxxx values
+  public:
+    int length_;    // number of samples
+    int frequency_; // frequency
+    int mode_;      // one of the kMixxxx values
 
     // signed 16-bit samples.
     // For kMixMono, both pointers refer to the same memory.
@@ -76,7 +76,7 @@ class SoundData
 
     bool reverb_is_outdoors_;
 
-   public:
+  public:
     SoundData();
     ~SoundData();
 
@@ -85,8 +85,7 @@ class SoundData
     void FreeFilter();
     void MixVacuum();
     void MixSubmerged();
-    void MixReverb(bool dynamic_reverb, float room_area, bool outdoor_reverb,
-                   int ddf_reverb_type, int ddf_reverb_ratio,
+    void MixReverb(bool dynamic_reverb, float room_area, bool outdoor_reverb, int ddf_reverb_type, int ddf_reverb_ratio,
                    int ddf_reverb_delay);
 };
 

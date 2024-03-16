@@ -32,8 +32,7 @@
 
 static constexpr uint8_t kPolyObjectBoxSize = 10;
 
-static int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax, int x1,
-                                 int y1, int x2, int y2)
+static int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax, int x1, int y1, int x2, int y2)
 {
     int count = 2;
     int tmp;
@@ -42,10 +41,10 @@ static int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax, int x1,
     {
         if (y1 > ymax)
         {
-            if (y2 > ymax) return false;
+            if (y2 > ymax)
+                return false;
 
-            x1 =
-                x1 + (int)((x2 - x1) * (double)(ymax - y1) / (double)(y2 - y1));
+            x1 = x1 + (int)((x2 - x1) * (double)(ymax - y1) / (double)(y2 - y1));
             y1 = ymax;
 
             count = 2;
@@ -54,10 +53,10 @@ static int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax, int x1,
 
         if (y1 < ymin)
         {
-            if (y2 < ymin) return false;
+            if (y2 < ymin)
+                return false;
 
-            x1 =
-                x1 + (int)((x2 - x1) * (double)(ymin - y1) / (double)(y2 - y1));
+            x1 = x1 + (int)((x2 - x1) * (double)(ymin - y1) / (double)(y2 - y1));
             y1 = ymin;
 
             count = 2;
@@ -66,10 +65,10 @@ static int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax, int x1,
 
         if (x1 > xmax)
         {
-            if (x2 > xmax) return false;
+            if (x2 > xmax)
+                return false;
 
-            y1 =
-                y1 + (int)((y2 - y1) * (double)(xmax - x1) / (double)(x2 - x1));
+            y1 = y1 + (int)((y2 - y1) * (double)(xmax - x1) / (double)(x2 - x1));
             x1 = xmax;
 
             count = 2;
@@ -78,10 +77,10 @@ static int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax, int x1,
 
         if (x1 < xmin)
         {
-            if (x2 < xmin) return false;
+            if (x2 < xmin)
+                return false;
 
-            y1 =
-                y1 + (int)((y2 - y1) * (double)(xmin - x1) / (double)(x2 - x1));
+            y1 = y1 + (int)((y2 - y1) * (double)(xmin - x1) / (double)(x2 - x1));
             x1 = xmin;
 
             count = 2;
@@ -90,7 +89,8 @@ static int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax, int x1,
 
         count--;
 
-        if (count == 0) break;
+        if (count == 0)
+            break;
 
         // swap end points
         tmp = x1;
@@ -116,14 +116,16 @@ namespace ajbsp
 
 void MarkPolyobjSector(Sector *sector)
 {
-    if (sector == nullptr) return;
+    if (sector == nullptr)
+        return;
 
 #if DEBUG_POLYOBJ
     LogDebug("  Marking SECTOR %d\n", sector->index);
 #endif
 
     /* already marked ? */
-    if (sector->has_polyobject) return;
+    if (sector->has_polyobject)
+        return;
 
     // mark all lines of this sector as precious, to prevent (ideally)
     // the sector from being split.
@@ -133,8 +135,7 @@ void MarkPolyobjSector(Sector *sector)
     {
         Linedef *L = level_linedefs[i];
 
-        if ((L->right != nullptr && L->right->sector == sector) ||
-            (L->left != nullptr && L->left->sector == sector))
+        if ((L->right != nullptr && L->right->sector == sector) || (L->left != nullptr && L->left->sector == sector))
         {
             L->is_precious = true;
         }
@@ -163,23 +164,25 @@ void MarkPolyobjPoint(double x, double y)
     {
         const Linedef *L = level_linedefs[i];
 
-        if (CheckLinedefInsideBox(bminx, bminy, bmaxx, bmaxy, (int)L->start->x_,
-                                  (int)L->start->y_, (int)L->end->x_,
+        if (CheckLinedefInsideBox(bminx, bminy, bmaxx, bmaxy, (int)L->start->x_, (int)L->start->y_, (int)L->end->x_,
                                   (int)L->end->y_))
         {
 #if DEBUG_POLYOBJ
             LogDebug("  Touching line was %d\n", L->index);
 #endif
 
-            if (L->left != nullptr) MarkPolyobjSector(L->left->sector);
+            if (L->left != nullptr)
+                MarkPolyobjSector(L->left->sector);
 
-            if (L->right != nullptr) MarkPolyobjSector(L->right->sector);
+            if (L->right != nullptr)
+                MarkPolyobjSector(L->right->sector);
 
             inside_count++;
         }
     }
 
-    if (inside_count > 0) return;
+    if (inside_count > 0)
+        return;
 
     // -AJA- Algorithm is just like in DEU: we cast a line horizontally
     //       from the given (x,y) position and find all linedefs that
@@ -197,10 +200,10 @@ void MarkPolyobjPoint(double x, double y)
         double y2 = L->end->y_;
 
         /* check vertical range */
-        if (fabs(y2 - y1) < kEpsilon) continue;
+        if (fabs(y2 - y1) < kEpsilon)
+            continue;
 
-        if ((y > (y1 + kEpsilon) && y > (y2 + kEpsilon)) ||
-            (y < (y1 - kEpsilon) && y < (y2 - kEpsilon)))
+        if ((y > (y1 + kEpsilon) && y > (y2 + kEpsilon)) || (y < (y1 - kEpsilon) && y < (y2 - kEpsilon)))
             continue;
 
         double x_cut = x1 + (x2 - x1) * (y - y1) / (y2 - y1) - x;
@@ -225,16 +228,14 @@ void MarkPolyobjPoint(double x, double y)
     double y2 = best_match->end->y_;
 
 #if DEBUG_POLYOBJ
-    LogDebug("  Closest line was %d Y=%1.0f..%1.0f (dist=%1.1f)\n",
-             best_match->index, y1, y2, best_dist);
+    LogDebug("  Closest line was %d Y=%1.0f..%1.0f (dist=%1.1f)\n", best_match->index, y1, y2, best_dist);
 #endif
 
     /* sanity check: shouldn't be directly on the line */
 #if DEBUG_POLYOBJ
     if (fabs(best_dist) < kEpsilon)
     {
-        LogDebug("  Polyobj FAILURE: directly on the line (%d)\n",
-                 best_match->index);
+        LogDebug("  Polyobj FAILURE: directly on the line (%d)\n", best_match->index);
     }
 #endif
 
@@ -247,8 +248,7 @@ void MarkPolyobjPoint(double x, double y)
         sector = best_match->left ? best_match->left->sector : nullptr;
 
 #if DEBUG_POLYOBJ
-    LogDebug("  Sector %d contains the polyobj.\n",
-             sector ? sector->index : -1);
+    LogDebug("  Sector %d contains the polyobj.\n", sector ? sector->index : -1);
 #endif
 
     if (sector == nullptr)
@@ -290,8 +290,7 @@ void DetectPolyobjSectors()
     {
         Linedef *L = level_linedefs[i];
 
-        if (L->type == kHexenPolyobjectStart ||
-            L->type == kHexenPolyobjectExplicit)
+        if (L->type == kHexenPolyobjectStart || L->type == kHexenPolyobjectExplicit)
             break;
     }
 
@@ -309,8 +308,7 @@ void DetectPolyobjSectors()
         double y = (double)T->y;
 
         // ignore everything except polyobj start spots
-        if (T->type != kZDoomPolyobjectSpawnType &&
-            T->type != kZDoomPolyobjectSpawnCrushType)
+        if (T->type != kZDoomPolyobjectSpawnType && T->type != kZDoomPolyobjectSpawnCrushType)
             continue;
 
 #if DEBUG_POLYOBJ
@@ -335,10 +333,12 @@ bool Vertex::Overlaps(const Vertex *other) const
 static inline int cmpVertex(const Vertex *A, const Vertex *B)
 {
     const double xdiff = (A->x_ - B->x_);
-    if (fabs(xdiff) > 0.0001) return (xdiff < 0 ? -1 : 1);
+    if (fabs(xdiff) > 0.0001)
+        return (xdiff < 0 ? -1 : 1);
 
     const double ydiff = (A->y_ - B->y_);
-    if (fabs(ydiff) > 0.0001) return (ydiff < 0 ? -1 : 1);
+    if (fabs(ydiff) > 0.0001)
+        return (ydiff < 0 ? -1 : 1);
 
     return 0;
 }
@@ -348,7 +348,8 @@ static int VertexCompare(const void *p1, const void *p2)
     int vert1 = ((const uint32_t *)p1)[0];
     int vert2 = ((const uint32_t *)p2)[0];
 
-    if (vert1 == vert2) return 0;
+    if (vert1 == vert2)
+        return 0;
 
     Vertex *A = level_vertices[vert1];
     Vertex *B = level_vertices[vert2];
@@ -359,11 +360,11 @@ static int VertexCompare(const void *p1, const void *p2)
 void DetectOverlappingVertices(void)
 {
     int       i;
-    uint32_t *array =
-        (uint32_t *)UtilCalloc(level_vertices.size() * sizeof(uint32_t));
+    uint32_t *array = (uint32_t *)UtilCalloc(level_vertices.size() * sizeof(uint32_t));
 
     // sort array of indices
-    for (i = 0; i < level_vertices.size(); i++) array[i] = i;
+    for (i = 0; i < level_vertices.size(); i++)
+        array[i] = i;
 
     qsort(array, level_vertices.size(), sizeof(uint32_t), VertexCompare);
 
@@ -393,9 +394,15 @@ void DetectOverlappingVertices(void)
     {
         Linedef *L = level_linedefs[i];
 
-        while (L->start->overlap_) { L->start = L->start->overlap_; }
+        while (L->start->overlap_)
+        {
+            L->start = L->start->overlap_;
+        }
 
-        while (L->end->overlap_) { L->end = L->end->overlap_; }
+        while (L->end->overlap_)
+        {
+            L->end = L->end->overlap_;
+        }
     }
 }
 
@@ -410,7 +417,8 @@ void PruneVerticesAtEnd(void)
     {
         Vertex *V = level_vertices[i];
 
-        if (V->is_used_) break;
+        if (V->is_used_)
+            break;
 
         UtilFree(V);
 
@@ -433,8 +441,7 @@ static inline int LineVertexLowest(const Linedef *L)
     // line is vertical, then the bottom-most) => 0 for start, 1 for end.
 
     return ((int)L->start->x_ < (int)L->end->x_ ||
-            ((int)L->start->x_ == (int)L->end->x_ &&
-             (int)L->start->y_ < (int)L->end->y_))
+            ((int)L->start->x_ == (int)L->end->x_ && (int)L->start->y_ < (int)L->end->y_))
                ? 0
                : 1;
 }
@@ -444,7 +451,8 @@ static int LineStartCompare(const void *p1, const void *p2)
     int line1 = ((const int *)p1)[0];
     int line2 = ((const int *)p2)[0];
 
-    if (line1 == line2) return 0;
+    if (line1 == line2)
+        return 0;
 
     Linedef *A = level_linedefs[line1];
     Linedef *B = level_linedefs[line2];
@@ -461,7 +469,8 @@ static int LineEndCompare(const void *p1, const void *p2)
     int line1 = ((const int *)p1)[0];
     int line2 = ((const int *)p2)[0];
 
-    if (line1 == line2) return 0;
+    if (line1 == line2)
+        return 0;
 
     Linedef *A = level_linedefs[line1];
     Linedef *B = level_linedefs[line2];
@@ -485,7 +494,8 @@ void DetectOverlappingLines(void)
     int  count = 0;
 
     // sort array of indices
-    for (i = 0; i < level_linedefs.size(); i++) array[i] = i;
+    for (i = 0; i < level_linedefs.size(); i++)
+        array[i] = i;
 
     qsort(array, level_linedefs.size(), sizeof(int), LineStartCompare);
 
@@ -495,7 +505,8 @@ void DetectOverlappingLines(void)
 
         for (j = i + 1; j < level_linedefs.size(); j++)
         {
-            if (LineStartCompare(array + i, array + j) != 0) break;
+            if (LineStartCompare(array + i, array + j) != 0)
+                break;
 
             if (LineEndCompare(array + i, array + j) == 0)
             {
@@ -528,7 +539,9 @@ void Vertex::AddWallTip(double dx, double dy, bool open_left, bool open_right)
     tip->open_right = open_right;
 
     // find the correct place (order is increasing angle)
-    for (after = tip_set_; after && after->next; after = after->next) {}
+    for (after = tip_set_; after && after->next; after = after->next)
+    {
+    }
 
     while (after && tip->angle + kEpsilon < after->angle)
         after = after->previous;
@@ -539,13 +552,15 @@ void Vertex::AddWallTip(double dx, double dy, bool open_left, bool open_right)
 
     if (after)
     {
-        if (after->next) after->next->previous = tip;
+        if (after->next)
+            after->next->previous = tip;
 
         after->next = tip;
     }
     else
     {
-        if (tip_set_ != nullptr) tip_set_->previous = tip;
+        if (tip_set_ != nullptr)
+            tip_set_->previous = tip;
 
         tip_set_ = tip;
     }
@@ -557,7 +572,8 @@ void CalculateWallTips()
     {
         const Linedef *L = level_linedefs[i];
 
-        if (L->overlap || L->zero_length) continue;
+        if (L->overlap || L->zero_length)
+            continue;
 
         double x1 = L->start->x_;
         double y1 = L->start->y_;
@@ -583,8 +599,7 @@ void CalculateWallTips()
 
         for (WallTip *tip = V->tip_set; tip; tip = tip->next)
         {
-            LogDebug("  Angle=%1.1f left=%d right=%d\n", tip->angle,
-                     tip->open_left ? 1 : 0, tip->open_right ? 1 : 0);
+            LogDebug("  Angle=%1.1f left=%d right=%d\n", tip->angle, tip->open_left ? 1 : 0, tip->open_right ? 1 : 0);
         }
     }
 #endif
@@ -611,10 +626,8 @@ Vertex *NewVertexFromSplitSeg(Seg *seg, double x, double y)
     }
     else
     {
-        const Sidedef *front =
-            seg->side_ ? seg->linedef_->left : seg->linedef_->right;
-        const Sidedef *back =
-            seg->side_ ? seg->linedef_->right : seg->linedef_->left;
+        const Sidedef *front = seg->side_ ? seg->linedef_->left : seg->linedef_->right;
+        const Sidedef *back  = seg->side_ ? seg->linedef_->right : seg->linedef_->left;
 
         bool left  = (back != nullptr) && (back->sector != nullptr);
         bool right = (front != nullptr) && (front->sector != nullptr);
@@ -678,8 +691,7 @@ bool Vertex::CheckOpen(double dx, double dy) const
 
     for (tip = tip_set_; tip; tip = tip->next)
     {
-        if (fabs(tip->angle - angle) < kEpsilon ||
-            fabs(tip->angle - angle) > (360.0 - kEpsilon))
+        if (fabs(tip->angle - angle) < kEpsilon || fabs(tip->angle - angle) > (360.0 - kEpsilon))
         {
             // found one, hence closed
             return false;
@@ -711,7 +723,7 @@ bool Vertex::CheckOpen(double dx, double dy) const
     return true;
 }
 
-}  // namespace ajbsp
+} // namespace ajbsp
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

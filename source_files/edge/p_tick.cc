@@ -53,7 +53,8 @@ extern ConsoleVariable double_framerate;
 //
 void MapObjectTicker(bool extra_tic)
 {
-    if (paused) return;
+    if (paused)
+        return;
 
     // pause if in menu and at least one tic has been run
     if (!network_game && (menu_active || rts_menu_active) &&
@@ -83,24 +84,29 @@ void MapObjectTicker(bool extra_tic)
     else
     {
         for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
-            if (players[pnum]) PlayerThink(players[pnum], extra_tic);
+            if (players[pnum])
+                PlayerThink(players[pnum], extra_tic);
     }
 
-    if (!extra_tic || !double_framerate.d_) RunScriptTriggers();
+    if (!extra_tic || !double_framerate.d_)
+        RunScriptTriggers();
 
     RunForces(extra_tic);
     RunMapObjectThinkers(extra_tic);
 
-    if (!extra_tic || !double_framerate.d_) RunLights();
+    if (!extra_tic || !double_framerate.d_)
+        RunLights();
 
     RunActivePlanes();
     RunActiveSliders();
 
-    if (!extra_tic || !double_framerate.d_) RunAmbientSounds();
+    if (!extra_tic || !double_framerate.d_)
+        RunAmbientSounds();
 
     UpdateSpecials(extra_tic);
 
-    if (extra_tic && double_framerate.d_) return;
+    if (extra_tic && double_framerate.d_)
+        return;
 
     ItemRespawn();
 
@@ -124,7 +130,8 @@ void HubFastForward(void)
         RunActiveSliders();
     }
 
-    for (int k = 0; k < kTicRate / 3; k++) MapObjectTicker(false);
+    for (int k = 0; k < kTicRate / 3; k++)
+        MapObjectTicker(false);
 
     fast_forward_active = false;
 }

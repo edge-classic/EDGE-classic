@@ -29,7 +29,7 @@ enum LineTrigger
     kLineTriggerShootable,
     kLineTriggerWalkable,
     kLineTriggerPushable,
-    kLineTriggerManual,  // same as pushable, but ignore any tag
+    kLineTriggerManual, // same as pushable, but ignore any tag
     kLineTriggerAny
 };
 
@@ -39,22 +39,22 @@ enum TriggerActivator
     kTriggerActivatorPlayer  = 1,
     kTriggerActivatorMonster = 2,
     kTriggerActivatorOther   = 4,
-    kTriggerActivatorNoBot   = 8  // -AJA- 2009/10/17
+    kTriggerActivatorNoBot   = 8 // -AJA- 2009/10/17
 };
 
 enum TriggerHeightReference
 {
-    kTriggerHeightReferenceAbsolute = 0,  // Absolute from current position
-    kTriggerHeightReferenceCurrent,       // Measure from current sector height
-    kTriggerHeightReferenceSurrounding,   // Measure from surrounding heights
+    kTriggerHeightReferenceAbsolute = 0,      // Absolute from current position
+    kTriggerHeightReferenceCurrent,           // Measure from current sector height
+    kTriggerHeightReferenceSurrounding,       // Measure from surrounding heights
     kTriggerHeightReferenceLowestLowTexture,
-    kTriggerHeightReferenceTriggeringLinedef,  // Use the triggering linedef
+    kTriggerHeightReferenceTriggeringLinedef, // Use the triggering linedef
     // additive flags
     kTriggerHeightReferenceMask    = 0x00FF,
-    kTriggerHeightReferenceCeiling = 0x0100,  // otherwise floor
-    kTriggerHeightReferenceHighest = 0x0200,  // otherwise lowest
-    kTriggerHeightReferenceNext    = 0x0400,  // otherwise absolute
-    kTriggerHeightReferenceInclude = 0x0800,  // otherwise excludes self
+    kTriggerHeightReferenceCeiling = 0x0100, // otherwise floor
+    kTriggerHeightReferenceHighest = 0x0200, // otherwise lowest
+    kTriggerHeightReferenceNext    = 0x0400, // otherwise absolute
+    kTriggerHeightReferenceInclude = 0x0800, // otherwise excludes self
 };
 
 // Movement type
@@ -67,8 +67,8 @@ enum PlaneMoverType
     kPlaneMoverPlatform,
     kPlaneMoverStairs,
     kPlaneMoverStop,
-    kPlaneMoverToggle,    // -AJA- 2004/10/07: added.
-    kPlaneMoverElevator,  // -AJA- 2006/11/17: added.
+    kPlaneMoverToggle,   // -AJA- 2004/10/07: added.
+    kPlaneMoverElevator, // -AJA- 2006/11/17: added.
 };
 
 enum DoorKeyType
@@ -106,8 +106,7 @@ enum DoorKeyType
 
 inline int ExpandKeyBits(int set)
 {
-    return ((set) | (((set)&kDoorKeyCardBits) << 4) |
-            (((set)&kDoorKeySkullBits) >> 4));
+    return ((set) | (((set)&kDoorKeyCardBits) << 4) | (((set)&kDoorKeySkullBits) >> 4));
 }
 
 enum ExitType
@@ -166,12 +165,9 @@ enum ExtraFloorType
     kExtraFloorTypeBoomTex = 0x1000
 };
 
-constexpr ExtraFloorType kExtraFloorThinDefaults =
-    ((ExtraFloorType)(kExtraFloorTypePresent | 0));
-constexpr ExtraFloorType kExtraFloorThickDefaults =
-    ((ExtraFloorType)(kExtraFloorTypePresent | kExtraFloorTypeThick));
-constexpr ExtraFloorType kExtraFloorLiquidDefaults =
-    ((ExtraFloorType)(kExtraFloorTypePresent | kExtraFloorTypeLiquid));
+constexpr ExtraFloorType kExtraFloorThinDefaults   = ((ExtraFloorType)(kExtraFloorTypePresent | 0));
+constexpr ExtraFloorType kExtraFloorThickDefaults  = ((ExtraFloorType)(kExtraFloorTypePresent | kExtraFloorTypeThick));
+constexpr ExtraFloorType kExtraFloorLiquidDefaults = ((ExtraFloorType)(kExtraFloorTypePresent | kExtraFloorTypeLiquid));
 
 enum ExtraFloorControl
 {
@@ -182,15 +178,15 @@ enum ExtraFloorControl
 
 class ExtraFloorDefinition
 {
-   public:
+  public:
     ExtraFloorDefinition();
     ExtraFloorDefinition(ExtraFloorDefinition &rhs);
     ~ExtraFloorDefinition();
 
-   private:
+  private:
     void Copy(ExtraFloorDefinition &src);
 
-   public:
+  public:
     void                  Default(void);
     ExtraFloorDefinition &operator=(ExtraFloorDefinition &src);
 
@@ -200,7 +196,7 @@ class ExtraFloorDefinition
 
 class PlaneMoverDefinition
 {
-   public:
+  public:
     PlaneMoverDefinition();
     PlaneMoverDefinition(PlaneMoverDefinition &rhs);
     ~PlaneMoverDefinition();
@@ -215,10 +211,10 @@ class PlaneMoverDefinition
         kTotalPlaneMoverDefaultTypes
     };
 
-   private:
+  private:
     void Copy(PlaneMoverDefinition &src);
 
-   public:
+  public:
     void                  Default(PlaneMoverDefault def);
     PlaneMoverDefinition &operator=(PlaneMoverDefinition &rhs);
 
@@ -287,15 +283,15 @@ enum SlidingDoorType
 //
 class SlidingDoor
 {
-   public:
+  public:
     SlidingDoor();
     SlidingDoor(SlidingDoor &rhs);
     ~SlidingDoor();
 
-   private:
+  private:
     void Copy(SlidingDoor &src);
 
-   public:
+  public:
     void         Default(void);
     SlidingDoor &operator=(SlidingDoor &rhs);
 
@@ -324,15 +320,15 @@ class SlidingDoor
 
 class DonutDefinition
 {
-   public:
+  public:
     DonutDefinition();
     DonutDefinition(DonutDefinition &rhs);
     ~DonutDefinition();
 
-   private:
+  private:
     void Copy(DonutDefinition &src);
 
-   public:
+  public:
     void             Default(void);
     DonutDefinition &operator=(DonutDefinition &rhs);
 
@@ -360,29 +356,28 @@ class DonutDefinition
 enum TeleportSpecial
 {
     kTeleportSpecialNone       = 0,
-    kTeleportSpecialRelative   = 0x0001,  // keep same relative angle
-    kTeleportSpecialSameHeight = 0x0002,  // keep same height off the floor
-    kTeleportSpecialSameSpeed  = 0x0004,  // keep same momentum
-    kTeleportSpecialSameOffset = 0x0008,  // keep same X/Y offset along line
-    kTeleportSpecialSameAbsDir =
-        0x0010,                       // keep same _absolute_ angle (DEPRECATED)
-    kTeleportSpecialRotate = 0x0020,  // rotate by target angle     (DEPRECATED)
-    kTeleportSpecialLine   = 0x0100,  // target is a line (not a thing)
-    kTeleportSpecialFlipped = 0x0200,  // pretend target was flipped 180 degrees
-    kTeleportSpecialSilent  = 0x0400   // no fog or sound
+    kTeleportSpecialRelative   = 0x0001, // keep same relative angle
+    kTeleportSpecialSameHeight = 0x0002, // keep same height off the floor
+    kTeleportSpecialSameSpeed  = 0x0004, // keep same momentum
+    kTeleportSpecialSameOffset = 0x0008, // keep same X/Y offset along line
+    kTeleportSpecialSameAbsDir = 0x0010, // keep same _absolute_ angle (DEPRECATED)
+    kTeleportSpecialRotate     = 0x0020, // rotate by target angle     (DEPRECATED)
+    kTeleportSpecialLine       = 0x0100, // target is a line (not a thing)
+    kTeleportSpecialFlipped    = 0x0200, // pretend target was flipped 180 degrees
+    kTeleportSpecialSilent     = 0x0400  // no fog or sound
 };
 
 class TeleportDefinition
 {
-   public:
+  public:
     TeleportDefinition();
     TeleportDefinition(TeleportDefinition &rhs);
     ~TeleportDefinition();
 
-   private:
+  private:
     void Copy(TeleportDefinition &src);
 
-   public:
+  public:
     void                Default(void);
     TeleportDefinition &operator=(TeleportDefinition &rhs);
 
@@ -395,11 +390,11 @@ class TeleportDefinition
     bool teleport_;
 
     // effect object spawned when going in...
-    const MapObjectDefinition *inspawnobj_;  // FIXME! Do mobjtypes.Lookup()?
+    const MapObjectDefinition *inspawnobj_; // FIXME! Do mobjtypes.Lookup()?
     std::string                inspawnobj_ref_;
 
     // effect object spawned when going out...
-    const MapObjectDefinition *outspawnobj_;  // FIXME! Do mobjtypes.Lookup()?
+    const MapObjectDefinition *outspawnobj_; // FIXME! Do mobjtypes.Lookup()?
     std::string                outspawnobj_ref_;
 
     // Teleport delay
@@ -429,15 +424,15 @@ enum LightSpecialType
 // --> Light information class
 class LightSpecialDefinition
 {
-   public:
+  public:
     LightSpecialDefinition();
     LightSpecialDefinition(LightSpecialDefinition &rhs);
     ~LightSpecialDefinition();
 
-   private:
+  private:
     void Copy(LightSpecialDefinition &src);
 
-   public:
+  public:
     void                    Default(void);
     LightSpecialDefinition &operator=(LightSpecialDefinition &rhs);
 
@@ -462,15 +457,15 @@ class LightSpecialDefinition
 
 class LadderDefinition
 {
-   public:
+  public:
     LadderDefinition();
     LadderDefinition(LadderDefinition &rhs);
     ~LadderDefinition();
 
-   private:
+  private:
     void Copy(LadderDefinition &src);
 
-   public:
+  public:
     void              Default(void);
     LadderDefinition &operator=(LadderDefinition &rhs);
 
@@ -506,11 +501,9 @@ enum LineEffectType
     // block land monsters (MBF21)
     kLineEffectTypeBlockGroundedMonsters = (1 << 11),
     // block players (MBF21)
-    kLineEffectTypeBlockPlayers = (1 << 12),
-    kLineEffectTypeStretchWidth =
-        (1 << 13),  // stretch the texture horizontally to line length
-    kLineEffectTypeStretchHeight =
-        (1 << 14),  // stretch the texture vertically to line length
+    kLineEffectTypeBlockPlayers  = (1 << 12),
+    kLineEffectTypeStretchWidth  = (1 << 13), // stretch the texture horizontally to line length
+    kLineEffectTypeStretchHeight = (1 << 14), // stretch the texture vertically to line length
 };
 
 enum SectorEffectType
@@ -576,11 +569,9 @@ enum ScrollingPart
 };
 
 constexpr ScrollingPart kScrollingPartRight =
-    ((ScrollingPart)(kScrollingPartRightUpper | kScrollingPartRightMiddle |
-                     kScrollingPartRightLower));
+    ((ScrollingPart)(kScrollingPartRightUpper | kScrollingPartRightMiddle | kScrollingPartRightLower));
 constexpr ScrollingPart kScrollingPartLeft =
-    ((ScrollingPart)(kScrollingPartLeftUpper | kScrollingPartLeftMiddle |
-                     kScrollingPartLeftLower));
+    ((ScrollingPart)(kScrollingPartLeftUpper | kScrollingPartLeftMiddle | kScrollingPartLeftLower));
 
 // -AJA- 1999/12/07: Linedef special flags
 enum LineSpecial
@@ -604,11 +595,11 @@ enum BoomScrollerType
 
 class LineType
 {
-   public:
+  public:
     LineType();
     ~LineType();
 
-   public:
+  public:
     void Default(void);
     void CopyDetail(LineType &src);
 
@@ -732,9 +723,12 @@ class LineType
     // -AJA- 2007/07/05: color for effects (e.g. MIRRORs)
     RGBAColor fx_color_;
 
-   private:
+  private:
     // disable copy construct and assignment operator
-    explicit LineType(LineType &rhs) { (void)rhs; }
+    explicit LineType(LineType &rhs)
+    {
+        (void)rhs;
+    }
     LineType &operator=(LineType &rhs)
     {
         (void)rhs;
@@ -746,14 +740,14 @@ class LineType
 
 class LineTypeContainer : public std::vector<LineType *>
 {
-   public:
+  public:
     LineTypeContainer();
     ~LineTypeContainer();
 
-   private:
+  private:
     LineType *lookup_cache_[kLookupCacheSize];
 
-   public:
+  public:
     LineType *Lookup(int num);
     void      Reset();
 };
@@ -798,11 +792,11 @@ enum SectorFlag
 
 class SectorType
 {
-   public:
+  public:
     SectorType();
     ~SectorType();
 
-   public:
+  public:
     void Default(void);
     void CopyDetail(SectorType &src);
 
@@ -867,9 +861,12 @@ class SectorType
     RGBAColor fog_color_;
     float     fog_density_;
 
-   private:
+  private:
     // disable copy construct and assignment operator
-    explicit SectorType(SectorType &rhs) { (void)rhs; }
+    explicit SectorType(SectorType &rhs)
+    {
+        (void)rhs;
+    }
     SectorType &operator=(SectorType &rhs)
     {
         (void)rhs;
@@ -879,22 +876,22 @@ class SectorType
 
 class SectorTypeContainer : public std::vector<SectorType *>
 {
-   public:
+  public:
     SectorTypeContainer();
     ~SectorTypeContainer();
 
-   private:
+  private:
     SectorType *lookup_cache_[kLookupCacheSize];
 
-   public:
+  public:
     SectorType *Lookup(int num);
     void        Reset();
 };
 
 /* EXTERNALISATIONS */
 
-extern LineTypeContainer   linetypes;    // -ACB- 2004/07/05 Implemented
-extern SectorTypeContainer sectortypes;  // -ACB- 2004/07/05 Implemented
+extern LineTypeContainer   linetypes;   // -ACB- 2004/07/05 Implemented
+extern SectorTypeContainer sectortypes; // -ACB- 2004/07/05 Implemented
 
 void DDF_ReadLines(const std::string &data);
 void DDF_ReadSectors(const std::string &data);

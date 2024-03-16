@@ -37,27 +37,35 @@
 namespace dehacked
 {
 
-InputBuffer::InputBuffer(const char *data, int length)
-    : data_(data), pointer_(data), length_(length)
+InputBuffer::InputBuffer(const char *data, int length) : data_(data), pointer_(data), length_(length)
 {
     if (length_ < 0)
-        FatalError("Dehacked: Error - Illegal length of lump (%d bytes)\n",
-                   length_);
+        FatalError("Dehacked: Error - Illegal length of lump (%d bytes)\n", length_);
 }
 
-InputBuffer::~InputBuffer() {}
+InputBuffer::~InputBuffer()
+{
+}
 
-bool InputBuffer::EndOfFile() { return (pointer_ >= data_ + length_); }
+bool InputBuffer::EndOfFile()
+{
+    return (pointer_ >= data_ + length_);
+}
 
-bool InputBuffer::Error() { return false; }
+bool InputBuffer::Error()
+{
+    return false;
+}
 
 int InputBuffer::Read(void *buffer, int count)
 {
     int available = data_ + length_ - pointer_;
 
-    if (available < count) count = available;
+    if (available < count)
+        count = available;
 
-    if (count <= 0) return 0;
+    if (count <= 0)
+        return 0;
 
     memcpy(buffer, pointer_, count);
 
@@ -68,7 +76,8 @@ int InputBuffer::Read(void *buffer, int count)
 
 int InputBuffer::GetCharacter()
 {
-    if (EndOfFile()) return EOF;
+    if (EndOfFile())
+        return EOF;
 
     return *pointer_++;
 }
@@ -76,21 +85,24 @@ int InputBuffer::GetCharacter()
 void InputBuffer::UngetCharacter(int character)
 {
     // NOTE: assumes c == last character read
-    (void)character;  // what was supposed to be done with this? - Dasho
+    (void)character; // what was supposed to be done with this? - Dasho
 
-    if (pointer_ > data_) pointer_--;
+    if (pointer_ > data_)
+        pointer_--;
 }
 
 bool InputBuffer::IsBinary() const
 {
-    if (length_ == 0) return false;
+    if (length_ == 0)
+        return false;
 
     int test_length = (length_ > 260) ? 256 : ((length_ * 3 + 1) / 4);
 
     for (; test_length > 0; test_length--)
-        if (data_[test_length - 1] == 0) return true;
+        if (data_[test_length - 1] == 0)
+            return true;
 
     return false;
 }
 
-}  // namespace dehacked
+} // namespace dehacked

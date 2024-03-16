@@ -87,52 +87,68 @@ extern ECFrameStats ec_frame_stats;
 
 class RenderState
 {
-   public:
+  public:
     void Enable(GLenum cap, bool enabled = true)
     {
         switch (cap)
         {
-            case GL_TEXTURE_2D:
-                if (enable_texture_2d_[active_texture_ - GL_TEXTURE0] ==
-                    enabled)
-                    return;
-                enable_texture_2d_[active_texture_ - GL_TEXTURE0] = enabled;
-                break;
-            case GL_FOG:
-                if (enable_fog_ == enabled) return;
-                enable_fog_ = enabled;
-                break;
-            case GL_ALPHA_TEST:
-                if (enable_alpha_test_ == enabled) return;
-                enable_alpha_test_ = enabled;
-                break;
-            case GL_BLEND:
-                if (enable_blend_ == enabled) return;
-                enable_blend_ = enabled;
-                break;
-            case GL_CULL_FACE:
-                if (enable_cull_face_ == enabled) return;
-                enable_cull_face_ = enabled;
-                break;
-            case GL_SCISSOR_TEST:
-                if (enable_scissor_test_ == enabled) return;
-                enable_scissor_test_ = enabled;
-                break;
-            default:
-                FatalError("Unknown GL State %i", cap);
+        case GL_TEXTURE_2D:
+            if (enable_texture_2d_[active_texture_ - GL_TEXTURE0] == enabled)
+                return;
+            enable_texture_2d_[active_texture_ - GL_TEXTURE0] = enabled;
+            break;
+        case GL_FOG:
+            if (enable_fog_ == enabled)
+                return;
+            enable_fog_ = enabled;
+            break;
+        case GL_ALPHA_TEST:
+            if (enable_alpha_test_ == enabled)
+                return;
+            enable_alpha_test_ = enabled;
+            break;
+        case GL_BLEND:
+            if (enable_blend_ == enabled)
+                return;
+            enable_blend_ = enabled;
+            break;
+        case GL_CULL_FACE:
+            if (enable_cull_face_ == enabled)
+                return;
+            enable_cull_face_ = enabled;
+            break;
+        case GL_SCISSOR_TEST:
+            if (enable_scissor_test_ == enabled)
+                return;
+            enable_scissor_test_ = enabled;
+            break;
+        default:
+            FatalError("Unknown GL State %i", cap);
         }
 
-        if (enabled) { glEnable(cap); }
-        else { glDisable(cap); }
+        if (enabled)
+        {
+            glEnable(cap);
+        }
+        else
+        {
+            glDisable(cap);
+        }
 
         ec_frame_stats.draw_state_change++;
     }
 
-    void Disable(GLenum cap) { Enable(cap, false); }
+    void Disable(GLenum cap)
+    {
+        Enable(cap, false);
+    }
 
     void DepthMask(bool enable)
     {
-        if (depth_mask_ == enable) { return; }
+        if (depth_mask_ == enable)
+        {
+            return;
+        }
 
         depth_mask_ = enable;
         glDepthMask(enable ? GL_TRUE : GL_FALSE);
@@ -141,7 +157,10 @@ class RenderState
 
     void CullFace(GLenum mode)
     {
-        if (cull_face_ == mode) { return; }
+        if (cull_face_ == mode)
+        {
+            return;
+        }
 
         cull_face_ = mode;
         glCullFace(mode);
@@ -150,8 +169,7 @@ class RenderState
 
     void AlphaFunction(GLenum func, GLfloat ref)
     {
-        if (func == alpha_function_ &&
-            AlmostEquals(ref, alpha_function_reference_))
+        if (func == alpha_function_ && AlmostEquals(ref, alpha_function_reference_))
         {
             return;
         }
@@ -165,7 +183,10 @@ class RenderState
 
     void ActiveTexture(GLenum activeTexture)
     {
-        if (activeTexture == active_texture_) { return; }
+        if (activeTexture == active_texture_)
+        {
+            return;
+        }
 
         active_texture_ = activeTexture;
         glActiveTexture(active_texture_);
@@ -175,7 +196,10 @@ class RenderState
     void BindTexture(GLuint textureid)
     {
         GLuint index = active_texture_ - GL_TEXTURE0;
-        if (bind_texture_2d_[index] == textureid) { return; }
+        if (bind_texture_2d_[index] == textureid)
+        {
+            return;
+        }
 
         bind_texture_2d_[index] = textureid;
         glBindTexture(GL_TEXTURE_2D, textureid);
@@ -198,9 +222,7 @@ class RenderState
 
     void ClearColor(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha)
     {
-        if (AlmostEquals(red, clear_red_) &&
-            AlmostEquals(green, clear_green_) &&
-            AlmostEquals(blue, clear_blue_) &&
+        if (AlmostEquals(red, clear_red_) && AlmostEquals(green, clear_green_) && AlmostEquals(blue, clear_blue_) &&
             AlmostEquals(alpha, clear_alpha_))
         {
             return;
@@ -216,7 +238,10 @@ class RenderState
 
     void FogMode(GLint fogMode)
     {
-        if (fog_mode_ == fogMode) { return; }
+        if (fog_mode_ == fogMode)
+        {
+            return;
+        }
 
         fog_mode_ = fogMode;
         glFogi(GL_FOG_MODE, fog_mode_);
@@ -225,10 +250,8 @@ class RenderState
 
     void FogColor(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha)
     {
-        if (AlmostEquals(red, fog_color_[0]) &&
-            AlmostEquals(green, fog_color_[1]) &&
-            AlmostEquals(blue, fog_color_[2]) &&
-            AlmostEquals(alpha, fog_color_[3]))
+        if (AlmostEquals(red, fog_color_[0]) && AlmostEquals(green, fog_color_[1]) &&
+            AlmostEquals(blue, fog_color_[2]) && AlmostEquals(alpha, fog_color_[3]))
         {
             return;
         }
@@ -244,7 +267,10 @@ class RenderState
 
     void FogStart(GLfloat start)
     {
-        if (fog_start_ == start) { return; }
+        if (fog_start_ == start)
+        {
+            return;
+        }
 
         fog_start_ = start;
         glFogf(GL_FOG_START, fog_start_);
@@ -253,7 +279,10 @@ class RenderState
 
     void FogEnd(GLfloat end)
     {
-        if (fog_end_ == end) { return; }
+        if (fog_end_ == end)
+        {
+            return;
+        }
 
         fog_end_ = end;
         glFogf(GL_FOG_END, fog_end_);
@@ -262,7 +291,10 @@ class RenderState
 
     void FogDensity(GLfloat density)
     {
-        if (fog_density_ == density) { return; }
+        if (fog_density_ == density)
+        {
+            return;
+        }
 
         fog_density_ = density;
         glFogf(GL_FOG_DENSITY, fog_density_);
@@ -271,8 +303,7 @@ class RenderState
 
     void BlendFunction(GLenum sfactor, GLenum dfactor)
     {
-        if (blend_source_factor_ == sfactor &&
-            blend_destination_factor_ == dfactor)
+        if (blend_source_factor_ == sfactor && blend_destination_factor_ == dfactor)
         {
             return;
         }
@@ -287,11 +318,13 @@ class RenderState
     {
         GLuint index = active_texture_ - GL_TEXTURE0;
 
-        if (texture_environment_mode_[index] == param) { return; }
+        if (texture_environment_mode_[index] == param)
+        {
+            return;
+        }
 
         texture_environment_mode_[index] = param;
-        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,
-                  texture_environment_mode_[index]);
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, texture_environment_mode_[index]);
         ec_frame_stats.draw_state_change++;
     }
 
@@ -299,11 +332,13 @@ class RenderState
     {
         GLuint index = active_texture_ - GL_TEXTURE0;
 
-        if (texture_environment_combine_rgb_[index] == param) { return; }
+        if (texture_environment_combine_rgb_[index] == param)
+        {
+            return;
+        }
 
         texture_environment_combine_rgb_[index] = param;
-        glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB,
-                  texture_environment_combine_rgb_[index]);
+        glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, texture_environment_combine_rgb_[index]);
         ec_frame_stats.draw_state_change++;
     }
 
@@ -311,11 +346,13 @@ class RenderState
     {
         GLuint index = active_texture_ - GL_TEXTURE0;
 
-        if (texture_environment_source_0_rgb_[index] == param) { return; }
+        if (texture_environment_source_0_rgb_[index] == param)
+        {
+            return;
+        }
 
         texture_environment_source_0_rgb_[index] = param;
-        glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB,
-                  texture_environment_source_0_rgb_[index]);
+        glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, texture_environment_source_0_rgb_[index]);
         ec_frame_stats.draw_state_change++;
     }
 
@@ -323,11 +360,13 @@ class RenderState
     {
         GLuint index = active_texture_ - GL_TEXTURE0;
 
-        if (texture_wrap_t_[index] == param) { return; }
+        if (texture_wrap_t_[index] == param)
+        {
+            return;
+        }
 
         texture_wrap_t_[index] = param;
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
-                        texture_wrap_t_[index]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_wrap_t_[index]);
         ec_frame_stats.draw_state_change++;
     }
 
@@ -455,7 +494,7 @@ class RenderState
 
     int frameStateChanges_ = 0;
 
-   private:
+  private:
     bool   enable_blend_;
     GLenum blend_source_factor_;
     GLenum blend_destination_factor_;

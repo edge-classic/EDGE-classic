@@ -28,7 +28,7 @@
 
 static SectorType *dynamic_sector;
 
-SectorTypeContainer sectortypes;  // <-- User-defined
+SectorTypeContainer sectortypes; // <-- User-defined
 
 static SectorType *default_sector;
 
@@ -50,14 +50,12 @@ static const DDFCommandList sect_commands[] = {
     DDF_FIELD("LIGHT_TYPE", dummy_sector, l_.type_, DDF_SectGetLighttype),
     DDF_FIELD("LIGHT_LEVEL", dummy_sector, l_.level_, DDF_MainGetNumeric),
     DDF_FIELD("LIGHT_DARKTIME", dummy_sector, l_.darktime_, DDF_MainGetTime),
-    DDF_FIELD("LIGHT_BRIGHTTIME", dummy_sector, l_.brighttime_,
-              DDF_MainGetTime),
+    DDF_FIELD("LIGHT_BRIGHTTIME", dummy_sector, l_.brighttime_, DDF_MainGetTime),
     DDF_FIELD("LIGHT_CHANCE", dummy_sector, l_.chance_, DDF_MainGetPercent),
     DDF_FIELD("LIGHT_SYNC", dummy_sector, l_.sync_, DDF_MainGetTime),
     DDF_FIELD("LIGHT_STEP", dummy_sector, l_.step_, DDF_MainGetNumeric),
     DDF_FIELD("EXIT", dummy_sector, e_exit_, DDF_SectGetExit),
-    DDF_FIELD("USE_COLOURMAP", dummy_sector, use_colourmap_,
-              DDF_MainGetColourmap),
+    DDF_FIELD("USE_COLOURMAP", dummy_sector, use_colourmap_, DDF_MainGetColourmap),
     DDF_FIELD("GRAVITY", dummy_sector, gravity_, DDF_MainGetFloat),
     DDF_FIELD("FRICTION", dummy_sector, friction_, DDF_MainGetFloat),
     DDF_FIELD("VISCOSITY", dummy_sector, viscosity_, DDF_MainGetFloat),
@@ -140,8 +138,7 @@ static void SectorDoTemplate(const char *contents)
 //
 // SectorParseField
 //
-static void SectorParseField(const char *field, const char *contents, int index,
-                             bool is_last)
+static void SectorParseField(const char *field, const char *contents, int index, bool is_last)
 {
 #if (DEBUG_DDF)
     LogDebug("SECTOR_PARSE: %s = %s;\n", field, contents);
@@ -154,16 +151,14 @@ static void SectorParseField(const char *field, const char *contents, int index,
     }
 
     // backwards compatibility...
-    if (DDF_CompareName(field, "CRUSH") == 0 ||
-        DDF_CompareName(field, "CRUSH_DAMAGE") == 0)
+    if (DDF_CompareName(field, "CRUSH") == 0 || DDF_CompareName(field, "CRUSH_DAMAGE") == 0)
     {
         DDF_SectMakeCrush(contents);
         return;
     }
 
-    if (DDF_MainParseField(sect_commands, field, contents,
-                           (uint8_t *)dynamic_sector))
-        return;  // OK
+    if (DDF_MainParseField(sect_commands, field, contents, (uint8_t *)dynamic_sector))
+        return; // OK
 
     DDF_WarnError("Unknown sectors.ddf command: %s\n", field);
 }
@@ -215,22 +210,23 @@ void DDF_SectorInit(void)
 //
 // DDF_SectorCleanUp
 //
-void DDF_SectorCleanUp(void) { sectortypes.shrink_to_fit(); }
+void DDF_SectorCleanUp(void)
+{
+    sectortypes.shrink_to_fit();
+}
 
 //----------------------------------------------------------------------------
 
-static DDFSpecialFlags sector_specials[] = {
-    { "WHOLE_REGION", kSectorFlagWholeRegion, 0 },
-    { "PROPORTIONAL", kSectorFlagProportional, 0 },
-    { "PUSH_ALL", kSectorFlagPushAll, 0 },
-    { "PUSH_CONSTANT", kSectorFlagPushConstant, 0 },
-    { "AIRLESS", kSectorFlagAirLess, 0 },
-    { "SWIM", kSectorFlagSwimming, 0 },
-    { "SUBMERGED_SFX", kSectorFlagSubmergedSFX, 0 },
-    { "VACUUM_SFX", kSectorFlagVacuumSFX, 0 },
-    { "REVERB_SFX", kSectorFlagReverbSFX, 0 },
-    { nullptr, 0, 0 }
-};
+static DDFSpecialFlags sector_specials[] = { { "WHOLE_REGION", kSectorFlagWholeRegion, 0 },
+                                             { "PROPORTIONAL", kSectorFlagProportional, 0 },
+                                             { "PUSH_ALL", kSectorFlagPushAll, 0 },
+                                             { "PUSH_CONSTANT", kSectorFlagPushConstant, 0 },
+                                             { "AIRLESS", kSectorFlagAirLess, 0 },
+                                             { "SWIM", kSectorFlagSwimming, 0 },
+                                             { "SUBMERGED_SFX", kSectorFlagSubmergedSFX, 0 },
+                                             { "VACUUM_SFX", kSectorFlagVacuumSFX, 0 },
+                                             { "REVERB_SFX", kSectorFlagReverbSFX, 0 },
+                                             { nullptr, 0, 0 } };
 
 //
 // DDF_SectGetSpecialFlags
@@ -243,35 +239,32 @@ void DDF_SectGetSpecialFlags(const char *info, void *storage)
 
     int flag_value;
 
-    switch (DDF_MainCheckSpecialFlag(info, sector_specials, &flag_value, true,
-                                     false))
+    switch (DDF_MainCheckSpecialFlag(info, sector_specials, &flag_value, true, false))
     {
-        case kDDFCheckFlagPositive:
-            *special = (SectorFlag)(*special | flag_value);
+    case kDDFCheckFlagPositive:
+        *special = (SectorFlag)(*special | flag_value);
 
-            break;
+        break;
 
-        case kDDFCheckFlagNegative:
-            *special = (SectorFlag)(*special & ~flag_value);
+    case kDDFCheckFlagNegative:
+        *special = (SectorFlag)(*special & ~flag_value);
 
-            break;
+        break;
 
-        case kDDFCheckFlagUser:
-        case kDDFCheckFlagUnknown:
-            DDF_WarnError("Unknown sector special: %s", info);
-            break;
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDF_WarnError("Unknown sector special: %s", info);
+        break;
     }
 }
 
-static DDFSpecialFlags exit_types[] = {
-    { "NONE", kExitTypeNone, 0 },
-    { "NORMAL", kExitTypeNormal, 0 },
-    { "SECRET", kExitTypeSecret, 0 },
+static DDFSpecialFlags exit_types[] = { { "NONE", kExitTypeNone, 0 },
+                                        { "NORMAL", kExitTypeNormal, 0 },
+                                        { "SECRET", kExitTypeSecret, 0 },
 
-    // -AJA- backwards compatibility cruft...
-    { "!EXIT", kExitTypeNormal, 0 },
-    { nullptr, 0, 0 }
-};
+                                        // -AJA- backwards compatibility cruft...
+                                        { "!EXIT", kExitTypeNormal, 0 },
+                                        { nullptr, 0, 0 } };
 
 //
 // DDF_SectGetExit
@@ -283,30 +276,25 @@ void DDF_SectGetExit(const char *info, void *storage)
     int *dest = (int *)storage;
     int  flag_value;
 
-    switch (
-        DDF_MainCheckSpecialFlag(info, exit_types, &flag_value, false, false))
+    switch (DDF_MainCheckSpecialFlag(info, exit_types, &flag_value, false, false))
     {
-        case kDDFCheckFlagPositive:
-        case kDDFCheckFlagNegative:
-            (*dest) = flag_value;
-            break;
+    case kDDFCheckFlagPositive:
+    case kDDFCheckFlagNegative:
+        (*dest) = flag_value;
+        break;
 
-        case kDDFCheckFlagUser:
-        case kDDFCheckFlagUnknown:
-            DDF_WarnError("Unknown Exit type: %s\n", info);
-            break;
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDF_WarnError("Unknown Exit type: %s\n", info);
+        break;
     }
 }
 
 static DDFSpecialFlags light_types[] = {
-    { "NONE", kLightSpecialTypeNone, 0 },
-    { "SET", kLightSpecialTypeSet, 0 },
-    { "FADE", kLightSpecialTypeFade, 0 },
-    { "STROBE", kLightSpecialTypeStrobe, 0 },
-    { "FLASH", kLightSpecialTypeFlash, 0 },
-    { "GLOW", kLightSpecialTypeGlow, 0 },
-    { "FLICKER", kLightSpecialTypeFireFlicker, 0 },
-    { nullptr, 0, 0 }
+    { "NONE", kLightSpecialTypeNone, 0 },           { "SET", kLightSpecialTypeSet, 0 },
+    { "FADE", kLightSpecialTypeFade, 0 },           { "STROBE", kLightSpecialTypeStrobe, 0 },
+    { "FLASH", kLightSpecialTypeFlash, 0 },         { "GLOW", kLightSpecialTypeGlow, 0 },
+    { "FLICKER", kLightSpecialTypeFireFlicker, 0 }, { nullptr, 0, 0 }
 };
 
 //
@@ -319,32 +307,29 @@ void DDF_SectGetLighttype(const char *info, void *storage)
     int *dest = (int *)storage;
     int  flag_value;
 
-    switch (
-        DDF_MainCheckSpecialFlag(info, light_types, &flag_value, false, false))
+    switch (DDF_MainCheckSpecialFlag(info, light_types, &flag_value, false, false))
     {
-        case kDDFCheckFlagPositive:
-        case kDDFCheckFlagNegative:
-            (*dest) = flag_value;
-            break;
+    case kDDFCheckFlagPositive:
+    case kDDFCheckFlagNegative:
+        (*dest) = flag_value;
+        break;
 
-        case kDDFCheckFlagUser:
-        case kDDFCheckFlagUnknown:
-            DDF_WarnError("Unknown light type: %s\n", info);
-            break;
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDF_WarnError("Unknown light type: %s\n", info);
+        break;
     }
 }
 
-static DDFSpecialFlags movement_types[] = {
-    { "MOVE", kPlaneMoverOnce, 0 },
-    { "MOVEWAITRETURN", kPlaneMoverMoveWaitReturn, 0 },
-    { "CONTINUOUS", kPlaneMoverContinuous, 0 },
-    { "PLAT", kPlaneMoverPlatform, 0 },
-    { "BUILDSTAIRS", kPlaneMoverStairs, 0 },
-    { "STOP", kPlaneMoverStop, 0 },
-    { "TOGGLE", kPlaneMoverToggle, 0 },
-    { "ELEVATOR", kPlaneMoverElevator, 0 },
-    { nullptr, 0, 0 }
-};
+static DDFSpecialFlags movement_types[] = { { "MOVE", kPlaneMoverOnce, 0 },
+                                            { "MOVEWAITRETURN", kPlaneMoverMoveWaitReturn, 0 },
+                                            { "CONTINUOUS", kPlaneMoverContinuous, 0 },
+                                            { "PLAT", kPlaneMoverPlatform, 0 },
+                                            { "BUILDSTAIRS", kPlaneMoverStairs, 0 },
+                                            { "STOP", kPlaneMoverStop, 0 },
+                                            { "TOGGLE", kPlaneMoverToggle, 0 },
+                                            { "ELEVATOR", kPlaneMoverElevator, 0 },
+                                            { nullptr, 0, 0 } };
 
 //
 // DDF_SectGetMType
@@ -356,18 +341,17 @@ void DDF_SectGetMType(const char *info, void *storage)
     int *dest = (int *)storage;
     int  flag_value;
 
-    switch (DDF_MainCheckSpecialFlag(info, movement_types, &flag_value, false,
-                                     false))
+    switch (DDF_MainCheckSpecialFlag(info, movement_types, &flag_value, false, false))
     {
-        case kDDFCheckFlagPositive:
-        case kDDFCheckFlagNegative:
-            (*dest) = flag_value;
-            break;
+    case kDDFCheckFlagPositive:
+    case kDDFCheckFlagNegative:
+        (*dest) = flag_value;
+        break;
 
-        case kDDFCheckFlagUser:
-        case kDDFCheckFlagUnknown:
-            DDF_WarnError("Unknown Movement type: %s\n", info);
-            break;
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDF_WarnError("Unknown Movement type: %s\n", info);
+        break;
     }
 }
 
@@ -375,30 +359,19 @@ static DDFSpecialFlags reference_types[] = {
     { "ABSOLUTE", kTriggerHeightReferenceAbsolute, false },
 
     { "FLOOR", kTriggerHeightReferenceCurrent, false },
-    { "CEILING",
-      kTriggerHeightReferenceCurrent + kTriggerHeightReferenceCeiling, false },
+    { "CEILING", kTriggerHeightReferenceCurrent + kTriggerHeightReferenceCeiling, false },
 
     { "TRIGGERFLOOR", kTriggerHeightReferenceTriggeringLinedef, false },
-    { "TRIGGERCEILING",
-      kTriggerHeightReferenceTriggeringLinedef + kTriggerHeightReferenceCeiling,
-      false },
+    { "TRIGGERCEILING", kTriggerHeightReferenceTriggeringLinedef + kTriggerHeightReferenceCeiling, false },
 
     // Note that LOSURROUNDINGFLOOR has the kTriggerHeightReferenceInclude flag,
     // but the others do not.  It's there to maintain backwards compatibility.
     //
-    { "LOSURROUNDINGCEILING",
-      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceCeiling,
-      false },
+    { "LOSURROUNDINGCEILING", kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceCeiling, false },
     { "HISURROUNDINGCEILING",
-      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceCeiling +
-          kTriggerHeightReferenceHighest,
-      false },
-    { "LOSURROUNDINGFLOOR",
-      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceInclude,
-      false },
-    { "HISURROUNDINGFLOOR",
-      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceHighest,
-      false },
+      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceCeiling + kTriggerHeightReferenceHighest, false },
+    { "LOSURROUNDINGFLOOR", kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceInclude, false },
+    { "HISURROUNDINGFLOOR", kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceHighest, false },
 
     // Note that kTriggerHeightReferenceHighest is used for the NextLowest
     // types, and vice versa, which may seem strange.  It's because the next
@@ -406,19 +379,14 @@ static DDFSpecialFlags reference_types[] = {
     // that are lower than the current sector.
     //
     { "NEXTLOWESTFLOOR",
-      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext +
+      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext + kTriggerHeightReferenceHighest, false },
+    { "NEXTHIGHESTFLOOR", kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext, false },
+    { "NEXTLOWESTCEILING",
+      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext + kTriggerHeightReferenceCeiling +
           kTriggerHeightReferenceHighest,
       false },
-    { "NEXTHIGHESTFLOOR",
-      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext, false },
-    { "NEXTLOWESTCEILING",
-      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext +
-          kTriggerHeightReferenceCeiling + kTriggerHeightReferenceHighest,
-      false },
     { "NEXTHIGHESTCEILING",
-      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext +
-          kTriggerHeightReferenceCeiling,
-      false },
+      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext + kTriggerHeightReferenceCeiling, false },
 
     { "LOWESTBOTTOMTEXTURE", kTriggerHeightReferenceLowestLowTexture, false }
 };
@@ -445,18 +413,17 @@ void DDF_SectGetDestRef(const char *info, void *storage)
         return;
     }
 
-    switch (DDF_MainCheckSpecialFlag(info, reference_types, &flag_value, false,
-                                     false))
+    switch (DDF_MainCheckSpecialFlag(info, reference_types, &flag_value, false, false))
     {
-        case kDDFCheckFlagPositive:
-        case kDDFCheckFlagNegative:
-            (*dest) = flag_value;
-            break;
+    case kDDFCheckFlagPositive:
+    case kDDFCheckFlagNegative:
+        (*dest) = flag_value;
+        break;
 
-        case kDDFCheckFlagUser:
-        case kDDFCheckFlagUnknown:
-            DDF_WarnError("Unknown Reference Point: %s\n", info);
-            break;
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDF_WarnError("Unknown Reference Point: %s\n", info);
+        break;
     }
 }
 
@@ -473,12 +440,17 @@ static void DDF_SectMakeCrush(const char *info)
 //
 // SectorType Constructor
 //
-SectorType::SectorType() : number_(0) { Default(); }
+SectorType::SectorType() : number_(0)
+{
+    Default();
+}
 
 //
 // SectorType Destructor
 //
-SectorType::~SectorType() {}
+SectorType::~SectorType()
+{
+}
 
 //
 // SectorType::CopyDetail()
@@ -567,7 +539,10 @@ void SectorType::Default()
     fog_density_ = 0;
 }
 
-SectorTypeContainer::SectorTypeContainer() { Reset(); }
+SectorTypeContainer::SectorTypeContainer()
+{
+    Reset();
+}
 
 SectorTypeContainer::~SectorTypeContainer()
 {
@@ -584,7 +559,8 @@ SectorTypeContainer::~SectorTypeContainer()
 //
 SectorType *SectorTypeContainer::Lookup(const int id)
 {
-    if (id == 0) return default_sector;
+    if (id == 0)
+        return default_sector;
 
     int slot = (((id) + kLookupCacheSize) % kLookupCacheSize);
 

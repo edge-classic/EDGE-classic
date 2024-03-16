@@ -118,7 +118,7 @@ enum WeaponSelection
 //
 class Player
 {
-   public:
+  public:
     // player number.  Starts at 0.
     int player_number_;
 
@@ -159,8 +159,7 @@ class Player
 
     // bounded/scaled total momentum.
     float bob_factor_;
-    int   erraticism_bob_ticker_ =
-        0;  // Erraticism bob timer to prevent weapon bob jumps
+    int   erraticism_bob_ticker_ = 0; // Erraticism bob timer to prevent weapon bob jumps
 
     // Kick offset for vertangle (in mobj_t)
     float kick_offset_;
@@ -175,7 +174,7 @@ class Player
     // Armour points for each type
     float                      armours_[kTotalArmourTypes];
     const MapObjectDefinition *armour_types_[kTotalArmourTypes];
-    float                      total_armour_;  // needed for status bar
+    float                      total_armour_; // needed for status bar
 
     // Power ups. invinc and invis are tic counters.
     float powers_[kTotalPowerTypes];
@@ -250,7 +249,7 @@ class Player
 
     // -AJA- 1999/07/10: changed for colmap.ddf.
     const Colormap *effect_colourmap_;
-    int effect_left_;  // tics remaining, maxed to kMaximumEffectTime
+    int             effect_left_; // tics remaining, maxed to kMaximumEffectTime
 
     // Overlay view sprites (gun, etc).
     PlayerSprite player_sprites_[kTotalPlayerSpriteTypes];
@@ -302,10 +301,13 @@ class Player
     void (*Builder)(const class Player *, void *data, EventTicCommand *dest);
     void *build_data_;
 
-   public:
+  public:
     void Reborn();
 
-    bool IsBot() const { return (player_flags_ & kPlayerFlagBot) != 0; }
+    bool IsBot() const
+    {
+        return (player_flags_ & kPlayerFlagBot) != 0;
+    }
 };
 
 // Player ticcmd builders

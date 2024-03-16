@@ -35,13 +35,17 @@ void BoundingBoxClear(float *box)
 
 void BoundingBoxAddPoint(float *box, float x, float y)
 {
-    if (x < box[kBoundingBoxLeft]) box[kBoundingBoxLeft] = x;
+    if (x < box[kBoundingBoxLeft])
+        box[kBoundingBoxLeft] = x;
 
-    if (x > box[kBoundingBoxRight]) box[kBoundingBoxRight] = x;
+    if (x > box[kBoundingBoxRight])
+        box[kBoundingBoxRight] = x;
 
-    if (y < box[kBoundingBoxBottom]) box[kBoundingBoxBottom] = y;
+    if (y < box[kBoundingBoxBottom])
+        box[kBoundingBoxBottom] = y;
 
-    if (y > box[kBoundingBoxTop]) box[kBoundingBoxTop] = y;
+    if (y > box[kBoundingBoxTop])
+        box[kBoundingBoxTop] = y;
 }
 
 //--- editor settings ---

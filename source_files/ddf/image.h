@@ -34,39 +34,37 @@ enum ImageNamespace
 //
 enum ImageDataType
 {
-    kImageDataColor = 0,  // solid colour
-    kImageDataFile,       // load from an image file
-    kImageDataLump,       // load from lump in a WAD
-    kImageDataPackage,    // load from an EPK package
-    kImageDataCompose     // compose from patches
+    kImageDataColor = 0, // solid colour
+    kImageDataFile,      // load from an image file
+    kImageDataLump,      // load from lump in a WAD
+    kImageDataPackage,   // load from an EPK package
+    kImageDataCompose    // compose from patches
 };
 
 enum ImageSpecial
 {
     kImageSpecialNone      = 0,
-    kImageSpecialNoAlpha   = 0x0001,  // image does not require an alpha channel
-    kImageSpecialMip       = 0x0002,  // force   mip-mapping
-    kImageSpecialNoMip     = 0x0004,  // disable mip-mapping
-    kImageSpecialClamp     = 0x0008,  // clamp image
-    kImageSpecialSmooth    = 0x0010,  // force smoothing
-    kImageSpecialNoSmooth  = 0x0020,  // disable smoothing
-    kImageSpecialCrosshair = 0x0040,  // weapon crosshair (center vertically)
-    kImageSpecialGrayscale =
-        0x0080,  // forces image to be grayscaled upon creation
-    kImageSpecialPrecache =
-        0x0100,  // forces image to be precached upon creation
+    kImageSpecialNoAlpha   = 0x0001, // image does not require an alpha channel
+    kImageSpecialMip       = 0x0002, // force   mip-mapping
+    kImageSpecialNoMip     = 0x0004, // disable mip-mapping
+    kImageSpecialClamp     = 0x0008, // clamp image
+    kImageSpecialSmooth    = 0x0010, // force smoothing
+    kImageSpecialNoSmooth  = 0x0020, // disable smoothing
+    kImageSpecialCrosshair = 0x0040, // weapon crosshair (center vertically)
+    kImageSpecialGrayscale = 0x0080, // forces image to be grayscaled upon creation
+    kImageSpecialPrecache  = 0x0100, // forces image to be precached upon creation
 };
 
 enum ImageTransparencyFix
 {
-    kTransparencyFixNone    = 0,  // no modification (the default)
-    kTransparencyFixBlacken = 1,  // make 100% transparent pixels Black
+    kTransparencyFixNone    = 0, // no modification (the default)
+    kTransparencyFixBlacken = 1, // make 100% transparent pixels Black
 };
 
 enum LumpImageFormat
 {
-    kLumpImageFormatStandard = 0,  // something standard, e.g. PNG, TGA or JPEG
-    kLumpImageFormatDoom     = 1,  // the DOOM "patch" format (in a wad lump)
+    kLumpImageFormatStandard = 0, // something standard, e.g. PNG, TGA or JPEG
+    kLumpImageFormatDoom     = 1, // the DOOM "patch" format (in a wad lump)
 };
 
 struct ComposePatch
@@ -78,11 +76,11 @@ struct ComposePatch
 
 class ImageDefinition
 {
-   public:
+  public:
     ImageDefinition();
     ~ImageDefinition(){};
 
-   public:
+  public:
     void Default(void);
     void CopyDetail(const ImageDefinition &src);
 
@@ -91,20 +89,20 @@ class ImageDefinition
 
     ImageDataType type_;
 
-    RGBAColor colour_;  // kImageDataColor
+    RGBAColor colour_;                                // kImageDataColor
 
-    std::string     info_;  // kImageDataPackage, kImageDataFile, kImageDataLump
-    LumpImageFormat format_;  //
+    std::string     info_;                            // kImageDataPackage, kImageDataFile, kImageDataLump
+    LumpImageFormat format_;                          //
 
-    int                       compose_w_, compose_h_;  // kImageDataCompose
-    std::vector<ComposePatch> patches_;                //
+    int                       compose_w_, compose_h_; // kImageDataCompose
+    std::vector<ComposePatch> patches_;               //
 
     ImageSpecial special_;
 
     // offsets for sprites (mainly)
     float x_offset_, y_offset_;
 
-    int fix_trans_;  // kTransparencyFixXXX value
+    int fix_trans_; // kTransparencyFixXXX value
 
     bool is_font_;
 
@@ -118,9 +116,12 @@ class ImageDefinition
     // Gaussian blurring
     float blur_factor_;
 
-   private:
+  private:
     // disable copy construct and assignment operator
-    explicit ImageDefinition(ImageDefinition &rhs) { (void)rhs; }
+    explicit ImageDefinition(ImageDefinition &rhs)
+    {
+        (void)rhs;
+    }
     ImageDefinition &operator=(ImageDefinition &rhs)
     {
         (void)rhs;
@@ -130,13 +131,13 @@ class ImageDefinition
 
 class ImageDefinitionContainer : public std::vector<ImageDefinition *>
 {
-   public:
-    ImageDefinitionContainer() {}
+  public:
+    ImageDefinitionContainer()
+    {
+    }
     ~ImageDefinitionContainer()
     {
-        for (std::vector<ImageDefinition *>::iterator iter     = begin(),
-                                                      iter_end = end();
-             iter != iter_end; iter++)
+        for (std::vector<ImageDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
         {
             ImageDefinition *img = *iter;
             delete img;
@@ -144,10 +145,10 @@ class ImageDefinitionContainer : public std::vector<ImageDefinition *>
         }
     }
 
-   private:
+  private:
     void CleanupObject(void *obj);
 
-   public:
+  public:
     // Search Functions
     ImageDefinition *Lookup(const char *refname, ImageNamespace belong);
 };

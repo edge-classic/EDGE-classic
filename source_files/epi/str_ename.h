@@ -64,19 +64,31 @@ enum KnownEName
 
 class EName
 {
-   public:
+  public:
     EName() = default;
-    EName(std::string_view text) { index_ = name_data_.FindName(text, false); }
+    EName(std::string_view text)
+    {
+        index_ = name_data_.FindName(text, false);
+    }
     EName(std::string_view text, bool no_create)
     {
         index_ = name_data_.FindName(text, no_create);
     }
 
     EName(const EName &other) = default;
-    EName(KnownEName index) { index_ = index; }
+    EName(KnownEName index)
+    {
+        index_ = index;
+    }
 
-    int         GetIndex() const { return index_; }
-    const char *GetChars() const { return name_data_.name_array_[index_].text; }
+    int GetIndex() const
+    {
+        return index_;
+    }
+    const char *GetChars() const
+    {
+        return name_data_.name_array_[index_].text;
+    }
 
     EName &operator=(std::string_view text)
     {
@@ -102,21 +114,57 @@ class EName
 
     // Note that the comparison operators compare the names' indices, not
     // their text, so they cannot be used to do a lexicographical sort.
-    bool operator==(const EName &other) const { return index_ == other.index_; }
-    bool operator!=(const EName &other) const { return index_ != other.index_; }
-    bool operator<(const EName &other) const { return index_ < other.index_; }
-    bool operator<=(const EName &other) const { return index_ <= other.index_; }
-    bool operator>(const EName &other) const { return index_ > other.index_; }
-    bool operator>=(const EName &other) const { return index_ >= other.index_; }
+    bool operator==(const EName &other) const
+    {
+        return index_ == other.index_;
+    }
+    bool operator!=(const EName &other) const
+    {
+        return index_ != other.index_;
+    }
+    bool operator<(const EName &other) const
+    {
+        return index_ < other.index_;
+    }
+    bool operator<=(const EName &other) const
+    {
+        return index_ <= other.index_;
+    }
+    bool operator>(const EName &other) const
+    {
+        return index_ > other.index_;
+    }
+    bool operator>=(const EName &other) const
+    {
+        return index_ >= other.index_;
+    }
 
-    bool operator==(KnownEName index) const { return index_ == index; }
-    bool operator!=(KnownEName index) const { return index_ != index; }
-    bool operator<(KnownEName index) const { return index_ < index; }
-    bool operator<=(KnownEName index) const { return index_ <= index; }
-    bool operator>(KnownEName index) const { return index_ > index; }
-    bool operator>=(KnownEName index) const { return index_ >= index; }
+    bool operator==(KnownEName index) const
+    {
+        return index_ == index;
+    }
+    bool operator!=(KnownEName index) const
+    {
+        return index_ != index;
+    }
+    bool operator<(KnownEName index) const
+    {
+        return index_ < index;
+    }
+    bool operator<=(KnownEName index) const
+    {
+        return index_ <= index;
+    }
+    bool operator>(KnownEName index) const
+    {
+        return index_ > index;
+    }
+    bool operator>=(KnownEName index) const
+    {
+        return index_ >= index;
+    }
 
-   protected:
+  protected:
     int index_;
 
     struct NameEntry
@@ -130,7 +178,7 @@ class EName
     {
         friend class EName;
 
-       private:
+      private:
         // No constructor because we can't ensure that it actually gets
         // called before any ENames are constructed during startup. This
         // means this class must only exist in the program's BSS section.
@@ -144,9 +192,8 @@ class EName
         int        num_names_, max_names_;
         int        buckets_[kHashSize];
 
-        int FindName(std::string_view text, bool no_create);
-        int AddName(std::string_view text, size_t text_len, unsigned int hash,
-                    unsigned int bucket);
+        int           FindName(std::string_view text, bool no_create);
+        int           AddName(std::string_view text, size_t text_len, unsigned int hash, unsigned int bucket);
         NameBlock    *AddBlock(size_t len);
         void          InitBuckets();
         static bool   inited_;
@@ -156,4 +203,4 @@ class EName
     static NameManager name_data_;
 };
 
-}  // namespace epi
+} // namespace epi

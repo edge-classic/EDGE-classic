@@ -80,15 +80,13 @@ static void SwitchStartEntry(const char *name, bool extend)
     switchdefs.push_back(dynamic_switchdef);
 }
 
-static void SwitchParseField(const char *field, const char *contents, int index,
-                             bool is_last)
+static void SwitchParseField(const char *field, const char *contents, int index, bool is_last)
 {
 #if (DEBUG_DDF)
     LogDebug("SWITCH_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DDF_MainParseField(switch_commands, field, contents,
-                           (uint8_t *)dynamic_switchdef))
+    if (DDF_MainParseField(switch_commands, field, contents, (uint8_t *)dynamic_switchdef))
         return;
 
     DDF_WarnError("Unknown switch.ddf command: %s\n", field);
@@ -141,8 +139,7 @@ void DDF_ReadSwitch(const std::string &data)
     {
         sw = ITERATOR_TO_TYPE(it, SwitchDefinition *);
 
-        LogDebug("  Num: %d  ON: '%s'  OFF: '%s'\n", i, sw->on_name,
-                 sw->off_name);
+        LogDebug("  Num: %d  ON: '%s'  OFF: '%s'\n", i, sw->on_name, sw->off_name);
     }
 #endif
 }
@@ -150,19 +147,28 @@ void DDF_ReadSwitch(const std::string &data)
 //
 // DDF_SwitchInit
 //
-void DDF_SwitchInit(void) { SwitchClearAll(); }
+void DDF_SwitchInit(void)
+{
+    SwitchClearAll();
+}
 
 //
 // DDF_SwitchCleanUp
 //
-void DDF_SwitchCleanUp(void) { switchdefs.shrink_to_fit(); }
+void DDF_SwitchCleanUp(void)
+{
+    switchdefs.shrink_to_fit();
+}
 
 // ---> SwitchDefinition class
 
 //
 // SwitchDefinition Constructor
 //
-SwitchDefinition::SwitchDefinition() : name_() { Default(); }
+SwitchDefinition::SwitchDefinition() : name_()
+{
+    Default();
+}
 
 //
 // SwitchDefinition::CopyDetail()
@@ -201,12 +207,11 @@ void SwitchDefinition::Default()
 //
 SwitchDefinition *SwitchDefinitionContainer::Find(const char *name)
 {
-    for (std::vector<SwitchDefinition *>::iterator iter     = begin(),
-                                                   iter_end = end();
-         iter != iter_end; iter++)
+    for (std::vector<SwitchDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
     {
         SwitchDefinition *sw = *iter;
-        if (DDF_CompareName(sw->name_.c_str(), name) == 0) return sw;
+        if (DDF_CompareName(sw->name_.c_str(), name) == 0)
+            return sw;
     }
 
     return nullptr;
@@ -218,13 +223,14 @@ void DDF_ConvertSWITCHES(const uint8_t *data, int size)
 {
     // handles the Boom SWITCHES lump (in a wad).
 
-    if (size < 20) return;
+    if (size < 20)
+        return;
 
     std::string text = "<SWITCHES>\n\n";
 
     for (; size >= 20; data += 20, size -= 20)
     {
-        if (data[18] == 0)  // end marker
+        if (data[18] == 0) // end marker
             break;
 
         char off_name[9];
@@ -243,7 +249,8 @@ void DDF_ConvertSWITCHES(const uint8_t *data, int size)
         LogDebug("- SWITCHES LUMP: off '%s' : on '%s'\n", off_name, on_name);
 
         // ignore zero-length names
-        if (off_name[0] == 0 || on_name[0] == 0) continue;
+        if (off_name[0] == 0 || on_name[0] == 0)
+            continue;
 
         // create the DDF equivalent...
         text += "[";

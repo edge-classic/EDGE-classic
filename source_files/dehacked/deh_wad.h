@@ -35,6 +35,6 @@ void Printf(const char *str, ...) __attribute__((format(printf, 1, 2)));
 #else
 void Printf(const char *str, ...);
 #endif
-}  // namespace wad
+} // namespace wad
 
-}  // namespace dehacked
+} // namespace dehacked

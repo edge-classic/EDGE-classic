@@ -45,7 +45,7 @@
 #include "filesystem.h"
 #include "g_game.h"
 #include "hu_draw.h"
-#include "hu_stuff.h"  // only for show_messages
+#include "hu_stuff.h" // only for show_messages
 #include "im_data.h"
 #include "im_funcs.h"
 #include "m_argv.h"
@@ -80,10 +80,8 @@ int                    sound_mixing_channels = 0;
 static bool done_first_init = false;
 
 static ConfigurationDefault defaults[] = {
-    { kConfigInteger, "screenwidth", &current_screen_width,
-      CFGDEF_SCREENWIDTH },
-    { kConfigInteger, "screenheight", &current_screen_height,
-      CFGDEF_SCREENHEIGHT },
+    { kConfigInteger, "screenwidth", &current_screen_width, CFGDEF_SCREENWIDTH },
+    { kConfigInteger, "screenheight", &current_screen_height, CFGDEF_SCREENHEIGHT },
     { kConfigInteger, "screendepth", &current_screen_depth, CFGDEF_SCREENBITS },
     { kConfigInteger, "displaymode", &current_window_mode, CFGDEF_DISPLAYMODE },
 
@@ -91,8 +89,7 @@ static ConfigurationDefault defaults[] = {
     { kConfigBoolean, "pc_speaker_mode", &pc_speaker_mode, 0 },
     { kConfigInteger, "midi_player", &var_midi_player, 0 },
     { kConfigBoolean, "dynamic_reverb", &dynamic_reverb, 0 },
-    { kConfigInteger, "mix_channels", &sound_mixing_channels,
-      CFGDEF_MIX_CHANNELS },
+    { kConfigInteger, "mix_channels", &sound_mixing_channels, CFGDEF_MIX_CHANNELS },
 
     { kConfigInteger, "show_messages", &show_messages, CFGDEF_SHOWMESSAGES },
 
@@ -101,31 +98,23 @@ static ConfigurationDefault defaults[] = {
     { kConfigInteger, "invuln_fx", &invulnerability_effect, CFGDEF_INVUL_FX },
     { kConfigEnum, "wipe_method", &wipe_method, CFGDEF_WIPE_METHOD },
     { kConfigBoolean, "rotate_map", &rotate_map, CFGDEF_ROTATEMAP },
-    { kConfigBoolean, "respawnsetting", &global_flags.enemy_respawn_mode,
-      CFGDEF_RES_RESPAWN },
-    { kConfigBoolean, "items_respawn", &global_flags.items_respawn,
-      CFGDEF_ITEMRESPAWN },
-    { kConfigBoolean, "respawn", &global_flags.enemies_respawn,
-      CFGDEF_RESPAWN },
-    { kConfigBoolean, "fast_monsters", &global_flags.fast_monsters,
-      CFGDEF_FASTPARM },
-    { kConfigBoolean, "true_3d_gameplay", &global_flags.true_3d_gameplay,
-      CFGDEF_TRUE3DGAMEPLAY },
+    { kConfigBoolean, "respawnsetting", &global_flags.enemy_respawn_mode, CFGDEF_RES_RESPAWN },
+    { kConfigBoolean, "items_respawn", &global_flags.items_respawn, CFGDEF_ITEMRESPAWN },
+    { kConfigBoolean, "respawn", &global_flags.enemies_respawn, CFGDEF_RESPAWN },
+    { kConfigBoolean, "fast_monsters", &global_flags.fast_monsters, CFGDEF_FASTPARM },
+    { kConfigBoolean, "true_3d_gameplay", &global_flags.true_3d_gameplay, CFGDEF_TRUE3DGAMEPLAY },
     { kConfigEnum, "autoaim", &global_flags.autoaim, CFGDEF_AUTOAIM },
-    { kConfigBoolean, "shootthru_scenery", &global_flags.pass_missile,
-      CFGDEF_PASS_MISSILE },
+    { kConfigBoolean, "shootthru_scenery", &global_flags.pass_missile, CFGDEF_PASS_MISSILE },
     { kConfigInteger, "swirling_flats", &swirling_flats, 0 },
 
     { kConfigBoolean, "pistol_starts", &pistol_starts, 0 },
-    { kConfigBoolean, "automap_keydoor_blink", &automap_keydoor_blink,
-      CFGDEF_AM_KEYDOORBLINK },
+    { kConfigBoolean, "automap_keydoor_blink", &automap_keydoor_blink, CFGDEF_AM_KEYDOORBLINK },
 
     // -KM- 1998/07/21 Save the blood setting
     { kConfigBoolean, "blood", &global_flags.more_blood, CFGDEF_MORE_BLOOD },
     { kConfigBoolean, "extra", &global_flags.have_extra, CFGDEF_HAVE_EXTRA },
     { kConfigBoolean, "weaponkick", &global_flags.kicking, CFGDEF_KICKING },
-    { kConfigBoolean, "weaponswitch", &global_flags.weapon_switch,
-      CFGDEF_WEAPON_SWITCH },
+    { kConfigBoolean, "weaponswitch", &global_flags.weapon_switch, CFGDEF_WEAPON_SWITCH },
     { kConfigBoolean, "mlook", &global_flags.mouselook, CFGDEF_MLOOK },
     { kConfigBoolean, "jumping", &global_flags.jump, CFGDEF_JUMP },
     { kConfigBoolean, "crouching", &global_flags.crouch, CFGDEF_CROUCH },
@@ -146,8 +135,7 @@ static ConfigurationDefault defaults[] = {
 
     { kConfigInteger, "screen_hud", &screen_hud, CFGDEF_SCREEN_HUD },
     { kConfigInteger, "save_page", &save_page, 0 },
-    { kConfigBoolean, "png_screenshots", &png_screenshots,
-      CFGDEF_PNG_SCRSHOTS },
+    { kConfigBoolean, "png_screenshots", &png_screenshots, CFGDEF_PNG_SCRSHOTS },
 
     // -------------------- VARS --------------------
 
@@ -167,8 +155,7 @@ static ConfigurationDefault defaults[] = {
     // -ES- 1999/03/28 Zoom Key
     { kConfigKey, "key_zoom", &key_zoom, CFGDEF_KEY_ZOOM },
     { kConfigKey, "key_strafe_left", &key_strafe_left, CFGDEF_KEY_STRAFELEFT },
-    { kConfigKey, "key_strafe_right", &key_strafe_right,
-      CFGDEF_KEY_STRAFERIGHT },
+    { kConfigKey, "key_strafe_right", &key_strafe_right, CFGDEF_KEY_STRAFERIGHT },
 
     // -ACB- for -MH- 1998/07/02 Flying Keys
     { kConfigKey, "key_fly_up", &key_fly_up, CFGDEF_KEY_FLYUP },
@@ -180,28 +167,21 @@ static ConfigurationDefault defaults[] = {
     { kConfigKey, "key_speed", &key_speed, CFGDEF_KEY_SPEED },
     { kConfigKey, "key_autorun", &key_autorun, CFGDEF_KEY_AUTORUN },
     { kConfigKey, "key_next_weapon", &key_next_weapon, CFGDEF_KEY_NEXTWEAPON },
-    { kConfigKey, "key_previous_weapon", &key_previous_weapon,
-      CFGDEF_KEY_PREVWEAPON },
+    { kConfigKey, "key_previous_weapon", &key_previous_weapon, CFGDEF_KEY_PREVWEAPON },
 
     { kConfigKey, "key_180", &key_180, CFGDEF_KEY_180 },
     { kConfigKey, "key_map", &key_map, CFGDEF_KEY_MAP },
     { kConfigKey, "key_talk", &key_talk, CFGDEF_KEY_TALK },
-    { kConfigKey, "key_console", &key_console,
-      CFGDEF_KEY_CONSOLE },                           // -AJA- 2007/08/15.
-    { kConfigKey, "key_pause", &key_pause, kPause },  // -AJA- 2010/06/13.
+    { kConfigKey, "key_console", &key_console, CFGDEF_KEY_CONSOLE },               // -AJA- 2007/08/15.
+    { kConfigKey, "key_pause", &key_pause, kPause },                               // -AJA- 2010/06/13.
 
-    { kConfigKey, "key_mouselook", &key_mouselook,
-      CFGDEF_KEY_MLOOK },  // -AJA- 1999/07/27.
-    { kConfigKey, "key_second_attack", &key_second_attack,
-      CFGDEF_KEY_SECONDATK },  // -AJA- 2000/02/08.
-    { kConfigKey, "key_third_attack", &key_third_attack, 0 },    //
-    { kConfigKey, "key_fourth_attack", &key_fourth_attack, 0 },  //
-    { kConfigKey, "key_reload", &key_reload,
-      CFGDEF_KEY_RELOAD },  // -AJA- 2004/11/11.
-    { kConfigKey, "key_action1", &key_action1,
-      CFGDEF_KEY_ACTION1 },  // -AJA- 2009/09/07
-    { kConfigKey, "key_action2", &key_action2,
-      CFGDEF_KEY_ACTION2 },  // -AJA- 2009/09/07
+    { kConfigKey, "key_mouselook", &key_mouselook, CFGDEF_KEY_MLOOK },             // -AJA- 1999/07/27.
+    { kConfigKey, "key_second_attack", &key_second_attack, CFGDEF_KEY_SECONDATK }, // -AJA- 2000/02/08.
+    { kConfigKey, "key_third_attack", &key_third_attack, 0 },                      //
+    { kConfigKey, "key_fourth_attack", &key_fourth_attack, 0 },                    //
+    { kConfigKey, "key_reload", &key_reload, CFGDEF_KEY_RELOAD },                  // -AJA- 2004/11/11.
+    { kConfigKey, "key_action1", &key_action1, CFGDEF_KEY_ACTION1 },               // -AJA- 2009/09/07
+    { kConfigKey, "key_action2", &key_action2, CFGDEF_KEY_ACTION2 },               // -AJA- 2009/09/07
 
     // -AJA- 2010/06/13: weapon and automap keys
     { kConfigKey, "key_weapon1", &key_weapons[1], '1' },
@@ -226,11 +206,9 @@ static ConfigurationDefault defaults[] = {
     { kConfigKey, "key_automap_mark", &key_automap_mark, 'm' },
     { kConfigKey, "key_automap_clear", &key_automap_clear, 'c' },
 
-    { kConfigKey, "key_inventory_previous", &key_inventory_previous,
-      CFGDEF_KEY_PREVINV },
+    { kConfigKey, "key_inventory_previous", &key_inventory_previous, CFGDEF_KEY_PREVINV },
     { kConfigKey, "key_inventory_use", &key_inventory_use, CFGDEF_KEY_USEINV },
-    { kConfigKey, "key_inventory_next", &key_inventory_next,
-      CFGDEF_KEY_NEXTINV },
+    { kConfigKey, "key_inventory_next", &key_inventory_next, CFGDEF_KEY_NEXTINV },
 
     { kConfigKey, "key_screenshot", &key_screenshot, kFunction1 },
     { kConfigKey, "key_save_game", &key_save_game, kFunction2 },
@@ -253,14 +231,12 @@ void ConfigurationSaveDefaults(void)
     // -ACB- 1999/09/24 idiot proof checking as required by MSVC
     EPI_ASSERT(!configuration_file.empty());
 
-    FILE *f = epi::FileOpenRaw(configuration_file,
-                               epi::kFileAccessWrite | epi::kFileAccessBinary);
+    FILE *f = epi::FileOpenRaw(configuration_file, epi::kFileAccessWrite | epi::kFileAccessBinary);
 
     if (!f)
     {
-        LogWarning("Couldn't open config file %s for writing.",
-                   configuration_file.c_str());
-        return;  // can't write the file, but don't complain
+        LogWarning("Couldn't open config file %s for writing.", configuration_file.c_str());
+        return; // can't write the file, but don't complain
     }
 
     fprintf(f, "#VERSION %d\n", kInternalConfigVersion);
@@ -275,20 +251,18 @@ void ConfigurationSaveDefaults(void)
 
         switch (defaults[i].type)
         {
-            case kConfigInteger:
-                fprintf(f, "%s\t\t%i\n", defaults[i].name,
-                        *(int *)defaults[i].location);
-                break;
+        case kConfigInteger:
+            fprintf(f, "%s\t\t%i\n", defaults[i].name, *(int *)defaults[i].location);
+            break;
 
-            case kConfigBoolean:
-                fprintf(f, "%s\t\t%i\n", defaults[i].name,
-                        *(bool *)defaults[i].location ? 1 : 0);
-                break;
+        case kConfigBoolean:
+            fprintf(f, "%s\t\t%i\n", defaults[i].name, *(bool *)defaults[i].location ? 1 : 0);
+            break;
 
-            case kConfigKey:
-                v = *(int *)defaults[i].location;
-                fprintf(f, "%s\t\t0x%X\n", defaults[i].name, v);
-                break;
+        case kConfigKey:
+            v = *(int *)defaults[i].location;
+            fprintf(f, "%s\t\t0x%X\n", defaults[i].name, v);
+            break;
         }
     }
 
@@ -301,14 +275,14 @@ static void SetToBaseValue(ConfigurationDefault *def)
 {
     switch (def->type)
     {
-        case kConfigInteger:
-        case kConfigKey:
-            *(int *)(def->location) = def->default_value;
-            break;
+    case kConfigInteger:
+    case kConfigKey:
+        *(int *)(def->location) = def->default_value;
+        break;
 
-        case kConfigBoolean:
-            *(bool *)(def->location) = def->default_value ? true : false;
-            break;
+    case kConfigBoolean:
+        *(bool *)(def->location) = def->default_value ? true : false;
+        break;
     }
 }
 
@@ -319,7 +293,8 @@ void ConfigurationResetDefaults(int dummy, ConsoleVariable *dummy_cvar)
     for (int i = 0; i < total_defaults; i++)
     {
         // don't reset the first five entries except at startup
-        if (done_first_init && i < 5) continue;
+        if (done_first_init && i < 5)
+            continue;
 
         SetToBaseValue(defaults + i);
     }
@@ -328,8 +303,7 @@ void ConfigurationResetDefaults(int dummy, ConsoleVariable *dummy_cvar)
 
     // Set default SF2 location in midi_soundfont CVAR
     // We can't store this as a CVAR default since it is path-dependent
-    midi_soundfont = epi::SanitizePath(
-        epi::PathAppend(game_directory, "soundfont/Default.sf2"));
+    midi_soundfont = epi::SanitizePath(epi::PathAppend(game_directory, "soundfont/Default.sf2"));
 
     // Needed so that Smoothing/Upscaling is properly reset
     DeleteAllImages();
@@ -346,11 +320,11 @@ static void ParseConfigBlock(epi::Lexer &lex)
 
         epi::TokenKind tok = lex.Next(key);
 
-        if (key ==
-            "/")  // CVAR keys will start with this, but we need to discard it
+        if (key == "/") // CVAR keys will start with this, but we need to discard it
             continue;
 
-        if (tok == epi::kTokenEOF) return;
+        if (tok == epi::kTokenEOF)
+            return;
 
         if (tok == epi::kTokenError)
             FatalError("ParseConfig: error parsing file!\n");
@@ -359,11 +333,11 @@ static void ParseConfigBlock(epi::Lexer &lex)
 
         // The last line of the config writer causes a weird blank key with an
         // EOF value, so just return here
-        if (tok == epi::kTokenEOF) return;
+        if (tok == epi::kTokenEOF)
+            return;
 
         if (tok == epi::kTokenError)
-            FatalError("ParseConfig: malformed value for key %s!\n",
-                       key.c_str());
+            FatalError("ParseConfig: malformed value for key %s!\n", key.c_str());
 
         if (tok == epi::kTokenString)
         {
@@ -379,8 +353,7 @@ static void ParseConfigBlock(epi::Lexer &lex)
                 {
                     if (defaults[i].type == kConfigBoolean)
                     {
-                        *(bool *)defaults[i].location =
-                            epi::LexInteger(value) ? true : false;
+                        *(bool *)defaults[i].location = epi::LexInteger(value) ? true : false;
                     }
                     else /* kConfigInteger and
                             kConfigKey */
@@ -419,8 +392,7 @@ static void ParseConfig(const std::string &data, bool check_config_version)
 
         tok = lex.Next(version);
 
-        if (tok != epi::kTokenNumber ||
-            epi::LexInteger(version) < kInternalConfigVersion)
+        if (tok != epi::kTokenNumber || epi::LexInteger(version) < kInternalConfigVersion)
         {
             show_old_config_warning = true;
         }
@@ -431,7 +403,8 @@ static void ParseConfig(const std::string &data, bool check_config_version)
         std::string    section;
         epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF) return;
+        if (tok == epi::kTokenEOF)
+            return;
 
         // process the block
         ParseConfigBlock(lex);
@@ -449,8 +422,7 @@ void ConfigurationLoadDefaults(void)
 
     if (!file)
     {
-        LogWarning("Couldn't open config file %s for reading.\n",
-                   configuration_file.c_str());
+        LogWarning("Couldn't open config file %s for reading.\n", configuration_file.c_str());
         LogWarning("Resetting config to RECOMMENDED values...\n");
         return;
     }
@@ -469,7 +441,8 @@ void ConfigurationLoadBranding(void)
     epi::File *file = FileOpen(branding_file, epi::kFileAccessRead);
 
     // Just use hardcoded values if no branding file present
-    if (!file) return;
+    if (!file)
+        return;
 
     // load the file into this string
     std::string data = file->ReadText();
@@ -503,23 +476,27 @@ void TakeScreenshot(bool show_msg)
 
         if (!epi::TestFileAccess(fn))
         {
-            break;  // file doesn't exist
+            break; // file doesn't exist
         }
     }
 
-    ImageData *img =
-        new ImageData(current_screen_width, current_screen_height, 3);
+    ImageData *img = new ImageData(current_screen_width, current_screen_height, 3);
 
-    RendererReadScreen(0, 0, current_screen_width, current_screen_height,
-                       img->PixelAt(0, 0));
+    RendererReadScreen(0, 0, current_screen_width, current_screen_height, img->PixelAt(0, 0));
 
     // ReadScreen produces a bottom-up image, need to invert it
     img->Invert();
 
     bool result;
 
-    if (png_screenshots) { result = ImageSavePng(fn, img); }
-    else { result = ImageSaveJpeg(fn, img); }
+    if (png_screenshots)
+    {
+        result = ImageSavePng(fn, img);
+    }
+    else
+    {
+        result = ImageSaveJpeg(fn, img);
+    }
 
     if (show_msg)
     {
@@ -536,17 +513,14 @@ void CreateSaveScreenshot(void)
 {
     const char *extension = "jpg";
 
-    std::string temp(
-        epi::StringFormat("%s/%s.%s", "current", "head", extension));
+    std::string temp(epi::StringFormat("%s/%s.%s", "current", "head", extension));
     std::string filename = epi::PathAppend(save_directory, temp);
 
     epi::FileDelete(filename);
 
-    ImageData *img =
-        new ImageData(current_screen_width, current_screen_height, 3);
+    ImageData *img = new ImageData(current_screen_width, current_screen_height, 3);
 
-    RendererReadScreen(0, 0, current_screen_width, current_screen_height,
-                       img->PixelAt(0, 0));
+    RendererReadScreen(0, 0, current_screen_width, current_screen_height, img->PixelAt(0, 0));
 
     // ReadScreen produces a bottom-up image, need to invert it
     img->Invert();
@@ -616,7 +590,7 @@ void PrintDebugOrError(const char *error, ...)
         LogDebug("%s", message_buf);
 }
 
-extern FILE *debug_file;  // FIXME
+extern FILE *debug_file; // FIXME
 
 void LogDebug(const char *message, ...)
 {
@@ -625,7 +599,8 @@ void LogDebug(const char *message, ...)
     // -ACB- 1999/09/22: From #define to Procedure
     // -AJA- 2001/02/07: Moved here from platform codes.
     //
-    if (!debug_file) return;
+    if (!debug_file)
+        return;
 
     char message_buf[4096];
 
@@ -645,7 +620,7 @@ void LogDebug(const char *message, ...)
     fflush(debug_file);
 }
 
-extern FILE *log_file;  // FIXME: make file_c and unify with debug_file
+extern FILE *log_file; // FIXME: make file_c and unify with debug_file
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

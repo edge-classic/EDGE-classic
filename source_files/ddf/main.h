@@ -71,39 +71,39 @@ struct JumpActionInfo
 
 class BecomeActionInfo
 {
-   public:
+  public:
     const MapObjectDefinition *info_;
     std::string                info_ref_;
 
     LabelOffset start_;
 
-   public:
+  public:
     BecomeActionInfo();
     ~BecomeActionInfo();
 };
 
 class MorphActionInfo
 {
-   public:
+  public:
     const MapObjectDefinition *info_;
     std::string                info_ref_;
 
     LabelOffset start_;
 
-   public:
+  public:
     MorphActionInfo();
     ~MorphActionInfo();
 };
 
 class WeaponBecomeActionInfo
 {
-   public:
+  public:
     const WeaponDefinition *info_;
     std::string             info_ref_;
 
     LabelOffset start_;
 
-   public:
+  public:
     WeaponBecomeActionInfo();
     ~WeaponBecomeActionInfo();
 };
@@ -127,15 +127,14 @@ void DDF_CleanUp();
 bool        DDF_MainParseCondition(const char *str, ConditionCheck *cond);
 void        DDF_MainGetWhenAppear(const char *info, void *storage);
 void        DDF_MainGetRGB(const char *info, void *storage);
-bool        DDF_MainDecodeBrackets(const char *info, char *outer, char *inner,
-                                   int buf_len);
+bool        DDF_MainDecodeBrackets(const char *info, char *outer, char *inner, int buf_len);
 const char *DDF_MainDecodeList(const char *info, char divider, bool simple);
 void        DDF_GetLumpNameForFile(const char *filename, char *lumpname);
 
 int DDF_CompareName(const char *A, const char *B);
 
-void DDF_MainAddDefine(const char *name, const char *value);
-void DDF_MainAddDefine(const std::string &name, const std::string &value);
+void        DDF_MainAddDefine(const char *name, const char *value);
+void        DDF_MainAddDefine(const std::string &name, const std::string &value);
 const char *DDF_MainGetDefine(const char *name);
 void        DDF_MainFreeDefines();
 

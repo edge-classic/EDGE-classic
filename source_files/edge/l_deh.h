@@ -27,8 +27,7 @@
 
 #include <string>
 
-void ConvertDehacked(const uint8_t *data, int length,
-                     const std::string &source);
+void ConvertDehacked(const uint8_t *data, int length, const std::string &source);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

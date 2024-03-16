@@ -34,6 +34,6 @@ extern int patch_fmt;
 extern int doom_ver;
 
 DehackedResult Load(InputBuffer *buf);
-}  // namespace patch
+} // namespace patch
 
-}  // namespace dehacked
+} // namespace dehacked

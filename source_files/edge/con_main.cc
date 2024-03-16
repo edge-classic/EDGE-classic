@@ -41,8 +41,7 @@
 
 static constexpr uint8_t kMaximumConsoleArguments = 64;
 
-static std::string readme_names[4] = { "readme.txt", "readme.1st", "read.me",
-                                       "readme.md" };
+static std::string readme_names[4] = { "readme.txt", "readme.1st", "read.me", "readme.md" };
 
 struct ConsoleCommand
 {
@@ -65,8 +64,7 @@ int ConsoleCommandExec(char **argv, int argc)
         return 1;
     }
 
-    FILE *script = epi::FileOpenRaw(
-        argv[1], epi::kFileAccessRead | epi::kFileAccessBinary);
+    FILE *script = epi::FileOpenRaw(argv[1], epi::kFileAccessRead | epi::kFileAccessBinary);
     if (!script)
     {
         ConsolePrint("Unable to open file: %s\n", argv[1]);
@@ -118,7 +116,8 @@ int ConsoleCommandReadme(char **argv, int argc)
     for (auto name : readme_names)
     {
         readme_file = OpenFileFromPack(name);
-        if (readme_file) break;
+        if (readme_file)
+            break;
     }
 
     if (!readme_file)
@@ -130,7 +129,8 @@ int ConsoleCommandReadme(char **argv, int argc)
             std::string readme_check = data_files[i]->name_;
             epi::ReplaceExtension(readme_check, ".txt");
             readme_file = OpenFileFromPack(readme_check);
-            if (readme_file) break;
+            if (readme_file)
+                break;
         }
     }
 
@@ -167,8 +167,7 @@ int ConsoleCommandReadme(char **argv, int argc)
     {
         std::string readme = readme_file->ReadText();
         delete readme_file;
-        std::vector<std::string> readme_strings =
-            epi::SeparatedStringVector(readme, '\n');
+        std::vector<std::string> readme_strings = epi::SeparatedStringVector(readme, '\n');
         for (std::string &line : readme_strings)
         {
             ConsolePrint("%s\n", line.c_str());
@@ -192,7 +191,8 @@ int ConsoleCommandDir(char **argv, int argc)
             path = argv[1];
     }
 
-    if (argc >= 3) mask = argv[2];
+    if (argc >= 3)
+        mask = argv[2];
 
     std::vector<epi::DirectoryEntry> fsd;
 
@@ -208,13 +208,11 @@ int ConsoleCommandDir(char **argv, int argc)
         return 0;
     }
 
-    LogPrint("Directory contents for %s matching %s\n",
-             epi::GetDirectory(fsd[0].name).c_str(), mask.c_str());
+    LogPrint("Directory contents for %s matching %s\n", epi::GetDirectory(fsd[0].name).c_str(), mask.c_str());
 
     for (size_t i = 0; i < fsd.size(); i++)
     {
-        LogPrint("%4d: %10d  %s  \"%s\"\n", (int)i + 1, (int)fsd[i].size,
-                 fsd[i].is_dir ? "DIR" : "   ",
+        LogPrint("%4d: %10d  %s  \"%s\"\n", (int)i + 1, (int)fsd[i].size, fsd[i].is_dir ? "DIR" : "   ",
                  epi::GetFilename(fsd[i].name).c_str());
     }
 
@@ -261,7 +259,10 @@ int ConsoleCommandCrc(char **argv, int argc)
     {
         int lump = CheckLumpNumberForName(argv[i]);
 
-        if (lump == -1) { ConsolePrint("No such lump: %s\n", argv[i]); }
+        if (lump == -1)
+        {
+            ConsolePrint("No such lump: %s\n", argv[i]);
+        }
         else
         {
             int      length;
@@ -274,8 +275,7 @@ int ConsoleCommandCrc(char **argv, int argc)
 
             delete[] data;
 
-            ConsolePrint("  %s  %d bytes  crc = %08x\n", argv[i], length,
-                         result.GetCRC());
+            ConsolePrint("  %s  %d bytes  crc = %08x\n", argv[i], length, result.GetCRC());
         }
     }
 
@@ -293,8 +293,14 @@ int ConsoleCommandPlaySound(char **argv, int argc)
     }
 
     sfx = sfxdefs.GetEffect(argv[1], false);
-    if (!sfx) { ConsolePrint("No such sound: %s\n", argv[1]); }
-    else { StartSoundEffect(sfx, kCategoryUi); }
+    if (!sfx)
+    {
+        ConsolePrint("No such sound: %s\n", argv[1]);
+    }
+    else
+    {
+        StartSoundEffect(sfx, kCategoryUi);
+    }
 
     return 0;
 }
@@ -320,11 +326,12 @@ int ConsoleCommandOpenHome(char **argv, int argc)
 
 int ConsoleCommandShowLumps(char **argv, int argc)
 {
-    int for_file = -1;  // all files
+    int for_file = -1; // all files
 
     char *match = nullptr;
 
-    if (argc >= 2 && epi::IsDigitASCII(argv[1][0])) for_file = atoi(argv[1]);
+    if (argc >= 2 && epi::IsDigitASCII(argv[1][0]))
+        for_file = atoi(argv[1]);
 
     if (argc >= 3)
     {
@@ -352,13 +359,15 @@ int ConsoleCommandShowVars(char **argv, int argc)
         argc--;
     }
 
-    if (argc >= 2) match = argv[1];
+    if (argc >= 2)
+        match = argv[1];
 
     LogPrint("Console Variables:\n");
 
     int total = ConsolePrintVariables(match, show_default);
 
-    if (total == 0) LogPrint("Nothing matched.\n");
+    if (total == 0)
+        LogPrint("Nothing matched.\n");
 
     return 0;
 }
@@ -367,7 +376,8 @@ int ConsoleCommandShowCmds(char **argv, int argc)
 {
     char *match = nullptr;
 
-    if (argc >= 2) match = argv[1];
+    if (argc >= 2)
+        match = argv[1];
 
     LogPrint("Console Commands:\n");
 
@@ -376,13 +386,15 @@ int ConsoleCommandShowCmds(char **argv, int argc)
     for (int i = 0; builtin_commands[i].name; i++)
     {
         if (match && *match)
-            if (!strstr(builtin_commands[i].name, match)) continue;
+            if (!strstr(builtin_commands[i].name, match))
+                continue;
 
         LogPrint("  %-15s\n", builtin_commands[i].name);
         total++;
     }
 
-    if (total == 0) LogPrint("Nothing matched.\n");
+    if (total == 0)
+        LogPrint("Nothing matched.\n");
 
     return 0;
 }
@@ -394,8 +406,7 @@ int ConsoleCommandShowMaps(char **argv, int argc)
     for (int i = 0; i < mapdefs.size(); i++)
     {
         if (GameMapExists(mapdefs[i]) && mapdefs[i]->episode_)
-            LogPrint("  %s           %s\n", mapdefs[i]->name_.c_str(),
-                     language[mapdefs[i]->description_.c_str()]);
+            LogPrint("  %s           %s\n", mapdefs[i]->name_.c_str(), language[mapdefs[i]->description_.c_str()]);
     }
 
     return 0;
@@ -479,12 +490,15 @@ static int GetArgs(const char *line, char **argv, int max_argc)
 
     for (;;)
     {
-        while (epi::IsSpaceASCII(*(uint8_t *)line)) line++;
+        while (epi::IsSpaceASCII(*(uint8_t *)line))
+            line++;
 
-        if (!*line) break;
+        if (!*line)
+            break;
 
         // silent truncation (bad?)
-        if (argc >= max_argc) break;
+        if (argc >= max_argc)
+            break;
 
         const char *start = line;
 
@@ -493,11 +507,13 @@ static int GetArgs(const char *line, char **argv, int max_argc)
             start++;
             line++;
 
-            while (*line && *line != '"') line++;
+            while (*line && *line != '"')
+                line++;
         }
         else
         {
-            while (*line && !epi::IsSpaceASCII(*(uint8_t *)line)) line++;
+            while (*line && !epi::IsSpaceASCII(*(uint8_t *)line))
+                line++;
         }
 
         // ignore empty strings at beginning of the line
@@ -506,7 +522,8 @@ static int GetArgs(const char *line, char **argv, int max_argc)
             argv[argc++] = StrDup(start, line - start);
         }
 
-        if (*line) line++;
+        if (*line)
+            line++;
     }
 
     return argc;
@@ -514,44 +531,43 @@ static int GetArgs(const char *line, char **argv, int max_argc)
 
 static void KillArgs(char **argv, int argc)
 {
-    for (int i = 0; i < argc; i++) delete[] argv[i];
+    for (int i = 0; i < argc; i++)
+        delete[] argv[i];
 }
 
 //
 // Current console commands:
 //
-const ConsoleCommand builtin_commands[] = {
-    { "args", ConsoleCommandArgList },
-    { "cat", ConsoleCommandType },
-    { "cls", ConsoleCommandClear },
-    { "clear", ConsoleCommandClear },
-    { "crc", ConsoleCommandCrc },
-    { "dir", ConsoleCommandDir },
-    { "ls", ConsoleCommandDir },
-    { "endoom", ConsoleCommandEndoom },
-    { "exec", ConsoleCommandExec },
-    { "help", ConsoleCommandHelp },
-    { "map", ConsoleCommandMap },
-    { "warp", ConsoleCommandMap },  // compatibility
-    { "playsound", ConsoleCommandPlaySound },
-    { "readme", ConsoleCommandReadme },
-    { "openhome", ConsoleCommandOpenHome },
-    { "resetvars", ConsoleCommandResetVars },
-    { "showfiles", ConsoleCommandShowFiles },
-    { "showgamepads", ConsoleCommandShowGamepads },
-    { "showlumps", ConsoleCommandShowLumps },
-    { "showcmds", ConsoleCommandShowCmds },
-    { "showmaps", ConsoleCommandShowMaps },
-    { "showvars", ConsoleCommandShowVars },
-    { "screenshot", ConsoleCommandScreenShot },
-    { "type", ConsoleCommandType },
-    { "version", ConsoleCommandVersion },
-    { "quit", ConsoleCommandQuitEDGE },
-    { "exit", ConsoleCommandQuitEDGE },
+const ConsoleCommand builtin_commands[] = { { "args", ConsoleCommandArgList },
+                                            { "cat", ConsoleCommandType },
+                                            { "cls", ConsoleCommandClear },
+                                            { "clear", ConsoleCommandClear },
+                                            { "crc", ConsoleCommandCrc },
+                                            { "dir", ConsoleCommandDir },
+                                            { "ls", ConsoleCommandDir },
+                                            { "endoom", ConsoleCommandEndoom },
+                                            { "exec", ConsoleCommandExec },
+                                            { "help", ConsoleCommandHelp },
+                                            { "map", ConsoleCommandMap },
+                                            { "warp", ConsoleCommandMap }, // compatibility
+                                            { "playsound", ConsoleCommandPlaySound },
+                                            { "readme", ConsoleCommandReadme },
+                                            { "openhome", ConsoleCommandOpenHome },
+                                            { "resetvars", ConsoleCommandResetVars },
+                                            { "showfiles", ConsoleCommandShowFiles },
+                                            { "showgamepads", ConsoleCommandShowGamepads },
+                                            { "showlumps", ConsoleCommandShowLumps },
+                                            { "showcmds", ConsoleCommandShowCmds },
+                                            { "showmaps", ConsoleCommandShowMaps },
+                                            { "showvars", ConsoleCommandShowVars },
+                                            { "screenshot", ConsoleCommandScreenShot },
+                                            { "type", ConsoleCommandType },
+                                            { "version", ConsoleCommandVersion },
+                                            { "quit", ConsoleCommandQuitEDGE },
+                                            { "exit", ConsoleCommandQuitEDGE },
 
-    // end of list
-    { nullptr, nullptr }
-};
+                                            // end of list
+                                            { nullptr, nullptr } };
 
 static int FindCommand(const char *name)
 {
@@ -561,7 +577,7 @@ static int FindCommand(const char *name)
             return i;
     }
 
-    return -1;  // not found
+    return -1; // not found
 }
 
 void ConsoleTryCommand(const char *cmd)
@@ -569,7 +585,8 @@ void ConsoleTryCommand(const char *cmd)
     char *argv[kMaximumConsoleArguments];
     int   argc = GetArgs(cmd, argv, kMaximumConsoleArguments);
 
-    if (argc == 0) return;
+    if (argc == 0)
+        return;
 
     int index = FindCommand(argv[0]);
     if (index >= 0)
@@ -586,13 +603,12 @@ void ConsoleTryCommand(const char *cmd)
         if (argc <= 1)
         {
             if (var->flags_ & kConsoleVariableFlagFilepath)
-                LogPrint("%s \"%s\"\n", argv[0],
-                         epi::SanitizePath(var->s_).c_str());
+                LogPrint("%s \"%s\"\n", argv[0], epi::SanitizePath(var->s_).c_str());
             else
                 LogPrint("%s \"%s\"\n", argv[0], var->c_str());
         }
-        else if (argc - 1 >= 2)  // Assume string with spaces; concat args into
-                                 // one string and try it
+        else if (argc - 1 >= 2) // Assume string with spaces; concat args into
+                                // one string and try it
         {
             std::string concatter = argv[1];
             for (int i = 2; i < argc; i++)
@@ -631,7 +647,8 @@ int ConsoleMatchAllCmds(std::vector<const char *> &list, const char *pattern)
 
     for (int i = 0; builtin_commands[i].name; i++)
     {
-        if (!ConsoleMatchPattern(builtin_commands[i].name, pattern)) continue;
+        if (!ConsoleMatchPattern(builtin_commands[i].name, pattern))
+            continue;
 
         list.push_back(builtin_commands[i].name);
     }
@@ -651,7 +668,8 @@ void ConsolePlayerMessage(int plyr, const char *message, ...)
     va_list argptr;
     char    buffer[256];
 
-    if (console_player != plyr) return;
+    if (console_player != plyr)
+        return;
 
     va_start(argptr, message);
     vsnprintf(buffer, sizeof(buffer), message, argptr);
@@ -674,7 +692,8 @@ void ConsolePlayerMessageLDF(int plyr, const char *message, ...)
     va_list argptr;
     char    buffer[256];
 
-    if (console_player != plyr) return;
+    if (console_player != plyr)
+        return;
 
     message = language[message];
 

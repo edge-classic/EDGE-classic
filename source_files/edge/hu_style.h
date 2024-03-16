@@ -25,7 +25,7 @@ class Style
 {
     friend class StyleContainer;
 
-   public:
+  public:
     Style(StyleDefinition *definition);
     ~Style();
 
@@ -35,7 +35,7 @@ class Style
 
     const Image *background_image_;
 
-   public:
+  public:
     void Load();
 
     // Drawing functions
@@ -44,12 +44,13 @@ class Style
 
 class StyleContainer : public std::vector<Style *>
 {
-   public:
-    StyleContainer() {}
+  public:
+    StyleContainer()
+    {
+    }
     ~StyleContainer()
     {
-        for (std::vector<Style *>::iterator iter = begin(), iter_end = end();
-             iter != iter_end; iter++)
+        for (std::vector<Style *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
         {
             Style *s = *iter;
             delete s;
@@ -57,15 +58,14 @@ class StyleContainer : public std::vector<Style *>
         }
     }
 
-   public:
+  public:
     // Search Functions
     Style *Lookup(StyleDefinition *definition);
 };
 
 extern StyleContainer hud_styles;
 
-void HudWriteText(Style *style, int text_type, int x, int y, const char *str,
-                  float scale = 1.0f);
+void HudWriteText(Style *style, int text_type, int x, int y, const char *str, float scale = 1.0f);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

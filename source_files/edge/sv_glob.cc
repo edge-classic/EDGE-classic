@@ -62,69 +62,40 @@ struct GlobalCommand
 };
 
 static const GlobalCommand global_commands[] = {
-    { "GAME", SaveGlobalGetString, SaveGlobalPutString,
-      offsetof(SaveGlobals, game) },
-    { "LEVEL", SaveGlobalGetString, SaveGlobalPutString,
-      offsetof(SaveGlobals, level) },
-    { "FLAGS", SaveGlobalGetLevelFlags, SaveGlobalPutLevelFlags,
-      offsetof(SaveGlobals, flags) },
-    { "HUB_TAG", SaveGlobalGetInteger, SaveGlobalPutInteger,
-      offsetof(SaveGlobals, hub_tag) },
-    { "HUB_FIRST", SaveGlobalGetString, SaveGlobalPutString,
-      offsetof(SaveGlobals, hub_first) },
+    { "GAME", SaveGlobalGetString, SaveGlobalPutString, offsetof(SaveGlobals, game) },
+    { "LEVEL", SaveGlobalGetString, SaveGlobalPutString, offsetof(SaveGlobals, level) },
+    { "FLAGS", SaveGlobalGetLevelFlags, SaveGlobalPutLevelFlags, offsetof(SaveGlobals, flags) },
+    { "HUB_TAG", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, hub_tag) },
+    { "HUB_FIRST", SaveGlobalGetString, SaveGlobalPutString, offsetof(SaveGlobals, hub_first) },
 
-    { "GRAVITY", SaveGlobalGetInteger, SaveGlobalPutInteger,
-      offsetof(SaveGlobals, flags.menu_gravity_factor) },
-    { "LEVEL_TIME", SaveGlobalGetInteger, SaveGlobalPutInteger,
-      offsetof(SaveGlobals, level_time) },
-    { "EXIT_TIME", SaveGlobalGetInteger, SaveGlobalPutInteger,
-      offsetof(SaveGlobals, exit_time) },
-    { "P_RANDOM", SaveGlobalGetInteger, SaveGlobalPutInteger,
-      offsetof(SaveGlobals, p_random) },
+    { "GRAVITY", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, flags.menu_gravity_factor) },
+    { "LEVEL_TIME", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, level_time) },
+    { "EXIT_TIME", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, exit_time) },
+    { "P_RANDOM", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, p_random) },
 
-    { "TOTAL_KILLS", SaveGlobalGetInteger, SaveGlobalPutInteger,
-      offsetof(SaveGlobals, total_kills) },
-    { "TOTAL_ITEMS", SaveGlobalGetInteger, SaveGlobalPutInteger,
-      offsetof(SaveGlobals, total_items) },
-    { "TOTAL_SECRETS", SaveGlobalGetInteger, SaveGlobalPutInteger,
-      offsetof(SaveGlobals, total_secrets) },
-    { "CONSOLE_PLAYER", SaveGlobalGetInteger, SaveGlobalPutInteger,
-      offsetof(SaveGlobals, console_player) },
-    { "SKILL", SaveGlobalGetInteger, SaveGlobalPutInteger,
-      offsetof(SaveGlobals, skill) },
-    { "NETGAME", SaveGlobalGetInteger, SaveGlobalPutInteger,
-      offsetof(SaveGlobals, netgame) },
-    { "SKY_IMAGE", SaveGlobalGetImage, SaveGlobalPutImage,
-      offsetof(SaveGlobals, sky_image) },
+    { "TOTAL_KILLS", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, total_kills) },
+    { "TOTAL_ITEMS", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, total_items) },
+    { "TOTAL_SECRETS", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, total_secrets) },
+    { "CONSOLE_PLAYER", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, console_player) },
+    { "SKILL", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, skill) },
+    { "NETGAME", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, netgame) },
+    { "SKY_IMAGE", SaveGlobalGetImage, SaveGlobalPutImage, offsetof(SaveGlobals, sky_image) },
 
-    { "DESCRIPTION", SaveGlobalGetString, SaveGlobalPutString,
-      offsetof(SaveGlobals, description) },
-    { "DESC_DATE", SaveGlobalGetString, SaveGlobalPutString,
-      offsetof(SaveGlobals, desc_date) },
+    { "DESCRIPTION", SaveGlobalGetString, SaveGlobalPutString, offsetof(SaveGlobals, description) },
+    { "DESC_DATE", SaveGlobalGetString, SaveGlobalPutString, offsetof(SaveGlobals, desc_date) },
 
-    { "MAPSECTOR", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
-      offsetof(SaveGlobals, mapsector) },
-    { "MAPLINE", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
-      offsetof(SaveGlobals, mapline) },
-    { "MAPTHING", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
-      offsetof(SaveGlobals, mapthing) },
+    { "MAPSECTOR", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, mapsector) },
+    { "MAPLINE", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, mapline) },
+    { "MAPTHING", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, mapthing) },
 
-    { "RSCRIPT", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
-      offsetof(SaveGlobals, rscript) },
-    { "DDFATK", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
-      offsetof(SaveGlobals, ddfatk) },
-    { "DDFGAME", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
-      offsetof(SaveGlobals, ddfgame) },
-    { "DDFLEVL", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
-      offsetof(SaveGlobals, ddflevl) },
-    { "DDFLINE", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
-      offsetof(SaveGlobals, ddfline) },
-    { "DDFSECT", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
-      offsetof(SaveGlobals, ddfsect) },
-    { "DDFMOBJ", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
-      offsetof(SaveGlobals, ddfmobj) },
-    { "DDFWEAP", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
-      offsetof(SaveGlobals, ddfweap) },
+    { "RSCRIPT", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, rscript) },
+    { "DDFATK", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfatk) },
+    { "DDFGAME", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfgame) },
+    { "DDFLEVL", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddflevl) },
+    { "DDFLINE", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfline) },
+    { "DDFSECT", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfsect) },
+    { "DDFMOBJ", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfmobj) },
+    { "DDFWEAP", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfweap) },
 
     { nullptr, nullptr, nullptr, 0 }
 };
@@ -195,9 +166,7 @@ static void SaveGlobalGetLevelFlags(const char *info, void *storage)
     dest->pass_missile       = (flags & kMapFlagPassMissile) ? true : false;
     dest->team_damage        = (flags & kMapFlagTeamDamage) ? true : false;
     dest->autoaim =
-        (flags & kMapFlagAutoAim)
-            ? ((flags & kMapFlagAutoAimMlook) ? kAutoAimMouselook : kAutoAimOn)
-            : kAutoAimOff;
+        (flags & kMapFlagAutoAim) ? ((flags & kMapFlagAutoAimMlook) ? kAutoAimMouselook : kAutoAimOn) : kAutoAimOff;
 }
 
 static void SaveGlobalGetImage(const char *info, void *storage)
@@ -243,7 +212,8 @@ static const char *SaveGlobalPutString(void *storage)
 
     EPI_ASSERT(storage);
 
-    if (*src == nullptr) return SaveChunkCopyString("");
+    if (*src == nullptr)
+        return SaveChunkCopyString("");
 
     return SaveChunkCopyString(*src);
 }
@@ -269,24 +239,42 @@ static const char *SaveGlobalPutLevelFlags(void *storage)
 
     flags = 0;
 
-    if (src->jump) flags |= kMapFlagJumping;
-    if (src->crouch) flags |= kMapFlagCrouching;
-    if (src->mouselook) flags |= kMapFlagMlook;
-    if (src->items_respawn) flags |= kMapFlagItemRespawn;
-    if (src->fast_monsters) flags |= kMapFlagFastParm;
-    if (src->true_3d_gameplay) flags |= kMapFlagTrue3D;
-    if (src->more_blood) flags |= kMapFlagMoreBlood;
-    if (src->cheats) flags |= kMapFlagCheats;
-    if (src->enemies_respawn) flags |= kMapFlagRespawn;
-    if (src->enemy_respawn_mode) flags |= kMapFlagResRespawn;
-    if (src->have_extra) flags |= kMapFlagExtras;
-    if (src->limit_zoom) flags |= kMapFlagLimitZoom;
-    if (src->kicking) flags |= kMapFlagKicking;
-    if (src->weapon_switch) flags |= kMapFlagWeaponSwitch;
-    if (src->pass_missile) flags |= kMapFlagPassMissile;
-    if (src->team_damage) flags |= kMapFlagTeamDamage;
-    if (src->autoaim != kAutoAimOff) flags |= kMapFlagAutoAim;
-    if (src->autoaim == kAutoAimMouselook) flags |= kMapFlagAutoAimMlook;
+    if (src->jump)
+        flags |= kMapFlagJumping;
+    if (src->crouch)
+        flags |= kMapFlagCrouching;
+    if (src->mouselook)
+        flags |= kMapFlagMlook;
+    if (src->items_respawn)
+        flags |= kMapFlagItemRespawn;
+    if (src->fast_monsters)
+        flags |= kMapFlagFastParm;
+    if (src->true_3d_gameplay)
+        flags |= kMapFlagTrue3D;
+    if (src->more_blood)
+        flags |= kMapFlagMoreBlood;
+    if (src->cheats)
+        flags |= kMapFlagCheats;
+    if (src->enemies_respawn)
+        flags |= kMapFlagRespawn;
+    if (src->enemy_respawn_mode)
+        flags |= kMapFlagResRespawn;
+    if (src->have_extra)
+        flags |= kMapFlagExtras;
+    if (src->limit_zoom)
+        flags |= kMapFlagLimitZoom;
+    if (src->kicking)
+        flags |= kMapFlagKicking;
+    if (src->weapon_switch)
+        flags |= kMapFlagWeaponSwitch;
+    if (src->pass_missile)
+        flags |= kMapFlagPassMissile;
+    if (src->team_damage)
+        flags |= kMapFlagTeamDamage;
+    if (src->autoaim != kAutoAimOff)
+        flags |= kMapFlagAutoAim;
+    if (src->autoaim == kAutoAimMouselook)
+        flags |= kMapFlagAutoAimMlook;
 
     return SaveGlobalPutInteger(&flags);
 }
@@ -300,7 +288,8 @@ static const char *SaveGlobalPutImage(void *storage)
 
     EPI_ASSERT(storage);
 
-    if (*src == nullptr) return SaveChunkCopyString("");
+    if (*src == nullptr)
+        return SaveChunkCopyString("");
 
     ImageMakeSaveString(*src, buffer, buffer + 2);
     buffer[1] = ':';
@@ -334,7 +323,8 @@ void SaveGlobalsFree(SaveGlobals *globs)
     SaveChunkFreeString(globs->description);
     SaveChunkFreeString(globs->desc_date);
 
-    if (globs->wad_names) delete[] globs->wad_names;
+    if (globs->wad_names)
+        delete[] globs->wad_names;
 
     delete globs;
 }
@@ -352,7 +342,8 @@ static bool GlobalReadVariable(SaveGlobals *globs)
     int   i;
     void *storage;
 
-    if (!SavePushReadChunk("Vari")) return false;
+    if (!SavePushReadChunk("Vari"))
+        return false;
 
     var_name = SaveChunkGetString();
     var_data = SaveChunkGetString();
@@ -368,7 +359,8 @@ static bool GlobalReadVariable(SaveGlobals *globs)
     // find variable in list
     for (i = 0; global_commands[i].name; i++)
     {
-        if (strcmp(global_commands[i].name, var_name) == 0) break;
+        if (strcmp(global_commands[i].name, var_name) == 0)
+            break;
     }
 
     if (global_commands[i].name)
@@ -378,7 +370,10 @@ static bool GlobalReadVariable(SaveGlobals *globs)
 
         (*global_commands[i].parse_function)(var_data, storage);
     }
-    else { LogDebug("GlobalReadVariable: unknown global: %s\n", var_name); }
+    else
+    {
+        LogDebug("GlobalReadVariable: unknown global: %s\n", var_name);
+    }
 
     SaveChunkFreeString(var_name);
     SaveChunkFreeString(var_data);
@@ -388,7 +383,8 @@ static bool GlobalReadVariable(SaveGlobals *globs)
 
 static bool GlobalReadWads(SaveGlobals *glob)
 {
-    if (!SavePushReadChunk("Wads")) return false;
+    if (!SavePushReadChunk("Wads"))
+        return false;
 
     //!!! IMPLEMENT THIS
 
@@ -413,9 +409,11 @@ SaveGlobals *SaveGlobalsLoad(void)
 
     for (;;)
     {
-        if (SaveGetError() != 0) break;  /// set error !!
+        if (SaveGetError() != 0)
+            break; /// set error !!
 
-        if (SaveRemainingChunkSize() == 0) break;
+        if (SaveRemainingChunkSize() == 0)
+            break;
 
         SaveChunkGetMarker(marker);
 
@@ -433,10 +431,11 @@ SaveGlobals *SaveGlobalsLoad(void)
         // skip chunk
         LogWarning("LOADGAME: Unknown GLOB chunk [%s]\n", marker);
 
-        if (!SaveSkipReadChunk(marker)) break;
+        if (!SaveSkipReadChunk(marker))
+            break;
     }
 
-    SavePopReadChunk();  /// check err
+    SavePopReadChunk(); /// check err
 
     return globs;
 }
@@ -470,7 +469,8 @@ static void GlobalWriteWads(SaveGlobals *globs)
 {
     int i;
 
-    if (!globs->wad_names) return;
+    if (!globs->wad_names)
+        return;
 
     EPI_ASSERT(globs->wad_num > 0);
 

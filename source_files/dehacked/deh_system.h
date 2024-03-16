@@ -34,4 +34,4 @@ void SetErrorMsg(const char *str, ...);
 #endif
 const char *GetErrorMsg(void);
 
-}  // namespace dehacked
+} // namespace dehacked

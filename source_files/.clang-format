@@ -1,33 +1,10 @@
-BasedOnStyle: Google
+BasedOnStyle: Microsoft
 AlignConsecutiveAssignments: Consecutive
+AlignConsecutiveBitFields: Consecutive
 AlignConsecutiveDeclarations: Consecutive
 AlignConsecutiveMacros: Consecutive
-AlignEscapedNewlines: Right
-AlignTrailingComments: Always
-AllowShortBlocksOnASingleLine: Always
-AllowShortCaseLabelsOnASingleLine: false
-AllowShortEnumsOnASingleLine: false
-AllowShortIfStatementsOnASingleLine: WithoutElse
-SortIncludes: true
-BreakBeforeBraces: Allman
-BreakBeforeTernaryOperators: true
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 2
 Cpp11BracedListStyle: false
-EmptyLineAfterAccessModifier: Never
-EmptyLineBeforeAccessModifier: LogicalBlock
-KeepEmptyLinesAtTheStartOfBlocks: false
-IndentWidth: 4
-PointerAlignment: Right
-ReferenceAlignment: Right
-SpaceAfterCStyleCast: false
-SpaceAfterLogicalNot: false
-SpaceBeforeAssignmentOperators: true
-SpaceBeforeCaseColon: false
-SpaceBeforeCpp11BracedList: false
-SpaceBeforeCtorInitializerColon: true
-SpaceBeforeInheritanceColon: true
-SpaceBeforeRangeBasedForLoopColon: true
-SpaceBeforeSquareBrackets: false
-SpaceInEmptyBlock: false
-SpacesInAngles: false
-SpacesInSquareBrackets: false
-UseTab: Never
+SortIncludes: true

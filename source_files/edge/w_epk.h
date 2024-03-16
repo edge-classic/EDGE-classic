@@ -24,8 +24,7 @@ class PackFile;
 
 epi::File *PackOpenFile(PackFile *pack, const std::string &name);
 
-epi::File *PackOpenMatch(PackFile *pack, const std::string &name,
-                         const std::vector<std::string> &extensions);
+epi::File *PackOpenMatch(PackFile *pack, const std::string &name, const std::vector<std::string> &extensions);
 
 // Equivalent to IsLumpInPwad....doesn't care or check filetype itself
 int PackFindStem(PackFile *pack, const std::string &name);

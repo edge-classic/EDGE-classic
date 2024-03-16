@@ -63,8 +63,7 @@ void ArgumentParse(const int argc, const char *const *argv)
     wchar_t **win_argv = CommandLineToArgvW(GetCommandLineW(), &win_argc);
 
     if (!win_argv)
-        FatalError(
-            "ArgumentParse: Could not retrieve command line arguments!\n");
+        FatalError("ArgumentParse: Could not retrieve command line arguments!\n");
 
     program_argument_list.reserve(win_argc);
 
@@ -88,7 +87,7 @@ void ArgumentParse(const int argc, const char *const *argv)
         }
 
         if (argv_block[i][0] == '@')
-        {  // add it as a response file
+        { // add it as a response file
             ArgumentApplyResponseFile(&argv_block[i][1]);
             continue;
         }
@@ -108,7 +107,8 @@ void ArgumentParse(const int argc, const char *const *argv)
 
 #ifdef __APPLE__
         // ignore MacOS X rubbish
-        if (argv[i] == "-psn") continue;
+        if (argv[i] == "-psn")
+            continue;
 #endif
         // Just place argv[0] as is
         if (i == 0)
@@ -118,7 +118,7 @@ void ArgumentParse(const int argc, const char *const *argv)
         }
 
         if (argv[i][0] == '@')
-        {  // add it as a response file
+        { // add it as a response file
             ArgumentApplyResponseFile(&argv[i][1]);
             continue;
         }
@@ -132,26 +132,29 @@ int ArgumentFind(std::string_view long_name, int *total_parameters)
 {
     EPI_ASSERT(!long_name.empty());
 
-    if (total_parameters) *total_parameters = 0;
+    if (total_parameters)
+        *total_parameters = 0;
 
     size_t p = 0;
 
     for (; p < program_argument_list.size(); ++p)
     {
-        if (!ArgumentIsOption(p)) continue;
+        if (!ArgumentIsOption(p))
+            continue;
 
-        if (epi::StringCaseCompareASCII(
-                long_name, program_argument_list[p].substr(1)) == 0)
+        if (epi::StringCaseCompareASCII(long_name, program_argument_list[p].substr(1)) == 0)
             break;
     }
 
-    if (p == program_argument_list.size()) return -1;
+    if (p == program_argument_list.size())
+        return -1;
 
     if (total_parameters)
     {
         size_t q = p + 1;
 
-        while (q < program_argument_list.size() && !ArgumentIsOption(q)) ++q;
+        while (q < program_argument_list.size() && !ArgumentIsOption(q))
+            ++q;
 
         *total_parameters = q - p - 1;
     }
@@ -165,10 +168,10 @@ std::string ArgumentValue(std::string_view long_name, int *total_parameters)
 
     int pos = ArgumentFind(long_name, total_parameters);
 
-    if (pos <= 0) return "";
+    if (pos <= 0)
+        return "";
 
-    if (pos + 1 < int(program_argument_list.size()) &&
-        !ArgumentIsOption(pos + 1))
+    if (pos + 1 < int(program_argument_list.size()) && !ArgumentIsOption(pos + 1))
         return program_argument_list[pos + 1];
     else
         return "";
@@ -178,8 +181,7 @@ std::string ArgumentValue(std::string_view long_name, int *total_parameters)
 // present, sets it to false if parm prefixed with `-no' is present,
 // otherwise leaves it unchanged.
 //
-void ArgumentCheckBooleanParameter(const std::string &parameter,
-                                   bool *boolean_value, bool reverse)
+void ArgumentCheckBooleanParameter(const std::string &parameter, bool *boolean_value, bool reverse)
 {
     if (ArgumentFind(parameter) > 0)
     {
@@ -194,9 +196,7 @@ void ArgumentCheckBooleanParameter(const std::string &parameter,
     }
 }
 
-void ArgumentCheckBooleanConsoleVariable(const std::string &parameter,
-                                         ConsoleVariable   *variable,
-                                         bool               reverse)
+void ArgumentCheckBooleanConsoleVariable(const std::string &parameter, ConsoleVariable *variable, bool reverse)
 {
     if (ArgumentFind(parameter) > 0)
     {
@@ -219,10 +219,12 @@ static int ParseOneFilename(FILE *fp, char *buf)
     int ch;
 
     // skip whitespace
-    do {
+    do
+    {
         ch = fgetc(fp);
 
-        if (ch == EOF) return EOF;
+        if (ch == EOF)
+            return EOF;
     } while (epi::IsSpaceASCII(ch));
 
     bool quoting = false;
@@ -236,7 +238,8 @@ static int ParseOneFilename(FILE *fp, char *buf)
             continue;
         }
 
-        if (ch == EOF || (epi::IsSpaceASCII(ch) && !quoting)) break;
+        if (ch == EOF || (epi::IsSpaceASCII(ch) && !quoting))
+            break;
 
         *buf++ = ch;
 
@@ -261,7 +264,8 @@ void ArgumentApplyResponseFile(std::string_view name)
     // check if the file has already been added
     for (p = added_parameters; p; p = p->next)
     {
-        if (epi::StringCompare(p->name, name) == 0) return;
+        if (epi::StringCompare(p->name, name) == 0)
+            return;
     }
 
     // mark that this file has been added
@@ -292,12 +296,10 @@ void ArgumentDebugDump(void)
     {
         bool pair_it_up = false;
 
-        if (i > 0 && i + 1 < int(program_argument_list.size()) &&
-            !ArgumentIsOption(i + 1))
+        if (i > 0 && i + 1 < int(program_argument_list.size()) && !ArgumentIsOption(i + 1))
             pair_it_up = true;
 
-        LogPrint("  %s %s\n", program_argument_list[i].c_str(),
-                 pair_it_up ? program_argument_list[i + 1].c_str() : "");
+        LogPrint("  %s %s\n", program_argument_list[i].c_str(), pair_it_up ? program_argument_list[i + 1].c_str() : "");
 
         i += pair_it_up ? 2 : 1;
     }

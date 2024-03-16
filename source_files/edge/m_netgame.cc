@@ -73,52 +73,37 @@ static int host_want_bots;
 
 static void ListAccept(void);
 
-EDGE_DEFINE_CONSOLE_VARIABLE(player_deathmatch_damage_resistance, "9",
-                             kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(player_deathmatch_damage_resistance, "9", kConsoleVariableFlagArchive)
 
-static void DrawKeyword(int index, Style *style, int y, const char *keyword,
-                        const char *value)
+static void DrawKeyword(int index, Style *style, int y, const char *keyword, const char *value)
 {
     int x = 160;
 
     bool is_selected = (index == host_position);
 
     x = x - 10;
-    x = x -
-        (style->fonts_[StyleDefinition::kTextSectionText]->StringWidth(
-             keyword) *
-         style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
+    x = x - (style->fonts_[StyleDefinition::kTextSectionText]->StringWidth(keyword) *
+             style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
     HudWriteText(style, (index < 0) ? 3 : is_selected ? 2 : 0, x, y, keyword);
 
     x = 160;
-    HudWriteText(style, StyleDefinition::kTextSectionAlternate, x + 10, y,
-                 value);
+    HudWriteText(style, StyleDefinition::kTextSectionAlternate, x + 10, y, value);
 
     if (is_selected)
     {
-        if (style->fonts_[StyleDefinition::kTextSectionAlternate]
-                ->definition_->type_ == kFontTypeImage)
+        if (style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeImage)
         {
             int cursor = 16;
             HudWriteText(style, StyleDefinition::kTextSectionTitle,
-                         x - style->fonts_[StyleDefinition::kTextSectionTitle]
-                                     ->StringWidth((const char *)&cursor) /
-                                 2,
+                         x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth((const char *)&cursor) / 2,
                          y, (const char *)&cursor);
         }
-        else if (style->fonts_[StyleDefinition::kTextSectionAlternate]
-                     ->definition_->type_ == kFontTypeTrueType)
+        else if (style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType)
             HudWriteText(style, StyleDefinition::kTextSectionTitle,
-                         x - style->fonts_[StyleDefinition::kTextSectionTitle]
-                                     ->StringWidth("+") /
-                                 2,
-                         y, "+");
+                         x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth("+") / 2, y, "+");
         else
             HudWriteText(style, StyleDefinition::kTextSectionTitle,
-                         x - style->fonts_[StyleDefinition::kTextSectionTitle]
-                                     ->StringWidth("*") /
-                                 2,
-                         y, "*");
+                         x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth("*") / 2, y, "*");
     }
 }
 
@@ -126,14 +111,14 @@ static const char *GetModeName(char mode)
 {
     switch (mode)
     {
-        case 0:
-            return language["BotCoop"];
-        case 1:
-            return language["BotOldDM"];
-        case 2:
-            return language["BotNewDM"];
-        default:
-            return "????";
+    case 0:
+        return language["BotCoop"];
+    case 1:
+        return language["BotOldDM"];
+    case 2:
+        return language["BotNewDM"];
+    default:
+        return "????";
     }
 }
 
@@ -141,19 +126,19 @@ static const char *GetSkillName(SkillLevel skill)
 {
     switch (skill)
     {
-        case kSkillBaby:
-            return language["MenuDifficulty1"];
-        case kSkillEasy:
-            return language["MenuDifficulty2"];
-        case kSkillMedium:
-            return language["MenuDifficulty3"];
-        case kSkillHard:
-            return language["MenuDifficulty4"];
-        case kSkillNightmare:
-            return language["MenuDifficulty5"];
+    case kSkillBaby:
+        return language["MenuDifficulty1"];
+    case kSkillEasy:
+        return language["MenuDifficulty2"];
+    case kSkillMedium:
+        return language["MenuDifficulty3"];
+    case kSkillHard:
+        return language["MenuDifficulty4"];
+    case kSkillNightmare:
+        return language["MenuDifficulty5"];
 
-        default:
-            return "????";
+    default:
+        return "????";
     }
 }
 
@@ -161,19 +146,19 @@ static const char *GetBotSkillName(int sk)
 {
     switch (sk)
     {
-        case 0:
-            return language["BotDifficulty1"];
-        case 1:
-            return language["BotDifficulty2"];
-        case 2:
-            return language["BotDifficulty3"];
-        case 3:
-            return language["BotDifficulty4"];
-        case 4:
-            return language["BotDifficulty5"];
+    case 0:
+        return language["BotDifficulty1"];
+    case 1:
+        return language["BotDifficulty2"];
+    case 2:
+        return language["BotDifficulty3"];
+    case 3:
+        return language["BotDifficulty4"];
+    case 4:
+        return language["BotDifficulty5"];
 
-        default:
-            return "????";
+    default:
+        return "????";
     }
 }
 
@@ -181,47 +166,47 @@ static const char *GetPlayerDamageResistanceNameName(int res)
 {
     switch (res)
     {
-        case 0:
-            return "-90%";
-        case 1:
-            return "-80%";
-        case 2:
-            return "-70%";
-        case 3:
-            return "-60%";
-        case 4:
-            return "-50%";
-        case 5:
-            return "-40%";
-        case 6:
-            return "-30%";
-        case 7:
-            return "-20%";
-        case 8:
-            return "-10%";
-        case 9:
-            return "Normal";
-        case 10:
-            return "+10%";
-        case 11:
-            return "+20%";
-        case 12:
-            return "+30%";
-        case 13:
-            return "+40%";
-        case 14:
-            return "+50%";
-        case 15:
-            return "+60%";
-        case 16:
-            return "+70%";
-        case 17:
-            return "+80%";
-        case 18:
-            return "+90%";
+    case 0:
+        return "-90%";
+    case 1:
+        return "-80%";
+    case 2:
+        return "-70%";
+    case 3:
+        return "-60%";
+    case 4:
+        return "-50%";
+    case 5:
+        return "-40%";
+    case 6:
+        return "-30%";
+    case 7:
+        return "-20%";
+    case 8:
+        return "-10%";
+    case 9:
+        return "Normal";
+    case 10:
+        return "+10%";
+    case 11:
+        return "+20%";
+    case 12:
+        return "+30%";
+    case 13:
+        return "+40%";
+    case 14:
+        return "+50%";
+    case 15:
+        return "+60%";
+    case 16:
+        return "+70%";
+    case 17:
+        return "+80%";
+    case 18:
+        return "+90%";
 
-        default:
-            return "????";
+    default:
+        return "????";
     }
 }
 
@@ -231,7 +216,8 @@ void OptionMenuNetworkHostBegun(void)
 {
     host_position = 0;
 
-    if (network_game_parameters) delete network_game_parameters;
+    if (network_game_parameters)
+        delete network_game_parameters;
 
     network_game_parameters = new NewGameParameters;
 
@@ -254,32 +240,31 @@ static void ChangeGame(NewGameParameters *param, int dir)
     {
         MapDefinition *first_map = mapdefs.Lookup(def->firstmap_.c_str());
 
-        if (!first_map || !GameMapExists(first_map)) continue;
+        if (!first_map || !GameMapExists(first_map))
+            continue;
 
         const char *old_name = param->map_->episode_->name_.c_str();
         const char *new_name = def->name_.c_str();
 
         int compare = DDF_CompareName(new_name, old_name);
 
-        if (compare == 0) continue;
+        if (compare == 0)
+            continue;
 
         if (compare * dir > 0)
         {
-            if (!closest ||
-                dir * DDF_CompareName(new_name, closest->name_.c_str()) < 0)
+            if (!closest || dir * DDF_CompareName(new_name, closest->name_.c_str()) < 0)
                 closest = def;
         }
         else
         {
-            if (!furthest ||
-                dir * DDF_CompareName(new_name, furthest->name_.c_str()) < 0)
+            if (!furthest || dir * DDF_CompareName(new_name, furthest->name_.c_str()) < 0)
                 furthest = def;
         }
     }
 
     LogDebug("DIR: %d  CURRENT: %s   CLOSEST: %s   FURTHEST: %s\n", dir,
-             network_game_parameters->map_->episode_->name_.c_str(),
-             closest ? closest->name_.c_str() : "none",
+             network_game_parameters->map_->episode_->name_.c_str(), closest ? closest->name_.c_str() : "none",
              furthest ? furthest->name_.c_str() : "none");
 
     if (closest)
@@ -305,25 +290,25 @@ static void ChangeLevel(NewGameParameters *param, int dir)
 
     for (MapDefinition *def : mapdefs)
     {
-        if (def->episode_ != param->map_->episode_) continue;
+        if (def->episode_ != param->map_->episode_)
+            continue;
 
         const char *old_name = param->map_->name_.c_str();
         const char *new_name = def->name_.c_str();
 
         int compare = DDF_CompareName(new_name, old_name);
 
-        if (compare == 0) continue;
+        if (compare == 0)
+            continue;
 
         if (compare * dir > 0)
         {
-            if (!closest ||
-                dir * DDF_CompareName(new_name, closest->name_.c_str()) < 0)
+            if (!closest || dir * DDF_CompareName(new_name, closest->name_.c_str()) < 0)
                 closest = def;
         }
         else
         {
-            if (!furthest ||
-                dir * DDF_CompareName(new_name, furthest->name_.c_str()) < 0)
+            if (!furthest || dir * DDF_CompareName(new_name, furthest->name_.c_str()) < 0)
                 furthest = def;
         }
     }
@@ -335,7 +320,8 @@ static void ChangeLevel(NewGameParameters *param, int dir)
     }
 
     // could not find the next/previous map, hence wrap around
-    if (furthest) param->map_ = furthest;
+    if (furthest)
+        param->map_ = furthest;
 }
 
 static void HostChangeOption(int opt, int key)
@@ -344,90 +330,83 @@ static void HostChangeOption(int opt, int key)
 
     switch (opt)
     {
-        case 0:  // Game
-            ChangeGame(network_game_parameters, dir);
-            break;
+    case 0: // Game
+        ChangeGame(network_game_parameters, dir);
+        break;
 
-        case 1:  // Level
-            ChangeLevel(network_game_parameters, dir);
-            break;
+    case 1: // Level
+        ChangeLevel(network_game_parameters, dir);
+        break;
 
-        case 2:  // Mode
+    case 2: // Mode
+    {
+        network_game_parameters->deathmatch_ += dir;
+
+        if (network_game_parameters->deathmatch_ < 0)
+            network_game_parameters->deathmatch_ = 2;
+        else if (network_game_parameters->deathmatch_ > 2)
+            network_game_parameters->deathmatch_ = 0;
+
+        break;
+    }
+
+    case 3: // Skill
+        network_game_parameters->skill_ = (SkillLevel)((int)network_game_parameters->skill_ + dir);
+        if ((int)network_game_parameters->skill_ < (int)kSkillBaby || (int)network_game_parameters->skill_ > 250)
+            network_game_parameters->skill_ = kSkillNightmare;
+        else if ((int)network_game_parameters->skill_ > (int)kSkillNightmare)
+            network_game_parameters->skill_ = kSkillBaby;
+
+        break;
+
+    case 4: // Bots
+        host_want_bots += dir;
+
+        if (host_want_bots < 0)
+            host_want_bots = 3;
+        else if (host_want_bots > 3)
+            host_want_bots = 0;
+
+        break;
+
+    case 5: // Bot Skill
+        bot_skill = bot_skill.d_ + dir;
+        bot_skill = HMM_Clamp(0, bot_skill.d_, 4);
+
+        break;
+
+    case 6:
+        player_deathmatch_damage_resistance = player_deathmatch_damage_resistance.d_ + dir;
+        player_deathmatch_damage_resistance = HMM_Clamp(0, player_deathmatch_damage_resistance.d_, 18);
+
+        break;
+
+    case 7: // Monsters
+        if (network_game_parameters->flags_->fast_monsters)
         {
-            network_game_parameters->deathmatch_ += dir;
-
-            if (network_game_parameters->deathmatch_ < 0)
-                network_game_parameters->deathmatch_ = 2;
-            else if (network_game_parameters->deathmatch_ > 2)
-                network_game_parameters->deathmatch_ = 0;
-
-            break;
+            network_game_parameters->flags_->fast_monsters = false;
+            network_game_parameters->flags_->no_monsters   = (dir > 0);
         }
+        else if (network_game_parameters->flags_->no_monsters == (dir < 0))
+        {
+            network_game_parameters->flags_->fast_monsters = true;
+            network_game_parameters->flags_->no_monsters   = false;
+        }
+        else
+            network_game_parameters->flags_->no_monsters = (dir < 0);
 
-        case 3:  // Skill
-            network_game_parameters->skill_ =
-                (SkillLevel)((int)network_game_parameters->skill_ + dir);
-            if ((int)network_game_parameters->skill_ < (int)kSkillBaby ||
-                (int)network_game_parameters->skill_ > 250)
-                network_game_parameters->skill_ = kSkillNightmare;
-            else if ((int)network_game_parameters->skill_ >
-                     (int)kSkillNightmare)
-                network_game_parameters->skill_ = kSkillBaby;
+        break;
 
-            break;
+    case 8: // Item-Respawn
+        network_game_parameters->flags_->items_respawn = !network_game_parameters->flags_->items_respawn;
+        break;
 
-        case 4:  // Bots
-            host_want_bots += dir;
+    case 9: // Team-Damage
+        network_game_parameters->flags_->team_damage = !network_game_parameters->flags_->team_damage;
+        break;
 
-            if (host_want_bots < 0)
-                host_want_bots = 3;
-            else if (host_want_bots > 3)
-                host_want_bots = 0;
-
-            break;
-
-        case 5:  // Bot Skill
-            bot_skill = bot_skill.d_ + dir;
-            bot_skill = HMM_Clamp(0, bot_skill.d_, 4);
-
-            break;
-
-        case 6:
-            player_deathmatch_damage_resistance =
-                player_deathmatch_damage_resistance.d_ + dir;
-            player_deathmatch_damage_resistance =
-                HMM_Clamp(0, player_deathmatch_damage_resistance.d_, 18);
-
-            break;
-
-        case 7:  // Monsters
-            if (network_game_parameters->flags_->fast_monsters)
-            {
-                network_game_parameters->flags_->fast_monsters = false;
-                network_game_parameters->flags_->no_monsters   = (dir > 0);
-            }
-            else if (network_game_parameters->flags_->no_monsters == (dir < 0))
-            {
-                network_game_parameters->flags_->fast_monsters = true;
-                network_game_parameters->flags_->no_monsters   = false;
-            }
-            else
-                network_game_parameters->flags_->no_monsters = (dir < 0);
-
-            break;
-
-        case 8:  // Item-Respawn
-            network_game_parameters->flags_->items_respawn =
-                !network_game_parameters->flags_->items_respawn;
-            break;
-
-        case 9:  // Team-Damage
-            network_game_parameters->flags_->team_damage =
-                !network_game_parameters->flags_->team_damage;
-            break;
-
-        default:
-            break;
+    default:
+        break;
     }
 }
 
@@ -454,80 +433,60 @@ void OptionMenuDrawHostMenu(void)
     int CenterX;
     CenterX = 160;
     CenterX -=
-        (network_game_host_style->fonts_[StyleDefinition::kTextSectionHeader]
-             ->StringWidth("Bot Match Settings") *
-         network_game_host_style->definition_
-             ->text_[StyleDefinition::kTextSectionHeader]
-             .scale_) /
+        (network_game_host_style->fonts_[StyleDefinition::kTextSectionHeader]->StringWidth("Bot Match Settings") *
+         network_game_host_style->definition_->text_[StyleDefinition::kTextSectionHeader].scale_) /
         2;
 
-    HudWriteText(network_game_host_style, StyleDefinition::kTextSectionHeader,
-                 CenterX, 25, "Bot Match Settings");
+    HudWriteText(network_game_host_style, StyleDefinition::kTextSectionHeader, CenterX, 25, "Bot Match Settings");
 
-    int y   = 40;
-    int idx = 0;
-    int deltay =
-        2 +
-        (network_game_host_style->fonts_[StyleDefinition::kTextSectionText]
-             ->NominalHeight() *
-         network_game_host_style->definition_
-             ->text_[StyleDefinition::kTextSectionText]
-             .scale_) +
-        network_game_host_style->definition_->entry_spacing_;
+    int y      = 40;
+    int idx    = 0;
+    int deltay = 2 +
+                 (network_game_host_style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight() *
+                  network_game_host_style->definition_->text_[StyleDefinition::kTextSectionText].scale_) +
+                 network_game_host_style->definition_->entry_spacing_;
 
     if (!network_game_parameters->map_->episode_->description_.empty())
         DrawKeyword(idx, network_game_host_style, y, "Episode",
-                    language[network_game_parameters->map_->episode_
-                                 ->description_.c_str()]);
+                    language[network_game_parameters->map_->episode_->description_.c_str()]);
     else
-        DrawKeyword(
-            idx, network_game_host_style, y, "Episode",
-            language[network_game_parameters->map_->episode_name_.c_str()]);
+        DrawKeyword(idx, network_game_host_style, y, "Episode",
+                    language[network_game_parameters->map_->episode_name_.c_str()]);
 
     y += deltay;
     idx++;
 
-    DrawKeyword(idx, network_game_host_style, y, "Level",
-                network_game_parameters->map_->name_.c_str());
+    DrawKeyword(idx, network_game_host_style, y, "Level", network_game_parameters->map_->name_.c_str());
     y += deltay + (deltay / 2);
     idx++;
 
-    DrawKeyword(idx, network_game_host_style, y, "Mode",
-                GetModeName(network_game_parameters->deathmatch_));
+    DrawKeyword(idx, network_game_host_style, y, "Mode", GetModeName(network_game_parameters->deathmatch_));
     y += deltay;
     idx++;
 
-    DrawKeyword(idx, network_game_host_style, y, "Skill",
-                GetSkillName(network_game_parameters->skill_));
+    DrawKeyword(idx, network_game_host_style, y, "Skill", GetSkillName(network_game_parameters->skill_));
     y += deltay;
     idx++;
 
-    DrawKeyword(idx, network_game_host_style, y, "Bots",
-                epi::StringFormat("%d", host_want_bots).c_str());
+    DrawKeyword(idx, network_game_host_style, y, "Bots", epi::StringFormat("%d", host_want_bots).c_str());
     y += deltay;
     idx++;
 
     int skill = HMM_Clamp(0, bot_skill.d_, 4);
-    DrawKeyword(idx, network_game_host_style, y, "Bot Skill",
-                GetBotSkillName(skill));
+    DrawKeyword(idx, network_game_host_style, y, "Bot Skill", GetBotSkillName(skill));
     y += deltay;
     idx++;
 
-    int dm_damage_resistance =
-        HMM_Clamp(0, player_deathmatch_damage_resistance.d_, 18);
+    int dm_damage_resistance = HMM_Clamp(0, player_deathmatch_damage_resistance.d_, 18);
     DrawKeyword(idx, network_game_host_style, y, "Player Damage Resistance",
                 GetPlayerDamageResistanceNameName(dm_damage_resistance));
     y += deltay;
     idx++;
 
-    int x = 150 -
-            (network_game_host_style->fonts_[StyleDefinition::kTextSectionText]
-                 ->StringWidth("(Deathmatch Only)") *
-             network_game_host_style->definition_
-                 ->text_[StyleDefinition::kTextSectionText]
-                 .scale_);
-    HudWriteText(network_game_host_style, idx - 1 == host_position ? 2 : 0, x,
-                 y, "(Deathmatch Only)");
+    int x =
+        150 - (network_game_host_style->fonts_[StyleDefinition::kTextSectionText]->StringWidth("(Deathmatch Only)") *
+               network_game_host_style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
+    HudWriteText(network_game_host_style, idx - 1 == host_position ? 2 : 0, x, y, "(Deathmatch Only)");
     y += deltay;
 
     DrawKeyword(idx, network_game_host_style, y, "Monsters",
@@ -548,17 +507,12 @@ void OptionMenuDrawHostMenu(void)
     idx++;
 
     CenterX = 160;
-    CenterX -=
-        (network_game_host_style->fonts_[StyleDefinition::kTextSectionText]
-             ->StringWidth("Start") *
-         network_game_host_style->definition_
-             ->text_[StyleDefinition::kTextSectionText]
-             .scale_) /
-        2;
+    CenterX -= (network_game_host_style->fonts_[StyleDefinition::kTextSectionText]->StringWidth("Start") *
+                network_game_host_style->definition_->text_[StyleDefinition::kTextSectionText].scale_) /
+               2;
 
     HudWriteText(network_game_host_style,
-                 (host_position == idx) ? StyleDefinition::kTextSectionHelp
-                                        : StyleDefinition::kTextSectionText,
+                 (host_position == idx) ? StyleDefinition::kTextSectionHelp : StyleDefinition::kTextSectionText,
                  CenterX, y, "Start");
 }
 
@@ -587,8 +541,8 @@ bool OptionMenuNetworkHostResponder(InputEvent *ev, int ch)
         return true;
     }
 
-    if (ch == kLeftArrow || ch == kRightArrow || ch == kGamepadLeft ||
-        ch == kGamepadRight || ch == kEnter || ch == kGamepadA || ch == kMouse1)
+    if (ch == kLeftArrow || ch == kRightArrow || ch == kGamepadLeft || ch == kGamepadRight || ch == kEnter ||
+        ch == kGamepadA || ch == kMouse1)
     {
         HostChangeOption(host_position, ch);
         StartSoundEffect(sound_effect_stnmov);
@@ -634,7 +588,8 @@ void OptionMenuDrawPlayerList(void)
     {
         int flags = network_game_parameters->players_[i];
 
-        if (flags & kPlayerFlagBot) continue;
+        if (flags & kPlayerFlagBot)
+            continue;
 
         humans++;
 
@@ -646,20 +601,17 @@ void OptionMenuDrawPlayerList(void)
                 bots_here++;
         }
 
-        HudWriteText(network_game_list_style,
-                     (flags & kPlayerFlagNetwork) ? 0 : 3, 20, y,
+        HudWriteText(network_game_list_style, (flags & kPlayerFlagNetwork) ? 0 : 3, 20, y,
                      epi::StringFormat("PLAYER %d", humans).c_str());
 
         HudWriteText(network_game_list_style, 1, 100, y, "Local");
 
-        HudWriteText(network_game_list_style,
-                     (flags & kPlayerFlagNetwork) ? 0 : 3, 200, y,
+        HudWriteText(network_game_list_style, (flags & kPlayerFlagNetwork) ? 0 : 3, 200, y,
                      epi::StringFormat("%d BOTS", bots_here).c_str());
         y += 10;
     }
 
-    HudWriteText(network_game_list_style, 2, 40, 140,
-                 "Press <ENTER> to Start Game");
+    HudWriteText(network_game_list_style, 2, 40, 140, "Press <ENTER> to Start Game");
 }
 
 static void ListAccept()
@@ -701,7 +653,8 @@ void NetworkGameInitialize(void)
     Style           *ng_default;
 
     def = styledefs.Lookup("OPTIONS");
-    if (!def) def = default_style;
+    if (!def)
+        def = default_style;
     ng_default = hud_styles.Lookup(def);
 
     def                     = styledefs.Lookup("HOST NETGAME");
@@ -715,41 +668,39 @@ void NetworkGameDrawer(void)
 {
     switch (network_game_menu_on)
     {
-        case 1:
-            OptionMenuDrawHostMenu();
-            return;
-        case 3:
-            OptionMenuDrawPlayerList();
-            return;
+    case 1:
+        OptionMenuDrawHostMenu();
+        return;
+    case 3:
+        OptionMenuDrawPlayerList();
+        return;
     }
 
-    FatalError("INTERNAL ERROR: network_game_menu_on=%d\n",
-               network_game_menu_on);
+    FatalError("INTERNAL ERROR: network_game_menu_on=%d\n", network_game_menu_on);
 }
 
 bool NetworkGameResponder(InputEvent *ev, int ch)
 {
     switch (ch)
     {
-        case kMouse2:
-        case kMouse3:
-        case kEscape:
-        case kGamepadB:
-        {
-            network_game_menu_on = 0;
-            MenuClear();
+    case kMouse2:
+    case kMouse3:
+    case kEscape:
+    case kGamepadB: {
+        network_game_menu_on = 0;
+        MenuClear();
 
-            StartSoundEffect(sound_effect_pistol);
-            return true;
-        }
+        StartSoundEffect(sound_effect_pistol);
+        return true;
+    }
     }
 
     switch (network_game_menu_on)
     {
-        case 1:
-            return OptionMenuNetworkHostResponder(ev, ch);
-        case 3:
-            return OptionMenuNetListResponder(ev, ch);
+    case 1:
+        return OptionMenuNetworkHostResponder(ev, ch);
+    case 3:
+        return OptionMenuNetListResponder(ev, ch);
     }
 
     return false;
@@ -759,10 +710,10 @@ void NetworkGameTicker(void)
 {
     switch (network_game_menu_on)
     {
-        case 1:
-            return OptionMenuNetworkHostTicker();
-        case 3:
-            return OptionMenuNetListTicker();
+    case 1:
+        return OptionMenuNetworkHostTicker();
+    case 3:
+        return OptionMenuNetListTicker();
     }
 }
 

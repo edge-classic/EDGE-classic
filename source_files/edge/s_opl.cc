@@ -48,10 +48,8 @@ extern int  sound_device_frequency;
 
 bool opl_disabled = false;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(
-    opl_instrument_bank, "GENMIDI",
-    (ConsoleVariableFlag)(kConsoleVariableFlagArchive |
-                          kConsoleVariableFlagFilepath))
+EDGE_DEFINE_CONSOLE_VARIABLE(opl_instrument_bank, "GENMIDI",
+                             (ConsoleVariableFlag)(kConsoleVariableFlagArchive | kConsoleVariableFlagFilepath))
 
 extern std::vector<std::string> available_opl_banks;
 
@@ -59,11 +57,13 @@ bool StartupOpal(void)
 {
     LogPrint("Initializing OPL player...\n");
 
-    if (edge_opl) delete edge_opl;
+    if (edge_opl)
+        delete edge_opl;
 
     edge_opl = new OPLPlayer(sound_device_frequency);
 
-    if (!edge_opl) return false;
+    if (!edge_opl)
+        return false;
 
     // Check if CVAR value is still good
     bool cvar_good = false;
@@ -73,18 +73,16 @@ bool StartupOpal(void)
     {
         for (size_t i = 0; i < available_opl_banks.size(); i++)
         {
-            if (epi::StringCaseCompareASCII(opl_instrument_bank.s_,
-                                            available_opl_banks.at(i)) == 0)
+            if (epi::StringCaseCompareASCII(opl_instrument_bank.s_, available_opl_banks.at(i)) == 0)
                 cvar_good = true;
         }
     }
 
     if (!cvar_good)
     {
-        LogWarning(
-            "Cannot find previously used GENMIDI %s, falling back to "
-            "default!\n",
-            opl_instrument_bank.c_str());
+        LogWarning("Cannot find previously used GENMIDI %s, falling back to "
+                   "default!\n",
+                   opl_instrument_bank.c_str());
         opl_instrument_bank = "GENMIDI";
     }
 
@@ -103,8 +101,7 @@ bool StartupOpal(void)
     }
     else
     {
-        F = epi::FileOpen(opl_instrument_bank.s_,
-                          epi::kFileAccessRead | epi::kFileAccessBinary);
+        F = epi::FileOpen(opl_instrument_bank.s_, epi::kFileAccessRead | epi::kFileAccessBinary);
         if (!F)
         {
             LogWarning("StartupOpal: Error opening GENMIDI!\n");
@@ -117,7 +114,8 @@ bool StartupOpal(void)
     if (!data)
     {
         LogWarning("StartupOpal: Error loading instruments!\n");
-        if (F) delete F;
+        if (F)
+            delete F;
         return false;
     }
 
@@ -139,7 +137,8 @@ bool StartupOpal(void)
 // Should only be invoked when switching GENMIDI lumps
 void RestartOpal(void)
 {
-    if (opl_disabled) return;
+    if (opl_disabled)
+        return;
 
     int old_entry = entry_playing;
 
@@ -152,9 +151,9 @@ void RestartOpal(void)
     }
 
     ChangeMusic(old_entry,
-                true);  // Restart track that was playing when switched
+                true); // Restart track that was playing when switched
 
-    return;  // OK!
+    return;            // OK!
 }
 
 static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
@@ -170,7 +169,7 @@ static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
 
 class OpalPlayer : public AbstractMusicPlayer
 {
-   private:
+  private:
     enum Status
     {
         kNotLoaded,
@@ -186,7 +185,7 @@ class OpalPlayer : public AbstractMusicPlayer
 
     OPLInterface *opl_interface_;
 
-   public:
+  public:
     OpalPlayer(bool looping) : status_(kNotLoaded), looping_(looping)
     {
         mono_buffer_ = new int16_t[2 * OPL_SAMPLES];
@@ -197,14 +196,14 @@ class OpalPlayer : public AbstractMusicPlayer
     {
         Close();
 
-        if (mono_buffer_) delete[] mono_buffer_;
+        if (mono_buffer_)
+            delete[] mono_buffer_;
     }
 
-   public:
+  public:
     OPLSequencer *opl_sequencer_;
 
-    static void rtNoteOn(void *userdata, uint8_t channel, uint8_t note,
-                         uint8_t velocity)
+    static void rtNoteOn(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity)
     {
         edge_opl->midiNoteOn(channel, note, velocity);
     }
@@ -214,8 +213,7 @@ class OpalPlayer : public AbstractMusicPlayer
         edge_opl->midiNoteOff(channel, note);
     }
 
-    static void rtNoteAfterTouch(void *userdata, uint8_t channel, uint8_t note,
-                                 uint8_t atVal)
+    static void rtNoteAfterTouch(void *userdata, uint8_t channel, uint8_t note, uint8_t atVal)
     {
         (void)userdata;
         (void)channel;
@@ -223,16 +221,14 @@ class OpalPlayer : public AbstractMusicPlayer
         (void)atVal;
     }
 
-    static void rtChannelAfterTouch(void *userdata, uint8_t channel,
-                                    uint8_t atVal)
+    static void rtChannelAfterTouch(void *userdata, uint8_t channel, uint8_t atVal)
     {
         (void)userdata;
         (void)channel;
         (void)atVal;
     }
 
-    static void rtControllerChange(void *userdata, uint8_t channel,
-                                   uint8_t type, uint8_t value)
+    static void rtControllerChange(void *userdata, uint8_t channel, uint8_t type, uint8_t value)
     {
         edge_opl->midiControlChange(channel, type, value);
     }
@@ -242,8 +238,7 @@ class OpalPlayer : public AbstractMusicPlayer
         edge_opl->midiProgramChange(channel, patch);
     }
 
-    static void rtPitchBend(void *userdata, uint8_t channel, uint8_t msb,
-                            uint8_t lsb)
+    static void rtPitchBend(void *userdata, uint8_t channel, uint8_t msb, uint8_t lsb)
     {
         edge_opl->midiPitchControl(channel, (msb - 64) / 127.0);
     }
@@ -253,8 +248,7 @@ class OpalPlayer : public AbstractMusicPlayer
         edge_opl->midiSysEx(msg, size);
     }
 
-    static void rtDeviceSwitch(void *userdata, size_t track, const char *data,
-                               size_t length)
+    static void rtDeviceSwitch(void *userdata, size_t track, const char *data, size_t length)
     {
         (void)userdata;
         (void)track;
@@ -300,10 +294,8 @@ class OpalPlayer : public AbstractMusicPlayer
         opl_interface_->onPcmRender_userdata = this;
 
         opl_interface_->pcmSampleRate = sound_device_frequency;
-        opl_interface_->pcmFrameSize =
-            2 /*channels*/ *
-            2 /*size of one sample*/;  // OPL3 is 2 'channels' regardless of the
-                                       // sound_device_stereo setting
+        opl_interface_->pcmFrameSize  = 2 /*channels*/ * 2 /*size of one sample*/; // OPL3 is 2 'channels' regardless of
+                                                                                  // the sound_device_stereo setting
 
         opl_interface_->rt_deviceSwitch  = rtDeviceSwitch;
         opl_interface_->rt_currentDevice = rtCurrentDevice;
@@ -319,10 +311,12 @@ class OpalPlayer : public AbstractMusicPlayer
 
     void Close(void)
     {
-        if (status_ == kNotLoaded) return;
+        if (status_ == kNotLoaded)
+            return;
 
         // Stop playback
-        if (status_ != kStopped) Stop();
+        if (status_ != kStopped)
+            Stop();
 
         if (opl_sequencer_)
         {
@@ -340,7 +334,8 @@ class OpalPlayer : public AbstractMusicPlayer
 
     void Play(bool loop)
     {
-        if (!(status_ == kNotLoaded || status_ == kStopped)) return;
+        if (!(status_ == kNotLoaded || status_ == kStopped))
+            return;
 
         status_  = kPlaying;
         looping_ = loop;
@@ -351,7 +346,8 @@ class OpalPlayer : public AbstractMusicPlayer
 
     void Stop(void)
     {
-        if (!(status_ == kPlaying || status_ == kPaused)) return;
+        if (!(status_ == kPlaying || status_ == kPaused))
+            return;
 
         edge_opl->reset();
 
@@ -362,14 +358,16 @@ class OpalPlayer : public AbstractMusicPlayer
 
     void Pause(void)
     {
-        if (status_ != kPlaying) return;
+        if (status_ != kPlaying)
+            return;
 
         status_ = kPaused;
     }
 
     void Resume(void)
     {
-        if (status_ != kPaused) return;
+        if (status_ != kPaused)
+            return;
 
         status_ = kPlaying;
     }
@@ -378,10 +376,10 @@ class OpalPlayer : public AbstractMusicPlayer
     {
         while (status_ == kPlaying && !pc_speaker_mode)
         {
-            SoundData *buf = SoundQueueGetFreeBuffer(
-                OPL_SAMPLES, sound_device_stereo ? kMixInterleaved : kMixMono);
+            SoundData *buf = SoundQueueGetFreeBuffer(OPL_SAMPLES, sound_device_stereo ? kMixInterleaved : kMixMono);
 
-            if (!buf) break;
+            if (!buf)
+                break;
 
             if (StreamIntoBuffer(buf))
             {
@@ -397,7 +395,7 @@ class OpalPlayer : public AbstractMusicPlayer
         }
     }
 
-   private:
+  private:
     bool StreamIntoBuffer(SoundData *buf)
     {
         int16_t *data_buf;
@@ -409,10 +407,10 @@ class OpalPlayer : public AbstractMusicPlayer
         else
             data_buf = buf->data_left_;
 
-        int played =
-            opl_sequencer_->PlayStream((uint8_t *)(data_buf), OPL_SAMPLES);
+        int played = opl_sequencer_->PlayStream((uint8_t *)(data_buf), OPL_SAMPLES);
 
-        if (opl_sequencer_->PositionAtEnd()) song_done = true;
+        if (opl_sequencer_->PositionAtEnd())
+            song_done = true;
 
         buf->length_ = played / (2 * sizeof(int16_t));
 
@@ -421,7 +419,8 @@ class OpalPlayer : public AbstractMusicPlayer
 
         if (song_done) /* EOF */
         {
-            if (!looping_) return false;
+            if (!looping_)
+                return false;
             opl_sequencer_->Rewind();
             return true;
         }
@@ -430,8 +429,7 @@ class OpalPlayer : public AbstractMusicPlayer
     }
 };
 
-AbstractMusicPlayer *PlayOplMusic(uint8_t *data, int length, bool loop,
-                                  int type)
+AbstractMusicPlayer *PlayOplMusic(uint8_t *data, int length, bool loop, int type)
 {
     if (opl_disabled)
     {
@@ -452,23 +450,22 @@ AbstractMusicPlayer *PlayOplMusic(uint8_t *data, int length, bool loop,
 
     switch (type)
     {
-        case kDDFMusicIMF280:
-            rate = 280;
-            break;
-        case kDDFMusicIMF560:
-            rate = 560;
-            break;
-        case kDDFMusicIMF700:
-            rate = 700;
-            break;
-        default:
-            rate = 0;
-            break;
+    case kDDFMusicIMF280:
+        rate = 280;
+        break;
+    case kDDFMusicIMF560:
+        rate = 560;
+        break;
+    case kDDFMusicIMF700:
+        rate = 700;
+        break;
+    default:
+        rate = 0;
+        break;
     }
 
-    if (!player->LoadTrack(
-            data, length,
-            rate))  // Lobo: quietly log it instead of completely exiting EDGE
+    if (!player->LoadTrack(data, length,
+                           rate)) // Lobo: quietly log it instead of completely exiting EDGE
     {
         LogDebug("OPL player: failed to load MIDI file!\n");
         delete[] data;

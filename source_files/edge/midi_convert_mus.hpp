@@ -31,14 +31,12 @@
 #include <string.h>
 
 static constexpr uint8_t kMusFrequency = 140;
-static constexpr int     kMusTempo =
-    0x00068A1B; /* MPQN: 60000000 / 140BPM (140Hz) = 428571 */
-                /*  0x000D1436 -> MPQN: 60000000 /  70BPM  (70Hz) = 857142 */
-static constexpr uint16_t kMusDivision =
-    0x0101; /* 257 for 140Hz files with a 140MPQN */
-            /*  0x0088 -> 136 for  70Hz files with a 140MPQN */
-            /*  0x010B -> 267 for  70hz files with a 70MPQN  */
-            /*  0x01F9 -> 505 for 140hz files with a 70MPQN  */
+static constexpr int     kMusTempo     = 0x00068A1B; /* MPQN: 60000000 / 140BPM (140Hz) = 428571 */
+                                                     /*  0x000D1436 -> MPQN: 60000000 /  70BPM  (70Hz) = 857142 */
+static constexpr uint16_t kMusDivision = 0x0101;     /* 257 for 140Hz files with a 140MPQN */
+                                                     /*  0x0088 -> 136 for  70Hz files with a 140MPQN */
+                                                     /*  0x010B -> 267 for  70hz files with a 70MPQN  */
+                                                     /*  0x01F9 -> 505 for 140hz files with a 70MPQN  */
 
 /* New
  * QLS: MPQN/1000000 = 0.428571
@@ -100,7 +98,7 @@ static constexpr uint8_t kMusToMidiMap[] = {
 
 struct MusHeader
 {
-    char     ID[4]; /* identifier: "MUS" 0x1A */
+    char     ID[4];        /* identifier: "MUS" 0x1A */
     uint16_t scoreLen;
     uint16_t scoreStart;
     uint16_t channels;     /* count of primary channels */
@@ -133,11 +131,10 @@ struct MusConversionContext
 };
 
 static constexpr uint16_t kMusDestinationChunkSize = 8192;
-static void MusToMidiResizeDestination(struct MusConversionContext *ctx)
+static void               MusToMidiResizeDestination(struct MusConversionContext *ctx)
 {
     uint32_t pos = (uint32_t)(ctx->dst_ptr - ctx->dst);
-    ctx->dst =
-        (uint8_t *)realloc(ctx->dst, ctx->dstsize + kMusDestinationChunkSize);
+    ctx->dst     = (uint8_t *)realloc(ctx->dst, ctx->dstsize + kMusDestinationChunkSize);
     ctx->dstsize += kMusDestinationChunkSize;
     ctx->dstrem += kMusDestinationChunkSize;
     ctx->dst_ptr = ctx->dst + pos;
@@ -145,14 +142,16 @@ static void MusToMidiResizeDestination(struct MusConversionContext *ctx)
 
 static void MusToMidiWrite1(struct MusConversionContext *ctx, uint32_t val)
 {
-    if (ctx->dstrem < 1) MusToMidiResizeDestination(ctx);
+    if (ctx->dstrem < 1)
+        MusToMidiResizeDestination(ctx);
     *ctx->dst_ptr++ = val & 0xff;
     ctx->dstrem--;
 }
 
 static void MusToMidiWrite2(struct MusConversionContext *ctx, uint32_t val)
 {
-    if (ctx->dstrem < 2) MusToMidiResizeDestination(ctx);
+    if (ctx->dstrem < 2)
+        MusToMidiResizeDestination(ctx);
     *ctx->dst_ptr++ = (val >> 8) & 0xff;
     *ctx->dst_ptr++ = val & 0xff;
     ctx->dstrem -= 2;
@@ -160,7 +159,8 @@ static void MusToMidiWrite2(struct MusConversionContext *ctx, uint32_t val)
 
 static void MusToMidiWrite4(struct MusConversionContext *ctx, uint32_t val)
 {
-    if (ctx->dstrem < 4) MusToMidiResizeDestination(ctx);
+    if (ctx->dstrem < 4)
+        MusToMidiResizeDestination(ctx);
     *ctx->dst_ptr++ = (uint8_t)((val >> 24) & 0xff);
     *ctx->dst_ptr++ = (uint8_t)((val >> 16) & 0xff);
     *ctx->dst_ptr++ = (uint8_t)((val >> 8) & 0xff);
@@ -168,26 +168,25 @@ static void MusToMidiWrite4(struct MusConversionContext *ctx, uint32_t val)
     ctx->dstrem -= 4;
 }
 
-static void MusToMidiSeekDestination(struct MusConversionContext *ctx,
-                                     uint32_t                     pos)
+static void MusToMidiSeekDestination(struct MusConversionContext *ctx, uint32_t pos)
 {
     ctx->dst_ptr = ctx->dst + pos;
-    while (ctx->dstsize < pos) MusToMidiResizeDestination(ctx);
+    while (ctx->dstsize < pos)
+        MusToMidiResizeDestination(ctx);
     ctx->dstrem = ctx->dstsize - pos;
 }
 
-static void MusToMidiSkipDestination(struct MusConversionContext *ctx,
-                                     int32_t                      pos)
+static void MusToMidiSkipDestination(struct MusConversionContext *ctx, int32_t pos)
 {
     size_t newpos;
     ctx->dst_ptr += pos;
     newpos = ctx->dst_ptr - ctx->dst;
-    while (ctx->dstsize < newpos) MusToMidiResizeDestination(ctx);
+    while (ctx->dstsize < newpos)
+        MusToMidiResizeDestination(ctx);
     ctx->dstrem = (uint32_t)(ctx->dstsize - newpos);
 }
 
-static uint32_t MusToMidiGetDestinationPosition(
-    struct MusConversionContext *ctx)
+static uint32_t MusToMidiGetDestinationPosition(struct MusConversionContext *ctx)
 {
     return (uint32_t)(ctx->dst_ptr - ctx->dst);
 }
@@ -219,11 +218,9 @@ static int32_t MusToMidiWriteVariableLength(int32_t value, uint8_t *out)
 }
 
 #define EDGE_MUS_READ_SHORT(b) ((b)[0] | ((b)[1] << 8))
-#define EDGE_MUS_READ_INT(b)                                                   \
-    ((b)[0] | ((b)[1] << 8) | ((b)[2] << 16) | ((b)[3] << 24))
+#define EDGE_MUS_READ_INT(b)   ((b)[0] | ((b)[1] << 8) | ((b)[2] << 16) | ((b)[3] << 24))
 
-static int ConvertMusToMidi(uint8_t *in, uint32_t insize, uint8_t **out,
-                            uint32_t *outsize, uint16_t frequency)
+static int ConvertMusToMidi(uint8_t *in, uint32_t insize, uint8_t **out, uint32_t *outsize, uint16_t frequency)
 {
     struct MusConversionContext ctx;
     MusHeader                   header;
@@ -241,7 +238,8 @@ static int ConvertMusToMidi(uint8_t *in, uint32_t insize, uint8_t **out,
         return (-1);
     }
 
-    if (!frequency) frequency = kMusFrequency;
+    if (!frequency)
+        frequency = kMusFrequency;
 
     /* read the MUS header and set our location */
     memcpy(header.ID, in, 4);
@@ -353,31 +351,53 @@ static int ConvertMusToMidi(uint8_t *in, uint32_t insize, uint8_t **out,
             *out_local++        = 100;
             *out_local++        = 0x00;
             channelMap[channel] = currentChannel++;
-            if (currentChannel == 9) ++currentChannel;
+            if (currentChannel == 9)
+                ++currentChannel;
         }
         status = channelMap[channel];
 
         /* handle events */
         switch ((event & 122) >> 4)
         {
-            case kMusEventKeyOff:
-                status |= 0x80;
+        case kMusEventKeyOff:
+            status |= 0x80;
+            bit1 = *cur++;
+            bit2 = 0x40;
+            break;
+        case kMusEventKeyOn:
+            status |= 0x90;
+            bit1 = *cur & 127;
+            if (*cur++ & 128) /* volume bit? */
+                channel_volume[channelMap[channel]] = *cur++;
+            bit2 = channel_volume[channelMap[channel]];
+            break;
+        case kMusEventPitchWheel:
+            status |= 0xE0;
+            bit1 = (*cur & 1) >> 6;
+            bit2 = (*cur++ >> 1) & 127;
+            break;
+        case kMusEventChannelMode:
+            status |= 0xB0;
+            if (*cur >= sizeof(kMusToMidiMap) / sizeof(kMusToMidiMap[0]))
+            {
+                /*_WM_ERROR_NEW("%s:%i: can't map %u to midi",
+                              __FUNCTION__, __LINE__, *cur);*/
+                goto _end;
+            }
+            bit1 = kMusToMidiMap[*cur++];
+            bit2 = (*cur++ == 12) ? header.channels + 1 : 0x00;
+            break;
+        case kMusEventControllerChange:
+            if (*cur == 0)
+            {
+                cur++;
+                status |= 0xC0;
                 bit1 = *cur++;
-                bit2 = 0x40;
-                break;
-            case kMusEventKeyOn:
-                status |= 0x90;
-                bit1 = *cur & 127;
-                if (*cur++ & 128) /* volume bit? */
-                    channel_volume[channelMap[channel]] = *cur++;
-                bit2 = channel_volume[channelMap[channel]];
-                break;
-            case kMusEventPitchWheel:
-                status |= 0xE0;
-                bit1 = (*cur & 1) >> 6;
-                bit2 = (*cur++ >> 1) & 127;
-                break;
-            case kMusEventChannelMode:
+                bit2 = 0; /* silence bogus warnings */
+                bitc = 1;
+            }
+            else
+            {
                 status |= 0xB0;
                 if (*cur >= sizeof(kMusToMidiMap) / sizeof(kMusToMidiMap[0]))
                 {
@@ -386,53 +406,32 @@ static int ConvertMusToMidi(uint8_t *in, uint32_t insize, uint8_t **out,
                     goto _end;
                 }
                 bit1 = kMusToMidiMap[*cur++];
-                bit2 = (*cur++ == 12) ? header.channels + 1 : 0x00;
-                break;
-            case kMusEventControllerChange:
-                if (*cur == 0)
-                {
-                    cur++;
-                    status |= 0xC0;
-                    bit1 = *cur++;
-                    bit2 = 0; /* silence bogus warnings */
-                    bitc = 1;
-                }
-                else
-                {
-                    status |= 0xB0;
-                    if (*cur >=
-                        sizeof(kMusToMidiMap) / sizeof(kMusToMidiMap[0]))
-                    {
-                        /*_WM_ERROR_NEW("%s:%i: can't map %u to midi",
-                                      __FUNCTION__, __LINE__, *cur);*/
-                        goto _end;
-                    }
-                    bit1 = kMusToMidiMap[*cur++];
-                    bit2 = *cur++;
-                }
-                break;
-            case kMusEventEnd: /* End */
-                status = 0xff;
-                bit1   = 0x2f;
-                bit2   = 0x00;
-                if (cur != end)
-                { /* should we error here or report-only? */
-                    /*_WM_DEBUG_MSG("%s:%i: MUS buffer off by %ld bytes",
-                                  __FUNCTION__, __LINE__, (long)(cur - end));*/
-                }
-                break;
-            case 5:  /* Unknown */
-            case 7:  /* Unknown */
-            default: /* shouldn't happen */
-                /*_WM_ERROR_NEW("%s:%i: unrecognized event (%u)",
-                              __FUNCTION__, __LINE__, event);*/
-                goto _end;
+                bit2 = *cur++;
+            }
+            break;
+        case kMusEventEnd: /* End */
+            status = 0xff;
+            bit1   = 0x2f;
+            bit2   = 0x00;
+            if (cur != end)
+            { /* should we error here or report-only? */
+                /*_WM_DEBUG_MSG("%s:%i: MUS buffer off by %ld bytes",
+                              __FUNCTION__, __LINE__, (long)(cur - end));*/
+            }
+            break;
+        case 5:  /* Unknown */
+        case 7:  /* Unknown */
+        default: /* shouldn't happen */
+            /*_WM_ERROR_NEW("%s:%i: unrecognized event (%u)",
+                          __FUNCTION__, __LINE__, event);*/
+            goto _end;
         }
 
         /* write it out */
         *out_local++ = status;
         *out_local++ = bit1;
-        if (bitc == 2) *out_local++ = bit2;
+        if (bitc == 2)
+            *out_local++ = bit2;
 
         /* write out our temp buffer */
         if (out_local != temp_buffer)
@@ -448,19 +447,21 @@ static int ConvertMusToMidi(uint8_t *in, uint32_t insize, uint8_t **out,
         if (event & 128)
         {
             delta_time = 0;
-            do {
-                delta_time = (int32_t)((delta_time * 128 + (*cur & 127)) *
-                                       (140.0 / (double)frequency));
+            do
+            {
+                delta_time = (int32_t)((delta_time * 128 + (*cur & 127)) * (140.0 / (double)frequency));
             } while ((*cur++ & 128));
         }
-        else { delta_time = 0; }
+        else
+        {
+            delta_time = 0;
+        }
     }
 
     /* write out track length */
     current_pos = MusToMidiGetDestinationPosition(&ctx);
     MusToMidiSeekDestination(&ctx, track_size_pos);
-    MusToMidiWrite4(&ctx,
-                    current_pos - begin_track_pos - sizeof(MidiTrackChunk));
+    MusToMidiWrite4(&ctx, current_pos - begin_track_pos - sizeof(MidiTrackChunk));
     MusToMidiSeekDestination(&ctx, current_pos); /* reseek to end position */
 
     *out     = ctx.dst;

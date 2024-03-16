@@ -30,11 +30,11 @@
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "edge_profiling.h"
-#include "g_game.h"  //current_map
+#include "g_game.h" //current_map
 #include "i_defs_gl.h"
 #include "im_data.h"
 #include "im_funcs.h"
-#include "m_misc.h"  // !!!! model test
+#include "m_misc.h" // !!!! model test
 #include "math_color.h"
 #include "p_local.h"
 #include "r_colormap.h"
@@ -58,22 +58,20 @@
 #include "w_sprite.h"
 
 extern coal::vm_c *ui_vm;
-extern double      CoalGetFloat(coal::vm_c *vm, const char *mod_name,
-                                const char *var_name);
+extern double      CoalGetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name);
 
 extern bool erraticism_active;
 
 #define EDGE_DEBUG 0
 
 EDGE_DEFINE_CONSOLE_VARIABLE(crosshair_style, "0",
-                             kConsoleVariableFlagArchive)  // shape
+                             kConsoleVariableFlagArchive) // shape
 EDGE_DEFINE_CONSOLE_VARIABLE(crosshair_color, "0",
-                             kConsoleVariableFlagArchive)  // 0 .. 7
-EDGE_DEFINE_CONSOLE_VARIABLE(
-    crosshair_size, "16.0",
-    kConsoleVariableFlagArchive)  // pixels on a 320x200 screen
+                             kConsoleVariableFlagArchive) // 0 .. 7
+EDGE_DEFINE_CONSOLE_VARIABLE(crosshair_size, "16.0",
+                             kConsoleVariableFlagArchive) // pixels on a 320x200 screen
 EDGE_DEFINE_CONSOLE_VARIABLE(crosshair_brightness, "1.0",
-                             kConsoleVariableFlagArchive)  // 1.0 is normal
+                             kConsoleVariableFlagArchive) // 1.0 is normal
 
 float sprite_skew;
 
@@ -88,7 +86,8 @@ static int          crosshair_which;
 
 static float GetHoverDeltaZ(MapObject *mo, float bob_mult = 0)
 {
-    if (time_stop_active || erraticism_active) return mo->phase_;
+    if (time_stop_active || erraticism_active)
+        return mo->phase_;
 
     // compute a different phase for different objects
     BAMAngle phase = (BAMAngle)(long long)mo;
@@ -120,8 +119,7 @@ static void DLIT_PSprite(MapObject *mo, void *dataptr)
 
     EPI_ASSERT(mo->dynamic_light_.shader);
 
-    mo->dynamic_light_.shader->Sample(data->colors + 0, data->light_position.X,
-                                      data->light_position.Y,
+    mo->dynamic_light_.shader->Sample(data->colors + 0, data->light_position.X, data->light_position.Y,
                                       data->light_position.Z);
 }
 
@@ -139,22 +137,20 @@ static int GetMulticolMaxRGB(ColorMixer *cols, int num, bool additive)
     return result;
 }
 
-static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
-                                RegionProperties *props, const State *state)
+static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player, RegionProperties *props,
+                                const State *state)
 {
-    if (state->flags & kStateFrameFlagModel) return;
+    if (state->flags & kStateFrameFlagModel)
+        return;
 
     // determine sprite patch
     bool         flip;
-    const Image *image =
-        RendererGetOtherSprite(state->sprite, state->frame, &flip);
+    const Image *image = RendererGetOtherSprite(state->sprite, state->frame, &flip);
 
-    if (!image) return;
+    if (!image)
+        return;
 
-    GLuint tex_id = ImageCache(image, false,
-                               (which == kPlayerSpriteCrosshair)
-                                   ? nullptr
-                                   : render_view_effect_colormap);
+    GLuint tex_id = ImageCache(image, false, (which == kPlayerSpriteCrosshair) ? nullptr : render_view_effect_colormap);
 
     float w     = image->ScaledWidthActual();
     float h     = image->ScaledHeightActual();
@@ -162,15 +158,13 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
     float top   = image->Top();
     float ratio = 1.0f;
 
-    bool is_fuzzy =
-        (player->map_object_->flags_ & kMapObjectFlagFuzzy) ? true : false;
+    bool is_fuzzy = (player->map_object_->flags_ & kMapObjectFlagFuzzy) ? true : false;
 
     float trans = player->map_object_->visibility_;
 
     if (which == kPlayerSpriteCrosshair)
     {
-        if (!player->weapons_[player->ready_weapon_]
-                 .info->ignore_crosshair_scaling_)
+        if (!player->weapons_[player->ready_weapon_].info->ignore_crosshair_scaling_)
             ratio = crosshair_size.f_ / w;
 
         w *= ratio;
@@ -180,8 +174,7 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
     }
 
     // Lobo: no sense having the zoom crosshair fuzzy
-    if (which == kPlayerSpriteWeapon && view_is_zoomed &&
-        player->weapons_[player->ready_weapon_].info->zoom_state_ > 0)
+    if (which == kPlayerSpriteWeapon && view_is_zoomed && player->weapons_[player->ready_weapon_].info->zoom_state_ > 0)
     {
         is_fuzzy = false;
         trans    = 1.0f;
@@ -189,10 +182,11 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
 
     trans *= psp->visibility;
 
-    if (trans <= 0) return;
+    if (trans <= 0)
+        return;
 
-    float tex_top_h = top;   /// ## 1.00f; // 0.98;
-    float tex_bot_h = 0.0f;  /// ## 1.00f - top;  // 1.02 - bottom;
+    float tex_top_h = top;  /// ## 1.00f; // 0.98;
+    float tex_bot_h = 0.0f; /// ## 1.00f - top;  // 1.02 - bottom;
 
     float tex_x1 = 0.002f;
     float tex_x2 = right - 0.002f;
@@ -209,29 +203,26 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
     float tx1 = (coord_W - w) / 2.0 + psp->screen_x - image->ScaledOffsetX();
     float tx2 = tx1 + w;
 
-    float ty1 = -psp->screen_y + image->ScaledOffsetY() -
-                ((h - image->ScaledHeightActual()) * 0.5f);
+    float ty1 = -psp->screen_y + image->ScaledOffsetY() - ((h - image->ScaledHeightActual()) * 0.5f);
 
     if (LuaUseLuaHud())
     {
         // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
-        if ((state->flags & kStateFrameFlagWeapon) &&
-            (player->ready_weapon_ >= 0))
+        if ((state->flags & kStateFrameFlagWeapon) && (player->ready_weapon_ >= 0))
             ty1 += LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") +
                    player->weapons_[player->ready_weapon_].info->y_adjust_;
     }
     else
     {
         // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
-        if ((state->flags & kStateFrameFlagWeapon) &&
-            (player->ready_weapon_ >= 0))
+        if ((state->flags & kStateFrameFlagWeapon) && (player->ready_weapon_ >= 0))
             ty1 += CoalGetFloat(ui_vm, "hud", "universal_y_adjust") +
                    player->weapons_[player->ready_weapon_].info->y_adjust_;
     }
 
     float ty2 = ty1 + h;
 
-    float x1b, y1b, x1t, y1t, x2b, y2b, x2t, y2t;  // screen coords
+    float x1b, y1b, x1t, y1t, x2b, y2b, x2t, y2t; // screen coords
 
     x1b = x1t = view_window_width * tx1 / coord_W;
     x2b = x2t = view_window_width * tx2 / coord_W;
@@ -242,8 +233,7 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
     // clip psprite to view window
     glEnable(GL_SCISSOR_TEST);
 
-    glScissor(view_window_x, view_window_y, view_window_width,
-              view_window_height);
+    glScissor(view_window_x, view_window_y, view_window_width, view_window_height);
 
     x1b = (float)view_window_x + x1b;
     x1t = (float)view_window_x + x1t;
@@ -272,8 +262,7 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
     data.light_position.X = player->map_object_->x + view_cosine * away;
     data.light_position.Y = player->map_object_->y + view_sine * away;
     data.light_position.Z =
-        player->map_object_->z +
-        player->map_object_->height_ * player->map_object_->info_->shotheight_;
+        player->map_object_->z + player->map_object_->height_ * player->map_object_->info_->shotheight_;
 
     data.colors[0].Clear();
 
@@ -291,10 +280,8 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
         trans    = 1.0f;
     }
 
-    RGBAColor fc_to_use =
-        player->map_object_->subsector_->sector->properties.fog_color;
-    float fd_to_use =
-        player->map_object_->subsector_->sector->properties.fog_density;
+    RGBAColor fc_to_use = player->map_object_->subsector_->sector->properties.fog_color;
+    float     fd_to_use = player->map_object_->subsector_->sector->properties.fog_density;
     // check for DDFLEVL fog
     if (fc_to_use == kRGBANoValue)
     {
@@ -312,27 +299,22 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
 
     if (!is_fuzzy)
     {
-        AbstractShader *shader = GetColormapShader(
-            props, state->bright, player->map_object_->subsector_->sector);
+        AbstractShader *shader = GetColormapShader(props, state->bright, player->map_object_->subsector_->sector);
 
-        shader->Sample(data.colors + 0, data.light_position.X,
-                       data.light_position.Y, data.light_position.Z);
+        shader->Sample(data.colors + 0, data.light_position.X, data.light_position.Y, data.light_position.Z);
 
         if (fc_to_use != kRGBANoValue)
         {
             int       mix_factor = RoundToInteger(255.0f * (fd_to_use * 75));
-            RGBAColor mixme =
-                epi::MixRGBA(epi::MakeRGBA(data.colors[0].modulate_red_,
-                                           data.colors[0].modulate_green_,
-                                           data.colors[0].modulate_blue_),
-                             fc_to_use, mix_factor);
+            RGBAColor mixme = epi::MixRGBA(epi::MakeRGBA(data.colors[0].modulate_red_, data.colors[0].modulate_green_,
+                                                         data.colors[0].modulate_blue_),
+                                           fc_to_use, mix_factor);
             data.colors[0].modulate_red_   = epi::GetRGBARed(mixme);
             data.colors[0].modulate_green_ = epi::GetRGBAGreen(mixme);
             data.colors[0].modulate_blue_  = epi::GetRGBABlue(mixme);
-            mixme = epi::MixRGBA(epi::MakeRGBA(data.colors[0].add_red_,
-                                               data.colors[0].add_green_,
-                                               data.colors[0].add_blue_),
-                                 fc_to_use, mix_factor);
+            mixme                          = epi::MixRGBA(
+                epi::MakeRGBA(data.colors[0].add_red_, data.colors[0].add_green_, data.colors[0].add_blue_), fc_to_use,
+                mix_factor);
             data.colors[0].add_red_   = epi::GetRGBARed(mixme);
             data.colors[0].add_green_ = epi::GetRGBAGreen(mixme);
             data.colors[0].add_blue_  = epi::GetRGBABlue(mixme);
@@ -345,20 +327,14 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
 
             float r = 96;
 
-            DynamicLightIterator(
-                data.light_position.X - r, data.light_position.Y - r,
-                player->map_object_->z, data.light_position.X + r,
-                data.light_position.Y + r,
-                player->map_object_->z + player->map_object_->height_,
-                DLIT_PSprite, &data);
+            DynamicLightIterator(data.light_position.X - r, data.light_position.Y - r, player->map_object_->z,
+                                 data.light_position.X + r, data.light_position.Y + r,
+                                 player->map_object_->z + player->map_object_->height_, DLIT_PSprite, &data);
 
-            SectorGlowIterator(
-                player->map_object_->subsector_->sector,
-                data.light_position.X - r, data.light_position.Y - r,
-                player->map_object_->z, data.light_position.X + r,
-                data.light_position.Y + r,
-                player->map_object_->z + player->map_object_->height_,
-                DLIT_PSprite, &data);
+            SectorGlowIterator(player->map_object_->subsector_->sector, data.light_position.X - r,
+                               data.light_position.Y - r, player->map_object_->z, data.light_position.X + r,
+                               data.light_position.Y + r, player->map_object_->z + player->map_object_->height_,
+                               DLIT_PSprite, &data);
         }
     }
 
@@ -385,21 +361,21 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
 
         if (pass > 0 && pass < num_pass - 1)
         {
-            if (GetMulticolMaxRGB(data.colors, 4, false) <= 0) continue;
+            if (GetMulticolMaxRGB(data.colors, 4, false) <= 0)
+                continue;
         }
         else if (is_additive)
         {
-            if (GetMulticolMaxRGB(data.colors, 4, true) <= 0) continue;
+            if (GetMulticolMaxRGB(data.colors, 4, true) <= 0)
+                continue;
         }
 
         GLuint fuzz_tex = is_fuzzy ? ImageCache(fuzz_image, false) : 0;
 
-        RendererVertex *glvert = RendererBeginUnit(
-            GL_POLYGON, 4,
-            is_additive ? (GLuint)kTextureEnvironmentSkipRgb : GL_MODULATE,
-            tex_id, is_fuzzy ? GL_MODULATE : (GLuint)kTextureEnvironmentDisable,
-            fuzz_tex, pass, blending, pass > 0 ? kRGBANoValue : fc_to_use,
-            fd_to_use);
+        RendererVertex *glvert =
+            RendererBeginUnit(GL_POLYGON, 4, is_additive ? (GLuint)kTextureEnvironmentSkipRgb : GL_MODULATE, tex_id,
+                              is_fuzzy ? GL_MODULATE : (GLuint)kTextureEnvironmentDisable, fuzz_tex, pass, blending,
+                              pass > 0 ? kRGBANoValue : fc_to_use, fd_to_use);
 
         for (int v_idx = 0; v_idx < 4; v_idx++)
         {
@@ -412,21 +388,17 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
 
             if (is_fuzzy)
             {
-                dest->texture_coordinates[1].X =
-                    dest->position.X / (float)current_screen_width;
-                dest->texture_coordinates[1].Y =
-                    dest->position.Y / (float)current_screen_height;
+                dest->texture_coordinates[1].X = dest->position.X / (float)current_screen_width;
+                dest->texture_coordinates[1].Y = dest->position.Y / (float)current_screen_height;
 
                 FuzzAdjust(&dest->texture_coordinates[1], player->map_object_);
 
-                dest->rgba_color[0]     = dest->rgba_color[1] =
-                    dest->rgba_color[2] = 0;
+                dest->rgba_color[0] = dest->rgba_color[1] = dest->rgba_color[2] = 0;
             }
             else if (!is_additive)
             {
                 dest->rgba_color[0] = data.colors[v_idx].modulate_red_ / 255.0;
-                dest->rgba_color[1] =
-                    data.colors[v_idx].modulate_green_ / 255.0;
+                dest->rgba_color[1] = data.colors[v_idx].modulate_green_ / 255.0;
                 dest->rgba_color[2] = data.colors[v_idx].modulate_blue_ / 255.0;
 
                 data.colors[v_idx].modulate_red_ -= 256;
@@ -452,24 +424,23 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player,
 }
 
 static const RGBAColor crosshair_colors[8] = {
-    SG_LIGHT_GRAY_RGBA32, SG_BLUE_RGBA32,        SG_GREEN_RGBA32,
-    SG_CYAN_RGBA32,       SG_RED_RGBA32,         SG_FUCHSIA_RGBA32,
-    SG_YELLOW_RGBA32,     SG_DARK_ORANGE_RGBA32,
+    SG_LIGHT_GRAY_RGBA32, SG_BLUE_RGBA32,    SG_GREEN_RGBA32,  SG_CYAN_RGBA32,
+    SG_RED_RGBA32,        SG_FUCHSIA_RGBA32, SG_YELLOW_RGBA32, SG_DARK_ORANGE_RGBA32,
 };
 
 static void DrawStdCrossHair(void)
 {
-    if (crosshair_style.d_ <= 0 || crosshair_style.d_ > 9) return;
+    if (crosshair_style.d_ <= 0 || crosshair_style.d_ > 9)
+        return;
 
-    if (crosshair_size.f_ < 0.1 || crosshair_brightness.f_ < 0.1) return;
+    if (crosshair_size.f_ < 0.1 || crosshair_brightness.f_ < 0.1)
+        return;
 
     if (!crosshair_image || crosshair_which != crosshair_style.d_)
     {
         crosshair_which = crosshair_style.d_;
 
-        crosshair_image = ImageLookup(
-            epi::StringFormat("STANDARD_CROSSHAIR_%d", crosshair_which)
-                .c_str());
+        crosshair_image = ImageLookup(epi::StringFormat("STANDARD_CROSSHAIR_%d", crosshair_which).c_str());
     }
 
     GLuint tex_id = ImageCache(crosshair_image);
@@ -535,7 +506,8 @@ void RendererDrawWeaponSprites(Player *p)
     {
         PlayerSprite *psp = &p->player_sprites_[kPlayerSpriteWeapon];
 
-        if ((p->ready_weapon_ < 0) || (psp->state == 0)) return;
+        if ((p->ready_weapon_ < 0) || (psp->state == 0))
+            return;
 
         WeaponDefinition *w = p->weapons_[p->ready_weapon_].info;
 
@@ -543,8 +515,7 @@ void RendererDrawWeaponSprites(Player *p)
         // regular psprite drawing routines to occur (old EDGE behavior)
         if (w->zoom_state_ > 0)
         {
-            RendererDrawPSprite(psp, kPlayerSpriteWeapon, p, view_properties,
-                                states + w->zoom_state_);
+            RendererDrawPSprite(psp, kPlayerSpriteWeapon, p, view_properties, states + w->zoom_state_);
             return;
         }
     }
@@ -564,22 +535,24 @@ void RendererDrawWeaponSprites(Player *p)
 
     if (FlashFirst == false)
     {
-        for (int i = 0; i < kTotalPlayerSpriteTypes; i++)  // normal
+        for (int i = 0; i < kTotalPlayerSpriteTypes; i++) // normal
         {
             PlayerSprite *psp = &p->player_sprites_[i];
 
-            if ((p->ready_weapon_ < 0) || (psp->state == 0)) continue;
+            if ((p->ready_weapon_ < 0) || (psp->state == 0))
+                continue;
 
             RendererDrawPSprite(psp, i, p, view_properties, psp->state);
         }
     }
     else
     {
-        for (int i = kTotalPlayerSpriteTypes - 1; i >= 0; i--)  // go backwards
+        for (int i = kTotalPlayerSpriteTypes - 1; i >= 0; i--) // go backwards
         {
             PlayerSprite *psp = &p->player_sprites_[i];
 
-            if ((p->ready_weapon_ < 0) || (psp->state == 0)) continue;
+            if ((p->ready_weapon_ < 0) || (psp->state == 0))
+                continue;
 
             RendererDrawPSprite(psp, i, p, view_properties, psp->state);
         }
@@ -598,10 +571,12 @@ void RendererDrawCrosshair(Player *p)
     {
         PlayerSprite *psp = &p->player_sprites_[kPlayerSpriteCrosshair];
 
-        if (p->ready_weapon_ >= 0 && psp->state != 0) return;
+        if (p->ready_weapon_ >= 0 && psp->state != 0)
+            return;
     }
 
-    if (p->health_ > 0) DrawStdCrossHair();
+    if (p->health_ > 0)
+        DrawStdCrossHair();
 }
 
 void RendererDrawWeaponModel(Player *p)
@@ -611,11 +586,14 @@ void RendererDrawWeaponModel(Player *p)
 
     PlayerSprite *psp = &p->player_sprites_[kPlayerSpriteWeapon];
 
-    if (p->ready_weapon_ < 0) return;
+    if (p->ready_weapon_ < 0)
+        return;
 
-    if (psp->state == 0) return;
+    if (psp->state == 0)
+        return;
 
-    if (!(psp->state->flags & kStateFrameFlagModel)) return;
+    if (!(psp->state->flags & kStateFrameFlagModel))
+        return;
 
     WeaponDefinition *w = p->weapons_[p->ready_weapon_].info;
 
@@ -625,7 +603,10 @@ void RendererDrawWeaponModel(Player *p)
 
     const Image *skin_img = md->skins_[skin_num];
 
-    if (!skin_img && md->md2_model_) { skin_img = ImageForDummySkin(); }
+    if (!skin_img && md->md2_model_)
+    {
+        skin_img = ImageForDummySkin();
+    }
 
     float x = view_x + view_right.X * psp->screen_x / 8.0;
     float y = view_y + view_right.Y * psp->screen_x / 8.0;
@@ -661,28 +642,23 @@ void RendererDrawWeaponModel(Player *p)
 
     if (LuaUseLuaHud())
     {
-        bias = LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") +
-               p->weapons_[p->ready_weapon_].info->y_adjust_;
+        bias =
+            LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") + p->weapons_[p->ready_weapon_].info->y_adjust_;
     }
     else
     {
-        bias = CoalGetFloat(ui_vm, "hud", "universal_y_adjust") +
-               p->weapons_[p->ready_weapon_].info->y_adjust_;
+        bias = CoalGetFloat(ui_vm, "hud", "universal_y_adjust") + p->weapons_[p->ready_weapon_].info->y_adjust_;
     }
 
     bias /= 5;
     bias += w->model_bias_;
 
     if (md->md2_model_)
-        Md2RenderModel(md->md2_model_, skin_img, true, last_frame,
-                       psp->state->frame, lerp, x, y, z, p->map_object_,
-                       view_properties, 1.0f /* scale */, w->model_aspect_,
-                       bias, w->model_rotate_);
+        Md2RenderModel(md->md2_model_, skin_img, true, last_frame, psp->state->frame, lerp, x, y, z, p->map_object_,
+                       view_properties, 1.0f /* scale */, w->model_aspect_, bias, w->model_rotate_);
     else if (md->mdl_model_)
-        MdlRenderModel(md->mdl_model_, skin_img, true, last_frame,
-                       psp->state->frame, lerp, x, y, z, p->map_object_,
-                       view_properties, 1.0f /* scale */, w->model_aspect_,
-                       bias, w->model_rotate_);
+        MdlRenderModel(md->mdl_model_, skin_img, true, last_frame, psp->state->frame, lerp, x, y, z, p->map_object_,
+                       view_properties, 1.0f /* scale */, w->model_aspect_, bias, w->model_rotate_);
 }
 
 // ============================================================================
@@ -691,27 +667,27 @@ void RendererDrawWeaponModel(Player *p)
 
 int sprite_kludge = 0;
 
-static inline void LinkDrawThingIntoDrawFloor(DrawFloor *dfloor,
-                                              DrawThing *dthing)
+static inline void LinkDrawThingIntoDrawFloor(DrawFloor *dfloor, DrawThing *dthing)
 {
     dthing->properties = dfloor->properties;
     dthing->next       = dfloor->things;
     dthing->previous   = nullptr;
 
-    if (dfloor->things) dfloor->things->previous = dthing;
+    if (dfloor->things)
+        dfloor->things->previous = dthing;
 
     dfloor->things = dthing;
 }
 
-static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my,
-                                            bool *flip)
+static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my, bool *flip)
 {
     // Note: can return nullptr for no image.
 
     // decide which patch to use for sprite relative to player
     EPI_ASSERT(mo->state_);
 
-    if (mo->state_->sprite == 0) return nullptr;
+    if (mo->state_->sprite == 0)
+        return nullptr;
 
     SpriteFrame *frame = GetSpriteFrame(mo->state_->sprite, mo->state_->frame);
 
@@ -734,7 +710,8 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my,
 
         ang = from_view - ang + kBAMAngle180;
 
-        if (MirrorReflective()) ang = (BAMAngle)0 - ang;
+        if (MirrorReflective())
+            ang = (BAMAngle)0 - ang;
 
         if (frame->rotations_ == 16)
             rot = (ang + (kBAMAngle45 / 4)) >> (kBAMAngleBits - 4);
@@ -746,7 +723,8 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my,
 
     (*flip) = frame->flip_[rot] ? true : false;
 
-    if (MirrorReflective()) (*flip) = !(*flip);
+    if (MirrorReflective())
+        (*flip) = !(*flip);
 
     if (!frame->images_[rot])
     {
@@ -762,7 +740,8 @@ const Image *RendererGetOtherSprite(int spritenum, int framenum, bool *flip)
 {
     /* Used for non-object stuff, like weapons and finale */
 
-    if (spritenum == 0) return nullptr;
+    if (spritenum == 0)
+        return nullptr;
 
     SpriteFrame *frame = GetSpriteFrame(spritenum, framenum);
 
@@ -792,7 +771,8 @@ static void RendererClipSpriteVertically(DrawSubsector *dsub, DrawThing *dthing)
     {
         dfloor = *DFI;
 
-        if (z <= dfloor->top_height) break;
+        if (z <= dfloor->top_height)
+            break;
     }
 
     EPI_ASSERT(dfloor);
@@ -810,13 +790,16 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     EPI_ASSERT(mo->state_);
 
     // ignore the camera itself
-    if (mo == view_camera_map_object && total_active_mirrors == 0) return;
+    if (mo == view_camera_map_object && total_active_mirrors == 0)
+        return;
 
     // ignore invisible things
-    if (AlmostEquals(mo->visibility_, 0.0f)) return;
+    if (AlmostEquals(mo->visibility_, 0.0f))
+        return;
 
     // ignore things that are mid-teleport
-    if (mo->teleport_tic_-- > 0) return;
+    if (mo->teleport_tic_-- > 0)
+        return;
 
     bool is_model = (mo->state_->flags & kStateFrameFlagModel) ? true : false;
 
@@ -826,15 +809,11 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     // position interpolation
     if (mo->interpolation_number_ > 1)
     {
-        float along =
-            mo->interpolation_position_ / (float)mo->interpolation_number_;
+        float along = mo->interpolation_position_ / (float)mo->interpolation_number_;
 
-        mx = mo->interpolation_from_.X +
-             (mx - mo->interpolation_from_.X) * along;
-        my = mo->interpolation_from_.Y +
-             (my - mo->interpolation_from_.Y) * along;
-        mz = mo->interpolation_from_.Z +
-             (mz - mo->interpolation_from_.Z) * along;
+        mx = mo->interpolation_from_.X + (mx - mo->interpolation_from_.X) * along;
+        my = mo->interpolation_from_.Y + (my - mo->interpolation_from_.Y) * along;
+        mz = mo->interpolation_from_.Z + (mz - mo->interpolation_from_.Z) * along;
     }
 
     MirrorCoordinate(mx, my);
@@ -845,7 +824,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     float tz = tr_x * view_cosine + tr_y * view_sine;
 
     // thing is behind view plane?
-    if (clip_scope != kBAMAngle180 && tz <= 0)  // && !is_model)
+    if (clip_scope != kBAMAngle180 && tz <= 0) // && !is_model)
         return;
 
     float tx = tr_x * view_sine - tr_y * view_cosine;
@@ -854,13 +833,13 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     // -ES- 1999/03/13 Fixed clipping to work with large FOVs (up to 176 deg)
     // rejects all sprites where angle>176 deg (arctan 32), since those
     // sprites would result in overflow in future calculations
-    if (tz >= kMinimumSpriteDistance && fabs(tx) / 32 > tz) return;
+    if (tz >= kMinimumSpriteDistance && fabs(tx) / 32 > tz)
+        return;
 
     float   sink_mult = 0;
     float   bob_mult  = 0;
     Sector *cur_sec   = mo->subsector_->sector;
-    if (!cur_sec->extrafloor_used && !cur_sec->height_sector &&
-        abs(mo->z - cur_sec->floor_height) < 1)
+    if (!cur_sec->extrafloor_used && !cur_sec->height_sector && abs(mo->z - cur_sec->floor_height) < 1)
     {
         sink_mult = cur_sec->sink_depth;
         bob_mult  = cur_sec->bob_depth;
@@ -869,12 +848,11 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     float hover_dz = 0;
 
     if (mo->hyper_flags_ & kHyperFlagHover ||
-        ((mo->flags_ & kMapObjectFlagSpecial ||
-          mo->flags_ & kMapObjectFlagCorpse) &&
-         bob_mult > 0))
+        ((mo->flags_ & kMapObjectFlagSpecial || mo->flags_ & kMapObjectFlagCorpse) && bob_mult > 0))
         hover_dz = GetHoverDeltaZ(mo, bob_mult);
 
-    if (sink_mult > 0) hover_dz -= (mo->height_ * 0.5 * sink_mult);
+    if (sink_mult > 0)
+        hover_dz -= (mo->height_ * 0.5 * sink_mult);
 
     bool         spr_flip = false;
     const Image *image    = nullptr;
@@ -886,7 +864,8 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     {
         image = RendererGetThingSprite2(mo, mx, my, &spr_flip);
 
-        if (!image) return;
+        if (!image)
+            return;
 
         // calculate edges of the shape
         float sprite_width  = image->ScaledWidthActual();
@@ -894,7 +873,8 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
         float side_offset   = image->ScaledOffsetX();
         float top_offset    = image->ScaledOffsetY();
 
-        if (spr_flip) side_offset = -side_offset;
+        if (spr_flip)
+            side_offset = -side_offset;
 
         float xscale = mo->scale_ * mo->aspect_;
 
@@ -903,35 +883,33 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
 
         switch (mo->info_->yalign_)
         {
-            case SpriteYAlignmentTopDown:
-                gzt = mo->z + mo->height_ + top_offset * mo->scale_;
-                gzb = gzt - sprite_height * mo->scale_;
-                break;
+        case SpriteYAlignmentTopDown:
+            gzt = mo->z + mo->height_ + top_offset * mo->scale_;
+            gzb = gzt - sprite_height * mo->scale_;
+            break;
 
-            case SpriteYAlignmentMiddle:
-            {
-                float _mz = mo->z + mo->height_ * 0.5 + top_offset * mo->scale_;
-                float dz  = sprite_height * 0.5 * mo->scale_;
+        case SpriteYAlignmentMiddle: {
+            float _mz = mo->z + mo->height_ * 0.5 + top_offset * mo->scale_;
+            float dz  = sprite_height * 0.5 * mo->scale_;
 
-                gzt = _mz + dz;
-                gzb = _mz - dz;
-                break;
-            }
-
-            case SpriteYAlignmentBottomUp:
-            default:
-                gzb = mo->z + top_offset * mo->scale_;
-                gzt = gzb + sprite_height * mo->scale_;
-                break;
+            gzt = _mz + dz;
+            gzb = _mz - dz;
+            break;
         }
 
-        if (mo->hyper_flags_ & kHyperFlagHover ||
-            (sink_mult > 0 || bob_mult > 0))
+        case SpriteYAlignmentBottomUp:
+        default:
+            gzb = mo->z + top_offset * mo->scale_;
+            gzt = gzb + sprite_height * mo->scale_;
+            break;
+        }
+
+        if (mo->hyper_flags_ & kHyperFlagHover || (sink_mult > 0 || bob_mult > 0))
         {
             gzt += hover_dz;
             gzb += hover_dz;
         }
-    }  // if (! is_model)
+    } // if (! is_model)
 
     // fix for sprites that sit wrongly into the floor/ceiling
     int y_clipping = kVerticalClipSoft;
@@ -976,7 +954,8 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
 
     if (!is_model)
     {
-        if (gzb >= gzt) return;
+        if (gzb >= gzt)
+            return;
 
         MirrorHeight(gzb);
         MirrorHeight(gzt);
@@ -1045,19 +1024,17 @@ static void RendererDrawModel(DrawThing *dthing)
     float   sink_mult = 0;
     float   bob_mult  = 0;
     Sector *cur_sec   = mo->subsector_->sector;
-    if (!cur_sec->extrafloor_used && !cur_sec->height_sector &&
-        abs(mo->z - cur_sec->floor_height) < 1)
+    if (!cur_sec->extrafloor_used && !cur_sec->height_sector && abs(mo->z - cur_sec->floor_height) < 1)
     {
         sink_mult = cur_sec->sink_depth;
         bob_mult  = cur_sec->bob_depth;
     }
 
-    if (sink_mult > 0) z -= mo->height_ * 0.5 * sink_mult;
+    if (sink_mult > 0)
+        z -= mo->height_ * 0.5 * sink_mult;
 
     if (mo->hyper_flags_ & kHyperFlagHover ||
-        ((mo->flags_ & kMapObjectFlagSpecial ||
-          mo->flags_ & kMapObjectFlagCorpse) &&
-         bob_mult > 0))
+        ((mo->flags_ & kMapObjectFlagSpecial || mo->flags_ & kMapObjectFlagCorpse) && bob_mult > 0))
         z += GetHoverDeltaZ(mo, bob_mult);
 
     int   last_frame = mo->state_->frame;
@@ -1074,17 +1051,13 @@ static void RendererDrawModel(DrawThing *dthing)
     }
 
     if (md->md2_model_)
-        Md2RenderModel(md->md2_model_, skin_img, false, last_frame,
-                       mo->state_->frame, lerp, dthing->map_x, dthing->map_y, z,
-                       mo, mo->region_properties_, mo->model_scale_,
-                       mo->model_aspect_, mo->info_->model_bias_,
-                       mo->info_->model_rotate_);
+        Md2RenderModel(md->md2_model_, skin_img, false, last_frame, mo->state_->frame, lerp, dthing->map_x,
+                       dthing->map_y, z, mo, mo->region_properties_, mo->model_scale_, mo->model_aspect_,
+                       mo->info_->model_bias_, mo->info_->model_rotate_);
     else if (md->mdl_model_)
-        MdlRenderModel(md->mdl_model_, skin_img, false, last_frame,
-                       mo->state_->frame, lerp, dthing->map_x, dthing->map_y, z,
-                       mo, mo->region_properties_, mo->model_scale_,
-                       mo->model_aspect_, mo->info_->model_bias_,
-                       mo->info_->model_rotate_);
+        MdlRenderModel(md->mdl_model_, skin_img, false, last_frame, mo->state_->frame, lerp, dthing->map_x,
+                       dthing->map_y, z, mo, mo->region_properties_, mo->model_scale_, mo->model_aspect_,
+                       mo->info_->model_bias_, mo->info_->model_rotate_);
 }
 
 struct ThingCoordinateData
@@ -1103,14 +1076,14 @@ static void DLIT_Thing(MapObject *mo, void *dataptr)
     ThingCoordinateData *data = (ThingCoordinateData *)dataptr;
 
     // dynamic lights do not light themselves up!
-    if (mo == data->mo) return;
+    if (mo == data->mo)
+        return;
 
     EPI_ASSERT(mo->dynamic_light_.shader);
 
     for (int v = 0; v < 4; v++)
     {
-        mo->dynamic_light_.shader->Sample(data->colors + v, data->vertices[v].X,
-                                          data->vertices[v].Y,
+        mo->dynamic_light_.shader->Sample(data->colors + v, data->vertices[v].X, data->vertices[v].Y,
                                           data->vertices[v].Z);
     }
 }
@@ -1135,14 +1108,13 @@ void RendererDrawThing(DrawFloor *dfloor, DrawThing *dthing)
 
     float dx = 0, dy = 0;
 
-    if (trans <= 0) return;
+    if (trans <= 0)
+        return;
 
     const Image *image = dthing->image;
 
-    GLuint tex_id = ImageCache(image, false,
-                               render_view_effect_colormap
-                                   ? render_view_effect_colormap
-                                   : dthing->map_object->info_->palremap_);
+    GLuint tex_id = ImageCache(
+        image, false, render_view_effect_colormap ? render_view_effect_colormap : dthing->map_object->info_->palremap_);
 
     float h     = image->ScaledHeightActual();
     float right = image->Right();
@@ -1165,7 +1137,8 @@ void RendererDrawThing(DrawFloor *dfloor, DrawThing *dthing)
         float _h    = dthing->original_top - dthing->original_bottom;
         float skew2 = _h;
 
-        if (mo->radius_ >= 1.0f && h > mo->radius_) skew2 = mo->radius_;
+        if (mo->radius_ >= 1.0f && h > mo->radius_)
+            skew2 = mo->radius_;
 
         float _dx = view_cosine * sprite_skew * skew2;
         float _dy = view_sine * sprite_skew * skew2;
@@ -1245,8 +1218,7 @@ void RendererDrawThing(DrawFloor *dfloor, DrawThing *dthing)
         blending = kBlendingMasked | kBlendingAlpha;
         trans    = 1.0f;
 
-        float dist =
-            ApproximateDistance(mo->x - view_x, mo->y - view_y, mo->z - view_z);
+        float dist = ApproximateDistance(mo->x - view_x, mo->y - view_y, mo->z - view_z);
 
         fuzz_mul = 0.8 / HMM_Clamp(20, dist, 700);
 
@@ -1255,26 +1227,22 @@ void RendererDrawThing(DrawFloor *dfloor, DrawThing *dthing)
 
     if (!is_fuzzy)
     {
-        AbstractShader *shader = GetColormapShader(
-            dthing->properties, mo->state_->bright, mo->subsector_->sector);
+        AbstractShader *shader = GetColormapShader(dthing->properties, mo->state_->bright, mo->subsector_->sector);
 
         for (int v = 0; v < 4; v++)
         {
-            shader->Sample(data.colors + v, data.vertices[v].X,
-                           data.vertices[v].Y, data.vertices[v].Z);
+            shader->Sample(data.colors + v, data.vertices[v].X, data.vertices[v].Y, data.vertices[v].Z);
         }
 
         if (use_dynamic_lights && render_view_extra_light < 250)
         {
             float r = mo->radius_ + 32;
 
-            DynamicLightIterator(mo->x - r, mo->y - r, mo->z, mo->x + r,
-                                 mo->y + r, mo->z + mo->height_, DLIT_Thing,
+            DynamicLightIterator(mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r, mo->z + mo->height_, DLIT_Thing,
                                  &data);
 
-            SectorGlowIterator(mo->subsector_->sector, mo->x - r, mo->y - r,
-                               mo->z, mo->x + r, mo->y + r, mo->z + mo->height_,
-                               DLIT_Thing, &data);
+            SectorGlowIterator(mo->subsector_->sector, mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r,
+                               mo->z + mo->height_, DLIT_Thing, &data);
         }
     }
 
@@ -1282,10 +1250,8 @@ void RendererDrawThing(DrawFloor *dfloor, DrawThing *dthing)
 
     int num_pass = is_fuzzy ? 1 : (detail_level > 0 ? 4 : 3);
 
-    RGBAColor fc_to_use =
-        dthing->map_object->subsector_->sector->properties.fog_color;
-    float fd_to_use =
-        dthing->map_object->subsector_->sector->properties.fog_density;
+    RGBAColor fc_to_use = dthing->map_object->subsector_->sector->properties.fog_color;
+    float     fd_to_use = dthing->map_object->subsector_->sector->properties.fog_density;
     // check for DDFLEVL fog
     if (fc_to_use == kRGBANoValue)
     {
@@ -1313,21 +1279,21 @@ void RendererDrawThing(DrawFloor *dfloor, DrawThing *dthing)
 
         if (pass > 0 && pass < num_pass - 1)
         {
-            if (GetMulticolMaxRGB(data.colors, 4, false) <= 0) continue;
+            if (GetMulticolMaxRGB(data.colors, 4, false) <= 0)
+                continue;
         }
         else if (is_additive)
         {
-            if (GetMulticolMaxRGB(data.colors, 4, true) <= 0) continue;
+            if (GetMulticolMaxRGB(data.colors, 4, true) <= 0)
+                continue;
         }
 
         GLuint fuzz_tex = is_fuzzy ? ImageCache(fuzz_image, false) : 0;
 
-        RendererVertex *glvert = RendererBeginUnit(
-            GL_POLYGON, 4,
-            is_additive ? (GLuint)kTextureEnvironmentSkipRgb : GL_MODULATE,
-            tex_id, is_fuzzy ? GL_MODULATE : (GLuint)kTextureEnvironmentDisable,
-            fuzz_tex, pass, blending, pass > 0 ? kRGBANoValue : fc_to_use,
-            fd_to_use);
+        RendererVertex *glvert =
+            RendererBeginUnit(GL_POLYGON, 4, is_additive ? (GLuint)kTextureEnvironmentSkipRgb : GL_MODULATE, tex_id,
+                              is_fuzzy ? GL_MODULATE : (GLuint)kTextureEnvironmentDisable, fuzz_tex, pass, blending,
+                              pass > 0 ? kRGBANoValue : fc_to_use, fd_to_use);
 
         for (int v_idx = 0; v_idx < 4; v_idx++)
         {
@@ -1346,14 +1312,12 @@ void RendererDrawThing(DrawFloor *dfloor, DrawThing *dthing)
                 dest->texture_coordinates[1].Y = fty * fuzz_mul + fuzz_add.Y;
                 ;
 
-                dest->rgba_color[0]     = dest->rgba_color[1] =
-                    dest->rgba_color[2] = 0;
+                dest->rgba_color[0] = dest->rgba_color[1] = dest->rgba_color[2] = 0;
             }
             else if (!is_additive)
             {
                 dest->rgba_color[0] = data.colors[v_idx].modulate_red_ / 255.0;
-                dest->rgba_color[1] =
-                    data.colors[v_idx].modulate_green_ / 255.0;
+                dest->rgba_color[1] = data.colors[v_idx].modulate_green_ / 255.0;
                 dest->rgba_color[2] = data.colors[v_idx].modulate_blue_ / 255.0;
 
                 data.colors[v_idx].modulate_red_ -= 256;
@@ -1406,15 +1370,15 @@ void RendererDrawSortThings(DrawFloor *dfloor)
 
     // Check we have something to draw
     head_dt = dfloor->things;
-    if (!head_dt) return;
+    if (!head_dt)
+        return;
 
     DrawThing *curr_dt, *dt, *next_dt;
     float      cmp_val;
 
-    head_dt->render_left = head_dt->render_right = head_dt->render_previous =
-        head_dt->render_next                     = nullptr;
+    head_dt->render_left = head_dt->render_right = head_dt->render_previous = head_dt->render_next = nullptr;
 
-    dt = nullptr;  // Warning removal: This will always have been set
+    dt = nullptr; // Warning removal: This will always have been set
 
     curr_dt = head_dt->next;
     while (curr_dt)
@@ -1423,7 +1387,8 @@ void RendererDrawSortThings(DrawFloor *dfloor)
 
         // Parse the tree to find our place
         next_dt = head_dt;
-        do {
+        do
+        {
             dt = next_dt;
 
             cmp_val = dt->translated_z - curr_dt->translated_z;
@@ -1447,7 +1412,8 @@ void RendererDrawSortThings(DrawFloor *dfloor)
             dt->render_left = curr_dt;
 
             // Update the linked list (Insert behind node)
-            if (dt->render_previous) dt->render_previous->render_next = curr_dt;
+            if (dt->render_previous)
+                dt->render_previous->render_next = curr_dt;
 
             curr_dt->render_previous = dt->render_previous;
             curr_dt->render_next     = dt;
@@ -1460,7 +1426,8 @@ void RendererDrawSortThings(DrawFloor *dfloor)
             dt->render_right = curr_dt;
 
             // Update the linked list (Insert infront of node)
-            if (dt->render_next) dt->render_next->render_previous = curr_dt;
+            if (dt->render_next)
+                dt->render_next->render_previous = curr_dt;
 
             curr_dt->render_next     = dt->render_next;
             curr_dt->render_previous = dt;
@@ -1472,10 +1439,12 @@ void RendererDrawSortThings(DrawFloor *dfloor)
     }
 
     // Find the first to draw
-    while (head_dt->render_previous) head_dt = head_dt->render_previous;
+    while (head_dt->render_previous)
+        head_dt = head_dt->render_previous;
 
     // Draw...
-    for (dt = head_dt; dt; dt = dt->render_next) RendererDrawThing(dfloor, dt);
+    for (dt = head_dt; dt; dt = dt->render_next)
+        RendererDrawThing(dfloor, dt);
 }
 
 //--- editor settings ---

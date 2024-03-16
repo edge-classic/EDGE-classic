@@ -23,25 +23,25 @@
 enum FontType
 {
     kFontTypeUnset    = 0,
-    kFontTypePatch    = 1,  // font is made up of individual patches
-    kFontTypeImage    = 2,  // font consists of one big image (16x16 chars)
-    kFontTypeTrueType = 3   // font is a ttf/otf file or lump
+    kFontTypePatch    = 1, // font is made up of individual patches
+    kFontTypeImage    = 2, // font consists of one big image (16x16 chars)
+    kFontTypeTrueType = 3  // font is a ttf/otf file or lump
 };
 
 struct FontPatch
 {
-    FontPatch  *next;          // link in list
-    int         char1, char2;  // range
+    FontPatch  *next;         // link in list
+    int         char1, char2; // range
     std::string patch1;
 };
 
 class FontDefinition
 {
-   public:
+  public:
     FontDefinition();
     ~FontDefinition(){};
 
-   public:
+  public:
     void Default(void);
     void CopyDetail(const FontDefinition &src);
 
@@ -68,11 +68,14 @@ class FontDefinition
 
     std::string truetype_name_;
     int         truetype_smoothing_;
-    std::string truetype_smoothing_string_;  // User convenience
+    std::string truetype_smoothing_string_; // User convenience
 
-   private:
+  private:
     // disable copy construct and assignment operator
-    explicit FontDefinition(FontDefinition &rhs) { (void)rhs; }
+    explicit FontDefinition(FontDefinition &rhs)
+    {
+        (void)rhs;
+    }
     FontDefinition &operator=(FontDefinition &rhs)
     {
         (void)rhs;
@@ -83,13 +86,13 @@ class FontDefinition
 // Our fontdefs container
 class FontDefinitionContainer : public std::vector<FontDefinition *>
 {
-   public:
-    FontDefinitionContainer() {}
+  public:
+    FontDefinitionContainer()
+    {
+    }
     ~FontDefinitionContainer()
     {
-        for (std::vector<FontDefinition *>::iterator iter     = begin(),
-                                                     iter_end = end();
-             iter != iter_end; iter++)
+        for (std::vector<FontDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
         {
             FontDefinition *fnt = *iter;
             delete fnt;
@@ -97,7 +100,7 @@ class FontDefinitionContainer : public std::vector<FontDefinition *>
         }
     }
 
-   public:
+  public:
     // Search Functions
     FontDefinition *Lookup(const char *refname);
 };

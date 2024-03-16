@@ -32,7 +32,7 @@
 #include "snd_gather.h"
 #include "w_wad.h"
 
-extern bool sound_device_stereo;  // FIXME: encapsulation
+extern bool sound_device_stereo; // FIXME: encapsulation
 
 // The following structs and PC Speaker Conversion routine are adapted from the
 // SLADE codebase, specifically
@@ -74,22 +74,19 @@ struct SpeakerSoundHeader
 uint8_t *ConvertPcSpeakerSound(const uint8_t *data, int *length)
 {
     static const double   ORIG_RATE     = 140.0;
-    static const int      FACTOR        = 315;  // 315*140 = 44100
+    static const int      FACTOR        = 315; // 315*140 = 44100
     static const double   FREQ          = 1193181.0;
     static const double   RATE          = (ORIG_RATE * FACTOR);
     static const int      PC_VOLUME     = 20;
     static const uint16_t counters[128] = {
-        0,    6818, 6628, 6449, 6279, 6087, 5906, 5736, 5575, 5423, 5279, 5120,
-        4971, 4830, 4697, 4554, 4435, 4307, 4186, 4058, 3950, 3836, 3728, 3615,
-        3519, 3418, 3323, 3224, 3131, 3043, 2960, 2875, 2794, 2711, 2633, 2560,
-        2485, 2415, 2348, 2281, 2213, 2153, 2089, 2032, 1975, 1918, 1864, 1810,
-        1757, 1709, 1659, 1612, 1565, 1521, 1478, 1435, 1395, 1355, 1316, 1280,
-        1242, 1207, 1173, 1140, 1107, 1075, 1045, 1015, 986,  959,  931,  905,
-        879,  854,  829,  806,  783,  760,  739,  718,  697,  677,  658,  640,
-        621,  604,  586,  570,  553,  538,  522,  507,  493,  479,  465,  452,
-        439,  427,  415,  403,  391,  380,  369,  359,  348,  339,  329,  319,
-        310,  302,  293,  285,  276,  269,  261,  253,  246,  239,  232,  226,
-        219,  213,  207,  201,  195,  190,  184,  179
+        0,    6818, 6628, 6449, 6279, 6087, 5906, 5736, 5575, 5423, 5279, 5120, 4971, 4830, 4697, 4554,
+        4435, 4307, 4186, 4058, 3950, 3836, 3728, 3615, 3519, 3418, 3323, 3224, 3131, 3043, 2960, 2875,
+        2794, 2711, 2633, 2560, 2485, 2415, 2348, 2281, 2213, 2153, 2089, 2032, 1975, 1918, 1864, 1810,
+        1757, 1709, 1659, 1612, 1565, 1521, 1478, 1435, 1395, 1355, 1316, 1280, 1242, 1207, 1173, 1140,
+        1107, 1075, 1045, 1015, 986,  959,  931,  905,  879,  854,  829,  806,  783,  760,  739,  718,
+        697,  677,  658,  640,  621,  604,  586,  570,  553,  538,  522,  507,  493,  479,  465,  452,
+        439,  427,  415,  403,  391,  380,  369,  359,  348,  339,  329,  319,  310,  302,  293,  285,
+        276,  269,  261,  253,  246,  239,  232,  226,  219,  213,  207,  201,  195,  190,  184,  179
     };
 
     // --- Read Doom sound ---
@@ -105,13 +102,12 @@ uint8_t *ConvertPcSpeakerSound(const uint8_t *data, int *length)
     size_t numsamples;
 
     // Format checks
-    if (header.zero != 0)  // Check for magic number
+    if (header.zero != 0) // Check for magic number
     {
         LogWarning("Invalid Doom PC Speaker Sound\n");
         return nullptr;
     }
-    if (header.samples > (*length - 4) ||
-        header.samples < 4)  // Check for sane values
+    if (header.samples > (*length - 4) || header.samples < 4) // Check for sane values
     {
         LogWarning("Invalid Doom PC Speaker Sound\n");
         return nullptr;
@@ -131,8 +127,7 @@ uint8_t *ConvertPcSpeakerSound(const uint8_t *data, int *length)
     {
         if (osamples[s] > 127)
         {
-            LogWarning("Invalid PC Speaker counter value: %d > 127",
-                       osamples[s]);
+            LogWarning("Invalid PC Speaker counter value: %d > 127", osamples[s]);
             return nullptr;
         }
         if (osamples[s] > 0)
@@ -190,7 +185,7 @@ uint8_t *ConvertPcSpeakerSound(const uint8_t *data, int *length)
 
     // Write chunks
 
-    *length = 20 + sizeof(WavFormatChunk) + (numsamples * FACTOR);
+    *length                = 20 + sizeof(WavFormatChunk) + (numsamples * FACTOR);
     int      write_counter = 0;
     uint8_t *new_data      = new uint8_t[*length];
     memcpy(new_data + write_counter, &whdr, 8);
@@ -212,7 +207,8 @@ bool SoundLoadWAV(SoundData *buf, uint8_t *data, int length, bool pc_speaker)
 {
     drwav wav;
 
-    if (pc_speaker) data = ConvertPcSpeakerSound(data, &length);
+    if (pc_speaker)
+        data = ConvertPcSpeakerSound(data, &length);
 
     if (!drwav_init_memory(&wav, data, length, nullptr))
     {
@@ -227,17 +223,15 @@ bool SoundLoadWAV(SoundData *buf, uint8_t *data, int length, bool pc_speaker)
         return false;
     }
 
-    if (wav.totalPCMFrameCount <=
-        0)  // I think the initial loading would fail if this were the case, but
-            // just as a sanity check - Dasho
+    if (wav.totalPCMFrameCount <= 0) // I think the initial loading would fail if this were the case, but
+                                     // just as a sanity check - Dasho
     {
         LogWarning("WAV SFX Loader: no samples!\n");
         drwav_uninit(&wav);
         return false;
     }
 
-    LogDebug("WAV SFX Loader: freq %d Hz, %d channels\n", wav.sampleRate,
-             wav.channels);
+    LogDebug("WAV SFX Loader: freq %d Hz, %d channels\n", wav.sampleRate, wav.channels);
 
     bool is_stereo = (wav.channels > 1);
 
@@ -247,8 +241,7 @@ bool SoundLoadWAV(SoundData *buf, uint8_t *data, int length, bool pc_speaker)
 
     int16_t *buffer = gather.MakeChunk(wav.totalPCMFrameCount, is_stereo);
 
-    gather.CommitChunk(
-        drwav_read_pcm_frames_s16(&wav, wav.totalPCMFrameCount, buffer));
+    gather.CommitChunk(drwav_read_pcm_frames_s16(&wav, wav.totalPCMFrameCount, buffer));
 
     if (!gather.Finalise(buf, is_stereo))
         LogWarning("WAV SFX Loader: no samples!\n");

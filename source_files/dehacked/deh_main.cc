@@ -96,7 +96,8 @@ DehackedResult Convert(void)
     {
         result = patch::Load(input_buffers[i]);
 
-        if (result != kDehackedConversionOK) return result;
+        if (result != kDehackedConversionOK)
+            return result;
     }
 
     // do conversions into DDF...
@@ -139,7 +140,7 @@ void Shutdown()
     FreeInputBuffers();
 }
 
-}  // namespace dehacked
+} // namespace dehacked
 
 //------------------------------------------------------------------------
 
@@ -150,7 +151,10 @@ void DehackedStartup()
     LogPrint("*** DeHackEd -> EDGE Conversion ***\n");
 }
 
-const char *DehackedGetError(void) { return dehacked::GetErrorMsg(); }
+const char *DehackedGetError(void)
+{
+    return dehacked::GetErrorMsg();
+}
 
 DehackedResult DehackedSetQuiet(int quiet)
 {

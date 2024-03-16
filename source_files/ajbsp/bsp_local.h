@@ -61,7 +61,7 @@ struct WallTip
 
 class Vertex
 {
-   public:
+  public:
     // coordinates
     double x_, y_;
 
@@ -82,7 +82,7 @@ class Vertex
     // list of wall-tips
     WallTip *tip_set_;
 
-   public:
+  public:
     // check whether a line with the given delta coordinates from this
     // vertex is open or closed.  If there exists a walltip at same
     // angle, it is closed, likewise if line is in void space.
@@ -122,8 +122,8 @@ struct Linedef
     Vertex *start;  // from this vertex...
     Vertex *end;    // ... to this vertex
 
-    Sidedef *right;  // right sidedef
-    Sidedef *left;   // left sidede, or nullptr if none
+    Sidedef *right; // right sidedef
+    Sidedef *left;  // left sidede, or nullptr if none
 
     int type;
 
@@ -163,12 +163,12 @@ struct Thing
 
 class Seg
 {
-   public:
+  public:
     // link for list
     Seg *next_;
 
-    Vertex *start_;  // from this vertex...
-    Vertex *end_;    // ... to this vertex
+    Vertex *start_; // from this vertex...
+    Vertex *end_;   // ... to this vertex
 
     // linedef that this seg goes along, or nullptr if miniseg
     Linedef *linedef_;
@@ -213,7 +213,7 @@ class Seg
     // this only used by ClockwiseOrder()
     double cmp_angle_;
 
-   public:
+  public:
     // compute the seg private info (psx/y, pex/y, pdx/y, etc).
     void Recompute();
 
@@ -238,7 +238,7 @@ constexpr uint32_t kSegIsGarbage = (1 << 29);
 
 class Subsector
 {
-   public:
+  public:
     // list of segs
     Seg *seg_list_;
 
@@ -253,7 +253,7 @@ class Subsector
     double mid_x_;
     double mid_y_;
 
-   public:
+  public:
     void AddToTail(Seg *seg);
 
     void DetermineMiddle();
@@ -282,13 +282,13 @@ struct Child
 
 class Node
 {
-   public:
+  public:
     // these coordinates are high precision to support UDMF.
     // in non-UDMF maps, they will actually be integral since a
     // partition line *always* comes from a normal linedef.
 
-    double x_, y_;    // starting point
-    double dx_, dy_;  // offset to ending point
+    double x_, y_;   // starting point
+    double dx_, dy_; // offset to ending point
 
     // right & left children
     Child r_;
@@ -298,7 +298,7 @@ class Node
     // created.
     int index_;
 
-   public:
+  public:
     void SetPartition(const Seg *part);
 };
 
@@ -306,7 +306,7 @@ class QuadTree
 {
     // NOTE: not a real quadtree, division is always binary.
 
-   public:
+  public:
     // coordinates on map for this block, from lower-left corner to
     // upper-right corner.  Fully inclusive, i.e (x,y) is inside this
     // block when x1 < x < x2 and y1 < y < y2.
@@ -326,14 +326,17 @@ class QuadTree
     // list of segs completely contained in this node.
     Seg *list_;
 
-   public:
+  public:
     QuadTree(int _x1, int _y1, int _x2, int _y2);
     ~QuadTree();
 
     void AddSeg(Seg *seg);
     void AddList(Seg *list);
 
-    inline bool Empty() const { return (real_num_ + mini_num_) == 0; }
+    inline bool Empty() const
+    {
+        return (real_num_ + mini_num_) == 0;
+    }
 
     void ConvertToList(Seg **list);
 
@@ -466,8 +469,7 @@ Seg *CreateSegs(void);
 // two halves, a node is created by calling this routine recursively,
 // and '*N' is the new node (and '*S' is set to nullptr).  Normally
 // returns kBuildOK, or BUILD_Cancelled if user stopped it.
-BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */,
-                       Node **N, Subsector **S);
+BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */, Node **N, Subsector **S);
 
 // compute the height of the bsp tree, starting at 'node'.
 int ComputeBspHeight(const Node *node);
@@ -480,7 +482,7 @@ int ComputeBspHeight(const Node *node);
 //   in the wrong place order-wise. ]
 void ClockwiseBspTree();
 
-}  // namespace ajbsp
+} // namespace ajbsp
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

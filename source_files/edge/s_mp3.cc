@@ -36,15 +36,15 @@
 
 #define MP3_SAMPLES 1024
 
-extern bool sound_device_stereo;  // FIXME: encapsulation
+extern bool sound_device_stereo; // FIXME: encapsulation
 
 class Mp3Player : public AbstractMusicPlayer
 {
-   public:
+  public:
     Mp3Player();
     ~Mp3Player();
 
-   private:
+  private:
     enum Status
     {
         kNotLoaded,
@@ -63,7 +63,7 @@ class Mp3Player : public AbstractMusicPlayer
 
     int16_t *mono_buffer_;
 
-   public:
+  public:
     bool OpenMemory(uint8_t *data, int length);
 
     virtual void Close(void);
@@ -76,7 +76,7 @@ class Mp3Player : public AbstractMusicPlayer
 
     virtual void Ticker(void);
 
-   private:
+  private:
     void PostOpen(void);
 
     bool StreamIntoBuffer(SoundData *buf);
@@ -93,13 +93,20 @@ Mp3Player::~Mp3Player()
 {
     Close();
 
-    if (mono_buffer_) delete[] mono_buffer_;
+    if (mono_buffer_)
+        delete[] mono_buffer_;
 }
 
 void Mp3Player::PostOpen()
 {
-    if (mp3_decoder_->channels == 1) { is_stereo_ = false; }
-    else { is_stereo_ = true; }
+    if (mp3_decoder_->channels == 1)
+    {
+        is_stereo_ = false;
+    }
+    else
+    {
+        is_stereo_ = true;
+    }
 
     // Loaded, but not playing
     status_ = kStopped;
@@ -125,12 +132,12 @@ bool Mp3Player::StreamIntoBuffer(SoundData *buf)
     else
         data_buf = buf->data_left_;
 
-    int got_size =
-        drmp3_read_pcm_frames_s16(mp3_decoder_, MP3_SAMPLES, data_buf);
+    int got_size = drmp3_read_pcm_frames_s16(mp3_decoder_, MP3_SAMPLES, data_buf);
 
     if (got_size == 0) /* EOF */
     {
-        if (!looping_) return false;
+        if (!looping_)
+            return false;
         drmp3_seek_to_pcm_frame(mp3_decoder_, 0);
         return true;
     }
@@ -151,7 +158,8 @@ bool Mp3Player::StreamIntoBuffer(SoundData *buf)
 
 bool Mp3Player::OpenMemory(uint8_t *data, int length)
 {
-    if (status_ != kNotLoaded) Close();
+    if (status_ != kNotLoaded)
+        Close();
 
     mp3_decoder_ = new drmp3;
 
@@ -164,8 +172,7 @@ bool Mp3Player::OpenMemory(uint8_t *data, int length)
 
     if (mp3_decoder_->channels > 2)
     {
-        LogWarning("mp3player_c: MP3 has too many channels: %d\n",
-                   mp3_decoder_->channels);
+        LogWarning("mp3player_c: MP3 has too many channels: %d\n", mp3_decoder_->channels);
         drmp3_uninit(mp3_decoder_);
         return false;
     }
@@ -176,10 +183,12 @@ bool Mp3Player::OpenMemory(uint8_t *data, int length)
 
 void Mp3Player::Close()
 {
-    if (status_ == kNotLoaded) return;
+    if (status_ == kNotLoaded)
+        return;
 
     // Stop playback
-    if (status_ != kStopped) Stop();
+    if (status_ != kStopped)
+        Stop();
 
     drmp3_uninit(mp3_decoder_);
     delete mp3_decoder_;
@@ -196,21 +205,24 @@ void Mp3Player::Close()
 
 void Mp3Player::Pause()
 {
-    if (status_ != kPlaying) return;
+    if (status_ != kPlaying)
+        return;
 
     status_ = kPaused;
 }
 
 void Mp3Player::Resume()
 {
-    if (status_ != kPaused) return;
+    if (status_ != kPaused)
+        return;
 
     status_ = kPlaying;
 }
 
 void Mp3Player::Play(bool loop)
 {
-    if (status_ != kNotLoaded && status_ != kStopped) return;
+    if (status_ != kNotLoaded && status_ != kStopped)
+        return;
 
     status_  = kPlaying;
     looping_ = loop;
@@ -224,7 +236,8 @@ void Mp3Player::Play(bool loop)
 
 void Mp3Player::Stop()
 {
-    if (status_ != kPlaying && status_ != kPaused) return;
+    if (status_ != kPlaying && status_ != kPaused)
+        return;
 
     SoundQueueStop();
 
@@ -235,11 +248,11 @@ void Mp3Player::Ticker()
 {
     while (status_ == kPlaying && !pc_speaker_mode)
     {
-        SoundData *buf = SoundQueueGetFreeBuffer(
-            MP3_SAMPLES,
-            (is_stereo_ && sound_device_stereo) ? kMixInterleaved : kMixMono);
+        SoundData *buf =
+            SoundQueueGetFreeBuffer(MP3_SAMPLES, (is_stereo_ && sound_device_stereo) ? kMixInterleaved : kMixMono);
 
-        if (!buf) break;
+        if (!buf)
+            break;
 
         if (StreamIntoBuffer(buf))
         {
@@ -294,16 +307,15 @@ bool LoadMp3Sound(SoundData *buf, const uint8_t *data, int length)
 
     drmp3_uint64 framecount = drmp3_get_pcm_frame_count(&mp3);
 
-    if (framecount <= 0)  // I think the initial loading would fail if this were
-                          // the case, but just as a sanity check - Dasho
+    if (framecount <= 0) // I think the initial loading would fail if this were
+                         // the case, but just as a sanity check - Dasho
     {
         LogWarning("MP3 SFX Loader: no samples!\n");
         drmp3_uninit(&mp3);
         return false;
     }
 
-    LogDebug("MP3 SFX Loader: freq %d Hz, %d channels\n", mp3.sampleRate,
-             mp3.channels);
+    LogDebug("MP3 SFX Loader: freq %d Hz, %d channels\n", mp3.sampleRate, mp3.channels);
 
     bool is_stereo_ = (mp3.channels > 1);
 

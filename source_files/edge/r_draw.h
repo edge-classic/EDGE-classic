@@ -28,9 +28,8 @@
 #include "r_image.h"
 
 // Move to somewhere appropriate later -ACB- 2004/08/19
-void RendererDrawImage(float x, float y, float w, float h, const Image *image,
-                       float tx1, float ty1, float tx2, float ty2,
-                       const Colormap *textmap = nullptr, float alpha = 1.0f,
+void RendererDrawImage(float x, float y, float w, float h, const Image *image, float tx1, float ty1, float tx2,
+                       float ty2, const Colormap *textmap = nullptr, float alpha = 1.0f,
                        const Colormap *palremap = nullptr);
 
 void RendererReadScreen(int x, int y, int w, int h, uint8_t *rgb_buffer);

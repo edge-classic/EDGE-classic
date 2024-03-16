@@ -106,23 +106,23 @@ static bool HasFinale(const FinaleDefinition *F, FinaleStage cur)
 
     switch (cur)
     {
-        case kFinaleStageText:
-            return F->text_ != "";
+    case kFinaleStageText:
+        return F->text_ != "";
 
-        case kFinaleStageMovie:
-            return F->movie_ != "";
+    case kFinaleStageMovie:
+        return F->movie_ != "";
 
-        case kFinaleStagePicture:
-            return (F->pics_.size() > 0);
+    case kFinaleStagePicture:
+        return (F->pics_.size() > 0);
 
-        case kFinaleStageBunny:
-            return F->dobunny_;
+    case kFinaleStageBunny:
+        return F->dobunny_;
 
-        case kFinaleStageCast:
-            return F->docast_;
+    case kFinaleStageCast:
+        return F->docast_;
 
-        default:
-            FatalError("Bad parameter passed to HasFinale().\n");
+    default:
+        FatalError("Bad parameter passed to HasFinale().\n");
     }
 
     return false; /* NOT REACHED */
@@ -135,7 +135,8 @@ static FinaleStage FindValidFinale(const FinaleDefinition *F, FinaleStage cur)
 
     for (; cur != kFinaleStageDone; cur = (FinaleStage)(cur + 1))
     {
-        if (HasFinale(F, cur)) return cur;
+        if (HasFinale(F, cur))
+            return cur;
     }
 
     return kFinaleStageDone;
@@ -147,38 +148,39 @@ static void DoStartFinale(void)
 
     switch (finale_stage)
     {
-        case kFinaleStageText:
-            finale_text = language[finale->text_];
-            ChangeMusic(finale->music_, true);
-            break;
+    case kFinaleStageText:
+        finale_text = language[finale->text_];
+        ChangeMusic(finale->music_, true);
+        break;
 
-        case kFinaleStageMovie:
-            PlayMovie(finale->movie_);
-            DoBumpFinale();
-            break;
+    case kFinaleStageMovie:
+        PlayMovie(finale->movie_);
+        DoBumpFinale();
+        break;
 
-        case kFinaleStagePicture:
-            picture_number = 0;
-            break;
+    case kFinaleStagePicture:
+        picture_number = 0;
+        break;
 
-        case kFinaleStageBunny:
-            if (current_map->episode_)
-                ChangeMusic(current_map->episode_->special_music_, true);
-            break;
+    case kFinaleStageBunny:
+        if (current_map->episode_)
+            ChangeMusic(current_map->episode_->special_music_, true);
+        break;
 
-        case kFinaleStageCast:
-            CastInitNew(2);
-            if (current_map->episode_)
-                ChangeMusic(current_map->episode_->special_music_, true);
-            break;
+    case kFinaleStageCast:
+        CastInitNew(2);
+        if (current_map->episode_)
+            ChangeMusic(current_map->episode_->special_music_, true);
+        break;
 
-        default:
-            FatalError("DoStartFinale: bad stage #%d\n", (int)finale_stage);
-            break;
+    default:
+        FatalError("DoStartFinale: bad stage #%d\n", (int)finale_stage);
+        break;
     }
 
     for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
-        if (players[pnum]) players[pnum]->command_.buttons = 0;
+        if (players[pnum])
+            players[pnum]->command_.buttons = 0;
 }
 
 static void DoBumpFinale(void)
@@ -190,7 +192,8 @@ static void DoBumpFinale(void)
 
     if (stage != kFinaleStageDone)
     {
-        if (game_state != kGameStateIntermission) ForceWipe();
+        if (game_state != kGameStateIntermission)
+            ForceWipe();
 
         finale_stage = stage;
 
@@ -205,7 +208,7 @@ static void DoBumpFinale(void)
         game_action = new_game_action;
     }
 
-    game_state = kGameStateNothing;  // hack ???  (cannot leave as GS_FINALE)
+    game_state = kGameStateNothing; // hack ???  (cannot leave as GS_FINALE)
 }
 
 static void LookupFinaleStuff(void)
@@ -213,11 +216,9 @@ static void LookupFinaleStuff(void)
     // here is where we lookup the required images
 
     if (finale->text_flat_ != "")
-        finale_text_background =
-            ImageLookup(finale->text_flat_.c_str(), kImageNamespaceFlat);
+        finale_text_background = ImageLookup(finale->text_flat_.c_str(), kImageNamespaceFlat);
     else if (finale->text_back_ != "")
-        finale_text_background =
-            ImageLookup(finale->text_back_.c_str(), kImageNamespaceGraphic);
+        finale_text_background = ImageLookup(finale->text_back_.c_str(), kImageNamespaceGraphic);
     else
         finale_text_background = nullptr;
 
@@ -226,13 +227,15 @@ static void LookupFinaleStuff(void)
     if (!finale_level_text_style)
     {
         StyleDefinition *def = styledefs.Lookup("INTERLEVEL TEXT");
-        if (!def) def = default_style;
+        if (!def)
+            def = default_style;
         finale_level_text_style = hud_styles.Lookup(def);
     }
     if (!finale_cast_style)
     {
         StyleDefinition *def = styledefs.Lookup("CAST_SCREEN");
-        if (!def) def = default_style;
+        if (!def)
+            def = default_style;
         finale_cast_style = hud_styles.Lookup(def);
     }
 }
@@ -272,7 +275,8 @@ bool FinaleResponder(InputEvent *event)
     EPI_ASSERT(game_state == kGameStateFinale);
 
     // FIXME: use WI_CheckAccelerate() in netgames
-    if (event->type != kInputEventKeyDown) return false;
+    if (event->type != kInputEventKeyDown)
+        return false;
 
     if (finale_count > kTicRate)
     {
@@ -295,56 +299,54 @@ void FinaleTicker(void)
 
     switch (finale_stage)
     {
-        case kFinaleStageText:
-            if (skip_finale &&
-                finale_count < (int)strlen(finale_text) * kFinaleTextSpeed)
-            {
-                finale_count = kFinaleTextSpeed * strlen(finale_text);
-                skip_finale  = false;
-            }
-            else if (skip_finale ||
-                     finale_count >
-                         kFinaleTextWaitTime +
-                             (int)strlen(finale_text) * kFinaleTextSpeed)
-            {
-                DoBumpFinale();
-                skip_finale = false;
-            }
-            break;
+    case kFinaleStageText:
+        if (skip_finale && finale_count < (int)strlen(finale_text) * kFinaleTextSpeed)
+        {
+            finale_count = kFinaleTextSpeed * strlen(finale_text);
+            skip_finale  = false;
+        }
+        else if (skip_finale || finale_count > kFinaleTextWaitTime + (int)strlen(finale_text) * kFinaleTextSpeed)
+        {
+            DoBumpFinale();
+            skip_finale = false;
+        }
+        break;
 
-        case kFinaleStagePicture:
-            if (skip_finale || finale_count > (int)finale->picwait_)
-            {
-                picture_number++;
-                finale_count = 0;
-                skip_finale  = false;
-            }
-            if (picture_number >= (int)finale->pics_.size()) { DoBumpFinale(); }
-            break;
+    case kFinaleStagePicture:
+        if (skip_finale || finale_count > (int)finale->picwait_)
+        {
+            picture_number++;
+            finale_count = 0;
+            skip_finale  = false;
+        }
+        if (picture_number >= (int)finale->pics_.size())
+        {
+            DoBumpFinale();
+        }
+        break;
 
-        case kFinaleStageBunny:
-            if (skip_finale && finale_count < 1100)
-            {
-                finale_count = 1100;
-                skip_finale  = false;
-            }
-            break;
+    case kFinaleStageBunny:
+        if (skip_finale && finale_count < 1100)
+        {
+            finale_count = 1100;
+            skip_finale  = false;
+        }
+        break;
 
-        case kFinaleStageCast:
-            if (skip_finale)
-            {
-                CastSkip();
-                skip_finale = false;
-            }
-            else
-                CastTicker();
+    case kFinaleStageCast:
+        if (skip_finale)
+        {
+            CastSkip();
+            skip_finale = false;
+        }
+        else
+            CastTicker();
 
-            break;
+        break;
 
-        default:
-            FatalError("FinaleTicker: bad finale_stage #%d\n",
-                       (int)finale_stage);
-            break;
+    default:
+        FatalError("FinaleTicker: bad finale_stage #%d\n", (int)finale_stage);
+        break;
     }
 
     if (finale_stage == kFinaleStageDone)
@@ -356,7 +358,8 @@ void FinaleTicker(void)
             // don't come here again (for E_ForceWipe)
             new_game_action = kGameActionNothing;
 
-            if (game_state == kGameStateFinale) ForceWipe();
+            if (game_state == kGameStateFinale)
+                ForceWipe();
         }
     }
 }
@@ -375,16 +378,15 @@ static void TextWrite(void)
 
             // Lobo: if it's a flat, tile it
             HudTileImage(hud_x_left, 0, hud_x_right - hud_x_left, 200,
-                         finale_text_background);  // Lobo: Widescreen support
+                         finale_text_background); // Lobo: Widescreen support
         }
         else
         {
-            if (title_scaling.d_)  // Fill Border
+            if (title_scaling.d_) // Fill Border
             {
                 if (!finale_text_background->blurred_version_)
                     ImageStoreBlurred(finale_text_background);
-                HudStretchImage(-320, -200, 960, 600,
-                                finale_text_background->blurred_version_, 0, 0);
+                HudStretchImage(-320, -200, 960, 600, finale_text_background->blurred_version_, 0, 0);
             }
             HudDrawImageTitleWS(finale_text_background);
         }
@@ -404,15 +406,16 @@ static void TextWrite(void)
     const char *ch = finale_text;
 
     int count = (int)((finale_count - 10) / finale->text_speed_);
-    if (count < 0) count = 0;
+    if (count < 0)
+        count = 0;
 
     EPI_ASSERT(finale);
 
     // HudSetFont();
     // HudSetScale();
-    HudSetTextColor(finale_text_color);  // set a default
+    HudSetTextColor(finale_text_color); // set a default
 
-    float txtscale = 0.9;  // set a default
+    float txtscale = 0.9;               // set a default
     if (style->definition_->text_[t_type].scale_)
     {
         txtscale = style->definition_->text_[t_type].scale_;
@@ -425,12 +428,12 @@ static void TextWrite(void)
         HudSetTextColor(GetFontColor(colmap));
     }
 
-    int h = 11;  // set a default
+    int h = 11; // set a default
     if (style->fonts_[t_type])
     {
         HudSetFont(style->fonts_[t_type]);
         h = style->fonts_[t_type]->NominalHeight();
-        h = h + (3 * txtscale);  // bit of spacing
+        h = h + (3 * txtscale); // bit of spacing
         h = h * txtscale;
     }
 
@@ -459,7 +462,7 @@ static void TextWrite(void)
             pos     = 0;
             line[0] = 0;
 
-            cy += h;  // 11;
+            cy += h; // 11;
             continue;
         }
 
@@ -495,12 +498,14 @@ static bool                       cast_attacking;
 //
 static void CastSetState(int st)
 {
-    if (st == 0) return;
+    if (st == 0)
+        return;
 
     cast_state = &states[st];
 
     cast_tics = cast_state->tics;
-    if (cast_tics < 0) cast_tics = 15;
+    if (cast_tics < 0)
+        cast_tics = 15;
 }
 
 static void CAST_RangeAttack(const AttackDefinition *range)
@@ -509,7 +514,10 @@ static void CAST_RangeAttack(const AttackDefinition *range)
 
     EPI_ASSERT(range);
 
-    if (range->attackstyle_ == kAttackStyleShot) { sfx = range->sound_; }
+    if (range->attackstyle_ == kAttackStyleShot)
+    {
+        sfx = range->sound_;
+    }
     else if (range->attackstyle_ == kAttackStyleSkullFly)
     {
         sfx = range->initsound_;
@@ -523,7 +531,10 @@ static void CAST_RangeAttack(const AttackDefinition *range)
     {
         sfx = range->initsound_;
     }
-    else if (range->atk_mobj_) { sfx = range->atk_mobj_->seesound_; }
+    else if (range->atk_mobj_)
+    {
+        sfx = range->atk_mobj_->seesound_;
+    }
 
     StartSoundEffect(sfx);
 }
@@ -541,7 +552,8 @@ static void CastPerformAction(void)
     }
     else if (cast_state->action == A_MeleeAttack)
     {
-        if (cast_order->closecombat_) sfx = cast_order->closecombat_->sound_;
+        if (cast_order->closecombat_)
+            sfx = cast_order->closecombat_->sound_;
     }
     else if (cast_state->action == A_MakeRangeAttemptSound)
     {
@@ -581,18 +593,17 @@ static void CastInitNew(int num)
     cast_order = mobjtypes.LookupCastMember(num);
 
     // FIXME!!! Better handling of the finale
-    if (!cast_order) cast_order = mobjtypes.Lookup(0);
+    if (!cast_order)
+        cast_order = mobjtypes.Lookup(0);
 
-    cast_title = cast_order->cast_title_ != ""
-                     ? language[cast_order->cast_title_]
-                     : cast_order->name_.c_str();
+    cast_title = cast_order->cast_title_ != "" ? language[cast_order->cast_title_] : cast_order->name_.c_str();
 
     cast_death     = false;
     cast_frames    = 0;
     cast_on_melee  = 0;
     cast_attacking = false;
 
-    EPI_ASSERT(cast_order->chase_state_);  // checked in ddf_mobj.c
+    EPI_ASSERT(cast_order->chase_state_); // checked in ddf_mobj.c
     CastSetState(cast_order->chase_state_);
 }
 
@@ -608,15 +619,16 @@ static void CastTicker(void)
 
     // time to change state yet ?
     cast_tics--;
-    if (cast_tics > 0) return;
+    if (cast_tics > 0)
+        return;
 
     // switch from deathstate to next monster
-    if (cast_state->tics == -1 || cast_state->nextstate == 0 ||
-        (cast_death && cast_frames >= 30))
+    if (cast_state->tics == -1 || cast_state->nextstate == 0 || (cast_death && cast_frames >= 30))
     {
         CastInitNew(cast_order->castorder_ + 1);
 
-        if (cast_order->seesound_) StartSoundEffect(cast_order->seesound_);
+        if (cast_order->seesound_)
+            StartSoundEffect(cast_order->seesound_);
 
         return;
     }
@@ -626,8 +638,7 @@ static void CastTicker(void)
     // advance to next state in animation
     // -AJA- if there's a jumpstate, enter it occasionally
 
-    if (cast_state->action == A_Jump && cast_state->jumpstate &&
-        (RandomByte() < 64))
+    if (cast_state->action == A_Jump && cast_state->jumpstate && (RandomByte() < 64))
         st = cast_state->jumpstate;
     else
         st = cast_state->nextstate;
@@ -639,14 +650,12 @@ static void CastTicker(void)
     if (cast_frames == 24 && !cast_death)
     {
         cast_on_melee ^= 1;
-        st = cast_on_melee ? cast_order->melee_state_
-                           : cast_order->missile_state_;
+        st = cast_on_melee ? cast_order->melee_state_ : cast_order->missile_state_;
 
         if (st == 0)
         {
             cast_on_melee ^= 1;
-            st = cast_on_melee ? cast_order->melee_state_
-                               : cast_order->missile_state_;
+            st = cast_on_melee ? cast_order->melee_state_ : cast_order->missile_state_;
         }
 
         // check if missing both melee and missile states
@@ -661,8 +670,7 @@ static void CastTicker(void)
     }
 
     // leave attack frames after a certain time
-    if (cast_attacking &&
-        (cast_frames == 48 || cast_state == &states[cast_order->chase_state_]))
+    if (cast_attacking && (cast_frames == 48 || cast_state == &states[cast_order->chase_state_]))
     {
         cast_attacking = false;
         cast_frames    = 0;
@@ -675,7 +683,8 @@ static void CastTicker(void)
 //
 static void CastSkip(void)
 {
-    if (cast_death) return;  // already in dying frames
+    if (cast_death)
+        return; // already in dying frames
 
     // go into death frame
     cast_death = true;
@@ -684,7 +693,7 @@ static void CastSkip(void)
         cast_state = &states[cast_order->overkill_state_];
     else
     {
-        EPI_ASSERT(cast_order->death_state_);  // checked in ddf_mobj.c
+        EPI_ASSERT(cast_order->death_state_); // checked in ddf_mobj.c
         cast_state = &states[cast_order->death_state_];
     }
 
@@ -692,7 +701,8 @@ static void CastSkip(void)
     cast_frames    = 0;
     cast_attacking = false;
 
-    if (cast_order->deathsound_) StartSoundEffect(cast_order->deathsound_);
+    if (cast_order->deathsound_)
+        StartSoundEffect(cast_order->deathsound_);
 }
 
 //
@@ -711,36 +721,32 @@ static void CastDrawer(void)
     else
     {
         image = ImageLookup("BOSSBACK");
-        if (title_scaling.d_)  // Fill Border
+        if (title_scaling.d_) // Fill Border
         {
-            if (!image->blurred_version_) ImageStoreBlurred(image);
-            HudStretchImage(-320, -200, 960, 600, image->blurred_version_, 0,
-                            0);
+            if (!image->blurred_version_)
+                ImageStoreBlurred(image);
+            HudStretchImage(-320, -200, 960, 600, image->blurred_version_, 0, 0);
         }
         HudDrawImageTitleWS(image);
     }
 
     HudSetAlignment(0, -1);
 
-    if (finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText]
-            .colmap_)
+    if (finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText].colmap_)
     {
-        HudSetTextColor(
-            GetFontColor(finale_cast_style->definition_
-                             ->text_[StyleDefinition::kTextSectionText]
-                             .colmap_));
+        HudSetTextColor(GetFontColor(finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText].colmap_));
     }
-    else { HudSetTextColor(SG_YELLOW_RGBA32); }
+    else
+    {
+        HudSetTextColor(SG_YELLOW_RGBA32);
+    }
 
-    TempScale =
-        finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText]
-            .scale_;
+    TempScale = finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
     HudSetScale(TempScale);
 
     if (finale_cast_style->fonts_[StyleDefinition::kTextSectionText])
     {
-        HudSetFont(
-            finale_cast_style->fonts_[StyleDefinition::kTextSectionText]);
+        HudSetFont(finale_cast_style->fonts_[StyleDefinition::kTextSectionText]);
     }
 
     HudDrawText(160, 180, cast_title);
@@ -752,14 +758,10 @@ static void CastDrawer(void)
     float pos_x, pos_y;
     float scale_x, scale_y;
 
-    TempScale = finale_cast_style->definition_
-                    ->text_[StyleDefinition::kTextSectionHeader]
-                    .scale_;
+    TempScale = finale_cast_style->definition_->text_[StyleDefinition::kTextSectionHeader].scale_;
     if (TempScale < 1.0 || TempScale > 1.0)
     {
-        scale_y = finale_cast_style->definition_
-                      ->text_[StyleDefinition::kTextSectionHeader]
-                      .scale_;
+        scale_y = finale_cast_style->definition_->text_[StyleDefinition::kTextSectionHeader].scale_;
     }
     else
         scale_y = 3;
@@ -772,27 +774,26 @@ static void CastDrawer(void)
 
         const Image *skin_img = md->skins_[cast_order->model_skin_];
 
-        if (!skin_img) skin_img = ImageForDummySkin();
+        if (!skin_img)
+            skin_img = ImageForDummySkin();
 
         glClear(GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
 
         if (md->md2_model_)
-            Md2RenderModel2d(md->md2_model_, skin_img, cast_state->frame, pos_x,
-                             pos_y, scale_x, scale_y, cast_order);
+            Md2RenderModel2d(md->md2_model_, skin_img, cast_state->frame, pos_x, pos_y, scale_x, scale_y, cast_order);
         else if (md->mdl_model_)
-            MdlRenderModel2d(md->mdl_model_, skin_img, cast_state->frame, pos_x,
-                             pos_y, scale_x, scale_y, cast_order);
+            MdlRenderModel2d(md->mdl_model_, skin_img, cast_state->frame, pos_x, pos_y, scale_x, scale_y, cast_order);
 
         glDisable(GL_DEPTH_TEST);
         return;
     }
 
     // draw the current frame in the middle of the screen
-    image =
-        RendererGetOtherSprite(cast_state->sprite, cast_state->frame, &flip);
+    image = RendererGetOtherSprite(cast_state->sprite, cast_state->frame, &flip);
 
-    if (!image) return;
+    if (!image)
+        return;
 
     scale_x *= cast_order->scale_ * cast_order->aspect_;
     scale_y *= cast_order->scale_;
@@ -803,7 +804,8 @@ static void CastDrawer(void)
     float offset_x = image->ScaledOffsetX();
     float offset_y = image->ScaledOffsetY();
 
-    if (flip) offset_x = -offset_x;
+    if (flip)
+        offset_x = -offset_x;
 
     offset_x = (width / 2.0f + offset_x) * scale_x;
     offset_y *= scale_y;
@@ -811,9 +813,8 @@ static void CastDrawer(void)
     width *= scale_x;
     height *= scale_y;
 
-    RendererDrawImage(pos_x - offset_x, pos_y + offset_y, width, height, image,
-                      flip ? image->Right() : 0, 0, flip ? 0 : image->Right(),
-                      image->Top(), nullptr, 1.0f, cast_order->palremap_);
+    RendererDrawImage(pos_x - offset_x, pos_y + offset_y, width, height, image, flip ? image->Right() : 0, 0,
+                      flip ? 0 : image->Right(), image->Top(), nullptr, 1.0f, cast_order->palremap_);
 }
 
 //
@@ -848,14 +849,16 @@ static void BunnyScroll(void)
     CenterX -= (p1->actual_width_ * TempScale) / 2;
 
     scrolled = (TempWidth + CenterX) - (finale_count - 230) / 2;
-    if (scrolled > (TempWidth + CenterX)) scrolled = (TempWidth + CenterX);
-    if (scrolled < 0) scrolled = 0;
+    if (scrolled > (TempWidth + CenterX))
+        scrolled = (TempWidth + CenterX);
+    if (scrolled < 0)
+        scrolled = 0;
 
     HudStretchImage(CenterX - scrolled, 0, TempWidth, TempHeight, p1, 0.0, 0.0);
-    HudStretchImage((CenterX + TempWidth) - (scrolled + 1), 0, TempWidth,
-                    TempHeight, p2, 0.0, 0.0);
+    HudStretchImage((CenterX + TempWidth) - (scrolled + 1), 0, TempWidth, TempHeight, p2, 0.0, 0.0);
 
-    if (finale_count < 1130) return;
+    if (finale_count < 1130)
+        return;
 
     if (finale_count < 1180)
     {
@@ -868,7 +871,8 @@ static void BunnyScroll(void)
 
     stage = (finale_count - 1180) / 5;
 
-    if (stage > 6) stage = 6;
+    if (stage > 6)
+        stage = 6;
 
     if (stage > laststage)
     {
@@ -889,44 +893,39 @@ void FinaleDrawer(void)
 
     switch (finale_stage)
     {
-        case kFinaleStageText:
-            TextWrite();
-            break;
+    case kFinaleStageText:
+        TextWrite();
+        break;
 
-        // Shouldn't get here, but just in case don't allow to fall through to
-        // default (error)
-        case kFinaleStageMovie:
-            break;
+    // Shouldn't get here, but just in case don't allow to fall through to
+    // default (error)
+    case kFinaleStageMovie:
+        break;
 
-        case kFinaleStagePicture:
+    case kFinaleStagePicture: {
+        const Image *image =
+            ImageLookup(finale->pics_[HMM_MIN((size_t)picture_number, finale->pics_.size() - 1)].c_str());
+        if (title_scaling.d_) // Fill Border
         {
-            const Image *image =
-                ImageLookup(finale
-                                ->pics_[HMM_MIN((size_t)picture_number,
-                                                finale->pics_.size() - 1)]
-                                .c_str());
-            if (title_scaling.d_)  // Fill Border
-            {
-                if (!image->blurred_version_) ImageStoreBlurred(image);
-                HudStretchImage(-320, -200, 960, 600, image->blurred_version_,
-                                0, 0);
-            }
-            HudDrawImageTitleWS(image);
-            break;
+            if (!image->blurred_version_)
+                ImageStoreBlurred(image);
+            HudStretchImage(-320, -200, 960, 600, image->blurred_version_, 0, 0);
         }
+        HudDrawImageTitleWS(image);
+        break;
+    }
 
-        case kFinaleStageBunny:
-            BunnyScroll();
-            break;
+    case kFinaleStageBunny:
+        BunnyScroll();
+        break;
 
-        case kFinaleStageCast:
-            CastDrawer();
-            break;
+    case kFinaleStageCast:
+        CastDrawer();
+        break;
 
-        default:
-            FatalError("FinaleDrawer: bad finale_stage #%d\n",
-                       (int)finale_stage);
-            break;
+    default:
+        FatalError("FinaleDrawer: bad finale_stage #%d\n", (int)finale_stage);
+        break;
     }
 }
 

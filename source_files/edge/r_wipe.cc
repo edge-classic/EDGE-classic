@@ -77,8 +77,7 @@ static void CaptureScreenAsTexture(bool speckly, bool spooky)
     {
         uint8_t *dest = img.PixelAt(0, y);
 
-        glReadPixels(0, y, current_screen_width, 1, GL_RGBA, GL_UNSIGNED_BYTE,
-                     dest);
+        glReadPixels(0, y, current_screen_width, 1, GL_RGBA, GL_UNSIGNED_BYTE, dest);
 
         int rnd_val = y;
 
@@ -168,12 +167,13 @@ void RendererInitializeWipe(ScreenWipe effect)
     current_wipe_progress  = 0;
     current_wipe_last_time = -1;
 
-    if (current_wipe_effect == kScreenWipeNone) return;
+    if (current_wipe_effect == kScreenWipeNone)
+        return;
 
-    CaptureScreenAsTexture(effect == kScreenWipePixelfade,
-                           effect == kScreenWipeSpooky);
+    CaptureScreenAsTexture(effect == kScreenWipePixelfade, effect == kScreenWipeSpooky);
 
-    if (current_wipe_effect == kScreenWipeMelt) RendererInitializeMelt();
+    if (current_wipe_effect == kScreenWipeMelt)
+        RendererInitializeMelt();
 }
 
 void RendererStopWipe(void)
@@ -326,8 +326,7 @@ static void RendererWipeDoors(float how_far)
             float t_x1 = (side == 0) ? c : (0.9f - c);
             float t_x2 = t_x1 + 0.1f;
 
-            float v_x1 = (side == 0) ? (dx * e)
-                                     : (current_screen_width - dx * (e + 0.2f));
+            float v_x1 = (side == 0) ? (dx * e) : (current_screen_width - dx * (e + 0.2f));
             float v_x2 = v_x1 + dx * 0.2f;
 
             float v_y1 = (side == 0) ? (dy * e) : (dy * (e + 0.2f));
@@ -381,47 +380,47 @@ bool RendererDoWipe(void)
 
     current_wipe_progress += tics;
 
-    if (current_wipe_progress > 40)  // FIXME: have option for wipe time
+    if (current_wipe_progress > 40) // FIXME: have option for wipe time
         return true;
 
     float how_far = (float)current_wipe_progress / 40.0f;
 
     switch (current_wipe_effect)
     {
-        case kScreenWipeMelt:
-            RendererWipeMelt();
-            RendererUpdateMelt(tics);
-            break;
+    case kScreenWipeMelt:
+        RendererWipeMelt();
+        RendererUpdateMelt(tics);
+        break;
 
-        case kScreenWipeTop:
-            RendererWipeSlide(how_far, 0, +current_screen_height);
-            break;
+    case kScreenWipeTop:
+        RendererWipeSlide(how_far, 0, +current_screen_height);
+        break;
 
-        case kScreenWipeBottom:
-            RendererWipeSlide(how_far, 0, -current_screen_height);
-            break;
+    case kScreenWipeBottom:
+        RendererWipeSlide(how_far, 0, -current_screen_height);
+        break;
 
-        case kScreenWipeLeft:
-            RendererWipeSlide(how_far, -current_screen_width, 0);
-            break;
+    case kScreenWipeLeft:
+        RendererWipeSlide(how_far, -current_screen_width, 0);
+        break;
 
-        case kScreenWipeRight:
-            RendererWipeSlide(how_far, +current_screen_width, 0);
-            break;
+    case kScreenWipeRight:
+        RendererWipeSlide(how_far, +current_screen_width, 0);
+        break;
 
-        case kScreenWipeDoors:
-            RendererWipeDoors(how_far);
-            break;
+    case kScreenWipeDoors:
+        RendererWipeDoors(how_far);
+        break;
 
-        case kScreenWipeSpooky:  // difference is in alpha channel
-        case kScreenWipePixelfade:
-            RendererWipePixelfade(how_far);
-            break;
+    case kScreenWipeSpooky: // difference is in alpha channel
+    case kScreenWipePixelfade:
+        RendererWipePixelfade(how_far);
+        break;
 
-        case kScreenWipeCrossfade:
-        default:
-            RendererWipeFading(how_far);
-            break;
+    case kScreenWipeCrossfade:
+    default:
+        RendererWipeFading(how_far);
+        break;
     }
 
     return false;

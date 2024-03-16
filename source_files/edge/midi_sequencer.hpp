@@ -50,11 +50,20 @@ class MidiFraction
     uint64_t num1_, num2_;
     void     Optim();
 
-   public:
-    MidiFraction() : num1_(0), num2_(1) {}
-    MidiFraction(uint64_t value) : num1_(value), num2_(1) {}
-    MidiFraction(uint64_t n, uint64_t d) : num1_(n), num2_(d) {}
-    inline double Value() const { return Nom() / (double)Denom(); }
+  public:
+    MidiFraction() : num1_(0), num2_(1)
+    {
+    }
+    MidiFraction(uint64_t value) : num1_(value), num2_(1)
+    {
+    }
+    MidiFraction(uint64_t n, uint64_t d) : num1_(n), num2_(d)
+    {
+    }
+    inline double Value() const
+    {
+        return Nom() / (double)Denom();
+    }
     MidiFraction &operator*=(const MidiFraction &b)
     {
         num1_ *= b.Nom();
@@ -68,8 +77,14 @@ class MidiFraction
         tmp *= b;
         return tmp;
     }
-    const uint64_t &Nom() const { return num1_; }
-    const uint64_t &Denom() const { return num2_; }
+    const uint64_t &Nom() const
+    {
+        return num1_;
+    }
+    const uint64_t &Denom() const
+    {
+        return num2_;
+    }
 };
 
 void MidiFraction::Optim()
@@ -93,7 +108,8 @@ void MidiFraction::Optim()
     for (;;)
     {
         uint64_t tmp = n2 % n1;
-        if (!tmp) break;
+        if (!tmp)
+            break;
         n2 = n1;
         n1 = tmp;
     }
@@ -121,30 +137,29 @@ class MidiSequencer
             //! Unknown event
             kUnknown = 0x00,
             //! Note-Off event
-            kNoteOff = 0x08,            // size == 2
-                                        //! Note-On event
-            kNoteOn = 0x09,             // size == 2
-                                        //! Note After-Touch event
-            kNoteTouch = 0x0A,          // size == 2
-                                        //! Controller change event
-            kControlChange = 0x0B,      // size == 2
-                                        //! Patch change event
-            kPatchChange = 0x0C,        // size == 1
-                                        //! Channel After-Touch event
-            kChannelAftertouch = 0x0D,  // size == 1
-                                        //! Pitch-bend change event
-            kPitchWheel = 0x0E,         // size == 2
+            kNoteOff = 0x08,           // size == 2
+                                       //! Note-On event
+            kNoteOn = 0x09,            // size == 2
+                                       //! Note After-Touch event
+            kNoteTouch = 0x0A,         // size == 2
+                                       //! Controller change event
+            kControlChange = 0x0B,     // size == 2
+                                       //! Patch change event
+            kPatchChange = 0x0C,       // size == 1
+                                       //! Channel After-Touch event
+            kChannelAftertouch = 0x0D, // size == 1
+                                       //! Pitch-bend change event
+            kPitchWheel = 0x0E,        // size == 2
 
             //! System Exclusive message, type 1
-            kSysex = 0xF0,  // size == len
-                            //! Sys Com Song Position Pntr [LSB, MSB]
-            kSysComSongPositionPointer =
-                0xF2,                  // size == 2
-                                       //! Sys Com Song Select(Song #) [0-127]
-            kSysComSongSelect = 0xF3,  // size == 1
-                                       //! System Exclusive message, type 2
-            kSysex2 = 0xF7,            // size == len
-                                       //! Special event
+            kSysex = 0xF0,                     // size == len
+                                               //! Sys Com Song Position Pntr [LSB, MSB]
+            kSysComSongPositionPointer = 0xF2, // size == 2
+                                               //! Sys Com Song Select(Song #) [0-127]
+            kSysComSongSelect = 0xF3,          // size == 1
+                                               //! System Exclusive message, type 2
+            kSysex2 = 0xF7,                    // size == len
+                                               //! Special event
             kSpecial = 0xFF
         };
         /**
@@ -153,57 +168,57 @@ class MidiSequencer
         enum SubTypes
         {
             //! Sequension number
-            kSequensionNumber = 0x00,    // size == 2
-                                         //! Text label
-            kText = 0x01,                // size == len
-                                         //! Copyright notice
-            kCopyright = 0x02,           // size == len
-                                         //! Sequence track title
-            kSequenceTrackTitle = 0x03,  // size == len
-                                         //! Instrument title
-            kInstrumentTitle = 0x04,     // size == len
-                                         //! Lyrics text fragment
-            kLyrics = 0x05,              // size == len
-                                         //! MIDI Marker
-            kMarker = 0x06,              // size == len
-                                         //! Cue Point
-            kCuePoint = 0x07,            // size == len
-                                         //! [Non-Standard] Device Switch
-            kDeviceSwitch = 0x09,        // size == len <CUSTOM>
-                                         //! MIDI Channel prefix
-            kMidiChannelPrefix = 0x20,   // size == 1
+            kSequensionNumber = 0x00,   // size == 2
+                                        //! Text label
+            kText = 0x01,               // size == len
+                                        //! Copyright notice
+            kCopyright = 0x02,          // size == len
+                                        //! Sequence track title
+            kSequenceTrackTitle = 0x03, // size == len
+                                        //! Instrument title
+            kInstrumentTitle = 0x04,    // size == len
+                                        //! Lyrics text fragment
+            kLyrics = 0x05,             // size == len
+                                        //! MIDI Marker
+            kMarker = 0x06,             // size == len
+                                        //! Cue Point
+            kCuePoint = 0x07,           // size == len
+                                        //! [Non-Standard] Device Switch
+            kDeviceSwitch = 0x09,       // size == len <CUSTOM>
+                                        //! MIDI Channel prefix
+            kMidiChannelPrefix = 0x20,  // size == 1
 
             //! End of Track event
-            kEndTrack = 0x2F,       // size == 0
-                                    //! Tempo change event
-            kTempoChange = 0x51,    // size == 3
-                                    //! SMPTE offset
-            kSmpteOffset = 0x54,    // size == 5
-                                    //! Time signature
-            kTimeSignature = 0x55,  // size == 4
-                                    //! Key signature
-            kKeySignature = 0x59,   // size == 2
-                                    //! Sequencer specs
-            kSequencerSpec = 0x7F,  // size == len
+            kEndTrack = 0x2F,      // size == 0
+                                   //! Tempo change event
+            kTempoChange = 0x51,   // size == 3
+                                   //! SMPTE offset
+            kSmpteOffset = 0x54,   // size == 5
+                                   //! Time signature
+            kTimeSignature = 0x55, // size == 4
+                                   //! Key signature
+            kKeySignature = 0x59,  // size == 2
+                                   //! Sequencer specs
+            kSequencerSpec = 0x7F, // size == len
 
             /* Non-standard, internal ADLMIDI usage only */
             //! [Non-Standard] Loop Start point
-            kLoopStart = 0xE1,  // size == 0 <CUSTOM>
-                                //! [Non-Standard] Loop End point
-            kLoopEnd = 0xE2,    // size == 0 <CUSTOM>
-                                //! [Non-Standard] Raw OPL data
-            kRawOpl = 0xE3,     // size == 0 <CUSTOM>
+            kLoopStart = 0xE1, // size == 0 <CUSTOM>
+                               //! [Non-Standard] Loop End point
+            kLoopEnd = 0xE2,   // size == 0 <CUSTOM>
+                               //! [Non-Standard] Raw OPL data
+            kRawOpl = 0xE3,    // size == 0 <CUSTOM>
 
             //! [Non-Standard] Loop Start point with support of multi-loops
-            kLoopStackBegin = 0xE4,   // size == 1 <CUSTOM>
-                                      //! [Non-Standard] Loop End point with
-                                      //! support of multi-loops
-            kLoopStackEnd = 0xE5,     // size == 0 <CUSTOM>
-                                      //! [Non-Standard] Loop End point with
-                                      //! support of multi-loops
-            kLoopStackBreak = 0xE6,   // size == 0 <CUSTOM>
-                                      //! [Non-Standard] Callback Trigger
-            kCallbackTrigger = 0xE7,  // size == 1 <CUSTOM>
+            kLoopStackBegin = 0xE4,  // size == 1 <CUSTOM>
+                                     //! [Non-Standard] Loop End point with
+                                     //! support of multi-loops
+            kLoopStackEnd = 0xE5,    // size == 0 <CUSTOM>
+                                     //! [Non-Standard] Loop End point with
+                                     //! support of multi-loops
+            kLoopStackBreak = 0xE6,  // size == 0 <CUSTOM>
+                                     //! [Non-Standard] Callback Trigger
+            kCallbackTrigger = 0xE7, // size == 1 <CUSTOM>
 
             // Built-in hooks
             kSongBeginHook = 0x101
@@ -234,7 +249,7 @@ class MidiSequencer
      */
     class MidiTrackRow
     {
-       public:
+      public:
         MidiTrackRow();
         //! Clear MIDI row data
         void Clear();
@@ -317,9 +332,8 @@ class MidiSequencer
      * @param loop_end_ticks Global loop end tick (give zero if no global loop
      * presented)
      */
-    void BuildTimeLine(const std::vector<MidiEvent> &tempos,
-                       uint64_t                      loop_start_ticks = 0,
-                       uint64_t                      loop_end_ticks   = 0);
+    void BuildTimeLine(const std::vector<MidiEvent> &tempos, uint64_t loop_start_ticks = 0,
+                       uint64_t loop_end_ticks = 0);
 
     /**
      * @brief Parse one event from raw MIDI track stream
@@ -348,7 +362,7 @@ class MidiSequencer
      */
     void handleEvent(size_t tk, const MidiEvent &evt, int32_t &status);
 
-   public:
+  public:
     /**
      * @brief MIDI marker entry
      */
@@ -388,7 +402,7 @@ class MidiSequencer
         kLoopHmi
     };
 
-   private:
+  private:
     //! Music file format type. MIDI is default.
     FileFormat midi_format_;
     //! SMF format identifier.
@@ -468,7 +482,7 @@ class MidiSequencer
 
     class LoopState
     {
-       public:
+      public:
         //! Loop start has reached
         bool caught_start_;
         //! Loop end has reached, reset on handling
@@ -529,18 +543,24 @@ class MidiSequencer
 
         bool IsStackEnd()
         {
-            if (caught_stack_end_ && (stack_level_ >= 0) &&
-                (stack_level_ < (int)(stack_.size())))
+            if (caught_stack_end_ && (stack_level_ >= 0) && (stack_level_ < (int)(stack_.size())))
             {
                 const LoopStackEntry &e = stack_[(size_t)(stack_level_)];
-                if (e.infinity || (!e.infinity && e.loops > 0)) return true;
+                if (e.infinity || (!e.infinity && e.loops > 0))
+                    return true;
             }
             return false;
         }
 
-        void StackUp(int count = 1) { stack_level_ += count; }
+        void StackUp(int count = 1)
+        {
+            stack_level_ += count;
+        }
 
-        void StackDown(int count = 1) { stack_level_ -= count; }
+        void StackDown(int count = 1)
+        {
+            stack_level_ -= count;
+        }
 
         LoopStackEntry &GetCurrentStack()
         {
@@ -574,8 +594,7 @@ class MidiSequencer
      * @param trigger Value of the event which triggered this callback.
      * @param track Identifier of the track which triggered this callback.
      */
-    typedef void (*TriggerHandler)(void *userdata, unsigned trigger,
-                                   size_t track);
+    typedef void (*TriggerHandler)(void *userdata, unsigned trigger, size_t track);
 
     //! Handler of callback trigger events
     TriggerHandler midi_trigger_handler_;
@@ -590,7 +609,7 @@ class MidiSequencer
 
     class SequencerTime
     {
-       public:
+      public:
         //! Time buffer
         double time_rest_;
         //! Sample rate
@@ -619,7 +638,7 @@ class MidiSequencer
 
     SequencerTime midi_time_;
 
-   public:
+  public:
     MidiSequencer();
     virtual ~MidiSequencer();
 
@@ -837,7 +856,7 @@ class MidiSequencer
      */
     void SetTempo(double tempo);
 
-   private:
+  private:
     /**
      * @brief Load file as Id-software-Music-File (Wolfenstein)
      * @param mfr mem_file_c with opened source file

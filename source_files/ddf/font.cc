@@ -40,8 +40,7 @@ static const DDFCommandList font_commands[] = {
     DDF_FIELD("IMAGE", dummy_font, image_name_, DDF_MainGetString),
     DDF_FIELD("TTF", dummy_font, truetype_name_, DDF_MainGetString),
     DDF_FIELD("DEFAULT_SIZE", dummy_font, default_size_, DDF_MainGetFloat),
-    DDF_FIELD("TTF_SMOOTHING", dummy_font, truetype_smoothing_string_,
-              DDF_MainGetString),
+    DDF_FIELD("TTF_SMOOTHING", dummy_font, truetype_smoothing_string_, DDF_MainGetString),
     DDF_FIELD("MISSING_PATCH", dummy_font, missing_patch_, DDF_MainGetString),
     DDF_FIELD("SPACING", dummy_font, spacing_, DDF_MainGetFloat),
 
@@ -66,7 +65,8 @@ static void FontStartEntry(const char *name, bool extend)
 
     if (extend)
     {
-        if (!dynamic_font) DDF_Error("Unknown font to extend: %s\n", name);
+        if (!dynamic_font)
+            DDF_Error("Unknown font to extend: %s\n", name);
         return;
     }
 
@@ -85,16 +85,14 @@ static void FontStartEntry(const char *name, bool extend)
     fontdefs.push_back(dynamic_font);
 }
 
-static void FontParseField(const char *field, const char *contents, int index,
-                           bool is_last)
+static void FontParseField(const char *field, const char *contents, int index, bool is_last)
 {
 #if (DEBUG_DDF)
     LogDebug("FONT_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DDF_MainParseField(font_commands, field, contents,
-                           (uint8_t *)dynamic_font))
-        return;  // OK
+    if (DDF_MainParseField(font_commands, field, contents, (uint8_t *)dynamic_font))
+        return; // OK
 
     DDF_Error("Unknown fonts.ddf command: %s\n", field);
 }
@@ -107,30 +105,20 @@ static void FontFinishEntry(void)
     if (dynamic_font->type_ == kFontTypePatch && !dynamic_font->patches_)
         DDF_Error("Missing font patch list.\n");
 
-    if (dynamic_font->type_ == kFontTypeImage &&
-        dynamic_font->image_name_.empty())
+    if (dynamic_font->type_ == kFontTypeImage && dynamic_font->image_name_.empty())
         DDF_Error("Missing font image name.\n");
 
-    if (dynamic_font->type_ == kFontTypeTrueType &&
-        dynamic_font->truetype_name_.empty())
+    if (dynamic_font->type_ == kFontTypeTrueType && dynamic_font->truetype_name_.empty())
         DDF_Error("Missing font TTF/OTF lump/file name.\n");
 
-    if (dynamic_font->type_ == kFontTypeTrueType &&
-        !dynamic_font->truetype_smoothing_string_.empty())
+    if (dynamic_font->type_ == kFontTypeTrueType && !dynamic_font->truetype_smoothing_string_.empty())
     {
-        if (epi::StringCaseCompareASCII(
-                dynamic_font->truetype_smoothing_string_, "NEVER") == 0)
-            dynamic_font->truetype_smoothing_ =
-                dynamic_font->kTrueTypeSmoothNever;
-        else if (epi::StringCaseCompareASCII(
-                     dynamic_font->truetype_smoothing_string_, "ALWAYS") == 0)
-            dynamic_font->truetype_smoothing_ =
-                dynamic_font->kTrueTypeSmoothAlways;
-        else if (epi::StringCaseCompareASCII(
-                     dynamic_font->truetype_smoothing_string_, "ON_DEMAND") ==
-                 0)
-            dynamic_font->truetype_smoothing_ =
-                dynamic_font->kTrueTypeSmoothOnDemand;
+        if (epi::StringCaseCompareASCII(dynamic_font->truetype_smoothing_string_, "NEVER") == 0)
+            dynamic_font->truetype_smoothing_ = dynamic_font->kTrueTypeSmoothNever;
+        else if (epi::StringCaseCompareASCII(dynamic_font->truetype_smoothing_string_, "ALWAYS") == 0)
+            dynamic_font->truetype_smoothing_ = dynamic_font->kTrueTypeSmoothAlways;
+        else if (epi::StringCaseCompareASCII(dynamic_font->truetype_smoothing_string_, "ON_DEMAND") == 0)
+            dynamic_font->truetype_smoothing_ = dynamic_font->kTrueTypeSmoothOnDemand;
     }
 }
 
@@ -166,9 +154,10 @@ void DDF_FontInit(void)
 
 void DDF_FontCleanUp(void)
 {
-    if (fontdefs.empty()) FatalError("There are no fonts defined in DDF !\n");
+    if (fontdefs.empty())
+        FatalError("There are no fonts defined in DDF !\n");
 
-    fontdefs.shrink_to_fit();  // <-- Reduce to allocated size
+    fontdefs.shrink_to_fit(); // <-- Reduce to allocated size
 }
 
 //
@@ -220,7 +209,8 @@ static void DDF_FontGetPatch(const char *info, void *storage)
     if (strlen(range_buf) > 1)
         colon = (char *)DDF_MainDecodeList(range_buf, ':', true);
 
-    if (colon) *colon++ = 0;
+    if (colon)
+        *colon++ = 0;
 
     int char1, char2;
 
@@ -246,12 +236,15 @@ static void DDF_FontGetPatch(const char *info, void *storage)
     *patch_list = pat;
 }
 
-FontDefinition::FontDefinition() : name_() { Default(); }
+FontDefinition::FontDefinition() : name_()
+{
+    Default();
+}
 
 void FontDefinition::CopyDetail(const FontDefinition &src)
 {
     type_                      = src.type_;
-    patches_                   = src.patches_;  // FIXME: copy list
+    patches_                   = src.patches_; // FIXME: copy list
     image_name_                = src.image_name_;
     missing_patch_             = src.missing_patch_;
     spacing_                   = src.spacing_;
@@ -282,14 +275,14 @@ void FontDefinition::Default()
 //
 FontDefinition *FontDefinitionContainer::Lookup(const char *refname)
 {
-    if (!refname || !refname[0]) return nullptr;
+    if (!refname || !refname[0])
+        return nullptr;
 
-    for (std::vector<FontDefinition *>::iterator iter     = begin(),
-                                                 iter_end = end();
-         iter != iter_end; iter++)
+    for (std::vector<FontDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
     {
         FontDefinition *fnt = *iter;
-        if (DDF_CompareName(fnt->name_.c_str(), refname) == 0) return fnt;
+        if (DDF_CompareName(fnt->name_.c_str(), refname) == 0)
+            return fnt;
     }
 
     return nullptr;
@@ -304,7 +297,8 @@ void DDF_MainLookupFont(const char *info, void *storage)
 
     *dest = fontdefs.Lookup(info);
 
-    if (*dest == nullptr) DDF_Error("Unknown font: %s\n", info);
+    if (*dest == nullptr)
+        DDF_Error("Unknown font: %s\n", info);
 }
 
 //--- editor settings ---

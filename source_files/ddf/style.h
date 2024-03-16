@@ -28,7 +28,7 @@ class Colormap;
 //
 class BackgroundStyle
 {
-   public:
+  public:
     BackgroundStyle();
     BackgroundStyle(const BackgroundStyle &rhs);
     ~BackgroundStyle();
@@ -47,7 +47,7 @@ class BackgroundStyle
 
 class TextStyle
 {
-   public:
+  public:
     TextStyle();
     TextStyle(const TextStyle &rhs);
     ~TextStyle();
@@ -69,7 +69,7 @@ class TextStyle
 
 class CursorStyle
 {
-   public:
+  public:
     CursorStyle();
     CursorStyle(const CursorStyle &rhs);
     ~CursorStyle();
@@ -81,8 +81,8 @@ class CursorStyle
     float translucency_;
 
     std::string alt_cursor_;
-    std::string pos_string_;  // Here for user convenience, is translated to a
-                              // value for position
+    std::string pos_string_; // Here for user convenience, is translated to a
+                             // value for position
     std::string cursor_string_;
 
     bool force_offsets_;
@@ -92,7 +92,7 @@ class CursorStyle
 
 class SoundStyle
 {
-   public:
+  public:
     SoundStyle();
     SoundStyle(const SoundStyle &rhs);
     ~SoundStyle();
@@ -111,21 +111,19 @@ class SoundStyle
 
 enum StyleSpecial
 {
-    kStyleSpecialNone = 0,
-    kStyleSpecialTiled =
-        0x0001,  // bg image should tile (otherwise covers whole area)
-    kStyleSpecialTiledNoScale = 0x0002,  // bg image should tile (1:1 pixels)
-    kStyleSpecialStretchFullScreen =
-        0x0004,  // bg image will be stretched to fill the screen
+    kStyleSpecialNone              = 0,
+    kStyleSpecialTiled             = 0x0001, // bg image should tile (otherwise covers whole area)
+    kStyleSpecialTiledNoScale      = 0x0002, // bg image should tile (1:1 pixels)
+    kStyleSpecialStretchFullScreen = 0x0004, // bg image will be stretched to fill the screen
 };
 
 class StyleDefinition
 {
-   public:
+  public:
     StyleDefinition();
     ~StyleDefinition();
 
-   public:
+  public:
     void Default(void);
     void CopyDetail(const StyleDefinition &src);
 
@@ -137,12 +135,12 @@ class StyleDefinition
     // the four text styles
     enum TextSection
     {
-        kTextSectionText = 0,   // main text style
-        kTextSectionAlternate,  // alternative text style
-        kTextSectionTitle,      // title style
-        kTextSectionHelp,       // for help messages
-        kTextSectionHeader,     // for header /main title
-        kTextSectionSelected,   // for selected menu item
+        kTextSectionText = 0,  // main text style
+        kTextSectionAlternate, // alternative text style
+        kTextSectionTitle,     // title style
+        kTextSectionHelp,      // for help messages
+        kTextSectionHeader,    // for header /main title
+        kTextSectionSelected,  // for selected menu item
         kTotalTextSections
     };
 
@@ -167,24 +165,29 @@ class StyleDefinition
 
     int         entry_alignment_;
     int         entry_spacing_;
-    std::string entry_align_string_;  // User convenience
+    std::string entry_align_string_; // User convenience
 
-   private:
+  private:
     // disable copy construct and assignment operator
-    explicit StyleDefinition(StyleDefinition &rhs) {}
-    StyleDefinition &operator=(StyleDefinition &rhs) { return *this; }
+    explicit StyleDefinition(StyleDefinition &rhs)
+    {
+    }
+    StyleDefinition &operator=(StyleDefinition &rhs)
+    {
+        return *this;
+    }
 };
 
 // Our styledefs container
 class StyleDefinitionContainer : public std::vector<StyleDefinition *>
 {
-   public:
-    StyleDefinitionContainer() {}
+  public:
+    StyleDefinitionContainer()
+    {
+    }
     ~StyleDefinitionContainer()
     {
-        for (std::vector<StyleDefinition *>::iterator iter     = begin(),
-                                                      iter_end = end();
-             iter != iter_end; iter++)
+        for (std::vector<StyleDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
         {
             StyleDefinition *s = *iter;
             delete s;
@@ -192,7 +195,7 @@ class StyleDefinitionContainer : public std::vector<StyleDefinition *>
         }
     }
 
-   public:
+  public:
     // Search Functions
     StyleDefinition *Lookup(const char *refname);
 };

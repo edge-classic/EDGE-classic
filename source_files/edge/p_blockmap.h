@@ -27,10 +27,10 @@
 
 #include "r_defs.h"
 
-extern int blockmap_width;  // in mapblocks
+extern int blockmap_width;      // in mapblocks
 extern int blockmap_height;
 
-extern float blockmap_origin_x;  // origin of block map
+extern float blockmap_origin_x; // origin of block map
 extern float blockmap_origin_y;
 
 constexpr uint8_t  kBlockmapUnitSize = 128;
@@ -64,7 +64,7 @@ enum PathInterceptFlags
 
 struct PathIntercept
 {
-    float along;  // along trace line
+    float along; // along trace line
     // one of these will be nullptr
     MapObject *thing;
     Line      *line;
@@ -85,25 +85,21 @@ void FreeSectorTouchNodes(Sector *sec);
 
 void GenerateBlockmap(int min_x, int min_y, int max_x, int max_y);
 
-bool BlockmapLineIterator(float x1, float y1, float x2, float y2,
-                          bool (*func)(Line *, void *), void *data = nullptr);
+bool BlockmapLineIterator(float x1, float y1, float x2, float y2, bool (*func)(Line *, void *), void *data = nullptr);
 
-bool BlockmapThingIterator(float x1, float y1, float x2, float y2,
-                           bool (*func)(MapObject *, void *),
+bool BlockmapThingIterator(float x1, float y1, float x2, float y2, bool (*func)(MapObject *, void *),
                            void *data = nullptr);
 
-void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2,
-                          float z2, void (*func)(MapObject *, void *),
+void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, float z2, void (*func)(MapObject *, void *),
                           void *data = nullptr);
 
-void SectorGlowIterator(Sector *sec, float x1, float y1, float z1, float x2,
-                        float y2, float z2, void (*func)(MapObject *, void *),
-                        void *data = nullptr);
+void SectorGlowIterator(Sector *sec, float x1, float y1, float z1, float x2, float y2, float z2,
+                        void (*func)(MapObject *, void *), void *data = nullptr);
 
 float PathInterceptVector(DividingLine *v2, DividingLine *v1);
 
-bool PathTraverse(float x1, float y1, float x2, float y2, int flags,
-                  bool (*func)(PathIntercept *, void *), void *data = nullptr);
+bool PathTraverse(float x1, float y1, float x2, float y2, int flags, bool (*func)(PathIntercept *, void *),
+                  void *data = nullptr);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

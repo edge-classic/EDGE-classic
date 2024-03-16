@@ -30,12 +30,12 @@ enum ImageFormat
     kImageTga,
     kImageJpeg,
     kImageDoom,
-    kImageOther  // e.g. gif, dds, bmp
+    kImageOther // e.g. gif, dds, bmp
 };
 
 class ImageAtlasRectangle
 {
-   public:
+  public:
     // Normalized atlas x/y/width/height for texcoords
     float texture_coordinate_x;
     float texture_coordinate_y;
@@ -50,11 +50,11 @@ class ImageAtlasRectangle
 
 class ImageAtlas
 {
-   public:
+  public:
     ImageData                                   *data_;
     std::unordered_map<int, ImageAtlasRectangle> rectangles_;
 
-   public:
+  public:
     ImageAtlas(int w, int h);
     ~ImageAtlas();
 };
@@ -80,8 +80,7 @@ ImageData *ImageLoad(epi::File *file);
 // The integer keys for the associated image data can vary based on need, but
 // are generally a way of tracking which part of the atlas you are trying to
 // retrieve
-ImageAtlas *ImagePack(
-    const std::unordered_map<int, ImageData *> &image_pack_data);
+ImageAtlas *ImagePack(const std::unordered_map<int, ImageData *> &image_pack_data);
 
 // reads the principle information from the image header.
 // (should be much faster than loading the whole image).

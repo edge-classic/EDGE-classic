@@ -22,23 +22,25 @@
 
 class GatherChunk
 {
-   public:
+  public:
     int16_t *samples_;
 
-    int total_samples_;  // total number is *2 for stereo
+    int total_samples_; // total number is *2 for stereo
 
     bool is_stereo_;
 
-   public:
-    GatherChunk(int count, bool stereo)
-        : total_samples_(count), is_stereo_(stereo)
+  public:
+    GatherChunk(int count, bool stereo) : total_samples_(count), is_stereo_(stereo)
     {
         EPI_ASSERT(total_samples_ > 0);
 
         samples_ = new int16_t[total_samples_ * (is_stereo_ ? 2 : 1)];
     }
 
-    ~GatherChunk() { delete[] samples_; }
+    ~GatherChunk()
+    {
+        delete[] samples_;
+    }
 };
 
 //----------------------------------------------------------------------------
@@ -49,9 +51,11 @@ SoundGatherer::SoundGatherer() : chunks_(), total_samples_(0), request_(nullptr)
 
 SoundGatherer::~SoundGatherer()
 {
-    if (request_) DiscardChunk();
+    if (request_)
+        DiscardChunk();
 
-    for (unsigned int i = 0; i < chunks_.size(); i++) delete chunks_[i];
+    for (unsigned int i = 0; i < chunks_.size(); i++)
+        delete chunks_[i];
 }
 
 int16_t *SoundGatherer::MakeChunk(int max_samples, bool _stereo)
@@ -94,7 +98,8 @@ void SoundGatherer::DiscardChunk()
 
 bool SoundGatherer::Finalise(SoundData *buf, bool want_stereo)
 {
-    if (total_samples_ == 0) return false;
+    if (total_samples_ == 0)
+        return false;
 
     buf->Allocate(total_samples_, want_stereo ? kMixStereo : kMixMono);
 
@@ -131,7 +136,10 @@ void SoundGatherer::TransferMono(GatherChunk *chunk, SoundData *buf, int pos)
             *dest++ = ((int)src[0] + (int)src[1]) >> 1;
         }
     }
-    else { memcpy(dest, src, count * sizeof(int16_t)); }
+    else
+    {
+        memcpy(dest, src, count * sizeof(int16_t));
+    }
 }
 
 void SoundGatherer::TransferStereo(GatherChunk *chunk, SoundData *buf, int pos)

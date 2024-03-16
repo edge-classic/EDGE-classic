@@ -167,8 +167,8 @@ struct SpawnPoint
 
 struct DynamicLightState
 {
-    float           r;       // radius
-    float           target;  // target radius
+    float           r;      // radius
+    float           target; // target radius
     RGBAColor       color;
     AbstractShader *shader;
     Line           *glow_wall     = nullptr;
@@ -183,11 +183,11 @@ struct Position
 
 class MapObject : public Position
 {
-   public:
+  public:
     const MapObjectDefinition *info_ = nullptr;
 
-    BAMAngle angle_          = 0;  // orientation
-    BAMAngle vertical_angle_ = 0;  // looking up or down
+    BAMAngle angle_          = 0; // orientation
+    BAMAngle vertical_angle_ = 0; // looking up or down
 
     // For movement checking.
     float radius_ = 0;
@@ -253,7 +253,7 @@ class MapObject : public Position
     std::string wait_until_dead_tags_ = "";
 
     // Movement direction, movement generation (zig-zagging).
-    DirectionType move_direction_ = kDirectionEast;  // 0-7
+    DirectionType move_direction_ = kDirectionEast; // 0-7
 
     // when 0, select a new dir
     int move_count_ = 0;
@@ -374,7 +374,7 @@ class MapObject : public Position
 
     int teleport_tic_ = 0;
 
-   public:
+  public:
     bool IsRemoved() const;
 
     void SetTracer(MapObject *ref);
@@ -400,7 +400,10 @@ struct RespawnQueueItem
     struct RespawnQueueItem *previous   = nullptr;
 };
 
-inline float MapObjectMidZ(MapObject *mo) { return (mo->z + mo->height_ / 2); }
+inline float MapObjectMidZ(MapObject *mo)
+{
+    return (mo->z + mo->height_ / 2);
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

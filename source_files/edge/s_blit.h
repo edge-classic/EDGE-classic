@@ -43,8 +43,8 @@ enum ChannelState
 // channel info
 class SoundChannel
 {
-   public:
-    int state_;  // CHAN_xxx
+  public:
+    int state_; // CHAN_xxx
 
     SoundData *data_;
 
@@ -58,13 +58,13 @@ class SoundChannel
     uint32_t length_;
     uint32_t delta_;
 
-    int volume_left_;  // mixing volume
+    int volume_left_; // mixing volume
     int volume_right_;
 
-    bool loop_;  // will loop *one* more time
+    bool loop_;       // will loop *one* more time
     bool boss_;
 
-   public:
+  public:
     SoundChannel();
     ~SoundChannel();
 
@@ -83,7 +83,7 @@ extern bool  submerged_sound_effects;
 extern bool  outdoor_reverb;
 extern bool  dynamic_reverb;
 extern bool  ddf_reverb;
-extern int   ddf_reverb_type;  // 0 = None, 1 = Reverb, 2 = Echo
+extern int   ddf_reverb_type; // 0 = None, 1 = Reverb, 2 = Echo
 extern int   ddf_reverb_ratio;
 extern int   ddf_reverb_delay;
 extern float music_player_gain;

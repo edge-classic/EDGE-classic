@@ -77,7 +77,8 @@ bool DeathBot::CanGetArmour(const Benefit *be, int extendedflags) const
     {
         float slack = be->limit - pl_->armours_[a_class];
 
-        if (amount > slack) amount = slack;
+        if (amount > slack)
+            amount = slack;
 
         return (amount > 0);
     }
@@ -85,15 +86,19 @@ bool DeathBot::CanGetArmour(const Benefit *be, int extendedflags) const
     float slack   = be->limit - pl_->total_armour_;
     float upgrade = 0;
 
-    if (slack < 0) return false;
+    if (slack < 0)
+        return false;
 
-    for (int cl = a_class - 1; cl >= 0; cl--) upgrade += pl_->armours_[cl];
+    for (int cl = a_class - 1; cl >= 0; cl--)
+        upgrade += pl_->armours_[cl];
 
-    if (upgrade > amount) upgrade = amount;
+    if (upgrade > amount)
+        upgrade = amount;
 
     slack += upgrade;
 
-    if (amount > slack) amount = slack;
+    if (amount > slack)
+        amount = slack;
 
     return !(AlmostEquals(amount, 0.0f) && AlmostEquals(upgrade, 0.0f));
 }
@@ -102,16 +107,19 @@ bool DeathBot::MeleeWeapon() const
 {
     int wp_num = pl_->ready_weapon_;
 
-    if (pl_->pending_weapon_ >= 0) wp_num = pl_->pending_weapon_;
+    if (pl_->pending_weapon_ >= 0)
+        wp_num = pl_->pending_weapon_;
 
     return pl_->weapons_[wp_num].info->ammo_[0] == kAmmunitionTypeNoAmmo;
 }
 
 bool DeathBot::IsBarrel(const MapObject *mo)
 {
-    if (mo->player_) return false;
+    if (mo->player_)
+        return false;
 
-    if (0 == (mo->extended_flags_ & kExtendedFlagMonster)) return false;
+    if (0 == (mo->extended_flags_ & kExtendedFlagMonster))
+        return false;
 
     return true;
 }
@@ -131,16 +139,20 @@ float DeathBot::EvalEnemy(const MapObject *mo)
         return -1;
 
     // occasionally shoot barrels
-    if (IsBarrel(mo)) return (RandomShort() % 100 < 20) ? +1 : -1;
+    if (IsBarrel(mo))
+        return (RandomShort() % 100 < 20) ? +1 : -1;
 
     if (0 == (mo->extended_flags_ & kExtendedFlagMonster) && !mo->player_)
         return -1;
 
-    if (mo->player_ && mo->player_ == pl_) return -1;
+    if (mo->player_ && mo->player_ == pl_)
+        return -1;
 
-    if (pl_->map_object_->support_object_ == mo) return -1;
+    if (pl_->map_object_->support_object_ == mo)
+        return -1;
 
-    if (!InDeathmatch() && mo->player_) return -1;
+    if (!InDeathmatch() && mo->player_)
+        return -1;
 
     if (!InDeathmatch() && mo->support_object_ && mo->support_object_->player_)
         return -1;
@@ -156,7 +168,8 @@ float DeathBot::EvalItem(const MapObject *mo)
     // this depends on our current inventory, whether the game mode is COOP
     // or DEATHMATCH, and whether we are fighting or not.
 
-    if (0 == (mo->flags_ & kMapObjectFlagSpecial)) return -1;
+    if (0 == (mo->flags_ & kMapObjectFlagSpecial))
+        return -1;
 
     bool fighting = (pl_->map_object_->target_ != nullptr);
 
@@ -165,18 +178,20 @@ float DeathBot::EvalItem(const MapObject *mo)
     bool need_health = (pl_->map_object_->health_ < 45);
 
     // handle weapons first (due to deathmatch rules)
-    for (const Benefit *B = mo->info_->pickup_benefits_; B != nullptr;
-         B                = B->next)
+    for (const Benefit *B = mo->info_->pickup_benefits_; B != nullptr; B = B->next)
     {
         if (B->type == kBenefitTypeWeapon)
         {
-            if (!HasWeapon(B->sub.weap)) return BotNavigateEvaluateBigItem(mo);
+            if (!HasWeapon(B->sub.weap))
+                return BotNavigateEvaluateBigItem(mo);
 
             // try to get ammo from a dropped weapon
-            if (mo->flags_ & kMapObjectFlagDropped) continue;
+            if (mo->flags_ & kMapObjectFlagDropped)
+                continue;
 
             // cannot get the ammo from a placed weapon except in altdeath
-            if (deathmatch != 2) return -1;
+            if (deathmatch != 2)
+                return -1;
         }
 
         // ignore powerups, backpacks and armor in COOP.
@@ -185,90 +200,96 @@ float DeathBot::EvalItem(const MapObject *mo)
         {
             switch (B->type)
             {
-                case kBenefitTypePowerup:
-                case kBenefitTypeArmour:
-                case kBenefitTypeAmmoLimit:
-                    return -1;
+            case kBenefitTypePowerup:
+            case kBenefitTypeArmour:
+            case kBenefitTypeAmmoLimit:
+                return -1;
 
-                default:
-                    break;
+            default:
+                break;
             }
         }
     }
 
-    for (const Benefit *B = mo->info_->pickup_benefits_; B != nullptr;
-         B                = B->next)
+    for (const Benefit *B = mo->info_->pickup_benefits_; B != nullptr; B = B->next)
     {
         switch (B->type)
         {
-            case kBenefitTypeKey:
-                // have it already?
-                if (pl_->cards_ & (DoorKeyType)B->sub.type) continue;
-
-                return 90;
-
-            case kBenefitTypePowerup:
-                return BotNavigateEvaluateBigItem(mo);
-
-            case kBenefitTypeArmour:
-                // ignore when fighting
-                if (fighting) return -1;
-
-                if (!CanGetArmour(B, mo->extended_flags_)) continue;
-
-                return BotNavigateEvaluateBigItem(mo);
-
-            case kBenefitTypeHealth:
-            {
-                // cannot get it?
-                if (pl_->health_ >= B->limit) return -1;
-
-                // ignore potions unless really desperate
-                if (B->amount < 2.5)
-                {
-                    if (pl_->health_ > 19) return -1;
-
-                    return 2;
-                }
-
-                // don't grab health when fighting unless we NEED it
-                if (!(need_health || (want_health && !fighting))) return -1;
-
-                if (need_health)
-                    return 120;
-                else if (B->amount > 55)
-                    return 40;
-                else
-                    return 30;
-            }
-
-            case kBenefitTypeAmmo:
-            {
-                if (B->sub.type == kAmmunitionTypeNoAmmo) continue;
-
-                int ammo = B->sub.type;
-                int max  = pl_->ammo_[ammo].maximum;
-
-                // in COOP mode, leave some ammo for others
-                if (!InDeathmatch()) max = max / 4;
-
-                if (pl_->ammo_[ammo].count >= max) continue;
-
-                if (pl_->ammo_[ammo].count == 0)
-                    return 35;
-                else if (fighting)
-                    // ignore unneeded ammo when fighting
-                    continue;
-                else
-                    return 10;
-            }
-
-            case kBenefitTypeInventory:
-                // TODO : heretic stuff
+        case kBenefitTypeKey:
+            // have it already?
+            if (pl_->cards_ & (DoorKeyType)B->sub.type)
                 continue;
 
-            default:
+            return 90;
+
+        case kBenefitTypePowerup:
+            return BotNavigateEvaluateBigItem(mo);
+
+        case kBenefitTypeArmour:
+            // ignore when fighting
+            if (fighting)
+                return -1;
+
+            if (!CanGetArmour(B, mo->extended_flags_))
                 continue;
+
+            return BotNavigateEvaluateBigItem(mo);
+
+        case kBenefitTypeHealth: {
+            // cannot get it?
+            if (pl_->health_ >= B->limit)
+                return -1;
+
+            // ignore potions unless really desperate
+            if (B->amount < 2.5)
+            {
+                if (pl_->health_ > 19)
+                    return -1;
+
+                return 2;
+            }
+
+            // don't grab health when fighting unless we NEED it
+            if (!(need_health || (want_health && !fighting)))
+                return -1;
+
+            if (need_health)
+                return 120;
+            else if (B->amount > 55)
+                return 40;
+            else
+                return 30;
+        }
+
+        case kBenefitTypeAmmo: {
+            if (B->sub.type == kAmmunitionTypeNoAmmo)
+                continue;
+
+            int ammo = B->sub.type;
+            int max  = pl_->ammo_[ammo].maximum;
+
+            // in COOP mode, leave some ammo for others
+            if (!InDeathmatch())
+                max = max / 4;
+
+            if (pl_->ammo_[ammo].count >= max)
+                continue;
+
+            if (pl_->ammo_[ammo].count == 0)
+                return 35;
+            else if (fighting)
+                // ignore unneeded ammo when fighting
+                continue;
+            else
+                return 10;
+        }
+
+        case kBenefitTypeInventory:
+            // TODO : heretic stuff
+            continue;
+
+        default:
+            continue;
         }
     }
 
@@ -283,13 +304,15 @@ float DeathBot::EvaluateWeapon(int w_num, int &key) const
     PlayerWeapon *wp = &pl_->weapons_[w_num];
 
     // don't have this weapon
-    if (!wp->owned) return -1;
+    if (!wp->owned)
+        return -1;
 
     WeaponDefinition *weapon = wp->info;
     EPI_ASSERT(weapon);
 
     AttackDefinition *attack = weapon->attack_[0];
-    if (!attack) return -1;
+    if (!attack)
+        return -1;
 
     key = weapon->bind_key_;
 
@@ -306,19 +329,23 @@ float DeathBot::EvaluateWeapon(int w_num, int &key) const
     // when not fighting, prefer biggest non-dangerous weapon.
     if (pl_->map_object_->target_ == nullptr || InDeathmatch())
     {
-        if (!weapon->dangerous_) score += 1000.0f;
+        if (!weapon->dangerous_)
+            score += 1000.0f;
     }
     else if (pl_->map_object_->target_->spawn_health_ > 250)
     {
-        if (weapon->priority_ > 5) score += 1000.0f;
+        if (weapon->priority_ > 5)
+            score += 1000.0f;
     }
     else
     {
-        if (2 <= weapon->priority_ && weapon->priority_ <= 5) score += 1000.0f;
+        if (2 <= weapon->priority_ && weapon->priority_ <= 5)
+            score += 1000.0f;
     }
 
     // small preference for the current weapon (break ties)
-    if (w_num == pl_->ready_weapon_) score += 2.0f;
+    if (w_num == pl_->ready_weapon_)
+        score += 2.0f;
 
     // ultimate tie breaker (when two weapons have same priority)
     score += (float)w_num / 32.0f;
@@ -339,10 +366,12 @@ float DeathBot::DistTo(Position pos) const
 void DeathBot::PainResponse()
 {
     // oneself?
-    if (pl_->attacker_ == pl_->map_object_) return;
+    if (pl_->attacker_ == pl_->map_object_)
+        return;
 
     // ignore friendly fire -- shit happens
-    if (!InDeathmatch() && pl_->attacker_->player_) return;
+    if (!InDeathmatch() && pl_->attacker_->player_)
+        return;
 
     if (pl_->attacker_->health_ <= 0)
     {
@@ -365,18 +394,22 @@ void DeathBot::PainResponse()
 
 void DeathBot::LookForLeader()
 {
-    if (InDeathmatch()) return;
+    if (InDeathmatch())
+        return;
 
-    if (pl_->map_object_->support_object_ != nullptr) return;
+    if (pl_->map_object_->support_object_ != nullptr)
+        return;
 
     for (int i = 0; i < kMaximumPlayers; i++)
     {
         Player *p2 = players[i];
 
-        if (p2 == nullptr || p2->IsBot()) continue;
+        if (p2 == nullptr || p2->IsBot())
+            continue;
 
         // when multiple humans, make it random who is picked
-        if (RandomShort() % 100 < 90) continue;
+        if (RandomShort() % 100 < 90)
+            continue;
 
         pl_->map_object_->SetSupportObject(p2->map_object_);
     }
@@ -391,7 +424,8 @@ bool DeathBot::IsEnemyVisible(MapObject *enemy)
     float slope = ApproximateSlope(dx, dy, dz);
 
     // require slope to not be excessive, e.g. caged imps in MAP13
-    if (slope > 1.0f) return false;
+    if (slope > 1.0f)
+        return false;
 
     return CheckSight(pl_->map_object_, enemy);
 }
@@ -411,7 +445,8 @@ void DeathBot::LookForEnemies(float radius)
 
         // IDEA: if patience == kTicRate/2, try using pathing algo
 
-        if (patience_-- >= 0) return;
+        if (patience_-- >= 0)
+            return;
 
         // look for a new enemy
         pl_->map_object_->SetTarget(nullptr);
@@ -438,7 +473,8 @@ void DeathBot::LookForItems(float radius)
     MapObject *item      = nullptr;
     BotPath   *item_path = BotNavigateFindThing(this, radius, item);
 
-    if (item_path == nullptr) return;
+    if (item_path == nullptr)
+        return;
 
     // GET IT !!
 
@@ -459,9 +495,11 @@ void DeathBot::LookAround()
 
     LookForEnemies(1024);
 
-    if ((look_time_ & 3) == 2) LookForLeader();
+    if ((look_time_ & 3) == 2)
+        LookForLeader();
 
-    if (look_time_ >= 0) return;
+    if (look_time_ >= 0)
+        return;
 
     // look for items every second or so
     look_time_ = 20 + RandomShort() % 20;
@@ -475,7 +513,8 @@ void DeathBot::SelectWeapon()
     weapon_time_ = 20 + RandomShort() % 20;
 
     // allow any weapon change to complete first
-    if (pl_->pending_weapon_ != KWeaponSelectionNoChange) return;
+    if (pl_->pending_weapon_ != KWeaponSelectionNoChange)
+        return;
 
     int   best       = pl_->ready_weapon_;
     int   best_key   = -1;
@@ -494,21 +533,22 @@ void DeathBot::SelectWeapon()
         }
     }
 
-    if (best != pl_->ready_weapon_) { cmd_.weapon = best_key; }
+    if (best != pl_->ready_weapon_)
+    {
+        cmd_.weapon = best_key;
+    }
 }
 
 void DeathBot::MoveToward(const Position &pos)
 {
     cmd_.speed     = MOVE_SPEED + (6.25 * bot_skill.d_);
-    cmd_.direction = RendererPointToAngle(pl_->map_object_->x,
-                                          pl_->map_object_->y, pos.x, pos.y);
+    cmd_.direction = RendererPointToAngle(pl_->map_object_->x, pl_->map_object_->y, pos.x, pos.y);
 }
 
 void DeathBot::WalkToward(const Position &pos)
 {
     cmd_.speed     = (MOVE_SPEED + (3.125 * bot_skill.d_));
-    cmd_.direction = RendererPointToAngle(pl_->map_object_->x,
-                                          pl_->map_object_->y, pos.x, pos.y);
+    cmd_.direction = RendererPointToAngle(pl_->map_object_->x, pl_->map_object_->y, pos.x, pos.y);
 }
 
 void DeathBot::TurnToward(BAMAngle want_angle, float want_slope, bool fast)
@@ -524,8 +564,10 @@ void DeathBot::TurnToward(BAMAngle want_angle, float want_slope, bool fast)
     look_angle_ = pl_->map_object_->angle_ + delta;
 
     // vertical (pitch or mlook) angle
-    if (want_slope < -2.0) want_slope = -2.0;
-    if (want_slope > +2.0) want_slope = +2.0;
+    if (want_slope < -2.0)
+        want_slope = -2.0;
+    if (want_slope > +2.0)
+        want_slope = +2.0;
 
     float diff = want_slope - epi::BAMTan(pl_->map_object_->vertical_angle_);
 
@@ -573,10 +615,14 @@ void DeathBot::WeaveToward(const Position &pos)
 
     MoveToward(pos);
 
-    if (weave_ == -2) cmd_.direction -= kBAMAngle5 * 12;
-    if (weave_ == -1) cmd_.direction -= kBAMAngle5 * 3;
-    if (weave_ == +1) cmd_.direction += kBAMAngle5 * 3;
-    if (weave_ == +2) cmd_.direction += kBAMAngle5 * 12;
+    if (weave_ == -2)
+        cmd_.direction -= kBAMAngle5 * 12;
+    if (weave_ == -1)
+        cmd_.direction -= kBAMAngle5 * 3;
+    if (weave_ == +1)
+        cmd_.direction += kBAMAngle5 * 3;
+    if (weave_ == +2)
+        cmd_.direction += kBAMAngle5 * 12;
 }
 
 void DeathBot::WeaveToward(const MapObject *mo)
@@ -592,8 +638,7 @@ void DeathBot::RetreatFrom(const MapObject *enemy)
     float dy   = pl_->map_object_->y - enemy->y;
     float dlen = HMM_MAX(hypotf(dx, dy), 1.0f);
 
-    Position pos{ pl_->map_object_->x, pl_->map_object_->y,
-                  pl_->map_object_->z };
+    Position pos{ pl_->map_object_->x, pl_->map_object_->y, pl_->map_object_->z };
 
     pos.x += 16.0f * (dx / dlen);
     pos.y += 16.0f * (dy / dlen);
@@ -603,9 +648,8 @@ void DeathBot::RetreatFrom(const MapObject *enemy)
 
 void DeathBot::Strafe(bool right)
 {
-    cmd_.speed = MOVE_SPEED + (6.25 * bot_skill.d_);
-    cmd_.direction =
-        pl_->map_object_->angle_ + (right ? kBAMAngle270 : kBAMAngle90);
+    cmd_.speed     = MOVE_SPEED + (6.25 * bot_skill.d_);
+    cmd_.direction = pl_->map_object_->angle_ + (right ? kBAMAngle270 : kBAMAngle90);
 }
 
 void DeathBot::DetectObstacle()
@@ -664,31 +708,35 @@ void DeathBot::StrafeAroundEnemy()
         return;
     }
 
-    if (strafe_dir_ != 0) { Strafe(strafe_dir_ > 0); }
+    if (strafe_dir_ != 0)
+    {
+        Strafe(strafe_dir_ > 0);
+    }
 }
 
 void DeathBot::ShootTarget()
 {
     // no weapon to shoot?
-    if (pl_->ready_weapon_ == KWeaponSelectionNone ||
-        pl_->pending_weapon_ != KWeaponSelectionNoChange)
+    if (pl_->ready_weapon_ == KWeaponSelectionNone || pl_->pending_weapon_ != KWeaponSelectionNoChange)
         return;
 
     // TODO: ammo check
 
     // too far away?
-    if (enemy_dist_ > 2000) return;
+    if (enemy_dist_ > 2000)
+        return;
 
     // too close for a dangerous weapon?
     const WeaponDefinition *weapon = pl_->weapons_[pl_->ready_weapon_].info;
-    if (weapon->dangerous_ && enemy_dist_ < 208) return;
+    if (weapon->dangerous_ && enemy_dist_ < 208)
+        return;
 
     // check that we are facing the enemy
-    BAMAngle delta = enemy_angle_ - pl_->map_object_->angle_;
-    float    sl_diff =
-        fabs(enemy_slope_ - epi::BAMTan(pl_->map_object_->vertical_angle_));
+    BAMAngle delta   = enemy_angle_ - pl_->map_object_->angle_;
+    float    sl_diff = fabs(enemy_slope_ - epi::BAMTan(pl_->map_object_->vertical_angle_));
 
-    if (delta > kBAMAngle180) delta = kBAMAngle360 - delta;
+    if (delta > kBAMAngle180)
+        delta = kBAMAngle360 - delta;
 
     // the further away we are, the more accurate our shot must be.
     // e.g. at point-blank range, even 45 degrees away can hit.
@@ -698,7 +746,8 @@ void DeathBot::ShootTarget()
     if (delta > (BAMAngle)(kBAMAngle90 / adjust / (11 - (2.5 * bot_skill.d_))))
         return;
 
-    if (sl_diff > (8.0f / adjust)) return;
+    if (sl_diff > (8.0f / adjust))
+        return;
 
     // in COOP, check if other players might be hit
     if (!InDeathmatch())
@@ -763,7 +812,8 @@ void DeathBot::ThinkFight()
     // handle dangerous weapons
     const WeaponDefinition *weapon = pl_->weapons_[pl_->ready_weapon_].info;
 
-    if (weapon->dangerous_) min_dist = HMM_MAX(min_dist, 224.0f);
+    if (weapon->dangerous_)
+        min_dist = HMM_MAX(min_dist, 224.0f);
 
     // approach if too far away
     if (enemy_dist_ > max_dist)
@@ -810,7 +860,10 @@ void DeathBot::PathToLeader()
 
     path_ = BotNavigateFindPath(pl_->map_object_, leader, 0);
 
-    if (path_ != nullptr) { EstimateTravelTime(); }
+    if (path_ != nullptr)
+    {
+        EstimateTravelTime();
+    }
 }
 
 void DeathBot::EstimateTravelTime()
@@ -865,18 +918,18 @@ void DeathBot::ThinkHelp()
     {
         switch (FollowPath(true))
         {
-            case kBotFollowPathResultOK:
-                return;
+        case kBotFollowPathResultOK:
+            return;
 
-            case kBotFollowPathResultDone:
-                DeletePath();
-                path_wait_ = 4 + RandomShort() % 4;
-                break;
+        case kBotFollowPathResultDone:
+            DeletePath();
+            path_wait_ = 4 + RandomShort() % 4;
+            break;
 
-            case kBotFollowPathResultFailed:
-                DeletePath();
-                path_wait_ = 30 + RandomShort() % 10;
-                break;
+        case kBotFollowPathResultFailed:
+            DeletePath();
+            path_wait_ = 30 + RandomShort() % 10;
+            break;
         }
     }
 
@@ -933,12 +986,18 @@ BotFollowPathResult DeathBot::FollowPath(bool do_look)
     {
         path_->along_ += 1;
 
-        if (path_->Finished()) { return kBotFollowPathResultDone; }
+        if (path_->Finished())
+        {
+            return kBotFollowPathResultDone;
+        }
 
         EstimateTravelTime();
     }
 
-    if (travel_time_-- < 0) { return kBotFollowPathResultFailed; }
+    if (travel_time_-- < 0)
+    {
+        return kBotFollowPathResultFailed;
+    }
 
     // determine looking angle
     if (do_look)
@@ -969,21 +1028,21 @@ void DeathBot::ThinkRoam()
     {
         switch (FollowPath(true))
         {
-            case kBotFollowPathResultOK:
-                return;
+        case kBotFollowPathResultOK:
+            return;
 
-            case kBotFollowPathResultDone:
-                // arrived at the spot!
-                // TODO look for other nearby items
+        case kBotFollowPathResultDone:
+            // arrived at the spot!
+            // TODO look for other nearby items
 
-                DeletePath();
-                path_wait_ = 4 + RandomShort() % 4;
-                break;
+            DeletePath();
+            path_wait_ = 4 + RandomShort() % 4;
+            break;
 
-            case kBotFollowPathResultFailed:
-                DeletePath();
-                path_wait_ = 30 + RandomShort() % 10;
-                break;
+        case kBotFollowPathResultFailed:
+            DeletePath();
+            path_wait_ = 30 + RandomShort() % 10;
+            break;
         }
     }
 
@@ -1030,14 +1089,15 @@ void DeathBot::FinishGetItem()
     // otherwise collect nearby items
     LookForItems(256);
 
-    if (task_ == kBotTaskGetItem) return;
+    if (task_ == kBotTaskGetItem)
+        return;
 
     // continue to follow player
-    if (pl_->map_object_->support_object_ != nullptr) return;
+    if (pl_->map_object_->support_object_ != nullptr)
+        return;
 
     // otherwise we were roaming about, so re-establish path
-    if (!(AlmostEquals(roam_goal_.x, 0.0f) &&
-          AlmostEquals(roam_goal_.y, 0.0f) && AlmostEquals(roam_goal_.z, 0.0f)))
+    if (!(AlmostEquals(roam_goal_.x, 0.0f) && AlmostEquals(roam_goal_.y, 0.0f) && AlmostEquals(roam_goal_.z, 0.0f)))
     {
         path_ = BotNavigateFindPath(pl_->map_object_, &roam_goal_, 0);
 
@@ -1068,27 +1128,31 @@ void DeathBot::ThinkGetItem()
 
         TurnToward(enemy_angle_, enemy_slope_, false);
 
-        if (see_enemy_) ShootTarget();
+        if (see_enemy_)
+            ShootTarget();
     }
-    else { TurnToward(pl_->map_object_->tracer_, false); }
+    else
+    {
+        TurnToward(pl_->map_object_->tracer_, false);
+    }
 
     // follow the path previously found
     if (path_ != nullptr)
     {
         switch (FollowPath(false))
         {
-            case kBotFollowPathResultOK:
-                return;
+        case kBotFollowPathResultOK:
+            return;
 
-            case kBotFollowPathResultDone:
-                DeletePath();
-                item_time_ = kTicRate;
-                break;
+        case kBotFollowPathResultDone:
+            DeletePath();
+            item_time_ = kTicRate;
+            break;
 
-            case kBotFollowPathResultFailed:
-                // took too long? (e.g. we got stuck)
-                FinishGetItem();
-                return;
+        case kBotFollowPathResultFailed:
+            // took too long? (e.g. we got stuck)
+            FinishGetItem();
+            return;
         }
     }
 
@@ -1107,7 +1171,10 @@ void DeathBot::FinishDoorOrLift(bool ok)
 {
     task_ = kBotTaskNone;
 
-    if (ok) { path_->along_ += 1; }
+    if (ok)
+    {
+        path_->along_ += 1;
+    }
     else
     {
         DeletePath();
@@ -1119,65 +1186,66 @@ void DeathBot::ThinkOpenDoor()
 {
     switch (door_stage_)
     {
-        case kBotOpenDoorTaskApproach:
+    case kBotOpenDoorTaskApproach: {
+        if (door_time_-- < 0)
         {
-            if (door_time_-- < 0)
-            {
-                FinishDoorOrLift(false);
-                return;
-            }
-
-            float    dist = DistTo(path_->CurrentDestination());
-            BAMAngle ang =
-                path_->nodes_[path_->along_].seg->angle + kBAMAngle90;
-            BAMAngle diff = ang - pl_->map_object_->angle_;
-
-            if (diff > kBAMAngle180) diff = kBAMAngle360 - diff;
-
-            if (diff < kBAMAngle5 && dist < (kUseRange - 16))
-            {
-                door_stage_ = kBotOpenDoorTaskUse;
-                door_time_  = kTicRate * 5;
-                return;
-            }
-
-            TurnToward(ang, 0.0, false);
-            WeaveToward(path_->CurrentDestination());
+            FinishDoorOrLift(false);
             return;
         }
 
-        case kBotOpenDoorTaskUse:
+        float    dist = DistTo(path_->CurrentDestination());
+        BAMAngle ang  = path_->nodes_[path_->along_].seg->angle + kBAMAngle90;
+        BAMAngle diff = ang - pl_->map_object_->angle_;
+
+        if (diff > kBAMAngle180)
+            diff = kBAMAngle360 - diff;
+
+        if (diff < kBAMAngle5 && dist < (kUseRange - 16))
         {
-            if (door_time_-- < 0)
-            {
-                FinishDoorOrLift(false);
-                return;
-            }
-
-            // if closing, try to re-open
-            const Sector     *sector = door_seg_->back_subsector->sector;
-            const PlaneMover *pm     = sector->ceiling_move;
-
-            if (pm != nullptr && pm->direction < 0)
-            {
-                if (door_time_ & 1) cmd_.use = true;
-                return;
-            }
-
-            // already open?
-            if (sector->ceiling_height > sector->floor_height + 56.0f)
-            {
-                FinishDoorOrLift(true);
-                return;
-            }
-
-            // door is opening, so don't interfere
-            if (pm != nullptr) return;
-
-            if (door_time_ & 1) cmd_.use = true;
-
+            door_stage_ = kBotOpenDoorTaskUse;
+            door_time_  = kTicRate * 5;
             return;
         }
+
+        TurnToward(ang, 0.0, false);
+        WeaveToward(path_->CurrentDestination());
+        return;
+    }
+
+    case kBotOpenDoorTaskUse: {
+        if (door_time_-- < 0)
+        {
+            FinishDoorOrLift(false);
+            return;
+        }
+
+        // if closing, try to re-open
+        const Sector     *sector = door_seg_->back_subsector->sector;
+        const PlaneMover *pm     = sector->ceiling_move;
+
+        if (pm != nullptr && pm->direction < 0)
+        {
+            if (door_time_ & 1)
+                cmd_.use = true;
+            return;
+        }
+
+        // already open?
+        if (sector->ceiling_height > sector->floor_height + 56.0f)
+        {
+            FinishDoorOrLift(true);
+            return;
+        }
+
+        // door is opening, so don't interfere
+        if (pm != nullptr)
+            return;
+
+        if (door_time_ & 1)
+            cmd_.use = true;
+
+        return;
+    }
     }
 }
 
@@ -1185,98 +1253,98 @@ void DeathBot::ThinkUseLift()
 {
     switch (lift_stage_)
     {
-        case kBotOpenDoorTaskApproach:
+    case kBotOpenDoorTaskApproach: {
+        if (lift_time_-- < 0)
         {
-            if (lift_time_-- < 0)
-            {
-                FinishDoorOrLift(false);
-                return;
-            }
-
-            float    dist = DistTo(path_->CurrentDestination());
-            BAMAngle ang =
-                path_->nodes_[path_->along_].seg->angle + kBAMAngle90;
-            BAMAngle diff = ang - pl_->map_object_->angle_;
-
-            if (diff > kBAMAngle180) diff = kBAMAngle360 - diff;
-
-            if (diff < kBAMAngle5 && dist < (kUseRange - 16))
-            {
-                lift_stage_ = kBotUseLiftTaskUse;
-                lift_time_  = kTicRate * 5;
-                return;
-            }
-
-            TurnToward(ang, 0.0, false);
-            WeaveToward(path_->CurrentDestination());
+            FinishDoorOrLift(false);
             return;
         }
 
-        case kBotUseLiftTaskUse:
+        float    dist = DistTo(path_->CurrentDestination());
+        BAMAngle ang  = path_->nodes_[path_->along_].seg->angle + kBAMAngle90;
+        BAMAngle diff = ang - pl_->map_object_->angle_;
+
+        if (diff > kBAMAngle180)
+            diff = kBAMAngle360 - diff;
+
+        if (diff < kBAMAngle5 && dist < (kUseRange - 16))
         {
-            if (lift_time_-- < 0)
-            {
-                FinishDoorOrLift(false);
-                return;
-            }
+            lift_stage_ = kBotUseLiftTaskUse;
+            lift_time_  = kTicRate * 5;
+            return;
+        }
 
-            // if lift is raising, try to re-lower
-            const Sector     *sector = lift_seg_->back_subsector->sector;
-            const PlaneMover *pm     = sector->floor_move;
+        TurnToward(ang, 0.0, false);
+        WeaveToward(path_->CurrentDestination());
+        return;
+    }
 
-            if (pm != nullptr && pm->direction > 0)
-            {
-                if (lift_time_ & 1) cmd_.use = true;
-                return;
-            }
+    case kBotUseLiftTaskUse: {
+        if (lift_time_-- < 0)
+        {
+            FinishDoorOrLift(false);
+            return;
+        }
 
-            // already lowered?
-            if (sector->floor_height <
-                lift_seg_->front_subsector->sector->floor_height + 24.0f)
-            {
-                // navigation code added a place to stand
-                path_->along_ += 1;
+        // if lift is raising, try to re-lower
+        const Sector     *sector = lift_seg_->back_subsector->sector;
+        const PlaneMover *pm     = sector->floor_move;
 
-                // TODO compute time it will take for lift to go fully up
-                lift_stage_ = kBotUseLiftTaskRide;
-                lift_time_  = kTicRate * 10;
-                return;
-            }
+        if (pm != nullptr && pm->direction > 0)
+        {
+            if (lift_time_ & 1)
+                cmd_.use = true;
+            return;
+        }
 
-            // lift is lowering, so don't interfere
-            if (pm != nullptr) return;
+        // already lowered?
+        if (sector->floor_height < lift_seg_->front_subsector->sector->floor_height + 24.0f)
+        {
+            // navigation code added a place to stand
+            path_->along_ += 1;
 
-            // try to activate it
-            if (lift_time_ & 1) cmd_.use = true;
+            // TODO compute time it will take for lift to go fully up
+            lift_stage_ = kBotUseLiftTaskRide;
+            lift_time_  = kTicRate * 10;
+            return;
+        }
+
+        // lift is lowering, so don't interfere
+        if (pm != nullptr)
+            return;
+
+        // try to activate it
+        if (lift_time_ & 1)
+            cmd_.use = true;
+
+        return;
+    }
+
+    case kBotUseLiftTaskRide:
+        if (lift_time_-- < 0)
+        {
+            FinishDoorOrLift(false);
+            return;
+        }
+
+        WalkToward(path_->CurrentDestination());
+
+        const Sector *lift_sec = lift_seg_->back_subsector->sector;
+
+        if (lift_sec->floor_move != nullptr)
+        {
+            // if lift went down again, don't time out
+            if (lift_sec->floor_move->direction <= 0)
+                lift_time_ = 10 * kTicRate;
 
             return;
         }
 
-        case kBotUseLiftTaskRide:
-            if (lift_time_-- < 0)
-            {
-                FinishDoorOrLift(false);
-                return;
-            }
+        // reached the top?
+        bool ok = pl_->map_object_->z > (lift_sec->floor_height - 0.5);
 
-            WalkToward(path_->CurrentDestination());
-
-            const Sector *lift_sec = lift_seg_->back_subsector->sector;
-
-            if (lift_sec->floor_move != nullptr)
-            {
-                // if lift went down again, don't time out
-                if (lift_sec->floor_move->direction <= 0)
-                    lift_time_ = 10 * kTicRate;
-
-                return;
-            }
-
-            // reached the top?
-            bool ok = pl_->map_object_->z > (lift_sec->floor_height - 0.5);
-
-            FinishDoorOrLift(ok);
-            return;
+        FinishDoorOrLift(ok);
+        return;
     }
 }
 
@@ -1301,7 +1369,8 @@ void DeathBot::Think()
     cmd_.weapon = -1;
 
     // do nothing when game is paused
-    if (paused) return;
+    if (paused)
+        return;
 
     MapObject *mo = pl_->map_object_;
 
@@ -1313,38 +1382,43 @@ void DeathBot::Think()
     }
 
     // forget target (etc) if they died
-    if (mo->target_ && mo->target_->health_ <= 0) mo->SetTarget(nullptr);
+    if (mo->target_ && mo->target_->health_ <= 0)
+        mo->SetTarget(nullptr);
 
     if (mo->support_object_ && mo->support_object_->health_ <= 0)
         mo->SetSupportObject(nullptr);
 
     // hurt by somebody?
-    if (pl_->attacker_ != nullptr) { PainResponse(); }
+    if (pl_->attacker_ != nullptr)
+    {
+        PainResponse();
+    }
 
     DetectObstacle();
 
     // doing a task?
     switch (task_)
     {
-        case kBotTaskGetItem:
-            ThinkGetItem();
-            return;
+    case kBotTaskGetItem:
+        ThinkGetItem();
+        return;
 
-        case kBotTaskOpenDoor:
-            ThinkOpenDoor();
-            return;
+    case kBotTaskOpenDoor:
+        ThinkOpenDoor();
+        return;
 
-        case kBotTaskUseLift:
-            ThinkUseLift();
-            return;
+    case kBotTaskUseLift:
+        ThinkUseLift();
+        return;
 
-        default:
-            break;
+    default:
+        break;
     }
 
     LookAround();
 
-    if (weapon_time_-- < 0) SelectWeapon();
+    if (weapon_time_-- < 0)
+        SelectWeapon();
 
     // if we have a target enemy, fight it or flee it
     if (pl_->map_object_->target_ != nullptr)
@@ -1375,7 +1449,8 @@ void DeathBot::DeathThink()
     {
         dead_time_ = 0;
 
-        if (RandomShort() % 100 < 35) cmd_.use = true;
+        if (RandomShort() % 100 < 35)
+            cmd_.use = true;
     }
 }
 
@@ -1385,26 +1460,28 @@ void DeathBot::ConvertTiccmd(EventTicCommand *dest)
 
     MapObject *mo = pl_->map_object_;
 
-    if (cmd_.attack) dest->buttons |= kButtonCodeAttack;
+    if (cmd_.attack)
+        dest->buttons |= kButtonCodeAttack;
 
-    if (cmd_.attack2) dest->extended_buttons |= kExtendedButtonCodeSecondAttack;
+    if (cmd_.attack2)
+        dest->extended_buttons |= kExtendedButtonCodeSecondAttack;
 
-    if (cmd_.use) dest->buttons |= kButtonCodeUse;
+    if (cmd_.use)
+        dest->buttons |= kButtonCodeUse;
 
-    if (cmd_.jump) dest->upward_move = 0x20;
+    if (cmd_.jump)
+        dest->upward_move = 0x20;
 
     if (cmd_.weapon != -1)
     {
         dest->buttons |= kButtonCodeChangeWeapon;
-        dest->buttons |=
-            (cmd_.weapon << kButtonCodeWeaponMaskShift) & kButtonCodeWeaponMask;
+        dest->buttons |= (cmd_.weapon << kButtonCodeWeaponMaskShift) & kButtonCodeWeaponMask;
     }
 
     dest->player_index = pl_->player_number_;
 
-    dest->angle_turn = (mo->angle_ - look_angle_) >> 16;
-    dest->mouselook_turn =
-        (epi::BAMFromATan(look_slope_) - mo->vertical_angle_) >> 16;
+    dest->angle_turn     = (mo->angle_ - look_angle_) >> 16;
+    dest->mouselook_turn = (epi::BAMFromATan(look_slope_) - mo->vertical_angle_) >> 16;
 
     if (cmd_.speed != 0)
     {
@@ -1434,7 +1511,10 @@ void DeathBot::Respawn()
     DeletePath();
 }
 
-void DeathBot::EndLevel() { DeletePath(); }
+void DeathBot::EndLevel()
+{
+    DeletePath();
+}
 
 //----------------------------------------------------------------------------
 
@@ -1453,14 +1533,16 @@ void P_BotCreate(Player *p, bool recreate)
     p->build_data_ = (void *)bot;
     p->player_flags_ |= kPlayerFlagBot;
 
-    if (!recreate) sprintf(p->player_name_, "Bot%d", p->player_number_ + 1);
+    if (!recreate)
+        sprintf(p->player_name_, "Bot%d", p->player_number_ + 1);
 }
 
 void BotPlayerBuilder(const Player *p, void *data, EventTicCommand *cmd)
 {
     memset(cmd, 0, sizeof(EventTicCommand));
 
-    if (game_state != kGameStateLevel) return;
+    if (game_state != kGameStateLevel)
+        return;
 
     DeathBot *bot = (DeathBot *)data;
     EPI_ASSERT(bot);
@@ -1471,7 +1553,8 @@ void BotPlayerBuilder(const Player *p, void *data, EventTicCommand *cmd)
 
 void BotBeginLevel(void)
 {
-    if (total_bots > 0) BotNavigateAnalyseLevel();
+    if (total_bots > 0)
+        BotNavigateAnalyseLevel();
 }
 
 //

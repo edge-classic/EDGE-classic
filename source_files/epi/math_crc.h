@@ -30,15 +30,26 @@ namespace epi
 class CRC32
 {
     /* sealed */
-   private:
+  private:
     uint32_t crc_;
 
-   public:
-    CRC32() { Reset(); }
-    CRC32(const CRC32 &rhs) { crc_ = rhs.crc_; }
-    ~CRC32() {}
+  public:
+    CRC32()
+    {
+        Reset();
+    }
+    CRC32(const CRC32 &rhs)
+    {
+        crc_ = rhs.crc_;
+    }
+    ~CRC32()
+    {
+    }
 
-    bool operator==(const CRC32 &other) const { return crc_ == other.crc_; }
+    bool operator==(const CRC32 &other) const
+    {
+        return crc_ == other.crc_;
+    }
 
     CRC32 &operator=(const CRC32 &rhs)
     {
@@ -54,12 +65,18 @@ class CRC32
     CRC32 &AddBlock(const uint8_t *data, int len);
     CRC32 &AddCString(const char *str);
 
-    void Reset(void) { crc_ = 1; }
+    void Reset(void)
+    {
+        crc_ = 1;
+    }
 
-    uint32_t GetCRC(void) const { return crc_; }
+    uint32_t GetCRC(void) const
+    {
+        return crc_;
+    }
 };
 
-};  // namespace epi
+}; // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

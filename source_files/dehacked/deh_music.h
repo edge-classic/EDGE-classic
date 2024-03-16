@@ -110,6 +110,6 @@ bool ReplaceMusic(const char *before, const char *after);
 void AlterBexMusic(const char *new_val);
 
 void ConvertMUS();
-}  // namespace music
+} // namespace music
 
-}  // namespace dehacked
+} // namespace dehacked

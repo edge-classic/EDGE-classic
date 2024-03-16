@@ -27,7 +27,7 @@ constexpr uint8_t kMaximumModelSkins = 10;
 
 class ModelDefinition
 {
-   public:
+  public:
     // four letter model name (e.g. "TROO").
     char name_[6];
 
@@ -36,7 +36,7 @@ class ModelDefinition
 
     const Image *skins_[kMaximumModelSkins];
 
-   public:
+  public:
     ModelDefinition(const char *prefix);
     ~ModelDefinition();
 };

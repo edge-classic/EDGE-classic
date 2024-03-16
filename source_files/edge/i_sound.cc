@@ -65,8 +65,7 @@ static bool TryOpenSound(int want_freq, bool want_stereo)
     SDL_AudioSpec trydev;
     SDL_zero(trydev);
 
-    LogPrint("StartupSound: trying %d Hz %s\n", want_freq,
-             want_stereo ? "Stereo" : "Mono");
+    LogPrint("StartupSound: trying %d Hz %s\n", want_freq, want_stereo ? "Stereo" : "Mono");
 
     trydev.freq     = want_freq;
     trydev.format   = AUDIO_S16SYS;
@@ -74,10 +73,10 @@ static bool TryOpenSound(int want_freq, bool want_stereo)
     trydev.samples  = 1024;
     trydev.callback = SoundFillCallback;
 
-    current_sound_device =
-        SDL_OpenAudioDevice(nullptr, 0, &trydev, &sound_device_check, 0);
+    current_sound_device = SDL_OpenAudioDevice(nullptr, 0, &trydev, &sound_device_check, 0);
 
-    if (current_sound_device > 0) return true;
+    if (current_sound_device > 0)
+        return true;
 
     LogPrint("  failed: %s\n", SDL_GetError());
 
@@ -86,17 +85,20 @@ static bool TryOpenSound(int want_freq, bool want_stereo)
 
 void StartupAudio(void)
 {
-    if (no_sound) return;
+    if (no_sound)
+        return;
 
     std::string driver = ArgumentValue("audiodriver");
 
     if (driver.empty())
     {
         const char *check = SDL_getenv("SDL_AUDIODRIVER");
-        if (check) driver = check;
+        if (check)
+            driver = check;
     }
 
-    if (driver.empty()) driver = "default";
+    if (driver.empty())
+        driver = "default";
 
     if (epi::StringCaseCompareASCII(driver, "default") != 0)
     {
@@ -115,12 +117,15 @@ void StartupAudio(void)
     int  want_freq   = 44100;
     bool want_stereo = (var_sound_stereo >= 1);
 
-    if (ArgumentFind("mono") > 0) want_stereo = false;
-    if (ArgumentFind("stereo") > 0) want_stereo = true;
+    if (ArgumentFind("mono") > 0)
+        want_stereo = false;
+    if (ArgumentFind("stereo") > 0)
+        want_stereo = true;
 
     bool success = false;
 
-    if (TryOpenSound(want_freq, want_stereo)) success = true;
+    if (TryOpenSound(want_freq, want_stereo))
+        success = true;
 
     if (!success)
     {
@@ -135,8 +140,7 @@ void StartupAudio(void)
 
     if (sound_device_check.format != AUDIO_S16SYS)
     {
-        LogPrint("StartupSound: unsupported format: %d\n",
-                 sound_device_check.format);
+        LogPrint("StartupSound: unsupported format: %d\n", sound_device_check.format);
         SDL_CloseAudioDevice(current_sound_device);
         no_sound = true;
         return;
@@ -144,8 +148,7 @@ void StartupAudio(void)
 
     if (sound_device_check.channels >= 3)
     {
-        LogPrint("StartupSound: unsupported channel num: %d\n",
-                 sound_device_check.channels);
+        LogPrint("StartupSound: unsupported channel num: %d\n", sound_device_check.channels);
         SDL_CloseAudioDevice(current_sound_device);
 
         no_sound = true;
@@ -163,9 +166,8 @@ void StartupAudio(void)
         LogPrint("StartupSound: %d Hz sound not available.\n", want_freq);
     }
 
-    sound_device_bytes_per_sample = (sound_device_check.channels) * 2;
-    sound_device_samples_per_buffer =
-        sound_device_check.size / sound_device_bytes_per_sample;
+    sound_device_bytes_per_sample   = (sound_device_check.channels) * 2;
+    sound_device_samples_per_buffer = sound_device_check.size / sound_device_bytes_per_sample;
 
     EPI_ASSERT(sound_device_bytes_per_sample > 0);
     EPI_ASSERT(sound_device_samples_per_buffer > 0);
@@ -178,15 +180,15 @@ void StartupAudio(void)
         var_sound_stereo = sound_device_stereo ? 1 : 0;
 
     // display some useful stuff
-    LogPrint("StartupSound: Success @ %d Hz %s\n", sound_device_frequency,
-             sound_device_stereo ? "Stereo" : "Mono");
+    LogPrint("StartupSound: Success @ %d Hz %s\n", sound_device_frequency, sound_device_stereo ? "Stereo" : "Mono");
 
     return;
 }
 
 void AudioShutdown(void)
 {
-    if (no_sound) return;
+    if (no_sound)
+        return;
 
     SoundShutdown();
 
@@ -220,19 +222,17 @@ void StartupMusic(void)
 {
     // Check for soundfonts and instrument banks
     std::vector<epi::DirectoryEntry> sfd;
-    std::string soundfont_dir = epi::PathAppend(game_directory, "soundfont");
+    std::string                      soundfont_dir = epi::PathAppend(game_directory, "soundfont");
 
     // Always add the default/internal GENMIDI lump choice
     available_opl_banks.push_back("GENMIDI");
     // Set default SF2 location in CVAR if needed
     if (midi_soundfont.s_.empty())
-        midi_soundfont =
-            epi::SanitizePath(epi::PathAppend(soundfont_dir, "Default.sf2"));
+        midi_soundfont = epi::SanitizePath(epi::PathAppend(soundfont_dir, "Default.sf2"));
 
     if (!ReadDirectory(sfd, soundfont_dir, "*.*"))
     {
-        LogWarning("StartupMusic: Failed to read '%s' directory!\n",
-                   soundfont_dir.c_str());
+        LogWarning("StartupMusic: Failed to read '%s' directory!\n", soundfont_dir.c_str());
     }
     else
     {
@@ -244,13 +244,10 @@ void StartupMusic(void)
                 epi::StringLowerASCII(ext);
                 if (ext == ".sf2")
                 {
-                    available_soundfonts.push_back(
-                        epi::SanitizePath(sfd[i].name));
+                    available_soundfonts.push_back(epi::SanitizePath(sfd[i].name));
                 }
-                else if (ext == ".op2" || ext == ".ad" || ext == ".opl" ||
-                         ext == ".tmb")
-                    available_opl_banks.push_back(
-                        epi::SanitizePath(sfd[i].name));
+                else if (ext == ".op2" || ext == ".ad" || ext == ".opl" || ext == ".tmb")
+                    available_opl_banks.push_back(epi::SanitizePath(sfd[i].name));
             }
         }
     }
@@ -261,12 +258,12 @@ void StartupMusic(void)
         // doesn't exist (home_directory only)
         sfd.clear();
         soundfont_dir = epi::PathAppend(home_directory, "soundfont");
-        if (!epi::IsDirectory(soundfont_dir)) epi::MakeDirectory(soundfont_dir);
+        if (!epi::IsDirectory(soundfont_dir))
+            epi::MakeDirectory(soundfont_dir);
 
         if (!ReadDirectory(sfd, soundfont_dir, "*.*"))
         {
-            LogWarning("StartupMusic: Failed to read '%s' directory!\n",
-                       soundfont_dir.c_str());
+            LogWarning("StartupMusic: Failed to read '%s' directory!\n", soundfont_dir.c_str());
         }
         else
         {
@@ -277,20 +274,19 @@ void StartupMusic(void)
                     std::string ext = epi::GetExtension(sfd[i].name);
                     epi::StringLowerASCII(ext);
                     if (ext == ".sf2")
-                        available_soundfonts.push_back(
-                            epi::SanitizePath(sfd[i].name));
-                    else if (ext == ".op2" || ext == ".ad" || ext == ".opl" ||
-                             ext == ".tmb")
-                        available_opl_banks.push_back(
-                            epi::SanitizePath(sfd[i].name));
+                        available_soundfonts.push_back(epi::SanitizePath(sfd[i].name));
+                    else if (ext == ".op2" || ext == ".ad" || ext == ".opl" || ext == ".tmb")
+                        available_opl_banks.push_back(epi::SanitizePath(sfd[i].name));
                 }
             }
         }
     }
 
-    if (!StartupFluid()) fluid_disabled = true;
+    if (!StartupFluid())
+        fluid_disabled = true;
 
-    if (!StartupOpal()) opl_disabled = true;
+    if (!StartupOpal())
+        opl_disabled = true;
 
     return;
 }

@@ -7,7 +7,10 @@ extern Player *ui_hud_who;
 
 extern Player *ui_player_who;
 
-void LuaNewGame(void) { LuaCallGlobalFunction(LuaGetGlobalVM(), "new_game"); }
+void LuaNewGame(void)
+{
+    LuaCallGlobalFunction(LuaGetGlobalVM(), "new_game");
+}
 
 void LuaLoadGame(void)
 {
@@ -19,7 +22,10 @@ void LuaLoadGame(void)
     LuaCallGlobalFunction(LuaGetGlobalVM(), "load_game");
 }
 
-void LuaSaveGame(void) { LuaCallGlobalFunction(LuaGetGlobalVM(), "save_game"); }
+void LuaSaveGame(void)
+{
+    LuaCallGlobalFunction(LuaGetGlobalVM(), "save_game");
+}
 
 void LuaBeginLevel(void)
 {
@@ -30,4 +36,7 @@ void LuaBeginLevel(void)
     LuaCallGlobalFunction(LuaGetGlobalVM(), "begin_level");
 }
 
-void LuaEndLevel(void) { LuaCallGlobalFunction(LuaGetGlobalVM(), "end_level"); }
+void LuaEndLevel(void)
+{
+    LuaCallGlobalFunction(LuaGetGlobalVM(), "end_level");
+}

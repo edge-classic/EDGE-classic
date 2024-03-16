@@ -31,7 +31,7 @@
 #include "e_main.h"
 #include "e_player.h"
 #include "epi.h"
-#include "g_game.h"  // current_map
+#include "g_game.h" // current_map
 #include "game.h"
 #include "i_defs_gl.h"
 #include "i_system.h"
@@ -66,8 +66,7 @@ static constexpr uint8_t kTotalBonusPalettes = 4;
 // Radiation suit, green shift.
 static constexpr uint8_t kRadiationPaletteIndex = 13;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(sector_brightness_correction, "5",
-                             kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(sector_brightness_correction, "5", kConsoleVariableFlagArchive)
 
 // colour indices from palette
 int playpal_black, playpal_white, playpal_gray;
@@ -90,7 +89,8 @@ static int FindBestRgbMatch(int r, int g, int b)
 
         int dist = d_r * d_r + d_g * d_g + d_b * d_b;
 
-        if (dist == 0) return i;
+        if (dist == 0)
+            return i;
 
         if (dist < best_dist)
         {
@@ -107,10 +107,10 @@ void InitializePalette(void)
     int t, i;
 
     int            pal_length = 0;
-    const uint8_t *pal        = (const uint8_t *)OpenPackOrLumpInMemory(
-        "PLAYPAL", { ".pal" }, &pal_length);
+    const uint8_t *pal        = (const uint8_t *)OpenPackOrLumpInMemory("PLAYPAL", { ".pal" }, &pal_length);
 
-    if (!pal) FatalError("InitializePalette: Error opening PLAYPAL!\n");
+    if (!pal)
+        FatalError("InitializePalette: Error opening PLAYPAL!\n");
 
     // read in palette colours
     for (t = 0; t < 14; t++)
@@ -133,8 +133,7 @@ void InitializePalette(void)
 
     LogPrint("Loaded global palette.\n");
 
-    LogDebug("Black:%d White:%d Gray:%d\n", playpal_black, playpal_white,
-             playpal_gray);
+    LogDebug("Black:%d White:%d Gray:%d\n", playpal_black, playpal_white, playpal_gray);
 }
 
 static int cur_palette = -1;
@@ -144,22 +143,25 @@ void SetPalette(int type, float amount)
     int palette = 0;
 
     // -AJA- 1999/09/17: fixes problems with black text etc.
-    if (!loaded_playpal) return;
+    if (!loaded_playpal)
+        return;
 
-    if (amount >= 0.95f) amount = 0.95f;
+    if (amount >= 0.95f)
+        amount = 0.95f;
 
     switch (type)
     {
-        case kPaletteBonus:
-            palette = (int)(kBonusPaletteIndex + amount * kTotalBonusPalettes);
-            break;
+    case kPaletteBonus:
+        palette = (int)(kBonusPaletteIndex + amount * kTotalBonusPalettes);
+        break;
 
-        case kPaletteSuit:
-            palette = kRadiationPaletteIndex;
-            break;
+    case kPaletteSuit:
+        palette = kRadiationPaletteIndex;
+        break;
     }
 
-    if (palette == cur_palette) return;
+    if (palette == cur_palette)
+        return;
 
     cur_palette = palette;
 }
@@ -185,14 +187,16 @@ static void LoadColourmap(const Colormap *colm)
             FatalError("No such colormap file: %s\n", colm->pack_name_.c_str());
         size = f->GetLength();
         data = f->LoadIntoMemory();
-        delete f;  // close file
+        delete f; // close file
     }
-    else { data = LoadLumpIntoMemory(colm->lump_name_.c_str(), &size); }
+    else
+    {
+        data = LoadLumpIntoMemory(colm->lump_name_.c_str(), &size);
+    }
 
     if ((colm->start_ + colm->length_) * 256 > size)
     {
-        FatalError("Colourmap [%s] is too small ! (LENGTH too big)\n",
-                   colm->name_.c_str());
+        FatalError("Colourmap [%s] is too small ! (LENGTH too big)\n", colm->name_.c_str());
     }
 
     cache->size = colm->length_ * 256;
@@ -207,13 +211,13 @@ static const uint8_t *GetTranslationTable(const Colormap *colmap)
 {
     // Do we need to load or recompute this colourmap ?
 
-    if (colmap->cache_.data == nullptr) LoadColourmap(colmap);
+    if (colmap->cache_.data == nullptr)
+        LoadColourmap(colmap);
 
     return (const uint8_t *)colmap->cache_.data;
 }
 
-void TranslatePalette(uint8_t *new_pal, const uint8_t *old_pal,
-                      const Colormap *trans)
+void TranslatePalette(uint8_t *new_pal, const uint8_t *old_pal, const Colormap *trans)
 {
     // is the colormap just using GL_COLOUR?
     if (trans->length_ == 0)
@@ -245,8 +249,7 @@ void TranslatePalette(uint8_t *new_pal, const uint8_t *old_pal,
     }
 }
 
-static int AnalyseColourmap(const uint8_t *table, int alpha, int *r, int *g,
-                            int *b)
+static int AnalyseColourmap(const uint8_t *table, int alpha, int *r, int *g, int *b)
 {
     /* analyse whole colourmap */
     int r_tot = 0;
@@ -330,8 +333,7 @@ void TransformColourmap(Colormap *colmap)
 {
     const uint8_t *table = colmap->cache_.data;
 
-    if (table == nullptr &&
-        (!colmap->lump_name_.empty() || !colmap->pack_name_.empty()))
+    if (table == nullptr && (!colmap->lump_name_.empty() || !colmap->pack_name_.empty()))
     {
         LoadColourmap(colmap);
 
@@ -396,7 +398,8 @@ void GetColormapRgb(const Colormap *colmap, float *r, float *g, float *b)
 
 RGBAColor GetFontColor(const Colormap *colmap)
 {
-    if (!colmap) return kRGBANoValue;
+    if (!colmap)
+        return kRGBANoValue;
 
     if (colmap->font_colour_ == kRGBANoValue)
     {
@@ -409,7 +412,8 @@ RGBAColor GetFontColor(const Colormap *colmap)
 
 RGBAColor ParseFontColor(const char *name, bool strict)
 {
-    if (!name || !name[0]) return kRGBANoValue;
+    if (!name || !name[0])
+        return kRGBANoValue;
 
     RGBAColor rgb;
 
@@ -439,7 +443,8 @@ RGBAColor ParseFontColor(const char *name, bool strict)
         rgb = GetFontColor(colmap);
     }
 
-    if (rgb == kRGBANoValue) rgb ^= 0x00010100;
+    if (rgb == kRGBANoValue)
+        rgb ^= 0x00010100;
 
     return rgb;
 }
@@ -448,8 +453,7 @@ RGBAColor ParseFontColor(const char *name, bool strict)
 // Returns an RGB value from an index value - used the current
 // palette.  The byte pointer is assumed to point a 3-byte array.
 //
-void PalettedColourToRGB(int indexcol, uint8_t *returncol,
-                         RGBAColor last_damage_colour, float damageAmount)
+void PalettedColourToRGB(int indexcol, uint8_t *returncol, RGBAColor last_damage_colour, float damageAmount)
 {
     if ((cur_palette == kPaletteNormal) || (cur_palette == kPalettePain))
     {
@@ -457,12 +461,9 @@ void PalettedColourToRGB(int indexcol, uint8_t *returncol,
         float g = (float)epi::GetRGBAGreen(last_damage_colour) / 255.0;
         float b = (float)epi::GetRGBABlue(last_damage_colour) / 255.0;
 
-        returncol[0] =
-            (uint8_t)HMM_MAX(0, HMM_MIN(255, r * damageAmount * 2.5));
-        returncol[1] =
-            (uint8_t)HMM_MAX(0, HMM_MIN(255, g * damageAmount * 2.5));
-        returncol[2] =
-            (uint8_t)HMM_MAX(0, HMM_MIN(255, b * damageAmount * 2.5));
+        returncol[0] = (uint8_t)HMM_MAX(0, HMM_MIN(255, r * damageAmount * 2.5));
+        returncol[1] = (uint8_t)HMM_MAX(0, HMM_MIN(255, g * damageAmount * 2.5));
+        returncol[2] = (uint8_t)HMM_MAX(0, HMM_MIN(255, b * damageAmount * 2.5));
     }
     else
     {
@@ -490,15 +491,14 @@ void PaletteTicker(void)
     if (cnt)
     {
         palette = kPalettePain;
-        amount  = (cnt + 7) / 160.0f;  // 64.0f;
+        amount  = (cnt + 7) / 160.0f; // 64.0f;
     }
     else if (p->bonus_count_)
     {
         palette = kPaletteBonus;
         amount  = (p->bonus_count_ + 7) / 32.0f;
     }
-    else if (p->powers_[kPowerTypeAcidSuit] > 4 * 32 ||
-             fmod(p->powers_[kPowerTypeAcidSuit], 16) >= 8)
+    else if (p->powers_[kPowerTypeAcidSuit] > 4 * 32 || fmod(p->powers_[kPowerTypeAcidSuit], 16) >= 8)
     {
         palette = kPaletteSuit;
         amount  = 1.0f;
@@ -528,7 +528,7 @@ static int DoomLightingEquation(int L, float dist)
 
 class ColormapShader : public AbstractShader
 {
-   private:
+  private:
     const Colormap *colormap_;
 
     int light_level_;
@@ -545,21 +545,19 @@ class ColormapShader : public AbstractShader
     // for DDFLEVL fog checks
     Sector *sector_;
 
-   public:
+  public:
     ColormapShader(const Colormap *CM)
-        : colormap_(CM),
-          light_level_(255),
-          fade_texture_(0),
-          lighting_model_(kLightingModelDoom),
-          fog_color_(kRGBANoValue),
-          fog_density_(0),
-          sector_(nullptr)
+        : colormap_(CM), light_level_(255), fade_texture_(0), lighting_model_(kLightingModelDoom),
+          fog_color_(kRGBANoValue), fog_density_(0), sector_(nullptr)
     {
     }
 
-    virtual ~ColormapShader() { DeleteTex(); }
+    virtual ~ColormapShader()
+    {
+        DeleteTex();
+    }
 
-   private:
+  private:
     inline float DistanceFromViewPlane(float x, float y, float z)
     {
         float dx = (x - view_x) * view_forward.X;
@@ -569,18 +567,17 @@ class ColormapShader : public AbstractShader
         return dx + dy + dz;
     }
 
-    inline void TextureCoordinates(RendererVertex *v, int t,
-                                   const HMM_Vec3 *lit_pos)
+    inline void TextureCoordinates(RendererVertex *v, int t, const HMM_Vec3 *lit_pos)
     {
         float dist = DistanceFromViewPlane(lit_pos->X, lit_pos->Y, lit_pos->Z);
 
-        int L = light_level_ / 4;  // need integer range 0-63
+        int L = light_level_ / 4; // need integer range 0-63
 
         v->texture_coordinates[t].X = dist / 1600.0;
         v->texture_coordinates[t].Y = (L + 0.5) / 64.0;
     }
 
-   public:
+  public:
     virtual void Sample(ColorMixer *col, float x, float y, float z)
     {
         // FIXME: assumes standard COLORMAP
@@ -603,8 +600,7 @@ class ColormapShader : public AbstractShader
         // FIXME: for foggy maps, need to adjust add_red_/G/B too
     }
 
-    virtual void Corner(ColorMixer *col, float nx, float ny, float nz,
-                        MapObject *mod_pos, bool is_weapon)
+    virtual void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon)
     {
         // TODO: improve this (normal-ise a little bit)
 
@@ -621,9 +617,8 @@ class ColormapShader : public AbstractShader
         Sample(col, mx, my, mz);
     }
 
-    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha,
-                          int *pass_var, int blending, bool masked, void *data,
-                          ShaderCoordinateFunction func)
+    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
+                          void *data, ShaderCoordinateFunction func)
     {
         RGBAColor fc_to_use = fog_color_;
         float     fd_to_use = fog_density_;
@@ -642,9 +637,8 @@ class ColormapShader : public AbstractShader
             }
         }
 
-        RendererVertex *glvert = RendererBeginUnit(
-            shape, num_vert, GL_MODULATE, tex, GL_MODULATE, fade_texture_,
-            *pass_var, blending, fc_to_use, fd_to_use);
+        RendererVertex *glvert = RendererBeginUnit(shape, num_vert, GL_MODULATE, tex, GL_MODULATE, fade_texture_,
+                                                   *pass_var, blending, fc_to_use, fd_to_use);
 
         for (int v_idx = 0; v_idx < num_vert; v_idx++)
         {
@@ -654,8 +648,8 @@ class ColormapShader : public AbstractShader
 
             HMM_Vec3 lit_pos;
 
-            (*func)(data, v_idx, &dest->position, dest->rgba_color,
-                    &dest->texture_coordinates[0], &dest->normal, &lit_pos);
+            (*func)(data, v_idx, &dest->position, dest->rgba_color, &dest->texture_coordinates[0], &dest->normal,
+                    &lit_pos);
 
             TextureCoordinates(dest, 1, &lit_pos);
         }
@@ -665,7 +659,7 @@ class ColormapShader : public AbstractShader
         (*pass_var) += 1;
     }
 
-   private:
+  private:
     void MakeColormapTexture()
     {
         ImageData img(256, 64, 4);
@@ -692,13 +686,12 @@ class ColormapShader : public AbstractShader
                 whites_[ci] = epi::MakeRGBA(r, g, b);
             }
         }
-        else if (colormap_)  // GL_COLOUR
+        else if (colormap_) // GL_COLOUR
         {
             for (int ci = 0; ci < 32; ci++)
             {
                 int r = epi::GetRGBARed(colormap_->gl_color_) * (31 - ci) / 31;
-                int g =
-                    epi::GetRGBAGreen(colormap_->gl_color_) * (31 - ci) / 31;
+                int g = epi::GetRGBAGreen(colormap_->gl_color_) * (31 - ci) / 31;
                 int b = epi::GetRGBABlue(colormap_->gl_color_) * (31 - ci) / 31;
 
                 whites_[ci] = epi::MakeRGBA(r, g, b);
@@ -753,19 +746,19 @@ class ColormapShader : public AbstractShader
             }
         }
 
-        fade_texture_ =
-            RendererUploadTexture(&img, kUploadSmooth | kUploadClamp);
+        fade_texture_ = RendererUploadTexture(&img, kUploadSmooth | kUploadClamp);
     }
 
-   public:
+  public:
     void Update()
     {
-        if (fade_texture_ == 0 ||
-            (force_flat_lighting.d_ && lighting_model_ != kLightingModelFlat) ||
-            (!force_flat_lighting.d_ &&
-             lighting_model_ != current_map->episode_->lighting_))
+        if (fade_texture_ == 0 || (force_flat_lighting.d_ && lighting_model_ != kLightingModelFlat) ||
+            (!force_flat_lighting.d_ && lighting_model_ != current_map->episode_->lighting_))
         {
-            if (fade_texture_ != 0) { glDeleteTextures(1, &fade_texture_); }
+            if (fade_texture_ != 0)
+            {
+                glDeleteTextures(1, &fade_texture_);
+            }
 
             if (force_flat_lighting.d_)
                 lighting_model_ = kLightingModelFlat;
@@ -785,7 +778,10 @@ class ColormapShader : public AbstractShader
         }
     }
 
-    void SetLight(int level) { light_level_ = level; }
+    void SetLight(int level)
+    {
+        light_level_ = level;
+    }
 
     void SetFog(RGBAColor fog_color, float fog_density)
     {
@@ -793,13 +789,15 @@ class ColormapShader : public AbstractShader
         fog_density_ = fog_density;
     }
 
-    void SetSector(Sector *sec) { sector_ = sec; }
+    void SetSector(Sector *sec)
+    {
+        sector_ = sec;
+    }
 };
 
 static ColormapShader *standard_colormap_shader;
 
-AbstractShader *GetColormapShader(const struct RegionProperties *props,
-                                  int light_add, Sector *sec)
+AbstractShader *GetColormapShader(const struct RegionProperties *props, int light_add, Sector *sec)
 {
     if (!standard_colormap_shader)
         standard_colormap_shader = new ColormapShader(nullptr);
@@ -824,12 +822,9 @@ AbstractShader *GetColormapShader(const struct RegionProperties *props,
 
     shader->Update();
 
-    int lit_Nom = props->light_level + light_add +
-                  ((sector_brightness_correction.d_ - 5) * 10);
+    int lit_Nom = props->light_level + light_add + ((sector_brightness_correction.d_ - 5) * 10);
 
-    if (!(props->colourmap &&
-          (props->colourmap->special_ & kColorSpecialNoFlash)) ||
-        render_view_extra_light > 250)
+    if (!(props->colourmap && (props->colourmap->special_ & kColorSpecialNoFlash)) || render_view_extra_light > 250)
     {
         lit_Nom += render_view_extra_light;
     }
@@ -847,7 +842,8 @@ AbstractShader *GetColormapShader(const struct RegionProperties *props,
 
 void DeleteColourmapTextures(void)
 {
-    if (standard_colormap_shader) standard_colormap_shader->DeleteTex();
+    if (standard_colormap_shader)
+        standard_colormap_shader->DeleteTex();
 
     standard_colormap_shader = nullptr;
 

@@ -71,21 +71,19 @@ HMM_Vec3 MathTripleCrossProduct(HMM_Vec3 v1, HMM_Vec3 v2, HMM_Vec3 v3)
 }
 
 // If the plane normal is precalculated; otherwise use the other version
-HMM_Vec3 MathLinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b,
-                                   HMM_Vec3 plane_c, HMM_Vec3 plane_normal)
+HMM_Vec3 MathLinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_c, HMM_Vec3 plane_normal)
 {
-    float    n = HMM_DotV3(plane_normal, HMM_SubV3(plane_c, line_a));
+    float    n             = HMM_DotV3(plane_normal, HMM_SubV3(plane_c, line_a));
     HMM_Vec3 line_subtract = HMM_SubV3(line_b, line_a);
     float    d             = HMM_DotV3(plane_normal, line_subtract);
     return HMM_AddV3(line_a, HMM_MulV3F(line_subtract, n / d));
 }
 
-HMM_Vec3 MathLinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b,
-                                   HMM_Vec3 plane_a, HMM_Vec3 plane_b,
+HMM_Vec3 MathLinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_a, HMM_Vec3 plane_b,
                                    HMM_Vec3 plane_c)
 {
-    HMM_Vec3 plane_normal = MathTripleCrossProduct(plane_a, plane_b, plane_c);
-    float    n            = HMM_DotV3(plane_normal, HMM_SubV3(plane_c, line_a));
+    HMM_Vec3 plane_normal  = MathTripleCrossProduct(plane_a, plane_b, plane_c);
+    float    n             = HMM_DotV3(plane_normal, HMM_SubV3(plane_c, line_a));
     HMM_Vec3 line_subtract = HMM_SubV3(line_b, line_a);
     float    d             = HMM_DotV3(plane_normal, line_subtract);
     return HMM_AddV3(line_a, HMM_MulV3F(line_subtract, n / d));
@@ -102,8 +100,7 @@ float MathPointToSegDistance(HMM_Vec2 seg_a, HMM_Vec2 seg_b, HMM_Vec2 point)
     else if (HMM_DotV2(seg_ab, seg_ap) < 0)
         return HMM_LenV2(HMM_SubV2(point, seg_a));
     else
-        return abs(seg_ab.X * seg_ap.Y - seg_ab.Y * seg_ap.X) /
-               HMM_LenV2(seg_ab);
+        return abs(seg_ab.X * seg_ap.Y - seg_ab.Y * seg_ap.X) / HMM_LenV2(seg_ab);
 }
 
 int MathPointInTriangle(HMM_Vec2 v1, HMM_Vec2 v2, HMM_Vec2 v3, HMM_Vec2 test)
@@ -115,9 +112,8 @@ int MathPointInTriangle(HMM_Vec2 v1, HMM_Vec2 v2, HMM_Vec2 v3, HMM_Vec2 test)
     for (i = 0, j = 2; i < 3; j = i++)
     {
         if (((tri_vec[i].Y > test.Y) != (tri_vec[j].Y > test.Y)) &&
-            (test.X < (tri_vec[j].X - tri_vec[i].X) * (test.Y - tri_vec[i].Y) /
-                              (tri_vec[j].Y - tri_vec[i].Y) +
-                          tri_vec[i].X))
+            (test.X <
+             (tri_vec[j].X - tri_vec[i].X) * (test.Y - tri_vec[i].Y) / (tri_vec[j].Y - tri_vec[i].Y) + tri_vec[i].X))
             c = !c;
     }
     return c;

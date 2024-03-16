@@ -28,7 +28,7 @@
 #include "m_argv.h"
 #include "m_misc.h"
 #include "m_random.h"
-#include "p_local.h"  // ApproximateDistance
+#include "p_local.h" // ApproximateDistance
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_sound.h"
@@ -52,38 +52,38 @@ const int channel_counts[8] = { 32, 64, 96, 128, 160, 192, 224, 256 };
 const int category_limit_table[3][8][3] = {
     /* 8 channel (TEST) */
     {
-        { 1, 1, 1 },  // UI
-        { 1, 1, 1 },  // Player
-        { 1, 1, 1 },  // Weapon
+        { 1, 1, 1 }, // UI
+        { 1, 1, 1 }, // Player
+        { 1, 1, 1 }, // Weapon
 
-        { 1, 1, 1 },  // Opponent
-        { 1, 1, 1 },  // Monster
-        { 1, 1, 1 },  // Object
-        { 1, 1, 1 },  // Level
+        { 1, 1, 1 }, // Opponent
+        { 1, 1, 1 }, // Monster
+        { 1, 1, 1 }, // Object
+        { 1, 1, 1 }, // Level
     },
 
     /* 16 channel */
     {
-        { 1, 1, 1 },  // UI
-        { 1, 1, 1 },  // Player
-        { 2, 2, 2 },  // Weapon
+        { 1, 1, 1 }, // UI
+        { 1, 1, 1 }, // Player
+        { 2, 2, 2 }, // Weapon
 
-        { 0, 2, 7 },  // Opponent
-        { 7, 5, 0 },  // Monster
-        { 3, 3, 3 },  // Object
-        { 2, 2, 2 },  // Level
+        { 0, 2, 7 }, // Opponent
+        { 7, 5, 0 }, // Monster
+        { 3, 3, 3 }, // Object
+        { 2, 2, 2 }, // Level
     },
 
     /* 32 channel */
     {
-        { 2, 2, 2 },  // UI
-        { 2, 2, 2 },  // Player
-        { 3, 3, 3 },  // Weapon
+        { 2, 2, 2 },   // UI
+        { 2, 2, 2 },   // Player
+        { 3, 3, 3 },   // Weapon
 
-        { 0, 5, 12 },   // Opponent
-        { 14, 10, 2 },  // Monster
-        { 7, 6, 7 },    // Object
-        { 4, 4, 4 },    // Level
+        { 0, 5, 12 },  // Opponent
+        { 14, 10, 2 }, // Monster
+        { 7, 6, 7 },   // Object
+        { 4, 4, 4 },   // Level
     },
 
     // NOTE: never put a '0' on the WEAPON line, since the top
@@ -99,15 +99,20 @@ static void SetupCategoryLimits(void)
     //          and InCooperativeMatch() macros are working.
 
     int mode = 0;
-    if (InCooperativeMatch()) mode = 1;
-    if (InDeathmatch()) mode = 2;
+    if (InCooperativeMatch())
+        mode = 1;
+    if (InDeathmatch())
+        mode = 2;
 
     int idx = 0;
-    if (total_channels >= 16) idx = 1;
-    if (total_channels >= 32) idx = 2;
+    if (total_channels >= 16)
+        idx = 1;
+    if (total_channels >= 32)
+        idx = 2;
 
     int multiply = 1;
-    if (total_channels >= 64) multiply = total_channels / 32;
+    if (total_channels >= 64)
+        multiply = total_channels / 32;
 
     for (int t = 0; t < kTotalCategories; t++)
     {
@@ -122,12 +127,14 @@ static int FindFreeChannel(void)
     {
         SoundChannel *chan = mix_channels[i];
 
-        if (chan->state_ == kChannelFinished) SoundKillChannel(i);
+        if (chan->state_ == kChannelFinished)
+            SoundKillChannel(i);
 
-        if (chan->state_ == kChannelEmpty) return i;
+        if (chan->state_ == kChannelEmpty)
+            return i;
     }
 
-    return -1;  // not found
+    return -1; // not found
 }
 
 static int FindPlayingFX(SoundEffectDefinition *def, int cat, Position *pos)
@@ -136,18 +143,17 @@ static int FindPlayingFX(SoundEffectDefinition *def, int cat, Position *pos)
     {
         SoundChannel *chan = mix_channels[i];
 
-        if (chan->state_ == kChannelPlaying && chan->category_ == cat &&
-            chan->position_ == pos)
+        if (chan->state_ == kChannelPlaying && chan->category_ == cat && chan->position_ == pos)
         {
-            if (chan->definition_ == def) return i;
+            if (chan->definition_ == def)
+                return i;
 
-            if (chan->definition_->singularity_ > 0 &&
-                chan->definition_->singularity_ == def->singularity_)
+            if (chan->definition_->singularity_ > 0 && chan->definition_->singularity_ == def->singularity_)
                 return i;
         }
     }
 
-    return -1;  // not found
+    return -1; // not found
 }
 
 static int FindBiggestHog(int real_cat)
@@ -157,11 +163,13 @@ static int FindBiggestHog(int real_cat)
 
     for (int hog = 0; hog < kTotalCategories; hog++)
     {
-        if (hog == real_cat) continue;
+        if (hog == real_cat)
+            continue;
 
         int extra = category_counts[hog] - category_limits[hog];
 
-        if (extra <= 0) continue;
+        if (extra <= 0)
+            continue;
 
         // found a hog!
         if (biggest_hog < 0 || extra > biggest_extra)
@@ -178,7 +186,8 @@ static int FindBiggestHog(int real_cat)
 
 static void CountPlayingCats(void)
 {
-    for (int c = 0; c < kTotalCategories; c++) category_counts[c] = 0;
+    for (int c = 0; c < kTotalCategories; c++)
+        category_counts[c] = 0;
 
     for (int i = 0; i < total_channels; i++)
     {
@@ -189,19 +198,18 @@ static void CountPlayingCats(void)
     }
 }
 
-static int ChannelScore(SoundEffectDefinition *def, int category, Position *pos,
-                        bool boss)
+static int ChannelScore(SoundEffectDefinition *def, int category, Position *pos, bool boss)
 {
     // for full-volume sounds, use the priority from DDF
-    if (category <= kCategoryWeapon) { return 200 - def->priority_; }
+    if (category <= kCategoryWeapon)
+    {
+        return 200 - def->priority_;
+    }
 
     // for stuff in the level, use the distance
     EPI_ASSERT(pos);
 
-    float dist = boss
-                     ? 0
-                     : ApproximateDistance(listen_x - pos->x, listen_y - pos->y,
-                                           listen_z - pos->z);
+    float dist = boss ? 0 : ApproximateDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z);
 
     int base_score = 999 - (int)(dist / 10.0);
 
@@ -219,12 +227,13 @@ static int FindChannelToKill(int kill_cat, int real_cat, int new_score)
     {
         SoundChannel *chan = mix_channels[j];
 
-        if (chan->state_ != kChannelPlaying) continue;
+        if (chan->state_ != kChannelPlaying)
+            continue;
 
-        if (chan->category_ != kill_cat) continue;
+        if (chan->category_ != kill_cat)
+            continue;
 
-        int score = ChannelScore(chan->definition_, chan->category_,
-                                 chan->position_, chan->boss_);
+        int score = ChannelScore(chan->definition_, chan->category_, chan->position_, chan->boss_);
 
         if (score < kill_score)
         {
@@ -235,18 +244,21 @@ static int FindChannelToKill(int kill_cat, int real_cat, int new_score)
     // LogPrint("kill_idx = %d\n", kill_idx);
     EPI_ASSERT(kill_idx >= 0);
 
-    if (kill_cat != real_cat) return kill_idx;
+    if (kill_cat != real_cat)
+        return kill_idx;
 
     // if the score for new sound is worse than any existing
     // channel, then simply discard the new sound.
-    if (new_score >= kill_score) return kill_idx;
+    if (new_score >= kill_score)
+        return kill_idx;
 
     return -1;
 }
 
 void SoundInitialize(void)
 {
-    if (no_sound) return;
+    if (no_sound)
+        return;
 
     StartupProgressMessage("Initializing sound device...");
 
@@ -267,7 +279,8 @@ void SoundInitialize(void)
 
 void SoundShutdown(void)
 {
-    if (no_sound) return;
+    if (no_sound)
+        return;
 
     SDL_PauseAudioDevice(current_sound_device, 1);
 
@@ -297,8 +310,7 @@ SoundEffectDefinition *LookupEffectDef(const SoundEffect *s)
     return sfxdefs[num];
 }
 
-static void S_PlaySound(int idx, SoundEffectDefinition *def, int category,
-                        Position *pos, int flags, SoundData *buf)
+static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, Position *pos, int flags, SoundData *buf)
 {
     // LogPrint("S_PlaySound on idx #%d DEF:%p\n", idx, def);
 
@@ -313,7 +325,7 @@ static void S_PlaySound(int idx, SoundEffectDefinition *def, int category,
 
     chan->definition_ = def;
     chan->position_   = pos;
-    chan->category_   = category;  //?? store use_cat and orig_cat
+    chan->category_   = category; //?? store use_cat and orig_cat
 
     // volume computed during mixing (?)
     chan->volume_left_  = 0;
@@ -330,8 +342,7 @@ static void S_PlaySound(int idx, SoundEffectDefinition *def, int category,
     // LogPrint("FINISHED: delta=0x%lx\n", chan->delta);
 }
 
-static void DoStartFX(SoundEffectDefinition *def, int category, Position *pos,
-                      int flags, SoundData *buf)
+static void DoStartFX(SoundEffectDefinition *def, int category, Position *pos, int flags, SoundData *buf)
 {
     CountPlayingCats();
 
@@ -348,7 +359,8 @@ static void DoStartFX(SoundEffectDefinition *def, int category, Position *pos,
         }
         else if (flags & kSoundEffectSingle)
         {
-            if (chan->definition_->precious_) return;
+            if (chan->definition_->precious_)
+                return;
 
             // LogPrint("@@ Killing sound for SINGULAR\n");
             SoundKillChannel(k);
@@ -361,7 +373,8 @@ static void DoStartFX(SoundEffectDefinition *def, int category, Position *pos,
 
     if (!allow_hogs)
     {
-        if (category_counts[category] >= category_limits[category]) k = -1;
+        if (category_counts[category] >= category_limits[category])
+            k = -1;
     }
 
     // LogPrint("@ free channel = #%d\n", k);
@@ -370,8 +383,7 @@ static void DoStartFX(SoundEffectDefinition *def, int category, Position *pos,
         // all channels are in use.
         // either kill one, or drop the new sound.
 
-        int new_score = ChannelScore(def, category, pos,
-                                     (flags & kSoundEffectBoss) ? true : false);
+        int new_score = ChannelScore(def, category, pos, (flags & kSoundEffectBoss) ? true : false);
 
         // decide which category to kill a sound in.
         int kill_cat = category;
@@ -388,7 +400,8 @@ static void DoStartFX(SoundEffectDefinition *def, int category, Position *pos,
         k = FindChannelToKill(kill_cat, category, new_score);
 
         // if (k<0) LogPrint("- new score too low\n");
-        if (k < 0) return;
+        if (k < 0)
+            return;
 
         // LogPrint("- killing channel %d (kill_cat:%d)  my_cat:%d\n", k,
         // kill_cat, category);
@@ -400,15 +413,16 @@ static void DoStartFX(SoundEffectDefinition *def, int category, Position *pos,
 
 void StartSoundEffect(SoundEffect *sfx, int category, Position *pos, int flags)
 {
-    if (no_sound || !sfx) return;
+    if (no_sound || !sfx)
+        return;
 
-    if (fast_forward_active) return;
+    if (fast_forward_active)
+        return;
 
     EPI_ASSERT(0 <= category && category < kTotalCategories);
 
     if (category >= kCategoryOpponent && !pos)
-        FatalError("StartSoundEffect: position missing for category: %d\n",
-                   category);
+        FatalError("StartSoundEffect: position missing for category: %d\n", category);
 
     SoundEffectDefinition *def = LookupEffectDef(sfx);
     EPI_ASSERT(def);
@@ -416,10 +430,10 @@ void StartSoundEffect(SoundEffect *sfx, int category, Position *pos, int flags)
     // ignore very far away sounds
     if (category >= kCategoryOpponent && !(flags & kSoundEffectBoss))
     {
-        float dist = ApproximateDistance(listen_x - pos->x, listen_y - pos->y,
-                                         listen_z - pos->z);
+        float dist = ApproximateDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z);
 
-        if (dist > def->max_distance_) return;
+        if (dist > def->max_distance_)
+            return;
     }
 
     if (def->singularity_ > 0)
@@ -431,10 +445,12 @@ void StartSoundEffect(SoundEffect *sfx, int category, Position *pos, int flags)
     // LogPrint("StartFX: '%s' cat:%d flags:0x%04x\n", def->name.c_str(),
     // category, flags);
 
-    while (category_limits[category] == 0) category++;
+    while (category_limits[category] == 0)
+        category++;
 
     SoundData *buf = SoundCacheLoad(def);
-    if (!buf) return;
+    if (!buf)
+        return;
 
     if (vacuum_sound_effects)
         buf->MixVacuum();
@@ -443,8 +459,8 @@ void StartSoundEffect(SoundEffect *sfx, int category, Position *pos, int flags)
     else
     {
         if (ddf_reverb)
-            buf->MixReverb(dynamic_reverb, room_area, outdoor_reverb,
-                           ddf_reverb_type, ddf_reverb_ratio, ddf_reverb_delay);
+            buf->MixReverb(dynamic_reverb, room_area, outdoor_reverb, ddf_reverb_type, ddf_reverb_ratio,
+                           ddf_reverb_delay);
         else
             buf->MixReverb(dynamic_reverb, room_area, outdoor_reverb, 0, 0, 0);
     }
@@ -458,7 +474,8 @@ void StartSoundEffect(SoundEffect *sfx, int category, Position *pos, int flags)
 
 void StopSoundEffect(Position *pos)
 {
-    if (no_sound) return;
+    if (no_sound)
+        return;
 
     LockAudio();
     {
@@ -478,7 +495,8 @@ void StopSoundEffect(Position *pos)
 
 void StopLevelSoundEffects(void)
 {
-    if (no_sound) return;
+    if (no_sound)
+        return;
 
     LockAudio();
     {
@@ -497,7 +515,8 @@ void StopLevelSoundEffects(void)
 
 void StopAllSoundEffects(void)
 {
-    if (no_sound) return;
+    if (no_sound)
+        return;
 
     LockAudio();
     {
@@ -505,7 +524,10 @@ void StopAllSoundEffects(void)
         {
             SoundChannel *chan = mix_channels[i];
 
-            if (chan->state_ != kChannelEmpty) { SoundKillChannel(i); }
+            if (chan->state_ != kChannelEmpty)
+            {
+                SoundKillChannel(i);
+            }
         }
     }
     UnlockAudio();
@@ -513,7 +535,8 @@ void StopAllSoundEffects(void)
 
 void SoundTicker(void)
 {
-    if (no_sound) return;
+    if (no_sound)
+        return;
 
     LockAudio();
     {
@@ -526,14 +549,18 @@ void SoundTicker(void)
 
             UpdateSounds(pmo, pmo->angle_);
         }
-        else { UpdateSounds(nullptr, 0); }
+        else
+        {
+            UpdateSounds(nullptr, 0);
+        }
     }
     UnlockAudio();
 }
 
 void UpdateSoundCategoryLimits(void)
 {
-    if (no_sound) return;
+    if (no_sound)
+        return;
 
     LockAudio();
     {
@@ -551,7 +578,10 @@ void PrecacheSounds(void)
     if (precache_sound_effects)
     {
         StartupProgressMessage("Precaching SFX...");
-        for (int i = 0; i < sfxdefs.size(); i++) { SoundCacheLoad(sfxdefs[i]); }
+        for (int i = 0; i < sfxdefs.size(); i++)
+        {
+            SoundCacheLoad(sfxdefs[i]);
+        }
     }
 }
 
@@ -561,7 +591,10 @@ void ResumeAudioDevice()
 
 #ifdef EDGE_WEB
     // Yield back to main thread for audio processing
-    if (emscripten_has_asyncify()) { emscripten_sleep(100); }
+    if (emscripten_has_asyncify())
+    {
+        emscripten_sleep(100);
+    }
 #endif
 }
 
@@ -573,7 +606,10 @@ void PauseAudioDevice()
 #ifdef EDGE_WEB
     // Yield back to main thread for audio processing
     // If complied without async support, as with debug build, will stutter
-    if (emscripten_has_asyncify()) { emscripten_sleep(100); }
+    if (emscripten_has_asyncify())
+    {
+        emscripten_sleep(100);
+    }
 #endif
 }
 

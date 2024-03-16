@@ -72,7 +72,7 @@ TriggerScriptTrigger *active_triggers = nullptr;
 
 class rts_menu_c
 {
-   private:
+  private:
     static const int MAX_TITLE  = 24;
     static const int MAX_CHOICE = 9;
 
@@ -84,38 +84,41 @@ class rts_menu_c
 
     std::vector<std::string> choices;
 
-   public:
+  public:
     int current_choice;
 
-   public:
-    rts_menu_c(ScriptShowMenuParameter *menu, TriggerScriptTrigger *_trigger,
-               Style *_style)
+  public:
+    rts_menu_c(ScriptShowMenuParameter *menu, TriggerScriptTrigger *_trigger, Style *_style)
         : trigger(_trigger), style(_style), title(), choices()
     {
         const char *text = menu->title;
-        if (menu->use_ldf) text = language[text];
+        if (menu->use_ldf)
+            text = language[text];
 
         title = text;
 
         bool no_choices = (!menu->options[0] || !menu->options[1]);
 
         for (int idx = 0; (idx < 9) && menu->options[idx]; idx++)
-            AddChoice(no_choices ? 0 : ('1' + idx), menu->options[idx],
-                      menu->use_ldf);
+            AddChoice(no_choices ? 0 : ('1' + idx), menu->options[idx], menu->use_ldf);
 
         current_choice = 0;
 
-        if (choices.size() > 1) { choices[0].replace(0, 1, ">"); }
+        if (choices.size() > 1)
+        {
+            choices[0].replace(0, 1, ">");
+        }
     }
 
     ~rts_menu_c()
     { /* nothing to do */
     }
 
-   private:
+  private:
     void AddChoice(char key, const char *text, bool use_ldf)
     {
-        if (use_ldf) text = language[text];
+        if (use_ldf)
+            text = language[text];
 
         std::string choice_line = text;
 
@@ -130,10 +133,16 @@ class rts_menu_c
         choices.push_back(choice_line);
     }
 
-   public:
-    int NumChoices() const { return (int)choices.size(); }
+  public:
+    int NumChoices() const
+    {
+        return (int)choices.size();
+    }
 
-    void NotifyResult(int result) { trigger->menu_result = result; }
+    void NotifyResult(int result)
+    {
+        trigger->menu_result = result;
+    }
 
     void ChoiceDown()
     {
@@ -163,9 +172,8 @@ class rts_menu_c
 
         HudSetAlignment(0, -1);
 
-        HudSetScale(style->definition_->text_[2]
-                        .scale_);      // LOBO: Use TITLE.SCALE from styles.ddf
-        HudSetFont(style->fonts_[2]);  // LOBO: Use TITLE.FONT from styles.ddf
+        HudSetScale(style->definition_->text_[2].scale_); // LOBO: Use TITLE.SCALE from styles.ddf
+        HudSetFont(style->fonts_[2]);                     // LOBO: Use TITLE.FONT from styles.ddf
 
         float total_h = HudStringHeight(title.c_str());
         total_h += HudFontHeight() * (NumChoices() + 1);
@@ -174,11 +182,13 @@ class rts_menu_c
 
         if (style->definition_->text_[2].colmap_)
         {
-            HudSetTextColor(GetFontColor(
-                style->definition_->text_[2]
-                    .colmap_));  // LOBO: Use TITLE.COLOURMAP from styles.ddf
+            HudSetTextColor(
+                GetFontColor(style->definition_->text_[2].colmap_)); // LOBO: Use TITLE.COLOURMAP from styles.ddf
         }
-        else { HudSetTextColor(SG_WHITE_RGBA32); }
+        else
+        {
+            HudSetTextColor(SG_WHITE_RGBA32);
+        }
 
         HudDrawText(160, y, title.c_str());
 
@@ -186,20 +196,21 @@ class rts_menu_c
         HudSetFont();
         HudSetTextColor();
 
-        HudSetScale(style->definition_->text_[0]
-                        .scale_);      // LOBO: Use TEXT.SCALE from styles.ddf
-        HudSetFont(style->fonts_[0]);  // LOBO: Use TEXT.FONT from styles.ddf
+        HudSetScale(style->definition_->text_[0].scale_); // LOBO: Use TEXT.SCALE from styles.ddf
+        HudSetFont(style->fonts_[0]);                     // LOBO: Use TEXT.FONT from styles.ddf
 
         y += HudStringHeight(title.c_str());
         y += HudFontHeight();
 
         if (style->definition_->text_[0].colmap_)
         {
-            HudSetTextColor(GetFontColor(
-                style->definition_->text_[0]
-                    .colmap_));  // LOBO: Use TEXT.COLOURMAP from styles.ddf
+            HudSetTextColor(
+                GetFontColor(style->definition_->text_[0].colmap_)); // LOBO: Use TEXT.COLOURMAP from styles.ddf
         }
-        else { HudSetTextColor(SG_LIGHT_BLUE_RGBA32); }
+        else
+        {
+            HudSetTextColor(SG_LIGHT_BLUE_RGBA32);
+        }
 
         for (int c = 0; c < NumChoices(); c++, y += HudFontHeight())
         {
@@ -219,16 +230,17 @@ class rts_menu_c
         if (key == kUpArrow || key == kGamepadUp || key == kMouseWheelUp)
             ChoiceUp();
 
-        if ('a' <= key && key <= 'z') key = epi::ToUpperASCII(key);
+        if ('a' <= key && key <= 'z')
+            key = epi::ToUpperASCII(key);
 
-        if (key == 'Q' || key == 'X' || key == kGamepadB || key == kMouse2 ||
-            key == kMouse3)
+        if (key == 'Q' || key == 'X' || key == kGamepadB || key == kMouse2 || key == kMouse3)
             return 0;
 
-        if ('1' <= key && key <= ('0' + NumChoices())) return key - '0';
+        if ('1' <= key && key <= ('0' + NumChoices()))
+            return key - '0';
 
-        if (key == kSpace || key == kEnter || key == 'Y' || key == kGamepadA ||
-            key == kMouse1 || EventMatchesKey(key_use, key))
+        if (key == kSpace || key == kEnter || key == 'Y' || key == kGamepadA || key == kMouse1 ||
+            EventMatchesKey(key_use, key))
             return current_choice + 1;
 
         return -1; /* invalid */
@@ -245,11 +257,14 @@ TriggerScript *FindScriptByName(const char *map_name, const char *name)
 
     for (scr = current_scripts; scr; scr = scr->next)
     {
-        if (scr->script_name == nullptr) continue;
+        if (scr->script_name == nullptr)
+            continue;
 
-        if (strcmp(scr->mapid, map_name) != 0) continue;
+        if (strcmp(scr->mapid, map_name) != 0)
+            continue;
 
-        if (DDF_CompareName(scr->script_name, name) == 0) return scr;
+        if (DDF_CompareName(scr->script_name, name) == 0)
+            return scr;
     }
 
     FatalError("RTS: No such script `%s' on map %s.\n", name, map_name);
@@ -262,9 +277,11 @@ TriggerScriptTrigger *FindScriptTriggerByName(const char *name)
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
-        if (trig->info->script_name == nullptr) continue;
+        if (trig->info->script_name == nullptr)
+            continue;
 
-        if (DDF_CompareName(trig->info->script_name, name) == 0) return trig;
+        if (DDF_CompareName(trig->info->script_name, name) == 0)
+            return trig;
     }
 
     LogWarning("RTS: No such trigger `%s'.\n", name);
@@ -277,10 +294,11 @@ static TriggerScriptTrigger *FindTriggerByScript(const TriggerScript *scr)
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
-        if (trig->info == scr) return trig;
+        if (trig->info == scr)
+            return trig;
     }
 
-    return nullptr;  // no worries if none.
+    return nullptr; // no worries if none.
 }
 
 TriggerScriptState *FindScriptStateByLabel(TriggerScript *scr, char *label)
@@ -289,9 +307,11 @@ TriggerScriptState *FindScriptStateByLabel(TriggerScript *scr, char *label)
 
     for (st = scr->first_state; st; st = st->next)
     {
-        if (st->label == nullptr) continue;
+        if (st->label == nullptr)
+            continue;
 
-        if (DDF_CompareName(st->label, label) == 0) return st;
+        if (DDF_CompareName(st->label, label) == 0)
+            return st;
     }
 
     // NOTE: no error message, unlike the other Find funcs
@@ -304,15 +324,14 @@ void ClearDeathTriggersByMap(const std::string &mapname)
     {
         if (epi::StringCaseCompareASCII(scr->mapid, mapname) == 0)
         {
-            for (TriggerScriptState *state = scr->first_state; state;
-                 state                     = state->next)
+            for (TriggerScriptState *state = scr->first_state; state; state = state->next)
             {
                 if (state->action == ScriptWaitUntilDead)
                 {
-                    ScriptWaitUntilDeadParameter *wud =
-                        (ScriptWaitUntilDeadParameter *)state->param;
-                    wud->tag = 0;
-                    for (int n = 0; n < 10; n++) delete wud->mon_names[n];
+                    ScriptWaitUntilDeadParameter *wud = (ScriptWaitUntilDeadParameter *)state->param;
+                    wud->tag                          = 0;
+                    for (int n = 0; n < 10; n++)
+                        delete wud->mon_names[n];
                 }
             }
         }
@@ -324,18 +343,19 @@ void ClearDeathTriggersByMap(const std::string &mapname)
 // either enables them or disables them (based on `disable').
 // Actor can be nullptr.
 //
-void ScriptEnableByTag(MapObject *actor, uint32_t tag, bool disable,
-                       TriggerScriptTag tagtype)
+void ScriptEnableByTag(MapObject *actor, uint32_t tag, bool disable, TriggerScriptTag tagtype)
 {
     TriggerScriptTrigger *trig;
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
-        if (trig->info->tag[tagtype] == tag) break;
+        if (trig->info->tag[tagtype] == tag)
+            break;
     }
 
     // were there any ?
-    if (!trig) return;
+    if (!trig)
+        return;
 
     for (; trig; trig = trig->tag_next)
     {
@@ -359,11 +379,13 @@ void ScriptEnableByTag(MapObject *actor, const char *name, bool disable)
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
-        if (trig->info->tag[kTriggerTagHash] == tag) break;
+        if (trig->info->tag[kTriggerTagHash] == tag)
+            break;
     }
 
     // were there any ?
-    if (!trig) return;
+    if (!trig)
+        return;
 
     for (; trig; trig = trig->tag_next)
     {
@@ -387,13 +409,16 @@ bool CheckActiveScriptByTag(MapObject *actor, const char *name)
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
-        if (trig->info->tag[1] == tag) break;
+        if (trig->info->tag[1] == tag)
+            break;
     }
 
     // were there any ?
-    if (!trig) return false;
+    if (!trig)
+        return false;
 
-    if (trig->disabled == false) return true;
+    if (trig->disabled == false)
+        return true;
 
     return false;
     /*
@@ -412,9 +437,9 @@ bool ScriptRadiusCheck(MapObject *mo, TriggerScript *r)
     int sec_tag = r->sector_tag;
     if (sec_tag > 0)
     {
-        if (mo->subsector_->sector->tag != sec_tag) return false;
-        if (r->rad_z >= 0 &&
-            fabs(r->z - MapObjectMidZ(mo)) > r->rad_z + mo->height_ / 2)
+        if (mo->subsector_->sector->tag != sec_tag)
+            return false;
+        if (r->rad_z >= 0 && fabs(r->z - MapObjectMidZ(mo)) > r->rad_z + mo->height_ / 2)
             return false;
         return true;
     }
@@ -422,9 +447,9 @@ bool ScriptRadiusCheck(MapObject *mo, TriggerScript *r)
     int sec_ind = r->sector_index;
     if (sec_ind >= 0 && sec_ind <= total_level_sectors)
     {
-        if (mo->subsector_->sector - level_sectors != sec_ind) return false;
-        if (r->rad_z >= 0 &&
-            fabs(r->z - MapObjectMidZ(mo)) > r->rad_z + mo->height_ / 2)
+        if (mo->subsector_->sector - level_sectors != sec_ind)
+            return false;
+        if (r->rad_z >= 0 && fabs(r->z - MapObjectMidZ(mo)) > r->rad_z + mo->height_ / 2)
             return false;
         return true;
     }
@@ -435,8 +460,7 @@ bool ScriptRadiusCheck(MapObject *mo, TriggerScript *r)
     if (r->rad_y >= 0 && fabs(r->y - mo->y) > r->rad_y + mo->radius_)
         return false;
 
-    if (r->rad_z >= 0 &&
-        fabs(r->z - MapObjectMidZ(mo)) > r->rad_z + mo->height_ / 2)
+    if (r->rad_z >= 0 && fabs(r->z - MapObjectMidZ(mo)) > r->rad_z + mo->height_ / 2)
     {
         return false;
     }
@@ -452,7 +476,8 @@ static int ScriptAlivePlayers(void)
     {
         Player *p = players[pnum];
 
-        if (p && p->player_state_ != kPlayerDead) result |= (1 << pnum);
+        if (p && p->player_state_ != kPlayerDead)
+            result |= (1 << pnum);
     }
 
     return result;
@@ -481,7 +506,8 @@ static int ScriptAllPlayersUsing(int mask)
     {
         Player *p = players[pnum];
 
-        if (p && p->use_button_down_) result |= (1 << pnum);
+        if (p && p->use_button_down_)
+            result |= (1 << pnum);
     }
 
     return result & mask;
@@ -495,16 +521,14 @@ static int ScriptAllPlayersCheckCondition(TriggerScript *r, int mask)
     {
         Player *p = players[pnum];
 
-        if (p && (mask & (1 << pnum)) &&
-            GameCheckConditions(p->map_object_, r->cond_trig))
+        if (p && (mask & (1 << pnum)) && GameCheckConditions(p->map_object_, r->cond_trig))
             result |= (1 << pnum);
     }
 
     return result;
 }
 
-static bool ScriptCheckBossTrigger(TriggerScriptTrigger   *trig,
-                                   ScriptOnDeathParameter *cond)
+static bool ScriptCheckBossTrigger(TriggerScriptTrigger *trig, ScriptOnDeathParameter *cond)
 {
     MapObject *mo;
 
@@ -520,8 +544,7 @@ static bool ScriptCheckBossTrigger(TriggerScriptTrigger   *trig,
             cond->cached_info = mobjtypes.Lookup(cond->thing_type);
 
             if (cond->cached_info == nullptr)
-                FatalError("RTS ONDEATH: Unknown thing type %d.\n",
-                           cond->thing_type);
+                FatalError("RTS ONDEATH: Unknown thing type %d.\n", cond->thing_type);
         }
     }
 
@@ -529,21 +552,21 @@ static bool ScriptCheckBossTrigger(TriggerScriptTrigger   *trig,
     for (mo = map_object_list_head; mo != nullptr; mo = mo->next_)
     {
         if (seen_monsters.count(cond->cached_info) == 0)
-            return false;  // Never on map?
+            return false; // Never on map?
 
         if (mo->info_ == cond->cached_info && mo->health_ > 0)
         {
             count++;
 
-            if (count > cond->threshhold) return false;
+            if (count > cond->threshhold)
+                return false;
         }
     }
 
     return true;
 }
 
-static bool ScriptCheckHeightTrigger(TriggerScriptTrigger    *trig,
-                                     ScriptOnHeightParameter *cond)
+static bool ScriptCheckHeightTrigger(TriggerScriptTrigger *trig, ScriptOnHeightParameter *cond)
 {
     float h;
 
@@ -559,8 +582,7 @@ static bool ScriptCheckHeightTrigger(TriggerScriptTrigger    *trig,
         }
         else
         {
-            cond->cached_sector =
-                RendererPointInSubsector(trig->info->x, trig->info->y)->sector;
+            cond->cached_sector = RendererPointInSubsector(trig->info->x, trig->info->y)->sector;
         }
     }
 
@@ -580,7 +602,8 @@ bool ScriptUpdatePath(MapObject *thing)
     TriggerScriptPath *path;
     int                choice;
 
-    if (!ScriptRadiusCheck(thing, scr)) return false;
+    if (!ScriptRadiusCheck(thing, scr))
+        return false;
 
     // Thing has reached this path node. Update so it starts following
     // the next node.  Handle any PATH_EVENT too.  Enable the associated
@@ -588,7 +611,8 @@ bool ScriptUpdatePath(MapObject *thing)
 
     trig = FindTriggerByScript(scr);
 
-    if (trig) trig->disabled = false;
+    if (trig)
+        trig->disabled = false;
 
     if (scr->path_event_label)
     {
@@ -629,12 +653,15 @@ bool ScriptUpdatePath(MapObject *thing)
 static void DoRemoveTrigger(TriggerScriptTrigger *trig)
 {
     // handle tag linkage
-    if (trig->tag_next) trig->tag_next->tag_previous = trig->tag_previous;
+    if (trig->tag_next)
+        trig->tag_next->tag_previous = trig->tag_previous;
 
-    if (trig->tag_previous) trig->tag_previous->tag_next = trig->tag_next;
+    if (trig->tag_previous)
+        trig->tag_previous->tag_next = trig->tag_next;
 
     // unlink and free it
-    if (trig->next) trig->next->prev = trig->prev;
+    if (trig->next)
+        trig->next->prev = trig->prev;
 
     if (trig->prev)
         trig->prev->next = trig->next;
@@ -659,10 +686,12 @@ void RunScriptTriggers(void)
         next = trig->next;
 
         // stop running all triggers when an RTS menu becomes active
-        if (rts_menu_active) break;
+        if (rts_menu_active)
+            break;
 
         // Don't process, if disabled
-        if (trig->disabled) continue;
+        if (trig->disabled)
+            continue;
 
         // Handle repeat delay (from TAGGED_REPEATABLE).  This must be
         // done *before* all the condition checks, and that's what makes
@@ -687,14 +716,16 @@ void RunScriptTriggers(void)
             if (!trig->info->tagged_immediate)
             {
                 mask = ScriptAllPlayersInRadius(trig->info, mask);
-                if (mask == 0) continue;
+                if (mask == 0)
+                    continue;
             }
 
             // Check for use key trigger.
             if (trig->info->tagged_use)
             {
                 mask = ScriptAllPlayersUsing(mask);
-                if (mask == 0) continue;
+                if (mask == 0)
+                    continue;
             }
 
             // height check...
@@ -703,10 +734,12 @@ void RunScriptTriggers(void)
                 ScriptOnHeightParameter *cur;
 
                 for (cur = trig->info->height_trig; cur; cur = cur->next)
-                    if (!ScriptCheckHeightTrigger(trig, cur)) break;
+                    if (!ScriptCheckHeightTrigger(trig, cur))
+                        break;
 
                 // if they all succeeded, then cur will be nullptr...
-                if (cur) continue;
+                if (cur)
+                    continue;
             }
 
             // ondeath check...
@@ -715,17 +748,20 @@ void RunScriptTriggers(void)
                 ScriptOnDeathParameter *cur;
 
                 for (cur = trig->info->boss_trig; cur; cur = cur->next)
-                    if (!ScriptCheckBossTrigger(trig, cur)) break;
+                    if (!ScriptCheckBossTrigger(trig, cur))
+                        break;
 
                 // if they all succeeded, then cur will be nullptr...
-                if (cur) continue;
+                if (cur)
+                    continue;
             }
 
             // condition check...
             if (trig->info->cond_trig)
             {
                 mask = ScriptAllPlayersCheckCondition(trig->info, mask);
-                if (mask == 0) continue;
+                if (mask == 0)
+                    continue;
             }
 
             trig->activated    = true;
@@ -756,19 +792,23 @@ void RunScriptTriggers(void)
 
             (*state->action)(trig, state->param);
 
-            if (!trig->state) break;
+            if (!trig->state)
+                break;
 
             trig->wait_tics += trig->state->tics;
 
-            if (trig->disabled || rts_menu_active) break;
+            if (trig->disabled || rts_menu_active)
+                break;
         }
 
-        if (trig->state) continue;
+        if (trig->state)
+            continue;
 
         // we've reached the end of the states.  Delete the trigger unless
         // it is Tagged_Repeatable and has some more repeats left.
         //
-        if (trig->info->repeat_count != 0) trig->repeats_left--;
+        if (trig->info->repeat_count != 0)
+            trig->repeats_left--;
 
         if (trig->repeats_left > 0)
         {
@@ -792,10 +832,10 @@ void ScriptUpdateMonsterDeaths(MapObject *mo)
 
         for (trig = active_triggers; trig; trig = trig->next)
         {
-            for (auto tag :
-                 epi::SeparatedStringVector(mo->wait_until_dead_tags_, ','))
+            for (auto tag : epi::SeparatedStringVector(mo->wait_until_dead_tags_, ','))
             {
-                if (trig->wud_tag == atoi(tag.c_str())) trig->wud_count--;
+                if (trig->wud_tag == atoi(tag.c_str()))
+                    trig->wud_count--;
             }
         }
     }
@@ -815,21 +855,24 @@ void GroupTriggerTags(TriggerScriptTrigger *trig)
     // find first trigger with the same tag #
     for (cur = active_triggers; cur; cur = cur->next)
     {
-        if (cur == trig) continue;
+        if (cur == trig)
+            continue;
 
         if ((cur->info->tag[0] && (cur->info->tag[0] == trig->info->tag[0])) ||
             (cur->info->tag[1] && (cur->info->tag[1] == trig->info->tag[1])))
             break;
     }
 
-    if (!cur) return;
+    if (!cur)
+        return;
 
     // link it in
 
     trig->tag_next     = cur;
     trig->tag_previous = cur->tag_previous;
 
-    if (cur->tag_previous) cur->tag_previous->tag_next = trig;
+    if (cur->tag_previous)
+        cur->tag_previous->tag_next = trig;
 
     cur->tag_previous = trig;
 }
@@ -851,24 +894,23 @@ void SpawnScriptTriggers(const char *map_name)
             continue;
 
         // -AJA- 1999/09/25: Added skill checks.
-        if (!GameCheckWhenAppear(scr->appear)) continue;
+        if (!GameCheckWhenAppear(scr->appear))
+            continue;
 
         // -AJA- 2000/02/03: Added player num checks.
-        if (total_players < scr->min_players ||
-            total_players > scr->max_players)
+        if (total_players < scr->min_players || total_players > scr->max_players)
             continue;
 
         // ignore empty scripts (e.g. path nodes)
-        if (!scr->first_state) continue;
+        if (!scr->first_state)
+            continue;
 
         // OK, spawn new dynamic trigger
         trig = new TriggerScriptTrigger;
 
         trig->info         = scr;
         trig->disabled     = scr->tagged_disabled;
-        trig->repeats_left = (scr->repeat_count < 0 || scr->repeat_count == 0)
-                                 ? 1
-                                 : scr->repeat_count;
+        trig->repeats_left = (scr->repeat_count < 0 || scr->repeat_count == 0) ? 1 : scr->repeat_count;
         trig->repeat_delay = 0;
         trig->tip_slot     = 0;
         trig->wud_tag = trig->wud_count = 0;
@@ -883,7 +925,8 @@ void SpawnScriptTriggers(const char *map_name)
         trig->next = active_triggers;
         trig->prev = nullptr;
 
-        if (active_triggers) active_triggers->prev = trig;
+        if (active_triggers)
+            active_triggers->prev = trig;
 
         active_triggers = trig;
     }
@@ -926,7 +969,10 @@ void ClearScriptTriggers(void)
     ResetScriptTips();
 }
 
-void InitializeTriggerScripts(void) { InitializeScriptTips(); }
+void InitializeTriggerScripts(void)
+{
+    InitializeScriptTips();
+}
 
 void ScriptMenuStart(TriggerScriptTrigger *R, ScriptShowMenuParameter *menu)
 {
@@ -935,11 +981,15 @@ void ScriptMenuStart(TriggerScriptTrigger *R, ScriptShowMenuParameter *menu)
     // find the right style
     StyleDefinition *def = nullptr;
 
-    if (R->menu_style_name) def = styledefs.Lookup(R->menu_style_name);
+    if (R->menu_style_name)
+        def = styledefs.Lookup(R->menu_style_name);
 
-    if (!def) def = styledefs.Lookup("RTS MENU");
-    if (!def) def = styledefs.Lookup("MENU");
-    if (!def) def = default_style;
+    if (!def)
+        def = styledefs.Lookup("RTS MENU");
+    if (!def)
+        def = styledefs.Lookup("MENU");
+    if (!def)
+        def = default_style;
 
     rts_curr_menu   = new rts_menu_c(menu, R, hud_styles.Lookup(def));
     rts_menu_active = true;
@@ -947,12 +997,14 @@ void ScriptMenuStart(TriggerScriptTrigger *R, ScriptShowMenuParameter *menu)
 
 void ScriptMenuFinish(int result)
 {
-    if (!rts_menu_active) return;
+    if (!rts_menu_active)
+        return;
 
     EPI_ASSERT(rts_curr_menu);
 
     // zero is cancelled, otherwise result is 1..N
-    if (result < 0 || result > HMM_MAX(1, rts_curr_menu->NumChoices())) return;
+    if (result < 0 || result > HMM_MAX(1, rts_curr_menu->NumChoices()))
+        return;
 
     rts_curr_menu->NotifyResult(result);
 
@@ -971,16 +1023,20 @@ static void ScriptMenuDrawer(void)
 
 void ScriptDrawer(void)
 {
-    if (!automap_active) DisplayScriptTips();
+    if (!automap_active)
+        DisplayScriptTips();
 
-    if (rts_menu_active) ScriptMenuDrawer();
+    if (rts_menu_active)
+        ScriptMenuDrawer();
 }
 
 bool ScriptResponder(InputEvent *ev)
 {
-    if (ev->type != kInputEventKeyDown) return false;
+    if (ev->type != kInputEventKeyDown)
+        return false;
 
-    if (!rts_menu_active) return false;
+    if (!rts_menu_active)
+        return false;
 
     EPI_ASSERT(rts_curr_menu);
 

@@ -91,7 +91,7 @@ struct RegionProperties
     // rendering related
     int light_level;
 
-    const Colormap *colourmap;  // can be nullptr
+    const Colormap *colourmap; // can be nullptr
 
     // special type (e.g. damaging)
     int               type;
@@ -293,7 +293,7 @@ struct Sector
     Position sound_effects_origin;
 
     int           line_count;
-    struct Line **lines;  // [line_count] size
+    struct Line **lines; // [line_count] size
 
     // touch list: objects in or touching this sector
     TouchNode *touch_things;
@@ -505,7 +505,7 @@ struct Seg
     Side *sidedef;
     Line *linedef;
 
-    int side;  // 0 for front, 1 for back
+    int side; // 0 for front, 1 for back
 
     // Sector references.
     // backsector is nullptr for one sided lines

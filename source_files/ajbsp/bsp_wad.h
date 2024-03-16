@@ -42,7 +42,7 @@ class Lump
 {
     friend class WadFile;
 
-   private:
+  private:
     WadFile *parent_;
 
     const char *name_;
@@ -56,11 +56,17 @@ class Lump
 
     void MakeEntry(struct RawWadEntry *entry);
 
-   public:
+  public:
     ~Lump();
 
-    const char *Name() const { return name_; }
-    int         Length() const { return lump_length_; }
+    const char *Name() const
+    {
+        return name_;
+    }
+    int Length() const
+    {
+        return lump_length_;
+    }
 
     // do not call this directly, use WadFile::RenameLump()
     void Rename(const char *new_name);
@@ -89,14 +95,14 @@ class Lump
     // predicate for std::sort()
     class OffsetComparisonPredicate
     {
-       public:
+      public:
         inline bool operator()(const Lump *A, const Lump *B) const
         {
             return A->lump_start_ < B->lump_start_;
         }
     };
 
-   private:
+  private:
     // deliberately don't implement these
     Lump(const Lump &other);
     Lump &operator=(const Lump &other);
@@ -108,16 +114,16 @@ class WadFile
 {
     friend class Lump;
 
-   private:
+  private:
     std::string filename_;
 
-    char mode_;  // mode value passed to ::Open()
+    char mode_; // mode value passed to ::Open()
 
     FILE *file_pointer_;
 
     epi::MemFile *memory_file_pointer_;
 
-    char kind_;  // 'P' for PWAD, 'I' for IWAD
+    char kind_; // 'P' for PWAD, 'I' for IWAD
 
     // zero means "currently unknown", which only occurs after a
     // call to BeginWrite() and before any call to AddLump() or
@@ -143,10 +149,9 @@ class WadFile
     int insert_point_;
 
     // constructor is private
-    WadFile(std::string name, char mode, FILE *file_pointer,
-            epi::MemFile *memory_file_pointer);
+    WadFile(std::string name, char mode, FILE *file_pointer, epi::MemFile *memory_file_pointer);
 
-   public:
+  public:
     ~WadFile();
 
     // open a wad file.
@@ -161,21 +166,32 @@ class WadFile
     //
     static WadFile *Open(std::string filename, char mode = 'a');
 
-    static WadFile *OpenMem(std::string filename, uint8_t *raw_wad,
-                            int raw_length);
+    static WadFile *OpenMem(std::string filename, uint8_t *raw_wad, int raw_length);
 
-    bool IsReadOnly() const { return mode_ == 'r'; }
+    bool IsReadOnly() const
+    {
+        return mode_ == 'r';
+    }
 
-    int TotalSize() const { return total_size_; }
+    int TotalSize() const
+    {
+        return total_size_;
+    }
 
-    int   NumLumps() const { return (int)directory_.size(); }
+    int NumLumps() const
+    {
+        return (int)directory_.size();
+    }
     Lump *GetLump(int index);
     Lump *FindLump(const char *name);
     int   FindLumpNumber(const char *name);
 
     Lump *FindLumpInNamespace(const char *name, char group);
 
-    int LevelCount() const { return (int)levels_.size(); }
+    int LevelCount() const
+    {
+        return (int)levels_.size();
+    }
     int LevelHeader(int level_number);
     int LevelLastLump(int level_number);
 
@@ -203,8 +219,7 @@ class WadFile
     // you will write into the lump -- writing more will corrupt
     // something else in the WAD.
     Lump *AddLump(const char *name, int max_size = -1);
-    Lump *AddLevel(const char *name, int max_size = -1,
-                   int *level_number = nullptr);
+    Lump *AddLevel(const char *name, int max_size = -1, int *level_number = nullptr);
 
     // setup lump to write new data to it.
     // the old contents are lost.
@@ -219,7 +234,7 @@ class WadFile
     // RemoveLumps(), RemoveLevel() and EndWrite() also reset it.
     void InsertPoint(int index = -1);
 
-   private:
+  private:
     static WadFile *Create(std::string filename, char mode);
 
     // read the existing directory.
@@ -252,23 +267,24 @@ class WadFile
     // (including the CRC).
     void WriteDirectory();
 
-    void FixGroup(std::vector<int> &group, int index, int number_added,
-                  int number_removed);
+    void FixGroup(std::vector<int> &group, int index, int number_added, int number_removed);
 
-   private:
+  private:
     // deliberately don't implement these
     WadFile(const WadFile &other);
     WadFile &operator=(const WadFile &other);
 
-   private:
+  private:
     // predicate for sorting the levels[] vector
     class LevelNameComparisonPredicate
     {
-       private:
+      private:
         WadFile *wad_;
 
-       public:
-        LevelNameComparisonPredicate(WadFile *w) : wad_(w) {}
+      public:
+        LevelNameComparisonPredicate(WadFile *w) : wad_(w)
+        {
+        }
 
         inline bool operator()(const int A, const int B) const
         {
@@ -280,7 +296,7 @@ class WadFile
     };
 };
 
-}  // namespace ajbsp
+} // namespace ajbsp
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

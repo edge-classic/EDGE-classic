@@ -83,7 +83,7 @@ int LevelsInWad();
 // kBuildError
 BuildResult BuildLevel(int level_index);
 
-}  // namespace ajbsp
+} // namespace ajbsp
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

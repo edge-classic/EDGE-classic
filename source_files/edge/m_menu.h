@@ -80,8 +80,7 @@ void MenuInitialize(void);
 void MenuStartControlPanel(void);
 
 // 25-6-98 KM
-void MenuStartMessage(const char *string, void (*routine)(int response),
-                      bool        input);
+void MenuStartMessage(const char *string, void (*routine)(int response), bool input);
 
 // -KM- 1998/07/21
 // String will be printed as a prompt.
@@ -89,14 +88,13 @@ void MenuStartMessage(const char *string, void (*routine)(int response),
 // and will be called with the input returned
 // or nullptr if user pressed escape.
 
-void MenuStartMessageInput(const char *string,
-                           void (*routine)(const char *response));
+void MenuStartMessageInput(const char *string, void (*routine)(const char *response));
 
 void MenuEndGame(int choice, ConsoleVariable *cvar = nullptr);
 void MenuQuitEdge(int choice);
 void MenuImmediateQuit(void);
-void MenuDrawSlider(int x, int y, float slider_position, float increment,
-                    int div, float min, float max, std::string format_string);
+void MenuDrawSlider(int x, int y, float slider_position, float increment, int div, float min, float max,
+                    std::string format_string);
 void MenuClear(void);
 
 //--- editor settings ---

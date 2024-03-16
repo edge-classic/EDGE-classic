@@ -25,7 +25,7 @@
 
 #include "p_umapinfo.h"
 
-#include <unordered_map>  // ZDoom Actor Name <-> Doomednum lookups
+#include <unordered_map> // ZDoom Actor Name <-> Doomednum lookups
 
 #include "deh_text.h"
 #include "game.h"
@@ -183,8 +183,7 @@ static std::unordered_map<int, int16_t> ActorNames = {
     { epi::kENamePlasmaBall2, -1 },
     { epi::kENameEvilSceptre, -1 },
     { epi::kENameUnholyBible, -1 },
-    { epi::kENameMusicChanger,
-      -1 },  // Doomednums 14101-14165, but I don't think we need this
+    { epi::kENameMusicChanger, -1 }, // Doomednums 14101-14165, but I don't think we need this
     // I'm guessing below here
     { epi::kENameDeh_Actor_145, 145 },
     { epi::kENameDeh_Actor_146, 146 },
@@ -192,117 +191,124 @@ static std::unordered_map<int, int16_t> ActorNames = {
     { epi::kENameDeh_Actor_148, 148 },
     { epi::kENameDeh_Actor_149, 149 },
     // DEHEXTRA Actors start here
-    { epi::kENameDeh_Actor_150, 150 },  // Extra thing 0
-    { epi::kENameDeh_Actor_151, 151 },  // Extra thing 1
-    { epi::kENameDeh_Actor_152, 152 },  // Extra thing 2
-    { epi::kENameDeh_Actor_153, 153 },  // Extra thing 3
-    { epi::kENameDeh_Actor_154, 154 },  // Extra thing 4
-    { epi::kENameDeh_Actor_155, 155 },  // Extra thing 5
-    { epi::kENameDeh_Actor_156, 156 },  // Extra thing 6
-    { epi::kENameDeh_Actor_157, 157 },  // Extra thing 7
-    { epi::kENameDeh_Actor_158, 158 },  // Extra thing 8
-    { epi::kENameDeh_Actor_159, 159 },  // Extra thing 9
-    { epi::kENameDeh_Actor_160, 160 },  // Extra thing 10
-    { epi::kENameDeh_Actor_161, 161 },  // Extra thing 11
-    { epi::kENameDeh_Actor_162, 162 },  // Extra thing 12
-    { epi::kENameDeh_Actor_163, 163 },  // Extra thing 13
-    { epi::kENameDeh_Actor_164, 164 },  // Extra thing 14
-    { epi::kENameDeh_Actor_165, 165 },  // Extra thing 15
-    { epi::kENameDeh_Actor_166, 166 },  // Extra thing 16
-    { epi::kENameDeh_Actor_167, 167 },  // Extra thing 17
-    { epi::kENameDeh_Actor_168, 168 },  // Extra thing 18
-    { epi::kENameDeh_Actor_169, 169 },  // Extra thing 19
-    { epi::kENameDeh_Actor_170, 170 },  // Extra thing 20
-    { epi::kENameDeh_Actor_171, 171 },  // Extra thing 21
-    { epi::kENameDeh_Actor_172, 172 },  // Extra thing 22
-    { epi::kENameDeh_Actor_173, 173 },  // Extra thing 23
-    { epi::kENameDeh_Actor_174, 174 },  // Extra thing 24
-    { epi::kENameDeh_Actor_175, 175 },  // Extra thing 25
-    { epi::kENameDeh_Actor_176, 176 },  // Extra thing 26
-    { epi::kENameDeh_Actor_177, 177 },  // Extra thing 27
-    { epi::kENameDeh_Actor_178, 178 },  // Extra thing 28
-    { epi::kENameDeh_Actor_179, 179 },  // Extra thing 29
-    { epi::kENameDeh_Actor_180, 180 },  // Extra thing 30
-    { epi::kENameDeh_Actor_181, 181 },  // Extra thing 31
-    { epi::kENameDeh_Actor_182, 182 },  // Extra thing 32
-    { epi::kENameDeh_Actor_183, 183 },  // Extra thing 33
-    { epi::kENameDeh_Actor_184, 184 },  // Extra thing 34
-    { epi::kENameDeh_Actor_185, 185 },  // Extra thing 35
-    { epi::kENameDeh_Actor_186, 186 },  // Extra thing 36
-    { epi::kENameDeh_Actor_187, 187 },  // Extra thing 37
-    { epi::kENameDeh_Actor_188, 188 },  // Extra thing 38
-    { epi::kENameDeh_Actor_189, 189 },  // Extra thing 39
-    { epi::kENameDeh_Actor_190, 190 },  // Extra thing 40
-    { epi::kENameDeh_Actor_191, 191 },  // Extra thing 41
-    { epi::kENameDeh_Actor_192, 192 },  // Extra thing 42
-    { epi::kENameDeh_Actor_193, 193 },  // Extra thing 43
-    { epi::kENameDeh_Actor_194, 194 },  // Extra thing 44
-    { epi::kENameDeh_Actor_195, 195 },  // Extra thing 45
-    { epi::kENameDeh_Actor_196, 196 },  // Extra thing 46
-    { epi::kENameDeh_Actor_197, 197 },  // Extra thing 47
-    { epi::kENameDeh_Actor_198, 198 },  // Extra thing 48
-    { epi::kENameDeh_Actor_199, 199 },  // Extra thing 49
-    { epi::kENameDeh_Actor_200, 200 },  // Extra thing 50
-    { epi::kENameDeh_Actor_201, 201 },  // Extra thing 51
-    { epi::kENameDeh_Actor_202, 202 },  // Extra thing 52
-    { epi::kENameDeh_Actor_203, 203 },  // Extra thing 53
-    { epi::kENameDeh_Actor_204, 204 },  // Extra thing 54
-    { epi::kENameDeh_Actor_205, 205 },  // Extra thing 55
-    { epi::kENameDeh_Actor_206, 206 },  // Extra thing 56
-    { epi::kENameDeh_Actor_207, 207 },  // Extra thing 57
-    { epi::kENameDeh_Actor_208, 208 },  // Extra thing 58
-    { epi::kENameDeh_Actor_209, 209 },  // Extra thing 59
-    { epi::kENameDeh_Actor_210, 210 },  // Extra thing 60
-    { epi::kENameDeh_Actor_211, 211 },  // Extra thing 61
-    { epi::kENameDeh_Actor_212, 212 },  // Extra thing 62
-    { epi::kENameDeh_Actor_213, 213 },  // Extra thing 63
-    { epi::kENameDeh_Actor_214, 214 },  // Extra thing 64
-    { epi::kENameDeh_Actor_215, 215 },  // Extra thing 65
-    { epi::kENameDeh_Actor_216, 216 },  // Extra thing 66
-    { epi::kENameDeh_Actor_217, 217 },  // Extra thing 67
-    { epi::kENameDeh_Actor_218, 218 },  // Extra thing 68
-    { epi::kENameDeh_Actor_219, 219 },  // Extra thing 69
-    { epi::kENameDeh_Actor_220, 220 },  // Extra thing 70
-    { epi::kENameDeh_Actor_221, 221 },  // Extra thing 71
-    { epi::kENameDeh_Actor_222, 222 },  // Extra thing 72
-    { epi::kENameDeh_Actor_223, 223 },  // Extra thing 73
-    { epi::kENameDeh_Actor_224, 224 },  // Extra thing 74
-    { epi::kENameDeh_Actor_225, 225 },  // Extra thing 75
-    { epi::kENameDeh_Actor_226, 226 },  // Extra thing 76
-    { epi::kENameDeh_Actor_227, 227 },  // Extra thing 77
-    { epi::kENameDeh_Actor_228, 228 },  // Extra thing 78
-    { epi::kENameDeh_Actor_229, 229 },  // Extra thing 79
-    { epi::kENameDeh_Actor_230, 230 },  // Extra thing 80
-    { epi::kENameDeh_Actor_231, 231 },  // Extra thing 81
-    { epi::kENameDeh_Actor_232, 232 },  // Extra thing 82
-    { epi::kENameDeh_Actor_233, 233 },  // Extra thing 83
-    { epi::kENameDeh_Actor_234, 234 },  // Extra thing 84
-    { epi::kENameDeh_Actor_235, 235 },  // Extra thing 85
-    { epi::kENameDeh_Actor_236, 236 },  // Extra thing 86
-    { epi::kENameDeh_Actor_237, 237 },  // Extra thing 87
-    { epi::kENameDeh_Actor_238, 238 },  // Extra thing 88
-    { epi::kENameDeh_Actor_239, 239 },  // Extra thing 89
-    { epi::kENameDeh_Actor_240, 240 },  // Extra thing 90
-    { epi::kENameDeh_Actor_241, 241 },  // Extra thing 91
-    { epi::kENameDeh_Actor_242, 242 },  // Extra thing 92
-    { epi::kENameDeh_Actor_243, 243 },  // Extra thing 93
-    { epi::kENameDeh_Actor_244, 244 },  // Extra thing 94
-    { epi::kENameDeh_Actor_245, 245 },  // Extra thing 95
-    { epi::kENameDeh_Actor_246, 246 },  // Extra thing 96
-    { epi::kENameDeh_Actor_247, 247 },  // Extra thing 97
-    { epi::kENameDeh_Actor_248, 248 },  // Extra thing 98
-    { epi::kENameDeh_Actor_249, 249 },  // Extra thing 99
+    { epi::kENameDeh_Actor_150, 150 }, // Extra thing 0
+    { epi::kENameDeh_Actor_151, 151 }, // Extra thing 1
+    { epi::kENameDeh_Actor_152, 152 }, // Extra thing 2
+    { epi::kENameDeh_Actor_153, 153 }, // Extra thing 3
+    { epi::kENameDeh_Actor_154, 154 }, // Extra thing 4
+    { epi::kENameDeh_Actor_155, 155 }, // Extra thing 5
+    { epi::kENameDeh_Actor_156, 156 }, // Extra thing 6
+    { epi::kENameDeh_Actor_157, 157 }, // Extra thing 7
+    { epi::kENameDeh_Actor_158, 158 }, // Extra thing 8
+    { epi::kENameDeh_Actor_159, 159 }, // Extra thing 9
+    { epi::kENameDeh_Actor_160, 160 }, // Extra thing 10
+    { epi::kENameDeh_Actor_161, 161 }, // Extra thing 11
+    { epi::kENameDeh_Actor_162, 162 }, // Extra thing 12
+    { epi::kENameDeh_Actor_163, 163 }, // Extra thing 13
+    { epi::kENameDeh_Actor_164, 164 }, // Extra thing 14
+    { epi::kENameDeh_Actor_165, 165 }, // Extra thing 15
+    { epi::kENameDeh_Actor_166, 166 }, // Extra thing 16
+    { epi::kENameDeh_Actor_167, 167 }, // Extra thing 17
+    { epi::kENameDeh_Actor_168, 168 }, // Extra thing 18
+    { epi::kENameDeh_Actor_169, 169 }, // Extra thing 19
+    { epi::kENameDeh_Actor_170, 170 }, // Extra thing 20
+    { epi::kENameDeh_Actor_171, 171 }, // Extra thing 21
+    { epi::kENameDeh_Actor_172, 172 }, // Extra thing 22
+    { epi::kENameDeh_Actor_173, 173 }, // Extra thing 23
+    { epi::kENameDeh_Actor_174, 174 }, // Extra thing 24
+    { epi::kENameDeh_Actor_175, 175 }, // Extra thing 25
+    { epi::kENameDeh_Actor_176, 176 }, // Extra thing 26
+    { epi::kENameDeh_Actor_177, 177 }, // Extra thing 27
+    { epi::kENameDeh_Actor_178, 178 }, // Extra thing 28
+    { epi::kENameDeh_Actor_179, 179 }, // Extra thing 29
+    { epi::kENameDeh_Actor_180, 180 }, // Extra thing 30
+    { epi::kENameDeh_Actor_181, 181 }, // Extra thing 31
+    { epi::kENameDeh_Actor_182, 182 }, // Extra thing 32
+    { epi::kENameDeh_Actor_183, 183 }, // Extra thing 33
+    { epi::kENameDeh_Actor_184, 184 }, // Extra thing 34
+    { epi::kENameDeh_Actor_185, 185 }, // Extra thing 35
+    { epi::kENameDeh_Actor_186, 186 }, // Extra thing 36
+    { epi::kENameDeh_Actor_187, 187 }, // Extra thing 37
+    { epi::kENameDeh_Actor_188, 188 }, // Extra thing 38
+    { epi::kENameDeh_Actor_189, 189 }, // Extra thing 39
+    { epi::kENameDeh_Actor_190, 190 }, // Extra thing 40
+    { epi::kENameDeh_Actor_191, 191 }, // Extra thing 41
+    { epi::kENameDeh_Actor_192, 192 }, // Extra thing 42
+    { epi::kENameDeh_Actor_193, 193 }, // Extra thing 43
+    { epi::kENameDeh_Actor_194, 194 }, // Extra thing 44
+    { epi::kENameDeh_Actor_195, 195 }, // Extra thing 45
+    { epi::kENameDeh_Actor_196, 196 }, // Extra thing 46
+    { epi::kENameDeh_Actor_197, 197 }, // Extra thing 47
+    { epi::kENameDeh_Actor_198, 198 }, // Extra thing 48
+    { epi::kENameDeh_Actor_199, 199 }, // Extra thing 49
+    { epi::kENameDeh_Actor_200, 200 }, // Extra thing 50
+    { epi::kENameDeh_Actor_201, 201 }, // Extra thing 51
+    { epi::kENameDeh_Actor_202, 202 }, // Extra thing 52
+    { epi::kENameDeh_Actor_203, 203 }, // Extra thing 53
+    { epi::kENameDeh_Actor_204, 204 }, // Extra thing 54
+    { epi::kENameDeh_Actor_205, 205 }, // Extra thing 55
+    { epi::kENameDeh_Actor_206, 206 }, // Extra thing 56
+    { epi::kENameDeh_Actor_207, 207 }, // Extra thing 57
+    { epi::kENameDeh_Actor_208, 208 }, // Extra thing 58
+    { epi::kENameDeh_Actor_209, 209 }, // Extra thing 59
+    { epi::kENameDeh_Actor_210, 210 }, // Extra thing 60
+    { epi::kENameDeh_Actor_211, 211 }, // Extra thing 61
+    { epi::kENameDeh_Actor_212, 212 }, // Extra thing 62
+    { epi::kENameDeh_Actor_213, 213 }, // Extra thing 63
+    { epi::kENameDeh_Actor_214, 214 }, // Extra thing 64
+    { epi::kENameDeh_Actor_215, 215 }, // Extra thing 65
+    { epi::kENameDeh_Actor_216, 216 }, // Extra thing 66
+    { epi::kENameDeh_Actor_217, 217 }, // Extra thing 67
+    { epi::kENameDeh_Actor_218, 218 }, // Extra thing 68
+    { epi::kENameDeh_Actor_219, 219 }, // Extra thing 69
+    { epi::kENameDeh_Actor_220, 220 }, // Extra thing 70
+    { epi::kENameDeh_Actor_221, 221 }, // Extra thing 71
+    { epi::kENameDeh_Actor_222, 222 }, // Extra thing 72
+    { epi::kENameDeh_Actor_223, 223 }, // Extra thing 73
+    { epi::kENameDeh_Actor_224, 224 }, // Extra thing 74
+    { epi::kENameDeh_Actor_225, 225 }, // Extra thing 75
+    { epi::kENameDeh_Actor_226, 226 }, // Extra thing 76
+    { epi::kENameDeh_Actor_227, 227 }, // Extra thing 77
+    { epi::kENameDeh_Actor_228, 228 }, // Extra thing 78
+    { epi::kENameDeh_Actor_229, 229 }, // Extra thing 79
+    { epi::kENameDeh_Actor_230, 230 }, // Extra thing 80
+    { epi::kENameDeh_Actor_231, 231 }, // Extra thing 81
+    { epi::kENameDeh_Actor_232, 232 }, // Extra thing 82
+    { epi::kENameDeh_Actor_233, 233 }, // Extra thing 83
+    { epi::kENameDeh_Actor_234, 234 }, // Extra thing 84
+    { epi::kENameDeh_Actor_235, 235 }, // Extra thing 85
+    { epi::kENameDeh_Actor_236, 236 }, // Extra thing 86
+    { epi::kENameDeh_Actor_237, 237 }, // Extra thing 87
+    { epi::kENameDeh_Actor_238, 238 }, // Extra thing 88
+    { epi::kENameDeh_Actor_239, 239 }, // Extra thing 89
+    { epi::kENameDeh_Actor_240, 240 }, // Extra thing 90
+    { epi::kENameDeh_Actor_241, 241 }, // Extra thing 91
+    { epi::kENameDeh_Actor_242, 242 }, // Extra thing 92
+    { epi::kENameDeh_Actor_243, 243 }, // Extra thing 93
+    { epi::kENameDeh_Actor_244, 244 }, // Extra thing 94
+    { epi::kENameDeh_Actor_245, 245 }, // Extra thing 95
+    { epi::kENameDeh_Actor_246, 246 }, // Extra thing 96
+    { epi::kENameDeh_Actor_247, 247 }, // Extra thing 97
+    { epi::kENameDeh_Actor_248, 248 }, // Extra thing 98
+    { epi::kENameDeh_Actor_249, 249 }, // Extra thing 99
 };
 
 static void FreeMap(MapEntry *mape)
 {
-    if (mape->mapname) free(mape->mapname);
-    if (mape->levelname) free(mape->levelname);
-    if (mape->label) free(mape->label);
-    if (mape->intertext) free(mape->intertext);
-    if (mape->intertextsecret) free(mape->intertextsecret);
-    if (mape->bossactions) free(mape->bossactions);
-    if (mape->authorname) free(mape->authorname);
+    if (mape->mapname)
+        free(mape->mapname);
+    if (mape->levelname)
+        free(mape->levelname);
+    if (mape->label)
+        free(mape->label);
+    if (mape->intertext)
+        free(mape->intertext);
+    if (mape->intertextsecret)
+        free(mape->intertextsecret);
+    if (mape->bossactions)
+        free(mape->bossactions);
+    if (mape->authorname)
+        free(mape->authorname);
     mape->mapname = nullptr;
 }
 
@@ -310,14 +316,16 @@ void FreeMapList()
 {
     unsigned i;
 
-    for (i = 0; i < Maps.mapcount; i++) { FreeMap(&Maps.maps[i]); }
+    for (i = 0; i < Maps.mapcount; i++)
+    {
+        FreeMap(&Maps.maps[i]);
+    }
     free(Maps.maps);
     Maps.maps     = nullptr;
     Maps.mapcount = 0;
 }
 
-static void SkipToNextLine(epi::Lexer &lex, epi::TokenKind &tok,
-                           std::string &value)
+static void SkipToNextLine(epi::Lexer &lex, epi::TokenKind &tok, std::string &value)
 {
     int skip_line = lex.LastLine();
     for (;;)
@@ -326,7 +334,8 @@ static void SkipToNextLine(epi::Lexer &lex, epi::TokenKind &tok,
         if (lex.LastLine() == skip_line)
         {
             tok = lex.Next(value);
-            if (tok == epi::kTokenEOF) break;
+            if (tok == epi::kTokenEOF)
+                break;
         }
         else
             break;
@@ -343,7 +352,8 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
 {
     for (;;)
     {
-        if (lex.Match("}")) break;
+        if (lex.Match("}"))
+            break;
 
         std::string key;
         std::string value;
@@ -368,322 +378,279 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
 
         switch (key_ename.GetIndex())
         {
-            case epi::kENameLevelname:
+        case epi::kENameLevelname: {
+            if (val->levelname)
+                free(val->levelname);
+            val->levelname = (char *)calloc(value.size() + 1, sizeof(char));
+            epi::CStringCopyMax(val->levelname, value.c_str(), value.size());
+        }
+        break;
+        case epi::kENameLabel: {
+            if (epi::StringCaseCompareASCII(value, "clear") == 0)
             {
-                if (val->levelname) free(val->levelname);
-                val->levelname = (char *)calloc(value.size() + 1, sizeof(char));
-                epi::CStringCopyMax(val->levelname, value.c_str(),
-                                    value.size());
+                if (val->label)
+                    free(val->label);
+                val->label    = (char *)calloc(2, sizeof(char));
+                val->label[0] = '-';
             }
-            break;
-            case epi::kENameLabel:
+            else
             {
-                if (epi::StringCaseCompareASCII(value, "clear") == 0)
+                if (val->label)
+                    free(val->label);
+                val->label = (char *)calloc(value.size() + 1, sizeof(char));
+                epi::CStringCopyMax(val->label, value.c_str(), value.size());
+            }
+        }
+        break;
+        case epi::kENameNext: {
+            EPI_CLEAR_MEMORY(val->next_map, char, 9);
+            if (value.size() > 8)
+                FatalError("UMAPINFO: Mapname for \"next\" over 8 characters!\n");
+            epi::CStringCopyMax(val->next_map, value.data(), 8);
+        }
+        break;
+        case epi::kENameNextsecret: {
+            EPI_CLEAR_MEMORY(val->nextsecret, char, 9);
+            if (value.size() > 8)
+                FatalError("UMAPINFO: Mapname for \"nextsecret\" over 8 "
+                           "characters!\n");
+            epi::CStringCopyMax(val->nextsecret, value.data(), 8);
+        }
+        break;
+        case epi::kENameLevelpic: {
+            EPI_CLEAR_MEMORY(val->levelpic, char, 9);
+            if (value.size() > 8)
+                FatalError("UMAPINFO: Entry for \"levelpic\" over 8 "
+                           "characters!\n");
+            epi::CStringCopyMax(val->levelpic, value.data(), 8);
+        }
+        break;
+        case epi::kENameSkytexture: {
+            EPI_CLEAR_MEMORY(val->skytexture, char, 9);
+            if (value.size() > 8)
+                FatalError("UMAPINFO: Entry for \"skytexture\" over 8 "
+                           "characters!\n");
+            epi::CStringCopyMax(val->skytexture, value.data(), 8);
+        }
+        break;
+        case epi::kENameMusic: {
+            EPI_CLEAR_MEMORY(val->music, char, 9);
+            if (value.size() > 8)
+                FatalError("UMAPINFO: Entry for \"music\" over 8 characters!\n");
+            epi::CStringCopyMax(val->music, value.data(), 8);
+        }
+        break;
+        case epi::kENameEndpic: {
+            EPI_CLEAR_MEMORY(val->endpic, char, 9);
+            if (value.size() > 8)
+                FatalError("UMAPINFO: Entry for \"endpic\" over 8 characters!\n");
+            epi::CStringCopyMax(val->endpic, value.data(), 8);
+        }
+        break;
+        case epi::kENameEndcast:
+            val->docast = epi::LexBoolean(value);
+            break;
+        case epi::kENameEndbunny:
+            val->dobunny = epi::LexBoolean(value);
+            break;
+        case epi::kENameEndgame:
+            val->endgame = epi::LexBoolean(value);
+            break;
+        case epi::kENameExitpic: {
+            EPI_CLEAR_MEMORY(val->exitpic, char, 9);
+            if (value.size() > 8)
+                FatalError("UMAPINFO: Entry for \"exitpic\" over 8 characters!\n");
+            epi::CStringCopyMax(val->exitpic, value.data(), 8);
+        }
+        break;
+        case epi::kENameEnterpic: {
+            EPI_CLEAR_MEMORY(val->enterpic, char, 9);
+            if (value.size() > 8)
+                FatalError("UMAPINFO: Entry for \"enterpic\" over 8 "
+                           "characters!\n");
+            epi::CStringCopyMax(val->enterpic, value.data(), 8);
+        }
+        break;
+        case epi::kENameNointermission:
+            val->nointermission = epi::LexBoolean(value);
+            break;
+        case epi::kENamePartime:
+            val->partime = 35 * epi::LexInteger(value);
+            break;
+        case epi::kENameIntertext: {
+            std::string it_builder = value;
+            while (lex.Match(","))
+            {
+                it_builder.append("\n");
+                lex.Next(value);
+                it_builder.append(value);
+            }
+            if (val->intertext)
+                free(val->intertext);
+            val->intertext = (char *)calloc(it_builder.size() + 1, sizeof(char));
+            epi::CStringCopyMax(val->intertext, it_builder.c_str(), it_builder.size());
+        }
+        break;
+        case epi::kENameIntertextsecret: {
+            std::string it_builder = value;
+            while (lex.Match(","))
+            {
+                it_builder.append("\n");
+                lex.Next(value);
+                it_builder.append(value);
+            }
+            if (val->intertextsecret)
+                free(val->intertextsecret);
+            val->intertextsecret = (char *)calloc(it_builder.size() + 1, sizeof(char));
+            epi::CStringCopyMax(val->intertextsecret, it_builder.c_str(), it_builder.size());
+        }
+        break;
+        case epi::kENameInterbackdrop: {
+            EPI_CLEAR_MEMORY(val->interbackdrop, char, 9);
+            if (value.size() > 8)
+                FatalError("UMAPINFO: Entry for \"interbackdrop\" over 8 "
+                           "characters!\n");
+            epi::CStringCopyMax(val->interbackdrop, value.data(), 8);
+        }
+        break;
+        case epi::kENameIntermusic: {
+            EPI_CLEAR_MEMORY(val->intermusic, char, 9);
+            if (value.size() > 8)
+                FatalError("UMAPINFO: Entry for \"intermusic\" over 8 "
+                           "characters!\n");
+            epi::CStringCopyMax(val->intermusic, value.data(), 8);
+        }
+        break;
+        case epi::kENameEpisode: {
+            if (epi::StringCaseCompareASCII(value, "clear") == 0)
+            {
+                // This should leave the initial [EDGE] episode and nothing
+                // else Since 'clear' is supposed to come before any custom
+                // definitions this should not clear out any
+                // UMAPINFO-defined episodes
+                for (auto iter = gamedefs.begin() + 1; iter != gamedefs.end();)
                 {
-                    if (val->label) free(val->label);
-                    val->label    = (char *)calloc(2, sizeof(char));
-                    val->label[0] = '-';
-                }
-                else
-                {
-                    if (val->label) free(val->label);
-                    val->label = (char *)calloc(value.size() + 1, sizeof(char));
-                    epi::CStringCopyMax(val->label, value.c_str(),
-                                        value.size());
-                }
-            }
-            break;
-            case epi::kENameNext:
-            {
-                EPI_CLEAR_MEMORY(val->next_map, char, 9);
-                if (value.size() > 8)
-                    FatalError(
-                        "UMAPINFO: Mapname for \"next\" over 8 characters!\n");
-                epi::CStringCopyMax(val->next_map, value.data(), 8);
-            }
-            break;
-            case epi::kENameNextsecret:
-            {
-                EPI_CLEAR_MEMORY(val->nextsecret, char, 9);
-                if (value.size() > 8)
-                    FatalError(
-                        "UMAPINFO: Mapname for \"nextsecret\" over 8 "
-                        "characters!\n");
-                epi::CStringCopyMax(val->nextsecret, value.data(), 8);
-            }
-            break;
-            case epi::kENameLevelpic:
-            {
-                EPI_CLEAR_MEMORY(val->levelpic, char, 9);
-                if (value.size() > 8)
-                    FatalError(
-                        "UMAPINFO: Entry for \"levelpic\" over 8 "
-                        "characters!\n");
-                epi::CStringCopyMax(val->levelpic, value.data(), 8);
-            }
-            break;
-            case epi::kENameSkytexture:
-            {
-                EPI_CLEAR_MEMORY(val->skytexture, char, 9);
-                if (value.size() > 8)
-                    FatalError(
-                        "UMAPINFO: Entry for \"skytexture\" over 8 "
-                        "characters!\n");
-                epi::CStringCopyMax(val->skytexture, value.data(), 8);
-            }
-            break;
-            case epi::kENameMusic:
-            {
-                EPI_CLEAR_MEMORY(val->music, char, 9);
-                if (value.size() > 8)
-                    FatalError(
-                        "UMAPINFO: Entry for \"music\" over 8 characters!\n");
-                epi::CStringCopyMax(val->music, value.data(), 8);
-            }
-            break;
-            case epi::kENameEndpic:
-            {
-                EPI_CLEAR_MEMORY(val->endpic, char, 9);
-                if (value.size() > 8)
-                    FatalError(
-                        "UMAPINFO: Entry for \"endpic\" over 8 characters!\n");
-                epi::CStringCopyMax(val->endpic, value.data(), 8);
-            }
-            break;
-            case epi::kENameEndcast:
-                val->docast = epi::LexBoolean(value);
-                break;
-            case epi::kENameEndbunny:
-                val->dobunny = epi::LexBoolean(value);
-                break;
-            case epi::kENameEndgame:
-                val->endgame = epi::LexBoolean(value);
-                break;
-            case epi::kENameExitpic:
-            {
-                EPI_CLEAR_MEMORY(val->exitpic, char, 9);
-                if (value.size() > 8)
-                    FatalError(
-                        "UMAPINFO: Entry for \"exitpic\" over 8 characters!\n");
-                epi::CStringCopyMax(val->exitpic, value.data(), 8);
-            }
-            break;
-            case epi::kENameEnterpic:
-            {
-                EPI_CLEAR_MEMORY(val->enterpic, char, 9);
-                if (value.size() > 8)
-                    FatalError(
-                        "UMAPINFO: Entry for \"enterpic\" over 8 "
-                        "characters!\n");
-                epi::CStringCopyMax(val->enterpic, value.data(), 8);
-            }
-            break;
-            case epi::kENameNointermission:
-                val->nointermission = epi::LexBoolean(value);
-                break;
-            case epi::kENamePartime:
-                val->partime = 35 * epi::LexInteger(value);
-                break;
-            case epi::kENameIntertext:
-            {
-                std::string it_builder = value;
-                while (lex.Match(","))
-                {
-                    it_builder.append("\n");
-                    lex.Next(value);
-                    it_builder.append(value);
-                }
-                if (val->intertext) free(val->intertext);
-                val->intertext =
-                    (char *)calloc(it_builder.size() + 1, sizeof(char));
-                epi::CStringCopyMax(val->intertext, it_builder.c_str(),
-                                    it_builder.size());
-            }
-            break;
-            case epi::kENameIntertextsecret:
-            {
-                std::string it_builder = value;
-                while (lex.Match(","))
-                {
-                    it_builder.append("\n");
-                    lex.Next(value);
-                    it_builder.append(value);
-                }
-                if (val->intertextsecret) free(val->intertextsecret);
-                val->intertextsecret =
-                    (char *)calloc(it_builder.size() + 1, sizeof(char));
-                epi::CStringCopyMax(val->intertextsecret, it_builder.c_str(),
-                                    it_builder.size());
-            }
-            break;
-            case epi::kENameInterbackdrop:
-            {
-                EPI_CLEAR_MEMORY(val->interbackdrop, char, 9);
-                if (value.size() > 8)
-                    FatalError(
-                        "UMAPINFO: Entry for \"interbackdrop\" over 8 "
-                        "characters!\n");
-                epi::CStringCopyMax(val->interbackdrop, value.data(), 8);
-            }
-            break;
-            case epi::kENameIntermusic:
-            {
-                EPI_CLEAR_MEMORY(val->intermusic, char, 9);
-                if (value.size() > 8)
-                    FatalError(
-                        "UMAPINFO: Entry for \"intermusic\" over 8 "
-                        "characters!\n");
-                epi::CStringCopyMax(val->intermusic, value.data(), 8);
-            }
-            break;
-            case epi::kENameEpisode:
-            {
-                if (epi::StringCaseCompareASCII(value, "clear") == 0)
-                {
-                    // This should leave the initial [EDGE] episode and nothing
-                    // else Since 'clear' is supposed to come before any custom
-                    // definitions this should not clear out any
-                    // UMAPINFO-defined episodes
-                    for (auto iter = gamedefs.begin() + 1;
-                         iter != gamedefs.end();)
+                    GameDefinition *game = *iter;
+                    if (game->firstmap_.empty() && epi::StringCaseCompareASCII(game->name_, "UMAPINFO_TEMPLATE") != 0)
                     {
-                        GameDefinition *game = *iter;
-                        if (game->firstmap_.empty() &&
-                            epi::StringCaseCompareASCII(
-                                game->name_, "UMAPINFO_TEMPLATE") != 0)
-                        {
-                            delete game;
-                            game = nullptr;
-                            iter = gamedefs.erase(iter);
-                        }
-                        else
-                            ++iter;
+                        delete game;
+                        game = nullptr;
+                        iter = gamedefs.erase(iter);
+                    }
+                    else
+                        ++iter;
+                }
+            }
+            else
+            {
+                GameDefinition *new_epi = nullptr;
+                // Check for episode to replace
+                for (auto game : gamedefs)
+                {
+                    if (epi::StringCaseCompareASCII(game->firstmap_, val->mapname) == 0 &&
+                        epi::StringCaseCompareASCII(game->name_, "UMAPINFO_TEMPLATE") != 0)
+                    {
+                        new_epi = game;
+                        break;
                     }
                 }
-                else
+                if (!new_epi)
                 {
-                    GameDefinition *new_epi = nullptr;
-                    // Check for episode to replace
+                    // Create a new episode from game-specific UMAPINFO
+                    // template data
+                    GameDefinition *um_template = nullptr;
                     for (auto game : gamedefs)
                     {
-                        if (epi::StringCaseCompareASCII(game->firstmap_,
-                                                        val->mapname) == 0 &&
-                            epi::StringCaseCompareASCII(
-                                game->name_, "UMAPINFO_TEMPLATE") != 0)
+                        if (epi::StringCaseCompareASCII(game->name_, "UMAPINFO_TEMPLATE") == 0)
                         {
-                            new_epi = game;
+                            um_template = game;
                             break;
                         }
                     }
-                    if (!new_epi)
-                    {
-                        // Create a new episode from game-specific UMAPINFO
-                        // template data
-                        GameDefinition *um_template = nullptr;
-                        for (auto game : gamedefs)
-                        {
-                            if (epi::StringCaseCompareASCII(
-                                    game->name_, "UMAPINFO_TEMPLATE") == 0)
-                            {
-                                um_template = game;
-                                break;
-                            }
-                        }
-                        if (!um_template)
-                            FatalError(
-                                "UMAPINFO: No custom episode template exists "
-                                "for this IWAD! Check DDFGAME!\n");
-                        new_epi = new GameDefinition;
-                        new_epi->CopyDetail(*um_template);
-                        new_epi->firstmap_ = val->mapname;
-                        gamedefs.push_back(new_epi);
-                    }
-                    char        lumpname[9] = { 0 };
-                    std::string alttext;
-                    std::string epikey;  // Do we use this?
-                    if (value.size() > 8)
-                        FatalError(
-                            "UMAPINFO: Entry for \"enterpic\" over 8 "
-                            "characters!\n");
-                    epi::CStringCopyMax(lumpname, value.data(), 8);
-                    if (lex.Match(","))
-                    {
-                        lex.Next(alttext);
-                        if (lex.Match(",")) lex.Next(epikey);
-                    }
-                    new_epi->namegraphic_ = lumpname;
-                    new_epi->description_ = alttext;
-                    new_epi->name_        = epi::StringFormat(
-                        "UMAPINFO_%s\n", val->mapname);  // Internal
+                    if (!um_template)
+                        FatalError("UMAPINFO: No custom episode template exists "
+                                   "for this IWAD! Check DDFGAME!\n");
+                    new_epi = new GameDefinition;
+                    new_epi->CopyDetail(*um_template);
+                    new_epi->firstmap_ = val->mapname;
+                    gamedefs.push_back(new_epi);
                 }
-            }
-            break;
-            case epi::kENameBossaction:
-            {
-                int special = 0;
-                int tag     = 0;
-                if (epi::StringCaseCompareASCII(value, "clear") == 0)
+                char        lumpname[9] = { 0 };
+                std::string alttext;
+                std::string epikey; // Do we use this?
+                if (value.size() > 8)
+                    FatalError("UMAPINFO: Entry for \"enterpic\" over 8 "
+                               "characters!\n");
+                epi::CStringCopyMax(lumpname, value.data(), 8);
+                if (lex.Match(","))
                 {
-                    special = tag = -1;
-                    if (val->bossactions) free(val->bossactions);
-                    val->bossactions    = nullptr;
-                    val->numbossactions = -1;
+                    lex.Next(alttext);
+                    if (lex.Match(","))
+                        lex.Next(epikey);
                 }
+                new_epi->namegraphic_ = lumpname;
+                new_epi->description_ = alttext;
+                new_epi->name_        = epi::StringFormat("UMAPINFO_%s\n", val->mapname); // Internal
+            }
+        }
+        break;
+        case epi::kENameBossaction: {
+            int special = 0;
+            int tag     = 0;
+            if (epi::StringCaseCompareASCII(value, "clear") == 0)
+            {
+                special = tag = -1;
+                if (val->bossactions)
+                    free(val->bossactions);
+                val->bossactions    = nullptr;
+                val->numbossactions = -1;
+            }
+            else
+            {
+                int actor_num   = -1;
+                int actor_check = epi::EName(value, true).GetIndex();
+                if (!ActorNames.count(actor_check))
+                    FatalError("UMAPINFO: Unknown thing type %s\n", value.c_str());
+                else
+                    actor_num = ActorNames[actor_check];
+                if (actor_num == -1)
+                    SkipToNextLine(lex, tok, value);
                 else
                 {
-                    int actor_num   = -1;
-                    int actor_check = epi::EName(value, true).GetIndex();
-                    if (!ActorNames.count(actor_check))
-                        FatalError("UMAPINFO: Unknown thing type %s\n",
-                                   value.c_str());
-                    else
-                        actor_num = ActorNames[actor_check];
-                    if (actor_num == -1)
-                        SkipToNextLine(lex, tok, value);
-                    else
+                    if (!lex.Match(","))
+                        FatalError("UMAPINFO: \"bossaction\" key missing line "
+                                   "special!\n");
+                    lex.Next(value);
+                    special = epi::LexInteger(value);
+                    if (!lex.Match(","))
+                        FatalError("UMAPINFO: \"bossaction\" key missing tag!\n");
+                    lex.Next(value);
+                    tag = epi::LexInteger(value);
+                    if (tag != 0 || special == 11 || special == 51 || special == 52 || special == 124)
                     {
-                        if (!lex.Match(","))
-                            FatalError(
-                                "UMAPINFO: \"bossaction\" key missing line "
-                                "special!\n");
-                        lex.Next(value);
-                        special = epi::LexInteger(value);
-                        if (!lex.Match(","))
-                            FatalError(
-                                "UMAPINFO: \"bossaction\" key missing tag!\n");
-                        lex.Next(value);
-                        tag = epi::LexInteger(value);
-                        if (tag != 0 || special == 11 || special == 51 ||
-                            special == 52 || special == 124)
-                        {
-                            if (val->numbossactions == -1)
-                                val->numbossactions = 1;
-                            else
-                                val->numbossactions++;
-                            val->bossactions = (struct BossAction *)realloc(
-                                val->bossactions, sizeof(struct BossAction) *
-                                                      val->numbossactions);
-                            val->bossactions[val->numbossactions - 1].type =
-                                actor_num;
-                            val->bossactions[val->numbossactions - 1].special =
-                                special;
-                            val->bossactions[val->numbossactions - 1].tag = tag;
-                        }
+                        if (val->numbossactions == -1)
+                            val->numbossactions = 1;
+                        else
+                            val->numbossactions++;
+                        val->bossactions = (struct BossAction *)realloc(val->bossactions, sizeof(struct BossAction) *
+                                                                                              val->numbossactions);
+                        val->bossactions[val->numbossactions - 1].type    = actor_num;
+                        val->bossactions[val->numbossactions - 1].special = special;
+                        val->bossactions[val->numbossactions - 1].tag     = tag;
                     }
                 }
             }
+        }
+        break;
+        case epi::kENameAuthor: {
+            if (val->authorname)
+                free(val->authorname);
+            val->authorname = (char *)calloc(value.size() + 1, sizeof(char));
+            epi::CStringCopyMax(val->authorname, value.c_str(), value.size());
+        }
+        break;
+        default:
             break;
-            case epi::kENameAuthor:
-            {
-                if (val->authorname) free(val->authorname);
-                val->authorname =
-                    (char *)calloc(value.size() + 1, sizeof(char));
-                epi::CStringCopyMax(val->authorname, value.c_str(),
-                                    value.size());
-            }
-            break;
-            default:
-                break;
         }
     }
     // Some fallback handling
@@ -721,10 +688,10 @@ void ParseUmapinfo(const std::string &buffer)
         std::string    section;
         epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF) break;
+        if (tok == epi::kTokenEOF)
+            break;
 
-        if (tok != epi::kTokenIdentifier ||
-            epi::StringCaseCompareASCII(section, "MAP") != 0)
+        if (tok != epi::kTokenIdentifier || epi::StringCaseCompareASCII(section, "MAP") != 0)
             FatalError("Malformed UMAPINFO lump.\n");
 
         tok = lex.Next(section);
@@ -744,8 +711,7 @@ void ParseUmapinfo(const std::string &buffer)
         // Does this map entry already exist? If yes, replace it.
         for (i = 0; i < Maps.mapcount; i++)
         {
-            if (epi::StringCaseCompareASCII(parsed.mapname,
-                                            Maps.maps[i].mapname) == 0)
+            if (epi::StringCaseCompareASCII(parsed.mapname, Maps.maps[i].mapname) == 0)
             {
                 FreeMap(&Maps.maps[i]);
                 Maps.maps[i] = parsed;
@@ -756,8 +722,7 @@ void ParseUmapinfo(const std::string &buffer)
         if (i == Maps.mapcount)
         {
             Maps.mapcount++;
-            Maps.maps                    = (MapEntry *)realloc(Maps.maps,
-                                                               sizeof(MapEntry) * Maps.mapcount);
+            Maps.maps                    = (MapEntry *)realloc(Maps.maps, sizeof(MapEntry) * Maps.mapcount);
             Maps.maps[Maps.mapcount - 1] = parsed;
         }
     }

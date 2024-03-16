@@ -41,25 +41,21 @@ void RendererNewScreenSize(int width, int height, int bits)
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void RendererDrawImage(float x, float y, float w, float h, const Image *image,
-                       float tx1, float ty1, float tx2, float ty2,
-                       const Colormap *textmap, float alpha,
-                       const Colormap *palremap)
+void RendererDrawImage(float x, float y, float w, float h, const Image *image, float tx1, float ty1, float tx2,
+                       float ty2, const Colormap *textmap, float alpha, const Colormap *palremap)
 {
     int x1 = RoundToInteger(x);
     int y1 = RoundToInteger(y);
     int x2 = RoundToInteger(x + w + 0.25f);
     int y2 = RoundToInteger(y + h + 0.25f);
 
-    if (x1 == x2 || y1 == y2) return;
+    if (x1 == x2 || y1 == y2)
+        return;
 
     sg_color sgcol = sg_white;
 
-    GLuint tex_id = ImageCache(
-        image, true,
-        (textmap && (textmap->special_ & kColorSpecialWhiten)) ? nullptr
-                                                               : palremap,
-        (textmap && (textmap->special_ & kColorSpecialWhiten)) ? true : false);
+    GLuint tex_id = ImageCache(image, true, (textmap && (textmap->special_ & kColorSpecialWhiten)) ? nullptr : palremap,
+                               (textmap && (textmap->special_ & kColorSpecialWhiten)) ? true : false);
 
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, tex_id);
@@ -74,9 +70,11 @@ void RendererDrawImage(float x, float y, float w, float h, const Image *image,
             glAlphaFunc(GL_GREATER, alpha * 0.66f);
     }
 
-    if (image->opacity_ == kOpacityComplex || alpha < 0.99f) glEnable(GL_BLEND);
+    if (image->opacity_ == kOpacityComplex || alpha < 0.99f)
+        glEnable(GL_BLEND);
 
-    if (textmap) sgcol = sg_make_color_1i(GetFontColor(textmap));
+    if (textmap)
+        sgcol = sg_make_color_1i(GetFontColor(textmap));
 
     glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
 

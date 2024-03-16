@@ -45,9 +45,9 @@ constexpr uint8_t kDummyImageSize = 16;
 enum ImageOpacity
 {
     kOpacityUnknown = 0,
-    kOpacitySolid   = 1,  // utterly solid (alpha = 255 everywhere)
-    kOpacityMasked  = 2,  // only uses alpha 255 and 0
-    kOpacityComplex = 3,  // uses full range of alpha values
+    kOpacitySolid   = 1, // utterly solid (alpha = 255 everywhere)
+    kOpacityMasked  = 2, // only uses alpha 255 and 0
+    kOpacityComplex = 3, // uses full range of alpha values
 };
 
 enum LiquidImageType
@@ -59,7 +59,7 @@ enum LiquidImageType
 
 class Image
 {
-   public:
+  public:
     // actual image size.  Images that are smaller than their total size
     // are located in the bottom left corner, cannot tile, and are padded
     // with black pixels if solid, or transparent pixels otherwise.
@@ -107,10 +107,9 @@ class Image
     // --- information about where this image came from ---
     std::string name_;
 
-    int source_type_;  // image_source_e
+    int source_type_; // image_source_e
 
-    union
-    {
+    union {
         // case kImageSourceGraphic:
         // case kImageSourceSprite:
         // case kImageSourceTxHi:
@@ -177,25 +176,49 @@ class Image
         uint16_t speed;
     } animation_;
 
-   public:
+  public:
     Image();
     ~Image();
 
-    float Right() const { return (float(actual_width_) / total_width_); }
+    float Right() const
+    {
+        return (float(actual_width_) / total_width_);
+    }
 
-    float Top() const { return (float(actual_height_) / total_height_); }
+    float Top() const
+    {
+        return (float(actual_height_) / total_height_);
+    }
 
-    float ScaledWidthActual() const { return (actual_width_ * scale_x_); }
+    float ScaledWidthActual() const
+    {
+        return (actual_width_ * scale_x_);
+    }
 
-    float ScaledHeightActual() const { return (actual_height_ * scale_y_); }
+    float ScaledHeightActual() const
+    {
+        return (actual_height_ * scale_y_);
+    }
 
-    float ScaledWidthTotal() const { return (total_width_ * scale_x_); }
+    float ScaledWidthTotal() const
+    {
+        return (total_width_ * scale_x_);
+    }
 
-    float ScaledHeightTotal() const { return (total_height_ * scale_y_); }
+    float ScaledHeightTotal() const
+    {
+        return (total_height_ * scale_y_);
+    }
 
-    float ScaledOffsetX() const { return (offset_x_ * scale_x_); }
+    float ScaledOffsetX() const
+    {
+        return (offset_x_ * scale_x_);
+    }
 
-    float ScaledOffsetY() const { return (offset_y_ * scale_y_); }
+    float ScaledOffsetY() const
+    {
+        return (offset_y_ * scale_y_);
+    }
 };
 
 //
@@ -203,17 +226,14 @@ class Image
 //
 enum ImageLookupFlag
 {
-    kImageLookupNull  = 0x0001,  // return nullptr rather than a dummy image
-    kImageLookupExact = 0x0002,  // type must be exactly the same
-    kImageLookupNoNew = 0x0004,  // image must already exist (don't create it)
-    kImageLookupFont  = 0x0008,  // font character (be careful with backups)
+    kImageLookupNull  = 0x0001, // return nullptr rather than a dummy image
+    kImageLookupExact = 0x0002, // type must be exactly the same
+    kImageLookupNoNew = 0x0004, // image must already exist (don't create it)
+    kImageLookupFont  = 0x0008, // font character (be careful with backups)
 };
 
-Image       *ImageContainerLookup(std::list<Image *> &bucket, const char *name,
-                                  int source_type = -1);
-const Image *ImageLookup(const char *name,
-                         ImageNamespace = kImageNamespaceGraphic,
-                         int flags      = 0);
+Image       *ImageContainerLookup(std::list<Image *> &bucket, const char *name, int source_type = -1);
+const Image *ImageLookup(const char *name, ImageNamespace = kImageNamespaceGraphic, int flags = 0);
 
 const Image *ImageForDummySprite(void);
 const Image *ImageForDummySkin(void);
@@ -248,8 +268,7 @@ void DeleteAllImages(void);
 void         CreateFlats(std::vector<int> &lumps);
 void         CreateTextures(struct TextureDefinition **defs, int number);
 const Image *CreateSprite(const char *name, int lump, bool is_weapon);
-const Image *CreatePackSprite(std::string packname, PackFile *pack,
-                              bool is_weapon);
+const Image *CreatePackSprite(std::string packname, PackFile *pack, bool is_weapon);
 void         CreateUserImages(void);
 void         ImageAddTxHx(int lump, const char *name, bool hires);
 void         AnimateImageSet(const Image **images, int number, int speed);
@@ -257,8 +276,7 @@ void         AnimateImageSet(const Image **images, int number, int speed);
 void CreateFallbackFlat(void);
 void CreateFallbackTexture(void);
 
-GLuint ImageCache(const Image *image, bool anim = true,
-                  const Colormap *trans = nullptr, bool do_whiten = false);
+GLuint ImageCache(const Image *image, bool anim = true, const Colormap *trans = nullptr, bool do_whiten = false);
 void   ImagePrecache(const Image *image);
 
 // this only needed during initialisation -- r_things.cpp
@@ -304,10 +322,8 @@ extern std::list<Image *> real_textures;
 extern std::list<Image *> real_flats;
 extern std::list<Image *> real_sprites;
 
-Image *AddPackImageSmart(const char *name, ImageSource type,
-                         const char         *packfile_name,
-                         std::list<Image *> &container,
-                         const Image        *replaces = nullptr);
+Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfile_name, std::list<Image *> &container,
+                         const Image *replaces = nullptr);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

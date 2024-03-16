@@ -29,11 +29,11 @@ class LanguageChoice;
 
 class Language
 {
-   public:
+  public:
     Language();
     ~Language();
 
-   private:
+  private:
     std::vector<LanguageChoice *> choices_;
 
     // UMAPINFO strings
@@ -42,11 +42,17 @@ class Language
     // the current language choice
     int current_choice_;
 
-   public:
+  public:
     void Clear();
 
-    int GetChoiceCount() { return (int)choices_.size(); }
-    int GetChoice() { return current_choice_; }
+    int GetChoiceCount()
+    {
+        return (int)choices_.size();
+    }
+    int GetChoice()
+    {
+        return current_choice_;
+    }
 
     const char *GetName(int idx = -1);
     bool        IsValidRef(const char *refname);
@@ -68,7 +74,7 @@ class Language
     LanguageChoice *AddChoice(const char *name);
 };
 
-extern Language language;  // -ACB- 2004/06/27 Implemented
+extern Language language; // -ACB- 2004/06/27 Implemented
 
 void DDF_ReadLangs(const std::string &data);
 

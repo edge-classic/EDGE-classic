@@ -55,9 +55,15 @@ extern ConsoleVariable debug_fps;
 extern ConsoleVariable debug_position;
 
 static CheatSequence cheat_powerup[9] = {
-    { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
-    { 0, 0 }, { 0, 0 }, { 0, 0 },  // -MH- 1998/06/17  added "give jetpack"
-                                   // cheat
+    { 0, 0 },
+    { 0, 0 },
+    { 0, 0 },
+    { 0, 0 },
+    { 0, 0 },
+    { 0, 0 },
+    { 0, 0 },
+    { 0, 0 }, // -MH- 1998/06/17  added "give jetpack"
+              // cheat
     { 0, 0 }  // -ACB- 1998/07/15  added "give nightvision" cheat
 };
 
@@ -79,8 +85,7 @@ static CheatSequence cheat_no_clipping2    = { 0, 0 };
 static CheatSequence cheat_hall_of_mirrors = { 0, 0 };
 
 static CheatSequence cheat_give_weapon[11] = {
-    { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
-    { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
 };
 
 //
@@ -93,7 +98,8 @@ int CheatCheckSequence(CheatSequence *cht, char key)
 {
     int rc = 0;
 
-    if (!cht->p) cht->p = cht->sequence;  // initialise if first time
+    if (!cht->p)
+        cht->p = cht->sequence; // initialise if first time
 
     if ((unsigned char)key == (unsigned char)*cht->p)
         cht->p++;
@@ -101,7 +107,7 @@ int CheatCheckSequence(CheatSequence *cht, char key)
         cht->p = cht->sequence;
 
     if (*cht->p == 0)
-    {  // end of sequence character
+    { // end of sequence character
 
         cht->p = cht->sequence;
         rc     = 1;
@@ -113,7 +119,8 @@ int CheatCheckSequence(CheatSequence *cht, char key)
 void M_ChangeLevelCheat(const char *string)
 {
     // User pressed <ESC>
-    if (!string) return;
+    if (!string)
+        return;
 
     // NOTE WELL: following assumes single player
 
@@ -151,11 +158,13 @@ static void M_ChangeMusicCheat(const char *string)
     int entry_num;
 
     // User pressed <ESC>
-    if (!string) return;
+    if (!string)
+        return;
 
     entry_num = atoi(string);
 
-    if (!entry_num) return;
+    if (!entry_num)
+        return;
 
     ChangeMusic(entry_num, true);
     ConsoleMessageLDF("MusChange");
@@ -175,7 +184,8 @@ static void CheatGiveWeapons(Player *pl, int key = -2)
     {
         for (int slot = 0; slot < kMaximumWeapons; slot++)
         {
-            if (pl->weapons_[slot].info) FillWeapon(pl, slot);
+            if (pl->weapons_[slot].info)
+                FillWeapon(pl, slot);
         }
     }
 
@@ -192,15 +202,18 @@ bool CheatResponder(InputEvent *ev)
     Player *pl = players[console_player];
 
     // disable cheats while in RTS menu
-    if (rts_menu_active) return false;
+    if (rts_menu_active)
+        return false;
 
     // if a user keypress...
-    if (ev->type != kInputEventKeyDown) return false;
+    if (ev->type != kInputEventKeyDown)
+        return false;
 
     char key = (char)ev->value.key.sym;
 
     // no cheating in bot deathmatch or if disallowed in levels.ddf
-    if (!level_flags.cheats || deathmatch) return false;
+    if (!level_flags.cheats || deathmatch)
+        return false;
 
     // 'dqd' cheat for toggleable god mode
     if (CheatCheckSequence(&cheat_god, key))
@@ -210,8 +223,7 @@ bool CheatResponder(InputEvent *ev)
         {
             if (pl->map_object_)
             {
-                pl->health_ = pl->map_object_->health_ =
-                    pl->map_object_->spawn_health_;
+                pl->health_ = pl->map_object_->health_ = pl->map_object_->spawn_health_;
             }
             ConsoleMessageLDF("GodModeOn");
         }
@@ -269,7 +281,7 @@ bool CheatResponder(InputEvent *ev)
 
         ConsoleMessageLDF("LoadedCheat");
     }
-#if 0  // FIXME: this crashes ?
+#if 0 // FIXME: this crashes ?
 	else if (CheatCheckSequence(&cheat_take_all, key))
 	{
 		P_GiveInitialBenefits(pl, pl->map_object_->info_);
@@ -297,8 +309,7 @@ bool CheatResponder(InputEvent *ev)
         {
             next = mo->next_;
 
-            if ((mo->extended_flags_ & kExtendedFlagMonster) &&
-                (mo->health_ > 0))
+            if ((mo->extended_flags_ & kExtendedFlagMonster) && (mo->health_ > 0))
             {
                 TelefragMapObject(mo, nullptr, nullptr);
                 killcount++;
@@ -309,8 +320,7 @@ bool CheatResponder(InputEvent *ev)
     }
     // Simplified, accepting both "noclip" and "idspispopd".
     // no clipping mode cheat
-    else if (CheatCheckSequence(&cheat_no_clipping, key) ||
-             CheatCheckSequence(&cheat_no_clipping2, key))
+    else if (CheatCheckSequence(&cheat_no_clipping, key) || CheatCheckSequence(&cheat_no_clipping2, key))
     {
         pl->cheats_ ^= kCheatingNoClip;
 
@@ -349,7 +359,8 @@ bool CheatResponder(InputEvent *ev)
     // 'give#' power-up cheats
     for (i = 0; i < 10; i++)
     {
-        if (!CheatCheckSequence(&cheat_give_weapon[i + 1], key)) continue;
+        if (!CheatCheckSequence(&cheat_give_weapon[i + 1], key))
+            continue;
 
         CheatGiveWeapons(pl, i);
     }
@@ -369,9 +380,8 @@ bool CheatResponder(InputEvent *ev)
     // 'mypos' for player position
     else if (CheatCheckSequence(&cheat_my_position, key))
     {
-        ConsoleMessage("ang=%f;x,y=(%f,%f)",
-                       epi::DegreesFromBAM(pl->map_object_->angle_),
-                       pl->map_object_->x, pl->map_object_->y);
+        ConsoleMessage("ang=%f;x,y=(%f,%f)", epi::DegreesFromBAM(pl->map_object_->angle_), pl->map_object_->x,
+                       pl->map_object_->y);
     }
 
     if (CheatCheckSequence(&cheat_change_level, key))

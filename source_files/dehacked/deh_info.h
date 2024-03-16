@@ -121,7 +121,7 @@ enum Actions
     kA_FireOldBFG,
     kA_BetaSkullAttack,
 
-    kTotalMBFActions,  // Keep this around in case we need to delineate - Dasho
+    kTotalMBFActions, // Keep this around in case we need to delineate - Dasho
 
     // MBF21 actions:
     kA_RefireTo = kTotalMBFActions,
@@ -1247,4 +1247,4 @@ struct State
     int arg_pointer;
 };
 
-}  // namespace dehacked
+} // namespace dehacked

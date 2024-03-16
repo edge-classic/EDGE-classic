@@ -26,9 +26,9 @@ class DeathBot;
 enum BotPathNodeFlag
 {
     kBotPathNodeNormal   = 0,
-    kBotPathNodeDoor     = (1 << 0),  // manual door (press USE to open)
-    kBotPathNodeLift     = (1 << 1),  // manual lift (press USE to lower)
-    kBotPathNodeTeleport = (1 << 2),  // teleporter line, walk over it
+    kBotPathNodeDoor     = (1 << 0), // manual door (press USE to open)
+    kBotPathNodeLift     = (1 << 1), // manual lift (press USE to lower)
+    kBotPathNodeTeleport = (1 << 2), // teleporter line, walk over it
 };
 
 struct BotPathNode
@@ -42,12 +42,15 @@ struct BotPathNode
 // includes both start and finish (at least two entries).
 class BotPath
 {
-   public:
+  public:
     std::vector<BotPathNode> nodes_;
 
     size_t along_ = 1;
 
-    bool Finished() const { return along_ == nodes_.size(); }
+    bool Finished() const
+    {
+        return along_ == nodes_.size();
+    }
 
     Position CurrentDestination() const;
     Position CurrentFrom() const;
@@ -65,8 +68,7 @@ float BotNavigateEvaluateBigItem(const MapObject *mo);
 bool  BotNavigateNextRoamPoint(Position &out);
 
 // attempt to find a traversible path, returns nullptr if failed.
-BotPath *BotNavigateFindPath(const Position *start, const Position *finish,
-                             int flags);
+BotPath *BotNavigateFindPath(const Position *start, const Position *finish, int flags);
 
 // find an pickup item in a nearby area, returns nullptr if none found.
 BotPath *BotNavigateFindThing(DeathBot *bot, float radius, MapObject *&best);

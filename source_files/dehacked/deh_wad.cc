@@ -72,6 +72,6 @@ void Printf(const char *str, ...)
     cur_lump->data += (const char *)wad_msg_buf;
 }
 
-}  // namespace wad
+} // namespace wad
 
-}  // namespace dehacked
+} // namespace dehacked

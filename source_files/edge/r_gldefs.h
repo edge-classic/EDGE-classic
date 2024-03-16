@@ -77,8 +77,8 @@ struct DrawSubsector;
 enum VerticalClipMode
 {
     kVerticalClipNever = 0,
-    kVerticalClipSoft  = 1,  // only clip at translucent water
-    kVerticalClipHard  = 2,  // vertically clip sprites at all solid surfaces
+    kVerticalClipSoft  = 1, // only clip at translucent water
+    kVerticalClipHard  = 2, // vertically clip sprites at all solid surfaces
 };
 
 //
@@ -97,7 +97,7 @@ struct DrawThing
 
     bool is_model;
 
-    float map_x, map_y, map_z;  // map_z only used for models
+    float map_x, map_y, map_z; // map_z only used for models
 
     // vertical extent of sprite (world coords)
     float top;
@@ -164,7 +164,7 @@ struct DrawMirror
     std::list<DrawSubsector *> draw_subsectors;
 };
 
-struct DrawSeg  // HOPEFULLY this can go away
+struct DrawSeg // HOPEFULLY this can go away
 {
     Seg *seg;
 };

@@ -148,7 +148,7 @@ struct ScriptArmourParameter
 struct ScriptBenefitParameter
 {
     Benefit *benefit = nullptr;
-    bool     lose_it = false;  // or use_it :)
+    bool     lose_it = false; // or use_it :)
 };
 
 // Radius Damage Monster Trigger

@@ -39,17 +39,15 @@ std::wstring UTF8ToWString(std::string_view instring)
     utf8proc_int32_t        u32c;
     while (utf8pos < utf8len)
     {
-        u32c = 0;
-        size_t res =
-            utf8proc_iterate(utf8ptr + utf8pos, utf8len - utf8pos, &u32c);
+        u32c       = 0;
+        size_t res = utf8proc_iterate(utf8ptr + utf8pos, utf8len - utf8pos, &u32c);
         if (res < 0)
-            FatalError("Failed to convert %s to a wide string!\n",
-                       std::string(instring).c_str());
+            FatalError("Failed to convert %s to a wide string!\n", std::string(instring).c_str());
         else
             utf8pos += res;
         if (u32c < 0x10000)
             outstring.push_back((wchar_t)u32c);
-        else  // Make into surrogate pair if needed
+        else // Make into surrogate pair if needed
         {
             u32c -= 0x10000;
             outstring.push_back((wchar_t)(u32c >> 10) + 0xD800);
@@ -68,21 +66,18 @@ std::string WStringToUTF8(std::wstring_view instring)
     while (inpos < inlen)
     {
         utf8proc_int32_t u32c = 0;
-        if ((*(inptr + inpos) & 0xD800) == 0xD800)  // High surrogate
+        if ((*(inptr + inpos) & 0xD800) == 0xD800)                              // High surrogate
         {
-            if (inpos + 1 < inlen &&
-                (*(inptr + inpos + 1) & 0xDC00) == 0xDC00)  // Low surrogate
+            if (inpos + 1 < inlen && (*(inptr + inpos + 1) & 0xDC00) == 0xDC00) // Low surrogate
             {
-                u32c = ((*(inptr + inpos) - 0xD800) * 0x400) +
-                       (*(inptr + inpos + 1) - 0xDC00) + 0x10000;
+                u32c = ((*(inptr + inpos) - 0xD800) * 0x400) + (*(inptr + inpos + 1) - 0xDC00) + 0x10000;
                 inpos += 2;
             }
-            else  // Assume an unpaired surrogate is malformed
+            else // Assume an unpaired surrogate is malformed
             {
                 // print what was safely converted if present
                 if (!outstring.empty())
-                    FatalError("Failure to convert %s from a wide string!\n",
-                               outstring.c_str());
+                    FatalError("Failure to convert %s from a wide string!\n", outstring.c_str());
                 else
                     FatalError("Wide string to UTF-8 conversion failure!\n");
             }
@@ -97,15 +92,18 @@ std::string WStringToUTF8(std::wstring_view instring)
         {
             // print what was safely converted if present
             if (!outstring.empty())
-                FatalError("Failure to convert %s from a wide string!\n",
-                           outstring.c_str());
+                FatalError("Failure to convert %s from a wide string!\n", outstring.c_str());
             else
                 FatalError("Wide string to UTF-8 conversion failure!\n");
         }
-        if (u8c[0]) outstring.push_back(u8c[0]);
-        if (u8c[1]) outstring.push_back(u8c[1]);
-        if (u8c[2]) outstring.push_back(u8c[2]);
-        if (u8c[3]) outstring.push_back(u8c[3]);
+        if (u8c[0])
+            outstring.push_back(u8c[0]);
+        if (u8c[1])
+            outstring.push_back(u8c[1]);
+        if (u8c[2])
+            outstring.push_back(u8c[2]);
+        if (u8c[3])
+            outstring.push_back(u8c[3]);
     }
     return outstring;
 }
@@ -115,14 +113,16 @@ void StringLowerASCII(std::string &s)
 {
     for (char &ch : s)
     {
-        if (ch > '@' && ch < '[') ch ^= 0x20;
+        if (ch > '@' && ch < '[')
+            ch ^= 0x20;
     }
 }
 void StringUpperASCII(std::string &s)
 {
     for (char &ch : s)
     {
-        if (ch > '`' && ch < '{') ch ^= 0x20;
+        if (ch > '`' && ch < '{')
+            ch ^= 0x20;
     }
 }
 
@@ -179,8 +179,7 @@ std::string StringFormat(const char *fmt, ...)
     }
 }
 
-std::vector<std::string> SeparatedStringVector(std::string_view str,
-                                               char             separator)
+std::vector<std::string> SeparatedStringVector(std::string_view str, char separator)
 {
     std::vector<std::string>    vec;
     std::string_view::size_type oldpos = 0;
@@ -188,17 +187,21 @@ std::vector<std::string> SeparatedStringVector(std::string_view str,
     while (pos != std::string_view::npos)
     {
         pos = str.find(separator, oldpos);
-        std::string sub_string(str.substr(
-            oldpos, (pos == std::string::npos ? str.size() : pos) - oldpos));
-        if (!sub_string.empty()) vec.push_back(sub_string);
-        if (pos != std::string_view::npos) oldpos = pos + 1;
+        std::string sub_string(str.substr(oldpos, (pos == std::string::npos ? str.size() : pos) - oldpos));
+        if (!sub_string.empty())
+            vec.push_back(sub_string);
+        if (pos != std::string_view::npos)
+            oldpos = pos + 1;
     }
     return vec;
 }
 
 uint32_t StringHash32(std::string_view str_to_hash)
 {
-    if (str_to_hash.empty()) { return 0; }
+    if (str_to_hash.empty())
+    {
+        return 0;
+    }
 
     return SFH_MakeKey(str_to_hash.data(), str_to_hash.length());
 }
@@ -208,7 +211,10 @@ uint32_t StringHash32(std::string_view str_to_hash)
 // The terminating zero is always applied (there is no reason not to)
 void CStringCopyMax(char *destination, const char *source, int max)
 {
-    for (; *source && max > 0; max--) { *destination++ = *source++; }
+    for (; *source && max > 0; max--)
+    {
+        *destination++ = *source++;
+    }
 
     *destination = 0;
 }
@@ -219,20 +225,23 @@ char *CStringNew(int length)
 
     char *s = (char *)calloc(length + 1, 1);
 
-    if (!s) FatalError("Out of memory (%d bytes for string)\n", length);
+    if (!s)
+        FatalError("Out of memory (%d bytes for string)\n", length);
 
     return s;
 }
 
 char *CStringDuplicate(const char *original, int limit)
 {
-    if (!original) return nullptr;
+    if (!original)
+        return nullptr;
 
     if (limit < 0)
     {
         char *s = strdup(original);
 
-        if (!s) FatalError("Out of memory (copy string)\n");
+        if (!s)
+            FatalError("Out of memory (copy string)\n");
 
         return s;
     }
@@ -248,17 +257,21 @@ char *CStringUpper(const char *name)
 {
     char *copy = CStringDuplicate(name);
 
-    for (char *p = copy; *p; p++) *p = epi::ToUpperASCII(*p);
+    for (char *p = copy; *p; p++)
+        *p = epi::ToUpperASCII(*p);
 
     return copy;
 }
 
 void CStringFree(const char *string)
 {
-    if (string) { free((void *)string); }
+    if (string)
+    {
+        free((void *)string);
+    }
 }
 
-}  // namespace epi
+} // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

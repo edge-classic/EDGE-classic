@@ -280,7 +280,8 @@ SaveStruct *SaveStructLookup(const char *name)
     SaveStruct *cur;
 
     for (cur = sv_known_structs; cur; cur = cur->next)
-        if (strcmp(cur->struct_name, name) == 0) return cur;
+        if (strcmp(cur->struct_name, name) == 0)
+            return cur;
 
     // not found
     return nullptr;
@@ -291,7 +292,8 @@ SaveArray *SaveArrayLookup(const char *name)
     SaveArray *cur;
 
     for (cur = sv_known_arrays; cur; cur = cur->next)
-        if (strcmp(cur->array_name, name) == 0) return cur;
+        if (strcmp(cur->array_name, name) == 0)
+            return cur;
 
     // not found
     return nullptr;
@@ -317,15 +319,15 @@ const char *SaveMapName(const MapDefinition *map)
 
     strcpy(buffer, map->name_.c_str());
 
-    for (char *pos = buffer; *pos; pos++) *pos = epi::ToLowerASCII(*pos);
+    for (char *pos = buffer; *pos; pos++)
+        *pos = epi::ToLowerASCII(*pos);
 
     return buffer;
 }
 
 std::string SaveFilename(const char *slot_name, const char *map_name)
 {
-    std::string temp(
-        epi::StringFormat("%s/%s.%s", slot_name, map_name, kSaveGameExtension));
+    std::string temp(epi::StringFormat("%s/%s.%s", slot_name, map_name, kSaveGameExtension));
 
     return epi::PathAppend(save_directory, temp);
 }
@@ -354,9 +356,9 @@ void SaveClearSlot(const char *slot_name)
 
     for (size_t i = 0; i < fsd.size(); i++)
     {
-        if (fsd[i].is_dir) continue;
-        std::string cur_file =
-            epi::PathAppend(full_dir, epi::GetFilename(fsd[i].name));
+        if (fsd[i].is_dir)
+            continue;
+        std::string cur_file = epi::PathAppend(full_dir, epi::GetFilename(fsd[i].name));
         LogDebug("  Deleting %s\n", cur_file.c_str());
 
         epi::FileDelete(cur_file);
@@ -380,7 +382,8 @@ void SaveCopySlot(const char *src_name, const char *dest_name)
 
     for (size_t i = 0; i < fsd.size(); i++)
     {
-        if (fsd[i].is_dir) continue;
+        if (fsd[i].is_dir)
+            continue;
 
         std::string fn        = epi::GetFilename(fsd[i].name);
         std::string src_file  = epi::PathAppend(src_dir, fn);
@@ -389,8 +392,7 @@ void SaveCopySlot(const char *src_name, const char *dest_name)
         LogDebug("  Copying %s --> %s\n", src_file.c_str(), dest_file.c_str());
 
         if (!epi::FileCopy(src_file, dest_file))
-            FatalError("SV_CopySlot: failed to copy '%s' to '%s'\n",
-                       src_file.c_str(), dest_file.c_str());
+            FatalError("SV_CopySlot: failed to copy '%s' to '%s'\n", src_file.c_str(), dest_file.c_str());
     }
 }
 

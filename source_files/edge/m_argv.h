@@ -34,15 +34,11 @@ int ArgumentFind(std::string_view long_name, int *total_parameters = nullptr);
 
 //  Same as above, but return the value of position + 1 if valid, else an empty
 //  string
-std::string ArgumentValue(std::string_view long_name,
-                          int             *total_parameters = nullptr);
+std::string ArgumentValue(std::string_view long_name, int *total_parameters = nullptr);
 
-void ArgumentCheckBooleanParameter(const std::string &parameter,
-                                   bool *boolean_value, bool reverse);
+void ArgumentCheckBooleanParameter(const std::string &parameter, bool *boolean_value, bool reverse);
 
-void ArgumentCheckBooleanConsoleVariable(const std::string &parameter,
-                                         ConsoleVariable   *variable,
-                                         bool               reverse);
+void ArgumentCheckBooleanConsoleVariable(const std::string &parameter, ConsoleVariable *variable, bool reverse);
 
 void ArgumentApplyResponseFile(std::string_view name);
 

@@ -41,8 +41,7 @@ static int PL_set_who(lua_State *L)
     int index = luaL_checknumber(L, 1);
 
     if (index < 0 || index >= total_players)
-        FatalError("player.set_who: bad index value: %d (numplayers=%d)\n",
-                   index, total_players);
+        FatalError("player.set_who: bad index value: %d (numplayers=%d)\n", index, total_players);
 
     if (index == 0)
     {
@@ -54,7 +53,8 @@ static int PL_set_who(lua_State *L)
 
     for (; index > 1; index--)
     {
-        do {
+        do
+        {
             who = (who + 1) % kMaximumPlayers;
         } while (players[who] == nullptr);
     }
@@ -100,8 +100,10 @@ static int PL_get_angle(lua_State *L)
 {
     float value = epi::DegreesFromBAM(ui_player_who->map_object_->angle_);
 
-    if (value > 360.0f) value -= 360.0f;
-    if (value < 0) value += 360.0f;
+    if (value > 360.0f)
+        value -= 360.0f;
+    if (value < 0)
+        value += 360.0f;
 
     lua_pushnumber(L, value);
     return 1;
@@ -113,7 +115,8 @@ static int PL_get_mlook(lua_State *L)
 {
     float value = epi::DegreesFromBAM(ui_player_who->map_object_->vertical_angle_);
 
-    if (value > 180.0f) value -= 360.0f;
+    if (value > 180.0f)
+        value -= 360.0f;
 
     lua_pushnumber(L, value);
     return 1;
@@ -125,7 +128,8 @@ static int PL_health(lua_State *L)
 {
     float h = ui_player_who->health_ * 100 / ui_player_who->map_object_->spawn_health_;
 
-    if (h < 98) h += 0.99f;
+    if (h < 98)
+        h += 0.99f;
 
     lua_pushinteger(L, floor(h));
     return 1;
@@ -144,7 +148,8 @@ static int PL_armor(lua_State *L)
     // lua_pushnumber(L, floor(ui_player_who->armours_[kind] + 0.99));
 
     float a = ui_player_who->armours_[kind];
-    if (a < 98) a += 0.99f;
+    if (a < 98)
+        a += 0.99f;
 
     lua_pushinteger(L, floor(a));
     return 1;
@@ -157,7 +162,8 @@ static int PL_total_armor(lua_State *L)
     // lua_pushnumber(L, floor(ui_player_who->total_armour_ + 0.99));
 
     float a = ui_player_who->total_armour_;
-    if (a < 98) a += 0.99f;
+    if (a < 98)
+        a += 0.99f;
 
     lua_pushinteger(L, floor(a));
     return 1;
@@ -187,9 +193,8 @@ static int PL_on_ground(lua_State *L)
     if (ui_player_who->map_object_->subsector_->sector->extrafloor_used == 0)
     {
         // on the edge above water/lava/etc? Handles edge walker case
-        if (!AlmostEquals(
-                ui_player_who->map_object_->floor_z_,
-                ui_player_who->map_object_->subsector_->sector->floor_height) &&
+        if (!AlmostEquals(ui_player_who->map_object_->floor_z_,
+                          ui_player_who->map_object_->subsector_->sector->floor_height) &&
             !ui_player_who->map_object_->subsector_->sector->floor_vertex_slope)
             lua_pushboolean(L, 0);
         else
@@ -232,9 +237,7 @@ static int PL_is_jumping(lua_State *L)
 //
 static int PL_is_crouching(lua_State *L)
 {
-    lua_pushboolean(
-        L,
-        (ui_player_who->map_object_->extended_flags_ & kExtendedFlagCrouching) ? 1 : 0);
+    lua_pushboolean(L, (ui_player_who->map_object_->extended_flags_ & kExtendedFlagCrouching) ? 1 : 0);
     return 1;
 }
 
@@ -242,9 +245,10 @@ static int PL_is_crouching(lua_State *L)
 //
 static int PL_is_attacking(lua_State *L)
 {
-    lua_pushboolean(
-        L,
-        (ui_player_who->attack_button_down_[0] || ui_player_who->attack_button_down_[1] || ui_player_who->attack_button_down_[2] || ui_player_who->attack_button_down_[3]) ? 1 : 0);
+    lua_pushboolean(L, (ui_player_who->attack_button_down_[0] || ui_player_who->attack_button_down_[1] ||
+                        ui_player_who->attack_button_down_[2] || ui_player_who->attack_button_down_[3])
+                           ? 1
+                           : 0);
     return 1;
 }
 
@@ -314,8 +318,7 @@ static int PL_air_in_lungs(lua_State *L)
         return 1;
     }
 
-    float value = ui_player_who->air_in_lungs_ * 100.0f /
-                  ui_player_who->map_object_->info_->lung_capacity_;
+    float value = ui_player_who->air_in_lungs_ * 100.0f / ui_player_who->map_object_->info_->lung_capacity_;
 
     value = HMM_Clamp(0.0f, value, 100.0f);
 
@@ -374,7 +377,8 @@ static int PL_power_left(lua_State *L)
 
     float value = ui_player_who->powers_[power];
 
-    if (value > 0) value /= kTicRate;
+    if (value > 0)
+        value /= kTicRate;
 
     lua_pushnumber(L, value);
     return 1;
@@ -420,8 +424,7 @@ static int PL_has_weapon(lua_State *L)
     {
         PlayerWeapon *pw = &ui_player_who->weapons_[j];
 
-        if (pw->owned && !(pw->flags & kPlayerWeaponRemoving) &&
-            DDF_CompareName(name, pw->info->name_.c_str()) == 0)
+        if (pw->owned && !(pw->flags & kPlayerWeaponRemoving) && DDF_CompareName(name, pw->info->name_.c_str()) == 0)
         {
             lua_pushboolean(L, 1);
             return 1;
@@ -448,15 +451,13 @@ static int PL_cur_weapon(lua_State *L)
         return 1;
     }
 
-    WeaponDefinition *info =
-        ui_player_who->weapons_[ui_player_who->ready_weapon_].info;
+    WeaponDefinition *info = ui_player_who->weapons_[ui_player_who->ready_weapon_].info;
 
     lua_pushstring(L, info->name_.c_str());
     return 1;
 }
 
-static void LuaSetPlayerSprite(Player *p, int position, int stnum,
-                               WeaponDefinition *info = nullptr)
+static void LuaSetPlayerSprite(Player *p, int position, int stnum, WeaponDefinition *info = nullptr)
 {
     PlayerSprite *psp = &p->player_sprites_[position];
 
@@ -474,17 +475,16 @@ static void LuaSetPlayerSprite(Player *p, int position, int stnum,
 
         if (st->label)
         {
-            int new_state = DDF_StateFindLabel(info->state_grp_, st->label,
-                                               true /* quiet */);
-            if (new_state != 0) stnum = new_state;
+            int new_state = DDF_StateFindLabel(info->state_grp_, st->label, true /* quiet */);
+            if (new_state != 0)
+                stnum = new_state;
         }
     }
 
     State *st = &states[stnum];
 
     // model interpolation stuff
-    if (psp->state && (st->flags & kStateFrameFlagModel) &&
-        (psp->state->flags & kStateFrameFlagModel) &&
+    if (psp->state && (st->flags & kStateFrameFlagModel) && (psp->state->flags & kStateFrameFlagModel) &&
         (st->sprite == psp->state->sprite) && st->tics > 1)
     {
         p->weapon_last_frame_ = psp->state->frame;
@@ -500,7 +500,8 @@ static void LuaSetPlayerSprite(Player *p, int position, int stnum,
 
     p->action_player_sprite_ = position;
 
-    if (st->action) (*st->action)(p->map_object_);
+    if (st->action)
+        (*st->action)(p->map_object_);
 }
 
 //
@@ -547,8 +548,7 @@ static int PL_weapon_state(lua_State *L)
     WeaponDefinition *oldWep = weapondefs.Lookup(weapon_name);
     if (!oldWep)
     {
-        FatalError("player.weapon_state: Unknown weapon name '%s'.\n",
-                   weapon_name);
+        FatalError("player.weapon_state: Unknown weapon name '%s'.\n", weapon_name);
     }
 
     int pw_index;
@@ -556,29 +556,28 @@ static int PL_weapon_state(lua_State *L)
     // see if player owns this kind of weapon
     for (pw_index = 0; pw_index < kMaximumWeapons; pw_index++)
     {
-        if (!ui_player_who->weapons_[pw_index].owned) continue;
+        if (!ui_player_who->weapons_[pw_index].owned)
+            continue;
 
-        if (ui_player_who->weapons_[pw_index].info == oldWep) break;
+        if (ui_player_who->weapons_[pw_index].info == oldWep)
+            break;
     }
 
-    if (pw_index == kMaximumWeapons)  // we dont have the weapon
+    if (pw_index == kMaximumWeapons) // we dont have the weapon
     {
         lua_pushboolean(L, 0);
         return 1;
     }
 
-    ui_player_who->ready_weapon_ =
-        (WeaponSelection)pw_index;  // insta-switch to it
+    ui_player_who->ready_weapon_ = (WeaponSelection)pw_index; // insta-switch to it
 
-    int state =
-        DDF_StateFindLabel(oldWep->state_grp_, weapon_state, true /* quiet */);
+    int state = DDF_StateFindLabel(oldWep->state_grp_, weapon_state, true /* quiet */);
     if (state == 0)
-        FatalError("player.weapon_state: frame '%s' in [%s] not found!\n",
-                   weapon_state, weapon_name);
+        FatalError("player.weapon_state: frame '%s' in [%s] not found!\n", weapon_state, weapon_name);
     // state += 1;
 
     LuaSetPlayerSpriteDeferred(ui_player_who, kPlayerSpriteWeapon,
-                               state);  // refresh the sprite
+                               state); // refresh the sprite
 
     lua_pushboolean(L, 1);
     return 1;
@@ -690,10 +689,9 @@ static int PL_set_counter(lua_State *L)
         FatalError("player.set_counter: target amount cannot be negative!\n");
 
     if (amt > ui_player_who->counters_[cntr].maximum)
-        FatalError(
-            "player.set_counter: target amount %d exceeds limit for counter "
-            "number %d\n",
-            amt, cntr);
+        FatalError("player.set_counter: target amount %d exceeds limit for counter "
+                   "number %d\n",
+                   amt, cntr);
 
     ui_player_who->counters_[cntr].count = amt;
 
@@ -722,7 +720,8 @@ static int PL_main_ammo(lua_State *L)
             {
                 value = ui_player_who->ammo_[pw->info->ammo_[0]].count;
 
-                if (pw->info->clip_size_[0] > 0) value += pw->clip_size[0];
+                if (pw->info->clip_size_[0] > 0)
+                    value += pw->clip_size[0];
             }
         }
     }
@@ -837,7 +836,8 @@ static int PL_clip_is_shared(lua_State *L)
     {
         PlayerWeapon *pw = &ui_player_who->weapons_[ui_player_who->ready_weapon_];
 
-        if (pw->info->shared_clip_) value = 1;
+        if (pw->info->shared_clip_)
+            value = 1;
     }
 
     lua_pushboolean(L, value);
@@ -857,8 +857,7 @@ static int PL_hurt_by(lua_State *L)
     // getting hurt because of your own damn stupidity
     if (ui_player_who->attacker_ == ui_player_who->map_object_)
         lua_pushstring(L, "self");
-    else if (ui_player_who->attacker_ &&
-             (ui_player_who->attacker_->side_ & ui_player_who->map_object_->side_))
+    else if (ui_player_who->attacker_ && (ui_player_who->attacker_->side_ & ui_player_who->map_object_->side_))
         lua_pushstring(L, "friend");
     else if (ui_player_who->attacker_)
         lua_pushstring(L, "enemy");
@@ -902,12 +901,16 @@ static int PL_hurt_dir(lua_State *L)
         MapObject *badguy = ui_player_who->attacker_;
         MapObject *pmo    = ui_player_who->map_object_;
 
-        BAMAngle diff =
-            RendererPointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) -
-            pmo->angle_;
+        BAMAngle diff = RendererPointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) - pmo->angle_;
 
-        if (diff >= kBAMAngle45 && diff <= kBAMAngle135) { dir = -1; }
-        else if (diff >= kBAMAngle225 && diff <= kBAMAngle315) { dir = +1; }
+        if (diff >= kBAMAngle45 && diff <= kBAMAngle135)
+        {
+            dir = -1;
+        }
+        else if (diff >= kBAMAngle225 && diff <= kBAMAngle315)
+        {
+            dir = +1;
+        }
     }
 
     lua_pushinteger(L, dir);
@@ -925,14 +928,15 @@ static int PL_hurt_angle(lua_State *L)
         MapObject *badguy = ui_player_who->attacker_;
         MapObject *pmo    = ui_player_who->map_object_;
 
-        BAMAngle real_a =
-            RendererPointToAngle(pmo->x, pmo->y, badguy->x, badguy->y);
+        BAMAngle real_a = RendererPointToAngle(pmo->x, pmo->y, badguy->x, badguy->y);
 
         value = epi::DegreesFromBAM(real_a);
 
-        if (value > 360.0f) value -= 360.0f;
+        if (value > 360.0f)
+            value -= 360.0f;
 
-        if (value < 0) value += 360.0f;
+        if (value < 0)
+            value += 360.0f;
     }
 
     lua_pushinteger(L, value);
@@ -994,17 +998,14 @@ static int PL_floor_flat(lua_State *L)
     // If no 3D floors, just return the flat
     if (ui_player_who->map_object_->subsector_->sector->extrafloor_used == 0)
     {
-        lua_pushstring(
-            L,
-            ui_player_who->map_object_->subsector_->sector->floor.image->name_.c_str());
+        lua_pushstring(L, ui_player_who->map_object_->subsector_->sector->floor.image->name_.c_str());
     }
     else
     {
         // Start from the lowest exfloor and check if the player is standing on
         // it, then return the control sector's flat
         float       player_floor_height = ui_player_who->map_object_->floor_z_;
-        Extrafloor *floor_checker =
-            ui_player_who->map_object_->subsector_->sector->bottom_extrafloor;
+        Extrafloor *floor_checker       = ui_player_who->map_object_->subsector_->sector->bottom_extrafloor;
         for (Extrafloor *ef = floor_checker; ef; ef = ef->higher)
         {
             if (player_floor_height + 1 > ef->top_height)
@@ -1014,9 +1015,7 @@ static int PL_floor_flat(lua_State *L)
             }
         }
         // Fallback if nothing else satisfies these conditions
-        lua_pushstring(
-            L,
-            ui_player_who->map_object_->subsector_->sector->floor.image->name_.c_str());
+        lua_pushstring(L, ui_player_who->map_object_->subsector_->sector->floor.image->name_.c_str());
     }
 
     return 1;
@@ -1036,7 +1035,8 @@ static int PL_sector_tag(lua_State *L)
 static int PL_play_footstep(lua_State *L)
 {
     const char *flat = luaL_checkstring(L, 1);
-    if (!flat) FatalError("player.play_footstep: No flat name given!\n");
+    if (!flat)
+        FatalError("player.play_footstep: No flat name given!\n");
 
     FlatDefinition *current_flatdef = flatdefs.Find(flat);
 
@@ -1099,22 +1099,21 @@ static int PL_rts_enable_tagged(lua_State *L)
 {
     std::string name = luaL_checkstring(L, 1);
 
-    if (!name.empty()) ScriptEnableByTag(nullptr, name.c_str(), false);
+    if (!name.empty())
+        ScriptEnableByTag(nullptr, name.c_str(), false);
 
     return 0;
 }
 
 // AuxStringReplaceAll("Our_String", std::string("_"), std::string(" "));
 //
-static std::string AuxStringReplaceAll(std::string str, const std::string &from,
-                                       const std::string &to)
+static std::string AuxStringReplaceAll(std::string str, const std::string &from, const std::string &to)
 {
     size_t start_pos = 0;
     while ((start_pos = str.find(from, start_pos)) != std::string::npos)
     {
         str.replace(start_pos, from.length(), to);
-        start_pos +=
-            to.length();  // Handles case where 'to' is a substring of 'from'
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
     }
     return str;
 }
@@ -1136,58 +1135,59 @@ static std::string GetMobjBenefits(MapObject *obj, bool KillBenefits = false)
     {
         switch (list->type)
         {
-            case kBenefitTypeWeapon:
-                // If it's a weapon all bets are off: we'll want to parse
-                // it differently, not here.
-                temp_string = "WEAPON=1";
-                break;
+        case kBenefitTypeWeapon:
+            // If it's a weapon all bets are off: we'll want to parse
+            // it differently, not here.
+            temp_string = "WEAPON=1";
+            break;
 
-            case kBenefitTypeAmmo:
-                temp_string += "AMMO";
-                if ((list->sub.type + 1) < 10) temp_string += "0";
-                temp_string += std::to_string((int)list->sub.type + 1);
-                temp_string += "=" + std::to_string((int)list->amount);
-                break;
+        case kBenefitTypeAmmo:
+            temp_string += "AMMO";
+            if ((list->sub.type + 1) < 10)
+                temp_string += "0";
+            temp_string += std::to_string((int)list->sub.type + 1);
+            temp_string += "=" + std::to_string((int)list->amount);
+            break;
 
-            case kBenefitTypeHealth:  // only benefit without a sub.type so just
-                                      // give it 01
-                temp_string += "HEALTH01=" + std::to_string((int)list->amount);
-                break;
+        case kBenefitTypeHealth: // only benefit without a sub.type so just
+                                 // give it 01
+            temp_string += "HEALTH01=" + std::to_string((int)list->amount);
+            break;
 
-            case kBenefitTypeArmour:
-                temp_string +=
-                    "ARMOUR" + std::to_string((int)list->sub.type + 1);
-                temp_string += "=" + std::to_string((int)list->amount);
-                break;
+        case kBenefitTypeArmour:
+            temp_string += "ARMOUR" + std::to_string((int)list->sub.type + 1);
+            temp_string += "=" + std::to_string((int)list->amount);
+            break;
 
-            case kBenefitTypeInventory:
-                temp_string += "INVENTORY";
-                if ((list->sub.type + 1) < 10) temp_string += "0";
-                temp_string += std::to_string((int)list->sub.type + 1);
-                temp_string += "=" + std::to_string((int)list->amount);
-                break;
+        case kBenefitTypeInventory:
+            temp_string += "INVENTORY";
+            if ((list->sub.type + 1) < 10)
+                temp_string += "0";
+            temp_string += std::to_string((int)list->sub.type + 1);
+            temp_string += "=" + std::to_string((int)list->amount);
+            break;
 
-            case kBenefitTypeCounter:
-                temp_string += "COUNTER";
-                if ((list->sub.type + 1) < 10) temp_string += "0";
-                temp_string += std::to_string((int)list->sub.type + 1);
-                temp_string += "=" + std::to_string((int)list->amount);
-                break;
+        case kBenefitTypeCounter:
+            temp_string += "COUNTER";
+            if ((list->sub.type + 1) < 10)
+                temp_string += "0";
+            temp_string += std::to_string((int)list->sub.type + 1);
+            temp_string += "=" + std::to_string((int)list->amount);
+            break;
 
-            case kBenefitTypeKey:
-                temp_string += "KEY";
-                temp_num = log2((int)list->sub.type);
-                temp_num++;
-                temp_string += std::to_string(temp_num);
-                break;
+        case kBenefitTypeKey:
+            temp_string += "KEY";
+            temp_num = log2((int)list->sub.type);
+            temp_num++;
+            temp_string += std::to_string(temp_num);
+            break;
 
-            case kBenefitTypePowerup:
-                temp_string +=
-                    "POWERUP" + std::to_string((int)list->sub.type + 1);
-                break;
+        case kBenefitTypePowerup:
+            temp_string += "POWERUP" + std::to_string((int)list->sub.type + 1);
+            break;
 
-            default:
-                break;
+        default:
+            break;
         }
     }
     return temp_string;
@@ -1202,131 +1202,141 @@ static std::string GetQueryInfoFromMobj(MapObject *obj, int whatinfo)
 
     switch (whatinfo)
     {
-        case 1:  // name
-            if (obj)
+    case 1: // name
+        if (obj)
+        {
+            // try CAST_TITLE first
+            temp_string = language[obj->info_->cast_title_];
+
+            if (temp_string.empty()) // fallback to DDFTHING entry name
             {
-                // try CAST_TITLE first
-                temp_string = language[obj->info_->cast_title_];
-
-                if (temp_string.empty())  // fallback to DDFTHING entry name
-                {
-                    temp_string = obj->info_->name_;
-                    temp_string = AuxStringReplaceAll(
-                        temp_string, std::string("_"), std::string(" "));
-                }
+                temp_string = obj->info_->name_;
+                temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
             }
-            break;
+        }
+        break;
 
-        case 2:  // current health
-            if (obj)
-            {
-                temp_num    = obj->health_;
-                temp_string = std::to_string(temp_num);
-            }
-            break;
+    case 2: // current health
+        if (obj)
+        {
+            temp_num    = obj->health_;
+            temp_string = std::to_string(temp_num);
+        }
+        break;
 
-        case 3:  // spawn health
-            if (obj)
-            {
-                temp_num    = obj->spawn_health_;
-                temp_string = std::to_string(temp_num);
-            }
-            break;
+    case 3: // spawn health
+        if (obj)
+        {
+            temp_num    = obj->spawn_health_;
+            temp_string = std::to_string(temp_num);
+        }
+        break;
 
-        case 4:  // pickup_benefits
-            if (obj) { temp_string = GetMobjBenefits(obj, false); }
-            break;
+    case 4: // pickup_benefits
+        if (obj)
+        {
+            temp_string = GetMobjBenefits(obj, false);
+        }
+        break;
 
-        case 5:  // kill_benefits
-            if (obj) { temp_string = GetMobjBenefits(obj, true); }
-            break;
+    case 5: // kill_benefits
+        if (obj)
+        {
+            temp_string = GetMobjBenefits(obj, true);
+        }
+        break;
     }
 
-    if (temp_string.empty()) return ("");
+    if (temp_string.empty())
+        return ("");
 
     return (temp_string.c_str());
 }
 
 // GetQueryInfoFromWeapon(mobj, whatinfo, [secattackinfo])
 //
-static std::string GetQueryInfoFromWeapon(MapObject *obj, int whatinfo,
-                                          bool secattackinfo = false)
+static std::string GetQueryInfoFromWeapon(MapObject *obj, int whatinfo, bool secattackinfo = false)
 {
     int         temp_num = 0;
     std::string temp_string;
 
-    if (!obj->info_->pickup_benefits_) return "";
-    if (!obj->info_->pickup_benefits_->sub.weap) return "";
-    if (obj->info_->pickup_benefits_->type != kBenefitTypeWeapon) return "";
+    if (!obj->info_->pickup_benefits_)
+        return "";
+    if (!obj->info_->pickup_benefits_->sub.weap)
+        return "";
+    if (obj->info_->pickup_benefits_->type != kBenefitTypeWeapon)
+        return "";
 
     WeaponDefinition *objWep = obj->info_->pickup_benefits_->sub.weap;
-    if (!objWep) return "";
+    if (!objWep)
+        return "";
 
-    int attacknum = 0;  // default to primary attack
-    if (secattackinfo) attacknum = 1;
+    int attacknum = 0; // default to primary attack
+    if (secattackinfo)
+        attacknum = 1;
 
     AttackDefinition *objAtck = objWep->attack_[attacknum];
     if (!objAtck && whatinfo > 2)
-        return "";  // no attack to get info about (only should happen with
-                    // secondary attacks)
+        return ""; // no attack to get info about (only should happen with
+                   // secondary attacks)
 
     const DamageClass *damtype;
     float              temp_num2;
 
     switch (whatinfo)
     {
-        case 1:  // name
-            temp_string = objWep->name_;
-            temp_string = AuxStringReplaceAll(temp_string, std::string("_"),
-                                              std::string(" "));
-            break;
+    case 1: // name
+        temp_string = objWep->name_;
+        temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
+        break;
 
-        case 2:  // ZOOM_FACTOR
-            temp_num2   = 90.0f / objWep->zoom_fov_;
-            temp_string = std::to_string(temp_num2);
-            break;
+    case 2: // ZOOM_FACTOR
+        temp_num2   = 90.0f / objWep->zoom_fov_;
+        temp_string = std::to_string(temp_num2);
+        break;
 
-        case 3:  // AMMOTYPE
-            temp_num    = (objWep->ammo_[attacknum]) + 1;
-            temp_string = std::to_string(temp_num);
-            break;
+    case 3: // AMMOTYPE
+        temp_num    = (objWep->ammo_[attacknum]) + 1;
+        temp_string = std::to_string(temp_num);
+        break;
 
-        case 4:  // AMMOPERSHOT
-            temp_num    = objWep->ammopershot_[attacknum];
-            temp_string = std::to_string(temp_num);
-            break;
+    case 4: // AMMOPERSHOT
+        temp_num    = objWep->ammopershot_[attacknum];
+        temp_string = std::to_string(temp_num);
+        break;
 
-        case 5:  // CLIPSIZE
-            temp_num    = objWep->clip_size_[attacknum];
-            temp_string = std::to_string(temp_num);
-            break;
+    case 5: // CLIPSIZE
+        temp_num    = objWep->clip_size_[attacknum];
+        temp_string = std::to_string(temp_num);
+        break;
 
-        case 6:  // DAMAGE Nominal
-            damtype     = &objAtck->damage_;
-            temp_num    = damtype->nominal_;
-            temp_string = std::to_string(temp_num);
-            break;
+    case 6: // DAMAGE Nominal
+        damtype     = &objAtck->damage_;
+        temp_num    = damtype->nominal_;
+        temp_string = std::to_string(temp_num);
+        break;
 
-        case 7:  // DAMAGE Max
-            damtype     = &objAtck->damage_;
-            temp_num    = damtype->linear_max_;
-            temp_string = std::to_string(temp_num);
-            break;
+    case 7: // DAMAGE Max
+        damtype     = &objAtck->damage_;
+        temp_num    = damtype->linear_max_;
+        temp_string = std::to_string(temp_num);
+        break;
 
-        case 8:  // Range
-            temp_num    = objAtck->range_;
-            temp_string = std::to_string(temp_num);
-            break;
+    case 8: // Range
+        temp_num    = objAtck->range_;
+        temp_string = std::to_string(temp_num);
+        break;
 
-        case 9:  // AUTOMATIC
-            if (objWep->autofire_[attacknum])
-                temp_string = "1";
-            else
-                temp_string = "0";
-            break;
+    case 9: // AUTOMATIC
+        if (objWep->autofire_[attacknum])
+            temp_string = "1";
+        else
+            temp_string = "0";
+        break;
     }
 
-    if (temp_string.empty()) return ("");
+    if (temp_string.empty())
+        return ("");
 
     return (temp_string.c_str());
 }
@@ -1341,8 +1351,7 @@ static int PL_query_object(lua_State *L)
     if (whatinfo < 1 || whatinfo > 5)
         FatalError("player.query_object: bad whatInfo number: %d\n", whatinfo);
 
-    MapObject *obj = GetMapTargetAimInfo(
-        ui_player_who->map_object_, ui_player_who->map_object_->angle_, maxdistance);
+    MapObject *obj = GetMapTargetAimInfo(ui_player_who->map_object_, ui_player_who->map_object_->angle_, maxdistance);
     if (!obj)
     {
         lua_pushstring(L, "");
@@ -1390,8 +1399,7 @@ static int MO_query_tagged(lua_State *L)
 
 // CreateLuaTable_Benefits(LuaState, mobj, Killbenefits);
 //
-static void CreateLuaTable_Benefits(lua_State *L, MapObject *obj,
-                                    bool KillBenefits = false)
+static void CreateLuaTable_Benefits(lua_State *L, MapObject *obj, bool KillBenefits = false)
 {
     Benefit    *list;
     std::string BenefitName;
@@ -1406,20 +1414,24 @@ static void CreateLuaTable_Benefits(lua_State *L, MapObject *obj,
 
     // how many benefits do we have?
     int NumberOfBenefits = 0;
-    for (; list != nullptr; list = list->next) { NumberOfBenefits++; }
+    for (; list != nullptr; list = list->next)
+    {
+        NumberOfBenefits++;
+    }
 
-    if (NumberOfBenefits < 1) return;
+    if (NumberOfBenefits < 1)
+        return;
 
     lua_pushstring(L, "benefits");
 
-    int NumberOfBenefitFields = 4;            // how many fields in a row
-    lua_createtable(L, NumberOfBenefits, 0);  // create BENEFITS table
+    int NumberOfBenefitFields = 4;           // how many fields in a row
+    lua_createtable(L, NumberOfBenefits, 0); // create BENEFITS table
 
-    int CurrentBenefit = 1;  // counter
+    int CurrentBenefit = 1;                  // counter
     if (KillBenefits)
-        list = obj->info_->kill_benefits_;  // need to grab these again
+        list = obj->info_->kill_benefits_;   // need to grab these again
     else
-        list = obj->info_->pickup_benefits_;  // need to grab these again
+        list = obj->info_->pickup_benefits_; // need to grab these again
 
     for (; list != nullptr; list = list->next)
     {
@@ -1430,122 +1442,121 @@ static void CreateLuaTable_Benefits(lua_State *L, MapObject *obj,
 
         switch (list->type)
         {
-            case kBenefitTypeWeapon:
-                // If it's a weapon we'll want to parse
-                // it differently to get the name.
-                BenefitName = "WEAPON";
-                if (list->sub.weap)
-                {
-                    WeaponDefinition *objWep = list->sub.weap;
-                    BenefitName              = objWep->name_;
-                    BenefitName              = AuxStringReplaceAll(
-                        BenefitName, std::string("_"), std::string(" "));
-                }
-                BenefitType   = 0;
-                BenefitAmount = 1;
-                break;
+        case kBenefitTypeWeapon:
+            // If it's a weapon we'll want to parse
+            // it differently to get the name.
+            BenefitName = "WEAPON";
+            if (list->sub.weap)
+            {
+                WeaponDefinition *objWep = list->sub.weap;
+                BenefitName              = objWep->name_;
+                BenefitName              = AuxStringReplaceAll(BenefitName, std::string("_"), std::string(" "));
+            }
+            BenefitType   = 0;
+            BenefitAmount = 1;
+            break;
 
-            case kBenefitTypeAmmo:
-                BenefitName   = "AMMO";
-                BenefitType   = (int)list->sub.type + 1;
-                BenefitAmount = (int)list->amount;
-                if ((game_skill == kSkillBaby) || (game_skill == kSkillNightmare))
-                    BenefitAmount <<= 1;  // double the ammo
-                if (BenefitAmount > 1 && obj->flags_ & kMapObjectFlagDropped)
-                    BenefitAmount /= 2;  // dropped ammo gives half
-                BenefitLimit = (int)list->limit;
-                break;
+        case kBenefitTypeAmmo:
+            BenefitName   = "AMMO";
+            BenefitType   = (int)list->sub.type + 1;
+            BenefitAmount = (int)list->amount;
+            if ((game_skill == kSkillBaby) || (game_skill == kSkillNightmare))
+                BenefitAmount <<= 1; // double the ammo
+            if (BenefitAmount > 1 && obj->flags_ & kMapObjectFlagDropped)
+                BenefitAmount /= 2;  // dropped ammo gives half
+            BenefitLimit = (int)list->limit;
+            break;
 
-            case kBenefitTypeHealth:  // only benefit without a sub.type so just
-                                      // give it 1
-                BenefitName   = "HEALTH";
-                BenefitType   = 1;
-                BenefitAmount = (int)list->amount;
-                BenefitLimit  = (int)list->limit;
-                break;
+        case kBenefitTypeHealth: // only benefit without a sub.type so just
+                                 // give it 1
+            BenefitName   = "HEALTH";
+            BenefitType   = 1;
+            BenefitAmount = (int)list->amount;
+            BenefitLimit  = (int)list->limit;
+            break;
 
-            case kBenefitTypeArmour:
-                BenefitName   = "ARMOUR";
-                BenefitType   = (int)list->sub.type + 1;
-                BenefitAmount = (int)list->amount;
-                BenefitLimit  = (int)list->limit;
-                break;
+        case kBenefitTypeArmour:
+            BenefitName   = "ARMOUR";
+            BenefitType   = (int)list->sub.type + 1;
+            BenefitAmount = (int)list->amount;
+            BenefitLimit  = (int)list->limit;
+            break;
 
-            case kBenefitTypeInventory:
-                BenefitName   = "INVENTORY";
-                BenefitType   = (int)list->sub.type + 1;
-                BenefitAmount = (int)list->amount;
-                BenefitLimit  = (int)list->limit;
-                break;
+        case kBenefitTypeInventory:
+            BenefitName   = "INVENTORY";
+            BenefitType   = (int)list->sub.type + 1;
+            BenefitAmount = (int)list->amount;
+            BenefitLimit  = (int)list->limit;
+            break;
 
-            case kBenefitTypeCounter:
-                BenefitName   = "COUNTER";
-                BenefitType   = (int)list->sub.type + 1;
-                BenefitAmount = (int)list->amount;
-                BenefitLimit  = (int)list->limit;
-                break;
+        case kBenefitTypeCounter:
+            BenefitName   = "COUNTER";
+            BenefitType   = (int)list->sub.type + 1;
+            BenefitAmount = (int)list->amount;
+            BenefitLimit  = (int)list->limit;
+            break;
 
-            case kBenefitTypeKey:
-                BenefitName   = "KEY";
-                BenefitType   = (log2((int)list->sub.type) + 1);
-                BenefitAmount = 1;
-                break;
+        case kBenefitTypeKey:
+            BenefitName   = "KEY";
+            BenefitType   = (log2((int)list->sub.type) + 1);
+            BenefitAmount = 1;
+            break;
 
-            case kBenefitTypePowerup:
-                BenefitName   = "POWERUP";
-                BenefitType   = (int)list->sub.type + 1;
-                BenefitAmount = (int)list->amount;
-                BenefitLimit  = (int)list->limit;
-                break;
+        case kBenefitTypePowerup:
+            BenefitName   = "POWERUP";
+            BenefitType   = (int)list->sub.type + 1;
+            BenefitAmount = (int)list->amount;
+            BenefitLimit  = (int)list->limit;
+            break;
 
-            case kBenefitTypeAmmoLimit:
-                BenefitName   = "AMMOLIMIT";
-                BenefitType   = (int)list->sub.type + 1;
-                BenefitAmount = (int)list->amount;
-                BenefitLimit  = (int)list->limit;
-                break;
+        case kBenefitTypeAmmoLimit:
+            BenefitName   = "AMMOLIMIT";
+            BenefitType   = (int)list->sub.type + 1;
+            BenefitAmount = (int)list->amount;
+            BenefitLimit  = (int)list->limit;
+            break;
 
-            case kBenefitTypeInventoryLimit:
-                BenefitName   = "INVENTORYLIMIT";
-                BenefitType   = (int)list->sub.type + 1;
-                BenefitAmount = (int)list->amount;
-                BenefitLimit  = (int)list->limit;
-                break;
+        case kBenefitTypeInventoryLimit:
+            BenefitName   = "INVENTORYLIMIT";
+            BenefitType   = (int)list->sub.type + 1;
+            BenefitAmount = (int)list->amount;
+            BenefitLimit  = (int)list->limit;
+            break;
 
-            case kBenefitTypeCounterLimit:
-                BenefitName   = "COUNTERLIMIT";
-                BenefitType   = (int)list->sub.type + 1;
-                BenefitAmount = (int)list->amount;
-                BenefitLimit  = (int)list->limit;
-                break;
+        case kBenefitTypeCounterLimit:
+            BenefitName   = "COUNTERLIMIT";
+            BenefitType   = (int)list->sub.type + 1;
+            BenefitAmount = (int)list->amount;
+            BenefitLimit  = (int)list->limit;
+            break;
 
-            default:
-                break;
+        default:
+            break;
         }
 
         // add it to our table
-        lua_pushnumber(L, CurrentBenefit);  // new benefit
+        lua_pushnumber(L, CurrentBenefit);      // new benefit
         lua_createtable(L, 0,
-                        NumberOfBenefitFields);  // create Benefit subItem table
+                        NumberOfBenefitFields); // create Benefit subItem table
 
         lua_pushstring(L, BenefitName.c_str());
-        lua_setfield(L, -2, "name");  // add to Benefit subItem table
+        lua_setfield(L, -2, "name");            // add to Benefit subItem table
 
         lua_pushinteger(L, BenefitType);
-        lua_setfield(L, -2, "type");  // add to Benefit subItem table
+        lua_setfield(L, -2, "type");            // add to Benefit subItem table
 
         lua_pushinteger(L, BenefitAmount);
-        lua_setfield(L, -2, "amount");  // add to Benefit subItem table
+        lua_setfield(L, -2, "amount");          // add to Benefit subItem table
 
         lua_pushinteger(L, BenefitLimit);
-        lua_setfield(L, -2, "limit");  // add to Benefit subItem table
+        lua_setfield(L, -2, "limit");           // add to Benefit subItem table
 
-        lua_settable(L, -3);  // add to BENEFITS table
+        lua_settable(L, -3);                    // add to BENEFITS table
 
         CurrentBenefit++;
     }
 
-    lua_settable(L, -3);  // add to MOBJ Table
+    lua_settable(L, -3); // add to MOBJ Table
 }
 
 // CreateLuaTable_Mobj(LuaState, mobj)
@@ -1553,35 +1564,36 @@ static void CreateLuaTable_Benefits(lua_State *L, MapObject *obj,
 static void CreateLuaTable_Mobj(lua_State *L, MapObject *mo)
 {
     std::string temp_value;
-    int         NumberOfItems = 12;        // how many fields in a row
-    lua_createtable(L, 0, NumberOfItems);  // our MOBJ table
+    int         NumberOfItems = 12;       // how many fields in a row
+    lua_createtable(L, 0, NumberOfItems); // our MOBJ table
 
     //---------------
     // object.name
-    temp_value = language[mo->info_->cast_title_];  // try CAST_TITLE first
-    if (temp_value.empty())  // fallback to DDFTHING entry name
+    temp_value = language[mo->info_->cast_title_]; // try CAST_TITLE first
+    if (temp_value.empty())                        // fallback to DDFTHING entry name
     {
         temp_value = mo->info_->name_;
-        temp_value =
-            AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
+        temp_value = AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
     }
 
     lua_pushstring(L, temp_value.c_str());
-    lua_setfield(L, -2, "name");  // add to MOBJ Table
+    lua_setfield(L, -2, "name"); // add to MOBJ Table
     //---------------
 
     //---------------
     // object.tag
     lua_pushinteger(L, (int)mo->tag_);
-    lua_setfield(L, -2, "tag");  // add to MOBJ Table
+    lua_setfield(L, -2, "tag"); // add to MOBJ Table
     //---------------
 
     //---------------
     // object.type
-    temp_value = "SCENERY";  // default to scenery
+    temp_value = "SCENERY"; // default to scenery
 
-    if (mo->extended_flags_ & kExtendedFlagMonster) temp_value = "MONSTER";
-    if (mo->flags_ & kMapObjectFlagSpecial) temp_value = "PICKUP";
+    if (mo->extended_flags_ & kExtendedFlagMonster)
+        temp_value = "MONSTER";
+    if (mo->flags_ & kMapObjectFlagSpecial)
+        temp_value = "PICKUP";
     if (mo->info_->pickup_benefits_)
     {
         if (mo->info_->pickup_benefits_->type == kBenefitTypeWeapon)
@@ -1589,63 +1601,66 @@ static void CreateLuaTable_Mobj(lua_State *L, MapObject *mo)
     }
 
     lua_pushstring(L, temp_value.c_str());
-    lua_setfield(L, -2, "type");  // add to MOBJ Table
+    lua_setfield(L, -2, "type"); // add to MOBJ Table
     //---------------
 
     //---------------
     // object.currenthealth
     lua_pushinteger(L, (int)mo->health_);
-    lua_setfield(L, -2, "current_health");  // add to MOBJ Table
+    lua_setfield(L, -2, "current_health"); // add to MOBJ Table
     //---------------
 
     //---------------
     // object.spawnhealth
     lua_pushinteger(L, (int)mo->spawn_health_);
-    lua_setfield(L, -2, "spawn_health");  // add to MOBJ Table
+    lua_setfield(L, -2, "spawn_health"); // add to MOBJ Table
     //---------------
 
     //---------------
     // object.x
     lua_pushinteger(L, (int)mo->x);
-    lua_setfield(L, -2, "x");  // add to MOBJ Table
+    lua_setfield(L, -2, "x"); // add to MOBJ Table
     //---------------
 
     //---------------
     // object.y
     lua_pushinteger(L, (int)mo->y);
-    lua_setfield(L, -2, "y");  // add to MOBJ Table
+    lua_setfield(L, -2, "y"); // add to MOBJ Table
     //---------------
 
     //---------------
     // object.z
     lua_pushinteger(L, (int)mo->z);
-    lua_setfield(L, -2, "z");  // add to MOBJ Table
+    lua_setfield(L, -2, "z"); // add to MOBJ Table
     //---------------
 
     //---------------
     // object.angle
     float value = epi::DegreesFromBAM(mo->angle_);
-    if (value > 360.0f) value -= 360.0f;
-    if (value < 0) value += 360.0f;
+    if (value > 360.0f)
+        value -= 360.0f;
+    if (value < 0)
+        value += 360.0f;
 
     lua_pushinteger(L, (int)value);
-    lua_setfield(L, -2, "angle");  // add to MOBJ Table
+    lua_setfield(L, -2, "angle"); // add to MOBJ Table
     //---------------
 
     //---------------
     // object.mlook
     value = epi::DegreesFromBAM(mo->vertical_angle_);
 
-    if (value > 180.0f) value -= 360.0f;
+    if (value > 180.0f)
+        value -= 360.0f;
 
     lua_pushinteger(L, (int)value);
-    lua_setfield(L, -2, "mlook");  // add to MOBJ Table
+    lua_setfield(L, -2, "mlook"); // add to MOBJ Table
     //---------------
 
     //---------------
     // object.radius
     lua_pushinteger(L, (int)mo->radius_);
-    lua_setfield(L, -2, "radius");  // add to MOBJ Table
+    lua_setfield(L, -2, "radius"); // add to MOBJ Table
     //---------------
 
     //---------------
@@ -1653,7 +1668,7 @@ static void CreateLuaTable_Mobj(lua_State *L, MapObject *mo)
     if (mo->extended_flags_ & kExtendedFlagMonster)
         CreateLuaTable_Benefits(L, mo, true);  // only want kill benefits
     else
-        CreateLuaTable_Benefits(L, mo, false);  // only want pickup benefits
+        CreateLuaTable_Benefits(L, mo, false); // only want pickup benefits
     //---------------
 }
 
@@ -1667,71 +1682,71 @@ static void CreateLuaTable_Attacks(lua_State *L, WeaponDefinition *objWep)
     int NumberOfAttacks = 0;
     for (NumberOfAttacks = 0; NumberOfAttacks < 3; NumberOfAttacks++)
     {
-        if (!objWep->attack_[NumberOfAttacks]) break;
+        if (!objWep->attack_[NumberOfAttacks])
+            break;
     }
 
     lua_pushstring(L, "attacks");
 
-    lua_createtable(L, NumberOfAttacks, 0);  // create ATTACKS table
+    lua_createtable(L, NumberOfAttacks, 0); // create ATTACKS table
 
-    int NumberOfAttackFields = 8;  // how many fields in a row
-    int CurrentAttack        = 0;  // counter
+    int NumberOfAttackFields = 8;           // how many fields in a row
+    int CurrentAttack        = 0;           // counter
     for (CurrentAttack = 0; CurrentAttack < NumberOfAttacks; CurrentAttack++)
     {
         objAtck = objWep->attack_[CurrentAttack];
         const DamageClass *damtype;
 
         // add it to our table
-        lua_pushnumber(L, CurrentAttack);  // new attack
+        lua_pushnumber(L, CurrentAttack);      // new attack
         lua_createtable(L, 0,
-                        NumberOfAttackFields);  // create attack subItem table
+                        NumberOfAttackFields); // create attack subItem table
 
         // NAME
         temp_string = objAtck->name_;
-        temp_string = AuxStringReplaceAll(temp_string, std::string("_"),
-                                          std::string(" "));
+        temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
         lua_pushstring(L, temp_string.c_str());
-        lua_setfield(L, -2, "name");  // add to ATTACK subItem table
+        lua_setfield(L, -2, "name"); // add to ATTACK subItem table
 
         // AMMOTYPE
         temp_num = (objWep->ammo_[CurrentAttack]) + 1;
         lua_pushinteger(L, temp_num);
-        lua_setfield(L, -2, "ammo_type");  // add to ATTACK subItem table
+        lua_setfield(L, -2, "ammo_type"); // add to ATTACK subItem table
 
         // AMMOPERSHOT
         temp_num = objWep->ammopershot_[CurrentAttack];
         lua_pushinteger(L, temp_num);
-        lua_setfield(L, -2, "ammo_per_shot");  // add to ATTACK subItem table
+        lua_setfield(L, -2, "ammo_per_shot"); // add to ATTACK subItem table
 
         // CLIPSIZE
         temp_num = objWep->clip_size_[CurrentAttack];
         lua_pushinteger(L, temp_num);
-        lua_setfield(L, -2, "clip_size");  // add to ATTACK subItem table
+        lua_setfield(L, -2, "clip_size"); // add to ATTACK subItem table
 
         // DAMAGE Nominal
         damtype  = &objAtck->damage_;
         temp_num = damtype->nominal_;
         lua_pushnumber(L, temp_num);
-        lua_setfield(L, -2, "damage");  // add to ATTACK subItem table
+        lua_setfield(L, -2, "damage"); // add to ATTACK subItem table
 
         // DAMAGE Max
         temp_num = damtype->linear_max_;
         lua_pushnumber(L, temp_num);
-        lua_setfield(L, -2, "damage_max");  // add to ATTACK subItem table
+        lua_setfield(L, -2, "damage_max"); // add to ATTACK subItem table
 
         // Range
         temp_num = objAtck->range_;
         lua_pushinteger(L, temp_num);
-        lua_setfield(L, -2, "range");  // add to ATTACK subItem table
+        lua_setfield(L, -2, "range"); // add to ATTACK subItem table
 
         // AUTOMATIC
         lua_pushboolean(L, objWep->autofire_[CurrentAttack] ? 1 : 0);
-        lua_setfield(L, -2, "is_automatic");  // add to ATTACK subItem table
+        lua_setfield(L, -2, "is_automatic"); // add to ATTACK subItem table
 
-        lua_settable(L, -3);  // add to ATTACKS table
+        lua_settable(L, -3);                 // add to ATTACKS table
     }
 
-    lua_settable(L, -3);  // add to WEAPON Table
+    lua_settable(L, -3);                     // add to WEAPON Table
 }
 
 // CreateLuaTable_Weapon(LuaState, mobj)
@@ -1739,16 +1754,15 @@ static void CreateLuaTable_Attacks(lua_State *L, WeaponDefinition *objWep)
 static void CreateLuaTable_Weapon(lua_State *L, WeaponDefinition *objWep)
 {
     std::string temp_value;
-    int         NumberOfItems = 3;         // how many fields in a row
-    lua_createtable(L, 0, NumberOfItems);  // our WEAPON table
+    int         NumberOfItems = 3;        // how many fields in a row
+    lua_createtable(L, 0, NumberOfItems); // our WEAPON table
 
     //---------------
     // weapon.name
     temp_value = objWep->name_;
-    temp_value =
-        AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
+    temp_value = AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
     lua_pushstring(L, temp_value.c_str());
-    lua_setfield(L, -2, "name");  // add to WEAPON Table
+    lua_setfield(L, -2, "name"); // add to WEAPON Table
     //---------------
 
     //---------------
@@ -1756,7 +1770,7 @@ static void CreateLuaTable_Weapon(lua_State *L, WeaponDefinition *objWep)
     // float temp_num2   = 90.0f / objWep->zoom_fov;
     float temp_num2 = objWep->zoom_factor_;
     lua_pushnumber(L, temp_num2);
-    lua_setfield(L, -2, "zoom_factor");  // add to WEAPON Table
+    lua_setfield(L, -2, "zoom_factor"); // add to WEAPON Table
     //---------------
 
     //---------------
@@ -1771,8 +1785,7 @@ static int MO_weapon_info(lua_State *L)
 {
     int maxdistance = (int)luaL_checknumber(L, 1);
 
-    MapObject *mo = GetMapTargetAimInfo(ui_player_who->map_object_,
-                                        ui_player_who->map_object_->angle_, maxdistance);
+    MapObject *mo = GetMapTargetAimInfo(ui_player_who->map_object_, ui_player_who->map_object_->angle_, maxdistance);
     if (!mo)
     {
         lua_pushstring(L, "");
@@ -1804,7 +1817,7 @@ static int MO_weapon_info(lua_State *L)
         }
         else
         {
-            CreateLuaTable_Weapon(L, objWep);  // create table with weapon info
+            CreateLuaTable_Weapon(L, objWep); // create table with weapon info
             return 1;
         }
     }
@@ -1816,8 +1829,7 @@ static int MO_object_info(lua_State *L)
 {
     int maxdistance = (int)luaL_checknumber(L, 1);
 
-    MapObject *mo = GetMapTargetAimInfo(ui_player_who->map_object_,
-                                        ui_player_who->map_object_->angle_, maxdistance);
+    MapObject *mo = GetMapTargetAimInfo(ui_player_who->map_object_, ui_player_who->map_object_->angle_, maxdistance);
     if (!mo)
     {
         lua_pushstring(L, "");
@@ -1825,7 +1837,7 @@ static int MO_object_info(lua_State *L)
     }
     else
     {
-        CreateLuaTable_Mobj(L, mo);  // create table with mobj info
+        CreateLuaTable_Mobj(L, mo); // create table with mobj info
         return 1;
     }
 }
@@ -1849,12 +1861,12 @@ static int MO_tagged_info(lua_State *L)
 
     if (temp_value.empty())
     {
-        lua_pushstring(L, "");  // Found nothing
+        lua_pushstring(L, ""); // Found nothing
         return 1;
     }
     else
     {
-        CreateLuaTable_Mobj(L, mo);  // create table with mobj info
+        CreateLuaTable_Mobj(L, mo); // create table with mobj info
         return 1;
     }
 }
@@ -1869,7 +1881,8 @@ static int MO_count(lua_State *L)
 
     for (mo = map_object_list_head; mo; mo = mo->next_)
     {
-        if (mo->info_->number_ == thingid && mo->health_ > 0) thingcount++;
+        if (mo->info_->number_ == thingid && mo->health_ > 0)
+            thingcount++;
     }
 
     lua_pushinteger(L, thingcount);
@@ -1889,11 +1902,9 @@ static int PL_query_weapon(lua_State *L)
         FatalError("player.query_weapon: bad whatInfo number: %d\n", whatinfo);
 
     if (secattackinfo < 0 || secattackinfo > 1)
-        FatalError("player.query_weapon: bad secAttackInfo number: %d\n",
-                   whatinfo);
+        FatalError("player.query_weapon: bad secAttackInfo number: %d\n", whatinfo);
 
-    MapObject *obj = GetMapTargetAimInfo(
-        ui_player_who->map_object_, ui_player_who->map_object_->angle_, maxdistance);
+    MapObject *obj = GetMapTargetAimInfo(ui_player_who->map_object_, ui_player_who->map_object_->angle_, maxdistance);
     if (!obj)
     {
         lua_pushstring(L, "");
@@ -1919,8 +1930,7 @@ static int PL_query_weapon(lua_State *L)
 // Lobo: May 2023
 static int PL_sector_light(lua_State *L)
 {
-    lua_pushnumber(
-        L, ui_player_who->map_object_->subsector_->sector->properties.light_level);
+    lua_pushnumber(L, ui_player_who->map_object_->subsector_->sector->properties.light_level);
     return 1;
 }
 
@@ -1940,8 +1950,7 @@ static int PL_sector_floor_height(lua_State *L)
         //  then return the control sector floor height
         float       CurrentFloor        = 0;
         float       player_floor_height = ui_player_who->map_object_->floor_z_;
-        Extrafloor *floor_checker =
-            ui_player_who->map_object_->subsector_->sector->bottom_extrafloor;
+        Extrafloor *floor_checker       = ui_player_who->map_object_->subsector_->sector->bottom_extrafloor;
         for (Extrafloor *ef = floor_checker; ef; ef = ef->higher)
         {
             if (CurrentFloor > ef->top_height)
@@ -1968,8 +1977,7 @@ static int PL_sector_ceiling_height(lua_State *L)
     // If no 3D floors, just return the current sector ceiling height
     if (ui_player_who->map_object_->subsector_->sector->extrafloor_used == 0)
     {
-        lua_pushnumber(L,
-                       ui_player_who->map_object_->subsector_->sector->ceiling_height);
+        lua_pushnumber(L, ui_player_who->map_object_->subsector_->sector->ceiling_height);
     }
     else
     {
@@ -1978,8 +1986,7 @@ static int PL_sector_ceiling_height(lua_State *L)
         //   then return the control sector ceiling height
         float       HighestCeiling      = 0;
         float       player_floor_height = ui_player_who->map_object_->floor_z_;
-        Extrafloor *floor_checker =
-            ui_player_who->map_object_->subsector_->sector->bottom_extrafloor;
+        Extrafloor *floor_checker       = ui_player_who->map_object_->subsector_->sector->bottom_extrafloor;
         for (Extrafloor *ef = floor_checker; ef; ef = ef->higher)
         {
             if (player_floor_height + 1 > ef->top_height)
@@ -1993,8 +2000,7 @@ static int PL_sector_ceiling_height(lua_State *L)
             }
         }
         // Fallback if nothing else satisfies these conditions
-        lua_pushnumber(L,
-                       ui_player_who->map_object_->subsector_->sector->ceiling_height);
+        lua_pushnumber(L, ui_player_who->map_object_->subsector_->sector->ceiling_height);
     }
 
     return 1;
@@ -2006,8 +2012,7 @@ static int PL_is_outside(lua_State *L)
 {
     // Doesn't account for extrafloors by design. Reasoning is that usually
     //  extrafloors will be platforms, not roofs...
-    if (ui_player_who->map_object_->subsector_->sector->ceiling.image !=
-        sky_flat_image)  // is it outdoors?
+    if (ui_player_who->map_object_->subsector_->sector->ceiling.image != sky_flat_image) // is it outdoors?
         lua_pushboolean(L, 0);
     else
         lua_pushboolean(L, 1);
@@ -2021,8 +2026,8 @@ static int Game_info(lua_State *L)
 {
     std::string temp_value;
 
-    int NumberOfItems = 3;                 // how many fields in a row
-    lua_createtable(L, 0, NumberOfItems);  // our GAME table
+    int NumberOfItems = 3;                // how many fields in a row
+    lua_createtable(L, 0, NumberOfItems); // our GAME table
 
     //---------------
     // game.name
@@ -2032,16 +2037,15 @@ static int Game_info(lua_State *L)
     if (g->description_.empty())
     {
         temp_value = g->name_;
-        temp_value =
-            AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
+        temp_value = AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
     }
     else
     {
-        temp_value = language[g->description_];  // try for description
+        temp_value = language[g->description_]; // try for description
     }
 
     lua_pushstring(L, temp_value.c_str());
-    lua_setfield(L, -2, "name");  // add to GAME Table
+    lua_setfield(L, -2, "name"); // add to GAME Table
     //---------------
 
     //---------------
@@ -2053,13 +2057,13 @@ static int Game_info(lua_State *L)
     else
         lua_pushstring(L, "sp");
 
-    lua_setfield(L, -2, "mode");  // add to GAME Table
+    lua_setfield(L, -2, "mode"); // add to GAME Table
     //---------------
 
     //---------------
     // game.skill
     lua_pushinteger(L, game_skill);
-    lua_setfield(L, -2, "skill");  // add to GAME Table
+    lua_setfield(L, -2, "skill"); // add to GAME Table
     //---------------
 
     return 1;
@@ -2071,43 +2075,43 @@ static int Map_info(lua_State *L)
 {
     std::string temp_value;
 
-    int NumberOfItems = 6;                 // how many fields in a row
-    lua_createtable(L, 0, NumberOfItems);  // our MAP table
+    int NumberOfItems = 6;                // how many fields in a row
+    lua_createtable(L, 0, NumberOfItems); // our MAP table
 
     //---------------
     // MAP.name
     lua_pushstring(L, current_map->name_.c_str());
-    lua_setfield(L, -2, "name");  // add to MAP Table
+    lua_setfield(L, -2, "name"); // add to MAP Table
     //---------------
 
     //---------------
     // MAP.title
     lua_pushstring(L, language[current_map->description_]);
-    lua_setfield(L, -2, "title");  // add to MAP Table
+    lua_setfield(L, -2, "title"); // add to MAP Table
     //---------------
 
     //---------------
     // MAP.author
     lua_pushstring(L, current_map->author_.c_str());
-    lua_setfield(L, -2, "author");  // add to MAP Table
+    lua_setfield(L, -2, "author"); // add to MAP Table
     //---------------
 
     //---------------
     // MAP.secrets
     lua_pushinteger(L, intermission_stats.secrets);
-    lua_setfield(L, -2, "secrets");  // add to MAP Table
+    lua_setfield(L, -2, "secrets"); // add to MAP Table
     //---------------
 
     //---------------
     // MAP.enemies
     lua_pushinteger(L, intermission_stats.kills);
-    lua_setfield(L, -2, "enemies");  // add to MAP Table
+    lua_setfield(L, -2, "enemies"); // add to MAP Table
     //---------------
 
     //---------------
     // MAP.items
     lua_pushinteger(L, intermission_stats.items);
-    lua_setfield(L, -2, "items");  // add to MAP Table
+    lua_setfield(L, -2, "items"); // add to MAP Table
     //---------------
 
     return 1;
@@ -2119,20 +2123,19 @@ static int Sector_info(lua_State *L)
 {
     std::string temp_value;
 
-    int NumberOfItems = 15;                // how many fields in a row
-    lua_createtable(L, 0, NumberOfItems);  // our SECTOR table
+    int NumberOfItems = 15;               // how many fields in a row
+    lua_createtable(L, 0, NumberOfItems); // our SECTOR table
 
     //---------------
     // SECTOR.tag
     lua_pushinteger(L, ui_player_who->map_object_->subsector_->sector->tag);
-    lua_setfield(L, -2, "tag");  // add to SECTOR Table
+    lua_setfield(L, -2, "tag"); // add to SECTOR Table
     //---------------
 
     //---------------
     // SECTOR.lightlevel
-    lua_pushinteger(
-        L, ui_player_who->map_object_->subsector_->sector->properties.light_level);
-    lua_setfield(L, -2, "light_level");  // add to SECTOR Table
+    lua_pushinteger(L, ui_player_who->map_object_->subsector_->sector->properties.light_level);
+    lua_setfield(L, -2, "light_level"); // add to SECTOR Table
     //---------------
 
     //---------------
@@ -2152,8 +2155,7 @@ static int Sector_info(lua_State *L)
         // it,
         //  then return the control sector floor height
         float       player_floor_height = ui_player_who->map_object_->floor_z_;
-        Extrafloor *floor_checker =
-            ui_player_who->map_object_->subsector_->sector->bottom_extrafloor;
+        Extrafloor *floor_checker       = ui_player_who->map_object_->subsector_->sector->bottom_extrafloor;
         for (Extrafloor *ef = floor_checker; ef; ef = ef->higher)
         {
             if (CurrentSurface > ef->top_height)
@@ -2170,13 +2172,13 @@ static int Sector_info(lua_State *L)
         }
     }
     lua_pushinteger(L, (int)CurrentSurface);
-    lua_setfield(L, -2, "floor_height");  // add to SECTOR Table
+    lua_setfield(L, -2, "floor_height"); // add to SECTOR Table
     //---------------
 
     //---------------
     // SECTOR.floor_flat
     lua_pushstring(L, temp_value.c_str());
-    lua_setfield(L, -2, "floor_flat");  // add to MAP Table
+    lua_setfield(L, -2, "floor_flat"); // add to MAP Table
     temp_value.clear();
     //---------------
 
@@ -2194,8 +2196,7 @@ static int Sector_info(lua_State *L)
         //   then return the control sector ceiling height
         float       HighestCeiling      = 0;
         float       player_floor_height = ui_player_who->map_object_->floor_z_;
-        Extrafloor *floor_checker =
-            ui_player_who->map_object_->subsector_->sector->bottom_extrafloor;
+        Extrafloor *floor_checker       = ui_player_who->map_object_->subsector_->sector->bottom_extrafloor;
         for (Extrafloor *ef = floor_checker; ef; ef = ef->higher)
         {
             if (player_floor_height + 1 > ef->top_height)
@@ -2210,72 +2211,67 @@ static int Sector_info(lua_State *L)
         }
     }
     lua_pushinteger(L, (int)CurrentSurface);
-    lua_setfield(L, -2, "ceiling_height");  // add to SECTOR Table
+    lua_setfield(L, -2, "ceiling_height"); // add to SECTOR Table
     //---------------
 
     //---------------
     // SECTOR.is_outside
     // Doesn't account for extrafloors by design. Reasoning is that usually
     //  extrafloors will be platforms, not roofs...
-    if (ui_player_who->map_object_->subsector_->sector->ceiling.image !=
-        sky_flat_image)  // is it outdoors?
+    if (ui_player_who->map_object_->subsector_->sector->ceiling.image != sky_flat_image) // is it outdoors?
         lua_pushboolean(L, 0);
     else
         lua_pushboolean(L, 1);
 
-    lua_setfield(L, -2, "is_outside");  // add to SECTOR Table
+    lua_setfield(L, -2, "is_outside"); // add to SECTOR Table
     //---------------
 
     //---------------
     // SECTOR.type
     lua_pushinteger(L, ui_player_who->map_object_->subsector_->sector->properties.type);
-    lua_setfield(L, -2, "type");  // add to SECTOR Table
+    lua_setfield(L, -2, "type"); // add to SECTOR Table
     //---------------
 
     //---------------
     // SECTOR.airless
     lua_pushboolean(L, ui_player_who->airless_ ? 1 : 0);
-    lua_setfield(L, -2, "is_airless");  // add to SECTOR Table
+    lua_setfield(L, -2, "is_airless"); // add to SECTOR Table
     //---------------
 
     //---------------
     // SECTOR.swimmable
     lua_pushboolean(L, ui_player_who->swimming_ ? 1 : 0);
-    lua_setfield(L, -2, "is_swimmable");  // add to SECTOR Table
+    lua_setfield(L, -2, "is_swimmable"); // add to SECTOR Table
     //---------------
 
     //---------------
     // SECTOR.gravity
-    lua_pushnumber(L,
-                   ui_player_who->map_object_->subsector_->sector->properties.gravity);
-    lua_setfield(L, -2, "gravity");  // add to SECTOR Table
+    lua_pushnumber(L, ui_player_who->map_object_->subsector_->sector->properties.gravity);
+    lua_setfield(L, -2, "gravity"); // add to SECTOR Table
     //---------------
 
     //---------------
     // SECTOR.friction
-    lua_pushnumber(L,
-                   ui_player_who->map_object_->subsector_->sector->properties.friction);
-    lua_setfield(L, -2, "friction");  // add to SECTOR Table
+    lua_pushnumber(L, ui_player_who->map_object_->subsector_->sector->properties.friction);
+    lua_setfield(L, -2, "friction"); // add to SECTOR Table
     //---------------
 
     //---------------
     // SECTOR.viscosity
-    lua_pushnumber(L,
-                   ui_player_who->map_object_->subsector_->sector->properties.viscosity);
-    lua_setfield(L, -2, "viscosity");  // add to SECTOR Table
+    lua_pushnumber(L, ui_player_who->map_object_->subsector_->sector->properties.viscosity);
+    lua_setfield(L, -2, "viscosity"); // add to SECTOR Table
     //---------------
 
     //---------------
     // SECTOR.drag
     lua_pushnumber(L, ui_player_who->map_object_->subsector_->sector->properties.drag);
-    lua_setfield(L, -2, "drag");  // add to SECTOR Table
+    lua_setfield(L, -2, "drag"); // add to SECTOR Table
     //---------------
 
     //---------------
     // SECTOR.fogcolor
     HMM_Vec3  rgb;
-    RGBAColor tempcolor =
-        ui_player_who->map_object_->subsector_->sector->properties.fog_color;
+    RGBAColor tempcolor = ui_player_who->map_object_->subsector_->sector->properties.fog_color;
 
     rgb.X = -1;
     rgb.Y = -1;
@@ -2291,108 +2287,104 @@ static int Sector_info(lua_State *L)
     }
 
     LuaPushVector3(L, rgb);
-    lua_setfield(L, -2, "fog_color");  // add to SECTOR Table
+    lua_setfield(L, -2, "fog_color"); // add to SECTOR Table
     //---------------
 
     //---------------
     // SECTOR.fogdensity
 
     // Convert to approximate percentage (a value between 0 and 100)
-    float tempfogdensity =
-        (ui_player_who->map_object_->subsector_->sector->properties.fog_density /
-         0.01f) *
-        100;
-    tempfogdensity = ceil(tempfogdensity);
+    float tempfogdensity = (ui_player_who->map_object_->subsector_->sector->properties.fog_density / 0.01f) * 100;
+    tempfogdensity       = ceil(tempfogdensity);
     lua_pushinteger(L, (int)tempfogdensity);
-    lua_setfield(L, -2, "fog_density");  // add to SECTOR Table
+    lua_setfield(L, -2, "fog_density"); // add to SECTOR Table
     //---------------
 
     return 1;
 }
 
-static const luaL_Reg playerlib[] = {
-    {"num_players", PL_num_players},
-    {"set_who", PL_set_who},
-    {"is_bot", PL_is_bot},
-    {"get_name", PL_get_name},
-    {"get_pos", PL_get_pos},
-    {"get_angle", PL_get_angle},
-    {"get_mlook", PL_get_mlook},
+static const luaL_Reg playerlib[] = { { "num_players", PL_num_players },
+                                      { "set_who", PL_set_who },
+                                      { "is_bot", PL_is_bot },
+                                      { "get_name", PL_get_name },
+                                      { "get_pos", PL_get_pos },
+                                      { "get_angle", PL_get_angle },
+                                      { "get_mlook", PL_get_mlook },
 
-    {"health", PL_health},
-    {"armor", PL_armor},
-    {"total_armor", PL_total_armor},
-    {"ammo", PL_ammo},
-    {"ammomax", PL_ammomax},
-    {"frags", PL_frags},
+                                      { "health", PL_health },
+                                      { "armor", PL_armor },
+                                      { "total_armor", PL_total_armor },
+                                      { "ammo", PL_ammo },
+                                      { "ammomax", PL_ammomax },
+                                      { "frags", PL_frags },
 
-    {"is_swimming", PL_is_swimming},
-    {"is_jumping", PL_is_jumping},
-    {"is_crouching", PL_is_crouching},
-    {"is_using", PL_is_using},
-    {"is_action1", PL_is_action1},
-    {"is_action2", PL_is_action2},
-    {"is_attacking", PL_is_attacking},
-    {"is_rampaging", PL_is_rampaging},
-    {"is_grinning", PL_is_grinning},
+                                      { "is_swimming", PL_is_swimming },
+                                      { "is_jumping", PL_is_jumping },
+                                      { "is_crouching", PL_is_crouching },
+                                      { "is_using", PL_is_using },
+                                      { "is_action1", PL_is_action1 },
+                                      { "is_action2", PL_is_action2 },
+                                      { "is_attacking", PL_is_attacking },
+                                      { "is_rampaging", PL_is_rampaging },
+                                      { "is_grinning", PL_is_grinning },
 
-    {"under_water", PL_under_water},
-    {"on_ground", PL_on_ground},
-    {"move_speed", PL_move_speed},
-    {"air_in_lungs", PL_air_in_lungs},
+                                      { "under_water", PL_under_water },
+                                      { "on_ground", PL_on_ground },
+                                      { "move_speed", PL_move_speed },
+                                      { "air_in_lungs", PL_air_in_lungs },
 
-    {"has_key", PL_has_key},
-    {"has_power", PL_has_power},
-    {"power_left", PL_power_left},
-    {"has_weapon", PL_has_weapon},
-    {"has_weapon_slot", PL_has_weapon_slot},
-    {"cur_weapon", PL_cur_weapon},
-    {"cur_weapon_slot", PL_cur_weapon_slot},
+                                      { "has_key", PL_has_key },
+                                      { "has_power", PL_has_power },
+                                      { "power_left", PL_power_left },
+                                      { "has_weapon", PL_has_weapon },
+                                      { "has_weapon_slot", PL_has_weapon_slot },
+                                      { "cur_weapon", PL_cur_weapon },
+                                      { "cur_weapon_slot", PL_cur_weapon_slot },
 
-    {"main_ammo", PL_main_ammo},
-    {"ammo_type", PL_ammo_type},
-    {"ammo_pershot", PL_ammo_pershot},
-    {"clip_ammo", PL_clip_ammo},
-    {"clip_size", PL_clip_size},
-    {"clip_is_shared", PL_clip_is_shared},
+                                      { "main_ammo", PL_main_ammo },
+                                      { "ammo_type", PL_ammo_type },
+                                      { "ammo_pershot", PL_ammo_pershot },
+                                      { "clip_ammo", PL_clip_ammo },
+                                      { "clip_size", PL_clip_size },
+                                      { "clip_is_shared", PL_clip_is_shared },
 
-    {"hurt_by", PL_hurt_by},
-    {"hurt_mon", PL_hurt_mon},
-    {"hurt_pain", PL_hurt_pain},
-    {"hurt_dir", PL_hurt_dir},
-    {"hurt_angle", PL_hurt_angle},
+                                      { "hurt_by", PL_hurt_by },
+                                      { "hurt_mon", PL_hurt_mon },
+                                      { "hurt_pain", PL_hurt_pain },
+                                      { "hurt_dir", PL_hurt_dir },
+                                      { "hurt_angle", PL_hurt_angle },
 
-    {"kills", PL_kills},
-    {"secrets", PL_secrets},
-    {"items", PL_items},
-    {"map_enemies", PL_map_enemies},
-    {"map_secrets", PL_map_secrets},
-    {"map_items", PL_map_items},
-    {"floor_flat", PL_floor_flat},
-    {"sector_tag", PL_sector_tag},
+                                      { "kills", PL_kills },
+                                      { "secrets", PL_secrets },
+                                      { "items", PL_items },
+                                      { "map_enemies", PL_map_enemies },
+                                      { "map_secrets", PL_map_secrets },
+                                      { "map_items", PL_map_items },
+                                      { "floor_flat", PL_floor_flat },
+                                      { "sector_tag", PL_sector_tag },
 
-    {"play_footstep", PL_play_footstep},
+                                      { "play_footstep", PL_play_footstep },
 
-    {"use_inventory", PL_use_inventory},
-    {"inventory", PL_inventory},
-    {"inventorymax", PL_inventorymax},
+                                      { "use_inventory", PL_use_inventory },
+                                      { "inventory", PL_inventory },
+                                      { "inventorymax", PL_inventorymax },
 
-    {"rts_enable_tagged", PL_rts_enable_tagged},
+                                      { "rts_enable_tagged", PL_rts_enable_tagged },
 
-    {"counter", PL_counter},
-    {"counter_max", PL_counter_max},
-    {"set_counter", PL_set_counter},
+                                      { "counter", PL_counter },
+                                      { "counter_max", PL_counter_max },
+                                      { "set_counter", PL_set_counter },
 
-    {"query_object", PL_query_object},
-    {"query_weapon", PL_query_weapon},
-    {"is_zoomed", PL_is_zoomed},
-    {"weapon_state", PL_weapon_state},
+                                      { "query_object", PL_query_object },
+                                      { "query_weapon", PL_query_weapon },
+                                      { "is_zoomed", PL_is_zoomed },
+                                      { "weapon_state", PL_weapon_state },
 
-    {"sector_light", PL_sector_light},
-    {"sector_floor_height", PL_sector_floor_height},
-    {"sector_ceiling_height", PL_sector_ceiling_height},
-    {"is_outside", PL_is_outside},
-    {nullptr, nullptr}};
+                                      { "sector_light", PL_sector_light },
+                                      { "sector_floor_height", PL_sector_floor_height },
+                                      { "sector_ceiling_height", PL_sector_ceiling_height },
+                                      { "is_outside", PL_is_outside },
+                                      { nullptr, nullptr } };
 
 static int luaopen_player(lua_State *L)
 {
@@ -2400,12 +2392,12 @@ static int luaopen_player(lua_State *L)
     return 1;
 }
 
-static const luaL_Reg mapobjectlib[] = {{"query_tagged", MO_query_tagged},
-                                        {"tagged_info", MO_tagged_info},
-                                        {"object_info", MO_object_info},
-                                        {"weapon_info", MO_weapon_info},
-                                        {"count", MO_count},
-                                        {nullptr, nullptr}};
+static const luaL_Reg mapobjectlib[] = { { "query_tagged", MO_query_tagged },
+                                         { "tagged_info", MO_tagged_info },
+                                         { "object_info", MO_object_info },
+                                         { "weapon_info", MO_weapon_info },
+                                         { "count", MO_count },
+                                         { nullptr, nullptr } };
 
 static int luaopen_mapobject(lua_State *L)
 {
@@ -2413,7 +2405,7 @@ static int luaopen_mapobject(lua_State *L)
     return 1;
 }
 
-static const luaL_Reg gamelib[] = {{"info", Game_info}, {nullptr, nullptr}};
+static const luaL_Reg gamelib[] = { { "info", Game_info }, { nullptr, nullptr } };
 
 static int luaopen_game(lua_State *L)
 {
@@ -2421,7 +2413,7 @@ static int luaopen_game(lua_State *L)
     return 1;
 }
 
-static const luaL_Reg maplib[] = {{"info", Map_info}, {nullptr, nullptr}};
+static const luaL_Reg maplib[] = { { "info", Map_info }, { nullptr, nullptr } };
 
 static int luaopen_map(lua_State *L)
 {
@@ -2429,7 +2421,7 @@ static int luaopen_map(lua_State *L)
     return 1;
 }
 
-static const luaL_Reg sectorlib[] = {{"info", Sector_info}, {nullptr, nullptr}};
+static const luaL_Reg sectorlib[] = { { "info", Sector_info }, { nullptr, nullptr } };
 
 static int luaopen_sector(lua_State *L)
 {

@@ -800,8 +800,8 @@ void MidiSequencer::BuildTimeLine(const std::vector<MidiEvent> &tempos,
                     // before end point
                     std::vector<TempoChangePoint> points;
                     MidiFraction                  t;
-                    TempoChangePoint firstPoint = {posPrev->absolute_position_,
-                                                   currentTempo};
+                    TempoChangePoint firstPoint = { posPrev->absolute_position_,
+                                                    currentTempo };
                     points.push_back(firstPoint);
 
                     // Collect tempo change points between previous and current
@@ -2407,7 +2407,7 @@ bool MidiSequencer::ParseGmf(epi::MemFile *mfr)
     midi_individual_tick_delta_ =
         MidiFraction(1, 1000000l * (uint64_t)(deltaTicks));
     midi_tempo_ = MidiFraction(1, (uint64_t)(deltaTicks) * 2);
-    static const unsigned char EndTag[4]   = {0xFF, 0x2F, 0x00, 0x00};
+    static const unsigned char EndTag[4]   = { 0xFF, 0x2F, 0x00, 0x00 };
     size_t                     totalGotten = 0;
 
     for (size_t tk = 0; tk < track_count; ++tk)

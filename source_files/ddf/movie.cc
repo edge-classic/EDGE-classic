@@ -38,7 +38,8 @@ static const DDFCommandList movie_commands[] = {
     DDF_FIELD("SPECIAL", dummy_movie, special_, DDF_MovieGetSpecial),
     DDF_FIELD("SCALING", dummy_movie, scaling_, DDF_MovieGetScaling),
 
-    {nullptr, nullptr, 0, nullptr}};
+    { nullptr, nullptr, 0, nullptr }
+};
 
 MovieDefinitionContainer moviedefs;
 
@@ -158,8 +159,8 @@ static void DDF_MovieGetType(const char *info, void *storage)
         DDF_Error("Unknown movie type: %s\n", keyword);
 }
 
-static DDFSpecialFlags movie_specials[] = {{"MUTE", kMovieSpecialMute, 0},
-                                           {nullptr, 0, 0}};
+static DDFSpecialFlags movie_specials[] = { { "MUTE", kMovieSpecialMute, 0 },
+                                            { nullptr, 0, 0 } };
 
 static void DDF_MovieGetSpecial(const char *info, void *storage)
 {

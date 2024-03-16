@@ -52,7 +52,7 @@ EDGE_DEFINE_CONSOLE_VARIABLE(
     busy_wait, "1",
     kConsoleVariableFlagReadOnly)  // Not sure what to rename this yet - Dasho
 
-#if !defined(__MINGW32__) && \
+#if !defined(__MINGW32__) &&                                                   \
     (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
 HANDLE windows_timer = nullptr;
 #endif
@@ -82,7 +82,7 @@ void NetworkInitialize(void)
 
     NetworkResetTics();
 
-#if !defined(__MINGW32__) && \
+#if !defined(__MINGW32__) &&                                                   \
     (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
     windows_timer = CreateWaitableTimerExW(
         nullptr, nullptr, CREATE_WAITABLE_TIMER_HIGH_RESOLUTION,
@@ -93,7 +93,7 @@ void NetworkInitialize(void)
 
 void NetworkShutdown(void)
 {
-#if !defined(__MINGW32__) && \
+#if !defined(__MINGW32__) &&                                                   \
     (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
     if (windows_timer)
     {

@@ -110,12 +110,12 @@ int key_inventory_next;
 int key_third_attack;
 int key_fourth_attack;
 
-static int forward_move[2] = {25, 50};
-static int side_move[2]    = {24, 40};
-static int upward_move[2]  = {20, 30};
+static int forward_move[2] = { 25, 50 };
+static int side_move[2]    = { 24, 40 };
+static int upward_move[2]  = { 20, 30 };
 
-static int angle_turn[3]     = {640, 1280, 320};  // + slow turn
-static int mouselook_turn[3] = {400, 800, 200};
+static int angle_turn[3]     = { 640, 1280, 320 };  // + slow turn
+static int mouselook_turn[3] = { 400, 800, 200 };
 
 static constexpr uint8_t kSlowTurnTics = 6;
 
@@ -139,15 +139,15 @@ static int mouselook_held;  // for accelerative mlooking
 int mouse_x_axis;
 int mouse_y_axis;
 
-int joystick_axis[4] = {0, 0, 0, 0};
+int joystick_axis[4] = { 0, 0, 0, 0 };
 
 static constexpr float kJoystickAxisPeak = 32767.0f / 32768.0f;
 
 static int joy_last_raw[4];
 
 // The last one is ignored (kAxisDisable)
-static float ball_deltas[6] = {0, 0, 0, 0, 0, 0};
-static float joy_forces[6]  = {0, 0, 0, 0, 0, 0};
+static float ball_deltas[6] = { 0, 0, 0, 0, 0, 0 };
+static float joy_forces[6]  = { 0, 0, 0, 0, 0, 0 };
 
 EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_0, "0.30",
                                      kConsoleVariableFlagArchive, 0.01f, 0.99f)
@@ -289,7 +289,7 @@ void EventBuildTicCommand(EventTicCommand *cmd)
 {
     UpdateForces();
 
-    *cmd = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    *cmd = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     bool strafe = EventIsKeyPressed(key_strafe);
     int  speed  = EventIsKeyPressed(key_speed) ? 1 : 0;
@@ -685,106 +685,107 @@ struct EventSpecialKey
 };
 
 static EventSpecialKey special_keys[] = {
-    {kRightArrow, "Right Arrow"},
-    {kLeftArrow, "Left Arrow"},
-    {kUpArrow, "Up Arrow"},
-    {kDownArrow, "Down Arrow"},
-    {kEscape, "Escape"},
-    {kEnter, "Enter"},
-    {kTab, "Tab"},
+    { kRightArrow, "Right Arrow" },
+    { kLeftArrow, "Left Arrow" },
+    { kUpArrow, "Up Arrow" },
+    { kDownArrow, "Down Arrow" },
+    { kEscape, "Escape" },
+    { kEnter, "Enter" },
+    { kTab, "Tab" },
 
-    {kBackspace, "Backspace"},
-    {kEquals, "Equals"},
-    {kMinus, "Minus"},
-    {kRightShift, "Shift"},
-    {kRightControl, "Ctrl"},
-    {kRightAlt, "Alt"},
-    {kInsert, "Insert"},
-    {kDelete, "Delete"},
-    {kPageDown, "PageDown"},
-    {kPageUp, "PageUp"},
-    {kHome, "Home"},
-    {kEnd, "End"},
-    {kScrollLock, "ScrollLock"},
-    {kNumberLock, "NumLock"},
-    {kCapsLock, "CapsLock"},
-    {kEnd, "End"},
-    {'\'', "\'"},
-    {kSpace, "Space"},
-    {kTilde, "`"},
-    {kPause, "Pause"},
+    { kBackspace, "Backspace" },
+    { kEquals, "Equals" },
+    { kMinus, "Minus" },
+    { kRightShift, "Shift" },
+    { kRightControl, "Ctrl" },
+    { kRightAlt, "Alt" },
+    { kInsert, "Insert" },
+    { kDelete, "Delete" },
+    { kPageDown, "PageDown" },
+    { kPageUp, "PageUp" },
+    { kHome, "Home" },
+    { kEnd, "End" },
+    { kScrollLock, "ScrollLock" },
+    { kNumberLock, "NumLock" },
+    { kCapsLock, "CapsLock" },
+    { kEnd, "End" },
+    { '\'', "\'" },
+    { kSpace, "Space" },
+    { kTilde, "`" },
+    { kPause, "Pause" },
 
     // function keys
-    {kFunction1, "F1"},
-    {kFunction2, "F2"},
-    {kFunction3, "F3"},
-    {kFunction4, "F4"},
-    {kFunction5, "F5"},
-    {kFunction6, "F6"},
-    {kFunction7, "F7"},
-    {kFunction8, "F8"},
-    {kFunction9, "F9"},
-    {kFunction10, "F10"},
-    {kFunction11, "F11"},
-    {kFunction12, "F12"},
+    { kFunction1, "F1" },
+    { kFunction2, "F2" },
+    { kFunction3, "F3" },
+    { kFunction4, "F4" },
+    { kFunction5, "F5" },
+    { kFunction6, "F6" },
+    { kFunction7, "F7" },
+    { kFunction8, "F8" },
+    { kFunction9, "F9" },
+    { kFunction10, "F10" },
+    { kFunction11, "F11" },
+    { kFunction12, "F12" },
 
     // numeric keypad
-    {kKeypad0, "KP_0"},
-    {kKeypad1, "KP_1"},
-    {kKeypad2, "KP_2"},
-    {kKeypad3, "KP_3"},
-    {kKeypad4, "KP_4"},
-    {kKeypad5, "KP_5"},
-    {kKeypad6, "KP_6"},
-    {kKeypad7, "KP_7"},
-    {kKeypad8, "KP_8"},
-    {kKeypad9, "KP_9"},
+    { kKeypad0, "KP_0" },
+    { kKeypad1, "KP_1" },
+    { kKeypad2, "KP_2" },
+    { kKeypad3, "KP_3" },
+    { kKeypad4, "KP_4" },
+    { kKeypad5, "KP_5" },
+    { kKeypad6, "KP_6" },
+    { kKeypad7, "KP_7" },
+    { kKeypad8, "KP_8" },
+    { kKeypad9, "KP_9" },
 
-    {kKeypadDot, "KP_DOT"},
-    {kKeypadPlus, "KP_PLUS"},
-    {kKeypadMinus, "KP_MINUS"},
-    {kKeypadStar, "KP_STAR"},
-    {kKeypadSlash, "KP_SLASH"},
-    {kKeypadEquals, "KP_EQUAL"},
-    {kKeypadEnter, "KP_ENTER"},
+    { kKeypadDot, "KP_DOT" },
+    { kKeypadPlus, "KP_PLUS" },
+    { kKeypadMinus, "KP_MINUS" },
+    { kKeypadStar, "KP_STAR" },
+    { kKeypadSlash, "KP_SLASH" },
+    { kKeypadEquals, "KP_EQUAL" },
+    { kKeypadEnter, "KP_ENTER" },
 
     // mouse buttons
-    {kMouse1, "Mouse1"},
-    {kMouse2, "Mouse2"},
-    {kMouse3, "Mouse3"},
-    {kMouse4, "Mouse4"},
-    {kMouse5, "Mouse5"},
-    {kMouse6, "Mouse6"},
-    {kMouseWheelUp, "Wheel Up"},
-    {kMouseWheelDown, "Wheel Down"},
+    { kMouse1, "Mouse1" },
+    { kMouse2, "Mouse2" },
+    { kMouse3, "Mouse3" },
+    { kMouse4, "Mouse4" },
+    { kMouse5, "Mouse5" },
+    { kMouse6, "Mouse6" },
+    { kMouseWheelUp, "Wheel Up" },
+    { kMouseWheelDown, "Wheel Down" },
 
     // gamepad buttons
-    {kGamepadA, "A Button"},
-    {kGamepadB, "B Button"},
-    {kGamepadX, "X Button"},
-    {kGamepadY, "Y Button"},
-    {kGamepadBack, "Back Button"},
-    {kGamepadGuide, "Guide Button"},  // ???
-    {kGamepadStart, "Start Button"},
-    {kGamepadLeftStick, "Left Stick"},
-    {kGamepadRightStick, "Right Stick"},
-    {kGamepadLeftShoulder, "Left Shoulder"},
-    {kGamepadRightShoulder, "Right Shoulder"},
-    {kGamepadUp, "DPad Up"},
-    {kGamepadDown, "DPad Down"},
-    {kGamepadLeft, "DPad Left"},
-    {kGamepadRight, "DPad Right"},
-    {kGamepadMisc1, "Misc1 Button"},  // ???
-    {kGamepadPaddle1, "Paddle 1"},
-    {kGamepadPaddle2, "Paddle 2"},
-    {kGamepadPaddle3, "Paddle 3"},
-    {kGamepadPaddle4, "Paddle 4"},
-    {kGamepadTouchpad, "Touchpad"},
-    {kGamepadTriggerLeft, "Left Trigger"},
-    {kGamepadTriggerRight, "Right Trigger"},
+    { kGamepadA, "A Button" },
+    { kGamepadB, "B Button" },
+    { kGamepadX, "X Button" },
+    { kGamepadY, "Y Button" },
+    { kGamepadBack, "Back Button" },
+    { kGamepadGuide, "Guide Button" },  // ???
+    { kGamepadStart, "Start Button" },
+    { kGamepadLeftStick, "Left Stick" },
+    { kGamepadRightStick, "Right Stick" },
+    { kGamepadLeftShoulder, "Left Shoulder" },
+    { kGamepadRightShoulder, "Right Shoulder" },
+    { kGamepadUp, "DPad Up" },
+    { kGamepadDown, "DPad Down" },
+    { kGamepadLeft, "DPad Left" },
+    { kGamepadRight, "DPad Right" },
+    { kGamepadMisc1, "Misc1 Button" },  // ???
+    { kGamepadPaddle1, "Paddle 1" },
+    { kGamepadPaddle2, "Paddle 2" },
+    { kGamepadPaddle3, "Paddle 3" },
+    { kGamepadPaddle4, "Paddle 4" },
+    { kGamepadTouchpad, "Touchpad" },
+    { kGamepadTriggerLeft, "Left Trigger" },
+    { kGamepadTriggerRight, "Right Trigger" },
 
     // THE END
-    {-1, nullptr}};
+    { -1, nullptr }
+};
 
 const char *EventGetKeyName(int key)
 {

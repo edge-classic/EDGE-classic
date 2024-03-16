@@ -134,10 +134,10 @@ bool tile_leaving_background  = false;
 bool tile_entering_background = false;
 
 // You Are Here graphic
-static const Image *you_are_here[2] = {nullptr, nullptr};
+static const Image *you_are_here[2] = { nullptr, nullptr };
 
 // splat
-static const Image *splat[2] = {nullptr, nullptr};
+static const Image *splat[2] = { nullptr, nullptr };
 
 // %, : graphics
 static const Image *percent;

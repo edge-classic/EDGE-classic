@@ -5893,7 +5893,7 @@ DehackedMapObjectDefinition
             0,                             // Fullbright
             kS_NULL                        // raisestate
         },
-};
+    };
 
 DehackedMapObjectDefinition brain_explode_mobj = {
     "BRAIN_DEATH_MISSILE",                                       // name

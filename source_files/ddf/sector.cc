@@ -83,7 +83,8 @@ static const DDFCommandList sect_commands[] = {
     DDF_FIELD("FOG_COLOR", dummy_sector, fog_cmap_, DDF_MainGetColourmap),
     DDF_FIELD("FOG_DENSITY", dummy_sector, fog_density_, DDF_MainGetPercent),
 
-    {nullptr, nullptr, 0, nullptr}};
+    { nullptr, nullptr, 0, nullptr }
+};
 
 //
 //  DDF PARSE ROUTINES
@@ -219,16 +220,17 @@ void DDF_SectorCleanUp(void) { sectortypes.shrink_to_fit(); }
 //----------------------------------------------------------------------------
 
 static DDFSpecialFlags sector_specials[] = {
-    {"WHOLE_REGION", kSectorFlagWholeRegion, 0},
-    {"PROPORTIONAL", kSectorFlagProportional, 0},
-    {"PUSH_ALL", kSectorFlagPushAll, 0},
-    {"PUSH_CONSTANT", kSectorFlagPushConstant, 0},
-    {"AIRLESS", kSectorFlagAirLess, 0},
-    {"SWIM", kSectorFlagSwimming, 0},
-    {"SUBMERGED_SFX", kSectorFlagSubmergedSFX, 0},
-    {"VACUUM_SFX", kSectorFlagVacuumSFX, 0},
-    {"REVERB_SFX", kSectorFlagReverbSFX, 0},
-    {nullptr, 0, 0}};
+    { "WHOLE_REGION", kSectorFlagWholeRegion, 0 },
+    { "PROPORTIONAL", kSectorFlagProportional, 0 },
+    { "PUSH_ALL", kSectorFlagPushAll, 0 },
+    { "PUSH_CONSTANT", kSectorFlagPushConstant, 0 },
+    { "AIRLESS", kSectorFlagAirLess, 0 },
+    { "SWIM", kSectorFlagSwimming, 0 },
+    { "SUBMERGED_SFX", kSectorFlagSubmergedSFX, 0 },
+    { "VACUUM_SFX", kSectorFlagVacuumSFX, 0 },
+    { "REVERB_SFX", kSectorFlagReverbSFX, 0 },
+    { nullptr, 0, 0 }
+};
 
 //
 // DDF_SectGetSpecialFlags
@@ -261,13 +263,15 @@ void DDF_SectGetSpecialFlags(const char *info, void *storage)
     }
 }
 
-static DDFSpecialFlags exit_types[] = {{"NONE", kExitTypeNone, 0},
-                                       {"NORMAL", kExitTypeNormal, 0},
-                                       {"SECRET", kExitTypeSecret, 0},
+static DDFSpecialFlags exit_types[] = {
+    { "NONE", kExitTypeNone, 0 },
+    { "NORMAL", kExitTypeNormal, 0 },
+    { "SECRET", kExitTypeSecret, 0 },
 
-                                       // -AJA- backwards compatibility cruft...
-                                       {"!EXIT", kExitTypeNormal, 0},
-                                       {nullptr, 0, 0}};
+    // -AJA- backwards compatibility cruft...
+    { "!EXIT", kExitTypeNormal, 0 },
+    { nullptr, 0, 0 }
+};
 
 //
 // DDF_SectGetExit
@@ -295,14 +299,15 @@ void DDF_SectGetExit(const char *info, void *storage)
 }
 
 static DDFSpecialFlags light_types[] = {
-    {"NONE", kLightSpecialTypeNone, 0},
-    {"SET", kLightSpecialTypeSet, 0},
-    {"FADE", kLightSpecialTypeFade, 0},
-    {"STROBE", kLightSpecialTypeStrobe, 0},
-    {"FLASH", kLightSpecialTypeFlash, 0},
-    {"GLOW", kLightSpecialTypeGlow, 0},
-    {"FLICKER", kLightSpecialTypeFireFlicker, 0},
-    {nullptr, 0, 0}};
+    { "NONE", kLightSpecialTypeNone, 0 },
+    { "SET", kLightSpecialTypeSet, 0 },
+    { "FADE", kLightSpecialTypeFade, 0 },
+    { "STROBE", kLightSpecialTypeStrobe, 0 },
+    { "FLASH", kLightSpecialTypeFlash, 0 },
+    { "GLOW", kLightSpecialTypeGlow, 0 },
+    { "FLICKER", kLightSpecialTypeFireFlicker, 0 },
+    { nullptr, 0, 0 }
+};
 
 //
 // DDF_SectGetLighttype
@@ -330,15 +335,16 @@ void DDF_SectGetLighttype(const char *info, void *storage)
 }
 
 static DDFSpecialFlags movement_types[] = {
-    {"MOVE", kPlaneMoverOnce, 0},
-    {"MOVEWAITRETURN", kPlaneMoverMoveWaitReturn, 0},
-    {"CONTINUOUS", kPlaneMoverContinuous, 0},
-    {"PLAT", kPlaneMoverPlatform, 0},
-    {"BUILDSTAIRS", kPlaneMoverStairs, 0},
-    {"STOP", kPlaneMoverStop, 0},
-    {"TOGGLE", kPlaneMoverToggle, 0},
-    {"ELEVATOR", kPlaneMoverElevator, 0},
-    {nullptr, 0, 0}};
+    { "MOVE", kPlaneMoverOnce, 0 },
+    { "MOVEWAITRETURN", kPlaneMoverMoveWaitReturn, 0 },
+    { "CONTINUOUS", kPlaneMoverContinuous, 0 },
+    { "PLAT", kPlaneMoverPlatform, 0 },
+    { "BUILDSTAIRS", kPlaneMoverStairs, 0 },
+    { "STOP", kPlaneMoverStop, 0 },
+    { "TOGGLE", kPlaneMoverToggle, 0 },
+    { "ELEVATOR", kPlaneMoverElevator, 0 },
+    { nullptr, 0, 0 }
+};
 
 //
 // DDF_SectGetMType
@@ -366,55 +372,56 @@ void DDF_SectGetMType(const char *info, void *storage)
 }
 
 static DDFSpecialFlags reference_types[] = {
-    {"ABSOLUTE", kTriggerHeightReferenceAbsolute, false},
+    { "ABSOLUTE", kTriggerHeightReferenceAbsolute, false },
 
-    {"FLOOR", kTriggerHeightReferenceCurrent, false},
-    {"CEILING", kTriggerHeightReferenceCurrent + kTriggerHeightReferenceCeiling,
-     false},
+    { "FLOOR", kTriggerHeightReferenceCurrent, false },
+    { "CEILING",
+      kTriggerHeightReferenceCurrent + kTriggerHeightReferenceCeiling, false },
 
-    {"TRIGGERFLOOR", kTriggerHeightReferenceTriggeringLinedef, false},
-    {"TRIGGERCEILING",
-     kTriggerHeightReferenceTriggeringLinedef + kTriggerHeightReferenceCeiling,
-     false},
+    { "TRIGGERFLOOR", kTriggerHeightReferenceTriggeringLinedef, false },
+    { "TRIGGERCEILING",
+      kTriggerHeightReferenceTriggeringLinedef + kTriggerHeightReferenceCeiling,
+      false },
 
     // Note that LOSURROUNDINGFLOOR has the kTriggerHeightReferenceInclude flag,
     // but the others do not.  It's there to maintain backwards compatibility.
     //
-    {"LOSURROUNDINGCEILING",
-     kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceCeiling,
-     false},
-    {"HISURROUNDINGCEILING",
-     kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceCeiling +
-         kTriggerHeightReferenceHighest,
-     false},
-    {"LOSURROUNDINGFLOOR",
-     kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceInclude,
-     false},
-    {"HISURROUNDINGFLOOR",
-     kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceHighest,
-     false},
+    { "LOSURROUNDINGCEILING",
+      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceCeiling,
+      false },
+    { "HISURROUNDINGCEILING",
+      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceCeiling +
+          kTriggerHeightReferenceHighest,
+      false },
+    { "LOSURROUNDINGFLOOR",
+      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceInclude,
+      false },
+    { "HISURROUNDINGFLOOR",
+      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceHighest,
+      false },
 
     // Note that kTriggerHeightReferenceHighest is used for the NextLowest
     // types, and vice versa, which may seem strange.  It's because the next
     // lowest sector is actually the highest of all adjacent sectors
     // that are lower than the current sector.
     //
-    {"NEXTLOWESTFLOOR",
-     kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext +
-         kTriggerHeightReferenceHighest,
-     false},
-    {"NEXTHIGHESTFLOOR",
-     kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext, false},
-    {"NEXTLOWESTCEILING",
-     kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext +
-         kTriggerHeightReferenceCeiling + kTriggerHeightReferenceHighest,
-     false},
-    {"NEXTHIGHESTCEILING",
-     kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext +
-         kTriggerHeightReferenceCeiling,
-     false},
+    { "NEXTLOWESTFLOOR",
+      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext +
+          kTriggerHeightReferenceHighest,
+      false },
+    { "NEXTHIGHESTFLOOR",
+      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext, false },
+    { "NEXTLOWESTCEILING",
+      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext +
+          kTriggerHeightReferenceCeiling + kTriggerHeightReferenceHighest,
+      false },
+    { "NEXTHIGHESTCEILING",
+      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext +
+          kTriggerHeightReferenceCeiling,
+      false },
 
-    {"LOWESTBOTTOMTEXTURE", kTriggerHeightReferenceLowestLowTexture, false}};
+    { "LOWESTBOTTOMTEXTURE", kTriggerHeightReferenceLowestLowTexture, false }
+};
 
 //
 // DDF_SectGetDestRef

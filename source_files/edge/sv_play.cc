@@ -180,13 +180,14 @@ static SaveField sv_fields_player[] = {
     //   avail_weapons, totalarmour: regenerated.
     //   attacker: not very important
 
-    {0,
-     nullptr,
-     0,
-     {kSaveFieldInvalid, 0, nullptr},
-     nullptr,
-     nullptr,
-     nullptr}};
+    { 0,
+      nullptr,
+      0,
+      { kSaveFieldInvalid, 0, nullptr },
+      nullptr,
+      nullptr,
+      nullptr }
+};
 
 SaveStruct sv_struct_player = {
     nullptr,                      // link in list
@@ -243,13 +244,14 @@ static SaveField sv_fields_playerweapon[] = {
                     kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
                     SaveGamePutInteger),
 
-    {0,
-     nullptr,
-     0,
-     {kSaveFieldInvalid, 0, nullptr},
-     nullptr,
-     nullptr,
-     nullptr}};
+    { 0,
+      nullptr,
+      0,
+      { kSaveFieldInvalid, 0, nullptr },
+      nullptr,
+      nullptr,
+      nullptr }
+};
 
 SaveStruct sv_struct_playerweapon = {
     nullptr,                      // link in list
@@ -275,13 +277,14 @@ static SaveField sv_fields_playercounter[] = {
     EDGE_SAVE_FIELD(dummy_stock, maximum, "max", 1, kSaveFieldNumeric, 4,
                     nullptr, SaveGameGetInteger, SaveGamePutInteger),
 
-    {0,
-     nullptr,
-     0,
-     {kSaveFieldInvalid, 0, nullptr},
-     nullptr,
-     nullptr,
-     nullptr}};
+    { 0,
+      nullptr,
+      0,
+      { kSaveFieldInvalid, 0, nullptr },
+      nullptr,
+      nullptr,
+      nullptr }
+};
 
 SaveStruct sv_struct_playercounter = {
     nullptr,                     // link in list
@@ -304,13 +307,14 @@ static SaveField sv_fields_playerinv[] = {
     EDGE_SAVE_FIELD(dummy_stock, maximum, "max", 1, kSaveFieldNumeric, 4,
                     nullptr, SaveGameGetInteger, SaveGamePutInteger),
 
-    {0,
-     nullptr,
-     0,
-     {kSaveFieldInvalid, 0, nullptr},
-     nullptr,
-     nullptr,
-     nullptr}};
+    { 0,
+      nullptr,
+      0,
+      { kSaveFieldInvalid, 0, nullptr },
+      nullptr,
+      nullptr,
+      nullptr }
+};
 
 SaveStruct sv_struct_playerinv = {
     nullptr,                     // link in list
@@ -333,13 +337,14 @@ static SaveField sv_fields_playerammo[] = {
     EDGE_SAVE_FIELD(dummy_stock, maximum, "max", 1, kSaveFieldNumeric, 4,
                     nullptr, SaveGameGetInteger, SaveGamePutInteger),
 
-    {0,
-     nullptr,
-     0,
-     {kSaveFieldInvalid, 0, nullptr},
-     nullptr,
-     nullptr,
-     nullptr}};
+    { 0,
+      nullptr,
+      0,
+      { kSaveFieldInvalid, 0, nullptr },
+      nullptr,
+      nullptr,
+      nullptr }
+};
 
 SaveStruct sv_struct_playerammo = {
     nullptr,                     // link in list
@@ -375,13 +380,14 @@ static SaveField sv_fields_psprite[] = {
     // NOT HERE:
     //   sx, sy: they can be regenerated.
 
-    {0,
-     nullptr,
-     0,
-     {kSaveFieldInvalid, 0, nullptr},
-     nullptr,
-     nullptr,
-     nullptr}};
+    { 0,
+      nullptr,
+      0,
+      { kSaveFieldInvalid, 0, nullptr },
+      nullptr,
+      nullptr,
+      nullptr }
+};
 
 SaveStruct sv_struct_psprite = {
     nullptr,                             // link in list

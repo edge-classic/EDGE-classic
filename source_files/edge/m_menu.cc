@@ -217,7 +217,7 @@ struct MenuItem
     int status = 0;
 
     // image for menu entry
-    char         patch_name[10] = {0};
+    char         patch_name[10] = { 0 };
     const Image *image          = nullptr;
 
     // choice = menu item #.
@@ -321,17 +321,19 @@ enum MainMenuCategory
 };
 
 static MenuItem MainMenu[] = {
-    {1, "M_NGAME", nullptr, MenuNewGame, 'n', language["MainNewGame"]},
-    {1, "M_OPTION", nullptr, MenuOptions, 'o', language["MainOptions"]},
-    {1, "M_LOADG", nullptr, MenuLoadGame, 'l', language["MainLoadGame"]},
-    {1, "M_SAVEG", nullptr, MenuSaveGame, 's', language["MainSaveGame"]},
+    { 1, "M_NGAME", nullptr, MenuNewGame, 'n', language["MainNewGame"] },
+    { 1, "M_OPTION", nullptr, MenuOptions, 'o', language["MainOptions"] },
+    { 1, "M_LOADG", nullptr, MenuLoadGame, 'l', language["MainLoadGame"] },
+    { 1, "M_SAVEG", nullptr, MenuSaveGame, 's', language["MainSaveGame"] },
     // Another hickup with Special edition.
-    {1, "M_RDTHIS", nullptr, MenuReadThis, 'r', language["MainReadThis"]},
-    {1, "M_QUITG", nullptr, MenuQuitEdge, 'q', language["MainQuitGame"]}};
+    { 1, "M_RDTHIS", nullptr, MenuReadThis, 'r', language["MainReadThis"] },
+    { 1, "M_QUITG", nullptr, MenuQuitEdge, 'q', language["MainQuitGame"] }
+};
 
 static Menu MainMenuDefinition = {
     kTotalMainMenuCategories, nullptr, MainMenu, &main_menu_style,
-    MenuDrawMainMenu,         94,      64,       0};
+    MenuDrawMainMenu,         94,      64,       0
+};
 
 //
 // EPISODE SELECT
@@ -341,12 +343,12 @@ static Menu MainMenuDefinition = {
 static MenuItem *EpisodeMenu          = nullptr;
 static bool     *EpisodeMenuSkipSkill = nullptr;
 
-static MenuItem DefaultEpisodeMenu = {1,          // status
-                                      "Working",  // name
-                                      nullptr,    // image
-                                      nullptr,    // select_function
-                                      'w',        // alphakey
-                                      "DEFAULT"};
+static MenuItem DefaultEpisodeMenu = { 1,          // status
+                                       "Working",  // name
+                                       nullptr,    // image
+                                       nullptr,    // select_function
+                                       'w',        // alphakey
+                                       "DEFAULT" };
 
 static Menu EpisodeMenuDefinition = {
     0,                    // ep_end,  // # of menu items
@@ -360,11 +362,15 @@ static Menu EpisodeMenuDefinition = {
 };
 
 static MenuItem SkillMenu[] = {
-    {1, "M_JKILL", nullptr, MenuChooseSkill, 'p', language["MenuDifficulty1"]},
-    {1, "M_ROUGH", nullptr, MenuChooseSkill, 'r', language["MenuDifficulty2"]},
-    {1, "M_HURT", nullptr, MenuChooseSkill, 'h', language["MenuDifficulty3"]},
-    {1, "M_ULTRA", nullptr, MenuChooseSkill, 'u', language["MenuDifficulty4"]},
-    {1, "M_NMARE", nullptr, MenuChooseSkill, 'n', language["MenuDifficulty5"]}};
+    { 1, "M_JKILL", nullptr, MenuChooseSkill, 'p',
+      language["MenuDifficulty1"] },
+    { 1, "M_ROUGH", nullptr, MenuChooseSkill, 'r',
+      language["MenuDifficulty2"] },
+    { 1, "M_HURT", nullptr, MenuChooseSkill, 'h', language["MenuDifficulty3"] },
+    { 1, "M_ULTRA", nullptr, MenuChooseSkill, 'u',
+      language["MenuDifficulty4"] },
+    { 1, "M_NMARE", nullptr, MenuChooseSkill, 'n', language["MenuDifficulty5"] }
+};
 
 static Menu SkillMenuDefinition = {
     kTotalSkillLevels,       // # of menu items
@@ -385,7 +391,7 @@ static Menu SkillMenuDefinition = {
 // Read This! MENU 1 & 2
 //
 
-static MenuItem ReadMenu1[] = {{1, "", nullptr, MenuReadThis2, 0}};
+static MenuItem ReadMenu1[] = { { 1, "", nullptr, MenuReadThis2, 0 } };
 
 static Menu ReadThisMenuDefinition1 = {
     1,
@@ -395,9 +401,10 @@ static Menu ReadThisMenuDefinition1 = {
     MenuDrawReadThis1,
     1000,
     1000,
-    0};
+    0
+};
 
-static MenuItem ReadMenu2[] = {{1, "", nullptr, MenuFinishReadThis, 0}};
+static MenuItem ReadMenu2[] = { { 1, "", nullptr, MenuFinishReadThis, 0 } };
 
 static Menu ReadThisMenuDefinition2 = {
     1,
@@ -407,55 +414,56 @@ static Menu ReadThisMenuDefinition2 = {
     MenuDrawReadThis2,
     1000,
     1000,
-    0};
+    0
+};
 
 //
 // LOAD GAME MENU
 //
 // Note: upto 10 slots per page
 //
-static MenuItem LoadingMenu[] = {{2, "", nullptr, MenuLoadSelect, '1'},
-                                 {2, "", nullptr, MenuLoadSelect, '2'},
-                                 {2, "", nullptr, MenuLoadSelect, '3'},
-                                 {2, "", nullptr, MenuLoadSelect, '4'},
-                                 {2, "", nullptr, MenuLoadSelect, '5'},
-                                 {2, "", nullptr, MenuLoadSelect, '6'},
-                                 {2, "", nullptr, MenuLoadSelect, '7'},
-                                 {2, "", nullptr, MenuLoadSelect, '8'},
-                                 {2, "", nullptr, MenuLoadSelect, '9'},
-                                 {2, "", nullptr, MenuLoadSelect, '0'}};
+static MenuItem LoadingMenu[] = { { 2, "", nullptr, MenuLoadSelect, '1' },
+                                  { 2, "", nullptr, MenuLoadSelect, '2' },
+                                  { 2, "", nullptr, MenuLoadSelect, '3' },
+                                  { 2, "", nullptr, MenuLoadSelect, '4' },
+                                  { 2, "", nullptr, MenuLoadSelect, '5' },
+                                  { 2, "", nullptr, MenuLoadSelect, '6' },
+                                  { 2, "", nullptr, MenuLoadSelect, '7' },
+                                  { 2, "", nullptr, MenuLoadSelect, '8' },
+                                  { 2, "", nullptr, MenuLoadSelect, '9' },
+                                  { 2, "", nullptr, MenuLoadSelect, '0' } };
 
-static Menu LoadMenuDefinition = {kTotalSaveSlots,
-                                  &MainMenuDefinition,
-                                  LoadingMenu,
-                                  &load_style,
-                                  MenuDrawLoad,
-                                  30,
-                                  42,
-                                  0};
+static Menu LoadMenuDefinition = { kTotalSaveSlots,
+                                   &MainMenuDefinition,
+                                   LoadingMenu,
+                                   &load_style,
+                                   MenuDrawLoad,
+                                   30,
+                                   42,
+                                   0 };
 
 //
 // SAVE GAME MENU
 //
-static MenuItem SavingMenu[] = {{2, "", nullptr, MenuSaveSelect, '1'},
-                                {2, "", nullptr, MenuSaveSelect, '2'},
-                                {2, "", nullptr, MenuSaveSelect, '3'},
-                                {2, "", nullptr, MenuSaveSelect, '4'},
-                                {2, "", nullptr, MenuSaveSelect, '5'},
-                                {2, "", nullptr, MenuSaveSelect, '6'},
-                                {2, "", nullptr, MenuSaveSelect, '7'},
-                                {2, "", nullptr, MenuSaveSelect, '8'},
-                                {2, "", nullptr, MenuSaveSelect, '9'},
-                                {2, "", nullptr, MenuSaveSelect, '0'}};
+static MenuItem SavingMenu[] = { { 2, "", nullptr, MenuSaveSelect, '1' },
+                                 { 2, "", nullptr, MenuSaveSelect, '2' },
+                                 { 2, "", nullptr, MenuSaveSelect, '3' },
+                                 { 2, "", nullptr, MenuSaveSelect, '4' },
+                                 { 2, "", nullptr, MenuSaveSelect, '5' },
+                                 { 2, "", nullptr, MenuSaveSelect, '6' },
+                                 { 2, "", nullptr, MenuSaveSelect, '7' },
+                                 { 2, "", nullptr, MenuSaveSelect, '8' },
+                                 { 2, "", nullptr, MenuSaveSelect, '9' },
+                                 { 2, "", nullptr, MenuSaveSelect, '0' } };
 
-static Menu SaveMenuDefinition = {kTotalSaveSlots,
-                                  &MainMenuDefinition,
-                                  SavingMenu,
-                                  &save_style,
-                                  MenuDrawSave,
-                                  30,
-                                  42,
-                                  0};
+static Menu SaveMenuDefinition = { kTotalSaveSlots,
+                                   &MainMenuDefinition,
+                                   SavingMenu,
+                                   &save_style,
+                                   MenuDrawSave,
+                                   30,
+                                   42,
+                                   0 };
 
 // 98-7-10 KM Chooses the page of MainMenuSaveGames to view
 void MenuLoadSavePage(int choice)

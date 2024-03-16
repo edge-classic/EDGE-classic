@@ -113,13 +113,14 @@ static SaveField sv_fields_button[] = {
 
     // FIXME: off_sound
 
-    {0,
-     nullptr,
-     0,
-     {kSaveFieldInvalid, 0, nullptr},
-     nullptr,
-     nullptr,
-     nullptr}};
+    { 0,
+      nullptr,
+      0,
+      { kSaveFieldInvalid, 0, nullptr },
+      nullptr,
+      nullptr,
+      nullptr }
+};
 
 SaveStruct sv_struct_button = {
     nullptr,                      // link in list
@@ -174,13 +175,14 @@ static SaveField sv_fields_light[] = {
     // NOT HERE:
     //   - prev & next: automatically regenerated
 
-    {0,
-     nullptr,
-     0,
-     {kSaveFieldInvalid, 0, nullptr},
-     nullptr,
-     nullptr,
-     nullptr}};
+    { 0,
+      nullptr,
+      0,
+      { kSaveFieldInvalid, 0, nullptr },
+      nullptr,
+      nullptr,
+      nullptr }
+};
 
 SaveStruct sv_struct_light = {
     nullptr,                     // link in list
@@ -256,13 +258,14 @@ static SaveField sv_fields_trigger[] = {
     //   - sound: can be recomputed.
     //   - last_con_message: doesn't matter.
 
-    {0,
-     nullptr,
-     0,
-     {kSaveFieldInvalid, 0, nullptr},
-     nullptr,
-     nullptr,
-     nullptr}};
+    { 0,
+      nullptr,
+      0,
+      { kSaveFieldInvalid, 0, nullptr },
+      nullptr,
+      nullptr,
+      nullptr }
+};
 
 SaveStruct sv_struct_trigger = {
     nullptr,                       // link in list
@@ -334,13 +337,14 @@ static SaveField sv_fields_drawtip[] = {
     //    hu_*: these are regenerated on next display
     //    p.color_name: only serves to generate 'color' field
 
-    {0,
-     nullptr,
-     0,
-     {kSaveFieldInvalid, 0, nullptr},
-     nullptr,
-     nullptr,
-     nullptr}};
+    { 0,
+      nullptr,
+      0,
+      { kSaveFieldInvalid, 0, nullptr },
+      nullptr,
+      nullptr,
+      nullptr }
+};
 
 SaveStruct sv_struct_drawtip = {
     nullptr,                        // link in list
@@ -421,13 +425,14 @@ static SaveField sv_fields_plane_move[] = {
                     kSaveFieldString, 0, nullptr, SaveGameLevelGetImage,
                     SaveGameLevelPutImage),
 
-    {0,
-     nullptr,
-     0,
-     {kSaveFieldInvalid, 0, nullptr},
-     nullptr,
-     nullptr,
-     nullptr}};
+    { 0,
+      nullptr,
+      0,
+      { kSaveFieldInvalid, 0, nullptr },
+      nullptr,
+      nullptr,
+      nullptr }
+};
 
 SaveStruct sv_struct_plane_move = {
     nullptr,                           // link in list
@@ -487,13 +492,14 @@ static SaveField sv_fields_slider_move[] = {
     // NOT HERE:
     //   - line_length (can recreate)
 
-    {0,
-     nullptr,
-     0,
-     {kSaveFieldInvalid, 0, nullptr},
-     nullptr,
-     nullptr,
-     nullptr}};
+    { 0,
+      nullptr,
+      0,
+      { kSaveFieldInvalid, 0, nullptr },
+      nullptr,
+      nullptr,
+      nullptr }
+};
 
 SaveStruct sv_struct_slider_move = {
     nullptr,                      // link in list

@@ -21,11 +21,11 @@
 #include <string>
 #include <vector>
 
-#define EDGE_DEFINE_CONSOLE_VARIABLE(name, value, flags) \
+#define EDGE_DEFINE_CONSOLE_VARIABLE(name, value, flags)                       \
     ConsoleVariable name(#name, value, flags);
-#define EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(name, value, flags, min, max) \
+#define EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(name, value, flags, min, max)     \
     ConsoleVariable name(#name, value, flags, nullptr, min, max);
-#define EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK(name, value, flags, cb) \
+#define EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK(name, value, flags, cb)     \
     ConsoleVariable name(#name, value, flags, cb);
 #define EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK_CLAMPED(name, value, flags, \
                                                            cb, min, max)       \

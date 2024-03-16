@@ -33,7 +33,7 @@ enum BotPathNodeFlag
 
 struct BotPathNode
 {
-    Position   pos{0, 0, 0};
+    Position   pos{ 0, 0, 0 };
     int        flags = kBotPathNodeNormal;
     const Seg *seg   = nullptr;
 };

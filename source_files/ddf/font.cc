@@ -45,7 +45,8 @@ static const DDFCommandList font_commands[] = {
     DDF_FIELD("MISSING_PATCH", dummy_font, missing_patch_, DDF_MainGetString),
     DDF_FIELD("SPACING", dummy_font, spacing_, DDF_MainGetFloat),
 
-    {nullptr, nullptr, 0, nullptr}};
+    { nullptr, nullptr, 0, nullptr }
+};
 
 // -ACB- 2004/06/03 Replaced array and size with purpose-built class
 FontDefinitionContainer fontdefs;
@@ -237,7 +238,7 @@ static void DDF_FontGetPatch(const char *info, void *storage)
     else
         char2 = char1;
 
-    FontPatch *pat = new FontPatch({nullptr, char1, char2, patch_buf});
+    FontPatch *pat = new FontPatch({ nullptr, char1, char2, patch_buf });
 
     // add to list
     pat->next = *patch_list;

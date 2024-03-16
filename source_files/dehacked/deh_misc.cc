@@ -69,31 +69,31 @@ struct MiscellaneousInfo
 namespace miscellaneous
 {
 // mobjtypes which are affected by a setting
-const int init_ammo_mobj[]   = {kMT_PLAYER, -1};
-const int max_heal_mobj[]    = {kMT_MISC2, -1};
-const int max_arm_mobj[]     = {kMT_MISC0, kMT_MISC1, kMT_MISC3, kMT_MEGA, -1};
-const int green_class_mobj[] = {kMT_MISC0, -1};
-const int blue_class_mobj[]  = {kMT_MISC1, -1};
-const int soulsphere_mobj[]  = {kMT_MISC12, -1};
-const int megasphere_mobj[]  = {kMT_MEGA, -1};
+const int init_ammo_mobj[] = { kMT_PLAYER, -1 };
+const int max_heal_mobj[]  = { kMT_MISC2, -1 };
+const int max_arm_mobj[]   = { kMT_MISC0, kMT_MISC1, kMT_MISC3, kMT_MEGA, -1 };
+const int green_class_mobj[] = { kMT_MISC0, -1 };
+const int blue_class_mobj[]  = { kMT_MISC1, -1 };
+const int soulsphere_mobj[]  = { kMT_MISC12, -1 };
+const int megasphere_mobj[]  = { kMT_MEGA, -1 };
 
 const MiscellaneousInfo misc_info[] = {
-    {"Initial Bullets", 0, &init_ammo, init_ammo_mobj},
-    {"Max Health", 1, &max_health, max_heal_mobj},
-    {"Max Armor", 1, &max_armour, max_arm_mobj},
-    {"Green Armor Class", 0, &green_armour_class, green_class_mobj},
-    {"Blue Armor Class", 0, &blue_armour_class, blue_class_mobj},
-    {"Max Soulsphere", 1, &soul_limit, soulsphere_mobj},
-    {"Soulsphere Health", 1, &soul_health, soulsphere_mobj},
-    {"Megasphere Health", 1, &mega_health, megasphere_mobj},
+    { "Initial Bullets", 0, &init_ammo, init_ammo_mobj },
+    { "Max Health", 1, &max_health, max_heal_mobj },
+    { "Max Armor", 1, &max_armour, max_arm_mobj },
+    { "Green Armor Class", 0, &green_armour_class, green_class_mobj },
+    { "Blue Armor Class", 0, &blue_armour_class, blue_class_mobj },
+    { "Max Soulsphere", 1, &soul_limit, soulsphere_mobj },
+    { "Soulsphere Health", 1, &soul_health, soulsphere_mobj },
+    { "Megasphere Health", 1, &mega_health, megasphere_mobj },
 
-    {"God Mode Health", 0, nullptr, nullptr},
-    {"IDFA Armor", 0, nullptr, nullptr},
-    {"IDFA Armor Class", 0, nullptr, nullptr},
-    {"IDKFA Armor", 0, nullptr, nullptr},
-    {"IDKFA Armor Class", 0, nullptr, nullptr},
+    { "God Mode Health", 0, nullptr, nullptr },
+    { "IDFA Armor", 0, nullptr, nullptr },
+    { "IDFA Armor Class", 0, nullptr, nullptr },
+    { "IDKFA Armor", 0, nullptr, nullptr },
+    { "IDKFA Armor Class", 0, nullptr, nullptr },
 
-    {nullptr, 0, nullptr, 0}  // End sentinel
+    { nullptr, 0, nullptr, 0 }  // End sentinel
 };
 }  // namespace miscellaneous
 

@@ -38,7 +38,7 @@
 extern FILE *debug_file;
 extern FILE *log_file;
 
-#if !defined(__MINGW32__) && \
+#if !defined(__MINGW32__) &&                                                   \
     (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
 extern HANDLE windows_timer;
 #endif
@@ -147,7 +147,7 @@ uint32_t GetMicroseconds(void)
 
 void SleepForMilliseconds(int millisecs)
 {
-#if !defined(__MINGW32__) && \
+#if !defined(__MINGW32__) &&                                                   \
     (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
     // On Windows use high resolution timer if available, the Sleep Win32 call
     // defaults to 15.6ms resolution and timeBeginPeriod is problematic

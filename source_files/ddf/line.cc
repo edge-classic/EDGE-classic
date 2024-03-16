@@ -96,13 +96,14 @@ const DDFCommandList floor_commands[] = {
     DDF_FIELD("IGNORE_TEXTURE", dummy_floor, ignore_texture_,
               DDF_MainGetBoolean),
 
-    {nullptr, nullptr, 0, nullptr}};
+    { nullptr, nullptr, 0, nullptr }
+};
 
 static LadderDefinition dummy_ladder;
 
-const DDFCommandList ladder_commands[] = {
-    DDF_FIELD("HEIGHT", dummy_ladder, height_, DDF_MainGetFloat),
-    {nullptr, nullptr, 0, nullptr}};
+const DDFCommandList ladder_commands[] = { DDF_FIELD("HEIGHT", dummy_ladder,
+                                                     height_, DDF_MainGetFloat),
+                                           { nullptr, nullptr, 0, nullptr } };
 
 static SlidingDoor dummy_slider;
 
@@ -117,7 +118,8 @@ const DDFCommandList slider_commands[] = {
     DDF_FIELD("SFX_CLOSE", dummy_slider, sfx_close_, DDF_MainLookupSound),
     DDF_FIELD("SFX_STOP", dummy_slider, sfx_stop_, DDF_MainLookupSound),
 
-    {nullptr, nullptr, 0, nullptr}};
+    { nullptr, nullptr, 0, nullptr }
+};
 
 static LineType *dynamic_line;
 
@@ -211,7 +213,8 @@ static const DDFCommandList linedef_commands[] = {
     DDF_FIELD("GLASS", dummy_line, glass_, DDF_MainGetBoolean),
     DDF_FIELD("BROKEN_TEXTURE", dummy_line, brokentex_, DDF_MainGetLumpName),
 
-    {nullptr, nullptr, 0, nullptr}};
+    { nullptr, nullptr, 0, nullptr }
+};
 
 struct ScrollKludge
 {
@@ -220,13 +223,14 @@ struct ScrollKludge
 };
 
 static ScrollKludge s_scroll[] = {
-    {"NONE", kScrollDirectionNone},
-    {"UP", (ScrollDirections)(kScrollDirectionVertical | kScrollDirectionUp)},
-    {"DOWN", kScrollDirectionVertical},
-    {"LEFT",
-     (ScrollDirections)(kScrollDirectionHorizontal | kScrollDirectionLeft)},
-    {"RIGHT", kScrollDirectionHorizontal},
-    {nullptr, kScrollDirectionNone}};
+    { "NONE", kScrollDirectionNone },
+    { "UP", (ScrollDirections)(kScrollDirectionVertical | kScrollDirectionUp) },
+    { "DOWN", kScrollDirectionVertical },
+    { "LEFT",
+      (ScrollDirections)(kScrollDirectionHorizontal | kScrollDirectionLeft) },
+    { "RIGHT", kScrollDirectionHorizontal },
+    { nullptr, kScrollDirectionNone }
+};
 
 static struct  // FIXME: APPLIES TO NEXT 3 TABLES !
 {
@@ -235,44 +239,44 @@ static struct  // FIXME: APPLIES TO NEXT 3 TABLES !
 }
 
 // FIXME: use keytype_names (in ddf_mobj.c)
-s_keys[] = {{"NONE", kDoorKeyNone},
+s_keys[] = { { "NONE", kDoorKeyNone },
 
-            {"BLUE_CARD", kDoorKeyBlueCard},
-            {"YELLOW_CARD", kDoorKeyYellowCard},
-            {"RED_CARD", kDoorKeyRedCard},
-            {"BLUE_SKULL", kDoorKeyBlueSkull},
-            {"YELLOW_SKULL", kDoorKeyYellowSkull},
-            {"RED_SKULL", kDoorKeyRedSkull},
-            {"GREEN_CARD", kDoorKeyGreenCard},
-            {"GREEN_SKULL", kDoorKeyGreenSkull},
+             { "BLUE_CARD", kDoorKeyBlueCard },
+             { "YELLOW_CARD", kDoorKeyYellowCard },
+             { "RED_CARD", kDoorKeyRedCard },
+             { "BLUE_SKULL", kDoorKeyBlueSkull },
+             { "YELLOW_SKULL", kDoorKeyYellowSkull },
+             { "RED_SKULL", kDoorKeyRedSkull },
+             { "GREEN_CARD", kDoorKeyGreenCard },
+             { "GREEN_SKULL", kDoorKeyGreenSkull },
 
-            {"GOLD_KEY", kDoorKeyGoldKey},
-            {"SILVER_KEY", kDoorKeySilverKey},
-            {"BRASS_KEY", kDoorKeyBrassKey},
-            {"COPPER_KEY", kDoorKeyCopperKey},
-            {"STEEL_KEY", kDoorKeySteelKey},
-            {"WOODEN_KEY", kDoorKeyWoodenKey},
-            {"FIRE_KEY", kDoorKeyFireKey},
-            {"WATER_KEY", kDoorKeyWaterKey},
+             { "GOLD_KEY", kDoorKeyGoldKey },
+             { "SILVER_KEY", kDoorKeySilverKey },
+             { "BRASS_KEY", kDoorKeyBrassKey },
+             { "COPPER_KEY", kDoorKeyCopperKey },
+             { "STEEL_KEY", kDoorKeySteelKey },
+             { "WOODEN_KEY", kDoorKeyWoodenKey },
+             { "FIRE_KEY", kDoorKeyFireKey },
+             { "WATER_KEY", kDoorKeyWaterKey },
 
-            // backwards compatibility
-            {"REQUIRES_ALL", kDoorKeyStrictlyAllKeys | kDoorKeyBlueCard |
-                                 kDoorKeyYellowCard | kDoorKeyRedCard |
-                                 kDoorKeyBlueSkull | kDoorKeyYellowSkull |
-                                 kDoorKeyRedSkull}},
+             // backwards compatibility
+             { "REQUIRES_ALL", kDoorKeyStrictlyAllKeys | kDoorKeyBlueCard |
+                                   kDoorKeyYellowCard | kDoorKeyRedCard |
+                                   kDoorKeyBlueSkull | kDoorKeyYellowSkull |
+                                   kDoorKeyRedSkull } },
 
-    s_trigger[] = {{"WALK", kLineTriggerWalkable},
-                   {"PUSH", kLineTriggerPushable},
-                   {"SHOOT", kLineTriggerShootable},
-                   {"MANUAL", kLineTriggerManual}},
+    s_trigger[] = { { "WALK", kLineTriggerWalkable },
+                    { "PUSH", kLineTriggerPushable },
+                    { "SHOOT", kLineTriggerShootable },
+                    { "MANUAL", kLineTriggerManual } },
 
-    s_activators[] = {{"PLAYER", kTriggerActivatorPlayer},
-                      {"MONSTER", kTriggerActivatorMonster},
-                      {"OTHER", kTriggerActivatorOther},
-                      {"NOBOT", kTriggerActivatorNoBot},
+    s_activators[] = { { "PLAYER", kTriggerActivatorPlayer },
+                       { "MONSTER", kTriggerActivatorMonster },
+                       { "OTHER", kTriggerActivatorOther },
+                       { "NOBOT", kTriggerActivatorNoBot },
 
-                      // obsolete stuff
-                      {"MISSILE", 0}};
+                       // obsolete stuff
+                       { "MISSILE", 0 } };
 
 //
 //  DDF PARSE ROUTINES
@@ -589,24 +593,25 @@ void DDF_LineGetActivators(const char *info, void *storage)
 
 static DDFSpecialFlags extrafloor_types[] = {
     // definers:
-    {"THIN", kExtraFloorThinDefaults, 0},
-    {"THICK", kExtraFloorThickDefaults, 0},
-    {"LIQUID", kExtraFloorLiquidDefaults, 0},
+    { "THIN", kExtraFloorThinDefaults, 0 },
+    { "THICK", kExtraFloorThickDefaults, 0 },
+    { "LIQUID", kExtraFloorLiquidDefaults, 0 },
 
     // modifiers:
-    {"SEE_THROUGH", kExtraFloorTypeSeeThrough, 0},
-    {"WATER", kExtraFloorTypeWater, 0},
-    {"SHADE", kExtraFloorTypeNoShade, 1},
-    {"FLOODER", kExtraFloorTypeFlooder, 0},
-    {"SIDE_UPPER", kExtraFloorTypeSideUpper, 0},
-    {"SIDE_LOWER", kExtraFloorTypeSideLower, 0},
-    {"SIDE_MIDY", kExtraFloorTypeSideMidY, 0},
-    {"BOOMTEX", kExtraFloorTypeBoomTex, 0},
+    { "SEE_THROUGH", kExtraFloorTypeSeeThrough, 0 },
+    { "WATER", kExtraFloorTypeWater, 0 },
+    { "SHADE", kExtraFloorTypeNoShade, 1 },
+    { "FLOODER", kExtraFloorTypeFlooder, 0 },
+    { "SIDE_UPPER", kExtraFloorTypeSideUpper, 0 },
+    { "SIDE_LOWER", kExtraFloorTypeSideLower, 0 },
+    { "SIDE_MIDY", kExtraFloorTypeSideMidY, 0 },
+    { "BOOMTEX", kExtraFloorTypeBoomTex, 0 },
 
     // backwards compatibility...
-    {"FALL_THROUGH", kExtraFloorTypeLiquid, 0},
-    {"SHOOT_THROUGH", 0, 0},
-    {nullptr, 0, 0}};
+    { "FALL_THROUGH", kExtraFloorTypeLiquid, 0 },
+    { "SHOOT_THROUGH", 0, 0 },
+    { nullptr, 0, 0 }
+};
 
 //
 // DDF_LineGetExtraFloor
@@ -647,9 +652,10 @@ void DDF_LineGetExtraFloor(const char *info, void *storage)
 }
 
 static DDFSpecialFlags ef_control_types[] = {
-    {"NONE", kExtraFloorControlNone, 0},
-    {"REMOVE", kExtraFloorControlRemove, 0},
-    {nullptr, 0, 0}};
+    { "NONE", kExtraFloorControlNone, 0 },
+    { "REMOVE", kExtraFloorControlRemove, 0 },
+    { nullptr, 0, 0 }
+};
 
 //
 // DDF_LineGetEFControl
@@ -684,22 +690,23 @@ static constexpr int kTeleportSpecialPreserve =
                        kTeleportSpecialSameSpeed));
 
 static DDFSpecialFlags teleport_specials[] = {
-    {"RELATIVE", kTeleportSpecialRelative, 0},
-    {"SAME_HEIGHT", kTeleportSpecialSameHeight, 0},
-    {"SAME_SPEED", kTeleportSpecialSameSpeed, 0},
-    {"SAME_OFFSET", kTeleportSpecialSameOffset, 0},
-    {"ALL_SAME", kTeleportSpecialAllSame, 0},
+    { "RELATIVE", kTeleportSpecialRelative, 0 },
+    { "SAME_HEIGHT", kTeleportSpecialSameHeight, 0 },
+    { "SAME_SPEED", kTeleportSpecialSameSpeed, 0 },
+    { "SAME_OFFSET", kTeleportSpecialSameOffset, 0 },
+    { "ALL_SAME", kTeleportSpecialAllSame, 0 },
 
-    {"LINE", kTeleportSpecialLine, 0},
-    {"FLIPPED", kTeleportSpecialFlipped, 0},
-    {"SILENT", kTeleportSpecialSilent, 0},
+    { "LINE", kTeleportSpecialLine, 0 },
+    { "FLIPPED", kTeleportSpecialFlipped, 0 },
+    { "SILENT", kTeleportSpecialSilent, 0 },
 
     // these modes are deprecated (kept for B.C.)
-    {"SAME_DIR", kTeleportSpecialSameAbsDir, 0},
-    {"ROTATE", kTeleportSpecialRotate, 0},
-    {"PRESERVE", kTeleportSpecialPreserve, 0},
+    { "SAME_DIR", kTeleportSpecialSameAbsDir, 0 },
+    { "ROTATE", kTeleportSpecialRotate, 0 },
+    { "PRESERVE", kTeleportSpecialPreserve, 0 },
 
-    {nullptr, 0, 0}};
+    { nullptr, 0, 0 }
+};
 
 //
 // DDF_LineGetTeleportSpecial
@@ -734,17 +741,18 @@ void DDF_LineGetTeleportSpecial(const char *info, void *storage)
 }
 
 static DDFSpecialFlags scrollpart_specials[] = {
-    {"RIGHT_UPPER", kScrollingPartRightUpper, 0},
-    {"RIGHT_MIDDLE", kScrollingPartRightMiddle, 0},
-    {"RIGHT_LOWER", kScrollingPartRightLower, 0},
-    {"RIGHT", kScrollingPartRight, 0},
-    {"LEFT_UPPER", kScrollingPartLeftUpper, 0},
-    {"LEFT_MIDDLE", kScrollingPartLeftMiddle, 0},
-    {"LEFT_LOWER", kScrollingPartLeftLower, 0},
-    {"LEFT", kScrollingPartLeft, 0},
-    {"LEFT_REVERSE_X", kScrollingPartLeftRevX, 0},
-    {"LEFT_REVERSE_Y", kScrollingPartLeftRevY, 0},
-    {nullptr, 0, 0}};
+    { "RIGHT_UPPER", kScrollingPartRightUpper, 0 },
+    { "RIGHT_MIDDLE", kScrollingPartRightMiddle, 0 },
+    { "RIGHT_LOWER", kScrollingPartRightLower, 0 },
+    { "RIGHT", kScrollingPartRight, 0 },
+    { "LEFT_UPPER", kScrollingPartLeftUpper, 0 },
+    { "LEFT_MIDDLE", kScrollingPartLeftMiddle, 0 },
+    { "LEFT_LOWER", kScrollingPartLeftLower, 0 },
+    { "LEFT", kScrollingPartLeft, 0 },
+    { "LEFT_REVERSE_X", kScrollingPartLeftRevX, 0 },
+    { "LEFT_REVERSE_Y", kScrollingPartLeftRevY, 0 },
+    { nullptr, 0, 0 }
+};
 
 //
 // DDF_LineGetScrollPart
@@ -785,10 +793,11 @@ void DDF_LineGetScrollPart(const char *info, void *storage)
 //----------------------------------------------------------------------------
 
 static DDFSpecialFlags line_specials[] = {
-    {"MUST_REACH", kLineSpecialMustReach, 0},
-    {"SWITCH_SEPARATE", kLineSpecialSwitchSeparate, 0},
-    {"BACK_SECTOR", kLineSpecialBackSector, 0},
-    {nullptr, 0, 0}};
+    { "MUST_REACH", kLineSpecialMustReach, 0 },
+    { "SWITCH_SEPARATE", kLineSpecialSwitchSeparate, 0 },
+    { "BACK_SECTOR", kLineSpecialBackSector, 0 },
+    { nullptr, 0, 0 }
+};
 
 //
 // DDF_LineGetSpecialFlags
@@ -843,12 +852,13 @@ static void DDF_LineGetRadTrig(const char *info, void *storage)
 }
 
 static const DDFSpecialFlags slidingdoor_names[] = {
-    {"NONE", kSlidingDoorTypeNone, 0},
-    {"LEFT", kSlidingDoorTypeLeft, 0},
-    {"RIGHT", kSlidingDoorTypeRight, 0},
-    {"CENTER", kSlidingDoorTypeCenter, 0},
-    {"CENTRE", kSlidingDoorTypeCenter, 0},  // synonym
-    {nullptr, 0, 0}};
+    { "NONE", kSlidingDoorTypeNone, 0 },
+    { "LEFT", kSlidingDoorTypeLeft, 0 },
+    { "RIGHT", kSlidingDoorTypeRight, 0 },
+    { "CENTER", kSlidingDoorTypeCenter, 0 },
+    { "CENTRE", kSlidingDoorTypeCenter, 0 },  // synonym
+    { nullptr, 0, 0 }
+};
 
 //
 // DDF_LineGetSlideType
@@ -864,24 +874,26 @@ static void DDF_LineGetSlideType(const char *info, void *storage)
 }
 
 static DDFSpecialFlags line_effect_names[] = {
-    {"TRANSLUCENT", kLineEffectTypeTranslucency, 0},
-    {"VECTOR_SCROLL", kLineEffectTypeVectorScroll, 0},
-    {"OFFSET_SCROLL", kLineEffectTypeOffsetScroll, 0},
+    { "TRANSLUCENT", kLineEffectTypeTranslucency, 0 },
+    { "VECTOR_SCROLL", kLineEffectTypeVectorScroll, 0 },
+    { "OFFSET_SCROLL", kLineEffectTypeOffsetScroll, 0 },
 
-    {"SCALE_TEX", kLineEffectTypeScale, 0},
-    {"SKEW_TEX", kLineEffectTypeSkew, 0},
-    {"LIGHT_WALL", kLineEffectTypeLightWall, 0},
+    { "SCALE_TEX", kLineEffectTypeScale, 0 },
+    { "SKEW_TEX", kLineEffectTypeSkew, 0 },
+    { "LIGHT_WALL", kLineEffectTypeLightWall, 0 },
 
-    {"UNBLOCK_THINGS", kLineEffectTypeUnblockThings, 0},
-    {"BLOCK_SHOTS", kLineEffectTypeBlockShots, 0},
-    {"BLOCK_SIGHT", kLineEffectTypeBlockSight, 0},
-    {"SKY_TRANSFER", kLineEffectTypeSkyTransfer, 0},  // Lobo 2022
-    {"TAGGED_OFFSET_SCROLL", kLineEffectTypeTaggedOffsetScroll, 0},    // MBF21
-    {"BLOCK_LAND_MONSTERS", kLineEffectTypeBlockGroundedMonsters, 0},  // MBF21
-    {"BLOCK_PLAYERS", kLineEffectTypeBlockPlayers, 0},                 // MBF21
-    {"STRETCH_TEX_WIDTH", kLineEffectTypeStretchWidth, 0},    // Lobo 2023
-    {"STRETCH_TEX_HEIGHT", kLineEffectTypeStretchHeight, 0},  // Lobo 2023
-    {nullptr, 0, 0}};
+    { "UNBLOCK_THINGS", kLineEffectTypeUnblockThings, 0 },
+    { "BLOCK_SHOTS", kLineEffectTypeBlockShots, 0 },
+    { "BLOCK_SIGHT", kLineEffectTypeBlockSight, 0 },
+    { "SKY_TRANSFER", kLineEffectTypeSkyTransfer, 0 },  // Lobo 2022
+    { "TAGGED_OFFSET_SCROLL", kLineEffectTypeTaggedOffsetScroll, 0 },  // MBF21
+    { "BLOCK_LAND_MONSTERS", kLineEffectTypeBlockGroundedMonsters,
+      0 },                                                      // MBF21
+    { "BLOCK_PLAYERS", kLineEffectTypeBlockPlayers, 0 },        // MBF21
+    { "STRETCH_TEX_WIDTH", kLineEffectTypeStretchWidth, 0 },    // Lobo 2023
+    { "STRETCH_TEX_HEIGHT", kLineEffectTypeStretchHeight, 0 },  // Lobo 2023
+    { nullptr, 0, 0 }
+};
 
 //
 // Gets the line effect flags.
@@ -917,9 +929,10 @@ static void DDF_LineGetLineEffect(const char *info, void *storage)
 }
 
 static DDFSpecialFlags scroll_type_names[] = {
-    {"DISPLACE", BoomScrollerTypeDisplace, 0},
-    {"ACCEL", BoomScrollerTypeAccel, 0},
-    {nullptr, 0, 0}};
+    { "DISPLACE", BoomScrollerTypeDisplace, 0 },
+    { "ACCEL", BoomScrollerTypeAccel, 0 },
+    { nullptr, 0, 0 }
+};
 
 //
 // Gets the scroll type flags.
@@ -955,26 +968,27 @@ static void DDF_LineGetScrollType(const char *info, void *storage)
 }
 
 static DDFSpecialFlags sector_effect_names[] = {
-    {"LIGHT_FLOOR", kSectorEffectTypeLightFloor, 0},
-    {"LIGHT_CEILING", kSectorEffectTypeLightCeiling, 0},
-    {"SCROLL_FLOOR", kSectorEffectTypeScrollFloor, 0},
-    {"SCROLL_CEILING", kSectorEffectTypeScrollCeiling, 0},
+    { "LIGHT_FLOOR", kSectorEffectTypeLightFloor, 0 },
+    { "LIGHT_CEILING", kSectorEffectTypeLightCeiling, 0 },
+    { "SCROLL_FLOOR", kSectorEffectTypeScrollFloor, 0 },
+    { "SCROLL_CEILING", kSectorEffectTypeScrollCeiling, 0 },
 
-    {"PUSH_THINGS", kSectorEffectTypePushThings, 0},
-    {"SET_FRICTION", kSectorEffectTypeSetFriction, 0},
-    {"WIND_FORCE", kSectorEffectTypeWindForce, 0},
-    {"CURRENT_FORCE", kSectorEffectTypeCurrentForce, 0},
-    {"POINT_FORCE", kSectorEffectTypePointForce, 0},
+    { "PUSH_THINGS", kSectorEffectTypePushThings, 0 },
+    { "SET_FRICTION", kSectorEffectTypeSetFriction, 0 },
+    { "WIND_FORCE", kSectorEffectTypeWindForce, 0 },
+    { "CURRENT_FORCE", kSectorEffectTypeCurrentForce, 0 },
+    { "POINT_FORCE", kSectorEffectTypePointForce, 0 },
 
-    {"RESET_FLOOR", kSectorEffectTypeResetFloor, 0},
-    {"RESET_CEILING", kSectorEffectTypeResetCeiling, 0},
-    {"ALIGN_FLOOR", kSectorEffectTypeAlignFloor, 0},
-    {"ALIGN_CEILING", kSectorEffectTypeAlignCeiling, 0},
-    {"SCALE_FLOOR", kSectorEffectTypeScaleFloor, 0},
-    {"SCALE_CEILING", kSectorEffectTypeScaleCeiling, 0},
+    { "RESET_FLOOR", kSectorEffectTypeResetFloor, 0 },
+    { "RESET_CEILING", kSectorEffectTypeResetCeiling, 0 },
+    { "ALIGN_FLOOR", kSectorEffectTypeAlignFloor, 0 },
+    { "ALIGN_CEILING", kSectorEffectTypeAlignCeiling, 0 },
+    { "SCALE_FLOOR", kSectorEffectTypeScaleFloor, 0 },
+    { "SCALE_CEILING", kSectorEffectTypeScaleCeiling, 0 },
 
-    {"BOOM_HEIGHTS", kSectorEffectTypeBoomHeights, 0},
-    {nullptr, 0, 0}};
+    { "BOOM_HEIGHTS", kSectorEffectTypeBoomHeights, 0 },
+    { nullptr, 0, 0 }
+};
 
 //
 // Gets the sector effect flags.
@@ -1010,11 +1024,12 @@ static void DDF_LineGetSectorEffect(const char *info, void *storage)
 }
 
 static DDFSpecialFlags portal_effect_names[] = {
-    {"STANDARD", kPortalEffectTypeStandard, 0},
-    {"MIRROR", kPortalEffectTypeMirror, 0},
-    {"CAMERA", kPortalEffectTypeCamera, 0},
+    { "STANDARD", kPortalEffectTypeStandard, 0 },
+    { "MIRROR", kPortalEffectTypeMirror, 0 },
+    { "CAMERA", kPortalEffectTypeCamera, 0 },
 
-    {nullptr, 0, 0}};
+    { nullptr, 0, 0 }
+};
 
 //
 // Gets the portal effect flags.
@@ -1050,10 +1065,11 @@ static void DDF_LineGetPortalEffect(const char *info, void *storage)
 }
 
 static DDFSpecialFlags slope_type_names[] = {
-    {"FAKE_FLOOR", kSlopeTypeDetailFloor, 0},
-    {"FAKE_CEILING", kSlopeTypeDetailCeiling, 0},
+    { "FAKE_FLOOR", kSlopeTypeDetailFloor, 0 },
+    { "FAKE_CEILING", kSlopeTypeDetailCeiling, 0 },
 
-    {nullptr, 0, 0}};
+    { nullptr, 0, 0 }
+};
 
 static void DDF_LineGetSlopeType(const char *info, void *storage)
 {

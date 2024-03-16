@@ -145,8 +145,8 @@ Sector *GetLineSectorAdjacent(const Line *line, const Sector *sec,
 //       this one big routine -- the compiler's optimiser had better
 //       kick in !
 //
-#define EDGE_REFERENCE_PLANE_HEIGHT(sector)                            \
-    ((ref & kTriggerHeightReferenceCeiling) ? (sector)->ceiling_height \
+#define EDGE_REFERENCE_PLANE_HEIGHT(sector)                                    \
+    ((ref & kTriggerHeightReferenceCeiling) ? (sector)->ceiling_height         \
                                             : (sector)->floor_height)
 
 float FindSurroundingHeight(const TriggerHeightReference ref, const Sector *sec)
@@ -1937,7 +1937,7 @@ static inline void PlayerInProperties(Player *player, float bz, float tz,
                              kCategoryUi, player->map_object_);
             // StartSoundEffect(player->map_object_->info_->secretsound_,
             //		P_MobjGetSfxCategory(player->map_object_),
-            //player->map_object_);
+            // player->map_object_);
         }
 
         props->secret_found = true;
@@ -2408,7 +2408,7 @@ void UpdateSpecials(bool extra_tic)
                               ld->side[0]->top.net_scroll.Y) *
                                  factor,
                          ld->side[0]->top.image->actual_height_);
-                ld->side[0]->top.net_scroll = {{0, 0}};
+                ld->side[0]->top.net_scroll = { { 0, 0 } };
             }
             if (ld->side[0]->middle.image)
             {
@@ -2424,7 +2424,7 @@ void UpdateSpecials(bool extra_tic)
                               ld->side[0]->middle.net_scroll.Y) *
                                  factor,
                          ld->side[0]->middle.image->actual_height_);
-                ld->side[0]->middle.net_scroll = {{0, 0}};
+                ld->side[0]->middle.net_scroll = { { 0, 0 } };
             }
             if (ld->side[0]->bottom.image)
             {
@@ -2440,7 +2440,7 @@ void UpdateSpecials(bool extra_tic)
                               ld->side[0]->bottom.net_scroll.Y) *
                                  factor,
                          ld->side[0]->bottom.image->actual_height_);
-                ld->side[0]->bottom.net_scroll = {{0, 0}};
+                ld->side[0]->bottom.net_scroll = { { 0, 0 } };
             }
         }
 
@@ -2460,7 +2460,7 @@ void UpdateSpecials(bool extra_tic)
                               ld->side[1]->top.net_scroll.Y) *
                                  factor,
                          ld->side[1]->top.image->actual_height_);
-                ld->side[1]->top.net_scroll = {{0, 0}};
+                ld->side[1]->top.net_scroll = { { 0, 0 } };
             }
             if (ld->side[1]->middle.image)
             {
@@ -2476,7 +2476,7 @@ void UpdateSpecials(bool extra_tic)
                               ld->side[1]->middle.net_scroll.Y) *
                                  factor,
                          ld->side[1]->middle.image->actual_height_);
-                ld->side[1]->middle.net_scroll = {{0, 0}};
+                ld->side[1]->middle.net_scroll = { { 0, 0 } };
             }
             if (ld->side[1]->bottom.image)
             {
@@ -2492,7 +2492,7 @@ void UpdateSpecials(bool extra_tic)
                               ld->side[1]->bottom.net_scroll.Y) *
                                  factor,
                          ld->side[1]->bottom.image->actual_height_);
-                ld->side[1]->bottom.net_scroll = {{0, 0}};
+                ld->side[1]->bottom.net_scroll = { { 0, 0 } };
             }
         }
     }
@@ -2615,9 +2615,9 @@ void UpdateSpecials(bool extra_tic)
             sec->properties.push.Y + sec->properties.net_push.Y;
 
         // Reset dynamic stuff
-        sec->properties.net_push = {{0, 0, 0}};
-        sec->floor.net_scroll    = {{0, 0}};
-        sec->ceiling.net_scroll  = {{0, 0}};
+        sec->properties.net_push = { { 0, 0, 0 } };
+        sec->floor.net_scroll    = { { 0, 0 } };
+        sec->ceiling.net_scroll  = { { 0, 0 } };
     }
 
     // DO BUTTONS

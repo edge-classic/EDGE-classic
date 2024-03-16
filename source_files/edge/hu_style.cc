@@ -30,8 +30,7 @@
 // Edge has lots of style
 StyleContainer hud_styles;
 
-Style::Style(StyleDefinition *definition)
-    : definition_(definition), background_image_(nullptr)
+Style::Style(StyleDefinition *definition) : definition_(definition), background_image_(nullptr)
 {
     for (int T = 0; T < StyleDefinition::kTotalTextSections; T++)
         fonts_[T] = nullptr;
@@ -47,8 +46,7 @@ void Style::Load()
     {
         const char *name = definition_->bg_.image_name_.c_str();
 
-        background_image_ =
-            ImageLookup(name, kImageNamespaceFlat, kImageLookupNull);
+        background_image_ = ImageLookup(name, kImageNamespaceFlat, kImageLookupNull);
 
         if (!background_image_)
             background_image_ = ImageLookup(name, kImageNamespaceGraphic);
@@ -65,20 +63,21 @@ void Style::DrawBackground()
 {
     float alpha = definition_->bg_.translucency_;
 
-    if (alpha < 0.02) return;
+    if (alpha < 0.02)
+        return;
 
     HudSetAlpha(alpha);
 
-    float WS_x = -130;  // Lobo: fixme, this should be calculated, not arbitrary
-                        // hardcoded ;)
-    float WS_w = current_screen_width;  // 580;
+    float WS_x = -130;                 // Lobo: fixme, this should be calculated, not arbitrary
+                                       // hardcoded ;)
+    float WS_w = current_screen_width; // 580;
 
     if (!background_image_)
     {
         if (!(definition_->special_ & kStyleSpecialStretchFullScreen))
         {
-            WS_x = 1;    // cannot be 0 or WS is invoked
-            WS_w = 319;  // cannot be 320 or WS is invoked
+            WS_x = 1;   // cannot be 0 or WS is invoked
+            WS_w = 319; // cannot be 320 or WS is invoked
         }
 
         if (definition_->bg_.colour_ != kRGBANoValue)
@@ -90,8 +89,7 @@ void Style::DrawBackground()
         return;
     }
 
-    if (definition_->special_ &
-        (kStyleSpecialTiled | kStyleSpecialTiledNoScale))
+    if (definition_->special_ & (kStyleSpecialTiled | kStyleSpecialTiledNoScale))
     {
         HudSetScale(definition_->bg_.scale_);
 
@@ -117,9 +115,7 @@ void Style::DrawBackground()
         float CenterX = 0;
 
         CenterX = 160;
-        CenterX -=
-            (background_image_->actual_width_ * background_image_->scale_x_) /
-            2;
+        CenterX -= (background_image_->actual_width_ * background_image_->scale_x_) / 2;
 
         HudSetScale(definition_->bg_.scale_);
         // HudStretchImage(0, 0, 320, 200, background_image_);
@@ -142,12 +138,12 @@ Style *StyleContainer::Lookup(StyleDefinition *definition)
 {
     EPI_ASSERT(definition);
 
-    for (std::vector<Style *>::iterator iter = begin(), iter_end = end();
-         iter != iter_end; iter++)
+    for (std::vector<Style *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
     {
         Style *st = *iter;
 
-        if (definition == st->definition_) return st;
+        if (definition == st->definition_)
+            return st;
     }
 
     Style *new_st = new Style(definition);
@@ -161,15 +157,15 @@ Style *StyleContainer::Lookup(StyleDefinition *definition)
 //
 // HudWriteText
 //
-void HudWriteText(Style *style, int text_type, int x, int y, const char *str,
-                  float scale)
+void HudWriteText(Style *style, int text_type, int x, int y, const char *str, float scale)
 {
     HudSetFont(style->fonts_[text_type]);
     HudSetScale(scale * style->definition_->text_[text_type].scale_);
 
     const Colormap *colmap = style->definition_->text_[text_type].colmap_;
 
-    if (colmap) HudSetTextColor(GetFontColor(colmap));
+    if (colmap)
+        HudSetTextColor(GetFontColor(colmap));
 
     HudDrawText(x, y, str);
 

@@ -29,7 +29,7 @@
 #include "snd_gather.h"
 #include "w_wad.h"
 
-extern bool sound_device_stereo;  // FIXME: encapsulation
+extern bool sound_device_stereo; // FIXME: encapsulation
 extern int  sound_device_frequency;
 
 #define RAD_BLOCK_SIZE 1024
@@ -40,11 +40,11 @@ RADPlayer *edge_rad  = nullptr;
 
 class RadPlayer : public AbstractMusicPlayer
 {
-   public:
+  public:
     RadPlayer();
     ~RadPlayer();
 
-   private:
+  private:
     enum Status
     {
         kNotLoaded,
@@ -63,7 +63,7 @@ class RadPlayer : public AbstractMusicPlayer
     int      sample_rate_;
     uint8_t *tune_;
 
-   public:
+  public:
     bool OpenMemory(uint8_t *data, int length);
 
     virtual void Close(void);
@@ -76,7 +76,7 @@ class RadPlayer : public AbstractMusicPlayer
 
     virtual void Ticker(void);
 
-   private:
+  private:
     void PostOpen(void);
 
     bool StreamIntoBuffer(SoundData *buf);
@@ -93,7 +93,8 @@ RadPlayer::~RadPlayer()
 {
     Close();
 
-    if (mono_buffer_) delete[] mono_buffer_;
+    if (mono_buffer_)
+        delete[] mono_buffer_;
 }
 
 void RadPlayer::PostOpen()
@@ -146,7 +147,8 @@ bool RadPlayer::StreamIntoBuffer(SoundData *buf)
 
     if (song_done) /* EOF */
     {
-        if (!looping_) return false;
+        if (!looping_)
+            return false;
         return true;
     }
 
@@ -168,10 +170,7 @@ bool RadPlayer::OpenMemory(uint8_t *data, int length)
     edge_opal = new Opal(sound_device_frequency);
     edge_rad  = new RADPlayer;
     edge_rad->Init(
-        data,
-        [](void *arg, uint16_t reg_num, uint8_t val)
-        { edge_opal->Port(reg_num, val); },
-        0);
+        data, [](void *arg, uint16_t reg_num, uint8_t val) { edge_opal->Port(reg_num, val); }, 0);
 
     sample_rate_ = edge_rad->GetHertz();
 
@@ -194,10 +193,12 @@ bool RadPlayer::OpenMemory(uint8_t *data, int length)
 
 void RadPlayer::Close()
 {
-    if (status_ == kNotLoaded) return;
+    if (status_ == kNotLoaded)
+        return;
 
     // Stop playback
-    if (status_ != kStopped) Stop();
+    if (status_ != kStopped)
+        Stop();
 
     delete edge_rad;
     edge_rad = nullptr;
@@ -210,21 +211,24 @@ void RadPlayer::Close()
 
 void RadPlayer::Pause()
 {
-    if (status_ != kPlaying) return;
+    if (status_ != kPlaying)
+        return;
 
     status_ = kPaused;
 }
 
 void RadPlayer::Resume()
 {
-    if (status_ != kPaused) return;
+    if (status_ != kPaused)
+        return;
 
     status_ = kPlaying;
 }
 
 void RadPlayer::Play(bool loop)
 {
-    if (status_ != kNotLoaded && status_ != kStopped) return;
+    if (status_ != kNotLoaded && status_ != kStopped)
+        return;
 
     status_  = kPlaying;
     looping_ = loop;
@@ -235,7 +239,8 @@ void RadPlayer::Play(bool loop)
 
 void RadPlayer::Stop()
 {
-    if (status_ != kPlaying && status_ != kPaused) return;
+    if (status_ != kPlaying && status_ != kPaused)
+        return;
 
     SoundQueueStop();
 
@@ -248,10 +253,10 @@ void RadPlayer::Ticker()
 {
     while (status_ == kPlaying && !pc_speaker_mode)
     {
-        SoundData *buf = SoundQueueGetFreeBuffer(
-            RAD_BLOCK_SIZE, (sound_device_stereo) ? kMixInterleaved : kMixMono);
+        SoundData *buf = SoundQueueGetFreeBuffer(RAD_BLOCK_SIZE, (sound_device_stereo) ? kMixInterleaved : kMixMono);
 
-        if (!buf) break;
+        if (!buf)
+            break;
 
         if (StreamIntoBuffer(buf))
         {
@@ -259,7 +264,10 @@ void RadPlayer::Ticker()
             {
                 SoundQueueAddBuffer(buf, sound_device_frequency);
             }
-            else { SoundQueueReturnBuffer(buf); }
+            else
+            {
+                SoundQueueReturnBuffer(buf);
+            }
         }
         else
         {

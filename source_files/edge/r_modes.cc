@@ -32,7 +32,7 @@
 
 #include "am_map.h"
 #include "epi.h"
-#include "hu_font.h"  // current_font_size
+#include "hu_font.h" // current_font_size
 #include "i_defs_gl.h"
 #include "i_system.h"
 #include "r_colormap.h"
@@ -50,28 +50,21 @@ int current_screen_depth;
 int current_window_mode;
 
 DisplayMode borderless_mode;
-EDGE_DEFINE_CONSOLE_VARIABLE(toggle_fullscreen_width, "0",
-                             kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(toggle_fullscreen_height, "0",
-                             kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(toggle_fullscreen_depth, "0",
-                             kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(toggle_fullscreen_window_mode, "-1",
-                             kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(toggle_windowed_width, "0",
-                             kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(toggle_windowed_height, "0",
-                             kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(toggle_windowed_depth, "0",
-                             kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(toggle_windowed_window_mode, "-1",
-                             kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(toggle_fullscreen_width, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(toggle_fullscreen_height, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(toggle_fullscreen_depth, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(toggle_fullscreen_window_mode, "-1", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(toggle_windowed_width, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(toggle_windowed_height, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(toggle_windowed_depth, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(toggle_windowed_window_mode, "-1", kConsoleVariableFlagArchive)
 
 std::vector<DisplayMode *> screen_modes;
 
 bool EquivalentDisplayDepth(int depth1, int depth2)
 {
-    if (depth1 == depth2) return true;
+    if (depth1 == depth2)
+        return true;
 
     if (HMM_MIN(depth1, depth2) == 15 && HMM_MAX(depth1, depth2) == 16)
         return true;
@@ -93,8 +86,7 @@ static DisplayMode *FindResolution(int w, int h, int depth, int window_mode)
     {
         DisplayMode *cur = screen_modes[i];
 
-        if (cur->width == w && cur->height == h &&
-            EquivalentDisplayDepth(cur->depth, depth) &&
+        if (cur->width == w && cur->height == h && EquivalentDisplayDepth(cur->depth, depth) &&
             cur->window_mode == window_mode)
         {
             return cur;
@@ -112,8 +104,7 @@ static DisplayMode *FindResolution(int w, int h, int depth, int window_mode)
 //
 void AddDisplayResolution(DisplayMode *mode)
 {
-    DisplayMode *exist = FindResolution(mode->width, mode->height, mode->depth,
-                                        mode->window_mode);
+    DisplayMode *exist = FindResolution(mode->width, mode->height, mode->depth, mode->window_mode);
     if (exist)
     {
         if (mode->depth != exist->depth)
@@ -138,13 +129,13 @@ void DumpResolutionList(void)
     {
         DisplayMode *cur = screen_modes[i];
 
-        if (i > 0 && (i % 3) == 0) LogPrint("\n");
+        if (i > 0 && (i % 3) == 0)
+            LogPrint("\n");
 
-        LogPrint(
-            "  %4dx%4d @ %02d %s", cur->width, cur->height, cur->depth,
-            cur->window_mode == kWindowModeBorderless
-                ? "BL"
-                : (cur->window_mode == kWindowModeFullscreen ? "FS " : "win"));
+        LogPrint("  %4dx%4d @ %02d %s", cur->width, cur->height, cur->depth,
+                 cur->window_mode == kWindowModeBorderless
+                     ? "BL"
+                     : (cur->window_mode == kWindowModeFullscreen ? "FS " : "win"));
     }
 
     LogPrint("\n");
@@ -196,16 +187,18 @@ bool IncrementResolution(DisplayMode *mode, int what, int dir)
     {
         DisplayMode *cur = screen_modes[i];
 
-        if (!EquivalentDisplayDepth(cur->depth, depth)) continue;
+        if (!EquivalentDisplayDepth(cur->depth, depth))
+            continue;
 
-        if (cur->window_mode != window_mode) continue;
+        if (cur->window_mode != window_mode)
+            continue;
 
-        int diff =
-            SizeDifference(cur->width, cur->height, mode->width, mode->height);
+        int diff = SizeDifference(cur->width, cur->height, mode->width, mode->height);
 
         if (what == kIncrementSize)
         {
-            if (diff * dir <= 0) continue;
+            if (diff * dir <= 0)
+                continue;
         }
 
         diff = HMM_ABS(diff);
@@ -215,7 +208,8 @@ bool IncrementResolution(DisplayMode *mode, int what, int dir)
             best_diff = diff;
             best      = cur;
 
-            if (diff == 0) break;
+            if (diff == 0)
+                break;
         }
     }
 
@@ -260,8 +254,7 @@ void SoftInitializeResolution(void)
 {
     LogDebug("SoftInitializeResolution...\n");
 
-    RendererNewScreenSize(current_screen_width, current_screen_height,
-                          current_screen_depth);
+    RendererNewScreenSize(current_screen_width, current_screen_height, current_screen_depth);
 
     if (current_screen_width < 720)
         current_font_size = 0;
@@ -283,13 +276,14 @@ void SoftInitializeResolution(void)
 
 static bool DoExecuteChangeResolution(DisplayMode *mode)
 {
-    RendererStopWipe();  // delete any wipe texture too
+    RendererStopWipe(); // delete any wipe texture too
 
     DeleteAllImages();
 
     bool was_ok = SetScreenSize(mode);
 
-    if (!was_ok) return false;
+    if (!was_ok)
+        return false;
 
     current_screen_width  = mode->width;
     current_screen_height = mode->height;
@@ -320,8 +314,7 @@ struct CompareResolutionPredicate
     {
         if (A->window_mode != B->window_mode)
         {
-            return current_window_mode ? (A->window_mode > B->window_mode)
-                                       : (A->window_mode < B->window_mode);
+            return current_window_mode ? (A->window_mode > B->window_mode) : (A->window_mode < B->window_mode);
         }
 
         if (!EquivalentDisplayDepth(A->depth, B->depth))
@@ -329,9 +322,7 @@ struct CompareResolutionPredicate
             int a_equiv = (A->depth < 20) ? 16 : 32;
             int b_equiv = (B->depth < 20) ? 16 : 32;
 
-            return EquivalentDisplayDepth(current_screen_depth, 16)
-                       ? (a_equiv < b_equiv)
-                       : (a_equiv > b_equiv);
+            return EquivalentDisplayDepth(current_screen_depth, 16) ? (a_equiv < b_equiv) : (a_equiv > b_equiv);
         }
 
         if (A->width != B->width)
@@ -357,7 +348,8 @@ void SetInitialResolution(void)
 
     if (current_window_mode == 2)
     {
-        if (DoExecuteChangeResolution(&borderless_mode)) return;
+        if (DoExecuteChangeResolution(&borderless_mode))
+            return;
     }
 
     DisplayMode mode;
@@ -379,12 +371,12 @@ void SetInitialResolution(void)
     // sort modes into a good order, choosing sizes near the
     // request size first, and different depths/fullness last.
 
-    std::sort(screen_modes.begin(), screen_modes.end(),
-              CompareResolutionPredicate());
+    std::sort(screen_modes.begin(), screen_modes.end(), CompareResolutionPredicate());
 
     for (int i = 0; i < (int)screen_modes.size(); i++)
     {
-        if (DoExecuteChangeResolution(screen_modes[i])) return;
+        if (DoExecuteChangeResolution(screen_modes[i]))
+            return;
     }
 
     // FOOBAR!
@@ -395,8 +387,7 @@ bool ChangeResolution(DisplayMode *mode)
 {
     LogDebug("ChangeResolution...\n");
 
-    if (DoExecuteChangeResolution(mode->window_mode == 2 ? &borderless_mode
-                                                         : mode))
+    if (DoExecuteChangeResolution(mode->window_mode == 2 ? &borderless_mode : mode))
         return true;
 
     LogDebug("- Failed : switching back...\n");
@@ -408,7 +399,8 @@ bool ChangeResolution(DisplayMode *mode)
     old_mode.depth       = current_screen_depth;
     old_mode.window_mode = current_window_mode;
 
-    if (DoExecuteChangeResolution(&old_mode)) return false;
+    if (DoExecuteChangeResolution(&old_mode))
+        return false;
 
     // This ain't good - current and previous resolutions do not work.
     FatalError("Switch back to old resolution failed!\n");

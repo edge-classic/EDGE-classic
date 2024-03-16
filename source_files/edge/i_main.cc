@@ -39,8 +39,7 @@ extern "C"
 #ifdef _WIN32
         // -AJA- change current dir to match executable
         if (!epi::CurrentDirectorySet(executable_path))
-            FatalError("Couldn't set program directory to %s!!\n",
-                       executable_path.c_str());
+            FatalError("Couldn't set program directory to %s!!\n", executable_path.c_str());
 #endif
 
         // Run EDGE. it never returns
@@ -49,7 +48,7 @@ extern "C"
         return 0;
     }
 
-}  // extern "C"
+} // extern "C"
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

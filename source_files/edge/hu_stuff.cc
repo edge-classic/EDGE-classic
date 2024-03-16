@@ -83,15 +83,16 @@ void HudStart(void)
     EPI_ASSERT(current_map);
 
     StyleDefinition *map_styledef = styledefs.Lookup("AUTOMAP");
-    if (!map_styledef) map_styledef = default_style;
+    if (!map_styledef)
+        map_styledef = default_style;
     automap_style = hud_styles.Lookup(map_styledef);
 
     StyleDefinition *messages_styledef = styledefs.Lookup("MESSAGES");
-    if (!messages_styledef) messages_styledef = default_style;
+    if (!messages_styledef)
+        messages_styledef = default_style;
     message_style = hud_styles.Lookup(messages_styledef);
 
-    StyleDefinition *important_messages_styledef =
-        styledefs.Lookup("IMPORTANT_MESSAGES");
+    StyleDefinition *important_messages_styledef = styledefs.Lookup("IMPORTANT_MESSAGES");
     if (!important_messages_styledef)
         important_messages_styledef = default_style;
     important_message_style = hud_styles.Lookup(important_messages_styledef);
@@ -103,8 +104,7 @@ void HudStart(void)
     // -ACB- 1998/08/09 Use current_map settings
     // if (current_map->description &&
     // language.IsValidRef(current_map->description))
-    if (current_map->description_ !=
-        "")  // Lobo 2022: if it's wrong, show it anyway
+    if (current_map->description_ != "") // Lobo 2022: if it's wrong, show it anyway
     {
         LogPrint("\n");
         LogPrint("--------------------------------------------------\n");
@@ -131,19 +131,16 @@ void HudDrawer(void)
     if (message_on)
     {
         tempY = 0;
-        tempY +=
-            message_style->fonts_[0]->StringLines(current_message.c_str()) *
-            (message_style->fonts_[0]->NominalHeight() *
-             message_style->definition_->text_[0].scale_);
+        tempY += message_style->fonts_[0]->StringLines(current_message.c_str()) *
+                 (message_style->fonts_[0]->NominalHeight() * message_style->definition_->text_[0].scale_);
         tempY /= 2;
         if (message_style->fonts_[0]->StringLines(current_message.c_str()) > 1)
-            tempY += message_style->fonts_[0]->NominalHeight() *
-                     message_style->definition_->text_[0].scale_;
+            tempY += message_style->fonts_[0]->NominalHeight() * message_style->definition_->text_[0].scale_;
 
         y = tempY;
 
         message_style->DrawBackground();
-        HudSetAlignment(0, 0);  // center it
+        HudSetAlignment(0, 0); // center it
         HudSetAlpha(message_style->definition_->text_->translucency_);
         HudWriteText(message_style, 0, 160, y, current_message.c_str());
         HudSetAlignment();
@@ -153,17 +150,15 @@ void HudDrawer(void)
     if (important_message_on)
     {
         tempY = 0;
-        tempY -= important_message_style->fonts_[0]->StringLines(
-                     current_important_message_message.c_str()) *
+        tempY -= important_message_style->fonts_[0]->StringLines(current_important_message_message.c_str()) *
                  (important_message_style->fonts_[0]->NominalHeight() *
                   important_message_style->definition_->text_[0].scale_);
         tempY /= 2;
         y = 90 - tempY;
         important_message_style->DrawBackground();
-        HudSetAlignment(0, 0);  // center it
+        HudSetAlignment(0, 0); // center it
         HudSetAlpha(important_message_style->definition_->text_->translucency_);
-        HudWriteText(important_message_style, 0, 160, y,
-                     current_important_message_message.c_str());
+        HudWriteText(important_message_style, 0, 160, y, current_important_message_message.c_str());
         HudSetAlignment();
         HudSetAlpha();
     }

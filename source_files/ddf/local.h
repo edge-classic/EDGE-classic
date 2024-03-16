@@ -44,19 +44,19 @@ struct DDFCommandList
 };
 
 // NOTE: requires an instantiated base struct
-#define DDF_FIELD(name, base, field, parser)                                   \
-    {                                                                          \
-        name, parser, ((char *)&base.field - (char *)&base), nullptr           \
+#define DDF_FIELD(name, base, field, parser)                                                                           \
+    {                                                                                                                  \
+        name, parser, ((char *)&base.field - (char *)&base), nullptr                                                   \
     }
 
-#define DDF_SUB_LIST(name, base, field, subcomms)                              \
-    {                                                                          \
-        "*" name, nullptr, ((char *)&base.field - (char *)&base), subcomms     \
+#define DDF_SUB_LIST(name, base, field, subcomms)                                                                      \
+    {                                                                                                                  \
+        "*" name, nullptr, ((char *)&base.field - (char *)&base), subcomms                                             \
     }
 
-#define DDF_STATE(name, redir, base, field)                                    \
-    {                                                                          \
-        name, redir, ((char *)&base.field - (char *)&base)                     \
+#define DDF_STATE(name, redir, base, field)                                                                            \
+    {                                                                                                                  \
+        name, redir, ((char *)&base.field - (char *)&base)                                                             \
     }
 
 //
@@ -100,8 +100,7 @@ struct DDFReadInfo
     // be called multiple times, once for each element, and `index' is
     // used to indicate which element (starting at 0).
     //
-    void (*parse_field)(const char *field, const char *contents, int index,
-                        bool is_last);
+    void (*parse_field)(const char *field, const char *contents, int index, bool is_last);
 
     // when the entry has finished, this routine can perform any
     // necessary operations here (such as updating a number -> entry
@@ -212,18 +211,14 @@ void DDF_MainGetRGB(const char *info, void *storage);
 void DDF_MainGetWhenAppear(const char *info, void *storage);
 void DDF_MainGetBitSet(const char *info, void *storage);
 
-bool DDF_MainParseField(const DDFCommandList *commands, const char *field,
-                        const char *contents, uint8_t *obj_base);
+bool DDF_MainParseField(const DDFCommandList *commands, const char *field, const char *contents, uint8_t *obj_base);
 void DDF_MainLookupSound(const char *info, void *storage);
 void DDF_MainRefAttack(const char *info, void *storage);
 
 void DDF_DummyFunction(const char *info, void *storage);
 
-DDFCheckFlagResult DDF_MainCheckSpecialFlag(const char            *name,
-                                            const DDFSpecialFlags *flag_set,
-                                            int                   *flag_value,
-                                            bool allow_prefixes,
-                                            bool allow_user);
+DDFCheckFlagResult DDF_MainCheckSpecialFlag(const char *name, const DDFSpecialFlags *flag_set, int *flag_value,
+                                            bool allow_prefixes, bool allow_user);
 
 int DDF_MainLookupDirector(const MapObjectDefinition *obj, const char *info);
 
@@ -265,8 +260,7 @@ void DDF_MobjGetBpKeys(const char *info, void *storage);
 void DDF_MobjGetBpWeapon(const char *info, void *storage);
 void DDF_MobjGetPlayer(const char *info, void *storage);
 
-void ThingParseField(const char *field, const char *contents, int index,
-                     bool is_last);
+void ThingParseField(const char *field, const char *contents, int index, bool is_last);
 
 // DDF_MUS Code
 void DDF_MusicPlaylistInit(void);
@@ -290,11 +284,9 @@ void DDF_StateGetAngle(const char *arg, State *cur_state);
 void DDF_StateGetSlope(const char *arg, State *cur_state);
 void DDF_StateGetRGB(const char *arg, State *cur_state);
 
-bool DDF_MainParseState(uint8_t *object, std::vector<StateRange> &group,
-                        const char *field, const char *contents, int index,
-                        bool is_last, bool is_weapon,
-                        const DDFStateStarter *starters,
-                        const DDFActionCode   *actions);
+bool DDF_MainParseState(uint8_t *object, std::vector<StateRange> &group, const char *field, const char *contents,
+                        int index, bool is_last, bool is_weapon, const DDFStateStarter *starters,
+                        const DDFActionCode *actions);
 
 void DDF_StateBeginRange(std::vector<StateRange> &group);
 void DDF_StateFinishRange(std::vector<StateRange> &group);

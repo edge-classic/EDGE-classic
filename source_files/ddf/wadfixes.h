@@ -22,37 +22,42 @@
 
 class WadFixDefinition
 {
-   public:
+  public:
     WadFixDefinition();
     ~WadFixDefinition(){};
 
-   public:
+  public:
     void Default(void);
     void CopyDetail(WadFixDefinition &src);
 
     // Member vars....
     std::string name_;
 
-    std::string md5_string_;  // Fixes are likely to be for finalized WADs that
-                              // won't be updated anymore, but other qualifiers
-                              // like unique lumps might be added if necessary
+    std::string md5_string_; // Fixes are likely to be for finalized WADs that
+                             // won't be updated anymore, but other qualifiers
+                             // like unique lumps might be added if necessary
 
-   private:
+  private:
     // disable copy construct and assignment operator
-    explicit WadFixDefinition(WadFixDefinition &rhs) {}
-    WadFixDefinition &operator=(WadFixDefinition &rhs) { return *this; }
+    explicit WadFixDefinition(WadFixDefinition &rhs)
+    {
+    }
+    WadFixDefinition &operator=(WadFixDefinition &rhs)
+    {
+        return *this;
+    }
 };
 
 // Our fixdefs container
 class WadFixDefinitionContainer : public std::vector<WadFixDefinition *>
 {
-   public:
-    WadFixDefinitionContainer() {}
+  public:
+    WadFixDefinitionContainer()
+    {
+    }
     ~WadFixDefinitionContainer()
     {
-        for (std::vector<WadFixDefinition *>::iterator iter     = begin(),
-                                                       iter_end = end();
-             iter != iter_end; iter++)
+        for (std::vector<WadFixDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
         {
             WadFixDefinition *f = *iter;
             delete f;
@@ -60,11 +65,11 @@ class WadFixDefinitionContainer : public std::vector<WadFixDefinition *>
         }
     }
 
-   public:
+  public:
     WadFixDefinition *Find(const char *name);
 };
 
-extern WadFixDefinitionContainer fixdefs;  // -DASHO- 2022 Implemented
+extern WadFixDefinitionContainer fixdefs; // -DASHO- 2022 Implemented
 
 void DDF_ReadFixes(const std::string &data);
 

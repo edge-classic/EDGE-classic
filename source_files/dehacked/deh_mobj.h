@@ -214,9 +214,8 @@ enum DehackedMapObjectFlagMBF21
 };
 
 #define kMF_TRANSLATION (kMF_TRANSLATION1 | kMF_TRANSLATION2)
-#define ALL_BEX_FLAGS                                                          \
-    (kMF_TRANSLUCENT | kMF_TOUCHY | kMF_BOUNCES |                              \
-     kMF_FRIEND)  // Also housed kMF_STEALTH, but this is not a BEX flag
+#define ALL_BEX_FLAGS                                                                                                  \
+    (kMF_TRANSLUCENT | kMF_TOUCHY | kMF_BOUNCES | kMF_FRIEND) // Also housed kMF_STEALTH, but this is not a BEX flag
 
 enum DehackedMapObjectType
 {
@@ -429,4 +428,4 @@ struct DehackedMapObjectDefinition
     int raisestate;
 };
 
-}  // namespace dehacked
+} // namespace dehacked

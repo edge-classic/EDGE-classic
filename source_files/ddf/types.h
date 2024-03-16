@@ -35,26 +35,32 @@
 class MapObjectDefinition;
 class WeaponDefinition;
 
-constexpr uint8_t kLookupCacheSize = 211;  // Why this number? - Dasho
+constexpr uint8_t kLookupCacheSize = 211; // Why this number? - Dasho
 
 class MobjStringReference
 {
-   public:
-    MobjStringReference() : name_(), def_(nullptr) {}
-    MobjStringReference(const char *s) : name_(s), def_(nullptr) {}
-    MobjStringReference(const MobjStringReference &rhs)
-        : name_(rhs.name_), def_(nullptr)
+  public:
+    MobjStringReference() : name_(), def_(nullptr)
+    {
+    }
+    MobjStringReference(const char *s) : name_(s), def_(nullptr)
+    {
+    }
+    MobjStringReference(const MobjStringReference &rhs) : name_(rhs.name_), def_(nullptr)
     {
     }
     ~MobjStringReference(){};
 
-   private:
+  private:
     std::string name_;
 
     const MapObjectDefinition *def_;
 
-   public:
-    const char *GetName() const { return name_.c_str(); }
+  public:
+    const char *GetName() const
+    {
+        return name_.c_str();
+    }
 
     const MapObjectDefinition *GetRef();
     // Note: this returns nullptr if not found, in which case you should
@@ -104,8 +110,7 @@ struct Benefit
 
     // sub-type (specific type of ammo, weapon, key, powerup, or inventory). For
     // armour this is the class, for health it is unused.
-    union
-    {
+    union {
         int               type;
         WeaponDefinition *weap;
     } sub;
@@ -123,15 +128,15 @@ struct Benefit
 
 class LabelOffset
 {
-   public:
+  public:
     LabelOffset();
     LabelOffset(LabelOffset &rhs);
     ~LabelOffset();
 
-   private:
+  private:
     void Copy(LabelOffset &src);
 
-   public:
+  public:
     void         Default();
     LabelOffset &operator=(LabelOffset &rhs);
 
@@ -141,7 +146,7 @@ class LabelOffset
 
 class DamageClass
 {
-   public:
+  public:
     DamageClass();
     DamageClass(DamageClass &rhs);
     ~DamageClass();
@@ -155,10 +160,10 @@ class DamageClass
         kDamageClassDefaultNumtypes
     };
 
-   private:
+  private:
     void Copy(DamageClass &src);
 
-   public:
+  public:
     void         Default(DamageClassDefault def);
     DamageClass &operator=(DamageClass &rhs);
 
@@ -214,7 +219,7 @@ enum AttackStyle
     kAttackStyleNone = 0,
     kAttackStyleProjectile,
     kAttackStyleSpawner,
-    kAttackStyleDoubleSpawner,  // Lobo 2021: doom64 pain elemental
+    kAttackStyleDoubleSpawner, // Lobo 2021: doom64 pain elemental
     kAttackStyleTripleSpawner,
     kAttackStyleSpreader,
     kAttackStyleRandomSpread,
@@ -225,9 +230,9 @@ enum AttackStyle
     kAttackStyleSkullFly,
     kAttackStyleSmartProjectile,
     kAttackStyleSpray,
-    kAttackStyleDualAttack,  // Dasho 2023: Execute two independent atkdefs with
-                             // one command
-    kAttackStylePsychic,     // Dasho 2023: Beta Lost Soul attack
+    kAttackStyleDualAttack, // Dasho 2023: Execute two independent atkdefs with
+                            // one command
+    kAttackStylePsychic,    // Dasho 2023: Beta Lost Soul attack
     kTotalAttackStyles
 };
 
@@ -251,11 +256,11 @@ enum AttackFlags
 
 class AttackDefinition
 {
-   public:
+  public:
     AttackDefinition();
     ~AttackDefinition();
 
-   public:
+  public:
     void Default();
     void CopyDetail(AttackDefinition &src);
 
@@ -270,15 +275,15 @@ class AttackDefinition
     BAMAngle            accuracy_angle_;
     float               xoffset_;
     float               yoffset_;
-    BAMAngle            angle_offset_;  // -AJA- 1999/09/10.
-    float               slope_offset_;  //
-    BAMAngle            trace_angle_;   // -AJA- 2005/02/08.
+    BAMAngle            angle_offset_; // -AJA- 1999/09/10.
+    float               slope_offset_; //
+    BAMAngle            trace_angle_;  // -AJA- 2005/02/08.
     float               assault_speed_;
     float               height_;
     float               range_;
     int                 count_;
     int                 tooclose_;
-    float               berserk_mul_;  // -AJA- 2005/08/06.
+    float               berserk_mul_; // -AJA- 2005/08/06.
     DamageClass         damage_;
 
     // class of the attack.
@@ -310,9 +315,12 @@ class AttackDefinition
     AttackDefinition *dualattack1_;
     AttackDefinition *dualattack2_;
 
-   private:
+  private:
     // disable copy construct and assignment operator
-    explicit AttackDefinition(AttackDefinition &rhs) { (void)rhs; }
+    explicit AttackDefinition(AttackDefinition &rhs)
+    {
+        (void)rhs;
+    }
     AttackDefinition &operator=(AttackDefinition &rhs)
     {
         (void)rhs;
@@ -322,12 +330,12 @@ class AttackDefinition
 
 enum AmmunitionType
 {
-    kAmmunitionTypeDontCare = -2,  // Only used for SelectNewWeapon()
-    kAmmunitionTypeNoAmmo   = -1,  // Unlimited for chainsaw / fist.
-    kAmmunitionTypeBullet   = 0,   // Pistol / chaingun ammo.
-    kAmmunitionTypeShell,          // Shotgun / double barreled shotgun.
-    kAmmunitionTypeRocket,         // Missile launcher.
-    kAmmunitionTypeCell,           // Plasma rifle, BFG.
+    kAmmunitionTypeDontCare = -2, // Only used for SelectNewWeapon()
+    kAmmunitionTypeNoAmmo   = -1, // Unlimited for chainsaw / fist.
+    kAmmunitionTypeBullet   = 0,  // Pistol / chaingun ammo.
+    kAmmunitionTypeShell,         // Shotgun / double barreled shotgun.
+    kAmmunitionTypeRocket,        // Missile launcher.
+    kAmmunitionTypeCell,          // Plasma rifle, BFG.
     // New ammo types
     kAmmunitionTypePellet,
     kAmmunitionTypeNail,
@@ -424,80 +432,75 @@ enum AmmunitionType
     kAmmunitionType97,
     kAmmunitionType98,
     kAmmunitionType99,
-    kTotalAmmunitionTypes  // Total count (99)
+    kTotalAmmunitionTypes // Total count (99)
 };
 
 // -AJA- 2000/01/12: Weapon special flags
 enum WeaponFlag
 {
     WeaponFlagNone             = 0,
-    WeaponFlagSilentToMonsters = (1 << 0),  // monsters cannot hear this weapon
-    WeaponFlagAnimated         = (1 << 1),  // raise/lower states are animated
-    WeaponFlagSwitchAway =
-        (1 << 4),  // select new weapon when we run out of ammo
+    WeaponFlagSilentToMonsters = (1 << 0), // monsters cannot hear this weapon
+    WeaponFlagAnimated         = (1 << 1), // raise/lower states are animated
+    WeaponFlagSwitchAway       = (1 << 4), // select new weapon when we run out of ammo
     // reload flags:
-    WeaponFlagReloadWhileTrigger =
-        (1 << 8),  // allow reload while holding trigger
-    WeaponFlagFreshReload =
-        (1 << 9),  // automatically reload when new ammo is avail
-    WeaponFlagManualReload  = (1 << 10),  // enables the manual reload key
-    WeaponFlagPartialReload = (1 << 11),  // manual reload: allow partial refill
+    WeaponFlagReloadWhileTrigger = (1 << 8),  // allow reload while holding trigger
+    WeaponFlagFreshReload        = (1 << 9),  // automatically reload when new ammo is avail
+    WeaponFlagManualReload       = (1 << 10), // enables the manual reload key
+    WeaponFlagPartialReload      = (1 << 11), // manual reload: allow partial refill
     // MBF21 flags:
-    WeaponFlagNoAutoFire =
-        (1 << 12),  // Do not fire if switched to while trigger is held
+    WeaponFlagNoAutoFire = (1 << 12), // Do not fire if switched to while trigger is held
 };
 
-constexpr WeaponFlag kDefaultWeaponFlags =
-    (WeaponFlag)(WeaponFlagReloadWhileTrigger | WeaponFlagManualReload |
-                 WeaponFlagSwitchAway | WeaponFlagPartialReload);
+constexpr WeaponFlag kDefaultWeaponFlags = (WeaponFlag)(WeaponFlagReloadWhileTrigger | WeaponFlagManualReload |
+                                                        WeaponFlagSwitchAway | WeaponFlagPartialReload);
 
 class WeaponDefinition
 {
-   public:
+  public:
     WeaponDefinition();
     ~WeaponDefinition();
 
-   public:
+  public:
     void Default(void);
     void CopyDetail(WeaponDefinition &src);
 
     // Weapon's name, etc...
     std::string name_;
 
-    AttackDefinition *attack_[4];  // Attack type used.
+    AttackDefinition *attack_[4];   // Attack type used.
 
-    AmmunitionType ammo_[4];         // Type of ammo this weapon uses.
-    int            ammopershot_[4];  // Ammo used per shot.
-    int  clip_size_[4];  // Amount of shots in a clip (if <= 1, non-clip weapon)
-    bool autofire_[4];   // If true, this is an automatic else it's semiauto
+    AmmunitionType ammo_[4];        // Type of ammo this weapon uses.
+    int            ammopershot_[4]; // Ammo used per shot.
+    int            clip_size_[4];   // Amount of shots in a clip (if <= 1, non-clip weapon)
+    bool           autofire_[4];    // If true, this is an automatic else it's semiauto
 
-    float kick_;  // Amount of kick this weapon gives
+    float kick_;                    // Amount of kick this weapon gives
 
     // range of states used
     std::vector<StateRange> state_grp_;
 
-    int up_state_;     // State to use when raising the weapon
-    int down_state_;   // State to use when lowering the weapon (if changing
-                       // weapon)
-    int ready_state_;  // State that the weapon is ready to fire in
-    int empty_state_;  // State when weapon is empty.  Usually zero
-    int idle_state_;   // State to use when polishing weapon
+    int up_state_;                   // State to use when raising the weapon
+    int down_state_;                 // State to use when lowering the weapon (if changing
+                                     // weapon)
+    int ready_state_;                // State that the weapon is ready to fire in
+    int empty_state_;                // State when weapon is empty.  Usually zero
+    int idle_state_;                 // State to use when polishing weapon
 
-    int attack_state_[4];   // State showing the weapon 'firing'
-    int reload_state_[4];   // State showing the weapon being reloaded
-    int discard_state_[4];  // State showing the weapon discarding a clip
-    int warmup_state_[4];   // State showing the weapon warming up
-    int flash_state_[4];    // State showing the muzzle flash
+    int attack_state_[4];            // State showing the weapon 'firing'
+    int reload_state_[4];            // State showing the weapon being reloaded
+    int discard_state_[4];           // State showing the weapon discarding a clip
+    int warmup_state_[4];            // State showing the weapon warming up
+    int flash_state_[4];             // State showing the muzzle flash
 
-    int crosshair_;   // Crosshair states
-    int zoom_state_;  // State showing viewfinder when zoomed.  Can be zero
+    int crosshair_;                  // Crosshair states
+    int zoom_state_;                 // State showing viewfinder when zoomed.  Can be zero
 
-    bool no_cheat_;  // Not given for cheats (Note: set by #CLEARALL)
+    bool no_cheat_;                  // Not given for cheats (Note: set by #CLEARALL)
 
-    bool autogive_;  // The player gets this weapon on spawn.  (Fist + Pistol)
-    bool feedback_;  // This weapon gives feedback on hit (chainsaw)
+    bool autogive_;                  // The player gets this weapon on spawn.  (Fist + Pistol)
+    bool feedback_;                  // This weapon gives feedback on hit (chainsaw)
 
-    WeaponDefinition *upgrade_weap_;  // This weapon upgrades a previous one.
+    WeaponDefinition *upgrade_weap_; // This weapon upgrades a previous one.
 
     // This affects how it will be selected if out of ammo.  Also
     // determines the cycling order when on the same key.  Dangerous
@@ -561,7 +564,7 @@ class WeaponDefinition
     int   idle_wait_;
     float idle_chance_;
 
-    int   model_skin_;  // -AJA- 2007/10/16: MD2 model support
+    int   model_skin_; // -AJA- 2007/10/16: MD2 model support
     float model_aspect_;
     float model_bias_;
     float model_forward_;
@@ -579,8 +582,8 @@ class WeaponDefinition
     // weapons custom crosshair
     bool ignore_crosshair_scaling_;
 
-   public:
-    inline int KeyPri(int idx) const  // next/prev order value
+  public:
+    inline int KeyPri(int idx) const // next/prev order value
     {
         int key = 1 + HMM_MAX(-1, HMM_MIN(10, bind_key_));
         int pri = 1 + HMM_MAX(-1, HMM_MIN(900, priority_));
@@ -588,9 +591,12 @@ class WeaponDefinition
         return (pri * 20 + key) * 100 + idx;
     }
 
-   private:
+  private:
     // disable copy construct and assignment operator
-    explicit WeaponDefinition(WeaponDefinition &rhs) { (void)rhs; }
+    explicit WeaponDefinition(WeaponDefinition &rhs)
+    {
+        (void)rhs;
+    }
     WeaponDefinition &operator=(WeaponDefinition &rhs)
     {
         (void)rhs;

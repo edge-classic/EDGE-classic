@@ -37,16 +37,16 @@
 
 #define FLAC_FRAMES 1024
 
-extern bool sound_device_stereo;  // FIXME: encapsulation
+extern bool sound_device_stereo; // FIXME: encapsulation
 extern int  sound_device_frequency;
 
 class FlacPlayer : public AbstractMusicPlayer
 {
-   public:
+  public:
     FlacPlayer();
     ~FlacPlayer();
 
-   private:
+  private:
     enum Status
     {
         kNotLoaded,
@@ -58,13 +58,13 @@ class FlacPlayer : public AbstractMusicPlayer
     int  status_;
     bool looping_;
 
-    drflac *flac_track_;  // I had to make it rhyme
+    drflac *flac_track_; // I had to make it rhyme
 
-    uint8_t *flac_data_;  // Passed in from s_music; must be deleted on close
+    uint8_t *flac_data_; // Passed in from s_music; must be deleted on close
 
     int16_t *mono_buffer_;
 
-   public:
+  public:
     bool OpenMemory(uint8_t *data, int length);
 
     virtual void Close(void);
@@ -79,7 +79,7 @@ class FlacPlayer : public AbstractMusicPlayer
 
     void PostOpen(void);
 
-   private:
+  private:
     bool StreamIntoBuffer(SoundData *buf);
 };
 
@@ -94,7 +94,8 @@ FlacPlayer::~FlacPlayer()
 {
     Close();
 
-    if (mono_buffer_) delete[] mono_buffer_;
+    if (mono_buffer_)
+        delete[] mono_buffer_;
 }
 
 void FlacPlayer::PostOpen()
@@ -126,10 +127,10 @@ bool FlacPlayer::StreamIntoBuffer(SoundData *buf)
     else
         data_buf = buf->data_left_;
 
-    drflac_uint64 frames =
-        drflac_read_pcm_frames_s16(flac_track_, FLAC_FRAMES, data_buf);
+    drflac_uint64 frames = drflac_read_pcm_frames_s16(flac_track_, FLAC_FRAMES, data_buf);
 
-    if (frames < FLAC_FRAMES) song_done = true;
+    if (frames < FLAC_FRAMES)
+        song_done = true;
 
     buf->length_ = frames;
 
@@ -140,7 +141,8 @@ bool FlacPlayer::StreamIntoBuffer(SoundData *buf)
 
     if (song_done) /* EOF */
     {
-        if (!looping_) return false;
+        if (!looping_)
+            return false;
         drflac_seek_to_pcm_frame(flac_track_, 0);
         return true;
     }
@@ -169,10 +171,12 @@ bool FlacPlayer::OpenMemory(uint8_t *data, int length)
 
 void FlacPlayer::Close()
 {
-    if (status_ == kNotLoaded) return;
+    if (status_ == kNotLoaded)
+        return;
 
     // Stop playback
-    if (status_ != kStopped) Stop();
+    if (status_ != kStopped)
+        Stop();
 
     drflac_close(flac_track_);
     delete[] flac_data_;
@@ -185,21 +189,24 @@ void FlacPlayer::Close()
 
 void FlacPlayer::Pause()
 {
-    if (status_ != kPlaying) return;
+    if (status_ != kPlaying)
+        return;
 
     status_ = kPaused;
 }
 
 void FlacPlayer::Resume()
 {
-    if (status_ != kPaused) return;
+    if (status_ != kPaused)
+        return;
 
     status_ = kPlaying;
 }
 
 void FlacPlayer::Play(bool loop)
 {
-    if (status_ != kNotLoaded && status_ != kStopped) return;
+    if (status_ != kNotLoaded && status_ != kStopped)
+        return;
 
     status_  = kPlaying;
     looping_ = loop;
@@ -213,7 +220,8 @@ void FlacPlayer::Play(bool loop)
 
 void FlacPlayer::Stop()
 {
-    if (status_ != kPlaying && status_ != kPaused) return;
+    if (status_ != kPlaying && status_ != kPaused)
+        return;
 
     SoundQueueStop();
 
@@ -224,15 +232,21 @@ void FlacPlayer::Ticker()
 {
     while (status_ == kPlaying && !pc_speaker_mode)
     {
-        SoundData *buf = SoundQueueGetFreeBuffer(
-            FLAC_FRAMES, (sound_device_stereo) ? kMixInterleaved : kMixMono);
+        SoundData *buf = SoundQueueGetFreeBuffer(FLAC_FRAMES, (sound_device_stereo) ? kMixInterleaved : kMixMono);
 
-        if (!buf) break;
+        if (!buf)
+            break;
 
         if (StreamIntoBuffer(buf))
         {
-            if (buf->length_ > 0) { SoundQueueAddBuffer(buf, buf->frequency_); }
-            else { SoundQueueReturnBuffer(buf); }
+            if (buf->length_ > 0)
+            {
+                SoundQueueAddBuffer(buf, buf->frequency_);
+            }
+            else
+            {
+                SoundQueueReturnBuffer(buf);
+            }
         }
         else
         {

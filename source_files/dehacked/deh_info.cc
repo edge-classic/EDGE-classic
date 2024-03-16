@@ -36,1096 +36,1095 @@ namespace dehacked
 
 State states_orig[kTotalMBFStates] = {
     // the dummy state
-    { kSPR_TROO, 0, -1, kA_NULL, kS_NULL, 0 },  // S_NULL
+    {kSPR_TROO, 0, -1, kA_NULL, kS_NULL, 0}, // S_NULL
 
     // weapons...
-    { kSPR_SHTG, 4, 0, kA_Light0, kS_NULL, 0 },               // S_LIGHTDONE
-    { kSPR_PUNG, 0, 1, kA_WeaponReady, kS_PUNCH, 0 },         // S_PUNCH
-    { kSPR_PUNG, 0, 1, kA_Lower, kS_PUNCHDOWN, 0 },           // S_PUNCHDOWN
-    { kSPR_PUNG, 0, 1, kA_Raise, kS_PUNCHUP, 0 },             // S_PUNCHUP
-    { kSPR_PUNG, 1, 4, kA_NULL, kS_PUNCH2, 0 },               // S_PUNCH1
-    { kSPR_PUNG, 2, 4, kA_Punch, kS_PUNCH3, 0 },              // S_PUNCH2
-    { kSPR_PUNG, 3, 5, kA_NULL, kS_PUNCH4, 0 },               // S_PUNCH3
-    { kSPR_PUNG, 2, 4, kA_NULL, kS_PUNCH5, 0 },               // S_PUNCH4
-    { kSPR_PUNG, 1, 5, kA_ReFire, kS_PUNCH, 0 },              // S_PUNCH5
-    { kSPR_PISG, 0, 1, kA_WeaponReady, kS_PISTOL, 0 },        // S_PISTOL
-    { kSPR_PISG, 0, 1, kA_Lower, kS_PISTOLDOWN, 0 },          // S_PISTOLDOWN
-    { kSPR_PISG, 0, 1, kA_Raise, kS_PISTOLUP, 0 },            // S_PISTOLUP
-    { kSPR_PISG, 0, 4, kA_NULL, kS_PISTOL2, 0 },              // S_PISTOL1
-    { kSPR_PISG, 1, 6, kA_FirePistol, kS_PISTOL3, 0 },        // S_PISTOL2
-    { kSPR_PISG, 2, 4, kA_NULL, kS_PISTOL4, 0 },              // S_PISTOL3
-    { kSPR_PISG, 1, 5, kA_ReFire, kS_PISTOL, 0 },             // S_PISTOL4
-    { kSPR_PISF, 32768, 7, kA_Light1, kS_LIGHTDONE, 0 },      // S_PISTOLFLASH
-    { kSPR_SHTG, 0, 1, kA_WeaponReady, kS_SGUN, 0 },          // S_SGUN
-    { kSPR_SHTG, 0, 1, kA_Lower, kS_SGUNDOWN, 0 },            // S_SGUNDOWN
-    { kSPR_SHTG, 0, 1, kA_Raise, kS_SGUNUP, 0 },              // S_SGUNUP
-    { kSPR_SHTG, 0, 3, kA_NULL, kS_SGUN2, 0 },                // S_SGUN1
-    { kSPR_SHTG, 0, 7, kA_FireShotgun, kS_SGUN3, 0 },         // S_SGUN2
-    { kSPR_SHTG, 1, 5, kA_NULL, kS_SGUN4, 0 },                // S_SGUN3
-    { kSPR_SHTG, 2, 5, kA_NULL, kS_SGUN5, 0 },                // S_SGUN4
-    { kSPR_SHTG, 3, 4, kA_NULL, kS_SGUN6, 0 },                // S_SGUN5
-    { kSPR_SHTG, 2, 5, kA_NULL, kS_SGUN7, 0 },                // S_SGUN6
-    { kSPR_SHTG, 1, 5, kA_NULL, kS_SGUN8, 0 },                // S_SGUN7
-    { kSPR_SHTG, 0, 3, kA_NULL, kS_SGUN9, 0 },                // S_SGUN8
-    { kSPR_SHTG, 0, 7, kA_ReFire, kS_SGUN, 0 },               // S_SGUN9
-    { kSPR_SHTF, 32768, 4, kA_Light1, kS_SGUNFLASH2, 0 },     // S_SGUNFLASH1
-    { kSPR_SHTF, 32769, 3, kA_Light2, kS_LIGHTDONE, 0 },      // S_SGUNFLASH2
-    { kSPR_SHT2, 0, 1, kA_WeaponReady, kS_DSGUN, 0 },         // S_DSGUN
-    { kSPR_SHT2, 0, 1, kA_Lower, kS_DSGUNDOWN, 0 },           // S_DSGUNDOWN
-    { kSPR_SHT2, 0, 1, kA_Raise, kS_DSGUNUP, 0 },             // S_DSGUNUP
-    { kSPR_SHT2, 0, 3, kA_NULL, kS_DSGUN2, 0 },               // S_DSGUN1
-    { kSPR_SHT2, 0, 7, kA_FireShotgun2, kS_DSGUN3, 0 },       // S_DSGUN2
-    { kSPR_SHT2, 1, 7, kA_NULL, kS_DSGUN4, 0 },               // S_DSGUN3
-    { kSPR_SHT2, 2, 7, kA_CheckReload, kS_DSGUN5, 0 },        // S_DSGUN4
-    { kSPR_SHT2, 3, 7, kA_OpenShotgun2, kS_DSGUN6, 0 },       // S_DSGUN5
-    { kSPR_SHT2, 4, 7, kA_NULL, kS_DSGUN7, 0 },               // S_DSGUN6
-    { kSPR_SHT2, 5, 7, kA_LoadShotgun2, kS_DSGUN8, 0 },       // S_DSGUN7
-    { kSPR_SHT2, 6, 6, kA_NULL, kS_DSGUN9, 0 },               // S_DSGUN8
-    { kSPR_SHT2, 7, 6, kA_CloseShotgun2, kS_DSGUN10, 0 },     // S_DSGUN9
-    { kSPR_SHT2, 0, 5, kA_ReFire, kS_DSGUN, 0 },              // S_DSGUN10
-    { kSPR_SHT2, 1, 7, kA_NULL, kS_DSNR2, 0 },                // S_DSNR1
-    { kSPR_SHT2, 0, 3, kA_NULL, kS_DSGUNDOWN, 0 },            // S_DSNR2
-    { kSPR_SHT2, 32776, 5, kA_Light1, kS_DSGUNFLASH2, 0 },    // S_DSGUNFLASH1
-    { kSPR_SHT2, 32777, 4, kA_Light2, kS_LIGHTDONE, 0 },      // S_DSGUNFLASH2
-    { kSPR_CHGG, 0, 1, kA_WeaponReady, kS_CHAIN, 0 },         // S_CHAIN
-    { kSPR_CHGG, 0, 1, kA_Lower, kS_CHAINDOWN, 0 },           // S_CHAINDOWN
-    { kSPR_CHGG, 0, 1, kA_Raise, kS_CHAINUP, 0 },             // S_CHAINUP
-    { kSPR_CHGG, 0, 4, kA_FireCGun, kS_CHAIN2, 0 },           // S_CHAIN1
-    { kSPR_CHGG, 1, 4, kA_FireCGun, kS_CHAIN3, 0 },           // S_CHAIN2
-    { kSPR_CHGG, 1, 0, kA_ReFire, kS_CHAIN, 0 },              // S_CHAIN3
-    { kSPR_CHGF, 32768, 5, kA_Light1, kS_LIGHTDONE, 0 },      // S_CHAINFLASH1
-    { kSPR_CHGF, 32769, 5, kA_Light2, kS_LIGHTDONE, 0 },      // S_CHAINFLASH2
-    { kSPR_MISG, 0, 1, kA_WeaponReady, kS_MISSILE, 0 },       // S_MISSILE
-    { kSPR_MISG, 0, 1, kA_Lower, kS_MISSILEDOWN, 0 },         // S_MISSILEDOWN
-    { kSPR_MISG, 0, 1, kA_Raise, kS_MISSILEUP, 0 },           // S_MISSILEUP
-    { kSPR_MISG, 1, 8, kA_GunFlash, kS_MISSILE2, 0 },         // S_MISSILE1
-    { kSPR_MISG, 1, 12, kA_FireMissile, kS_MISSILE3, 0 },     // S_MISSILE2
-    { kSPR_MISG, 1, 0, kA_ReFire, kS_MISSILE, 0 },            // S_MISSILE3
-    { kSPR_MISF, 32768, 3, kA_Light1, kS_MISSILEFLASH2, 0 },  // S_MISSILEFLASH1
-    { kSPR_MISF, 32769, 4, kA_NULL, kS_MISSILEFLASH3, 0 },    // S_MISSILEFLASH2
-    { kSPR_MISF, 32770, 4, kA_Light2, kS_MISSILEFLASH4, 0 },  // S_MISSILEFLASH3
-    { kSPR_MISF, 32771, 4, kA_Light2, kS_LIGHTDONE, 0 },      // S_MISSILEFLASH4
-    { kSPR_SAWG, 2, 4, kA_WeaponReady, kS_SAWB, 0 },          // S_SAW
-    { kSPR_SAWG, 3, 4, kA_WeaponReady, kS_SAW, 0 },           // S_SAWB
-    { kSPR_SAWG, 2, 1, kA_Lower, kS_SAWDOWN, 0 },             // S_SAWDOWN
-    { kSPR_SAWG, 2, 1, kA_Raise, kS_SAWUP, 0 },               // S_SAWUP
-    { kSPR_SAWG, 0, 4, kA_Saw, kS_SAW2, 0 },                  // S_SAW1
-    { kSPR_SAWG, 1, 4, kA_Saw, kS_SAW3, 0 },                  // S_SAW2
-    { kSPR_SAWG, 1, 0, kA_ReFire, kS_SAW, 0 },                // S_SAW3
-    { kSPR_PLSG, 0, 1, kA_WeaponReady, kS_PLASMA, 0 },        // S_PLASMA
-    { kSPR_PLSG, 0, 1, kA_Lower, kS_PLASMADOWN, 0 },          // S_PLASMADOWN
-    { kSPR_PLSG, 0, 1, kA_Raise, kS_PLASMAUP, 0 },            // S_PLASMAUP
-    { kSPR_PLSG, 0, 3, kA_FirePlasma, kS_PLASMA2, 0 },        // S_PLASMA1
-    { kSPR_PLSG, 1, 20, kA_ReFire, kS_PLASMA, 0 },            // S_PLASMA2
-    { kSPR_PLSF, 32768, 4, kA_Light1, kS_LIGHTDONE, 0 },      // S_PLASMAFLASH1
-    { kSPR_PLSF, 32769, 4, kA_Light1, kS_LIGHTDONE, 0 },      // S_PLASMAFLASH2
-    { kSPR_BFGG, 0, 1, kA_WeaponReady, kS_BFG, 0 },           // S_BFG
-    { kSPR_BFGG, 0, 1, kA_Lower, kS_BFGDOWN, 0 },             // S_BFGDOWN
-    { kSPR_BFGG, 0, 1, kA_Raise, kS_BFGUP, 0 },               // S_BFGUP
-    { kSPR_BFGG, 0, 20, kA_BFGsound, kS_BFG2, 0 },            // S_BFG1
-    { kSPR_BFGG, 1, 10, kA_GunFlash, kS_BFG3, 0 },            // S_BFG2
-    { kSPR_BFGG, 1, 10, kA_FireBFG, kS_BFG4, 0 },             // S_BFG3
-    { kSPR_BFGG, 1, 20, kA_ReFire, kS_BFG, 0 },               // S_BFG4
-    { kSPR_BFGF, 32768, 11, kA_Light1, kS_BFGFLASH2, 0 },     // S_BFGFLASH1
-    { kSPR_BFGF, 32769, 6, kA_Light2, kS_LIGHTDONE, 0 },      // S_BFGFLASH2
+    {kSPR_SHTG, 4, 0, kA_Light0, kS_NULL, 0},              // S_LIGHTDONE
+    {kSPR_PUNG, 0, 1, kA_WeaponReady, kS_PUNCH, 0},        // S_PUNCH
+    {kSPR_PUNG, 0, 1, kA_Lower, kS_PUNCHDOWN, 0},          // S_PUNCHDOWN
+    {kSPR_PUNG, 0, 1, kA_Raise, kS_PUNCHUP, 0},            // S_PUNCHUP
+    {kSPR_PUNG, 1, 4, kA_NULL, kS_PUNCH2, 0},              // S_PUNCH1
+    {kSPR_PUNG, 2, 4, kA_Punch, kS_PUNCH3, 0},             // S_PUNCH2
+    {kSPR_PUNG, 3, 5, kA_NULL, kS_PUNCH4, 0},              // S_PUNCH3
+    {kSPR_PUNG, 2, 4, kA_NULL, kS_PUNCH5, 0},              // S_PUNCH4
+    {kSPR_PUNG, 1, 5, kA_ReFire, kS_PUNCH, 0},             // S_PUNCH5
+    {kSPR_PISG, 0, 1, kA_WeaponReady, kS_PISTOL, 0},       // S_PISTOL
+    {kSPR_PISG, 0, 1, kA_Lower, kS_PISTOLDOWN, 0},         // S_PISTOLDOWN
+    {kSPR_PISG, 0, 1, kA_Raise, kS_PISTOLUP, 0},           // S_PISTOLUP
+    {kSPR_PISG, 0, 4, kA_NULL, kS_PISTOL2, 0},             // S_PISTOL1
+    {kSPR_PISG, 1, 6, kA_FirePistol, kS_PISTOL3, 0},       // S_PISTOL2
+    {kSPR_PISG, 2, 4, kA_NULL, kS_PISTOL4, 0},             // S_PISTOL3
+    {kSPR_PISG, 1, 5, kA_ReFire, kS_PISTOL, 0},            // S_PISTOL4
+    {kSPR_PISF, 32768, 7, kA_Light1, kS_LIGHTDONE, 0},     // S_PISTOLFLASH
+    {kSPR_SHTG, 0, 1, kA_WeaponReady, kS_SGUN, 0},         // S_SGUN
+    {kSPR_SHTG, 0, 1, kA_Lower, kS_SGUNDOWN, 0},           // S_SGUNDOWN
+    {kSPR_SHTG, 0, 1, kA_Raise, kS_SGUNUP, 0},             // S_SGUNUP
+    {kSPR_SHTG, 0, 3, kA_NULL, kS_SGUN2, 0},               // S_SGUN1
+    {kSPR_SHTG, 0, 7, kA_FireShotgun, kS_SGUN3, 0},        // S_SGUN2
+    {kSPR_SHTG, 1, 5, kA_NULL, kS_SGUN4, 0},               // S_SGUN3
+    {kSPR_SHTG, 2, 5, kA_NULL, kS_SGUN5, 0},               // S_SGUN4
+    {kSPR_SHTG, 3, 4, kA_NULL, kS_SGUN6, 0},               // S_SGUN5
+    {kSPR_SHTG, 2, 5, kA_NULL, kS_SGUN7, 0},               // S_SGUN6
+    {kSPR_SHTG, 1, 5, kA_NULL, kS_SGUN8, 0},               // S_SGUN7
+    {kSPR_SHTG, 0, 3, kA_NULL, kS_SGUN9, 0},               // S_SGUN8
+    {kSPR_SHTG, 0, 7, kA_ReFire, kS_SGUN, 0},              // S_SGUN9
+    {kSPR_SHTF, 32768, 4, kA_Light1, kS_SGUNFLASH2, 0},    // S_SGUNFLASH1
+    {kSPR_SHTF, 32769, 3, kA_Light2, kS_LIGHTDONE, 0},     // S_SGUNFLASH2
+    {kSPR_SHT2, 0, 1, kA_WeaponReady, kS_DSGUN, 0},        // S_DSGUN
+    {kSPR_SHT2, 0, 1, kA_Lower, kS_DSGUNDOWN, 0},          // S_DSGUNDOWN
+    {kSPR_SHT2, 0, 1, kA_Raise, kS_DSGUNUP, 0},            // S_DSGUNUP
+    {kSPR_SHT2, 0, 3, kA_NULL, kS_DSGUN2, 0},              // S_DSGUN1
+    {kSPR_SHT2, 0, 7, kA_FireShotgun2, kS_DSGUN3, 0},      // S_DSGUN2
+    {kSPR_SHT2, 1, 7, kA_NULL, kS_DSGUN4, 0},              // S_DSGUN3
+    {kSPR_SHT2, 2, 7, kA_CheckReload, kS_DSGUN5, 0},       // S_DSGUN4
+    {kSPR_SHT2, 3, 7, kA_OpenShotgun2, kS_DSGUN6, 0},      // S_DSGUN5
+    {kSPR_SHT2, 4, 7, kA_NULL, kS_DSGUN7, 0},              // S_DSGUN6
+    {kSPR_SHT2, 5, 7, kA_LoadShotgun2, kS_DSGUN8, 0},      // S_DSGUN7
+    {kSPR_SHT2, 6, 6, kA_NULL, kS_DSGUN9, 0},              // S_DSGUN8
+    {kSPR_SHT2, 7, 6, kA_CloseShotgun2, kS_DSGUN10, 0},    // S_DSGUN9
+    {kSPR_SHT2, 0, 5, kA_ReFire, kS_DSGUN, 0},             // S_DSGUN10
+    {kSPR_SHT2, 1, 7, kA_NULL, kS_DSNR2, 0},               // S_DSNR1
+    {kSPR_SHT2, 0, 3, kA_NULL, kS_DSGUNDOWN, 0},           // S_DSNR2
+    {kSPR_SHT2, 32776, 5, kA_Light1, kS_DSGUNFLASH2, 0},   // S_DSGUNFLASH1
+    {kSPR_SHT2, 32777, 4, kA_Light2, kS_LIGHTDONE, 0},     // S_DSGUNFLASH2
+    {kSPR_CHGG, 0, 1, kA_WeaponReady, kS_CHAIN, 0},        // S_CHAIN
+    {kSPR_CHGG, 0, 1, kA_Lower, kS_CHAINDOWN, 0},          // S_CHAINDOWN
+    {kSPR_CHGG, 0, 1, kA_Raise, kS_CHAINUP, 0},            // S_CHAINUP
+    {kSPR_CHGG, 0, 4, kA_FireCGun, kS_CHAIN2, 0},          // S_CHAIN1
+    {kSPR_CHGG, 1, 4, kA_FireCGun, kS_CHAIN3, 0},          // S_CHAIN2
+    {kSPR_CHGG, 1, 0, kA_ReFire, kS_CHAIN, 0},             // S_CHAIN3
+    {kSPR_CHGF, 32768, 5, kA_Light1, kS_LIGHTDONE, 0},     // S_CHAINFLASH1
+    {kSPR_CHGF, 32769, 5, kA_Light2, kS_LIGHTDONE, 0},     // S_CHAINFLASH2
+    {kSPR_MISG, 0, 1, kA_WeaponReady, kS_MISSILE, 0},      // S_MISSILE
+    {kSPR_MISG, 0, 1, kA_Lower, kS_MISSILEDOWN, 0},        // S_MISSILEDOWN
+    {kSPR_MISG, 0, 1, kA_Raise, kS_MISSILEUP, 0},          // S_MISSILEUP
+    {kSPR_MISG, 1, 8, kA_GunFlash, kS_MISSILE2, 0},        // S_MISSILE1
+    {kSPR_MISG, 1, 12, kA_FireMissile, kS_MISSILE3, 0},    // S_MISSILE2
+    {kSPR_MISG, 1, 0, kA_ReFire, kS_MISSILE, 0},           // S_MISSILE3
+    {kSPR_MISF, 32768, 3, kA_Light1, kS_MISSILEFLASH2, 0}, // S_MISSILEFLASH1
+    {kSPR_MISF, 32769, 4, kA_NULL, kS_MISSILEFLASH3, 0},   // S_MISSILEFLASH2
+    {kSPR_MISF, 32770, 4, kA_Light2, kS_MISSILEFLASH4, 0}, // S_MISSILEFLASH3
+    {kSPR_MISF, 32771, 4, kA_Light2, kS_LIGHTDONE, 0},     // S_MISSILEFLASH4
+    {kSPR_SAWG, 2, 4, kA_WeaponReady, kS_SAWB, 0},         // S_SAW
+    {kSPR_SAWG, 3, 4, kA_WeaponReady, kS_SAW, 0},          // S_SAWB
+    {kSPR_SAWG, 2, 1, kA_Lower, kS_SAWDOWN, 0},            // S_SAWDOWN
+    {kSPR_SAWG, 2, 1, kA_Raise, kS_SAWUP, 0},              // S_SAWUP
+    {kSPR_SAWG, 0, 4, kA_Saw, kS_SAW2, 0},                 // S_SAW1
+    {kSPR_SAWG, 1, 4, kA_Saw, kS_SAW3, 0},                 // S_SAW2
+    {kSPR_SAWG, 1, 0, kA_ReFire, kS_SAW, 0},               // S_SAW3
+    {kSPR_PLSG, 0, 1, kA_WeaponReady, kS_PLASMA, 0},       // S_PLASMA
+    {kSPR_PLSG, 0, 1, kA_Lower, kS_PLASMADOWN, 0},         // S_PLASMADOWN
+    {kSPR_PLSG, 0, 1, kA_Raise, kS_PLASMAUP, 0},           // S_PLASMAUP
+    {kSPR_PLSG, 0, 3, kA_FirePlasma, kS_PLASMA2, 0},       // S_PLASMA1
+    {kSPR_PLSG, 1, 20, kA_ReFire, kS_PLASMA, 0},           // S_PLASMA2
+    {kSPR_PLSF, 32768, 4, kA_Light1, kS_LIGHTDONE, 0},     // S_PLASMAFLASH1
+    {kSPR_PLSF, 32769, 4, kA_Light1, kS_LIGHTDONE, 0},     // S_PLASMAFLASH2
+    {kSPR_BFGG, 0, 1, kA_WeaponReady, kS_BFG, 0},          // S_BFG
+    {kSPR_BFGG, 0, 1, kA_Lower, kS_BFGDOWN, 0},            // S_BFGDOWN
+    {kSPR_BFGG, 0, 1, kA_Raise, kS_BFGUP, 0},              // S_BFGUP
+    {kSPR_BFGG, 0, 20, kA_BFGsound, kS_BFG2, 0},           // S_BFG1
+    {kSPR_BFGG, 1, 10, kA_GunFlash, kS_BFG3, 0},           // S_BFG2
+    {kSPR_BFGG, 1, 10, kA_FireBFG, kS_BFG4, 0},            // S_BFG3
+    {kSPR_BFGG, 1, 20, kA_ReFire, kS_BFG, 0},              // S_BFG4
+    {kSPR_BFGF, 32768, 11, kA_Light1, kS_BFGFLASH2, 0},    // S_BFGFLASH1
+    {kSPR_BFGF, 32769, 6, kA_Light2, kS_LIGHTDONE, 0},     // S_BFGFLASH2
 
     // things...
-    { kSPR_BLUD, 2, 8, kA_NULL, kS_BLOOD2, 0 },            // S_BLOOD1
-    { kSPR_BLUD, 1, 8, kA_NULL, kS_BLOOD3, 0 },            // S_BLOOD2
-    { kSPR_BLUD, 0, 8, kA_NULL, kS_NULL, 0 },              // S_BLOOD3
-    { kSPR_PUFF, 32768, 4, kA_NULL, kS_PUFF2, 0 },         // S_PUFF1
-    { kSPR_PUFF, 1, 4, kA_NULL, kS_PUFF3, 0 },             // S_PUFF2
-    { kSPR_PUFF, 2, 4, kA_NULL, kS_PUFF4, 0 },             // S_PUFF3
-    { kSPR_PUFF, 3, 4, kA_NULL, kS_NULL, 0 },              // S_PUFF4
-    { kSPR_BAL1, 32768, 4, kA_NULL, kS_TBALL2, 0 },        // S_TBALL1
-    { kSPR_BAL1, 32769, 4, kA_NULL, kS_TBALL1, 0 },        // S_TBALL2
-    { kSPR_BAL1, 32770, 6, kA_NULL, kS_TBALLX2, 0 },       // S_TBALLX1
-    { kSPR_BAL1, 32771, 6, kA_NULL, kS_TBALLX3, 0 },       // S_TBALLX2
-    { kSPR_BAL1, 32772, 6, kA_NULL, kS_NULL, 0 },          // S_TBALLX3
-    { kSPR_BAL2, 32768, 4, kA_NULL, kS_RBALL2, 0 },        // S_RBALL1
-    { kSPR_BAL2, 32769, 4, kA_NULL, kS_RBALL1, 0 },        // S_RBALL2
-    { kSPR_BAL2, 32770, 6, kA_NULL, kS_RBALLX2, 0 },       // S_RBALLX1
-    { kSPR_BAL2, 32771, 6, kA_NULL, kS_RBALLX3, 0 },       // S_RBALLX2
-    { kSPR_BAL2, 32772, 6, kA_NULL, kS_NULL, 0 },          // S_RBALLX3
-    { kSPR_PLSS, 32768, 6, kA_NULL, kS_PLASBALL2, 0 },     // S_PLASBALL
-    { kSPR_PLSS, 32769, 6, kA_NULL, kS_PLASBALL, 0 },      // S_PLASBALL2
-    { kSPR_PLSE, 32768, 4, kA_NULL, kS_PLASEXP2, 0 },      // S_PLASEXP
-    { kSPR_PLSE, 32769, 4, kA_NULL, kS_PLASEXP3, 0 },      // S_PLASEXP2
-    { kSPR_PLSE, 32770, 4, kA_NULL, kS_PLASEXP4, 0 },      // S_PLASEXP3
-    { kSPR_PLSE, 32771, 4, kA_NULL, kS_PLASEXP5, 0 },      // S_PLASEXP4
-    { kSPR_PLSE, 32772, 4, kA_NULL, kS_NULL, 0 },          // S_PLASEXP5
-    { kSPR_MISL, 32768, 1, kA_NULL, kS_ROCKET, 0 },        // S_ROCKET
-    { kSPR_BFS1, 32768, 4, kA_NULL, kS_BFGSHOT2, 0 },      // S_BFGSHOT
-    { kSPR_BFS1, 32769, 4, kA_NULL, kS_BFGSHOT, 0 },       // S_BFGSHOT2
-    { kSPR_BFE1, 32768, 8, kA_NULL, kS_BFGLAND2, 0 },      // S_BFGLAND
-    { kSPR_BFE1, 32769, 8, kA_NULL, kS_BFGLAND3, 0 },      // S_BFGLAND2
-    { kSPR_BFE1, 32770, 8, kA_BFGSpray, kS_BFGLAND4, 0 },  // S_BFGLAND3
-    { kSPR_BFE1, 32771, 8, kA_NULL, kS_BFGLAND5, 0 },      // S_BFGLAND4
-    { kSPR_BFE1, 32772, 8, kA_NULL, kS_BFGLAND6, 0 },      // S_BFGLAND5
-    { kSPR_BFE1, 32773, 8, kA_NULL, kS_NULL, 0 },          // S_BFGLAND6
-    { kSPR_BFE2, 32768, 8, kA_NULL, kS_BFGEXP2, 0 },       // S_BFGEXP
-    { kSPR_BFE2, 32769, 8, kA_NULL, kS_BFGEXP3, 0 },       // S_BFGEXP2
-    { kSPR_BFE2, 32770, 8, kA_NULL, kS_BFGEXP4, 0 },       // S_BFGEXP3
-    { kSPR_BFE2, 32771, 8, kA_NULL, kS_NULL, 0 },          // S_BFGEXP4
-    { kSPR_MISL, 32769, 8, kA_Explode, kS_EXPLODE2, 0 },   // S_EXPLODE1
-    { kSPR_MISL, 32770, 6, kA_NULL, kS_EXPLODE3, 0 },      // S_EXPLODE2
-    { kSPR_MISL, 32771, 4, kA_NULL, kS_NULL, 0 },          // S_EXPLODE3
-    { kSPR_TFOG, 32768, 6, kA_SpawnSound, kS_TFOG01, 0 },  // S_TFOG  /* MOD */
-    { kSPR_TFOG, 32769, 6, kA_NULL, kS_TFOG02, 0 },        // S_TFOG01
-    { kSPR_TFOG, 32768, 6, kA_NULL, kS_TFOG2, 0 },         // S_TFOG02
-    { kSPR_TFOG, 32769, 6, kA_NULL, kS_TFOG3, 0 },         // S_TFOG2
-    { kSPR_TFOG, 32770, 6, kA_NULL, kS_TFOG4, 0 },         // S_TFOG3
-    { kSPR_TFOG, 32771, 6, kA_NULL, kS_TFOG5, 0 },         // S_TFOG4
-    { kSPR_TFOG, 32772, 6, kA_NULL, kS_TFOG6, 0 },         // S_TFOG5
-    { kSPR_TFOG, 32773, 6, kA_NULL, kS_TFOG7, 0 },         // S_TFOG6
-    { kSPR_TFOG, 32774, 6, kA_NULL, kS_TFOG8, 0 },         // S_TFOG7
-    { kSPR_TFOG, 32775, 6, kA_NULL, kS_TFOG9, 0 },         // S_TFOG8
-    { kSPR_TFOG, 32776, 6, kA_NULL, kS_TFOG10, 0 },        // S_TFOG9
-    { kSPR_TFOG, 32777, 6, kA_NULL, kS_NULL, 0 },          // S_TFOG10
-    { kSPR_IFOG, 32768, 6, kA_NULL, kS_IFOG01, 0 },        // S_IFOG
-    { kSPR_IFOG, 32769, 6, kA_NULL, kS_IFOG02, 0 },        // S_IFOG01
-    { kSPR_IFOG, 32768, 6, kA_NULL, kS_IFOG2, 0 },         // S_IFOG02
-    { kSPR_IFOG, 32769, 6, kA_NULL, kS_IFOG3, 0 },         // S_IFOG2
-    { kSPR_IFOG, 32770, 6, kA_NULL, kS_IFOG4, 0 },         // S_IFOG3
-    { kSPR_IFOG, 32771, 6, kA_NULL, kS_IFOG5, 0 },         // S_IFOG4
-    { kSPR_IFOG, 32772, 6, kA_NULL, kS_NULL, 0 },          // S_IFOG5
-    { kSPR_PLAY, 0, -1, kA_NULL, kS_NULL, 0 },             // S_PLAY
-    { kSPR_PLAY, 0, 4, kA_NULL, kS_PLAY_RUN2, 0 },         // S_PLAY_RUN1
-    { kSPR_PLAY, 1, 4, kA_NULL, kS_PLAY_RUN3, 0 },         // S_PLAY_RUN2
-    { kSPR_PLAY, 2, 4, kA_NULL, kS_PLAY_RUN4, 0 },         // S_PLAY_RUN3
-    { kSPR_PLAY, 3, 4, kA_NULL, kS_PLAY_RUN1, 0 },         // S_PLAY_RUN4
-    { kSPR_PLAY, 4, 12, kA_NULL, kS_PLAY, 0 },             // S_PLAY_ATK1
-    { kSPR_PLAY, 32773, 6, kA_NULL, kS_PLAY_ATK1, 0 },     // S_PLAY_ATK2
-    { kSPR_PLAY, 6, 4, kA_NULL, kS_PLAY_PAIN2, 0 },        // S_PLAY_PAIN
-    { kSPR_PLAY, 6, 4, kA_Pain, kS_PLAY, 0 },              // S_PLAY_PAIN2
-    { kSPR_PLAY, 7, 10, kA_NULL, kS_PLAY_DIE2, 0 },        // S_PLAY_DIE1
-    { kSPR_PLAY, 8, 10, kA_PlayerScream, kS_PLAY_DIE3, 0 },     // S_PLAY_DIE2
-    { kSPR_PLAY, 9, 10, kA_Fall, kS_PLAY_DIE4, 0 },             // S_PLAY_DIE3
-    { kSPR_PLAY, 10, 10, kA_NULL, kS_PLAY_DIE5, 0 },            // S_PLAY_DIE4
-    { kSPR_PLAY, 11, 10, kA_NULL, kS_PLAY_DIE6, 0 },            // S_PLAY_DIE5
-    { kSPR_PLAY, 12, 10, kA_NULL, kS_PLAY_DIE7, 0 },            // S_PLAY_DIE6
-    { kSPR_PLAY, 13, -1, kA_NULL, kS_NULL, 0 },                 // S_PLAY_DIE7
-    { kSPR_PLAY, 14, 5, kA_NULL, kS_PLAY_XDIE2, 0 },            // S_PLAY_XDIE1
-    { kSPR_PLAY, 15, 5, kA_XScream, kS_PLAY_XDIE3, 0 },         // S_PLAY_XDIE2
-    { kSPR_PLAY, 16, 5, kA_Fall, kS_PLAY_XDIE4, 0 },            // S_PLAY_XDIE3
-    { kSPR_PLAY, 17, 5, kA_NULL, kS_PLAY_XDIE5, 0 },            // S_PLAY_XDIE4
-    { kSPR_PLAY, 18, 5, kA_NULL, kS_PLAY_XDIE6, 0 },            // S_PLAY_XDIE5
-    { kSPR_PLAY, 19, 5, kA_NULL, kS_PLAY_XDIE7, 0 },            // S_PLAY_XDIE6
-    { kSPR_PLAY, 20, 5, kA_NULL, kS_PLAY_XDIE8, 0 },            // S_PLAY_XDIE7
-    { kSPR_PLAY, 21, 5, kA_NULL, kS_PLAY_XDIE9, 0 },            // S_PLAY_XDIE8
-    { kSPR_PLAY, 22, -1, kA_NULL, kS_NULL, 0 },                 // S_PLAY_XDIE9
-    { kSPR_POSS, 0, 10, kA_Look, kS_POSS_STND2, 0 },            // S_POSS_STND
-    { kSPR_POSS, 1, 10, kA_Look, kS_POSS_STND, 0 },             // S_POSS_STND2
-    { kSPR_POSS, 0, 4, kA_Chase, kS_POSS_RUN2, 0 },             // S_POSS_RUN1
-    { kSPR_POSS, 0, 4, kA_Chase, kS_POSS_RUN3, 0 },             // S_POSS_RUN2
-    { kSPR_POSS, 1, 4, kA_Chase, kS_POSS_RUN4, 0 },             // S_POSS_RUN3
-    { kSPR_POSS, 1, 4, kA_Chase, kS_POSS_RUN5, 0 },             // S_POSS_RUN4
-    { kSPR_POSS, 2, 4, kA_Chase, kS_POSS_RUN6, 0 },             // S_POSS_RUN5
-    { kSPR_POSS, 2, 4, kA_Chase, kS_POSS_RUN7, 0 },             // S_POSS_RUN6
-    { kSPR_POSS, 3, 4, kA_Chase, kS_POSS_RUN8, 0 },             // S_POSS_RUN7
-    { kSPR_POSS, 3, 4, kA_Chase, kS_POSS_RUN1, 0 },             // S_POSS_RUN8
-    { kSPR_POSS, 4, 10, kA_FaceTarget, kS_POSS_ATK2, 0 },       // S_POSS_ATK1
-    { kSPR_POSS, 5, 8, kA_PosAttack, kS_POSS_ATK3, 0 },         // S_POSS_ATK2
-    { kSPR_POSS, 4, 8, kA_NULL, kS_POSS_RUN1, 0 },              // S_POSS_ATK3
-    { kSPR_POSS, 6, 3, kA_NULL, kS_POSS_PAIN2, 0 },             // S_POSS_PAIN
-    { kSPR_POSS, 6, 3, kA_Pain, kS_POSS_RUN1, 0 },              // S_POSS_PAIN2
-    { kSPR_POSS, 7, 5, kA_NULL, kS_POSS_DIE2, 0 },              // S_POSS_DIE1
-    { kSPR_POSS, 8, 5, kA_Scream, kS_POSS_DIE3, 0 },            // S_POSS_DIE2
-    { kSPR_POSS, 9, 5, kA_Fall, kS_POSS_DIE4, 0 },              // S_POSS_DIE3
-    { kSPR_POSS, 10, 5, kA_NULL, kS_POSS_DIE5, 0 },             // S_POSS_DIE4
-    { kSPR_POSS, 11, -1, kA_NULL, kS_NULL, 0 },                 // S_POSS_DIE5
-    { kSPR_POSS, 12, 5, kA_NULL, kS_POSS_XDIE2, 0 },            // S_POSS_XDIE1
-    { kSPR_POSS, 13, 5, kA_XScream, kS_POSS_XDIE3, 0 },         // S_POSS_XDIE2
-    { kSPR_POSS, 14, 5, kA_Fall, kS_POSS_XDIE4, 0 },            // S_POSS_XDIE3
-    { kSPR_POSS, 15, 5, kA_NULL, kS_POSS_XDIE5, 0 },            // S_POSS_XDIE4
-    { kSPR_POSS, 16, 5, kA_NULL, kS_POSS_XDIE6, 0 },            // S_POSS_XDIE5
-    { kSPR_POSS, 17, 5, kA_NULL, kS_POSS_XDIE7, 0 },            // S_POSS_XDIE6
-    { kSPR_POSS, 18, 5, kA_NULL, kS_POSS_XDIE8, 0 },            // S_POSS_XDIE7
-    { kSPR_POSS, 19, 5, kA_NULL, kS_POSS_XDIE9, 0 },            // S_POSS_XDIE8
-    { kSPR_POSS, 20, -1, kA_NULL, kS_NULL, 0 },                 // S_POSS_XDIE9
-    { kSPR_POSS, 10, 5, kA_NULL, kS_POSS_RAISE2, 0 },           // S_POSS_RAISE1
-    { kSPR_POSS, 9, 5, kA_NULL, kS_POSS_RAISE3, 0 },            // S_POSS_RAISE2
-    { kSPR_POSS, 8, 5, kA_NULL, kS_POSS_RAISE4, 0 },            // S_POSS_RAISE3
-    { kSPR_POSS, 7, 5, kA_NULL, kS_POSS_RUN1, 0 },              // S_POSS_RAISE4
-    { kSPR_SPOS, 0, 10, kA_Look, kS_SPOS_STND2, 0 },            // S_SPOS_STND
-    { kSPR_SPOS, 1, 10, kA_Look, kS_SPOS_STND, 0 },             // S_SPOS_STND2
-    { kSPR_SPOS, 0, 3, kA_Chase, kS_SPOS_RUN2, 0 },             // S_SPOS_RUN1
-    { kSPR_SPOS, 0, 3, kA_Chase, kS_SPOS_RUN3, 0 },             // S_SPOS_RUN2
-    { kSPR_SPOS, 1, 3, kA_Chase, kS_SPOS_RUN4, 0 },             // S_SPOS_RUN3
-    { kSPR_SPOS, 1, 3, kA_Chase, kS_SPOS_RUN5, 0 },             // S_SPOS_RUN4
-    { kSPR_SPOS, 2, 3, kA_Chase, kS_SPOS_RUN6, 0 },             // S_SPOS_RUN5
-    { kSPR_SPOS, 2, 3, kA_Chase, kS_SPOS_RUN7, 0 },             // S_SPOS_RUN6
-    { kSPR_SPOS, 3, 3, kA_Chase, kS_SPOS_RUN8, 0 },             // S_SPOS_RUN7
-    { kSPR_SPOS, 3, 3, kA_Chase, kS_SPOS_RUN1, 0 },             // S_SPOS_RUN8
-    { kSPR_SPOS, 4, 10, kA_FaceTarget, kS_SPOS_ATK2, 0 },       // S_SPOS_ATK1
-    { kSPR_SPOS, 32773, 10, kA_SPosAttack, kS_SPOS_ATK3, 0 },   // S_SPOS_ATK2
-    { kSPR_SPOS, 4, 10, kA_NULL, kS_SPOS_RUN1, 0 },             // S_SPOS_ATK3
-    { kSPR_SPOS, 6, 3, kA_NULL, kS_SPOS_PAIN2, 0 },             // S_SPOS_PAIN
-    { kSPR_SPOS, 6, 3, kA_Pain, kS_SPOS_RUN1, 0 },              // S_SPOS_PAIN2
-    { kSPR_SPOS, 7, 5, kA_NULL, kS_SPOS_DIE2, 0 },              // S_SPOS_DIE1
-    { kSPR_SPOS, 8, 5, kA_Scream, kS_SPOS_DIE3, 0 },            // S_SPOS_DIE2
-    { kSPR_SPOS, 9, 5, kA_Fall, kS_SPOS_DIE4, 0 },              // S_SPOS_DIE3
-    { kSPR_SPOS, 10, 5, kA_NULL, kS_SPOS_DIE5, 0 },             // S_SPOS_DIE4
-    { kSPR_SPOS, 11, -1, kA_NULL, kS_NULL, 0 },                 // S_SPOS_DIE5
-    { kSPR_SPOS, 12, 5, kA_NULL, kS_SPOS_XDIE2, 0 },            // S_SPOS_XDIE1
-    { kSPR_SPOS, 13, 5, kA_XScream, kS_SPOS_XDIE3, 0 },         // S_SPOS_XDIE2
-    { kSPR_SPOS, 14, 5, kA_Fall, kS_SPOS_XDIE4, 0 },            // S_SPOS_XDIE3
-    { kSPR_SPOS, 15, 5, kA_NULL, kS_SPOS_XDIE5, 0 },            // S_SPOS_XDIE4
-    { kSPR_SPOS, 16, 5, kA_NULL, kS_SPOS_XDIE6, 0 },            // S_SPOS_XDIE5
-    { kSPR_SPOS, 17, 5, kA_NULL, kS_SPOS_XDIE7, 0 },            // S_SPOS_XDIE6
-    { kSPR_SPOS, 18, 5, kA_NULL, kS_SPOS_XDIE8, 0 },            // S_SPOS_XDIE7
-    { kSPR_SPOS, 19, 5, kA_NULL, kS_SPOS_XDIE9, 0 },            // S_SPOS_XDIE8
-    { kSPR_SPOS, 20, -1, kA_NULL, kS_NULL, 0 },                 // S_SPOS_XDIE9
-    { kSPR_SPOS, 11, 5, kA_NULL, kS_SPOS_RAISE2, 0 },           // S_SPOS_RAISE1
-    { kSPR_SPOS, 10, 5, kA_NULL, kS_SPOS_RAISE3, 0 },           // S_SPOS_RAISE2
-    { kSPR_SPOS, 9, 5, kA_NULL, kS_SPOS_RAISE4, 0 },            // S_SPOS_RAISE3
-    { kSPR_SPOS, 8, 5, kA_NULL, kS_SPOS_RAISE5, 0 },            // S_SPOS_RAISE4
-    { kSPR_SPOS, 7, 5, kA_NULL, kS_SPOS_RUN1, 0 },              // S_SPOS_RAISE5
-    { kSPR_VILE, 0, 10, kA_Look, kS_VILE_STND2, 0 },            // S_VILE_STND
-    { kSPR_VILE, 1, 10, kA_Look, kS_VILE_STND, 0 },             // S_VILE_STND2
-    { kSPR_VILE, 0, 2, kA_VileChase, kS_VILE_RUN2, 0 },         // S_VILE_RUN1
-    { kSPR_VILE, 0, 2, kA_VileChase, kS_VILE_RUN3, 0 },         // S_VILE_RUN2
-    { kSPR_VILE, 1, 2, kA_VileChase, kS_VILE_RUN4, 0 },         // S_VILE_RUN3
-    { kSPR_VILE, 1, 2, kA_VileChase, kS_VILE_RUN5, 0 },         // S_VILE_RUN4
-    { kSPR_VILE, 2, 2, kA_VileChase, kS_VILE_RUN6, 0 },         // S_VILE_RUN5
-    { kSPR_VILE, 2, 2, kA_VileChase, kS_VILE_RUN7, 0 },         // S_VILE_RUN6
-    { kSPR_VILE, 3, 2, kA_VileChase, kS_VILE_RUN8, 0 },         // S_VILE_RUN7
-    { kSPR_VILE, 3, 2, kA_VileChase, kS_VILE_RUN9, 0 },         // S_VILE_RUN8
-    { kSPR_VILE, 4, 2, kA_VileChase, kS_VILE_RUN10, 0 },        // S_VILE_RUN9
-    { kSPR_VILE, 4, 2, kA_VileChase, kS_VILE_RUN11, 0 },        // S_VILE_RUN10
-    { kSPR_VILE, 5, 2, kA_VileChase, kS_VILE_RUN12, 0 },        // S_VILE_RUN11
-    { kSPR_VILE, 5, 2, kA_VileChase, kS_VILE_RUN1, 0 },         // S_VILE_RUN12
-    { kSPR_VILE, 32774, 0, kA_VileStart, kS_VILE_ATK2, 0 },     // S_VILE_ATK1
-    { kSPR_VILE, 32774, 10, kA_FaceTarget, kS_VILE_ATK3, 0 },   // S_VILE_ATK2
-    { kSPR_VILE, 32775, 8, kA_VileTarget, kS_VILE_ATK4, 0 },    // S_VILE_ATK3
-    { kSPR_VILE, 32776, 8, kA_FaceTarget, kS_VILE_ATK5, 0 },    // S_VILE_ATK4
-    { kSPR_VILE, 32777, 8, kA_FaceTarget, kS_VILE_ATK6, 0 },    // S_VILE_ATK5
-    { kSPR_VILE, 32778, 8, kA_FaceTarget, kS_VILE_ATK7, 0 },    // S_VILE_ATK6
-    { kSPR_VILE, 32779, 8, kA_FaceTarget, kS_VILE_ATK8, 0 },    // S_VILE_ATK7
-    { kSPR_VILE, 32780, 8, kA_FaceTarget, kS_VILE_ATK9, 0 },    // S_VILE_ATK8
-    { kSPR_VILE, 32781, 8, kA_FaceTarget, kS_VILE_ATK10, 0 },   // S_VILE_ATK9
-    { kSPR_VILE, 32782, 8, kA_VileAttack, kS_VILE_ATK11, 0 },   // S_VILE_ATK10
-    { kSPR_VILE, 32783, 20, kA_NULL, kS_VILE_RUN1, 0 },         // S_VILE_ATK11
-    { kSPR_VILE, 32794, 10, kA_NULL, kS_VILE_HEAL2, 0 },        // S_VILE_HEAL1
-    { kSPR_VILE, 32795, 10, kA_NULL, kS_VILE_HEAL3, 0 },        // S_VILE_HEAL2
-    { kSPR_VILE, 32796, 10, kA_NULL, kS_VILE_RUN1, 0 },         // S_VILE_HEAL3
-    { kSPR_VILE, 16, 5, kA_NULL, kS_VILE_PAIN2, 0 },            // S_VILE_PAIN
-    { kSPR_VILE, 16, 5, kA_Pain, kS_VILE_RUN1, 0 },             // S_VILE_PAIN2
-    { kSPR_VILE, 16, 7, kA_NULL, kS_VILE_DIE2, 0 },             // S_VILE_DIE1
-    { kSPR_VILE, 17, 7, kA_Scream, kS_VILE_DIE3, 0 },           // S_VILE_DIE2
-    { kSPR_VILE, 18, 7, kA_Fall, kS_VILE_DIE4, 0 },             // S_VILE_DIE3
-    { kSPR_VILE, 19, 7, kA_NULL, kS_VILE_DIE5, 0 },             // S_VILE_DIE4
-    { kSPR_VILE, 20, 7, kA_NULL, kS_VILE_DIE6, 0 },             // S_VILE_DIE5
-    { kSPR_VILE, 21, 7, kA_NULL, kS_VILE_DIE7, 0 },             // S_VILE_DIE6
-    { kSPR_VILE, 22, 7, kA_NULL, kS_VILE_DIE8, 0 },             // S_VILE_DIE7
-    { kSPR_VILE, 23, 5, kA_NULL, kS_VILE_DIE9, 0 },             // S_VILE_DIE8
-    { kSPR_VILE, 24, 5, kA_NULL, kS_VILE_DIE10, 0 },            // S_VILE_DIE9
-    { kSPR_VILE, 25, -1, kA_NULL, kS_NULL, 0 },                 // S_VILE_DIE10
-    { kSPR_FIRE, 32768, 2, kA_StartFire, kS_FIRE2, 0 },         // S_FIRE1
-    { kSPR_FIRE, 32769, 2, kA_Fire, kS_FIRE3, 0 },              // S_FIRE2
-    { kSPR_FIRE, 32768, 2, kA_Fire, kS_FIRE4, 0 },              // S_FIRE3
-    { kSPR_FIRE, 32769, 2, kA_Fire, kS_FIRE5, 0 },              // S_FIRE4
-    { kSPR_FIRE, 32770, 2, kA_FireCrackle, kS_FIRE6, 0 },       // S_FIRE5
-    { kSPR_FIRE, 32769, 2, kA_Fire, kS_FIRE7, 0 },              // S_FIRE6
-    { kSPR_FIRE, 32770, 2, kA_Fire, kS_FIRE8, 0 },              // S_FIRE7
-    { kSPR_FIRE, 32769, 2, kA_Fire, kS_FIRE9, 0 },              // S_FIRE8
-    { kSPR_FIRE, 32770, 2, kA_Fire, kS_FIRE10, 0 },             // S_FIRE9
-    { kSPR_FIRE, 32771, 2, kA_Fire, kS_FIRE11, 0 },             // S_FIRE10
-    { kSPR_FIRE, 32770, 2, kA_Fire, kS_FIRE12, 0 },             // S_FIRE11
-    { kSPR_FIRE, 32771, 2, kA_Fire, kS_FIRE13, 0 },             // S_FIRE12
-    { kSPR_FIRE, 32770, 2, kA_Fire, kS_FIRE14, 0 },             // S_FIRE13
-    { kSPR_FIRE, 32771, 2, kA_Fire, kS_FIRE15, 0 },             // S_FIRE14
-    { kSPR_FIRE, 32772, 2, kA_Fire, kS_FIRE16, 0 },             // S_FIRE15
-    { kSPR_FIRE, 32771, 2, kA_Fire, kS_FIRE17, 0 },             // S_FIRE16
-    { kSPR_FIRE, 32772, 2, kA_Fire, kS_FIRE18, 0 },             // S_FIRE17
-    { kSPR_FIRE, 32771, 2, kA_Fire, kS_FIRE19, 0 },             // S_FIRE18
-    { kSPR_FIRE, 32772, 2, kA_FireCrackle, kS_FIRE20, 0 },      // S_FIRE19
-    { kSPR_FIRE, 32773, 2, kA_Fire, kS_FIRE21, 0 },             // S_FIRE20
-    { kSPR_FIRE, 32772, 2, kA_Fire, kS_FIRE22, 0 },             // S_FIRE21
-    { kSPR_FIRE, 32773, 2, kA_Fire, kS_FIRE23, 0 },             // S_FIRE22
-    { kSPR_FIRE, 32772, 2, kA_Fire, kS_FIRE24, 0 },             // S_FIRE23
-    { kSPR_FIRE, 32773, 2, kA_Fire, kS_FIRE25, 0 },             // S_FIRE24
-    { kSPR_FIRE, 32774, 2, kA_Fire, kS_FIRE26, 0 },             // S_FIRE25
-    { kSPR_FIRE, 32775, 2, kA_Fire, kS_FIRE27, 0 },             // S_FIRE26
-    { kSPR_FIRE, 32774, 2, kA_Fire, kS_FIRE28, 0 },             // S_FIRE27
-    { kSPR_FIRE, 32775, 2, kA_Fire, kS_FIRE29, 0 },             // S_FIRE28
-    { kSPR_FIRE, 32774, 2, kA_Fire, kS_FIRE30, 0 },             // S_FIRE29
-    { kSPR_FIRE, 32775, 2, kA_Fire, kS_NULL, 0 },               // S_FIRE30
-    { kSPR_PUFF, 1, 4, kA_NULL, kS_SMOKE2, 0 },                 // S_SMOKE1
-    { kSPR_PUFF, 2, 4, kA_NULL, kS_SMOKE3, 0 },                 // S_SMOKE2
-    { kSPR_PUFF, 1, 4, kA_NULL, kS_SMOKE4, 0 },                 // S_SMOKE3
-    { kSPR_PUFF, 2, 4, kA_NULL, kS_SMOKE5, 0 },                 // S_SMOKE4
-    { kSPR_PUFF, 3, 4, kA_NULL, kS_NULL, 0 },                   // S_SMOKE5
-    { kSPR_FATB, 32768, 2, kA_Tracer, kS_TRACER2, 0 },          // S_TRACER
-    { kSPR_FATB, 32769, 2, kA_Tracer, kS_TRACER, 0 },           // S_TRACER2
-    { kSPR_FBXP, 32768, 8, kA_NULL, kS_TRACEEXP2, 0 },          // S_TRACEEXP1
-    { kSPR_FBXP, 32769, 6, kA_NULL, kS_TRACEEXP3, 0 },          // S_TRACEEXP2
-    { kSPR_FBXP, 32770, 4, kA_NULL, kS_NULL, 0 },               // S_TRACEEXP3
-    { kSPR_SKEL, 0, 10, kA_Look, kS_SKEL_STND2, 0 },            // S_SKEL_STND
-    { kSPR_SKEL, 1, 10, kA_Look, kS_SKEL_STND, 0 },             // S_SKEL_STND2
-    { kSPR_SKEL, 0, 2, kA_Chase, kS_SKEL_RUN2, 0 },             // S_SKEL_RUN1
-    { kSPR_SKEL, 0, 2, kA_Chase, kS_SKEL_RUN3, 0 },             // S_SKEL_RUN2
-    { kSPR_SKEL, 1, 2, kA_Chase, kS_SKEL_RUN4, 0 },             // S_SKEL_RUN3
-    { kSPR_SKEL, 1, 2, kA_Chase, kS_SKEL_RUN5, 0 },             // S_SKEL_RUN4
-    { kSPR_SKEL, 2, 2, kA_Chase, kS_SKEL_RUN6, 0 },             // S_SKEL_RUN5
-    { kSPR_SKEL, 2, 2, kA_Chase, kS_SKEL_RUN7, 0 },             // S_SKEL_RUN6
-    { kSPR_SKEL, 3, 2, kA_Chase, kS_SKEL_RUN8, 0 },             // S_SKEL_RUN7
-    { kSPR_SKEL, 3, 2, kA_Chase, kS_SKEL_RUN9, 0 },             // S_SKEL_RUN8
-    { kSPR_SKEL, 4, 2, kA_Chase, kS_SKEL_RUN10, 0 },            // S_SKEL_RUN9
-    { kSPR_SKEL, 4, 2, kA_Chase, kS_SKEL_RUN11, 0 },            // S_SKEL_RUN10
-    { kSPR_SKEL, 5, 2, kA_Chase, kS_SKEL_RUN12, 0 },            // S_SKEL_RUN11
-    { kSPR_SKEL, 5, 2, kA_Chase, kS_SKEL_RUN1, 0 },             // S_SKEL_RUN12
-    { kSPR_SKEL, 6, 0, kA_FaceTarget, kS_SKEL_FIST2, 0 },       // S_SKEL_FIST1
-    { kSPR_SKEL, 6, 6, kA_SkelWhoosh, kS_SKEL_FIST3, 0 },       // S_SKEL_FIST2
-    { kSPR_SKEL, 7, 6, kA_FaceTarget, kS_SKEL_FIST4, 0 },       // S_SKEL_FIST3
-    { kSPR_SKEL, 8, 6, kA_SkelFist, kS_SKEL_RUN1, 0 },          // S_SKEL_FIST4
-    { kSPR_SKEL, 32777, 0, kA_FaceTarget, kS_SKEL_MISS2, 0 },   // S_SKEL_MISS1
-    { kSPR_SKEL, 32777, 10, kA_FaceTarget, kS_SKEL_MISS3, 0 },  // S_SKEL_MISS2
-    { kSPR_SKEL, 10, 10, kA_SkelMissile, kS_SKEL_MISS4, 0 },    // S_SKEL_MISS3
-    { kSPR_SKEL, 10, 10, kA_FaceTarget, kS_SKEL_RUN1, 0 },      // S_SKEL_MISS4
-    { kSPR_SKEL, 11, 5, kA_NULL, kS_SKEL_PAIN2, 0 },            // S_SKEL_PAIN
-    { kSPR_SKEL, 11, 5, kA_Pain, kS_SKEL_RUN1, 0 },             // S_SKEL_PAIN2
-    { kSPR_SKEL, 11, 7, kA_NULL, kS_SKEL_DIE2, 0 },             // S_SKEL_DIE1
-    { kSPR_SKEL, 12, 7, kA_NULL, kS_SKEL_DIE3, 0 },             // S_SKEL_DIE2
-    { kSPR_SKEL, 13, 7, kA_Scream, kS_SKEL_DIE4, 0 },           // S_SKEL_DIE3
-    { kSPR_SKEL, 14, 7, kA_Fall, kS_SKEL_DIE5, 0 },             // S_SKEL_DIE4
-    { kSPR_SKEL, 15, 7, kA_NULL, kS_SKEL_DIE6, 0 },             // S_SKEL_DIE5
-    { kSPR_SKEL, 16, -1, kA_NULL, kS_NULL, 0 },                 // S_SKEL_DIE6
-    { kSPR_SKEL, 16, 5, kA_NULL, kS_SKEL_RAISE2, 0 },           // S_SKEL_RAISE1
-    { kSPR_SKEL, 15, 5, kA_NULL, kS_SKEL_RAISE3, 0 },           // S_SKEL_RAISE2
-    { kSPR_SKEL, 14, 5, kA_NULL, kS_SKEL_RAISE4, 0 },           // S_SKEL_RAISE3
-    { kSPR_SKEL, 13, 5, kA_NULL, kS_SKEL_RAISE5, 0 },           // S_SKEL_RAISE4
-    { kSPR_SKEL, 12, 5, kA_NULL, kS_SKEL_RAISE6, 0 },           // S_SKEL_RAISE5
-    { kSPR_SKEL, 11, 5, kA_NULL, kS_SKEL_RUN1, 0 },             // S_SKEL_RAISE6
-    { kSPR_MANF, 32768, 4, kA_NULL, kS_FATSHOT2, 0 },           // S_FATSHOT1
-    { kSPR_MANF, 32769, 4, kA_NULL, kS_FATSHOT1, 0 },           // S_FATSHOT2
-    { kSPR_MISL, 32769, 8, kA_NULL, kS_FATSHOTX2, 0 },          // S_FATSHOTX1
-    { kSPR_MISL, 32770, 6, kA_NULL, kS_FATSHOTX3, 0 },          // S_FATSHOTX2
-    { kSPR_MISL, 32771, 4, kA_NULL, kS_NULL, 0 },               // S_FATSHOTX3
-    { kSPR_FATT, 0, 15, kA_Look, kS_FATT_STND2, 0 },            // S_FATT_STND
-    { kSPR_FATT, 1, 15, kA_Look, kS_FATT_STND, 0 },             // S_FATT_STND2
-    { kSPR_FATT, 0, 4, kA_Chase, kS_FATT_RUN2, 0 },             // S_FATT_RUN1
-    { kSPR_FATT, 0, 4, kA_Chase, kS_FATT_RUN3, 0 },             // S_FATT_RUN2
-    { kSPR_FATT, 1, 4, kA_Chase, kS_FATT_RUN4, 0 },             // S_FATT_RUN3
-    { kSPR_FATT, 1, 4, kA_Chase, kS_FATT_RUN5, 0 },             // S_FATT_RUN4
-    { kSPR_FATT, 2, 4, kA_Chase, kS_FATT_RUN6, 0 },             // S_FATT_RUN5
-    { kSPR_FATT, 2, 4, kA_Chase, kS_FATT_RUN7, 0 },             // S_FATT_RUN6
-    { kSPR_FATT, 3, 4, kA_Chase, kS_FATT_RUN8, 0 },             // S_FATT_RUN7
-    { kSPR_FATT, 3, 4, kA_Chase, kS_FATT_RUN9, 0 },             // S_FATT_RUN8
-    { kSPR_FATT, 4, 4, kA_Chase, kS_FATT_RUN10, 0 },            // S_FATT_RUN9
-    { kSPR_FATT, 4, 4, kA_Chase, kS_FATT_RUN11, 0 },            // S_FATT_RUN10
-    { kSPR_FATT, 5, 4, kA_Chase, kS_FATT_RUN12, 0 },            // S_FATT_RUN11
-    { kSPR_FATT, 5, 4, kA_Chase, kS_FATT_RUN1, 0 },             // S_FATT_RUN12
-    { kSPR_FATT, 6, 20, kA_FatRaise, kS_FATT_ATK2, 0 },         // S_FATT_ATK1
-    { kSPR_FATT, 32775, 10, kA_FatAttack1, kS_FATT_ATK3, 0 },   // S_FATT_ATK2
-    { kSPR_FATT, 8, 5, kA_FaceTarget, kS_FATT_ATK4, 0 },        // S_FATT_ATK3
-    { kSPR_FATT, 6, 5, kA_FaceTarget, kS_FATT_ATK5, 0 },        // S_FATT_ATK4
-    { kSPR_FATT, 32775, 10, kA_FatAttack2, kS_FATT_ATK6, 0 },   // S_FATT_ATK5
-    { kSPR_FATT, 8, 5, kA_FaceTarget, kS_FATT_ATK7, 0 },        // S_FATT_ATK6
-    { kSPR_FATT, 6, 5, kA_FaceTarget, kS_FATT_ATK8, 0 },        // S_FATT_ATK7
-    { kSPR_FATT, 32775, 10, kA_FatAttack3, kS_FATT_ATK9, 0 },   // S_FATT_ATK8
-    { kSPR_FATT, 8, 5, kA_FaceTarget, kS_FATT_ATK10, 0 },       // S_FATT_ATK9
-    { kSPR_FATT, 6, 5, kA_FaceTarget, kS_FATT_RUN1, 0 },        // S_FATT_ATK10
-    { kSPR_FATT, 9, 3, kA_NULL, kS_FATT_PAIN2, 0 },             // S_FATT_PAIN
-    { kSPR_FATT, 9, 3, kA_Pain, kS_FATT_RUN1, 0 },              // S_FATT_PAIN2
-    { kSPR_FATT, 10, 6, kA_NULL, kS_FATT_DIE2, 0 },             // S_FATT_DIE1
-    { kSPR_FATT, 11, 6, kA_Scream, kS_FATT_DIE3, 0 },           // S_FATT_DIE2
-    { kSPR_FATT, 12, 6, kA_Fall, kS_FATT_DIE4, 0 },             // S_FATT_DIE3
-    { kSPR_FATT, 13, 6, kA_NULL, kS_FATT_DIE5, 0 },             // S_FATT_DIE4
-    { kSPR_FATT, 14, 6, kA_NULL, kS_FATT_DIE6, 0 },             // S_FATT_DIE5
-    { kSPR_FATT, 15, 6, kA_NULL, kS_FATT_DIE7, 0 },             // S_FATT_DIE6
-    { kSPR_FATT, 16, 6, kA_NULL, kS_FATT_DIE8, 0 },             // S_FATT_DIE7
-    { kSPR_FATT, 17, 6, kA_NULL, kS_FATT_DIE9, 0 },             // S_FATT_DIE8
-    { kSPR_FATT, 18, 6, kA_NULL, kS_FATT_DIE10, 0 },            // S_FATT_DIE9
-    { kSPR_FATT, 19, -1, kA_BossDeath, kS_NULL, 0 },            // S_FATT_DIE10
-    { kSPR_FATT, 17, 5, kA_NULL, kS_FATT_RAISE2, 0 },           // S_FATT_RAISE1
-    { kSPR_FATT, 16, 5, kA_NULL, kS_FATT_RAISE3, 0 },           // S_FATT_RAISE2
-    { kSPR_FATT, 15, 5, kA_NULL, kS_FATT_RAISE4, 0 },           // S_FATT_RAISE3
-    { kSPR_FATT, 14, 5, kA_NULL, kS_FATT_RAISE5, 0 },           // S_FATT_RAISE4
-    { kSPR_FATT, 13, 5, kA_NULL, kS_FATT_RAISE6, 0 },           // S_FATT_RAISE5
-    { kSPR_FATT, 12, 5, kA_NULL, kS_FATT_RAISE7, 0 },           // S_FATT_RAISE6
-    { kSPR_FATT, 11, 5, kA_NULL, kS_FATT_RAISE8, 0 },           // S_FATT_RAISE7
-    { kSPR_FATT, 10, 5, kA_NULL, kS_FATT_RUN1, 0 },             // S_FATT_RAISE8
-    { kSPR_CPOS, 0, 10, kA_Look, kS_CPOS_STND2, 0 },            // S_CPOS_STND
-    { kSPR_CPOS, 1, 10, kA_Look, kS_CPOS_STND, 0 },             // S_CPOS_STND2
-    { kSPR_CPOS, 0, 3, kA_Chase, kS_CPOS_RUN2, 0 },             // S_CPOS_RUN1
-    { kSPR_CPOS, 0, 3, kA_Chase, kS_CPOS_RUN3, 0 },             // S_CPOS_RUN2
-    { kSPR_CPOS, 1, 3, kA_Chase, kS_CPOS_RUN4, 0 },             // S_CPOS_RUN3
-    { kSPR_CPOS, 1, 3, kA_Chase, kS_CPOS_RUN5, 0 },             // S_CPOS_RUN4
-    { kSPR_CPOS, 2, 3, kA_Chase, kS_CPOS_RUN6, 0 },             // S_CPOS_RUN5
-    { kSPR_CPOS, 2, 3, kA_Chase, kS_CPOS_RUN7, 0 },             // S_CPOS_RUN6
-    { kSPR_CPOS, 3, 3, kA_Chase, kS_CPOS_RUN8, 0 },             // S_CPOS_RUN7
-    { kSPR_CPOS, 3, 3, kA_Chase, kS_CPOS_RUN1, 0 },             // S_CPOS_RUN8
-    { kSPR_CPOS, 4, 10, kA_FaceTarget, kS_CPOS_ATK2, 0 },       // S_CPOS_ATK1
-    { kSPR_CPOS, 32773, 4, kA_CPosAttack, kS_CPOS_ATK3, 0 },    // S_CPOS_ATK2
-    { kSPR_CPOS, 32772, 4, kA_CPosAttack, kS_CPOS_ATK4, 0 },    // S_CPOS_ATK3
-    { kSPR_CPOS, 5, 1, kA_CPosRefire, kS_CPOS_ATK2, 0 },        // S_CPOS_ATK4
-    { kSPR_CPOS, 6, 3, kA_NULL, kS_CPOS_PAIN2, 0 },             // S_CPOS_PAIN
-    { kSPR_CPOS, 6, 3, kA_Pain, kS_CPOS_RUN1, 0 },              // S_CPOS_PAIN2
-    { kSPR_CPOS, 7, 5, kA_NULL, kS_CPOS_DIE2, 0 },              // S_CPOS_DIE1
-    { kSPR_CPOS, 8, 5, kA_Scream, kS_CPOS_DIE3, 0 },            // S_CPOS_DIE2
-    { kSPR_CPOS, 9, 5, kA_Fall, kS_CPOS_DIE4, 0 },              // S_CPOS_DIE3
-    { kSPR_CPOS, 10, 5, kA_NULL, kS_CPOS_DIE5, 0 },             // S_CPOS_DIE4
-    { kSPR_CPOS, 11, 5, kA_NULL, kS_CPOS_DIE6, 0 },             // S_CPOS_DIE5
-    { kSPR_CPOS, 12, 5, kA_NULL, kS_CPOS_DIE7, 0 },             // S_CPOS_DIE6
-    { kSPR_CPOS, 13, -1, kA_NULL, kS_NULL, 0 },                 // S_CPOS_DIE7
-    { kSPR_CPOS, 14, 5, kA_NULL, kS_CPOS_XDIE2, 0 },            // S_CPOS_XDIE1
-    { kSPR_CPOS, 15, 5, kA_XScream, kS_CPOS_XDIE3, 0 },         // S_CPOS_XDIE2
-    { kSPR_CPOS, 16, 5, kA_Fall, kS_CPOS_XDIE4, 0 },            // S_CPOS_XDIE3
-    { kSPR_CPOS, 17, 5, kA_NULL, kS_CPOS_XDIE5, 0 },            // S_CPOS_XDIE4
-    { kSPR_CPOS, 18, 5, kA_NULL, kS_CPOS_XDIE6, 0 },            // S_CPOS_XDIE5
-    { kSPR_CPOS, 19, -1, kA_NULL, kS_NULL, 0 },                 // S_CPOS_XDIE6
-    { kSPR_CPOS, 13, 5, kA_NULL, kS_CPOS_RAISE2, 0 },           // S_CPOS_RAISE1
-    { kSPR_CPOS, 12, 5, kA_NULL, kS_CPOS_RAISE3, 0 },           // S_CPOS_RAISE2
-    { kSPR_CPOS, 11, 5, kA_NULL, kS_CPOS_RAISE4, 0 },           // S_CPOS_RAISE3
-    { kSPR_CPOS, 10, 5, kA_NULL, kS_CPOS_RAISE5, 0 },           // S_CPOS_RAISE4
-    { kSPR_CPOS, 9, 5, kA_NULL, kS_CPOS_RAISE6, 0 },            // S_CPOS_RAISE5
-    { kSPR_CPOS, 8, 5, kA_NULL, kS_CPOS_RAISE7, 0 },            // S_CPOS_RAISE6
-    { kSPR_CPOS, 7, 5, kA_NULL, kS_CPOS_RUN1, 0 },              // S_CPOS_RAISE7
-    { kSPR_TROO, 0, 10, kA_Look, kS_TROO_STND2, 0 },            // S_TROO_STND
-    { kSPR_TROO, 1, 10, kA_Look, kS_TROO_STND, 0 },             // S_TROO_STND2
-    { kSPR_TROO, 0, 3, kA_Chase, kS_TROO_RUN2, 0 },             // S_TROO_RUN1
-    { kSPR_TROO, 0, 3, kA_Chase, kS_TROO_RUN3, 0 },             // S_TROO_RUN2
-    { kSPR_TROO, 1, 3, kA_Chase, kS_TROO_RUN4, 0 },             // S_TROO_RUN3
-    { kSPR_TROO, 1, 3, kA_Chase, kS_TROO_RUN5, 0 },             // S_TROO_RUN4
-    { kSPR_TROO, 2, 3, kA_Chase, kS_TROO_RUN6, 0 },             // S_TROO_RUN5
-    { kSPR_TROO, 2, 3, kA_Chase, kS_TROO_RUN7, 0 },             // S_TROO_RUN6
-    { kSPR_TROO, 3, 3, kA_Chase, kS_TROO_RUN8, 0 },             // S_TROO_RUN7
-    { kSPR_TROO, 3, 3, kA_Chase, kS_TROO_RUN1, 0 },             // S_TROO_RUN8
-    { kSPR_TROO, 4, 8, kA_FaceTarget, kS_TROO_ATK2, 0 },        // S_TROO_ATK1
-    { kSPR_TROO, 5, 8, kA_FaceTarget, kS_TROO_ATK3, 0 },        // S_TROO_ATK2
-    { kSPR_TROO, 6, 6, kA_TroopAttack, kS_TROO_RUN1, 0 },       // S_TROO_ATK3
-    { kSPR_TROO, 7, 2, kA_NULL, kS_TROO_PAIN2, 0 },             // S_TROO_PAIN
-    { kSPR_TROO, 7, 2, kA_Pain, kS_TROO_RUN1, 0 },              // S_TROO_PAIN2
-    { kSPR_TROO, 8, 8, kA_NULL, kS_TROO_DIE2, 0 },              // S_TROO_DIE1
-    { kSPR_TROO, 9, 8, kA_Scream, kS_TROO_DIE3, 0 },            // S_TROO_DIE2
-    { kSPR_TROO, 10, 6, kA_NULL, kS_TROO_DIE4, 0 },             // S_TROO_DIE3
-    { kSPR_TROO, 11, 6, kA_Fall, kS_TROO_DIE5, 0 },             // S_TROO_DIE4
-    { kSPR_TROO, 12, -1, kA_NULL, kS_NULL, 0 },                 // S_TROO_DIE5
-    { kSPR_TROO, 13, 5, kA_NULL, kS_TROO_XDIE2, 0 },            // S_TROO_XDIE1
-    { kSPR_TROO, 14, 5, kA_XScream, kS_TROO_XDIE3, 0 },         // S_TROO_XDIE2
-    { kSPR_TROO, 15, 5, kA_NULL, kS_TROO_XDIE4, 0 },            // S_TROO_XDIE3
-    { kSPR_TROO, 16, 5, kA_Fall, kS_TROO_XDIE5, 0 },            // S_TROO_XDIE4
-    { kSPR_TROO, 17, 5, kA_NULL, kS_TROO_XDIE6, 0 },            // S_TROO_XDIE5
-    { kSPR_TROO, 18, 5, kA_NULL, kS_TROO_XDIE7, 0 },            // S_TROO_XDIE6
-    { kSPR_TROO, 19, 5, kA_NULL, kS_TROO_XDIE8, 0 },            // S_TROO_XDIE7
-    { kSPR_TROO, 20, -1, kA_NULL, kS_NULL, 0 },                 // S_TROO_XDIE8
-    { kSPR_TROO, 12, 8, kA_NULL, kS_TROO_RAISE2, 0 },           // S_TROO_RAISE1
-    { kSPR_TROO, 11, 8, kA_NULL, kS_TROO_RAISE3, 0 },           // S_TROO_RAISE2
-    { kSPR_TROO, 10, 6, kA_NULL, kS_TROO_RAISE4, 0 },           // S_TROO_RAISE3
-    { kSPR_TROO, 9, 6, kA_NULL, kS_TROO_RAISE5, 0 },            // S_TROO_RAISE4
-    { kSPR_TROO, 8, 6, kA_NULL, kS_TROO_RUN1, 0 },              // S_TROO_RAISE5
-    { kSPR_SARG, 0, 10, kA_Look, kS_SARG_STND2, 0 },            // S_SARG_STND
-    { kSPR_SARG, 1, 10, kA_Look, kS_SARG_STND, 0 },             // S_SARG_STND2
-    { kSPR_SARG, 0, 2, kA_Chase, kS_SARG_RUN2, 0 },             // S_SARG_RUN1
-    { kSPR_SARG, 0, 2, kA_Chase, kS_SARG_RUN3, 0 },             // S_SARG_RUN2
-    { kSPR_SARG, 1, 2, kA_Chase, kS_SARG_RUN4, 0 },             // S_SARG_RUN3
-    { kSPR_SARG, 1, 2, kA_Chase, kS_SARG_RUN5, 0 },             // S_SARG_RUN4
-    { kSPR_SARG, 2, 2, kA_Chase, kS_SARG_RUN6, 0 },             // S_SARG_RUN5
-    { kSPR_SARG, 2, 2, kA_Chase, kS_SARG_RUN7, 0 },             // S_SARG_RUN6
-    { kSPR_SARG, 3, 2, kA_Chase, kS_SARG_RUN8, 0 },             // S_SARG_RUN7
-    { kSPR_SARG, 3, 2, kA_Chase, kS_SARG_RUN1, 0 },             // S_SARG_RUN8
-    { kSPR_SARG, 4, 8, kA_FaceTarget, kS_SARG_ATK2, 0 },        // S_SARG_ATK1
-    { kSPR_SARG, 5, 8, kA_FaceTarget, kS_SARG_ATK3, 0 },        // S_SARG_ATK2
-    { kSPR_SARG, 6, 8, kA_SargAttack, kS_SARG_RUN1, 0 },        // S_SARG_ATK3
-    { kSPR_SARG, 7, 2, kA_NULL, kS_SARG_PAIN2, 0 },             // S_SARG_PAIN
-    { kSPR_SARG, 7, 2, kA_Pain, kS_SARG_RUN1, 0 },              // S_SARG_PAIN2
-    { kSPR_SARG, 8, 8, kA_NULL, kS_SARG_DIE2, 0 },              // S_SARG_DIE1
-    { kSPR_SARG, 9, 8, kA_Scream, kS_SARG_DIE3, 0 },            // S_SARG_DIE2
-    { kSPR_SARG, 10, 4, kA_NULL, kS_SARG_DIE4, 0 },             // S_SARG_DIE3
-    { kSPR_SARG, 11, 4, kA_Fall, kS_SARG_DIE5, 0 },             // S_SARG_DIE4
-    { kSPR_SARG, 12, 4, kA_NULL, kS_SARG_DIE6, 0 },             // S_SARG_DIE5
-    { kSPR_SARG, 13, -1, kA_NULL, kS_NULL, 0 },                 // S_SARG_DIE6
-    { kSPR_SARG, 13, 5, kA_NULL, kS_SARG_RAISE2, 0 },           // S_SARG_RAISE1
-    { kSPR_SARG, 12, 5, kA_NULL, kS_SARG_RAISE3, 0 },           // S_SARG_RAISE2
-    { kSPR_SARG, 11, 5, kA_NULL, kS_SARG_RAISE4, 0 },           // S_SARG_RAISE3
-    { kSPR_SARG, 10, 5, kA_NULL, kS_SARG_RAISE5, 0 },           // S_SARG_RAISE4
-    { kSPR_SARG, 9, 5, kA_NULL, kS_SARG_RAISE6, 0 },            // S_SARG_RAISE5
-    { kSPR_SARG, 8, 5, kA_NULL, kS_SARG_RUN1, 0 },              // S_SARG_RAISE6
-    { kSPR_HEAD, 0, 10, kA_Look, kS_HEAD_STND, 0 },             // S_HEAD_STND
-    { kSPR_HEAD, 0, 3, kA_Chase, kS_HEAD_RUN1, 0 },             // S_HEAD_RUN1
-    { kSPR_HEAD, 1, 5, kA_FaceTarget, kS_HEAD_ATK2, 0 },        // S_HEAD_ATK1
-    { kSPR_HEAD, 2, 5, kA_FaceTarget, kS_HEAD_ATK3, 0 },        // S_HEAD_ATK2
-    { kSPR_HEAD, 32771, 5, kA_HeadAttack, kS_HEAD_RUN1, 0 },    // S_HEAD_ATK3
-    { kSPR_HEAD, 4, 3, kA_NULL, kS_HEAD_PAIN2, 0 },             // S_HEAD_PAIN
-    { kSPR_HEAD, 4, 3, kA_Pain, kS_HEAD_PAIN3, 0 },             // S_HEAD_PAIN2
-    { kSPR_HEAD, 5, 6, kA_NULL, kS_HEAD_RUN1, 0 },              // S_HEAD_PAIN3
-    { kSPR_HEAD, 6, 8, kA_NULL, kS_HEAD_DIE2, 0 },              // S_HEAD_DIE1
-    { kSPR_HEAD, 7, 8, kA_Scream, kS_HEAD_DIE3, 0 },            // S_HEAD_DIE2
-    { kSPR_HEAD, 8, 8, kA_NULL, kS_HEAD_DIE4, 0 },              // S_HEAD_DIE3
-    { kSPR_HEAD, 9, 8, kA_NULL, kS_HEAD_DIE5, 0 },              // S_HEAD_DIE4
-    { kSPR_HEAD, 10, 8, kA_Fall, kS_HEAD_DIE6, 0 },             // S_HEAD_DIE5
-    { kSPR_HEAD, 11, -1, kA_NULL, kS_NULL, 0 },                 // S_HEAD_DIE6
-    { kSPR_HEAD, 11, 8, kA_NULL, kS_HEAD_RAISE2, 0 },           // S_HEAD_RAISE1
-    { kSPR_HEAD, 10, 8, kA_NULL, kS_HEAD_RAISE3, 0 },           // S_HEAD_RAISE2
-    { kSPR_HEAD, 9, 8, kA_NULL, kS_HEAD_RAISE4, 0 },            // S_HEAD_RAISE3
-    { kSPR_HEAD, 8, 8, kA_NULL, kS_HEAD_RAISE5, 0 },            // S_HEAD_RAISE4
-    { kSPR_HEAD, 7, 8, kA_NULL, kS_HEAD_RAISE6, 0 },            // S_HEAD_RAISE5
-    { kSPR_HEAD, 6, 8, kA_NULL, kS_HEAD_RUN1, 0 },              // S_HEAD_RAISE6
-    { kSPR_BAL7, 32768, 4, kA_NULL, kS_BRBALL2, 0 },            // S_BRBALL1
-    { kSPR_BAL7, 32769, 4, kA_NULL, kS_BRBALL1, 0 },            // S_BRBALL2
-    { kSPR_BAL7, 32770, 6, kA_NULL, kS_BRBALLX2, 0 },           // S_BRBALLX1
-    { kSPR_BAL7, 32771, 6, kA_NULL, kS_BRBALLX3, 0 },           // S_BRBALLX2
-    { kSPR_BAL7, 32772, 6, kA_NULL, kS_NULL, 0 },               // S_BRBALLX3
-    { kSPR_BOSS, 0, 10, kA_Look, kS_BOSS_STND2, 0 },            // S_BOSS_STND
-    { kSPR_BOSS, 1, 10, kA_Look, kS_BOSS_STND, 0 },             // S_BOSS_STND2
-    { kSPR_BOSS, 0, 3, kA_Chase, kS_BOSS_RUN2, 0 },             // S_BOSS_RUN1
-    { kSPR_BOSS, 0, 3, kA_Chase, kS_BOSS_RUN3, 0 },             // S_BOSS_RUN2
-    { kSPR_BOSS, 1, 3, kA_Chase, kS_BOSS_RUN4, 0 },             // S_BOSS_RUN3
-    { kSPR_BOSS, 1, 3, kA_Chase, kS_BOSS_RUN5, 0 },             // S_BOSS_RUN4
-    { kSPR_BOSS, 2, 3, kA_Chase, kS_BOSS_RUN6, 0 },             // S_BOSS_RUN5
-    { kSPR_BOSS, 2, 3, kA_Chase, kS_BOSS_RUN7, 0 },             // S_BOSS_RUN6
-    { kSPR_BOSS, 3, 3, kA_Chase, kS_BOSS_RUN8, 0 },             // S_BOSS_RUN7
-    { kSPR_BOSS, 3, 3, kA_Chase, kS_BOSS_RUN1, 0 },             // S_BOSS_RUN8
-    { kSPR_BOSS, 4, 8, kA_FaceTarget, kS_BOSS_ATK2, 0 },        // S_BOSS_ATK1
-    { kSPR_BOSS, 5, 8, kA_FaceTarget, kS_BOSS_ATK3, 0 },        // S_BOSS_ATK2
-    { kSPR_BOSS, 6, 8, kA_BruisAttack, kS_BOSS_RUN1, 0 },       // S_BOSS_ATK3
-    { kSPR_BOSS, 7, 2, kA_NULL, kS_BOSS_PAIN2, 0 },             // S_BOSS_PAIN
-    { kSPR_BOSS, 7, 2, kA_Pain, kS_BOSS_RUN1, 0 },              // S_BOSS_PAIN2
-    { kSPR_BOSS, 8, 8, kA_NULL, kS_BOSS_DIE2, 0 },              // S_BOSS_DIE1
-    { kSPR_BOSS, 9, 8, kA_Scream, kS_BOSS_DIE3, 0 },            // S_BOSS_DIE2
-    { kSPR_BOSS, 10, 8, kA_NULL, kS_BOSS_DIE4, 0 },             // S_BOSS_DIE3
-    { kSPR_BOSS, 11, 8, kA_Fall, kS_BOSS_DIE5, 0 },             // S_BOSS_DIE4
-    { kSPR_BOSS, 12, 8, kA_NULL, kS_BOSS_DIE6, 0 },             // S_BOSS_DIE5
-    { kSPR_BOSS, 13, 8, kA_NULL, kS_BOSS_DIE7, 0 },             // S_BOSS_DIE6
-    { kSPR_BOSS, 14, -1, kA_BossDeath, kS_NULL, 0 },            // S_BOSS_DIE7
-    { kSPR_BOSS, 14, 8, kA_NULL, kS_BOSS_RAISE2, 0 },           // S_BOSS_RAISE1
-    { kSPR_BOSS, 13, 8, kA_NULL, kS_BOSS_RAISE3, 0 },           // S_BOSS_RAISE2
-    { kSPR_BOSS, 12, 8, kA_NULL, kS_BOSS_RAISE4, 0 },           // S_BOSS_RAISE3
-    { kSPR_BOSS, 11, 8, kA_NULL, kS_BOSS_RAISE5, 0 },           // S_BOSS_RAISE4
-    { kSPR_BOSS, 10, 8, kA_NULL, kS_BOSS_RAISE6, 0 },           // S_BOSS_RAISE5
-    { kSPR_BOSS, 9, 8, kA_NULL, kS_BOSS_RAISE7, 0 },            // S_BOSS_RAISE6
-    { kSPR_BOSS, 8, 8, kA_NULL, kS_BOSS_RUN1, 0 },              // S_BOSS_RAISE7
-    { kSPR_BOS2, 0, 10, kA_Look, kS_BOS2_STND2, 0 },            // S_BOS2_STND
-    { kSPR_BOS2, 1, 10, kA_Look, kS_BOS2_STND, 0 },             // S_BOS2_STND2
-    { kSPR_BOS2, 0, 3, kA_Chase, kS_BOS2_RUN2, 0 },             // S_BOS2_RUN1
-    { kSPR_BOS2, 0, 3, kA_Chase, kS_BOS2_RUN3, 0 },             // S_BOS2_RUN2
-    { kSPR_BOS2, 1, 3, kA_Chase, kS_BOS2_RUN4, 0 },             // S_BOS2_RUN3
-    { kSPR_BOS2, 1, 3, kA_Chase, kS_BOS2_RUN5, 0 },             // S_BOS2_RUN4
-    { kSPR_BOS2, 2, 3, kA_Chase, kS_BOS2_RUN6, 0 },             // S_BOS2_RUN5
-    { kSPR_BOS2, 2, 3, kA_Chase, kS_BOS2_RUN7, 0 },             // S_BOS2_RUN6
-    { kSPR_BOS2, 3, 3, kA_Chase, kS_BOS2_RUN8, 0 },             // S_BOS2_RUN7
-    { kSPR_BOS2, 3, 3, kA_Chase, kS_BOS2_RUN1, 0 },             // S_BOS2_RUN8
-    { kSPR_BOS2, 4, 8, kA_FaceTarget, kS_BOS2_ATK2, 0 },        // S_BOS2_ATK1
-    { kSPR_BOS2, 5, 8, kA_FaceTarget, kS_BOS2_ATK3, 0 },        // S_BOS2_ATK2
-    { kSPR_BOS2, 6, 8, kA_BruisAttack, kS_BOS2_RUN1, 0 },       // S_BOS2_ATK3
-    { kSPR_BOS2, 7, 2, kA_NULL, kS_BOS2_PAIN2, 0 },             // S_BOS2_PAIN
-    { kSPR_BOS2, 7, 2, kA_Pain, kS_BOS2_RUN1, 0 },              // S_BOS2_PAIN2
-    { kSPR_BOS2, 8, 8, kA_NULL, kS_BOS2_DIE2, 0 },              // S_BOS2_DIE1
-    { kSPR_BOS2, 9, 8, kA_Scream, kS_BOS2_DIE3, 0 },            // S_BOS2_DIE2
-    { kSPR_BOS2, 10, 8, kA_NULL, kS_BOS2_DIE4, 0 },             // S_BOS2_DIE3
-    { kSPR_BOS2, 11, 8, kA_Fall, kS_BOS2_DIE5, 0 },             // S_BOS2_DIE4
-    { kSPR_BOS2, 12, 8, kA_NULL, kS_BOS2_DIE6, 0 },             // S_BOS2_DIE5
-    { kSPR_BOS2, 13, 8, kA_NULL, kS_BOS2_DIE7, 0 },             // S_BOS2_DIE6
-    { kSPR_BOS2, 14, -1, kA_NULL, kS_NULL, 0 },                 // S_BOS2_DIE7
-    { kSPR_BOS2, 14, 8, kA_NULL, kS_BOS2_RAISE2, 0 },           // S_BOS2_RAISE1
-    { kSPR_BOS2, 13, 8, kA_NULL, kS_BOS2_RAISE3, 0 },           // S_BOS2_RAISE2
-    { kSPR_BOS2, 12, 8, kA_NULL, kS_BOS2_RAISE4, 0 },           // S_BOS2_RAISE3
-    { kSPR_BOS2, 11, 8, kA_NULL, kS_BOS2_RAISE5, 0 },           // S_BOS2_RAISE4
-    { kSPR_BOS2, 10, 8, kA_NULL, kS_BOS2_RAISE6, 0 },           // S_BOS2_RAISE5
-    { kSPR_BOS2, 9, 8, kA_NULL, kS_BOS2_RAISE7, 0 },            // S_BOS2_RAISE6
-    { kSPR_BOS2, 8, 8, kA_NULL, kS_BOS2_RUN1, 0 },              // S_BOS2_RAISE7
-    { kSPR_SKUL, 32768, 10, kA_Look, kS_SKULL_STND2, 0 },       // S_SKULL_STND
-    { kSPR_SKUL, 32769, 10, kA_Look, kS_SKULL_STND, 0 },        // S_SKULL_STND2
-    { kSPR_SKUL, 32768, 6, kA_Chase, kS_SKULL_RUN2, 0 },        // S_SKULL_RUN1
-    { kSPR_SKUL, 32769, 6, kA_Chase, kS_SKULL_RUN1, 0 },        // S_SKULL_RUN2
-    { kSPR_SKUL, 32770, 10, kA_FaceTarget, kS_SKULL_ATK2, 0 },  // S_SKULL_ATK1
-    { kSPR_SKUL, 32771, 4, kA_SkullAttack, kS_SKULL_ATK3, 0 },  // S_SKULL_ATK2
-    { kSPR_SKUL, 32770, 4, kA_NULL, kS_SKULL_ATK4, 0 },         // S_SKULL_ATK3
-    { kSPR_SKUL, 32771, 4, kA_NULL, kS_SKULL_ATK3, 0 },         // S_SKULL_ATK4
-    { kSPR_SKUL, 32772, 3, kA_NULL, kS_SKULL_PAIN2, 0 },        // S_SKULL_PAIN
-    { kSPR_SKUL, 32772, 3, kA_Pain, kS_SKULL_RUN1, 0 },         // S_SKULL_PAIN2
-    { kSPR_SKUL, 32773, 6, kA_NULL, kS_SKULL_DIE2, 0 },         // S_SKULL_DIE1
-    { kSPR_SKUL, 32774, 6, kA_Scream, kS_SKULL_DIE3, 0 },       // S_SKULL_DIE2
-    { kSPR_SKUL, 32775, 6, kA_NULL, kS_SKULL_DIE4, 0 },         // S_SKULL_DIE3
-    { kSPR_SKUL, 32776, 6, kA_Fall, kS_SKULL_DIE5, 0 },         // S_SKULL_DIE4
-    { kSPR_SKUL, 9, 6, kA_NULL, kS_SKULL_DIE6, 0 },             // S_SKULL_DIE5
-    { kSPR_SKUL, 10, 6, kA_NULL, kS_NULL, 0 },                  // S_SKULL_DIE6
-    { kSPR_SPID, 0, 10, kA_Look, kS_SPID_STND2, 0 },            // S_SPID_STND
-    { kSPR_SPID, 1, 10, kA_Look, kS_SPID_STND, 0 },             // S_SPID_STND2
-    { kSPR_SPID, 0, 3, kA_Metal, kS_SPID_RUN2, 0 },             // S_SPID_RUN1
-    { kSPR_SPID, 0, 3, kA_Chase, kS_SPID_RUN3, 0 },             // S_SPID_RUN2
-    { kSPR_SPID, 1, 3, kA_Chase, kS_SPID_RUN4, 0 },             // S_SPID_RUN3
-    { kSPR_SPID, 1, 3, kA_Chase, kS_SPID_RUN5, 0 },             // S_SPID_RUN4
-    { kSPR_SPID, 2, 3, kA_Metal, kS_SPID_RUN6, 0 },             // S_SPID_RUN5
-    { kSPR_SPID, 2, 3, kA_Chase, kS_SPID_RUN7, 0 },             // S_SPID_RUN6
-    { kSPR_SPID, 3, 3, kA_Chase, kS_SPID_RUN8, 0 },             // S_SPID_RUN7
-    { kSPR_SPID, 3, 3, kA_Chase, kS_SPID_RUN9, 0 },             // S_SPID_RUN8
-    { kSPR_SPID, 4, 3, kA_Metal, kS_SPID_RUN10, 0 },            // S_SPID_RUN9
-    { kSPR_SPID, 4, 3, kA_Chase, kS_SPID_RUN11, 0 },            // S_SPID_RUN10
-    { kSPR_SPID, 5, 3, kA_Chase, kS_SPID_RUN12, 0 },            // S_SPID_RUN11
-    { kSPR_SPID, 5, 3, kA_Chase, kS_SPID_RUN1, 0 },             // S_SPID_RUN12
-    { kSPR_SPID, 32768, 20, kA_FaceTarget, kS_SPID_ATK2, 0 },   // S_SPID_ATK1
-    { kSPR_SPID, 32774, 4, kA_SPosAttack, kS_SPID_ATK3, 0 },    // S_SPID_ATK2
-    { kSPR_SPID, 32775, 4, kA_SPosAttack, kS_SPID_ATK4, 0 },    // S_SPID_ATK3
-    { kSPR_SPID, 32775, 1, kA_SpidRefire, kS_SPID_ATK2, 0 },    // S_SPID_ATK4
-    { kSPR_SPID, 8, 3, kA_NULL, kS_SPID_PAIN2, 0 },             // S_SPID_PAIN
-    { kSPR_SPID, 8, 3, kA_Pain, kS_SPID_RUN1, 0 },              // S_SPID_PAIN2
-    { kSPR_SPID, 9, 20, kA_Scream, kS_SPID_DIE2, 0 },           // S_SPID_DIE1
-    { kSPR_SPID, 10, 10, kA_Fall, kS_SPID_DIE3, 0 },            // S_SPID_DIE2
-    { kSPR_SPID, 11, 10, kA_NULL, kS_SPID_DIE4, 0 },            // S_SPID_DIE3
-    { kSPR_SPID, 12, 10, kA_NULL, kS_SPID_DIE5, 0 },            // S_SPID_DIE4
-    { kSPR_SPID, 13, 10, kA_NULL, kS_SPID_DIE6, 0 },            // S_SPID_DIE5
-    { kSPR_SPID, 14, 10, kA_NULL, kS_SPID_DIE7, 0 },            // S_SPID_DIE6
-    { kSPR_SPID, 15, 10, kA_NULL, kS_SPID_DIE8, 0 },            // S_SPID_DIE7
-    { kSPR_SPID, 16, 10, kA_NULL, kS_SPID_DIE9, 0 },            // S_SPID_DIE8
-    { kSPR_SPID, 17, 10, kA_NULL, kS_SPID_DIE10, 0 },           // S_SPID_DIE9
-    { kSPR_SPID, 18, 30, kA_NULL, kS_SPID_DIE11, 0 },           // S_SPID_DIE10
-    { kSPR_SPID, 18, -1, kA_BossDeath, kS_NULL, 0 },            // S_SPID_DIE11
-    { kSPR_BSPI, 0, 10, kA_Look, kS_BSPI_STND2, 0 },            // S_BSPI_STND
-    { kSPR_BSPI, 1, 10, kA_Look, kS_BSPI_STND, 0 },             // S_BSPI_STND2
-    { kSPR_BSPI, 0, 20, kA_NULL, kS_BSPI_RUN1, 0 },             // S_BSPI_SIGHT
-    { kSPR_BSPI, 0, 3, kA_BabyMetal, kS_BSPI_RUN2, 0 },         // S_BSPI_RUN1
-    { kSPR_BSPI, 0, 3, kA_Chase, kS_BSPI_RUN3, 0 },             // S_BSPI_RUN2
-    { kSPR_BSPI, 1, 3, kA_Chase, kS_BSPI_RUN4, 0 },             // S_BSPI_RUN3
-    { kSPR_BSPI, 1, 3, kA_Chase, kS_BSPI_RUN5, 0 },             // S_BSPI_RUN4
-    { kSPR_BSPI, 2, 3, kA_Chase, kS_BSPI_RUN6, 0 },             // S_BSPI_RUN5
-    { kSPR_BSPI, 2, 3, kA_Chase, kS_BSPI_RUN7, 0 },             // S_BSPI_RUN6
-    { kSPR_BSPI, 3, 3, kA_BabyMetal, kS_BSPI_RUN8, 0 },         // S_BSPI_RUN7
-    { kSPR_BSPI, 3, 3, kA_Chase, kS_BSPI_RUN9, 0 },             // S_BSPI_RUN8
-    { kSPR_BSPI, 4, 3, kA_Chase, kS_BSPI_RUN10, 0 },            // S_BSPI_RUN9
-    { kSPR_BSPI, 4, 3, kA_Chase, kS_BSPI_RUN11, 0 },            // S_BSPI_RUN10
-    { kSPR_BSPI, 5, 3, kA_Chase, kS_BSPI_RUN12, 0 },            // S_BSPI_RUN11
-    { kSPR_BSPI, 5, 3, kA_Chase, kS_BSPI_RUN1, 0 },             // S_BSPI_RUN12
-    { kSPR_BSPI, 32768, 20, kA_FaceTarget, kS_BSPI_ATK2, 0 },   // S_BSPI_ATK1
-    { kSPR_BSPI, 32774, 4, kA_BspiAttack, kS_BSPI_ATK3, 0 },    // S_BSPI_ATK2
-    { kSPR_BSPI, 32775, 4, kA_NULL, kS_BSPI_ATK4, 0 },          // S_BSPI_ATK3
-    { kSPR_BSPI, 32775, 1, kA_SpidRefire, kS_BSPI_ATK2, 0 },    // S_BSPI_ATK4
-    { kSPR_BSPI, 8, 3, kA_NULL, kS_BSPI_PAIN2, 0 },             // S_BSPI_PAIN
-    { kSPR_BSPI, 8, 3, kA_Pain, kS_BSPI_RUN1, 0 },              // S_BSPI_PAIN2
-    { kSPR_BSPI, 9, 20, kA_Scream, kS_BSPI_DIE2, 0 },           // S_BSPI_DIE1
-    { kSPR_BSPI, 10, 7, kA_Fall, kS_BSPI_DIE3, 0 },             // S_BSPI_DIE2
-    { kSPR_BSPI, 11, 7, kA_NULL, kS_BSPI_DIE4, 0 },             // S_BSPI_DIE3
-    { kSPR_BSPI, 12, 7, kA_NULL, kS_BSPI_DIE5, 0 },             // S_BSPI_DIE4
-    { kSPR_BSPI, 13, 7, kA_NULL, kS_BSPI_DIE6, 0 },             // S_BSPI_DIE5
-    { kSPR_BSPI, 14, 7, kA_NULL, kS_BSPI_DIE7, 0 },             // S_BSPI_DIE6
-    { kSPR_BSPI, 15, -1, kA_BossDeath, kS_NULL, 0 },            // S_BSPI_DIE7
-    { kSPR_BSPI, 15, 5, kA_NULL, kS_BSPI_RAISE2, 0 },           // S_BSPI_RAISE1
-    { kSPR_BSPI, 14, 5, kA_NULL, kS_BSPI_RAISE3, 0 },           // S_BSPI_RAISE2
-    { kSPR_BSPI, 13, 5, kA_NULL, kS_BSPI_RAISE4, 0 },           // S_BSPI_RAISE3
-    { kSPR_BSPI, 12, 5, kA_NULL, kS_BSPI_RAISE5, 0 },           // S_BSPI_RAISE4
-    { kSPR_BSPI, 11, 5, kA_NULL, kS_BSPI_RAISE6, 0 },           // S_BSPI_RAISE5
-    { kSPR_BSPI, 10, 5, kA_NULL, kS_BSPI_RAISE7, 0 },           // S_BSPI_RAISE6
-    { kSPR_BSPI, 9, 5, kA_NULL, kS_BSPI_RUN1, 0 },              // S_BSPI_RAISE7
-    { kSPR_APLS, 32768, 5, kA_NULL, kS_ARACH_PLAZ2, 0 },        // S_ARACH_PLAZ
-    { kSPR_APLS, 32769, 5, kA_NULL, kS_ARACH_PLAZ, 0 },         // S_ARACH_PLAZ2
-    { kSPR_APBX, 32768, 5, kA_NULL, kS_ARACH_PLEX2, 0 },        // S_ARACH_PLEX
-    { kSPR_APBX, 32769, 5, kA_NULL, kS_ARACH_PLEX3, 0 },        // S_ARACH_PLEX2
-    { kSPR_APBX, 32770, 5, kA_NULL, kS_ARACH_PLEX4, 0 },        // S_ARACH_PLEX3
-    { kSPR_APBX, 32771, 5, kA_NULL, kS_ARACH_PLEX5, 0 },        // S_ARACH_PLEX4
-    { kSPR_APBX, 32772, 5, kA_NULL, kS_NULL, 0 },               // S_ARACH_PLEX5
-    { kSPR_CYBR, 0, 10, kA_Look, kS_CYBER_STND2, 0 },           // S_CYBER_STND
-    { kSPR_CYBR, 1, 10, kA_Look, kS_CYBER_STND, 0 },            // S_CYBER_STND2
-    { kSPR_CYBR, 0, 3, kA_Hoof, kS_CYBER_RUN2, 0 },             // S_CYBER_RUN1
-    { kSPR_CYBR, 0, 3, kA_Chase, kS_CYBER_RUN3, 0 },            // S_CYBER_RUN2
-    { kSPR_CYBR, 1, 3, kA_Chase, kS_CYBER_RUN4, 0 },            // S_CYBER_RUN3
-    { kSPR_CYBR, 1, 3, kA_Chase, kS_CYBER_RUN5, 0 },            // S_CYBER_RUN4
-    { kSPR_CYBR, 2, 3, kA_Chase, kS_CYBER_RUN6, 0 },            // S_CYBER_RUN5
-    { kSPR_CYBR, 2, 3, kA_Chase, kS_CYBER_RUN7, 0 },            // S_CYBER_RUN6
-    { kSPR_CYBR, 3, 3, kA_Metal, kS_CYBER_RUN8, 0 },            // S_CYBER_RUN7
-    { kSPR_CYBR, 3, 3, kA_Chase, kS_CYBER_RUN1, 0 },            // S_CYBER_RUN8
-    { kSPR_CYBR, 4, 6, kA_FaceTarget, kS_CYBER_ATK2, 0 },       // S_CYBER_ATK1
-    { kSPR_CYBR, 5, 12, kA_CyberAttack, kS_CYBER_ATK3, 0 },     // S_CYBER_ATK2
-    { kSPR_CYBR, 4, 12, kA_FaceTarget, kS_CYBER_ATK4, 0 },      // S_CYBER_ATK3
-    { kSPR_CYBR, 5, 12, kA_CyberAttack, kS_CYBER_ATK5, 0 },     // S_CYBER_ATK4
-    { kSPR_CYBR, 4, 12, kA_FaceTarget, kS_CYBER_ATK6, 0 },      // S_CYBER_ATK5
-    { kSPR_CYBR, 5, 12, kA_CyberAttack, kS_CYBER_RUN1, 0 },     // S_CYBER_ATK6
-    { kSPR_CYBR, 6, 10, kA_Pain, kS_CYBER_RUN1, 0 },            // S_CYBER_PAIN
-    { kSPR_CYBR, 7, 10, kA_NULL, kS_CYBER_DIE2, 0 },            // S_CYBER_DIE1
-    { kSPR_CYBR, 8, 10, kA_Scream, kS_CYBER_DIE3, 0 },          // S_CYBER_DIE2
-    { kSPR_CYBR, 9, 10, kA_NULL, kS_CYBER_DIE4, 0 },            // S_CYBER_DIE3
-    { kSPR_CYBR, 10, 10, kA_NULL, kS_CYBER_DIE5, 0 },           // S_CYBER_DIE4
-    { kSPR_CYBR, 11, 10, kA_NULL, kS_CYBER_DIE6, 0 },           // S_CYBER_DIE5
-    { kSPR_CYBR, 12, 10, kA_Fall, kS_CYBER_DIE7, 0 },           // S_CYBER_DIE6
-    { kSPR_CYBR, 13, 10, kA_NULL, kS_CYBER_DIE8, 0 },           // S_CYBER_DIE7
-    { kSPR_CYBR, 14, 10, kA_NULL, kS_CYBER_DIE9, 0 },           // S_CYBER_DIE8
-    { kSPR_CYBR, 15, 30, kA_NULL, kS_CYBER_DIE10, 0 },          // S_CYBER_DIE9
-    { kSPR_CYBR, 15, -1, kA_BossDeath, kS_NULL, 0 },            // S_CYBER_DIE10
-    { kSPR_PAIN, 0, 10, kA_Look, kS_PAIN_STND, 0 },             // S_PAIN_STND
-    { kSPR_PAIN, 0, 3, kA_Chase, kS_PAIN_RUN2, 0 },             // S_PAIN_RUN1
-    { kSPR_PAIN, 0, 3, kA_Chase, kS_PAIN_RUN3, 0 },             // S_PAIN_RUN2
-    { kSPR_PAIN, 1, 3, kA_Chase, kS_PAIN_RUN4, 0 },             // S_PAIN_RUN3
-    { kSPR_PAIN, 1, 3, kA_Chase, kS_PAIN_RUN5, 0 },             // S_PAIN_RUN4
-    { kSPR_PAIN, 2, 3, kA_Chase, kS_PAIN_RUN6, 0 },             // S_PAIN_RUN5
-    { kSPR_PAIN, 2, 3, kA_Chase, kS_PAIN_RUN1, 0 },             // S_PAIN_RUN6
-    { kSPR_PAIN, 3, 5, kA_FaceTarget, kS_PAIN_ATK2, 0 },        // S_PAIN_ATK1
-    { kSPR_PAIN, 4, 5, kA_FaceTarget, kS_PAIN_ATK3, 0 },        // S_PAIN_ATK2
-    { kSPR_PAIN, 32773, 5, kA_FaceTarget, kS_PAIN_ATK4, 0 },    // S_PAIN_ATK3
-    { kSPR_PAIN, 32773, 0, kA_PainAttack, kS_PAIN_RUN1, 0 },    // S_PAIN_ATK4
-    { kSPR_PAIN, 6, 6, kA_NULL, kS_PAIN_PAIN2, 0 },             // S_PAIN_PAIN
-    { kSPR_PAIN, 6, 6, kA_Pain, kS_PAIN_RUN1, 0 },              // S_PAIN_PAIN2
-    { kSPR_PAIN, 32775, 8, kA_NULL, kS_PAIN_DIE2, 0 },          // S_PAIN_DIE1
-    { kSPR_PAIN, 32776, 8, kA_Scream, kS_PAIN_DIE3, 0 },        // S_PAIN_DIE2
-    { kSPR_PAIN, 32777, 8, kA_NULL, kS_PAIN_DIE4, 0 },          // S_PAIN_DIE3
-    { kSPR_PAIN, 32778, 8, kA_NULL, kS_PAIN_DIE5, 0 },          // S_PAIN_DIE4
-    { kSPR_PAIN, 32779, 8, kA_PainDie, kS_PAIN_DIE6, 0 },       // S_PAIN_DIE5
-    { kSPR_PAIN, 32780, 8, kA_NULL, kS_NULL, 0 },               // S_PAIN_DIE6
-    { kSPR_PAIN, 12, 8, kA_NULL, kS_PAIN_RAISE2, 0 },           // S_PAIN_RAISE1
-    { kSPR_PAIN, 11, 8, kA_NULL, kS_PAIN_RAISE3, 0 },           // S_PAIN_RAISE2
-    { kSPR_PAIN, 10, 8, kA_NULL, kS_PAIN_RAISE4, 0 },           // S_PAIN_RAISE3
-    { kSPR_PAIN, 9, 8, kA_NULL, kS_PAIN_RAISE5, 0 },            // S_PAIN_RAISE4
-    { kSPR_PAIN, 8, 8, kA_NULL, kS_PAIN_RAISE6, 0 },            // S_PAIN_RAISE5
-    { kSPR_PAIN, 7, 8, kA_NULL, kS_PAIN_RUN1, 0 },              // S_PAIN_RAISE6
-    { kSPR_SSWV, 0, 10, kA_Look, kS_SSWV_STND2, 0 },            // S_SSWV_STND
-    { kSPR_SSWV, 1, 10, kA_Look, kS_SSWV_STND, 0 },             // S_SSWV_STND2
-    { kSPR_SSWV, 0, 3, kA_Chase, kS_SSWV_RUN2, 0 },             // S_SSWV_RUN1
-    { kSPR_SSWV, 0, 3, kA_Chase, kS_SSWV_RUN3, 0 },             // S_SSWV_RUN2
-    { kSPR_SSWV, 1, 3, kA_Chase, kS_SSWV_RUN4, 0 },             // S_SSWV_RUN3
-    { kSPR_SSWV, 1, 3, kA_Chase, kS_SSWV_RUN5, 0 },             // S_SSWV_RUN4
-    { kSPR_SSWV, 2, 3, kA_Chase, kS_SSWV_RUN6, 0 },             // S_SSWV_RUN5
-    { kSPR_SSWV, 2, 3, kA_Chase, kS_SSWV_RUN7, 0 },             // S_SSWV_RUN6
-    { kSPR_SSWV, 3, 3, kA_Chase, kS_SSWV_RUN8, 0 },             // S_SSWV_RUN7
-    { kSPR_SSWV, 3, 3, kA_Chase, kS_SSWV_RUN1, 0 },             // S_SSWV_RUN8
-    { kSPR_SSWV, 4, 10, kA_FaceTarget, kS_SSWV_ATK2, 0 },       // S_SSWV_ATK1
-    { kSPR_SSWV, 5, 10, kA_FaceTarget, kS_SSWV_ATK3, 0 },       // S_SSWV_ATK2
-    { kSPR_SSWV, 32774, 4, kA_CPosAttack, kS_SSWV_ATK4, 0 },    // S_SSWV_ATK3
-    { kSPR_SSWV, 5, 6, kA_FaceTarget, kS_SSWV_ATK5, 0 },        // S_SSWV_ATK4
-    { kSPR_SSWV, 32774, 4, kA_CPosAttack, kS_SSWV_ATK6, 0 },    // S_SSWV_ATK5
-    { kSPR_SSWV, 5, 1, kA_CPosRefire, kS_SSWV_ATK2, 0 },        // S_SSWV_ATK6
-    { kSPR_SSWV, 7, 3, kA_NULL, kS_SSWV_PAIN2, 0 },             // S_SSWV_PAIN
-    { kSPR_SSWV, 7, 3, kA_Pain, kS_SSWV_RUN1, 0 },              // S_SSWV_PAIN2
-    { kSPR_SSWV, 8, 5, kA_NULL, kS_SSWV_DIE2, 0 },              // S_SSWV_DIE1
-    { kSPR_SSWV, 9, 5, kA_Scream, kS_SSWV_DIE3, 0 },            // S_SSWV_DIE2
-    { kSPR_SSWV, 10, 5, kA_Fall, kS_SSWV_DIE4, 0 },             // S_SSWV_DIE3
-    { kSPR_SSWV, 11, 5, kA_NULL, kS_SSWV_DIE5, 0 },             // S_SSWV_DIE4
-    { kSPR_SSWV, 12, -1, kA_NULL, kS_NULL, 0 },                 // S_SSWV_DIE5
-    { kSPR_SSWV, 13, 5, kA_NULL, kS_SSWV_XDIE2, 0 },            // S_SSWV_XDIE1
-    { kSPR_SSWV, 14, 5, kA_XScream, kS_SSWV_XDIE3, 0 },         // S_SSWV_XDIE2
-    { kSPR_SSWV, 15, 5, kA_Fall, kS_SSWV_XDIE4, 0 },            // S_SSWV_XDIE3
-    { kSPR_SSWV, 16, 5, kA_NULL, kS_SSWV_XDIE5, 0 },            // S_SSWV_XDIE4
-    { kSPR_SSWV, 17, 5, kA_NULL, kS_SSWV_XDIE6, 0 },            // S_SSWV_XDIE5
-    { kSPR_SSWV, 18, 5, kA_NULL, kS_SSWV_XDIE7, 0 },            // S_SSWV_XDIE6
-    { kSPR_SSWV, 19, 5, kA_NULL, kS_SSWV_XDIE8, 0 },            // S_SSWV_XDIE7
-    { kSPR_SSWV, 20, 5, kA_NULL, kS_SSWV_XDIE9, 0 },            // S_SSWV_XDIE8
-    { kSPR_SSWV, 21, -1, kA_NULL, kS_NULL, 0 },                 // S_SSWV_XDIE9
-    { kSPR_SSWV, 12, 5, kA_NULL, kS_SSWV_RAISE2, 0 },           // S_SSWV_RAISE1
-    { kSPR_SSWV, 11, 5, kA_NULL, kS_SSWV_RAISE3, 0 },           // S_SSWV_RAISE2
-    { kSPR_SSWV, 10, 5, kA_NULL, kS_SSWV_RAISE4, 0 },           // S_SSWV_RAISE3
-    { kSPR_SSWV, 9, 5, kA_NULL, kS_SSWV_RAISE5, 0 },            // S_SSWV_RAISE4
-    { kSPR_SSWV, 8, 5, kA_NULL, kS_SSWV_RUN1, 0 },              // S_SSWV_RAISE5
-    { kSPR_KEEN, 0, -1, kA_NULL, kS_KEENSTND, 0 },              // S_KEENSTND
-    { kSPR_KEEN, 0, 6, kA_NULL, kS_COMMKEEN2, 0 },              // S_COMMKEEN
-    { kSPR_KEEN, 1, 6, kA_NULL, kS_COMMKEEN3, 0 },              // S_COMMKEEN2
-    { kSPR_KEEN, 2, 6, kA_Scream, kS_COMMKEEN4, 0 },            // S_COMMKEEN3
-    { kSPR_KEEN, 3, 6, kA_NULL, kS_COMMKEEN5, 0 },              // S_COMMKEEN4
-    { kSPR_KEEN, 4, 6, kA_NULL, kS_COMMKEEN6, 0 },              // S_COMMKEEN5
-    { kSPR_KEEN, 5, 6, kA_NULL, kS_COMMKEEN7, 0 },              // S_COMMKEEN6
-    { kSPR_KEEN, 6, 6, kA_NULL, kS_COMMKEEN8, 0 },              // S_COMMKEEN7
-    { kSPR_KEEN, 7, 6, kA_NULL, kS_COMMKEEN9, 0 },              // S_COMMKEEN8
-    { kSPR_KEEN, 8, 6, kA_NULL, kS_COMMKEEN10, 0 },             // S_COMMKEEN9
-    { kSPR_KEEN, 9, 6, kA_NULL, kS_COMMKEEN11, 0 },             // S_COMMKEEN10
-    { kSPR_KEEN, 10, 6, kA_KeenDie, kS_COMMKEEN12, 0 },         // S_COMMKEEN11
-    { kSPR_KEEN, 11, -1, kA_NULL, kS_NULL, 0 },                 // S_COMMKEEN12
-    { kSPR_KEEN, 12, 4, kA_NULL, kS_KEENPAIN2, 0 },             // S_KEENPAIN
-    { kSPR_KEEN, 12, 8, kA_Pain, kS_KEENSTND, 0 },              // S_KEENPAIN2
-    { kSPR_BBRN, 0, -1, kA_NULL, kS_NULL, 0 },                  // S_BRAIN
-    { kSPR_BBRN, 1, 36, kA_BrainPain, kS_BRAIN, 0 },            // S_BRAIN_PAIN
-    { kSPR_BBRN, 0, 100, kA_BrainScream, kS_BRAIN_DIE2, 0 },    // S_BRAIN_DIE1
-    { kSPR_BBRN, 0, 10, kA_NULL, kS_BRAIN_DIE3, 0 },            // S_BRAIN_DIE2
-    { kSPR_BBRN, 0, 10, kA_NULL, kS_BRAIN_DIE4, 0 },            // S_BRAIN_DIE3
-    { kSPR_BBRN, 0, -1, kA_BrainDie, kS_NULL, 0 },              // S_BRAIN_DIE4
-    { kSPR_SSWV, 0, 10, kA_Look, kS_BRAINEYE, 0 },              // S_BRAINEYE
-    { kSPR_SSWV, 0, 181, kA_BrainAwake, kS_BRAINEYE1, 0 },      // S_BRAINEYESEE
-    { kSPR_SSWV, 0, 150, kA_BrainSpit, kS_BRAINEYE1, 0 },       // S_BRAINEYE1
-    { kSPR_BOSF, 32768, 3, kA_SpawnSound, kS_SPAWN2, 0 },       // S_SPAWN1
-    { kSPR_BOSF, 32769, 3, kA_SpawnFly, kS_SPAWN3, 0 },         // S_SPAWN2
-    { kSPR_BOSF, 32770, 3, kA_SpawnFly, kS_SPAWN4, 0 },         // S_SPAWN3
-    { kSPR_BOSF, 32771, 3, kA_SpawnFly, kS_SPAWN1, 0 },         // S_SPAWN4
-    { kSPR_FIRE, 32768, 4, kA_Fire, kS_SPAWNFIRE2, 0 },         // S_SPAWNFIRE1
-    { kSPR_FIRE, 32769, 4, kA_Fire, kS_SPAWNFIRE3, 0 },         // S_SPAWNFIRE2
-    { kSPR_FIRE, 32770, 4, kA_Fire, kS_SPAWNFIRE4, 0 },         // S_SPAWNFIRE3
-    { kSPR_FIRE, 32771, 4, kA_Fire, kS_SPAWNFIRE5, 0 },         // S_SPAWNFIRE4
-    { kSPR_FIRE, 32772, 4, kA_Fire, kS_SPAWNFIRE6, 0 },         // S_SPAWNFIRE5
-    { kSPR_FIRE, 32773, 4, kA_Fire, kS_SPAWNFIRE7, 0 },         // S_SPAWNFIRE6
-    { kSPR_FIRE, 32774, 4, kA_Fire, kS_SPAWNFIRE8, 0 },         // S_SPAWNFIRE7
-    { kSPR_FIRE, 32775, 4, kA_CubeSpawn, kS_NULL,
-      0 },  // S_SPAWNFIRE8  /* MOD */
-    { kSPR_MISL, 32769, 10, kA_NULL, kS_BRAINEXPLODE2, 0 },  // S_BRAINEXPLODE1
-    { kSPR_MISL, 32770, 10, kA_NULL, kS_BRAINEXPLODE3, 0 },  // S_BRAINEXPLODE2
-    { kSPR_MISL, 32771, 10, kA_BrainExplode, kS_NULL, 0 },   // S_BRAINEXPLODE3
-    { kSPR_ARM1, 0, 6, kA_NULL, kS_ARM1A, 0 },               // S_ARM1
-    { kSPR_ARM1, 32769, 7, kA_NULL, kS_ARM1, 0 },            // S_ARM1A
-    { kSPR_ARM2, 0, 6, kA_NULL, kS_ARM2A, 0 },               // S_ARM2
-    { kSPR_ARM2, 32769, 6, kA_NULL, kS_ARM2, 0 },            // S_ARM2A
-    { kSPR_BAR1, 0, 6, kA_NULL, kS_BAR2, 0 },                // S_BAR1
-    { kSPR_BAR1, 1, 6, kA_NULL, kS_BAR1, 0 },                // S_BAR2
-    { kSPR_BEXP, 32768, 5, kA_NULL, kS_BEXP2, 0 },           // S_BEXP
-    { kSPR_BEXP, 32769, 5, kA_Scream, kS_BEXP3, 0 },         // S_BEXP2
-    { kSPR_BEXP, 32770, 5, kA_NULL, kS_BEXP4, 0 },           // S_BEXP3
-    { kSPR_BEXP, 32771, 10, kA_Explode, kS_BEXP5, 0 },       // S_BEXP4
-    { kSPR_BEXP, 32772, 10, kA_NULL, kS_NULL, 0 },           // S_BEXP5
-    { kSPR_FCAN, 32768, 4, kA_NULL, kS_BBAR2, 0 },           // S_BBAR1
-    { kSPR_FCAN, 32769, 4, kA_NULL, kS_BBAR3, 0 },           // S_BBAR2
-    { kSPR_FCAN, 32770, 4, kA_NULL, kS_BBAR1, 0 },           // S_BBAR3
-    { kSPR_BON1, 0, 6, kA_NULL, kS_BON1A, 0 },               // S_BON1
-    { kSPR_BON1, 1, 6, kA_NULL, kS_BON1B, 0 },               // S_BON1A
-    { kSPR_BON1, 2, 6, kA_NULL, kS_BON1C, 0 },               // S_BON1B
-    { kSPR_BON1, 3, 6, kA_NULL, kS_BON1D, 0 },               // S_BON1C
-    { kSPR_BON1, 2, 6, kA_NULL, kS_BON1E, 0 },               // S_BON1D
-    { kSPR_BON1, 1, 6, kA_NULL, kS_BON1, 0 },                // S_BON1E
-    { kSPR_BON2, 0, 6, kA_NULL, kS_BON2A, 0 },               // S_BON2
-    { kSPR_BON2, 1, 6, kA_NULL, kS_BON2B, 0 },               // S_BON2A
-    { kSPR_BON2, 2, 6, kA_NULL, kS_BON2C, 0 },               // S_BON2B
-    { kSPR_BON2, 3, 6, kA_NULL, kS_BON2D, 0 },               // S_BON2C
-    { kSPR_BON2, 2, 6, kA_NULL, kS_BON2E, 0 },               // S_BON2D
-    { kSPR_BON2, 1, 6, kA_NULL, kS_BON2, 0 },                // S_BON2E
-    { kSPR_BKEY, 0, 10, kA_NULL, kS_BKEY2, 0 },              // S_BKEY
-    { kSPR_BKEY, 32769, 10, kA_NULL, kS_BKEY, 0 },           // S_BKEY2
-    { kSPR_RKEY, 0, 10, kA_NULL, kS_RKEY2, 0 },              // S_RKEY
-    { kSPR_RKEY, 32769, 10, kA_NULL, kS_RKEY, 0 },           // S_RKEY2
-    { kSPR_YKEY, 0, 10, kA_NULL, kS_YKEY2, 0 },              // S_YKEY
-    { kSPR_YKEY, 32769, 10, kA_NULL, kS_YKEY, 0 },           // S_YKEY2
-    { kSPR_BSKU, 0, 10, kA_NULL, kS_BSKULL2, 0 },            // S_BSKULL
-    { kSPR_BSKU, 32769, 10, kA_NULL, kS_BSKULL, 0 },         // S_BSKULL2
-    { kSPR_RSKU, 0, 10, kA_NULL, kS_RSKULL2, 0 },            // S_RSKULL
-    { kSPR_RSKU, 32769, 10, kA_NULL, kS_RSKULL, 0 },         // S_RSKULL2
-    { kSPR_YSKU, 0, 10, kA_NULL, kS_YSKULL2, 0 },            // S_YSKULL
-    { kSPR_YSKU, 32769, 10, kA_NULL, kS_YSKULL, 0 },         // S_YSKULL2
-    { kSPR_STIM, 0, -1, kA_NULL, kS_NULL, 0 },               // S_STIM
-    { kSPR_MEDI, 0, -1, kA_NULL, kS_NULL, 0 },               // S_MEDI
-    { kSPR_SOUL, 32768, 6, kA_NULL, kS_SOUL2, 0 },           // S_SOUL
-    { kSPR_SOUL, 32769, 6, kA_NULL, kS_SOUL3, 0 },           // S_SOUL2
-    { kSPR_SOUL, 32770, 6, kA_NULL, kS_SOUL4, 0 },           // S_SOUL3
-    { kSPR_SOUL, 32771, 6, kA_NULL, kS_SOUL5, 0 },           // S_SOUL4
-    { kSPR_SOUL, 32770, 6, kA_NULL, kS_SOUL6, 0 },           // S_SOUL5
-    { kSPR_SOUL, 32769, 6, kA_NULL, kS_SOUL, 0 },            // S_SOUL6
-    { kSPR_PINV, 32768, 6, kA_NULL, kS_PINV2, 0 },           // S_PINV
-    { kSPR_PINV, 32769, 6, kA_NULL, kS_PINV3, 0 },           // S_PINV2
-    { kSPR_PINV, 32770, 6, kA_NULL, kS_PINV4, 0 },           // S_PINV3
-    { kSPR_PINV, 32771, 6, kA_NULL, kS_PINV, 0 },            // S_PINV4
-    { kSPR_PSTR, 32768, -1, kA_NULL, kS_NULL, 0 },           // S_PSTR
-    { kSPR_PINS, 32768, 6, kA_NULL, kS_PINS2, 0 },           // S_PINS
-    { kSPR_PINS, 32769, 6, kA_NULL, kS_PINS3, 0 },           // S_PINS2
-    { kSPR_PINS, 32770, 6, kA_NULL, kS_PINS4, 0 },           // S_PINS3
-    { kSPR_PINS, 32771, 6, kA_NULL, kS_PINS, 0 },            // S_PINS4
-    { kSPR_MEGA, 32768, 6, kA_NULL, kS_MEGA2, 0 },           // S_MEGA
-    { kSPR_MEGA, 32769, 6, kA_NULL, kS_MEGA3, 0 },           // S_MEGA2
-    { kSPR_MEGA, 32770, 6, kA_NULL, kS_MEGA4, 0 },           // S_MEGA3
-    { kSPR_MEGA, 32771, 6, kA_NULL, kS_MEGA, 0 },            // S_MEGA4
-    { kSPR_SUIT, 32768, -1, kA_NULL, kS_NULL, 0 },           // S_SUIT
-    { kSPR_PMAP, 32768, 6, kA_NULL, kS_PMAP2, 0 },           // S_PMAP
-    { kSPR_PMAP, 32769, 6, kA_NULL, kS_PMAP3, 0 },           // S_PMAP2
-    { kSPR_PMAP, 32770, 6, kA_NULL, kS_PMAP4, 0 },           // S_PMAP3
-    { kSPR_PMAP, 32771, 6, kA_NULL, kS_PMAP5, 0 },           // S_PMAP4
-    { kSPR_PMAP, 32770, 6, kA_NULL, kS_PMAP6, 0 },           // S_PMAP5
-    { kSPR_PMAP, 32769, 6, kA_NULL, kS_PMAP, 0 },            // S_PMAP6
-    { kSPR_PVIS, 32768, 6, kA_NULL, kS_PVIS2, 0 },           // S_PVIS
-    { kSPR_PVIS, 1, 6, kA_NULL, kS_PVIS, 0 },                // S_PVIS2
-    { kSPR_CLIP, 0, -1, kA_NULL, kS_NULL, 0 },               // S_CLIP
-    { kSPR_AMMO, 0, -1, kA_NULL, kS_NULL, 0 },               // S_AMMO
-    { kSPR_ROCK, 0, -1, kA_NULL, kS_NULL, 0 },               // S_ROCK
-    { kSPR_BROK, 0, -1, kA_NULL, kS_NULL, 0 },               // S_BROK
-    { kSPR_CELL, 0, -1, kA_NULL, kS_NULL, 0 },               // S_CELL
-    { kSPR_CELP, 0, -1, kA_NULL, kS_NULL, 0 },               // S_CELP
-    { kSPR_SHEL, 0, -1, kA_NULL, kS_NULL, 0 },               // S_SHEL
-    { kSPR_SBOX, 0, -1, kA_NULL, kS_NULL, 0 },               // S_SBOX
-    { kSPR_BPAK, 0, -1, kA_NULL, kS_NULL, 0 },               // S_BPAK
-    { kSPR_BFUG, 0, -1, kA_NULL, kS_NULL, 0 },               // S_BFUG
-    { kSPR_MGUN, 0, -1, kA_NULL, kS_NULL, 0 },               // S_MGUN
-    { kSPR_CSAW, 0, -1, kA_NULL, kS_NULL, 0 },               // S_CSAW
-    { kSPR_LAUN, 0, -1, kA_NULL, kS_NULL, 0 },               // S_LAUN
-    { kSPR_PLAS, 0, -1, kA_NULL, kS_NULL, 0 },               // S_PLAS
-    { kSPR_SHOT, 0, -1, kA_NULL, kS_NULL, 0 },               // S_SHOT
-    { kSPR_SGN2, 0, -1, kA_NULL, kS_NULL, 0 },               // S_SHOT2
-    { kSPR_COLU, 32768, -1, kA_NULL, kS_NULL, 0 },           // S_COLU
-    { kSPR_SMT2, 0, -1, kA_NULL, kS_NULL, 0 },               // S_STALAG
-    { kSPR_GOR1, 0, 10, kA_NULL, kS_BLOODYTWITCH2, 0 },      // S_BLOODYTWITCH
-    { kSPR_GOR1, 1, 15, kA_NULL, kS_BLOODYTWITCH3, 0 },      // S_BLOODYTWITCH2
-    { kSPR_GOR1, 2, 8, kA_NULL, kS_BLOODYTWITCH4, 0 },       // S_BLOODYTWITCH3
-    { kSPR_GOR1, 1, 6, kA_NULL, kS_BLOODYTWITCH, 0 },        // S_BLOODYTWITCH4
-    { kSPR_PLAY, 13, -1, kA_NULL, kS_NULL, 0 },              // S_DEADTORSO
-    { kSPR_PLAY, 18, -1, kA_NULL, kS_NULL, 0 },              // S_DEADBOTTOM
-    { kSPR_POL2, 0, -1, kA_NULL, kS_NULL, 0 },               // S_HEADSONSTICK
-    { kSPR_POL5, 0, -1, kA_NULL, kS_NULL, 0 },               // S_GIBS
-    { kSPR_POL4, 0, -1, kA_NULL, kS_NULL, 0 },               // S_HEADONASTICK
-    { kSPR_POL3, 32768, 6, kA_NULL, kS_HEADCANDLES2, 0 },    // S_HEADCANDLES
-    { kSPR_POL3, 32769, 6, kA_NULL, kS_HEADCANDLES, 0 },     // S_HEADCANDLES2
-    { kSPR_POL1, 0, -1, kA_NULL, kS_NULL, 0 },               // S_DEADSTICK
-    { kSPR_POL6, 0, 6, kA_NULL, kS_LIVESTICK2, 0 },          // S_LIVESTICK
-    { kSPR_POL6, 1, 8, kA_NULL, kS_LIVESTICK, 0 },           // S_LIVESTICK2
-    { kSPR_GOR2, 0, -1, kA_NULL, kS_NULL, 0 },               // S_MEAT2
-    { kSPR_GOR3, 0, -1, kA_NULL, kS_NULL, 0 },               // S_MEAT3
-    { kSPR_GOR4, 0, -1, kA_NULL, kS_NULL, 0 },               // S_MEAT4
-    { kSPR_GOR5, 0, -1, kA_NULL, kS_NULL, 0 },               // S_MEAT5
-    { kSPR_SMIT, 0, -1, kA_NULL, kS_NULL, 0 },               // S_STALAGTITE
-    { kSPR_COL1, 0, -1, kA_NULL, kS_NULL, 0 },               // S_TALLGRNCOL
-    { kSPR_COL2, 0, -1, kA_NULL, kS_NULL, 0 },               // S_SHRTGRNCOL
-    { kSPR_COL3, 0, -1, kA_NULL, kS_NULL, 0 },               // S_TALLREDCOL
-    { kSPR_COL4, 0, -1, kA_NULL, kS_NULL, 0 },               // S_SHRTREDCOL
-    { kSPR_CAND, 32768, -1, kA_NULL, kS_NULL, 0 },           // S_CANDLESTIK
-    { kSPR_CBRA, 32768, -1, kA_NULL, kS_NULL, 0 },           // S_CANDELABRA
-    { kSPR_COL6, 0, -1, kA_NULL, kS_NULL, 0 },               // S_SKULLCOL
-    { kSPR_TRE1, 0, -1, kA_NULL, kS_NULL, 0 },               // S_TORCHTREE
-    { kSPR_TRE2, 0, -1, kA_NULL, kS_NULL, 0 },               // S_BIGTREE
-    { kSPR_ELEC, 0, -1, kA_NULL, kS_NULL, 0 },               // S_TECHPILLAR
-    { kSPR_CEYE, 32768, 6, kA_NULL, kS_EVILEYE2, 0 },        // S_EVILEYE
-    { kSPR_CEYE, 32769, 6, kA_NULL, kS_EVILEYE3, 0 },        // S_EVILEYE2
-    { kSPR_CEYE, 32770, 6, kA_NULL, kS_EVILEYE4, 0 },        // S_EVILEYE3
-    { kSPR_CEYE, 32769, 6, kA_NULL, kS_EVILEYE, 0 },         // S_EVILEYE4
-    { kSPR_FSKU, 32768, 6, kA_NULL, kS_FLOATSKULL2, 0 },     // S_FLOATSKULL
-    { kSPR_FSKU, 32769, 6, kA_NULL, kS_FLOATSKULL3, 0 },     // S_FLOATSKULL2
-    { kSPR_FSKU, 32770, 6, kA_NULL, kS_FLOATSKULL, 0 },      // S_FLOATSKULL3
-    { kSPR_COL5, 0, 14, kA_NULL, kS_HEARTCOL2, 0 },          // S_HEARTCOL
-    { kSPR_COL5, 1, 14, kA_NULL, kS_HEARTCOL, 0 },           // S_HEARTCOL2
-    { kSPR_TBLU, 32768, 4, kA_NULL, kS_BLUETORCH2, 0 },      // S_BLUETORCH
-    { kSPR_TBLU, 32769, 4, kA_NULL, kS_BLUETORCH3, 0 },      // S_BLUETORCH2
-    { kSPR_TBLU, 32770, 4, kA_NULL, kS_BLUETORCH4, 0 },      // S_BLUETORCH3
-    { kSPR_TBLU, 32771, 4, kA_NULL, kS_BLUETORCH, 0 },       // S_BLUETORCH4
-    { kSPR_TGRN, 32768, 4, kA_NULL, kS_GREENTORCH2, 0 },     // S_GREENTORCH
-    { kSPR_TGRN, 32769, 4, kA_NULL, kS_GREENTORCH3, 0 },     // S_GREENTORCH2
-    { kSPR_TGRN, 32770, 4, kA_NULL, kS_GREENTORCH4, 0 },     // S_GREENTORCH3
-    { kSPR_TGRN, 32771, 4, kA_NULL, kS_GREENTORCH, 0 },      // S_GREENTORCH4
-    { kSPR_TRED, 32768, 4, kA_NULL, kS_REDTORCH2, 0 },       // S_REDTORCH
-    { kSPR_TRED, 32769, 4, kA_NULL, kS_REDTORCH3, 0 },       // S_REDTORCH2
-    { kSPR_TRED, 32770, 4, kA_NULL, kS_REDTORCH4, 0 },       // S_REDTORCH3
-    { kSPR_TRED, 32771, 4, kA_NULL, kS_REDTORCH, 0 },        // S_REDTORCH4
-    { kSPR_SMBT, 32768, 4, kA_NULL, kS_BTORCHSHRT2, 0 },     // S_BTORCHSHRT
-    { kSPR_SMBT, 32769, 4, kA_NULL, kS_BTORCHSHRT3, 0 },     // S_BTORCHSHRT2
-    { kSPR_SMBT, 32770, 4, kA_NULL, kS_BTORCHSHRT4, 0 },     // S_BTORCHSHRT3
-    { kSPR_SMBT, 32771, 4, kA_NULL, kS_BTORCHSHRT, 0 },      // S_BTORCHSHRT4
-    { kSPR_SMGT, 32768, 4, kA_NULL, kS_GTORCHSHRT2, 0 },     // S_GTORCHSHRT
-    { kSPR_SMGT, 32769, 4, kA_NULL, kS_GTORCHSHRT3, 0 },     // S_GTORCHSHRT2
-    { kSPR_SMGT, 32770, 4, kA_NULL, kS_GTORCHSHRT4, 0 },     // S_GTORCHSHRT3
-    { kSPR_SMGT, 32771, 4, kA_NULL, kS_GTORCHSHRT, 0 },      // S_GTORCHSHRT4
-    { kSPR_SMRT, 32768, 4, kA_NULL, kS_RTORCHSHRT2, 0 },     // S_RTORCHSHRT
-    { kSPR_SMRT, 32769, 4, kA_NULL, kS_RTORCHSHRT3, 0 },     // S_RTORCHSHRT2
-    { kSPR_SMRT, 32770, 4, kA_NULL, kS_RTORCHSHRT4, 0 },     // S_RTORCHSHRT3
-    { kSPR_SMRT, 32771, 4, kA_NULL, kS_RTORCHSHRT, 0 },      // S_RTORCHSHRT4
-    { kSPR_HDB1, 0, -1, kA_NULL, kS_NULL, 0 },               // S_HANGNOGUTS
-    { kSPR_HDB2, 0, -1, kA_NULL, kS_NULL, 0 },               // S_HANGBNOBRAIN
-    { kSPR_HDB3, 0, -1, kA_NULL, kS_NULL, 0 },               // S_HANGTLOOKDN
-    { kSPR_HDB4, 0, -1, kA_NULL, kS_NULL, 0 },               // S_HANGTSKULL
-    { kSPR_HDB5, 0, -1, kA_NULL, kS_NULL, 0 },               // S_HANGTLOOKUP
-    { kSPR_HDB6, 0, -1, kA_NULL, kS_NULL, 0 },               // S_HANGTNOBRAIN
-    { kSPR_POB1, 0, -1, kA_NULL, kS_NULL, 0 },               // S_COLONGIBS
-    { kSPR_POB2, 0, -1, kA_NULL, kS_NULL, 0 },               // S_SMALLPOOL
-    { kSPR_BRS1, 0, -1, kA_NULL, kS_NULL, 0 },               // S_BRAINSTEM
-    { kSPR_TLMP, 32768, 4, kA_NULL, kS_TECHLAMP2, 0 },       // S_TECHLAMP
-    { kSPR_TLMP, 32769, 4, kA_NULL, kS_TECHLAMP3, 0 },       // S_TECHLAMP2
-    { kSPR_TLMP, 32770, 4, kA_NULL, kS_TECHLAMP4, 0 },       // S_TECHLAMP3
-    { kSPR_TLMP, 32771, 4, kA_NULL, kS_TECHLAMP, 0 },        // S_TECHLAMP4
-    { kSPR_TLP2, 32768, 4, kA_NULL, kS_TECH2LAMP2, 0 },      // S_TECH2LAMP
-    { kSPR_TLP2, 32769, 4, kA_NULL, kS_TECH2LAMP3, 0 },      // S_TECH2LAMP2
-    { kSPR_TLP2, 32770, 4, kA_NULL, kS_TECH2LAMP4, 0 },      // S_TECH2LAMP3
-    { kSPR_TLP2, 32771, 4, kA_NULL, kS_TECH2LAMP, 0 },       // S_TECH2LAMP4
+    {kSPR_BLUD, 2, 8, kA_NULL, kS_BLOOD2, 0},                // S_BLOOD1
+    {kSPR_BLUD, 1, 8, kA_NULL, kS_BLOOD3, 0},                // S_BLOOD2
+    {kSPR_BLUD, 0, 8, kA_NULL, kS_NULL, 0},                  // S_BLOOD3
+    {kSPR_PUFF, 32768, 4, kA_NULL, kS_PUFF2, 0},             // S_PUFF1
+    {kSPR_PUFF, 1, 4, kA_NULL, kS_PUFF3, 0},                 // S_PUFF2
+    {kSPR_PUFF, 2, 4, kA_NULL, kS_PUFF4, 0},                 // S_PUFF3
+    {kSPR_PUFF, 3, 4, kA_NULL, kS_NULL, 0},                  // S_PUFF4
+    {kSPR_BAL1, 32768, 4, kA_NULL, kS_TBALL2, 0},            // S_TBALL1
+    {kSPR_BAL1, 32769, 4, kA_NULL, kS_TBALL1, 0},            // S_TBALL2
+    {kSPR_BAL1, 32770, 6, kA_NULL, kS_TBALLX2, 0},           // S_TBALLX1
+    {kSPR_BAL1, 32771, 6, kA_NULL, kS_TBALLX3, 0},           // S_TBALLX2
+    {kSPR_BAL1, 32772, 6, kA_NULL, kS_NULL, 0},              // S_TBALLX3
+    {kSPR_BAL2, 32768, 4, kA_NULL, kS_RBALL2, 0},            // S_RBALL1
+    {kSPR_BAL2, 32769, 4, kA_NULL, kS_RBALL1, 0},            // S_RBALL2
+    {kSPR_BAL2, 32770, 6, kA_NULL, kS_RBALLX2, 0},           // S_RBALLX1
+    {kSPR_BAL2, 32771, 6, kA_NULL, kS_RBALLX3, 0},           // S_RBALLX2
+    {kSPR_BAL2, 32772, 6, kA_NULL, kS_NULL, 0},              // S_RBALLX3
+    {kSPR_PLSS, 32768, 6, kA_NULL, kS_PLASBALL2, 0},         // S_PLASBALL
+    {kSPR_PLSS, 32769, 6, kA_NULL, kS_PLASBALL, 0},          // S_PLASBALL2
+    {kSPR_PLSE, 32768, 4, kA_NULL, kS_PLASEXP2, 0},          // S_PLASEXP
+    {kSPR_PLSE, 32769, 4, kA_NULL, kS_PLASEXP3, 0},          // S_PLASEXP2
+    {kSPR_PLSE, 32770, 4, kA_NULL, kS_PLASEXP4, 0},          // S_PLASEXP3
+    {kSPR_PLSE, 32771, 4, kA_NULL, kS_PLASEXP5, 0},          // S_PLASEXP4
+    {kSPR_PLSE, 32772, 4, kA_NULL, kS_NULL, 0},              // S_PLASEXP5
+    {kSPR_MISL, 32768, 1, kA_NULL, kS_ROCKET, 0},            // S_ROCKET
+    {kSPR_BFS1, 32768, 4, kA_NULL, kS_BFGSHOT2, 0},          // S_BFGSHOT
+    {kSPR_BFS1, 32769, 4, kA_NULL, kS_BFGSHOT, 0},           // S_BFGSHOT2
+    {kSPR_BFE1, 32768, 8, kA_NULL, kS_BFGLAND2, 0},          // S_BFGLAND
+    {kSPR_BFE1, 32769, 8, kA_NULL, kS_BFGLAND3, 0},          // S_BFGLAND2
+    {kSPR_BFE1, 32770, 8, kA_BFGSpray, kS_BFGLAND4, 0},      // S_BFGLAND3
+    {kSPR_BFE1, 32771, 8, kA_NULL, kS_BFGLAND5, 0},          // S_BFGLAND4
+    {kSPR_BFE1, 32772, 8, kA_NULL, kS_BFGLAND6, 0},          // S_BFGLAND5
+    {kSPR_BFE1, 32773, 8, kA_NULL, kS_NULL, 0},              // S_BFGLAND6
+    {kSPR_BFE2, 32768, 8, kA_NULL, kS_BFGEXP2, 0},           // S_BFGEXP
+    {kSPR_BFE2, 32769, 8, kA_NULL, kS_BFGEXP3, 0},           // S_BFGEXP2
+    {kSPR_BFE2, 32770, 8, kA_NULL, kS_BFGEXP4, 0},           // S_BFGEXP3
+    {kSPR_BFE2, 32771, 8, kA_NULL, kS_NULL, 0},              // S_BFGEXP4
+    {kSPR_MISL, 32769, 8, kA_Explode, kS_EXPLODE2, 0},       // S_EXPLODE1
+    {kSPR_MISL, 32770, 6, kA_NULL, kS_EXPLODE3, 0},          // S_EXPLODE2
+    {kSPR_MISL, 32771, 4, kA_NULL, kS_NULL, 0},              // S_EXPLODE3
+    {kSPR_TFOG, 32768, 6, kA_SpawnSound, kS_TFOG01, 0},      // S_TFOG  /* MOD */
+    {kSPR_TFOG, 32769, 6, kA_NULL, kS_TFOG02, 0},            // S_TFOG01
+    {kSPR_TFOG, 32768, 6, kA_NULL, kS_TFOG2, 0},             // S_TFOG02
+    {kSPR_TFOG, 32769, 6, kA_NULL, kS_TFOG3, 0},             // S_TFOG2
+    {kSPR_TFOG, 32770, 6, kA_NULL, kS_TFOG4, 0},             // S_TFOG3
+    {kSPR_TFOG, 32771, 6, kA_NULL, kS_TFOG5, 0},             // S_TFOG4
+    {kSPR_TFOG, 32772, 6, kA_NULL, kS_TFOG6, 0},             // S_TFOG5
+    {kSPR_TFOG, 32773, 6, kA_NULL, kS_TFOG7, 0},             // S_TFOG6
+    {kSPR_TFOG, 32774, 6, kA_NULL, kS_TFOG8, 0},             // S_TFOG7
+    {kSPR_TFOG, 32775, 6, kA_NULL, kS_TFOG9, 0},             // S_TFOG8
+    {kSPR_TFOG, 32776, 6, kA_NULL, kS_TFOG10, 0},            // S_TFOG9
+    {kSPR_TFOG, 32777, 6, kA_NULL, kS_NULL, 0},              // S_TFOG10
+    {kSPR_IFOG, 32768, 6, kA_NULL, kS_IFOG01, 0},            // S_IFOG
+    {kSPR_IFOG, 32769, 6, kA_NULL, kS_IFOG02, 0},            // S_IFOG01
+    {kSPR_IFOG, 32768, 6, kA_NULL, kS_IFOG2, 0},             // S_IFOG02
+    {kSPR_IFOG, 32769, 6, kA_NULL, kS_IFOG3, 0},             // S_IFOG2
+    {kSPR_IFOG, 32770, 6, kA_NULL, kS_IFOG4, 0},             // S_IFOG3
+    {kSPR_IFOG, 32771, 6, kA_NULL, kS_IFOG5, 0},             // S_IFOG4
+    {kSPR_IFOG, 32772, 6, kA_NULL, kS_NULL, 0},              // S_IFOG5
+    {kSPR_PLAY, 0, -1, kA_NULL, kS_NULL, 0},                 // S_PLAY
+    {kSPR_PLAY, 0, 4, kA_NULL, kS_PLAY_RUN2, 0},             // S_PLAY_RUN1
+    {kSPR_PLAY, 1, 4, kA_NULL, kS_PLAY_RUN3, 0},             // S_PLAY_RUN2
+    {kSPR_PLAY, 2, 4, kA_NULL, kS_PLAY_RUN4, 0},             // S_PLAY_RUN3
+    {kSPR_PLAY, 3, 4, kA_NULL, kS_PLAY_RUN1, 0},             // S_PLAY_RUN4
+    {kSPR_PLAY, 4, 12, kA_NULL, kS_PLAY, 0},                 // S_PLAY_ATK1
+    {kSPR_PLAY, 32773, 6, kA_NULL, kS_PLAY_ATK1, 0},         // S_PLAY_ATK2
+    {kSPR_PLAY, 6, 4, kA_NULL, kS_PLAY_PAIN2, 0},            // S_PLAY_PAIN
+    {kSPR_PLAY, 6, 4, kA_Pain, kS_PLAY, 0},                  // S_PLAY_PAIN2
+    {kSPR_PLAY, 7, 10, kA_NULL, kS_PLAY_DIE2, 0},            // S_PLAY_DIE1
+    {kSPR_PLAY, 8, 10, kA_PlayerScream, kS_PLAY_DIE3, 0},    // S_PLAY_DIE2
+    {kSPR_PLAY, 9, 10, kA_Fall, kS_PLAY_DIE4, 0},            // S_PLAY_DIE3
+    {kSPR_PLAY, 10, 10, kA_NULL, kS_PLAY_DIE5, 0},           // S_PLAY_DIE4
+    {kSPR_PLAY, 11, 10, kA_NULL, kS_PLAY_DIE6, 0},           // S_PLAY_DIE5
+    {kSPR_PLAY, 12, 10, kA_NULL, kS_PLAY_DIE7, 0},           // S_PLAY_DIE6
+    {kSPR_PLAY, 13, -1, kA_NULL, kS_NULL, 0},                // S_PLAY_DIE7
+    {kSPR_PLAY, 14, 5, kA_NULL, kS_PLAY_XDIE2, 0},           // S_PLAY_XDIE1
+    {kSPR_PLAY, 15, 5, kA_XScream, kS_PLAY_XDIE3, 0},        // S_PLAY_XDIE2
+    {kSPR_PLAY, 16, 5, kA_Fall, kS_PLAY_XDIE4, 0},           // S_PLAY_XDIE3
+    {kSPR_PLAY, 17, 5, kA_NULL, kS_PLAY_XDIE5, 0},           // S_PLAY_XDIE4
+    {kSPR_PLAY, 18, 5, kA_NULL, kS_PLAY_XDIE6, 0},           // S_PLAY_XDIE5
+    {kSPR_PLAY, 19, 5, kA_NULL, kS_PLAY_XDIE7, 0},           // S_PLAY_XDIE6
+    {kSPR_PLAY, 20, 5, kA_NULL, kS_PLAY_XDIE8, 0},           // S_PLAY_XDIE7
+    {kSPR_PLAY, 21, 5, kA_NULL, kS_PLAY_XDIE9, 0},           // S_PLAY_XDIE8
+    {kSPR_PLAY, 22, -1, kA_NULL, kS_NULL, 0},                // S_PLAY_XDIE9
+    {kSPR_POSS, 0, 10, kA_Look, kS_POSS_STND2, 0},           // S_POSS_STND
+    {kSPR_POSS, 1, 10, kA_Look, kS_POSS_STND, 0},            // S_POSS_STND2
+    {kSPR_POSS, 0, 4, kA_Chase, kS_POSS_RUN2, 0},            // S_POSS_RUN1
+    {kSPR_POSS, 0, 4, kA_Chase, kS_POSS_RUN3, 0},            // S_POSS_RUN2
+    {kSPR_POSS, 1, 4, kA_Chase, kS_POSS_RUN4, 0},            // S_POSS_RUN3
+    {kSPR_POSS, 1, 4, kA_Chase, kS_POSS_RUN5, 0},            // S_POSS_RUN4
+    {kSPR_POSS, 2, 4, kA_Chase, kS_POSS_RUN6, 0},            // S_POSS_RUN5
+    {kSPR_POSS, 2, 4, kA_Chase, kS_POSS_RUN7, 0},            // S_POSS_RUN6
+    {kSPR_POSS, 3, 4, kA_Chase, kS_POSS_RUN8, 0},            // S_POSS_RUN7
+    {kSPR_POSS, 3, 4, kA_Chase, kS_POSS_RUN1, 0},            // S_POSS_RUN8
+    {kSPR_POSS, 4, 10, kA_FaceTarget, kS_POSS_ATK2, 0},      // S_POSS_ATK1
+    {kSPR_POSS, 5, 8, kA_PosAttack, kS_POSS_ATK3, 0},        // S_POSS_ATK2
+    {kSPR_POSS, 4, 8, kA_NULL, kS_POSS_RUN1, 0},             // S_POSS_ATK3
+    {kSPR_POSS, 6, 3, kA_NULL, kS_POSS_PAIN2, 0},            // S_POSS_PAIN
+    {kSPR_POSS, 6, 3, kA_Pain, kS_POSS_RUN1, 0},             // S_POSS_PAIN2
+    {kSPR_POSS, 7, 5, kA_NULL, kS_POSS_DIE2, 0},             // S_POSS_DIE1
+    {kSPR_POSS, 8, 5, kA_Scream, kS_POSS_DIE3, 0},           // S_POSS_DIE2
+    {kSPR_POSS, 9, 5, kA_Fall, kS_POSS_DIE4, 0},             // S_POSS_DIE3
+    {kSPR_POSS, 10, 5, kA_NULL, kS_POSS_DIE5, 0},            // S_POSS_DIE4
+    {kSPR_POSS, 11, -1, kA_NULL, kS_NULL, 0},                // S_POSS_DIE5
+    {kSPR_POSS, 12, 5, kA_NULL, kS_POSS_XDIE2, 0},           // S_POSS_XDIE1
+    {kSPR_POSS, 13, 5, kA_XScream, kS_POSS_XDIE3, 0},        // S_POSS_XDIE2
+    {kSPR_POSS, 14, 5, kA_Fall, kS_POSS_XDIE4, 0},           // S_POSS_XDIE3
+    {kSPR_POSS, 15, 5, kA_NULL, kS_POSS_XDIE5, 0},           // S_POSS_XDIE4
+    {kSPR_POSS, 16, 5, kA_NULL, kS_POSS_XDIE6, 0},           // S_POSS_XDIE5
+    {kSPR_POSS, 17, 5, kA_NULL, kS_POSS_XDIE7, 0},           // S_POSS_XDIE6
+    {kSPR_POSS, 18, 5, kA_NULL, kS_POSS_XDIE8, 0},           // S_POSS_XDIE7
+    {kSPR_POSS, 19, 5, kA_NULL, kS_POSS_XDIE9, 0},           // S_POSS_XDIE8
+    {kSPR_POSS, 20, -1, kA_NULL, kS_NULL, 0},                // S_POSS_XDIE9
+    {kSPR_POSS, 10, 5, kA_NULL, kS_POSS_RAISE2, 0},          // S_POSS_RAISE1
+    {kSPR_POSS, 9, 5, kA_NULL, kS_POSS_RAISE3, 0},           // S_POSS_RAISE2
+    {kSPR_POSS, 8, 5, kA_NULL, kS_POSS_RAISE4, 0},           // S_POSS_RAISE3
+    {kSPR_POSS, 7, 5, kA_NULL, kS_POSS_RUN1, 0},             // S_POSS_RAISE4
+    {kSPR_SPOS, 0, 10, kA_Look, kS_SPOS_STND2, 0},           // S_SPOS_STND
+    {kSPR_SPOS, 1, 10, kA_Look, kS_SPOS_STND, 0},            // S_SPOS_STND2
+    {kSPR_SPOS, 0, 3, kA_Chase, kS_SPOS_RUN2, 0},            // S_SPOS_RUN1
+    {kSPR_SPOS, 0, 3, kA_Chase, kS_SPOS_RUN3, 0},            // S_SPOS_RUN2
+    {kSPR_SPOS, 1, 3, kA_Chase, kS_SPOS_RUN4, 0},            // S_SPOS_RUN3
+    {kSPR_SPOS, 1, 3, kA_Chase, kS_SPOS_RUN5, 0},            // S_SPOS_RUN4
+    {kSPR_SPOS, 2, 3, kA_Chase, kS_SPOS_RUN6, 0},            // S_SPOS_RUN5
+    {kSPR_SPOS, 2, 3, kA_Chase, kS_SPOS_RUN7, 0},            // S_SPOS_RUN6
+    {kSPR_SPOS, 3, 3, kA_Chase, kS_SPOS_RUN8, 0},            // S_SPOS_RUN7
+    {kSPR_SPOS, 3, 3, kA_Chase, kS_SPOS_RUN1, 0},            // S_SPOS_RUN8
+    {kSPR_SPOS, 4, 10, kA_FaceTarget, kS_SPOS_ATK2, 0},      // S_SPOS_ATK1
+    {kSPR_SPOS, 32773, 10, kA_SPosAttack, kS_SPOS_ATK3, 0},  // S_SPOS_ATK2
+    {kSPR_SPOS, 4, 10, kA_NULL, kS_SPOS_RUN1, 0},            // S_SPOS_ATK3
+    {kSPR_SPOS, 6, 3, kA_NULL, kS_SPOS_PAIN2, 0},            // S_SPOS_PAIN
+    {kSPR_SPOS, 6, 3, kA_Pain, kS_SPOS_RUN1, 0},             // S_SPOS_PAIN2
+    {kSPR_SPOS, 7, 5, kA_NULL, kS_SPOS_DIE2, 0},             // S_SPOS_DIE1
+    {kSPR_SPOS, 8, 5, kA_Scream, kS_SPOS_DIE3, 0},           // S_SPOS_DIE2
+    {kSPR_SPOS, 9, 5, kA_Fall, kS_SPOS_DIE4, 0},             // S_SPOS_DIE3
+    {kSPR_SPOS, 10, 5, kA_NULL, kS_SPOS_DIE5, 0},            // S_SPOS_DIE4
+    {kSPR_SPOS, 11, -1, kA_NULL, kS_NULL, 0},                // S_SPOS_DIE5
+    {kSPR_SPOS, 12, 5, kA_NULL, kS_SPOS_XDIE2, 0},           // S_SPOS_XDIE1
+    {kSPR_SPOS, 13, 5, kA_XScream, kS_SPOS_XDIE3, 0},        // S_SPOS_XDIE2
+    {kSPR_SPOS, 14, 5, kA_Fall, kS_SPOS_XDIE4, 0},           // S_SPOS_XDIE3
+    {kSPR_SPOS, 15, 5, kA_NULL, kS_SPOS_XDIE5, 0},           // S_SPOS_XDIE4
+    {kSPR_SPOS, 16, 5, kA_NULL, kS_SPOS_XDIE6, 0},           // S_SPOS_XDIE5
+    {kSPR_SPOS, 17, 5, kA_NULL, kS_SPOS_XDIE7, 0},           // S_SPOS_XDIE6
+    {kSPR_SPOS, 18, 5, kA_NULL, kS_SPOS_XDIE8, 0},           // S_SPOS_XDIE7
+    {kSPR_SPOS, 19, 5, kA_NULL, kS_SPOS_XDIE9, 0},           // S_SPOS_XDIE8
+    {kSPR_SPOS, 20, -1, kA_NULL, kS_NULL, 0},                // S_SPOS_XDIE9
+    {kSPR_SPOS, 11, 5, kA_NULL, kS_SPOS_RAISE2, 0},          // S_SPOS_RAISE1
+    {kSPR_SPOS, 10, 5, kA_NULL, kS_SPOS_RAISE3, 0},          // S_SPOS_RAISE2
+    {kSPR_SPOS, 9, 5, kA_NULL, kS_SPOS_RAISE4, 0},           // S_SPOS_RAISE3
+    {kSPR_SPOS, 8, 5, kA_NULL, kS_SPOS_RAISE5, 0},           // S_SPOS_RAISE4
+    {kSPR_SPOS, 7, 5, kA_NULL, kS_SPOS_RUN1, 0},             // S_SPOS_RAISE5
+    {kSPR_VILE, 0, 10, kA_Look, kS_VILE_STND2, 0},           // S_VILE_STND
+    {kSPR_VILE, 1, 10, kA_Look, kS_VILE_STND, 0},            // S_VILE_STND2
+    {kSPR_VILE, 0, 2, kA_VileChase, kS_VILE_RUN2, 0},        // S_VILE_RUN1
+    {kSPR_VILE, 0, 2, kA_VileChase, kS_VILE_RUN3, 0},        // S_VILE_RUN2
+    {kSPR_VILE, 1, 2, kA_VileChase, kS_VILE_RUN4, 0},        // S_VILE_RUN3
+    {kSPR_VILE, 1, 2, kA_VileChase, kS_VILE_RUN5, 0},        // S_VILE_RUN4
+    {kSPR_VILE, 2, 2, kA_VileChase, kS_VILE_RUN6, 0},        // S_VILE_RUN5
+    {kSPR_VILE, 2, 2, kA_VileChase, kS_VILE_RUN7, 0},        // S_VILE_RUN6
+    {kSPR_VILE, 3, 2, kA_VileChase, kS_VILE_RUN8, 0},        // S_VILE_RUN7
+    {kSPR_VILE, 3, 2, kA_VileChase, kS_VILE_RUN9, 0},        // S_VILE_RUN8
+    {kSPR_VILE, 4, 2, kA_VileChase, kS_VILE_RUN10, 0},       // S_VILE_RUN9
+    {kSPR_VILE, 4, 2, kA_VileChase, kS_VILE_RUN11, 0},       // S_VILE_RUN10
+    {kSPR_VILE, 5, 2, kA_VileChase, kS_VILE_RUN12, 0},       // S_VILE_RUN11
+    {kSPR_VILE, 5, 2, kA_VileChase, kS_VILE_RUN1, 0},        // S_VILE_RUN12
+    {kSPR_VILE, 32774, 0, kA_VileStart, kS_VILE_ATK2, 0},    // S_VILE_ATK1
+    {kSPR_VILE, 32774, 10, kA_FaceTarget, kS_VILE_ATK3, 0},  // S_VILE_ATK2
+    {kSPR_VILE, 32775, 8, kA_VileTarget, kS_VILE_ATK4, 0},   // S_VILE_ATK3
+    {kSPR_VILE, 32776, 8, kA_FaceTarget, kS_VILE_ATK5, 0},   // S_VILE_ATK4
+    {kSPR_VILE, 32777, 8, kA_FaceTarget, kS_VILE_ATK6, 0},   // S_VILE_ATK5
+    {kSPR_VILE, 32778, 8, kA_FaceTarget, kS_VILE_ATK7, 0},   // S_VILE_ATK6
+    {kSPR_VILE, 32779, 8, kA_FaceTarget, kS_VILE_ATK8, 0},   // S_VILE_ATK7
+    {kSPR_VILE, 32780, 8, kA_FaceTarget, kS_VILE_ATK9, 0},   // S_VILE_ATK8
+    {kSPR_VILE, 32781, 8, kA_FaceTarget, kS_VILE_ATK10, 0},  // S_VILE_ATK9
+    {kSPR_VILE, 32782, 8, kA_VileAttack, kS_VILE_ATK11, 0},  // S_VILE_ATK10
+    {kSPR_VILE, 32783, 20, kA_NULL, kS_VILE_RUN1, 0},        // S_VILE_ATK11
+    {kSPR_VILE, 32794, 10, kA_NULL, kS_VILE_HEAL2, 0},       // S_VILE_HEAL1
+    {kSPR_VILE, 32795, 10, kA_NULL, kS_VILE_HEAL3, 0},       // S_VILE_HEAL2
+    {kSPR_VILE, 32796, 10, kA_NULL, kS_VILE_RUN1, 0},        // S_VILE_HEAL3
+    {kSPR_VILE, 16, 5, kA_NULL, kS_VILE_PAIN2, 0},           // S_VILE_PAIN
+    {kSPR_VILE, 16, 5, kA_Pain, kS_VILE_RUN1, 0},            // S_VILE_PAIN2
+    {kSPR_VILE, 16, 7, kA_NULL, kS_VILE_DIE2, 0},            // S_VILE_DIE1
+    {kSPR_VILE, 17, 7, kA_Scream, kS_VILE_DIE3, 0},          // S_VILE_DIE2
+    {kSPR_VILE, 18, 7, kA_Fall, kS_VILE_DIE4, 0},            // S_VILE_DIE3
+    {kSPR_VILE, 19, 7, kA_NULL, kS_VILE_DIE5, 0},            // S_VILE_DIE4
+    {kSPR_VILE, 20, 7, kA_NULL, kS_VILE_DIE6, 0},            // S_VILE_DIE5
+    {kSPR_VILE, 21, 7, kA_NULL, kS_VILE_DIE7, 0},            // S_VILE_DIE6
+    {kSPR_VILE, 22, 7, kA_NULL, kS_VILE_DIE8, 0},            // S_VILE_DIE7
+    {kSPR_VILE, 23, 5, kA_NULL, kS_VILE_DIE9, 0},            // S_VILE_DIE8
+    {kSPR_VILE, 24, 5, kA_NULL, kS_VILE_DIE10, 0},           // S_VILE_DIE9
+    {kSPR_VILE, 25, -1, kA_NULL, kS_NULL, 0},                // S_VILE_DIE10
+    {kSPR_FIRE, 32768, 2, kA_StartFire, kS_FIRE2, 0},        // S_FIRE1
+    {kSPR_FIRE, 32769, 2, kA_Fire, kS_FIRE3, 0},             // S_FIRE2
+    {kSPR_FIRE, 32768, 2, kA_Fire, kS_FIRE4, 0},             // S_FIRE3
+    {kSPR_FIRE, 32769, 2, kA_Fire, kS_FIRE5, 0},             // S_FIRE4
+    {kSPR_FIRE, 32770, 2, kA_FireCrackle, kS_FIRE6, 0},      // S_FIRE5
+    {kSPR_FIRE, 32769, 2, kA_Fire, kS_FIRE7, 0},             // S_FIRE6
+    {kSPR_FIRE, 32770, 2, kA_Fire, kS_FIRE8, 0},             // S_FIRE7
+    {kSPR_FIRE, 32769, 2, kA_Fire, kS_FIRE9, 0},             // S_FIRE8
+    {kSPR_FIRE, 32770, 2, kA_Fire, kS_FIRE10, 0},            // S_FIRE9
+    {kSPR_FIRE, 32771, 2, kA_Fire, kS_FIRE11, 0},            // S_FIRE10
+    {kSPR_FIRE, 32770, 2, kA_Fire, kS_FIRE12, 0},            // S_FIRE11
+    {kSPR_FIRE, 32771, 2, kA_Fire, kS_FIRE13, 0},            // S_FIRE12
+    {kSPR_FIRE, 32770, 2, kA_Fire, kS_FIRE14, 0},            // S_FIRE13
+    {kSPR_FIRE, 32771, 2, kA_Fire, kS_FIRE15, 0},            // S_FIRE14
+    {kSPR_FIRE, 32772, 2, kA_Fire, kS_FIRE16, 0},            // S_FIRE15
+    {kSPR_FIRE, 32771, 2, kA_Fire, kS_FIRE17, 0},            // S_FIRE16
+    {kSPR_FIRE, 32772, 2, kA_Fire, kS_FIRE18, 0},            // S_FIRE17
+    {kSPR_FIRE, 32771, 2, kA_Fire, kS_FIRE19, 0},            // S_FIRE18
+    {kSPR_FIRE, 32772, 2, kA_FireCrackle, kS_FIRE20, 0},     // S_FIRE19
+    {kSPR_FIRE, 32773, 2, kA_Fire, kS_FIRE21, 0},            // S_FIRE20
+    {kSPR_FIRE, 32772, 2, kA_Fire, kS_FIRE22, 0},            // S_FIRE21
+    {kSPR_FIRE, 32773, 2, kA_Fire, kS_FIRE23, 0},            // S_FIRE22
+    {kSPR_FIRE, 32772, 2, kA_Fire, kS_FIRE24, 0},            // S_FIRE23
+    {kSPR_FIRE, 32773, 2, kA_Fire, kS_FIRE25, 0},            // S_FIRE24
+    {kSPR_FIRE, 32774, 2, kA_Fire, kS_FIRE26, 0},            // S_FIRE25
+    {kSPR_FIRE, 32775, 2, kA_Fire, kS_FIRE27, 0},            // S_FIRE26
+    {kSPR_FIRE, 32774, 2, kA_Fire, kS_FIRE28, 0},            // S_FIRE27
+    {kSPR_FIRE, 32775, 2, kA_Fire, kS_FIRE29, 0},            // S_FIRE28
+    {kSPR_FIRE, 32774, 2, kA_Fire, kS_FIRE30, 0},            // S_FIRE29
+    {kSPR_FIRE, 32775, 2, kA_Fire, kS_NULL, 0},              // S_FIRE30
+    {kSPR_PUFF, 1, 4, kA_NULL, kS_SMOKE2, 0},                // S_SMOKE1
+    {kSPR_PUFF, 2, 4, kA_NULL, kS_SMOKE3, 0},                // S_SMOKE2
+    {kSPR_PUFF, 1, 4, kA_NULL, kS_SMOKE4, 0},                // S_SMOKE3
+    {kSPR_PUFF, 2, 4, kA_NULL, kS_SMOKE5, 0},                // S_SMOKE4
+    {kSPR_PUFF, 3, 4, kA_NULL, kS_NULL, 0},                  // S_SMOKE5
+    {kSPR_FATB, 32768, 2, kA_Tracer, kS_TRACER2, 0},         // S_TRACER
+    {kSPR_FATB, 32769, 2, kA_Tracer, kS_TRACER, 0},          // S_TRACER2
+    {kSPR_FBXP, 32768, 8, kA_NULL, kS_TRACEEXP2, 0},         // S_TRACEEXP1
+    {kSPR_FBXP, 32769, 6, kA_NULL, kS_TRACEEXP3, 0},         // S_TRACEEXP2
+    {kSPR_FBXP, 32770, 4, kA_NULL, kS_NULL, 0},              // S_TRACEEXP3
+    {kSPR_SKEL, 0, 10, kA_Look, kS_SKEL_STND2, 0},           // S_SKEL_STND
+    {kSPR_SKEL, 1, 10, kA_Look, kS_SKEL_STND, 0},            // S_SKEL_STND2
+    {kSPR_SKEL, 0, 2, kA_Chase, kS_SKEL_RUN2, 0},            // S_SKEL_RUN1
+    {kSPR_SKEL, 0, 2, kA_Chase, kS_SKEL_RUN3, 0},            // S_SKEL_RUN2
+    {kSPR_SKEL, 1, 2, kA_Chase, kS_SKEL_RUN4, 0},            // S_SKEL_RUN3
+    {kSPR_SKEL, 1, 2, kA_Chase, kS_SKEL_RUN5, 0},            // S_SKEL_RUN4
+    {kSPR_SKEL, 2, 2, kA_Chase, kS_SKEL_RUN6, 0},            // S_SKEL_RUN5
+    {kSPR_SKEL, 2, 2, kA_Chase, kS_SKEL_RUN7, 0},            // S_SKEL_RUN6
+    {kSPR_SKEL, 3, 2, kA_Chase, kS_SKEL_RUN8, 0},            // S_SKEL_RUN7
+    {kSPR_SKEL, 3, 2, kA_Chase, kS_SKEL_RUN9, 0},            // S_SKEL_RUN8
+    {kSPR_SKEL, 4, 2, kA_Chase, kS_SKEL_RUN10, 0},           // S_SKEL_RUN9
+    {kSPR_SKEL, 4, 2, kA_Chase, kS_SKEL_RUN11, 0},           // S_SKEL_RUN10
+    {kSPR_SKEL, 5, 2, kA_Chase, kS_SKEL_RUN12, 0},           // S_SKEL_RUN11
+    {kSPR_SKEL, 5, 2, kA_Chase, kS_SKEL_RUN1, 0},            // S_SKEL_RUN12
+    {kSPR_SKEL, 6, 0, kA_FaceTarget, kS_SKEL_FIST2, 0},      // S_SKEL_FIST1
+    {kSPR_SKEL, 6, 6, kA_SkelWhoosh, kS_SKEL_FIST3, 0},      // S_SKEL_FIST2
+    {kSPR_SKEL, 7, 6, kA_FaceTarget, kS_SKEL_FIST4, 0},      // S_SKEL_FIST3
+    {kSPR_SKEL, 8, 6, kA_SkelFist, kS_SKEL_RUN1, 0},         // S_SKEL_FIST4
+    {kSPR_SKEL, 32777, 0, kA_FaceTarget, kS_SKEL_MISS2, 0},  // S_SKEL_MISS1
+    {kSPR_SKEL, 32777, 10, kA_FaceTarget, kS_SKEL_MISS3, 0}, // S_SKEL_MISS2
+    {kSPR_SKEL, 10, 10, kA_SkelMissile, kS_SKEL_MISS4, 0},   // S_SKEL_MISS3
+    {kSPR_SKEL, 10, 10, kA_FaceTarget, kS_SKEL_RUN1, 0},     // S_SKEL_MISS4
+    {kSPR_SKEL, 11, 5, kA_NULL, kS_SKEL_PAIN2, 0},           // S_SKEL_PAIN
+    {kSPR_SKEL, 11, 5, kA_Pain, kS_SKEL_RUN1, 0},            // S_SKEL_PAIN2
+    {kSPR_SKEL, 11, 7, kA_NULL, kS_SKEL_DIE2, 0},            // S_SKEL_DIE1
+    {kSPR_SKEL, 12, 7, kA_NULL, kS_SKEL_DIE3, 0},            // S_SKEL_DIE2
+    {kSPR_SKEL, 13, 7, kA_Scream, kS_SKEL_DIE4, 0},          // S_SKEL_DIE3
+    {kSPR_SKEL, 14, 7, kA_Fall, kS_SKEL_DIE5, 0},            // S_SKEL_DIE4
+    {kSPR_SKEL, 15, 7, kA_NULL, kS_SKEL_DIE6, 0},            // S_SKEL_DIE5
+    {kSPR_SKEL, 16, -1, kA_NULL, kS_NULL, 0},                // S_SKEL_DIE6
+    {kSPR_SKEL, 16, 5, kA_NULL, kS_SKEL_RAISE2, 0},          // S_SKEL_RAISE1
+    {kSPR_SKEL, 15, 5, kA_NULL, kS_SKEL_RAISE3, 0},          // S_SKEL_RAISE2
+    {kSPR_SKEL, 14, 5, kA_NULL, kS_SKEL_RAISE4, 0},          // S_SKEL_RAISE3
+    {kSPR_SKEL, 13, 5, kA_NULL, kS_SKEL_RAISE5, 0},          // S_SKEL_RAISE4
+    {kSPR_SKEL, 12, 5, kA_NULL, kS_SKEL_RAISE6, 0},          // S_SKEL_RAISE5
+    {kSPR_SKEL, 11, 5, kA_NULL, kS_SKEL_RUN1, 0},            // S_SKEL_RAISE6
+    {kSPR_MANF, 32768, 4, kA_NULL, kS_FATSHOT2, 0},          // S_FATSHOT1
+    {kSPR_MANF, 32769, 4, kA_NULL, kS_FATSHOT1, 0},          // S_FATSHOT2
+    {kSPR_MISL, 32769, 8, kA_NULL, kS_FATSHOTX2, 0},         // S_FATSHOTX1
+    {kSPR_MISL, 32770, 6, kA_NULL, kS_FATSHOTX3, 0},         // S_FATSHOTX2
+    {kSPR_MISL, 32771, 4, kA_NULL, kS_NULL, 0},              // S_FATSHOTX3
+    {kSPR_FATT, 0, 15, kA_Look, kS_FATT_STND2, 0},           // S_FATT_STND
+    {kSPR_FATT, 1, 15, kA_Look, kS_FATT_STND, 0},            // S_FATT_STND2
+    {kSPR_FATT, 0, 4, kA_Chase, kS_FATT_RUN2, 0},            // S_FATT_RUN1
+    {kSPR_FATT, 0, 4, kA_Chase, kS_FATT_RUN3, 0},            // S_FATT_RUN2
+    {kSPR_FATT, 1, 4, kA_Chase, kS_FATT_RUN4, 0},            // S_FATT_RUN3
+    {kSPR_FATT, 1, 4, kA_Chase, kS_FATT_RUN5, 0},            // S_FATT_RUN4
+    {kSPR_FATT, 2, 4, kA_Chase, kS_FATT_RUN6, 0},            // S_FATT_RUN5
+    {kSPR_FATT, 2, 4, kA_Chase, kS_FATT_RUN7, 0},            // S_FATT_RUN6
+    {kSPR_FATT, 3, 4, kA_Chase, kS_FATT_RUN8, 0},            // S_FATT_RUN7
+    {kSPR_FATT, 3, 4, kA_Chase, kS_FATT_RUN9, 0},            // S_FATT_RUN8
+    {kSPR_FATT, 4, 4, kA_Chase, kS_FATT_RUN10, 0},           // S_FATT_RUN9
+    {kSPR_FATT, 4, 4, kA_Chase, kS_FATT_RUN11, 0},           // S_FATT_RUN10
+    {kSPR_FATT, 5, 4, kA_Chase, kS_FATT_RUN12, 0},           // S_FATT_RUN11
+    {kSPR_FATT, 5, 4, kA_Chase, kS_FATT_RUN1, 0},            // S_FATT_RUN12
+    {kSPR_FATT, 6, 20, kA_FatRaise, kS_FATT_ATK2, 0},        // S_FATT_ATK1
+    {kSPR_FATT, 32775, 10, kA_FatAttack1, kS_FATT_ATK3, 0},  // S_FATT_ATK2
+    {kSPR_FATT, 8, 5, kA_FaceTarget, kS_FATT_ATK4, 0},       // S_FATT_ATK3
+    {kSPR_FATT, 6, 5, kA_FaceTarget, kS_FATT_ATK5, 0},       // S_FATT_ATK4
+    {kSPR_FATT, 32775, 10, kA_FatAttack2, kS_FATT_ATK6, 0},  // S_FATT_ATK5
+    {kSPR_FATT, 8, 5, kA_FaceTarget, kS_FATT_ATK7, 0},       // S_FATT_ATK6
+    {kSPR_FATT, 6, 5, kA_FaceTarget, kS_FATT_ATK8, 0},       // S_FATT_ATK7
+    {kSPR_FATT, 32775, 10, kA_FatAttack3, kS_FATT_ATK9, 0},  // S_FATT_ATK8
+    {kSPR_FATT, 8, 5, kA_FaceTarget, kS_FATT_ATK10, 0},      // S_FATT_ATK9
+    {kSPR_FATT, 6, 5, kA_FaceTarget, kS_FATT_RUN1, 0},       // S_FATT_ATK10
+    {kSPR_FATT, 9, 3, kA_NULL, kS_FATT_PAIN2, 0},            // S_FATT_PAIN
+    {kSPR_FATT, 9, 3, kA_Pain, kS_FATT_RUN1, 0},             // S_FATT_PAIN2
+    {kSPR_FATT, 10, 6, kA_NULL, kS_FATT_DIE2, 0},            // S_FATT_DIE1
+    {kSPR_FATT, 11, 6, kA_Scream, kS_FATT_DIE3, 0},          // S_FATT_DIE2
+    {kSPR_FATT, 12, 6, kA_Fall, kS_FATT_DIE4, 0},            // S_FATT_DIE3
+    {kSPR_FATT, 13, 6, kA_NULL, kS_FATT_DIE5, 0},            // S_FATT_DIE4
+    {kSPR_FATT, 14, 6, kA_NULL, kS_FATT_DIE6, 0},            // S_FATT_DIE5
+    {kSPR_FATT, 15, 6, kA_NULL, kS_FATT_DIE7, 0},            // S_FATT_DIE6
+    {kSPR_FATT, 16, 6, kA_NULL, kS_FATT_DIE8, 0},            // S_FATT_DIE7
+    {kSPR_FATT, 17, 6, kA_NULL, kS_FATT_DIE9, 0},            // S_FATT_DIE8
+    {kSPR_FATT, 18, 6, kA_NULL, kS_FATT_DIE10, 0},           // S_FATT_DIE9
+    {kSPR_FATT, 19, -1, kA_BossDeath, kS_NULL, 0},           // S_FATT_DIE10
+    {kSPR_FATT, 17, 5, kA_NULL, kS_FATT_RAISE2, 0},          // S_FATT_RAISE1
+    {kSPR_FATT, 16, 5, kA_NULL, kS_FATT_RAISE3, 0},          // S_FATT_RAISE2
+    {kSPR_FATT, 15, 5, kA_NULL, kS_FATT_RAISE4, 0},          // S_FATT_RAISE3
+    {kSPR_FATT, 14, 5, kA_NULL, kS_FATT_RAISE5, 0},          // S_FATT_RAISE4
+    {kSPR_FATT, 13, 5, kA_NULL, kS_FATT_RAISE6, 0},          // S_FATT_RAISE5
+    {kSPR_FATT, 12, 5, kA_NULL, kS_FATT_RAISE7, 0},          // S_FATT_RAISE6
+    {kSPR_FATT, 11, 5, kA_NULL, kS_FATT_RAISE8, 0},          // S_FATT_RAISE7
+    {kSPR_FATT, 10, 5, kA_NULL, kS_FATT_RUN1, 0},            // S_FATT_RAISE8
+    {kSPR_CPOS, 0, 10, kA_Look, kS_CPOS_STND2, 0},           // S_CPOS_STND
+    {kSPR_CPOS, 1, 10, kA_Look, kS_CPOS_STND, 0},            // S_CPOS_STND2
+    {kSPR_CPOS, 0, 3, kA_Chase, kS_CPOS_RUN2, 0},            // S_CPOS_RUN1
+    {kSPR_CPOS, 0, 3, kA_Chase, kS_CPOS_RUN3, 0},            // S_CPOS_RUN2
+    {kSPR_CPOS, 1, 3, kA_Chase, kS_CPOS_RUN4, 0},            // S_CPOS_RUN3
+    {kSPR_CPOS, 1, 3, kA_Chase, kS_CPOS_RUN5, 0},            // S_CPOS_RUN4
+    {kSPR_CPOS, 2, 3, kA_Chase, kS_CPOS_RUN6, 0},            // S_CPOS_RUN5
+    {kSPR_CPOS, 2, 3, kA_Chase, kS_CPOS_RUN7, 0},            // S_CPOS_RUN6
+    {kSPR_CPOS, 3, 3, kA_Chase, kS_CPOS_RUN8, 0},            // S_CPOS_RUN7
+    {kSPR_CPOS, 3, 3, kA_Chase, kS_CPOS_RUN1, 0},            // S_CPOS_RUN8
+    {kSPR_CPOS, 4, 10, kA_FaceTarget, kS_CPOS_ATK2, 0},      // S_CPOS_ATK1
+    {kSPR_CPOS, 32773, 4, kA_CPosAttack, kS_CPOS_ATK3, 0},   // S_CPOS_ATK2
+    {kSPR_CPOS, 32772, 4, kA_CPosAttack, kS_CPOS_ATK4, 0},   // S_CPOS_ATK3
+    {kSPR_CPOS, 5, 1, kA_CPosRefire, kS_CPOS_ATK2, 0},       // S_CPOS_ATK4
+    {kSPR_CPOS, 6, 3, kA_NULL, kS_CPOS_PAIN2, 0},            // S_CPOS_PAIN
+    {kSPR_CPOS, 6, 3, kA_Pain, kS_CPOS_RUN1, 0},             // S_CPOS_PAIN2
+    {kSPR_CPOS, 7, 5, kA_NULL, kS_CPOS_DIE2, 0},             // S_CPOS_DIE1
+    {kSPR_CPOS, 8, 5, kA_Scream, kS_CPOS_DIE3, 0},           // S_CPOS_DIE2
+    {kSPR_CPOS, 9, 5, kA_Fall, kS_CPOS_DIE4, 0},             // S_CPOS_DIE3
+    {kSPR_CPOS, 10, 5, kA_NULL, kS_CPOS_DIE5, 0},            // S_CPOS_DIE4
+    {kSPR_CPOS, 11, 5, kA_NULL, kS_CPOS_DIE6, 0},            // S_CPOS_DIE5
+    {kSPR_CPOS, 12, 5, kA_NULL, kS_CPOS_DIE7, 0},            // S_CPOS_DIE6
+    {kSPR_CPOS, 13, -1, kA_NULL, kS_NULL, 0},                // S_CPOS_DIE7
+    {kSPR_CPOS, 14, 5, kA_NULL, kS_CPOS_XDIE2, 0},           // S_CPOS_XDIE1
+    {kSPR_CPOS, 15, 5, kA_XScream, kS_CPOS_XDIE3, 0},        // S_CPOS_XDIE2
+    {kSPR_CPOS, 16, 5, kA_Fall, kS_CPOS_XDIE4, 0},           // S_CPOS_XDIE3
+    {kSPR_CPOS, 17, 5, kA_NULL, kS_CPOS_XDIE5, 0},           // S_CPOS_XDIE4
+    {kSPR_CPOS, 18, 5, kA_NULL, kS_CPOS_XDIE6, 0},           // S_CPOS_XDIE5
+    {kSPR_CPOS, 19, -1, kA_NULL, kS_NULL, 0},                // S_CPOS_XDIE6
+    {kSPR_CPOS, 13, 5, kA_NULL, kS_CPOS_RAISE2, 0},          // S_CPOS_RAISE1
+    {kSPR_CPOS, 12, 5, kA_NULL, kS_CPOS_RAISE3, 0},          // S_CPOS_RAISE2
+    {kSPR_CPOS, 11, 5, kA_NULL, kS_CPOS_RAISE4, 0},          // S_CPOS_RAISE3
+    {kSPR_CPOS, 10, 5, kA_NULL, kS_CPOS_RAISE5, 0},          // S_CPOS_RAISE4
+    {kSPR_CPOS, 9, 5, kA_NULL, kS_CPOS_RAISE6, 0},           // S_CPOS_RAISE5
+    {kSPR_CPOS, 8, 5, kA_NULL, kS_CPOS_RAISE7, 0},           // S_CPOS_RAISE6
+    {kSPR_CPOS, 7, 5, kA_NULL, kS_CPOS_RUN1, 0},             // S_CPOS_RAISE7
+    {kSPR_TROO, 0, 10, kA_Look, kS_TROO_STND2, 0},           // S_TROO_STND
+    {kSPR_TROO, 1, 10, kA_Look, kS_TROO_STND, 0},            // S_TROO_STND2
+    {kSPR_TROO, 0, 3, kA_Chase, kS_TROO_RUN2, 0},            // S_TROO_RUN1
+    {kSPR_TROO, 0, 3, kA_Chase, kS_TROO_RUN3, 0},            // S_TROO_RUN2
+    {kSPR_TROO, 1, 3, kA_Chase, kS_TROO_RUN4, 0},            // S_TROO_RUN3
+    {kSPR_TROO, 1, 3, kA_Chase, kS_TROO_RUN5, 0},            // S_TROO_RUN4
+    {kSPR_TROO, 2, 3, kA_Chase, kS_TROO_RUN6, 0},            // S_TROO_RUN5
+    {kSPR_TROO, 2, 3, kA_Chase, kS_TROO_RUN7, 0},            // S_TROO_RUN6
+    {kSPR_TROO, 3, 3, kA_Chase, kS_TROO_RUN8, 0},            // S_TROO_RUN7
+    {kSPR_TROO, 3, 3, kA_Chase, kS_TROO_RUN1, 0},            // S_TROO_RUN8
+    {kSPR_TROO, 4, 8, kA_FaceTarget, kS_TROO_ATK2, 0},       // S_TROO_ATK1
+    {kSPR_TROO, 5, 8, kA_FaceTarget, kS_TROO_ATK3, 0},       // S_TROO_ATK2
+    {kSPR_TROO, 6, 6, kA_TroopAttack, kS_TROO_RUN1, 0},      // S_TROO_ATK3
+    {kSPR_TROO, 7, 2, kA_NULL, kS_TROO_PAIN2, 0},            // S_TROO_PAIN
+    {kSPR_TROO, 7, 2, kA_Pain, kS_TROO_RUN1, 0},             // S_TROO_PAIN2
+    {kSPR_TROO, 8, 8, kA_NULL, kS_TROO_DIE2, 0},             // S_TROO_DIE1
+    {kSPR_TROO, 9, 8, kA_Scream, kS_TROO_DIE3, 0},           // S_TROO_DIE2
+    {kSPR_TROO, 10, 6, kA_NULL, kS_TROO_DIE4, 0},            // S_TROO_DIE3
+    {kSPR_TROO, 11, 6, kA_Fall, kS_TROO_DIE5, 0},            // S_TROO_DIE4
+    {kSPR_TROO, 12, -1, kA_NULL, kS_NULL, 0},                // S_TROO_DIE5
+    {kSPR_TROO, 13, 5, kA_NULL, kS_TROO_XDIE2, 0},           // S_TROO_XDIE1
+    {kSPR_TROO, 14, 5, kA_XScream, kS_TROO_XDIE3, 0},        // S_TROO_XDIE2
+    {kSPR_TROO, 15, 5, kA_NULL, kS_TROO_XDIE4, 0},           // S_TROO_XDIE3
+    {kSPR_TROO, 16, 5, kA_Fall, kS_TROO_XDIE5, 0},           // S_TROO_XDIE4
+    {kSPR_TROO, 17, 5, kA_NULL, kS_TROO_XDIE6, 0},           // S_TROO_XDIE5
+    {kSPR_TROO, 18, 5, kA_NULL, kS_TROO_XDIE7, 0},           // S_TROO_XDIE6
+    {kSPR_TROO, 19, 5, kA_NULL, kS_TROO_XDIE8, 0},           // S_TROO_XDIE7
+    {kSPR_TROO, 20, -1, kA_NULL, kS_NULL, 0},                // S_TROO_XDIE8
+    {kSPR_TROO, 12, 8, kA_NULL, kS_TROO_RAISE2, 0},          // S_TROO_RAISE1
+    {kSPR_TROO, 11, 8, kA_NULL, kS_TROO_RAISE3, 0},          // S_TROO_RAISE2
+    {kSPR_TROO, 10, 6, kA_NULL, kS_TROO_RAISE4, 0},          // S_TROO_RAISE3
+    {kSPR_TROO, 9, 6, kA_NULL, kS_TROO_RAISE5, 0},           // S_TROO_RAISE4
+    {kSPR_TROO, 8, 6, kA_NULL, kS_TROO_RUN1, 0},             // S_TROO_RAISE5
+    {kSPR_SARG, 0, 10, kA_Look, kS_SARG_STND2, 0},           // S_SARG_STND
+    {kSPR_SARG, 1, 10, kA_Look, kS_SARG_STND, 0},            // S_SARG_STND2
+    {kSPR_SARG, 0, 2, kA_Chase, kS_SARG_RUN2, 0},            // S_SARG_RUN1
+    {kSPR_SARG, 0, 2, kA_Chase, kS_SARG_RUN3, 0},            // S_SARG_RUN2
+    {kSPR_SARG, 1, 2, kA_Chase, kS_SARG_RUN4, 0},            // S_SARG_RUN3
+    {kSPR_SARG, 1, 2, kA_Chase, kS_SARG_RUN5, 0},            // S_SARG_RUN4
+    {kSPR_SARG, 2, 2, kA_Chase, kS_SARG_RUN6, 0},            // S_SARG_RUN5
+    {kSPR_SARG, 2, 2, kA_Chase, kS_SARG_RUN7, 0},            // S_SARG_RUN6
+    {kSPR_SARG, 3, 2, kA_Chase, kS_SARG_RUN8, 0},            // S_SARG_RUN7
+    {kSPR_SARG, 3, 2, kA_Chase, kS_SARG_RUN1, 0},            // S_SARG_RUN8
+    {kSPR_SARG, 4, 8, kA_FaceTarget, kS_SARG_ATK2, 0},       // S_SARG_ATK1
+    {kSPR_SARG, 5, 8, kA_FaceTarget, kS_SARG_ATK3, 0},       // S_SARG_ATK2
+    {kSPR_SARG, 6, 8, kA_SargAttack, kS_SARG_RUN1, 0},       // S_SARG_ATK3
+    {kSPR_SARG, 7, 2, kA_NULL, kS_SARG_PAIN2, 0},            // S_SARG_PAIN
+    {kSPR_SARG, 7, 2, kA_Pain, kS_SARG_RUN1, 0},             // S_SARG_PAIN2
+    {kSPR_SARG, 8, 8, kA_NULL, kS_SARG_DIE2, 0},             // S_SARG_DIE1
+    {kSPR_SARG, 9, 8, kA_Scream, kS_SARG_DIE3, 0},           // S_SARG_DIE2
+    {kSPR_SARG, 10, 4, kA_NULL, kS_SARG_DIE4, 0},            // S_SARG_DIE3
+    {kSPR_SARG, 11, 4, kA_Fall, kS_SARG_DIE5, 0},            // S_SARG_DIE4
+    {kSPR_SARG, 12, 4, kA_NULL, kS_SARG_DIE6, 0},            // S_SARG_DIE5
+    {kSPR_SARG, 13, -1, kA_NULL, kS_NULL, 0},                // S_SARG_DIE6
+    {kSPR_SARG, 13, 5, kA_NULL, kS_SARG_RAISE2, 0},          // S_SARG_RAISE1
+    {kSPR_SARG, 12, 5, kA_NULL, kS_SARG_RAISE3, 0},          // S_SARG_RAISE2
+    {kSPR_SARG, 11, 5, kA_NULL, kS_SARG_RAISE4, 0},          // S_SARG_RAISE3
+    {kSPR_SARG, 10, 5, kA_NULL, kS_SARG_RAISE5, 0},          // S_SARG_RAISE4
+    {kSPR_SARG, 9, 5, kA_NULL, kS_SARG_RAISE6, 0},           // S_SARG_RAISE5
+    {kSPR_SARG, 8, 5, kA_NULL, kS_SARG_RUN1, 0},             // S_SARG_RAISE6
+    {kSPR_HEAD, 0, 10, kA_Look, kS_HEAD_STND, 0},            // S_HEAD_STND
+    {kSPR_HEAD, 0, 3, kA_Chase, kS_HEAD_RUN1, 0},            // S_HEAD_RUN1
+    {kSPR_HEAD, 1, 5, kA_FaceTarget, kS_HEAD_ATK2, 0},       // S_HEAD_ATK1
+    {kSPR_HEAD, 2, 5, kA_FaceTarget, kS_HEAD_ATK3, 0},       // S_HEAD_ATK2
+    {kSPR_HEAD, 32771, 5, kA_HeadAttack, kS_HEAD_RUN1, 0},   // S_HEAD_ATK3
+    {kSPR_HEAD, 4, 3, kA_NULL, kS_HEAD_PAIN2, 0},            // S_HEAD_PAIN
+    {kSPR_HEAD, 4, 3, kA_Pain, kS_HEAD_PAIN3, 0},            // S_HEAD_PAIN2
+    {kSPR_HEAD, 5, 6, kA_NULL, kS_HEAD_RUN1, 0},             // S_HEAD_PAIN3
+    {kSPR_HEAD, 6, 8, kA_NULL, kS_HEAD_DIE2, 0},             // S_HEAD_DIE1
+    {kSPR_HEAD, 7, 8, kA_Scream, kS_HEAD_DIE3, 0},           // S_HEAD_DIE2
+    {kSPR_HEAD, 8, 8, kA_NULL, kS_HEAD_DIE4, 0},             // S_HEAD_DIE3
+    {kSPR_HEAD, 9, 8, kA_NULL, kS_HEAD_DIE5, 0},             // S_HEAD_DIE4
+    {kSPR_HEAD, 10, 8, kA_Fall, kS_HEAD_DIE6, 0},            // S_HEAD_DIE5
+    {kSPR_HEAD, 11, -1, kA_NULL, kS_NULL, 0},                // S_HEAD_DIE6
+    {kSPR_HEAD, 11, 8, kA_NULL, kS_HEAD_RAISE2, 0},          // S_HEAD_RAISE1
+    {kSPR_HEAD, 10, 8, kA_NULL, kS_HEAD_RAISE3, 0},          // S_HEAD_RAISE2
+    {kSPR_HEAD, 9, 8, kA_NULL, kS_HEAD_RAISE4, 0},           // S_HEAD_RAISE3
+    {kSPR_HEAD, 8, 8, kA_NULL, kS_HEAD_RAISE5, 0},           // S_HEAD_RAISE4
+    {kSPR_HEAD, 7, 8, kA_NULL, kS_HEAD_RAISE6, 0},           // S_HEAD_RAISE5
+    {kSPR_HEAD, 6, 8, kA_NULL, kS_HEAD_RUN1, 0},             // S_HEAD_RAISE6
+    {kSPR_BAL7, 32768, 4, kA_NULL, kS_BRBALL2, 0},           // S_BRBALL1
+    {kSPR_BAL7, 32769, 4, kA_NULL, kS_BRBALL1, 0},           // S_BRBALL2
+    {kSPR_BAL7, 32770, 6, kA_NULL, kS_BRBALLX2, 0},          // S_BRBALLX1
+    {kSPR_BAL7, 32771, 6, kA_NULL, kS_BRBALLX3, 0},          // S_BRBALLX2
+    {kSPR_BAL7, 32772, 6, kA_NULL, kS_NULL, 0},              // S_BRBALLX3
+    {kSPR_BOSS, 0, 10, kA_Look, kS_BOSS_STND2, 0},           // S_BOSS_STND
+    {kSPR_BOSS, 1, 10, kA_Look, kS_BOSS_STND, 0},            // S_BOSS_STND2
+    {kSPR_BOSS, 0, 3, kA_Chase, kS_BOSS_RUN2, 0},            // S_BOSS_RUN1
+    {kSPR_BOSS, 0, 3, kA_Chase, kS_BOSS_RUN3, 0},            // S_BOSS_RUN2
+    {kSPR_BOSS, 1, 3, kA_Chase, kS_BOSS_RUN4, 0},            // S_BOSS_RUN3
+    {kSPR_BOSS, 1, 3, kA_Chase, kS_BOSS_RUN5, 0},            // S_BOSS_RUN4
+    {kSPR_BOSS, 2, 3, kA_Chase, kS_BOSS_RUN6, 0},            // S_BOSS_RUN5
+    {kSPR_BOSS, 2, 3, kA_Chase, kS_BOSS_RUN7, 0},            // S_BOSS_RUN6
+    {kSPR_BOSS, 3, 3, kA_Chase, kS_BOSS_RUN8, 0},            // S_BOSS_RUN7
+    {kSPR_BOSS, 3, 3, kA_Chase, kS_BOSS_RUN1, 0},            // S_BOSS_RUN8
+    {kSPR_BOSS, 4, 8, kA_FaceTarget, kS_BOSS_ATK2, 0},       // S_BOSS_ATK1
+    {kSPR_BOSS, 5, 8, kA_FaceTarget, kS_BOSS_ATK3, 0},       // S_BOSS_ATK2
+    {kSPR_BOSS, 6, 8, kA_BruisAttack, kS_BOSS_RUN1, 0},      // S_BOSS_ATK3
+    {kSPR_BOSS, 7, 2, kA_NULL, kS_BOSS_PAIN2, 0},            // S_BOSS_PAIN
+    {kSPR_BOSS, 7, 2, kA_Pain, kS_BOSS_RUN1, 0},             // S_BOSS_PAIN2
+    {kSPR_BOSS, 8, 8, kA_NULL, kS_BOSS_DIE2, 0},             // S_BOSS_DIE1
+    {kSPR_BOSS, 9, 8, kA_Scream, kS_BOSS_DIE3, 0},           // S_BOSS_DIE2
+    {kSPR_BOSS, 10, 8, kA_NULL, kS_BOSS_DIE4, 0},            // S_BOSS_DIE3
+    {kSPR_BOSS, 11, 8, kA_Fall, kS_BOSS_DIE5, 0},            // S_BOSS_DIE4
+    {kSPR_BOSS, 12, 8, kA_NULL, kS_BOSS_DIE6, 0},            // S_BOSS_DIE5
+    {kSPR_BOSS, 13, 8, kA_NULL, kS_BOSS_DIE7, 0},            // S_BOSS_DIE6
+    {kSPR_BOSS, 14, -1, kA_BossDeath, kS_NULL, 0},           // S_BOSS_DIE7
+    {kSPR_BOSS, 14, 8, kA_NULL, kS_BOSS_RAISE2, 0},          // S_BOSS_RAISE1
+    {kSPR_BOSS, 13, 8, kA_NULL, kS_BOSS_RAISE3, 0},          // S_BOSS_RAISE2
+    {kSPR_BOSS, 12, 8, kA_NULL, kS_BOSS_RAISE4, 0},          // S_BOSS_RAISE3
+    {kSPR_BOSS, 11, 8, kA_NULL, kS_BOSS_RAISE5, 0},          // S_BOSS_RAISE4
+    {kSPR_BOSS, 10, 8, kA_NULL, kS_BOSS_RAISE6, 0},          // S_BOSS_RAISE5
+    {kSPR_BOSS, 9, 8, kA_NULL, kS_BOSS_RAISE7, 0},           // S_BOSS_RAISE6
+    {kSPR_BOSS, 8, 8, kA_NULL, kS_BOSS_RUN1, 0},             // S_BOSS_RAISE7
+    {kSPR_BOS2, 0, 10, kA_Look, kS_BOS2_STND2, 0},           // S_BOS2_STND
+    {kSPR_BOS2, 1, 10, kA_Look, kS_BOS2_STND, 0},            // S_BOS2_STND2
+    {kSPR_BOS2, 0, 3, kA_Chase, kS_BOS2_RUN2, 0},            // S_BOS2_RUN1
+    {kSPR_BOS2, 0, 3, kA_Chase, kS_BOS2_RUN3, 0},            // S_BOS2_RUN2
+    {kSPR_BOS2, 1, 3, kA_Chase, kS_BOS2_RUN4, 0},            // S_BOS2_RUN3
+    {kSPR_BOS2, 1, 3, kA_Chase, kS_BOS2_RUN5, 0},            // S_BOS2_RUN4
+    {kSPR_BOS2, 2, 3, kA_Chase, kS_BOS2_RUN6, 0},            // S_BOS2_RUN5
+    {kSPR_BOS2, 2, 3, kA_Chase, kS_BOS2_RUN7, 0},            // S_BOS2_RUN6
+    {kSPR_BOS2, 3, 3, kA_Chase, kS_BOS2_RUN8, 0},            // S_BOS2_RUN7
+    {kSPR_BOS2, 3, 3, kA_Chase, kS_BOS2_RUN1, 0},            // S_BOS2_RUN8
+    {kSPR_BOS2, 4, 8, kA_FaceTarget, kS_BOS2_ATK2, 0},       // S_BOS2_ATK1
+    {kSPR_BOS2, 5, 8, kA_FaceTarget, kS_BOS2_ATK3, 0},       // S_BOS2_ATK2
+    {kSPR_BOS2, 6, 8, kA_BruisAttack, kS_BOS2_RUN1, 0},      // S_BOS2_ATK3
+    {kSPR_BOS2, 7, 2, kA_NULL, kS_BOS2_PAIN2, 0},            // S_BOS2_PAIN
+    {kSPR_BOS2, 7, 2, kA_Pain, kS_BOS2_RUN1, 0},             // S_BOS2_PAIN2
+    {kSPR_BOS2, 8, 8, kA_NULL, kS_BOS2_DIE2, 0},             // S_BOS2_DIE1
+    {kSPR_BOS2, 9, 8, kA_Scream, kS_BOS2_DIE3, 0},           // S_BOS2_DIE2
+    {kSPR_BOS2, 10, 8, kA_NULL, kS_BOS2_DIE4, 0},            // S_BOS2_DIE3
+    {kSPR_BOS2, 11, 8, kA_Fall, kS_BOS2_DIE5, 0},            // S_BOS2_DIE4
+    {kSPR_BOS2, 12, 8, kA_NULL, kS_BOS2_DIE6, 0},            // S_BOS2_DIE5
+    {kSPR_BOS2, 13, 8, kA_NULL, kS_BOS2_DIE7, 0},            // S_BOS2_DIE6
+    {kSPR_BOS2, 14, -1, kA_NULL, kS_NULL, 0},                // S_BOS2_DIE7
+    {kSPR_BOS2, 14, 8, kA_NULL, kS_BOS2_RAISE2, 0},          // S_BOS2_RAISE1
+    {kSPR_BOS2, 13, 8, kA_NULL, kS_BOS2_RAISE3, 0},          // S_BOS2_RAISE2
+    {kSPR_BOS2, 12, 8, kA_NULL, kS_BOS2_RAISE4, 0},          // S_BOS2_RAISE3
+    {kSPR_BOS2, 11, 8, kA_NULL, kS_BOS2_RAISE5, 0},          // S_BOS2_RAISE4
+    {kSPR_BOS2, 10, 8, kA_NULL, kS_BOS2_RAISE6, 0},          // S_BOS2_RAISE5
+    {kSPR_BOS2, 9, 8, kA_NULL, kS_BOS2_RAISE7, 0},           // S_BOS2_RAISE6
+    {kSPR_BOS2, 8, 8, kA_NULL, kS_BOS2_RUN1, 0},             // S_BOS2_RAISE7
+    {kSPR_SKUL, 32768, 10, kA_Look, kS_SKULL_STND2, 0},      // S_SKULL_STND
+    {kSPR_SKUL, 32769, 10, kA_Look, kS_SKULL_STND, 0},       // S_SKULL_STND2
+    {kSPR_SKUL, 32768, 6, kA_Chase, kS_SKULL_RUN2, 0},       // S_SKULL_RUN1
+    {kSPR_SKUL, 32769, 6, kA_Chase, kS_SKULL_RUN1, 0},       // S_SKULL_RUN2
+    {kSPR_SKUL, 32770, 10, kA_FaceTarget, kS_SKULL_ATK2, 0}, // S_SKULL_ATK1
+    {kSPR_SKUL, 32771, 4, kA_SkullAttack, kS_SKULL_ATK3, 0}, // S_SKULL_ATK2
+    {kSPR_SKUL, 32770, 4, kA_NULL, kS_SKULL_ATK4, 0},        // S_SKULL_ATK3
+    {kSPR_SKUL, 32771, 4, kA_NULL, kS_SKULL_ATK3, 0},        // S_SKULL_ATK4
+    {kSPR_SKUL, 32772, 3, kA_NULL, kS_SKULL_PAIN2, 0},       // S_SKULL_PAIN
+    {kSPR_SKUL, 32772, 3, kA_Pain, kS_SKULL_RUN1, 0},        // S_SKULL_PAIN2
+    {kSPR_SKUL, 32773, 6, kA_NULL, kS_SKULL_DIE2, 0},        // S_SKULL_DIE1
+    {kSPR_SKUL, 32774, 6, kA_Scream, kS_SKULL_DIE3, 0},      // S_SKULL_DIE2
+    {kSPR_SKUL, 32775, 6, kA_NULL, kS_SKULL_DIE4, 0},        // S_SKULL_DIE3
+    {kSPR_SKUL, 32776, 6, kA_Fall, kS_SKULL_DIE5, 0},        // S_SKULL_DIE4
+    {kSPR_SKUL, 9, 6, kA_NULL, kS_SKULL_DIE6, 0},            // S_SKULL_DIE5
+    {kSPR_SKUL, 10, 6, kA_NULL, kS_NULL, 0},                 // S_SKULL_DIE6
+    {kSPR_SPID, 0, 10, kA_Look, kS_SPID_STND2, 0},           // S_SPID_STND
+    {kSPR_SPID, 1, 10, kA_Look, kS_SPID_STND, 0},            // S_SPID_STND2
+    {kSPR_SPID, 0, 3, kA_Metal, kS_SPID_RUN2, 0},            // S_SPID_RUN1
+    {kSPR_SPID, 0, 3, kA_Chase, kS_SPID_RUN3, 0},            // S_SPID_RUN2
+    {kSPR_SPID, 1, 3, kA_Chase, kS_SPID_RUN4, 0},            // S_SPID_RUN3
+    {kSPR_SPID, 1, 3, kA_Chase, kS_SPID_RUN5, 0},            // S_SPID_RUN4
+    {kSPR_SPID, 2, 3, kA_Metal, kS_SPID_RUN6, 0},            // S_SPID_RUN5
+    {kSPR_SPID, 2, 3, kA_Chase, kS_SPID_RUN7, 0},            // S_SPID_RUN6
+    {kSPR_SPID, 3, 3, kA_Chase, kS_SPID_RUN8, 0},            // S_SPID_RUN7
+    {kSPR_SPID, 3, 3, kA_Chase, kS_SPID_RUN9, 0},            // S_SPID_RUN8
+    {kSPR_SPID, 4, 3, kA_Metal, kS_SPID_RUN10, 0},           // S_SPID_RUN9
+    {kSPR_SPID, 4, 3, kA_Chase, kS_SPID_RUN11, 0},           // S_SPID_RUN10
+    {kSPR_SPID, 5, 3, kA_Chase, kS_SPID_RUN12, 0},           // S_SPID_RUN11
+    {kSPR_SPID, 5, 3, kA_Chase, kS_SPID_RUN1, 0},            // S_SPID_RUN12
+    {kSPR_SPID, 32768, 20, kA_FaceTarget, kS_SPID_ATK2, 0},  // S_SPID_ATK1
+    {kSPR_SPID, 32774, 4, kA_SPosAttack, kS_SPID_ATK3, 0},   // S_SPID_ATK2
+    {kSPR_SPID, 32775, 4, kA_SPosAttack, kS_SPID_ATK4, 0},   // S_SPID_ATK3
+    {kSPR_SPID, 32775, 1, kA_SpidRefire, kS_SPID_ATK2, 0},   // S_SPID_ATK4
+    {kSPR_SPID, 8, 3, kA_NULL, kS_SPID_PAIN2, 0},            // S_SPID_PAIN
+    {kSPR_SPID, 8, 3, kA_Pain, kS_SPID_RUN1, 0},             // S_SPID_PAIN2
+    {kSPR_SPID, 9, 20, kA_Scream, kS_SPID_DIE2, 0},          // S_SPID_DIE1
+    {kSPR_SPID, 10, 10, kA_Fall, kS_SPID_DIE3, 0},           // S_SPID_DIE2
+    {kSPR_SPID, 11, 10, kA_NULL, kS_SPID_DIE4, 0},           // S_SPID_DIE3
+    {kSPR_SPID, 12, 10, kA_NULL, kS_SPID_DIE5, 0},           // S_SPID_DIE4
+    {kSPR_SPID, 13, 10, kA_NULL, kS_SPID_DIE6, 0},           // S_SPID_DIE5
+    {kSPR_SPID, 14, 10, kA_NULL, kS_SPID_DIE7, 0},           // S_SPID_DIE6
+    {kSPR_SPID, 15, 10, kA_NULL, kS_SPID_DIE8, 0},           // S_SPID_DIE7
+    {kSPR_SPID, 16, 10, kA_NULL, kS_SPID_DIE9, 0},           // S_SPID_DIE8
+    {kSPR_SPID, 17, 10, kA_NULL, kS_SPID_DIE10, 0},          // S_SPID_DIE9
+    {kSPR_SPID, 18, 30, kA_NULL, kS_SPID_DIE11, 0},          // S_SPID_DIE10
+    {kSPR_SPID, 18, -1, kA_BossDeath, kS_NULL, 0},           // S_SPID_DIE11
+    {kSPR_BSPI, 0, 10, kA_Look, kS_BSPI_STND2, 0},           // S_BSPI_STND
+    {kSPR_BSPI, 1, 10, kA_Look, kS_BSPI_STND, 0},            // S_BSPI_STND2
+    {kSPR_BSPI, 0, 20, kA_NULL, kS_BSPI_RUN1, 0},            // S_BSPI_SIGHT
+    {kSPR_BSPI, 0, 3, kA_BabyMetal, kS_BSPI_RUN2, 0},        // S_BSPI_RUN1
+    {kSPR_BSPI, 0, 3, kA_Chase, kS_BSPI_RUN3, 0},            // S_BSPI_RUN2
+    {kSPR_BSPI, 1, 3, kA_Chase, kS_BSPI_RUN4, 0},            // S_BSPI_RUN3
+    {kSPR_BSPI, 1, 3, kA_Chase, kS_BSPI_RUN5, 0},            // S_BSPI_RUN4
+    {kSPR_BSPI, 2, 3, kA_Chase, kS_BSPI_RUN6, 0},            // S_BSPI_RUN5
+    {kSPR_BSPI, 2, 3, kA_Chase, kS_BSPI_RUN7, 0},            // S_BSPI_RUN6
+    {kSPR_BSPI, 3, 3, kA_BabyMetal, kS_BSPI_RUN8, 0},        // S_BSPI_RUN7
+    {kSPR_BSPI, 3, 3, kA_Chase, kS_BSPI_RUN9, 0},            // S_BSPI_RUN8
+    {kSPR_BSPI, 4, 3, kA_Chase, kS_BSPI_RUN10, 0},           // S_BSPI_RUN9
+    {kSPR_BSPI, 4, 3, kA_Chase, kS_BSPI_RUN11, 0},           // S_BSPI_RUN10
+    {kSPR_BSPI, 5, 3, kA_Chase, kS_BSPI_RUN12, 0},           // S_BSPI_RUN11
+    {kSPR_BSPI, 5, 3, kA_Chase, kS_BSPI_RUN1, 0},            // S_BSPI_RUN12
+    {kSPR_BSPI, 32768, 20, kA_FaceTarget, kS_BSPI_ATK2, 0},  // S_BSPI_ATK1
+    {kSPR_BSPI, 32774, 4, kA_BspiAttack, kS_BSPI_ATK3, 0},   // S_BSPI_ATK2
+    {kSPR_BSPI, 32775, 4, kA_NULL, kS_BSPI_ATK4, 0},         // S_BSPI_ATK3
+    {kSPR_BSPI, 32775, 1, kA_SpidRefire, kS_BSPI_ATK2, 0},   // S_BSPI_ATK4
+    {kSPR_BSPI, 8, 3, kA_NULL, kS_BSPI_PAIN2, 0},            // S_BSPI_PAIN
+    {kSPR_BSPI, 8, 3, kA_Pain, kS_BSPI_RUN1, 0},             // S_BSPI_PAIN2
+    {kSPR_BSPI, 9, 20, kA_Scream, kS_BSPI_DIE2, 0},          // S_BSPI_DIE1
+    {kSPR_BSPI, 10, 7, kA_Fall, kS_BSPI_DIE3, 0},            // S_BSPI_DIE2
+    {kSPR_BSPI, 11, 7, kA_NULL, kS_BSPI_DIE4, 0},            // S_BSPI_DIE3
+    {kSPR_BSPI, 12, 7, kA_NULL, kS_BSPI_DIE5, 0},            // S_BSPI_DIE4
+    {kSPR_BSPI, 13, 7, kA_NULL, kS_BSPI_DIE6, 0},            // S_BSPI_DIE5
+    {kSPR_BSPI, 14, 7, kA_NULL, kS_BSPI_DIE7, 0},            // S_BSPI_DIE6
+    {kSPR_BSPI, 15, -1, kA_BossDeath, kS_NULL, 0},           // S_BSPI_DIE7
+    {kSPR_BSPI, 15, 5, kA_NULL, kS_BSPI_RAISE2, 0},          // S_BSPI_RAISE1
+    {kSPR_BSPI, 14, 5, kA_NULL, kS_BSPI_RAISE3, 0},          // S_BSPI_RAISE2
+    {kSPR_BSPI, 13, 5, kA_NULL, kS_BSPI_RAISE4, 0},          // S_BSPI_RAISE3
+    {kSPR_BSPI, 12, 5, kA_NULL, kS_BSPI_RAISE5, 0},          // S_BSPI_RAISE4
+    {kSPR_BSPI, 11, 5, kA_NULL, kS_BSPI_RAISE6, 0},          // S_BSPI_RAISE5
+    {kSPR_BSPI, 10, 5, kA_NULL, kS_BSPI_RAISE7, 0},          // S_BSPI_RAISE6
+    {kSPR_BSPI, 9, 5, kA_NULL, kS_BSPI_RUN1, 0},             // S_BSPI_RAISE7
+    {kSPR_APLS, 32768, 5, kA_NULL, kS_ARACH_PLAZ2, 0},       // S_ARACH_PLAZ
+    {kSPR_APLS, 32769, 5, kA_NULL, kS_ARACH_PLAZ, 0},        // S_ARACH_PLAZ2
+    {kSPR_APBX, 32768, 5, kA_NULL, kS_ARACH_PLEX2, 0},       // S_ARACH_PLEX
+    {kSPR_APBX, 32769, 5, kA_NULL, kS_ARACH_PLEX3, 0},       // S_ARACH_PLEX2
+    {kSPR_APBX, 32770, 5, kA_NULL, kS_ARACH_PLEX4, 0},       // S_ARACH_PLEX3
+    {kSPR_APBX, 32771, 5, kA_NULL, kS_ARACH_PLEX5, 0},       // S_ARACH_PLEX4
+    {kSPR_APBX, 32772, 5, kA_NULL, kS_NULL, 0},              // S_ARACH_PLEX5
+    {kSPR_CYBR, 0, 10, kA_Look, kS_CYBER_STND2, 0},          // S_CYBER_STND
+    {kSPR_CYBR, 1, 10, kA_Look, kS_CYBER_STND, 0},           // S_CYBER_STND2
+    {kSPR_CYBR, 0, 3, kA_Hoof, kS_CYBER_RUN2, 0},            // S_CYBER_RUN1
+    {kSPR_CYBR, 0, 3, kA_Chase, kS_CYBER_RUN3, 0},           // S_CYBER_RUN2
+    {kSPR_CYBR, 1, 3, kA_Chase, kS_CYBER_RUN4, 0},           // S_CYBER_RUN3
+    {kSPR_CYBR, 1, 3, kA_Chase, kS_CYBER_RUN5, 0},           // S_CYBER_RUN4
+    {kSPR_CYBR, 2, 3, kA_Chase, kS_CYBER_RUN6, 0},           // S_CYBER_RUN5
+    {kSPR_CYBR, 2, 3, kA_Chase, kS_CYBER_RUN7, 0},           // S_CYBER_RUN6
+    {kSPR_CYBR, 3, 3, kA_Metal, kS_CYBER_RUN8, 0},           // S_CYBER_RUN7
+    {kSPR_CYBR, 3, 3, kA_Chase, kS_CYBER_RUN1, 0},           // S_CYBER_RUN8
+    {kSPR_CYBR, 4, 6, kA_FaceTarget, kS_CYBER_ATK2, 0},      // S_CYBER_ATK1
+    {kSPR_CYBR, 5, 12, kA_CyberAttack, kS_CYBER_ATK3, 0},    // S_CYBER_ATK2
+    {kSPR_CYBR, 4, 12, kA_FaceTarget, kS_CYBER_ATK4, 0},     // S_CYBER_ATK3
+    {kSPR_CYBR, 5, 12, kA_CyberAttack, kS_CYBER_ATK5, 0},    // S_CYBER_ATK4
+    {kSPR_CYBR, 4, 12, kA_FaceTarget, kS_CYBER_ATK6, 0},     // S_CYBER_ATK5
+    {kSPR_CYBR, 5, 12, kA_CyberAttack, kS_CYBER_RUN1, 0},    // S_CYBER_ATK6
+    {kSPR_CYBR, 6, 10, kA_Pain, kS_CYBER_RUN1, 0},           // S_CYBER_PAIN
+    {kSPR_CYBR, 7, 10, kA_NULL, kS_CYBER_DIE2, 0},           // S_CYBER_DIE1
+    {kSPR_CYBR, 8, 10, kA_Scream, kS_CYBER_DIE3, 0},         // S_CYBER_DIE2
+    {kSPR_CYBR, 9, 10, kA_NULL, kS_CYBER_DIE4, 0},           // S_CYBER_DIE3
+    {kSPR_CYBR, 10, 10, kA_NULL, kS_CYBER_DIE5, 0},          // S_CYBER_DIE4
+    {kSPR_CYBR, 11, 10, kA_NULL, kS_CYBER_DIE6, 0},          // S_CYBER_DIE5
+    {kSPR_CYBR, 12, 10, kA_Fall, kS_CYBER_DIE7, 0},          // S_CYBER_DIE6
+    {kSPR_CYBR, 13, 10, kA_NULL, kS_CYBER_DIE8, 0},          // S_CYBER_DIE7
+    {kSPR_CYBR, 14, 10, kA_NULL, kS_CYBER_DIE9, 0},          // S_CYBER_DIE8
+    {kSPR_CYBR, 15, 30, kA_NULL, kS_CYBER_DIE10, 0},         // S_CYBER_DIE9
+    {kSPR_CYBR, 15, -1, kA_BossDeath, kS_NULL, 0},           // S_CYBER_DIE10
+    {kSPR_PAIN, 0, 10, kA_Look, kS_PAIN_STND, 0},            // S_PAIN_STND
+    {kSPR_PAIN, 0, 3, kA_Chase, kS_PAIN_RUN2, 0},            // S_PAIN_RUN1
+    {kSPR_PAIN, 0, 3, kA_Chase, kS_PAIN_RUN3, 0},            // S_PAIN_RUN2
+    {kSPR_PAIN, 1, 3, kA_Chase, kS_PAIN_RUN4, 0},            // S_PAIN_RUN3
+    {kSPR_PAIN, 1, 3, kA_Chase, kS_PAIN_RUN5, 0},            // S_PAIN_RUN4
+    {kSPR_PAIN, 2, 3, kA_Chase, kS_PAIN_RUN6, 0},            // S_PAIN_RUN5
+    {kSPR_PAIN, 2, 3, kA_Chase, kS_PAIN_RUN1, 0},            // S_PAIN_RUN6
+    {kSPR_PAIN, 3, 5, kA_FaceTarget, kS_PAIN_ATK2, 0},       // S_PAIN_ATK1
+    {kSPR_PAIN, 4, 5, kA_FaceTarget, kS_PAIN_ATK3, 0},       // S_PAIN_ATK2
+    {kSPR_PAIN, 32773, 5, kA_FaceTarget, kS_PAIN_ATK4, 0},   // S_PAIN_ATK3
+    {kSPR_PAIN, 32773, 0, kA_PainAttack, kS_PAIN_RUN1, 0},   // S_PAIN_ATK4
+    {kSPR_PAIN, 6, 6, kA_NULL, kS_PAIN_PAIN2, 0},            // S_PAIN_PAIN
+    {kSPR_PAIN, 6, 6, kA_Pain, kS_PAIN_RUN1, 0},             // S_PAIN_PAIN2
+    {kSPR_PAIN, 32775, 8, kA_NULL, kS_PAIN_DIE2, 0},         // S_PAIN_DIE1
+    {kSPR_PAIN, 32776, 8, kA_Scream, kS_PAIN_DIE3, 0},       // S_PAIN_DIE2
+    {kSPR_PAIN, 32777, 8, kA_NULL, kS_PAIN_DIE4, 0},         // S_PAIN_DIE3
+    {kSPR_PAIN, 32778, 8, kA_NULL, kS_PAIN_DIE5, 0},         // S_PAIN_DIE4
+    {kSPR_PAIN, 32779, 8, kA_PainDie, kS_PAIN_DIE6, 0},      // S_PAIN_DIE5
+    {kSPR_PAIN, 32780, 8, kA_NULL, kS_NULL, 0},              // S_PAIN_DIE6
+    {kSPR_PAIN, 12, 8, kA_NULL, kS_PAIN_RAISE2, 0},          // S_PAIN_RAISE1
+    {kSPR_PAIN, 11, 8, kA_NULL, kS_PAIN_RAISE3, 0},          // S_PAIN_RAISE2
+    {kSPR_PAIN, 10, 8, kA_NULL, kS_PAIN_RAISE4, 0},          // S_PAIN_RAISE3
+    {kSPR_PAIN, 9, 8, kA_NULL, kS_PAIN_RAISE5, 0},           // S_PAIN_RAISE4
+    {kSPR_PAIN, 8, 8, kA_NULL, kS_PAIN_RAISE6, 0},           // S_PAIN_RAISE5
+    {kSPR_PAIN, 7, 8, kA_NULL, kS_PAIN_RUN1, 0},             // S_PAIN_RAISE6
+    {kSPR_SSWV, 0, 10, kA_Look, kS_SSWV_STND2, 0},           // S_SSWV_STND
+    {kSPR_SSWV, 1, 10, kA_Look, kS_SSWV_STND, 0},            // S_SSWV_STND2
+    {kSPR_SSWV, 0, 3, kA_Chase, kS_SSWV_RUN2, 0},            // S_SSWV_RUN1
+    {kSPR_SSWV, 0, 3, kA_Chase, kS_SSWV_RUN3, 0},            // S_SSWV_RUN2
+    {kSPR_SSWV, 1, 3, kA_Chase, kS_SSWV_RUN4, 0},            // S_SSWV_RUN3
+    {kSPR_SSWV, 1, 3, kA_Chase, kS_SSWV_RUN5, 0},            // S_SSWV_RUN4
+    {kSPR_SSWV, 2, 3, kA_Chase, kS_SSWV_RUN6, 0},            // S_SSWV_RUN5
+    {kSPR_SSWV, 2, 3, kA_Chase, kS_SSWV_RUN7, 0},            // S_SSWV_RUN6
+    {kSPR_SSWV, 3, 3, kA_Chase, kS_SSWV_RUN8, 0},            // S_SSWV_RUN7
+    {kSPR_SSWV, 3, 3, kA_Chase, kS_SSWV_RUN1, 0},            // S_SSWV_RUN8
+    {kSPR_SSWV, 4, 10, kA_FaceTarget, kS_SSWV_ATK2, 0},      // S_SSWV_ATK1
+    {kSPR_SSWV, 5, 10, kA_FaceTarget, kS_SSWV_ATK3, 0},      // S_SSWV_ATK2
+    {kSPR_SSWV, 32774, 4, kA_CPosAttack, kS_SSWV_ATK4, 0},   // S_SSWV_ATK3
+    {kSPR_SSWV, 5, 6, kA_FaceTarget, kS_SSWV_ATK5, 0},       // S_SSWV_ATK4
+    {kSPR_SSWV, 32774, 4, kA_CPosAttack, kS_SSWV_ATK6, 0},   // S_SSWV_ATK5
+    {kSPR_SSWV, 5, 1, kA_CPosRefire, kS_SSWV_ATK2, 0},       // S_SSWV_ATK6
+    {kSPR_SSWV, 7, 3, kA_NULL, kS_SSWV_PAIN2, 0},            // S_SSWV_PAIN
+    {kSPR_SSWV, 7, 3, kA_Pain, kS_SSWV_RUN1, 0},             // S_SSWV_PAIN2
+    {kSPR_SSWV, 8, 5, kA_NULL, kS_SSWV_DIE2, 0},             // S_SSWV_DIE1
+    {kSPR_SSWV, 9, 5, kA_Scream, kS_SSWV_DIE3, 0},           // S_SSWV_DIE2
+    {kSPR_SSWV, 10, 5, kA_Fall, kS_SSWV_DIE4, 0},            // S_SSWV_DIE3
+    {kSPR_SSWV, 11, 5, kA_NULL, kS_SSWV_DIE5, 0},            // S_SSWV_DIE4
+    {kSPR_SSWV, 12, -1, kA_NULL, kS_NULL, 0},                // S_SSWV_DIE5
+    {kSPR_SSWV, 13, 5, kA_NULL, kS_SSWV_XDIE2, 0},           // S_SSWV_XDIE1
+    {kSPR_SSWV, 14, 5, kA_XScream, kS_SSWV_XDIE3, 0},        // S_SSWV_XDIE2
+    {kSPR_SSWV, 15, 5, kA_Fall, kS_SSWV_XDIE4, 0},           // S_SSWV_XDIE3
+    {kSPR_SSWV, 16, 5, kA_NULL, kS_SSWV_XDIE5, 0},           // S_SSWV_XDIE4
+    {kSPR_SSWV, 17, 5, kA_NULL, kS_SSWV_XDIE6, 0},           // S_SSWV_XDIE5
+    {kSPR_SSWV, 18, 5, kA_NULL, kS_SSWV_XDIE7, 0},           // S_SSWV_XDIE6
+    {kSPR_SSWV, 19, 5, kA_NULL, kS_SSWV_XDIE8, 0},           // S_SSWV_XDIE7
+    {kSPR_SSWV, 20, 5, kA_NULL, kS_SSWV_XDIE9, 0},           // S_SSWV_XDIE8
+    {kSPR_SSWV, 21, -1, kA_NULL, kS_NULL, 0},                // S_SSWV_XDIE9
+    {kSPR_SSWV, 12, 5, kA_NULL, kS_SSWV_RAISE2, 0},          // S_SSWV_RAISE1
+    {kSPR_SSWV, 11, 5, kA_NULL, kS_SSWV_RAISE3, 0},          // S_SSWV_RAISE2
+    {kSPR_SSWV, 10, 5, kA_NULL, kS_SSWV_RAISE4, 0},          // S_SSWV_RAISE3
+    {kSPR_SSWV, 9, 5, kA_NULL, kS_SSWV_RAISE5, 0},           // S_SSWV_RAISE4
+    {kSPR_SSWV, 8, 5, kA_NULL, kS_SSWV_RUN1, 0},             // S_SSWV_RAISE5
+    {kSPR_KEEN, 0, -1, kA_NULL, kS_KEENSTND, 0},             // S_KEENSTND
+    {kSPR_KEEN, 0, 6, kA_NULL, kS_COMMKEEN2, 0},             // S_COMMKEEN
+    {kSPR_KEEN, 1, 6, kA_NULL, kS_COMMKEEN3, 0},             // S_COMMKEEN2
+    {kSPR_KEEN, 2, 6, kA_Scream, kS_COMMKEEN4, 0},           // S_COMMKEEN3
+    {kSPR_KEEN, 3, 6, kA_NULL, kS_COMMKEEN5, 0},             // S_COMMKEEN4
+    {kSPR_KEEN, 4, 6, kA_NULL, kS_COMMKEEN6, 0},             // S_COMMKEEN5
+    {kSPR_KEEN, 5, 6, kA_NULL, kS_COMMKEEN7, 0},             // S_COMMKEEN6
+    {kSPR_KEEN, 6, 6, kA_NULL, kS_COMMKEEN8, 0},             // S_COMMKEEN7
+    {kSPR_KEEN, 7, 6, kA_NULL, kS_COMMKEEN9, 0},             // S_COMMKEEN8
+    {kSPR_KEEN, 8, 6, kA_NULL, kS_COMMKEEN10, 0},            // S_COMMKEEN9
+    {kSPR_KEEN, 9, 6, kA_NULL, kS_COMMKEEN11, 0},            // S_COMMKEEN10
+    {kSPR_KEEN, 10, 6, kA_KeenDie, kS_COMMKEEN12, 0},        // S_COMMKEEN11
+    {kSPR_KEEN, 11, -1, kA_NULL, kS_NULL, 0},                // S_COMMKEEN12
+    {kSPR_KEEN, 12, 4, kA_NULL, kS_KEENPAIN2, 0},            // S_KEENPAIN
+    {kSPR_KEEN, 12, 8, kA_Pain, kS_KEENSTND, 0},             // S_KEENPAIN2
+    {kSPR_BBRN, 0, -1, kA_NULL, kS_NULL, 0},                 // S_BRAIN
+    {kSPR_BBRN, 1, 36, kA_BrainPain, kS_BRAIN, 0},           // S_BRAIN_PAIN
+    {kSPR_BBRN, 0, 100, kA_BrainScream, kS_BRAIN_DIE2, 0},   // S_BRAIN_DIE1
+    {kSPR_BBRN, 0, 10, kA_NULL, kS_BRAIN_DIE3, 0},           // S_BRAIN_DIE2
+    {kSPR_BBRN, 0, 10, kA_NULL, kS_BRAIN_DIE4, 0},           // S_BRAIN_DIE3
+    {kSPR_BBRN, 0, -1, kA_BrainDie, kS_NULL, 0},             // S_BRAIN_DIE4
+    {kSPR_SSWV, 0, 10, kA_Look, kS_BRAINEYE, 0},             // S_BRAINEYE
+    {kSPR_SSWV, 0, 181, kA_BrainAwake, kS_BRAINEYE1, 0},     // S_BRAINEYESEE
+    {kSPR_SSWV, 0, 150, kA_BrainSpit, kS_BRAINEYE1, 0},      // S_BRAINEYE1
+    {kSPR_BOSF, 32768, 3, kA_SpawnSound, kS_SPAWN2, 0},      // S_SPAWN1
+    {kSPR_BOSF, 32769, 3, kA_SpawnFly, kS_SPAWN3, 0},        // S_SPAWN2
+    {kSPR_BOSF, 32770, 3, kA_SpawnFly, kS_SPAWN4, 0},        // S_SPAWN3
+    {kSPR_BOSF, 32771, 3, kA_SpawnFly, kS_SPAWN1, 0},        // S_SPAWN4
+    {kSPR_FIRE, 32768, 4, kA_Fire, kS_SPAWNFIRE2, 0},        // S_SPAWNFIRE1
+    {kSPR_FIRE, 32769, 4, kA_Fire, kS_SPAWNFIRE3, 0},        // S_SPAWNFIRE2
+    {kSPR_FIRE, 32770, 4, kA_Fire, kS_SPAWNFIRE4, 0},        // S_SPAWNFIRE3
+    {kSPR_FIRE, 32771, 4, kA_Fire, kS_SPAWNFIRE5, 0},        // S_SPAWNFIRE4
+    {kSPR_FIRE, 32772, 4, kA_Fire, kS_SPAWNFIRE6, 0},        // S_SPAWNFIRE5
+    {kSPR_FIRE, 32773, 4, kA_Fire, kS_SPAWNFIRE7, 0},        // S_SPAWNFIRE6
+    {kSPR_FIRE, 32774, 4, kA_Fire, kS_SPAWNFIRE8, 0},        // S_SPAWNFIRE7
+    {kSPR_FIRE, 32775, 4, kA_CubeSpawn, kS_NULL, 0},         // S_SPAWNFIRE8  /* MOD */
+    {kSPR_MISL, 32769, 10, kA_NULL, kS_BRAINEXPLODE2, 0},    // S_BRAINEXPLODE1
+    {kSPR_MISL, 32770, 10, kA_NULL, kS_BRAINEXPLODE3, 0},    // S_BRAINEXPLODE2
+    {kSPR_MISL, 32771, 10, kA_BrainExplode, kS_NULL, 0},     // S_BRAINEXPLODE3
+    {kSPR_ARM1, 0, 6, kA_NULL, kS_ARM1A, 0},                 // S_ARM1
+    {kSPR_ARM1, 32769, 7, kA_NULL, kS_ARM1, 0},              // S_ARM1A
+    {kSPR_ARM2, 0, 6, kA_NULL, kS_ARM2A, 0},                 // S_ARM2
+    {kSPR_ARM2, 32769, 6, kA_NULL, kS_ARM2, 0},              // S_ARM2A
+    {kSPR_BAR1, 0, 6, kA_NULL, kS_BAR2, 0},                  // S_BAR1
+    {kSPR_BAR1, 1, 6, kA_NULL, kS_BAR1, 0},                  // S_BAR2
+    {kSPR_BEXP, 32768, 5, kA_NULL, kS_BEXP2, 0},             // S_BEXP
+    {kSPR_BEXP, 32769, 5, kA_Scream, kS_BEXP3, 0},           // S_BEXP2
+    {kSPR_BEXP, 32770, 5, kA_NULL, kS_BEXP4, 0},             // S_BEXP3
+    {kSPR_BEXP, 32771, 10, kA_Explode, kS_BEXP5, 0},         // S_BEXP4
+    {kSPR_BEXP, 32772, 10, kA_NULL, kS_NULL, 0},             // S_BEXP5
+    {kSPR_FCAN, 32768, 4, kA_NULL, kS_BBAR2, 0},             // S_BBAR1
+    {kSPR_FCAN, 32769, 4, kA_NULL, kS_BBAR3, 0},             // S_BBAR2
+    {kSPR_FCAN, 32770, 4, kA_NULL, kS_BBAR1, 0},             // S_BBAR3
+    {kSPR_BON1, 0, 6, kA_NULL, kS_BON1A, 0},                 // S_BON1
+    {kSPR_BON1, 1, 6, kA_NULL, kS_BON1B, 0},                 // S_BON1A
+    {kSPR_BON1, 2, 6, kA_NULL, kS_BON1C, 0},                 // S_BON1B
+    {kSPR_BON1, 3, 6, kA_NULL, kS_BON1D, 0},                 // S_BON1C
+    {kSPR_BON1, 2, 6, kA_NULL, kS_BON1E, 0},                 // S_BON1D
+    {kSPR_BON1, 1, 6, kA_NULL, kS_BON1, 0},                  // S_BON1E
+    {kSPR_BON2, 0, 6, kA_NULL, kS_BON2A, 0},                 // S_BON2
+    {kSPR_BON2, 1, 6, kA_NULL, kS_BON2B, 0},                 // S_BON2A
+    {kSPR_BON2, 2, 6, kA_NULL, kS_BON2C, 0},                 // S_BON2B
+    {kSPR_BON2, 3, 6, kA_NULL, kS_BON2D, 0},                 // S_BON2C
+    {kSPR_BON2, 2, 6, kA_NULL, kS_BON2E, 0},                 // S_BON2D
+    {kSPR_BON2, 1, 6, kA_NULL, kS_BON2, 0},                  // S_BON2E
+    {kSPR_BKEY, 0, 10, kA_NULL, kS_BKEY2, 0},                // S_BKEY
+    {kSPR_BKEY, 32769, 10, kA_NULL, kS_BKEY, 0},             // S_BKEY2
+    {kSPR_RKEY, 0, 10, kA_NULL, kS_RKEY2, 0},                // S_RKEY
+    {kSPR_RKEY, 32769, 10, kA_NULL, kS_RKEY, 0},             // S_RKEY2
+    {kSPR_YKEY, 0, 10, kA_NULL, kS_YKEY2, 0},                // S_YKEY
+    {kSPR_YKEY, 32769, 10, kA_NULL, kS_YKEY, 0},             // S_YKEY2
+    {kSPR_BSKU, 0, 10, kA_NULL, kS_BSKULL2, 0},              // S_BSKULL
+    {kSPR_BSKU, 32769, 10, kA_NULL, kS_BSKULL, 0},           // S_BSKULL2
+    {kSPR_RSKU, 0, 10, kA_NULL, kS_RSKULL2, 0},              // S_RSKULL
+    {kSPR_RSKU, 32769, 10, kA_NULL, kS_RSKULL, 0},           // S_RSKULL2
+    {kSPR_YSKU, 0, 10, kA_NULL, kS_YSKULL2, 0},              // S_YSKULL
+    {kSPR_YSKU, 32769, 10, kA_NULL, kS_YSKULL, 0},           // S_YSKULL2
+    {kSPR_STIM, 0, -1, kA_NULL, kS_NULL, 0},                 // S_STIM
+    {kSPR_MEDI, 0, -1, kA_NULL, kS_NULL, 0},                 // S_MEDI
+    {kSPR_SOUL, 32768, 6, kA_NULL, kS_SOUL2, 0},             // S_SOUL
+    {kSPR_SOUL, 32769, 6, kA_NULL, kS_SOUL3, 0},             // S_SOUL2
+    {kSPR_SOUL, 32770, 6, kA_NULL, kS_SOUL4, 0},             // S_SOUL3
+    {kSPR_SOUL, 32771, 6, kA_NULL, kS_SOUL5, 0},             // S_SOUL4
+    {kSPR_SOUL, 32770, 6, kA_NULL, kS_SOUL6, 0},             // S_SOUL5
+    {kSPR_SOUL, 32769, 6, kA_NULL, kS_SOUL, 0},              // S_SOUL6
+    {kSPR_PINV, 32768, 6, kA_NULL, kS_PINV2, 0},             // S_PINV
+    {kSPR_PINV, 32769, 6, kA_NULL, kS_PINV3, 0},             // S_PINV2
+    {kSPR_PINV, 32770, 6, kA_NULL, kS_PINV4, 0},             // S_PINV3
+    {kSPR_PINV, 32771, 6, kA_NULL, kS_PINV, 0},              // S_PINV4
+    {kSPR_PSTR, 32768, -1, kA_NULL, kS_NULL, 0},             // S_PSTR
+    {kSPR_PINS, 32768, 6, kA_NULL, kS_PINS2, 0},             // S_PINS
+    {kSPR_PINS, 32769, 6, kA_NULL, kS_PINS3, 0},             // S_PINS2
+    {kSPR_PINS, 32770, 6, kA_NULL, kS_PINS4, 0},             // S_PINS3
+    {kSPR_PINS, 32771, 6, kA_NULL, kS_PINS, 0},              // S_PINS4
+    {kSPR_MEGA, 32768, 6, kA_NULL, kS_MEGA2, 0},             // S_MEGA
+    {kSPR_MEGA, 32769, 6, kA_NULL, kS_MEGA3, 0},             // S_MEGA2
+    {kSPR_MEGA, 32770, 6, kA_NULL, kS_MEGA4, 0},             // S_MEGA3
+    {kSPR_MEGA, 32771, 6, kA_NULL, kS_MEGA, 0},              // S_MEGA4
+    {kSPR_SUIT, 32768, -1, kA_NULL, kS_NULL, 0},             // S_SUIT
+    {kSPR_PMAP, 32768, 6, kA_NULL, kS_PMAP2, 0},             // S_PMAP
+    {kSPR_PMAP, 32769, 6, kA_NULL, kS_PMAP3, 0},             // S_PMAP2
+    {kSPR_PMAP, 32770, 6, kA_NULL, kS_PMAP4, 0},             // S_PMAP3
+    {kSPR_PMAP, 32771, 6, kA_NULL, kS_PMAP5, 0},             // S_PMAP4
+    {kSPR_PMAP, 32770, 6, kA_NULL, kS_PMAP6, 0},             // S_PMAP5
+    {kSPR_PMAP, 32769, 6, kA_NULL, kS_PMAP, 0},              // S_PMAP6
+    {kSPR_PVIS, 32768, 6, kA_NULL, kS_PVIS2, 0},             // S_PVIS
+    {kSPR_PVIS, 1, 6, kA_NULL, kS_PVIS, 0},                  // S_PVIS2
+    {kSPR_CLIP, 0, -1, kA_NULL, kS_NULL, 0},                 // S_CLIP
+    {kSPR_AMMO, 0, -1, kA_NULL, kS_NULL, 0},                 // S_AMMO
+    {kSPR_ROCK, 0, -1, kA_NULL, kS_NULL, 0},                 // S_ROCK
+    {kSPR_BROK, 0, -1, kA_NULL, kS_NULL, 0},                 // S_BROK
+    {kSPR_CELL, 0, -1, kA_NULL, kS_NULL, 0},                 // S_CELL
+    {kSPR_CELP, 0, -1, kA_NULL, kS_NULL, 0},                 // S_CELP
+    {kSPR_SHEL, 0, -1, kA_NULL, kS_NULL, 0},                 // S_SHEL
+    {kSPR_SBOX, 0, -1, kA_NULL, kS_NULL, 0},                 // S_SBOX
+    {kSPR_BPAK, 0, -1, kA_NULL, kS_NULL, 0},                 // S_BPAK
+    {kSPR_BFUG, 0, -1, kA_NULL, kS_NULL, 0},                 // S_BFUG
+    {kSPR_MGUN, 0, -1, kA_NULL, kS_NULL, 0},                 // S_MGUN
+    {kSPR_CSAW, 0, -1, kA_NULL, kS_NULL, 0},                 // S_CSAW
+    {kSPR_LAUN, 0, -1, kA_NULL, kS_NULL, 0},                 // S_LAUN
+    {kSPR_PLAS, 0, -1, kA_NULL, kS_NULL, 0},                 // S_PLAS
+    {kSPR_SHOT, 0, -1, kA_NULL, kS_NULL, 0},                 // S_SHOT
+    {kSPR_SGN2, 0, -1, kA_NULL, kS_NULL, 0},                 // S_SHOT2
+    {kSPR_COLU, 32768, -1, kA_NULL, kS_NULL, 0},             // S_COLU
+    {kSPR_SMT2, 0, -1, kA_NULL, kS_NULL, 0},                 // S_STALAG
+    {kSPR_GOR1, 0, 10, kA_NULL, kS_BLOODYTWITCH2, 0},        // S_BLOODYTWITCH
+    {kSPR_GOR1, 1, 15, kA_NULL, kS_BLOODYTWITCH3, 0},        // S_BLOODYTWITCH2
+    {kSPR_GOR1, 2, 8, kA_NULL, kS_BLOODYTWITCH4, 0},         // S_BLOODYTWITCH3
+    {kSPR_GOR1, 1, 6, kA_NULL, kS_BLOODYTWITCH, 0},          // S_BLOODYTWITCH4
+    {kSPR_PLAY, 13, -1, kA_NULL, kS_NULL, 0},                // S_DEADTORSO
+    {kSPR_PLAY, 18, -1, kA_NULL, kS_NULL, 0},                // S_DEADBOTTOM
+    {kSPR_POL2, 0, -1, kA_NULL, kS_NULL, 0},                 // S_HEADSONSTICK
+    {kSPR_POL5, 0, -1, kA_NULL, kS_NULL, 0},                 // S_GIBS
+    {kSPR_POL4, 0, -1, kA_NULL, kS_NULL, 0},                 // S_HEADONASTICK
+    {kSPR_POL3, 32768, 6, kA_NULL, kS_HEADCANDLES2, 0},      // S_HEADCANDLES
+    {kSPR_POL3, 32769, 6, kA_NULL, kS_HEADCANDLES, 0},       // S_HEADCANDLES2
+    {kSPR_POL1, 0, -1, kA_NULL, kS_NULL, 0},                 // S_DEADSTICK
+    {kSPR_POL6, 0, 6, kA_NULL, kS_LIVESTICK2, 0},            // S_LIVESTICK
+    {kSPR_POL6, 1, 8, kA_NULL, kS_LIVESTICK, 0},             // S_LIVESTICK2
+    {kSPR_GOR2, 0, -1, kA_NULL, kS_NULL, 0},                 // S_MEAT2
+    {kSPR_GOR3, 0, -1, kA_NULL, kS_NULL, 0},                 // S_MEAT3
+    {kSPR_GOR4, 0, -1, kA_NULL, kS_NULL, 0},                 // S_MEAT4
+    {kSPR_GOR5, 0, -1, kA_NULL, kS_NULL, 0},                 // S_MEAT5
+    {kSPR_SMIT, 0, -1, kA_NULL, kS_NULL, 0},                 // S_STALAGTITE
+    {kSPR_COL1, 0, -1, kA_NULL, kS_NULL, 0},                 // S_TALLGRNCOL
+    {kSPR_COL2, 0, -1, kA_NULL, kS_NULL, 0},                 // S_SHRTGRNCOL
+    {kSPR_COL3, 0, -1, kA_NULL, kS_NULL, 0},                 // S_TALLREDCOL
+    {kSPR_COL4, 0, -1, kA_NULL, kS_NULL, 0},                 // S_SHRTREDCOL
+    {kSPR_CAND, 32768, -1, kA_NULL, kS_NULL, 0},             // S_CANDLESTIK
+    {kSPR_CBRA, 32768, -1, kA_NULL, kS_NULL, 0},             // S_CANDELABRA
+    {kSPR_COL6, 0, -1, kA_NULL, kS_NULL, 0},                 // S_SKULLCOL
+    {kSPR_TRE1, 0, -1, kA_NULL, kS_NULL, 0},                 // S_TORCHTREE
+    {kSPR_TRE2, 0, -1, kA_NULL, kS_NULL, 0},                 // S_BIGTREE
+    {kSPR_ELEC, 0, -1, kA_NULL, kS_NULL, 0},                 // S_TECHPILLAR
+    {kSPR_CEYE, 32768, 6, kA_NULL, kS_EVILEYE2, 0},          // S_EVILEYE
+    {kSPR_CEYE, 32769, 6, kA_NULL, kS_EVILEYE3, 0},          // S_EVILEYE2
+    {kSPR_CEYE, 32770, 6, kA_NULL, kS_EVILEYE4, 0},          // S_EVILEYE3
+    {kSPR_CEYE, 32769, 6, kA_NULL, kS_EVILEYE, 0},           // S_EVILEYE4
+    {kSPR_FSKU, 32768, 6, kA_NULL, kS_FLOATSKULL2, 0},       // S_FLOATSKULL
+    {kSPR_FSKU, 32769, 6, kA_NULL, kS_FLOATSKULL3, 0},       // S_FLOATSKULL2
+    {kSPR_FSKU, 32770, 6, kA_NULL, kS_FLOATSKULL, 0},        // S_FLOATSKULL3
+    {kSPR_COL5, 0, 14, kA_NULL, kS_HEARTCOL2, 0},            // S_HEARTCOL
+    {kSPR_COL5, 1, 14, kA_NULL, kS_HEARTCOL, 0},             // S_HEARTCOL2
+    {kSPR_TBLU, 32768, 4, kA_NULL, kS_BLUETORCH2, 0},        // S_BLUETORCH
+    {kSPR_TBLU, 32769, 4, kA_NULL, kS_BLUETORCH3, 0},        // S_BLUETORCH2
+    {kSPR_TBLU, 32770, 4, kA_NULL, kS_BLUETORCH4, 0},        // S_BLUETORCH3
+    {kSPR_TBLU, 32771, 4, kA_NULL, kS_BLUETORCH, 0},         // S_BLUETORCH4
+    {kSPR_TGRN, 32768, 4, kA_NULL, kS_GREENTORCH2, 0},       // S_GREENTORCH
+    {kSPR_TGRN, 32769, 4, kA_NULL, kS_GREENTORCH3, 0},       // S_GREENTORCH2
+    {kSPR_TGRN, 32770, 4, kA_NULL, kS_GREENTORCH4, 0},       // S_GREENTORCH3
+    {kSPR_TGRN, 32771, 4, kA_NULL, kS_GREENTORCH, 0},        // S_GREENTORCH4
+    {kSPR_TRED, 32768, 4, kA_NULL, kS_REDTORCH2, 0},         // S_REDTORCH
+    {kSPR_TRED, 32769, 4, kA_NULL, kS_REDTORCH3, 0},         // S_REDTORCH2
+    {kSPR_TRED, 32770, 4, kA_NULL, kS_REDTORCH4, 0},         // S_REDTORCH3
+    {kSPR_TRED, 32771, 4, kA_NULL, kS_REDTORCH, 0},          // S_REDTORCH4
+    {kSPR_SMBT, 32768, 4, kA_NULL, kS_BTORCHSHRT2, 0},       // S_BTORCHSHRT
+    {kSPR_SMBT, 32769, 4, kA_NULL, kS_BTORCHSHRT3, 0},       // S_BTORCHSHRT2
+    {kSPR_SMBT, 32770, 4, kA_NULL, kS_BTORCHSHRT4, 0},       // S_BTORCHSHRT3
+    {kSPR_SMBT, 32771, 4, kA_NULL, kS_BTORCHSHRT, 0},        // S_BTORCHSHRT4
+    {kSPR_SMGT, 32768, 4, kA_NULL, kS_GTORCHSHRT2, 0},       // S_GTORCHSHRT
+    {kSPR_SMGT, 32769, 4, kA_NULL, kS_GTORCHSHRT3, 0},       // S_GTORCHSHRT2
+    {kSPR_SMGT, 32770, 4, kA_NULL, kS_GTORCHSHRT4, 0},       // S_GTORCHSHRT3
+    {kSPR_SMGT, 32771, 4, kA_NULL, kS_GTORCHSHRT, 0},        // S_GTORCHSHRT4
+    {kSPR_SMRT, 32768, 4, kA_NULL, kS_RTORCHSHRT2, 0},       // S_RTORCHSHRT
+    {kSPR_SMRT, 32769, 4, kA_NULL, kS_RTORCHSHRT3, 0},       // S_RTORCHSHRT2
+    {kSPR_SMRT, 32770, 4, kA_NULL, kS_RTORCHSHRT4, 0},       // S_RTORCHSHRT3
+    {kSPR_SMRT, 32771, 4, kA_NULL, kS_RTORCHSHRT, 0},        // S_RTORCHSHRT4
+    {kSPR_HDB1, 0, -1, kA_NULL, kS_NULL, 0},                 // S_HANGNOGUTS
+    {kSPR_HDB2, 0, -1, kA_NULL, kS_NULL, 0},                 // S_HANGBNOBRAIN
+    {kSPR_HDB3, 0, -1, kA_NULL, kS_NULL, 0},                 // S_HANGTLOOKDN
+    {kSPR_HDB4, 0, -1, kA_NULL, kS_NULL, 0},                 // S_HANGTSKULL
+    {kSPR_HDB5, 0, -1, kA_NULL, kS_NULL, 0},                 // S_HANGTLOOKUP
+    {kSPR_HDB6, 0, -1, kA_NULL, kS_NULL, 0},                 // S_HANGTNOBRAIN
+    {kSPR_POB1, 0, -1, kA_NULL, kS_NULL, 0},                 // S_COLONGIBS
+    {kSPR_POB2, 0, -1, kA_NULL, kS_NULL, 0},                 // S_SMALLPOOL
+    {kSPR_BRS1, 0, -1, kA_NULL, kS_NULL, 0},                 // S_BRAINSTEM
+    {kSPR_TLMP, 32768, 4, kA_NULL, kS_TECHLAMP2, 0},         // S_TECHLAMP
+    {kSPR_TLMP, 32769, 4, kA_NULL, kS_TECHLAMP3, 0},         // S_TECHLAMP2
+    {kSPR_TLMP, 32770, 4, kA_NULL, kS_TECHLAMP4, 0},         // S_TECHLAMP3
+    {kSPR_TLMP, 32771, 4, kA_NULL, kS_TECHLAMP, 0},          // S_TECHLAMP4
+    {kSPR_TLP2, 32768, 4, kA_NULL, kS_TECH2LAMP2, 0},        // S_TECH2LAMP
+    {kSPR_TLP2, 32769, 4, kA_NULL, kS_TECH2LAMP3, 0},        // S_TECH2LAMP2
+    {kSPR_TLP2, 32770, 4, kA_NULL, kS_TECH2LAMP4, 0},        // S_TECH2LAMP3
+    {kSPR_TLP2, 32771, 4, kA_NULL, kS_TECH2LAMP, 0},         // S_TECH2LAMP4
 
     // BOOM and MBF...
-    { kSPR_TNT1, 0, -1, kA_NULL, kS_TNT1, 0 },              // S_TNT1
-    { kSPR_MISL, 32768, 1000, kA_Die, kS_GRENADE, 0 },      // S_GRENADE
-    { kSPR_MISL, 32769, 4, kA_Scream, kS_DETONATE2, 0 },    // S_DETONATE
-    { kSPR_MISL, 32770, 6, kA_Detonate, kS_DETONATE3, 0 },  // S_DETONATE2
-    { kSPR_MISL, 32771, 10, kA_NULL, kS_NULL, 0 },          // S_DETONATE3
-    { kSPR_DOGS, 0, 10, kA_Look, kS_DOGS_STND2, 0 },        // S_DOGS_STND
-    { kSPR_DOGS, 1, 10, kA_Look, kS_DOGS_STND, 0 },         // S_DOGS_STND2
-    { kSPR_DOGS, 0, 2, kA_Chase, kS_DOGS_RUN2, 0 },         // S_DOGS_RUN1
-    { kSPR_DOGS, 0, 2, kA_Chase, kS_DOGS_RUN3, 0 },         // S_DOGS_RUN2
-    { kSPR_DOGS, 1, 2, kA_Chase, kS_DOGS_RUN4, 0 },         // S_DOGS_RUN3
-    { kSPR_DOGS, 1, 2, kA_Chase, kS_DOGS_RUN5, 0 },         // S_DOGS_RUN4
-    { kSPR_DOGS, 2, 2, kA_Chase, kS_DOGS_RUN6, 0 },         // S_DOGS_RUN5
-    { kSPR_DOGS, 2, 2, kA_Chase, kS_DOGS_RUN7, 0 },         // S_DOGS_RUN6
-    { kSPR_DOGS, 3, 2, kA_Chase, kS_DOGS_RUN8, 0 },         // S_DOGS_RUN7
-    { kSPR_DOGS, 3, 2, kA_Chase, kS_DOGS_RUN1, 0 },         // S_DOGS_RUN8
-    { kSPR_DOGS, 4, 8, kA_FaceTarget, kS_DOGS_ATK2, 0 },    // S_DOGS_ATK1
-    { kSPR_DOGS, 5, 8, kA_FaceTarget, kS_DOGS_ATK3, 0 },    // S_DOGS_ATK2
-    { kSPR_DOGS, 6, 8, kA_SargAttack, kS_DOGS_RUN1, 0 },    // S_DOGS_ATK3
-    { kSPR_DOGS, 7, 2, kA_NULL, kS_DOGS_PAIN2, 0 },         // S_DOGS_PAIN
-    { kSPR_DOGS, 7, 2, kA_Pain, kS_DOGS_RUN1, 0 },          // S_DOGS_PAIN2
-    { kSPR_DOGS, 8, 8, kA_NULL, kS_DOGS_DIE2, 0 },          // S_DOGS_DIE1
-    { kSPR_DOGS, 9, 8, kA_Scream, kS_DOGS_DIE3, 0 },        // S_DOGS_DIE2
-    { kSPR_DOGS, 10, 4, kA_NULL, kS_DOGS_DIE4, 0 },         // S_DOGS_DIE3
-    { kSPR_DOGS, 11, 4, kA_Fall, kS_DOGS_DIE5, 0 },         // S_DOGS_DIE4
-    { kSPR_DOGS, 12, 4, kA_NULL, kS_DOGS_DIE6, 0 },         // S_DOGS_DIE5
-    { kSPR_DOGS, 13, -1, kA_NULL, kS_NULL, 0 },             // S_DOGS_DIE6
-    { kSPR_DOGS, 13, 5, kA_NULL, kS_DOGS_RAISE2, 0 },       // S_DOGS_RAISE1
-    { kSPR_DOGS, 12, 5, kA_NULL, kS_DOGS_RAISE3, 0 },       // S_DOGS_RAISE2
-    { kSPR_DOGS, 11, 5, kA_NULL, kS_DOGS_RAISE4, 0 },       // S_DOGS_RAISE3
-    { kSPR_DOGS, 10, 5, kA_NULL, kS_DOGS_RAISE5, 0 },       // S_DOGS_RAISE4
-    { kSPR_DOGS, 9, 5, kA_NULL, kS_DOGS_RAISE6, 0 },        // S_DOGS_RAISE5
-    { kSPR_DOGS, 8, 5, kA_NULL, kS_DOGS_RUN1, 0 },          // S_DOGS_RAISE6
+    {kSPR_TNT1, 0, -1, kA_NULL, kS_TNT1, 0},             // S_TNT1
+    {kSPR_MISL, 32768, 1000, kA_Die, kS_GRENADE, 0},     // S_GRENADE
+    {kSPR_MISL, 32769, 4, kA_Scream, kS_DETONATE2, 0},   // S_DETONATE
+    {kSPR_MISL, 32770, 6, kA_Detonate, kS_DETONATE3, 0}, // S_DETONATE2
+    {kSPR_MISL, 32771, 10, kA_NULL, kS_NULL, 0},         // S_DETONATE3
+    {kSPR_DOGS, 0, 10, kA_Look, kS_DOGS_STND2, 0},       // S_DOGS_STND
+    {kSPR_DOGS, 1, 10, kA_Look, kS_DOGS_STND, 0},        // S_DOGS_STND2
+    {kSPR_DOGS, 0, 2, kA_Chase, kS_DOGS_RUN2, 0},        // S_DOGS_RUN1
+    {kSPR_DOGS, 0, 2, kA_Chase, kS_DOGS_RUN3, 0},        // S_DOGS_RUN2
+    {kSPR_DOGS, 1, 2, kA_Chase, kS_DOGS_RUN4, 0},        // S_DOGS_RUN3
+    {kSPR_DOGS, 1, 2, kA_Chase, kS_DOGS_RUN5, 0},        // S_DOGS_RUN4
+    {kSPR_DOGS, 2, 2, kA_Chase, kS_DOGS_RUN6, 0},        // S_DOGS_RUN5
+    {kSPR_DOGS, 2, 2, kA_Chase, kS_DOGS_RUN7, 0},        // S_DOGS_RUN6
+    {kSPR_DOGS, 3, 2, kA_Chase, kS_DOGS_RUN8, 0},        // S_DOGS_RUN7
+    {kSPR_DOGS, 3, 2, kA_Chase, kS_DOGS_RUN1, 0},        // S_DOGS_RUN8
+    {kSPR_DOGS, 4, 8, kA_FaceTarget, kS_DOGS_ATK2, 0},   // S_DOGS_ATK1
+    {kSPR_DOGS, 5, 8, kA_FaceTarget, kS_DOGS_ATK3, 0},   // S_DOGS_ATK2
+    {kSPR_DOGS, 6, 8, kA_SargAttack, kS_DOGS_RUN1, 0},   // S_DOGS_ATK3
+    {kSPR_DOGS, 7, 2, kA_NULL, kS_DOGS_PAIN2, 0},        // S_DOGS_PAIN
+    {kSPR_DOGS, 7, 2, kA_Pain, kS_DOGS_RUN1, 0},         // S_DOGS_PAIN2
+    {kSPR_DOGS, 8, 8, kA_NULL, kS_DOGS_DIE2, 0},         // S_DOGS_DIE1
+    {kSPR_DOGS, 9, 8, kA_Scream, kS_DOGS_DIE3, 0},       // S_DOGS_DIE2
+    {kSPR_DOGS, 10, 4, kA_NULL, kS_DOGS_DIE4, 0},        // S_DOGS_DIE3
+    {kSPR_DOGS, 11, 4, kA_Fall, kS_DOGS_DIE5, 0},        // S_DOGS_DIE4
+    {kSPR_DOGS, 12, 4, kA_NULL, kS_DOGS_DIE6, 0},        // S_DOGS_DIE5
+    {kSPR_DOGS, 13, -1, kA_NULL, kS_NULL, 0},            // S_DOGS_DIE6
+    {kSPR_DOGS, 13, 5, kA_NULL, kS_DOGS_RAISE2, 0},      // S_DOGS_RAISE1
+    {kSPR_DOGS, 12, 5, kA_NULL, kS_DOGS_RAISE3, 0},      // S_DOGS_RAISE2
+    {kSPR_DOGS, 11, 5, kA_NULL, kS_DOGS_RAISE4, 0},      // S_DOGS_RAISE3
+    {kSPR_DOGS, 10, 5, kA_NULL, kS_DOGS_RAISE5, 0},      // S_DOGS_RAISE4
+    {kSPR_DOGS, 9, 5, kA_NULL, kS_DOGS_RAISE6, 0},       // S_DOGS_RAISE5
+    {kSPR_DOGS, 8, 5, kA_NULL, kS_DOGS_RUN1, 0},         // S_DOGS_RAISE6
 
     // add dummy beta bfg/lost soul frames for dehacked compatibility
-    { kSPR_BFGG, 0, 10, kA_BFGsound, kS_OLDBFG2, 0 },    // S_OLDBFG1
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG3, 0 },   // S_OLDBFG2
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG4, 0 },   // S_OLDBFG3
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG5, 0 },   // S_OLDBFG4
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG6, 0 },   // S_OLDBFG5
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG7, 0 },   // S_OLDBFG6
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG8, 0 },   // S_OLDBFG7
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG9, 0 },   // S_OLDBFG8
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG10, 0 },  // S_OLDBFG9
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG11, 0 },  // S_OLDBFG10
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG12, 0 },  // S_OLDBFG11
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG13, 0 },  // S_OLDBFG12
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG14, 0 },  // S_OLDBFG13
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG15, 0 },  // S_OLDBFG14
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG16, 0 },  // S_OLDBFG15
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG17, 0 },  // S_OLDBFG16
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG18, 0 },  // S_OLDBFG17
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG19, 0 },  // S_OLDBFG18
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG20, 0 },  // S_OLDBFG19
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG21, 0 },  // S_OLDBFG20
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG22, 0 },  // S_OLDBFG21
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG23, 0 },  // S_OLDBFG22
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG24, 0 },  // S_OLDBFG23
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG25, 0 },  // S_OLDBFG24
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG26, 0 },  // S_OLDBFG25
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG27, 0 },  // S_OLDBFG26
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG28, 0 },  // S_OLDBFG27
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG29, 0 },  // S_OLDBFG28
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG30, 0 },  // S_OLDBFG29
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG31, 0 },  // S_OLDBFG30
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG32, 0 },  // S_OLDBFG31
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG33, 0 },  // S_OLDBFG32
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG34, 0 },  // S_OLDBFG33
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG35, 0 },  // S_OLDBFG34
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG36, 0 },  // S_OLDBFG35
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG37, 0 },  // S_OLDBFG36
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG38, 0 },  // S_OLDBFG37
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG39, 0 },  // S_OLDBFG38
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG40, 0 },  // S_OLDBFG39
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG41, 0 },  // S_OLDBFG40
-    { kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG42, 0 },  // S_OLDBFG41
-    { kSPR_BFGG, 1, 0, kA_Light0, kS_OLDBFG43, 0 },      // S_OLDBFG42
-    { kSPR_BFGG, 1, 20, kA_ReFire, kS_BFG, 0 },          // S_OLDBFG43
+    {kSPR_BFGG, 0, 10, kA_BFGsound, kS_OLDBFG2, 0},          // S_OLDBFG1
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG3, 0},         // S_OLDBFG2
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG4, 0},         // S_OLDBFG3
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG5, 0},         // S_OLDBFG4
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG6, 0},         // S_OLDBFG5
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG7, 0},         // S_OLDBFG6
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG8, 0},         // S_OLDBFG7
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG9, 0},         // S_OLDBFG8
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG10, 0},        // S_OLDBFG9
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG11, 0},        // S_OLDBFG10
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG12, 0},        // S_OLDBFG11
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG13, 0},        // S_OLDBFG12
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG14, 0},        // S_OLDBFG13
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG15, 0},        // S_OLDBFG14
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG16, 0},        // S_OLDBFG15
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG17, 0},        // S_OLDBFG16
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG18, 0},        // S_OLDBFG17
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG19, 0},        // S_OLDBFG18
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG20, 0},        // S_OLDBFG19
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG21, 0},        // S_OLDBFG20
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG22, 0},        // S_OLDBFG21
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG23, 0},        // S_OLDBFG22
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG24, 0},        // S_OLDBFG23
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG25, 0},        // S_OLDBFG24
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG26, 0},        // S_OLDBFG25
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG27, 0},        // S_OLDBFG26
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG28, 0},        // S_OLDBFG27
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG29, 0},        // S_OLDBFG28
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG30, 0},        // S_OLDBFG29
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG31, 0},        // S_OLDBFG30
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG32, 0},        // S_OLDBFG31
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG33, 0},        // S_OLDBFG32
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG34, 0},        // S_OLDBFG33
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG35, 0},        // S_OLDBFG34
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG36, 0},        // S_OLDBFG35
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG37, 0},        // S_OLDBFG36
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG38, 0},        // S_OLDBFG37
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG39, 0},        // S_OLDBFG38
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG40, 0},        // S_OLDBFG39
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG41, 0},        // S_OLDBFG40
+    {kSPR_BFGG, 1, 1, kA_FireOldBFG, kS_OLDBFG42, 0},        // S_OLDBFG41
+    {kSPR_BFGG, 1, 0, kA_Light0, kS_OLDBFG43, 0},            // S_OLDBFG42
+    {kSPR_BFGG, 1, 20, kA_ReFire, kS_BFG, 0},                // S_OLDBFG43
 
-    { kSPR_PLS1, 32768, 6, kA_NULL, kS_PLS1BALL2, 0 },  // S_PLS1BALL
-    { kSPR_PLS1, 32769, 6, kA_NULL, kS_PLS1BALL, 0 },   // S_PLS1BALL2
-    { kSPR_PLS1, 32770, 4, kA_NULL, kS_PLS1EXP2, 0 },   // S_PLS1EXP
-    { kSPR_PLS1, 32771, 4, kA_NULL, kS_PLS1EXP3, 0 },   // S_PLS1EXP2
-    { kSPR_PLS1, 32772, 4, kA_NULL, kS_PLS1EXP4, 0 },   // S_PLS1EXP3
-    { kSPR_PLS1, 32773, 4, kA_NULL, kS_PLS1EXP5, 0 },   // S_PLS1EXP4
-    { kSPR_PLS1, 32774, 4, kA_NULL, kS_NULL, 0 },       // S_PLS1EXP5
+    {kSPR_PLS1, 32768, 6, kA_NULL, kS_PLS1BALL2, 0},         // S_PLS1BALL
+    {kSPR_PLS1, 32769, 6, kA_NULL, kS_PLS1BALL, 0},          // S_PLS1BALL2
+    {kSPR_PLS1, 32770, 4, kA_NULL, kS_PLS1EXP2, 0},          // S_PLS1EXP
+    {kSPR_PLS1, 32771, 4, kA_NULL, kS_PLS1EXP3, 0},          // S_PLS1EXP2
+    {kSPR_PLS1, 32772, 4, kA_NULL, kS_PLS1EXP4, 0},          // S_PLS1EXP3
+    {kSPR_PLS1, 32773, 4, kA_NULL, kS_PLS1EXP5, 0},          // S_PLS1EXP4
+    {kSPR_PLS1, 32774, 4, kA_NULL, kS_NULL, 0},              // S_PLS1EXP5
 
-    { kSPR_PLS2, 32768, 4, kA_NULL, kS_PLS2BALL2, 0 },   // S_PLS2BALL
-    { kSPR_PLS2, 32769, 4, kA_NULL, kS_PLS2BALL, 0 },    // S_PLS2BALL2
-    { kSPR_PLS2, 32770, 6, kA_NULL, kS_PLS2BALLX2, 0 },  // S_PLS2BALLX1
-    { kSPR_PLS2, 32771, 6, kA_NULL, kS_PLS2BALLX3, 0 },  // S_PLS2BALLX2
-    { kSPR_PLS2, 32772, 6, kA_NULL, kS_NULL, 0 },        // S_PLS2BALLX3
+    {kSPR_PLS2, 32768, 4, kA_NULL, kS_PLS2BALL2, 0},         // S_PLS2BALL
+    {kSPR_PLS2, 32769, 4, kA_NULL, kS_PLS2BALL, 0},          // S_PLS2BALL2
+    {kSPR_PLS2, 32770, 6, kA_NULL, kS_PLS2BALLX2, 0},        // S_PLS2BALLX1
+    {kSPR_PLS2, 32771, 6, kA_NULL, kS_PLS2BALLX3, 0},        // S_PLS2BALLX2
+    {kSPR_PLS2, 32772, 6, kA_NULL, kS_NULL, 0},              // S_PLS2BALLX3
 
-    { kSPR_BON3, 0, 6, kA_NULL, kS_BON3, 0 },  // S_BON3
-    { kSPR_BON4, 0, 6, kA_NULL, kS_BON4, 0 },  // S_BON4
+    {kSPR_BON3, 0, 6, kA_NULL, kS_BON3, 0},                  // S_BON3
+    {kSPR_BON4, 0, 6, kA_NULL, kS_BON4, 0},                  // S_BON4
 
-    { kSPR_SKUL, 0, 10, kA_Look, kS_BSKUL_STND, 0 },            // S_BSKUL_STND
-    { kSPR_SKUL, 1, 5, kA_Chase, kS_BSKUL_RUN2, 0 },            // S_BSKUL_RUN1
-    { kSPR_SKUL, 2, 5, kA_Chase, kS_BSKUL_RUN3, 0 },            // S_BSKUL_RUN2
-    { kSPR_SKUL, 3, 5, kA_Chase, kS_BSKUL_RUN4, 0 },            // S_BSKUL_RUN3
-    { kSPR_SKUL, 0, 5, kA_Chase, kS_BSKUL_RUN1, 0 },            // S_BSKUL_RUN4
-    { kSPR_SKUL, 4, 4, kA_FaceTarget, kS_BSKUL_ATK2, 0 },       // S_BSKUL_ATK1
-    { kSPR_SKUL, 5, 5, kA_BetaSkullAttack, kS_BSKUL_ATK3, 0 },  // S_BSKUL_ATK2
-    { kSPR_SKUL, 5, 4, kA_NULL, kS_BSKUL_RUN1, 0 },             // S_BSKUL_ATK3
-    { kSPR_SKUL, 6, 4, kA_NULL, kS_BSKUL_PAIN2, 0 },            // S_BSKUL_PAIN1
-    { kSPR_SKUL, 7, 2, kA_Pain, kS_BSKUL_RUN1, 0 },             // S_BSKUL_PAIN2
-    { kSPR_SKUL, 8, 4, kA_NULL, kS_BSKUL_RUN1, 0 },             // S_BSKUL_PAIN3
-    { kSPR_SKUL, 9, 5, kA_NULL, kS_BSKUL_DIE2, 0 },             // S_BSKUL_DIE1
-    { kSPR_SKUL, 10, 5, kA_NULL, kS_BSKUL_DIE3, 0 },            // S_BSKUL_DIE2
-    { kSPR_SKUL, 11, 5, kA_NULL, kS_BSKUL_DIE4, 0 },            // S_BSKUL_DIE3
-    { kSPR_SKUL, 12, 5, kA_NULL, kS_BSKUL_DIE5, 0 },            // S_BSKUL_DIE4
-    { kSPR_SKUL, 13, 5, kA_Scream, kS_BSKUL_DIE6, 0 },          // S_BSKUL_DIE5
-    { kSPR_SKUL, 14, 5, kA_NULL, kS_BSKUL_DIE7, 0 },            // S_BSKUL_DIE6
-    { kSPR_SKUL, 15, 5, kA_Fall, kS_BSKUL_DIE8, 0 },            // S_BSKUL_DIE7
-    { kSPR_SKUL, 16, 5, kA_Stop, kS_BSKUL_DIE8, 0 },            // S_BSKUL_DIE8
+    {kSPR_SKUL, 0, 10, kA_Look, kS_BSKUL_STND, 0},           // S_BSKUL_STND
+    {kSPR_SKUL, 1, 5, kA_Chase, kS_BSKUL_RUN2, 0},           // S_BSKUL_RUN1
+    {kSPR_SKUL, 2, 5, kA_Chase, kS_BSKUL_RUN3, 0},           // S_BSKUL_RUN2
+    {kSPR_SKUL, 3, 5, kA_Chase, kS_BSKUL_RUN4, 0},           // S_BSKUL_RUN3
+    {kSPR_SKUL, 0, 5, kA_Chase, kS_BSKUL_RUN1, 0},           // S_BSKUL_RUN4
+    {kSPR_SKUL, 4, 4, kA_FaceTarget, kS_BSKUL_ATK2, 0},      // S_BSKUL_ATK1
+    {kSPR_SKUL, 5, 5, kA_BetaSkullAttack, kS_BSKUL_ATK3, 0}, // S_BSKUL_ATK2
+    {kSPR_SKUL, 5, 4, kA_NULL, kS_BSKUL_RUN1, 0},            // S_BSKUL_ATK3
+    {kSPR_SKUL, 6, 4, kA_NULL, kS_BSKUL_PAIN2, 0},           // S_BSKUL_PAIN1
+    {kSPR_SKUL, 7, 2, kA_Pain, kS_BSKUL_RUN1, 0},            // S_BSKUL_PAIN2
+    {kSPR_SKUL, 8, 4, kA_NULL, kS_BSKUL_RUN1, 0},            // S_BSKUL_PAIN3
+    {kSPR_SKUL, 9, 5, kA_NULL, kS_BSKUL_DIE2, 0},            // S_BSKUL_DIE1
+    {kSPR_SKUL, 10, 5, kA_NULL, kS_BSKUL_DIE3, 0},           // S_BSKUL_DIE2
+    {kSPR_SKUL, 11, 5, kA_NULL, kS_BSKUL_DIE4, 0},           // S_BSKUL_DIE3
+    {kSPR_SKUL, 12, 5, kA_NULL, kS_BSKUL_DIE5, 0},           // S_BSKUL_DIE4
+    {kSPR_SKUL, 13, 5, kA_Scream, kS_BSKUL_DIE6, 0},         // S_BSKUL_DIE5
+    {kSPR_SKUL, 14, 5, kA_NULL, kS_BSKUL_DIE7, 0},           // S_BSKUL_DIE6
+    {kSPR_SKUL, 15, 5, kA_Fall, kS_BSKUL_DIE8, 0},           // S_BSKUL_DIE7
+    {kSPR_SKUL, 16, 5, kA_Stop, kS_BSKUL_DIE8, 0},           // S_BSKUL_DIE8
 
-    { kSPR_MISL, 32769, 8, kA_Mushroom, kS_EXPLODE2, 0 },  // S_MUSHROOM
+    {kSPR_MISL, 32769, 8, kA_Mushroom, kS_EXPLODE2, 0},      // S_MUSHROOM
 };
 
-}  // namespace dehacked
+} // namespace dehacked

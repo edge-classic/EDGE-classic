@@ -36,7 +36,7 @@ enum IntermissionState
 
 struct IntermissionInfo
 {
-    const char *level;  // episode # (0-2)
+    const char *level; // episode # (0-2)
 
     const MapDefinition *current_level;
     const MapDefinition *next_level;

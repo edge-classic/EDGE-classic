@@ -33,19 +33,19 @@
 
 enum FileKind
 {
-    kFileKindIWad = 0,  // iwad file
-    kFileKindPWad,      // normal .wad file
-    kFileKindEWad,      // edge wad, priority loading
-    kFileKindXWad,      // ajbsp node wad
+    kFileKindIWad = 0, // iwad file
+    kFileKindPWad,     // normal .wad file
+    kFileKindEWad,     // edge wad, priority loading
+    kFileKindXWad,     // ajbsp node wad
 
-    kFileKindFolder,    // a folder somewhere
-    kFileKindEFolder,   // edge folder, priority loading
-    kFileKindEpk,       // edge package (.epk)
-    kFileKindEEpk,      // edge epks, priority loading (same extension as epk)
-    kFileKindPackWad,   // WADs within pack files; should only be used for maps
-    kFileKindIpk,       // standalone game EPK (same extension as epk)
-    kFileKindIFolder,   // standalone game folder
-    kFileKindIPackWad,  // IWADs within pack files :/
+    kFileKindFolder,   // a folder somewhere
+    kFileKindEFolder,  // edge folder, priority loading
+    kFileKindEpk,      // edge package (.epk)
+    kFileKindEEpk,     // edge epks, priority loading (same extension as epk)
+    kFileKindPackWad,  // WADs within pack files; should only be used for maps
+    kFileKindIpk,      // standalone game EPK (same extension as epk)
+    kFileKindIFolder,  // standalone game folder
+    kFileKindIPackWad, // IWADs within pack files :/
 
     kFileKindDdf,      // .ddf or .ldf file
     kFileKindRts,      // .rts script  file
@@ -57,7 +57,7 @@ class PackFile;
 
 class DataFile
 {
-   public:
+  public:
     // full name of file
     std::string name_;
 
@@ -73,7 +73,7 @@ class DataFile
     // for kFileKindEpk
     PackFile *pack_;
 
-   public:
+  public:
     DataFile(std::string name, FileKind kind);
     ~DataFile();
 };
@@ -92,9 +92,7 @@ epi::File *OpenFileFromPack(const std::string &name);
 
 void DoPackSubstitutions(void);
 
-uint8_t *OpenPackOrLumpInMemory(const std::string              &name,
-                                const std::vector<std::string> &extensions,
-                                int                            *length);
+uint8_t *OpenPackOrLumpInMemory(const std::string &name, const std::vector<std::string> &extensions, int *length);
 
 int CheckPackFilesForName(const std::string &name);
 

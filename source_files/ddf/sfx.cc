@@ -35,9 +35,8 @@ static const DDFCommandList sfx_commands[] = {
     DDF_FIELD("PACK_NAME", dummy_sfx, pack_name_, DDF_MainGetString),
     DDF_FIELD("FILE_NAME", dummy_sfx, file_name_, DDF_MainGetString),
     DDF_FIELD("PC_SPEAKER_LUMP", dummy_sfx, pc_speaker_sound_,
-              DDF_MainGetString),  // Kept for backwards compat
-    DDF_FIELD("PC_SPEAKER_SOUND", dummy_sfx, pc_speaker_sound_,
-              DDF_MainGetString),
+              DDF_MainGetString), // Kept for backwards compat
+    DDF_FIELD("PC_SPEAKER_SOUND", dummy_sfx, pc_speaker_sound_, DDF_MainGetString),
     DDF_FIELD("SINGULAR", dummy_sfx, singularity_, DDF_MainGetNumeric),
     DDF_FIELD("PRIORITY", dummy_sfx, priority_, DDF_MainGetNumeric),
     DDF_FIELD("VOLUME", dummy_sfx, volume_, DDF_MainGetPercent),
@@ -45,8 +44,7 @@ static const DDFCommandList sfx_commands[] = {
     DDF_FIELD("PRECIOUS", dummy_sfx, precious_, DDF_MainGetBoolean),
     DDF_FIELD("MAX_DISTANCE", dummy_sfx, max_distance_, DDF_MainGetFloat),
 
-    { nullptr, nullptr, 0, nullptr }
-};
+    {nullptr, nullptr, 0, nullptr}};
 
 //
 //  DDF PARSE ROUTINES
@@ -64,7 +62,8 @@ static void SoundStartEntry(const char *name, bool extend)
 
     if (extend)
     {
-        if (!dynamic_sfx) DDF_Error("Unknown sound to extend: %s\n", name);
+        if (!dynamic_sfx)
+            DDF_Error("Unknown sound to extend: %s\n", name);
         return;
     }
 
@@ -93,29 +92,25 @@ static void SoundStartEntry(const char *name, bool extend)
     dynamic_sfx->normal_.num       = 1;
 }
 
-static void SoundParseField(const char *field, const char *contents, int index,
-                            bool is_last)
+static void SoundParseField(const char *field, const char *contents, int index, bool is_last)
 {
 #if (DEBUG_DDF)
     LogDebug("SOUND_PARSE: %s = %s;\n", field, contents);
 #endif
 
     // -AJA- ignore these for backwards compatibility
-    if (DDF_CompareName(field, "BITS") == 0 ||
-        DDF_CompareName(field, "STEREO") == 0)
+    if (DDF_CompareName(field, "BITS") == 0 || DDF_CompareName(field, "STEREO") == 0)
         return;
 
-    if (DDF_MainParseField(sfx_commands, field, contents,
-                           (uint8_t *)dynamic_sfx))
-        return;  // OK
+    if (DDF_MainParseField(sfx_commands, field, contents, (uint8_t *)dynamic_sfx))
+        return; // OK
 
     DDF_WarnError("Unknown sounds.ddf command: %s\n", field);
 }
 
 static void SoundFinishEntry(void)
 {
-    if (dynamic_sfx->lump_name_.empty() && dynamic_sfx->file_name_.empty() &&
-        dynamic_sfx->pack_name_.empty())
+    if (dynamic_sfx->lump_name_.empty() && dynamic_sfx->file_name_.empty() && dynamic_sfx->pack_name_.empty())
     {
         DDF_Error("Missing LUMP_NAME or PACK_NAME for sound.\n");
     }
@@ -151,7 +146,10 @@ void DDF_SFXInit(void)
     sfxdefs.clear();
 }
 
-void DDF_SFXCleanUp(void) { sfxdefs.shrink_to_fit(); }
+void DDF_SFXCleanUp(void)
+{
+    sfxdefs.shrink_to_fit();
+}
 
 //
 // DDF_MainLookupSound
@@ -177,12 +175,17 @@ void DDF_MainLookupSound(const char *info, void *storage)
 //
 // SoundEffectDefinition Constructor
 //
-SoundEffectDefinition::SoundEffectDefinition() : name_() { Default(); }
+SoundEffectDefinition::SoundEffectDefinition() : name_()
+{
+    Default();
+}
 
 //
 // SoundEffectDefinition Destructor
 //
-SoundEffectDefinition::~SoundEffectDefinition() {}
+SoundEffectDefinition::~SoundEffectDefinition()
+{
+}
 
 //
 // SoundEffectDefinition::CopyDetail()
@@ -198,12 +201,12 @@ void SoundEffectDefinition::CopyDetail(SoundEffectDefinition &src)
     normal_.sounds[0] = 0;
     normal_.num       = 0;
 
-    singularity_  = src.singularity_;   // singularity
-    priority_     = src.priority_;      // priority (lower is more important)
-    volume_       = src.volume_;        // volume
-    looping_      = src.looping_;       // looping
-    precious_     = src.precious_;      // precious
-    max_distance_ = src.max_distance_;  // max_distance
+    singularity_  = src.singularity_;  // singularity
+    priority_     = src.priority_;     // priority (lower is more important)
+    volume_       = src.volume_;       // volume
+    looping_      = src.looping_;      // looping
+    precious_     = src.precious_;     // precious
+    max_distance_ = src.max_distance_; // max_distance
 }
 
 //
@@ -219,12 +222,12 @@ void SoundEffectDefinition::Default()
     normal_.sounds[0] = 0;
     normal_.num       = 0;
 
-    singularity_  = 0;        // singularity
-    priority_     = 999;      // priority (lower is more important)
-    volume_       = 1.0f;     // volume
-    looping_      = false;    // looping
-    precious_     = false;    // precious
-    max_distance_ = 4000.0f;  // max_distance
+    singularity_  = 0;       // singularity
+    priority_     = 999;     // priority (lower is more important)
+    volume_       = 1.0f;    // volume
+    looping_      = false;   // looping
+    precious_     = false;   // precious
+    max_distance_ = 4000.0f; // max_distance
 }
 
 // --> Sound Effect Definition Containter Class
@@ -235,14 +238,15 @@ static int strncasecmpwild(const char *s1, const char *s2, int n)
 
     for (i = 0; s1[i] && s2[i] && i < n; i++)
     {
-        if ((epi::ToUpperASCII(s1[i]) != epi::ToUpperASCII(s2[i])) &&
-            (s1[i] != '?') && (s2[i] != '?'))
+        if ((epi::ToUpperASCII(s1[i]) != epi::ToUpperASCII(s2[i])) && (s1[i] != '?') && (s2[i] != '?'))
             break;
     }
     // -KM- 1999/01/29 If strings are equal return equal.
-    if (i == n) return 0;
+    if (i == n)
+        return 0;
 
-    if (s1[i] == '?' || s2[i] == '?') return 0;
+    if (s1[i] == '?' || s2[i] == '?')
+        return 0;
 
     return s1[i] - s2[i];
 }
@@ -253,8 +257,7 @@ static int strncasecmpwild(const char *s1, const char *s2, int n)
 // FIXME!! Remove error param hack
 // FIXME!! Cache results for those we create
 //
-SoundEffect *SoundEffectDefinitionContainer::GetEffect(const char *name,
-                                                       bool        error)
+SoundEffect *SoundEffectDefinitionContainer::GetEffect(const char *name, bool error)
 {
     int count = 0;
 
@@ -263,26 +266,27 @@ SoundEffect *SoundEffectDefinitionContainer::GetEffect(const char *name,
     SoundEffect           *r    = nullptr;
 
     // nullptr Sound
-    if (!name || !name[0] || DDF_CompareName(name, "NULL") == 0) return nullptr;
+    if (!name || !name[0] || DDF_CompareName(name, "NULL") == 0)
+        return nullptr;
 
     // count them
-    for (std::vector<SoundEffectDefinition *>::reverse_iterator
-             iter     = rbegin(),
-             iter_end = rend();
-         iter != iter_end; iter++)
+    for (std::vector<SoundEffectDefinition *>::reverse_iterator iter = rbegin(), iter_end = rend(); iter != iter_end;
+         iter++)
     {
         si = *iter;
 
         if (strncasecmpwild(name, si->name_.c_str(), 8) == 0)
         {
             count++;
-            if (!last) last = si;
+            if (!last)
+                last = si;
         }
     }
 
     if (count == 0)
     {
-        if (error) DDF_WarnError("Unknown SFX: '%.8s'\n", name);
+        if (error)
+            DDF_WarnError("Unknown SFX: '%.8s'\n", name);
 
         return nullptr;
     }
@@ -302,8 +306,7 @@ SoundEffect *SoundEffectDefinitionContainer::GetEffect(const char *name,
     // allocate elements.  Uses (count-1) since SoundEffect already includes
     // the first integer.
     //
-    r      = (SoundEffect
-             *)new uint8_t[sizeof(SoundEffect) + ((count - 1) * sizeof(int))];
+    r      = (SoundEffect *)new uint8_t[sizeof(SoundEffect) + ((count - 1) * sizeof(int))];
     r->num = 0;
 
     // now store them
@@ -325,13 +328,12 @@ SoundEffect *SoundEffectDefinitionContainer::GetEffect(const char *name,
 //
 SoundEffectDefinition *SoundEffectDefinitionContainer::Lookup(const char *name)
 {
-    for (std::vector<SoundEffectDefinition *>::iterator iter     = begin(),
-                                                        iter_end = end();
-         iter != iter_end; iter++)
+    for (std::vector<SoundEffectDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
     {
         SoundEffectDefinition *s = *iter;
 
-        if (DDF_CompareName(s->name_.c_str(), name) == 0) return s;
+        if (DDF_CompareName(s->name_.c_str(), name) == 0)
+            return s;
     }
 
     return nullptr;

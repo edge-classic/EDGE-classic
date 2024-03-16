@@ -18,19 +18,19 @@ extern bool            erraticism_active;
 extern std::string     current_map_title;
 
 extern ImageData *ReadAsEpiBlock(Image *rim);
-extern ImageData *RgbFromPalettised(ImageData *src, const uint8_t *palette,
-                                    int opacity);
+extern ImageData *RgbFromPalettised(ImageData *src, const uint8_t *palette, int opacity);
 
 extern Player *ui_player_who;
 
 extern Player *ui_hud_who;
 
-static int   ui_hud_automap_flags[2];  // 0 = disabled, 1 = enabled
+static int   ui_hud_automap_flags[2]; // 0 = disabled, 1 = enabled
 static float ui_hud_automap_zoom;
 
 static RGBAColor HD_VectorToColor(const HMM_Vec3 &v)
 {
-    if (v.X < 0) return kRGBANoValue;
+    if (v.X < 0)
+        return kRGBANoValue;
 
     int r = HMM_Clamp(0, (int)v.X, 255);
     int g = HMM_Clamp(0, (int)v.Y, 255);
@@ -39,7 +39,8 @@ static RGBAColor HD_VectorToColor(const HMM_Vec3 &v)
     RGBAColor rgb = epi::MakeRGBA(r, g, b);
 
     // ensure we don't get the "no color" value by mistake
-    if (rgb == kRGBANoValue) rgb ^= 0x00010100;
+    if (rgb == kRGBANoValue)
+        rgb ^= 0x00010100;
 
     return rgb;
 }
@@ -55,7 +56,8 @@ static int HD_coord_sys(lua_State *L)
     double w = luaL_checknumber(L, 1);
     double h = luaL_checknumber(L, 2);
 
-    if (w < 64 || h < 64) FatalError("Bad hud.coord_sys size: %fx%f\n", w, h);
+    if (w < 64 || h < 64)
+        FatalError("Bad hud.coord_sys size: %fx%f\n", w, h);
 
     HudSetCoordinateSystem(w, h);
 
@@ -157,12 +159,14 @@ static int HD_text_font(lua_State *L)
     FontDefinition *DEF = fontdefs.Lookup(font_name);
     EPI_ASSERT(DEF);
 
-    if (!DEF) FatalError("hud.text_font: Bad font name: %s\n", font_name);
+    if (!DEF)
+        FatalError("hud.text_font: Bad font name: %s\n", font_name);
 
     Font *font = hud_fonts.Lookup(DEF);
     EPI_ASSERT(font);
 
-    if (!font) FatalError("hud.text_font: Bad font name: %s\n", font_name);
+    if (!font)
+        FatalError("hud.text_font: Bad font name: %s\n", font_name);
 
     HudSetFont(font);
 
@@ -316,14 +320,13 @@ static int HD_scroll_image(lua_State *L)
     if (img)
     {
         if (noOffset)
-            HudScrollImageNoOffset(
-                x, y, img, -sx,
-                -sy);  // Invert sx/sy so that user can enter positive X for
-                       // right and positive Y for up
+            HudScrollImageNoOffset(x, y, img, -sx,
+                                   -sy); // Invert sx/sy so that user can enter positive X for
+                                         // right and positive Y for up
         else
             HudScrollImage(x, y, img, -sx,
-                           -sy);  // Invert sx/sy so that user can enter
-                                  // positive X for right and positive Y for up
+                           -sy);         // Invert sx/sy so that user can enter
+                                         // positive X for right and positive Y for up
     }
 
     return 0;
@@ -372,7 +375,10 @@ static int HD_tile_image(lua_State *L)
 
     const Image *img = ImageLookup(name, kImageNamespaceTexture);
 
-    if (img) { HudTileImage(x, y, w, h, img, offset_x, offset_y); }
+    if (img)
+    {
+        HudTileImage(x, y, w, h, img, offset_x, offset_y);
+    }
 
     return 0;
 }
@@ -423,12 +429,17 @@ static int HD_draw_num2(lua_State *L)
 
     *--pos = 0;
 
-    if (num == 0) { *--pos = '0'; }
+    if (num == 0)
+    {
+        *--pos = '0';
+    }
     else
     {
-        for (; num > 0 && len > 0; num /= 10, len--) *--pos = '0' + (num % 10);
+        for (; num > 0 && len > 0; num /= 10, len--)
+            *--pos = '0' + (num % 10);
 
-        if (is_neg) *--pos = '-';
+        if (is_neg)
+            *--pos = '-';
     }
 
     HudSetAlignment(+1, -1);
@@ -469,15 +480,23 @@ static int HD_draw_number(lua_State *L)
 
     *--pos = 0;
 
-    if (num == 0) { *--pos = '0'; }
+    if (num == 0)
+    {
+        *--pos = '0';
+    }
     else
     {
-        for (; num > 0 && len > 0; num /= 10, len--) *--pos = '0' + (num % 10);
+        for (; num > 0 && len > 0; num /= 10, len--)
+            *--pos = '0' + (num % 10);
 
-        if (is_neg) *--pos = '-';
+        if (is_neg)
+            *--pos = '-';
     }
 
-    if (align_right == 0) { HudDrawText(x, y, pos, size); }
+    if (align_right == 0)
+    {
+        HudDrawText(x, y, pos, size);
+    }
     else
     {
         HudSetAlignment(+1, -1);
@@ -492,12 +511,14 @@ static int HD_draw_number(lua_State *L)
 //
 static int HD_game_paused(lua_State *L)
 {
-    if (paused || menu_active || rts_menu_active || time_stop_active ||
-        erraticism_active)
+    if (paused || menu_active || rts_menu_active || time_stop_active || erraticism_active)
     {
         lua_pushboolean(L, 1);
     }
-    else { lua_pushboolean(L, 0); }
+    else
+    {
+        lua_pushboolean(L, 0);
+    }
 
     return 1;
 }
@@ -506,8 +527,14 @@ static int HD_game_paused(lua_State *L)
 //
 static int HD_erraticism_active(lua_State *L)
 {
-    if (erraticism_active) { lua_pushboolean(L, 1); }
-    else { lua_pushboolean(L, 0); }
+    if (erraticism_active)
+    {
+        lua_pushboolean(L, 1);
+    }
+    else
+    {
+        lua_pushboolean(L, 0);
+    }
 
     return 1;
 }
@@ -516,8 +543,14 @@ static int HD_erraticism_active(lua_State *L)
 //
 static int HD_time_stop_active(lua_State *L)
 {
-    if (time_stop_active) { lua_pushboolean(L, 1); }
-    else { lua_pushboolean(L, 0); }
+    if (time_stop_active)
+    {
+        lua_pushboolean(L, 1);
+    }
+    else
+    {
+        lua_pushboolean(L, 0);
+    }
 
     return 1;
 }
@@ -555,7 +588,8 @@ static int HD_render_automap(lua_State *L)
     new_state |= ui_hud_automap_flags[1];
 
     float new_zoom = old_zoom;
-    if (ui_hud_automap_zoom > 0.1) new_zoom = ui_hud_automap_zoom;
+    if (ui_hud_automap_zoom > 0.1)
+        new_zoom = ui_hud_automap_zoom;
 
     AutomapSetState(new_state, new_zoom);
 
@@ -634,8 +668,7 @@ static int HD_set_render_who(lua_State *L)
     int index = (int)luaL_checknumber(L, 1);
 
     if (index < 0 || index >= total_players)
-        FatalError("hud.set_render_who: bad index value: %d (numplayers=%d)\n",
-                   index, total_players);
+        FatalError("hud.set_render_who: bad index value: %d (numplayers=%d)\n", index, total_players);
 
     if (index == 0)
     {
@@ -647,7 +680,8 @@ static int HD_set_render_who(lua_State *L)
 
     for (; index > 1; index--)
     {
-        do {
+        do
+        {
             who = (who + 1) % kMaximumPlayers;
         } while (players[who] == nullptr);
     }
@@ -693,12 +727,11 @@ static int HD_get_average_color(lua_State *L)
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
         what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
-    ImageData *tmp_img_data = RgbFromPalettised(
-        ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
-    RGBAColor col = tmp_img_data->AverageColor(from_x, to_x, from_y, to_y);
-    rgb.X         = epi::GetRGBARed(col);
-    rgb.Y         = epi::GetRGBAGreen(col);
-    rgb.Z         = epi::GetRGBABlue(col);
+    ImageData *tmp_img_data = RgbFromPalettised(ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    RGBAColor  col          = tmp_img_data->AverageColor(from_x, to_x, from_y, to_y);
+    rgb.X                   = epi::GetRGBARed(col);
+    rgb.Y                   = epi::GetRGBAGreen(col);
+    rgb.Z                   = epi::GetRGBABlue(col);
     delete tmp_img_data;
 
     LuaPushVector3(L, rgb);
@@ -718,12 +751,11 @@ static int HD_get_lightest_color(lua_State *L)
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
         what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
-    ImageData *tmp_img_data = RgbFromPalettised(
-        ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
-    RGBAColor col = tmp_img_data->LightestColor(from_x, to_x, from_y, to_y);
-    rgb.X         = epi::GetRGBARed(col);
-    rgb.Y         = epi::GetRGBAGreen(col);
-    rgb.Z         = epi::GetRGBABlue(col);
+    ImageData *tmp_img_data = RgbFromPalettised(ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    RGBAColor  col          = tmp_img_data->LightestColor(from_x, to_x, from_y, to_y);
+    rgb.X                   = epi::GetRGBARed(col);
+    rgb.Y                   = epi::GetRGBAGreen(col);
+    rgb.Z                   = epi::GetRGBABlue(col);
     delete tmp_img_data;
 
     LuaPushVector3(L, rgb);
@@ -742,12 +774,11 @@ static int HD_get_darkest_color(lua_State *L)
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
         what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
-    ImageData *tmp_img_data = RgbFromPalettised(
-        ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
-    RGBAColor col = tmp_img_data->DarkestColor(from_x, to_x, from_y, to_y);
-    rgb.X         = epi::GetRGBARed(col);
-    rgb.Y         = epi::GetRGBAGreen(col);
-    rgb.Z         = epi::GetRGBABlue(col);
+    ImageData *tmp_img_data = RgbFromPalettised(ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    RGBAColor  col          = tmp_img_data->DarkestColor(from_x, to_x, from_y, to_y);
+    rgb.X                   = epi::GetRGBARed(col);
+    rgb.Y                   = epi::GetRGBAGreen(col);
+    rgb.Z                   = epi::GetRGBABlue(col);
     delete tmp_img_data;
 
     LuaPushVector3(L, rgb);
@@ -766,9 +797,8 @@ static int HD_get_average_hue(lua_State *L)
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
         what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
-    ImageData *tmp_img_data = RgbFromPalettised(
-        ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
-    uint8_t temp_rgb[3];
+    ImageData *tmp_img_data = RgbFromPalettised(ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    uint8_t    temp_rgb[3];
     tmp_img_data->AverageHue(temp_rgb, nullptr, from_x, to_x, from_y, to_y);
     rgb.X = temp_rgb[0];
     rgb.Y = temp_rgb[1];
@@ -789,14 +819,12 @@ static int HD_get_average_top_border_color(lua_State *L)
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
         what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
-    ImageData *tmp_img_data = RgbFromPalettised(
-        ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
-    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_,
-                                               tmp_img_c->actual_height_ - 1,
-                                               tmp_img_c->actual_height_);
-    rgb.X         = epi::GetRGBARed(col);
-    rgb.Y         = epi::GetRGBAGreen(col);
-    rgb.Z         = epi::GetRGBABlue(col);
+    ImageData *tmp_img_data = RgbFromPalettised(ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    RGBAColor  col          = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, tmp_img_c->actual_height_ - 1,
+                                                         tmp_img_c->actual_height_);
+    rgb.X                   = epi::GetRGBARed(col);
+    rgb.Y                   = epi::GetRGBAGreen(col);
+    rgb.Z                   = epi::GetRGBABlue(col);
     delete tmp_img_data;
 
     LuaPushVector3(L, rgb);
@@ -810,13 +838,11 @@ static int HD_get_average_bottom_border_color(lua_State *L)
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
         what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
-    ImageData *tmp_img_data = RgbFromPalettised(
-        ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
-    RGBAColor col =
-        tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, 0, 1);
-    rgb.X = epi::GetRGBARed(col);
-    rgb.Y = epi::GetRGBAGreen(col);
-    rgb.Z = epi::GetRGBABlue(col);
+    ImageData *tmp_img_data = RgbFromPalettised(ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    RGBAColor  col          = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, 0, 1);
+    rgb.X                   = epi::GetRGBARed(col);
+    rgb.Y                   = epi::GetRGBAGreen(col);
+    rgb.Z                   = epi::GetRGBABlue(col);
     delete tmp_img_data;
 
     LuaPushVector3(L, rgb);
@@ -829,7 +855,8 @@ static int HD_rts_enable(lua_State *L)
 {
     std::string name = luaL_checkstring(L, 1);
 
-    if (!name.empty()) ScriptEnableByTag(nullptr, name.c_str(), false);
+    if (!name.empty())
+        ScriptEnableByTag(nullptr, name.c_str(), false);
 
     return 0;
 }
@@ -840,7 +867,8 @@ static int HD_rts_disable(lua_State *L)
 {
     std::string name = luaL_checkstring(L, 1);
 
-    if (!name.empty()) ScriptEnableByTag(nullptr, name.c_str(), true);
+    if (!name.empty())
+        ScriptEnableByTag(nullptr, name.c_str(), true);
 
     return 0;
 }
@@ -870,8 +898,14 @@ static int HD_get_image_width(lua_State *L)
 
     const Image *img = ImageLookup(name, kImageNamespaceGraphic);
 
-    if (img) { lua_pushinteger(L, HudGetImageWidth(img)); }
-    else { lua_pushinteger(L, 0); }
+    if (img)
+    {
+        lua_pushinteger(L, HudGetImageWidth(img));
+    }
+    else
+    {
+        lua_pushinteger(L, 0);
+    }
 
     return 1;
 }
@@ -884,79 +918,84 @@ static int HD_get_image_height(lua_State *L)
 
     const Image *img = ImageLookup(name, kImageNamespaceGraphic);
 
-    if (img) { lua_pushinteger(L, HudGetImageHeight(img)); }
-    else { lua_pushinteger(L, 0); }
+    if (img)
+    {
+        lua_pushinteger(L, HudGetImageHeight(img));
+    }
+    else
+    {
+        lua_pushinteger(L, 0);
+    }
 
     return 1;
 }
 
-static const luaL_Reg hudlib[] = {
-    {"game_mode", HD_game_mode},
-    {"game_name", HD_game_name},
-    {"game_skill", HD_game_skill},
-    {"map_name", HD_map_name},
-    {"map_title", HD_map_title},
-    {"map_author", HD_map_author},
+static const luaL_Reg hudlib[] = {{"game_mode", HD_game_mode},
+                                  {"game_name", HD_game_name},
+                                  {"game_skill", HD_game_skill},
+                                  {"map_name", HD_map_name},
+                                  {"map_title", HD_map_title},
+                                  {"map_author", HD_map_author},
 
-    {"which_hud", HD_which_hud},
-    {"check_automap", HD_check_automap},
-    {"get_time", HD_get_time},
+                                  {"which_hud", HD_which_hud},
+                                  {"check_automap", HD_check_automap},
+                                  {"get_time", HD_get_time},
 
-    // set-state functions
-    {"coord_sys", HD_coord_sys},
+                                  // set-state functions
+                                  {"coord_sys", HD_coord_sys},
 
-    {"text_font", HD_text_font},
-    {"text_color", HD_text_color},
-    {"set_scale", HD_set_scale},
-    {"set_alpha", HD_set_alpha},
+                                  {"text_font", HD_text_font},
+                                  {"text_color", HD_text_color},
+                                  {"set_scale", HD_set_scale},
+                                  {"set_alpha", HD_set_alpha},
 
-    {"set_render_who", HD_set_render_who},
-    {"automap_color", HD_automap_color},
-    {"automap_option", HD_automap_option},
-    {"automap_zoom", HD_automap_zoom},
-    {"automap_player_arrow", HD_automap_player_arrow},
+                                  {"set_render_who", HD_set_render_who},
+                                  {"automap_color", HD_automap_color},
+                                  {"automap_option", HD_automap_option},
+                                  {"automap_zoom", HD_automap_zoom},
+                                  {"automap_player_arrow", HD_automap_player_arrow},
 
-    // drawing functions
-    {"solid_box", HD_solid_box},
-    {"solid_line", HD_solid_line},
-    {"thin_box", HD_thin_box},
-    {"gradient_box", HD_gradient_box},
+                                  // drawing functions
+                                  {"solid_box", HD_solid_box},
+                                  {"solid_line", HD_solid_line},
+                                  {"thin_box", HD_thin_box},
+                                  {"gradient_box", HD_gradient_box},
 
-    {"draw_image", HD_draw_image},
-    {"stretch_image", HD_stretch_image},
-    {"scroll_image", HD_scroll_image},
+                                  {"draw_image", HD_draw_image},
+                                  {"stretch_image", HD_stretch_image},
+                                  {"scroll_image", HD_scroll_image},
 
-    {"tile_image", HD_tile_image},
-    {"draw_text", HD_draw_text},
-    {"draw_num2", HD_draw_num2},
+                                  {"tile_image", HD_tile_image},
+                                  {"draw_text", HD_draw_text},
+                                  {"draw_num2", HD_draw_num2},
 
-    {"draw_number", HD_draw_number},
-    {"game_paused", HD_game_paused},
-    {"erraticism_active", HD_erraticism_active},
-    {"time_stop_active", HD_time_stop_active},
-    {"screen_aspect", HD_screen_aspect},
+                                  {"draw_number", HD_draw_number},
+                                  {"game_paused", HD_game_paused},
+                                  {"erraticism_active", HD_erraticism_active},
+                                  {"time_stop_active", HD_time_stop_active},
+                                  {"screen_aspect", HD_screen_aspect},
 
-    {"render_world", HD_render_world},
-    {"render_automap", HD_render_automap},
+                                  {"render_world", HD_render_world},
+                                  {"render_automap", HD_render_automap},
 
-    // sound functions
-    {"play_sound", HD_play_sound},
+                                  // sound functions
+                                  {"play_sound", HD_play_sound},
 
-    // image color functions
-    {"get_average_color", HD_get_average_color},
-    {"get_average_top_border_color", HD_get_average_top_border_color},
-    {"get_average_bottom_border_color", HD_get_average_bottom_border_color},
-    {"get_lightest_color", HD_get_lightest_color},
-    {"get_darkest_color", HD_get_darkest_color},
-    {"get_average_hue", HD_get_average_hue},
+                                  // image color functions
+                                  {"get_average_color", HD_get_average_color},
+                                  {"get_average_top_border_color", HD_get_average_top_border_color},
+                                  {"get_average_bottom_border_color", HD_get_average_bottom_border_color},
+                                  {"get_lightest_color", HD_get_lightest_color},
+                                  {"get_darkest_color", HD_get_darkest_color},
+                                  {"get_average_hue", HD_get_average_hue},
 
-    {"rts_enable", HD_rts_enable},
-    {"rts_disable", HD_rts_disable},
-    {"rts_isactive", HD_rts_isactive},
+                                  {"rts_enable", HD_rts_enable},
+                                  {"rts_disable", HD_rts_disable},
+                                  {"rts_isactive", HD_rts_isactive},
 
-    {"get_image_width", HD_get_image_width},
-    {"get_image_height", HD_get_image_height},
-    {nullptr, nullptr}};
+                                  {"get_image_width", HD_get_image_width},
+                                  {"get_image_height", HD_get_image_height},
+                                  {nullptr, nullptr}};
 
 static int luaopen_hud(lua_State *L)
 {

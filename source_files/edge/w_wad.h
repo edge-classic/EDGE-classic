@@ -81,9 +81,8 @@ const char *GetLumpNameFromIndex(int lump);
 epi::File *LoadLumpAsFile(int lump);
 epi::File *LoadLumpAsFile(const char *name);
 
-int GetPaletteForLump(int lump);
-int FindFlatSequence(const char *start, const char *end, int *s_offset,
-                     int *e_offset);
+int               GetPaletteForLump(int lump);
+int               FindFlatSequence(const char *start, const char *end, int *s_offset, int *e_offset);
 std::vector<int> *GetFlatListForWad(int file);
 std::vector<int> *GetSpriteListForWad(int file);
 std::vector<int> *GetPatchListForWad(int file);

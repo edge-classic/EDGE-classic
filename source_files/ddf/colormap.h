@@ -38,11 +38,11 @@ struct ColormapCache
 
 class Colormap
 {
-   public:
+  public:
     Colormap();
     ~Colormap();
 
-   public:
+  public:
     void CopyDetail(Colormap &src);
     void Default();
 
@@ -60,15 +60,18 @@ class Colormap
     // colours for GL renderer
     RGBAColor gl_color_;
 
-    RGBAColor font_colour_;  // (computed only, not in DDF)
+    RGBAColor font_colour_; // (computed only, not in DDF)
 
     ColormapCache cache_;
 
     void *analysis_;
 
-   private:
+  private:
     // disable copy construct and assignment operator
-    explicit Colormap(Colormap &rhs) { (void)rhs; }
+    explicit Colormap(Colormap &rhs)
+    {
+        (void)rhs;
+    }
     Colormap &operator=(Colormap &rhs)
     {
         (void)rhs;
@@ -78,15 +81,15 @@ class Colormap
 
 class ColormapContainer : public std::vector<Colormap *>
 {
-   public:
+  public:
     ColormapContainer();
     ~ColormapContainer();
 
-   public:
+  public:
     Colormap *Lookup(const char *refname);
 };
 
-extern ColormapContainer colormaps;  // -ACB- 2004/06/10 Implemented
+extern ColormapContainer colormaps; // -ACB- 2004/06/10 Implemented
 
 void DDF_ReadColourMaps(const std::string &data);
 

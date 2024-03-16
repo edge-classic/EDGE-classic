@@ -50,9 +50,8 @@
 namespace dehacked
 {
 
-static constexpr uint16_t kMaximumLineLength =
-    768;  // Lobo 2023: seeing lots of truncated wads lately so bumped up from
-          // 512
+static constexpr uint16_t kMaximumLineLength = 768; // Lobo 2023: seeing lots of truncated wads lately so bumped up from
+                                                    // 512
 static constexpr uint16_t kMaximumTextStringLength = 1200;
 
 static constexpr uint8_t kPrettyLength = 28;
@@ -66,77 +65,58 @@ static constexpr uint16_t kV16Texts   = 1053;
 
 // Thing conversion array from 1.2 to 1.666
 static constexpr int16_t thing_v12_to_v166[kV12Things] = {
-    0,   11,  1,   2,   12,  13,  14,  18,  15,  19,  21,  30,  31,  32,  16,
-    33,  34,  35,  37,  38,  39,  41,  42,  43,  44,  45,  46,  47,  48,  49,
-    50,  51,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  63,  64,  65,
-    66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,  81,  82,  83,
-    84,  85,  86,  87,  88,  89,  90,  91,  92,  93,  94,  95,  96,  97,  98,
-    99,  100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113,
-    114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126
-};
+    0,   11,  1,   2,   12,  13,  14,  18,  15,  19,  21,  30,  31,  32,  16,  33,  34,  35,  37,  38,  39,
+    41,  42,  43,  44,  45,  46,  47,  48,  49,  50,  51,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,
+    63,  64,  65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,  81,  82,  83,  84,  85,  86,
+    87,  88,  89,  90,  91,  92,  93,  94,  95,  96,  97,  98,  99,  100, 101, 102, 103, 104, 105, 106, 107,
+    108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126};
 
 // Frame conversion array from 1.2 to 1.666
 static constexpr int16_t frame_v12_to_v166[kV12Frames] = {
-    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-    21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 49, 50, 51, 52, 53, 54, 55, 56,
-    57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,
-    76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94,
-    95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 522, 523, 524, 525,
-    526, 107, 108, 109, 110, 111,
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+    31, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76,
+    77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104,
+    105, 106, 522, 523, 524, 525, 526, 107, 108, 109, 110, 111,
     /* 100 */
-    112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126,
-    127, 128, 129, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160,
-    161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175,
-    176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190,
-    191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 207, 208, 209,
-    210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224,
-    225, 226, 227, 228, 229, 230, 231, 232, 233, 234,
+    112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 149, 150, 151, 152, 153,
+    154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176,
+    177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199,
+    200, 201, 202, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226,
+    227, 228, 229, 230, 231, 232, 233, 234,
     /* 200 */
-    235, 442, 443, 444, 445, 446, 447, 448, 449, 450, 451, 452, 453, 454, 455,
-    456, 457, 458, 459, 460, 461, 462, 463, 464, 465, 466, 467, 468, 469, 475,
-    476, 477, 478, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490,
-    491, 492, 493, 494, 495, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511,
-    512, 513, 514, 515, 527, 528, 529, 530, 531, 532, 533, 534, 535, 536, 537,
-    538, 539, 540, 541, 542, 543, 544, 545, 546, 547, 548, 585, 586, 587, 588,
-    589, 590, 591, 592, 593, 594, 595, 596, 597, 598,
+    235, 442, 443, 444, 445, 446, 447, 448, 449, 450, 451, 452, 453, 454, 455, 456, 457, 458, 459, 460, 461, 462, 463,
+    464, 465, 466, 467, 468, 469, 475, 476, 477, 478, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491,
+    492, 493, 494, 495, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515, 527, 528, 529, 530, 531,
+    532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545, 546, 547, 548, 585, 586, 587, 588, 589, 590,
+    591, 592, 593, 594, 595, 596, 597, 598,
     /* 300 */
-    599, 600, 601, 602, 603, 604, 605, 606, 607, 608, 609, 610, 611, 612, 613,
-    614, 615, 616, 617, 618, 619, 620, 621, 622, 623, 624, 625, 626, 627, 628,
-    629, 630, 631, 674, 675, 676, 677, 678, 679, 680, 681, 682, 683, 684, 685,
-    686, 687, 688, 689, 690, 691, 692, 693, 694, 695, 696, 697, 698, 699, 700,
-    130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 802, 803, 804,
-    805, 806, 807, 808, 809, 810, 811, 812, 816, 817, 818, 819, 820, 821, 822,
-    823, 824, 825, 826, 827, 828, 829, 830, 831, 832,
+    599, 600, 601, 602, 603, 604, 605, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615, 616, 617, 618, 619, 620, 621,
+    622, 623, 624, 625, 626, 627, 628, 629, 630, 631, 674, 675, 676, 677, 678, 679, 680, 681, 682, 683, 684, 685, 686,
+    687, 688, 689, 690, 691, 692, 693, 694, 695, 696, 697, 698, 699, 700, 130, 131, 132, 133, 134, 135, 136, 137, 138,
+    139, 140, 141, 802, 803, 804, 805, 806, 807, 808, 809, 810, 811, 812, 816, 817, 818, 819, 820, 821, 822, 823, 824,
+    825, 826, 827, 828, 829, 830, 831, 832,
     /* 400 */
-    833, 834, 835, 836, 837, 838, 839, 840, 841, 842, 843, 844, 845, 846, 847,
-    848, 849, 850, 851, 852, 853, 854, 855, 856, 861, 862, 863, 864, 865, 866,
-    867, 868, 869, 870, 871, 872, 873, 874, 875, 876, 877, 878, 879, 880, 881,
-    882, 883, 884, 886, 887, 888, 889, 890, 891, 892, 893, 894, 895, 896, 897,
-    898, 899, 900, 901, 902, 903, 904, 905, 906, 907, 908, 909, 910, 911, 912,
-    913, 914, 915, 916, 917, 918, 919, 920, 921, 922, 923, 924, 925, 926, 927,
-    928, 929, 930, 931, 932, 933, 934, 935, 936, 937,
+    833, 834, 835, 836, 837, 838, 839, 840, 841, 842, 843, 844, 845, 846, 847, 848, 849, 850, 851, 852, 853, 854, 855,
+    856, 861, 862, 863, 864, 865, 866, 867, 868, 869, 870, 871, 872, 873, 874, 875, 876, 877, 878, 879, 880, 881, 882,
+    883, 884, 886, 887, 888, 889, 890, 891, 892, 893, 894, 895, 896, 897, 898, 899, 900, 901, 902, 903, 904, 905, 906,
+    907, 908, 909, 910, 911, 912, 913, 914, 915, 916, 917, 918, 919, 920, 921, 922, 923, 924, 925, 926, 927, 928, 929,
+    930, 931, 932, 933, 934, 935, 936, 937,
     /* 500 */
-    938, 939, 940, 941, 942, 943, 944, 945, 946, 947, 948, 949
-};
+    938, 939, 940, 941, 942, 943, 944, 945, 946, 947, 948, 949};
 
 // Sound conversion array from 1.2 to 1.666
 static constexpr int16_t sound_v12_to_v166[kV12Sounds] = {
-    0,  1,  2,  3,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-    20, 21, 22, 23, 24, 25, 26, 27, 31, 32, 33, 34, 35, 36, 37, 38,
-    39, 40, 41, 42, 43, 44, 45, 51, 52, 55, 57, 59, 60, 61, 62, 63,
-    64, 65, 66, 67, 68, 69, 75, 76, 77, 81, 82, 83, 84, 85, 86
-};
+    0,  1,  2,  3,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+    25, 26, 27, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 51, 52, 55,
+    57, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 75, 76, 77, 81, 82, 83, 84, 85, 86};
 
 // Sprite conversion array from 1.2 to 1.666
 static constexpr int16_t sprite_v12_to_v166[kV12Sprites] = {
-    0,   1,   2,   3,   4,   5,   7,   8,   9,   10,  11,  12,  13,  14,  15,
-    16,  17,  18,  19,  41,  20,  21,  22,  23,  24,  25,  28,  29,  30,  39,
-    40,  42,  44,  45,  49,  26,  55,  56,  57,  58,  60,  61,  62,  63,  64,
-    65,  66,  67,  68,  69,  70,  71,  72,  73,  75,  76,  77,  78,  79,  80,
-    81,  82,  83,  84,  85,  86,  87,  88,  89,  90,  91,  92,  94,  95,  96,
-    97,  98,  99,  100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
-    112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126
-};
+    0,   1,   2,   3,   4,   5,   7,   8,   9,   10,  11,  12,  13,  14,  15,  16,  17,  18,  19,  41,  20,
+    21,  22,  23,  24,  25,  28,  29,  30,  39,  40,  42,  44,  45,  49,  26,  55,  56,  57,  58,  60,  61,
+    62,  63,  64,  65,  66,  67,  68,  69,  70,  71,  72,  73,  75,  76,  77,  78,  79,  80,  81,  82,  83,
+    84,  85,  86,  87,  88,  89,  90,  91,  92,  94,  95,  96,  97,  98,  99,  100, 101, 102, 103, 104, 105,
+    106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126};
 
 namespace patch
 {
@@ -160,28 +140,28 @@ enum ObjectKind
 
 void DetectMsg(const char *kind)
 {
-    LogPrint("Detected %s patch file from DEHACKED v%d.%d\n", kind,
-             dhe_ver / 10, dhe_ver % 10);
+    LogPrint("Detected %s patch file from DEHACKED v%d.%d\n", kind, dhe_ver / 10, dhe_ver % 10);
 }
 
 void VersionMsg(void)
 {
-    LogPrint("Patch format %d, for DOOM EXE %d.%d%s\n", patch_fmt,
-             doom_ver / 10, doom_ver % 10, (doom_ver == 16) ? "66" : "");
+    LogPrint("Patch format %d, for DOOM EXE %d.%d%s\n", patch_fmt, doom_ver / 10, doom_ver % 10,
+             (doom_ver == 16) ? "66" : "");
 }
 
 int GetRawInt(void)
 {
-    if (pat_buf->EndOfFile() || pat_buf->Error()) file_error = true;
+    if (pat_buf->EndOfFile() || pat_buf->Error())
+        file_error = true;
 
-    if (file_error) return -1;
+    if (file_error)
+        return -1;
 
     unsigned char raw[4];
 
     pat_buf->Read(raw, 4);
 
-    return ((int)raw[0]) + ((int)raw[1] << 8) + ((int)raw[2] << 16) +
-           ((int)(char)raw[3] << 24);
+    return ((int)raw[0]) + ((int)raw[1] << 8) + ((int)raw[2] << 16) + ((int)(char)raw[3] << 24);
 }
 
 void GetRawString(char *buf, int max_len)
@@ -198,52 +178,55 @@ void GetRawString(char *buf, int max_len)
     {
         int ch = pat_buf->GetCharacter();
 
-        if (ch == 0) break;
+        if (ch == 0)
+            break;
 
-        if (ch == EOF || pat_buf->Error()) file_error = true;
+        if (ch == EOF || pat_buf->Error())
+            file_error = true;
 
-        if (file_error) break;
+        if (file_error)
+            break;
 
         buf[len++] = ch;
 
         if (len >= max_len)
         {
-            FatalError(
-                "Dehacked: Error - Text string exceeds internal buffer "
-                "length.\n"
-                "[> %d characters, from binary patch file]\n",
-                kMaximumTextStringLength);
+            FatalError("Dehacked: Error - Text string exceeds internal buffer "
+                       "length.\n"
+                       "[> %d characters, from binary patch file]\n",
+                       kMaximumTextStringLength);
         }
     }
 
     buf[len] = 0;
 
     // strings are aligned to 4 byte boundaries
-    for (; (len % 4) != 3; len++) pat_buf->GetCharacter();
+    for (; (len % 4) != 3; len++)
+        pat_buf->GetCharacter();
 }
 
 const char *ObjectName(int o_kind)
 {
     switch (o_kind)
     {
-        case kObjectKindMobj:
-            return "thing";
-        case kObjectKindAmmo:
-            return "ammo";
-        case kObjectKindWeapon:
-            return "weapon";
-        case kObjectKindFrame:
-            return "frame";
-        case kObjectKindSound:
-            return "sound";
-        case kObjectKindSprite:
-            return "sprite";
+    case kObjectKindMobj:
+        return "thing";
+    case kObjectKindAmmo:
+        return "ammo";
+    case kObjectKindWeapon:
+        return "weapon";
+    case kObjectKindFrame:
+        return "frame";
+    case kObjectKindSound:
+        return "sound";
+    case kObjectKindSprite:
+        return "sprite";
 
-        default:
-            FatalError("Dehacked: Error - Illegal object kind: %d\n", o_kind);
+    default:
+        FatalError("Dehacked: Error - Illegal object kind: %d\n", o_kind);
     }
 
-    return nullptr;  // not reached
+    return nullptr; // not reached
 }
 
 void MarkObject(int o_kind, int o_num)
@@ -252,27 +235,27 @@ void MarkObject(int o_kind, int o_num)
 
     switch (o_kind)
     {
-        case kObjectKindMobj:
-            things::MarkThing(o_num);
-            break;
-        case kObjectKindAmmo:
-            ammo::MarkAmmo(o_num);
-            break;
-        case kObjectKindWeapon:
-            weapons::MarkWeapon(o_num);
-            break;
-        case kObjectKindFrame:
-            frames::MarkState(o_num);
-            break;
-        case kObjectKindSound:
-            sounds::MarkSound(o_num);
-            break;
+    case kObjectKindMobj:
+        things::MarkThing(o_num);
+        break;
+    case kObjectKindAmmo:
+        ammo::MarkAmmo(o_num);
+        break;
+    case kObjectKindWeapon:
+        weapons::MarkWeapon(o_num);
+        break;
+    case kObjectKindFrame:
+        frames::MarkState(o_num);
+        break;
+    case kObjectKindSound:
+        sounds::MarkSound(o_num);
+        break;
 
-        case kObjectKindSprite:  // not needed
-            break;
+    case kObjectKindSprite: // not needed
+        break;
 
-        default:
-            FatalError("Dehacked: Error - Illegal object kind: %d\n", o_kind);
+    default:
+        FatalError("Dehacked: Error - Illegal object kind: %d\n", o_kind);
     }
 }
 
@@ -282,7 +265,8 @@ void GetInt(int o_kind, int o_num, int *dest)
 
     LogPrint("Int: %d\n", temp);
 
-    if (*dest == temp) return;
+    if (*dest == temp)
+        return;
 
     MarkObject(o_kind, o_num);
 
@@ -299,7 +283,8 @@ void GetFlags(int o_kind, int o_num, int *dest)
     // from binary patch files.
     temp &= ~ALL_BEX_FLAGS;
 
-    if (*dest == temp) return;
+    if (*dest == temp)
+        return;
 
     MarkObject(o_kind, o_num);
 
@@ -316,9 +301,7 @@ void GetFrame(int o_kind, int o_num, int *dest)
     {
         if (temp < 0 || temp >= kV12Frames)
         {
-            LogDebug(
-                "Dehacked: Warning - Found illegal V1.2 frame number: %d\n",
-                temp);
+            LogDebug("Dehacked: Warning - Found illegal V1.2 frame number: %d\n", temp);
             return;
         }
 
@@ -346,9 +329,7 @@ void GetSprite(int o_kind, int o_num, int *dest)
     {
         if (temp < 0 || temp >= kV12Sprites)
         {
-            LogDebug(
-                "Dehacked: Warning - Found illegal V1.2 sprite number: %d\n",
-                temp);
+            LogDebug("Dehacked: Warning - Found illegal V1.2 sprite number: %d\n", temp);
             return;
         }
 
@@ -374,9 +355,7 @@ void GetSound(int o_kind, int o_num, int *dest)
     {
         if (temp < 0 || temp >= kV12Sounds)
         {
-            LogDebug(
-                "Dehacked: Warning - Found illegal V1.2 sound number: %d\n",
-                temp);
+            LogDebug("Dehacked: Warning - Found illegal V1.2 sound number: %d\n", temp);
             return;
         }
 
@@ -406,7 +385,8 @@ void GetAmmoType(int o_kind, int o_num, int *dest)
         return;
     }
 
-    if (temp == 4) temp = kAmmoTypeNoAmmo;
+    if (temp == 4)
+        temp = kAmmoTypeNoAmmo;
 
     // no need to MarkObject, already done (in ReadBinaryWeapon)
 
@@ -417,17 +397,23 @@ const char *PrettyTextString(const char *t)
 {
     static char buf[kPrettyLength * 2 + 10];
 
-    while (epi::IsSpaceASCII(*t)) t++;
+    while (epi::IsSpaceASCII(*t))
+        t++;
 
-    if (!*t) return "<<EMPTY>>";
+    if (!*t)
+        return "<<EMPTY>>";
 
     int len = 0;
 
     for (; *t && len < kPrettyLength; t++)
     {
-        if (t[0] == t[1] && t[1] == t[2]) continue;
+        if (t[0] == t[1] && t[1] == t[2])
+            continue;
 
-        if (*t == '"') { buf[len++] = '\''; }
+        if (*t == '"')
+        {
+            buf[len++] = '\'';
+        }
         else if (*t == '\n')
         {
             buf[len++] = '\\';
@@ -458,8 +444,7 @@ void ReadBinaryThing(int mt_num)
     LogPrint("\n--- ReadBinaryThing %d ---\n", mt_num);
 
     if (file_error)
-        FatalError(
-            "Dehacked: Error - File error reading binary thing table.\n");
+        FatalError("Dehacked: Error - File error reading binary thing table.\n");
 
     DehackedMapObjectDefinition *mobj = things::GetModifiedMobj(mt_num);
 
@@ -488,7 +473,8 @@ void ReadBinaryThing(int mt_num)
     GetSound(kObjectKindMobj, mt_num, &mobj->activesound);
     GetFlags(kObjectKindMobj, mt_num, &mobj->flags);
 
-    if (doom_ver != 12) GetFrame(kObjectKindMobj, mt_num, &mobj->raisestate);
+    if (doom_ver != 12)
+        GetFrame(kObjectKindMobj, mt_num, &mobj->raisestate);
 }
 
 void ReadBinaryAmmo(void)
@@ -514,8 +500,7 @@ void ReadBinaryWeapon(int wp_num)
     LogPrint("\n--- ReadBinaryWeapon %d ---\n", wp_num);
 
     if (file_error)
-        FatalError(
-            "Dehacked: Error - File error reading binary weapon table.\n");
+        FatalError("Dehacked: Error - File error reading binary weapon table.\n");
 
     WeaponInfo *weap = weapon_info + wp_num;
 
@@ -533,8 +518,7 @@ void ReadBinaryFrame(int st_num)
     LogPrint("\n--- ReadBinaryFrame %d ---\n", st_num);
 
     if (file_error)
-        FatalError(
-            "Dehacked: Error - File error reading binary frame table.\n");
+        FatalError("Dehacked: Error - File error reading binary frame table.\n");
 
     State *state = frames::GetModifiedState(st_num);
 
@@ -542,11 +526,11 @@ void ReadBinaryFrame(int st_num)
     GetInt(kObjectKindFrame, st_num, &state->frame);
     GetInt(kObjectKindFrame, st_num, &state->tics);
 
-    GetRawInt();  // ignore code-pointer
+    GetRawInt(); // ignore code-pointer
 
     GetFrame(kObjectKindFrame, st_num, &state->next_state);
 
-    GetRawInt();  // ignore misc1/misc2 fields
+    GetRawInt(); // ignore misc1/misc2 fields
     GetRawInt();
 }
 
@@ -555,20 +539,19 @@ void ReadBinarySound(int s_num)
     LogPrint("\n--- ReadBinarySound %d ---\n", s_num);
 
     if (file_error)
-        FatalError(
-            "Dehacked: Error - File error reading binary sound table.\n");
+        FatalError("Dehacked: Error - File error reading binary sound table.\n");
 
-    GetRawInt();  // ignore sound name pointer
-    GetRawInt();  // ignore singularity
-    GetRawInt();  // ignore priority
+    GetRawInt(); // ignore sound name pointer
+    GetRawInt(); // ignore singularity
+    GetRawInt(); // ignore priority
 
-    GetRawInt();  // ignore link pointer
-    GetRawInt();  // ignore link pitch
-    GetRawInt();  // ignore link volume
+    GetRawInt(); // ignore link pointer
+    GetRawInt(); // ignore link pitch
+    GetRawInt(); // ignore link volume
 
-    GetRawInt();  //
-    GetRawInt();  // unused stuff
-    GetRawInt();  //
+    GetRawInt(); //
+    GetRawInt(); // unused stuff
+    GetRawInt(); //
 }
 
 void ReadBinarySprite(int spr_num)
@@ -576,10 +559,9 @@ void ReadBinarySprite(int spr_num)
     LogPrint("\n--- ReadBinarySprite %d ---\n", spr_num);
 
     if (file_error)
-        FatalError(
-            "Dehacked: Error - File error reading binary sprite table.\n");
+        FatalError("Dehacked: Error - File error reading binary sprite table.\n");
 
-    GetRawInt();  // ignore sprite name pointer
+    GetRawInt(); // ignore sprite name pointer
 }
 
 void ReadBinaryText(int tx_num)
@@ -606,10 +588,9 @@ DehackedResult LoadReallyOld(void)
 
     if (tempfmt < 1 || tempfmt > 2)
     {
-        SetErrorMsg(
-            "Bad format byte in DeHackEd patch file.\n"
-            "[Really old patch, format byte %d]\n",
-            tempfmt);
+        SetErrorMsg("Bad format byte in DeHackEd patch file.\n"
+                    "[Really old patch, format byte %d]\n",
+                    tempfmt);
         return kDehackedConversionParseError;
     }
 
@@ -622,15 +603,18 @@ DehackedResult LoadReallyOld(void)
 
     int j;
 
-    for (j = 0; j < kV12Things; j++) ReadBinaryThing(thing_v12_to_v166[j]);
+    for (j = 0; j < kV12Things; j++)
+        ReadBinaryThing(thing_v12_to_v166[j]);
 
     ReadBinaryAmmo();
 
-    for (j = 0; j < 8; j++) ReadBinaryWeapon(j);  // no need to convert
+    for (j = 0; j < 8; j++)
+        ReadBinaryWeapon(j); // no need to convert
 
     if (patch_fmt == 2)
     {
-        for (j = 0; j < kV12Frames; j++) ReadBinaryFrame(frame_v12_to_v166[j]);
+        for (j = 0; j < kV12Frames; j++)
+            ReadBinaryFrame(frame_v12_to_v166[j]);
     }
 
     return kDehackedConversionOK;
@@ -651,10 +635,9 @@ DehackedResult LoadBinary(void)
     }
     else if (tempfmt != 4)
     {
-        SetErrorMsg(
-            "Bad format byte in DeHackEd patch file.\n"
-            "[Binary patch, format byte %d]\n",
-            tempfmt);
+        SetErrorMsg("Bad format byte in DeHackEd patch file.\n"
+                    "[Binary patch, format byte %d]\n",
+                    tempfmt);
         return kDehackedConversionParseError;
     }
 
@@ -662,10 +645,9 @@ DehackedResult LoadBinary(void)
 
     if (tempdoom != 12 && !(tempdoom >= 16 && tempdoom <= 21))
     {
-        SetErrorMsg(
-            "Bad Doom release number in patch file !\n"
-            "[Binary patch, release number %d]\n",
-            tempdoom);
+        SetErrorMsg("Bad Doom release number in patch file !\n"
+                    "[Binary patch, release number %d]\n",
+                    tempdoom);
         return kDehackedConversionParseError;
     }
 
@@ -678,22 +660,26 @@ DehackedResult LoadBinary(void)
 
     if (doom_ver == 12)
     {
-        for (j = 0; j < kV12Things; j++) ReadBinaryThing(thing_v12_to_v166[j]);
+        for (j = 0; j < kV12Things; j++)
+            ReadBinaryThing(thing_v12_to_v166[j]);
     }
     else
     {
-        for (j = 0; j < kTotalDehackedMapObjectTypes; j++) ReadBinaryThing(j);
+        for (j = 0; j < kTotalDehackedMapObjectTypes; j++)
+            ReadBinaryThing(j);
     }
 
     ReadBinaryAmmo();
 
     int num_weap = (doom_ver == 12) ? 8 : 9;
 
-    for (j = 0; j < num_weap; j++) ReadBinaryWeapon(j);
+    for (j = 0; j < num_weap; j++)
+        ReadBinaryWeapon(j);
 
     if (doom_ver == 12)
     {
-        for (j = 0; j < kV12Frames; j++) ReadBinaryFrame(frame_v12_to_v166[j]);
+        for (j = 0; j < kV12Frames; j++)
+            ReadBinaryFrame(frame_v12_to_v166[j]);
     }
     else
     {
@@ -701,7 +687,8 @@ DehackedResult LoadBinary(void)
          * DeHackEd code omits the very last frame from the V1.666+
          * binary format.  The V1.2 binary format is fine though.
          */
-        for (j = 0; j < kTotalStates - 1; j++) ReadBinaryFrame(j);
+        for (j = 0; j < kTotalStates - 1; j++)
+            ReadBinaryFrame(j);
     }
 
     if (doom_ver == 12)
@@ -709,7 +696,8 @@ DehackedResult LoadBinary(void)
         // Note: this V1.2 sound/sprite handling UNTESTED.  I'm not even
         // sure that there exists any such DEH patch files.
 
-        for (j = 1; j < kV12Sounds; j++) ReadBinarySound(sound_v12_to_v166[j]);
+        for (j = 1; j < kV12Sounds; j++)
+            ReadBinarySound(sound_v12_to_v166[j]);
 
         for (j = 0; j < kV12Sprites; j++)
             ReadBinarySprite(sprite_v12_to_v166[j]);
@@ -721,15 +709,18 @@ DehackedResult LoadBinary(void)
          * the very last sound is "DSRADIO" which is omitted from the
          * patch file.  Confirmed through testing.
          */
-        for (j = 1; j < kTotalSoundEffects - 1; j++) ReadBinarySound(j);
+        for (j = 1; j < kTotalSoundEffects - 1; j++)
+            ReadBinarySound(j);
 
-        for (j = 0; j < kTotalSprites; j++) ReadBinarySprite(j);
+        for (j = 0; j < kTotalSprites; j++)
+            ReadBinarySprite(j);
     }
 
     if (doom_ver == 16 || doom_ver == 17)
     {
         // -AJA- starts at one simply to match v166_index
-        for (j = 1; j <= kV16Texts; j++) ReadBinaryText(j);
+        for (j = 1; j <= kV16Texts; j++)
+            ReadBinaryText(j);
     }
 
     return kDehackedConversionOK;
@@ -768,12 +759,10 @@ enum SectionKind
     kTotalSections
 };
 
-const char *section_name[] = { "Thing", "Sound", "Frame", "Sprite", "Ammo",
-                               "Weapon", "Pointer", "Cheat", "Misc",
+const char *section_name[] = {"Thing", "Sound", "Frame", "Sprite", "Ammo", "Weapon", "Pointer", "Cheat", "Misc",
 
-                               // Boom extensions:
-                               "[HELPER]", "[STRINGS]", "[PARS]", "[CODEPTR]",
-                               "[SPRITES]", "[SOUNDS]", "[MUSIC]" };
+                              // Boom extensions:
+                              "[HELPER]", "[STRINGS]", "[PARS]", "[CODEPTR]", "[SPRITES]", "[SOUNDS]", "[MUSIC]"};
 
 char line_buf[kMaximumLineLength + 4];
 int  line_num;
@@ -808,27 +797,29 @@ void GetNextLine(void)
         //    2. LF only  (Unix)
         //    3. CR only  (Macintosh)
 
-        if (ch == '\n') break;
+        if (ch == '\n')
+            break;
 
         if (ch == '\r')
         {
             ch = pat_buf->GetCharacter();
 
-            if (ch != EOF && ch != '\n') pat_buf->UngetCharacter(ch);
+            if (ch != EOF && ch != '\n')
+                pat_buf->UngetCharacter(ch);
 
             break;
         }
 
-        if (len >= kMaximumLineLength)  // truncation mode
+        if (len >= kMaximumLineLength) // truncation mode
             continue;
 
-        if (!equal_pos && (char)ch == '=') equal_pos = line_buf + len;
+        if (!equal_pos && (char)ch == '=')
+            equal_pos = line_buf + len;
 
         line_buf[len++] = (char)ch;
 
         if (len == kMaximumLineLength)
-            LogDebug("Dehacked: Warning - Truncating very long line (#%d).\n",
-                     line_num);
+            LogDebug("Dehacked: Warning - Truncating very long line (#%d).\n", line_num);
     }
 
     line_buf[len] = 0;
@@ -839,7 +830,8 @@ void StripTrailingSpace(void)
 {
     int len = strlen(line_buf);
 
-    while (len > 0 && epi::IsSpaceASCII(line_buf[len - 1])) len--;
+    while (len > 0 && epi::IsSpaceASCII(line_buf[len - 1]))
+        len--;
 
     line_buf[len] = 0;
 }
@@ -849,8 +841,7 @@ bool ValidateObject(void)
     int min_obj = 0;
     int max_obj = 0;
 
-    if (active_section == kDEH_MISC || active_section == kDEH_CHEAT ||
-        active_section == kDEH_SPRITE)
+    if (active_section == kDEH_MISC || active_section == kDEH_CHEAT || active_section == kDEH_SPRITE)
     {
         return true; /* don't care */
     }
@@ -859,68 +850,66 @@ bool ValidateObject(void)
     {
         switch (active_section)
         {
-            case kDEH_THING:
-                max_obj = kTotalDehackedMapObjectTypes;
-                min_obj = 1;
-                break;
+        case kDEH_THING:
+            max_obj = kTotalDehackedMapObjectTypes;
+            min_obj = 1;
+            break;
 
-            case kDEH_SOUND:
-                max_obj = kTotalSoundEffects - 1;
-                break;
-            case kDEH_FRAME:
-                max_obj = kTotalStates - 1;
-                break;
-            case kDEH_AMMO:
-                max_obj = kTotalAmmoTypes - 1;
-                break;
-            case kDEH_WEAPON:
-                max_obj = kTotalWeapons - 1;
-                break;
-            case kDEH_PTR:
-                max_obj = kTotalStates - 1;
-                break;
+        case kDEH_SOUND:
+            max_obj = kTotalSoundEffects - 1;
+            break;
+        case kDEH_FRAME:
+            max_obj = kTotalStates - 1;
+            break;
+        case kDEH_AMMO:
+            max_obj = kTotalAmmoTypes - 1;
+            break;
+        case kDEH_WEAPON:
+            max_obj = kTotalWeapons - 1;
+            break;
+        case kDEH_PTR:
+            max_obj = kTotalStates - 1;
+            break;
 
-            default:
-                FatalError("Dehacked: Error - Bad active_section value %d\n",
-                           active_section);
+        default:
+            FatalError("Dehacked: Error - Bad active_section value %d\n", active_section);
         }
     }
     else /* patch_fmt == 6, allow BOOM/MBF stuff */
     {
         switch (active_section)
         {
-            case kDEH_AMMO:
-                max_obj = kTotalAmmoTypes - 1;
-                break;
-            case kDEH_WEAPON:
-                max_obj = kTotalWeapons - 1;
-                break;
+        case kDEH_AMMO:
+            max_obj = kTotalAmmoTypes - 1;
+            break;
+        case kDEH_WEAPON:
+            max_obj = kTotalWeapons - 1;
+            break;
 
-            // for DSDehacked, allow very high values
-            case kDEH_FRAME:
-                max_obj = 32767;
-                break;
-            case kDEH_PTR:
-                max_obj = 32767;
-                break;
-            case kDEH_SOUND:
-                max_obj = 32767;
-                break;
-            case kDEH_THING:
-                max_obj = 32767;
-                min_obj = 1;
-                break;
+        // for DSDehacked, allow very high values
+        case kDEH_FRAME:
+            max_obj = 32767;
+            break;
+        case kDEH_PTR:
+            max_obj = 32767;
+            break;
+        case kDEH_SOUND:
+            max_obj = 32767;
+            break;
+        case kDEH_THING:
+            max_obj = 32767;
+            min_obj = 1;
+            break;
 
-            default:
-                FatalError("Dehacked: Error - Bad active_section value %d\n",
-                           active_section);
+        default:
+            FatalError("Dehacked: Error - Bad active_section value %d\n", active_section);
         }
     }
 
     if (active_obj < min_obj || active_obj > max_obj)
     {
-        LogDebug("Dehacked: Warning - Line %d: Illegal %s number: %d.\n",
-                 line_num, section_name[active_section], active_obj);
+        LogDebug("Dehacked: Warning - Line %d: Illegal %s number: %d.\n", line_num, section_name[active_section],
+                 active_obj);
 
         syncing = true;
         return false;
@@ -942,17 +931,17 @@ bool CheckNewSection(void)
         // make sure no '=' appears (to prevent a mismatch with
         // DEH ^Frame sections and BEX CODEPTR ^FRAME lines).
         for (const char *pos = line_buf; *pos && *pos != '('; pos++)
-            if (*pos == '=') return false;
+            if (*pos == '=')
+                return false;
 
         if (line_buf[0] == '[')
         {
             active_section = i;
-            active_obj     = -1;  // unused
+            active_obj     = -1; // unused
 
             if (active_section == BEX_PARS || active_section == BEX_HELPER)
             {
-                LogDebug("Dehacked: Warning - Ignoring BEX %s section.\n",
-                         section_name[i]);
+                LogDebug("Dehacked: Warning - Ignoring BEX %s section.\n", section_name[i]);
             }
 
             return true;
@@ -960,7 +949,8 @@ bool CheckNewSection(void)
 
         int sec_len = strlen(section_name[i]);
 
-        if (!epi::IsSpaceASCII(line_buf[sec_len])) continue;
+        if (!epi::IsSpaceASCII(line_buf[sec_len]))
+            continue;
 
         // for the "Pointer" section, MBF and other source ports don't use
         // the immediately following number, but the state number in `()`
@@ -972,7 +962,8 @@ bool CheckNewSection(void)
         }
         else
         {
-            if (sscanf(line_buf + sec_len, " %i ", &obj_num) != 1) continue;
+            if (sscanf(line_buf + sec_len, " %i ", &obj_num) != 1)
+                continue;
         }
 
         active_section = i;
@@ -996,11 +987,10 @@ void ReadTextString(char *dest, int len)
     {
         if ((dest - begin) >= kMaximumTextStringLength)
         {
-            FatalError(
-                "Dehacked: Error - Text string exceeds internal buffer "
-                "length.\n"
-                "[> %d characters, starting on line %d]\n",
-                kMaximumTextStringLength, start_line);
+            FatalError("Dehacked: Error - Text string exceeds internal buffer "
+                       "length.\n"
+                       "[> %d characters, starting on line %d]\n",
+                       kMaximumTextStringLength, start_line);
         }
 
         if (*cur_txt_ptr)
@@ -1011,9 +1001,8 @@ void ReadTextString(char *dest, int len)
         }
 
         if (pat_buf->EndOfFile())
-            FatalError(
-                "Dehacked: Error - End of file while reading Text "
-                "replacement.\n");
+            FatalError("Dehacked: Error - End of file while reading Text "
+                       "replacement.\n");
 
         GetNextLine();
         cur_txt_ptr = line_buf;
@@ -1043,22 +1032,25 @@ void ProcessTextSection(int len1, int len2)
     LogPrint("- After  <%s>\n", text_2);
 
     if (len1 == 4 && len2 == 4)
-        if (sprites::ReplaceSprite(text_1, text_2)) return;
+        if (sprites::ReplaceSprite(text_1, text_2))
+            return;
 
     if (len1 <= 6 && len2 <= 6)
     {
-        if (sounds::ReplaceSound(text_1, text_2)) return;
+        if (sounds::ReplaceSound(text_1, text_2))
+            return;
 
-        if (music::ReplaceMusic(text_1, text_2)) return;
+        if (music::ReplaceMusic(text_1, text_2))
+            return;
     }
 
-    if (text_strings::ReplaceString(text_1, text_2)) return;
+    if (text_strings::ReplaceString(text_1, text_2))
+        return;
 
-    LogDebug("Dehacked: Warning - Cannot match text: \"%s\"\n",
-             PrettyTextString(text_1));
+    LogDebug("Dehacked: Warning - Cannot match text: \"%s\"\n", PrettyTextString(text_1));
 }
 
-void ReadBexTextString(char *dest)  // upto kMaximumTextStringLength chars
+void ReadBexTextString(char *dest) // upto kMaximumTextStringLength chars
 {
     EPI_ASSERT(cur_txt_ptr);
 
@@ -1070,13 +1062,13 @@ void ReadBexTextString(char *dest)  // upto kMaximumTextStringLength chars
     {
         if ((dest - begin) >= kMaximumTextStringLength)
         {
-            FatalError(
-                "Dehacked: Error - Bex String exceeds internal buffer length.\n"
-                "[> %d characters, starting on line %d]\n",
-                kMaximumTextStringLength, start_line);
+            FatalError("Dehacked: Error - Bex String exceeds internal buffer length.\n"
+                       "[> %d characters, starting on line %d]\n",
+                       kMaximumTextStringLength, start_line);
         }
 
-        if (*cur_txt_ptr == 0) break;
+        if (*cur_txt_ptr == 0)
+            break;
 
         // handle the newline sequence
         if (cur_txt_ptr[0] == '\\' && epi::ToLowerASCII(cur_txt_ptr[1]) == 'n')
@@ -1088,12 +1080,11 @@ void ReadBexTextString(char *dest)  // upto kMaximumTextStringLength chars
 
         if (cur_txt_ptr[0] == '\\' && cur_txt_ptr[1] == 0)
         {
-            do  // need a loop to ignore comment lines
+            do // need a loop to ignore comment lines
             {
                 if (pat_buf->EndOfFile())
-                    FatalError(
-                        "Dehacked: Error - End of file while reading Bex "
-                        "String replacement.\n");
+                    FatalError("Dehacked: Error - End of file while reading Bex "
+                               "String replacement.\n");
 
                 GetNextLine();
                 StripTrailingSpace();
@@ -1102,7 +1093,8 @@ void ReadBexTextString(char *dest)  // upto kMaximumTextStringLength chars
             cur_txt_ptr = line_buf;
 
             // strip leading whitespace from continuing lines
-            while (epi::IsSpaceASCII(*cur_txt_ptr)) cur_txt_ptr++;
+            while (epi::IsSpaceASCII(*cur_txt_ptr))
+                cur_txt_ptr++;
 
             continue;
         }
@@ -1118,9 +1110,7 @@ void ProcessBexString(void)
     LogPrint("BEX STRING REPLACE: %s\n", line_buf);
 
     if (strlen(line_buf) >= 100)
-        FatalError(
-            "Dehacked: Error - Bex string name too long !\nLine %d: %s\n",
-            line_num, line_buf);
+        FatalError("Dehacked: Error - Bex string name too long !\nLine %d: %s\n", line_num, line_buf);
 
     char bex_field[104];
 
@@ -1135,18 +1125,17 @@ void ProcessBexString(void)
     LogPrint("- Replacement <%s>\n", text_buf);
 
     if (!text_strings::ReplaceBexString(bex_field, text_buf))
-        LogDebug("Dehacked: Warning - Line %d: unknown BEX string name: %s\n",
-                 line_num, bex_field);
+        LogDebug("Dehacked: Warning - Line %d: unknown BEX string name: %s\n", line_num, bex_field);
 }
 
 void ProcessLine(void)
 {
     EPI_ASSERT(active_section >= 0);
 
-    LogPrint("Section %d Object %d : <%s>\n", active_section, active_obj,
-             line_buf);
+    LogPrint("Section %d Object %d : <%s>\n", active_section, active_obj, line_buf);
 
-    if (active_section == BEX_PARS || active_section == BEX_HELPER) return;
+    if (active_section == BEX_PARS || active_section == BEX_HELPER)
+        return;
 
     if (!equal_pos)
     {
@@ -1164,37 +1153,34 @@ void ProcessLine(void)
 
     char *final = equal_pos;
 
-    while (final > line_buf && epi::IsSpaceASCII(final[-1])) final--;
+    while (final > line_buf && epi::IsSpaceASCII(final[-1]))
+        final--;
 
     *final = 0;
 
     equal_pos++;
 
-    while (*equal_pos && epi::IsSpaceASCII(*equal_pos)) equal_pos++;
+    while (*equal_pos && epi::IsSpaceASCII(*equal_pos))
+        equal_pos++;
 
     if (line_buf[0] == 0)
     {
-        LogDebug(
-            "Dehacked: Warning - Line %d: No field name before equal sign.\n",
-            line_num);
+        LogDebug("Dehacked: Warning - Line %d: No field name before equal sign.\n", line_num);
         return;
     }
     else if (equal_pos[0] == 0)
     {
-        LogDebug("Dehacked: Warning - Line %d: No value after equal sign.\n",
-                 line_num);
+        LogDebug("Dehacked: Warning - Line %d: No value after equal sign.\n", line_num);
         return;
     }
 
-    if (patch_fmt >= 6 && active_section == kDEH_THING &&
-        epi::StringCaseCompareASCII(line_buf, "Bits") == 0)
+    if (patch_fmt >= 6 && active_section == kDEH_THING && epi::StringCaseCompareASCII(line_buf, "Bits") == 0)
     {
         things::AlterBexBits(equal_pos);
         return;
     }
 
-    if (patch_fmt >= 6 && active_section == kDEH_THING &&
-        epi::StringCaseCompareASCII(line_buf, "MBF21 Bits") == 0)
+    if (patch_fmt >= 6 && active_section == kDEH_THING && epi::StringCaseCompareASCII(line_buf, "MBF21 Bits") == 0)
     {
         things::AlterMBF21Bits(equal_pos);
         return;
@@ -1206,62 +1192,61 @@ void ProcessLine(void)
     {
         if (sscanf(equal_pos, " %i ", &num_value) != 1)
         {
-            LogDebug("Dehacked: Warning - Line %d: unreadable %s value: %s\n",
-                     line_num, section_name[active_section], equal_pos);
+            LogDebug("Dehacked: Warning - Line %d: unreadable %s value: %s\n", line_num, section_name[active_section],
+                     equal_pos);
             return;
         }
     }
 
     switch (active_section)
     {
-        case kDEH_THING:
-            things::AlterThing(num_value);
-            break;
-        case kDEH_SOUND:
-            sounds::AlterSound(num_value);
-            break;
-        case kDEH_FRAME:
-            frames::AlterFrame(num_value);
-            break;
-        case kDEH_AMMO:
-            ammo::AlterAmmo(num_value);
-            break;
-        case kDEH_WEAPON:
-            weapons::AlterWeapon(num_value);
-            break;
-        case kDEH_PTR:
-            frames::AlterPointer(num_value);
-            break;
-        case kDEH_MISC:
-            miscellaneous::AlterMisc(num_value);
-            break;
+    case kDEH_THING:
+        things::AlterThing(num_value);
+        break;
+    case kDEH_SOUND:
+        sounds::AlterSound(num_value);
+        break;
+    case kDEH_FRAME:
+        frames::AlterFrame(num_value);
+        break;
+    case kDEH_AMMO:
+        ammo::AlterAmmo(num_value);
+        break;
+    case kDEH_WEAPON:
+        weapons::AlterWeapon(num_value);
+        break;
+    case kDEH_PTR:
+        frames::AlterPointer(num_value);
+        break;
+    case kDEH_MISC:
+        miscellaneous::AlterMisc(num_value);
+        break;
 
-        case kDEH_CHEAT:
-            text_strings::AlterCheat(equal_pos);
-            break;
-        case kDEH_SPRITE: /* ignored */
-            break;
+    case kDEH_CHEAT:
+        text_strings::AlterCheat(equal_pos);
+        break;
+    case kDEH_SPRITE: /* ignored */
+        break;
 
-        case BEX_CODEPTR:
-            frames::AlterBexCodePtr(equal_pos);
-            break;
-        case BEX_STRINGS:
-            ProcessBexString();
-            break;
+    case BEX_CODEPTR:
+        frames::AlterBexCodePtr(equal_pos);
+        break;
+    case BEX_STRINGS:
+        ProcessBexString();
+        break;
 
-        case BEX_SOUNDS:
-            sounds::AlterBexSound(equal_pos);
-            break;
-        case BEX_MUSIC:
-            music::AlterBexMusic(equal_pos);
-            break;
-        case BEX_SPRITES:
-            sprites::AlterBexSprite(equal_pos);
-            break;
+    case BEX_SOUNDS:
+        sounds::AlterBexSound(equal_pos);
+        break;
+    case BEX_MUSIC:
+        music::AlterBexMusic(equal_pos);
+        break;
+    case BEX_SPRITES:
+        sprites::AlterBexSprite(equal_pos);
+        break;
 
-        default:
-            FatalError("Dehacked: Error - Bad active_section value %d\n",
-                       active_section);
+    default:
+        FatalError("Dehacked: Error - Bad active_section value %d\n", active_section);
     }
 }
 
@@ -1281,7 +1266,8 @@ DehackedResult LoadDiff(bool no_header)
     {
         GetNextLine();
 
-        if (line_buf[0] == 0 || line_buf[0] == '#') continue;
+        if (line_buf[0] == 0 || line_buf[0] == '#')
+            continue;
 
         // LogPrint("LINE %d: <%s>\n", line_num, line_buf);
 
@@ -1289,18 +1275,15 @@ DehackedResult LoadDiff(bool no_header)
         {
             if (!equal_pos)
             {
-                SetErrorMsg("Badly formed directive !\nLine %d: %s\n", line_num,
-                            line_buf);
+                SetErrorMsg("Badly formed directive !\nLine %d: %s\n", line_num, line_buf);
                 return kDehackedConversionParseError;
             }
 
             doom_ver = (int)strtol(equal_pos + 1, nullptr, 10);
 
-            if (!(doom_ver == 12 || (doom_ver >= 16 && doom_ver <= 21) ||
-                  doom_ver == 2021 /* DSDehacked */))
+            if (!(doom_ver == 12 || (doom_ver >= 16 && doom_ver <= 21) || doom_ver == 2021 /* DSDehacked */))
             {
-                SetErrorMsg("Unknown doom version found: V%d.%d\n",
-                            doom_ver / 10, (doom_ver + 1000) % 10);
+                SetErrorMsg("Unknown doom version found: V%d.%d\n", doom_ver / 10, (doom_ver + 1000) % 10);
                 return kDehackedConversionParseError;
             }
 
@@ -1325,8 +1308,7 @@ DehackedResult LoadDiff(bool no_header)
 
             if (!equal_pos)
             {
-                SetErrorMsg("Badly formed directive !\nLine %d: %s\n", line_num,
-                            line_buf);
+                SetErrorMsg("Badly formed directive !\nLine %d: %s\n", line_num, line_buf);
                 return kDehackedConversionParseError;
             }
 
@@ -1334,8 +1316,7 @@ DehackedResult LoadDiff(bool no_header)
 
             if (patch_fmt < 5 || patch_fmt > 6)
             {
-                SetErrorMsg("Unknown dehacked patch format found: %d\n",
-                            patch_fmt);
+                SetErrorMsg("Unknown dehacked patch format found: %d\n", patch_fmt);
                 return kDehackedConversionParseError;
             }
 
@@ -1348,8 +1329,7 @@ DehackedResult LoadDiff(bool no_header)
             continue;
         }
 
-        if (epi::StringPrefixCaseCompareASCII(line_buf, "Text") == 0 &&
-            epi::IsSpaceASCII(line_buf[4]))
+        if (epi::StringPrefixCaseCompareASCII(line_buf, "Text") == 0 && epi::IsSpaceASCII(line_buf[4]))
         {
             int len1, len2;
 
@@ -1367,7 +1347,10 @@ DehackedResult LoadDiff(bool no_header)
             continue;
         }
 
-        if (!syncing) { ProcessLine(); }
+        if (!syncing)
+        {
+            ProcessLine();
+        }
     }
 
     return kDehackedConversionOK;
@@ -1392,13 +1375,11 @@ DehackedResult LoadNormal(void)
 
     pat_buf->Read(idstr, 3);
 
-    if (!epi::IsDigitASCII(idstr[0]) || idstr[1] != '.' ||
-        !epi::IsDigitASCII(idstr[2]))
+    if (!epi::IsDigitASCII(idstr[0]) || idstr[1] != '.' || !epi::IsDigitASCII(idstr[2]))
     {
-        SetErrorMsg(
-            "Bad version string in DeHackEd patch file.\n"
-            "[String %s is not digit . digit]\n",
-            idstr);
+        SetErrorMsg("Bad version string in DeHackEd patch file.\n"
+                    "[String %s is not digit . digit]\n",
+                    idstr);
         return kDehackedConversionParseError;
     }
 
@@ -1406,19 +1387,19 @@ DehackedResult LoadNormal(void)
 
     if (dhe_ver < 20 || dhe_ver > 31)
     {
-        SetErrorMsg(
-            "This patch file has an incorrect version number !\n"
-            "[Version %s]\n",
-            idstr);
+        SetErrorMsg("This patch file has an incorrect version number !\n"
+                    "[Version %s]\n",
+                    idstr);
         return kDehackedConversionParseError;
     }
 
-    if (dhe_ver < 23) return LoadBinary();
+    if (dhe_ver < 23)
+        return LoadBinary();
 
     DetectMsg("text-based");
     return LoadDiff(false);
 }
-}  // namespace patch
+} // namespace patch
 
 DehackedResult patch::Load(InputBuffer *buf)
 {
@@ -1431,8 +1412,14 @@ DehackedResult patch::Load(InputBuffer *buf)
 
     char tempver = pat_buf->GetCharacter();
 
-    if (tempver == 12) { result = LoadReallyOld(); }
-    else if (tempver == 'P') { result = LoadNormal(); }
+    if (tempver == 12)
+    {
+        result = LoadReallyOld();
+    }
+    else if (tempver == 'P')
+    {
+        result = LoadNormal();
+    }
     else if (!pat_buf->IsBinary())
     {
         pat_buf->UngetCharacter(tempver);
@@ -1453,4 +1440,4 @@ DehackedResult patch::Load(InputBuffer *buf)
     return result;
 }
 
-}  // namespace dehacked
+} // namespace dehacked

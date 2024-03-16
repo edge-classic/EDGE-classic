@@ -220,7 +220,7 @@ constexpr uint8_t kAxisTurn      = 1;
 constexpr uint8_t kAxisMouselook = 2;
 constexpr uint8_t kAxisForward   = 3;
 constexpr uint8_t kAxisStrafe    = 4;
-constexpr uint8_t kAxisFly       = 5;  // includes SWIM up/down
+constexpr uint8_t kAxisFly       = 5; // includes SWIM up/down
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

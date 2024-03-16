@@ -56,7 +56,7 @@ int soul_limit;
 int mega_health;
 
 int monster_infight;
-}  // namespace miscellaneous
+} // namespace miscellaneous
 
 struct MiscellaneousInfo
 {
@@ -69,33 +69,33 @@ struct MiscellaneousInfo
 namespace miscellaneous
 {
 // mobjtypes which are affected by a setting
-const int init_ammo_mobj[] = { kMT_PLAYER, -1 };
-const int max_heal_mobj[]  = { kMT_MISC2, -1 };
-const int max_arm_mobj[]   = { kMT_MISC0, kMT_MISC1, kMT_MISC3, kMT_MEGA, -1 };
-const int green_class_mobj[] = { kMT_MISC0, -1 };
-const int blue_class_mobj[]  = { kMT_MISC1, -1 };
-const int soulsphere_mobj[]  = { kMT_MISC12, -1 };
-const int megasphere_mobj[]  = { kMT_MEGA, -1 };
+const int init_ammo_mobj[]   = {kMT_PLAYER, -1};
+const int max_heal_mobj[]    = {kMT_MISC2, -1};
+const int max_arm_mobj[]     = {kMT_MISC0, kMT_MISC1, kMT_MISC3, kMT_MEGA, -1};
+const int green_class_mobj[] = {kMT_MISC0, -1};
+const int blue_class_mobj[]  = {kMT_MISC1, -1};
+const int soulsphere_mobj[]  = {kMT_MISC12, -1};
+const int megasphere_mobj[]  = {kMT_MEGA, -1};
 
 const MiscellaneousInfo misc_info[] = {
-    { "Initial Bullets", 0, &init_ammo, init_ammo_mobj },
-    { "Max Health", 1, &max_health, max_heal_mobj },
-    { "Max Armor", 1, &max_armour, max_arm_mobj },
-    { "Green Armor Class", 0, &green_armour_class, green_class_mobj },
-    { "Blue Armor Class", 0, &blue_armour_class, blue_class_mobj },
-    { "Max Soulsphere", 1, &soul_limit, soulsphere_mobj },
-    { "Soulsphere Health", 1, &soul_health, soulsphere_mobj },
-    { "Megasphere Health", 1, &mega_health, megasphere_mobj },
+    {"Initial Bullets", 0, &init_ammo, init_ammo_mobj},
+    {"Max Health", 1, &max_health, max_heal_mobj},
+    {"Max Armor", 1, &max_armour, max_arm_mobj},
+    {"Green Armor Class", 0, &green_armour_class, green_class_mobj},
+    {"Blue Armor Class", 0, &blue_armour_class, blue_class_mobj},
+    {"Max Soulsphere", 1, &soul_limit, soulsphere_mobj},
+    {"Soulsphere Health", 1, &soul_health, soulsphere_mobj},
+    {"Megasphere Health", 1, &mega_health, megasphere_mobj},
 
-    { "God Mode Health", 0, nullptr, nullptr },
-    { "IDFA Armor", 0, nullptr, nullptr },
-    { "IDFA Armor Class", 0, nullptr, nullptr },
-    { "IDKFA Armor", 0, nullptr, nullptr },
-    { "IDKFA Armor Class", 0, nullptr, nullptr },
+    {"God Mode Health", 0, nullptr, nullptr},
+    {"IDFA Armor", 0, nullptr, nullptr},
+    {"IDFA Armor Class", 0, nullptr, nullptr},
+    {"IDKFA Armor", 0, nullptr, nullptr},
+    {"IDKFA Armor Class", 0, nullptr, nullptr},
 
-    { nullptr, 0, nullptr, 0 }  // End sentinel
+    {nullptr, 0, nullptr, 0} // End sentinel
 };
-}  // namespace miscellaneous
+} // namespace miscellaneous
 
 void miscellaneous::Init()
 {
@@ -114,7 +114,9 @@ void miscellaneous::Init()
     monster_infight = 202;
 }
 
-void miscellaneous::Shutdown() {}
+void miscellaneous::Shutdown()
+{
+}
 
 void miscellaneous::AlterMisc(int new_val)
 {
@@ -126,8 +128,7 @@ void miscellaneous::AlterMisc(int new_val)
     {
         if (new_val < 1)
         {
-            LogDebug("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
-                     new_val, misc_name);
+            LogDebug("Dehacked: Warning - Bad value '%d' for MISC field: %s\n", new_val, misc_name);
             return;
         }
 
@@ -139,8 +140,7 @@ void miscellaneous::AlterMisc(int new_val)
     {
         if (new_val < 1)
         {
-            LogDebug("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
-                     new_val, misc_name);
+            LogDebug("Dehacked: Warning - Bad value '%d' for MISC field: %s\n", new_val, misc_name);
             return;
         }
 
@@ -154,14 +154,14 @@ void miscellaneous::AlterMisc(int new_val)
     {
         if (new_val != 202 && new_val != 221)
         {
-            LogDebug("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
-                     new_val, misc_name);
+            LogDebug("Dehacked: Warning - Bad value '%d' for MISC field: %s\n", new_val, misc_name);
             return;
         }
 
         monster_infight = new_val;
 
-        if (monster_infight == 221) things::MarkAllMonsters();
+        if (monster_infight == 221)
+            things::MarkAllMonsters();
 
         return;
     }
@@ -190,10 +190,9 @@ void miscellaneous::AlterMisc(int new_val)
         return;
     }
 
-    if (new_val < info->minimum)  // mainly here to disallow negative values
+    if (new_val < info->minimum) // mainly here to disallow negative values
     {
-        LogDebug("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
-                 new_val, misc_name);
+        LogDebug("Dehacked: Warning - Bad value '%d' for MISC field: %s\n", new_val, misc_name);
         new_val = info->minimum;
     }
 
@@ -204,7 +203,10 @@ void miscellaneous::AlterMisc(int new_val)
     const int *affect = info->affected_mobjs;
     EPI_ASSERT(affect);
 
-    for (; *affect >= 0; affect++) { things::MarkThing(*affect); }
+    for (; *affect >= 0; affect++)
+    {
+        things::MarkThing(*affect);
+    }
 }
 
-}  // namespace dehacked
+} // namespace dehacked

@@ -56,9 +56,8 @@ static inline uint32_t MD5Function4(uint32_t x, uint32_t y, uint32_t z)
 
 /* This is the central step in the MD5 algorithm. */
 
-static inline void MD5Step(uint32_t (*func)(uint32_t, uint32_t, uint32_t),
-                           uint32_t &w, uint32_t x, uint32_t y, uint32_t z,
-                           uint32_t data, uint8_t s)
+static inline void MD5Step(uint32_t (*func)(uint32_t, uint32_t, uint32_t), uint32_t &w, uint32_t x, uint32_t y,
+                           uint32_t z, uint32_t data, uint8_t s)
 {
     w += func(x, y, z) + data, w = (w << s) | (w >> (32 - s)), w += x;
 }
@@ -166,8 +165,7 @@ void MD5Hash::PackHash::TransformBytes(const uint8_t chunk[64])
 
     for (int pos = 0; pos < 16; pos++, chunk += 4)
     {
-        extra[pos] =
-            (chunk[0]) | (chunk[1] << 8) | (chunk[2] << 16) | (chunk[3] << 24);
+        extra[pos] = (chunk[0]) | (chunk[1] << 8) | (chunk[2] << 16) | (chunk[3] << 24);
     }
 
     Transform(extra);
@@ -186,7 +184,10 @@ void MD5Hash::PackHash::Encode(uint8_t *hash)
 
 //------------------------------------------------------------------------
 
-MD5Hash::MD5Hash() { memset(hash_, 0, sizeof(hash_)); }
+MD5Hash::MD5Hash()
+{
+    memset(hash_, 0, sizeof(hash_));
+}
 
 MD5Hash::MD5Hash(const uint8_t *message, unsigned int len)
 {
@@ -206,7 +207,10 @@ void MD5Hash::Compute(const uint8_t *message, unsigned int len)
 
     uint8_t buffer[128];
 
-    if (len > 0) { memcpy(buffer, message, len); }
+    if (len > 0)
+    {
+        memcpy(buffer, message, len);
+    }
 
     /* add single "1" bit */
 
@@ -216,7 +220,10 @@ void MD5Hash::Compute(const uint8_t *message, unsigned int len)
      * congruous with 448 bits (56 bytes).
      */
 
-    while ((len % 64) != 56) { buffer[len++] = 0; }
+    while ((len % 64) != 56)
+    {
+        buffer[len++] = 0;
+    }
 
     buffer[len++] = (bit_length) & 0xff;
     buffer[len++] = (bit_length >> 8) & 0xff;
@@ -236,21 +243,22 @@ void MD5Hash::Compute(const uint8_t *message, unsigned int len)
 
     packed.TransformBytes(buffer);
 
-    if (len == 128) { packed.TransformBytes(buffer + 64); }
+    if (len == 128)
+    {
+        packed.TransformBytes(buffer + 64);
+    }
 
     packed.Encode(hash_);
 }
 
 std::string MD5Hash::ToString()
 {
-    return StringFormat(
-        "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-        hash_[0], hash_[1], hash_[2], hash_[3], hash_[4], hash_[5], hash_[6],
-        hash_[7], hash_[8], hash_[9], hash_[10], hash_[11], hash_[12],
-        hash_[13], hash_[14], hash_[15]);
+    return StringFormat("%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x", hash_[0], hash_[1],
+                        hash_[2], hash_[3], hash_[4], hash_[5], hash_[6], hash_[7], hash_[8], hash_[9], hash_[10],
+                        hash_[11], hash_[12], hash_[13], hash_[14], hash_[15]);
 }
 
-}  // namespace epi
+} // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

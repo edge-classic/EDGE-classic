@@ -45,7 +45,7 @@ extern unsigned int root_node;
 
 class big_item_c
 {
-   public:
+  public:
     float x     = 0;
     float y     = 0;
     float z     = 0;
@@ -58,61 +58,62 @@ float BotNavigateEvaluateBigItem(const MapObject *mo)
 {
     AmmunitionType ammotype;
 
-    for (const Benefit *B = mo->info_->pickup_benefits_; B != nullptr;
-         B                = B->next)
+    for (const Benefit *B = mo->info_->pickup_benefits_; B != nullptr; B = B->next)
     {
         switch (B->type)
         {
-            case kBenefitTypeWeapon:
-                // crude guess of powerfulness based on ammo
-                ammotype = B->sub.weap->ammo_[0];
+        case kBenefitTypeWeapon:
+            // crude guess of powerfulness based on ammo
+            ammotype = B->sub.weap->ammo_[0];
 
-                switch (ammotype)
-                {
-                    case kAmmunitionTypeNoAmmo:
-                        return 25;
-                    case kAmmunitionTypeBullet:
-                        return 50;
-                    case kAmmunitionTypeShell:
-                        return 60;
-                    case kAmmunitionTypeRocket:
-                        return 70;
-                    case kAmmunitionTypeCell:
-                        return 80;
-                    default:
-                        return 65;
-                }
-                break;
-
-            case kBenefitTypePowerup:
-                // invisibility is not here, since in COOP it makes monster
-                // projectiles harder to dodge, and powerups are rare in DM.
-                // hence for bots, only invulnerability is actually useful.
-                switch (B->sub.type)
-                {
-                    case kPowerTypeInvulnerable:
-                        return 100;
-                    default:
-                        return -1;
-                }
-                break;
-
-            case kBenefitTypeAmmo:
-                // ignored here
-                break;
-
-            case kBenefitTypeHealth:
-                // ignore small amounts (e.g. potions, stimpacks)
-                if (B->amount >= 100) return 40;
-                break;
-
-            case kBenefitTypeArmour:
-                // ignore small amounts (e.g. helmets)
-                if (B->amount >= 50) return 20;
-                break;
-
+            switch (ammotype)
+            {
+            case kAmmunitionTypeNoAmmo:
+                return 25;
+            case kAmmunitionTypeBullet:
+                return 50;
+            case kAmmunitionTypeShell:
+                return 60;
+            case kAmmunitionTypeRocket:
+                return 70;
+            case kAmmunitionTypeCell:
+                return 80;
             default:
-                break;
+                return 65;
+            }
+            break;
+
+        case kBenefitTypePowerup:
+            // invisibility is not here, since in COOP it makes monster
+            // projectiles harder to dodge, and powerups are rare in DM.
+            // hence for bots, only invulnerability is actually useful.
+            switch (B->sub.type)
+            {
+            case kPowerTypeInvulnerable:
+                return 100;
+            default:
+                return -1;
+            }
+            break;
+
+        case kBenefitTypeAmmo:
+            // ignored here
+            break;
+
+        case kBenefitTypeHealth:
+            // ignore small amounts (e.g. potions, stimpacks)
+            if (B->amount >= 100)
+                return 40;
+            break;
+
+        case kBenefitTypeArmour:
+            // ignore small amounts (e.g. helmets)
+            if (B->amount >= 50)
+                return 20;
+            break;
+
+        default:
+            break;
         }
     }
 
@@ -126,15 +127,16 @@ static void BotNavigateCollectBigItems()
     // items (e.g. weapons) tend to be well distributed around a map.
     // it will also be useful for finding a weapon after spawning.
 
-    for (const MapObject *mo = map_object_list_head; mo != nullptr;
-         mo                  = mo->next_)
+    for (const MapObject *mo = map_object_list_head; mo != nullptr; mo = mo->next_)
     {
-        if ((mo->flags_ & kMapObjectFlagSpecial) == 0) continue;
+        if ((mo->flags_ & kMapObjectFlagSpecial) == 0)
+            continue;
 
         float score = BotNavigateEvaluateBigItem(mo);
-        if (score < 0) continue;
+        if (score < 0)
+            continue;
 
-        big_items.push_back(big_item_c{ mo->x, mo->y, mo->z, score });
+        big_items.push_back(big_item_c{mo->x, mo->y, mo->z, score});
     }
 
     // TODO : if < 4, pad out with DM spawn spots or random locs
@@ -142,7 +144,8 @@ static void BotNavigateCollectBigItems()
 
 bool BotNavigateNextRoamPoint(Position &out)
 {
-    if (big_items.empty()) return false;
+    if (big_items.empty())
+        return false;
 
     for (int loop = 0; loop < 100; loop++)
     {
@@ -154,7 +157,8 @@ bool BotNavigateNextRoamPoint(Position &out)
         float dy = fabs(item.y - out.y);
 
         // too close to last goal?
-        if (dx < 200 && dy < 200) continue;
+        if (dx < 200 && dy < 200)
+            continue;
 
         out.x = item.x;
         out.y = item.y;
@@ -178,7 +182,7 @@ bool BotNavigateNextRoamPoint(Position &out)
 
 class nav_area_c
 {
-   public:
+  public:
     int id         = 0;
     int first_link = 0;
     int num_links  = 0;
@@ -189,14 +193,18 @@ class nav_area_c
 
     // info for A* path finding...
 
-    bool  open   = false;  // in the OPEN set?
-    int   parent = -1;     // parent nav_area_c / subsector_t
-    float G      = 0;      // cost of this node (from start node)
-    float H      = 0;      // estimated cost to reach end node
+    bool  open   = false; // in the OPEN set?
+    int   parent = -1;    // parent nav_area_c / subsector_t
+    float G      = 0;     // cost of this node (from start node)
+    float H      = 0;     // estimated cost to reach end node
 
-    nav_area_c(int _id) : id(_id) {}
+    nav_area_c(int _id) : id(_id)
+    {
+    }
 
-    ~nav_area_c() {}
+    ~nav_area_c()
+    {
+    }
 
     Position get_middle() const;
 
@@ -205,7 +213,7 @@ class nav_area_c
 
 class nav_link_c
 {
-   public:
+  public:
     int        dest_id = -1;
     float      length  = 0;
     int        flags   = kBotPathNodeNormal;
@@ -223,7 +231,7 @@ Position nav_area_c::get_middle() const
 {
     float z = level_subsectors[id].sector->floor_height;
 
-    return Position{ mid_x, mid_y, z };
+    return Position{mid_x, mid_y, z};
 }
 
 void nav_area_c::compute_middle(const Subsector &sub)
@@ -233,14 +241,14 @@ void nav_area_c::compute_middle(const Subsector &sub)
 
     int total = 0;
 
-    for (const Seg *seg = sub.segs; seg != nullptr;
-         seg            = seg->subsector_next, total += 1)
+    for (const Seg *seg = sub.segs; seg != nullptr; seg = seg->subsector_next, total += 1)
     {
         sum_x += seg->vertex_1->X;
         sum_y += seg->vertex_1->Y;
     }
 
-    if (total == 0) total = 1;
+    if (total == 0)
+        total = 1;
 
     mid_x = sum_x / total;
     mid_y = sum_y / total;
@@ -248,11 +256,13 @@ void nav_area_c::compute_middle(const Subsector &sub)
 
 static int BotNavigateCheckDoorOrLift(const Seg *seg)
 {
-    if (seg->miniseg) return kBotPathNodeNormal;
+    if (seg->miniseg)
+        return kBotPathNodeNormal;
 
     const Line *ld = seg->linedef;
 
-    if (ld->special == nullptr) return kBotPathNodeNormal;
+    if (ld->special == nullptr)
+        return kBotPathNodeNormal;
 
     const LineType *spec = ld->special;
 
@@ -263,7 +273,8 @@ static int BotNavigateCheckDoorOrLift(const Seg *seg)
     else if (spec->type_ == kLineTriggerPushable)
     {
         // require tag to match the back sector
-        if (ld->tag <= 0) return kBotPathNodeNormal;
+        if (ld->tag <= 0)
+            return kBotPathNodeNormal;
 
         if (seg->back_subsector->sector->tag != ld->tag)
             return kBotPathNodeNormal;
@@ -275,14 +286,13 @@ static int BotNavigateCheckDoorOrLift(const Seg *seg)
     }
 
     // don't open single-use doors in COOP -- a human should do it
-    if (!InDeathmatch() && spec->count_ > 0) return kBotPathNodeNormal;
+    if (!InDeathmatch() && spec->count_ > 0)
+        return kBotPathNodeNormal;
 
-    if (spec->c_.type_ == kPlaneMoverOnce ||
-        spec->c_.type_ == kPlaneMoverMoveWaitReturn)
+    if (spec->c_.type_ == kPlaneMoverOnce || spec->c_.type_ == kPlaneMoverMoveWaitReturn)
     {
         // determine "front" of door by ceiling heights
-        if (seg->back_subsector->sector->ceiling_height >=
-            seg->front_subsector->sector->ceiling_height)
+        if (seg->back_subsector->sector->ceiling_height >= seg->front_subsector->sector->ceiling_height)
             return kBotPathNodeNormal;
 
         // ignore locked doors in COOP, since bots don't puzzle solve (yet)
@@ -292,14 +302,11 @@ static int BotNavigateCheckDoorOrLift(const Seg *seg)
         return kBotPathNodeDoor;
     }
 
-    if (spec->f_.type_ == kPlaneMoverOnce ||
-        spec->f_.type_ == kPlaneMoverMoveWaitReturn ||
-        spec->f_.type_ == kPlaneMoverPlatform ||
-        spec->f_.type_ == kPlaneMoverElevator)
+    if (spec->f_.type_ == kPlaneMoverOnce || spec->f_.type_ == kPlaneMoverMoveWaitReturn ||
+        spec->f_.type_ == kPlaneMoverPlatform || spec->f_.type_ == kPlaneMoverElevator)
     {
         // determine "front" of lift by floor heights
-        if (seg->back_subsector->sector->floor_height <=
-            seg->front_subsector->sector->floor_height)
+        if (seg->back_subsector->sector->floor_height <= seg->front_subsector->sector->floor_height)
             return kBotPathNodeNormal;
 
         return kBotPathNodeLift;
@@ -313,33 +320,43 @@ static int BotNavigateCheckTeleporter(const Seg *seg)
     // returns # of destination subsector, or -1 if not a teleporter.
     // TODO: we don't support line-to-line teleporters yet...
 
-    if (seg->miniseg) return -1;
+    if (seg->miniseg)
+        return -1;
 
     // teleporters only work on front of a linedef
-    if (seg->side != 0) return -1;
+    if (seg->side != 0)
+        return -1;
 
     const Line *ld = seg->linedef;
 
-    if (ld->special == nullptr) return -1;
+    if (ld->special == nullptr)
+        return -1;
 
     const LineType *spec = ld->special;
 
-    if (spec->type_ != kLineTriggerWalkable) return -1;
+    if (spec->type_ != kLineTriggerWalkable)
+        return -1;
 
-    if (!spec->t_.teleport_) return -1;
+    if (!spec->t_.teleport_)
+        return -1;
 
     // ignore a single-use teleporter
-    if (spec->count_ > 0) return -1;
+    if (spec->count_ > 0)
+        return -1;
 
-    if (ld->tag <= 0) return -1;
+    if (ld->tag <= 0)
+        return -1;
 
-    if (spec->t_.special_ & kTeleportSpecialLine) return -1;
+    if (spec->t_.special_ & kTeleportSpecialLine)
+        return -1;
 
     // find the destination thing...
-    if (spec->t_.outspawnobj_ == nullptr) return -1;
+    if (spec->t_.outspawnobj_ == nullptr)
+        return -1;
 
     const MapObject *dest = FindTeleportMan(ld->tag, spec->t_.outspawnobj_);
-    if (dest == nullptr) return -1;
+    if (dest == nullptr)
+        return -1;
 
     return (int)(dest->subsector_ - level_subsectors);
 }
@@ -360,18 +377,17 @@ static void BotNavigateCreateLinks()
         nav_area_c &area = nav_areas[i];
         area.first_link  = (int)nav_links.size();
 
-        for (const Seg *seg = sub.segs; seg != nullptr;
-             seg            = seg->subsector_next)
+        for (const Seg *seg = sub.segs; seg != nullptr; seg = seg->subsector_next)
         {
             // no link for a one-sided wall
-            if (seg->back_subsector == nullptr) continue;
+            if (seg->back_subsector == nullptr)
+                continue;
 
             int dest_id = (int)(seg->back_subsector - level_subsectors);
 
             // ignore player-blocking lines
             if (!seg->miniseg)
-                if (0 != (seg->linedef->flags &
-                          (kLineFlagBlocking | kLineFlagBlockPlayers)))
+                if (0 != (seg->linedef->flags & (kLineFlagBlocking | kLineFlagBlockPlayers)))
                     continue;
 
             // NOTE: a big height difference is allowed here, it is checked
@@ -390,10 +406,9 @@ static void BotNavigateCreateLinks()
             int tele_id = BotNavigateCheckTeleporter(seg);
 
             if (tele_id >= 0)
-                nav_links.push_back(
-                    nav_link_c{ tele_id, length, kBotPathNodeTeleport, seg });
+                nav_links.push_back(nav_link_c{tele_id, length, kBotPathNodeTeleport, seg});
             else
-                nav_links.push_back(nav_link_c{ dest_id, length, flags, seg });
+                nav_links.push_back(nav_link_c{dest_id, length, flags, seg});
 
             area.num_links += 1;
 
@@ -403,8 +418,7 @@ static void BotNavigateCreateLinks()
     }
 }
 
-static float BotNavigateTraverseLinkCost(int cur, const nav_link_c &link,
-                                         bool allow_doors)
+static float BotNavigateTraverseLinkCost(int cur, const nav_link_c &link, bool allow_doors)
 {
     const Sector *s1 = level_subsectors[cur].sector;
     const Sector *s2 = level_subsectors[link.dest_id].sector;
@@ -417,17 +431,23 @@ static float BotNavigateTraverseLinkCost(int cur, const nav_link_c &link,
     {
         const Sector *s3 = link.seg->back_subsector->sector;
 
-        if (s3->floor_height > s1->floor_height + 24.0f) return -1;
+        if (s3->floor_height > s1->floor_height + 24.0f)
+            return -1;
 
-        if (s3->ceiling_height < s3->floor_height + 56.0f) return -1;
+        if (s3->ceiling_height < s3->floor_height + 56.0f)
+            return -1;
 
-        if (s2->ceiling_height < s2->floor_height + 56.0f) return -1;
+        if (s2->ceiling_height < s2->floor_height + 56.0f)
+            return -1;
 
         return time + 1.0f;
     }
 
     // estimate time for lift
-    if (link.flags & kBotPathNodeLift) { time += 10.0f; }
+    if (link.flags & kBotPathNodeLift)
+    {
+        time += 10.0f;
+    }
     else if (f_diff > 24.0f)
     {
         // too big a step up
@@ -435,12 +455,14 @@ static float BotNavigateTraverseLinkCost(int cur, const nav_link_c &link,
     }
 
     // estimate time for door
-    if (link.flags & kBotPathNodeLift) { time += 2.0f; }
+    if (link.flags & kBotPathNodeLift)
+    {
+        time += 2.0f;
+    }
     else
     {
         // check for travelling THROUGH a door
-        if ((link.flags & kBotPathNodeDoor) ||
-            (s1->ceiling_height < s1->floor_height + 56.0f))
+        if ((link.flags & kBotPathNodeDoor) || (s1->ceiling_height < s1->floor_height + 56.0f))
         {
             // okay
         }
@@ -450,12 +472,16 @@ static float BotNavigateTraverseLinkCost(int cur, const nav_link_c &link,
             float high_f = HMM_MAX(s1->floor_height, s2->floor_height);
             float low_c  = HMM_MIN(s1->ceiling_height, s2->ceiling_height);
 
-            if (low_c - high_f < 56.0f) return -1;
+            if (low_c - high_f < 56.0f)
+                return -1;
         }
     }
 
     // for a big drop-off, estimate time to fall
-    if (f_diff < -100.0f) { time += sqrtf(-f_diff - 80.0f) / 18.0f; }
+    if (f_diff < -100.0f)
+    {
+        time += sqrtf(-f_diff - 80.0f) / 18.0f;
+    }
 
     return time;
 }
@@ -465,8 +491,7 @@ static float BotNavigateEstimateH(const Subsector *cur_sub)
     int  id = (int)(cur_sub - level_subsectors);
     auto p  = nav_areas[id].get_middle();
 
-    float dist =
-        RendererPointToDistance(p.x, p.y, nav_finish_mid.x, nav_finish_mid.y);
+    float dist = RendererPointToDistance(p.x, p.y, nav_finish_mid.x, nav_finish_mid.y);
     float time = dist / RUNNING_SPEED;
 
     // over-estimate, to account for height changes, obstacles etc
@@ -527,20 +552,19 @@ static void BotNavigateStoreSegMiddle(BotPath *path, int flags, const Seg *seg)
     pos.y = (seg->vertex_1->Y + seg->vertex_2->Y) * 0.5f;
     pos.z = seg->front_subsector->sector->floor_height;
 
-    path->nodes_.push_back(BotPathNode{ pos, flags, seg });
+    path->nodes_.push_back(BotPathNode{pos, flags, seg});
 }
 
-static BotPath *BotNavigateStorePath(Position start, int start_id,
-                                     Position finish, int finish_id)
+static BotPath *BotNavigateStorePath(Position start, int start_id, Position finish, int finish_id)
 {
     BotPath *path = new BotPath;
 
-    path->nodes_.push_back(BotPathNode{ start, 0, nullptr });
+    path->nodes_.push_back(BotPathNode{start, 0, nullptr});
 
     // handle case of same subsector -- no segs
     if (start_id == finish_id)
     {
-        path->nodes_.push_back(BotPathNode{ finish, 0, nullptr });
+        path->nodes_.push_back(BotPathNode{finish, 0, nullptr});
         return path;
     }
 
@@ -551,7 +575,8 @@ static BotPath *BotNavigateStorePath(Position start, int start_id,
     {
         subsec_list.push_front(cur_id);
 
-        if (cur_id == start_id) break;
+        if (cur_id == start_id)
+            break;
 
         cur_id = nav_areas[cur_id].parent;
     }
@@ -584,8 +609,7 @@ static BotPath *BotNavigateStorePath(Position start, int start_id,
 
         // this should never happen
         if (link == nullptr)
-            FatalError("could not find link in path (%d -> %d)\n", prev_id,
-                       cur_id);
+            FatalError("could not find link in path (%d -> %d)\n", prev_id, cur_id);
 
         BotNavigateStoreSegMiddle(path, link->flags, link->seg);
 
@@ -593,19 +617,18 @@ static BotPath *BotNavigateStorePath(Position start, int start_id,
         if (link->flags & kBotPathNodeLift)
         {
             auto pos = nav_areas[link->dest_id].get_middle();
-            path->nodes_.push_back(BotPathNode{ pos, 0, nullptr });
+            path->nodes_.push_back(BotPathNode{pos, 0, nullptr});
         }
 
         prev_id = cur_id;
     }
 
-    path->nodes_.push_back(BotPathNode{ finish, 0, nullptr });
+    path->nodes_.push_back(BotPathNode{finish, 0, nullptr});
 
     return path;
 }
 
-BotPath *BotNavigateFindPath(const Position *start, const Position *finish,
-                             int flags)
+BotPath *BotNavigateFindPath(const Position *start, const Position *finish, int flags)
 {
     // tries to find a path from start to finish.
     // if successful, returns a path, otherwise returns nullptr.
@@ -646,7 +669,8 @@ BotPath *BotNavigateFindPath(const Position *start, const Position *finish,
         int cur = BotNavigateLowestOpenF();
 
         // no path at all?
-        if (cur < 0) return nullptr;
+        if (cur < 0)
+            return nullptr;
 
         // reached the destination?
         if (cur == finish_id)
@@ -664,7 +688,8 @@ BotPath *BotNavigateFindPath(const Position *start, const Position *finish,
             const nav_link_c &link = nav_links[area.first_link + k];
 
             float cost = BotNavigateTraverseLinkCost(cur, link, true);
-            if (cost < 0) continue;
+            if (cost < 0)
+                continue;
 
             // we need the total traversal time
             cost += area.G;
@@ -677,22 +702,22 @@ BotPath *BotNavigateFindPath(const Position *start, const Position *finish,
 
 //----------------------------------------------------------------------------
 
-static void BotNavigateItemsInSubsector(Subsector *sub, DeathBot *bot,
-                                        Position &pos, float radius, int sub_id,
-                                        int &best_id, float &best_score,
-                                        MapObject *&best_mo)
+static void BotNavigateItemsInSubsector(Subsector *sub, DeathBot *bot, Position &pos, float radius, int sub_id,
+                                        int &best_id, float &best_score, MapObject *&best_mo)
 {
-    for (MapObject *mo = sub->thing_list; mo != nullptr;
-         mo            = mo->subsector_next_)
+    for (MapObject *mo = sub->thing_list; mo != nullptr; mo = mo->subsector_next_)
     {
         float score = bot->EvalItem(mo);
-        if (score < 0) continue;
+        if (score < 0)
+            continue;
 
         float dist = RendererPointToDistance(pos.x, pos.y, mo->x, mo->y);
-        if (dist > radius) continue;
+        if (dist > radius)
+            continue;
 
         // very close things get a boost
-        if (dist < radius * 0.25f) score = score * 2.0f;
+        if (dist < radius * 0.25f)
+            score = score * 2.0f;
 
         // randomize the score -- to break ties
         score += (float)RandomShort() / 65535.0f;
@@ -712,8 +737,7 @@ BotPath *BotNavigateFindThing(DeathBot *bot, float radius, MapObject *&best)
     // each nearby thing (limited roughly by `radius') will be passed to the
     // EvalThing() method of the bot.  returns nullptr if nothing was found.
 
-    Position pos{ bot->pl_->map_object_->x, bot->pl_->map_object_->y,
-                  bot->pl_->map_object_->z };
+    Position pos{bot->pl_->map_object_->x, bot->pl_->map_object_->y, bot->pl_->map_object_->z};
 
     Subsector *start    = RendererPointInSubsector(pos.x, pos.y);
     int        start_id = (int)(start - level_subsectors);
@@ -728,7 +752,7 @@ BotPath *BotNavigateFindThing(DeathBot *bot, float radius, MapObject *&best)
     {
         area.open   = false;
         area.G      = 9e19;
-        area.H      = 1.0;  // a constant gives a Djikstra search
+        area.H      = 1.0; // a constant gives a Djikstra search
         area.parent = -1;
     }
 
@@ -741,7 +765,8 @@ BotPath *BotNavigateFindThing(DeathBot *bot, float radius, MapObject *&best)
         // no areas left to visit?
         if (cur < 0)
         {
-            if (best == nullptr) return nullptr;
+            if (best == nullptr)
+                return nullptr;
 
             return BotNavigateStorePath(pos, start_id, *best, best_id);
         }
@@ -751,8 +776,7 @@ BotPath *BotNavigateFindThing(DeathBot *bot, float radius, MapObject *&best)
         area.open        = false;
 
         // visit the things
-        BotNavigateItemsInSubsector(&level_subsectors[cur], bot, pos, radius,
-                                    cur, best_id, best_score, best);
+        BotNavigateItemsInSubsector(&level_subsectors[cur], bot, pos, radius, cur, best_id, best_score, best);
 
         // visit each neighbor node
         for (int k = 0; k < area.num_links; k++)
@@ -762,15 +786,18 @@ BotPath *BotNavigateFindThing(DeathBot *bot, float radius, MapObject *&best)
 
             // doors, lifts and teleporters are not allowed for things.
             // [ since getting an item and opening a door are both tasks ]
-            if (link.flags != kBotPathNodeNormal) continue;
+            if (link.flags != kBotPathNodeNormal)
+                continue;
 
             float cost = BotNavigateTraverseLinkCost(cur, link, false);
-            if (cost < 0) continue;
+            if (cost < 0)
+                continue;
 
             // we need the total traversal time
             cost += area.G;
 
-            if (cost > (radius * 1.4) / RUNNING_SPEED) continue;
+            if (cost > (radius * 1.4) / RUNNING_SPEED)
+                continue;
 
             // update neighbor if this path is a better one
             BotNavigateTryOpenArea(link.dest_id, cur, cost);
@@ -780,19 +807,19 @@ BotPath *BotNavigateFindThing(DeathBot *bot, float radius, MapObject *&best)
 
 //----------------------------------------------------------------------------
 
-static void BotNavigateEnemiesInSubsector(const Subsector *sub, DeathBot *bot,
-                                          float radius, MapObject *&best_mo,
+static void BotNavigateEnemiesInSubsector(const Subsector *sub, DeathBot *bot, float radius, MapObject *&best_mo,
                                           float &best_score)
 {
-    for (MapObject *mo = sub->thing_list; mo != nullptr;
-         mo            = mo->subsector_next_)
+    for (MapObject *mo = sub->thing_list; mo != nullptr; mo = mo->subsector_next_)
     {
-        if (bot->EvalEnemy(mo) < 0) continue;
+        if (bot->EvalEnemy(mo) < 0)
+            continue;
 
         float dx = fabs(bot->pl_->map_object_->x - mo->x);
         float dy = fabs(bot->pl_->map_object_->y - mo->y);
 
-        if (dx > radius || dy > radius) continue;
+        if (dx > radius || dy > radius)
+            continue;
 
         // pick one of the monsters at random
         float score = (float)RandomShort() / 65535.0f;
@@ -805,22 +832,19 @@ static void BotNavigateEnemiesInSubsector(const Subsector *sub, DeathBot *bot,
     }
 }
 
-static void BotNavigateEnemiesInNode(unsigned int bspnum, DeathBot *bot,
-                                     float radius, MapObject *&best_mo,
+static void BotNavigateEnemiesInNode(unsigned int bspnum, DeathBot *bot, float radius, MapObject *&best_mo,
                                      float &best_score)
 {
     if (bspnum & kLeafSubsector)
     {
         bspnum &= ~kLeafSubsector;
-        BotNavigateEnemiesInSubsector(&level_subsectors[bspnum], bot, radius,
-                                      best_mo, best_score);
+        BotNavigateEnemiesInSubsector(&level_subsectors[bspnum], bot, radius, best_mo, best_score);
         return;
     }
 
     const BspNode *node = &level_nodes[bspnum];
 
-    Position pos{ bot->pl_->map_object_->x, bot->pl_->map_object_->y,
-                  bot->pl_->map_object_->z };
+    Position pos{bot->pl_->map_object_->x, bot->pl_->map_object_->y, bot->pl_->map_object_->z};
 
     for (int c = 0; c < 2; c++)
     {
@@ -831,10 +855,10 @@ static void BotNavigateEnemiesInNode(unsigned int bspnum, DeathBot *bot,
             continue;
         if (node->bounding_boxes[c][kBoundingBoxBottom] > pos.y + radius)
             continue;
-        if (node->bounding_boxes[c][kBoundingBoxTop] < pos.y - radius) continue;
+        if (node->bounding_boxes[c][kBoundingBoxTop] < pos.y - radius)
+            continue;
 
-        BotNavigateEnemiesInNode(node->children[c], bot, radius, best_mo,
-                                 best_score);
+        BotNavigateEnemiesInNode(node->children[c], bot, radius, best_mo, best_score);
     }
 }
 
@@ -854,9 +878,15 @@ MapObject *BotNavigateFindEnemy(DeathBot *bot, float radius)
 
 //----------------------------------------------------------------------------
 
-Position BotPath::CurrentDestination() const { return nodes_.at(along_).pos; }
+Position BotPath::CurrentDestination() const
+{
+    return nodes_.at(along_).pos;
+}
 
-Position BotPath::CurrentFrom() const { return nodes_.at(along_ - 1).pos; }
+Position BotPath::CurrentFrom() const
+{
+    return nodes_.at(along_ - 1).pos;
+}
 
 float BotPath::CurrentLength() const
 {
@@ -879,12 +909,19 @@ bool BotPath::ReachedDestination(const Position *pos) const
     Position dest = CurrentDestination();
 
     // too low?
-    if (pos->z < dest.z - 15.0) { return false; }
+    if (pos->z < dest.z - 15.0)
+    {
+        return false;
+    }
 
-    if (pos->x < dest.x - 64) return false;
-    if (pos->x > dest.x + 64) return false;
-    if (pos->y < dest.y - 64) return false;
-    if (pos->y > dest.y + 64) return false;
+    if (pos->x < dest.x - 64)
+        return false;
+    if (pos->x > dest.x + 64)
+        return false;
+    if (pos->y < dest.y - 64)
+        return false;
+    if (pos->y > dest.y + 64)
+        return false;
 
     // check bot has entered the other half plane
     Position from = nodes_.at(along_ - 1).pos;
@@ -893,14 +930,16 @@ bool BotPath::ReachedDestination(const Position *pos) const
     float uy   = dest.y - from.y;
     float ulen = hypotf(ux, uy);
 
-    if (ulen < 1.0) return true;
+    if (ulen < 1.0)
+        return true;
 
     ux /= ulen;
     uy /= ulen;
 
     float dot_p = (pos->x - dest.x) * ux + (pos->y - dest.y) * uy;
 
-    if (dot_p < -16.0) return false;
+    if (dot_p < -16.0)
+        return false;
 
     return true;
 }

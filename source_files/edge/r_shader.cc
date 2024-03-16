@@ -25,7 +25,7 @@
 #include "p_mobj.h"
 #include "r_defs.h"
 #include "r_gldefs.h"
-#include "r_image.h"  // ImageCache
+#include "r_image.h" // ImageCache
 #include "r_misc.h"
 #include "r_state.h"
 #include "r_texgl.h"
@@ -40,21 +40,28 @@ static constexpr uint8_t kLightImageCurveSize = 32;
 
 class LightImage
 {
-   public:
+  public:
     std::string name_;
 
     const Image *image_;
 
     RGBAColor curve_[kLightImageCurveSize];
 
-   public:
-    LightImage(const char *name, const Image *img) : name_(name), image_(img) {}
+  public:
+    LightImage(const char *name, const Image *img) : name_(name), image_(img)
+    {
+    }
 
-    ~LightImage() {}
+    ~LightImage()
+    {
+    }
 
-    inline GLuint TextureId() const { return ImageCache(image_, false); }
+    inline GLuint TextureId() const
+    {
+        return ImageCache(image_, false);
+    }
 
-    void MakeStandardCurve()  // TEMP CRUD
+    void MakeStandardCurve() // TEMP CRUD
     {
         for (int i = 0; i < kLightImageCurveSize - 1; i++)
         {
@@ -109,8 +116,7 @@ class LightImage
 static LightImage *GetLightImage(const MapObjectDefinition *info, int DL)
 {
     // Intentional Const Overrides
-    DynamicLightDefinition *D_info =
-        (DynamicLightDefinition *)&info->dlight_[DL];
+    DynamicLightDefinition *D_info = (DynamicLightDefinition *)&info->dlight_[DL];
 
     if (!D_info->cache_data_)
     {
@@ -120,10 +126,10 @@ static LightImage *GetLightImage(const MapObjectDefinition *info, int DL)
 
         EPI_ASSERT(shape && strlen(shape) > 0);
 
-        const Image *image =
-            ImageLookup(shape, kImageNamespaceGraphic, kImageLookupNull);
+        const Image *image = ImageLookup(shape, kImageNamespaceGraphic, kImageLookupNull);
 
-        if (!image) FatalError("Missing dynamic light graphic: %s\n", shape);
+        if (!image)
+            FatalError("Missing dynamic light graphic: %s\n", shape);
 
         LightImage *lim = new LightImage(shape, image);
 
@@ -141,12 +147,12 @@ static LightImage *GetLightImage(const MapObjectDefinition *info, int DL)
 
 class dynlight_shader_c : public AbstractShader
 {
-   private:
+  private:
     MapObject *mo;
 
     LightImage *lim[2];
 
-   public:
+  public:
     dynlight_shader_c(MapObject *object) : mo(object)
     {
         // Note: these are shared, we must not delete them
@@ -158,9 +164,8 @@ class dynlight_shader_c : public AbstractShader
     { /* nothing to do */
     }
 
-   private:
-    inline float TexCoord(HMM_Vec2 *texc, float r, const HMM_Vec3 *lit_pos,
-                          const HMM_Vec3 *normal)
+  private:
+    inline float TexCoord(HMM_Vec2 *texc, float r, const HMM_Vec3 *lit_pos, const HMM_Vec3 *normal)
     {
         float mx = mo->x;
         float my = mo->y;
@@ -195,7 +200,7 @@ class dynlight_shader_c : public AbstractShader
 
             float dxy = nx * dy - ny * dx;
 
-            r /= sqrt(nx * nx + ny * ny);  // correct ??
+            r /= sqrt(nx * nx + ny * ny); // correct ??
 
             texc->Y = (1 + dz / r) / 2.0;
             texc->X = (1 + dxy / r) / 2.0;
@@ -206,16 +211,15 @@ class dynlight_shader_c : public AbstractShader
 
     inline float WhatRadius(int DL)
     {
-        if (DL == 0) return mo->dynamic_light_.r * MirrorXYScale();
+        if (DL == 0)
+            return mo->dynamic_light_.r * MirrorXYScale();
 
-        return mo->info_->dlight_[1].radius_ * mo->dynamic_light_.r /
-               mo->info_->dlight_[0].radius_ * MirrorXYScale();
+        return mo->info_->dlight_[1].radius_ * mo->dynamic_light_.r / mo->info_->dlight_[0].radius_ * MirrorXYScale();
     }
 
     inline RGBAColor WhatColor(int DL)
     {
-        return (DL == 0) ? mo->dynamic_light_.color
-                         : mo->info_->dlight_[1].colour_;
+        return (DL == 0) ? mo->dynamic_light_.color : mo->info_->dlight_[1].colour_;
     }
 
     inline DynamicLightType WhatType(int DL)
@@ -223,7 +227,7 @@ class dynlight_shader_c : public AbstractShader
         return mo->info_->dlight_[DL].type_;
     }
 
-   public:
+  public:
     virtual void Sample(ColorMixer *col, float x, float y, float z)
     {
         float mx = mo->x;
@@ -241,10 +245,10 @@ class dynlight_shader_c : public AbstractShader
 
         for (int DL = 0; DL < 2; DL++)
         {
-            if (WhatType(DL) == kDynamicLightTypeNone) break;
+            if (WhatType(DL) == kDynamicLightTypeNone)
+                break;
 
-            RGBAColor new_col =
-                lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
+            RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
             float L = mo->state_->bright / 255.0;
 
@@ -258,8 +262,7 @@ class dynlight_shader_c : public AbstractShader
         }
     }
 
-    virtual void Corner(ColorMixer *col, float nx, float ny, float nz,
-                        MapObject *mod_pos, bool is_weapon)
+    virtual void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon)
     {
         float mx = mo->x;
         float my = mo->y;
@@ -299,10 +302,10 @@ class dynlight_shader_c : public AbstractShader
 
         for (int DL = 0; DL < 2; DL++)
         {
-            if (WhatType(DL) == kDynamicLightTypeNone) break;
+            if (WhatType(DL) == kDynamicLightTypeNone)
+                break;
 
-            RGBAColor new_col =
-                lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
+            RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
             if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
             {
@@ -314,13 +317,13 @@ class dynlight_shader_c : public AbstractShader
         }
     }
 
-    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha,
-                          int *pass_var, int blending, bool masked, void *data,
-                          ShaderCoordinateFunction func)
+    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
+                          void *data, ShaderCoordinateFunction func)
     {
         for (int DL = 0; DL < 2; DL++)
         {
-            if (WhatType(DL) == kDynamicLightTypeNone) break;
+            if (WhatType(DL) == kDynamicLightTypeNone)
+                break;
 
             bool is_additive = (WhatType(DL) == kDynamicLightTypeAdd);
 
@@ -332,16 +335,14 @@ class dynlight_shader_c : public AbstractShader
             float G = L * epi::GetRGBAGreen(col) / 255.0;
             float B = L * epi::GetRGBABlue(col) / 255.0;
 
-            RendererVertex *glvert = RendererBeginUnit(
-                shape, num_vert,
-                (is_additive && masked) ? (GLuint)kTextureEnvironmentSkipRgb
-                : is_additive           ? (GLuint)kTextureEnvironmentDisable
-                                        : GL_MODULATE,
-                (is_additive && !masked) ? 0 : tex, GL_MODULATE,
-                lim[DL]->TextureId(), *pass_var, blending,
-                *pass_var > 0 ? kRGBANoValue
-                              : mo->subsector_->sector->properties.fog_color,
-                mo->subsector_->sector->properties.fog_density);
+            RendererVertex *glvert =
+                RendererBeginUnit(shape, num_vert,
+                                  (is_additive && masked) ? (GLuint)kTextureEnvironmentSkipRgb
+                                  : is_additive           ? (GLuint)kTextureEnvironmentDisable
+                                                          : GL_MODULATE,
+                                  (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim[DL]->TextureId(), *pass_var,
+                                  blending, *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->properties.fog_color,
+                                  mo->subsector_->sector->properties.fog_density);
 
             for (int v_idx = 0; v_idx < num_vert; v_idx++)
             {
@@ -349,11 +350,10 @@ class dynlight_shader_c : public AbstractShader
 
                 HMM_Vec3 lit_pos;
 
-                (*func)(data, v_idx, &dest->position, dest->rgba_color,
-                        &dest->texture_coordinates[0], &dest->normal, &lit_pos);
+                (*func)(data, v_idx, &dest->position, dest->rgba_color, &dest->texture_coordinates[0], &dest->normal,
+                        &lit_pos);
 
-                float dist = TexCoord(&dest->texture_coordinates[1],
-                                      WhatRadius(DL), &lit_pos, &dest->normal);
+                float dist = TexCoord(&dest->texture_coordinates[1], WhatRadius(DL), &lit_pos, &dest->normal);
 
                 float ity = exp(-5.44 * dist * dist);
 
@@ -381,12 +381,12 @@ AbstractShader *MakeDLightShader(MapObject *mo)
 
 class plane_glow_c : public AbstractShader
 {
-   private:
+  private:
     MapObject *mo;
 
     LightImage *lim[2];
 
-   public:
+  public:
     plane_glow_c(MapObject *_glower) : mo(_glower)
     {
         lim[0] = GetLightImage(mo->info_, 0);
@@ -397,17 +397,16 @@ class plane_glow_c : public AbstractShader
     { /* nothing to do */
     }
 
-   private:
+  private:
     inline float Dist(const Sector *sec, float z)
     {
         if (mo->info_->glow_type_ == kSectorGlowTypeFloor)
             return fabs(sec->floor_height - z);
         else
-            return fabs(sec->ceiling_height - z);  // kSectorGlowTypeCeiling
+            return fabs(sec->ceiling_height - z); // kSectorGlowTypeCeiling
     }
 
-    inline void TexCoord(HMM_Vec2 *texc, float r, const Sector *sec,
-                         const HMM_Vec3 *lit_pos, const HMM_Vec3 *normal)
+    inline void TexCoord(HMM_Vec2 *texc, float r, const Sector *sec, const HMM_Vec3 *lit_pos, const HMM_Vec3 *normal)
     {
         texc->X = 0.5;
         texc->Y = 0.5 + Dist(sec, lit_pos->Z) / r / 2.0;
@@ -415,16 +414,15 @@ class plane_glow_c : public AbstractShader
 
     inline float WhatRadius(int DL)
     {
-        if (DL == 0) return mo->dynamic_light_.r * MirrorXYScale();
+        if (DL == 0)
+            return mo->dynamic_light_.r * MirrorXYScale();
 
-        return mo->info_->dlight_[1].radius_ * mo->dynamic_light_.r /
-               mo->info_->dlight_[0].radius_ * MirrorXYScale();
+        return mo->info_->dlight_[1].radius_ * mo->dynamic_light_.r / mo->info_->dlight_[0].radius_ * MirrorXYScale();
     }
 
     inline RGBAColor WhatColor(int DL)
     {
-        return (DL == 0) ? mo->dynamic_light_.color
-                         : mo->info_->dlight_[1].colour_;
+        return (DL == 0) ? mo->dynamic_light_.color : mo->info_->dlight_[1].colour_;
     }
 
     inline DynamicLightType WhatType(int DL)
@@ -432,7 +430,7 @@ class plane_glow_c : public AbstractShader
         return mo->info_->dlight_[DL].type_;
     }
 
-   public:
+  public:
     virtual void Sample(ColorMixer *col, float x, float y, float z)
     {
         const Sector *sec = mo->subsector_->sector;
@@ -441,10 +439,10 @@ class plane_glow_c : public AbstractShader
 
         for (int DL = 0; DL < 2; DL++)
         {
-            if (WhatType(DL) == kDynamicLightTypeNone) break;
+            if (WhatType(DL) == kDynamicLightTypeNone)
+                break;
 
-            RGBAColor new_col =
-                lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
+            RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
             float L = mo->state_->bright / 255.0;
 
@@ -458,8 +456,7 @@ class plane_glow_c : public AbstractShader
         }
     }
 
-    virtual void Corner(ColorMixer *col, float nx, float ny, float nz,
-                        MapObject *mod_pos, bool is_weapon)
+    virtual void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon)
     {
         const Sector *sec = mo->subsector_->sector;
 
@@ -468,8 +465,7 @@ class plane_glow_c : public AbstractShader
 
         if (is_weapon)
         {
-            float weapon_z =
-                mod_pos->z + mod_pos->height_ * mod_pos->info_->shotheight_;
+            float weapon_z = mod_pos->z + mod_pos->height_ * mod_pos->info_->shotheight_;
 
             if (mo->info_->glow_type_ == kSectorGlowTypeFloor)
                 dist = weapon_z - sec->floor_height;
@@ -489,10 +485,10 @@ class plane_glow_c : public AbstractShader
 
         for (int DL = 0; DL < 2; DL++)
         {
-            if (WhatType(DL) == kDynamicLightTypeNone) break;
+            if (WhatType(DL) == kDynamicLightTypeNone)
+                break;
 
-            RGBAColor new_col =
-                lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
+            RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
             if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
             {
@@ -504,15 +500,15 @@ class plane_glow_c : public AbstractShader
         }
     }
 
-    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha,
-                          int *pass_var, int blending, bool masked, void *data,
-                          ShaderCoordinateFunction func)
+    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
+                          void *data, ShaderCoordinateFunction func)
     {
         const Sector *sec = mo->subsector_->sector;
 
         for (int DL = 0; DL < 2; DL++)
         {
-            if (WhatType(DL) == kDynamicLightTypeNone) break;
+            if (WhatType(DL) == kDynamicLightTypeNone)
+                break;
 
             bool is_additive = (WhatType(DL) == kDynamicLightTypeAdd);
 
@@ -524,16 +520,14 @@ class plane_glow_c : public AbstractShader
             float G = L * epi::GetRGBAGreen(col) / 255.0;
             float B = L * epi::GetRGBABlue(col) / 255.0;
 
-            RendererVertex *glvert = RendererBeginUnit(
-                shape, num_vert,
-                (is_additive && masked) ? (GLuint)kTextureEnvironmentSkipRgb
-                : is_additive           ? (GLuint)kTextureEnvironmentDisable
-                                        : GL_MODULATE,
-                (is_additive && !masked) ? 0 : tex, GL_MODULATE,
-                lim[DL]->TextureId(), *pass_var, blending,
-                *pass_var > 0 ? kRGBANoValue
-                              : mo->subsector_->sector->properties.fog_color,
-                mo->subsector_->sector->properties.fog_density);
+            RendererVertex *glvert =
+                RendererBeginUnit(shape, num_vert,
+                                  (is_additive && masked) ? (GLuint)kTextureEnvironmentSkipRgb
+                                  : is_additive           ? (GLuint)kTextureEnvironmentDisable
+                                                          : GL_MODULATE,
+                                  (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim[DL]->TextureId(), *pass_var,
+                                  blending, *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->properties.fog_color,
+                                  mo->subsector_->sector->properties.fog_density);
 
             for (int v_idx = 0; v_idx < num_vert; v_idx++)
             {
@@ -541,11 +535,10 @@ class plane_glow_c : public AbstractShader
 
                 HMM_Vec3 lit_pos;
 
-                (*func)(data, v_idx, &dest->position, dest->rgba_color,
-                        &dest->texture_coordinates[0], &dest->normal, &lit_pos);
+                (*func)(data, v_idx, &dest->position, dest->rgba_color, &dest->texture_coordinates[0], &dest->normal,
+                        &lit_pos);
 
-                TexCoord(&dest->texture_coordinates[1], WhatRadius(DL), sec,
-                         &lit_pos, &dest->normal);
+                TexCoord(&dest->texture_coordinates[1], WhatRadius(DL), sec, &lit_pos, &dest->normal);
 
                 dest->rgba_color[0] = R;
                 dest->rgba_color[1] = G;
@@ -560,7 +553,10 @@ class plane_glow_c : public AbstractShader
     }
 };
 
-AbstractShader *MakePlaneGlow(MapObject *mo) { return new plane_glow_c(mo); }
+AbstractShader *MakePlaneGlow(MapObject *mo)
+{
+    return new plane_glow_c(mo);
+}
 
 //----------------------------------------------------------------------------
 //  WALL GLOWS
@@ -568,11 +564,11 @@ AbstractShader *MakePlaneGlow(MapObject *mo) { return new plane_glow_c(mo); }
 
 class wall_glow_c : public AbstractShader
 {
-   private:
+  private:
     Line      *ld;
     MapObject *mo;
 
-    float norm_x, norm_y;  // normal
+    float norm_x, norm_y; // normal
 
     LightImage *lim[2];
 
@@ -581,8 +577,7 @@ class wall_glow_c : public AbstractShader
         return (ld->vertex_1->X - x) * norm_x + (ld->vertex_1->Y - y) * norm_y;
     }
 
-    inline void TexCoord(HMM_Vec2 *texc, float r, const Sector *sec,
-                         const HMM_Vec3 *lit_pos, const HMM_Vec3 *normal)
+    inline void TexCoord(HMM_Vec2 *texc, float r, const Sector *sec, const HMM_Vec3 *lit_pos, const HMM_Vec3 *normal)
     {
         texc->X = 0.5;
         texc->Y = 0.5 + Dist(lit_pos->X, lit_pos->Y) / r / 2.0;
@@ -590,16 +585,15 @@ class wall_glow_c : public AbstractShader
 
     inline float WhatRadius(int DL)
     {
-        if (DL == 0) return mo->dynamic_light_.r * MirrorXYScale();
+        if (DL == 0)
+            return mo->dynamic_light_.r * MirrorXYScale();
 
-        return mo->info_->dlight_[1].radius_ * mo->dynamic_light_.r /
-               mo->info_->dlight_[0].radius_ * MirrorXYScale();
+        return mo->info_->dlight_[1].radius_ * mo->dynamic_light_.r / mo->info_->dlight_[0].radius_ * MirrorXYScale();
     }
 
     inline RGBAColor WhatColor(int DL)
     {
-        return (DL == 0) ? mo->dynamic_light_.color
-                         : mo->info_->dlight_[1].colour_;
+        return (DL == 0) ? mo->dynamic_light_.color : mo->info_->dlight_[1].colour_;
     }
 
     inline DynamicLightType WhatType(int DL)
@@ -607,7 +601,7 @@ class wall_glow_c : public AbstractShader
         return mo->info_->dlight_[DL].type_;
     }
 
-   public:
+  public:
     wall_glow_c(MapObject *_glower) : mo(_glower)
     {
         EPI_ASSERT(mo->dynamic_light_.glow_wall);
@@ -633,10 +627,10 @@ class wall_glow_c : public AbstractShader
 
         for (int DL = 0; DL < 2; DL++)
         {
-            if (WhatType(DL) == kDynamicLightTypeNone) break;
+            if (WhatType(DL) == kDynamicLightTypeNone)
+                break;
 
-            RGBAColor new_col =
-                lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
+            RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
             if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
             {
@@ -648,8 +642,7 @@ class wall_glow_c : public AbstractShader
         }
     }
 
-    virtual void Corner(ColorMixer *col, float nx, float ny, float nz,
-                        MapObject *mod_pos, bool is_weapon = false)
+    virtual void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon = false)
     {
         float dist = Dist(mod_pos->x, mod_pos->y);
 
@@ -659,10 +652,10 @@ class wall_glow_c : public AbstractShader
 
         for (int DL = 0; DL < 2; DL++)
         {
-            if (WhatType(DL) == kDynamicLightTypeNone) break;
+            if (WhatType(DL) == kDynamicLightTypeNone)
+                break;
 
-            RGBAColor new_col =
-                lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
+            RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
             if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
             {
@@ -674,15 +667,15 @@ class wall_glow_c : public AbstractShader
         }
     }
 
-    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha,
-                          int *pass_var, int blending, bool masked, void *data,
-                          ShaderCoordinateFunction func)
+    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
+                          void *data, ShaderCoordinateFunction func)
     {
         const Sector *sec = mo->subsector_->sector;
 
         for (int DL = 0; DL < 2; DL++)
         {
-            if (WhatType(DL) == kDynamicLightTypeNone) break;
+            if (WhatType(DL) == kDynamicLightTypeNone)
+                break;
 
             bool is_additive = (WhatType(DL) == kDynamicLightTypeAdd);
 
@@ -694,16 +687,14 @@ class wall_glow_c : public AbstractShader
             float G = L * epi::GetRGBAGreen(col) / 255.0;
             float B = L * epi::GetRGBABlue(col) / 255.0;
 
-            RendererVertex *glvert = RendererBeginUnit(
-                shape, num_vert,
-                (is_additive && masked) ? (GLuint)kTextureEnvironmentSkipRgb
-                : is_additive           ? (GLuint)kTextureEnvironmentDisable
-                                        : GL_MODULATE,
-                (is_additive && !masked) ? 0 : tex, GL_MODULATE,
-                lim[DL]->TextureId(), *pass_var, blending,
-                *pass_var > 0 ? kRGBANoValue
-                              : mo->subsector_->sector->properties.fog_color,
-                mo->subsector_->sector->properties.fog_density);
+            RendererVertex *glvert =
+                RendererBeginUnit(shape, num_vert,
+                                  (is_additive && masked) ? (GLuint)kTextureEnvironmentSkipRgb
+                                  : is_additive           ? (GLuint)kTextureEnvironmentDisable
+                                                          : GL_MODULATE,
+                                  (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim[DL]->TextureId(), *pass_var,
+                                  blending, *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->properties.fog_color,
+                                  mo->subsector_->sector->properties.fog_density);
 
             for (int v_idx = 0; v_idx < num_vert; v_idx++)
             {
@@ -711,11 +702,10 @@ class wall_glow_c : public AbstractShader
 
                 HMM_Vec3 lit_pos;
 
-                (*func)(data, v_idx, &dest->position, dest->rgba_color,
-                        &dest->texture_coordinates[0], &dest->normal, &lit_pos);
+                (*func)(data, v_idx, &dest->position, dest->rgba_color, &dest->texture_coordinates[0], &dest->normal,
+                        &lit_pos);
 
-                TexCoord(&dest->texture_coordinates[1], WhatRadius(DL), sec,
-                         &lit_pos, &dest->normal);
+                TexCoord(&dest->texture_coordinates[1], WhatRadius(DL), sec, &lit_pos, &dest->normal);
 
                 dest->rgba_color[0] = R;
                 dest->rgba_color[1] = G;
@@ -730,7 +720,10 @@ class wall_glow_c : public AbstractShader
     }
 };
 
-AbstractShader *MakeWallGlow(MapObject *mo) { return new wall_glow_c(mo); }
+AbstractShader *MakeWallGlow(MapObject *mo)
+{
+    return new wall_glow_c(mo);
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

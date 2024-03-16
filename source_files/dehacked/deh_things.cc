@@ -68,21 +68,23 @@ static constexpr char kExtraFlagNoItemBk     = 'I';
 
 static constexpr uint8_t kCastMaximum = 20;
 
-extern DehackedMapObjectDefinition
-    mobjinfo[kTotalDehackedMapObjectTypesPortCompatibility];
+extern DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibility];
 
 extern DehackedMapObjectDefinition brain_explode_mobj;
 
 std::vector<DehackedMapObjectDefinition *> new_mobjinfo;
 
-static inline float FixedToFloat(int fixed) { return (float)fixed / 65536.0f; }
+static inline float FixedToFloat(int fixed)
+{
+    return (float)fixed / 65536.0f;
+}
 
 namespace things
 {
 DehackedMapObjectDefinition       *NewMobj(int mt_num);
 const DehackedMapObjectDefinition *OldMobj(int mt_num);
 const DehackedMapObjectDefinition *NewMobjElseOld(int mt_num);
-}  // namespace things
+} // namespace things
 
 //----------------------------------------------------------------------------
 //
@@ -121,7 +123,10 @@ void BeginLump(void)
     wad::Printf("<ATTACKS>\n\n");
 }
 
-void FinishLump(void) { wad::Printf("\n"); }
+void FinishLump(void)
+{
+    wad::Printf("\n");
+}
 
 struct ExtraAttack
 {
@@ -132,32 +137,28 @@ struct ExtraAttack
     const char *flags;
 };
 
-const ExtraAttack attack_extra[] = {
-    { kMT_FIRE, "TRACKER", 0, 75, "FS" },
-    { kMT_TRACER, "PROJECTILE", 48, 75, "cptF" },
-    { kMT_FATSHOT, "FIXED_SPREADER", 32, 75, "" },
-    { kMT_TROOPSHOT, "PROJECTILE", 32, 75, "F" },
-    { kMT_BRUISERSHOT, "PROJECTILE", 32, 75, "F" },
-    { kMT_HEADSHOT, "PROJECTILE", 32, 75, "F" },
-    { kMT_ARACHPLAZ, "PROJECTILE", 16, 50, "eF" },
-    { kMT_ROCKET, "PROJECTILE", 44, 75, "FK" },
-    { kMT_PLASMA, "PROJECTILE", 32, 75, "eK" },
-    { kMT_BFG, "PROJECTILE", 32, 50, "K" },
-    { kMT_EXTRABFG, "SPRAY", 0, 75, "" },
-    { kMT_SPAWNSHOT, "SHOOTTOSPOT", 16, 100, "" },
+const ExtraAttack attack_extra[] = {{kMT_FIRE, "TRACKER", 0, 75, "FS"},
+                                    {kMT_TRACER, "PROJECTILE", 48, 75, "cptF"},
+                                    {kMT_FATSHOT, "FIXED_SPREADER", 32, 75, ""},
+                                    {kMT_TROOPSHOT, "PROJECTILE", 32, 75, "F"},
+                                    {kMT_BRUISERSHOT, "PROJECTILE", 32, 75, "F"},
+                                    {kMT_HEADSHOT, "PROJECTILE", 32, 75, "F"},
+                                    {kMT_ARACHPLAZ, "PROJECTILE", 16, 50, "eF"},
+                                    {kMT_ROCKET, "PROJECTILE", 44, 75, "FK"},
+                                    {kMT_PLASMA, "PROJECTILE", 32, 75, "eK"},
+                                    {kMT_BFG, "PROJECTILE", 32, 50, "K"},
+                                    {kMT_EXTRABFG, "SPRAY", 0, 75, ""},
+                                    {kMT_SPAWNSHOT, "SHOOTTOSPOT", 16, 100, ""},
 
-    { -1, nullptr, 0, 0, "" }
-};
+                                    {-1, nullptr, 0, 0, ""}};
 
 void HandleSounds(const DehackedMapObjectDefinition *info, int mt_num)
 {
     if (info->seesound != ksfx_None)
-        wad::Printf("LAUNCH_SOUND = \"%s\";\n",
-                    sounds::GetSound(info->seesound));
+        wad::Printf("LAUNCH_SOUND = \"%s\";\n", sounds::GetSound(info->seesound));
 
     if (info->deathsound != ksfx_None)
-        wad::Printf("DEATH_SOUND = \"%s\";\n",
-                    sounds::GetSound(info->deathsound));
+        wad::Printf("DEATH_SOUND = \"%s\";\n", sounds::GetSound(info->deathsound));
 
     if (info->rip_sound != ksfx_None)
         wad::Printf("RIP_SOUND = \"%s\";\n", sounds::GetSound(info->rip_sound));
@@ -176,7 +177,8 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
 {
     frames::ResetGroups();
 
-    if (info->fullbright) frames::force_fullbright = true;
+    if (info->fullbright)
+        frames::force_fullbright = true;
 
     // special cases...
 
@@ -187,17 +189,15 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
 
         int count = 0;
 
-        const DehackedMapObjectDefinition *spawnfire =
-            things::NewMobjElseOld(kMT_SPAWNFIRE);
+        const DehackedMapObjectDefinition *spawnfire = things::NewMobjElseOld(kMT_SPAWNFIRE);
         EPI_ASSERT(spawnfire);
 
         count += frames::BeginGroup('D', spawnfire->spawnstate);
         count += frames::BeginGroup('S', info->spawnstate);
 
         if (count != 2)
-            LogDebug(
-                "Dehacked: Warning - Brain cube is missing spawn/fire "
-                "states.\n");
+            LogDebug("Dehacked: Warning - Brain cube is missing spawn/fire "
+                     "states.\n");
 
         if (count == 0)
         {
@@ -224,8 +224,7 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
 
     if (count == 0)
     {
-        LogDebug("Dehacked: Warning - Attack [%s] has no states.\n",
-                 things::GetMobjName(mt_num) + 1);
+        LogDebug("Dehacked: Warning - Attack [%s] has no states.\n", things::GetMobjName(mt_num) + 1);
         frames::force_fullbright = false;
         return;
     }
@@ -253,15 +252,15 @@ void AddAtkSpecial(const char *name)
     wad::Printf("%s", name);
 }
 
-void HandleAtkSpecials(const DehackedMapObjectDefinition *info, int mt_num,
-                       const ExtraAttack *ext, bool plr_rocket)
+void HandleAtkSpecials(const DehackedMapObjectDefinition *info, int mt_num, const ExtraAttack *ext, bool plr_rocket)
 {
     flag_got_one = false;
 
     if (strchr(ext->flags, kAttackFlagFaceTarget) && !plr_rocket)
         AddAtkSpecial("FACE_TARGET");
 
-    if (strchr(ext->flags, kAttackFlagSight)) AddAtkSpecial("NEED_SIGHT");
+    if (strchr(ext->flags, kAttackFlagSight))
+        AddAtkSpecial("NEED_SIGHT");
 
     if (strchr(ext->flags, kAttackFlagKillFail))
         AddAtkSpecial("KILL_FAILED_SPAWN");
@@ -269,7 +268,8 @@ void HandleAtkSpecials(const DehackedMapObjectDefinition *info, int mt_num,
     if (strchr(ext->flags, kAttackFlagPuffSmoke))
         AddAtkSpecial("SMOKING_TRACER");
 
-    if (flag_got_one) wad::Printf(";\n");
+    if (flag_got_one)
+        wad::Printf(";\n");
 }
 
 void CheckPainElemental(void)
@@ -278,11 +278,11 @@ void CheckPainElemental(void)
     // (ELEMENTAL_SPAWNER and ELEMENTAL_DEATHSPAWN).  check if
     // those states are still valid, recreate attacks if not.
 
-    const DehackedMapObjectDefinition *skull =
-        things::NewMobjElseOld(kMT_SKULL);
+    const DehackedMapObjectDefinition *skull = things::NewMobjElseOld(kMT_SKULL);
     EPI_ASSERT(skull);
 
-    if (frames::CheckMissileState(skull->missilestate)) return;
+    if (frames::CheckMissileState(skull->missilestate))
+        return;
 
     // need to write out new versions
 
@@ -321,10 +321,9 @@ void CheckPainElemental(void)
     wad::Printf("SPAWN_OBJECT_STATE = %s;\n", spawn_at);
 }
 
-void ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num,
-                   bool plr_rocket);
+void ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num, bool plr_rocket);
 void ConvertScratch(const ScratchAttack *atk);
-}  // namespace Attacks
+} // namespace Attacks
 
 const char *Attacks::AddScratchAttack(int damage, const char *sfx)
 {
@@ -341,8 +340,7 @@ const char *Attacks::AddScratchAttack(int damage, const char *sfx)
     }
 
     static char namebuf[256];
-    snprintf(namebuf, sizeof(namebuf), "SCRATCH_%s_%d", safe_sfx.c_str(),
-             damage);
+    snprintf(namebuf, sizeof(namebuf), "SCRATCH_%s_%d", safe_sfx.c_str(), damage);
 
     // already have it?
     for (size_t i = 0; i < scratchers.size(); i++)
@@ -351,7 +349,7 @@ const char *Attacks::AddScratchAttack(int damage, const char *sfx)
             return namebuf;
     }
 
-    scratchers.push_back({ damage, sfx ? sfx : "", namebuf });
+    scratchers.push_back({damage, sfx ? sfx : "", namebuf});
 
     return namebuf;
 }
@@ -380,14 +378,14 @@ void Attacks::ConvertScratch(const ScratchAttack *atk)
     wad::Printf("\n");
 }
 
-void Attacks::ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num,
-                            bool plr_rocket)
+void Attacks::ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num, bool plr_rocket)
 {
-    if (info->name[0] != '*')  // thing?
+    if (info->name[0] != '*') // thing?
         return;
 
     // kMT_SPAWNFIRE is handled specially (in other code)
-    if (mt_num == kMT_SPAWNFIRE) return;
+    if (mt_num == kMT_SPAWNFIRE)
+        return;
 
     if (!got_one)
     {
@@ -411,8 +409,7 @@ void Attacks::ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num,
         }
 
     if (!ext)
-        FatalError("Dehacked: Error - Missing attack %s in extra table.\n",
-                   things::GetMobjName(mt_num) + 1);
+        FatalError("Dehacked: Error - Missing attack %s in extra table.\n", things::GetMobjName(mt_num) + 1);
 
     wad::Printf("ATTACKTYPE = %s;\n", ext->atk_type);
 
@@ -425,7 +422,8 @@ void Attacks::ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num,
     if (info->speed != 0)
         wad::Printf("SPEED = %s;\n", things::GetSpeed(info->speed));
 
-    if (info->mass != 100) wad::Printf("MASS = %d;\n", info->mass);
+    if (info->mass != 100)
+        wad::Printf("MASS = %d;\n", info->mass);
 
     if (mt_num == kMT_BRUISERSHOT)
         wad::Printf("FAST = 1.4;\n");
@@ -453,7 +451,8 @@ void Attacks::ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num,
         wad::Printf("DAMAGE.MAX = %d;\n", info->damage * 8);
     }
 
-    if (mt_num == kMT_BFG) wad::Printf("SPARE_ATTACK = BFG9000_SPRAY;\n");
+    if (mt_num == kMT_BFG)
+        wad::Printf("SPARE_ATTACK = BFG9000_SPRAY;\n");
 
     if (ext->translucency != 100)
         wad::Printf("TRANSLUCENCY = %d%%;\n", ext->translucency);
@@ -482,12 +481,9 @@ void Attacks::ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num,
 
     things::HandleFlags(info, mt_num, 0);
 
-    if (frames::attack_slot[0] || frames::attack_slot[1] ||
-        frames::attack_slot[2])
+    if (frames::attack_slot[0] || frames::attack_slot[1] || frames::attack_slot[2])
     {
-        LogDebug(
-            "Dehacked: Warning - Attack [%s] contained an attacking action.\n",
-            things::GetMobjName(mt_num) + 1);
+        LogDebug("Dehacked: Warning - Attack [%s] contained an attacking action.\n", things::GetMobjName(mt_num) + 1);
         things::HandleAttacks(info, mt_num);
     }
 
@@ -506,14 +502,12 @@ void Attacks::ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num,
 //----------------------------------------------------------------------------
 
 const int height_fixes[] = {
-    kMT_MISC14, 60, kMT_MISC29, 78, kMT_MISC30, 58, kMT_MISC31, 46,
-    kMT_MISC33, 38, kMT_MISC34, 50, kMT_MISC38, 56, kMT_MISC39, 48,
-    kMT_MISC41, 96, kMT_MISC42, 96, kMT_MISC43, 96, kMT_MISC44, 72,
-    kMT_MISC45, 72, kMT_MISC46, 72, kMT_MISC70, 64, kMT_MISC72, 52,
-    kMT_MISC73, 40, kMT_MISC74, 64, kMT_MISC75, 64, kMT_MISC76, 120,
+    kMT_MISC14, 60, kMT_MISC29, 78, kMT_MISC30, 58, kMT_MISC31, 46,  kMT_MISC33, 38, kMT_MISC34, 50,  kMT_MISC38, 56,
+    kMT_MISC39, 48, kMT_MISC41, 96, kMT_MISC42, 96, kMT_MISC43, 96,  kMT_MISC44, 72, kMT_MISC45, 72,  kMT_MISC46, 72,
+    kMT_MISC70, 64, kMT_MISC72, 52, kMT_MISC73, 40, kMT_MISC74, 64,  kMT_MISC75, 64, kMT_MISC76, 120,
 
-    kMT_MISC36, 56, kMT_MISC37, 56, kMT_MISC47, 56, kMT_MISC48, 128,
-    kMT_MISC35, 56, kMT_MISC40, 56, kMT_MISC50, 56, kMT_MISC77, 42,
+    kMT_MISC36, 56, kMT_MISC37, 56, kMT_MISC47, 56, kMT_MISC48, 128, kMT_MISC35, 56, kMT_MISC40, 56,  kMT_MISC50, 56,
+    kMT_MISC77, 42,
 
     -1,         -1 /* the end */
 };
@@ -525,9 +519,8 @@ int cast_mobjs[kCastMaximum];
 void BeginLump();
 void FinishLump();
 
-bool CheckIsMonster(const DehackedMapObjectDefinition *info, int mt_num,
-                    int player, bool use_act_flags);
-}  // namespace things
+bool CheckIsMonster(const DehackedMapObjectDefinition *info, int mt_num, int player, bool use_act_flags);
+} // namespace things
 
 void things::Init()
 {
@@ -538,7 +531,8 @@ void things::Init()
 void things::Shutdown()
 {
     for (size_t i = 0; i < new_mobjinfo.size(); i++)
-        if (new_mobjinfo[i] != nullptr) delete new_mobjinfo[i];
+        if (new_mobjinfo[i] != nullptr)
+            delete new_mobjinfo[i];
 
     new_mobjinfo.clear();
 
@@ -552,16 +546,21 @@ void things::BeginLump()
     wad::Printf("<THINGS>\n\n");
 }
 
-void things::FinishLump(void) { wad::Printf("\n"); }
+void things::FinishLump(void)
+{
+    wad::Printf("\n");
+}
 
 void things::MarkThing(int mt_num)
 {
     EPI_ASSERT(mt_num >= 0);
 
     // handle merged things/attacks
-    if (mt_num == kMT_TFOG) MarkThing(kMT_TELEPORTMAN);
+    if (mt_num == kMT_TFOG)
+        MarkThing(kMT_TELEPORTMAN);
 
-    if (mt_num == kMT_SPAWNFIRE) MarkThing(kMT_SPAWNSHOT);
+    if (mt_num == kMT_SPAWNFIRE)
+        MarkThing(kMT_SPAWNSHOT);
 
     // fill any missing slots with nullptrs, including the one we want
     while ((int)new_mobjinfo.size() < mt_num + 1)
@@ -570,7 +569,8 @@ void things::MarkThing(int mt_num)
     }
 
     // already have a modified entry?
-    if (new_mobjinfo[mt_num] != nullptr) return;
+    if (new_mobjinfo[mt_num] != nullptr)
+        return;
 
     // create new entry, copy original info if we have it
     DehackedMapObjectDefinition *entry = new DehackedMapObjectDefinition;
@@ -584,7 +584,7 @@ void things::MarkThing(int mt_num)
     {
         memset(entry, 0, sizeof(DehackedMapObjectDefinition));
 
-        entry->name      = "X";  // only needed to differentiate from an attack
+        entry->name      = "X"; // only needed to differentiate from an attack
         entry->doomednum = -1;
 
         // DEHEXTRA things have a default doomednum
@@ -598,18 +598,21 @@ void things::MarkThing(int mt_num)
 void things::UseThing(int mt_num)
 {
     // only create something when our standard DDF lacks it
-    if (mt_num >= kMT_DOGS) MarkThing(mt_num);
+    if (mt_num >= kMT_DOGS)
+        MarkThing(mt_num);
 }
 
 void things::MarkAllMonsters()
 {
     for (int i = 0; i < kTotalDehackedMapObjectTypesPortCompatibility; i++)
     {
-        if (i == kMT_PLAYER) continue;
+        if (i == kMT_PLAYER)
+            continue;
 
         const DehackedMapObjectDefinition *mobj = &mobjinfo[i];
 
-        if (CheckIsMonster(mobj, i, 0, false)) MarkThing(i);
+        if (CheckIsMonster(mobj, i, 0, false))
+            MarkThing(i);
     }
 }
 
@@ -654,7 +657,8 @@ const DehackedMapObjectDefinition *things::OldMobj(int mt_num)
 
 DehackedMapObjectDefinition *things::NewMobj(int mt_num)
 {
-    if (mt_num < (int)new_mobjinfo.size()) return new_mobjinfo[mt_num];
+    if (mt_num < (int)new_mobjinfo.size())
+        return new_mobjinfo[mt_num];
 
     return nullptr;
 }
@@ -662,7 +666,8 @@ DehackedMapObjectDefinition *things::NewMobj(int mt_num)
 const DehackedMapObjectDefinition *things::NewMobjElseOld(int mt_num)
 {
     const DehackedMapObjectDefinition *info = NewMobj(mt_num);
-    if (info != nullptr) return info;
+    if (info != nullptr)
+        return info;
 
     return OldMobj(mt_num);
 }
@@ -670,19 +675,20 @@ const DehackedMapObjectDefinition *things::NewMobjElseOld(int mt_num)
 int things::GetMobjMBF21Flags(int mt_num)
 {
     const DehackedMapObjectDefinition *info = NewMobjElseOld(mt_num);
-    if (info == nullptr) return 0;
+    if (info == nullptr)
+        return 0;
     return info->mbf21_flags;
 }
 
 bool things::IsSpawnable(int mt_num)
 {
     // attacks are not spawnable via A_Spawn
-    if (mt_num < kTotalDehackedMapObjectTypesPortCompatibility &&
-        mobjinfo[mt_num].name[0] == '*')
+    if (mt_num < kTotalDehackedMapObjectTypesPortCompatibility && mobjinfo[mt_num].name[0] == '*')
         return false;
 
     const DehackedMapObjectDefinition *info = NewMobjElseOld(mt_num);
-    if (info == nullptr) return false;
+    if (info == nullptr)
+        return false;
 
     return info->doomednum > 0;
 }
@@ -696,98 +702,96 @@ namespace things
 {
 struct FlagName
 {
-    long long int
-        flag;  // flag in DehackedMapObjectDefinition (kMF_XXX), 0 if ignored
-    const char *bex;   // name in a DEHACKED or BEX file
-    const char *conv;  // edge name, nullptr if none, can be multiple
+    long long int flag; // flag in DehackedMapObjectDefinition (kMF_XXX), 0 if ignored
+    const char   *bex;  // name in a DEHACKED or BEX file
+    const char   *conv; // edge name, nullptr if none, can be multiple
 };
 
 const FlagName flag_list[] = {
-    { kMF_SPECIAL, "SPECIAL", "SPECIAL" },
-    { kMF_SOLID, "SOLID", "SOLID" },
-    { kMF_SHOOTABLE, "SHOOTABLE", "SHOOTABLE" },
-    { kMF_NOSECTOR, "NOSECTOR", "NOSECTOR" },
-    { kMF_NOBLOCKMAP, "NOBLOCKMAP", "NOBLOCKMAP" },
-    { kMF_AMBUSH, "AMBUSH", "AMBUSH" },
-    { 0, "JUSTHIT", nullptr },
-    { 0, "JUSTATTACKED", nullptr },
-    { kMF_SPAWNCEILING, "SPAWNCEILING", "SPAWNCEILING" },
-    { kMF_NOGRAVITY, "NOGRAVITY", "NOGRAVITY" },
-    { kMF_DROPOFF, "DROPOFF", "DROPOFF" },
-    { kMF_PICKUP, "PICKUP", "PICKUP" },
-    { kMF_NOCLIP, "NOCLIP", "NOCLIP" },
-    { kMF_SLIDE, "SLIDE", "SLIDER" },
-    { kMF_FLOAT, "FLOAT", "FLOAT" },
-    { kMF_TELEPORT, "TELEPORT", "TELEPORT" },
-    { kMF_MISSILE, "MISSILE", "MISSILE" },
-    { kMF_DROPPED, "DROPPED", "DROPPED" },
-    { kMF_SHADOW, "SHADOW", "FUZZY" },
-    { kMF_NOBLOOD, "NOBLOOD", "DAMAGESMOKE" },
-    { kMF_CORPSE, "CORPSE", "CORPSE" },
-    { 0, "INFLOAT", nullptr },
-    { kMF_COUNTKILL, "COUNTKILL", "COUNT_AS_KILL" },
-    { kMF_COUNTITEM, "COUNTITEM", "COUNT_AS_ITEM" },
-    { kMF_SKULLFLY, "SKULLFLY", "SKULLFLY" },
-    { kMF_NOTDMATCH, "NOTDMATCH", "NODEATHMATCH" },
-    { kMF_TRANSLATION1, "TRANSLATION1", nullptr },
-    { kMF_TRANSLATION2, "TRANSLATION2", nullptr },
-    { kMF_TRANSLATION1, "TRANSLATION", nullptr },  // bug compat
-    { kMF_TOUCHY, "TOUCHY", "TOUCHY" },
-    { kMF_BOUNCES, "BOUNCES", "BOUNCE" },
-    { kMF_FRIEND, "FRIEND", nullptr },
-    { kMF_TRANSLUCENT, "TRANSLUCENT", nullptr },
-    { kMF_TRANSLUCENT, "TRANSLUC50", nullptr },
+    {kMF_SPECIAL, "SPECIAL", "SPECIAL"},
+    {kMF_SOLID, "SOLID", "SOLID"},
+    {kMF_SHOOTABLE, "SHOOTABLE", "SHOOTABLE"},
+    {kMF_NOSECTOR, "NOSECTOR", "NOSECTOR"},
+    {kMF_NOBLOCKMAP, "NOBLOCKMAP", "NOBLOCKMAP"},
+    {kMF_AMBUSH, "AMBUSH", "AMBUSH"},
+    {0, "JUSTHIT", nullptr},
+    {0, "JUSTATTACKED", nullptr},
+    {kMF_SPAWNCEILING, "SPAWNCEILING", "SPAWNCEILING"},
+    {kMF_NOGRAVITY, "NOGRAVITY", "NOGRAVITY"},
+    {kMF_DROPOFF, "DROPOFF", "DROPOFF"},
+    {kMF_PICKUP, "PICKUP", "PICKUP"},
+    {kMF_NOCLIP, "NOCLIP", "NOCLIP"},
+    {kMF_SLIDE, "SLIDE", "SLIDER"},
+    {kMF_FLOAT, "FLOAT", "FLOAT"},
+    {kMF_TELEPORT, "TELEPORT", "TELEPORT"},
+    {kMF_MISSILE, "MISSILE", "MISSILE"},
+    {kMF_DROPPED, "DROPPED", "DROPPED"},
+    {kMF_SHADOW, "SHADOW", "FUZZY"},
+    {kMF_NOBLOOD, "NOBLOOD", "DAMAGESMOKE"},
+    {kMF_CORPSE, "CORPSE", "CORPSE"},
+    {0, "INFLOAT", nullptr},
+    {kMF_COUNTKILL, "COUNTKILL", "COUNT_AS_KILL"},
+    {kMF_COUNTITEM, "COUNTITEM", "COUNT_AS_ITEM"},
+    {kMF_SKULLFLY, "SKULLFLY", "SKULLFLY"},
+    {kMF_NOTDMATCH, "NOTDMATCH", "NODEATHMATCH"},
+    {kMF_TRANSLATION1, "TRANSLATION1", nullptr},
+    {kMF_TRANSLATION2, "TRANSLATION2", nullptr},
+    {kMF_TRANSLATION1, "TRANSLATION", nullptr}, // bug compat
+    {kMF_TOUCHY, "TOUCHY", "TOUCHY"},
+    {kMF_BOUNCES, "BOUNCES", "BOUNCE"},
+    {kMF_FRIEND, "FRIEND", nullptr},
+    {kMF_TRANSLUCENT, "TRANSLUCENT", nullptr},
+    {kMF_TRANSLUCENT, "TRANSLUC50", nullptr},
     // BOOM and MBF flags...
     //{ kMF_STEALTH,      "STEALTH",       "STEALTH" },
 
-    { kMF_UNUSED1, "UNUSED1", nullptr },
-    { kMF_UNUSED2, "UNUSED2", nullptr },
-    { kMF_UNUSED3, "UNUSED3", nullptr },
-    { kMF_UNUSED4, "UNUSED4", nullptr },
+    {kMF_UNUSED1, "UNUSED1", nullptr},
+    {kMF_UNUSED2, "UNUSED2", nullptr},
+    {kMF_UNUSED3, "UNUSED3", nullptr},
+    {kMF_UNUSED4, "UNUSED4", nullptr},
 
-    { 0, nullptr, nullptr }  // End sentinel
+    {0, nullptr, nullptr} // End sentinel
 };
 
 const FlagName mbf21flag_list[] = {
-    { kMBF21_LOGRAV, "LOGRAV", "LOGRAV" },
-    { kMBF21_DMGIGNORED, "DMGIGNORED", "NEVERTARGETED" },
-    { kMBF21_NORADIUSDMG, "NORADIUSDMG", "EXPLODE_IMMUNE" },
-    { kMBF21_HIGHERMPROB, "HIGHERMPROB",
-      "TRIGGER_HAPPY" },  // FIXME: not quite the same
-    { kMBF21_RANGEHALF, "RANGEHALF", "TRIGGER_HAPPY" },
-    { kMBF21_NOTHRESHOLD, "NOTHRESHOLD", "NOGRUDGE" },
-    { kMBF21_BOSS, "BOSS", "BOSSMAN" },
-    { kMBF21_RIP, "RIP", "TUNNEL" },
-    { kMBF21_FULLVOLSOUNDS, "FULLVOLSOUNDS", "ALWAYS_LOUD" },
+    {kMBF21_LOGRAV, "LOGRAV", "LOGRAV"},
+    {kMBF21_DMGIGNORED, "DMGIGNORED", "NEVERTARGETED"},
+    {kMBF21_NORADIUSDMG, "NORADIUSDMG", "EXPLODE_IMMUNE"},
+    {kMBF21_HIGHERMPROB, "HIGHERMPROB", "TRIGGER_HAPPY"}, // FIXME: not quite the same
+    {kMBF21_RANGEHALF, "RANGEHALF", "TRIGGER_HAPPY"},
+    {kMBF21_NOTHRESHOLD, "NOTHRESHOLD", "NOGRUDGE"},
+    {kMBF21_BOSS, "BOSS", "BOSSMAN"},
+    {kMBF21_RIP, "RIP", "TUNNEL"},
+    {kMBF21_FULLVOLSOUNDS, "FULLVOLSOUNDS", "ALWAYS_LOUD"},
 
     // flags which don't produce an Edge special
-    { kMBF21_SHORTMRANGE, "SHORTMRANGE", nullptr },
-    { kMBF21_LONGMELEE, "LONGMELEE", nullptr },
-    { kMBF21_FORCERADIUSDMG, "FORCERADIUSDMG", nullptr },
+    {kMBF21_SHORTMRANGE, "SHORTMRANGE", nullptr},
+    {kMBF21_LONGMELEE, "LONGMELEE", nullptr},
+    {kMBF21_FORCERADIUSDMG, "FORCERADIUSDMG", nullptr},
 
-    { kMBF21_MAP07BOSS1, "MAP07BOSS1", nullptr },
-    { kMBF21_MAP07BOSS2, "MAP07BOSS2", nullptr },
-    { kMBF21_E1M8BOSS, "E1M8BOSS", nullptr },
-    { kMBF21_E2M8BOSS, "E2M8BOSS", nullptr },
-    { kMBF21_E3M8BOSS, "E3M8BOSS", nullptr },
-    { kMBF21_E4M6BOSS, "E4M6BOSS", nullptr },
-    { kMBF21_E4M8BOSS, "E4M8BOSS", nullptr },
+    {kMBF21_MAP07BOSS1, "MAP07BOSS1", nullptr},
+    {kMBF21_MAP07BOSS2, "MAP07BOSS2", nullptr},
+    {kMBF21_E1M8BOSS, "E1M8BOSS", nullptr},
+    {kMBF21_E2M8BOSS, "E2M8BOSS", nullptr},
+    {kMBF21_E3M8BOSS, "E3M8BOSS", nullptr},
+    {kMBF21_E4M6BOSS, "E4M6BOSS", nullptr},
+    {kMBF21_E4M8BOSS, "E4M8BOSS", nullptr},
 
-    { 0, nullptr, nullptr }  // End sentinel
+    {0, nullptr, nullptr} // End sentinel
 };
 
 // these are extra flags we add for certain monsters.
 // they do not correspond to anything in DEHACKED / BEX / MBF21.
 const FlagName extflaglist[] = {
-    { kExtraFlagDisloyal, nullptr, "DISLOYAL,ATTACK_HURTS" },  // must be first
-    { kExtraFlagTriggerHappy, nullptr, "TRIGGER_HAPPY" },
-    { kExtraFlagBossMan, nullptr, "BOSSMAN" },
-    { kExtraFlagLoud, nullptr, "ALWAYS_LOUD" },
-    { kExtraFlagNoRaise, nullptr, "NO_RESURRECT" },
-    { kExtraFlagNoGrudge, nullptr, "NO_GRUDGE,NEVERTARGETED" },
-    { kExtraFlagNoItemBk, nullptr, "NO_RESPAWN" },
+    {kExtraFlagDisloyal, nullptr, "DISLOYAL,ATTACK_HURTS"}, // must be first
+    {kExtraFlagTriggerHappy, nullptr, "TRIGGER_HAPPY"},
+    {kExtraFlagBossMan, nullptr, "BOSSMAN"},
+    {kExtraFlagLoud, nullptr, "ALWAYS_LOUD"},
+    {kExtraFlagNoRaise, nullptr, "NO_RESURRECT"},
+    {kExtraFlagNoGrudge, nullptr, "NO_GRUDGE,NEVERTARGETED"},
+    {kExtraFlagNoItemBk, nullptr, "NO_RESPAWN"},
 
-    { 0, nullptr, nullptr }  // End sentinel
+    {0, nullptr, nullptr} // End sentinel
 };
 
 int ParseBits(const FlagName *list, char *bit_str)
@@ -797,8 +801,7 @@ int ParseBits(const FlagName *list, char *bit_str)
     // these delimiters are the same as what Boom/MBF uses
     static const char *delims = "+|, \t\f\r";
 
-    for (char *token = strtok(bit_str, delims); token != nullptr;
-         token       = strtok(nullptr, delims))
+    for (char *token = strtok(bit_str, delims); token != nullptr; token = strtok(nullptr, delims))
     {
         // tokens should be non-empty
         EPI_ASSERT(token[0] != 0);
@@ -810,9 +813,7 @@ int ParseBits(const FlagName *list, char *bit_str)
             if (sscanf(token, " %i ", &flags) == 1)
                 new_flags |= flags;
             else
-                LogDebug(
-                    "Dehacked: Warning - Line %d: unreadable BITS value: %s\n",
-                    patch::line_num, token);
+                LogDebug("Dehacked: Warning - Line %d: unreadable BITS value: %s\n", patch::line_num, token);
 
             continue;
         }
@@ -820,12 +821,12 @@ int ParseBits(const FlagName *list, char *bit_str)
         // find the name in the given list
         int i;
         for (i = 0; list[i].bex != nullptr; i++)
-            if (epi::StringCaseCompareASCII(token, list[i].bex) == 0) break;
+            if (epi::StringCaseCompareASCII(token, list[i].bex) == 0)
+                break;
 
         if (list[i].bex == nullptr)
         {
-            LogDebug("Dehacked: Warning - Line %d: unknown BITS mnemonic: %s\n",
-                     patch::line_num, token);
+            LogDebug("Dehacked: Warning - Line %d: unknown BITS mnemonic: %s\n", patch::line_num, token);
             continue;
         }
 
@@ -835,53 +836,61 @@ int ParseBits(const FlagName *list, char *bit_str)
     return new_flags;
 }
 
-bool CheckIsMonster(const DehackedMapObjectDefinition *info, int mt_num,
-                    int player, bool use_act_flags)
+bool CheckIsMonster(const DehackedMapObjectDefinition *info, int mt_num, int player, bool use_act_flags)
 {
-    if (player > 0) return false;
+    if (player > 0)
+        return false;
 
-    if (info->doomednum <= 0) return false;
+    if (info->doomednum <= 0)
+        return false;
 
-    if (info->name[0] == '*') return false;
+    if (info->name[0] == '*')
+        return false;
 
-    if (info->flags & kMF_COUNTKILL) return true;
+    if (info->flags & kMF_COUNTKILL)
+        return true;
 
-    if (info->flags & (kMF_SPECIAL | kMF_COUNTITEM)) return false;
+    if (info->flags & (kMF_SPECIAL | kMF_COUNTITEM))
+        return false;
 
     int score = 0;
 
     // values determined by statistical analysis of major DEH patches
     // (Standard DOOM, Batman, Mordeth, Wheel-of-Time, Osiris).
 
-    if (info->flags & kMF_SOLID) score += 25;
-    if (info->flags & kMF_SHOOTABLE) score += 72;
+    if (info->flags & kMF_SOLID)
+        score += 25;
+    if (info->flags & kMF_SHOOTABLE)
+        score += 72;
 
-    if (info->painstate) score += 91;
-    if (info->missilestate || info->meleestate) score += 91;
-    if (info->deathstate) score += 72;
-    if (info->raisestate) score += 31;
+    if (info->painstate)
+        score += 91;
+    if (info->missilestate || info->meleestate)
+        score += 91;
+    if (info->deathstate)
+        score += 72;
+    if (info->raisestate)
+        score += 31;
 
     if (use_act_flags)
     {
-        if (frames::act_flags & kActionFlagChase) score += 78;
-        if (frames::act_flags & kActionFlagFall) score += 61;
+        if (frames::act_flags & kActionFlagChase)
+            score += 78;
+        if (frames::act_flags & kActionFlagFall)
+            score += 61;
     }
 
-    if (info->speed > 0) score += 87;
+    if (info->speed > 0)
+        score += 87;
 
 #if (DEBUG_MONST)
-    Debug_PrintMsg(
-        "[%20.20s:%-4d] %c%c%c%c%c %c%c%c%c %c%c %d = %d\n",
-        GetMobjName(mt_num), info->doomednum,
-        (info->flags & kMF_SOLID) ? 'S' : '-',
-        (info->flags & kMF_SHOOTABLE) ? 'H' : '-',
-        (info->flags & kMF_FLOAT) ? 'F' : '-',
-        (info->flags & kMF_MISSILE) ? 'M' : '-',
-        (info->flags & kMF_NOBLOOD) ? 'B' : '-', (info->painstate) ? 'p' : '-',
-        (info->deathstate) ? 'd' : '-', (info->raisestate) ? 'r' : '-',
-        (info->missilestate || info->meleestate) ? 'm' : '-',
-        (frames::act_flags & AF_CHASER) ? 'C' : '-',
-        (frames::act_flags & AF_FALLER) ? 'F' : '-', info->speed, score);
+    Debug_PrintMsg("[%20.20s:%-4d] %c%c%c%c%c %c%c%c%c %c%c %d = %d\n", GetMobjName(mt_num), info->doomednum,
+                   (info->flags & kMF_SOLID) ? 'S' : '-', (info->flags & kMF_SHOOTABLE) ? 'H' : '-',
+                   (info->flags & kMF_FLOAT) ? 'F' : '-', (info->flags & kMF_MISSILE) ? 'M' : '-',
+                   (info->flags & kMF_NOBLOOD) ? 'B' : '-', (info->painstate) ? 'p' : '-',
+                   (info->deathstate) ? 'd' : '-', (info->raisestate) ? 'r' : '-',
+                   (info->missilestate || info->meleestate) ? 'm' : '-', (frames::act_flags & AF_CHASER) ? 'C' : '-',
+                   (frames::act_flags & AF_FALLER) ? 'F' : '-', info->speed, score);
 #endif
 
     return score >= (use_act_flags ? 370 : 300);
@@ -889,45 +898,45 @@ bool CheckIsMonster(const DehackedMapObjectDefinition *info, int mt_num,
 
 const char *GetExtFlags(int mt_num, int player)
 {
-    if (player > 0) return "D";
+    if (player > 0)
+        return "D";
 
     switch (mt_num)
     {
-        case kMT_INS:
-        case kMT_INV:
-            return "I";
+    case kMT_INS:
+    case kMT_INV:
+        return "I";
 
-        case kMT_POSSESSED:
-        case kMT_SHOTGUY:
-        case kMT_CHAINGUY:
-            return "D";
+    case kMT_POSSESSED:
+    case kMT_SHOTGUY:
+    case kMT_CHAINGUY:
+        return "D";
 
-        case kMT_SKULL:
-            return "DHM";
-        case kMT_UNDEAD:
-            return "H";
+    case kMT_SKULL:
+        return "DHM";
+    case kMT_UNDEAD:
+        return "H";
 
-        case kMT_VILE:
-            return "GR";
-        case kMT_CYBORG:
-            return "BHR";
-        case kMT_SPIDER:
-            return "BHR";
+    case kMT_VILE:
+        return "GR";
+    case kMT_CYBORG:
+        return "BHR";
+    case kMT_SPIDER:
+        return "BHR";
 
-        case kMT_BOSSSPIT:
-            return "B";
-        case kMT_BOSSBRAIN:
-            return "L";
+    case kMT_BOSSSPIT:
+        return "B";
+    case kMT_BOSSBRAIN:
+        return "L";
 
-        default:
-            break;
+    default:
+        break;
     }
 
     return "";
 }
 
-void AddOneFlag(const DehackedMapObjectDefinition *info, const char *name,
-                bool &got_a_flag)
+void AddOneFlag(const DehackedMapObjectDefinition *info, const char *name, bool &got_a_flag)
 {
     if (!got_a_flag)
     {
@@ -944,31 +953,35 @@ void AddOneFlag(const DehackedMapObjectDefinition *info, const char *name,
     wad::Printf("%s", name);
 }
 
-void HandleFlags(const DehackedMapObjectDefinition *info, int mt_num,
-                 int player)
+void HandleFlags(const DehackedMapObjectDefinition *info, int mt_num, int player)
 {
     int  i;
     int  cur_f      = info->flags;
     bool got_a_flag = false;
 
     // strangely absent from kMT_PLAYER
-    if (player) cur_f |= kMF_SLIDE;
+    if (player)
+        cur_f |= kMF_SLIDE;
 
     // this can cause EDGE 1.27 to crash
-    if (!player) cur_f &= ~kMF_PICKUP;
+    if (!player)
+        cur_f &= ~kMF_PICKUP;
 
     // EDGE requires teleportman in sector. (DOOM uses thinker list)
-    if (mt_num == kMT_TELEPORTMAN) cur_f &= ~kMF_NOSECTOR;
+    if (mt_num == kMT_TELEPORTMAN)
+        cur_f &= ~kMF_NOSECTOR;
 
     // special workaround for negative MASS values
-    if (info->mass < 0) cur_f |= kMF_SPAWNCEILING | kMF_NOGRAVITY;
+    if (info->mass < 0)
+        cur_f |= kMF_SPAWNCEILING | kMF_NOGRAVITY;
 
     bool is_monster     = CheckIsMonster(info, mt_num, player, true);
     bool force_disloyal = (is_monster && miscellaneous::monster_infight == 221);
 
     for (i = 0; flag_list[i].bex != nullptr; i++)
     {
-        if (0 == (cur_f & flag_list[i].flag)) continue;
+        if (0 == (cur_f & flag_list[i].flag))
+            continue;
 
         if (flag_list[i].conv != nullptr)
             AddOneFlag(info, flag_list[i].conv, got_a_flag);
@@ -980,7 +993,8 @@ void HandleFlags(const DehackedMapObjectDefinition *info, int mt_num,
     {
         char ch = (char)extflaglist[i].flag;
 
-        if (!strchr(eflags, ch)) continue;
+        if (!strchr(eflags, ch))
+            continue;
 
         if (ch == kExtraFlagDisloyal)
         {
@@ -995,7 +1009,8 @@ void HandleFlags(const DehackedMapObjectDefinition *info, int mt_num,
 
     for (i = 0; mbf21flag_list[i].bex != nullptr; i++)
     {
-        if (0 == (cur_f & mbf21flag_list[i].flag)) continue;
+        if (0 == (cur_f & mbf21flag_list[i].flag))
+            continue;
 
         if (mbf21flag_list[i].conv != nullptr)
             AddOneFlag(info, mbf21flag_list[i].conv, got_a_flag);
@@ -1003,13 +1018,16 @@ void HandleFlags(const DehackedMapObjectDefinition *info, int mt_num,
 
     cur_f = info->flags;
 
-    if (force_disloyal) AddOneFlag(info, extflaglist[0].conv, got_a_flag);
+    if (force_disloyal)
+        AddOneFlag(info, extflaglist[0].conv, got_a_flag);
 
-    if (is_monster) AddOneFlag(info, "MONSTER", got_a_flag);
+    if (is_monster)
+        AddOneFlag(info, "MONSTER", got_a_flag);
 
     AddOneFlag(info, "DEHACKED_COMPAT", got_a_flag);
 
-    if (got_a_flag) wad::Printf(";\n");
+    if (got_a_flag)
+        wad::Printf(";\n");
 
     if (cur_f & kMF_TRANSLATION)
     {
@@ -1021,9 +1039,15 @@ void HandleFlags(const DehackedMapObjectDefinition *info, int mt_num,
             wad::Printf("PALETTE_REMAP = PLAYER_DULL_RED;\n");
     }
 
-    if (cur_f & kMF_TRANSLUCENT) { wad::Printf("TRANSLUCENCY = 50%%;\n"); }
+    if (cur_f & kMF_TRANSLUCENT)
+    {
+        wad::Printf("TRANSLUCENCY = 50%%;\n");
+    }
 
-    if ((cur_f & kMF_FRIEND) && !player) { wad::Printf("SIDE = 16777215;\n"); }
+    if ((cur_f & kMF_FRIEND) && !player)
+    {
+        wad::Printf("SIDE = 16777215;\n");
+    }
 }
 
 void FixHeights()
@@ -1036,17 +1060,21 @@ void FixHeights()
         EPI_ASSERT(mt_num < kTotalDehackedMapObjectTypesPortCompatibility);
 
         // if the thing was not modified, nothing to do here
-        if (mt_num >= (int)new_mobjinfo.size()) continue;
+        if (mt_num >= (int)new_mobjinfo.size())
+            continue;
 
         DehackedMapObjectDefinition *info = new_mobjinfo[mt_num];
-        if (info == nullptr) continue;
+        if (info == nullptr)
+            continue;
 
         /* Kludge for Aliens TC (and others) that put these things on
          * the ceiling -- they need the 16 height for correct display,
          */
-        if (info->flags & kMF_SPAWNCEILING) continue;
+        if (info->flags & kMF_SPAWNCEILING)
+            continue;
 
-        if (info->height != 16 * kFracUnit) continue;
+        if (info->height != 16 * kFracUnit)
+            continue;
 
         info->height = new_h * kFracUnit;
     }
@@ -1054,74 +1082,75 @@ void FixHeights()
 
 void CollectTheCast()
 {
-    for (int i = 0; i < kCastMaximum; i++) cast_mobjs[i] = -1;
+    for (int i = 0; i < kCastMaximum; i++)
+        cast_mobjs[i] = -1;
 
-    for (int mt_num = 0; mt_num < kTotalDehackedMapObjectTypesPortCompatibility;
-         mt_num++)
+    for (int mt_num = 0; mt_num < kTotalDehackedMapObjectTypesPortCompatibility; mt_num++)
     {
         int order = 0;
 
         // cast objects are required to have CHASE and DEATH states
         const DehackedMapObjectDefinition *info = NewMobjElseOld(mt_num);
 
-        if (info->seestate == kS_NULL || info->deathstate == kS_NULL) continue;
+        if (info->seestate == kS_NULL || info->deathstate == kS_NULL)
+            continue;
 
         switch (mt_num)
         {
-            case kMT_PLAYER:
-                order = 1;
-                break;
-            case kMT_POSSESSED:
-                order = 2;
-                break;
-            case kMT_SHOTGUY:
-                order = 3;
-                break;
-            case kMT_CHAINGUY:
-                order = 4;
-                break;
-            case kMT_TROOP:
-                order = 5;
-                break;
-            case kMT_SERGEANT:
-                order = 6;
-                break;
-            case kMT_SKULL:
-                order = 7;
-                break;
-            case kMT_HEAD:
-                order = 8;
-                break;
-            case kMT_KNIGHT:
-                order = 9;
-                break;
-            case kMT_BRUISER:
-                order = 10;
-                break;
-            case kMT_BABY:
-                order = 11;
-                break;
-            case kMT_PAIN:
-                order = 12;
-                break;
-            case kMT_UNDEAD:
-                order = 13;
-                break;
-            case kMT_FATSO:
-                order = 14;
-                break;
-            case kMT_VILE:
-                order = 15;
-                break;
-            case kMT_SPIDER:
-                order = 16;
-                break;
-            case kMT_CYBORG:
-                order = 17;
-                break;
+        case kMT_PLAYER:
+            order = 1;
+            break;
+        case kMT_POSSESSED:
+            order = 2;
+            break;
+        case kMT_SHOTGUY:
+            order = 3;
+            break;
+        case kMT_CHAINGUY:
+            order = 4;
+            break;
+        case kMT_TROOP:
+            order = 5;
+            break;
+        case kMT_SERGEANT:
+            order = 6;
+            break;
+        case kMT_SKULL:
+            order = 7;
+            break;
+        case kMT_HEAD:
+            order = 8;
+            break;
+        case kMT_KNIGHT:
+            order = 9;
+            break;
+        case kMT_BRUISER:
+            order = 10;
+            break;
+        case kMT_BABY:
+            order = 11;
+            break;
+        case kMT_PAIN:
+            order = 12;
+            break;
+        case kMT_UNDEAD:
+            order = 13;
+            break;
+        case kMT_FATSO:
+            order = 14;
+            break;
+        case kMT_VILE:
+            order = 15;
+            break;
+        case kMT_SPIDER:
+            order = 16;
+            break;
+        case kMT_CYBORG:
+            order = 17;
+            break;
 
-            default:
-                continue;
+        default:
+            continue;
         }
 
         cast_mobjs[order] = mt_num;
@@ -1148,35 +1177,28 @@ void HandleSounds(const DehackedMapObjectDefinition *info, int mt_num)
     if (info->activesound != ksfx_None)
     {
         if (info->flags & kMF_PICKUP)
-            wad::Printf("PICKUP_SOUND = \"%s\";\n",
-                        sounds::GetSound(info->activesound));
+            wad::Printf("PICKUP_SOUND = \"%s\";\n", sounds::GetSound(info->activesound));
         else
-            wad::Printf("ACTIVE_SOUND = \"%s\";\n",
-                        sounds::GetSound(info->activesound));
+            wad::Printf("ACTIVE_SOUND = \"%s\";\n", sounds::GetSound(info->activesound));
     }
     else if (mt_num == kMT_TELEPORTMAN)
         wad::Printf("ACTIVE_SOUND = \"%s\";\n", sounds::GetSound(ksfx_telept));
 
     if (info->seesound != ksfx_None)
-        wad::Printf("SIGHTING_SOUND = \"%s\";\n",
-                    sounds::GetSound(info->seesound));
+        wad::Printf("SIGHTING_SOUND = \"%s\";\n", sounds::GetSound(info->seesound));
     else if (mt_num == kMT_BOSSSPIT)
-        wad::Printf("SIGHTING_SOUND = \"%s\";\n",
-                    sounds::GetSound(ksfx_bossit));
+        wad::Printf("SIGHTING_SOUND = \"%s\";\n", sounds::GetSound(ksfx_bossit));
 
     if (info->attacksound != ksfx_None && info->meleestate != kS_NULL)
     {
-        wad::Printf("STARTCOMBAT_SOUND = \"%s\";\n",
-                    sounds::GetSound(info->attacksound));
+        wad::Printf("STARTCOMBAT_SOUND = \"%s\";\n", sounds::GetSound(info->attacksound));
     }
 
     if (info->painsound != ksfx_None)
-        wad::Printf("PAIN_SOUND = \"%s\";\n",
-                    sounds::GetSound(info->painsound));
+        wad::Printf("PAIN_SOUND = \"%s\";\n", sounds::GetSound(info->painsound));
 
     if (info->deathsound != ksfx_None)
-        wad::Printf("DEATH_SOUND = \"%s\";\n",
-                    sounds::GetSound(info->deathsound));
+        wad::Printf("DEATH_SOUND = \"%s\";\n", sounds::GetSound(info->deathsound));
 
     if (info->rip_sound != ksfx_None)
         wad::Printf("RIP_SOUND = \"%s\";\n", sounds::GetSound(info->rip_sound));
@@ -1192,8 +1214,7 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
     {
         wad::Printf("TRANSLUCENCY = 50%%;\n");
         wad::Printf("\n");
-        wad::Printf("STATES(IDLE) = %s:A:-1:NORMAL:TRANS_SET(0%%);\n",
-                    sprites::GetSprite(kSPR_TFOG));
+        wad::Printf("STATES(IDLE) = %s:A:-1:NORMAL:TRANS_SET(0%%);\n", sprites::GetSprite(kSPR_TFOG));
 
         // EDGE doesn't use the TELEPORT_FOG object, instead it uses
         // the CHASE states of the TELEPORT_FLASH object (i.e. the one
@@ -1234,14 +1255,12 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
         // with teleport target (handled above) and brain spit targets.
 
         if (mt_num != kMT_BOSSTARGET)
-            LogDebug("Dehacked: Warning - Mobj [%s:%d] has no states.\n",
-                     GetMobjName(mt_num), info->doomednum);
+            LogDebug("Dehacked: Warning - Mobj [%s:%d] has no states.\n", GetMobjName(mt_num), info->doomednum);
 
         wad::Printf("TRANSLUCENCY = 0%%;\n");
 
         wad::Printf("\n");
-        wad::Printf("STATES(IDLE) = %s:A:-1:NORMAL:NOTHING;\n",
-                    sprites::GetSprite(kSPR_CAND));
+        wad::Printf("STATES(IDLE) = %s:A:-1:NORMAL:NOTHING;\n", sprites::GetSprite(kSPR_CAND));
 
         return;
     }
@@ -1277,16 +1296,15 @@ struct PlayerInfo
     const char *remap;
 };
 
-const PlayerInfo player_info[NUMPLAYERS] = {
-    { "OUR_HERO", 1, "PLAYER_GREEN" },    { "PLAYER2", 2, "PLAYER_DK_GREY" },
-    { "PLAYER3", 3, "PLAYER_BROWN" },     { "PLAYER4", 4, "PLAYER_DULL_RED" },
-    { "PLAYER5", 4001, "PLAYER_ORANGE" }, { "PLAYER6", 4002, "PLAYER_LT_GREY" },
-    { "PLAYER7", 4003, "PLAYER_LT_RED" }, { "PLAYER8", 4004, "PLAYER_PINK" }
-};
+const PlayerInfo player_info[NUMPLAYERS] = {{"OUR_HERO", 1, "PLAYER_GREEN"},    {"PLAYER2", 2, "PLAYER_DK_GREY"},
+                                            {"PLAYER3", 3, "PLAYER_BROWN"},     {"PLAYER4", 4, "PLAYER_DULL_RED"},
+                                            {"PLAYER5", 4001, "PLAYER_ORANGE"}, {"PLAYER6", 4002, "PLAYER_LT_GREY"},
+                                            {"PLAYER7", 4003, "PLAYER_LT_RED"}, {"PLAYER8", 4004, "PLAYER_PINK"}};
 
 void HandlePlayer(const DehackedMapObjectDefinition *info, int player)
 {
-    if (player <= 0) return;
+    if (player <= 0)
+        return;
 
     EPI_ASSERT(player <= NUMPLAYERS);
 
@@ -1330,95 +1348,86 @@ struct PickupItem
 
 const PickupItem pickup_item[] = {
     // Health & Armor....
-    { kSPR_BON1, "HEALTH", 2, 1, 200, "GotHealthPotion", ksfx_itemup },
-    { kSPR_STIM, "HEALTH", 2, 10, 100, "GotStim", ksfx_itemup },
-    { kSPR_MEDI, "HEALTH", 2, 25, 100, "GotMedi", ksfx_itemup },
-    { kSPR_BON2, "GREEN_ARMOUR", 2, 1, 200, "GotArmourHelmet", ksfx_itemup },
-    { kSPR_ARM1, "GREEN_ARMOUR", 2, 100, 100, "GotArmour", ksfx_itemup },
-    { kSPR_ARM2, "BLUE_ARMOUR", 2, 200, 200, "GotMegaArmour", ksfx_itemup },
+    {kSPR_BON1, "HEALTH", 2, 1, 200, "GotHealthPotion", ksfx_itemup},
+    {kSPR_STIM, "HEALTH", 2, 10, 100, "GotStim", ksfx_itemup},
+    {kSPR_MEDI, "HEALTH", 2, 25, 100, "GotMedi", ksfx_itemup},
+    {kSPR_BON2, "GREEN_ARMOUR", 2, 1, 200, "GotArmourHelmet", ksfx_itemup},
+    {kSPR_ARM1, "GREEN_ARMOUR", 2, 100, 100, "GotArmour", ksfx_itemup},
+    {kSPR_ARM2, "BLUE_ARMOUR", 2, 200, 200, "GotMegaArmour", ksfx_itemup},
 
     // Keys....
-    { kSPR_BKEY, "KEY_BLUECARD", 0, 0, 0, "GotBlueCard", ksfx_itemup },
-    { kSPR_YKEY, "KEY_YELLOWCARD", 0, 0, 0, "GotYellowCard", ksfx_itemup },
-    { kSPR_RKEY, "KEY_REDCARD", 0, 0, 0, "GotRedCard", ksfx_itemup },
-    { kSPR_BSKU, "KEY_BLUESKULL", 0, 0, 0, "GotBlueSkull", ksfx_itemup },
-    { kSPR_YSKU, "KEY_YELLOWSKULL", 0, 0, 0, "GotYellowSkull", ksfx_itemup },
-    { kSPR_RSKU, "KEY_REDSKULL", 0, 0, 0, "GotRedSkull", ksfx_itemup },
+    {kSPR_BKEY, "KEY_BLUECARD", 0, 0, 0, "GotBlueCard", ksfx_itemup},
+    {kSPR_YKEY, "KEY_YELLOWCARD", 0, 0, 0, "GotYellowCard", ksfx_itemup},
+    {kSPR_RKEY, "KEY_REDCARD", 0, 0, 0, "GotRedCard", ksfx_itemup},
+    {kSPR_BSKU, "KEY_BLUESKULL", 0, 0, 0, "GotBlueSkull", ksfx_itemup},
+    {kSPR_YSKU, "KEY_YELLOWSKULL", 0, 0, 0, "GotYellowSkull", ksfx_itemup},
+    {kSPR_RSKU, "KEY_REDSKULL", 0, 0, 0, "GotRedSkull", ksfx_itemup},
 
     // Ammo....
-    { kSPR_CLIP, "BULLETS", 1, 10, 0, "GotClip", ksfx_itemup },
-    { kSPR_AMMO, "BULLETS", 1, 50, 0, "GotClipBox", ksfx_itemup },
-    { kSPR_SHEL, "SHELLS", 1, 4, 0, "GotShells", ksfx_itemup },
-    { kSPR_SBOX, "SHELLS", 1, 20, 0, "GotShellBox", ksfx_itemup },
-    { kSPR_ROCK, "ROCKETS", 1, 1, 0, "GotRocket", ksfx_itemup },
-    { kSPR_BROK, "ROCKETS", 1, 5, 0, "GotRocketBox", ksfx_itemup },
-    { kSPR_CELL, "CELLS", 1, 20, 0, "GotCell", ksfx_itemup },
-    { kSPR_CELP, "CELLS", 1, 100, 0, "GotCellPack", ksfx_itemup },
+    {kSPR_CLIP, "BULLETS", 1, 10, 0, "GotClip", ksfx_itemup},
+    {kSPR_AMMO, "BULLETS", 1, 50, 0, "GotClipBox", ksfx_itemup},
+    {kSPR_SHEL, "SHELLS", 1, 4, 0, "GotShells", ksfx_itemup},
+    {kSPR_SBOX, "SHELLS", 1, 20, 0, "GotShellBox", ksfx_itemup},
+    {kSPR_ROCK, "ROCKETS", 1, 1, 0, "GotRocket", ksfx_itemup},
+    {kSPR_BROK, "ROCKETS", 1, 5, 0, "GotRocketBox", ksfx_itemup},
+    {kSPR_CELL, "CELLS", 1, 20, 0, "GotCell", ksfx_itemup},
+    {kSPR_CELP, "CELLS", 1, 100, 0, "GotCellPack", ksfx_itemup},
 
     // Powerups....
-    { kSPR_SOUL, "HEALTH", 2, 100, 200, "GotSoul", ksfx_getpow },
-    { kSPR_PMAP, "POWERUP_AUTOMAP", 0, 0, 0, "GotMap", ksfx_getpow },
-    { kSPR_PINS, "POWERUP_PARTINVIS", 2, 100, 100, "GotInvis", ksfx_getpow },
-    { kSPR_PINV, "POWERUP_INVULNERABLE", 2, 30, 30, "GotInvulner",
-      ksfx_getpow },
-    { kSPR_PVIS, "POWERUP_LIGHTGOGGLES", 2, 120, 120, "GotVisor", ksfx_getpow },
-    { kSPR_SUIT, "POWERUP_ACIDSUIT", 2, 60, 60, "GotSuit", ksfx_getpow },
+    {kSPR_SOUL, "HEALTH", 2, 100, 200, "GotSoul", ksfx_getpow},
+    {kSPR_PMAP, "POWERUP_AUTOMAP", 0, 0, 0, "GotMap", ksfx_getpow},
+    {kSPR_PINS, "POWERUP_PARTINVIS", 2, 100, 100, "GotInvis", ksfx_getpow},
+    {kSPR_PINV, "POWERUP_INVULNERABLE", 2, 30, 30, "GotInvulner", ksfx_getpow},
+    {kSPR_PVIS, "POWERUP_LIGHTGOGGLES", 2, 120, 120, "GotVisor", ksfx_getpow},
+    {kSPR_SUIT, "POWERUP_ACIDSUIT", 2, 60, 60, "GotSuit", ksfx_getpow},
 
     // Weapons....
-    { kSPR_CSAW, "CHAINSAW", 0, 0, 0, "GotChainSaw", ksfx_wpnup },
-    { kSPR_SHOT, "SHOTGUN,SHELLS", 1, 8, 0, "GotShotGun", ksfx_wpnup },
-    { kSPR_SGN2, "SUPERSHOTGUN,SHELLS", 1, 8, 0, "GotDoubleBarrel",
-      ksfx_wpnup },
-    { kSPR_MGUN, "CHAINGUN,BULLETS", 1, 20, 0, "GotChainGun", ksfx_wpnup },
-    { kSPR_LAUN, "ROCKET_LAUNCHER,ROCKETS", 1, 2, 0, "GotRocketLauncher",
-      ksfx_wpnup },
-    { kSPR_PLAS, "PLASMA_RIFLE,CELLS", 1, 40, 0, "GotPlasmaGun", ksfx_wpnup },
-    { kSPR_BFUG, "BFG9000,CELLS", 1, 40, 0, "GotBFG", ksfx_wpnup },
+    {kSPR_CSAW, "CHAINSAW", 0, 0, 0, "GotChainSaw", ksfx_wpnup},
+    {kSPR_SHOT, "SHOTGUN,SHELLS", 1, 8, 0, "GotShotGun", ksfx_wpnup},
+    {kSPR_SGN2, "SUPERSHOTGUN,SHELLS", 1, 8, 0, "GotDoubleBarrel", ksfx_wpnup},
+    {kSPR_MGUN, "CHAINGUN,BULLETS", 1, 20, 0, "GotChainGun", ksfx_wpnup},
+    {kSPR_LAUN, "ROCKET_LAUNCHER,ROCKETS", 1, 2, 0, "GotRocketLauncher", ksfx_wpnup},
+    {kSPR_PLAS, "PLASMA_RIFLE,CELLS", 1, 40, 0, "GotPlasmaGun", ksfx_wpnup},
+    {kSPR_BFUG, "BFG9000,CELLS", 1, 40, 0, "GotBFG", ksfx_wpnup},
 
-    { -1, nullptr, 0, 0, 0, nullptr }
-};
+    {-1, nullptr, 0, 0, 0, nullptr}};
 
 void HandleItem(const DehackedMapObjectDefinition *info, int mt_num)
 {
-    if (!(info->flags & kMF_SPECIAL)) return;
+    if (!(info->flags & kMF_SPECIAL))
+        return;
 
-    if (info->spawnstate == kS_NULL) return;
+    if (info->spawnstate == kS_NULL)
+        return;
 
     int spr_num = frames::GetStateSprite(info->spawnstate);
 
     // special cases:
 
-    if (spr_num == kSPR_PSTR)  // Berserk
+    if (spr_num == kSPR_PSTR) // Berserk
     {
-        wad::Printf(
-            "PICKUP_BENEFIT = POWERUP_BERSERK(60:60),HEALTH(100:100);\n");
+        wad::Printf("PICKUP_BENEFIT = POWERUP_BERSERK(60:60),HEALTH(100:100);\n");
         wad::Printf("PICKUP_MESSAGE = GotBerserk;\n");
         wad::Printf("PICKUP_SOUND = %s;\n", sounds::GetSound(ksfx_getpow));
         wad::Printf("PICKUP_EFFECT = SWITCH_WEAPON(FIST);\n");
         return;
     }
-    else if (spr_num == kSPR_MEGA)  // Megasphere
+    else if (spr_num == kSPR_MEGA) // Megasphere
     {
         wad::Printf("PICKUP_BENEFIT = ");
-        wad::Printf("HEALTH(%d:%d),", miscellaneous::mega_health,
-                    miscellaneous::mega_health);
-        wad::Printf("BLUE_ARMOUR(%d:%d);\n", miscellaneous::max_armour,
-                    miscellaneous::max_armour);
+        wad::Printf("HEALTH(%d:%d),", miscellaneous::mega_health, miscellaneous::mega_health);
+        wad::Printf("BLUE_ARMOUR(%d:%d);\n", miscellaneous::max_armour, miscellaneous::max_armour);
         wad::Printf("PICKUP_MESSAGE = GotMega;\n");
         wad::Printf("PICKUP_SOUND = %s;\n", sounds::GetSound(ksfx_getpow));
         return;
     }
-    else if (spr_num == kSPR_BPAK)  // Backpack full of AMMO
+    else if (spr_num == kSPR_BPAK) // Backpack full of AMMO
     {
         wad::Printf("PICKUP_BENEFIT = \n");
-        wad::Printf("    BULLETS.LIMIT(%d), ",
-                    2 * ammo::player_max[kAmmoTypeBullet]);
-        wad::Printf("    SHELLS.LIMIT(%d),\n",
-                    2 * ammo::player_max[kAmmoTypeShell]);
-        wad::Printf("    ROCKETS.LIMIT(%d), ",
-                    2 * ammo::player_max[kAmmoTypeRocket]);
-        wad::Printf("    CELLS.LIMIT(%d),\n",
-                    2 * ammo::player_max[kAmmoTypeCell]);
+        wad::Printf("    BULLETS.LIMIT(%d), ", 2 * ammo::player_max[kAmmoTypeBullet]);
+        wad::Printf("    SHELLS.LIMIT(%d),\n", 2 * ammo::player_max[kAmmoTypeShell]);
+        wad::Printf("    ROCKETS.LIMIT(%d), ", 2 * ammo::player_max[kAmmoTypeRocket]);
+        wad::Printf("    CELLS.LIMIT(%d),\n", 2 * ammo::player_max[kAmmoTypeCell]);
         wad::Printf("    BULLETS(10), SHELLS(4), ROCKETS(1), CELLS(20);\n");
         wad::Printf("PICKUP_MESSAGE = GotBackpack;\n");
         wad::Printf("PICKUP_SOUND = %s;\n", sounds::GetSound(ksfx_itemup));
@@ -1429,16 +1438,16 @@ void HandleItem(const DehackedMapObjectDefinition *info, int mt_num)
 
     for (i = 0; pickup_item[i].benefit != nullptr; i++)
     {
-        if (spr_num == pickup_item[i].spr_num) break;
+        if (spr_num == pickup_item[i].spr_num)
+            break;
     }
 
     const PickupItem *pu = pickup_item + i;
 
-    if (pu->benefit == nullptr)  // not found
+    if (pu->benefit == nullptr) // not found
     {
-        LogDebug(
-            "Dehacked: Warning - Unknown pickup sprite \"%s\" for item [%s]\n",
-            sprites::GetOriginalName(spr_num), GetMobjName(mt_num));
+        LogDebug("Dehacked: Warning - Unknown pickup sprite \"%s\" for item [%s]\n", sprites::GetOriginalName(spr_num),
+                 GetMobjName(mt_num));
         return;
     }
 
@@ -1449,63 +1458,63 @@ void HandleItem(const DehackedMapObjectDefinition *info, int mt_num)
 
     switch (spr_num)
     {
-        // Armor & health...
-        case kSPR_BON2:  // "ARMOUR_HELMET"
-            limit = miscellaneous::max_armour;
-            break;
+    // Armor & health...
+    case kSPR_BON2: // "ARMOUR_HELMET"
+        limit = miscellaneous::max_armour;
+        break;
 
-        case kSPR_ARM1:  // "GREEN_ARMOUR"
-            amount = miscellaneous::green_armour_class * 100;
-            limit  = miscellaneous::max_armour;
-            break;
+    case kSPR_ARM1: // "GREEN_ARMOUR"
+        amount = miscellaneous::green_armour_class * 100;
+        limit  = miscellaneous::max_armour;
+        break;
 
-        case kSPR_ARM2:  // "BLUE_ARMOUR"
-            amount = miscellaneous::blue_armour_class * 100;
-            limit  = miscellaneous::max_armour;
-            break;
+    case kSPR_ARM2: // "BLUE_ARMOUR"
+        amount = miscellaneous::blue_armour_class * 100;
+        limit  = miscellaneous::max_armour;
+        break;
 
-        case kSPR_BON1:                         // "HEALTH_POTION"
-            limit = miscellaneous::max_health;  // Note: *not* MEDIKIT
-            break;
+    case kSPR_BON1:                        // "HEALTH_POTION"
+        limit = miscellaneous::max_health; // Note: *not* MEDIKIT
+        break;
 
-        case kSPR_SOUL:  // "SOULSPHERE"
-            amount = miscellaneous::soul_health;
-            limit  = miscellaneous::soul_limit;
-            break;
+    case kSPR_SOUL:                        // "SOULSPHERE"
+        amount = miscellaneous::soul_health;
+        limit  = miscellaneous::soul_limit;
+        break;
 
-        // Ammo...
-        case kSPR_CLIP:  // "CLIP"
-        case kSPR_AMMO:  // "BOX_OF_BULLETS"
-            amount = ammo::pickups[kAmmoTypeBullet];
-            break;
+    // Ammo...
+    case kSPR_CLIP: // "CLIP"
+    case kSPR_AMMO: // "BOX_OF_BULLETS"
+        amount = ammo::pickups[kAmmoTypeBullet];
+        break;
 
-        case kSPR_SHEL:  // "SHELLS"
-        case kSPR_SBOX:  // "BOX_OF_SHELLS"
-            amount = ammo::pickups[kAmmoTypeShell];
-            break;
+    case kSPR_SHEL: // "SHELLS"
+    case kSPR_SBOX: // "BOX_OF_SHELLS"
+        amount = ammo::pickups[kAmmoTypeShell];
+        break;
 
-        case kSPR_ROCK:  // "ROCKET"
-        case kSPR_BROK:  // "BOX_OF_ROCKETS"
-            amount = ammo::pickups[kAmmoTypeRocket];
-            break;
+    case kSPR_ROCK: // "ROCKET"
+    case kSPR_BROK: // "BOX_OF_ROCKETS"
+        amount = ammo::pickups[kAmmoTypeRocket];
+        break;
 
-        case kSPR_CELL:  // "CELLS"
-        case kSPR_CELP:  // "CELL_PACK"
-            amount = ammo::pickups[kAmmoTypeCell];
-            break;
+    case kSPR_CELL: // "CELLS"
+    case kSPR_CELP: // "CELL_PACK"
+        amount = ammo::pickups[kAmmoTypeCell];
+        break;
 
-        default:
-            break;
+    default:
+        break;
     }
 
     // big boxes of ammo
-    if (spr_num == kSPR_AMMO || spr_num == kSPR_BROK || spr_num == kSPR_CELP ||
-        spr_num == kSPR_SBOX)
+    if (spr_num == kSPR_AMMO || spr_num == kSPR_BROK || spr_num == kSPR_CELP || spr_num == kSPR_SBOX)
     {
         amount *= 5;
     }
 
-    if (pu->par_num == 2 && amount > limit) amount = limit;
+    if (pu->par_num == 2 && amount > limit)
+        amount = limit;
 
     wad::Printf("PICKUP_BENEFIT = %s", pu->benefit);
 
@@ -1522,18 +1531,14 @@ void HandleItem(const DehackedMapObjectDefinition *info, int mt_num)
 }
 
 const char *cast_titles[17] = {
-    "OurHeroName",          "ZombiemanName",   "ShotgunGuyName",
-    "HeavyWeaponDudeName",  "ImpName",         "DemonName",
-    "LostSoulName",         "CacodemonName",   "HellKnightName",
-    "BaronOfHellName",      "ArachnotronName", "PainElementalName",
-    "RevenantName",         "MancubusName",    "ArchVileName",
-    "SpiderMastermindName", "CyberdemonName"
-};
+    "OurHeroName",  "ZombiemanName", "ShotgunGuyName", "HeavyWeaponDudeName",  "ImpName",         "DemonName",
+    "LostSoulName", "CacodemonName", "HellKnightName", "BaronOfHellName",      "ArachnotronName", "PainElementalName",
+    "RevenantName", "MancubusName",  "ArchVileName",   "SpiderMastermindName", "CyberdemonName"};
 
-void HandleCastOrder(const DehackedMapObjectDefinition *info, int mt_num,
-                     int player)
+void HandleCastOrder(const DehackedMapObjectDefinition *info, int mt_num, int player)
 {
-    if (player >= 2) return;
+    if (player >= 2)
+        return;
 
     int pos   = 1;
     int order = 1;
@@ -1541,14 +1546,16 @@ void HandleCastOrder(const DehackedMapObjectDefinition *info, int mt_num,
     for (; pos < kCastMaximum; pos++)
     {
         // ignore missing members (ensure real order is contiguous)
-        if (cast_mobjs[pos] < 0) continue;
+        if (cast_mobjs[pos] < 0)
+            continue;
 
-        if (cast_mobjs[pos] == mt_num) break;
+        if (cast_mobjs[pos] == mt_num)
+            break;
 
         order++;
     }
 
-    if (pos >= kCastMaximum)  // not found
+    if (pos >= kCastMaximum) // not found
         return;
 
     wad::Printf("CASTORDER = %d;\n", order);
@@ -1557,9 +1564,8 @@ void HandleCastOrder(const DehackedMapObjectDefinition *info, int mt_num,
 
 void HandleDropItem(const DehackedMapObjectDefinition *info, int mt_num);
 void HandleAttacks(const DehackedMapObjectDefinition *info, int mt_num);
-void ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num,
-                 int player, bool brain_missile, bool &got_one);
-}  // namespace things
+void ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num, int player, bool brain_missile, bool &got_one);
+} // namespace things
 
 void things::HandleDropItem(const DehackedMapObjectDefinition *info, int mt_num)
 {
@@ -1567,31 +1573,32 @@ void things::HandleDropItem(const DehackedMapObjectDefinition *info, int mt_num)
 
     if (info->dropped_item == 0)
     {
-        return;  // I think '0' is used to clear out normal drops
+        return; // I think '0' is used to clear out normal drops
     }
     else if (info->dropped_item - 1 > kMT_PLAYER)
     {
         item = GetMobjName(info->dropped_item - 1);
-        if (!item) return;
+        if (!item)
+            return;
     }
     else
     {
         switch (mt_num)
         {
-            case kMT_WOLFSS:
-            case kMT_POSSESSED:
-                item = "CLIP";
-                break;
+        case kMT_WOLFSS:
+        case kMT_POSSESSED:
+            item = "CLIP";
+            break;
 
-            case kMT_SHOTGUY:
-                item = "SHOTGUN";
-                break;
-            case kMT_CHAINGUY:
-                item = "CHAINGUN";
-                break;
+        case kMT_SHOTGUY:
+            item = "SHOTGUN";
+            break;
+        case kMT_CHAINGUY:
+            item = "CHAINGUN";
+            break;
 
-            default:
-                return;
+        default:
+            return;
         }
     }
 
@@ -1604,33 +1611,28 @@ void things::HandleAttacks(const DehackedMapObjectDefinition *info, int mt_num)
 {
     if (frames::attack_slot[frames::kAttackMethodRanged])
     {
-        wad::Printf("RANGE_ATTACK = %s;\n",
-                    frames::attack_slot[frames::kAttackMethodRanged]);
+        wad::Printf("RANGE_ATTACK = %s;\n", frames::attack_slot[frames::kAttackMethodRanged]);
         wad::Printf("MINATTACK_CHANCE = 25%%;\n");
     }
 
     if (frames::attack_slot[frames::kAttackMethodCombat])
     {
-        wad::Printf("CLOSE_ATTACK = %s;\n",
-                    frames::attack_slot[frames::kAttackMethodCombat]);
+        wad::Printf("CLOSE_ATTACK = %s;\n", frames::attack_slot[frames::kAttackMethodCombat]);
     }
     else if (info->meleestate && info->name[0] != '*')
     {
-        LogDebug(
-            "Dehacked: Warning - No close attack in melee states of [%s].\n",
-            GetMobjName(mt_num));
+        LogDebug("Dehacked: Warning - No close attack in melee states of [%s].\n", GetMobjName(mt_num));
         wad::Printf("CLOSE_ATTACK = DEMON_CLOSECOMBAT; // dummy attack\n");
     }
 
     if (frames::attack_slot[frames::kAttackMethodSpare])
-        wad::Printf("SPARE_ATTACK = %s;\n",
-                    frames::attack_slot[frames::kAttackMethodSpare]);
+        wad::Printf("SPARE_ATTACK = %s;\n", frames::attack_slot[frames::kAttackMethodSpare]);
 }
 
-void things::ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num,
-                         int player, bool brain_missile, bool &got_one)
+void things::ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num, int player, bool brain_missile,
+                         bool &got_one)
 {
-    if (info->name[0] == '*')  // attack
+    if (info->name[0] == '*') // attack
         return;
 
     if (!got_one)
@@ -1641,11 +1643,11 @@ void things::ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num,
 
     const char *ddf_name = GetMobjName(mt_num);
 
-    if (brain_missile) ddf_name = info->name;
+    if (brain_missile)
+        ddf_name = info->name;
 
     if (player > 0)
-        wad::Printf("[%s:%d]\n", player_info[player - 1].name,
-                    player_info[player - 1].num);
+        wad::Printf("[%s:%d]\n", player_info[player - 1].name, player_info[player - 1].num);
     else if (info->doomednum < 0)
         wad::Printf("[%s]\n", ddf_name);
     else
@@ -1657,8 +1659,7 @@ void things::ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num,
         wad::Printf("RADIUS = %1.1f;\n", FixedToFloat(info->radius));
 
     if (info->projectile_pass_height != 0)
-        wad::Printf("HEIGHT = %1.1f;\n",
-                    FixedToFloat(info->projectile_pass_height));
+        wad::Printf("HEIGHT = %1.1f;\n", FixedToFloat(info->projectile_pass_height));
     else
         wad::Printf("HEIGHT = %1.1f;\n", FixedToFloat(info->height));
 
@@ -1679,13 +1680,13 @@ void things::ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num,
     if (info->painchance >= 256)
         wad::Printf("PAINCHANCE = 100%%;\n");
     else if (info->painchance > 0)
-        wad::Printf("PAINCHANCE = %1.1f%%;\n",
-                    (float)info->painchance * 100.0 / 256.0);
+        wad::Printf("PAINCHANCE = %1.1f%%;\n", (float)info->painchance * 100.0 / 256.0);
 
     if (info->gib_health != 0)
         wad::Printf("GIB_HEALTH = %d;\n", info->gib_health);
 
-    if (mt_num == kMT_BOSSSPIT) wad::Printf("SPIT_SPOT = BRAIN_SPAWNSPOT;\n");
+    if (mt_num == kMT_BOSSSPIT)
+        wad::Printf("SPIT_SPOT = BRAIN_SPAWNSPOT;\n");
 
     HandleCastOrder(info, mt_num, player);
     HandleDropItem(info, mt_num);
@@ -1704,7 +1705,8 @@ void things::ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num,
     else if (frames::act_flags & kActionFlagDetonate)
         wad::Printf("EXPLODE_DAMAGE.VAL = %d;\n", info->damage);
 
-    if ((frames::act_flags & kActionFlagKeenDie)) rscript::MarkKeenDie(mt_num);
+    if ((frames::act_flags & kActionFlagKeenDie))
+        rscript::MarkKeenDie(mt_num);
 
     wad::Printf("\n");
 }
@@ -1732,7 +1734,8 @@ void things::ConvertTHING(void)
     {
         const DehackedMapObjectDefinition *info = new_mobjinfo[i];
 
-        if (info == nullptr) continue;
+        if (info == nullptr)
+            continue;
 
         if (i == kMT_PLAYER)
         {
@@ -1746,9 +1749,11 @@ void things::ConvertTHING(void)
     }
 
     // TODO we don't always need this, figure out WHEN WE DO
-    if (true) ConvertMobj(&brain_explode_mobj, kMT_ROCKET, 0, true, got_one);
+    if (true)
+        ConvertMobj(&brain_explode_mobj, kMT_ROCKET, 0, true, got_one);
 
-    if (got_one) FinishLump();
+    if (got_one)
+        FinishLump();
 }
 
 void things::ConvertATK()
@@ -1766,16 +1771,19 @@ void things::ConvertATK()
     {
         const DehackedMapObjectDefinition *info = new_mobjinfo[i];
 
-        if (info == nullptr) continue;
+        if (info == nullptr)
+            continue;
 
         Attacks::ConvertAttack(info, i, false);
 
-        if (i == kMT_ROCKET) Attacks::ConvertAttack(info, i, true);
+        if (i == kMT_ROCKET)
+            Attacks::ConvertAttack(info, i, true);
     }
 
     Attacks::CheckPainElemental();
 
-    if (Attacks::got_one) Attacks::FinishLump();
+    if (Attacks::got_one)
+        Attacks::FinishLump();
 }
 
 //------------------------------------------------------------------------
@@ -1783,84 +1791,49 @@ void things::ConvertATK()
 namespace things
 {
 const FieldReference mobj_field[] = {
-    { "ID #", offsetof(DehackedMapObjectDefinition, doomednum), kFieldTypeAny },
-    { "Initial frame", offsetof(DehackedMapObjectDefinition, spawnstate),
-      kFieldTypeFrameNumber },
-    { "Hit points", offsetof(DehackedMapObjectDefinition, spawnhealth),
-      kFieldTypeOneOrGreater },
-    { "First moving frame", offsetof(DehackedMapObjectDefinition, seestate),
-      kFieldTypeFrameNumber },
-    { "Alert sound", offsetof(DehackedMapObjectDefinition, seesound),
-      kFieldTypeSoundNumber },
-    { "Reaction time", offsetof(DehackedMapObjectDefinition, reactiontime),
-      kFieldTypeZeroOrGreater },
-    { "Attack sound", offsetof(DehackedMapObjectDefinition, attacksound),
-      kFieldTypeSoundNumber },
-    { "Injury frame", offsetof(DehackedMapObjectDefinition, painstate),
-      kFieldTypeFrameNumber },
-    { "Pain chance", offsetof(DehackedMapObjectDefinition, painchance),
-      kFieldTypeZeroOrGreater },
-    { "Pain sound", offsetof(DehackedMapObjectDefinition, painsound),
-      kFieldTypeSoundNumber },
-    { "Close attack frame", offsetof(DehackedMapObjectDefinition, meleestate),
-      kFieldTypeFrameNumber },
-    { "Far attack frame", offsetof(DehackedMapObjectDefinition, missilestate),
-      kFieldTypeFrameNumber },
-    { "Death frame", offsetof(DehackedMapObjectDefinition, deathstate),
-      kFieldTypeFrameNumber },
-    { "Exploding frame", offsetof(DehackedMapObjectDefinition, xdeathstate),
-      kFieldTypeFrameNumber },
-    { "Death sound", offsetof(DehackedMapObjectDefinition, deathsound),
-      kFieldTypeSoundNumber },
-    { "Speed", offsetof(DehackedMapObjectDefinition, speed),
-      kFieldTypeZeroOrGreater },
-    { "Width", offsetof(DehackedMapObjectDefinition, radius),
-      kFieldTypeZeroOrGreater },
-    { "Height", offsetof(DehackedMapObjectDefinition, height),
-      kFieldTypeZeroOrGreater },
-    { "Mass", offsetof(DehackedMapObjectDefinition, mass),
-      kFieldTypeZeroOrGreater },
-    { "Missile damage", offsetof(DehackedMapObjectDefinition, damage),
-      kFieldTypeZeroOrGreater },
-    { "Action sound", offsetof(DehackedMapObjectDefinition, activesound),
-      kFieldTypeSoundNumber },
-    { "Bits", offsetof(DehackedMapObjectDefinition, flags),
-      kFieldTypeBitflags },
-    { "MBF21 Bits", offsetof(DehackedMapObjectDefinition, mbf21_flags),
-      kFieldTypeBitflags },
-    { "Infighting group", offsetof(DehackedMapObjectDefinition, infight_group),
-      kFieldTypeZeroOrGreater },
-    { "Projectile group", offsetof(DehackedMapObjectDefinition, proj_group),
-      kFieldTypeAny },
-    { "Splash group", offsetof(DehackedMapObjectDefinition, splash_group),
-      kFieldTypeZeroOrGreater },
-    { "Rip sound", offsetof(DehackedMapObjectDefinition, rip_sound),
-      kFieldTypeSoundNumber },
-    { "Fast speed", offsetof(DehackedMapObjectDefinition, fast_speed),
-      kFieldTypeZeroOrGreater },
-    { "Melee range", offsetof(DehackedMapObjectDefinition, melee_range),
-      kFieldTypeZeroOrGreater },
-    { "Gib health", offsetof(DehackedMapObjectDefinition, gib_health),
-      kFieldTypeAny },
-    { "Dropped item", offsetof(DehackedMapObjectDefinition, dropped_item),
-      kFieldTypeZeroOrGreater },
-    { "Pickup width", offsetof(DehackedMapObjectDefinition, pickup_width),
-      kFieldTypeZeroOrGreater },
-    { "Projectile pass height",
-      offsetof(DehackedMapObjectDefinition, projectile_pass_height),
-      kFieldTypeZeroOrGreater },
-    { "Fullbright", offsetof(DehackedMapObjectDefinition, fullbright),
-      kFieldTypeZeroOrGreater },
-    { "Respawn frame", offsetof(DehackedMapObjectDefinition, raisestate),
-      kFieldTypeFrameNumber },
+    {"ID #", offsetof(DehackedMapObjectDefinition, doomednum), kFieldTypeAny},
+    {"Initial frame", offsetof(DehackedMapObjectDefinition, spawnstate), kFieldTypeFrameNumber},
+    {"Hit points", offsetof(DehackedMapObjectDefinition, spawnhealth), kFieldTypeOneOrGreater},
+    {"First moving frame", offsetof(DehackedMapObjectDefinition, seestate), kFieldTypeFrameNumber},
+    {"Alert sound", offsetof(DehackedMapObjectDefinition, seesound), kFieldTypeSoundNumber},
+    {"Reaction time", offsetof(DehackedMapObjectDefinition, reactiontime), kFieldTypeZeroOrGreater},
+    {"Attack sound", offsetof(DehackedMapObjectDefinition, attacksound), kFieldTypeSoundNumber},
+    {"Injury frame", offsetof(DehackedMapObjectDefinition, painstate), kFieldTypeFrameNumber},
+    {"Pain chance", offsetof(DehackedMapObjectDefinition, painchance), kFieldTypeZeroOrGreater},
+    {"Pain sound", offsetof(DehackedMapObjectDefinition, painsound), kFieldTypeSoundNumber},
+    {"Close attack frame", offsetof(DehackedMapObjectDefinition, meleestate), kFieldTypeFrameNumber},
+    {"Far attack frame", offsetof(DehackedMapObjectDefinition, missilestate), kFieldTypeFrameNumber},
+    {"Death frame", offsetof(DehackedMapObjectDefinition, deathstate), kFieldTypeFrameNumber},
+    {"Exploding frame", offsetof(DehackedMapObjectDefinition, xdeathstate), kFieldTypeFrameNumber},
+    {"Death sound", offsetof(DehackedMapObjectDefinition, deathsound), kFieldTypeSoundNumber},
+    {"Speed", offsetof(DehackedMapObjectDefinition, speed), kFieldTypeZeroOrGreater},
+    {"Width", offsetof(DehackedMapObjectDefinition, radius), kFieldTypeZeroOrGreater},
+    {"Height", offsetof(DehackedMapObjectDefinition, height), kFieldTypeZeroOrGreater},
+    {"Mass", offsetof(DehackedMapObjectDefinition, mass), kFieldTypeZeroOrGreater},
+    {"Missile damage", offsetof(DehackedMapObjectDefinition, damage), kFieldTypeZeroOrGreater},
+    {"Action sound", offsetof(DehackedMapObjectDefinition, activesound), kFieldTypeSoundNumber},
+    {"Bits", offsetof(DehackedMapObjectDefinition, flags), kFieldTypeBitflags},
+    {"MBF21 Bits", offsetof(DehackedMapObjectDefinition, mbf21_flags), kFieldTypeBitflags},
+    {"Infighting group", offsetof(DehackedMapObjectDefinition, infight_group), kFieldTypeZeroOrGreater},
+    {"Projectile group", offsetof(DehackedMapObjectDefinition, proj_group), kFieldTypeAny},
+    {"Splash group", offsetof(DehackedMapObjectDefinition, splash_group), kFieldTypeZeroOrGreater},
+    {"Rip sound", offsetof(DehackedMapObjectDefinition, rip_sound), kFieldTypeSoundNumber},
+    {"Fast speed", offsetof(DehackedMapObjectDefinition, fast_speed), kFieldTypeZeroOrGreater},
+    {"Melee range", offsetof(DehackedMapObjectDefinition, melee_range), kFieldTypeZeroOrGreater},
+    {"Gib health", offsetof(DehackedMapObjectDefinition, gib_health), kFieldTypeAny},
+    {"Dropped item", offsetof(DehackedMapObjectDefinition, dropped_item), kFieldTypeZeroOrGreater},
+    {"Pickup width", offsetof(DehackedMapObjectDefinition, pickup_width), kFieldTypeZeroOrGreater},
+    {"Projectile pass height", offsetof(DehackedMapObjectDefinition, projectile_pass_height), kFieldTypeZeroOrGreater},
+    {"Fullbright", offsetof(DehackedMapObjectDefinition, fullbright), kFieldTypeZeroOrGreater},
+    {"Respawn frame", offsetof(DehackedMapObjectDefinition, raisestate), kFieldTypeFrameNumber},
 
-    { nullptr, 0, kFieldTypeAny }  // End sentinel
+    {nullptr, 0, kFieldTypeAny} // End sentinel
 };
-}  // namespace things
+} // namespace things
 
 void things::AlterThing(int new_val)
 {
-    int mt_num = patch::active_obj - 1;  // NOTE WELL
+    int mt_num = patch::active_obj - 1; // NOTE WELL
     EPI_ASSERT(mt_num >= 0);
 
     const char *field_name = patch::line_buf;
@@ -1896,4 +1869,4 @@ void things::AlterMBF21Bits(char *bit_str)
     new_mobjinfo[mt_num]->mbf21_flags = ParseBits(mbf21flag_list, bit_str);
 }
 
-}  // namespace dehacked
+} // namespace dehacked

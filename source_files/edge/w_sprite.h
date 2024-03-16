@@ -40,7 +40,7 @@
 //
 class SpriteFrame
 {
-   public:
+  public:
     // whether this frame has been completed.  Completed frames cannot
     // be replaced by sprite lumps in older wad files.
     bool finished_;
@@ -59,7 +59,7 @@ class SpriteFrame
 
     bool is_weapon_;
 
-   public:
+  public:
     SpriteFrame() : finished_(false), rotations_(0), is_weapon_(false)
     {
         for (int j = 0; j < 16; j++)

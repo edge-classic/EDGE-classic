@@ -29,11 +29,11 @@ constexpr uint8_t kTotalWeaponKeys = 10;
 
 class WeaponDefinitionContainer : public std::vector<WeaponDefinition *>
 {
-   public:
+  public:
     WeaponDefinitionContainer();
     ~WeaponDefinitionContainer();
 
-   public:
+  public:
     // Search Functions
     int               FindFirst(const char *name, int startpos = -1);
     WeaponDefinition *Lookup(const char *refname);
@@ -41,7 +41,7 @@ class WeaponDefinitionContainer : public std::vector<WeaponDefinition *>
 
 // -------EXTERNALISATIONS-------
 
-extern WeaponDefinitionContainer weapondefs;  // -ACB- 2004/07/14 Implemented
+extern WeaponDefinitionContainer weapondefs; // -ACB- 2004/07/14 Implemented
 
 void DDF_ReadWeapons(const std::string &data);
 

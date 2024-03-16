@@ -28,7 +28,7 @@
 #include "r_gldefs.h"
 #include "r_image.h"
 #include "r_misc.h"
-#include "r_misc.h"  //  R_Render
+#include "r_misc.h" //  R_Render
 #include "r_modes.h"
 #include "r_units.h"
 #include "str_compare.h"
@@ -97,7 +97,8 @@ static inline float HudToRealCoordinatesY(float y)
 
 void HudSetCoordinateSystem(int width, int height)
 {
-    if (width < 1 || height < 1) return;
+    if (width < 1 || height < 1)
+        return;
 
     float sw = (float)current_screen_width;
     float sh = (float)current_screen_height;
@@ -132,15 +133,30 @@ void HudSetCoordinateSystem(int width, int height)
     margin_x            = 0.0f - hud_x_left * margin_x_multiplier;
 }
 
-void HudSetFont(Font *font) { current_font = font ? font : default_font; }
+void HudSetFont(Font *font)
+{
+    current_font = font ? font : default_font;
+}
 
-void HudSetScale(float scale) { current_scale = scale; }
+void HudSetScale(float scale)
+{
+    current_scale = scale;
+}
 
-void HudSetTextColor(RGBAColor color) { current_color = color; }
+void HudSetTextColor(RGBAColor color)
+{
+    current_color = color;
+}
 
-void HudSetAlpha(float alpha) { current_alpha = alpha; }
+void HudSetAlpha(float alpha)
+{
+    current_alpha = alpha;
+}
 
-float HudGetAlpha() { return current_alpha; }
+float HudGetAlpha()
+{
+    return current_alpha;
+}
 
 void HudSetAlignment(int xa, int ya)
 {
@@ -251,7 +267,10 @@ void HudPopScissor()
 
     scissor_stack_top--;
 
-    if (scissor_stack_top == 0) { glDisable(GL_SCISSOR_TEST); }
+    if (scissor_stack_top == 0)
+    {
+        glDisable(GL_SCISSOR_TEST);
+    }
     else
     {
         // restore previous scissor
@@ -262,8 +281,7 @@ void HudPopScissor()
 }
 
 // Adapted from Quake 3 GPL release
-void HudCalcScrollTexCoords(float x_scroll, float y_scroll, float *tx1,
-                            float *ty1, float *tx2, float *ty2)
+void HudCalcScrollTexCoords(float x_scroll, float y_scroll, float *tx1, float *ty1, float *tx2, float *ty2)
 {
     float timeScale, adjustedScrollS, adjustedScrollT;
 
@@ -299,26 +317,18 @@ void HudCalcTurbulentTexCoords(float *tx, float *ty, float x, float y)
         {
             if (hud_swirl_pass == 1)
             {
-                *tx = *tx + sine_table[(int)((x * 1.0 / 128 * 0.125 + now) *
-                                             kSineTableSize) &
-                                       (kSineTableMask)] *
-                                amplitude;
-                *ty = *ty + sine_table[(int)((y * 1.0 / 128 * 0.125 + now) *
-                                             kSineTableSize) &
-                                       (kSineTableMask)] *
-                                amplitude;
+                *tx = *tx +
+                      sine_table[(int)((x * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
+                *ty = *ty +
+                      sine_table[(int)((y * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
             }
             else
             {
                 amplitude = 0;
-                *tx = *tx - sine_table[(int)((x * 1.0 / 128 * 0.125 + now) *
-                                             kSineTableSize) &
-                                       (kSineTableMask)] *
-                                amplitude;
-                *ty = *ty - sine_table[(int)((y * 1.0 / 128 * 0.125 + now) *
-                                             kSineTableSize) &
-                                       (kSineTableMask)] *
-                                amplitude;
+                *tx       = *tx -
+                      sine_table[(int)((x * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
+                *ty = *ty -
+                      sine_table[(int)((y * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
             }
         }
         else
@@ -326,58 +336,42 @@ void HudCalcTurbulentTexCoords(float *tx, float *ty, float x, float y)
             if (hud_swirl_pass == 1)
             {
                 amplitude = 0.025;
-                *tx = *tx + sine_table[(int)((x * 1.0 / 128 * 0.125 + now) *
-                                             kSineTableSize) &
-                                       (kSineTableMask)] *
-                                amplitude;
-                *ty = *ty + sine_table[(int)((y * 1.0 / 128 * 0.125 + now) *
-                                             kSineTableSize) &
-                                       (kSineTableMask)] *
-                                amplitude;
+                *tx       = *tx +
+                      sine_table[(int)((x * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
+                *ty = *ty +
+                      sine_table[(int)((y * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
             }
             else
             {
                 amplitude = 0.015;
-                *tx = *tx - sine_table[(int)((x * 1.0 / 128 * 0.125 + now) *
-                                             kSineTableSize) &
-                                       (kSineTableMask)] *
-                                amplitude;
-                *ty = *ty - sine_table[(int)((y * 1.0 / 128 * 0.125 + now) *
-                                             kSineTableSize) &
-                                       (kSineTableMask)] *
-                                amplitude;
+                *tx       = *tx -
+                      sine_table[(int)((x * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
+                *ty = *ty -
+                      sine_table[(int)((y * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
             }
         }
     }
     else
     {
-        *tx = *tx +
-              sine_table[(int)((x * 1.0 / 128 * 0.125 + now) * kSineTableSize) &
-                         (kSineTableMask)] *
-                  amplitude;
-        *ty = *ty +
-              sine_table[(int)((y * 1.0 / 128 * 0.125 + now) * kSineTableSize) &
-                         (kSineTableMask)] *
-                  amplitude;
+        *tx = *tx + sine_table[(int)((x * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
+        *ty = *ty + sine_table[(int)((y * 1.0 / 128 * 0.125 + now) * kSineTableSize) & (kSineTableMask)] * amplitude;
     }
 }
 
 //----------------------------------------------------------------------------
 
-void HudRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
-                 float tx1, float ty1, float tx2, float ty2, float alpha,
-                 RGBAColor text_col, const Colormap *palremap, float sx,
-                 float sy, char ch)
+void HudRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image, float tx1, float ty1, float tx2,
+                 float ty2, float alpha, RGBAColor text_col, const Colormap *palremap, float sx, float sy, char ch)
 {
     int x1 = RoundToInteger(hx1);
     int y1 = RoundToInteger(hy1);
     int x2 = RoundToInteger(hx2 + 0.25f);
     int y2 = RoundToInteger(hy2 + 0.25f);
 
-    if (x1 >= x2 || y1 >= y2) return;
+    if (x1 >= x2 || y1 >= y2)
+        return;
 
-    if (x2 < 0 || x1 > current_screen_width || y2 < 0 ||
-        y1 > current_screen_height)
+    if (x2 < 0 || x1 > current_screen_width || y2 < 0 || y1 > current_screen_height)
         return;
 
     sg_color sgcol = sg_white;
@@ -399,20 +393,13 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_TEXTURE_2D);
             if ((image_smoothing &&
-                 current_font->definition_->truetype_smoothing_ ==
-                     FontDefinition::kTrueTypeSmoothOnDemand) ||
-                current_font->definition_->truetype_smoothing_ ==
-                    FontDefinition::kTrueTypeSmoothAlways)
-                glBindTexture(
-                    GL_TEXTURE_2D,
-                    current_font
-                        ->truetype_smoothed_texture_id_[current_font_size]);
+                 current_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothOnDemand) ||
+                current_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothAlways)
+                glBindTexture(GL_TEXTURE_2D, current_font->truetype_smoothed_texture_id_[current_font_size]);
             else
-                glBindTexture(
-                    GL_TEXTURE_2D,
-                    current_font->truetype_texture_id_[current_font_size]);
+                glBindTexture(GL_TEXTURE_2D, current_font->truetype_texture_id_[current_font_size]);
         }
-        else  // patch font
+        else // patch font
         {
             glEnable(GL_ALPHA_TEST);
             if (!(alpha < 0.11f || image->opacity_ == kOpacityComplex))
@@ -420,30 +407,20 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
             glEnable(GL_BLEND);
             glEnable(GL_TEXTURE_2D);
             if ((image_smoothing &&
-                 current_font->definition_->truetype_smoothing_ ==
-                     FontDefinition::kTrueTypeSmoothOnDemand) ||
-                current_font->definition_->truetype_smoothing_ ==
-                    FontDefinition::kTrueTypeSmoothAlways)
+                 current_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothOnDemand) ||
+                current_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothAlways)
             {
                 if (do_whiten)
-                    glBindTexture(GL_TEXTURE_2D,
-                                  current_font->patch_font_cache_
-                                      .atlas_whitened_smoothed_texture_id);
+                    glBindTexture(GL_TEXTURE_2D, current_font->patch_font_cache_.atlas_whitened_smoothed_texture_id);
                 else
-                    glBindTexture(GL_TEXTURE_2D,
-                                  current_font->patch_font_cache_
-                                      .atlas_smoothed_texture_id);
+                    glBindTexture(GL_TEXTURE_2D, current_font->patch_font_cache_.atlas_smoothed_texture_id);
             }
             else
             {
                 if (do_whiten)
-                    glBindTexture(GL_TEXTURE_2D,
-                                  current_font->patch_font_cache_
-                                      .atlas_whitened_texture_id);
+                    glBindTexture(GL_TEXTURE_2D, current_font->patch_font_cache_.atlas_whitened_texture_id);
                 else
-                    glBindTexture(
-                        GL_TEXTURE_2D,
-                        current_font->patch_font_cache_.atlas_texture_id);
+                    glBindTexture(GL_TEXTURE_2D, current_font->patch_font_cache_.atlas_texture_id);
             }
         }
         glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
@@ -480,7 +457,8 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
             glAlphaFunc(GL_GREATER, alpha * 0.66f);
     }
 
-    if (image->opacity_ == kOpacityComplex || alpha < 0.99f) glEnable(GL_BLEND);
+    if (image->opacity_ == kOpacityComplex || alpha < 0.99f)
+        glEnable(GL_BLEND);
 
     GLint old_s_clamp = kDummyClamp;
     GLint old_t_clamp = kDummyClamp;
@@ -496,8 +474,7 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
         HudCalcScrollTexCoords(sx, sy, &tx1, &ty1, &tx2, &ty2);
     }
 
-    if (epi::StringCaseCompareASCII(image->name_,
-                                    hud_overlays.at(video_overlay.d_)) == 0)
+    if (epi::StringCaseCompareASCII(image->name_, hud_overlays.at(video_overlay.d_)) == 0)
     {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -505,14 +482,14 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
 
     bool hud_swirl = false;
 
-    if (image->liquid_type_ > kLiquidImageNone &&
-        swirling_flats > kLiquidSwirlSmmu)
+    if (image->liquid_type_ > kLiquidImageNone && swirling_flats > kLiquidSwirlSmmu)
     {
         hud_swirl_pass = 1;
         hud_swirl      = true;
     }
 
-    if (image->liquid_type_ == kLiquidImageThick) hud_thick_liquid = true;
+    if (image->liquid_type_ == kLiquidImageThick)
+        hud_thick_liquid = true;
 
     glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
 
@@ -584,8 +561,7 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
     glAlphaFunc(GL_GREATER, 0);
 }
 
-void HudRawFromTexID(float hx1, float hy1, float hx2, float hy2,
-                     unsigned int tex_id, ImageOpacity opacity, float tx1,
+void HudRawFromTexID(float hx1, float hy1, float hx2, float hy2, unsigned int tex_id, ImageOpacity opacity, float tx1,
                      float ty1, float tx2, float ty2, float alpha)
 {
     int x1 = RoundToInteger(hx1);
@@ -593,10 +569,10 @@ void HudRawFromTexID(float hx1, float hy1, float hx2, float hy2,
     int x2 = RoundToInteger(hx2 + 0.25f);
     int y2 = RoundToInteger(hy2 + 0.25f);
 
-    if (x1 >= x2 || y1 >= y2) return;
+    if (x1 >= x2 || y1 >= y2)
+        return;
 
-    if (x2 < 0 || x1 > current_screen_width || y2 < 0 ||
-        y1 > current_screen_height)
+    if (x2 < 0 || x1 > current_screen_width || y2 < 0 || y1 > current_screen_height)
         return;
 
     glEnable(GL_TEXTURE_2D);
@@ -612,7 +588,8 @@ void HudRawFromTexID(float hx1, float hy1, float hx2, float hy2,
             glAlphaFunc(GL_GREATER, alpha * 0.66f);
     }
 
-    if (opacity == kOpacityComplex || alpha < 0.99f) glEnable(GL_BLEND);
+    if (opacity == kOpacityComplex || alpha < 0.99f)
+        glEnable(GL_BLEND);
 
     glColor4f(1.0f, 1.0f, 1.0f, alpha);
 
@@ -639,8 +616,7 @@ void HudRawFromTexID(float hx1, float hy1, float hx2, float hy2,
     glAlphaFunc(GL_GREATER, 0);
 }
 
-void HudStretchFromImageData(float x, float y, float w, float h,
-                             const ImageData *img, unsigned int tex_id,
+void HudStretchFromImageData(float x, float y, float w, float h, const ImageData *img, unsigned int tex_id,
                              ImageOpacity opacity)
 {
     if (current_x_alignment >= 0)
@@ -655,13 +631,11 @@ void HudStretchFromImageData(float x, float y, float w, float h,
     float y1 = HudToRealCoordinatesY(y + h);
     float y2 = HudToRealCoordinatesY(y);
 
-    HudRawFromTexID(x1, y1, x2, y2, tex_id, opacity, 0, 0,
-                    (float)img->used_width_ / img->width_,
+    HudRawFromTexID(x1, y1, x2, y2, tex_id, opacity, 0, 0, (float)img->used_width_ / img->width_,
                     (float)img->used_height_ / img->height_, current_alpha);
 }
 
-void HudStretchImage(float x, float y, float w, float h, const Image *img,
-                     float sx, float sy, const Colormap *colmap)
+void HudStretchImage(float x, float y, float w, float h, const Image *img, float sx, float sy, const Colormap *colmap)
 {
     if (current_x_alignment >= 0)
         x -= w / (current_x_alignment == 0 ? 2.0f : 1.0f);
@@ -680,16 +654,17 @@ void HudStretchImage(float x, float y, float w, float h, const Image *img,
 
     RGBAColor text_col = kRGBANoValue;
 
-    if (colmap) { text_col = GetFontColor(colmap); }
+    if (colmap)
+    {
+        text_col = GetFontColor(colmap);
+    }
 
     // HudRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(),
     // current_alpha, text_col, colmap, sx, sy);
-    HudRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(),
-                current_alpha, text_col, nullptr, sx, sy);
+    HudRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(), current_alpha, text_col, nullptr, sx, sy);
 }
 
-void HudStretchImageNoOffset(float x, float y, float w, float h,
-                             const Image *img, float sx, float sy)
+void HudStretchImageNoOffset(float x, float y, float w, float h, const Image *img, float sx, float sy)
 {
     if (current_x_alignment >= 0)
         x -= w / (current_x_alignment == 0 ? 2.0f : 1.0f);
@@ -706,8 +681,7 @@ void HudStretchImageNoOffset(float x, float y, float w, float h,
     float y1 = HudToRealCoordinatesY(y + h);
     float y2 = HudToRealCoordinatesY(y);
 
-    HudRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(),
-                current_alpha, kRGBANoValue, nullptr, sx, sy);
+    HudRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(), current_alpha, kRGBANoValue, nullptr, sx, sy);
 }
 
 void HudDrawImageTitleWS(const Image *title_image)
@@ -727,8 +701,7 @@ void HudDrawImageTitleWS(const Image *title_image)
     TempScale = 200;
     TempScale /= title_image->actual_height_;
 
-    TempWidth = title_image->ScaledWidthActual() *
-                TempScale;  // respect ASPECT in images.ddf at least
+    TempWidth  = title_image->ScaledWidthActual() * TempScale; // respect ASPECT in images.ddf at least
     TempHeight = title_image->actual_height_ * TempScale;
 
     // 2. Calculate centering on screen.
@@ -736,8 +709,7 @@ void HudDrawImageTitleWS(const Image *title_image)
     CenterX -= TempWidth / 2;
 
     // 3. Draw it.
-    HudStretchImage(CenterX, -0.1f, TempWidth, TempHeight + 0.1f, title_image,
-                    0.0, 0.0);
+    HudStretchImage(CenterX, -0.1f, TempWidth, TempHeight + 0.1f, title_image, 0.0, 0.0);
 }
 
 float HudGetImageWidth(const Image *img)
@@ -774,8 +746,7 @@ void HudScrollImage(float x, float y, const Image *img, float sx, float sy)
     HudStretchImage(x, y, w, h, img, sx, sy);
 }
 
-void HudScrollImageNoOffset(float x, float y, const Image *img, float sx,
-                            float sy)
+void HudScrollImageNoOffset(float x, float y, const Image *img, float sx, float sy)
 {
     float w = img->ScaledWidthActual() * current_scale;
     float h = img->ScaledHeightActual() * current_scale;
@@ -783,8 +754,7 @@ void HudScrollImageNoOffset(float x, float y, const Image *img, float sx,
     HudStretchImageNoOffset(x, y, w, h, img, sx, sy);
 }
 
-void HudTileImage(float x, float y, float w, float h, const Image *img,
-                  float offset_x, float offset_y)
+void HudTileImage(float x, float y, float w, float h, const Image *img, float offset_x, float offset_y)
 {
     if (current_x_alignment >= 0)
         x -= w / (current_x_alignment == 0 ? 2.0f : 1.0f);
@@ -804,16 +774,14 @@ void HudTileImage(float x, float y, float w, float h, const Image *img,
     float y1 = HudToRealCoordinatesY(y + h);
     float y2 = HudToRealCoordinatesY(y);
 
-    HudRawImage(x1, y1, x2, y2, img, (offset_x)*tx_scale, (offset_y)*ty_scale,
-                (offset_x + 1) * tx_scale, (offset_y + 1) * ty_scale,
-                current_alpha);
+    HudRawImage(x1, y1, x2, y2, img, (offset_x)*tx_scale, (offset_y)*ty_scale, (offset_x + 1) * tx_scale,
+                (offset_y + 1) * ty_scale, current_alpha);
 }
 
 void HudSolidBox(float x1, float y1, float x2, float y2, RGBAColor col)
 {
     // expand to cover wide screens
-    if (x1 < hud_x_left && x2 > hud_x_right - 1 && y1 < hud_y_top + 1 &&
-        y2 > hud_y_bottom - 1)
+    if (x1 < hud_x_left && x2 > hud_x_right - 1 && y1 < hud_y_top + 1 && y2 > hud_y_bottom - 1)
     {
         x1 = 0;
         x2 = current_screen_width;
@@ -830,7 +798,8 @@ void HudSolidBox(float x1, float y1, float x2, float y2, RGBAColor col)
         y2 = HudToRealCoordinatesY(y2);
     }
 
-    if (current_alpha < 0.99f) glEnable(GL_BLEND);
+    if (current_alpha < 0.99f)
+        glEnable(GL_BLEND);
 
     sg_color sgcol = sg_make_color_1i(col);
 
@@ -848,8 +817,8 @@ void HudSolidBox(float x1, float y1, float x2, float y2, RGBAColor col)
     glDisable(GL_BLEND);
 }
 
-void HudSolidLine(float x1, float y1, float x2, float y2, RGBAColor col,
-                  float thickness, bool smooth, float dx, float dy)
+void HudSolidLine(float x1, float y1, float x2, float y2, RGBAColor col, float thickness, bool smooth, float dx,
+                  float dy)
 {
     x1 = HudToRealCoordinatesX(x1);
     y1 = HudToRealCoordinatesY(y1);
@@ -861,9 +830,11 @@ void HudSolidLine(float x1, float y1, float x2, float y2, RGBAColor col,
 
     glLineWidth(thickness);
 
-    if (smooth) glEnable(GL_LINE_SMOOTH);
+    if (smooth)
+        glEnable(GL_LINE_SMOOTH);
 
-    if (smooth || current_alpha < 0.99f) glEnable(GL_BLEND);
+    if (smooth || current_alpha < 0.99f)
+        glEnable(GL_BLEND);
 
     sg_color sgcol = sg_make_color_1i(col);
 
@@ -881,8 +852,7 @@ void HudSolidLine(float x1, float y1, float x2, float y2, RGBAColor col,
     glLineWidth(1.0f);
 }
 
-void HudThinBox(float x1, float y1, float x2, float y2, RGBAColor col,
-                float thickness)
+void HudThinBox(float x1, float y1, float x2, float y2, RGBAColor col, float thickness)
 {
     std::swap(y1, y2);
 
@@ -891,7 +861,8 @@ void HudThinBox(float x1, float y1, float x2, float y2, RGBAColor col,
     x2 = HudToRealCoordinatesX(x2);
     y2 = HudToRealCoordinatesY(y2);
 
-    if (current_alpha < 0.99f) glEnable(GL_BLEND);
+    if (current_alpha < 0.99f)
+        glEnable(GL_BLEND);
 
     sg_color sgcol = sg_make_color_1i(col);
 
@@ -937,7 +908,8 @@ void HudGradientBox(float x1, float y1, float x2, float y2, RGBAColor *cols)
     x2 = HudToRealCoordinatesX(x2);
     y2 = HudToRealCoordinatesY(y2);
 
-    if (current_alpha < 0.99f) glEnable(GL_BLEND);
+    if (current_alpha < 0.99f)
+        glEnable(GL_BLEND);
 
     glBegin(GL_QUADS);
 
@@ -984,10 +956,9 @@ float HudStringHeight(const char *str)
     return slines * HudFontHeight() + (slines - 1) * kVerticalSpacing;
 }
 
-void HudDrawChar(float left_x, float top_y, const Image *img, char ch,
-                 float size)
+void HudDrawChar(float left_x, float top_y, const Image *img, char ch, float size)
 {
-    float sc_x = current_scale;  // TODO * aspect;
+    float sc_x = current_scale; // TODO * aspect;
     float sc_y = current_scale;
 
     float x = left_x - img->ScaledOffsetX() * sc_x;
@@ -1000,81 +971,51 @@ void HudDrawChar(float left_x, float top_y, const Image *img, char ch,
     {
         if (current_font->definition_->type_ == kFontTypeTrueType)
         {
-            stbtt_aligned_quad *q =
-                current_font->truetype_glyph_map_.at((uint8_t)ch)
-                    .character_quad[current_font_size];
-            y = top_y +
-                (current_font->truetype_glyph_map_.at((uint8_t)ch)
-                     .y_shift[current_font_size] *
-                 (size > 0 ? (size / current_font->definition_->default_size_)
-                           : 1.0) *
-                 sc_y);
-            w = ((size > 0 ? (current_font->CharWidth(ch) *
-                              (size / current_font->definition_->default_size_))
+            stbtt_aligned_quad *q = current_font->truetype_glyph_map_.at((uint8_t)ch).character_quad[current_font_size];
+            y = top_y + (current_font->truetype_glyph_map_.at((uint8_t)ch).y_shift[current_font_size] *
+                         (size > 0 ? (size / current_font->definition_->default_size_) : 1.0) * sc_y);
+            w = ((size > 0 ? (current_font->CharWidth(ch) * (size / current_font->definition_->default_size_))
                            : current_font->CharWidth(ch)) -
                  current_font->spacing_) *
                 sc_x;
-            h = (current_font->truetype_glyph_map_.at((uint8_t)ch)
-                     .height[current_font_size] *
-                 (size > 0 ? (size / current_font->definition_->default_size_)
-                           : 1.0)) *
+            h = (current_font->truetype_glyph_map_.at((uint8_t)ch).height[current_font_size] *
+                 (size > 0 ? (size / current_font->definition_->default_size_) : 1.0)) *
                 sc_y;
             tx1 = q->s0;
             ty1 = q->t0;
             tx2 = q->s1;
             ty2 = q->t1;
         }
-        else  // Patch font atlas
+        else // Patch font atlas
         {
-            w = (size > 0 ? (size * current_font->patch_font_cache_.ratio)
-                          : current_font->CharWidth(ch)) *
-                sc_x;
-            h = (size > 0
-                     ? size
-                     : (current_font->definition_->default_size_ > 0.0
-                            ? current_font->definition_->default_size_
-                            : current_font->patch_font_cache_.atlas_rectangles
-                                  .at(kCP437UnicodeValues[(uint8_t)ch])
-                                  .image_height)) *
+            w = (size > 0 ? (size * current_font->patch_font_cache_.ratio) : current_font->CharWidth(ch)) * sc_x;
+            h = (size > 0 ? size
+                          : (current_font->definition_->default_size_ > 0.0
+                                 ? current_font->definition_->default_size_
+                                 : current_font->patch_font_cache_.atlas_rectangles.at(kCP437UnicodeValues[(uint8_t)ch])
+                                       .image_height)) *
                 sc_y;
-            x -= (current_font->patch_font_cache_.atlas_rectangles
-                      .at(kCP437UnicodeValues[(uint8_t)ch])
-                      .offset_x *
-                  sc_x);
-            y -= (current_font->patch_font_cache_.atlas_rectangles
-                      .at(kCP437UnicodeValues[(uint8_t)ch])
-                      .offset_y *
-                  sc_y);
-            tx1 =
-                current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch)
-                    .texture_coordinate_x;
-            ty2 =
-                current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch)
-                    .texture_coordinate_y;
-            tx2 = tx1 + current_font->patch_font_cache_.atlas_rectangles
-                            .at((uint8_t)ch)
-                            .texture_coordinate_width;
-            ty1 = ty2 + current_font->patch_font_cache_.atlas_rectangles
-                            .at((uint8_t)ch)
-                            .texture_coordinate_height;
+            x -=
+                (current_font->patch_font_cache_.atlas_rectangles.at(kCP437UnicodeValues[(uint8_t)ch]).offset_x * sc_x);
+            y -=
+                (current_font->patch_font_cache_.atlas_rectangles.at(kCP437UnicodeValues[(uint8_t)ch]).offset_y * sc_y);
+            tx1 = current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch).texture_coordinate_x;
+            ty2 = current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch).texture_coordinate_y;
+            tx2 = tx1 + current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch).texture_coordinate_width;
+            ty1 = ty2 + current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch).texture_coordinate_height;
         }
     }
-    else  // spritesheet font
+    else // spritesheet font
     {
-        w = ((size > 0 ? (size * current_font->CharRatio(ch))
-                       : current_font->CharWidth(ch)) -
-             current_font->spacing_) *
+        w = ((size > 0 ? (size * current_font->CharRatio(ch)) : current_font->CharWidth(ch)) - current_font->spacing_) *
             sc_x;
-        h = (size > 0 ? size : current_font->image_character_height_) * sc_y;
+        h      = (size > 0 ? size : current_font->image_character_height_) * sc_y;
         int px = (uint8_t)ch % 16;
         int py = 15 - (uint8_t)ch / 16;
         tx1    = (px)*current_font->font_image_->width_ratio_;
         tx2    = (px + 1) * current_font->font_image_->width_ratio_;
         float char_texcoord_adjust =
-            ((tx2 - tx1) -
-             ((tx2 - tx1) * (current_font->CharWidth(ch) /
-                             current_font->image_character_width_))) /
-            2;
+            ((tx2 - tx1) - ((tx2 - tx1) * (current_font->CharWidth(ch) / current_font->image_character_width_))) / 2;
         tx1 += char_texcoord_adjust;
         tx2 -= char_texcoord_adjust;
         ty1 = (py)*current_font->font_image_->height_ratio_;
@@ -1087,19 +1028,19 @@ void HudDrawChar(float left_x, float top_y, const Image *img, char ch,
     float y1 = HudToRealCoordinatesY(y + h);
     float y2 = HudToRealCoordinatesY(y);
 
-    HudRawImage(x1, y1, x2, y2, img, tx1, ty1, tx2, ty2, current_alpha,
-                current_color, nullptr, 0.0, 0.0, ch);
+    HudRawImage(x1, y1, x2, y2, img, tx1, ty1, tx2, ty2, current_alpha, current_color, nullptr, 0.0, 0.0, ch);
 }
 
-void HudDrawEndoomChar(float left_x, float top_y, float FNX, const Image *img,
-                       char ch, RGBAColor color1, RGBAColor color2, bool blink)
+void HudDrawEndoomChar(float left_x, float top_y, float FNX, const Image *img, char ch, RGBAColor color1,
+                       RGBAColor color2, bool blink)
 {
     float w, h;
     float tx1, tx2, ty1, ty2;
 
     uint8_t character = (uint8_t)ch;
 
-    if (blink && console_cursor >= 16) character = 0x20;
+    if (blink && console_cursor >= 16)
+        character = 0x20;
 
     uint8_t px = character % 16;
     uint8_t py = 15 - character / 16;
@@ -1142,7 +1083,8 @@ void HudDrawEndoomChar(float left_x, float top_y, float FNX, const Image *img,
     {
         glEnable(GL_ALPHA_TEST);
 
-        if (img->opacity_ != kOpacityComplex) glAlphaFunc(GL_GREATER, 0.66f);
+        if (img->opacity_ != kOpacityComplex)
+            glAlphaFunc(GL_GREATER, 0.66f);
     }
 
     glColor4f(sgcol.r, sgcol.g, sgcol.b, current_alpha);
@@ -1185,20 +1127,23 @@ void HudDrawText(float x, float y, const char *str, float size)
     {
         float total_h = HudStringHeight(str);
 
-        if (current_y_alignment == 0) total_h /= 2.0f;
+        if (current_y_alignment == 0)
+            total_h /= 2.0f;
 
         cy -= total_h;
     }
 
     // handle each line
 
-    if (!str) return;
+    if (!str)
+        return;
 
     while (*str)
     {
         // get the length of the line
         int len = 0;
-        while (str[len] && str[len] != '\n') len++;
+        while (str[len] && str[len] != '\n')
+            len++;
 
         float cx      = x;
         float total_w = 0;
@@ -1207,39 +1152,30 @@ void HudDrawText(float x, float y, const char *str, float size)
         {
             if (current_font->definition_->type_ == kFontTypeTrueType)
             {
-                float factor =
-                    size > 0 ? (size / current_font->definition_->default_size_)
-                             : 1;
-                total_w +=
-                    current_font->CharWidth(str[i]) * factor * current_scale;
+                float factor = size > 0 ? (size / current_font->definition_->default_size_) : 1;
+                total_w += current_font->CharWidth(str[i]) * factor * current_scale;
                 if (str[i + 1])
                 {
                     total_w +=
-                        stbtt_GetGlyphKernAdvance(
-                            current_font->truetype_info_,
-                            current_font->GetGlyphIndex(str[i]),
-                            current_font->GetGlyphIndex(str[i + 1])) *
-                        current_font
-                            ->truetype_kerning_scale_[current_font_size] *
-                        factor * current_scale;
+                        stbtt_GetGlyphKernAdvance(current_font->truetype_info_, current_font->GetGlyphIndex(str[i]),
+                                                  current_font->GetGlyphIndex(str[i + 1])) *
+                        current_font->truetype_kerning_scale_[current_font_size] * factor * current_scale;
                 }
             }
             else if (current_font->definition_->type_ == kFontTypeImage)
-                total_w += (size > 0 ? size * current_font->CharRatio(str[i]) +
-                                           current_font->spacing_
+                total_w += (size > 0 ? size * current_font->CharRatio(str[i]) + current_font->spacing_
                                      : current_font->CharWidth(str[i])) *
                            current_scale;
             else
-                total_w +=
-                    (size > 0 ? size * current_font->patch_font_cache_.ratio +
-                                    current_font->spacing_
-                              : current_font->CharWidth(str[i])) *
-                    current_scale;
+                total_w += (size > 0 ? size * current_font->patch_font_cache_.ratio + current_font->spacing_
+                                     : current_font->CharWidth(str[i])) *
+                           current_scale;
         }
 
         if (current_x_alignment >= 0)
         {
-            if (current_x_alignment == 0) total_w /= 2.0f;
+            if (current_x_alignment == 0)
+                total_w /= 2.0f;
 
             cx -= total_w;
         }
@@ -1250,38 +1186,32 @@ void HudDrawText(float x, float y, const char *str, float size)
 
             const Image *img = current_font->CharImage(ch);
 
-            if (img) HudDrawChar(cx, cy, img, ch, size);
+            if (img)
+                HudDrawChar(cx, cy, img, ch, size);
 
             if (current_font->definition_->type_ == kFontTypeTrueType)
             {
-                float factor =
-                    size > 0 ? (size / current_font->definition_->default_size_)
-                             : 1;
+                float factor = size > 0 ? (size / current_font->definition_->default_size_) : 1;
                 cx += current_font->CharWidth(ch) * factor * current_scale;
                 if (str[k + 1])
                 {
-                    cx += stbtt_GetGlyphKernAdvance(
-                              current_font->truetype_info_,
-                              current_font->GetGlyphIndex(str[k]),
-                              current_font->GetGlyphIndex(str[k + 1])) *
-                          current_font
-                              ->truetype_kerning_scale_[current_font_size] *
-                          factor * current_scale;
+                    cx += stbtt_GetGlyphKernAdvance(current_font->truetype_info_, current_font->GetGlyphIndex(str[k]),
+                                                    current_font->GetGlyphIndex(str[k + 1])) *
+                          current_font->truetype_kerning_scale_[current_font_size] * factor * current_scale;
                 }
             }
             else if (current_font->definition_->type_ == kFontTypeImage)
-                cx += (size > 0 ? size * current_font->CharRatio(ch) +
-                                      current_font->spacing_
+                cx += (size > 0 ? size * current_font->CharRatio(ch) + current_font->spacing_
                                 : current_font->CharWidth(ch)) *
                       current_scale;
             else
-                cx += (size > 0 ? size * current_font->patch_font_cache_.ratio +
-                                      current_font->spacing_
+                cx += (size > 0 ? size * current_font->patch_font_cache_.ratio + current_font->spacing_
                                 : current_font->CharWidth(ch)) *
                       current_scale;
         }
 
-        if (str[len] == 0) break;
+        if (str[len] == 0)
+            break;
 
         str += (len + 1);
         cy += (size > 0 ? size : HudFontHeight()) + kVerticalSpacing;
@@ -1302,8 +1232,7 @@ void HudDrawQuitText(int line, float FNX, float FNY, float cx)
     {
         uint8_t info = quit_lines[line]->endoom_bytes_.at(i);
 
-        HudDrawEndoomChar(cx, cy, FNX, img, quit_lines[line]->line_.at(i),
-                          endoom_colors[info & 15],
+        HudDrawEndoomChar(cx, cy, FNX, img, quit_lines[line]->line_.at(i), endoom_colors[info & 15],
                           endoom_colors[(info >> 4) & 7], info & 128);
 
         cx += FNX;
@@ -1320,33 +1249,27 @@ void HudDrawQuitScreen()
 
     if (quit_lines[0])
     {
-        float FNX = HMM_MIN(
-            (float)current_screen_width / 80.0f,
-            320.0f / 80.0f * ((float)current_screen_height * 0.90f / 200.0f));
+        float FNX = HMM_MIN((float)current_screen_width / 80.0f,
+                            320.0f / 80.0f * ((float)current_screen_height * 0.90f / 200.0f));
         float FNY = FNX * 2;
-        float cx =
-            HMM_MAX(0, (((float)current_screen_width - (FNX * 80.0f)) / 2.0f));
+        float cx  = HMM_MAX(0, (((float)current_screen_width - (FNX * 80.0f)) / 2.0f));
         for (int i = 0; i < kEndoomLines; i++)
         {
             HudDrawQuitText(i, FNX, FNY, cx);
         }
         HudSetAlignment(0, -1);
-        HudDrawText(
-            160, 195 - HudStringHeight("Are you sure you want to quit? (Y/N)"),
-            "Are you sure you want to quit? (Y/N)");
+        HudDrawText(160, 195 - HudStringHeight("Are you sure you want to quit? (Y/N)"),
+                    "Are you sure you want to quit? (Y/N)");
     }
     else
     {
         HudSetAlignment(0, -1);
-        HudDrawText(
-            160,
-            100 - (HudStringHeight("Are you sure you want to quit? (Y/N)") / 2),
-            "Are you sure you want to quit? (Y/N)");
+        HudDrawText(160, 100 - (HudStringHeight("Are you sure you want to quit? (Y/N)") / 2),
+                    "Are you sure you want to quit? (Y/N)");
     }
 }
 
-void HudRenderWorld(float x, float y, float w, float h, MapObject *camera,
-                    int flags)
+void HudRenderWorld(float x, float y, float w, float h, MapObject *camera, int flags)
 {
     HudPushScissor(x, y, x + w, y + h, (flags & 1) == 0);
 
@@ -1363,18 +1286,17 @@ void HudRenderWorld(float x, float y, float w, float h, MapObject *camera,
 
     // renderer needs true (OpenGL) coordinates.
     // get from scissor due to the expansion thing [ FIXME: HACKY ]
-    float x1 = xy[0];  // HudToRealCoordinatesX(x);
-    float y1 = xy[1];  // HudToRealCoordinatesY(y);
-    float x2 = xy[2];  // HudToRealCoordinatesX(x+w);
-    float y2 = xy[3];  // HudToRealCoordinatesY(y+h);
+    float x1 = xy[0]; // HudToRealCoordinatesX(x);
+    float y1 = xy[1]; // HudToRealCoordinatesY(y);
+    float x2 = xy[2]; // HudToRealCoordinatesX(x+w);
+    float y2 = xy[3]; // HudToRealCoordinatesY(y+h);
 
     RenderView(x1, y1, x2 - x1, y2 - y1, camera, full_height, expand_w);
 
     HudPopScissor();
 }
 
-void HudRenderAutomap(float x, float y, float w, float h, MapObject *player,
-                      int flags)
+void HudRenderAutomap(float x, float y, float w, float h, MapObject *player, int flags)
 {
     HudPushScissor(x, y, x + w, y + h, (flags & 1) == 0);
 

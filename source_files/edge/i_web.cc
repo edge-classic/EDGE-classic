@@ -20,7 +20,7 @@
 
 #include "dm_defs.h"
 #include "e_main.h"
-#include "epi_sdl.h"  // needed for proper SDL main linkage
+#include "epi_sdl.h" // needed for proper SDL main linkage
 #include "filesystem.h"
 #include "i_system.h"
 #include "i_video.h"
@@ -55,15 +55,20 @@ void WebTick(void)
 {
     if (web_deferred_screen_width != -1)
     {
-        WebSyncScreenSize(web_deferred_screen_width,
-                          web_deferred_screen_height);
+        WebSyncScreenSize(web_deferred_screen_width, web_deferred_screen_height);
         web_deferred_screen_width = web_deferred_screen_height = -1;
     }
 
     if (web_deferred_menu != -1)
     {
-        if (web_deferred_menu) { MenuStartControlPanel(); }
-        else { MenuClear(); }
+        if (web_deferred_menu)
+        {
+            MenuStartControlPanel();
+        }
+        else
+        {
+            MenuClear();
+        }
 
         web_deferred_menu = -1;
     }
@@ -72,23 +77,28 @@ void WebTick(void)
     // makes in own calls to keep on top of the event processing
     ControlGetEvents();
 
-    if (app_state & kApplicationActive) EdgeTicker();
+    if (app_state & kApplicationActive)
+        EdgeTicker();
 }
 
 extern "C"
 {
-    static EM_BOOL WebHandlePointerLockChange(
-        int eventType, const EmscriptenPointerlockChangeEvent *changeEvent,
-        void *userData)
+    static EM_BOOL WebHandlePointerLockChange(int eventType, const EmscriptenPointerlockChangeEvent *changeEvent,
+                                              void *userData)
     {
-        if (changeEvent->isActive) { SDL_ShowCursor(SDL_FALSE); }
-        else { SDL_ShowCursor(SDL_TRUE); }
+        if (changeEvent->isActive)
+        {
+            SDL_ShowCursor(SDL_FALSE);
+        }
+        else
+        {
+            SDL_ShowCursor(SDL_TRUE);
+        }
 
         return 0;
     }
 
-    static EM_BOOL WebWindowResizedCallback(int eventType, const void *reserved,
-                                            void *userData)
+    static EM_BOOL WebWindowResizedCallback(int eventType, const void *reserved, void *userData)
     {
         double width, height;
         emscripten_get_element_css_size("canvas", &width, &height);
@@ -98,7 +108,10 @@ extern "C"
         WebSyncScreenSize(width, height);
 
         EM_ASM_({
-            if (Module.onFullscreen) { Module.onFullscreen(); }
+            if (Module.onFullscreen)
+            {
+                Module.onFullscreen();
+            }
         });
 
         return true;
@@ -109,12 +122,15 @@ extern "C"
         if (fullscreen)
         {
             EmscriptenFullscreenStrategy strategy;
-            strategy.scaleMode     = EMSCRIPTEN_FULLSCREEN_CANVAS_SCALE_STDDEF;
-            strategy.filteringMode = EMSCRIPTEN_FULLSCREEN_FILTERING_DEFAULT;
+            strategy.scaleMode             = EMSCRIPTEN_FULLSCREEN_CANVAS_SCALE_STDDEF;
+            strategy.filteringMode         = EMSCRIPTEN_FULLSCREEN_FILTERING_DEFAULT;
             strategy.canvasResizedCallback = WebWindowResizedCallback;
             emscripten_enter_soft_fullscreen("canvas", &strategy);
         }
-        else { emscripten_exit_soft_fullscreen(); }
+        else
+        {
+            emscripten_exit_soft_fullscreen();
+        }
     }
 
     void EMSCRIPTEN_KEEPALIVE WebOpenGameMenu(int open)
@@ -138,9 +154,8 @@ extern "C"
         // requestAnimationFrame
         emscripten_set_main_loop(WebTick, 70, 0);
 
-        emscripten_set_pointerlockchange_callback(
-            EMSCRIPTEN_EVENT_TARGET_DOCUMENT, nullptr, 0,
-            WebHandlePointerLockChange);
+        emscripten_set_pointerlockchange_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT, nullptr, 0,
+                                                  WebHandlePointerLockChange);
 
         if (SDL_Init(0) < 0)
             FatalError("Couldn't init SDL!!\n%s\n", SDL_GetError());
@@ -150,7 +165,10 @@ extern "C"
         EdgeMain(argc, argv);
 
         EM_ASM_({
-            if (Module.edgePostInit) { Module.edgePostInit(); }
+            if (Module.edgePostInit)
+            {
+                Module.edgePostInit();
+            }
         });
     }
 
@@ -176,7 +194,10 @@ extern "C"
 
                 const homeDir = args[homeIndex + 1];
 
-                if (!FS.analyzePath(homeDir).exists) { FS.mkdirTree(homeDir); }
+                if (!FS.analyzePath(homeDir).exists)
+                {
+                    FS.mkdirTree(homeDir);
+                }
 
                 FS.mount(IDBFS, {}, homeDir);
                 FS.syncfs(

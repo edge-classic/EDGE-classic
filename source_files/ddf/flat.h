@@ -22,19 +22,19 @@
 
 class FlatDefinition
 {
-   public:
+  public:
     FlatDefinition();
     ~FlatDefinition(){};
 
-   public:
+  public:
     void Default(void);
     void CopyDetail(FlatDefinition &src);
 
     // Member vars....
     std::string name_;
 
-    std::string liquid_;  // Values are "THIN" and "THICK" - determines swirl
-                          // and shader params - Dasho
+    std::string liquid_; // Values are "THIN" and "THICK" - determines swirl
+                         // and shader params - Dasho
 
     struct SoundEffect *footstep_;
     std::string         splash_;
@@ -50,9 +50,12 @@ class FlatDefinition
     float sink_depth_;
     float bob_depth_;
 
-   private:
+  private:
     // disable copy construct and assignment operator
-    explicit FlatDefinition(FlatDefinition &rhs) { (void)rhs; }
+    explicit FlatDefinition(FlatDefinition &rhs)
+    {
+        (void)rhs;
+    }
     FlatDefinition &operator=(FlatDefinition &rhs)
     {
         (void)rhs;
@@ -63,13 +66,13 @@ class FlatDefinition
 // Our flatdefs container
 class FlatDefinitionContainer : public std::vector<FlatDefinition *>
 {
-   public:
-    FlatDefinitionContainer() {}
+  public:
+    FlatDefinitionContainer()
+    {
+    }
     ~FlatDefinitionContainer()
     {
-        for (std::vector<FlatDefinition *>::iterator iter     = begin(),
-                                                     iter_end = end();
-             iter != iter_end; iter++)
+        for (std::vector<FlatDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
         {
             FlatDefinition *flt = *iter;
             delete flt;
@@ -77,11 +80,11 @@ class FlatDefinitionContainer : public std::vector<FlatDefinition *>
         }
     }
 
-   public:
+  public:
     FlatDefinition *Find(const char *name);
 };
 
-extern FlatDefinitionContainer flatdefs;  // -DASHO- 2022 Implemented
+extern FlatDefinitionContainer flatdefs; // -DASHO- 2022 Implemented
 
 void DDF_ReadFlat(const std::string &data);
 

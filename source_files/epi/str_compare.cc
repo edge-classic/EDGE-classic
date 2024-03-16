@@ -47,9 +47,11 @@ int StringCompare(std::string_view A, std::string_view B)
         else
             BC = (int)(unsigned char)B[B_pos];
 
-        if (AC != BC) return AC - BC;
+        if (AC != BC)
+            return AC - BC;
 
-        if (A_pos == A_end) return 0;
+        if (A_pos == A_end)
+            return 0;
     }
 }
 
@@ -67,7 +69,8 @@ int StringCompareMax(std::string_view A, std::string_view B, size_t n)
 
     for (;; A_pos++, B_pos++)
     {
-        if (n == 0) return 0;
+        if (n == 0)
+            return 0;
 
         if (A_pos >= A_end)
             AC = 0;
@@ -78,9 +81,11 @@ int StringCompareMax(std::string_view A, std::string_view B, size_t n)
         else
             BC = (int)(unsigned char)B[B_pos];
 
-        if (AC != BC) return AC - BC;
+        if (AC != BC)
+            return AC - BC;
 
-        if (A_pos == A_end) return 0;
+        if (A_pos == A_end)
+            return 0;
 
         n--;
     }
@@ -104,19 +109,23 @@ int StringCaseCompareASCII(std::string_view A, std::string_view B)
         else
         {
             AC = (int)(unsigned char)A[A_pos];
-            if (AC > '@' && AC < '[') AC ^= 0x20;
+            if (AC > '@' && AC < '[')
+                AC ^= 0x20;
         }
         if (B_pos >= B_end)
             BC = 0;
         else
         {
             BC = (int)(unsigned char)B[B_pos];
-            if (BC > '@' && BC < '[') BC ^= 0x20;
+            if (BC > '@' && BC < '[')
+                BC ^= 0x20;
         }
 
-        if (AC != BC) return AC - BC;
+        if (AC != BC)
+            return AC - BC;
 
-        if (A_pos == A_end) return 0;
+        if (A_pos == A_end)
+            return 0;
     }
 }
 
@@ -134,26 +143,31 @@ int StringCaseCompareMaxASCII(std::string_view A, std::string_view B, size_t n)
 
     for (;; A_pos++, B_pos++)
     {
-        if (n == 0) return 0;
+        if (n == 0)
+            return 0;
 
         if (A_pos >= A_end)
             AC = 0;
         else
         {
             AC = (int)(unsigned char)A[A_pos];
-            if (AC > '@' && AC < '[') AC ^= 0x20;
+            if (AC > '@' && AC < '[')
+                AC ^= 0x20;
         }
         if (B_pos >= B_end)
             BC = 0;
         else
         {
             BC = (int)(unsigned char)B[B_pos];
-            if (BC > '@' && BC < '[') BC ^= 0x20;
+            if (BC > '@' && BC < '[')
+                BC ^= 0x20;
         }
 
-        if (AC != BC) return AC - BC;
+        if (AC != BC)
+            return AC - BC;
 
-        if (A_pos == A_end) return 0;
+        if (A_pos == A_end)
+            return 0;
 
         n--;
     }
@@ -181,9 +195,11 @@ int StringPrefixCompare(std::string_view A, std::string_view B)
         else
             BC = (int)(unsigned char)B[B_pos];
 
-        if (B_pos == B_end) return 0;
+        if (B_pos == B_end)
+            return 0;
 
-        if (AC != BC) return AC - BC;
+        if (AC != BC)
+            return AC - BC;
     }
 }
 
@@ -205,23 +221,27 @@ int StringPrefixCaseCompareASCII(std::string_view A, std::string_view B)
         else
         {
             AC = (int)(unsigned char)A[A_pos];
-            if (AC > '@' && AC < '[') AC ^= 0x20;
+            if (AC > '@' && AC < '[')
+                AC ^= 0x20;
         }
         if (B_pos >= B_end)
             BC = 0;
         else
         {
             BC = (int)(unsigned char)B[B_pos];
-            if (BC > '@' && BC < '[') BC ^= 0x20;
+            if (BC > '@' && BC < '[')
+                BC ^= 0x20;
         }
 
-        if (B_pos == B_end) return 0;
+        if (B_pos == B_end)
+            return 0;
 
-        if (AC != BC) return AC - BC;
+        if (AC != BC)
+            return AC - BC;
     }
 }
 
-}  // namespace epi
+} // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

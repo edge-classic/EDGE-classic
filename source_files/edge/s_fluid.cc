@@ -49,10 +49,8 @@ fluid_sfloader_t *edge_fluid_sf2_loader = nullptr;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(midi_soundfont, "", kConsoleVariableFlagArchive)
 
-EDGE_DEFINE_CONSOLE_VARIABLE(
-    fluid_player_gain, "0.3",
-    (ConsoleVariableFlag)(kConsoleVariableFlagArchive |
-                          kConsoleVariableFlagFilepath))
+EDGE_DEFINE_CONSOLE_VARIABLE(fluid_player_gain, "0.3",
+                             (ConsoleVariableFlag)(kConsoleVariableFlagArchive | kConsoleVariableFlagFilepath))
 
 extern std::vector<std::string> available_soundfonts;
 
@@ -65,9 +63,9 @@ static void FluidError(int level, char *message, void *data)
 
 static void *edge_fluid_fopen(fluid_fileapi_t *fileapi, const char *filename)
 {
-    FILE *fp = epi::FileOpenRaw(filename,
-                                epi::kFileAccessRead | epi::kFileAccessBinary);
-    if (!fp) return nullptr;
+    FILE *fp = epi::FileOpenRaw(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
+    if (!fp)
+        return nullptr;
     return fp;
 }
 
@@ -90,8 +88,7 @@ bool StartupFluid(void)
     bool cvar_good = false;
     for (size_t i = 0; i < available_soundfonts.size(); i++)
     {
-        if (epi::StringCaseCompareASCII(midi_soundfont.s_,
-                                        available_soundfonts.at(i)) == 0)
+        if (epi::StringCaseCompareASCII(midi_soundfont.s_, available_soundfonts.at(i)) == 0)
         {
             cvar_good = true;
             break;
@@ -100,17 +97,14 @@ bool StartupFluid(void)
 
     if (!cvar_good)
     {
-        LogWarning(
-            "Cannot find previously used soundfont %s, falling back to "
-            "default!\n",
-            midi_soundfont.c_str());
-        midi_soundfont = epi::SanitizePath(
-            epi::PathAppend(game_directory, "soundfont/Default.sf2"));
+        LogWarning("Cannot find previously used soundfont %s, falling back to "
+                   "default!\n",
+                   midi_soundfont.c_str());
+        midi_soundfont = epi::SanitizePath(epi::PathAppend(game_directory, "soundfont/Default.sf2"));
         if (!epi::FileExists(midi_soundfont.s_))
-            FatalError(
-                "Fluidlite: Cannot locate default soundfont (Default.sf2)! "
-                "Please check the /soundfont directory "
-                "of your EDGE-Classic install!\n");
+            FatalError("Fluidlite: Cannot locate default soundfont (Default.sf2)! "
+                       "Please check the /soundfont directory "
+                       "of your EDGE-Classic install!\n");
     }
 
     // Initialize settings and change values from default if needed
@@ -121,10 +115,8 @@ bool StartupFluid(void)
     edge_fluid_settings = new_fluid_settings();
     fluid_settings_setstr(edge_fluid_settings, "synth.reverb.active", "no");
     fluid_settings_setstr(edge_fluid_settings, "synth.chorus.active", "no");
-    fluid_settings_setnum(edge_fluid_settings, "synth.gain",
-                          fluid_player_gain.f_);
-    fluid_settings_setnum(edge_fluid_settings, "synth.sample-rate",
-                          sound_device_frequency);
+    fluid_settings_setnum(edge_fluid_settings, "synth.gain", fluid_player_gain.f_);
+    fluid_settings_setnum(edge_fluid_settings, "synth.sample-rate", sound_device_frequency);
     fluid_settings_setnum(edge_fluid_settings, "synth.polyphony", 64);
     edge_fluid = new_fluid_synth(edge_fluid_settings);
 
@@ -146,13 +138,14 @@ bool StartupFluid(void)
 
     fluid_synth_program_reset(edge_fluid);
 
-    return true;  // OK!
+    return true; // OK!
 }
 
 // Should only be invoked when switching soundfonts
 void RestartFluid(void)
 {
-    if (fluid_disabled) return;
+    if (fluid_disabled)
+        return;
 
     LogPrint("Restarting FluidLite...\n");
 
@@ -162,10 +155,9 @@ void RestartFluid(void)
 
     delete_fluid_synth(edge_fluid);
     delete_fluid_settings(edge_fluid_settings);
-    edge_fluid          = nullptr;
-    edge_fluid_settings = nullptr;
-    edge_fluid_sf2_loader =
-        nullptr;  // This is already deleted upon invoking delete_fluid_synth
+    edge_fluid            = nullptr;
+    edge_fluid_settings   = nullptr;
+    edge_fluid_sf2_loader = nullptr; // This is already deleted upon invoking delete_fluid_synth
 
     if (!StartupFluid())
     {
@@ -174,14 +166,14 @@ void RestartFluid(void)
     }
 
     ChangeMusic(old_entry,
-                true);  // Restart track that was playing when switched
+                true); // Restart track that was playing when switched
 
-    return;  // OK!
+    return;            // OK!
 }
 
 class FluidPlayer : public AbstractMusicPlayer
 {
-   private:
+  private:
     enum Status
     {
         kNotLoaded,
@@ -197,9 +189,8 @@ class FluidPlayer : public AbstractMusicPlayer
 
     int16_t *mono_buffer_;
 
-   public:
-    FluidPlayer(uint8_t *data, int _length, bool looping)
-        : status_(kNotLoaded), looping_(looping)
+  public:
+    FluidPlayer(uint8_t *data, int _length, bool looping) : status_(kNotLoaded), looping_(looping)
     {
         mono_buffer_ = new int16_t[FLUID_NUM_SAMPLES * 2];
         SequencerInit();
@@ -209,14 +200,14 @@ class FluidPlayer : public AbstractMusicPlayer
     {
         Close();
 
-        if (mono_buffer_) delete[] mono_buffer_;
+        if (mono_buffer_)
+            delete[] mono_buffer_;
     }
 
-   public:
+  public:
     FluidSequencer *fluid_sequencer_;
 
-    static void rtNoteOn(void *userdata, uint8_t channel, uint8_t note,
-                         uint8_t velocity)
+    static void rtNoteOn(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity)
     {
         fluid_synth_noteon(edge_fluid, channel, note, velocity);
     }
@@ -226,20 +217,17 @@ class FluidPlayer : public AbstractMusicPlayer
         fluid_synth_noteoff(edge_fluid, channel, note);
     }
 
-    static void rtNoteAfterTouch(void *userdata, uint8_t channel, uint8_t note,
-                                 uint8_t atVal)
+    static void rtNoteAfterTouch(void *userdata, uint8_t channel, uint8_t note, uint8_t atVal)
     {
         fluid_synth_key_pressure(edge_fluid, channel, note, atVal);
     }
 
-    static void rtChannelAfterTouch(void *userdata, uint8_t channel,
-                                    uint8_t atVal)
+    static void rtChannelAfterTouch(void *userdata, uint8_t channel, uint8_t atVal)
     {
         fluid_synth_channel_pressure(edge_fluid, channel, atVal);
     }
 
-    static void rtControllerChange(void *userdata, uint8_t channel,
-                                   uint8_t type, uint8_t value)
+    static void rtControllerChange(void *userdata, uint8_t channel, uint8_t type, uint8_t value)
     {
         fluid_synth_cc(edge_fluid, channel, type, value);
     }
@@ -249,20 +237,17 @@ class FluidPlayer : public AbstractMusicPlayer
         fluid_synth_program_change(edge_fluid, channel, patch);
     }
 
-    static void rtPitchBend(void *userdata, uint8_t channel, uint8_t msb,
-                            uint8_t lsb)
+    static void rtPitchBend(void *userdata, uint8_t channel, uint8_t msb, uint8_t lsb)
     {
         fluid_synth_pitch_bend(edge_fluid, channel, (msb << 7) | lsb);
     }
 
     static void rtSysEx(void *userdata, const uint8_t *msg, size_t size)
     {
-        fluid_synth_sysex(edge_fluid, (const char *)msg, (int)size, nullptr,
-                          nullptr, nullptr, 0);
+        fluid_synth_sysex(edge_fluid, (const char *)msg, (int)size, nullptr, nullptr, nullptr, 0);
     }
 
-    static void rtDeviceSwitch(void *userdata, size_t track, const char *data,
-                               size_t length)
+    static void rtDeviceSwitch(void *userdata, size_t track, const char *data, size_t length)
     {
         (void)userdata;
         (void)track;
@@ -279,8 +264,7 @@ class FluidPlayer : public AbstractMusicPlayer
 
     static void playSynth(void *userdata, uint8_t *stream, size_t length)
     {
-        fluid_synth_write_s16(edge_fluid, (int)length / 4, stream, 0, 2,
-                              stream + 2, 0, 2);
+        fluid_synth_write_s16(edge_fluid, (int)length / 4, stream, 0, 2, stream + 2, 0, 2);
     }
 
     void SequencerInit()
@@ -303,8 +287,7 @@ class FluidPlayer : public AbstractMusicPlayer
         fluid_interface_->onPcmRender_userdata = this;
 
         fluid_interface_->pcmSampleRate = sound_device_frequency;
-        fluid_interface_->pcmFrameSize =
-            2 /*channels*/ * 2 /*size of one sample*/;
+        fluid_interface_->pcmFrameSize  = 2 /*channels*/ * 2 /*size of one sample*/;
 
         fluid_interface_->rt_deviceSwitch  = rtDeviceSwitch;
         fluid_interface_->rt_currentDevice = rtCurrentDevice;
@@ -319,10 +302,12 @@ class FluidPlayer : public AbstractMusicPlayer
 
     void Close(void)
     {
-        if (status_ == kNotLoaded) return;
+        if (status_ == kNotLoaded)
+            return;
 
         // Stop playback
-        if (status_ != kStopped) Stop();
+        if (status_ != kStopped)
+            Stop();
 
         if (fluid_sequencer_)
         {
@@ -340,7 +325,8 @@ class FluidPlayer : public AbstractMusicPlayer
 
     void Play(bool loop)
     {
-        if (!(status_ == kNotLoaded || status_ == kStopped)) return;
+        if (!(status_ == kNotLoaded || status_ == kStopped))
+            return;
 
         status_  = kPlaying;
         looping_ = loop;
@@ -351,7 +337,8 @@ class FluidPlayer : public AbstractMusicPlayer
 
     void Stop(void)
     {
-        if (!(status_ == kPlaying || status_ == kPaused)) return;
+        if (!(status_ == kPlaying || status_ == kPaused))
+            return;
 
         fluid_synth_all_voices_stop(edge_fluid);
 
@@ -362,7 +349,8 @@ class FluidPlayer : public AbstractMusicPlayer
 
     void Pause(void)
     {
-        if (status_ != kPlaying) return;
+        if (status_ != kPlaying)
+            return;
 
         fluid_synth_all_voices_pause(edge_fluid);
 
@@ -371,7 +359,8 @@ class FluidPlayer : public AbstractMusicPlayer
 
     void Resume(void)
     {
-        if (status_ != kPaused) return;
+        if (status_ != kPaused)
+            return;
 
         status_ = kPlaying;
     }
@@ -387,11 +376,11 @@ class FluidPlayer : public AbstractMusicPlayer
 
         while (status_ == kPlaying && !pc_speaker_mode)
         {
-            SoundData *buf = SoundQueueGetFreeBuffer(
-                FLUID_NUM_SAMPLES,
-                sound_device_stereo ? kMixInterleaved : kMixMono);
+            SoundData *buf =
+                SoundQueueGetFreeBuffer(FLUID_NUM_SAMPLES, sound_device_stereo ? kMixInterleaved : kMixMono);
 
-            if (!buf) break;
+            if (!buf)
+                break;
 
             if (StreamIntoBuffer(buf))
             {
@@ -407,7 +396,7 @@ class FluidPlayer : public AbstractMusicPlayer
         }
     }
 
-   private:
+  private:
     bool StreamIntoBuffer(SoundData *buf)
     {
         int16_t *data_buf;
@@ -419,10 +408,10 @@ class FluidPlayer : public AbstractMusicPlayer
         else
             data_buf = buf->data_left_;
 
-        int played = fluid_sequencer_->PlayStream((uint8_t *)data_buf,
-                                                  FLUID_NUM_SAMPLES);
+        int played = fluid_sequencer_->PlayStream((uint8_t *)data_buf, FLUID_NUM_SAMPLES);
 
-        if (fluid_sequencer_->PositionAtEnd()) song_done = true;
+        if (fluid_sequencer_->PositionAtEnd())
+            song_done = true;
 
         buf->length_ = played / 4;
 
@@ -431,7 +420,8 @@ class FluidPlayer : public AbstractMusicPlayer
 
         if (song_done) /* EOF */
         {
-            if (!looping_) return false;
+            if (!looping_)
+                return false;
             fluid_sequencer_->Rewind();
             return true;
         }
@@ -457,9 +447,8 @@ AbstractMusicPlayer *PlayFluidMusic(uint8_t *data, int length, bool loop)
         return nullptr;
     }
 
-    if (!player->LoadTrack(
-            data,
-            length))  // Lobo: quietly log it instead of completely exiting EDGE
+    if (!player->LoadTrack(data,
+                           length)) // Lobo: quietly log it instead of completely exiting EDGE
     {
         LogDebug("FluidLite player: failed to load MIDI file!\n");
         delete[] data;

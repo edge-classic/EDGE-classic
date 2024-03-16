@@ -22,7 +22,7 @@
 
 class ImageData
 {
-   public:
+  public:
     short width_;
     short height_;
 
@@ -44,7 +44,7 @@ class ImageData
 
     uint8_t *pixels_;
 
-   public:
+  public:
     ImageData(int width, int height, int depth = 3);
     ~ImageData();
 
@@ -62,7 +62,8 @@ class ImageData
         uint8_t *src  = PixelAt(sx, sy);
         uint8_t *dest = PixelAt(dx, dy);
 
-        for (int i = 0; i < depth_; i++) *dest++ = *src++;
+        for (int i = 0; i < depth_; i++)
+            *dest++ = *src++;
     }
 
     // convert all RGB(A) pixels to a greyscale equivalent.
@@ -125,20 +126,17 @@ class ImageData
     // compute the average Hue of the RGB(A) image, storing the
     // result in the 'hue' array (r, g, b).  The average intensity
     // will be stored in 'intensity' when given.
-    void AverageHue(uint8_t *hue, uint8_t *intensity = nullptr, int from_x = -1,
-                    int to_x = 1000000, int from_y = -1, int to_y = 1000000);
+    void AverageHue(uint8_t *hue, uint8_t *intensity = nullptr, int from_x = -1, int to_x = 1000000, int from_y = -1,
+                    int to_y = 1000000);
 
     // compute the average color of the RGB image, based on modal average
-    RGBAColor AverageColor(int from_x = -1, int to_x = 1000000, int from_y = -1,
-                           int to_y = 1000000);
+    RGBAColor AverageColor(int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
 
     // compute the lightest color in the RGB image
-    RGBAColor LightestColor(int from_x = -1, int to_x = 1000000,
-                            int from_y = -1, int to_y = 1000000);
+    RGBAColor LightestColor(int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
 
     // compute the darkest color in the RGB image
-    RGBAColor DarkestColor(int from_x = -1, int to_x = 1000000, int from_y = -1,
-                           int to_y = 1000000);
+    RGBAColor DarkestColor(int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
 
     // SMMU-style swirling
     void Swirl(int level_time, int thickness);

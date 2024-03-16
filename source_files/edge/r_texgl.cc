@@ -46,26 +46,38 @@ int MakeValidTextureSize(int value)
 {
     EPI_ASSERT(value > 0);
 
-    if (value <= 1) return 1;
-    if (value <= 2) return 2;
-    if (value <= 4) return 4;
-    if (value <= 8) return 8;
-    if (value <= 16) return 16;
-    if (value <= 32) return 32;
-    if (value <= 64) return 64;
-    if (value <= 128) return 128;
-    if (value <= 256) return 256;
-    if (value <= 512) return 512;
-    if (value <= 1024) return 1024;
-    if (value <= 2048) return 2048;
-    if (value <= 4096) return 4096;
+    if (value <= 1)
+        return 1;
+    if (value <= 2)
+        return 2;
+    if (value <= 4)
+        return 4;
+    if (value <= 8)
+        return 8;
+    if (value <= 16)
+        return 16;
+    if (value <= 32)
+        return 32;
+    if (value <= 64)
+        return 64;
+    if (value <= 128)
+        return 128;
+    if (value <= 256)
+        return 256;
+    if (value <= 512)
+        return 512;
+    if (value <= 1024)
+        return 1024;
+    if (value <= 2048)
+        return 2048;
+    if (value <= 4096)
+        return 4096;
 
     FatalError("Texture size (%d) too large !\n", value);
     return -1; /* NOT REACHED */
 }
 
-ImageData *RgbFromPalettised(ImageData *src, const uint8_t *palette,
-                             int opacity)
+ImageData *RgbFromPalettised(ImageData *src, const uint8_t *palette, int opacity)
 {
     if (src->depth_ == 1)
     {
@@ -84,7 +96,8 @@ ImageData *RgbFromPalettised(ImageData *src, const uint8_t *palette,
                 {
                     dest_pix[0] = dest_pix[1] = dest_pix[2] = 0;
 
-                    if (bpp == 4) dest_pix[3] = 0;
+                    if (bpp == 4)
+                        dest_pix[3] = 0;
                 }
                 else
                 {
@@ -92,7 +105,8 @@ ImageData *RgbFromPalettised(ImageData *src, const uint8_t *palette,
                     dest_pix[1] = palette[src_pix * 3 + 1];
                     dest_pix[2] = palette[src_pix * 3 + 2];
 
-                    if (bpp == 4) dest_pix[3] = 255;
+                    if (bpp == 4)
+                        dest_pix[3] = 255;
                 }
             }
         return dest;
@@ -144,7 +158,8 @@ GLuint RendererUploadTexture(ImageData *img, int flags, int max_pix)
 
     GLint tmode = GL_REPEAT;
 
-    if (clamp) tmode = renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE;
+    if (clamp)
+        tmode = renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE;
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, tmode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, tmode);
@@ -152,8 +167,7 @@ GLuint RendererUploadTexture(ImageData *img, int flags, int max_pix)
     texture_clamp.emplace(id, tmode);
 
     // magnification mode
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-                    smooth ? GL_LINEAR : GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, smooth ? GL_LINEAR : GL_NEAREST);
 
     // minification mode
     int mip_level = HMM_Clamp(0, detail_level, 2);
@@ -162,16 +176,14 @@ GLuint RendererUploadTexture(ImageData *img, int flags, int max_pix)
     // guarantees that each texture level has simple alpha (0 or 255),
     // but we must also disable Trilinear Mipmapping because it will
     // produce partial alpha values when interpolating between mips.
-    if (flags & kUploadThresh) mip_level = HMM_Clamp(0, mip_level, 1);
+    if (flags & kUploadThresh)
+        mip_level = HMM_Clamp(0, mip_level, 1);
 
-    static GLuint minif_modes[2 * 3] = {
-        GL_NEAREST, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR,
+    static GLuint minif_modes[2 * 3] = {GL_NEAREST, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR,
 
-        GL_LINEAR,  GL_LINEAR_MIPMAP_NEAREST,  GL_LINEAR_MIPMAP_LINEAR
-    };
+                                        GL_LINEAR,  GL_LINEAR_MIPMAP_NEAREST,  GL_LINEAR_MIPMAP_LINEAR};
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                    minif_modes[(smooth ? 3 : 0) + (nomip ? 0 : mip_level)]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minif_modes[(smooth ? 3 : 0) + (nomip ? 0 : mip_level)]);
 
     for (int mip = 0;; mip++)
     {
@@ -183,13 +195,12 @@ GLuint RendererUploadTexture(ImageData *img, int flags, int max_pix)
                 img->ThresholdAlpha((mip & 1) ? 96 : 144);
         }
 
-        glTexImage2D(GL_TEXTURE_2D, mip, (img->depth_ == 3) ? GL_RGB : GL_RGBA,
-                     new_w, new_h, 0 /* border */,
-                     (img->depth_ == 3) ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE,
-                     img->PixelAt(0, 0));
+        glTexImage2D(GL_TEXTURE_2D, mip, (img->depth_ == 3) ? GL_RGB : GL_RGBA, new_w, new_h, 0 /* border */,
+                     (img->depth_ == 3) ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, img->PixelAt(0, 0));
 
         // stop if mipmapping disabled or we have reached the end
-        if (nomip || !detail_level || (new_w == 1 && new_h == 1)) break;
+        if (nomip || !detail_level || (new_w == 1 && new_h == 1))
+            break;
 
         new_w = HMM_MAX(1, new_w / 2);
         new_h = HMM_MAX(1, new_h / 2);
@@ -207,8 +218,7 @@ GLuint RendererUploadTexture(ImageData *img, int flags, int max_pix)
 
 //----------------------------------------------------------------------------
 
-void PaletteRemapRgba(ImageData *img, const uint8_t *new_pal,
-                      const uint8_t *old_pal)
+void PaletteRemapRgba(ImageData *img, const uint8_t *new_pal, const uint8_t *old_pal)
 {
     const int max_prev = 16;
 
@@ -222,16 +232,15 @@ void PaletteRemapRgba(ImageData *img, const uint8_t *new_pal,
             uint8_t *cur = img->PixelAt(x, y);
 
             // skip completely transparent pixels
-            if (img->depth_ == 4 && cur[3] == 0) continue;
+            if (img->depth_ == 4 && cur[3] == 0)
+                continue;
 
             // optimisation: if colour matches previous one, don't need
             // to compute the remapping again.
             int i;
             for (i = 0; i < num_prev; i++)
             {
-                if (previous[i * 6 + 0] == cur[0] &&
-                    previous[i * 6 + 1] == cur[1] &&
-                    previous[i * 6 + 2] == cur[2])
+                if (previous[i * 6 + 0] == cur[0] && previous[i * 6 + 1] == cur[1] && previous[i * 6 + 2] == cur[2])
                 {
                     break;
                 }
@@ -291,8 +300,7 @@ void PaletteRemapRgba(ImageData *img, const uint8_t *new_pal,
 
             // if this colour is not affected by the colourmap, then
             // keep the original colour (which has more precision).
-            if (old_pal[best * 3 + 0] != new_pal[best * 3 + 0] ||
-                old_pal[best * 3 + 1] != new_pal[best * 3 + 1] ||
+            if (old_pal[best * 3 + 0] != new_pal[best * 3 + 0] || old_pal[best * 3 + 1] != new_pal[best * 3 + 1] ||
                 old_pal[best * 3 + 2] != new_pal[best * 3 + 2])
             {
                 cur[0] = new_pal[best * 3 + 0];
@@ -383,14 +391,18 @@ void BlackenClearAreas(ImageData *img)
     {
         for (; count > 0; count--, dest++)
         {
-            if (*dest == kTransparentPixelIndex) *dest = playpal_black;
+            if (*dest == kTransparentPixelIndex)
+                *dest = playpal_black;
         }
     }
     else if (img->depth_ == 4)
     {
         for (; count > 0; count--, dest += 4)
         {
-            if (dest[3] == 0) { dest[0] = dest[1] = dest[2] = 0; }
+            if (dest[3] == 0)
+            {
+                dest[0] = dest[1] = dest[2] = 0;
+            }
         }
     }
 }

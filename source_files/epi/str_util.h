@@ -40,13 +40,11 @@ inline bool IsLowerASCII(int character)
 }
 inline bool IsAlphaASCII(int character)
 {
-    return ((character > '@' && character < '[') ||
-            (character > '`' && character < '{'));
+    return ((character > '@' && character < '[') || (character > '`' && character < '{'));
 }
 inline bool IsAlphanumericASCII(int character)
 {
-    return ((character > '@' && character < '[') ||
-            (character > '`' && character < '{') ||
+    return ((character > '@' && character < '[') || (character > '`' && character < '{') ||
             (character > '/' && character < ':'));
 }
 inline bool IsDigitASCII(int character)
@@ -55,8 +53,7 @@ inline bool IsDigitASCII(int character)
 }
 inline bool IsXDigitASCII(int character)
 {
-    return ((character > '@' && character < 'G') ||
-            (character > '`' && character < 'g') ||
+    return ((character > '@' && character < 'G') || (character > '`' && character < 'g') ||
             (character > '/' && character < ':'));
 }
 inline bool IsPrintASCII(int character)
@@ -95,15 +92,13 @@ void  CStringFree(const char *string);
 
 void TextureNameFromFilename(std::string &buf, std::string_view stem);
 #ifdef __GNUC__
-std::string StringFormat(const char *fmt, ...)
-    __attribute__((format(printf, 1, 2)));
+std::string StringFormat(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 #else
 std::string StringFormat(const char *fmt, ...);
 #endif
-std::vector<std::string> SeparatedStringVector(std::string_view str,
-                                               char             separator);
+std::vector<std::string> SeparatedStringVector(std::string_view str, char separator);
 uint32_t                 StringHash32(std::string_view str_to_hash);
-}  // namespace epi
+} // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

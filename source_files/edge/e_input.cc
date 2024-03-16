@@ -110,12 +110,12 @@ int key_inventory_next;
 int key_third_attack;
 int key_fourth_attack;
 
-static int forward_move[2] = { 25, 50 };
-static int side_move[2]    = { 24, 40 };
-static int upward_move[2]  = { 20, 30 };
+static int forward_move[2] = {25, 50};
+static int side_move[2]    = {24, 40};
+static int upward_move[2]  = {20, 30};
 
-static int angle_turn[3]     = { 640, 1280, 320 };  // + slow turn
-static int mouselook_turn[3] = { 400, 800, 200 };
+static int angle_turn[3]     = {640, 1280, 320}; // + slow turn
+static int mouselook_turn[3] = {400, 800, 200};
 
 static constexpr uint8_t kSlowTurnTics = 6;
 
@@ -129,8 +129,8 @@ enum GameKeyState
 
 static uint8_t game_key_down[kTotalKeys];
 
-static int turn_held;       // for accelerative turning
-static int mouselook_held;  // for accelerative mlooking
+static int turn_held;      // for accelerative turning
+static int mouselook_held; // for accelerative mlooking
 
 //-------------------------------------------
 // -KM-  1998/09/01 Analogue binding
@@ -139,32 +139,25 @@ static int mouselook_held;  // for accelerative mlooking
 int mouse_x_axis;
 int mouse_y_axis;
 
-int joystick_axis[4] = { 0, 0, 0, 0 };
+int joystick_axis[4] = {0, 0, 0, 0};
 
 static constexpr float kJoystickAxisPeak = 32767.0f / 32768.0f;
 
 static int joy_last_raw[4];
 
 // The last one is ignored (kAxisDisable)
-static float ball_deltas[6] = { 0, 0, 0, 0, 0, 0 };
-static float joy_forces[6]  = { 0, 0, 0, 0, 0, 0 };
+static float ball_deltas[6] = {0, 0, 0, 0, 0, 0};
+static float joy_forces[6]  = {0, 0, 0, 0, 0, 0};
 
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_0, "0.30",
-                                     kConsoleVariableFlagArchive, 0.01f, 0.99f)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_1, "0.30",
-                                     kConsoleVariableFlagArchive, 0.01f, 0.99f)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_2, "0.30",
-                                     kConsoleVariableFlagArchive, 0.01f, 0.99f)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_3, "0.30",
-                                     kConsoleVariableFlagArchive, 0.01f, 0.99f)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_4, "0.30",
-                                     kConsoleVariableFlagArchive, 0.01f, 0.99f)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_5, "0.30",
-                                     kConsoleVariableFlagArchive, 0.01f, 0.99f)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_0, "0.30", kConsoleVariableFlagArchive, 0.01f, 0.99f)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_1, "0.30", kConsoleVariableFlagArchive, 0.01f, 0.99f)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_2, "0.30", kConsoleVariableFlagArchive, 0.01f, 0.99f)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_3, "0.30", kConsoleVariableFlagArchive, 0.01f, 0.99f)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_4, "0.30", kConsoleVariableFlagArchive, 0.01f, 0.99f)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_5, "0.30", kConsoleVariableFlagArchive, 0.01f, 0.99f)
 float *joystick_deadzones[6] = {
-    &joystick_deadzone_axis_0.f_, &joystick_deadzone_axis_1.f_,
-    &joystick_deadzone_axis_2.f_, &joystick_deadzone_axis_3.f_,
-    &joystick_deadzone_axis_4.f_, &joystick_deadzone_axis_5.f_,
+    &joystick_deadzone_axis_0.f_, &joystick_deadzone_axis_1.f_, &joystick_deadzone_axis_2.f_,
+    &joystick_deadzone_axis_3.f_, &joystick_deadzone_axis_4.f_, &joystick_deadzone_axis_5.f_,
 };
 
 EDGE_DEFINE_CONSOLE_VARIABLE(in_running, "1", kConsoleVariableFlagArchive)
@@ -173,15 +166,12 @@ EDGE_DEFINE_CONSOLE_VARIABLE(in_stageturn, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(debug_mouse, "0", kConsoleVariableFlagNone)
 EDGE_DEFINE_CONSOLE_VARIABLE(debug_joyaxis, "0", kConsoleVariableFlagNone)
 
-EDGE_DEFINE_CONSOLE_VARIABLE(mouse_x_sensitivity, "10.0",
-                             kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(mouse_y_sensitivity, "10.0",
-                             kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(mouse_x_sensitivity, "10.0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(mouse_y_sensitivity, "10.0", kConsoleVariableFlagArchive)
 
 // Speed controls
 EDGE_DEFINE_CONSOLE_VARIABLE(turn_speed, "1.0", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(vertical_look_speed, "1.0",
-                             kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(vertical_look_speed, "1.0", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(forward_speed, "1.0", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(side_speed, "1.0", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(fly_speed, "1.0", kConsoleVariableFlagArchive)
@@ -192,16 +182,19 @@ static float JoystickAxisFromRaw(int raw, float dead)
 
     float v = raw / 32768.0f;
 
-    if (fabs(v) < dead) return 0;
+    if (fabs(v) < dead)
+        return 0;
 
-    if (fabs(v) >= kJoystickAxisPeak) return (v < 0) ? -1.0f : +1.0f;
+    if (fabs(v) >= kJoystickAxisPeak)
+        return (v < 0) ? -1.0f : +1.0f;
 
     return v;
 }
 
 static void UpdateJoystickAxis(int n)
 {
-    if (joystick_axis[n] == kAxisDisable) return;
+    if (joystick_axis[n] == kAxisDisable)
+        return;
 
     int raw = JoystickGetAxis(n);
     int old = joy_last_raw[n];
@@ -214,7 +207,8 @@ static void UpdateJoystickAxis(int n)
     float force = JoystickAxisFromRaw(cooked, *joystick_deadzones[n]);
 
     // perform inversion
-    if ((joystick_axis[n] + 1) & 1) force = -force;
+    if ((joystick_axis[n] + 1) & 1)
+        force = -force;
 
     if (debug_joyaxis.d_ == n + 1)
         LogPrint("Axis%d : raw %+05d --> %+7.3f\n", n + 1, raw, force);
@@ -238,27 +232,36 @@ bool EventIsKeyPressed(int keyvar)
         FatalError("Invalid key!");
 #endif
 
-    if (game_key_down[keyvar >> 16] & kGameKeyDown) return true;
+    if (game_key_down[keyvar >> 16] & kGameKeyDown)
+        return true;
 
-    if (game_key_down[keyvar & 0xffff] & kGameKeyDown) return true;
+    if (game_key_down[keyvar & 0xffff] & kGameKeyDown)
+        return true;
 
     return false;
 }
 
-static inline void AddKeyForce(int axis, int upkeys, int downkeys,
-                               float qty = 1.0f)
+static inline void AddKeyForce(int axis, int upkeys, int downkeys, float qty = 1.0f)
 {
     // let movement keys cancel each other out
-    if (EventIsKeyPressed(upkeys)) { joy_forces[axis] += qty; }
-    if (EventIsKeyPressed(downkeys)) { joy_forces[axis] -= qty; }
+    if (EventIsKeyPressed(upkeys))
+    {
+        joy_forces[axis] += qty;
+    }
+    if (EventIsKeyPressed(downkeys))
+    {
+        joy_forces[axis] -= qty;
+    }
 }
 
 static void UpdateForces(void)
 {
-    for (int k = 0; k < 6; k++) joy_forces[k] = 0;
+    for (int k = 0; k < 6; k++)
+        joy_forces[k] = 0;
 
     // ---Joystick---
-    for (int j = 0; j < 4; j++) UpdateJoystickAxis(j);
+    for (int j = 0; j < 4; j++)
+        UpdateJoystickAxis(j);
 
     // ---Keyboard---
     AddKeyForce(kAxisTurn, key_right, key_left);
@@ -289,12 +292,13 @@ void EventBuildTicCommand(EventTicCommand *cmd)
 {
     UpdateForces();
 
-    *cmd = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    *cmd = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     bool strafe = EventIsKeyPressed(key_strafe);
     int  speed  = EventIsKeyPressed(key_speed) ? 1 : 0;
 
-    if (in_running.d_) speed = !speed;
+    if (in_running.d_)
+        speed = !speed;
 
     //
     // -KM- 1998/09/01 use two stage accelerative turning on all devices
@@ -310,7 +314,8 @@ void EventBuildTicCommand(EventTicCommand *cmd)
         turn_held = 0;
 
     // slow turn ?
-    if (turn_held < kSlowTurnTics && in_stageturn.d_) t_speed = 2;
+    if (turn_held < kSlowTurnTics && in_stageturn.d_)
+        t_speed = 2;
 
     int m_speed = speed;
 
@@ -320,13 +325,13 @@ void EventBuildTicCommand(EventTicCommand *cmd)
         mouselook_held = 0;
 
     // slow mlook ?
-    if (mouselook_held < kSlowTurnTics && in_stageturn.d_) m_speed = 2;
+    if (mouselook_held < kSlowTurnTics && in_stageturn.d_)
+        m_speed = 2;
 
     // Turning
     if (!strafe)
     {
-        float turn = angle_turn[t_speed] / (double_framerate.d_ ? 2 : 1) *
-                     joy_forces[kAxisTurn];
+        float turn = angle_turn[t_speed] / (double_framerate.d_ ? 2 : 1) * joy_forces[kAxisTurn];
 
         turn *= turn_speed.f_;
 
@@ -366,14 +371,16 @@ void EventBuildTicCommand(EventTicCommand *cmd)
     {
         float side = side_move[speed] * joy_forces[kAxisStrafe];
 
-        if (strafe) side += side_move[speed] * joy_forces[kAxisTurn];
+        if (strafe)
+            side += side_move[speed] * joy_forces[kAxisTurn];
 
         side *= side_speed.f_;
 
         // -ACB- 1998/09/06 Side Move Speed Control
         side += side_move[speed] * ball_deltas[kAxisStrafe] / 64.0;
 
-        if (strafe) side += side_move[speed] * ball_deltas[kAxisTurn] / 64.0;
+        if (strafe)
+            side += side_move[speed] * ball_deltas[kAxisTurn] / 64.0;
 
         side = HMM_Clamp(-forward_move[1], side, forward_move[1]);
 
@@ -395,12 +402,12 @@ void EventBuildTicCommand(EventTicCommand *cmd)
 
     // ---Buttons---
 
-    if (EventIsKeyPressed(key_fire)) cmd->buttons |= kButtonCodeAttack;
+    if (EventIsKeyPressed(key_fire))
+        cmd->buttons |= kButtonCodeAttack;
 
     if (EventIsKeyPressed(key_use) &&
-        players[cmd->player_index]->player_state_ !=
-            kPlayerAwaitingRespawn)  // Prevent passing use action when hitting
-                                     // 'use' to respawn
+        players[cmd->player_index]->player_state_ != kPlayerAwaitingRespawn) // Prevent passing use action when hitting
+                                                                             // 'use' to respawn
         cmd->buttons |= kButtonCodeUse;
 
     if (EventIsKeyPressed(key_second_attack))
@@ -444,14 +451,14 @@ void EventBuildTicCommand(EventTicCommand *cmd)
     else if (EventIsKeyPressed(key_previous_weapon))
     {
         cmd->buttons |= kButtonCodeChangeWeapon;
-        cmd->buttons |=
-            (kButtonCodePreviousWeapon << kButtonCodeWeaponMaskShift);
+        cmd->buttons |= (kButtonCodePreviousWeapon << kButtonCodeWeaponMaskShift);
     }
 
     // You have to release the 180 deg turn key before you can press it again
     if (EventIsKeyPressed(key_180))
     {
-        if (allow_180) cmd->angle_turn ^= 0x8000;
+        if (allow_180)
+            cmd->angle_turn ^= 0x8000;
 
         allow_180 = false;
     }
@@ -517,7 +524,8 @@ void EventBuildTicCommand(EventTicCommand *cmd)
 
     cmd->chat_character = 0;
 
-    for (int k = 0; k < 6; k++) ball_deltas[k] = 0;
+    for (int k = 0; k < 6; k++)
+        ball_deltas[k] = 0;
 }
 
 //
@@ -527,58 +535,58 @@ bool EventInputResponderResponder(InputEvent *ev)
 {
     switch (ev->type)
     {
-        case kInputEventKeyDown:
-            if (ev->value.key.sym < kTotalKeys)
-            {
-                game_key_down[ev->value.key.sym] &= ~kGameKeyUp;
-                game_key_down[ev->value.key.sym] |= kGameKeyDown;
-            }
-
-            // eat key down events
-            return true;
-
-        case kInputEventKeyUp:
-            if (ev->value.key.sym < kTotalKeys)
-            {
-                game_key_down[ev->value.key.sym] |= kGameKeyUp;
-            }
-
-            // always let key up events filter down
-            return false;
-
-        case kInputEventKeyMouse:
+    case kInputEventKeyDown:
+        if (ev->value.key.sym < kTotalKeys)
         {
-            float dx = ev->value.mouse.dx;
-            float dy = ev->value.mouse.dy;
-
-            // perform inversion
-            if ((mouse_x_axis + 1) & 1) dx = -dx;
-            if ((mouse_y_axis + 1) & 1) dy = -dy;
-
-            dx *= mouse_x_sensitivity.f_;
-            dy *= mouse_y_sensitivity.f_;
-
-            if (debug_mouse.d_)
-                LogPrint("Mouse %+04d %+04d --> %+7.2f %+7.2f\n",
-                         ev->value.mouse.dx, ev->value.mouse.dy, dx, dy);
-
-            // -AJA- 1999/07/27: Mlook key like quake's.
-            if (EventIsKeyPressed(key_mouselook))
-            {
-                ball_deltas[kAxisTurn] += dx;
-                ball_deltas[kAxisMouselook] += dy;
-            }
-            else
-            {
-                ball_deltas[(mouse_x_axis + 1) >> 1] += dx;
-                ball_deltas[(mouse_y_axis + 1) >> 1] += dy;
-            }
-
-            return true;  // eat events
+            game_key_down[ev->value.key.sym] &= ~kGameKeyUp;
+            game_key_down[ev->value.key.sym] |= kGameKeyDown;
         }
 
-        default:
-            break;
+        // eat key down events
+        return true;
+
+    case kInputEventKeyUp:
+        if (ev->value.key.sym < kTotalKeys)
+        {
+            game_key_down[ev->value.key.sym] |= kGameKeyUp;
+        }
+
+        // always let key up events filter down
+        return false;
+
+    case kInputEventKeyMouse: {
+        float dx = ev->value.mouse.dx;
+        float dy = ev->value.mouse.dy;
+
+        // perform inversion
+        if ((mouse_x_axis + 1) & 1)
+            dx = -dx;
+        if ((mouse_y_axis + 1) & 1)
+            dy = -dy;
+
+        dx *= mouse_x_sensitivity.f_;
+        dy *= mouse_y_sensitivity.f_;
+
+        if (debug_mouse.d_)
+            LogPrint("Mouse %+04d %+04d --> %+7.2f %+7.2f\n", ev->value.mouse.dx, ev->value.mouse.dy, dx, dy);
+
+        // -AJA- 1999/07/27: Mlook key like quake's.
+        if (EventIsKeyPressed(key_mouselook))
+        {
+            ball_deltas[kAxisTurn] += dx;
+            ball_deltas[kAxisMouselook] += dy;
+        }
+        else
+        {
+            ball_deltas[(mouse_x_axis + 1) >> 1] += dx;
+            ball_deltas[(mouse_y_axis + 1) >> 1] += dy;
+        }
+
+        return true; // eat events
+    }
+
+    default:
+        break;
     }
 
     return false;
@@ -615,7 +623,8 @@ void EventClearInput(void)
 void EventUpdateKeyState(void)
 {
     for (int k = 0; k < kTotalKeys; k++)
-        if (game_key_down[k] & kGameKeyUp) game_key_down[k] = 0;
+        if (game_key_down[k] & kGameKeyUp)
+            game_key_down[k] = 0;
 }
 
 //
@@ -646,7 +655,7 @@ void EventPostEvent(InputEvent *ev)
     events[event_head] = *ev;
     event_head         = (event_head + 1) % kMaximumInputEvents;
 
-#ifdef EDGE_DEBUG_KEY_EV  //!!!!
+#ifdef EDGE_DEBUG_KEY_EV //!!!!
     if (ev->type == kInputEventKeyDown || ev->type == kInputEventKeyUp)
     {
         LogDebug("EVENT @ %08x %d %s\n", GetMilliseconds(), ev->value.key,
@@ -662,16 +671,17 @@ void EventProcessEvents(void)
 {
     InputEvent *ev;
 
-    for (; event_tail != event_head;
-         event_tail = (event_tail + 1) % kMaximumInputEvents)
+    for (; event_tail != event_head; event_tail = (event_tail + 1) % kMaximumInputEvents)
     {
         ev = &events[event_tail];
 
-        if (ConsoleResponder(ev)) continue;  // Console ate the event
+        if (ConsoleResponder(ev))
+            continue;      // Console ate the event
 
-        if (MenuResponder(ev)) continue;  // menu ate the event
+        if (MenuResponder(ev))
+            continue;      // menu ate the event
 
-        GameResponder(ev);  // let game eat it, nobody else wanted it
+        GameResponder(ev); // let game eat it, nobody else wanted it
     }
 }
 
@@ -684,108 +694,106 @@ struct EventSpecialKey
     const char *name;
 };
 
-static EventSpecialKey special_keys[] = {
-    { kRightArrow, "Right Arrow" },
-    { kLeftArrow, "Left Arrow" },
-    { kUpArrow, "Up Arrow" },
-    { kDownArrow, "Down Arrow" },
-    { kEscape, "Escape" },
-    { kEnter, "Enter" },
-    { kTab, "Tab" },
+static EventSpecialKey special_keys[] = {{kRightArrow, "Right Arrow"},
+                                         {kLeftArrow, "Left Arrow"},
+                                         {kUpArrow, "Up Arrow"},
+                                         {kDownArrow, "Down Arrow"},
+                                         {kEscape, "Escape"},
+                                         {kEnter, "Enter"},
+                                         {kTab, "Tab"},
 
-    { kBackspace, "Backspace" },
-    { kEquals, "Equals" },
-    { kMinus, "Minus" },
-    { kRightShift, "Shift" },
-    { kRightControl, "Ctrl" },
-    { kRightAlt, "Alt" },
-    { kInsert, "Insert" },
-    { kDelete, "Delete" },
-    { kPageDown, "PageDown" },
-    { kPageUp, "PageUp" },
-    { kHome, "Home" },
-    { kEnd, "End" },
-    { kScrollLock, "ScrollLock" },
-    { kNumberLock, "NumLock" },
-    { kCapsLock, "CapsLock" },
-    { kEnd, "End" },
-    { '\'', "\'" },
-    { kSpace, "Space" },
-    { kTilde, "`" },
-    { kPause, "Pause" },
+                                         {kBackspace, "Backspace"},
+                                         {kEquals, "Equals"},
+                                         {kMinus, "Minus"},
+                                         {kRightShift, "Shift"},
+                                         {kRightControl, "Ctrl"},
+                                         {kRightAlt, "Alt"},
+                                         {kInsert, "Insert"},
+                                         {kDelete, "Delete"},
+                                         {kPageDown, "PageDown"},
+                                         {kPageUp, "PageUp"},
+                                         {kHome, "Home"},
+                                         {kEnd, "End"},
+                                         {kScrollLock, "ScrollLock"},
+                                         {kNumberLock, "NumLock"},
+                                         {kCapsLock, "CapsLock"},
+                                         {kEnd, "End"},
+                                         {'\'', "\'"},
+                                         {kSpace, "Space"},
+                                         {kTilde, "`"},
+                                         {kPause, "Pause"},
 
-    // function keys
-    { kFunction1, "F1" },
-    { kFunction2, "F2" },
-    { kFunction3, "F3" },
-    { kFunction4, "F4" },
-    { kFunction5, "F5" },
-    { kFunction6, "F6" },
-    { kFunction7, "F7" },
-    { kFunction8, "F8" },
-    { kFunction9, "F9" },
-    { kFunction10, "F10" },
-    { kFunction11, "F11" },
-    { kFunction12, "F12" },
+                                         // function keys
+                                         {kFunction1, "F1"},
+                                         {kFunction2, "F2"},
+                                         {kFunction3, "F3"},
+                                         {kFunction4, "F4"},
+                                         {kFunction5, "F5"},
+                                         {kFunction6, "F6"},
+                                         {kFunction7, "F7"},
+                                         {kFunction8, "F8"},
+                                         {kFunction9, "F9"},
+                                         {kFunction10, "F10"},
+                                         {kFunction11, "F11"},
+                                         {kFunction12, "F12"},
 
-    // numeric keypad
-    { kKeypad0, "KP_0" },
-    { kKeypad1, "KP_1" },
-    { kKeypad2, "KP_2" },
-    { kKeypad3, "KP_3" },
-    { kKeypad4, "KP_4" },
-    { kKeypad5, "KP_5" },
-    { kKeypad6, "KP_6" },
-    { kKeypad7, "KP_7" },
-    { kKeypad8, "KP_8" },
-    { kKeypad9, "KP_9" },
+                                         // numeric keypad
+                                         {kKeypad0, "KP_0"},
+                                         {kKeypad1, "KP_1"},
+                                         {kKeypad2, "KP_2"},
+                                         {kKeypad3, "KP_3"},
+                                         {kKeypad4, "KP_4"},
+                                         {kKeypad5, "KP_5"},
+                                         {kKeypad6, "KP_6"},
+                                         {kKeypad7, "KP_7"},
+                                         {kKeypad8, "KP_8"},
+                                         {kKeypad9, "KP_9"},
 
-    { kKeypadDot, "KP_DOT" },
-    { kKeypadPlus, "KP_PLUS" },
-    { kKeypadMinus, "KP_MINUS" },
-    { kKeypadStar, "KP_STAR" },
-    { kKeypadSlash, "KP_SLASH" },
-    { kKeypadEquals, "KP_EQUAL" },
-    { kKeypadEnter, "KP_ENTER" },
+                                         {kKeypadDot, "KP_DOT"},
+                                         {kKeypadPlus, "KP_PLUS"},
+                                         {kKeypadMinus, "KP_MINUS"},
+                                         {kKeypadStar, "KP_STAR"},
+                                         {kKeypadSlash, "KP_SLASH"},
+                                         {kKeypadEquals, "KP_EQUAL"},
+                                         {kKeypadEnter, "KP_ENTER"},
 
-    // mouse buttons
-    { kMouse1, "Mouse1" },
-    { kMouse2, "Mouse2" },
-    { kMouse3, "Mouse3" },
-    { kMouse4, "Mouse4" },
-    { kMouse5, "Mouse5" },
-    { kMouse6, "Mouse6" },
-    { kMouseWheelUp, "Wheel Up" },
-    { kMouseWheelDown, "Wheel Down" },
+                                         // mouse buttons
+                                         {kMouse1, "Mouse1"},
+                                         {kMouse2, "Mouse2"},
+                                         {kMouse3, "Mouse3"},
+                                         {kMouse4, "Mouse4"},
+                                         {kMouse5, "Mouse5"},
+                                         {kMouse6, "Mouse6"},
+                                         {kMouseWheelUp, "Wheel Up"},
+                                         {kMouseWheelDown, "Wheel Down"},
 
-    // gamepad buttons
-    { kGamepadA, "A Button" },
-    { kGamepadB, "B Button" },
-    { kGamepadX, "X Button" },
-    { kGamepadY, "Y Button" },
-    { kGamepadBack, "Back Button" },
-    { kGamepadGuide, "Guide Button" },  // ???
-    { kGamepadStart, "Start Button" },
-    { kGamepadLeftStick, "Left Stick" },
-    { kGamepadRightStick, "Right Stick" },
-    { kGamepadLeftShoulder, "Left Shoulder" },
-    { kGamepadRightShoulder, "Right Shoulder" },
-    { kGamepadUp, "DPad Up" },
-    { kGamepadDown, "DPad Down" },
-    { kGamepadLeft, "DPad Left" },
-    { kGamepadRight, "DPad Right" },
-    { kGamepadMisc1, "Misc1 Button" },  // ???
-    { kGamepadPaddle1, "Paddle 1" },
-    { kGamepadPaddle2, "Paddle 2" },
-    { kGamepadPaddle3, "Paddle 3" },
-    { kGamepadPaddle4, "Paddle 4" },
-    { kGamepadTouchpad, "Touchpad" },
-    { kGamepadTriggerLeft, "Left Trigger" },
-    { kGamepadTriggerRight, "Right Trigger" },
+                                         // gamepad buttons
+                                         {kGamepadA, "A Button"},
+                                         {kGamepadB, "B Button"},
+                                         {kGamepadX, "X Button"},
+                                         {kGamepadY, "Y Button"},
+                                         {kGamepadBack, "Back Button"},
+                                         {kGamepadGuide, "Guide Button"}, // ???
+                                         {kGamepadStart, "Start Button"},
+                                         {kGamepadLeftStick, "Left Stick"},
+                                         {kGamepadRightStick, "Right Stick"},
+                                         {kGamepadLeftShoulder, "Left Shoulder"},
+                                         {kGamepadRightShoulder, "Right Shoulder"},
+                                         {kGamepadUp, "DPad Up"},
+                                         {kGamepadDown, "DPad Down"},
+                                         {kGamepadLeft, "DPad Left"},
+                                         {kGamepadRight, "DPad Right"},
+                                         {kGamepadMisc1, "Misc1 Button"}, // ???
+                                         {kGamepadPaddle1, "Paddle 1"},
+                                         {kGamepadPaddle2, "Paddle 2"},
+                                         {kGamepadPaddle3, "Paddle 3"},
+                                         {kGamepadPaddle4, "Paddle 4"},
+                                         {kGamepadTouchpad, "Touchpad"},
+                                         {kGamepadTriggerLeft, "Left Trigger"},
+                                         {kGamepadTriggerRight, "Right Trigger"},
 
-    // THE END
-    { -1, nullptr }
-};
+                                         // THE END
+                                         {-1, nullptr}};
 
 const char *EventGetKeyName(int key)
 {
@@ -801,7 +809,8 @@ const char *EventGetKeyName(int key)
 
     for (int i = 0; special_keys[i].name; i++)
     {
-        if (special_keys[i].key == key) return special_keys[i].name;
+        if (special_keys[i].key == key)
+            return special_keys[i].name;
     }
 
     sprintf(buffer, "Key%03d", key);

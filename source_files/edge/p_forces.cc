@@ -44,13 +44,13 @@
 #include "p_local.h"
 #include "r_state.h"
 
-constexpr float kPushFactor = 64.0f;  // should be 128 ?? (why? - Dasho)
+constexpr float kPushFactor = 64.0f; // should be 128 ?? (why? - Dasho)
 
 extern ConsoleVariable double_framerate;
 
 std::vector<Force *> active_forces;
 
-static Force *current_force;  // for PushThingCallback
+static Force *current_force; // for PushThingCallback
 
 static void WindCurrentForce(Force *f, MapObject *mo)
 {
@@ -60,23 +60,25 @@ static void WindCurrentForce(Force *f, MapObject *mo)
     Sector *sec = f->sector;
 
     // NOTE: assumes that BOOM's [242] linetype was used
-    Extrafloor *ef =
-        sec->bottom_liquid ? sec->bottom_liquid : sec->bottom_extrafloor;
+    Extrafloor *ef = sec->bottom_liquid ? sec->bottom_liquid : sec->bottom_extrafloor;
 
     float qty = 0.5f;
 
     if (f->is_wind)
     {
-        if (ef && z2 < ef->bottom_height) return;
+        if (ef && z2 < ef->bottom_height)
+            return;
 
         if (z1 > (ef ? ef->bottom_height : sec->floor_height) + 2.0f)
             qty = 1.0f;
     }
-    else  // Current
+    else // Current
     {
-        if (z1 > (ef ? ef->bottom_height : sec->floor_height) + 2.0f) return;
+        if (z1 > (ef ? ef->bottom_height : sec->floor_height) + 2.0f)
+            return;
 
-        if (z2 < (ef ? ef->bottom_height : sec->ceiling_height)) qty = 1.0f;
+        if (z2 < (ef ? ef->bottom_height : sec->ceiling_height))
+            qty = 1.0f;
     }
 
     mo->momentum_.X += qty * f->direction.X;
@@ -85,9 +87,11 @@ static void WindCurrentForce(Force *f, MapObject *mo)
 
 static bool PushThingCallback(MapObject *mo, void *dataptr)
 {
-    if (!(mo->hyper_flags_ & kHyperFlagPushable)) return true;
+    if (!(mo->hyper_flags_ & kHyperFlagPushable))
+        return true;
 
-    if (mo->flags_ & kMapObjectFlagNoClip) return true;
+    if (mo->flags_ & kMapObjectFlagNoClip)
+        return true;
 
     float dx = mo->x - current_force->point.X;
     float dy = mo->y - current_force->point.Y;
@@ -95,11 +99,11 @@ static bool PushThingCallback(MapObject *mo, void *dataptr)
     float d_unit = ApproximateDistance(dx, dy);
     float dist   = d_unit * 2.0f / current_force->radius;
 
-    if (dist >= 2.0f) return true;
+    if (dist >= 2.0f)
+        return true;
 
     // don't apply the force through walls
-    if (!CheckSightToPoint(mo, current_force->point.X, current_force->point.Y,
-                           current_force->point.Z))
+    if (!CheckSightToPoint(mo, current_force->point.X, current_force->point.Y, current_force->point.Z))
         return true;
 
     float speed;
@@ -136,10 +140,9 @@ static void DoForce(Force *f)
             float y = f->point.Y;
             float r = f->radius;
 
-            BlockmapThingIterator(x - r, y - r, x + r, y + r,
-                                  PushThingCallback);
+            BlockmapThingIterator(x - r, y - r, x + r, y + r, PushThingCallback);
         }
-        else  // wind/current
+        else // wind/current
         {
             TouchNode *nd;
 
@@ -212,7 +215,8 @@ void AddSectorForce(Sector *sec, bool is_wind, float x_mag, float y_mag)
 void RunForces(bool extra_tic)
 {
     // TODO: review what needs updating here for 70 Hz
-    if (extra_tic && double_framerate.d_) return;
+    if (extra_tic && double_framerate.d_)
+        return;
 
     std::vector<Force *>::iterator FI;
 

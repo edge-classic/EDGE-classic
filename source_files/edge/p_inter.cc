@@ -56,27 +56,28 @@ extern ConsoleVariable player_deathmatch_damage_resistance;
 
 struct PickupInfo
 {
-    Benefit *list;       // full list of benefits
-    bool     lose_them;  // lose stuff if true
+    Benefit *list;      // full list of benefits
+    bool     lose_them; // lose stuff if true
 
-    Player    *player;   // player picking it up
-    MapObject *special;  // object to pick up
-    bool       dropped;  // object was dropped by a monster
+    Player    *player;  // player picking it up
+    MapObject *special; // object to pick up
+    bool       dropped; // object was dropped by a monster
 
-    int new_weapon;  // index (for player) of a new weapon, -1 = none
-    int new_ammo;    // ammotype of new ammo, -1 = none
+    int new_weapon;     // index (for player) of a new weapon, -1 = none
+    int new_ammo;       // ammotype of new ammo, -1 = none
 
-    bool got_it;   // player actually got the benefit
-    bool keep_it;  // don't remove the thing from map
-    bool silent;   // don't make sound/flash/effects
-    bool no_ammo;  // skip ammo
+    bool got_it;        // player actually got the benefit
+    bool keep_it;       // don't remove the thing from map
+    bool silent;        // don't make sound/flash/effects
+    bool no_ammo;       // skip ammo
 };
 
 static bool CheckForBenefit(Benefit *list, int kind)
 {
     for (Benefit *be = list; be != nullptr; be = be->next)
     {
-        if (be->type == kind) return true;
+        if (be->type == kind)
+            return true;
     }
 
     return false;
@@ -98,7 +99,8 @@ static void GiveCounter(PickupInfo *pu, Benefit *be)
 
     if (pu->lose_them)
     {
-        if (pu->player->counters_[cntr].count == 0) return;
+        if (pu->player->counters_[cntr].count == 0)
+            return;
 
         pu->player->counters_[cntr].count -= num;
 
@@ -109,8 +111,7 @@ static void GiveCounter(PickupInfo *pu, Benefit *be)
         return;
     }
 
-    if (pu->player->counters_[cntr].count ==
-        pu->player->counters_[cntr].maximum)
+    if (pu->player->counters_[cntr].count == pu->player->counters_[cntr].maximum)
     {
         return;
     }
@@ -165,7 +166,8 @@ static void GiveInventory(PickupInfo *pu, Benefit *be)
 
     if (pu->lose_them)
     {
-        if (pu->player->inventory_[inv].count == 0) return;
+        if (pu->player->inventory_[inv].count == 0)
+            return;
 
         pu->player->inventory_[inv].count -= num;
 
@@ -176,8 +178,7 @@ static void GiveInventory(PickupInfo *pu, Benefit *be)
         return;
     }
 
-    if (pu->player->inventory_[inv].count ==
-        pu->player->inventory_[inv].maximum)
+    if (pu->player->inventory_[inv].count == pu->player->inventory_[inv].maximum)
     {
         return;
     }
@@ -226,26 +227,28 @@ static void GiveInventoryLimit(PickupInfo *pu, Benefit *be)
 //
 static void GiveAmmo(PickupInfo *pu, Benefit *be)
 {
-    if (pu->no_ammo) return;
+    if (pu->no_ammo)
+        return;
 
     int ammo = be->sub.type;
     int num  = RoundToInteger(be->amount);
 
     // -AJA- in old deathmatch, weapons give 2.5 times more ammo
-    if (deathmatch == 1 && CheckForBenefit(pu->list, kBenefitTypeWeapon) &&
-        pu->special && !pu->dropped)
+    if (deathmatch == 1 && CheckForBenefit(pu->list, kBenefitTypeWeapon) && pu->special && !pu->dropped)
     {
         num = RoundToInteger(be->amount * 2.5);
     }
 
-    if (ammo == kAmmunitionTypeNoAmmo || num <= 0) return;
+    if (ammo == kAmmunitionTypeNoAmmo || num <= 0)
+        return;
 
     if (ammo < 0 || ammo >= kTotalAmmunitionTypes)
         FatalError("GiveAmmo: bad type %i", ammo);
 
     if (pu->lose_them)
     {
-        if (pu->player->ammo_[ammo].count == 0) return;
+        if (pu->player->ammo_[ammo].count == 0)
+            return;
 
         pu->player->ammo_[ammo].count -= num;
 
@@ -269,8 +272,7 @@ static void GiveAmmo(PickupInfo *pu, Benefit *be)
     // a clip, try to "bundle" this ammo inside that clip.
     if (pu->new_weapon >= 0)
     {
-        did_pickup = TryFillNewWeapon(pu->player, pu->new_weapon,
-                                      (AmmunitionType)ammo, &num);
+        did_pickup = TryFillNewWeapon(pu->player, pu->new_weapon, (AmmunitionType)ammo, &num);
 
         if (num == 0)
         {
@@ -281,16 +283,19 @@ static void GiveAmmo(PickupInfo *pu, Benefit *be)
 
     // divide by two _here_, which means that the ammo for filling
     // clip weapons is not affected by the kMapObjectFlagDropped flag.
-    if (num > 1 && pu->dropped) num /= 2;
+    if (num > 1 && pu->dropped)
+        num /= 2;
 
     if (pu->player->ammo_[ammo].count == pu->player->ammo_[ammo].maximum)
     {
-        if (did_pickup) pu->got_it = true;
+        if (did_pickup)
+            pu->got_it = true;
         return;
     }
 
     // if there is some fresh ammo, we should change weapons
-    if (pu->player->ammo_[ammo].count == 0) pu->new_ammo = ammo;
+    if (pu->player->ammo_[ammo].count == 0)
+        pu->new_ammo = ammo;
 
     pu->player->ammo_[ammo].count += num;
 
@@ -308,7 +313,8 @@ static void GiveAmmoLimit(PickupInfo *pu, Benefit *be)
     int ammo  = be->sub.type;
     int limit = RoundToInteger(be->amount);
 
-    if (ammo == kAmmunitionTypeNoAmmo) return;
+    if (ammo == kAmmunitionTypeNoAmmo)
+        return;
 
     if (ammo < 0 || ammo >= kTotalAmmunitionTypes)
         FatalError("GiveAmmoLimit: bad type %i", ammo);
@@ -344,7 +350,8 @@ static void GiveWeapon(PickupInfo *pu, Benefit *be)
 
     if (pu->lose_them)
     {
-        if (RemoveWeapon(pu->player, info)) pu->got_it = true;
+        if (RemoveWeapon(pu->player, info))
+            pu->got_it = true;
         return;
     }
 
@@ -363,7 +370,8 @@ static void GiveWeapon(PickupInfo *pu, Benefit *be)
         return;
     }
 
-    if (!AddWeapon(pu->player, info, &pw_index)) return;
+    if (!AddWeapon(pu->player, info, &pw_index))
+        return;
 
     pu->new_weapon = pw_index;
     pu->got_it     = true;
@@ -382,7 +390,8 @@ static void GiveHealth(PickupInfo *pu, Benefit *be)
     {
         // DamageMapObject(pu->player->map_object_, pu->special, nullptr,
         // be->amount, nullptr);
-        if (pu->player->health_ <= 0) return;
+        if (pu->player->health_ <= 0)
+            return;
 
         pu->player->health_ -= be->amount;
         pu->player->map_object_->health_ = pu->player->health_;
@@ -397,11 +406,13 @@ static void GiveHealth(PickupInfo *pu, Benefit *be)
         return;
     }
 
-    if (pu->player->health_ >= be->limit) return;
+    if (pu->player->health_ >= be->limit)
+        return;
 
     pu->player->health_ += be->amount;
 
-    if (pu->player->health_ > be->limit) pu->player->health_ = be->limit;
+    if (pu->player->health_ > be->limit)
+        pu->player->health_ = be->limit;
 
     pu->player->map_object_->health_ = pu->player->health_;
 
@@ -421,7 +432,8 @@ static void GiveArmour(PickupInfo *pu, Benefit *be)
 
     if (pu->lose_them)
     {
-        if (AlmostEquals(pu->player->armours_[a_class], 0.0f)) return;
+        if (AlmostEquals(pu->player->armours_[a_class], 0.0f))
+            return;
 
         pu->player->armours_[a_class] -= be->amount;
         if (pu->player->armours_[a_class] < 0)
@@ -436,20 +448,22 @@ static void GiveArmour(PickupInfo *pu, Benefit *be)
     float amount  = be->amount;
     float upgrade = 0;
 
-    if (!pu->special ||
-        (pu->special->extended_flags_ & kExtendedFlagSimpleArmour))
+    if (!pu->special || (pu->special->extended_flags_ & kExtendedFlagSimpleArmour))
     {
         float slack = be->limit - pu->player->armours_[a_class];
 
-        if (amount > slack) amount = slack;
+        if (amount > slack)
+            amount = slack;
 
-        if (amount <= 0) return;
+        if (amount <= 0)
+            return;
     }
     else /* Doom emulation */
     {
         float slack = be->limit - pu->player->total_armour_;
 
-        if (slack < 0) return;
+        if (slack < 0)
+            return;
 
         // we try to Upgrade any lower class armour with this armour.
         for (int cl = a_class - 1; cl >= 0; cl--)
@@ -458,16 +472,19 @@ static void GiveArmour(PickupInfo *pu, Benefit *be)
         }
 
         // cannot upgrade more than the specified amount
-        if (upgrade > amount) upgrade = amount;
+        if (upgrade > amount)
+            upgrade = amount;
 
         slack += upgrade;
 
-        if (amount > slack) amount = slack;
+        if (amount > slack)
+            amount = slack;
 
         EPI_ASSERT(amount >= 0);
         EPI_ASSERT(upgrade >= 0);
 
-        if (AlmostEquals(amount, 0.0f) && AlmostEquals(upgrade, 0.0f)) return;
+        if (AlmostEquals(amount, 0.0f) && AlmostEquals(upgrade, 0.0f))
+            return;
     }
 
     pu->player->armours_[a_class] += amount;
@@ -509,19 +526,22 @@ static void GiveKey(PickupInfo *pu, Benefit *be)
 
     if (pu->lose_them)
     {
-        if (!(pu->player->cards_ & key)) return;
+        if (!(pu->player->cards_ & key))
+            return;
 
         pu->player->cards_ = (DoorKeyType)(pu->player->cards_ & ~key);
     }
     else
     {
-        if (pu->player->cards_ & key) return;
+        if (pu->player->cards_ & key)
+            return;
 
         pu->player->cards_ = (DoorKeyType)(pu->player->cards_ | key);
     }
 
     // -AJA- leave keys in Co-op games
-    if (InCooperativeMatch()) pu->keep_it = true;
+    if (InCooperativeMatch())
+        pu->keep_it = true;
 
     pu->got_it = true;
 }
@@ -544,7 +564,8 @@ static void GivePower(PickupInfo *pu, Benefit *be)
 
     if (pu->lose_them)
     {
-        if (AlmostEquals(pu->player->powers_[be->sub.type], 0.0f)) return;
+        if (AlmostEquals(pu->player->powers_[be->sub.type], 0.0f))
+            return;
 
         pu->player->powers_[be->sub.type] -= duration;
 
@@ -555,7 +576,8 @@ static void GivePower(PickupInfo *pu, Benefit *be)
         return;
     }
 
-    if (pu->player->powers_[be->sub.type] >= limit) return;
+    if (pu->player->powers_[be->sub.type] >= limit)
+        return;
 
     pu->player->powers_[be->sub.type] += duration;
 
@@ -565,8 +587,7 @@ static void GivePower(PickupInfo *pu, Benefit *be)
     // special handling for scuba...
     if (be->sub.type == kPowerTypeScuba)
     {
-        pu->player->air_in_lungs_ =
-            pu->player->map_object_->info_->lung_capacity_;
+        pu->player->air_in_lungs_ = pu->player->map_object_->info_->lung_capacity_;
     }
 
     pu->got_it = true;
@@ -589,52 +610,57 @@ static void DoGiveBenefitList(PickupInfo *pu)
 
         switch (be->type)
         {
-            case kBenefitTypeNone:
-            case kBenefitTypeWeapon:
-                break;
+        case kBenefitTypeNone:
+        case kBenefitTypeWeapon:
+            break;
 
-            case kBenefitTypeAmmo:
-                if (be->amount >= 0.0) GiveAmmo(pu, be);
-                break;
+        case kBenefitTypeAmmo:
+            if (be->amount >= 0.0)
+                GiveAmmo(pu, be);
+            break;
 
-            case kBenefitTypeAmmoLimit:
-                if (be->amount >= 0.0) GiveAmmoLimit(pu, be);
-                break;
+        case kBenefitTypeAmmoLimit:
+            if (be->amount >= 0.0)
+                GiveAmmoLimit(pu, be);
+            break;
 
-            case kBenefitTypeKey:
-                if (be->amount >= 0.0) GiveKey(pu, be);
-                break;
+        case kBenefitTypeKey:
+            if (be->amount >= 0.0)
+                GiveKey(pu, be);
+            break;
 
-            case kBenefitTypeHealth:
-                if (be->amount >= 0.0) GiveHealth(pu, be);
-                break;
+        case kBenefitTypeHealth:
+            if (be->amount >= 0.0)
+                GiveHealth(pu, be);
+            break;
 
-            case kBenefitTypeArmour:
-                if (be->amount >= 0.0) GiveArmour(pu, be);
-                break;
+        case kBenefitTypeArmour:
+            if (be->amount >= 0.0)
+                GiveArmour(pu, be);
+            break;
 
-            case kBenefitTypePowerup:
-                GivePower(pu, be);
-                break;
+        case kBenefitTypePowerup:
+            GivePower(pu, be);
+            break;
 
-            case kBenefitTypeInventory:
-                GiveInventory(pu, be);
-                break;
+        case kBenefitTypeInventory:
+            GiveInventory(pu, be);
+            break;
 
-            case kBenefitTypeInventoryLimit:
-                GiveInventoryLimit(pu, be);
-                break;
+        case kBenefitTypeInventoryLimit:
+            GiveInventoryLimit(pu, be);
+            break;
 
-            case kBenefitTypeCounter:
-                GiveCounter(pu, be);
-                break;
+        case kBenefitTypeCounter:
+            GiveCounter(pu, be);
+            break;
 
-            case kBenefitTypeCounterLimit:
-                GiveCounterLimit(pu, be);
-                break;
+        case kBenefitTypeCounterLimit:
+            GiveCounterLimit(pu, be);
+            break;
 
-            default:
-                break;
+        default:
+            break;
         }
     }
 }
@@ -654,65 +680,70 @@ bool HasBenefitInList(Player *player, Benefit *list)
     {
         switch (be->type)
         {
-            case kBenefitTypeNone:
-                break;
+        case kBenefitTypeNone:
+            break;
 
-            case kBenefitTypeWeapon:
-                for (int i = 0; i < kMaximumWeapons; i++)
-                {
-                    WeaponDefinition *cur_info = player->weapons_[i].info;
-                    if (cur_info == be->sub.weap) return true;
-                }
-                break;
-
-            case kBenefitTypeAmmo:
-                if (player->ammo_[be->sub.type].count > be->amount) return true;
-                break;
-
-            case kBenefitTypeAmmoLimit:
-                if (player->ammo_[be->sub.type].maximum > be->amount)
+        case kBenefitTypeWeapon:
+            for (int i = 0; i < kMaximumWeapons; i++)
+            {
+                WeaponDefinition *cur_info = player->weapons_[i].info;
+                if (cur_info == be->sub.weap)
                     return true;
-                break;
+            }
+            break;
 
-            case kBenefitTypeKey:
-                if (player->cards_ & (DoorKeyType)be->sub.type) return true;
-                break;
+        case kBenefitTypeAmmo:
+            if (player->ammo_[be->sub.type].count > be->amount)
+                return true;
+            break;
 
-            case kBenefitTypeHealth:
-                if (player->health_ > be->amount) return true;
-                break;
+        case kBenefitTypeAmmoLimit:
+            if (player->ammo_[be->sub.type].maximum > be->amount)
+                return true;
+            break;
 
-            case kBenefitTypeArmour:
-                if (player->armours_[be->sub.type] > be->amount) return true;
-                break;
+        case kBenefitTypeKey:
+            if (player->cards_ & (DoorKeyType)be->sub.type)
+                return true;
+            break;
 
-            case kBenefitTypePowerup:
-                if (!AlmostEquals(player->powers_[be->sub.type], 0.0f))
-                    return true;
-                break;
+        case kBenefitTypeHealth:
+            if (player->health_ > be->amount)
+                return true;
+            break;
 
-            case kBenefitTypeInventory:
-                if (player->inventory_[be->sub.type].count > be->amount)
-                    return true;
-                break;
+        case kBenefitTypeArmour:
+            if (player->armours_[be->sub.type] > be->amount)
+                return true;
+            break;
 
-            case kBenefitTypeInventoryLimit:
-                if (player->inventory_[be->sub.type].maximum > be->amount)
-                    return true;
-                break;
+        case kBenefitTypePowerup:
+            if (!AlmostEquals(player->powers_[be->sub.type], 0.0f))
+                return true;
+            break;
 
-            case kBenefitTypeCounter:
-                if (player->counters_[be->sub.type].count > be->amount)
-                    return true;
-                break;
+        case kBenefitTypeInventory:
+            if (player->inventory_[be->sub.type].count > be->amount)
+                return true;
+            break;
 
-            case kBenefitTypeCounterLimit:
-                if (player->counters_[be->sub.type].maximum > be->amount)
-                    return true;
-                break;
+        case kBenefitTypeInventoryLimit:
+            if (player->inventory_[be->sub.type].maximum > be->amount)
+                return true;
+            break;
 
-            default:
-                break;
+        case kBenefitTypeCounter:
+            if (player->counters_[be->sub.type].count > be->amount)
+                return true;
+            break;
+
+        case kBenefitTypeCounterLimit:
+            if (player->counters_[be->sub.type].maximum > be->amount)
+                return true;
+            break;
+
+        default:
+            break;
         }
     }
     return false;
@@ -727,8 +758,7 @@ bool HasBenefitInList(Player *player, Benefit *list)
 // benefits should be taken away instead.  Returns true if _any_
 // benefit was picked up (or lost), or false if none of them were.
 //
-bool GiveBenefitList(Player *player, MapObject *special, Benefit *list,
-                     bool lose_them)
+bool GiveBenefitList(Player *player, MapObject *special, Benefit *list, bool lose_them)
 {
     PickupInfo info;
 
@@ -755,31 +785,30 @@ bool GiveBenefitList(Player *player, MapObject *special, Benefit *list,
 //
 // RunPickupEffects
 //
-static void RunPickupEffects(Player *player, MapObject *special,
-                             PickupEffect *list)
+static void RunPickupEffects(Player *player, MapObject *special, PickupEffect *list)
 {
     for (; list; list = list->next_)
     {
         switch (list->type_)
         {
-            case kPickupEffectTypeSwitchWeapon:
-                PlayerSwitchWeapon(player, list->sub_.weap);
-                break;
+        case kPickupEffectTypeSwitchWeapon:
+            PlayerSwitchWeapon(player, list->sub_.weap);
+            break;
 
-            case kPickupEffectTypeKeepPowerup:
-                player->keep_powers_ |= (1 << list->sub_.type);
-                break;
+        case kPickupEffectTypeKeepPowerup:
+            player->keep_powers_ |= (1 << list->sub_.type);
+            break;
 
-            case kPickupEffectTypePowerupEffect:
-                // FIXME
-                break;
+        case kPickupEffectTypePowerupEffect:
+            // FIXME
+            break;
 
-            case kPickupEffectTypeScreenEffect:
-                // FIXME
-                break;
+        case kPickupEffectTypeScreenEffect:
+            // FIXME
+            break;
 
-            default:
-                break;
+        default:
+            break;
         }
     }
 }
@@ -796,16 +825,18 @@ void TouchSpecialThing(MapObject *special, MapObject *toucher)
     float delta = special->z - toucher->z;
 
     // out of reach
-    if (delta > toucher->height_ || delta < -special->height_) return;
+    if (delta > toucher->height_ || delta < -special->height_)
+        return;
 
-    if (!toucher->player_) return;
+    if (!toucher->player_)
+        return;
 
     // Dead thing touching. Can happen with a sliding player corpse.
-    if (toucher->health_ <= 0) return;
+    if (toucher->health_ <= 0)
+        return;
 
     // VOODOO DOLLS: Do not pick up the item if completely still
-    if (toucher->is_voodoo_ && AlmostEquals(toucher->momentum_.X, 0.0f) &&
-        AlmostEquals(toucher->momentum_.Y, 0.0f) &&
+    if (toucher->is_voodoo_ && AlmostEquals(toucher->momentum_.X, 0.0f) && AlmostEquals(toucher->momentum_.Y, 0.0f) &&
         AlmostEquals(toucher->momentum_.Z, 0.0f))
         return;
 
@@ -816,11 +847,10 @@ void TouchSpecialThing(MapObject *special, MapObject *toucher)
 
     info.player  = toucher->player_;
     info.special = special;
-    info.dropped =
-        (special && (special->flags_ & kMapObjectFlagDropped)) ? true : false;
+    info.dropped = (special && (special->flags_ & kMapObjectFlagDropped)) ? true : false;
 
-    info.new_weapon = -1;  // the most recently added weapon (must be new)
-    info.new_ammo   = -1;  // got fresh ammo (old count was zero).
+    info.new_weapon = -1; // the most recently added weapon (must be new)
+    info.new_ammo   = -1; // got fresh ammo (old count was zero).
 
     info.got_it  = false;
     info.keep_it = false;
@@ -848,13 +878,14 @@ void TouchSpecialThing(MapObject *special, MapObject *toucher)
         info.keep_it = false;
     }
 
-    if (!info.got_it) return;
+    if (!info.got_it)
+        return;
 
     if (!info.keep_it)
     {
         special->health_ = 0;
-        if (time_stop_active)  // Hide pickup after gaining benefit while time
-                               // stop is still active
+        if (time_stop_active) // Hide pickup after gaining benefit while time
+                              // stop is still active
             special->visibility_ = 0.0f;
         KillMapObject(info.player->map_object_, special, nullptr);
     }
@@ -866,11 +897,9 @@ void TouchSpecialThing(MapObject *special, MapObject *toucher)
         if (info.player->bonus_count_ > kBonusLimit)
             info.player->bonus_count_ = kBonusLimit;
 
-        if (special->info_->pickup_message_ != "" &&
-            language.IsValidRef(special->info_->pickup_message_.c_str()))
+        if (special->info_->pickup_message_ != "" && language.IsValidRef(special->info_->pickup_message_.c_str()))
         {
-            ConsolePlayerMessage(info.player->player_number_, "%s",
-                                 language[special->info_->pickup_message_]);
+            ConsolePlayerMessage(info.player->player_number_, "%s", language[special->info_->pickup_message_]);
         }
 
         if (sound)
@@ -886,16 +915,14 @@ void TouchSpecialThing(MapObject *special, MapObject *toucher)
         }
 
         if (info.new_weapon >= 0 || info.new_ammo >= 0)
-            TrySwitchNewWeapon(info.player, info.new_weapon,
-                               (AmmunitionType)info.new_ammo);
+            TrySwitchNewWeapon(info.player, info.new_weapon, (AmmunitionType)info.new_ammo);
     }
 
     RunPickupEffects(info.player, special, special->info_->pickup_effects_);
 }
 
 // FIXME: move this into utility code
-static std::string PatternSubstitution(const char                     *format,
-                                       const std::vector<std::string> &keywords)
+static std::string PatternSubstitution(const char *format, const std::vector<std::string> &keywords)
 {
     std::string result;
 
@@ -909,7 +936,8 @@ static std::string PatternSubstitution(const char                     *format,
             break;
         }
 
-        if (pos > format) result = result + std::string(format, pos - format);
+        if (pos > format)
+            result = result + std::string(format, pos - format);
 
         pos++;
 
@@ -918,7 +946,8 @@ static std::string PatternSubstitution(const char                     *format,
         key[0] = *pos++;
         key[1] = 0;
 
-        if (!key[0]) break;
+        if (!key[0])
+            break;
 
         if (epi::IsAlphaASCII(key[0]))
         {
@@ -931,7 +960,10 @@ static std::string PatternSubstitution(const char                     *format,
                 }
             }
         }
-        else if (key[0] == '%') { result = result + std::string("%"); }
+        else if (key[0] == '%')
+        {
+            result = result + std::string("%");
+        }
         else
         {
             result = result + std::string("%");
@@ -959,10 +991,10 @@ static void DoObituary(const char *format, MapObject *victim, MapObject *killer)
     ConsolePlayerMessage(victim->player_->player_number_, "%s", msg.c_str());
 }
 
-void ObituaryMessage(MapObject *victim, MapObject *killer,
-                     const DamageClass *damtype)
+void ObituaryMessage(MapObject *victim, MapObject *killer, const DamageClass *damtype)
 {
-    if (!show_obituaries) return;
+    if (!show_obituaries)
+        return;
 
     if (damtype && !damtype->obituary_.empty())
     {
@@ -996,8 +1028,7 @@ void ObituaryMessage(MapObject *victim, MapObject *killer,
 // -AJA- 1999/09/12: Now uses P_SetMobjStateDeferred, since this
 //       routine can be called by TryMove/CheckRelativeThingCallback/etc.
 //
-void KillMapObject(MapObject *source, MapObject *target,
-                   const DamageClass *damtype, bool weak_spot)
+void KillMapObject(MapObject *source, MapObject *target, const DamageClass *damtype, bool weak_spot)
 {
     // -AJA- 2006/09/10: Voodoo doll handling for coop
     if (target->player_ && target->player_->map_object_ != target)
@@ -1008,18 +1039,15 @@ void KillMapObject(MapObject *source, MapObject *target,
 
     bool nofog = (target->flags_ & kMapObjectFlagSpecial);
 
-    target->flags_ &=
-        ~(kMapObjectFlagSpecial | kMapObjectFlagShootable |
-          kMapObjectFlagFloat | kMapObjectFlagSkullFly | kMapObjectFlagTouchy);
-    target->extended_flags_ &=
-        ~(kExtendedFlagBounce | kExtendedFlagUsable | kExtendedFlagClimbable);
+    target->flags_ &= ~(kMapObjectFlagSpecial | kMapObjectFlagShootable | kMapObjectFlagFloat | kMapObjectFlagSkullFly |
+                        kMapObjectFlagTouchy);
+    target->extended_flags_ &= ~(kExtendedFlagBounce | kExtendedFlagUsable | kExtendedFlagClimbable);
 
     if (!(target->extended_flags_ & kExtendedFlagNoGravityOnKill))
         target->flags_ &= ~kMapObjectFlagNoGravity;
 
     target->flags_ |= kMapObjectFlagCorpse | kMapObjectFlagDropOff;
-    target->height_ /=
-        (4 / (target->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1));
+    target->height_ /= (4 / (target->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1));
 
     ScriptUpdateMonsterDeaths(target);
 
@@ -1036,9 +1064,8 @@ void KillMapObject(MapObject *source, MapObject *target,
             info.special = nullptr;
             info.dropped = false;
 
-            info.new_weapon =
-                -1;              // the most recently added weapon (must be new)
-            info.new_ammo = -1;  // got fresh ammo (old count was zero).
+            info.new_weapon = -1; // the most recently added weapon (must be new)
+            info.new_ammo   = -1; // got fresh ammo (old count was zero).
 
             info.got_it  = false;
             info.keep_it = false;
@@ -1065,8 +1092,7 @@ void KillMapObject(MapObject *source, MapObject *target,
             }
         }
     }
-    else if (InSinglePlayerMatch() &&
-             (target->flags_ & kMapObjectFlagCountKill))
+    else if (InSinglePlayerMatch() && (target->flags_ & kMapObjectFlagCountKill))
     {
         // count all monster deaths,
         // even those caused by other monsters
@@ -1085,10 +1111,9 @@ void KillMapObject(MapObject *source, MapObject *target,
         }
 
         target->flags_ &= ~kMapObjectFlagSolid;
-        target->player_->player_state_ = kPlayerDead;
-        target->player_->standard_view_height_ =
-            HMM_MIN(kDeathViewHeight, target->height_ / 3);
-        target->player_->actual_speed_ = 0;
+        target->player_->player_state_         = kPlayerDead;
+        target->player_->standard_view_height_ = HMM_MIN(kDeathViewHeight, target->height_ / 3);
+        target->player_->actual_speed_         = 0;
 
         DropWeapon(target->player_);
 
@@ -1097,14 +1122,14 @@ void KillMapObject(MapObject *source, MapObject *target,
             AutomapStop();
 
         // don't immediately restart when USE key was pressed
-        if (target->player_ == players[console_player]) EventClearInput();
+        if (target->player_ == players[console_player])
+            EventClearInput();
     }
 
     int  state    = 0;
     bool overkill = false;
 
-    if (target->info_->gib_health_ < 0 &&
-        target->health_ < target->info_->gib_health_)
+    if (target->info_->gib_health_ < 0 && target->health_ < target->info_->gib_health_)
         overkill = true;
     else if (target->health_ < -target->spawn_health_)
         overkill = true;
@@ -1112,13 +1137,15 @@ void KillMapObject(MapObject *source, MapObject *target,
     if (weak_spot)
     {
         state = MapObjectFindLabel(target, "WEAKDEATH");
-        if (state == 0) overkill = true;
+        if (state == 0)
+            overkill = true;
     }
 
     if (state == 0 && overkill && damtype && damtype->overkill_.label_ != "")
     {
         state = MapObjectFindLabel(target, damtype->overkill_.label_.c_str());
-        if (state != 0) state += damtype->overkill_.offset_;
+        if (state != 0)
+            state += damtype->overkill_.offset_;
     }
 
     if (state == 0 && overkill && target->info_->overkill_state_)
@@ -1127,23 +1154,21 @@ void KillMapObject(MapObject *source, MapObject *target,
     if (state == 0 && damtype && damtype->death_.label_ != "")
     {
         state = MapObjectFindLabel(target, damtype->death_.label_.c_str());
-        if (state != 0) state += damtype->death_.offset_;
+        if (state != 0)
+            state += damtype->death_.offset_;
     }
 
-    if (state == 0) state = target->info_->death_state_;
+    if (state == 0)
+        state = target->info_->death_state_;
 
-    if (gore_level.d_ == 2 &&
-        (target->flags_ &
-         kMapObjectFlagCountKill))  // Hopefully the only things with
-                                    // blood/gore_level are monsters and not
-                                    // "barrels", etc
+    if (gore_level.d_ == 2 && (target->flags_ & kMapObjectFlagCountKill)) // Hopefully the only things with
+                                                                          // blood/gore_level are monsters and not
+                                                                          // "barrels", etc
     {
         state = 0;
         if (!nofog)
         {
-            MapObject *fog =
-                CreateMapObject(target->x, target->y, target->z,
-                                mobjtypes.Lookup("TELEPORT_FLASH"));
+            MapObject *fog = CreateMapObject(target->x, target->y, target->z, mobjtypes.Lookup("TELEPORT_FLASH"));
             if (fog && fog->info_->chase_state_)
                 MapObjectSetStateDeferred(fog, fog->info_->chase_state_, 0);
         }
@@ -1153,7 +1178,8 @@ void KillMapObject(MapObject *source, MapObject *target,
     {
         MapObjectSetState(target, state);
         target->tics_ -= RandomByteDeterministic() & 3;
-        if (target->tics_ < 1) target->tics_ = 1;
+        if (target->tics_ < 1)
+            target->tics_ = 1;
     }
     else
     {
@@ -1165,11 +1191,11 @@ void KillMapObject(MapObject *source, MapObject *target,
     const MapObjectDefinition *item = target->info_->dropitem_;
     if (item)
     {
-        MapObject *mo =
-            CreateMapObject(target->x, target->y, target->floor_z_, item);
+        MapObject *mo = CreateMapObject(target->x, target->y, target->floor_z_, item);
 
         // -ES- 1998/07/18 nullptr check to prevent crashing
-        if (mo) mo->flags_ |= kMapObjectFlagDropped;
+        if (mo)
+            mo->flags_ |= kMapObjectFlagDropped;
     }
 }
 
@@ -1189,14 +1215,15 @@ void KillMapObject(MapObject *source, MapObject *target,
 void ThrustMapObject(MapObject *target, MapObject *inflictor, float thrust)
 {
     // check for immunity against the attack
-    if (target->hyper_flags_ & kHyperFlagInvulnerable) return;
+    if (target->hyper_flags_ & kHyperFlagInvulnerable)
+        return;
 
     // check for lead feet ;)
-    if (target->hyper_flags_ & kHyperFlagImmovable) return;
+    if (target->hyper_flags_ & kHyperFlagImmovable)
+        return;
 
     if (inflictor && inflictor->current_attack_ &&
-        0 == (inflictor->current_attack_->attack_class_ &
-              ~target->info_->immunity_))
+        0 == (inflictor->current_attack_->attack_class_ & ~target->info_->immunity_))
     {
         return;
     }
@@ -1205,7 +1232,8 @@ void ThrustMapObject(MapObject *target, MapObject *inflictor, float thrust)
     float dy = target->y - inflictor->y;
 
     // don't thrust if at the same location (no angle)
-    if (fabs(dx) < 1.0f && fabs(dy) < 1.0f) return;
+    if (fabs(dx) < 1.0f && fabs(dy) < 1.0f)
+        return;
 
     BAMAngle angle = RendererPointToAngle(0, 0, dx, dy);
 
@@ -1215,8 +1243,10 @@ void ThrustMapObject(MapObject *target, MapObject *inflictor, float thrust)
     float push = 12.0f * thrust / target->info_->mass_;
 
     // limit thrust to reasonable values
-    if (push < -40.0f) push = -40.0f;
-    if (push > 40.0f) push = 40.0f;
+    if (push < -40.0f)
+        push = -40.0f;
+    if (push > 40.0f)
+        push = 40.0f;
 
     target->momentum_.X += push * epi::BAMCos(angle);
     target->momentum_.Y += push * epi::BAMSin(angle);
@@ -1256,7 +1286,8 @@ void PushMapObject(MapObject *target, MapObject *inflictor, float thrust)
     float dy = target->y - inflictor->y;
 
     // don't thrust if at the same location (no angle)
-    if (fabs(dx) < 1.0f && fabs(dy) < 1.0f) return;
+    if (fabs(dx) < 1.0f && fabs(dy) < 1.0f)
+        return;
 
     BAMAngle angle = RendererPointToAngle(0, 0, dx, dy);
 
@@ -1266,8 +1297,10 @@ void PushMapObject(MapObject *target, MapObject *inflictor, float thrust)
     float push = 12.0f * thrust / target->info_->mass_;
 
     // limit thrust to reasonable values
-    if (push < -40.0f) push = -40.0f;
-    if (push > 40.0f) push = 40.0f;
+    if (push < -40.0f)
+        push = -40.0f;
+    if (push > 40.0f)
+        push = 40.0f;
 
     target->momentum_.X += push * epi::BAMCos(angle);
     target->momentum_.Y += push * epi::BAMSin(angle);
@@ -1300,38 +1333,41 @@ void PushMapObject(MapObject *target, MapObject *inflictor, float thrust)
 // -AJA- 1999/09/12: Now uses P_SetMobjStateDeferred, since this
 //       routine can be called by TryMove/CheckRelativeThingCallback/etc.
 //
-void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
-                     float damage, const DamageClass *damtype, bool weak_spot)
+void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source, float damage,
+                     const DamageClass *damtype, bool weak_spot)
 {
-    if (target->IsRemoved()) return;
+    if (target->IsRemoved())
+        return;
 
-    if (!(target->flags_ & kMapObjectFlagShootable)) return;
+    if (!(target->flags_ & kMapObjectFlagShootable))
+        return;
 
-    if (target->health_ <= 0) return;
+    if (target->health_ <= 0)
+        return;
 
     // check for immunity against the attack
-    if (target->hyper_flags_ & kHyperFlagInvulnerable) return;
+    if (target->hyper_flags_ & kHyperFlagInvulnerable)
+        return;
 
     if (!weak_spot && inflictor && inflictor->current_attack_ &&
-        0 == (inflictor->current_attack_->attack_class_ &
-              ~target->info_->immunity_))
+        0 == (inflictor->current_attack_->attack_class_ & ~target->info_->immunity_))
     {
         return;
     }
 
     // sanity check : don't produce references to removed objects
-    if (inflictor && inflictor->IsRemoved()) inflictor = nullptr;
-    if (source && source->IsRemoved()) source = nullptr;
+    if (inflictor && inflictor->IsRemoved())
+        inflictor = nullptr;
+    if (source && source->IsRemoved())
+        source = nullptr;
 
     // check for immortality
     if (target->hyper_flags_ & kHyperFlagImmortal)
-        damage = 0.0f;  // do no damage
+        damage = 0.0f; // do no damage
 
     // check for partial resistance against the attack
-    if (!weak_spot && damage >= 0.1f && inflictor &&
-        inflictor->current_attack_ &&
-        0 == (inflictor->current_attack_->attack_class_ &
-              ~target->info_->resistance_))
+    if (!weak_spot && damage >= 0.1f && inflictor && inflictor->current_attack_ &&
+        0 == (inflictor->current_attack_->attack_class_ & ~target->info_->resistance_))
     {
         damage = HMM_MAX(0.1f, damage * target->info_->resist_multiply_);
     }
@@ -1355,12 +1391,10 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
 
     if (inflictor && !(target->flags_ & kMapObjectFlagNoClip) &&
         !(source && source->player_ && source->player_->ready_weapon_ >= 0 &&
-          source->player_->weapons_[source->player_->ready_weapon_]
-              .info->nothrust_))
+          source->player_->weapons_[source->player_->ready_weapon_].info->nothrust_))
     {
         // make fall forwards sometimes
-        if (damage < 40 && damage > target->health_ &&
-            target->z - inflictor->z > 64 && (RandomByteDeterministic() & 1))
+        if (damage < 40 && damage > target->health_ && target->z - inflictor->z > 64 && (RandomByteDeterministic() & 1))
         {
             ThrustMapObject(target, inflictor, -damage * 4);
         }
@@ -1375,11 +1409,11 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
 
         // Don't damage player if sector type should only affect grounded
         // monsters Note: flesh this out be be more versatile - Dasho
-        if (damtype && damtype->grounded_monsters_) return;
+        if (damtype && damtype->grounded_monsters_)
+            return;
 
         // ignore damage in GOD mode, or with INVUL powerup
-        if ((player->cheats_ & kCheatingGodMode) ||
-            player->powers_[kPowerTypeInvulnerable] > 0)
+        if ((player->cheats_ & kCheatingGodMode) || player->powers_[kPowerTypeInvulnerable] > 0)
         {
             if (!damtype)
                 return;
@@ -1392,24 +1426,26 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
         {
             bool unless_damage = (damtype->damage_unless_ != nullptr);
             bool if_damage     = false;
-            if (damtype->damage_unless_ &&
-                HasBenefitInList(player, damtype->damage_unless_))
+            if (damtype->damage_unless_ && HasBenefitInList(player, damtype->damage_unless_))
                 unless_damage = false;
-            if (damtype->damage_if_ &&
-                HasBenefitInList(player, damtype->damage_if_))
+            if (damtype->damage_if_ && HasBenefitInList(player, damtype->damage_if_))
                 if_damage = true;
-            if (!unless_damage && !if_damage && !damtype->bypass_all_) return;
+            if (!unless_damage && !if_damage && !damtype->bypass_all_)
+                return;
         }
 
         // take half damage in trainer mode
-        if (game_skill == kSkillBaby) damage /= 2.0f;
+        if (game_skill == kSkillBaby)
+            damage /= 2.0f;
 
         // preliminary check: immunity and resistance
         for (i = kTotalArmourTypes - 1; i >= kArmourTypeGreen; i--)
         {
-            if (damtype && damtype->no_armour_) continue;
+            if (damtype && damtype->no_armour_)
+                continue;
 
-            if (player->armours_[i] <= 0) continue;
+            if (player->armours_[i] <= 0)
+                continue;
 
             const MapObjectDefinition *arm_info = player->armour_types_[i];
 
@@ -1417,54 +1453,47 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
                 continue;
 
             // this armor does not provide any protection for this attack
-            if (0 != (inflictor->current_attack_->attack_class_ &
-                      ~arm_info->armour_class_))
+            if (0 != (inflictor->current_attack_->attack_class_ & ~arm_info->armour_class_))
                 continue;
 
-            if (0 == (inflictor->current_attack_->attack_class_ &
-                      ~arm_info->immunity_))
+            if (0 == (inflictor->current_attack_->attack_class_ & ~arm_info->immunity_))
                 return; /* immune : we can go home early! */
 
-            if (damage > 0.1f &&
-                0 == (inflictor->current_attack_->attack_class_ &
-                      ~arm_info->resistance_))
+            if (damage > 0.1f && 0 == (inflictor->current_attack_->attack_class_ & ~arm_info->resistance_))
             {
                 damage = HMM_MAX(0.1f, damage * arm_info->resist_multiply_);
             }
         }
 
         // Bot Deathmatch Damange Resistance check
-        if (InDeathmatch() && !player->IsBot() && source && source->player_ &&
-            source->player_->IsBot())
+        if (InDeathmatch() && !player->IsBot() && source && source->player_ && source->player_->IsBot())
         {
             if (player_deathmatch_damage_resistance.d_ < 9)
             {
-                float mul =
-                    1.90f - (player_deathmatch_damage_resistance.d_ * 0.10f);
+                float mul = 1.90f - (player_deathmatch_damage_resistance.d_ * 0.10f);
                 damage *= mul;
             }
             else if (player_deathmatch_damage_resistance.d_ > 9)
             {
-                float mul =
-                    0.10f +
-                    ((18 - player_deathmatch_damage_resistance.d_) * 0.10f);
-                damage = HMM_MAX(0.1f, damage * mul);
+                float mul = 0.10f + ((18 - player_deathmatch_damage_resistance.d_) * 0.10f);
+                damage    = HMM_MAX(0.1f, damage * mul);
             }
         }
 
         // check which armour can take some damage
         for (i = kTotalArmourTypes - 1; i >= kArmourTypeGreen; i--)
         {
-            if (damtype && damtype->no_armour_) continue;
+            if (damtype && damtype->no_armour_)
+                continue;
 
-            if (player->armours_[i] <= 0) continue;
+            if (player->armours_[i] <= 0)
+                continue;
 
             const MapObjectDefinition *arm_info = player->armour_types_[i];
 
             // this armor does not provide any protection for this attack
             if (arm_info && inflictor && inflictor->current_attack_ &&
-                0 != (inflictor->current_attack_->attack_class_ &
-                      ~arm_info->armour_class_))
+                0 != (inflictor->current_attack_->attack_class_ & ~arm_info->armour_class_))
             {
                 continue;
             }
@@ -1477,27 +1506,26 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
             {
                 switch (i)
                 {
-                    case kArmourTypeGreen:
-                        saved = damage * 0.33;
-                        break;
-                    case kArmourTypeBlue:
-                        saved = damage * 0.50;
-                        break;
-                    case kArmourTypePurple:
-                        saved = damage * 0.66;
-                        break;
-                    case kArmourTypeYellow:
-                        saved = damage * 0.75;
-                        break;
-                    case kArmourTypeRed:
-                        saved = damage * 0.90;
-                        break;
+                case kArmourTypeGreen:
+                    saved = damage * 0.33;
+                    break;
+                case kArmourTypeBlue:
+                    saved = damage * 0.50;
+                    break;
+                case kArmourTypePurple:
+                    saved = damage * 0.66;
+                    break;
+                case kArmourTypeYellow:
+                    saved = damage * 0.75;
+                    break;
+                case kArmourTypeRed:
+                    saved = damage * 0.90;
+                    break;
 
-                    default:
-                        FatalError(
-                            "INTERNAL ERROR in DamageMapObject: bad armour "
-                            "%d\n",
-                            i);
+                default:
+                    FatalError("INTERNAL ERROR in DamageMapObject: bad armour "
+                               "%d\n",
+                               i);
                 }
             }
 
@@ -1509,12 +1537,14 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
 
             damage -= saved;
 
-            if (arm_info) saved *= arm_info->armour_deplete_;
+            if (arm_info)
+                saved *= arm_info->armour_deplete_;
 
             player->armours_[i] -= saved;
 
             // don't apply inner armour unless outer is finished
-            if (player->armours_[i] > 0) break;
+            if (player->armours_[i] > 0)
+                break;
 
             player->armours_[i] = 0;
         }
@@ -1551,7 +1581,8 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
     else
     {
         // instakill sectors
-        if (damtype && damtype->instakill_) damage = target->health_ + 1;
+        if (damtype && damtype->instakill_)
+            damage = target->health_ + 1;
     }
 
     // do the damage
@@ -1573,31 +1604,28 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
     //  This attack will always be treated as originating from the player, even
     //  if it's an indirect secondary attack. This way the player gets his
     //  VAMPIRE health and KillBenefits.
-    if (inflictor && inflictor->current_attack_ &&
-        (inflictor->current_attack_->flags_ & kAttackFlagPlayer))
+    if (inflictor && inflictor->current_attack_ && (inflictor->current_attack_->flags_ & kAttackFlagPlayer))
     {
         Player *current_player;
         current_player = players[console_player];
 
         source = current_player->map_object_;
 
-        if (source && source->IsRemoved())  // Sanity check?
+        if (source && source->IsRemoved()) // Sanity check?
             source = nullptr;
     }
 
     // -AJA- 2007/11/06: vampire mode!
     if (source && source != target && source->health_ < source->spawn_health_ &&
         ((source->hyper_flags_ & kHyperFlagVampire) ||
-         (inflictor && inflictor->current_attack_ &&
-          (inflictor->current_attack_->flags_ & kAttackFlagVampire))))
+         (inflictor && inflictor->current_attack_ && (inflictor->current_attack_->flags_ & kAttackFlagVampire))))
     {
         float qty = (target->player_ ? 0.5 : 0.25) * damage;
 
         source->health_ = HMM_MIN(source->health_ + qty, source->spawn_health_);
 
         if (source->player_)
-            source->player_->health_ =
-                HMM_MIN(source->player_->health_ + qty, source->spawn_health_);
+            source->player_->health_ = HMM_MIN(source->player_->health_ + qty, source->spawn_health_);
     }
 
     if (target->health_ <= 0)
@@ -1613,14 +1641,11 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
         pain_chance = 0;
     else if (weak_spot && target->info_->weak_.painchance_ >= 0)
         pain_chance = target->info_->weak_.painchance_;
-    else if (target->info_->resist_painchance_ >= 0 && inflictor &&
-             inflictor->current_attack_ &&
-             0 == (inflictor->current_attack_->attack_class_ &
-                   ~target->info_->resistance_))
+    else if (target->info_->resist_painchance_ >= 0 && inflictor && inflictor->current_attack_ &&
+             0 == (inflictor->current_attack_->attack_class_ & ~target->info_->resistance_))
         pain_chance = target->info_->resist_painchance_;
     else
-        pain_chance =
-            target->pain_chance_;  // Lobo 2023: use dynamic painchance
+        pain_chance = target->pain_chance_; // Lobo 2023: use dynamic painchance
     // pain_chance = target->info->painchance_;
 
     if (pain_chance > 0 && RandomByteTestDeterministic(pain_chance))
@@ -1630,38 +1655,37 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
 
         int state = 0;
 
-        if (weak_spot) state = MapObjectFindLabel(target, "WEAKPAIN");
+        if (weak_spot)
+            state = MapObjectFindLabel(target, "WEAKPAIN");
 
         if (state == 0 && damtype && damtype->pain_.label_ != "")
         {
             state = MapObjectFindLabel(target, damtype->pain_.label_.c_str());
-            if (state != 0) state += damtype->pain_.offset_;
+            if (state != 0)
+                state += damtype->pain_.offset_;
         }
 
-        if (state == 0) state = target->info_->pain_state_;
+        if (state == 0)
+            state = target->info_->pain_state_;
 
-        if (state != 0) MapObjectSetStateDeferred(target, state, 0);
+        if (state != 0)
+            MapObjectSetStateDeferred(target, state, 0);
     }
 
     // we're awake now...
     target->reaction_time_ = 0;
 
     bool ultra_loyal =
-        (source && (target->hyper_flags_ & kHyperFlagUltraLoyal) &&
-         (source->side_ & target->side_) != 0);
+        (source && (target->hyper_flags_ & kHyperFlagUltraLoyal) && (source->side_ & target->side_) != 0);
 
-    if ((!target->threshold_ ||
-         target->extended_flags_ & kExtendedFlagNoGrudge) &&
-        source && source != target &&
-        (!(source->extended_flags_ & kExtendedFlagNeverTarget)) &&
-        !target->player_ && !ultra_loyal)
+    if ((!target->threshold_ || target->extended_flags_ & kExtendedFlagNoGrudge) && source && source != target &&
+        (!(source->extended_flags_ & kExtendedFlagNeverTarget)) && !target->player_ && !ultra_loyal)
     {
         // if not intent on another player, chase after this one
         target->SetTarget(source);
         target->threshold_ = kBaseThreshold;
 
-        if (target->state_ == &states[target->info_->idle_state_] &&
-            target->info_->chase_state_)
+        if (target->state_ == &states[target->info_->idle_state_] && target->info_->chase_state_)
         {
             MapObjectSetStateDeferred(target, target->info_->chase_state_, 0);
         }
@@ -1673,10 +1697,10 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
 // of them.  Even the invulnerability powerup doesn't stop it.  Also
 // used for the kill-all cheat.  Inflictor and damtype can be nullptr.
 //
-void TelefragMapObject(MapObject *target, MapObject *inflictor,
-                       const DamageClass *damtype)
+void TelefragMapObject(MapObject *target, MapObject *inflictor, const DamageClass *damtype)
 {
-    if (target->health_ <= 0) return;
+    if (target->health_ <= 0)
+        return;
 
     target->health_ = -1000;
 

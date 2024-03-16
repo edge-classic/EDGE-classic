@@ -39,33 +39,34 @@ MapObject *FindTeleportMan(int tag, const MapObjectDefinition *info)
 {
     for (int i = 0; i < total_level_sectors; i++)
     {
-        if (level_sectors[i].tag != tag) continue;
+        if (level_sectors[i].tag != tag)
+            continue;
 
-        for (Subsector *sub = level_sectors[i].subsectors; sub;
-             sub            = sub->sector_next)
+        for (Subsector *sub = level_sectors[i].subsectors; sub; sub = sub->sector_next)
         {
             for (MapObject *mo = sub->thing_list; mo; mo = mo->subsector_next_)
-                if (mo->info_ == info &&
-                    !(mo->extended_flags_ & kExtendedFlagNeverTarget))
+                if (mo->info_ == info && !(mo->extended_flags_ & kExtendedFlagNeverTarget))
                     return mo;
         }
     }
 
-    return nullptr;  // not found
+    return nullptr; // not found
 }
 
 Line *FindTeleportLine(int tag, Line *original)
 {
     for (int i = 0; i < total_level_lines; i++)
     {
-        if (level_lines[i].tag != tag) continue;
+        if (level_lines[i].tag != tag)
+            continue;
 
-        if (level_lines + i == original) continue;
+        if (level_lines + i == original)
+            continue;
 
         return level_lines + i;
     }
 
-    return nullptr;  // not found
+    return nullptr; // not found
 }
 
 //
@@ -105,10 +106,10 @@ Line *FindTeleportLine(int tag, Line *original)
 // -AJA- 2004/10/08: Reworked for Silent and Line-to-Line teleporters
 //                   (based on the logic in prBoom's p_telept.c code).
 //
-bool TeleportMapObject(Line *line, int tag, MapObject *thing,
-                       const TeleportDefinition *def)
+bool TeleportMapObject(Line *line, int tag, MapObject *thing, const TeleportDefinition *def)
 {
-    if (!thing) return false;
+    if (!thing)
+        return false;
 
     float oldx = thing->x;
     float oldy = thing->y;
@@ -121,9 +122,7 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing,
     BAMAngle new_ang;
 
     BAMAngle dest_ang;
-    BAMAngle source_ang =
-        kBAMAngle90 +
-        (line ? RendererPointToAngle(0, 0, line->delta_x, line->delta_y) : 0);
+    BAMAngle source_ang = kBAMAngle90 + (line ? RendererPointToAngle(0, 0, line->delta_x, line->delta_y) : 0);
 
     MapObject *currmobj = nullptr;
     Line      *currline = nullptr;
@@ -131,39 +130,40 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing,
     bool flipped = (def->special_ & kTeleportSpecialFlipped) ? true : false;
 
     Player *player = thing->player_;
-    if (player && player->map_object_ != thing)  // exclude voodoo dolls
+    if (player && player->map_object_ != thing) // exclude voodoo dolls
         player = nullptr;
 
     if (def->special_ & kTeleportSpecialLine)
     {
-        if (!line || tag <= 0) return false;
+        if (!line || tag <= 0)
+            return false;
 
         currline = FindTeleportLine(tag, line);
 
-        if (!currline) return false;
+        if (!currline)
+            return false;
 
         new_x = currline->vertex_1->X + currline->delta_x / 2.0f;
         new_y = currline->vertex_1->Y + currline->delta_y / 2.0f;
 
-        new_z = currline->front_sector ? currline->front_sector->floor_height
-                                       : -32000;
+        new_z = currline->front_sector ? currline->front_sector->floor_height : -32000;
 
         if (currline->back_sector)
             new_z = HMM_MAX(new_z, currline->back_sector->floor_height);
 
-        dest_ang =
-            RendererPointToAngle(0, 0, currline->delta_x, currline->delta_y) +
-            kBAMAngle90;
+        dest_ang = RendererPointToAngle(0, 0, currline->delta_x, currline->delta_y) + kBAMAngle90;
 
-        flipped = !flipped;  // match Boom's logic
+        flipped = !flipped; // match Boom's logic
     }
-    else /* thing-based teleport */
+    else                    /* thing-based teleport */
     {
-        if (!def->outspawnobj_) return false;
+        if (!def->outspawnobj_)
+            return false;
 
         currmobj = FindTeleportMan(tag, def->outspawnobj_);
 
-        if (!currmobj) return false;
+        if (!currmobj)
+            return false;
 
         new_x = currmobj->x;
         new_y = currmobj->y;
@@ -174,7 +174,8 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing,
 
     /* --- Angle handling --- */
 
-    if (flipped) dest_ang += kBAMAngle180;
+    if (flipped)
+        dest_ang += kBAMAngle180;
 
     if (def->special_ & kTeleportSpecialRelative && currline)
         new_ang = thing->angle_ + (dest_ang - source_ang);
@@ -245,7 +246,8 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing,
         new_z += thing->original_height_;
     }
 
-    if (!TeleportMove(thing, new_x, new_y, new_z)) return false;
+    if (!TeleportMove(thing, new_x, new_y, new_z))
+        return false;
 
     if (player)
     {
@@ -289,9 +291,8 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing,
 
     thing->angle_ = new_ang;
 
-    if (currmobj && 0 == (def->special_ & (kTeleportSpecialRelative |
-                                           kTeleportSpecialSameAbsDir |
-                                           kTeleportSpecialRotate)))
+    if (currmobj &&
+        0 == (def->special_ & (kTeleportSpecialRelative | kTeleportSpecialSameAbsDir | kTeleportSpecialRotate)))
     {
         thing->vertical_angle_ = currmobj->vertical_angle_;
     }
@@ -322,8 +323,7 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing,
             // -ES- 1998/10/29 When fading, we don't want to see the fog.
             //
             fog = CreateMapObject(new_x + 20.0f * epi::BAMCos(thing->angle_),
-                                  new_y + 20.0f * epi::BAMSin(thing->angle_),
-                                  new_z, def->outspawnobj_);
+                                  new_y + 20.0f * epi::BAMSin(thing->angle_), new_z, def->outspawnobj_);
 
             // never use this object as a teleport destination
             fog->extended_flags_ |= kExtendedFlagNeverTarget;

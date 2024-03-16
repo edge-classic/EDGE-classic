@@ -5,15 +5,15 @@
 #include "epi.h"
 #include "lua.hpp"
 
-lua_State* LuaCreateVM();
+lua_State *LuaCreateVM();
 
 void LuaInit();
-void LuaAddScript(const std::string& data, const std::string& source);
+void LuaAddScript(const std::string &data, const std::string &source);
 void LuaLoadScripts();
 
 // Do a file, returns the number of return values on stack
-int  LuaDoFile(lua_State* L, const char* filename, const char* source);
-void LuaCallGlobalFunction(lua_State* L, const char* function_name);
+int  LuaDoFile(lua_State *L, const char *filename, const char *source);
+void LuaCallGlobalFunction(lua_State *L, const char *function_name);
 
 // Game
 void LuaNewGame(void);
@@ -23,20 +23,20 @@ void LuaBeginLevel(void);
 void LuaEndLevel(void);
 
 // Core
-void LuaRegisterCoreLibraries(lua_State* L);
+void LuaRegisterCoreLibraries(lua_State *L);
 
 // Player
-void LuaRegisterPlayerLibrary(lua_State* L);
+void LuaRegisterPlayerLibrary(lua_State *L);
 
 // Hud
 void LuaRunHud(void);
-void LuaRegisterHudLibrary(lua_State* L);
+void LuaRegisterHudLibrary(lua_State *L);
 
 // VM
 
-lua_State* LuaGetGlobalVM();
+lua_State *LuaGetGlobalVM();
 
-inline HMM_Vec3 LuaCheckVector3(lua_State* L, int index)
+inline HMM_Vec3 LuaCheckVector3(lua_State *L, int index)
 {
     HMM_Vec3 v;
 
@@ -52,7 +52,7 @@ inline HMM_Vec3 LuaCheckVector3(lua_State* L, int index)
     return v;
 }
 
-inline void LuaPushVector3(lua_State* L, HMM_Vec3 v)
+inline void LuaPushVector3(lua_State *L, HMM_Vec3 v)
 {
     lua_getglobal(L, "vec3");
     lua_pushnumber(L, v.X);
@@ -61,8 +61,7 @@ inline void LuaPushVector3(lua_State* L, HMM_Vec3 v)
     lua_call(L, 3, 1);
 }
 
-inline void LuaSetVector3(lua_State* L, const char* module,
-                          const char* variable, HMM_Vec3 v)
+inline void LuaSetVector3(lua_State *L, const char *module, const char *variable, HMM_Vec3 v)
 {
     lua_getglobal(L, module);
     LuaPushVector3(L, v);
@@ -70,7 +69,7 @@ inline void LuaSetVector3(lua_State* L, const char* module,
     lua_pop(L, 1);
 }
 
-inline float LuaGetFloat(lua_State* L, const char* module, const char* variable)
+inline float LuaGetFloat(lua_State *L, const char *module, const char *variable)
 {
     lua_getglobal(L, module);
     lua_getfield(L, -1, variable);
@@ -79,8 +78,7 @@ inline float LuaGetFloat(lua_State* L, const char* module, const char* variable)
     return ret;
 }
 
-inline void LuaSetFloat(lua_State* L, const char* module, const char* variable,
-                        float value)
+inline void LuaSetFloat(lua_State *L, const char *module, const char *variable, float value)
 {
     lua_getglobal(L, module);
     lua_pushnumber(L, value);
@@ -88,8 +86,7 @@ inline void LuaSetFloat(lua_State* L, const char* module, const char* variable,
     lua_pop(L, 1);
 }
 
-inline void LuaSetBoolean(lua_State* L, const char* module,
-                          const char* variable, bool value)
+inline void LuaSetBoolean(lua_State *L, const char *module, const char *variable, bool value)
 {
     lua_getglobal(L, module);
     lua_pushboolean(L, value ? 1 : 0);
@@ -102,4 +99,4 @@ bool LuaGetLuaHudDetected();
 void LuaSetLuaHudDetected(bool detected);
 bool LuaUseLuaHud();
 
-extern lua_State* global_lua_state;
+extern lua_State *global_lua_state;

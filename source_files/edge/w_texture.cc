@@ -38,13 +38,16 @@ extern std::string game_base;
 
 class TextureSet
 {
-   public:
+  public:
     TextureSet(int num) : total_textures_(num)
     {
         textures_ = new TextureDefinition *[total_textures_];
     }
 
-    ~TextureSet() { delete[] textures_; }
+    ~TextureSet()
+    {
+        delete[] textures_;
+    }
 
     TextureDefinition **textures_;
     int                 total_textures_;
@@ -72,9 +75,8 @@ static void InstallTextureLumps(int file, const WadTextureResource *WT)
     const int *directory;
 
     // Load the patch names from pnames.lmp.
-    const char *names = (const char *)LoadLumpIntoMemory(WT->pnames);
-    int         nummappatches =
-        AlignedLittleEndianS32(*((const int *)names));  // Eww...
+    const char *names         = (const char *)LoadLumpIntoMemory(WT->pnames);
+    int         nummappatches = AlignedLittleEndianS32(*((const int *)names)); // Eww...
 
     const char *name_p = names + 4;
 
@@ -88,8 +90,7 @@ static void InstallTextureLumps(int file, const WadTextureResource *WT)
     {
         patch_names[i].resize(9);
 
-        epi::CStringCopyMax(patch_names[i].data(),
-                            (const char *)(name_p + i * 8), 8);
+        epi::CStringCopyMax(patch_names[i].data(), (const char *)(name_p + i * 8), 8);
 
         patchlookup[i] = CheckPatchLumpNumberForName(patch_names[i].c_str());
     }
@@ -139,8 +140,7 @@ static void InstallTextureLumps(int file, const WadTextureResource *WT)
         if (offset < 0 || offset > maxoff)
             FatalError("InitializeTextures: bad texture directory");
 
-        const RawTexture *mtexture =
-            (const RawTexture *)((const uint8_t *)maptex + offset);
+        const RawTexture *mtexture = (const RawTexture *)((const uint8_t *)maptex + offset);
 
         // -ES- 2000/02/10 Texture must have patches.
         int patchcount = AlignedLittleEndianS16(mtexture->patch_count);
@@ -149,25 +149,21 @@ static void InstallTextureLumps(int file, const WadTextureResource *WT)
         //  which have this issue
         if (!patchcount)
         {
-            LogWarning("InitializeTextures: Texture '%.8s' has no patches\n",
-                       mtexture->name);
+            LogWarning("InitializeTextures: Texture '%.8s' has no patches\n", mtexture->name);
             // FatalError("InitializeTextures: Texture '%.8s' has no patches",
             // mtexture->name);
-            patchcount = 0;  // mark it as a dud
+            patchcount = 0; // mark it as a dud
         }
 
         int width = AlignedLittleEndianS16(mtexture->width);
         if (width == 0)
-            FatalError("InitializeTextures: Texture '%.8s' has zero width",
-                       mtexture->name);
+            FatalError("InitializeTextures: Texture '%.8s' has zero width", mtexture->name);
 
         // -ES- Allocate texture, patches and columnlump/ofs in one big chunk
-        int base_size =
-            sizeof(TextureDefinition) + sizeof(TexturePatch) * (patchcount - 1);
+        int base_size = sizeof(TextureDefinition) + sizeof(TexturePatch) * (patchcount - 1);
 
-        TextureDefinition *texture = (TextureDefinition *)malloc(
-            base_size + width * (sizeof(uint8_t) + sizeof(short)));
-        cur_set->textures_[i] = texture;
+        TextureDefinition *texture = (TextureDefinition *)malloc(base_size + width * (sizeof(uint8_t) + sizeof(short)));
+        cur_set->textures_[i]      = texture;
 
         uint8_t *base = (uint8_t *)texture + base_size;
 
@@ -190,8 +186,7 @@ static void InstallTextureLumps(int file, const WadTextureResource *WT)
         const RawPatchDefinition *mpatch = &mtexture->patches[0];
         TexturePatch             *patch  = &texture->patches[0];
 
-        bool is_sky =
-            (epi::StringPrefixCaseCompareASCII(texture->name, "SKY") == 0);
+        bool is_sky = (epi::StringPrefixCaseCompareASCII(texture->name, "SKY") == 0);
 
         for (int k = 0; k < texture->patch_count; k++, mpatch++, patch++)
         {
@@ -202,12 +197,12 @@ static void InstallTextureLumps(int file, const WadTextureResource *WT)
             patch->patch    = patchlookup[pname];
 
             // work-around for strange Y offset in SKY1 of DOOM 1
-            if (is_sky && patch->origin_y < 0) patch->origin_y = 0;
+            if (is_sky && patch->origin_y < 0)
+                patch->origin_y = 0;
 
             if (patch->patch == -1)
             {
-                LogWarning("Missing patch '%.8s' in texture \'%.8s\'\n",
-                           patch_names[pname].c_str(), texture->name);
+                LogWarning("Missing patch '%.8s' in texture \'%.8s\'\n", patch_names[pname].c_str(), texture->name);
 
                 // mark texture as a dud
                 texture->patch_count = 0;
@@ -221,7 +216,8 @@ static void InstallTextureLumps(int file, const WadTextureResource *WT)
 
     delete[] maptex1;
 
-    if (maptex2) delete[] maptex2;
+    if (maptex2)
+        delete[] maptex2;
 
     delete[] patchlookup;
 }
@@ -240,9 +236,8 @@ static void InstallTextureLumpsStrife(int file, const WadTextureResource *WT)
     const int *directory;
 
     // Load the patch names from pnames.lmp.
-    const char *names = (const char *)LoadLumpIntoMemory(WT->pnames);
-    int         nummappatches =
-        AlignedLittleEndianS32(*((const int *)names));  // Eww...
+    const char *names         = (const char *)LoadLumpIntoMemory(WT->pnames);
+    int         nummappatches = AlignedLittleEndianS32(*((const int *)names)); // Eww...
 
     const char *name_p = names + 4;
 
@@ -256,8 +251,7 @@ static void InstallTextureLumpsStrife(int file, const WadTextureResource *WT)
     {
         patch_names[i].resize(9);
 
-        epi::CStringCopyMax(patch_names[i].data(),
-                            (const char *)(name_p + i * 8), 8);
+        epi::CStringCopyMax(patch_names[i].data(), (const char *)(name_p + i * 8), 8);
 
         patchlookup[i] = CheckPatchLumpNumberForName(patch_names[i].c_str());
     }
@@ -307,8 +301,7 @@ static void InstallTextureLumpsStrife(int file, const WadTextureResource *WT)
         if (offset < 0 || offset > maxoff)
             FatalError("InitializeTextures: bad texture directory");
 
-        const RawStrifeTexture *mtexture =
-            (const RawStrifeTexture *)((const uint8_t *)maptex + offset);
+        const RawStrifeTexture *mtexture = (const RawStrifeTexture *)((const uint8_t *)maptex + offset);
 
         // -ES- 2000/02/10 Texture must have patches.
         int patchcount = AlignedLittleEndianS16(mtexture->patch_count);
@@ -317,25 +310,21 @@ static void InstallTextureLumpsStrife(int file, const WadTextureResource *WT)
         //  which have this issue
         if (!patchcount)
         {
-            LogWarning("InitializeTextures: Texture '%.8s' has no patches\n",
-                       mtexture->name);
+            LogWarning("InitializeTextures: Texture '%.8s' has no patches\n", mtexture->name);
             // FatalError("InitializeTextures: Texture '%.8s' has no patches",
             // mtexture->name);
-            patchcount = 0;  // mark it as a dud
+            patchcount = 0; // mark it as a dud
         }
 
         int width = AlignedLittleEndianS16(mtexture->width);
         if (width == 0)
-            FatalError("InitializeTextures: Texture '%.8s' has zero width",
-                       mtexture->name);
+            FatalError("InitializeTextures: Texture '%.8s' has zero width", mtexture->name);
 
         // -ES- Allocate texture, patches and columnlump/ofs in one big chunk
-        int base_size =
-            sizeof(TextureDefinition) + sizeof(TexturePatch) * (patchcount - 1);
+        int base_size = sizeof(TextureDefinition) + sizeof(TexturePatch) * (patchcount - 1);
 
-        TextureDefinition *texture = (TextureDefinition *)malloc(
-            base_size + width * (sizeof(uint8_t) + sizeof(short)));
-        cur_set->textures_[i] = texture;
+        TextureDefinition *texture = (TextureDefinition *)malloc(base_size + width * (sizeof(uint8_t) + sizeof(short)));
+        cur_set->textures_[i]      = texture;
 
         uint8_t *base = (uint8_t *)texture + base_size;
 
@@ -358,8 +347,7 @@ static void InstallTextureLumpsStrife(int file, const WadTextureResource *WT)
         const RawStrifePatchDefinition *mpatch = &mtexture->patches[0];
         TexturePatch                   *patch  = &texture->patches[0];
 
-        bool is_sky =
-            (epi::StringPrefixCaseCompareASCII(texture->name, "SKY") == 0);
+        bool is_sky = (epi::StringPrefixCaseCompareASCII(texture->name, "SKY") == 0);
 
         for (int k = 0; k < texture->patch_count; k++, mpatch++, patch++)
         {
@@ -370,12 +358,12 @@ static void InstallTextureLumpsStrife(int file, const WadTextureResource *WT)
             patch->patch    = patchlookup[pname];
 
             // work-around for strange Y offset in SKY1 of DOOM 1
-            if (is_sky && patch->origin_y < 0) patch->origin_y = 0;
+            if (is_sky && patch->origin_y < 0)
+                patch->origin_y = 0;
 
             if (patch->patch == -1)
             {
-                LogWarning("Missing patch '%.8s' in texture \'%.8s\'\n",
-                           patch_names[pname].c_str(), texture->name);
+                LogWarning("Missing patch '%.8s' in texture \'%.8s\'\n", patch_names[pname].c_str(), texture->name);
 
                 // mark texture as a dud
                 texture->patch_count = 0;
@@ -389,7 +377,8 @@ static void InstallTextureLumpsStrife(int file, const WadTextureResource *WT)
 
     delete[] maptex1;
 
-    if (maptex2) delete[] maptex2;
+    if (maptex2)
+        delete[] maptex2;
 
     delete[] patchlookup;
 }
@@ -424,7 +413,8 @@ void InitializeTextures(void)
 
         GetTextureLumpsForWad(file, &WT);
 
-        if (WT.pnames < 0) continue;
+        if (WT.pnames < 0)
+            continue;
 
         if (WT.texture1 < 0 && WT.texture2 >= 0)
         {
@@ -432,7 +422,8 @@ void InitializeTextures(void)
             WT.texture2 = -1;
         }
 
-        if (WT.texture1 < 0) continue;
+        if (WT.texture1 < 0)
+            continue;
 
         if (game_base == "strife")
             InstallTextureLumpsStrife(file, &WT);
@@ -464,14 +455,13 @@ void InitializeTextures(void)
         TextureSet *set = texture_sets[k];
 
         for (int m = 0; m < set->total_textures_; m++)
-            if (set->textures_[m]->patch_count > 0) *cur++ = set->textures_[m];
+            if (set->textures_[m]->patch_count > 0)
+                *cur++ = set->textures_[m];
     }
 
     numtextures = cur - textures;
 
-#define EDGE_CMP(a, b)                                                         \
-    (strcmp(a->name, b->name) < 0 ||                                           \
-     (strcmp(a->name, b->name) == 0 && a->file < b->file))
+#define EDGE_CMP(a, b) (strcmp(a->name, b->name) < 0 || (strcmp(a->name, b->name) == 0 && a->file < b->file))
     EDGE_QSORT(TextureDefinition *, textures, numtextures, 10);
 #undef EDGE_CMP
 
@@ -484,7 +474,10 @@ void InitializeTextures(void)
         TextureDefinition *a = textures[k - 1];
         TextureDefinition *b = textures[k];
 
-        if (strcmp(a->name, b->name) == 0) { textures[k - 1] = nullptr; }
+        if (strcmp(a->name, b->name) == 0)
+        {
+            textures[k - 1] = nullptr;
+        }
     }
 
     CreateTextures(textures, numtextures);
@@ -503,8 +496,7 @@ void InitializeTextures(void)
 //
 // Note: search is from latest set to earliest set.
 //
-int FindTextureSequence(const char *start, const char *end, int *s_offset,
-                        int *e_offset)
+int FindTextureSequence(const char *start, const char *end, int *s_offset, int *e_offset)
 {
     int i, j;
 
@@ -512,19 +504,18 @@ int FindTextureSequence(const char *start, const char *end, int *s_offset,
     {
         // look for start name
         for (j = 0; j < texture_sets[i]->total_textures_; j++)
-            if (epi::StringCaseCompareASCII(
-                    start, texture_sets[i]->textures_[j]->name) == 0)
+            if (epi::StringCaseCompareASCII(start, texture_sets[i]->textures_[j]->name) == 0)
                 break;
 
-        if (j >= texture_sets[i]->total_textures_) continue;
+        if (j >= texture_sets[i]->total_textures_)
+            continue;
 
         (*s_offset) = j;
 
         // look for end name
         for (j++; j < texture_sets[i]->total_textures_; j++)
         {
-            if (epi::StringCaseCompareASCII(
-                    end, texture_sets[i]->textures_[j]->name) == 0)
+            if (epi::StringCaseCompareASCII(end, texture_sets[i]->textures_[j]->name) == 0)
             {
                 (*e_offset) = j;
                 return i;

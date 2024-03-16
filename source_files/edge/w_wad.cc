@@ -58,7 +58,7 @@
 #include "m_misc.h"
 #include "main.h"
 #include "math_md5.h"
-#include "p_umapinfo.h"  //Lobo 2022
+#include "p_umapinfo.h" //Lobo 2022
 #include "r_image.h"
 #include "rad_trig.h"
 #include "script/compat/lua_compat.h"
@@ -72,37 +72,30 @@
 #include "wadfixes.h"
 
 // Combination of unique lumps needed to best identify an IWAD
-const std::vector<GameCheck> game_checker = { {
-    { "Custom", "custom", { "EDGEGAME", "EDGEGAME" } },
-    { "Blasphemer", "blasphemer", { "BLASPHEM", "E1M1" } },
-    { "Freedoom 1", "freedoom1", { "FREEDOOM", "E1M1" } },
-    { "Freedoom 2", "freedoom2", { "FREEDOOM", "MAP01" } },
-    { "REKKR", "rekkr", { "REKCREDS", "E1M1" } },
-    { "HacX", "hacx", { "HACX-R", "MAP01" } },
-    { "Harmony",
-      "harmony",
-      { "0HAWK01", "DBIGFONT" } },  // Only the original, not
-                                    // Harmony-Compatible, should have DBIGFONT
-    { "Chex Quest",
-      "chex",
-      { "ENDOOM", "_DEUTEX_" } },  // Original Chex Quest, NOT CQ3
-    { "Heretic", "heretic", { "MUS_E1M1", "E1M1" } },
-    { "Plutonia", "plutonia", { "CAMO1", "MAP01" } },
-    { "Evilution", "tnt", { "REDTNT2", "MAP01" } },
-    { "Doom", "doom", { "BFGGA0", "E2M1" } },
-    { "Doom BFG", "doom", { "DMENUPIC", "M_MULTI" } },  // BFG Edition
-    { "Doom Demo", "doom1", { "SHOTA0", "E1M1" } },
-    { "Doom II", "doom2", { "BFGGA0", "MAP01" } },
-    { "Doom II BFG", "doom2", { "DMENUPIC", "MAP33" } },  // BFG Edition
-    { "Strife",
-      "strife",
-      { "VELLOGO",
-        "RGELOGO" } }  // Dev/internal use - Definitely nowhwere near playable
-} };
+const std::vector<GameCheck> game_checker = {{
+    {"Custom", "custom", {"EDGEGAME", "EDGEGAME"}},
+    {"Blasphemer", "blasphemer", {"BLASPHEM", "E1M1"}},
+    {"Freedoom 1", "freedoom1", {"FREEDOOM", "E1M1"}},
+    {"Freedoom 2", "freedoom2", {"FREEDOOM", "MAP01"}},
+    {"REKKR", "rekkr", {"REKCREDS", "E1M1"}},
+    {"HacX", "hacx", {"HACX-R", "MAP01"}},
+    {"Harmony", "harmony", {"0HAWK01", "DBIGFONT"}}, // Only the original, not
+                                                     // Harmony-Compatible, should have DBIGFONT
+    {"Chex Quest", "chex", {"ENDOOM", "_DEUTEX_"}},  // Original Chex Quest, NOT CQ3
+    {"Heretic", "heretic", {"MUS_E1M1", "E1M1"}},
+    {"Plutonia", "plutonia", {"CAMO1", "MAP01"}},
+    {"Evilution", "tnt", {"REDTNT2", "MAP01"}},
+    {"Doom", "doom", {"BFGGA0", "E2M1"}},
+    {"Doom BFG", "doom", {"DMENUPIC", "M_MULTI"}},   // BFG Edition
+    {"Doom Demo", "doom1", {"SHOTA0", "E1M1"}},
+    {"Doom II", "doom2", {"BFGGA0", "MAP01"}},
+    {"Doom II BFG", "doom2", {"DMENUPIC", "MAP33"}}, // BFG Edition
+    {"Strife", "strife", {"VELLOGO", "RGELOGO"}}     // Dev/internal use - Definitely nowhwere near playable
+}};
 
 class WadFile
 {
-   public:
+  public:
     // lists for sprites, flats, patches (stuff between markers)
     std::vector<int> sprite_lumps_;
     std::vector<int> flat_lumps_;
@@ -140,40 +133,29 @@ class WadFile
 
     std::string md5_string_;
 
-   public:
+  public:
     WadFile()
-        : sprite_lumps_(),
-          flat_lumps_(),
-          patch_lumps_(),
-          colormap_lumps_(),
-          tx_lumps_(),
-          hires_lumps_(),
-          xgl_lumps_(),
-          level_markers_(),
-          skin_markers_(),
-          wadtex_(),
-          dehacked_lump_(-1),
-          coal_huds_(-1),
-          lua_huds_(-1),
-          umapinfo_lump_(-1),
-          animated_(-1),
-          switches_(-1),
-          md5_string_()
+        : sprite_lumps_(), flat_lumps_(), patch_lumps_(), colormap_lumps_(), tx_lumps_(), hires_lumps_(), xgl_lumps_(),
+          level_markers_(), skin_markers_(), wadtex_(), dehacked_lump_(-1), coal_huds_(-1), lua_huds_(-1),
+          umapinfo_lump_(-1), animated_(-1), switches_(-1), md5_string_()
     {
-        for (int d = 0; d < kTotalDDFTypes; d++) ddf_lumps_[d] = -1;
+        for (int d = 0; d < kTotalDDFTypes; d++)
+            ddf_lumps_[d] = -1;
     }
 
-    ~WadFile() {}
+    ~WadFile()
+    {
+    }
 
     bool HasLevel(const char *name) const;
 };
 
 enum LumpKind
 {
-    kLumpNormal   = 0,   // fallback value
-    kLumpMarker   = 3,   // X_START, X_END, S_SKIN, level name
-    kLumpWadTex   = 6,   // palette, pnames, texture1/2
-    kLumpDdfRts   = 10,  // DDF, RTS, DEHACKED lump
+    kLumpNormal   = 0,  // fallback value
+    kLumpMarker   = 3,  // X_START, X_END, S_SKIN, level name
+    kLumpWadTex   = 6,  // palette, pnames, texture1/2
+    kLumpDdfRts   = 10, // DDF, RTS, DEHACKED lump
     kLumpTx       = 14,
     kLumpColormap = 15,
     kLumpFlat     = 16,
@@ -319,9 +301,15 @@ static bool IsP_END(char *name)
 //
 // Is the name a colourmap list start/end flag?
 //
-static bool IsC_START(char *name) { return (strncmp(name, "C_START", 8) == 0); }
+static bool IsC_START(char *name)
+{
+    return (strncmp(name, "C_START", 8) == 0);
+}
 
-static bool IsC_END(char *name) { return (strncmp(name, "C_END", 8) == 0); }
+static bool IsC_END(char *name)
+{
+    return (strncmp(name, "C_END", 8) == 0);
+}
 
 //
 // Is the name a texture list start/end flag?
@@ -331,7 +319,10 @@ static bool IsTX_START(char *name)
     return (strncmp(name, "TX_START", 8) == 0);
 }
 
-static bool IsTX_END(char *name) { return (strncmp(name, "TX_END", 8) == 0); }
+static bool IsTX_END(char *name)
+{
+    return (strncmp(name, "TX_END", 8) == 0);
+}
 
 //
 // Is the name a high-resolution start/end flag?
@@ -341,7 +332,10 @@ static bool IsHI_START(char *name)
     return (strncmp(name, "HI_START", 8) == 0);
 }
 
-static bool IsHI_END(char *name) { return (strncmp(name, "HI_END", 8) == 0); }
+static bool IsHI_END(char *name)
+{
+    return (strncmp(name, "HI_END", 8) == 0);
+}
 
 //
 // Is the name a XGL nodes start/end flag?
@@ -351,22 +345,20 @@ static bool IsXG_START(char *name)
     return (strncmp(name, "XG_START", 8) == 0);
 }
 
-static bool IsXG_END(char *name) { return (strncmp(name, "XG_END", 8) == 0); }
+static bool IsXG_END(char *name)
+{
+    return (strncmp(name, "XG_END", 8) == 0);
+}
 
 //
 // Is the name a dummy sprite/flat/patch marker ?
 //
 static bool IsDummySF(const char *name)
 {
-    return (strncmp(name, "S1_START", 8) == 0 ||
-            strncmp(name, "S2_START", 8) == 0 ||
-            strncmp(name, "S3_START", 8) == 0 ||
-            strncmp(name, "F1_START", 8) == 0 ||
-            strncmp(name, "F2_START", 8) == 0 ||
-            strncmp(name, "F3_START", 8) == 0 ||
-            strncmp(name, "P1_START", 8) == 0 ||
-            strncmp(name, "P2_START", 8) == 0 ||
-            strncmp(name, "P3_START", 8) == 0);
+    return (
+        strncmp(name, "S1_START", 8) == 0 || strncmp(name, "S2_START", 8) == 0 || strncmp(name, "S3_START", 8) == 0 ||
+        strncmp(name, "F1_START", 8) == 0 || strncmp(name, "F2_START", 8) == 0 || strncmp(name, "F3_START", 8) == 0 ||
+        strncmp(name, "P1_START", 8) == 0 || strncmp(name, "P2_START", 8) == 0 || strncmp(name, "P3_START", 8) == 0);
 }
 
 //
@@ -380,7 +372,8 @@ static bool IsSkin(const char *name)
 bool WadFile::HasLevel(const char *name) const
 {
     for (size_t i = 0; i < level_markers_.size(); i++)
-        if (strcmp(lump_info[level_markers_[i]].name, name) == 0) return true;
+        if (strcmp(lump_info[level_markers_[i]].name, name) == 0)
+            return true;
 
     return false;
 }
@@ -443,14 +436,17 @@ struct Compare_lump_pred
 
         // increasing name
         int cmp = strcmp(C.name, D.name);
-        if (cmp != 0) return (cmp < 0);
+        if (cmp != 0)
+            return (cmp < 0);
 
         // decreasing file number
         cmp = C.file - D.file;
-        if (cmp != 0) return (cmp > 0);
+        if (cmp != 0)
+            return (cmp > 0);
 
         // lump type
-        if (C.kind != D.kind) return C.kind > D.kind;
+        if (C.kind != D.kind)
+            return C.kind > D.kind;
 
         // tie breaker
         return C.position > D.position;
@@ -463,7 +459,8 @@ static void SortLumps(void)
 
     sorted_lumps.resize(lump_info.size());
 
-    for (i = 0; i < (int)lump_info.size(); i++) sorted_lumps[i] = i;
+    for (i = 0; i < (int)lump_info.size(); i++)
+        sorted_lumps[i] = i;
 
     // sort it, primarily by increasing name, secondly by decreasing
     // file number, thirdly by the lump type.
@@ -479,10 +476,10 @@ static void SortLumps(void)
 //
 static void SortSpriteLumps(WadFile *wad)
 {
-    if (wad->sprite_lumps_.size() < 2) return;
+    if (wad->sprite_lumps_.size() < 2)
+        return;
 
-    std::sort(wad->sprite_lumps_.begin(), wad->sprite_lumps_.end(),
-              Compare_lump_pred());
+    std::sort(wad->sprite_lumps_.begin(), wad->sprite_lumps_.end(), Compare_lump_pred());
 }
 
 //
@@ -492,8 +489,7 @@ static void SortSpriteLumps(WadFile *wad)
 //
 // AddLump
 //
-static void AddLump(DataFile *df, const char *raw_name, int pos, int size,
-                    int file_index, bool allow_ddf)
+static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int file_index, bool allow_ddf)
 {
     int lump = (int)lump_info.size();
 
@@ -524,62 +520,73 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size,
     if (strcmp(info.name, "PLAYPAL") == 0)
     {
         lump_p->kind = kLumpWadTex;
-        if (wad != nullptr) wad->wadtex_.palette = lump;
-        if (palette_datafile < 0) palette_datafile = file_index;
+        if (wad != nullptr)
+            wad->wadtex_.palette = lump;
+        if (palette_datafile < 0)
+            palette_datafile = file_index;
         return;
     }
     else if (strcmp(info.name, "PNAMES") == 0)
     {
         lump_p->kind = kLumpWadTex;
-        if (wad != nullptr) wad->wadtex_.pnames = lump;
+        if (wad != nullptr)
+            wad->wadtex_.pnames = lump;
         return;
     }
     else if (strcmp(info.name, "TEXTURE1") == 0)
     {
         lump_p->kind = kLumpWadTex;
-        if (wad != nullptr) wad->wadtex_.texture1 = lump;
+        if (wad != nullptr)
+            wad->wadtex_.texture1 = lump;
         return;
     }
     else if (strcmp(info.name, "TEXTURE2") == 0)
     {
         lump_p->kind = kLumpWadTex;
-        if (wad != nullptr) wad->wadtex_.texture2 = lump;
+        if (wad != nullptr)
+            wad->wadtex_.texture2 = lump;
         return;
     }
     else if (strcmp(info.name, "DEHACKED") == 0)
     {
         lump_p->kind = kLumpDdfRts;
-        if (wad != nullptr && info.size > 0) wad->dehacked_lump_ = lump;
+        if (wad != nullptr && info.size > 0)
+            wad->dehacked_lump_ = lump;
         return;
     }
     else if (strcmp(info.name, "COALHUDS") == 0)
     {
         lump_p->kind = kLumpDdfRts;
-        if (wad != nullptr) wad->coal_huds_ = lump;
+        if (wad != nullptr)
+            wad->coal_huds_ = lump;
         return;
     }
     else if (strcmp(info.name, "LUAHUDS") == 0)
     {
         lump_p->kind = kLumpDdfRts;
-        if (wad != nullptr) wad->lua_huds_ = lump;
+        if (wad != nullptr)
+            wad->lua_huds_ = lump;
         return;
     }
     else if (strcmp(info.name, "UMAPINFO") == 0)
     {
         lump_p->kind = kLumpNormal;
-        if (wad != nullptr) wad->umapinfo_lump_ = lump;
+        if (wad != nullptr)
+            wad->umapinfo_lump_ = lump;
         return;
     }
     else if (strcmp(info.name, "ANIMATED") == 0)
     {
         lump_p->kind = kLumpDdfRts;
-        if (wad != nullptr) wad->animated_ = lump;
+        if (wad != nullptr)
+            wad->animated_ = lump;
         return;
     }
     else if (strcmp(info.name, "SWITCHES") == 0)
     {
         lump_p->kind = kLumpDdfRts;
-        if (wad != nullptr) wad->switches_ = lump;
+        if (wad != nullptr)
+            wad->switches_ = lump;
         return;
     }
 
@@ -599,7 +606,8 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size,
     if (IsSkin(info.name))
     {
         lump_p->kind = kLumpMarker;
-        if (wad != nullptr) wad->skin_markers_.push_back(lump);
+        if (wad != nullptr)
+            wad->skin_markers_.push_back(lump);
         return;
     }
 
@@ -628,7 +636,8 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size,
     }
     else if (IsF_END(lump_p->name))
     {
-        if (!within_flat_list) LogWarning("Unexpected F_END marker in wad.\n");
+        if (!within_flat_list)
+            LogWarning("Unexpected F_END marker in wad.\n");
 
         lump_p->kind     = kLumpMarker;
         within_flat_list = false;
@@ -642,7 +651,8 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size,
     }
     else if (IsP_END(lump_p->name))
     {
-        if (!within_patch_list) LogWarning("Unexpected P_END marker in wad.\n");
+        if (!within_patch_list)
+            LogWarning("Unexpected P_END marker in wad.\n");
 
         lump_p->kind      = kLumpMarker;
         within_patch_list = false;
@@ -671,7 +681,8 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size,
     }
     else if (IsTX_END(lump_p->name))
     {
-        if (!within_tex_list) LogWarning("Unexpected TX_END marker in wad.\n");
+        if (!within_tex_list)
+            LogWarning("Unexpected TX_END marker in wad.\n");
 
         lump_p->kind    = kLumpMarker;
         within_tex_list = false;
@@ -700,7 +711,8 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size,
     }
     else if (IsXG_END(lump_p->name))
     {
-        if (!within_xgl_list) LogWarning("Unexpected XG_END marker in wad.\n");
+        if (!within_xgl_list)
+            LogWarning("Unexpected XG_END marker in wad.\n");
 
         lump_p->kind    = kLumpMarker;
         within_xgl_list = false;
@@ -708,9 +720,11 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size,
     }
 
     // ignore zero size lumps or dummy markers
-    if (lump_p->size == 0 || IsDummySF(lump_p->name)) return;
+    if (lump_p->size == 0 || IsDummySF(lump_p->name))
+        return;
 
-    if (wad == nullptr) return;
+    if (wad == nullptr)
+        return;
 
     if (within_sprite_list)
     {
@@ -763,17 +777,15 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size,
 // sequence of lumps _after_ this one, which works well since their
 // order is fixed (e.g. THINGS is always first).
 //
-static void CheckForLevel(WadFile *wad, int lump, const char *name,
-                          const RawWadEntry *raw, int remaining)
+static void CheckForLevel(WadFile *wad, int lump, const char *name, const RawWadEntry *raw, int remaining)
 {
     // we only test four lumps (it is enough), but fewer definitely
     // means this is not a level marker.
-    if (remaining < 2) return;
+    if (remaining < 2)
+        return;
 
-    if (strncmp(raw[1].name, "THINGS", 8) == 0 &&
-        strncmp(raw[2].name, "LINEDEFS", 8) == 0 &&
-        strncmp(raw[3].name, "SIDEDEFS", 8) == 0 &&
-        strncmp(raw[4].name, "VERTEXES", 8) == 0)
+    if (strncmp(raw[1].name, "THINGS", 8) == 0 && strncmp(raw[2].name, "LINEDEFS", 8) == 0 &&
+        strncmp(raw[3].name, "SIDEDEFS", 8) == 0 && strncmp(raw[4].name, "VERTEXES", 8) == 0)
     {
         if (strlen(name) > 5)
         {
@@ -794,10 +806,8 @@ static void CheckForLevel(WadFile *wad, int lump, const char *name,
 
     // handle GL nodes here too
 
-    if (strncmp(raw[1].name, "GL_VERT", 8) == 0 &&
-        strncmp(raw[2].name, "GL_SEGS", 8) == 0 &&
-        strncmp(raw[3].name, "GL_SSECT", 8) == 0 &&
-        strncmp(raw[4].name, "GL_NODES", 8) == 0)
+    if (strncmp(raw[1].name, "GL_VERT", 8) == 0 && strncmp(raw[2].name, "GL_SEGS", 8) == 0 &&
+        strncmp(raw[3].name, "GL_SSECT", 8) == 0 && strncmp(raw[4].name, "GL_NODES", 8) == 0)
     {
         wad->level_markers_.push_back(lump);
         return;
@@ -841,16 +851,11 @@ int CheckForUniqueGameLumps(epi::File *file)
         // Do not require IWAD header if loading Harmony, REKKR, BFG Edition
         // WADs, Chex Quest or a custom standalone IWAD
         if (epi::StringPrefixCompare(header.magic, "IWAD") != 0 &&
-            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0],
-                                        "DMENUPIC") != 0 &&
-            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0],
-                                        "REKCREDS") != 0 &&
-            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "0HAWK01") !=
-                0 &&
-            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0],
-                                        "EDGEGAME") != 0 &&
-            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "ENDOOM") !=
-                0)
+            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "DMENUPIC") != 0 &&
+            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "REKCREDS") != 0 &&
+            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "0HAWK01") != 0 &&
+            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "EDGEGAME") != 0 &&
+            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "ENDOOM") != 0)
         {
             continue;
         }
@@ -863,13 +868,10 @@ int CheckForUniqueGameLumps(epi::File *file)
             RawWadEntry &entry = raw_info[i];
 
             if (epi::StringCompareMax(gamecheck.unique_lumps[0], entry.name,
-                                      gamecheck.unique_lumps[0].size() < 8
-                                          ? gamecheck.unique_lumps[0].size()
-                                          : 8) == 0)
+                                      gamecheck.unique_lumps[0].size() < 8 ? gamecheck.unique_lumps[0].size() : 8) == 0)
             {
                 // EDGEGAME is the only lump needed for custom standalones
-                if (epi::StringCaseCompareASCII(gamecheck.unique_lumps[0],
-                                                "EDGEGAME") == 0)
+                if (epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "EDGEGAME") == 0)
                 {
                     delete[] raw_info;
                     file->Seek(0, epi::File::kSeekpointStart);
@@ -877,17 +879,14 @@ int CheckForUniqueGameLumps(epi::File *file)
                 }
                 // Either really smart or really dumb Chex Quest detection
                 // method
-                else if (epi::StringCaseCompareASCII(gamecheck.unique_lumps[0],
-                                                     "ENDOOM") == 0)
+                else if (epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "ENDOOM") == 0)
                 {
                     EPI_ASSERT(entry.size == 4000);
                     file->Seek(entry.position, epi::File::kSeekpointStart);
                     uint8_t *endoom = new uint8_t[entry.size];
                     file->Read(endoom, entry.size);
-                    if (endoom[1026] == 'c' && endoom[1028] == 'h' &&
-                        endoom[1030] == 'e' && endoom[1032] == 'x' &&
-                        endoom[1034] == 'q' && endoom[1036] == 'u' &&
-                        endoom[1038] == 'e' && endoom[1040] == 's' &&
+                    if (endoom[1026] == 'c' && endoom[1028] == 'h' && endoom[1030] == 'e' && endoom[1032] == 'x' &&
+                        endoom[1034] == 'q' && endoom[1036] == 'u' && endoom[1038] == 'e' && endoom[1040] == 's' &&
                         endoom[1042] == 't')
                     {
                         lump1_found = true;
@@ -898,9 +897,7 @@ int CheckForUniqueGameLumps(epi::File *file)
                     lump1_found = true;
             }
             if (epi::StringCompareMax(gamecheck.unique_lumps[1], entry.name,
-                                      gamecheck.unique_lumps[1].size() < 8
-                                          ? gamecheck.unique_lumps[1].size()
-                                          : 8) == 0)
+                                      gamecheck.unique_lumps[1].size() < 8 ? gamecheck.unique_lumps[1].size() : 8) == 0)
                 lump2_found = true;
         }
 
@@ -922,11 +919,9 @@ void ProcessFixersForWad(DataFile *df)
     // Special handling for Doom 2 BFG Edition
     if (df->kind_ == kFileKindIWad || df->kind_ == kFileKindIPackWad)
     {
-        if (CheckLumpNumberForName("MAP33") > -1 &&
-            CheckLumpNumberForName("DMENUPIC") > -1)
+        if (CheckLumpNumberForName("MAP33") > -1 && CheckLumpNumberForName("DMENUPIC") > -1)
         {
-            std::string fix_path =
-                epi::PathAppend(game_directory, "edge_fixes/doom2_bfg.epk");
+            std::string fix_path = epi::PathAppend(game_directory, "edge_fixes/doom2_bfg.epk");
             if (epi::TestFileAccess(fix_path))
             {
                 AddPendingFile(fix_path, kFileKindEpk);
@@ -934,9 +929,8 @@ void ProcessFixersForWad(DataFile *df)
                 LogPrint("WADFIXES: Applying fixes for Doom 2 BFG Edition\n");
             }
             else
-                LogWarning(
-                    "WADFIXES: Doom 2 BFG Edition detected, but fix not found "
-                    "in edge_fixes directory!\n");
+                LogWarning("WADFIXES: Doom 2 BFG Edition detected, but fix not found "
+                           "in edge_fixes directory!\n");
             return;
         }
     }
@@ -945,29 +939,26 @@ void ProcessFixersForWad(DataFile *df)
 
     fix_checker = df->wad_->md5_string_;
 
-    if (fix_checker.empty()) return;
+    if (fix_checker.empty())
+        return;
 
     for (size_t i = 0; i < fixdefs.size(); i++)
     {
-        if (epi::StringCaseCompareASCII(fix_checker, fixdefs[i]->md5_string_) ==
-            0)
+        if (epi::StringCaseCompareASCII(fix_checker, fixdefs[i]->md5_string_) == 0)
         {
-            std::string fix_path =
-                epi::PathAppend(game_directory, "edge_fixes");
-            fix_path = epi::PathAppend(fix_path, fix_checker.append(".epk"));
+            std::string fix_path = epi::PathAppend(game_directory, "edge_fixes");
+            fix_path             = epi::PathAppend(fix_path, fix_checker.append(".epk"));
             if (epi::TestFileAccess(fix_path))
             {
                 AddPendingFile(fix_path, kFileKindEpk);
 
-                LogPrint("WADFIXES: Applying fixes for %s\n",
-                         fixdefs[i]->name_.c_str());
+                LogPrint("WADFIXES: Applying fixes for %s\n", fixdefs[i]->name_.c_str());
             }
             else
             {
-                LogWarning(
-                    "WADFIXES: %s defined, but no fix WAD located in "
-                    "edge_fixes!\n",
-                    fixdefs[i]->name_.c_str());
+                LogWarning("WADFIXES: %s defined, but no fix WAD located in "
+                           "edge_fixes!\n",
+                           fixdefs[i]->name_.c_str());
                 return;
             }
         }
@@ -977,15 +968,15 @@ void ProcessFixersForWad(DataFile *df)
 void ProcessDehackedInWad(DataFile *df)
 {
     int deh_lump = df->wad_->dehacked_lump_;
-    if (deh_lump < 0) return;
+    if (deh_lump < 0)
+        return;
 
     const char *lump_name = lump_info[deh_lump].name;
 
     LogPrint("Converting [%s] lump in: %s\n", lump_name, df->name_.c_str());
 
     int            length = -1;
-    const uint8_t *data =
-        (const uint8_t *)LoadLumpIntoMemory(deh_lump, &length);
+    const uint8_t *data   = (const uint8_t *)LoadLumpIntoMemory(deh_lump, &length);
 
     std::string bare_name = epi::GetFilename(df->name_);
 
@@ -1008,8 +999,7 @@ static void ProcessDDFInWad(DataFile *df)
 
         if (lump >= 0)
         {
-            LogPrint("Loading %s lump in %s\n", GetLumpNameFromIndex(lump),
-                     bare_filename.c_str());
+            LogPrint("Loading %s lump in %s\n", GetLumpNameFromIndex(lump), bare_filename.c_str());
 
             std::string data   = LoadLumpAsString(lump);
             std::string source = GetLumpNameFromIndex(lump);
@@ -1098,8 +1088,7 @@ static void ProcessBoomStuffInWad(DataFile *df)
     // handle BOOM Colourmaps (between C_START and C_END)
     for (int lump : df->wad_->colormap_lumps_)
     {
-        DDF_AddRawColourmap(GetLumpNameFromIndex(lump), GetLumpLength(lump),
-                            nullptr);
+        DDF_AddRawColourmap(GetLumpNameFromIndex(lump), GetLumpLength(lump), nullptr);
     }
 }
 
@@ -1126,8 +1115,7 @@ void ProcessWad(DataFile *df, size_t file_index)
         // Homebrew levels?
         if (strncmp(header.magic, "PWAD", 4) != 0)
         {
-            FatalError("Wad file %s doesn't have IWAD or PWAD id\n",
-                       df->name_.c_str());
+            FatalError("Wad file %s doesn't have IWAD or PWAD id\n", df->name_.c_str());
         }
     }
 
@@ -1148,36 +1136,36 @@ void ProcessWad(DataFile *df, size_t file_index)
     {
         RawWadEntry &entry = raw_info[i];
 
-        bool allow_ddf =
-            (df->kind_ == kFileKindEWad ||
-             (df->kind_ == kFileKindIWad &&
-              epi::StringCompare(game_base, "CUSTOM") == 0) ||
-             df->kind_ == kFileKindPWad || df->kind_ == kFileKindPackWad ||
-             df->kind_ == kFileKindIpk || df->kind_ == kFileKindIFolder);
+        bool allow_ddf = (df->kind_ == kFileKindEWad ||
+                          (df->kind_ == kFileKindIWad && epi::StringCompare(game_base, "CUSTOM") == 0) ||
+                          df->kind_ == kFileKindPWad || df->kind_ == kFileKindPackWad || df->kind_ == kFileKindIpk ||
+                          df->kind_ == kFileKindIFolder);
 
-        AddLump(df, entry.name, AlignedLittleEndianS32(entry.position),
-                AlignedLittleEndianS32(entry.size), (int)file_index, allow_ddf);
+        AddLump(df, entry.name, AlignedLittleEndianS32(entry.position), AlignedLittleEndianS32(entry.size),
+                (int)file_index, allow_ddf);
 
         // this will be uppercase
         const char *level_name = lump_info[startlump + i].name;
 
-        CheckForLevel(wad, startlump + i, level_name, &entry,
-                      header.total_entries - 1 - i);
+        CheckForLevel(wad, startlump + i, level_name, &entry, header.total_entries - 1 - i);
     }
 
     // check for unclosed sprite/flat/patch lists
     const char *filename = df->name_.c_str();
     if (within_sprite_list)
         LogWarning("Missing S_END marker in %s.\n", filename);
-    if (within_flat_list) LogWarning("Missing F_END marker in %s.\n", filename);
+    if (within_flat_list)
+        LogWarning("Missing F_END marker in %s.\n", filename);
     if (within_patch_list)
         LogWarning("Missing P_END marker in %s.\n", filename);
     if (within_colmap_list)
         LogWarning("Missing C_END marker in %s.\n", filename);
-    if (within_tex_list) LogWarning("Missing TX_END marker in %s.\n", filename);
+    if (within_tex_list)
+        LogWarning("Missing TX_END marker in %s.\n", filename);
     if (within_hires_list)
         LogWarning("Missing HI_END marker in %s.\n", filename);
-    if (within_xgl_list) LogWarning("Missing XG_END marker in %s.\n", filename);
+    if (within_xgl_list)
+        LogWarning("Missing XG_END marker in %s.\n", filename);
 
     SortLumps();
 
@@ -1202,7 +1190,8 @@ void ProcessWad(DataFile *df, size_t file_index)
 
 std::string BuildXglNodesForWad(DataFile *df)
 {
-    if (df->wad_->level_markers_.empty()) return "";
+    if (df->wad_->level_markers_.empty())
+        return "";
 
     // determine XWA filename in the cache
     std::string cache_name = epi::GetStem(df->name_);
@@ -1242,7 +1231,8 @@ std::string BuildXglNodesForWad(DataFile *df)
 
         ajbsp::CreateXWA(xwa_filename);
 
-        for (int i = 0; i < ajbsp::LevelsInWad(); i++) ajbsp::BuildLevel(i);
+        for (int i = 0; i < ajbsp::LevelsInWad(); i++)
+            ajbsp::BuildLevel(i);
 
         ajbsp::FinishXWA();
         ajbsp::CloseWad();
@@ -1292,7 +1282,7 @@ void ReadUmapinfoLumps(void)
                     continue;
             }
         }
-        else  // ???
+        else // ???
             continue;
 
         unsigned int i;
@@ -1307,21 +1297,17 @@ void ReadUmapinfoLumps(void)
                 for (auto c : mapname.substr(3))
                 {
                     if (!epi::IsDigitASCII(c))
-                        FatalError("UMAPINFO: Bad map name: %s!\n",
-                                   mapname.c_str());
+                        FatalError("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
                 }
             }
-            else if (mapname.size() > 3 && mapname[0] == 'E' &&
-                     mapname[2] == 'M')
+            else if (mapname.size() > 3 && mapname[0] == 'E' && mapname[2] == 'M')
             {
                 if (!epi::IsDigitASCII(mapname[1]))
-                    FatalError("UMAPINFO: Bad map name: %s!\n",
-                               mapname.c_str());
+                    FatalError("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
                 for (auto c : mapname.substr(3))
                 {
                     if (!epi::IsDigitASCII(c))
-                        FatalError("UMAPINFO: Bad map name: %s!\n",
-                                   mapname.c_str());
+                        FatalError("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
                 }
             }
             else
@@ -1350,10 +1336,8 @@ void ReadUmapinfoLumps(void)
 
             if (Maps.maps[i].levelname)
             {
-                std::string temp_ref =
-                    epi::StringFormat("%sDesc", Maps.maps[i].mapname);
-                std::string temp_value =
-                    epi::StringFormat(" %s ", Maps.maps[i].levelname);
+                std::string temp_ref   = epi::StringFormat("%sDesc", Maps.maps[i].mapname);
+                std::string temp_value = epi::StringFormat(" %s ", Maps.maps[i].levelname);
                 language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
                 temp_level->description_ = temp_ref;
             }
@@ -1367,11 +1351,11 @@ void ReadUmapinfoLumps(void)
             {
                 int val = 0;
                 val     = playlist.FindLast(Maps.maps[i].music);
-                if (val != -1)  // we already have it
+                if (val != -1) // we already have it
                 {
                     temp_level->music_ = val;
                 }
-                else  // we need to add it
+                else // we need to add it
                 {
                     static PlaylistEntry *dynamic_plentry;
                     dynamic_plentry            = new PlaylistEntry;
@@ -1392,8 +1376,7 @@ void ReadUmapinfoLumps(void)
 
             if (Maps.maps[i].intertext)
             {
-                if (!epi::StringCaseCompareASCII(temp_level->next_mapname_,
-                                                 "MAP07"))
+                if (!epi::StringCaseCompareASCII(temp_level->next_mapname_, "MAP07"))
                 {
                     // Clear out some of our defaults on certain maps
                     MapDefinition *conflict_level = mapdefs.Lookup("MAP07");
@@ -1403,8 +1386,7 @@ void ReadUmapinfoLumps(void)
                         conflict_level->f_pre_.text_flat_.clear();
                     }
                 }
-                if (!epi::StringCaseCompareASCII(temp_level->next_mapname_,
-                                                 "MAP21"))
+                if (!epi::StringCaseCompareASCII(temp_level->next_mapname_, "MAP21"))
                 {
                     // Clear out some of our defaults on certain maps
                     MapDefinition *conflict_level = mapdefs.Lookup("MAP21");
@@ -1414,8 +1396,7 @@ void ReadUmapinfoLumps(void)
                         conflict_level->f_pre_.text_flat_.clear();
                     }
                 }
-                if (!epi::StringCaseCompareASCII(temp_level->next_mapname_,
-                                                 "MAP31"))
+                if (!epi::StringCaseCompareASCII(temp_level->next_mapname_, "MAP31"))
                 {
                     // Clear out some of our defaults on certain maps
                     MapDefinition *conflict_level = mapdefs.Lookup("MAP31");
@@ -1425,8 +1406,7 @@ void ReadUmapinfoLumps(void)
                         conflict_level->f_pre_.text_flat_.clear();
                     }
                 }
-                if (!epi::StringCaseCompareASCII(temp_level->next_mapname_,
-                                                 "MAP32"))
+                if (!epi::StringCaseCompareASCII(temp_level->next_mapname_, "MAP32"))
                 {
                     // Clear out some of our defaults on certain maps
                     MapDefinition *conflict_level = mapdefs.Lookup("MAP32");
@@ -1437,21 +1417,18 @@ void ReadUmapinfoLumps(void)
                     }
                 }
 
-                if (epi::StringCaseCompareASCII(Maps.maps[i].intertext,
-                                                "clear") == 0)
+                if (epi::StringCaseCompareASCII(Maps.maps[i].intertext, "clear") == 0)
                 {
                     temp_level->f_end_.text_.clear();
                     temp_level->f_end_.text_flat_.clear();
                 }
                 else
                 {
-                    std::string temp_ref =
-                        epi::StringFormat("%sINTERTEXT", Maps.maps[i].mapname);
-                    std::string temp_value =
-                        epi::StringFormat(" %s ", Maps.maps[i].intertext);
+                    std::string temp_ref   = epi::StringFormat("%sINTERTEXT", Maps.maps[i].mapname);
+                    std::string temp_value = epi::StringFormat(" %s ", Maps.maps[i].intertext);
                     language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
                     temp_level->f_end_.text_    = temp_ref;
-                    temp_level->f_end_.picwait_ = 350;  // 10 seconds
+                    temp_level->f_end_.picwait_ = 350; // 10 seconds
                 }
 
                 if (Maps.maps[i].interbackdrop[0])
@@ -1461,22 +1438,18 @@ void ReadUmapinfoLumps(void)
                     std::string ibd_lookup = Maps.maps[i].interbackdrop;
                     epi::StringUpperASCII(ibd_lookup);
 
-                    rim = ImageLookup(ibd_lookup.c_str(), kImageNamespaceFlat,
-                                      kImageLookupNull);
+                    rim = ImageLookup(ibd_lookup.c_str(), kImageNamespaceFlat, kImageLookupNull);
 
-                    if (!rim)  // no flat
+                    if (!rim) // no flat
                     {
-                        rim = ImageLookup(ibd_lookup.c_str(),
-                                          kImageNamespaceGraphic,
-                                          kImageLookupNull);
+                        rim = ImageLookup(ibd_lookup.c_str(), kImageNamespaceGraphic, kImageLookupNull);
 
-                        if (!rim)  // no graphic
-                            temp_level->f_end_.text_flat_ =
-                                "FLOOR4_8";  // should not happen
-                        else                 // background is a graphic
+                        if (!rim)                                       // no graphic
+                            temp_level->f_end_.text_flat_ = "FLOOR4_8"; // should not happen
+                        else                                            // background is a graphic
                             temp_level->f_end_.text_back_ = ibd_lookup;
                     }
-                    else  // background is a flat
+                    else                                                // background is a flat
                     {
                         temp_level->f_end_.text_flat_ = ibd_lookup;
                     }
@@ -1487,11 +1460,11 @@ void ReadUmapinfoLumps(void)
             {
                 int val = 0;
                 val     = playlist.FindLast(Maps.maps[i].intermusic);
-                if (val != -1)  // we already have it
+                if (val != -1) // we already have it
                 {
                     temp_level->f_end_.music_ = val;
                 }
-                else  // we need to add it
+                else // we need to add it
                 {
                     static PlaylistEntry *dynamic_plentry;
                     dynamic_plentry            = new PlaylistEntry;
@@ -1510,32 +1483,28 @@ void ReadUmapinfoLumps(void)
                 epi::StringUpperASCII(temp_level->secretmapname_);
                 if (Maps.maps[i].intertextsecret)
                 {
-                    if (!epi::StringCaseCompareASCII(temp_level->secretmapname_,
-                                                     "MAP07"))
+                    if (!epi::StringCaseCompareASCII(temp_level->secretmapname_, "MAP07"))
                     {
                         // Clear out some of our defaults on certain maps
                         MapDefinition *conflict_level = mapdefs.Lookup("MAP07");
                         conflict_level->f_pre_.text_.clear();
                         conflict_level->f_pre_.text_flat_.clear();
                     }
-                    if (!epi::StringCaseCompareASCII(temp_level->secretmapname_,
-                                                     "MAP21"))
+                    if (!epi::StringCaseCompareASCII(temp_level->secretmapname_, "MAP21"))
                     {
                         // Clear out some of our defaults on certain maps
                         MapDefinition *conflict_level = mapdefs.Lookup("MAP21");
                         conflict_level->f_pre_.text_.clear();
                         conflict_level->f_pre_.text_flat_.clear();
                     }
-                    if (!epi::StringCaseCompareASCII(temp_level->secretmapname_,
-                                                     "MAP31"))
+                    if (!epi::StringCaseCompareASCII(temp_level->secretmapname_, "MAP31"))
                     {
                         // Clear out some of our defaults on certain maps
                         MapDefinition *conflict_level = mapdefs.Lookup("MAP31");
                         conflict_level->f_pre_.text_.clear();
                         conflict_level->f_pre_.text_flat_.clear();
                     }
-                    if (!epi::StringCaseCompareASCII(temp_level->secretmapname_,
-                                                     "MAP32"))
+                    if (!epi::StringCaseCompareASCII(temp_level->secretmapname_, "MAP32"))
                     {
                         // Clear out some of our defaults on certain maps
                         MapDefinition *conflict_level = mapdefs.Lookup("MAP32");
@@ -1543,8 +1512,7 @@ void ReadUmapinfoLumps(void)
                         conflict_level->f_pre_.text_flat_.clear();
                     }
 
-                    MapDefinition *secret_level =
-                        mapdefs.Lookup(temp_level->secretmapname_.c_str());
+                    MapDefinition *secret_level = mapdefs.Lookup(temp_level->secretmapname_.c_str());
                     if (!secret_level)
                     {
                         secret_level        = new MapDefinition;
@@ -1555,53 +1523,41 @@ void ReadUmapinfoLumps(void)
                         mapdefs.push_back(secret_level);
                     }
 
-                    if (epi::StringCaseCompareASCII(
-                            Maps.maps[i].intertextsecret, "clear") == 0)
+                    if (epi::StringCaseCompareASCII(Maps.maps[i].intertextsecret, "clear") == 0)
                     {
                         secret_level->f_pre_.text_.clear();
                         secret_level->f_pre_.text_flat_.clear();
                     }
                     else
                     {
-                        std::string temp_ref = epi::StringFormat(
-                            "%sPRETEXT", secret_level->name_.c_str());
-                        std::string temp_value = epi::StringFormat(
-                            " %s ", Maps.maps[i].intertextsecret);
-                        language.AddOrReplace(temp_ref.c_str(),
-                                              temp_value.c_str());
+                        std::string temp_ref   = epi::StringFormat("%sPRETEXT", secret_level->name_.c_str());
+                        std::string temp_value = epi::StringFormat(" %s ", Maps.maps[i].intertextsecret);
+                        language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
 
                         // hack for shitty dbp shennanigans :/
-                        if (temp_level->next_mapname_ ==
-                            temp_level->secretmapname_)
+                        if (temp_level->next_mapname_ == temp_level->secretmapname_)
                         {
                             temp_level->f_end_.text_    = temp_ref;
-                            temp_level->f_end_.picwait_ = 700;  // 20 seconds
+                            temp_level->f_end_.picwait_ = 700; // 20 seconds
 
                             if (Maps.maps[i].interbackdrop[0])
                             {
                                 const Image *rim;
-                                std::string  ibd_lookup =
-                                    Maps.maps[i].interbackdrop;
+                                std::string  ibd_lookup = Maps.maps[i].interbackdrop;
                                 epi::StringUpperASCII(ibd_lookup);
 
-                                rim = ImageLookup(ibd_lookup.c_str(),
-                                                  kImageNamespaceFlat,
-                                                  kImageLookupNull);
+                                rim = ImageLookup(ibd_lookup.c_str(), kImageNamespaceFlat, kImageLookupNull);
 
-                                if (!rim)  // no flat
+                                if (!rim) // no flat
                                 {
-                                    rim = ImageLookup(ibd_lookup.c_str(),
-                                                      kImageNamespaceGraphic,
-                                                      kImageLookupNull);
+                                    rim = ImageLookup(ibd_lookup.c_str(), kImageNamespaceGraphic, kImageLookupNull);
 
-                                    if (!rim)  // no graphic
-                                        temp_level->f_end_.text_flat_ =
-                                            "FLOOR4_8";  // should not happen
-                                    else  // background is a graphic
-                                        temp_level->f_end_.text_back_ =
-                                            ibd_lookup;
+                                    if (!rim)                                       // no graphic
+                                        temp_level->f_end_.text_flat_ = "FLOOR4_8"; // should not happen
+                                    else                                            // background is a graphic
+                                        temp_level->f_end_.text_back_ = ibd_lookup;
                                 }
-                                else  // background is a flat
+                                else                                                // background is a flat
                                 {
                                     temp_level->f_end_.text_flat_ = ibd_lookup;
                                 }
@@ -1610,39 +1566,30 @@ void ReadUmapinfoLumps(void)
                         else
                         {
                             secret_level->f_pre_.text_    = temp_ref;
-                            secret_level->f_pre_.picwait_ = 700;  // 20 seconds
+                            secret_level->f_pre_.picwait_ = 700; // 20 seconds
                             if (temp_level->f_end_.music_)
-                                secret_level->f_pre_.music_ =
-                                    temp_level->f_end_.music_;
+                                secret_level->f_pre_.music_ = temp_level->f_end_.music_;
 
                             if (Maps.maps[i].interbackdrop[0])
                             {
                                 const Image *rim;
-                                std::string  ibd_lookup =
-                                    Maps.maps[i].interbackdrop;
+                                std::string  ibd_lookup = Maps.maps[i].interbackdrop;
                                 epi::StringUpperASCII(ibd_lookup);
 
-                                rim = ImageLookup(ibd_lookup.c_str(),
-                                                  kImageNamespaceFlat,
-                                                  kImageLookupNull);
+                                rim = ImageLookup(ibd_lookup.c_str(), kImageNamespaceFlat, kImageLookupNull);
 
-                                if (!rim)  // no flat
+                                if (!rim) // no flat
                                 {
-                                    rim = ImageLookup(ibd_lookup.c_str(),
-                                                      kImageNamespaceGraphic,
-                                                      kImageLookupNull);
+                                    rim = ImageLookup(ibd_lookup.c_str(), kImageNamespaceGraphic, kImageLookupNull);
 
-                                    if (!rim)  // no graphic
-                                        secret_level->f_pre_.text_flat_ =
-                                            "FLOOR4_8";  // should not happen
-                                    else  // background is a graphic
-                                        secret_level->f_pre_.text_back_ =
-                                            ibd_lookup;
+                                    if (!rim)                                         // no graphic
+                                        secret_level->f_pre_.text_flat_ = "FLOOR4_8"; // should not happen
+                                    else                                              // background is a graphic
+                                        secret_level->f_pre_.text_back_ = ibd_lookup;
                                 }
-                                else  // background is a flat
+                                else                                                  // background is a flat
                                 {
-                                    secret_level->f_pre_.text_flat_ =
-                                        ibd_lookup;
+                                    secret_level->f_pre_.text_flat_ = ibd_lookup;
                                 }
                             }
                         }
@@ -1668,8 +1615,7 @@ void ReadUmapinfoLumps(void)
                 temp_level->f_end_.pics_.clear();
                 temp_level->f_end_.pics_.push_back(Maps.maps[i].endpic);
                 epi::StringUpperASCII(temp_level->f_end_.pics_.back());
-                temp_level->f_end_.picwait_ =
-                    INT_MAX;  // Stay on endpic for now
+                temp_level->f_end_.picwait_ = INT_MAX; // Stay on endpic for now
             }
 
             if (Maps.maps[i].dobunny)
@@ -1684,15 +1630,17 @@ void ReadUmapinfoLumps(void)
                 temp_level->f_end_.docast_ = true;
             }
 
-            if (Maps.maps[i].endgame) { temp_level->next_mapname_.clear(); }
+            if (Maps.maps[i].endgame)
+            {
+                temp_level->next_mapname_.clear();
+            }
 
             if (Maps.maps[i].partime > 0)
                 temp_level->partime_ = Maps.maps[i].partime;
 
-            if (Maps.maps[i].numbossactions == -1)  // "clear" directive
+            if (Maps.maps[i].numbossactions == -1) // "clear" directive
                 ClearDeathTriggersByMap(Maps.maps[i].mapname);
-            else if (Maps.maps[i].bossactions &&
-                     Maps.maps[i].numbossactions >= 1)
+            else if (Maps.maps[i].bossactions && Maps.maps[i].numbossactions >= 1)
             {
                 // The UMAPINFO spec seems to suggest that any custom actions
                 // should invalidate previous death triggers for the map in
@@ -1703,19 +1651,14 @@ void ReadUmapinfoLumps(void)
                 {
                     for (size_t m = 0; m < mobjtypes.size(); m++)
                     {
-                        if (mobjtypes[m]->number_ ==
-                            Maps.maps[i].bossactions[a].type)
+                        if (mobjtypes[m]->number_ == Maps.maps[i].bossactions[a].type)
                         {
-                            ba_rts.append(epi::StringFormat(
-                                "START_MAP %s\n", Maps.maps[i].mapname));
+                            ba_rts.append(epi::StringFormat("START_MAP %s\n", Maps.maps[i].mapname));
                             ba_rts.append("  RADIUS_TRIGGER 0 0 -1\n");
-                            ba_rts.append(
-                                epi::StringFormat("    WAIT_UNTIL_DEAD %s\n",
-                                                  mobjtypes[m]->name_.c_str()));
-                            ba_rts.append(epi::StringFormat(
-                                "    ACTIVATE_LINETYPE %d %d\n",
-                                Maps.maps[i].bossactions[a].special,
-                                Maps.maps[i].bossactions[a].tag));
+                            ba_rts.append(epi::StringFormat("    WAIT_UNTIL_DEAD %s\n", mobjtypes[m]->name_.c_str()));
+                            ba_rts.append(epi::StringFormat("    ACTIVATE_LINETYPE %d %d\n",
+                                                            Maps.maps[i].bossactions[a].special,
+                                                            Maps.maps[i].bossactions[a].tag));
                             ba_rts.append("  END_RADIUS_TRIGGER\n");
                             ba_rts.append("END_MAP\n\n");
                         }
@@ -1732,35 +1675,27 @@ void ReadUmapinfoLumps(void)
                 for (int g = gamedefs.size() - 1; g >= 0; g--)
                 {
                     if (gamedefs[g]->name_ != "TEMPEPI" &&
-                        epi::StringCaseCompareMaxASCII(
-                            gamedefs[g]->firstmap_, temp_level->name_, 3) == 0)
+                        epi::StringCaseCompareMaxASCII(gamedefs[g]->firstmap_, temp_level->name_, 3) == 0)
                     {
-                        if (atoi(gamedefs[g]->firstmap_.substr(3).c_str()) >
-                            atoi(temp_level->name_.substr(3).c_str()))
+                        if (atoi(gamedefs[g]->firstmap_.substr(3).c_str()) > atoi(temp_level->name_.substr(3).c_str()))
                             continue;
                         else
                         {
-                            temp_level->episode_->background_ =
-                                gamedefs[g]->background_;
-                            temp_level->episode_->music_ = gamedefs[g]->music_;
-                            temp_level->episode_->titlemusic_ =
-                                gamedefs[g]->titlemusic_;
-                            temp_level->episode_->titlepics_ =
-                                gamedefs[g]->titlepics_;
-                            temp_level->episode_->titletics_ =
-                                gamedefs[g]->titletics_;
-                            temp_level->episode_->percent_ =
-                                gamedefs[g]->percent_;
-                            temp_level->episode_->done_ = gamedefs[g]->done_;
-                            temp_level->episode_->accel_snd_ =
-                                gamedefs[g]->accel_snd_;
+                            temp_level->episode_->background_ = gamedefs[g]->background_;
+                            temp_level->episode_->music_      = gamedefs[g]->music_;
+                            temp_level->episode_->titlemusic_ = gamedefs[g]->titlemusic_;
+                            temp_level->episode_->titlepics_  = gamedefs[g]->titlepics_;
+                            temp_level->episode_->titletics_  = gamedefs[g]->titletics_;
+                            temp_level->episode_->percent_    = gamedefs[g]->percent_;
+                            temp_level->episode_->done_       = gamedefs[g]->done_;
+                            temp_level->episode_->accel_snd_  = gamedefs[g]->accel_snd_;
                             break;
                         }
                     }
                 }
             }
-            else  // Validate episode entry to make sure it wasn't renamed or
-                  // removed
+            else // Validate episode entry to make sure it wasn't renamed or
+                 // removed
             {
                 bool good_epi = false;
                 for (auto g : gamedefs)
@@ -1771,13 +1706,11 @@ void ReadUmapinfoLumps(void)
                         break;
                     }
                 }
-                if (!good_epi)  // Find a suitable episode
+                if (!good_epi) // Find a suitable episode
                 {
                     for (int g = gamedefs.size() - 1; g >= 0; g--)
                     {
-                        if (epi::StringCaseCompareMaxASCII(
-                                gamedefs[g]->firstmap_, temp_level->name_, 3) ==
-                            0)
+                        if (epi::StringCaseCompareMaxASCII(gamedefs[g]->firstmap_, temp_level->name_, 3) == 0)
                         {
                             if (atoi(gamedefs[g]->firstmap_.substr(3).c_str()) >
                                 atoi(temp_level->name_.substr(3).c_str()))
@@ -1793,15 +1726,12 @@ void ReadUmapinfoLumps(void)
                     }
                 }
                 if (!good_epi)
-                    FatalError(
-                        "UMAPINFO: No valid episode found for level %s\n",
-                        temp_level->name_.c_str());
+                    FatalError("UMAPINFO: No valid episode found for level %s\n", temp_level->name_.c_str());
             }
             // Validate important things
             if (temp_level->sky_.empty())
             {
-                if (epi::StringPrefixCaseCompareASCII(temp_level->name_,
-                                                      "MAP") == 0)
+                if (epi::StringPrefixCaseCompareASCII(temp_level->name_, "MAP") == 0)
                 {
                     int levnum = atoi(temp_level->name_.substr(3).c_str());
                     if (levnum < 12)
@@ -1827,8 +1757,7 @@ void ReadUmapinfoLumps(void)
             // Clear pre_text for this map if it is an episode's starting map
             for (int g = gamedefs.size() - 1; g >= 0; g--)
             {
-                if (epi::StringCaseCompareASCII(gamedefs[g]->firstmap_,
-                                                temp_level->name_) == 0)
+                if (epi::StringCaseCompareASCII(gamedefs[g]->firstmap_, temp_level->name_) == 0)
                 {
                     temp_level->f_pre_.text_.clear();
                     temp_level->f_pre_.text_flat_.clear();
@@ -1885,20 +1814,18 @@ static int QuickFindLumpMap(const char *buf)
     int low  = 0;
     int high = (int)lump_info.size() - 1;
 
-    if (high < 0) return -1;
+    if (high < 0)
+        return -1;
 
     while (low <= high)
     {
-        int i = (low + high) / 2;
-        int cmp =
-            epi::StringCompareMax(lump_info[sorted_lumps[i]].name, buf, 8);
+        int i   = (low + high) / 2;
+        int cmp = epi::StringCompareMax(lump_info[sorted_lumps[i]].name, buf, 8);
 
         if (cmp == 0)
         {
             // jump to first matching name
-            while (i > 0 &&
-                   epi::StringCompareMax(lump_info[sorted_lumps[i - 1]].name,
-                                         buf, 8) == 0)
+            while (i > 0 && epi::StringCompareMax(lump_info[sorted_lumps[i - 1]].name, buf, 8) == 0)
                 i--;
 
             return i;
@@ -1934,17 +1861,20 @@ int CheckLumpNumberForName(const char *name)
 
     if (strlen(name) > 8)
     {
-        LogDebug("CheckLumpNumberForName: Name '%s' longer than 8 chars!\n",
-                 name);
+        LogDebug("CheckLumpNumberForName: Name '%s' longer than 8 chars!\n", name);
         return -1;
     }
 
-    for (i = 0; name[i]; i++) { buf[i] = epi::ToUpperASCII(name[i]); }
+    for (i = 0; name[i]; i++)
+    {
+        buf[i] = epi::ToUpperASCII(name[i]);
+    }
     buf[i] = 0;
 
     i = QuickFindLumpMap(buf);
 
-    if (i < 0) return -1;  // not found
+    if (i < 0)
+        return -1; // not found
 
     return sorted_lumps[i];
 }
@@ -1962,17 +1892,20 @@ int CheckDataFileIndexForName(const char *name)
 
     if (strlen(name) > 8)
     {
-        LogDebug("CheckLumpNumberForName: Name '%s' longer than 8 chars!\n",
-                 name);
+        LogDebug("CheckLumpNumberForName: Name '%s' longer than 8 chars!\n", name);
         return -1;
     }
 
-    for (i = 0; name[i]; i++) { buf[i] = epi::ToUpperASCII(name[i]); }
+    for (i = 0; name[i]; i++)
+    {
+        buf[i] = epi::ToUpperASCII(name[i]);
+    }
     buf[i] = 0;
 
     i = QuickFindLumpMap(buf);
 
-    if (i < 0) return -1;  // not found
+    if (i < 0)
+        return -1; // not found
 
     return lump_info[sorted_lumps[i]].file;
 }
@@ -1987,25 +1920,27 @@ int CheckGraphicLumpNumberForName(const char *name)
 
     if (strlen(name) > 8)
     {
-        LogDebug("CheckLumpNumberForName: Name '%s' longer than 8 chars!\n",
-                 name);
+        LogDebug("CheckLumpNumberForName: Name '%s' longer than 8 chars!\n", name);
         return -1;
     }
 
-    for (i = 0; name[i]; i++) { buf[i] = epi::ToUpperASCII(name[i]); }
+    for (i = 0; name[i]; i++)
+    {
+        buf[i] = epi::ToUpperASCII(name[i]);
+    }
     buf[i] = 0;
 
     // search backwards
     for (i = (int)lump_info.size() - 1; i >= 0; i--)
     {
-        if (lump_info[i].kind == kLumpNormal ||
-            lump_info[i].kind == kLumpSprite || lump_info[i].kind == kLumpPatch)
+        if (lump_info[i].kind == kLumpNormal || lump_info[i].kind == kLumpSprite || lump_info[i].kind == kLumpPatch)
         {
-            if (strncmp(lump_info[i].name, buf, 8) == 0) return i;
+            if (strncmp(lump_info[i].name, buf, 8) == 0)
+                return i;
         }
     }
 
-    return -1;  // not found
+    return -1; // not found
 }
 
 int CheckXglLumpNumberForName(const char *name)
@@ -2017,22 +1952,25 @@ int CheckXglLumpNumberForName(const char *name)
 
     if (strlen(name) > 8)
     {
-        LogWarning("CheckLumpNumberForName: Name '%s' longer than 8 chars!\n",
-                   name);
+        LogWarning("CheckLumpNumberForName: Name '%s' longer than 8 chars!\n", name);
         return -1;
     }
 
-    for (i = 0; name[i]; i++) { buf[i] = epi::ToUpperASCII(name[i]); }
+    for (i = 0; name[i]; i++)
+    {
+        buf[i] = epi::ToUpperASCII(name[i]);
+    }
     buf[i] = 0;
 
     // search backwards
     for (i = (int)lump_info.size() - 1; i >= 0; i--)
     {
         if (lump_info[i].kind == kLumpXgl)
-            if (strncmp(lump_info[i].name, buf, 8) == 0) return i;
+            if (strncmp(lump_info[i].name, buf, 8) == 0)
+                return i;
     }
 
-    return -1;  // not found
+    return -1; // not found
 }
 
 int CheckMapLumpNumberForName(const char *name)
@@ -2044,22 +1982,25 @@ int CheckMapLumpNumberForName(const char *name)
 
     if (strlen(name) > 8)
     {
-        LogWarning("CheckLumpNumberForName: Name '%s' longer than 8 chars!\n",
-                   name);
+        LogWarning("CheckLumpNumberForName: Name '%s' longer than 8 chars!\n", name);
         return -1;
     }
 
-    for (i = 0; name[i]; i++) { buf[i] = epi::ToUpperASCII(name[i]); }
+    for (i = 0; name[i]; i++)
+    {
+        buf[i] = epi::ToUpperASCII(name[i]);
+    }
     buf[i] = 0;
 
     // search backwards
     for (i = (int)lump_info.size() - 1; i >= 0; i--)
     {
         if (lump_info[i].kind != kLumpXgl)
-            if (strncmp(lump_info[i].name, buf, 8) == 0) return i;
+            if (strncmp(lump_info[i].name, buf, 8) == 0)
+                return i;
     }
 
-    return -1;  // not found
+    return -1; // not found
 }
 
 //
@@ -2095,8 +2036,7 @@ int CheckPatchLumpNumberForName(const char *name)
     {
 #ifdef DEVELOPERS
         if (i > 8)
-            FatalError("CheckPatchLumpNumberForName: '%s' longer than 8 chars!",
-                       name);
+            FatalError("CheckPatchLumpNumberForName: '%s' longer than 8 chars!", name);
 #endif
         buf[i] = epi::ToUpperASCII(name[i]);
     }
@@ -2104,16 +2044,14 @@ int CheckPatchLumpNumberForName(const char *name)
 
     i = QuickFindLumpMap(buf);
 
-    if (i < 0) return -1;  // not found
+    if (i < 0)
+        return -1; // not found
 
-    for (; i < (int)lump_info.size() &&
-           epi::StringCompareMax(lump_info[sorted_lumps[i]].name, buf, 8) == 0;
-         i++)
+    for (; i < (int)lump_info.size() && epi::StringCompareMax(lump_info[sorted_lumps[i]].name, buf, 8) == 0; i++)
     {
         LumpInfo *L = &lump_info[sorted_lumps[i]];
 
-        if (L->kind == kLumpPatch || L->kind == kLumpSprite ||
-            L->kind == kLumpNormal)
+        if (L->kind == kLumpPatch || L->kind == kLumpSprite || L->kind == kLumpNormal)
         {
             // allow kLumpNormal to support patches outside of the
             // P_START/END markers.  We especially want to disallow
@@ -2122,7 +2060,7 @@ int CheckPatchLumpNumberForName(const char *name)
         }
     }
 
-    return -1;  // nothing suitable
+    return -1; // nothing suitable
 }
 
 //
@@ -2140,7 +2078,8 @@ bool IsLumpIndexValid(int lump)
 
 bool VerifyLump(int lump, const char *name)
 {
-    if (!IsLumpIndexValid(lump)) return false;
+    if (!IsLumpIndexValid(lump))
+        return false;
 
     return (strncmp(lump_info[lump].name, name, 8) == 0);
 }
@@ -2164,26 +2103,26 @@ int GetLumpLength(int lump)
 // Returns the file number containing the sequence, or -1 if not
 // found.  Search is from newest wad file to oldest wad file.
 //
-int FindFlatSequence(const char *start, const char *end, int *s_offset,
-                     int *e_offset)
+int FindFlatSequence(const char *start, const char *end, int *s_offset, int *e_offset)
 {
     for (int file = (int)data_files.size() - 1; file >= 0; file--)
     {
         DataFile *df  = data_files[file];
         WadFile  *wad = df->wad_;
 
-        if (wad == nullptr) continue;
+        if (wad == nullptr)
+            continue;
 
         // look for start name
         int i;
         for (i = 0; i < (int)wad->flat_lumps_.size(); i++)
         {
-            if (strncmp(start, GetLumpNameFromIndex(wad->flat_lumps_[i]), 8) ==
-                0)
+            if (strncmp(start, GetLumpNameFromIndex(wad->flat_lumps_[i]), 8) == 0)
                 break;
         }
 
-        if (i >= (int)wad->flat_lumps_.size()) continue;
+        if (i >= (int)wad->flat_lumps_.size())
+            continue;
 
         (*s_offset) = i;
 
@@ -2210,7 +2149,8 @@ std::vector<int> *GetFlatListForWad(int file)
     DataFile *df  = data_files[file];
     WadFile  *wad = df->wad_;
 
-    if (wad != nullptr) return &wad->flat_lumps_;
+    if (wad != nullptr)
+        return &wad->flat_lumps_;
 
     return nullptr;
 }
@@ -2222,7 +2162,8 @@ std::vector<int> *GetSpriteListForWad(int file)
     DataFile *df  = data_files[file];
     WadFile  *wad = df->wad_;
 
-    if (wad != nullptr) return &wad->sprite_lumps_;
+    if (wad != nullptr)
+        return &wad->sprite_lumps_;
 
     return nullptr;
 }
@@ -2234,7 +2175,8 @@ std::vector<int> *GetPatchListForWad(int file)
     DataFile *df  = data_files[file];
     WadFile  *wad = df->wad_;
 
-    if (wad != nullptr) return &wad->patch_lumps_;
+    if (wad != nullptr)
+        return &wad->patch_lumps_;
 
     return nullptr;
 }
@@ -2259,7 +2201,8 @@ int GetKindForLump(int lump)
 //
 static void W_RawReadLump(int lump, void *dest)
 {
-    if (!IsLumpIndexValid(lump)) FatalError("W_ReadLump: %i >= numlumps", lump);
+    if (!IsLumpIndexValid(lump))
+        FatalError("W_ReadLump: %i >= numlumps", lump);
 
     LumpInfo *L  = &lump_info[lump];
     DataFile *df = data_files[L->file];
@@ -2269,8 +2212,7 @@ static void W_RawReadLump(int lump, void *dest)
     int c = df->file_->Read(dest, L->size);
 
     if (c < L->size)
-        FatalError("W_ReadLump: only read %i of %i on lump %i", c, L->size,
-                   lump);
+        FatalError("W_ReadLump: only read %i of %i on lump %i", c, L->size, lump);
 }
 
 //
@@ -2282,7 +2224,8 @@ uint8_t *LoadLumpIntoMemory(int lump, int *length)
 {
     int w_length = GetLumpLength(lump);
 
-    if (length != nullptr) *length = w_length;
+    if (length != nullptr)
+        *length = w_length;
 
     uint8_t *data = new uint8_t[w_length + 1];
 
@@ -2320,7 +2263,10 @@ std::string LoadLumpAsString(const char *name)
 //
 // GetLumpNameFromIndex
 //
-const char *GetLumpNameFromIndex(int lump) { return lump_info[lump].name; }
+const char *GetLumpNameFromIndex(int lump)
+{
+    return lump_info[lump].name;
+}
 
 void ProcessTxHiNamespaces(void)
 {
@@ -2335,7 +2281,8 @@ void ProcessTxHiNamespaces(void)
         DataFile *df  = data_files[file];
         WadFile  *wad = df->wad_;
 
-        if (wad == nullptr) continue;
+        if (wad == nullptr)
+            continue;
 
         for (int i = 0; i < (int)wad->tx_lumps_.size(); i++)
         {
@@ -2360,7 +2307,10 @@ void ProcessTxHiNamespaces(void)
                 ImageAddTxHx(lump, GetLumpNameFromIndex(lump), true);
             }
         }
-        else if (df->pack_) { PackProcessHiresSubstitutions(df->pack_, file); }
+        else if (df->pack_)
+        {
+            PackProcessHiresSubstitutions(df->pack_, file);
+        }
     }
 }
 
@@ -2368,30 +2318,30 @@ static const char *LumpKindString(LumpKind kind)
 {
     switch (kind)
     {
-        case kLumpNormal:
-            return "normal";
-        case kLumpMarker:
-            return "marker";
-        case kLumpWadTex:
-            return "wadtex";
-        case kLumpDdfRts:
-            return "ddf";
+    case kLumpNormal:
+        return "normal";
+    case kLumpMarker:
+        return "marker";
+    case kLumpWadTex:
+        return "wadtex";
+    case kLumpDdfRts:
+        return "ddf";
 
-        case kLumpTx:
-            return "tx";
-        case kLumpColormap:
-            return "cmap";
-        case kLumpFlat:
-            return "flat";
-        case kLumpSprite:
-            return "sprite";
-        case kLumpPatch:
-            return "patch";
-        case kLumpHiRes:
-            return "hires";
+    case kLumpTx:
+        return "tx";
+    case kLumpColormap:
+        return "cmap";
+    case kLumpFlat:
+        return "flat";
+    case kLumpSprite:
+        return "sprite";
+    case kLumpPatch:
+        return "patch";
+    case kLumpHiRes:
+        return "hires";
 
-        default:
-            return "???";
+    default:
+        return "???";
     }
 }
 
@@ -2405,13 +2355,15 @@ void ShowLoadedLumps(int for_file, const char *match)
     {
         LumpInfo *L = &lump_info[i];
 
-        if (for_file >= 1 && L->file != for_file - 1) continue;
+        if (for_file >= 1 && L->file != for_file - 1)
+            continue;
 
         if (match && *match)
-            if (!strstr(L->name, match)) continue;
+            if (!strstr(L->name, match))
+                continue;
 
-        LogPrint(" %4d %-9s %2d %-6s %7d @ 0x%08x\n", i + 1, L->name,
-                 L->file + 1, LumpKindString(L->kind), L->size, L->position);
+        LogPrint(" %4d %-9s %2d %-6s %7d @ 0x%08x\n", i + 1, L->name, L->file + 1, LumpKindString(L->kind), L->size,
+                 L->position);
         total++;
     }
 
@@ -2442,28 +2394,27 @@ bool DisableStockSkybox(const char *ActualSky)
 
     // First we should try for "SKY1_N" type names but only
     // use it if it's in a pwad i.e. a users skybox
-    tempImage = ImageLookup(UserSkyBoxName(ActualSky, 0),
-                            kImageNamespaceTexture, kImageLookupNull);
+    tempImage = ImageLookup(UserSkyBoxName(ActualSky, 0), kImageNamespaceTexture, kImageLookupNull);
     if (tempImage)
     {
-        if (tempImage->source_type_ == kImageSourceUser)  // from images.ddf
+        if (tempImage->source_type_ == kImageSourceUser) // from images.ddf
         {
             lumpnum = CheckLumpNumberForName(tempImage->name_.c_str());
 
-            if (lumpnum != -1) { filenum = GetDataFileIndexForLump(lumpnum); }
+            if (lumpnum != -1)
+            {
+                filenum = GetDataFileIndexForLump(lumpnum);
+            }
 
-            if (filenum != -1)  // make sure we actually have a file
+            if (filenum != -1) // make sure we actually have a file
             {
                 // we only want pwads
-                if (data_files[filenum]->kind_ == kFileKindPWad ||
-                    data_files[filenum]->kind_ == kFileKindPackWad)
+                if (data_files[filenum]->kind_ == kFileKindPWad || data_files[filenum]->kind_ == kFileKindPackWad)
                 {
-                    LogDebug(
-                        "SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n",
-                        tempImage->name_.c_str(), tempImage->source_type_,
-                        lumpnum, filenum);
+                    LogDebug("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name_.c_str(),
+                             tempImage->source_type_, lumpnum, filenum);
                     TurnOffSkyBox = false;
-                    return TurnOffSkyBox;  // get out of here
+                    return TurnOffSkyBox; // get out of here
                 }
             }
         }
@@ -2471,56 +2422,52 @@ bool DisableStockSkybox(const char *ActualSky)
 
     // If we're here then there are no user skyboxes.
     // Lets check for single texture ones instead.
-    tempImage =
-        ImageLookup(ActualSky, kImageNamespaceTexture, kImageLookupNull);
+    tempImage = ImageLookup(ActualSky, kImageNamespaceTexture, kImageLookupNull);
 
-    if (tempImage)  // this should always be true but check just in case
+    if (tempImage)                                          // this should always be true but check just in case
     {
-        if (tempImage->source_type_ ==
-            kImageSourceTexture)  // Normal doom format sky
+        if (tempImage->source_type_ == kImageSourceTexture) // Normal doom format sky
         {
-            filenum = GetDataFileIndexForLump(
-                tempImage->source_.texture.tdef->patches->patch);
+            filenum = GetDataFileIndexForLump(tempImage->source_.texture.tdef->patches->patch);
         }
-        else if (tempImage->source_type_ ==
-                 kImageSourceUser)  // texture from images.ddf
+        else if (tempImage->source_type_ == kImageSourceUser) // texture from images.ddf
         {
-            LogDebug("SKYBOX: Sky is: %s. Type:%d  \n",
-                     tempImage->name_.c_str(), tempImage->source_type_);
-            TurnOffSkyBox = true;  // turn off or not? hmmm...
+            LogDebug("SKYBOX: Sky is: %s. Type:%d  \n", tempImage->name_.c_str(), tempImage->source_type_);
+            TurnOffSkyBox = true;                             // turn off or not? hmmm...
             return TurnOffSkyBox;
         }
-        else  // could be a png or jpg i.e. TX_ or HI_
+        else                                                  // could be a png or jpg i.e. TX_ or HI_
         {
             lumpnum = CheckLumpNumberForName(tempImage->name_.c_str());
             // lumpnum = tempImage->source.graphic.lump;
-            if (lumpnum != -1) { filenum = GetDataFileIndexForLump(lumpnum); }
+            if (lumpnum != -1)
+            {
+                filenum = GetDataFileIndexForLump(lumpnum);
+            }
         }
 
-        if (tempImage->source_type_ == kImageSourceDummy)  // probably a skybox?
+        if (tempImage->source_type_ == kImageSourceDummy) // probably a skybox?
         {
             TurnOffSkyBox = false;
         }
 
-        if (filenum == 0)  // it's the IWAD so we're done
+        if (filenum == 0) // it's the IWAD so we're done
         {
             TurnOffSkyBox = false;
         }
 
-        if (filenum != -1)  // make sure we actually have a file
+        if (filenum != -1) // make sure we actually have a file
         {
             // we only want pwads
-            if (data_files[filenum]->kind_ == kFileKindPWad ||
-                data_files[filenum]->kind_ == kFileKindPackWad)
+            if (data_files[filenum]->kind_ == kFileKindPWad || data_files[filenum]->kind_ == kFileKindPackWad)
             {
                 TurnOffSkyBox = true;
             }
         }
     }
 
-    LogDebug("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n",
-             tempImage->name_.c_str(), tempImage->source_type_, lumpnum,
-             filenum);
+    LogDebug("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name_.c_str(), tempImage->source_type_,
+             lumpnum, filenum);
     return TurnOffSkyBox;
 }
 
@@ -2531,7 +2478,8 @@ bool DisableStockSkybox(const char *ActualSky)
 // Returns true if found
 bool IsLumpInPwad(const char *name)
 {
-    if (!name) return false;
+    if (!name)
+        return false;
 
     // first check images.ddf
     const Image *tempImage;
@@ -2539,7 +2487,7 @@ bool IsLumpInPwad(const char *name)
     tempImage = ImageLookup(name);
     if (tempImage)
     {
-        if (tempImage->source_type_ == kImageSourceUser)  // from images.ddf
+        if (tempImage->source_type_ == kImageSourceUser) // from images.ddf
         {
             return true;
         }
@@ -2554,29 +2502,27 @@ bool IsLumpInPwad(const char *name)
     {
         filenum = GetDataFileIndexForLump(lumpnum);
 
-        if (filenum >= 2)  // ignore edge_defs and the IWAD itself
+        if (filenum >= 2) // ignore edge_defs and the IWAD itself
         {
             DataFile *df = data_files[filenum];
 
             // we only want pwads
             // or ewads ;)
-            if (df->kind_ == kFileKindPWad || df->kind_ == kFileKindEWad ||
-                df->kind_ == kFileKindPackWad)
+            if (df->kind_ == kFileKindPWad || df->kind_ == kFileKindEWad || df->kind_ == kFileKindPackWad)
             {
                 in_pwad = true;
             }
         }
     }
 
-    if (!in_pwad)  // Check EPKs/folders now
+    if (!in_pwad) // Check EPKs/folders now
     {
         // search from newest file to oldest
-        for (int i = (int)data_files.size() - 1; i >= 2;
-             i--)  // ignore edge_defs and the IWAD itself
+        for (int i = (int)data_files.size() - 1; i >= 2; i--) // ignore edge_defs and the IWAD itself
         {
             DataFile *df = data_files[i];
-            if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder ||
-                df->kind_ == kFileKindEpk || df->kind_ == kFileKindEEpk)
+            if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEpk ||
+                df->kind_ == kFileKindEEpk)
             {
                 if (PackFindStem(df->pack_, name))
                 {
@@ -2597,12 +2543,14 @@ bool IsLumpInPwad(const char *name)
 // Returns true if found
 bool IsLumpInAnyWad(const char *name)
 {
-    if (!name) return false;
+    if (!name)
+        return false;
 
     int  lumpnum   = CheckLumpNumberForName(name);
     bool in_anywad = false;
 
-    if (lumpnum != -1) in_anywad = true;
+    if (lumpnum != -1)
+        in_anywad = true;
 
     if (!in_anywad)
     {
@@ -2610,9 +2558,8 @@ bool IsLumpInAnyWad(const char *name)
         for (int i = 0; i < (int)data_files.size() - 1; i++)
         {
             DataFile *df = data_files[i];
-            if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder ||
-                df->kind_ == kFileKindEpk || df->kind_ == kFileKindEEpk ||
-                df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIpk)
+            if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEpk ||
+                df->kind_ == kFileKindEEpk || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIpk)
             {
                 if (PackFindStem(df->pack_, name))
                 {

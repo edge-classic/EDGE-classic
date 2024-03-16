@@ -27,14 +27,14 @@ class GatherChunk;
 
 class SoundGatherer
 {
-   private:
+  private:
     std::vector<GatherChunk *> chunks_;
 
     int total_samples_;
 
     GatherChunk *request_;
 
-   public:
+  public:
     SoundGatherer();
     ~SoundGatherer();
 
@@ -61,7 +61,7 @@ class SoundGatherer
     // Returns false (failure) if total samples was zero,
     // otherwise returns true (success).
 
-   private:
+  private:
     void TransferMono(GatherChunk *chunk, SoundData *buf, int pos);
     void TransferStereo(GatherChunk *chunk, SoundData *buf, int pos);
 };

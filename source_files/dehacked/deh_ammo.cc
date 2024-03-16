@@ -47,7 +47,7 @@ int pickups[4];
 bool ammo_modified[4];
 
 void MarkAmmo(int a_num);
-}  // namespace ammo
+} // namespace ammo
 
 void ammo::Init()
 {
@@ -66,49 +66,49 @@ void ammo::Init()
     memset(ammo_modified, 0, sizeof(ammo_modified));
 }
 
-void ammo::Shutdown() {}
+void ammo::Shutdown()
+{
+}
 
 void ammo::MarkAmmo(int a_num)
 {
-    EPI_ASSERT(0 <= a_num && a_num < kTotalAmmoTypes &&
-               a_num != kAmmoTypeUnused);
+    EPI_ASSERT(0 <= a_num && a_num < kTotalAmmoTypes && a_num != kAmmoTypeUnused);
 
     ammo_modified[a_num] = true;
 }
 
 void ammo::AmmoDependencies()
 {
-    bool any = ammo_modified[0] || ammo_modified[1] || ammo_modified[2] ||
-               ammo_modified[3];
+    bool any = ammo_modified[0] || ammo_modified[1] || ammo_modified[2] || ammo_modified[3];
 
     if (any)
     {
         things::MarkThing(kMT_PLAYER);
-        things::MarkThing(kMT_MISC24);  // backpack
+        things::MarkThing(kMT_MISC24); // backpack
     }
 
     if (ammo_modified[kAmmoTypeBullet])
     {
-        things::MarkThing(kMT_CLIP);    // "CLIP"
-        things::MarkThing(kMT_MISC17);  // "BOX_OF_BULLETS"
+        things::MarkThing(kMT_CLIP);   // "CLIP"
+        things::MarkThing(kMT_MISC17); // "BOX_OF_BULLETS"
     }
 
     if (ammo_modified[kAmmoTypeShell])
     {
-        things::MarkThing(kMT_MISC22);  // "SHELLS"
-        things::MarkThing(kMT_MISC23);  // "BOX_OF_SHELLS"
+        things::MarkThing(kMT_MISC22); // "SHELLS"
+        things::MarkThing(kMT_MISC23); // "BOX_OF_SHELLS"
     }
 
     if (ammo_modified[kAmmoTypeRocket])
     {
-        things::MarkThing(kMT_MISC18);  // "ROCKET"
-        things::MarkThing(kMT_MISC19);  // "BOX_OF_ROCKETS"
+        things::MarkThing(kMT_MISC18); // "ROCKET"
+        things::MarkThing(kMT_MISC19); // "BOX_OF_ROCKETS"
     }
 
     if (ammo_modified[kAmmoTypeCell])
     {
-        things::MarkThing(kMT_MISC20);  // "CELLS"
-        things::MarkThing(kMT_MISC21);  // "CELL_PACK"
+        things::MarkThing(kMT_MISC20); // "CELLS"
+        things::MarkThing(kMT_MISC21); // "CELL_PACK"
     }
 }
 
@@ -116,16 +116,16 @@ const char *ammo::GetAmmo(int type)
 {
     switch (type)
     {
-        case kAmmoTypeBullet:
-            return "BULLETS";
-        case kAmmoTypeShell:
-            return "SHELLS";
-        case kAmmoTypeRocket:
-            return "ROCKETS";
-        case kAmmoTypeCell:
-            return "CELLS";
-        case kAmmoTypeNoAmmo:
-            return "NOAMMO";
+    case kAmmoTypeBullet:
+        return "BULLETS";
+    case kAmmoTypeShell:
+        return "SHELLS";
+    case kAmmoTypeRocket:
+        return "ROCKETS";
+    case kAmmoTypeCell:
+        return "CELLS";
+    case kAmmoTypeNoAmmo:
+        return "NOAMMO";
     }
 
     FatalError("Dehacked: Internal Error - Bad ammo type %d\n", type);
@@ -137,8 +137,7 @@ void ammo::AlterAmmo(int new_val)
     int         a_num     = patch::active_obj;
     const char *deh_field = patch::line_buf;
 
-    EPI_ASSERT(0 <= a_num && a_num < kTotalAmmoTypes &&
-               a_num != kAmmoTypeUnused);
+    EPI_ASSERT(0 <= a_num && a_num < kTotalAmmoTypes && a_num != kAmmoTypeUnused);
 
     bool max_m = (0 == epi::StringCaseCompareASCII(deh_field, "Max ammo"));
     bool per_m = (0 == epi::StringCaseCompareASCII(deh_field, "Per ammo"));
@@ -149,19 +148,21 @@ void ammo::AlterAmmo(int new_val)
         return;
     }
 
-    if (new_val > 10000) new_val = 10000;
+    if (new_val > 10000)
+        new_val = 10000;
 
     if (new_val < 0)
     {
-        LogDebug("Dehacked: Warning - Bad value '%d' for AMMO field: %s\n",
-                 new_val, deh_field);
+        LogDebug("Dehacked: Warning - Bad value '%d' for AMMO field: %s\n", new_val, deh_field);
         return;
     }
 
-    if (max_m) player_max[a_num] = new_val;
-    if (per_m) pickups[a_num] = new_val;
+    if (max_m)
+        player_max[a_num] = new_val;
+    if (per_m)
+        pickups[a_num] = new_val;
 
     MarkAmmo(a_num);
 }
 
-}  // namespace dehacked
+} // namespace dehacked

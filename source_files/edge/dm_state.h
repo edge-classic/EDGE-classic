@@ -54,12 +54,12 @@ extern int deathmatch;
 // Depending on view size - no status bar?
 // Note that there is no way to disable the
 //  status bar explicitely.
-extern bool menu_active;  // Menu overlayed?
+extern bool menu_active; // Menu overlayed?
 extern bool rts_menu_active;
-extern bool paused;  // Game Pause?
+extern bool paused;      // Game Pause?
 
 // Timer, for scores.
-extern int  level_time_elapsed;  // tics in game play for par
+extern int  level_time_elapsed; // tics in game play for par
 extern bool fast_forward_active;
 
 //?
@@ -67,7 +67,10 @@ extern GameState game_state;
 
 extern int make_tic;
 
-inline bool InDeathmatch(void) { return (deathmatch > 0); }
+inline bool InDeathmatch(void)
+{
+    return (deathmatch > 0);
+}
 inline bool InCooperativeMatch(void)
 {
     return (deathmatch == 0 && total_players > 1);
@@ -126,8 +129,8 @@ extern int reduce_flash;
 
 enum InvulnerabilityEffectType
 {
-    kInvulnerabilitySimple = 0,  // plain inverse blending
-    kInvulnerabilityTextured,    // upload new textures
+    kInvulnerabilitySimple = 0, // plain inverse blending
+    kInvulnerabilityTextured,   // upload new textures
     kTotalInvulnerabilityEffects
 };
 

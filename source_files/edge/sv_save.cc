@@ -43,7 +43,10 @@ void BeginSaveGameSave(void)
     ClearAllStaleReferences();
 }
 
-void FinishSaveGameSave(void) { LogDebug("SV_FinishSave...\n"); }
+void FinishSaveGameSave(void)
+{
+    LogDebug("SV_FinishSave...\n");
+}
 
 void SaveGameStructSave(void *base, SaveStruct *info)
 {
@@ -57,7 +60,8 @@ void SaveGameStructSave(void *base, SaveStruct *info)
     for (cur = info->fields; cur->type.kind != kSaveFieldInvalid; cur++)
     {
         // ignore read-only (fudging) fields
-        if (!cur->field_put) continue;
+        if (!cur->field_put)
+            continue;
 
         offset = cur->offset_pointer - info->dummy_base;
 
@@ -67,14 +71,14 @@ void SaveGameStructSave(void *base, SaveStruct *info)
         {
             switch (cur->type.kind)
             {
-                case kSaveFieldStruct:
-                case kSaveFieldIndex:
-                    (*cur->field_put)(storage, i, (char *)cur->type.name);
-                    break;
+            case kSaveFieldStruct:
+            case kSaveFieldIndex:
+                (*cur->field_put)(storage, i, (char *)cur->type.name);
+                break;
 
-                default:
-                    (*cur->field_put)(storage, i, nullptr);
-                    break;
+            default:
+                (*cur->field_put)(storage, i, nullptr);
+                break;
             }
         }
     }
@@ -148,7 +152,8 @@ void SaveAllSaveChunks(void)
     // Structure Area
     for (stru = sv_known_structs; stru; stru = stru->next)
     {
-        if (!stru->define_me) continue;
+        if (!stru->define_me)
+            continue;
 
         SavePushWriteChunk("Stru");
         SV_SaveSTRU(stru);
@@ -158,7 +163,8 @@ void SaveAllSaveChunks(void)
     // Array Area
     for (arry = sv_known_arrays; arry; arry = arry->next)
     {
-        if (!arry->define_me) continue;
+        if (!arry->define_me)
+            continue;
 
         SavePushWriteChunk("Arry");
         SV_SaveARRY(arry);
@@ -168,7 +174,8 @@ void SaveAllSaveChunks(void)
     // Data Area
     for (arry = sv_known_arrays; arry; arry = arry->next)
     {
-        if (!arry->define_me) continue;
+        if (!arry->define_me)
+            continue;
 
         SavePushWriteChunk("Data");
         SV_SaveDATA(arry);

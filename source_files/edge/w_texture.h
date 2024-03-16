@@ -32,9 +32,8 @@
 
 #include <stdint.h>
 
-void InitializeTextures(void);
-int  FindTextureSequence(const char *start, const char *end, int *s_offset,
-                         int *e_offset);
+void        InitializeTextures(void);
+int         FindTextureSequence(const char *start, const char *end, int *s_offset, int *e_offset);
 const char *TextureNameInSet(int set, int offset);
 
 //
@@ -58,7 +57,7 @@ struct TexturePatch
 {
     int origin_x;
     int origin_y;
-    int patch;  // lump number
+    int patch; // lump number
 };
 
 //

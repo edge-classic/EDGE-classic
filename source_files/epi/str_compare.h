@@ -31,7 +31,7 @@ int StringCaseCompareASCII(std::string_view A, std::string_view B);
 int StringCaseCompareMaxASCII(std::string_view A, std::string_view B, size_t n);
 int StringPrefixCaseCompareASCII(std::string_view A, std::string_view B);
 
-}  // namespace epi
+} // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

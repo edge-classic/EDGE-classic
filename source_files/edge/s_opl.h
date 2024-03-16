@@ -28,8 +28,7 @@ bool StartupOpal(void);
 
 void RestartOpal(void);
 
-AbstractMusicPlayer *PlayOplMusic(uint8_t *data, int length, bool loop,
-                                  int type);
+AbstractMusicPlayer *PlayOplMusic(uint8_t *data, int length, bool loop, int type);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

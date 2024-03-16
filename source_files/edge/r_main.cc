@@ -34,14 +34,10 @@ static int maximum_clip_planes;
 static int maximum_texture_units;
 int        maximum_texture_size;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(renderer_near_clip, "4",
-                             kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(renderer_far_clip, "64000",
-                             kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(renderer_near_clip, "4", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(renderer_far_clip, "64000", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(draw_culling, "0", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(r_culldist, "3000",
-                                     kConsoleVariableFlagArchive, 1000.0f,
-                                     16000.0f)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(r_culldist, "3000", kConsoleVariableFlagArchive, 1000.0f, 16000.0f)
 EDGE_DEFINE_CONSOLE_VARIABLE(cull_fog_color, "0", kConsoleVariableFlagArchive)
 
 //
@@ -55,8 +51,7 @@ void RendererSetupMatrices2D(void)
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0.0f, (float)current_screen_width, 0.0f,
-            (float)current_screen_height, -1.0f, 1.0f);
+    glOrtho(0.0f, (float)current_screen_width, 0.0f, (float)current_screen_height, -1.0f, 1.0f);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -72,13 +67,12 @@ void RendererSetupMatrices2D(void)
 //
 void RendererSetupMatricesWorld2D(void)
 {
-    glViewport(view_window_x, view_window_y, view_window_width,
-               view_window_height);
+    glViewport(view_window_x, view_window_y, view_window_width, view_window_height);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho((float)view_window_x, (float)view_window_width,
-            (float)view_window_y, (float)view_window_height, -1.0f, 1.0f);
+    glOrtho((float)view_window_x, (float)view_window_width, (float)view_window_y, (float)view_window_height, -1.0f,
+            1.0f);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -93,10 +87,9 @@ void RendererSetupMatricesWorld2D(void)
 //
 void RendererSetupMatrices3d(void)
 {
-    GLfloat ambient[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat ambient[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
-    glViewport(view_window_x, view_window_y, view_window_width,
-               view_window_height);
+    glViewport(view_window_x, view_window_y, view_window_width, view_window_height);
 
     // calculate perspective matrix
 
@@ -104,10 +97,8 @@ void RendererSetupMatrices3d(void)
 
     glLoadIdentity();
 
-    glFrustum(-view_x_slope * renderer_near_clip.f_,
-              view_x_slope * renderer_near_clip.f_,
-              -view_y_slope * renderer_near_clip.f_,
-              view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
+    glFrustum(-view_x_slope * renderer_near_clip.f_, view_x_slope * renderer_near_clip.f_,
+              -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
               renderer_far_clip.f_);
 
     // calculate look-at matrix
@@ -115,8 +106,7 @@ void RendererSetupMatrices3d(void)
     glMatrixMode(GL_MODELVIEW);
 
     glLoadIdentity();
-    glRotatef(270.0f - epi::DegreesFromBAM(view_vertical_angle), 1.0f, 0.0f,
-              0.0f);
+    glRotatef(270.0f - epi::DegreesFromBAM(view_vertical_angle), 1.0f, 0.0f, 0.0f);
     glRotatef(90.0f - epi::DegreesFromBAM(view_angle), 0.0f, 0.0f, 1.0f);
     glTranslatef(-view_x, -view_y, -view_z);
 }
@@ -153,8 +143,7 @@ void RendererCheckExtensions(void)
 
 #ifndef EDGE_GL_ES2
     if (!GLAD_GL_VERSION_1_5)
-        FatalError(
-            "OpenGL supported version below minimum! (Requires OpenGL 1.5).\n");
+        FatalError("OpenGL supported version below minimum! (Requires OpenGL 1.5).\n");
 #endif
 }
 
@@ -220,9 +209,8 @@ void RendererInit(void)
         maximum_texture_units = max_tex_units;
     }
 
-    LogPrint("OpenGL: Lights: %d  Clips: %d  Tex: %d  Units: %d\n",
-             maximum_lights, maximum_clip_planes, maximum_texture_size,
-             maximum_texture_units);
+    LogPrint("OpenGL: Lights: %d  Clips: %d  Tex: %d  Units: %d\n", maximum_lights, maximum_clip_planes,
+             maximum_texture_size, maximum_texture_units);
 
     RendererSoftInit();
 

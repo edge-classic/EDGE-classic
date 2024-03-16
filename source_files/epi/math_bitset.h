@@ -40,7 +40,7 @@ inline BitSet BitSetFromChar(char ch)
         return 0;
 }
 
-}  // namespace epi
+} // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

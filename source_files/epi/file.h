@@ -27,7 +27,7 @@ namespace epi
 // base class
 class File
 {
-   public:
+  public:
     // Seek reference points
     enum Seek
     {
@@ -37,10 +37,14 @@ class File
         kSeekpointNumTypes
     };
 
-   protected:
-   public:
-    File() {}
-    virtual ~File() {}
+  protected:
+  public:
+    File()
+    {
+    }
+    virtual ~File()
+    {
+    }
 
     virtual int GetLength()   = 0;
     virtual int GetPosition() = 0;
@@ -50,7 +54,7 @@ class File
 
     virtual bool Seek(int offset, int seekpoint) = 0;
 
-   public:
+  public:
     // load the file into memory, reading from the current
     // position, and reading no more than the 'max_size'
     // parameter (in bytes).  An extra NUL byte is appended
@@ -65,14 +69,14 @@ class File
 // standard File class using ANSI C functions
 class ANSIFile : public File
 {
-   private:
+  private:
     FILE *fp_;
 
-   public:
+  public:
     ANSIFile(FILE *filep);
     ~ANSIFile();
 
-   public:
+  public:
     int GetLength();
     int GetPosition();
 
@@ -84,19 +88,25 @@ class ANSIFile : public File
 
 class SubFile : public File
 {
-   private:
+  private:
     File *parent_;
 
     int start_;
     int length_;
     int pos_;
 
-   public:
+  public:
     SubFile(File *parent, int start, int len);
     ~SubFile();
 
-    int GetLength() { return length_; }
-    int GetPosition() { return pos_; }
+    int GetLength()
+    {
+        return length_;
+    }
+    int GetPosition()
+    {
+        return pos_;
+    }
 
     unsigned int Read(void *dest, unsigned int size);
     unsigned int Write(const void *src, unsigned int size);
@@ -106,19 +116,25 @@ class SubFile : public File
 
 class MemFile : public File
 {
-   private:
+  private:
     uint8_t *data_;
 
     int  length_;
     int  pos_;
     bool copied_;
 
-   public:
+  public:
     MemFile(const uint8_t *block, int len, bool copy_it = true);
     ~MemFile();
 
-    int GetLength() { return length_; }
-    int GetPosition() { return pos_; }
+    int GetLength()
+    {
+        return length_;
+    }
+    int GetPosition()
+    {
+        return pos_;
+    }
 
     unsigned int Read(void *dest, unsigned int size);
     unsigned int Write(const void *src, unsigned int size);
@@ -126,7 +142,7 @@ class MemFile : public File
     bool Seek(int offset, int seekpoint);
 };
 
-}  // namespace epi
+} // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -33,7 +33,7 @@ enum SoundFormat
     kSoundRad,
     kSoundMus,
     kSoundMidi,
-    kSoundImf,  // Used with DDFPLAY; not in auto-detection
+    kSoundImf, // Used with DDFPLAY; not in auto-detection
     kSoundDoom,
     kSoundPcSpeaker
 };

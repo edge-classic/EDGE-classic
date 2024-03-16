@@ -58,9 +58,14 @@ DataFile::DataFile(std::string name, FileKind kind)
 {
 }
 
-DataFile::~DataFile() {}
+DataFile::~DataFile()
+{
+}
 
-int GetTotalFiles() { return (int)data_files.size(); }
+int GetTotalFiles()
+{
+    return (int)data_files.size();
+}
 
 size_t AddDataFile(std::string file, FileKind kind)
 {
@@ -96,8 +101,7 @@ extern std::string BuildXglNodesForWad(DataFile *df);
 
 static void DEH_ConvertFile(std::string &filename)
 {
-    epi::File *F =
-        epi::FileOpen(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
+    epi::File *F = epi::FileOpen(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
     if (F == nullptr)
     {
         LogPrint("FAILED to open file: %s\n", filename.c_str());
@@ -133,7 +137,8 @@ static void W_ExternalDDF(DataFile *df)
     LogPrint("Reading DDF file: %s\n", df->name_.c_str());
 
     epi::File *F = epi::FileOpen(df->name_, epi::kFileAccessRead);
-    if (F == nullptr) FatalError("Couldn't open file: %s\n", df->name_.c_str());
+    if (F == nullptr)
+        FatalError("Couldn't open file: %s\n", df->name_.c_str());
 
     // WISH: load directly into a std::string
 
@@ -152,7 +157,8 @@ static void W_ExternalRTS(DataFile *df)
     LogPrint("Reading RTS script: %s\n", df->name_.c_str());
 
     epi::File *F = epi::FileOpen(df->name_, epi::kFileAccessRead);
-    if (F == nullptr) FatalError("Couldn't open file: %s\n", df->name_.c_str());
+    if (F == nullptr)
+        FatalError("Couldn't open file: %s\n", df->name_.c_str());
 
     // WISH: load directly into a std::string
 
@@ -178,8 +184,7 @@ void ProcessFile(DataFile *df)
 
     if (df->kind_ <= kFileKindXWad)
     {
-        epi::File *file = epi::FileOpen(
-            filename, epi::kFileAccessRead | epi::kFileAccessBinary);
+        epi::File *file = epi::FileOpen(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
         if (file == nullptr)
         {
             FatalError("Couldn't open file: %s\n", filename.c_str());
@@ -192,13 +197,12 @@ void ProcessFile(DataFile *df)
     }
     else if (df->kind_ == kFileKindPackWad || df->kind_ == kFileKindIPackWad)
     {
-        EPI_ASSERT(df->file_);  // This should already be handled by the pack
-                                // processing
+        EPI_ASSERT(df->file_); // This should already be handled by the pack
+                               // processing
         ProcessWad(df, file_index);
     }
-    else if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder ||
-             df->kind_ == kFileKindEpk || df->kind_ == kFileKindEEpk ||
-             df->kind_ == kFileKindIpk || df->kind_ == kFileKindIFolder)
+    else if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEpk ||
+             df->kind_ == kFileKindEEpk || df->kind_ == kFileKindIpk || df->kind_ == kFileKindIFolder)
     {
         PackProcessAll(df, file_index);
     }
@@ -221,7 +225,8 @@ void ProcessFile(DataFile *df)
     }
 
     // handle fixer-uppers   [ TODO support it for EPK files too ]
-    if (df->wad_ != nullptr) ProcessFixersForWad(df);
+    if (df->wad_ != nullptr)
+        ProcessFixersForWad(df);
 }
 
 void ProcessMultipleFiles()
@@ -252,8 +257,8 @@ void BuildXglNodes(void)
     {
         DataFile *df = data_files[i];
 
-        if (df->kind_ == kFileKindIWad || df->kind_ == kFileKindPWad ||
-            df->kind_ == kFileKindPackWad || df->kind_ == kFileKindIPackWad)
+        if (df->kind_ == kFileKindIWad || df->kind_ == kFileKindPWad || df->kind_ == kFileKindPackWad ||
+            df->kind_ == kFileKindIPackWad)
         {
             std::string xwa_filename = BuildXglNodesForWad(df);
 
@@ -273,11 +278,11 @@ int CheckPackFilesForName(const std::string &name)
     for (int i = (int)data_files.size() - 1; i >= 0; i--)
     {
         DataFile *df = data_files[i];
-        if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder ||
-            df->kind_ == kFileKindEpk || df->kind_ == kFileKindEEpk ||
-            df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIpk)
+        if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEpk ||
+            df->kind_ == kFileKindEEpk || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIpk)
         {
-            if (PackFindFile(df->pack_, name)) return i;
+            if (PackFindFile(df->pack_, name))
+                return i;
         }
     }
     return -1;
@@ -291,12 +296,12 @@ epi::File *OpenFileFromPack(const std::string &name)
     for (int i = (int)data_files.size() - 1; i >= 0; i--)
     {
         DataFile *df = data_files[i];
-        if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder ||
-            df->kind_ == kFileKindEpk || df->kind_ == kFileKindEEpk ||
-            df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIpk)
+        if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEpk ||
+            df->kind_ == kFileKindEEpk || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIpk)
         {
             epi::File *F = PackOpenFile(df->pack_, name);
-            if (F != nullptr) return F;
+            if (F != nullptr)
+                return F;
         }
     }
 
@@ -306,22 +311,20 @@ epi::File *OpenFileFromPack(const std::string &name)
 
 //----------------------------------------------------------------------------
 
-uint8_t *OpenPackOrLumpInMemory(const std::string              &name,
-                                const std::vector<std::string> &extensions,
-                                int                            *length)
+uint8_t *OpenPackOrLumpInMemory(const std::string &name, const std::vector<std::string> &extensions, int *length)
 {
     int lump_df  = -1;
     int lump_num = CheckLumpNumberForName(name.c_str());
-    if (lump_num > -1) lump_df = GetDataFileIndexForLump(lump_num);
+    if (lump_num > -1)
+        lump_df = GetDataFileIndexForLump(lump_num);
 
     for (int i = (int)data_files.size() - 1; i >= 0; i--)
     {
         if (i > lump_df)
         {
             DataFile *df = data_files[i];
-            if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder ||
-                df->kind_ == kFileKindEpk || df->kind_ == kFileKindEEpk ||
-                df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIpk)
+            if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEpk ||
+                df->kind_ == kFileKindEEpk || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIpk)
             {
                 epi::File *F = PackOpenMatch(df->pack_, name, extensions);
                 if (F != nullptr)
@@ -335,7 +338,8 @@ uint8_t *OpenPackOrLumpInMemory(const std::string              &name,
         }
     }
 
-    if (lump_num > -1) return LoadLumpIntoMemory(lump_num, length);
+    if (lump_num > -1)
+        return LoadLumpIntoMemory(lump_num, length);
 
     // not found
     return nullptr;
@@ -358,41 +362,41 @@ static const char *FileKindString(FileKind kind)
 {
     switch (kind)
     {
-        case kFileKindIWad:
-            return "iwad";
-        case kFileKindPWad:
-            return "pwad";
-        case kFileKindEWad:
-            return "edge";
-        case kFileKindEEpk:
-            return "edge";
-        case kFileKindXWad:
-            return "xwa";
-        case kFileKindPackWad:
-            return "pwad";
-        case kFileKindIPackWad:
-            return "iwad";
+    case kFileKindIWad:
+        return "iwad";
+    case kFileKindPWad:
+        return "pwad";
+    case kFileKindEWad:
+        return "edge";
+    case kFileKindEEpk:
+        return "edge";
+    case kFileKindXWad:
+        return "xwa";
+    case kFileKindPackWad:
+        return "pwad";
+    case kFileKindIPackWad:
+        return "iwad";
 
-        case kFileKindFolder:
-            return "DIR";
-        case kFileKindEFolder:
-            return "edge";
-        case kFileKindIFolder:
-            return "DIR";
-        case kFileKindEpk:
-            return "epk";
-        case kFileKindIpk:
-            return "epk";
+    case kFileKindFolder:
+        return "DIR";
+    case kFileKindEFolder:
+        return "edge";
+    case kFileKindIFolder:
+        return "DIR";
+    case kFileKindEpk:
+        return "epk";
+    case kFileKindIpk:
+        return "epk";
 
-        case kFileKindDdf:
-            return "ddf";
-        case kFileKindRts:
-            return "rts";
-        case kFileKindDehacked:
-            return "deh";
+    case kFileKindDdf:
+        return "ddf";
+    case kFileKindRts:
+        return "rts";
+    case kFileKindDehacked:
+        return "deh";
 
-        default:
-            return "???";
+    default:
+        return "???";
     }
 }
 
@@ -404,8 +408,7 @@ void ShowLoadedFiles()
     {
         DataFile *df = data_files[i];
 
-        LogPrint(" %2d: %-4s \"%s\"\n", i + 1, FileKindString(df->kind_),
-                 df->name_.c_str());
+        LogPrint(" %2d: %-4s \"%s\"\n", i + 1, FileKindString(df->kind_), df->name_.c_str());
     }
 }
 

@@ -46,13 +46,13 @@ class MapObject;
 //
 enum SoundCategory
 {
-    kCategoryUi = 0,    // for the user interface (menus, tips)
-    kCategoryPlayer,    // for console player (pain, death, pickup)
-    kCategoryWeapon,    // for console player's weapon
-    kCategoryOpponent,  // for all other players (DM or COOP)
-    kCategoryMonster,   // for all monster sounds
-    kCategoryObject,    // for all objects (esp. projectiles)
-    kCategoryLevel,     // for doors, lifts and map scripts
+    kCategoryUi = 0,   // for the user interface (menus, tips)
+    kCategoryPlayer,   // for console player (pain, death, pickup)
+    kCategoryWeapon,   // for console player's weapon
+    kCategoryOpponent, // for all other players (DM or COOP)
+    kCategoryMonster,  // for all monster sounds
+    kCategoryObject,   // for all objects (esp. projectiles)
+    kCategoryLevel,    // for doors, lifts and map scripts
     kTotalCategories
 };
 
@@ -78,8 +78,7 @@ enum SoundEffectFlag
 void SoundInitialize(void);
 void SoundShutdown(void);
 
-void StartSoundEffect(struct SoundEffect *sfx, int category = kCategoryUi,
-                      Position *pos = nullptr, int flags = 0);
+void StartSoundEffect(struct SoundEffect *sfx, int category = kCategoryUi, Position *pos = nullptr, int flags = 0);
 
 void StopSoundEffect(Position *pos);
 void StopLevelSoundEffects(void);

@@ -105,15 +105,13 @@ void DDF_Error(const char *err, ...)
 
     if (cur_ddf_filename != "")
     {
-        sprintf(pos, "Error occurred near line %d of %s\n", cur_ddf_line_num,
-                cur_ddf_filename.c_str());
+        sprintf(pos, "Error occurred near line %d of %s\n", cur_ddf_line_num, cur_ddf_filename.c_str());
         pos += strlen(pos);
     }
 
     if (cur_ddf_entryname != "")
     {
-        sprintf(pos, "Error occurred in entry: %s\n",
-                cur_ddf_entryname.c_str());
+        sprintf(pos, "Error occurred in entry: %s\n", cur_ddf_entryname.c_str());
         pos += strlen(pos);
     }
 
@@ -124,7 +122,8 @@ void DDF_Error(const char *err, ...)
     }
 
     // check for buffer overflow
-    if (buffer[2047] != 0) FatalError("Buffer overflow in DDF_Error\n");
+    if (buffer[2047] != 0)
+        FatalError("Buffer overflow in DDF_Error\n");
 
     // add a blank line for readability under DOS/Linux.
     LogPrint("\n");
@@ -137,7 +136,8 @@ void DDF_Warning(const char *err, ...)
     va_list argptr;
     char    buffer[1024];
 
-    if (no_warnings) return;
+    if (no_warnings)
+        return;
 
     va_start(argptr, err);
     vsprintf(buffer, err, argptr);
@@ -147,14 +147,12 @@ void DDF_Warning(const char *err, ...)
 
     if (!cur_ddf_filename.empty())
     {
-        LogPrint("  problem occurred near line %d of %s\n", cur_ddf_line_num,
-                 cur_ddf_filename.c_str());
+        LogPrint("  problem occurred near line %d of %s\n", cur_ddf_line_num, cur_ddf_filename.c_str());
     }
 
     if (!cur_ddf_entryname.empty())
     {
-        LogPrint("  problem occurred in entry: %s\n",
-                 cur_ddf_entryname.c_str());
+        LogPrint("  problem occurred in entry: %s\n", cur_ddf_entryname.c_str());
     }
 
     if (!cur_ddf_linedata.empty())
@@ -168,7 +166,8 @@ void DDF_Debug(const char *err, ...)
     va_list argptr;
     char    buffer[1024];
 
-    if (no_warnings) return;
+    if (no_warnings)
+        return;
 
     va_start(argptr, err);
     vsprintf(buffer, err, argptr);
@@ -178,14 +177,12 @@ void DDF_Debug(const char *err, ...)
 
     if (!cur_ddf_filename.empty())
     {
-        LogDebug("  problem occurred near line %d of %s\n", cur_ddf_line_num,
-                 cur_ddf_filename.c_str());
+        LogDebug("  problem occurred near line %d of %s\n", cur_ddf_line_num, cur_ddf_filename.c_str());
     }
 
     if (!cur_ddf_entryname.empty())
     {
-        LogDebug("  problem occurred in entry: %s\n",
-                 cur_ddf_entryname.c_str());
+        LogDebug("  problem occurred in entry: %s\n", cur_ddf_entryname.c_str());
     }
 
     if (!cur_ddf_linedata.empty())
@@ -234,18 +231,26 @@ void DDF_Init()
 
 class define_c
 {
-   public:
+  public:
     std::string name;
     std::string value;
 
-   public:
-    define_c() : name(), value() {}
+  public:
+    define_c() : name(), value()
+    {
+    }
 
-    define_c(const char *N, const char *V) : name(N), value(V) {}
+    define_c(const char *N, const char *V) : name(N), value(V)
+    {
+    }
 
-    define_c(const std::string &N, const std::string &V) : name(N), value(V) {}
+    define_c(const std::string &N, const std::string &V) : name(N), value(V)
+    {
+    }
 
-    ~define_c() {}
+    ~define_c()
+    {
+    }
 };
 
 // defines are very rare, hence no need for fast lookup.
@@ -273,7 +278,10 @@ const char *DDF_MainGetDefine(const char *name)
     return name;
 }
 
-void DDF_MainFreeDefines() { all_defines.clear(); }
+void DDF_MainFreeDefines()
+{
+    all_defines.clear();
+}
 
 //
 // DDF_MainCleanup
@@ -306,22 +314,20 @@ void DDF_CleanUp()
 }
 
 static const char *tag_conversion_table[] = {
-    "ANIMATIONS", "DDFANIM",  "ATTACKS", "DDFATK",   "COLOURMAPS", "DDFCOLM",
-    "FLATS",      "DDFFLAT",  "FIXES",   "WADFIXES", "FONTS",      "DDFFONT",
-    "GAMES",      "DDFGAME",  "IMAGES",  "DDFIMAGE", "LANGUAGES",  "DDFLANG",
-    "LEVELS",     "DDFLEVL",  "LINES",   "DDFLINE",  "PLAYLISTS",  "DDFPLAY",
-    "SECTORS",    "DDFSECT",  "SOUNDS",  "DDFSFX",   "STYLES",     "DDFSTYLE",
-    "SWITCHES",   "DDFSWTH",  "THINGS",  "DDFTHING", "WEAPONS",    "DDFWEAP",
-    "MOVIES",     "DDFMOVIE",
+    "ANIMATIONS", "DDFANIM",  "ATTACKS", "DDFATK",  "COLOURMAPS", "DDFCOLM",  "FLATS",     "DDFFLAT",
+    "FIXES",      "WADFIXES", "FONTS",   "DDFFONT", "GAMES",      "DDFGAME",  "IMAGES",    "DDFIMAGE",
+    "LANGUAGES",  "DDFLANG",  "LEVELS",  "DDFLEVL", "LINES",      "DDFLINE",  "PLAYLISTS", "DDFPLAY",
+    "SECTORS",    "DDFSECT",  "SOUNDS",  "DDFSFX",  "STYLES",     "DDFSTYLE", "SWITCHES",  "DDFSWTH",
+    "THINGS",     "DDFTHING", "WEAPONS", "DDFWEAP", "MOVIES",     "DDFMOVIE",
 
-    nullptr,      nullptr
-};
+    nullptr,      nullptr};
 
 void DDF_GetLumpNameForFile(const char *filename, char *lumpname)
 {
     FILE *fp = fopen(filename, "r");
 
-    if (!fp) FatalError("Couldn't open DDF file: %s\n", filename);
+    if (!fp)
+        FatalError("Couldn't open DDF file: %s\n", filename);
 
     bool in_comment = false;
 
@@ -329,9 +335,10 @@ void DDF_GetLumpNameForFile(const char *filename, char *lumpname)
     {
         int ch = fgetc(fp);
 
-        if (ch == EOF || ferror(fp)) break;
+        if (ch == EOF || ferror(fp))
+            break;
 
-        if (ch == '/' || ch == '#')  // skip directives too
+        if (ch == '/' || ch == '#') // skip directives too
         {
             in_comment = true;
             continue;
@@ -339,13 +346,16 @@ void DDF_GetLumpNameForFile(const char *filename, char *lumpname)
 
         if (in_comment)
         {
-            if (ch == '\n' || ch == '\r') in_comment = false;
+            if (ch == '\n' || ch == '\r')
+                in_comment = false;
             continue;
         }
 
-        if (ch == '[') break;
+        if (ch == '[')
+            break;
 
-        if (ch != '<') continue;
+        if (ch != '<')
+            continue;
 
         // found start of <XYZ> tag, read it in
 
@@ -356,11 +366,13 @@ void DDF_GetLumpNameForFile(const char *filename, char *lumpname)
         {
             ch = fgetc(fp);
 
-            if (ch == EOF || ferror(fp) || ch == '>') break;
+            if (ch == EOF || ferror(fp) || ch == '>')
+                break;
 
             tag_buf[len++] = epi::ToUpperASCII(ch);
 
-            if (len + 2 >= (int)sizeof(tag_buf)) break;
+            if (len + 2 >= (int)sizeof(tag_buf))
+                break;
         }
 
         tag_buf[len] = 0;
@@ -374,13 +386,12 @@ void DDF_GetLumpNameForFile(const char *filename, char *lumpname)
                     strcpy(lumpname, tag_conversion_table[i + 1]);
                     fclose(fp);
 
-                    return;  // SUCCESS!
+                    return; // SUCCESS!
                 }
             }
 
             fclose(fp);
-            FatalError("Unknown marker <%s> in DDF file: %s\n", tag_buf,
-                       filename);
+            FatalError("Unknown marker <%s> in DDF file: %s\n", tag_buf, filename);
         }
         break;
     }
@@ -487,8 +498,7 @@ void DDF_GetLumpNameForFile(const char *filename, char *lumpname)
 //
 // 1998/08/10 Added String reading code.
 //
-static DDFReadCharReturn DDF_MainProcessChar(char character, std::string &token,
-                                             int status)
+static DDFReadCharReturn DDF_MainProcessChar(char character, std::string &token, int status)
 {
     // int len;
 
@@ -498,9 +508,10 @@ static DDFReadCharReturn DDF_MainProcessChar(char character, std::string &token,
     // With the exception of kDDFReadStatusReadingString, whitespace is ignored.
     if (status != kDDFReadStatusReadingString)
     {
-        if (epi::IsSpaceASCII(character)) return kDDFReadCharReturnNothing;
+        if (epi::IsSpaceASCII(character))
+            return kDDFReadCharReturnNothing;
     }
-    else  // check for formatting char in a string
+    else // check for formatting char in a string
     {
         if (!formatchar && character == '\\')
         {
@@ -521,152 +532,161 @@ static DDFReadCharReturn DDF_MainProcessChar(char character, std::string &token,
 
     switch (status)
     {
-        case kDDFReadStatusReadingRemark:
+    case kDDFReadStatusReadingRemark:
+        return kDDFReadCharReturnNothing;
+
+        // -ES- 2000/02/29 Added tag check.
+    case kDDFReadStatusWaitingTag:
+        if (character == '<')
+            return kDDFReadCharReturnTagStart;
+        else
+            DDF_Error("DDF: File must start with a tag!\n");
+        break;
+
+    case kDDFReadStatusReadingTag:
+        if (character == '>')
+            return kDDFReadCharReturnTagStop;
+        else
+        {
+            token += (character);
+            return kDDFReadCharReturnOK;
+        }
+
+    case kDDFReadStatusWaitingNewDefinition:
+        if (character == '[')
+            return kDDFReadCharReturnDefinitionStart;
+        else
             return kDDFReadCharReturnNothing;
 
-            // -ES- 2000/02/29 Added tag check.
-        case kDDFReadStatusWaitingTag:
-            if (character == '<')
-                return kDDFReadCharReturnTagStart;
-            else
-                DDF_Error("DDF: File must start with a tag!\n");
-            break;
+    case kDDFReadStatusReadingNewDefinition:
+        if (character == ']')
+        {
+            return kDDFReadCharReturnDefinitionStop;
+        }
+        else if ((epi::IsAlphanumericASCII(character)) || (character == '_') || (character == ':') ||
+                 (character == '+'))
+        {
+            token += epi::ToUpperASCII(character);
+            return kDDFReadCharReturnOK;
+        }
+        return kDDFReadCharReturnNothing;
 
-        case kDDFReadStatusReadingTag:
-            if (character == '>')
-                return kDDFReadCharReturnTagStop;
-            else
+    case kDDFReadStatusReadingCommand:
+        if (character == '=')
+        {
+            return kDDFReadCharReturnCommand;
+        }
+        else if (character == ';')
+        {
+            return kDDFReadCharReturnProperty;
+        }
+        else if (character == '[')
+        {
+            return kDDFReadCharReturnDefinitionStart;
+        }
+        else if (epi::IsAlphanumericASCII(character) || character == '_' || character == '(' || character == ')' ||
+                 character == '.')
+        {
+            token += epi::ToUpperASCII(character);
+            return kDDFReadCharReturnOK;
+        }
+        return kDDFReadCharReturnNothing;
+
+        // -ACB- 1998/08/10 Check for string start
+    case kDDFReadStatusReadingData:
+        if (character == '\"')
+            return kDDFReadCharReturnStringStart;
+
+        if (character == ';')
+            return kDDFReadCharReturnTerminator;
+
+        if (character == ',')
+            return kDDFReadCharReturnSeparator;
+
+        if (character == '(')
+        {
+            token += (character);
+            return kDDFReadCharReturnGroupStart;
+        }
+
+        if (character == ')')
+        {
+            token += (character);
+            return kDDFReadCharReturnGroupStop;
+        }
+
+        // Sprite Data - more than a few exceptions....
+        if (epi::IsAlphanumericASCII(character) || character == '_' || character == '-' || character == ':' ||
+            character == '.' || character == '[' || character == ']' || character == '\\' || character == '!' ||
+            character == '#' || character == '%' || character == '+' || character == '@' || character == '?')
+        {
+            token += epi::ToUpperASCII(character);
+            return kDDFReadCharReturnOK;
+        }
+        else if (epi::IsPrintASCII(character))
+            DDF_WarnError("DDF: Illegal character '%c' found.\n", character);
+
+        break;
+
+    case kDDFReadStatusReadingString: // -ACB- 1998/08/10 New string
+                                      // handling
+        // -KM- 1999/01/29 Fixed nasty bug where \" would be recognised as
+        //  string end over quote mark.  One of the level text used this.
+        if (formatchar)
+        {
+            // -ACB- 1998/08/11 Formatting check: Carriage-return.
+            if (character == 'n')
+            {
+                token += ('\n');
+                formatchar = false;
+                return kDDFReadCharReturnOK;
+            }
+            else if (character == '\"') // -KM- 1998/10/29 Also recognise quote
+            {
+                token += ('\"');
+                formatchar = false;
+                return kDDFReadCharReturnOK;
+            }
+            else if (character == '\\') // -ACB- 1999/11/24 Double
+                                        // backslash means directory
+            {
+                token += ('\\');
+                formatchar = false;
+                return kDDFReadCharReturnOK;
+            }
+            else // -ACB- 1999/11/24 Any other characters are treated in
+                 // the norm
             {
                 token += (character);
+                formatchar = false;
                 return kDDFReadCharReturnOK;
             }
+        }
+        else if (character == '\"')
+        {
+            return kDDFReadCharReturnStringStop;
+        }
+        else if (character == '\n')
+        {
+            cur_ddf_line_num--;
+            DDF_WarnError("Unclosed string detected.\n");
 
-        case kDDFReadStatusWaitingNewDefinition:
-            if (character == '[')
-                return kDDFReadCharReturnDefinitionStart;
-            else
-                return kDDFReadCharReturnNothing;
-
-        case kDDFReadStatusReadingNewDefinition:
-            if (character == ']') { return kDDFReadCharReturnDefinitionStop; }
-            else if ((epi::IsAlphanumericASCII(character)) ||
-                     (character == '_') || (character == ':') ||
-                     (character == '+'))
-            {
-                token += epi::ToUpperASCII(character);
-                return kDDFReadCharReturnOK;
-            }
+            cur_ddf_line_num++;
             return kDDFReadCharReturnNothing;
+        }
+        // -KM- 1998/10/29 Removed ascii check, allow foreign characters (?)
+        // -ES- HEY! Swedish is not foreign!
+        else
+        {
+            token += (character);
+            return kDDFReadCharReturnOK;
+        }
 
-        case kDDFReadStatusReadingCommand:
-            if (character == '=') { return kDDFReadCharReturnCommand; }
-            else if (character == ';') { return kDDFReadCharReturnProperty; }
-            else if (character == '[')
-            {
-                return kDDFReadCharReturnDefinitionStart;
-            }
-            else if (epi::IsAlphanumericASCII(character) || character == '_' ||
-                     character == '(' || character == ')' || character == '.')
-            {
-                token += epi::ToUpperASCII(character);
-                return kDDFReadCharReturnOK;
-            }
-            return kDDFReadCharReturnNothing;
-
-            // -ACB- 1998/08/10 Check for string start
-        case kDDFReadStatusReadingData:
-            if (character == '\"') return kDDFReadCharReturnStringStart;
-
-            if (character == ';') return kDDFReadCharReturnTerminator;
-
-            if (character == ',') return kDDFReadCharReturnSeparator;
-
-            if (character == '(')
-            {
-                token += (character);
-                return kDDFReadCharReturnGroupStart;
-            }
-
-            if (character == ')')
-            {
-                token += (character);
-                return kDDFReadCharReturnGroupStop;
-            }
-
-            // Sprite Data - more than a few exceptions....
-            if (epi::IsAlphanumericASCII(character) || character == '_' ||
-                character == '-' || character == ':' || character == '.' ||
-                character == '[' || character == ']' || character == '\\' ||
-                character == '!' || character == '#' || character == '%' ||
-                character == '+' || character == '@' || character == '?')
-            {
-                token += epi::ToUpperASCII(character);
-                return kDDFReadCharReturnOK;
-            }
-            else if (epi::IsPrintASCII(character))
-                DDF_WarnError("DDF: Illegal character '%c' found.\n",
-                              character);
-
-            break;
-
-        case kDDFReadStatusReadingString:  // -ACB- 1998/08/10 New string
-                                           // handling
-            // -KM- 1999/01/29 Fixed nasty bug where \" would be recognised as
-            //  string end over quote mark.  One of the level text used this.
-            if (formatchar)
-            {
-                // -ACB- 1998/08/11 Formatting check: Carriage-return.
-                if (character == 'n')
-                {
-                    token += ('\n');
-                    formatchar = false;
-                    return kDDFReadCharReturnOK;
-                }
-                else if (character ==
-                         '\"')  // -KM- 1998/10/29 Also recognise quote
-                {
-                    token += ('\"');
-                    formatchar = false;
-                    return kDDFReadCharReturnOK;
-                }
-                else if (character == '\\')  // -ACB- 1999/11/24 Double
-                                             // backslash means directory
-                {
-                    token += ('\\');
-                    formatchar = false;
-                    return kDDFReadCharReturnOK;
-                }
-                else  // -ACB- 1999/11/24 Any other characters are treated in
-                      // the norm
-                {
-                    token += (character);
-                    formatchar = false;
-                    return kDDFReadCharReturnOK;
-                }
-            }
-            else if (character == '\"') { return kDDFReadCharReturnStringStop; }
-            else if (character == '\n')
-            {
-                cur_ddf_line_num--;
-                DDF_WarnError("Unclosed string detected.\n");
-
-                cur_ddf_line_num++;
-                return kDDFReadCharReturnNothing;
-            }
-            // -KM- 1998/10/29 Removed ascii check, allow foreign characters (?)
-            // -ES- HEY! Swedish is not foreign!
-            else
-            {
-                token += (character);
-                return kDDFReadCharReturnOK;
-            }
-
-        default:  // doh!
-            FatalError(
-                "DDF_MainProcessChar: INTERNAL ERROR: "
-                "Bad status value %d !\n",
-                status);
-            break;
+    default: // doh!
+        FatalError("DDF_MainProcessChar: INTERNAL ERROR: "
+                   "Bad status value %d !\n",
+                   status);
+        break;
     }
 
     return kDDFReadCharReturnNothing;
@@ -718,8 +738,7 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
     while (memfileptr < &memfile[memsize])
     {
         // -KM- 1998/12/16 Added #define command to ddf files.
-        if (epi::StringPrefixCaseCompareASCII(std::string_view(memfileptr, 7),
-                                              "#DEFINE") == 0)
+        if (epi::StringPrefixCaseCompareASCII(std::string_view(memfileptr, 7), "#DEFINE") == 0)
         {
             bool line = false;
 
@@ -734,19 +753,26 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
                 *memfileptr++ = 0;
                 value         = memfileptr;
             }
-            else { DDF_Error("#DEFINE '%s' as what?!\n", name); }
+            else
+            {
+                DDF_Error("#DEFINE '%s' as what?!\n", name);
+            }
 
             // FIXME handle comments, stop at "//"
 
             while (memfileptr < &memfile[memsize])
             {
-                if (*memfileptr == '\r') *memfileptr = ' ';
-                if (*memfileptr == '\\') line = true;
-                if (*memfileptr == '\n' && !line) break;
+                if (*memfileptr == '\r')
+                    *memfileptr = ' ';
+                if (*memfileptr == '\\')
+                    line = true;
+                if (*memfileptr == '\n' && !line)
+                    break;
                 memfileptr++;
             }
 
-            if (*memfileptr == '\n') cur_ddf_line_num++;
+            if (*memfileptr == '\n')
+                cur_ddf_line_num++;
 
             *memfileptr++ = 0;
 
@@ -760,14 +786,14 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
         //       comments here and ignore them.  Ow the pain of long
         //       identifier names...  Ow the pain of &memfile[size] :-)
 
-        if (comment_level == 0 && status != kDDFReadStatusReadingString &&
-            memfileptr + 1 < &memfile[memsize] && memfileptr[0] == '/' &&
-            memfileptr[1] == '/')
+        if (comment_level == 0 && status != kDDFReadStatusReadingString && memfileptr + 1 < &memfile[memsize] &&
+            memfileptr[0] == '/' && memfileptr[1] == '/')
         {
             while (memfileptr < &memfile[memsize] && *memfileptr != '\n')
                 memfileptr++;
 
-            if (memfileptr >= &memfile[memsize]) break;
+            if (memfileptr >= &memfile[memsize])
+                break;
         }
 
         char character = *memfileptr++;
@@ -780,8 +806,7 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
 
             // -AJA- 2000/03/21: determine linedata.  Ouch.
             for (l_len = 0;
-                 &memfileptr[l_len] < &memfile[memsize] &&
-                 memfileptr[l_len] != '\n' && memfileptr[l_len] != '\r';
+                 &memfileptr[l_len] < &memfile[memsize] && memfileptr[l_len] != '\n' && memfileptr[l_len] != '\r';
                  l_len++)
             {
             }
@@ -792,8 +817,7 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
             // This code is more hackitude -- to be fixed when the whole
             // parsing code gets the overhaul it needs.
 
-            if (epi::StringPrefixCaseCompareASCII(
-                    std::string_view(memfileptr, 9), "#CLEARALL") == 0)
+            if (epi::StringPrefixCaseCompareASCII(std::string_view(memfileptr, 9), "#CLEARALL") == 0)
             {
                 if (!firstgo)
                     DDF_Error("#CLEARALL cannot be used inside an entry !\n");
@@ -804,8 +828,7 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
                 continue;
             }
 
-            if (epi::StringPrefixCaseCompareASCII(
-                    std::string_view(memfileptr, 8), "#VERSION") == 0)
+            if (epi::StringPrefixCaseCompareASCII(std::string_view(memfileptr, 8), "#VERSION") == 0)
             {
                 // just ignore it
                 memfileptr += l_len;
@@ -817,172 +840,167 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
 
         switch (response)
         {
-            case kDDFReadCharReturnRemarkStart:
-                if (comment_level == 0)
-                {
-                    formerstatus = status;
-                    status       = kDDFReadStatusReadingRemark;
-                }
-                comment_level++;
-                break;
+        case kDDFReadCharReturnRemarkStart:
+            if (comment_level == 0)
+            {
+                formerstatus = status;
+                status       = kDDFReadStatusReadingRemark;
+            }
+            comment_level++;
+            break;
 
-            case kDDFReadCharReturnRemarkStop:
-                comment_level--;
-                if (comment_level == 0) { status = formerstatus; }
-                break;
+        case kDDFReadCharReturnRemarkStop:
+            comment_level--;
+            if (comment_level == 0)
+            {
+                status = formerstatus;
+            }
+            break;
 
-            case kDDFReadCharReturnCommand:
-                if (!token.empty())
-                    current_cmd = token.c_str();
-                else
-                    current_cmd.clear();
+        case kDDFReadCharReturnCommand:
+            if (!token.empty())
+                current_cmd = token.c_str();
+            else
+                current_cmd.clear();
 
-                EPI_ASSERT(current_index == 0);
+            EPI_ASSERT(current_index == 0);
 
-                token.clear();
-                status = kDDFReadStatusReadingData;
-                break;
+            token.clear();
+            status = kDDFReadStatusReadingData;
+            break;
 
-            case kDDFReadCharReturnTagStart:
-                status = kDDFReadStatusReadingTag;
-                break;
+        case kDDFReadCharReturnTagStart:
+            status = kDDFReadStatusReadingTag;
+            break;
 
-            case kDDFReadCharReturnTagStop:
-                if (epi::StringCaseCompareASCII(token, readinfo->tag) != 0)
-                    DDF_Error("Start tag <%s> expected, found <%s>!\n",
-                              readinfo->tag, token.c_str());
+        case kDDFReadCharReturnTagStop:
+            if (epi::StringCaseCompareASCII(token, readinfo->tag) != 0)
+                DDF_Error("Start tag <%s> expected, found <%s>!\n", readinfo->tag, token.c_str());
 
-                status = kDDFReadStatusWaitingNewDefinition;
-                token.clear();
-                break;
+            status = kDDFReadStatusWaitingNewDefinition;
+            token.clear();
+            break;
 
-            case kDDFReadCharReturnDefinitionStart:
-                if (bracket_level > 0)
-                    DDF_Error("Unclosed () brackets detected.\n");
+        case kDDFReadCharReturnDefinitionStart:
+            if (bracket_level > 0)
+                DDF_Error("Unclosed () brackets detected.\n");
 
-                entry_count++;
+            entry_count++;
 
-                if (firstgo)
-                {
-                    firstgo = false;
-                    status  = kDDFReadStatusReadingNewDefinition;
-                }
-                else
-                {
-                    cur_ddf_linedata.clear();
+            if (firstgo)
+            {
+                firstgo = false;
+                status  = kDDFReadStatusReadingNewDefinition;
+            }
+            else
+            {
+                cur_ddf_linedata.clear();
 
-                    // finish off previous entry
-                    (*readinfo->finish_entry)();
-
-                    token.clear();
-
-                    status = kDDFReadStatusReadingNewDefinition;
-
-                    cur_ddf_entryname.clear();
-                }
-                break;
-
-            case kDDFReadCharReturnDefinitionStop:
-                cur_ddf_entryname = epi::StringFormat("[%s]", token.c_str());
-
-                // -AJA- 2009/07/27: extend an existing entry
-                if (token[0] == '+' && token[1] == '+')
-                    (*readinfo->start_entry)(token.c_str() + 2, true);
-                else
-                    (*readinfo->start_entry)(token.c_str(), false);
+                // finish off previous entry
+                (*readinfo->finish_entry)();
 
                 token.clear();
-                status = kDDFReadStatusReadingCommand;
+
+                status = kDDFReadStatusReadingNewDefinition;
+
+                cur_ddf_entryname.clear();
+            }
+            break;
+
+        case kDDFReadCharReturnDefinitionStop:
+            cur_ddf_entryname = epi::StringFormat("[%s]", token.c_str());
+
+            // -AJA- 2009/07/27: extend an existing entry
+            if (token[0] == '+' && token[1] == '+')
+                (*readinfo->start_entry)(token.c_str() + 2, true);
+            else
+                (*readinfo->start_entry)(token.c_str(), false);
+
+            token.clear();
+            status = kDDFReadStatusReadingCommand;
+            break;
+
+            // -AJA- 2000/10/02: support for () brackets
+        case kDDFReadCharReturnGroupStart:
+            if (status == kDDFReadStatusReadingData || status == kDDFReadStatusReadingCommand)
+                bracket_level++;
+            break;
+
+        case kDDFReadCharReturnGroupStop:
+            if (status == kDDFReadStatusReadingData || status == kDDFReadStatusReadingCommand)
+            {
+                bracket_level--;
+                if (bracket_level < 0)
+                    DDF_Error("Unexpected `)' bracket.\n");
+            }
+            break;
+
+        case kDDFReadCharReturnSeparator:
+            if (bracket_level > 0)
+            {
+                token += (',');
                 break;
+            }
 
-                // -AJA- 2000/10/02: support for () brackets
-            case kDDFReadCharReturnGroupStart:
-                if (status == kDDFReadStatusReadingData ||
-                    status == kDDFReadStatusReadingCommand)
-                    bracket_level++;
-                break;
+            if (current_cmd.empty())
+                DDF_Error("Unexpected comma `,'.\n");
 
-            case kDDFReadCharReturnGroupStop:
-                if (status == kDDFReadStatusReadingData ||
-                    status == kDDFReadStatusReadingCommand)
-                {
-                    bracket_level--;
-                    if (bracket_level < 0)
-                        DDF_Error("Unexpected `)' bracket.\n");
-                }
-                break;
+            if (firstgo)
+                DDF_WarnError("Command %s used outside of any entry\n", current_cmd.c_str());
+            else
+            {
+                (*readinfo->parse_field)(current_cmd.c_str(), DDF_MainGetDefine(token.c_str()), current_index, false);
+                current_index++;
+            }
 
-            case kDDFReadCharReturnSeparator:
-                if (bracket_level > 0)
-                {
-                    token += (',');
-                    break;
-                }
+            token.clear();
+            break;
 
-                if (current_cmd.empty()) DDF_Error("Unexpected comma `,'.\n");
+            // -ACB- 1998/08/10 String Handling
+        case kDDFReadCharReturnStringStart:
+            status = kDDFReadStatusReadingString;
+            break;
 
-                if (firstgo)
-                    DDF_WarnError("Command %s used outside of any entry\n",
-                                  current_cmd.c_str());
-                else
-                {
-                    (*readinfo->parse_field)(current_cmd.c_str(),
-                                             DDF_MainGetDefine(token.c_str()),
-                                             current_index, false);
-                    current_index++;
-                }
+            // -ACB- 1998/08/10 String Handling
+        case kDDFReadCharReturnStringStop:
+            status = kDDFReadStatusReadingData;
+            break;
 
-                token.clear();
-                break;
+        case kDDFReadCharReturnTerminator:
+            if (current_cmd.empty())
+                DDF_Error("Unexpected semicolon `;'.\n");
 
-                // -ACB- 1998/08/10 String Handling
-            case kDDFReadCharReturnStringStart:
-                status = kDDFReadStatusReadingString;
-                break;
+            if (bracket_level > 0)
+                DDF_Error("Missing ')' bracket in ddf command.\n");
 
-                // -ACB- 1998/08/10 String Handling
-            case kDDFReadCharReturnStringStop:
-                status = kDDFReadStatusReadingData;
-                break;
+            (*readinfo->parse_field)(current_cmd.c_str(), DDF_MainGetDefine(token.c_str()), current_index, true);
+            current_index = 0;
 
-            case kDDFReadCharReturnTerminator:
-                if (current_cmd.empty())
-                    DDF_Error("Unexpected semicolon `;'.\n");
+            token.clear();
+            status = kDDFReadStatusReadingCommand;
+            break;
 
-                if (bracket_level > 0)
-                    DDF_Error("Missing ')' bracket in ddf command.\n");
+        case kDDFReadCharReturnProperty:
+            DDF_WarnError("Badly formed command: Unexpected semicolon `;'\n");
+            break;
 
-                (*readinfo->parse_field)(current_cmd.c_str(),
-                                         DDF_MainGetDefine(token.c_str()),
-                                         current_index, true);
-                current_index = 0;
+        case kDDFReadCharReturnNothing:
+            break;
 
-                token.clear();
-                status = kDDFReadStatusReadingCommand;
-                break;
-
-            case kDDFReadCharReturnProperty:
-                DDF_WarnError(
-                    "Badly formed command: Unexpected semicolon `;'\n");
-                break;
-
-            case kDDFReadCharReturnNothing:
-                break;
-
-            case kDDFReadCharReturnOK:
+        case kDDFReadCharReturnOK:
 #if (DEBUG_DDFREAD)
-                charcount++;
-                LogDebug("%c", character);
-                if (charcount == 75)
-                {
-                    charcount = 0;
-                    LogDebug("\n");
-                }
+            charcount++;
+            LogDebug("%c", character);
+            if (charcount == 75)
+            {
+                charcount = 0;
+                LogDebug("\n");
+            }
 #endif
-                break;
+            break;
 
-            default:
-                break;
+        default:
+            break;
         }
     }
 
@@ -990,9 +1008,11 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
     cur_ddf_linedata.clear();
 
     // -AJA- 1999/10/21: check for unclosed comments
-    if (comment_level > 0) DDF_Error("Unclosed comments detected.\n");
+    if (comment_level > 0)
+        DDF_Error("Unclosed comments detected.\n");
 
-    if (bracket_level > 0) DDF_Error("Unclosed () brackets detected.\n");
+    if (bracket_level > 0)
+        DDF_Error("Unclosed () brackets detected.\n");
 
     if (status == kDDFReadStatusReadingTag)
         DDF_Error("Unclosed <> brackets detected.\n");
@@ -1000,12 +1020,12 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
     if (status == kDDFReadStatusReadingNewDefinition)
         DDF_Error("Unclosed [] brackets detected.\n");
 
-    if (status == kDDFReadStatusReadingData ||
-        status == kDDFReadStatusReadingString)
+    if (status == kDDFReadStatusReadingData || status == kDDFReadStatusReadingString)
         DDF_WarnError("Unfinished DDF command on last line.\n");
 
     // if firstgo is true, nothing was defined
-    if (!firstgo) (*readinfo->finish_entry)();
+    if (!firstgo)
+        (*readinfo->finish_entry)();
 
     delete[] memfile;
 
@@ -1033,7 +1053,7 @@ void DDF_MainGetNumeric(const char *info, void *storage)
     }
 
     // -KM- 1999/01/29 strtol accepts hex and decimal.
-    *dest = strtol(info, nullptr, 0);  // straight conversion - no messin'
+    *dest = strtol(info, nullptr, 0); // straight conversion - no messin'
 }
 
 //
@@ -1049,15 +1069,13 @@ void DDF_MainGetBoolean(const char *info, void *storage)
 
     EPI_ASSERT(info && storage);
 
-    if ((epi::StringCaseCompareASCII(info, "TRUE") == 0) ||
-        (epi::StringCaseCompareASCII(info, "1") == 0))
+    if ((epi::StringCaseCompareASCII(info, "TRUE") == 0) || (epi::StringCaseCompareASCII(info, "1") == 0))
     {
         *dest = true;
         return;
     }
 
-    if ((epi::StringCaseCompareASCII(info, "FALSE") == 0) ||
-        (epi::StringCaseCompareASCII(info, "0") == 0))
+    if ((epi::StringCaseCompareASCII(info, "FALSE") == 0) || (epi::StringCaseCompareASCII(info, "0") == 0))
     {
         *dest = false;
         return;
@@ -1086,8 +1104,7 @@ void DDF_MainGetString(const char *info, void *storage)
 // Check if the command exists, and call the parser function if it
 // does (and return true), otherwise return false.
 //
-bool DDF_MainParseField(const DDFCommandList *commands, const char *field,
-                        const char *contents, uint8_t *obj_base)
+bool DDF_MainParseField(const DDFCommandList *commands, const char *field, const char *contents, uint8_t *obj_base)
 {
     EPI_ASSERT(obj_base);
 
@@ -1095,7 +1112,8 @@ bool DDF_MainParseField(const DDFCommandList *commands, const char *field,
     {
         const char *name = commands[i].name;
 
-        if (name[0] == '!') name++;
+        if (name[0] == '!')
+            name++;
 
         // handle subfields
         if (name[0] == '*')
@@ -1105,19 +1123,18 @@ bool DDF_MainParseField(const DDFCommandList *commands, const char *field,
             int len = strlen(name);
             EPI_ASSERT(len > 0);
 
-            if (strncmp(field, name, len) == 0 && field[len] == '.' &&
-                epi::IsAlphanumericASCII(field[len + 1]))
+            if (strncmp(field, name, len) == 0 && field[len] == '.' && epi::IsAlphanumericASCII(field[len + 1]))
             {
                 // recursively parse the sub-field
-                return DDF_MainParseField(commands[i].sub_comms,
-                                          field + len + 1, contents,
+                return DDF_MainParseField(commands[i].sub_comms, field + len + 1, contents,
                                           obj_base + commands[i].offset);
             }
 
             continue;
         }
 
-        if (DDF_CompareName(field, name) != 0) continue;
+        if (DDF_CompareName(field, name) != 0)
+            continue;
 
         // found it, so call parse routine
         EPI_ASSERT(commands[i].parse_command);
@@ -1139,10 +1156,9 @@ void DDF_MainGetLumpName(const char *info, void *storage)
     std::string *LN = (std::string *)storage;
 
     if (strlen(info) > 8)
-        DDF_Debug(
-            "Name %s too long for a lump; this is acceptable if referring to a "
-            "pack file or other special value.\n",
-            info);
+        DDF_Debug("Name %s too long for a lump; this is acceptable if referring to a "
+                  "pack file or other special value.\n",
+                  info);
 
     (*LN) = info;
 }
@@ -1154,7 +1170,8 @@ void DDF_MainRefAttack(const char *info, void *storage)
     EPI_ASSERT(info && storage);
 
     *dest = (AttackDefinition *)atkdefs.Lookup(info);
-    if (*dest == nullptr) DDF_WarnError("Unknown Attack: %s\n", info);
+    if (*dest == nullptr)
+        DDF_WarnError("Unknown Attack: %s\n", info);
 }
 
 int DDF_MainLookupDirector(const MapObjectDefinition *info, const char *ref)
@@ -1163,7 +1180,8 @@ int DDF_MainLookupDirector(const MapObjectDefinition *info, const char *ref)
 
     int len = p ? (p - ref) : strlen(ref);
 
-    if (len <= 0) DDF_Error("Bad Director `%s' : Nothing after divide\n", ref);
+    if (len <= 0)
+        DDF_Error("Bad Director `%s' : Nothing after divide\n", ref);
 
     std::string director(ref, len);
 
@@ -1200,7 +1218,8 @@ void DDF_MainGetAngle(const char *info, void *storage)
 
     float val;
 
-    if (sscanf(info, "%f", &val) != 1) DDF_Error("Bad angle value: %s\n", info);
+    if (sscanf(info, "%f", &val) != 1)
+        DDF_Error("Bad angle value: %s\n", info);
 
     *dest = epi::BAMFromDegrees(val);
 }
@@ -1212,10 +1231,13 @@ void DDF_MainGetSlope(const char *info, void *storage)
 
     EPI_ASSERT(info && storage);
 
-    if (sscanf(info, "%f", &val) != 1) DDF_Error("Bad slope value: %s\n", info);
+    if (sscanf(info, "%f", &val) != 1)
+        DDF_Error("Bad slope value: %s\n", info);
 
-    if (val > +89.5f) val = +89.5f;
-    if (val < -89.5f) val = -89.5f;
+    if (val > +89.5f)
+        val = +89.5f;
+    if (val < -89.5f)
+        val = -89.5f;
 
     *dest = tan(val * HMM_PI / 180.0);
 }
@@ -1251,9 +1273,7 @@ void DDF_MainGetPercent(const char *info, void *storage)
     // the number must be followed by %
     if (*p != '%')
     {
-        DDF_WarnError(
-            "Bad percent value '%s': Should be a number followed by %%\n",
-            info);
+        DDF_WarnError("Bad percent value '%s': Should be a number followed by %%\n", info);
         // -AJA- 2001/01/27: backwards compatibility
         DoGetFloat(s, &f);
         *dest = HMM_MAX(0, HMM_MIN(1, f));
@@ -1291,9 +1311,7 @@ void DDF_MainGetPercentAny(const char *info, void *storage)
     // the number must be followed by %
     if (*p != '%')
     {
-        DDF_WarnError(
-            "Bad percent value '%s': Should be a number followed by %%\n",
-            info);
+        DDF_WarnError("Bad percent value '%s': Should be a number followed by %%\n", info);
         // -AJA- 2001/01/27: backwards compatibility
         DoGetFloat(s, dest);
         return;
@@ -1319,7 +1337,7 @@ void DDF_MainGetTime(const char *info, void *storage)
     // -ES- 1999/09/14 MAXT means that time should be maximal.
     if (epi::StringCaseCompareASCII(info, "maxt") == 0)
     {
-        *dest = INT_MAX;  // -ACB- 1999/09/22 Standards, Please.
+        *dest = INT_MAX; // -ACB- 1999/09/22 Standards, Please.
         return;
     }
 
@@ -1329,7 +1347,8 @@ void DDF_MainGetTime(const char *info, void *storage)
         return;
     }
 
-    if (sscanf(info, "%f", &val) != 1) DDF_Error("Bad time value: %s\n", info);
+    if (sscanf(info, "%f", &val) != 1)
+        DDF_Error("Bad time value: %s\n", info);
 
     *dest = (int)(val * (float)kTicRate);
 }
@@ -1380,7 +1399,8 @@ void DDF_MainGetRGB(const char *info, void *storage)
     *result = epi::MakeRGBA((uint8_t)r, (uint8_t)g, (uint8_t)b);
 
     // silently change if matches the "none specified" value
-    if (*result == kRGBANoValue) *result ^= 0x00010100;
+    if (*result == kRGBANoValue)
+        *result ^= 0x00010100;
 }
 
 //
@@ -1408,9 +1428,8 @@ void DDF_MainGetWhenAppear(const char *info, void *storage)
 
     if (range)
     {
-        if (range <= info || range[+1] == 0 || range[-1] < '1' ||
-            range[-1] > '5' || range[+1] < '1' || range[+1] > '5' ||
-            range[-1] > range[+1])
+        if (range <= info || range[+1] == 0 || range[-1] < '1' || range[-1] > '5' || range[+1] < '1' ||
+            range[+1] > '5' || range[-1] > range[+1])
         {
             DDF_Error("Bad range in WHEN_APPEAR value: %s\n", info);
             return;
@@ -1418,8 +1437,7 @@ void DDF_MainGetWhenAppear(const char *info, void *storage)
 
         for (char sk = '1'; sk <= '5'; sk++)
             if (range[-1] <= sk && sk <= range[+1])
-                *result = (AppearsFlag)(*result | (kAppearsWhenSkillLevel1
-                                                   << (sk - '1')));
+                *result = (AppearsFlag)(*result | (kAppearsWhenSkillLevel1 << (sk - '1')));
     }
     else
     {
@@ -1451,8 +1469,7 @@ void DDF_MainGetWhenAppear(const char *info, void *storage)
     // allow more human readable strings...
 
     if (negate)
-        *result = (AppearsFlag)(*result ^
-                                (kAppearsWhenSkillBits | kAppearsWhenNetBits));
+        *result = (AppearsFlag)(*result ^ (kAppearsWhenSkillBits | kAppearsWhenNetBits));
 
     if ((*result & kAppearsWhenSkillBits) == 0)
         *result = (AppearsFlag)(*result | kAppearsWhenSkillBits);
@@ -1472,29 +1489,30 @@ void DDF_MainGetBitSet(const char *info, void *storage)
     EPI_ASSERT(info && storage);
 
     // allow a numeric value
-    if (sscanf(info, " %i ", result) == 1) return;
+    if (sscanf(info, " %i ", result) == 1)
+        return;
 
     *result = 0;
 
     for (; *info; info++)
     {
-        if (*info < 'A' || *info > 'Z') continue;
+        if (*info < 'A' || *info > 'Z')
+            continue;
 
         start = end = (*info) - 'A';
 
         // handle ranges
-        if (info[1] == '-' && 'A' <= info[2] && info[2] <= 'Z' &&
-            info[2] >= info[0])
+        if (info[1] == '-' && 'A' <= info[2] && info[2] <= 'Z' && info[2] >= info[0])
         {
             end = info[2] - 'A';
         }
 
-        for (; start <= end; start++) (*result) |= (1 << start);
+        for (; start <= end; start++)
+            (*result) |= (1 << start);
     }
 }
 
-static int FindSpecialFlag(const char *prefix, const char *name,
-                           const DDFSpecialFlags *flag_set)
+static int FindSpecialFlag(const char *prefix, const char *name, const DDFSpecialFlags *flag_set)
 {
     int  i;
     char try_name[512];
@@ -1503,21 +1521,20 @@ static int FindSpecialFlag(const char *prefix, const char *name,
     {
         const char *current = flag_set[i].name;
 
-        if (current[0] == '!') current++;
+        if (current[0] == '!')
+            current++;
 
         sprintf(try_name, "%s%s", prefix, current);
 
-        if (DDF_CompareName(name, try_name) == 0) return i;
+        if (DDF_CompareName(name, try_name) == 0)
+            return i;
     }
 
     return -1;
 }
 
-DDFCheckFlagResult DDF_MainCheckSpecialFlag(const char            *name,
-                                            const DDFSpecialFlags *flag_set,
-                                            int                   *flag_value,
-                                            bool allow_prefixes,
-                                            bool allow_user)
+DDFCheckFlagResult DDF_MainCheckSpecialFlag(const char *name, const DDFSpecialFlags *flag_set, int *flag_value,
+                                            bool allow_prefixes, bool allow_user)
 {
     int index;
     int negate = 0;
@@ -1529,7 +1546,10 @@ DDFCheckFlagResult DDF_MainCheckSpecialFlag(const char            *name,
     if (allow_prefixes)
     {
         // try name with ENABLE_ prefix...
-        if (index == -1) { index = FindSpecialFlag("ENABLE_", name, flag_set); }
+        if (index == -1)
+        {
+            index = FindSpecialFlag("ENABLE_", name, flag_set);
+        }
 
         // try name with NO_ prefix...
         if (index == -1)
@@ -1561,15 +1581,19 @@ DDFCheckFlagResult DDF_MainCheckSpecialFlag(const char            *name,
         }
     }
 
-    if (index < 0) return kDDFCheckFlagUnknown;
+    if (index < 0)
+        return kDDFCheckFlagUnknown;
 
     (*flag_value) = flag_set[index].flags;
 
-    if (flag_set[index].negative) negate = !negate;
+    if (flag_set[index].negative)
+        negate = !negate;
 
-    if (user) return kDDFCheckFlagUser;
+    if (user)
+        return kDDFCheckFlagUser;
 
-    if (negate) return kDDFCheckFlagNegative;
+    if (negate)
+        return kDDFCheckFlagNegative;
 
     return kDDFCheckFlagPositive;
 }
@@ -1582,22 +1606,23 @@ DDFCheckFlagResult DDF_MainCheckSpecialFlag(const char            *name,
 // to be non-empty, though the inside can be empty.  Returns false if
 // cannot be parsed (e.g. no brackets).  Handles strings.
 //
-bool DDF_MainDecodeBrackets(const char *info, char *outer, char *inner,
-                            int buf_len)
+bool DDF_MainDecodeBrackets(const char *info, char *outer, char *inner, int buf_len)
 {
     const char *pos = info;
 
-    while (*pos && *pos != '(') pos++;
+    while (*pos && *pos != '(')
+        pos++;
 
-    if (*pos == 0 || pos == info) return false;
+    if (*pos == 0 || pos == info)
+        return false;
 
-    if (pos - info >= buf_len)  // overflow
+    if (pos - info >= buf_len) // overflow
         return false;
 
     strncpy(outer, info, pos - info);
     outer[pos - info] = 0;
 
-    pos++;  // skip the '('
+    pos++; // skip the '('
 
     info = pos;
 
@@ -1612,14 +1637,16 @@ bool DDF_MainDecodeBrackets(const char *info, char *outer, char *inner,
             continue;
         }
 
-        if (*pos == '"') in_string = !in_string;
+        if (*pos == '"')
+            in_string = !in_string;
 
         pos++;
     }
 
-    if (*pos == 0) return false;
+    if (*pos == 0)
+        return false;
 
-    if (pos - info >= buf_len)  // overflow
+    if (pos - info >= buf_len) // overflow
         return false;
 
     strncpy(inner, info, pos - info);
@@ -1643,9 +1670,11 @@ const char *DDF_MainDecodeList(const char *info, char divider, bool simple)
 
     for (;;)
     {
-        if (*pos == 0) break;
+        if (*pos == 0)
+            break;
 
-        if (brackets == 0 && !in_string && *pos == divider) return pos;
+        if (brackets == 0 && !in_string && *pos == divider)
+            return pos;
 
         // handle escaped quotes
         if (!simple)
@@ -1656,23 +1685,28 @@ const char *DDF_MainDecodeList(const char *info, char divider, bool simple)
                 continue;
             }
 
-            if (*pos == '"') in_string = !in_string;
+            if (*pos == '"')
+                in_string = !in_string;
 
-            if (!in_string && *pos == '(') brackets++;
+            if (!in_string && *pos == '(')
+                brackets++;
 
             if (!in_string && *pos == ')')
             {
                 brackets--;
-                if (brackets < 0) DDF_Error("Too many ')' found: %s\n", info);
+                if (brackets < 0)
+                    DDF_Error("Too many ')' found: %s\n", info);
             }
         }
 
         pos++;
     }
 
-    if (in_string) DDF_Error("Unterminated string found: %s\n", info);
+    if (in_string)
+        DDF_Error("Unterminated string found: %s\n", info);
 
-    if (brackets != 0) DDF_Error("Unclosed brackets found: %s\n", info);
+    if (brackets != 0)
+        DDF_Error("Unclosed brackets found: %s\n", info);
 
     return nullptr;
 }
@@ -1683,7 +1717,8 @@ const char *DDF_MainDecodeList(const char *info, char divider, bool simple)
 
 const MapObjectDefinition *MobjStringReference::GetRef()
 {
-    if (def_) return def_;
+    if (def_)
+        return def_;
 
     def_ = mobjtypes.Lookup(name_.c_str());
 
@@ -1695,17 +1730,24 @@ const MapObjectDefinition *MobjStringReference::GetRef()
 //
 // DamageClass Constructor
 //
-DamageClass::DamageClass() {}
+DamageClass::DamageClass()
+{
+}
 
 //
 // DamageClass Copy constructor
 //
-DamageClass::DamageClass(DamageClass &rhs) { Copy(rhs); }
+DamageClass::DamageClass(DamageClass &rhs)
+{
+    Copy(rhs);
+}
 
 //
 // DamageClass Destructor
 //
-DamageClass::~DamageClass() {}
+DamageClass::~DamageClass()
+{
+}
 
 //
 // DamageClass::Copy
@@ -1750,59 +1792,56 @@ void DamageClass::Default(DamageClassDefault def)
 
     switch (def)
     {
-        case kDamageClassDefaultMobjChoke:
-        {
-            nominal_             = 6.0f;
-            linear_max_          = 14.0f;
-            error_               = -1.0f;
-            delay_               = 2 * kTicRate;
-            obituary_            = "OB_DROWN";
-            no_armour_           = true;
-            bypass_all_          = false;
-            instakill_           = false;
-            damage_unless_       = nullptr;
-            damage_if_           = nullptr;
-            grounded_monsters_   = false;
-            damage_flash_colour_ = SG_RED_RGBA32;
-            all_players_         = false;
-            break;
-        }
+    case kDamageClassDefaultMobjChoke: {
+        nominal_             = 6.0f;
+        linear_max_          = 14.0f;
+        error_               = -1.0f;
+        delay_               = 2 * kTicRate;
+        obituary_            = "OB_DROWN";
+        no_armour_           = true;
+        bypass_all_          = false;
+        instakill_           = false;
+        damage_unless_       = nullptr;
+        damage_if_           = nullptr;
+        grounded_monsters_   = false;
+        damage_flash_colour_ = SG_RED_RGBA32;
+        all_players_         = false;
+        break;
+    }
 
-        case kDamageClassDefaultSector:
-        {
-            nominal_             = 0.0f;
-            linear_max_          = -1.0f;
-            error_               = -1.0f;
-            delay_               = 31;
-            no_armour_           = false;
-            bypass_all_          = false;
-            instakill_           = false;
-            damage_unless_       = nullptr;
-            damage_if_           = nullptr;
-            grounded_monsters_   = false;
-            damage_flash_colour_ = SG_RED_RGBA32;
-            all_players_         = false;
-            break;
-        }
+    case kDamageClassDefaultSector: {
+        nominal_             = 0.0f;
+        linear_max_          = -1.0f;
+        error_               = -1.0f;
+        delay_               = 31;
+        no_armour_           = false;
+        bypass_all_          = false;
+        instakill_           = false;
+        damage_unless_       = nullptr;
+        damage_if_           = nullptr;
+        grounded_monsters_   = false;
+        damage_flash_colour_ = SG_RED_RGBA32;
+        all_players_         = false;
+        break;
+    }
 
-        case kDamageClassDefaultAttack:
-        case kDamageClassDefaultMobj:
-        default:
-        {
-            nominal_             = 0.0f;
-            linear_max_          = -1.0f;
-            error_               = -1.0f;
-            delay_               = 0;
-            no_armour_           = false;
-            bypass_all_          = false;
-            instakill_           = false;
-            damage_unless_       = nullptr;
-            damage_if_           = nullptr;
-            grounded_monsters_   = false;
-            damage_flash_colour_ = SG_RED_RGBA32;
-            all_players_         = false;
-            break;
-        }
+    case kDamageClassDefaultAttack:
+    case kDamageClassDefaultMobj:
+    default: {
+        nominal_             = 0.0f;
+        linear_max_          = -1.0f;
+        error_               = -1.0f;
+        delay_               = 0;
+        no_armour_           = false;
+        bypass_all_          = false;
+        instakill_           = false;
+        damage_unless_       = nullptr;
+        damage_if_           = nullptr;
+        grounded_monsters_   = false;
+        damage_flash_colour_ = SG_RED_RGBA32;
+        all_players_         = false;
+        break;
+    }
     }
 
     pain_.Default();
@@ -1815,7 +1854,8 @@ void DamageClass::Default(DamageClassDefault def)
 //
 DamageClass &DamageClass::operator=(DamageClass &rhs)
 {
-    if (&rhs != this) Copy(rhs);
+    if (&rhs != this)
+        Copy(rhs);
 
     return *this;
 }
@@ -1825,17 +1865,25 @@ DamageClass &DamageClass::operator=(DamageClass &rhs)
 //
 // LabelOffset Constructor
 //
-LabelOffset::LabelOffset() { offset_ = 0; }
+LabelOffset::LabelOffset()
+{
+    offset_ = 0;
+}
 
 //
 // LabelOffset Copy constructor
 //
-LabelOffset::LabelOffset(LabelOffset &rhs) { Copy(rhs); }
+LabelOffset::LabelOffset(LabelOffset &rhs)
+{
+    Copy(rhs);
+}
 
 //
 // LabelOffset Destructor
 //
-LabelOffset::~LabelOffset() {}
+LabelOffset::~LabelOffset()
+{
+}
 
 //
 // LabelOffset::Copy
@@ -1860,14 +1908,18 @@ void LabelOffset::Default()
 //
 LabelOffset &LabelOffset::operator=(LabelOffset &rhs)
 {
-    if (&rhs != this) Copy(rhs);
+    if (&rhs != this)
+        Copy(rhs);
 
     return *this;
 }
 
 // ---> dlight_info class
 
-DynamicLightDefinition::DynamicLightDefinition() { Default(); }
+DynamicLightDefinition::DynamicLightDefinition()
+{
+    Default();
+}
 
 DynamicLightDefinition::DynamicLightDefinition(DynamicLightDefinition &rhs)
 {
@@ -1898,10 +1950,10 @@ void DynamicLightDefinition::Default()
     cache_data_ = nullptr;
 }
 
-DynamicLightDefinition &DynamicLightDefinition::operator=(
-    DynamicLightDefinition &rhs)
+DynamicLightDefinition &DynamicLightDefinition::operator=(DynamicLightDefinition &rhs)
 {
-    if (this == &rhs) return *this;
+    if (this == &rhs)
+        return *this;
 
     Copy(rhs);
 
@@ -1910,9 +1962,15 @@ DynamicLightDefinition &DynamicLightDefinition::operator=(
 
 // ---> weakness_info class
 
-WeaknessDefinition::WeaknessDefinition() { Default(); }
+WeaknessDefinition::WeaknessDefinition()
+{
+    Default();
+}
 
-WeaknessDefinition::WeaknessDefinition(WeaknessDefinition &rhs) { Copy(rhs); }
+WeaknessDefinition::WeaknessDefinition(WeaknessDefinition &rhs)
+{
+    Copy(rhs);
+}
 
 void WeaknessDefinition::Copy(WeaknessDefinition &src)
 {
@@ -1936,12 +1994,13 @@ void WeaknessDefinition::Default()
 
     classes_    = 0;
     multiply_   = 2.5;
-    painchance_ = -1;  // disabled
+    painchance_ = -1; // disabled
 }
 
 WeaknessDefinition &WeaknessDefinition::operator=(WeaknessDefinition &rhs)
 {
-    if (this == &rhs) return *this;
+    if (this == &rhs)
+        return *this;
 
     Copy(rhs);
 
@@ -1963,31 +2022,28 @@ struct ddf_reader_t
 
 // -KM- 1999/01/31 Order is important, Languages are loaded before sfx, etc...
 static ddf_reader_t ddf_readers[kTotalDDFTypes] = {
-    { kDDFTypeLanguage, "DDFLANG", "language.ldf", "Languages", DDF_ReadLangs },
-    { kDDFTypeSFX, "DDFSFX", "sounds.ddf", "Sounds", DDF_ReadSFX },
-    { kDDFTypeColourMap, "DDFCOLM", "colmap.ddf", "ColourMaps",
-      DDF_ReadColourMaps },
-    { kDDFTypeImage, "DDFIMAGE", "images.ddf", "Images", DDF_ReadImages },
-    { kDDFTypeFont, "DDFFONT", "fonts.ddf", "Fonts", DDF_ReadFonts },
-    { kDDFTypeStyle, "DDFSTYLE", "styles.ddf", "Styles", DDF_ReadStyles },
-    { kDDFTypeAttack, "DDFATK", "attacks.ddf", "Attacks", DDF_ReadAtks },
-    { kDDFTypeWeapon, "DDFWEAP", "weapons.ddf", "Weapons", DDF_ReadWeapons },
-    { kDDFTypeThing, "DDFTHING", "things.ddf", "Things", DDF_ReadThings },
+    {kDDFTypeLanguage, "DDFLANG", "language.ldf", "Languages", DDF_ReadLangs},
+    {kDDFTypeSFX, "DDFSFX", "sounds.ddf", "Sounds", DDF_ReadSFX},
+    {kDDFTypeColourMap, "DDFCOLM", "colmap.ddf", "ColourMaps", DDF_ReadColourMaps},
+    {kDDFTypeImage, "DDFIMAGE", "images.ddf", "Images", DDF_ReadImages},
+    {kDDFTypeFont, "DDFFONT", "fonts.ddf", "Fonts", DDF_ReadFonts},
+    {kDDFTypeStyle, "DDFSTYLE", "styles.ddf", "Styles", DDF_ReadStyles},
+    {kDDFTypeAttack, "DDFATK", "attacks.ddf", "Attacks", DDF_ReadAtks},
+    {kDDFTypeWeapon, "DDFWEAP", "weapons.ddf", "Weapons", DDF_ReadWeapons},
+    {kDDFTypeThing, "DDFTHING", "things.ddf", "Things", DDF_ReadThings},
 
-    { kDDFTypePlaylist, "DDFPLAY", "playlist.ddf", "Playlists",
-      DDF_ReadMusicPlaylist },
-    { kDDFTypeLine, "DDFLINE", "lines.ddf", "Lines", DDF_ReadLines },
-    { kDDFTypeSector, "DDFSECT", "sectors.ddf", "Sectors", DDF_ReadSectors },
-    { kDDFTypeSwitch, "DDFSWTH", "switch.ddf", "Switches", DDF_ReadSwitch },
-    { kDDFTypeAnim, "DDFANIM", "anims.ddf", "Anims", DDF_ReadAnims },
-    { kDDFTypeGame, "DDFGAME", "games.ddf", "Games", DDF_ReadGames },
-    { kDDFTypeLevel, "DDFLEVL", "levels.ddf", "Levels", DDF_ReadLevels },
-    { kDDFTypeFlat, "DDFFLAT", "flats.ddf", "Flats", DDF_ReadFlat },
-    { kDDFTypeMovie, "DDFMOVIE", "movies.ddf", "Movies", DDF_ReadMovies },
+    {kDDFTypePlaylist, "DDFPLAY", "playlist.ddf", "Playlists", DDF_ReadMusicPlaylist},
+    {kDDFTypeLine, "DDFLINE", "lines.ddf", "Lines", DDF_ReadLines},
+    {kDDFTypeSector, "DDFSECT", "sectors.ddf", "Sectors", DDF_ReadSectors},
+    {kDDFTypeSwitch, "DDFSWTH", "switch.ddf", "Switches", DDF_ReadSwitch},
+    {kDDFTypeAnim, "DDFANIM", "anims.ddf", "Anims", DDF_ReadAnims},
+    {kDDFTypeGame, "DDFGAME", "games.ddf", "Games", DDF_ReadGames},
+    {kDDFTypeLevel, "DDFLEVL", "levels.ddf", "Levels", DDF_ReadLevels},
+    {kDDFTypeFlat, "DDFFLAT", "flats.ddf", "Flats", DDF_ReadFlat},
+    {kDDFTypeMovie, "DDFMOVIE", "movies.ddf", "Movies", DDF_ReadMovies},
 
     // RTS scripts are handled differently
-    { kDDFTypeRadScript, "RSCRIPT", "rscript.rts", "RadTrig", nullptr }
-};
+    {kDDFTypeRadScript, "RSCRIPT", "rscript.rts", "RadTrig", nullptr}};
 
 DDFType DDF_LumpToType(const std::string &name)
 {
@@ -1995,7 +2051,8 @@ DDFType DDF_LumpToType(const std::string &name)
     epi::StringUpperASCII(up_name);
 
     for (size_t i = 0; i < kTotalDDFTypes; i++)
-        if (up_name == ddf_readers[i].lump_name) return ddf_readers[i].type;
+        if (up_name == ddf_readers[i].lump_name)
+            return ddf_readers[i].type;
 
     return kDDFTypeUNKNOWN;
 }
@@ -2021,7 +2078,7 @@ DDFType DDF_FilenameToType(const std::string &path)
 
 void DDF_AddFile(DDFType type, std::string &data, const std::string &source)
 {
-    unread_ddf.push_back({ type, source, "" });
+    unread_ddf.push_back({type, source, ""});
 
     // transfer the caller's data
     unread_ddf.back().data.swap(data);
@@ -2029,7 +2086,8 @@ void DDF_AddFile(DDFType type, std::string &data, const std::string &source)
 
 void DDF_AddCollection(std::vector<DDFFile> &col, const std::string &source)
 {
-    for (DDFFile &it : col) DDF_AddFile(it.type, it.data, source);
+    for (DDFFile &it : col)
+        DDF_AddFile(it.type, it.data, source);
 }
 
 void DDF_DumpFile(const std::string &data)
@@ -2053,12 +2111,14 @@ void DDF_DumpFile(const std::string &data)
         }
     }
 
-    if (line.size() > 0) LogDebug("%s", line.c_str());
+    if (line.size() > 0)
+        LogDebug("%s", line.c_str());
 }
 
 void DDF_DumpCollection(const std::vector<DDFFile> &col)
 {
-    for (const DDFFile &it : col) DDF_DumpFile(it.data);
+    for (const DDFFile &it : col)
+        DDF_DumpFile(it.data);
 }
 
 static void DDF_ParseUnreadFile(size_t d)
@@ -2067,8 +2127,7 @@ static void DDF_ParseUnreadFile(size_t d)
     {
         if (it.type == ddf_readers[d].type)
         {
-            LogPrint("Parsing %s from: %s\n", ddf_readers[d].lump_name,
-                     it.source.c_str());
+            LogPrint("Parsing %s from: %s\n", ddf_readers[d].lump_name, it.source.c_str());
 
             if (it.type == kDDFTypeRadScript)
             {
@@ -2093,7 +2152,8 @@ void DDF_ParseEverything()
     //       sense to load all lumps of a certain type together, for example
     //       all DDFSFX lumps before all the DDFTHING lumps.
 
-    for (size_t d = 0; d < kTotalDDFTypes; d++) DDF_ParseUnreadFile(d);
+    for (size_t d = 0; d < kTotalDDFTypes; d++)
+        DDF_ParseUnreadFile(d);
 }
 
 //--- editor settings ---

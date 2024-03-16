@@ -43,7 +43,10 @@ bool has_error_msg = false;
 //
 // System_Startup
 //
-void System_Startup(void) { has_error_msg = false; }
+void System_Startup(void)
+{
+    has_error_msg = false;
+}
 
 /* -------- text output code ----------------------------- */
 
@@ -60,11 +63,12 @@ void SetErrorMsg(const char *str, ...)
 
 const char *GetErrorMsg(void)
 {
-    if (!has_error_msg) return "";
+    if (!has_error_msg)
+        return "";
 
     has_error_msg = false;
 
     return global_error_buf;
 }
 
-}  // namespace dehacked
+} // namespace dehacked

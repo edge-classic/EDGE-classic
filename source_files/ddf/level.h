@@ -25,15 +25,15 @@ class GameDefinition;
 
 class FinaleDefinition
 {
-   public:
+  public:
     FinaleDefinition();
     FinaleDefinition(FinaleDefinition &rhs);
     ~FinaleDefinition();
 
-   private:
+  private:
     void Copy(FinaleDefinition &src);
 
-   public:
+  public:
     void              Default(void);
     FinaleDefinition &operator=(FinaleDefinition &rhs);
 
@@ -69,19 +69,19 @@ enum MapFlag
     kMapFlagMlook        = (1 << 1),
     kMapFlagCheats       = (1 << 2),
     kMapFlagItemRespawn  = (1 << 3),
-    kMapFlagFastParm     = (1 << 4),  // Fast Monsters
-    kMapFlagResRespawn   = (1 << 5),  // Resurrect Monsters (else Teleport)
-    kMapFlagTrue3D       = (1 << 6),  // True 3D Gameplay
-    kMapFlagStomp        = (1 << 7),  // Monsters can stomp players
-    kMapFlagMoreBlood    = (1 << 8),  // Make a bloody mess
+    kMapFlagFastParm     = (1 << 4), // Fast Monsters
+    kMapFlagResRespawn   = (1 << 5), // Resurrect Monsters (else Teleport)
+    kMapFlagTrue3D       = (1 << 6), // True 3D Gameplay
+    kMapFlagStomp        = (1 << 7), // Monsters can stomp players
+    kMapFlagMoreBlood    = (1 << 8), // Make a bloody mess
     kMapFlagRespawn      = (1 << 9),
     kMapFlagAutoAim      = (1 << 10),
     kMapFlagAutoAimMlook = (1 << 11),
-    kMapFlagResetPlayer  = (1 << 12),  // Force player back to square #1
+    kMapFlagResetPlayer  = (1 << 12), // Force player back to square #1
     kMapFlagExtras       = (1 << 13),
-    kMapFlagLimitZoom    = (1 << 14),  // Limit zoom to certain weapons
+    kMapFlagLimitZoom    = (1 << 14), // Limit zoom to certain weapons
     kMapFlagCrouching    = (1 << 15),
-    kMapFlagKicking      = (1 << 16),  // Weapon recoil
+    kMapFlagKicking      = (1 << 16), // Weapon recoil
     kMapFlagWeaponSwitch = (1 << 17),
     kMapFlagPassMissile  = (1 << 18),
     kMapFlagTeamDamage   = (1 << 19),
@@ -106,11 +106,11 @@ enum IntermissionStyle
 
 class MapDefinition
 {
-   public:
+  public:
     MapDefinition();
     ~MapDefinition();
 
-   public:
+  public:
     void Default(void);
     void CopyDetail(MapDefinition &src);
 
@@ -131,7 +131,7 @@ class MapDefinition
 
     int partime_;
 
-    GameDefinition *episode_;  // set during DDF_CleanUp
+    GameDefinition *episode_; // set during DDF_CleanUp
     std::string     episode_name_;
 
     // flags come in two flavours: "force on" and "force off".  When not
@@ -169,9 +169,12 @@ class MapDefinition
     RGBAColor outdoor_fog_color_;
     float     outdoor_fog_density_;
 
-   private:
+  private:
     // disable copy construct and assignment operator
-    explicit MapDefinition(MapDefinition &rhs) { (void)rhs; }
+    explicit MapDefinition(MapDefinition &rhs)
+    {
+        (void)rhs;
+    }
     MapDefinition &operator=(MapDefinition &rhs)
     {
         (void)rhs;
@@ -181,13 +184,13 @@ class MapDefinition
 
 class MapDefinitionContainer : public std::vector<MapDefinition *>
 {
-   public:
-    MapDefinitionContainer() {}
+  public:
+    MapDefinitionContainer()
+    {
+    }
     ~MapDefinitionContainer()
     {
-        for (std::vector<MapDefinition *>::iterator iter     = begin(),
-                                                    iter_end = end();
-             iter != iter_end; iter++)
+        for (std::vector<MapDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
         {
             MapDefinition *map = *iter;
             delete map;
@@ -195,11 +198,11 @@ class MapDefinitionContainer : public std::vector<MapDefinition *>
         }
     }
 
-   public:
+  public:
     MapDefinition *Lookup(const char *name);
 };
 
-extern MapDefinitionContainer mapdefs;  // -ACB- 2004/06/29 Implemented
+extern MapDefinitionContainer mapdefs; // -ACB- 2004/06/29 Implemented
 
 void DDF_ReadLevels(const std::string &data);
 

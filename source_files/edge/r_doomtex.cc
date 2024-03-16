@@ -65,30 +65,24 @@ struct TexturePost
     uint8_t top_delta;
 
     // length data bytes follows
-    uint8_t length;  // length data bytes follows
+    uint8_t length; // length data bytes follows
 };
 
 // Dummy image, for when texture/flat/graphic is unknown.  Row major
 // order.  Could be packed, but why bother ?
 static constexpr uint8_t dummy_graphic[kDummyImageSize * kDummyImageSize] = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
-    1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
-    0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
-    0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+    0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 //
 //  UTILITY
 //
-static void DrawColumnIntoEpiBlock(Image *rim, ImageData *img,
-                                   const TexturePost *patchcol, int x, int y)
+static void DrawColumnIntoEpiBlock(Image *rim, ImageData *img, const TexturePost *patchcol, int x, int y)
 {
     EPI_ASSERT(patchcol);
 
@@ -97,7 +91,8 @@ static void DrawColumnIntoEpiBlock(Image *rim, ImageData *img,
     int w2 = rim->total_width_;
 
     // clip horizontally
-    if (x < 0 || x >= w1) return;
+    if (x < 0 || x >= w1)
+        return;
 
     int top = -1;
 
@@ -110,14 +105,21 @@ static void DrawColumnIntoEpiBlock(Image *rim, ImageData *img,
         uint8_t       *dest = img->pixels_ + x;
 
         // logic for DeePsea's tall patches
-        if (delta <= top) { top += delta; }
-        else { top = delta; }
+        if (delta <= top)
+        {
+            top += delta;
+        }
+        else
+        {
+            top = delta;
+        }
 
         for (int i = 0; i < count; i++, src++)
         {
             int y2 = y + top + i;
 
-            if (y2 < 0 || y2 >= h1) continue;
+            if (y2 < 0 || y2 >= h1)
+                continue;
 
             if (*src == kTransparentPixelIndex)
                 dest[(h1 - 1 - y2) * w2] = playpal_black;
@@ -126,8 +128,7 @@ static void DrawColumnIntoEpiBlock(Image *rim, ImageData *img,
         }
 
         // jump to next column
-        patchcol = (const TexturePost *)((const uint8_t *)patchcol +
-                                         patchcol->length + 4);
+        patchcol = (const TexturePost *)((const uint8_t *)patchcol + patchcol->length + 4);
     }
 }
 
@@ -145,8 +146,7 @@ static void DrawColumnIntoEpiBlock(Image *rim, ImageData *img,
 //
 static ImageData *ReadFlatAsEpiBlock(Image *rim)
 {
-    EPI_ASSERT(rim->source_type_ == kImageSourceFlat ||
-               rim->source_type_ == kImageSourceRawBlock);
+    EPI_ASSERT(rim->source_type_ == kImageSourceFlat || rim->source_type_ == kImageSourceRawBlock);
 
     int tw = HMM_MAX(rim->total_width_, 1);
     int th = HMM_MAX(rim->total_height_, 1);
@@ -162,8 +162,7 @@ static ImageData *ReadFlatAsEpiBlock(Image *rim)
     img->Clear(playpal_black);
 
     // read in pixels
-    const uint8_t *src =
-        (const uint8_t *)LoadLumpIntoMemory(rim->source_.flat.lump);
+    const uint8_t *src = (const uint8_t *)LoadLumpIntoMemory(rim->source_.flat.lump);
 
     for (int y = 0; y < h; y++)
         for (int x = 0; x < w; x++)
@@ -229,8 +228,7 @@ static ImageData *ReadTextureAsEpiBlock(Image *rim)
     // Composite the columns into the block.
     for (i = 0, patch = tdef->patches; i < tdef->patch_count; i++, patch++)
     {
-        const Patch *realpatch =
-            (const Patch *)LoadLumpIntoMemory(patch->patch);
+        const Patch *realpatch = (const Patch *)LoadLumpIntoMemory(patch->patch);
 
         int realsize = GetLumpLength(patch->patch);
 
@@ -244,15 +242,12 @@ static ImageData *ReadTextureAsEpiBlock(Image *rim)
 
         for (; x < x2; x++)
         {
-            int offset =
-                AlignedLittleEndianS32(realpatch->column_offset[x - x1]);
+            int offset = AlignedLittleEndianS32(realpatch->column_offset[x - x1]);
 
             if (offset < 0 || offset >= realsize)
-                FatalError("Bad image offset 0x%08x in image [%s]\n", offset,
-                           rim->name_.c_str());
+                FatalError("Bad image offset 0x%08x in image [%s]\n", offset, rim->name_.c_str());
 
-            const TexturePost *patchcol =
-                (const TexturePost *)((const uint8_t *)realpatch + offset);
+            const TexturePost *patchcol = (const TexturePost *)((const uint8_t *)realpatch + offset);
 
             DrawColumnIntoEpiBlock(rim, img, patchcol, x, y1);
         }
@@ -280,8 +275,7 @@ static ImageData *ReadTextureAsEpiBlock(Image *rim)
 //
 static ImageData *ReadPatchAsEpiBlock(Image *rim)
 {
-    EPI_ASSERT(rim->source_type_ == kImageSourceGraphic ||
-               rim->source_type_ == kImageSourceSprite ||
+    EPI_ASSERT(rim->source_type_ == kImageSourceGraphic || rim->source_type_ == kImageSourceSprite ||
                rim->source_type_ == kImageSourceTxHi);
 
     int         lump          = rim->source_.graphic.lump;
@@ -303,9 +297,7 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
         delete f;
 
         if (!img)
-            FatalError(
-                "Error loading image in lump: %s\n",
-                packfile_name ? packfile_name : GetLumpNameFromIndex(lump));
+            FatalError("Error loading image in lump: %s\n", packfile_name ? packfile_name : GetLumpNameFromIndex(lump));
 
         return img;
     }
@@ -340,8 +332,7 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
             realsize  = f->GetLength();
         }
         else
-            FatalError("ReadPatchAsEpiBlock: Failed to load %s!\n",
-                       packfile_name);
+            FatalError("ReadPatchAsEpiBlock: Failed to load %s!\n", packfile_name);
         delete f;
     }
     else
@@ -352,8 +343,7 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
 
     EPI_ASSERT(realpatch);
     EPI_ASSERT(rim->actual_width_ == AlignedLittleEndianS16(realpatch->width));
-    EPI_ASSERT(rim->actual_height_ ==
-               AlignedLittleEndianS16(realpatch->height));
+    EPI_ASSERT(rim->actual_height_ == AlignedLittleEndianS16(realpatch->height));
 
     // 2023.11.07 - These were previously left as total_w/h, which accounts
     // for power-of-two sizing and was messing up patch font atlas generation.
@@ -366,11 +356,9 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
         int offset = AlignedLittleEndianS32(realpatch->column_offset[x]);
 
         if (offset < 0 || offset >= realsize)
-            FatalError("Bad image offset 0x%08x in image [%s]\n", offset,
-                       rim->name_.c_str());
+            FatalError("Bad image offset 0x%08x in image [%s]\n", offset, rim->name_.c_str());
 
-        const TexturePost *patchcol =
-            (const TexturePost *)((const uint8_t *)realpatch + offset);
+        const TexturePost *patchcol = (const TexturePost *)((const uint8_t *)realpatch + offset);
 
         DrawColumnIntoEpiBlock(rim, img, patchcol, x, 0);
     }
@@ -451,28 +439,25 @@ epi::File *OpenUserFileOrLump(ImageDefinition *def)
 {
     switch (def->type_)
     {
-        case kImageDataFile:
-        {
-            // -AJA- 2005/01/15: filenames in DDF relative to APPDIR
-            std::string data_file = epi::PathAppendIfNotAbsolute(
-                game_directory.c_str(), def->info_.c_str());
-            return epi::FileOpen(data_file,
-                                 epi::kFileAccessRead | epi::kFileAccessBinary);
-        }
+    case kImageDataFile: {
+        // -AJA- 2005/01/15: filenames in DDF relative to APPDIR
+        std::string data_file = epi::PathAppendIfNotAbsolute(game_directory.c_str(), def->info_.c_str());
+        return epi::FileOpen(data_file, epi::kFileAccessRead | epi::kFileAccessBinary);
+    }
 
-        case kImageDataPackage:
-            return OpenFileFromPack(def->info_);
+    case kImageDataPackage:
+        return OpenFileFromPack(def->info_);
 
-        case kImageDataLump:
-        {
-            int lump = CheckLumpNumberForName(def->info_.c_str());
-            if (lump < 0) return nullptr;
-
-            return LoadLumpAsFile(lump);
-        }
-
-        default:
+    case kImageDataLump: {
+        int lump = CheckLumpNumberForName(def->info_.c_str());
+        if (lump < 0)
             return nullptr;
+
+        return LoadLumpAsFile(lump);
+    }
+
+    default:
+        return nullptr;
     }
 }
 
@@ -480,7 +465,8 @@ static ImageData *CreateUserFileImage(Image *rim, ImageDefinition *def)
 {
     epi::File *f = OpenUserFileOrLump(def);
 
-    if (!f) FatalError("Missing image file: %s\n", def->info_.c_str());
+    if (!f)
+        FatalError("Missing image file: %s\n", def->info_.c_str());
 
     ImageData *img = ImageLoad(f);
 
@@ -488,14 +474,15 @@ static ImageData *CreateUserFileImage(Image *rim, ImageDefinition *def)
     delete f;
 
     if (!img)
-        FatalError("Error occurred loading image file: %s\n",
-                   def->info_.c_str());
+        FatalError("Error occurred loading image file: %s\n", def->info_.c_str());
 
     rim->opacity_ = DetermineOpacity(img, &rim->is_empty_);
 
-    if (def->is_font_) return img;
+    if (def->is_font_)
+        return img;
 
-    if (def->fix_trans_ == kTransparencyFixBlacken) BlackenClearAreas(img);
+    if (def->fix_trans_ == kTransparencyFixBlacken)
+        BlackenClearAreas(img);
 
     EPI_ASSERT(rim->total_width_ == img->width_);
     EPI_ASSERT(rim->total_height_ == img->height_);
@@ -528,17 +515,16 @@ static ImageData *ReadUserAsEpiBlock(Image *rim)
 
     switch (def->type_)
     {
-        case kImageDataColor:
-            return CreateUserColourImage(rim, def);
+    case kImageDataColor:
+        return CreateUserColourImage(rim, def);
 
-        case kImageDataFile:
-        case kImageDataLump:
-        case kImageDataPackage:
-            return CreateUserFileImage(rim, def);
+    case kImageDataFile:
+    case kImageDataLump:
+    case kImageDataPackage:
+        return CreateUserFileImage(rim, def);
 
-        default:
-            FatalError("ReadUserAsEpiBlock: Coding error, unknown type %d\n",
-                       def->type_);
+    default:
+        FatalError("ReadUserAsEpiBlock: Coding error, unknown type %d\n", def->type_);
     }
 
     return nullptr; /* NOT REACHED */
@@ -558,28 +544,27 @@ ImageData *ReadAsEpiBlock(Image *rim)
 {
     switch (rim->source_type_)
     {
-        case kImageSourceFlat:
-        case kImageSourceRawBlock:
-            return ReadFlatAsEpiBlock(rim);
+    case kImageSourceFlat:
+    case kImageSourceRawBlock:
+        return ReadFlatAsEpiBlock(rim);
 
-        case kImageSourceTexture:
-            return ReadTextureAsEpiBlock(rim);
+    case kImageSourceTexture:
+        return ReadTextureAsEpiBlock(rim);
 
-        case kImageSourceGraphic:
-        case kImageSourceSprite:
-        case kImageSourceTxHi:
-            return ReadPatchAsEpiBlock(rim);
+    case kImageSourceGraphic:
+    case kImageSourceSprite:
+    case kImageSourceTxHi:
+        return ReadPatchAsEpiBlock(rim);
 
-        case kImageSourceDummy:
-            return ReadDummyAsEpiBlock(rim);
+    case kImageSourceDummy:
+        return ReadDummyAsEpiBlock(rim);
 
-        case kImageSourceUser:
-            return ReadUserAsEpiBlock(rim);
+    case kImageSourceUser:
+        return ReadUserAsEpiBlock(rim);
 
-        default:
-            FatalError("ReadAsBlock: unknown source_type %d !\n",
-                       rim->source_type_);
-            return nullptr;
+    default:
+        FatalError("ReadAsBlock: unknown source_type %d !\n", rim->source_type_);
+        return nullptr;
     }
 }
 

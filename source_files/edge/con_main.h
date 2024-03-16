@@ -26,42 +26,43 @@
 
 constexpr uint8_t kEndoomLines = 25;
 
-const RGBAColor endoom_colors[16] = {
-    0x000000FF, 0x0000AAFF, 0x00AA00FF, 0x00AAAAFF, 0xAA0000FF, 0xAA00AAFF,
-    0xAA5500FF, 0xAAAAAAFF, 0x555555FF, 0x5555FFFF, 0x55FF55FF, 0x55FFFFFF,
-    0xFF5555FF, 0xFF55FFFF, 0xFFFF55FF, 0xFFFFFFFF
-};
+const RGBAColor endoom_colors[16] = {0x000000FF, 0x0000AAFF, 0x00AA00FF, 0x00AAAAFF, 0xAA0000FF, 0xAA00AAFF,
+                                     0xAA5500FF, 0xAAAAAAFF, 0x555555FF, 0x5555FFFF, 0x55FF55FF, 0x55FFFFFF,
+                                     0xFF5555FF, 0xFF55FFFF, 0xFFFF55FF, 0xFFFFFFFF};
 
 enum ConsoleVisibility
 {
-    kConsoleVisibilityNotVisible,  // invisible
-    kConsoleVisibilityMaximal,     // fullscreen + a command line
+    kConsoleVisibilityNotVisible, // invisible
+    kConsoleVisibilityMaximal,    // fullscreen + a command line
     kConsoleVisibilityToggle
 };
 
 class ConsoleLine
 {
-   public:
+  public:
     std::string line_;
 
     RGBAColor color_;
 
     std::vector<uint8_t> endoom_bytes_;
 
-   public:
-    ConsoleLine(const std::string &text, RGBAColor col = SG_LIGHT_GRAY_RGBA32)
-        : line_(text), color_(col)
+  public:
+    ConsoleLine(const std::string &text, RGBAColor col = SG_LIGHT_GRAY_RGBA32) : line_(text), color_(col)
     {
     }
 
-    ConsoleLine(const char *text, RGBAColor col = SG_LIGHT_GRAY_RGBA32)
-        : line_(text), color_(col)
+    ConsoleLine(const char *text, RGBAColor col = SG_LIGHT_GRAY_RGBA32) : line_(text), color_(col)
     {
     }
 
-    ~ConsoleLine() {}
+    ~ConsoleLine()
+    {
+    }
 
-    void Append(const char *text) { line_.append(text); }
+    void Append(const char *text)
+    {
+        line_.append(text);
+    }
 
     void AppendEndoom(uint8_t endoom_byte)
     {
@@ -78,12 +79,9 @@ class ConsoleLine
 void ConsoleTryCommand(const char *cmd);
 
 #ifdef __GNUC__
-void ConsolePrint(const char *message, ...)
-    __attribute__((format(printf, 1, 2)));
-void ConsoleMessage(const char *message, ...)
-    __attribute__((format(printf, 1, 2)));
-void ConsolePlayerMessage(int plyr, const char *message, ...)
-    __attribute__((format(printf, 2, 3)));
+void ConsolePrint(const char *message, ...) __attribute__((format(printf, 1, 2)));
+void ConsoleMessage(const char *message, ...) __attribute__((format(printf, 1, 2)));
+void ConsolePlayerMessage(int plyr, const char *message, ...) __attribute__((format(printf, 2, 3)));
 #else
 void ConsolePrint(const char *message, ...);
 void ConsoleMessage(const char *message, ...);

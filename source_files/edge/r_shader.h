@@ -24,13 +24,17 @@
 
 class ColorMixer
 {
-   public:
+  public:
     int modulate_red_, modulate_green_, modulate_blue_;
     int add_red_, add_green_, add_blue_;
 
-   public:
-    ColorMixer() {}
-    ~ColorMixer() {}
+  public:
+    ColorMixer()
+    {
+    }
+    ~ColorMixer()
+    {
+    }
 
     void Clear()
     {
@@ -61,7 +65,8 @@ class ColorMixer
 
     void modulate_green_ive(RGBAColor rgb, float qty)
     {
-        if (qty > 1.0f) qty = 1.0f;
+        if (qty > 1.0f)
+            qty = 1.0f;
 
         modulate_red_ += (int)(epi::GetRGBARed(rgb) * qty);
         modulate_green_ += (int)(epi::GetRGBAGreen(rgb) * qty);
@@ -70,7 +75,8 @@ class ColorMixer
 
     void add_green_ive(RGBAColor rgb, float qty)
     {
-        if (qty > 1.0f) qty = 1.0f;
+        if (qty > 1.0f)
+            qty = 1.0f;
 
         add_red_ += (int)(epi::GetRGBARed(rgb) * qty);
         add_green_ += (int)(epi::GetRGBAGreen(rgb) * qty);
@@ -78,28 +84,29 @@ class ColorMixer
     }
 };
 
-typedef void (*ShaderCoordinateFunction)(void *data, int v_idx, HMM_Vec3 *pos,
-                                         float *rgb, HMM_Vec2 *texc,
+typedef void (*ShaderCoordinateFunction)(void *data, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc,
                                          HMM_Vec3 *normal, HMM_Vec3 *lit_pos);
 
 /* abstract base class */
 class AbstractShader
 {
-   public:
-    AbstractShader() {}
-    virtual ~AbstractShader() {}
+  public:
+    AbstractShader()
+    {
+    }
+    virtual ~AbstractShader()
+    {
+    }
 
     // used for arbitrary points in the world (sprites)
     virtual void Sample(ColorMixer *col, float x, float y, float z) = 0;
 
     // used for normal-based lighting (MD2 models)
-    virtual void Corner(ColorMixer *col, float nx, float ny, float nz,
-                        MapObject *mod_pos, bool is_weapon = false) = 0;
+    virtual void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon = false) = 0;
 
     // used to render overlay textures (world polygons)
-    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha,
-                          int *pass_var, int blending, bool masked, void *data,
-                          ShaderCoordinateFunction func) = 0;
+    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
+                          void *data, ShaderCoordinateFunction func) = 0;
 };
 
 //--- editor settings ---

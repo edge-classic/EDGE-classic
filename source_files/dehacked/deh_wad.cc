@@ -53,7 +53,7 @@ void NewLump(DDFType type)
     if (dest_container == nullptr)
         FatalError("Dehacked: Error - WAD_NewLump: no container!\n");
 
-    dest_container->push_back({ type, "", "" });
+    dest_container->push_back({type, "", ""});
 
     cur_lump = &dest_container->back();
 }
@@ -72,6 +72,6 @@ void Printf(const char *str, ...)
     cur_lump->data += (const char *)wad_msg_buf;
 }
 
-}  // namespace wad
+} // namespace wad
 
-}  // namespace dehacked
+} // namespace dehacked

@@ -75,10 +75,9 @@ extern float sine_table[kSineTableSize];
 
 //
 // Utility functions.
-BAMAngle   RendererPointToAngle(float x1, float y1, float x2, float y2,
-                                bool precise = false);
-float      RendererPointToDistance(float x1, float y1, float x2, float y2);
-Subsector *RendererPointInSubsector(float x, float y);
+BAMAngle          RendererPointToAngle(float x1, float y1, float x2, float y2, bool precise = false);
+float             RendererPointToDistance(float x1, float y1, float x2, float y2);
+Subsector        *RendererPointInSubsector(float x, float y);
 RegionProperties *RendererPointGetProps(Subsector *sub, float z);
 
 //
@@ -86,8 +85,7 @@ RegionProperties *RendererPointGetProps(Subsector *sub, float z);
 //
 
 // Renders the view for the next frame.
-void RenderView(int x, int y, int w, int h, MapObject *camera, bool full_height,
-                float expand_w);
+void RenderView(int x, int y, int w, int h, MapObject *camera, bool full_height, float expand_w);
 
 // Called by startup code.
 void RendererStartup(void);

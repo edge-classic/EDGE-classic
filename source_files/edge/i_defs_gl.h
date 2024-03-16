@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "gl.h"  // GLAD or gl4es
+#include "gl.h" // GLAD or gl4es
 
 #ifdef EDGE_GL_ES2
 #include "gl4esinit.h"

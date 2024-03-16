@@ -22,35 +22,35 @@
 
 enum MovieDataType
 {
-    kMovieDataNone,     // Default/dummy value
-    kMovieDataLump,     // load from lump in a WAD
-    kMovieDataPackage,  // load from an EPK
+    kMovieDataNone,    // Default/dummy value
+    kMovieDataLump,    // load from lump in a WAD
+    kMovieDataPackage, // load from an EPK
 };
 
 enum MovieScaling
 {
-    kMovieScalingAutofit,  // fit movie to screen as best as possible
-    kMovieScalingNoScale,  // force movie to play at original size regardless of
-                           // display
-    kMovieScalingZoom,  // movie will be scaled to fit display height; sides may
-                        // be clipped
-    kMovieScalingStretch,  // movie will stretch to fit display; disregards
-                           // aspect ratio
+    kMovieScalingAutofit, // fit movie to screen as best as possible
+    kMovieScalingNoScale, // force movie to play at original size regardless of
+                          // display
+    kMovieScalingZoom,    // movie will be scaled to fit display height; sides may
+                          // be clipped
+    kMovieScalingStretch, // movie will stretch to fit display; disregards
+                          // aspect ratio
 };
 
 enum MovieSpecial
 {
     kMovieSpecialNone = 0,
-    kMovieSpecialMute = 0x0001,  // do not play associated audio track
+    kMovieSpecialMute = 0x0001, // do not play associated audio track
 };
 
 class MovieDefinition
 {
-   public:
+  public:
     MovieDefinition();
     ~MovieDefinition(){};
 
-   public:
+  public:
     void Default(void);
     void CopyDetail(const MovieDefinition &src);
 
@@ -65,9 +65,12 @@ class MovieDefinition
 
     MovieSpecial special_;
 
-   private:
+  private:
     // disable copy construct and assignment operator
-    explicit MovieDefinition(MovieDefinition &rhs) { (void)rhs; }
+    explicit MovieDefinition(MovieDefinition &rhs)
+    {
+        (void)rhs;
+    }
     MovieDefinition &operator=(MovieDefinition &rhs)
     {
         (void)rhs;
@@ -77,13 +80,13 @@ class MovieDefinition
 
 class MovieDefinitionContainer : public std::vector<MovieDefinition *>
 {
-   public:
-    MovieDefinitionContainer() {}
+  public:
+    MovieDefinitionContainer()
+    {
+    }
     ~MovieDefinitionContainer()
     {
-        for (std::vector<MovieDefinition *>::iterator iter     = begin(),
-                                                      iter_end = end();
-             iter != iter_end; iter++)
+        for (std::vector<MovieDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
         {
             MovieDefinition *mov = *iter;
             delete mov;
@@ -91,7 +94,7 @@ class MovieDefinitionContainer : public std::vector<MovieDefinition *>
         }
     }
 
-   public:
+  public:
     // Search Functions
     MovieDefinition *Lookup(const char *refname);
 };

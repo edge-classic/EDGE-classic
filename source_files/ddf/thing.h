@@ -353,15 +353,15 @@ enum InventoryType
     kInventoryType97,
     kInventoryType98,
     kInventoryType99,
-    kTotalInventoryTypes  // Total count (99)
+    kTotalInventoryTypes // Total count (99)
 };
 
 enum CounterType
 {
-    kCounterTypeLives = 0,   // Arbitrarily named Lives counter
-    kCounterTypeScore,       // Arbitrarily named Score counter
-    kCounterTypeMoney,       // Arbitrarily named Money
-    kCounterTypeExperience,  // Arbitrarily named EXP counter
+    kCounterTypeLives = 0,  // Arbitrarily named Lives counter
+    kCounterTypeScore,      // Arbitrarily named Score counter
+    kCounterTypeMoney,      // Arbitrarily named Money
+    kCounterTypeExperience, // Arbitrarily named EXP counter
     kCounterType05,
     kCounterType06,
     kCounterType07,
@@ -457,7 +457,7 @@ enum CounterType
     kCounterType97,
     kCounterType98,
     kCounterType99,
-    kTotalCounterTypes  // Total count (99)
+    kTotalCounterTypes // Total count (99)
 };
 
 enum ArmourType
@@ -489,7 +489,7 @@ enum PowerType
     kPowerTypeAllMap,
     kPowerTypeInfrared,
     // extra powerups (not in Doom)
-    kPowerTypeJetpack,  // -MH- 1998/06/18  jetpack "fuel" counter
+    kPowerTypeJetpack, // -MH- 1998/06/18  jetpack "fuel" counter
     kPowerTypeNightVision,
     kPowerTypeScuba,
     kPowerTypeTimeStop,
@@ -514,11 +514,12 @@ enum PickupEffectType
 
 class PickupEffect
 {
-   public:
+  public:
     PickupEffect(PickupEffectType type, int sub, int slot, float time);
-    PickupEffect(PickupEffectType type, WeaponDefinition *weap, int slot,
-                 float time);
-    ~PickupEffect() {}
+    PickupEffect(PickupEffectType type, WeaponDefinition *weap, int slot, float time);
+    ~PickupEffect()
+    {
+    }
 
     // next in linked list
     PickupEffect *next_;
@@ -526,8 +527,7 @@ class PickupEffect
     // type and optional sub-type
     PickupEffectType type_;
 
-    union
-    {
+    union {
         int               type;
         WeaponDefinition *weap;
     } sub_;
@@ -596,8 +596,7 @@ struct ConditionCheck
 
     // sub-type (specific type of ammo, weapon, key, powerup, inventory).  Not
     // used for health, jumping, crouching, etc.
-    union
-    {
+    union {
         int               type;
         WeaponDefinition *weap;
     } sub;
@@ -650,20 +649,20 @@ enum DynamicLightType
 
 class DynamicLightDefinition
 {
-   public:
+  public:
     DynamicLightDefinition();
     DynamicLightDefinition(DynamicLightDefinition &rhs);
     ~DynamicLightDefinition(){};
 
-   private:
+  private:
     void Copy(DynamicLightDefinition &src);
 
-   public:
+  public:
     void                    Default(void);
     DynamicLightDefinition &operator=(DynamicLightDefinition &rhs);
 
     DynamicLightType type_;
-    std::string      shape_;  // IMAGES.DDF reference
+    std::string      shape_; // IMAGES.DDF reference
     float            radius_;
     RGBAColor        colour_;
     float            height_;
@@ -674,15 +673,15 @@ class DynamicLightDefinition
 
 class WeaknessDefinition
 {
-   public:
+  public:
     WeaknessDefinition();
     WeaknessDefinition(WeaknessDefinition &rhs);
     ~WeaknessDefinition(){};
 
-   private:
+  private:
     void Copy(WeaknessDefinition &src);
 
-   public:
+  public:
     void                Default(void);
     WeaknessDefinition &operator=(WeaknessDefinition &rhs);
 
@@ -696,7 +695,7 @@ class WeaknessDefinition
 // mobjdef class
 class MapObjectDefinition
 {
-   public:
+  public:
     // DDF Id
     std::string name_;
 
@@ -738,7 +737,7 @@ class MapObjectDefinition
     int mbf21_flags_;
 
     DamageClass explode_damage_;
-    float       explode_radius_;  // normally zero (radius == damage)
+    float       explode_radius_; // normally zero (radius == damage)
 
     // linked list of losing benefits, or nullptr
     Benefit *lose_benefits_;
@@ -811,9 +810,9 @@ class MapObjectDefinition
 
     BitSet side_;
     int    playernum_;
-    int    yalign_;  // -AJA- 2007/08/08: sprite Y alignment in bbox
+    int    yalign_;    // -AJA- 2007/08/08: sprite Y alignment in bbox
 
-    int   model_skin_;  // -AJA- 2007/10/16: MD2 model support
+    int   model_skin_; // -AJA- 2007/10/16: MD2 model support
     float model_scale_;
     float model_aspect_;
     float model_bias_;
@@ -832,7 +831,7 @@ class MapObjectDefinition
     // what attack classes we are immune/resistant to (usually none).
     BitSet immunity_;
     BitSet resistance_;
-    BitSet ghost_;  // pass through us
+    BitSet ghost_; // pass through us
 
     float resist_multiply_;
     float resist_painchance_;
@@ -867,10 +866,10 @@ class MapObjectDefinition
     const MapObjectDefinition *spitspot_;
     std::string                spitspot_ref_;
 
-    float sight_distance_;  // lobo 2022: How far this thing can see
-    float hear_distance_;   // lobo 2022: How far this thing can hear
+    float sight_distance_; // lobo 2022: How far this thing can see
+    float hear_distance_;  // lobo 2022: How far this thing can hear
 
-    int morphtimeout_;  // lobo 2023: Go to MORPH states when times up
+    int morphtimeout_;     // lobo 2023: Go to MORPH states when times up
 
     // DEHEXTRA
     float gib_health_;
@@ -882,19 +881,22 @@ class MapObjectDefinition
     int fast_speed_;
     int melee_range_;
 
-   public:
+  public:
     MapObjectDefinition();
     ~MapObjectDefinition();
 
-   public:
+  public:
     void Default();
     void CopyDetail(MapObjectDefinition &src);
 
     void DLightCompatibility(void);
 
-   private:
+  private:
     // disable copy construct and assignment operator
-    explicit MapObjectDefinition(MapObjectDefinition &rhs) { (void)rhs; }
+    explicit MapObjectDefinition(MapObjectDefinition &rhs)
+    {
+        (void)rhs;
+    }
     MapObjectDefinition &operator=(MapObjectDefinition &rhs)
     {
         (void)rhs;
@@ -904,14 +906,14 @@ class MapObjectDefinition
 
 class MapObjectDefinitionContainer : public std::vector<MapObjectDefinition *>
 {
-   public:
+  public:
     MapObjectDefinitionContainer();
     ~MapObjectDefinitionContainer();
 
-   private:
+  private:
     MapObjectDefinition *lookup_cache_[kLookupCacheSize];
 
-   public:
+  public:
     // List Management
     bool MoveToEnd(int idx);
 

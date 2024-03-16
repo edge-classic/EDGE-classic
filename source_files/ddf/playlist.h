@@ -53,11 +53,11 @@ enum DDFMusicDataType
 
 class PlaylistEntry
 {
-   public:
+  public:
     PlaylistEntry();
     ~PlaylistEntry();
 
-   public:
+  public:
     void Default(void);
     void CopyDetail(PlaylistEntry &src);
 
@@ -69,9 +69,12 @@ class PlaylistEntry
 
     std::string info_;
 
-   private:
+  private:
     // disable copy construct and assignment operator
-    explicit PlaylistEntry(PlaylistEntry &rhs) { (void)rhs; }
+    explicit PlaylistEntry(PlaylistEntry &rhs)
+    {
+        (void)rhs;
+    }
     PlaylistEntry &operator=(PlaylistEntry &rhs)
     {
         (void)rhs;
@@ -81,13 +84,13 @@ class PlaylistEntry
 
 class PlaylistEntryContainer : public std::vector<PlaylistEntry *>
 {
-   public:
-    PlaylistEntryContainer() {}
+  public:
+    PlaylistEntryContainer()
+    {
+    }
     ~PlaylistEntryContainer()
     {
-        for (std::vector<PlaylistEntry *>::iterator iter     = begin(),
-                                                    iter_end = end();
-             iter != iter_end; iter++)
+        for (std::vector<PlaylistEntry *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
         {
             PlaylistEntry *pl = *iter;
             delete pl;
@@ -95,7 +98,7 @@ class PlaylistEntryContainer : public std::vector<PlaylistEntry *>
         }
     }
 
-   public:
+  public:
     PlaylistEntry *Find(int number);
     int            FindLast(const char *name);
     int            FindFree();
@@ -103,7 +106,7 @@ class PlaylistEntryContainer : public std::vector<PlaylistEntry *>
 
 // -------EXTERNALISATIONS-------
 
-extern PlaylistEntryContainer playlist;  // -ACB- 2004/06/04 Implemented
+extern PlaylistEntryContainer playlist; // -ACB- 2004/06/04 Implemented
 
 void DDF_ReadMusicPlaylist(const std::string &data);
 

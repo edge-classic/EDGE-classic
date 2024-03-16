@@ -54,24 +54,20 @@ namespace dehacked
 
 static bool FieldValidateValue(const FieldReference *reference, int new_val)
 {
-    if (reference->field_type == kFieldTypeAny ||
-        reference->field_type == kFieldTypeBitflags)
+    if (reference->field_type == kFieldTypeAny || reference->field_type == kFieldTypeBitflags)
         return true;
 
-    if (new_val < 0 ||
-        (new_val == 0 && reference->field_type == kFieldTypeOneOrGreater))
+    if (new_val < 0 || (new_val == 0 && reference->field_type == kFieldTypeOneOrGreater))
     {
-        LogDebug("Dehacked: Warning - Line %d: bad value '%d' for %s\n",
-                 patch::line_num, new_val, reference->dehacked_name);
+        LogDebug("Dehacked: Warning - Line %d: bad value '%d' for %s\n", patch::line_num, new_val,
+                 reference->dehacked_name);
         return false;
     }
 
-    if (reference->field_type == kFieldTypeZeroOrGreater ||
-        reference->field_type == kFieldTypeOneOrGreater)
+    if (reference->field_type == kFieldTypeZeroOrGreater || reference->field_type == kFieldTypeOneOrGreater)
         return true;
 
-    if (reference->field_type ==
-        kFieldTypeSubspriteNumber)  // ignore the bright bit
+    if (reference->field_type == kFieldTypeSubspriteNumber) // ignore the bright bit
         new_val &= ~32768;
 
     int min_obj = 0;
@@ -81,59 +77,57 @@ static bool FieldValidateValue(const FieldReference *reference, int new_val)
     {
         switch (reference->field_type)
         {
-            case kFieldTypeAmmoNumber:
-                max_obj = kTotalAmmoTypes - 1;
-                break;
-            case kFieldTypeFrameNumber:
-                max_obj = kTotalStates - 1;
-                break;
-            case kFieldTypeSoundNumber:
-                max_obj = kTotalSoundEffects - 1;
-                break;
-            case kFieldTypeSpriteNumber:
-                max_obj = kTotalSprites - 1;
-                break;
-            case kFieldTypeSubspriteNumber:
-                max_obj = 31;
-                break;
+        case kFieldTypeAmmoNumber:
+            max_obj = kTotalAmmoTypes - 1;
+            break;
+        case kFieldTypeFrameNumber:
+            max_obj = kTotalStates - 1;
+            break;
+        case kFieldTypeSoundNumber:
+            max_obj = kTotalSoundEffects - 1;
+            break;
+        case kFieldTypeSpriteNumber:
+            max_obj = kTotalSprites - 1;
+            break;
+        case kFieldTypeSubspriteNumber:
+            max_obj = 31;
+            break;
 
-            default:
-                FatalError("Dehacked: Error - Bad field type %d\n",
-                           reference->field_type);
+        default:
+            FatalError("Dehacked: Error - Bad field type %d\n", reference->field_type);
         }
     }
     else /* patch_fmt == 6, allow BOOM/MBF stuff */
     {
         switch (reference->field_type)
         {
-            case kFieldTypeAmmoNumber:
-                max_obj = kTotalAmmoTypes - 1;
-                break;
-            case kFieldTypeSubspriteNumber:
-                max_obj = 31;
-                break;
+        case kFieldTypeAmmoNumber:
+            max_obj = kTotalAmmoTypes - 1;
+            break;
+        case kFieldTypeSubspriteNumber:
+            max_obj = 31;
+            break;
 
-            // for DSDehacked, allow very high values
-            case kFieldTypeFrameNumber:
-                max_obj = 32767;
-                break;
-            case kFieldTypeSpriteNumber:
-                max_obj = 32767;
-                break;
-            case kFieldTypeSoundNumber:
-                max_obj = 32767;
-                break;
+        // for DSDehacked, allow very high values
+        case kFieldTypeFrameNumber:
+            max_obj = 32767;
+            break;
+        case kFieldTypeSpriteNumber:
+            max_obj = 32767;
+            break;
+        case kFieldTypeSoundNumber:
+            max_obj = 32767;
+            break;
 
-            default:
-                FatalError("Dehacked: Error - Bad field type %d\n",
-                           reference->field_type);
+        default:
+            FatalError("Dehacked: Error - Bad field type %d\n", reference->field_type);
         }
     }
 
     if (new_val < min_obj || new_val > max_obj)
     {
-        LogDebug("Dehacked: Warning - Line %d: bad value '%d' for %s\n",
-                 patch::line_num, new_val, reference->dehacked_name);
+        LogDebug("Dehacked: Warning - Line %d: bad value '%d' for %s\n", patch::line_num, new_val,
+                 reference->dehacked_name);
 
         return false;
     }
@@ -141,13 +135,11 @@ static bool FieldValidateValue(const FieldReference *reference, int new_val)
     return true;
 }
 
-bool FieldAlter(const FieldReference *references, const char *dehacked_field,
-                int *object, int new_value)
+bool FieldAlter(const FieldReference *references, const char *dehacked_field, int *object, int new_value)
 {
     for (; references->dehacked_name; references++)
     {
-        if (epi::StringCaseCompareASCII(references->dehacked_name,
-                                        dehacked_field) != 0)
+        if (epi::StringCaseCompareASCII(references->dehacked_name, dehacked_field) != 0)
             continue;
 
         // found it...
@@ -170,4 +162,4 @@ bool FieldAlter(const FieldReference *references, const char *dehacked_field,
     return false;
 }
 
-}  // namespace dehacked
+} // namespace dehacked

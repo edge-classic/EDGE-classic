@@ -30,7 +30,7 @@ void  UtilFree(void *data);
 // math stuff
 double ComputeAngle(double dx, double dy);
 
-}  // namespace ajbsp
+} // namespace ajbsp
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

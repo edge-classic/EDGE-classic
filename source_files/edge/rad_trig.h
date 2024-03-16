@@ -49,11 +49,10 @@ bool                  ScriptRadiusCheck(MapObject *mo, TriggerScript *r);
 TriggerScript        *FindScriptByName(const char *map_name, const char *name);
 TriggerScriptTrigger *FindScriptTriggerByName(const char *name);
 TriggerScriptState   *FindScriptStateByLabel(TriggerScript *scr, char *label);
-void ScriptEnableByTag(MapObject *actor, uint32_t tag, bool disable,
-                       TriggerScriptTag tagtype);
-void ScriptEnableByTag(MapObject *actor, const char *name, bool disable);
-bool CheckActiveScriptByTag(MapObject *actor, const char *name);
-void ScriptUpdateMonsterDeaths(MapObject *mo);
+void                  ScriptEnableByTag(MapObject *actor, uint32_t tag, bool disable, TriggerScriptTag tagtype);
+void                  ScriptEnableByTag(MapObject *actor, const char *name, bool disable);
+bool                  CheckActiveScriptByTag(MapObject *actor, const char *name);
+void                  ScriptUpdateMonsterDeaths(MapObject *mo);
 
 // Menu support
 void ScriptMenuStart(TriggerScriptTrigger *R, ScriptShowMenuParameter *menu);

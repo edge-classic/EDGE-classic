@@ -38,8 +38,7 @@
 extern FILE *debug_file;
 extern FILE *log_file;
 
-#if !defined(__MINGW32__) &&                                                   \
-    (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
+#if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
 extern HANDLE windows_timer;
 #endif
 
@@ -49,12 +48,15 @@ static char              message_buffer[kMessageBufferSize];
 
 void SystemStartup(void)
 {
-    StartupGraphics();  // SDL requires this to be called first
+    StartupGraphics(); // SDL requires this to be called first
     StartupControl();
     StartupAudio();
 }
 
-void CloseProgram(int exitnum) { exit(exitnum); }
+void CloseProgram(int exitnum)
+{
+    exit(exitnum);
+}
 
 void LogWarning(const char *warning, ...)
 {
@@ -147,16 +149,14 @@ uint32_t GetMicroseconds(void)
 
 void SleepForMilliseconds(int millisecs)
 {
-#if !defined(__MINGW32__) &&                                                   \
-    (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
+#if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
     // On Windows use high resolution timer if available, the Sleep Win32 call
     // defaults to 15.6ms resolution and timeBeginPeriod is problematic
     if (windows_timer != nullptr)
     {
         LARGE_INTEGER due_time;
         due_time.QuadPart = -((LONGLONG)(millisecs * 1000000) / 100);
-        if (SetWaitableTimerEx(windows_timer, &due_time, 0, nullptr, nullptr,
-                               nullptr, 0))
+        if (SetWaitableTimerEx(windows_timer, &due_time, 0, nullptr, nullptr, nullptr, 0))
         {
             WaitForSingleObject(windows_timer, INFINITE);
         }

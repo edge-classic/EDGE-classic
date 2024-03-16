@@ -196,6 +196,6 @@ const char *GetSprite(int spr_num);
 const char *GetOriginalName(int spr_num);
 
 void SpriteDependencies();
-}  // namespace sprites
+} // namespace sprites
 
-}  // namespace dehacked
+} // namespace dehacked

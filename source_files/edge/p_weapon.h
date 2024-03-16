@@ -67,7 +67,7 @@ struct PlayerSprite
 enum PlayerWeaponFlag
 {
     kPlayerWeaponNoFlag   = 0,
-    kPlayerWeaponRemoving = 0x0001,  // weapon is being removed (or upgraded)
+    kPlayerWeaponRemoving = 0x0001, // weapon is being removed (or upgraded)
 };
 
 //

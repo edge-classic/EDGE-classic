@@ -37,6 +37,6 @@ void AlterCheat(const char *new_val);
 const char *GetLDFForBex(const char *bex_name);
 
 void ConvertLDF(void);
-}  // namespace text_strings
+} // namespace text_strings
 
-}  // namespace dehacked
+} // namespace dehacked

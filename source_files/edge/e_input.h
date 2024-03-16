@@ -99,13 +99,13 @@ extern int key_talk;
 extern int key_console;
 extern int key_pause;
 
-extern int key_mouselook;  // -AJA- 1999/07/27.
+extern int key_mouselook; // -AJA- 1999/07/27.
 extern int key_second_attack;
 extern int key_third_attack;
 extern int key_fourth_attack;
-extern int key_reload;   // -AJA- 2004/11/10
-extern int key_action1;  // -AJA- 2009/09/07
-extern int key_action2;  // -AJA- 2009/09/07
+extern int key_reload;  // -AJA- 2004/11/10
+extern int key_action1; // -AJA- 2009/09/07
+extern int key_action2; // -AJA- 2009/09/07
 
 // -AJA- 2010/06/13: weapon and automap stuff
 extern int key_weapons[10];

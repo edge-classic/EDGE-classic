@@ -21,31 +21,28 @@
 #include <string>
 #include <vector>
 
-#define EDGE_DEFINE_CONSOLE_VARIABLE(name, value, flags)                       \
-    ConsoleVariable name(#name, value, flags);
-#define EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(name, value, flags, min, max)     \
+#define EDGE_DEFINE_CONSOLE_VARIABLE(name, value, flags) ConsoleVariable name(#name, value, flags);
+#define EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(name, value, flags, min, max)                                             \
     ConsoleVariable name(#name, value, flags, nullptr, min, max);
-#define EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK(name, value, flags, cb)     \
+#define EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK(name, value, flags, cb)                                             \
     ConsoleVariable name(#name, value, flags, cb);
-#define EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK_CLAMPED(name, value, flags, \
-                                                           cb, min, max)       \
+#define EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK_CLAMPED(name, value, flags, cb, min, max)                           \
     ConsoleVariable name(#name, value, flags, cb, min, max);
 
 enum ConsoleVariableFlag
 {
     kConsoleVariableFlagNone     = 0,
-    kConsoleVariableFlagArchive  = (1 << 0),  // saved in the config file
-    kConsoleVariableFlagCheat    = (1 << 1),  // disabled in multi-player games
-    kConsoleVariableFlagNoReset  = (1 << 2),  // do not reset to default
-    kConsoleVariableFlagReadOnly = (1 << 3),  // read-only
-    kConsoleVariableFlagFilepath =
-        (1 << 4),  // a filesystem path and needs to be sanitized for
-                   // certain characters
+    kConsoleVariableFlagArchive  = (1 << 0), // saved in the config file
+    kConsoleVariableFlagCheat    = (1 << 1), // disabled in multi-player games
+    kConsoleVariableFlagNoReset  = (1 << 2), // do not reset to default
+    kConsoleVariableFlagReadOnly = (1 << 3), // read-only
+    kConsoleVariableFlagFilepath = (1 << 4), // a filesystem path and needs to be sanitized for
+                                             // certain characters
 };
 
 class ConsoleVariable
 {
-   public:
+  public:
     // current value
     int         d_;
     float       f_;
@@ -69,16 +66,14 @@ class ConsoleVariable
 
     ConsoleVariableCallback callback_;
 
-   private:
+  private:
     // this is incremented each time a value is set.
     // (Note: whether the value is different is not checked)
     int modified_;
 
-   public:
-    ConsoleVariable(const char *name, const char *def,
-                    ConsoleVariableFlag     flags = kConsoleVariableFlagNone,
-                    ConsoleVariableCallback cb    = nullptr,
-                    float min = -256000.0f, float max = 256000.0f);
+  public:
+    ConsoleVariable(const char *name, const char *def, ConsoleVariableFlag flags = kConsoleVariableFlagNone,
+                    ConsoleVariableCallback cb = nullptr, float min = -256000.0f, float max = 256000.0f);
 
     ~ConsoleVariable();
 
@@ -87,7 +82,10 @@ class ConsoleVariable
     ConsoleVariable &operator=(const char *value);
     ConsoleVariable &operator=(std::string value);
 
-    inline const char *c_str() const { return s_.c_str(); }
+    inline const char *c_str() const
+    {
+        return s_.c_str();
+    }
 
     // this checks and clears the 'modified' value
     inline bool CheckModified()
@@ -100,7 +98,7 @@ class ConsoleVariable
         return false;
     }
 
-   private:
+  private:
     void FormatInteger(int value);
     void FormatFloat(float value);
 
@@ -124,8 +122,7 @@ bool ConsoleMatchPattern(const char *name, const char *pat);
 // and/or uppercase letters to require the flag to be absent.
 //
 // Returns number of matches found.
-int ConsoleMatchAllVariables(std::vector<const char *> &list,
-                             const char                *pattern);
+int ConsoleMatchAllVariables(std::vector<const char *> &list, const char *pattern);
 
 // scan the program arguments and set matching cvars.
 void ConsoleHandleProgramArguments(void);

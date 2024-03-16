@@ -19,12 +19,10 @@
 #pragma once
 
 // Screen resolution
-#define CFGDEF_SCREENWIDTH                                                     \
-    (1000000)  // Super high number to force scaling to native res
-#define CFGDEF_SCREENHEIGHT                                                    \
-    (1000000)  // Super high number to force scaling to native res
-#define CFGDEF_SCREENBITS  (32)
-#define CFGDEF_DISPLAYMODE (2)
+#define CFGDEF_SCREENWIDTH  (1000000) // Super high number to force scaling to native res
+#define CFGDEF_SCREENHEIGHT (1000000) // Super high number to force scaling to native res
+#define CFGDEF_SCREENBITS   (32)
+#define CFGDEF_DISPLAYMODE  (2)
 
 // Controls (Key/Mouse Buttons)
 #define CFGDEF_KEY_FIRE        (kMouse1 + (kGamepadTriggerRight << 16))
@@ -72,8 +70,8 @@
 #define CFGDEF_SHOWMESSAGES (1)
 
 // Sound and Music
-#define CFGDEF_SOUND_STEREO (1)  // Stereo
-#define CFGDEF_MIX_CHANNELS (2)  // 32 channels
+#define CFGDEF_SOUND_STEREO (1) // Stereo
+#define CFGDEF_MIX_CHANNELS (2) // 32 channels
 
 // Video Options
 #define CFGDEF_USE_SMOOTHING (1)
@@ -84,7 +82,7 @@
 #define CFGDEF_CROSSHAIR     (0)
 #define CFGDEF_MAP_OVERLAY   (0)
 #define CFGDEF_ROTATEMAP     (0)
-#define CFGDEF_INVUL_FX      (1)  // TEXTURED
+#define CFGDEF_INVUL_FX      (1) // TEXTURED
 #define CFGDEF_WIPE_METHOD   (1)
 #define CFGDEF_PNG_SCRSHOTS  (1)
 
@@ -99,7 +97,7 @@
 #define CFGDEF_HAVE_EXTRA     (1)
 #define CFGDEF_TRUE3DGAMEPLAY (1)
 #define CFGDEF_PASS_MISSILE   (1)
-#define CFGDEF_RES_RESPAWN    (1)  // Resurrect Mode
+#define CFGDEF_RES_RESPAWN    (1) // Resurrect Mode
 #define CFGDEF_ITEMRESPAWN    (0)
 #define CFGDEF_FASTPARM       (0)
 #define CFGDEF_RESPAWN        (0)

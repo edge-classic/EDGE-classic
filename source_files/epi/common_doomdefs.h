@@ -54,18 +54,18 @@ struct RawWadEntry
 // to provide a complete scene geometry description.
 enum LumpOrder
 {
-    kLumpLabel = 0,   // A separator name, ExMx or MAPxx
-    kLumpThings,      // Monsters, items..
-    kLumpLinedefs,    // LineDefs, from editing
-    kLumpSidedefs,    // SideDefs, from editing
-    kLumpVertexes,    // Vertices, edited and BSP splits generated
-    kLumpSegs,        // LineSegs, from LineDefs split by BSP
-    kLumpSubSectors,  // SubSectors, list of LineSegs
-    kLumpNodes,       // BSP nodes
-    kLumpSectors,     // Sectors, from editing
-    kLumpReject,      // LUT, sector-sector visibility
-    kLumpBlockmap,    // LUT, motion clipping, walls/grid element
-    kLumpBehavior     // Hexen scripting stuff
+    kLumpLabel = 0,  // A separator name, ExMx or MAPxx
+    kLumpThings,     // Monsters, items..
+    kLumpLinedefs,   // LineDefs, from editing
+    kLumpSidedefs,   // SideDefs, from editing
+    kLumpVertexes,   // Vertices, edited and BSP splits generated
+    kLumpSegs,       // LineSegs, from LineDefs split by BSP
+    kLumpSubSectors, // SubSectors, list of LineSegs
+    kLumpNodes,      // BSP nodes
+    kLumpSectors,    // Sectors, from editing
+    kLumpReject,     // LUT, sector-sector visibility
+    kLumpBlockmap,   // LUT, motion clipping, walls/grid element
+    kLumpBehavior    // Hexen scripting stuff
 };
 
 /* ----- The level structures ---------------------- */
@@ -86,52 +86,52 @@ struct RawV2Vertex
 #pragma pack(push, 1)
 struct RawLinedef
 {
-    uint16_t start;  // from this vertex...
-    uint16_t end;    // ... to this vertex
-    uint16_t flags;  // linedef flags (impassible, etc)
-    uint16_t type;   // special type (0 for none, 97 for teleporter, etc)
-    int16_t  tag;    // this linedef activates the sector with same tag
-    uint16_t right;  // right sidedef
-    uint16_t left;   // left sidedef (only if this line adjoins 2 sectors)
+    uint16_t start; // from this vertex...
+    uint16_t end;   // ... to this vertex
+    uint16_t flags; // linedef flags (impassible, etc)
+    uint16_t type;  // special type (0 for none, 97 for teleporter, etc)
+    int16_t  tag;   // this linedef activates the sector with same tag
+    uint16_t right; // right sidedef
+    uint16_t left;  // left sidedef (only if this line adjoins 2 sectors)
 };
 #pragma pack(pop)
 
 #pragma pack(push, 1)
 struct RawSidedef
 {
-    int16_t x_offset;  // X offset for texture
-    int16_t y_offset;  // Y offset for texture
+    int16_t x_offset;      // X offset for texture
+    int16_t y_offset;      // Y offset for texture
 
-    char upper_texture[8];  // texture name for the part above
-    char lower_texture[8];  // texture name for the part below
-    char mid_texture[8];    // texture name for the regular part
+    char upper_texture[8]; // texture name for the part above
+    char lower_texture[8]; // texture name for the part below
+    char mid_texture[8];   // texture name for the regular part
 
-    uint16_t sector;  // adjacent sector
+    uint16_t sector;       // adjacent sector
 };
 #pragma pack(pop)
 
 #pragma pack(push, 1)
 struct RawSector
 {
-    int16_t floor_height;    // floor height
-    int16_t ceiling_height;  // ceiling height
+    int16_t floor_height;   // floor height
+    int16_t ceiling_height; // ceiling height
 
     char floor_texture[8];  // floor texture
     char ceil_texture[8];   // ceiling texture
 
-    uint16_t light;  // light level (0-255)
-    uint16_t type;   // special type (0 = normal, 9 = secret, ...)
-    int16_t  tag;    // sector activated by a linedef with same tag
+    uint16_t light;         // light level (0-255)
+    uint16_t type;          // special type (0 = normal, 9 = secret, ...)
+    int16_t  tag;           // sector activated by a linedef with same tag
 };
 #pragma pack(pop)
 
 #pragma pack(push, 1)
 struct RawThing
 {
-    int16_t  x, y;     // position of thing
-    int16_t  angle;    // angle thing faces (degrees)
-    uint16_t type;     // type of thing
-    uint16_t options;  // when appears, deaf, etc..
+    int16_t  x, y;    // position of thing
+    int16_t  angle;   // angle thing faces (degrees)
+    uint16_t type;    // type of thing
+    uint16_t options; // when appears, deaf, etc..
 };
 #pragma pack(pop)
 
@@ -149,10 +149,10 @@ struct RawV5Node
 {
     // this structure used by ZDoom nodes too
 
-    int16_t        x, y;                            // starting point
-    int16_t        delta_x, delta_y;                // offset to ending point
-    RawBoundingBox bounding_box_1, bounding_box_2;  // bounding rectangles
-    uint32_t right, left;  // children: Node or SSector (if high bit is set)
+    int16_t        x, y;                           // starting point
+    int16_t        delta_x, delta_y;               // offset to ending point
+    RawBoundingBox bounding_box_1, bounding_box_2; // bounding rectangles
+    uint32_t       right, left;                    // children: Node or SSector (if high bit is set)
 };
 #pragma pack(pop)
 
@@ -163,9 +163,9 @@ struct RawPatchDefinition
     int16_t x_origin;
     int16_t y_origin;
 
-    uint16_t pname;     // index into PNAMES
-    uint16_t stepdir;   // NOT USED
-    uint16_t colormap;  // NOT USED
+    uint16_t pname;    // index into PNAMES
+    uint16_t stepdir;  // NOT USED
+    uint16_t colormap; // NOT USED
 };
 #pragma pack(pop)
 
@@ -174,7 +174,7 @@ struct RawStrifePatchDefinition
 {
     int16_t  x_origin;
     int16_t  y_origin;
-    uint16_t pname;  // index into PNAMES
+    uint16_t pname; // index into PNAMES
 };
 #pragma pack(pop)
 
@@ -188,12 +188,12 @@ struct RawTexture
 {
     char name[8];
 
-    uint16_t masked;  // NOT USED
+    uint16_t masked; // NOT USED
     uint8_t  scale_x;
     uint8_t  scale_y;
     uint16_t width;
     uint16_t height;
-    uint32_t column_dir;  // NOT USED
+    uint32_t column_dir; // NOT USED
     uint16_t patch_count;
 
     RawPatchDefinition patches[1];
@@ -205,7 +205,7 @@ struct RawStrifeTexture
 {
     char name[8];
 
-    uint16_t masked;  // NOT USED
+    uint16_t masked; // NOT USED
     uint8_t  scale_x;
     uint8_t  scale_y;
     uint16_t width;
@@ -236,7 +236,7 @@ struct Patch
     // pixels below the origin
     int16_t top_offset;
 
-    uint32_t column_offset[1];  // only [width] used
+    uint32_t column_offset[1]; // only [width] used
 };
 #pragma pack(pop)
 
@@ -315,8 +315,7 @@ constexpr int16_t kBoomGeneralizedLineLast  = 0x7fff;
 
 inline bool IsBoomGeneralizedLine(int16_t line)
 {
-    return (line >= kBoomGeneralizedLineFirst &&
-            line <= kBoomGeneralizedLineLast);
+    return (line >= kBoomGeneralizedLineFirst && line <= kBoomGeneralizedLineLast);
 }
 
 //

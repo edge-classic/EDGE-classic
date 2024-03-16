@@ -22,79 +22,74 @@
 
 class IntermissionMapPositionInfo
 {
-   public:
+  public:
     std::string name_;
 
     int x_, y_;
 
-   public:
+  public:
     IntermissionMapPositionInfo();
     IntermissionMapPositionInfo(IntermissionMapPositionInfo &rhs);
     ~IntermissionMapPositionInfo();
 
-   public:
+  public:
     IntermissionMapPositionInfo &operator=(IntermissionMapPositionInfo &rhs);
 
-   private:
+  private:
     void Copy(IntermissionMapPositionInfo &src);
 };
 
-class IntermissionMapPositionInfoContainer
-    : public std::vector<IntermissionMapPositionInfo *>
+class IntermissionMapPositionInfoContainer : public std::vector<IntermissionMapPositionInfo *>
 {
-   public:
+  public:
     IntermissionMapPositionInfoContainer();
-    IntermissionMapPositionInfoContainer(
-        IntermissionMapPositionInfoContainer &rhs);
+    IntermissionMapPositionInfoContainer(IntermissionMapPositionInfoContainer &rhs);
     ~IntermissionMapPositionInfoContainer();
 
-   private:
+  private:
     void Copy(IntermissionMapPositionInfoContainer &src);
 
-   public:
-    IntermissionMapPositionInfoContainer &operator=(
-        IntermissionMapPositionInfoContainer &rhs);
+  public:
+    IntermissionMapPositionInfoContainer &operator=(IntermissionMapPositionInfoContainer &rhs);
 };
 
 class IntermissionFrameInfo
 {
-   public:
-    std::string pic_;    // Name of pic to display.
-    int         tics_;   // Tics on this frame
-    int         x_, y_;  // Position on screen where this goes
+  public:
+    std::string pic_;   // Name of pic to display.
+    int         tics_;  // Tics on this frame
+    int         x_, y_; // Position on screen where this goes
 
-   public:
+  public:
     IntermissionFrameInfo();
     IntermissionFrameInfo(IntermissionFrameInfo &rhs);
     ~IntermissionFrameInfo();
 
-   public:
+  public:
     void                   Default(void);
     IntermissionFrameInfo &operator=(IntermissionFrameInfo &rhs);
 
-   private:
+  private:
     void Copy(IntermissionFrameInfo &src);
 };
 
-class IntermissionFrameInfoContainer
-    : public std::vector<IntermissionFrameInfo *>
+class IntermissionFrameInfoContainer : public std::vector<IntermissionFrameInfo *>
 {
-   public:
+  public:
     IntermissionFrameInfoContainer();
     IntermissionFrameInfoContainer(IntermissionFrameInfoContainer &rhs);
     ~IntermissionFrameInfoContainer();
 
-   private:
+  private:
     void Copy(IntermissionFrameInfoContainer &rhs);
 
-   public:
-    IntermissionFrameInfoContainer &operator=(
-        IntermissionFrameInfoContainer &rhs);
+  public:
+    IntermissionFrameInfoContainer &operator=(IntermissionFrameInfoContainer &rhs);
 };
 
 class IntermissionAnimationInfo
 {
-   public:
+  public:
     enum AnimationType
     {
         kIntermissionAnimationInfoNormal,
@@ -107,33 +102,31 @@ class IntermissionAnimationInfo
 
     IntermissionFrameInfoContainer frames_;
 
-   public:
+  public:
     IntermissionAnimationInfo();
     IntermissionAnimationInfo(IntermissionAnimationInfo &rhs);
     ~IntermissionAnimationInfo();
 
-   public:
+  public:
     IntermissionAnimationInfo &operator=(IntermissionAnimationInfo &rhs);
     void                       Default(void);
 
-   private:
+  private:
     void Copy(IntermissionAnimationInfo &rhs);
 };
 
-class IntermissionAnimationInfoContainer
-    : public std::vector<IntermissionAnimationInfo *>
+class IntermissionAnimationInfoContainer : public std::vector<IntermissionAnimationInfo *>
 {
-   public:
+  public:
     IntermissionAnimationInfoContainer();
     IntermissionAnimationInfoContainer(IntermissionAnimationInfoContainer &rhs);
     ~IntermissionAnimationInfoContainer();
 
-   private:
+  private:
     void Copy(IntermissionAnimationInfoContainer &src);
 
-   public:
-    IntermissionAnimationInfoContainer &operator=(
-        IntermissionAnimationInfoContainer &rhs);
+  public:
+    IntermissionAnimationInfoContainer &operator=(IntermissionAnimationInfoContainer &rhs);
 };
 
 enum LightingModel
@@ -153,11 +146,11 @@ enum LightingModel
 
 class GameDefinition
 {
-   public:
+  public:
     GameDefinition();
     ~GameDefinition();
 
-   public:
+  public:
     void Default(void);
     void CopyDetail(GameDefinition &src);
 
@@ -199,9 +192,12 @@ class GameDefinition
     // Episode description, a reference to languages.ldf
     std::string description_;
 
-   private:
+  private:
     // disable copy construct and assignment operator
-    explicit GameDefinition(GameDefinition &rhs) { (void)rhs; }
+    explicit GameDefinition(GameDefinition &rhs)
+    {
+        (void)rhs;
+    }
     GameDefinition &operator=(GameDefinition &rhs)
     {
         (void)rhs;
@@ -211,16 +207,16 @@ class GameDefinition
 
 class GameDefinitionContainer : public std::vector<GameDefinition *>
 {
-   public:
+  public:
     GameDefinitionContainer();
     ~GameDefinitionContainer();
 
-   public:
+  public:
     // Search Functions
     GameDefinition *Lookup(const char *refname);
 };
 
-extern GameDefinitionContainer gamedefs;  // -ACB- 2004/06/21 Implemented
+extern GameDefinitionContainer gamedefs; // -ACB- 2004/06/21 Implemented
 
 void DDF_ReadGames(const std::string &data);
 

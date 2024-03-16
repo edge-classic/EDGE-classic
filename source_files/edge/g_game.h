@@ -31,7 +31,7 @@
 
 extern bool pistol_starts;
 extern int  random_seed;
-extern int  exit_time;  // for savegame code
+extern int  exit_time; // for savegame code
 extern int  key_show_players;
 
 // -KM- 1998/11/25 Added support for finales before levels
@@ -60,7 +60,7 @@ extern GameAction game_action;
 
 class NewGameParameters
 {
-   public:
+  public:
     SkillLevel skill_;
     int        deathmatch_;
 
@@ -72,16 +72,16 @@ class NewGameParameters
 
     PlayerFlag players_[kMaximumPlayers];
 
-    GameFlags *flags_;  // can be nullptr
+    GameFlags *flags_; // can be nullptr
 
     bool level_skip_ = false;
 
-   public:
+  public:
     NewGameParameters();
     NewGameParameters(const NewGameParameters &src);
     ~NewGameParameters();
 
-   public:
+  public:
     /* methods */
 
     void SinglePlayer(int num_bots = 0);

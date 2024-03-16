@@ -90,10 +90,16 @@ bool SpreadGroupPass(bool alt_jumps);
 void UpdateAttacks(char group, char *act_name, int action);
 bool DependRangeWasModified(int low, int high);
 
-inline bool IS_WEAPON(char group) { return islower(group); }
+inline bool IS_WEAPON(char group)
+{
+    return islower(group);
+}
 
-inline int MISC_TO_ANGLE(int m) { return m / 11930465; }
-}  // namespace frames
+inline int MISC_TO_ANGLE(int m)
+{
+    return m / 11930465;
+}
+} // namespace frames
 
 struct ActionInfo
 {
@@ -112,300 +118,283 @@ struct ActionInfo
 };
 
 const ActionInfo action_info[kTotalMBF21Actions] = {
-    { "A_nullptr", 0, "NOTHING", nullptr, nullptr },
+    {"A_nullptr", 0, "NOTHING", nullptr, nullptr},
 
     // weapon actions...
-    { "A_Light0", 0, "W:LIGHT0", nullptr, nullptr },
-    { "A_WeaponReady", 0, "W:READY", nullptr, nullptr },
-    { "A_Lower", 0, "W:LOWER", nullptr, nullptr },
-    { "A_Raise", 0, "W:RAISE", nullptr, nullptr },
-    { "A_Punch", 0, "W:SHOOT", "C:PLAYER_PUNCH", nullptr },
-    { "A_ReFire", 0, "W:REFIRE", nullptr, nullptr },
-    { "A_FirePistol", kActionFlagFlash, "W:SHOOT", "R:PLAYER_PISTOL", nullptr },
-    { "A_Light1", 0, "W:LIGHT1", nullptr, nullptr },
-    { "A_FireShotgun", kActionFlagFlash, "W:SHOOT", "R:PLAYER_SHOTGUN",
-      nullptr },
-    { "A_Light2", 0, "W:LIGHT2", nullptr, nullptr },
-    { "A_FireShotgun2", kActionFlagFlash, "W:SHOOT", "R:PLAYER_SHOTGUN2",
-      nullptr },
-    { "A_CheckReload", 0, "W:CHECKRELOAD", nullptr, nullptr },
-    { "A_OpenShotgun2", 0, "W:PLAYSOUND(DBOPN)", nullptr, nullptr },
-    { "A_LoadShotgun2", 0, "W:PLAYSOUND(DBLOAD)", nullptr, nullptr },
-    { "A_CloseShotgun2", 0, "W:PLAYSOUND(DBCLS)", nullptr, nullptr },
-    { "A_FireCGun", kActionFlagFlash, "W:SHOOT", "R:PLAYER_CHAINGUN", nullptr },
-    { "A_GunFlash", kActionFlagFlash, "W:FLASH", nullptr, nullptr },
-    { "A_FireMissile", 0, "W:SHOOT", "R:PLAYER_MISSILE", nullptr },
-    { "A_Saw", 0, "W:SHOOT", "C:PLAYER_SAW", nullptr },
-    { "A_FirePlasma", kActionFlagFlash, "W:SHOOT", "R:PLAYER_PLASMA", nullptr },
-    { "A_BFGsound", 0, "W:PLAYSOUND(BFG)", nullptr, nullptr },
-    { "A_FireBFG", 0, "W:SHOOT", "R:PLAYER_BFG9000", nullptr },
+    {"A_Light0", 0, "W:LIGHT0", nullptr, nullptr},
+    {"A_WeaponReady", 0, "W:READY", nullptr, nullptr},
+    {"A_Lower", 0, "W:LOWER", nullptr, nullptr},
+    {"A_Raise", 0, "W:RAISE", nullptr, nullptr},
+    {"A_Punch", 0, "W:SHOOT", "C:PLAYER_PUNCH", nullptr},
+    {"A_ReFire", 0, "W:REFIRE", nullptr, nullptr},
+    {"A_FirePistol", kActionFlagFlash, "W:SHOOT", "R:PLAYER_PISTOL", nullptr},
+    {"A_Light1", 0, "W:LIGHT1", nullptr, nullptr},
+    {"A_FireShotgun", kActionFlagFlash, "W:SHOOT", "R:PLAYER_SHOTGUN", nullptr},
+    {"A_Light2", 0, "W:LIGHT2", nullptr, nullptr},
+    {"A_FireShotgun2", kActionFlagFlash, "W:SHOOT", "R:PLAYER_SHOTGUN2", nullptr},
+    {"A_CheckReload", 0, "W:CHECKRELOAD", nullptr, nullptr},
+    {"A_OpenShotgun2", 0, "W:PLAYSOUND(DBOPN)", nullptr, nullptr},
+    {"A_LoadShotgun2", 0, "W:PLAYSOUND(DBLOAD)", nullptr, nullptr},
+    {"A_CloseShotgun2", 0, "W:PLAYSOUND(DBCLS)", nullptr, nullptr},
+    {"A_FireCGun", kActionFlagFlash, "W:SHOOT", "R:PLAYER_CHAINGUN", nullptr},
+    {"A_GunFlash", kActionFlagFlash, "W:FLASH", nullptr, nullptr},
+    {"A_FireMissile", 0, "W:SHOOT", "R:PLAYER_MISSILE", nullptr},
+    {"A_Saw", 0, "W:SHOOT", "C:PLAYER_SAW", nullptr},
+    {"A_FirePlasma", kActionFlagFlash, "W:SHOOT", "R:PLAYER_PLASMA", nullptr},
+    {"A_BFGsound", 0, "W:PLAYSOUND(BFG)", nullptr, nullptr},
+    {"A_FireBFG", 0, "W:SHOOT", "R:PLAYER_BFG9000", nullptr},
 
     // thing actions...
-    { "A_BFGSpray", 0, "SPARE_ATTACK", nullptr, nullptr },
-    { "A_Explode", kActionFlagExplode, "EXPLOSIONDAMAGE", nullptr, nullptr },
-    { "A_Pain", 0, "MAKEPAINSOUND", nullptr, nullptr },
-    { "A_PlayerScream", 0, "PLAYER_SCREAM", nullptr, nullptr },
-    { "A_Fall", kActionFlagFall, "MAKEDEAD", nullptr, nullptr },
-    { "A_XScream", 0, "MAKEOVERKILLSOUND", nullptr, nullptr },
-    { "A_Look", kActionFlagLook, "LOOKOUT", nullptr, nullptr },
-    { "A_Chase", kActionFlagChase, "CHASE", nullptr, nullptr },
-    { "A_FaceTarget", 0, "FACETARGET", nullptr, nullptr },
-    { "A_PosAttack", 0, "RANGE_ATTACK", "R:FORMER_HUMAN_PISTOL", nullptr },
-    { "A_Scream", 0, "MAKEDEATHSOUND", nullptr, nullptr },
-    { "A_SPosAttack", 0, "RANGE_ATTACK", "R:FORMER_HUMAN_SHOTGUN", nullptr },
-    { "A_VileChase", kActionFlagChase | kActionFlagRaise, "RESCHASE", nullptr,
-      nullptr },
-    { "A_VileStart", 0, "PLAYSOUND(VILATK)", nullptr, nullptr },
-    { "A_VileTarget", 0, "RANGE_ATTACK", "R:ARCHVILE_FIRE", nullptr },
-    { "A_VileAttack", 0, "EFFECTTRACKER", nullptr, nullptr },
-    { "A_StartFire", 0, "TRACKERSTART", nullptr, nullptr },
-    { "A_Fire", 0, "TRACKERFOLLOW", nullptr, nullptr },
-    { "A_FireCrackle", 0, "TRACKERACTIVE", nullptr, nullptr },
-    { "A_Tracer", 0, "RANDOM_TRACER", nullptr, nullptr },
-    { "A_SkelWhoosh", kActionFlagFaceTarget, "PLAYSOUND(SKESWG)", nullptr,
-      nullptr },
-    { "A_SkelFist", kActionFlagFaceTarget, "CLOSE_ATTACK",
-      "C:REVENANT_CLOSECOMBAT", nullptr },
-    { "A_SkelMissile", 0, "RANGE_ATTACK", "R:REVENANT_MISSILE", nullptr },
-    { "A_FatRaise", kActionFlagFaceTarget, "PLAYSOUND(MANATK)", nullptr,
-      nullptr },
-    { "A_FatAttack1", kActionFlagSpread, "RANGE_ATTACK", "R:MANCUBUS_FIREBALL",
-      nullptr },
-    { "A_FatAttack2", kActionFlagSpread, "RANGE_ATTACK", "R:MANCUBUS_FIREBALL",
-      nullptr },
-    { "A_FatAttack3", kActionFlagSpread, "RANGE_ATTACK", "R:MANCUBUS_FIREBALL",
-      nullptr },
-    { "A_BossDeath", 0, "NOTHING", nullptr, nullptr },
-    { "A_CPosAttack", 0, "RANGE_ATTACK", "R:FORMER_HUMAN_CHAINGUN", nullptr },
-    { "A_CPosRefire", 0, "REFIRE_CHECK", nullptr, nullptr },
-    { "A_TroopAttack", 0, "COMBOATTACK", "R:IMP_FIREBALL",
-      "C:IMP_CLOSECOMBAT" },
-    { "A_SargAttack", 0, "CLOSE_ATTACK", "C:DEMON_CLOSECOMBAT", nullptr },
-    { "A_HeadAttack", 0, "COMBOATTACK", "R:CACO_FIREBALL",
-      "C:CACO_CLOSECOMBAT" },
-    { "A_BruisAttack", 0, "COMBOATTACK", "R:BARON_FIREBALL",
-      "C:BARON_CLOSECOMBAT" },
-    { "A_SkullAttack", 0, "RANGE_ATTACK", "R:SKULL_ASSAULT", nullptr },
-    { "A_Metal", 0, "WALKSOUND_CHASE", nullptr, nullptr },
-    { "A_SpidRefire", 0, "REFIRE_CHECK", nullptr, nullptr },
-    { "A_BabyMetal", 0, "WALKSOUND_CHASE", nullptr, nullptr },
-    { "A_BspiAttack", 0, "RANGE_ATTACK", "R:ARACHNOTRON_PLASMA", nullptr },
-    { "A_Hoof", 0, "PLAYSOUND(HOOF)", nullptr, nullptr },
-    { "A_CyberAttack", 0, "RANGE_ATTACK", "R:CYBERDEMON_MISSILE", nullptr },
-    { "A_PainAttack", 0, "RANGE_ATTACK", "R:ELEMENTAL_SPAWNER", nullptr },
-    { "A_PainDie", kActionFlagMakeDead, "SPARE_ATTACK",
-      "S:ELEMENTAL_DEATHSPAWN", nullptr },
-    { "A_KeenDie",
-      kActionFlagSpecial | kActionFlagKeenDie | kActionFlagMakeDead, "",
-      nullptr, nullptr },
-    { "A_BrainPain", 0, "MAKEPAINSOUND", nullptr, nullptr },
-    { "A_BrainScream", 0, "BRAINSCREAM", nullptr, nullptr },
-    { "A_BrainDie", 0, "BRAINDIE", nullptr, nullptr },
-    { "A_BrainAwake", 0, "NOTHING", nullptr, nullptr },
-    { "A_BrainSpit", 0, "BRAINSPIT", "R:BRAIN_CUBE", nullptr },
-    { "A_SpawnSound", 0, "MAKEACTIVESOUND", nullptr, nullptr },
-    { "A_SpawnFly", 0, "CUBETRACER", nullptr, nullptr },
-    { "A_BrainExplode", 0, "BRAINMISSILEEXPLODE", nullptr, nullptr },
-    { "A_CubeSpawn", 0, "CUBESPAWN", nullptr, nullptr },
+    {"A_BFGSpray", 0, "SPARE_ATTACK", nullptr, nullptr},
+    {"A_Explode", kActionFlagExplode, "EXPLOSIONDAMAGE", nullptr, nullptr},
+    {"A_Pain", 0, "MAKEPAINSOUND", nullptr, nullptr},
+    {"A_PlayerScream", 0, "PLAYER_SCREAM", nullptr, nullptr},
+    {"A_Fall", kActionFlagFall, "MAKEDEAD", nullptr, nullptr},
+    {"A_XScream", 0, "MAKEOVERKILLSOUND", nullptr, nullptr},
+    {"A_Look", kActionFlagLook, "LOOKOUT", nullptr, nullptr},
+    {"A_Chase", kActionFlagChase, "CHASE", nullptr, nullptr},
+    {"A_FaceTarget", 0, "FACETARGET", nullptr, nullptr},
+    {"A_PosAttack", 0, "RANGE_ATTACK", "R:FORMER_HUMAN_PISTOL", nullptr},
+    {"A_Scream", 0, "MAKEDEATHSOUND", nullptr, nullptr},
+    {"A_SPosAttack", 0, "RANGE_ATTACK", "R:FORMER_HUMAN_SHOTGUN", nullptr},
+    {"A_VileChase", kActionFlagChase | kActionFlagRaise, "RESCHASE", nullptr, nullptr},
+    {"A_VileStart", 0, "PLAYSOUND(VILATK)", nullptr, nullptr},
+    {"A_VileTarget", 0, "RANGE_ATTACK", "R:ARCHVILE_FIRE", nullptr},
+    {"A_VileAttack", 0, "EFFECTTRACKER", nullptr, nullptr},
+    {"A_StartFire", 0, "TRACKERSTART", nullptr, nullptr},
+    {"A_Fire", 0, "TRACKERFOLLOW", nullptr, nullptr},
+    {"A_FireCrackle", 0, "TRACKERACTIVE", nullptr, nullptr},
+    {"A_Tracer", 0, "RANDOM_TRACER", nullptr, nullptr},
+    {"A_SkelWhoosh", kActionFlagFaceTarget, "PLAYSOUND(SKESWG)", nullptr, nullptr},
+    {"A_SkelFist", kActionFlagFaceTarget, "CLOSE_ATTACK", "C:REVENANT_CLOSECOMBAT", nullptr},
+    {"A_SkelMissile", 0, "RANGE_ATTACK", "R:REVENANT_MISSILE", nullptr},
+    {"A_FatRaise", kActionFlagFaceTarget, "PLAYSOUND(MANATK)", nullptr, nullptr},
+    {"A_FatAttack1", kActionFlagSpread, "RANGE_ATTACK", "R:MANCUBUS_FIREBALL", nullptr},
+    {"A_FatAttack2", kActionFlagSpread, "RANGE_ATTACK", "R:MANCUBUS_FIREBALL", nullptr},
+    {"A_FatAttack3", kActionFlagSpread, "RANGE_ATTACK", "R:MANCUBUS_FIREBALL", nullptr},
+    {"A_BossDeath", 0, "NOTHING", nullptr, nullptr},
+    {"A_CPosAttack", 0, "RANGE_ATTACK", "R:FORMER_HUMAN_CHAINGUN", nullptr},
+    {"A_CPosRefire", 0, "REFIRE_CHECK", nullptr, nullptr},
+    {"A_TroopAttack", 0, "COMBOATTACK", "R:IMP_FIREBALL", "C:IMP_CLOSECOMBAT"},
+    {"A_SargAttack", 0, "CLOSE_ATTACK", "C:DEMON_CLOSECOMBAT", nullptr},
+    {"A_HeadAttack", 0, "COMBOATTACK", "R:CACO_FIREBALL", "C:CACO_CLOSECOMBAT"},
+    {"A_BruisAttack", 0, "COMBOATTACK", "R:BARON_FIREBALL", "C:BARON_CLOSECOMBAT"},
+    {"A_SkullAttack", 0, "RANGE_ATTACK", "R:SKULL_ASSAULT", nullptr},
+    {"A_Metal", 0, "WALKSOUND_CHASE", nullptr, nullptr},
+    {"A_SpidRefire", 0, "REFIRE_CHECK", nullptr, nullptr},
+    {"A_BabyMetal", 0, "WALKSOUND_CHASE", nullptr, nullptr},
+    {"A_BspiAttack", 0, "RANGE_ATTACK", "R:ARACHNOTRON_PLASMA", nullptr},
+    {"A_Hoof", 0, "PLAYSOUND(HOOF)", nullptr, nullptr},
+    {"A_CyberAttack", 0, "RANGE_ATTACK", "R:CYBERDEMON_MISSILE", nullptr},
+    {"A_PainAttack", 0, "RANGE_ATTACK", "R:ELEMENTAL_SPAWNER", nullptr},
+    {"A_PainDie", kActionFlagMakeDead, "SPARE_ATTACK", "S:ELEMENTAL_DEATHSPAWN", nullptr},
+    {"A_KeenDie", kActionFlagSpecial | kActionFlagKeenDie | kActionFlagMakeDead, "", nullptr, nullptr},
+    {"A_BrainPain", 0, "MAKEPAINSOUND", nullptr, nullptr},
+    {"A_BrainScream", 0, "BRAINSCREAM", nullptr, nullptr},
+    {"A_BrainDie", 0, "BRAINDIE", nullptr, nullptr},
+    {"A_BrainAwake", 0, "NOTHING", nullptr, nullptr},
+    {"A_BrainSpit", 0, "BRAINSPIT", "R:BRAIN_CUBE", nullptr},
+    {"A_SpawnSound", 0, "MAKEACTIVESOUND", nullptr, nullptr},
+    {"A_SpawnFly", 0, "CUBETRACER", nullptr, nullptr},
+    {"A_BrainExplode", 0, "BRAINMISSILEEXPLODE", nullptr, nullptr},
+    {"A_CubeSpawn", 0, "CUBESPAWN", nullptr, nullptr},
 
     // BOOM and MBF actions...
-    { "A_Die", kActionFlagSpecial, "", nullptr, nullptr },
-    { "A_Stop", 0, "STOP", nullptr, nullptr },
-    { "A_Detonate", kActionFlagDetonate, "EXPLOSIONDAMAGE", nullptr, nullptr },
-    { "A_Mushroom", 0, "MUSHROOM", nullptr, nullptr },
+    {"A_Die", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_Stop", 0, "STOP", nullptr, nullptr},
+    {"A_Detonate", kActionFlagDetonate, "EXPLOSIONDAMAGE", nullptr, nullptr},
+    {"A_Mushroom", 0, "MUSHROOM", nullptr, nullptr},
 
-    { "A_Spawn", kActionFlagSpecial, "", nullptr, nullptr },
-    { "A_Turn", kActionFlagSpecial, "", nullptr, nullptr },
-    { "A_Face", kActionFlagSpecial, "", nullptr, nullptr },
-    { "A_Scratch", kActionFlagSpecial, "", nullptr, nullptr },
-    { "A_PlaySound", kActionFlagSpecial, "", nullptr, nullptr },
-    { "A_RandomJump", kActionFlagSpecial, "", nullptr, nullptr },
-    { "A_LineEffect", kActionFlagSpecial, "", nullptr, nullptr },
+    {"A_Spawn", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_Turn", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_Face", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_Scratch", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_PlaySound", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_RandomJump", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_LineEffect", kActionFlagSpecial, "", nullptr, nullptr},
 
-    { "A_FireOldBFG", 0, "W:SHOOT", "R:INTERNAL_FIRE_OLD_BFG", nullptr },
-    { "A_BetaSkullAttack", 0, "RANGE_ATTACK",
-      "R:INTERNAL_BETA_LOST_SOUL_ATTACK", nullptr },
+    {"A_FireOldBFG", 0, "W:SHOOT", "R:INTERNAL_FIRE_OLD_BFG", nullptr},
+    {"A_BetaSkullAttack", 0, "RANGE_ATTACK", "R:INTERNAL_BETA_LOST_SOUL_ATTACK", nullptr},
 
     // MBF21 actions...
-    { "A_RefireTo", kActionFlagSpecial, "", nullptr, nullptr }
-};
+    {"A_RefireTo", kActionFlagSpecial, "", nullptr, nullptr}};
 
 //------------------------------------------------------------------------
 
 struct StateRange
 {
-    int obj_num;  // thing or weapon
+    int obj_num; // thing or weapon
     int start1, end1;
     int start2, end2;
 };
 
 const StateRange thing_range[] = {
     // Things...
-    { kMT_PLAYER, kS_PLAY, kS_PLAY_XDIE9, -1, -1 },
-    { kMT_POSSESSED, kS_POSS_STND, kS_POSS_RAISE4, -1, -1 },
-    { kMT_SHOTGUY, kS_SPOS_STND, kS_SPOS_RAISE5, -1, -1 },
-    { kMT_VILE, kS_VILE_STND, kS_VILE_DIE10, -1, -1 },
-    { kMT_UNDEAD, kS_SKEL_STND, kS_SKEL_RAISE6, -1, -1 },
-    { kMT_SMOKE, kS_SMOKE1, kS_SMOKE5, -1, -1 },
-    { kMT_FATSO, kS_FATT_STND, kS_FATT_RAISE8, -1, -1 },
-    { kMT_CHAINGUY, kS_CPOS_STND, kS_CPOS_RAISE7, -1, -1 },
-    { kMT_TROOP, kS_TROO_STND, kS_TROO_RAISE5, -1, -1 },
-    { kMT_SERGEANT, kS_SARG_STND, kS_SARG_RAISE6, -1, -1 },
-    { kMT_SHADOWS, kS_SARG_STND, kS_SARG_RAISE6, -1, -1 },
-    { kMT_HEAD, kS_HEAD_STND, kS_HEAD_RAISE6, -1, -1 },
-    { kMT_BRUISER, kS_BOSS_STND, kS_BOSS_RAISE7, -1, -1 },
-    { kMT_KNIGHT, kS_BOS2_STND, kS_BOS2_RAISE7, -1, -1 },
-    { kMT_SKULL, kS_SKULL_STND, kS_SKULL_DIE6, -1, -1 },
-    { kMT_SPIDER, kS_SPID_STND, kS_SPID_DIE11, -1, -1 },
-    { kMT_BABY, kS_BSPI_STND, kS_BSPI_RAISE7, -1, -1 },
-    { kMT_CYBORG, kS_CYBER_STND, kS_CYBER_DIE10, -1, -1 },
-    { kMT_PAIN, kS_PAIN_STND, kS_PAIN_RAISE6, -1, -1 },
-    { kMT_WOLFSS, kS_SSWV_STND, kS_SSWV_RAISE5, -1, -1 },
-    { kMT_KEEN, kS_KEENSTND, kS_KEENPAIN2, -1, -1 },
-    { kMT_BOSSBRAIN, kS_BRAIN, kS_BRAIN_DIE4, -1, -1 },
-    { kMT_BOSSSPIT, kS_BRAINEYE, kS_BRAINEYE1, -1, -1 },
-    { kMT_BARREL, kS_BAR1, kS_BEXP5, -1, -1 },
-    { kMT_PUFF, kS_PUFF1, kS_PUFF4, -1, -1 },
-    { kMT_BLOOD, kS_BLOOD1, kS_BLOOD3, -1, -1 },
-    { kMT_TFOG, kS_TFOG, kS_TFOG10, -1, -1 },
-    { kMT_IFOG, kS_IFOG, kS_IFOG5, -1, -1 },
-    { kMT_TELEPORTMAN, kS_TFOG, kS_TFOG10, -1, -1 },
+    {kMT_PLAYER, kS_PLAY, kS_PLAY_XDIE9, -1, -1},
+    {kMT_POSSESSED, kS_POSS_STND, kS_POSS_RAISE4, -1, -1},
+    {kMT_SHOTGUY, kS_SPOS_STND, kS_SPOS_RAISE5, -1, -1},
+    {kMT_VILE, kS_VILE_STND, kS_VILE_DIE10, -1, -1},
+    {kMT_UNDEAD, kS_SKEL_STND, kS_SKEL_RAISE6, -1, -1},
+    {kMT_SMOKE, kS_SMOKE1, kS_SMOKE5, -1, -1},
+    {kMT_FATSO, kS_FATT_STND, kS_FATT_RAISE8, -1, -1},
+    {kMT_CHAINGUY, kS_CPOS_STND, kS_CPOS_RAISE7, -1, -1},
+    {kMT_TROOP, kS_TROO_STND, kS_TROO_RAISE5, -1, -1},
+    {kMT_SERGEANT, kS_SARG_STND, kS_SARG_RAISE6, -1, -1},
+    {kMT_SHADOWS, kS_SARG_STND, kS_SARG_RAISE6, -1, -1},
+    {kMT_HEAD, kS_HEAD_STND, kS_HEAD_RAISE6, -1, -1},
+    {kMT_BRUISER, kS_BOSS_STND, kS_BOSS_RAISE7, -1, -1},
+    {kMT_KNIGHT, kS_BOS2_STND, kS_BOS2_RAISE7, -1, -1},
+    {kMT_SKULL, kS_SKULL_STND, kS_SKULL_DIE6, -1, -1},
+    {kMT_SPIDER, kS_SPID_STND, kS_SPID_DIE11, -1, -1},
+    {kMT_BABY, kS_BSPI_STND, kS_BSPI_RAISE7, -1, -1},
+    {kMT_CYBORG, kS_CYBER_STND, kS_CYBER_DIE10, -1, -1},
+    {kMT_PAIN, kS_PAIN_STND, kS_PAIN_RAISE6, -1, -1},
+    {kMT_WOLFSS, kS_SSWV_STND, kS_SSWV_RAISE5, -1, -1},
+    {kMT_KEEN, kS_KEENSTND, kS_KEENPAIN2, -1, -1},
+    {kMT_BOSSBRAIN, kS_BRAIN, kS_BRAIN_DIE4, -1, -1},
+    {kMT_BOSSSPIT, kS_BRAINEYE, kS_BRAINEYE1, -1, -1},
+    {kMT_BARREL, kS_BAR1, kS_BEXP5, -1, -1},
+    {kMT_PUFF, kS_PUFF1, kS_PUFF4, -1, -1},
+    {kMT_BLOOD, kS_BLOOD1, kS_BLOOD3, -1, -1},
+    {kMT_TFOG, kS_TFOG, kS_TFOG10, -1, -1},
+    {kMT_IFOG, kS_IFOG, kS_IFOG5, -1, -1},
+    {kMT_TELEPORTMAN, kS_TFOG, kS_TFOG10, -1, -1},
 
-    { kMT_MISC0, kS_ARM1, kS_ARM1A, -1, -1 },
-    { kMT_MISC1, kS_ARM2, kS_ARM2A, -1, -1 },
-    { kMT_MISC2, kS_BON1, kS_BON1E, -1, -1 },
-    { kMT_MISC3, kS_BON2, kS_BON2E, -1, -1 },
-    { kMT_MISC4, kS_BKEY, kS_BKEY2, -1, -1 },
-    { kMT_MISC5, kS_RKEY, kS_RKEY2, -1, -1 },
-    { kMT_MISC6, kS_YKEY, kS_YKEY2, -1, -1 },
-    { kMT_MISC7, kS_YSKULL, kS_YSKULL2, -1, -1 },
-    { kMT_MISC8, kS_RSKULL, kS_RSKULL2, -1, -1 },
-    { kMT_MISC9, kS_BSKULL, kS_BSKULL2, -1, -1 },
-    { kMT_MISC10, kS_STIM, kS_STIM, -1, -1 },
-    { kMT_MISC11, kS_MEDI, kS_MEDI, -1, -1 },
-    { kMT_MISC12, kS_SOUL, kS_SOUL6, -1, -1 },
-    { kMT_INV, kS_PINV, kS_PINV4, -1, -1 },
-    { kMT_MISC13, kS_PSTR, kS_PSTR, -1, -1 },
-    { kMT_INS, kS_PINS, kS_PINS4, -1, -1 },
-    { kMT_MISC14, kS_SUIT, kS_SUIT, -1, -1 },
-    { kMT_MISC15, kS_PMAP, kS_PMAP6, -1, -1 },
-    { kMT_MISC16, kS_PVIS, kS_PVIS2, -1, -1 },
-    { kMT_MEGA, kS_MEGA, kS_MEGA4, -1, -1 },
-    { kMT_CLIP, kS_CLIP, kS_CLIP, -1, -1 },
-    { kMT_MISC17, kS_AMMO, kS_AMMO, -1, -1 },
-    { kMT_MISC18, kS_ROCK, kS_ROCK, -1, -1 },
-    { kMT_MISC19, kS_BROK, kS_BROK, -1, -1 },
-    { kMT_MISC20, kS_CELL, kS_CELL, -1, -1 },
-    { kMT_MISC21, kS_CELP, kS_CELP, -1, -1 },
-    { kMT_MISC22, kS_SHEL, kS_SHEL, -1, -1 },
-    { kMT_MISC23, kS_SBOX, kS_SBOX, -1, -1 },
-    { kMT_MISC24, kS_BPAK, kS_BPAK, -1, -1 },
-    { kMT_MISC25, kS_BFUG, kS_BFUG, -1, -1 },
-    { kMT_CHAINGUN, kS_MGUN, kS_MGUN, -1, -1 },
-    { kMT_MISC26, kS_CSAW, kS_CSAW, -1, -1 },
-    { kMT_MISC27, kS_LAUN, kS_LAUN, -1, -1 },
-    { kMT_MISC28, kS_PLAS, kS_PLAS, -1, -1 },
-    { kMT_SHOTGUN, kS_SHOT, kS_SHOT, -1, -1 },
-    { kMT_SUPERSHOTGUN, kS_SHOT2, kS_SHOT2, -1, -1 },
+    {kMT_MISC0, kS_ARM1, kS_ARM1A, -1, -1},
+    {kMT_MISC1, kS_ARM2, kS_ARM2A, -1, -1},
+    {kMT_MISC2, kS_BON1, kS_BON1E, -1, -1},
+    {kMT_MISC3, kS_BON2, kS_BON2E, -1, -1},
+    {kMT_MISC4, kS_BKEY, kS_BKEY2, -1, -1},
+    {kMT_MISC5, kS_RKEY, kS_RKEY2, -1, -1},
+    {kMT_MISC6, kS_YKEY, kS_YKEY2, -1, -1},
+    {kMT_MISC7, kS_YSKULL, kS_YSKULL2, -1, -1},
+    {kMT_MISC8, kS_RSKULL, kS_RSKULL2, -1, -1},
+    {kMT_MISC9, kS_BSKULL, kS_BSKULL2, -1, -1},
+    {kMT_MISC10, kS_STIM, kS_STIM, -1, -1},
+    {kMT_MISC11, kS_MEDI, kS_MEDI, -1, -1},
+    {kMT_MISC12, kS_SOUL, kS_SOUL6, -1, -1},
+    {kMT_INV, kS_PINV, kS_PINV4, -1, -1},
+    {kMT_MISC13, kS_PSTR, kS_PSTR, -1, -1},
+    {kMT_INS, kS_PINS, kS_PINS4, -1, -1},
+    {kMT_MISC14, kS_SUIT, kS_SUIT, -1, -1},
+    {kMT_MISC15, kS_PMAP, kS_PMAP6, -1, -1},
+    {kMT_MISC16, kS_PVIS, kS_PVIS2, -1, -1},
+    {kMT_MEGA, kS_MEGA, kS_MEGA4, -1, -1},
+    {kMT_CLIP, kS_CLIP, kS_CLIP, -1, -1},
+    {kMT_MISC17, kS_AMMO, kS_AMMO, -1, -1},
+    {kMT_MISC18, kS_ROCK, kS_ROCK, -1, -1},
+    {kMT_MISC19, kS_BROK, kS_BROK, -1, -1},
+    {kMT_MISC20, kS_CELL, kS_CELL, -1, -1},
+    {kMT_MISC21, kS_CELP, kS_CELP, -1, -1},
+    {kMT_MISC22, kS_SHEL, kS_SHEL, -1, -1},
+    {kMT_MISC23, kS_SBOX, kS_SBOX, -1, -1},
+    {kMT_MISC24, kS_BPAK, kS_BPAK, -1, -1},
+    {kMT_MISC25, kS_BFUG, kS_BFUG, -1, -1},
+    {kMT_CHAINGUN, kS_MGUN, kS_MGUN, -1, -1},
+    {kMT_MISC26, kS_CSAW, kS_CSAW, -1, -1},
+    {kMT_MISC27, kS_LAUN, kS_LAUN, -1, -1},
+    {kMT_MISC28, kS_PLAS, kS_PLAS, -1, -1},
+    {kMT_SHOTGUN, kS_SHOT, kS_SHOT, -1, -1},
+    {kMT_SUPERSHOTGUN, kS_SHOT2, kS_SHOT2, -1, -1},
 
-    { kMT_MISC29, kS_TECHLAMP, kS_TECHLAMP4, -1, -1 },
-    { kMT_MISC30, kS_TECH2LAMP, kS_TECH2LAMP4, -1, -1 },
-    { kMT_MISC31, kS_COLU, kS_COLU, -1, -1 },
-    { kMT_MISC32, kS_TALLGRNCOL, kS_TALLGRNCOL, -1, -1 },
-    { kMT_MISC33, kS_SHRTGRNCOL, kS_SHRTGRNCOL, -1, -1 },
-    { kMT_MISC34, kS_TALLREDCOL, kS_TALLREDCOL, -1, -1 },
-    { kMT_MISC35, kS_SHRTREDCOL, kS_SHRTREDCOL, -1, -1 },
-    { kMT_MISC36, kS_SKULLCOL, kS_SKULLCOL, -1, -1 },
-    { kMT_MISC37, kS_HEARTCOL, kS_HEARTCOL2, -1, -1 },
-    { kMT_MISC38, kS_EVILEYE, kS_EVILEYE4, -1, -1 },
-    { kMT_MISC39, kS_FLOATSKULL, kS_FLOATSKULL3, -1, -1 },
-    { kMT_MISC40, kS_TORCHTREE, kS_TORCHTREE, -1, -1 },
-    { kMT_MISC41, kS_BLUETORCH, kS_BLUETORCH4, -1, -1 },
-    { kMT_MISC42, kS_GREENTORCH, kS_GREENTORCH4, -1, -1 },
-    { kMT_MISC43, kS_REDTORCH, kS_REDTORCH4, -1, -1 },
-    { kMT_MISC44, kS_BTORCHSHRT, kS_BTORCHSHRT4, -1, -1 },
-    { kMT_MISC45, kS_GTORCHSHRT, kS_GTORCHSHRT4, -1, -1 },
-    { kMT_MISC46, kS_RTORCHSHRT, kS_RTORCHSHRT4, -1, -1 },
-    { kMT_MISC47, kS_STALAGTITE, kS_STALAGTITE, -1, -1 },
-    { kMT_MISC48, kS_TECHPILLAR, kS_TECHPILLAR, -1, -1 },
-    { kMT_MISC49, kS_CANDLESTIK, kS_CANDLESTIK, -1, -1 },
-    { kMT_MISC50, kS_CANDELABRA, kS_CANDELABRA, -1, -1 },
-    { kMT_MISC51, kS_BLOODYTWITCH, kS_BLOODYTWITCH4, -1, -1 },
-    { kMT_MISC60, kS_BLOODYTWITCH, kS_BLOODYTWITCH4, -1, -1 },
-    { kMT_MISC52, kS_MEAT2, kS_MEAT2, -1, -1 },
-    { kMT_MISC53, kS_MEAT3, kS_MEAT3, -1, -1 },
-    { kMT_MISC54, kS_MEAT4, kS_MEAT4, -1, -1 },
-    { kMT_MISC55, kS_MEAT5, kS_MEAT5, -1, -1 },
-    { kMT_MISC56, kS_MEAT2, kS_MEAT2, -1, -1 },
-    { kMT_MISC57, kS_MEAT4, kS_MEAT4, -1, -1 },
-    { kMT_MISC58, kS_MEAT3, kS_MEAT3, -1, -1 },
-    { kMT_MISC59, kS_MEAT5, kS_MEAT5, -1, -1 },
-    { kMT_MISC61, kS_HEAD_DIE6, kS_HEAD_DIE6, -1, -1 },
-    { kMT_MISC62, kS_PLAY_DIE7, kS_PLAY_DIE7, -1, -1 },
-    { kMT_MISC63, kS_POSS_DIE5, kS_POSS_DIE5, -1, -1 },
-    { kMT_MISC64, kS_SARG_DIE6, kS_SARG_DIE6, -1, -1 },
-    { kMT_MISC65, kS_SKULL_DIE6, kS_SKULL_DIE6, -1, -1 },
-    { kMT_MISC66, kS_TROO_DIE5, kS_TROO_DIE5, -1, -1 },
-    { kMT_MISC67, kS_SPOS_DIE5, kS_SPOS_DIE5, -1, -1 },
-    { kMT_MISC68, kS_PLAY_XDIE9, kS_PLAY_XDIE9, -1, -1 },
-    { kMT_MISC69, kS_PLAY_XDIE9, kS_PLAY_XDIE9, -1, -1 },
-    { kMT_MISC70, kS_HEADSONSTICK, kS_HEADSONSTICK, -1, -1 },
-    { kMT_MISC71, kS_GIBS, kS_GIBS, -1, -1 },
-    { kMT_MISC72, kS_HEADONASTICK, kS_HEADONASTICK, -1, -1 },
-    { kMT_MISC73, kS_HEADCANDLES, kS_HEADCANDLES2, -1, -1 },
-    { kMT_MISC74, kS_DEADSTICK, kS_DEADSTICK, -1, -1 },
-    { kMT_MISC75, kS_LIVESTICK, kS_LIVESTICK2, -1, -1 },
-    { kMT_MISC76, kS_BIGTREE, kS_BIGTREE, -1, -1 },
-    { kMT_MISC77, kS_BBAR1, kS_BBAR3, -1, -1 },
-    { kMT_MISC78, kS_HANGNOGUTS, kS_HANGNOGUTS, -1, -1 },
-    { kMT_MISC79, kS_HANGBNOBRAIN, kS_HANGBNOBRAIN, -1, -1 },
-    { kMT_MISC80, kS_HANGTLOOKDN, kS_HANGTLOOKDN, -1, -1 },
-    { kMT_MISC81, kS_HANGTSKULL, kS_HANGTSKULL, -1, -1 },
-    { kMT_MISC82, kS_HANGTLOOKUP, kS_HANGTLOOKUP, -1, -1 },
-    { kMT_MISC83, kS_HANGTNOBRAIN, kS_HANGTNOBRAIN, -1, -1 },
-    { kMT_MISC84, kS_COLONGIBS, kS_COLONGIBS, -1, -1 },
-    { kMT_MISC85, kS_SMALLPOOL, kS_SMALLPOOL, -1, -1 },
-    { kMT_MISC86, kS_BRAINSTEM, kS_BRAINSTEM, -1, -1 },
+    {kMT_MISC29, kS_TECHLAMP, kS_TECHLAMP4, -1, -1},
+    {kMT_MISC30, kS_TECH2LAMP, kS_TECH2LAMP4, -1, -1},
+    {kMT_MISC31, kS_COLU, kS_COLU, -1, -1},
+    {kMT_MISC32, kS_TALLGRNCOL, kS_TALLGRNCOL, -1, -1},
+    {kMT_MISC33, kS_SHRTGRNCOL, kS_SHRTGRNCOL, -1, -1},
+    {kMT_MISC34, kS_TALLREDCOL, kS_TALLREDCOL, -1, -1},
+    {kMT_MISC35, kS_SHRTREDCOL, kS_SHRTREDCOL, -1, -1},
+    {kMT_MISC36, kS_SKULLCOL, kS_SKULLCOL, -1, -1},
+    {kMT_MISC37, kS_HEARTCOL, kS_HEARTCOL2, -1, -1},
+    {kMT_MISC38, kS_EVILEYE, kS_EVILEYE4, -1, -1},
+    {kMT_MISC39, kS_FLOATSKULL, kS_FLOATSKULL3, -1, -1},
+    {kMT_MISC40, kS_TORCHTREE, kS_TORCHTREE, -1, -1},
+    {kMT_MISC41, kS_BLUETORCH, kS_BLUETORCH4, -1, -1},
+    {kMT_MISC42, kS_GREENTORCH, kS_GREENTORCH4, -1, -1},
+    {kMT_MISC43, kS_REDTORCH, kS_REDTORCH4, -1, -1},
+    {kMT_MISC44, kS_BTORCHSHRT, kS_BTORCHSHRT4, -1, -1},
+    {kMT_MISC45, kS_GTORCHSHRT, kS_GTORCHSHRT4, -1, -1},
+    {kMT_MISC46, kS_RTORCHSHRT, kS_RTORCHSHRT4, -1, -1},
+    {kMT_MISC47, kS_STALAGTITE, kS_STALAGTITE, -1, -1},
+    {kMT_MISC48, kS_TECHPILLAR, kS_TECHPILLAR, -1, -1},
+    {kMT_MISC49, kS_CANDLESTIK, kS_CANDLESTIK, -1, -1},
+    {kMT_MISC50, kS_CANDELABRA, kS_CANDELABRA, -1, -1},
+    {kMT_MISC51, kS_BLOODYTWITCH, kS_BLOODYTWITCH4, -1, -1},
+    {kMT_MISC60, kS_BLOODYTWITCH, kS_BLOODYTWITCH4, -1, -1},
+    {kMT_MISC52, kS_MEAT2, kS_MEAT2, -1, -1},
+    {kMT_MISC53, kS_MEAT3, kS_MEAT3, -1, -1},
+    {kMT_MISC54, kS_MEAT4, kS_MEAT4, -1, -1},
+    {kMT_MISC55, kS_MEAT5, kS_MEAT5, -1, -1},
+    {kMT_MISC56, kS_MEAT2, kS_MEAT2, -1, -1},
+    {kMT_MISC57, kS_MEAT4, kS_MEAT4, -1, -1},
+    {kMT_MISC58, kS_MEAT3, kS_MEAT3, -1, -1},
+    {kMT_MISC59, kS_MEAT5, kS_MEAT5, -1, -1},
+    {kMT_MISC61, kS_HEAD_DIE6, kS_HEAD_DIE6, -1, -1},
+    {kMT_MISC62, kS_PLAY_DIE7, kS_PLAY_DIE7, -1, -1},
+    {kMT_MISC63, kS_POSS_DIE5, kS_POSS_DIE5, -1, -1},
+    {kMT_MISC64, kS_SARG_DIE6, kS_SARG_DIE6, -1, -1},
+    {kMT_MISC65, kS_SKULL_DIE6, kS_SKULL_DIE6, -1, -1},
+    {kMT_MISC66, kS_TROO_DIE5, kS_TROO_DIE5, -1, -1},
+    {kMT_MISC67, kS_SPOS_DIE5, kS_SPOS_DIE5, -1, -1},
+    {kMT_MISC68, kS_PLAY_XDIE9, kS_PLAY_XDIE9, -1, -1},
+    {kMT_MISC69, kS_PLAY_XDIE9, kS_PLAY_XDIE9, -1, -1},
+    {kMT_MISC70, kS_HEADSONSTICK, kS_HEADSONSTICK, -1, -1},
+    {kMT_MISC71, kS_GIBS, kS_GIBS, -1, -1},
+    {kMT_MISC72, kS_HEADONASTICK, kS_HEADONASTICK, -1, -1},
+    {kMT_MISC73, kS_HEADCANDLES, kS_HEADCANDLES2, -1, -1},
+    {kMT_MISC74, kS_DEADSTICK, kS_DEADSTICK, -1, -1},
+    {kMT_MISC75, kS_LIVESTICK, kS_LIVESTICK2, -1, -1},
+    {kMT_MISC76, kS_BIGTREE, kS_BIGTREE, -1, -1},
+    {kMT_MISC77, kS_BBAR1, kS_BBAR3, -1, -1},
+    {kMT_MISC78, kS_HANGNOGUTS, kS_HANGNOGUTS, -1, -1},
+    {kMT_MISC79, kS_HANGBNOBRAIN, kS_HANGBNOBRAIN, -1, -1},
+    {kMT_MISC80, kS_HANGTLOOKDN, kS_HANGTLOOKDN, -1, -1},
+    {kMT_MISC81, kS_HANGTSKULL, kS_HANGTSKULL, -1, -1},
+    {kMT_MISC82, kS_HANGTLOOKUP, kS_HANGTLOOKUP, -1, -1},
+    {kMT_MISC83, kS_HANGTNOBRAIN, kS_HANGTNOBRAIN, -1, -1},
+    {kMT_MISC84, kS_COLONGIBS, kS_COLONGIBS, -1, -1},
+    {kMT_MISC85, kS_SMALLPOOL, kS_SMALLPOOL, -1, -1},
+    {kMT_MISC86, kS_BRAINSTEM, kS_BRAINSTEM, -1, -1},
 
     /* BRAIN_DEATH_MISSILE : kS_BRAINEXPLODE1, kS_BRAINEXPLODE3 */
 
     // Attacks...
-    { kMT_FIRE, kS_FIRE1, kS_FIRE30, -1, -1 },
-    { kMT_TRACER, kS_TRACER, kS_TRACEEXP3, -1, -1 },
-    { kMT_FATSHOT, kS_FATSHOT1, kS_FATSHOTX3, -1, -1 },
-    { kMT_BRUISERSHOT, kS_BRBALL1, kS_BRBALLX3, -1, -1 },
-    { kMT_SPAWNSHOT, kS_SPAWN1, kS_SPAWNFIRE8, -1, -1 },
-    { kMT_TROOPSHOT, kS_TBALL1, kS_TBALLX3, -1, -1 },
-    { kMT_HEADSHOT, kS_RBALL1, kS_RBALLX3, -1, -1 },
-    { kMT_ARACHPLAZ, kS_ARACH_PLAZ, kS_ARACH_PLEX5, -1, -1 },
-    { kMT_ROCKET, kS_ROCKET, kS_ROCKET, kS_EXPLODE1, kS_EXPLODE3 },
-    { kMT_PLASMA, kS_PLASBALL, kS_PLASEXP5, -1, -1 },
-    { kMT_BFG, kS_BFGSHOT, kS_BFGLAND6, -1, -1 },
-    { kMT_EXTRABFG, kS_BFGEXP, kS_BFGEXP4, -1, -1 },
+    {kMT_FIRE, kS_FIRE1, kS_FIRE30, -1, -1},
+    {kMT_TRACER, kS_TRACER, kS_TRACEEXP3, -1, -1},
+    {kMT_FATSHOT, kS_FATSHOT1, kS_FATSHOTX3, -1, -1},
+    {kMT_BRUISERSHOT, kS_BRBALL1, kS_BRBALLX3, -1, -1},
+    {kMT_SPAWNSHOT, kS_SPAWN1, kS_SPAWNFIRE8, -1, -1},
+    {kMT_TROOPSHOT, kS_TBALL1, kS_TBALLX3, -1, -1},
+    {kMT_HEADSHOT, kS_RBALL1, kS_RBALLX3, -1, -1},
+    {kMT_ARACHPLAZ, kS_ARACH_PLAZ, kS_ARACH_PLEX5, -1, -1},
+    {kMT_ROCKET, kS_ROCKET, kS_ROCKET, kS_EXPLODE1, kS_EXPLODE3},
+    {kMT_PLASMA, kS_PLASBALL, kS_PLASEXP5, -1, -1},
+    {kMT_BFG, kS_BFGSHOT, kS_BFGLAND6, -1, -1},
+    {kMT_EXTRABFG, kS_BFGEXP, kS_BFGEXP4, -1, -1},
 
     // Boom/MBF stuff...
-    { kMT_DOGS, kS_DOGS_STND, kS_DOGS_RAISE6, -1, -1 },
+    {kMT_DOGS, kS_DOGS_STND, kS_DOGS_RAISE6, -1, -1},
 
-    { kMT_PLASMA1, kS_PLS1BALL, kS_PLS1EXP5, -1, -1 },
-    { kMT_PLASMA2, kS_PLS2BALL, kS_PLS2BALLX3, -1, -1 },
-    { kMT_SCEPTRE, kS_BON3, kS_BON3, -1, -1 },
-    { kMT_BIBLE, kS_BON4, kS_BON4, -1, -1 },
+    {kMT_PLASMA1, kS_PLS1BALL, kS_PLS1EXP5, -1, -1},
+    {kMT_PLASMA2, kS_PLS2BALL, kS_PLS2BALLX3, -1, -1},
+    {kMT_SCEPTRE, kS_BON3, kS_BON3, -1, -1},
+    {kMT_BIBLE, kS_BON4, kS_BON4, -1, -1},
 
-    { -1, 0, 0, 0, 0 }  // End sentinel
+    {-1, 0, 0, 0, 0} // End sentinel
 };
 
 const StateRange weapon_range[] = {
-    { kwp_fist, kS_PUNCH, kS_PUNCH5, -1, -1 },
-    { kwp_chainsaw, kS_SAW, kS_SAW3, -1, -1 },
-    { kwp_pistol, kS_PISTOL, kS_PISTOLFLASH, kS_LIGHTDONE, kS_LIGHTDONE },
-    { kwp_shotgun, kS_SGUN, kS_SGUNFLASH2, kS_LIGHTDONE, kS_LIGHTDONE },
-    { kwp_chaingun, kS_CHAIN, kS_CHAINFLASH2, kS_LIGHTDONE, kS_LIGHTDONE },
-    { kwp_missile, kS_MISSILE, kS_MISSILEFLASH4, kS_LIGHTDONE, kS_LIGHTDONE },
-    { kwp_plasma, kS_PLASMA, kS_PLASMAFLASH2, kS_LIGHTDONE, kS_LIGHTDONE },
-    { kwp_bfg, kS_BFG, kS_BFGFLASH2, kS_LIGHTDONE, kS_LIGHTDONE },
-    { kwp_supershotgun, kS_DSGUN, kS_DSGUNFLASH2, kS_LIGHTDONE, kS_LIGHTDONE },
+    {kwp_fist, kS_PUNCH, kS_PUNCH5, -1, -1},
+    {kwp_chainsaw, kS_SAW, kS_SAW3, -1, -1},
+    {kwp_pistol, kS_PISTOL, kS_PISTOLFLASH, kS_LIGHTDONE, kS_LIGHTDONE},
+    {kwp_shotgun, kS_SGUN, kS_SGUNFLASH2, kS_LIGHTDONE, kS_LIGHTDONE},
+    {kwp_chaingun, kS_CHAIN, kS_CHAINFLASH2, kS_LIGHTDONE, kS_LIGHTDONE},
+    {kwp_missile, kS_MISSILE, kS_MISSILEFLASH4, kS_LIGHTDONE, kS_LIGHTDONE},
+    {kwp_plasma, kS_PLASMA, kS_PLASMAFLASH2, kS_LIGHTDONE, kS_LIGHTDONE},
+    {kwp_bfg, kS_BFG, kS_BFGFLASH2, kS_LIGHTDONE, kS_LIGHTDONE},
+    {kwp_supershotgun, kS_DSGUN, kS_DSGUNFLASH2, kS_LIGHTDONE, kS_LIGHTDONE},
 
-    { -1, 0, 0, 0, 0 }  // End sentinel
+    {-1, 0, 0, 0, 0} // End sentinel
 };
 
 //------------------------------------------------------------------------
@@ -419,7 +408,8 @@ void frames::Init()
 void frames::Shutdown()
 {
     for (size_t i = 0; i < new_states.size(); i++)
-        if (new_states[i] != nullptr) delete new_states[i];
+        if (new_states[i] != nullptr)
+            delete new_states[i];
 
     new_states.clear();
     argument_mem.clear();
@@ -428,7 +418,8 @@ void frames::Shutdown()
 void frames::MarkState(int st_num)
 {
     // this is possible since binary patches store the dummy state
-    if (st_num == kS_NULL) return;
+    if (st_num == kS_NULL)
+        return;
 
     // fill any missing slots with nullptrs, including the one we want
     while ((int)new_states.size() < st_num + 1)
@@ -437,7 +428,8 @@ void frames::MarkState(int st_num)
     }
 
     // already have a modified entry?
-    if (new_states[st_num] != nullptr) return;
+    if (new_states[st_num] != nullptr)
+        return;
 
     State *entry       = new State;
     new_states[st_num] = entry;
@@ -461,14 +453,15 @@ void frames::MarkState(int st_num)
 
 const State *frames::NewStateElseOld(int st_num)
 {
-    if (st_num < 0) return nullptr;
+    if (st_num < 0)
+        return nullptr;
 
     if (st_num < (int)new_states.size())
     {
-        if (new_states[st_num] != nullptr) return new_states[st_num];
+        if (new_states[st_num] != nullptr)
+            return new_states[st_num];
     }
-    else if (patch::doom_ver ==
-             21)  // DSDehacked stuff has to exist I guess - Dasho
+    else if (patch::doom_ver == 21) // DSDehacked stuff has to exist I guess - Dasho
     {
         size_t to_add = st_num + 1 - new_states.size();
         for (size_t i = 0; i < to_add; i++)
@@ -486,7 +479,8 @@ const State *frames::NewStateElseOld(int st_num)
         return new_states[st_num];
     }
 
-    if (st_num < kTotalMBFStates) return &states_orig[st_num];
+    if (st_num < kTotalMBFStates)
+        return &states_orig[st_num];
 
     return nullptr;
 }
@@ -509,33 +503,39 @@ int frames::GetStateSprite(int st_num)
 {
     const State *st = NewStateElseOld(st_num);
 
-    if (st == nullptr) return -1;
+    if (st == nullptr)
+        return -1;
 
     return st->sprite;
 }
 
 bool frames::CheckMissileState(int st_num)
 {
-    if (st_num == kS_NULL) return false;
+    if (st_num == kS_NULL)
+        return false;
 
     const State *mis_st = NewStateElseOld(st_num);
 
-    if (mis_st == nullptr) return false;
+    if (mis_st == nullptr)
+        return false;
 
     return (mis_st->tics >= 0 && mis_st->next_state != kS_NULL);
 }
 
 bool frames::DependRangeWasModified(int low, int high)
 {
-    if (high < 0) return false;
+    if (high < 0)
+        return false;
 
     EPI_ASSERT(low <= high);
     EPI_ASSERT(low > kS_NULL);
 
-    if (high >= (int)new_states.size()) high = (int)new_states.size() - 1;
+    if (high >= (int)new_states.size())
+        high = (int)new_states.size() - 1;
 
     for (int i = low; i <= high; i++)
-        if (new_states[i] != nullptr) return true;
+        if (new_states[i] != nullptr)
+            return true;
 
     return false;
 }
@@ -551,8 +551,7 @@ void frames::StateDependencies()
     {
         const StateRange &R = weapon_range[w];
 
-        if (DependRangeWasModified(R.start1, R.end1) ||
-            DependRangeWasModified(R.start2, R.end2))
+        if (DependRangeWasModified(R.start1, R.end1) || DependRangeWasModified(R.start2, R.end2))
         {
             weapons::MarkWeapon(R.obj_num);
         }
@@ -564,8 +563,7 @@ void frames::StateDependencies()
     {
         const StateRange &R = thing_range[t];
 
-        if (DependRangeWasModified(R.start1, R.end1) ||
-            DependRangeWasModified(R.start2, R.end2))
+        if (DependRangeWasModified(R.start1, R.end1) || DependRangeWasModified(R.start2, R.end2))
         {
             things::MarkThing(R.obj_num);
         }
@@ -576,14 +574,16 @@ void frames::MarkStatesWithSprite(int spr_num)
 {
     // only need to handle old states here
     for (int st = 1; st < kTotalMBFStates; st++)
-        if (states_orig[st].sprite == spr_num) MarkState(st);
+        if (states_orig[st].sprite == spr_num)
+            MarkState(st);
 }
 
 int frames::ReadArg(const State *st, int i)
 {
     // the given state can be old or new here.
 
-    if (st->arg_pointer == 0) return 0;
+    if (st->arg_pointer == 0)
+        return 0;
 
     int ofs = (st->arg_pointer - 1) * 8;
     return argument_mem[ofs + i];
@@ -596,7 +596,8 @@ void frames::WriteArg(State *st, int i, int value)
 
     if (st->arg_pointer == 0)
     {
-        for (int k = 0; k < 8; k++) argument_mem.push_back(0);
+        for (int k = 0; k < 8; k++)
+            argument_mem.push_back(0);
 
         st->arg_pointer = (int)argument_mem.size() / 8;
     }
@@ -622,10 +623,11 @@ void frames::ResetGroups()
 
 int frames::BeginGroup(char group, int first)
 {
-    if (first == kS_NULL) return 0;
+    if (first == kS_NULL)
+        return 0;
 
     // create the group info
-    groups[group] = GroupInfo{ group, { first } };
+    groups[group] = GroupInfo{group, {first}};
 
     group_for_state[first]  = group;
     offset_for_state[first] = 1;
@@ -642,9 +644,11 @@ bool frames::SpreadGroupPass(bool alt_jumps)
     for (int i = 1; i < total; i++)
     {
         const State *st = NewStateElseOld(i);
-        if (st == nullptr) continue;
+        if (st == nullptr)
+            continue;
 
-        if (group_for_state.find(i) == group_for_state.end()) continue;
+        if (group_for_state.find(i) == group_for_state.end())
+            continue;
 
         char       group = group_for_state[i];
         GroupInfo &G     = groups[group];
@@ -657,25 +661,28 @@ bool frames::SpreadGroupPass(bool alt_jumps)
         //    ```
         // and that means it *will* enter the next state.
 
-        bool first_death =
-            ((group == 'D' || group == 'X') && G.states.size() == 1);
+        bool first_death = ((group == 'D' || group == 'X') && G.states.size() == 1);
 
         // hibernation?
         // if action is kA_RandomJump or similar, still need to follow it!
-        if (st->tics < 0 && !first_death && !alt_jumps) continue;
+        if (st->tics < 0 && !first_death && !alt_jumps)
+            continue;
 
         int next = st->next_state;
 
         if (alt_jumps)
         {
             next = kS_NULL;
-            if (st->action == kA_RandomJump) next = ReadArg(st, 0);  // misc1
+            if (st->action == kA_RandomJump)
+                next = ReadArg(st, 0); // misc1
         }
 
-        if (next == kS_NULL) continue;
+        if (next == kS_NULL)
+            continue;
 
         // require next state to have no group yet
-        if (group_for_state.find(next) != group_for_state.end()) continue;
+        if (group_for_state.find(next) != group_for_state.end())
+            continue;
 
         G.states.push_back(next);
 
@@ -695,7 +702,8 @@ void frames::SpreadGroups()
         bool changes1 = SpreadGroupPass(false);
         bool changes2 = SpreadGroupPass(true);
 
-        if (!(changes1 || changes2)) break;
+        if (!(changes1 || changes2))
+            break;
     }
 }
 
@@ -706,19 +714,22 @@ bool frames::CheckWeaponFlash(int first)
 
     for (int len = 0; len < 30; len++)
     {
-        if (first == kS_NULL) break;
+        if (first == kS_NULL)
+            break;
 
         const State *st = NewStateElseOld(first);
-        if (st == nullptr) break;
+        if (st == nullptr)
+            break;
 
-        if (st->tics < 0)  // hibernation
+        if (st->tics < 0) // hibernation
             break;
 
         int act = st->action;
 
         EPI_ASSERT(0 <= act && act < kTotalMBF21Actions);
 
-        if (action_info[act].act_flags & kActionFlagFlash) return true;
+        if (action_info[act].act_flags & kActionFlagFlash)
+            return true;
 
         first = st->next_state;
     }
@@ -737,7 +748,10 @@ void frames::UpdateAttacks(char group, char *act_name, int action)
     int kind1 = -1;
     int kind2 = -1;
 
-    if (!atk1) { return; }
+    if (!atk1)
+    {
+        return;
+    }
     else if (IS_WEAPON(group))
     {
         EPI_ASSERT(strlen(atk1) >= 3);
@@ -751,36 +765,31 @@ void frames::UpdateAttacks(char group, char *act_name, int action)
         EPI_ASSERT(strlen(atk1) >= 3);
         EPI_ASSERT(atk1[1] == ':');
 
-        kind1 = (atk1[0] == 'R')   ? kAttackMethodRanged
-                : (atk1[0] == 'C') ? kAttackMethodCombat
-                                   : kAttackMethodSpare;
+        kind1 = (atk1[0] == 'R') ? kAttackMethodRanged : (atk1[0] == 'C') ? kAttackMethodCombat : kAttackMethodSpare;
     }
 
     atk1 += 2;
 
-    free1 = (!attack_slot[kind1] ||
-             epi::StringCaseCompareASCII(attack_slot[kind1], atk1) == 0);
+    free1 = (!attack_slot[kind1] || epi::StringCaseCompareASCII(attack_slot[kind1], atk1) == 0);
 
     if (atk2)
     {
         EPI_ASSERT(strlen(atk2) >= 3);
         EPI_ASSERT(atk2[1] == ':');
 
-        kind2 = (atk2[0] == 'R')   ? kAttackMethodRanged
-                : (atk2[0] == 'C') ? kAttackMethodCombat
-                                   : kAttackMethodSpare;
+        kind2 = (atk2[0] == 'R') ? kAttackMethodRanged : (atk2[0] == 'C') ? kAttackMethodCombat : kAttackMethodSpare;
 
         atk2 += 2;
 
-        free2 = (!attack_slot[kind2] ||
-                 epi::StringCaseCompareASCII(attack_slot[kind2], atk2) == 0);
+        free2 = (!attack_slot[kind2] || epi::StringCaseCompareASCII(attack_slot[kind2], atk2) == 0);
     }
 
     if (free1 && free2)
     {
         attack_slot[kind1] = atk1;
 
-        if (atk2) attack_slot[kind2] = atk2;
+        if (atk2)
+            attack_slot[kind2] = atk2;
 
         return;
     }
@@ -792,9 +801,8 @@ void frames::UpdateAttacks(char group, char *act_name, int action)
 
     if (epi::StringCaseCompareASCII(act_name, "BRAINSPIT") == 0)
     {
-        LogDebug(
-            "Dehacked: Warning - Multiple range attacks used with "
-            "kA_BrainSpit.\n");
+        LogDebug("Dehacked: Warning - Multiple range attacks used with "
+                 "kA_BrainSpit.\n");
         return;
     }
 
@@ -805,13 +813,11 @@ void frames::UpdateAttacks(char group, char *act_name, int action)
     {
         if (group != 'L' && group != 'M')
         {
-            LogDebug(
-                "Dehacked: Warning - Not enough attack slots for "
-                "COMBOATTACK.\n");
+            LogDebug("Dehacked: Warning - Not enough attack slots for "
+                     "COMBOATTACK.\n");
         }
 
-        if ((group == 'L' && kind2 == kAttackMethodCombat) ||
-            (group == 'M' && kind2 == kAttackMethodRanged))
+        if ((group == 'L' && kind2 == kAttackMethodCombat) || (group == 'M' && kind2 == kAttackMethodRanged))
         {
             atk1  = atk2;
             kind1 = kind2;
@@ -819,18 +825,18 @@ void frames::UpdateAttacks(char group, char *act_name, int action)
 
         switch (kind1)
         {
-            case kAttackMethodRanged:
-                strcpy(act_name, "RANGE_ATTACK");
-                break;
-            case kAttackMethodCombat:
-                strcpy(act_name, "CLOSE_ATTACK");
-                break;
-            case kAttackMethodSpare:
-                strcpy(act_name, "SPARE_ATTACK");
-                break;
+        case kAttackMethodRanged:
+            strcpy(act_name, "RANGE_ATTACK");
+            break;
+        case kAttackMethodCombat:
+            strcpy(act_name, "CLOSE_ATTACK");
+            break;
+        case kAttackMethodSpare:
+            strcpy(act_name, "SPARE_ATTACK");
+            break;
 
-            default:
-                FatalError("Dehacked: Error - Bad attack kind %d\n", kind1);
+        default:
+            FatalError("Dehacked: Error - Bad attack kind %d\n", kind1);
         }
     }
 
@@ -845,40 +851,39 @@ const char *frames::GroupToName(char group)
 
     switch (group)
     {
-        case 'S':
-            return "IDLE";
-        case 'E':
-            return "CHASE";
-        case 'L':
-            return "MELEE";
-        case 'M':
-            return "MISSILE";
-        case 'P':
-            return "PAIN";
-        case 'D':
-            return "DEATH";
-        case 'X':
-            return "OVERKILL";
-        case 'R':
-            return "RESPAWN";
-        case 'H':
-            return "RESURRECT";
+    case 'S':
+        return "IDLE";
+    case 'E':
+        return "CHASE";
+    case 'L':
+        return "MELEE";
+    case 'M':
+        return "MISSILE";
+    case 'P':
+        return "PAIN";
+    case 'D':
+        return "DEATH";
+    case 'X':
+        return "OVERKILL";
+    case 'R':
+        return "RESPAWN";
+    case 'H':
+        return "RESURRECT";
 
-        // weapons
-        case 'u':
-            return "UP";
-        case 'd':
-            return "DOWN";
-        case 'r':
-            return "READY";
-        case 'a':
-            return "ATTACK";
-        case 'f':
-            return "FLASH";
+    // weapons
+    case 'u':
+        return "UP";
+    case 'd':
+        return "DOWN";
+    case 'r':
+        return "READY";
+    case 'a':
+        return "ATTACK";
+    case 'f':
+        return "FLASH";
 
-        default:
-            FatalError("Dehacked: Error - GroupToName: BAD GROUP '%c'\n",
-                       group);
+    default:
+        FatalError("Dehacked: Error - GroupToName: BAD GROUP '%c'\n", group);
     }
 
     return nullptr;
@@ -892,8 +897,7 @@ const char *frames::RedirectorName(int next_st)
     // which we collected/processed as a group.
     if (group_for_state.find(next_st) == group_for_state.end())
     {
-        LogDebug("Dehacked: Warning - Redirection to state %d FAILED\n",
-                 next_st);
+        LogDebug("Dehacked: Warning - Redirection to state %d FAILED\n", next_st);
         return "IDLE";
     }
 
@@ -906,8 +910,7 @@ const char *frames::RedirectorName(int next_st)
     if (next_ofs == 1)
         snprintf(name_buf, sizeof(name_buf), "%s", GroupToName(next_group));
     else
-        snprintf(name_buf, sizeof(name_buf), "%s:%d", GroupToName(next_group),
-                 next_ofs);
+        snprintf(name_buf, sizeof(name_buf), "%s:%d", GroupToName(next_group), next_ofs);
 
     return name_buf;
 }
@@ -916,128 +919,124 @@ void frames::SpecialAction(char *act_name, const State *st)
 {
     switch (st->action)
     {
-        case kA_Die:
-            strcpy(act_name, "DIE");
-            break;
-
-        case kA_KeenDie:
-            strcpy(act_name, "KEEN_DIE");
-            break;
-
-        case kA_RandomJump:
-        {
-            int next = ReadArg(st, 0);  // misc1
-            int perc = ReadArg(st, 1);  // misc2
-
-            if (next <= 0 || NewStateElseOld(next) == nullptr)
-            {
-                strcpy(act_name, "NOTHING");
-            }
-            else
-            {
-                perc = perc * 100 / 256;
-                if (perc < 0) perc = 0;
-                if (perc > 100) perc = 100;
-
-                sprintf(act_name, "JUMP(%s,%d%%)", RedirectorName(next), perc);
-            }
-        }
+    case kA_Die:
+        strcpy(act_name, "DIE");
         break;
 
-        case kA_Turn:
-            sprintf(act_name, "TURN(%d)", MISC_TO_ANGLE(ReadArg(st, 0)));
-            break;
-
-        case kA_Face:
-            sprintf(act_name, "FACE(%d)", MISC_TO_ANGLE(ReadArg(st, 0)));
-            break;
-
-        case kA_PlaySound:
-        {
-            const char *sfx = sounds::GetSound(ReadArg(st, 0));
-
-            if (epi::StringCaseCompareASCII(sfx, "NULL") == 0)
-                strcpy(act_name, "NOTHING");
-            else
-                sprintf(act_name, "PLAYSOUND(\"%s\")", sfx);
-        }
+    case kA_KeenDie:
+        strcpy(act_name, "KEEN_DIE");
         break;
 
-        case kA_Scratch:
+    case kA_RandomJump: {
+        int next = ReadArg(st, 0); // misc1
+        int perc = ReadArg(st, 1); // misc2
+
+        if (next <= 0 || NewStateElseOld(next) == nullptr)
         {
-            int damage = ReadArg(st, 0);  // misc1
-            int sfx_id = ReadArg(st, 1);  // misc2
-
-            if (damage == 0 && sfx_id == 0) { sprintf(act_name, "NOTHING"); }
-            else
-            {
-                const char *sfx = nullptr;
-                if (sfx_id > 0) sfx = sounds::GetSound(sfx_id);
-                if (sfx != nullptr &&
-                    epi::StringCaseCompareASCII(sfx, "NULL") == 0)
-                    sfx = nullptr;
-
-                const char *atk_name = things::AddScratchAttack(damage, sfx);
-                sprintf(act_name, "CLOSE_ATTACK(%s)", atk_name);
-            }
+            strcpy(act_name, "NOTHING");
         }
+        else
+        {
+            perc = perc * 100 / 256;
+            if (perc < 0)
+                perc = 0;
+            if (perc > 100)
+                perc = 100;
+
+            sprintf(act_name, "JUMP(%s,%d%%)", RedirectorName(next), perc);
+        }
+    }
+    break;
+
+    case kA_Turn:
+        sprintf(act_name, "TURN(%d)", MISC_TO_ANGLE(ReadArg(st, 0)));
         break;
 
-        case kA_LineEffect:
-        {
-            int misc1 = ReadArg(st, 0);
-            int misc2 = ReadArg(st, 1);
-
-            if (misc1 <= 0)
-                strcpy(act_name, "NOTHING");
-            else
-                sprintf(act_name, "ACTIVATE_LINETYPE(%d,%d)", misc1, misc2);
-        }
+    case kA_Face:
+        sprintf(act_name, "FACE(%d)", MISC_TO_ANGLE(ReadArg(st, 0)));
         break;
 
-        case kA_Spawn:
+    case kA_PlaySound: {
+        const char *sfx = sounds::GetSound(ReadArg(st, 0));
+
+        if (epi::StringCaseCompareASCII(sfx, "NULL") == 0)
+            strcpy(act_name, "NOTHING");
+        else
+            sprintf(act_name, "PLAYSOUND(\"%s\")", sfx);
+    }
+    break;
+
+    case kA_Scratch: {
+        int damage = ReadArg(st, 0); // misc1
+        int sfx_id = ReadArg(st, 1); // misc2
+
+        if (damage == 0 && sfx_id == 0)
         {
-            int kMT_num = ReadArg(st, 0);
-
-            if (!things::IsSpawnable(kMT_num))
-            {
-                LogDebug(
-                    "Dehacked: Warning - Action kA_SPAWN unusable type (%d)\n",
-                    kMT_num);
-                strcpy(act_name, "NOTHING");
-            }
-            else
-            {
-                things::UseThing(kMT_num);
-                sprintf(act_name, "SPAWN(%s)", things::GetMobjName(kMT_num));
-            }
+            sprintf(act_name, "NOTHING");
         }
-        break;
-
-        case kA_RefireTo:
+        else
         {
-            int next = ReadArg(st, 0);  // state
-            int perc = ReadArg(st, 1);  // noammocheck
+            const char *sfx = nullptr;
+            if (sfx_id > 0)
+                sfx = sounds::GetSound(sfx_id);
+            if (sfx != nullptr && epi::StringCaseCompareASCII(sfx, "NULL") == 0)
+                sfx = nullptr;
 
-            if (next <= 0 || NewStateElseOld(next) == nullptr)
-            {
-                strcpy(act_name, "NOTHING");
-            }
-            else
-            {
-                perc = perc * 100 / 256;
-                if (perc != 0)
-                    perc = -1;  // We use the negative percentage in kA_RefireTo
-                                // to denote skipping the ammo check (or will)
-
-                sprintf(act_name, "REFIRE_TO(%s,%d%%)", RedirectorName(next),
-                        perc);
-            }
+            const char *atk_name = things::AddScratchAttack(damage, sfx);
+            sprintf(act_name, "CLOSE_ATTACK(%s)", atk_name);
         }
-        break;
+    }
+    break;
 
-        default:
-            FatalError("Dehacked: Error - Bad special action %d\n", st->action);
+    case kA_LineEffect: {
+        int misc1 = ReadArg(st, 0);
+        int misc2 = ReadArg(st, 1);
+
+        if (misc1 <= 0)
+            strcpy(act_name, "NOTHING");
+        else
+            sprintf(act_name, "ACTIVATE_LINETYPE(%d,%d)", misc1, misc2);
+    }
+    break;
+
+    case kA_Spawn: {
+        int kMT_num = ReadArg(st, 0);
+
+        if (!things::IsSpawnable(kMT_num))
+        {
+            LogDebug("Dehacked: Warning - Action kA_SPAWN unusable type (%d)\n", kMT_num);
+            strcpy(act_name, "NOTHING");
+        }
+        else
+        {
+            things::UseThing(kMT_num);
+            sprintf(act_name, "SPAWN(%s)", things::GetMobjName(kMT_num));
+        }
+    }
+    break;
+
+    case kA_RefireTo: {
+        int next = ReadArg(st, 0); // state
+        int perc = ReadArg(st, 1); // noammocheck
+
+        if (next <= 0 || NewStateElseOld(next) == nullptr)
+        {
+            strcpy(act_name, "NOTHING");
+        }
+        else
+        {
+            perc = perc * 100 / 256;
+            if (perc != 0)
+                perc = -1; // We use the negative percentage in kA_RefireTo
+                           // to denote skipping the ammo check (or will)
+
+            sprintf(act_name, "REFIRE_TO(%s,%d%%)", RedirectorName(next), perc);
+        }
+    }
+    break;
+
+    default:
+        FatalError("Dehacked: Error - Bad special action %d\n", st->action);
     }
 }
 
@@ -1046,7 +1045,8 @@ void frames::OutputState(char group, int cur, bool do_action)
     EPI_ASSERT(cur > 0);
 
     const State *st = NewStateElseOld(cur);
-    if (st == nullptr) st = &states_orig[kS_TNT1];
+    if (st == nullptr)
+        st = &states_orig[kS_TNT1];
 
     int action = do_action ? st->action : kA_NULL;
 
@@ -1060,9 +1060,7 @@ void frames::OutputState(char group, int cur, bool do_action)
         act_flags |= kActionFlagThingState;
 
     if (action_info[action].act_flags & kActionFlagUnimplemented)
-        LogDebug(
-            "Dehacked: Warning - Frame %d: action %s is not yet supported.\n",
-            cur, bex_name);
+        LogDebug("Dehacked: Warning - Frame %d: action %s is not yet supported.\n", cur, bex_name);
 
     char act_name[kMaximumActionNameLength];
 
@@ -1078,22 +1076,20 @@ void frames::OutputState(char group, int cur, bool do_action)
 
         weap_act = (act_name[0] == 'W' && act_name[1] == ':');
 
-        if (weap_act) strcpy(act_name, action_info[action].ddf_name + 2);
+        if (weap_act)
+            strcpy(act_name, action_info[action].ddf_name + 2);
     }
 
-    if (action != kA_NULL && (weap_act == !IS_WEAPON(group)) &&
-        epi::StringCaseCompareASCII(act_name, "NOTHING") != 0)
+    if (action != kA_NULL && (weap_act == !IS_WEAPON(group)) && epi::StringCaseCompareASCII(act_name, "NOTHING") != 0)
     {
         if (weap_act)
-            LogDebug(
-                "Dehacked: Warning - Frame %d: weapon action %s used in "
-                "thing.\n",
-                cur, bex_name);
+            LogDebug("Dehacked: Warning - Frame %d: weapon action %s used in "
+                     "thing.\n",
+                     cur, bex_name);
         else
-            LogDebug(
-                "Dehacked: Warning - Frame %d: thing action %s used in "
-                "weapon.\n",
-                cur, bex_name);
+            LogDebug("Dehacked: Warning - Frame %d: thing action %s used in "
+                     "weapon.\n",
+                     cur, bex_name);
 
         strcpy(act_name, "NOTHING");
     }
@@ -1107,19 +1103,15 @@ void frames::OutputState(char group, int cur, bool do_action)
     // need to add an kA_Fall action for proper operation in EDGE.
     if (action_info[action].act_flags & kActionFlagMakeDead)
     {
-        wad::Printf(
-            "    %s:%c:0:%s:MAKEDEAD,  // %s\n", sprites::GetSprite(st->sprite),
-            'A' + ((int)st->frame & 31),
-            (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL",
-            (action == kA_PainDie) ? "A_PainDie" : "A_KeenDie");
+        wad::Printf("    %s:%c:0:%s:MAKEDEAD,  // %s\n", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31),
+                    (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL",
+                    (action == kA_PainDie) ? "A_PainDie" : "A_KeenDie");
     }
 
     if (action_info[action].act_flags & kActionFlagFaceTarget)
     {
-        wad::Printf(
-            "    %s:%c:0:%s:FACE_TARGET,\n", sprites::GetSprite(st->sprite),
-            'A' + ((int)st->frame & 31),
-            (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL");
+        wad::Printf("    %s:%c:0:%s:FACE_TARGET,\n", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31),
+                    (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL");
     }
 
     // special handling for Mancubus attacks...
@@ -1127,17 +1119,13 @@ void frames::OutputState(char group, int cur, bool do_action)
     {
         if ((act_flags & kActionFlagSpread) == 0)
         {
-            wad::Printf(
-                "    %s:%c:0:%s:RESET_SPREADER,\n",
-                sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31),
-                (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL");
+            wad::Printf("    %s:%c:0:%s:RESET_SPREADER,\n", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31),
+                        (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL");
         }
 
-        wad::Printf(
-            "    %s:%c:0:%s:%s,  // kA_FatAttack\n",
-            sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31),
-            (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL",
-            act_name);
+        wad::Printf("    %s:%c:0:%s:%s,  // kA_FatAttack\n", sprites::GetSprite(st->sprite),
+                    'A' + ((int)st->frame & 31), (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL",
+                    act_name);
     }
 
     // special handling for kA_CloseShotgun2
@@ -1146,13 +1134,10 @@ void frames::OutputState(char group, int cur, bool do_action)
     // handling this causes the DBCLS sound to play repeatedly and persist even
     // with the refire noises (ex: Harmony re-release chaingun will constantly
     // play its wind-down noise)
-    if (epi::StringCaseCompareASCII(action_info[action].bex_name,
-                                    "A_CloseShotgun2") == 0)
+    if (epi::StringCaseCompareASCII(action_info[action].bex_name, "A_CloseShotgun2") == 0)
     {
-        wad::Printf(
-            "    %s:%c:0:%s:REFIRE,\n", sprites::GetSprite(st->sprite),
-            'A' + ((int)st->frame & 31),
-            (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL");
+        wad::Printf("    %s:%c:0:%s:REFIRE,\n", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31),
+                    (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL");
     }
 
     int tics = (int)st->tics;
@@ -1160,16 +1145,14 @@ void frames::OutputState(char group, int cur, bool do_action)
     // kludge for EDGE and Batman TC.  EDGE waits 35 tics before exiting the
     // level from kA_BrainDie, but standard Doom does it immediately.  Oddly,
     // Batman TC goes into a loop calling kA_BrainDie every tic.
-    if (tics >= 0 && tics < 44 &&
-        epi::StringCaseCompareASCII(act_name, "BRAINDIE") == 0)
+    if (tics >= 0 && tics < 44 && epi::StringCaseCompareASCII(act_name, "BRAINDIE") == 0)
         tics = 44;
 
-    wad::Printf("    %s:%c:%d:%s:%s", sprites::GetSprite(st->sprite),
-                'A' + ((int)st->frame & 31), tics,
-                (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL",
-                act_name);
+    wad::Printf("    %s:%c:%d:%s:%s", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31), tics,
+                (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL", act_name);
 
-    if (action != kA_NULL && weap_act == !IS_WEAPON(group)) return;
+    if (action != kA_NULL && weap_act == !IS_WEAPON(group))
+        return;
 
     act_flags |= action_info[action].act_flags;
 }
@@ -1182,7 +1165,8 @@ bool frames::OutputSpawnState(int first)
     wad::Printf("STATES(SPAWN) =\n");
 
     const State *st = NewStateElseOld(first);
-    if (st == nullptr) st = &states_orig[kS_TNT1];
+    if (st == nullptr)
+        st = &states_orig[kS_TNT1];
 
     OutputState('S', first, false);
 
@@ -1210,7 +1194,8 @@ void frames::OutputGroup(char group)
 {
     auto GIT = groups.find(group);
 
-    if (GIT == groups.end()) return;
+    if (GIT == groups.end())
+        return;
 
     GroupInfo &G = GIT->second;
 
@@ -1219,7 +1204,8 @@ void frames::OutputGroup(char group)
     // action when an object is spawned, but EDGE *does* execute it.
     if (group == 'S')
     {
-        if (OutputSpawnState(G.states[0])) return;
+        if (OutputSpawnState(G.states[0]))
+            return;
     }
 
     wad::Printf("\n");
@@ -1241,7 +1227,10 @@ void frames::OutputGroup(char group)
         {
             // go into hibernation (nothing needed)
         }
-        else if (next == kS_NULL) { wad::Printf(",#REMOVE"); }
+        else if (next == kS_NULL)
+        {
+            wad::Printf(",#REMOVE");
+        }
         else if (is_last || next != G.states[i + 1])
         {
             wad::Printf(",#%s", RedirectorName(next));
@@ -1262,14 +1251,14 @@ void frames::OutputGroup(char group)
 namespace frames
 {
 const FieldReference frame_field[] = {
-    { "Sprite number", offsetof(State, sprite), kFieldTypeSpriteNumber },
-    { "Sprite subnumber", offsetof(State, frame), kFieldTypeSubspriteNumber },
-    { "Duration", offsetof(State, tics), kFieldTypeAny },
-    { "Next frame", offsetof(State, next_state), kFieldTypeFrameNumber },
+    {"Sprite number", offsetof(State, sprite), kFieldTypeSpriteNumber},
+    {"Sprite subnumber", offsetof(State, frame), kFieldTypeSubspriteNumber},
+    {"Duration", offsetof(State, tics), kFieldTypeAny},
+    {"Next frame", offsetof(State, next_state), kFieldTypeFrameNumber},
 
-    { nullptr, 0, kFieldTypeAny }  // End sentinel
+    {nullptr, 0, kFieldTypeAny} // End sentinel
 };
-}  // namespace frames
+} // namespace frames
 
 void frames::AlterFrame(int new_val)
 {
@@ -1279,7 +1268,8 @@ void frames::AlterFrame(int new_val)
     EPI_ASSERT(st_num >= 0);
 
     // the kS_NULL state is never output, no need to change it
-    if (st_num == kS_NULL) return;
+    if (st_num == kS_NULL)
+        return;
 
     MarkState(st_num);
 
@@ -1288,9 +1278,7 @@ void frames::AlterFrame(int new_val)
 
     if (epi::StringCaseCompareASCII(field_name, "Action pointer") == 0)
     {
-        LogDebug(
-            "Dehacked: Warning - Line %d: raw Action pointer not supported.\n",
-            patch::line_num);
+        LogDebug("Dehacked: Warning - Line %d: raw Action pointer not supported.\n", patch::line_num);
         return;
     }
 
@@ -1333,7 +1321,8 @@ void frames::AlterPointer(int new_val)
     EPI_ASSERT(st_num >= 0);
 
     // the kS_NULL state is never output, no need to change it
-    if (st_num == kS_NULL) return;
+    if (st_num == kS_NULL)
+        return;
 
     MarkState(st_num);
 
@@ -1348,9 +1337,7 @@ void frames::AlterPointer(int new_val)
 
     if (new_val < 0 || new_val >= kTotalMBFStates)
     {
-        LogDebug(
-            "Dehacked: Warning - Line %d: Illegal Codep frame number: %d\n",
-            patch::line_num, new_val);
+        LogDebug("Dehacked: Warning - Line %d: Illegal Codep frame number: %d\n", patch::line_num, new_val);
         return;
     }
 
@@ -1363,10 +1350,9 @@ void frames::AlterBexCodePtr(const char *new_action)
 
     if (epi::StringPrefixCaseCompareASCII(bex_field, "FRAME ") != 0)
     {
-        LogDebug(
-            "Dehacked: Warning - Line %d: bad code pointer '%s' - must begin "
-            "with FRAME.\n",
-            patch::line_num, bex_field);
+        LogDebug("Dehacked: Warning - Line %d: bad code pointer '%s' - must begin "
+                 "with FRAME.\n",
+                 patch::line_num, bex_field);
         return;
     }
 
@@ -1374,20 +1360,19 @@ void frames::AlterBexCodePtr(const char *new_action)
 
     if (sscanf(bex_field + 6, " %i ", &st_num) != 1)
     {
-        LogDebug("Dehacked: Warning - Line %d: unreadable FRAME number: %s\n",
-                 patch::line_num, bex_field + 6);
+        LogDebug("Dehacked: Warning - Line %d: unreadable FRAME number: %s\n", patch::line_num, bex_field + 6);
         return;
     }
 
     if (st_num < 0 || st_num > 32767)
     {
-        LogDebug("Dehacked: Warning - Line %d: illegal FRAME number: %d\n",
-                 patch::line_num, st_num);
+        LogDebug("Dehacked: Warning - Line %d: illegal FRAME number: %d\n", patch::line_num, st_num);
         return;
     }
 
     // the kS_NULL state is never output, no need to change it
-    if (st_num == kS_NULL) return;
+    if (st_num == kS_NULL)
+        return;
 
     MarkState(st_num);
 
@@ -1399,8 +1384,7 @@ void frames::AlterBexCodePtr(const char *new_action)
     for (action = 0; action < kTotalMBF21Actions; action++)
     {
         // use +2 here to ignore the "A_" prefix
-        if (epi::StringCaseCompareASCII(action_info[action].bex_name + 2,
-                                        new_action) == 0)
+        if (epi::StringCaseCompareASCII(action_info[action].bex_name + 2, new_action) == 0)
         {
             // found it!
             st->action = action;
@@ -1408,8 +1392,7 @@ void frames::AlterBexCodePtr(const char *new_action)
         }
     }
 
-    LogDebug("Dehacked: Warning - Line %d: unknown action %s for CODEPTR.\n",
-             patch::line_num, new_action);
+    LogDebug("Dehacked: Warning - Line %d: unknown action %s for CODEPTR.\n", patch::line_num, new_action);
 }
 
-}  // namespace dehacked
+} // namespace dehacked

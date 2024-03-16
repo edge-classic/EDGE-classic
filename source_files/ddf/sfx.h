@@ -28,18 +28,18 @@
 struct SoundEffect
 {
     int num;
-    int sounds[1];  // -ACB- 1999/11/06 Zero based array is not ANSI compliant
-                    // -AJA- I'm also relying on the [1] within
-                    // SoundEffectDefinition.
+    int sounds[1]; // -ACB- 1999/11/06 Zero based array is not ANSI compliant
+                   // -AJA- I'm also relying on the [1] within
+                   // SoundEffectDefinition.
 };
 
 class SoundEffectDefinition
 {
-   public:
+  public:
     SoundEffectDefinition();
     ~SoundEffectDefinition();
 
-   public:
+  public:
     void Default(void);
     void CopyDetail(SoundEffectDefinition &src);
 
@@ -80,9 +80,12 @@ class SoundEffectDefinition
     // then the this sound won't be played at all.
     float max_distance_;
 
-   private:
+  private:
     // disable copy construct and assignment operator
-    explicit SoundEffectDefinition(SoundEffectDefinition &rhs) { (void)rhs; }
+    explicit SoundEffectDefinition(SoundEffectDefinition &rhs)
+    {
+        (void)rhs;
+    }
     SoundEffectDefinition &operator=(SoundEffectDefinition &rhs)
     {
         (void)rhs;
@@ -91,17 +94,16 @@ class SoundEffectDefinition
 };
 
 // Our sound effect definition container
-class SoundEffectDefinitionContainer
-    : public std::vector<SoundEffectDefinition *>
+class SoundEffectDefinitionContainer : public std::vector<SoundEffectDefinition *>
 {
-   public:
-    SoundEffectDefinitionContainer() {}
+  public:
+    SoundEffectDefinitionContainer()
+    {
+    }
 
     ~SoundEffectDefinitionContainer()
     {
-        for (std::vector<SoundEffectDefinition *>::iterator iter     = begin(),
-                                                            iter_end = end();
-             iter != iter_end; iter++)
+        for (std::vector<SoundEffectDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
         {
             SoundEffectDefinition *s = *iter;
             delete s;
@@ -109,7 +111,7 @@ class SoundEffectDefinitionContainer
         }
     }
 
-   public:
+  public:
     // Lookup functions
     SoundEffect           *GetEffect(const char *name, bool error = true);
     SoundEffectDefinition *Lookup(const char *name);
@@ -117,7 +119,7 @@ class SoundEffectDefinitionContainer
 
 // ----------EXTERNALISATIONS----------
 
-extern SoundEffectDefinitionContainer sfxdefs;  // -ACB- 2004/07/25 Implemented
+extern SoundEffectDefinitionContainer sfxdefs; // -ACB- 2004/07/25 Implemented
 
 void DDF_ReadSFX(const std::string &data);
 

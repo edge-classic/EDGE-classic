@@ -38,33 +38,33 @@ class BotPath;
 // use a lift.
 enum BotTask
 {
-    kBotTaskNone = 0,  // no task right now
-    kBotTaskGetItem,   // pickup a nearby item (in tracer)
-    kBotTaskOpenDoor,  // open a door
-    kBotTaskUseLift,   // lower a lift, ride it to top
+    kBotTaskNone = 0, // no task right now
+    kBotTaskGetItem,  // pickup a nearby item (in tracer)
+    kBotTaskOpenDoor, // open a door
+    kBotTaskUseLift,  // lower a lift, ride it to top
 };
 
 // stages for kBotTaskOpenDoor
 enum BotOpenDoorTask
 {
-    kBotOpenDoorTaskApproach = 0,  // walk to door and face it
-    kBotOpenDoorTaskUse      = 1,  // press USE button, wait for it to open
+    kBotOpenDoorTaskApproach = 0, // walk to door and face it
+    kBotOpenDoorTaskUse      = 1, // press USE button, wait for it to open
 };
 
 // stages for kBotTaskUseLift
 enum BotUseLiftTask
 {
-    kBotUseLiftTaskApproach = 0,  // walk to lift and face it
-    kBotUseLiftTaskUse      = 1,  // press USE button, wait for it to lower
-    kBotUseLiftTaskRide     = 2,  // hop on lift, ride it to the top
+    kBotUseLiftTaskApproach = 0, // walk to lift and face it
+    kBotUseLiftTaskUse      = 1, // press USE button, wait for it to lower
+    kBotUseLiftTaskRide     = 2, // hop on lift, ride it to the top
 };
 
 // results of FollowPath()
 enum BotFollowPathResult
 {
-    kBotFollowPathResultOK = 0,  // going okay...
-    kBotFollowPathResultDone,    // reached end of path
-    kBotFollowPathResultFailed   // got stuck somewhere
+    kBotFollowPathResultOK = 0, // going okay...
+    kBotFollowPathResultDone,   // reached end of path
+    kBotFollowPathResultFailed  // got stuck somewhere
 };
 
 // This describes what action the bot wants to do.
@@ -89,7 +89,7 @@ struct BotCommand
 
 class DeathBot
 {
-   public:
+  public:
     class Player *pl_ = nullptr;
 
     BotTask task_ = kBotTaskNone;
@@ -112,9 +112,9 @@ class DeathBot
     float    enemy_slope_ = 0;
     float    enemy_dist_  = 0;
 
-    int dead_time_   = 0;  // increases when dead
-    int look_time_   = 0;  // when to look for items
-    int weapon_time_ = 0;  // when to reconsider weapons
+    int dead_time_   = 0; // increases when dead
+    int look_time_   = 0; // when to look for items
+    int weapon_time_ = 0; // when to reconsider weapons
 
     // last position, to check if we actually moved
     float last_x_       = 0;
@@ -127,7 +127,7 @@ class DeathBot
     // main_goal is final target.  travel_time detects losing the path.
     // path_wait is when we need a path, but are waiting a bit.
     BotPath *path_ = nullptr;
-    Position roam_goal_{ 0, 0, 0 };
+    Position roam_goal_{0, 0, 0};
     int      travel_time_ = 0;
     int      path_wait_   = 0;
 
@@ -146,14 +146,14 @@ class DeathBot
 
     BotCommand cmd_;
 
-   public:
+  public:
     void Think();
     void DeathThink();
     void ConvertTiccmd(EventTicCommand *dest);
     void Respawn();
     void EndLevel();
 
-   private:
+  private:
     float DistTo(Position pos) const;
 
     void  SelectWeapon();
@@ -203,7 +203,7 @@ class DeathBot
 
     void DeletePath();
 
-   public:
+  public:
     float EvalItem(const MapObject *mo);
     float EvalEnemy(const MapObject *mo);
 };

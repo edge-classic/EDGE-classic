@@ -62,7 +62,10 @@ static bool console_allocated = false;
 static int SYS_AllocConsole(lua_State *L)
 {
 #ifdef WIN32
-    if (console_allocated) { return 0; }
+    if (console_allocated)
+    {
+        return 0;
+    }
 
     console_allocated = true;
     AllocConsole();

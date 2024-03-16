@@ -85,13 +85,13 @@ void AutomapSetColor(int which, RGBAColor color);
 // NOTE: the bit numbers here must match the COAL API script
 enum AutomapState
 {
-    kAutomapStateGrid      = (1 << 0),  // draw the grid
-    kAutomapStateFollow    = (1 << 4),  // follow the player
-    kAutomapStateRotate    = (1 << 5),  // rotate the map (disables grid)
-    kAutomapStateHideLines = (1 << 6),  // turn off all line drawing
-    kAutomapStateThings    = (1 << 3),  // draw all objects
-    kAutomapStateWalls     = (1 << 2),  // draw all walls (like IDDT)
-    kAutomapStateAllmap    = (1 << 1),  // draw like Allmap powerup
+    kAutomapStateGrid      = (1 << 0), // draw the grid
+    kAutomapStateFollow    = (1 << 4), // follow the player
+    kAutomapStateRotate    = (1 << 5), // rotate the map (disables grid)
+    kAutomapStateHideLines = (1 << 6), // turn off all line drawing
+    kAutomapStateThings    = (1 << 3), // draw all objects
+    kAutomapStateWalls     = (1 << 2), // draw all walls (like IDDT)
+    kAutomapStateAllmap    = (1 << 1), // draw like Allmap powerup
 };
 
 enum AutomapArrowStyle

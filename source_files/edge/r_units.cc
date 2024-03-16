@@ -117,7 +117,10 @@ void RendererStartUnits(bool sort_em)
 //
 // Finishes a batch of units, drawing any that haven't been drawn yet.
 //
-void RendererFinishUnits(void) { RendererDrawUnits(); }
+void RendererFinishUnits(void)
+{
+    RendererDrawUnits();
+}
 
 //
 // RendererBeginUnit
@@ -129,30 +132,28 @@ void RendererFinishUnits(void) { RendererDrawUnits(); }
 // contains "holes" (like sprites).  `blended' should be true if the
 // texture should be blended (like for translucent water or sprites).
 //
-RendererVertex *RendererBeginUnit(GLuint shape, int max_vert, GLuint env1,
-                                  GLuint tex1, GLuint env2, GLuint tex2,
-                                  int pass, int blending, RGBAColor fog_color,
-                                  float fog_density)
+RendererVertex *RendererBeginUnit(GLuint shape, int max_vert, GLuint env1, GLuint tex1, GLuint env2, GLuint tex2,
+                                  int pass, int blending, RGBAColor fog_color, float fog_density)
 {
     RendererUnit *unit;
 
     EPI_ASSERT(max_vert > 0);
     EPI_ASSERT(pass >= 0);
 
-    EPI_ASSERT((blending & (kBlendingCullBack | kBlendingCullFront)) !=
-               (kBlendingCullBack | kBlendingCullFront));
+    EPI_ASSERT((blending & (kBlendingCullBack | kBlendingCullFront)) != (kBlendingCullBack | kBlendingCullFront));
 
     // check we have enough space left
-    if (current_render_vert + max_vert > kMaximumLocalVertices ||
-        current_render_unit >= kMaximumLocalUnits)
+    if (current_render_vert + max_vert > kMaximumLocalVertices || current_render_unit >= kMaximumLocalUnits)
     {
         RendererDrawUnits();
     }
 
     unit = local_units + current_render_unit;
 
-    if (env1 == kTextureEnvironmentDisable) tex1 = 0;
-    if (env2 == kTextureEnvironmentDisable) tex2 = 0;
+    if (env1 == kTextureEnvironmentDisable)
+        tex1 = 0;
+    if (env2 == kTextureEnvironmentDisable)
+        tex2 = 0;
 
     unit->shape               = shape;
     unit->environment_mode[0] = env1;
@@ -162,7 +163,7 @@ RendererVertex *RendererBeginUnit(GLuint shape, int max_vert, GLuint env1,
 
     unit->pass     = pass;
     unit->blending = blending;
-    unit->first    = current_render_vert;  // count set later
+    unit->first    = current_render_vert; // count set later
 
     unit->fog_color   = fog_color;
     unit->fog_density = fog_density;
@@ -204,7 +205,8 @@ struct Compare_Unit_pred
 {
     inline bool operator()(const RendererUnit *A, const RendererUnit *B) const
     {
-        if (A->pass != B->pass) return A->pass < B->pass;
+        if (A->pass != B->pass)
+            return A->pass < B->pass;
 
         if (A->texture[0] != B->texture[0])
             return A->texture[0] < B->texture[0];
@@ -227,23 +229,23 @@ static void EnableCustomEnvironment(GLuint env, bool enable)
     RenderState *state = RendererGetState();
     switch (env)
     {
-        case uint32_t(kTextureEnvironmentSkipRgb):
-            if (enable)
-            {
-                state->TextureEnvironmentMode(GL_COMBINE);
-                state->TextureEnvironmentCombineRGB(GL_REPLACE);
-                state->TextureEnvironmentSource0RGB(GL_PREVIOUS);
-            }
-            else
-            {
-                /* no need to modify TEXTURE_ENV_MODE */
-                state->TextureEnvironmentCombineRGB(GL_MODULATE);
-                state->TextureEnvironmentSource0RGB(GL_TEXTURE);
-            }
-            break;
+    case uint32_t(kTextureEnvironmentSkipRgb):
+        if (enable)
+        {
+            state->TextureEnvironmentMode(GL_COMBINE);
+            state->TextureEnvironmentCombineRGB(GL_REPLACE);
+            state->TextureEnvironmentSource0RGB(GL_PREVIOUS);
+        }
+        else
+        {
+            /* no need to modify TEXTURE_ENV_MODE */
+            state->TextureEnvironmentCombineRGB(GL_MODULATE);
+            state->TextureEnvironmentSource0RGB(GL_TEXTURE);
+        }
+        break;
 
-        default:
-            FatalError("INTERNAL ERROR: no such custom env: %08x\n", env);
+    default:
+        FatalError("INTERNAL ERROR: no such custom env: %08x\n", env);
     }
 }
 
@@ -251,10 +253,8 @@ static inline void RendererSendRawVector(const RendererVertex *V)
 {
     glColor4fv(V->rgba_color);
 
-    glMultiTexCoord2fv(GL_TEXTURE0,
-                       (const GLfloat *)(&V->texture_coordinates[0]));
-    glMultiTexCoord2fv(GL_TEXTURE1,
-                       (const GLfloat *)(&V->texture_coordinates[1]));
+    glMultiTexCoord2fv(GL_TEXTURE0, (const GLfloat *)(&V->texture_coordinates[0]));
+    glMultiTexCoord2fv(GL_TEXTURE1, (const GLfloat *)(&V->texture_coordinates[1]));
 
     glNormal3fv((const GLfloat *)(&V->normal));
 
@@ -272,12 +272,13 @@ void RendererDrawUnits(void)
 {
     EDGE_ZoneScoped;
 
-    if (current_render_unit == 0) return;
+    if (current_render_unit == 0)
+        return;
 
     RenderState *state = RendererGetState();
 
-    GLuint active_tex[2] = { 0, 0 };
-    GLuint active_env[2] = { 0, 0 };
+    GLuint active_tex[2] = {0, 0};
+    GLuint active_env[2] = {0, 0};
 
     int active_pass     = 0;
     int active_blending = 0;
@@ -290,9 +291,7 @@ void RendererDrawUnits(void)
 
     if (batch_sort)
     {
-        std::sort(local_unit_map.begin(),
-                  local_unit_map.begin() + current_render_unit,
-                  Compare_Unit_pred());
+        std::sort(local_unit_map.begin(), local_unit_map.begin() + current_render_unit, Compare_Unit_pred());
     }
 
     if (draw_culling.d_)
@@ -300,22 +299,22 @@ void RendererDrawUnits(void)
         sg_color fogColor;
         switch (cull_fog_color.d_)
         {
-            case 0:
-                fogColor = culling_fog_color;
-                break;
-            case 1:
-                // Not pure white, but 1.0f felt like a little much - Dasho
-                fogColor = sg_silver;
-                break;
-            case 2:
-                fogColor = { 0.25f, 0.25f, 0.25f, 1.0f };
-                break;
-            case 3:
-                fogColor = sg_black;
-                break;
-            default:
-                fogColor = culling_fog_color;
-                break;
+        case 0:
+            fogColor = culling_fog_color;
+            break;
+        case 1:
+            // Not pure white, but 1.0f felt like a little much - Dasho
+            fogColor = sg_silver;
+            break;
+        case 2:
+            fogColor = {0.25f, 0.25f, 0.25f, 1.0f};
+            break;
+        case 3:
+            fogColor = sg_black;
+            break;
+        default:
+            fogColor = culling_fog_color;
+            break;
         }
 
         state->ClearColor(fogColor.r, fogColor.g, fogColor.b, 1.0f);
@@ -326,7 +325,7 @@ void RendererDrawUnits(void)
         state->Enable(GL_FOG);
     }
     else
-        state->FogMode(GL_EXP);  // if needed
+        state->FogMode(GL_EXP); // if needed
 
     for (int j = 0; j < current_render_unit; j++)
     {
@@ -367,8 +366,7 @@ void RendererDrawUnits(void)
             state->PolygonOffset(0, -active_pass);
         }
 
-        if ((active_blending ^ unit->blending) &
-            (kBlendingMasked | kBlendingLess))
+        if ((active_blending ^ unit->blending) & (kBlendingMasked | kBlendingLess))
         {
             if (unit->blending & kBlendingLess)
             {
@@ -386,8 +384,7 @@ void RendererDrawUnits(void)
                 state->Disable(GL_ALPHA_TEST);
         }
 
-        if ((active_blending ^ unit->blending) &
-            (kBlendingAlpha | kBlendingAdd))
+        if ((active_blending ^ unit->blending) & (kBlendingAlpha | kBlendingAdd))
         {
             if (unit->blending & kBlendingAdd)
             {
@@ -403,14 +400,12 @@ void RendererDrawUnits(void)
                 state->Disable(GL_BLEND);
         }
 
-        if ((active_blending ^ unit->blending) &
-            (kBlendingCullBack | kBlendingCullFront))
+        if ((active_blending ^ unit->blending) & (kBlendingCullBack | kBlendingCullFront))
         {
             if (unit->blending & (kBlendingCullBack | kBlendingCullFront))
             {
                 state->Enable(GL_CULL_FACE);
-                state->CullFace(
-                    (unit->blending & kBlendingCullFront) ? GL_FRONT : GL_BACK);
+                state->CullFace((unit->blending & kBlendingCullFront) ? GL_FRONT : GL_BACK);
             }
             else
                 state->Disable(GL_CULL_FACE);
@@ -418,8 +413,7 @@ void RendererDrawUnits(void)
 
         if ((active_blending ^ unit->blending) & kBlendingNoZBuffer)
         {
-            state->DepthMask((unit->blending & kBlendingNoZBuffer) ? false
-                                                                   : true);
+            state->DepthMask((unit->blending & kBlendingNoZBuffer) ? false : true);
         }
 
         active_blending = unit->blending;
@@ -435,8 +429,7 @@ void RendererDrawUnits(void)
 
         for (int t = 1; t >= 0; t--)
         {
-            if (active_tex[t] != unit->texture[t] ||
-                active_env[t] != unit->environment_mode[t])
+            if (active_tex[t] != unit->texture[t] || active_env[t] != unit->environment_mode[t])
             {
                 state->ActiveTexture(GL_TEXTURE0 + t);
             }
@@ -456,12 +449,12 @@ void RendererDrawUnits(void)
                 else if (active_tex[t] == 0)
                     state->Enable(GL_TEXTURE_2D);
 
-                if (unit->texture[t] != 0) state->BindTexture(unit->texture[t]);
+                if (unit->texture[t] != 0)
+                    state->BindTexture(unit->texture[t]);
 
                 active_tex[t] = unit->texture[t];
 
-                if (!t && (active_blending & kBlendingClampY) &&
-                    active_tex[0] != 0)
+                if (!t && (active_blending & kBlendingClampY) && active_tex[0] != 0)
                 {
                     auto existing = texture_clamp.find(active_tex[0]);
                     if (existing != texture_clamp.end())
@@ -472,8 +465,7 @@ void RendererDrawUnits(void)
                     // This is very expensive, thus the map
                     // glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
                     // &old_clamp);
-                    state->TextureWrapT(
-                        renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE);
+                    state->TextureWrapT(renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE);
                 }
             }
 
@@ -488,8 +480,7 @@ void RendererDrawUnits(void)
                 {
                     EnableCustomEnvironment(unit->environment_mode[t], true);
                 }
-                else if (unit->environment_mode[t] !=
-                         kTextureEnvironmentDisable)
+                else if (unit->environment_mode[t] != kTextureEnvironmentDisable)
                     state->TextureEnvironmentMode(unit->environment_mode[t]);
 
                 active_env[t] = unit->environment_mode[t];
@@ -506,7 +497,10 @@ void RendererDrawUnits(void)
         glEnd();
 
         // restore the clamping mode
-        if (old_clamp != kDummyClamp) { state->TextureWrapT(old_clamp); }
+        if (old_clamp != kDummyClamp)
+        {
+            state->TextureWrapT(old_clamp);
+        }
     }
 
     // all done

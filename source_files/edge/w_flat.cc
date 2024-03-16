@@ -48,8 +48,7 @@
 #include "w_texture.h"
 #include "w_wad.h"
 
-EDGE_DEFINE_CONSOLE_VARIABLE(precache_textures, "1",
-                             kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(precache_textures, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(precache_sprites, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(precache_models, "1", kConsoleVariableFlagArchive)
 
@@ -75,7 +74,7 @@ EDGE_DEFINE_CONSOLE_VARIABLE(precache_models, "1", kConsoleVariableFlagArchive)
 //
 static void AddFlatAnimation(AnimationDefinition *anim)
 {
-    if (anim->pics_.empty())  // old way
+    if (anim->pics_.empty()) // old way
     {
         int start = CheckLumpNumberForName(anim->start_name_.c_str());
         int end   = CheckLumpNumberForName(anim->end_name_.c_str());
@@ -91,18 +90,18 @@ static void AddFlatAnimation(AnimationDefinition *anim)
             return;
         }
 
-        file = FindFlatSequence(anim->start_name_.c_str(),
-                                anim->end_name_.c_str(), &s_offset, &e_offset);
+        file = FindFlatSequence(anim->start_name_.c_str(), anim->end_name_.c_str(), &s_offset, &e_offset);
 
         if (file < 0)
         {
-            LogWarning("Missing flat animation: %s-%s not in any wad.\n",
-                       anim->start_name_.c_str(), anim->end_name_.c_str());
+            LogWarning("Missing flat animation: %s-%s not in any wad.\n", anim->start_name_.c_str(),
+                       anim->end_name_.c_str());
             return;
         }
 
         std::vector<int> *lumps = GetFlatListForWad(file);
-        if (lumps == nullptr) return;
+        if (lumps == nullptr)
+            return;
 
         int total = (int)lumps->size();
 
@@ -124,9 +123,7 @@ static void AddFlatAnimation(AnimationDefinition *anim)
             // that -- the lump list does NOT take overriding flats (in newer
             // pwads) into account.
 
-            flats[i] = ImageLookup(
-                name, kImageNamespaceFlat,
-                kImageLookupNull | kImageLookupExact | kImageLookupNoNew);
+            flats[i] = ImageLookup(name, kImageNamespaceFlat, kImageLookupNull | kImageLookupExact | kImageLookupNoNew);
         }
 
         AnimateImageSet(flats, total, anim->speed_);
@@ -137,14 +134,14 @@ static void AddFlatAnimation(AnimationDefinition *anim)
 
     int total = (int)anim->pics_.size();
 
-    if (total == 1) return;
+    if (total == 1)
+        return;
 
     const Image **flats = new const Image *[total];
 
     for (int i = 0; i < total; i++)
     {
-        flats[i] = ImageLookup(anim->pics_[i].c_str(), kImageNamespaceFlat,
-                               kImageLookupNull | kImageLookupExact);
+        flats[i] = ImageLookup(anim->pics_[i].c_str(), kImageNamespaceFlat, kImageLookupNull | kImageLookupExact);
     }
 
     AnimateImageSet(flats, total, anim->speed_);
@@ -177,13 +174,11 @@ static void AddFlatAnimation(AnimationDefinition *anim)
 //
 static void AddTextureAnimation(AnimationDefinition *anim)
 {
-    if (anim->pics_.empty())  // old way
+    if (anim->pics_.empty()) // old way
     {
         int set, s_offset, e_offset;
 
-        set =
-            FindTextureSequence(anim->start_name_.c_str(),
-                                anim->end_name_.c_str(), &s_offset, &e_offset);
+        set = FindTextureSequence(anim->start_name_.c_str(), anim->end_name_.c_str(), &s_offset, &e_offset);
 
         if (set < 0)
         {
@@ -200,9 +195,8 @@ static void AddTextureAnimation(AnimationDefinition *anim)
         for (int i = 0; i < total; i++)
         {
             const char *name = TextureNameInSet(set, s_offset + i);
-            texs[i]          = ImageLookup(
-                name, kImageNamespaceTexture,
-                kImageLookupNull | kImageLookupExact | kImageLookupNoNew);
+            texs[i] =
+                ImageLookup(name, kImageNamespaceTexture, kImageLookupNull | kImageLookupExact | kImageLookupNoNew);
         }
 
         AnimateImageSet(texs, total, anim->speed_);
@@ -215,14 +209,14 @@ static void AddTextureAnimation(AnimationDefinition *anim)
 
     int total = (int)anim->pics_.size();
 
-    if (total == 1) return;
+    if (total == 1)
+        return;
 
     const Image **texs = new const Image *[total];
 
     for (int i = 0; i < total; i++)
     {
-        texs[i] = ImageLookup(anim->pics_[i].c_str(), kImageNamespaceTexture,
-                              kImageLookupNull | kImageLookupExact);
+        texs[i] = ImageLookup(anim->pics_[i].c_str(), kImageNamespaceTexture, kImageLookupNull | kImageLookupExact);
     }
 
     AnimateImageSet(texs, total, anim->speed_);
@@ -238,14 +232,14 @@ static void AddGraphicAnimation(AnimationDefinition *anim)
 
     EPI_ASSERT(total != 0);
 
-    if (total == 1) return;
+    if (total == 1)
+        return;
 
     const Image **users = new const Image *[total];
 
     for (int i = 0; i < total; i++)
     {
-        users[i] = ImageLookup(anim->pics_[i].c_str(), kImageNamespaceGraphic,
-                               kImageLookupNull | kImageLookupExact);
+        users[i] = ImageLookup(anim->pics_[i].c_str(), kImageNamespaceGraphic, kImageLookupNull | kImageLookupExact);
     }
 
     AnimateImageSet(users, total, anim->speed_);
@@ -257,8 +251,10 @@ struct CompareFlatPredicate
     inline bool operator()(const int &A, const int &B) const
     {
         int cmp = strcmp(GetLumpNameFromIndex(A), GetLumpNameFromIndex(B));
-        if (cmp < 0) return true;
-        if (cmp > 0) return false;
+        if (cmp < 0)
+            return true;
+        if (cmp > 0)
+            return false;
         return A < B;
     }
 };
@@ -280,11 +276,15 @@ void InitializeFlats(void)
     for (file = 0; file < max_file; file++)
     {
         std::vector<int> *lumps = GetFlatListForWad(file);
-        if (lumps == nullptr) continue;
+        if (lumps == nullptr)
+            continue;
 
         int lumpnum = (int)lumps->size();
 
-        for (j = 0; j < lumpnum; j++) { flats.push_back((int)(*lumps)[j]); }
+        for (j = 0; j < lumpnum; j++)
+        {
+            flats.push_back((int)(*lumps)[j]);
+        }
     }
 
     if (flats.size() == 0)
@@ -325,9 +325,7 @@ void InitializeAnimations(void)
 {
     // loop through animdefs, and add relevant anims.
     // Note: reverse order, give priority to newer anims.
-    for (std::vector<AnimationDefinition *>::reverse_iterator
-             iter     = animdefs.rbegin(),
-             iter_end = animdefs.rend();
+    for (std::vector<AnimationDefinition *>::reverse_iterator iter = animdefs.rbegin(), iter_end = animdefs.rend();
          iter != iter_end; iter++)
     {
         AnimationDefinition *A = *iter;
@@ -336,17 +334,17 @@ void InitializeAnimations(void)
 
         switch (A->type_)
         {
-            case AnimationDefinition::kAnimationTypeTexture:
-                AddTextureAnimation(A);
-                break;
+        case AnimationDefinition::kAnimationTypeTexture:
+            AddTextureAnimation(A);
+            break;
 
-            case AnimationDefinition::kAnimationTypeFlat:
-                AddFlatAnimation(A);
-                break;
+        case AnimationDefinition::kAnimationTypeFlat:
+            AddFlatAnimation(A);
+            break;
 
-            case AnimationDefinition::kAnimationTypeGraphic:
-                AddGraphicAnimation(A);
-                break;
+        case AnimationDefinition::kAnimationTypeGraphic:
+            AddGraphicAnimation(A);
+            break;
         }
     }
 }
@@ -399,9 +397,11 @@ static void PrecacheTextures(void)
     {
         EPI_ASSERT(images[i]);
 
-        if (i + 1 < count && images[i] == images[i + 1]) continue;
+        if (i + 1 < count && images[i] == images[i + 1])
+            continue;
 
-        if (images[i] == sky_flat_image) continue;
+        if (images[i] == sky_flat_image)
+            continue;
 
         ImagePrecache(images[i]);
     }
@@ -418,11 +418,14 @@ static void PrecacheTextures(void)
 //
 void PrecacheLevelGraphics(void)
 {
-    if (precache_sprites.d_) PrecacheSprites();
+    if (precache_sprites.d_)
+        PrecacheSprites();
 
-    if (precache_textures.d_) PrecacheTextures();
+    if (precache_textures.d_)
+        PrecacheTextures();
 
-    if (precache_models.d_) PrecacheModels();
+    if (precache_models.d_)
+        PrecacheModels();
 
     RendererPreCacheSky();
 }

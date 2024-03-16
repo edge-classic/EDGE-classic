@@ -85,8 +85,7 @@ extern bool EventMatchesKey(int keyvar, int key);
 
 extern ConsoleVariable sector_brightness_correction;
 
-extern unsigned int RendererUploadTexture(ImageData *img, int flags,
-                                          int max_pix);
+extern unsigned int RendererUploadTexture(ImageData *img, int flags, int max_pix);
 
 extern const Image *menu_backdrop;
 
@@ -99,7 +98,7 @@ int show_messages;
 
 extern ConsoleVariable m_language;
 
-int screen_hud;  // has default
+int screen_hud; // has default
 
 static std::string message_string;
 static int         message_last_menu;
@@ -198,8 +197,7 @@ struct SaveSlotExtendedInformation
     int          save_image_page = 0;
 };
 
-static SaveSlotExtendedInformation
-    save_extended_information_slots[kTotalSaveSlots];
+static SaveSlotExtendedInformation save_extended_information_slots[kTotalSaveSlots];
 
 // 98-7-10 KM New defines for slider left.
 // Part of MainMenuSaveGame changes.
@@ -217,7 +215,7 @@ struct MenuItem
     int status = 0;
 
     // image for menu entry
-    char         patch_name[10] = { 0 };
+    char         patch_name[10] = {0};
     const Image *image          = nullptr;
 
     // choice = menu item #.
@@ -320,20 +318,16 @@ enum MainMenuCategory
     kTotalMainMenuCategories
 };
 
-static MenuItem MainMenu[] = {
-    { 1, "M_NGAME", nullptr, MenuNewGame, 'n', language["MainNewGame"] },
-    { 1, "M_OPTION", nullptr, MenuOptions, 'o', language["MainOptions"] },
-    { 1, "M_LOADG", nullptr, MenuLoadGame, 'l', language["MainLoadGame"] },
-    { 1, "M_SAVEG", nullptr, MenuSaveGame, 's', language["MainSaveGame"] },
-    // Another hickup with Special edition.
-    { 1, "M_RDTHIS", nullptr, MenuReadThis, 'r', language["MainReadThis"] },
-    { 1, "M_QUITG", nullptr, MenuQuitEdge, 'q', language["MainQuitGame"] }
-};
+static MenuItem MainMenu[] = {{1, "M_NGAME", nullptr, MenuNewGame, 'n', language["MainNewGame"]},
+                              {1, "M_OPTION", nullptr, MenuOptions, 'o', language["MainOptions"]},
+                              {1, "M_LOADG", nullptr, MenuLoadGame, 'l', language["MainLoadGame"]},
+                              {1, "M_SAVEG", nullptr, MenuSaveGame, 's', language["MainSaveGame"]},
+                              // Another hickup with Special edition.
+                              {1, "M_RDTHIS", nullptr, MenuReadThis, 'r', language["MainReadThis"]},
+                              {1, "M_QUITG", nullptr, MenuQuitEdge, 'q', language["MainQuitGame"]}};
 
-static Menu MainMenuDefinition = {
-    kTotalMainMenuCategories, nullptr, MainMenu, &main_menu_style,
-    MenuDrawMainMenu,         94,      64,       0
-};
+static Menu MainMenuDefinition = {kTotalMainMenuCategories, nullptr, MainMenu, &main_menu_style,
+                                  MenuDrawMainMenu,         94,      64,       0};
 
 //
 // EPISODE SELECT
@@ -343,44 +337,39 @@ static Menu MainMenuDefinition = {
 static MenuItem *EpisodeMenu          = nullptr;
 static bool     *EpisodeMenuSkipSkill = nullptr;
 
-static MenuItem DefaultEpisodeMenu = { 1,          // status
-                                       "Working",  // name
-                                       nullptr,    // image
-                                       nullptr,    // select_function
-                                       'w',        // alphakey
-                                       "DEFAULT" };
+static MenuItem DefaultEpisodeMenu = {1,         // status
+                                      "Working", // name
+                                      nullptr,   // image
+                                      nullptr,   // select_function
+                                      'w',       // alphakey
+                                      "DEFAULT"};
 
 static Menu EpisodeMenuDefinition = {
-    0,                    // ep_end,  // # of menu items
-    &MainMenuDefinition,  // previous menu
-    &DefaultEpisodeMenu,  // menuitem_t ->
+    0,                   // ep_end,  // # of menu items
+    &MainMenuDefinition, // previous menu
+    &DefaultEpisodeMenu, // menuitem_t ->
     &episode_style,
-    MenuDrawEpisode,  // drawing routine ->
+    MenuDrawEpisode,     // drawing routine ->
     48,
-    63,  // x,y
-    0    // last_on
+    63,                  // x,y
+    0                    // last_on
 };
 
-static MenuItem SkillMenu[] = {
-    { 1, "M_JKILL", nullptr, MenuChooseSkill, 'p',
-      language["MenuDifficulty1"] },
-    { 1, "M_ROUGH", nullptr, MenuChooseSkill, 'r',
-      language["MenuDifficulty2"] },
-    { 1, "M_HURT", nullptr, MenuChooseSkill, 'h', language["MenuDifficulty3"] },
-    { 1, "M_ULTRA", nullptr, MenuChooseSkill, 'u',
-      language["MenuDifficulty4"] },
-    { 1, "M_NMARE", nullptr, MenuChooseSkill, 'n', language["MenuDifficulty5"] }
-};
+static MenuItem SkillMenu[] = {{1, "M_JKILL", nullptr, MenuChooseSkill, 'p', language["MenuDifficulty1"]},
+                               {1, "M_ROUGH", nullptr, MenuChooseSkill, 'r', language["MenuDifficulty2"]},
+                               {1, "M_HURT", nullptr, MenuChooseSkill, 'h', language["MenuDifficulty3"]},
+                               {1, "M_ULTRA", nullptr, MenuChooseSkill, 'u', language["MenuDifficulty4"]},
+                               {1, "M_NMARE", nullptr, MenuChooseSkill, 'n', language["MenuDifficulty5"]}};
 
 static Menu SkillMenuDefinition = {
-    kTotalSkillLevels,       // # of menu items
-    &EpisodeMenuDefinition,  // previous menu
-    SkillMenu,               // menuitem_t ->
+    kTotalSkillLevels,      // # of menu items
+    &EpisodeMenuDefinition, // previous menu
+    SkillMenu,              // menuitem_t ->
     &skill_style,
-    MenuDrawNewGame,  // drawing routine ->
+    MenuDrawNewGame,        // drawing routine ->
     48,
-    63,           // x,y
-    kSkillMedium  // last_on
+    63,                     // x,y
+    kSkillMedium            // last_on
 };
 
 //
@@ -391,97 +380,73 @@ static Menu SkillMenuDefinition = {
 // Read This! MENU 1 & 2
 //
 
-static MenuItem ReadMenu1[] = { { 1, "", nullptr, MenuReadThis2, 0 } };
+static MenuItem ReadMenu1[] = {{1, "", nullptr, MenuReadThis2, 0}};
 
-static Menu ReadThisMenuDefinition1 = {
-    1,
-    &MainMenuDefinition,
-    ReadMenu1,
-    &menu_default_style,  // FIXME: maybe have READ_1 and READ_2 styles ??
-    MenuDrawReadThis1,
-    1000,
-    1000,
-    0
-};
+static Menu ReadThisMenuDefinition1 = {1,
+                                       &MainMenuDefinition,
+                                       ReadMenu1,
+                                       &menu_default_style, // FIXME: maybe have READ_1 and READ_2 styles ??
+                                       MenuDrawReadThis1,
+                                       1000,
+                                       1000,
+                                       0};
 
-static MenuItem ReadMenu2[] = { { 1, "", nullptr, MenuFinishReadThis, 0 } };
+static MenuItem ReadMenu2[] = {{1, "", nullptr, MenuFinishReadThis, 0}};
 
-static Menu ReadThisMenuDefinition2 = {
-    1,
-    &ReadThisMenuDefinition1,
-    ReadMenu2,
-    &menu_default_style,  // FIXME: maybe have READ_1 and READ_2 styles ??
-    MenuDrawReadThis2,
-    1000,
-    1000,
-    0
-};
+static Menu ReadThisMenuDefinition2 = {1,
+                                       &ReadThisMenuDefinition1,
+                                       ReadMenu2,
+                                       &menu_default_style, // FIXME: maybe have READ_1 and READ_2 styles ??
+                                       MenuDrawReadThis2,
+                                       1000,
+                                       1000,
+                                       0};
 
 //
 // LOAD GAME MENU
 //
 // Note: upto 10 slots per page
 //
-static MenuItem LoadingMenu[] = { { 2, "", nullptr, MenuLoadSelect, '1' },
-                                  { 2, "", nullptr, MenuLoadSelect, '2' },
-                                  { 2, "", nullptr, MenuLoadSelect, '3' },
-                                  { 2, "", nullptr, MenuLoadSelect, '4' },
-                                  { 2, "", nullptr, MenuLoadSelect, '5' },
-                                  { 2, "", nullptr, MenuLoadSelect, '6' },
-                                  { 2, "", nullptr, MenuLoadSelect, '7' },
-                                  { 2, "", nullptr, MenuLoadSelect, '8' },
-                                  { 2, "", nullptr, MenuLoadSelect, '9' },
-                                  { 2, "", nullptr, MenuLoadSelect, '0' } };
+static MenuItem LoadingMenu[] = {{2, "", nullptr, MenuLoadSelect, '1'}, {2, "", nullptr, MenuLoadSelect, '2'},
+                                 {2, "", nullptr, MenuLoadSelect, '3'}, {2, "", nullptr, MenuLoadSelect, '4'},
+                                 {2, "", nullptr, MenuLoadSelect, '5'}, {2, "", nullptr, MenuLoadSelect, '6'},
+                                 {2, "", nullptr, MenuLoadSelect, '7'}, {2, "", nullptr, MenuLoadSelect, '8'},
+                                 {2, "", nullptr, MenuLoadSelect, '9'}, {2, "", nullptr, MenuLoadSelect, '0'}};
 
-static Menu LoadMenuDefinition = { kTotalSaveSlots,
-                                   &MainMenuDefinition,
-                                   LoadingMenu,
-                                   &load_style,
-                                   MenuDrawLoad,
-                                   30,
-                                   42,
-                                   0 };
+static Menu LoadMenuDefinition = {
+    kTotalSaveSlots, &MainMenuDefinition, LoadingMenu, &load_style, MenuDrawLoad, 30, 42, 0};
 
 //
 // SAVE GAME MENU
 //
-static MenuItem SavingMenu[] = { { 2, "", nullptr, MenuSaveSelect, '1' },
-                                 { 2, "", nullptr, MenuSaveSelect, '2' },
-                                 { 2, "", nullptr, MenuSaveSelect, '3' },
-                                 { 2, "", nullptr, MenuSaveSelect, '4' },
-                                 { 2, "", nullptr, MenuSaveSelect, '5' },
-                                 { 2, "", nullptr, MenuSaveSelect, '6' },
-                                 { 2, "", nullptr, MenuSaveSelect, '7' },
-                                 { 2, "", nullptr, MenuSaveSelect, '8' },
-                                 { 2, "", nullptr, MenuSaveSelect, '9' },
-                                 { 2, "", nullptr, MenuSaveSelect, '0' } };
+static MenuItem SavingMenu[] = {{2, "", nullptr, MenuSaveSelect, '1'}, {2, "", nullptr, MenuSaveSelect, '2'},
+                                {2, "", nullptr, MenuSaveSelect, '3'}, {2, "", nullptr, MenuSaveSelect, '4'},
+                                {2, "", nullptr, MenuSaveSelect, '5'}, {2, "", nullptr, MenuSaveSelect, '6'},
+                                {2, "", nullptr, MenuSaveSelect, '7'}, {2, "", nullptr, MenuSaveSelect, '8'},
+                                {2, "", nullptr, MenuSaveSelect, '9'}, {2, "", nullptr, MenuSaveSelect, '0'}};
 
-static Menu SaveMenuDefinition = { kTotalSaveSlots,
-                                   &MainMenuDefinition,
-                                   SavingMenu,
-                                   &save_style,
-                                   MenuDrawSave,
-                                   30,
-                                   42,
-                                   0 };
+static Menu SaveMenuDefinition = {
+    kTotalSaveSlots, &MainMenuDefinition, SavingMenu, &save_style, MenuDrawSave, 30, 42, 0};
 
 // 98-7-10 KM Chooses the page of MainMenuSaveGames to view
 void MenuLoadSavePage(int choice)
 {
     switch (choice)
     {
-        case kSliderLeft:
-            // -AJA- could use `OOF' sound...
-            if (save_page == 0) return;
+    case kSliderLeft:
+        // -AJA- could use `OOF' sound...
+        if (save_page == 0)
+            return;
 
-            save_page--;
-            break;
+        save_page--;
+        break;
 
-        case kSliderRight:
-            if (save_page >= kTotalSavePages - 1) return;
+    case kSliderRight:
+        if (save_page >= kTotalSavePages - 1)
+            return;
 
-            save_page++;
-            break;
+        save_page++;
+        break;
     }
 
     StartSoundEffect(sound_effect_swtchn);
@@ -533,7 +498,8 @@ void MenuReadSaveStrings(void)
         // close file now -- we only need the globals
         SaveFileCloseRead();
 
-        if (!globs) continue;
+        if (!globs)
+            continue;
 
         // --- pull info from global structure ---
 
@@ -545,17 +511,13 @@ void MenuReadSaveStrings(void)
 
         save_extended_information_slots[i].corrupt = false;
 
-        epi::CStringCopyMax(save_extended_information_slots[i].game_name,
-                            globs->game, 32 - 1);
-        epi::CStringCopyMax(save_extended_information_slots[i].map_name,
-                            globs->level, 10 - 1);
+        epi::CStringCopyMax(save_extended_information_slots[i].game_name, globs->game, 32 - 1);
+        epi::CStringCopyMax(save_extended_information_slots[i].map_name, globs->level, 10 - 1);
 
-        epi::CStringCopyMax(save_extended_information_slots[i].description,
-                            globs->description, kSaveStringSize - 1);
+        epi::CStringCopyMax(save_extended_information_slots[i].description, globs->description, kSaveStringSize - 1);
 
         if (globs->desc_date)
-            epi::CStringCopyMax(save_extended_information_slots[i].time_string,
-                                globs->desc_date, 32 - 1);
+            epi::CStringCopyMax(save_extended_information_slots[i].time_string, globs->desc_date, 32 - 1);
 
         save_extended_information_slots[i].skill        = globs->skill;
         save_extended_information_slots[i].network_game = globs->netgame;
@@ -568,8 +530,7 @@ void MenuReadSaveStrings(void)
             delete save_extended_information_slots[i].save_image_data;
             save_extended_information_slots[i].save_image_data = nullptr;
             if (save_extended_information_slots[i].save_texture_id)
-                glDeleteTextures(
-                    1, &save_extended_information_slots[i].save_texture_id);
+                glDeleteTextures(1, &save_extended_information_slots[i].save_texture_id);
             save_extended_information_slots[i].save_texture_id = 0;
             save_extended_information_slots[i].save_image_page = save_page;
             epi::FileDelete(fn);
@@ -578,41 +539,29 @@ void MenuReadSaveStrings(void)
         // Save screenshot
         epi::ReplaceExtension(fn, ".jpg");
 
-        if (epi::FileExists(fn) &&
-            (!save_extended_information_slots[i].save_image_data ||
-             save_page != save_extended_information_slots[i].save_image_page))
+        if (epi::FileExists(fn) && (!save_extended_information_slots[i].save_image_data ||
+                                    save_page != save_extended_information_slots[i].save_image_page))
         {
             delete save_extended_information_slots[i].save_image_data;
             if (save_extended_information_slots[i].save_texture_id)
-                glDeleteTextures(
-                    1, &save_extended_information_slots[i].save_texture_id);
-            epi::File *svimg_file = epi::FileOpen(
-                fn, epi::kFileAccessRead | epi::kFileAccessBinary);
+                glDeleteTextures(1, &save_extended_information_slots[i].save_texture_id);
+            epi::File *svimg_file = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
             if (svimg_file)
             {
-                save_extended_information_slots[i].save_image_data =
-                    ImageLoad(svimg_file);
+                save_extended_information_slots[i].save_image_data = ImageLoad(svimg_file);
                 if (save_extended_information_slots[i].save_image_data)
                 {
                     save_extended_information_slots[i].save_texture_id =
-                        RendererUploadTexture(
-                            save_extended_information_slots[i].save_image_data,
-                            2, (1 << 30));
-                    save_extended_information_slots[i].save_image_page =
-                        save_page;
+                        RendererUploadTexture(save_extended_information_slots[i].save_image_data, 2, (1 << 30));
+                    save_extended_information_slots[i].save_image_page = save_page;
                     delete svimg_file;
                 }
                 else
                 {
-                    LogWarning(
-                        "Error reading MainMenuSaveGame screenshot %s!\n",
-                        fn.c_str());
-                    save_extended_information_slots[i].save_image_data =
-                        nullptr;
-                    save_extended_information_slots[i].save_texture_id =
-                        0;  // just in case
-                    save_extended_information_slots[i].save_image_page =
-                        save_page;
+                    LogWarning("Error reading MainMenuSaveGame screenshot %s!\n", fn.c_str());
+                    save_extended_information_slots[i].save_image_data = nullptr;
+                    save_extended_information_slots[i].save_texture_id = 0; // just in case
+                    save_extended_information_slots[i].save_image_page = save_page;
                     delete svimg_file;
                 }
             }
@@ -624,14 +573,12 @@ void MenuReadSaveStrings(void)
     {
         if (save_extended_information_slots[i].corrupt)
         {
-            strncpy(save_extended_information_slots[i].description,
-                    language["Corrupt_Slot"], kSaveStringSize - 1);
+            strncpy(save_extended_information_slots[i].description, language["Corrupt_Slot"], kSaveStringSize - 1);
             continue;
         }
         else if (save_extended_information_slots[i].empty)
         {
-            strncpy(save_extended_information_slots[i].description,
-                    language["EmptySlot"], kSaveStringSize - 1);
+            strncpy(save_extended_information_slots[i].description, language["EmptySlot"], kSaveStringSize - 1);
             continue;
         }
     }
@@ -679,23 +626,20 @@ int CenterMenuText(Style *style, int text_type, const char *str)
 
 // AuxStringReplaceAll("Our_String", std::string("_"), std::string(" "));
 //
-std::string LoboStringReplaceAll(std::string str, const std::string &from,
-                                 const std::string &to)
+std::string LoboStringReplaceAll(std::string str, const std::string &from, const std::string &to)
 {
     size_t start_pos = 0;
     while ((start_pos = str.find(from, start_pos)) != std::string::npos)
     {
         str.replace(start_pos, from.length(), to);
-        start_pos +=
-            to.length();  // Handles case where 'to' is a substring of 'from'
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
     }
     return str;
 }
 
-static void MenuDrawSaveLoadCommon(int row, int row2, Style *style,
-                                   float LineHeight)
+static void MenuDrawSaveLoadCommon(int row, int row2, Style *style, float LineHeight)
 {
-    int   y         = 0;  // LoadMenuDefinition.y + LineHeight * row;
+    int   y         = 0; // LoadMenuDefinition.y + LineHeight * row;
     int   x         = 0;
     int   text_type = StyleDefinition::kTextSectionTitle;
     float txtscale  = style->definition_->text_[text_type].scale_;
@@ -712,7 +656,8 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style,
 
     std::string temp_string = epi::StringFormat("PAGE %d", save_page + 1);
 
-    if (save_page > 0) HudWriteText(style, text_type, x - 4, y, "< PREV");
+    if (save_page > 0)
+        HudWriteText(style, text_type, x - 4, y, "< PREV");
 
     x += style->fonts_[text_type]->StringWidth("< PREV") * txtscale;
     x += 30;
@@ -745,27 +690,23 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style,
     // HudThinBox(x - 5, y - 5, x + 95, y + 50, col);
     HudThinBox(x - 5, y - 5, x + 95, y + 115, col);
 
-    if (entering_save_string || info->empty || info->corrupt) return;
+    if (entering_save_string || info->empty || info->corrupt)
+        return;
 
     temp_string = info->time_string;
-    if (temp_string[0] ==
-        ' ')  // Remove beginning space that legacy behavior had sometimes
+    if (temp_string[0] == ' ') // Remove beginning space that legacy behavior had sometimes
         temp_string = temp_string.substr(1);
     size_t timesplit = temp_string.find("  ");
-    EPI_ASSERT(timesplit != std::string::npos &&
-               temp_string.size() > timesplit + 2);
-    HudWriteText(style, text_type, x, y,
-                 temp_string.substr(0, timesplit).c_str());
+    EPI_ASSERT(timesplit != std::string::npos && temp_string.size() > timesplit + 2);
+    HudWriteText(style, text_type, x, y, temp_string.substr(0, timesplit).c_str());
     y += LineHeight;
     y += style->definition_->entry_spacing_;
-    HudWriteText(style, text_type, x, y,
-                 temp_string.substr(timesplit + 2).c_str());
+    HudWriteText(style, text_type, x, y, temp_string.substr(timesplit + 2).c_str());
     y += LineHeight;
     y += style->definition_->entry_spacing_;
 
     temp_string = info->game_name;
-    temp_string =
-        LoboStringReplaceAll(temp_string, std::string("_"), std::string(" "));
+    temp_string = LoboStringReplaceAll(temp_string, std::string("_"), std::string(" "));
     HudWriteText(style, text_type, x, y, temp_string.c_str());
 
     y += LineHeight;
@@ -779,21 +720,21 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style,
 
     switch (info->skill)
     {
-        case 0:
-            temp_string = language["MenuDifficulty1"];
-            break;
-        case 1:
-            temp_string = language["MenuDifficulty2"];
-            break;
-        case 2:
-            temp_string = language["MenuDifficulty3"];
-            break;
-        case 3:
-            temp_string = language["MenuDifficulty4"];
-            break;
-        default:
-            temp_string = language["MenuDifficulty5"];
-            break;
+    case 0:
+        temp_string = language["MenuDifficulty1"];
+        break;
+    case 1:
+        temp_string = language["MenuDifficulty2"];
+        break;
+    case 2:
+        temp_string = language["MenuDifficulty3"];
+        break;
+    case 3:
+        temp_string = language["MenuDifficulty4"];
+        break;
+    default:
+        temp_string = language["MenuDifficulty5"];
+        break;
     }
     HudWriteText(style, text_type, x, y, temp_string.c_str());
 
@@ -809,9 +750,7 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style,
         // BottomY -= y;
         HudStretchFromImageData(
             x - 3, y, 95,
-            (style->definition_->text_[text_type].y_offset_ +
-             style->definition_->entry_spacing_ + 114) -
-                y,
+            (style->definition_->text_[text_type].y_offset_ + style->definition_->entry_spacing_ + 114) - y,
             info->save_image_data, info->save_texture_id, kOpacitySolid);
     }
 }
@@ -866,34 +805,28 @@ void MenuDrawLoad(void)
         fontType = StyleDefinition::kTextSectionText;
         if (i == item_on)
         {
-            if (style->definition_->text_[StyleDefinition::kTextSectionSelected]
-                    .font_)
+            if (style->definition_->text_[StyleDefinition::kTextSectionSelected].font_)
                 fontType = StyleDefinition::kTextSectionSelected;
         }
 
-        LineHeight = style->fonts_[fontType]->NominalHeight();  // * txtscale
+        LineHeight = style->fonts_[fontType]->NominalHeight(); // * txtscale
 
         if (fontType == StyleDefinition::kTextSectionSelected)
         {
-            if (style->fonts_[StyleDefinition::kTextSectionSelected]
-                    ->definition_->type_ == kFontTypeTrueType)
+            if (style->fonts_[StyleDefinition::kTextSectionSelected]->definition_->type_ == kFontTypeTrueType)
             {
                 // truetype_reference_yshift_ is important for TTF fonts.
-                float y_shift =
-                    style->fonts_[StyleDefinition::kTextSectionSelected]
-                        ->truetype_reference_yshift_
-                            [current_font_size];  // * txtscale;
+                float y_shift = style->fonts_[StyleDefinition::kTextSectionSelected]
+                                    ->truetype_reference_yshift_[current_font_size]; // * txtscale;
 
                 HudSetAlpha(0.33f);
-                HudSolidBox(TempX - 3, TempY - 2 + (y_shift / 2), TempX + 173,
-                            TempY + LineHeight + 2 + y_shift, col);
+                HudSolidBox(TempX - 3, TempY - 2 + (y_shift / 2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
                 HudSetAlpha(old_alpha);
             }
             else
             {
                 HudSetAlpha(0.33f);
-                HudSolidBox(TempX - 3, TempY - 2, TempX + 173,
-                            TempY + LineHeight + 2, col);
+                HudSolidBox(TempX - 3, TempY - 2, TempX + 173, TempY + LineHeight + 2, col);
                 HudSetAlpha(old_alpha);
             }
         }
@@ -901,8 +834,7 @@ void MenuDrawLoad(void)
             HudWriteText(style, fontType, TempX, TempY - (LineHeight / 2),
                          save_extended_information_slots[i].description);
         else
-            HudWriteText(style, fontType, TempX, TempY - 1,
-                         save_extended_information_slots[i].description);
+            HudWriteText(style, fontType, TempX, TempY - 1, save_extended_information_slots[i].description);
         TempY += LineHeight + (LineHeight / 2);
         TempY += style->definition_->entry_spacing_;
     }
@@ -993,36 +925,30 @@ void MenuDrawSave(void)
         txtscale = style->definition_->text_[fontType].scale_;
         if (i == item_on)
         {
-            if (style->definition_->text_[StyleDefinition::kTextSectionSelected]
-                    .font_)
+            if (style->definition_->text_[StyleDefinition::kTextSectionSelected].font_)
             {
                 fontType = StyleDefinition::kTextSectionSelected;
                 txtscale = style->definition_->text_[fontType].scale_;
             }
         }
 
-        LineHeight = style->fonts_[fontType]->NominalHeight();  // * txtscale
+        LineHeight = style->fonts_[fontType]->NominalHeight(); // * txtscale
 
         if (fontType == StyleDefinition::kTextSectionSelected)
         {
-            if (style->fonts_[fontType]->definition_->type_ ==
-                kFontTypeTrueType)
+            if (style->fonts_[fontType]->definition_->type_ == kFontTypeTrueType)
             {
                 // truetype_reference_yshift_ is important for TTF fonts.
-                float y_shift =
-                    style->fonts_[fontType]->truetype_reference_yshift_
-                        [current_font_size];  // * txtscale;
+                float y_shift = style->fonts_[fontType]->truetype_reference_yshift_[current_font_size]; // * txtscale;
 
                 HudSetAlpha(0.33f);
-                HudSolidBox(TempX - 3, TempY - 2 + (y_shift / 2), TempX + 173,
-                            TempY + LineHeight + 2 + y_shift, col);
+                HudSolidBox(TempX - 3, TempY - 2 + (y_shift / 2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
                 HudSetAlpha(old_alpha);
             }
             else
             {
                 HudSetAlpha(0.33f);
-                HudSolidBox(TempX - 3, TempY - 2, TempX + 173,
-                            TempY + LineHeight + 2, col);
+                HudSolidBox(TempX - 3, TempY - 2, TempX + 173, TempY + LineHeight + 2, col);
                 HudSetAlpha(old_alpha);
             }
         }
@@ -1043,9 +969,8 @@ void MenuDrawSave(void)
                 txtscale = style->definition_->text_[fontType].scale_;
             }
 
-            len = style->fonts_[fontType]->StringWidth(
-                      save_extended_information_slots[save_slot].description) *
-                  txtscale;
+            len =
+                style->fonts_[fontType]->StringWidth(save_extended_information_slots[save_slot].description) * txtscale;
         }
 
         if (style->fonts_[fontType]->definition_->type_ == kFontTypeTrueType)
@@ -1055,14 +980,12 @@ void MenuDrawSave(void)
 
             if (entering_save)
             {
-                HudWriteText(style, fontType, TempX + len,
-                             TempY - (LineHeight / 2), "_");
+                HudWriteText(style, fontType, TempX + len, TempY - (LineHeight / 2), "_");
             }
         }
         else
         {
-            HudWriteText(style, fontType, TempX, TempY - 1,
-                         save_extended_information_slots[i].description);
+            HudWriteText(style, fontType, TempX, TempY - 1, save_extended_information_slots[i].description);
 
             if (entering_save)
             {
@@ -1084,8 +1007,7 @@ void MenuDrawSave(void)
 //
 static void M_DoSave(int page, int slot)
 {
-    GameDeferredSaveGame(page * kTotalSaveSlots + slot,
-                         save_extended_information_slots[slot].description);
+    GameDeferredSaveGame(page * kTotalSaveSlots + slot, save_extended_information_slots[slot].description);
     MenuClear();
 
     // PICK QUICKSAVE SLOT YET?
@@ -1113,14 +1035,12 @@ void MenuSaveSelect(int choice)
     entering_save_string = 1;
 
     save_slot = choice;
-    strcpy(old_save_string,
-           save_extended_information_slots[choice].description);
+    strcpy(old_save_string, save_extended_information_slots[choice].description);
 
     if (save_extended_information_slots[choice].empty)
         save_extended_information_slots[choice].description[0] = 0;
 
-    save_string_character_index =
-        strlen(save_extended_information_slots[choice].description);
+    save_string_character_index = strlen(save_extended_information_slots[choice].description);
 }
 
 //
@@ -1137,8 +1057,7 @@ void MenuSaveGame(int choice)
     // -AJA- big cop-out here (add RTS menu stuff to MainMenuSaveGame ?)
     if (rts_menu_active)
     {
-        MenuStartMessage("You can't save during an RTS menu.\npress a key.",
-                         nullptr, false);
+        MenuStartMessage("You can't save during an RTS menu.\npress a key.", nullptr, false);
         return;
     }
 
@@ -1179,13 +1098,12 @@ void MenuQuickSave(void)
         need_save_screenshot  = true;
         save_screenshot_valid = false;
 
-        quicksave_slot = -2;  // means to pick a slot now
+        quicksave_slot = -2; // means to pick a slot now
         return;
     }
 
-    std::string s(epi::StringFormat(
-        language["QuickSaveOver"],
-        save_extended_information_slots[quicksave_slot].description));
+    std::string s(
+        epi::StringFormat(language["QuickSaveOver"], save_extended_information_slots[quicksave_slot].description));
 
     MenuStartMessage(s.c_str(), QuickSaveResponse, true);
 }
@@ -1218,9 +1136,8 @@ void MenuQuickLoad(void)
         return;
     }
 
-    std::string s(epi::StringFormat(
-        language["QuickLoad"],
-        save_extended_information_slots[quicksave_slot].description));
+    std::string s(
+        epi::StringFormat(language["QuickLoad"], save_extended_information_slots[quicksave_slot].description));
 
     MenuStartMessage(s.c_str(), QuickLoadResponse, true);
 }
@@ -1229,19 +1146,24 @@ void MenuQuickLoad(void)
 // Read This Menus
 // Had a "quick hack to fix romero bug"
 //
-void MenuDrawReadThis1(void) { HudDrawImageTitleWS(menu_read_this[0]); }
+void MenuDrawReadThis1(void)
+{
+    HudDrawImageTitleWS(menu_read_this[0]);
+}
 
 //
 // Read This Menus - optional second page.
 //
-void MenuDrawReadThis2(void) { HudDrawImageTitleWS(menu_read_this[1]); }
+void MenuDrawReadThis2(void)
+{
+    HudDrawImageTitleWS(menu_read_this[1]);
+}
 
 void MenuDrawMainMenu(void)
 {
     float CenterX = 0;
-    if (menu_doom->offset_x_ != 0.0f)  // Only auto-center if no Xoffset
-        CenterX = MainMenuDefinition
-                      .x;  // cannot get away from the damn hardcoded value
+    if (menu_doom->offset_x_ != 0.0f)   // Only auto-center if no Xoffset
+        CenterX = MainMenuDefinition.x; // cannot get away from the damn hardcoded value
     else
         CenterX = CenterMenuImage(menu_doom);
 
@@ -1268,44 +1190,36 @@ void MenuDrawNewGame(void)
 
     if (custom_MenuDifficulty == false)
     {
-        if (style->definition_->entry_alignment_ ==
-            StyleDefinition::kAlignmentCenter)
+        if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentCenter)
             x = CenterMenuText(style, fontType, language["MainNewGame"]);
         else
             x = 94;
-        HudWriteText(style, fontType,
-                     x + style->definition_->text_[fontType].x_offset_,
-                     14 + style->definition_->text_[fontType].y_offset_,
-                     language["MainNewGame"]);
+        HudWriteText(style, fontType, x + style->definition_->text_[fontType].x_offset_,
+                     14 + style->definition_->text_[fontType].y_offset_, language["MainNewGame"]);
 
         HudSetAlpha(old_alpha);
         fontType = StyleDefinition::kTextSectionTitle;
         txtscale = style->definition_->text_[fontType].scale_;
         HudSetAlpha(style->definition_->text_[fontType].translucency_);
 
-        if (style->definition_->entry_alignment_ ==
-            StyleDefinition::kAlignmentCenter)
+        if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentCenter)
             x = CenterMenuText(style, fontType, language["MenuSkill"]);
         else
             x = 54;
 
-        HudWriteText(style, fontType,
-                     x + style->definition_->text_[fontType].x_offset_,
-                     38 + style->definition_->text_[fontType].y_offset_,
-                     language["MenuSkill"]);
+        HudWriteText(style, fontType, x + style->definition_->text_[fontType].x_offset_,
+                     38 + style->definition_->text_[fontType].y_offset_, language["MenuSkill"]);
     }
     else
     {
         const Colormap *colmap = style->definition_->text_[fontType].colmap_;
-        if (menu_new_game->offset_x_ != 0.0f)  // Only auto-center if no Xoffset
-            x = MainMenuDefinition
-                    .x;  // cannot get away from the damn hardcoded value
+        if (menu_new_game->offset_x_ != 0.0f) // Only auto-center if no Xoffset
+            x = MainMenuDefinition.x;         // cannot get away from the damn hardcoded value
         else
             x = CenterMenuImage2(style, fontType, menu_new_game);
 
         HudStretchImage(x, 14 + style->definition_->text_[fontType].y_offset_,
-                        menu_new_game->ScaledWidthActual() * txtscale,
-                        menu_new_game->ScaledHeightActual() * txtscale,
+                        menu_new_game->ScaledWidthActual() * txtscale, menu_new_game->ScaledHeightActual() * txtscale,
                         menu_new_game, 0.0, 0.0, colmap);
 
         // HudDrawImage(x + style->definition_->text[fontType].x_offset,
@@ -1318,20 +1232,17 @@ void MenuDrawNewGame(void)
         HudSetAlpha(style->definition_->text_[fontType].translucency_);
 
         x = 54;
-        if (style->definition_->entry_alignment_ ==
-            StyleDefinition::kAlignmentCenter)
+        if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentCenter)
         {
-            if (menu_skill->offset_x_ !=
-                0.0f)    // Only auto-center if no Xoffset
-                x = 54;  // cannot get away from the damn hardcoded value
+            if (menu_skill->offset_x_ != 0.0f) // Only auto-center if no Xoffset
+                x = 54;                        // cannot get away from the damn hardcoded value
             else
                 x = CenterMenuImage2(style, fontType, menu_skill);
         }
         colmap = style->definition_->text_[fontType].colmap_;
         HudStretchImage(x, 38 + style->definition_->text_[fontType].y_offset_,
-                        menu_skill->ScaledWidthActual() * txtscale,
-                        menu_skill->ScaledHeightActual() * txtscale, menu_skill,
-                        0.0, 0.0, colmap);
+                        menu_skill->ScaledWidthActual() * txtscale, menu_skill->ScaledHeightActual() * txtscale,
+                        menu_skill, 0.0, 0.0, colmap);
 
         // HudDrawImage(x + style->definition_->text[fontType].x_offset,
         //	38 + style->definition_->text[fontType].y_offset, menu_skill,
@@ -1347,7 +1258,8 @@ void MenuDrawNewGame(void)
 // -KM- 1998/12/16 Generates EpisodeMenuDefinition menu dynamically.
 static void CreateEpisodeMenu(void)
 {
-    if (gamedefs.empty()) FatalError("No defined episodes !\n");
+    if (gamedefs.empty())
+        FatalError("No defined episodes !\n");
 
     EpisodeMenu          = new MenuItem[gamedefs.size()];
     EpisodeMenuSkipSkill = new bool[gamedefs.size()];
@@ -1356,11 +1268,14 @@ static void CreateEpisodeMenu(void)
 
     for (auto g : gamedefs)
     {
-        if (!g) continue;
+        if (!g)
+            continue;
 
-        if (g->firstmap_.empty()) continue;
+        if (g->firstmap_.empty())
+            continue;
 
-        if (CheckLumpNumberForName(g->firstmap_.c_str()) == -1) continue;
+        if (CheckLumpNumberForName(g->firstmap_.c_str()) == -1)
+            continue;
 
         EpisodeMenu[e].status          = 1;
         EpisodeMenu[e].select_function = MenuEpisode;
@@ -1368,15 +1283,17 @@ static void CreateEpisodeMenu(void)
         EpisodeMenu[e].alpha_key       = '1' + e;
         EpisodeMenuSkipSkill[e]        = g->no_skill_menu_;
 
-        epi::CStringCopyMax(EpisodeMenu[e].patch_name, g->namegraphic_.c_str(),
-                            8);
+        epi::CStringCopyMax(EpisodeMenu[e].patch_name, g->namegraphic_.c_str(), 8);
         EpisodeMenu[e].patch_name[8] = 0;
 
         if (g->description_ != "")
         {
             EpisodeMenu[e].name = language[g->description_];
         }
-        else { EpisodeMenu[e].name = g->name_.c_str(); }
+        else
+        {
+            EpisodeMenu[e].name = g->name_.c_str();
+        }
 
         if (EpisodeMenu[e].patch_name[0])
         {
@@ -1387,7 +1304,8 @@ static void CreateEpisodeMenu(void)
         e++;
     }
 
-    if (e == 0) FatalError("No available episodes !\n");
+    if (e == 0)
+        FatalError("No available episodes !\n");
 
     EpisodeMenuDefinition.total_items = e;
     EpisodeMenuDefinition.menu_items  = EpisodeMenu;
@@ -1401,9 +1319,13 @@ void MenuNewGame(int choice)
         return;
     }
 
-    if (!EpisodeMenu) CreateEpisodeMenu();
+    if (!EpisodeMenu)
+        CreateEpisodeMenu();
 
-    if (EpisodeMenuDefinition.total_items == 1) { MenuEpisode(0); }
+    if (EpisodeMenuDefinition.total_items == 1)
+    {
+        MenuEpisode(0);
+    }
     else
         MenuSetupNextMenu(&EpisodeMenuDefinition);
 }
@@ -1427,31 +1349,25 @@ void MenuDrawEpisode(void)
 
     if (custom_MenuEpisode == false)
     {
-        if (style->definition_->entry_alignment_ ==
-            StyleDefinition::kAlignmentCenter)
+        if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentCenter)
             x = CenterMenuText(style, fontType, language["MenuWhichEpisode"]);
 
-        HudWriteText(style, fontType,
-                     x + style->definition_->text_[fontType].x_offset_,
-                     38 + style->definition_->text_[fontType].y_offset_,
-                     language["MenuWhichEpisode"]);
+        HudWriteText(style, fontType, x + style->definition_->text_[fontType].x_offset_,
+                     38 + style->definition_->text_[fontType].y_offset_, language["MenuWhichEpisode"]);
     }
     else
     {
-        if (style->definition_->entry_alignment_ ==
-            StyleDefinition::kAlignmentCenter)
+        if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentCenter)
         {
-            if (menu_episode->offset_x_ !=
-                0.0f)    // Only auto-center if no Xoffset
-                x = 54;  // cannot get away from the damn hardcoded value
+            if (menu_episode->offset_x_ != 0.0f) // Only auto-center if no Xoffset
+                x = 54;                          // cannot get away from the damn hardcoded value
             else
                 x = CenterMenuImage2(style, fontType, menu_episode);
         }
 
         const Colormap *colmap = style->definition_->text_[fontType].colmap_;
         HudStretchImage(x, 38 + style->definition_->text_[fontType].y_offset_,
-                        menu_episode->ScaledWidthActual() * txtscale,
-                        menu_episode->ScaledHeightActual() * txtscale,
+                        menu_episode->ScaledWidthActual() * txtscale, menu_episode->ScaledHeightActual() * txtscale,
                         menu_episode, 0.0, 0.0, colmap);
 
         // HudDrawImage(x + episode_style->definition_->text[fontType].x_offset,
@@ -1499,18 +1415,15 @@ static void DoStartLevel(SkillLevel skill)
     // find episode
     GameDefinition *g = nullptr;
 
-    std::string chosen_episodesode =
-        epi::StringFormat("%s", EpisodeMenu[chosen_episode].name);
+    std::string chosen_episodesode = epi::StringFormat("%s", EpisodeMenu[chosen_episode].name);
 
     for (auto game : gamedefs)
     {
         // Lobo 2022: lets use text instead of M_EPIxx graphic
         if (game->description_ != "")
         {
-            std::string gamedef_episode =
-                epi::StringFormat("%s", language[game->description_.c_str()]);
-            if (DDF_CompareName(gamedef_episode.c_str(),
-                                chosen_episodesode.c_str()) == 0)
+            std::string gamedef_episode = epi::StringFormat("%s", language[game->description_.c_str()]);
+            if (DDF_CompareName(gamedef_episode.c_str(), chosen_episodesode.c_str()) == 0)
             {
                 g = game;
                 break;
@@ -1518,8 +1431,7 @@ static void DoStartLevel(SkillLevel skill)
         }
         else
         {
-            if (DDF_CompareName(game->name_.c_str(),
-                                chosen_episodesode.c_str()) == 0)
+            if (DDF_CompareName(game->name_.c_str(), chosen_episodesode.c_str()) == 0)
             {
                 g = game;
                 break;
@@ -1539,8 +1451,7 @@ static void DoStartLevel(SkillLevel skill)
     // Sanity checking...
     if (!g)
     {
-        LogWarning("Internal Error: no episode for '%s'.\n",
-                   chosen_episodesode.c_str());
+        LogWarning("Internal Error: no episode for '%s'.\n", chosen_episodesode.c_str());
         MenuClear();
         return;
     }
@@ -1548,8 +1459,7 @@ static void DoStartLevel(SkillLevel skill)
     const MapDefinition *map = GameLookupMap(g->firstmap_.c_str());
     if (!map)
     {
-        LogWarning("Cannot find map for '%s' (episode %s)\n",
-                   g->firstmap_.c_str(), chosen_episodesode.c_str());
+        LogWarning("Cannot find map for '%s' (episode %s)\n", g->firstmap_.c_str(), chosen_episodesode.c_str());
         MenuClear();
         return;
     }
@@ -1559,7 +1469,8 @@ static void DoStartLevel(SkillLevel skill)
 
 static void VerifyNightmare(int ch)
 {
-    if (ch != 'y' && ch != kGamepadA && ch != kMouse1) return;
+    if (ch != 'y' && ch != kGamepadA && ch != kMouse1)
+        return;
 
     DoStartLevel(kSkillNightmare);
 }
@@ -1602,7 +1513,8 @@ void MenuChangeMessages(int choice)
 
 static void EndGameResponse(int ch)
 {
-    if (ch != 'y' && ch != kGamepadA && ch != kMouse1) return;
+    if (ch != 'y' && ch != kGamepadA && ch != kMouse1)
+        return;
 
     GameDeferredEndGame();
 
@@ -1630,11 +1542,20 @@ void MenuEndGame(int choice, ConsoleVariable *cvar)
     MenuStartMessage(language["EndGameCheck"], EndGameResponse, true);
 }
 
-void MenuReadThis(int choice) { MenuSetupNextMenu(&ReadThisMenuDefinition1); }
+void MenuReadThis(int choice)
+{
+    MenuSetupNextMenu(&ReadThisMenuDefinition1);
+}
 
-void MenuReadThis2(int choice) { MenuSetupNextMenu(&ReadThisMenuDefinition2); }
+void MenuReadThis2(int choice)
+{
+    MenuSetupNextMenu(&ReadThisMenuDefinition2);
+}
 
-void MenuFinishReadThis(int choice) { MenuSetupNextMenu(&MainMenuDefinition); }
+void MenuFinishReadThis(int choice)
+{
+    MenuSetupNextMenu(&MainMenuDefinition);
+}
 
 //
 // -KM- 1998/12/16 Handle sfx that don't exist in this version.
@@ -1642,7 +1563,8 @@ void MenuFinishReadThis(int choice) { MenuSetupNextMenu(&MainMenuDefinition); }
 //
 static void QuitResponse(int ch)
 {
-    if (ch != 'y' && ch != kGamepadA && ch != kMouse1) return;
+    if (ch != 'y' && ch != kGamepadA && ch != kMouse1)
+        return;
 
     if (!network_game)
     {
@@ -1652,7 +1574,8 @@ static void QuitResponse(int ch)
         int  i, start;
 
         // Count the quit messages
-        do {
+        do
+        {
             sprintf(refname, "QuitSnd%d", numsounds + 1);
             if (language.IsValidRef(refname))
                 numsounds++;
@@ -1665,7 +1588,8 @@ static void QuitResponse(int ch)
             // cycle through all the quit sounds, until one of them exists
             // (some of the default quit sounds do not exist in DOOM 1)
             start = i = RandomByte() % numsounds;
-            do {
+            do
+            {
                 sprintf(refname, "QuitSnd%d", i + 1);
                 sprintf(sound, "DS%s", language[refname]);
                 if (CheckLumpNumberForName(sound) != -1)
@@ -1718,7 +1642,8 @@ void MenuQuitEdge(int choice)
     int num_quitmessages = 0;
 
     // Count the quit messages
-    do {
+    do
+    {
         num_quitmessages++;
 
         sprintf(ref, "QUITMSG%d", num_quitmessages);
@@ -1734,10 +1659,12 @@ void MenuQuitEdge(int choice)
         sprintf(ref, "QUITMSG%d", 1 + (RandomByte() % num_quitmessages));
 
         // Construct the quit message in full
-        msg = epi::StringFormat("%s\n\n%s", language[ref],
-                                language["PressToQuit"]);
+        msg = epi::StringFormat("%s\n\n%s", language[ref], language["PressToQuit"]);
     }
-    else { msg = std::string(language["PressToQuit"]); }
+    else
+    {
+        msg = std::string(language["PressToQuit"]);
+    }
 
     // Trigger the message
     MenuStartMessage(msg.c_str(), QuitResponse, true);
@@ -1765,8 +1692,8 @@ void MenuImmediateQuit()
 //   MENU FUNCTIONS
 //----------------------------------------------------------------------------
 
-void MenuDrawSlider(int x, int y, float slider_position, float increment,
-                    int div, float min, float max, std::string format_string)
+void MenuDrawSlider(int x, int y, float slider_position, float increment, int div, float min, float max,
+                    std::string format_string)
 {
     float basex      = x;
     int   step       = (8 / div);
@@ -1774,10 +1701,7 @@ void MenuDrawSlider(int x, int y, float slider_position, float increment,
 
     // Capture actual value first since it will be aligned to the slider
     // increment
-    std::string actual_val =
-        format_string.empty()
-            ? ""
-            : epi::StringFormat(format_string.c_str(), slider_position);
+    std::string actual_val = format_string.empty() ? "" : epi::StringFormat(format_string.c_str(), slider_position);
 
     slider_position = HMM_Clamp(min, slider_position, max);
 
@@ -1787,33 +1711,25 @@ void MenuDrawSlider(int x, int y, float slider_position, float increment,
 
     // If using an IMAGE or TRUETYPE type font for the menu, use a
     // COALHUDs-style bar for the slider instead
-    if (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]
-                ->definition_->type_ == kFontTypeImage ||
-        opt_style->fonts_[StyleDefinition::kTextSectionAlternate]
-                ->definition_->type_ == kFontTypeTrueType)
+    if (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeImage ||
+        opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType)
     {
         RGBAColor slider_color = SG_WHITE_RGBA32;
 
-        const Colormap *colmap =
-            opt_style->definition_
-                ->text_[StyleDefinition::kTextSectionAlternate]
-                .colmap_;
+        const Colormap *colmap = opt_style->definition_->text_[StyleDefinition::kTextSectionAlternate].colmap_;
 
-        if (colmap) slider_color = GetFontColor(colmap);
+        if (colmap)
+            slider_color = GetFontColor(colmap);
 
         HudThinBox(
             x,
-            y + (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]
-                             ->definition_->type_ == kFontTypeTrueType
+            y + (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType
                      ? opt_style->fonts_[StyleDefinition::kTextSectionAlternate]
                            ->truetype_reference_yshift_[current_font_size]
                      : 0),
             x + 50.0f,
-            y +
-                opt_style->fonts_[StyleDefinition::kTextSectionAlternate]
-                    ->NominalHeight() +
-                (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]
-                             ->definition_->type_ == kFontTypeTrueType
+            y + opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->NominalHeight() +
+                (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType
                      ? opt_style->fonts_[StyleDefinition::kTextSectionAlternate]
                                ->truetype_reference_yshift_[current_font_size] /
                            2
@@ -1821,25 +1737,20 @@ void MenuDrawSlider(int x, int y, float slider_position, float increment,
             slider_color);
         HudSolidBox(
             x,
-            y + (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]
-                             ->definition_->type_ == kFontTypeTrueType
+            y + (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType
                      ? opt_style->fonts_[StyleDefinition::kTextSectionAlternate]
                            ->truetype_reference_yshift_[current_font_size]
                      : 0),
             x + (((slider_position - min) / increment) * scale_step),
-            y +
-                opt_style->fonts_[StyleDefinition::kTextSectionAlternate]
-                    ->NominalHeight() +
-                (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]
-                             ->definition_->type_ == kFontTypeTrueType
+            y + opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->NominalHeight() +
+                (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType
                      ? opt_style->fonts_[StyleDefinition::kTextSectionAlternate]
                                ->truetype_reference_yshift_[current_font_size] /
                            2
                      : 0),
             slider_color);
         if (!actual_val.empty())
-            HudWriteText(opt_style, StyleDefinition::kTextSectionAlternate,
-                         x + 50.0f + step, y, actual_val.c_str());
+            HudWriteText(opt_style, StyleDefinition::kTextSectionAlternate, x + 50.0f + step, y, actual_val.c_str());
     }
     else
     {
@@ -1848,32 +1759,25 @@ void MenuDrawSlider(int x, int y, float slider_position, float increment,
 
         int i = 0;
 
-        HudStretchImage(x, y, step + 1, therm_l->ScaledHeightActual() / div,
-                        therm_l, 0.0, 0.0);
+        HudStretchImage(x, y, step + 1, therm_l->ScaledHeightActual() / div, therm_l, 0.0, 0.0);
 
         for (x += step; i < (50 / step); i++, x += step)
         {
-            HudStretchImage(x, y, step + 1, therm_m->ScaledHeightActual() / div,
-                            therm_m, 0.0, 0.0);
+            HudStretchImage(x, y, step + 1, therm_m->ScaledHeightActual() / div, therm_m, 0.0, 0.0);
         }
 
-        HudStretchImage(x, y, step + 1, therm_r->ScaledHeightActual() / div,
-                        therm_r, 0.0, 0.0);
+        HudStretchImage(x, y, step + 1, therm_r->ScaledHeightActual() / div, therm_r, 0.0, 0.0);
 
-        HudStretchImage(
-            basex + ((slider_position - min) / increment) * scale_step + 1, y,
-            step + 1, therm_o->ScaledHeightActual() / div, therm_o, 0.0, 0.0);
+        HudStretchImage(basex + ((slider_position - min) / increment) * scale_step + 1, y, step + 1,
+                        therm_o->ScaledHeightActual() / div, therm_o, 0.0, 0.0);
 
         if (!actual_val.empty())
             HudWriteText(opt_style, StyleDefinition::kTextSectionAlternate,
-                         basex + (((max - min) / increment) * scale_step) +
-                             (step * 2 + 2),
-                         y, actual_val.c_str());
+                         basex + (((max - min) / increment) * scale_step) + (step * 2 + 2), y, actual_val.c_str());
     }
 }
 
-void MenuStartMessage(const char *string, void (*routine)(int response),
-                      bool        input)
+void MenuStartMessage(const char *string, void (*routine)(int response), bool input)
 {
     message_last_menu     = menu_active;
     message_mode          = 1;
@@ -1897,8 +1801,7 @@ void MenuStartMessage(const char *string, void (*routine)(int response),
 //          with a pointer to the input in s.  s will be nullptr if the user
 //          pressed ESCAPE to cancel the input.
 //
-void MenuStartMessageInput(const char *string,
-                           void (*routine)(const char *response))
+void MenuStartMessageInput(const char *string, void (*routine)(const char *response))
 {
     message_last_menu     = menu_active;
     message_mode          = 2;
@@ -1922,7 +1825,8 @@ bool MenuResponder(InputEvent *ev)
 {
     int i;
 
-    if (ev->type != kInputEventKeyDown) return false;
+    if (ev->type != kInputEventKeyDown)
+        return false;
 
     int ch = ev->value.key.sym;
 
@@ -1939,17 +1843,16 @@ bool MenuResponder(InputEvent *ev)
     // -KM- 1998/07/21 Message Input
     if (message_mode == 1)
     {
-        if (message_needs_input == true &&
-            !(ch == ' ' || ch == 'n' || ch == 'y' || ch == kEscape ||
-              ch == kGamepadB || ch == kGamepadA || ch == kMouse1 ||
-              ch == kMouse2 || ch == kMouse3))
+        if (message_needs_input == true && !(ch == ' ' || ch == 'n' || ch == 'y' || ch == kEscape || ch == kGamepadB ||
+                                             ch == kGamepadA || ch == kMouse1 || ch == kMouse2 || ch == kMouse3))
             return false;
 
         message_mode = 0;
         // -KM- 1998/07/31 Moved this up here to fix bugs.
         menu_active = message_last_menu ? true : false;
 
-        if (message_key_routine) (*message_key_routine)(ch);
+        if (message_key_routine)
+            (*message_key_routine)(ch);
 
         StartSoundEffect(sound_effect_swtchx);
         return true;
@@ -1976,7 +1879,8 @@ bool MenuResponder(InputEvent *ev)
             menu_active  = message_last_menu ? true : false;
             message_mode = 0;
 
-            if (message_input_routine) (*message_input_routine)(nullptr);
+            if (message_input_routine)
+                (*message_input_routine)(nullptr);
 
             input_string.clear();
 
@@ -1997,88 +1901,84 @@ bool MenuResponder(InputEvent *ev)
             return true;
         }
 
-        if (mod & KMOD_SHIFT || mod & KMOD_CAPS) ch = epi::ToUpperASCII(ch);
-        if (ch == '-') ch = '_';
+        if (mod & KMOD_SHIFT || mod & KMOD_CAPS)
+            ch = epi::ToUpperASCII(ch);
+        if (ch == '-')
+            ch = '_';
 
-        if (ch >= 32 && ch <= 126)  // FIXME: international characters ??
+        if (ch >= 32 && ch <= 126) // FIXME: international characters ??
         {
             // Set the input_string only if fits
-            if (input_string.size() < 64) { input_string += ch; }
+            if (input_string.size() < 64)
+            {
+                input_string += ch;
+            }
         }
 
         return true;
     }
 
     // new MainMenuOptions menu on - use that responder
-    if (option_menu_on) return OptionMenuResponder(ev, ch);
+    if (option_menu_on)
+        return OptionMenuResponder(ev, ch);
 
-    if (network_game_menu_on) return NetworkGameResponder(ev, ch);
+    if (network_game_menu_on)
+        return NetworkGameResponder(ev, ch);
 
     // Save Game string input
     if (entering_save_string)
     {
         switch (ch)
         {
-            case kBackspace:
-                if (save_string_character_index > 0)
-                {
-                    save_string_character_index--;
-                    save_extended_information_slots[save_slot]
-                        .description[save_string_character_index] = 0;
-                }
-                break;
+        case kBackspace:
+            if (save_string_character_index > 0)
+            {
+                save_string_character_index--;
+                save_extended_information_slots[save_slot].description[save_string_character_index] = 0;
+            }
+            break;
 
-            case kEscape:
-            case kGamepadB:
-            case kMouse2:
-            case kMouse3:
-                entering_save_string = 0;
-                strcpy(save_extended_information_slots[save_slot].description,
-                       old_save_string);
-                break;
+        case kEscape:
+        case kGamepadB:
+        case kMouse2:
+        case kMouse3:
+            entering_save_string = 0;
+            strcpy(save_extended_information_slots[save_slot].description, old_save_string);
+            break;
 
-            case kEnter:
-            case kGamepadA:
-            case kMouse1:
-                entering_save_string = 0;
-                if (save_extended_information_slots[save_slot].description[0])
+        case kEnter:
+        case kGamepadA:
+        case kMouse1:
+            entering_save_string = 0;
+            if (save_extended_information_slots[save_slot].description[0])
+            {
+                M_DoSave(save_page, save_slot);
+            }
+            else
+            {
+                std::string default_name = epi::StringFormat("SAVE-%d", save_page * kTotalSaveSlots + save_slot + 1);
+                for (; (size_t)save_string_character_index < default_name.size(); save_string_character_index++)
                 {
-                    M_DoSave(save_page, save_slot);
+                    save_extended_information_slots[save_slot].description[save_string_character_index] =
+                        default_name[save_string_character_index];
                 }
-                else
-                {
-                    std::string default_name = epi::StringFormat(
-                        "SAVE-%d", save_page * kTotalSaveSlots + save_slot + 1);
-                    for (; (size_t)save_string_character_index <
-                           default_name.size();
-                         save_string_character_index++)
-                    {
-                        save_extended_information_slots[save_slot]
-                            .description[save_string_character_index] =
-                            default_name[save_string_character_index];
-                    }
-                    save_extended_information_slots[save_slot]
-                        .description[save_string_character_index] = 0;
-                    M_DoSave(save_page, save_slot);
-                }
-                break;
+                save_extended_information_slots[save_slot].description[save_string_character_index] = 0;
+                M_DoSave(save_page, save_slot);
+            }
+            break;
 
-            default:
-                if (mod & KMOD_SHIFT || mod & KMOD_CAPS)
-                    ch = epi::ToUpperASCII(ch);
-                EPI_ASSERT(save_style);
-                if (ch >= 32 && ch <= 127 &&
-                    save_string_character_index < kSaveStringSize - 1 &&
-                    save_style->fonts_[1]->StringWidth(
-                        save_extended_information_slots[save_slot]
-                            .description) < (kSaveStringSize - 2) * 8)
-                {
-                    save_extended_information_slots[save_slot]
-                        .description[save_string_character_index++] = ch;
-                    save_extended_information_slots[save_slot]
-                        .description[save_string_character_index] = 0;
-                }
-                break;
+        default:
+            if (mod & KMOD_SHIFT || mod & KMOD_CAPS)
+                ch = epi::ToUpperASCII(ch);
+            EPI_ASSERT(save_style);
+            if (ch >= 32 && ch <= 127 && save_string_character_index < kSaveStringSize - 1 &&
+                save_style->fonts_[1]->StringWidth(save_extended_information_slots[save_slot].description) <
+                    (kSaveStringSize - 2) * 8)
+            {
+                save_extended_information_slots[save_slot].description[save_string_character_index++] = ch;
+                save_extended_information_slots[save_slot].description[save_string_character_index]   = 0;
+            }
+            break;
         }
         return true;
     }
@@ -2086,144 +1986,175 @@ bool MenuResponder(InputEvent *ev)
     // F-Keys
     if (!menu_active)
     {
-        if (EventMatchesKey(key_screenshot, ch)) { ch = kScreenshot; }
-        if (EventMatchesKey(key_save_game, ch)) { ch = kSaveGame; }
-        if (EventMatchesKey(key_load_game, ch)) { ch = kLoadGame; }
-        if (EventMatchesKey(key_sound_controls, ch)) { ch = kSoundControls; }
-        if (EventMatchesKey(key_options_menu, ch)) { ch = kOptionsMenu; }
-        if (EventMatchesKey(key_quick_save, ch)) { ch = kQuickSave; }
-        if (EventMatchesKey(key_end_game, ch)) { ch = kEndGame; }
-        if (EventMatchesKey(key_message_toggle, ch)) { ch = kMessageToggle; }
-        if (EventMatchesKey(key_quick_load, ch)) { ch = kQuickLoad; }
-        if (EventMatchesKey(key_quit_edge, ch)) { ch = kQuitEdge; }
-        if (EventMatchesKey(key_gamma_toggle, ch)) { ch = kGammaToggle; }
+        if (EventMatchesKey(key_screenshot, ch))
+        {
+            ch = kScreenshot;
+        }
+        if (EventMatchesKey(key_save_game, ch))
+        {
+            ch = kSaveGame;
+        }
+        if (EventMatchesKey(key_load_game, ch))
+        {
+            ch = kLoadGame;
+        }
+        if (EventMatchesKey(key_sound_controls, ch))
+        {
+            ch = kSoundControls;
+        }
+        if (EventMatchesKey(key_options_menu, ch))
+        {
+            ch = kOptionsMenu;
+        }
+        if (EventMatchesKey(key_quick_save, ch))
+        {
+            ch = kQuickSave;
+        }
+        if (EventMatchesKey(key_end_game, ch))
+        {
+            ch = kEndGame;
+        }
+        if (EventMatchesKey(key_message_toggle, ch))
+        {
+            ch = kMessageToggle;
+        }
+        if (EventMatchesKey(key_quick_load, ch))
+        {
+            ch = kQuickLoad;
+        }
+        if (EventMatchesKey(key_quit_edge, ch))
+        {
+            ch = kQuitEdge;
+        }
+        if (EventMatchesKey(key_gamma_toggle, ch))
+        {
+            ch = kGammaToggle;
+        }
 
         switch (ch)
         {
-            case kMinus:  // Screen size down
+        case kMinus: // Screen size down
 
-                if (automap_active) return false;
+            if (automap_active)
+                return false;
 
-                screen_hud =
-                    (screen_hud - 1 + kTotalScreenHuds) % kTotalScreenHuds;
+            screen_hud = (screen_hud - 1 + kTotalScreenHuds) % kTotalScreenHuds;
 
-                StartSoundEffect(sound_effect_stnmov);
-                return true;
+            StartSoundEffect(sound_effect_stnmov);
+            return true;
 
-            case kEquals:  // Screen size up
+        case kEquals: // Screen size up
 
-                if (automap_active) return false;
+            if (automap_active)
+                return false;
 
-                screen_hud = (screen_hud + 1) % kTotalScreenHuds;
+            screen_hud = (screen_hud + 1) % kTotalScreenHuds;
 
-                StartSoundEffect(sound_effect_stnmov);
-                return true;
+            StartSoundEffect(sound_effect_stnmov);
+            return true;
 
-            case kSaveGame:  // Save
+        case kSaveGame: // Save
 
-                MenuStartControlPanel();
-                StartSoundEffect(sound_effect_swtchn);
-                MenuSaveGame(0);
-                return true;
+            MenuStartControlPanel();
+            StartSoundEffect(sound_effect_swtchn);
+            MenuSaveGame(0);
+            return true;
 
-            case kLoadGame:  // Load
+        case kLoadGame: // Load
 
-                MenuStartControlPanel();
-                StartSoundEffect(sound_effect_swtchn);
-                MenuLoadGame(0);
-                return true;
+            MenuStartControlPanel();
+            StartSoundEffect(sound_effect_swtchn);
+            MenuLoadGame(0);
+            return true;
 
-            case kSoundControls:  // Sound Volume
+        case kSoundControls: // Sound Volume
 
-                StartSoundEffect(sound_effect_swtchn);
-                MenuStartControlPanel();
-                MenuF4SoundOptions(0);
-                return true;
+            StartSoundEffect(sound_effect_swtchn);
+            MenuStartControlPanel();
+            MenuF4SoundOptions(0);
+            return true;
 
-            case kOptionsMenu:  // Detail toggle, now loads MainMenuOptions
-                                // menu
-                // -KM- 1998/07/31 F5 now loads MainMenuOptions menu, detail is
-                // obsolete.
+        case kOptionsMenu: // Detail toggle, now loads MainMenuOptions
+                           // menu
+            // -KM- 1998/07/31 F5 now loads MainMenuOptions menu, detail is
+            // obsolete.
 
-                StartSoundEffect(sound_effect_swtchn);
-                MenuStartControlPanel();
-                MenuOptions(1);
-                return true;
+            StartSoundEffect(sound_effect_swtchn);
+            MenuStartControlPanel();
+            MenuOptions(1);
+            return true;
 
-            case kQuickSave:  // Quicksave
+        case kQuickSave: // Quicksave
 
-                StartSoundEffect(sound_effect_swtchn);
-                MenuQuickSave();
-                return true;
+            StartSoundEffect(sound_effect_swtchn);
+            MenuQuickSave();
+            return true;
 
-            case kEndGame:  // End game
+        case kEndGame: // End game
 
-                StartSoundEffect(sound_effect_swtchn);
-                MenuEndGame(0);
-                return true;
+            StartSoundEffect(sound_effect_swtchn);
+            MenuEndGame(0);
+            return true;
 
-            case kMessageToggle:  // Toggle messages
+        case kMessageToggle: // Toggle messages
 
-                MenuChangeMessages(0);
-                StartSoundEffect(sound_effect_swtchn);
-                return true;
+            MenuChangeMessages(0);
+            StartSoundEffect(sound_effect_swtchn);
+            return true;
 
-            case kQuickLoad:  // Quickload
+        case kQuickLoad: // Quickload
 
-                StartSoundEffect(sound_effect_swtchn);
-                MenuQuickLoad();
-                return true;
+            StartSoundEffect(sound_effect_swtchn);
+            MenuQuickLoad();
+            return true;
 
-            case kQuitEdge:  // Quit DOOM
+        case kQuitEdge: // Quit DOOM
 
-                StartSoundEffect(sound_effect_swtchn);
-                MenuQuitEdge(0);
-                return true;
+            StartSoundEffect(sound_effect_swtchn);
+            MenuQuitEdge(0);
+            return true;
 
-            case kGammaToggle:  // gamma toggle
+        case kGammaToggle: // gamma toggle
 
-                sector_brightness_correction.d_++;
-                if (sector_brightness_correction.d_ > 10)
-                    sector_brightness_correction.d_ = 0;
+            sector_brightness_correction.d_++;
+            if (sector_brightness_correction.d_ > 10)
+                sector_brightness_correction.d_ = 0;
 
-                sector_brightness_correction = sector_brightness_correction.d_;
+            sector_brightness_correction = sector_brightness_correction.d_;
 
-                std::string msg =
-                    "Sector Brightness ";  // TODO: Make language entry - Dasho
+            std::string msg = "Sector Brightness "; // TODO: Make language entry - Dasho
 
-                switch (sector_brightness_correction.d_)
-                {
-                    case 0:
-                    case 1:
-                    case 2:
-                    case 3:
-                    case 4:
-                        msg.append("-");
-                        msg.append(std::to_string(
-                            (5 - sector_brightness_correction.d_) * 10));
-                        break;
-                    case 5:
-                        msg.append("Default");
-                        break;
-                    case 6:
-                    case 7:
-                    case 8:
-                    case 9:
-                    case 10:
-                        msg.append("+");
-                        msg.append(std::to_string(
-                            (5 - sector_brightness_correction.d_) * -10));
-                        break;
-                    default:
-                        msg.clear();
-                        break;
-                }
+            switch (sector_brightness_correction.d_)
+            {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+                msg.append("-");
+                msg.append(std::to_string((5 - sector_brightness_correction.d_) * 10));
+                break;
+            case 5:
+                msg.append("Default");
+                break;
+            case 6:
+            case 7:
+            case 8:
+            case 9:
+            case 10:
+                msg.append("+");
+                msg.append(std::to_string((5 - sector_brightness_correction.d_) * -10));
+                break;
+            default:
+                msg.clear();
+                break;
+            }
 
-                if (!msg.empty())
-                    ConsolePlayerMessage(console_player, "%s", msg.c_str());
+            if (!msg.empty())
+                ConsolePlayerMessage(console_player, "%s", msg.c_str());
 
-                // -AJA- 1999/07/03: removed PLAYPAL reference.
-                return true;
+            // -AJA- 1999/07/03: removed PLAYPAL reference.
+            return true;
         }
 
         // Pop-up menu?
@@ -2239,148 +2170,143 @@ bool MenuResponder(InputEvent *ev)
     // Keys usable within menu
     switch (ch)
     {
-        case kMouseWheelDown:
-            do {
-                if (item_on + 1 > current_menu->total_items - 1)
+    case kMouseWheelDown:
+        do
+        {
+            if (item_on + 1 > current_menu->total_items - 1)
+            {
+                if (current_menu->menu_items[item_on].select_function && current_menu->menu_items[item_on].status == 2)
                 {
-                    if (current_menu->menu_items[item_on].select_function &&
-                        current_menu->menu_items[item_on].status == 2)
-                    {
-                        StartSoundEffect(sound_effect_stnmov);
-                        // 98-7-10 KM Use new defines
-                        (*current_menu->menu_items[item_on].select_function)(
-                            kSliderRight);
-                        item_on = 0;
-                        return true;
-                    }
-                    else
-                        item_on = 0;
-                }
-                else
-                    item_on++;
-                StartSoundEffect(sound_effect_pstop);
-            } while (current_menu->menu_items[item_on].status == -1);
-            return true;
-
-        case kMouseWheelUp:
-            do {
-                if (item_on == 0)
-                {
-                    if (current_menu->menu_items[item_on].select_function &&
-                        current_menu->menu_items[item_on].status == 2)
-                    {
-                        StartSoundEffect(sound_effect_stnmov);
-                        // 98-7-10 KM Use new defines
-                        (*current_menu->menu_items[item_on].select_function)(
-                            kSliderLeft);
-                        item_on = current_menu->total_items - 1;
-                        return true;
-                    }
-                    else
-                        item_on = current_menu->total_items - 1;
-                }
-                else
-                    item_on--;
-                StartSoundEffect(sound_effect_pstop);
-            } while (current_menu->menu_items[item_on].status == -1);
-            return true;
-
-        case kDownArrow:
-        case kGamepadDown:
-            do {
-                if (item_on + 1 > current_menu->total_items - 1)
+                    StartSoundEffect(sound_effect_stnmov);
+                    // 98-7-10 KM Use new defines
+                    (*current_menu->menu_items[item_on].select_function)(kSliderRight);
                     item_on = 0;
+                    return true;
+                }
                 else
-                    item_on++;
-                StartSoundEffect(sound_effect_pstop);
-            } while (current_menu->menu_items[item_on].status == -1);
-            return true;
+                    item_on = 0;
+            }
+            else
+                item_on++;
+            StartSoundEffect(sound_effect_pstop);
+        } while (current_menu->menu_items[item_on].status == -1);
+        return true;
 
-        case kUpArrow:
-        case kGamepadUp:
-            do {
-                if (item_on == 0)
+    case kMouseWheelUp:
+        do
+        {
+            if (item_on == 0)
+            {
+                if (current_menu->menu_items[item_on].select_function && current_menu->menu_items[item_on].status == 2)
+                {
+                    StartSoundEffect(sound_effect_stnmov);
+                    // 98-7-10 KM Use new defines
+                    (*current_menu->menu_items[item_on].select_function)(kSliderLeft);
                     item_on = current_menu->total_items - 1;
+                    return true;
+                }
                 else
-                    item_on--;
+                    item_on = current_menu->total_items - 1;
+            }
+            else
+                item_on--;
+            StartSoundEffect(sound_effect_pstop);
+        } while (current_menu->menu_items[item_on].status == -1);
+        return true;
+
+    case kDownArrow:
+    case kGamepadDown:
+        do
+        {
+            if (item_on + 1 > current_menu->total_items - 1)
+                item_on = 0;
+            else
+                item_on++;
+            StartSoundEffect(sound_effect_pstop);
+        } while (current_menu->menu_items[item_on].status == -1);
+        return true;
+
+    case kUpArrow:
+    case kGamepadUp:
+        do
+        {
+            if (item_on == 0)
+                item_on = current_menu->total_items - 1;
+            else
+                item_on--;
+            StartSoundEffect(sound_effect_pstop);
+        } while (current_menu->menu_items[item_on].status == -1);
+        return true;
+
+    case kPageUp:
+    case kLeftArrow:
+    case kGamepadLeft:
+        if (current_menu->menu_items[item_on].select_function && current_menu->menu_items[item_on].status == 2)
+        {
+            StartSoundEffect(sound_effect_stnmov);
+            // 98-7-10 KM Use new defines
+            (*current_menu->menu_items[item_on].select_function)(kSliderLeft);
+        }
+        return true;
+
+    case kPageDown:
+    case kRightArrow:
+    case kGamepadRight:
+        if (current_menu->menu_items[item_on].select_function && current_menu->menu_items[item_on].status == 2)
+        {
+            StartSoundEffect(sound_effect_stnmov);
+            // 98-7-10 KM Use new defines
+            (*current_menu->menu_items[item_on].select_function)(kSliderRight);
+        }
+        return true;
+
+    case kEnter:
+    case kMouse1:
+    case kGamepadA:
+        if (current_menu->menu_items[item_on].select_function && current_menu->menu_items[item_on].status)
+        {
+            current_menu->last_on = item_on;
+            (*current_menu->menu_items[item_on].select_function)(item_on);
+            StartSoundEffect(sound_effect_pistol);
+        }
+        return true;
+
+    case kEscape:
+    case kMouse2:
+    case kMouse3:
+    case kGamepadStart:
+        current_menu->last_on = item_on;
+        MenuClear();
+        StartSoundEffect(sound_effect_swtchx);
+        return true;
+
+    case kBackspace:
+    case kGamepadB:
+        current_menu->last_on = item_on;
+        if (current_menu->previous_menu)
+        {
+            current_menu = current_menu->previous_menu;
+            item_on      = current_menu->last_on;
+            StartSoundEffect(sound_effect_swtchn);
+        }
+        return true;
+
+    default:
+        for (i = item_on + 1; i < current_menu->total_items; i++)
+            if (current_menu->menu_items[i].alpha_key == ch)
+            {
+                item_on = i;
                 StartSoundEffect(sound_effect_pstop);
-            } while (current_menu->menu_items[item_on].status == -1);
-            return true;
-
-        case kPageUp:
-        case kLeftArrow:
-        case kGamepadLeft:
-            if (current_menu->menu_items[item_on].select_function &&
-                current_menu->menu_items[item_on].status == 2)
-            {
-                StartSoundEffect(sound_effect_stnmov);
-                // 98-7-10 KM Use new defines
-                (*current_menu->menu_items[item_on].select_function)(
-                    kSliderLeft);
+                return true;
             }
-            return true;
-
-        case kPageDown:
-        case kRightArrow:
-        case kGamepadRight:
-            if (current_menu->menu_items[item_on].select_function &&
-                current_menu->menu_items[item_on].status == 2)
+        for (i = 0; i <= item_on; i++)
+            if (current_menu->menu_items[i].alpha_key == ch)
             {
-                StartSoundEffect(sound_effect_stnmov);
-                // 98-7-10 KM Use new defines
-                (*current_menu->menu_items[item_on].select_function)(
-                    kSliderRight);
+                item_on = i;
+                StartSoundEffect(sound_effect_pstop);
+                return true;
             }
-            return true;
-
-        case kEnter:
-        case kMouse1:
-        case kGamepadA:
-            if (current_menu->menu_items[item_on].select_function &&
-                current_menu->menu_items[item_on].status)
-            {
-                current_menu->last_on = item_on;
-                (*current_menu->menu_items[item_on].select_function)(item_on);
-                StartSoundEffect(sound_effect_pistol);
-            }
-            return true;
-
-        case kEscape:
-        case kMouse2:
-        case kMouse3:
-        case kGamepadStart:
-            current_menu->last_on = item_on;
-            MenuClear();
-            StartSoundEffect(sound_effect_swtchx);
-            return true;
-
-        case kBackspace:
-        case kGamepadB:
-            current_menu->last_on = item_on;
-            if (current_menu->previous_menu)
-            {
-                current_menu = current_menu->previous_menu;
-                item_on      = current_menu->last_on;
-                StartSoundEffect(sound_effect_swtchn);
-            }
-            return true;
-
-        default:
-            for (i = item_on + 1; i < current_menu->total_items; i++)
-                if (current_menu->menu_items[i].alpha_key == ch)
-                {
-                    item_on = i;
-                    StartSoundEffect(sound_effect_pstop);
-                    return true;
-                }
-            for (i = 0; i <= item_on; i++)
-                if (current_menu->menu_items[i].alpha_key == ch)
-                {
-                    item_on = i;
-                    StartSoundEffect(sound_effect_pstop);
-                    return true;
-                }
-            break;
+        break;
     }
 
     return false;
@@ -2389,13 +2315,14 @@ bool MenuResponder(InputEvent *ev)
 void MenuStartControlPanel(void)
 {
     // intro might call this repeatedly
-    if (menu_active) return;
+    if (menu_active)
+        return;
 
     menu_active = true;
     ConsoleSetVisible(kConsoleVisibilityNotVisible);
 
-    current_menu = &MainMenuDefinition;    // JDC
-    item_on      = current_menu->last_on;  // JDC
+    current_menu = &MainMenuDefinition;   // JDC
+    item_on      = current_menu->last_on; // JDC
 
     OptionMenuCheckNetworkGame();
 }
@@ -2406,7 +2333,8 @@ static int FindChar(std::string &str, char ch, int pos)
 
     const char *scan = strchr(str.c_str() + pos, ch);
 
-    if (!scan) return -1;
+    if (!scan)
+        return -1;
 
     return (int)(scan - str.c_str());
 }
@@ -2416,36 +2344,30 @@ static std::string GetMiddle(std::string &str, int pos, int len)
     EPI_ASSERT(pos >= 0 && len >= 0);
     EPI_ASSERT(pos + len <= (int)str.size());
 
-    if (len == 0) return std::string();
+    if (len == 0)
+        return std::string();
 
     return std::string(str.c_str() + pos, len);
 }
 
 static void DrawMessage(void)
 {
-    if (message_key_routine == QuitResponse &&
-        !exit_style->background_image_)  // Respect dialog styles with custom
-                                         // backgrounds
+    if (message_key_routine == QuitResponse && !exit_style->background_image_) // Respect dialog styles with custom
+                                                                               // backgrounds
     {
-        StartFrame();  // To clear and ensure solid black background regardless
-                       // of style
+        StartFrame(); // To clear and ensure solid black background regardless
+                      // of style
 
-        if (exit_style->definition_->text_[StyleDefinition::kTextSectionText]
-                .colmap_)
+        if (exit_style->definition_->text_[StyleDefinition::kTextSectionText].colmap_)
         {
-            HudSetTextColor(
-                GetFontColor(exit_style->definition_
-                                 ->text_[StyleDefinition::kTextSectionText]
-                                 .colmap_));
+            HudSetTextColor(GetFontColor(exit_style->definition_->text_[StyleDefinition::kTextSectionText].colmap_));
         }
 
         if (exit_style->fonts_[StyleDefinition::kTextSectionText])
         {
             HudSetFont(exit_style->fonts_[StyleDefinition::kTextSectionText]);
         }
-        HudSetScale(
-            exit_style->definition_->text_[StyleDefinition::kTextSectionText]
-                .scale_);
+        HudSetScale(exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
 
         HudDrawQuitScreen();
         return;
@@ -2465,25 +2387,23 @@ static void DrawMessage(void)
 
     std::string input(input_string);
 
-    if (message_mode == 2) input += "_";
+    if (message_mode == 2)
+        input += "_";
 
     // Calc required height
 
     std::string s = msg + input;
 
-    y = 100 -
-        (exit_style->fonts_[StyleDefinition::kTextSectionText]->StringLines(
-             s.c_str()) *
-         exit_style->fonts_[StyleDefinition::kTextSectionText]
-             ->NominalHeight() *
-         1.5f / 2);
+    y = 100 - (exit_style->fonts_[StyleDefinition::kTextSectionText]->StringLines(s.c_str()) *
+               exit_style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight() * 1.5f / 2);
 
     if (!msg.empty())
     {
         int oldpos = 0;
         int pos;
 
-        do {
+        do
+        {
             pos = FindChar(msg, '\n', oldpos);
 
             if (pos < 0)
@@ -2494,14 +2414,11 @@ static void DrawMessage(void)
             if (s.size() > 0)
             {
                 HudSetAlignment(0, -1);  // center it
-                HudWriteText(exit_style, StyleDefinition::kTextSectionText, 160,
-                             y, s.c_str());
-                HudSetAlignment(-1, -1);  // set it back to usual
+                HudWriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str());
+                HudSetAlignment(-1, -1); // set it back to usual
             }
 
-            y += exit_style->fonts_[StyleDefinition::kTextSectionText]
-                     ->NominalHeight() *
-                 1.5f;
+            y += exit_style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight() * 1.5f;
 
             oldpos = pos + 1;
         } while (pos >= 0 && oldpos < (int)msg.size());
@@ -2512,7 +2429,8 @@ static void DrawMessage(void)
         int oldpos = 0;
         int pos;
 
-        do {
+        do
+        {
             pos = FindChar(input, '\n', oldpos);
 
             if (pos < 0)
@@ -2523,9 +2441,8 @@ static void DrawMessage(void)
             if (s.size() > 0)
             {
                 HudSetAlignment(0, -1);  // center it
-                HudWriteText(exit_style, StyleDefinition::kTextSectionText, 160,
-                             y, s.c_str());
-                HudSetAlignment(-1, -1);  // set it back to usual
+                HudWriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str());
+                HudSetAlignment(-1, -1); // set it back to usual
             }
 
             y += exit_style->fonts_[0]->NominalHeight();
@@ -2556,8 +2473,7 @@ void MenuDrawCursor(Style *style, bool graphical_item)
 
     float old_alpha = HudGetAlpha();
 
-    float txtscale =
-        style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
+    float txtscale = style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
 
     // const colourmap_c *colmap =
     // style->definition_->text[StyleDefinition::kTextSectionText].colmap; //
@@ -2571,12 +2487,11 @@ void MenuDrawCursor(Style *style, bool graphical_item)
     if (style->definition_->cursor_.cursor_string_ != "")
         cursor = nullptr;
     else if (style->definition_->cursor_.alt_cursor_ != "")
-        cursor = (Image *)ImageLookup(
-            style->definition_->cursor_.alt_cursor_.c_str());
+        cursor = (Image *)ImageLookup(style->definition_->cursor_.alt_cursor_.c_str());
     else
         cursor = menu_skull[0];
 
-    if (cursor)  // we're using a graphic for the cursor
+    if (cursor) // we're using a graphic for the cursor
         graphical_cursor = true;
 
     HudSetAlpha(style->definition_->cursor_.translucency_);
@@ -2587,18 +2502,16 @@ void MenuDrawCursor(Style *style, bool graphical_item)
     //-------------------------------------------------------------
     // graphical_item==false //We're going text-based menu items
     // graphical_item==true //We're going graphic-based menu items
-    if (graphical_cursor == false)  // We're going text-based cursor
+    if (graphical_cursor == false) // We're going text-based cursor
     {
-        TempWidth =
-            style->fonts_[StyleDefinition::kTextSectionText]->StringWidth(
-                style->definition_->cursor_.cursor_string_.c_str()) *
-            txtscale;
+        TempWidth = style->fonts_[StyleDefinition::kTextSectionText]->StringWidth(
+                        style->definition_->cursor_.cursor_string_.c_str()) *
+                    txtscale;
         TempSpacer =
-            style->fonts_[StyleDefinition::kTextSectionText]->CharWidth(
-                style->definition_->cursor_.cursor_string_[0]) *
+            style->fonts_[StyleDefinition::kTextSectionText]->CharWidth(style->definition_->cursor_.cursor_string_[0]) *
             txtscale * 0.2;
     }
-    else  // We're going graphical cursor
+    else // We're going graphical cursor
     {
         old_offset_x      = cursor->offset_x_;
         old_offset_y      = cursor->offset_y_;
@@ -2613,60 +2526,48 @@ void MenuDrawCursor(Style *style, bool graphical_item)
 
         if (graphical_item == false)
         {
-            if (style->fonts_[StyleDefinition::kTextSectionText]
-                    ->definition_->type_ == kFontTypeTrueType)
+            if (style->fonts_[StyleDefinition::kTextSectionText]->definition_->type_ == kFontTypeTrueType)
             {
                 ShortestLine =
-                    style->fonts_[StyleDefinition::kTextSectionText]
-                        ->truetype_reference_height_[current_font_size] *
+                    style->fonts_[StyleDefinition::kTextSectionText]->truetype_reference_height_[current_font_size] *
                     txtscale;
-                y_shift = style->fonts_[StyleDefinition::kTextSectionText]
-                              ->truetype_reference_yshift_[current_font_size] *
-                          txtscale;
+                y_shift =
+                    style->fonts_[StyleDefinition::kTextSectionText]->truetype_reference_yshift_[current_font_size] *
+                    txtscale;
             }
         }
         TempScale = ShortestLine / cursor->ScaledHeightActual();
         TempWidth = cursor->ScaledWidthActual() * TempScale;
         if (!style->definition_->cursor_.scaling_)
         {
-            current_menu->menu_items[item_on].y -=
-                (cursor->ScaledHeightActual() - ShortestLine) / 2;
+            current_menu->menu_items[item_on].y -= (cursor->ScaledHeightActual() - ShortestLine) / 2;
             ShortestLine = cursor->ScaledHeightActual();
             TempWidth    = cursor->ScaledWidthActual();
         }
     }
 
-    TempSpacer = TempWidth * 0.2;  // 20% of cursor graphic is our space
-    if (style->definition_->cursor_.position_ ==
-        StyleDefinition::kAlignmentBoth)
+    TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
+    if (style->definition_->cursor_.position_ == StyleDefinition::kAlignmentBoth)
     {
-        if (style->definition_->entry_alignment_ ==
-            StyleDefinition::kAlignmentRight)
+        if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentRight)
         {
             // Left cursor
             if (graphical_item == false)
-                txtWidth =
-                    style->fonts_[StyleDefinition::kTextSectionText]
-                        ->StringWidth(current_menu->menu_items[item_on].name) *
-                    txtscale;
-            else
-                txtWidth = current_menu->menu_items[item_on]
-                               .image->ScaledWidthActual() *
+                txtWidth = style->fonts_[StyleDefinition::kTextSectionText]->StringWidth(
+                               current_menu->menu_items[item_on].name) *
                            txtscale;
+            else
+                txtWidth = current_menu->menu_items[item_on].image->ScaledWidthActual() * txtscale;
 
-            TempX =
-                current_menu->menu_items[item_on].x + WidestLine - TempSpacer;
+            TempX = current_menu->menu_items[item_on].x + WidestLine - TempSpacer;
             TempX -= txtWidth;
             TempX -= TempWidth;
 
             TempY = current_menu->menu_items[item_on].y + y_shift;
             if (graphical_item == true)
             {
-                TempX -= (current_menu->menu_items[item_on].image->offset_x_ *
-                          txtscale) *
-                         2;
-                TempY -= (current_menu->menu_items[item_on].image->offset_y_ *
-                          txtscale);
+                TempX -= (current_menu->menu_items[item_on].image->offset_x_ * txtscale) * 2;
+                TempY -= (current_menu->menu_items[item_on].image->offset_y_ * txtscale);
             }
             if (graphical_cursor == true)
             {
@@ -2676,26 +2577,20 @@ void MenuDrawCursor(Style *style, bool graphical_item)
 
             if (graphical_cursor == true)
             {
-                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor,
-                                0.0, 0.0, colmap);
+                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
             }
             else
-                HudWriteText(
-                    style, StyleDefinition::kTextSectionText, TempX, TempY,
-                    style->definition_->cursor_.cursor_string_.c_str());
+                HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
+                             style->definition_->cursor_.cursor_string_.c_str());
 
             // Right cursor
-            TempX =
-                current_menu->menu_items[item_on].x + WidestLine + TempSpacer;
+            TempX = current_menu->menu_items[item_on].x + WidestLine + TempSpacer;
 
             TempY = current_menu->menu_items[item_on].y + y_shift;
             if (graphical_item == true)
             {
-                TempX -= (current_menu->menu_items[item_on].image->offset_x_ *
-                          txtscale) *
-                         2;
-                TempY -= (current_menu->menu_items[item_on].image->offset_y_ *
-                          txtscale);
+                TempX -= (current_menu->menu_items[item_on].image->offset_x_ * txtscale) * 2;
+                TempY -= (current_menu->menu_items[item_on].image->offset_y_ * txtscale);
             }
             if (graphical_cursor == true)
             {
@@ -2705,28 +2600,22 @@ void MenuDrawCursor(Style *style, bool graphical_item)
 
             if (graphical_cursor == true)
             {
-                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor,
-                                0.0, 0.0, colmap);
+                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
             }
             else
-                HudWriteText(
-                    style, StyleDefinition::kTextSectionText, TempX, TempY,
-                    style->definition_->cursor_.cursor_string_.c_str());
+                HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
+                             style->definition_->cursor_.cursor_string_.c_str());
         }
         else
         {
             // Left cursor
-            TempX =
-                current_menu->menu_items[item_on].x - TempWidth - TempSpacer;
+            TempX = current_menu->menu_items[item_on].x - TempWidth - TempSpacer;
             TempY = current_menu->menu_items[item_on].y + y_shift;
 
             if (graphical_item == true)
             {
-                TempX -= (current_menu->menu_items[item_on].image->offset_x_ *
-                          txtscale) *
-                         2;
-                TempY -= (current_menu->menu_items[item_on].image->offset_y_ *
-                          txtscale);
+                TempX -= (current_menu->menu_items[item_on].image->offset_x_ * txtscale) * 2;
+                TempY -= (current_menu->menu_items[item_on].image->offset_y_ * txtscale);
             }
             if (graphical_cursor == true)
             {
@@ -2736,34 +2625,26 @@ void MenuDrawCursor(Style *style, bool graphical_item)
 
             if (graphical_cursor == true)
             {
-                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor,
-                                0.0, 0.0, colmap);
+                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
             }
             else
-                HudWriteText(
-                    style, StyleDefinition::kTextSectionText, TempX, TempY,
-                    style->definition_->cursor_.cursor_string_.c_str());
+                HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
+                             style->definition_->cursor_.cursor_string_.c_str());
 
             // Right cursor
             if (graphical_item == false)
-                txtWidth =
-                    style->fonts_[StyleDefinition::kTextSectionText]
-                        ->StringWidth(current_menu->menu_items[item_on].name) *
-                    txtscale;
-            else
-                txtWidth = current_menu->menu_items[item_on]
-                               .image->ScaledWidthActual() *
+                txtWidth = style->fonts_[StyleDefinition::kTextSectionText]->StringWidth(
+                               current_menu->menu_items[item_on].name) *
                            txtscale;
+            else
+                txtWidth = current_menu->menu_items[item_on].image->ScaledWidthActual() * txtscale;
 
             TempX = current_menu->menu_items[item_on].x + txtWidth + TempSpacer;
             TempY = current_menu->menu_items[item_on].y + y_shift;
             if (graphical_item == true)
             {
-                TempX -= (current_menu->menu_items[item_on].image->offset_x_ *
-                          txtscale) *
-                         2;
-                TempY -= (current_menu->menu_items[item_on].image->offset_y_ *
-                          txtscale);
+                TempX -= (current_menu->menu_items[item_on].image->offset_x_ * txtscale) * 2;
+                TempY -= (current_menu->menu_items[item_on].image->offset_y_ * txtscale);
             }
             if (graphical_cursor == true)
             {
@@ -2772,88 +2653,71 @@ void MenuDrawCursor(Style *style, bool graphical_item)
             }
             if (graphical_cursor == true)
             {
-                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor,
-                                0.0, 0.0, colmap);
+                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
             }
             else
-                HudWriteText(
-                    style, StyleDefinition::kTextSectionText, TempX, TempY,
-                    style->definition_->cursor_.cursor_string_.c_str());
+                HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
+                             style->definition_->cursor_.cursor_string_.c_str());
         }
     }
-    else if (style->definition_->cursor_.position_ ==
-             StyleDefinition::kAlignmentCenter)
+    else if (style->definition_->cursor_.position_ == StyleDefinition::kAlignmentCenter)
     {
         TempX = 0;
 
         if (graphical_cursor == true)
         {
             TempX = CenterMenuImage2(style, StyleDefinition::kTextSectionText,
-                                     cursor);  // + TempSpacer;
+                                     cursor); // + TempSpacer;
             TempY = current_menu->menu_items[item_on].y + y_shift;
             if (graphical_item == true)
             {
-                TempY -= (current_menu->menu_items[item_on].image->offset_y_ *
-                          txtscale);
+                TempY -= (current_menu->menu_items[item_on].image->offset_y_ * txtscale);
             }
             TempX -= (cursor->offset_x_ * txtscale);
             TempY -= (cursor->offset_y_ * txtscale);
 
             if (style->definition_->cursor_.border_)
-                HudStretchImage(current_menu->menu_items[item_on].x, TempY,
-                                WidestLine, TallestLine, cursor, 0.0, 0.0,
+                HudStretchImage(current_menu->menu_items[item_on].x, TempY, WidestLine, TallestLine, cursor, 0.0, 0.0,
                                 colmap);
             else
-                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor,
-                                0.0, 0.0, colmap);
+                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
         }
         else
         {
             TempX = CenterMenuText(style, StyleDefinition::kTextSectionText,
-                                   style->definition_->cursor_.cursor_string_
-                                       .c_str());  // + TempSpacer;
+                                   style->definition_->cursor_.cursor_string_.c_str()); // + TempSpacer;
             TempY = current_menu->menu_items[item_on].y + y_shift;
             if (graphical_item == true)
             {
-                TempY -= (current_menu->menu_items[item_on].image->offset_y_ *
-                          txtscale);
+                TempY -= (current_menu->menu_items[item_on].image->offset_y_ * txtscale);
             }
             HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
                          style->definition_->cursor_.cursor_string_.c_str());
         }
     }
-    else if (style->definition_->cursor_.position_ ==
-             StyleDefinition::kAlignmentRight)
+    else if (style->definition_->cursor_.position_ == StyleDefinition::kAlignmentRight)
     {
         TempX = 0;
 
-        if (style->definition_->entry_alignment_ ==
-            StyleDefinition::kAlignmentCenter)
+        if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentCenter)
         {
             if (graphical_item == false)
-                txtWidth =
-                    style->fonts_[StyleDefinition::kTextSectionText]
-                        ->StringWidth(current_menu->menu_items[item_on].name) *
-                    txtscale;
-            else
-                txtWidth = current_menu->menu_items[item_on]
-                               .image->ScaledWidthActual() *
+                txtWidth = style->fonts_[StyleDefinition::kTextSectionText]->StringWidth(
+                               current_menu->menu_items[item_on].name) *
                            txtscale;
+            else
+                txtWidth = current_menu->menu_items[item_on].image->ScaledWidthActual() * txtscale;
 
             TempX = current_menu->menu_items[item_on].x + txtWidth + TempSpacer;
         }
         else
-            TempX =
-                current_menu->menu_items[item_on].x + WidestLine + TempSpacer;
+            TempX = current_menu->menu_items[item_on].x + WidestLine + TempSpacer;
 
         TempY = current_menu->menu_items[item_on].y + y_shift;
         if (graphical_item == true)
         {
-            TempX -= (current_menu->menu_items[item_on].image->offset_x_ *
-                      txtscale) *
-                     2;
-            TempY -=
-                (current_menu->menu_items[item_on].image->offset_y_ * txtscale);
+            TempX -= (current_menu->menu_items[item_on].image->offset_x_ * txtscale) * 2;
+            TempY -= (current_menu->menu_items[item_on].image->offset_y_ * txtscale);
         }
         if (graphical_cursor == true)
         {
@@ -2863,8 +2727,7 @@ void MenuDrawCursor(Style *style, bool graphical_item)
 
         if (graphical_cursor == true)
         {
-            HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0,
-                            0.0, colmap);
+            HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
         }
         else
             HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
@@ -2876,11 +2739,8 @@ void MenuDrawCursor(Style *style, bool graphical_item)
         TempY = current_menu->menu_items[item_on].y + y_shift;
         if (graphical_item == true)
         {
-            TempX -= (current_menu->menu_items[item_on].image->offset_x_ *
-                      txtscale) *
-                     2;
-            TempY -=
-                (current_menu->menu_items[item_on].image->offset_y_ * txtscale);
+            TempX -= (current_menu->menu_items[item_on].image->offset_x_ * txtscale) * 2;
+            TempY -= (current_menu->menu_items[item_on].image->offset_y_ * txtscale);
         }
         if (graphical_cursor == true)
         {
@@ -2889,8 +2749,7 @@ void MenuDrawCursor(Style *style, bool graphical_item)
         }
         if (graphical_cursor == true)
         {
-            HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0,
-                            0.0, colmap);
+            HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
         }
         else
             HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
@@ -2928,48 +2787,35 @@ void MenuDrawItems(Style *style, bool graphical_item)
 
     float old_alpha = HudGetAlpha();
 
-    float txtscale =
-        style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
+    float txtscale = style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
 
     //---------------------------------------------------
     // 1. For each menu item calculate x, width, height
     //---------------------------------------------------
-    if (graphical_item == false)  // We're going text-based menu items
+    if (graphical_item == false) // We're going text-based menu items
     {
-        ShortestLine =
-            txtscale *
-            style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight();
-        TallestLine =
-            txtscale *
-            style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight();
+        ShortestLine = txtscale * style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight();
+        TallestLine  = txtscale * style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight();
         for (i = 0; i < max; i++)
         {
             current_menu->menu_items[i].height = ShortestLine;
-            if (style->definition_->entry_alignment_ ==
-                StyleDefinition::kAlignmentCenter)
+            if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentCenter)
                 current_menu->menu_items[i].x =
-                    CenterMenuText(style, StyleDefinition::kTextSectionText,
-                                   current_menu->menu_items[i].name);
+                    CenterMenuText(style, StyleDefinition::kTextSectionText, current_menu->menu_items[i].name);
             else
-                current_menu->menu_items[i].x =
-                    x + style->definition_->x_offset_ +
-                    style->definition_->text_[StyleDefinition::kTextSectionText]
-                        .x_offset_;
+                current_menu->menu_items[i].x = x + style->definition_->x_offset_ +
+                                                style->definition_->text_[StyleDefinition::kTextSectionText].x_offset_;
 
-            current_menu->menu_items[i].y =
-                y + style->definition_->y_offset_ +
-                style->definition_->text_[StyleDefinition::kTextSectionText]
-                    .y_offset_;
+            current_menu->menu_items[i].y = y + style->definition_->y_offset_ +
+                                            style->definition_->text_[StyleDefinition::kTextSectionText].y_offset_;
             if (current_menu->menu_items[i].width < 0)
                 current_menu->menu_items[i].width =
-                    style->fonts_[StyleDefinition::kTextSectionText]
-                        ->StringWidth(current_menu->menu_items[i].name) *
+                    style->fonts_[StyleDefinition::kTextSectionText]->StringWidth(current_menu->menu_items[i].name) *
                     txtscale;
             if (current_menu->menu_items[i].width > WidestLine)
                 WidestLine = current_menu->menu_items[i].width;
 
-            y += current_menu->menu_items[i].height + 1 +
-                 style->definition_->entry_spacing_;
+            y += current_menu->menu_items[i].height + 1 + style->definition_->entry_spacing_;
         }
     }
     else
@@ -2978,17 +2824,15 @@ void MenuDrawItems(Style *style, bool graphical_item)
         TallestLine  = 0.0f;
         for (i = 0; i < max; i++)
         {
-            if (!current_menu->menu_items[i].patch_name[0]) continue;
+            if (!current_menu->menu_items[i].patch_name[0])
+                continue;
             if (!current_menu->menu_items[i].image)
-                current_menu->menu_items[i].image =
-                    ImageLookup(current_menu->menu_items[i].patch_name);
+                current_menu->menu_items[i].image = ImageLookup(current_menu->menu_items[i].patch_name);
 
             const Image *image = current_menu->menu_items[i].image;
 
-            current_menu->menu_items[i].height =
-                image->ScaledHeightActual() * txtscale;
-            current_menu->menu_items[i].width =
-                image->ScaledWidthActual() * txtscale;
+            current_menu->menu_items[i].height = image->ScaledHeightActual() * txtscale;
+            current_menu->menu_items[i].width  = image->ScaledWidthActual() * txtscale;
 
             if (!image->is_empty_)
             {
@@ -2999,24 +2843,16 @@ void MenuDrawItems(Style *style, bool graphical_item)
                 if (current_menu->menu_items[i].width > WidestLine)
                     WidestLine = current_menu->menu_items[i].width;
 
-                if (style->definition_->entry_alignment_ ==
-                    StyleDefinition::kAlignmentCenter)
-                    current_menu->menu_items[i].x = CenterMenuImage2(
-                        style, StyleDefinition::kTextSectionText, image);
+                if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentCenter)
+                    current_menu->menu_items[i].x = CenterMenuImage2(style, StyleDefinition::kTextSectionText, image);
                 else
                     current_menu->menu_items[i].x =
-                        x + (image->offset_x_ * txtscale) +
-                        style->definition_->x_offset_ +
-                        style->definition_
-                            ->text_[StyleDefinition::kTextSectionText]
-                            .x_offset_;
+                        x + (image->offset_x_ * txtscale) + style->definition_->x_offset_ +
+                        style->definition_->text_[StyleDefinition::kTextSectionText].x_offset_;
 
-                current_menu->menu_items[i].y =
-                    y - image->offset_y_ + style->definition_->y_offset_ +
-                    style->definition_->text_[StyleDefinition::kTextSectionText]
-                        .y_offset_;
-                y += current_menu->menu_items[i].height +
-                     style->definition_->entry_spacing_;
+                current_menu->menu_items[i].y = y - image->offset_y_ + style->definition_->y_offset_ +
+                                                style->definition_->text_[StyleDefinition::kTextSectionText].y_offset_;
+                y += current_menu->menu_items[i].height + style->definition_->entry_spacing_;
             }
             else
             {
@@ -3025,8 +2861,7 @@ void MenuDrawItems(Style *style, bool graphical_item)
                 y += 15 + style->definition_->entry_spacing_;
             }
         }
-        if (AlmostEquals(ShortestLine, 10000.0f) &&
-            AlmostEquals(TallestLine, 0.0f))
+        if (AlmostEquals(ShortestLine, 10000.0f) && AlmostEquals(TallestLine, 0.0f))
         {
             ShortestLine = 20.0f;
             TallestLine  = 20.0f;
@@ -3055,8 +2890,7 @@ void MenuDrawItems(Style *style, bool graphical_item)
         txtscale  = style->definition_->text_[textstyle].scale_;
         if (j == item_on)
         {
-            if (style->definition_->text_[StyleDefinition::kTextSectionSelected]
-                    .font_)
+            if (style->definition_->text_[StyleDefinition::kTextSectionSelected].font_)
             {
                 textstyle = StyleDefinition::kTextSectionSelected;
                 txtscale  = style->definition_->text_[textstyle].scale_;
@@ -3065,19 +2899,16 @@ void MenuDrawItems(Style *style, bool graphical_item)
 
         HudSetAlpha(style->definition_->text_[textstyle].translucency_);
 
-        if (style->definition_->entry_alignment_ ==
-            StyleDefinition::kAlignmentRight)
-            TempX = current_menu->menu_items[j].x + WidestLine -
-                    current_menu->menu_items[j].width;
+        if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentRight)
+            TempX = current_menu->menu_items[j].x + WidestLine - current_menu->menu_items[j].width;
         else
             TempX = current_menu->menu_items[j].x;
 
-        if (graphical_item == false)  // We're going text-based menu items
+        if (graphical_item == false) // We're going text-based menu items
         {
-            HudWriteText(style, textstyle, TempX, current_menu->menu_items[j].y,
-                         current_menu->menu_items[j].name);
+            HudWriteText(style, textstyle, TempX, current_menu->menu_items[j].y, current_menu->menu_items[j].name);
         }
-        else  // We're going graphical menu items
+        else // We're going graphical menu items
         {
             // const colourmap_c *colmap = i == item_on ?
             // style->definition_->text[StyleDefinition::kTextSectionSelected].colmap
@@ -3088,27 +2919,21 @@ void MenuDrawItems(Style *style, bool graphical_item)
             txtscale  = style->definition_->text_[textstyle].scale_;
             if (j == item_on)
             {
-                if (style->definition_
-                        ->text_[StyleDefinition::kTextSectionSelected]
-                        .colmap_)
+                if (style->definition_->text_[StyleDefinition::kTextSectionSelected].colmap_)
                 {
                     textstyle = StyleDefinition::kTextSectionSelected;
                     txtscale  = style->definition_->text_[textstyle].scale_;
                 }
             }
 
-            const Colormap *colmap =
-                style->definition_->text_[textstyle].colmap_;
+            const Colormap *colmap = style->definition_->text_[textstyle].colmap_;
             // colourmap_c *colmap = nullptr;
 
             // HudStretchImage() will apply image.offset_x again so subtract it
             // first
             TempX -= (current_menu->menu_items[j].image->offset_x_ * txtscale);
-            HudStretchImage(TempX, current_menu->menu_items[j].y,
-                            current_menu->menu_items[j].width,
-                            current_menu->menu_items[j].height,
-                            current_menu->menu_items[j].image, 0.0, 0.0,
-                            colmap);
+            HudStretchImage(TempX, current_menu->menu_items[j].y, current_menu->menu_items[j].width,
+                            current_menu->menu_items[j].height, current_menu->menu_items[j].image, 0.0, 0.0, colmap);
         }
         HudSetAlpha(old_alpha);
     }
@@ -3121,21 +2946,20 @@ void MenuDrawItems(Style *style, bool graphical_item)
 //
 void MenuDrawer(void)
 {
-    if (!menu_active) return;
+    if (!menu_active)
+        return;
 
     if (menu_backdrop && (option_menu_on || network_game_menu_on ||
-                          (current_menu->draw_function == MenuDrawLoad ||
-                           current_menu->draw_function == MenuDrawSave)))
+                          (current_menu->draw_function == MenuDrawLoad || current_menu->draw_function == MenuDrawSave)))
     {
-        if (title_scaling.d_)  // Fill Border
+        if (title_scaling.d_) // Fill Border
         {
             if (!menu_backdrop->blurred_version_)
             {
                 ImageStoreBlurred(menu_backdrop);
                 menu_backdrop->blurred_version_->grayscale_ = true;
             }
-            HudStretchImage(-320, -200, 960, 600,
-                            menu_backdrop->blurred_version_, 0, 0);
+            HudStretchImage(-320, -200, 960, 600, menu_backdrop->blurred_version_, 0, 0);
         }
         else
             HudSolidBox(-320, -200, 960, 600, 0);
@@ -3165,16 +2989,13 @@ void MenuDrawer(void)
     // Lobo 2022: Check if we're going to use text-based menus
     // or the users (custom)graphics
     bool custom_menu = false;
-    if ((current_menu->draw_function == MenuDrawMainMenu) &&
-        (custom_MenuMain == true))
+    if ((current_menu->draw_function == MenuDrawMainMenu) && (custom_MenuMain == true))
         custom_menu = true;
 
-    if ((current_menu->draw_function == MenuDrawNewGame) &&
-        (custom_MenuDifficulty == true))
+    if ((current_menu->draw_function == MenuDrawNewGame) && (custom_MenuDifficulty == true))
         custom_menu = true;
 
-    if (current_menu->draw_function == MenuDrawEpisode &&
-        custom_MenuEpisode == true)
+    if (current_menu->draw_function == MenuDrawEpisode && custom_MenuEpisode == true)
         custom_menu = true;
 
     Style *style = current_menu->style_variable[0];
@@ -3183,14 +3004,14 @@ void MenuDrawer(void)
     style->DrawBackground();
 
     // call Draw routine
-    if (current_menu->draw_function) (*current_menu->draw_function)();
+    if (current_menu->draw_function)
+        (*current_menu->draw_function)();
 
     // custom_menu==false //We're going text-based menu items
     // custom_menu==true //We're going graphic-based menu items
     MenuDrawItems(style, custom_menu);
 
-    if (!(current_menu->draw_function == MenuDrawLoad ||
-          current_menu->draw_function == MenuDrawSave))
+    if (!(current_menu->draw_function == MenuDrawLoad || current_menu->draw_function == MenuDrawSave))
     {
         // custom_menu==false //We're going text-based menu items
         // custom_menu==true //We're going graphic-based menu items
@@ -3201,7 +3022,10 @@ void MenuDrawer(void)
 void MenuClear(void)
 {
     // -AJA- 2007/12/24: save user changes ASAP (in case of crash)
-    if (menu_active) { ConfigurationSaveDefaults(); }
+    if (menu_active)
+    {
+        ConfigurationSaveDefaults();
+    }
 
     menu_active           = false;
     save_screenshot_valid = false;
@@ -3250,7 +3074,8 @@ void MenuInitialize(void)
     StyleDefinition *def;
 
     def = styledefs.Lookup("MENU");
-    if (!def) def = default_style;
+    if (!def)
+        def = default_style;
     menu_default_style = hud_styles.Lookup(def);
 
     def             = styledefs.Lookup("MAIN MENU");
@@ -3272,7 +3097,8 @@ void MenuInitialize(void)
     exit_style = def ? hud_styles.Lookup(def) : menu_default_style;
 
     def = styledefs.Lookup("OPTIONS");
-    if (!def) def = default_style;
+    if (!def)
+        def = default_style;
 
     language.Select(m_language.c_str());
 
@@ -3308,25 +3134,35 @@ void MenuInitialize(void)
     // Check for custom menu graphics in pwads:
     // If we have them then use them instead of our
     //  text-based ones.
-    if (IsLumpInPwad("M_NEWG")) custom_MenuMain = true;
+    if (IsLumpInPwad("M_NEWG"))
+        custom_MenuMain = true;
 
-    if (IsLumpInPwad("M_LOADG")) custom_MenuMain = true;
+    if (IsLumpInPwad("M_LOADG"))
+        custom_MenuMain = true;
 
-    if (IsLumpInPwad("M_SAVEG")) custom_MenuMain = true;
+    if (IsLumpInPwad("M_SAVEG"))
+        custom_MenuMain = true;
 
-    if (IsLumpInPwad("M_EPISOD")) custom_MenuEpisode = true;
+    if (IsLumpInPwad("M_EPISOD"))
+        custom_MenuEpisode = true;
 
-    if (IsLumpInPwad("M_EPI1")) custom_MenuEpisode = true;
+    if (IsLumpInPwad("M_EPI1"))
+        custom_MenuEpisode = true;
 
-    if (IsLumpInPwad("M_EPI2")) custom_MenuEpisode = true;
+    if (IsLumpInPwad("M_EPI2"))
+        custom_MenuEpisode = true;
 
-    if (IsLumpInPwad("M_EPI3")) custom_MenuEpisode = true;
+    if (IsLumpInPwad("M_EPI3"))
+        custom_MenuEpisode = true;
 
-    if (IsLumpInPwad("M_EPI4")) custom_MenuEpisode = true;
+    if (IsLumpInPwad("M_EPI4"))
+        custom_MenuEpisode = true;
 
-    if (IsLumpInPwad("M_JKILL")) custom_MenuDifficulty = true;
+    if (IsLumpInPwad("M_JKILL"))
+        custom_MenuDifficulty = true;
 
-    if (IsLumpInPwad("M_NMARE")) custom_MenuDifficulty = true;
+    if (IsLumpInPwad("M_NMARE"))
+        custom_MenuDifficulty = true;
 
     LogDebug("custom_MenuMain =%d \n", custom_MenuMain);
     LogDebug("custom_MenuEpisode =%d \n", custom_MenuEpisode);
@@ -3341,40 +3177,38 @@ void MenuInitialize(void)
     //    else if (CheckLumpNumberForName("M_EPI5") < 0)
     //      EpisodeMenuDefinition.total_items--;
 
-    if (IsLumpInAnyWad("HELP"))  // doom2
+    if (IsLumpInAnyWad("HELP"))                              // doom2
     {
-        menu_read_this[0] = ImageLookup("HELP");
-        menu_read_this[1] = ImageLookup(
-            "CREDIT");  // Unnecessary since we won't see it anyway...
+        menu_read_this[0]           = ImageLookup("HELP");
+        menu_read_this[1]           = ImageLookup("CREDIT"); // Unnecessary since we won't see it anyway...
         MainMenu[kMainMenuReadThis] = MainMenu[kMainMenuQuitDoom];
         MainMenuDefinition.total_items--;
-        MainMenuDefinition.y += 8;  // FIXME
+        MainMenuDefinition.y += 8;                           // FIXME
         SkillMenuDefinition.previous_menu     = &MainMenuDefinition;
         ReadThisMenuDefinition1.draw_function = MenuDrawReadThis1;
         ReadThisMenuDefinition1.x             = 330;
         ReadThisMenuDefinition1.y             = 165;
         ReadMenu1[0].select_function          = MenuFinishReadThis;
     }
-    else  // doom or shareware doom
+    else // doom or shareware doom
     {
         menu_read_this[0] = ImageLookup("HELP1");
         if (IsLumpInAnyWad("HELP2"))
             menu_read_this[1] = ImageLookup("HELP2");  // Shareware doom
         else
-            menu_read_this[1] = ImageLookup("CREDIT");  // Full doom
+            menu_read_this[1] = ImageLookup("CREDIT"); // Full doom
     }
 
     // Lobo 2022: Use new sfx definitions so we don't have to share names with
     // normal doom sfx.
-    sound_effect_swtchn = sfxdefs.GetEffect("MENU_IN");   // Enter Menu
-    sound_effect_tink   = sfxdefs.GetEffect("TINK");      // unused
-    sound_effect_radio  = sfxdefs.GetEffect("RADIO");     // unused
-    sound_effect_oof    = sfxdefs.GetEffect("MENU_INV");  // invalid choice
-    sound_effect_pstop =
-        sfxdefs.GetEffect("MENU_MOV");  // moving cursor in a menu
-    sound_effect_stnmov = sfxdefs.GetEffect("MENU_SLD");  // slider move
-    sound_effect_pistol = sfxdefs.GetEffect("MENU_SEL");  // select in menu
-    sound_effect_swtchx = sfxdefs.GetEffect("MENU_OUT");  // cancel/exit menu
+    sound_effect_swtchn = sfxdefs.GetEffect("MENU_IN");  // Enter Menu
+    sound_effect_tink   = sfxdefs.GetEffect("TINK");     // unused
+    sound_effect_radio  = sfxdefs.GetEffect("RADIO");    // unused
+    sound_effect_oof    = sfxdefs.GetEffect("MENU_INV"); // invalid choice
+    sound_effect_pstop  = sfxdefs.GetEffect("MENU_MOV"); // moving cursor in a menu
+    sound_effect_stnmov = sfxdefs.GetEffect("MENU_SLD"); // slider move
+    sound_effect_pistol = sfxdefs.GetEffect("MENU_SEL"); // select in menu
+    sound_effect_swtchx = sfxdefs.GetEffect("MENU_OUT"); // cancel/exit menu
 
     OptionMenuInitialize();
     NetworkGameInitialize();

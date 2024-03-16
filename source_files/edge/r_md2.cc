@@ -1002,8 +1002,8 @@ static inline void ModelCoordFunc(Md2CoordinateData *data, int v_idx,
         return;
     }
 
-    *texc = {
-        {point->skin_s * data->image_right_, point->skin_t * data->image_top_}};
+    *texc = { { point->skin_s * data->image_right_,
+                point->skin_t * data->image_top_ } };
 
     ColorMixer *col = &data->normal_colors_[n_vert->normal_idx];
 
@@ -1113,7 +1113,7 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_,
         skin_tex = ImageCache(fuzz_image, false);
 
         data.fuzz_multiplier_ = 0.8;
-        data.fuzz_add_        = {{0, 0}};
+        data.fuzz_add_        = { { 0, 0 } };
 
         data.image_right_ = 1.0;
         data.image_top_   = 1.0;
@@ -1212,7 +1212,7 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_,
                     fogColor = sg_silver;
                     break;
                 case 2:
-                    fogColor = {0.25f, 0.25f, 0.25f, 1.0f};
+                    fogColor = { 0.25f, 0.25f, 0.25f, 1.0f };
                     break;
                 case 3:
                     fogColor = sg_black;

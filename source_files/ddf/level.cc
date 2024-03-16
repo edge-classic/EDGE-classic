@@ -49,7 +49,8 @@ static const DDFCommandList finale_commands[] = {
     DDF_FIELD("BUNNY", dummy_finale, dobunny_, DDF_MainGetBoolean),
     DDF_FIELD("MUSIC", dummy_finale, music_, DDF_MainGetNumeric),
 
-    {nullptr, nullptr, 0, nullptr}};
+    { nullptr, nullptr, 0, nullptr }
+};
 
 // -KM- 1998/11/25 Finales are all go.
 
@@ -90,31 +91,33 @@ static const DDFCommandList level_commands[] = {
     DDF_FIELD("OUTDOOR_FOG_DENSITY", dummy_level, outdoor_fog_density_,
               DDF_MainGetPercent),
 
-    {nullptr, nullptr, 0, nullptr}};
+    { nullptr, nullptr, 0, nullptr }
+};
 
 static DDFSpecialFlags map_specials[] = {
-    {"JUMPING", kMapFlagJumping, 0},
-    {"MLOOK", kMapFlagMlook, 0},
-    {"FREELOOK", kMapFlagMlook, 0},  // -AJA- backwards compat.
-    {"CHEATS", kMapFlagCheats, 0},
-    {"ITEM_RESPAWN", kMapFlagItemRespawn, 0},
-    {"FAST_MONSTERS", kMapFlagFastParm, 0},
-    {"RESURRECT_RESPAWN", kMapFlagResRespawn, 0},
-    {"TELEPORT_RESPAWN", kMapFlagResRespawn, 1},
-    {"TRUE3D", kMapFlagTrue3D, 0},
-    {"ENEMY_STOMP", kMapFlagStomp, 0},
-    {"MORE_BLOOD", kMapFlagMoreBlood, 0},
-    {"NORMAL_BLOOD", kMapFlagMoreBlood, 1},
-    {"RESPAWN", kMapFlagRespawn, 0},
-    {"AUTOAIM", kMapFlagAutoAim, 0},
-    {"AA_MLOOK", kMapFlagAutoAimMlook, 0},
-    {"EXTRAS", kMapFlagExtras, 0},
-    {"RESET_PLAYER", kMapFlagResetPlayer, 0},
-    {"LIMIT_ZOOM", kMapFlagLimitZoom, 0},
-    {"CROUCHING", kMapFlagCrouching, 0},
-    {"WEAPON_KICK", kMapFlagKicking, 0},
+    { "JUMPING", kMapFlagJumping, 0 },
+    { "MLOOK", kMapFlagMlook, 0 },
+    { "FREELOOK", kMapFlagMlook, 0 },  // -AJA- backwards compat.
+    { "CHEATS", kMapFlagCheats, 0 },
+    { "ITEM_RESPAWN", kMapFlagItemRespawn, 0 },
+    { "FAST_MONSTERS", kMapFlagFastParm, 0 },
+    { "RESURRECT_RESPAWN", kMapFlagResRespawn, 0 },
+    { "TELEPORT_RESPAWN", kMapFlagResRespawn, 1 },
+    { "TRUE3D", kMapFlagTrue3D, 0 },
+    { "ENEMY_STOMP", kMapFlagStomp, 0 },
+    { "MORE_BLOOD", kMapFlagMoreBlood, 0 },
+    { "NORMAL_BLOOD", kMapFlagMoreBlood, 1 },
+    { "RESPAWN", kMapFlagRespawn, 0 },
+    { "AUTOAIM", kMapFlagAutoAim, 0 },
+    { "AA_MLOOK", kMapFlagAutoAimMlook, 0 },
+    { "EXTRAS", kMapFlagExtras, 0 },
+    { "RESET_PLAYER", kMapFlagResetPlayer, 0 },
+    { "LIMIT_ZOOM", kMapFlagLimitZoom, 0 },
+    { "CROUCHING", kMapFlagCrouching, 0 },
+    { "WEAPON_KICK", kMapFlagKicking, 0 },
 
-    {nullptr, 0, 0}};
+    { nullptr, 0, 0 }
+};
 
 //
 //  DDF PARSE ROUTINES
@@ -322,9 +325,11 @@ void DDF_LevelGetSkyStretch(const char *info, void *storage)
         *stretch = kSkyStretchUnset;
 }
 
-static DDFSpecialFlags wistyle_names[] = {{"DOOM", kIntermissionStyleDoom, 0},
-                                          {"NONE", kIntermissionStyleNone, 0},
-                                          {nullptr, 0, 0}};
+static DDFSpecialFlags wistyle_names[] = {
+    { "DOOM", kIntermissionStyleDoom, 0 },
+    { "NONE", kIntermissionStyleNone, 0 },
+    { nullptr, 0, 0 }
+};
 
 void DDF_LevelGetWistyle(const char *info, void *storage)
 {

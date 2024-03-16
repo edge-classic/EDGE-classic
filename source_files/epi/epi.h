@@ -39,15 +39,15 @@ inline int RoundToInteger(float x) { return (int)roundf(x); }
 inline int RoundToInteger(double x) { return (int)round(x); }
 
 // assertion macro
-#define EPI_ASSERT(cond)                                                      \
-    ((cond) ? (void)0                                                         \
-            : FatalError("Assertion '%s' failed (%s:%d).\n", #cond, __FILE__, \
+#define EPI_ASSERT(cond)                                                       \
+    ((cond) ? (void)0                                                          \
+            : FatalError("Assertion '%s' failed (%s:%d).\n", #cond, __FILE__,  \
                          __LINE__))
 
 //
 // Clears memory to zero.
 //
-#define EPI_CLEAR_MEMORY(ptr, type, num) \
+#define EPI_CLEAR_MEMORY(ptr, type, num)                                       \
     memset((void *)(ptr), ((ptr) - ((type *)(ptr))), (num) * sizeof(type))
 
 //--- editor settings ---

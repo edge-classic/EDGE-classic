@@ -469,8 +469,8 @@ void InitializeTextures(void)
 
     numtextures = cur - textures;
 
-#define EDGE_CMP(a, b)               \
-    (strcmp(a->name, b->name) < 0 || \
+#define EDGE_CMP(a, b)                                                         \
+    (strcmp(a->name, b->name) < 0 ||                                           \
      (strcmp(a->name, b->name) == 0 && a->file < b->file))
     EDGE_QSORT(TextureDefinition *, textures, numtextures, 10);
 #undef EDGE_CMP

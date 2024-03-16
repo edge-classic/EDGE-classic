@@ -1790,7 +1790,8 @@ static void LaunchOrderedSpread(MapObject *mo)
     static int spreadorder[] = {
         (int)(kBAMAngle90 / 8),   true,  (int)(kBAMAngle90 / 8),  false,
         -(int)(kBAMAngle90 / 8),  true,  -(int)(kBAMAngle90 / 4), false,
-        -(int)(kBAMAngle90 / 16), false, (int)(kBAMAngle90 / 16), false};
+        -(int)(kBAMAngle90 / 16), false, (int)(kBAMAngle90 / 16), false
+    };
 
     const AttackDefinition *attack = mo->current_attack_;
 

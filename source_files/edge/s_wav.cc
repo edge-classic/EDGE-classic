@@ -89,7 +89,8 @@ uint8_t *ConvertPcSpeakerSound(const uint8_t *data, int *length)
         621,  604,  586,  570,  553,  538,  522,  507,  493,  479,  465,  452,
         439,  427,  415,  403,  391,  380,  369,  359,  348,  339,  329,  319,
         310,  302,  293,  285,  276,  269,  261,  253,  246,  239,  232,  226,
-        219,  213,  207,  201,  195,  190,  184,  179};
+        219,  213,  207,  201,  195,  190,  184,  179
+    };
 
     // --- Read Doom sound ---
 
@@ -167,12 +168,12 @@ uint8_t *ConvertPcSpeakerSound(const uint8_t *data, int *length)
     WavFormatChunk fmtchunk;
 
     // Setup data header
-    char did[4] = {'d', 'a', 't', 'a'};
+    char did[4] = { 'd', 'a', 't', 'a' };
     memcpy(&wdhdr.id, &did, 4);
     wdhdr.size = numsamples * FACTOR;
 
     // Setup fmt chunk
-    char fid[4] = {'f', 'm', 't', ' '};
+    char fid[4] = { 'f', 'm', 't', ' ' };
     memcpy(&fmtchunk.header.id, &fid, 4);
     fmtchunk.header.size = 16;
     fmtchunk.tag         = 1;
@@ -183,7 +184,7 @@ uint8_t *ConvertPcSpeakerSound(const uint8_t *data, int *length)
     fmtchunk.bps         = 8;
 
     // Setup main header
-    char wid[4] = {'R', 'I', 'F', 'F'};
+    char wid[4] = { 'R', 'I', 'F', 'F' };
     memcpy(&whdr.id, &wid, 4);
     whdr.size = wdhdr.size + fmtchunk.header.size + 20;
 
@@ -194,7 +195,7 @@ uint8_t *ConvertPcSpeakerSound(const uint8_t *data, int *length)
     uint8_t *new_data      = new uint8_t[*length];
     memcpy(new_data + write_counter, &whdr, 8);
     write_counter += 8;
-    char wave[4] = {'W', 'A', 'V', 'E'};
+    char wave[4] = { 'W', 'A', 'V', 'E' };
     memcpy(new_data + write_counter, wave, 4);
     write_counter += 4;
     memcpy(new_data + write_counter, &fmtchunk, sizeof(WavFormatChunk));

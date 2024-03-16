@@ -77,7 +77,8 @@ const char *sprnames_orig[kTotalSpritesDEHEXTRA] = {
     "SP72", "SP73", "SP74", "SP75", "SP76", "SP77", "SP78", "SP79", "SP80",
     "SP81", "SP82", "SP83", "SP84", "SP85", "SP86", "SP87", "SP88", "SP89",
     "SP90", "SP91", "SP92", "SP93", "SP94", "SP95", "SP96", "SP97", "SP98",
-    "SP99"};
+    "SP99"
+};
 
 // elements here can be "" for unmodified names
 std::vector<std::string> sprnames;

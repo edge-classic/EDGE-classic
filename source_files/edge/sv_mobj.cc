@@ -240,13 +240,14 @@ static SaveField sv_fields_mobj[] = {
     //   lastlookup: being reset to zero won't hurt.
     //   ...
 
-    {0,
-     nullptr,
-     0,
-     {kSaveFieldInvalid, 0, nullptr},
-     nullptr,
-     nullptr,
-     nullptr}};
+    { 0,
+      nullptr,
+      0,
+      { kSaveFieldInvalid, 0, nullptr },
+      nullptr,
+      nullptr,
+      nullptr }
+};
 
 SaveStruct sv_struct_mobj = {
     nullptr,                          // link in list
@@ -298,13 +299,14 @@ static SaveField sv_fields_spawnpoint[] = {
     EDGE_SAVE_FIELD(dummy_spawn_point, flags, "flags", 1, kSaveFieldNumeric, 4,
                     nullptr, SaveGameGetInteger, SaveGamePutInteger),
 
-    {0,
-     nullptr,
-     0,
-     {kSaveFieldInvalid, 0, nullptr},
-     nullptr,
-     nullptr,
-     nullptr}};
+    { 0,
+      nullptr,
+      0,
+      { kSaveFieldInvalid, 0, nullptr },
+      nullptr,
+      nullptr,
+      nullptr }
+};
 
 SaveStruct sv_struct_spawnpoint = {
     nullptr,                           // link in list
@@ -333,13 +335,14 @@ static SaveField sv_fields_iteminque[] = {
     // NOT HERE:
     //   next,prev: links are regenerated.
 
-    {0,
-     nullptr,
-     0,
-     {kSaveFieldInvalid, 0, nullptr},
-     nullptr,
-     nullptr,
-     nullptr}};
+    { 0,
+      nullptr,
+      0,
+      { kSaveFieldInvalid, 0, nullptr },
+      nullptr,
+      nullptr,
+      nullptr }
+};
 
 SaveStruct sv_struct_iteminque = {
     nullptr,                          // link in list

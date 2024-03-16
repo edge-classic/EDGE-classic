@@ -82,7 +82,7 @@ struct ScriptShowMenuParameter
     bool use_ldf = false;
 
     char *title      = nullptr;
-    char *options[9] = {nullptr};
+    char *options[9] = { nullptr };
 };
 
 struct ScriptMenuStyle
@@ -94,7 +94,7 @@ struct ScriptJumpOnParameter
 {
     // int vartype;  /* only MENU currently supported */
 
-    char *labels[9] = {nullptr};
+    char *labels[9] = { nullptr };
 };
 
 // SpawnThing Function
@@ -275,7 +275,7 @@ struct ScriptEnablerParameter
     // script to enable/disable.  If script_name is nullptr, then `tag' is
     // the tag number to enable/disable.
     char    *script_name = nullptr;
-    uint32_t tag[2]      = {0, 0};
+    uint32_t tag[2]      = { 0, 0 };
 
     // true to disable, false to enable
     bool new_disabled = false;
@@ -349,7 +349,7 @@ struct ScriptChangeTexturetureParameter
     ScriptChangeTexturetureType what = kChangeTextureRightUpper;
 
     // texture/flat name
-    char texname[10] = {0};
+    char texname[10] = { 0 };
 
     // tags used to find lines/sectors to change.  The `tag' value must
     // match sector.tag for sector changers and line.tag for line
@@ -481,7 +481,7 @@ struct ScriptWaitUntilDeadParameter
     int tag = 0;
 
     // the DDF names of the monsters to wait for
-    const char *mon_names[10] = {nullptr};
+    const char *mon_names[10] = { nullptr };
 };
 
 // Trigger Definition (Made up of actions)
@@ -523,7 +523,7 @@ struct TriggerScript
     char *script_name = nullptr;
 
     // Script tag (or 0 for none)
-    uint32_t tag[2] = {0, 0};
+    uint32_t tag[2] = { 0, 0 };
 
     // ABSOLUTE mode: minimum players needed to trigger, -1 for ALL
     int absolute_req_players = 0;
@@ -606,7 +606,7 @@ struct TriggerScriptTrigger
     int menu_result = 0;
 
     // Sound handle
-    Position sound_effects_origin = {0, 0, 0};
+    Position sound_effects_origin = { 0, 0, 0 };
 
     // used for WAIT_UNTIL_DEAD, normally zero
     int wud_tag   = 0;

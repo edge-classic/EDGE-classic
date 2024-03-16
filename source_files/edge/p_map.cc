@@ -610,7 +610,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
             if (isfinite(ix) && isfinite(iy))
             {
                 iz = MathLinePlaneIntersection(
-                         {{ix, iy, -40000}}, {{ix, iy, 40000}},
+                         { { ix, iy, -40000 } }, { { ix, iy, 40000 } },
                          ld->front_sector->floor_z_vertices[2],
                          ld->front_sector->floor_vertex_slope_normal)
                          .Z;
@@ -637,7 +637,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
             if (isfinite(ix) && isfinite(iy))
             {
                 iz = MathLinePlaneIntersection(
-                         {{ix, iy, -40000}}, {{ix, iy, 40000}},
+                         { { ix, iy, -40000 } }, { { ix, iy, 40000 } },
                          ld->back_sector->floor_z_vertices[2],
                          ld->back_sector->floor_vertex_slope_normal)
                          .Z;
@@ -676,7 +676,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
                 if (isfinite(ix) && isfinite(iy))
                 {
                     iz = MathLinePlaneIntersection(
-                             {{ix, iy, -40000}}, {{ix, iy, 40000}},
+                             { { ix, iy, -40000 } }, { { ix, iy, 40000 } },
                              ld->back_sector->floor_z_vertices[2],
                              ld->back_sector->floor_vertex_slope_normal)
                              .Z;
@@ -716,7 +716,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
                 if (isfinite(ix) && isfinite(iy))
                 {
                     iz = MathLinePlaneIntersection(
-                             {{ix, iy, -40000}}, {{ix, iy, 40000}},
+                             { { ix, iy, -40000 } }, { { ix, iy, 40000 } },
                              ld->front_sector->floor_z_vertices[2],
                              ld->front_sector->floor_vertex_slope_normal)
                              .Z;
@@ -743,7 +743,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
             if (isfinite(ix) && isfinite(iy))
             {
                 float icz = MathLinePlaneIntersection(
-                                {{ix, iy, -40000}}, {{ix, iy, 40000}},
+                                { { ix, iy, -40000 } }, { { ix, iy, 40000 } },
                                 ld->front_sector->ceiling_z_vertices[2],
                                 ld->front_sector->ceiling_vertex_slope_normal)
                                 .Z;
@@ -768,7 +768,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
             if (isfinite(ix) && isfinite(iy))
             {
                 float icz = MathLinePlaneIntersection(
-                                {{ix, iy, -40000}}, {{ix, iy, 40000}},
+                                { { ix, iy, -40000 } }, { { ix, iy, 40000 } },
                                 ld->back_sector->ceiling_z_vertices[2],
                                 ld->back_sector->ceiling_vertex_slope_normal)
                                 .Z;
@@ -805,7 +805,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
                 {
                     float icz =
                         MathLinePlaneIntersection(
-                            {{ix, iy, -40000}}, {{ix, iy, 40000}},
+                            { { ix, iy, -40000 } }, { { ix, iy, 40000 } },
                             ld->back_sector->ceiling_z_vertices[2],
                             ld->back_sector->ceiling_vertex_slope_normal)
                             .Z;
@@ -843,7 +843,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
                 {
                     float icz =
                         MathLinePlaneIntersection(
-                            {{ix, iy, -40000}}, {{ix, iy, 40000}},
+                            { { ix, iy, -40000 } }, { { ix, iy, 40000 } },
                             ld->front_sector->ceiling_z_vertices[2],
                             ld->front_sector->ceiling_vertex_slope_normal)
                             .Z;
@@ -1083,8 +1083,8 @@ static bool CheckRelativePosition(MapObject *thing, float x, float y)
     // Vertex slope check here?
     if (move_check.subsector->sector->floor_vertex_slope)
     {
-        HMM_Vec3 line_a{{move_check.x, move_check.y, -40000}};
-        HMM_Vec3 line_b{{move_check.x, move_check.y, 40000}};
+        HMM_Vec3 line_a{ { move_check.x, move_check.y, -40000 } };
+        HMM_Vec3 line_b{ { move_check.x, move_check.y, 40000 } };
         float    z_test =
             MathLinePlaneIntersection(
                 line_a, line_b,
@@ -1098,8 +1098,8 @@ static bool CheckRelativePosition(MapObject *thing, float x, float y)
 
     if (move_check.subsector->sector->ceiling_vertex_slope)
     {
-        HMM_Vec3 line_a{{move_check.x, move_check.y, -40000}};
-        HMM_Vec3 line_b{{move_check.x, move_check.y, 40000}};
+        HMM_Vec3 line_a{ { move_check.x, move_check.y, -40000 } };
+        HMM_Vec3 line_b{ { move_check.x, move_check.y, 40000 } };
         float    z_test =
             MathLinePlaneIntersection(
                 line_a, line_b,
@@ -1755,8 +1755,8 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
         if (sec_check->floor_vertex_slope_high_low.X > sec_check->floor_height)
         {
             // Check to see if hitting the side of a vertex slope sector
-            HMM_Vec3 tri_v1 = {{0, 0, 0}};
-            HMM_Vec3 tri_v2 = {{0, 0, 0}};
+            HMM_Vec3 tri_v1 = { { 0, 0, 0 } };
+            HMM_Vec3 tri_v2 = { { 0, 0, 0 } };
             for (auto v : sec_check->floor_z_vertices)
             {
                 if (AlmostEquals(ld->vertex_1->X, v.X) &&
@@ -1796,10 +1796,11 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
                     std::abs(tri_v1.Y - tri_v2.Y))
                 {
                     if (MathPointInTriangle(
-                            {{tri_v1.X, tri_v1.Z}}, {{tri_v2.X, tri_v2.Z}},
-                            {{(tri_v1.Z > tri_v2.Z ? tri_v1.X : tri_v2.X),
-                              sec_check->floor_height}},
-                            {{sx, z}}))
+                            { { tri_v1.X, tri_v1.Z } },
+                            { { tri_v2.X, tri_v2.Z } },
+                            { { (tri_v1.Z > tri_v2.Z ? tri_v1.X : tri_v2.X),
+                                sec_check->floor_height } },
+                            { { sx, z } }))
                     {
                         if (shoot_check.puff)
                         {
@@ -1814,10 +1815,11 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
                 else
                 {
                     if (MathPointInTriangle(
-                            {{tri_v1.Y, tri_v1.Z}}, {{tri_v2.Y, tri_v2.Z}},
-                            {{(tri_v1.Z > tri_v2.Z ? tri_v1.Y : tri_v2.Y),
-                              sec_check->floor_height}},
-                            {{sy, z}}))
+                            { { tri_v1.Y, tri_v1.Z } },
+                            { { tri_v2.Y, tri_v2.Z } },
+                            { { (tri_v1.Z > tri_v2.Z ? tri_v1.Y : tri_v2.Y),
+                                sec_check->floor_height } },
+                            { { sy, z } }))
                     {
                         if (shoot_check.puff)
                             SpawnPuff(sx, sy, z, shoot_check.puff,
@@ -1834,8 +1836,8 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
             sec_check->ceiling_height)
         {
             // Check to see if hitting the side of a vertex slope sector
-            HMM_Vec3 tri_v1 = {{0, 0, 0}};
-            HMM_Vec3 tri_v2 = {{0, 0, 0}};
+            HMM_Vec3 tri_v1 = { { 0, 0, 0 } };
+            HMM_Vec3 tri_v2 = { { 0, 0, 0 } };
             for (auto v : sec_check->ceiling_z_vertices)
             {
                 if (AlmostEquals(ld->vertex_1->X, v.X) &&
@@ -1875,10 +1877,11 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
                     std::abs(tri_v1.Y - tri_v2.Y))
                 {
                     if (MathPointInTriangle(
-                            {{tri_v1.X, tri_v1.Z}}, {{tri_v2.X, tri_v2.Z}},
-                            {{(tri_v1.Z < tri_v2.Z ? tri_v1.X : tri_v2.X),
-                              sec_check->ceiling_height}},
-                            {{sx, z}}))
+                            { { tri_v1.X, tri_v1.Z } },
+                            { { tri_v2.X, tri_v2.Z } },
+                            { { (tri_v1.Z < tri_v2.Z ? tri_v1.X : tri_v2.X),
+                                sec_check->ceiling_height } },
+                            { { sx, z } }))
                     {
                         if (shoot_check.puff)
                         {
@@ -1893,10 +1896,11 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
                 else
                 {
                     if (MathPointInTriangle(
-                            {{tri_v1.Y, tri_v1.Z}}, {{tri_v2.Y, tri_v2.Z}},
-                            {{(tri_v1.Z < tri_v2.Z ? tri_v1.Y : tri_v2.Y),
-                              sec_check->ceiling_height}},
-                            {{sy, z}}))
+                            { { tri_v1.Y, tri_v1.Z } },
+                            { { tri_v2.Y, tri_v2.Z } },
+                            { { (tri_v1.Z < tri_v2.Z ? tri_v1.Y : tri_v2.Y),
+                                sec_check->ceiling_height } },
+                            { { sy, z } }))
                     {
                         if (shoot_check.puff)
                             SpawnPuff(sx, sy, z, shoot_check.puff,
@@ -1924,9 +1928,9 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
         {
             // Check floor vertex slope intersect from shooter's angle
             HMM_Vec3 shoota = MathLinePlaneIntersection(
-                {{shoot_check.source->x, shoot_check.source->y,
-                  shoot_check.start_z}},
-                {{sx, sy, z}}, sec_check->floor_z_vertices[2],
+                { { shoot_check.source->x, shoot_check.source->y,
+                    shoot_check.start_z } },
+                { { sx, sy, z } }, sec_check->floor_z_vertices[2],
                 sec_check->floor_vertex_slope_normal);
             Sector *shoota_sec =
                 RendererPointInSubsector(shoota.X, shoota.Y)->sector;
@@ -1950,9 +1954,9 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
             {
                 // Check ceiling vertex slope intersect from shooter's angle
                 shoota = MathLinePlaneIntersection(
-                    {{shoot_check.source->x, shoot_check.source->y,
-                      shoot_check.start_z}},
-                    {{sx, sy, z}}, sec_check->ceiling_z_vertices[2],
+                    { { shoot_check.source->x, shoot_check.source->y,
+                        shoot_check.start_z } },
+                    { { sx, sy, z } }, sec_check->ceiling_z_vertices[2],
                     sec_check->ceiling_vertex_slope_normal);
                 shoota_sec =
                     RendererPointInSubsector(shoota.X, shoota.Y)->sector;
@@ -1982,9 +1986,9 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
         {
             // Check ceiling vertex slope intersect from shooter's angle
             HMM_Vec3 shoota = MathLinePlaneIntersection(
-                {{shoot_check.source->x, shoot_check.source->y,
-                  shoot_check.start_z}},
-                {{sx, sy, z}}, sec_check->ceiling_z_vertices[2],
+                { { shoot_check.source->x, shoot_check.source->y,
+                    shoot_check.start_z } },
+                { { sx, sy, z } }, sec_check->ceiling_z_vertices[2],
                 sec_check->ceiling_vertex_slope_normal);
             Sector *shoota_sec =
                 RendererPointInSubsector(shoota.X, shoota.Y)->sector;
@@ -2033,7 +2037,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
         if (last_shoota_sec->floor_vertex_slope)
         {
             if (z <= MathLinePlaneIntersection(
-                         {{x, y, -40000}}, {{x, y, 40000}},
+                         { { x, y, -40000 } }, { { x, y, 40000 } },
                          last_shoota_sec->floor_z_vertices[2],
                          last_shoota_sec->floor_vertex_slope_normal)
                          .Z)
@@ -2042,7 +2046,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z,
         if (last_shoota_sec->ceiling_vertex_slope)
         {
             if (z >= MathLinePlaneIntersection(
-                         {{x, y, -40000}}, {{x, y, 40000}},
+                         { { x, y, -40000 } }, { { x, y, 40000 } },
                          last_shoota_sec->ceiling_z_vertices[2],
                          last_shoota_sec->ceiling_vertex_slope_normal)
                          .Z)
@@ -2297,7 +2301,7 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
             if (last_shoota_sec->floor_vertex_slope)
             {
                 if (z <= MathLinePlaneIntersection(
-                             {{x, y, -40000}}, {{x, y, 40000}},
+                             { { x, y, -40000 } }, { { x, y, 40000 } },
                              last_shoota_sec->floor_z_vertices[2],
                              last_shoota_sec->floor_vertex_slope_normal)
                              .Z)
@@ -2310,7 +2314,7 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
             if (last_shoota_sec->ceiling_vertex_slope)
             {
                 if (z >= MathLinePlaneIntersection(
-                             {{x, y, -40000}}, {{x, y, 40000}},
+                             { { x, y, -40000 } }, { { x, y, 40000 } },
                              last_shoota_sec->ceiling_z_vertices[2],
                              last_shoota_sec->ceiling_vertex_slope_normal)
                              .Z)
@@ -3435,7 +3439,7 @@ static bool CheckBlockingLineCallback(Line *line, void *data)
         if (slope_sec->floor_vertex_slope)
         {
             if (mb2 <= MathLinePlaneIntersection(
-                           {{mx2, my2, -40000}}, {{mx2, my2, 40000}},
+                           { { mx2, my2, -40000 } }, { { mx2, my2, 40000 } },
                            slope_sec->floor_z_vertices[2],
                            slope_sec->floor_vertex_slope_normal)
                            .Z)
@@ -3444,7 +3448,7 @@ static bool CheckBlockingLineCallback(Line *line, void *data)
         if (slope_sec->ceiling_vertex_slope)
         {
             if (mt2 >= MathLinePlaneIntersection(
-                           {{mx2, my2, -40000}}, {{mx2, my2, 40000}},
+                           { { mx2, my2, -40000 } }, { { mx2, my2, 40000 } },
                            slope_sec->ceiling_z_vertices[2],
                            slope_sec->ceiling_vertex_slope_normal)
                            .Z)

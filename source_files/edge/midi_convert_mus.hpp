@@ -77,7 +77,7 @@ enum MusEvent
 
 static constexpr uint8_t kMusMidiMaxChannels = 16;
 
-static constexpr char kMusHeader[] = {'M', 'U', 'S', 0x1A};
+static constexpr char kMusHeader[] = { 'M', 'U', 'S', 0x1A };
 
 static constexpr uint8_t kMusToMidiMap[] = {
     /* MIDI  Number  Description */
@@ -219,7 +219,7 @@ static int32_t MusToMidiWriteVariableLength(int32_t value, uint8_t *out)
 }
 
 #define EDGE_MUS_READ_SHORT(b) ((b)[0] | ((b)[1] << 8))
-#define EDGE_MUS_READ_INT(b) \
+#define EDGE_MUS_READ_INT(b)                                                   \
     ((b)[0] | ((b)[1] << 8) | ((b)[2] << 16) | ((b)[3] << 24))
 
 static int ConvertMusToMidi(uint8_t *in, uint32_t insize, uint8_t **out,

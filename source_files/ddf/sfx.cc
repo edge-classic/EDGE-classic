@@ -45,7 +45,8 @@ static const DDFCommandList sfx_commands[] = {
     DDF_FIELD("PRECIOUS", dummy_sfx, precious_, DDF_MainGetBoolean),
     DDF_FIELD("MAX_DISTANCE", dummy_sfx, max_distance_, DDF_MainGetFloat),
 
-    {nullptr, nullptr, 0, nullptr}};
+    { nullptr, nullptr, 0, nullptr }
+};
 
 //
 //  DDF PARSE ROUTINES

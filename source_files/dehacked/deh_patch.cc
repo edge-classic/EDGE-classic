@@ -72,7 +72,8 @@ static constexpr int16_t thing_v12_to_v166[kV12Things] = {
     66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,  81,  82,  83,
     84,  85,  86,  87,  88,  89,  90,  91,  92,  93,  94,  95,  96,  97,  98,
     99,  100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113,
-    114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126};
+    114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126
+};
 
 // Frame conversion array from 1.2 to 1.666
 static constexpr int16_t frame_v12_to_v166[kV12Frames] = {
@@ -115,14 +116,16 @@ static constexpr int16_t frame_v12_to_v166[kV12Frames] = {
     913, 914, 915, 916, 917, 918, 919, 920, 921, 922, 923, 924, 925, 926, 927,
     928, 929, 930, 931, 932, 933, 934, 935, 936, 937,
     /* 500 */
-    938, 939, 940, 941, 942, 943, 944, 945, 946, 947, 948, 949};
+    938, 939, 940, 941, 942, 943, 944, 945, 946, 947, 948, 949
+};
 
 // Sound conversion array from 1.2 to 1.666
 static constexpr int16_t sound_v12_to_v166[kV12Sounds] = {
     0,  1,  2,  3,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
     20, 21, 22, 23, 24, 25, 26, 27, 31, 32, 33, 34, 35, 36, 37, 38,
     39, 40, 41, 42, 43, 44, 45, 51, 52, 55, 57, 59, 60, 61, 62, 63,
-    64, 65, 66, 67, 68, 69, 75, 76, 77, 81, 82, 83, 84, 85, 86};
+    64, 65, 66, 67, 68, 69, 75, 76, 77, 81, 82, 83, 84, 85, 86
+};
 
 // Sprite conversion array from 1.2 to 1.666
 static constexpr int16_t sprite_v12_to_v166[kV12Sprites] = {
@@ -132,7 +135,8 @@ static constexpr int16_t sprite_v12_to_v166[kV12Sprites] = {
     65,  66,  67,  68,  69,  70,  71,  72,  73,  75,  76,  77,  78,  79,  80,
     81,  82,  83,  84,  85,  86,  87,  88,  89,  90,  91,  92,  94,  95,  96,
     97,  98,  99,  100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
-    112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126};
+    112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126
+};
 
 namespace patch
 {
@@ -764,12 +768,12 @@ enum SectionKind
     kTotalSections
 };
 
-const char *section_name[] = {"Thing", "Sound", "Frame", "Sprite", "Ammo",
-                              "Weapon", "Pointer", "Cheat", "Misc",
+const char *section_name[] = { "Thing", "Sound", "Frame", "Sprite", "Ammo",
+                               "Weapon", "Pointer", "Cheat", "Misc",
 
-                              // Boom extensions:
-                              "[HELPER]", "[STRINGS]", "[PARS]", "[CODEPTR]",
-                              "[SPRITES]", "[SOUNDS]", "[MUSIC]"};
+                               // Boom extensions:
+                               "[HELPER]", "[STRINGS]", "[PARS]", "[CODEPTR]",
+                               "[SPRITES]", "[SOUNDS]", "[MUSIC]" };
 
 char line_buf[kMaximumLineLength + 4];
 int  line_num;

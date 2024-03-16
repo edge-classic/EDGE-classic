@@ -42,18 +42,18 @@ constexpr float kOnFloorZ        = (float)INT_MIN;
 constexpr float kOnCeilingZ      = (float)INT_MAX;
 
 // -ACB- 2004/07/22 Moved here since its playsim related
-#define EDGE_DAMAGE_COMPUTE(var, dam)                                         \
-    {                                                                         \
-        (var) = (dam)->nominal_;                                              \
-                                                                              \
-        if ((dam)->error_ > 0)                                                \
-            (var) +=                                                          \
-                (dam)->error_ * RandomByteSkewToZeroDeterministic() / 255.0f; \
-        else if ((dam)->linear_max_ > 0)                                      \
-            (var) += ((dam)->linear_max_ - (var)) *                           \
-                     RandomByteDeterministic() / 255.0f;                      \
-                                                                              \
-        if ((var) < 0) (var) = 0;                                             \
+#define EDGE_DAMAGE_COMPUTE(var, dam)                                          \
+    {                                                                          \
+        (var) = (dam)->nominal_;                                               \
+                                                                               \
+        if ((dam)->error_ > 0)                                                 \
+            (var) +=                                                           \
+                (dam)->error_ * RandomByteSkewToZeroDeterministic() / 255.0f;  \
+        else if ((dam)->linear_max_ > 0)                                       \
+            (var) += ((dam)->linear_max_ - (var)) *                            \
+                     RandomByteDeterministic() / 255.0f;                       \
+                                                                               \
+        if ((var) < 0) (var) = 0;                                              \
     }
 
 //

@@ -108,7 +108,7 @@ void InitializePalette(void)
 
     int            pal_length = 0;
     const uint8_t *pal        = (const uint8_t *)OpenPackOrLumpInMemory(
-        "PLAYPAL", {".pal"}, &pal_length);
+        "PLAYPAL", { ".pal" }, &pal_length);
 
     if (!pal) FatalError("InitializePalette: Error opening PLAYPAL!\n");
 

@@ -47,43 +47,43 @@ extern float listen_z;
 bool precache_sound_effects = true;
 
 /* See m_option.cc for corresponding menu items */
-const int channel_counts[8] = {32, 64, 96, 128, 160, 192, 224, 256};
+const int channel_counts[8] = { 32, 64, 96, 128, 160, 192, 224, 256 };
 
 const int category_limit_table[3][8][3] = {
     /* 8 channel (TEST) */
     {
-        {1, 1, 1},  // UI
-        {1, 1, 1},  // Player
-        {1, 1, 1},  // Weapon
+        { 1, 1, 1 },  // UI
+        { 1, 1, 1 },  // Player
+        { 1, 1, 1 },  // Weapon
 
-        {1, 1, 1},  // Opponent
-        {1, 1, 1},  // Monster
-        {1, 1, 1},  // Object
-        {1, 1, 1},  // Level
+        { 1, 1, 1 },  // Opponent
+        { 1, 1, 1 },  // Monster
+        { 1, 1, 1 },  // Object
+        { 1, 1, 1 },  // Level
     },
 
     /* 16 channel */
     {
-        {1, 1, 1},  // UI
-        {1, 1, 1},  // Player
-        {2, 2, 2},  // Weapon
+        { 1, 1, 1 },  // UI
+        { 1, 1, 1 },  // Player
+        { 2, 2, 2 },  // Weapon
 
-        {0, 2, 7},  // Opponent
-        {7, 5, 0},  // Monster
-        {3, 3, 3},  // Object
-        {2, 2, 2},  // Level
+        { 0, 2, 7 },  // Opponent
+        { 7, 5, 0 },  // Monster
+        { 3, 3, 3 },  // Object
+        { 2, 2, 2 },  // Level
     },
 
     /* 32 channel */
     {
-        {2, 2, 2},  // UI
-        {2, 2, 2},  // Player
-        {3, 3, 3},  // Weapon
+        { 2, 2, 2 },  // UI
+        { 2, 2, 2 },  // Player
+        { 3, 3, 3 },  // Weapon
 
-        {0, 5, 12},   // Opponent
-        {14, 10, 2},  // Monster
-        {7, 6, 7},    // Object
-        {4, 4, 4},    // Level
+        { 0, 5, 12 },   // Opponent
+        { 14, 10, 2 },  // Monster
+        { 7, 6, 7 },    // Object
+        { 4, 4, 4 },    // Level
     },
 
     // NOTE: never put a '0' on the WEAPON line, since the top

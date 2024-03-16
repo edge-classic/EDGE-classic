@@ -42,7 +42,8 @@ static const DDFCommandList anim_commands[] = {
     DDF_FIELD("FIRST", dummy_anim, start_name_, DDF_MainGetLumpName),
     DDF_FIELD("LAST", dummy_anim, end_name_, DDF_MainGetLumpName),
 
-    {nullptr, nullptr, 0, nullptr}};
+    { nullptr, nullptr, 0, nullptr }
+};
 
 // Floor/ceiling animation sequences, defined by first and last frame,
 // i.e. the flat (64x64 tile) name or texture name to be used.

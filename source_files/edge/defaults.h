@@ -19,9 +19,9 @@
 #pragma once
 
 // Screen resolution
-#define CFGDEF_SCREENWIDTH \
+#define CFGDEF_SCREENWIDTH                                                     \
     (1000000)  // Super high number to force scaling to native res
-#define CFGDEF_SCREENHEIGHT \
+#define CFGDEF_SCREENHEIGHT                                                    \
     (1000000)  // Super high number to force scaling to native res
 #define CFGDEF_SCREENBITS  (32)
 #define CFGDEF_DISPLAYMODE (2)

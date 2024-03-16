@@ -72,33 +72,33 @@
 #include "wadfixes.h"
 
 // Combination of unique lumps needed to best identify an IWAD
-const std::vector<GameCheck> game_checker = {{
-    {"Custom", "custom", {"EDGEGAME", "EDGEGAME"}},
-    {"Blasphemer", "blasphemer", {"BLASPHEM", "E1M1"}},
-    {"Freedoom 1", "freedoom1", {"FREEDOOM", "E1M1"}},
-    {"Freedoom 2", "freedoom2", {"FREEDOOM", "MAP01"}},
-    {"REKKR", "rekkr", {"REKCREDS", "E1M1"}},
-    {"HacX", "hacx", {"HACX-R", "MAP01"}},
-    {"Harmony",
-     "harmony",
-     {"0HAWK01", "DBIGFONT"}},  // Only the original, not Harmony-Compatible,
-                                // should have DBIGFONT
-    {"Chex Quest",
-     "chex",
-     {"ENDOOM", "_DEUTEX_"}},  // Original Chex Quest, NOT CQ3
-    {"Heretic", "heretic", {"MUS_E1M1", "E1M1"}},
-    {"Plutonia", "plutonia", {"CAMO1", "MAP01"}},
-    {"Evilution", "tnt", {"REDTNT2", "MAP01"}},
-    {"Doom", "doom", {"BFGGA0", "E2M1"}},
-    {"Doom BFG", "doom", {"DMENUPIC", "M_MULTI"}},  // BFG Edition
-    {"Doom Demo", "doom1", {"SHOTA0", "E1M1"}},
-    {"Doom II", "doom2", {"BFGGA0", "MAP01"}},
-    {"Doom II BFG", "doom2", {"DMENUPIC", "MAP33"}},  // BFG Edition
-    {"Strife",
-     "strife",
-     {"VELLOGO",
-      "RGELOGO"}}  // Dev/internal use - Definitely nowhwere near playable
-}};
+const std::vector<GameCheck> game_checker = { {
+    { "Custom", "custom", { "EDGEGAME", "EDGEGAME" } },
+    { "Blasphemer", "blasphemer", { "BLASPHEM", "E1M1" } },
+    { "Freedoom 1", "freedoom1", { "FREEDOOM", "E1M1" } },
+    { "Freedoom 2", "freedoom2", { "FREEDOOM", "MAP01" } },
+    { "REKKR", "rekkr", { "REKCREDS", "E1M1" } },
+    { "HacX", "hacx", { "HACX-R", "MAP01" } },
+    { "Harmony",
+      "harmony",
+      { "0HAWK01", "DBIGFONT" } },  // Only the original, not
+                                    // Harmony-Compatible, should have DBIGFONT
+    { "Chex Quest",
+      "chex",
+      { "ENDOOM", "_DEUTEX_" } },  // Original Chex Quest, NOT CQ3
+    { "Heretic", "heretic", { "MUS_E1M1", "E1M1" } },
+    { "Plutonia", "plutonia", { "CAMO1", "MAP01" } },
+    { "Evilution", "tnt", { "REDTNT2", "MAP01" } },
+    { "Doom", "doom", { "BFGGA0", "E2M1" } },
+    { "Doom BFG", "doom", { "DMENUPIC", "M_MULTI" } },  // BFG Edition
+    { "Doom Demo", "doom1", { "SHOTA0", "E1M1" } },
+    { "Doom II", "doom2", { "BFGGA0", "MAP01" } },
+    { "Doom II BFG", "doom2", { "DMENUPIC", "MAP33" } },  // BFG Edition
+    { "Strife",
+      "strife",
+      { "VELLOGO",
+        "RGELOGO" } }  // Dev/internal use - Definitely nowhwere near playable
+} };
 
 class WadFile
 {

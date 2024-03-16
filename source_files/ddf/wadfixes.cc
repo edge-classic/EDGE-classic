@@ -30,7 +30,8 @@ static WadFixDefinition dummy_fixdef;
 static const DDFCommandList fix_commands[] = {
     DDF_FIELD("MD5", dummy_fixdef, md5_string_, DDF_MainGetString),
 
-    {nullptr, nullptr, 0, nullptr}};
+    { nullptr, nullptr, 0, nullptr }
+};
 
 //
 //  DDF PARSE ROUTINES

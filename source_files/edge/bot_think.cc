@@ -581,7 +581,7 @@ void DeathBot::WeaveToward(const Position &pos)
 
 void DeathBot::WeaveToward(const MapObject *mo)
 {
-    Position pos{mo->x, mo->y, mo->z};
+    Position pos{ mo->x, mo->y, mo->z };
 
     WeaveToward(pos);
 }
@@ -592,7 +592,8 @@ void DeathBot::RetreatFrom(const MapObject *enemy)
     float dy   = pl_->map_object_->y - enemy->y;
     float dlen = HMM_MAX(hypotf(dx, dy), 1.0f);
 
-    Position pos{pl_->map_object_->x, pl_->map_object_->y, pl_->map_object_->z};
+    Position pos{ pl_->map_object_->x, pl_->map_object_->y,
+                  pl_->map_object_->z };
 
     pos.x += 16.0f * (dx / dlen);
     pos.y += 16.0f * (dy / dlen);
@@ -630,7 +631,7 @@ void DeathBot::UpdateEnemy()
     MapObject *enemy = pl_->map_object_->target_;
 
     // update angle, slope and distance, even if not seen
-    Position pos = {enemy->x, enemy->y, enemy->z};
+    Position pos = { enemy->x, enemy->y, enemy->z };
 
     float dx = enemy->x - pl_->map_object_->x;
     float dy = enemy->y - pl_->map_object_->y;
@@ -794,7 +795,7 @@ void DeathBot::WeaveNearLeader(const MapObject *leader)
     dx = dx * 96.0f / dlen;
     dy = dy * 96.0f / dlen;
 
-    Position pos{leader->x + dx, leader->y + dy, leader->z};
+    Position pos{ leader->x + dx, leader->y + dy, leader->z };
 
     TurnToward(leader, false);
     WeaveToward(pos);
@@ -830,7 +831,7 @@ void DeathBot::ThinkHelp()
     // check if we are close to the leader, and can see them
     bool cur_near = false;
 
-    Position pos  = {leader->x, leader->y, leader->z};
+    Position pos  = { leader->x, leader->y, leader->z };
     float    dist = DistTo(pos);
 
     // allow a bit of "hysteresis"
@@ -992,7 +993,7 @@ void DeathBot::ThinkRoam()
 
         if (!BotNavigateNextRoamPoint(roam_goal_))
         {
-            roam_goal_ = Position{0, 0, 0};
+            roam_goal_ = Position{ 0, 0, 0 };
             return;
         }
 
@@ -1001,7 +1002,7 @@ void DeathBot::ThinkRoam()
         // if no path found, try again soon
         if (path_ == nullptr)
         {
-            roam_goal_ = Position{0, 0, 0};
+            roam_goal_ = Position{ 0, 0, 0 };
             return;
         }
 
@@ -1043,7 +1044,7 @@ void DeathBot::FinishGetItem()
         // if no path found, try again soon
         if (path_ == nullptr)
         {
-            roam_goal_ = Position{0, 0, 0};
+            roam_goal_ = Position{ 0, 0, 0 };
             return;
         }
 
@@ -1110,7 +1111,7 @@ void DeathBot::FinishDoorOrLift(bool ok)
     else
     {
         DeletePath();
-        roam_goal_ = Position{0, 0, 0};
+        roam_goal_ = Position{ 0, 0, 0 };
     }
 }
 
@@ -1428,7 +1429,7 @@ void DeathBot::Respawn()
 
     hit_obstacle_ = false;
     near_leader_  = false;
-    roam_goal_    = Position{0, 0, 0};
+    roam_goal_    = Position{ 0, 0, 0 };
 
     DeletePath();
 }

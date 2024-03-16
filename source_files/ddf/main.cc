@@ -314,7 +314,8 @@ static const char *tag_conversion_table[] = {
     "SWITCHES",   "DDFSWTH",  "THINGS",  "DDFTHING", "WEAPONS",    "DDFWEAP",
     "MOVIES",     "DDFMOVIE",
 
-    nullptr,      nullptr};
+    nullptr,      nullptr
+};
 
 void DDF_GetLumpNameForFile(const char *filename, char *lumpname)
 {
@@ -1962,30 +1963,31 @@ struct ddf_reader_t
 
 // -KM- 1999/01/31 Order is important, Languages are loaded before sfx, etc...
 static ddf_reader_t ddf_readers[kTotalDDFTypes] = {
-    {kDDFTypeLanguage, "DDFLANG", "language.ldf", "Languages", DDF_ReadLangs},
-    {kDDFTypeSFX, "DDFSFX", "sounds.ddf", "Sounds", DDF_ReadSFX},
-    {kDDFTypeColourMap, "DDFCOLM", "colmap.ddf", "ColourMaps",
-     DDF_ReadColourMaps},
-    {kDDFTypeImage, "DDFIMAGE", "images.ddf", "Images", DDF_ReadImages},
-    {kDDFTypeFont, "DDFFONT", "fonts.ddf", "Fonts", DDF_ReadFonts},
-    {kDDFTypeStyle, "DDFSTYLE", "styles.ddf", "Styles", DDF_ReadStyles},
-    {kDDFTypeAttack, "DDFATK", "attacks.ddf", "Attacks", DDF_ReadAtks},
-    {kDDFTypeWeapon, "DDFWEAP", "weapons.ddf", "Weapons", DDF_ReadWeapons},
-    {kDDFTypeThing, "DDFTHING", "things.ddf", "Things", DDF_ReadThings},
+    { kDDFTypeLanguage, "DDFLANG", "language.ldf", "Languages", DDF_ReadLangs },
+    { kDDFTypeSFX, "DDFSFX", "sounds.ddf", "Sounds", DDF_ReadSFX },
+    { kDDFTypeColourMap, "DDFCOLM", "colmap.ddf", "ColourMaps",
+      DDF_ReadColourMaps },
+    { kDDFTypeImage, "DDFIMAGE", "images.ddf", "Images", DDF_ReadImages },
+    { kDDFTypeFont, "DDFFONT", "fonts.ddf", "Fonts", DDF_ReadFonts },
+    { kDDFTypeStyle, "DDFSTYLE", "styles.ddf", "Styles", DDF_ReadStyles },
+    { kDDFTypeAttack, "DDFATK", "attacks.ddf", "Attacks", DDF_ReadAtks },
+    { kDDFTypeWeapon, "DDFWEAP", "weapons.ddf", "Weapons", DDF_ReadWeapons },
+    { kDDFTypeThing, "DDFTHING", "things.ddf", "Things", DDF_ReadThings },
 
-    {kDDFTypePlaylist, "DDFPLAY", "playlist.ddf", "Playlists",
-     DDF_ReadMusicPlaylist},
-    {kDDFTypeLine, "DDFLINE", "lines.ddf", "Lines", DDF_ReadLines},
-    {kDDFTypeSector, "DDFSECT", "sectors.ddf", "Sectors", DDF_ReadSectors},
-    {kDDFTypeSwitch, "DDFSWTH", "switch.ddf", "Switches", DDF_ReadSwitch},
-    {kDDFTypeAnim, "DDFANIM", "anims.ddf", "Anims", DDF_ReadAnims},
-    {kDDFTypeGame, "DDFGAME", "games.ddf", "Games", DDF_ReadGames},
-    {kDDFTypeLevel, "DDFLEVL", "levels.ddf", "Levels", DDF_ReadLevels},
-    {kDDFTypeFlat, "DDFFLAT", "flats.ddf", "Flats", DDF_ReadFlat},
-    {kDDFTypeMovie, "DDFMOVIE", "movies.ddf", "Movies", DDF_ReadMovies},
+    { kDDFTypePlaylist, "DDFPLAY", "playlist.ddf", "Playlists",
+      DDF_ReadMusicPlaylist },
+    { kDDFTypeLine, "DDFLINE", "lines.ddf", "Lines", DDF_ReadLines },
+    { kDDFTypeSector, "DDFSECT", "sectors.ddf", "Sectors", DDF_ReadSectors },
+    { kDDFTypeSwitch, "DDFSWTH", "switch.ddf", "Switches", DDF_ReadSwitch },
+    { kDDFTypeAnim, "DDFANIM", "anims.ddf", "Anims", DDF_ReadAnims },
+    { kDDFTypeGame, "DDFGAME", "games.ddf", "Games", DDF_ReadGames },
+    { kDDFTypeLevel, "DDFLEVL", "levels.ddf", "Levels", DDF_ReadLevels },
+    { kDDFTypeFlat, "DDFFLAT", "flats.ddf", "Flats", DDF_ReadFlat },
+    { kDDFTypeMovie, "DDFMOVIE", "movies.ddf", "Movies", DDF_ReadMovies },
 
     // RTS scripts are handled differently
-    {kDDFTypeRadScript, "RSCRIPT", "rscript.rts", "RadTrig", nullptr}};
+    { kDDFTypeRadScript, "RSCRIPT", "rscript.rts", "RadTrig", nullptr }
+};
 
 DDFType DDF_LumpToType(const std::string &name)
 {
@@ -2019,7 +2021,7 @@ DDFType DDF_FilenameToType(const std::string &path)
 
 void DDF_AddFile(DDFType type, std::string &data, const std::string &source)
 {
-    unread_ddf.push_back({type, source, ""});
+    unread_ddf.push_back({ type, source, "" });
 
     // transfer the caller's data
     unread_ddf.back().data.swap(data);

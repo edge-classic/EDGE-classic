@@ -903,14 +903,15 @@ bool PlayerThink(Player *player, bool extra_tic)
         LuaSetVector3(
             LuaGetGlobalVM(), "player", "inventory_event_handler",
             HMM_Vec3{
-                {cmd->extended_buttons & kExtendedButtonCodeInventoryPrevious
-                     ? 1.0f
-                     : 0.0f,
-                 cmd->extended_buttons & kExtendedButtonCodeInventoryUse ? 1.0f
-                                                                         : 0.0f,
-                 cmd->extended_buttons & kExtendedButtonCodeInventoryNext
-                     ? 1.0f
-                     : 0.0f}});
+                { cmd->extended_buttons & kExtendedButtonCodeInventoryPrevious
+                      ? 1.0f
+                      : 0.0f,
+                  cmd->extended_buttons & kExtendedButtonCodeInventoryUse
+                      ? 1.0f
+                      : 0.0f,
+                  cmd->extended_buttons & kExtendedButtonCodeInventoryNext
+                      ? 1.0f
+                      : 0.0f } });
     else
         CoalSetVector(
             ui_vm, "player", "inventory_event_handler",

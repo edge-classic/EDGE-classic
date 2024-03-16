@@ -40,7 +40,8 @@ static const DDFCommandList background_commands[] = {
     DDF_FIELD("SCALE", dummy_bgstyle, scale_, DDF_MainGetFloat),
     DDF_FIELD("ASPECT", dummy_bgstyle, aspect_, DDF_MainGetFloat),
 
-    {nullptr, nullptr, 0, nullptr}};
+    { nullptr, nullptr, 0, nullptr }
+};
 
 static TextStyle dummy_textstyle;
 
@@ -54,7 +55,8 @@ static const DDFCommandList text_commands[] = {
     DDF_FIELD("X_OFFSET", dummy_textstyle, x_offset_, DDF_MainGetNumeric),
     DDF_FIELD("Y_OFFSET", dummy_textstyle, y_offset_, DDF_MainGetNumeric),
 
-    {nullptr, nullptr, 0, nullptr}};
+    { nullptr, nullptr, 0, nullptr }
+};
 
 static CursorStyle dummy_cursorstyle;
 
@@ -69,7 +71,8 @@ static const DDFCommandList cursor_commands[] = {
     DDF_FIELD("FORCE_OFFSETS", dummy_cursorstyle, force_offsets_,
               DDF_MainGetBoolean),
 
-    {nullptr, nullptr, 0, nullptr}};
+    { nullptr, nullptr, 0, nullptr }
+};
 
 static SoundStyle dummy_soundstyle;
 
@@ -82,7 +85,8 @@ static const DDFCommandList sound_commands[] = {
     DDF_FIELD("MOVE", dummy_soundstyle, move_, DDF_MainLookupSound),
     DDF_FIELD("SLIDER", dummy_soundstyle, slider_, DDF_MainLookupSound),
 
-    {nullptr, nullptr, 0, nullptr}};
+    { nullptr, nullptr, 0, nullptr }
+};
 
 static StyleDefinition *dynamic_style;
 
@@ -107,7 +111,8 @@ static const DDFCommandList style_commands[] = {
 
     DDF_FIELD("SPECIAL", dummy_style, special_, DDF_StyleGetSpecials),
 
-    {nullptr, nullptr, 0, nullptr}};
+    { nullptr, nullptr, 0, nullptr }
+};
 
 //
 //  DDF PARSE ROUTINES
@@ -232,10 +237,11 @@ void DDF_StyleCleanUp(void)
 }
 
 static DDFSpecialFlags style_specials[] = {
-    {"TILED", kStyleSpecialTiled, 0},
-    {"TILED_NOSCALE", kStyleSpecialTiledNoScale, 0},
-    {"STRETCH_FULLSCREEN", kStyleSpecialStretchFullScreen, 0},
-    {nullptr, 0, 0}};
+    { "TILED", kStyleSpecialTiled, 0 },
+    { "TILED_NOSCALE", kStyleSpecialTiledNoScale, 0 },
+    { "STRETCH_FULLSCREEN", kStyleSpecialStretchFullScreen, 0 },
+    { nullptr, 0, 0 }
+};
 
 void DDF_StyleGetSpecials(const char *info, void *storage)
 {

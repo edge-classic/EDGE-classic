@@ -133,20 +133,21 @@ struct ExtraAttack
 };
 
 const ExtraAttack attack_extra[] = {
-    {kMT_FIRE, "TRACKER", 0, 75, "FS"},
-    {kMT_TRACER, "PROJECTILE", 48, 75, "cptF"},
-    {kMT_FATSHOT, "FIXED_SPREADER", 32, 75, ""},
-    {kMT_TROOPSHOT, "PROJECTILE", 32, 75, "F"},
-    {kMT_BRUISERSHOT, "PROJECTILE", 32, 75, "F"},
-    {kMT_HEADSHOT, "PROJECTILE", 32, 75, "F"},
-    {kMT_ARACHPLAZ, "PROJECTILE", 16, 50, "eF"},
-    {kMT_ROCKET, "PROJECTILE", 44, 75, "FK"},
-    {kMT_PLASMA, "PROJECTILE", 32, 75, "eK"},
-    {kMT_BFG, "PROJECTILE", 32, 50, "K"},
-    {kMT_EXTRABFG, "SPRAY", 0, 75, ""},
-    {kMT_SPAWNSHOT, "SHOOTTOSPOT", 16, 100, ""},
+    { kMT_FIRE, "TRACKER", 0, 75, "FS" },
+    { kMT_TRACER, "PROJECTILE", 48, 75, "cptF" },
+    { kMT_FATSHOT, "FIXED_SPREADER", 32, 75, "" },
+    { kMT_TROOPSHOT, "PROJECTILE", 32, 75, "F" },
+    { kMT_BRUISERSHOT, "PROJECTILE", 32, 75, "F" },
+    { kMT_HEADSHOT, "PROJECTILE", 32, 75, "F" },
+    { kMT_ARACHPLAZ, "PROJECTILE", 16, 50, "eF" },
+    { kMT_ROCKET, "PROJECTILE", 44, 75, "FK" },
+    { kMT_PLASMA, "PROJECTILE", 32, 75, "eK" },
+    { kMT_BFG, "PROJECTILE", 32, 50, "K" },
+    { kMT_EXTRABFG, "SPRAY", 0, 75, "" },
+    { kMT_SPAWNSHOT, "SHOOTTOSPOT", 16, 100, "" },
 
-    {-1, nullptr, 0, 0, ""}};
+    { -1, nullptr, 0, 0, "" }
+};
 
 void HandleSounds(const DehackedMapObjectDefinition *info, int mt_num)
 {
@@ -350,7 +351,7 @@ const char *Attacks::AddScratchAttack(int damage, const char *sfx)
             return namebuf;
     }
 
-    scratchers.push_back({damage, sfx ? sfx : "", namebuf});
+    scratchers.push_back({ damage, sfx ? sfx : "", namebuf });
 
     return namebuf;
 }
@@ -702,91 +703,91 @@ struct FlagName
 };
 
 const FlagName flag_list[] = {
-    {kMF_SPECIAL, "SPECIAL", "SPECIAL"},
-    {kMF_SOLID, "SOLID", "SOLID"},
-    {kMF_SHOOTABLE, "SHOOTABLE", "SHOOTABLE"},
-    {kMF_NOSECTOR, "NOSECTOR", "NOSECTOR"},
-    {kMF_NOBLOCKMAP, "NOBLOCKMAP", "NOBLOCKMAP"},
-    {kMF_AMBUSH, "AMBUSH", "AMBUSH"},
-    {0, "JUSTHIT", nullptr},
-    {0, "JUSTATTACKED", nullptr},
-    {kMF_SPAWNCEILING, "SPAWNCEILING", "SPAWNCEILING"},
-    {kMF_NOGRAVITY, "NOGRAVITY", "NOGRAVITY"},
-    {kMF_DROPOFF, "DROPOFF", "DROPOFF"},
-    {kMF_PICKUP, "PICKUP", "PICKUP"},
-    {kMF_NOCLIP, "NOCLIP", "NOCLIP"},
-    {kMF_SLIDE, "SLIDE", "SLIDER"},
-    {kMF_FLOAT, "FLOAT", "FLOAT"},
-    {kMF_TELEPORT, "TELEPORT", "TELEPORT"},
-    {kMF_MISSILE, "MISSILE", "MISSILE"},
-    {kMF_DROPPED, "DROPPED", "DROPPED"},
-    {kMF_SHADOW, "SHADOW", "FUZZY"},
-    {kMF_NOBLOOD, "NOBLOOD", "DAMAGESMOKE"},
-    {kMF_CORPSE, "CORPSE", "CORPSE"},
-    {0, "INFLOAT", nullptr},
-    {kMF_COUNTKILL, "COUNTKILL", "COUNT_AS_KILL"},
-    {kMF_COUNTITEM, "COUNTITEM", "COUNT_AS_ITEM"},
-    {kMF_SKULLFLY, "SKULLFLY", "SKULLFLY"},
-    {kMF_NOTDMATCH, "NOTDMATCH", "NODEATHMATCH"},
-    {kMF_TRANSLATION1, "TRANSLATION1", nullptr},
-    {kMF_TRANSLATION2, "TRANSLATION2", nullptr},
-    {kMF_TRANSLATION1, "TRANSLATION", nullptr},  // bug compat
-    {kMF_TOUCHY, "TOUCHY", "TOUCHY"},
-    {kMF_BOUNCES, "BOUNCES", "BOUNCE"},
-    {kMF_FRIEND, "FRIEND", nullptr},
-    {kMF_TRANSLUCENT, "TRANSLUCENT", nullptr},
-    {kMF_TRANSLUCENT, "TRANSLUC50", nullptr},
+    { kMF_SPECIAL, "SPECIAL", "SPECIAL" },
+    { kMF_SOLID, "SOLID", "SOLID" },
+    { kMF_SHOOTABLE, "SHOOTABLE", "SHOOTABLE" },
+    { kMF_NOSECTOR, "NOSECTOR", "NOSECTOR" },
+    { kMF_NOBLOCKMAP, "NOBLOCKMAP", "NOBLOCKMAP" },
+    { kMF_AMBUSH, "AMBUSH", "AMBUSH" },
+    { 0, "JUSTHIT", nullptr },
+    { 0, "JUSTATTACKED", nullptr },
+    { kMF_SPAWNCEILING, "SPAWNCEILING", "SPAWNCEILING" },
+    { kMF_NOGRAVITY, "NOGRAVITY", "NOGRAVITY" },
+    { kMF_DROPOFF, "DROPOFF", "DROPOFF" },
+    { kMF_PICKUP, "PICKUP", "PICKUP" },
+    { kMF_NOCLIP, "NOCLIP", "NOCLIP" },
+    { kMF_SLIDE, "SLIDE", "SLIDER" },
+    { kMF_FLOAT, "FLOAT", "FLOAT" },
+    { kMF_TELEPORT, "TELEPORT", "TELEPORT" },
+    { kMF_MISSILE, "MISSILE", "MISSILE" },
+    { kMF_DROPPED, "DROPPED", "DROPPED" },
+    { kMF_SHADOW, "SHADOW", "FUZZY" },
+    { kMF_NOBLOOD, "NOBLOOD", "DAMAGESMOKE" },
+    { kMF_CORPSE, "CORPSE", "CORPSE" },
+    { 0, "INFLOAT", nullptr },
+    { kMF_COUNTKILL, "COUNTKILL", "COUNT_AS_KILL" },
+    { kMF_COUNTITEM, "COUNTITEM", "COUNT_AS_ITEM" },
+    { kMF_SKULLFLY, "SKULLFLY", "SKULLFLY" },
+    { kMF_NOTDMATCH, "NOTDMATCH", "NODEATHMATCH" },
+    { kMF_TRANSLATION1, "TRANSLATION1", nullptr },
+    { kMF_TRANSLATION2, "TRANSLATION2", nullptr },
+    { kMF_TRANSLATION1, "TRANSLATION", nullptr },  // bug compat
+    { kMF_TOUCHY, "TOUCHY", "TOUCHY" },
+    { kMF_BOUNCES, "BOUNCES", "BOUNCE" },
+    { kMF_FRIEND, "FRIEND", nullptr },
+    { kMF_TRANSLUCENT, "TRANSLUCENT", nullptr },
+    { kMF_TRANSLUCENT, "TRANSLUC50", nullptr },
     // BOOM and MBF flags...
     //{ kMF_STEALTH,      "STEALTH",       "STEALTH" },
 
-    {kMF_UNUSED1, "UNUSED1", nullptr},
-    {kMF_UNUSED2, "UNUSED2", nullptr},
-    {kMF_UNUSED3, "UNUSED3", nullptr},
-    {kMF_UNUSED4, "UNUSED4", nullptr},
+    { kMF_UNUSED1, "UNUSED1", nullptr },
+    { kMF_UNUSED2, "UNUSED2", nullptr },
+    { kMF_UNUSED3, "UNUSED3", nullptr },
+    { kMF_UNUSED4, "UNUSED4", nullptr },
 
-    {0, nullptr, nullptr}  // End sentinel
+    { 0, nullptr, nullptr }  // End sentinel
 };
 
 const FlagName mbf21flag_list[] = {
-    {kMBF21_LOGRAV, "LOGRAV", "LOGRAV"},
-    {kMBF21_DMGIGNORED, "DMGIGNORED", "NEVERTARGETED"},
-    {kMBF21_NORADIUSDMG, "NORADIUSDMG", "EXPLODE_IMMUNE"},
-    {kMBF21_HIGHERMPROB, "HIGHERMPROB",
-     "TRIGGER_HAPPY"},  // FIXME: not quite the same
-    {kMBF21_RANGEHALF, "RANGEHALF", "TRIGGER_HAPPY"},
-    {kMBF21_NOTHRESHOLD, "NOTHRESHOLD", "NOGRUDGE"},
-    {kMBF21_BOSS, "BOSS", "BOSSMAN"},
-    {kMBF21_RIP, "RIP", "TUNNEL"},
-    {kMBF21_FULLVOLSOUNDS, "FULLVOLSOUNDS", "ALWAYS_LOUD"},
+    { kMBF21_LOGRAV, "LOGRAV", "LOGRAV" },
+    { kMBF21_DMGIGNORED, "DMGIGNORED", "NEVERTARGETED" },
+    { kMBF21_NORADIUSDMG, "NORADIUSDMG", "EXPLODE_IMMUNE" },
+    { kMBF21_HIGHERMPROB, "HIGHERMPROB",
+      "TRIGGER_HAPPY" },  // FIXME: not quite the same
+    { kMBF21_RANGEHALF, "RANGEHALF", "TRIGGER_HAPPY" },
+    { kMBF21_NOTHRESHOLD, "NOTHRESHOLD", "NOGRUDGE" },
+    { kMBF21_BOSS, "BOSS", "BOSSMAN" },
+    { kMBF21_RIP, "RIP", "TUNNEL" },
+    { kMBF21_FULLVOLSOUNDS, "FULLVOLSOUNDS", "ALWAYS_LOUD" },
 
     // flags which don't produce an Edge special
-    {kMBF21_SHORTMRANGE, "SHORTMRANGE", nullptr},
-    {kMBF21_LONGMELEE, "LONGMELEE", nullptr},
-    {kMBF21_FORCERADIUSDMG, "FORCERADIUSDMG", nullptr},
+    { kMBF21_SHORTMRANGE, "SHORTMRANGE", nullptr },
+    { kMBF21_LONGMELEE, "LONGMELEE", nullptr },
+    { kMBF21_FORCERADIUSDMG, "FORCERADIUSDMG", nullptr },
 
-    {kMBF21_MAP07BOSS1, "MAP07BOSS1", nullptr},
-    {kMBF21_MAP07BOSS2, "MAP07BOSS2", nullptr},
-    {kMBF21_E1M8BOSS, "E1M8BOSS", nullptr},
-    {kMBF21_E2M8BOSS, "E2M8BOSS", nullptr},
-    {kMBF21_E3M8BOSS, "E3M8BOSS", nullptr},
-    {kMBF21_E4M6BOSS, "E4M6BOSS", nullptr},
-    {kMBF21_E4M8BOSS, "E4M8BOSS", nullptr},
+    { kMBF21_MAP07BOSS1, "MAP07BOSS1", nullptr },
+    { kMBF21_MAP07BOSS2, "MAP07BOSS2", nullptr },
+    { kMBF21_E1M8BOSS, "E1M8BOSS", nullptr },
+    { kMBF21_E2M8BOSS, "E2M8BOSS", nullptr },
+    { kMBF21_E3M8BOSS, "E3M8BOSS", nullptr },
+    { kMBF21_E4M6BOSS, "E4M6BOSS", nullptr },
+    { kMBF21_E4M8BOSS, "E4M8BOSS", nullptr },
 
-    {0, nullptr, nullptr}  // End sentinel
+    { 0, nullptr, nullptr }  // End sentinel
 };
 
 // these are extra flags we add for certain monsters.
 // they do not correspond to anything in DEHACKED / BEX / MBF21.
 const FlagName extflaglist[] = {
-    {kExtraFlagDisloyal, nullptr, "DISLOYAL,ATTACK_HURTS"},  // must be first
-    {kExtraFlagTriggerHappy, nullptr, "TRIGGER_HAPPY"},
-    {kExtraFlagBossMan, nullptr, "BOSSMAN"},
-    {kExtraFlagLoud, nullptr, "ALWAYS_LOUD"},
-    {kExtraFlagNoRaise, nullptr, "NO_RESURRECT"},
-    {kExtraFlagNoGrudge, nullptr, "NO_GRUDGE,NEVERTARGETED"},
-    {kExtraFlagNoItemBk, nullptr, "NO_RESPAWN"},
+    { kExtraFlagDisloyal, nullptr, "DISLOYAL,ATTACK_HURTS" },  // must be first
+    { kExtraFlagTriggerHappy, nullptr, "TRIGGER_HAPPY" },
+    { kExtraFlagBossMan, nullptr, "BOSSMAN" },
+    { kExtraFlagLoud, nullptr, "ALWAYS_LOUD" },
+    { kExtraFlagNoRaise, nullptr, "NO_RESURRECT" },
+    { kExtraFlagNoGrudge, nullptr, "NO_GRUDGE,NEVERTARGETED" },
+    { kExtraFlagNoItemBk, nullptr, "NO_RESPAWN" },
 
-    {0, nullptr, nullptr}  // End sentinel
+    { 0, nullptr, nullptr }  // End sentinel
 };
 
 int ParseBits(const FlagName *list, char *bit_str)
@@ -1277,10 +1278,11 @@ struct PlayerInfo
 };
 
 const PlayerInfo player_info[NUMPLAYERS] = {
-    {"OUR_HERO", 1, "PLAYER_GREEN"},    {"PLAYER2", 2, "PLAYER_DK_GREY"},
-    {"PLAYER3", 3, "PLAYER_BROWN"},     {"PLAYER4", 4, "PLAYER_DULL_RED"},
-    {"PLAYER5", 4001, "PLAYER_ORANGE"}, {"PLAYER6", 4002, "PLAYER_LT_GREY"},
-    {"PLAYER7", 4003, "PLAYER_LT_RED"}, {"PLAYER8", 4004, "PLAYER_PINK"}};
+    { "OUR_HERO", 1, "PLAYER_GREEN" },    { "PLAYER2", 2, "PLAYER_DK_GREY" },
+    { "PLAYER3", 3, "PLAYER_BROWN" },     { "PLAYER4", 4, "PLAYER_DULL_RED" },
+    { "PLAYER5", 4001, "PLAYER_ORANGE" }, { "PLAYER6", 4002, "PLAYER_LT_GREY" },
+    { "PLAYER7", 4003, "PLAYER_LT_RED" }, { "PLAYER8", 4004, "PLAYER_PINK" }
+};
 
 void HandlePlayer(const DehackedMapObjectDefinition *info, int player)
 {
@@ -1328,50 +1330,53 @@ struct PickupItem
 
 const PickupItem pickup_item[] = {
     // Health & Armor....
-    {kSPR_BON1, "HEALTH", 2, 1, 200, "GotHealthPotion", ksfx_itemup},
-    {kSPR_STIM, "HEALTH", 2, 10, 100, "GotStim", ksfx_itemup},
-    {kSPR_MEDI, "HEALTH", 2, 25, 100, "GotMedi", ksfx_itemup},
-    {kSPR_BON2, "GREEN_ARMOUR", 2, 1, 200, "GotArmourHelmet", ksfx_itemup},
-    {kSPR_ARM1, "GREEN_ARMOUR", 2, 100, 100, "GotArmour", ksfx_itemup},
-    {kSPR_ARM2, "BLUE_ARMOUR", 2, 200, 200, "GotMegaArmour", ksfx_itemup},
+    { kSPR_BON1, "HEALTH", 2, 1, 200, "GotHealthPotion", ksfx_itemup },
+    { kSPR_STIM, "HEALTH", 2, 10, 100, "GotStim", ksfx_itemup },
+    { kSPR_MEDI, "HEALTH", 2, 25, 100, "GotMedi", ksfx_itemup },
+    { kSPR_BON2, "GREEN_ARMOUR", 2, 1, 200, "GotArmourHelmet", ksfx_itemup },
+    { kSPR_ARM1, "GREEN_ARMOUR", 2, 100, 100, "GotArmour", ksfx_itemup },
+    { kSPR_ARM2, "BLUE_ARMOUR", 2, 200, 200, "GotMegaArmour", ksfx_itemup },
 
     // Keys....
-    {kSPR_BKEY, "KEY_BLUECARD", 0, 0, 0, "GotBlueCard", ksfx_itemup},
-    {kSPR_YKEY, "KEY_YELLOWCARD", 0, 0, 0, "GotYellowCard", ksfx_itemup},
-    {kSPR_RKEY, "KEY_REDCARD", 0, 0, 0, "GotRedCard", ksfx_itemup},
-    {kSPR_BSKU, "KEY_BLUESKULL", 0, 0, 0, "GotBlueSkull", ksfx_itemup},
-    {kSPR_YSKU, "KEY_YELLOWSKULL", 0, 0, 0, "GotYellowSkull", ksfx_itemup},
-    {kSPR_RSKU, "KEY_REDSKULL", 0, 0, 0, "GotRedSkull", ksfx_itemup},
+    { kSPR_BKEY, "KEY_BLUECARD", 0, 0, 0, "GotBlueCard", ksfx_itemup },
+    { kSPR_YKEY, "KEY_YELLOWCARD", 0, 0, 0, "GotYellowCard", ksfx_itemup },
+    { kSPR_RKEY, "KEY_REDCARD", 0, 0, 0, "GotRedCard", ksfx_itemup },
+    { kSPR_BSKU, "KEY_BLUESKULL", 0, 0, 0, "GotBlueSkull", ksfx_itemup },
+    { kSPR_YSKU, "KEY_YELLOWSKULL", 0, 0, 0, "GotYellowSkull", ksfx_itemup },
+    { kSPR_RSKU, "KEY_REDSKULL", 0, 0, 0, "GotRedSkull", ksfx_itemup },
 
     // Ammo....
-    {kSPR_CLIP, "BULLETS", 1, 10, 0, "GotClip", ksfx_itemup},
-    {kSPR_AMMO, "BULLETS", 1, 50, 0, "GotClipBox", ksfx_itemup},
-    {kSPR_SHEL, "SHELLS", 1, 4, 0, "GotShells", ksfx_itemup},
-    {kSPR_SBOX, "SHELLS", 1, 20, 0, "GotShellBox", ksfx_itemup},
-    {kSPR_ROCK, "ROCKETS", 1, 1, 0, "GotRocket", ksfx_itemup},
-    {kSPR_BROK, "ROCKETS", 1, 5, 0, "GotRocketBox", ksfx_itemup},
-    {kSPR_CELL, "CELLS", 1, 20, 0, "GotCell", ksfx_itemup},
-    {kSPR_CELP, "CELLS", 1, 100, 0, "GotCellPack", ksfx_itemup},
+    { kSPR_CLIP, "BULLETS", 1, 10, 0, "GotClip", ksfx_itemup },
+    { kSPR_AMMO, "BULLETS", 1, 50, 0, "GotClipBox", ksfx_itemup },
+    { kSPR_SHEL, "SHELLS", 1, 4, 0, "GotShells", ksfx_itemup },
+    { kSPR_SBOX, "SHELLS", 1, 20, 0, "GotShellBox", ksfx_itemup },
+    { kSPR_ROCK, "ROCKETS", 1, 1, 0, "GotRocket", ksfx_itemup },
+    { kSPR_BROK, "ROCKETS", 1, 5, 0, "GotRocketBox", ksfx_itemup },
+    { kSPR_CELL, "CELLS", 1, 20, 0, "GotCell", ksfx_itemup },
+    { kSPR_CELP, "CELLS", 1, 100, 0, "GotCellPack", ksfx_itemup },
 
     // Powerups....
-    {kSPR_SOUL, "HEALTH", 2, 100, 200, "GotSoul", ksfx_getpow},
-    {kSPR_PMAP, "POWERUP_AUTOMAP", 0, 0, 0, "GotMap", ksfx_getpow},
-    {kSPR_PINS, "POWERUP_PARTINVIS", 2, 100, 100, "GotInvis", ksfx_getpow},
-    {kSPR_PINV, "POWERUP_INVULNERABLE", 2, 30, 30, "GotInvulner", ksfx_getpow},
-    {kSPR_PVIS, "POWERUP_LIGHTGOGGLES", 2, 120, 120, "GotVisor", ksfx_getpow},
-    {kSPR_SUIT, "POWERUP_ACIDSUIT", 2, 60, 60, "GotSuit", ksfx_getpow},
+    { kSPR_SOUL, "HEALTH", 2, 100, 200, "GotSoul", ksfx_getpow },
+    { kSPR_PMAP, "POWERUP_AUTOMAP", 0, 0, 0, "GotMap", ksfx_getpow },
+    { kSPR_PINS, "POWERUP_PARTINVIS", 2, 100, 100, "GotInvis", ksfx_getpow },
+    { kSPR_PINV, "POWERUP_INVULNERABLE", 2, 30, 30, "GotInvulner",
+      ksfx_getpow },
+    { kSPR_PVIS, "POWERUP_LIGHTGOGGLES", 2, 120, 120, "GotVisor", ksfx_getpow },
+    { kSPR_SUIT, "POWERUP_ACIDSUIT", 2, 60, 60, "GotSuit", ksfx_getpow },
 
     // Weapons....
-    {kSPR_CSAW, "CHAINSAW", 0, 0, 0, "GotChainSaw", ksfx_wpnup},
-    {kSPR_SHOT, "SHOTGUN,SHELLS", 1, 8, 0, "GotShotGun", ksfx_wpnup},
-    {kSPR_SGN2, "SUPERSHOTGUN,SHELLS", 1, 8, 0, "GotDoubleBarrel", ksfx_wpnup},
-    {kSPR_MGUN, "CHAINGUN,BULLETS", 1, 20, 0, "GotChainGun", ksfx_wpnup},
-    {kSPR_LAUN, "ROCKET_LAUNCHER,ROCKETS", 1, 2, 0, "GotRocketLauncher",
-     ksfx_wpnup},
-    {kSPR_PLAS, "PLASMA_RIFLE,CELLS", 1, 40, 0, "GotPlasmaGun", ksfx_wpnup},
-    {kSPR_BFUG, "BFG9000,CELLS", 1, 40, 0, "GotBFG", ksfx_wpnup},
+    { kSPR_CSAW, "CHAINSAW", 0, 0, 0, "GotChainSaw", ksfx_wpnup },
+    { kSPR_SHOT, "SHOTGUN,SHELLS", 1, 8, 0, "GotShotGun", ksfx_wpnup },
+    { kSPR_SGN2, "SUPERSHOTGUN,SHELLS", 1, 8, 0, "GotDoubleBarrel",
+      ksfx_wpnup },
+    { kSPR_MGUN, "CHAINGUN,BULLETS", 1, 20, 0, "GotChainGun", ksfx_wpnup },
+    { kSPR_LAUN, "ROCKET_LAUNCHER,ROCKETS", 1, 2, 0, "GotRocketLauncher",
+      ksfx_wpnup },
+    { kSPR_PLAS, "PLASMA_RIFLE,CELLS", 1, 40, 0, "GotPlasmaGun", ksfx_wpnup },
+    { kSPR_BFUG, "BFG9000,CELLS", 1, 40, 0, "GotBFG", ksfx_wpnup },
 
-    {-1, nullptr, 0, 0, 0, nullptr}};
+    { -1, nullptr, 0, 0, 0, nullptr }
+};
 
 void HandleItem(const DehackedMapObjectDefinition *info, int mt_num)
 {
@@ -1522,7 +1527,8 @@ const char *cast_titles[17] = {
     "LostSoulName",         "CacodemonName",   "HellKnightName",
     "BaronOfHellName",      "ArachnotronName", "PainElementalName",
     "RevenantName",         "MancubusName",    "ArchVileName",
-    "SpiderMastermindName", "CyberdemonName"};
+    "SpiderMastermindName", "CyberdemonName"
+};
 
 void HandleCastOrder(const DehackedMapObjectDefinition *info, int mt_num,
                      int player)
@@ -1777,77 +1783,78 @@ void things::ConvertATK()
 namespace things
 {
 const FieldReference mobj_field[] = {
-    {"ID #", offsetof(DehackedMapObjectDefinition, doomednum), kFieldTypeAny},
-    {"Initial frame", offsetof(DehackedMapObjectDefinition, spawnstate),
-     kFieldTypeFrameNumber},
-    {"Hit points", offsetof(DehackedMapObjectDefinition, spawnhealth),
-     kFieldTypeOneOrGreater},
-    {"First moving frame", offsetof(DehackedMapObjectDefinition, seestate),
-     kFieldTypeFrameNumber},
-    {"Alert sound", offsetof(DehackedMapObjectDefinition, seesound),
-     kFieldTypeSoundNumber},
-    {"Reaction time", offsetof(DehackedMapObjectDefinition, reactiontime),
-     kFieldTypeZeroOrGreater},
-    {"Attack sound", offsetof(DehackedMapObjectDefinition, attacksound),
-     kFieldTypeSoundNumber},
-    {"Injury frame", offsetof(DehackedMapObjectDefinition, painstate),
-     kFieldTypeFrameNumber},
-    {"Pain chance", offsetof(DehackedMapObjectDefinition, painchance),
-     kFieldTypeZeroOrGreater},
-    {"Pain sound", offsetof(DehackedMapObjectDefinition, painsound),
-     kFieldTypeSoundNumber},
-    {"Close attack frame", offsetof(DehackedMapObjectDefinition, meleestate),
-     kFieldTypeFrameNumber},
-    {"Far attack frame", offsetof(DehackedMapObjectDefinition, missilestate),
-     kFieldTypeFrameNumber},
-    {"Death frame", offsetof(DehackedMapObjectDefinition, deathstate),
-     kFieldTypeFrameNumber},
-    {"Exploding frame", offsetof(DehackedMapObjectDefinition, xdeathstate),
-     kFieldTypeFrameNumber},
-    {"Death sound", offsetof(DehackedMapObjectDefinition, deathsound),
-     kFieldTypeSoundNumber},
-    {"Speed", offsetof(DehackedMapObjectDefinition, speed),
-     kFieldTypeZeroOrGreater},
-    {"Width", offsetof(DehackedMapObjectDefinition, radius),
-     kFieldTypeZeroOrGreater},
-    {"Height", offsetof(DehackedMapObjectDefinition, height),
-     kFieldTypeZeroOrGreater},
-    {"Mass", offsetof(DehackedMapObjectDefinition, mass),
-     kFieldTypeZeroOrGreater},
-    {"Missile damage", offsetof(DehackedMapObjectDefinition, damage),
-     kFieldTypeZeroOrGreater},
-    {"Action sound", offsetof(DehackedMapObjectDefinition, activesound),
-     kFieldTypeSoundNumber},
-    {"Bits", offsetof(DehackedMapObjectDefinition, flags), kFieldTypeBitflags},
-    {"MBF21 Bits", offsetof(DehackedMapObjectDefinition, mbf21_flags),
-     kFieldTypeBitflags},
-    {"Infighting group", offsetof(DehackedMapObjectDefinition, infight_group),
-     kFieldTypeZeroOrGreater},
-    {"Projectile group", offsetof(DehackedMapObjectDefinition, proj_group),
-     kFieldTypeAny},
-    {"Splash group", offsetof(DehackedMapObjectDefinition, splash_group),
-     kFieldTypeZeroOrGreater},
-    {"Rip sound", offsetof(DehackedMapObjectDefinition, rip_sound),
-     kFieldTypeSoundNumber},
-    {"Fast speed", offsetof(DehackedMapObjectDefinition, fast_speed),
-     kFieldTypeZeroOrGreater},
-    {"Melee range", offsetof(DehackedMapObjectDefinition, melee_range),
-     kFieldTypeZeroOrGreater},
-    {"Gib health", offsetof(DehackedMapObjectDefinition, gib_health),
-     kFieldTypeAny},
-    {"Dropped item", offsetof(DehackedMapObjectDefinition, dropped_item),
-     kFieldTypeZeroOrGreater},
-    {"Pickup width", offsetof(DehackedMapObjectDefinition, pickup_width),
-     kFieldTypeZeroOrGreater},
-    {"Projectile pass height",
-     offsetof(DehackedMapObjectDefinition, projectile_pass_height),
-     kFieldTypeZeroOrGreater},
-    {"Fullbright", offsetof(DehackedMapObjectDefinition, fullbright),
-     kFieldTypeZeroOrGreater},
-    {"Respawn frame", offsetof(DehackedMapObjectDefinition, raisestate),
-     kFieldTypeFrameNumber},
+    { "ID #", offsetof(DehackedMapObjectDefinition, doomednum), kFieldTypeAny },
+    { "Initial frame", offsetof(DehackedMapObjectDefinition, spawnstate),
+      kFieldTypeFrameNumber },
+    { "Hit points", offsetof(DehackedMapObjectDefinition, spawnhealth),
+      kFieldTypeOneOrGreater },
+    { "First moving frame", offsetof(DehackedMapObjectDefinition, seestate),
+      kFieldTypeFrameNumber },
+    { "Alert sound", offsetof(DehackedMapObjectDefinition, seesound),
+      kFieldTypeSoundNumber },
+    { "Reaction time", offsetof(DehackedMapObjectDefinition, reactiontime),
+      kFieldTypeZeroOrGreater },
+    { "Attack sound", offsetof(DehackedMapObjectDefinition, attacksound),
+      kFieldTypeSoundNumber },
+    { "Injury frame", offsetof(DehackedMapObjectDefinition, painstate),
+      kFieldTypeFrameNumber },
+    { "Pain chance", offsetof(DehackedMapObjectDefinition, painchance),
+      kFieldTypeZeroOrGreater },
+    { "Pain sound", offsetof(DehackedMapObjectDefinition, painsound),
+      kFieldTypeSoundNumber },
+    { "Close attack frame", offsetof(DehackedMapObjectDefinition, meleestate),
+      kFieldTypeFrameNumber },
+    { "Far attack frame", offsetof(DehackedMapObjectDefinition, missilestate),
+      kFieldTypeFrameNumber },
+    { "Death frame", offsetof(DehackedMapObjectDefinition, deathstate),
+      kFieldTypeFrameNumber },
+    { "Exploding frame", offsetof(DehackedMapObjectDefinition, xdeathstate),
+      kFieldTypeFrameNumber },
+    { "Death sound", offsetof(DehackedMapObjectDefinition, deathsound),
+      kFieldTypeSoundNumber },
+    { "Speed", offsetof(DehackedMapObjectDefinition, speed),
+      kFieldTypeZeroOrGreater },
+    { "Width", offsetof(DehackedMapObjectDefinition, radius),
+      kFieldTypeZeroOrGreater },
+    { "Height", offsetof(DehackedMapObjectDefinition, height),
+      kFieldTypeZeroOrGreater },
+    { "Mass", offsetof(DehackedMapObjectDefinition, mass),
+      kFieldTypeZeroOrGreater },
+    { "Missile damage", offsetof(DehackedMapObjectDefinition, damage),
+      kFieldTypeZeroOrGreater },
+    { "Action sound", offsetof(DehackedMapObjectDefinition, activesound),
+      kFieldTypeSoundNumber },
+    { "Bits", offsetof(DehackedMapObjectDefinition, flags),
+      kFieldTypeBitflags },
+    { "MBF21 Bits", offsetof(DehackedMapObjectDefinition, mbf21_flags),
+      kFieldTypeBitflags },
+    { "Infighting group", offsetof(DehackedMapObjectDefinition, infight_group),
+      kFieldTypeZeroOrGreater },
+    { "Projectile group", offsetof(DehackedMapObjectDefinition, proj_group),
+      kFieldTypeAny },
+    { "Splash group", offsetof(DehackedMapObjectDefinition, splash_group),
+      kFieldTypeZeroOrGreater },
+    { "Rip sound", offsetof(DehackedMapObjectDefinition, rip_sound),
+      kFieldTypeSoundNumber },
+    { "Fast speed", offsetof(DehackedMapObjectDefinition, fast_speed),
+      kFieldTypeZeroOrGreater },
+    { "Melee range", offsetof(DehackedMapObjectDefinition, melee_range),
+      kFieldTypeZeroOrGreater },
+    { "Gib health", offsetof(DehackedMapObjectDefinition, gib_health),
+      kFieldTypeAny },
+    { "Dropped item", offsetof(DehackedMapObjectDefinition, dropped_item),
+      kFieldTypeZeroOrGreater },
+    { "Pickup width", offsetof(DehackedMapObjectDefinition, pickup_width),
+      kFieldTypeZeroOrGreater },
+    { "Projectile pass height",
+      offsetof(DehackedMapObjectDefinition, projectile_pass_height),
+      kFieldTypeZeroOrGreater },
+    { "Fullbright", offsetof(DehackedMapObjectDefinition, fullbright),
+      kFieldTypeZeroOrGreater },
+    { "Respawn frame", offsetof(DehackedMapObjectDefinition, raisestate),
+      kFieldTypeFrameNumber },
 
-    {nullptr, 0, kFieldTypeAny}  // End sentinel
+    { nullptr, 0, kFieldTypeAny }  // End sentinel
 };
 }  // namespace things
 

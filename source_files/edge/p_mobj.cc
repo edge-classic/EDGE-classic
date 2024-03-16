@@ -294,8 +294,8 @@ static bool CorpseShouldSlide(MapObject *mo)
     // Vertex slope check here?
     if (mo->subsector_->sector->floor_vertex_slope)
     {
-        HMM_Vec3 line_a{ { mo->x, mo->y, -40000 } };
-        HMM_Vec3 line_b{ { mo->x, mo->y, 40000 } };
+        HMM_Vec3 line_a{{mo->x, mo->y, -40000}};
+        HMM_Vec3 line_b{{mo->x, mo->y, 40000}};
         float    z_test = MathLinePlaneIntersection(line_a, line_b, mo->subsector_->sector->floor_z_vertices[2],
                                                     mo->subsector_->sector->floor_vertex_slope_normal)
                            .Z;
@@ -305,8 +305,8 @@ static bool CorpseShouldSlide(MapObject *mo)
 
     if (mo->subsector_->sector->ceiling_vertex_slope)
     {
-        HMM_Vec3 line_a{ { mo->x, mo->y, -40000 } };
-        HMM_Vec3 line_b{ { mo->x, mo->y, 40000 } };
+        HMM_Vec3 line_a{{mo->x, mo->y, -40000}};
+        HMM_Vec3 line_b{{mo->x, mo->y, 40000}};
         float    z_test = MathLinePlaneIntersection(line_a, line_b, mo->subsector_->sector->ceiling_z_vertices[2],
                                                     mo->subsector_->sector->ceiling_vertex_slope_normal)
                            .Z;
@@ -649,7 +649,7 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz, 
     {
         int      countx     = 0;
         int      county     = 0;
-        HMM_Vec2 cumulative = { { 0, 0 } };
+        HMM_Vec2 cumulative = {{0, 0}};
         // handle push sectors
         for (TouchNode *tn = mo->touch_sectors_; tn; tn = tn->map_object_next)
         {
@@ -2336,7 +2336,7 @@ MapObject *CreateMapObject(float x, float y, float z, const MapObjectDefinition 
 
     if (sec->floor_vertex_slope)
     {
-        float sz = MathLinePlaneIntersection({ { x, y, -40000 } }, { { x, y, 40000 } }, sec->floor_z_vertices[2],
+        float sz = MathLinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, sec->floor_z_vertices[2],
                                              sec->floor_vertex_slope_normal)
                        .Z;
         if (isfinite(sz))
@@ -2344,7 +2344,7 @@ MapObject *CreateMapObject(float x, float y, float z, const MapObjectDefinition 
     }
     if (sec->ceiling_vertex_slope)
     {
-        float sz = MathLinePlaneIntersection({ { x, y, -40000 } }, { { x, y, 40000 } }, sec->ceiling_z_vertices[2],
+        float sz = MathLinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, sec->ceiling_z_vertices[2],
                                              sec->ceiling_vertex_slope_normal)
                        .Z;
         if (isfinite(sz))

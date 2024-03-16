@@ -92,7 +92,7 @@ bool StartupOpal(void)
 
     if (opl_instrument_bank.s_ == "GENMIDI")
     {
-        data = OpenPackOrLumpInMemory("GENMIDI", { ".op2" }, &length);
+        data = OpenPackOrLumpInMemory("GENMIDI", {".op2"}, &length);
         if (!data)
         {
             LogDebug("no GENMIDI lump !\n");
@@ -295,7 +295,7 @@ class OpalPlayer : public AbstractMusicPlayer
 
         opl_interface_->pcmSampleRate = sound_device_frequency;
         opl_interface_->pcmFrameSize  = 2 /*channels*/ * 2 /*size of one sample*/; // OPL3 is 2 'channels' regardless of
-                                                                                  // the sound_device_stereo setting
+                                                                                   // the sound_device_stereo setting
 
         opl_interface_->rt_deviceSwitch  = rtDeviceSwitch;
         opl_interface_->rt_currentDevice = rtCurrentDevice;

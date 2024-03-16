@@ -37,7 +37,7 @@
 #include "w_wad.h"
 #include "wadfixes.h"
 
-static std::string known_image_directories[5] = { "flats", "graphics", "skins", "textures", "sprites" };
+static std::string known_image_directories[5] = {"flats", "graphics", "skins", "textures", "sprites"};
 
 class PackEntry
 {
@@ -322,7 +322,7 @@ static void ProcessSubDirectory(PackFile *pack, std::string &fullpath)
             std::string stem     = epi::GetStem(filename);
             epi::StringUpperASCII(stem);
             pack->directories_[d].AddEntry(filename, fsd[i].name, packpath, 0);
-            pack->search_files_.insert({ stem, packpath });
+            pack->search_files_.insert({stem, packpath});
         }
     }
 }
@@ -361,7 +361,7 @@ static PackFile *ProcessFolder(DataFile *df)
             std::string stem     = epi::GetStem(filename);
             epi::StringUpperASCII(stem);
             pack->directories_[0].AddEntry(filename, fsd[i].name, packpath, 0);
-            pack->search_files_.insert({ stem, packpath });
+            pack->search_files_.insert({stem, packpath});
         }
     }
 
@@ -467,7 +467,7 @@ static PackFile *ProcessZip(DataFile *df)
         std::string stem     = epi::GetStem(basename);
         epi::StringUpperASCII(stem);
         pack->directories_[dir_idx].AddEntry(epi::GetFilename(add_name), "", packpath, idx);
-        pack->search_files_.insert({ stem, packpath });
+        pack->search_files_.insert({stem, packpath});
     }
 
     return pack;

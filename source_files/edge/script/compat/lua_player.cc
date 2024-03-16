@@ -2303,88 +2303,88 @@ static int Sector_info(lua_State *L)
     return 1;
 }
 
-static const luaL_Reg playerlib[] = { { "num_players", PL_num_players },
-                                      { "set_who", PL_set_who },
-                                      { "is_bot", PL_is_bot },
-                                      { "get_name", PL_get_name },
-                                      { "get_pos", PL_get_pos },
-                                      { "get_angle", PL_get_angle },
-                                      { "get_mlook", PL_get_mlook },
+static const luaL_Reg playerlib[] = {{"num_players", PL_num_players},
+                                     {"set_who", PL_set_who},
+                                     {"is_bot", PL_is_bot},
+                                     {"get_name", PL_get_name},
+                                     {"get_pos", PL_get_pos},
+                                     {"get_angle", PL_get_angle},
+                                     {"get_mlook", PL_get_mlook},
 
-                                      { "health", PL_health },
-                                      { "armor", PL_armor },
-                                      { "total_armor", PL_total_armor },
-                                      { "ammo", PL_ammo },
-                                      { "ammomax", PL_ammomax },
-                                      { "frags", PL_frags },
+                                     {"health", PL_health},
+                                     {"armor", PL_armor},
+                                     {"total_armor", PL_total_armor},
+                                     {"ammo", PL_ammo},
+                                     {"ammomax", PL_ammomax},
+                                     {"frags", PL_frags},
 
-                                      { "is_swimming", PL_is_swimming },
-                                      { "is_jumping", PL_is_jumping },
-                                      { "is_crouching", PL_is_crouching },
-                                      { "is_using", PL_is_using },
-                                      { "is_action1", PL_is_action1 },
-                                      { "is_action2", PL_is_action2 },
-                                      { "is_attacking", PL_is_attacking },
-                                      { "is_rampaging", PL_is_rampaging },
-                                      { "is_grinning", PL_is_grinning },
+                                     {"is_swimming", PL_is_swimming},
+                                     {"is_jumping", PL_is_jumping},
+                                     {"is_crouching", PL_is_crouching},
+                                     {"is_using", PL_is_using},
+                                     {"is_action1", PL_is_action1},
+                                     {"is_action2", PL_is_action2},
+                                     {"is_attacking", PL_is_attacking},
+                                     {"is_rampaging", PL_is_rampaging},
+                                     {"is_grinning", PL_is_grinning},
 
-                                      { "under_water", PL_under_water },
-                                      { "on_ground", PL_on_ground },
-                                      { "move_speed", PL_move_speed },
-                                      { "air_in_lungs", PL_air_in_lungs },
+                                     {"under_water", PL_under_water},
+                                     {"on_ground", PL_on_ground},
+                                     {"move_speed", PL_move_speed},
+                                     {"air_in_lungs", PL_air_in_lungs},
 
-                                      { "has_key", PL_has_key },
-                                      { "has_power", PL_has_power },
-                                      { "power_left", PL_power_left },
-                                      { "has_weapon", PL_has_weapon },
-                                      { "has_weapon_slot", PL_has_weapon_slot },
-                                      { "cur_weapon", PL_cur_weapon },
-                                      { "cur_weapon_slot", PL_cur_weapon_slot },
+                                     {"has_key", PL_has_key},
+                                     {"has_power", PL_has_power},
+                                     {"power_left", PL_power_left},
+                                     {"has_weapon", PL_has_weapon},
+                                     {"has_weapon_slot", PL_has_weapon_slot},
+                                     {"cur_weapon", PL_cur_weapon},
+                                     {"cur_weapon_slot", PL_cur_weapon_slot},
 
-                                      { "main_ammo", PL_main_ammo },
-                                      { "ammo_type", PL_ammo_type },
-                                      { "ammo_pershot", PL_ammo_pershot },
-                                      { "clip_ammo", PL_clip_ammo },
-                                      { "clip_size", PL_clip_size },
-                                      { "clip_is_shared", PL_clip_is_shared },
+                                     {"main_ammo", PL_main_ammo},
+                                     {"ammo_type", PL_ammo_type},
+                                     {"ammo_pershot", PL_ammo_pershot},
+                                     {"clip_ammo", PL_clip_ammo},
+                                     {"clip_size", PL_clip_size},
+                                     {"clip_is_shared", PL_clip_is_shared},
 
-                                      { "hurt_by", PL_hurt_by },
-                                      { "hurt_mon", PL_hurt_mon },
-                                      { "hurt_pain", PL_hurt_pain },
-                                      { "hurt_dir", PL_hurt_dir },
-                                      { "hurt_angle", PL_hurt_angle },
+                                     {"hurt_by", PL_hurt_by},
+                                     {"hurt_mon", PL_hurt_mon},
+                                     {"hurt_pain", PL_hurt_pain},
+                                     {"hurt_dir", PL_hurt_dir},
+                                     {"hurt_angle", PL_hurt_angle},
 
-                                      { "kills", PL_kills },
-                                      { "secrets", PL_secrets },
-                                      { "items", PL_items },
-                                      { "map_enemies", PL_map_enemies },
-                                      { "map_secrets", PL_map_secrets },
-                                      { "map_items", PL_map_items },
-                                      { "floor_flat", PL_floor_flat },
-                                      { "sector_tag", PL_sector_tag },
+                                     {"kills", PL_kills},
+                                     {"secrets", PL_secrets},
+                                     {"items", PL_items},
+                                     {"map_enemies", PL_map_enemies},
+                                     {"map_secrets", PL_map_secrets},
+                                     {"map_items", PL_map_items},
+                                     {"floor_flat", PL_floor_flat},
+                                     {"sector_tag", PL_sector_tag},
 
-                                      { "play_footstep", PL_play_footstep },
+                                     {"play_footstep", PL_play_footstep},
 
-                                      { "use_inventory", PL_use_inventory },
-                                      { "inventory", PL_inventory },
-                                      { "inventorymax", PL_inventorymax },
+                                     {"use_inventory", PL_use_inventory},
+                                     {"inventory", PL_inventory},
+                                     {"inventorymax", PL_inventorymax},
 
-                                      { "rts_enable_tagged", PL_rts_enable_tagged },
+                                     {"rts_enable_tagged", PL_rts_enable_tagged},
 
-                                      { "counter", PL_counter },
-                                      { "counter_max", PL_counter_max },
-                                      { "set_counter", PL_set_counter },
+                                     {"counter", PL_counter},
+                                     {"counter_max", PL_counter_max},
+                                     {"set_counter", PL_set_counter},
 
-                                      { "query_object", PL_query_object },
-                                      { "query_weapon", PL_query_weapon },
-                                      { "is_zoomed", PL_is_zoomed },
-                                      { "weapon_state", PL_weapon_state },
+                                     {"query_object", PL_query_object},
+                                     {"query_weapon", PL_query_weapon},
+                                     {"is_zoomed", PL_is_zoomed},
+                                     {"weapon_state", PL_weapon_state},
 
-                                      { "sector_light", PL_sector_light },
-                                      { "sector_floor_height", PL_sector_floor_height },
-                                      { "sector_ceiling_height", PL_sector_ceiling_height },
-                                      { "is_outside", PL_is_outside },
-                                      { nullptr, nullptr } };
+                                     {"sector_light", PL_sector_light},
+                                     {"sector_floor_height", PL_sector_floor_height},
+                                     {"sector_ceiling_height", PL_sector_ceiling_height},
+                                     {"is_outside", PL_is_outside},
+                                     {nullptr, nullptr}};
 
 static int luaopen_player(lua_State *L)
 {
@@ -2392,12 +2392,12 @@ static int luaopen_player(lua_State *L)
     return 1;
 }
 
-static const luaL_Reg mapobjectlib[] = { { "query_tagged", MO_query_tagged },
-                                         { "tagged_info", MO_tagged_info },
-                                         { "object_info", MO_object_info },
-                                         { "weapon_info", MO_weapon_info },
-                                         { "count", MO_count },
-                                         { nullptr, nullptr } };
+static const luaL_Reg mapobjectlib[] = {{"query_tagged", MO_query_tagged},
+                                        {"tagged_info", MO_tagged_info},
+                                        {"object_info", MO_object_info},
+                                        {"weapon_info", MO_weapon_info},
+                                        {"count", MO_count},
+                                        {nullptr, nullptr}};
 
 static int luaopen_mapobject(lua_State *L)
 {
@@ -2405,7 +2405,7 @@ static int luaopen_mapobject(lua_State *L)
     return 1;
 }
 
-static const luaL_Reg gamelib[] = { { "info", Game_info }, { nullptr, nullptr } };
+static const luaL_Reg gamelib[] = {{"info", Game_info}, {nullptr, nullptr}};
 
 static int luaopen_game(lua_State *L)
 {
@@ -2413,7 +2413,7 @@ static int luaopen_game(lua_State *L)
     return 1;
 }
 
-static const luaL_Reg maplib[] = { { "info", Map_info }, { nullptr, nullptr } };
+static const luaL_Reg maplib[] = {{"info", Map_info}, {nullptr, nullptr}};
 
 static int luaopen_map(lua_State *L)
 {
@@ -2421,7 +2421,7 @@ static int luaopen_map(lua_State *L)
     return 1;
 }
 
-static const luaL_Reg sectorlib[] = { { "info", Sector_info }, { nullptr, nullptr } };
+static const luaL_Reg sectorlib[] = {{"info", Sector_info}, {nullptr, nullptr}};
 
 static int luaopen_sector(lua_State *L)
 {

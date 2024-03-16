@@ -29,14 +29,14 @@ void DDF_ColmapGetSpecial(const char *info, void *storage);
 
 static Colormap dummy_colmap;
 
-static const DDFCommandList colmap_commands[] = { DDF_FIELD("LUMP", dummy_colmap, lump_name_, DDF_MainGetLumpName),
-                                                  DDF_FIELD("PACK", dummy_colmap, pack_name_, DDF_MainGetString),
-                                                  DDF_FIELD("START", dummy_colmap, start_, DDF_MainGetNumeric),
-                                                  DDF_FIELD("LENGTH", dummy_colmap, length_, DDF_MainGetNumeric),
-                                                  DDF_FIELD("SPECIAL", dummy_colmap, special_, DDF_ColmapGetSpecial),
-                                                  DDF_FIELD("GL_COLOUR", dummy_colmap, gl_color_, DDF_MainGetRGB),
+static const DDFCommandList colmap_commands[] = {DDF_FIELD("LUMP", dummy_colmap, lump_name_, DDF_MainGetLumpName),
+                                                 DDF_FIELD("PACK", dummy_colmap, pack_name_, DDF_MainGetString),
+                                                 DDF_FIELD("START", dummy_colmap, start_, DDF_MainGetNumeric),
+                                                 DDF_FIELD("LENGTH", dummy_colmap, length_, DDF_MainGetNumeric),
+                                                 DDF_FIELD("SPECIAL", dummy_colmap, special_, DDF_ColmapGetSpecial),
+                                                 DDF_FIELD("GL_COLOUR", dummy_colmap, gl_color_, DDF_MainGetRGB),
 
-                                                  { nullptr, nullptr, 0, nullptr } };
+                                                 {nullptr, nullptr, 0, nullptr}};
 
 //
 //  DDF PARSE ROUTINES
@@ -171,13 +171,13 @@ void DDF_ColmapCleanUp(void)
     colormaps.shrink_to_fit();
 }
 
-DDFSpecialFlags colmap_specials[] = { { "FLASH", kColorSpecialNoFlash, true },
-                                      { "WHITEN", kColorSpecialWhiten, false },
+DDFSpecialFlags colmap_specials[] = {{"FLASH", kColorSpecialNoFlash, true},
+                                     {"WHITEN", kColorSpecialWhiten, false},
 
-                                      // -AJA- backwards compatibility cruft...
-                                      { "SKY", 0, 0 },
+                                     // -AJA- backwards compatibility cruft...
+                                     {"SKY", 0, 0},
 
-                                      { nullptr, 0, 0 } };
+                                     {nullptr, 0, 0}};
 
 //
 // DDF_ColmapGetSpecial

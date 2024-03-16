@@ -197,7 +197,7 @@ class MapObject : public Position
     float alpha_  = 1.0f;
 
     // Momentum, used to update position.
-    HMM_Vec3 momentum_ = { { 0, 0, 0 } };
+    HMM_Vec3 momentum_ = {{0, 0, 0}};
 
     // Track hover phase for time stop shenanigans
     float phase_ = 0.0f;
@@ -273,7 +273,7 @@ class MapObject : public Position
     int last_look_ = 0;
 
     // For respawning.
-    SpawnPoint spawnpoint_ = { 0, 0, 0, 0, 0, nullptr, 0, 0 };
+    SpawnPoint spawnpoint_ = {0, 0, 0, 0, 0, nullptr, 0, 0};
 
     float original_height_ = 0;
 
@@ -331,19 +331,19 @@ class MapObject : public Position
     // if we're on a ladder, this is the linedef #, otherwise -1.
     int on_ladder_ = -1;
 
-    DynamicLightState dynamic_light_ = { 0, 0, 0, nullptr };
+    DynamicLightState dynamic_light_ = {0, 0, 0, nullptr};
 
     // monster reload support: count the number of shots
     int shot_count_ = 0;
 
     // hash values for TUNNEL missiles
-    uint32_t tunnel_hash_[2] = { 0, 0 };
+    uint32_t tunnel_hash_[2] = {0, 0};
 
     // position interpolation (disabled when lerp_num <= 1)
     short interpolation_number_   = 0;
     short interpolation_position_ = 0;
 
-    HMM_Vec3 interpolation_from_ = { { 0, 0, 0 } };
+    HMM_Vec3 interpolation_from_ = {{0, 0, 0}};
 
     // touch list: sectors this thing is in or touches
     struct TouchNode *touch_sectors_ = nullptr;
@@ -394,7 +394,7 @@ class MapObject : public Position
 // Item-in-Respawn-que Structure -ACB- 1998/07/30
 struct RespawnQueueItem
 {
-    SpawnPoint               spawnpoint = { 0, 0, 0, 0, 0, nullptr, 0, 0 };
+    SpawnPoint               spawnpoint = {0, 0, 0, 0, 0, nullptr, 0, 0};
     int                      time       = 0;
     struct RespawnQueueItem *next       = nullptr;
     struct RespawnQueueItem *previous   = nullptr;

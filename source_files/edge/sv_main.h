@@ -97,7 +97,7 @@ struct SaveField
 // NOTE: requires an instantiated dummy struct for "base"
 #define EDGE_SAVE_FIELD(base, field, name, num, fkind, fsize, fname, getter, putter)                                   \
     {                                                                                                                  \
-        (const char *)&base.field, name, num, { fkind, fsize, fname }, getter, putter, nullptr                         \
+        (const char *)&base.field, name, num, {fkind, fsize, fname}, getter, putter, nullptr                           \
     }
 
 // This describes a single structure

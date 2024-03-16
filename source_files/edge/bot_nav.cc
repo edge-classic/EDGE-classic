@@ -136,7 +136,7 @@ static void BotNavigateCollectBigItems()
         if (score < 0)
             continue;
 
-        big_items.push_back(big_item_c{ mo->x, mo->y, mo->z, score });
+        big_items.push_back(big_item_c{mo->x, mo->y, mo->z, score});
     }
 
     // TODO : if < 4, pad out with DM spawn spots or random locs
@@ -231,7 +231,7 @@ Position nav_area_c::get_middle() const
 {
     float z = level_subsectors[id].sector->floor_height;
 
-    return Position{ mid_x, mid_y, z };
+    return Position{mid_x, mid_y, z};
 }
 
 void nav_area_c::compute_middle(const Subsector &sub)
@@ -406,9 +406,9 @@ static void BotNavigateCreateLinks()
             int tele_id = BotNavigateCheckTeleporter(seg);
 
             if (tele_id >= 0)
-                nav_links.push_back(nav_link_c{ tele_id, length, kBotPathNodeTeleport, seg });
+                nav_links.push_back(nav_link_c{tele_id, length, kBotPathNodeTeleport, seg});
             else
-                nav_links.push_back(nav_link_c{ dest_id, length, flags, seg });
+                nav_links.push_back(nav_link_c{dest_id, length, flags, seg});
 
             area.num_links += 1;
 
@@ -552,19 +552,19 @@ static void BotNavigateStoreSegMiddle(BotPath *path, int flags, const Seg *seg)
     pos.y = (seg->vertex_1->Y + seg->vertex_2->Y) * 0.5f;
     pos.z = seg->front_subsector->sector->floor_height;
 
-    path->nodes_.push_back(BotPathNode{ pos, flags, seg });
+    path->nodes_.push_back(BotPathNode{pos, flags, seg});
 }
 
 static BotPath *BotNavigateStorePath(Position start, int start_id, Position finish, int finish_id)
 {
     BotPath *path = new BotPath;
 
-    path->nodes_.push_back(BotPathNode{ start, 0, nullptr });
+    path->nodes_.push_back(BotPathNode{start, 0, nullptr});
 
     // handle case of same subsector -- no segs
     if (start_id == finish_id)
     {
-        path->nodes_.push_back(BotPathNode{ finish, 0, nullptr });
+        path->nodes_.push_back(BotPathNode{finish, 0, nullptr});
         return path;
     }
 
@@ -617,13 +617,13 @@ static BotPath *BotNavigateStorePath(Position start, int start_id, Position fini
         if (link->flags & kBotPathNodeLift)
         {
             auto pos = nav_areas[link->dest_id].get_middle();
-            path->nodes_.push_back(BotPathNode{ pos, 0, nullptr });
+            path->nodes_.push_back(BotPathNode{pos, 0, nullptr});
         }
 
         prev_id = cur_id;
     }
 
-    path->nodes_.push_back(BotPathNode{ finish, 0, nullptr });
+    path->nodes_.push_back(BotPathNode{finish, 0, nullptr});
 
     return path;
 }
@@ -737,7 +737,7 @@ BotPath *BotNavigateFindThing(DeathBot *bot, float radius, MapObject *&best)
     // each nearby thing (limited roughly by `radius') will be passed to the
     // EvalThing() method of the bot.  returns nullptr if nothing was found.
 
-    Position pos{ bot->pl_->map_object_->x, bot->pl_->map_object_->y, bot->pl_->map_object_->z };
+    Position pos{bot->pl_->map_object_->x, bot->pl_->map_object_->y, bot->pl_->map_object_->z};
 
     Subsector *start    = RendererPointInSubsector(pos.x, pos.y);
     int        start_id = (int)(start - level_subsectors);
@@ -844,7 +844,7 @@ static void BotNavigateEnemiesInNode(unsigned int bspnum, DeathBot *bot, float r
 
     const BspNode *node = &level_nodes[bspnum];
 
-    Position pos{ bot->pl_->map_object_->x, bot->pl_->map_object_->y, bot->pl_->map_object_->z };
+    Position pos{bot->pl_->map_object_->x, bot->pl_->map_object_->y, bot->pl_->map_object_->z};
 
     for (int c = 0; c < 2; c++)
     {

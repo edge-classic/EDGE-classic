@@ -38,8 +38,7 @@ static const DDFCommandList flat_commands[] = {
     DDF_FIELD("SINK_DEPTH", dummy_flatdef, sink_depth_, DDF_MainGetPercent),
     DDF_FIELD("BOB_DEPTH", dummy_flatdef, bob_depth_, DDF_MainGetPercent),
 
-    { nullptr, nullptr, 0, nullptr }
-};
+    {nullptr, nullptr, 0, nullptr}};
 
 //
 //  DDF PARSE ROUTINES

@@ -207,11 +207,11 @@ static void LuaSandbox(lua_State *L)
     lua_pop(L, 1);
 
     // os module
-    const char *os_functions[] = { "execute", "exit", "getenv", "remove", "rename", "setlocale", "tmpname", nullptr };
+    const char *os_functions[] = {"execute", "exit", "getenv", "remove", "rename", "setlocale", "tmpname", nullptr};
     LuaSandbox_Module(L, "os", os_functions);
 
     // base/global functions
-    const char *base_functions[] = { "dofile", "loadfile", nullptr };
+    const char *base_functions[] = {"dofile", "loadfile", nullptr};
     LuaSandbox_Module(L, "_G", base_functions);
 
     // if debugging is enabled, load debug/io libs and sandbox
@@ -222,9 +222,7 @@ static void LuaSandbox(lua_State *L)
         luaL_requiref(L, LUA_IOLIBNAME, luaopen_io, 1);
         lua_pop(L, 2);
 
-        const char *io_functions[] = {
-            "close", "input", "lines", "open", "output", "popen", "tmpfile", "type", nullptr
-        };
+        const char *io_functions[] = {"close", "input", "lines", "open", "output", "popen", "tmpfile", "type", nullptr};
         LuaSandbox_Module(L, "io", io_functions);
     }
 }
@@ -242,10 +240,9 @@ lua_State *LuaCreateVM()
     ** program
     */
     const luaL_Reg loadedlibs[] = {
-        { LUA_GNAME, luaopen_base },          { LUA_LOADLIBNAME, luaopen_package }, { LUA_OSLIBNAME, luaopen_os },
-        { LUA_COLIBNAME, luaopen_coroutine }, { LUA_TABLIBNAME, luaopen_table },    { LUA_STRLIBNAME, luaopen_string },
-        { LUA_MATHLIBNAME, luaopen_math },    { LUA_UTF8LIBNAME, luaopen_utf8 },    { nullptr, nullptr }
-    };
+        {LUA_GNAME, luaopen_base},          {LUA_LOADLIBNAME, luaopen_package}, {LUA_OSLIBNAME, luaopen_os},
+        {LUA_COLIBNAME, luaopen_coroutine}, {LUA_TABLIBNAME, luaopen_table},    {LUA_STRLIBNAME, luaopen_string},
+        {LUA_MATHLIBNAME, luaopen_math},    {LUA_UTF8LIBNAME, luaopen_utf8},    {nullptr, nullptr}};
 
     const luaL_Reg *lib;
     /* "require" functions from 'loadedlibs' and set results to global table */

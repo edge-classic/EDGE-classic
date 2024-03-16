@@ -44,15 +44,15 @@
 #include "s_sound.h"
 #include "w_wad.h"
 
-DirectionType opposite[] = { kDirectionWest,      kDirectionSouthwest, kDirectionSouth,
-                             kDirectionSoutheast, kDirectionEast,      kDirectionNorthEast,
-                             kDirectionNorth,     kDirectionNorthWest, kDirectionNone };
+DirectionType opposite[] = {kDirectionWest,      kDirectionSouthwest, kDirectionSouth,
+                            kDirectionSoutheast, kDirectionEast,      kDirectionNorthEast,
+                            kDirectionNorth,     kDirectionNorthWest, kDirectionNone};
 
-DirectionType diagonals[] = { kDirectionNorthWest, kDirectionNorthEast, kDirectionSouthwest, kDirectionSoutheast };
+DirectionType diagonals[] = {kDirectionNorthWest, kDirectionNorthEast, kDirectionSouthwest, kDirectionSoutheast};
 
 // 0.7071067812f: The diagonal speed of creatures
-float xspeed[8] = { 1.0f, 0.7071067812f, 0.0f, -0.7071067812f, -1.0f, -0.7071067812f, 0.0f, 0.7071067812f };
-float yspeed[8] = { 0.0f, 0.7071067812f, 1.0f, 0.7071067812f, 0.0f, -0.7071067812f, -1.0f, -0.7071067812f };
+float xspeed[8] = {1.0f, 0.7071067812f, 0.0f, -0.7071067812f, -1.0f, -0.7071067812f, 0.0f, 0.7071067812f};
+float yspeed[8] = {0.0f, 0.7071067812f, 1.0f, 0.7071067812f, 0.0f, -0.7071067812f, -1.0f, -0.7071067812f};
 
 //
 //  ENEMY THINKING
@@ -168,7 +168,7 @@ void A_NoiseAlert(MapObject *actor)
 //
 bool DoMove(MapObject *actor, bool path)
 {
-    HMM_Vec3 orig_pos{ { actor->x, actor->y, actor->z } };
+    HMM_Vec3 orig_pos{{actor->x, actor->y, actor->z}};
 
     float tryx;
     float tryy;

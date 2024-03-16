@@ -30,21 +30,21 @@ SoundEffectDefinitionContainer sfxdefs;
 
 static SoundEffectDefinition dummy_sfx;
 
-static const DDFCommandList sfx_commands[] = { DDF_FIELD("LUMP_NAME", dummy_sfx, lump_name_, DDF_MainGetLumpName),
-                                               DDF_FIELD("PACK_NAME", dummy_sfx, pack_name_, DDF_MainGetString),
-                                               DDF_FIELD("FILE_NAME", dummy_sfx, file_name_, DDF_MainGetString),
-                                               DDF_FIELD("PC_SPEAKER_LUMP", dummy_sfx, pc_speaker_sound_,
-                                                         DDF_MainGetString), // Kept for backwards compat
-                                               DDF_FIELD("PC_SPEAKER_SOUND", dummy_sfx, pc_speaker_sound_,
-                                                         DDF_MainGetString),
-                                               DDF_FIELD("SINGULAR", dummy_sfx, singularity_, DDF_MainGetNumeric),
-                                               DDF_FIELD("PRIORITY", dummy_sfx, priority_, DDF_MainGetNumeric),
-                                               DDF_FIELD("VOLUME", dummy_sfx, volume_, DDF_MainGetPercent),
-                                               DDF_FIELD("LOOP", dummy_sfx, looping_, DDF_MainGetBoolean),
-                                               DDF_FIELD("PRECIOUS", dummy_sfx, precious_, DDF_MainGetBoolean),
-                                               DDF_FIELD("MAX_DISTANCE", dummy_sfx, max_distance_, DDF_MainGetFloat),
+static const DDFCommandList sfx_commands[] = {
+    DDF_FIELD("LUMP_NAME", dummy_sfx, lump_name_, DDF_MainGetLumpName),
+    DDF_FIELD("PACK_NAME", dummy_sfx, pack_name_, DDF_MainGetString),
+    DDF_FIELD("FILE_NAME", dummy_sfx, file_name_, DDF_MainGetString),
+    DDF_FIELD("PC_SPEAKER_LUMP", dummy_sfx, pc_speaker_sound_,
+              DDF_MainGetString), // Kept for backwards compat
+    DDF_FIELD("PC_SPEAKER_SOUND", dummy_sfx, pc_speaker_sound_, DDF_MainGetString),
+    DDF_FIELD("SINGULAR", dummy_sfx, singularity_, DDF_MainGetNumeric),
+    DDF_FIELD("PRIORITY", dummy_sfx, priority_, DDF_MainGetNumeric),
+    DDF_FIELD("VOLUME", dummy_sfx, volume_, DDF_MainGetPercent),
+    DDF_FIELD("LOOP", dummy_sfx, looping_, DDF_MainGetBoolean),
+    DDF_FIELD("PRECIOUS", dummy_sfx, precious_, DDF_MainGetBoolean),
+    DDF_FIELD("MAX_DISTANCE", dummy_sfx, max_distance_, DDF_MainGetFloat),
 
-                                               { nullptr, nullptr, 0, nullptr } };
+    {nullptr, nullptr, 0, nullptr}};
 
 //
 //  DDF PARSE ROUTINES

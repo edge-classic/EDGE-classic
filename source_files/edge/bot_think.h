@@ -127,7 +127,7 @@ class DeathBot
     // main_goal is final target.  travel_time detects losing the path.
     // path_wait is when we need a path, but are waiting a bit.
     BotPath *path_ = nullptr;
-    Position roam_goal_{ 0, 0, 0 };
+    Position roam_goal_{0, 0, 0};
     int      travel_time_ = 0;
     int      path_wait_   = 0;
 

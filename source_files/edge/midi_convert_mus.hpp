@@ -75,7 +75,7 @@ enum MusEvent
 
 static constexpr uint8_t kMusMidiMaxChannels = 16;
 
-static constexpr char kMusHeader[] = { 'M', 'U', 'S', 0x1A };
+static constexpr char kMusHeader[] = {'M', 'U', 'S', 0x1A};
 
 static constexpr uint8_t kMusToMidiMap[] = {
     /* MIDI  Number  Description */

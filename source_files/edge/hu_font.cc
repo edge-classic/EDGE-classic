@@ -48,8 +48,8 @@ FontContainer hud_fonts;
 
 int current_font_size;
 
-static constexpr int truetype_scaling_font_sizes[3]   = { 12, 24, 48 };
-static constexpr int truetype_scaling_bitmap_sizes[3] = { 512, 1024, 2048 };
+static constexpr int truetype_scaling_font_sizes[3]   = {12, 24, 48};
+static constexpr int truetype_scaling_bitmap_sizes[3] = {512, 1024, 2048};
 
 Font::Font(FontDefinition *definition) : definition_(definition)
 {

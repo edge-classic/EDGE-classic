@@ -289,7 +289,7 @@ class MidiSequencer
         //! Was track began playing
         bool began = false;
         //! Reserved
-        char padding[7] = { 0, 0, 0, 0, 0, 0, 0 };
+        char padding[7] = {0, 0, 0, 0, 0, 0, 0};
         //! Waiting time before next event in seconds
         double wait = 0.0;
         //! Absolute time position on the track in seconds

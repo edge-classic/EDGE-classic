@@ -41,7 +41,7 @@
 
 static constexpr uint8_t kMaximumConsoleArguments = 64;
 
-static std::string readme_names[4] = { "readme.txt", "readme.1st", "read.me", "readme.md" };
+static std::string readme_names[4] = {"readme.txt", "readme.1st", "read.me", "readme.md"};
 
 struct ConsoleCommand
 {
@@ -538,36 +538,36 @@ static void KillArgs(char **argv, int argc)
 //
 // Current console commands:
 //
-const ConsoleCommand builtin_commands[] = { { "args", ConsoleCommandArgList },
-                                            { "cat", ConsoleCommandType },
-                                            { "cls", ConsoleCommandClear },
-                                            { "clear", ConsoleCommandClear },
-                                            { "crc", ConsoleCommandCrc },
-                                            { "dir", ConsoleCommandDir },
-                                            { "ls", ConsoleCommandDir },
-                                            { "endoom", ConsoleCommandEndoom },
-                                            { "exec", ConsoleCommandExec },
-                                            { "help", ConsoleCommandHelp },
-                                            { "map", ConsoleCommandMap },
-                                            { "warp", ConsoleCommandMap }, // compatibility
-                                            { "playsound", ConsoleCommandPlaySound },
-                                            { "readme", ConsoleCommandReadme },
-                                            { "openhome", ConsoleCommandOpenHome },
-                                            { "resetvars", ConsoleCommandResetVars },
-                                            { "showfiles", ConsoleCommandShowFiles },
-                                            { "showgamepads", ConsoleCommandShowGamepads },
-                                            { "showlumps", ConsoleCommandShowLumps },
-                                            { "showcmds", ConsoleCommandShowCmds },
-                                            { "showmaps", ConsoleCommandShowMaps },
-                                            { "showvars", ConsoleCommandShowVars },
-                                            { "screenshot", ConsoleCommandScreenShot },
-                                            { "type", ConsoleCommandType },
-                                            { "version", ConsoleCommandVersion },
-                                            { "quit", ConsoleCommandQuitEDGE },
-                                            { "exit", ConsoleCommandQuitEDGE },
+const ConsoleCommand builtin_commands[] = {{"args", ConsoleCommandArgList},
+                                           {"cat", ConsoleCommandType},
+                                           {"cls", ConsoleCommandClear},
+                                           {"clear", ConsoleCommandClear},
+                                           {"crc", ConsoleCommandCrc},
+                                           {"dir", ConsoleCommandDir},
+                                           {"ls", ConsoleCommandDir},
+                                           {"endoom", ConsoleCommandEndoom},
+                                           {"exec", ConsoleCommandExec},
+                                           {"help", ConsoleCommandHelp},
+                                           {"map", ConsoleCommandMap},
+                                           {"warp", ConsoleCommandMap}, // compatibility
+                                           {"playsound", ConsoleCommandPlaySound},
+                                           {"readme", ConsoleCommandReadme},
+                                           {"openhome", ConsoleCommandOpenHome},
+                                           {"resetvars", ConsoleCommandResetVars},
+                                           {"showfiles", ConsoleCommandShowFiles},
+                                           {"showgamepads", ConsoleCommandShowGamepads},
+                                           {"showlumps", ConsoleCommandShowLumps},
+                                           {"showcmds", ConsoleCommandShowCmds},
+                                           {"showmaps", ConsoleCommandShowMaps},
+                                           {"showvars", ConsoleCommandShowVars},
+                                           {"screenshot", ConsoleCommandScreenShot},
+                                           {"type", ConsoleCommandType},
+                                           {"version", ConsoleCommandVersion},
+                                           {"quit", ConsoleCommandQuitEDGE},
+                                           {"exit", ConsoleCommandQuitEDGE},
 
-                                            // end of list
-                                            { nullptr, nullptr } };
+                                           // end of list
+                                           {nullptr, nullptr}};
 
 static int FindCommand(const char *name)
 {

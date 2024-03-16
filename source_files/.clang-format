@@ -6,5 +6,4 @@ AlignConsecutiveMacros: Consecutive
 AlignTrailingComments:
   Kind: Always
   OverEmptyLines: 2
-Cpp11BracedListStyle: false
 SortIncludes: true

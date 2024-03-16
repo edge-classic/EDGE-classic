@@ -60,8 +60,7 @@ static const DDFCommandList gamedef_commands[] = {
     DDF_FIELD("DESCRIPTION", dummy_gamedef, description_, DDF_MainGetString),
     DDF_FIELD("NO_SKILL_MENU", dummy_gamedef, no_skill_menu_, DDF_MainGetBoolean),
 
-    { nullptr, nullptr, 0, nullptr }
-};
+    {nullptr, nullptr, 0, nullptr}};
 
 //
 //  DDF PARSE ROUTINES
@@ -286,11 +285,11 @@ static void DDF_GameGetPic(const char *info, void *storage)
     dynamic_gamedef->titlepics_.push_back(info);
 }
 
-static DDFSpecialFlags lighting_names[] = { { "DOOM", kLightingModelDoom, 0 },
-                                            { "DOOMISH", kLightingModelDoomish, 0 },
-                                            { "FLAT", kLightingModelFlat, 0 },
-                                            { "VERTEX", kLightingModelVertex, 0 },
-                                            { nullptr, 0, 0 } };
+static DDFSpecialFlags lighting_names[] = {{"DOOM", kLightingModelDoom, 0},
+                                           {"DOOMISH", kLightingModelDoomish, 0},
+                                           {"FLAT", kLightingModelFlat, 0},
+                                           {"VERTEX", kLightingModelVertex, 0},
+                                           {nullptr, 0, 0}};
 
 void DDF_GameGetLighting(const char *info, void *storage)
 {

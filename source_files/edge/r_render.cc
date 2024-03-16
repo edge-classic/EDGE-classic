@@ -98,17 +98,17 @@ MapObject *view_camera_map_object;
 
 float widescreen_view_width_multiplier;
 
-static int check_coordinates[12][4] = { { kBoundingBoxRight, kBoundingBoxTop, kBoundingBoxLeft, kBoundingBoxBottom },
-                                        { kBoundingBoxRight, kBoundingBoxTop, kBoundingBoxLeft, kBoundingBoxTop },
-                                        { kBoundingBoxRight, kBoundingBoxBottom, kBoundingBoxLeft, kBoundingBoxTop },
-                                        { 0 },
-                                        { kBoundingBoxLeft, kBoundingBoxTop, kBoundingBoxLeft, kBoundingBoxBottom },
-                                        { 0 },
-                                        { kBoundingBoxRight, kBoundingBoxBottom, kBoundingBoxRight, kBoundingBoxTop },
-                                        { 0 },
-                                        { kBoundingBoxLeft, kBoundingBoxTop, kBoundingBoxRight, kBoundingBoxBottom },
-                                        { kBoundingBoxLeft, kBoundingBoxBottom, kBoundingBoxRight, kBoundingBoxBottom },
-                                        { kBoundingBoxLeft, kBoundingBoxBottom, kBoundingBoxRight, kBoundingBoxTop } };
+static int check_coordinates[12][4] = {{kBoundingBoxRight, kBoundingBoxTop, kBoundingBoxLeft, kBoundingBoxBottom},
+                                       {kBoundingBoxRight, kBoundingBoxTop, kBoundingBoxLeft, kBoundingBoxTop},
+                                       {kBoundingBoxRight, kBoundingBoxBottom, kBoundingBoxLeft, kBoundingBoxTop},
+                                       {0},
+                                       {kBoundingBoxLeft, kBoundingBoxTop, kBoundingBoxLeft, kBoundingBoxBottom},
+                                       {0},
+                                       {kBoundingBoxRight, kBoundingBoxBottom, kBoundingBoxRight, kBoundingBoxTop},
+                                       {0},
+                                       {kBoundingBoxLeft, kBoundingBoxTop, kBoundingBoxRight, kBoundingBoxBottom},
+                                       {kBoundingBoxLeft, kBoundingBoxBottom, kBoundingBoxRight, kBoundingBoxBottom},
+                                       {kBoundingBoxLeft, kBoundingBoxBottom, kBoundingBoxRight, kBoundingBoxTop}};
 
 extern float sprite_skew;
 
@@ -139,9 +139,9 @@ static inline void ClipPlaneEyeAngle(GLdouble *p, BAMAngle ang)
 {
     HMM_Vec2 s, e;
 
-    s = { { view_x, view_y } };
+    s = {{view_x, view_y}};
 
-    e = { { view_x + epi::BAMCos(ang), view_y + epi::BAMSin(ang) } };
+    e = {{view_x + epi::BAMCos(ang), view_y + epi::BAMSin(ang)}};
 
     ClipPlaneHorizontalLine(p, s, e);
 }
@@ -395,8 +395,8 @@ static void MirrorSetClippers()
 
         HMM_Vec2 v1, v2;
 
-        v1 = { { mir.draw_mirror_->seg->vertex_1->X, mir.draw_mirror_->seg->vertex_1->Y } };
-        v2 = { { mir.draw_mirror_->seg->vertex_2->X, mir.draw_mirror_->seg->vertex_2->Y } };
+        v1 = {{mir.draw_mirror_->seg->vertex_1->X, mir.draw_mirror_->seg->vertex_1->Y}};
+        v2 = {{mir.draw_mirror_->seg->vertex_2->X, mir.draw_mirror_->seg->vertex_2->Y}};
 
         for (int k = i - 1; k >= 0; k--)
         {
@@ -655,7 +655,7 @@ static void PlaneCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Ve
         rgb[2] = data->B;
     }
 
-    HMM_Vec2 rxy = { { (data->tx0 + pos->X), (data->ty0 + pos->Y) } };
+    HMM_Vec2 rxy = {{(data->tx0 + pos->X), (data->ty0 + pos->Y)}};
 
     if (data->rotation)
         rxy = HMM_RotateV2(rxy, epi::RadiansFromBAM(data->rotation));
@@ -979,7 +979,7 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
     data.ty_mul = ty_mul;
 
     // TODO: make a unit vector
-    data.normal = { { (y2 - y1), (x1 - x2), 0 } };
+    data.normal = {{(y2 - y1), (x1 - x2), 0}};
 
     data.tex_id     = tex_id;
     data.pass       = 0;
@@ -1731,8 +1731,8 @@ static void DLIT_Flood(MapObject *mo, void *dataptr)
             float x = sx + dx * col / (float)data->piece_col;
             float y = sy + dy * col / (float)data->piece_col;
 
-            data->vertices[col * 2 + 0] = { { x, y, z } };
-            data->vertices[col * 2 + 1] = { { x, y, z + data->dh / data->piece_row } };
+            data->vertices[col * 2 + 0] = {{x, y, z}};
+            data->vertices[col * 2 + 1] = {{x, y, z + data->dh / data->piece_row}};
         }
 
         mo->dynamic_light_.shader->WorldMix(GL_QUAD_STRIP, data->v_count, data->tex_id, 1.0, &data->pass, blending,
@@ -1787,7 +1787,7 @@ static void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref, 
     data.x_mat = surf->x_matrix;
     data.y_mat = surf->y_matrix;
 
-    data.normal = { { 0, 0, (float)face_dir } };
+    data.normal = {{0, 0, (float)face_dir}};
 
     // determine number of pieces to subdivide the area into.
     // The more the better, upto a limit of 64 pieces, and
@@ -1846,8 +1846,8 @@ static void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref, 
             float x = sx + dx * col / (float)piece_col;
             float y = sy + dy * col / (float)piece_col;
 
-            data.vertices[col * 2 + 0] = { { x, y, z } };
-            data.vertices[col * 2 + 1] = { { x, y, z + dh / piece_row } };
+            data.vertices[col * 2 + 0] = {{x, y, z}};
+            data.vertices[col * 2 + 1] = {{x, y, z + dh / piece_row}};
         }
 
         cmap_shader->WorldMix(GL_QUAD_STRIP, data.v_count, data.tex_id, 1.0, &data.pass, kBlendingNone, false, &data,
@@ -2304,16 +2304,16 @@ bool RendererCheckBBox(float *bspcoord)
         if (draw_culling.d_)
         {
             float closest = 1000000.0f;
-            float check   = MathPointToSegDistance({ { x1, y1 } }, { { x2, y1 } }, { { view_x, view_y } });
+            float check   = MathPointToSegDistance({{x1, y1}}, {{x2, y1}}, {{view_x, view_y}});
             if (check < closest)
                 closest = check;
-            check = MathPointToSegDistance({ { x1, y1 } }, { { x1, y2 } }, { { view_x, view_y } });
+            check = MathPointToSegDistance({{x1, y1}}, {{x1, y2}}, {{view_x, view_y}});
             if (check < closest)
                 closest = check;
-            check = MathPointToSegDistance({ { x2, y1 } }, { { x2, y2 } }, { { view_x, view_y } });
+            check = MathPointToSegDistance({{x2, y1}}, {{x2, y2}}, {{view_x, view_y}});
             if (check < closest)
                 closest = check;
-            check = MathPointToSegDistance({ { x1, y2 } }, { { x2, y2 } }, { { view_x, view_y } });
+            check = MathPointToSegDistance({{x1, y2}}, {{x2, y2}}, {{view_x, view_y}});
             if (check < closest)
                 closest = check;
 
@@ -2482,7 +2482,7 @@ static void RendererDrawPlane(DrawFloor *dfloor, float h, MapSurface *surf, int 
     data.x_mat.Y /= mir_scale;
     data.y_mat.X /= mir_scale;
     data.y_mat.Y /= mir_scale;
-    data.normal   = { { 0, 0, (view_z > h) ? 1.0f : -1.0f } };
+    data.normal   = {{0, 0, (view_z > h) ? 1.0f : -1.0f}};
     data.tex_id   = tex_id;
     data.pass     = 0;
     data.blending = blending;
@@ -2744,7 +2744,7 @@ static void RendererWalkSubsector(int num)
             float sx2 = seg->vertex_2->X;
             float sy2 = seg->vertex_2->Y;
 
-            if (MathPointToSegDistance({ { sx1, sy1 } }, { { sx2, sy2 } }, { { view_x, view_y } }) <=
+            if (MathPointToSegDistance({{sx1, sy1}}, {{sx2, sy2}}, {{view_x, view_y}}) <=
                 (renderer_far_clip.f_ + 500.0f))
             {
                 skip = false;

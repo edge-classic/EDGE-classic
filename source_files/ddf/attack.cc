@@ -61,8 +61,7 @@ const DDFCommandList damage_commands[] = {
     DDF_FIELD("DEATH_STATE", dummy_damage, death_, DDF_AtkGetLabel),
     DDF_FIELD("OVERKILL_STATE", dummy_damage, overkill_, DDF_AtkGetLabel),
 
-    { nullptr, nullptr, 0, nullptr }
-};
+    {nullptr, nullptr, 0, nullptr}};
 
 // -KM- 1998/09/27 Major changes to sound handling
 // -KM- 1998/11/25 Accuracy + Translucency are now fraction.  Added a spare
@@ -109,8 +108,7 @@ static const DDFCommandList attack_commands[] = {
     // -AJA- backward compatibility cruft...
     DDF_FIELD("DAMAGE", dummy_atk, damage_.nominal_, DDF_MainGetFloat),
 
-    { nullptr, nullptr, 0, nullptr }
-};
+    {nullptr, nullptr, 0, nullptr}};
 
 static MapObjectDefinition *CreateAtkMobj(const char *atk_name)
 {
@@ -378,26 +376,26 @@ void DDF_AttackCleanUp(void)
     atkdefs.shrink_to_fit();
 }
 
-static const DDFSpecialFlags attack_specials[] = { { "SMOKING_TRACER", kAttackFlagSmokingTracer, 0 },
-                                                   { "KILL_FAILED_SPAWN", kAttackFlagKillFailedSpawn, 0 },
-                                                   { "REMOVE_FAILED_SPAWN", kAttackFlagKillFailedSpawn, 1 },
-                                                   { "PRESTEP_SPAWN", kAttackFlagPrestepSpawn, 0 },
-                                                   { "SPAWN_TELEFRAGS", kAttackFlagSpawnTelefrags, 0 },
-                                                   { "NEED_SIGHT", kAttackFlagNeedSight, 0 },
-                                                   { "FACE_TARGET", kAttackFlagFaceTarget, 0 },
+static const DDFSpecialFlags attack_specials[] = {{"SMOKING_TRACER", kAttackFlagSmokingTracer, 0},
+                                                  {"KILL_FAILED_SPAWN", kAttackFlagKillFailedSpawn, 0},
+                                                  {"REMOVE_FAILED_SPAWN", kAttackFlagKillFailedSpawn, 1},
+                                                  {"PRESTEP_SPAWN", kAttackFlagPrestepSpawn, 0},
+                                                  {"SPAWN_TELEFRAGS", kAttackFlagSpawnTelefrags, 0},
+                                                  {"NEED_SIGHT", kAttackFlagNeedSight, 0},
+                                                  {"FACE_TARGET", kAttackFlagFaceTarget, 0},
 
-                                                   { "FORCE_AIM", kAttackFlagForceAim, 0 },
-                                                   { "ANGLED_SPAWN", kAttackFlagAngledSpawn, 0 },
-                                                   { "PLAYER_ATTACK", kAttackFlagPlayer, 0 },
-                                                   { "TRIGGER_LINES", kAttackFlagNoTriggerLines, 1 },
-                                                   { "SILENT_TO_MONSTERS", kAttackFlagSilentToMonsters, 0 },
-                                                   { "TARGET", kAttackFlagNoTarget, 1 },
-                                                   { "VAMPIRE", kAttackFlagVampire, 0 },
+                                                  {"FORCE_AIM", kAttackFlagForceAim, 0},
+                                                  {"ANGLED_SPAWN", kAttackFlagAngledSpawn, 0},
+                                                  {"PLAYER_ATTACK", kAttackFlagPlayer, 0},
+                                                  {"TRIGGER_LINES", kAttackFlagNoTriggerLines, 1},
+                                                  {"SILENT_TO_MONSTERS", kAttackFlagSilentToMonsters, 0},
+                                                  {"TARGET", kAttackFlagNoTarget, 1},
+                                                  {"VAMPIRE", kAttackFlagVampire, 0},
 
-                                                   // -AJA- backwards compatibility cruft...
-                                                   { "NOAMMO", kAttackFlagNone, 0 },
+                                                  // -AJA- backwards compatibility cruft...
+                                                  {"NOAMMO", kAttackFlagNone, 0},
 
-                                                   { nullptr, kAttackFlagNone, 0 } };
+                                                  {nullptr, kAttackFlagNone, 0}};
 
 static void DDF_AtkGetSpecial(const char *info, void *storage)
 {
@@ -423,12 +421,11 @@ static void DDF_AtkGetSpecial(const char *info, void *storage)
 }
 
 // -KM- 1998/11/25 Added new attack type for BFG: Spray
-static const char *attack_class[kTotalAttackStyles] = { "NONE",           "PROJECTILE",     "SPAWNER",
-                                                        "DOUBLE_SPAWNER", // Lobo 2021: doom64 pain elemental
-                                                        "TRIPLE_SPAWNER", "FIXED_SPREADER", "RANDOM_SPREADER",
-                                                        "SHOT",           "TRACKER",        "CLOSECOMBAT",
-                                                        "SHOOTTOSPOT",    "SKULLFLY",       "SMARTPROJECTILE",
-                                                        "SPRAY",          "DUALATTACK",     "PSYCHIC" };
+static const char *attack_class[kTotalAttackStyles] = {
+    "NONE",           "PROJECTILE",     "SPAWNER",
+    "DOUBLE_SPAWNER", // Lobo 2021: doom64 pain elemental
+    "TRIPLE_SPAWNER", "FIXED_SPREADER", "RANDOM_SPREADER", "SHOT",  "TRACKER",    "CLOSECOMBAT",
+    "SHOOTTOSPOT",    "SKULLFLY",       "SMARTPROJECTILE", "SPRAY", "DUALATTACK", "PSYCHIC"};
 
 static void DDF_AtkGetType(const char *info, void *storage)
 {

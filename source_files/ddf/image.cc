@@ -54,8 +54,7 @@ static const DDFCommandList image_commands[] = {
     DDF_FIELD("BRIGHTNESS", dummy_image, hsv_value_, DDF_MainGetNumeric),
     DDF_FIELD("BLUR_FACTOR", dummy_image, blur_factor_, DDF_MainGetFloat),
 
-    { nullptr, nullptr, 0, nullptr }
-};
+    {nullptr, nullptr, 0, nullptr}};
 
 ImageDefinitionContainer imagedefs;
 
@@ -324,12 +323,11 @@ static void DDF_ImageGetType(const char *info, void *storage)
 }
 
 static DDFSpecialFlags image_specials[] = {
-    { "NOALPHA", kImageSpecialNoAlpha, 0 },         { "FORCE_MIP", kImageSpecialMip, 0 },
-    { "FORCE_NOMIP", kImageSpecialNoMip, 0 },       { "FORCE_CLAMP", kImageSpecialClamp, 0 },
-    { "FORCE_SMOOTH", kImageSpecialSmooth, 0 },     { "FORCE_NOSMOOTH", kImageSpecialNoSmooth, 0 },
-    { "CROSSHAIR", kImageSpecialCrosshair, 0 },     { "GRAYSCALE", kImageSpecialGrayscale, 0 },
-    { "FORCE_PRECACHE", kImageSpecialPrecache, 0 }, { nullptr, 0, 0 }
-};
+    {"NOALPHA", kImageSpecialNoAlpha, 0},         {"FORCE_MIP", kImageSpecialMip, 0},
+    {"FORCE_NOMIP", kImageSpecialNoMip, 0},       {"FORCE_CLAMP", kImageSpecialClamp, 0},
+    {"FORCE_SMOOTH", kImageSpecialSmooth, 0},     {"FORCE_NOSMOOTH", kImageSpecialNoSmooth, 0},
+    {"CROSSHAIR", kImageSpecialCrosshair, 0},     {"GRAYSCALE", kImageSpecialGrayscale, 0},
+    {"FORCE_PRECACHE", kImageSpecialPrecache, 0}, {nullptr, 0, 0}};
 
 static void DDF_ImageGetSpecial(const char *info, void *storage)
 {

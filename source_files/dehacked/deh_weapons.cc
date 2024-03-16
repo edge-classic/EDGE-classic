@@ -55,18 +55,18 @@ static constexpr char kWeaponFlagNoThrust         = 't';
 static constexpr char kWeaponFlagFeedback         = 'b';
 
 WeaponInfo weapon_info[kTotalWeapons] = {
-    { "FIST", kAmmoTypeNoAmmo, 0, 1, 0, "f", kS_PUNCHUP, kS_PUNCHDOWN, kS_PUNCH, kS_PUNCH1, kS_NULL, 0 },
-    { "PISTOL", kAmmoTypeBullet, 1, 2, 2, "fr", kS_PISTOLUP, kS_PISTOLDOWN, kS_PISTOL, kS_PISTOL1, kS_PISTOLFLASH, 0 },
-    { "SHOTGUN", kAmmoTypeShell, 1, 3, 3, nullptr, kS_SGUNUP, kS_SGUNDOWN, kS_SGUN, kS_SGUN1, kS_SGUNFLASH1, 0 },
-    { "CHAINGUN", kAmmoTypeBullet, 1, 4, 5, "r", kS_CHAINUP, kS_CHAINDOWN, kS_CHAIN, kS_CHAIN1, kS_CHAINFLASH1, 0 },
-    { "ROCKET_LAUNCHER", kAmmoTypeRocket, 1, 5, 6, "d", kS_MISSILEUP, kS_MISSILEDOWN, kS_MISSILE, kS_MISSILE1,
-      kS_MISSILEFLASH1, 0 },
-    { "PLASMA_RIFLE", kAmmoTypeCell, 1, 6, 7, nullptr, kS_PLASMAUP, kS_PLASMADOWN, kS_PLASMA, kS_PLASMA1,
-      kS_PLASMAFLASH1, 0 },
-    { "BFG_9000", kAmmoTypeCell, 40, 7, 8, "d", kS_BFGUP, kS_BFGDOWN, kS_BFG, kS_BFG1, kS_BFGFLASH1, 0 },
-    { "CHAINSAW", kAmmoTypeNoAmmo, 0, 1, 1, "bt", kS_SAWUP, kS_SAWDOWN, kS_SAW, kS_SAW1, kS_NULL, 0 },
-    { "SUPER_SHOTGUN", kAmmoTypeShell, 2, 3, 4, nullptr, kS_DSGUNUP, kS_DSGUNDOWN, kS_DSGUN, kS_DSGUN1, kS_DSGUNFLASH1,
-      0 },
+    {"FIST", kAmmoTypeNoAmmo, 0, 1, 0, "f", kS_PUNCHUP, kS_PUNCHDOWN, kS_PUNCH, kS_PUNCH1, kS_NULL, 0},
+    {"PISTOL", kAmmoTypeBullet, 1, 2, 2, "fr", kS_PISTOLUP, kS_PISTOLDOWN, kS_PISTOL, kS_PISTOL1, kS_PISTOLFLASH, 0},
+    {"SHOTGUN", kAmmoTypeShell, 1, 3, 3, nullptr, kS_SGUNUP, kS_SGUNDOWN, kS_SGUN, kS_SGUN1, kS_SGUNFLASH1, 0},
+    {"CHAINGUN", kAmmoTypeBullet, 1, 4, 5, "r", kS_CHAINUP, kS_CHAINDOWN, kS_CHAIN, kS_CHAIN1, kS_CHAINFLASH1, 0},
+    {"ROCKET_LAUNCHER", kAmmoTypeRocket, 1, 5, 6, "d", kS_MISSILEUP, kS_MISSILEDOWN, kS_MISSILE, kS_MISSILE1,
+     kS_MISSILEFLASH1, 0},
+    {"PLASMA_RIFLE", kAmmoTypeCell, 1, 6, 7, nullptr, kS_PLASMAUP, kS_PLASMADOWN, kS_PLASMA, kS_PLASMA1,
+     kS_PLASMAFLASH1, 0},
+    {"BFG_9000", kAmmoTypeCell, 40, 7, 8, "d", kS_BFGUP, kS_BFGDOWN, kS_BFG, kS_BFG1, kS_BFGFLASH1, 0},
+    {"CHAINSAW", kAmmoTypeNoAmmo, 0, 1, 1, "bt", kS_SAWUP, kS_SAWDOWN, kS_SAW, kS_SAW1, kS_NULL, 0},
+    {"SUPER_SHOTGUN", kAmmoTypeShell, 2, 3, 4, nullptr, kS_DSGUNUP, kS_DSGUNDOWN, kS_DSGUN, kS_DSGUN1, kS_DSGUNFLASH1,
+     0},
 };
 
 bool weapon_modified[kTotalWeapons];
@@ -93,29 +93,29 @@ struct FlagName
 };
 
 const FieldReference weapon_field[] = {
-    { "Ammo type", offsetof(WeaponInfo, ammo), kFieldTypeAmmoNumber },
-    { "Ammo per shot", offsetof(WeaponInfo, ammo_per_shot), kFieldTypeZeroOrGreater },
+    {"Ammo type", offsetof(WeaponInfo, ammo), kFieldTypeAmmoNumber},
+    {"Ammo per shot", offsetof(WeaponInfo, ammo_per_shot), kFieldTypeZeroOrGreater},
 
     // -AJA- these first two fields have misleading dehacked names
-    { "Deselect frame", offsetof(WeaponInfo, upstate), kFieldTypeFrameNumber },
-    { "Select frame", offsetof(WeaponInfo, downstate), kFieldTypeFrameNumber },
-    { "Bobbing frame", offsetof(WeaponInfo, readystate), kFieldTypeFrameNumber },
-    { "Shooting frame", offsetof(WeaponInfo, atkstate), kFieldTypeFrameNumber },
-    { "Firing frame", offsetof(WeaponInfo, flashstate), kFieldTypeFrameNumber },
-    { "MBF21 Bits", offsetof(WeaponInfo, mbf21_flags), kFieldTypeBitflags },
+    {"Deselect frame", offsetof(WeaponInfo, upstate), kFieldTypeFrameNumber},
+    {"Select frame", offsetof(WeaponInfo, downstate), kFieldTypeFrameNumber},
+    {"Bobbing frame", offsetof(WeaponInfo, readystate), kFieldTypeFrameNumber},
+    {"Shooting frame", offsetof(WeaponInfo, atkstate), kFieldTypeFrameNumber},
+    {"Firing frame", offsetof(WeaponInfo, flashstate), kFieldTypeFrameNumber},
+    {"MBF21 Bits", offsetof(WeaponInfo, mbf21_flags), kFieldTypeBitflags},
 
-    { nullptr, 0, kFieldTypeAny } // End sentinel
+    {nullptr, 0, kFieldTypeAny} // End sentinel
 };
 
 const FlagName mbf21flagnamelist[] = {
-    { kMBF21_NOTHRUST, "NOTHRUST", nullptr },
-    { kMBF21_SILENT, "SILENT_TO_MONSTERS", "SILENT" },
-    { kMBF21_NOAUTOFIRE, "NOAUTOFIRE", nullptr },
-    { kMBF21_FLEEMELEE, "FLEEMELEE", nullptr },
-    { kMBF21_AUTOSWITCHFROM, "SWITCH", "AUTOSWITCHFROM" },
-    { kMBF21_NOAUTOSWITCHTO, "DANGEROUS", "NOAUTOSWITCHTO" },
+    {kMBF21_NOTHRUST, "NOTHRUST", nullptr},
+    {kMBF21_SILENT, "SILENT_TO_MONSTERS", "SILENT"},
+    {kMBF21_NOAUTOFIRE, "NOAUTOFIRE", nullptr},
+    {kMBF21_FLEEMELEE, "FLEEMELEE", nullptr},
+    {kMBF21_AUTOSWITCHFROM, "SWITCH", "AUTOSWITCHFROM"},
+    {kMBF21_NOAUTOSWITCHTO, "DANGEROUS", "NOAUTOSWITCHTO"},
 
-    { 0, nullptr, nullptr } // End sentinel
+    {0, nullptr, nullptr} // End sentinel
 };
 } // namespace weapons
 

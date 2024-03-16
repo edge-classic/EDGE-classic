@@ -41,8 +41,7 @@ static const DDFCommandList switch_commands[] = {
     // -AJA- backwards compatibility cruft...
     DDF_FIELD("SOUND", dummy_switchdef, on_sfx_, DDF_MainLookupSound),
 
-    { nullptr, nullptr, 0, nullptr }
-};
+    {nullptr, nullptr, 0, nullptr}};
 
 //
 //  DDF PARSE ROUTINES

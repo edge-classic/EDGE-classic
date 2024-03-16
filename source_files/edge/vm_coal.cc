@@ -455,7 +455,7 @@ void CoalInitialize()
 
 void CoalAddScript(int type, std::string &data, const std::string &source)
 {
-    unread_scripts.push_back(PendingCoalScript{ type, "", source });
+    unread_scripts.push_back(PendingCoalScript{type, "", source});
 
     // transfer the caller's data
     unread_scripts.back().data.swap(data);

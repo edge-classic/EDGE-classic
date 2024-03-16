@@ -88,9 +88,15 @@ const char *predefined_names[] = {
 // false, then the name is added to the table and its new index is returned.
 int EName::NameManager::FindName(std::string_view text, bool no_create)
 {
-    if (!inited_) { InitBuckets(); }
+    if (!inited_)
+    {
+        InitBuckets();
+    }
 
-    if (text.empty()) { return 0; }
+    if (text.empty())
+    {
+        return 0;
+    }
 
     uint32_t hash     = StringHash32(text);
     uint32_t bucket   = hash % kHashSize;
@@ -101,8 +107,7 @@ int EName::NameManager::FindName(std::string_view text, bool no_create)
     while (scanner >= 0)
     {
         if (name_array_[scanner].hash == hash &&
-            StringCaseCompareMaxASCII(name_array_[scanner].text, text,
-                                      text_len) == 0 &&
+            StringCaseCompareMaxASCII(name_array_[scanner].text, text, text_len) == 0 &&
             name_array_[scanner].text[text_len] == '\0')
         {
             return scanner;
@@ -111,7 +116,10 @@ int EName::NameManager::FindName(std::string_view text, bool no_create)
     }
 
     // If we get here, then the name does not exist.
-    if (no_create) { return 0; }
+    if (no_create)
+    {
+        return 0;
+    }
 
     return AddName(text, text_len, hash, bucket);
 }
@@ -127,15 +135,13 @@ void EName::NameManager::InitBuckets()
     // Register built-in names. 'None' must be name 0.
     for (size_t i = 0; i < known_name_count_; ++i)
     {
-        EPI_ASSERT((0 == FindName(predefined_names[i], true)) &&
-                   "Predefined name already inserted");
+        EPI_ASSERT((0 == FindName(predefined_names[i], true)) && "Predefined name already inserted");
         FindName(predefined_names[i], false);
     }
 }
 
 // Adds a new name to the name table.
-int EName::NameManager::AddName(std::string_view text, size_t text_len,
-                                unsigned int hash, unsigned int bucket)
+int EName::NameManager::AddName(std::string_view text, size_t text_len, unsigned int hash, unsigned int bucket)
 {
     char      *textstore;
     NameBlock *block = blocks_;
@@ -159,11 +165,9 @@ int EName::NameManager::AddName(std::string_view text, size_t text_len,
     {
         // If no names have been defined yet, make the first allocation
         // large enough to hold all the predefined names.
-        max_names_ += max_names_ == 0 ? known_name_count_ + kNameGrowAmount
-                                      : kNameGrowAmount;
+        max_names_ += max_names_ == 0 ? known_name_count_ + kNameGrowAmount : kNameGrowAmount;
 
-        name_array_ =
-            (NameEntry *)realloc(name_array_, max_names_ * sizeof(NameEntry));
+        name_array_ = (NameEntry *)realloc(name_array_, max_names_ * sizeof(NameEntry));
     }
 
     name_array_[num_names_].text      = textstore;
@@ -181,7 +185,10 @@ EName::NameManager::NameBlock *EName::NameManager::AddBlock(size_t len)
     NameBlock *block;
 
     len += sizeof(NameBlock);
-    if (len < kBlockSize) { len = kBlockSize; }
+    if (len < kBlockSize)
+    {
+        len = kBlockSize;
+    }
     block             = (NameBlock *)malloc(len);
     block->next_alloc = sizeof(NameBlock);
     block->next_block = blocks_;
@@ -210,4 +217,4 @@ EName::NameManager::~NameManager()
     memset(buckets_, -1, sizeof(buckets_));
 }
 
-}  // namespace epi
+} // namespace epi

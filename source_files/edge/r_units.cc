@@ -277,8 +277,8 @@ void RendererDrawUnits(void)
 
     RenderState *state = RendererGetState();
 
-    GLuint active_tex[2] = { 0, 0 };
-    GLuint active_env[2] = { 0, 0 };
+    GLuint active_tex[2] = {0, 0};
+    GLuint active_env[2] = {0, 0};
 
     int active_pass     = 0;
     int active_blending = 0;
@@ -307,7 +307,7 @@ void RendererDrawUnits(void)
             fogColor = sg_silver;
             break;
         case 2:
-            fogColor = { 0.25f, 0.25f, 0.25f, 1.0f };
+            fogColor = {0.25f, 0.25f, 0.25f, 1.0f};
             break;
         case 3:
             fogColor = sg_black;

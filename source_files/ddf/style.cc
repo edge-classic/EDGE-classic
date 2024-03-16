@@ -33,27 +33,27 @@ StyleDefinitionContainer styledefs;
 
 static BackgroundStyle dummy_bgstyle;
 
-static const DDFCommandList background_commands[] = { DDF_FIELD("COLOUR", dummy_bgstyle, colour_, DDF_MainGetRGB),
-                                                      DDF_FIELD("TRANSLUCENCY", dummy_bgstyle, translucency_,
-                                                                DDF_MainGetPercent),
-                                                      DDF_FIELD("IMAGE", dummy_bgstyle, image_name_, DDF_MainGetString),
-                                                      DDF_FIELD("SCALE", dummy_bgstyle, scale_, DDF_MainGetFloat),
-                                                      DDF_FIELD("ASPECT", dummy_bgstyle, aspect_, DDF_MainGetFloat),
+static const DDFCommandList background_commands[] = {
+    DDF_FIELD("COLOUR", dummy_bgstyle, colour_, DDF_MainGetRGB),
+    DDF_FIELD("TRANSLUCENCY", dummy_bgstyle, translucency_, DDF_MainGetPercent),
+    DDF_FIELD("IMAGE", dummy_bgstyle, image_name_, DDF_MainGetString),
+    DDF_FIELD("SCALE", dummy_bgstyle, scale_, DDF_MainGetFloat),
+    DDF_FIELD("ASPECT", dummy_bgstyle, aspect_, DDF_MainGetFloat),
 
-                                                      { nullptr, nullptr, 0, nullptr } };
+    {nullptr, nullptr, 0, nullptr}};
 
 static TextStyle dummy_textstyle;
 
-static const DDFCommandList text_commands[] = { DDF_FIELD("COLOURMAP", dummy_textstyle, colmap_, DDF_MainGetColourmap),
-                                                DDF_FIELD("TRANSLUCENCY", dummy_textstyle, translucency_,
-                                                          DDF_MainGetPercent),
-                                                DDF_FIELD("FONT", dummy_textstyle, font_, DDF_MainLookupFont),
-                                                DDF_FIELD("SCALE", dummy_textstyle, scale_, DDF_MainGetFloat),
-                                                DDF_FIELD("ASPECT", dummy_textstyle, aspect_, DDF_MainGetFloat),
-                                                DDF_FIELD("X_OFFSET", dummy_textstyle, x_offset_, DDF_MainGetNumeric),
-                                                DDF_FIELD("Y_OFFSET", dummy_textstyle, y_offset_, DDF_MainGetNumeric),
+static const DDFCommandList text_commands[] = {
+    DDF_FIELD("COLOURMAP", dummy_textstyle, colmap_, DDF_MainGetColourmap),
+    DDF_FIELD("TRANSLUCENCY", dummy_textstyle, translucency_, DDF_MainGetPercent),
+    DDF_FIELD("FONT", dummy_textstyle, font_, DDF_MainLookupFont),
+    DDF_FIELD("SCALE", dummy_textstyle, scale_, DDF_MainGetFloat),
+    DDF_FIELD("ASPECT", dummy_textstyle, aspect_, DDF_MainGetFloat),
+    DDF_FIELD("X_OFFSET", dummy_textstyle, x_offset_, DDF_MainGetNumeric),
+    DDF_FIELD("Y_OFFSET", dummy_textstyle, y_offset_, DDF_MainGetNumeric),
 
-                                                { nullptr, nullptr, 0, nullptr } };
+    {nullptr, nullptr, 0, nullptr}};
 
 static CursorStyle dummy_cursorstyle;
 
@@ -66,20 +66,19 @@ static const DDFCommandList cursor_commands[] = {
     DDF_FIELD("SCALING", dummy_cursorstyle, scaling_, DDF_MainGetBoolean),
     DDF_FIELD("FORCE_OFFSETS", dummy_cursorstyle, force_offsets_, DDF_MainGetBoolean),
 
-    { nullptr, nullptr, 0, nullptr }
-};
+    {nullptr, nullptr, 0, nullptr}};
 
 static SoundStyle dummy_soundstyle;
 
-static const DDFCommandList sound_commands[] = { DDF_FIELD("BEGIN", dummy_soundstyle, begin_, DDF_MainLookupSound),
-                                                 DDF_FIELD("END", dummy_soundstyle, end_, DDF_MainLookupSound),
-                                                 DDF_FIELD("SELECT", dummy_soundstyle, select_, DDF_MainLookupSound),
-                                                 DDF_FIELD("BACK", dummy_soundstyle, back_, DDF_MainLookupSound),
-                                                 DDF_FIELD("ERROR", dummy_soundstyle, error_, DDF_MainLookupSound),
-                                                 DDF_FIELD("MOVE", dummy_soundstyle, move_, DDF_MainLookupSound),
-                                                 DDF_FIELD("SLIDER", dummy_soundstyle, slider_, DDF_MainLookupSound),
+static const DDFCommandList sound_commands[] = {DDF_FIELD("BEGIN", dummy_soundstyle, begin_, DDF_MainLookupSound),
+                                                DDF_FIELD("END", dummy_soundstyle, end_, DDF_MainLookupSound),
+                                                DDF_FIELD("SELECT", dummy_soundstyle, select_, DDF_MainLookupSound),
+                                                DDF_FIELD("BACK", dummy_soundstyle, back_, DDF_MainLookupSound),
+                                                DDF_FIELD("ERROR", dummy_soundstyle, error_, DDF_MainLookupSound),
+                                                DDF_FIELD("MOVE", dummy_soundstyle, move_, DDF_MainLookupSound),
+                                                DDF_FIELD("SLIDER", dummy_soundstyle, slider_, DDF_MainLookupSound),
 
-                                                 { nullptr, nullptr, 0, nullptr } };
+                                                {nullptr, nullptr, 0, nullptr}};
 
 static StyleDefinition *dynamic_style;
 
@@ -103,8 +102,7 @@ static const DDFCommandList style_commands[] = {
 
     DDF_FIELD("SPECIAL", dummy_style, special_, DDF_StyleGetSpecials),
 
-    { nullptr, nullptr, 0, nullptr }
-};
+    {nullptr, nullptr, 0, nullptr}};
 
 //
 //  DDF PARSE ROUTINES
@@ -227,10 +225,10 @@ void DDF_StyleCleanUp(void)
     styledefs.shrink_to_fit();
 }
 
-static DDFSpecialFlags style_specials[] = { { "TILED", kStyleSpecialTiled, 0 },
-                                            { "TILED_NOSCALE", kStyleSpecialTiledNoScale, 0 },
-                                            { "STRETCH_FULLSCREEN", kStyleSpecialStretchFullScreen, 0 },
-                                            { nullptr, 0, 0 } };
+static DDFSpecialFlags style_specials[] = {{"TILED", kStyleSpecialTiled, 0},
+                                           {"TILED_NOSCALE", kStyleSpecialTiledNoScale, 0},
+                                           {"STRETCH_FULLSCREEN", kStyleSpecialStretchFullScreen, 0},
+                                           {nullptr, 0, 0}};
 
 void DDF_StyleGetSpecials(const char *info, void *storage)
 {

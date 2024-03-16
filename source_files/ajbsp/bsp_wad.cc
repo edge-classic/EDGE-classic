@@ -1076,7 +1076,7 @@ bool WadFile::FinishLump(int final_size)
 
 int WadFile::WritePadding(int count)
 {
-    static uint8_t zeros[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+    static uint8_t zeros[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
     EPI_ASSERT(1 <= count && count <= 8);
 

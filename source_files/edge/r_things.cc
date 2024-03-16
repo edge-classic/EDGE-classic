@@ -247,15 +247,15 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player, Re
 
     PlayerSpriteCoordinateData data;
 
-    data.vertices[0] = { { x1b, y1b, 0 } };
-    data.vertices[1] = { { x1t, y1t, 0 } };
-    data.vertices[2] = { { x2t, y1t, 0 } };
-    data.vertices[3] = { { x2b, y2b, 0 } };
+    data.vertices[0] = {{x1b, y1b, 0}};
+    data.vertices[1] = {{x1t, y1t, 0}};
+    data.vertices[2] = {{x2t, y1t, 0}};
+    data.vertices[3] = {{x2b, y2b, 0}};
 
-    data.texture_coordinates[0] = { { tex_x1, tex_bot_h } };
-    data.texture_coordinates[1] = { { tex_x1, tex_top_h } };
-    data.texture_coordinates[2] = { { tex_x2, tex_top_h } };
-    data.texture_coordinates[3] = { { tex_x2, tex_bot_h } };
+    data.texture_coordinates[0] = {{tex_x1, tex_bot_h}};
+    data.texture_coordinates[1] = {{tex_x1, tex_top_h}};
+    data.texture_coordinates[2] = {{tex_x2, tex_top_h}};
+    data.texture_coordinates[3] = {{tex_x2, tex_bot_h}};
 
     float away = 120.0;
 
@@ -384,7 +384,7 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player, Re
             dest->position               = data.vertices[v_idx];
             dest->texture_coordinates[0] = data.texture_coordinates[v_idx];
 
-            dest->normal = { { 0, 0, 1 } };
+            dest->normal = {{0, 0, 1}};
 
             if (is_fuzzy)
             {
@@ -1180,17 +1180,17 @@ void RendererDrawThing(DrawFloor *dfloor, DrawThing *dthing)
 
     data.mo = mo;
 
-    data.vertices[0] = { { x1b + dx, y1b + dy, z1b } };
-    data.vertices[1] = { { x1t + dx, y1t + dy, z1t } };
-    data.vertices[2] = { { x2t + dx, y2t + dy, z2t } };
-    data.vertices[3] = { { x2b + dx, y2b + dy, z2b } };
+    data.vertices[0] = {{x1b + dx, y1b + dy, z1b}};
+    data.vertices[1] = {{x1t + dx, y1t + dy, z1t}};
+    data.vertices[2] = {{x2t + dx, y2t + dy, z2t}};
+    data.vertices[3] = {{x2b + dx, y2b + dy, z2b}};
 
-    data.texture_coordinates[0] = { { tex_x1, tex_y1 } };
-    data.texture_coordinates[1] = { { tex_x1, tex_y2 } };
-    data.texture_coordinates[2] = { { tex_x2, tex_y2 } };
-    data.texture_coordinates[3] = { { tex_x2, tex_y1 } };
+    data.texture_coordinates[0] = {{tex_x1, tex_y1}};
+    data.texture_coordinates[1] = {{tex_x1, tex_y2}};
+    data.texture_coordinates[2] = {{tex_x2, tex_y2}};
+    data.texture_coordinates[3] = {{tex_x2, tex_y1}};
 
-    data.normal = { { -view_cosine, -view_sine, 0 } };
+    data.normal = {{-view_cosine, -view_sine, 0}};
 
     data.colors[0].Clear();
     data.colors[1].Clear();
@@ -1211,7 +1211,7 @@ void RendererDrawThing(DrawFloor *dfloor, DrawThing *dthing)
     float    fuzz_mul = 0;
     HMM_Vec2 fuzz_add;
 
-    fuzz_add = { { 0, 0 } };
+    fuzz_add = {{0, 0}};
 
     if (is_fuzzy)
     {

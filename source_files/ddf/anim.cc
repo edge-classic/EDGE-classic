@@ -35,13 +35,13 @@ static void DDF_AnimGetPic(const char *info, void *storage);
 
 static AnimationDefinition dummy_anim;
 
-static const DDFCommandList anim_commands[] = { DDF_FIELD("TYPE", dummy_anim, type_, DDF_AnimGetType),
-                                                DDF_FIELD("SEQUENCE", dummy_anim, pics_, DDF_AnimGetPic),
-                                                DDF_FIELD("SPEED", dummy_anim, speed_, DDF_MainGetTime),
-                                                DDF_FIELD("FIRST", dummy_anim, start_name_, DDF_MainGetLumpName),
-                                                DDF_FIELD("LAST", dummy_anim, end_name_, DDF_MainGetLumpName),
+static const DDFCommandList anim_commands[] = {DDF_FIELD("TYPE", dummy_anim, type_, DDF_AnimGetType),
+                                               DDF_FIELD("SEQUENCE", dummy_anim, pics_, DDF_AnimGetPic),
+                                               DDF_FIELD("SPEED", dummy_anim, speed_, DDF_MainGetTime),
+                                               DDF_FIELD("FIRST", dummy_anim, start_name_, DDF_MainGetLumpName),
+                                               DDF_FIELD("LAST", dummy_anim, end_name_, DDF_MainGetLumpName),
 
-                                                { nullptr, nullptr, 0, nullptr } };
+                                               {nullptr, nullptr, 0, nullptr}};
 
 // Floor/ceiling animation sequences, defined by first and last frame,
 // i.e. the flat (64x64 tile) name or texture name to be used.

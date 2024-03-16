@@ -29,7 +29,7 @@ void LuaInit()
 
 void LuaAddScript(const std::string &data, const std::string &source)
 {
-    pending_scripts.push_back(pending_lua_script_c{ data, source });
+    pending_scripts.push_back(pending_lua_script_c{data, source});
 }
 
 void LuaLoadScripts()

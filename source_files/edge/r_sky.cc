@@ -200,9 +200,8 @@ struct FakeSkybox
 };
 
 static FakeSkybox fake_box[2] = {
-    { nullptr, nullptr, 1, { 0, 0, 0, 0, 0, 0 }, { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr } },
-    { nullptr, nullptr, 1, { 0, 0, 0, 0, 0, 0 }, { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr } }
-};
+    {nullptr, nullptr, 1, {0, 0, 0, 0, 0, 0}, {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}},
+    {nullptr, nullptr, 1, {0, 0, 0, 0, 0, 0}, {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}}};
 
 static void DeleteSkyTexGroup(int SK)
 {
@@ -309,7 +308,7 @@ static void BuildSkyCircle()
     float rot = 0;
     for (auto &pos : sky_circle)
     {
-        pos = { { HMM_SINF(rot), -HMM_COSF(rot) } };
+        pos = {{HMM_SINF(rot), -HMM_COSF(rot)}};
         rot -= (HMM_PI32 * 2) / 32.0;
     }
 }

@@ -930,72 +930,72 @@ static int HD_get_image_height(lua_State *L)
     return 1;
 }
 
-static const luaL_Reg hudlib[] = { { "game_mode", HD_game_mode },
-                                   { "game_name", HD_game_name },
-                                   { "game_skill", HD_game_skill },
-                                   { "map_name", HD_map_name },
-                                   { "map_title", HD_map_title },
-                                   { "map_author", HD_map_author },
+static const luaL_Reg hudlib[] = {{"game_mode", HD_game_mode},
+                                  {"game_name", HD_game_name},
+                                  {"game_skill", HD_game_skill},
+                                  {"map_name", HD_map_name},
+                                  {"map_title", HD_map_title},
+                                  {"map_author", HD_map_author},
 
-                                   { "which_hud", HD_which_hud },
-                                   { "check_automap", HD_check_automap },
-                                   { "get_time", HD_get_time },
+                                  {"which_hud", HD_which_hud},
+                                  {"check_automap", HD_check_automap},
+                                  {"get_time", HD_get_time},
 
-                                   // set-state functions
-                                   { "coord_sys", HD_coord_sys },
+                                  // set-state functions
+                                  {"coord_sys", HD_coord_sys},
 
-                                   { "text_font", HD_text_font },
-                                   { "text_color", HD_text_color },
-                                   { "set_scale", HD_set_scale },
-                                   { "set_alpha", HD_set_alpha },
+                                  {"text_font", HD_text_font},
+                                  {"text_color", HD_text_color},
+                                  {"set_scale", HD_set_scale},
+                                  {"set_alpha", HD_set_alpha},
 
-                                   { "set_render_who", HD_set_render_who },
-                                   { "automap_color", HD_automap_color },
-                                   { "automap_option", HD_automap_option },
-                                   { "automap_zoom", HD_automap_zoom },
-                                   { "automap_player_arrow", HD_automap_player_arrow },
+                                  {"set_render_who", HD_set_render_who},
+                                  {"automap_color", HD_automap_color},
+                                  {"automap_option", HD_automap_option},
+                                  {"automap_zoom", HD_automap_zoom},
+                                  {"automap_player_arrow", HD_automap_player_arrow},
 
-                                   // drawing functions
-                                   { "solid_box", HD_solid_box },
-                                   { "solid_line", HD_solid_line },
-                                   { "thin_box", HD_thin_box },
-                                   { "gradient_box", HD_gradient_box },
+                                  // drawing functions
+                                  {"solid_box", HD_solid_box},
+                                  {"solid_line", HD_solid_line},
+                                  {"thin_box", HD_thin_box},
+                                  {"gradient_box", HD_gradient_box},
 
-                                   { "draw_image", HD_draw_image },
-                                   { "stretch_image", HD_stretch_image },
-                                   { "scroll_image", HD_scroll_image },
+                                  {"draw_image", HD_draw_image},
+                                  {"stretch_image", HD_stretch_image},
+                                  {"scroll_image", HD_scroll_image},
 
-                                   { "tile_image", HD_tile_image },
-                                   { "draw_text", HD_draw_text },
-                                   { "draw_num2", HD_draw_num2 },
+                                  {"tile_image", HD_tile_image},
+                                  {"draw_text", HD_draw_text},
+                                  {"draw_num2", HD_draw_num2},
 
-                                   { "draw_number", HD_draw_number },
-                                   { "game_paused", HD_game_paused },
-                                   { "erraticism_active", HD_erraticism_active },
-                                   { "time_stop_active", HD_time_stop_active },
-                                   { "screen_aspect", HD_screen_aspect },
+                                  {"draw_number", HD_draw_number},
+                                  {"game_paused", HD_game_paused},
+                                  {"erraticism_active", HD_erraticism_active},
+                                  {"time_stop_active", HD_time_stop_active},
+                                  {"screen_aspect", HD_screen_aspect},
 
-                                   { "render_world", HD_render_world },
-                                   { "render_automap", HD_render_automap },
+                                  {"render_world", HD_render_world},
+                                  {"render_automap", HD_render_automap},
 
-                                   // sound functions
-                                   { "play_sound", HD_play_sound },
+                                  // sound functions
+                                  {"play_sound", HD_play_sound},
 
-                                   // image color functions
-                                   { "get_average_color", HD_get_average_color },
-                                   { "get_average_top_border_color", HD_get_average_top_border_color },
-                                   { "get_average_bottom_border_color", HD_get_average_bottom_border_color },
-                                   { "get_lightest_color", HD_get_lightest_color },
-                                   { "get_darkest_color", HD_get_darkest_color },
-                                   { "get_average_hue", HD_get_average_hue },
+                                  // image color functions
+                                  {"get_average_color", HD_get_average_color},
+                                  {"get_average_top_border_color", HD_get_average_top_border_color},
+                                  {"get_average_bottom_border_color", HD_get_average_bottom_border_color},
+                                  {"get_lightest_color", HD_get_lightest_color},
+                                  {"get_darkest_color", HD_get_darkest_color},
+                                  {"get_average_hue", HD_get_average_hue},
 
-                                   { "rts_enable", HD_rts_enable },
-                                   { "rts_disable", HD_rts_disable },
-                                   { "rts_isactive", HD_rts_isactive },
+                                  {"rts_enable", HD_rts_enable},
+                                  {"rts_disable", HD_rts_disable},
+                                  {"rts_isactive", HD_rts_isactive},
 
-                                   { "get_image_width", HD_get_image_width },
-                                   { "get_image_height", HD_get_image_height },
-                                   { nullptr, nullptr } };
+                                  {"get_image_width", HD_get_image_width},
+                                  {"get_image_height", HD_get_image_height},
+                                  {nullptr, nullptr}};
 
 static int luaopen_hud(lua_State *L)
 {

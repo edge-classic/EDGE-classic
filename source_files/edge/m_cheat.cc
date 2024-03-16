@@ -55,37 +55,37 @@ extern ConsoleVariable debug_fps;
 extern ConsoleVariable debug_position;
 
 static CheatSequence cheat_powerup[9] = {
-    { 0, 0 },
-    { 0, 0 },
-    { 0, 0 },
-    { 0, 0 },
-    { 0, 0 },
-    { 0, 0 },
-    { 0, 0 },
-    { 0, 0 }, // -MH- 1998/06/17  added "give jetpack"
-              // cheat
-    { 0, 0 }  // -ACB- 1998/07/15  added "give nightvision" cheat
+    {0, 0},
+    {0, 0},
+    {0, 0},
+    {0, 0},
+    {0, 0},
+    {0, 0},
+    {0, 0},
+    {0, 0}, // -MH- 1998/06/17  added "give jetpack"
+            // cheat
+    {0, 0}  // -ACB- 1998/07/15  added "give nightvision" cheat
 };
 
-static CheatSequence cheat_music           = { 0, 0 };
-static CheatSequence cheat_my_position     = { 0, 0 };
-static CheatSequence cheat_show_stats      = { 0, 0 };
-static CheatSequence cheat_choppers        = { 0, 0 };
-static CheatSequence cheat_change_level    = { 0, 0 };
-static CheatSequence cheat_kill_all        = { 0, 0 };
-static CheatSequence cheat_suicide         = { 0, 0 };
-static CheatSequence cheat_loaded          = { 0, 0 };
-static CheatSequence cheat_take_all        = { 0, 0 };
-static CheatSequence cheat_god             = { 0, 0 };
-static CheatSequence cheat_ammo            = { 0, 0 };
-static CheatSequence cheat_ammo_no_keys    = { 0, 0 };
-static CheatSequence cheat_keys            = { 0, 0 };
-static CheatSequence cheat_no_clipping     = { 0, 0 };
-static CheatSequence cheat_no_clipping2    = { 0, 0 };
-static CheatSequence cheat_hall_of_mirrors = { 0, 0 };
+static CheatSequence cheat_music           = {0, 0};
+static CheatSequence cheat_my_position     = {0, 0};
+static CheatSequence cheat_show_stats      = {0, 0};
+static CheatSequence cheat_choppers        = {0, 0};
+static CheatSequence cheat_change_level    = {0, 0};
+static CheatSequence cheat_kill_all        = {0, 0};
+static CheatSequence cheat_suicide         = {0, 0};
+static CheatSequence cheat_loaded          = {0, 0};
+static CheatSequence cheat_take_all        = {0, 0};
+static CheatSequence cheat_god             = {0, 0};
+static CheatSequence cheat_ammo            = {0, 0};
+static CheatSequence cheat_ammo_no_keys    = {0, 0};
+static CheatSequence cheat_keys            = {0, 0};
+static CheatSequence cheat_no_clipping     = {0, 0};
+static CheatSequence cheat_no_clipping2    = {0, 0};
+static CheatSequence cheat_hall_of_mirrors = {0, 0};
 
 static CheatSequence cheat_give_weapon[11] = {
-    { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
+    {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0},
 };
 
 //

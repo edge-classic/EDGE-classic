@@ -138,7 +138,7 @@ static void GetMusinfoTracksForLevel(void)
     if (musinfo_tracks.count(current_map->name_) && musinfo_tracks[current_map->name_].processed)
         return;
     int      raw_length  = 0;
-    uint8_t *raw_musinfo = OpenPackOrLumpInMemory("MUSINFO", { ".txt" }, &raw_length);
+    uint8_t *raw_musinfo = OpenPackOrLumpInMemory("MUSINFO", {".txt"}, &raw_length);
     if (!raw_musinfo)
         return;
     std::string musinfo;
@@ -147,7 +147,7 @@ static void GetMusinfoTracksForLevel(void)
     delete[] raw_musinfo;
     epi::Lexer lex(musinfo);
     if (!musinfo_tracks.count(current_map->name_))
-        musinfo_tracks.try_emplace({ current_map->name_, {} });
+        musinfo_tracks.try_emplace({current_map->name_, {}});
     for (;;)
     {
         std::string    section;
@@ -208,7 +208,7 @@ static void CheckEvilutionBug(uint8_t *data, int length)
     // the yellow keycard from appearing (the "Multiplayer Only" flag
     // is set), and the level cannot be completed.  This fixes it.
 
-    static const uint8_t Y_key_data[] = { 0x59, 0xf5, 0x48, 0xf8, 0, 0, 6, 0, 0x17, 0 };
+    static const uint8_t Y_key_data[] = {0x59, 0xf5, 0x48, 0xf8, 0, 0, 6, 0, 0x17, 0};
 
     static const int Y_key_offset = 0x125C;
 
@@ -230,11 +230,11 @@ static void CheckDoom2Map05Bug(uint8_t *data, int length)
     // The IWAD for Doom2 has a bug in MAP05 where 2 sectors
     // are incorrectly tagged 9.  This fixes it.
 
-    static const uint8_t sector_4_data[] = { 0x60, 0,    0xc8, 0,    0x46, 0x4c, 0x41, 0x54, 0x31, 0, 0, 0, 0x46,
-                                             0x4c, 0x41, 0x54, 0x31, 0x30, 0,    0,    0x70, 0,    0, 0, 9, 0 };
+    static const uint8_t sector_4_data[] = {0x60, 0,    0xc8, 0,    0x46, 0x4c, 0x41, 0x54, 0x31, 0, 0, 0, 0x46,
+                                            0x4c, 0x41, 0x54, 0x31, 0x30, 0,    0,    0x70, 0,    0, 0, 9, 0};
 
-    static const uint8_t sector_153_data[] = { 0x98, 0,    0xe8, 0,    0x46, 0x4c, 0x41, 0x54, 0x31, 0, 0, 0, 0x46,
-                                               0x4c, 0x41, 0x54, 0x31, 0x30, 0,    0,    0x70, 0,    9, 0, 9, 0 };
+    static const uint8_t sector_153_data[] = {0x98, 0,    0xe8, 0,    0x46, 0x4c, 0x41, 0x54, 0x31, 0, 0, 0, 0x46,
+                                              0x4c, 0x41, 0x54, 0x31, 0x30, 0,    0,    0x70, 0,    9, 0, 9, 0};
 
     static const int sector_4_offset   = 0x68; // 104
     static const int sector_153_offset = 3978; // 0xf8a; //3978
@@ -1414,7 +1414,7 @@ static void LoadUDMFVertexes()
                     break;
                 }
             }
-            level_vertexes[cur_vertex] = { { { { { x, y, zf } } }, zc } };
+            level_vertexes[cur_vertex] = {{{{{x, y, zf}}}, zc}};
             cur_vertex++;
         }
         else // consume other blocks
@@ -2940,8 +2940,8 @@ void GroupLines(void)
         // and the other two have it unset
         if (sector->line_count == 3 && udmf_level)
         {
-            sector->floor_vertex_slope_high_low   = { { -40000, 40000 } };
-            sector->ceiling_vertex_slope_high_low = { { -40000, 40000 } };
+            sector->floor_vertex_slope_high_low   = {{-40000, 40000}};
+            sector->ceiling_vertex_slope_high_low = {{-40000, 40000}};
             for (j = 0; j < 3; j++)
             {
                 Vertex *vert   = sector->lines[j]->vertex_1;
@@ -2954,25 +2954,25 @@ void GroupLines(void)
                     if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
                         sector->floor_vertex_slope = true;
-                        sector->floor_z_vertices.push_back({ { vert->X, vert->Y, vert->Z } });
+                        sector->floor_z_vertices.push_back({{vert->X, vert->Y, vert->Z}});
                         if (vert->Z > sector->floor_vertex_slope_high_low.X)
                             sector->floor_vertex_slope_high_low.X = vert->Z;
                         if (vert->Z < sector->floor_vertex_slope_high_low.Y)
                             sector->floor_vertex_slope_high_low.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_vertices.push_back({ { vert->X, vert->Y, sector->floor_height } });
+                        sector->floor_z_vertices.push_back({{vert->X, vert->Y, sector->floor_height}});
                     if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
                         sector->ceiling_vertex_slope = true;
-                        sector->ceiling_z_vertices.push_back({ { vert->X, vert->Y, vert->W } });
+                        sector->ceiling_z_vertices.push_back({{vert->X, vert->Y, vert->W}});
                         if (vert->W > sector->ceiling_vertex_slope_high_low.X)
                             sector->ceiling_vertex_slope_high_low.X = vert->W;
                         if (vert->W < sector->ceiling_vertex_slope_high_low.Y)
                             sector->ceiling_vertex_slope_high_low.Y = vert->W;
                     }
                     else
-                        sector->ceiling_z_vertices.push_back({ { vert->X, vert->Y, sector->ceiling_height } });
+                        sector->ceiling_z_vertices.push_back({{vert->X, vert->Y, sector->ceiling_height}});
                 }
                 vert   = sector->lines[j]->vertex_2;
                 add_it = true;
@@ -2984,25 +2984,25 @@ void GroupLines(void)
                     if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
                         sector->floor_vertex_slope = true;
-                        sector->floor_z_vertices.push_back({ { vert->X, vert->Y, vert->Z } });
+                        sector->floor_z_vertices.push_back({{vert->X, vert->Y, vert->Z}});
                         if (vert->Z > sector->floor_vertex_slope_high_low.X)
                             sector->floor_vertex_slope_high_low.X = vert->Z;
                         if (vert->Z < sector->floor_vertex_slope_high_low.Y)
                             sector->floor_vertex_slope_high_low.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_vertices.push_back({ { vert->X, vert->Y, sector->floor_height } });
+                        sector->floor_z_vertices.push_back({{vert->X, vert->Y, sector->floor_height}});
                     if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
                         sector->ceiling_vertex_slope = true;
-                        sector->ceiling_z_vertices.push_back({ { vert->X, vert->Y, vert->W } });
+                        sector->ceiling_z_vertices.push_back({{vert->X, vert->Y, vert->W}});
                         if (vert->W > sector->ceiling_vertex_slope_high_low.X)
                             sector->ceiling_vertex_slope_high_low.X = vert->W;
                         if (vert->W < sector->ceiling_vertex_slope_high_low.Y)
                             sector->ceiling_vertex_slope_high_low.Y = vert->W;
                     }
                     else
-                        sector->ceiling_z_vertices.push_back({ { vert->X, vert->Y, sector->ceiling_height } });
+                        sector->ceiling_z_vertices.push_back({{vert->X, vert->Y, sector->ceiling_height}});
                 }
             }
             if (!sector->floor_vertex_slope)
@@ -3032,8 +3032,8 @@ void GroupLines(void)
         {
             int floor_z_lines                     = 0;
             int ceil_z_lines                      = 0;
-            sector->floor_vertex_slope_high_low   = { { -40000, 40000 } };
-            sector->ceiling_vertex_slope_high_low = { { -40000, 40000 } };
+            sector->floor_vertex_slope_high_low   = {{-40000, 40000}};
+            sector->ceiling_vertex_slope_high_low = {{-40000, 40000}};
             for (j = 0; j < 4; j++)
             {
                 Vertex *vert      = sector->lines[j]->vertex_1;
@@ -3050,47 +3050,47 @@ void GroupLines(void)
                 {
                     if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
-                        sector->floor_z_vertices.push_back({ { vert->X, vert->Y, vert->Z } });
+                        sector->floor_z_vertices.push_back({{vert->X, vert->Y, vert->Z}});
                         if (vert->Z > sector->floor_vertex_slope_high_low.X)
                             sector->floor_vertex_slope_high_low.X = vert->Z;
                         if (vert->Z < sector->floor_vertex_slope_high_low.Y)
                             sector->floor_vertex_slope_high_low.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_vertices.push_back({ { vert->X, vert->Y, sector->floor_height } });
+                        sector->floor_z_vertices.push_back({{vert->X, vert->Y, sector->floor_height}});
                     if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
-                        sector->ceiling_z_vertices.push_back({ { vert->X, vert->Y, vert->W } });
+                        sector->ceiling_z_vertices.push_back({{vert->X, vert->Y, vert->W}});
                         if (vert->W > sector->ceiling_vertex_slope_high_low.X)
                             sector->ceiling_vertex_slope_high_low.X = vert->W;
                         if (vert->W < sector->ceiling_vertex_slope_high_low.Y)
                             sector->ceiling_vertex_slope_high_low.Y = vert->W;
                     }
                     else
-                        sector->ceiling_z_vertices.push_back({ { vert->X, vert->Y, sector->ceiling_height } });
+                        sector->ceiling_z_vertices.push_back({{vert->X, vert->Y, sector->ceiling_height}});
                 }
                 if (add_it_v2)
                 {
                     if (vert2->Z < 32767.0f && vert2->Z > -32768.0f)
                     {
-                        sector->floor_z_vertices.push_back({ { vert2->X, vert2->Y, vert2->Z } });
+                        sector->floor_z_vertices.push_back({{vert2->X, vert2->Y, vert2->Z}});
                         if (vert2->Z > sector->floor_vertex_slope_high_low.X)
                             sector->floor_vertex_slope_high_low.X = vert2->Z;
                         if (vert2->Z < sector->floor_vertex_slope_high_low.Y)
                             sector->floor_vertex_slope_high_low.Y = vert2->Z;
                     }
                     else
-                        sector->floor_z_vertices.push_back({ { vert2->X, vert2->Y, sector->floor_height } });
+                        sector->floor_z_vertices.push_back({{vert2->X, vert2->Y, sector->floor_height}});
                     if (vert2->W < 32767.0f && vert2->W > -32768.0f)
                     {
-                        sector->ceiling_z_vertices.push_back({ { vert2->X, vert2->Y, vert2->W } });
+                        sector->ceiling_z_vertices.push_back({{vert2->X, vert2->Y, vert2->W}});
                         if (vert2->W > sector->ceiling_vertex_slope_high_low.X)
                             sector->ceiling_vertex_slope_high_low.X = vert2->W;
                         if (vert2->W < sector->ceiling_vertex_slope_high_low.Y)
                             sector->ceiling_vertex_slope_high_low.Y = vert2->W;
                     }
                     else
-                        sector->ceiling_z_vertices.push_back({ { vert2->X, vert2->Y, sector->ceiling_height } });
+                        sector->ceiling_z_vertices.push_back({{vert2->X, vert2->Y, sector->ceiling_height}});
                 }
                 if ((vert->Z < 32767.0f && vert->Z > -32768.0f) && (vert2->Z < 32767.0f && vert2->Z > -32768.0f) &&
                     AlmostEquals(vert->Z, vert2->Z))

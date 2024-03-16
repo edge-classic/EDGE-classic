@@ -105,7 +105,7 @@ float MathPointToSegDistance(HMM_Vec2 seg_a, HMM_Vec2 seg_b, HMM_Vec2 point)
 
 int MathPointInTriangle(HMM_Vec2 v1, HMM_Vec2 v2, HMM_Vec2 v3, HMM_Vec2 test)
 {
-    std::vector<HMM_Vec2> tri_vec = { v1, v2, v3 };
+    std::vector<HMM_Vec2> tri_vec = {v1, v2, v3};
     int                   i       = 0;
     int                   j       = 0;
     int                   c       = 0;

@@ -668,7 +668,7 @@ static inline void ModelCoordFunc(MdlCoordinateData *data, int v_idx, HMM_Vec3 *
         return;
     }
 
-    *texc = { { point->skin_s, point->skin_t } };
+    *texc = {{point->skin_s, point->skin_t}};
 
     ColorMixer *col = &data->normal_colors_[n_vert->normal_idx];
 
@@ -764,7 +764,7 @@ void MdlRenderModel(MdlModel *md, const Image *skin_img, bool is_weapon, int fra
         skin_tex = ImageCache(fuzz_image, false);
 
         data.fuzz_multiplier_ = 0.8;
-        data.fuzz_add_        = { { 0, 0 } };
+        data.fuzz_add_        = {{0, 0}};
 
         data.image_right_ = 1.0;
         data.image_top_   = 1.0;
@@ -869,7 +869,7 @@ void MdlRenderModel(MdlModel *md, const Image *skin_img, bool is_weapon, int fra
                 fogColor = sg_silver;
                 break;
             case 2:
-                fogColor = { 0.25f, 0.25f, 0.25f, 1.0f };
+                fogColor = {0.25f, 0.25f, 0.25f, 1.0f};
                 break;
             case 3:
                 fogColor = sg_black;

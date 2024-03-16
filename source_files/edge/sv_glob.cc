@@ -62,43 +62,42 @@ struct GlobalCommand
 };
 
 static const GlobalCommand global_commands[] = {
-    { "GAME", SaveGlobalGetString, SaveGlobalPutString, offsetof(SaveGlobals, game) },
-    { "LEVEL", SaveGlobalGetString, SaveGlobalPutString, offsetof(SaveGlobals, level) },
-    { "FLAGS", SaveGlobalGetLevelFlags, SaveGlobalPutLevelFlags, offsetof(SaveGlobals, flags) },
-    { "HUB_TAG", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, hub_tag) },
-    { "HUB_FIRST", SaveGlobalGetString, SaveGlobalPutString, offsetof(SaveGlobals, hub_first) },
+    {"GAME", SaveGlobalGetString, SaveGlobalPutString, offsetof(SaveGlobals, game)},
+    {"LEVEL", SaveGlobalGetString, SaveGlobalPutString, offsetof(SaveGlobals, level)},
+    {"FLAGS", SaveGlobalGetLevelFlags, SaveGlobalPutLevelFlags, offsetof(SaveGlobals, flags)},
+    {"HUB_TAG", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, hub_tag)},
+    {"HUB_FIRST", SaveGlobalGetString, SaveGlobalPutString, offsetof(SaveGlobals, hub_first)},
 
-    { "GRAVITY", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, flags.menu_gravity_factor) },
-    { "LEVEL_TIME", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, level_time) },
-    { "EXIT_TIME", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, exit_time) },
-    { "P_RANDOM", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, p_random) },
+    {"GRAVITY", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, flags.menu_gravity_factor)},
+    {"LEVEL_TIME", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, level_time)},
+    {"EXIT_TIME", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, exit_time)},
+    {"P_RANDOM", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, p_random)},
 
-    { "TOTAL_KILLS", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, total_kills) },
-    { "TOTAL_ITEMS", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, total_items) },
-    { "TOTAL_SECRETS", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, total_secrets) },
-    { "CONSOLE_PLAYER", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, console_player) },
-    { "SKILL", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, skill) },
-    { "NETGAME", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, netgame) },
-    { "SKY_IMAGE", SaveGlobalGetImage, SaveGlobalPutImage, offsetof(SaveGlobals, sky_image) },
+    {"TOTAL_KILLS", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, total_kills)},
+    {"TOTAL_ITEMS", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, total_items)},
+    {"TOTAL_SECRETS", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, total_secrets)},
+    {"CONSOLE_PLAYER", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, console_player)},
+    {"SKILL", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, skill)},
+    {"NETGAME", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, netgame)},
+    {"SKY_IMAGE", SaveGlobalGetImage, SaveGlobalPutImage, offsetof(SaveGlobals, sky_image)},
 
-    { "DESCRIPTION", SaveGlobalGetString, SaveGlobalPutString, offsetof(SaveGlobals, description) },
-    { "DESC_DATE", SaveGlobalGetString, SaveGlobalPutString, offsetof(SaveGlobals, desc_date) },
+    {"DESCRIPTION", SaveGlobalGetString, SaveGlobalPutString, offsetof(SaveGlobals, description)},
+    {"DESC_DATE", SaveGlobalGetString, SaveGlobalPutString, offsetof(SaveGlobals, desc_date)},
 
-    { "MAPSECTOR", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, mapsector) },
-    { "MAPLINE", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, mapline) },
-    { "MAPTHING", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, mapthing) },
+    {"MAPSECTOR", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, mapsector)},
+    {"MAPLINE", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, mapline)},
+    {"MAPTHING", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, mapthing)},
 
-    { "RSCRIPT", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, rscript) },
-    { "DDFATK", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfatk) },
-    { "DDFGAME", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfgame) },
-    { "DDFLEVL", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddflevl) },
-    { "DDFLINE", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfline) },
-    { "DDFSECT", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfsect) },
-    { "DDFMOBJ", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfmobj) },
-    { "DDFWEAP", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfweap) },
+    {"RSCRIPT", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, rscript)},
+    {"DDFATK", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfatk)},
+    {"DDFGAME", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfgame)},
+    {"DDFLEVL", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddflevl)},
+    {"DDFLINE", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfline)},
+    {"DDFSECT", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfsect)},
+    {"DDFMOBJ", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfmobj)},
+    {"DDFWEAP", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC, offsetof(SaveGlobals, ddfweap)},
 
-    { nullptr, nullptr, nullptr, 0 }
-};
+    {nullptr, nullptr, nullptr, 0}};
 
 //----------------------------------------------------------------------------
 //

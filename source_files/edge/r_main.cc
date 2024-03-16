@@ -87,7 +87,7 @@ void RendererSetupMatricesWorld2D(void)
 //
 void RendererSetupMatrices3d(void)
 {
-    GLfloat ambient[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat ambient[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
     glViewport(view_window_x, view_window_y, view_window_width, view_window_height);
 

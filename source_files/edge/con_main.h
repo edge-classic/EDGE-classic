@@ -26,9 +26,9 @@
 
 constexpr uint8_t kEndoomLines = 25;
 
-const RGBAColor endoom_colors[16] = { 0x000000FF, 0x0000AAFF, 0x00AA00FF, 0x00AAAAFF, 0xAA0000FF, 0xAA00AAFF,
-                                      0xAA5500FF, 0xAAAAAAFF, 0x555555FF, 0x5555FFFF, 0x55FF55FF, 0x55FFFFFF,
-                                      0xFF5555FF, 0xFF55FFFF, 0xFFFF55FF, 0xFFFFFFFF };
+const RGBAColor endoom_colors[16] = {0x000000FF, 0x0000AAFF, 0x00AA00FF, 0x00AAAAFF, 0xAA0000FF, 0xAA00AAFF,
+                                     0xAA5500FF, 0xAAAAAAFF, 0x555555FF, 0x5555FFFF, 0x55FF55FF, 0x55FFFFFF,
+                                     0xFF5555FF, 0xFF55FFFF, 0xFFFF55FF, 0xFFFFFFFF};
 
 enum ConsoleVisibility
 {

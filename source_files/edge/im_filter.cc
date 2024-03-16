@@ -69,9 +69,9 @@ static void HorizontalBlurRgb(uint8_t *in, uint8_t *out, int w, int h, int c, in
         int li = ti;
         int ri = ti + r;
 
-        int fv[3]  = { in[ti * c + 0], in[ti * c + 1], in[ti * c + 2] };
-        int lv[3]  = { in[(ti + w - 1) * c + 0], in[(ti + w - 1) * c + 1], in[(ti + w - 1) * c + 2] };
-        int val[3] = { (r + 1) * fv[0], (r + 1) * fv[1], (r + 1) * fv[2] };
+        int fv[3]  = {in[ti * c + 0], in[ti * c + 1], in[ti * c + 2]};
+        int lv[3]  = {in[(ti + w - 1) * c + 0], in[(ti + w - 1) * c + 1], in[(ti + w - 1) * c + 2]};
+        int val[3] = {(r + 1) * fv[0], (r + 1) * fv[1], (r + 1) * fv[2]};
 
         for (int j = 0; j < r; j++)
         {
@@ -122,9 +122,9 @@ static void TotalBlurRgb(uint8_t *in, uint8_t *out, int w, int h, int c, int r)
         int li = ti;
         int ri = ti + r * w;
 
-        int fv[3]  = { in[ti * c + 0], in[ti * c + 1], in[ti * c + 2] };
-        int lv[3]  = { in[(ti + w * (h - 1)) * c + 0], in[(ti + w * (h - 1)) * c + 1], in[(ti + w * (h - 1)) * c + 2] };
-        int val[3] = { (r + 1) * fv[0], (r + 1) * fv[1], (r + 1) * fv[2] };
+        int fv[3]  = {in[ti * c + 0], in[ti * c + 1], in[ti * c + 2]};
+        int lv[3]  = {in[(ti + w * (h - 1)) * c + 0], in[(ti + w * (h - 1)) * c + 1], in[(ti + w * (h - 1)) * c + 2]};
+        int val[3] = {(r + 1) * fv[0], (r + 1) * fv[1], (r + 1) * fv[2]};
 
         for (int j = 0; j < r; j++)
         {

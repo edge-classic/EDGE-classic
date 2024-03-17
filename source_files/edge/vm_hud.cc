@@ -40,10 +40,10 @@
 #include "w_wad.h"
 
 extern ConsoleVariable double_framerate;
-extern coal::vm_c     *ui_vm;
+extern coal::Vm     *ui_vm;
 
-extern void CoalSetFloat(coal::vm_c *vm, const char *mod, const char *name, double value);
-extern void CoalCallFunction(coal::vm_c *vm, const char *name);
+extern void CoalSetFloat(coal::Vm *vm, const char *mod, const char *name, double value);
+extern void CoalCallFunction(coal::Vm *vm, const char *name);
 
 // Needed for color functions
 extern ImageData *ReadAsEpiBlock(Image *rim);
@@ -87,7 +87,7 @@ RGBAColor CoalVectorToColor(double *v)
 
 // hud.coord_sys(w, h)
 //
-static void HD_coord_sys(coal::vm_c *vm, int argc)
+static void HD_coord_sys(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -105,7 +105,7 @@ static void HD_coord_sys(coal::vm_c *vm, int argc)
 
 // hud.game_mode()
 //
-static void HD_game_mode(coal::vm_c *vm, int argc)
+static void HD_game_mode(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -119,7 +119,7 @@ static void HD_game_mode(coal::vm_c *vm, int argc)
 
 // hud.game_name()
 //
-static void HD_game_name(coal::vm_c *vm, int argc)
+static void HD_game_name(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -131,7 +131,7 @@ static void HD_game_name(coal::vm_c *vm, int argc)
 
 // hud.map_name()
 //
-static void HD_map_name(coal::vm_c *vm, int argc)
+static void HD_map_name(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -140,7 +140,7 @@ static void HD_map_name(coal::vm_c *vm, int argc)
 
 // hud.map_title()
 //
-static void HD_map_title(coal::vm_c *vm, int argc)
+static void HD_map_title(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -149,7 +149,7 @@ static void HD_map_title(coal::vm_c *vm, int argc)
 
 // hud.map_author()
 //
-static void HD_map_author(coal::vm_c *vm, int argc)
+static void HD_map_author(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -158,7 +158,7 @@ static void HD_map_author(coal::vm_c *vm, int argc)
 
 // hud.which_hud()
 //
-static void HD_which_hud(coal::vm_c *vm, int argc)
+static void HD_which_hud(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -167,7 +167,7 @@ static void HD_which_hud(coal::vm_c *vm, int argc)
 
 // hud.check_automap()
 //
-static void HD_check_automap(coal::vm_c *vm, int argc)
+static void HD_check_automap(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -176,7 +176,7 @@ static void HD_check_automap(coal::vm_c *vm, int argc)
 
 // hud.get_time()
 //
-static void HD_get_time(coal::vm_c *vm, int argc)
+static void HD_get_time(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -186,7 +186,7 @@ static void HD_get_time(coal::vm_c *vm, int argc)
 
 // hud.text_font(name)
 //
-static void HD_text_font(coal::vm_c *vm, int argc)
+static void HD_text_font(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -209,7 +209,7 @@ static void HD_text_font(coal::vm_c *vm, int argc)
 
 // hud.text_color(rgb)
 //
-static void HD_text_color(coal::vm_c *vm, int argc)
+static void HD_text_color(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -222,7 +222,7 @@ static void HD_text_color(coal::vm_c *vm, int argc)
 
 // hud.set_scale(value)
 //
-static void HD_set_scale(coal::vm_c *vm, int argc)
+static void HD_set_scale(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -236,7 +236,7 @@ static void HD_set_scale(coal::vm_c *vm, int argc)
 
 // hud.set_alpha(value)
 //
-static void HD_set_alpha(coal::vm_c *vm, int argc)
+static void HD_set_alpha(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -247,7 +247,7 @@ static void HD_set_alpha(coal::vm_c *vm, int argc)
 
 // hud.solid_box(x, y, w, h, color)
 //
-static void HD_solid_box(coal::vm_c *vm, int argc)
+static void HD_solid_box(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -263,7 +263,7 @@ static void HD_solid_box(coal::vm_c *vm, int argc)
 
 // hud.solid_line(x1, y1, x2, y2, color)
 //
-static void HD_solid_line(coal::vm_c *vm, int argc)
+static void HD_solid_line(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -279,7 +279,7 @@ static void HD_solid_line(coal::vm_c *vm, int argc)
 
 // hud.thin_box(x, y, w, h, color)
 //
-static void HD_thin_box(coal::vm_c *vm, int argc)
+static void HD_thin_box(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -295,7 +295,7 @@ static void HD_thin_box(coal::vm_c *vm, int argc)
 
 // hud.gradient_box(x, y, w, h, TL, BL, TR, BR)
 //
-static void HD_gradient_box(coal::vm_c *vm, int argc)
+static void HD_gradient_box(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -318,7 +318,7 @@ static void HD_gradient_box(coal::vm_c *vm, int argc)
 // if we specify noOffset then it ignores
 // X and Y offsets from doom or images.ddf
 //
-static void HD_draw_image(coal::vm_c *vm, int argc)
+static void HD_draw_image(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -342,7 +342,7 @@ static void HD_draw_image(coal::vm_c *vm, int argc)
 // Dasho 2022: Same as above but adds x/y texcoord scrolling
 // hud.scroll_image(x, y, name, sx, sy, [noOffset])
 //
-static void HD_scroll_image(coal::vm_c *vm, int argc)
+static void HD_scroll_image(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -372,7 +372,7 @@ static void HD_scroll_image(coal::vm_c *vm, int argc)
 // if we specify noOffset then it ignores
 // X and Y offsets from doom or images.ddf
 //
-static void HD_stretch_image(coal::vm_c *vm, int argc)
+static void HD_stretch_image(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -397,7 +397,7 @@ static void HD_stretch_image(coal::vm_c *vm, int argc)
 
 // hud.tile_image(x, y, w, h, name, offset_x, offset_y)
 //
-static void HD_tile_image(coal::vm_c *vm, int argc)
+static void HD_tile_image(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -421,7 +421,7 @@ static void HD_tile_image(coal::vm_c *vm, int argc)
 
 // hud.draw_text(x, y, str, [size])
 //
-static void HD_draw_text(coal::vm_c *vm, int argc)
+static void HD_draw_text(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -437,7 +437,7 @@ static void HD_draw_text(coal::vm_c *vm, int argc)
 
 // hud.draw_num2(x, y, len, num, [size])
 //
-static void HD_draw_num2(coal::vm_c *vm, int argc)
+static void HD_draw_num2(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -488,7 +488,7 @@ static void HD_draw_num2(coal::vm_c *vm, int argc)
 // Lobo November 2021:
 // hud.draw_number(x, y, len, num, align_right, [size])
 //
-static void HD_draw_number(coal::vm_c *vm, int argc)
+static void HD_draw_number(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -545,7 +545,7 @@ static void HD_draw_number(coal::vm_c *vm, int argc)
 
 // hud.game_paused()
 //
-static void HD_game_paused(coal::vm_c *vm, int argc)
+static void HD_game_paused(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -561,7 +561,7 @@ static void HD_game_paused(coal::vm_c *vm, int argc)
 
 // hud.erraticism_active()
 //
-static void HD_erraticism_active(coal::vm_c *vm, int argc)
+static void HD_erraticism_active(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -577,7 +577,7 @@ static void HD_erraticism_active(coal::vm_c *vm, int argc)
 
 // hud.time_stop_active()
 //
-static void HD_time_stop_active(coal::vm_c *vm, int argc)
+static void HD_time_stop_active(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -593,7 +593,7 @@ static void HD_time_stop_active(coal::vm_c *vm, int argc)
 
 // hud.render_world(x, y, w, h, [flags])
 //
-static void HD_render_world(coal::vm_c *vm, int argc)
+static void HD_render_world(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -609,7 +609,7 @@ static void HD_render_world(coal::vm_c *vm, int argc)
 
 // hud.render_automap(x, y, w, h, [flags])
 //
-static void HD_render_automap(coal::vm_c *vm, int argc)
+static void HD_render_automap(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -642,7 +642,7 @@ static void HD_render_automap(coal::vm_c *vm, int argc)
 
 // hud.automap_color(which, color)
 //
-static void HD_automap_color(coal::vm_c *vm, int argc)
+static void HD_automap_color(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -660,7 +660,7 @@ static void HD_automap_color(coal::vm_c *vm, int argc)
 
 // hud.automap_option(which, value)
 //
-static void HD_automap_option(coal::vm_c *vm, int argc)
+static void HD_automap_option(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -680,7 +680,7 @@ static void HD_automap_option(coal::vm_c *vm, int argc)
 
 // hud.automap_zoom(value)
 //
-static void HD_automap_zoom(coal::vm_c *vm, int argc)
+static void HD_automap_zoom(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -692,7 +692,7 @@ static void HD_automap_zoom(coal::vm_c *vm, int argc)
 
 // hud.automap_player_arrow(type)
 //
-static void HD_automap_player_arrow(coal::vm_c *vm, int argc)
+static void HD_automap_player_arrow(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -703,7 +703,7 @@ static void HD_automap_player_arrow(coal::vm_c *vm, int argc)
 
 // hud.set_render_who(index)
 //
-static void HD_set_render_who(coal::vm_c *vm, int argc)
+static void HD_set_render_who(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -733,7 +733,7 @@ static void HD_set_render_who(coal::vm_c *vm, int argc)
 
 // hud.play_sound(name)
 //
-static void HD_play_sound(coal::vm_c *vm, int argc)
+static void HD_play_sound(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -749,7 +749,7 @@ static void HD_play_sound(coal::vm_c *vm, int argc)
 
 // hud.screen_aspect()
 //
-static void HD_screen_aspect(coal::vm_c *vm, int argc)
+static void HD_screen_aspect(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -758,7 +758,7 @@ static void HD_screen_aspect(coal::vm_c *vm, int argc)
     vm->ReturnFloat(TempAspect);
 }
 
-static void HD_get_average_color(coal::vm_c *vm, int argc)
+static void HD_get_average_color(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -782,7 +782,7 @@ static void HD_get_average_color(coal::vm_c *vm, int argc)
     vm->ReturnVector(rgb);
 }
 
-static void HD_get_lightest_color(coal::vm_c *vm, int argc)
+static void HD_get_lightest_color(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -806,7 +806,7 @@ static void HD_get_lightest_color(coal::vm_c *vm, int argc)
     vm->ReturnVector(rgb);
 }
 
-static void HD_get_darkest_color(coal::vm_c *vm, int argc)
+static void HD_get_darkest_color(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -830,7 +830,7 @@ static void HD_get_darkest_color(coal::vm_c *vm, int argc)
     vm->ReturnVector(rgb);
 }
 
-static void HD_get_average_hue(coal::vm_c *vm, int argc)
+static void HD_get_average_hue(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -858,7 +858,7 @@ static void HD_get_average_hue(coal::vm_c *vm, int argc)
 
 // These two aren't really needed anymore with the AverageColor rework, but
 // keeping them in case COALHUDS in the wild use them - Dasho
-static void HD_get_average_top_border_color(coal::vm_c *vm, int argc)
+static void HD_get_average_top_border_color(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -877,7 +877,7 @@ static void HD_get_average_top_border_color(coal::vm_c *vm, int argc)
     delete tmp_img_data;
     vm->ReturnVector(rgb);
 }
-static void HD_get_average_bottom_border_color(coal::vm_c *vm, int argc)
+static void HD_get_average_bottom_border_color(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -898,7 +898,7 @@ static void HD_get_average_bottom_border_color(coal::vm_c *vm, int argc)
 
 // hud.rts_enable(tag)
 //
-static void HD_rts_enable(coal::vm_c *vm, int argc)
+static void HD_rts_enable(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -910,7 +910,7 @@ static void HD_rts_enable(coal::vm_c *vm, int argc)
 
 // hud.rts_disable(tag)
 //
-static void HD_rts_disable(coal::vm_c *vm, int argc)
+static void HD_rts_disable(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -922,7 +922,7 @@ static void HD_rts_disable(coal::vm_c *vm, int argc)
 
 // hud.rts_isactive(tag)
 //
-static void HD_rts_isactive(coal::vm_c *vm, int argc)
+static void HD_rts_isactive(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -939,7 +939,7 @@ static void HD_rts_isactive(coal::vm_c *vm, int argc)
 
 // hud.get_image_width(name)
 //
-static void HD_get_image_width(coal::vm_c *vm, int argc)
+static void HD_get_image_width(coal::Vm *vm, int argc)
 {
     (void)argc;
     const char *name = vm->AccessParamString(0);
@@ -958,7 +958,7 @@ static void HD_get_image_width(coal::vm_c *vm, int argc)
 
 // hud.get_image_height(name)
 //
-static void HD_get_image_height(coal::vm_c *vm, int argc)
+static void HD_get_image_height(coal::Vm *vm, int argc)
 {
     (void)argc;
     const char *name = vm->AccessParamString(0);

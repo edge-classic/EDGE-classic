@@ -23,19 +23,88 @@
 //
 //----------------------------------------------------------------------
 
-#ifndef __COAL_LOCAL_DEFS_H__
-#define __COAL_LOCAL_DEFS_H__
+#pragma once
 
-#include "c_memory.h"
+#include <stdint.h>
 
-typedef int func_t;
-typedef int string_t;
+#include <vector>
 
-#define MAX_NAME 64
+#include "coal.h"
 
-#define MAX_PARMS 16
+namespace coal
+{
 
-typedef enum
+struct MemoryBlock
+{
+    int used = 0;
+
+// Prevent SIGBUS errors on ARM32 and heap alignment issues with emscripten
+#if defined(__arm__) || defined(EMSCRIPTEN)
+    double data[4096];
+#else
+    char data[4096];
+#endif
+};
+
+class MemoryBlockGroup
+{
+    friend class MemoryManager;
+
+  private:
+    int pos_;
+
+    MemoryBlock *blocks_[256];
+
+  public:
+    MemoryBlockGroup();
+    ~MemoryBlockGroup();
+
+    int TryAlloc(int len);
+
+    void Reset();
+
+    int UsedMemory() const;
+    int TotalMemory() const;
+};
+
+class MemoryManager
+{
+  private:
+    int pos_;
+
+    MemoryBlockGroup *groups_[256];
+
+  public:
+    MemoryManager();
+    ~MemoryManager();
+
+    int Alloc(int len);
+
+    inline void *Deref(int index) const
+    {
+        MemoryBlockGroup *grp = groups_[index >> 20];
+        index &= ((1 << 20) - 1);
+
+        MemoryBlock *blk = grp->blocks_[index >> 12];
+        index &= ((1 << 12) - 1);
+
+        return blk->data + index;
+    }
+
+    // forget all the previously stored items.  May not actually
+    // free any memory.
+    void Reset();
+
+    // compute the total amount of memory used.  The second form
+    // includes all the extra/free/wasted space.
+    int UsedMemory() const;
+    int TotalMemory() const;
+};
+
+constexpr uint8_t kMaximumNameLength = 64;
+constexpr uint8_t kMaximumParameters = 16;
+
+enum BasicType
 {
     ev_INVALID = -1,
 
@@ -49,17 +118,16 @@ typedef enum
     ev_module,
     ev_pointer,
     ev_null
-} etype_t;
+};
 
-typedef struct
+struct Statement
 {
-    short op;
-    short line; // offset from start of function
+    int16_t op;
+    int16_t line; // offset from start of function
+    int     a, b, c;
+};
 
-    int a, b, c;
-} statement_t;
-
-enum
+enum OperationType
 {
     OP_NULL = 0,
 
@@ -132,7 +200,7 @@ enum
     NUM_OPERATIONS
 };
 
-typedef struct
+struct Function
 {
     const char *name;
 
@@ -142,10 +210,10 @@ typedef struct
 
     int return_size;
 
-    int   parm_num;
-    short parm_ofs[MAX_PARMS];
-    short parm_size[MAX_PARMS];
-    int   optional_parm_start; // Param nums equal or higher to this are optional
+    int     parm_num;
+    int16_t parm_ofs[kMaximumParameters];
+    int16_t parm_size[kMaximumParameters];
+    int     optional_parm_start; // Param nums equal or higher to this are optional
 
     int locals_ofs;
     int locals_size;
@@ -153,50 +221,180 @@ typedef struct
 
     int first_statement; // negative numbers are builtins
     int last_statement;
-} function_t;
-
-// offset in global data block (if > 0)
-// when < 0, it is offset into local stack frame
-typedef int gofs_t;
+};
 
 //=============================================================================
 
-#define OFS_NULL    0
-#define OFS_RETURN  1
-#define OFS_DEFAULT 4
+constexpr uint8_t kReturnOffset  = 1;
+constexpr uint8_t kDefaultOffset = 4;
 
-#define REF_OP(ofs)     ((statement_t *)op_mem.deref(ofs))
-#define REF_GLOBAL(ofs) ((double *)global_mem.deref(ofs))
-#define REF_STRING(ofs)                                                                                                \
-    ((ofs) == 0 ? "" : (ofs) < 0 ? (char *)temp_strings.deref(-(1 + (ofs))) : (char *)string_mem.deref(ofs))
+#define COAL_REF_OP(ofs)     ((Statement *)op_mem_.Deref(ofs))
+#define COAL_REF_GLOBAL(ofs) ((double *)global_mem_.Deref(ofs))
+#define COAL_REF_STRING(ofs)                                                                                           \
+    ((ofs) == 0 ? "" : (ofs) < 0 ? (char *)temp_strings_.Deref(-(1 + (ofs))) : (char *)string_mem_.Deref(ofs))
 
-#define G_FLOAT(ofs)  (*REF_GLOBAL(ofs))
-#define G_VECTOR(ofs) REF_GLOBAL(ofs)
-#define G_STRING(ofs) REF_STRING((int)G_FLOAT(ofs))
+#define COAL_G_FLOAT(ofs)  (*COAL_REF_GLOBAL(ofs))
+#define COAL_G_VECTOR(ofs) COAL_REF_GLOBAL(ofs)
+#define COAL_G_STRING(ofs) COAL_REF_STRING((int)COAL_G_FLOAT(ofs))
 
-typedef struct
+struct RegisteredNativeFunction
 {
-    const char   *name;
-    native_func_t func;
-} reg_native_func_t;
+    const char    *name;
+    NativeFunction func;
+};
 
 //============================================================//
 
-#include "c_compile.h"
-#include "c_execute.h"
+class Scope;
 
-class real_vm_c : public vm_c
+enum Token
+{
+    tt_eof,     // end of file reached
+    tt_name,    // an alphanumeric name token
+    tt_punct,   // code punctuation
+    tt_literal, // string, float, vector
+    tt_error    // an error occured (so get next token)
+};
+
+struct Type
+{
+    BasicType type;
+
+    // function types are more complex
+    Type *aux_type;                       // return type or field type
+
+    int   parm_num;                       // -1 = variable args
+    Type *parm_types[kMaximumParameters]; // only [parm_num] allocated
+};
+
+struct Definition
+{
+    Type       *type;
+    const char *name;
+
+    // offset in global data block (if > 0)
+    // when < 0, it is offset into local stack frame
+    int ofs;
+
+    Scope *scope;
+
+    int flags;
+
+    Definition *next;
+};
+
+enum DefinitionFlag
+{
+    DF_Constant  = (1 << 1),
+    DF_Temporary = (1 << 2),
+    DF_FreeTemp  = (1 << 3), // temporary can be re-used
+};
+
+class Scope
+{
+  public:
+    char kind_;         // 'g' global, 'f' function, 'm' module
+
+    Definition *names_; // functions, vars, constants, parameters
+
+    Definition *def_;   // parent scope is def->scope
+
+  public:
+    Scope() : kind_('g'), names_(nullptr), def_(nullptr)
+    {
+    }
+    ~Scope()
+    {
+    }
+
+    void PushBack(Definition *def_in)
+    {
+        def_in->scope = this;
+        def_in->next  = names_;
+        names_        = def_in;
+    }
+};
+
+struct Compiler
+{
+    const char *source_file = nullptr;
+    int         source_line = 0;
+    int         function_line;
+
+    bool asm_dump = false;
+
+    // current parsing position
+    char *parse_p    = nullptr;
+    char *line_start = nullptr; // start of current source line
+    int   bracelevel;
+    int   fol_level;            // fol = first on line
+
+    // current token (from LEX_Next)
+    char  token_buf[2048];
+    Token token_type;
+    bool  token_is_first;
+
+    char   literal_buf[2048];
+    Type  *literal_type;
+    double literal_value[3];
+
+    // parameter names (when parsing a function def)
+    char parm_names[kMaximumParameters][kMaximumNameLength];
+
+    int error_count = 0;
+
+    Scope global_scope;
+
+    std::vector<Scope *>      all_modules;
+    std::vector<Type *>       all_types;
+    std::vector<Definition *> all_literals;
+
+    // all temporaries for current function
+    std::vector<Definition *> temporaries;
+
+    // the function/module being parsed, or nullptr
+    Scope *scope;
+
+    // for tracking local variables vs temps
+    int locals_end;
+    int last_statement;
+};
+
+constexpr uint8_t  kMaximumCallStack  = 96;
+constexpr uint16_t kMaximumLocalStack = 2048;
+
+struct CallStack
+{
+    int s;
+    int func;
+};
+
+struct Execution
+{
+    // code pointer
+    int s    = 0;
+    int func = 0;
+
+    bool tracing = false;
+
+    double stack[kMaximumLocalStack];
+    int    stack_depth = 0;
+
+    CallStack call_stack[kMaximumCallStack + 1];
+    int       call_depth = 0;
+};
+
+class RealVm : public Vm
 {
   public:
     /* API functions */
 
-    real_vm_c();
-    ~real_vm_c();
+    RealVm();
+    ~RealVm();
 
-    void SetPrinter(print_func_t func);
+    void SetPrinter(PrintFunction func);
 
-    void AddNativeModule(const char *name);
-    void AddNativeFunction(const char *name, native_func_t func);
+    void AddNativeFunction(const char *name, NativeFunction func);
 
     bool CompileFile(char *buffer, const char *filename);
     void ShowStats();
@@ -231,18 +429,18 @@ class real_vm_c : public vm_c
     void ReturnString(const char *s, int len = -1);
 
   private:
-    print_func_t printer;
+    PrintFunction Printer;
 
-    bmaster_c op_mem;
-    bmaster_c global_mem;
-    bmaster_c string_mem;
-    bmaster_c temp_strings;
+    MemoryManager op_mem_;
+    MemoryManager global_mem_;
+    MemoryManager string_mem_;
+    MemoryManager temp_strings_;
 
-    std::vector<function_t *>        functions;
-    std::vector<reg_native_func_t *> native_funcs;
+    std::vector<Function *>                 functions_;
+    std::vector<RegisteredNativeFunction *> native_funcs_;
 
-    compiling_c comp;
-    execution_c exec;
+    Compiler  comp_;
+    Execution exec_;
 
     // c_compile.cc
   private:
@@ -251,10 +449,10 @@ class real_vm_c : public vm_c
     void GLOB_Constant();
     void GLOB_Variable();
     void GLOB_Function();
-    int  GLOB_FunctionBody(def_t *func_def, type_t *type, const char *func_name);
+    int  GLOB_FunctionBody(Definition *func_def, Type *type, const char *func_name);
 
     void STAT_Statement(bool allow_def);
-    void STAT_Assignment(def_t *e);
+    void STAT_Assignment(Definition *e);
     void STAT_If_Else();
     void STAT_Assert();
     void STAT_WhileLoop();
@@ -262,37 +460,37 @@ class real_vm_c : public vm_c
     void STAT_ForLoop();
     void STAT_Return();
 
-    def_t *EXP_Expression(int priority, bool *lvalue = nullptr);
-    def_t *EXP_FieldQuery(def_t *e, bool lvalue);
-    def_t *EXP_ShortCircuit(def_t *e, int n);
-    def_t *EXP_Term();
-    def_t *EXP_VarValue();
-    def_t *EXP_FunctionCall(def_t *func);
-    def_t *EXP_Literal();
+    Definition *EXP_Expression(int priority, bool *lvalue = nullptr);
+    Definition *EXP_FieldQuery(Definition *e, bool lvalue);
+    Definition *EXP_ShortCircuit(Definition *e, int n);
+    Definition *EXP_Term();
+    Definition *EXP_VarValue();
+    Definition *EXP_FunctionCall(Definition *func);
+    Definition *EXP_Literal();
 
-    def_t *DeclareDef(type_t *type, char *name, scope_c *scope);
-    def_t *FindDef(type_t *type, char *name, scope_c *scope);
+    Definition *DeclareDef(Type *type, char *name, Scope *scope);
+    Definition *FindDef(Type *type, char *name, Scope *scope);
 
-    void   StoreLiteral(int ofs);
-    def_t *FindLiteral();
+    void        StoreLiteral(int ofs);
+    Definition *FindLiteral();
 
-    def_t *NewTemporary(type_t *type);
-    void   FreeTemporaries();
+    Definition *NewTemporary(Type *type);
+    void        FreeTemporaries();
 
-    def_t *NewGlobal(type_t *type);
-    def_t *NewLocal(type_t *type);
+    Definition *NewGlobal(Type *type);
+    Definition *NewLocal(Type *type);
 
-    char   *ParseName();
-    type_t *ParseType();
-    type_t *FindType(type_t *type);
+    char *ParseName();
+    Type *ParseType();
+    Type *FindType(Type *type);
 
-    int EmitCode(short op, int a = 0, int b = 0, int c = 0);
-    int EmitMove(type_t *type, int a, int b);
+    int EmitCode(int16_t op, int a = 0, int b = 0, int c = 0);
+    int EmitMove(Type *type, int a, int b);
 
     void LEX_Next();
     void LEX_Whitespace();
     void LEX_NewLine();
- 
+
     bool LEX_Check(const char *str);
     void LEX_Expect(const char *str);
 
@@ -322,17 +520,14 @@ class real_vm_c : public vm_c
     void RunError(const char *error, ...);
 
     void        StackTrace();
-    void        PrintStatement(function_t *f, int s);
-    const char *RegString(statement_t *st, int who);
+    void        PrintStatement(Function *f, int s);
+    const char *RegString(Statement *st, int who);
 
-    void ASM_DumpFunction(function_t *f);
+    void ASM_DumpFunction(Function *f);
     void ASM_DumpAll();
-
-    static void default_printer(const char *msg, ...);
-    static void default_aborter(const char *msg, ...);
 };
 
-#endif /* __COAL_LOCAL_DEFS_H__ */
+} // namespace coal
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -17,132 +17,127 @@
 //
 //----------------------------------------------------------------------
 
+#include "c_local.h"
+#include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
-#include <assert.h>
-
 #include <vector>
-
-#include "coal.h"
 
 namespace coal
 {
 
-#include "c_local.h"
-#include "c_memory.h"
-
-bgroup_c::bgroup_c() : pos(0)
+MemoryBlockGroup::MemoryBlockGroup() : pos_(0)
 {
-    memset(blocks, 0, sizeof(blocks));
+    memset(blocks_, 0, sizeof(blocks_));
 }
 
-bgroup_c::~bgroup_c()
+MemoryBlockGroup::~MemoryBlockGroup()
 {
     for (int i = 0; i < 256; i++)
-        if (blocks[i])
-            delete[] blocks[i];
+        if (blocks_[i])
+            delete[] blocks_[i];
 }
 
-int bgroup_c::try_alloc(int len)
+int MemoryBlockGroup::TryAlloc(int len)
 {
     // look in previous blocks (waste less space)
-    if (len <= 4096 && pos >= 10 && pos < 256)
-        pos -= 10;
+    if (len <= 4096 && pos_ >= 10 && pos_ < 256)
+        pos_ -= 10;
 
-    while (pos < 256)
+    while (pos_ < 256)
     {
         if (len > 4096)
         {
             // Special handling for "big" blocks:
             //
-            // We allocate a number of contiguous block_c structures,
+            // We allocate a number of contiguous MemoryBlock structures,
             // returning the address for the first one (allowing the
             // rest to be overwritten).
             //
-            // Luckily the block_c destructor does nothing, delete[]
-            // will call it for every block_c in the array.
+            // Luckily the MemoryBlock destructor does nothing, delete[]
+            // will call it for every MemoryBlock in the array.
 
-            if (blocks[pos] && blocks[pos]->used > 0)
+            if (blocks_[pos_] && blocks_[pos_]->used > 0)
             {
-                pos++;
+                pos_++;
                 continue;
             }
 
-            if (blocks[pos])
-                delete[] blocks[pos];
+            if (blocks_[pos_])
+                delete[] blocks_[pos_];
 
             int big_num = 1 + (len >> 12);
 
-            blocks[pos]       = new block_c[big_num];
-            blocks[pos]->used = len;
+            blocks_[pos_]       = new MemoryBlock[big_num];
+            blocks_[pos_]->used = len;
 
-            return (pos << 12);
+            return (pos_ << 12);
         }
 
-        if (!blocks[pos])
-            blocks[pos] = new block_c[1];
+        if (!blocks_[pos_])
+            blocks_[pos_] = new MemoryBlock[1];
 
-        if (blocks[pos]->used + len <= 4096)
+        if (blocks_[pos_]->used + len <= 4096)
         {
-            int offset = blocks[pos]->used;
+            int offset = blocks_[pos_]->used;
 
-            blocks[pos]->used += len;
+            blocks_[pos_]->used += len;
 
-            return (pos << 12) | offset;
+            return (pos_ << 12) | offset;
         }
 
         // try next block
-        pos++;
+        pos_++;
     }
 
-    // no space left in this bgroup_c
+    // no space left in this MemoryBlockGroup
     return -1;
 }
 
-void bgroup_c::reset()
+void MemoryBlockGroup::Reset()
 {
-    for (int i = 0; i <= pos; i++)
-        if (blocks[i])
+    for (int i = 0; i <= pos_; i++)
+        if (blocks_[i])
         {
             // need to remove "big" blocks, otherwise the extra
             // space will go unused (a kind of memory leak).
-            if (blocks[i]->used > 4096)
+            if (blocks_[i]->used > 4096)
             {
-                delete[] blocks[i];
-                blocks[i] = nullptr;
+                delete[] blocks_[i];
+                blocks_[i] = nullptr;
             }
             else
-                blocks[i]->used = 0;
+                blocks_[i]->used = 0;
         }
 
-    pos = 0;
+    pos_ = 0;
 }
 
-int bgroup_c::usedMemory() const
+int MemoryBlockGroup::UsedMemory() const
 {
     int result = 0;
 
-    for (int i = 0; i <= pos; i++)
-        if (blocks[i])
-            result += blocks[i]->used;
+    for (int i = 0; i <= pos_; i++)
+        if (blocks_[i])
+            result += blocks_[i]->used;
 
     return result;
 }
 
-int bgroup_c::totalMemory() const
+int MemoryBlockGroup::TotalMemory() const
 {
-    int result = (int)sizeof(bgroup_c);
+    int result = (int)sizeof(MemoryBlockGroup);
 
     for (int i = 0; i < 256; i++)
-        if (blocks[i])
+        if (blocks_[i])
         {
             int big_num = 1;
-            if (blocks[i]->used > 4096)
-                big_num = 1 + (blocks[i]->used >> 12);
+            if (blocks_[i]->used > 4096)
+                big_num = 1 + (blocks_[i]->used >> 12);
 
-            result += big_num * (int)sizeof(block_c);
+            result += big_num * (int)sizeof(MemoryBlock);
         }
 
     return result;
@@ -150,67 +145,67 @@ int bgroup_c::totalMemory() const
 
 //----------------------------------------------------------------------
 
-bmaster_c::bmaster_c() : pos(0)
+MemoryManager::MemoryManager() : pos_(0)
 {
-    memset(groups, 0, sizeof(groups));
+    memset(groups_, 0, sizeof(groups_));
 }
 
-bmaster_c::~bmaster_c()
+MemoryManager::~MemoryManager()
 {
     for (int k = 0; k < 256; k++)
-        if (groups[k])
-            delete groups[k];
+        if (groups_[k])
+            delete groups_[k];
 }
 
-int bmaster_c::alloc(int len)
+int MemoryManager::Alloc(int len)
 {
     if (len == 0)
         return 0;
 
     for (;;)
     {
-        assert(pos < 256);
+        assert(pos_ < 256);
 
-        if (!groups[pos])
-            groups[pos] = new bgroup_c;
+        if (!groups_[pos_])
+            groups_[pos_] = new MemoryBlockGroup;
 
-        int result = groups[pos]->try_alloc(len);
+        int result = groups_[pos_]->TryAlloc(len);
 
         if (result >= 0)
-            return (pos << 20) | result;
+            return (pos_ << 20) | result;
 
         // try next group
-        pos++;
+        pos_++;
     }
 }
 
-void bmaster_c::reset()
+void MemoryManager::Reset()
 {
-    for (int k = 0; k <= pos; k++)
-        if (groups[k])
-            groups[k]->reset();
+    for (int k = 0; k <= pos_; k++)
+        if (groups_[k])
+            groups_[k]->Reset();
 
-    pos = 0;
+    pos_ = 0;
 }
 
-int bmaster_c::usedMemory() const
+int MemoryManager::UsedMemory() const
 {
     int result = 0;
 
-    for (int k = 0; k <= pos; k++)
-        if (groups[k])
-            result += groups[k]->usedMemory();
+    for (int k = 0; k <= pos_; k++)
+        if (groups_[k])
+            result += groups_[k]->UsedMemory();
 
     return result;
 }
 
-int bmaster_c::totalMemory() const
+int MemoryManager::TotalMemory() const
 {
-    int result = (int)sizeof(bmaster_c);
+    int result = (int)sizeof(MemoryManager);
 
     for (int k = 0; k < 256; k++)
-        if (groups[k])
-            result += groups[k]->totalMemory();
+        if (groups_[k])
+            result += groups_[k]->TotalMemory();
 
     return result;
 }

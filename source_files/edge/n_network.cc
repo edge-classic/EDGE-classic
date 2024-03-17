@@ -39,8 +39,8 @@
 #include "types.h"
 #include "vm_coal.h" // for coal::vm_c
 
-extern coal::vm_c *ui_vm;
-extern void        CoalSetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name, double value);
+extern coal::Vm *ui_vm;
+extern void        CoalSetFloat(coal::Vm *vm, const char *mod_name, const char *var_name, double value);
 
 // only true if packets are exchanged with a server
 bool network_game = false;

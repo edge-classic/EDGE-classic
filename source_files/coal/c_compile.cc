@@ -23,73 +23,55 @@
 //
 //----------------------------------------------------------------------
 
+#include "AlmostEquals.h"
+#include "c_local.h"
+#include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+#include <float.h>
+#include <math.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <string.h>
-#include <ctype.h>
-#include <math.h>
-#include <errno.h>
-#include <assert.h>
-
-// #include <sys/signal.h>
-
 #include <vector>
-#include <float.h>
-
-#include "coal.h"
-
-#include "AlmostEquals.h"
 
 extern void FatalError(const char *error, ...);
 
 namespace coal
 {
 
-#include "c_local.h"
-#include "c_compile.h"
-
-compiling_c::compiling_c()
-    : source_file(nullptr), source_line(0), asm_dump(false), parse_p(nullptr), line_start(nullptr), error_count(0),
-      global_scope(), all_modules(), all_types(), all_literals(), temporaries()
-{
-}
-
-compiling_c::~compiling_c()
-{
-}
-
-const char *punctuation[] =
+static constexpr const char *punctuation[] =
     // longer symbols must be before a shorter partial match
     {"&&", "||", "<=", ">=", "==", "!=", "++", "--", "...", "..", ":", ";", ",", "!", "*", "/", "%",
      "^",  "(",  ")",  "-",  "+",  "=",  "[",  "]",  "{",   "}",  ".", "<", ">", "#", "&", "|", nullptr};
 
-// simple types.  function types are dynamically allocated
-static type_t type_void     = {ev_void};
-static type_t type_string   = {ev_string};
-static type_t type_float    = {ev_float};
-static type_t type_vector   = {ev_vector};
-static type_t type_function = {ev_function, &type_void};
-static type_t type_module   = {ev_module};
-static type_t type_null     = {ev_null};
+// simple types.  function types are dynamically Allocated
+static Type type_void     = {ev_void};
+static Type type_string   = {ev_string};
+static Type type_float    = {ev_float};
+static Type type_vector   = {ev_vector};
+static Type type_function = {ev_function, &type_void};
+static Type type_module   = {ev_module};
+static Type type_null     = {ev_null};
 
-static int type_size[10] = {1, 1, 1, 3, 1, 1, 1, 1, 1, 1};
+static constexpr int type_size[10] = {1, 1, 1, 3, 1, 1, 1, 1, 1, 1};
 
 // definition used for void return functions
-static def_t def_void = {&type_void, "VOID_SPACE", 0};
+static Definition def_void = {&type_void, "VOID_SPACE", 0};
 
 //
 //  OPERATOR TABLE
 //
-typedef struct
+struct OpCode
 {
     const char *name;
     int         op; // OP_XXX
     int         priority;
-    type_t     *type_a, *type_b, *type_c;
-} opcode_t;
+    Type       *type_a, *type_b, *type_c;
+};
 
-static opcode_t all_operators[] = {
+static OpCode all_operators[] = {
     {"!", OP_NOT_F, -1, &type_float, &type_void, &type_float},
     {"!", OP_NOT_V, -1, &type_vector, &type_void, &type_float},
     {"!", OP_NOT_S, -1, &type_string, &type_void, &type_float},
@@ -141,24 +123,24 @@ static opcode_t all_operators[] = {
     {nullptr} // end of list
 };
 
-#define TOP_PRIORITY 6
-#define NOT_PRIORITY 1
+static constexpr uint8_t kTopPriority = 6;
+static constexpr uint8_t kNotPriority = 1;
 
-void real_vm_c::LEX_NewLine()
+void RealVm::LEX_NewLine()
 {
-    // Called when *comp.parse_p == '\n'
+    // Called when *comp_.parse_p == '\n'
 
-    comp.source_line++;
+    comp_.source_line++;
 
-    comp.line_start = comp.parse_p + 1;
-    comp.fol_level  = 0;
+    comp_.line_start = comp_.parse_p + 1;
+    comp_.fol_level  = 0;
 }
 
 //
 // Aborts the current function parse.
 // The given message should have a trailing \n
 //
-void real_vm_c::CompileError(const char *error, ...)
+void RealVm::CompileError(const char *error, ...)
 {
     va_list argptr;
     char    buffer[1024];
@@ -167,26 +149,26 @@ void real_vm_c::CompileError(const char *error, ...)
     vsprintf(buffer, error, argptr);
     va_end(argptr);
 
-    FatalError("%s:%i: %s", comp.source_file, comp.source_line, buffer);
+    FatalError("%s:%i: %s", comp_.source_file, comp_.source_line, buffer);
 }
 
-void real_vm_c::LEX_String()
+void RealVm::LEX_String()
 {
     // Parses a quoted string
 
-    comp.parse_p++;
+    comp_.parse_p++;
 
     int len = 0;
 
     for (;;)
     {
-        int c = *comp.parse_p++;
+        int c = *comp_.parse_p++;
         if (!c || c == '\n')
             CompileError("unfinished string\n");
 
         if (c == '\\') // escape char
         {
-            c = *comp.parse_p++;
+            c = *comp_.parse_p++;
             if (!c || !(c > 0x1F && c < 0x7F))
                 CompileError("bad escape in string\n");
 
@@ -199,102 +181,101 @@ void real_vm_c::LEX_String()
         }
         else if (c == '\"')
         {
-            comp.token_buf[len] = 0;
-            comp.token_type     = tt_literal;
-            comp.literal_type   = &type_string;
-            strcpy(comp.literal_buf, comp.token_buf);
+            comp_.token_buf[len] = 0;
+            comp_.token_type     = tt_literal;
+            comp_.literal_type   = &type_string;
+            strcpy(comp_.literal_buf, comp_.token_buf);
             return;
         }
 
-        comp.token_buf[len++] = c;
+        comp_.token_buf[len++] = c;
     }
 }
 
-float real_vm_c::LEX_Number()
+float RealVm::LEX_Number()
 {
     int len = 0;
-    int c   = *comp.parse_p;
+    int c   = *comp_.parse_p;
 
     do
     {
-        comp.token_buf[len++] = c;
+        comp_.token_buf[len++] = c;
 
-        comp.parse_p++;
-        c = *comp.parse_p;
+        comp_.parse_p++;
+        c = *comp_.parse_p;
     } while ((c >= '0' && c <= '9') || c == '.');
 
-    comp.token_buf[len] = 0;
+    comp_.token_buf[len] = 0;
 
-    return atof(comp.token_buf);
+    return atof(comp_.token_buf);
 }
 
-void real_vm_c::LEX_Vector()
+void RealVm::LEX_Vector()
 {
     // Parses a single quoted vector
 
-    comp.parse_p++;
-    comp.token_type   = tt_literal;
-    comp.literal_type = &type_vector;
+    comp_.parse_p++;
+    comp_.token_type   = tt_literal;
+    comp_.literal_type = &type_vector;
 
     for (int i = 0; i < 3; i++)
     {
         // FIXME: check for digits etc!
 
-        comp.literal_value[i] = LEX_Number();
+        comp_.literal_value[i] = LEX_Number();
 
-        while (((*comp.parse_p > 0x8 && *comp.parse_p < 0xE) || *comp.parse_p == 0x20) && *comp.parse_p != '\n')
-            comp.parse_p++;
+        while (((*comp_.parse_p > 0x8 && *comp_.parse_p < 0xE) || *comp_.parse_p == 0x20) && *comp_.parse_p != '\n')
+            comp_.parse_p++;
     }
 
-    if (*comp.parse_p != '\'')
+    if (*comp_.parse_p != '\'')
         CompileError("bad vector\n");
 
-    comp.parse_p++;
+    comp_.parse_p++;
 }
 
-void real_vm_c::LEX_Name()
+void RealVm::LEX_Name()
 {
     // Parses an identifier
 
     int len = 0;
-    int c   = *comp.parse_p;
+    int c   = *comp_.parse_p;
 
     do
     {
-        comp.token_buf[len++] = c;
+        comp_.token_buf[len++] = c;
 
-        comp.parse_p++;
-        c = *comp.parse_p;
-    } while (((c > '@' && c < '[') || (c > '`' && c < '{') ||
-            (c > '/' && c < ':')) || c == '_');
+        comp_.parse_p++;
+        c = *comp_.parse_p;
+    } while (((c > '@' && c < '[') || (c > '`' && c < '{') || (c > '/' && c < ':')) || c == '_');
 
-    comp.token_buf[len] = 0;
-    comp.token_type     = tt_name;
+    comp_.token_buf[len] = 0;
+    comp_.token_type     = tt_name;
 }
 
-void real_vm_c::LEX_Punctuation()
+void RealVm::LEX_Punctuation()
 {
-    comp.token_type = tt_punct;
+    comp_.token_type = tt_punct;
 
     const char *p;
 
-    char ch = *comp.parse_p;
+    char ch = *comp_.parse_p;
 
     for (int i = 0; (p = punctuation[i]) != nullptr; i++)
     {
         int len = strlen(p);
 
-        if (strncmp(p, comp.parse_p, len) == 0)
+        if (strncmp(p, comp_.parse_p, len) == 0)
         {
             // found it
-            strcpy(comp.token_buf, p);
+            strcpy(comp_.token_buf, p);
 
             if (p[0] == '{')
-                comp.bracelevel++;
+                comp_.bracelevel++;
             else if (p[0] == '}')
-                comp.bracelevel--;
+                comp_.bracelevel--;
 
-            comp.parse_p += len;
+            comp_.parse_p += len;
             return;
         }
     }
@@ -302,14 +283,14 @@ void real_vm_c::LEX_Punctuation()
     CompileError("unknown punctuation: %c\n", ch);
 }
 
-void real_vm_c::LEX_Whitespace(void)
+void RealVm::LEX_Whitespace(void)
 {
     int c;
 
     for (;;)
     {
         // skip whitespace
-        while ((c = *comp.parse_p) <= ' ')
+        while ((c = *comp_.parse_p) <= ' ')
         {
             if (c == 0) // end of file?
                 return;
@@ -317,37 +298,37 @@ void real_vm_c::LEX_Whitespace(void)
             if (c == '\n')
                 LEX_NewLine();
 
-            comp.parse_p++;
+            comp_.parse_p++;
         }
 
         // skip // comments
-        if (c == '/' && comp.parse_p[1] == '/')
+        if (c == '/' && comp_.parse_p[1] == '/')
         {
-            while (*comp.parse_p && *comp.parse_p != '\n')
-                comp.parse_p++;
+            while (*comp_.parse_p && *comp_.parse_p != '\n')
+                comp_.parse_p++;
 
             LEX_NewLine();
 
-            comp.parse_p++;
+            comp_.parse_p++;
             continue;
         }
 
         // skip /* */ comments
-        if (c == '/' && comp.parse_p[1] == '*')
+        if (c == '/' && comp_.parse_p[1] == '*')
         {
             do
             {
-                comp.parse_p++;
+                comp_.parse_p++;
 
-                if (comp.parse_p[0] == '\n')
+                if (comp_.parse_p[0] == '\n')
                     LEX_NewLine();
 
-                if (comp.parse_p[1] == 0)
+                if (comp_.parse_p[1] == 0)
                     return;
 
-            } while (comp.parse_p[-1] != '*' || comp.parse_p[0] != '/');
+            } while (comp_.parse_p[-1] != '*' || comp_.parse_p[0] != '/');
 
-            comp.parse_p++;
+            comp_.parse_p++;
             continue;
         }
 
@@ -359,23 +340,23 @@ void real_vm_c::LEX_Whitespace(void)
 // Parse the next token in the file.
 // Sets token_type and token_buf, and possibly the literal_xxx fields
 //
-void real_vm_c::LEX_Next()
+void RealVm::LEX_Next()
 {
-    assert(comp.parse_p);
+    assert(comp_.parse_p);
 
     LEX_Whitespace();
 
-    comp.token_buf[0]   = 0;
-    comp.token_is_first = (comp.fol_level == 0);
+    comp_.token_buf[0]   = 0;
+    comp_.token_is_first = (comp_.fol_level == 0);
 
-    comp.fol_level++;
+    comp_.fol_level++;
 
-    int c = *comp.parse_p;
+    int c = *comp_.parse_p;
 
     if (!c)
     {
-        comp.token_type = tt_eof;
-        strcpy(comp.token_buf, "(EOF)");
+        comp_.token_type = tt_eof;
+        strcpy(comp_.token_buf, "(EOF)");
         return;
     }
 
@@ -395,11 +376,11 @@ void real_vm_c::LEX_Next()
 
     // if the first character is a valid identifier, parse until a non-id
     // character is reached
-    if ((c >= '0' && c <= '9') || (c == '-' && comp.parse_p[1] >= '0' && comp.parse_p[1] <= '9'))
+    if ((c >= '0' && c <= '9') || (c == '-' && comp_.parse_p[1] >= '0' && comp_.parse_p[1] <= '9'))
     {
-        comp.token_type       = tt_literal;
-        comp.literal_type     = &type_float;
-        comp.literal_value[0] = LEX_Number();
+        comp_.token_type       = tt_literal;
+        comp_.literal_type     = &type_float;
+        comp_.literal_value[0] = LEX_Number();
         return;
     }
 
@@ -417,10 +398,10 @@ void real_vm_c::LEX_Next()
 // Issues an error if the current token isn't what we want.
 // On success, automatically skips to the next token.
 //
-void real_vm_c::LEX_Expect(const char *str)
+void RealVm::LEX_Expect(const char *str)
 {
-    if (strcmp(comp.token_buf, str) != 0)
-        CompileError("expected %s got %s\n", str, comp.token_buf);
+    if (strcmp(comp_.token_buf, str) != 0)
+        CompileError("expected %s got %s\n", str, comp_.token_buf);
 
     LEX_Next();
 }
@@ -432,9 +413,9 @@ void real_vm_c::LEX_Expect(const char *str)
 // Returns true on a match (skipping to the next token),
 // otherwise returns false and does nothing.
 //
-bool real_vm_c::LEX_Check(const char *str)
+bool RealVm::LEX_Check(const char *str)
 {
-    if (strcmp(comp.token_buf, str) != 0)
+    if (strcmp(comp_.token_buf, str) != 0)
         return false;
 
     LEX_Next();
@@ -445,17 +426,17 @@ bool real_vm_c::LEX_Check(const char *str)
 //
 // Checks to see if the current token is a valid name
 //
-char *real_vm_c::ParseName()
+char *RealVm::ParseName()
 {
-    static char ident[MAX_NAME];
+    static char ident[kMaximumNameLength];
 
-    if (comp.token_type != tt_name)
-        CompileError("expected identifier, got %s\n", comp.token_buf);
+    if (comp_.token_type != tt_name)
+        CompileError("expected identifier, got %s\n", comp_.token_buf);
 
-    if (strlen(comp.token_buf) >= MAX_NAME - 1)
+    if (strlen(comp_.token_buf) >= kMaximumNameLength - 1)
         CompileError("identifier too long\n");
 
-    strcpy(ident, comp.token_buf);
+    strcpy(ident, comp_.token_buf);
 
     LEX_Next();
 
@@ -465,14 +446,14 @@ char *real_vm_c::ParseName()
 //=============================================================================
 
 //
-// Returns a preexisting complex type that matches the parm, or allocates
+// Returns a preexisting complex type that matches the parm, or Allocates
 // a new one and copies it out.
 //
-type_t *real_vm_c::FindType(type_t *type)
+Type *RealVm::FindType(Type *type)
 {
-    for (int k = 0; k < (int)comp.all_types.size(); k++)
+    for (int k = 0; k < (int)comp_.all_types.size(); k++)
     {
-        type_t *check = comp.all_types[k];
+        Type *check = comp_.all_types[k];
 
         if (check->type != type->type || check->aux_type != type->aux_type || check->parm_num != type->parm_num)
             continue;
@@ -486,11 +467,11 @@ type_t *real_vm_c::FindType(type_t *type)
             return check;
     }
 
-    // allocate a new one
-    type_t *t_new = new type_t;
-    *t_new        = *type;
+    // Allocate a new one
+    Type *t_new = new Type;
+    *t_new      = *type;
 
-    comp.all_types.push_back(t_new);
+    comp_.all_types.push_back(t_new);
 
     return t_new;
 }
@@ -498,28 +479,28 @@ type_t *real_vm_c::FindType(type_t *type)
 //
 // Parses a variable type, including field and functions types
 //
-type_t *real_vm_c::ParseType()
+Type *RealVm::ParseType()
 {
-    type_t  t_new;
-    type_t *type;
-    char   *name;
+    Type  t_new;
+    Type *type;
+    char *name;
 
-    if (!strcmp(comp.token_buf, "float"))
+    if (!strcmp(comp_.token_buf, "float"))
         type = &type_float;
-    else if (!strcmp(comp.token_buf, "vector"))
+    else if (!strcmp(comp_.token_buf, "vector"))
         type = &type_vector;
-    else if (!strcmp(comp.token_buf, "float"))
+    else if (!strcmp(comp_.token_buf, "float"))
         type = &type_float;
-    //	else if (!strcmp(comp.token_buf, "entity") )
+    //	else if (!strcmp(comp_.token_buf, "entity") )
     //		type = &type_entity;
-    else if (!strcmp(comp.token_buf, "string"))
+    else if (!strcmp(comp_.token_buf, "string"))
         type = &type_string;
-    else if (!strcmp(comp.token_buf, "void"))
+    else if (!strcmp(comp_.token_buf, "void"))
         type = &type_void;
     else
     {
         type = &type_float; // shut up compiler warning
-        CompileError("unknown type: %s\n", comp.token_buf);
+        CompileError("unknown type: %s\n", comp_.token_buf);
     }
     LEX_Next();
 
@@ -542,7 +523,7 @@ type_t *real_vm_c::ParseType()
                 type = ParseType();
                 name = ParseName();
 
-                strcpy(comp.parm_names[t_new.parm_num], name);
+                strcpy(comp_.parm_names[t_new.parm_num], name);
 
                 t_new.parm_types[t_new.parm_num] = type;
                 t_new.parm_num++;
@@ -556,28 +537,28 @@ type_t *real_vm_c::ParseType()
 
 //===========================================================================
 
-int real_vm_c::EmitCode(short op, int a, int b, int c)
+int RealVm::EmitCode(int16_t op, int a, int b, int c)
 {
     // TODO: if last statement was OP_NULL, overwrite it instead of
     //       creating a new one.
 
-    int ofs = op_mem.alloc((int)sizeof(statement_t));
+    int ofs = op_mem_.Alloc((int)sizeof(Statement));
 
-    statement_t *st = REF_OP(ofs);
+    Statement *st = COAL_REF_OP(ofs);
 
     st->op   = op;
-    st->line = comp.source_line - comp.function_line;
+    st->line = comp_.source_line - comp_.function_line;
 
     st->a = a;
     st->b = b;
     st->c = c;
 
-    comp.last_statement = ofs;
+    comp_.last_statement = ofs;
 
     return ofs;
 }
 
-int real_vm_c::EmitMove(type_t *type, int a, int b)
+int RealVm::EmitMove(Type *type, int a, int b)
 {
     switch (type->type)
     {
@@ -592,42 +573,42 @@ int real_vm_c::EmitMove(type_t *type, int a, int b)
     }
 }
 
-def_t *real_vm_c::NewGlobal(type_t *type)
+Definition *RealVm::NewGlobal(Type *type)
 {
     int tsize = type_size[type->type];
 
-    def_t *var = new def_t;
-    memset(var, 0, sizeof(def_t));
+    Definition *var = new Definition;
+    memset(var, 0, sizeof(Definition));
 
-    var->ofs  = global_mem.alloc(tsize * sizeof(double));
+    var->ofs  = global_mem_.Alloc(tsize * sizeof(double));
     var->type = type;
 
     // clear it
-    memset(global_mem.deref(var->ofs), 0, tsize * sizeof(double));
+    memset(global_mem_.Deref(var->ofs), 0, tsize * sizeof(double));
 
     return var;
 }
 
-def_t *real_vm_c::NewLocal(type_t *type)
+Definition *RealVm::NewLocal(Type *type)
 {
-    def_t *var = new def_t;
-    memset(var, 0, sizeof(def_t));
+    Definition *var = new Definition;
+    memset(var, 0, sizeof(Definition));
 
-    var->ofs  = -(comp.locals_end + 1);
+    var->ofs  = -(comp_.locals_end + 1);
     var->type = type;
 
-    comp.locals_end += type_size[type->type];
+    comp_.locals_end += type_size[type->type];
 
     return var;
 }
 
-def_t *real_vm_c::NewTemporary(type_t *type)
+Definition *RealVm::NewTemporary(Type *type)
 {
-    def_t *var;
+    Definition *var;
 
-    std::vector<def_t *>::iterator TI;
+    std::vector<Definition *>::iterator TI;
 
-    for (TI = comp.temporaries.begin(); TI != comp.temporaries.end(); TI++)
+    for (TI = comp_.temporaries.begin(); TI != comp_.temporaries.end(); TI++)
     {
         var = *TI;
 
@@ -648,48 +629,48 @@ def_t *real_vm_c::NewTemporary(type_t *type)
     var = NewLocal(type);
 
     var->flags |= DF_Temporary;
-    comp.temporaries.push_back(var);
+    comp_.temporaries.push_back(var);
 
     return var;
 }
 
-void real_vm_c::FreeTemporaries()
+void RealVm::FreeTemporaries()
 {
-    std::vector<def_t *>::iterator TI;
+    std::vector<Definition *>::iterator TI;
 
-    for (TI = comp.temporaries.begin(); TI != comp.temporaries.end(); TI++)
+    for (TI = comp_.temporaries.begin(); TI != comp_.temporaries.end(); TI++)
     {
-        def_t *tvar = *TI;
+        Definition *tvar = *TI;
 
         tvar->flags |= DF_FreeTemp;
     }
 }
 
-def_t *real_vm_c::FindLiteral()
+Definition *RealVm::FindLiteral()
 {
     // check for a constant with the same value
-    for (int i = 0; i < (int)comp.all_literals.size(); i++)
+    for (int i = 0; i < (int)comp_.all_literals.size(); i++)
     {
-        def_t *cn = comp.all_literals[i];
+        Definition *cn = comp_.all_literals[i];
 
-        if (cn->type != comp.literal_type)
+        if (cn->type != comp_.literal_type)
             continue;
 
-        if (comp.literal_type == &type_string)
+        if (comp_.literal_type == &type_string)
         {
-            if (strcmp(G_STRING(cn->ofs), comp.literal_buf) == 0)
+            if (strcmp(COAL_G_STRING(cn->ofs), comp_.literal_buf) == 0)
                 return cn;
         }
-        else if (comp.literal_type == &type_float)
+        else if (comp_.literal_type == &type_float)
         {
-            if (AlmostEquals(G_FLOAT(cn->ofs), comp.literal_value[0]))
+            if (AlmostEquals(COAL_G_FLOAT(cn->ofs), comp_.literal_value[0]))
                 return cn;
         }
-        else if (comp.literal_type == &type_vector)
+        else if (comp_.literal_type == &type_vector)
         {
-            if (AlmostEquals(G_FLOAT(cn->ofs), comp.literal_value[0]) &&
-                AlmostEquals(G_FLOAT(cn->ofs + 1), comp.literal_value[1]) &&
-                AlmostEquals(G_FLOAT(cn->ofs + 2), comp.literal_value[2]))
+            if (AlmostEquals(COAL_G_FLOAT(cn->ofs), comp_.literal_value[0]) &&
+                AlmostEquals(COAL_G_FLOAT(cn->ofs + 1), comp_.literal_value[1]) &&
+                AlmostEquals(COAL_G_FLOAT(cn->ofs + 2), comp_.literal_value[2]))
             {
                 return cn;
             }
@@ -699,35 +680,35 @@ def_t *real_vm_c::FindLiteral()
     return nullptr; // not found
 }
 
-void real_vm_c::StoreLiteral(int ofs)
+void RealVm::StoreLiteral(int ofs)
 {
-    double *p = REF_GLOBAL(ofs);
+    double *p = COAL_REF_GLOBAL(ofs);
 
-    if (comp.literal_type == &type_string)
+    if (comp_.literal_type == &type_string)
     {
-        *p = (double)InternaliseString(comp.literal_buf);
+        *p = (double)InternaliseString(comp_.literal_buf);
     }
-    else if (comp.literal_type == &type_vector)
+    else if (comp_.literal_type == &type_vector)
     {
-        p[0] = comp.literal_value[0];
-        p[1] = comp.literal_value[1];
-        p[2] = comp.literal_value[2];
+        p[0] = comp_.literal_value[0];
+        p[1] = comp_.literal_value[1];
+        p[2] = comp_.literal_value[2];
     }
     else
     {
-        *p = comp.literal_value[0];
+        *p = comp_.literal_value[0];
     }
 }
 
-def_t *real_vm_c::EXP_Literal()
+Definition *RealVm::EXP_Literal()
 {
     // Looks for a preexisting constant
-    def_t *cn = FindLiteral();
+    Definition *cn = FindLiteral();
 
     if (!cn)
     {
-        // allocate a new one
-        cn = NewGlobal(comp.literal_type);
+        // Allocate a new one
+        cn = NewGlobal(comp_.literal_type);
 
         cn->name = "CONSTANT VALUE";
 
@@ -737,24 +718,24 @@ def_t *real_vm_c::EXP_Literal()
         // copy the literal to the global area
         StoreLiteral(cn->ofs);
 
-        comp.all_literals.push_back(cn);
+        comp_.all_literals.push_back(cn);
     }
 
     LEX_Next();
     return cn;
 }
 
-def_t *real_vm_c::EXP_FunctionCall(def_t *func)
+Definition *RealVm::EXP_FunctionCall(Definition *func)
 {
-    type_t *t = func->type;
+    Type *t = func->type;
 
     if (t->type != ev_function)
         CompileError("not a function before ()\n");
 
-    function_t *df = functions[(int)*REF_GLOBAL(func->ofs)];
+    Function *df = functions_[(int)*COAL_REF_GLOBAL(func->ofs)];
 
     // evaluate all parameters
-    def_t *exprs[MAX_PARMS];
+    Definition *exprs[kMaximumParameters];
 
     int arg = 0;
 
@@ -765,9 +746,9 @@ def_t *real_vm_c::EXP_FunctionCall(def_t *func)
             if (arg >= t->parm_num)
                 CompileError("too many parameters (expected %d)\n", t->parm_num);
 
-            assert(arg < MAX_PARMS);
+            assert(arg < kMaximumParameters);
 
-            def_t *e = EXP_Expression(TOP_PRIORITY);
+            Definition *e = EXP_Expression(kTopPriority);
 
             if (e->type != t->parm_types[arg])
                 CompileError("type mismatch on parameter %i\n", arg + 1);
@@ -796,7 +777,7 @@ def_t *real_vm_c::EXP_FunctionCall(def_t *func)
         }
     }
 
-    def_t *result = nullptr;
+    Definition *result = nullptr;
 
     if (t->aux_type->type != ev_void)
     {
@@ -832,18 +813,18 @@ def_t *real_vm_c::EXP_FunctionCall(def_t *func)
 
     if (result)
     {
-        EmitMove(result->type, OFS_RETURN * 8, result->ofs);
+        EmitMove(result->type, kReturnOffset * 8, result->ofs);
         return result;
     }
 
     return &def_void;
 }
 
-void real_vm_c::STAT_Return(void)
+void RealVm::STAT_Return(void)
 {
-    def_t *func_def = comp.scope->def;
+    Definition *func_def = comp_.scope->def_;
 
-    if (comp.token_is_first || comp.token_buf[0] == '}' || LEX_Check(";"))
+    if (comp_.token_is_first || comp_.token_buf[0] == '}' || LEX_Check(";"))
     {
         if (func_def->type->aux_type->type != ev_void)
             CompileError("missing value for return\n");
@@ -852,7 +833,7 @@ void real_vm_c::STAT_Return(void)
         return;
     }
 
-    def_t *e = EXP_Expression(TOP_PRIORITY);
+    Definition *e = EXP_Expression(kTopPriority);
 
     if (func_def->type->aux_type->type == ev_void)
         CompileError("return with value in void function\n");
@@ -860,18 +841,18 @@ void real_vm_c::STAT_Return(void)
     if (func_def->type->aux_type != e->type)
         CompileError("type mismatch for return\n");
 
-    EmitMove(func_def->type->aux_type, e->ofs, OFS_RETURN * 8);
+    EmitMove(func_def->type->aux_type, e->ofs, kReturnOffset * 8);
 
     EmitCode(OP_RET);
 
     // -AJA- optional semicolons
-    if (!(comp.token_is_first || comp.token_buf[0] == '}'))
+    if (!(comp_.token_is_first || comp_.token_buf[0] == '}'))
         LEX_Expect(";");
 }
 
-def_t *real_vm_c::FindDef(type_t *type, char *name, scope_c *scope)
+Definition *RealVm::FindDef(Type *type, char *name, Scope *scope)
 {
-    for (def_t *def = scope->names; def; def = def->next)
+    for (Definition *def = scope->names_; def; def = def->next)
     {
         if (strcmp(def->name, name) != 0)
             continue;
@@ -885,19 +866,19 @@ def_t *real_vm_c::FindDef(type_t *type, char *name, scope_c *scope)
     return nullptr;
 }
 
-def_t *real_vm_c::DeclareDef(type_t *type, char *name, scope_c *scope)
+Definition *RealVm::DeclareDef(Type *type, char *name, Scope *scope)
 {
-    // A new def will be allocated if it can't be found
+    // A new def will be Allocated if it can't be found
 
     assert(type);
 
-    def_t *def = FindDef(type, name, scope);
+    Definition *def = FindDef(type, name, scope);
     if (def)
         return def;
 
-    // allocate a new def
+    // Allocate a new def
 
-    if (scope->kind == 'f')
+    if (scope->kind_ == 'f')
         def = NewLocal(type);
     else
         def = NewGlobal(type);
@@ -905,44 +886,44 @@ def_t *real_vm_c::DeclareDef(type_t *type, char *name, scope_c *scope)
     def->name = strdup(name);
 
     // link into list
-    scope->push_back(def);
+    scope->PushBack(def);
 
     return def;
 }
 
-def_t *real_vm_c::EXP_VarValue()
+Definition *RealVm::EXP_VarValue()
 {
     char *name = ParseName();
 
     // look through the defs
-    scope_c *scope = comp.scope;
+    Scope *scope = comp_.scope;
 
     for (;;)
     {
-        def_t *d = FindDef(nullptr, name, scope);
+        Definition *d = FindDef(nullptr, name, scope);
         if (d)
             return d;
 
-        if (scope->kind == 'g')
+        if (scope->kind_ == 'g')
             CompileError("unknown identifier: %s\n", name);
 
         // move to outer scope
-        scope = scope->def->scope;
+        scope = scope->def_->scope;
     }
 }
 
-def_t *real_vm_c::EXP_Term()
+Definition *RealVm::EXP_Term()
 {
-    // if the token is a literal, allocate a constant for it
-    if (comp.token_type == tt_literal)
+    // if the token is a literal, Allocate a constant for it
+    if (comp_.token_type == tt_literal)
         return EXP_Literal();
 
-    if (comp.token_type == tt_name)
+    if (comp_.token_type == tt_name)
         return EXP_VarValue();
 
     if (LEX_Check("("))
     {
-        def_t *e = EXP_Expression(TOP_PRIORITY);
+        Definition *e = EXP_Expression(kTopPriority);
         LEX_Expect(")");
         return e;
     }
@@ -951,7 +932,7 @@ def_t *real_vm_c::EXP_Term()
 
     for (int n = 0; all_operators[n].name; n++)
     {
-        opcode_t *op = &all_operators[n];
+        OpCode *op = &all_operators[n];
 
         if (op->priority != -1)
             continue;
@@ -959,14 +940,14 @@ def_t *real_vm_c::EXP_Term()
         if (!LEX_Check(op->name))
             continue;
 
-        def_t *e = EXP_Expression(NOT_PRIORITY);
+        Definition *e = EXP_Expression(kNotPriority);
 
         for (int i = 0; i == 0 || strcmp(op->name, op[i].name) == 0; i++)
         {
             if (op[i].type_a->type != e->type->type)
                 continue;
 
-            def_t *result = NewTemporary(op[i].type_c);
+            Definition *result = NewTemporary(op[i].type_c);
 
             EmitCode(op[i].op, e->ofs, 0, result->ofs);
 
@@ -977,13 +958,13 @@ def_t *real_vm_c::EXP_Term()
         break;
     }
 
-    CompileError("expected value, got %s\n", comp.token_buf);
+    CompileError("expected value, got %s\n", comp_.token_buf);
     return nullptr; /* NOT REACHED */
 }
 
-def_t *real_vm_c::EXP_ShortCircuit(def_t *e, int n)
+Definition *RealVm::EXP_ShortCircuit(Definition *e, int n)
 {
-    opcode_t *op = &all_operators[n];
+    OpCode *op = &all_operators[n];
 
     if (e->type->type != ev_float)
         CompileError("type mismatch for %s\n", op->name);
@@ -997,7 +978,7 @@ def_t *real_vm_c::EXP_ShortCircuit(def_t *e, int n)
     //		MOVE b --> c
     //		label:
 
-    def_t *result = NewTemporary(op->type_c);
+    Definition *result = NewTemporary(op->type_c);
 
     EmitCode(OP_MOVE_F, e->ofs, result->ofs);
 
@@ -1008,27 +989,27 @@ def_t *real_vm_c::EXP_ShortCircuit(def_t *e, int n)
     else
         patch = EmitCode(OP_IF, result->ofs);
 
-    def_t *e2 = EXP_Expression(op->priority - 1);
+    Definition *e2 = EXP_Expression(op->priority - 1);
     if (e2->type->type != ev_float)
         CompileError("type mismatch for %s\n", op->name);
 
     EmitCode(OP_MOVE_F, e2->ofs, result->ofs);
 
-    REF_OP(patch)->b = EmitCode(OP_NULL);
+    COAL_REF_OP(patch)->b = EmitCode(OP_NULL);
 
     return result;
 }
 
-def_t *real_vm_c::EXP_FieldQuery(def_t *e, bool lvalue)
+Definition *RealVm::EXP_FieldQuery(Definition *e, bool lvalue)
 {
     char *name = ParseName();
 
     if (e->type->type == ev_vector)
     {
-        def_t *vec = FindDef(&type_vector, (char *)e->name, e->scope);
+        Definition *vec = FindDef(&type_vector, (char *)e->name, e->scope);
         if (vec)
         {
-            def_t *element = NewTemporary(&type_float);
+            Definition *element = NewTemporary(&type_float);
             if (strcmp(name, "x") == 0)
                 element->ofs = vec->ofs;
             else if (strcmp(name, "y") == 0)
@@ -1046,9 +1027,9 @@ def_t *real_vm_c::EXP_FieldQuery(def_t *e, bool lvalue)
 
     if (e->type->type == ev_module)
     {
-        scope_c *mod = comp.all_modules[e->ofs];
+        Scope *mod = comp_.all_modules[e->ofs];
 
-        def_t *d = FindDef(nullptr, name, mod);
+        Definition *d = FindDef(nullptr, name, mod);
         if (!d)
             CompileError("unknown identifier: %s.%s\n", e->name, name);
 
@@ -1059,12 +1040,12 @@ def_t *real_vm_c::EXP_FieldQuery(def_t *e, bool lvalue)
     return nullptr; // NOT REACHED
 }
 
-def_t *real_vm_c::EXP_Expression(int priority, bool *lvalue)
+Definition *RealVm::EXP_Expression(int priority, bool *lvalue)
 {
     if (priority == 0)
         return EXP_Term();
 
-    def_t *e = EXP_Expression(priority - 1, lvalue);
+    Definition *e = EXP_Expression(priority - 1, lvalue);
 
     // loop through a sequence of same-priority operators
     bool found;
@@ -1088,7 +1069,7 @@ def_t *real_vm_c::EXP_Expression(int priority, bool *lvalue)
 
         for (int n = 0; all_operators[n].name; n++)
         {
-            opcode_t *op = &all_operators[n];
+            OpCode *op = &all_operators[n];
 
             if (op->priority != priority)
                 continue;
@@ -1104,15 +1085,15 @@ def_t *real_vm_c::EXP_Expression(int priority, bool *lvalue)
                 break;
             }
 
-            def_t *e2 = EXP_Expression(priority - 1);
+            Definition *e2 = EXP_Expression(priority - 1);
 
             // type check
 
-            etype_t type_a = e->type->type;
-            etype_t type_b = e2->type->type;
-            etype_t type_c = ev_void;
+            BasicType type_a = e->type->type;
+            BasicType type_b = e2->type->type;
+            BasicType type_c = ev_void;
 
-            opcode_t *oldop = op;
+            OpCode *oldop = op;
 
             while (type_a != op->type_a->type || type_b != op->type_b->type ||
                    (type_c != ev_void && type_c != op->type_c->type))
@@ -1125,7 +1106,7 @@ def_t *real_vm_c::EXP_Expression(int priority, bool *lvalue)
             if (type_a == ev_pointer && type_b != e->type->aux_type->type)
                 CompileError("type mismatch for %s\n", op->name);
 
-            def_t *result = NewTemporary(op->type_c);
+            Definition *result = NewTemporary(op->type_c);
 
             EmitCode(op->op, e->ofs, e2->ofs, result->ofs);
 
@@ -1137,10 +1118,10 @@ def_t *real_vm_c::EXP_Expression(int priority, bool *lvalue)
     return e;
 }
 
-void real_vm_c::STAT_If_Else()
+void RealVm::STAT_If_Else()
 {
     LEX_Expect("(");
-    def_t *e = EXP_Expression(TOP_PRIORITY);
+    Definition *e = EXP_Expression(kTopPriority);
     LEX_Expect(")");
 
     int patch = EmitCode(OP_IFNOT, e->ofs);
@@ -1153,7 +1134,7 @@ void real_vm_c::STAT_If_Else()
         // use GOTO to skip over the else statements
         int patch2 = EmitCode(OP_GOTO);
 
-        REF_OP(patch)->b = EmitCode(OP_NULL);
+        COAL_REF_OP(patch)->b = EmitCode(OP_NULL);
 
         patch = patch2;
 
@@ -1161,17 +1142,17 @@ void real_vm_c::STAT_If_Else()
         FreeTemporaries();
     }
 
-    REF_OP(patch)->b = EmitCode(OP_NULL);
+    COAL_REF_OP(patch)->b = EmitCode(OP_NULL);
 }
 
-void real_vm_c::STAT_Assert()
+void RealVm::STAT_Assert()
 {
     // TODO: only internalise the filename ONCE
-    int file_str = InternaliseString(comp.source_file);
-    int line_num = comp.source_line;
+    int file_str = InternaliseString(comp_.source_file);
+    int line_num = comp_.source_line;
 
     LEX_Expect("(");
-    def_t *e = EXP_Expression(TOP_PRIORITY);
+    Definition *e = EXP_Expression(kTopPriority);
     LEX_Expect(")");
 
     int patch = EmitCode(OP_IF, e->ofs);
@@ -1179,15 +1160,15 @@ void real_vm_c::STAT_Assert()
     EmitCode(OP_ERROR, file_str, line_num);
     FreeTemporaries();
 
-    REF_OP(patch)->b = EmitCode(OP_NULL);
+    COAL_REF_OP(patch)->b = EmitCode(OP_NULL);
 }
 
-void real_vm_c::STAT_WhileLoop()
+void RealVm::STAT_WhileLoop()
 {
     int begin = EmitCode(OP_NULL);
 
     LEX_Expect("(");
-    def_t *e = EXP_Expression(TOP_PRIORITY);
+    Definition *e = EXP_Expression(kTopPriority);
     LEX_Expect(")");
 
     int patch = EmitCode(OP_IFNOT, e->ofs);
@@ -1197,10 +1178,10 @@ void real_vm_c::STAT_WhileLoop()
 
     EmitCode(OP_GOTO, 0, begin);
 
-    REF_OP(patch)->b = EmitCode(OP_NULL);
+    COAL_REF_OP(patch)->b = EmitCode(OP_NULL);
 }
 
-void real_vm_c::STAT_RepeatLoop()
+void RealVm::STAT_RepeatLoop()
 {
     int begin = EmitCode(OP_NULL);
 
@@ -1210,31 +1191,31 @@ void real_vm_c::STAT_RepeatLoop()
     LEX_Expect("until");
     LEX_Expect("(");
 
-    def_t *e = EXP_Expression(TOP_PRIORITY);
+    Definition *e = EXP_Expression(kTopPriority);
 
     EmitCode(OP_IFNOT, e->ofs, begin);
 
     LEX_Expect(")");
 
     // -AJA- optional semicolons
-    if (!(comp.token_is_first || comp.token_buf[0] == '}'))
+    if (!(comp_.token_is_first || comp_.token_buf[0] == '}'))
         LEX_Expect(";");
 }
 
-void real_vm_c::STAT_ForLoop()
+void RealVm::STAT_ForLoop()
 {
     LEX_Expect("(");
 
     char *var_name = strdup(ParseName());
 
-    def_t *var = FindDef(&type_float, var_name, comp.scope);
+    Definition *var = FindDef(&type_float, var_name, comp_.scope);
 
     if (!var || (var->flags & DF_Constant))
         CompileError("unknown variable in for loop: %s\n", var_name);
 
     LEX_Expect("=");
 
-    def_t *e1 = EXP_Expression(TOP_PRIORITY);
+    Definition *e1 = EXP_Expression(kTopPriority);
     if (e1->type != var->type)
         CompileError("type mismatch in for loop\n");
 
@@ -1243,17 +1224,17 @@ void real_vm_c::STAT_ForLoop()
 
     LEX_Expect(",");
 
-    def_t *e2 = EXP_Expression(TOP_PRIORITY);
+    Definition *e2 = EXP_Expression(kTopPriority);
     if (e2->type != var->type)
         CompileError("type mismatch in for loop\n");
 
     // create local to contain second value
-    def_t *target = NewLocal(&type_float);
+    Definition *target = NewLocal(&type_float);
     EmitCode(OP_MOVE_F, e2->ofs, target->ofs);
 
     LEX_Expect(")");
 
-    def_t *cond_temp = NewTemporary(&type_float);
+    Definition *cond_temp = NewTemporary(&type_float);
 
     int begin = EmitCode(OP_LE, var->ofs, target->ofs, cond_temp->ofs);
     int patch = EmitCode(OP_IFNOT, cond_temp->ofs);
@@ -1265,15 +1246,15 @@ void real_vm_c::STAT_ForLoop()
     EmitCode(OP_INC, var->ofs, 0, var->ofs);
     EmitCode(OP_GOTO, 0, begin);
 
-    REF_OP(patch)->b = EmitCode(OP_NULL);
+    COAL_REF_OP(patch)->b = EmitCode(OP_NULL);
 }
 
-void real_vm_c::STAT_Assignment(def_t *e)
+void RealVm::STAT_Assignment(Definition *e)
 {
     if (e->flags & DF_Constant)
         CompileError("assignment to a constant\n");
 
-    def_t *e2 = EXP_Expression(TOP_PRIORITY);
+    Definition *e2 = EXP_Expression(kTopPriority);
 
     if (e2->type != e->type)
         CompileError("type mismatch in assignment\n");
@@ -1281,7 +1262,7 @@ void real_vm_c::STAT_Assignment(def_t *e)
     EmitMove(e->type, e2->ofs, e->ofs);
 }
 
-void real_vm_c::STAT_Statement(bool allow_def)
+void RealVm::STAT_Statement(bool allow_def)
 {
     if (allow_def && LEX_Check("var"))
     {
@@ -1348,8 +1329,8 @@ void real_vm_c::STAT_Statement(bool allow_def)
         return;
     }
 
-    bool   lvalue = true;
-    def_t *e      = EXP_Expression(TOP_PRIORITY, &lvalue);
+    bool        lvalue = true;
+    Definition *e      = EXP_Expression(kTopPriority, &lvalue);
 
     // lvalue is false for a plain function call
 
@@ -1361,17 +1342,17 @@ void real_vm_c::STAT_Statement(bool allow_def)
     }
 
     // -AJA- optional semicolons
-    if (!(comp.token_is_first || comp.token_buf[0] == '}'))
+    if (!(comp_.token_is_first || comp_.token_buf[0] == '}'))
         LEX_Expect(";");
 }
 
-int real_vm_c::GLOB_FunctionBody(def_t *func_def, type_t *type, const char *func_name)
+int RealVm::GLOB_FunctionBody(Definition *func_def, Type *type, const char *func_name)
 {
     // Returns the first_statement value
 
-    comp.temporaries.clear();
+    comp_.temporaries.clear();
 
-    comp.function_line = comp.source_line;
+    comp_.function_line = comp_.source_line;
 
     //
     // check for native function definition
@@ -1379,15 +1360,15 @@ int real_vm_c::GLOB_FunctionBody(def_t *func_def, type_t *type, const char *func
     if (LEX_Check("native"))
     {
         const char *module = nullptr;
-        if (func_def->scope->kind == 'm')
-            module = func_def->scope->def->name;
+        if (func_def->scope->kind_ == 'm')
+            module = func_def->scope->def_->name;
 
         int native = GetNativeFunc(func_name, module);
 
         if (native < 0)
         {
             // fix scope (must not stay in function scope)
-            comp.scope = func_def->scope;
+            comp_.scope = func_def->scope;
 
             CompileError("no such native function: %s%s%s\n", module ? module : "", module ? "." : "", func_name);
         }
@@ -1401,10 +1382,10 @@ int real_vm_c::GLOB_FunctionBody(def_t *func_def, type_t *type, const char *func
 
     for (int i = 0; i < type->parm_num; i++)
     {
-        if (FindDef(type->parm_types[i], comp.parm_names[i], comp.scope))
-            CompileError("parameter %s redeclared\n", comp.parm_names[i]);
+        if (FindDef(type->parm_types[i], comp_.parm_names[i], comp_.scope))
+            CompileError("parameter %s redeclared\n", comp_.parm_names[i]);
 
-        DeclareDef(type->parm_types[i], comp.parm_names[i], comp.scope);
+        DeclareDef(type->parm_types[i], comp_.parm_names[i], comp_.scope);
     }
 
     int code = EmitCode(OP_NULL);
@@ -1416,18 +1397,18 @@ int real_vm_c::GLOB_FunctionBody(def_t *func_def, type_t *type, const char *func
 
     while (!LEX_Check("}"))
     {
-        if (comp.token_type == tt_error)
+        if (comp_.token_type == tt_error)
             LEX_Next();
         else
             STAT_Statement(true);
 
-        if (comp.token_type == tt_eof)
+        if (comp_.token_type == tt_eof)
             CompileError("unfinished function body (hit EOF)\n");
 
         FreeTemporaries();
     }
 
-    statement_t *last = REF_OP(comp.last_statement);
+    Statement *last = COAL_REF_OP(comp_.last_statement);
 
     if (last->op != OP_RET)
     {
@@ -1440,13 +1421,13 @@ int real_vm_c::GLOB_FunctionBody(def_t *func_def, type_t *type, const char *func
     return code;
 }
 
-void real_vm_c::GLOB_Function()
+void RealVm::GLOB_Function()
 {
     char *func_name = strdup(ParseName());
 
     LEX_Expect("(");
 
-    type_t t_new;
+    Type t_new;
 
     memset(&t_new, 0, sizeof(t_new));
     t_new.type         = ev_function;
@@ -1458,8 +1439,8 @@ void real_vm_c::GLOB_Function()
     {
         do
         {
-            if (t_new.parm_num >= MAX_PARMS)
-                CompileError("too many parameters (over %d)\n", MAX_PARMS);
+            if (t_new.parm_num >= kMaximumParameters)
+                CompileError("too many parameters (over %d)\n", kMaximumParameters);
 
             char *name = ParseName();
 
@@ -1476,7 +1457,7 @@ void real_vm_c::GLOB_Function()
                                  func_name);
             }
 
-            strcpy(comp.parm_names[t_new.parm_num], name);
+            strcpy(comp_.parm_names[t_new.parm_num], name);
 
             // parameter type (defaults to float)
             if (LEX_Check(":"))
@@ -1496,25 +1477,25 @@ void real_vm_c::GLOB_Function()
         t_new.aux_type = ParseType();
     }
 
-    type_t *func_type = FindType(&t_new);
+    Type *func_type = FindType(&t_new);
 
-    def_t *def = DeclareDef(func_type, func_name, comp.scope);
+    Definition *def = DeclareDef(func_type, func_name, comp_.scope);
 
     assert(func_type->type == ev_function);
 
     LEX_Expect("=");
 
     // fill in the dfunction
-    G_FLOAT(def->ofs) = (double)functions.size();
+    COAL_G_FLOAT(def->ofs) = (double)functions_.size();
 
-    function_t *df = new function_t;
-    memset(df, 0, sizeof(function_t));
+    Function *df = new Function;
+    memset(df, 0, sizeof(Function));
 
-    functions.push_back(df);
+    functions_.push_back(df);
 
     df->name        = func_name; // already strdup'd
-    df->source_file = strdup(comp.source_file);
-    df->source_line = comp.source_line;
+    df->source_file = strdup(comp_.source_file);
+    df->source_line = comp_.source_line;
 
     int stack_ofs = 0;
 
@@ -1539,41 +1520,41 @@ void real_vm_c::GLOB_Function()
 
     df->locals_ofs = stack_ofs;
 
-    // parms are "realloc'd" by DeclareDef in FunctionBody
-    comp.locals_end = 0;
+    // parms are "reAlloc'd" by DeclareDef in FunctionBody
+    comp_.locals_end = 0;
 
-    scope_c *OLD_scope = comp.scope;
+    Scope *OLD_scope = comp_.scope;
 
-    comp.scope       = new scope_c;
-    comp.scope->kind = 'f';
-    comp.scope->def  = def;
+    comp_.scope        = new Scope;
+    comp_.scope->kind_ = 'f';
+    comp_.scope->def_  = def;
     //  {
     df->first_statement = GLOB_FunctionBody(def, func_type, func_name);
-    df->last_statement  = comp.last_statement;
+    df->last_statement  = comp_.last_statement;
     //  }
-    comp.scope = OLD_scope;
+    comp_.scope = OLD_scope;
 
-    df->locals_size = comp.locals_end - df->locals_ofs;
-    df->locals_end  = comp.locals_end;
+    df->locals_size = comp_.locals_end - df->locals_ofs;
+    df->locals_end  = comp_.locals_end;
 
-    if (comp.asm_dump)
+    if (comp_.asm_dump)
         ASM_DumpFunction(df);
 
-    // debugprintf(stderr, "FUNCTION %s locals:%d\n", func_name, comp.locals_end);
+    // debugprintf(stderr, "FUNCTION %s locals:%d\n", func_name, comp_.locals_end);
 }
 
-void real_vm_c::GLOB_Variable()
+void RealVm::GLOB_Variable()
 {
     char *var_name = strdup(ParseName());
 
-    type_t *type = &type_float;
+    Type *type = &type_float;
 
     if (LEX_Check(":"))
     {
         type = ParseType();
     }
 
-    def_t *def = DeclareDef(type, var_name, comp.scope);
+    Definition *def = DeclareDef(type, var_name, comp_.scope);
 
     if (def->flags & DF_Constant)
         CompileError("%s previously defined as a constant\n");
@@ -1583,10 +1564,10 @@ void real_vm_c::GLOB_Variable()
         // global variables can only be initialised with a constant
         if (def->ofs > 0)
         {
-            if (comp.token_type != tt_literal)
-                CompileError("expected value for var, got %s\n", comp.token_buf);
+            if (comp_.token_type != tt_literal)
+                CompileError("expected value for var, got %s\n", comp_.token_buf);
 
-            if (comp.literal_type->type != type->type)
+            if (comp_.literal_type->type != type->type)
                 CompileError("type mismatch for %s\n", var_name);
 
             StoreLiteral(def->ofs);
@@ -1596,7 +1577,7 @@ void real_vm_c::GLOB_Variable()
         else // local variables can take an expression
              // it is equivalent to: var XX ; XX = ...
         {
-            def_t *e2 = EXP_Expression(TOP_PRIORITY);
+            Definition *e2 = EXP_Expression(kTopPriority);
 
             if (e2->type != def->type)
                 CompileError("type mismatch for %s\n", var_name);
@@ -1608,24 +1589,24 @@ void real_vm_c::GLOB_Variable()
     {
         // global vars are already zero (via NewGlobal)
         if (def->ofs < 0)
-            EmitMove(type, OFS_DEFAULT * 8, def->ofs);
+            EmitMove(type, kDefaultOffset * 8, def->ofs);
     }
 
     // -AJA- optional semicolons
-    if (!(comp.token_is_first || comp.token_buf[0] == '}'))
+    if (!(comp_.token_is_first || comp_.token_buf[0] == '}'))
         LEX_Expect(";");
 }
 
-void real_vm_c::GLOB_Constant()
+void RealVm::GLOB_Constant()
 {
     char *const_name = strdup(ParseName());
 
     LEX_Expect("=");
 
-    if (comp.token_type != tt_literal)
-        CompileError("expected value for constant, got %s\n", comp.token_buf);
+    if (comp_.token_type != tt_literal)
+        CompileError("expected value for constant, got %s\n", comp_.token_buf);
 
-    def_t *cn = DeclareDef(comp.literal_type, const_name, comp.scope);
+    Definition *cn = DeclareDef(comp_.literal_type, const_name, comp_.scope);
 
     cn->flags |= DF_Constant;
 
@@ -1634,65 +1615,65 @@ void real_vm_c::GLOB_Constant()
     LEX_Next();
 
     // -AJA- optional semicolons
-    if (!(comp.token_is_first || comp.token_buf[0] == '}'))
+    if (!(comp_.token_is_first || comp_.token_buf[0] == '}'))
         LEX_Expect(";");
 }
 
-void real_vm_c::GLOB_Module()
+void RealVm::GLOB_Module()
 {
-    if (comp.scope->kind != 'g')
+    if (comp_.scope->kind_ != 'g')
         CompileError("modules cannot contain other modules\n");
 
     char *mod_name = strdup(ParseName());
 
-    def_t *def = FindDef(&type_module, mod_name, comp.scope);
+    Definition *def = FindDef(&type_module, mod_name, comp_.scope);
 
-    scope_c *mod = nullptr;
+    Scope *mod = nullptr;
 
     if (def)
-        mod = comp.all_modules[def->ofs];
+        mod = comp_.all_modules[def->ofs];
     else
     {
-        def = new def_t;
-        memset(def, 0, sizeof(def_t));
+        def = new Definition;
+        memset(def, 0, sizeof(Definition));
 
         def->name  = mod_name;
         def->type  = &type_module;
-        def->ofs   = (int)comp.all_modules.size();
-        def->scope = comp.scope;
+        def->ofs   = (int)comp_.all_modules.size();
+        def->scope = comp_.scope;
 
-        comp.scope->push_back(def);
+        comp_.scope->PushBack(def);
 
-        mod = new scope_c;
+        mod = new Scope;
 
-        mod->kind = 'm';
-        mod->def  = def;
+        mod->kind_ = 'm';
+        mod->def_  = def;
 
-        comp.all_modules.push_back(mod);
+        comp_.all_modules.push_back(mod);
     }
 
-    scope_c *OLD_scope = comp.scope;
+    Scope *OLD_scope = comp_.scope;
 
-    comp.scope = mod;
+    comp_.scope = mod;
 
     LEX_Expect("{");
 
     while (!LEX_Check("}"))
     {
         // handle a previous error
-        if (comp.token_type == tt_error)
+        if (comp_.token_type == tt_error)
             LEX_Next();
         else
             GLOB_Globals();
-            
-        if (comp.token_type == tt_eof)
+
+        if (comp_.token_type == tt_eof)
             CompileError("unfinished module (hit EOF)\n");
     }
 
-    comp.scope = OLD_scope;
+    comp_.scope = OLD_scope;
 }
 
-void real_vm_c::GLOB_Globals()
+void RealVm::GLOB_Globals()
 {
     if (LEX_Check("function"))
     {
@@ -1718,67 +1699,66 @@ void real_vm_c::GLOB_Globals()
         return;
     }
 
-    CompileError("expected global definition, got %s\n", comp.token_buf);
+    CompileError("expected global definition, got %s\n", comp_.token_buf);
 }
 
 //
 // compiles the NUL terminated text, adding definitions to the pr structure
 //
-bool real_vm_c::CompileFile(char *buffer, const char *filename)
+bool RealVm::CompileFile(char *buffer, const char *filename)
 {
-    comp.source_file   = filename;
-    comp.source_line   = 1;
-    comp.function_line = 0;
+    comp_.source_file   = filename;
+    comp_.source_line   = 1;
+    comp_.function_line = 0;
 
-    comp.parse_p    = buffer;
-    comp.line_start = buffer;
-    comp.bracelevel = 0;
-    comp.fol_level  = 0;
+    comp_.parse_p    = buffer;
+    comp_.line_start = buffer;
+    comp_.bracelevel = 0;
+    comp_.fol_level  = 0;
 
     LEX_Next(); // read first token
 
-    while (comp.token_type != tt_eof)
+    while (comp_.token_type != tt_eof)
     {
-        comp.scope = &comp.global_scope;
+        comp_.scope = &comp_.global_scope;
 
         // handle a previous error
-        if (comp.token_type == tt_error)
+        if (comp_.token_type == tt_error)
             LEX_Next();
         else
             GLOB_Globals();
     }
 
-    comp.source_file = nullptr;
+    comp_.source_file = nullptr;
 
-    return (comp.error_count == 0);
+    return (comp_.error_count == 0);
 }
 
-void real_vm_c::ShowStats()
+void RealVm::ShowStats()
 {
-    printer("functions: %u\n", functions.size());
-    printer("string memory: %d / %d\n", string_mem.usedMemory(), string_mem.totalMemory());
-    printer("instruction memory: %d / %d\n", op_mem.usedMemory(), op_mem.totalMemory());
-    printer("globals memory: %d / %d\n", global_mem.usedMemory(), global_mem.totalMemory());
+    Printer("functions: %u\n", functions_.size());
+    Printer("string memory: %d / %d\n", string_mem_.UsedMemory(), string_mem_.TotalMemory());
+    Printer("instruction memory: %d / %d\n", op_mem_.UsedMemory(), op_mem_.TotalMemory());
+    Printer("globals memory: %d / %d\n", global_mem_.UsedMemory(), global_mem_.TotalMemory());
 }
 
-real_vm_c::real_vm_c()
-    : printer(default_printer), op_mem(), global_mem(), string_mem(), temp_strings(), functions(), native_funcs(),
-      comp(), exec()
+RealVm::RealVm()
+    : op_mem_(), global_mem_(), string_mem_(), temp_strings_(), functions_(), native_funcs_(), comp_(), exec_()
 {
     // string #0 must be the empty string
-    int ofs = string_mem.alloc(2);
+    int ofs = string_mem_.Alloc(2);
     if (ofs != 0)
     {
         RunError("string #0 must be the empty string\n");
     }
 
-    strcpy((char *)string_mem.deref(0), "");
+    strcpy((char *)string_mem_.Deref(0), "");
 
     // function #0 is the "null function"
-    function_t *df = new function_t;
-    memset(df, 0, sizeof(function_t));
+    Function *df = new Function;
+    memset(df, 0, sizeof(Function));
 
-    functions.push_back(df);
+    functions_.push_back(df);
 
     // statement #0 is never used
     ofs = EmitCode(OP_RET);
@@ -1790,77 +1770,77 @@ real_vm_c::real_vm_c()
     // global #0 is never used (equivalent to nullptr)
     // global #1-#3 are reserved for function return values
     // global #4-#6 are reserved for a zero value
-    ofs = global_mem.alloc(7 * sizeof(double));
+    ofs = global_mem_.Alloc(7 * sizeof(double));
     assert(ofs == 0);
-    memset(global_mem.deref(0), 0, 7 * sizeof(double));
+    memset(global_mem_.Deref(0), 0, 7 * sizeof(double));
 }
 
-real_vm_c::~real_vm_c()
+RealVm::~RealVm()
 {
     // FIXME !!!!
 }
 
-void real_vm_c::SetPrinter(print_func_t func)
+void RealVm::SetPrinter(PrintFunction func)
 {
-    printer = func;
+    Printer = func;
 }
 
-void real_vm_c::SetAsmDump(bool enable)
+void RealVm::SetAsmDump(bool enable)
 {
-    comp.asm_dump = enable;
+    comp_.asm_dump = enable;
 }
 
-double real_vm_c::GetFloat(const char *mod_name, const char *var_name)
+double RealVm::GetFloat(const char *mod_name, const char *var_name)
 {
-    def_t   *mod_def   = nullptr;
-    scope_c *mod_scope = nullptr;
+    Definition *mod_def   = nullptr;
+    Scope      *mod_scope = nullptr;
     if (mod_name)
     {
-        mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+        mod_def = FindDef(&type_module, (char *)mod_name, &comp_.global_scope);
         if (!mod_def)
         {
             RunError("GetFloat failed: Could not find module %s\n", mod_name);
         }
-        mod_scope = comp.all_modules[mod_def->ofs];
+        mod_scope = comp_.all_modules[mod_def->ofs];
     }
 
-    def_t *var = nullptr;
+    Definition *var = nullptr;
     if (mod_scope)
         var = FindDef(&type_float, (char *)var_name, mod_scope);
     else
-        var = FindDef(&type_float, (char *)var_name, &comp.global_scope);
+        var = FindDef(&type_float, (char *)var_name, &comp_.global_scope);
 
     if (var)
-        return G_FLOAT(var->ofs);
+        return COAL_G_FLOAT(var->ofs);
 
     RunError("GetFloat failed: Could not find variable %s\n", var_name);
 
     return 0; // Not reached
 }
 
-const char *real_vm_c::GetString(const char *mod_name, const char *var_name)
+const char *RealVm::GetString(const char *mod_name, const char *var_name)
 {
-    def_t   *mod_def   = nullptr;
-    scope_c *mod_scope = nullptr;
+    Definition *mod_def   = nullptr;
+    Scope      *mod_scope = nullptr;
     if (mod_name)
     {
-        mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+        mod_def = FindDef(&type_module, (char *)mod_name, &comp_.global_scope);
         if (!mod_def)
         {
             RunError("GetString failed: Could not find module %s\n", mod_name);
         }
-        mod_scope = comp.all_modules[mod_def->ofs];
+        mod_scope = comp_.all_modules[mod_def->ofs];
     }
 
-    def_t *var = nullptr;
+    Definition *var = nullptr;
     if (mod_scope)
         var = FindDef(&type_string, (char *)var_name, mod_scope);
     else
-        var = FindDef(&type_string, (char *)var_name, &comp.global_scope);
+        var = FindDef(&type_string, (char *)var_name, &comp_.global_scope);
 
     if (var)
     {
-        return G_STRING(var->ofs);
+        return COAL_G_STRING(var->ofs);
     }
 
     RunError("GetString failed: Could not find variable %s\n", var_name);
@@ -1868,29 +1848,29 @@ const char *real_vm_c::GetString(const char *mod_name, const char *var_name)
     return 0; // Not reached
 }
 
-double *real_vm_c::GetVector(const char *mod_name, const char *var_name)
+double *RealVm::GetVector(const char *mod_name, const char *var_name)
 {
-    def_t   *mod_def   = nullptr;
-    scope_c *mod_scope = nullptr;
+    Definition *mod_def   = nullptr;
+    Scope      *mod_scope = nullptr;
     if (mod_name)
     {
-        mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+        mod_def = FindDef(&type_module, (char *)mod_name, &comp_.global_scope);
         if (!mod_def)
         {
             RunError("GetVector failed: Could not find module %s\n", mod_name);
         }
-        mod_scope = comp.all_modules[mod_def->ofs];
+        mod_scope = comp_.all_modules[mod_def->ofs];
     }
 
-    def_t *var = nullptr;
+    Definition *var = nullptr;
     if (mod_scope)
         var = FindDef(&type_vector, (char *)var_name, mod_scope);
     else
-        var = FindDef(&type_vector, (char *)var_name, &comp.global_scope);
+        var = FindDef(&type_vector, (char *)var_name, &comp_.global_scope);
 
     if (var)
     {
-        return G_VECTOR(var->ofs);
+        return COAL_G_VECTOR(var->ofs);
     }
 
     RunError("GetVector failed: Could not find variable %s\n", var_name);
@@ -1898,29 +1878,29 @@ double *real_vm_c::GetVector(const char *mod_name, const char *var_name)
     return 0; // Not reached
 }
 
-double real_vm_c::GetVectorX(const char *mod_name, const char *var_name)
+double RealVm::GetVectorX(const char *mod_name, const char *var_name)
 {
-    def_t   *mod_def   = nullptr;
-    scope_c *mod_scope = nullptr;
+    Definition *mod_def   = nullptr;
+    Scope      *mod_scope = nullptr;
     if (mod_name)
     {
-        mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+        mod_def = FindDef(&type_module, (char *)mod_name, &comp_.global_scope);
         if (!mod_def)
         {
             RunError("GetVectorX failed: Could not find module %s\n", mod_name);
         }
-        mod_scope = comp.all_modules[mod_def->ofs];
+        mod_scope = comp_.all_modules[mod_def->ofs];
     }
 
-    def_t *var = nullptr;
+    Definition *var = nullptr;
     if (mod_scope)
         var = FindDef(&type_vector, (char *)var_name, mod_scope);
     else
-        var = FindDef(&type_vector, (char *)var_name, &comp.global_scope);
+        var = FindDef(&type_vector, (char *)var_name, &comp_.global_scope);
 
     if (var)
     {
-        return G_VECTOR(var->ofs)[0];
+        return COAL_G_VECTOR(var->ofs)[0];
     }
 
     RunError("GetVectorX failed: Could not find variable %s\n", var_name);
@@ -1928,29 +1908,29 @@ double real_vm_c::GetVectorX(const char *mod_name, const char *var_name)
     return 0; // Not reached
 }
 
-double real_vm_c::GetVectorY(const char *mod_name, const char *var_name)
+double RealVm::GetVectorY(const char *mod_name, const char *var_name)
 {
-    def_t   *mod_def   = nullptr;
-    scope_c *mod_scope = nullptr;
+    Definition *mod_def   = nullptr;
+    Scope      *mod_scope = nullptr;
     if (mod_name)
     {
-        mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+        mod_def = FindDef(&type_module, (char *)mod_name, &comp_.global_scope);
         if (!mod_def)
         {
             RunError("GetVectorY failed: Could not find module %s\n", mod_name);
         }
-        mod_scope = comp.all_modules[mod_def->ofs];
+        mod_scope = comp_.all_modules[mod_def->ofs];
     }
 
-    def_t *var = nullptr;
+    Definition *var = nullptr;
     if (mod_scope)
         var = FindDef(&type_vector, (char *)var_name, mod_scope);
     else
-        var = FindDef(&type_vector, (char *)var_name, &comp.global_scope);
+        var = FindDef(&type_vector, (char *)var_name, &comp_.global_scope);
 
     if (var)
     {
-        return G_VECTOR(var->ofs)[1];
+        return COAL_G_VECTOR(var->ofs)[1];
     }
 
     RunError("GetVectorY failed: Could not find variable %s\n", var_name);
@@ -1958,29 +1938,29 @@ double real_vm_c::GetVectorY(const char *mod_name, const char *var_name)
     return 0; // Not reached
 }
 
-double real_vm_c::GetVectorZ(const char *mod_name, const char *var_name)
+double RealVm::GetVectorZ(const char *mod_name, const char *var_name)
 {
-    def_t   *mod_def   = nullptr;
-    scope_c *mod_scope = nullptr;
+    Definition *mod_def   = nullptr;
+    Scope      *mod_scope = nullptr;
     if (mod_name)
     {
-        mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+        mod_def = FindDef(&type_module, (char *)mod_name, &comp_.global_scope);
         if (!mod_def)
         {
             RunError("GetVectorZ failed: Could not find module %s\n", mod_name);
         }
-        mod_scope = comp.all_modules[mod_def->ofs];
+        mod_scope = comp_.all_modules[mod_def->ofs];
     }
 
-    def_t *var = nullptr;
+    Definition *var = nullptr;
     if (mod_scope)
         var = FindDef(&type_vector, (char *)var_name, mod_scope);
     else
-        var = FindDef(&type_vector, (char *)var_name, &comp.global_scope);
+        var = FindDef(&type_vector, (char *)var_name, &comp_.global_scope);
 
     if (var)
     {
-        return G_VECTOR(var->ofs)[2];
+        return COAL_G_VECTOR(var->ofs)[2];
     }
 
     RunError("GetVectorZ failed: Could not find variable %s\n", var_name);
@@ -1988,199 +1968,199 @@ double real_vm_c::GetVectorZ(const char *mod_name, const char *var_name)
     return 0; // Not reached
 }
 
-void real_vm_c::SetFloat(const char *mod_name, const char *var_name, double value)
+void RealVm::SetFloat(const char *mod_name, const char *var_name, double value)
 {
-    def_t   *mod_def   = nullptr;
-    scope_c *mod_scope = nullptr;
+    Definition *mod_def   = nullptr;
+    Scope      *mod_scope = nullptr;
     if (mod_name)
     {
-        mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+        mod_def = FindDef(&type_module, (char *)mod_name, &comp_.global_scope);
         if (!mod_def)
         {
-            printer("SetFloat failed: Could not find module %s\n", mod_name);
+            Printer("SetFloat failed: Could not find module %s\n", mod_name);
             return;
         }
-        mod_scope = comp.all_modules[mod_def->ofs];
+        mod_scope = comp_.all_modules[mod_def->ofs];
     }
 
-    def_t *var = nullptr;
+    Definition *var = nullptr;
     if (mod_scope)
         var = FindDef(&type_float, (char *)var_name, mod_scope);
     else
-        var = FindDef(&type_float, (char *)var_name, &comp.global_scope);
+        var = FindDef(&type_float, (char *)var_name, &comp_.global_scope);
 
     if (var)
     {
-        G_FLOAT(var->ofs) = value;
+        COAL_G_FLOAT(var->ofs) = value;
         return;
     }
 
-    printer("SetFloat failed: Could not find variable %s\n", var_name);
+    Printer("SetFloat failed: Could not find variable %s\n", var_name);
     return;
 }
 
-void real_vm_c::SetString(const char *mod_name, const char *var_name, const char *value)
+void RealVm::SetString(const char *mod_name, const char *var_name, const char *value)
 {
-    def_t   *mod_def   = nullptr;
-    scope_c *mod_scope = nullptr;
+    Definition *mod_def   = nullptr;
+    Scope      *mod_scope = nullptr;
     if (mod_name)
     {
-        mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+        mod_def = FindDef(&type_module, (char *)mod_name, &comp_.global_scope);
         if (!mod_def)
         {
-            printer("SetString failed: Could not find module %s\n", mod_name);
+            Printer("SetString failed: Could not find module %s\n", mod_name);
             return;
         }
-        mod_scope = comp.all_modules[mod_def->ofs];
+        mod_scope = comp_.all_modules[mod_def->ofs];
     }
 
-    def_t *var = nullptr;
+    Definition *var = nullptr;
     if (mod_scope)
         var = FindDef(&type_string, (char *)var_name, mod_scope);
     else
-        var = FindDef(&type_string, (char *)var_name, &comp.global_scope);
+        var = FindDef(&type_string, (char *)var_name, &comp_.global_scope);
 
     if (var)
     {
-        *REF_GLOBAL(var->ofs) = (double)InternaliseString(value);
+        *COAL_REF_GLOBAL(var->ofs) = (double)InternaliseString(value);
         return;
     }
 
-    printer("SetString failed: Could not find variable %s\n", var_name);
+    Printer("SetString failed: Could not find variable %s\n", var_name);
     return;
 }
 
-void real_vm_c::SetVector(const char *mod_name, const char *var_name, double val_1, double val_2, double val_3)
+void RealVm::SetVector(const char *mod_name, const char *var_name, double val_1, double val_2, double val_3)
 {
-    def_t   *mod_def   = nullptr;
-    scope_c *mod_scope = nullptr;
+    Definition *mod_def   = nullptr;
+    Scope      *mod_scope = nullptr;
     if (mod_name)
     {
-        mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+        mod_def = FindDef(&type_module, (char *)mod_name, &comp_.global_scope);
         if (!mod_def)
         {
-            printer("SetVector failed: Could not find module %s\n", mod_name);
+            Printer("SetVector failed: Could not find module %s\n", mod_name);
             return;
         }
-        mod_scope = comp.all_modules[mod_def->ofs];
+        mod_scope = comp_.all_modules[mod_def->ofs];
     }
 
-    def_t *var = nullptr;
+    Definition *var = nullptr;
     if (mod_scope)
         var = FindDef(&type_vector, (char *)var_name, mod_scope);
     else
-        var = FindDef(&type_vector, (char *)var_name, &comp.global_scope);
+        var = FindDef(&type_vector, (char *)var_name, &comp_.global_scope);
 
     if (var)
     {
-        G_VECTOR(var->ofs)[0] = val_1;
-        G_VECTOR(var->ofs)[1] = val_2;
-        G_VECTOR(var->ofs)[2] = val_3;
+        COAL_G_VECTOR(var->ofs)[0] = val_1;
+        COAL_G_VECTOR(var->ofs)[1] = val_2;
+        COAL_G_VECTOR(var->ofs)[2] = val_3;
         return;
     }
 
-    printer("SetVector failed: Could not find variable %s\n", var_name);
+    Printer("SetVector failed: Could not find variable %s\n", var_name);
     return;
 }
 
-void real_vm_c::SetVectorX(const char *mod_name, const char *var_name, double val)
+void RealVm::SetVectorX(const char *mod_name, const char *var_name, double val)
 {
-    def_t   *mod_def   = nullptr;
-    scope_c *mod_scope = nullptr;
+    Definition *mod_def   = nullptr;
+    Scope      *mod_scope = nullptr;
     if (mod_name)
     {
-        mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+        mod_def = FindDef(&type_module, (char *)mod_name, &comp_.global_scope);
         if (!mod_def)
         {
-            printer("SetVectorX failed: Could not find module %s\n", mod_name);
+            Printer("SetVectorX failed: Could not find module %s\n", mod_name);
             return;
         }
-        mod_scope = comp.all_modules[mod_def->ofs];
+        mod_scope = comp_.all_modules[mod_def->ofs];
     }
 
-    def_t *var = nullptr;
+    Definition *var = nullptr;
     if (mod_scope)
         var = FindDef(&type_vector, (char *)var_name, mod_scope);
     else
-        var = FindDef(&type_vector, (char *)var_name, &comp.global_scope);
+        var = FindDef(&type_vector, (char *)var_name, &comp_.global_scope);
 
     if (var)
     {
-        G_VECTOR(var->ofs)[0] = val;
+        COAL_G_VECTOR(var->ofs)[0] = val;
         return;
     }
 
-    printer("SetVectorX failed: Could not find variable %s\n", var_name);
+    Printer("SetVectorX failed: Could not find variable %s\n", var_name);
     return;
 }
 
-void real_vm_c::SetVectorY(const char *mod_name, const char *var_name, double val)
+void RealVm::SetVectorY(const char *mod_name, const char *var_name, double val)
 {
-    def_t   *mod_def   = nullptr;
-    scope_c *mod_scope = nullptr;
+    Definition *mod_def   = nullptr;
+    Scope      *mod_scope = nullptr;
     if (mod_name)
     {
-        mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+        mod_def = FindDef(&type_module, (char *)mod_name, &comp_.global_scope);
         if (!mod_def)
         {
-            printer("SetVectorY failed: Could not find module %s\n", mod_name);
+            Printer("SetVectorY failed: Could not find module %s\n", mod_name);
             return;
         }
-        mod_scope = comp.all_modules[mod_def->ofs];
+        mod_scope = comp_.all_modules[mod_def->ofs];
     }
 
-    def_t *var = nullptr;
+    Definition *var = nullptr;
     if (mod_scope)
         var = FindDef(&type_vector, (char *)var_name, mod_scope);
     else
-        var = FindDef(&type_vector, (char *)var_name, &comp.global_scope);
+        var = FindDef(&type_vector, (char *)var_name, &comp_.global_scope);
 
     if (var)
     {
-        G_VECTOR(var->ofs)[1] = val;
+        COAL_G_VECTOR(var->ofs)[1] = val;
         return;
     }
 
-    printer("SetVectorY failed: Could not find variable %s\n", var_name);
+    Printer("SetVectorY failed: Could not find variable %s\n", var_name);
     return;
 }
 
-void real_vm_c::SetVectorZ(const char *mod_name, const char *var_name, double val)
+void RealVm::SetVectorZ(const char *mod_name, const char *var_name, double val)
 {
-    def_t   *mod_def   = nullptr;
-    scope_c *mod_scope = nullptr;
+    Definition *mod_def   = nullptr;
+    Scope      *mod_scope = nullptr;
     if (mod_name)
     {
-        mod_def = FindDef(&type_module, (char *)mod_name, &comp.global_scope);
+        mod_def = FindDef(&type_module, (char *)mod_name, &comp_.global_scope);
         if (!mod_def)
         {
-            printer("SetVectorZ failed: Could not find module %s\n", mod_name);
+            Printer("SetVectorZ failed: Could not find module %s\n", mod_name);
             return;
         }
-        mod_scope = comp.all_modules[mod_def->ofs];
+        mod_scope = comp_.all_modules[mod_def->ofs];
     }
 
-    def_t *var = nullptr;
+    Definition *var = nullptr;
     if (mod_scope)
         var = FindDef(&type_vector, (char *)var_name, mod_scope);
     else
-        var = FindDef(&type_vector, (char *)var_name, &comp.global_scope);
+        var = FindDef(&type_vector, (char *)var_name, &comp_.global_scope);
 
     if (var)
     {
-        G_VECTOR(var->ofs)[2] = val;
+        COAL_G_VECTOR(var->ofs)[2] = val;
         return;
     }
 
-    printer("SetVectorZ failed: Could not find variable %s\n", var_name);
+    Printer("SetVectorZ failed: Could not find variable %s\n", var_name);
     return;
 }
 
-vm_c *CreateVM()
+Vm *CreateVM()
 {
     assert(sizeof(double) == 8);
 
-    return new real_vm_c;
+    return new RealVm;
 }
 
 } // namespace coal

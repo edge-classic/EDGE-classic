@@ -23,54 +23,27 @@
 //
 //----------------------------------------------------------------------
 
+#include "AlmostEquals.h"
+#include "c_local.h"
+#include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+#include <float.h>
+#include <math.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <string.h>
-#include <ctype.h>
-#include <math.h>
-#include <errno.h>
-#include <assert.h>
-
-#include <float.h>
-
-#include "coal.h"
-
 #include <vector>
-
-#include "AlmostEquals.h"
 
 extern void FatalError(const char *error, ...);
 
 namespace coal
 {
 
-#include "c_local.h"
-#include "c_execute.h"
+static constexpr uint32_t kMaximumRunaway = 1000000;
 
-#define MAX_RUNAWAY (1000 * 1000)
-
-#define MAX_PRINTMSG 1024
-
-execution_c::execution_c() : s(0), func(0), tracing(false), stack_depth(0), call_depth(0)
-{
-}
-
-execution_c::~execution_c()
-{
-}
-
-void real_vm_c::default_printer(const char *msg, ...)
-{
-    // does nothing
-}
-
-void real_vm_c::default_aborter(const char *msg, ...)
-{
-    exit(66);
-}
-
-int real_vm_c::GetNativeFunc(const char *name, const char *module)
+int RealVm::GetNativeFunc(const char *name, const char *module)
 {
     char buffer[256];
 
@@ -79,107 +52,107 @@ int real_vm_c::GetNativeFunc(const char *name, const char *module)
     else
         strcpy(buffer, name);
 
-    for (int i = 0; i < (int)native_funcs.size(); i++)
-        if (strcmp(native_funcs[i]->name, buffer) == 0)
+    for (int i = 0; i < (int)native_funcs_.size(); i++)
+        if (strcmp(native_funcs_[i]->name, buffer) == 0)
             return i;
 
     return -1; // NOT FOUND
 }
 
-void real_vm_c::AddNativeFunction(const char *name, native_func_t func)
+void RealVm::AddNativeFunction(const char *name, NativeFunction func)
 {
     // already registered?
     int prev = GetNativeFunc(name, nullptr);
 
     if (prev >= 0)
     {
-        native_funcs[prev]->func = func;
+        native_funcs_[prev]->func = func;
         return;
     }
 
-    reg_native_func_t *reg = new reg_native_func_t;
+    RegisteredNativeFunction *reg = new RegisteredNativeFunction;
 
     reg->name = strdup(name);
     reg->func = func;
 
-    native_funcs.push_back(reg);
+    native_funcs_.push_back(reg);
 }
 
-void real_vm_c::SetTrace(bool enable)
+void RealVm::SetTrace(bool enable)
 {
-    exec.tracing = enable;
+    exec_.tracing = enable;
 }
 
-int real_vm_c::FindFunction(const char *func_name)
+int RealVm::FindFunction(const char *func_name)
 {
-    for (int i = (int)functions.size() - 1; i >= 1; i--)
+    for (int i = (int)functions_.size() - 1; i >= 1; i--)
     {
-        function_t *f = functions[i];
+        Function *f = functions_[i];
 
         if (strcmp(f->name, func_name) == 0)
             return i;
     }
 
-    return vm_c::NOT_FOUND;
+    return Vm::NOT_FOUND;
 }
 
-int real_vm_c::FindVariable(const char *var_name)
+int RealVm::FindVariable(const char *var_name)
 {
     // FIXME
 
-    return vm_c::NOT_FOUND;
+    return Vm::NOT_FOUND;
 }
 
 // returns an offset from the string heap
-int real_vm_c::InternaliseString(const char *new_s)
+int RealVm::InternaliseString(const char *new_s)
 {
     if (new_s[0] == 0)
         return 0;
 
-    int ofs = string_mem.alloc(strlen(new_s) + 1);
-    strcpy((char *)string_mem.deref(ofs), new_s);
+    int ofs = string_mem_.Alloc(strlen(new_s) + 1);
+    strcpy((char *)string_mem_.Deref(ofs), new_s);
 
     return ofs;
 }
 
-double *real_vm_c::AccessParam(int p)
+double *RealVm::AccessParam(int p)
 {
-    assert(exec.func);
+    assert(exec_.func);
 
-    if (p >= functions[exec.func]->parm_num)
+    if (p >= functions_[exec_.func]->parm_num)
         RunError("PR_Parameter: p=%d out of range\n", p);
 
-    if (AlmostEquals(exec.stack[exec.stack_depth + functions[exec.func]->parm_ofs[p]], (double)(-FLT_MAX)))
+    if (AlmostEquals(exec_.stack[exec_.stack_depth + functions_[exec_.func]->parm_ofs[p]], (double)(-FLT_MAX)))
         return nullptr;
     else
-        return &exec.stack[exec.stack_depth + functions[exec.func]->parm_ofs[p]];
+        return &exec_.stack[exec_.stack_depth + functions_[exec_.func]->parm_ofs[p]];
 }
 
-const char *real_vm_c::AccessParamString(int p)
+const char *RealVm::AccessParamString(int p)
 {
     double *d = AccessParam(p);
 
     if (d)
-        return REF_STRING((int)*d);
+        return COAL_REF_STRING((int)*d);
     else
         return nullptr;
 }
 
-void real_vm_c::ReturnFloat(double f)
+void RealVm::ReturnFloat(double f)
 {
-    G_FLOAT(OFS_RETURN * 8) = f;
+    COAL_G_FLOAT(kReturnOffset * 8) = f;
 }
 
-void real_vm_c::ReturnVector(double *v)
+void RealVm::ReturnVector(double *v)
 {
-    double *c = G_VECTOR(OFS_RETURN * 8);
+    double *c = COAL_G_VECTOR(kReturnOffset * 8);
 
     c[0] = v[0];
     c[1] = v[1];
     c[2] = v[2];
 }
 
-void real_vm_c::ReturnString(const char *s, int len)
+void RealVm::ReturnString(const char *s, int len)
 {
     // TODO: turn this code into a utility function
 
@@ -188,45 +161,45 @@ void real_vm_c::ReturnString(const char *s, int len)
 
     if (len == 0)
     {
-        G_FLOAT(OFS_RETURN * 8) = 0;
+        COAL_G_FLOAT(kReturnOffset * 8) = 0;
     }
     else
     {
-        int index = temp_strings.alloc(len + 1);
+        int index = temp_strings_.Alloc(len + 1);
 
-        char *s3 = (char *)temp_strings.deref(index);
+        char *s3 = (char *)temp_strings_.Deref(index);
 
         memcpy(s3, s, (size_t)len);
         s3[len] = 0;
 
-        G_FLOAT(OFS_RETURN * 8) = -(1 + index);
+        COAL_G_FLOAT(kReturnOffset * 8) = -(1 + index);
     }
 }
 
 //
 // Aborts the currently executing functions
 //
-void real_vm_c::RunError(const char *error, ...)
+void RealVm::RunError(const char *error, ...)
 {
     va_list argptr;
-    char    buffer[MAX_PRINTMSG];
+    char    buffer[1024];
 
     va_start(argptr, error);
     vsnprintf(buffer, sizeof(buffer), error, argptr);
     va_end(argptr);
 
-    printer("COAL ERROR: %s\n", buffer);
+    Printer("COAL ERROR: %s\n", buffer);
 
-    if (exec.call_depth > 0)
+    if (exec_.call_depth > 0)
         StackTrace();
 
     /* clear the stack so SV/Host_Error can shutdown functions */
-    exec.call_depth = 0;
+    exec_.call_depth = 0;
 
     FatalError(buffer);
 }
 
-int real_vm_c::STR_Concat(const char *s1, const char *s2)
+int RealVm::STR_Concat(const char *s1, const char *s2)
 {
     int len1 = strlen(s1);
     int len2 = strlen(s2);
@@ -234,8 +207,8 @@ int real_vm_c::STR_Concat(const char *s1, const char *s2)
     if (len1 == 0 && len2 == 0)
         return 0;
 
-    int   index = temp_strings.alloc(len1 + len2 + 1);
-    char *s3    = (char *)temp_strings.deref(index);
+    int   index = temp_strings_.Alloc(len1 + len2 + 1);
+    char *s3    = (char *)temp_strings_.Deref(index);
 
     strcpy(s3, s1);
     strcpy(s3 + len1, s2);
@@ -243,7 +216,7 @@ int real_vm_c::STR_Concat(const char *s1, const char *s2)
     return -(1 + index);
 }
 
-int real_vm_c::STR_ConcatFloat(const char *s, double f)
+int RealVm::STR_ConcatFloat(const char *s, double f)
 {
     char buffer[100];
 
@@ -259,7 +232,7 @@ int real_vm_c::STR_ConcatFloat(const char *s, double f)
     return STR_Concat(s, buffer);
 }
 
-int real_vm_c::STR_ConcatVector(const char *s, double *v)
+int RealVm::STR_ConcatVector(const char *s, double *v)
 {
     char buffer[200];
 
@@ -279,92 +252,93 @@ int real_vm_c::STR_ConcatVector(const char *s, double *v)
 //  EXECUTION ENGINE
 //================================================================
 
-void real_vm_c::EnterFunction(int func)
+void RealVm::EnterFunction(int func)
 {
     assert(func > 0);
 
-    function_t *new_f = functions[func];
+    Function *new_f = functions_[func];
 
     // NOTE: the saved 's' value points to the instruction _after_ OP_CALL
 
-    exec.call_stack[exec.call_depth].s    = exec.s;
-    exec.call_stack[exec.call_depth].func = exec.func;
+    exec_.call_stack[exec_.call_depth].s    = exec_.s;
+    exec_.call_stack[exec_.call_depth].func = exec_.func;
 
-    exec.call_depth++;
-    if (exec.call_depth >= MAX_CALL_STACK)
+    exec_.call_depth++;
+    if (exec_.call_depth >= kMaximumCallStack)
         RunError("stack overflow");
 
-    if (exec.func)
-        exec.stack_depth += functions[exec.func]->locals_end;
+    if (exec_.func)
+        exec_.stack_depth += functions_[exec_.func]->locals_end;
 
-    if (exec.stack_depth + new_f->locals_end >= MAX_LOCAL_STACK)
+    if (exec_.stack_depth + new_f->locals_end >= kMaximumLocalStack)
         RunError("PR_ExecuteProgram: locals stack overflow\n");
 
-    exec.s    = new_f->first_statement;
-    exec.func = func;
+    exec_.s    = new_f->first_statement;
+    exec_.func = func;
 }
 
-void real_vm_c::LeaveFunction()
+void RealVm::LeaveFunction()
 {
-    if (exec.call_depth <= 0)
+    if (exec_.call_depth <= 0)
         RunError("stack underflow");
 
-    exec.call_depth--;
+    exec_.call_depth--;
 
-    exec.s    = exec.call_stack[exec.call_depth].s;
-    exec.func = exec.call_stack[exec.call_depth].func;
+    exec_.s    = exec_.call_stack[exec_.call_depth].s;
+    exec_.func = exec_.call_stack[exec_.call_depth].func;
 
-    if (exec.func)
-        exec.stack_depth -= functions[exec.func]->locals_end;
+    if (exec_.func)
+        exec_.stack_depth -= functions_[exec_.func]->locals_end;
 }
 
-void real_vm_c::EnterNative(int func, int argc)
+void RealVm::EnterNative(int func, int argc)
 {
-    function_t *newf = functions[func];
+    Function *newf = functions_[func];
 
     int n = -(newf->first_statement + 1);
-    assert(n < (int)native_funcs.size());
+    assert(n < (int)native_funcs_.size());
 
-    exec.stack_depth += functions[exec.func]->locals_end;
+    exec_.stack_depth += functions_[exec_.func]->locals_end;
     {
-        int old_func = exec.func;
+        int old_func = exec_.func;
         {
-            exec.func = func;
-            native_funcs[n]->func(this, argc);
+            exec_.func = func;
+            native_funcs_[n]->func(this, argc);
         }
-        exec.func = old_func;
+        exec_.func = old_func;
     }
-    exec.stack_depth -= functions[exec.func]->locals_end;
+    exec_.stack_depth -= functions_[exec_.func]->locals_end;
 }
 
-#define Operand(a) (((a) > 0) ? REF_GLOBAL(a) : ((a) < 0) ? &exec.stack[exec.stack_depth - ((a) + 1)] : nullptr)
+#define COAL_OPERAND(a)                                                                                                \
+    (((a) > 0) ? COAL_REF_GLOBAL(a) : ((a) < 0) ? &exec_.stack[exec_.stack_depth - ((a) + 1)] : nullptr)
 
-void real_vm_c::DoExecute(int fnum)
+void RealVm::DoExecute(int fnum)
 {
-    function_t *f = functions[fnum];
+    Function *f = functions_[fnum];
 
-    int runaway = MAX_RUNAWAY;
+    int runaway = kMaximumRunaway;
 
     // make a stack frame
-    int exitdepth = exec.call_depth;
+    int exitdepth = exec_.call_depth;
 
     EnterFunction(fnum);
 
     for (;;)
     {
-        statement_t *st = REF_OP(exec.s);
+        Statement *st = COAL_REF_OP(exec_.s);
 
-        if (exec.tracing)
-            PrintStatement(f, exec.s);
+        if (exec_.tracing)
+            PrintStatement(f, exec_.s);
 
         if (!--runaway)
             RunError("runaway loop error");
 
         // move code pointer to next statement
-        exec.s += sizeof(statement_t);
+        exec_.s += sizeof(Statement);
 
         // handle exotic operations here (ones which store special
-        // values in the a / b / c fields of statement_t).
+        // values in the a / b / c fields of Statement).
 
         if (st->op < OP_MOVE_F)
             switch (st->op)
@@ -374,13 +348,13 @@ void real_vm_c::DoExecute(int fnum)
                 continue;
 
             case OP_CALL: {
-                double *a = Operand(st->a);
+                double *a = COAL_OPERAND(st->a);
 
                 int fnum_call = (int)*a;
                 if (fnum_call <= 0)
                     RunError("NULL function");
 
-                function_t *newf = functions[fnum_call];
+                Function *newf = functions_[fnum_call];
 
                 /* negative statements are built in functions */
                 if (newf->first_statement < 0)
@@ -394,30 +368,30 @@ void real_vm_c::DoExecute(int fnum)
                 LeaveFunction();
 
                 // all done?
-                if (exec.call_depth == exitdepth)
+                if (exec_.call_depth == exitdepth)
                     return;
 
                 continue;
             }
 
             case OP_PARM_NULL: {
-                double *a = &exec.stack[exec.stack_depth + functions[exec.func]->locals_end + st->b];
+                double *a = &exec_.stack[exec_.stack_depth + functions_[exec_.func]->locals_end + st->b];
 
                 *a = -FLT_MAX; // Trying to pick a reliable but very unlikely value for a parameter - Dasho
                 continue;
             }
 
             case OP_PARM_F: {
-                double *a = Operand(st->a);
-                double *b = &exec.stack[exec.stack_depth + functions[exec.func]->locals_end + st->b];
+                double *a = COAL_OPERAND(st->a);
+                double *b = &exec_.stack[exec_.stack_depth + functions_[exec_.func]->locals_end + st->b];
 
                 *b = *a;
                 continue;
             }
 
             case OP_PARM_V: {
-                double *a = Operand(st->a);
-                double *b = &exec.stack[exec.stack_depth + functions[exec.func]->locals_end + st->b];
+                double *a = COAL_OPERAND(st->a);
+                double *b = &exec_.stack[exec_.stack_depth + functions_[exec_.func]->locals_end + st->b];
 
                 b[0] = a[0];
                 b[1] = a[1];
@@ -426,23 +400,23 @@ void real_vm_c::DoExecute(int fnum)
             }
 
             case OP_IFNOT: {
-                if (!Operand(st->a)[0])
-                    exec.s = st->b;
+                if (!COAL_OPERAND(st->a)[0])
+                    exec_.s = st->b;
                 continue;
             }
 
             case OP_IF: {
-                if (Operand(st->a)[0])
-                    exec.s = st->b;
+                if (COAL_OPERAND(st->a)[0])
+                    exec_.s = st->b;
                 continue;
             }
 
             case OP_GOTO:
-                exec.s = st->b;
+                exec_.s = st->b;
                 continue;
 
             case OP_ERROR:
-                RunError("Assertion failed @ %s:%d\n", REF_STRING(st->a), st->b);
+                RunError("Assertion failed @ %s:%d\n", COAL_REF_STRING(st->a), st->b);
                 break; /* NOT REACHED */
 
             default:
@@ -451,9 +425,9 @@ void real_vm_c::DoExecute(int fnum)
 
         // handle mathematical ops here
 
-        double *a = Operand(st->a);
-        double *b = Operand(st->b);
-        double *c = Operand(st->c);
+        double *a = COAL_OPERAND(st->a);
+        double *b = COAL_OPERAND(st->b);
+        double *c = COAL_OPERAND(st->c);
 
         switch (st->op)
         {
@@ -465,8 +439,8 @@ void real_vm_c::DoExecute(int fnum)
         case OP_MOVE_S:
             // temp strings must be internalised when assigned
             // to a global variable.
-            if (*a < 0 && st->b > OFS_RETURN * 8)
-                *b = InternaliseString(REF_STRING((int)*a));
+            if (*a < 0 && st->b > kReturnOffset * 8)
+                *b = InternaliseString(COAL_REF_STRING((int)*a));
             else
                 *b = *a;
             break;
@@ -506,23 +480,23 @@ void real_vm_c::DoExecute(int fnum)
             break;
 
         case OP_ADD_S:
-            *c = STR_Concat(REF_STRING((int)*a), REF_STRING((int)*b));
+            *c = STR_Concat(COAL_REF_STRING((int)*a), COAL_REF_STRING((int)*b));
             // temp strings must be internalised when assigned
             // to a global variable.
-            if (st->c > OFS_RETURN * 8)
-                *c = InternaliseString(REF_STRING((int)*c));
+            if (st->c > kReturnOffset * 8)
+                *c = InternaliseString(COAL_REF_STRING((int)*c));
             break;
 
         case OP_ADD_SF:
-            *c = STR_ConcatFloat(REF_STRING((int)*a), *b);
-            if (st->c > OFS_RETURN * 8)
-                *c = InternaliseString(REF_STRING((int)*c));
+            *c = STR_ConcatFloat(COAL_REF_STRING((int)*a), *b);
+            if (st->c > kReturnOffset * 8)
+                *c = InternaliseString(COAL_REF_STRING((int)*c));
             break;
 
         case OP_ADD_SV:
-            *c = STR_ConcatVector(REF_STRING((int)*a), b);
-            if (st->c > OFS_RETURN * 8)
-                *c = InternaliseString(REF_STRING((int)*c));
+            *c = STR_ConcatVector(COAL_REF_STRING((int)*a), b);
+            if (st->c > kReturnOffset * 8)
+                *c = InternaliseString(COAL_REF_STRING((int)*c));
             break;
 
         case OP_SUB_F:
@@ -600,7 +574,7 @@ void real_vm_c::DoExecute(int fnum)
             *c = (AlmostEquals(a[0], b[0])) && (AlmostEquals(a[1], b[1])) && (AlmostEquals(a[2], b[2]));
             break;
         case OP_EQ_S:
-            *c = (AlmostEquals(*a, *b)) ? 1 : !strcmp(REF_STRING((int)*a), REF_STRING((int)*b));
+            *c = (AlmostEquals(*a, *b)) ? 1 : !strcmp(COAL_REF_STRING((int)*a), COAL_REF_STRING((int)*b));
             break;
 
         case OP_NE_F:
@@ -611,7 +585,7 @@ void real_vm_c::DoExecute(int fnum)
             *c = (!AlmostEquals(a[0], b[0])) || (!AlmostEquals(a[1], b[1])) || (!AlmostEquals(a[2], b[2]));
             break;
         case OP_NE_S:
-            *c = (AlmostEquals(*a, *b)) ? 0 : !!strcmp(REF_STRING((int)*a), REF_STRING((int)*b));
+            *c = (AlmostEquals(*a, *b)) ? 0 : !!strcmp(COAL_REF_STRING((int)*a), COAL_REF_STRING((int)*b));
             break;
 
         case OP_AND:
@@ -634,14 +608,14 @@ void real_vm_c::DoExecute(int fnum)
     }
 }
 
-int real_vm_c::Execute(int func_id)
+int RealVm::Execute(int func_id)
 {
     // re-use the temporary string space
-    temp_strings.reset();
+    temp_strings_.Reset();
 
-    if (func_id < 1 || func_id >= (int)functions.size())
+    if (func_id < 1 || func_id >= (int)functions_.size())
     {
-        RunError("vm_c::Execute: NULL function");
+        RunError("Vm::Execute: NULL function");
     }
 
     DoExecute(func_id);
@@ -653,7 +627,7 @@ int real_vm_c::Execute(int func_id)
 //  DEBUGGING STUFF
 //=================================================================
 
-const char *opcode_names[] = {
+static constexpr const char *opcode_names[] = {
     "NULL",   "CALL",   "RET",    "PARM_F",   "PARM_V", "IF",    "IFNOT", "GOTO",   "ERROR",
 
     "MOVE_F", "MOVE_V", "MOVE_S", "MOVE_FNC",
@@ -671,7 +645,7 @@ const char *opcode_names[] = {
     "AND",    "OR",     "BITAND", "BITOR",
 };
 
-static const char *OpcodeName(short op)
+static const char *OpcodeName(int16_t op)
 {
     if (op < 0 || op >= NUM_OPERATIONS)
         return "???";
@@ -679,53 +653,53 @@ static const char *OpcodeName(short op)
     return opcode_names[op];
 }
 
-void real_vm_c::StackTrace()
+void RealVm::StackTrace()
 {
-    printer("Stack Trace:\n");
+    Printer("Stack Trace:\n");
 
-    exec.call_stack[exec.call_depth].func = exec.func;
-    exec.call_stack[exec.call_depth].s    = exec.s;
+    exec_.call_stack[exec_.call_depth].func = exec_.func;
+    exec_.call_stack[exec_.call_depth].s    = exec_.s;
 
-    for (int i = exec.call_depth; i >= 1; i--)
+    for (int i = exec_.call_depth; i >= 1; i--)
     {
-        int back = (exec.call_depth - i) + 1;
+        int back = (exec_.call_depth - i) + 1;
 
-        function_t *f = functions[exec.call_stack[i].func];
+        Function *f = functions_[exec_.call_stack[i].func];
 
-        statement_t *st = REF_OP(exec.call_stack[i].s);
+        Statement *st = COAL_REF_OP(exec_.call_stack[i].s);
 
         if (f)
-            printer("%-2d %s() at %s:%d\n", back, f->name, f->source_file, f->source_line + st->line);
+            Printer("%-2d %s() at %s:%d\n", back, f->name, f->source_file, f->source_line + st->line);
         else
-            printer("%-2d ????\n", back);
+            Printer("%-2d ????\n", back);
     }
 
-    printer("\n");
+    Printer("\n");
 }
 
-const char *real_vm_c::RegString(statement_t *st, int who)
+const char *RealVm::RegString(Statement *st, int who)
 {
     static char buffer[100];
 
     int val = (who == 1) ? st->a : (who == 2) ? st->b : st->c;
 
-    if (val == OFS_RETURN * 8)
+    if (val == kReturnOffset * 8)
         return "result";
 
-    if (val == OFS_DEFAULT * 8)
+    if (val == kDefaultOffset * 8)
         return "default";
 
     sprintf(buffer, "%s[%d]", (val < 0) ? "stack" : "glob", abs(val));
     return buffer;
 }
 
-void real_vm_c::PrintStatement(function_t *f, int s)
+void RealVm::PrintStatement(Function *f, int s)
 {
-    statement_t *st = REF_OP(s);
+    Statement *st = COAL_REF_OP(s);
 
     const char *op_name = OpcodeName(st->op);
 
-    printer("  %06x: %-9s ", s, op_name);
+    Printer("  %06x: %-9s ", s, op_name);
 
     switch (st->op)
     {
@@ -738,75 +712,75 @@ void real_vm_c::PrintStatement(function_t *f, int s)
     case OP_MOVE_S:
     case OP_MOVE_FNC: // pointers
     case OP_MOVE_V:
-        printer("%s ", RegString(st, 1));
-        printer("-> %s", RegString(st, 2));
+        Printer("%s ", RegString(st, 1));
+        Printer("-> %s", RegString(st, 2));
         break;
 
     case OP_IFNOT:
     case OP_IF:
-        printer("%s %08x", RegString(st, 1), st->b);
+        Printer("%s %08x", RegString(st, 1), st->b);
         break;
 
     case OP_GOTO:
-        printer("%08x", st->b);
+        Printer("%08x", st->b);
         // TODO
         break;
 
     case OP_CALL:
-        printer("%s (%d) ", RegString(st, 1), st->b);
+        Printer("%s (%d) ", RegString(st, 1), st->b);
 
         if (!st->c)
-            printer(" ");
+            Printer(" ");
         else
-            printer("-> %s", RegString(st, 3));
+            Printer("-> %s", RegString(st, 3));
         break;
 
     case OP_PARM_F:
     case OP_PARM_V:
-        printer("%s -> future[%d]", RegString(st, 1), st->b);
+        Printer("%s -> future[%d]", RegString(st, 1), st->b);
         break;
 
     case OP_NOT_F:
     case OP_NOT_FNC:
     case OP_NOT_V:
     case OP_NOT_S:
-        printer("%s ", RegString(st, 1));
-        printer("-> %s", RegString(st, 3));
+        Printer("%s ", RegString(st, 1));
+        Printer("-> %s", RegString(st, 3));
         break;
 
     default:
-        printer("%s + ", RegString(st, 1));
-        printer("%s ", RegString(st, 2));
-        printer("-> %s", RegString(st, 3));
+        Printer("%s + ", RegString(st, 1));
+        Printer("%s ", RegString(st, 2));
+        Printer("-> %s", RegString(st, 3));
         break;
     }
 
-    printer("\n");
+    Printer("\n");
 }
 
-void real_vm_c::ASM_DumpFunction(function_t *f)
+void RealVm::ASM_DumpFunction(Function *f)
 {
-    printer("Function %s()\n", f->name);
+    Printer("Function %s()\n", f->name);
 
     if (f->first_statement < 0)
     {
-        printer("  native #%d\n\n", -f->first_statement);
+        Printer("  native #%d\n\n", -f->first_statement);
         return;
     }
 
-    for (int s = f->first_statement; s <= f->last_statement; s += sizeof(statement_t))
+    for (int s = f->first_statement; s <= f->last_statement; s += sizeof(Statement))
     {
         PrintStatement(f, s);
     }
 
-    printer("\n");
+    Printer("\n");
 }
 
-void real_vm_c::ASM_DumpAll()
+void RealVm::ASM_DumpAll()
 {
-    for (int i = 1; i < (int)functions.size(); i++)
+    for (int i = 1; i < (int)functions_.size(); i++)
     {
-        function_t *f = functions[i];
+        Function *f = functions_[i];
 
         ASM_DumpFunction(f);
     }

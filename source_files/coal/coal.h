@@ -23,33 +23,32 @@
 //
 //----------------------------------------------------------------------
 
-#ifndef __COAL_API_H__
-#define __COAL_API_H__
+#pragma once
 
 namespace coal
 {
 
-class vm_c;
+class Vm;
 
-typedef void (*print_func_t)(const char *msg, ...);
+typedef void (*PrintFunction)(const char *msg, ...);
 
-typedef void (*native_func_t)(vm_c *vm, int argc);
+typedef void (*NativeFunction)(Vm *vm, int argc);
 
-class vm_c
+class Vm
 {
     /* this is an abstract base class */
 
   public:
-    vm_c()
+    Vm()
     {
     }
-    virtual ~vm_c()
+    virtual ~Vm()
     {
     }
 
-    virtual void SetPrinter(print_func_t func) = 0;
+    virtual void SetPrinter(PrintFunction func) = 0;
 
-    virtual void AddNativeFunction(const char *name, native_func_t func) = 0;
+    virtual void AddNativeFunction(const char *name, NativeFunction func) = 0;
 
     virtual bool CompileFile(char *buffer, const char *filename) = 0;
     virtual void ShowStats()                                     = 0;
@@ -90,11 +89,9 @@ class vm_c
 };
 
 // create a new Coal virtual machine
-vm_c *CreateVM();
+Vm *CreateVM();
 
 } // namespace coal
-
-#endif /* __COAL_API_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -40,7 +40,7 @@
 extern ConsoleVariable double_framerate;
 
 // user interface VM
-coal::vm_c *ui_vm = nullptr;
+coal::Vm *ui_vm = nullptr;
 
 void CoalPrinter(const char *msg, ...)
 {
@@ -62,32 +62,32 @@ void CoalPrinter(const char *msg, ...)
 // "math", etc var_name = Variable name, without the module prefix, i.e.
 // "custom_stbar" instead of "hud.custom_stbar"
 
-double CoalGetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name)
+double CoalGetFloat(coal::Vm *vm, const char *mod_name, const char *var_name)
 {
     return vm->GetFloat(mod_name, var_name);
 }
 
-const char *CoalGetString(coal::vm_c *vm, const char *mod_name, const char *var_name)
+const char *CoalGetString(coal::Vm *vm, const char *mod_name, const char *var_name)
 {
     return vm->GetString(mod_name, var_name);
 }
 
-double *CoalGetVector(coal::vm_c *vm, const char *mod_name, const char *var_name)
+double *CoalGetVector(coal::Vm *vm, const char *mod_name, const char *var_name)
 {
     return vm->GetVector(mod_name, var_name);
 }
 
-double CoalGetVectorX(coal::vm_c *vm, const char *mod_name, const char *var_name)
+double CoalGetVectorX(coal::Vm *vm, const char *mod_name, const char *var_name)
 {
     return vm->GetVectorX(mod_name, var_name);
 }
 
-double CoalGetVectorY(coal::vm_c *vm, const char *mod_name, const char *var_name)
+double CoalGetVectorY(coal::Vm *vm, const char *mod_name, const char *var_name)
 {
     return vm->GetVectorY(mod_name, var_name);
 }
 
-double CoalGetVectorZ(coal::vm_c *vm, const char *mod_name, const char *var_name)
+double CoalGetVectorZ(coal::Vm *vm, const char *mod_name, const char *var_name)
 {
     return vm->GetVectorZ(mod_name, var_name);
 }
@@ -98,41 +98,41 @@ double CoalGetVectorZ(coal::vm_c *vm, const char *mod_name, const char *var_name
 // "custom_stbar" instead of "hud.custom_stbar" value = Whatever is appropriate.
 // SetString should allow a nullptr string as this may be desired
 
-void CoalSetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name, double value)
+void CoalSetFloat(coal::Vm *vm, const char *mod_name, const char *var_name, double value)
 {
     vm->SetFloat(mod_name, var_name, value);
 }
 
-void CoalSetString(coal::vm_c *vm, const char *mod_name, const char *var_name, const char *value)
+void CoalSetString(coal::Vm *vm, const char *mod_name, const char *var_name, const char *value)
 {
     vm->SetString(mod_name, var_name, value);
 }
 
-void CoalSetVector(coal::vm_c *vm, const char *mod_name, const char *var_name, double val_1, double val_2, double val_3)
+void CoalSetVector(coal::Vm *vm, const char *mod_name, const char *var_name, double val_1, double val_2, double val_3)
 {
     vm->SetVector(mod_name, var_name, val_1, val_2, val_3);
 }
 
-void CoalSetVectorX(coal::vm_c *vm, const char *mod_name, const char *var_name, double val)
+void CoalSetVectorX(coal::Vm *vm, const char *mod_name, const char *var_name, double val)
 {
     vm->SetVectorX(mod_name, var_name, val);
 }
 
-void CoalSetVectorY(coal::vm_c *vm, const char *mod_name, const char *var_name, double val)
+void CoalSetVectorY(coal::Vm *vm, const char *mod_name, const char *var_name, double val)
 {
     vm->SetVectorY(mod_name, var_name, val);
 }
 
-void CoalSetVectorZ(coal::vm_c *vm, const char *mod_name, const char *var_name, double val)
+void CoalSetVectorZ(coal::Vm *vm, const char *mod_name, const char *var_name, double val)
 {
     vm->SetVectorZ(mod_name, var_name, val);
 }
 
-void CoalCallFunction(coal::vm_c *vm, const char *name)
+void CoalCallFunction(coal::Vm *vm, const char *name)
 {
     int func = vm->FindFunction(name);
 
-    if (func == coal::vm_c::NOT_FOUND)
+    if (func == coal::Vm::NOT_FOUND)
         FatalError("Missing coal function: %s\n", name);
 
     if (vm->Execute(func) != 0)
@@ -145,7 +145,7 @@ void CoalCallFunction(coal::vm_c *vm, const char *name)
 
 // sys.error(str)
 //
-static void SYS_error(coal::vm_c *vm, int argc)
+static void SYS_error(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -156,7 +156,7 @@ static void SYS_error(coal::vm_c *vm, int argc)
 
 // sys.print(str)
 //
-static void SYS_print(coal::vm_c *vm, int argc)
+static void SYS_print(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -167,7 +167,7 @@ static void SYS_print(coal::vm_c *vm, int argc)
 
 // sys.debug_print(str)
 //
-static void SYS_debug_print(coal::vm_c *vm, int argc)
+static void SYS_debug_print(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -178,7 +178,7 @@ static void SYS_debug_print(coal::vm_c *vm, int argc)
 
 // sys.edge_version()
 //
-static void SYS_edge_version(coal::vm_c *vm, int argc)
+static void SYS_edge_version(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -190,7 +190,7 @@ static void SYS_edge_version(coal::vm_c *vm, int argc)
 //------------------------------------------------------------------------
 
 // math.rint(val)
-static void MATH_rint(coal::vm_c *vm, int argc)
+static void MATH_rint(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -199,7 +199,7 @@ static void MATH_rint(coal::vm_c *vm, int argc)
 }
 
 // math.floor(val)
-static void MATH_floor(coal::vm_c *vm, int argc)
+static void MATH_floor(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -208,7 +208,7 @@ static void MATH_floor(coal::vm_c *vm, int argc)
 }
 
 // math.ceil(val)
-static void MATH_ceil(coal::vm_c *vm, int argc)
+static void MATH_ceil(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -217,7 +217,7 @@ static void MATH_ceil(coal::vm_c *vm, int argc)
 }
 
 // math.random()
-static void MATH_random(coal::vm_c *vm, int argc)
+static void MATH_random(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -225,7 +225,7 @@ static void MATH_random(coal::vm_c *vm, int argc)
 }
 
 // Lobo November 2021: math.random2() always between 0 and 10
-static void MATH_random2(coal::vm_c *vm, int argc)
+static void MATH_random2(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -233,7 +233,7 @@ static void MATH_random2(coal::vm_c *vm, int argc)
 }
 
 // math.cos(val)
-static void MATH_cos(coal::vm_c *vm, int argc)
+static void MATH_cos(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -242,7 +242,7 @@ static void MATH_cos(coal::vm_c *vm, int argc)
 }
 
 // math.sin(val)
-static void MATH_sin(coal::vm_c *vm, int argc)
+static void MATH_sin(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -251,7 +251,7 @@ static void MATH_sin(coal::vm_c *vm, int argc)
 }
 
 // math.tan(val)
-static void MATH_tan(coal::vm_c *vm, int argc)
+static void MATH_tan(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -260,7 +260,7 @@ static void MATH_tan(coal::vm_c *vm, int argc)
 }
 
 // math.acos(val)
-static void MATH_acos(coal::vm_c *vm, int argc)
+static void MATH_acos(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -269,7 +269,7 @@ static void MATH_acos(coal::vm_c *vm, int argc)
 }
 
 // math.asin(val)
-static void MATH_asin(coal::vm_c *vm, int argc)
+static void MATH_asin(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -278,7 +278,7 @@ static void MATH_asin(coal::vm_c *vm, int argc)
 }
 
 // math.atan(val)
-static void MATH_atan(coal::vm_c *vm, int argc)
+static void MATH_atan(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -287,7 +287,7 @@ static void MATH_atan(coal::vm_c *vm, int argc)
 }
 
 // math.atan2(x, y)
-static void MATH_atan2(coal::vm_c *vm, int argc)
+static void MATH_atan2(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -298,7 +298,7 @@ static void MATH_atan2(coal::vm_c *vm, int argc)
 }
 
 // math.log(val)
-static void MATH_log(coal::vm_c *vm, int argc)
+static void MATH_log(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -316,7 +316,7 @@ static void MATH_log(coal::vm_c *vm, int argc)
 
 // strings.len(s)
 //
-static void STRINGS_len(coal::vm_c *vm, int argc)
+static void STRINGS_len(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -329,7 +329,7 @@ static void STRINGS_len(coal::vm_c *vm, int argc)
 //  strings.find(s,TextToFind)
 //  returns substring position or -1 if not found
 //
-static void STRINGS_find(coal::vm_c *vm, int argc)
+static void STRINGS_find(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -346,7 +346,7 @@ static void STRINGS_find(coal::vm_c *vm, int argc)
 
 // strings.sub(s, start, end)
 //
-static void STRINGS_sub(coal::vm_c *vm, int argc)
+static void STRINGS_sub(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -386,7 +386,7 @@ static void STRINGS_sub(coal::vm_c *vm, int argc)
 
 // strings.tonumber(s)
 //
-static void STRINGS_tonumber(coal::vm_c *vm, int argc)
+static void STRINGS_tonumber(coal::Vm *vm, int argc)
 {
     (void)argc;
 
@@ -395,7 +395,7 @@ static void STRINGS_tonumber(coal::vm_c *vm, int argc)
     vm->ReturnFloat(atof(s));
 }
 
-void CoalRegisterBASE(coal::vm_c *vm)
+void CoalRegisterBASE(coal::Vm *vm)
 {
     // SYSTEM
     vm->AddNativeFunction("sys.error", SYS_error);

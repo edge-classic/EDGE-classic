@@ -44,8 +44,8 @@
 #include "script/compat/lua_compat.h"
 #include "vm_coal.h"
 
-extern coal::vm_c *ui_vm;
-extern void        CoalSetVector(coal::vm_c *vm, const char *mod_name, const char *var_name, double val_1, double val_2,
+extern coal::Vm *ui_vm;
+extern void        CoalSetVector(coal::Vm *vm, const char *mod_name, const char *var_name, double val_1, double val_2,
                                  double val_3);
 
 extern ConsoleVariable double_framerate;

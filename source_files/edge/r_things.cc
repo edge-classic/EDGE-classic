@@ -57,8 +57,8 @@
 #include "w_model.h"
 #include "w_sprite.h"
 
-extern coal::vm_c *ui_vm;
-extern double      CoalGetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name);
+extern coal::Vm *ui_vm;
+extern double      CoalGetFloat(coal::Vm *vm, const char *mod_name, const char *var_name);
 
 extern bool erraticism_active;
 

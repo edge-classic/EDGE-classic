@@ -25,9 +25,9 @@
 #include "sv_chunk.h"
 
 #include "epi.h"
-#include "filesystem.h"
+#include "epi_crc.h"
+#include "epi_filesystem.h"
 #include "i_system.h"
-#include "math_crc.h"
 #include "miniz.h"
 
 #define EDGE_DEBUG_SAVE_GET_BYTE       0

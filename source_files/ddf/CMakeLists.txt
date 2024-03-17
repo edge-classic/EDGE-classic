@@ -4,28 +4,28 @@
 
 add_library(
   edge_ddf
-  anim.cc
-  attack.cc
-  boom.cc
-  colormap.cc
-  flat.cc
-  font.cc
-  game.cc
-  image.cc
-  language.cc
-  level.cc
-  line.cc
-  main.cc
-  movie.cc
-  playlist.cc
-  sector.cc
-  sfx.cc
-  states.cc
-  style.cc
-  switch.cc
-  thing.cc
-  wadfixes.cc
-  weapon.cc
+  ddf_anim.cc
+  ddf_attack.cc
+  ddf_boom.cc
+  ddf_colormap.cc
+  ddf_flat.cc
+  ddf_font.cc
+  ddf_game.cc
+  ddf_image.cc
+  ddf_language.cc
+  ddf_level.cc
+  ddf_line.cc
+  ddf_main.cc
+  ddf_movie.cc
+  ddf_playlist.cc
+  ddf_sector.cc
+  ddf_sfx.cc
+  ddf_states.cc
+  ddf_style.cc
+  ddf_switch.cc
+  ddf_thing.cc
+  ddf_wadfixes.cc
+  ddf_weapon.cc
 )
 
 target_include_directories(edge_ddf PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)

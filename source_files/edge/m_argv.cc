@@ -23,11 +23,11 @@
 #include <string.h>
 
 #include "epi.h"
+#include "epi_filesystem.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "epi_windows.h"
-#include "filesystem.h"
 #include "i_system.h"
-#include "str_compare.h"
-#include "str_util.h"
 #ifdef _WIN32
 #include <shellapi.h>
 #endif

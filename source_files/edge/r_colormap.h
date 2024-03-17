@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "colormap.h"
+#include "ddf_colormap.h"
 #include "r_defs.h"
 
 class AbstractShader;

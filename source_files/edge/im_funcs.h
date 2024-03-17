@@ -20,7 +20,7 @@
 
 #include <unordered_map>
 
-#include "file.h"
+#include "epi_file.h"
 #include "im_data.h"
 
 enum ImageFormat

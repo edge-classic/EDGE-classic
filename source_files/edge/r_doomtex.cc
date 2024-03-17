@@ -33,14 +33,14 @@
 
 #include <limits.h>
 
-#include "common_doomdefs.h"
 #include "dm_state.h"
 #include "e_main.h"
 #include "e_search.h"
-#include "endianess.h"
 #include "epi.h"
-#include "file.h"
-#include "filesystem.h"
+#include "epi_doomdefs.h"
+#include "epi_endian.h"
+#include "epi_file.h"
+#include "epi_filesystem.h"
 #include "i_defs_gl.h"
 #include "im_data.h"
 #include "im_filter.h"

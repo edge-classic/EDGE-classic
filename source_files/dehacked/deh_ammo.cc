@@ -35,7 +35,7 @@
 #include "deh_system.h"
 #include "deh_things.h"
 #include "epi.h"
-#include "str_compare.h"
+#include "epi_str_compare.h"
 namespace dehacked
 {
 

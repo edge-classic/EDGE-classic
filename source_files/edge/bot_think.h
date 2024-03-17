@@ -26,7 +26,7 @@
 #pragma once
 
 #include "e_ticcmd.h"
-#include "math_bam.h"
+#include "epi_bam.h"
 #include "p_mobj.h"
 #include "r_defs.h"
 

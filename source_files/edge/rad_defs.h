@@ -18,9 +18,9 @@
 
 #pragma once
 
+#include "ddf_main.h"
+#include "epi_crc.h"
 #include "hu_stuff.h"
-#include "main.h"
-#include "math_crc.h"
 #include "r_defs.h"
 
 struct TriggerScriptState;

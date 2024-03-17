@@ -26,7 +26,7 @@
 #pragma once
 
 #include "HandmadeMath.h"
-#include "math_bam.h"
+#include "epi_bam.h"
 
 float    MathPointToSegDistance(HMM_Vec2 seg_a, HMM_Vec2 seg_b, HMM_Vec2 point);
 HMM_Vec3 MathTripleCrossProduct(HMM_Vec3 v1, HMM_Vec3 v2, HMM_Vec3 v3);

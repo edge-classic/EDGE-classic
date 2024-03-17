@@ -24,7 +24,7 @@
 
 #include "HandmadeMath.h"
 #include "epi.h"
-#include "math_color.h"
+#include "epi_color.h"
 #include "sokol_color.h"
 #include "swirl_table.h"
 

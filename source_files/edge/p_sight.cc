@@ -40,9 +40,9 @@
 #include <vector>
 
 #include "AlmostEquals.h"
-#include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "epi.h"
+#include "epi_doomdefs.h"
 #include "m_bbox.h"
 #include "p_local.h"
 #include "r_misc.h"

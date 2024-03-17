@@ -30,7 +30,7 @@
 
 #pragma once
 
-#include "main.h"
+#include "ddf_main.h"
 #include "r_defs.h"
 #include "r_image.h"
 

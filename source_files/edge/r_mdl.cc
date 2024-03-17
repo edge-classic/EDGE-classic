@@ -29,10 +29,12 @@
 
 #include <vector>
 
+#include "ddf_types.h"
 #include "dm_state.h" // EDGE_IMAGE_IS_SKY
-#include "endianess.h"
 #include "epi.h"
-#include "g_game.h"   //current_map
+#include "epi_endian.h"
+#include "epi_str_compare.h"
+#include "g_game.h" //current_map
 #include "i_defs_gl.h"
 #include "im_data.h"
 #include "p_blockmap.h"
@@ -47,8 +49,6 @@
 #include "r_state.h"
 #include "r_texgl.h"
 #include "r_units.h"
-#include "str_compare.h"
-#include "types.h"
 
 extern float ApproximateDistance(float dx, float dy, float dz);
 

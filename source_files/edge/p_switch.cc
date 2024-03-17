@@ -23,15 +23,15 @@
 //
 //----------------------------------------------------------------------------
 
+#include "ddf_main.h"
+#include "ddf_switch.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "epi.h"
 #include "g_game.h"
-#include "main.h"
 #include "p_local.h"
 #include "r_state.h"
 #include "s_sound.h"
-#include "switch.h"
 #include "w_texture.h"
 
 std::vector<Button *> active_buttons;

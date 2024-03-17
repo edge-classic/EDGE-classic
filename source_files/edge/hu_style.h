@@ -18,8 +18,8 @@
 
 #pragma once
 
+#include "ddf_style.h"
 #include "hu_font.h"
-#include "style.h"
 
 class Style
 {

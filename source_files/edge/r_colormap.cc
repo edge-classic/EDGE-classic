@@ -25,18 +25,19 @@
 
 #include "r_colormap.h"
 
-#include "colormap.h"
+#include "ddf_colormap.h"
+#include "ddf_game.h"
+#include "ddf_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_main.h"
 #include "e_player.h"
 #include "epi.h"
+#include "epi_str_util.h"
 #include "g_game.h" // current_map
-#include "game.h"
 #include "i_defs_gl.h"
 #include "i_system.h"
 #include "m_argv.h"
-#include "main.h"
 #include "r_gldefs.h"
 #include "r_image.h"
 #include "r_misc.h"
@@ -44,7 +45,6 @@
 #include "r_shader.h"
 #include "r_texgl.h"
 #include "r_units.h"
-#include "str_util.h"
 #include "w_files.h"
 #include "w_wad.h"
 

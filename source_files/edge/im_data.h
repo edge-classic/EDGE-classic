@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "math_color.h"
+#include "epi_color.h"
 
 class ImageData
 {

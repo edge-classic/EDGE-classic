@@ -31,6 +31,7 @@
 #include "f_finale.h"
 
 #include "am_map.h"
+#include "ddf_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "dstrings.h"
@@ -45,7 +46,6 @@
 #include "i_movie.h"
 #include "m_menu.h"
 #include "m_random.h"
-#include "main.h"
 #include "p_action.h"
 #include "r_colormap.h"
 #include "r_draw.h"

@@ -26,8 +26,8 @@
 #pragma once
 
 #include "HandmadeMath.h"
+#include "epi_color.h"
 #include "i_defs_gl.h"
-#include "math_color.h"
 #include "sokol_color.h"
 
 constexpr uint16_t kDummyClamp = 789;

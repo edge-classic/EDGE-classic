@@ -23,20 +23,20 @@
 
 #include "AlmostEquals.h"
 #include "bot_think.h"
-#include "common_doomdefs.h"
 #include "con_main.h"
+#include "ddf_main.h"
+#include "ddf_thing.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "epi.h"
+#include "epi_doomdefs.h"
 #include "m_bbox.h"
 #include "m_random.h"
-#include "main.h"
 #include "p_local.h"
 #include "p_mobj.h"
 #include "r_defs.h"
 #include "r_misc.h"
 #include "r_state.h"
-#include "thing.h"
 
 extern MapObject *FindTeleportMan(int tag, const MapObjectDefinition *info);
 extern Line      *p_FindTeleportLine(int tag, Line *original);

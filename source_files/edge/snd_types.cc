@@ -19,9 +19,9 @@
 #include "snd_types.h"
 
 #include "epi.h"
-#include "filesystem.h"
+#include "epi_filesystem.h"
+#include "epi_str_util.h"
 #include "m4p.h"
-#include "str_util.h"
 
 SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
 {

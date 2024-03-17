@@ -23,8 +23,6 @@
 //
 //----------------------------------------------------------------------
 
-#include "AlmostEquals.h"
-#include "c_local.h"
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -34,7 +32,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <vector>
+
+#include "AlmostEquals.h"
+#include "c_local.h"
 
 extern void FatalError(const char *error, ...);
 

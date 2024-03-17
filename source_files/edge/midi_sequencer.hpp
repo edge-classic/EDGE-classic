@@ -29,7 +29,7 @@
 #include <string>
 #include <vector>
 
-#include "file.h"
+#include "epi_file.h"
 #include "midi_sequencer.h"
 
 // MidiFraction is a stripped down version of

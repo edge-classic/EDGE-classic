@@ -19,13 +19,13 @@
 #include "i_video.h"
 
 #include "edge_profiling.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "i_defs_gl.h"
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_misc.h"
 #include "r_modes.h"
-#include "str_compare.h"
-#include "str_util.h"
 #include "version.h"
 
 SDL_Window *program_window;

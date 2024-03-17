@@ -33,9 +33,9 @@
 #include <float.h>
 
 #include "AlmostEquals.h"
-#include "common_doomdefs.h"
 #include "dm_state.h"
 #include "epi.h"
+#include "epi_doomdefs.h"
 #include "g_game.h"
 #include "m_random.h"
 #include "p_action.h"

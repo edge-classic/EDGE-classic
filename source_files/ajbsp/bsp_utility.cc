@@ -21,7 +21,7 @@
 
 #include "HandmadeMath.h"
 #include "bsp_local.h"
-#include "str_util.h"
+#include "epi_str_util.h"
 
 namespace ajbsp
 {

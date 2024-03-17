@@ -22,10 +22,10 @@
 
 #include "con_main.h"
 #include "epi.h"
-#include "filesystem.h"
+#include "epi_filesystem.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "m_argv.h"
-#include "str_compare.h"
-#include "str_util.h"
 
 // NOTE: we must use a plain linked list (and not std::vector) here,
 //       because constructors run very early (before main is called)

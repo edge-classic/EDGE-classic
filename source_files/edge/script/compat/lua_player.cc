@@ -1,10 +1,11 @@
 
 #include "AlmostEquals.h"
+#include "ddf_flat.h"
+#include "ddf_types.h"
 #include "dm_state.h"
 #include "e_main.h"
 #include "e_player.h"
 #include "f_interm.h"
-#include "flat.h"
 #include "g_game.h"
 #include "hu_draw.h"
 #include "hu_font.h"
@@ -18,7 +19,6 @@
 #include "r_state.h"
 #include "rad_trig.h"
 #include "s_sound.h"
-#include "types.h"
 
 extern Player *ui_player_who;
 

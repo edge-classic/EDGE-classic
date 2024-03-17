@@ -40,8 +40,10 @@
 #include "e_input.h"
 #include "e_main.h"
 #include "epi.h"
-#include "file.h"
-#include "filesystem.h"
+#include "epi_file.h"
+#include "epi_filesystem.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "g_game.h"
 #include "hu_draw.h"
 #include "hu_stuff.h"
@@ -60,8 +62,6 @@
 #include "rad_act.h"
 #include "s_sound.h"
 #include "sokol_color.h"
-#include "str_compare.h"
-#include "str_util.h"
 #include "w_wad.h"
 
 // Static Scripts.  Never change once all scripts have been read in.

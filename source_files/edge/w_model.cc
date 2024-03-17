@@ -20,14 +20,14 @@
 
 #include "e_main.h"
 #include "epi.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "i_defs_gl.h"
 #include "p_local.h" // map_object_list_head
 #include "r_image.h"
 #include "r_md2.h"
 #include "r_mdl.h"
 #include "r_things.h"
-#include "str_compare.h"
-#include "str_util.h"
 #include "w_files.h"
 #include "w_wad.h"
 

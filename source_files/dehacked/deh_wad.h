@@ -20,7 +20,7 @@
 
 #include <vector>
 
-#include "collection.h"
+#include "ddf_collection.h"
 
 namespace dehacked
 {

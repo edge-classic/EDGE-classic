@@ -28,7 +28,7 @@
 #include <vector>
 
 #include "dm_defs.h"
-#include "file.h"
+#include "epi_file.h"
 
 struct WadTextureResource
 {

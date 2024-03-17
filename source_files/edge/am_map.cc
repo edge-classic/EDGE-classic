@@ -30,11 +30,12 @@
 #include <stdio.h>
 
 #include "AlmostEquals.h"
-#include "common_doomdefs.h"
 #include "con_main.h"
 #include "con_var.h"
 #include "e_input.h"
 #include "epi.h"
+#include "epi_doomdefs.h"
+#include "epi_str_compare.h"
 #include "hu_draw.h"
 #include "hu_style.h"
 #include "i_defs_gl.h"
@@ -49,7 +50,6 @@
 #include "r_gldefs.h"
 #include "r_modes.h"
 #include "sokol_color.h"
-#include "str_compare.h"
 
 EDGE_DEFINE_CONSOLE_VARIABLE(automap_debug_bsp, "0", kConsoleVariableFlagNone)
 EDGE_DEFINE_CONSOLE_VARIABLE(automap_debug_collisions, "0", kConsoleVariableFlagNone)

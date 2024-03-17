@@ -39,10 +39,13 @@
 #include "dm_state.h"
 #include "e_input.h"
 #include "e_player.h"
-#include "endianess.h"
 #include "epi.h"
-#include "file.h"
-#include "filesystem.h"
+#include "epi_endian.h"
+#include "epi_file.h"
+#include "epi_filesystem.h"
+#include "epi_lexer.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "g_game.h"
 #include "hu_draw.h"
 #include "hu_stuff.h" // only for show_messages
@@ -61,9 +64,6 @@
 #include "r_wipe.h"
 #include "s_blit.h"
 #include "s_sound.h"
-#include "str_compare.h"
-#include "str_lexer.h"
-#include "str_util.h"
 #include "version.h"
 //
 // DEFAULTS

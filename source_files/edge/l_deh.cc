@@ -26,9 +26,9 @@
 #include "l_deh.h"
 
 #include "con_var.h"
+#include "ddf_main.h"
 #include "deh_edge.h"
 #include "i_system.h"
-#include "main.h"
 
 EDGE_DEFINE_CONSOLE_VARIABLE(debug_dehacked, "0", kConsoleVariableFlagArchive)
 

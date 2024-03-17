@@ -18,11 +18,11 @@
 
 #include "dm_defs.h"
 #include "e_main.h"
+#include "epi_filesystem.h"
 #include "epi_sdl.h"
-#include "filesystem.h"
+#include "epi_str_util.h"
 #include "i_system.h"
 #include "m_argv.h"
-#include "str_util.h"
 #include "version.h"
 
 std::string executable_path = ".";

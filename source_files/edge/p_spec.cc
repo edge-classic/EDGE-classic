@@ -32,11 +32,13 @@
 #include <limits.h>
 
 #include "AlmostEquals.h"
-#include "common_doomdefs.h"
 #include "con_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "epi.h"
+#include "epi_doomdefs.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "f_interm.h"
 #include "g_game.h"
 #include "m_argv.h"
@@ -49,8 +51,6 @@
 #include "s_blit.h"
 #include "s_music.h"
 #include "s_sound.h"
-#include "str_compare.h"
-#include "str_util.h"
 
 extern ConsoleVariable double_framerate;
 

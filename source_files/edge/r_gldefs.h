@@ -29,8 +29,8 @@
 #include <vector>
 
 #include "con_var.h"
-#include "image.h"
-#include "main.h"
+#include "ddf_image.h"
+#include "ddf_main.h"
 #include "r_defs.h"
 
 extern ConsoleVariable renderer_dumb_sky;

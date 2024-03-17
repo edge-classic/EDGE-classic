@@ -20,8 +20,8 @@
 
 #include "HandmadeMath.h"
 #include "dm_state.h"
-#include "file.h"
-#include "filesystem.h"
+#include "epi_file.h"
+#include "epi_filesystem.h"
 #include "fluidlite.h"
 #include "i_system.h"
 #include "m_misc.h"
@@ -31,10 +31,10 @@
 typedef struct MidiRealTimeInterface FluidInterface;
 #include "midi_sequencer_impl.hpp"
 // clang-format on
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "s_blit.h"
 #include "s_music.h"
-#include "str_compare.h"
-#include "str_util.h"
 
 #define FLUID_NUM_SAMPLES 4096
 

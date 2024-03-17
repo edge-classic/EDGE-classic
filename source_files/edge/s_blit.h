@@ -26,8 +26,8 @@
 #pragma once
 
 #include "con_var.h"
+#include "ddf_types.h"
 #include "snd_data.h"
-#include "types.h"
 
 // Forward declarations
 class SoundEffectDefinition;

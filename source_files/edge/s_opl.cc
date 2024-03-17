@@ -19,8 +19,8 @@
 #include "s_opl.h"
 
 #include "dm_state.h"
-#include "file.h"
-#include "filesystem.h"
+#include "epi_file.h"
+#include "epi_filesystem.h"
 #include "i_system.h"
 #include "m_misc.h"
 // clang-format off
@@ -29,13 +29,13 @@
 typedef struct MidiRealTimeInterface OPLInterface;
 #include "midi_sequencer_impl.hpp"
 // clang-format on
-#include "playlist.h"
+#include "ddf_playlist.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "radmidi.h"
 #include "s_blit.h"
 #include "s_music.h"
 #include "snd_types.h"
-#include "str_compare.h"
-#include "str_util.h"
 #include "w_files.h"
 #include "w_wad.h"
 

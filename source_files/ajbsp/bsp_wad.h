@@ -21,9 +21,9 @@
 #include <string>
 #include <vector>
 
-#include "common_doomdefs.h"
-#include "file.h"
-#include "str_compare.h"
+#include "epi_doomdefs.h"
+#include "epi_file.h"
+#include "epi_str_compare.h"
 
 namespace ajbsp
 {

@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "main.h"
+#include "ddf_main.h"
 
 // maximum weapons player can hold at once
 static constexpr uint8_t kMaximumWeapons = 64;

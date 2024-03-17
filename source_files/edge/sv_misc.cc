@@ -34,9 +34,9 @@
 //
 
 #include "epi.h"
+#include "epi_str_util.h"
 #include "r_misc.h"
 #include "rad_trig.h"
-#include "str_util.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
 

@@ -23,7 +23,7 @@
 #include "bsp_local.h"
 #include "bsp_utility.h"
 #include "bsp_wad.h"
-#include "common_doomdefs.h"
+#include "epi_doomdefs.h"
 
 #define DEBUG_WALLTIPS  0
 #define DEBUG_POLYOBJ   0

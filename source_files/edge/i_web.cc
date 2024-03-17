@@ -20,14 +20,14 @@
 
 #include "dm_defs.h"
 #include "e_main.h"
+#include "epi_filesystem.h"
 #include "epi_sdl.h" // needed for proper SDL main linkage
-#include "filesystem.h"
+#include "epi_str_util.h"
 #include "i_system.h"
 #include "i_video.h"
 #include "m_argv.h"
 #include "m_menu.h"
 #include "r_modes.h"
-#include "str_util.h"
 #include "version.h"
 
 // Event reference

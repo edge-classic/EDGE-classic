@@ -16,6 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
+#include "epi_str_compare.h"
 #include "g_game.h"
 #include "i_defs_gl.h"
 #include "r_colormap.h"
@@ -25,7 +26,6 @@
 #include "r_misc.h"
 #include "r_modes.h"
 #include "r_units.h"
-#include "str_compare.h"
 
 // implementation limits
 

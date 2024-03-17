@@ -28,9 +28,9 @@
 #include <string.h>
 
 #include "epi.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "p_setup.h"
-#include "str_compare.h"
-#include "str_util.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
 

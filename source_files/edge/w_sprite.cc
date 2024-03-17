@@ -32,17 +32,17 @@
 
 #include <algorithm> // sort
 
-#include "common_doomdefs.h"
 #include "e_main.h"
 #include "e_search.h"
-#include "endianess.h"
 #include "epi.h"
-#include "filesystem.h"
+#include "epi_doomdefs.h"
+#include "epi_endian.h"
+#include "epi_filesystem.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "p_local.h" // map_object_list_head
 #include "r_image.h"
 #include "r_things.h"
-#include "str_compare.h"
-#include "str_util.h"
 #include "w_epk.h"
 #include "w_files.h"
 #include "w_wad.h"

@@ -23,12 +23,12 @@
 #include "bsp_local.h"
 #include "bsp_utility.h"
 #include "bsp_wad.h"
-#include "common_doomdefs.h"
-#include "endianess.h"
+#include "epi_doomdefs.h"
+#include "epi_ename.h"
+#include "epi_endian.h"
+#include "epi_lexer.h"
+#include "epi_str_util.h"
 #include "miniz.h"
-#include "str_ename.h"
-#include "str_lexer.h"
-#include "str_util.h"
 
 #define DEBUG_BLOCKMAP 0
 #define DEBUG_REJECT   0

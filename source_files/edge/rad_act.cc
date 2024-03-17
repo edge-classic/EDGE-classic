@@ -24,11 +24,12 @@
 #include <limits.h>
 
 #include "AlmostEquals.h"
-#include "common_doomdefs.h"
 #include "con_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "epi.h"
+#include "epi_doomdefs.h"
+#include "epi_str_util.h"
 #include "g_game.h"
 #include "hu_draw.h"
 #include "hu_stuff.h"
@@ -50,7 +51,6 @@
 #include "rad_trig.h"
 #include "s_music.h"
 #include "s_sound.h"
-#include "str_util.h"
 #include "sv_chunk.h"
 #include "w_texture.h"
 #include "w_wad.h"

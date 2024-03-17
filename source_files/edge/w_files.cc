@@ -29,27 +29,27 @@
 #include <list>
 #include <vector>
 
-#include "anim.h"
-#include "colormap.h"
 #include "con_main.h"
+#include "ddf_anim.h"
+#include "ddf_colormap.h"
+#include "ddf_flat.h"
+#include "ddf_font.h"
+#include "ddf_image.h"
+#include "ddf_main.h"
+#include "ddf_style.h"
+#include "ddf_switch.h"
+#include "ddf_wadfixes.h"
 #include "deh_edge.h"
 #include "dm_state.h"
 #include "dstrings.h"
 #include "epi.h"
-#include "file.h"
-#include "filesystem.h"
-#include "flat.h"
-#include "font.h"
+#include "epi_file.h"
+#include "epi_filesystem.h"
 #include "i_system.h"
-#include "image.h"
 #include "l_deh.h"
-#include "main.h"
 #include "rad_trig.h"
-#include "style.h"
-#include "switch.h"
 #include "w_epk.h"
 #include "w_wad.h"
-#include "wadfixes.h"
 
 std::vector<DataFile *> data_files;
 

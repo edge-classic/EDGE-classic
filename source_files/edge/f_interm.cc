@@ -35,6 +35,8 @@
 #include "dm_state.h"
 #include "e_main.h"
 #include "epi.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "f_finale.h"
 #include "g_game.h"
 #include "hu_draw.h"
@@ -46,8 +48,6 @@
 #include "r_modes.h"
 #include "s_music.h"
 #include "s_sound.h"
-#include "str_compare.h"
-#include "str_util.h"
 #include "w_wad.h"
 
 //

@@ -26,10 +26,10 @@
 #include "HandmadeMath.h"
 #include "bsp_local.h"
 #include "bsp_utility.h"
-#include "common_doomdefs.h"
-#include "endianess.h"
-#include "filesystem.h"
-#include "str_compare.h"
+#include "epi_doomdefs.h"
+#include "epi_endian.h"
+#include "epi_filesystem.h"
+#include "epi_str_compare.h"
 
 #define DEBUG_WAD 0
 

@@ -41,10 +41,10 @@
 #include <vector>
 
 #include "AlmostEquals.h"
-#include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "epi.h"
+#include "epi_doomdefs.h"
 #include "m_bbox.h"
 #include "p_local.h"
 #include "p_spec.h"

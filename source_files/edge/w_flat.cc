@@ -32,7 +32,7 @@
 #include <algorithm>
 #include <vector>
 
-#include "anim.h"
+#include "ddf_anim.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_search.h"

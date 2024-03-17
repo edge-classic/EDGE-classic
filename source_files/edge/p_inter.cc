@@ -31,12 +31,12 @@
 #include "dstrings.h"
 #include "e_input.h"
 #include "epi.h"
+#include "epi_str_util.h"
 #include "m_random.h"
 #include "p_local.h"
 #include "r_misc.h"
 #include "rad_trig.h"
 #include "s_sound.h"
-#include "str_util.h"
 
 static constexpr uint8_t kBonusAddMinimum = 6;
 static constexpr uint8_t kBonusLimit      = 100;

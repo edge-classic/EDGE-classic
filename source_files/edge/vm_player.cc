@@ -18,12 +18,13 @@
 
 #include "AlmostEquals.h"
 #include "coal.h"
+#include "ddf_flat.h" // DDFFLAT - Dasho
+#include "ddf_types.h"
 #include "dm_state.h"
 #include "e_main.h"
 #include "e_player.h"
 #include "epi.h"
 #include "f_interm.h" //Lobo: need this to get access to intermission_stats
-#include "flat.h"     // DDFFLAT - Dasho
 #include "g_game.h"
 #include "hu_draw.h"
 #include "hu_font.h"
@@ -36,7 +37,6 @@
 #include "r_state.h"
 #include "rad_trig.h" //Lobo: need this to access RTS
 #include "s_sound.h"  // play_footstep() - Dasho
-#include "types.h"
 #include "vm_coal.h"
 
 extern coal::Vm *ui_vm;

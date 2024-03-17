@@ -18,9 +18,9 @@
 
 #include "r_occlude.h"
 
+#include "ddf_types.h"
 #include "epi.h"
-#include "math_bam.h"
-#include "types.h"
+#include "epi_bam.h"
 
 // #define EDGE_DEBUG_OCCLUSION 1
 

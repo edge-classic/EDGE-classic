@@ -28,8 +28,8 @@
 #include <list>
 #include <vector>
 
-#include "image.h"
-#include "main.h"
+#include "ddf_image.h"
+#include "ddf_main.h"
 #include "r_defs.h"
 #include "r_state.h"
 #include "w_epk.h"

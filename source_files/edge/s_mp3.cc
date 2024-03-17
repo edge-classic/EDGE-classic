@@ -23,11 +23,11 @@
 #define DR_MP3_IMPLEMENTATION
 #include "dr_mp3.h"
 // clang-format on
-#include "endianess.h"
+#include "ddf_playlist.h"
 #include "epi.h"
-#include "file.h"
-#include "filesystem.h"
-#include "playlist.h"
+#include "epi_endian.h"
+#include "epi_file.h"
+#include "epi_filesystem.h"
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_music.h"

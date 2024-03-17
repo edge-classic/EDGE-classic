@@ -26,10 +26,11 @@
 #include <algorithm>
 
 #include "AlmostEquals.h"
-#include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "epi.h"
+#include "epi_doomdefs.h"
+#include "epi_str_compare.h"
 #include "m_random.h"
 #include "n_network.h"
 #include "p_local.h"
@@ -37,7 +38,6 @@
 #include "r_sky.h"
 #include "r_state.h"
 #include "s_sound.h"
-#include "str_compare.h"
 
 typedef enum
 {

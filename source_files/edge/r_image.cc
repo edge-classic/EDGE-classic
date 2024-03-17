@@ -37,16 +37,18 @@
 
 #include <list>
 
-#include "common_doomdefs.h"
+#include "ddf_flat.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_main.h"
 #include "e_search.h"
-#include "endianess.h"
 #include "epi.h"
-#include "file.h"
-#include "filesystem.h"
-#include "flat.h"
+#include "epi_doomdefs.h"
+#include "epi_endian.h"
+#include "epi_file.h"
+#include "epi_filesystem.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "hu_draw.h" // hud_tic
 #include "i_defs_gl.h"
 #include "i_system.h"
@@ -62,8 +64,6 @@
 #include "r_misc.h"
 #include "r_sky.h"
 #include "r_texgl.h"
-#include "str_compare.h"
-#include "str_util.h"
 #include "w_epk.h"
 #include "w_files.h"
 #include "w_texture.h"

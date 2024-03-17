@@ -20,22 +20,22 @@
 #include <unordered_map>
 #include <vector>
 
-#include "colormap.h"
+#include "ddf_colormap.h"
+#include "ddf_main.h"
+#include "ddf_wadfixes.h"
 #include "epi.h"
-#include "file.h"
-#include "filesystem.h"
+#include "epi_file.h"
+#include "epi_filesystem.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "l_deh.h"
-#include "main.h"
 #include "miniz.h"
 #include "r_image.h"
 #include "script/compat/lua_compat.h"
 #include "snd_types.h"
-#include "str_compare.h"
-#include "str_util.h"
 #include "vm_coal.h"
 #include "w_files.h"
 #include "w_wad.h"
-#include "wadfixes.h"
 
 static std::string known_image_directories[5] = {"flats", "graphics", "skins", "textures", "sprites"};
 

@@ -24,6 +24,8 @@
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "epi.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "g_game.h"
 #include "m_argv.h"
 #include "m_math.h"
@@ -34,8 +36,6 @@
 #include "rad_act.h"
 #include "rad_trig.h"
 #include "s_sound.h"
-#include "str_compare.h"
-#include "str_util.h"
 #include "version.h"
 #include "w_wad.h"
 

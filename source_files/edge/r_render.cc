@@ -29,10 +29,10 @@
 #include <unordered_set>
 
 #include "AlmostEquals.h"
-#include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "epi.h"
+#include "epi_doomdefs.h"
 #include "g_game.h"
 #include "i_defs_gl.h"
 #include "m_bbox.h"

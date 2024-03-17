@@ -20,8 +20,9 @@
 
 #include "am_map.h"
 #include "con_main.h"
+#include "ddf_font.h"
 #include "epi.h"
-#include "font.h"
+#include "epi_str_compare.h"
 #include "g_game.h"
 #include "i_defs_gl.h"
 #include "r_colormap.h"
@@ -31,7 +32,6 @@
 #include "r_misc.h" //  R_Render
 #include "r_modes.h"
 #include "r_units.h"
-#include "str_compare.h"
 
 // FIXME: this seems totally arbitrary, review it.
 static constexpr float kVerticalSpacing = 2.0f;

@@ -23,11 +23,11 @@
 #include "e_main.h"
 #include "edge_profiling.h"
 #include "epi.h"
+#include "epi_str_util.h"
 #include "i_system.h"
 #include "i_video.h"
 #include "m_argv.h"
 #include "r_modes.h"
-#include "str_util.h"
 
 // FIXME: Combine all these SDL bool vars into an int/enum'd flags structure
 

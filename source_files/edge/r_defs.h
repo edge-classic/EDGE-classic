@@ -25,9 +25,9 @@
 
 #pragma once
 
+#include "ddf_main.h"
 #include "dm_defs.h"
 #include "m_math.h"
-#include "main.h"
 #include "p_mobj.h"
 
 class Image;

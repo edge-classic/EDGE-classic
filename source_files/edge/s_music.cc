@@ -23,12 +23,13 @@
 
 #include <stdlib.h>
 
+#include "ddf_main.h"
 #include "dm_state.h"
-#include "file.h"
-#include "filesystem.h"
+#include "epi_file.h"
+#include "epi_filesystem.h"
+#include "epi_str_util.h"
 #include "i_system.h"
 #include "m_misc.h"
-#include "main.h"
 #include "s_flac.h"
 #include "s_fluid.h"
 #include "s_m4p.h"
@@ -38,7 +39,6 @@
 #include "s_rad.h"
 #include "s_sound.h"
 #include "snd_types.h"
-#include "str_util.h"
 #include "w_files.h"
 #include "w_wad.h"
 

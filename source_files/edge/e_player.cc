@@ -34,7 +34,8 @@
 #include "bot_think.h"
 #include "dm_defs.h"
 #include "dm_state.h"
-#include "endianess.h"
+#include "epi_endian.h"
+#include "epi_str_util.h"
 #include "g_game.h"
 #include "hu_stuff.h"
 #include "i_system.h"
@@ -43,7 +44,6 @@
 #include "p_local.h"
 #include "script/compat/lua_compat.h"
 #include "sokol_color.h"
-#include "str_util.h"
 #include "vm_coal.h" // For CoalEndLevel()
 
 //

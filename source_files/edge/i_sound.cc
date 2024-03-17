@@ -19,8 +19,10 @@
 #include "i_sound.h"
 
 #include "epi.h"
-#include "file.h"
-#include "filesystem.h"
+#include "epi_file.h"
+#include "epi_filesystem.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_misc.h"
@@ -30,8 +32,6 @@
 #include "s_fluid.h"
 #include "s_opl.h"
 #include "s_sound.h"
-#include "str_compare.h"
-#include "str_util.h"
 #include "w_wad.h"
 
 // If true, sound system is off/not working. Changed to false if sound init ok.

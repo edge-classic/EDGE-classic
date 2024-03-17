@@ -28,7 +28,7 @@
 #include "AlmostEquals.h"
 #include "bot_think.h"
 #include "coal.h" // for coal::vm_c
-#include "colormap.h"
+#include "ddf_colormap.h"
 #include "dm_state.h"
 #include "e_input.h"
 #include "g_game.h"
@@ -45,8 +45,8 @@
 #include "vm_coal.h"
 
 extern coal::Vm *ui_vm;
-extern void        CoalSetVector(coal::Vm *vm, const char *mod_name, const char *var_name, double val_1, double val_2,
-                                 double val_3);
+extern void      CoalSetVector(coal::Vm *vm, const char *mod_name, const char *var_name, double val_1, double val_2,
+                               double val_3);
 
 extern ConsoleVariable double_framerate;
 

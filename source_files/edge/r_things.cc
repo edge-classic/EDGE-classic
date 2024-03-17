@@ -30,12 +30,13 @@
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "edge_profiling.h"
+#include "epi_color.h"
+#include "epi_str_util.h"
 #include "g_game.h" //current_map
 #include "i_defs_gl.h"
 #include "im_data.h"
 #include "im_funcs.h"
 #include "m_misc.h" // !!!! model test
-#include "math_color.h"
 #include "p_local.h"
 #include "r_colormap.h"
 #include "r_defs.h"
@@ -52,13 +53,12 @@
 #include "r_units.h"
 #include "script/compat/lua_compat.h"
 #include "sokol_color.h"
-#include "str_util.h"
 #include "vm_coal.h"
 #include "w_model.h"
 #include "w_sprite.h"
 
 extern coal::Vm *ui_vm;
-extern double      CoalGetFloat(coal::Vm *vm, const char *mod_name, const char *var_name);
+extern double    CoalGetFloat(coal::Vm *vm, const char *mod_name, const char *var_name);
 
 extern bool erraticism_active;
 

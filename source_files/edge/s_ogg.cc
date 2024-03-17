@@ -24,17 +24,17 @@
 
 #include "s_ogg.h"
 
-#include "endianess.h"
 #include "epi.h"
-#include "file.h"
-#include "filesystem.h"
+#include "epi_endian.h"
+#include "epi_file.h"
+#include "epi_filesystem.h"
 // clang-format off
 #define OV_EXCLUDE_STATIC_CALLBACKS
 #define OGG_IMPL
 #define VORBIS_IMPL
 #include "minivorbis.h"
 // clang-format on
-#include "playlist.h"
+#include "ddf_playlist.h"
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_music.h"

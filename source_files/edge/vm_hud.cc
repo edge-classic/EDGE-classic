@@ -20,17 +20,17 @@
 
 #include "am_map.h" // AutomapDrawer
 #include "coal.h"
+#include "ddf_font.h"
+#include "ddf_main.h"
 #include "dm_state.h"
 #include "e_main.h"
 #include "e_player.h"
 #include "epi.h"
-#include "font.h"
 #include "g_game.h"
 #include "hu_draw.h"
 #include "hu_font.h"
 #include "i_system.h"
 #include "im_data.h"
-#include "main.h"
 #include "r_colormap.h"
 #include "r_misc.h"
 #include "r_modes.h"
@@ -40,7 +40,7 @@
 #include "w_wad.h"
 
 extern ConsoleVariable double_framerate;
-extern coal::Vm     *ui_vm;
+extern coal::Vm       *ui_vm;
 
 extern void CoalSetFloat(coal::Vm *vm, const char *mod, const char *name, double value);
 extern void CoalCallFunction(coal::Vm *vm, const char *name);

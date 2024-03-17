@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "math_bam.h"
+#include "epi_bam.h"
 
 void RendererOcclusionClear(void);
 void RendererOcclusionSet(BAMAngle low, BAMAngle high);

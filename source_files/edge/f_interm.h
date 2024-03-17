@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "level.h"
+#include "ddf_level.h"
 
 enum IntermissionState
 {

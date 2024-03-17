@@ -32,11 +32,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "colormap.h"
+#include "ddf_colormap.h"
 #include "epi.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "r_image.h"
-#include "str_compare.h"
-#include "str_util.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
 

@@ -1,8 +1,8 @@
 
 #include "am_map.h"
+#include "ddf_font.h"
 #include "dm_state.h"
 #include "e_player.h"
-#include "font.h"
 #include "g_game.h"
 #include "hu_draw.h"
 #include "i_system.h"

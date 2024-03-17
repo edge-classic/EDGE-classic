@@ -4,9 +4,9 @@
 #include "../lua_debugger.h"
 #include "con_var.h"
 #include "edge_profiling.h"
+#include "epi_str_util.h"
 #include "i_system.h"
 #include "lua_compat.h"
-#include "str_util.h"
 #include "w_files.h"
 
 // Enable Lua debugging

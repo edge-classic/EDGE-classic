@@ -29,9 +29,9 @@
 //
 
 #include "bot_think.h"
+#include "ddf_main.h"
 #include "epi.h"
-#include "main.h"
-#include "str_util.h"
+#include "epi_str_util.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
 

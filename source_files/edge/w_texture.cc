@@ -23,14 +23,14 @@
 
 #include "w_texture.h"
 
-#include "common_doomdefs.h"
 #include "e_main.h"
 #include "e_search.h"
-#include "endianess.h"
 #include "epi.h"
+#include "epi_doomdefs.h"
+#include "epi_endian.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "r_image.h"
-#include "str_compare.h"
-#include "str_util.h"
 #include "w_files.h"
 #include "w_wad.h"
 

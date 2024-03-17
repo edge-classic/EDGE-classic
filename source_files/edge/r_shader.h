@@ -18,9 +18,9 @@
 
 #pragma once
 
+#include "ddf_types.h"
 #include "i_defs_gl.h"
 #include "p_mobj.h"
-#include "types.h"
 
 class ColorMixer
 {

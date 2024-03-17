@@ -23,10 +23,10 @@
 #define DR_WAV_IMPLEMENTATION
 #include "dr_wav.h"
 // clang-format on
-#include "endianess.h"
 #include "epi.h"
-#include "file.h"
-#include "filesystem.h"
+#include "epi_endian.h"
+#include "epi_file.h"
+#include "epi_filesystem.h"
 #include "s_blit.h"
 #include "s_cache.h"
 #include "snd_gather.h"

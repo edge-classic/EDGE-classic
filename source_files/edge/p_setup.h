@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "math_crc.h"
+#include "epi_crc.h"
 
 extern epi::CRC32 map_sectors_crc;
 extern epi::CRC32 map_lines_crc;

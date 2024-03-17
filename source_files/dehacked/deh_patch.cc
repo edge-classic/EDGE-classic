@@ -45,8 +45,8 @@
 #include "deh_things.h"
 #include "deh_weapons.h"
 #include "epi.h"
-#include "str_compare.h"
-#include "str_util.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 namespace dehacked
 {
 

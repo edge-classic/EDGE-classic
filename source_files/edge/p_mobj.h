@@ -34,8 +34,8 @@
 #include <unordered_set>
 
 #include "con_var.h"
+#include "ddf_types.h"
 #include "m_math.h"
-#include "types.h"
 
 // forward decl.
 class AttackDefinition;

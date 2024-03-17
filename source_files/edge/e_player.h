@@ -27,7 +27,7 @@
 
 #include <stdint.h>
 
-#include "colormap.h"
+#include "ddf_colormap.h"
 #include "e_ticcmd.h"
 #include "p_mobj.h"
 #include "p_weapon.h"

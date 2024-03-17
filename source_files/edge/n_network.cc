@@ -23,24 +23,24 @@
 #include <string.h>
 
 #include "coal.h"
+#include "ddf_types.h"
 #include "dm_state.h"
 #include "e_input.h"
 #include "e_main.h"
 #include "e_player.h"
 #include "edge_profiling.h"
-#include "endianess.h"
+#include "epi_endian.h"
+#include "epi_str_util.h"
 #include "epi_windows.h"
 #include "g_game.h"
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_random.h"
 #include "script/compat/lua_compat.h"
-#include "str_util.h"
-#include "types.h"
 #include "vm_coal.h" // for coal::vm_c
 
 extern coal::Vm *ui_vm;
-extern void        CoalSetFloat(coal::Vm *vm, const char *mod_name, const char *var_name, double value);
+extern void      CoalSetFloat(coal::Vm *vm, const char *mod_name, const char *var_name, double value);
 
 // only true if packets are exchanged with a server
 bool network_game = false;

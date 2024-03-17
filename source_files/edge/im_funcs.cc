@@ -19,8 +19,8 @@
 #include "im_funcs.h"
 
 #include "epi.h"
-#include "filesystem.h"
-#include "str_util.h"
+#include "epi_filesystem.h"
+#include "epi_str_util.h"
 #define STB_RECT_PACK_IMPLEMENTATION
 #include "stb_rect_pack.h"
 #define STBI_ONLY_PNG

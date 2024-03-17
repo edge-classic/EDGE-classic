@@ -27,25 +27,25 @@
 
 #include <vector>
 
+#include "ddf_main.h"
+#include "ddf_sfx.h"
 #include "dm_state.h" // game_directory
 #include "epi.h"
-#include "file.h"
-#include "filesystem.h"
+#include "epi_file.h"
+#include "epi_filesystem.h"
+#include "epi_str_util.h"
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_misc.h"
 #include "m_random.h"
-#include "main.h"
 #include "p_mobj.h"
 #include "r_defs.h"
 #include "s_mp3.h"
 #include "s_ogg.h"
 #include "s_sound.h"
 #include "s_wav.h"
-#include "sfx.h"
 #include "snd_data.h"
 #include "snd_types.h"
-#include "str_util.h"
 #include "w_files.h"
 #include "w_wad.h"
 

@@ -2,7 +2,7 @@
 
 #include "lua_compat.h"
 
-#include "file.h"
+#include "epi_file.h"
 #include "w_wad.h"
 
 bool GetCoalDetected();

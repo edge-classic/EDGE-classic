@@ -27,13 +27,13 @@
 
 #include <unordered_map> // ZDoom Actor Name <-> Doomednum lookups
 
+#include "ddf_game.h"
+#include "ddf_language.h"
 #include "deh_text.h"
-#include "game.h"
-#include "language.h"
-#include "str_compare.h"
-#include "str_ename.h"
-#include "str_lexer.h"
-#include "str_util.h"
+#include "epi_ename.h"
+#include "epi_lexer.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 
 MapList Maps;
 

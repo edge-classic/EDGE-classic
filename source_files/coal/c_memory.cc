@@ -17,13 +17,15 @@
 //
 //----------------------------------------------------------------------
 
-#include "c_local.h"
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <vector>
+
+#include "c_local.h"
 
 namespace coal
 {

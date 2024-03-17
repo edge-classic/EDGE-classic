@@ -18,10 +18,10 @@
 
 #include "r_shader.h"
 
+#include "ddf_main.h"
 #include "epi.h"
 #include "i_defs_gl.h"
 #include "im_data.h"
-#include "main.h"
 #include "p_mobj.h"
 #include "r_defs.h"
 #include "r_gldefs.h"

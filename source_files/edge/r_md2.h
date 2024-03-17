@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "file.h"
+#include "epi_file.h"
 #include "p_mobj.h"
 #include "r_defs.h"
 

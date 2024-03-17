@@ -15,3 +15,4 @@ General Improvements/Changes
 Bugs fixed
 ----------
 - Fixed sector fogwall check producing black 0% alpha fog walls for otherwise unfogged sectors
+- Fixed Autoscale texture linetypes(855,856,857) and Brightwall(850) being USEable (repeatedly) by the player.

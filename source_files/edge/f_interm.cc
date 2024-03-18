@@ -2030,7 +2030,7 @@ void IntermissionStart(void)
     {
         for (MapObject *mo = map_object_list_head; mo != nullptr; mo = mo->next_)
         {
-            if (DDF_CompareName(mo->info_->name_.c_str(), gd->bg_camera_.c_str()) != 0)
+            if (DdfCompareName(mo->info_->name_.c_str(), gd->bg_camera_.c_str()) != 0)
                 continue;
 
             background_camera_map_object = mo;

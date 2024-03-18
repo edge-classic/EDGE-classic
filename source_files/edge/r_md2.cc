@@ -54,8 +54,6 @@ extern ConsoleVariable draw_culling;
 extern ConsoleVariable cull_fog_color;
 extern bool            need_to_draw_sky;
 
-// #define DEBUG_Md2LOAD  1
-
 /*============== MD2 FORMAT DEFINITIONS ====================*/
 
 // format uses float pointing values, but to allow for endianness
@@ -515,7 +513,7 @@ short Md2FindFrame(Md2Model *md, const char *name)
     {
         Md2Frame *frame = &md->frames_[f];
 
-        if (DDF_CompareName(name, frame->name) == 0)
+        if (DdfCompareName(name, frame->name) == 0)
             return f;
     }
 
@@ -1061,13 +1059,13 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_, int fr
 
     bool tilt = is_weapon_ || (mo->flags_ & kMapObjectFlagMissile) || (mo->hyper_flags_ & kHyperFlagForceModelTilt);
 
-    MathBAMAngleToMatrix(tilt ? ~mo->vertical_angle_ : 0, &data.mouselook_x_matrix_, &data.mouselook_z_matrix_);
+    BAMAngleToMatrix(tilt ? ~mo->vertical_angle_ : 0, &data.mouselook_x_matrix_, &data.mouselook_z_matrix_);
 
     BAMAngle ang = mo->angle_ + rotation;
 
     MirrorAngle(ang);
 
-    MathBAMAngleToMatrix(~ang, &data.rotation_x_matrix_, &data.rotation_y_matrix_);
+    BAMAngleToMatrix(~ang, &data.rotation_x_matrix_, &data.rotation_y_matrix_);
 
     data.used_normals_ = (lerp < 0.5) ? data.frame1_->used_normals_ : data.frame2_->used_normals_;
 

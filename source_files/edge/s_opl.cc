@@ -41,8 +41,6 @@ typedef struct MidiRealTimeInterface OPLInterface;
 
 OPLPlayer *edge_opl = nullptr;
 
-#define OPL_SAMPLES 1024
-
 extern bool sound_device_stereo;
 extern int  sound_device_frequency;
 
@@ -188,7 +186,7 @@ class OpalPlayer : public AbstractMusicPlayer
   public:
     OpalPlayer(bool looping) : status_(kNotLoaded), looping_(looping)
     {
-        mono_buffer_ = new int16_t[2 * OPL_SAMPLES];
+        mono_buffer_ = new int16_t[2 * kMusicBuffer];
         SequencerInit();
     }
 
@@ -376,7 +374,7 @@ class OpalPlayer : public AbstractMusicPlayer
     {
         while (status_ == kPlaying && !pc_speaker_mode)
         {
-            SoundData *buf = SoundQueueGetFreeBuffer(OPL_SAMPLES, sound_device_stereo ? kMixInterleaved : kMixMono);
+            SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer, sound_device_stereo ? kMixInterleaved : kMixMono);
 
             if (!buf)
                 break;
@@ -407,7 +405,7 @@ class OpalPlayer : public AbstractMusicPlayer
         else
             data_buf = buf->data_left_;
 
-        int played = opl_sequencer_->PlayStream((uint8_t *)(data_buf), OPL_SAMPLES);
+        int played = opl_sequencer_->PlayStream((uint8_t *)(data_buf), kMusicBuffer);
 
         if (opl_sequencer_->PositionAtEnd())
             song_done = true;
@@ -450,13 +448,13 @@ AbstractMusicPlayer *PlayOplMusic(uint8_t *data, int length, bool loop, int type
 
     switch (type)
     {
-    case kDDFMusicIMF280:
+    case kDdfMusicIMF280:
         rate = 280;
         break;
-    case kDDFMusicIMF560:
+    case kDdfMusicIMF560:
         rate = 560;
         break;
-    case kDDFMusicIMF700:
+    case kDdfMusicIMF700:
         rate = 700;
         break;
     default:

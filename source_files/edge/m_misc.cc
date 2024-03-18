@@ -452,10 +452,6 @@ void ConfigurationLoadBranding(void)
     ParseConfig(data, false);
 }
 
-#define PIXEL_RED(pix) (playpal_data[0][pix][0])
-#define PIXEL_GRN(pix) (playpal_data[0][pix][1])
-#define PIXEL_BLU(pix) (playpal_data[0][pix][2])
-
 void TakeScreenshot(bool show_msg)
 {
     const char *extension;

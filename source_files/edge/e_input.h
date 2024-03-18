@@ -43,7 +43,7 @@ bool EventMatchesKey(int keyvar, int key);
 
 const char *EventGetKeyName(int key);
 
-bool EventInputResponderResponder(InputEvent *ev);
+bool EventInputResponder(InputEvent *ev);
 
 // -KM- 1998/09/01 Analogue binding stuff, These hold what axis they bind to.
 extern int mouse_x_axis;

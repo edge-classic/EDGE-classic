@@ -416,7 +416,7 @@ static void PL_has_weapon(coal::Vm *vm, int argc)
     {
         PlayerWeapon *pw = &ui_player_who->weapons_[j];
 
-        if (pw->owned && !(pw->flags & kPlayerWeaponRemoving) && DDF_CompareName(name, pw->info->name_.c_str()) == 0)
+        if (pw->owned && !(pw->flags & kPlayerWeaponRemoving) && DdfCompareName(name, pw->info->name_.c_str()) == 0)
         {
             vm->ReturnFloat(1);
             return;
@@ -465,7 +465,7 @@ static void COAL_SetPlayerSprite(Player *p, int position, int stnum, WeaponDefin
 
         if (st->label)
         {
-            int new_state = DDF_StateFindLabel(info->state_grp_, st->label, true /* quiet */);
+            int new_state = DdfStateFindLabel(info->state_grp_, st->label, true /* quiet */);
             if (new_state != 0)
                 stnum = new_state;
         }
@@ -561,7 +561,7 @@ static void PL_weapon_state(coal::Vm *vm, int argc)
 
     ui_player_who->ready_weapon_ = (WeaponSelection)pw_index; // insta-switch to it
 
-    int state = DDF_StateFindLabel(oldWep->state_grp_, weapon_state, true /* quiet */);
+    int state = DdfStateFindLabel(oldWep->state_grp_, weapon_state, true /* quiet */);
     if (state == 0)
         FatalError("player.weapon_state: frame '%s' in [%s] not found!\n", weapon_state, weapon_name);
     // state += 1;

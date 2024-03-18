@@ -25,10 +25,10 @@
 #include "bsp_wad.h"
 #include "epi_doomdefs.h"
 
-#define DEBUG_WALLTIPS  0
-#define DEBUG_POLYOBJ   0
-#define DEBUG_WINDOW_FX 0
-#define DEBUG_OVERLAPS  0
+#define AJBSP_DEBUG_WALLTIPS  0
+#define AJBSP_DEBUG_POLYOBJ   0
+#define AJBSP_DEBUG_WINDOW_FX 0
+#define AJBSP_DEBUG_OVERLAPS  0
 
 static constexpr uint8_t kPolyObjectBoxSize = 10;
 
@@ -119,7 +119,7 @@ void MarkPolyobjSector(Sector *sector)
     if (sector == nullptr)
         return;
 
-#if DEBUG_POLYOBJ
+#if AJBSP_DEBUG_POLYOBJ
     LogDebug("  Marking SECTOR %d\n", sector->index);
 #endif
 
@@ -167,7 +167,7 @@ void MarkPolyobjPoint(double x, double y)
         if (CheckLinedefInsideBox(bminx, bminy, bmaxx, bmaxy, (int)L->start->x_, (int)L->start->y_, (int)L->end->x_,
                                   (int)L->end->y_))
         {
-#if DEBUG_POLYOBJ
+#if AJBSP_DEBUG_POLYOBJ
             LogDebug("  Touching line was %d\n", L->index);
 #endif
 
@@ -227,12 +227,12 @@ void MarkPolyobjPoint(double x, double y)
     double y1 = best_match->start->y_;
     double y2 = best_match->end->y_;
 
-#if DEBUG_POLYOBJ
+#if AJBSP_DEBUG_POLYOBJ
     LogDebug("  Closest line was %d Y=%1.0f..%1.0f (dist=%1.1f)\n", best_match->index, y1, y2, best_dist);
 #endif
 
     /* sanity check: shouldn't be directly on the line */
-#if DEBUG_POLYOBJ
+#if AJBSP_DEBUG_POLYOBJ
     if (fabs(best_dist) < kEpsilon)
     {
         LogDebug("  Polyobj FAILURE: directly on the line (%d)\n", best_match->index);
@@ -247,7 +247,7 @@ void MarkPolyobjPoint(double x, double y)
     else
         sector = best_match->left ? best_match->left->sector : nullptr;
 
-#if DEBUG_POLYOBJ
+#if AJBSP_DEBUG_POLYOBJ
     LogDebug("  Sector %d contains the polyobj.\n", sector ? sector->index : -1);
 #endif
 
@@ -311,7 +311,7 @@ void DetectPolyobjSectors()
         if (T->type != kZDoomPolyobjectSpawnType && T->type != kZDoomPolyobjectSpawnCrushType)
             continue;
 
-#if DEBUG_POLYOBJ
+#if AJBSP_DEBUG_POLYOBJ
         LogDebug("Thing %d at (%1.0f,%1.0f) is a polyobj spawner.\n", i, x, y);
 #endif
 
@@ -590,7 +590,7 @@ void CalculateWallTips()
         L->end->AddWallTip(x1 - x2, y1 - y2, right, left);
     }
 
-#if DEBUG_WALLTIPS
+#if AJBSP_DEBUG_WALLTIPS
     for (int k = 0; k < level_vertices.size(); k++)
     {
         Vertex *V = level_vertices[k];

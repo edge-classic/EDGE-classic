@@ -31,12 +31,12 @@
 #include "epi_filesystem.h"
 #include "epi_str_compare.h"
 
-#define DEBUG_WAD 0
+#define AJBSP_DEBUG_WAD 0
 
 namespace ajbsp
 {
 
-#if DEBUG_WAD
+#if AJBSP_DEBUG_WAD
 #define FileMessage LogDebug
 #define LumpWarning LogDebug
 #else
@@ -76,7 +76,7 @@ Lump::Lump(WadFile *parent, const RawWadEntry *entry) : parent_(parent)
     lump_start_  = AlignedLittleEndianU32(entry->position);
     lump_length_ = AlignedLittleEndianU32(entry->size);
 
-#if DEBUG_WAD
+#if AJBSP_DEBUG_WAD
     LogDebug("new lump '%s' @ %d len:%d\n", name, lump_start, lump_length);
 #endif
 }
@@ -276,7 +276,7 @@ retry:
 
     w->total_size_ = (int)ftell(fp);
 
-#if DEBUG_WAD
+#if AJBSP_DEBUG_WAD
     LogDebug("total_size = %d\n", w->total_size);
 #endif
 
@@ -632,7 +632,7 @@ void WadFile::DetectLevels()
         if (epi::StringCaseCompareASCII(directory_[k + 1]->name_, "TEXTMAP") == 0)
         {
             levels_.push_back(k);
-#if DEBUG_WAD
+#if AJBSP_DEBUG_WAD
             LogDebug("Detected level : %s (UDMF)\n", directory_[k]->name_);
 #endif
             continue;
@@ -661,7 +661,7 @@ void WadFile::DetectLevels()
         {
             levels_.push_back(k);
 
-#if DEBUG_WAD
+#if AJBSP_DEBUG_WAD
             LogDebug("Detected level : %s\n", directory_[k]->name_);
 #endif
         }
@@ -783,7 +783,7 @@ void WadFile::ProcessNamespaces()
                 continue;
             }
 
-#if DEBUG_WAD
+#if AJBSP_DEBUG_WAD
             LogDebug("Namespace %c lump : %s\n", active, name);
 #endif
 
@@ -1047,7 +1047,7 @@ int WadFile::PositionForWrite(int max_size)
             FatalError("AJBSP: Error seeking to new write position.\n");
     }
 
-#if DEBUG_WAD
+#if AJBSP_DEBUG_WAD
     LogDebug("POSITION FOR WRITE: %d  (total_size %d)\n", want_pos, total_size);
 #endif
 
@@ -1103,7 +1103,7 @@ void WadFile::WriteDirectory()
     directory_start_ = PositionForWrite();
     directory_count_ = NumLumps();
 
-#if DEBUG_WAD
+#if AJBSP_DEBUG_WAD
     LogDebug("WriteDirectory...\n");
     LogDebug("dir_start:%d  dir_count:%d\n", dir_start, dir_count);
 #endif
@@ -1125,7 +1125,7 @@ void WadFile::WriteDirectory()
 
     total_size_ = (int)ftell(file_pointer_);
 
-#if DEBUG_WAD
+#if AJBSP_DEBUG_WAD
     LogDebug("total_size: %d\n", total_size);
 #endif
 

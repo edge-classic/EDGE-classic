@@ -23,13 +23,13 @@
 #include "bsp_utility.h"
 #include "bsp_wad.h"
 
-#define DEBUG_PICKNODE 0
-#define DEBUG_SPLIT    0
-#define DEBUG_CUTLIST  0
+#define AJBSP_DEBUG_PICKNODE 0
+#define AJBSP_DEBUG_SPLIT    0
+#define AJBSP_DEBUG_CUTLIST  0
 
-#define DEBUG_BUILDER 0
-#define DEBUG_SORTER  0
-#define DEBUG_SUBSEC  0
+#define AJBSP_DEBUG_BUILDER 0
+#define AJBSP_DEBUG_SORTER  0
+#define AJBSP_DEBUG_SUBSEC  0
 
 static constexpr uint8_t kPreciousCostMultiplier = 100;
 static constexpr uint8_t kSegFastModeThreshold   = 200;
@@ -140,7 +140,7 @@ void Seg::Recompute()
 //
 Seg *SplitSeg(Seg *old_seg, double x, double y)
 {
-#if DEBUG_SPLIT
+#if AJBSP_DEBUG_SPLIT
     if (old_seg->linedef)
         LogDebug("Splitting Linedef %d (%p) at (%1.1f,%1.1f)\n", old_seg->linedef->index, old_seg, x, y);
     else
@@ -160,7 +160,7 @@ Seg *SplitSeg(Seg *old_seg, double x, double y)
     old_seg->Recompute();
     new_seg->Recompute();
 
-#if DEBUG_SPLIT
+#if AJBSP_DEBUG_SPLIT
     LogDebug("Splitting Vertex is %04X at (%1.1f,%1.1f)\n", new_vert->index, new_vert->x, new_vert->y);
 #endif
 
@@ -168,7 +168,7 @@ Seg *SplitSeg(Seg *old_seg, double x, double y)
 
     if (old_seg->partner_)
     {
-#if DEBUG_SPLIT
+#if AJBSP_DEBUG_SPLIT
         LogDebug("Splitting partner %p\n", old_seg->partner_);
 #endif
 
@@ -500,7 +500,7 @@ double EvalPartition(QuadTree *tree, Seg *part, double best_cost)
     /* make sure there is at least one real seg on each side */
     if (info.real_left == 0 || info.real_right == 0)
     {
-#if DEBUG_PICKNODE
+#if AJBSP_DEBUG_PICKNODE
         LogDebug("Eval : No real segs on %s%sside\n", info.real_left ? "" : "left ", info.real_right ? "" : "right ");
 #endif
 
@@ -618,7 +618,7 @@ bool PickNodeWorker(QuadTree *part_list, QuadTree *tree, Seg **best, double *bes
     /* try each Seg as partition */
     for (Seg *part = part_list->list_; part; part = part->next_)
     {
-#if DEBUG_PICKNODE
+#if AJBSP_DEBUG_PICKNODE
         LogDebug("PickNode:   %sSEG %p  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", part->linedef ? "" : "MINI", part,
                  part->start->x, part->start->y, part->end->x, part->end->y);
 #endif
@@ -663,7 +663,7 @@ static Seg *PickNode(QuadTree *tree)
 
     double best_cost = 1.0e99;
 
-#if DEBUG_PICKNODE
+#if AJBSP_DEBUG_PICKNODE
     LogDebug("PickNode: BEGUN (depth %d)\n", depth);
 #endif
 
@@ -673,7 +673,7 @@ static Seg *PickNode(QuadTree *tree)
      */
     if (tree->real_num_ >= kSegFastModeThreshold)
     {
-#if DEBUG_PICKNODE
+#if AJBSP_DEBUG_PICKNODE
         LogDebug("PickNode: Looking for Fast node...\n");
 #endif
 
@@ -681,7 +681,7 @@ static Seg *PickNode(QuadTree *tree)
 
         if (best != nullptr)
         {
-#if DEBUG_PICKNODE
+#if AJBSP_DEBUG_PICKNODE
             LogDebug("PickNode: Using Fast node (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", best->start->x, best->start->y,
                      best->end->x, best->end->y);
 #endif
@@ -846,7 +846,7 @@ static void AddMinisegs(Intersection *cut_list, Seg *part, Seg **left_list, Seg 
 {
     Intersection *cut, *next;
 
-#if DEBUG_CUTLIST
+#if AJBSP_DEBUG_CUTLIST
     LogDebug("CUT LIST:\n");
     LogDebug("PARTITION: (%1.1f,%1.1f) += (%1.1f,%1.1f)\n", part->psx_, part->psy_, part->pdx_, part->pdy_);
 
@@ -913,7 +913,7 @@ static void AddMinisegs(Intersection *cut_list, Seg *part, Seg **left_list, Seg 
         ListAddSeg(right_list, seg);
         ListAddSeg(left_list, buddy);
 
-#if DEBUG_CUTLIST
+#if AJBSP_DEBUG_CUTLIST
         LogDebug("AddMiniseg: %p RIGHT  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->start_->x, seg->start_->y, seg->end_->x,
                  seg->end_->y);
 
@@ -1306,7 +1306,7 @@ void Subsector::ClockwiseOrder()
 {
     Seg *seg;
 
-#if DEBUG_SUBSEC
+#if AJBSP_DEBUG_SUBSEC
     LogDebug("Subsec: Clockwising %d\n", index);
 #endif
 
@@ -1379,7 +1379,7 @@ void Subsector::ClockwiseOrder()
         AddToTail(array[k]);
     }
 
-#if DEBUG_SORTER
+#if AJBSP_DEBUG_SORTER
     LogDebug("Sorted SEGS around (%1.1f,%1.1f)\n", mid_x, mid_y);
 
     for (seg = seg_list; seg; seg = seg->next)
@@ -1417,7 +1417,7 @@ void Subsector::SanityCheckClosed() const
                  index_, mid_x_, mid_y_, gaps, total);
         current_build_info.total_minor_issues++;
 
-#if DEBUG_SUBSEC
+#if AJBSP_DEBUG_SUBSEC
         for (seg = seg_list; seg; seg = seg->next)
         {
             LogDebug("  SEG %p  (%1.1f,%1.1f) --> (%1.1f,%1.1f)\n", seg, seg->start_->x, seg->start_->y, seg->end_->x,
@@ -1438,7 +1438,7 @@ void Subsector::SanityCheckHasRealSeg() const
 
 void Subsector::RenumberSegs(int &cur_seg_index)
 {
-#if DEBUG_SUBSEC
+#if AJBSP_DEBUG_SUBSEC
     LogDebug("Subsec: Renumbering %d\n", index);
 #endif
 
@@ -1451,7 +1451,7 @@ void Subsector::RenumberSegs(int &cur_seg_index)
 
         seg_count_++;
 
-#if DEBUG_SUBSEC
+#if AJBSP_DEBUG_SUBSEC
         LogDebug("Subsec:   %d: Seg %p  Index %d\n", seg_count, seg, seg->index);
 #endif
     }
@@ -1473,7 +1473,7 @@ Subsector *CreateSubsec(QuadTree *tree)
 
     sub->DetermineMiddle();
 
-#if DEBUG_SUBSEC
+#if AJBSP_DEBUG_SUBSEC
     LogDebug("Subsec: Creating %d\n", sub->index);
 #endif
 
@@ -1491,7 +1491,7 @@ int ComputeBspHeight(const Node *node)
     return HMM_MAX(left, right) + 1;
 }
 
-#if DEBUG_BUILDER
+#if AJBSP_DEBUG_BUILDER
 void DebugShowSegs(const Seg *list)
 {
     for (const Seg *seg = list; seg; seg = seg->next)
@@ -1507,7 +1507,7 @@ BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */, N
     *N = nullptr;
     *S = nullptr;
 
-#if DEBUG_BUILDER
+#if AJBSP_DEBUG_BUILDER
     LogDebug("Build: BEGUN @ %d\n", depth);
     DebugShowSegs(list);
 #endif
@@ -1522,7 +1522,7 @@ BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */, N
 
     if (part == nullptr)
     {
-#if DEBUG_BUILDER
+#if AJBSP_DEBUG_BUILDER
         LogDebug("Build: CONVEX\n");
 #endif
 
@@ -1532,7 +1532,7 @@ BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */, N
         return kBuildOK;
     }
 
-#if DEBUG_BUILDER
+#if AJBSP_DEBUG_BUILDER
     LogDebug("Build: PARTITION %p (%1.0f,%1.0f) -> (%1.0f,%1.0f)\n", part, part->start->x, part->start->y, part->end->x,
              part->end->y);
 #endif
@@ -1562,7 +1562,7 @@ BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */, N
 
     node->SetPartition(part);
 
-#if DEBUG_BUILDER
+#if AJBSP_DEBUG_BUILDER
     LogDebug("Build: Going LEFT\n");
 #endif
 
@@ -1573,7 +1573,7 @@ BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */, N
     if (ret != kBuildOK)
         return ret;
 
-#if DEBUG_BUILDER
+#if AJBSP_DEBUG_BUILDER
     LogDebug("Build: Going RIGHT\n");
 #endif
 
@@ -1582,7 +1582,7 @@ BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */, N
     if (ret != kBuildOK)
         return ret;
 
-#if DEBUG_BUILDER
+#if AJBSP_DEBUG_BUILDER
     LogDebug("Build: DONE\n");
 #endif
 

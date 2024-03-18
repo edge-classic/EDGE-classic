@@ -531,7 +531,7 @@ void EventBuildTicCommand(EventTicCommand *cmd)
 //
 // Get info needed to make ticcmd_ts for the players.
 //
-bool EventInputResponderResponder(InputEvent *ev)
+bool EventInputResponder(InputEvent *ev)
 {
     switch (ev->type)
     {
@@ -614,7 +614,7 @@ void EventClearInput(void)
 
 //
 // Finds all keys in the game_key_down[] array which have been released
-// and clears them.  The value is NOT cleared by EventInputResponderResponder()
+// and clears them.  The value is NOT cleared by EventInputResponder()
 // since that prevents very fast presses (also the mousewheel) from being down
 // long enough to be noticed by EventBuildTicCommand().
 //

@@ -24,7 +24,7 @@
 //----------------------------------------------------------------------------
 //
 // -KM- 1998/07/21 Clear the background behind those end pics.
-// -KM- 1998/09/27 sounds.ddf stuff: seesound_ -> DDF_LookupSound(seesound_)
+// -KM- 1998/09/27 sounds.ddf stuff: seesound_ -> DdfLookupSound(seesound_)
 // -KM- 1998/11/25 Finale generalised.
 //
 

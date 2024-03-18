@@ -63,7 +63,7 @@ void rscript::Shutdown()
 
 void rscript::BeginLump()
 {
-    wad::NewLump(kDDFTypeRadScript);
+    wad::NewLump(kDdfTypeRadScript);
 
     wad::Printf("// <SCRIPTS>\n\n");
 }

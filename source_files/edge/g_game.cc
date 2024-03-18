@@ -381,7 +381,7 @@ bool GameResponder(InputEvent *ev)
             return true; // finale ate the event
     }
 
-    return EventInputResponderResponder(ev);
+    return EventInputResponder(ev);
 }
 
 static void CheckPlayersReborn(void)
@@ -823,7 +823,7 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
         sky_image = globs->sky_image;
 
     // clear line/sector lookup caches
-    DDF_BoomClearGenTypes();
+    DdfBoomClearGeneralizedTypes();
 
     if (LoadAllSaveChunks() && SaveGetError() == 0)
     { /* all went well */

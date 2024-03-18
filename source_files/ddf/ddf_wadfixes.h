@@ -71,7 +71,7 @@ class WadFixDefinitionContainer : public std::vector<WadFixDefinition *>
 
 extern WadFixDefinitionContainer fixdefs; // -DASHO- 2022 Implemented
 
-void DDF_ReadFixes(const std::string &data);
+void DdfReadFixes(const std::string &data);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

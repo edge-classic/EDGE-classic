@@ -19,8 +19,8 @@
 // Moving Object Setup and Parser Code
 //
 // -ACB- 1998/08/04 Written.
-// -ACB- 1998/09/12 Use DDF_MainGetFixed for fixed number references.
-// -ACB- 1998/09/13 Use DDF_MainGetTime for Time count references.
+// -ACB- 1998/09/12 Use DdfMainGetFixed for fixed number references.
+// -ACB- 1998/09/13 Use DdfMainGetTime for Time count references.
 // -KM- 1998/11/25 Translucency is now a fixed_t. Fixed spelling of available.
 // -KM- 1998/12/16 No limit on number of ammo types.
 //
@@ -41,16 +41,16 @@ MapObjectDefinitionContainer mobjtypes;
 
 static MapObjectDefinition *default_mobjtype;
 
-void DDF_MobjGetSpecial(const char *info);
-void DDF_MobjGetBenefit(const char *info, void *storage);
-void DDF_MobjGetPickupEffect(const char *info, void *storage);
-void DDF_MobjGetDLight(const char *info, void *storage);
+void DdfMobjGetSpecial(const char *info);
+void DdfMobjGetBenefit(const char *info, void *storage);
+void DdfMobjGetPickupEffect(const char *info, void *storage);
+void DdfMobjGetDLight(const char *info, void *storage);
 
-static void DDF_MobjGetGlowType(const char *info, void *storage);
-static void DDF_MobjGetYAlign(const char *info, void *storage);
-static void DDF_MobjGetPercentRange(const char *info, void *storage);
-static void DDF_MobjGetAngleRange(const char *info, void *storage);
-static void DDF_MobjStateGetRADTrigger(const char *arg, State *cur_state);
+static void DdfMobjGetGlowType(const char *info, void *storage);
+static void DdfMobjGetYAlign(const char *info, void *storage);
+static void DdfMobjGetPercentRange(const char *info, void *storage);
+static void DdfMobjGetAngleRange(const char *info, void *storage);
+static void DdfMobjStateGetRADTrigger(const char *arg, State *cur_state);
 
 static void AddPickupEffect(PickupEffect **list, PickupEffect *cur);
 
@@ -58,25 +58,25 @@ static int dlight_radius_warnings = 0;
 
 static DynamicLightDefinition dummy_dlight;
 
-const DDFCommandList dlight_commands[] = {DDF_FIELD("TYPE", dummy_dlight, type_, DDF_MobjGetDLight),
-                                          DDF_FIELD("GRAPHIC", dummy_dlight, shape_, DDF_MainGetString),
-                                          DDF_FIELD("RADIUS", dummy_dlight, radius_, DDF_MainGetFloat),
-                                          DDF_FIELD("COLOUR", dummy_dlight, colour_, DDF_MainGetRGB),
-                                          DDF_FIELD("HEIGHT", dummy_dlight, height_, DDF_MainGetPercent),
-                                          DDF_FIELD("LEAKY", dummy_dlight, leaky_, DDF_MainGetBoolean),
+const DDFCommandList dlight_commands[] = {DDF_FIELD("TYPE", dummy_dlight, type_, DdfMobjGetDLight),
+                                          DDF_FIELD("GRAPHIC", dummy_dlight, shape_, DdfMainGetString),
+                                          DDF_FIELD("RADIUS", dummy_dlight, radius_, DdfMainGetFloat),
+                                          DDF_FIELD("COLOUR", dummy_dlight, colour_, DdfMainGetRGB),
+                                          DDF_FIELD("HEIGHT", dummy_dlight, height_, DdfMainGetPercent),
+                                          DDF_FIELD("LEAKY", dummy_dlight, leaky_, DdfMainGetBoolean),
 
                                           // backwards compatibility
-                                          DDF_FIELD("INTENSITY", dummy_dlight, radius_, DDF_MainGetFloat),
+                                          DDF_FIELD("INTENSITY", dummy_dlight, radius_, DdfMainGetFloat),
 
                                           {nullptr, nullptr, 0, nullptr}};
 
 static WeaknessDefinition dummy_weakness;
 
-const DDFCommandList weakness_commands[] = {DDF_FIELD("CLASS", dummy_weakness, classes_, DDF_MainGetBitSet),
-                                            DDF_FIELD("HEIGHTS", dummy_weakness, height_, DDF_MobjGetPercentRange),
-                                            DDF_FIELD("ANGLES", dummy_weakness, angle_, DDF_MobjGetAngleRange),
-                                            DDF_FIELD("MULTIPLY", dummy_weakness, multiply_, DDF_MainGetFloat),
-                                            DDF_FIELD("PAINCHANCE", dummy_weakness, painchance_, DDF_MainGetPercent),
+const DDFCommandList weakness_commands[] = {DDF_FIELD("CLASS", dummy_weakness, classes_, DdfMainGetBitSet),
+                                            DDF_FIELD("HEIGHTS", dummy_weakness, height_, DdfMobjGetPercentRange),
+                                            DDF_FIELD("ANGLES", dummy_weakness, angle_, DdfMobjGetAngleRange),
+                                            DDF_FIELD("MULTIPLY", dummy_weakness, multiply_, DdfMainGetFloat),
+                                            DDF_FIELD("PAINCHANCE", dummy_weakness, painchance_, DdfMainGetPercent),
 
                                             {nullptr, nullptr, 0, nullptr}};
 
@@ -92,126 +92,126 @@ const DDFCommandList thing_commands[] = {
     DDF_SUB_LIST("EXPLODE_DAMAGE", dummy_mobj, explode_damage_, damage_commands),
     DDF_SUB_LIST("CHOKE_DAMAGE", dummy_mobj, choke_damage_, damage_commands),
 
-    DDF_FIELD("SPAWNHEALTH", dummy_mobj, spawn_health_, DDF_MainGetFloat),
-    DDF_FIELD("RADIUS", dummy_mobj, radius_, DDF_MainGetFloat),
-    DDF_FIELD("HEIGHT", dummy_mobj, height_, DDF_MainGetFloat),
-    DDF_FIELD("MASS", dummy_mobj, mass_, DDF_MainGetFloat),
-    DDF_FIELD("SPEED", dummy_mobj, speed_, DDF_MainGetFloat),
-    DDF_FIELD("FAST", dummy_mobj, fast_, DDF_MainGetFloat),
-    DDF_FIELD("EXTRA", dummy_mobj, extended_flags_, DDF_MobjGetExtra),
-    DDF_FIELD("RESPAWN_TIME", dummy_mobj, respawntime_, DDF_MainGetTime),
-    DDF_FIELD("FUSE", dummy_mobj, fuse_, DDF_MainGetTime),
-    DDF_FIELD("LIFESPAN", dummy_mobj, fuse_, DDF_MainGetTime),
-    DDF_FIELD("PALETTE_REMAP", dummy_mobj, palremap_, DDF_MainGetColourmap),
-    DDF_FIELD("TRANSLUCENCY", dummy_mobj, translucency_, DDF_MainGetPercent),
+    DDF_FIELD("SPAWNHEALTH", dummy_mobj, spawn_health_, DdfMainGetFloat),
+    DDF_FIELD("RADIUS", dummy_mobj, radius_, DdfMainGetFloat),
+    DDF_FIELD("HEIGHT", dummy_mobj, height_, DdfMainGetFloat),
+    DDF_FIELD("MASS", dummy_mobj, mass_, DdfMainGetFloat),
+    DDF_FIELD("SPEED", dummy_mobj, speed_, DdfMainGetFloat),
+    DDF_FIELD("FAST", dummy_mobj, fast_, DdfMainGetFloat),
+    DDF_FIELD("EXTRA", dummy_mobj, extended_flags_, DdfMobjGetExtra),
+    DDF_FIELD("RESPAWN_TIME", dummy_mobj, respawntime_, DdfMainGetTime),
+    DDF_FIELD("FUSE", dummy_mobj, fuse_, DdfMainGetTime),
+    DDF_FIELD("LIFESPAN", dummy_mobj, fuse_, DdfMainGetTime),
+    DDF_FIELD("PALETTE_REMAP", dummy_mobj, palremap_, DdfMainGetColourmap),
+    DDF_FIELD("TRANSLUCENCY", dummy_mobj, translucency_, DdfMainGetPercent),
 
-    DDF_FIELD("INITIAL_BENEFIT", dummy_mobj, initial_benefits_, DDF_MobjGetBenefit),
-    DDF_FIELD("LOSE_BENEFIT", dummy_mobj, lose_benefits_, DDF_MobjGetBenefit),
-    DDF_FIELD("PICKUP_BENEFIT", dummy_mobj, pickup_benefits_, DDF_MobjGetBenefit),
-    DDF_FIELD("KILL_BENEFIT", dummy_mobj, kill_benefits_, DDF_MobjGetBenefit),
-    DDF_FIELD("PICKUP_MESSAGE", dummy_mobj, pickup_message_, DDF_MainGetString),
-    DDF_FIELD("PICKUP_EFFECT", dummy_mobj, pickup_effects_, DDF_MobjGetPickupEffect),
+    DDF_FIELD("INITIAL_BENEFIT", dummy_mobj, initial_benefits_, DdfMobjGetBenefit),
+    DDF_FIELD("LOSE_BENEFIT", dummy_mobj, lose_benefits_, DdfMobjGetBenefit),
+    DDF_FIELD("PICKUP_BENEFIT", dummy_mobj, pickup_benefits_, DdfMobjGetBenefit),
+    DDF_FIELD("KILL_BENEFIT", dummy_mobj, kill_benefits_, DdfMobjGetBenefit),
+    DDF_FIELD("PICKUP_MESSAGE", dummy_mobj, pickup_message_, DdfMainGetString),
+    DDF_FIELD("PICKUP_EFFECT", dummy_mobj, pickup_effects_, DdfMobjGetPickupEffect),
 
-    DDF_FIELD("PAINCHANCE", dummy_mobj, pain_chance_, DDF_MainGetPercent),
-    DDF_FIELD("MINATTACK_CHANCE", dummy_mobj, minatkchance_, DDF_MainGetPercent),
-    DDF_FIELD("REACTION_TIME", dummy_mobj, reaction_time_, DDF_MainGetTime),
-    DDF_FIELD("JUMP_DELAY", dummy_mobj, jump_delay_, DDF_MainGetTime),
-    DDF_FIELD("JUMP_HEIGHT", dummy_mobj, jumpheight_, DDF_MainGetFloat),
-    DDF_FIELD("CROUCH_HEIGHT", dummy_mobj, crouchheight_, DDF_MainGetFloat),
-    DDF_FIELD("VIEW_HEIGHT", dummy_mobj, viewheight_, DDF_MainGetPercent),
-    DDF_FIELD("SHOT_HEIGHT", dummy_mobj, shotheight_, DDF_MainGetPercent),
-    DDF_FIELD("MAX_FALL", dummy_mobj, maxfall_, DDF_MainGetFloat),
-    DDF_FIELD("CASTORDER", dummy_mobj, castorder_, DDF_MainGetNumeric),
-    DDF_FIELD("CAST_TITLE", dummy_mobj, cast_title_, DDF_MainGetString),
-    DDF_FIELD("PLAYER", dummy_mobj, playernum_, DDF_MobjGetPlayer),
-    DDF_FIELD("SIDE", dummy_mobj, side_, DDF_MainGetBitSet),
-    DDF_FIELD("CLOSE_ATTACK", dummy_mobj, closecombat_, DDF_MainRefAttack),
-    DDF_FIELD("RANGE_ATTACK", dummy_mobj, rangeattack_, DDF_MainRefAttack),
-    DDF_FIELD("SPARE_ATTACK", dummy_mobj, spareattack_, DDF_MainRefAttack),
-    DDF_FIELD("DROPITEM", dummy_mobj, dropitem_ref_, DDF_MainGetString),
-    DDF_FIELD("BLOOD", dummy_mobj, blood_ref_, DDF_MainGetString),
-    DDF_FIELD("RESPAWN_EFFECT", dummy_mobj, respawneffect_ref_, DDF_MainGetString),
-    DDF_FIELD("SPIT_SPOT", dummy_mobj, spitspot_ref_, DDF_MainGetString),
+    DDF_FIELD("PAINCHANCE", dummy_mobj, pain_chance_, DdfMainGetPercent),
+    DDF_FIELD("MINATTACK_CHANCE", dummy_mobj, minatkchance_, DdfMainGetPercent),
+    DDF_FIELD("REACTION_TIME", dummy_mobj, reaction_time_, DdfMainGetTime),
+    DDF_FIELD("JUMP_DELAY", dummy_mobj, jump_delay_, DdfMainGetTime),
+    DDF_FIELD("JUMP_HEIGHT", dummy_mobj, jumpheight_, DdfMainGetFloat),
+    DDF_FIELD("CROUCH_HEIGHT", dummy_mobj, crouchheight_, DdfMainGetFloat),
+    DDF_FIELD("VIEW_HEIGHT", dummy_mobj, viewheight_, DdfMainGetPercent),
+    DDF_FIELD("SHOT_HEIGHT", dummy_mobj, shotheight_, DdfMainGetPercent),
+    DDF_FIELD("MAX_FALL", dummy_mobj, maxfall_, DdfMainGetFloat),
+    DDF_FIELD("CASTORDER", dummy_mobj, castorder_, DdfMainGetNumeric),
+    DDF_FIELD("CAST_TITLE", dummy_mobj, cast_title_, DdfMainGetString),
+    DDF_FIELD("PLAYER", dummy_mobj, playernum_, DdfMobjGetPlayer),
+    DDF_FIELD("SIDE", dummy_mobj, side_, DdfMainGetBitSet),
+    DDF_FIELD("CLOSE_ATTACK", dummy_mobj, closecombat_, DdfMainRefAttack),
+    DDF_FIELD("RANGE_ATTACK", dummy_mobj, rangeattack_, DdfMainRefAttack),
+    DDF_FIELD("SPARE_ATTACK", dummy_mobj, spareattack_, DdfMainRefAttack),
+    DDF_FIELD("DROPITEM", dummy_mobj, dropitem_ref_, DdfMainGetString),
+    DDF_FIELD("BLOOD", dummy_mobj, blood_ref_, DdfMainGetString),
+    DDF_FIELD("RESPAWN_EFFECT", dummy_mobj, respawneffect_ref_, DdfMainGetString),
+    DDF_FIELD("SPIT_SPOT", dummy_mobj, spitspot_ref_, DdfMainGetString),
 
-    DDF_FIELD("PICKUP_SOUND", dummy_mobj, activesound_, DDF_MainLookupSound),
-    DDF_FIELD("ACTIVE_SOUND", dummy_mobj, activesound_, DDF_MainLookupSound),
-    DDF_FIELD("LAUNCH_SOUND", dummy_mobj, seesound_, DDF_MainLookupSound),
-    DDF_FIELD("AMBIENT_SOUND", dummy_mobj, seesound_, DDF_MainLookupSound),
-    DDF_FIELD("SIGHTING_SOUND", dummy_mobj, seesound_, DDF_MainLookupSound),
-    DDF_FIELD("DEATH_SOUND", dummy_mobj, deathsound_, DDF_MainLookupSound),
-    DDF_FIELD("OVERKILL_SOUND", dummy_mobj, overkill_sound_, DDF_MainLookupSound),
-    DDF_FIELD("PAIN_SOUND", dummy_mobj, painsound_, DDF_MainLookupSound),
-    DDF_FIELD("STARTCOMBAT_SOUND", dummy_mobj, attacksound_, DDF_MainLookupSound),
-    DDF_FIELD("WALK_SOUND", dummy_mobj, walksound_, DDF_MainLookupSound),
-    DDF_FIELD("JUMP_SOUND", dummy_mobj, jump_sound_, DDF_MainLookupSound),
-    DDF_FIELD("NOWAY_SOUND", dummy_mobj, noway_sound_, DDF_MainLookupSound),
-    DDF_FIELD("OOF_SOUND", dummy_mobj, oof_sound_, DDF_MainLookupSound),
-    DDF_FIELD("FALLPAIN_SOUND", dummy_mobj, fallpain_sound_, DDF_MainLookupSound),
-    DDF_FIELD("GASP_SOUND", dummy_mobj, gasp_sound_, DDF_MainLookupSound),
-    DDF_FIELD("SECRET_SOUND", dummy_mobj, secretsound_, DDF_MainLookupSound),
-    DDF_FIELD("FALLING_SOUND", dummy_mobj, falling_sound_, DDF_MainLookupSound),
-    DDF_FIELD("RIP_SOUND", dummy_mobj, rip_sound_, DDF_MainLookupSound),
+    DDF_FIELD("PICKUP_SOUND", dummy_mobj, activesound_, DdfMainLookupSound),
+    DDF_FIELD("ACTIVE_SOUND", dummy_mobj, activesound_, DdfMainLookupSound),
+    DDF_FIELD("LAUNCH_SOUND", dummy_mobj, seesound_, DdfMainLookupSound),
+    DDF_FIELD("AMBIENT_SOUND", dummy_mobj, seesound_, DdfMainLookupSound),
+    DDF_FIELD("SIGHTING_SOUND", dummy_mobj, seesound_, DdfMainLookupSound),
+    DDF_FIELD("DEATH_SOUND", dummy_mobj, deathsound_, DdfMainLookupSound),
+    DDF_FIELD("OVERKILL_SOUND", dummy_mobj, overkill_sound_, DdfMainLookupSound),
+    DDF_FIELD("PAIN_SOUND", dummy_mobj, painsound_, DdfMainLookupSound),
+    DDF_FIELD("STARTCOMBAT_SOUND", dummy_mobj, attacksound_, DdfMainLookupSound),
+    DDF_FIELD("WALK_SOUND", dummy_mobj, walksound_, DdfMainLookupSound),
+    DDF_FIELD("JUMP_SOUND", dummy_mobj, jump_sound_, DdfMainLookupSound),
+    DDF_FIELD("NOWAY_SOUND", dummy_mobj, noway_sound_, DdfMainLookupSound),
+    DDF_FIELD("OOF_SOUND", dummy_mobj, oof_sound_, DdfMainLookupSound),
+    DDF_FIELD("FALLPAIN_SOUND", dummy_mobj, fallpain_sound_, DdfMainLookupSound),
+    DDF_FIELD("GASP_SOUND", dummy_mobj, gasp_sound_, DdfMainLookupSound),
+    DDF_FIELD("SECRET_SOUND", dummy_mobj, secretsound_, DdfMainLookupSound),
+    DDF_FIELD("FALLING_SOUND", dummy_mobj, falling_sound_, DdfMainLookupSound),
+    DDF_FIELD("RIP_SOUND", dummy_mobj, rip_sound_, DdfMainLookupSound),
 
-    DDF_FIELD("FLOAT_SPEED", dummy_mobj, float_speed_, DDF_MainGetFloat),
-    DDF_FIELD("STEP_SIZE", dummy_mobj, step_size_, DDF_MainGetFloat),
-    DDF_FIELD("SPRITE_SCALE", dummy_mobj, scale_, DDF_MainGetFloat),
-    DDF_FIELD("SPRITE_ASPECT", dummy_mobj, aspect_, DDF_MainGetFloat),
+    DDF_FIELD("FLOAT_SPEED", dummy_mobj, float_speed_, DdfMainGetFloat),
+    DDF_FIELD("STEP_SIZE", dummy_mobj, step_size_, DdfMainGetFloat),
+    DDF_FIELD("SPRITE_SCALE", dummy_mobj, scale_, DdfMainGetFloat),
+    DDF_FIELD("SPRITE_ASPECT", dummy_mobj, aspect_, DdfMainGetFloat),
     DDF_FIELD("SPRITE_YALIGN", dummy_mobj, yalign_,
-              DDF_MobjGetYAlign),  // -AJA- 2007/08/08
+              DdfMobjGetYAlign),  // -AJA- 2007/08/08
     DDF_FIELD("MODEL_SKIN", dummy_mobj, model_skin_,
-              DDF_MainGetNumeric), // -AJA- 2007/10/16
-    DDF_FIELD("MODEL_SCALE", dummy_mobj, model_scale_, DDF_MainGetFloat),
-    DDF_FIELD("MODEL_ASPECT", dummy_mobj, model_aspect_, DDF_MainGetFloat),
-    DDF_FIELD("MODEL_BIAS", dummy_mobj, model_bias_, DDF_MainGetFloat),
-    DDF_FIELD("MODEL_ROTATE", dummy_mobj, model_rotate_, DDF_MainGetNumeric),
-    DDF_FIELD("BOUNCE_SPEED", dummy_mobj, bounce_speed_, DDF_MainGetFloat),
-    DDF_FIELD("BOUNCE_UP", dummy_mobj, bounce_up_, DDF_MainGetFloat),
-    DDF_FIELD("SIGHT_SLOPE", dummy_mobj, sight_slope_, DDF_MainGetSlope),
-    DDF_FIELD("SIGHT_ANGLE", dummy_mobj, sight_angle_, DDF_MainGetAngle),
-    DDF_FIELD("RIDE_FRICTION", dummy_mobj, ride_friction_, DDF_MainGetFloat),
-    DDF_FIELD("BOBBING", dummy_mobj, bobbing_, DDF_MainGetPercent),
-    DDF_FIELD("IMMUNITY_CLASS", dummy_mobj, immunity_, DDF_MainGetBitSet),
-    DDF_FIELD("RESISTANCE_CLASS", dummy_mobj, resistance_, DDF_MainGetBitSet),
-    DDF_FIELD("RESISTANCE_MULTIPLY", dummy_mobj, resist_multiply_, DDF_MainGetFloat),
-    DDF_FIELD("RESISTANCE_PAINCHANCE", dummy_mobj, resist_painchance_, DDF_MainGetPercent),
+              DdfMainGetNumeric), // -AJA- 2007/10/16
+    DDF_FIELD("MODEL_SCALE", dummy_mobj, model_scale_, DdfMainGetFloat),
+    DDF_FIELD("MODEL_ASPECT", dummy_mobj, model_aspect_, DdfMainGetFloat),
+    DDF_FIELD("MODEL_BIAS", dummy_mobj, model_bias_, DdfMainGetFloat),
+    DDF_FIELD("MODEL_ROTATE", dummy_mobj, model_rotate_, DdfMainGetNumeric),
+    DDF_FIELD("BOUNCE_SPEED", dummy_mobj, bounce_speed_, DdfMainGetFloat),
+    DDF_FIELD("BOUNCE_UP", dummy_mobj, bounce_up_, DdfMainGetFloat),
+    DDF_FIELD("SIGHT_SLOPE", dummy_mobj, sight_slope_, DdfMainGetSlope),
+    DDF_FIELD("SIGHT_ANGLE", dummy_mobj, sight_angle_, DdfMainGetAngle),
+    DDF_FIELD("RIDE_FRICTION", dummy_mobj, ride_friction_, DdfMainGetFloat),
+    DDF_FIELD("BOBBING", dummy_mobj, bobbing_, DdfMainGetPercent),
+    DDF_FIELD("IMMUNITY_CLASS", dummy_mobj, immunity_, DdfMainGetBitSet),
+    DDF_FIELD("RESISTANCE_CLASS", dummy_mobj, resistance_, DdfMainGetBitSet),
+    DDF_FIELD("RESISTANCE_MULTIPLY", dummy_mobj, resist_multiply_, DdfMainGetFloat),
+    DDF_FIELD("RESISTANCE_PAINCHANCE", dummy_mobj, resist_painchance_, DdfMainGetPercent),
     DDF_FIELD("GHOST_CLASS", dummy_mobj, ghost_,
-              DDF_MainGetBitSet), // -AJA- 2005/05/15
-    DDF_FIELD("SHADOW_TRANSLUCENCY", dummy_mobj, shadow_trans_, DDF_MainGetPercent),
-    DDF_FIELD("LUNG_CAPACITY", dummy_mobj, lung_capacity_, DDF_MainGetTime),
-    DDF_FIELD("GASP_START", dummy_mobj, gasp_start_, DDF_MainGetTime),
-    DDF_FIELD("EXPLODE_RADIUS", dummy_mobj, explode_radius_, DDF_MainGetFloat),
+              DdfMainGetBitSet), // -AJA- 2005/05/15
+    DDF_FIELD("SHADOW_TRANSLUCENCY", dummy_mobj, shadow_trans_, DdfMainGetPercent),
+    DDF_FIELD("LUNG_CAPACITY", dummy_mobj, lung_capacity_, DdfMainGetTime),
+    DDF_FIELD("GASP_START", dummy_mobj, gasp_start_, DdfMainGetTime),
+    DDF_FIELD("EXPLODE_RADIUS", dummy_mobj, explode_radius_, DdfMainGetFloat),
     DDF_FIELD("RELOAD_SHOTS", dummy_mobj, reload_shots_,
-              DDF_MainGetNumeric),    // -AJA- 2004/11/15
+              DdfMainGetNumeric),    // -AJA- 2004/11/15
     DDF_FIELD("GLOW_TYPE", dummy_mobj, glow_type_,
-              DDF_MobjGetGlowType),   // -AJA- 2007/08/19
+              DdfMobjGetGlowType),   // -AJA- 2007/08/19
     DDF_FIELD("ARMOUR_PROTECTION", dummy_mobj, armour_protect_,
-              DDF_MainGetPercent),    // -AJA- 2007/08/22
+              DdfMainGetPercent),    // -AJA- 2007/08/22
     DDF_FIELD("ARMOUR_DEPLETION", dummy_mobj, armour_deplete_,
-              DDF_MainGetPercentAny), // -AJA- 2007/08/22
+              DdfMainGetPercentAny), // -AJA- 2007/08/22
     DDF_FIELD("ARMOUR_CLASS", dummy_mobj, armour_class_,
-              DDF_MainGetBitSet),     // -AJA- 2007/08/22
+              DdfMainGetBitSet),     // -AJA- 2007/08/22
 
     DDF_FIELD("SIGHT_DISTANCE", dummy_mobj, sight_distance_,
-              DDF_MainGetFloat),      // Lobo 2022
+              DdfMainGetFloat),      // Lobo 2022
     DDF_FIELD("HEAR_DISTANCE", dummy_mobj, hear_distance_,
-              DDF_MainGetFloat),      // Lobo 2022
+              DdfMainGetFloat),      // Lobo 2022
 
     DDF_FIELD("MORPH_TIMEOUT", dummy_mobj, morphtimeout_,
-              DDF_MainGetTime),       // Lobo 2023
+              DdfMainGetTime),       // Lobo 2023
 
     // DEHEXTRA
-    DDF_FIELD("GIB_HEALTH", dummy_mobj, gib_health_, DDF_MainGetFloat),
+    DDF_FIELD("GIB_HEALTH", dummy_mobj, gib_health_, DdfMainGetFloat),
 
-    DDF_FIELD("INFIGHTING_GROUP", dummy_mobj, infight_group_, DDF_MainGetNumeric),
-    DDF_FIELD("PROJECTILE_GROUP", dummy_mobj, proj_group_, DDF_MainGetNumeric),
-    DDF_FIELD("SPLASH_GROUP", dummy_mobj, splash_group_, DDF_MainGetNumeric),
-    DDF_FIELD("FAST_SPEED", dummy_mobj, fast_speed_, DDF_MainGetNumeric),
-    DDF_FIELD("MELEE_RANGE", dummy_mobj, melee_range_, DDF_MainGetNumeric),
+    DDF_FIELD("INFIGHTING_GROUP", dummy_mobj, infight_group_, DdfMainGetNumeric),
+    DDF_FIELD("PROJECTILE_GROUP", dummy_mobj, proj_group_, DdfMainGetNumeric),
+    DDF_FIELD("SPLASH_GROUP", dummy_mobj, splash_group_, DdfMainGetNumeric),
+    DDF_FIELD("FAST_SPEED", dummy_mobj, fast_speed_, DdfMainGetNumeric),
+    DDF_FIELD("MELEE_RANGE", dummy_mobj, melee_range_, DdfMainGetNumeric),
 
     // -AJA- backwards compatibility cruft...
-    DDF_FIELD("EXPLOD_DAMAGE", dummy_mobj, explode_damage_.nominal_, DDF_MainGetFloat),
-    DDF_FIELD("EXPLOSION_DAMAGE", dummy_mobj, explode_damage_.nominal_, DDF_MainGetFloat),
-    DDF_FIELD("EXPLOD_DAMAGERANGE", dummy_mobj, explode_damage_.nominal_, DDF_MainGetFloat),
+    DDF_FIELD("EXPLOD_DAMAGE", dummy_mobj, explode_damage_.nominal_, DdfMainGetFloat),
+    DDF_FIELD("EXPLOSION_DAMAGE", dummy_mobj, explode_damage_.nominal_, DdfMainGetFloat),
+    DDF_FIELD("EXPLOD_DAMAGERANGE", dummy_mobj, explode_damage_.nominal_, DdfMainGetFloat),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -243,8 +243,8 @@ const DDFActionCode thing_actions[] = {{"NOTHING", nullptr, nullptr},
                                        {"CLOSEATTEMPTSND", A_MakeCloseAttemptSound, nullptr},
                                        {"COMBOATTACK", A_ComboAttack, nullptr},
                                        {"FACETARGET", A_FaceTarget, nullptr},
-                                       {"PLAYSOUND", A_PlaySound, DDF_StateGetSound},
-                                       {"PLAYSOUND_BOSS", A_PlaySoundBoss, DDF_StateGetSound},
+                                       {"PLAYSOUND", A_PlaySound, DdfStateGetSound},
+                                       {"PLAYSOUND_BOSS", A_PlaySoundBoss, DdfStateGetSound},
                                        {"KILLSOUND", A_KillSound, nullptr},
                                        {"MAKESOUND", A_MakeAmbientSound, nullptr},
                                        {"MAKEACTIVESOUND", A_MakeActiveSound, nullptr},
@@ -254,9 +254,9 @@ const DDFActionCode thing_actions[] = {{"NOTHING", nullptr, nullptr},
                                        {"MAKEOVERKILLSOUND", A_MakeOverKillSound, nullptr},
                                        {"MAKEPAINSOUND", A_MakePainSound, nullptr},
                                        {"PLAYER_SCREAM", A_PlayerScream, nullptr},
-                                       {"CLOSE_ATTACK", A_MeleeAttack, DDF_StateGetAttack},
-                                       {"RANGE_ATTACK", A_RangeAttack, DDF_StateGetAttack},
-                                       {"SPARE_ATTACK", A_SpareAttack, DDF_StateGetAttack},
+                                       {"CLOSE_ATTACK", A_MeleeAttack, DdfStateGetAttack},
+                                       {"RANGE_ATTACK", A_RangeAttack, DdfStateGetAttack},
+                                       {"SPARE_ATTACK", A_SpareAttack, DdfStateGetAttack},
 
                                        {"RANGEATTEMPTSND", A_MakeRangeAttemptSound, nullptr},
                                        {"REFIRE_CHECK", A_RefireCheck, nullptr},
@@ -282,19 +282,19 @@ const DDFActionCode thing_actions[] = {{"NOTHING", nullptr, nullptr},
                                        {"CHECKBLOOD", A_CheckBlood, nullptr},
                                        {"CHECKMOVING", A_CheckMoving, nullptr},
                                        {"CHECK_ACTIVITY", A_CheckActivity, nullptr},
-                                       {"JUMP", A_Jump, DDF_StateGetJump},
-                                       {"JUMP_LIQUID", A_JumpLiquid, DDF_StateGetJump},
-                                       {"JUMP_SKY", A_JumpSky, DDF_StateGetJump},
-                                       //{"JUMP_STUCK",        A_JumpStuck, DDF_StateGetJump},
-                                       {"BECOME", A_Become, DDF_StateGetBecome},
+                                       {"JUMP", A_Jump, DdfStateGetJump},
+                                       {"JUMP_LIQUID", A_JumpLiquid, DdfStateGetJump},
+                                       {"JUMP_SKY", A_JumpSky, DdfStateGetJump},
+                                       //{"JUMP_STUCK",        A_JumpStuck, DdfStateGetJump},
+                                       {"BECOME", A_Become, DdfStateGetBecome},
                                        {"UNBECOME", A_UnBecome, nullptr},
-                                       {"MORPH", A_Morph, DDF_StateGetMorph}, // same as BECOME but resets health
+                                       {"MORPH", A_Morph, DdfStateGetMorph}, // same as BECOME but resets health
                                        {"UNMORPH", A_UnMorph, nullptr},       // same as UNBECOME but resets health
 
                                        {"EXPLODE", A_Explode, nullptr},
-                                       {"ACTIVATE_LINETYPE", A_ActivateLineType, DDF_StateGetIntPair},
-                                       {"RTS_ENABLE_TAGGED", A_EnableRadTrig, DDF_MobjStateGetRADTrigger},
-                                       {"RTS_DISABLE_TAGGED", A_DisableRadTrig, DDF_MobjStateGetRADTrigger},
+                                       {"ACTIVATE_LINETYPE", A_ActivateLineType, DdfStateGetIntPair},
+                                       {"RTS_ENABLE_TAGGED", A_EnableRadTrig, DdfMobjStateGetRADTrigger},
+                                       {"RTS_DISABLE_TAGGED", A_DisableRadTrig, DdfMobjStateGetRADTrigger},
                                        {"TOUCHY_REARM", A_TouchyRearm, nullptr},
                                        {"TOUCHY_DISARM", A_TouchyDisarm, nullptr},
                                        {"BOUNCE_REARM", A_BounceRearm, nullptr},
@@ -303,29 +303,29 @@ const DDFActionCode thing_actions[] = {{"NOTHING", nullptr, nullptr},
                                        {"PATH_FOLLOW", A_PathFollow, nullptr},
                                        {"SET_INVULNERABLE", A_SetInvuln, nullptr},
                                        {"CLEAR_INVULNERABLE", A_ClearInvuln, nullptr},
-                                       {"SET_PAINCHANCE", A_PainChanceSet, DDF_StateGetPercent},
+                                       {"SET_PAINCHANCE", A_PainChanceSet, DdfStateGetPercent},
 
-                                       {"DROPITEM", A_DropItem, DDF_StateGetMobj},
-                                       {"SPAWN", A_Spawn, DDF_StateGetMobj},
-                                       {"TRANS_SET", A_TransSet, DDF_StateGetPercent},
-                                       {"TRANS_FADE", A_TransFade, DDF_StateGetPercent},
-                                       {"TRANS_MORE", A_TransMore, DDF_StateGetPercent},
-                                       {"TRANS_LESS", A_TransLess, DDF_StateGetPercent},
-                                       {"TRANS_ALTERNATE", A_TransAlternate, DDF_StateGetPercent},
-                                       {"DLIGHT_SET", A_DLightSet, DDF_StateGetInteger},
-                                       {"DLIGHT_FADE", A_DLightFade, DDF_StateGetInteger},
-                                       {"DLIGHT_RANDOM", A_DLightRandom, DDF_StateGetIntPair},
-                                       {"DLIGHT_COLOUR", A_DLightColour, DDF_StateGetRGB},
-                                       {"SET_SKIN", A_SetSkin, DDF_StateGetInteger},
+                                       {"DROPITEM", A_DropItem, DdfStateGetMobj},
+                                       {"SPAWN", A_Spawn, DdfStateGetMobj},
+                                       {"TRANS_SET", A_TransSet, DdfStateGetPercent},
+                                       {"TRANS_FADE", A_TransFade, DdfStateGetPercent},
+                                       {"TRANS_MORE", A_TransMore, DdfStateGetPercent},
+                                       {"TRANS_LESS", A_TransLess, DdfStateGetPercent},
+                                       {"TRANS_ALTERNATE", A_TransAlternate, DdfStateGetPercent},
+                                       {"DLIGHT_SET", A_DLightSet, DdfStateGetInteger},
+                                       {"DLIGHT_FADE", A_DLightFade, DdfStateGetInteger},
+                                       {"DLIGHT_RANDOM", A_DLightRandom, DdfStateGetIntPair},
+                                       {"DLIGHT_COLOUR", A_DLightColour, DdfStateGetRGB},
+                                       {"SET_SKIN", A_SetSkin, DdfStateGetInteger},
 
-                                       {"FACE", A_FaceDir, DDF_StateGetAngle},
-                                       {"TURN", A_TurnDir, DDF_StateGetAngle},
-                                       {"TURN_RANDOM", A_TurnRandom, DDF_StateGetAngle},
-                                       {"MLOOK_FACE", A_MlookFace, DDF_StateGetSlope},
-                                       {"MLOOK_TURN", A_MlookTurn, DDF_StateGetSlope},
-                                       {"MOVE_FWD", A_MoveFwd, DDF_StateGetFloat},
-                                       {"MOVE_RIGHT", A_MoveRight, DDF_StateGetFloat},
-                                       {"MOVE_UP", A_MoveUp, DDF_StateGetFloat},
+                                       {"FACE", A_FaceDir, DdfStateGetAngle},
+                                       {"TURN", A_TurnDir, DdfStateGetAngle},
+                                       {"TURN_RANDOM", A_TurnRandom, DdfStateGetAngle},
+                                       {"MLOOK_FACE", A_MlookFace, DdfStateGetSlope},
+                                       {"MLOOK_TURN", A_MlookTurn, DdfStateGetSlope},
+                                       {"MOVE_FWD", A_MoveFwd, DdfStateGetFloat},
+                                       {"MOVE_RIGHT", A_MoveRight, DdfStateGetFloat},
+                                       {"MOVE_UP", A_MoveUp, DdfStateGetFloat},
                                        {"STOP", A_StopMoving, nullptr},
 
                                        // Boom/MBF compatibility
@@ -505,14 +505,14 @@ const DDFSpecialFlags counter_types[] = {{"LIVES", kCounterTypeLives, 0},     {"
                                          {"COUNTER99", kCounterType99, 0},    {nullptr, 0, 0}};
 
 //
-// DDF_CompareName
+// DdfCompareName
 //
 // Compare two names. This is like stricmp(), except that spaces
 // and underscors are ignored for comparison purposes.
 //
 // -AJA- 1999/09/11: written.
 //
-int DDF_CompareName(const char *A, const char *B)
+int DdfCompareName(const char *A, const char *B)
 {
     for (;;)
     {
@@ -549,7 +549,7 @@ static void ThingStartEntry(const char *buffer, bool extend)
 {
     if (!buffer || !buffer[0])
     {
-        DDF_WarnError("New thing entry is missing a name!");
+        DdfWarnError("New thing entry is missing a name!");
         buffer = "THING_WITH_NO_NAME";
     }
 
@@ -568,7 +568,7 @@ static void ThingStartEntry(const char *buffer, bool extend)
 
         if (name.empty())
         {
-            DDF_WarnError("New thing entry is missing a name!");
+            DdfWarnError("New thing entry is missing a name!");
             name = "THING_WITH_NO_NAME";
         }
     }
@@ -586,12 +586,12 @@ static void ThingStartEntry(const char *buffer, bool extend)
     if (extend)
     {
         if (!dynamic_mobj)
-            DDF_Error("Unknown thing to extend: %s\n", name.c_str());
+            DdfError("Unknown thing to extend: %s\n", name.c_str());
 
         if (number > 0)
             dynamic_mobj->number_ = number;
 
-        DDF_StateBeginRange(dynamic_mobj->state_grp_);
+        DdfStateBeginRange(dynamic_mobj->state_grp_);
         return;
     }
 
@@ -611,70 +611,70 @@ static void ThingStartEntry(const char *buffer, bool extend)
         mobjtypes.push_back(dynamic_mobj);
     }
 
-    DDF_StateBeginRange(dynamic_mobj->state_grp_);
+    DdfStateBeginRange(dynamic_mobj->state_grp_);
 }
 
 static void ThingDoTemplate(const char *contents)
 {
     int idx = mobjtypes.FindFirst(contents, 0);
     if (idx < 0)
-        DDF_Error("Unknown thing template: '%s'\n", contents);
+        DdfError("Unknown thing template: '%s'\n", contents);
 
     MapObjectDefinition *other = mobjtypes[idx];
     EPI_ASSERT(other);
 
     if (other == dynamic_mobj)
-        DDF_Error("Bad thing template: '%s'\n", contents);
+        DdfError("Bad thing template: '%s'\n", contents);
 
     dynamic_mobj->CopyDetail(*other);
 
     TemplateThing = other->name_.c_str();
 
-    DDF_StateBeginRange(dynamic_mobj->state_grp_);
+    DdfStateBeginRange(dynamic_mobj->state_grp_);
 }
 
 void ThingParseField(const char *field, const char *contents, int index, bool is_last)
 {
-#if (DEBUG_DDF)
+#if (DDF_DEBUG)
     LogDebug("THING_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DDF_CompareName(field, "TEMPLATE") == 0)
+    if (DdfCompareName(field, "TEMPLATE") == 0)
     {
         ThingDoTemplate(contents);
         return;
     }
 
     // -AJA- this needs special handling (it touches several fields)
-    if (DDF_CompareName(field, "SPECIAL") == 0 || DDF_CompareName(field, "PROJECTILE_SPECIAL") == 0)
+    if (DdfCompareName(field, "SPECIAL") == 0 || DdfCompareName(field, "PROJECTILE_SPECIAL") == 0)
     {
-        DDF_MobjGetSpecial(contents);
+        DdfMobjGetSpecial(contents);
         return;
     }
 
     // handle the "MODEL_ROTATE" command
-    if (DDF_CompareName(field, "MODEL_ROTATE") == 0)
+    if (DdfCompareName(field, "MODEL_ROTATE") == 0)
     {
-        if (DDF_MainParseField(thing_commands, field, contents, (uint8_t *)dynamic_mobj))
+        if (DdfMainParseField(thing_commands, field, contents, (uint8_t *)dynamic_mobj))
         {
             dynamic_mobj->model_rotate_ *= kBAMAngle1; // apply the rotation
             return;
         }
     }
 
-    if (DDF_MainParseField(thing_commands, field, contents, (uint8_t *)dynamic_mobj))
+    if (DdfMainParseField(thing_commands, field, contents, (uint8_t *)dynamic_mobj))
         return;
 
-    if (DDF_MainParseState((uint8_t *)dynamic_mobj, dynamic_mobj->state_grp_, field, contents, index, is_last,
+    if (DdfMainParseState((uint8_t *)dynamic_mobj, dynamic_mobj->state_grp_, field, contents, index, is_last,
                            false /* is_weapon */, thing_starters, thing_actions))
         return;
 
-    DDF_WarnError("Unknown thing/attack command: %s\n", field);
+    DdfWarnError("Unknown thing/attack command: %s\n", field);
 }
 
 static void ThingFinishEntry(void)
 {
-    DDF_StateFinishRange(dynamic_mobj->state_grp_);
+    DdfStateFinishRange(dynamic_mobj->state_grp_);
 
     // count-as-kill things are automatically monsters
     if (dynamic_mobj->flags_ & kMapObjectFlagCountKill)
@@ -692,7 +692,7 @@ static void ThingFinishEntry(void)
 
     if (dynamic_mobj->mass_ < 1)
     {
-        DDF_WarnError("Bad MASS value %f in DDF.\n", dynamic_mobj->mass_);
+        DdfWarnError("Bad MASS value %f in DDF.\n", dynamic_mobj->mass_);
         dynamic_mobj->mass_ = 1;
     }
 
@@ -700,40 +700,40 @@ static void ThingFinishEntry(void)
     if (dynamic_mobj->castorder_ > 0)
     {
         if (!dynamic_mobj->chase_state_)
-            DDF_Error("Cast object must have CHASE states !\n");
+            DdfError("Cast object must have CHASE states !\n");
 
         if (!dynamic_mobj->death_state_)
-            DDF_Error("Cast object must have DEATH states !\n");
+            DdfError("Cast object must have DEATH states !\n");
     }
 
     // check DAMAGE stuff
     if (dynamic_mobj->explode_damage_.nominal_ < 0)
     {
-        DDF_WarnError("Bad EXPLODE_DAMAGE.VAL value %f in DDF.\n", dynamic_mobj->explode_damage_.nominal_);
+        DdfWarnError("Bad EXPLODE_DAMAGE.VAL value %f in DDF.\n", dynamic_mobj->explode_damage_.nominal_);
     }
 
     if (dynamic_mobj->explode_radius_ < 0)
     {
-        DDF_Error("Bad EXPLODE_RADIUS value %f in DDF.\n", dynamic_mobj->explode_radius_);
+        DdfError("Bad EXPLODE_RADIUS value %f in DDF.\n", dynamic_mobj->explode_radius_);
     }
 
     if (dynamic_mobj->reload_shots_ <= 0)
     {
-        DDF_Error("Bad RELOAD_SHOTS value %d in DDF.\n", dynamic_mobj->reload_shots_);
+        DdfError("Bad RELOAD_SHOTS value %d in DDF.\n", dynamic_mobj->reload_shots_);
     }
 
     if (dynamic_mobj->choke_damage_.nominal_ < 0)
     {
-        DDF_WarnError("Bad CHOKE_DAMAGE.VAL value %f in DDF.\n", dynamic_mobj->choke_damage_.nominal_);
+        DdfWarnError("Bad CHOKE_DAMAGE.VAL value %f in DDF.\n", dynamic_mobj->choke_damage_.nominal_);
     }
 
     if (dynamic_mobj->model_skin_ < 0 || dynamic_mobj->model_skin_ > 9)
-        DDF_Error("Bad MODEL_SKIN value %d in DDF (must be 0-9).\n", dynamic_mobj->model_skin_);
+        DdfError("Bad MODEL_SKIN value %d in DDF (must be 0-9).\n", dynamic_mobj->model_skin_);
 
     if (dynamic_mobj->dlight_[0].radius_ > 512)
     {
         if (dlight_radius_warnings < 3)
-            DDF_Warning("DLIGHT_RADIUS value %1.1f too large (over 512).\n", dynamic_mobj->dlight_[0].radius_);
+            DdfWarning("DLIGHT_RADIUS value %1.1f too large (over 512).\n", dynamic_mobj->dlight_[0].radius_);
         else if (dlight_radius_warnings == 3)
             LogWarning("More too large DLIGHT_RADIUS values found....\n");
 
@@ -752,7 +752,7 @@ static void ThingFinishEntry(void)
     {
         int idx = mobjtypes.FindFirst(TemplateThing, 0);
         if (idx < 0)
-            DDF_Error("Unknown thing template: \n");
+            DdfError("Unknown thing template: \n");
 
         MapObjectDefinition *other = mobjtypes[idx];
 
@@ -796,7 +796,7 @@ static void ThingClearAll(void)
     LogWarning("Ignoring #CLEARALL in things.ddf\n");
 }
 
-void DDF_ReadThings(const std::string &data)
+void DdfReadThings(const std::string &data)
 {
     DDFReadInfo things;
 
@@ -808,10 +808,10 @@ void DDF_ReadThings(const std::string &data)
     things.finish_entry = ThingFinishEntry;
     things.clear_all    = ThingClearAll;
 
-    DDF_MainReadFile(&things, data);
+    DdfMainReadFile(&things, data);
 }
 
-void DDF_MobjInit(void)
+void DdfMobjInit(void)
 {
     for (MapObjectDefinition *m : mobjtypes)
     {
@@ -825,7 +825,7 @@ void DDF_MobjInit(void)
     default_mobjtype->number_ = 0;
 }
 
-void DDF_MobjCleanUp(void)
+void DdfMobjCleanUp(void)
 {
     // lookup references
     for (MapObjectDefinition *m : mobjtypes)
@@ -887,13 +887,13 @@ static int ParseBenefitString(const char *info, char *name, char *param, float *
             return 2;
 
         default:
-            DDF_WarnError("Bad value in benefit string: %s\n", info);
+            DdfWarnError("Bad value in benefit string: %s\n", info);
             return -1;
         }
     }
     else if (pos)
     {
-        DDF_WarnError("Malformed benefit string: %s\n", info);
+        DdfWarnError("Malformed benefit string: %s\n", info);
         return -1;
     }
 
@@ -912,7 +912,7 @@ static int ParseBenefitString(const char *info, char *name, char *param, float *
 
 static bool BenefitTryCounter(const char *name, Benefit *be, int num_vals)
 {
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, counter_types, &be->sub.type, false, false))
+    if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(name, counter_types, &be->sub.type, false, false))
     {
         return false;
     }
@@ -921,7 +921,7 @@ static bool BenefitTryCounter(const char *name, Benefit *be, int num_vals)
 
     if (num_vals < 1)
     {
-        DDF_WarnError("Counter benefit used, but amount is missing.\n");
+        DdfWarnError("Counter benefit used, but amount is missing.\n");
         return false;
     }
 
@@ -939,13 +939,13 @@ static bool BenefitTryCounterLimit(const char *name, Benefit *be, int num_vals)
     size_t len = strlen(name);
 
     // check for ".LIMIT" prefix
-    if (len < 7 || DDF_CompareName(name + len - 6, ".LIMIT") != 0)
+    if (len < 7 || DdfCompareName(name + len - 6, ".LIMIT") != 0)
         return false;
 
     len -= 6;
     epi::CStringCopyMax(namebuf, name, len);
 
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(namebuf, counter_types, &be->sub.type, false, false))
+    if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(namebuf, counter_types, &be->sub.type, false, false))
     {
         return false;
     }
@@ -955,13 +955,13 @@ static bool BenefitTryCounterLimit(const char *name, Benefit *be, int num_vals)
 
     if (num_vals < 1)
     {
-        DDF_WarnError("CounterLimit benefit used, but amount is missing.\n");
+        DdfWarnError("CounterLimit benefit used, but amount is missing.\n");
         return false;
     }
 
     if (num_vals > 1)
     {
-        DDF_WarnError("CounterLimit benefit cannot have a limit value.\n");
+        DdfWarnError("CounterLimit benefit cannot have a limit value.\n");
         return false;
     }
     return true;
@@ -969,7 +969,7 @@ static bool BenefitTryCounterLimit(const char *name, Benefit *be, int num_vals)
 
 static bool BenefitTryInventory(const char *name, Benefit *be, int num_vals)
 {
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, inv_types, &be->sub.type, false, false))
+    if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(name, inv_types, &be->sub.type, false, false))
     {
         return false;
     }
@@ -978,7 +978,7 @@ static bool BenefitTryInventory(const char *name, Benefit *be, int num_vals)
 
     if (num_vals < 1)
     {
-        DDF_WarnError("Inventory benefit used, but amount is missing.\n");
+        DdfWarnError("Inventory benefit used, but amount is missing.\n");
         return false;
     }
 
@@ -996,13 +996,13 @@ static bool BenefitTryInventoryLimit(const char *name, Benefit *be, int num_vals
     int  len = strlen(name);
 
     // check for ".LIMIT" prefix
-    if (len < 7 || DDF_CompareName(name + len - 6, ".LIMIT") != 0)
+    if (len < 7 || DdfCompareName(name + len - 6, ".LIMIT") != 0)
         return false;
 
     len -= 6;
     epi::CStringCopyMax(namebuf, name, len);
 
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(namebuf, inv_types, &be->sub.type, false, false))
+    if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(namebuf, inv_types, &be->sub.type, false, false))
     {
         return false;
     }
@@ -1012,13 +1012,13 @@ static bool BenefitTryInventoryLimit(const char *name, Benefit *be, int num_vals
 
     if (num_vals < 1)
     {
-        DDF_WarnError("InventoryLimit benefit used, but amount is missing.\n");
+        DdfWarnError("InventoryLimit benefit used, but amount is missing.\n");
         return false;
     }
 
     if (num_vals > 1)
     {
-        DDF_WarnError("InventoryLimit benefit cannot have a limit value.\n");
+        DdfWarnError("InventoryLimit benefit cannot have a limit value.\n");
         return false;
     }
     return true;
@@ -1026,7 +1026,7 @@ static bool BenefitTryInventoryLimit(const char *name, Benefit *be, int num_vals
 
 static bool BenefitTryAmmo(const char *name, Benefit *be, int num_vals)
 {
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, ammo_types, &be->sub.type, false, false))
+    if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(name, ammo_types, &be->sub.type, false, false))
     {
         return false;
     }
@@ -1035,13 +1035,13 @@ static bool BenefitTryAmmo(const char *name, Benefit *be, int num_vals)
 
     if ((AmmunitionType)be->sub.type == kAmmunitionTypeNoAmmo)
     {
-        DDF_WarnError("Illegal ammo benefit: %s\n", name);
+        DdfWarnError("Illegal ammo benefit: %s\n", name);
         return false;
     }
 
     if (num_vals < 1)
     {
-        DDF_WarnError("Ammo benefit used, but amount is missing.\n");
+        DdfWarnError("Ammo benefit used, but amount is missing.\n");
         return false;
     }
 
@@ -1060,13 +1060,13 @@ static bool BenefitTryAmmoLimit(const char *name, Benefit *be, int num_vals)
 
     // check for ".LIMIT" prefix
 
-    if (len < 7 || DDF_CompareName(name + len - 6, ".LIMIT") != 0)
+    if (len < 7 || DdfCompareName(name + len - 6, ".LIMIT") != 0)
         return false;
 
     len -= 6;
     epi::CStringCopyMax(namebuf, name, len);
 
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(namebuf, ammo_types, &be->sub.type, false, false))
+    if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(namebuf, ammo_types, &be->sub.type, false, false))
     {
         return false;
     }
@@ -1076,19 +1076,19 @@ static bool BenefitTryAmmoLimit(const char *name, Benefit *be, int num_vals)
 
     if (be->sub.type == kAmmunitionTypeNoAmmo)
     {
-        DDF_WarnError("Illegal ammolimit benefit: %s\n", name);
+        DdfWarnError("Illegal ammolimit benefit: %s\n", name);
         return false;
     }
 
     if (num_vals < 1)
     {
-        DDF_WarnError("AmmoLimit benefit used, but amount is missing.\n");
+        DdfWarnError("AmmoLimit benefit used, but amount is missing.\n");
         return false;
     }
 
     if (num_vals > 1)
     {
-        DDF_WarnError("AmmoLimit benefit cannot have a limit value.\n");
+        DdfWarnError("AmmoLimit benefit cannot have a limit value.\n");
         return false;
     }
 
@@ -1111,13 +1111,13 @@ static bool BenefitTryWeapon(const char *name, Benefit *be, int num_vals)
         be->amount = 1.0f;
     else if (be->amount != 0.0f && be->amount != 1.0f)
     {
-        DDF_WarnError("Weapon benefit used, bad amount value: %1.1f\n", be->amount);
+        DdfWarnError("Weapon benefit used, bad amount value: %1.1f\n", be->amount);
         return false;
     }
 
     if (num_vals > 1)
     {
-        DDF_WarnError("Weapon benefit cannot have a limit value.\n");
+        DdfWarnError("Weapon benefit cannot have a limit value.\n");
         return false;
     }
 
@@ -1126,7 +1126,7 @@ static bool BenefitTryWeapon(const char *name, Benefit *be, int num_vals)
 
 static bool BenefitTryKey(const char *name, Benefit *be, int num_vals)
 {
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, keytype_names, &be->sub.type, false, false))
+    if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(name, keytype_names, &be->sub.type, false, false))
     {
         return false;
     }
@@ -1138,13 +1138,13 @@ static bool BenefitTryKey(const char *name, Benefit *be, int num_vals)
         be->amount = 1.0f;
     else if (be->amount != 0.0f && be->amount != 1.0f)
     {
-        DDF_WarnError("Key benefit used, bad amount value: %1.1f\n", be->amount);
+        DdfWarnError("Key benefit used, bad amount value: %1.1f\n", be->amount);
         return false;
     }
 
     if (num_vals > 1)
     {
-        DDF_WarnError("Key benefit cannot have a limit value.\n");
+        DdfWarnError("Key benefit cannot have a limit value.\n");
         return false;
     }
 
@@ -1153,7 +1153,7 @@ static bool BenefitTryKey(const char *name, Benefit *be, int num_vals)
 
 static bool BenefitTryHealth(const char *name, Benefit *be, int num_vals)
 {
-    if (DDF_CompareName(name, "HEALTH") != 0)
+    if (DdfCompareName(name, "HEALTH") != 0)
         return false;
 
     be->type     = kBenefitTypeHealth;
@@ -1161,7 +1161,7 @@ static bool BenefitTryHealth(const char *name, Benefit *be, int num_vals)
 
     if (num_vals < 1)
     {
-        DDF_WarnError("Health benefit used, but amount is missing.\n");
+        DdfWarnError("Health benefit used, but amount is missing.\n");
         return false;
     }
 
@@ -1173,7 +1173,7 @@ static bool BenefitTryHealth(const char *name, Benefit *be, int num_vals)
 
 static bool BenefitTryArmour(const char *name, Benefit *be, int num_vals)
 {
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, armourtype_names, &be->sub.type, false, false))
+    if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(name, armourtype_names, &be->sub.type, false, false))
     {
         return false;
     }
@@ -1182,7 +1182,7 @@ static bool BenefitTryArmour(const char *name, Benefit *be, int num_vals)
 
     if (num_vals < 1)
     {
-        DDF_WarnError("Armour benefit used, but amount is missing.\n");
+        DdfWarnError("Armour benefit used, but amount is missing.\n");
         return false;
     }
 
@@ -1214,7 +1214,7 @@ static bool BenefitTryArmour(const char *name, Benefit *be, int num_vals)
 
 static bool BenefitTryPowerup(const char *name, Benefit *be, int num_vals)
 {
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, powertype_names, &be->sub.type, false, false))
+    if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(name, powertype_names, &be->sub.type, false, false))
     {
         return false;
     }
@@ -1228,7 +1228,7 @@ static bool BenefitTryPowerup(const char *name, Benefit *be, int num_vals)
         be->limit = 999999.0f;
 
     // -AJA- backwards compatibility (need Fist for Berserk)
-    if (be->sub.type == kPowerTypeBerserk && DDF_CompareName(name, "POWERUP_BERSERK") == 0)
+    if (be->sub.type == kPowerTypeBerserk && DdfCompareName(name, "POWERUP_BERSERK") == 0)
     {
         int idx = weapondefs.FindFirst("FIST", 0);
 
@@ -1283,13 +1283,13 @@ static void BenefitAdd(Benefit **list, Benefit *source)
 }
 
 //
-// DDF_MobjGetBenefit
+// DdfMobjGetBenefit
 //
 // Parse a single benefit and update the benefit list accordingly.  If
 // the type/subtype are not in the list, add a new entry, otherwise
 // just modify the existing entry.
 //
-void DDF_MobjGetBenefit(const char *info, void *storage)
+void DdfMobjGetBenefit(const char *info, void *storage)
 {
     char namebuf[200];
     char parambuf[200];
@@ -1316,7 +1316,7 @@ void DDF_MobjGetBenefit(const char *info, void *storage)
         return;
     }
 
-    DDF_WarnError("Unknown/Malformed benefit type: %s\n", namebuf);
+    DdfWarnError("Unknown/Malformed benefit type: %s\n", namebuf);
 }
 
 PickupEffect::PickupEffect(PickupEffectType type, int sub, int slot, float time)
@@ -1358,7 +1358,7 @@ void BA_ParsePowerupEffect(PickupEffect **list, int pnum, float par1, float par2
     EPI_ASSERT(0 <= p_up && p_up < kTotalPowerTypes);
 
     if (slot < 0 || slot >= kTotalEffectsSlots)
-        DDF_Error("POWERUP_EFFECT: bad FX slot #%d\n", p_up);
+        DdfError("POWERUP_EFFECT: bad FX slot #%d\n", p_up);
 
     AddPickupEffect(list, new PickupEffect(kPickupEffectTypePowerupEffect, p_up, slot, 0));
 }
@@ -1368,10 +1368,10 @@ void BA_ParseScreenEffect(PickupEffect **list, int pnum, float par1, float par2,
     int slot = (int)par1;
 
     if (slot < 0 || slot >= kTotalEffectsSlots)
-        DDF_Error("SCREEN_EFFECT: bad FX slot #%d\n", slot);
+        DdfError("SCREEN_EFFECT: bad FX slot #%d\n", slot);
 
     if (par2 <= 0)
-        DDF_Error("SCREEN_EFFECT: bad time value: %1.2f\n", par2);
+        DdfError("SCREEN_EFFECT: bad time value: %1.2f\n", par2);
 
     AddPickupEffect(list, new PickupEffect(kPickupEffectTypeScreenEffect, 0, slot, par2));
 }
@@ -1379,7 +1379,7 @@ void BA_ParseScreenEffect(PickupEffect **list, int pnum, float par1, float par2,
 void BA_ParseSwitchWeapon(PickupEffect **list, int pnum, float par1, float par2, const char *word_par)
 {
     if (pnum != -1)
-        DDF_Error("SWITCH_WEAPON: missing weapon name !\n");
+        DdfError("SWITCH_WEAPON: missing weapon name !\n");
 
     EPI_ASSERT(word_par && word_par[0]);
 
@@ -1391,12 +1391,12 @@ void BA_ParseSwitchWeapon(PickupEffect **list, int pnum, float par1, float par2,
 void BA_ParseKeepPowerup(PickupEffect **list, int pnum, float par1, float par2, const char *word_par)
 {
     if (pnum != -1)
-        DDF_Error("KEEP_POWERUP: missing powerup name !\n");
+        DdfError("KEEP_POWERUP: missing powerup name !\n");
 
     EPI_ASSERT(word_par && word_par[0]);
 
-    if (DDF_CompareName(word_par, "BERSERK") != 0)
-        DDF_Error("KEEP_POWERUP: %s is not supported\n", word_par);
+    if (DdfCompareName(word_par, "BERSERK") != 0)
+        DdfError("KEEP_POWERUP: %s is not supported\n", word_par);
 
     AddPickupEffect(list, new PickupEffect(kPickupEffectTypeKeepPowerup, kPowerTypeBerserk, 0, 0));
 }
@@ -1416,12 +1416,12 @@ static const PickupEffectParser pick_fx_parsers[] = {{"SCREEN_EFFECT", 2, BA_Par
                                                      {nullptr, 0, nullptr}};
 
 //
-// DDF_MobjGetPickupEffect
+// DdfMobjGetPickupEffect
 //
 // Parse a single effect and add it to the effect list accordingly.
 // No merging is done.
 //
-void DDF_MobjGetPickupEffect(const char *info, void *storage)
+void DdfMobjGetPickupEffect(const char *info, void *storage)
 {
     char namebuf[200];
     char parambuf[200];
@@ -1444,7 +1444,7 @@ void DDF_MobjGetPickupEffect(const char *info, void *storage)
 
     for (int i = 0; pick_fx_parsers[i].name; i++)
     {
-        if (DDF_CompareName(pick_fx_parsers[i].name, namebuf) != 0)
+        if (DdfCompareName(pick_fx_parsers[i].name, namebuf) != 0)
             continue;
 
         (*pick_fx_parsers[i].parser)(fx_list, num_vals, temp.amount, temp.limit, parambuf);
@@ -1455,7 +1455,7 @@ void DDF_MobjGetPickupEffect(const char *info, void *storage)
     // secondly, try the powerups
     for (int p = 0; powertype_names[p].name; p++)
     {
-        if (DDF_CompareName(powertype_names[p].name, namebuf) != 0)
+        if (DdfCompareName(powertype_names[p].name, namebuf) != 0)
             continue;
 
         BA_ParsePowerupEffect(fx_list, num_vals, p, temp.amount, parambuf);
@@ -1463,7 +1463,7 @@ void DDF_MobjGetPickupEffect(const char *info, void *storage)
         return;
     }
 
-    DDF_Error("Unknown/Malformed benefit effect: %s\n", namebuf);
+    DdfError("Unknown/Malformed benefit effect: %s\n", namebuf);
 }
 
 // -KM- 1998/11/25 Translucency to fractional.
@@ -1557,24 +1557,24 @@ static DDFSpecialFlags hyper_specials[] = {
 static DDFSpecialFlags mbf21_specials[] = {{"LOGRAV", kMBF21FlagLowGravity, 0}, {nullptr, 0, 0}};
 
 //
-// DDF_MobjGetSpecial
+// DdfMobjGetSpecial
 //
 // Compares info the the entries in special flag lists.
 // If found, apply attributes for it to current mobj.
 //
-void DDF_MobjGetSpecial(const char *info)
+void DdfMobjGetSpecial(const char *info)
 {
     int flag_value;
 
     // handle the "INVISIBLE" tag
-    if (DDF_CompareName(info, "INVISIBLE") == 0)
+    if (DdfCompareName(info, "INVISIBLE") == 0)
     {
         dynamic_mobj->translucency_ = 0.0f;
         return;
     }
 
     // handle the "NOSHADOW" tag
-    if (DDF_CompareName(info, "NOSHADOW") == 0)
+    if (DdfCompareName(info, "NOSHADOW") == 0)
     {
         dynamic_mobj->shadow_trans_ = 0.0f;
         return;
@@ -1582,7 +1582,7 @@ void DDF_MobjGetSpecial(const char *info)
 
     // the "MISSILE" tag needs special treatment, since it sets both
     // normal flags & extended flags.
-    if (DDF_CompareName(info, "MISSILE") == 0)
+    if (DdfCompareName(info, "MISSILE") == 0)
     {
         dynamic_mobj->flags_ |= kMapObjectFlagMissile;
         dynamic_mobj->extended_flags_ |= kExtendedFlagCrossBlockingLines | kExtendedFlagNoFriction;
@@ -1591,45 +1591,45 @@ void DDF_MobjGetSpecial(const char *info)
 
     int *flag_ptr = &dynamic_mobj->flags_;
 
-    DDFCheckFlagResult res = DDF_MainCheckSpecialFlag(info, normal_specials, &flag_value, true, false);
+    DDFCheckFlagResult res = DdfMainCheckSpecialFlag(info, normal_specials, &flag_value, true, false);
 
-    if (res == kDDFCheckFlagUser || res == kDDFCheckFlagUnknown)
+    if (res == kDdfCheckFlagUser || res == kDdfCheckFlagUnknown)
     {
         // wasn't a normal special.  Try the extended ones...
         flag_ptr = &dynamic_mobj->extended_flags_;
 
-        res = DDF_MainCheckSpecialFlag(info, extended_specials, &flag_value, true, false);
+        res = DdfMainCheckSpecialFlag(info, extended_specials, &flag_value, true, false);
     }
 
-    if (res == kDDFCheckFlagUser || res == kDDFCheckFlagUnknown)
+    if (res == kDdfCheckFlagUser || res == kDdfCheckFlagUnknown)
     {
         // -AJA- 2004/08/25: Try the hyper specials...
         flag_ptr = &dynamic_mobj->hyper_flags_;
 
-        res = DDF_MainCheckSpecialFlag(info, hyper_specials, &flag_value, true, false);
+        res = DdfMainCheckSpecialFlag(info, hyper_specials, &flag_value, true, false);
     }
 
-    if (res == kDDFCheckFlagUser || res == kDDFCheckFlagUnknown)
+    if (res == kDdfCheckFlagUser || res == kDdfCheckFlagUnknown)
     {
         // Try the MBF21 specials...
         flag_ptr = &dynamic_mobj->mbf21_flags_;
 
-        res = DDF_MainCheckSpecialFlag(info, mbf21_specials, &flag_value, true, false);
+        res = DdfMainCheckSpecialFlag(info, mbf21_specials, &flag_value, true, false);
     }
 
     switch (res)
     {
-    case kDDFCheckFlagPositive:
+    case kDdfCheckFlagPositive:
         *flag_ptr |= flag_value;
         break;
 
-    case kDDFCheckFlagNegative:
+    case kDdfCheckFlagNegative:
         *flag_ptr &= ~flag_value;
         break;
 
-    case kDDFCheckFlagUser:
-    case kDDFCheckFlagUnknown:
-        DDF_WarnError("DDF_MobjGetSpecial: Unknown special '%s'\n", info);
+    case kDdfCheckFlagUser:
+    case kDdfCheckFlagUnknown:
+        DdfWarnError("DdfMobjGetSpecial: Unknown special '%s'\n", info);
         break;
     }
 }
@@ -1646,18 +1646,18 @@ static DDFSpecialFlags dlight_type_names[] = {{"NONE", kDynamicLightTypeNone, 0}
                                               {nullptr, 0, 0}};
 
 //
-// DDF_MobjGetDLight
+// DdfMobjGetDLight
 //
-void DDF_MobjGetDLight(const char *info, void *storage)
+void DdfMobjGetDLight(const char *info, void *storage)
 {
     DynamicLightType *dtype = (DynamicLightType *)storage;
     int               flag_value;
 
     EPI_ASSERT(dtype);
 
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(info, dlight_type_names, &flag_value, false, false))
+    if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(info, dlight_type_names, &flag_value, false, false))
     {
-        DDF_WarnError("Unknown dlight type '%s'\n", info);
+        DdfWarnError("Unknown dlight type '%s'\n", info);
         return;
     }
 
@@ -1665,16 +1665,16 @@ void DDF_MobjGetDLight(const char *info, void *storage)
 }
 
 //
-// DDF_MobjGetExtra
+// DdfMobjGetExtra
 //
-void DDF_MobjGetExtra(const char *info, void *storage)
+void DdfMobjGetExtra(const char *info, void *storage)
 {
     int *extendedflags = (int *)storage;
 
     // If keyword is "NULL", then the mobj is not marked as extra.
     // Otherwise it is.
 
-    if (DDF_CompareName(info, "NULL") == 0)
+    if (DdfCompareName(info, "NULL") == 0)
     {
         *extendedflags &= ~kExtendedFlagExtra;
     }
@@ -1685,21 +1685,21 @@ void DDF_MobjGetExtra(const char *info, void *storage)
 }
 
 //
-// DDF_MobjGetPlayer
+// DdfMobjGetPlayer
 //
 // Reads player number and makes sure that maxplayer is large enough.
 //
-void DDF_MobjGetPlayer(const char *info, void *storage)
+void DdfMobjGetPlayer(const char *info, void *storage)
 {
     int *dest = (int *)storage;
 
-    DDF_MainGetNumeric(info, storage);
+    DdfMainGetNumeric(info, storage);
 
     if (*dest > 32)
-        DDF_Warning("Player number '%d' will not work.", *dest);
+        DdfWarning("Player number '%d' will not work.", *dest);
 }
 
-static void DDF_MobjGetGlowType(const char *info, void *storage)
+static void DdfMobjGetGlowType(const char *info, void *storage)
 {
     SectorGlowType *glow = (SectorGlowType *)storage;
 
@@ -1719,31 +1719,31 @@ static const DDFSpecialFlags sprite_yalign_names[] = {{"BOTTOM", SpriteYAlignmen
 
                                                       {nullptr, 0, 0}};
 
-static void DDF_MobjGetYAlign(const char *info, void *storage)
+static void DdfMobjGetYAlign(const char *info, void *storage)
 {
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(info, sprite_yalign_names, (int *)storage, false, false))
+    if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(info, sprite_yalign_names, (int *)storage, false, false))
     {
-        DDF_WarnError("DDF_MobjGetYAlign: Unknown alignment: %s\n", info);
+        DdfWarnError("DdfMobjGetYAlign: Unknown alignment: %s\n", info);
     }
 }
 
-static void DDF_MobjGetPercentRange(const char *info, void *storage)
+static void DdfMobjGetPercentRange(const char *info, void *storage)
 {
     EPI_ASSERT(info && storage);
 
     float *dest = (float *)storage;
 
     if (sscanf(info, "%f%%:%f%%", dest + 0, dest + 1) != 2)
-        DDF_Error("Bad percentage range: %s\n", info);
+        DdfError("Bad percentage range: %s\n", info);
 
     dest[0] /= 100.0f;
     dest[1] /= 100.0f;
 
     if (dest[0] > dest[1])
-        DDF_Error("Bad percent range (low > high) : %s\n", info);
+        DdfError("Bad percent range (low > high) : %s\n", info);
 }
 
-static void DDF_MobjGetAngleRange(const char *info, void *storage)
+static void DdfMobjGetAngleRange(const char *info, void *storage)
 {
     EPI_ASSERT(info && storage);
 
@@ -1752,16 +1752,16 @@ static void DDF_MobjGetAngleRange(const char *info, void *storage)
     float val1, val2;
 
     if (sscanf(info, "%f:%f", &val1, &val2) != 2)
-        DDF_Error("Bad angle range: %s\n", info);
+        DdfError("Bad angle range: %s\n", info);
 
     dest[0] = epi::BAMFromDegrees(val1);
     dest[1] = epi::BAMFromDegrees(val2);
 }
 
 //
-// DDF_MobjStateGetRADTrigger
+// DdfMobjStateGetRADTrigger
 //
-static void DDF_MobjStateGetRADTrigger(const char *arg, State *cur_state)
+static void DdfMobjStateGetRADTrigger(const char *arg, State *cur_state)
 {
     if (!arg || !arg[0])
         return;
@@ -1801,7 +1801,7 @@ static void DDF_MobjStateGetRADTrigger(const char *arg, State *cur_state)
 
 static bool ConditionTryCounter(const char *name, const char *sub, ConditionCheck *cond)
 {
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, counter_types, &cond->sub.type, false, false))
+    if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(name, counter_types, &cond->sub.type, false, false))
     {
         return false;
     }
@@ -1815,7 +1815,7 @@ static bool ConditionTryCounter(const char *name, const char *sub, ConditionChec
 
 static bool ConditionTryInventory(const char *name, const char *sub, ConditionCheck *cond)
 {
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, inv_types, &cond->sub.type, false, false))
+    if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(name, inv_types, &cond->sub.type, false, false))
     {
         return false;
     }
@@ -1829,14 +1829,14 @@ static bool ConditionTryInventory(const char *name, const char *sub, ConditionCh
 
 static bool ConditionTryAmmo(const char *name, const char *sub, ConditionCheck *cond)
 {
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, ammo_types, &cond->sub.type, false, false))
+    if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(name, ammo_types, &cond->sub.type, false, false))
     {
         return false;
     }
 
     if ((AmmunitionType)cond->sub.type == kAmmunitionTypeNoAmmo)
     {
-        DDF_WarnError("Illegal ammo in condition: %s\n", name);
+        DdfWarnError("Illegal ammo in condition: %s\n", name);
         return false;
     }
 
@@ -1862,7 +1862,7 @@ static bool ConditionTryWeapon(const char *name, const char *sub, ConditionCheck
 
 static bool ConditionTryKey(const char *name, const char *sub, ConditionCheck *cond)
 {
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, keytype_names, &cond->sub.type, false, false))
+    if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(name, keytype_names, &cond->sub.type, false, false))
     {
         return false;
     }
@@ -1873,7 +1873,7 @@ static bool ConditionTryKey(const char *name, const char *sub, ConditionCheck *c
 
 static bool ConditionTryHealth(const char *name, const char *sub, ConditionCheck *cond)
 {
-    if (DDF_CompareName(name, "HEALTH") != 0)
+    if (DdfCompareName(name, "HEALTH") != 0)
         return false;
 
     if (sub[0])
@@ -1885,11 +1885,11 @@ static bool ConditionTryHealth(const char *name, const char *sub, ConditionCheck
 
 static bool ConditionTryArmour(const char *name, const char *sub, ConditionCheck *cond)
 {
-    if (DDF_CompareName(name, "ARMOUR") == 0)
+    if (DdfCompareName(name, "ARMOUR") == 0)
     {
         cond->sub.type = kTotalArmourTypes;
     }
-    else if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, armourtype_names, &cond->sub.type, false, false))
+    else if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(name, armourtype_names, &cond->sub.type, false, false))
     {
         return false;
     }
@@ -1903,7 +1903,7 @@ static bool ConditionTryArmour(const char *name, const char *sub, ConditionCheck
 
 static bool ConditionTryPowerup(const char *name, const char *sub, ConditionCheck *cond)
 {
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, powertype_names, &cond->sub.type, false, false))
+    if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(name, powertype_names, &cond->sub.type, false, false))
     {
         return false;
     }
@@ -1921,16 +1921,16 @@ static bool ConditionTryPowerup(const char *name, const char *sub, ConditionChec
 
 static bool ConditionTryPlayerState(const char *name, const char *sub, ConditionCheck *cond)
 {
-    return (kDDFCheckFlagPositive ==
-            DDF_MainCheckSpecialFlag(name, simplecond_names, (int *)&cond->cond_type, false, false));
+    return (kDdfCheckFlagPositive ==
+            DdfMainCheckSpecialFlag(name, simplecond_names, (int *)&cond->cond_type, false, false));
 }
 
 //
-// DDF_MainParseCondition
+// DdfMainParseCondition
 //
 // Returns `false' if parsing failed.
 //
-bool DDF_MainParseCondition(const char *info, ConditionCheck *cond)
+bool DdfMainParseCondition(const char *info, ConditionCheck *cond)
 {
     char typebuf[100];
     char sub_buf[100];
@@ -1960,7 +1960,7 @@ bool DDF_MainParseCondition(const char *info, ConditionCheck *cond)
     }
     else if (pos || strchr(info, ')'))
     {
-        DDF_WarnError("Malformed condition string: %s\n", info);
+        DdfWarnError("Malformed condition string: %s\n", info);
         return false;
     }
     else
@@ -1992,7 +1992,7 @@ bool DDF_MainParseCondition(const char *info, ConditionCheck *cond)
         return true;
     }
 
-    DDF_WarnError("Unknown/Malformed condition type: %s\n", typebuf);
+    DdfWarnError("Unknown/Malformed condition type: %s\n", typebuf);
     return false;
 }
 
@@ -2381,7 +2381,7 @@ int MapObjectDefinitionContainer::FindFirst(const char *name, int startpos)
     for (startpos; startpos < size(); startpos++)
     {
         MapObjectDefinition *m = at(startpos);
-        if (DDF_CompareName(m->name_.c_str(), name) == 0)
+        if (DdfCompareName(m->name_.c_str(), name) == 0)
             return startpos;
     }
 
@@ -2395,7 +2395,7 @@ int MapObjectDefinitionContainer::FindLast(const char *name, int startpos)
     for (startpos; startpos >= 0; startpos--)
     {
         MapObjectDefinition *m = at(startpos);
-        if (DDF_CompareName(m->name_.c_str(), name) == 0)
+        if (DdfCompareName(m->name_.c_str(), name) == 0)
             return startpos;
     }
 
@@ -2437,7 +2437,7 @@ const MapObjectDefinition *MapObjectDefinitionContainer::Lookup(const char *refn
     if (lax_errors)
         return default_mobjtype;
 
-    DDF_Error("Unknown thing type: %s\n", refname);
+    DdfError("Unknown thing type: %s\n", refname);
     return nullptr; /* NOT REACHED */
 }
 

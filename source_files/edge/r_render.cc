@@ -2304,16 +2304,16 @@ bool RendererCheckBBox(float *bspcoord)
         if (draw_culling.d_)
         {
             float closest = 1000000.0f;
-            float check   = MathPointToSegDistance({{x1, y1}}, {{x2, y1}}, {{view_x, view_y}});
+            float check   = PointToSegDistance({{x1, y1}}, {{x2, y1}}, {{view_x, view_y}});
             if (check < closest)
                 closest = check;
-            check = MathPointToSegDistance({{x1, y1}}, {{x1, y2}}, {{view_x, view_y}});
+            check = PointToSegDistance({{x1, y1}}, {{x1, y2}}, {{view_x, view_y}});
             if (check < closest)
                 closest = check;
-            check = MathPointToSegDistance({{x2, y1}}, {{x2, y2}}, {{view_x, view_y}});
+            check = PointToSegDistance({{x2, y1}}, {{x2, y2}}, {{view_x, view_y}});
             if (check < closest)
                 closest = check;
-            check = MathPointToSegDistance({{x1, y2}}, {{x2, y2}}, {{view_x, view_y}});
+            check = PointToSegDistance({{x1, y2}}, {{x2, y2}}, {{view_x, view_y}});
             if (check < closest)
                 closest = check;
 
@@ -2744,7 +2744,7 @@ static void RendererWalkSubsector(int num)
             float sx2 = seg->vertex_2->X;
             float sy2 = seg->vertex_2->Y;
 
-            if (MathPointToSegDistance({{sx1, sy1}}, {{sx2, sy2}}, {{view_x, view_y}}) <=
+            if (PointToSegDistance({{sx1, sy1}}, {{sx2, sy2}}, {{view_x, view_y}}) <=
                 (renderer_far_clip.f_ + 500.0f))
             {
                 skip = false;

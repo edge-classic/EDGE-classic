@@ -27,56 +27,56 @@
 
 StyleDefinition *default_style;
 
-static void DDF_StyleGetSpecials(const char *info, void *storage);
+static void DdfStyleGetSpecials(const char *info, void *storage);
 
 StyleDefinitionContainer styledefs;
 
 static BackgroundStyle dummy_bgstyle;
 
 static const DDFCommandList background_commands[] = {
-    DDF_FIELD("COLOUR", dummy_bgstyle, colour_, DDF_MainGetRGB),
-    DDF_FIELD("TRANSLUCENCY", dummy_bgstyle, translucency_, DDF_MainGetPercent),
-    DDF_FIELD("IMAGE", dummy_bgstyle, image_name_, DDF_MainGetString),
-    DDF_FIELD("SCALE", dummy_bgstyle, scale_, DDF_MainGetFloat),
-    DDF_FIELD("ASPECT", dummy_bgstyle, aspect_, DDF_MainGetFloat),
+    DDF_FIELD("COLOUR", dummy_bgstyle, colour_, DdfMainGetRGB),
+    DDF_FIELD("TRANSLUCENCY", dummy_bgstyle, translucency_, DdfMainGetPercent),
+    DDF_FIELD("IMAGE", dummy_bgstyle, image_name_, DdfMainGetString),
+    DDF_FIELD("SCALE", dummy_bgstyle, scale_, DdfMainGetFloat),
+    DDF_FIELD("ASPECT", dummy_bgstyle, aspect_, DdfMainGetFloat),
 
     {nullptr, nullptr, 0, nullptr}};
 
 static TextStyle dummy_textstyle;
 
 static const DDFCommandList text_commands[] = {
-    DDF_FIELD("COLOURMAP", dummy_textstyle, colmap_, DDF_MainGetColourmap),
-    DDF_FIELD("TRANSLUCENCY", dummy_textstyle, translucency_, DDF_MainGetPercent),
-    DDF_FIELD("FONT", dummy_textstyle, font_, DDF_MainLookupFont),
-    DDF_FIELD("SCALE", dummy_textstyle, scale_, DDF_MainGetFloat),
-    DDF_FIELD("ASPECT", dummy_textstyle, aspect_, DDF_MainGetFloat),
-    DDF_FIELD("X_OFFSET", dummy_textstyle, x_offset_, DDF_MainGetNumeric),
-    DDF_FIELD("Y_OFFSET", dummy_textstyle, y_offset_, DDF_MainGetNumeric),
+    DDF_FIELD("COLOURMAP", dummy_textstyle, colmap_, DdfMainGetColourmap),
+    DDF_FIELD("TRANSLUCENCY", dummy_textstyle, translucency_, DdfMainGetPercent),
+    DDF_FIELD("FONT", dummy_textstyle, font_, DdfMainLookupFont),
+    DDF_FIELD("SCALE", dummy_textstyle, scale_, DdfMainGetFloat),
+    DDF_FIELD("ASPECT", dummy_textstyle, aspect_, DdfMainGetFloat),
+    DDF_FIELD("X_OFFSET", dummy_textstyle, x_offset_, DdfMainGetNumeric),
+    DDF_FIELD("Y_OFFSET", dummy_textstyle, y_offset_, DdfMainGetNumeric),
 
     {nullptr, nullptr, 0, nullptr}};
 
 static CursorStyle dummy_cursorstyle;
 
 static const DDFCommandList cursor_commands[] = {
-    DDF_FIELD("POSITION", dummy_cursorstyle, pos_string_, DDF_MainGetString),
-    DDF_FIELD("TRANSLUCENCY", dummy_cursorstyle, translucency_, DDF_MainGetPercent),
-    DDF_FIELD("IMAGE", dummy_cursorstyle, alt_cursor_, DDF_MainGetString),
-    DDF_FIELD("STRING", dummy_cursorstyle, cursor_string_, DDF_MainGetString),
-    DDF_FIELD("BORDER", dummy_cursorstyle, border_, DDF_MainGetBoolean),
-    DDF_FIELD("SCALING", dummy_cursorstyle, scaling_, DDF_MainGetBoolean),
-    DDF_FIELD("FORCE_OFFSETS", dummy_cursorstyle, force_offsets_, DDF_MainGetBoolean),
+    DDF_FIELD("POSITION", dummy_cursorstyle, pos_string_, DdfMainGetString),
+    DDF_FIELD("TRANSLUCENCY", dummy_cursorstyle, translucency_, DdfMainGetPercent),
+    DDF_FIELD("IMAGE", dummy_cursorstyle, alt_cursor_, DdfMainGetString),
+    DDF_FIELD("STRING", dummy_cursorstyle, cursor_string_, DdfMainGetString),
+    DDF_FIELD("BORDER", dummy_cursorstyle, border_, DdfMainGetBoolean),
+    DDF_FIELD("SCALING", dummy_cursorstyle, scaling_, DdfMainGetBoolean),
+    DDF_FIELD("FORCE_OFFSETS", dummy_cursorstyle, force_offsets_, DdfMainGetBoolean),
 
     {nullptr, nullptr, 0, nullptr}};
 
 static SoundStyle dummy_soundstyle;
 
-static const DDFCommandList sound_commands[] = {DDF_FIELD("BEGIN", dummy_soundstyle, begin_, DDF_MainLookupSound),
-                                                DDF_FIELD("END", dummy_soundstyle, end_, DDF_MainLookupSound),
-                                                DDF_FIELD("SELECT", dummy_soundstyle, select_, DDF_MainLookupSound),
-                                                DDF_FIELD("BACK", dummy_soundstyle, back_, DDF_MainLookupSound),
-                                                DDF_FIELD("ERROR", dummy_soundstyle, error_, DDF_MainLookupSound),
-                                                DDF_FIELD("MOVE", dummy_soundstyle, move_, DDF_MainLookupSound),
-                                                DDF_FIELD("SLIDER", dummy_soundstyle, slider_, DDF_MainLookupSound),
+static const DDFCommandList sound_commands[] = {DDF_FIELD("BEGIN", dummy_soundstyle, begin_, DdfMainLookupSound),
+                                                DDF_FIELD("END", dummy_soundstyle, end_, DdfMainLookupSound),
+                                                DDF_FIELD("SELECT", dummy_soundstyle, select_, DdfMainLookupSound),
+                                                DDF_FIELD("BACK", dummy_soundstyle, back_, DdfMainLookupSound),
+                                                DDF_FIELD("ERROR", dummy_soundstyle, error_, DdfMainLookupSound),
+                                                DDF_FIELD("MOVE", dummy_soundstyle, move_, DdfMainLookupSound),
+                                                DDF_FIELD("SLIDER", dummy_soundstyle, slider_, DdfMainLookupSound),
 
                                                 {nullptr, nullptr, 0, nullptr}};
 
@@ -95,12 +95,12 @@ static const DDFCommandList style_commands[] = {
     DDF_SUB_LIST("HEADER", dummy_style, text_[4], text_commands),
     DDF_SUB_LIST("SELECTED", dummy_style, text_[5], text_commands),
     DDF_SUB_LIST("SOUND", dummy_style, sounds_, sound_commands),
-    DDF_FIELD("X_OFFSET", dummy_style, x_offset_, DDF_MainGetNumeric),
-    DDF_FIELD("Y_OFFSET", dummy_style, y_offset_, DDF_MainGetNumeric),
-    DDF_FIELD("ENTRY_ALIGNMENT", dummy_style, entry_align_string_, DDF_MainGetString),
-    DDF_FIELD("ENTRY_SPACING", dummy_style, entry_spacing_, DDF_MainGetNumeric),
+    DDF_FIELD("X_OFFSET", dummy_style, x_offset_, DdfMainGetNumeric),
+    DDF_FIELD("Y_OFFSET", dummy_style, y_offset_, DdfMainGetNumeric),
+    DDF_FIELD("ENTRY_ALIGNMENT", dummy_style, entry_align_string_, DdfMainGetString),
+    DDF_FIELD("ENTRY_SPACING", dummy_style, entry_spacing_, DdfMainGetNumeric),
 
-    DDF_FIELD("SPECIAL", dummy_style, special_, DDF_StyleGetSpecials),
+    DDF_FIELD("SPECIAL", dummy_style, special_, DdfStyleGetSpecials),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -112,7 +112,7 @@ static void StyleStartEntry(const char *name, bool extend)
 {
     if (!name || !name[0])
     {
-        DDF_WarnError("New style entry is missing a name!");
+        DdfWarnError("New style entry is missing a name!");
         name = "STYLE_WITH_NO_NAME";
     }
 
@@ -122,7 +122,7 @@ static void StyleStartEntry(const char *name, bool extend)
     if (extend)
     {
         if (!dynamic_style)
-            DDF_Error("Unknown style to extend: %s\n", name);
+            DdfError("Unknown style to extend: %s\n", name);
         return;
     }
 
@@ -141,14 +141,14 @@ static void StyleStartEntry(const char *name, bool extend)
 
 static void StyleParseField(const char *field, const char *contents, int index, bool is_last)
 {
-#if (DEBUG_DDF)
+#if (DDF_DEBUG)
     LogDebug("STYLE_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DDF_MainParseField(style_commands, field, contents, (uint8_t *)dynamic_style))
+    if (DdfMainParseField(style_commands, field, contents, (uint8_t *)dynamic_style))
         return; // OK
 
-    DDF_WarnError("Unknown styles.ddf command: %s\n", field);
+    DdfWarnError("Unknown styles.ddf command: %s\n", field);
 }
 
 static void StyleFinishEntry(void)
@@ -185,7 +185,7 @@ static void StyleClearAll(void)
     LogWarning("Ignoring #CLEARALL in styles.ddf\n");
 }
 
-void DDF_ReadStyles(const std::string &data)
+void DdfReadStyles(const std::string &data)
 {
     DDFReadInfo styles;
 
@@ -197,10 +197,10 @@ void DDF_ReadStyles(const std::string &data)
     styles.finish_entry = StyleFinishEntry;
     styles.clear_all    = StyleClearAll;
 
-    DDF_MainReadFile(&styles, data);
+    DdfMainReadFile(&styles, data);
 }
 
-void DDF_StyleInit(void)
+void DdfStyleInit(void)
 {
     for (auto s : styledefs)
     {
@@ -210,7 +210,7 @@ void DDF_StyleInit(void)
     styledefs.clear();
 }
 
-void DDF_StyleCleanUp(void)
+void DdfStyleCleanUp(void)
 {
     if (styledefs.empty())
         FatalError("There are no styles defined in DDF !\n");
@@ -230,25 +230,25 @@ static DDFSpecialFlags style_specials[] = {{"TILED", kStyleSpecialTiled, 0},
                                            {"STRETCH_FULLSCREEN", kStyleSpecialStretchFullScreen, 0},
                                            {nullptr, 0, 0}};
 
-void DDF_StyleGetSpecials(const char *info, void *storage)
+void DdfStyleGetSpecials(const char *info, void *storage)
 {
     StyleSpecial *dest = (StyleSpecial *)storage;
 
     int flag_value;
 
-    switch (DDF_MainCheckSpecialFlag(info, style_specials, &flag_value, true, false))
+    switch (DdfMainCheckSpecialFlag(info, style_specials, &flag_value, true, false))
     {
-    case kDDFCheckFlagPositive:
+    case kDdfCheckFlagPositive:
         *dest = (StyleSpecial)(*dest | flag_value);
         break;
 
-    case kDDFCheckFlagNegative:
+    case kDdfCheckFlagNegative:
         *dest = (StyleSpecial)(*dest & ~flag_value);
         break;
 
-    case kDDFCheckFlagUser:
-    case kDDFCheckFlagUnknown:
-        DDF_WarnError("Unknown style special: %s", info);
+    case kDdfCheckFlagUser:
+    case kDdfCheckFlagUnknown:
+        DdfWarnError("Unknown style special: %s", info);
         break;
     }
 }
@@ -568,7 +568,7 @@ StyleDefinition *StyleDefinitionContainer::Lookup(const char *refname)
     for (std::vector<StyleDefinition *>::reverse_iterator iter = rbegin(), iter_end = rend(); iter != iter_end; iter++)
     {
         StyleDefinition *m = *iter;
-        if (DDF_CompareName(m->name_.c_str(), refname) == 0)
+        if (DdfCompareName(m->name_.c_str(), refname) == 0)
             return m;
     }
 

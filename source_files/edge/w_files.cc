@@ -127,11 +127,11 @@ static void DEH_ConvertFile(std::string &filename)
 
 static void W_ExternalDDF(DataFile *df)
 {
-    DDFType type = DDF_FilenameToType(df->name_);
+    DdfType type = DdfFilenameToType(df->name_);
 
     std::string bare_name = epi::GetFilename(df->name_);
 
-    if (type == kDDFTypeUNKNOWN)
+    if (type == kDdfTypeUnknown)
         FatalError("Unknown DDF filename: %s\n", bare_name.c_str());
 
     LogPrint("Reading DDF file: %s\n", df->name_.c_str());
@@ -149,7 +149,7 @@ static void W_ExternalDDF(DataFile *df)
     std::string data(raw_data);
     delete[] raw_data;
 
-    DDF_AddFile(type, data, df->name_);
+    DdfAddFile(type, data, df->name_);
 }
 
 static void W_ExternalRTS(DataFile *df)
@@ -169,7 +169,7 @@ static void W_ExternalRTS(DataFile *df)
     std::string data(raw_data);
     delete[] raw_data;
 
-    DDF_AddFile(kDDFTypeRadScript, data, df->name_);
+    DdfAddFile(kDdfTypeRadScript, data, df->name_);
 }
 
 void ProcessFile(DataFile *df)

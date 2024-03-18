@@ -30,11 +30,11 @@
 #include "epi_str_util.h"
 #include "miniz.h"
 
-#define DEBUG_BLOCKMAP 0
-#define DEBUG_REJECT   0
+#define AJBSP_DEBUG_BLOCKMAP 0
+#define AJBSP_DEBUG_REJECT   0
 
-#define DEBUG_LOAD 0
-#define DEBUG_BSP  0
+#define AJBSP_DEBUG_LOAD 0
+#define AJBSP_DEBUG_BSP  0
 
 // Startup Messages
 extern void StartupProgressMessage(const char *message);
@@ -282,7 +282,7 @@ void GetVertices()
     if (lump)
         count = lump->Length() / (int)sizeof(RawVertex);
 
-#if DEBUG_LOAD
+#if AJBSP_DEBUG_LOAD
     LogDebug("GetVertices: num = %d\n", count);
 #endif
 
@@ -323,7 +323,7 @@ void GetSectors()
     if (!lump->Seek(0))
         FatalError("AJBSP: Error seeking to sectors.\n");
 
-#if DEBUG_LOAD
+#if AJBSP_DEBUG_LOAD
     LogDebug("GetSectors: num = %d\n", count);
 #endif
 
@@ -355,7 +355,7 @@ void GetThings()
     if (!lump->Seek(0))
         FatalError("AJBSP: Error seeking to things.\n");
 
-#if DEBUG_LOAD
+#if AJBSP_DEBUG_LOAD
     LogDebug("GetThings: num = %d\n", count);
 #endif
 
@@ -389,7 +389,7 @@ void GetSidedefs()
     if (!lump->Seek(0))
         FatalError("AJBSP: Error seeking to sidedefs.\n");
 
-#if DEBUG_LOAD
+#if AJBSP_DEBUG_LOAD
     LogDebug("GetSidedefs: num = %d\n", count);
 #endif
 
@@ -421,7 +421,7 @@ void GetLinedefs()
     if (!lump->Seek(0))
         FatalError("AJBSP: Error seeking to linedefs.\n");
 
-#if DEBUG_LOAD
+#if AJBSP_DEBUG_LOAD
     LogDebug("GetLinedefs: num = %d\n", count);
 #endif
 
@@ -885,7 +885,7 @@ void PutXGL3Segs()
         ZLibAppendLump(&line, 4);
         ZLibAppendLump(&side, 1);
 
-#if DEBUG_BSP
+#if AJBSP_DEBUG_BSP
         fprintf(stderr, "SEG[%d] v1=%d partner=%d line=%d side=%d\n", i, v1, partner, line, side);
 #endif
     }
@@ -945,7 +945,7 @@ static void PutOneZNode(Node *node)
     ZLibAppendLump(&raw.right, 4);
     ZLibAppendLump(&raw.left, 4);
 
-#if DEBUG_BSP
+#if AJBSP_DEBUG_BSP
     LogDebug("PUT Z NODE %08X  Left %08X  Right %08X  "
              "(%d,%d) -> (%d,%d)\n",
              node->index, AlignedLittleEndianU32(raw.left), AlignedLittleEndianU32(raw.right), node->x_, node->y_,

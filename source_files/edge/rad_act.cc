@@ -1130,7 +1130,7 @@ static bool WUD_Match(ScriptWaitUntilDeadParameter *wud, const char *name)
         if (!wud->mon_names[i])
             continue;
 
-        if (DDF_CompareName(name, wud->mon_names[i]) == 0)
+        if (DdfCompareName(name, wud->mon_names[i]) == 0)
             return true;
     }
 
@@ -1252,7 +1252,7 @@ static void ScriptSetPlayerSprite(Player *p, int position, int stnum, WeaponDefi
 
         if (st->label)
         {
-            int new_state = DDF_StateFindLabel(info->state_grp_, st->label, true /* quiet */);
+            int new_state = DdfStateFindLabel(info->state_grp_, st->label, true /* quiet */);
             if (new_state != 0)
                 stnum = new_state;
         }
@@ -1370,7 +1370,7 @@ void ScriptWeaponEvent(TriggerScriptTrigger *R, void *param)
 
     p->ready_weapon_ = (WeaponSelection)pw_index; // insta-switch to it
 
-    int state = DDF_StateFindLabel(oldWep->state_grp_, tev->label, true /* quiet */);
+    int state = DdfStateFindLabel(oldWep->state_grp_, tev->label, true /* quiet */);
     if (state == 0)
         FatalError("RTS WEAPON_EVENT: frame '%s' in [%s] not found!\n", tev->label, tev->weapon_name);
     state += tev->offset;

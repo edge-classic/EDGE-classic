@@ -41,8 +41,6 @@
 #include "snd_gather.h"
 #include "w_wad.h"
 
-#define OGGV_NUM_SAMPLES 1024
-
 extern bool sound_device_stereo; // FIXME: encapsulation
 
 struct OggDataLump
@@ -173,7 +171,7 @@ long oggplayer_memtell(void *datasource)
 
 OggPlayer::OggPlayer() : status_(kNotLoaded), vorbis_info_(nullptr)
 {
-    mono_buffer_ = new int16_t[OGGV_NUM_SAMPLES * 2];
+    mono_buffer_ = new int16_t[kMusicBuffer * 2];
 }
 
 OggPlayer::~OggPlayer()
@@ -245,7 +243,7 @@ bool OggPlayer::StreamIntoBuffer(SoundData *buf)
 
     int samples = 0;
 
-    while (samples < OGGV_NUM_SAMPLES)
+    while (samples < kMusicBuffer)
     {
         int16_t *data_buf;
 
@@ -256,7 +254,7 @@ bool OggPlayer::StreamIntoBuffer(SoundData *buf)
 
         int section;
         int got_size = ov_read(&ogg_stream_, (char *)data_buf,
-                               (OGGV_NUM_SAMPLES - samples) * (is_stereo_ ? 2 : 1) * sizeof(int16_t), ogg_endian,
+                               (kMusicBuffer - samples) * (is_stereo_ ? 2 : 1) * sizeof(int16_t), ogg_endian,
                                sizeof(int16_t), 1 /* signed data */, &section);
 
         if (got_size == OV_HOLE) // ignore corruption
@@ -396,7 +394,7 @@ void OggPlayer::Ticker()
     while (status_ == kPlaying && !pc_speaker_mode)
     {
         SoundData *buf =
-            SoundQueueGetFreeBuffer(OGGV_NUM_SAMPLES, (is_stereo_ && sound_device_stereo) ? kMixInterleaved : kMixMono);
+            SoundQueueGetFreeBuffer(kMusicBuffer, (is_stereo_ && sound_device_stereo) ? kMixInterleaved : kMixMono);
 
         if (!buf)
             break;

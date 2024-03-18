@@ -148,7 +148,7 @@ static float GetSecHeightReference(TriggerHeightReference ref, Sector *sec, Sect
     return 0;
 }
 
-#define RELOOP_TICKS 6
+static constexpr uint8_t kReloopTics = 6;
 
 static void MakeMovingSound(bool *started_var, SoundEffect *sfx, Position *pos)
 {
@@ -161,7 +161,7 @@ static void MakeMovingSound(bool *started_var, SoundEffect *sfx, Position *pos)
     // The main one is STNMOV, which lasts a little over 0.25 seconds,
     // hence we need to pump it every 6 tics or so.
 
-    if (!*started_var || (def->looping_ && (level_time_elapsed % RELOOP_TICKS) == 0))
+    if (!*started_var || (def->looping_ && (level_time_elapsed % kReloopTics) == 0))
     {
         StartSoundEffect(sfx, kCategoryLevel, pos);
 

@@ -653,9 +653,9 @@ static void ProcessDDFInPack(PackFile *pack)
             source += bare_filename;
 
             // this handles RTS scripts too!
-            DDFType type = DDF_FilenameToType(ent.name_);
+            DdfType type = DdfFilenameToType(ent.name_);
 
-            if (type != kDDFTypeUNKNOWN)
+            if (type != kDdfTypeUnknown)
             {
                 int            length   = -1;
                 const uint8_t *raw_data = pack->LoadEntry(dir, entry, length);
@@ -663,7 +663,7 @@ static void ProcessDDFInPack(PackFile *pack)
                 std::string data((const char *)raw_data);
                 delete[] raw_data;
 
-                DDF_AddFile(type, data, source);
+                DdfAddFile(type, data, source);
                 continue;
             }
 
@@ -913,12 +913,12 @@ void PackProcessSubstitutions(PackFile *pack, int pack_index)
             {
                 if (epi::GetExtension(song->info_).empty())
                 {
-                    if (song->infotype_ == kDDFMusicDataLump &&
+                    if (song->infotype_ == kDdfMusicDataLump &&
                         epi::StringCaseCompareASCII(epi::GetStem(entry.name_), song->info_) == 0 &&
                         CheckDataFileIndexForName(song->info_.c_str()) < pack_index)
                     {
                         song->info_     = entry.pack_path_;
-                        song->infotype_ = kDDFMusicDataPackage;
+                        song->infotype_ = kDdfMusicDataPackage;
                     }
                 }
             }
@@ -948,7 +948,7 @@ void PackProcessSubstitutions(PackFile *pack, int pack_index)
             }
 
             if (add_it)
-                DDF_AddRawColourmap(stem.c_str(), pack->EntryLength(d, i), entry.pack_path_.c_str());
+                DdfAddRawColourmap(stem.c_str(), pack->EntryLength(d, i), entry.pack_path_.c_str());
         }
     }
 }
@@ -1328,7 +1328,7 @@ void PackProcessAll(DataFile *df, size_t file_index)
         LogPrint("Loading WADFIXES\n");
         epi::File *wadfixes = PackOpenFile(df->pack_, "wadfixes.ddf");
         if (wadfixes)
-            DDF_ReadFixes(wadfixes->ReadText());
+            DdfReadFixes(wadfixes->ReadText());
         delete wadfixes;
     }
 

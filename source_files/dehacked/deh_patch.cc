@@ -281,7 +281,7 @@ void GetFlags(int o_kind, int o_num, int *dest)
 
     // prevent the BOOM/MBF specific flags from being set
     // from binary patch files.
-    temp &= ~ALL_BEX_FLAGS;
+    temp &= ~DEHACKED_ALL_BEX_FLAGS;
 
     if (*dest == temp)
         return;

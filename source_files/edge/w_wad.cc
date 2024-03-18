@@ -110,7 +110,7 @@ class WadFile
     std::vector<int> skin_markers_;
 
     // ddf and rts lump list
-    int ddf_lumps_[kTotalDDFTypes];
+    int ddf_lumps_[kTotalDdfTypes];
 
     // texture information
     WadTextureResource wadtex_;
@@ -139,7 +139,7 @@ class WadFile
           level_markers_(), skin_markers_(), wadtex_(), dehacked_lump_(-1), coal_huds_(-1), lua_huds_(-1),
           umapinfo_lump_(-1), animated_(-1), switches_(-1), md5_string_()
     {
-        for (int d = 0; d < kTotalDDFTypes; d++)
+        for (int d = 0; d < kTotalDdfTypes; d++)
             ddf_lumps_[d] = -1;
     }
 
@@ -593,9 +593,9 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
     // -KM- 1998/12/16 Load DDF/RSCRIPT file from wad.
     if (allow_ddf && wad != nullptr)
     {
-        DDFType type = DDF_LumpToType(info.name);
+        DdfType type = DdfLumpToType(info.name);
 
-        if (type != kDDFTypeUNKNOWN)
+        if (type != kDdfTypeUnknown)
         {
             lump_p->kind          = kLumpDdfRts;
             wad->ddf_lumps_[type] = lump;
@@ -993,7 +993,7 @@ static void ProcessDDFInWad(DataFile *df)
 {
     std::string bare_filename = epi::GetFilename(df->name_);
 
-    for (size_t d = 0; d < kTotalDDFTypes; d++)
+    for (size_t d = 0; d < kTotalDdfTypes; d++)
     {
         int lump = df->wad_->ddf_lumps_[d];
 
@@ -1007,7 +1007,7 @@ static void ProcessDDFInWad(DataFile *df)
             source += " in ";
             source += bare_filename;
 
-            DDF_AddFile((DDFType)d, data, source);
+            DdfAddFile((DdfType)d, data, source);
         }
     }
 }
@@ -1070,7 +1070,7 @@ static void ProcessBoomStuffInWad(DataFile *df)
         int      length = -1;
         uint8_t *data   = LoadLumpIntoMemory(animated, &length);
 
-        DDF_ConvertANIMATED(data, length);
+        DdfConvertAnimatedLump(data, length);
         delete[] data;
     }
 
@@ -1081,14 +1081,14 @@ static void ProcessBoomStuffInWad(DataFile *df)
         int      length = -1;
         uint8_t *data   = LoadLumpIntoMemory(switches, &length);
 
-        DDF_ConvertSWITCHES(data, length);
+        DdfConvertSwitchesLump(data, length);
         delete[] data;
     }
 
     // handle BOOM Colourmaps (between C_START and C_END)
     for (int lump : df->wad_->colormap_lumps_)
     {
-        DDF_AddRawColourmap(GetLumpNameFromIndex(lump), GetLumpLength(lump), nullptr);
+        DdfAddRawColourmap(GetLumpNameFromIndex(lump), GetLumpLength(lump), nullptr);
     }
 }
 
@@ -1361,8 +1361,8 @@ void ReadUmapinfoLumps(void)
                     dynamic_plentry            = new PlaylistEntry;
                     dynamic_plentry->number_   = playlist.FindFree();
                     dynamic_plentry->info_     = Maps.maps[i].music;
-                    dynamic_plentry->type_     = kDDFMusicUnknown;
-                    dynamic_plentry->infotype_ = kDDFMusicDataLump;
+                    dynamic_plentry->type_     = kDdfMusicUnknown;
+                    dynamic_plentry->infotype_ = kDdfMusicDataLump;
                     temp_level->music_         = dynamic_plentry->number_;
                     playlist.push_back(dynamic_plentry);
                 }
@@ -1470,8 +1470,8 @@ void ReadUmapinfoLumps(void)
                     dynamic_plentry            = new PlaylistEntry;
                     dynamic_plentry->number_   = playlist.FindFree();
                     dynamic_plentry->info_     = Maps.maps[i].intermusic;
-                    dynamic_plentry->type_     = kDDFMusicUnknown;
-                    dynamic_plentry->infotype_ = kDDFMusicDataLump;
+                    dynamic_plentry->type_     = kDdfMusicUnknown;
+                    dynamic_plentry->infotype_ = kDdfMusicDataLump;
                     temp_level->f_end_.music_  = dynamic_plentry->number_;
                     playlist.push_back(dynamic_plentry);
                 }

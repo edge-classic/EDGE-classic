@@ -263,7 +263,7 @@ TriggerScript *FindScriptByName(const char *map_name, const char *name)
         if (strcmp(scr->mapid, map_name) != 0)
             continue;
 
-        if (DDF_CompareName(scr->script_name, name) == 0)
+        if (DdfCompareName(scr->script_name, name) == 0)
             return scr;
     }
 
@@ -280,7 +280,7 @@ TriggerScriptTrigger *FindScriptTriggerByName(const char *name)
         if (trig->info->script_name == nullptr)
             continue;
 
-        if (DDF_CompareName(trig->info->script_name, name) == 0)
+        if (DdfCompareName(trig->info->script_name, name) == 0)
             return trig;
     }
 
@@ -310,7 +310,7 @@ TriggerScriptState *FindScriptStateByLabel(TriggerScript *scr, char *label)
         if (st->label == nullptr)
             continue;
 
-        if (DDF_CompareName(st->label, label) == 0)
+        if (DdfCompareName(st->label, label) == 0)
             return st;
     }
 

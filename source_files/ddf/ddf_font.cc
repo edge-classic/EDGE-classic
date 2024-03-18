@@ -29,20 +29,20 @@
 
 static FontDefinition *dynamic_font;
 
-static void DDF_FontGetType(const char *info, void *storage);
-static void DDF_FontGetPatch(const char *info, void *storage);
+static void DdfFontGetType(const char *info, void *storage);
+static void DdfFontGetPatch(const char *info, void *storage);
 
 static FontDefinition dummy_font;
 
 static const DDFCommandList font_commands[] = {
-    DDF_FIELD("TYPE", dummy_font, type_, DDF_FontGetType),
-    DDF_FIELD("PATCHES", dummy_font, patches_, DDF_FontGetPatch),
-    DDF_FIELD("IMAGE", dummy_font, image_name_, DDF_MainGetString),
-    DDF_FIELD("TTF", dummy_font, truetype_name_, DDF_MainGetString),
-    DDF_FIELD("DEFAULT_SIZE", dummy_font, default_size_, DDF_MainGetFloat),
-    DDF_FIELD("TTF_SMOOTHING", dummy_font, truetype_smoothing_string_, DDF_MainGetString),
-    DDF_FIELD("MISSING_PATCH", dummy_font, missing_patch_, DDF_MainGetString),
-    DDF_FIELD("SPACING", dummy_font, spacing_, DDF_MainGetFloat),
+    DDF_FIELD("TYPE", dummy_font, type_, DdfFontGetType),
+    DDF_FIELD("PATCHES", dummy_font, patches_, DdfFontGetPatch),
+    DDF_FIELD("IMAGE", dummy_font, image_name_, DdfMainGetString),
+    DDF_FIELD("TTF", dummy_font, truetype_name_, DdfMainGetString),
+    DDF_FIELD("DEFAULT_SIZE", dummy_font, default_size_, DdfMainGetFloat),
+    DDF_FIELD("TTF_SMOOTHING", dummy_font, truetype_smoothing_string_, DdfMainGetString),
+    DDF_FIELD("MISSING_PATCH", dummy_font, missing_patch_, DdfMainGetString),
+    DDF_FIELD("SPACING", dummy_font, spacing_, DdfMainGetFloat),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -56,7 +56,7 @@ static void FontStartEntry(const char *name, bool extend)
 {
     if (!name || !name[0])
     {
-        DDF_WarnError("New font entry is missing a name!");
+        DdfWarnError("New font entry is missing a name!");
         name = "FONT_WITH_NO_NAME";
     }
 
@@ -65,7 +65,7 @@ static void FontStartEntry(const char *name, bool extend)
     if (extend)
     {
         if (!dynamic_font)
-            DDF_Error("Unknown font to extend: %s\n", name);
+            DdfError("Unknown font to extend: %s\n", name);
         return;
     }
 
@@ -86,29 +86,29 @@ static void FontStartEntry(const char *name, bool extend)
 
 static void FontParseField(const char *field, const char *contents, int index, bool is_last)
 {
-#if (DEBUG_DDF)
+#if (DDF_DEBUG)
     LogDebug("FONT_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DDF_MainParseField(font_commands, field, contents, (uint8_t *)dynamic_font))
+    if (DdfMainParseField(font_commands, field, contents, (uint8_t *)dynamic_font))
         return; // OK
 
-    DDF_Error("Unknown fonts.ddf command: %s\n", field);
+    DdfError("Unknown fonts.ddf command: %s\n", field);
 }
 
 static void FontFinishEntry(void)
 {
     if (dynamic_font->type_ == kFontTypeUnset)
-        DDF_Error("No type specified for font.\n");
+        DdfError("No type specified for font.\n");
 
     if (dynamic_font->type_ == kFontTypePatch && !dynamic_font->patches_)
-        DDF_Error("Missing font patch list.\n");
+        DdfError("Missing font patch list.\n");
 
     if (dynamic_font->type_ == kFontTypeImage && dynamic_font->image_name_.empty())
-        DDF_Error("Missing font image name.\n");
+        DdfError("Missing font image name.\n");
 
     if (dynamic_font->type_ == kFontTypeTrueType && dynamic_font->truetype_name_.empty())
-        DDF_Error("Missing font TTF/OTF lump/file name.\n");
+        DdfError("Missing font TTF/OTF lump/file name.\n");
 
     if (dynamic_font->type_ == kFontTypeTrueType && !dynamic_font->truetype_smoothing_string_.empty())
     {
@@ -126,7 +126,7 @@ static void FontClearAll(void)
     LogWarning("Ignoring #CLEARALL in fonts.ddf\n");
 }
 
-void DDF_ReadFonts(const std::string &data)
+void DdfReadFonts(const std::string &data)
 {
     DDFReadInfo fonts;
 
@@ -138,10 +138,10 @@ void DDF_ReadFonts(const std::string &data)
     fonts.finish_entry = FontFinishEntry;
     fonts.clear_all    = FontClearAll;
 
-    DDF_MainReadFile(&fonts, data);
+    DdfMainReadFile(&fonts, data);
 }
 
-void DDF_FontInit(void)
+void DdfFontInit(void)
 {
     for (auto fnt : fontdefs)
     {
@@ -151,7 +151,7 @@ void DDF_FontInit(void)
     fontdefs.clear();
 }
 
-void DDF_FontCleanUp(void)
+void DdfFontCleanUp(void)
 {
     if (fontdefs.empty())
         FatalError("There are no fonts defined in DDF !\n");
@@ -160,22 +160,22 @@ void DDF_FontCleanUp(void)
 }
 
 //
-// DDF_FontGetType
+// DdfFontGetType
 //
-static void DDF_FontGetType(const char *info, void *storage)
+static void DdfFontGetType(const char *info, void *storage)
 {
     EPI_ASSERT(storage);
 
     FontType *type = (FontType *)storage;
 
-    if (DDF_CompareName(info, "PATCH") == 0)
+    if (DdfCompareName(info, "PATCH") == 0)
         (*type) = kFontTypePatch;
-    else if (DDF_CompareName(info, "IMAGE") == 0)
+    else if (DdfCompareName(info, "IMAGE") == 0)
         (*type) = kFontTypeImage;
-    else if (DDF_CompareName(info, "TRUETYPE") == 0)
+    else if (DdfCompareName(info, "TRUETYPE") == 0)
         (*type) = kFontTypeTrueType;
     else
-        DDF_Error("Unknown font type: %s\n", info);
+        DdfError("Unknown font type: %s\n", info);
 }
 
 static int FontParseCharacter(const char *buf)
@@ -187,26 +187,26 @@ static int FontParseCharacter(const char *buf)
 }
 
 //
-// DDF_FontGetPatch
+// DdfFontGetPatch
 //
 // Formats: PATCH123("x"), PATCH065(65),
 //          PATCH456("a" : "z"), PATCH033(33:111).
 //
-static void DDF_FontGetPatch(const char *info, void *storage)
+static void DdfFontGetPatch(const char *info, void *storage)
 {
     FontPatch **patch_list = (FontPatch **)storage;
 
     char patch_buf[100];
     char range_buf[100];
 
-    if (!DDF_MainDecodeBrackets(info, patch_buf, range_buf, 100))
-        DDF_Error("Malformed font patch: %s\n", info);
+    if (!DdfMainDecodeBrackets(info, patch_buf, range_buf, 100))
+        DdfError("Malformed font patch: %s\n", info);
 
     // find dividing colon
     char *colon = nullptr;
 
     if (strlen(range_buf) > 1)
-        colon = (char *)DDF_MainDecodeList(range_buf, ':', true);
+        colon = (char *)DdfMainDecodeList(range_buf, ':', true);
 
     if (colon)
         *colon++ = 0;
@@ -222,7 +222,7 @@ static void DDF_FontGetPatch(const char *info, void *storage)
         char2 = FontParseCharacter(colon);
 
         if (char1 > char2)
-            DDF_Error("Bad character range: %s > %s\n", range_buf, colon);
+            DdfError("Bad character range: %s > %s\n", range_buf, colon);
     }
     else
         char2 = char1;
@@ -280,7 +280,7 @@ FontDefinition *FontDefinitionContainer::Lookup(const char *refname)
     for (std::vector<FontDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
     {
         FontDefinition *fnt = *iter;
-        if (DDF_CompareName(fnt->name_.c_str(), refname) == 0)
+        if (DdfCompareName(fnt->name_.c_str(), refname) == 0)
             return fnt;
     }
 
@@ -288,16 +288,16 @@ FontDefinition *FontDefinitionContainer::Lookup(const char *refname)
 }
 
 //
-// DDF_MainLookupFont
+// DdfMainLookupFont
 //
-void DDF_MainLookupFont(const char *info, void *storage)
+void DdfMainLookupFont(const char *info, void *storage)
 {
     FontDefinition **dest = (FontDefinition **)storage;
 
     *dest = fontdefs.Lookup(info);
 
     if (*dest == nullptr)
-        DDF_Error("Unknown font: %s\n", info);
+        DdfError("Unknown font: %s\n", info);
 }
 
 //--- editor settings ---

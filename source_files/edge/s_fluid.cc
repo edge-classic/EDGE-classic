@@ -36,7 +36,7 @@ typedef struct MidiRealTimeInterface FluidInterface;
 #include "s_blit.h"
 #include "s_music.h"
 
-#define FLUID_NUM_SAMPLES 4096
+static constexpr uint16_t kFluidBuffer = kMusicBuffer * 4;
 
 extern bool sound_device_stereo;
 extern int  sound_device_frequency;
@@ -192,7 +192,7 @@ class FluidPlayer : public AbstractMusicPlayer
   public:
     FluidPlayer(uint8_t *data, int _length, bool looping) : status_(kNotLoaded), looping_(looping)
     {
-        mono_buffer_ = new int16_t[FLUID_NUM_SAMPLES * 2];
+        mono_buffer_ = new int16_t[kFluidBuffer * 2];
         SequencerInit();
     }
 
@@ -377,7 +377,7 @@ class FluidPlayer : public AbstractMusicPlayer
         while (status_ == kPlaying && !pc_speaker_mode)
         {
             SoundData *buf =
-                SoundQueueGetFreeBuffer(FLUID_NUM_SAMPLES, sound_device_stereo ? kMixInterleaved : kMixMono);
+                SoundQueueGetFreeBuffer(kFluidBuffer, sound_device_stereo ? kMixInterleaved : kMixMono);
 
             if (!buf)
                 break;
@@ -408,7 +408,7 @@ class FluidPlayer : public AbstractMusicPlayer
         else
             data_buf = buf->data_left_;
 
-        int played = fluid_sequencer_->PlayStream((uint8_t *)data_buf, FLUID_NUM_SAMPLES);
+        int played = fluid_sequencer_->PlayStream((uint8_t *)data_buf, kFluidBuffer);
 
         if (fluid_sequencer_->PositionAtEnd())
             song_done = true;

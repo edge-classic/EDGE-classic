@@ -55,11 +55,11 @@ namespace epi
 
 enum KnownEName
 {
-#define xx(n)    kEName##n,
-#define xy(n, s) kEName##n,
+#define EPI_XX(n)    kEName##n,
+#define EPI_XY(n, s) kEName##n,
 #include "epi_known_enames.h"
-#undef xx
-#undef xy
+#undef EPI_XX
+#undef EPI_XY
 };
 
 class EName

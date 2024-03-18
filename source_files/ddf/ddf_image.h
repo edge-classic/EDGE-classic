@@ -155,7 +155,7 @@ class ImageDefinitionContainer : public std::vector<ImageDefinition *>
 
 extern ImageDefinitionContainer imagedefs;
 
-void DDF_ReadImages(const std::string &data);
+void DdfReadImages(const std::string &data);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -269,7 +269,7 @@ void sounds::Shutdown()
 
 void sounds::BeginLump()
 {
-    wad::NewLump(kDDFTypeSFX);
+    wad::NewLump(kDdfTypeSFX);
 
     wad::Printf("<SOUNDS>\n\n");
 }

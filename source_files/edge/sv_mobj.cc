@@ -733,7 +733,7 @@ bool SaveGameMapObjectGetState(void *storage, int index, void *extra)
     // find base state
     offset = strtol(off_p, nullptr, 0) - 1;
 
-    base = DDF_StateFindLabel(actual->state_grp_, base_p, true /* quiet */);
+    base = DdfStateFindLabel(actual->state_grp_, base_p, true /* quiet */);
 
     if (!base)
     {
@@ -829,7 +829,7 @@ void SaveGameMapObjectPutState(void *storage, int index, void *extra)
     // state gone AWOL into another object ?
     actual = mo->info_;
 
-    if (!DDF_StateGroupHasState(actual->state_grp_, s_num))
+    if (!DdfStateGroupHasState(actual->state_grp_, s_num))
     {
         LogWarning("SAVEGAME: object [%s] is in AWOL state %d\n", mo->info_->name_.c_str(), s_num);
 
@@ -840,7 +840,7 @@ void SaveGameMapObjectPutState(void *storage, int index, void *extra)
         {
             actual = *iter;
 
-            if (DDF_StateGroupHasState(actual->state_grp_, s_num))
+            if (DdfStateGroupHasState(actual->state_grp_, s_num))
             {
                 state_found = true;
                 break;
@@ -865,7 +865,7 @@ void SaveGameMapObjectPutState(void *storage, int index, void *extra)
     // find the nearest base state
     base = s_num;
 
-    while (!states[base].label && DDF_StateGroupHasState(actual->state_grp_, base - 1))
+    while (!states[base].label && DdfStateGroupHasState(actual->state_grp_, base - 1))
     {
         base--;
     }

@@ -35,8 +35,6 @@
 #include "snd_gather.h"
 #include "w_wad.h"
 
-#define FLAC_FRAMES 1024
-
 extern bool sound_device_stereo; // FIXME: encapsulation
 extern int  sound_device_frequency;
 
@@ -87,7 +85,7 @@ class FlacPlayer : public AbstractMusicPlayer
 
 FlacPlayer::FlacPlayer() : status_(kNotLoaded)
 {
-    mono_buffer_ = new int16_t[FLAC_FRAMES * 2];
+    mono_buffer_ = new int16_t[kMusicBuffer * 2];
 }
 
 FlacPlayer::~FlacPlayer()
@@ -127,9 +125,9 @@ bool FlacPlayer::StreamIntoBuffer(SoundData *buf)
     else
         data_buf = buf->data_left_;
 
-    drflac_uint64 frames = drflac_read_pcm_frames_s16(flac_track_, FLAC_FRAMES, data_buf);
+    drflac_uint64 frames = drflac_read_pcm_frames_s16(flac_track_, kMusicBuffer, data_buf);
 
-    if (frames < FLAC_FRAMES)
+    if (frames < kMusicBuffer)
         song_done = true;
 
     buf->length_ = frames;
@@ -232,7 +230,7 @@ void FlacPlayer::Ticker()
 {
     while (status_ == kPlaying && !pc_speaker_mode)
     {
-        SoundData *buf = SoundQueueGetFreeBuffer(FLAC_FRAMES, (sound_device_stereo) ? kMixInterleaved : kMixMono);
+        SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer, (sound_device_stereo) ? kMixInterleaved : kMixMono);
 
         if (!buf)
             break;

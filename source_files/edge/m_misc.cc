@@ -80,62 +80,62 @@ int                    sound_mixing_channels = 0;
 static bool done_first_init = false;
 
 static ConfigurationDefault defaults[] = {
-    {kConfigInteger, "screenwidth", &current_screen_width, CFGDEF_SCREENWIDTH},
-    {kConfigInteger, "screenheight", &current_screen_height, CFGDEF_SCREENHEIGHT},
-    {kConfigInteger, "screendepth", &current_screen_depth, CFGDEF_SCREENBITS},
-    {kConfigInteger, "displaymode", &current_window_mode, CFGDEF_DISPLAYMODE},
+    {kConfigInteger, "screenwidth", &current_screen_width, EDGE_DEFAULT_SCREENWIDTH},
+    {kConfigInteger, "screenheight", &current_screen_height, EDGE_DEFAULT_SCREENHEIGHT},
+    {kConfigInteger, "screendepth", &current_screen_depth, EDGE_DEFAULT_SCREENBITS},
+    {kConfigInteger, "displaymode", &current_window_mode, EDGE_DEFAULT_DISPLAYMODE},
 
-    {kConfigInteger, "sound_stereo", &var_sound_stereo, CFGDEF_SOUND_STEREO},
+    {kConfigInteger, "sound_stereo", &var_sound_stereo, EDGE_DEFAULT_SOUND_STEREO},
     {kConfigBoolean, "pc_speaker_mode", &pc_speaker_mode, 0},
     {kConfigInteger, "midi_player", &var_midi_player, 0},
     {kConfigBoolean, "dynamic_reverb", &dynamic_reverb, 0},
-    {kConfigInteger, "mix_channels", &sound_mixing_channels, CFGDEF_MIX_CHANNELS},
+    {kConfigInteger, "mix_channels", &sound_mixing_channels, EDGE_DEFAULT_MIX_CHANNELS},
 
-    {kConfigInteger, "show_messages", &show_messages, CFGDEF_SHOWMESSAGES},
+    {kConfigInteger, "show_messages", &show_messages, EDGE_DEFAULT_SHOWMESSAGES},
 
     // -ES- 1998/11/28 Save fade settings
     {kConfigInteger, "reduce_flash", &reduce_flash, 0},
-    {kConfigInteger, "invuln_fx", &invulnerability_effect, CFGDEF_INVUL_FX},
-    {kConfigEnum, "wipe_method", &wipe_method, CFGDEF_WIPE_METHOD},
-    {kConfigBoolean, "rotate_map", &rotate_map, CFGDEF_ROTATEMAP},
-    {kConfigBoolean, "respawnsetting", &global_flags.enemy_respawn_mode, CFGDEF_RES_RESPAWN},
-    {kConfigBoolean, "items_respawn", &global_flags.items_respawn, CFGDEF_ITEMRESPAWN},
-    {kConfigBoolean, "respawn", &global_flags.enemies_respawn, CFGDEF_RESPAWN},
-    {kConfigBoolean, "fast_monsters", &global_flags.fast_monsters, CFGDEF_FASTPARM},
-    {kConfigBoolean, "true_3d_gameplay", &global_flags.true_3d_gameplay, CFGDEF_TRUE3DGAMEPLAY},
-    {kConfigEnum, "autoaim", &global_flags.autoaim, CFGDEF_AUTOAIM},
-    {kConfigBoolean, "shootthru_scenery", &global_flags.pass_missile, CFGDEF_PASS_MISSILE},
+    {kConfigInteger, "invuln_fx", &invulnerability_effect, EDGE_DEFAULT_INVUL_FX},
+    {kConfigEnum, "wipe_method", &wipe_method, EDGE_DEFAULT_WIPE_METHOD},
+    {kConfigBoolean, "rotate_map", &rotate_map, EDGE_DEFAULT_ROTATEMAP},
+    {kConfigBoolean, "respawnsetting", &global_flags.enemy_respawn_mode, EDGE_DEFAULT_RES_RESPAWN},
+    {kConfigBoolean, "items_respawn", &global_flags.items_respawn, EDGE_DEFAULT_ITEMRESPAWN},
+    {kConfigBoolean, "respawn", &global_flags.enemies_respawn, EDGE_DEFAULT_RESPAWN},
+    {kConfigBoolean, "fast_monsters", &global_flags.fast_monsters, EDGE_DEFAULT_FASTPARM},
+    {kConfigBoolean, "true_3d_gameplay", &global_flags.true_3d_gameplay, EDGE_DEFAULT_TRUE3DGAMEPLAY},
+    {kConfigEnum, "autoaim", &global_flags.autoaim, EDGE_DEFAULT_AUTOAIM},
+    {kConfigBoolean, "shootthru_scenery", &global_flags.pass_missile, EDGE_DEFAULT_PASS_MISSILE},
     {kConfigInteger, "swirling_flats", &swirling_flats, 0},
 
     {kConfigBoolean, "pistol_starts", &pistol_starts, 0},
-    {kConfigBoolean, "automap_keydoor_blink", &automap_keydoor_blink, CFGDEF_AM_KEYDOORBLINK},
+    {kConfigBoolean, "automap_keydoor_blink", &automap_keydoor_blink, EDGE_DEFAULT_AM_KEYDOORBLINK},
 
     // -KM- 1998/07/21 Save the blood setting
-    {kConfigBoolean, "blood", &global_flags.more_blood, CFGDEF_MORE_BLOOD},
-    {kConfigBoolean, "extra", &global_flags.have_extra, CFGDEF_HAVE_EXTRA},
-    {kConfigBoolean, "weaponkick", &global_flags.kicking, CFGDEF_KICKING},
-    {kConfigBoolean, "weaponswitch", &global_flags.weapon_switch, CFGDEF_WEAPON_SWITCH},
-    {kConfigBoolean, "mlook", &global_flags.mouselook, CFGDEF_MLOOK},
-    {kConfigBoolean, "jumping", &global_flags.jump, CFGDEF_JUMP},
-    {kConfigBoolean, "crouching", &global_flags.crouch, CFGDEF_CROUCH},
-    {kConfigInteger, "smoothing", &image_smoothing, CFGDEF_USE_SMOOTHING},
-    {kConfigInteger, "dlights", &use_dynamic_lights, CFGDEF_USE_DLIGHTS},
-    {kConfigInteger, "detail_level", &detail_level, CFGDEF_DETAIL_LEVEL},
-    {kConfigInteger, "hq2x_scaling", &hq2x_scaling, CFGDEF_HQ2X_SCALING},
+    {kConfigBoolean, "blood", &global_flags.more_blood, EDGE_DEFAULT_MORE_BLOOD},
+    {kConfigBoolean, "extra", &global_flags.have_extra, EDGE_DEFAULT_HAVE_EXTRA},
+    {kConfigBoolean, "weaponkick", &global_flags.kicking, EDGE_DEFAULT_KICKING},
+    {kConfigBoolean, "weaponswitch", &global_flags.weapon_switch, EDGE_DEFAULT_WEAPON_SWITCH},
+    {kConfigBoolean, "mlook", &global_flags.mouselook, EDGE_DEFAULT_MLOOK},
+    {kConfigBoolean, "jumping", &global_flags.jump, EDGE_DEFAULT_JUMP},
+    {kConfigBoolean, "crouching", &global_flags.crouch, EDGE_DEFAULT_CROUCH},
+    {kConfigInteger, "smoothing", &image_smoothing, EDGE_DEFAULT_USE_SMOOTHING},
+    {kConfigInteger, "dlights", &use_dynamic_lights, EDGE_DEFAULT_USE_DLIGHTS},
+    {kConfigInteger, "detail_level", &detail_level, EDGE_DEFAULT_DETAIL_LEVEL},
+    {kConfigInteger, "hq2x_scaling", &hq2x_scaling, EDGE_DEFAULT_HQ2X_SCALING},
 
     // -KM- 1998/09/01 Useless mouse/joy stuff removed,
     //                 analogue binding added
-    {kConfigInteger, "mouse_axis_x", &mouse_x_axis, CFGDEF_MOUSE_XAXIS},
-    {kConfigInteger, "mouse_axis_y", &mouse_y_axis, CFGDEF_MOUSE_YAXIS},
+    {kConfigInteger, "mouse_axis_x", &mouse_x_axis, EDGE_DEFAULT_MOUSE_XAXIS},
+    {kConfigInteger, "mouse_axis_y", &mouse_y_axis, EDGE_DEFAULT_MOUSE_YAXIS},
 
     {kConfigInteger, "joystick_axis1", &joystick_axis[0], 7},
     {kConfigInteger, "joystick_axis2", &joystick_axis[1], 6},
     {kConfigInteger, "joystick_axis3", &joystick_axis[2], 1},
     {kConfigInteger, "joystick_axis4", &joystick_axis[3], 4},
 
-    {kConfigInteger, "screen_hud", &screen_hud, CFGDEF_SCREEN_HUD},
+    {kConfigInteger, "screen_hud", &screen_hud, EDGE_DEFAULT_SCREEN_HUD},
     {kConfigInteger, "save_page", &save_page, 0},
-    {kConfigBoolean, "png_screenshots", &png_screenshots, CFGDEF_PNG_SCRSHOTS},
+    {kConfigBoolean, "png_screenshots", &png_screenshots, EDGE_DEFAULT_PNG_SCRSHOTS},
 
     // -------------------- VARS --------------------
 
@@ -144,44 +144,44 @@ static ConfigurationDefault defaults[] = {
 
     // -------------------- KEYS --------------------
 
-    {kConfigKey, "key_right", &key_right, CFGDEF_KEY_RIGHT},
-    {kConfigKey, "key_left", &key_left, CFGDEF_KEY_LEFT},
-    {kConfigKey, "key_up", &key_up, CFGDEF_KEY_UP},
-    {kConfigKey, "key_down", &key_down, CFGDEF_KEY_DOWN},
-    {kConfigKey, "key_look_up", &key_look_up, CFGDEF_KEY_LOOKUP},
-    {kConfigKey, "key_look_down", &key_look_down, CFGDEF_KEY_LOOKDOWN},
-    {kConfigKey, "key_look_center", &key_look_center, CFGDEF_KEY_LOOKCENTER},
+    {kConfigKey, "key_right", &key_right, EDGE_DEFAULT_KEY_RIGHT},
+    {kConfigKey, "key_left", &key_left, EDGE_DEFAULT_KEY_LEFT},
+    {kConfigKey, "key_up", &key_up, EDGE_DEFAULT_KEY_UP},
+    {kConfigKey, "key_down", &key_down, EDGE_DEFAULT_KEY_DOWN},
+    {kConfigKey, "key_look_up", &key_look_up, EDGE_DEFAULT_KEY_LOOKUP},
+    {kConfigKey, "key_look_down", &key_look_down, EDGE_DEFAULT_KEY_LOOKDOWN},
+    {kConfigKey, "key_look_center", &key_look_center, EDGE_DEFAULT_KEY_LOOKCENTER},
 
     // -ES- 1999/03/28 Zoom Key
-    {kConfigKey, "key_zoom", &key_zoom, CFGDEF_KEY_ZOOM},
-    {kConfigKey, "key_strafe_left", &key_strafe_left, CFGDEF_KEY_STRAFELEFT},
-    {kConfigKey, "key_strafe_right", &key_strafe_right, CFGDEF_KEY_STRAFERIGHT},
+    {kConfigKey, "key_zoom", &key_zoom, EDGE_DEFAULT_KEY_ZOOM},
+    {kConfigKey, "key_strafe_left", &key_strafe_left, EDGE_DEFAULT_KEY_STRAFELEFT},
+    {kConfigKey, "key_strafe_right", &key_strafe_right, EDGE_DEFAULT_KEY_STRAFERIGHT},
 
     // -ACB- for -MH- 1998/07/02 Flying Keys
-    {kConfigKey, "key_fly_up", &key_fly_up, CFGDEF_KEY_FLYUP},
-    {kConfigKey, "key_fly_down", &key_fly_down, CFGDEF_KEY_FLYDOWN},
+    {kConfigKey, "key_fly_up", &key_fly_up, EDGE_DEFAULT_KEY_FLYUP},
+    {kConfigKey, "key_fly_down", &key_fly_down, EDGE_DEFAULT_KEY_FLYDOWN},
 
-    {kConfigKey, "key_fire", &key_fire, CFGDEF_KEY_FIRE},
-    {kConfigKey, "key_use", &key_use, CFGDEF_KEY_USE},
-    {kConfigKey, "key_strafe", &key_strafe, CFGDEF_KEY_STRAFE},
-    {kConfigKey, "key_speed", &key_speed, CFGDEF_KEY_SPEED},
-    {kConfigKey, "key_autorun", &key_autorun, CFGDEF_KEY_AUTORUN},
-    {kConfigKey, "key_next_weapon", &key_next_weapon, CFGDEF_KEY_NEXTWEAPON},
-    {kConfigKey, "key_previous_weapon", &key_previous_weapon, CFGDEF_KEY_PREVWEAPON},
+    {kConfigKey, "key_fire", &key_fire, EDGE_DEFAULT_KEY_FIRE},
+    {kConfigKey, "key_use", &key_use, EDGE_DEFAULT_KEY_USE},
+    {kConfigKey, "key_strafe", &key_strafe, EDGE_DEFAULT_KEY_STRAFE},
+    {kConfigKey, "key_speed", &key_speed, EDGE_DEFAULT_KEY_SPEED},
+    {kConfigKey, "key_autorun", &key_autorun, EDGE_DEFAULT_KEY_AUTORUN},
+    {kConfigKey, "key_next_weapon", &key_next_weapon, EDGE_DEFAULT_KEY_NEXTWEAPON},
+    {kConfigKey, "key_previous_weapon", &key_previous_weapon, EDGE_DEFAULT_KEY_PREVWEAPON},
 
-    {kConfigKey, "key_180", &key_180, CFGDEF_KEY_180},
-    {kConfigKey, "key_map", &key_map, CFGDEF_KEY_MAP},
-    {kConfigKey, "key_talk", &key_talk, CFGDEF_KEY_TALK},
-    {kConfigKey, "key_console", &key_console, CFGDEF_KEY_CONSOLE},               // -AJA- 2007/08/15.
-    {kConfigKey, "key_pause", &key_pause, kPause},                               // -AJA- 2010/06/13.
+    {kConfigKey, "key_180", &key_180, EDGE_DEFAULT_KEY_180},
+    {kConfigKey, "key_map", &key_map, EDGE_DEFAULT_KEY_MAP},
+    {kConfigKey, "key_talk", &key_talk, EDGE_DEFAULT_KEY_TALK},
+    {kConfigKey, "key_console", &key_console, EDGE_DEFAULT_KEY_CONSOLE},               // -AJA- 2007/08/15.
+    {kConfigKey, "key_pause", &key_pause, kPause},                                     // -AJA- 2010/06/13.
 
-    {kConfigKey, "key_mouselook", &key_mouselook, CFGDEF_KEY_MLOOK},             // -AJA- 1999/07/27.
-    {kConfigKey, "key_second_attack", &key_second_attack, CFGDEF_KEY_SECONDATK}, // -AJA- 2000/02/08.
-    {kConfigKey, "key_third_attack", &key_third_attack, 0},                      //
-    {kConfigKey, "key_fourth_attack", &key_fourth_attack, 0},                    //
-    {kConfigKey, "key_reload", &key_reload, CFGDEF_KEY_RELOAD},                  // -AJA- 2004/11/11.
-    {kConfigKey, "key_action1", &key_action1, CFGDEF_KEY_ACTION1},               // -AJA- 2009/09/07
-    {kConfigKey, "key_action2", &key_action2, CFGDEF_KEY_ACTION2},               // -AJA- 2009/09/07
+    {kConfigKey, "key_mouselook", &key_mouselook, EDGE_DEFAULT_KEY_MLOOK},             // -AJA- 1999/07/27.
+    {kConfigKey, "key_second_attack", &key_second_attack, EDGE_DEFAULT_KEY_SECONDATK}, // -AJA- 2000/02/08.
+    {kConfigKey, "key_third_attack", &key_third_attack, 0},                            //
+    {kConfigKey, "key_fourth_attack", &key_fourth_attack, 0},                          //
+    {kConfigKey, "key_reload", &key_reload, EDGE_DEFAULT_KEY_RELOAD},                  // -AJA- 2004/11/11.
+    {kConfigKey, "key_action1", &key_action1, EDGE_DEFAULT_KEY_ACTION1},               // -AJA- 2009/09/07
+    {kConfigKey, "key_action2", &key_action2, EDGE_DEFAULT_KEY_ACTION2},               // -AJA- 2009/09/07
 
     // -AJA- 2010/06/13: weapon and automap keys
     {kConfigKey, "key_weapon1", &key_weapons[1], '1'},
@@ -206,9 +206,9 @@ static ConfigurationDefault defaults[] = {
     {kConfigKey, "key_automap_mark", &key_automap_mark, 'm'},
     {kConfigKey, "key_automap_clear", &key_automap_clear, 'c'},
 
-    {kConfigKey, "key_inventory_previous", &key_inventory_previous, CFGDEF_KEY_PREVINV},
-    {kConfigKey, "key_inventory_use", &key_inventory_use, CFGDEF_KEY_USEINV},
-    {kConfigKey, "key_inventory_next", &key_inventory_next, CFGDEF_KEY_NEXTINV},
+    {kConfigKey, "key_inventory_previous", &key_inventory_previous, EDGE_DEFAULT_KEY_PREVINV},
+    {kConfigKey, "key_inventory_use", &key_inventory_use, EDGE_DEFAULT_KEY_USEINV},
+    {kConfigKey, "key_inventory_next", &key_inventory_next, EDGE_DEFAULT_KEY_NEXTINV},
 
     {kConfigKey, "key_screenshot", &key_screenshot, kFunction1},
     {kConfigKey, "key_save_game", &key_save_game, kFunction2},

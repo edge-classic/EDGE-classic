@@ -30,7 +30,7 @@ class AttackDefinitionContainer : public std::vector<AttackDefinition *>
 
 extern AttackDefinitionContainer atkdefs; // -ACB- 2004/06/09 Implemented
 
-void DDF_ReadAtks(const std::string &data);
+void DdfReadAtks(const std::string &data);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

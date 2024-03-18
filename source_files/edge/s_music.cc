@@ -88,7 +88,7 @@ void ChangeMusic(int entry_number, bool loop)
 
     switch (play->infotype_)
     {
-    case kDDFMusicDataFile: {
+    case kDdfMusicDataFile: {
         std::string fn = epi::PathAppendIfNotAbsolute(game_directory, play->info_);
 
         F = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
@@ -100,7 +100,7 @@ void ChangeMusic(int entry_number, bool loop)
         break;
     }
 
-    case kDDFMusicDataPackage: {
+    case kDdfMusicDataPackage: {
         F = OpenFileFromPack(play->info_);
         if (!F)
         {
@@ -110,7 +110,7 @@ void ChangeMusic(int entry_number, bool loop)
         break;
     }
 
-    case kDDFMusicDataLump: {
+    case kDdfMusicDataLump: {
         int lump = CheckLumpNumberForName(play->info_.c_str());
         if (lump < 0)
         {
@@ -149,11 +149,11 @@ void ChangeMusic(int entry_number, bool loop)
     // IMF Music is the outlier in that it must be predefined in DDFPLAY with
     // the appropriate IMF frequency, as there is no way of determining this
     // from file information alone
-    if (play->type_ == kDDFMusicIMF280 || play->type_ == kDDFMusicIMF560 || play->type_ == kDDFMusicIMF700)
+    if (play->type_ == kDdfMusicIMF280 || play->type_ == kDdfMusicIMF560 || play->type_ == kDdfMusicIMF700)
         fmt = kSoundImf;
     else
     {
-        if (play->infotype_ == kDDFMusicDataLump)
+        if (play->infotype_ == kDdfMusicDataLump)
         {
             // lumps must use auto-detection based on their contents
             fmt = DetectSoundFormat(data, length);

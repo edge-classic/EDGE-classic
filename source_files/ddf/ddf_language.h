@@ -76,7 +76,7 @@ class Language
 
 extern Language language; // -ACB- 2004/06/27 Implemented
 
-void DDF_ReadLangs(const std::string &data);
+void DdfReadLangs(const std::string &data);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

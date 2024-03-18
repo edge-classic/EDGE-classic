@@ -452,7 +452,7 @@ short MdlFindFrame(MdlModel *md, const char *name)
     {
         MdlFrame *frame = &md->frames_[f];
 
-        if (DDF_CompareName(name, frame->name) == 0)
+        if (DdfCompareName(name, frame->name) == 0)
             return f;
     }
 
@@ -745,13 +745,13 @@ void MdlRenderModel(MdlModel *md, const Image *skin_img, bool is_weapon, int fra
 
     bool tilt = is_weapon || (mo->flags_ & kMapObjectFlagMissile) || (mo->hyper_flags_ & kHyperFlagForceModelTilt);
 
-    MathBAMAngleToMatrix(tilt ? ~mo->vertical_angle_ : 0, &data.mouselook_x_vector_, &data.mouselook_z_vector_);
+    BAMAngleToMatrix(tilt ? ~mo->vertical_angle_ : 0, &data.mouselook_x_vector_, &data.mouselook_z_vector_);
 
     BAMAngle ang = mo->angle_ + rotation;
 
     MirrorAngle(ang);
 
-    MathBAMAngleToMatrix(~ang, &data.rotation_vector_x_, &data.rotation_vector_y_);
+    BAMAngleToMatrix(~ang, &data.rotation_vector_x_, &data.rotation_vector_y_);
 
     data.used_normals_ = (lerp < 0.5) ? data.frame1_->used_normals : data.frame2_->used_normals;
 

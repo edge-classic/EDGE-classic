@@ -21,7 +21,7 @@
 #include "e_event.h"
 #include "rad_defs.h"
 
-#define DEBUG_RTS 0
+#define EDGE_DEBUG_TRIGGER_SCRIPTS 0
 
 extern TriggerScript        *current_scripts;
 extern TriggerScriptTrigger *active_triggers;

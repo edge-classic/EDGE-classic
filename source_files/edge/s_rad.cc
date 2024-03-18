@@ -32,8 +32,6 @@
 extern bool sound_device_stereo; // FIXME: encapsulation
 extern int  sound_device_frequency;
 
-#define RAD_BLOCK_SIZE 1024
-
 // Works better with the RAD code if these are 'global'
 Opal      *edge_opal = nullptr;
 RADPlayer *edge_rad  = nullptr;
@@ -86,7 +84,7 @@ class RadPlayer : public AbstractMusicPlayer
 
 RadPlayer::RadPlayer() : status_(kNotLoaded), tune_(nullptr)
 {
-    mono_buffer_ = new int16_t[RAD_BLOCK_SIZE * 2];
+    mono_buffer_ = new int16_t[kMusicBuffer * 2];
 }
 
 RadPlayer::~RadPlayer()
@@ -128,7 +126,7 @@ bool RadPlayer::StreamIntoBuffer(SoundData *buf)
     else
         data_buf = buf->data_left_;
 
-    for (int i = 0; i < RAD_BLOCK_SIZE; i += 2)
+    for (int i = 0; i < kMusicBuffer; i += 2)
     {
         edge_opal->Sample(data_buf + i, data_buf + i + 1);
         samples++;
@@ -253,7 +251,7 @@ void RadPlayer::Ticker()
 {
     while (status_ == kPlaying && !pc_speaker_mode)
     {
-        SoundData *buf = SoundQueueGetFreeBuffer(RAD_BLOCK_SIZE, (sound_device_stereo) ? kMixInterleaved : kMixMono);
+        SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer, (sound_device_stereo) ? kMixInterleaved : kMixMono);
 
         if (!buf)
             break;

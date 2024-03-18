@@ -48,7 +48,7 @@
 #include "r_misc.h"
 #include "r_state.h"
 
-#define DEBUG_SIGHT 0
+#define EDGE_DEBUG_SIGHT 0
 
 extern unsigned int root_node;
 
@@ -264,7 +264,7 @@ static bool CheckSightBSP(unsigned int bspnum)
         BspNode *node = level_nodes + bspnum;
         int      s1, s2;
 
-#if (DEBUG_SIGHT >= 2)
+#if (EDGE_DEBUG_SIGHT >= 2)
         LogDebug("CheckSightBSP: node %d (%1.1f,%1.1f) + (%1.1f,%1.1f)\n", bspnum, node->div.x, node->div.y,
                  node->div.delta_x, node->div.delta_y);
 #endif
@@ -273,7 +273,7 @@ static bool CheckSightBSP(unsigned int bspnum)
         s1 = PointOnDividingLineSide(sight_check.source.x, sight_check.source.y, &node->divider);
         s2 = PointOnDividingLineSide(sight_check.destination.X, sight_check.destination.Y, &node->divider);
 
-#if (DEBUG_SIGHT >= 2)
+#if (EDGE_DEBUG_SIGHT >= 2)
         LogDebug("  Sides: %d %d\n", s1, s2);
 #endif
 
@@ -297,7 +297,7 @@ static bool CheckSightBSP(unsigned int bspnum)
     {
         Subsector *sub = level_subsectors + bspnum;
 
-#if (DEBUG_SIGHT >= 2)
+#if (EDGE_DEBUG_SIGHT >= 2)
         LogDebug("  Subsec %d  SEC %d\n", bspnum, sub->sector - sectors);
 #endif
 
@@ -333,7 +333,7 @@ static bool CheckSightIntercepts(float slope)
     float last_h = sight_check.source_z;
     float cur_h;
 
-#if (DEBUG_SIGHT >= 1)
+#if (EDGE_DEBUG_SIGHT >= 1)
     LogDebug("INTERCEPTS  slope %1.0f\n", slope);
 #endif
 
@@ -343,7 +343,7 @@ static bool CheckSightIntercepts(float slope)
 
         cur_h = sight_check.source_z + slope * wall_intercepts[i].along;
 
-#if (DEBUG_SIGHT >= 1)
+#if (EDGE_DEBUG_SIGHT >= 1)
         LogDebug("  %d/%d  FRAC %1.4f  SEC %d  H=%1.4f/%1.4f\n", i + 1, wall_intercepts.size(),
                  wall_intercepts[i].along, wall_intercepts[i].sector - sectors, last_h, cur_h);
 #endif
@@ -356,7 +356,7 @@ static bool CheckSightIntercepts(float slope)
             float z1 = sec->sight_gaps[j].floor;
             float z2 = sec->sight_gaps[j].ceiling;
 
-#if (DEBUG_SIGHT >= 3)
+#if (EDGE_DEBUG_SIGHT >= 3)
             LogDebug("    SIGHT GAP [%d] = %1.1f .. %1.1f\n", j, z1, z2);
 #endif
 
@@ -465,7 +465,7 @@ bool CheckSight(MapObject *src, MapObject *dest)
             return false;                 // too far away for this thing to see
     }
 
-#if (DEBUG_SIGHT >= 1)
+#if (EDGE_DEBUG_SIGHT >= 1)
     LogDebug("\n");
     LogDebug("P_CheckSight:\n");
     LogDebug("  Src: [%s] @ (%1.0f,%1.0f) in sub %d SEC %d\n", src->info->name, sight_check.source.x,

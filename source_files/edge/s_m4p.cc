@@ -28,8 +28,6 @@
 #include "snd_gather.h"
 #include "w_wad.h"
 
-#define M4P_BUFFER 1024
-
 extern bool sound_device_stereo; // FIXME: encapsulation
 extern int  sound_device_frequency;
 
@@ -76,7 +74,7 @@ class M4pPlayer : public AbstractMusicPlayer
 
 M4pPlayer::M4pPlayer() : status_(kNotLoaded)
 {
-    mono_buffer_ = new int16_t[M4P_BUFFER * 2];
+    mono_buffer_ = new int16_t[kMusicBuffer * 2];
 }
 
 M4pPlayer::~M4pPlayer()
@@ -115,9 +113,9 @@ bool M4pPlayer::StreamIntoBuffer(SoundData *buf)
     else
         data_buf = buf->data_left_;
 
-    m4p_GenerateSamples(data_buf, M4P_BUFFER / sizeof(int16_t));
+    m4p_GenerateSamples(data_buf, kMusicBuffer / sizeof(int16_t));
 
-    buf->length_ = M4P_BUFFER / 2;
+    buf->length_ = kMusicBuffer / 2;
 
     if (!sound_device_stereo)
         ConvertToMono(buf->data_left_, mono_buffer_, buf->length_);
@@ -138,7 +136,7 @@ bool M4pPlayer::OpenMemory(uint8_t *data, int length)
 {
     EPI_ASSERT(data);
 
-    if (!m4p_LoadFromData(data, length, sound_device_frequency, M4P_BUFFER))
+    if (!m4p_LoadFromData(data, length, sound_device_frequency, kMusicBuffer))
     {
         LogWarning("M4P: failure to load song!\n");
         return false;
@@ -209,7 +207,7 @@ void M4pPlayer::Ticker()
 {
     while (status_ == kPlaying && !pc_speaker_mode)
     {
-        SoundData *buf = SoundQueueGetFreeBuffer(M4P_BUFFER, (sound_device_stereo) ? kMixInterleaved : kMixMono);
+        SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer, (sound_device_stereo) ? kMixInterleaved : kMixMono);
 
         if (!buf)
             break;

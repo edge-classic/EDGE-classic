@@ -45,7 +45,7 @@
 // Globals
 Language language; // -ACB- 2004/07/28 Languages instance
 
-std::string DDF_SanitizeName(const std::string &s)
+std::string DdfSanitizeName(const std::string &s)
 {
     std::string out;
 
@@ -85,7 +85,7 @@ class LanguageChoice
     void AddEntry(const char *refname, const char *value)
     {
         // ensure ref name is uppercase, with no spaces
-        std::string ref = DDF_SanitizeName(refname);
+        std::string ref = DdfSanitizeName(refname);
 
         refs[ref] = value;
     }
@@ -100,7 +100,7 @@ static void LanguageStartEntry(const char *name, bool extend)
 {
     if (!name || !name[0])
     {
-        DDF_WarnError("New language entry is missing a name!");
+        DdfWarnError("New language entry is missing a name!");
         name = "DEAD_LANGUAGE";
     }
 
@@ -111,13 +111,13 @@ static void LanguageStartEntry(const char *name, bool extend)
 
 static void LanguageParseField(const char *field, const char *contents, int index, bool is_last)
 {
-#if (DEBUG_DDF)
-    DDF_Debug("LANGUAGE_PARSE: %s = %s;\n", field, contents);
+#if (DDF_DEBUG)
+    DdfDebug("LANGUAGE_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (!is_last)
     {
-        DDF_WarnError("Unexpected comma `,' in LANGUAGE.LDF\n");
+        DdfWarnError("Unexpected comma `,' in LANGUAGE.LDF\n");
         return;
     }
 
@@ -135,7 +135,7 @@ static void LanguageClearAll(void)
     language.Clear();
 }
 
-void DDF_ReadLangs(const std::string &data)
+void DdfReadLangs(const std::string &data)
 {
     DDFReadInfo languages;
 
@@ -147,10 +147,10 @@ void DDF_ReadLangs(const std::string &data)
     languages.finish_entry = LanguageFinishEntry;
     languages.clear_all    = LanguageClearAll;
 
-    DDF_MainReadFile(&languages, data);
+    DdfMainReadFile(&languages, data);
 }
 
-void DDF_LanguageCleanUp(void)
+void DdfLanguageCleanUp(void)
 {
     if (language.GetChoiceCount() == 0)
         FatalError("Missing languages !\n");
@@ -170,7 +170,7 @@ LanguageChoice *Language::AddChoice(const char *name)
 {
     for (size_t i = 0; i < choices_.size(); i++)
     {
-        if (DDF_CompareName(name, choices_[i]->name.c_str()) == 0)
+        if (DdfCompareName(name, choices_[i]->name.c_str()) == 0)
             return choices_[i];
     }
 
@@ -199,7 +199,7 @@ const char *Language::GetReferenceOrNull(const char *refname)
         return nullptr;
 
     // ensure ref name is uppercase, with no spaces
-    std::string ref = DDF_SanitizeName(refname);
+    std::string ref = DdfSanitizeName(refname);
 
     if (umapinfo_choice_ != nullptr)
     {
@@ -268,7 +268,7 @@ bool Language::Select(const char *name)
 {
     for (size_t i = 0; i < choices_.size(); i++)
     {
-        if (DDF_CompareName(name, choices_[i]->name.c_str()) == 0)
+        if (DdfCompareName(name, choices_[i]->name.c_str()) == 0)
         {
             current_choice_ = i;
             return true;
@@ -296,7 +296,7 @@ bool Language::IsValidRef(const char *refname)
         return false;
 
     // ensure ref name is uppercase, with no spaces
-    std::string ref = DDF_SanitizeName(refname);
+    std::string ref = DdfSanitizeName(refname);
 
     if (umapinfo_choice_ != nullptr)
         if (umapinfo_choice_->HasEntry(ref))
@@ -315,7 +315,7 @@ const char *Language::operator[](const char *refname)
         return refname;
 
     // ensure ref name is uppercase, with no spaces
-    std::string ref = DDF_SanitizeName(refname);
+    std::string ref = DdfSanitizeName(refname);
 
     if (umapinfo_choice_ != nullptr)
     {

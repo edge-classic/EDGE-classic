@@ -34,8 +34,6 @@
 #include "snd_gather.h"
 #include "w_wad.h"
 
-#define MP3_SAMPLES 1024
-
 extern bool sound_device_stereo; // FIXME: encapsulation
 
 class Mp3Player : public AbstractMusicPlayer
@@ -86,7 +84,7 @@ class Mp3Player : public AbstractMusicPlayer
 
 Mp3Player::Mp3Player() : status_(kNotLoaded)
 {
-    mono_buffer_ = new int16_t[MP3_SAMPLES * 2];
+    mono_buffer_ = new int16_t[kMusicBuffer * 2];
 }
 
 Mp3Player::~Mp3Player()
@@ -132,7 +130,7 @@ bool Mp3Player::StreamIntoBuffer(SoundData *buf)
     else
         data_buf = buf->data_left_;
 
-    int got_size = drmp3_read_pcm_frames_s16(mp3_decoder_, MP3_SAMPLES, data_buf);
+    int got_size = drmp3_read_pcm_frames_s16(mp3_decoder_, kMusicBuffer, data_buf);
 
     if (got_size == 0) /* EOF */
     {
@@ -249,7 +247,7 @@ void Mp3Player::Ticker()
     while (status_ == kPlaying && !pc_speaker_mode)
     {
         SoundData *buf =
-            SoundQueueGetFreeBuffer(MP3_SAMPLES, (is_stereo_ && sound_device_stereo) ? kMixInterleaved : kMixMono);
+            SoundQueueGetFreeBuffer(kMusicBuffer, (is_stereo_ && sound_device_stereo) ? kMixInterleaved : kMixMono);
 
         if (!buf)
             break;

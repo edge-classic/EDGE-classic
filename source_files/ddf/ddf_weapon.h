@@ -43,7 +43,7 @@ class WeaponDefinitionContainer : public std::vector<WeaponDefinition *>
 
 extern WeaponDefinitionContainer weapondefs; // -ACB- 2004/07/14 Implemented
 
-void DDF_ReadWeapons(const std::string &data);
+void DdfReadWeapons(const std::string &data);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -35,31 +35,31 @@ extern MapObjectDefinition *dynamic_mobj;
 static float a_damage_range;
 static float a_damage_multi;
 
-static void DDF_AtkGetType(const char *info, void *storage);
-static void DDF_AtkGetSpecial(const char *info, void *storage);
-static void DDF_AtkGetLabel(const char *info, void *storage);
+static void DdfAtkGetType(const char *info, void *storage);
+static void DdfAtkGetSpecial(const char *info, void *storage);
+static void DdfAtkGetLabel(const char *info, void *storage);
 
 DamageClass dummy_damage;
 
 const DDFCommandList damage_commands[] = {
-    DDF_FIELD("VAL", dummy_damage, nominal_, DDF_MainGetFloat),
-    DDF_FIELD("MAX", dummy_damage, linear_max_, DDF_MainGetFloat),
-    DDF_FIELD("ERROR", dummy_damage, error_, DDF_MainGetFloat),
-    DDF_FIELD("DELAY", dummy_damage, delay_, DDF_MainGetTime),
+    DDF_FIELD("VAL", dummy_damage, nominal_, DdfMainGetFloat),
+    DDF_FIELD("MAX", dummy_damage, linear_max_, DdfMainGetFloat),
+    DDF_FIELD("ERROR", dummy_damage, error_, DdfMainGetFloat),
+    DDF_FIELD("DELAY", dummy_damage, delay_, DdfMainGetTime),
 
-    DDF_FIELD("BYPASS_ALL", dummy_damage, bypass_all_, DDF_MainGetBoolean),
-    DDF_FIELD("INSTAKILL", dummy_damage, instakill_, DDF_MainGetBoolean),
-    DDF_FIELD("DAMAGE_UNLESS_BENEFIT", dummy_damage, damage_unless_, DDF_MobjGetBenefit),
-    DDF_FIELD("DAMAGE_IF_BENEFIT", dummy_damage, damage_if_, DDF_MobjGetBenefit),
+    DDF_FIELD("BYPASS_ALL", dummy_damage, bypass_all_, DdfMainGetBoolean),
+    DDF_FIELD("INSTAKILL", dummy_damage, instakill_, DdfMainGetBoolean),
+    DDF_FIELD("DAMAGE_UNLESS_BENEFIT", dummy_damage, damage_unless_, DdfMobjGetBenefit),
+    DDF_FIELD("DAMAGE_IF_BENEFIT", dummy_damage, damage_if_, DdfMobjGetBenefit),
     DDF_FIELD("ALL_PLAYERS", dummy_damage, all_players_,
-              DDF_MainGetBoolean), // Doesn't do anything (yet)
-    DDF_FIELD("GROUNDED_MONSTERS_ONLY", dummy_damage, grounded_monsters_, DDF_MainGetBoolean),
-    DDF_FIELD("FLASH_COLOUR", dummy_damage, damage_flash_colour_, DDF_MainGetRGB),
+              DdfMainGetBoolean), // Doesn't do anything (yet)
+    DDF_FIELD("GROUNDED_MONSTERS_ONLY", dummy_damage, grounded_monsters_, DdfMainGetBoolean),
+    DDF_FIELD("FLASH_COLOUR", dummy_damage, damage_flash_colour_, DdfMainGetRGB),
 
-    DDF_FIELD("OBITUARY", dummy_damage, obituary_, DDF_MainGetString),
-    DDF_FIELD("PAIN_STATE", dummy_damage, pain_, DDF_AtkGetLabel),
-    DDF_FIELD("DEATH_STATE", dummy_damage, death_, DDF_AtkGetLabel),
-    DDF_FIELD("OVERKILL_STATE", dummy_damage, overkill_, DDF_AtkGetLabel),
+    DDF_FIELD("OBITUARY", dummy_damage, obituary_, DdfMainGetString),
+    DDF_FIELD("PAIN_STATE", dummy_damage, pain_, DdfAtkGetLabel),
+    DDF_FIELD("DEATH_STATE", dummy_damage, death_, DdfAtkGetLabel),
+    DDF_FIELD("OVERKILL_STATE", dummy_damage, overkill_, DdfAtkGetLabel),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -78,35 +78,35 @@ static const DDFCommandList attack_commands[] = {
     // sub-commands
     DDF_SUB_LIST("DAMAGE", dummy_atk, damage_, damage_commands),
 
-    DDF_FIELD("ATTACKTYPE", dummy_atk, attackstyle_, DDF_AtkGetType),
-    DDF_FIELD("ATTACK_SPECIAL", dummy_atk, flags_, DDF_AtkGetSpecial),
-    DDF_FIELD("ACCURACY_SLOPE", dummy_atk, accuracy_slope_, DDF_MainGetSlope),
-    DDF_FIELD("ACCURACY_ANGLE", dummy_atk, accuracy_angle_, DDF_MainGetAngle),
-    DDF_FIELD("ATTACK_HEIGHT", dummy_atk, height_, DDF_MainGetFloat),
-    DDF_FIELD("SHOTCOUNT", dummy_atk, count_, DDF_MainGetNumeric),
-    DDF_FIELD("X_OFFSET", dummy_atk, xoffset_, DDF_MainGetFloat),
-    DDF_FIELD("Y_OFFSET", dummy_atk, yoffset_, DDF_MainGetFloat),
-    DDF_FIELD("ANGLE_OFFSET", dummy_atk, angle_offset_, DDF_MainGetAngle),
-    DDF_FIELD("SLOPE_OFFSET", dummy_atk, slope_offset_, DDF_MainGetSlope),
-    DDF_FIELD("ATTACKRANGE", dummy_atk, range_, DDF_MainGetFloat),
-    DDF_FIELD("TOO_CLOSE_RANGE", dummy_atk, tooclose_, DDF_MainGetNumeric),
-    DDF_FIELD("BERSERK_MULTIPLY", dummy_atk, berserk_mul_, DDF_MainGetFloat),
-    DDF_FIELD("NO_TRACE_CHANCE", dummy_atk, notracechance_, DDF_MainGetPercent),
-    DDF_FIELD("KEEP_FIRING_CHANCE", dummy_atk, keepfirechance_, DDF_MainGetPercent),
-    DDF_FIELD("TRACE_ANGLE", dummy_atk, trace_angle_, DDF_MainGetAngle),
-    DDF_FIELD("ASSAULT_SPEED", dummy_atk, assault_speed_, DDF_MainGetFloat),
-    DDF_FIELD("ATTEMPT_SOUND", dummy_atk, initsound_, DDF_MainLookupSound),
-    DDF_FIELD("ENGAGED_SOUND", dummy_atk, sound_, DDF_MainLookupSound),
-    DDF_FIELD("SPAWNED_OBJECT", dummy_atk, spawnedobj_ref_, DDF_MainGetString),
-    DDF_FIELD("SPAWN_OBJECT_STATE", dummy_atk, objinitstate_ref_, DDF_MainGetString),
-    DDF_FIELD("SPAWN_LIMIT", dummy_atk, spawn_limit_, DDF_MainGetNumeric),
-    DDF_FIELD("PUFF", dummy_atk, puff_ref_, DDF_MainGetString),
-    DDF_FIELD("ATTACK_CLASS", dummy_atk, attack_class_, DDF_MainGetBitSet),
-    DDF_FIELD("DUALATTACK1", dummy_atk, dualattack1_, DDF_MainRefAttack),
-    DDF_FIELD("DUALATTACK2", dummy_atk, dualattack2_, DDF_MainRefAttack),
+    DDF_FIELD("ATTACKTYPE", dummy_atk, attackstyle_, DdfAtkGetType),
+    DDF_FIELD("ATTACK_SPECIAL", dummy_atk, flags_, DdfAtkGetSpecial),
+    DDF_FIELD("ACCURACY_SLOPE", dummy_atk, accuracy_slope_, DdfMainGetSlope),
+    DDF_FIELD("ACCURACY_ANGLE", dummy_atk, accuracy_angle_, DdfMainGetAngle),
+    DDF_FIELD("ATTACK_HEIGHT", dummy_atk, height_, DdfMainGetFloat),
+    DDF_FIELD("SHOTCOUNT", dummy_atk, count_, DdfMainGetNumeric),
+    DDF_FIELD("X_OFFSET", dummy_atk, xoffset_, DdfMainGetFloat),
+    DDF_FIELD("Y_OFFSET", dummy_atk, yoffset_, DdfMainGetFloat),
+    DDF_FIELD("ANGLE_OFFSET", dummy_atk, angle_offset_, DdfMainGetAngle),
+    DDF_FIELD("SLOPE_OFFSET", dummy_atk, slope_offset_, DdfMainGetSlope),
+    DDF_FIELD("ATTACKRANGE", dummy_atk, range_, DdfMainGetFloat),
+    DDF_FIELD("TOO_CLOSE_RANGE", dummy_atk, tooclose_, DdfMainGetNumeric),
+    DDF_FIELD("BERSERK_MULTIPLY", dummy_atk, berserk_mul_, DdfMainGetFloat),
+    DDF_FIELD("NO_TRACE_CHANCE", dummy_atk, notracechance_, DdfMainGetPercent),
+    DDF_FIELD("KEEP_FIRING_CHANCE", dummy_atk, keepfirechance_, DdfMainGetPercent),
+    DDF_FIELD("TRACE_ANGLE", dummy_atk, trace_angle_, DdfMainGetAngle),
+    DDF_FIELD("ASSAULT_SPEED", dummy_atk, assault_speed_, DdfMainGetFloat),
+    DDF_FIELD("ATTEMPT_SOUND", dummy_atk, initsound_, DdfMainLookupSound),
+    DDF_FIELD("ENGAGED_SOUND", dummy_atk, sound_, DdfMainLookupSound),
+    DDF_FIELD("SPAWNED_OBJECT", dummy_atk, spawnedobj_ref_, DdfMainGetString),
+    DDF_FIELD("SPAWN_OBJECT_STATE", dummy_atk, objinitstate_ref_, DdfMainGetString),
+    DDF_FIELD("SPAWN_LIMIT", dummy_atk, spawn_limit_, DdfMainGetNumeric),
+    DDF_FIELD("PUFF", dummy_atk, puff_ref_, DdfMainGetString),
+    DDF_FIELD("ATTACK_CLASS", dummy_atk, attack_class_, DdfMainGetBitSet),
+    DDF_FIELD("DUALATTACK1", dummy_atk, dualattack1_, DdfMainRefAttack),
+    DDF_FIELD("DUALATTACK2", dummy_atk, dualattack2_, DdfMainRefAttack),
 
     // -AJA- backward compatibility cruft...
-    DDF_FIELD("DAMAGE", dummy_atk, damage_.nominal_, DDF_MainGetFloat),
+    DDF_FIELD("DAMAGE", dummy_atk, damage_.nominal_, DdfMainGetFloat),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -134,7 +134,7 @@ static void AttackStartEntry(const char *name, bool extend)
 {
     if (!name || !name[0])
     {
-        DDF_WarnError("New attack entry is missing a name!");
+        DdfWarnError("New attack entry is missing a name!");
         name = "ATTACK_WITH_NO_NAME";
     }
 
@@ -149,13 +149,13 @@ static void AttackStartEntry(const char *name, bool extend)
     if (extend)
     {
         if (!dynamic_atk)
-            DDF_Error("Unknown attack to extend: %s\n", name);
+            DdfError("Unknown attack to extend: %s\n", name);
 
         // Intentional Const Override
         dynamic_mobj = (MapObjectDefinition *)dynamic_atk->atk_mobj_;
 
         if (dynamic_mobj)
-            DDF_StateBeginRange(dynamic_mobj->state_grp_);
+            DdfStateBeginRange(dynamic_mobj->state_grp_);
 
         return;
     }
@@ -179,7 +179,7 @@ static void AttackDoTemplate(const char *contents)
     AttackDefinition *other = atkdefs.Lookup(contents);
 
     if (!other || other == dynamic_atk)
-        DDF_Error("Unknown attack template: '%s'\n", contents);
+        DdfError("Unknown attack template: '%s'\n", contents);
 
     dynamic_atk->CopyDetail(*other);
     dynamic_atk->atk_mobj_ = nullptr;
@@ -194,36 +194,36 @@ static void AttackDoTemplate(const char *contents)
 
         dynamic_atk->atk_mobj_ = dynamic_mobj;
 
-        DDF_StateBeginRange(dynamic_mobj->state_grp_);
+        DdfStateBeginRange(dynamic_mobj->state_grp_);
     }
 }
 
 static void AttackParseField(const char *field, const char *contents, int index, bool is_last)
 {
-#if (DEBUG_DDF)
+#if (DDF_DEBUG)
     LogDebug("ATTACK_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DDF_CompareName(field, "TEMPLATE") == 0)
+    if (DdfCompareName(field, "TEMPLATE") == 0)
     {
         AttackDoTemplate(contents);
         return;
     }
 
     // backward compatibility...
-    if (DDF_CompareName(field, "DAMAGE_RANGE") == 0)
+    if (DdfCompareName(field, "DAMAGE_RANGE") == 0)
     {
         a_damage_range = atof(contents);
         return;
     }
-    else if (DDF_CompareName(field, "DAMAGE_MULTI") == 0)
+    else if (DdfCompareName(field, "DAMAGE_MULTI") == 0)
     {
         a_damage_multi = atof(contents);
         return;
     }
 
     // first, check attack commands
-    if (DDF_MainParseField(attack_commands, field, contents, (uint8_t *)dynamic_atk))
+    if (DdfMainParseField(attack_commands, field, contents, (uint8_t *)dynamic_atk))
         return;
 
     // we need to create an MOBJ for this attack
@@ -233,7 +233,7 @@ static void AttackParseField(const char *field, const char *contents, int index,
 
         dynamic_atk->atk_mobj_ = dynamic_mobj;
 
-        DDF_StateBeginRange(dynamic_mobj->state_grp_);
+        DdfStateBeginRange(dynamic_mobj->state_grp_);
     }
 
     ThingParseField(field, contents, index, is_last);
@@ -244,31 +244,31 @@ static void AttackFinishEntry(void)
     // handle attacks that have mobjs
     if (dynamic_mobj)
     {
-        DDF_StateFinishRange(dynamic_mobj->state_grp_);
+        DdfStateFinishRange(dynamic_mobj->state_grp_);
 
         // check MOBJ stuff
 
         if (dynamic_mobj->explode_damage_.nominal_ < 0)
         {
-            DDF_WarnError("Bad EXPLODE_DAMAGE.VAL value %f in DDF.\n", dynamic_mobj->explode_damage_.nominal_);
+            DdfWarnError("Bad EXPLODE_DAMAGE.VAL value %f in DDF.\n", dynamic_mobj->explode_damage_.nominal_);
         }
 
         if (dynamic_mobj->explode_radius_ < 0)
         {
-            DDF_WarnError("Bad EXPLODE_RADIUS value %f in DDF.\n", dynamic_mobj->explode_radius_);
+            DdfWarnError("Bad EXPLODE_RADIUS value %f in DDF.\n", dynamic_mobj->explode_radius_);
         }
 
         if (dynamic_mobj->model_skin_ < 0 || dynamic_mobj->model_skin_ > 9)
-            DDF_Error("Bad MODEL_SKIN value %d in DDF (must be 0-9).\n", dynamic_mobj->model_skin_);
+            DdfError("Bad MODEL_SKIN value %d in DDF (must be 0-9).\n", dynamic_mobj->model_skin_);
 
         if (dynamic_mobj->dlight_[0].radius_ > 512)
-            DDF_Warning("DLIGHT RADIUS value %1.1f too large (over 512).\n", dynamic_mobj->dlight_[0].radius_);
+            DdfWarning("DLIGHT RADIUS value %1.1f too large (over 512).\n", dynamic_mobj->dlight_[0].radius_);
     }
 
     // check DAMAGE stuff
     if (dynamic_atk->damage_.nominal_ < 0)
     {
-        DDF_WarnError("Bad DAMAGE.VAL value %f in DDF.\n", dynamic_atk->damage_.nominal_);
+        DdfWarnError("Bad DAMAGE.VAL value %f in DDF.\n", dynamic_atk->damage_.nominal_);
     }
 
     // check kAttackStyleDualAttack to make sure both attacks are defined
@@ -276,12 +276,12 @@ static void AttackFinishEntry(void)
     {
         if (!dynamic_atk->dualattack1_ || !dynamic_atk->dualattack2_)
         {
-            DDF_Error("DUALATTACK %s missing one or both dual attack definitions!\n", dynamic_atk->name_.c_str());
+            DdfError("DUALATTACK %s missing one or both dual attack definitions!\n", dynamic_atk->name_.c_str());
         }
         if (dynamic_atk->dualattack1_->name_ == dynamic_atk->name_ ||
             dynamic_atk->dualattack2_->name_ == dynamic_atk->name_)
         {
-            DDF_Error("DUALATTACK %s is referencing itself!\n", dynamic_atk->name_.c_str());
+            DdfError("DUALATTACK %s is referencing itself!\n", dynamic_atk->name_.c_str());
         }
     }
     // Create a minimal mobj for psychic attacks for their tracker
@@ -312,7 +312,7 @@ static void AttackFinishEntry(void)
     }
 
     // -AJA- 2005/08/06: Berserk backwards compatibility
-    if (DDF_CompareName(dynamic_atk->name_.c_str(), "PLAYER_PUNCH") == 0 && dynamic_atk->berserk_mul_ == 1.0f)
+    if (DdfCompareName(dynamic_atk->name_.c_str(), "PLAYER_PUNCH") == 0 && dynamic_atk->berserk_mul_ == 1.0f)
     {
         dynamic_atk->berserk_mul_ = 10.0f;
     }
@@ -325,7 +325,7 @@ static void AttackClearAll(void)
     LogWarning("Ignoring #CLEARALL in attacks.ddf\n");
 }
 
-void DDF_ReadAtks(const std::string &data)
+void DdfReadAtks(const std::string &data)
 {
     DDFReadInfo attacks;
 
@@ -337,10 +337,10 @@ void DDF_ReadAtks(const std::string &data)
     attacks.finish_entry = AttackFinishEntry;
     attacks.clear_all    = AttackClearAll;
 
-    DDF_MainReadFile(&attacks, data);
+    DdfMainReadFile(&attacks, data);
 }
 
-void DDF_AttackInit(void)
+void DdfAttackInit(void)
 {
     for (AttackDefinition *atk : atkdefs)
     {
@@ -350,7 +350,7 @@ void DDF_AttackInit(void)
     atkdefs.clear();
 }
 
-void DDF_AttackCleanUp(void)
+void DdfAttackCleanUp(void)
 {
     for (AttackDefinition *a : atkdefs)
     {
@@ -367,7 +367,7 @@ void DDF_AttackCleanUp(void)
             if (a->objinitstate_ref_.empty())
                 a->objinitstate_ = a->spawnedobj_->spawn_state_;
             else
-                a->objinitstate_ = DDF_MainLookupDirector(a->spawnedobj_, a->objinitstate_ref_.c_str());
+                a->objinitstate_ = DdfMainLookupDirector(a->spawnedobj_, a->objinitstate_ref_.c_str());
         }
 
         cur_ddf_entryname.clear();
@@ -397,25 +397,25 @@ static const DDFSpecialFlags attack_specials[] = {{"SMOKING_TRACER", kAttackFlag
 
                                                   {nullptr, kAttackFlagNone, 0}};
 
-static void DDF_AtkGetSpecial(const char *info, void *storage)
+static void DdfAtkGetSpecial(const char *info, void *storage)
 {
     AttackFlags *var = (AttackFlags *)storage;
 
     int flag_value;
 
-    switch (DDF_MainCheckSpecialFlag(info, attack_specials, &flag_value, true, false))
+    switch (DdfMainCheckSpecialFlag(info, attack_specials, &flag_value, true, false))
     {
-    case kDDFCheckFlagPositive:
+    case kDdfCheckFlagPositive:
         *var = (AttackFlags)(*var | flag_value);
         break;
 
-    case kDDFCheckFlagNegative:
+    case kDdfCheckFlagNegative:
         *var = (AttackFlags)(*var & ~flag_value);
         break;
 
-    case kDDFCheckFlagUser:
-    case kDDFCheckFlagUnknown:
-        DDF_WarnError("DDF_AtkGetSpecials: Unknown Attack Special: %s\n", info);
+    case kDdfCheckFlagUser:
+    case kDdfCheckFlagUnknown:
+        DdfWarnError("DdfAtkGetSpecials: Unknown Attack Special: %s\n", info);
         break;
     }
 }
@@ -427,19 +427,19 @@ static const char *attack_class[kTotalAttackStyles] = {
     "TRIPLE_SPAWNER", "FIXED_SPREADER", "RANDOM_SPREADER", "SHOT",  "TRACKER",    "CLOSECOMBAT",
     "SHOOTTOSPOT",    "SKULLFLY",       "SMARTPROJECTILE", "SPRAY", "DUALATTACK", "PSYCHIC"};
 
-static void DDF_AtkGetType(const char *info, void *storage)
+static void DdfAtkGetType(const char *info, void *storage)
 {
     AttackStyle *var = (AttackStyle *)storage;
 
     int i;
 
     for (i = 0; i < kTotalAttackStyles; i++)
-        if (DDF_CompareName(info, attack_class[i]) == 0)
+        if (DdfCompareName(info, attack_class[i]) == 0)
             break;
 
     if (i >= kTotalAttackStyles)
     {
-        DDF_WarnError("DDF_AtkGetType: No such attack type '%s'\n", info);
+        DdfWarnError("DdfAtkGetType: No such attack type '%s'\n", info);
         *var = kAttackStyleShot;
         return;
     }
@@ -448,9 +448,9 @@ static void DDF_AtkGetType(const char *info, void *storage)
 }
 
 //
-// DDF_AtkGetLabel
+// DdfAtkGetLabel
 //
-static void DDF_AtkGetLabel(const char *info, void *storage)
+static void DdfAtkGetLabel(const char *info, void *storage)
 {
     LabelOffset *lab = (LabelOffset *)storage;
 
@@ -460,7 +460,7 @@ static void DDF_AtkGetLabel(const char *info, void *storage)
     int i = div ? (div - info) : (int)strlen(info);
 
     if (i <= 0)
-        DDF_Error("Bad State `%s'.\n", info);
+        DdfError("Bad State `%s'.\n", info);
 
     lab->label_  = std::string(info, i);
     lab->offset_ = div ? HMM_MAX(0, atoi(div + 1) - 1) : 0;
@@ -598,7 +598,7 @@ AttackDefinition *AttackDefinitionContainer::Lookup(const char *refname)
     for (std::vector<AttackDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
     {
         AttackDefinition *atk = *iter;
-        if (DDF_CompareName(atk->name_.c_str(), refname) == 0)
+        if (DdfCompareName(atk->name_.c_str(), refname) == 0)
             return atk;
     }
 

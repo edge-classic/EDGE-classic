@@ -79,7 +79,7 @@ static void SetPlayerSprite(Player *p, int position, int stnum, WeaponDefinition
 
         if (st->label)
         {
-            int new_state = DDF_StateFindLabel(info->state_grp_, st->label, true /* quiet */);
+            int new_state = DdfStateFindLabel(info->state_grp_, st->label, true /* quiet */);
             if (new_state != 0)
                 stnum = new_state;
         }
@@ -1898,7 +1898,7 @@ void A_WeaponBecome(MapObject *mo)
 
     p->weapons_[p->ready_weapon_].info = newWep; // here it BECOMES()
 
-    int state = DDF_StateFindLabel(newWep->state_grp_, become->start_.label_.c_str(), true /* quiet */);
+    int state = DdfStateFindLabel(newWep->state_grp_, become->start_.label_.c_str(), true /* quiet */);
     if (state == 0)
         FatalError("BECOME action: frame '%s' in [%s] not found!\n", become->start_.label_.c_str(),
                    newWep->name_.c_str());

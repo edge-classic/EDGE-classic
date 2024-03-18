@@ -25,16 +25,16 @@ static Colormap *dynamic_colmap;
 
 ColormapContainer colormaps;
 
-void DDF_ColmapGetSpecial(const char *info, void *storage);
+void DdfColmapGetSpecial(const char *info, void *storage);
 
 static Colormap dummy_colmap;
 
-static const DDFCommandList colmap_commands[] = {DDF_FIELD("LUMP", dummy_colmap, lump_name_, DDF_MainGetLumpName),
-                                                 DDF_FIELD("PACK", dummy_colmap, pack_name_, DDF_MainGetString),
-                                                 DDF_FIELD("START", dummy_colmap, start_, DDF_MainGetNumeric),
-                                                 DDF_FIELD("LENGTH", dummy_colmap, length_, DDF_MainGetNumeric),
-                                                 DDF_FIELD("SPECIAL", dummy_colmap, special_, DDF_ColmapGetSpecial),
-                                                 DDF_FIELD("GL_COLOUR", dummy_colmap, gl_color_, DDF_MainGetRGB),
+static const DDFCommandList colmap_commands[] = {DDF_FIELD("LUMP", dummy_colmap, lump_name_, DdfMainGetLumpName),
+                                                 DDF_FIELD("PACK", dummy_colmap, pack_name_, DdfMainGetString),
+                                                 DDF_FIELD("START", dummy_colmap, start_, DdfMainGetNumeric),
+                                                 DDF_FIELD("LENGTH", dummy_colmap, length_, DdfMainGetNumeric),
+                                                 DDF_FIELD("SPECIAL", dummy_colmap, special_, DdfColmapGetSpecial),
+                                                 DDF_FIELD("GL_COLOUR", dummy_colmap, gl_color_, DdfMainGetRGB),
 
                                                  {nullptr, nullptr, 0, nullptr}};
 
@@ -46,7 +46,7 @@ static void ColmapStartEntry(const char *name, bool extend)
 {
     if (!name || name[0] == 0)
     {
-        DDF_WarnError("New colormap entry is missing a name!");
+        DdfWarnError("New colormap entry is missing a name!");
         name = "COLORMAP_WITH_NO_NAME";
     }
 
@@ -55,7 +55,7 @@ static void ColmapStartEntry(const char *name, bool extend)
     if (extend)
     {
         if (!dynamic_colmap)
-            DDF_Error("Unknown colormap to extend: %s\n", name);
+            DdfError("Unknown colormap to extend: %s\n", name);
         return;
     }
 
@@ -84,39 +84,39 @@ static void ColmapStartEntry(const char *name, bool extend)
 
 static void ColmapParseField(const char *field, const char *contents, int index, bool is_last)
 {
-#if (DEBUG_DDF)
+#if (DDF_DEBUG)
     LogDebug("COLMAP_PARSE: %s = %s;\n", field, contents);
 #endif
 
     // -AJA- backwards compatibility cruft...
-    if (DDF_CompareName(field, "PRIORITY") == 0)
+    if (DdfCompareName(field, "PRIORITY") == 0)
         return;
 
-    if (DDF_MainParseField(colmap_commands, field, contents, (uint8_t *)dynamic_colmap))
+    if (DdfMainParseField(colmap_commands, field, contents, (uint8_t *)dynamic_colmap))
         return; // OK
 
-    DDF_WarnError("Unknown colmap.ddf command: %s\n", field);
+    DdfWarnError("Unknown colmap.ddf command: %s\n", field);
 }
 
 static void ColmapFinishEntry(void)
 {
     if (dynamic_colmap->start_ < 0)
     {
-        DDF_WarnError("Bad START value for colmap: %d\n", dynamic_colmap->start_);
+        DdfWarnError("Bad START value for colmap: %d\n", dynamic_colmap->start_);
         dynamic_colmap->start_ = 0;
     }
 
     // don't need a length when using GL_COLOUR
     if (!dynamic_colmap->lump_name_.empty() && !dynamic_colmap->pack_name_.empty() && dynamic_colmap->length_ <= 0)
     {
-        DDF_WarnError("Bad LENGTH value for colmap: %d\n", dynamic_colmap->length_);
+        DdfWarnError("Bad LENGTH value for colmap: %d\n", dynamic_colmap->length_);
         dynamic_colmap->length_ = 1;
     }
 
     if (dynamic_colmap->lump_name_.empty() && dynamic_colmap->pack_name_.empty() &&
         dynamic_colmap->gl_color_ == kRGBANoValue)
     {
-        DDF_WarnError("Colourmap entry missing LUMP, PACK or GL_COLOUR.\n");
+        DdfWarnError("Colourmap entry missing LUMP, PACK or GL_COLOUR.\n");
         // We are now assuming that the intent is to remove all
         // colmaps with this name (i.e., "null" it), as the only way to get here
         // is to create an empty entry or use gl_color_=NONE; - Dasho
@@ -124,7 +124,7 @@ static void ColmapFinishEntry(void)
         for (std::vector<Colormap *>::iterator iter = colormaps.begin(); iter != colormaps.end(); iter++)
         {
             Colormap *cmap = *iter;
-            if (DDF_CompareName(doomed_name.c_str(), cmap->name_.c_str()) == 0)
+            if (DdfCompareName(doomed_name.c_str(), cmap->name_.c_str()) == 0)
             {
                 delete cmap;
                 cmap = nullptr;
@@ -141,7 +141,7 @@ static void ColmapClearAll(void)
     LogWarning("Ignoring #CLEARALL in colormap.ddf\n");
 }
 
-void DDF_ReadColourMaps(const std::string &data)
+void DdfReadColourMaps(const std::string &data)
 {
     DDFReadInfo colm_r;
 
@@ -153,10 +153,10 @@ void DDF_ReadColourMaps(const std::string &data)
     colm_r.finish_entry = ColmapFinishEntry;
     colm_r.clear_all    = ColmapClearAll;
 
-    DDF_MainReadFile(&colm_r, data);
+    DdfMainReadFile(&colm_r, data);
 }
 
-void DDF_ColmapInit(void)
+void DdfColmapInit(void)
 {
     for (Colormap *cmap : colormaps)
     {
@@ -166,7 +166,7 @@ void DDF_ColmapInit(void)
     colormaps.clear();
 }
 
-void DDF_ColmapCleanUp(void)
+void DdfColmapCleanUp(void)
 {
     colormaps.shrink_to_fit();
 }
@@ -180,29 +180,29 @@ DDFSpecialFlags colmap_specials[] = {{"FLASH", kColorSpecialNoFlash, true},
                                      {nullptr, 0, 0}};
 
 //
-// DDF_ColmapGetSpecial
+// DdfColmapGetSpecial
 //
 // Gets the colormap specials.
 //
-void DDF_ColmapGetSpecial(const char *info, void *storage)
+void DdfColmapGetSpecial(const char *info, void *storage)
 {
     ColorSpecial *spec = (ColorSpecial *)storage;
 
     int flag_value;
 
-    switch (DDF_MainCheckSpecialFlag(info, colmap_specials, &flag_value, true, false))
+    switch (DdfMainCheckSpecialFlag(info, colmap_specials, &flag_value, true, false))
     {
-    case kDDFCheckFlagPositive:
+    case kDdfCheckFlagPositive:
         *spec = (ColorSpecial)(*spec | flag_value);
         break;
 
-    case kDDFCheckFlagNegative:
+    case kDdfCheckFlagNegative:
         *spec = (ColorSpecial)(*spec & ~flag_value);
         break;
 
-    case kDDFCheckFlagUser:
-    case kDDFCheckFlagUnknown:
-        DDF_WarnError("DDF_ColmapGetSpecial: Unknown Special: %s", info);
+    case kDdfCheckFlagUser:
+    case kDdfCheckFlagUnknown:
+        DdfWarnError("DdfColmapGetSpecial: Unknown Special: %s", info);
         break;
     }
 }
@@ -293,7 +293,7 @@ Colormap *ColormapContainer::Lookup(const char *refname)
     for (std::vector<Colormap *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
     {
         Colormap *cmap = *iter;
-        if (DDF_CompareName(cmap->name_.c_str(), refname) == 0)
+        if (DdfCompareName(cmap->name_.c_str(), refname) == 0)
             return cmap;
     }
 
@@ -306,7 +306,7 @@ Colormap *ColormapContainer::Lookup(const char *refname)
 // This is used to make entries for lumps between C_START and C_END
 // markers in a (BOOM) WAD file.
 //
-void DDF_AddRawColourmap(const char *name, int size, const char *pack_name)
+void DdfAddRawColourmap(const char *name, int size, const char *pack_name)
 {
     if (size < 256)
     {
@@ -345,9 +345,9 @@ void DDF_AddRawColourmap(const char *name, int size, const char *pack_name)
     text += ";\n";
 
     // DEBUG:
-    DDF_DumpFile(text);
+    DdfDumpFile(text);
 
-    DDF_AddFile(kDDFTypeColourMap, text, pack_name ? pack_name : name);
+    DdfAddFile(kDdfTypeColourMap, text, pack_name ? pack_name : name);
 
     LogDebug("- Added RAW colormap '%s' start=0 length=%s\n", name, length_buf);
 }

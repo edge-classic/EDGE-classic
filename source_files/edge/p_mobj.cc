@@ -72,7 +72,7 @@
 #include "r_shader.h"
 #include "s_sound.h"
 
-#define DEBUG_MOBJ 0
+#define EDGE_DEBUG_MAP_OBJECTS 0
 
 static constexpr float kLadderFriction = 0.5f;
 
@@ -296,7 +296,7 @@ static bool CorpseShouldSlide(MapObject *mo)
     {
         HMM_Vec3 line_a{{mo->x, mo->y, -40000}};
         HMM_Vec3 line_b{{mo->x, mo->y, 40000}};
-        float    z_test = MathLinePlaneIntersection(line_a, line_b, mo->subsector_->sector->floor_z_vertices[2],
+        float    z_test = LinePlaneIntersection(line_a, line_b, mo->subsector_->sector->floor_z_vertices[2],
                                                     mo->subsector_->sector->floor_vertex_slope_normal)
                            .Z;
         if (isfinite(z_test))
@@ -307,7 +307,7 @@ static bool CorpseShouldSlide(MapObject *mo)
     {
         HMM_Vec3 line_a{{mo->x, mo->y, -40000}};
         HMM_Vec3 line_b{{mo->x, mo->y, 40000}};
-        float    z_test = MathLinePlaneIntersection(line_a, line_b, mo->subsector_->sector->ceiling_z_vertices[2],
+        float    z_test = LinePlaneIntersection(line_a, line_b, mo->subsector_->sector->ceiling_z_vertices[2],
                                                     mo->subsector_->sector->ceiling_vertex_slope_normal)
                            .Z;
         if (isfinite(z_test))
@@ -583,7 +583,7 @@ bool MapObjectSetStateDeferred(MapObject *mo, int stnum, int tic_skip)
 //
 int MapObjectFindLabel(MapObject *mobj, const char *label)
 {
-    return DDF_StateFindLabel(mobj->info_->state_grp_, label, true /* quiet */);
+    return DdfStateFindLabel(mobj->info_->state_grp_, label, true /* quiet */);
 }
 
 //
@@ -1639,7 +1639,7 @@ static void DeleteMobj(MapObject *mo)
         return;
     }
 
-#if (DEBUG_MOBJ > 0)
+#if (EDGE_DEBUG_MAP_OBJECTS > 0)
     LogDebug("tics=%05d  DELETE %p [%s]\n", level_time_elapsed, mo, mo->info_ ? mo->info_->name_.c_str() : "???");
 #endif
 
@@ -1749,14 +1749,14 @@ static void AddMobjToList(MapObject *mo)
     if (seen_monsters.count(mo->info_) == 0)
         seen_monsters.insert(mo->info_);
 
-#if (DEBUG_MOBJ > 0)
+#if (EDGE_DEBUG_MAP_OBJECTS > 0)
     LogDebug("tics=%05d  ADD %p [%s]\n", level_time_elapsed, mo, mo->info_ ? mo->info_->name_.c_str() : "???");
 #endif
 }
 
 static void RemoveMobjFromList(MapObject *mo)
 {
-#if (DEBUG_MOBJ > 0)
+#if (EDGE_DEBUG_MAP_OBJECTS > 0)
     LogDebug("tics=%05d  REMOVE %p [%s]\n", level_time_elapsed, mo, mo->info_ ? mo->info_->name_.c_str() : "???");
 #endif
 
@@ -2237,7 +2237,7 @@ MapObject *CreateMapObject(float x, float y, float z, const MapObjectDefinition 
 {
     MapObject *mobj = new MapObject;
 
-#if (DEBUG_MOBJ > 0)
+#if (EDGE_DEBUG_MAP_OBJECTS > 0)
     LogDebug("tics=%05d  CREATE %p [%s]  AT %1.0f,%1.0f,%1.0f\n", level_time_elapsed, mobj, info->name.c_str(), x, y,
              z);
 #endif
@@ -2336,7 +2336,7 @@ MapObject *CreateMapObject(float x, float y, float z, const MapObjectDefinition 
 
     if (sec->floor_vertex_slope)
     {
-        float sz = MathLinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, sec->floor_z_vertices[2],
+        float sz = LinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, sec->floor_z_vertices[2],
                                              sec->floor_vertex_slope_normal)
                        .Z;
         if (isfinite(sz))
@@ -2344,7 +2344,7 @@ MapObject *CreateMapObject(float x, float y, float z, const MapObjectDefinition 
     }
     if (sec->ceiling_vertex_slope)
     {
-        float sz = MathLinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, sec->ceiling_z_vertices[2],
+        float sz = LinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, sec->ceiling_z_vertices[2],
                                              sec->ceiling_vertex_slope_normal)
                        .Z;
         if (isfinite(sz))

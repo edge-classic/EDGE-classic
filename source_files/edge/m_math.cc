@@ -22,7 +22,7 @@
 //    Copyright (C) 1993-1996 by id Software, Inc.
 //
 //----------------------------------------------------------------------------
-// MathPointInTriangle is adapted from the PNPOLY algorithm with the following
+// PointInTriangle is adapted from the PNPOLY algorithm with the following
 // license:
 //
 // Copyright (c) 1970-2003, Wm. Randolph Franklin
@@ -56,7 +56,7 @@
 #include <math.h>
 #endif
 
-void MathBAMAngleToMatrix(BAMAngle ang, HMM_Vec2 *x, HMM_Vec2 *y)
+void BAMAngleToMatrix(BAMAngle ang, HMM_Vec2 *x, HMM_Vec2 *y)
 {
     x->X = epi::BAMCos(ang);
     x->Y = epi::BAMSin(ang);
@@ -65,13 +65,13 @@ void MathBAMAngleToMatrix(BAMAngle ang, HMM_Vec2 *x, HMM_Vec2 *y)
     y->Y = x->X;
 }
 
-HMM_Vec3 MathTripleCrossProduct(HMM_Vec3 v1, HMM_Vec3 v2, HMM_Vec3 v3)
+HMM_Vec3 TripleCrossProduct(HMM_Vec3 v1, HMM_Vec3 v2, HMM_Vec3 v3)
 {
     return HMM_Cross(HMM_SubV3(v2, v1), HMM_SubV3(v3, v1));
 }
 
 // If the plane normal is precalculated; otherwise use the other version
-HMM_Vec3 MathLinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_c, HMM_Vec3 plane_normal)
+HMM_Vec3 LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_c, HMM_Vec3 plane_normal)
 {
     float    n             = HMM_DotV3(plane_normal, HMM_SubV3(plane_c, line_a));
     HMM_Vec3 line_subtract = HMM_SubV3(line_b, line_a);
@@ -79,17 +79,17 @@ HMM_Vec3 MathLinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 pl
     return HMM_AddV3(line_a, HMM_MulV3F(line_subtract, n / d));
 }
 
-HMM_Vec3 MathLinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_a, HMM_Vec3 plane_b,
+HMM_Vec3 LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_a, HMM_Vec3 plane_b,
                                    HMM_Vec3 plane_c)
 {
-    HMM_Vec3 plane_normal  = MathTripleCrossProduct(plane_a, plane_b, plane_c);
+    HMM_Vec3 plane_normal  = TripleCrossProduct(plane_a, plane_b, plane_c);
     float    n             = HMM_DotV3(plane_normal, HMM_SubV3(plane_c, line_a));
     HMM_Vec3 line_subtract = HMM_SubV3(line_b, line_a);
     float    d             = HMM_DotV3(plane_normal, line_subtract);
     return HMM_AddV3(line_a, HMM_MulV3F(line_subtract, n / d));
 }
 
-float MathPointToSegDistance(HMM_Vec2 seg_a, HMM_Vec2 seg_b, HMM_Vec2 point)
+float PointToSegDistance(HMM_Vec2 seg_a, HMM_Vec2 seg_b, HMM_Vec2 point)
 {
     HMM_Vec2 seg_ab = HMM_SubV2(seg_b, seg_a);
     HMM_Vec2 seg_bp = HMM_SubV2(point, seg_b);
@@ -103,7 +103,7 @@ float MathPointToSegDistance(HMM_Vec2 seg_a, HMM_Vec2 seg_b, HMM_Vec2 point)
         return abs(seg_ab.X * seg_ap.Y - seg_ab.Y * seg_ap.X) / HMM_LenV2(seg_ab);
 }
 
-int MathPointInTriangle(HMM_Vec2 v1, HMM_Vec2 v2, HMM_Vec2 v3, HMM_Vec2 test)
+int PointInTriangle(HMM_Vec2 v1, HMM_Vec2 v2, HMM_Vec2 v3, HMM_Vec2 test)
 {
     std::vector<HMM_Vec2> tri_vec = {v1, v2, v3};
     int                   i       = 0;

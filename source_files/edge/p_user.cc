@@ -1086,7 +1086,7 @@ bool AddWeapon(Player *player, WeaponDefinition *info, int *index)
             return false;
 
         // don't downgrade any UPGRADED weapons
-        if (DDF_WeaponIsUpgrade(cur_info, info))
+        if (DdfWeaponIsUpgrade(cur_info, info))
             return false;
 
         // check for weapon upgrades

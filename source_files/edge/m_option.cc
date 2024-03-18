@@ -866,9 +866,9 @@ static OptionMenuDefinition program_optmenu2 = {program_keyconfig2,
 /*
  * ALL KEYBOARD MENUS
  */
-#define NUM_KEY_MENUS 9
+static constexpr uint8_t kTotalKeyMenus = 9;
 
-static OptionMenuDefinition *all_key_menus[NUM_KEY_MENUS] = {&movement_optmenu,  &attack_optmenu,   &look_optmenu,
+static OptionMenuDefinition *all_key_menus[kTotalKeyMenus] = {&movement_optmenu,  &attack_optmenu,   &look_optmenu,
                                                              &otherkey_optmenu,  &weapon_optmenu,   &automap_optmenu,
                                                              &inventory_optmenu, &program_optmenu1, &program_optmenu2};
 
@@ -1002,7 +1002,7 @@ void OptionMenuDrawer()
         if (current_key_menu > 0)
             HudWriteText(style, fontType, 60, 200 - deltay * 4, "< PREV");
 
-        if (current_key_menu < NUM_KEY_MENUS - 1)
+        if (current_key_menu < kTotalKeyMenus - 1)
             HudWriteText(style, fontType, 260 - style->fonts_[fontType]->StringWidth("NEXT >") * TEXTscale,
                          200 - deltay * 4, "NEXT >");
 
@@ -1271,7 +1271,7 @@ static void OptionMenuLanguageDrawer(int x, int y, int deltay)
 
 static void KeyMenu_Next()
 {
-    if (current_key_menu >= NUM_KEY_MENUS - 1)
+    if (current_key_menu >= kTotalKeyMenus - 1)
         return;
 
     current_key_menu++;
@@ -2007,8 +2007,8 @@ static void OptionMenuChangeLanguage(int key_pressed, ConsoleVariable *console_v
 static void OptionMenuChangeMidiPlayer(int key_pressed, ConsoleVariable *console_variable)
 {
     PlaylistEntry *playing = playlist.Find(entry_playing);
-    if (var_midi_player == 1 || (playing && (playing->type_ == kDDFMusicIMF280 || playing->type_ == kDDFMusicIMF560 ||
-                                             playing->type_ == kDDFMusicIMF700)))
+    if (var_midi_player == 1 || (playing && (playing->type_ == kDdfMusicIMF280 || playing->type_ == kDdfMusicIMF560 ||
+                                             playing->type_ == kDdfMusicIMF700)))
         RestartOpal();
     else
         RestartFluid();

@@ -62,8 +62,6 @@ extern double    CoalGetFloat(coal::Vm *vm, const char *mod_name, const char *va
 
 extern bool erraticism_active;
 
-#define EDGE_DEBUG 0
-
 EDGE_DEFINE_CONSOLE_VARIABLE(crosshair_style, "0",
                              kConsoleVariableFlagArchive) // shape
 EDGE_DEFINE_CONSOLE_VARIABLE(crosshair_color, "0",

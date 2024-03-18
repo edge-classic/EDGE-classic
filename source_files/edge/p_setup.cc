@@ -191,8 +191,8 @@ static void GetMusinfoTracksForLevel(void)
                     dynamic_plentry            = new PlaylistEntry;
                     dynamic_plentry->number_   = playlist.FindFree();
                     dynamic_plentry->info_     = value;
-                    dynamic_plentry->type_     = kDDFMusicUnknown;
-                    dynamic_plentry->infotype_ = kDDFMusicDataLump;
+                    dynamic_plentry->type_     = kDdfMusicUnknown;
+                    dynamic_plentry->infotype_ = kDdfMusicDataLump;
                     playlist.push_back(dynamic_plentry);
                     musinfo_tracks[current_map->name_].mappings.try_emplace(mus_number, dynamic_plentry->number_);
                 }
@@ -3009,7 +3009,7 @@ void GroupLines(void)
                 sector->floor_z_vertices.clear();
             else
             {
-                sector->floor_vertex_slope_normal = MathTripleCrossProduct(
+                sector->floor_vertex_slope_normal = TripleCrossProduct(
                     sector->floor_z_vertices[0], sector->floor_z_vertices[1], sector->floor_z_vertices[2]);
                 if (sector->floor_height > sector->floor_vertex_slope_high_low.X)
                     sector->floor_vertex_slope_high_low.X = sector->floor_height;
@@ -3020,7 +3020,7 @@ void GroupLines(void)
                 sector->ceiling_z_vertices.clear();
             else
             {
-                sector->ceiling_vertex_slope_normal = MathTripleCrossProduct(
+                sector->ceiling_vertex_slope_normal = TripleCrossProduct(
                     sector->ceiling_z_vertices[0], sector->ceiling_z_vertices[1], sector->ceiling_z_vertices[2]);
                 if (sector->ceiling_height < sector->ceiling_vertex_slope_high_low.Y)
                     sector->ceiling_vertex_slope_high_low.Y = sector->ceiling_height;
@@ -3106,7 +3106,7 @@ void GroupLines(void)
             if (floor_z_lines == 1 && sector->floor_z_vertices.size() == 4)
             {
                 sector->floor_vertex_slope        = true;
-                sector->floor_vertex_slope_normal = MathTripleCrossProduct(
+                sector->floor_vertex_slope_normal = TripleCrossProduct(
                     sector->floor_z_vertices[0], sector->floor_z_vertices[1], sector->floor_z_vertices[2]);
                 if (sector->floor_height > sector->floor_vertex_slope_high_low.X)
                     sector->floor_vertex_slope_high_low.X = sector->floor_height;
@@ -3118,7 +3118,7 @@ void GroupLines(void)
             if (ceil_z_lines == 1 && sector->ceiling_z_vertices.size() == 4)
             {
                 sector->ceiling_vertex_slope        = true;
-                sector->ceiling_vertex_slope_normal = MathTripleCrossProduct(
+                sector->ceiling_vertex_slope_normal = TripleCrossProduct(
                     sector->ceiling_z_vertices[0], sector->ceiling_z_vertices[1], sector->ceiling_z_vertices[2]);
                 if (sector->ceiling_height < sector->ceiling_vertex_slope_high_low.Y)
                     sector->ceiling_vertex_slope_high_low.Y = sector->ceiling_height;
@@ -3318,7 +3318,7 @@ void ShutdownLevel(void)
     DestroyAllSliders();
     DestroyAllAmbientSounds();
 
-    DDF_BoomClearGenTypes();
+    DdfBoomClearGeneralizedTypes();
 
     delete[] level_segs;
     level_segs = nullptr;
@@ -3545,8 +3545,8 @@ LineType *LookupLineType(int num)
     if (def)
         return def;
 
-    if (DDF_IsBoomLineType(num))
-        return DDF_BoomGetGenLine(num);
+    if (DdfIsBoomLineType(num))
+        return DdfBoomGetGeneralizedLine(num);
 
     LogWarning("P_LookupLineType(): Unknown linedef type %d\n", num);
 
@@ -3564,8 +3564,8 @@ SectorType *LookupSectorType(int num)
     if (def)
         return def;
 
-    if (DDF_IsBoomSectorType(num))
-        return DDF_BoomGetGenSector(num);
+    if (DdfIsBoomSectorType(num))
+        return DdfBoomGetGeneralizedSector(num);
 
     LogWarning("P_LookupSectorType(): Unknown sector type %d\n", num);
 

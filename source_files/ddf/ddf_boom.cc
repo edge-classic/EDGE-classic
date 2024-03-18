@@ -22,26 +22,26 @@ static LineTypeContainer   genlinetypes;   // <-- Generalised
 static SectorTypeContainer gensectortypes; // <-- Generalised
 
 //
-// DDF_IsBoomLineType
+// DdfIsBoomLineType
 //
-bool DDF_IsBoomLineType(int num)
+bool DdfIsBoomLineType(int num)
 {
     return (num >= 0x2F80 && num <= 0x7FFF);
 }
 
 //
-// DDF_IsBoomSectorType
+// DdfIsBoomSectorType
 //
-bool DDF_IsBoomSectorType(int num)
+bool DdfIsBoomSectorType(int num)
 {
     return (num >= 0x20 && num <= 0xFFFF); // Might as well extend to 16 bits to allow for
                                            // more MBF21-type expansions
 }
 
 //
-// DDF_BoomClearGenTypes
+// DdfBoomClearGeneralizedTypes
 //
-void DDF_BoomClearGenTypes(void)
+void DdfBoomClearGeneralizedTypes(void)
 {
     genlinetypes.Reset();
     gensectortypes.Reset();
@@ -50,7 +50,7 @@ void DDF_BoomClearGenTypes(void)
 //----------------------------------------------------------------------------
 
 //
-// DDF_BoomMakeGenSector
+// DdfBoomMakeGeneralizedSector
 //
 // Decodes the BOOM generalised sector number and fills in the DDF
 // sector type `sec' (which has already been instantiated with default
@@ -60,7 +60,7 @@ void DDF_BoomClearGenTypes(void)
 //
 // -AJA- 2001/06/22: written.
 //
-void DDF_BoomMakeGenSector(SectorType *sec, int number)
+void DdfBoomMakeGeneralizedSector(SectorType *sec, int number)
 {
     //  LogDebug("- Making Generalized Sector 0x%03x\n", number);
 
@@ -204,11 +204,11 @@ void DDF_BoomMakeGenSector(SectorType *sec, int number)
 }
 
 //
-// DDF_BoomGetGenSector
+// DdfBoomGetGeneralizedSector
 //
-SectorType *DDF_BoomGetGenSector(int number)
+SectorType *DdfBoomGetGeneralizedSector(int number)
 {
-    EPI_ASSERT(DDF_IsBoomSectorType(number));
+    EPI_ASSERT(DdfIsBoomSectorType(number));
 
     SectorType *sec = gensectortypes.Lookup(number);
 
@@ -220,7 +220,7 @@ SectorType *DDF_BoomGetGenSector(int number)
 
         sec->number_ = number;
 
-        DDF_BoomMakeGenSector(sec, number);
+        DdfBoomMakeGeneralizedSector(sec, number);
 
         gensectortypes.push_back(sec);
     }
@@ -695,7 +695,7 @@ static void MakeBoomCrusher(LineType *line, int number)
 }
 
 //
-// DDF_BoomMakeGenLine
+// DdfBoomMakeGeneralizedLine
 //
 // Decodes the BOOM generalised linedef number and fills in the DDF
 // linedef type `line' (which has already been instantiated with
@@ -705,7 +705,7 @@ static void MakeBoomCrusher(LineType *line, int number)
 //
 // -AJA- 2001/06/22: began work on this.
 //
-void DDF_BoomMakeGenLine(LineType *line, int number)
+void DdfBoomMakeGeneralizedLine(LineType *line, int number)
 {
     //	LogDebug("- Making Generalized Linedef 0x%04x\n", number);
 
@@ -734,9 +734,9 @@ void DDF_BoomMakeGenLine(LineType *line, int number)
         MakeBoomCrusher(line, number);
 }
 
-LineType *DDF_BoomGetGenLine(int number)
+LineType *DdfBoomGetGeneralizedLine(int number)
 {
-    EPI_ASSERT(DDF_IsBoomLineType(number));
+    EPI_ASSERT(DdfIsBoomLineType(number));
 
     LineType *line = genlinetypes.Lookup(number);
 
@@ -748,7 +748,7 @@ LineType *DDF_BoomGetGenLine(int number)
 
         line->number_ = number;
 
-        DDF_BoomMakeGenLine(line, number);
+        DdfBoomMakeGeneralizedLine(line, number);
 
         genlinetypes.push_back(line);
     }

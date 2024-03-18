@@ -79,9 +79,9 @@ extern int    num_states;
 extern std::vector<std::string> ddf_sprite_names;
 extern std::vector<std::string> ddf_model_names;
 
-int DDF_StateFindLabel(const std::vector<StateRange> &group, const char *label, bool quiet = false);
+int DdfStateFindLabel(const std::vector<StateRange> &group, const char *label, bool quiet = false);
 
-bool DDF_StateGroupHasState(const std::vector<StateRange> &group, int st);
+bool DdfStateGroupHasState(const std::vector<StateRange> &group, int st);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -56,7 +56,7 @@
 namespace dehacked
 {
 
-#define DEBUG_MONST 0
+#define DEHACKED_DEBUG_MONSTERS 0
 
 static constexpr char kExtraFlagDisloyal     = 'D';
 static constexpr char kExtraFlagTriggerHappy = 'H';
@@ -118,7 +118,7 @@ const char *AddScratchAttack(int damage, const char *sfx);
 
 void BeginLump(void)
 {
-    wad::NewLump(kDDFTypeAttack);
+    wad::NewLump(kDdfTypeAttack);
 
     wad::Printf("<ATTACKS>\n\n");
 }
@@ -541,7 +541,7 @@ void things::Shutdown()
 
 void things::BeginLump()
 {
-    wad::NewLump(kDDFTypeThing);
+    wad::NewLump(kDdfTypeThing);
 
     wad::Printf("<THINGS>\n\n");
 }
@@ -883,7 +883,7 @@ bool CheckIsMonster(const DehackedMapObjectDefinition *info, int mt_num, int pla
     if (info->speed > 0)
         score += 87;
 
-#if (DEBUG_MONST)
+#if (DEHACKED_DEBUG_MONSTERS)
     Debug_PrintMsg("[%20.20s:%-4d] %c%c%c%c%c %c%c%c%c %c%c %d = %d\n", GetMobjName(mt_num), info->doomednum,
                    (info->flags & kMF_SOLID) ? 'S' : '-', (info->flags & kMF_SHOOTABLE) ? 'H' : '-',
                    (info->flags & kMF_FLOAT) ? 'F' : '-', (info->flags & kMF_MISSILE) ? 'M' : '-',

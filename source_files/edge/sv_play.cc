@@ -723,7 +723,7 @@ bool SR_PlayerGetState(void *storage, int index, void *extra)
     // find base state
     offset = strtol(off_p, nullptr, 0) - 1;
 
-    base = DDF_StateFindLabel(actual->state_grp_, base_p, true /* quiet */);
+    base = DdfStateFindLabel(actual->state_grp_, base_p, true /* quiet */);
 
     if (!base)
     {
@@ -781,7 +781,7 @@ void SR_PlayerPutState(void *storage, int index, void *extra)
     {
         actual = *iter;
 
-        if (DDF_StateGroupHasState(actual->state_grp_, s_num))
+        if (DdfStateGroupHasState(actual->state_grp_, s_num))
             break;
     }
 
@@ -795,7 +795,7 @@ void SR_PlayerPutState(void *storage, int index, void *extra)
     // find the nearest base state
     int base = s_num;
 
-    while (!states[base].label && DDF_StateGroupHasState(actual->state_grp_, base - 1))
+    while (!states[base].label && DdfStateGroupHasState(actual->state_grp_, base - 1))
     {
         base--;
     }

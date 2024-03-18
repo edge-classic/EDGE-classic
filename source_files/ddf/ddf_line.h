@@ -641,7 +641,7 @@ class LineType
 
     // Lobo: item to spawn (or nullptr).  The mobjdef pointer is only valid
     // after
-    //  DDF_MobjCleanUp() has been called.
+    //  DdfMobjCleanUp() has been called.
     const MapObjectDefinition *effectobject_;
     std::string                effectobject_ref_;
 
@@ -893,8 +893,8 @@ class SectorTypeContainer : public std::vector<SectorType *>
 extern LineTypeContainer   linetypes;   // -ACB- 2004/07/05 Implemented
 extern SectorTypeContainer sectortypes; // -ACB- 2004/07/05 Implemented
 
-void DDF_ReadLines(const std::string &data);
-void DDF_ReadSectors(const std::string &data);
+void DdfReadLines(const std::string &data);
+void DdfReadSectors(const std::string &data);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

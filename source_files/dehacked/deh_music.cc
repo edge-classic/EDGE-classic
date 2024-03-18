@@ -192,7 +192,7 @@ void music::MarkEntry(int num)
 
 void music::BeginLump()
 {
-    wad::NewLump(kDDFTypePlaylist);
+    wad::NewLump(kDdfTypePlaylist);
 
     wad::Printf("<PLAYLISTS>\n");
 }

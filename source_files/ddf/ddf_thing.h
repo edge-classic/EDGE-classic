@@ -847,22 +847,22 @@ class MapObjectDefinition
     WeaknessDefinition weak_;
 
     // item to drop (or nullptr).  The mobjdef pointer is only valid after
-    // DDF_MobjCleanUp() has been called.
+    // DdfMobjCleanUp() has been called.
     const MapObjectDefinition *dropitem_;
     std::string                dropitem_ref_;
 
     // blood object (or nullptr).  The mobjdef pointer is only valid after
-    // DDF_MobjCleanUp() has been called.
+    // DdfMobjCleanUp() has been called.
     const MapObjectDefinition *blood_;
     std::string                blood_ref_;
 
     // respawn effect object (or nullptr).  The mobjdef pointer is only
-    // valid after DDF_MobjCleanUp() has been called.
+    // valid after DdfMobjCleanUp() has been called.
     const MapObjectDefinition *respawneffect_;
     std::string                respawneffect_ref_;
 
     // spot type for the `SHOOT_TO_SPOT' attack (or nullptr).  The mobjdef
-    // pointer is only valid after DDF_MobjCleanUp() has been called.
+    // pointer is only valid after DdfMobjCleanUp() has been called.
     const MapObjectDefinition *spitspot_;
     std::string                spitspot_ref_;
 
@@ -933,9 +933,9 @@ class MapObjectDefinitionContainer : public std::vector<MapObjectDefinition *>
 
 extern MapObjectDefinitionContainer mobjtypes;
 
-void DDF_MobjGetBenefit(const char *info, void *storage);
+void DdfMobjGetBenefit(const char *info, void *storage);
 
-void DDF_ReadThings(const std::string &data);
+void DdfReadThings(const std::string &data);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

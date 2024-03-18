@@ -131,7 +131,7 @@ class MapDefinition
 
     int partime_;
 
-    GameDefinition *episode_; // set during DDF_CleanUp
+    GameDefinition *episode_; // set during DdfCleanUp
     std::string     episode_name_;
 
     // flags come in two flavours: "force on" and "force off".  When not
@@ -204,7 +204,7 @@ class MapDefinitionContainer : public std::vector<MapDefinition *>
 
 extern MapDefinitionContainer mapdefs; // -ACB- 2004/06/29 Implemented
 
-void DDF_ReadLevels(const std::string &data);
+void DdfReadLevels(const std::string &data);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

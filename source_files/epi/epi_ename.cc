@@ -76,11 +76,11 @@ bool               EName::NameManager::inited_;
 size_t             EName::NameManager::known_name_count_;
 
 const char *predefined_names[] = {
-#define xx(n)    #n,
-#define xy(n, s) s,
+#define EPI_XX(n)    #n,
+#define EPI_XY(n, s) s,
 #include "epi_known_enames.h"
-#undef xx
-#undef xy
+#undef EPI_XX
+#undef EPI_XY
 };
 
 // Returns the index of a name. If the name does not exist and noCreate is

@@ -45,12 +45,10 @@
 #include "s_sound.h"
 #include "w_wad.h"
 
-#define DEBUG 0
-
 // this ranges from 0 (VERY EASY) to 4 (VERY HARD)
 EDGE_DEFINE_CONSOLE_VARIABLE(bot_skill, "2", kConsoleVariableFlagArchive)
 
-#define MOVE_SPEED 20
+static constexpr uint8_t kBotMoveSpeed = 20;
 
 //----------------------------------------------------------------------------
 //  EVALUATING ITEMS, MONSTERS, WEAPONS
@@ -541,13 +539,13 @@ void DeathBot::SelectWeapon()
 
 void DeathBot::MoveToward(const Position &pos)
 {
-    cmd_.speed     = MOVE_SPEED + (6.25 * bot_skill.d_);
+    cmd_.speed     = kBotMoveSpeed + (6.25 * bot_skill.d_);
     cmd_.direction = RendererPointToAngle(pl_->map_object_->x, pl_->map_object_->y, pos.x, pos.y);
 }
 
 void DeathBot::WalkToward(const Position &pos)
 {
-    cmd_.speed     = (MOVE_SPEED + (3.125 * bot_skill.d_));
+    cmd_.speed     = (kBotMoveSpeed + (3.125 * bot_skill.d_));
     cmd_.direction = RendererPointToAngle(pl_->map_object_->x, pl_->map_object_->y, pos.x, pos.y);
 }
 
@@ -648,7 +646,7 @@ void DeathBot::RetreatFrom(const MapObject *enemy)
 
 void DeathBot::Strafe(bool right)
 {
-    cmd_.speed     = MOVE_SPEED + (6.25 * bot_skill.d_);
+    cmd_.speed     = kBotMoveSpeed + (6.25 * bot_skill.d_);
     cmd_.direction = pl_->map_object_->angle_ + (right ? kBAMAngle270 : kBAMAngle90);
 }
 

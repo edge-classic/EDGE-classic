@@ -172,7 +172,7 @@ DehackedResult DehackedAddLump(const char *data, int length)
     return kDehackedConversionOK;
 }
 
-DehackedResult DehackedRunConversion(std::vector<DDFFile> *dest)
+DehackedResult DehackedRunConversion(std::vector<DdfFile> *dest)
 {
     dehacked::wad::dest_container = dest;
 

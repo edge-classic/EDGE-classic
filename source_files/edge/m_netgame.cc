@@ -69,7 +69,7 @@ static int host_position;
 
 static int host_want_bots;
 
-#define HOST_OPTIONS 11
+static constexpr uint8_t kTotalHostOptions = 11;
 
 static void ListAccept(void);
 
@@ -246,19 +246,19 @@ static void ChangeGame(NewGameParameters *param, int dir)
         const char *old_name = param->map_->episode_->name_.c_str();
         const char *new_name = def->name_.c_str();
 
-        int compare = DDF_CompareName(new_name, old_name);
+        int compare = DdfCompareName(new_name, old_name);
 
         if (compare == 0)
             continue;
 
         if (compare * dir > 0)
         {
-            if (!closest || dir * DDF_CompareName(new_name, closest->name_.c_str()) < 0)
+            if (!closest || dir * DdfCompareName(new_name, closest->name_.c_str()) < 0)
                 closest = def;
         }
         else
         {
-            if (!furthest || dir * DDF_CompareName(new_name, furthest->name_.c_str()) < 0)
+            if (!furthest || dir * DdfCompareName(new_name, furthest->name_.c_str()) < 0)
                 furthest = def;
         }
     }
@@ -296,19 +296,19 @@ static void ChangeLevel(NewGameParameters *param, int dir)
         const char *old_name = param->map_->name_.c_str();
         const char *new_name = def->name_.c_str();
 
-        int compare = DDF_CompareName(new_name, old_name);
+        int compare = DdfCompareName(new_name, old_name);
 
         if (compare == 0)
             continue;
 
         if (compare * dir > 0)
         {
-            if (!closest || dir * DDF_CompareName(new_name, closest->name_.c_str()) < 0)
+            if (!closest || dir * DdfCompareName(new_name, closest->name_.c_str()) < 0)
                 closest = def;
         }
         else
         {
-            if (!furthest || dir * DDF_CompareName(new_name, furthest->name_.c_str()) < 0)
+            if (!furthest || dir * DdfCompareName(new_name, furthest->name_.c_str()) < 0)
                 furthest = def;
         }
     }
@@ -520,7 +520,7 @@ bool OptionMenuNetworkHostResponder(InputEvent *ev, int ch)
 {
     if (ch == kEnter || ch == kGamepadA || ch == kMouse1)
     {
-        if (host_position == (HOST_OPTIONS - 1))
+        if (host_position == (kTotalHostOptions - 1))
         {
             HostAccept();
             StartSoundEffect(sound_effect_pistol);
@@ -530,13 +530,13 @@ bool OptionMenuNetworkHostResponder(InputEvent *ev, int ch)
 
     if (ch == kDownArrow || ch == kMouseWheelDown || ch == kGamepadDown)
     {
-        host_position = (host_position + 1) % HOST_OPTIONS;
+        host_position = (host_position + 1) % kTotalHostOptions;
         StartSoundEffect(sound_effect_pstop);
         return true;
     }
     else if (ch == kUpArrow || ch == kMouseWheelUp || ch == kGamepadUp)
     {
-        host_position = (host_position + HOST_OPTIONS - 1) % HOST_OPTIONS;
+        host_position = (host_position + kTotalHostOptions - 1) % kTotalHostOptions;
         StartSoundEffect(sound_effect_pstop);
         return true;
     }

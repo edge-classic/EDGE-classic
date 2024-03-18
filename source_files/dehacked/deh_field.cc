@@ -149,7 +149,7 @@ bool FieldAlter(const FieldReference *references, const char *dehacked_field, in
             // prevent BOOM/MBF specific flags from being set using
             // numeric notation.  Only settable via AA+BB+CC notation.
             if (references->field_type == kFieldTypeBitflags)
-                new_value &= ~ALL_BEX_FLAGS;
+                new_value &= ~DEHACKED_ALL_BEX_FLAGS;
 
             // Yup, we play a bit dirty here
             int *field = (int *)((char *)object + references->offset);

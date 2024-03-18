@@ -333,7 +333,8 @@ void RunLights(void)
 //  AMBIENT SOUND CODE
 //----------------------------------------------------------------------------
 
-#define SECSFX_TIME 7 // every 7 tics (i.e. 5 times per second)
+// every 7 tics (i.e. 5 times per second)
+static constexpr uint8_t kSectorSoundEffectInterval = 7;
 
 class ambientsfx_c
 {
@@ -346,7 +347,7 @@ class ambientsfx_c
     int count;
 
   public:
-    ambientsfx_c(Sector *_sec, SoundEffect *_fx) : sector(_sec), sfx(_fx), count(SECSFX_TIME)
+    ambientsfx_c(Sector *_sec, SoundEffect *_fx) : sector(_sec), sfx(_fx), count(kSectorSoundEffectInterval)
     {
     }
 
@@ -388,7 +389,7 @@ void RunAmbientSounds(void)
             amb->count--;
         else
         {
-            amb->count = SECSFX_TIME;
+            amb->count = kSectorSoundEffectInterval;
 
             StartSoundEffect(amb->sfx, kCategoryLevel, &amb->sector->sound_effects_origin);
         }

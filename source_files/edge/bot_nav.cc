@@ -178,7 +178,7 @@ bool BotNavigateNextRoamPoint(Position &out)
 //       the cost of travelling between two nodes.
 
 // player travel speed when running, in map units per second.
-#define RUNNING_SPEED 450.0f
+static constexpr float kRunningSpeed = 450.0f;
 
 class nav_area_c
 {
@@ -423,7 +423,7 @@ static float BotNavigateTraverseLinkCost(int cur, const nav_link_c &link, bool a
     const Sector *s1 = level_subsectors[cur].sector;
     const Sector *s2 = level_subsectors[link.dest_id].sector;
 
-    float time   = link.length / RUNNING_SPEED;
+    float time   = link.length / kRunningSpeed;
     float f_diff = s2->floor_height - s1->floor_height;
 
     // special check for teleport heights (dest_id is far away)
@@ -492,7 +492,7 @@ static float BotNavigateEstimateH(const Subsector *cur_sub)
     auto p  = nav_areas[id].get_middle();
 
     float dist = RendererPointToDistance(p.x, p.y, nav_finish_mid.x, nav_finish_mid.y);
-    float time = dist / RUNNING_SPEED;
+    float time = dist / kRunningSpeed;
 
     // over-estimate, to account for height changes, obstacles etc
     return time * 1.25f;
@@ -796,7 +796,7 @@ BotPath *BotNavigateFindThing(DeathBot *bot, float radius, MapObject *&best)
             // we need the total traversal time
             cost += area.G;
 
-            if (cost > (radius * 1.4) / RUNNING_SPEED)
+            if (cost > (radius * 1.4) / kRunningSpeed)
                 continue;
 
             // update neighbor if this path is a better one

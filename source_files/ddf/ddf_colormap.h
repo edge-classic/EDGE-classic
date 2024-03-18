@@ -91,9 +91,9 @@ class ColormapContainer : public std::vector<Colormap *>
 
 extern ColormapContainer colormaps; // -ACB- 2004/06/10 Implemented
 
-void DDF_ReadColourMaps(const std::string &data);
+void DdfReadColourMaps(const std::string &data);
 
-void DDF_AddRawColourmap(const char *name, int size, const char *pack_name);
+void DdfAddRawColourmap(const char *name, int size, const char *pack_name);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

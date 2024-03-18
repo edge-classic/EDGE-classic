@@ -1915,7 +1915,7 @@ static void InitializeDdf(void)
 {
     LogDebug("- Initialising DDF\n");
 
-    DDF_Init();
+    DdfInit();
 }
 
 void EdgeShutdown(void)
@@ -1973,7 +1973,7 @@ static void EdgeStartup(void)
 
     InitializeTriggerScripts();
     ProcessMultipleFiles();
-    DDF_ParseEverything();
+    DdfParseEverything();
     // Must be done after WAD and DDF loading to check for potential
     // overrides of lump-specific image/sound/DDF defines
     DoPackSubstitutions();
@@ -1981,7 +1981,7 @@ static void EdgeStartup(void)
                     // appropriate GENMIDI lump
     InitializePalette();
 
-    DDF_CleanUp();
+    DdfCleanUp();
     SetLanguage();
     ReadUmapinfoLumps();
 

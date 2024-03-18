@@ -1014,7 +1014,7 @@ bool SaveGameGetTriggerScript(void *storage, int index, void *extra)
 
     for (temp = current_scripts; temp; temp = temp->next)
     {
-        if (DDF_CompareName(temp->mapid, map_name) != 0)
+        if (DdfCompareName(temp->mapid, map_name) != 0)
             continue;
 
         if (temp->crc.GetCRC() != crc)
@@ -1067,7 +1067,7 @@ void SaveGamePutTriggerScript(void *storage, int index, void *extra)
     // FIXME: move into RTS code
     for (temp = current_scripts, idx_val = 1; temp; temp = temp->next)
     {
-        if (DDF_CompareName(src->mapid, temp->mapid) != 0)
+        if (DdfCompareName(src->mapid, temp->mapid) != 0)
             continue;
 
         if (temp == src)

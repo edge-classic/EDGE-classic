@@ -28,6 +28,7 @@
 #endif
 #ifndef _WIN32
 #include <dirent.h>
+#include <ftw.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -411,67 +412,31 @@ bool ReadDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir, const cha
     closedir(handle);
     return true;
 }
-// Naive implementation; switch to nftw - Dasho
+static std::vector<DirectoryEntry> *nftw_fsd = nullptr;
+static int WalkDirectoryCallback(const char *filename, const struct stat *stat_pointer, int file_flags, FTW *walk_pointer)
+{
+    if (file_flags == FTW_F) // The documentation for nftw refers to these as flags but I think it can only be one of them - Dasho
+    {
+        epi::DirectoryEntry new_entry;
+        new_entry.name   = filename;
+        new_entry.is_dir = false;
+        new_entry.size   = stat_pointer->st_size;
+        nftw_fsd->push_back(new_entry);
+    }
+    return 0;
+}
 bool WalkDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir)
 {
     if (dir.empty() || !FileExists(dir))
         return false;
 
-    std::string prev_dir = CurrentDirectoryGet();
+    nftw_fsd = &fsd;
 
-    if (prev_dir.empty()) // Something goofed up, don't make it worse
-        return false;
+    int result = nftw(dir.c_str(), WalkDirectoryCallback, 10, (FTW_DEPTH|FTW_MOUNT|FTW_PHYS));
 
-    if (!CurrentDirectorySet(dir))
-        return false;
+    nftw_fsd = nullptr;
 
-    DIR *handle = opendir(dir.c_str());
-    if (!handle)
-        return false;
-
-    for (;;)
-    {
-        struct dirent *fdata = readdir(handle);
-        if (!fdata)
-            break;
-
-        if (strlen(fdata->d_name) == 0)
-            continue;
-
-        std::string filename = fdata->d_name;
-
-        // skip the funky "." and ".." dirs
-        if (filename == "." || filename == "..")
-            continue;
-
-        struct stat finfo;
-
-        if (stat(filename.c_str(), &finfo) != 0)
-            continue;
-
-        if (S_ISDIR(finfo.st_mode))
-        {
-            std::string subdir = dir;
-            subdir.push_back('/');
-            subdir.append(filename);
-            if (!WalkDirectory(fsd, subdir))
-                return false;
-        }
-        else
-        {
-            epi::DirectoryEntry new_entry;
-            new_entry.name   = dir;
-            new_entry.is_dir = false;
-            new_entry.size   = finfo.st_size;
-            new_entry.name.push_back('/');
-            new_entry.name.append(filename);
-            fsd.push_back(new_entry);
-        }
-    }
-
-    CurrentDirectorySet(prev_dir);
-    closedir(handle);
-    return true;
+    return (result == 0);
 }
 #endif
 

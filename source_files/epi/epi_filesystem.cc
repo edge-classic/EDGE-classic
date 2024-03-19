@@ -415,6 +415,7 @@ bool ReadDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir, const cha
 static std::vector<DirectoryEntry> *nftw_fsd = nullptr;
 static int WalkDirectoryCallback(const char *filename, const struct stat *stat_pointer, int file_flags, FTW *walk_pointer)
 {
+    EPI_ASSERT(nftw_fsd);
     if (file_flags == FTW_F) // The documentation for nftw refers to these as flags but I think it can only be one of them - Dasho
     {
         epi::DirectoryEntry new_entry;

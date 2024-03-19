@@ -39,7 +39,7 @@
 namespace epi
 {
 
-#ifdef _WIN32                                   // Windows API
+#ifdef _WIN32                                    // Windows API
 static inline bool IsDirectorySeparator(const char c)
 {
     return (c == '\\' || c == '/' || c == ':'); // Kester added ':'
@@ -107,9 +107,15 @@ bool IsDirectory(std::string_view dir)
 {
     EPI_ASSERT(!dir.empty());
     std::wstring wide_dir = epi::UTF8ToWString(dir);
+#ifdef __MINGW32__
+    struct stat dircheck;
+    if (wstat(wide_dir.c_str(), &dircheck) != 0)
+        return false;
+#else
     struct _stat dircheck;
     if (_wstat(wide_dir.c_str(), &dircheck) != 0)
         return false;
+#endif
     return (dircheck.st_mode & _S_IFDIR);
 }
 static std::string CurrentDirectoryGet()

@@ -27,6 +27,8 @@
 
 #include "con_var.h"
 
+#include <stdint.h>
+
 constexpr uint16_t kMusicBuffer = 1024;
 
 /* abstract base class */

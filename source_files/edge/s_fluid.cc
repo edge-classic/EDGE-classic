@@ -18,6 +18,8 @@
 
 #include "s_fluid.h"
 
+#include <stdint.h>
+
 #include "HandmadeMath.h"
 #include "dm_state.h"
 #include "epi_file.h"

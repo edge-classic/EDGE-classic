@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include <string>
 
 void ConvertDehacked(const uint8_t *data, int length, const std::string &source);

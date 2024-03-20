@@ -366,8 +366,6 @@ static const char *FileKindString(FileKind kind)
         return "iwad";
     case kFileKindPWad:
         return "pwad";
-    case kFileKindEWad:
-        return "edge";
     case kFileKindEEpk:
         return "edge";
     case kFileKindXWad:

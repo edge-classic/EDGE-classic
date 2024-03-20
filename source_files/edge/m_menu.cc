@@ -1274,7 +1274,14 @@ static void CreateEpisodeMenu(void)
         if (g->firstmap_.empty())
             continue;
 
-        if (CheckLumpNumberForName(g->firstmap_.c_str()) == -1)
+        MapDefinition *ddf_map_name_check = mapdefs.Lookup(g->firstmap_.c_str());
+
+        if (ddf_map_name_check)
+        {
+            if (CheckLumpNumberForName(ddf_map_name_check->lump_.c_str()) == -1)
+                continue;
+        }
+        else if (CheckLumpNumberForName(g->firstmap_.c_str()) == -1)
             continue;
 
         EpisodeMenu[e].status          = 1;

@@ -756,11 +756,24 @@ void PickLoadingScreen(void)
 
         // ignore non-existing episodes.  Doesn't include title-only ones
         // like [EDGE].
-        if (title_pic == 0 && g->firstmap_ != "" && CheckLumpNumberForName(g->firstmap_.c_str()) == -1)
+        if (title_pic == 0 && g->firstmap_ != "")
         {
-            title_game = (title_game + 1) % gamedefs.size();
-            title_pic  = 0;
-            continue;
+            MapDefinition *ddf_map_name_check = mapdefs.Lookup(g->firstmap_.c_str());
+            if (ddf_map_name_check)
+            {
+                if (CheckLumpNumberForName(ddf_map_name_check->lump_.c_str()) == -1)
+                {
+                    title_game = (title_game + 1) % gamedefs.size();
+                    title_pic  = 0;
+                    continue;
+                }
+            }
+            else if (CheckLumpNumberForName(g->firstmap_.c_str()) == -1)
+            {
+                title_game = (title_game + 1) % gamedefs.size();
+                title_pic  = 0;
+                continue;
+            }
         }
 
         // ignore non-existing images
@@ -930,11 +943,24 @@ void AdvanceTitle(void)
 
         // ignore non-existing episodes.  Doesn't include title-only ones
         // like [EDGE].
-        if (title_pic == 0 && g->firstmap_ != "" && CheckLumpNumberForName(g->firstmap_.c_str()) == -1)
+        if (title_pic == 0 && g->firstmap_ != "")
         {
-            title_game = (title_game + 1) % gamedefs.size();
-            title_pic  = 0;
-            continue;
+            MapDefinition *ddf_map_name_check = mapdefs.Lookup(g->firstmap_.c_str());
+            if (ddf_map_name_check)
+            {
+                if (CheckLumpNumberForName(ddf_map_name_check->lump_.c_str()) == -1)
+                {
+                    title_game = (title_game + 1) % gamedefs.size();
+                    title_pic  = 0;
+                    continue;
+                }
+            }
+            else if (CheckLumpNumberForName(g->firstmap_.c_str()) == -1)
+            {
+                title_game = (title_game + 1) % gamedefs.size();
+                title_pic  = 0;
+                continue;
+            }
         }
 
         // ignore non-existing images

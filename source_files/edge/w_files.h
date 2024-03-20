@@ -35,7 +35,6 @@ enum FileKind
 {
     kFileKindIWad = 0, // iwad file
     kFileKindPWad,     // normal .wad file
-    kFileKindEWad,     // edge wad, priority loading
     kFileKindXWad,     // ajbsp node wad
 
     kFileKindFolder,   // a folder somewhere

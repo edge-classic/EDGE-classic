@@ -7,11 +7,6 @@
 
 #VERSION 1.30
 
-// this entry is for compability with mods
-[EDGE]
-TITLE_GRAPHIC="EDGECRED";
-TITLE_TIME=60T;
-
 [HELL_ON_EARTH] // Fix this when Doom stuff is moved out of edge-defs
 TITLE_GRAPHIC="TITLEPIC","CREDIT";
 DESCRIPTION=M_EPI6_Desc;

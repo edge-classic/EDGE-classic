@@ -1136,8 +1136,7 @@ void ProcessWad(DataFile *df, size_t file_index)
     {
         RawWadEntry &entry = raw_info[i];
 
-        bool allow_ddf = (df->kind_ == kFileKindEWad ||
-                          (df->kind_ == kFileKindIWad && epi::StringCompare(game_base, "CUSTOM") == 0) ||
+        bool allow_ddf = (epi::StringCompare(game_base, "custom") == 0 ||
                           df->kind_ == kFileKindPWad || df->kind_ == kFileKindPackWad || df->kind_ == kFileKindIpk ||
                           df->kind_ == kFileKindIFolder);
 
@@ -2507,8 +2506,7 @@ bool IsLumpInPwad(const char *name)
             DataFile *df = data_files[filenum];
 
             // we only want pwads
-            // or ewads ;)
-            if (df->kind_ == kFileKindPWad || df->kind_ == kFileKindEWad || df->kind_ == kFileKindPackWad)
+            if (df->kind_ == kFileKindPWad || df->kind_ == kFileKindPackWad)
             {
                 in_pwad = true;
             }

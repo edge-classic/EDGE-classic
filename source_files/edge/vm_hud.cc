@@ -975,6 +975,18 @@ static void HD_get_image_height(coal::Vm *vm, int argc)
     }
 }
 
+// hud.lookup_LDF(languageEntry)
+//
+static void HD_lookup_LDF(coal::Vm *vm, int argc)
+{
+    (void)argc;
+
+    const char *name = vm->AccessParamString(0);
+
+    vm->ReturnString(language[name]);
+}
+
+
 //------------------------------------------------------------------------
 // HUD Functions
 //------------------------------------------------------------------------
@@ -1046,6 +1058,7 @@ void CoalRegisterHud()
 
     ui_vm->AddNativeFunction("hud.get_image_width", HD_get_image_width);
     ui_vm->AddNativeFunction("hud.get_image_height", HD_get_image_height);
+    ui_vm->AddNativeFunction("hud.lookup_LDF", HD_lookup_LDF);
 }
 
 void CoalNewGame(void)

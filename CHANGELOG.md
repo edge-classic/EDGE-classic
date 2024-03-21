@@ -3,6 +3,7 @@ CHANGELOG for EDGE-Classic 1.38 (since EDGE-Classic 1.37)
 
 New Features
 ------------
+- COALHUDS/LUAHUDS: new function hud.lookup_LDF(languageEntry) which will return the language.ldf entry
 
 
 General Improvements/Changes

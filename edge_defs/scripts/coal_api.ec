@@ -265,6 +265,8 @@ module hud
 	function get_image_width(image : string)    : float = native
 	function get_image_height(image : string)    : float = native
 	
+	function lookup_LDF(languageEntry : string) : string = native
+	
 }
 
 

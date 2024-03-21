@@ -81,6 +81,18 @@ static int HD_game_mode(lua_State *L)
     return 1;
 }
 
+
+// hud.lookup_LDF(languageEntry)
+//
+static int HD_lookup_LDF(lua_State *L)
+{
+    const char *name = luaL_checkstring(L, 1);
+
+    lua_pushstring(L, language[name]);
+
+    return 1;
+}
+
 // hud.game_name()
 //
 static int HD_game_name(lua_State *L)
@@ -995,6 +1007,8 @@ static const luaL_Reg hudlib[] = {{"game_mode", HD_game_mode},
 
                                   {"get_image_width", HD_get_image_width},
                                   {"get_image_height", HD_get_image_height},
+
+                                  {"lookup_LDF", HD_lookup_LDF},
                                   {nullptr, nullptr}};
 
 static int luaopen_hud(lua_State *L)

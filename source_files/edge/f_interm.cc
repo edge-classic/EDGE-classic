@@ -1378,9 +1378,9 @@ static void DrawCoopStats(void)
     // FIXME: better alignment
 
     HudWriteText(multiplayer_intermission_style, t_type, 6, y, "Player");
-    HudWriteText(multiplayer_intermission_style, t_type, 56, y, "Kills");
-    HudWriteText(multiplayer_intermission_style, t_type, 98, y, "Items");
-    HudWriteText(multiplayer_intermission_style, t_type, 142, y, "Secret");
+    HudWriteText(multiplayer_intermission_style, t_type, 56, y, language["IntermissionKills"]);
+    HudWriteText(multiplayer_intermission_style, t_type, 98, y, language["IntermissionItems"]);
+    HudWriteText(multiplayer_intermission_style, t_type, 142, y, language["IntermissionSecrets"]);
 
     if (do_frags)
     {
@@ -1598,7 +1598,7 @@ static void DrawSinglePlayerStats(void)
     else
     {
         HudWriteText(single_player_intermission_style, StyleDefinition::kTextSectionAlternate, kSinglePlayerStateStatsX,
-                     kSinglePlayerStateStatsY, "Kills");
+                     kSinglePlayerStateStatsY, language["IntermissionKills"]);
         if (!s.empty())
             HudWriteText(
                 single_player_intermission_style, StyleDefinition::kTextSectionAlternate,
@@ -1625,7 +1625,7 @@ static void DrawSinglePlayerStats(void)
     else
     {
         HudWriteText(single_player_intermission_style, StyleDefinition::kTextSectionAlternate, kSinglePlayerStateStatsX,
-                     kSinglePlayerStateStatsY + lh, "Items");
+                     kSinglePlayerStateStatsY + lh, language["IntermissionItems"]);
         if (!s.empty())
             HudWriteText(
                 single_player_intermission_style, StyleDefinition::kTextSectionAlternate,
@@ -1652,7 +1652,7 @@ static void DrawSinglePlayerStats(void)
     else
     {
         HudWriteText(single_player_intermission_style, StyleDefinition::kTextSectionAlternate, kSinglePlayerStateStatsX,
-                     kSinglePlayerStateStatsY + 2 * lh, "Secrets");
+                     kSinglePlayerStateStatsY + 2 * lh, language["IntermissionSecrets"]);
         if (!s.empty())
             HudWriteText(
                 single_player_intermission_style, StyleDefinition::kTextSectionAlternate,
@@ -1670,7 +1670,7 @@ static void DrawSinglePlayerStats(void)
     else
     {
         HudWriteText(single_player_intermission_style, StyleDefinition::kTextSectionAlternate, kSinglePlayerStateTimeX,
-                     kSinglePlayerStateTimeY, "Time");
+                     kSinglePlayerStateTimeY, language["IntermissionTime"]);
         DrawTime(160 - kSinglePlayerStateTimeX - TimeWidth(count_time, true), kSinglePlayerStateTimeY, count_time,
                  true);
     }

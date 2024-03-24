@@ -266,7 +266,8 @@ static void ScriptCheckForTime(const char *info, void *storage)
     float val;
     if (sscanf(info, "%f", &val) != 1)
     {
-        LogWarning("Bad time value '%s'.\n", info);
+        //LogWarning("Bad time value '%s'.\n", info);
+        LogWarning("RTS: Bad time value '%s' near line %d.\n", info,current_script_line_number);
         return;
     }
 

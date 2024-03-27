@@ -339,7 +339,7 @@ bool CurrentDirectorySet(std::string_view dir)
 bool MakeDirectory(std::string_view dir)
 {
     EPI_ASSERT(!dir.empty());
-    return (mkdir(std::string(dir).c_str(), 0664) == 0);
+    return (mkdir(std::string(dir).c_str(), 0774) == 0);
 }
 bool FileExists(std::string_view name)
 {

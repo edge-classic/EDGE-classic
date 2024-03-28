@@ -1283,12 +1283,22 @@ static void IdentifyVersion(void)
             EPI_ASSERT(game_paths.size() == game_buttons.size());
             SDL_MessageBoxData picker_data;
             SDL_memset(&picker_data, 0, sizeof(SDL_MessageBoxData));
-            picker_data.title      = "EDGE-Classic Game Selector";
-            picker_data.message    = "No game was specified, but EDGE-Classic found multiple valid "
-                                     "game files. Please select one or press Escape to cancel.";
-            picker_data.numbuttons = game_buttons.size();
-            picker_data.buttons    = game_buttons.data();
-            int button_hit         = 0;
+            picker_data.title = "EDGE-Classic Game Selector";
+            if (game_paths.size() > 8)
+            {
+                picker_data.message    = "No game was specified, but EDGE-Classic found multiple valid "
+                                         "game files (first 8 shown here; please consider using a dedicated launcher). "
+                                         "Please select one or press Escape to cancel.";
+                picker_data.numbuttons = 8;
+            }
+            else
+            {
+                picker_data.message    = "No game was specified, but EDGE-Classic found multiple valid "
+                                         "game files. Please select one or press Escape to cancel.";
+                picker_data.numbuttons = game_buttons.size();
+            }
+            picker_data.buttons = game_buttons.data();
+            int button_hit      = 0;
             if (SDL_ShowMessageBox(&picker_data, &button_hit) != 0)
                 FatalError("Error in game selection dialog: %s!\n", SDL_GetError());
             else if (button_hit == -1)
@@ -1588,12 +1598,22 @@ static void IdentifyVersion(void)
             EPI_ASSERT(game_paths.size() == game_buttons.size());
             SDL_MessageBoxData picker_data;
             SDL_memset(&picker_data, 0, sizeof(SDL_MessageBoxData));
-            picker_data.title      = "EDGE-Classic Game Selector";
-            picker_data.message    = "No game was specified, but EDGE-Classic found multiple valid "
-                                     "game files. Please select one or press Escape to cancel.";
-            picker_data.numbuttons = game_buttons.size();
-            picker_data.buttons    = game_buttons.data();
-            int button_hit         = 0;
+            picker_data.title = "EDGE-Classic Game Selector";
+            if (game_paths.size() > 8)
+            {
+                picker_data.message    = "No game was specified, but EDGE-Classic found multiple valid "
+                                         "game files (first 8 shown here; please consider using a dedicated launcher). "
+                                         "Please select one or press Escape to cancel.";
+                picker_data.numbuttons = 8;
+            }
+            else
+            {
+                picker_data.message    = "No game was specified, but EDGE-Classic found multiple valid "
+                                         "game files. Please select one or press Escape to cancel.";
+                picker_data.numbuttons = game_buttons.size();
+            }
+            picker_data.buttons = game_buttons.data();
+            int button_hit      = 0;
             if (SDL_ShowMessageBox(&picker_data, &button_hit) != 0)
                 FatalError("Error in game selection dialog: %s!\n", SDL_GetError());
             else if (button_hit == -1)

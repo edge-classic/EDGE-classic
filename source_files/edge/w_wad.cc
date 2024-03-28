@@ -71,6 +71,8 @@
 #include "w_files.h"
 #include "w_texture.h"
 
+#define EDGE_ENABLE_STRIFE 0
+
 // Combination of unique lumps needed to best identify an IWAD
 const std::vector<GameCheck> game_checker = {{
     {"Custom", "custom", {"EDGEGAME", "EDGEGAME"}},
@@ -90,7 +92,9 @@ const std::vector<GameCheck> game_checker = {{
     {"Doom Demo", "doom1", {"SHOTA0", "E1M1"}},
     {"Doom II", "doom2", {"BFGGA0", "MAP01"}},
     {"Doom II BFG", "doom2", {"DMENUPIC", "MAP33"}}, // BFG Edition
+#if EDGE_ENABLE_STRIFE
     {"Strife", "strife", {"VELLOGO", "RGELOGO"}}     // Dev/internal use - Definitely nowhwere near playable
+#endif
 }};
 
 class WadFile

@@ -1287,7 +1287,7 @@ static void IdentifyVersion(void)
             if (game_paths.size() > 8)
             {
                 picker_data.message    = "No game was specified, but EDGE-Classic found multiple valid "
-                                         "game files (first 8 shown here; please consider using a dedicated launcher). "
+                                         "game files (first 8 shown here; consider using a dedicated launcher). "
                                          "Please select one or press Escape to cancel.";
                 picker_data.numbuttons = 8;
             }
@@ -1602,7 +1602,7 @@ static void IdentifyVersion(void)
             if (game_paths.size() > 8)
             {
                 picker_data.message    = "No game was specified, but EDGE-Classic found multiple valid "
-                                         "game files (first 8 shown here; please consider using a dedicated launcher). "
+                                         "game files (first 8 shown here; consider using a dedicated launcher). "
                                          "Please select one or press Escape to cancel.";
                 picker_data.numbuttons = 8;
             }

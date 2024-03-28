@@ -1290,7 +1290,7 @@ static void IdentifyVersion(void)
             picker_data.buttons    = game_buttons.data();
             int button_hit         = 0;
             if (SDL_ShowMessageBox(&picker_data, &button_hit) != 0)
-                FatalError("Error in game selection dialog!\n");
+                FatalError("Error in game selection dialog: %s!\n", SDL_GetError());
             else if (button_hit == -1)
                 FatalError("Game selection cancelled.\n");
             else
@@ -1595,7 +1595,7 @@ static void IdentifyVersion(void)
             picker_data.buttons    = game_buttons.data();
             int button_hit         = 0;
             if (SDL_ShowMessageBox(&picker_data, &button_hit) != 0)
-                FatalError("Error in game selection dialog!\n");
+                FatalError("Error in game selection dialog: %s!\n", SDL_GetError());
             else if (button_hit == -1)
                 FatalError("Game selection cancelled.\n");
             else

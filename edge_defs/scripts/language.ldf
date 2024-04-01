@@ -11,6 +11,9 @@
 
 [ENGLISH]
 
+KeyBindings="BIND THOSE KEYS";
+MouseController="Mouse / Controller";
+
 MusicPrefix="D_";
 MenuWhichEpisode="Which Episode?";
 M_EPI1_Desc="Knee Deep In The Dead";

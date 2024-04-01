@@ -242,7 +242,7 @@ struct OptionMenuItem
 {
     OptionMenuItemType type;
 
-    char        name[48];
+    const char *name;
     const char *type_names;
 
     int   total_types;
@@ -333,8 +333,8 @@ static constexpr uint8_t kOptionMenuLanguagePosition    = 10;
 static constexpr uint8_t kOptionMenuNetworkHostPosition = 13;
 
 static OptionMenuItem mainoptions[] = {
-    {kOptionMenuItemTypeFunction, "Key Bindings", nullptr, 0, nullptr, OptionMenuKeyboardOptions, "Controls"},
-    {kOptionMenuItemTypeFunction, "Mouse / Controller", nullptr, 0, nullptr, OptionMenuAnalogueOptions,
+    {kOptionMenuItemTypeFunction, "KeyBindings", nullptr, 0, nullptr, OptionMenuKeyboardOptions, "Controls"},
+    {kOptionMenuItemTypeFunction, "MouseController", nullptr, 0, nullptr, OptionMenuAnalogueOptions,
      "AnalogueOptions"},
     {kOptionMenuItemTypeFunction, "Gameplay Options", nullptr, 0, nullptr, OptionMenuGameplayOptions,
      "GameplayOptions"},
@@ -885,13 +885,13 @@ void OptionMenuCheckNetworkGame(void)
 {
     if (game_state >= kGameStateLevel)
     {
-        strcpy(mainoptions[kOptionMenuNetworkHostPosition + 0].name, "Leave Game");
+        mainoptions[kOptionMenuNetworkHostPosition + 0].name = "Leave Game";
         mainoptions[kOptionMenuNetworkHostPosition + 0].routine = &MenuEndGame;
         mainoptions[kOptionMenuNetworkHostPosition + 0].help    = nullptr;
     }
     else
     {
-        strcpy(mainoptions[kOptionMenuNetworkHostPosition + 0].name, "Start Bot Match");
+        mainoptions[kOptionMenuNetworkHostPosition + 0].name = "Start Bot Match";
         mainoptions[kOptionMenuNetworkHostPosition + 0].routine = &OptionMenuHostNetGame;
         mainoptions[kOptionMenuNetworkHostPosition + 0].help    = nullptr;
     }
@@ -1055,10 +1055,12 @@ void OptionMenuDrawer()
             TEXTscale = style->definition_->text_[fontType].scale_;
         }
 
+        const char *name_entry = language[current_menu->items[i].name];
+
         HudWriteText(style, fontType,
                      (current_menu->menu_center) -
-                         (style->fonts_[fontType]->StringWidth(current_menu->items[i].name) * TEXTscale),
-                     curry, current_menu->items[i].name);
+                         (style->fonts_[fontType]->StringWidth(name_entry) * TEXTscale),
+                     curry, name_entry);
 
         // Draw current soundfont
         if (current_menu == &sound_optmenu && current_menu->items[i].routine == OptionMenuChangeSoundfont)

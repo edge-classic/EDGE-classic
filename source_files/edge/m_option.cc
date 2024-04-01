@@ -333,28 +333,28 @@ static constexpr uint8_t kOptionMenuLanguagePosition    = 10;
 static constexpr uint8_t kOptionMenuNetworkHostPosition = 13;
 
 static OptionMenuItem mainoptions[] = {
-    {kOptionMenuItemTypeFunction, "KeyBindings", nullptr, 0, nullptr, OptionMenuKeyboardOptions, "Controls"},
-    {kOptionMenuItemTypeFunction, "MouseController", nullptr, 0, nullptr, OptionMenuAnalogueOptions,
+    {kOptionMenuItemTypeFunction, "MenuBinding", nullptr, 0, nullptr, OptionMenuKeyboardOptions, "Controls"},
+    {kOptionMenuItemTypeFunction, "MenuMouse", nullptr, 0, nullptr, OptionMenuAnalogueOptions,
      "AnalogueOptions"},
-    {kOptionMenuItemTypeFunction, "Gameplay Options", nullptr, 0, nullptr, OptionMenuGameplayOptions,
+    {kOptionMenuItemTypeFunction, "MenuGameplay", nullptr, 0, nullptr, OptionMenuGameplayOptions,
      "GameplayOptions"},
-    {kOptionMenuItemTypeFunction, "Performance Options", nullptr, 0, nullptr, OptionMenuPerformanceOptions,
+    {kOptionMenuItemTypeFunction, "MenuPerformance", nullptr, 0, nullptr, OptionMenuPerformanceOptions,
      "PerformanceOptions"},
-    {kOptionMenuItemTypeFunction, "Accessibility Options", nullptr, 0, nullptr, OptionMenuAccessibilityOptions,
+    {kOptionMenuItemTypeFunction, "MenuAccessibility", nullptr, 0, nullptr, OptionMenuAccessibilityOptions,
      "AccessibilityOptions"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeFunction, "Sound Options", nullptr, 0, nullptr, OptionMenuSoundOptions, "SoundOptions"},
-    {kOptionMenuItemTypeFunction, "Video Options", nullptr, 0, nullptr, OptionMenuVideoOptions, "VideoOptions"},
+    {kOptionMenuItemTypeFunction, "MenuSound", nullptr, 0, nullptr, OptionMenuSoundOptions, "SoundOptions"},
+    {kOptionMenuItemTypeFunction, "MenuVideo", nullptr, 0, nullptr, OptionMenuVideoOptions, "VideoOptions"},
 #ifndef EDGE_WEB
-    {kOptionMenuItemTypeFunction, "Screen Options", nullptr, 0, nullptr, OptionMenuResolutionOptions, "ChangeRes"},
+    {kOptionMenuItemTypeFunction, "MenuResolution", nullptr, 0, nullptr, OptionMenuResolutionOptions, "ChangeRes"},
 #endif
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeFunction, "Language", nullptr, 0, nullptr, OptionMenuChangeLanguage, nullptr},
-    {kOptionMenuItemTypeSwitch, "Messages", YesNo, 2, &show_messages, nullptr, "Messages"},
+    {kOptionMenuItemTypeFunction, "MenuLanguage", nullptr, 0, nullptr, OptionMenuChangeLanguage, nullptr},
+    {kOptionMenuItemTypeSwitch, "MenuMessages", YesNo, 2, &show_messages, nullptr, "Messages"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeFunction, "Start Bot Match", nullptr, 0, nullptr, OptionMenuHostNetGame, nullptr},
+    {kOptionMenuItemTypeFunction, "MenuStartBotmatch", nullptr, 0, nullptr, OptionMenuHostNetGame, nullptr},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeFunction, "Reset to Defaults", nullptr, 0, nullptr, ConfigurationResetDefaults, nullptr}};
+    {kOptionMenuItemTypeFunction, "MenuResetToDefault", nullptr, 0, nullptr, ConfigurationResetDefaults, nullptr}};
 
 static OptionMenuDefinition main_optmenu = {mainoptions,
                                             sizeof(mainoptions) / sizeof(OptionMenuItem),
@@ -885,13 +885,13 @@ void OptionMenuCheckNetworkGame(void)
 {
     if (game_state >= kGameStateLevel)
     {
-        mainoptions[kOptionMenuNetworkHostPosition + 0].name = "Leave Game";
+        mainoptions[kOptionMenuNetworkHostPosition + 0].name = language["MainQuitGame"]; // "Leave Game";
         mainoptions[kOptionMenuNetworkHostPosition + 0].routine = &MenuEndGame;
         mainoptions[kOptionMenuNetworkHostPosition + 0].help    = nullptr;
     }
     else
     {
-        mainoptions[kOptionMenuNetworkHostPosition + 0].name = "Start Bot Match";
+        mainoptions[kOptionMenuNetworkHostPosition + 0].name = language["MenuStartBotmatch"]; //"Start Bot Match";
         mainoptions[kOptionMenuNetworkHostPosition + 0].routine = &OptionMenuHostNetGame;
         mainoptions[kOptionMenuNetworkHostPosition + 0].help    = nullptr;
     }

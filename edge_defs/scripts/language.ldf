@@ -640,6 +640,7 @@ OptCrouching="Crouching";
 OptMoreBlood="More Blood";
 OptExtras="Extras";
 OptGravity="Gravity";
+OptQuickLoad="Quick Load";
 OptEnemyRespawnMode="Enemy Respawn Mode";
 OptItemRespawn="Item Respawn";
 OptFastMonsters="Fast Monsters";

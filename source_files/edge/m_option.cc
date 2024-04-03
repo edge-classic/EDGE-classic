@@ -382,7 +382,7 @@ static OptionMenuItem vidoptions[] = {
     {kOptionMenuItemTypeSwitch, "Smoothing", YesNo, 2, &image_smoothing, OptionMenuChangeMipMap, nullptr},
     {kOptionMenuItemTypeSwitch, "Upscale Textures", "Off/UI Only/UI & Sprites/All", 4, &hq2x_scaling,
      OptionMenuChangeMipMap, "Only affects paletted (Doom format) textures"},
-    {kOptionMenuItemTypeSwitch, "Title/Intermission Scaling", "Normal/Fill Border", 2, &title_scaling.d_,
+    {kOptionMenuItemTypeSwitch, "Title/Intermission Scaling", "Normal/Color Match/Border Fill", 3, &title_scaling.d_,
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &title_scaling},
     {kOptionMenuItemTypeSwitch, "Sky Scaling", "Mirror/Repeat/Stretch/Vanilla", 4, &sky_stretch_mode.d_,
      OptionMenuUpdateConsoleVariableFromInt, "Vanilla will be forced when Mouselook is Off", &sky_stretch_mode},

@@ -181,7 +181,7 @@ EDGE_DEFINE_CONSOLE_VARIABLE(homepage, "https://edge-classic.github.io", kConsol
 
 EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(video_overlay, "0", kConsoleVariableFlagArchive, 0, 6)
 
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(title_scaling, "0", kConsoleVariableFlagArchive, 0, 1)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(title_scaling, "0", kConsoleVariableFlagArchive, 0, 2)
 
 EDGE_DEFINE_CONSOLE_VARIABLE(force_infighting, "0", kConsoleVariableFlagArchive)
 
@@ -233,10 +233,16 @@ class StartupProgress
         HudFrameSetup();
         if (loading_image)
         {
-            if (title_scaling.d_) // Fill Border
+            if (title_scaling.d_ == 1) // Color Match
+            {
+                if (loading_image->color_match_average_ == kRGBANoValue)
+                    StoreColorMatchAverage(loading_image);
+                HudSolidBox(-320, -200, 960, 600, loading_image->color_match_average_);
+            }
+            else if (title_scaling.d_ == 2) // Fill Border
             {
                 if (!loading_image->blurred_version_)
-                    ImageStoreBlurred(loading_image);
+                    StoreBlurredImage(loading_image);
                 HudStretchImage(-320, -200, 960, 600, loading_image->blurred_version_, 0, 0);
             }
             HudDrawImageTitleWS(loading_image);
@@ -717,10 +723,16 @@ static void TitleDrawer(void)
 {
     if (title_image)
     {
-        if (title_scaling.d_) // Fill Border
+        if (title_scaling.d_ == 1) // Color Match
+        {
+            if (title_image->color_match_average_ == kRGBANoValue)
+                StoreColorMatchAverage(title_image);
+            HudSolidBox(-320, -200, 960, 600, title_image->color_match_average_);
+        }
+        else if (title_scaling.d_ == 2) // Fill Border
         {
             if (!title_image->blurred_version_)
-                ImageStoreBlurred(title_image);
+                StoreBlurredImage(title_image);
             HudStretchImage(-320, -200, 960, 600, title_image->blurred_version_, 0, 0);
         }
         HudDrawImageTitleWS(title_image);

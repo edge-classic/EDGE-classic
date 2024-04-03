@@ -103,6 +103,7 @@ class Image
 
     Image *blurred_version_ = nullptr;
     float  blur_sigma_      = 0.0f;
+    RGBAColor color_match_average_ = kRGBANoValue;
 
     // --- information about where this image came from ---
     std::string name_;
@@ -286,7 +287,10 @@ const Image **GetUserSprites(int *count);
 int MakeValidTextureSize(int value);
 
 // Store a duplicate version of the image_c with smoothing forced
-void ImageStoreBlurred(const Image *image);
+void StoreBlurredImage(const Image *image);
+
+// Store the image_c's average color
+void StoreColorMatchAverage(const Image *image);
 
 enum ImageSource
 {

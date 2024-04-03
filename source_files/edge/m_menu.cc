@@ -2959,13 +2959,16 @@ void MenuDrawer(void)
     if (menu_backdrop && (option_menu_on || network_game_menu_on ||
                           (current_menu->draw_function == MenuDrawLoad || current_menu->draw_function == MenuDrawSave)))
     {
-        if (title_scaling.d_) // Fill Border
+        if (title_scaling.d_ == 1) // Color Match
+        {
+            if (menu_backdrop->color_match_average_ == kRGBANoValue)
+                StoreColorMatchAverage(menu_backdrop);
+            HudSolidBox(-320, -200, 960, 600, menu_backdrop->color_match_average_);
+        }
+        else if (title_scaling.d_ == 2) // Fill Border
         {
             if (!menu_backdrop->blurred_version_)
-            {
-                ImageStoreBlurred(menu_backdrop);
-                menu_backdrop->blurred_version_->grayscale_ = true;
-            }
+                StoreBlurredImage(menu_backdrop);
             HudStretchImage(-320, -200, 960, 600, menu_backdrop->blurred_version_, 0, 0);
         }
         else

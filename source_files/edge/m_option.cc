@@ -570,7 +570,7 @@ static OptionMenuItem playoptions[] = {
     {kOptionMenuItemTypeBoolean, "Erraticism", YesNo, 2, &erraticism.d_, OptionMenuUpdateConsoleVariableFromInt,
      "Time only advances when you move or fire", &erraticism},
 
-    {kOptionMenuItemTypeSlider, "Gravity", nullptr, 0, &gravity_factor.f_, OptionMenuUpdateConsoleVariableFromFloat,
+    {kOptionMenuItemTypeSlider, "OptGravity", nullptr, 0, &gravity_factor.f_, OptionMenuUpdateConsoleVariableFromFloat,
      "Gravity", &gravity_factor, 0.10f, 0.0f, 2.0f, "%gx"},
 
     {kOptionMenuItemTypeBoolean, "Respawn Enemies", YesNo, 2, &global_flags.enemies_respawn, OptionMenuChangeRespawn,
@@ -847,7 +847,7 @@ static OptionMenuDefinition program_optmenu1 = {program_keyconfig1,
 static OptionMenuItem program_keyconfig2[] = {
     {kOptionMenuItemTypeKeyConfig, "End Game", nullptr, 0, &key_end_game, nullptr, nullptr},
     {kOptionMenuItemTypeKeyConfig, "Toggle Messages", nullptr, 0, &key_message_toggle, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Quickload", nullptr, 0, &key_quick_load, nullptr, nullptr},
+    {kOptionMenuItemTypeKeyConfig, "OptQuickLoad", nullptr, 0, &key_quick_load, nullptr, nullptr},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeKeyConfig, "Quit EDGE", nullptr, 0, &key_quit_edge, nullptr, nullptr},
     {kOptionMenuItemTypeKeyConfig, "Toggle Gamma", nullptr, 0, &key_gamma_toggle, nullptr, nullptr},

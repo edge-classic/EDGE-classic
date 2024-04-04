@@ -42,6 +42,11 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
         return kSoundOgg;
     }
 
+    if ((data[0] == 'P' || data[0] == 'R') && data[1] == 'S' && data[2] == 'I' && data[3] == 'D')
+    {
+        return kSoundSid;
+    }
+
     if (data[0] == 'M' && data[1] == 'U' && data[2] == 'S')
     {
         return kSoundMus;
@@ -133,6 +138,9 @@ SoundFormat SoundFilenameToFormat(std::string_view filename)
 
     if (ext == ".mp3")
         return kSoundMp3;
+
+    if (ext == ".sid" || ext == ".psid")
+        return kSoundSid;
 
     // Test MUS vs EA-MIDI MUS ?
     if (ext == ".mus")

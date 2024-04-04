@@ -5,7 +5,6 @@
 #include <climits>
 #include <queue>
 #include <vector>
-#include <array>
 
 #include "patches.h"
 
@@ -146,9 +145,9 @@ private:
 	Opal *m_opl3 = nullptr;
 	int rate;
 
-	std::array<int16_t, 2> m_output; // output sample data
+	std::pair<int16_t, int16_t> m_output; // output sample data
 	// if we need to clock one of the OPLs between register writes, save the resulting sample
-	std::queue<std::array<int16_t, 2>> m_sampleFIFO;
+	std::queue<std::pair<int16_t, int16_t>> m_sampleFIFO;
 	
 	MIDIChannel m_channels[16];
 	std::vector<OPLVoice> m_voices;

@@ -37,6 +37,7 @@
 #include "s_ogg.h"
 #include "s_opl.h"
 #include "s_rad.h"
+#include "s_sid.h"
 #include "s_sound.h"
 #include "snd_types.h"
 #include "w_files.h"
@@ -192,6 +193,11 @@ void ChangeMusic(int entry_number, bool loop)
     case kSoundRad:
         delete F;
         music_player = PlayRadMusic(data, length, loop);
+        break;
+
+    case kSoundSid:
+        delete F;
+        music_player = PlaySIDMusic(data, length, loop);
         break;
 
     // IMF writes raw OPL registers, so must use the OPL player

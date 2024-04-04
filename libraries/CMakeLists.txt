@@ -1,4 +1,4 @@
-
+add_subdirectory(crsid)
 if (NOT EDGE_GL_ES2)
   add_subdirectory(glad)
 else()

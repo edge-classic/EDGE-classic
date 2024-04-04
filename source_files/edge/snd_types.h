@@ -30,6 +30,7 @@ enum SoundFormat
     kSoundOgg,
     kSoundMp3,
     kSoundM4p,
+    kSoundSid,
     kSoundRad,
     kSoundMus,
     kSoundMidi,

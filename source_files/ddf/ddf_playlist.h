@@ -33,6 +33,7 @@ enum DDFMusicType
     kDdfMusicMUS,
     kDdfMusicOGG,
     kDdfMusicMP3,
+    kDdfMusicSID,
     kDdfMusicFLAC,
     kDdfMusicM4P,
     kDdfMusicRAD,

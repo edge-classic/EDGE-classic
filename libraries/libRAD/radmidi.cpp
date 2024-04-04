@@ -19,8 +19,8 @@ OPLPlayer::OPLPlayer(int frequency)
 	m_voices.resize(18);
 	
 	rate = frequency;
-	m_output[0] = 0;
-	m_output[1] = 0;
+	m_output.first = 0;
+	m_output.second = 0;
 	
 	reset();
 }
@@ -46,8 +46,8 @@ void OPLPlayer::generate(int16_t *data, unsigned numSamples)
 	{
 		updateMIDI();
 		
-		data[samp]   = m_output[0];
-		data[samp+1] = m_output[1];
+		data[samp]   = m_output.first;
+		data[samp+1] = m_output.second;
 
 		samp += 2;
 	}
@@ -65,7 +65,7 @@ void OPLPlayer::updateMIDI()
 
 	if (m_sampleFIFO.empty())
 	{
-		m_opl3->Sample(&m_output[0], &m_output[1]);
+		m_opl3->Sample(&m_output.first, &m_output.second);
 	}
 	else
 	{
@@ -127,8 +127,8 @@ void OPLPlayer::runSamples(unsigned count)
 	// (i.e. when forcing a voice off, changing 4op flags, etc.)
 	while (count--)
 	{
-		std::array<int16_t, 2> output;
-		m_opl3->Sample(&output[0], &output[1]);
+		std::pair<int16_t, int16_t> output;
+		m_opl3->Sample(&output.first, &output.second);
 		m_sampleFIFO.push(output);
 	}
 }

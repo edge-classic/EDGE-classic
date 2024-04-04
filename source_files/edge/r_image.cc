@@ -239,21 +239,6 @@ void StoreBlurredImage(const Image *image)
     }
 }
 
-void StoreColorMatchAverage(const Image *image)
-{
-    // const override
-    Image *img = (Image *)image;
-    if (img->color_match_average_ == kRGBANoValue)
-    {
-        const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-        if (img->source_palette_ >= 0)
-            what_palette = (const uint8_t *)LoadLumpIntoMemory(img->source_palette_);
-        ImageData *tmp_img_data = RgbFromPalettised(ReadAsEpiBlock((Image *)img), what_palette, img->opacity_);
-        img->color_match_average_ = tmp_img_data->AverageColor();
-        delete tmp_img_data;
-    }
-}
-
 static Image *NewImage(int width, int height, int opacity = kOpacityUnknown)
 {
     Image *rim = new Image;

@@ -382,13 +382,7 @@ static void TextWrite(void)
         }
         else
         {
-            if (title_scaling.d_ == 1) // Color Match
-            {
-                if (finale_text_background->color_match_average_ == kRGBANoValue)
-                    StoreColorMatchAverage(finale_text_background);
-                HudSolidBox(-320, -200, 960, 600, finale_text_background->color_match_average_);
-            }
-            else if (title_scaling.d_ == 2) // Fill Border
+            if (title_scaling.d_) // Fill Border
             {
                 if (!finale_text_background->blurred_version_)
                     StoreBlurredImage(finale_text_background);
@@ -727,13 +721,7 @@ static void CastDrawer(void)
     else
     {
         image = ImageLookup("BOSSBACK");
-        if (title_scaling.d_ == 1) // Color Match
-        {
-            if (image->color_match_average_ == kRGBANoValue)
-                StoreColorMatchAverage(image);
-            HudSolidBox(-320, -200, 960, 600, image->color_match_average_);
-        }
-        else if (title_scaling.d_ == 2) // Fill Border
+        if (title_scaling.d_) // Fill Border
         {
             if (!image->blurred_version_)
                 StoreBlurredImage(image);
@@ -917,13 +905,7 @@ void FinaleDrawer(void)
     case kFinaleStagePicture: {
         const Image *image =
             ImageLookup(finale->pics_[HMM_MIN((size_t)picture_number, finale->pics_.size() - 1)].c_str());
-        if (title_scaling.d_ == 1) // Color Match
-        {
-            if (image->color_match_average_ == kRGBANoValue)
-                StoreColorMatchAverage(image);
-            HudSolidBox(-320, -200, 960, 600, image->color_match_average_);
-        }
-        else if (title_scaling.d_ == 2) // Fill Border
+        if (title_scaling.d_) // Fill Border
         {
             if (!image->blurred_version_)
                 StoreBlurredImage(image);

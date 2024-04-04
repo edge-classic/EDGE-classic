@@ -103,8 +103,6 @@ class Image
 
     Image *blurred_version_ = nullptr;
     float  blur_sigma_      = 0.0f;
-    RGBAColor color_match_average_ = kRGBANoValue;
-    RGBAColor color_match_grayed_ = kRGBANoValue;
 
     // --- information about where this image came from ---
     std::string name_;

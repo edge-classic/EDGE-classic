@@ -2959,23 +2959,7 @@ void MenuDrawer(void)
     if (menu_backdrop && (option_menu_on || network_game_menu_on ||
                           (current_menu->draw_function == MenuDrawLoad || current_menu->draw_function == MenuDrawSave)))
     {
-        if (title_scaling.d_ == 1) // Color Match
-        {
-            if (menu_backdrop->color_match_grayed_ == kRGBANoValue)
-            {
-                // const override
-                Image *backdrop = (Image *)menu_backdrop;
-                if (menu_backdrop->color_match_average_ == kRGBANoValue)
-                    StoreColorMatchAverage(menu_backdrop);
-                RGBAColor avg = menu_backdrop->color_match_average_;
-                // 'grayscale' the average here since menu backdrops are grayscaled
-                int ity = HMM_MAX(epi::GetRGBARed(avg), HMM_MAX(epi::GetRGBAGreen(avg), epi::GetRGBABlue(avg)));
-                ity = (ity * 196 + epi::GetRGBARed(avg) * 20 + epi::GetRGBAGreen(avg) * 20 + epi::GetRGBABlue(avg) * 20) >> 8;
-                backdrop->color_match_grayed_ = epi::MakeRGBA(ity, ity, ity);
-            }
-            HudSolidBox(-320, -200, 960, 600, menu_backdrop->color_match_grayed_);
-        }
-        else if (title_scaling.d_ == 2) // Fill Border
+        if (title_scaling.d_) // Fill Border
         {
             if (!menu_backdrop->blurred_version_)
                 StoreBlurredImage(menu_backdrop);

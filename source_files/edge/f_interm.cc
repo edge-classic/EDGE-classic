@@ -391,13 +391,7 @@ static void DrawLevelFinished(void)
             HudTileImage(-240, 0, 820, 200, leaving_background_image);
         else
         {
-            if (title_scaling.d_ == 1) // Color Match
-            {
-                if (leaving_background_image->color_match_average_ == kRGBANoValue)
-                    StoreColorMatchAverage(leaving_background_image);
-                HudSolidBox(-320, -200, 960, 600, leaving_background_image->color_match_average_);
-            }
-            else if (title_scaling.d_ == 2) // Fill Border
+            if (title_scaling.d_) // Fill Border
             {
                 if (!leaving_background_image->blurred_version_)
                     StoreBlurredImage(leaving_background_image);
@@ -566,13 +560,7 @@ static void DrawEnteringLevel(void)
             HudTileImage(-240, 0, 820, 200, entering_background_image);
         else
         {
-            if (title_scaling.d_ == 1) // Color Match
-            {
-                if (entering_background_image->color_match_average_ == kRGBANoValue)
-                    StoreColorMatchAverage(entering_background_image);
-                HudSolidBox(-320, -200, 960, 600, entering_background_image->color_match_average_);
-            }
-            else if (title_scaling.d_ == 2) // Fill Border
+            if (title_scaling.d_) // Fill Border
             {
                 if (!entering_background_image->blurred_version_)
                     StoreBlurredImage(entering_background_image);
@@ -1818,13 +1806,7 @@ void IntermissionDrawer(void)
                              background_image); // Lobo: Widescreen support
             else
             {
-                if (title_scaling.d_ == 1) // Color Match
-                {
-                    if (background_image->color_match_average_ == kRGBANoValue)
-                        StoreColorMatchAverage(background_image);
-                    HudSolidBox(-320, -200, 960, 600, background_image->color_match_average_);
-                }
-                else if (title_scaling.d_ == 2) // Fill Border
+                if (title_scaling.d_) // Fill Border
                 {
                     if (!background_image->blurred_version_)
                         StoreBlurredImage(background_image);

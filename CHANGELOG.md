@@ -3,17 +3,36 @@ CHANGELOG for EDGE-Classic 1.38 (since EDGE-Classic 1.37)
 
 New Features
 ------------
-- COALHUDS/LUAHUDS: new function hud.lookup_LDF(languageEntry) which will return the language.ldf entry
+- COALHUDS/LUAHUDS: New function hud.lookup_LDF(languageEntry) which will return the language.ldf entry
+- New LUAHUDS-specific commands:
+  - hud.game_skill() which will return a number from 0 to 4 reflecting the current game skill
+  - Several functions which will return a table containing useful information:
+    - game.info()
+    - map.info()
+    - sector.info()
 
 
 General Improvements/Changes
 --------------------
 - Optimized GL state caching and other rendering-related factors to improve performance with the current renderer
 - Reduced CPU load when frame limiting (i.e., regular 35/70FPS modes)
-- Removed voxel loader and rendering functions
-- Removed SID playback library
+- Removed voxel loader and rendering functions due to performance concerns
+- Improved sector fogwall appearance/coverage when adjacent to detail slopes
+- Added one-time startup message/warning to user if loading a configuration file from a previous version of the program
+- Disabled default support for Strife (it is now a compile-time option for developers)
+- Limited fallback IWAD selection dialog to 8 options, even if more valid games are found.
+  - This is to account for a hardcoded SDL limitation for some backends
+- Developers:
+  - Support for exceptions/RTTI removed from program with compiler flags/options set accordingly
+    - Primesynth swapped back to Fluidlite for MIDI playback due to Primesynth's heavy reliance on exceptions
+  - Use of C++17 filesystem functions removed and replaced with Windows/POSIX specific functions
+  - Consistent code style and formatting performed on all files under the /source_files project folder
+
 
 Bugs fixed
 ----------
 - Fixed sector fogwall check producing black 0% alpha fog walls for otherwise unfogged sectors
 - Fixed Autoscale texture linetypes(855,856,857) and Brightwall(850) being USEable (repeatedly) by the player.
+- Fixed DDFLEVEL fog density using wrong multiplier when being applied to sectors
+- Fixed DDFLANG entries not being applied to Option Menu entry names
+- Fixed several factors preventing standalone games using the EDGEGAME lump/file from loading

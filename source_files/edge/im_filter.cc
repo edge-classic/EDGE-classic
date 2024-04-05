@@ -202,19 +202,19 @@ static constexpr uint32_t tr_y = 0x00300000;
 static constexpr uint32_t tr_u = 0x00000700;
 static constexpr uint32_t tr_v = 0x00000007; // -AJA- changed (was 6)
 
-static inline uint32_t Hq2xGetR(uint32_t col)
+static inline uint32_t HQ2xGetR(uint32_t col)
 {
     return (col >> 16) & 0xFF;
 }
-static inline uint32_t Hq2xGetG(uint32_t col)
+static inline uint32_t HQ2xGetG(uint32_t col)
 {
     return (col >> 8) & 0xFF;
 }
-static inline uint32_t Hq2xGetB(uint32_t col)
+static inline uint32_t HQ2xGetB(uint32_t col)
 {
     return (col) & 0xFF;
 }
-static inline uint32_t Hq2xGetA(uint32_t col)
+static inline uint32_t HQ2xGetA(uint32_t col)
 {
     return (col >> 24) & 0xFF;
 }
@@ -222,18 +222,18 @@ static inline uint32_t Hq2xGetA(uint32_t col)
 static inline void InterpolateColor(uint8_t *dest, uint32_t c1, uint32_t c2, uint32_t c3, uint32_t f1, uint32_t f2,
                                     uint32_t f3, uint32_t shift)
 {
-    dest[0] = (Hq2xGetR(c1) * f1 + Hq2xGetR(c2) * f2 + Hq2xGetR(c3) * f3) >> shift;
-    dest[1] = (Hq2xGetG(c1) * f1 + Hq2xGetG(c2) * f2 + Hq2xGetG(c3) * f3) >> shift;
-    dest[2] = (Hq2xGetB(c1) * f1 + Hq2xGetB(c2) * f2 + Hq2xGetB(c3) * f3) >> shift;
-    dest[3] = (Hq2xGetA(c1) * f1 + Hq2xGetA(c2) * f2 + Hq2xGetA(c3) * f3) >> shift;
+    dest[0] = (HQ2xGetR(c1) * f1 + HQ2xGetR(c2) * f2 + HQ2xGetR(c3) * f3) >> shift;
+    dest[1] = (HQ2xGetG(c1) * f1 + HQ2xGetG(c2) * f2 + HQ2xGetG(c3) * f3) >> shift;
+    dest[2] = (HQ2xGetB(c1) * f1 + HQ2xGetB(c2) * f2 + HQ2xGetB(c3) * f3) >> shift;
+    dest[3] = (HQ2xGetA(c1) * f1 + HQ2xGetA(c2) * f2 + HQ2xGetA(c3) * f3) >> shift;
 }
 
 static void Interpolate0(uint8_t *dest, uint32_t c1)
 {
-    dest[0] = Hq2xGetR(c1);
-    dest[1] = Hq2xGetG(c1);
-    dest[2] = Hq2xGetB(c1);
-    dest[3] = Hq2xGetA(c1);
+    dest[0] = HQ2xGetR(c1);
+    dest[1] = HQ2xGetG(c1);
+    dest[2] = HQ2xGetB(c1);
+    dest[3] = HQ2xGetA(c1);
 }
 
 static void Interpolate1(uint8_t *dest, uint32_t c1, uint32_t c2)
@@ -276,7 +276,7 @@ inline bool YuvDiff(const uint8_t p1, const uint8_t p2)
            HMM_ABS((int)((YUV1 & v_mask) - (YUV2 & v_mask))) > tr_v;
 }
 
-void Hq2xPaletteSetup(const uint8_t *palette, int transparent_pixel)
+void HQ2xPaletteSetup(const uint8_t *palette, int transparent_pixel)
 {
     for (int c = 0; c < 256; c++)
     {
@@ -2880,7 +2880,7 @@ void StripAlpha(uint8_t *dest, const uint8_t *src, int width)
     }
 }
 
-ImageData *ImageHq2x(ImageData *image, bool solid, bool invert)
+ImageData *ImageHQ2x(ImageData *image, bool solid, bool invert)
 {
     int w = image->width_;
     int h = image->height_;

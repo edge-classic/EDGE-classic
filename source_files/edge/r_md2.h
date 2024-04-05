@@ -23,18 +23,18 @@
 #include "r_defs.h"
 
 // opaque handle for rest of the engine
-class Md2Model;
+class MD2Model;
 
-Md2Model *Md2Load(epi::File *f);
-Md2Model *Md3Load(epi::File *f);
+MD2Model *MD2Load(epi::File *f);
+MD2Model *MD3Load(epi::File *f);
 
-short Md2FindFrame(Md2Model *md, const char *name);
+short MD2FindFrame(MD2Model *md, const char *name);
 
-void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon, int frame1, int frame2, float lerp, float x,
+void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int frame1, int frame2, float lerp, float x,
                     float y, float z, MapObject *mo, RegionProperties *props, float scale, float aspect, float bias,
                     int rotation);
 
-void Md2RenderModel2d(Md2Model *md, const Image *skin_img, int frame, float x, float y, float xscale, float yscale,
+void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, float y, float xscale, float yscale,
                       const MapObjectDefinition *info);
 
 //--- editor settings ---

@@ -41,7 +41,7 @@
 
 static std::unordered_map<uint32_t, std::string> parsed_string_tags;
 
-struct TriggerScriptParser
+struct RADScriptParser
 {
     // needed level:
     //   -1 : don't care
@@ -70,7 +70,7 @@ static int current_script_level = 0;
 static constexpr const char *rad_level_names[3] = {"outer area", "map area", "trigger area"};
 
 // Location of current script
-static TriggerScript *this_script;
+static RADScript *this_script;
 static char          *this_map = nullptr;
 
 // Pending state info for current script
@@ -234,7 +234,7 @@ static void ScriptCheckForPercentAny(const char *info, void *storage)
     *(float *)storage = f / 100.0f;
 }
 
-// -ES- Copied from DdfMainGetTime.
+// -ES- Copied from DDFMainGetTime.
 // FIXME: Collect all functions that are common to DDF and RTS,
 // and move them to a new module for RTS+DDF common code.
 static void ScriptCheckForTime(const char *info, void *storage)
@@ -276,15 +276,15 @@ static void ScriptCheckForTime(const char *info, void *storage)
 
 static ArmourType ScriptCheckForArmourType(const char *info)
 {
-    if (DdfCompareName(info, "GREEN") == 0)
+    if (DDFCompareName(info, "GREEN") == 0)
         return kArmourTypeGreen;
-    if (DdfCompareName(info, "BLUE") == 0)
+    if (DDFCompareName(info, "BLUE") == 0)
         return kArmourTypeBlue;
-    if (DdfCompareName(info, "PURPLE") == 0)
+    if (DDFCompareName(info, "PURPLE") == 0)
         return kArmourTypePurple;
-    if (DdfCompareName(info, "YELLOW") == 0)
+    if (DDFCompareName(info, "YELLOW") == 0)
         return kArmourTypeYellow;
-    if (DdfCompareName(info, "RED") == 0)
+    if (DDFCompareName(info, "RED") == 0)
         return kArmourTypeRed;
 
     // this never returns
@@ -294,23 +294,23 @@ static ArmourType ScriptCheckForArmourType(const char *info)
 
 static ScriptChangeTexturetureType ScriptCheckForChangetexType(const char *info)
 {
-    if (DdfCompareName(info, "LEFT_UPPER") == 0 || DdfCompareName(info, "BACK_UPPER") == 0)
+    if (DDFCompareName(info, "LEFT_UPPER") == 0 || DDFCompareName(info, "BACK_UPPER") == 0)
         return kChangeTextureLeftUpper;
-    if (DdfCompareName(info, "LEFT_MIDDLE") == 0 || DdfCompareName(info, "BACK_MIDDLE") == 0)
+    if (DDFCompareName(info, "LEFT_MIDDLE") == 0 || DDFCompareName(info, "BACK_MIDDLE") == 0)
         return kChangeTextureLeftMiddle;
-    if (DdfCompareName(info, "LEFT_LOWER") == 0 || DdfCompareName(info, "BACK_LOWER") == 0)
+    if (DDFCompareName(info, "LEFT_LOWER") == 0 || DDFCompareName(info, "BACK_LOWER") == 0)
         return kChangeTextureLeftLower;
-    if (DdfCompareName(info, "RIGHT_UPPER") == 0 || DdfCompareName(info, "FRONT_UPPER") == 0)
+    if (DDFCompareName(info, "RIGHT_UPPER") == 0 || DDFCompareName(info, "FRONT_UPPER") == 0)
         return kChangeTextureRightUpper;
-    if (DdfCompareName(info, "RIGHT_MIDDLE") == 0 || DdfCompareName(info, "FRONT_MIDDLE") == 0)
+    if (DDFCompareName(info, "RIGHT_MIDDLE") == 0 || DDFCompareName(info, "FRONT_MIDDLE") == 0)
         return kChangeTextureRightMiddle;
-    if (DdfCompareName(info, "RIGHT_LOWER") == 0 || DdfCompareName(info, "FRONT_LOWER") == 0)
+    if (DDFCompareName(info, "RIGHT_LOWER") == 0 || DDFCompareName(info, "FRONT_LOWER") == 0)
         return kChangeTextureRightLower;
-    if (DdfCompareName(info, "FLOOR") == 0)
+    if (DDFCompareName(info, "FLOOR") == 0)
         return kChangeTextureFloor;
-    if (DdfCompareName(info, "CEILING") == 0)
+    if (DDFCompareName(info, "CEILING") == 0)
         return kChangeTextureCeiling;
-    if (DdfCompareName(info, "SKY") == 0)
+    if (DDFCompareName(info, "SKY") == 0)
         return kChangeTextureSky;
 
     // this never returns
@@ -374,10 +374,10 @@ static bool CheckForBoolean(const char *s)
 // Adds a new action state to the tail of the current set of states
 // for the given radius trigger.
 //
-static void AddStateToScript(TriggerScript *R, int tics, void (*action)(struct TriggerScriptTrigger *R, void *param),
+static void AddStateToScript(RADScript *R, int tics, void (*action)(struct RADScriptTrigger *R, void *param),
                              void *param)
 {
-    TriggerScriptState *state = new TriggerScriptState;
+    RADScriptState *state = new RADScriptState;
 
     state->tics   = tics;
     state->action = action;
@@ -404,7 +404,7 @@ static void AddStateToScript(TriggerScript *R, int tics, void (*action)(struct T
 //
 // ClearOneScripts
 //
-static void ClearOneScript(TriggerScript *scr)
+static void ClearOneScript(RADScript *scr)
 {
     if (scr->mapid)
     {
@@ -431,7 +431,7 @@ static void ClearOneScript(TriggerScript *scr)
     // free all states
     while (scr->first_state)
     {
-        TriggerScriptState *cur = scr->first_state;
+        RADScriptState *cur = scr->first_state;
         scr->first_state        = cur->next;
 
         if (cur->param)
@@ -450,10 +450,10 @@ static void ClearOneScript(TriggerScript *scr)
 static void ClearPreviousScripts(const char *mapid)
 {
     // the "ALL" keyword is not a valid map name
-    if (DdfCompareName(mapid, "ALL") == 0)
+    if (DDFCompareName(mapid, "ALL") == 0)
         return;
 
-    TriggerScript *scr, *next;
+    RADScript *scr, *next;
 
     for (scr = current_scripts; scr; scr = next)
     {
@@ -485,7 +485,7 @@ static void ClearAllScripts(void)
 {
     while (current_scripts)
     {
-        TriggerScript *scr = current_scripts;
+        RADScript *scr = current_scripts;
         current_scripts    = scr->next;
 
         ClearOneScript(scr);
@@ -497,7 +497,7 @@ static void ClearAllScripts(void)
 //
 // ScriptComputeScriptCRC
 //
-static void ScriptComputeScriptCRC(TriggerScript *scr)
+static void ScriptComputeScriptCRC(RADScript *scr)
 {
     scr->crc.Reset();
 
@@ -666,7 +666,7 @@ static void ScriptTokenizeLine(std::vector<const char *> &pars)
         want_token = true;
 
         // check for defines
-        const char *par_str = epi::CStringDuplicate(DdfMainGetDefine(tokenbuf.c_str()));
+        const char *par_str = epi::CStringDuplicate(DDFMainGetDefine(tokenbuf.c_str()));
 
         pars.push_back(par_str);
 
@@ -713,7 +713,7 @@ static void ScriptParseDefine(std::vector<const char *> &pars)
 {
     // #Define <identifier> <num>
 
-    DdfMainAddDefine(pars[1], pars[2]);
+    DDFMainAddDefine(pars[1], pars[2]);
 }
 
 static void ScriptParseStartMap(std::vector<const char *> &pars)
@@ -755,7 +755,7 @@ static void ScriptParseRadiusTrigger(std::vector<const char *> &pars)
 
     // Set the node up,..
 
-    this_script = new TriggerScript;
+    this_script = new RADScript;
 
     // set defaults
     this_script->x                    = 0;
@@ -776,7 +776,7 @@ static void ScriptParseRadiusTrigger(std::vector<const char *> &pars)
     pending_wait_tics = 0;
     pending_label     = nullptr;
 
-    if (DdfCompareName("RECT_TRIGGER", pars[0]) == 0)
+    if (DDFCompareName("RECT_TRIGGER", pars[0]) == 0)
     {
         float x1, y1, x2, y2, z1, z2;
 
@@ -864,7 +864,7 @@ static void ScriptParseSectorTrigger(std::vector<const char *> &pars)
 
     // Set the node up,..
 
-    this_script = new TriggerScript;
+    this_script = new RADScript;
 
     // set defaults
     this_script->x                    = 0;
@@ -1003,7 +1003,7 @@ static void ScriptParseWhenAppear(std::vector<const char *> &pars)
 {
     // When_Appear 1:2:3:4:5:SP:COOP:DM
 
-    DdfMainGetWhenAppear(pars[1], &this_script->appear);
+    DDFMainGetWhenAppear(pars[1], &this_script->appear);
 }
 
 static void ScriptParseWhenPlayerNum(std::vector<const char *> &pars)
@@ -1091,7 +1091,7 @@ static void ScriptParseTaggedPath(std::vector<const char *> &pars)
 {
     // Tagged_Path  <next node>
 
-    TriggerScriptPath *path = new TriggerScriptPath;
+    RADScriptPath *path = new RADScriptPath;
 
     path->next = this_script->next_in_path;
     path->name = epi::CStringDuplicate(pars[1]);
@@ -1173,7 +1173,7 @@ static void ScriptParseOnHeight(std::vector<const char *> &pars)
         ScriptCheckForInt(pars[3], &cond->sec_num);
     }
 
-    cond->is_ceil = (DdfCompareName("ONCEILINGHEIGHT", pars[0]) == 0);
+    cond->is_ceil = (DDFCompareName("ONCEILINGHEIGHT", pars[0]) == 0);
 
     // link it into list of ONHEIGHT conditions
     cond->next               = this_script->height_trig;
@@ -1186,7 +1186,7 @@ static void ScriptParseOnCondition(std::vector<const char *> &pars)
 
     ConditionCheck *cond = new ConditionCheck;
 
-    if (!DdfMainParseCondition(pars[1], cond))
+    if (!DDFMainParseCondition(pars[1], cond))
     {
         delete cond;
         return;
@@ -1219,7 +1219,7 @@ static void ScriptParseEnableScript(std::vector<const char *> &pars)
     ScriptEnablerParameter *t = new ScriptEnablerParameter;
 
     t->script_name  = epi::CStringDuplicate(pars[1]);
-    t->new_disabled = DdfCompareName("DISABLE_SCRIPT", pars[0]) == 0;
+    t->new_disabled = DDFCompareName("DISABLE_SCRIPT", pars[0]) == 0;
 
     AddStateToScript(this_script, 0, ScriptEnableScript, t);
 }
@@ -1248,7 +1248,7 @@ static void ScriptParseEnableTagged(std::vector<const char *> &pars)
     // if (t->tag <= 0)
     // ScriptError("Bad tag value: %s\n", pars[1]);
 
-    t->new_disabled = DdfCompareName("DISABLE_TAGGED", pars[0]) == 0;
+    t->new_disabled = DDFCompareName("DISABLE_TAGGED", pars[0]) == 0;
 
     AddStateToScript(this_script, 0, ScriptEnableScript, t);
 }
@@ -1264,7 +1264,7 @@ static void ScriptParseExitLevel(std::vector<const char *> &pars)
     ScriptExitParameter *exit = new ScriptExitParameter;
 
     exit->exit_time = 10;
-    exit->is_secret = DdfCompareName("SECRETEXIT", pars[0]) == 0;
+    exit->is_secret = DDFCompareName("SECRETEXIT", pars[0]) == 0;
 
     if (pars.size() >= 2)
     {
@@ -1298,11 +1298,11 @@ static void ScriptParseTip(std::vector<const char *> &pars)
     tip->playsound    = false;
     tip->gfx_scale    = 1.0f;
 
-    if (DdfCompareName(pars[0], "TIP_GRAPHIC") == 0)
+    if (DDFCompareName(pars[0], "TIP_GRAPHIC") == 0)
     {
         tip->tip_graphic = epi::CStringDuplicate(pars[1]);
     }
-    else if (DdfCompareName(pars[0], "TIP_LDF") == 0)
+    else if (DDFCompareName(pars[0], "TIP_LDF") == 0)
     {
         tip->tip_ldf = epi::CStringDuplicate(pars[1]);
     }
@@ -1414,11 +1414,11 @@ static void ScriptParseTipAlign(std::vector<const char *> &pars)
     tp    = new ScriptTipProperties;
     tp[0] = default_tip_properties;
 
-    if (DdfCompareName(pars[1], "CENTER") == 0 || DdfCompareName(pars[1], "CENTRE") == 0)
+    if (DDFCompareName(pars[1], "CENTER") == 0 || DDFCompareName(pars[1], "CENTRE") == 0)
     {
         tp->left_just = 0;
     }
-    else if (DdfCompareName(pars[1], "LEFT") == 0)
+    else if (DDFCompareName(pars[1], "LEFT") == 0)
     {
         tp->left_just = 1;
     }
@@ -1457,7 +1457,7 @@ static void HandleSpawnKeyword(const char *par, ScriptThingParameter *t)
     }
     else if (epi::StringPrefixCaseCompareASCII(par, "WHEN=") == 0)
     {
-        DdfMainGetWhenAppear(par + 5, &t->appear);
+        DDFMainGetWhenAppear(par + 5, &t->appear);
     }
     else
     {
@@ -1504,8 +1504,8 @@ static void ScriptParseSpawnThing(std::vector<const char *> &pars)
 
     t->appear = kAppearsWhenDefault;
 
-    t->ambush       = DdfCompareName("SPAWNTHING_AMBUSH", pars[0]) == 0;
-    t->spawn_effect = DdfCompareName("SPAWNTHING_FLASH", pars[0]) == 0;
+    t->ambush       = DDFCompareName("SPAWNTHING_AMBUSH", pars[0]) == 0;
+    t->spawn_effect = DDFCompareName("SPAWNTHING_FLASH", pars[0]) == 0;
 
     // get map thing
     if (pars[1][0] == '-' || pars[1][0] == '+' || epi::IsDigitASCII(pars[1][0]))
@@ -1552,7 +1552,7 @@ static void ScriptParseSpawnThing(std::vector<const char *> &pars)
     {
         ScriptCheckForFloat(pars[6], &t->slope);
 
-        // FIXME: Merge with DdfMainGetSlope someday.
+        // FIXME: Merge with DDFMainGetSlope someday.
         t->slope /= 45.0f;
     }
 
@@ -1574,7 +1574,7 @@ static void ScriptParsePlaySound(std::vector<const char *> &pars)
 
     ScriptSoundParameter *t = new ScriptSoundParameter;
 
-    if (DdfCompareName(pars[0], "PLAYSOUND_BOSSMAN") == 0)
+    if (DDFCompareName(pars[0], "PLAYSOUND_BOSSMAN") == 0)
         t->kind = kScriptSoundBossMan;
     else
         t->kind = kScriptSoundNormal;
@@ -1701,10 +1701,10 @@ static void ScriptParseGiveLoseBenefit(std::vector<const char *> &pars)
 
     ScriptBenefitParameter *sb = new ScriptBenefitParameter;
 
-    if (DdfCompareName(pars[0], "LOSE_BENEFIT") == 0)
+    if (DDFCompareName(pars[0], "LOSE_BENEFIT") == 0)
         sb->lose_it = true;
 
-    DdfMobjGetBenefit(pars[1], &sb->benefit);
+    DDFMobjGetBenefit(pars[1], &sb->benefit);
 
     AddStateToScript(this_script, 0, ScriptBenefitPlayers, sb);
 }
@@ -1725,7 +1725,7 @@ static void ScriptParseDamageMonsters(std::vector<const char *> &pars)
     {
         ScriptCheckForInt(pars[1], &mon->thing_type);
     }
-    else if (DdfCompareName(pars[1], "ANY") == 0)
+    else if (DDFCompareName(pars[1], "ANY") == 0)
         mon->thing_type = -1;
     else
         mon->thing_name = epi::CStringDuplicate(pars[1]);
@@ -1761,7 +1761,7 @@ static void ScriptParseThingEvent(std::vector<const char *> &pars)
 
     if (pars[1][0] == '-' || pars[1][0] == '+' || epi::IsDigitASCII(pars[1][0]))
         ScriptCheckForInt(pars[1], &tev->thing_type);
-    else if (DdfCompareName(pars[1], "ANY") == 0)
+    else if (DDFCompareName(pars[1], "ANY") == 0)
         tev->thing_type = -1;
     else
         tev->thing_name = epi::CStringDuplicate(pars[1]);
@@ -1821,7 +1821,7 @@ static void ScriptParseGotoMap(std::vector<const char *> &pars)
 
     if (pars.size() >= 3)
     {
-        if (DdfCompareName(pars[2], "SKIP_ALL") == 0)
+        if (DDFCompareName(pars[2], "SKIP_ALL") == 0)
         {
             go->skip_all = true;
         }
@@ -1863,14 +1863,14 @@ static void ScriptParseMoveSector(std::vector<const char *> &pars)
     ScriptCheckForInt(pars[1], &secv->tag);
     ScriptCheckForFloat(pars[2], &secv->value);
 
-    if (DdfCompareName(pars[3], "FLOOR") == 0)
+    if (DDFCompareName(pars[3], "FLOOR") == 0)
         secv->is_ceiling = 0;
-    else if (DdfCompareName(pars[3], "CEILING") == 0)
+    else if (DDFCompareName(pars[3], "CEILING") == 0)
         secv->is_ceiling = 1;
     else
         secv->is_ceiling = !CheckForBoolean(pars[3]);
 
-    if (DdfCompareName(pars[0], "SECTORV") == 0)
+    if (DDFCompareName(pars[0], "SECTORV") == 0)
     {
         secv->secnum = secv->tag;
         secv->tag    = 0;
@@ -1882,7 +1882,7 @@ static void ScriptParseMoveSector(std::vector<const char *> &pars)
 
         if (pars.size() >= 5)
         {
-            if (DdfCompareName(pars[4], "ABSOLUTE") == 0)
+            if (DDFCompareName(pars[4], "ABSOLUTE") == 0)
                 secv->relative = false;
             else
                 ScriptWarnError("%s: expected 'ABSOLUTE' but got '%s'.\n", pars[0], pars[4]);
@@ -1909,7 +1909,7 @@ static void ScriptParseLightSector(std::vector<const char *> &pars)
     ScriptCheckForInt(pars[1], &secl->tag);
     ScriptCheckForFloat(pars[2], &secl->value);
 
-    if (DdfCompareName(pars[0], "SECTORL") == 0)
+    if (DDFCompareName(pars[0], "SECTORL") == 0)
     {
         secl->secnum = secl->tag;
         secl->tag    = 0;
@@ -1921,7 +1921,7 @@ static void ScriptParseLightSector(std::vector<const char *> &pars)
 
         if (pars.size() >= 4)
         {
-            if (DdfCompareName(pars[3], "ABSOLUTE") == 0)
+            if (DDFCompareName(pars[3], "ABSOLUTE") == 0)
                 secl->relative = false;
             else
                 ScriptWarnError("%s: expected 'ABSOLUTE' but got '%s'.\n", pars[0], pars[3]);
@@ -1948,16 +1948,16 @@ static void ScriptParseFogSector(std::vector<const char *> &pars)
 
     if (pars.size() == 4) // color + relative density change
     {
-        if (DdfCompareName(pars[2], "SAME") == 0)
+        if (DDFCompareName(pars[2], "SAME") == 0)
             secf->leave_color = true;
-        else if (DdfCompareName(pars[2], "CLEAR") == 0)
+        else if (DDFCompareName(pars[2], "CLEAR") == 0)
         { /* nothing - we will use null pointer to denote clearing fog later */
         }
         else
             secf->colmap_color = epi::CStringDuplicate(pars[2]);
-        if (DdfCompareName(pars[3], "SAME") == 0)
+        if (DDFCompareName(pars[3], "SAME") == 0)
             secf->leave_density = true;
-        else if (DdfCompareName(pars[3], "CLEAR") == 0)
+        else if (DDFCompareName(pars[3], "CLEAR") == 0)
         {
             secf->relative = false;
             secf->density  = 0;
@@ -1966,19 +1966,19 @@ static void ScriptParseFogSector(std::vector<const char *> &pars)
             ScriptCheckForPercentAny(pars[3], &secf->density);
         AddStateToScript(this_script, 0, ScriptFogSector, secf);
     }
-    else if (DdfCompareName(pars[4], "ABSOLUTE") == 0) // color + absolute density change
+    else if (DDFCompareName(pars[4], "ABSOLUTE") == 0) // color + absolute density change
     {
         secf->relative = false;
-        if (DdfCompareName(pars[2], "SAME") == 0)
+        if (DDFCompareName(pars[2], "SAME") == 0)
             secf->leave_color = true;
-        else if (DdfCompareName(pars[2], "CLEAR") == 0)
+        else if (DDFCompareName(pars[2], "CLEAR") == 0)
         { /* nothing - we will use null pointer to denote clearing fog later */
         }
         else
             secf->colmap_color = epi::CStringDuplicate(pars[2]);
-        if (DdfCompareName(pars[3], "SAME") == 0)
+        if (DDFCompareName(pars[3], "SAME") == 0)
             secf->leave_density = true;
-        else if (DdfCompareName(pars[3], "CLEAR") == 0)
+        else if (DDFCompareName(pars[3], "CLEAR") == 0)
             secf->density = 0;
         else
             ScriptCheckForPercent(pars[3], &secf->density);
@@ -2111,7 +2111,7 @@ static void ScriptParseShowMenu(std::vector<const char *> &pars)
     if (pars.size() > 11)
         ScriptError("%s: too many option strings (limit is 9)\n", pars[0]);
 
-    if (DdfCompareName(pars[0], "SHOW_MENU_LDF") == 0)
+    if (DDFCompareName(pars[0], "SHOW_MENU_LDF") == 0)
         menu->use_ldf = true;
 
     EPI_ASSERT(2 <= pars.size() && pars.size() <= 11);
@@ -2148,7 +2148,7 @@ static void ScriptParseJumpOn(std::vector<const char *> &pars)
     if (pars.size() > 11)
         ScriptError("%s: too many labels (limit is 9)\n", pars[0]);
 
-    if (DdfCompareName(pars[1], "MENU") != 0)
+    if (DDFCompareName(pars[1], "MENU") != 0)
     {
         ScriptError("%s: Unknown variable '%s' (should be MENU)\n", pars[0], pars[1]);
     }
@@ -2277,7 +2277,7 @@ static void ScriptParseReplaceThing(std::vector<const char *> &pars)
 
 //  PARSER TABLE
 
-static const TriggerScriptParser radtrig_parsers[] = {
+static const RADScriptParser radtrig_parsers[] = {
     // directives...
     {-1, "#DEFINE", 3, 3, ScriptParseDefine},
     {0, "#VERSION", 2, 2, ScriptParseVersion},
@@ -2388,11 +2388,11 @@ void ScriptParseLine()
     if (pars.empty())
         return;
 
-    for (const TriggerScriptParser *cur = radtrig_parsers; cur->name != nullptr; cur++)
+    for (const RADScriptParser *cur = radtrig_parsers; cur->name != nullptr; cur++)
     {
         const char *cur_name = cur->name;
 
-        if (DdfCompareName(pars[0], cur_name) != 0)
+        if (DDFCompareName(pars[0], cur_name) != 0)
             continue;
 
         // check level
@@ -2486,10 +2486,10 @@ static void ScriptParserDone()
     if (current_script_level == 1)
         ScriptError("START_MAP: block not terminated !\n");
 
-    DdfMainFreeDefines();
+    DDFMainFreeDefines();
 }
 
-void ReadTriggerScript(const std::string &data, const std::string &source)
+void ReadRADScript(const std::string &data, const std::string &source)
 {
     // FIXME store source somewhere, like current_script_filename
 

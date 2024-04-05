@@ -290,7 +290,7 @@ class AttackDefinition
     BitSet attack_class_;
 
     // object init state.  The integer value only becomes valid after
-    // DdfAttackCleanUp() has been called.
+    // DDFAttackCleanUp() has been called.
     int         objinitstate_;
     std::string objinitstate_ref_;
 
@@ -301,13 +301,13 @@ class AttackDefinition
     const MapObjectDefinition *atk_mobj_;
 
     // spawned object (for spawners).  The mobjdef pointer only becomes
-    // valid after DdfAttackCleanUp().  Can be nullptr.
+    // valid after DDFAttackCleanUp().  Can be nullptr.
     const MapObjectDefinition *spawnedobj_;
     std::string                spawnedobj_ref_;
     int                        spawn_limit_;
 
     // puff object.  The mobjdef pointer only becomes valid after
-    // DdfAttackCleanUp() has been called.  Can be nullptr.
+    // DDFAttackCleanUp() has been called.  Can be nullptr.
     const MapObjectDefinition *puff_;
     std::string                puff_ref_;
 

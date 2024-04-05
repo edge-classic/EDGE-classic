@@ -27,15 +27,15 @@
 
 static MovieDefinition *dynamic_movie;
 
-static void DdfMovieGetType(const char *info, void *storage);
-static void DdfMovieGetSpecial(const char *info, void *storage);
-static void DdfMovieGetScaling(const char *info, void *storage);
+static void DDFMovieGetType(const char *info, void *storage);
+static void DDFMovieGetSpecial(const char *info, void *storage);
+static void DDFMovieGetScaling(const char *info, void *storage);
 
 static MovieDefinition dummy_movie;
 
-static const DDFCommandList movie_commands[] = {DDF_FIELD("MOVIE_DATA", dummy_movie, type_, DdfMovieGetType),
-                                                DDF_FIELD("SPECIAL", dummy_movie, special_, DdfMovieGetSpecial),
-                                                DDF_FIELD("SCALING", dummy_movie, scaling_, DdfMovieGetScaling),
+static const DDFCommandList movie_commands[] = {DDF_FIELD("MOVIE_DATA", dummy_movie, type_, DDFMovieGetType),
+                                                DDF_FIELD("SPECIAL", dummy_movie, special_, DDFMovieGetSpecial),
+                                                DDF_FIELD("SCALING", dummy_movie, scaling_, DDFMovieGetScaling),
 
                                                 {nullptr, nullptr, 0, nullptr}};
 
@@ -48,14 +48,14 @@ MovieDefinitionContainer moviedefs;
 static void MovieStartEntry(const char *name, bool extend)
 {
     if (!name || !name[0])
-        DdfError("New movie entry is missing a name!\n");
+        DDFError("New movie entry is missing a name!\n");
 
     dynamic_movie = moviedefs.Lookup(name);
 
     if (extend)
     {
         if (!dynamic_movie)
-            DdfError("Unknown movie to extend: %s\n", name);
+            DDFError("Unknown movie to extend: %s\n", name);
         return;
     }
 
@@ -80,16 +80,16 @@ static void MovieParseField(const char *field, const char *contents, int index, 
     LogDebug("MOVIE_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DdfMainParseField(movie_commands, field, contents, (uint8_t *)dynamic_movie))
+    if (DDFMainParseField(movie_commands, field, contents, (uint8_t *)dynamic_movie))
         return; // OK
 
-    DdfError("Unknown movies.ddf command: %s\n", field);
+    DDFError("Unknown movies.ddf command: %s\n", field);
 }
 
 static void MovieFinishEntry(void)
 {
     if (dynamic_movie->type_ == kMovieDataNone)
-        DdfError("No lump or packfile defined for %s!\n", dynamic_movie->name_.c_str());
+        DDFError("No lump or packfile defined for %s!\n", dynamic_movie->name_.c_str());
 }
 
 static void MovieClearAll(void)
@@ -97,7 +97,7 @@ static void MovieClearAll(void)
     LogWarning("Ignoring #CLEARALL in movies.ddf\n");
 }
 
-void DdfReadMovies(const std::string &data)
+void DDFReadMovies(const std::string &data)
 {
     DDFReadInfo movies;
 
@@ -109,10 +109,10 @@ void DdfReadMovies(const std::string &data)
     movies.finish_entry = MovieFinishEntry;
     movies.clear_all    = MovieClearAll;
 
-    DdfMainReadFile(&movies, data);
+    DDFMainReadFile(&movies, data);
 }
 
-void DdfMovieInit(void)
+void DDFMovieInit(void)
 {
     for (MovieDefinition *movie : moviedefs)
     {
@@ -122,7 +122,7 @@ void DdfMovieInit(void)
     moviedefs.clear();
 }
 
-void DdfMovieCleanUp(void)
+void DDFMovieCleanUp(void)
 {
     moviedefs.shrink_to_fit(); // <-- Reduce to allocated size
 }
@@ -132,72 +132,72 @@ static void MovieParseInfo(const char *value)
     dynamic_movie->info_ = value;
 }
 
-static void DdfMovieGetType(const char *info, void *storage)
+static void DDFMovieGetType(const char *info, void *storage)
 {
-    const char *colon = DdfMainDecodeList(info, ':', true);
+    const char *colon = DDFMainDecodeList(info, ':', true);
 
     if (colon == nullptr || colon == info || (colon - info) >= 16 || colon[1] == 0)
-        DdfError("Malformed movie type spec: %s\n", info);
+        DDFError("Malformed movie type spec: %s\n", info);
 
     char keyword[20];
 
     strncpy(keyword, info, colon - info);
     keyword[colon - info] = 0;
 
-    if (DdfCompareName(keyword, "LUMP") == 0)
+    if (DDFCompareName(keyword, "LUMP") == 0)
     {
         dynamic_movie->type_ = kMovieDataLump;
         MovieParseInfo(colon + 1);
     }
-    else if (DdfCompareName(keyword, "PACK") == 0)
+    else if (DDFCompareName(keyword, "PACK") == 0)
     {
         dynamic_movie->type_ = kMovieDataPackage;
         MovieParseInfo(colon + 1);
     }
     else
-        DdfError("Unknown movie type: %s\n", keyword);
+        DDFError("Unknown movie type: %s\n", keyword);
 }
 
 static DDFSpecialFlags movie_specials[] = {{"MUTE", kMovieSpecialMute, 0}, {nullptr, 0, 0}};
 
-static void DdfMovieGetSpecial(const char *info, void *storage)
+static void DDFMovieGetSpecial(const char *info, void *storage)
 {
     MovieSpecial *dest = (MovieSpecial *)storage;
 
     int flag_value;
 
-    switch (DdfMainCheckSpecialFlag(info, movie_specials, &flag_value, false /* allow_prefixes */, false))
+    switch (DDFMainCheckSpecialFlag(info, movie_specials, &flag_value, false /* allow_prefixes */, false))
     {
-    case kDdfCheckFlagPositive:
+    case kDDFCheckFlagPositive:
         *dest = (MovieSpecial)(*dest | flag_value);
         break;
 
-    case kDdfCheckFlagNegative:
+    case kDDFCheckFlagNegative:
         *dest = (MovieSpecial)(*dest & ~flag_value);
         break;
 
-    case kDdfCheckFlagUser:
-    case kDdfCheckFlagUnknown:
-        DdfWarnError("Unknown movie special: %s\n", info);
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDFWarnError("Unknown movie special: %s\n", info);
         break;
     }
 }
 
-static void DdfMovieGetScaling(const char *info, void *storage)
+static void DDFMovieGetScaling(const char *info, void *storage)
 {
     MovieScaling *dest = (MovieScaling *)storage;
 
-    if (DdfCompareName(info, "AUTO") == 0)
+    if (DDFCompareName(info, "AUTO") == 0)
         *dest = kMovieScalingAutofit;
-    if (DdfCompareName(info, "NONE") == 0)
+    if (DDFCompareName(info, "NONE") == 0)
         *dest = kMovieScalingNoScale;
-    else if (DdfCompareName(info, "ZOOM") == 0)
+    else if (DDFCompareName(info, "ZOOM") == 0)
         *dest = kMovieScalingZoom;
-    else if (DdfCompareName(info, "STRETCH") == 0)
+    else if (DDFCompareName(info, "STRETCH") == 0)
         *dest = kMovieScalingStretch;
     else
     {
-        DdfWarnError("Unknown movie scaling mode: %s\n", info);
+        DDFWarnError("Unknown movie scaling mode: %s\n", info);
         *dest = kMovieScalingAutofit; // Default
     }
 }
@@ -239,7 +239,7 @@ MovieDefinition *MovieDefinitionContainer::Lookup(const char *refname)
 
     for (MovieDefinition *g : moviedefs)
     {
-        if (DdfCompareName(g->name_.c_str(), refname) == 0)
+        if (DDFCompareName(g->name_.c_str(), refname) == 0)
             return g;
     }
 

@@ -44,8 +44,8 @@
 #include "script/compat/lua_compat.h"
 #include "vm_coal.h"
 
-extern coal::Vm *ui_vm;
-extern void      CoalSetVector(coal::Vm *vm, const char *mod_name, const char *var_name, double val_1, double val_2,
+extern coal::VM *ui_vm;
+extern void      CoalSetVector(coal::VM *vm, const char *mod_name, const char *var_name, double val_1, double val_2,
                                double val_3);
 
 extern ConsoleVariable double_framerate;
@@ -1086,7 +1086,7 @@ bool AddWeapon(Player *player, WeaponDefinition *info, int *index)
             return false;
 
         // don't downgrade any UPGRADED weapons
-        if (DdfWeaponIsUpgrade(cur_info, info))
+        if (DDFWeaponIsUpgrade(cur_info, info))
             return false;
 
         // check for weapon upgrades

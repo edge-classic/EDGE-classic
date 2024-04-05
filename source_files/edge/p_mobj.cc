@@ -583,7 +583,7 @@ bool MapObjectSetStateDeferred(MapObject *mo, int stnum, int tic_skip)
 //
 int MapObjectFindLabel(MapObject *mobj, const char *label)
 {
-    return DdfStateFindLabel(mobj->info_->state_grp_, label, true /* quiet */);
+    return DDFStateFindLabel(mobj->info_->state_grp_, label, true /* quiet */);
 }
 
 //

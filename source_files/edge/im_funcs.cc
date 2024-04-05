@@ -57,7 +57,7 @@ ImageFormat ImageDetectFormat(uint8_t *header, int header_length, int file_size)
     if (header[0] == 0x89 && header[1] == 'P' && header[2] == 'N' && header[3] == 'G' && header[4] == 0x0D &&
         header[5] == 0x0A)
     {
-        return kImagePng;
+        return kImagePNG;
     }
 
     // check some other common image formats....
@@ -65,7 +65,7 @@ ImageFormat ImageDetectFormat(uint8_t *header, int header_length, int file_size)
     if (header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF && header[3] >= 0xE0 &&
         ((header[6] == 'J' && header[7] == 'F') || (header[6] == 'E' && header[7] == 'x')))
     {
-        return kImageJpeg;
+        return kImageJPEG;
     }
 
     if (header[0] == 'G' && header[1] == 'I' && header[2] == 'F' && header[3] == '8' && header[4] >= '7' &&
@@ -96,7 +96,7 @@ ImageFormat ImageDetectFormat(uint8_t *header, int header_length, int file_size)
             ((img_type | 8) >= 8 && (img_type | 8) <= 11) &&
             (depth == 8 || depth == 15 || depth == 16 || depth == 24 || depth == 32))
         {
-            return kImageTga;
+            return kImageTGA;
         }
     }
 
@@ -126,13 +126,13 @@ ImageFormat ImageFormatFromFilename(const std::string &filename)
     epi::StringLowerASCII(ext);
 
     if (ext == ".png")
-        return kImagePng;
+        return kImagePNG;
 
     if (ext == ".tga")
-        return kImageTga;
+        return kImageTGA;
 
     if (ext == ".jpg" || ext == ".jpeg")
-        return kImageJpeg;
+        return kImageJPEG;
 
     if (ext == ".lmp") // Kind of a gamble, but whatever
         return kImageDoom;
@@ -304,7 +304,7 @@ static void StbImageEpiFileWrite(void *context, void *data, int size)
     dest->Write(data, size);
 }
 
-bool ImageSaveJpeg(std::string filename, ImageData *image)
+bool ImageSaveJPEG(std::string filename, ImageData *image)
 {
     EPI_ASSERT(image->depth_ == 3);
 
@@ -328,7 +328,7 @@ bool ImageSaveJpeg(std::string filename, ImageData *image)
         return true;
 }
 
-bool ImageSavePng(std::string filename, ImageData *image)
+bool ImageSavePNG(std::string filename, ImageData *image)
 {
     EPI_ASSERT(image->depth_ >= 3);
 

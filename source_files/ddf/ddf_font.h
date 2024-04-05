@@ -107,9 +107,9 @@ class FontDefinitionContainer : public std::vector<FontDefinition *>
 
 extern FontDefinitionContainer fontdefs;
 
-void DdfMainLookupFont(const char *info, void *storage);
+void DDFMainLookupFont(const char *info, void *storage);
 
-void DdfReadFonts(const std::string &data);
+void DDFReadFonts(const std::string &data);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

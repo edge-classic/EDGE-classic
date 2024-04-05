@@ -121,7 +121,7 @@ class SoundEffectDefinitionContainer : public std::vector<SoundEffectDefinition 
 
 extern SoundEffectDefinitionContainer sfxdefs; // -ACB- 2004/07/25 Implemented
 
-void DdfReadSFX(const std::string &data);
+void DDFReadSFX(const std::string &data);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

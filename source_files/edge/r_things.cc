@@ -57,8 +57,8 @@
 #include "w_model.h"
 #include "w_sprite.h"
 
-extern coal::Vm *ui_vm;
-extern double    CoalGetFloat(coal::Vm *vm, const char *mod_name, const char *var_name);
+extern coal::VM *ui_vm;
+extern double    CoalGetFloat(coal::VM *vm, const char *mod_name, const char *var_name);
 
 extern bool erraticism_active;
 
@@ -652,10 +652,10 @@ void RendererDrawWeaponModel(Player *p)
     bias += w->model_bias_;
 
     if (md->md2_model_)
-        Md2RenderModel(md->md2_model_, skin_img, true, last_frame, psp->state->frame, lerp, x, y, z, p->map_object_,
+        MD2RenderModel(md->md2_model_, skin_img, true, last_frame, psp->state->frame, lerp, x, y, z, p->map_object_,
                        view_properties, 1.0f /* scale */, w->model_aspect_, bias, w->model_rotate_);
     else if (md->mdl_model_)
-        MdlRenderModel(md->mdl_model_, skin_img, true, last_frame, psp->state->frame, lerp, x, y, z, p->map_object_,
+        MDLRenderModel(md->mdl_model_, skin_img, true, last_frame, psp->state->frame, lerp, x, y, z, p->map_object_,
                        view_properties, 1.0f /* scale */, w->model_aspect_, bias, w->model_rotate_);
 }
 
@@ -1049,11 +1049,11 @@ static void RendererDrawModel(DrawThing *dthing)
     }
 
     if (md->md2_model_)
-        Md2RenderModel(md->md2_model_, skin_img, false, last_frame, mo->state_->frame, lerp, dthing->map_x,
+        MD2RenderModel(md->md2_model_, skin_img, false, last_frame, mo->state_->frame, lerp, dthing->map_x,
                        dthing->map_y, z, mo, mo->region_properties_, mo->model_scale_, mo->model_aspect_,
                        mo->info_->model_bias_, mo->info_->model_rotate_);
     else if (md->mdl_model_)
-        MdlRenderModel(md->mdl_model_, skin_img, false, last_frame, mo->state_->frame, lerp, dthing->map_x,
+        MDLRenderModel(md->mdl_model_, skin_img, false, last_frame, mo->state_->frame, lerp, dthing->map_x,
                        dthing->map_y, z, mo, mo->region_properties_, mo->model_scale_, mo->model_aspect_,
                        mo->info_->model_bias_, mo->info_->model_rotate_);
 }

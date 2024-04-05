@@ -36,11 +36,11 @@
 
 extern bool sound_device_stereo; // FIXME: encapsulation
 
-class Mp3Player : public AbstractMusicPlayer
+class MP3Player : public AbstractMusicPlayer
 {
   public:
-    Mp3Player();
-    ~Mp3Player();
+    MP3Player();
+    ~MP3Player();
 
   private:
     enum Status
@@ -82,12 +82,12 @@ class Mp3Player : public AbstractMusicPlayer
 
 //----------------------------------------------------------------------------
 
-Mp3Player::Mp3Player() : status_(kNotLoaded)
+MP3Player::MP3Player() : status_(kNotLoaded)
 {
     mono_buffer_ = new int16_t[kMusicBuffer * 2];
 }
 
-Mp3Player::~Mp3Player()
+MP3Player::~MP3Player()
 {
     Close();
 
@@ -95,7 +95,7 @@ Mp3Player::~Mp3Player()
         delete[] mono_buffer_;
 }
 
-void Mp3Player::PostOpen()
+void MP3Player::PostOpen()
 {
     if (mp3_decoder_->channels == 1)
     {
@@ -121,7 +121,7 @@ static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
     }
 }
 
-bool Mp3Player::StreamIntoBuffer(SoundData *buf)
+bool MP3Player::StreamIntoBuffer(SoundData *buf)
 {
     int16_t *data_buf;
 
@@ -154,7 +154,7 @@ bool Mp3Player::StreamIntoBuffer(SoundData *buf)
     return (true);
 }
 
-bool Mp3Player::OpenMemory(uint8_t *data, int length)
+bool MP3Player::OpenMemory(uint8_t *data, int length)
 {
     if (status_ != kNotLoaded)
         Close();
@@ -179,7 +179,7 @@ bool Mp3Player::OpenMemory(uint8_t *data, int length)
     return true;
 }
 
-void Mp3Player::Close()
+void MP3Player::Close()
 {
     if (status_ == kNotLoaded)
         return;
@@ -201,7 +201,7 @@ void Mp3Player::Close()
     status_ = kNotLoaded;
 }
 
-void Mp3Player::Pause()
+void MP3Player::Pause()
 {
     if (status_ != kPlaying)
         return;
@@ -209,7 +209,7 @@ void Mp3Player::Pause()
     status_ = kPaused;
 }
 
-void Mp3Player::Resume()
+void MP3Player::Resume()
 {
     if (status_ != kPaused)
         return;
@@ -217,7 +217,7 @@ void Mp3Player::Resume()
     status_ = kPlaying;
 }
 
-void Mp3Player::Play(bool loop)
+void MP3Player::Play(bool loop)
 {
     if (status_ != kNotLoaded && status_ != kStopped)
         return;
@@ -232,7 +232,7 @@ void Mp3Player::Play(bool loop)
     Ticker();
 }
 
-void Mp3Player::Stop()
+void MP3Player::Stop()
 {
     if (status_ != kPlaying && status_ != kPaused)
         return;
@@ -242,7 +242,7 @@ void Mp3Player::Stop()
     status_ = kStopped;
 }
 
-void Mp3Player::Ticker()
+void MP3Player::Ticker()
 {
     while (status_ == kPlaying && !pc_speaker_mode)
     {
@@ -270,9 +270,9 @@ void Mp3Player::Ticker()
 
 //----------------------------------------------------------------------------
 
-AbstractMusicPlayer *PlayMp3Music(uint8_t *data, int length, bool looping)
+AbstractMusicPlayer *PlayMP3Music(uint8_t *data, int length, bool looping)
 {
-    Mp3Player *player = new Mp3Player();
+    MP3Player *player = new MP3Player();
 
     if (!player->OpenMemory(data, length))
     {
@@ -286,7 +286,7 @@ AbstractMusicPlayer *PlayMp3Music(uint8_t *data, int length, bool looping)
     return player;
 }
 
-bool LoadMp3Sound(SoundData *buf, const uint8_t *data, int length)
+bool LoadMP3Sound(SoundData *buf, const uint8_t *data, int length)
 {
     drmp3 mp3;
 

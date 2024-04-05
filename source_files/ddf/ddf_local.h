@@ -60,7 +60,7 @@ struct DDFCommandList
     }
 
 //
-// This structure passes the information needed to DdfMainReadFile, so that
+// This structure passes the information needed to DDFMainReadFile, so that
 // the reader uses the correct procedures when reading a file.
 //
 struct DDFReadInfo
@@ -137,16 +137,16 @@ struct DDFSpecialFlags
 enum DDFCheckFlagResult
 {
     // special flag is unknown
-    kDdfCheckFlagUnknown,
+    kDDFCheckFlagUnknown,
 
     // the flag should be set (i.e. forced on)
-    kDdfCheckFlagPositive,
+    kDDFCheckFlagPositive,
 
     // the flag should be cleared (i.e. forced off)
-    kDdfCheckFlagNegative,
+    kDDFCheckFlagNegative,
 
     // the flag should be made user-definable
-    kDdfCheckFlagUser
+    kDDFCheckFlagUser
 };
 
 //
@@ -176,8 +176,8 @@ struct DDFStateStarter
     ptrdiff_t offset;
 };
 
-// DdfMAIN Code (Reading all files, main init & generic functions).
-void DdfMainReadFile(DDFReadInfo *readinfo, const std::string &data);
+// DDFMAIN Code (Reading all files, main init & generic functions).
+void DDFMainReadFile(DDFReadInfo *readinfo, const std::string &data);
 
 extern int         cur_ddf_line_num;
 extern std::string cur_ddf_filename;
@@ -185,162 +185,162 @@ extern std::string cur_ddf_entryname;
 extern std::string cur_ddf_linedata;
 
 #ifdef __GNUC__
-void DdfError(const char *err, ...) __attribute__((format(printf, 1, 2)));
-void DdfDebug(const char *err, ...) __attribute__((format(printf, 1, 2)));
-void DdfWarning(const char *err, ...) __attribute__((format(printf, 1, 2)));
-void DdfWarnError(const char *err, ...) __attribute__((format(printf, 1, 2)));
+void DDFError(const char *err, ...) __attribute__((format(printf, 1, 2)));
+void DDFDebug(const char *err, ...) __attribute__((format(printf, 1, 2)));
+void DDFWarning(const char *err, ...) __attribute__((format(printf, 1, 2)));
+void DDFWarnError(const char *err, ...) __attribute__((format(printf, 1, 2)));
 #else
-void DdfError(const char *err, ...);
-void DdfDebug(const char *err, ...);
-void DdfWarning(const char *err, ...);
-void DdfWarnError(const char *err, ...);
+void DDFError(const char *err, ...);
+void DDFDebug(const char *err, ...);
+void DDFWarning(const char *err, ...);
+void DDFWarnError(const char *err, ...);
 #endif
 
-void DdfMainGetPercent(const char *info, void *storage);
-void DdfMainGetPercentAny(const char *info, void *storage);
-void DdfMainGetBoolean(const char *info, void *storage);
-void DdfMainGetFloat(const char *info, void *storage);
-void DdfMainGetAngle(const char *info, void *storage);
-void DdfMainGetSlope(const char *info, void *storage);
-void DdfMainGetNumeric(const char *info, void *storage);
-void DdfMainGetString(const char *info, void *storage);
-void DdfMainGetLumpName(const char *info, void *storage);
-void DdfMainGetTime(const char *info, void *storage);
-void DdfMainGetColourmap(const char *info, void *storage);
-void DdfMainGetRGB(const char *info, void *storage);
-void DdfMainGetWhenAppear(const char *info, void *storage);
-void DdfMainGetBitSet(const char *info, void *storage);
+void DDFMainGetPercent(const char *info, void *storage);
+void DDFMainGetPercentAny(const char *info, void *storage);
+void DDFMainGetBoolean(const char *info, void *storage);
+void DDFMainGetFloat(const char *info, void *storage);
+void DDFMainGetAngle(const char *info, void *storage);
+void DDFMainGetSlope(const char *info, void *storage);
+void DDFMainGetNumeric(const char *info, void *storage);
+void DDFMainGetString(const char *info, void *storage);
+void DDFMainGetLumpName(const char *info, void *storage);
+void DDFMainGetTime(const char *info, void *storage);
+void DDFMainGetColourmap(const char *info, void *storage);
+void DDFMainGetRGB(const char *info, void *storage);
+void DDFMainGetWhenAppear(const char *info, void *storage);
+void DDFMainGetBitSet(const char *info, void *storage);
 
-bool DdfMainParseField(const DDFCommandList *commands, const char *field, const char *contents, uint8_t *obj_base);
-void DdfMainLookupSound(const char *info, void *storage);
-void DdfMainRefAttack(const char *info, void *storage);
+bool DDFMainParseField(const DDFCommandList *commands, const char *field, const char *contents, uint8_t *obj_base);
+void DDFMainLookupSound(const char *info, void *storage);
+void DDFMainRefAttack(const char *info, void *storage);
 
-void DdfDummyFunction(const char *info, void *storage);
+void DDFDummyFunction(const char *info, void *storage);
 
-DDFCheckFlagResult DdfMainCheckSpecialFlag(const char *name, const DDFSpecialFlags *flag_set, int *flag_value,
+DDFCheckFlagResult DDFMainCheckSpecialFlag(const char *name, const DDFSpecialFlags *flag_set, int *flag_value,
                                             bool allow_prefixes, bool allow_user);
 
-int DdfMainLookupDirector(const MapObjectDefinition *obj, const char *info);
+int DDFMainLookupDirector(const MapObjectDefinition *obj, const char *info);
 
-// DdfANIM Code
-void DdfAnimInit(void);
-void DdfAnimCleanUp(void);
+// DDFANIM Code
+void DDFAnimInit(void);
+void DDFAnimCleanUp(void);
 
-// DdfATK Code
-void DdfAttackInit(void);
-void DdfAttackCleanUp(void);
+// DDFATK Code
+void DDFAttackInit(void);
+void DDFAttackCleanUp(void);
 
-// DdfGAME Code
-void DdfGameInit(void);
-void DdfGameCleanUp(void);
+// DDFGAME Code
+void DDFGameInit(void);
+void DDFGameCleanUp(void);
 
-// DdfLANG Code
-void DdfLanguageCleanUp(void);
+// DDFLANG Code
+void DDFLanguageCleanUp(void);
 
-// DdfLEVL Code
-void DdfLevelInit(void);
-void DdfLevelCleanUp(void);
+// DDFLEVL Code
+void DDFLevelInit(void);
+void DDFLevelCleanUp(void);
 
-// DdfLINE Code
-void DdfLinedefInit(void);
-void DdfLinedefCleanUp(void);
+// DDFLINE Code
+void DDFLinedefInit(void);
+void DDFLinedefCleanUp(void);
 
 constexpr const char *kEmptyColormapName   = "_NONE_";
 constexpr int16_t     kEmptyColormapNumber = -777;
 
-// DdfMOBJ Code  (Moving Objects)
-void DdfMobjInit(void);
-void DdfMobjCleanUp(void);
-void DdfMobjGetExtra(const char *info, void *storage);
-void DdfMobjGetItemType(const char *info, void *storage);
-void DdfMobjGetBpAmmo(const char *info, void *storage);
-void DdfMobjGetBpAmmoLimit(const char *info, void *storage);
-void DdfMobjGetBpArmour(const char *info, void *storage);
-void DdfMobjGetBpKeys(const char *info, void *storage);
-void DdfMobjGetBpWeapon(const char *info, void *storage);
-void DdfMobjGetPlayer(const char *info, void *storage);
+// DDFMOBJ Code  (Moving Objects)
+void DDFMobjInit(void);
+void DDFMobjCleanUp(void);
+void DDFMobjGetExtra(const char *info, void *storage);
+void DDFMobjGetItemType(const char *info, void *storage);
+void DDFMobjGetBpAmmo(const char *info, void *storage);
+void DDFMobjGetBpAmmoLimit(const char *info, void *storage);
+void DDFMobjGetBpArmour(const char *info, void *storage);
+void DDFMobjGetBpKeys(const char *info, void *storage);
+void DDFMobjGetBpWeapon(const char *info, void *storage);
+void DDFMobjGetPlayer(const char *info, void *storage);
 
 void ThingParseField(const char *field, const char *contents, int index, bool is_last);
 
-// DdfMUS Code
-void DdfMusicPlaylistInit(void);
-void DdfMusicPlaylistCleanUp(void);
+// DDFMUS Code
+void DDFMusicPlaylistInit(void);
+void DDFMusicPlaylistCleanUp(void);
 
-// DdfSTAT Code
-void DdfStateInit(void);
-void DdfStateGetAttack(const char *arg, State *cur_state);
-void DdfStateGetMobj(const char *arg, State *cur_state);
-void DdfStateGetSound(const char *arg, State *cur_state);
-void DdfStateGetInteger(const char *arg, State *cur_state);
-void DdfStateGetIntPair(const char *arg, State *cur_state);
-void DdfStateGetFloat(const char *arg, State *cur_state);
-void DdfStateGetPercent(const char *arg, State *cur_state);
-void DdfStateGetJump(const char *arg, State *cur_state);
-void DdfStateGetBecome(const char *arg, State *cur_state);
-void DdfStateGetMorph(const char *arg, State *cur_state);
-void DdfStateGetBecomeWeapon(const char *arg, State *cur_state);
-void DdfStateGetFrame(const char *arg, State *cur_state);
-void DdfStateGetAngle(const char *arg, State *cur_state);
-void DdfStateGetSlope(const char *arg, State *cur_state);
-void DdfStateGetRGB(const char *arg, State *cur_state);
+// DDFSTAT Code
+void DDFStateInit(void);
+void DDFStateGetAttack(const char *arg, State *cur_state);
+void DDFStateGetMobj(const char *arg, State *cur_state);
+void DDFStateGetSound(const char *arg, State *cur_state);
+void DDFStateGetInteger(const char *arg, State *cur_state);
+void DDFStateGetIntPair(const char *arg, State *cur_state);
+void DDFStateGetFloat(const char *arg, State *cur_state);
+void DDFStateGetPercent(const char *arg, State *cur_state);
+void DDFStateGetJump(const char *arg, State *cur_state);
+void DDFStateGetBecome(const char *arg, State *cur_state);
+void DDFStateGetMorph(const char *arg, State *cur_state);
+void DDFStateGetBecomeWeapon(const char *arg, State *cur_state);
+void DDFStateGetFrame(const char *arg, State *cur_state);
+void DDFStateGetAngle(const char *arg, State *cur_state);
+void DDFStateGetSlope(const char *arg, State *cur_state);
+void DDFStateGetRGB(const char *arg, State *cur_state);
 
-bool DdfMainParseState(uint8_t *object, std::vector<StateRange> &group, const char *field, const char *contents,
+bool DDFMainParseState(uint8_t *object, std::vector<StateRange> &group, const char *field, const char *contents,
                         int index, bool is_last, bool is_weapon, const DDFStateStarter *starters,
                         const DDFActionCode *actions);
 
-void DdfStateBeginRange(std::vector<StateRange> &group);
-void DdfStateFinishRange(std::vector<StateRange> &group);
-void DdfStateCleanUp(void);
+void DDFStateBeginRange(std::vector<StateRange> &group);
+void DDFStateFinishRange(std::vector<StateRange> &group);
+void DDFStateCleanUp(void);
 
-// DdfSECT Code
-void DdfSectorInit(void);
-void DdfSectGetDestRef(const char *info, void *storage);
-void DdfSectGetExit(const char *info, void *storage);
-void DdfSectGetLighttype(const char *info, void *storage);
-void DdfSectGetMType(const char *info, void *storage);
-void DdfSectorCleanUp(void);
+// DDFSECT Code
+void DDFSectorInit(void);
+void DDFSectGetDestRef(const char *info, void *storage);
+void DDFSectGetExit(const char *info, void *storage);
+void DDFSectGetLighttype(const char *info, void *storage);
+void DDFSectGetMType(const char *info, void *storage);
+void DDFSectorCleanUp(void);
 
-// DdfSFX Code
-void DdfSFXInit(void);
-void DdfSFXCleanUp(void);
+// DDFSFX Code
+void DDFSFXInit(void);
+void DDFSFXCleanUp(void);
 
-// DdfSWTH Code
+// DDFSWTH Code
 // -KM- 1998/07/31 Switch and Anim ddfs.
-void DdfSwitchInit(void);
-void DdfSwitchCleanUp(void);
+void DDFSwitchInit(void);
+void DDFSwitchCleanUp(void);
 
-// DdfWEAP Code
-void                         DdfWeaponInit(void);
-void                         DdfWeaponCleanUp(void);
+// DDFWEAP Code
+void                         DDFWeaponInit(void);
+void                         DDFWeaponCleanUp(void);
 extern const DDFSpecialFlags ammo_types[];
 
-// DdfCOLM Code -AJA- 1999/07/09.
-void DdfColmapInit(void);
-void DdfColmapCleanUp(void);
+// DDFCOLM Code -AJA- 1999/07/09.
+void DDFColmapInit(void);
+void DDFColmapCleanUp(void);
 
-// DdfFONT Code -AJA- 2004/11/13.
-void DdfFontInit(void);
-void DdfFontCleanUp(void);
+// DDFFONT Code -AJA- 2004/11/13.
+void DDFFontInit(void);
+void DDFFontCleanUp(void);
 
-// DdfSTYLE Code -AJA- 2004/11/14.
-void DdfStyleInit(void);
-void DdfStyleCleanUp(void);
+// DDFSTYLE Code -AJA- 2004/11/14.
+void DDFStyleInit(void);
+void DDFStyleCleanUp(void);
 
-// DdfFONT Code -AJA- 2004/11/18.
-void DdfImageInit(void);
-void DdfImageCleanUp(void);
+// DDFFONT Code -AJA- 2004/11/18.
+void DDFImageInit(void);
+void DDFImageCleanUp(void);
 
-// DdfFLAT Code 2022
-void DdfFlatInit(void);
-void DdfFlatCleanUp(void);
+// DDFFLAT Code 2022
+void DDFFlatInit(void);
+void DDFFlatCleanUp(void);
 
 // WADFIXES Code 2022
-void DdfFixInit(void);
-void DdfFixCleanUp(void);
+void DDFFixInit(void);
+void DDFFixCleanUp(void);
 
 // MOVIES 2023
-void DdfMovieInit(void);
-void DdfMovieCleanUp(void);
+void DDFMovieInit(void);
+void DDFMovieCleanUp(void);
 
 // Miscellaneous stuff needed here & there
 extern const DDFCommandList floor_commands[];

@@ -23,17 +23,17 @@
 #include "r_defs.h"
 
 // opaque handle for rest of the engine
-class MdlModel;
+class MDLModel;
 
-MdlModel *MdlLoad(epi::File *f);
+MDLModel *MDLLoad(epi::File *f);
 
-short MdlFindFrame(MdlModel *md, const char *name);
+short MDLFindFrame(MDLModel *md, const char *name);
 
-void MdlRenderModel(MdlModel *md, const Image *skin_img, bool is_weapon, int frame1, int frame2, float lerp, float x,
+void MDLRenderModel(MDLModel *md, const Image *skin_img, bool is_weapon, int frame1, int frame2, float lerp, float x,
                     float y, float z, MapObject *mo, RegionProperties *props, float scale, float aspect, float bias,
                     int rotation);
 
-void MdlRenderModel2d(MdlModel *md, const Image *skin_img, int frame, float x, float y, float xscale, float yscale,
+void MDLRenderModel2D(MDLModel *md, const Image *skin_img, int frame, float x, float y, float xscale, float yscale,
                       const MapObjectDefinition *info);
 
 //--- editor settings ---

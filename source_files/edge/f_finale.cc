@@ -24,7 +24,7 @@
 //----------------------------------------------------------------------------
 //
 // -KM- 1998/07/21 Clear the background behind those end pics.
-// -KM- 1998/09/27 sounds.ddf stuff: seesound_ -> DdfLookupSound(seesound_)
+// -KM- 1998/09/27 sounds.ddf stuff: seesound_ -> DDFLookupSound(seesound_)
 // -KM- 1998/11/25 Finale generalised.
 //
 
@@ -781,9 +781,9 @@ static void CastDrawer(void)
         glEnable(GL_DEPTH_TEST);
 
         if (md->md2_model_)
-            Md2RenderModel2d(md->md2_model_, skin_img, cast_state->frame, pos_x, pos_y, scale_x, scale_y, cast_order);
+            MD2RenderModel2D(md->md2_model_, skin_img, cast_state->frame, pos_x, pos_y, scale_x, scale_y, cast_order);
         else if (md->mdl_model_)
-            MdlRenderModel2d(md->mdl_model_, skin_img, cast_state->frame, pos_x, pos_y, scale_x, scale_y, cast_order);
+            MDLRenderModel2D(md->mdl_model_, skin_img, cast_state->frame, pos_x, pos_y, scale_x, scale_y, cast_order);
 
         glDisable(GL_DEPTH_TEST);
         return;

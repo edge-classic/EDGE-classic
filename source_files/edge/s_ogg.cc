@@ -43,18 +43,18 @@
 
 extern bool sound_device_stereo; // FIXME: encapsulation
 
-struct OggDataLump
+struct OGGDataLump
 {
     const uint8_t *data;
     size_t         position;
     size_t         size;
 };
 
-class OggPlayer : public AbstractMusicPlayer
+class OGGPlayer : public AbstractMusicPlayer
 {
   public:
-    OggPlayer();
-    ~OggPlayer();
+    OGGPlayer();
+    ~OGGPlayer();
 
   private:
     enum Status
@@ -70,7 +70,7 @@ class OggPlayer : public AbstractMusicPlayer
     bool looping_;
     bool is_stereo_;
 
-    OggDataLump   *ogg_lump_ = nullptr;
+    OGGDataLump   *ogg_lump_ = nullptr;
     OggVorbis_File ogg_stream_;
     vorbis_info   *vorbis_info_ = nullptr;
 
@@ -104,7 +104,7 @@ class OggPlayer : public AbstractMusicPlayer
 
 size_t oggplayer_memread(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
-    OggDataLump *d  = (OggDataLump *)datasource;
+    OGGDataLump *d  = (OGGDataLump *)datasource;
     size_t       rb = size * nmemb;
 
     if (d->position >= d->size)
@@ -121,7 +121,7 @@ size_t oggplayer_memread(void *ptr, size_t size, size_t nmemb, void *datasource)
 
 int oggplayer_memseek(void *datasource, ogg_int64_t offset, int whence)
 {
-    OggDataLump *d = (OggDataLump *)datasource;
+    OGGDataLump *d = (OGGDataLump *)datasource;
     size_t       newpos;
 
     switch (whence)
@@ -159,7 +159,7 @@ int oggplayer_memclose(void *datasource)
 
 long oggplayer_memtell(void *datasource)
 {
-    OggDataLump *d = (OggDataLump *)datasource;
+    OGGDataLump *d = (OGGDataLump *)datasource;
 
     if (d->position > d->size)
         return -1;
@@ -169,12 +169,12 @@ long oggplayer_memtell(void *datasource)
 
 //----------------------------------------------------------------------------
 
-OggPlayer::OggPlayer() : status_(kNotLoaded), vorbis_info_(nullptr)
+OGGPlayer::OGGPlayer() : status_(kNotLoaded), vorbis_info_(nullptr)
 {
     mono_buffer_ = new int16_t[kMusicBuffer * 2];
 }
 
-OggPlayer::~OggPlayer()
+OGGPlayer::~OGGPlayer()
 {
     Close();
 
@@ -182,7 +182,7 @@ OggPlayer::~OggPlayer()
         delete[] mono_buffer_;
 }
 
-const char *OggPlayer::GetError(int code)
+const char *OGGPlayer::GetError(int code)
 {
     switch (code)
     {
@@ -205,10 +205,10 @@ const char *OggPlayer::GetError(int code)
         break;
     }
 
-    return ("Unknown Ogg error.");
+    return ("Unknown OGG error.");
 }
 
-void OggPlayer::PostOpen()
+void OGGPlayer::PostOpen()
 {
     vorbis_info_ = ov_info(&ogg_stream_, -1);
     EPI_ASSERT(vorbis_info_);
@@ -237,7 +237,7 @@ static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
     }
 }
 
-bool OggPlayer::StreamIntoBuffer(SoundData *buf)
+bool OGGPlayer::StreamIntoBuffer(SoundData *buf)
 {
     int ogg_endian = (kByteOrder == kLittleEndian) ? 0 : 1;
 
@@ -292,12 +292,12 @@ bool OggPlayer::StreamIntoBuffer(SoundData *buf)
     return (samples > 0);
 }
 
-bool OggPlayer::OpenMemory(uint8_t *data, int length)
+bool OGGPlayer::OpenMemory(uint8_t *data, int length)
 {
     if (status_ != kNotLoaded)
         Close();
 
-    ogg_lump_ = new OggDataLump;
+    ogg_lump_ = new OGGDataLump;
 
     ogg_lump_->data     = data;
     ogg_lump_->size     = length;
@@ -328,7 +328,7 @@ bool OggPlayer::OpenMemory(uint8_t *data, int length)
     return true;
 }
 
-void OggPlayer::Close()
+void OGGPlayer::Close()
 {
     if (status_ == kNotLoaded)
         return;
@@ -348,7 +348,7 @@ void OggPlayer::Close()
     status_ = kNotLoaded;
 }
 
-void OggPlayer::Pause()
+void OGGPlayer::Pause()
 {
     if (status_ != kPlaying)
         return;
@@ -356,7 +356,7 @@ void OggPlayer::Pause()
     status_ = kPaused;
 }
 
-void OggPlayer::Resume()
+void OGGPlayer::Resume()
 {
     if (status_ != kPaused)
         return;
@@ -364,7 +364,7 @@ void OggPlayer::Resume()
     status_ = kPlaying;
 }
 
-void OggPlayer::Play(bool loop)
+void OGGPlayer::Play(bool loop)
 {
     if (status_ != kNotLoaded && status_ != kStopped)
         return;
@@ -379,7 +379,7 @@ void OggPlayer::Play(bool loop)
     Ticker();
 }
 
-void OggPlayer::Stop()
+void OGGPlayer::Stop()
 {
     if (status_ != kPlaying && status_ != kPaused)
         return;
@@ -389,7 +389,7 @@ void OggPlayer::Stop()
     status_ = kStopped;
 }
 
-void OggPlayer::Ticker()
+void OGGPlayer::Ticker()
 {
     while (status_ == kPlaying && !pc_speaker_mode)
     {
@@ -414,9 +414,9 @@ void OggPlayer::Ticker()
 
 //----------------------------------------------------------------------------
 
-AbstractMusicPlayer *PlayOggMusic(uint8_t *data, int length, bool looping)
+AbstractMusicPlayer *PlayOGGMusic(uint8_t *data, int length, bool looping)
 {
-    OggPlayer *player = new OggPlayer();
+    OGGPlayer *player = new OGGPlayer();
 
     if (!player->OpenMemory(data, length))
     {
@@ -430,9 +430,9 @@ AbstractMusicPlayer *PlayOggMusic(uint8_t *data, int length, bool looping)
     return player;
 }
 
-bool LoadOggSound(SoundData *buf, const uint8_t *data, int length)
+bool LoadOGGSound(SoundData *buf, const uint8_t *data, int length)
 {
-    OggDataLump ogg_lump;
+    OGGDataLump ogg_lump;
 
     ogg_lump.data     = data;
     ogg_lump.size     = length;

@@ -40,7 +40,7 @@ class FlatDefinition
     std::string         splash_;
     // Lobo: item to spawn (or nullptr).  The mobjdef pointer is only valid
     // after
-    //  DdfflatCleanUp() has been called.
+    //  DDFflatCleanUp() has been called.
     const MapObjectDefinition *impactobject_;
     std::string                impactobject_ref_;
 
@@ -86,7 +86,7 @@ class FlatDefinitionContainer : public std::vector<FlatDefinition *>
 
 extern FlatDefinitionContainer flatdefs; // -DASHO- 2022 Implemented
 
-void DdfReadFlat(const std::string &data);
+void DDFReadFlat(const std::string &data);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

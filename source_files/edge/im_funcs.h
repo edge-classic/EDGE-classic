@@ -26,9 +26,9 @@
 enum ImageFormat
 {
     kImageUnknown = 0,
-    kImagePng,
-    kImageTga,
-    kImageJpeg,
+    kImagePNG,
+    kImageTGA,
+    kImageJPEG,
     kImageDoom,
     kImageOther // e.g. gif, dds, bmp
 };
@@ -93,12 +93,12 @@ bool ImageGetInfo(epi::File *file, int *width, int *height, int *depth);
 
 // saves the image (in JPEG format) to the given file.  Returns false if
 // something went wrong.  The image _MUST_ be RGB (bpp == 3).
-bool ImageSaveJpeg(std::string filename, ImageData *image);
+bool ImageSaveJPEG(std::string filename, ImageData *image);
 
 // saves the image (in PNG format) to the given file.
 // Returns false if failed to save (e.g. file already exists).
 // The image _MUST_ be RGB or RGBA.
-bool ImageSavePng(std::string filename, ImageData *image);
+bool ImageSavePNG(std::string filename, ImageData *image);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

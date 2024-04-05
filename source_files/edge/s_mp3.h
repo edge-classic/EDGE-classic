@@ -26,9 +26,9 @@
 
 /* FUNCTIONS */
 
-AbstractMusicPlayer *PlayMp3Music(uint8_t *data, int length, bool looping);
+AbstractMusicPlayer *PlayMP3Music(uint8_t *data, int length, bool looping);
 
-bool LoadMp3Sound(SoundData *buf, const uint8_t *data, int length);
+bool LoadMP3Sound(SoundData *buf, const uint8_t *data, int length);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

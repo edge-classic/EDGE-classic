@@ -1430,7 +1430,7 @@ static void DoStartLevel(SkillLevel skill)
         if (game->description_ != "")
         {
             std::string gamedef_episode = epi::StringFormat("%s", language[game->description_.c_str()]);
-            if (DdfCompareName(gamedef_episode.c_str(), chosen_episodesode.c_str()) == 0)
+            if (DDFCompareName(gamedef_episode.c_str(), chosen_episodesode.c_str()) == 0)
             {
                 g = game;
                 break;
@@ -1438,7 +1438,7 @@ static void DoStartLevel(SkillLevel skill)
         }
         else
         {
-            if (DdfCompareName(game->name_.c_str(), chosen_episodesode.c_str()) == 0)
+            if (DDFCompareName(game->name_.c_str(), chosen_episodesode.c_str()) == 0)
             {
                 g = game;
                 break;

@@ -26,7 +26,7 @@
 //                  Removed sector movement to ddf_main.c, so can be accesed by
 //                  ddf_sect.c
 //
-// -ACB- 2001/02/04 DdfGetSecHeightReference moved to p_plane.c
+// -ACB- 2001/02/04 DDFGetSecHeightReference moved to p_plane.c
 //
 
 #include "ddf_line.h"
@@ -54,64 +54,64 @@ LineTypeContainer linetypes; // <-- User-defined
 
 static LineType *default_linetype;
 
-static void DdfLineGetTrigType(const char *info, void *storage);
-static void DdfLineGetActivators(const char *info, void *storage);
-static void DdfLineGetSecurity(const char *info, void *storage);
-static void DdfLineGetScroller(const char *info, void *storage);
-static void DdfLineGetScrollPart(const char *info, void *storage);
-static void DdfLineGetExtraFloor(const char *info, void *storage);
-static void DdfLineGetEFControl(const char *info, void *storage);
-static void DdfLineGetTeleportSpecial(const char *info, void *storage);
-static void DdfLineGetRadTrig(const char *info, void *storage);
-static void DdfLineGetSpecialFlags(const char *info, void *storage);
-static void DdfLineGetSlideType(const char *info, void *storage);
-static void DdfLineGetLineEffect(const char *info, void *storage);
-static void DdfLineGetScrollType(const char *info, void *storage);
-static void DdfLineGetSectorEffect(const char *info, void *storage);
-static void DdfLineGetPortalEffect(const char *info, void *storage);
-static void DdfLineGetSlopeType(const char *info, void *storage);
+static void DDFLineGetTrigType(const char *info, void *storage);
+static void DDFLineGetActivators(const char *info, void *storage);
+static void DDFLineGetSecurity(const char *info, void *storage);
+static void DDFLineGetScroller(const char *info, void *storage);
+static void DDFLineGetScrollPart(const char *info, void *storage);
+static void DDFLineGetExtraFloor(const char *info, void *storage);
+static void DDFLineGetEFControl(const char *info, void *storage);
+static void DDFLineGetTeleportSpecial(const char *info, void *storage);
+static void DDFLineGetRadTrig(const char *info, void *storage);
+static void DDFLineGetSpecialFlags(const char *info, void *storage);
+static void DDFLineGetSlideType(const char *info, void *storage);
+static void DDFLineGetLineEffect(const char *info, void *storage);
+static void DDFLineGetScrollType(const char *info, void *storage);
+static void DDFLineGetSectorEffect(const char *info, void *storage);
+static void DDFLineGetPortalEffect(const char *info, void *storage);
+static void DDFLineGetSlopeType(const char *info, void *storage);
 
-static void DdfLineMakeCrush(const char *info);
+static void DDFLineMakeCrush(const char *info);
 
 static PlaneMoverDefinition dummy_floor;
 
-const DDFCommandList floor_commands[] = {DDF_FIELD("TYPE", dummy_floor, type_, DdfSectGetMType),
-                                         DDF_FIELD("SPEED_UP", dummy_floor, speed_up_, DdfMainGetFloat),
-                                         DDF_FIELD("SPEED_DOWN", dummy_floor, speed_down_, DdfMainGetFloat),
-                                         DDF_FIELD("DEST_REF", dummy_floor, destref_, DdfSectGetDestRef),
-                                         DDF_FIELD("DEST_OFFSET", dummy_floor, dest_, DdfMainGetFloat),
-                                         DDF_FIELD("OTHER_REF", dummy_floor, otherref_, DdfSectGetDestRef),
-                                         DDF_FIELD("OTHER_OFFSET", dummy_floor, other_, DdfMainGetFloat),
-                                         DDF_FIELD("CRUSH_DAMAGE", dummy_floor, crush_damage_, DdfMainGetNumeric),
-                                         DDF_FIELD("TEXTURE", dummy_floor, tex_, DdfMainGetLumpName),
-                                         DDF_FIELD("PAUSE_TIME", dummy_floor, wait_, DdfMainGetTime),
-                                         DDF_FIELD("WAIT_TIME", dummy_floor, prewait_, DdfMainGetTime),
-                                         DDF_FIELD("SFX_START", dummy_floor, sfxstart_, DdfMainLookupSound),
-                                         DDF_FIELD("SFX_UP", dummy_floor, sfxup_, DdfMainLookupSound),
-                                         DDF_FIELD("SFX_DOWN", dummy_floor, sfxdown_, DdfMainLookupSound),
-                                         DDF_FIELD("SFX_STOP", dummy_floor, sfxstop_, DdfMainLookupSound),
-                                         DDF_FIELD("SCROLL_ANGLE", dummy_floor, scroll_angle_, DdfMainGetAngle),
-                                         DDF_FIELD("SCROLL_SPEED", dummy_floor, scroll_speed_, DdfMainGetFloat),
-                                         DDF_FIELD("IGNORE_TEXTURE", dummy_floor, ignore_texture_, DdfMainGetBoolean),
+const DDFCommandList floor_commands[] = {DDF_FIELD("TYPE", dummy_floor, type_, DDFSectGetMType),
+                                         DDF_FIELD("SPEED_UP", dummy_floor, speed_up_, DDFMainGetFloat),
+                                         DDF_FIELD("SPEED_DOWN", dummy_floor, speed_down_, DDFMainGetFloat),
+                                         DDF_FIELD("DEST_REF", dummy_floor, destref_, DDFSectGetDestRef),
+                                         DDF_FIELD("DEST_OFFSET", dummy_floor, dest_, DDFMainGetFloat),
+                                         DDF_FIELD("OTHER_REF", dummy_floor, otherref_, DDFSectGetDestRef),
+                                         DDF_FIELD("OTHER_OFFSET", dummy_floor, other_, DDFMainGetFloat),
+                                         DDF_FIELD("CRUSH_DAMAGE", dummy_floor, crush_damage_, DDFMainGetNumeric),
+                                         DDF_FIELD("TEXTURE", dummy_floor, tex_, DDFMainGetLumpName),
+                                         DDF_FIELD("PAUSE_TIME", dummy_floor, wait_, DDFMainGetTime),
+                                         DDF_FIELD("WAIT_TIME", dummy_floor, prewait_, DDFMainGetTime),
+                                         DDF_FIELD("SFX_START", dummy_floor, sfxstart_, DDFMainLookupSound),
+                                         DDF_FIELD("SFX_UP", dummy_floor, sfxup_, DDFMainLookupSound),
+                                         DDF_FIELD("SFX_DOWN", dummy_floor, sfxdown_, DDFMainLookupSound),
+                                         DDF_FIELD("SFX_STOP", dummy_floor, sfxstop_, DDFMainLookupSound),
+                                         DDF_FIELD("SCROLL_ANGLE", dummy_floor, scroll_angle_, DDFMainGetAngle),
+                                         DDF_FIELD("SCROLL_SPEED", dummy_floor, scroll_speed_, DDFMainGetFloat),
+                                         DDF_FIELD("IGNORE_TEXTURE", dummy_floor, ignore_texture_, DDFMainGetBoolean),
 
                                          {nullptr, nullptr, 0, nullptr}};
 
 static LadderDefinition dummy_ladder;
 
-const DDFCommandList ladder_commands[] = {DDF_FIELD("HEIGHT", dummy_ladder, height_, DdfMainGetFloat),
+const DDFCommandList ladder_commands[] = {DDF_FIELD("HEIGHT", dummy_ladder, height_, DDFMainGetFloat),
                                           {nullptr, nullptr, 0, nullptr}};
 
 static SlidingDoor dummy_slider;
 
-const DDFCommandList slider_commands[] = {DDF_FIELD("TYPE", dummy_slider, type_, DdfLineGetSlideType),
-                                          DDF_FIELD("SPEED", dummy_slider, speed_, DdfMainGetFloat),
-                                          DDF_FIELD("PAUSE_TIME", dummy_slider, wait_, DdfMainGetTime),
-                                          DDF_FIELD("SEE_THROUGH", dummy_slider, see_through_, DdfMainGetBoolean),
-                                          DDF_FIELD("DISTANCE", dummy_slider, distance_, DdfMainGetPercent),
-                                          DDF_FIELD("SFX_START", dummy_slider, sfx_start_, DdfMainLookupSound),
-                                          DDF_FIELD("SFX_OPEN", dummy_slider, sfx_open_, DdfMainLookupSound),
-                                          DDF_FIELD("SFX_CLOSE", dummy_slider, sfx_close_, DdfMainLookupSound),
-                                          DDF_FIELD("SFX_STOP", dummy_slider, sfx_stop_, DdfMainLookupSound),
+const DDFCommandList slider_commands[] = {DDF_FIELD("TYPE", dummy_slider, type_, DDFLineGetSlideType),
+                                          DDF_FIELD("SPEED", dummy_slider, speed_, DDFMainGetFloat),
+                                          DDF_FIELD("PAUSE_TIME", dummy_slider, wait_, DDFMainGetTime),
+                                          DDF_FIELD("SEE_THROUGH", dummy_slider, see_through_, DDFMainGetBoolean),
+                                          DDF_FIELD("DISTANCE", dummy_slider, distance_, DDFMainGetPercent),
+                                          DDF_FIELD("SFX_START", dummy_slider, sfx_start_, DDFMainLookupSound),
+                                          DDF_FIELD("SFX_OPEN", dummy_slider, sfx_open_, DDFMainLookupSound),
+                                          DDF_FIELD("SFX_CLOSE", dummy_slider, sfx_close_, DDFMainLookupSound),
+                                          DDF_FIELD("SFX_STOP", dummy_slider, sfx_stop_, DDFMainLookupSound),
 
                                           {nullptr, nullptr, 0, nullptr}};
 
@@ -130,70 +130,70 @@ static const DDFCommandList linedef_commands[] = {
     DDF_SUB_LIST("SLIDER", dummy_line, s_, slider_commands),
     DDF_SUB_LIST("LADDER", dummy_line, ladder_, ladder_commands),
 
-    DDF_FIELD("NEWTRIGGER", dummy_line, newtrignum_, DdfMainGetNumeric),
-    DDF_FIELD("ACTIVATORS", dummy_line, obj_, DdfLineGetActivators),
-    DDF_FIELD("TYPE", dummy_line, type_, DdfLineGetTrigType),
-    DDF_FIELD("KEYS", dummy_line, keys_, DdfLineGetSecurity),
-    DDF_FIELD("FAILED_MESSAGE", dummy_line, failedmessage_, DdfMainGetString),
-    DDF_FIELD("FAILED_SFX", dummy_line, failed_sfx_, DdfMainLookupSound),
-    DDF_FIELD("COUNT", dummy_line, count_, DdfMainGetNumeric),
+    DDF_FIELD("NEWTRIGGER", dummy_line, newtrignum_, DDFMainGetNumeric),
+    DDF_FIELD("ACTIVATORS", dummy_line, obj_, DDFLineGetActivators),
+    DDF_FIELD("TYPE", dummy_line, type_, DDFLineGetTrigType),
+    DDF_FIELD("KEYS", dummy_line, keys_, DDFLineGetSecurity),
+    DDF_FIELD("FAILED_MESSAGE", dummy_line, failedmessage_, DDFMainGetString),
+    DDF_FIELD("FAILED_SFX", dummy_line, failed_sfx_, DDFMainLookupSound),
+    DDF_FIELD("COUNT", dummy_line, count_, DDFMainGetNumeric),
 
-    DDF_FIELD("DONUT", dummy_line, d_.dodonut_, DdfMainGetBoolean),
-    DDF_FIELD("DONUT_IN_SFX", dummy_line, d_.d_sfxin_, DdfMainLookupSound),
-    DDF_FIELD("DONUT_IN_SFXSTOP", dummy_line, d_.d_sfxinstop_, DdfMainLookupSound),
-    DDF_FIELD("DONUT_OUT_SFX", dummy_line, d_.d_sfxout_, DdfMainLookupSound),
-    DDF_FIELD("DONUT_OUT_SFXSTOP", dummy_line, d_.d_sfxoutstop_, DdfMainLookupSound),
+    DDF_FIELD("DONUT", dummy_line, d_.dodonut_, DDFMainGetBoolean),
+    DDF_FIELD("DONUT_IN_SFX", dummy_line, d_.d_sfxin_, DDFMainLookupSound),
+    DDF_FIELD("DONUT_IN_SFXSTOP", dummy_line, d_.d_sfxinstop_, DDFMainLookupSound),
+    DDF_FIELD("DONUT_OUT_SFX", dummy_line, d_.d_sfxout_, DDFMainLookupSound),
+    DDF_FIELD("DONUT_OUT_SFXSTOP", dummy_line, d_.d_sfxoutstop_, DDFMainLookupSound),
 
-    DDF_FIELD("TELEPORT", dummy_line, t_.teleport_, DdfMainGetBoolean),
-    DDF_FIELD("TELEPORT_DELAY", dummy_line, t_.delay_, DdfMainGetTime),
-    DDF_FIELD("TELEIN_EFFECTOBJ", dummy_line, t_.inspawnobj_ref_, DdfMainGetString),
-    DDF_FIELD("TELEOUT_EFFECTOBJ", dummy_line, t_.outspawnobj_ref_, DdfMainGetString),
-    DDF_FIELD("TELEPORT_SPECIAL", dummy_line, t_.special_, DdfLineGetTeleportSpecial),
+    DDF_FIELD("TELEPORT", dummy_line, t_.teleport_, DDFMainGetBoolean),
+    DDF_FIELD("TELEPORT_DELAY", dummy_line, t_.delay_, DDFMainGetTime),
+    DDF_FIELD("TELEIN_EFFECTOBJ", dummy_line, t_.inspawnobj_ref_, DDFMainGetString),
+    DDF_FIELD("TELEOUT_EFFECTOBJ", dummy_line, t_.outspawnobj_ref_, DDFMainGetString),
+    DDF_FIELD("TELEPORT_SPECIAL", dummy_line, t_.special_, DDFLineGetTeleportSpecial),
 
-    DDF_FIELD("LIGHT_TYPE", dummy_line, l_.type_, DdfSectGetLighttype),
-    DDF_FIELD("LIGHT_LEVEL", dummy_line, l_.level_, DdfMainGetNumeric),
-    DDF_FIELD("LIGHT_DARK_TIME", dummy_line, l_.darktime_, DdfMainGetTime),
-    DDF_FIELD("LIGHT_BRIGHT_TIME", dummy_line, l_.brighttime_, DdfMainGetTime),
-    DDF_FIELD("LIGHT_CHANCE", dummy_line, l_.chance_, DdfMainGetPercent),
-    DDF_FIELD("LIGHT_SYNC", dummy_line, l_.sync_, DdfMainGetTime),
-    DDF_FIELD("LIGHT_STEP", dummy_line, l_.step_, DdfMainGetNumeric),
-    DDF_FIELD("EXIT", dummy_line, e_exit_, DdfSectGetExit),
-    DDF_FIELD("HUB_EXIT", dummy_line, hub_exit_, DdfMainGetNumeric),
+    DDF_FIELD("LIGHT_TYPE", dummy_line, l_.type_, DDFSectGetLighttype),
+    DDF_FIELD("LIGHT_LEVEL", dummy_line, l_.level_, DDFMainGetNumeric),
+    DDF_FIELD("LIGHT_DARK_TIME", dummy_line, l_.darktime_, DDFMainGetTime),
+    DDF_FIELD("LIGHT_BRIGHT_TIME", dummy_line, l_.brighttime_, DDFMainGetTime),
+    DDF_FIELD("LIGHT_CHANCE", dummy_line, l_.chance_, DDFMainGetPercent),
+    DDF_FIELD("LIGHT_SYNC", dummy_line, l_.sync_, DDFMainGetTime),
+    DDF_FIELD("LIGHT_STEP", dummy_line, l_.step_, DDFMainGetNumeric),
+    DDF_FIELD("EXIT", dummy_line, e_exit_, DDFSectGetExit),
+    DDF_FIELD("HUB_EXIT", dummy_line, hub_exit_, DDFMainGetNumeric),
 
-    DDF_FIELD("SCROLL_XSPEED", dummy_line, s_xspeed_, DdfMainGetFloat),
-    DDF_FIELD("SCROLL_YSPEED", dummy_line, s_yspeed_, DdfMainGetFloat),
-    DDF_FIELD("SCROLL_PARTS", dummy_line, scroll_parts_, DdfLineGetScrollPart),
-    DDF_FIELD("USE_COLOURMAP", dummy_line, use_colourmap_, DdfMainGetColourmap),
-    DDF_FIELD("GRAVITY", dummy_line, gravity_, DdfMainGetFloat),
-    DDF_FIELD("FRICTION", dummy_line, friction_, DdfMainGetFloat),
-    DDF_FIELD("VISCOSITY", dummy_line, viscosity_, DdfMainGetFloat),
-    DDF_FIELD("DRAG", dummy_line, drag_, DdfMainGetFloat),
-    DDF_FIELD("AMBIENT_SOUND", dummy_line, ambient_sfx_, DdfMainLookupSound),
-    DDF_FIELD("ACTIVATE_SOUND", dummy_line, activate_sfx_, DdfMainLookupSound),
-    DDF_FIELD("MUSIC", dummy_line, music_, DdfMainGetNumeric),
-    DDF_FIELD("AUTO", dummy_line, autoline_, DdfMainGetBoolean),
-    DDF_FIELD("SINGLESIDED", dummy_line, singlesided_, DdfMainGetBoolean),
-    DDF_FIELD("EXTRAFLOOR_TYPE", dummy_line, ef_.type_, DdfLineGetExtraFloor),
-    DDF_FIELD("EXTRAFLOOR_CONTROL", dummy_line, ef_.control_, DdfLineGetEFControl),
-    DDF_FIELD("TRANSLUCENCY", dummy_line, translucency_, DdfMainGetPercent),
-    DDF_FIELD("WHEN_APPEAR", dummy_line, appear_, DdfMainGetWhenAppear),
-    DDF_FIELD("SPECIAL", dummy_line, special_flags_, DdfLineGetSpecialFlags),
-    DDF_FIELD("RADIUS_TRIGGER", dummy_line, trigger_effect_, DdfLineGetRadTrig),
-    DDF_FIELD("LINE_EFFECT", dummy_line, line_effect_, DdfLineGetLineEffect),
-    DDF_FIELD("SCROLL_TYPE", dummy_line, scroll_type_, DdfLineGetScrollType),
-    DDF_FIELD("LINE_PARTS", dummy_line, line_parts_, DdfLineGetScrollPart),
-    DDF_FIELD("SECTOR_EFFECT", dummy_line, sector_effect_, DdfLineGetSectorEffect),
-    DDF_FIELD("PORTAL_TYPE", dummy_line, portal_effect_, DdfLineGetPortalEffect),
-    DDF_FIELD("SLOPE_TYPE", dummy_line, slope_type_, DdfLineGetSlopeType),
-    DDF_FIELD("COLOUR", dummy_line, fx_color_, DdfMainGetRGB),
+    DDF_FIELD("SCROLL_XSPEED", dummy_line, s_xspeed_, DDFMainGetFloat),
+    DDF_FIELD("SCROLL_YSPEED", dummy_line, s_yspeed_, DDFMainGetFloat),
+    DDF_FIELD("SCROLL_PARTS", dummy_line, scroll_parts_, DDFLineGetScrollPart),
+    DDF_FIELD("USE_COLOURMAP", dummy_line, use_colourmap_, DDFMainGetColourmap),
+    DDF_FIELD("GRAVITY", dummy_line, gravity_, DDFMainGetFloat),
+    DDF_FIELD("FRICTION", dummy_line, friction_, DDFMainGetFloat),
+    DDF_FIELD("VISCOSITY", dummy_line, viscosity_, DDFMainGetFloat),
+    DDF_FIELD("DRAG", dummy_line, drag_, DDFMainGetFloat),
+    DDF_FIELD("AMBIENT_SOUND", dummy_line, ambient_sfx_, DDFMainLookupSound),
+    DDF_FIELD("ACTIVATE_SOUND", dummy_line, activate_sfx_, DDFMainLookupSound),
+    DDF_FIELD("MUSIC", dummy_line, music_, DDFMainGetNumeric),
+    DDF_FIELD("AUTO", dummy_line, autoline_, DDFMainGetBoolean),
+    DDF_FIELD("SINGLESIDED", dummy_line, singlesided_, DDFMainGetBoolean),
+    DDF_FIELD("EXTRAFLOOR_TYPE", dummy_line, ef_.type_, DDFLineGetExtraFloor),
+    DDF_FIELD("EXTRAFLOOR_CONTROL", dummy_line, ef_.control_, DDFLineGetEFControl),
+    DDF_FIELD("TRANSLUCENCY", dummy_line, translucency_, DDFMainGetPercent),
+    DDF_FIELD("WHEN_APPEAR", dummy_line, appear_, DDFMainGetWhenAppear),
+    DDF_FIELD("SPECIAL", dummy_line, special_flags_, DDFLineGetSpecialFlags),
+    DDF_FIELD("RADIUS_TRIGGER", dummy_line, trigger_effect_, DDFLineGetRadTrig),
+    DDF_FIELD("LINE_EFFECT", dummy_line, line_effect_, DDFLineGetLineEffect),
+    DDF_FIELD("SCROLL_TYPE", dummy_line, scroll_type_, DDFLineGetScrollType),
+    DDF_FIELD("LINE_PARTS", dummy_line, line_parts_, DDFLineGetScrollPart),
+    DDF_FIELD("SECTOR_EFFECT", dummy_line, sector_effect_, DDFLineGetSectorEffect),
+    DDF_FIELD("PORTAL_TYPE", dummy_line, portal_effect_, DDFLineGetPortalEffect),
+    DDF_FIELD("SLOPE_TYPE", dummy_line, slope_type_, DDFLineGetSlopeType),
+    DDF_FIELD("COLOUR", dummy_line, fx_color_, DDFMainGetRGB),
 
     // -AJA- backwards compatibility cruft...
-    DDF_FIELD("EXTRAFLOOR_TRANSLUCENCY", dummy_line, translucency_, DdfMainGetPercent),
+    DDF_FIELD("EXTRAFLOOR_TRANSLUCENCY", dummy_line, translucency_, DDFMainGetPercent),
 
     // Lobo: 2022
-    DDF_FIELD("EFFECT_OBJECT", dummy_line, effectobject_ref_, DdfMainGetString),
-    DDF_FIELD("GLASS", dummy_line, glass_, DdfMainGetBoolean),
-    DDF_FIELD("BROKEN_TEXTURE", dummy_line, brokentex_, DdfMainGetLumpName),
+    DDF_FIELD("EFFECT_OBJECT", dummy_line, effectobject_ref_, DDFMainGetString),
+    DDF_FIELD("GLASS", dummy_line, glass_, DDFMainGetBoolean),
+    DDF_FIELD("BROKEN_TEXTURE", dummy_line, brokentex_, DDFMainGetLumpName),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -263,7 +263,7 @@ static void LinedefStartEntry(const char *name, bool extend)
     int number = HMM_MAX(0, atoi(name));
 
     if (number == 0)
-        DdfError("Bad linetype number in lines.ddf: %s\n", name);
+        DDFError("Bad linetype number in lines.ddf: %s\n", name);
 
     scrolling_dir   = kScrollDirectionNone;
     scrolling_speed = 1.0f;
@@ -273,7 +273,7 @@ static void LinedefStartEntry(const char *name, bool extend)
     if (extend)
     {
         if (!dynamic_line)
-            DdfError("Unknown linetype to extend: %s\n", name);
+            DDFError("Unknown linetype to extend: %s\n", name);
         return;
     }
 
@@ -295,12 +295,12 @@ static void LinedefDoTemplate(const char *contents)
 {
     int number = HMM_MAX(0, atoi(contents));
     if (number == 0)
-        DdfError("Bad linetype number for template: %s\n", contents);
+        DDFError("Bad linetype number for template: %s\n", contents);
 
     LineType *other = linetypes.Lookup(number);
 
     if (!other || other == dynamic_line)
-        DdfError("Unknown linetype template: '%s'\n", contents);
+        DDFError("Unknown linetype template: '%s'\n", contents);
 
     dynamic_line->CopyDetail(*other);
 }
@@ -311,37 +311,37 @@ static void LinedefParseField(const char *field, const char *contents, int index
     LogDebug("LINEDEF_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DdfCompareName(field, "TEMPLATE") == 0)
+    if (DDFCompareName(field, "TEMPLATE") == 0)
     {
         LinedefDoTemplate(contents);
         return;
     }
 
     // ignored for backwards compatibility
-    if (DdfCompareName(field, "SECSPECIAL") == 0)
+    if (DDFCompareName(field, "SECSPECIAL") == 0)
         return;
 
     // -AJA- backwards compatibility cruft...
-    if (DdfCompareName(field, "CRUSH") == 0)
+    if (DDFCompareName(field, "CRUSH") == 0)
     {
-        DdfLineMakeCrush(contents);
+        DDFLineMakeCrush(contents);
         return;
     }
-    else if (DdfCompareName(field, "SCROLL") == 0)
+    else if (DDFCompareName(field, "SCROLL") == 0)
     {
-        DdfLineGetScroller(contents, &scrolling_dir);
+        DDFLineGetScroller(contents, &scrolling_dir);
         return;
     }
-    else if (DdfCompareName(field, "SCROLLING_SPEED") == 0)
+    else if (DDFCompareName(field, "SCROLLING_SPEED") == 0)
     {
         scrolling_speed = atof(contents);
         return;
     }
 
-    if (DdfMainParseField(linedef_commands, field, contents, (uint8_t *)dynamic_line))
+    if (DDFMainParseField(linedef_commands, field, contents, (uint8_t *)dynamic_line))
         return; // OK
 
-    DdfWarnError("Unknown lines.ddf command: %s\n", field);
+    DDFWarnError("Unknown lines.ddf command: %s\n", field);
 }
 
 static void LinedefFinishEntry(void)
@@ -379,20 +379,20 @@ static void LinedefFinishEntry(void)
 
         if ((dynamic_line->ef_.type_ & kExtraFloorTypeFlooder) && (dynamic_line->ef_.type_ & kExtraFloorTypeNoShade))
         {
-            DdfWarnError("FLOODER and NOSHADE tags cannot be used together.\n");
+            DDFWarnError("FLOODER and NOSHADE tags cannot be used together.\n");
             dynamic_line->ef_.type_ = (ExtraFloorType)(dynamic_line->ef_.type_ & ~kExtraFloorTypeFlooder);
         }
 
         if (!(dynamic_line->ef_.type_ & kExtraFloorTypePresent))
         {
-            DdfWarnError("Extrafloor type missing THIN, THICK or LIQUID.\n");
+            DDFWarnError("Extrafloor type missing THIN, THICK or LIQUID.\n");
             dynamic_line->ef_.type_ = kExtraFloorTypeNone;
         }
     }
 
     if (!AlmostEquals(dynamic_line->friction_, kFloatUnused) && dynamic_line->friction_ < 0.05f)
     {
-        DdfWarnError("Friction value too low (%1.2f), it would prevent "
+        DDFWarnError("Friction value too low (%1.2f), it would prevent "
                       "all movement.\n",
                       dynamic_line->friction_);
         dynamic_line->friction_ = 0.05f;
@@ -400,7 +400,7 @@ static void LinedefFinishEntry(void)
 
     if (!AlmostEquals(dynamic_line->viscosity_, kFloatUnused) && dynamic_line->viscosity_ > 0.95f)
     {
-        DdfWarnError("Viscosity value too high (%1.2f), it would prevent "
+        DDFWarnError("Viscosity value too high (%1.2f), it would prevent "
                       "all movement.\n",
                       dynamic_line->viscosity_);
         dynamic_line->viscosity_ = 0.95f;
@@ -415,7 +415,7 @@ static void LinedefClearAll(void)
     linetypes.Reset();
 }
 
-void DdfReadLines(const std::string &data)
+void DDFReadLines(const std::string &data)
 {
     DDFReadInfo lines;
 
@@ -427,10 +427,10 @@ void DdfReadLines(const std::string &data)
     lines.finish_entry = LinedefFinishEntry;
     lines.clear_all    = LinedefClearAll;
 
-    DdfMainReadFile(&lines, data);
+    DDFMainReadFile(&lines, data);
 }
 
-void DdfLinedefInit(void)
+void DDFLinedefInit(void)
 {
     linetypes.Reset();
 
@@ -438,7 +438,7 @@ void DdfLinedefInit(void)
     default_linetype->number_ = 0;
 }
 
-void DdfLinedefCleanUp(void)
+void DDFLinedefCleanUp(void)
 {
     for (auto l : linetypes)
     {
@@ -458,29 +458,29 @@ void DdfLinedefCleanUp(void)
 }
 
 //
-// DdfLineGetScroller
+// DDFLineGetScroller
 //
 // Check for scroll types
 //
-void DdfLineGetScroller(const char *info, void *storage)
+void DDFLineGetScroller(const char *info, void *storage)
 {
     for (int i = 0; s_scroll[i].s; i++)
     {
-        if (DdfCompareName(info, s_scroll[i].s) == 0)
+        if (DDFCompareName(info, s_scroll[i].s) == 0)
         {
             scrolling_dir = (ScrollDirections)(scrolling_dir | s_scroll[i].dir);
             return;
         }
     }
-    DdfWarnError("Unknown scroll direction %s\n", info);
+    DDFWarnError("Unknown scroll direction %s\n", info);
 }
 
 //
-// DdfLineGetSecurity
+// DDFLineGetSecurity
 //
 // Get Red/Blue/Yellow
 //
-void DdfLineGetSecurity(const char *info, void *storage)
+void DDFLineGetSecurity(const char *info, void *storage)
 {
     DoorKeyType *var = (DoorKeyType *)storage;
 
@@ -500,7 +500,7 @@ void DdfLineGetSecurity(const char *info, void *storage)
 
     for (int i = sizeof(s_keys) / sizeof(s_keys[0]); i--;)
     {
-        if (DdfCompareName(info, s_keys[i].s) == 0)
+        if (DDFCompareName(info, s_keys[i].s) == 0)
         {
             *var = (DoorKeyType)(*var | s_keys[i].n);
 
@@ -511,49 +511,49 @@ void DdfLineGetSecurity(const char *info, void *storage)
         }
     }
 
-    DdfWarnError("Unknown key type %s\n", info);
+    DDFWarnError("Unknown key type %s\n", info);
 }
 
 //
-// DdfLineGetTrigType
+// DDFLineGetTrigType
 //
 // Check for walk/push/shoot
 //
-void DdfLineGetTrigType(const char *info, void *storage)
+void DDFLineGetTrigType(const char *info, void *storage)
 {
     LineTrigger *var = (LineTrigger *)storage;
 
     for (int i = sizeof(s_trigger) / sizeof(s_trigger[0]); i--;)
     {
-        if (DdfCompareName(info, s_trigger[i].s) == 0)
+        if (DDFCompareName(info, s_trigger[i].s) == 0)
         {
             *var = (LineTrigger)s_trigger[i].n;
             return;
         }
     }
 
-    DdfWarnError("Unknown Trigger type %s\n", info);
+    DDFWarnError("Unknown Trigger type %s\n", info);
 }
 
 //
-// DdfLineGetActivators
+// DDFLineGetActivators
 //
 // Get player/monsters/missiles
 //
-void DdfLineGetActivators(const char *info, void *storage)
+void DDFLineGetActivators(const char *info, void *storage)
 {
     TriggerActivator *var = (TriggerActivator *)storage;
 
     for (int i = sizeof(s_activators) / sizeof(s_activators[0]); i--;)
     {
-        if (DdfCompareName(info, s_activators[i].s) == 0)
+        if (DDFCompareName(info, s_activators[i].s) == 0)
         {
             *var = (TriggerActivator)(*var | s_activators[i].n);
             return;
         }
     }
 
-    DdfWarnError("Unknown Activator type %s\n", info);
+    DDFWarnError("Unknown Activator type %s\n", info);
 }
 
 static DDFSpecialFlags extrafloor_types[] = {
@@ -578,18 +578,18 @@ static DDFSpecialFlags extrafloor_types[] = {
     {nullptr, 0, 0}};
 
 //
-// DdfLineGetExtraFloor
+// DDFLineGetExtraFloor
 //
 // Gets the extra floor type(s).
 //
 // -AJA- 1999/06/21: written.
 // -AJA- 2000/03/27: updated for simpler system.
 //
-void DdfLineGetExtraFloor(const char *info, void *storage)
+void DDFLineGetExtraFloor(const char *info, void *storage)
 {
     ExtraFloorType *var = (ExtraFloorType *)storage;
 
-    if (DdfCompareName(info, "NONE") == 0)
+    if (DDFCompareName(info, "NONE") == 0)
     {
         *var = kExtraFloorTypeNone;
         return;
@@ -597,19 +597,19 @@ void DdfLineGetExtraFloor(const char *info, void *storage)
 
     int flag_value;
 
-    switch (DdfMainCheckSpecialFlag(info, extrafloor_types, &flag_value, true, false))
+    switch (DDFMainCheckSpecialFlag(info, extrafloor_types, &flag_value, true, false))
     {
-    case kDdfCheckFlagPositive:
+    case kDDFCheckFlagPositive:
         *var = (ExtraFloorType)(*var | flag_value);
         break;
 
-    case kDdfCheckFlagNegative:
+    case kDDFCheckFlagNegative:
         *var = (ExtraFloorType)(*var & ~flag_value);
         break;
 
-    case kDdfCheckFlagUser:
-    case kDdfCheckFlagUnknown:
-        DdfWarnError("Unknown Extrafloor Type: %s\n", info);
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDFWarnError("Unknown Extrafloor Type: %s\n", info);
         break;
     }
 }
@@ -618,24 +618,24 @@ static DDFSpecialFlags ef_control_types[] = {
     {"NONE", kExtraFloorControlNone, 0}, {"REMOVE", kExtraFloorControlRemove, 0}, {nullptr, 0, 0}};
 
 //
-// DdfLineGetEFControl
+// DDFLineGetEFControl
 //
-void DdfLineGetEFControl(const char *info, void *storage)
+void DDFLineGetEFControl(const char *info, void *storage)
 {
     ExtraFloorControl *var = (ExtraFloorControl *)storage;
 
     int flag_value;
 
-    switch (DdfMainCheckSpecialFlag(info, ef_control_types, &flag_value, false, false))
+    switch (DDFMainCheckSpecialFlag(info, ef_control_types, &flag_value, false, false))
     {
-    case kDdfCheckFlagPositive:
-    case kDdfCheckFlagNegative:
+    case kDDFCheckFlagPositive:
+    case kDDFCheckFlagNegative:
         *var = (ExtraFloorControl)flag_value;
         break;
 
-    case kDdfCheckFlagUser:
-    case kDdfCheckFlagUnknown:
-        DdfWarnError("Unknown CONTROL_EXTRAFLOOR tag: %s", info);
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDFWarnError("Unknown CONTROL_EXTRAFLOOR tag: %s", info);
         break;
     }
 }
@@ -665,31 +665,31 @@ static DDFSpecialFlags teleport_specials[] = {{"RELATIVE", kTeleportSpecialRelat
                                               {nullptr, 0, 0}};
 
 //
-// DdfLineGetTeleportSpecial
+// DDFLineGetTeleportSpecial
 //
 // Gets the teleporter special flags.
 //
 // -AJA- 1999/07/12: written.
 //
-void DdfLineGetTeleportSpecial(const char *info, void *storage)
+void DDFLineGetTeleportSpecial(const char *info, void *storage)
 {
     TeleportSpecial *var = (TeleportSpecial *)storage;
 
     int flag_value;
 
-    switch (DdfMainCheckSpecialFlag(info, teleport_specials, &flag_value, true, false))
+    switch (DDFMainCheckSpecialFlag(info, teleport_specials, &flag_value, true, false))
     {
-    case kDdfCheckFlagPositive:
+    case kDDFCheckFlagPositive:
         *var = (TeleportSpecial)(*var | flag_value);
         break;
 
-    case kDdfCheckFlagNegative:
+    case kDDFCheckFlagNegative:
         *var = (TeleportSpecial)(*var & ~flag_value);
         break;
 
-    case kDdfCheckFlagUser:
-    case kDdfCheckFlagUnknown:
-        DdfWarnError("DdfLineGetTeleportSpecial: Unknown Special: %s\n", info);
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDFWarnError("DDFLineGetTeleportSpecial: Unknown Special: %s\n", info);
         break;
     }
 }
@@ -707,36 +707,36 @@ static DDFSpecialFlags scrollpart_specials[] = {{"RIGHT_UPPER", kScrollingPartRi
                                                 {nullptr, 0, 0}};
 
 //
-// DdfLineGetScrollPart
+// DDFLineGetScrollPart
 //
 // Gets the scroll part flags.
 //
 // -AJA- 1999/07/12: written.
 //
-void DdfLineGetScrollPart(const char *info, void *storage)
+void DDFLineGetScrollPart(const char *info, void *storage)
 {
     int            flag_value;
     ScrollingPart *dest = (ScrollingPart *)storage;
 
-    if (DdfCompareName(info, "NONE") == 0)
+    if (DDFCompareName(info, "NONE") == 0)
     {
         (*dest) = kScrollingPartNone;
         return;
     }
 
-    switch (DdfMainCheckSpecialFlag(info, scrollpart_specials, &flag_value, true, false))
+    switch (DDFMainCheckSpecialFlag(info, scrollpart_specials, &flag_value, true, false))
     {
-    case kDdfCheckFlagPositive:
+    case kDDFCheckFlagPositive:
         (*dest) = (ScrollingPart)((*dest) | flag_value);
         break;
 
-    case kDdfCheckFlagNegative:
+    case kDDFCheckFlagNegative:
         (*dest) = (ScrollingPart)((*dest) & ~flag_value);
         break;
 
-    case kDdfCheckFlagUser:
-    case kDdfCheckFlagUnknown:
-        DdfWarnError("DdfLineGetScrollPart: Unknown Part: %s", info);
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDFWarnError("DDFLineGetScrollPart: Unknown Part: %s", info);
         break;
     }
 }
@@ -749,54 +749,54 @@ static DDFSpecialFlags line_specials[] = {{"MUST_REACH", kLineSpecialMustReach, 
                                           {nullptr, 0, 0}};
 
 //
-// DdfLineGetSpecialFlags
+// DDFLineGetSpecialFlags
 //
 // Gets the line special flags.
 //
-void DdfLineGetSpecialFlags(const char *info, void *storage)
+void DDFLineGetSpecialFlags(const char *info, void *storage)
 {
     LineSpecial *var = (LineSpecial *)storage;
 
     int flag_value;
 
-    switch (DdfMainCheckSpecialFlag(info, line_specials, &flag_value, true, false))
+    switch (DDFMainCheckSpecialFlag(info, line_specials, &flag_value, true, false))
     {
-    case kDdfCheckFlagPositive:
+    case kDDFCheckFlagPositive:
         *var = (LineSpecial)(*var | flag_value);
         break;
 
-    case kDdfCheckFlagNegative:
+    case kDDFCheckFlagNegative:
         *var = (LineSpecial)(*var & ~flag_value);
         break;
 
-    case kDdfCheckFlagUser:
-    case kDdfCheckFlagUnknown:
-        DdfWarnError("Unknown line special: %s", info);
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDFWarnError("Unknown line special: %s", info);
         break;
     }
 }
 
 //
-// DdfLineGetRadTrig
+// DDFLineGetRadTrig
 //
 // Gets the line's radius trigger effect.
 //
-static void DdfLineGetRadTrig(const char *info, void *storage)
+static void DDFLineGetRadTrig(const char *info, void *storage)
 {
     int *trigger_effect = (int *)storage;
 
-    if (DdfCompareName(info, "ENABLE_TAGGED") == 0)
+    if (DDFCompareName(info, "ENABLE_TAGGED") == 0)
     {
         *trigger_effect = +1;
         return;
     }
-    if (DdfCompareName(info, "DISABLE_TAGGED") == 0)
+    if (DDFCompareName(info, "DISABLE_TAGGED") == 0)
     {
         *trigger_effect = -1;
         return;
     }
 
-    DdfWarnError("DdfLineGetRadTrig: Unknown effect: %s\n", info);
+    DDFWarnError("DDFLineGetRadTrig: Unknown effect: %s\n", info);
 }
 
 static const DDFSpecialFlags slidingdoor_names[] = {{"NONE", kSlidingDoorTypeNone, 0},
@@ -807,13 +807,13 @@ static const DDFSpecialFlags slidingdoor_names[] = {{"NONE", kSlidingDoorTypeNon
                                                     {nullptr, 0, 0}};
 
 //
-// DdfLineGetSlideType
+// DDFLineGetSlideType
 //
-static void DdfLineGetSlideType(const char *info, void *storage)
+static void DDFLineGetSlideType(const char *info, void *storage)
 {
-    if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(info, slidingdoor_names, (int *)storage, false, false))
+    if (kDDFCheckFlagPositive != DDFMainCheckSpecialFlag(info, slidingdoor_names, (int *)storage, false, false))
     {
-        DdfWarnError("DdfLineGetSlideType: Unknown slider: %s\n", info);
+        DDFWarnError("DDFLineGetSlideType: Unknown slider: %s\n", info);
     }
 }
 
@@ -839,31 +839,31 @@ static DDFSpecialFlags line_effect_names[] = {{"TRANSLUCENT", kLineEffectTypeTra
 //
 // Gets the line effect flags.
 //
-static void DdfLineGetLineEffect(const char *info, void *storage)
+static void DDFLineGetLineEffect(const char *info, void *storage)
 {
     LineEffectType *var = (LineEffectType *)storage;
 
     int flag_value;
 
-    if (DdfCompareName(info, "NONE") == 0)
+    if (DDFCompareName(info, "NONE") == 0)
     {
         *var = kLineEffectTypeNONE;
         return;
     }
 
-    switch (DdfMainCheckSpecialFlag(info, line_effect_names, &flag_value, true, false))
+    switch (DDFMainCheckSpecialFlag(info, line_effect_names, &flag_value, true, false))
     {
-    case kDdfCheckFlagPositive:
+    case kDDFCheckFlagPositive:
         *var = (LineEffectType)(*var | flag_value);
         break;
 
-    case kDdfCheckFlagNegative:
+    case kDDFCheckFlagNegative:
         *var = (LineEffectType)(*var & ~flag_value);
         break;
 
-    case kDdfCheckFlagUser:
-    case kDdfCheckFlagUnknown:
-        DdfWarnError("Unknown line effect type: %s", info);
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDFWarnError("Unknown line effect type: %s", info);
         break;
     }
 }
@@ -874,31 +874,31 @@ static DDFSpecialFlags scroll_type_names[] = {
 //
 // Gets the scroll type flags.
 //
-static void DdfLineGetScrollType(const char *info, void *storage)
+static void DDFLineGetScrollType(const char *info, void *storage)
 {
     BoomScrollerType *var = (BoomScrollerType *)storage;
 
     int flag_value;
 
-    if (DdfCompareName(info, "NONE") == 0)
+    if (DDFCompareName(info, "NONE") == 0)
     {
         *var = BoomScrollerTypeNone;
         return;
     }
 
-    switch (DdfMainCheckSpecialFlag(info, scroll_type_names, &flag_value, true, false))
+    switch (DDFMainCheckSpecialFlag(info, scroll_type_names, &flag_value, true, false))
     {
-    case kDdfCheckFlagPositive:
+    case kDDFCheckFlagPositive:
         *var = (BoomScrollerType)(*var | flag_value);
         break;
 
-    case kDdfCheckFlagNegative:
+    case kDDFCheckFlagNegative:
         *var = (BoomScrollerType)(*var & ~flag_value);
         break;
 
-    case kDdfCheckFlagUser:
-    case kDdfCheckFlagUnknown:
-        DdfWarnError("Unknown scroll type: %s", info);
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDFWarnError("Unknown scroll type: %s", info);
         break;
     }
 }
@@ -920,31 +920,31 @@ static DDFSpecialFlags sector_effect_names[] = {
 //
 // Gets the sector effect flags.
 //
-static void DdfLineGetSectorEffect(const char *info, void *storage)
+static void DDFLineGetSectorEffect(const char *info, void *storage)
 {
     SectorEffectType *var = (SectorEffectType *)storage;
 
     int flag_value;
 
-    if (DdfCompareName(info, "NONE") == 0)
+    if (DDFCompareName(info, "NONE") == 0)
     {
         *var = kSectorEffectTypeNone;
         return;
     }
 
-    switch (DdfMainCheckSpecialFlag(info, sector_effect_names, &flag_value, true, false))
+    switch (DDFMainCheckSpecialFlag(info, sector_effect_names, &flag_value, true, false))
     {
-    case kDdfCheckFlagPositive:
+    case kDDFCheckFlagPositive:
         *var = (SectorEffectType)(*var | flag_value);
         break;
 
-    case kDdfCheckFlagNegative:
+    case kDDFCheckFlagNegative:
         *var = (SectorEffectType)(*var & ~flag_value);
         break;
 
-    case kDdfCheckFlagUser:
-    case kDdfCheckFlagUnknown:
-        DdfWarnError("Unknown sector effect type: %s", info);
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDFWarnError("Unknown sector effect type: %s", info);
         break;
     }
 }
@@ -958,31 +958,31 @@ static DDFSpecialFlags portal_effect_names[] = {{"STANDARD", kPortalEffectTypeSt
 //
 // Gets the portal effect flags.
 //
-static void DdfLineGetPortalEffect(const char *info, void *storage)
+static void DDFLineGetPortalEffect(const char *info, void *storage)
 {
     PortalEffectType *var = (PortalEffectType *)storage;
 
     int flag_value;
 
-    if (DdfCompareName(info, "NONE") == 0)
+    if (DDFCompareName(info, "NONE") == 0)
     {
         *var = kPortalEffectTypeNone;
         return;
     }
 
-    switch (DdfMainCheckSpecialFlag(info, portal_effect_names, &flag_value, true, false))
+    switch (DDFMainCheckSpecialFlag(info, portal_effect_names, &flag_value, true, false))
     {
-    case kDdfCheckFlagPositive:
+    case kDDFCheckFlagPositive:
         *var = (PortalEffectType)(*var | flag_value);
         break;
 
-    case kDdfCheckFlagNegative:
+    case kDDFCheckFlagNegative:
         *var = (PortalEffectType)(*var & ~flag_value);
         break;
 
-    case kDdfCheckFlagUser:
-    case kDdfCheckFlagUnknown:
-        DdfWarnError("Unknown portal type: %s", info);
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDFWarnError("Unknown portal type: %s", info);
         break;
     }
 }
@@ -992,36 +992,36 @@ static DDFSpecialFlags slope_type_names[] = {{"FAKE_FLOOR", kSlopeTypeDetailFloo
 
                                              {nullptr, 0, 0}};
 
-static void DdfLineGetSlopeType(const char *info, void *storage)
+static void DDFLineGetSlopeType(const char *info, void *storage)
 {
     SlopeType *var = (SlopeType *)storage;
 
     int flag_value;
 
-    if (DdfCompareName(info, "NONE") == 0)
+    if (DDFCompareName(info, "NONE") == 0)
     {
         *var = kSlopeTypeNONE;
         return;
     }
 
-    switch (DdfMainCheckSpecialFlag(info, slope_type_names, &flag_value, true, false))
+    switch (DDFMainCheckSpecialFlag(info, slope_type_names, &flag_value, true, false))
     {
-    case kDdfCheckFlagPositive:
+    case kDDFCheckFlagPositive:
         *var = (SlopeType)(*var | flag_value);
         break;
 
-    case kDdfCheckFlagNegative:
+    case kDDFCheckFlagNegative:
         *var = (SlopeType)(*var & ~flag_value);
         break;
 
-    case kDdfCheckFlagUser:
-    case kDdfCheckFlagUnknown:
-        DdfWarnError("Unknown slope type: %s", info);
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDFWarnError("Unknown slope type: %s", info);
         break;
     }
 }
 
-static void DdfLineMakeCrush(const char *info)
+static void DDFLineMakeCrush(const char *info)
 {
     dynamic_line->f_.crush_damage_ = 10;
     dynamic_line->c_.crush_damage_ = 10;

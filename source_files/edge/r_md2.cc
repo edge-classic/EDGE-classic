@@ -62,10 +62,10 @@ extern bool            need_to_draw_sky;
 // struct member naming deviates from the style guide to reflect
 // MD2 format documentation
 
-static constexpr const char *kMd2Identifier = "IDP2";
-static constexpr uint8_t     kMd2Version    = 8;
+static constexpr const char *kMD2Identifier = "IDP2";
+static constexpr uint8_t     kMD2Version    = 8;
 
-struct RawMd2Header
+struct RawMD2Header
 {
     char ident[4];
 
@@ -91,24 +91,24 @@ struct RawMd2Header
     int32_t ofs_end;
 };
 
-struct RawMd2TextureCoordinate
+struct RawMD2TextureCoordinate
 {
     uint16_t s, t;
 };
 
-struct RawMd2Triangle
+struct RawMD2Triangle
 {
     uint16_t index_xyz[3];
     uint16_t index_st[3];
 };
 
-struct RawMd2Vertex
+struct RawMD2Vertex
 {
     uint8_t x, y, z;
     uint8_t light_normal;
 };
 
-struct RawMd2Frame
+struct RawMD2Frame
 {
     uint32_t scale[3];
     uint32_t translate[3];
@@ -116,7 +116,7 @@ struct RawMd2Frame
     char name[16];
 };
 
-struct RawMd2Skin
+struct RawMD2Skin
 {
     char name[64];
 };
@@ -129,10 +129,10 @@ struct RawMd2Skin
 // struct member naming deviates from the style guide to reflect
 // MD3 format documentation
 
-static constexpr const char *kMd3Identifier = "IDP3";
-static constexpr uint8_t     kMd3Version    = 15;
+static constexpr const char *kMD3Identifier = "IDP3";
+static constexpr uint8_t     kMD3Version    = 15;
 
-struct RawMd3Header
+struct RawMD3Header
 {
     char    ident[4];
     int32_t version;
@@ -151,7 +151,7 @@ struct RawMd3Header
     int32_t ofs_end;
 };
 
-struct RawMd3Mesh
+struct RawMD3Mesh
 {
     char ident[4];
     char name[64];
@@ -170,24 +170,24 @@ struct RawMd3Mesh
     int32_t ofs_next_mesh;
 };
 
-struct RawMd3TextureCoordinate
+struct RawMD3TextureCoordinate
 {
     uint32_t s, t;
 };
 
-struct RawMd3Triangle
+struct RawMD3Triangle
 {
     uint32_t index_xyz[3];
 };
 
-struct RawMd3Vertex
+struct RawMD3Vertex
 {
     int16_t x, y, z;
 
     uint8_t pitch, yaw;
 };
 
-struct RawMd3Frame
+struct RawMD3Frame
 {
     uint32_t mins[3];
     uint32_t maxs[3];
@@ -199,16 +199,16 @@ struct RawMd3Frame
 
 /*============== EDGE REPRESENTATION ====================*/
 
-struct Md2Vertex
+struct MD2Vertex
 {
     float x, y, z;
 
     short normal_idx;
 };
 
-struct Md2Frame
+struct MD2Frame
 {
-    Md2Vertex *vertices;
+    MD2Vertex *vertices;
 
     const char *name;
 
@@ -216,7 +216,7 @@ struct Md2Frame
     short *used_normals_;
 };
 
-struct Md2Point
+struct MD2Point
 {
     float skin_s, skin_t;
 
@@ -224,23 +224,23 @@ struct Md2Point
     int vert_idx;
 };
 
-struct Md2Triangle
+struct MD2Triangle
 {
     // index to the first point (within md2_model_c::points).
     // All points for the strip are contiguous in that array.
     int first;
 };
 
-class Md2Model
+class MD2Model
 {
   public:
     int total_frames_;
     int total_points_;
     int total_triangles_;
 
-    Md2Frame    *frames_;
-    Md2Point    *points_;
-    Md2Triangle *triangles_;
+    MD2Frame    *frames_;
+    MD2Point    *points_;
+    MD2Triangle *triangles_;
 
     int vertices_per_frame_;
 
@@ -249,17 +249,17 @@ class Md2Model
     RendererVertex *gl_vertices_;
 
   public:
-    Md2Model(int nframe, int npoint, int ntriangles_)
+    MD2Model(int nframe, int npoint, int ntriangles_)
         : total_frames_(nframe), total_points_(npoint), total_triangles_(ntriangles_), vertices_per_frame_(0),
           vertex_buffer_object_(0), gl_vertices_(nullptr)
     {
-        frames_      = new Md2Frame[total_frames_];
-        points_      = new Md2Point[total_points_];
-        triangles_   = new Md2Triangle[total_triangles_];
+        frames_      = new MD2Frame[total_frames_];
+        points_      = new MD2Point[total_points_];
+        triangles_   = new MD2Triangle[total_triangles_];
         gl_vertices_ = new RendererVertex[total_triangles_ * 3];
     }
 
-    ~Md2Model()
+    ~MD2Model()
     {
         delete[] frames_;
         delete[] points_;
@@ -269,7 +269,7 @@ class Md2Model
 
 /*============== LOADING CODE ====================*/
 
-static const char *CopyFrameName(RawMd2Frame *frm)
+static const char *CopyFrameName(RawMD2Frame *frm)
 {
     char *str = new char[20];
 
@@ -281,7 +281,7 @@ static const char *CopyFrameName(RawMd2Frame *frm)
     return str;
 }
 
-static const char *CopyFrameName(RawMd3Frame *frm)
+static const char *CopyFrameName(RawMD3Frame *frm)
 {
     char *str = new char[20];
 
@@ -298,7 +298,7 @@ static short *CreateNormalList(uint8_t *which_normals)
     int count = 0;
     int i;
 
-    for (i = 0; i < kTotalMdFormatNormals; i++)
+    for (i = 0; i < kTotalMDFormatNormals; i++)
         if (which_normals[i])
             count++;
 
@@ -306,7 +306,7 @@ static short *CreateNormalList(uint8_t *which_normals)
 
     count = 0;
 
-    for (i = 0; i < kTotalMdFormatNormals; i++)
+    for (i = 0; i < kTotalMDFormatNormals; i++)
         if (which_normals[i])
             n_list[count++] = i;
 
@@ -315,29 +315,29 @@ static short *CreateNormalList(uint8_t *which_normals)
     return n_list;
 }
 
-Md2Model *Md2Load(epi::File *f)
+MD2Model *MD2Load(epi::File *f)
 {
     int i;
 
-    RawMd2Header header;
+    RawMD2Header header;
 
     /* read header */
-    f->Read(&header, sizeof(RawMd2Header));
+    f->Read(&header, sizeof(RawMD2Header));
 
     int version = AlignedLittleEndianS32(header.version);
 
     LogDebug("MODEL IDENT: [%c%c%c%c] VERSION: %d", header.ident[0], header.ident[1], header.ident[2], header.ident[3],
              version);
 
-    if (epi::StringPrefixCompare(header.ident, kMd2Identifier) != 0)
+    if (epi::StringPrefixCompare(header.ident, kMD2Identifier) != 0)
     {
-        FatalError("Md2LoadModel: lump is not an MD2 model!");
+        FatalError("MD2LoadModel: lump is not an MD2 model!");
         return nullptr; /* NOT REACHED */
     }
 
-    if (version != kMd2Version)
+    if (version != kMD2Version)
     {
-        FatalError("Md2LoadModel: strange version!");
+        FatalError("MD2LoadModel: strange version!");
         return nullptr; /* NOT REACHED */
     }
 
@@ -348,10 +348,10 @@ Md2Model *Md2Load(epi::File *f)
 
     /* PARSE TRIANGLES */
 
-    RawMd2Triangle *md2_triangles_ = new RawMd2Triangle[total_triangles_];
+    RawMD2Triangle *md2_triangles_ = new RawMD2Triangle[total_triangles_];
 
     f->Seek(AlignedLittleEndianS32(header.ofs_triangles_), epi::File::kSeekpointStart);
-    f->Read(md2_triangles_, total_triangles_ * sizeof(RawMd2Triangle));
+    f->Read(md2_triangles_, total_triangles_ * sizeof(RawMD2Triangle));
 
     for (int tri = 0; tri < total_triangles_; tri++)
     {
@@ -364,10 +364,10 @@ Md2Model *Md2Load(epi::File *f)
 
     /* PARSE TEXCOORDS */
 
-    RawMd2TextureCoordinate *md2_sts = new RawMd2TextureCoordinate[num_sts];
+    RawMD2TextureCoordinate *md2_sts = new RawMD2TextureCoordinate[num_sts];
 
     f->Seek(AlignedLittleEndianS32(header.ofs_st), epi::File::kSeekpointStart);
-    f->Read(md2_sts, num_sts * sizeof(RawMd2TextureCoordinate));
+    f->Read(md2_sts, num_sts * sizeof(RawMD2TextureCoordinate));
 
     for (int st = 0; st < num_sts; st++)
     {
@@ -377,15 +377,15 @@ Md2Model *Md2Load(epi::File *f)
 
     LogDebug("  frames:%d  points:%d  triangles: %d\n", num_frames, total_triangles_ * 3, total_triangles_);
 
-    Md2Model *md = new Md2Model(num_frames, total_points_, total_triangles_);
+    MD2Model *md = new MD2Model(num_frames, total_points_, total_triangles_);
 
     md->vertices_per_frame_ = AlignedLittleEndianS32(header.num_vertices);
 
     LogDebug("  vertices_per_frame_:%d\n", md->vertices_per_frame_);
 
     // convert raw triangles
-    Md2Triangle *tri   = md->triangles_;
-    Md2Point    *point = md->points_;
+    MD2Triangle *tri   = md->triangles_;
+    MD2Point    *point = md->points_;
 
     for (i = 0; i < total_triangles_; i++)
     {
@@ -398,7 +398,7 @@ Md2Model *Md2Load(epi::File *f)
 
         for (int j = 0; j < 3; j++, point++)
         {
-            RawMd2Triangle t = md2_triangles_[i];
+            RawMD2Triangle t = md2_triangles_[i];
 
             point->skin_s   = (float)md2_sts[t.index_st[j]].s / header.skin_width;
             point->skin_t   = 1.0f - ((float)md2_sts[t.index_st[j]].t / header.skin_height);
@@ -417,15 +417,15 @@ Md2Model *Md2Load(epi::File *f)
 
     /* PARSE FRAMES */
 
-    uint8_t which_normals[kTotalMdFormatNormals];
+    uint8_t which_normals[kTotalMDFormatNormals];
 
-    RawMd2Vertex *raw_verts = new RawMd2Vertex[md->vertices_per_frame_];
+    RawMD2Vertex *raw_verts = new RawMD2Vertex[md->vertices_per_frame_];
 
     f->Seek(AlignedLittleEndianS32(header.ofs_frames), epi::File::kSeekpointStart);
 
     for (i = 0; i < num_frames; i++)
     {
-        RawMd2Frame raw_frame;
+        RawMD2Frame raw_frame;
 
         f->Read(&raw_frame, sizeof(raw_frame));
 
@@ -450,28 +450,28 @@ Md2Model *Md2Load(epi::File *f)
 
         md->frames_[i].name = CopyFrameName(&raw_frame);
 
-#ifdef EDGE_DEBUG_Md2LOAD
+#ifdef EDGE_DEBUG_MD2LOAD
         LogDebug("  __FRAME_%d__[%s]\n", i + 1, md->frames_[i].name);
         LogDebug("    scale: %1.2f, %1.2f, %1.2f\n", scale[0], scale[1], scale[2]);
         LogDebug("    translate: %1.2f, %1.2f, %1.2f\n", translate[0], translate[1], translate[2]);
 #endif
 
-        f->Read(raw_verts, md->vertices_per_frame_ * sizeof(RawMd2Vertex));
+        f->Read(raw_verts, md->vertices_per_frame_ * sizeof(RawMD2Vertex));
 
-        md->frames_[i].vertices = new Md2Vertex[md->vertices_per_frame_];
+        md->frames_[i].vertices = new MD2Vertex[md->vertices_per_frame_];
 
         memset(which_normals, 0, sizeof(which_normals));
 
         for (int v = 0; v < md->vertices_per_frame_; v++)
         {
-            RawMd2Vertex *raw_V  = raw_verts + v;
-            Md2Vertex    *good_V = md->frames_[i].vertices + v;
+            RawMD2Vertex *raw_V  = raw_verts + v;
+            MD2Vertex    *good_V = md->frames_[i].vertices + v;
 
             good_V->x = (int)raw_V->x * scale[0] + translate[0];
             good_V->y = (int)raw_V->y * scale[1] + translate[1];
             good_V->z = (int)raw_V->z * scale[2] + translate[2];
 
-#ifdef EDGE_DEBUG_Md2LOAD
+#ifdef EDGE_DEBUG_MD2LOAD
             LogDebug("    __VERT_%d__\n", v);
             LogDebug("      raw: %d,%d,%d\n", raw_V->x, raw_V->y, raw_V->z);
             LogDebug("      normal: %d\n", raw_V->light_normal);
@@ -480,12 +480,12 @@ Md2Model *Md2Load(epi::File *f)
             good_V->normal_idx = raw_V->light_normal;
 
             EPI_ASSERT(good_V->normal_idx >= 0);
-            // EPI_ASSERT(good_V->normal_idx < kTotalMdFormatNormals);
+            // EPI_ASSERT(good_V->normal_idx < kTotalMDFormatNormals);
             //  Dasho: Maybe try to salvage bad MD2 models?
-            if (good_V->normal_idx >= kTotalMdFormatNormals)
+            if (good_V->normal_idx >= kTotalMDFormatNormals)
             {
                 LogDebug("Vert %d of Frame %d has an invalid normal index: %d\n", v, i, good_V->normal_idx);
-                good_V->normal_idx = (good_V->normal_idx % kTotalMdFormatNormals);
+                good_V->normal_idx = (good_V->normal_idx % kTotalMDFormatNormals);
             }
 
             which_normals[good_V->normal_idx] = 1;
@@ -498,22 +498,22 @@ Md2Model *Md2Load(epi::File *f)
 
     glGenBuffers(1, &md->vertex_buffer_object_);
     if (md->vertex_buffer_object_ == 0)
-        FatalError("Md2LoadModel: Failed to bind VBO!\n");
+        FatalError("MD2LoadModel: Failed to bind VBO!\n");
     glBindBuffer(GL_ARRAY_BUFFER, md->vertex_buffer_object_);
     glBufferData(GL_ARRAY_BUFFER, md->total_triangles_ * 3 * sizeof(RendererVertex), nullptr, GL_STREAM_DRAW);
 
     return md;
 }
 
-short Md2FindFrame(Md2Model *md, const char *name)
+short MD2FindFrame(MD2Model *md, const char *name)
 {
     EPI_ASSERT(strlen(name) > 0);
 
     for (int f = 0; f < md->total_frames_; f++)
     {
-        Md2Frame *frame = &md->frames_[f];
+        MD2Frame *frame = &md->frames_[f];
 
-        if (DdfCompareName(name, frame->name) == 0)
+        if (DDFCompareName(name, frame->name) == 0)
             return f;
     }
 
@@ -525,7 +525,7 @@ short Md2FindFrame(Md2Model *md, const char *name)
 static uint8_t md3_normal_to_md2[128][128];
 static bool    md3_normal_map_built = false;
 
-static uint8_t Md2FindNormal(float x, float y, float z)
+static uint8_t MD2FindNormal(float x, float y, float z)
 {
     // -AJA- we make the search around SIX times faster by only
     // considering the first quadrant (where x, y, z are >= 0).
@@ -571,7 +571,7 @@ static uint8_t Md2FindNormal(float x, float y, float z)
     return md_normal_groups[best_g][quadrant];
 }
 
-static void Md3CreateNormalMap(void)
+static void MD3CreateNormalMap(void)
 {
     // Create a table mapping MD3 normals to MD2 normals.
     // We discard the least significant bit of pitch and yaw
@@ -595,40 +595,40 @@ static void Md3CreateNormalMap(void)
             float x = w * sintab[yaw + 32];
             float y = w * sintab[yaw];
 
-            *dest++ = Md2FindNormal(x, y, z);
+            *dest++ = MD2FindNormal(x, y, z);
         }
     }
 
     md3_normal_map_built = true;
 }
 
-Md2Model *Md3Load(epi::File *f)
+MD2Model *MD3Load(epi::File *f)
 {
     int    i;
     float *ff;
 
     if (!md3_normal_map_built)
-        Md3CreateNormalMap();
+        MD3CreateNormalMap();
 
-    RawMd3Header header;
+    RawMD3Header header;
 
     /* read header */
-    f->Read(&header, sizeof(RawMd3Header));
+    f->Read(&header, sizeof(RawMD3Header));
 
     int version = AlignedLittleEndianS32(header.version);
 
     LogDebug("MODEL IDENT: [%c%c%c%c] VERSION: %d", header.ident[0], header.ident[1], header.ident[2], header.ident[3],
              version);
 
-    if (strncmp(header.ident, kMd3Identifier, 4) != 0)
+    if (strncmp(header.ident, kMD3Identifier, 4) != 0)
     {
-        FatalError("Md3LoadModel: lump is not an MD3 model!");
+        FatalError("MD3LoadModel: lump is not an MD3 model!");
         return nullptr; /* NOT REACHED */
     }
 
-    if (version != kMd3Version)
+    if (version != kMD3Version)
     {
-        FatalError("Md3LoadModel: strange version!");
+        FatalError("MD3LoadModel: strange version!");
         return nullptr; /* NOT REACHED */
     }
 
@@ -641,9 +641,9 @@ Md2Model *Md3Load(epi::File *f)
 
     f->Seek(mesh_base, epi::File::kSeekpointStart);
 
-    RawMd3Mesh mesh;
+    RawMD3Mesh mesh;
 
-    f->Read(&mesh, sizeof(RawMd3Mesh));
+    f->Read(&mesh, sizeof(RawMD3Mesh));
 
     int num_frames       = AlignedLittleEndianS32(mesh.num_frames);
     int num_verts        = AlignedLittleEndianS32(mesh.num_verts);
@@ -651,21 +651,21 @@ Md2Model *Md3Load(epi::File *f)
 
     LogDebug("  frames:%d  verts:%d  triangles: %d\n", num_frames, num_verts, total_triangles_);
 
-    Md2Model *md = new Md2Model(num_frames, total_triangles_ * 3, total_triangles_);
+    MD2Model *md = new MD2Model(num_frames, total_triangles_ * 3, total_triangles_);
 
     md->vertices_per_frame_ = num_verts;
 
     /* PARSE TEXCOORD */
 
-    Md2Point *temp_TEXC = new Md2Point[num_verts];
+    MD2Point *temp_TEXC = new MD2Point[num_verts];
 
     f->Seek(mesh_base + AlignedLittleEndianS32(mesh.ofs_texcoords), epi::File::kSeekpointStart);
 
     for (i = 0; i < num_verts; i++)
     {
-        RawMd3TextureCoordinate texc;
+        RawMD3TextureCoordinate texc;
 
-        f->Read(&texc, sizeof(RawMd3TextureCoordinate));
+        f->Read(&texc, sizeof(RawMD3TextureCoordinate));
 
         texc.s = AlignedLittleEndianU32(texc.s);
         texc.t = AlignedLittleEndianU32(texc.t);
@@ -684,9 +684,9 @@ Md2Model *Md3Load(epi::File *f)
 
     for (i = 0; i < total_triangles_; i++)
     {
-        RawMd3Triangle tri;
+        RawMD3Triangle tri;
 
-        f->Read(&tri, sizeof(RawMd3Triangle));
+        f->Read(&tri, sizeof(RawMD3Triangle));
 
         int a = AlignedLittleEndianU32(tri.index_xyz[0]);
         int b = AlignedLittleEndianU32(tri.index_xyz[1]);
@@ -698,7 +698,7 @@ Md2Model *Md3Load(epi::File *f)
 
         md->triangles_[i].first = i * 3;
 
-        Md2Point *point = md->points_ + i * 3;
+        MD2Point *point = md->points_ + i * 3;
 
         point[0] = temp_TEXC[a];
         point[1] = temp_TEXC[b];
@@ -711,21 +711,21 @@ Md2Model *Md3Load(epi::File *f)
 
     f->Seek(mesh_base + AlignedLittleEndianS32(mesh.ofs_verts), epi::File::kSeekpointStart);
 
-    uint8_t which_normals[kTotalMdFormatNormals];
+    uint8_t which_normals[kTotalMDFormatNormals];
 
     for (i = 0; i < num_frames; i++)
     {
-        md->frames_[i].vertices = new Md2Vertex[num_verts];
+        md->frames_[i].vertices = new MD2Vertex[num_verts];
 
         memset(which_normals, 0, sizeof(which_normals));
 
-        Md2Vertex *good_V = md->frames_[i].vertices;
+        MD2Vertex *good_V = md->frames_[i].vertices;
 
         for (int v = 0; v < num_verts; v++, good_V++)
         {
-            RawMd3Vertex vert;
+            RawMD3Vertex vert;
 
-            f->Read(&vert, sizeof(RawMd3Vertex));
+            f->Read(&vert, sizeof(RawMD3Vertex));
 
             good_V->x = AlignedLittleEndianS16(vert.x) / 64.0;
             good_V->y = AlignedLittleEndianS16(vert.y) / 64.0;
@@ -745,9 +745,9 @@ Md2Model *Md3Load(epi::File *f)
 
     for (i = 0; i < num_frames; i++)
     {
-        RawMd3Frame frame;
+        RawMD3Frame frame;
 
-        f->Read(&frame, sizeof(RawMd3Frame));
+        f->Read(&frame, sizeof(RawMD3Frame));
 
         md->frames_[i].name = CopyFrameName(&frame);
 
@@ -757,7 +757,7 @@ Md2Model *Md3Load(epi::File *f)
     }
     glGenBuffers(1, &md->vertex_buffer_object_);
     if (md->vertex_buffer_object_ == 0)
-        FatalError("Md3LoadModel: Failed to create VBO!\n");
+        FatalError("MD3LoadModel: Failed to create VBO!\n");
     glBindBuffer(GL_ARRAY_BUFFER, md->vertex_buffer_object_);
     glBufferData(GL_ARRAY_BUFFER, md->total_triangles_ * 3 * sizeof(RendererVertex), nullptr, GL_STREAM_DRAW);
     return md;
@@ -765,16 +765,16 @@ Md2Model *Md3Load(epi::File *f)
 
 /*============== MODEL RENDERING ====================*/
 
-class Md2CoordinateData
+class MD2CoordinateData
 {
   public:
     MapObject *map_object_;
 
-    Md2Model *model_;
+    MD2Model *model_;
 
-    const Md2Frame    *frame1_;
-    const Md2Frame    *frame2_;
-    const Md2Triangle *triangles_;
+    const MD2Frame    *frame1_;
+    const MD2Frame    *frame2_;
+    const MD2Triangle *triangles_;
 
     float lerp_;
     float x_, y_, z_;
@@ -803,7 +803,7 @@ class Md2CoordinateData
     HMM_Vec2 rotation_x_matrix_;
     HMM_Vec2 rotation_y_matrix_;
 
-    ColorMixer normal_colors_[kTotalMdFormatNormals];
+    ColorMixer normal_colors_[kTotalMDFormatNormals];
 
     short *used_normals_;
 
@@ -825,7 +825,7 @@ class Md2CoordinateData
         pos->Z = z_ + z2;
     }
 
-    void CalcNormal(HMM_Vec3 *normal, const Md2Vertex *vert) const
+    void CalcNormal(HMM_Vec3 *normal, const MD2Vertex *vert) const
     {
         short n = vert->normal_idx;
 
@@ -843,7 +843,7 @@ class Md2CoordinateData
     }
 };
 
-static void InitNormalColors(Md2CoordinateData *data)
+static void InitNormalColors(MD2CoordinateData *data)
 {
     short *n_list = data->used_normals_;
 
@@ -853,7 +853,7 @@ static void InitNormalColors(Md2CoordinateData *data)
     }
 }
 
-static void ShadeNormals(AbstractShader *shader, Md2CoordinateData *data, bool skip_calc)
+static void ShadeNormals(AbstractShader *shader, MD2CoordinateData *data, bool skip_calc)
 {
     short *n_list = data->used_normals_;
 
@@ -885,7 +885,7 @@ static void ShadeNormals(AbstractShader *shader, Md2CoordinateData *data, bool s
 
 static void DLIT_Model(MapObject *mo, void *dataptr)
 {
-    Md2CoordinateData *data = (Md2CoordinateData *)dataptr;
+    MD2CoordinateData *data = (MD2CoordinateData *)dataptr;
 
     // dynamic lights do not light themselves up!
     if (mo == data->map_object_)
@@ -896,7 +896,7 @@ static void DLIT_Model(MapObject *mo, void *dataptr)
     ShadeNormals(mo->dynamic_light_.shader, data, false);
 }
 
-static int Md2MulticolMaxRGB(Md2CoordinateData *data, bool additive)
+static int MD2MulticolMaxRGB(MD2CoordinateData *data, bool additive)
 {
     int result = 0;
 
@@ -914,7 +914,7 @@ static int Md2MulticolMaxRGB(Md2CoordinateData *data, bool additive)
     return result;
 }
 
-static void UpdateMulticols(Md2CoordinateData *data)
+static void UpdateMulticols(MD2CoordinateData *data)
 {
     short *n_list = data->used_normals_;
 
@@ -933,22 +933,22 @@ static inline float LerpIt(float v1, float v2, float lerp)
     return v1 * (1.0f - lerp) + v2 * lerp;
 }
 
-static inline void ModelCoordFunc(Md2CoordinateData *data, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc,
+static inline void ModelCoordFunc(MD2CoordinateData *data, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc,
                                   HMM_Vec3 *normal)
 {
-    const Md2Model *md = data->model_;
+    const MD2Model *md = data->model_;
 
-    const Md2Frame    *frame1 = data->frame1_;
-    const Md2Frame    *frame2 = data->frame2_;
-    const Md2Triangle *tri    = data->triangles_;
+    const MD2Frame    *frame1 = data->frame1_;
+    const MD2Frame    *frame2 = data->frame2_;
+    const MD2Triangle *tri    = data->triangles_;
 
     EPI_ASSERT(tri->first + v_idx >= 0);
     EPI_ASSERT(tri->first + v_idx < md->total_points_);
 
-    const Md2Point *point = &md->points_[tri->first + v_idx];
+    const MD2Point *point = &md->points_[tri->first + v_idx];
 
-    const Md2Vertex *vert1 = &frame1->vertices[point->vert_idx];
-    const Md2Vertex *vert2 = &frame2->vertices[point->vert_idx];
+    const MD2Vertex *vert1 = &frame1->vertices[point->vert_idx];
+    const MD2Vertex *vert2 = &frame2->vertices[point->vert_idx];
 
     float x1 = LerpIt(vert1->x, vert2->x, data->lerp_);
     float y1 = LerpIt(vert1->y, vert2->y, data->lerp_);
@@ -959,7 +959,7 @@ static inline void ModelCoordFunc(Md2CoordinateData *data, int v_idx, HMM_Vec3 *
 
     data->CalcPos(pos, x1, y1, z1);
 
-    const Md2Vertex *n_vert = (data->lerp_ < 0.5) ? vert1 : vert2;
+    const MD2Vertex *n_vert = (data->lerp_ < 0.5) ? vert1 : vert2;
 
     data->CalcNormal(normal, n_vert);
 
@@ -994,7 +994,7 @@ static inline void ModelCoordFunc(Md2CoordinateData *data, int v_idx, HMM_Vec3 *
     rgb[2] *= render_view_blue_multiplier;
 }
 
-void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_, int frame1, int frame2, float lerp, float x,
+void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon_, int frame1, int frame2, float lerp, float x,
                     float y, float z, MapObject *mo, RegionProperties *props, float scale, float aspect, float bias_,
                     int rotation)
 {
@@ -1010,7 +1010,7 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_, int fr
         return;
     }
 
-    Md2CoordinateData data;
+    MD2CoordinateData data;
 
     data.is_fuzzy_ = (mo->flags_ & kMapObjectFlagFuzzy) ? true : false;
 
@@ -1210,12 +1210,12 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_, int fr
         if (pass > 0 && pass < num_pass - 1)
         {
             UpdateMulticols(&data);
-            if (Md2MulticolMaxRGB(&data, false) <= 0)
+            if (MD2MulticolMaxRGB(&data, false) <= 0)
                 continue;
         }
         else if (data.is_additive_)
         {
-            if (Md2MulticolMaxRGB(&data, true) <= 0)
+            if (MD2MulticolMaxRGB(&data, true) <= 0)
                 continue;
         }
 
@@ -1345,7 +1345,7 @@ void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon_, int fr
     state->SetDefaultStateFull();
 }
 
-void Md2RenderModel2d(Md2Model *md, const Image *skin_img, int frame, float x, float y, float xscale, float yscale,
+void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, float y, float xscale, float yscale,
                       const MapObjectDefinition *info)
 {
     // check if frame is valid
@@ -1373,19 +1373,19 @@ void Md2RenderModel2d(Md2Model *md, const Image *skin_img, int frame, float x, f
 
     for (int i = 0; i < md->total_triangles_; i++)
     {
-        const Md2Triangle *tri = &md->triangles_[i];
+        const MD2Triangle *tri = &md->triangles_[i];
 
         glBegin(GL_TRIANGLES);
 
         for (int v_idx = 0; v_idx < 3; v_idx++)
         {
-            const Md2Frame *frame_ptr = &md->frames_[frame];
+            const MD2Frame *frame_ptr = &md->frames_[frame];
 
             EPI_ASSERT(tri->first + v_idx >= 0);
             EPI_ASSERT(tri->first + v_idx < md->total_points_);
 
-            const Md2Point  *point = &md->points_[tri->first + v_idx];
-            const Md2Vertex *vert  = &frame_ptr->vertices[point->vert_idx];
+            const MD2Point  *point = &md->points_[tri->first + v_idx];
+            const MD2Vertex *vert  = &frame_ptr->vertices[point->vert_idx];
 
             glTexCoord2f(point->skin_s * im_right, point->skin_t * im_top);
 

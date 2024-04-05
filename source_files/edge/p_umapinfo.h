@@ -71,6 +71,6 @@ struct MapList
 
 extern struct MapList Maps;
 
-void ParseUmapinfo(const std::string &buffer);
+void ParseUMAPINFO(const std::string &buffer);
 
 void FreeMapList();

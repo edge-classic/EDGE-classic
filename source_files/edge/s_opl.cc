@@ -427,7 +427,7 @@ class OpalPlayer : public AbstractMusicPlayer
     }
 };
 
-AbstractMusicPlayer *PlayOplMusic(uint8_t *data, int length, bool loop, int type)
+AbstractMusicPlayer *PlayOPLMusic(uint8_t *data, int length, bool loop, int type)
 {
     if (opl_disabled)
     {
@@ -448,13 +448,13 @@ AbstractMusicPlayer *PlayOplMusic(uint8_t *data, int length, bool loop, int type
 
     switch (type)
     {
-    case kDdfMusicIMF280:
+    case kDDFMusicIMF280:
         rate = 280;
         break;
-    case kDdfMusicIMF560:
+    case kDDFMusicIMF560:
         rate = 560;
         break;
-    case kDdfMusicIMF700:
+    case kDDFMusicIMF700:
         rate = 700;
         break;
     default:

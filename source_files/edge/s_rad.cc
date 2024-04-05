@@ -278,7 +278,7 @@ void RadPlayer::Ticker()
 
 //----------------------------------------------------------------------------
 
-AbstractMusicPlayer *PlayRadMusic(uint8_t *data, int length, bool looping)
+AbstractMusicPlayer *PlayRADMusic(uint8_t *data, int length, bool looping)
 {
     RadPlayer *player = new RadPlayer();
 

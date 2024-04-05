@@ -101,7 +101,7 @@ class MovieDefinitionContainer : public std::vector<MovieDefinition *>
 
 extern MovieDefinitionContainer moviedefs;
 
-void DdfReadMovies(const std::string &data);
+void DDFReadMovies(const std::string &data);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

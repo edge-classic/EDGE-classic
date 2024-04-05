@@ -653,9 +653,9 @@ static void ProcessDDFInPack(PackFile *pack)
             source += bare_filename;
 
             // this handles RTS scripts too!
-            DdfType type = DdfFilenameToType(ent.name_);
+            DDFType type = DDFFilenameToType(ent.name_);
 
-            if (type != kDdfTypeUnknown)
+            if (type != kDDFTypeUnknown)
             {
                 int            length   = -1;
                 const uint8_t *raw_data = pack->LoadEntry(dir, entry, length);
@@ -663,7 +663,7 @@ static void ProcessDDFInPack(PackFile *pack)
                 std::string data((const char *)raw_data);
                 delete[] raw_data;
 
-                DdfAddFile(type, data, source);
+                DDFAddFile(type, data, source);
                 continue;
             }
 
@@ -913,12 +913,12 @@ void PackProcessSubstitutions(PackFile *pack, int pack_index)
             {
                 if (epi::GetExtension(song->info_).empty())
                 {
-                    if (song->infotype_ == kDdfMusicDataLump &&
+                    if (song->infotype_ == kDDFMusicDataLump &&
                         epi::StringCaseCompareASCII(epi::GetStem(entry.name_), song->info_) == 0 &&
                         CheckDataFileIndexForName(song->info_.c_str()) < pack_index)
                     {
                         song->info_     = entry.pack_path_;
-                        song->infotype_ = kDdfMusicDataPackage;
+                        song->infotype_ = kDDFMusicDataPackage;
                     }
                 }
             }
@@ -948,7 +948,7 @@ void PackProcessSubstitutions(PackFile *pack, int pack_index)
             }
 
             if (add_it)
-                DdfAddRawColourmap(stem.c_str(), pack->EntryLength(d, i), entry.pack_path_.c_str());
+                DDFAddRawColourmap(stem.c_str(), pack->EntryLength(d, i), entry.pack_path_.c_str());
         }
     }
 }
@@ -1260,9 +1260,9 @@ static void ProcessWADsInPack(PackFile *pack)
                 epi::MemFile *pack_wad_mem = new epi::MemFile(raw_pack_wad, pack_wad->GetLength(), true);
                 delete[] raw_pack_wad; // copied on pack_wad_mem creation
                 DataFile *pack_wad_df = new DataFile(
-                    entry.name_, (pack->parent_->kind_ == kFileKindIFolder || pack->parent_->kind_ == kFileKindIpk)
-                                     ? kFileKindIPackWad
-                                     : kFileKindPackWad);
+                    entry.name_, (pack->parent_->kind_ == kFileKindIFolder || pack->parent_->kind_ == kFileKindIPK)
+                                     ? kFileKindIPackWAD
+                                     : kFileKindPackWAD);
                 pack_wad_df->name_ = entry.name_;
                 pack_wad_df->file_ = pack_wad_mem;
                 ProcessFile(pack_wad_df);
@@ -1323,12 +1323,12 @@ void PackProcessAll(DataFile *df, size_t file_index)
 
     // parse the WADFIXES file from edge_defs folder or `edge_defs.epk`
     // immediately
-    if ((df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEEpk) && file_index == 0)
+    if ((df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEEPK) && file_index == 0)
     {
         LogPrint("Loading WADFIXES\n");
         epi::File *wadfixes = PackOpenFile(df->pack_, "wadfixes.ddf");
         if (wadfixes)
-            DdfReadFixes(wadfixes->ReadText());
+            DDFReadFixes(wadfixes->ReadText());
         delete wadfixes;
     }
 
@@ -1339,14 +1339,14 @@ void PackProcessAll(DataFile *df, size_t file_index)
     // COAL
 
     // parse COALAPI only from edge_defs folder or `edge_defs.epk`
-    if ((df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEEpk) && file_index == 0)
+    if ((df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEEPK) && file_index == 0)
         ProcessCoalAPIInPack(df->pack_);
     ProcessCoalHUDInPack(df->pack_);
 
     // LUA
 
     // parse lua api  only from edge_defs folder or `edge_defs.epk`
-    if ((df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEEpk) && file_index == 0)
+    if ((df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEEPK) && file_index == 0)
         ProcessLuaAPIInPack(df->pack_);
     ProcessLuaHUDInPack(df->pack_);
 

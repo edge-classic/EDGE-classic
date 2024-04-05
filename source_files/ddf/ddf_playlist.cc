@@ -25,11 +25,11 @@ static PlaylistEntry *dynamic_plentry;
 PlaylistEntryContainer playlist;
 
 //
-// DdfMusicParseInfo
+// DDFMusicParseInfo
 //
 // Parses the music information given.
 //
-static void DdfMusicParseInfo(const char *info)
+static void DDFMusicParseInfo(const char *info)
 {
     static const char *const musstrtype[] = {"UNKNOWN", "MIDI", "MUS",    "OGG",    "MP3", "SID",  "FLAC",
                                              "M4P",     "RAD",  "IMF280", "IMF560", "IMF700", nullptr};
@@ -45,7 +45,7 @@ static void DdfMusicParseInfo(const char *info)
     while (info[pos] != ':' && i < 255)
     {
         if (info[i] == '\0')
-            DdfError("DdfMusicParseInfo: Premature end of music info\n");
+            DDFError("DDFMusicParseInfo: Premature end of music info\n");
 
         charbuff[i] = info[pos];
 
@@ -54,22 +54,22 @@ static void DdfMusicParseInfo(const char *info)
     }
 
     if (i == 255)
-        DdfError("DdfMusicParseInfo: Music info too big\n");
+        DDFError("DDFMusicParseInfo: Music info too big\n");
 
     // -AJA- terminate charbuff with trailing \0.
     charbuff[i] = 0;
 
-    i = kDdfMusicUnknown;
-    while (i != kTotalDdfMusicTypes && epi::StringCaseCompareASCII(charbuff, musstrtype[i]) != 0)
+    i = kDDFMusicUnknown;
+    while (i != kTotalDDFMusicTypes && epi::StringCaseCompareASCII(charbuff, musstrtype[i]) != 0)
         i++;
 
-    if (i == kTotalDdfMusicTypes)
+    if (i == kTotalDDFMusicTypes)
     {
-        i = kDdfMusicDataUnknown;
+        i = kDDFMusicDataUnknown;
         while (musinftype[i] != nullptr && epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
             i++;
-        if (i == kTotalDdfMusicDataTypes)
-            DdfWarning("DdfMusicParseInfo: Unknown music type: '%s'\n", charbuff);
+        if (i == kTotalDDFMusicDataTypes)
+            DDFWarning("DDFMusicParseInfo: Unknown music type: '%s'\n", charbuff);
         else
         {
             dynamic_plentry->infotype_ = (DDFMusicDataType)i;
@@ -88,7 +88,7 @@ static void DdfMusicParseInfo(const char *info)
     while (info[pos] != ':' && i < 255)
     {
         if (info[pos] == '\0')
-            DdfError("DdfMusicParseInfo: Premature end of music info\n");
+            DDFError("DDFMusicParseInfo: Premature end of music info\n");
 
         charbuff[i] = info[pos];
 
@@ -97,17 +97,17 @@ static void DdfMusicParseInfo(const char *info)
     }
 
     if (i == 255)
-        DdfError("DdfMusicParseInfo: Music info too big\n");
+        DDFError("DDFMusicParseInfo: Music info too big\n");
 
     // -AJA- terminate charbuff with trailing \0.
     charbuff[i] = 0;
 
-    i = kDdfMusicDataUnknown;
+    i = kDDFMusicDataUnknown;
     while (musinftype[i] != nullptr && epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
         i++;
 
-    if (i == kTotalDdfMusicDataTypes)
-        DdfWarning("DdfMusicParseInfo: Unknown music info: '%s'\n", charbuff);
+    if (i == kTotalDDFMusicDataTypes)
+        DDFWarning("DDFMusicParseInfo: Unknown music info: '%s'\n", charbuff);
     else
         dynamic_plentry->infotype_ = (DDFMusicDataType)i; // technically speaking this is proper
 
@@ -127,14 +127,14 @@ static void PlaylistStartEntry(const char *name, bool extend)
     int number = HMM_MAX(0, atoi(name));
 
     if (number == 0)
-        DdfError("Bad music number in playlist.ddf: %s\n", name);
+        DDFError("Bad music number in playlist.ddf: %s\n", name);
 
     dynamic_plentry = playlist.Find(number);
 
     if (extend)
     {
         if (!dynamic_plentry)
-            DdfError("Unknown playlist to extend: %s\n", name);
+            DDFError("Unknown playlist to extend: %s\n", name);
         return;
     }
 
@@ -159,13 +159,13 @@ static void PlaylistParseField(const char *field, const char *contents, int inde
     LogDebug("PLAYLIST_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DdfCompareName(field, "MUSICINFO") == 0)
+    if (DDFCompareName(field, "MUSICINFO") == 0)
     {
-        DdfMusicParseInfo(contents);
+        DDFMusicParseInfo(contents);
         return;
     }
 
-    DdfWarnError("Unknown playlist.ddf command: %s\n", field);
+    DDFWarnError("Unknown playlist.ddf command: %s\n", field);
 }
 
 static void PlaylistFinishEntry(void)
@@ -184,7 +184,7 @@ static void PlaylistClearAll(void)
     playlist.clear();
 }
 
-void DdfReadMusicPlaylist(const std::string &data)
+void DDFReadMusicPlaylist(const std::string &data)
 {
     DDFReadInfo playlistinfo;
 
@@ -196,16 +196,16 @@ void DdfReadMusicPlaylist(const std::string &data)
     playlistinfo.finish_entry = PlaylistFinishEntry;
     playlistinfo.clear_all    = PlaylistClearAll;
 
-    DdfMainReadFile(&playlistinfo, data);
+    DDFMainReadFile(&playlistinfo, data);
 }
 
-void DdfMusicPlaylistInit(void)
+void DDFMusicPlaylistInit(void)
 {
     // -ACB- 2004/05/04 Use container
     PlaylistClearAll();
 }
 
-void DdfMusicPlaylistCleanUp(void)
+void DDFMusicPlaylistCleanUp(void)
 {
     // -ACB- 2004/05/04 Cut our playlist down to size
     playlist.shrink_to_fit();
@@ -245,8 +245,8 @@ void PlaylistEntry::CopyDetail(PlaylistEntry &src)
 //
 void PlaylistEntry::Default()
 {
-    type_     = kDdfMusicUnknown;
-    infotype_ = kDdfMusicDataUnknown;
+    type_     = kDDFMusicUnknown;
+    infotype_ = kDDFMusicDataUnknown;
     info_.clear();
 }
 
@@ -272,7 +272,7 @@ int PlaylistEntryContainer::FindLast(const char *name)
     for (std::vector<PlaylistEntry *>::reverse_iterator iter = rbegin(), iter_end = rend(); iter != iter_end; iter++)
     {
         PlaylistEntry *p = *iter;
-        if (DdfCompareName(p->info_.c_str(), name) == 0)
+        if (DDFCompareName(p->info_.c_str(), name) == 0)
             return p->number_;
     }
 

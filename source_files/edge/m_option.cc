@@ -207,7 +207,7 @@ static void OptionMenuLanguageDrawer(int x, int y, int deltay);
 static void OptionMenuChangeLanguage(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuChangeMidiPlayer(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuChangeSoundfont(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeOplInstrumentBank(int key_pressed, ConsoleVariable *console_variable = nullptr);
+static void OptionMenuChangeOPLInstrumentBank(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void InitMonitorSize();
 
 static constexpr char YesNo[]        = "Off/On"; // basic on/off
@@ -500,7 +500,7 @@ static OptionMenuItem soundoptions[] = {
     {kOptionMenuItemTypeSwitch, "MIDI Player", "Fluidlite/Opal", 2, &var_midi_player, OptionMenuChangeMidiPlayer,
      nullptr},
     {kOptionMenuItemTypeFunction, "Fluidlite Soundfont", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr},
-    {kOptionMenuItemTypeFunction, "Opal Instrument Bank", nullptr, 0, nullptr, OptionMenuChangeOplInstrumentBank,
+    {kOptionMenuItemTypeFunction, "Opal Instrument Bank", nullptr, 0, nullptr, OptionMenuChangeOPLInstrumentBank,
      nullptr},
     {kOptionMenuItemTypeBoolean, "PC Speaker Mode", YesNo, 2, &pc_speaker_mode, OptionMenuChangePCSpeakerMode,
      "Music will be Off while this is enabled"},
@@ -1072,7 +1072,7 @@ void OptionMenuDrawer()
         }
 
         // Draw current GENMIDI
-        if (current_menu == &sound_optmenu && current_menu->items[i].routine == OptionMenuChangeOplInstrumentBank)
+        if (current_menu == &sound_optmenu && current_menu->items[i].routine == OptionMenuChangeOPLInstrumentBank)
         {
             fontType  = StyleDefinition::kTextSectionAlternate;
             TEXTscale = style->definition_->text_[fontType].scale_;
@@ -2009,8 +2009,8 @@ static void OptionMenuChangeLanguage(int key_pressed, ConsoleVariable *console_v
 static void OptionMenuChangeMidiPlayer(int key_pressed, ConsoleVariable *console_variable)
 {
     PlaylistEntry *playing = playlist.Find(entry_playing);
-    if (var_midi_player == 1 || (playing && (playing->type_ == kDdfMusicIMF280 || playing->type_ == kDdfMusicIMF560 ||
-                                             playing->type_ == kDdfMusicIMF700)))
+    if (var_midi_player == 1 || (playing && (playing->type_ == kDDFMusicIMF280 || playing->type_ == kDDFMusicIMF560 ||
+                                             playing->type_ == kDDFMusicIMF700)))
         RestartOpal();
     else
         RestartFluid();
@@ -2062,10 +2062,10 @@ static void OptionMenuChangeSoundfont(int key_pressed, ConsoleVariable *console_
 }
 
 //
-// OptionMenuChangeOplInstrumentBank
+// OptionMenuChangeOPLInstrumentBank
 //
 //
-static void OptionMenuChangeOplInstrumentBank(int key_pressed, ConsoleVariable *console_variable)
+static void OptionMenuChangeOPLInstrumentBank(int key_pressed, ConsoleVariable *console_variable)
 {
     int op2_pos = -1;
     for (int i = 0; i < (int)available_opl_banks.size(); i++)
@@ -2079,7 +2079,7 @@ static void OptionMenuChangeOplInstrumentBank(int key_pressed, ConsoleVariable *
 
     if (op2_pos < 0)
     {
-        LogWarning("OptionMenuChangeOplInstrumentBank: Could not read list of "
+        LogWarning("OptionMenuChangeOPLInstrumentBank: Could not read list of "
                    "available GENMIDIs. "
                    "Falling back to default!\n");
         opl_instrument_bank.s_ = "";

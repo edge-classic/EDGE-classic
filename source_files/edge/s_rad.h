@@ -20,7 +20,7 @@
 
 #include "s_music.h"
 
-AbstractMusicPlayer *PlayRadMusic(uint8_t *data, int length, bool looping);
+AbstractMusicPlayer *PlayRADMusic(uint8_t *data, int length, bool looping);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

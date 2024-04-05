@@ -176,7 +176,7 @@ static SaveField sv_fields_mobj[] = {
     EDGE_SAVE_FIELD(dummy_map_object, on_ladder_, "on_ladder", 1, kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
                     SaveGamePutInteger),
     EDGE_SAVE_FIELD(dummy_map_object, path_trigger_, "path_trigger", 1, kSaveFieldString, 0, nullptr,
-                    SaveGameGetTriggerScript, SaveGamePutTriggerScript),
+                    SaveGameGetRADScript, SaveGamePutRADScript),
     EDGE_SAVE_FIELD(dummy_map_object, dynamic_light_.r, "dlight_qty", 1, kSaveFieldNumeric, 4, nullptr,
                     SaveGameGetFloat, SaveGamePutFloat),
     EDGE_SAVE_FIELD(dummy_map_object, dynamic_light_.target, "dlight_target", 1, kSaveFieldNumeric, 4, nullptr,
@@ -733,7 +733,7 @@ bool SaveGameMapObjectGetState(void *storage, int index, void *extra)
     // find base state
     offset = strtol(off_p, nullptr, 0) - 1;
 
-    base = DdfStateFindLabel(actual->state_grp_, base_p, true /* quiet */);
+    base = DDFStateFindLabel(actual->state_grp_, base_p, true /* quiet */);
 
     if (!base)
     {
@@ -829,7 +829,7 @@ void SaveGameMapObjectPutState(void *storage, int index, void *extra)
     // state gone AWOL into another object ?
     actual = mo->info_;
 
-    if (!DdfStateGroupHasState(actual->state_grp_, s_num))
+    if (!DDFStateGroupHasState(actual->state_grp_, s_num))
     {
         LogWarning("SAVEGAME: object [%s] is in AWOL state %d\n", mo->info_->name_.c_str(), s_num);
 
@@ -840,7 +840,7 @@ void SaveGameMapObjectPutState(void *storage, int index, void *extra)
         {
             actual = *iter;
 
-            if (DdfStateGroupHasState(actual->state_grp_, s_num))
+            if (DDFStateGroupHasState(actual->state_grp_, s_num))
             {
                 state_found = true;
                 break;
@@ -865,7 +865,7 @@ void SaveGameMapObjectPutState(void *storage, int index, void *extra)
     // find the nearest base state
     base = s_num;
 
-    while (!states[base].label && DdfStateGroupHasState(actual->state_grp_, base - 1))
+    while (!states[base].label && DDFStateGroupHasState(actual->state_grp_, base - 1))
     {
         base--;
     }

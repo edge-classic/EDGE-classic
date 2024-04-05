@@ -48,7 +48,7 @@ void ConvertDehacked(const uint8_t *data, int length, const std::string &source)
         FatalError("Failed to convert Dehacked file: %s\n", source.c_str());
     }
 
-    std::vector<DdfFile> col;
+    std::vector<DDFFile> col;
 
     ret = DehackedRunConversion(&col);
 
@@ -60,9 +60,9 @@ void ConvertDehacked(const uint8_t *data, int length, const std::string &source)
     }
 
     if (debug_dehacked.d_ > 0)
-        DdfDumpCollection(col);
+        DDFDumpCollection(col);
 
-    DdfAddCollection(col, source);
+    DDFAddCollection(col, source);
 }
 
 //--- editor settings ---

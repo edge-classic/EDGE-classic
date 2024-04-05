@@ -127,11 +127,11 @@ static void DEH_ConvertFile(std::string &filename)
 
 static void W_ExternalDDF(DataFile *df)
 {
-    DdfType type = DdfFilenameToType(df->name_);
+    DDFType type = DDFFilenameToType(df->name_);
 
     std::string bare_name = epi::GetFilename(df->name_);
 
-    if (type == kDdfTypeUnknown)
+    if (type == kDDFTypeUnknown)
         FatalError("Unknown DDF filename: %s\n", bare_name.c_str());
 
     LogPrint("Reading DDF file: %s\n", df->name_.c_str());
@@ -149,7 +149,7 @@ static void W_ExternalDDF(DataFile *df)
     std::string data(raw_data);
     delete[] raw_data;
 
-    DdfAddFile(type, data, df->name_);
+    DDFAddFile(type, data, df->name_);
 }
 
 static void W_ExternalRTS(DataFile *df)
@@ -169,7 +169,7 @@ static void W_ExternalRTS(DataFile *df)
     std::string data(raw_data);
     delete[] raw_data;
 
-    DdfAddFile(kDdfTypeRadScript, data, df->name_);
+    DDFAddFile(kDDFTypeRadScript, data, df->name_);
 }
 
 void ProcessFile(DataFile *df)
@@ -182,7 +182,7 @@ void ProcessFile(DataFile *df)
 
     LogPrint("  Processing: %s\n", filename.c_str());
 
-    if (df->kind_ <= kFileKindXWad)
+    if (df->kind_ <= kFileKindXWAD)
     {
         epi::File *file = epi::FileOpen(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
         if (file == nullptr)
@@ -195,23 +195,23 @@ void ProcessFile(DataFile *df)
 
         ProcessWad(df, file_index);
     }
-    else if (df->kind_ == kFileKindPackWad || df->kind_ == kFileKindIPackWad)
+    else if (df->kind_ == kFileKindPackWAD || df->kind_ == kFileKindIPackWAD)
     {
         EPI_ASSERT(df->file_); // This should already be handled by the pack
                                // processing
         ProcessWad(df, file_index);
     }
-    else if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEpk ||
-             df->kind_ == kFileKindEEpk || df->kind_ == kFileKindIpk || df->kind_ == kFileKindIFolder)
+    else if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
+             df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIPK || df->kind_ == kFileKindIFolder)
     {
         PackProcessAll(df, file_index);
     }
-    else if (df->kind_ == kFileKindDdf)
+    else if (df->kind_ == kFileKindDDF)
     {
         // handle external ddf files (from `-file` option)
         W_ExternalDDF(df);
     }
-    else if (df->kind_ == kFileKindRts)
+    else if (df->kind_ == kFileKindRTS)
     {
         // handle external rts scripts (from `-file` or `-script` option)
         W_ExternalRTS(df);
@@ -257,14 +257,14 @@ void BuildXglNodes(void)
     {
         DataFile *df = data_files[i];
 
-        if (df->kind_ == kFileKindIWad || df->kind_ == kFileKindPWad || df->kind_ == kFileKindPackWad ||
-            df->kind_ == kFileKindIPackWad)
+        if (df->kind_ == kFileKindIWAD || df->kind_ == kFileKindPWAD || df->kind_ == kFileKindPackWAD ||
+            df->kind_ == kFileKindIPackWAD)
         {
             std::string xwa_filename = BuildXglNodesForWad(df);
 
             if (!xwa_filename.empty())
             {
-                DataFile *new_df = new DataFile(xwa_filename, kFileKindXWad);
+                DataFile *new_df = new DataFile(xwa_filename, kFileKindXWAD);
                 ProcessFile(new_df);
             }
         }
@@ -278,8 +278,8 @@ int CheckPackFilesForName(const std::string &name)
     for (int i = (int)data_files.size() - 1; i >= 0; i--)
     {
         DataFile *df = data_files[i];
-        if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEpk ||
-            df->kind_ == kFileKindEEpk || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIpk)
+        if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
+            df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIPK)
         {
             if (PackFindFile(df->pack_, name))
                 return i;
@@ -296,8 +296,8 @@ epi::File *OpenFileFromPack(const std::string &name)
     for (int i = (int)data_files.size() - 1; i >= 0; i--)
     {
         DataFile *df = data_files[i];
-        if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEpk ||
-            df->kind_ == kFileKindEEpk || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIpk)
+        if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
+            df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIPK)
         {
             epi::File *F = PackOpenFile(df->pack_, name);
             if (F != nullptr)
@@ -323,8 +323,8 @@ uint8_t *OpenPackOrLumpInMemory(const std::string &name, const std::vector<std::
         if (i > lump_df)
         {
             DataFile *df = data_files[i];
-            if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEpk ||
-                df->kind_ == kFileKindEEpk || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIpk)
+            if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
+                df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIPK)
             {
                 epi::File *F = PackOpenMatch(df->pack_, name, extensions);
                 if (F != nullptr)
@@ -362,17 +362,17 @@ static const char *FileKindString(FileKind kind)
 {
     switch (kind)
     {
-    case kFileKindIWad:
+    case kFileKindIWAD:
         return "iwad";
-    case kFileKindPWad:
+    case kFileKindPWAD:
         return "pwad";
-    case kFileKindEEpk:
+    case kFileKindEEPK:
         return "edge";
-    case kFileKindXWad:
+    case kFileKindXWAD:
         return "xwa";
-    case kFileKindPackWad:
+    case kFileKindPackWAD:
         return "pwad";
-    case kFileKindIPackWad:
+    case kFileKindIPackWAD:
         return "iwad";
 
     case kFileKindFolder:
@@ -381,14 +381,14 @@ static const char *FileKindString(FileKind kind)
         return "edge";
     case kFileKindIFolder:
         return "DIR";
-    case kFileKindEpk:
+    case kFileKindEPK:
         return "epk";
-    case kFileKindIpk:
+    case kFileKindIPK:
         return "epk";
 
-    case kFileKindDdf:
+    case kFileKindDDF:
         return "ddf";
-    case kFileKindRts:
+    case kFileKindRTS:
         return "rts";
     case kFileKindDehacked:
         return "deh";

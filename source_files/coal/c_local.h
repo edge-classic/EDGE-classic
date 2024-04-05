@@ -384,13 +384,13 @@ struct Execution
     int       call_depth = 0;
 };
 
-class RealVm : public Vm
+class RealVM : public VM
 {
   public:
     /* API functions */
 
-    RealVm();
-    ~RealVm();
+    RealVM();
+    ~RealVM();
 
     void SetPrinter(PrintFunction func);
 

@@ -42,13 +42,13 @@ namespace dehacked
 namespace wad
 {
 
-std::vector<DdfFile> *dest_container = nullptr;
+std::vector<DDFFile> *dest_container = nullptr;
 
-DdfFile *cur_lump = nullptr;
+DDFFile *cur_lump = nullptr;
 
 char wad_msg_buf[1024];
 
-void NewLump(DdfType type)
+void NewLump(DDFType type)
 {
     if (dest_container == nullptr)
         FatalError("Dehacked: Error - WAD_NewLump: no container!\n");

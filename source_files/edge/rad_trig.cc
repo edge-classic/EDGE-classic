@@ -65,10 +65,10 @@
 #include "w_wad.h"
 
 // Static Scripts.  Never change once all scripts have been read in.
-TriggerScript *current_scripts = nullptr;
+RADScript *current_scripts = nullptr;
 
 // Dynamic Triggers.  These only exist for the current level.
-TriggerScriptTrigger *active_triggers = nullptr;
+RADScriptTrigger *active_triggers = nullptr;
 
 class rts_menu_c
 {
@@ -76,7 +76,7 @@ class rts_menu_c
     static const int MAX_TITLE  = 24;
     static const int MAX_CHOICE = 9;
 
-    TriggerScriptTrigger *trigger;
+    RADScriptTrigger *trigger;
 
     Style *style;
 
@@ -88,7 +88,7 @@ class rts_menu_c
     int current_choice;
 
   public:
-    rts_menu_c(ScriptShowMenuParameter *menu, TriggerScriptTrigger *_trigger, Style *_style)
+    rts_menu_c(ScriptShowMenuParameter *menu, RADScriptTrigger *_trigger, Style *_style)
         : trigger(_trigger), style(_style), title(), choices()
     {
         const char *text = menu->title;
@@ -251,9 +251,9 @@ class rts_menu_c
 bool               rts_menu_active = false;
 static rts_menu_c *rts_curr_menu   = nullptr;
 
-TriggerScript *FindScriptByName(const char *map_name, const char *name)
+RADScript *FindScriptByName(const char *map_name, const char *name)
 {
-    TriggerScript *scr;
+    RADScript *scr;
 
     for (scr = current_scripts; scr; scr = scr->next)
     {
@@ -263,7 +263,7 @@ TriggerScript *FindScriptByName(const char *map_name, const char *name)
         if (strcmp(scr->mapid, map_name) != 0)
             continue;
 
-        if (DdfCompareName(scr->script_name, name) == 0)
+        if (DDFCompareName(scr->script_name, name) == 0)
             return scr;
     }
 
@@ -271,16 +271,16 @@ TriggerScript *FindScriptByName(const char *map_name, const char *name)
     return nullptr;
 }
 
-TriggerScriptTrigger *FindScriptTriggerByName(const char *name)
+RADScriptTrigger *FindScriptTriggerByName(const char *name)
 {
-    TriggerScriptTrigger *trig;
+    RADScriptTrigger *trig;
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
         if (trig->info->script_name == nullptr)
             continue;
 
-        if (DdfCompareName(trig->info->script_name, name) == 0)
+        if (DDFCompareName(trig->info->script_name, name) == 0)
             return trig;
     }
 
@@ -288,9 +288,9 @@ TriggerScriptTrigger *FindScriptTriggerByName(const char *name)
     return nullptr;
 }
 
-static TriggerScriptTrigger *FindTriggerByScript(const TriggerScript *scr)
+static RADScriptTrigger *FindTriggerByScript(const RADScript *scr)
 {
-    TriggerScriptTrigger *trig;
+    RADScriptTrigger *trig;
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
@@ -301,16 +301,16 @@ static TriggerScriptTrigger *FindTriggerByScript(const TriggerScript *scr)
     return nullptr; // no worries if none.
 }
 
-TriggerScriptState *FindScriptStateByLabel(TriggerScript *scr, char *label)
+RADScriptState *FindScriptStateByLabel(RADScript *scr, char *label)
 {
-    TriggerScriptState *st;
+    RADScriptState *st;
 
     for (st = scr->first_state; st; st = st->next)
     {
         if (st->label == nullptr)
             continue;
 
-        if (DdfCompareName(st->label, label) == 0)
+        if (DDFCompareName(st->label, label) == 0)
             return st;
     }
 
@@ -320,11 +320,11 @@ TriggerScriptState *FindScriptStateByLabel(TriggerScript *scr, char *label)
 
 void ClearDeathTriggersByMap(const std::string &mapname)
 {
-    for (TriggerScript *scr = current_scripts; scr; scr = scr->next)
+    for (RADScript *scr = current_scripts; scr; scr = scr->next)
     {
         if (epi::StringCaseCompareASCII(scr->mapid, mapname) == 0)
         {
-            for (TriggerScriptState *state = scr->first_state; state; state = state->next)
+            for (RADScriptState *state = scr->first_state; state; state = state->next)
             {
                 if (state->action == ScriptWaitUntilDead)
                 {
@@ -343,9 +343,9 @@ void ClearDeathTriggersByMap(const std::string &mapname)
 // either enables them or disables them (based on `disable').
 // Actor can be nullptr.
 //
-void ScriptEnableByTag(MapObject *actor, uint32_t tag, bool disable, TriggerScriptTag tagtype)
+void ScriptEnableByTag(MapObject *actor, uint32_t tag, bool disable, RADScriptTag tagtype)
 {
-    TriggerScriptTrigger *trig;
+    RADScriptTrigger *trig;
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
@@ -373,7 +373,7 @@ void ScriptEnableByTag(MapObject *actor, uint32_t tag, bool disable, TriggerScri
 //
 void ScriptEnableByTag(MapObject *actor, const char *name, bool disable)
 {
-    TriggerScriptTrigger *trig;
+    RADScriptTrigger *trig;
 
     uint32_t tag = epi::StringHash32(name);
 
@@ -403,7 +403,7 @@ void ScriptEnableByTag(MapObject *actor, const char *name, bool disable)
 //
 bool CheckActiveScriptByTag(MapObject *actor, const char *name)
 {
-    TriggerScriptTrigger *trig;
+    RADScriptTrigger *trig;
 
     uint32_t tag = epi::StringHash32(name);
 
@@ -432,7 +432,7 @@ bool CheckActiveScriptByTag(MapObject *actor, const char *name)
     */
 }
 
-bool ScriptRadiusCheck(MapObject *mo, TriggerScript *r)
+bool ScriptRadiusCheck(MapObject *mo, RADScript *r)
 {
     int sec_tag = r->sector_tag;
     if (sec_tag > 0)
@@ -483,7 +483,7 @@ static int ScriptAlivePlayers(void)
     return result;
 }
 
-static int ScriptAllPlayersInRadius(TriggerScript *r, int mask)
+static int ScriptAllPlayersInRadius(RADScript *r, int mask)
 {
     int result = 0;
 
@@ -513,7 +513,7 @@ static int ScriptAllPlayersUsing(int mask)
     return result & mask;
 }
 
-static int ScriptAllPlayersCheckCondition(TriggerScript *r, int mask)
+static int ScriptAllPlayersCheckCondition(RADScript *r, int mask)
 {
     int result = 0;
 
@@ -528,7 +528,7 @@ static int ScriptAllPlayersCheckCondition(TriggerScript *r, int mask)
     return result;
 }
 
-static bool ScriptCheckBossTrigger(TriggerScriptTrigger *trig, ScriptOnDeathParameter *cond)
+static bool ScriptCheckBossTrigger(RADScriptTrigger *trig, ScriptOnDeathParameter *cond)
 {
     MapObject *mo;
 
@@ -566,7 +566,7 @@ static bool ScriptCheckBossTrigger(TriggerScriptTrigger *trig, ScriptOnDeathPara
     return true;
 }
 
-static bool ScriptCheckHeightTrigger(TriggerScriptTrigger *trig, ScriptOnHeightParameter *cond)
+static bool ScriptCheckHeightTrigger(RADScriptTrigger *trig, ScriptOnHeightParameter *cond)
 {
     float h;
 
@@ -596,10 +596,10 @@ static bool ScriptCheckHeightTrigger(TriggerScriptTrigger *trig, ScriptOnHeightP
 
 bool ScriptUpdatePath(MapObject *thing)
 {
-    TriggerScript        *scr = (TriggerScript *)thing->path_trigger_;
-    TriggerScriptTrigger *trig;
+    RADScript        *scr = (RADScript *)thing->path_trigger_;
+    RADScriptTrigger *trig;
 
-    TriggerScriptPath *path;
+    RADScriptPath *path;
     int                choice;
 
     if (!ScriptRadiusCheck(thing, scr))
@@ -650,7 +650,7 @@ bool ScriptUpdatePath(MapObject *thing)
     return true;
 }
 
-static void DoRemoveTrigger(TriggerScriptTrigger *trig)
+static void DoRemoveTrigger(RADScriptTrigger *trig)
 {
     // handle tag linkage
     if (trig->tag_next)
@@ -678,7 +678,7 @@ static void DoRemoveTrigger(TriggerScriptTrigger *trig)
 //
 void RunScriptTriggers(void)
 {
-    TriggerScriptTrigger *trig, *next;
+    RADScriptTrigger *trig, *next;
 
     // Start looking through the trigger list.
     for (trig = active_triggers; trig; trig = next)
@@ -781,7 +781,7 @@ void RunScriptTriggers(void)
         while (trig->wait_tics == 0 && trig->wud_count <= 0)
         {
             // Execute current command
-            TriggerScriptState *state = trig->state;
+            RADScriptState *state = trig->state;
             EPI_ASSERT(state);
 
             // move to next state.  We do this NOW since the action itself
@@ -828,7 +828,7 @@ void ScriptUpdateMonsterDeaths(MapObject *mo)
     {
         mo->hyper_flags_ &= ~kHyperFlagWaitUntilDead;
 
-        TriggerScriptTrigger *trig;
+        RADScriptTrigger *trig;
 
         for (trig = active_triggers; trig; trig = trig->next)
         {
@@ -846,9 +846,9 @@ void ScriptUpdateMonsterDeaths(MapObject *mo)
 // of each rad_trigger_t, keeping all triggers with the same tag in a
 // linked list for faster handling.
 //
-void GroupTriggerTags(TriggerScriptTrigger *trig)
+void GroupTriggerTags(RADScriptTrigger *trig)
 {
-    TriggerScriptTrigger *cur;
+    RADScriptTrigger *cur;
 
     trig->tag_next = trig->tag_previous = nullptr;
 
@@ -879,8 +879,8 @@ void GroupTriggerTags(TriggerScriptTrigger *trig)
 
 void SpawnScriptTriggers(const char *map_name)
 {
-    TriggerScript        *scr;
-    TriggerScriptTrigger *trig;
+    RADScript        *scr;
+    RADScriptTrigger *trig;
 
 #ifdef DEVELOPERS
     if (active_triggers)
@@ -906,7 +906,7 @@ void SpawnScriptTriggers(const char *map_name)
             continue;
 
         // OK, spawn new dynamic trigger
-        trig = new TriggerScriptTrigger;
+        trig = new RADScriptTrigger;
 
         trig->info         = scr;
         trig->disabled     = scr->tagged_disabled;
@@ -934,7 +934,7 @@ void SpawnScriptTriggers(const char *map_name)
 
 static void ScriptClearCachedInfo(void)
 {
-    TriggerScript           *scr;
+    RADScript           *scr;
     ScriptOnDeathParameter  *d_cur;
     ScriptOnHeightParameter *h_cur;
 
@@ -959,7 +959,7 @@ void ClearScriptTriggers(void)
     // remove all dynamic triggers
     while (active_triggers)
     {
-        TriggerScriptTrigger *trig = active_triggers;
+        RADScriptTrigger *trig = active_triggers;
         active_triggers            = trig->next;
 
         delete trig;
@@ -969,12 +969,12 @@ void ClearScriptTriggers(void)
     ResetScriptTips();
 }
 
-void InitializeTriggerScripts(void)
+void InitializeRADScripts(void)
 {
     InitializeScriptTips();
 }
 
-void ScriptMenuStart(TriggerScriptTrigger *R, ScriptShowMenuParameter *menu)
+void ScriptMenuStart(RADScriptTrigger *R, ScriptShowMenuParameter *menu)
 {
     EPI_ASSERT(!rts_menu_active);
 

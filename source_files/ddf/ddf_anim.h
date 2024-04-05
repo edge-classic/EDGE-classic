@@ -86,10 +86,10 @@ class AnimationDefinitionContainer : public std::vector<AnimationDefinition *>
 
 extern AnimationDefinitionContainer animdefs; // -ACB- 2004/06/03 Implemented
 
-void DdfReadAnims(const std::string &data);
+void DDFReadAnims(const std::string &data);
 
 // handle the BOOM lump
-void DdfConvertAnimatedLump(const uint8_t *data, int size);
+void DDFConvertAnimatedLump(const uint8_t *data, int size);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

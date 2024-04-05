@@ -119,7 +119,7 @@ static void SetupTip(ScriptDrawTip *cur)
         cur->color = ParseFontColor(cur->p.color_name);
 }
 
-static void SendTip(TriggerScriptTrigger *R, ScriptTip *tip, int slot)
+static void SendTip(RADScriptTrigger *R, ScriptTip *tip, int slot)
 {
     ScriptDrawTip *current;
 
@@ -265,7 +265,7 @@ void ScriptTicker(void)
 
 // --- Radius Trigger Actions -----------------------------------------------
 
-static Player *GetWhoDunnit(TriggerScriptTrigger *R)
+static Player *GetWhoDunnit(RADScriptTrigger *R)
 {
     return players[console_player];
 
@@ -294,12 +294,12 @@ static Player *GetWhoDunnit(TriggerScriptTrigger *R)
     */
 }
 
-void ScriptNoOperation(TriggerScriptTrigger *R, void *param)
+void ScriptNoOperation(RADScriptTrigger *R, void *param)
 {
     // No Operation
 }
 
-void ScriptShowTip(TriggerScriptTrigger *R, void *param)
+void ScriptShowTip(RADScriptTrigger *R, void *param)
 {
     ScriptTip *tip = (ScriptTip *)param;
 
@@ -312,7 +312,7 @@ void ScriptShowTip(TriggerScriptTrigger *R, void *param)
     SendTip(R, tip, R->tip_slot);
 }
 
-void ScriptUpdateTipProperties(TriggerScriptTrigger *R, void *param)
+void ScriptUpdateTipProperties(RADScriptTrigger *R, void *param)
 {
     ScriptTipProperties *tp = (ScriptTipProperties *)param;
     ScriptDrawTip       *current;
@@ -354,7 +354,7 @@ void ScriptUpdateTipProperties(TriggerScriptTrigger *R, void *param)
     current->dirty = true;
 }
 
-void ScriptSpawnThing(TriggerScriptTrigger *R, void *param)
+void ScriptSpawnThing(RADScriptTrigger *R, void *param)
 {
     ScriptThingParameter *t = (ScriptThingParameter *)param;
 
@@ -430,7 +430,7 @@ void ScriptSpawnThing(TriggerScriptTrigger *R, void *param)
         mo->path_trigger_ = R->info;
 }
 
-void ScriptDamagePlayers(TriggerScriptTrigger *R, void *param)
+void ScriptDamagePlayers(RADScriptTrigger *R, void *param)
 {
     ScriptDamagePlayerParameter *damage = (ScriptDamagePlayerParameter *)param;
 
@@ -449,7 +449,7 @@ void ScriptDamagePlayers(TriggerScriptTrigger *R, void *param)
     }
 }
 
-void ScriptHealPlayers(TriggerScriptTrigger *R, void *param)
+void ScriptHealPlayers(RADScriptTrigger *R, void *param)
 {
     ScriptHealParameter *heal = (ScriptHealParameter *)param;
 
@@ -475,7 +475,7 @@ void ScriptHealPlayers(TriggerScriptTrigger *R, void *param)
     }
 }
 
-void ScriptArmourPlayers(TriggerScriptTrigger *R, void *param)
+void ScriptArmourPlayers(RADScriptTrigger *R, void *param)
 {
     ScriptArmourParameter *armour = (ScriptArmourParameter *)param;
 
@@ -503,7 +503,7 @@ void ScriptArmourPlayers(TriggerScriptTrigger *R, void *param)
     }
 }
 
-void ScriptBenefitPlayers(TriggerScriptTrigger *R, void *param)
+void ScriptBenefitPlayers(RADScriptTrigger *R, void *param)
 {
     ScriptBenefitParameter *be = (ScriptBenefitParameter *)param;
 
@@ -520,7 +520,7 @@ void ScriptBenefitPlayers(TriggerScriptTrigger *R, void *param)
     }
 }
 
-void ScriptDamageMonsters(TriggerScriptTrigger *R, void *param)
+void ScriptDamageMonsters(RADScriptTrigger *R, void *param)
 {
     ScriptDamangeMonstersParameter *mon = (ScriptDamangeMonstersParameter *)param;
 
@@ -567,7 +567,7 @@ void ScriptDamageMonsters(TriggerScriptTrigger *R, void *param)
     }
 }
 
-void ScriptThingEvent(TriggerScriptTrigger *R, void *param)
+void ScriptThingEvent(RADScriptTrigger *R, void *param)
 {
     ScriptThingEventParameter *tev = (ScriptThingEventParameter *)param;
 
@@ -619,7 +619,7 @@ void ScriptThingEvent(TriggerScriptTrigger *R, void *param)
     }
 }
 
-void ScriptGotoMap(TriggerScriptTrigger *R, void *param)
+void ScriptGotoMap(RADScriptTrigger *R, void *param)
 {
     ScriptGoToMapParameter *go = (ScriptGoToMapParameter *)param;
 
@@ -630,7 +630,7 @@ void ScriptGotoMap(TriggerScriptTrigger *R, void *param)
         GameExitToLevel(go->map_name, 5, go->skip_all);
 }
 
-void ScriptExitLevel(TriggerScriptTrigger *R, void *param)
+void ScriptExitLevel(RADScriptTrigger *R, void *param)
 {
     ScriptExitParameter *exit = (ScriptExitParameter *)param;
 
@@ -641,12 +641,12 @@ void ScriptExitLevel(TriggerScriptTrigger *R, void *param)
 }
 
 // Lobo November 2021
-void ScriptExitGame(TriggerScriptTrigger *R, void *param)
+void ScriptExitGame(RADScriptTrigger *R, void *param)
 {
     GameDeferredEndGame();
 }
 
-void ScriptPlaySound(TriggerScriptTrigger *R, void *param)
+void ScriptPlaySound(RADScriptTrigger *R, void *param)
 {
     ScriptSoundParameter *ambient = (ScriptSoundParameter *)param;
 
@@ -675,26 +675,26 @@ void ScriptPlaySound(TriggerScriptTrigger *R, void *param)
     }
 }
 
-void ScriptKillSound(TriggerScriptTrigger *R, void *param)
+void ScriptKillSound(RADScriptTrigger *R, void *param)
 {
     StopSoundEffect(&R->sound_effects_origin);
 }
 
-void ScriptChangeMusic(TriggerScriptTrigger *R, void *param)
+void ScriptChangeMusic(RADScriptTrigger *R, void *param)
 {
     ScriptMusicParameter *music = (ScriptMusicParameter *)param;
 
     ChangeMusic(music->playnum, music->looping);
 }
 
-void ScriptPlayMovie(TriggerScriptTrigger *R, void *param)
+void ScriptPlayMovie(RADScriptTrigger *R, void *param)
 {
     ScriptMovieParameter *mov = (ScriptMovieParameter *)param;
 
     PlayMovie(mov->movie);
 }
 
-void ScriptChangeTexture(TriggerScriptTrigger *R, void *param)
+void ScriptChangeTexture(RADScriptTrigger *R, void *param)
 {
     ScriptChangeTexturetureParameter *ctex = (ScriptChangeTexturetureParameter *)param;
 
@@ -814,7 +814,7 @@ void ScriptChangeTexture(TriggerScriptTrigger *R, void *param)
     }
 }
 
-void ScriptSkill(TriggerScriptTrigger *R, void *param)
+void ScriptSkill(RADScriptTrigger *R, void *param)
 {
     ScriptSkillParameter *skill = (ScriptSkillParameter *)param;
 
@@ -845,7 +845,7 @@ static void MoveOneSector(Sector *sec, ScriptMoveSectorParameter *t)
     SolidSectorMove(sec, t->is_ceiling, dh);
 }
 
-void ScriptMoveSector(TriggerScriptTrigger *R, void *param)
+void ScriptMoveSector(RADScriptTrigger *R, void *param)
 {
     ScriptMoveSectorParameter *t = (ScriptMoveSectorParameter *)param;
     int                        i;
@@ -876,7 +876,7 @@ static void LightOneSector(Sector *sec, ScriptSectorLightParameter *t)
         sec->properties.light_level = RoundToInteger(t->value);
 }
 
-void ScriptLightSector(TriggerScriptTrigger *R, void *param)
+void ScriptLightSector(RADScriptTrigger *R, void *param)
 {
     ScriptSectorLightParameter *t = (ScriptSectorLightParameter *)param;
     int                         i;
@@ -899,7 +899,7 @@ void ScriptLightSector(TriggerScriptTrigger *R, void *param)
     }
 }
 
-void ScriptFogSector(TriggerScriptTrigger *R, void *param)
+void ScriptFogSector(RADScriptTrigger *R, void *param)
 {
     ScriptFogSectorParameter *t = (ScriptFogSectorParameter *)param;
     int                       i;
@@ -945,10 +945,10 @@ void ScriptFogSector(TriggerScriptTrigger *R, void *param)
     }
 }
 
-void ScriptEnableScript(TriggerScriptTrigger *R, void *param)
+void ScriptEnableScript(RADScriptTrigger *R, void *param)
 {
     ScriptEnablerParameter *t = (ScriptEnablerParameter *)param;
-    TriggerScriptTrigger   *other;
+    RADScriptTrigger   *other;
 
     // Enable/Disable Scripts
     if (t->script_name)
@@ -969,7 +969,7 @@ void ScriptEnableScript(TriggerScriptTrigger *R, void *param)
     }
 }
 
-void ScriptActivateLinetype(TriggerScriptTrigger *R, void *param)
+void ScriptActivateLinetype(RADScriptTrigger *R, void *param)
 {
     ScriptActivateLineParameter *t = (ScriptActivateLineParameter *)param;
 
@@ -978,7 +978,7 @@ void ScriptActivateLinetype(TriggerScriptTrigger *R, void *param)
     RemoteActivation(player ? player->map_object_ : nullptr, t->typenum, t->tag, 0, kLineTriggerAny);
 }
 
-void ScriptUnblockLines(TriggerScriptTrigger *R, void *param)
+void ScriptUnblockLines(RADScriptTrigger *R, void *param)
 {
     ScriptLineBlockParameter *ub = (ScriptLineBlockParameter *)param;
 
@@ -1003,7 +1003,7 @@ void ScriptUnblockLines(TriggerScriptTrigger *R, void *param)
     }
 }
 
-void ScriptBlockLines(TriggerScriptTrigger *R, void *param)
+void ScriptBlockLines(RADScriptTrigger *R, void *param)
 {
     ScriptLineBlockParameter *ub = (ScriptLineBlockParameter *)param;
 
@@ -1021,7 +1021,7 @@ void ScriptBlockLines(TriggerScriptTrigger *R, void *param)
     }
 }
 
-void ScriptJump(TriggerScriptTrigger *R, void *param)
+void ScriptJump(RADScriptTrigger *R, void *param)
 {
     ScriptJumpParameter *t = (ScriptJumpParameter *)param;
 
@@ -1044,18 +1044,18 @@ void ScriptJump(TriggerScriptTrigger *R, void *param)
     R->wait_tics += 1;
 }
 
-void ScriptSleep(TriggerScriptTrigger *R, void *param)
+void ScriptSleep(RADScriptTrigger *R, void *param)
 {
     R->disabled = true;
 }
 
-void ScriptRetrigger(TriggerScriptTrigger *R, void *param)
+void ScriptRetrigger(RADScriptTrigger *R, void *param)
 {
     R->activated    = false;
     R->acti_players = 0;
 }
 
-void ScriptShowMenu(TriggerScriptTrigger *R, void *param)
+void ScriptShowMenu(RADScriptTrigger *R, void *param)
 {
     ScriptShowMenuParameter *menu = (ScriptShowMenuParameter *)param;
 
@@ -1073,7 +1073,7 @@ void ScriptShowMenu(TriggerScriptTrigger *R, void *param)
     ScriptMenuStart(R, menu);
 }
 
-void ScriptUpdateMenuStyle(TriggerScriptTrigger *R, void *param)
+void ScriptUpdateMenuStyle(RADScriptTrigger *R, void *param)
 {
     ScriptMenuStyle *mm = (ScriptMenuStyle *)param;
 
@@ -1082,7 +1082,7 @@ void ScriptUpdateMenuStyle(TriggerScriptTrigger *R, void *param)
     R->menu_style_name = SaveChunkCopyString(mm->style);
 }
 
-void ScriptJumpOn(TriggerScriptTrigger *R, void *param)
+void ScriptJumpOn(RADScriptTrigger *R, void *param)
 {
     ScriptJumpOnParameter *jm = (ScriptJumpOnParameter *)param;
 
@@ -1094,7 +1094,7 @@ void ScriptJumpOn(TriggerScriptTrigger *R, void *param)
     if (R->menu_result < 0 || R->menu_result > count)
         return;
 
-    TriggerScriptState *cache_state;
+    RADScriptState *cache_state;
     char               *label = nullptr;
 
     if (R->menu_result > 0)
@@ -1130,14 +1130,14 @@ static bool WUD_Match(ScriptWaitUntilDeadParameter *wud, const char *name)
         if (!wud->mon_names[i])
             continue;
 
-        if (DdfCompareName(name, wud->mon_names[i]) == 0)
+        if (DDFCompareName(name, wud->mon_names[i]) == 0)
             return true;
     }
 
     return false;
 }
 
-void ScriptWaitUntilDead(TriggerScriptTrigger *R, void *param)
+void ScriptWaitUntilDead(RADScriptTrigger *R, void *param)
 {
     ScriptWaitUntilDeadParameter *wud = (ScriptWaitUntilDeadParameter *)param;
 
@@ -1181,7 +1181,7 @@ void ScriptWaitUntilDead(TriggerScriptTrigger *R, void *param)
     }
 }
 
-void ScriptSwitchWeapon(TriggerScriptTrigger *R, void *param)
+void ScriptSwitchWeapon(RADScriptTrigger *R, void *param)
 {
     ScriptWeaponParameter *weaparg = (ScriptWeaponParameter *)param;
 
@@ -1194,7 +1194,7 @@ void ScriptSwitchWeapon(TriggerScriptTrigger *R, void *param)
     }
 }
 
-void ScriptTeleportToStart(TriggerScriptTrigger *R, void *param)
+void ScriptTeleportToStart(RADScriptTrigger *R, void *param)
 {
     Player *p = GetWhoDunnit(R);
 
@@ -1252,7 +1252,7 @@ static void ScriptSetPlayerSprite(Player *p, int position, int stnum, WeaponDefi
 
         if (st->label)
         {
-            int new_state = DdfStateFindLabel(info->state_grp_, st->label, true /* quiet */);
+            int new_state = DDFStateFindLabel(info->state_grp_, st->label, true /* quiet */);
             if (new_state != 0)
                 stnum = new_state;
         }
@@ -1303,7 +1303,7 @@ static void ScriptSetPlayerSpriteDeferred(Player *p, int position, int stnum)
 
 // Replace one weapon with another instantly (no up/down states run)
 // It doesnt matter if we have the old one currently selected or not.
-void ScriptReplaceWeapon(TriggerScriptTrigger *R, void *param)
+void ScriptReplaceWeapon(RADScriptTrigger *R, void *param)
 {
     ScriptWeaponReplaceParameter *weaparg = (ScriptWeaponReplaceParameter *)param;
 
@@ -1341,7 +1341,7 @@ void ScriptReplaceWeapon(TriggerScriptTrigger *R, void *param)
 
 // If we have the weapon we insta-switch to it and
 // go to the STATE we indicated.
-void ScriptWeaponEvent(TriggerScriptTrigger *R, void *param)
+void ScriptWeaponEvent(RADScriptTrigger *R, void *param)
 {
     ScriptWeaponEventParameter *tev = (ScriptWeaponEventParameter *)param;
 
@@ -1370,7 +1370,7 @@ void ScriptWeaponEvent(TriggerScriptTrigger *R, void *param)
 
     p->ready_weapon_ = (WeaponSelection)pw_index; // insta-switch to it
 
-    int state = DdfStateFindLabel(oldWep->state_grp_, tev->label, true /* quiet */);
+    int state = DDFStateFindLabel(oldWep->state_grp_, tev->label, true /* quiet */);
     if (state == 0)
         FatalError("RTS WEAPON_EVENT: frame '%s' in [%s] not found!\n", tev->label, tev->weapon_name);
     state += tev->offset;
@@ -1440,7 +1440,7 @@ void P_ActReplace(MapObject *mo, const MapObjectDefinition *newThing)
 }
 
 // Replace one thing with another.
-void ScriptReplaceThing(TriggerScriptTrigger *R, void *param)
+void ScriptReplaceThing(RADScriptTrigger *R, void *param)
 {
     ScriptThingReplaceParameter *thingarg = (ScriptThingReplaceParameter *)param;
 

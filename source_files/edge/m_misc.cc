@@ -487,11 +487,11 @@ void TakeScreenshot(bool show_msg)
 
     if (png_screenshots)
     {
-        result = ImageSavePng(fn, img);
+        result = ImageSavePNG(fn, img);
     }
     else
     {
-        result = ImageSaveJpeg(fn, img);
+        result = ImageSaveJPEG(fn, img);
     }
 
     if (show_msg)
@@ -522,7 +522,7 @@ void CreateSaveScreenshot(void)
     img->Invert();
 
     bool result;
-    result = ImageSaveJpeg(filename, img);
+    result = ImageSaveJPEG(filename, img);
 
     if (result)
         LogPrint("Captured to file: %s\n", filename.c_str());

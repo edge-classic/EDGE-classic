@@ -585,7 +585,7 @@ void WriteTextString(const LanguageInfo *info);
 
 void text_strings::BeginTextLump()
 {
-    wad::NewLump(kDdfTypeLanguage);
+    wad::NewLump(kDDFTypeLanguage);
 
     wad::Printf("<LANGUAGES>\n\n");
     wad::Printf("[ENGLISH]\n");

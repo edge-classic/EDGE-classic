@@ -320,8 +320,8 @@ void SaveGamePutSector(void *storage, int index, void *extra);
 bool SaveGameSectorGetExtrafloor(void *storage, int index, void *extra);
 void SaveGameSectorPutExtrafloor(void *storage, int index, void *extra);
 
-bool SaveGameGetTriggerScript(void *storage, int index, void *extra);
-void SaveGamePutTriggerScript(void *storage, int index, void *extra);
+bool SaveGameGetRADScript(void *storage, int index, void *extra);
+void SaveGamePutRADScript(void *storage, int index, void *extra);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

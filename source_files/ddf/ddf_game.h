@@ -218,7 +218,7 @@ class GameDefinitionContainer : public std::vector<GameDefinition *>
 
 extern GameDefinitionContainer gamedefs; // -ACB- 2004/06/21 Implemented
 
-void DdfReadGames(const std::string &data);
+void DDFReadGames(const std::string &data);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

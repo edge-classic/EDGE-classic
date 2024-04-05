@@ -31,11 +31,11 @@
 extern bool sound_device_stereo; // FIXME: encapsulation
 extern int  sound_device_frequency;
 
-class M4pPlayer : public AbstractMusicPlayer
+class M4PPlayer : public AbstractMusicPlayer
 {
   public:
-    M4pPlayer();
-    ~M4pPlayer();
+    M4PPlayer();
+    ~M4PPlayer();
 
   private:
     enum Status
@@ -72,12 +72,12 @@ class M4pPlayer : public AbstractMusicPlayer
 
 //----------------------------------------------------------------------------
 
-M4pPlayer::M4pPlayer() : status_(kNotLoaded)
+M4PPlayer::M4PPlayer() : status_(kNotLoaded)
 {
     mono_buffer_ = new int16_t[kMusicBuffer * 2];
 }
 
-M4pPlayer::~M4pPlayer()
+M4PPlayer::~M4PPlayer()
 {
     Close();
 
@@ -85,7 +85,7 @@ M4pPlayer::~M4pPlayer()
         delete[] mono_buffer_;
 }
 
-void M4pPlayer::PostOpen()
+void M4PPlayer::PostOpen()
 {
     // Loaded, but not playing
     status_ = kStopped;
@@ -102,7 +102,7 @@ static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
     }
 }
 
-bool M4pPlayer::StreamIntoBuffer(SoundData *buf)
+bool M4PPlayer::StreamIntoBuffer(SoundData *buf)
 {
     int16_t *data_buf;
 
@@ -132,7 +132,7 @@ bool M4pPlayer::StreamIntoBuffer(SoundData *buf)
     return true;
 }
 
-bool M4pPlayer::OpenMemory(uint8_t *data, int length)
+bool M4PPlayer::OpenMemory(uint8_t *data, int length)
 {
     EPI_ASSERT(data);
 
@@ -146,7 +146,7 @@ bool M4pPlayer::OpenMemory(uint8_t *data, int length)
     return true;
 }
 
-void M4pPlayer::Close()
+void M4PPlayer::Close()
 {
     if (status_ == kNotLoaded)
         return;
@@ -161,7 +161,7 @@ void M4pPlayer::Close()
     status_ = kNotLoaded;
 }
 
-void M4pPlayer::Pause()
+void M4PPlayer::Pause()
 {
     if (status_ != kPlaying)
         return;
@@ -169,7 +169,7 @@ void M4pPlayer::Pause()
     status_ = kPaused;
 }
 
-void M4pPlayer::Resume()
+void M4PPlayer::Resume()
 {
     if (status_ != kPaused)
         return;
@@ -177,7 +177,7 @@ void M4pPlayer::Resume()
     status_ = kPlaying;
 }
 
-void M4pPlayer::Play(bool loop)
+void M4PPlayer::Play(bool loop)
 {
     if (status_ != kNotLoaded && status_ != kStopped)
         return;
@@ -191,7 +191,7 @@ void M4pPlayer::Play(bool loop)
     Ticker();
 }
 
-void M4pPlayer::Stop()
+void M4PPlayer::Stop()
 {
     if (status_ != kPlaying && status_ != kPaused)
         return;
@@ -203,7 +203,7 @@ void M4pPlayer::Stop()
     status_ = kStopped;
 }
 
-void M4pPlayer::Ticker()
+void M4PPlayer::Ticker()
 {
     while (status_ == kPlaying && !pc_speaker_mode)
     {
@@ -236,7 +236,7 @@ void M4pPlayer::Ticker()
 
 AbstractMusicPlayer *S_PlayM4PMusic(uint8_t *data, int length, bool looping)
 {
-    M4pPlayer *player = new M4pPlayer();
+    M4PPlayer *player = new M4PPlayer();
 
     if (!player->OpenMemory(data, length))
     {

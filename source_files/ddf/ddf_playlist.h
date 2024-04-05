@@ -28,28 +28,28 @@
 
 enum DDFMusicType
 {
-    kDdfMusicUnknown = 0,
-    kDdfMusicMIDI,
-    kDdfMusicMUS,
-    kDdfMusicOGG,
-    kDdfMusicMP3,
-    kDdfMusicSID,
-    kDdfMusicFLAC,
-    kDdfMusicM4P,
-    kDdfMusicRAD,
-    kDdfMusicIMF280,
-    kDdfMusicIMF560,
-    kDdfMusicIMF700,
-    kTotalDdfMusicTypes
+    kDDFMusicUnknown = 0,
+    kDDFMusicMIDI,
+    kDDFMusicMUS,
+    kDDFMusicOGG,
+    kDDFMusicMP3,
+    kDDFMusicSID,
+    kDDFMusicFLAC,
+    kDDFMusicM4P,
+    kDDFMusicRAD,
+    kDDFMusicIMF280,
+    kDDFMusicIMF560,
+    kDDFMusicIMF700,
+    kTotalDDFMusicTypes
 };
 
 enum DDFMusicDataType
 {
-    kDdfMusicDataUnknown    = 0,
-    kDdfMusicDataLump       = 1,
-    kDdfMusicDataFile       = 2,
-    kDdfMusicDataPackage    = 3,
-    kTotalDdfMusicDataTypes = 4
+    kDDFMusicDataUnknown    = 0,
+    kDDFMusicDataLump       = 1,
+    kDDFMusicDataFile       = 2,
+    kDDFMusicDataPackage    = 3,
+    kTotalDDFMusicDataTypes = 4
 };
 
 class PlaylistEntry
@@ -109,7 +109,7 @@ class PlaylistEntryContainer : public std::vector<PlaylistEntry *>
 
 extern PlaylistEntryContainer playlist; // -ACB- 2004/06/04 Implemented
 
-void DdfReadMusicPlaylist(const std::string &data);
+void DDFReadMusicPlaylist(const std::string &data);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

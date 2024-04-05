@@ -128,7 +128,7 @@ static OpCode all_operators[] = {
 static constexpr uint8_t kTopPriority = 6;
 static constexpr uint8_t kNotPriority = 1;
 
-void RealVm::LEX_NewLine()
+void RealVM::LEX_NewLine()
 {
     // Called when *comp_.parse_p == '\n'
 
@@ -142,7 +142,7 @@ void RealVm::LEX_NewLine()
 // Aborts the current function parse.
 // The given message should have a trailing \n
 //
-void RealVm::CompileError(const char *error, ...)
+void RealVM::CompileError(const char *error, ...)
 {
     va_list argptr;
     char    buffer[1024];
@@ -154,7 +154,7 @@ void RealVm::CompileError(const char *error, ...)
     FatalError("%s:%i: %s", comp_.source_file, comp_.source_line, buffer);
 }
 
-void RealVm::LEX_String()
+void RealVM::LEX_String()
 {
     // Parses a quoted string
 
@@ -194,7 +194,7 @@ void RealVm::LEX_String()
     }
 }
 
-float RealVm::LEX_Number()
+float RealVM::LEX_Number()
 {
     int len = 0;
     int c   = *comp_.parse_p;
@@ -212,7 +212,7 @@ float RealVm::LEX_Number()
     return atof(comp_.token_buf);
 }
 
-void RealVm::LEX_Vector()
+void RealVM::LEX_Vector()
 {
     // Parses a single quoted vector
 
@@ -236,7 +236,7 @@ void RealVm::LEX_Vector()
     comp_.parse_p++;
 }
 
-void RealVm::LEX_Name()
+void RealVM::LEX_Name()
 {
     // Parses an identifier
 
@@ -255,7 +255,7 @@ void RealVm::LEX_Name()
     comp_.token_type     = tt_name;
 }
 
-void RealVm::LEX_Punctuation()
+void RealVM::LEX_Punctuation()
 {
     comp_.token_type = tt_punct;
 
@@ -285,7 +285,7 @@ void RealVm::LEX_Punctuation()
     CompileError("unknown punctuation: %c\n", ch);
 }
 
-void RealVm::LEX_Whitespace(void)
+void RealVM::LEX_Whitespace(void)
 {
     int c;
 
@@ -342,7 +342,7 @@ void RealVm::LEX_Whitespace(void)
 // Parse the next token in the file.
 // Sets token_type and token_buf, and possibly the literal_xxx fields
 //
-void RealVm::LEX_Next()
+void RealVM::LEX_Next()
 {
     assert(comp_.parse_p);
 
@@ -400,7 +400,7 @@ void RealVm::LEX_Next()
 // Issues an error if the current token isn't what we want.
 // On success, automatically skips to the next token.
 //
-void RealVm::LEX_Expect(const char *str)
+void RealVM::LEX_Expect(const char *str)
 {
     if (strcmp(comp_.token_buf, str) != 0)
         CompileError("expected %s got %s\n", str, comp_.token_buf);
@@ -415,7 +415,7 @@ void RealVm::LEX_Expect(const char *str)
 // Returns true on a match (skipping to the next token),
 // otherwise returns false and does nothing.
 //
-bool RealVm::LEX_Check(const char *str)
+bool RealVM::LEX_Check(const char *str)
 {
     if (strcmp(comp_.token_buf, str) != 0)
         return false;
@@ -428,7 +428,7 @@ bool RealVm::LEX_Check(const char *str)
 //
 // Checks to see if the current token is a valid name
 //
-char *RealVm::ParseName()
+char *RealVM::ParseName()
 {
     static char ident[kMaximumNameLength];
 
@@ -451,7 +451,7 @@ char *RealVm::ParseName()
 // Returns a preexisting complex type that matches the parm, or Allocates
 // a new one and copies it out.
 //
-Type *RealVm::FindType(Type *type)
+Type *RealVM::FindType(Type *type)
 {
     for (int k = 0; k < (int)comp_.all_types.size(); k++)
     {
@@ -481,7 +481,7 @@ Type *RealVm::FindType(Type *type)
 //
 // Parses a variable type, including field and functions types
 //
-Type *RealVm::ParseType()
+Type *RealVM::ParseType()
 {
     Type  t_new;
     Type *type;
@@ -539,7 +539,7 @@ Type *RealVm::ParseType()
 
 //===========================================================================
 
-int RealVm::EmitCode(int16_t op, int a, int b, int c)
+int RealVM::EmitCode(int16_t op, int a, int b, int c)
 {
     // TODO: if last statement was OP_NULL, overwrite it instead of
     //       creating a new one.
@@ -560,7 +560,7 @@ int RealVm::EmitCode(int16_t op, int a, int b, int c)
     return ofs;
 }
 
-int RealVm::EmitMove(Type *type, int a, int b)
+int RealVM::EmitMove(Type *type, int a, int b)
 {
     switch (type->type)
     {
@@ -575,7 +575,7 @@ int RealVm::EmitMove(Type *type, int a, int b)
     }
 }
 
-Definition *RealVm::NewGlobal(Type *type)
+Definition *RealVM::NewGlobal(Type *type)
 {
     int tsize = type_size[type->type];
 
@@ -591,7 +591,7 @@ Definition *RealVm::NewGlobal(Type *type)
     return var;
 }
 
-Definition *RealVm::NewLocal(Type *type)
+Definition *RealVM::NewLocal(Type *type)
 {
     Definition *var = new Definition;
     memset(var, 0, sizeof(Definition));
@@ -604,7 +604,7 @@ Definition *RealVm::NewLocal(Type *type)
     return var;
 }
 
-Definition *RealVm::NewTemporary(Type *type)
+Definition *RealVM::NewTemporary(Type *type)
 {
     Definition *var;
 
@@ -636,7 +636,7 @@ Definition *RealVm::NewTemporary(Type *type)
     return var;
 }
 
-void RealVm::FreeTemporaries()
+void RealVM::FreeTemporaries()
 {
     std::vector<Definition *>::iterator TI;
 
@@ -648,7 +648,7 @@ void RealVm::FreeTemporaries()
     }
 }
 
-Definition *RealVm::FindLiteral()
+Definition *RealVM::FindLiteral()
 {
     // check for a constant with the same value
     for (int i = 0; i < (int)comp_.all_literals.size(); i++)
@@ -682,7 +682,7 @@ Definition *RealVm::FindLiteral()
     return nullptr; // not found
 }
 
-void RealVm::StoreLiteral(int ofs)
+void RealVM::StoreLiteral(int ofs)
 {
     double *p = COAL_REF_GLOBAL(ofs);
 
@@ -702,7 +702,7 @@ void RealVm::StoreLiteral(int ofs)
     }
 }
 
-Definition *RealVm::EXP_Literal()
+Definition *RealVM::EXP_Literal()
 {
     // Looks for a preexisting constant
     Definition *cn = FindLiteral();
@@ -727,7 +727,7 @@ Definition *RealVm::EXP_Literal()
     return cn;
 }
 
-Definition *RealVm::EXP_FunctionCall(Definition *func)
+Definition *RealVM::EXP_FunctionCall(Definition *func)
 {
     Type *t = func->type;
 
@@ -822,7 +822,7 @@ Definition *RealVm::EXP_FunctionCall(Definition *func)
     return &def_void;
 }
 
-void RealVm::STAT_Return(void)
+void RealVM::STAT_Return(void)
 {
     Definition *func_def = comp_.scope->def_;
 
@@ -852,7 +852,7 @@ void RealVm::STAT_Return(void)
         LEX_Expect(";");
 }
 
-Definition *RealVm::FindDef(Type *type, char *name, Scope *scope)
+Definition *RealVM::FindDef(Type *type, char *name, Scope *scope)
 {
     for (Definition *def = scope->names_; def; def = def->next)
     {
@@ -868,7 +868,7 @@ Definition *RealVm::FindDef(Type *type, char *name, Scope *scope)
     return nullptr;
 }
 
-Definition *RealVm::DeclareDef(Type *type, char *name, Scope *scope)
+Definition *RealVM::DeclareDef(Type *type, char *name, Scope *scope)
 {
     // A new def will be Allocated if it can't be found
 
@@ -893,7 +893,7 @@ Definition *RealVm::DeclareDef(Type *type, char *name, Scope *scope)
     return def;
 }
 
-Definition *RealVm::EXP_VarValue()
+Definition *RealVM::EXP_VarValue()
 {
     char *name = ParseName();
 
@@ -914,7 +914,7 @@ Definition *RealVm::EXP_VarValue()
     }
 }
 
-Definition *RealVm::EXP_Term()
+Definition *RealVM::EXP_Term()
 {
     // if the token is a literal, Allocate a constant for it
     if (comp_.token_type == tt_literal)
@@ -964,7 +964,7 @@ Definition *RealVm::EXP_Term()
     return nullptr; /* NOT REACHED */
 }
 
-Definition *RealVm::EXP_ShortCircuit(Definition *e, int n)
+Definition *RealVM::EXP_ShortCircuit(Definition *e, int n)
 {
     OpCode *op = &all_operators[n];
 
@@ -1002,7 +1002,7 @@ Definition *RealVm::EXP_ShortCircuit(Definition *e, int n)
     return result;
 }
 
-Definition *RealVm::EXP_FieldQuery(Definition *e, bool lvalue)
+Definition *RealVM::EXP_FieldQuery(Definition *e, bool lvalue)
 {
     char *name = ParseName();
 
@@ -1042,7 +1042,7 @@ Definition *RealVm::EXP_FieldQuery(Definition *e, bool lvalue)
     return nullptr; // NOT REACHED
 }
 
-Definition *RealVm::EXP_Expression(int priority, bool *lvalue)
+Definition *RealVM::EXP_Expression(int priority, bool *lvalue)
 {
     if (priority == 0)
         return EXP_Term();
@@ -1120,7 +1120,7 @@ Definition *RealVm::EXP_Expression(int priority, bool *lvalue)
     return e;
 }
 
-void RealVm::STAT_If_Else()
+void RealVM::STAT_If_Else()
 {
     LEX_Expect("(");
     Definition *e = EXP_Expression(kTopPriority);
@@ -1147,7 +1147,7 @@ void RealVm::STAT_If_Else()
     COAL_REF_OP(patch)->b = EmitCode(OP_NULL);
 }
 
-void RealVm::STAT_Assert()
+void RealVM::STAT_Assert()
 {
     // TODO: only internalise the filename ONCE
     int file_str = InternaliseString(comp_.source_file);
@@ -1165,7 +1165,7 @@ void RealVm::STAT_Assert()
     COAL_REF_OP(patch)->b = EmitCode(OP_NULL);
 }
 
-void RealVm::STAT_WhileLoop()
+void RealVM::STAT_WhileLoop()
 {
     int begin = EmitCode(OP_NULL);
 
@@ -1183,7 +1183,7 @@ void RealVm::STAT_WhileLoop()
     COAL_REF_OP(patch)->b = EmitCode(OP_NULL);
 }
 
-void RealVm::STAT_RepeatLoop()
+void RealVM::STAT_RepeatLoop()
 {
     int begin = EmitCode(OP_NULL);
 
@@ -1204,7 +1204,7 @@ void RealVm::STAT_RepeatLoop()
         LEX_Expect(";");
 }
 
-void RealVm::STAT_ForLoop()
+void RealVM::STAT_ForLoop()
 {
     LEX_Expect("(");
 
@@ -1251,7 +1251,7 @@ void RealVm::STAT_ForLoop()
     COAL_REF_OP(patch)->b = EmitCode(OP_NULL);
 }
 
-void RealVm::STAT_Assignment(Definition *e)
+void RealVM::STAT_Assignment(Definition *e)
 {
     if (e->flags & DF_Constant)
         CompileError("assignment to a constant\n");
@@ -1264,7 +1264,7 @@ void RealVm::STAT_Assignment(Definition *e)
     EmitMove(e->type, e2->ofs, e->ofs);
 }
 
-void RealVm::STAT_Statement(bool allow_def)
+void RealVM::STAT_Statement(bool allow_def)
 {
     if (allow_def && LEX_Check("var"))
     {
@@ -1348,7 +1348,7 @@ void RealVm::STAT_Statement(bool allow_def)
         LEX_Expect(";");
 }
 
-int RealVm::GLOB_FunctionBody(Definition *func_def, Type *type, const char *func_name)
+int RealVM::GLOB_FunctionBody(Definition *func_def, Type *type, const char *func_name)
 {
     // Returns the first_statement value
 
@@ -1423,7 +1423,7 @@ int RealVm::GLOB_FunctionBody(Definition *func_def, Type *type, const char *func
     return code;
 }
 
-void RealVm::GLOB_Function()
+void RealVM::GLOB_Function()
 {
     char *func_name = strdup(ParseName());
 
@@ -1545,7 +1545,7 @@ void RealVm::GLOB_Function()
     // debugprintf(stderr, "FUNCTION %s locals:%d\n", func_name, comp_.locals_end);
 }
 
-void RealVm::GLOB_Variable()
+void RealVM::GLOB_Variable()
 {
     char *var_name = strdup(ParseName());
 
@@ -1599,7 +1599,7 @@ void RealVm::GLOB_Variable()
         LEX_Expect(";");
 }
 
-void RealVm::GLOB_Constant()
+void RealVM::GLOB_Constant()
 {
     char *const_name = strdup(ParseName());
 
@@ -1621,7 +1621,7 @@ void RealVm::GLOB_Constant()
         LEX_Expect(";");
 }
 
-void RealVm::GLOB_Module()
+void RealVM::GLOB_Module()
 {
     if (comp_.scope->kind_ != 'g')
         CompileError("modules cannot contain other modules\n");
@@ -1675,7 +1675,7 @@ void RealVm::GLOB_Module()
     comp_.scope = OLD_scope;
 }
 
-void RealVm::GLOB_Globals()
+void RealVM::GLOB_Globals()
 {
     if (LEX_Check("function"))
     {
@@ -1707,7 +1707,7 @@ void RealVm::GLOB_Globals()
 //
 // compiles the NUL terminated text, adding definitions to the pr structure
 //
-bool RealVm::CompileFile(char *buffer, const char *filename)
+bool RealVM::CompileFile(char *buffer, const char *filename)
 {
     comp_.source_file   = filename;
     comp_.source_line   = 1;
@@ -1736,7 +1736,7 @@ bool RealVm::CompileFile(char *buffer, const char *filename)
     return (comp_.error_count == 0);
 }
 
-void RealVm::ShowStats()
+void RealVM::ShowStats()
 {
     Printer("functions: %u\n", functions_.size());
     Printer("string memory: %d / %d\n", string_mem_.UsedMemory(), string_mem_.TotalMemory());
@@ -1744,7 +1744,7 @@ void RealVm::ShowStats()
     Printer("globals memory: %d / %d\n", global_mem_.UsedMemory(), global_mem_.TotalMemory());
 }
 
-RealVm::RealVm()
+RealVM::RealVM()
     : op_mem_(), global_mem_(), string_mem_(), temp_strings_(), functions_(), native_funcs_(), comp_(), exec_()
 {
     // string #0 must be the empty string
@@ -1777,22 +1777,22 @@ RealVm::RealVm()
     memset(global_mem_.Deref(0), 0, 7 * sizeof(double));
 }
 
-RealVm::~RealVm()
+RealVM::~RealVM()
 {
     // FIXME !!!!
 }
 
-void RealVm::SetPrinter(PrintFunction func)
+void RealVM::SetPrinter(PrintFunction func)
 {
     Printer = func;
 }
 
-void RealVm::SetAsmDump(bool enable)
+void RealVM::SetAsmDump(bool enable)
 {
     comp_.asm_dump = enable;
 }
 
-double RealVm::GetFloat(const char *mod_name, const char *var_name)
+double RealVM::GetFloat(const char *mod_name, const char *var_name)
 {
     Definition *mod_def   = nullptr;
     Scope      *mod_scope = nullptr;
@@ -1820,7 +1820,7 @@ double RealVm::GetFloat(const char *mod_name, const char *var_name)
     return 0; // Not reached
 }
 
-const char *RealVm::GetString(const char *mod_name, const char *var_name)
+const char *RealVM::GetString(const char *mod_name, const char *var_name)
 {
     Definition *mod_def   = nullptr;
     Scope      *mod_scope = nullptr;
@@ -1850,7 +1850,7 @@ const char *RealVm::GetString(const char *mod_name, const char *var_name)
     return 0; // Not reached
 }
 
-double *RealVm::GetVector(const char *mod_name, const char *var_name)
+double *RealVM::GetVector(const char *mod_name, const char *var_name)
 {
     Definition *mod_def   = nullptr;
     Scope      *mod_scope = nullptr;
@@ -1880,7 +1880,7 @@ double *RealVm::GetVector(const char *mod_name, const char *var_name)
     return 0; // Not reached
 }
 
-double RealVm::GetVectorX(const char *mod_name, const char *var_name)
+double RealVM::GetVectorX(const char *mod_name, const char *var_name)
 {
     Definition *mod_def   = nullptr;
     Scope      *mod_scope = nullptr;
@@ -1910,7 +1910,7 @@ double RealVm::GetVectorX(const char *mod_name, const char *var_name)
     return 0; // Not reached
 }
 
-double RealVm::GetVectorY(const char *mod_name, const char *var_name)
+double RealVM::GetVectorY(const char *mod_name, const char *var_name)
 {
     Definition *mod_def   = nullptr;
     Scope      *mod_scope = nullptr;
@@ -1940,7 +1940,7 @@ double RealVm::GetVectorY(const char *mod_name, const char *var_name)
     return 0; // Not reached
 }
 
-double RealVm::GetVectorZ(const char *mod_name, const char *var_name)
+double RealVM::GetVectorZ(const char *mod_name, const char *var_name)
 {
     Definition *mod_def   = nullptr;
     Scope      *mod_scope = nullptr;
@@ -1970,7 +1970,7 @@ double RealVm::GetVectorZ(const char *mod_name, const char *var_name)
     return 0; // Not reached
 }
 
-void RealVm::SetFloat(const char *mod_name, const char *var_name, double value)
+void RealVM::SetFloat(const char *mod_name, const char *var_name, double value)
 {
     Definition *mod_def   = nullptr;
     Scope      *mod_scope = nullptr;
@@ -2001,7 +2001,7 @@ void RealVm::SetFloat(const char *mod_name, const char *var_name, double value)
     return;
 }
 
-void RealVm::SetString(const char *mod_name, const char *var_name, const char *value)
+void RealVM::SetString(const char *mod_name, const char *var_name, const char *value)
 {
     Definition *mod_def   = nullptr;
     Scope      *mod_scope = nullptr;
@@ -2032,7 +2032,7 @@ void RealVm::SetString(const char *mod_name, const char *var_name, const char *v
     return;
 }
 
-void RealVm::SetVector(const char *mod_name, const char *var_name, double val_1, double val_2, double val_3)
+void RealVM::SetVector(const char *mod_name, const char *var_name, double val_1, double val_2, double val_3)
 {
     Definition *mod_def   = nullptr;
     Scope      *mod_scope = nullptr;
@@ -2065,7 +2065,7 @@ void RealVm::SetVector(const char *mod_name, const char *var_name, double val_1,
     return;
 }
 
-void RealVm::SetVectorX(const char *mod_name, const char *var_name, double val)
+void RealVM::SetVectorX(const char *mod_name, const char *var_name, double val)
 {
     Definition *mod_def   = nullptr;
     Scope      *mod_scope = nullptr;
@@ -2096,7 +2096,7 @@ void RealVm::SetVectorX(const char *mod_name, const char *var_name, double val)
     return;
 }
 
-void RealVm::SetVectorY(const char *mod_name, const char *var_name, double val)
+void RealVM::SetVectorY(const char *mod_name, const char *var_name, double val)
 {
     Definition *mod_def   = nullptr;
     Scope      *mod_scope = nullptr;
@@ -2127,7 +2127,7 @@ void RealVm::SetVectorY(const char *mod_name, const char *var_name, double val)
     return;
 }
 
-void RealVm::SetVectorZ(const char *mod_name, const char *var_name, double val)
+void RealVM::SetVectorZ(const char *mod_name, const char *var_name, double val)
 {
     Definition *mod_def   = nullptr;
     Scope      *mod_scope = nullptr;
@@ -2158,11 +2158,11 @@ void RealVm::SetVectorZ(const char *mod_name, const char *var_name, double val)
     return;
 }
 
-Vm *CreateVM()
+VM *CreateVM()
 {
     assert(sizeof(double) == 8);
 
-    return new RealVm;
+    return new RealVM;
 }
 
 } // namespace coal

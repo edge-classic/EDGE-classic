@@ -33,21 +33,21 @@
 
 enum FileKind
 {
-    kFileKindIWad = 0, // iwad file
-    kFileKindPWad,     // normal .wad file
-    kFileKindXWad,     // ajbsp node wad
+    kFileKindIWAD = 0, // iwad file
+    kFileKindPWAD,     // normal .wad file
+    kFileKindXWAD,     // ajbsp node wad
 
     kFileKindFolder,   // a folder somewhere
     kFileKindEFolder,  // edge folder, priority loading
-    kFileKindEpk,      // edge package (.epk)
-    kFileKindEEpk,     // edge epks, priority loading (same extension as epk)
-    kFileKindPackWad,  // WADs within pack files; should only be used for maps
-    kFileKindIpk,      // standalone game EPK (same extension as epk)
+    kFileKindEPK,      // edge package (.epk)
+    kFileKindEEPK,     // edge epks, priority loading (same extension as epk)
+    kFileKindPackWAD,  // WADs within pack files; should only be used for maps
+    kFileKindIPK,      // standalone game EPK (same extension as epk)
     kFileKindIFolder,  // standalone game folder
-    kFileKindIPackWad, // IWADs within pack files :/
+    kFileKindIPackWAD, // IWADs within pack files :/
 
-    kFileKindDdf,      // .ddf or .ldf file
-    kFileKindRts,      // .rts script  file
+    kFileKindDDF,      // .ddf or .ldf file
+    kFileKindRTS,      // .rts script  file
     kFileKindDehacked  // .deh or .bex file
 };
 
@@ -66,10 +66,10 @@ class DataFile
     // file object   [ TODO review when active ]
     epi::File *file_;
 
-    // for kFileKindIWad, PWad, EWad, XWad.
+    // for kFileKindIWAD, PWAD, EWad, XWAD.
     WadFile *wad_;
 
-    // for kFileKindEpk
+    // for kFileKindEPK
     PackFile *pack_;
 
   public:

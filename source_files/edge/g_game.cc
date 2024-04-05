@@ -823,7 +823,7 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
         sky_image = globs->sky_image;
 
     // clear line/sector lookup caches
-    DdfBoomClearGeneralizedTypes();
+    DDFBoomClearGeneralizedTypes();
 
     if (LoadAllSaveChunks() && SaveGetError() == 0)
     { /* all went well */

@@ -23,11 +23,11 @@
 #include "hu_stuff.h"
 #include "r_defs.h"
 
-struct TriggerScriptState;
-struct TriggerScript;
-struct TriggerScriptTrigger;
+struct RADScriptState;
+struct RADScript;
+struct RADScriptTrigger;
 
-enum TriggerScriptTag
+enum RADScriptTag
 {
     kTriggerTagNumber = 0,
     kTriggerTagHash
@@ -307,7 +307,7 @@ struct ScriptJumpParameter
     // state to jump to.  Initially nullptr, it is looked up when needed
     // (since the label may be a future reference, we can't rely on
     // looking it up at parse time).
-    struct TriggerScriptState *cache_state = nullptr;
+    struct RADScriptState *cache_state = nullptr;
 
     // chance that the jump is taken.
     float random_chance = 0;
@@ -402,17 +402,17 @@ struct ScriptThingReplaceParameter
 
 // A single RTS action, not unlike the ones for DDF things.
 //
-struct TriggerScriptState
+struct RADScriptState
 {
     // link in list of states
-    TriggerScriptState *next = nullptr;
-    TriggerScriptState *prev = nullptr;
+    RADScriptState *next = nullptr;
+    RADScriptState *prev = nullptr;
 
     // duration in tics
     int tics = 0;
 
     // routine to be performed
-    void (*action)(struct TriggerScriptTrigger *trig, void *param) = nullptr;
+    void (*action)(struct RADScriptTrigger *trig, void *param) = nullptr;
 
     // parameter for routine, or nullptr
     void *param = nullptr;
@@ -422,15 +422,15 @@ struct TriggerScriptState
 };
 
 // Destination path name
-struct TriggerScriptPath
+struct RADScriptPath
 {
     // next in list, or nullptr
-    TriggerScriptPath *next = nullptr;
+    RADScriptPath *next = nullptr;
 
     const char *name = nullptr;
 
     // cached pointer to script
-    struct TriggerScript *cached_scr = nullptr;
+    struct RADScript *cached_scr = nullptr;
 };
 
 // ONDEATH info
@@ -487,11 +487,11 @@ struct ScriptWaitUntilDeadParameter
 // Trigger Definition (Made up of actions)
 // Start_Map & Radius_Trigger Declaration
 
-struct TriggerScript
+struct RADScript
 {
     // link in list
-    TriggerScript *next = nullptr;
-    TriggerScript *prev = nullptr;
+    RADScript *next = nullptr;
+    RADScript *prev = nullptr;
 
     // Which map
     char *mapid = nullptr;
@@ -550,15 +550,15 @@ struct TriggerScript
     ConditionCheck          *cond_trig   = nullptr;
 
     // Path info
-    TriggerScriptPath *next_in_path    = nullptr;
+    RADScriptPath *next_in_path    = nullptr;
     int                next_path_total = 0;
 
     const char *path_event_label  = nullptr;
     int         path_event_offset = 0;
 
     // Set of states
-    TriggerScriptState *first_state = nullptr;
-    TriggerScriptState *last_state  = nullptr;
+    RADScriptState *first_state = nullptr;
+    RADScriptState *last_state  = nullptr;
 
     // CRC of the important parts of this RTS script.
     epi::CRC32 crc;
@@ -566,18 +566,18 @@ struct TriggerScript
 
 // Dynamic Trigger info.
 // Goes away when trigger is finished.
-struct TriggerScriptTrigger
+struct RADScriptTrigger
 {
     // link in list
-    TriggerScriptTrigger *next = nullptr;
-    TriggerScriptTrigger *prev = nullptr;
+    RADScriptTrigger *next = nullptr;
+    RADScriptTrigger *prev = nullptr;
 
     // link for triggers with the same tag
-    TriggerScriptTrigger *tag_next     = nullptr;
-    TriggerScriptTrigger *tag_previous = nullptr;
+    RADScriptTrigger *tag_next     = nullptr;
+    RADScriptTrigger *tag_previous = nullptr;
 
     // parent info of trigger
-    TriggerScript *info = nullptr;
+    RADScript *info = nullptr;
 
     // is it disabled ?
     bool disabled = false;
@@ -593,7 +593,7 @@ struct TriggerScriptTrigger
     int repeat_delay = 0;
 
     // current state info
-    TriggerScriptState *state     = nullptr;
+    RADScriptState *state     = nullptr;
     int                 wait_tics = 0;
 
     // current tip slot (each tip slot works independently).

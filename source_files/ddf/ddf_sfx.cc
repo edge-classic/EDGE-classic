@@ -31,18 +31,18 @@ SoundEffectDefinitionContainer sfxdefs;
 static SoundEffectDefinition dummy_sfx;
 
 static const DDFCommandList sfx_commands[] = {
-    DDF_FIELD("LUMP_NAME", dummy_sfx, lump_name_, DdfMainGetLumpName),
-    DDF_FIELD("PACK_NAME", dummy_sfx, pack_name_, DdfMainGetString),
-    DDF_FIELD("FILE_NAME", dummy_sfx, file_name_, DdfMainGetString),
+    DDF_FIELD("LUMP_NAME", dummy_sfx, lump_name_, DDFMainGetLumpName),
+    DDF_FIELD("PACK_NAME", dummy_sfx, pack_name_, DDFMainGetString),
+    DDF_FIELD("FILE_NAME", dummy_sfx, file_name_, DDFMainGetString),
     DDF_FIELD("PC_SPEAKER_LUMP", dummy_sfx, pc_speaker_sound_,
-              DdfMainGetString), // Kept for backwards compat
-    DDF_FIELD("PC_SPEAKER_SOUND", dummy_sfx, pc_speaker_sound_, DdfMainGetString),
-    DDF_FIELD("SINGULAR", dummy_sfx, singularity_, DdfMainGetNumeric),
-    DDF_FIELD("PRIORITY", dummy_sfx, priority_, DdfMainGetNumeric),
-    DDF_FIELD("VOLUME", dummy_sfx, volume_, DdfMainGetPercent),
-    DDF_FIELD("LOOP", dummy_sfx, looping_, DdfMainGetBoolean),
-    DDF_FIELD("PRECIOUS", dummy_sfx, precious_, DdfMainGetBoolean),
-    DDF_FIELD("MAX_DISTANCE", dummy_sfx, max_distance_, DdfMainGetFloat),
+              DDFMainGetString), // Kept for backwards compat
+    DDF_FIELD("PC_SPEAKER_SOUND", dummy_sfx, pc_speaker_sound_, DDFMainGetString),
+    DDF_FIELD("SINGULAR", dummy_sfx, singularity_, DDFMainGetNumeric),
+    DDF_FIELD("PRIORITY", dummy_sfx, priority_, DDFMainGetNumeric),
+    DDF_FIELD("VOLUME", dummy_sfx, volume_, DDFMainGetPercent),
+    DDF_FIELD("LOOP", dummy_sfx, looping_, DDFMainGetBoolean),
+    DDF_FIELD("PRECIOUS", dummy_sfx, precious_, DDFMainGetBoolean),
+    DDF_FIELD("MAX_DISTANCE", dummy_sfx, max_distance_, DDFMainGetFloat),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -54,7 +54,7 @@ static void SoundStartEntry(const char *name, bool extend)
 {
     if (!name || !name[0])
     {
-        DdfWarnError("New sound entry is missing a name!");
+        DDFWarnError("New sound entry is missing a name!");
         name = "SOUND_WITH_NO_NAME";
     }
 
@@ -63,7 +63,7 @@ static void SoundStartEntry(const char *name, bool extend)
     if (extend)
     {
         if (!dynamic_sfx)
-            DdfError("Unknown sound to extend: %s\n", name);
+            DDFError("Unknown sound to extend: %s\n", name);
         return;
     }
 
@@ -99,20 +99,20 @@ static void SoundParseField(const char *field, const char *contents, int index, 
 #endif
 
     // -AJA- ignore these for backwards compatibility
-    if (DdfCompareName(field, "BITS") == 0 || DdfCompareName(field, "STEREO") == 0)
+    if (DDFCompareName(field, "BITS") == 0 || DDFCompareName(field, "STEREO") == 0)
         return;
 
-    if (DdfMainParseField(sfx_commands, field, contents, (uint8_t *)dynamic_sfx))
+    if (DDFMainParseField(sfx_commands, field, contents, (uint8_t *)dynamic_sfx))
         return; // OK
 
-    DdfWarnError("Unknown sounds.ddf command: %s\n", field);
+    DDFWarnError("Unknown sounds.ddf command: %s\n", field);
 }
 
 static void SoundFinishEntry(void)
 {
     if (dynamic_sfx->lump_name_.empty() && dynamic_sfx->file_name_.empty() && dynamic_sfx->pack_name_.empty())
     {
-        DdfError("Missing LUMP_NAME or PACK_NAME for sound.\n");
+        DDFError("Missing LUMP_NAME or PACK_NAME for sound.\n");
     }
 }
 
@@ -121,7 +121,7 @@ static void SoundClearAll(void)
     LogWarning("Ignoring #CLEARALL in sounds.ddf\n");
 }
 
-void DdfReadSFX(const std::string &data)
+void DDFReadSFX(const std::string &data)
 {
     DDFReadInfo sfx_r;
 
@@ -133,10 +133,10 @@ void DdfReadSFX(const std::string &data)
     sfx_r.finish_entry = SoundFinishEntry;
     sfx_r.clear_all    = SoundClearAll;
 
-    DdfMainReadFile(&sfx_r, data);
+    DDFMainReadFile(&sfx_r, data);
 }
 
-void DdfSFXInit(void)
+void DDFSFXInit(void)
 {
     for (SoundEffectDefinition *s : sfxdefs)
     {
@@ -146,13 +146,13 @@ void DdfSFXInit(void)
     sfxdefs.clear();
 }
 
-void DdfSFXCleanUp(void)
+void DDFSFXCleanUp(void)
 {
     sfxdefs.shrink_to_fit();
 }
 
 //
-// DdfMainLookupSound
+// DDFMainLookupSound
 //
 // Lookup the sound specified.
 //
@@ -161,7 +161,7 @@ void DdfSFXCleanUp(void)
 // -1 -KM- 1998/09/27 Fixed this func because of sounds.ddf -KM- 1998/10/29
 // SoundEffect finished
 //
-void DdfMainLookupSound(const char *info, void *storage)
+void DDFMainLookupSound(const char *info, void *storage)
 {
     SoundEffect **dest = (SoundEffect **)storage;
 
@@ -266,7 +266,7 @@ SoundEffect *SoundEffectDefinitionContainer::GetEffect(const char *name, bool er
     SoundEffect           *r    = nullptr;
 
     // nullptr Sound
-    if (!name || !name[0] || DdfCompareName(name, "NULL") == 0)
+    if (!name || !name[0] || DDFCompareName(name, "NULL") == 0)
         return nullptr;
 
     // count them
@@ -286,7 +286,7 @@ SoundEffect *SoundEffectDefinitionContainer::GetEffect(const char *name, bool er
     if (count == 0)
     {
         if (error)
-            DdfWarnError("Unknown SFX: '%.8s'\n", name);
+            DDFWarnError("Unknown SFX: '%.8s'\n", name);
 
         return nullptr;
     }
@@ -332,7 +332,7 @@ SoundEffectDefinition *SoundEffectDefinitionContainer::Lookup(const char *name)
     {
         SoundEffectDefinition *s = *iter;
 
-        if (DdfCompareName(s->name_.c_str(), name) == 0)
+        if (DDFCompareName(s->name_.c_str(), name) == 0)
             return s;
     }
 

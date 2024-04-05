@@ -424,7 +424,7 @@ static int PL_has_weapon(lua_State *L)
     {
         PlayerWeapon *pw = &ui_player_who->weapons_[j];
 
-        if (pw->owned && !(pw->flags & kPlayerWeaponRemoving) && DdfCompareName(name, pw->info->name_.c_str()) == 0)
+        if (pw->owned && !(pw->flags & kPlayerWeaponRemoving) && DDFCompareName(name, pw->info->name_.c_str()) == 0)
         {
             lua_pushboolean(L, 1);
             return 1;
@@ -475,7 +475,7 @@ static void LuaSetPlayerSprite(Player *p, int position, int stnum, WeaponDefinit
 
         if (st->label)
         {
-            int new_state = DdfStateFindLabel(info->state_grp_, st->label, true /* quiet */);
+            int new_state = DDFStateFindLabel(info->state_grp_, st->label, true /* quiet */);
             if (new_state != 0)
                 stnum = new_state;
         }
@@ -571,7 +571,7 @@ static int PL_weapon_state(lua_State *L)
 
     ui_player_who->ready_weapon_ = (WeaponSelection)pw_index; // insta-switch to it
 
-    int state = DdfStateFindLabel(oldWep->state_grp_, weapon_state, true /* quiet */);
+    int state = DDFStateFindLabel(oldWep->state_grp_, weapon_state, true /* quiet */);
     if (state == 0)
         FatalError("player.weapon_state: frame '%s' in [%s] not found!\n", weapon_state, weapon_name);
     // state += 1;

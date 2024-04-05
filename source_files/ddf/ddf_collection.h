@@ -20,35 +20,35 @@
 
 #include <string>
 
-enum DdfType
+enum DDFType
 {
-    kDdfTypeUnknown = -1,
-    kDdfTypeAnim    = 0,
-    kDdfTypeAttack,
-    kDdfTypeColourMap,
-    kDdfTypeFlat,
-    kDdfTypeFont,
-    kDdfTypeGame,
-    kDdfTypeImage,
-    kDdfTypeLanguage,
-    kDdfTypeLevel,
-    kDdfTypeLine,
-    kDdfTypeMovie,
-    kDdfTypePlaylist,
-    kDdfTypeSFX,
-    kDdfTypeSector,
-    kDdfTypeStyle,
-    kDdfTypeSwitch,
-    kDdfTypeThing,
-    kDdfTypeWeapon,
+    kDDFTypeUnknown = -1,
+    kDDFTypeAnim    = 0,
+    kDDFTypeAttack,
+    kDDFTypeColourMap,
+    kDDFTypeFlat,
+    kDDFTypeFont,
+    kDDFTypeGame,
+    kDDFTypeImage,
+    kDDFTypeLanguage,
+    kDDFTypeLevel,
+    kDDFTypeLine,
+    kDDFTypeMovie,
+    kDDFTypePlaylist,
+    kDDFTypeSFX,
+    kDDFTypeSector,
+    kDDFTypeStyle,
+    kDDFTypeSwitch,
+    kDDFTypeThing,
+    kDDFTypeWeapon,
     // not strictly DDF, but useful sometimes
-    kDdfTypeRadScript,
-    kTotalDdfTypes
+    kDDFTypeRadScript,
+    kTotalDDFTypes
 };
 
-struct DdfFile
+struct DDFFile
 {
-    DdfType     type;
+    DDFType     type;
     std::string source;
     std::string data;
 };

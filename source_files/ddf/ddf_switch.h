@@ -84,10 +84,10 @@ class SwitchDefinitionContainer : public std::vector<SwitchDefinition *>
 
 extern SwitchDefinitionContainer switchdefs; // -ACB- 2004/06/04 Implemented
 
-void DdfReadSwitch(const std::string &data);
+void DDFReadSwitch(const std::string &data);
 
 // handle the BOOM lump
-void DdfConvertSwitchesLump(const uint8_t *data, int size);
+void DDFConvertSwitchesLump(const uint8_t *data, int size);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

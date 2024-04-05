@@ -50,7 +50,7 @@ ModelDefinition::~ModelDefinition()
     // TODO: free the skins
 }
 
-static void FindModelFrameNames(Md2Model *md, int model_num)
+static void FindModelFrameNames(MD2Model *md, int model_num)
 {
     int missing = 0;
 
@@ -71,7 +71,7 @@ static void FindModelFrameNames(Md2Model *md, int model_num)
 
         EPI_ASSERT(st->model_frame);
 
-        st->frame = Md2FindFrame(md, st->model_frame);
+        st->frame = MD2FindFrame(md, st->model_frame);
 
         if (st->frame >= 0)
         {
@@ -89,7 +89,7 @@ static void FindModelFrameNames(Md2Model *md, int model_num)
                    ddf_model_names[model_num].c_str());
 }
 
-static void FindModelFrameNames(MdlModel *md, int model_num)
+static void FindModelFrameNames(MDLModel *md, int model_num)
 {
     int missing = 0;
 
@@ -110,7 +110,7 @@ static void FindModelFrameNames(MdlModel *md, int model_num)
 
         EPI_ASSERT(st->model_frame);
 
-        st->frame = MdlFindFrame(md, st->model_frame);
+        st->frame = MDLFindFrame(md, st->model_frame);
 
         if (st->frame >= 0)
         {
@@ -164,7 +164,7 @@ ModelDefinition *LoadModelFromLump(int model_num)
             if (f)
             {
                 LogDebug("Loading MD3 model from pack file : %s\n", packname.c_str());
-                def->md2_model_ = Md3Load(f);
+                def->md2_model_ = MD3Load(f);
                 pack_file       = true;
             }
         }
@@ -173,7 +173,7 @@ ModelDefinition *LoadModelFromLump(int model_num)
             LogDebug("Loading MD3 model from lump : %s\n", lumpname.c_str());
             f = LoadLumpAsFile(lumpname.c_str());
             if (f)
-                def->md2_model_ = Md3Load(f);
+                def->md2_model_ = MD3Load(f);
         }
     }
 
@@ -196,7 +196,7 @@ ModelDefinition *LoadModelFromLump(int model_num)
                 if (f)
                 {
                     LogDebug("Loading MD2 model from pack file : %s\n", packname.c_str());
-                    def->md2_model_ = Md2Load(f);
+                    def->md2_model_ = MD2Load(f);
                     pack_file       = true;
                 }
             }
@@ -205,7 +205,7 @@ ModelDefinition *LoadModelFromLump(int model_num)
                 LogDebug("Loading MD2 model from lump : %s\n", lumpname.c_str());
                 f = LoadLumpAsFile(lumpname.c_str());
                 if (f)
-                    def->md2_model_ = Md2Load(f);
+                    def->md2_model_ = MD2Load(f);
             }
         }
     }
@@ -229,7 +229,7 @@ ModelDefinition *LoadModelFromLump(int model_num)
                 if (f)
                 {
                     LogDebug("Loading MDL model from pack file : %s\n", packname.c_str());
-                    def->mdl_model_ = MdlLoad(f);
+                    def->mdl_model_ = MDLLoad(f);
                     pack_file       = true;
                 }
             }
@@ -238,7 +238,7 @@ ModelDefinition *LoadModelFromLump(int model_num)
                 LogDebug("Loading MDL model from lump : %s\n", lumpname.c_str());
                 f = LoadLumpAsFile(lumpname.c_str());
                 if (f)
-                    def->mdl_model_ = MdlLoad(f);
+                    def->mdl_model_ = MDLLoad(f);
             }
         }
     }

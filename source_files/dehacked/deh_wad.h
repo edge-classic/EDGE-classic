@@ -27,9 +27,9 @@ namespace dehacked
 
 namespace wad
 {
-extern std::vector<DdfFile> *dest_container;
+extern std::vector<DDFFile> *dest_container;
 
-void NewLump(DdfType type);
+void NewLump(DDFType type);
 #ifdef __GNUC__
 void Printf(const char *str, ...) __attribute__((format(printf, 1, 2)));
 #else

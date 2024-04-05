@@ -48,7 +48,7 @@ int    num_states;
 std::vector<std::string> ddf_sprite_names;
 std::vector<std::string> ddf_model_names;
 
-// Until the DdfStateFinishState() routine is called, the `nextstate'
+// Until the DDFStateFinishState() routine is called, the `nextstate'
 // field of each state contains a special value.  0 for normal (no
 // redirector).  -1 for the #REMOVE redirector.  Otherwise the top 16
 // bits is a redirector, and the bottom 16 bits is a positive offset
@@ -111,7 +111,7 @@ static int AddModelName(const char *name)
     return last_model;
 }
 
-void DdfStateInit(void)
+void DDFStateInit(void)
 {
     // create states array with a single 'S_NULL' state
     states = (State *)malloc(sizeof(State));
@@ -128,12 +128,12 @@ void DdfStateInit(void)
     AddModelName("!nullptr!");
 }
 
-void DdfStateCleanUp(void)
+void DDFStateCleanUp(void)
 { /* nothing to do */
 }
 
 //
-// DdfMainSplitIntoState
+// DDFMainSplitIntoState
 //
 // Small procedure that takes the info and splits it into relevant stuff
 //
@@ -142,7 +142,7 @@ void DdfStateCleanUp(void)
 // -AJA- 2000/09/03: Rewrote _again_ damn it, in order to handle `:'
 //       appearing inside brackets.
 //
-static int DdfMainSplitIntoState(const char *info)
+static int DDFMainSplitIntoState(const char *info)
 {
     char *temp;
     char *first;
@@ -172,7 +172,7 @@ static int DdfMainSplitIntoState(const char *info)
         if (*temp == ')')
         {
             if (brackets == 0)
-                DdfError("Mismatched ) bracket in states: %s\n", info);
+                DDFError("Mismatched ) bracket in states: %s\n", info);
 
             brackets--;
             continue;
@@ -208,20 +208,20 @@ static int DdfMainSplitIntoState(const char *info)
     }
 
     if (brackets > 0)
-        DdfError("Unclosed ( bracket in states: %s\n", info);
+        DDFError("Unclosed ( bracket in states: %s\n", info);
 
     return cur;
 }
 
 //
-// DdfMainSplitActionArg
+// DDFMainSplitActionArg
 //
 // Small procedure that takes an action like "FOO(BAR)", and splits it
 // into two strings "FOO" and "BAR".
 //
 // -AJA- 1999/08/10: written.
 //
-static void DdfMainSplitActionArg(const char *info, char *actname, char *actarg)
+static void DDFMainSplitActionArg(const char *info, char *actname, char *actarg)
 {
     int len = strlen(info);
 
@@ -250,7 +250,7 @@ static int StateGetRedirector(const char *redir)
 {
     for (size_t i = 0; i < redirs.size(); i++)
     {
-        if (DdfCompareName(redirs[i].c_str(), redir) == 0)
+        if (DDFCompareName(redirs[i].c_str(), redir) == 0)
             return (int)i;
     }
 
@@ -260,9 +260,9 @@ static int StateGetRedirector(const char *redir)
 }
 
 //
-// DdfStateFindLabel
+// DDFStateFindLabel
 //
-int DdfStateFindLabel(const std::vector<StateRange> &group, const char *label, bool quiet)
+int DDFStateFindLabel(const std::vector<StateRange> &group, const char *label, bool quiet)
 {
     for (int g = (int)group.size() - 1; g >= 0; g--)
     {
@@ -271,27 +271,27 @@ int DdfStateFindLabel(const std::vector<StateRange> &group, const char *label, b
             if (!states[i].label)
                 continue;
 
-            if (DdfCompareName(states[i].label, label) == 0)
+            if (DDFCompareName(states[i].label, label) == 0)
                 return i;
         }
     }
 
     // compatibility hack:
-    if (DdfCompareName(label, "IDLE") == 0)
+    if (DDFCompareName(label, "IDLE") == 0)
     {
-        return DdfStateFindLabel(group, "SPAWN");
+        return DDFStateFindLabel(group, "SPAWN");
     }
 
     if (!quiet)
-        DdfError("Unknown label '%s' (object has no such frames).\n", label);
+        DDFError("Unknown label '%s' (object has no such frames).\n", label);
 
     return 0;
 }
 
 //
-// DdfStateReadState
+// DDFStateReadState
 //
-void DdfStateReadState(const char *info, const char *label, std::vector<StateRange> &group, int *state_num, int index,
+void DDFStateReadState(const char *info, const char *label, std::vector<StateRange> &group, int *state_num, int index,
                         const char *redir, const DDFActionCode *action_list, bool is_weapon)
 {
     EPI_ASSERT(group.size() > 0);
@@ -308,19 +308,19 @@ void DdfStateReadState(const char *info, const char *label, std::vector<StateRan
     // Split the state info into component parts
     // -ACB- 1998/07/26 New Procedure, for cleaner code.
 
-    i = DdfMainSplitIntoState(info);
+    i = DDFMainSplitIntoState(info);
     if (i < 5 && i >= 0)
     {
         if (strchr(info, '['))
         {
             // -ES- 2000/02/02 Probably unterminated state.
-            DdfError("DdfMainLoadStates: Bad state '%s', possibly missing ';'\n", info);
+            DDFError("DDFMainLoadStates: Bad state '%s', possibly missing ';'\n", info);
         }
-        DdfError("Bad state '%s'\n", info);
+        DDFError("Bad state '%s'\n", info);
     }
 
     if (stateinfo[0].empty())
-        DdfError("Missing sprite in state frames: `%s'\n", info);
+        DDFError("Missing sprite in state frames: `%s'\n", info);
 
     //--------------------------------------------------
     //----------------REDIRECTOR HANDLING---------------
@@ -329,13 +329,13 @@ void DdfStateReadState(const char *info, const char *label, std::vector<StateRan
     if (stateinfo[2].empty())
     {
         if (!range.first)
-            DdfError("Redirector used without any states (`%s')\n", info);
+            DDFError("Redirector used without any states (`%s')\n", info);
 
         cur = &states[range.last];
 
         EPI_ASSERT(!stateinfo[0].empty());
 
-        if (DdfCompareName(stateinfo[0].c_str(), "REMOVE") == 0)
+        if (DDFCompareName(stateinfo[0].c_str(), "REMOVE") == 0)
         {
             cur->nextstate = -1;
             return;
@@ -384,7 +384,7 @@ void DdfStateReadState(const char *info, const char *label, std::vector<StateRan
 
     if (redir && cur->nextstate == 0)
     {
-        if (DdfCompareName("REMOVE", redir) == 0)
+        if (DDFCompareName("REMOVE", redir) == 0)
             cur->nextstate = -1;
         else
             cur->nextstate = (StateGetRedirector(redir) + 1) << 16;
@@ -395,7 +395,7 @@ void DdfStateReadState(const char *info, const char *label, std::vector<StateRan
     //--------------------------------------------------
 
     if (stateinfo[1].empty() || stateinfo[2].empty() || stateinfo[3].empty())
-        DdfError("Bad state frame, missing fields: %s\n", info);
+        DDFError("Bad state frame, missing fields: %s\n", info);
 
     //--------------------------------------------------
     //--------------SPRITE INDEX HANDLING---------------
@@ -431,10 +431,10 @@ void DdfStateReadState(const char *info, const char *label, std::vector<StateRan
         }
 
         if (cur->frame < 0)
-            DdfError("DdfMainLoadStates: Illegal model frame: %s\n", sprite_x);
+            DDFError("DDFMainLoadStates: Illegal model frame: %s\n", sprite_x);
     }
     else
-        DdfError("DdfMainLoadStates: Illegal sprite frame: %s\n", sprite_x);
+        DDFError("DDFMainLoadStates: Illegal sprite frame: %s\n", sprite_x);
 
     if (is_weapon)
         cur->flags |= kStateFrameFlagWeapon;
@@ -464,7 +464,7 @@ void DdfStateReadState(const char *info, const char *label, std::vector<StateRan
         cur->bright = HMM_Clamp(0, cur->bright * 255 / 99, 255);
     }
     else
-        DdfWarnError("DdfMainLoadStates: Lighting is not BRIGHT or NORMAL\n");
+        DDFWarnError("DDFMainLoadStates: Lighting is not BRIGHT or NORMAL\n");
 
     //--------------------------------------------------
     //------------STATE ACTION CODE HANDLING------------
@@ -477,7 +477,7 @@ void DdfStateReadState(const char *info, const char *label, std::vector<StateRan
         //
         // -AJA- 1999/08/10: Updated to handle a special argument.
 
-        DdfMainSplitActionArg(stateinfo[4].c_str(), action_name, action_arg);
+        DDFMainSplitActionArg(stateinfo[4].c_str(), action_name, action_arg);
 
         for (i = 0; action_list[i].actionname; i++)
         {
@@ -486,13 +486,13 @@ void DdfStateReadState(const char *info, const char *label, std::vector<StateRan
             if (current[0] == '!')
                 current++;
 
-            if (DdfCompareName(current, action_name) == 0)
+            if (DDFCompareName(current, action_name) == 0)
                 break;
         }
 
         if (!action_list[i].actionname)
         {
-            DdfWarnError("Unknown code pointer: %s\n", stateinfo[4].c_str());
+            DDFWarnError("Unknown code pointer: %s\n", stateinfo[4].c_str());
         }
         else
         {
@@ -505,7 +505,7 @@ void DdfStateReadState(const char *info, const char *label, std::vector<StateRan
     }
 }
 
-bool DdfMainParseState(uint8_t *object, std::vector<StateRange> &group, const char *field, const char *contents,
+bool DDFMainParseState(uint8_t *object, std::vector<StateRange> &group, const char *field, const char *contents,
                         int index, bool is_last, bool is_weapon, const DDFStateStarter *starters,
                         const DDFActionCode *actions)
 {
@@ -525,7 +525,7 @@ bool DdfMainParseState(uint8_t *object, std::vector<StateRange> &group, const ch
     // check for the "standard" states
     int i;
     for (i = 0; starters[i].label; i++)
-        if (DdfCompareName(starters[i].label, labname.c_str()) == 0)
+        if (DDFCompareName(starters[i].label, labname.c_str()) == 0)
             break;
 
     const DDFStateStarter *starter = nullptr;
@@ -540,11 +540,11 @@ bool DdfMainParseState(uint8_t *object, std::vector<StateRange> &group, const ch
     if (is_last)
         redir = starter ? starter->last_redir : (is_weapon ? "READY" : "IDLE");
 
-    DdfStateReadState(contents, labname.c_str(), group, var, index, redir, actions, is_weapon);
+    DDFStateReadState(contents, labname.c_str(), group, var, index, redir, actions, is_weapon);
     return true;
 }
 
-void DdfStateBeginRange(std::vector<StateRange> &group)
+void DDFStateBeginRange(std::vector<StateRange> &group)
 {
     StateRange range;
 
@@ -555,12 +555,12 @@ void DdfStateBeginRange(std::vector<StateRange> &group)
 }
 
 //
-// DdfStateFinishRange
+// DDFStateFinishRange
 //
 // Check through the states on an mobj and attempts to dereference any
 // encoded state redirectors.
 //
-void DdfStateFinishRange(std::vector<StateRange> &group)
+void DDFStateFinishRange(std::vector<StateRange> &group)
 {
     EPI_ASSERT(!group.empty());
 
@@ -591,7 +591,7 @@ void DdfStateFinishRange(std::vector<StateRange> &group)
             int RI = (states[i].nextstate >> 16) - 1;
 
             // FIXME: is this validated anywhere?
-            states[i].nextstate = DdfStateFindLabel(group, redirs[RI].c_str()) + (states[i].nextstate & 0xFFFF);
+            states[i].nextstate = DDFStateFindLabel(group, redirs[RI].c_str()) + (states[i].nextstate & 0xFFFF);
         }
 
         // handle jump state ref
@@ -607,14 +607,14 @@ void DdfStateFinishRange(std::vector<StateRange> &group)
         {
             int RI = (states[i].jumpstate >> 16) - 1;
 
-            states[i].jumpstate = DdfStateFindLabel(group, redirs[RI].c_str()) + (states[i].jumpstate & 0xFFFF);
+            states[i].jumpstate = DDFStateFindLabel(group, redirs[RI].c_str()) + (states[i].jumpstate & 0xFFFF);
         }
     }
 
     redirs.clear();
 }
 
-bool DdfStateGroupHasState(const std::vector<StateRange> &group, int st)
+bool DDFStateGroupHasState(const std::vector<StateRange> &group, int st)
 {
     for (int g = 0; g < (int)group.size(); g++)
     {
@@ -630,23 +630,23 @@ bool DdfStateGroupHasState(const std::vector<StateRange> &group, int st)
 //----------------------------------------------------------------------------
 
 //
-// DdfStateGetAttack
+// DDFStateGetAttack
 //
 // Parse the special argument for the state as an attack.
 //
 // -AJA- 1999/08/10: written.
 //
-void DdfStateGetAttack(const char *arg, State *cur_state)
+void DDFStateGetAttack(const char *arg, State *cur_state)
 {
     if (!arg || !arg[0])
         return;
 
     cur_state->action_par = (void *)atkdefs.Lookup(arg);
     if (cur_state->action_par == nullptr)
-        DdfWarnError("Unknown Attack (States): %s\n", arg);
+        DDFWarnError("Unknown Attack (States): %s\n", arg);
 }
 
-void DdfStateGetMobj(const char *arg, State *cur_state)
+void DDFStateGetMobj(const char *arg, State *cur_state)
 {
     if (!arg || !arg[0])
         return;
@@ -654,7 +654,7 @@ void DdfStateGetMobj(const char *arg, State *cur_state)
     cur_state->action_par = new MobjStringReference(arg);
 }
 
-void DdfStateGetSound(const char *arg, State *cur_state)
+void DDFStateGetSound(const char *arg, State *cur_state)
 {
     if (!arg || !arg[0])
         return;
@@ -662,7 +662,7 @@ void DdfStateGetSound(const char *arg, State *cur_state)
     cur_state->action_par = (void *)sfxdefs.GetEffect(arg);
 }
 
-void DdfStateGetInteger(const char *arg, State *cur_state)
+void DDFStateGetInteger(const char *arg, State *cur_state)
 {
     if (!arg || !arg[0])
         return;
@@ -670,12 +670,12 @@ void DdfStateGetInteger(const char *arg, State *cur_state)
     int *val_ptr = new int;
 
     if (sscanf(arg, " %i ", val_ptr) != 1)
-        DdfError("DdfStateGetInteger: bad value: %s\n", arg);
+        DDFError("DDFStateGetInteger: bad value: %s\n", arg);
 
     cur_state->action_par = val_ptr;
 }
 
-void DdfStateGetIntPair(const char *arg, State *cur_state)
+void DDFStateGetIntPair(const char *arg, State *cur_state)
 {
     // Parses two integers separated by commas.
     //
@@ -687,12 +687,12 @@ void DdfStateGetIntPair(const char *arg, State *cur_state)
     values = new int[2];
 
     if (sscanf(arg, " %i , %i ", &values[0], &values[1]) != 2)
-        DdfError("DdfStateGetIntPair: bad values: %s\n", arg);
+        DDFError("DDFStateGetIntPair: bad values: %s\n", arg);
 
     cur_state->action_par = values;
 }
 
-void DdfStateGetFloat(const char *arg, State *cur_state)
+void DDFStateGetFloat(const char *arg, State *cur_state)
 {
     if (!arg || !arg[0])
         return;
@@ -700,12 +700,12 @@ void DdfStateGetFloat(const char *arg, State *cur_state)
     float *val_ptr = new float;
 
     if (sscanf(arg, " %f ", val_ptr) != 1)
-        DdfError("DdfStateGetFloat: bad value: %s\n", arg);
+        DDFError("DDFStateGetFloat: bad value: %s\n", arg);
 
     cur_state->action_par = val_ptr;
 }
 
-void DdfStateGetPercent(const char *arg, State *cur_state)
+void DDFStateGetPercent(const char *arg, State *cur_state)
 {
     if (!arg || !arg[0])
         return;
@@ -713,14 +713,14 @@ void DdfStateGetPercent(const char *arg, State *cur_state)
     float *val_ptr = new float;
 
     if (sscanf(arg, " %f%% ", val_ptr) != 1 || (*val_ptr) < 0)
-        DdfError("DdfStateGetPercent: Bad percentage: %s\n", arg);
+        DDFError("DDFStateGetPercent: Bad percentage: %s\n", arg);
 
     (*val_ptr) /= 100.0f;
 
     cur_state->action_par = val_ptr;
 }
 
-void DdfStateGetJump(const char *arg, State *cur_state)
+void DDFStateGetJump(const char *arg, State *cur_state)
 {
     // JUMP(label)
     // JUMP(label,chance)
@@ -745,16 +745,16 @@ void DdfStateGetJump(const char *arg, State *cur_state)
     else
     {
         // convert chance value
-        DdfMainGetPercentAny(s + 1, &jump->chance);
+        DDFMainGetPercentAny(s + 1, &jump->chance);
 
         len = s - arg;
     }
 
     if (len == 0)
-        DdfError("DdfStateGetJump: missing label!\n");
+        DDFError("DDFStateGetJump: missing label!\n");
 
     if (len > 75)
-        DdfError("DdfStateGetJump: label name too long!\n");
+        DDFError("DDFStateGetJump: label name too long!\n");
 
     // copy label name
     char buffer[80];
@@ -772,9 +772,9 @@ void DdfStateGetJump(const char *arg, State *cur_state)
     cur_state->action_par = jump;
 }
 
-void DdfStateGetFrame(const char *arg, State *cur_state)
+void DDFStateGetFrame(const char *arg, State *cur_state)
 {
-    // Sets the jump_state, like DdfStateGetJump above.
+    // Sets the jump_state, like DDFStateGetJump above.
     //
     // ACTION(label)
 
@@ -807,7 +807,7 @@ MorphActionInfo::~MorphActionInfo()
 {
 }
 
-void DdfStateGetMorph(const char *arg, State *cur_state)
+void DDFStateGetMorph(const char *arg, State *cur_state)
 {
     // MORPH(typename)
     // MORPH(typename,label)
@@ -827,10 +827,10 @@ void DdfStateGetMorph(const char *arg, State *cur_state)
     int len = s ? (s - arg) : strlen(arg);
 
     if (len == 0)
-        DdfError("DdfStateGetMorph: missing type name!\n");
+        DDFError("DDFStateGetMorph: missing type name!\n");
 
     if (len > 75)
-        DdfError("DdfStateGetMorph: type name too long!\n");
+        DDFError("DDFStateGetMorph: type name too long!\n");
 
     for (len = 0; *arg && (*arg != ':') && (*arg != ','); len++, arg++)
         buffer[len] = *arg;
@@ -847,10 +847,10 @@ void DdfStateGetMorph(const char *arg, State *cur_state)
         len = strlen(s);
 
         if (len == 0)
-            DdfError("DdfStateGetMorph: missing label!\n");
+            DDFError("DDFStateGetMorph: missing label!\n");
 
         if (len > 75)
-            DdfError("DdfStateGetMorph: label too long!\n");
+            DDFError("DDFStateGetMorph: label too long!\n");
 
         for (len = 0; *s && (*s != ':') && (*s != ','); len++, s++)
             buffer[len] = *s;
@@ -874,7 +874,7 @@ BecomeActionInfo::~BecomeActionInfo()
 {
 }
 
-void DdfStateGetBecome(const char *arg, State *cur_state)
+void DDFStateGetBecome(const char *arg, State *cur_state)
 {
     // BECOME(typename)
     // BECOME(typename,label)
@@ -894,10 +894,10 @@ void DdfStateGetBecome(const char *arg, State *cur_state)
     int len = s ? (s - arg) : strlen(arg);
 
     if (len == 0)
-        DdfError("DdfStateGetBecome: missing type name!\n");
+        DDFError("DDFStateGetBecome: missing type name!\n");
 
     if (len > 75)
-        DdfError("DdfStateGetBecome: type name too long!\n");
+        DDFError("DDFStateGetBecome: type name too long!\n");
 
     for (len = 0; *arg && (*arg != ':') && (*arg != ','); len++, arg++)
         buffer[len] = *arg;
@@ -914,10 +914,10 @@ void DdfStateGetBecome(const char *arg, State *cur_state)
         len = strlen(s);
 
         if (len == 0)
-            DdfError("DdfStateGetBecome: missing label!\n");
+            DDFError("DDFStateGetBecome: missing label!\n");
 
         if (len > 75)
-            DdfError("DdfStateGetBecome: label too long!\n");
+            DDFError("DDFStateGetBecome: label too long!\n");
 
         for (len = 0; *s && (*s != ':') && (*s != ','); len++, s++)
             buffer[len] = *s;
@@ -941,7 +941,7 @@ WeaponBecomeActionInfo::~WeaponBecomeActionInfo()
 {
 }
 
-void DdfStateGetBecomeWeapon(const char *arg, State *cur_state)
+void DDFStateGetBecomeWeapon(const char *arg, State *cur_state)
 {
     // BECOME(typename)
     // BECOME(typename,label)
@@ -961,10 +961,10 @@ void DdfStateGetBecomeWeapon(const char *arg, State *cur_state)
     int len = s ? (s - arg) : strlen(arg);
 
     if (len == 0)
-        DdfError("DdfStateGetBecomeWeapon: missing type name!\n");
+        DDFError("DDFStateGetBecomeWeapon: missing type name!\n");
 
     if (len > 75)
-        DdfError("DdfStateGetBecomeWeapon: type name too long!\n");
+        DDFError("DDFStateGetBecomeWeapon: type name too long!\n");
 
     for (len = 0; *arg && (*arg != ':') && (*arg != ','); len++, arg++)
         buffer[len] = *arg;
@@ -981,10 +981,10 @@ void DdfStateGetBecomeWeapon(const char *arg, State *cur_state)
         len = strlen(s);
 
         if (len == 0)
-            DdfError("DdfStateGetBecomeWeapon: missing label!\n");
+            DDFError("DDFStateGetBecomeWeapon: missing label!\n");
 
         if (len > 75)
-            DdfError("DdfStateGetBecomeWeapon: label too long!\n");
+            DDFError("DDFStateGetBecomeWeapon: label too long!\n");
 
         for (len = 0; *s && (*s != ':') && (*s != ','); len++, s++)
             buffer[len] = *s;
@@ -1000,7 +1000,7 @@ void DdfStateGetBecomeWeapon(const char *arg, State *cur_state)
     cur_state->action_par = become;
 }
 
-void DdfStateGetAngle(const char *arg, State *cur_state)
+void DDFStateGetAngle(const char *arg, State *cur_state)
 {
     BAMAngle *value;
     float     tmp;
@@ -1011,14 +1011,14 @@ void DdfStateGetAngle(const char *arg, State *cur_state)
     value = new BAMAngle;
 
     if (sscanf(arg, " %f ", &tmp) != 1)
-        DdfError("DdfStateGetAngle: bad value: %s\n", arg);
+        DDFError("DDFStateGetAngle: bad value: %s\n", arg);
 
     *value = epi::BAMFromDegrees(tmp);
 
     cur_state->action_par = value;
 }
 
-void DdfStateGetSlope(const char *arg, State *cur_state)
+void DDFStateGetSlope(const char *arg, State *cur_state)
 {
     float *value, tmp;
 
@@ -1028,7 +1028,7 @@ void DdfStateGetSlope(const char *arg, State *cur_state)
     value = new float;
 
     if (sscanf(arg, " %f ", &tmp) != 1)
-        DdfError("DdfStateGetSlope: bad value: %s\n", arg);
+        DDFError("DDFStateGetSlope: bad value: %s\n", arg);
 
     if (tmp > +89.5f)
         tmp = +89.5f;
@@ -1040,14 +1040,14 @@ void DdfStateGetSlope(const char *arg, State *cur_state)
     cur_state->action_par = value;
 }
 
-void DdfStateGetRGB(const char *arg, State *cur_state)
+void DDFStateGetRGB(const char *arg, State *cur_state)
 {
     if (!arg || !arg[0])
         return;
 
     cur_state->action_par = new RGBAColor;
 
-    DdfMainGetRGB(arg, cur_state->action_par);
+    DDFMainGetRGB(arg, cur_state->action_par);
 }
 
 //--- editor settings ---

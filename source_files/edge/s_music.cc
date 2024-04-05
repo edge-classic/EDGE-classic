@@ -89,7 +89,7 @@ void ChangeMusic(int entry_number, bool loop)
 
     switch (play->infotype_)
     {
-    case kDdfMusicDataFile: {
+    case kDDFMusicDataFile: {
         std::string fn = epi::PathAppendIfNotAbsolute(game_directory, play->info_);
 
         F = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
@@ -101,7 +101,7 @@ void ChangeMusic(int entry_number, bool loop)
         break;
     }
 
-    case kDdfMusicDataPackage: {
+    case kDDFMusicDataPackage: {
         F = OpenFileFromPack(play->info_);
         if (!F)
         {
@@ -111,7 +111,7 @@ void ChangeMusic(int entry_number, bool loop)
         break;
     }
 
-    case kDdfMusicDataLump: {
+    case kDDFMusicDataLump: {
         int lump = CheckLumpNumberForName(play->info_.c_str());
         if (lump < 0)
         {
@@ -150,11 +150,11 @@ void ChangeMusic(int entry_number, bool loop)
     // IMF Music is the outlier in that it must be predefined in DDFPLAY with
     // the appropriate IMF frequency, as there is no way of determining this
     // from file information alone
-    if (play->type_ == kDdfMusicIMF280 || play->type_ == kDdfMusicIMF560 || play->type_ == kDdfMusicIMF700)
-        fmt = kSoundImf;
+    if (play->type_ == kDDFMusicIMF280 || play->type_ == kDDFMusicIMF560 || play->type_ == kDDFMusicIMF700)
+        fmt = kSoundIMF;
     else
     {
-        if (play->infotype_ == kDdfMusicDataLump)
+        if (play->infotype_ == kDDFMusicDataLump)
         {
             // lumps must use auto-detection based on their contents
             fmt = DetectSoundFormat(data, length);
@@ -170,46 +170,46 @@ void ChangeMusic(int entry_number, bool loop)
 
     switch (fmt)
     {
-    case kSoundOgg:
+    case kSoundOGG:
         delete F;
-        music_player = PlayOggMusic(data, length, loop);
+        music_player = PlayOGGMusic(data, length, loop);
         break;
 
-    case kSoundMp3:
+    case kSoundMP3:
         delete F;
-        music_player = PlayMp3Music(data, length, loop);
+        music_player = PlayMP3Music(data, length, loop);
         break;
 
-    case kSoundFlac:
+    case kSoundFLAC:
         delete F;
-        music_player = PlayFlacMusic(data, length, loop);
+        music_player = PlayFLACMusic(data, length, loop);
         break;
 
-    case kSoundM4p:
+    case kSoundM4P:
         delete F;
         music_player = S_PlayM4PMusic(data, length, loop);
         break;
 
-    case kSoundRad:
+    case kSoundRAD:
         delete F;
-        music_player = PlayRadMusic(data, length, loop);
+        music_player = PlayRADMusic(data, length, loop);
         break;
 
-    case kSoundSid:
+    case kSoundSID:
         delete F;
         music_player = PlaySIDMusic(data, length, loop);
         break;
 
     // IMF writes raw OPL registers, so must use the OPL player
     // unconditionally
-    case kSoundImf:
+    case kSoundIMF:
         delete F;
-        music_player = PlayOplMusic(data, length, loop, play->type_);
+        music_player = PlayOPLMusic(data, length, loop, play->type_);
         break;
 
-    case kSoundMidi:
-    case kSoundMus:
-    case kSoundWav: // RIFF MIDI has the same header as WAV
+    case kSoundMIDI:
+    case kSoundMUS:
+    case kSoundWAV: // RIFF MIDI has the same header as WAV
         delete F;
         if (var_midi_player == 0)
         {
@@ -217,7 +217,7 @@ void ChangeMusic(int entry_number, bool loop)
         }
         else
         {
-            music_player = PlayOplMusic(data, length, loop, play->type_);
+            music_player = PlayOPLMusic(data, length, loop, play->type_);
         }
         break;
 

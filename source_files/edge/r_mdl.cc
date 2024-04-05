@@ -64,10 +64,10 @@ extern bool            need_to_draw_sky;
 // struct member naming deviates from the style guide to reflect
 // MDL format documentation
 
-static constexpr const char *kMdlIdentifier = "IDPO";
-static constexpr uint8_t     kMdlVersion    = 6;
+static constexpr const char *kMDLIdentifier = "IDPO";
+static constexpr uint8_t     kMDLVersion    = 6;
 
-struct RawMdlHeader
+struct RawMDLHeader
 {
     char ident[4];
 
@@ -101,51 +101,51 @@ struct RawMdlHeader
     uint32_t size;
 };
 
-struct RawMdlTextureCoordinate
+struct RawMDLTextureCoordinate
 {
     int32_t onseam;
     int32_t s;
     int32_t t;
 };
 
-struct RawMdlTriangle
+struct RawMDLTriangle
 {
     int32_t facesfront;
     int32_t vertex[3];
 };
 
-struct RawMdlVertex
+struct RawMDLVertex
 {
     uint8_t x, y, z;
     uint8_t light_normal;
 };
 
-struct RawMdlSimpleFrame
+struct RawMDLSimpleFrame
 {
-    RawMdlVertex  bboxmin;
-    RawMdlVertex  bboxmax;
+    RawMDLVertex  bboxmin;
+    RawMDLVertex  bboxmax;
     char          name[16];
-    RawMdlVertex *verts;
+    RawMDLVertex *verts;
 };
 
-struct RawMdlFrame
+struct RawMDLFrame
 {
     int32_t           type;
-    RawMdlSimpleFrame frame;
+    RawMDLSimpleFrame frame;
 };
 
 /*============== EDGE REPRESENTATION ====================*/
 
-struct MdlVertex
+struct MDLVertex
 {
     float x, y, z;
 
     short normal_idx;
 };
 
-struct MdlFrame
+struct MDLFrame
 {
-    MdlVertex *vertices;
+    MDLVertex *vertices;
 
     const char *name;
 
@@ -153,7 +153,7 @@ struct MdlFrame
     short *used_normals;
 };
 
-struct MdlPoint
+struct MDLPoint
 {
     float skin_s, skin_t;
 
@@ -161,14 +161,14 @@ struct MdlPoint
     int vert_idx;
 };
 
-struct MdlTriangle
+struct MDLTriangle
 {
-    // index to the first point (within MdlModel::points).
+    // index to the first point (within MDLModel::points).
     // All points for the strip are contiguous in that array.
     int first;
 };
 
-class MdlModel
+class MDLModel
 {
   public:
     int total_frames_;
@@ -177,9 +177,9 @@ class MdlModel
     int skin_width_;
     int skin_height_;
 
-    MdlFrame    *frames_;
-    MdlPoint    *points_;
-    MdlTriangle *triangles_;
+    MDLFrame    *frames_;
+    MDLPoint    *points_;
+    MDLTriangle *triangles_;
 
     int vertices_per_frame_;
 
@@ -190,17 +190,17 @@ class MdlModel
     RendererVertex *gl_vertices_;
 
   public:
-    MdlModel(int nframe, int npoint, int ntris, int swidth, int sheight)
+    MDLModel(int nframe, int npoint, int ntris, int swidth, int sheight)
         : total_frames_(nframe), total_points_(npoint), total_triangles_(ntris), skin_width_(swidth),
           skin_height_(sheight), vertices_per_frame_(0), vertex_buffer_object_(0), gl_vertices_(nullptr)
     {
-        frames_      = new MdlFrame[total_frames_];
-        points_      = new MdlPoint[total_points_];
-        triangles_   = new MdlTriangle[total_triangles_];
+        frames_      = new MDLFrame[total_frames_];
+        points_      = new MDLPoint[total_points_];
+        triangles_   = new MDLTriangle[total_triangles_];
         gl_vertices_ = new RendererVertex[total_triangles_ * 3];
     }
 
-    ~MdlModel()
+    ~MDLModel()
     {
         delete[] frames_;
         delete[] points_;
@@ -210,7 +210,7 @@ class MdlModel
 
 /*============== LOADING CODE ====================*/
 
-static const char *CopyFrameName(RawMdlSimpleFrame *frm)
+static const char *CopyFrameName(RawMDLSimpleFrame *frm)
 {
     char *str = new char[20];
 
@@ -227,7 +227,7 @@ static short *CreateNormalList(uint8_t *which_normals)
     int count = 0;
     int i;
 
-    for (i = 0; i < kTotalMdFormatNormals; i++)
+    for (i = 0; i < kTotalMDFormatNormals; i++)
         if (which_normals[i])
             count++;
 
@@ -235,7 +235,7 @@ static short *CreateNormalList(uint8_t *which_normals)
 
     count = 0;
 
-    for (i = 0; i < kTotalMdFormatNormals; i++)
+    for (i = 0; i < kTotalMDFormatNormals; i++)
         if (which_normals[i])
             n_list[count++] = i;
 
@@ -244,25 +244,25 @@ static short *CreateNormalList(uint8_t *which_normals)
     return n_list;
 }
 
-MdlModel *MdlLoad(epi::File *f)
+MDLModel *MDLLoad(epi::File *f)
 {
-    RawMdlHeader header;
+    RawMDLHeader header;
 
     /* read header */
-    f->Read(&header, sizeof(RawMdlHeader));
+    f->Read(&header, sizeof(RawMDLHeader));
 
     int version = AlignedLittleEndianS32(header.version);
 
     LogDebug("MODEL IDENT: [%c%c%c%c] VERSION: %d", header.ident[0], header.ident[1], header.ident[2], header.ident[3],
              version);
 
-    if (epi::StringPrefixCompare(header.ident, kMdlIdentifier) != 0)
+    if (epi::StringPrefixCompare(header.ident, kMDLIdentifier) != 0)
     {
         FatalError("MDL_LoadModel: lump is not an MDL model!");
         return nullptr; /* NOT REACHED */
     }
 
-    if (version != kMdlVersion)
+    if (version != kMDLVersion)
     {
         FatalError("MDL_LoadModel: strange version!");
         return nullptr; /* NOT REACHED */
@@ -275,7 +275,7 @@ MdlModel *MdlLoad(epi::File *f)
     int sheight          = AlignedLittleEndianS32(header.skin_height);
     int total_points_    = total_triangles_ * 3;
 
-    MdlModel *md = new MdlModel(total_frames_, total_points_, total_triangles_, swidth, sheight);
+    MDLModel *md = new MDLModel(total_frames_, total_points_, total_triangles_, swidth, sheight);
 
     /* PARSE SKINS */
 
@@ -308,26 +308,26 @@ MdlModel *MdlLoad(epi::File *f)
     }
 
     /* PARSE TEXCOORDS */
-    RawMdlTextureCoordinate *texcoords = new RawMdlTextureCoordinate[num_verts];
-    f->Read(texcoords, num_verts * sizeof(RawMdlTextureCoordinate));
+    RawMDLTextureCoordinate *texcoords = new RawMDLTextureCoordinate[num_verts];
+    f->Read(texcoords, num_verts * sizeof(RawMDLTextureCoordinate));
 
     /* PARSE TRIANGLES */
 
-    RawMdlTriangle *tris = new RawMdlTriangle[total_triangles_];
-    f->Read(tris, total_triangles_ * sizeof(RawMdlTriangle));
+    RawMDLTriangle *tris = new RawMDLTriangle[total_triangles_];
+    f->Read(tris, total_triangles_ * sizeof(RawMDLTriangle));
 
     /* PARSE FRAMES */
 
-    RawMdlFrame *frames = new RawMdlFrame[total_frames_];
+    RawMDLFrame *frames = new RawMDLFrame[total_frames_];
 
     for (int fr = 0; fr < total_frames_; fr++)
     {
-        frames[fr].frame.verts = new RawMdlVertex[num_verts];
+        frames[fr].frame.verts = new RawMDLVertex[num_verts];
         f->Read(&frames[fr].type, sizeof(int));
-        f->Read(&frames[fr].frame.bboxmin, sizeof(RawMdlVertex));
-        f->Read(&frames[fr].frame.bboxmax, sizeof(RawMdlVertex));
+        f->Read(&frames[fr].frame.bboxmin, sizeof(RawMDLVertex));
+        f->Read(&frames[fr].frame.bboxmax, sizeof(RawMDLVertex));
         f->Read(frames[fr].frame.name, 16 * sizeof(char));
-        f->Read(frames[fr].frame.verts, num_verts * sizeof(RawMdlVertex));
+        f->Read(frames[fr].frame.verts, num_verts * sizeof(RawMDLVertex));
     }
 
     LogDebug("  frames:%d  points:%d  tris: %d\n", total_frames_, total_triangles_ * 3, total_triangles_);
@@ -337,8 +337,8 @@ MdlModel *MdlLoad(epi::File *f)
     LogDebug("  vertices_per_frame_:%d\n", md->vertices_per_frame_);
 
     // convert glcmds into tris and points
-    MdlTriangle *tri   = md->triangles_;
-    MdlPoint    *point = md->points_;
+    MDLTriangle *tri   = md->triangles_;
+    MDLPoint    *point = md->points_;
 
     for (int i = 0; i < total_triangles_; i++)
     {
@@ -351,7 +351,7 @@ MdlModel *MdlLoad(epi::File *f)
 
         for (int j = 0; j < 3; j++, point++)
         {
-            RawMdlTriangle raw_tri = tris[i];
+            RawMDLTriangle raw_tri = tris[i];
             point->vert_idx        = AlignedLittleEndianS32(raw_tri.vertex[j]);
             float s                = (float)AlignedLittleEndianS16(texcoords[point->vert_idx].s);
             float t                = (float)AlignedLittleEndianS16(texcoords[point->vert_idx].t);
@@ -370,7 +370,7 @@ MdlModel *MdlLoad(epi::File *f)
 
     /* PARSE FRAMES */
 
-    uint8_t which_normals[kTotalMdFormatNormals];
+    uint8_t which_normals[kTotalMDFormatNormals];
 
     uint32_t raw_scale[3];
     uint32_t raw_translate[3];
@@ -397,20 +397,20 @@ MdlModel *MdlLoad(epi::File *f)
 
     for (int i = 0; i < total_frames_; i++)
     {
-        RawMdlFrame raw_frame = frames[i];
+        RawMDLFrame raw_frame = frames[i];
 
         md->frames_[i].name = CopyFrameName(&raw_frame.frame);
 
-        RawMdlVertex *raw_verts = frames[i].frame.verts;
+        RawMDLVertex *raw_verts = frames[i].frame.verts;
 
-        md->frames_[i].vertices = new MdlVertex[md->vertices_per_frame_];
+        md->frames_[i].vertices = new MDLVertex[md->vertices_per_frame_];
 
         memset(which_normals, 0, sizeof(which_normals));
 
         for (int v = 0; v < md->vertices_per_frame_; v++)
         {
-            RawMdlVertex *raw_V  = raw_verts + v;
-            MdlVertex    *good_V = md->frames_[i].vertices + v;
+            RawMDLVertex *raw_V  = raw_verts + v;
+            MDLVertex    *good_V = md->frames_[i].vertices + v;
 
             good_V->x = (int)raw_V->x * scale[0] + translate[0];
             good_V->y = (int)raw_V->y * scale[1] + translate[1];
@@ -419,12 +419,12 @@ MdlModel *MdlLoad(epi::File *f)
             good_V->normal_idx = raw_V->light_normal;
 
             EPI_ASSERT(good_V->normal_idx >= 0);
-            // EPI_ASSERT(good_V->normal_idx < kTotalMdFormatNormals);
+            // EPI_ASSERT(good_V->normal_idx < kTotalMDFormatNormals);
             //  Dasho: Maybe try to salvage bad MDL models?
-            if (good_V->normal_idx >= kTotalMdFormatNormals)
+            if (good_V->normal_idx >= kTotalMDFormatNormals)
             {
                 LogDebug("Vert %d of Frame %d has an invalid normal index: %d\n", v, i, good_V->normal_idx);
-                good_V->normal_idx = (good_V->normal_idx % kTotalMdFormatNormals);
+                good_V->normal_idx = (good_V->normal_idx % kTotalMDFormatNormals);
             }
 
             which_normals[good_V->normal_idx] = 1;
@@ -444,15 +444,15 @@ MdlModel *MdlLoad(epi::File *f)
     return md;
 }
 
-short MdlFindFrame(MdlModel *md, const char *name)
+short MDLFindFrame(MDLModel *md, const char *name)
 {
     EPI_ASSERT(strlen(name) > 0);
 
     for (int f = 0; f < md->total_frames_; f++)
     {
-        MdlFrame *frame = &md->frames_[f];
+        MDLFrame *frame = &md->frames_[f];
 
-        if (DdfCompareName(name, frame->name) == 0)
+        if (DDFCompareName(name, frame->name) == 0)
             return f;
     }
 
@@ -461,16 +461,16 @@ short MdlFindFrame(MdlModel *md, const char *name)
 
 /*============== MODEL RENDERING ====================*/
 
-class MdlCoordinateData
+class MDLCoordinateData
 {
   public:
     MapObject *map_object_;
 
-    MdlModel *model_;
+    MDLModel *model_;
 
-    const MdlFrame    *frame1_;
-    const MdlFrame    *frame2_;
-    const MdlTriangle *strip_;
+    const MDLFrame    *frame1_;
+    const MDLFrame    *frame2_;
+    const MDLTriangle *strip_;
 
     float lerp_;
     float x_, y_, z_;
@@ -499,7 +499,7 @@ class MdlCoordinateData
     HMM_Vec2 rotation_vector_x_;
     HMM_Vec2 rotation_vector_y_;
 
-    ColorMixer normal_colors_[kTotalMdFormatNormals];
+    ColorMixer normal_colors_[kTotalMDFormatNormals];
 
     short *used_normals_;
 
@@ -521,7 +521,7 @@ class MdlCoordinateData
         pos->Z = z_ + z2;
     }
 
-    void CalculateNormal(HMM_Vec3 *normal, const MdlVertex *vert) const
+    void CalculateNormal(HMM_Vec3 *normal, const MDLVertex *vert) const
     {
         short n = vert->normal_idx;
 
@@ -539,7 +539,7 @@ class MdlCoordinateData
     }
 };
 
-static void InitializeNormalColors(MdlCoordinateData *data)
+static void InitializeNormalColors(MDLCoordinateData *data)
 {
     short *n_list = data->used_normals_;
 
@@ -549,7 +549,7 @@ static void InitializeNormalColors(MdlCoordinateData *data)
     }
 }
 
-static void ShadeNormals(AbstractShader *shader, MdlCoordinateData *data, bool skip_calc)
+static void ShadeNormals(AbstractShader *shader, MDLCoordinateData *data, bool skip_calc)
 {
     short *n_list = data->used_normals_;
 
@@ -579,9 +579,9 @@ static void ShadeNormals(AbstractShader *shader, MdlCoordinateData *data, bool s
     }
 }
 
-static void MdlDynamicLightCallback(MapObject *mo, void *dataptr)
+static void MDLDynamicLightCallback(MapObject *mo, void *dataptr)
 {
-    MdlCoordinateData *data = (MdlCoordinateData *)dataptr;
+    MDLCoordinateData *data = (MDLCoordinateData *)dataptr;
 
     // dynamic lights do not light themselves up!
     if (mo == data->map_object_)
@@ -592,7 +592,7 @@ static void MdlDynamicLightCallback(MapObject *mo, void *dataptr)
     ShadeNormals(mo->dynamic_light_.shader, data, false);
 }
 
-static int MdlMulticolorMaximumRgb(MdlCoordinateData *data, bool additive)
+static int MDLMulticolorMaximumRgb(MDLCoordinateData *data, bool additive)
 {
     int result = 0;
 
@@ -610,7 +610,7 @@ static int MdlMulticolorMaximumRgb(MdlCoordinateData *data, bool additive)
     return result;
 }
 
-static void UpdateMulticols(MdlCoordinateData *data)
+static void UpdateMulticols(MDLCoordinateData *data)
 {
     short *n_list = data->used_normals_;
 
@@ -629,22 +629,22 @@ static inline float LerpIt(float v1, float v2, float lerp)
     return v1 * (1.0f - lerp) + v2 * lerp;
 }
 
-static inline void ModelCoordFunc(MdlCoordinateData *data, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc,
+static inline void ModelCoordFunc(MDLCoordinateData *data, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc,
                                   HMM_Vec3 *normal)
 {
-    const MdlModel *md = data->model_;
+    const MDLModel *md = data->model_;
 
-    const MdlFrame    *frame1 = data->frame1_;
-    const MdlFrame    *frame2 = data->frame2_;
-    const MdlTriangle *strip  = data->strip_;
+    const MDLFrame    *frame1 = data->frame1_;
+    const MDLFrame    *frame2 = data->frame2_;
+    const MDLTriangle *strip  = data->strip_;
 
     EPI_ASSERT(strip->first + v_idx >= 0);
     EPI_ASSERT(strip->first + v_idx < md->total_points_);
 
-    const MdlPoint *point = &md->points_[strip->first + v_idx];
+    const MDLPoint *point = &md->points_[strip->first + v_idx];
 
-    const MdlVertex *vert1 = &frame1->vertices[point->vert_idx];
-    const MdlVertex *vert2 = &frame2->vertices[point->vert_idx];
+    const MDLVertex *vert1 = &frame1->vertices[point->vert_idx];
+    const MDLVertex *vert2 = &frame2->vertices[point->vert_idx];
 
     float x1 = LerpIt(vert1->x, vert2->x, data->lerp_);
     float y1 = LerpIt(vert1->y, vert2->y, data->lerp_);
@@ -655,7 +655,7 @@ static inline void ModelCoordFunc(MdlCoordinateData *data, int v_idx, HMM_Vec3 *
 
     data->CalculatePosition(pos, x1, y1, z1);
 
-    const MdlVertex *n_vert = (data->lerp_ < 0.5) ? vert1 : vert2;
+    const MDLVertex *n_vert = (data->lerp_ < 0.5) ? vert1 : vert2;
 
     data->CalculateNormal(normal, n_vert);
 
@@ -690,7 +690,7 @@ static inline void ModelCoordFunc(MdlCoordinateData *data, int v_idx, HMM_Vec3 *
     rgb[2] *= render_view_blue_multiplier;
 }
 
-void MdlRenderModel(MdlModel *md, const Image *skin_img, bool is_weapon, int frame1, int frame2, float lerp, float x,
+void MDLRenderModel(MDLModel *md, const Image *skin_img, bool is_weapon, int frame1, int frame2, float lerp, float x,
                     float y, float z, MapObject *mo, RegionProperties *props, float scale, float aspect, float bias,
                     int rotation)
 {
@@ -706,7 +706,7 @@ void MdlRenderModel(MdlModel *md, const Image *skin_img, bool is_weapon, int fra
         return;
     }
 
-    MdlCoordinateData data;
+    MDLCoordinateData data;
 
     data.is_fuzzy_ = (mo->flags_ & kMapObjectFlagFuzzy) ? true : false;
 
@@ -814,10 +814,10 @@ void MdlRenderModel(MdlModel *md, const Image *skin_img, bool is_weapon, int fra
             float r = mo->radius_;
 
             DynamicLightIterator(mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r, mo->z + mo->height_,
-                                 MdlDynamicLightCallback, &data);
+                                 MDLDynamicLightCallback, &data);
 
             SectorGlowIterator(mo->subsector_->sector, mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r,
-                               mo->z + mo->height_, MdlDynamicLightCallback, &data);
+                               mo->z + mo->height_, MDLDynamicLightCallback, &data);
         }
     }
 
@@ -907,12 +907,12 @@ void MdlRenderModel(MdlModel *md, const Image *skin_img, bool is_weapon, int fra
         if (pass > 0 && pass < num_pass - 1)
         {
             UpdateMulticols(&data);
-            if (MdlMulticolorMaximumRgb(&data, false) <= 0)
+            if (MDLMulticolorMaximumRgb(&data, false) <= 0)
                 continue;
         }
         else if (data.is_additive_)
         {
-            if (MdlMulticolorMaximumRgb(&data, true) <= 0)
+            if (MDLMulticolorMaximumRgb(&data, true) <= 0)
                 continue;
         }
 
@@ -1042,7 +1042,7 @@ void MdlRenderModel(MdlModel *md, const Image *skin_img, bool is_weapon, int fra
     state->SetDefaultStateFull();
 }
 
-void MdlRenderModel2d(MdlModel *md, const Image *skin_img, int frame, float x, float y, float xscale, float yscale,
+void MDLRenderModel2D(MDLModel *md, const Image *skin_img, int frame, float x, float y, float xscale, float yscale,
                       const MapObjectDefinition *info)
 {
     // check if frame is valid
@@ -1070,19 +1070,19 @@ void MdlRenderModel2d(MdlModel *md, const Image *skin_img, int frame, float x, f
 
     for (int i = 0; i < md->total_triangles_; i++)
     {
-        const MdlTriangle *strip = &md->triangles_[i];
+        const MDLTriangle *strip = &md->triangles_[i];
 
         glBegin(GL_TRIANGLES);
 
         for (int v_idx = 0; v_idx < 3; v_idx++)
         {
-            const MdlFrame *frame_ptr = &md->frames_[frame];
+            const MDLFrame *frame_ptr = &md->frames_[frame];
 
             EPI_ASSERT(strip->first + v_idx >= 0);
             EPI_ASSERT(strip->first + v_idx < md->total_points_);
 
-            const MdlPoint  *point = &md->points_[strip->first + v_idx];
-            const MdlVertex *vert  = &frame_ptr->vertices[point->vert_idx];
+            const MDLPoint  *point = &md->points_[strip->first + v_idx];
+            const MDLVertex *vert  = &frame_ptr->vertices[point->vert_idx];
 
             glTexCoord2f(point->skin_s, point->skin_t);
 

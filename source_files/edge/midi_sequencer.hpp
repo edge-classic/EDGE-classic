@@ -207,7 +207,7 @@ class MidiSequencer
                                //! [Non-Standard] Loop End point
             kLoopEnd = 0xE2,   // size == 0 <CUSTOM>
                                //! [Non-Standard] Raw OPL data
-            kRawOpl = 0xE3,    // size == 0 <CUSTOM>
+            kRawOPL = 0xE3,    // size == 0 <CUSTOM>
 
             //! [Non-Standard] Loop Start point with support of multi-loops
             kLoopStackBegin = 0xE4,  // size == 1 <CUSTOM>
@@ -384,7 +384,7 @@ class MidiSequencer
         //! MIDI format
         kFormatMidi,
         //! Id-Software Music File
-        kFormatImf,
+        kFormatIMF,
         //! EA-MUS format
         kFormatRsxx,
         //! AIL's XMIDI format (act same as MIDI, but with exceptions)
@@ -863,7 +863,7 @@ class MidiSequencer
      * @param rate For IMF formats, the proper playback rate in Hz
      * @return true on successful load
      */
-    bool ParseImf(epi::MemFile *mfr, uint16_t rate);
+    bool ParseIMF(epi::MemFile *mfr, uint16_t rate);
 
     /**
      * @brief Load file as EA MUS

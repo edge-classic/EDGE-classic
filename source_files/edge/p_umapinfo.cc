@@ -679,7 +679,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
 //
 // -----------------------------------------------
 
-void ParseUmapinfo(const std::string &buffer)
+void ParseUMAPINFO(const std::string &buffer)
 {
     epi::Lexer lex(buffer);
 

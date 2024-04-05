@@ -1151,7 +1151,7 @@ static bool IM_ShouldHQ2X(Image *rim)
 {
     // Note: no need to check kImageSourceUser, since those images are
     //       always PNG or JPEG (etc) and never palettised, hence
-    //       the Hq2x scaling would never apply.
+    //       the HQ2x scaling would never apply.
 
     if (hq2x_scaling == 0)
         return false;
@@ -1271,9 +1271,9 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
     {
         bool solid = (rim->opacity_ == kOpacitySolid);
 
-        Hq2xPaletteSetup(what_palette, solid ? -1 : kTransparentPixelIndex);
+        HQ2xPaletteSetup(what_palette, solid ? -1 : kTransparentPixelIndex);
 
-        ImageData *scaled_img = ImageHq2x(tmp_img, solid, false /* invert */);
+        ImageData *scaled_img = ImageHQ2x(tmp_img, solid, false /* invert */);
 
         if (rim->is_font_)
         {

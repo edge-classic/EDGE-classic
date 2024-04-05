@@ -1673,7 +1673,7 @@ void MidiSequencer::handleEvent(size_t track, const MidiSequencer::MidiEvent &ev
             return;
         }
 
-        if (evtype == MidiEvent::kRawOpl) // Special non-spec ADLMIDI special for IMF
+        if (evtype == MidiEvent::kRawOPL) // Special non-spec ADLMIDI special for IMF
                                           // playback: Direct poke to AdLib
         {
             if (midi_output_interface_->rt_rawOPL)
@@ -2065,7 +2065,7 @@ bool MidiSequencer::LoadMidi(epi::MemFile *mfr, uint16_t rate)
     if (detectIMF(headerBuf, mfr))
     {
         mfr->Seek(0, epi::File::kSeekpointStart);
-        return ParseImf(mfr, rate);
+        return ParseIMF(mfr, rate);
     }
 
     if (detectRSXX(headerBuf, mfr))
@@ -2079,7 +2079,7 @@ bool MidiSequencer::LoadMidi(epi::MemFile *mfr, uint16_t rate)
     return false;
 }
 
-bool MidiSequencer::ParseImf(epi::MemFile *mfr, uint16_t rate)
+bool MidiSequencer::ParseIMF(epi::MemFile *mfr, uint16_t rate)
 {
     const size_t deltaTicks   = 1;
     const size_t track_count  = 1;
@@ -2109,7 +2109,7 @@ bool MidiSequencer::ParseImf(epi::MemFile *mfr, uint16_t rate)
 
     std::vector<MidiEvent> temposList;
 
-    midi_format_ = kFormatImf;
+    midi_format_ = kFormatIMF;
 
     BuildSmfSetupReset(track_count);
 
@@ -2140,7 +2140,7 @@ bool MidiSequencer::ParseImf(epi::MemFile *mfr, uint16_t rate)
 
     // Define the draft for IMF events
     event.type                   = MidiEvent::kSpecial;
-    event.sub_type               = MidiEvent::kRawOpl;
+    event.sub_type               = MidiEvent::kRawOPL;
     event.absolute_tick_position = 0;
     event.data.resize(2);
 

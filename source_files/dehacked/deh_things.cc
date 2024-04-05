@@ -118,7 +118,7 @@ const char *AddScratchAttack(int damage, const char *sfx);
 
 void BeginLump(void)
 {
-    wad::NewLump(kDdfTypeAttack);
+    wad::NewLump(kDDFTypeAttack);
 
     wad::Printf("<ATTACKS>\n\n");
 }
@@ -541,7 +541,7 @@ void things::Shutdown()
 
 void things::BeginLump()
 {
-    wad::NewLump(kDdfTypeThing);
+    wad::NewLump(kDDFTypeThing);
 
     wad::Printf("<THINGS>\n\n");
 }

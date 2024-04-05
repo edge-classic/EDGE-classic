@@ -30,35 +30,35 @@ static GameDefinition *dynamic_gamedef;
 static IntermissionAnimationInfo buffer_animdef;
 static IntermissionFrameInfo     buffer_framedef;
 
-static void DdfGameGetPic(const char *info, void *storage);
-static void DdfGameGetAnim(const char *info, void *storage);
-static void DdfGameGetMap(const char *info, void *storage);
-static void DdfGameGetLighting(const char *info, void *storage);
+static void DDFGameGetPic(const char *info, void *storage);
+static void DDFGameGetAnim(const char *info, void *storage);
+static void DDFGameGetMap(const char *info, void *storage);
+static void DDFGameGetLighting(const char *info, void *storage);
 
 static GameDefinition dummy_gamedef;
 
 static const DDFCommandList gamedef_commands[] = {
-    DDF_FIELD("INTERMISSION_GRAPHIC", dummy_gamedef, background_, DdfMainGetLumpName),
-    DDF_FIELD("INTERMISSION_CAMERA", dummy_gamedef, bg_camera_, DdfMainGetString),
-    DDF_FIELD("INTERMISSION_MUSIC", dummy_gamedef, music_, DdfMainGetNumeric),
-    DDF_FIELD("SPLAT_GRAPHIC", dummy_gamedef, splatpic_, DdfMainGetLumpName),
-    DDF_FIELD("YAH1_GRAPHIC", dummy_gamedef, you_are_here_[0], DdfMainGetLumpName),
-    DDF_FIELD("YAH2_GRAPHIC", dummy_gamedef, you_are_here_[1], DdfMainGetLumpName),
-    DDF_FIELD("PERCENT_SOUND", dummy_gamedef, percent_, DdfMainLookupSound),
-    DDF_FIELD("DONE_SOUND", dummy_gamedef, done_, DdfMainLookupSound),
-    DDF_FIELD("ENDMAP_SOUND", dummy_gamedef, endmap_, DdfMainLookupSound),
-    DDF_FIELD("NEXTMAP_SOUND", dummy_gamedef, next_map_, DdfMainLookupSound),
-    DDF_FIELD("ACCEL_SOUND", dummy_gamedef, accel_snd_, DdfMainLookupSound),
-    DDF_FIELD("FRAG_SOUND", dummy_gamedef, frag_snd_, DdfMainLookupSound),
-    DDF_FIELD("FIRSTMAP", dummy_gamedef, firstmap_, DdfMainGetLumpName),
-    DDF_FIELD("NAME_GRAPHIC", dummy_gamedef, namegraphic_, DdfMainGetLumpName),
-    DDF_FIELD("TITLE_MOVIE", dummy_gamedef, titlemovie_, DdfMainGetString),
-    DDF_FIELD("TITLE_MUSIC", dummy_gamedef, titlemusic_, DdfMainGetNumeric),
-    DDF_FIELD("TITLE_TIME", dummy_gamedef, titletics_, DdfMainGetTime),
-    DDF_FIELD("SPECIAL_MUSIC", dummy_gamedef, special_music_, DdfMainGetNumeric),
-    DDF_FIELD("LIGHTING", dummy_gamedef, lighting_, DdfGameGetLighting),
-    DDF_FIELD("DESCRIPTION", dummy_gamedef, description_, DdfMainGetString),
-    DDF_FIELD("NO_SKILL_MENU", dummy_gamedef, no_skill_menu_, DdfMainGetBoolean),
+    DDF_FIELD("INTERMISSION_GRAPHIC", dummy_gamedef, background_, DDFMainGetLumpName),
+    DDF_FIELD("INTERMISSION_CAMERA", dummy_gamedef, bg_camera_, DDFMainGetString),
+    DDF_FIELD("INTERMISSION_MUSIC", dummy_gamedef, music_, DDFMainGetNumeric),
+    DDF_FIELD("SPLAT_GRAPHIC", dummy_gamedef, splatpic_, DDFMainGetLumpName),
+    DDF_FIELD("YAH1_GRAPHIC", dummy_gamedef, you_are_here_[0], DDFMainGetLumpName),
+    DDF_FIELD("YAH2_GRAPHIC", dummy_gamedef, you_are_here_[1], DDFMainGetLumpName),
+    DDF_FIELD("PERCENT_SOUND", dummy_gamedef, percent_, DDFMainLookupSound),
+    DDF_FIELD("DONE_SOUND", dummy_gamedef, done_, DDFMainLookupSound),
+    DDF_FIELD("ENDMAP_SOUND", dummy_gamedef, endmap_, DDFMainLookupSound),
+    DDF_FIELD("NEXTMAP_SOUND", dummy_gamedef, next_map_, DDFMainLookupSound),
+    DDF_FIELD("ACCEL_SOUND", dummy_gamedef, accel_snd_, DDFMainLookupSound),
+    DDF_FIELD("FRAG_SOUND", dummy_gamedef, frag_snd_, DDFMainLookupSound),
+    DDF_FIELD("FIRSTMAP", dummy_gamedef, firstmap_, DDFMainGetLumpName),
+    DDF_FIELD("NAME_GRAPHIC", dummy_gamedef, namegraphic_, DDFMainGetLumpName),
+    DDF_FIELD("TITLE_MOVIE", dummy_gamedef, titlemovie_, DDFMainGetString),
+    DDF_FIELD("TITLE_MUSIC", dummy_gamedef, titlemusic_, DDFMainGetNumeric),
+    DDF_FIELD("TITLE_TIME", dummy_gamedef, titletics_, DDFMainGetTime),
+    DDF_FIELD("SPECIAL_MUSIC", dummy_gamedef, special_music_, DDFMainGetNumeric),
+    DDF_FIELD("LIGHTING", dummy_gamedef, lighting_, DDFGameGetLighting),
+    DDF_FIELD("DESCRIPTION", dummy_gamedef, description_, DDFMainGetString),
+    DDF_FIELD("NO_SKILL_MENU", dummy_gamedef, no_skill_menu_, DDFMainGetBoolean),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -70,7 +70,7 @@ static void GameStartEntry(const char *name, bool extend)
 {
     if (!name || !name[0])
     {
-        DdfWarnError("New game entry is missing a name!");
+        DDFWarnError("New game entry is missing a name!");
         name = "GAME_WITH_NO_NAME";
     }
 
@@ -84,7 +84,7 @@ static void GameStartEntry(const char *name, bool extend)
     if (extend)
     {
         if (!dynamic_gamedef)
-            DdfError("Unknown game to extend: %s\n", name);
+            DDFError("Unknown game to extend: %s\n", name);
         return;
     }
 
@@ -106,7 +106,7 @@ static void GameDoTemplate(const char *contents)
     GameDefinition *other = gamedefs.Lookup(contents);
 
     if (!other || other == dynamic_gamedef)
-        DdfError("Unknown game template: '%s'\n", contents);
+        DDFError("Unknown game template: '%s'\n", contents);
 
     dynamic_gamedef->CopyDetail(*other);
 }
@@ -117,33 +117,33 @@ static void GameParseField(const char *field, const char *contents, int index, b
     LogDebug("GAME_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DdfCompareName(field, "TEMPLATE") == 0)
+    if (DDFCompareName(field, "TEMPLATE") == 0)
     {
         GameDoTemplate(contents);
         return;
     }
 
     // handle some special fields...
-    if (DdfCompareName(field, "TITLE_GRAPHIC") == 0)
+    if (DDFCompareName(field, "TITLE_GRAPHIC") == 0)
     {
-        DdfGameGetPic(contents, nullptr);
+        DDFGameGetPic(contents, nullptr);
         return;
     }
-    else if (DdfCompareName(field, "MAP") == 0)
+    else if (DDFCompareName(field, "MAP") == 0)
     {
-        DdfGameGetMap(contents, nullptr);
+        DDFGameGetMap(contents, nullptr);
         return;
     }
-    else if (DdfCompareName(field, "ANIM") == 0)
+    else if (DDFCompareName(field, "ANIM") == 0)
     {
-        DdfGameGetAnim(contents, &buffer_framedef);
+        DDFGameGetAnim(contents, &buffer_framedef);
         return;
     }
 
-    if (DdfMainParseField(gamedef_commands, field, contents, (uint8_t *)dynamic_gamedef))
+    if (DDFMainParseField(gamedef_commands, field, contents, (uint8_t *)dynamic_gamedef))
         return; // OK
 
-    DdfWarnError("Unknown games.ddf command: %s\n", field);
+    DDFWarnError("Unknown games.ddf command: %s\n", field);
 }
 
 static void GameFinishEntry(void)
@@ -162,7 +162,7 @@ static void GameClearAll(void)
     gamedefs.clear();
 }
 
-void DdfReadGames(const std::string &data)
+void DDFReadGames(const std::string &data)
 {
     DDFReadInfo games;
 
@@ -174,21 +174,21 @@ void DdfReadGames(const std::string &data)
     games.finish_entry = GameFinishEntry;
     games.clear_all    = GameClearAll;
 
-    DdfMainReadFile(&games, data);
+    DDFMainReadFile(&games, data);
 }
 
-void DdfGameInit(void)
+void DDFGameInit(void)
 {
     GameClearAll();
 }
 
-void DdfGameCleanUp(void)
+void DDFGameCleanUp(void)
 {
     if (gamedefs.empty())
         FatalError("There are no games defined in DDF !\n");
 }
 
-static void DdfGameAddFrame(void)
+static void DDFGameAddFrame(void)
 {
     IntermissionFrameInfo *f = new IntermissionFrameInfo(buffer_framedef);
 
@@ -197,7 +197,7 @@ static void DdfGameAddFrame(void)
     buffer_framedef.Default();
 }
 
-static void DdfGameAddAnim(void)
+static void DDFGameAddAnim(void)
 {
     IntermissionAnimationInfo *a = new IntermissionAnimationInfo(buffer_animdef);
 
@@ -215,23 +215,23 @@ static void ParseFrame(const char *info, IntermissionFrameInfo *f)
 {
     const char *p = strchr(info, ':');
     if (!p || p == info)
-        DdfError("Bad frame def: '%s' (missing pic name)\n", info);
+        DDFError("Bad frame def: '%s' (missing pic name)\n", info);
 
     f->pic_ = std::string(info, p - info);
 
     p++;
 
     if (sscanf(p, " %d : %d : %d ", &f->tics_, &f->x_, &f->y_) != 3)
-        DdfError("Bad frame definition: '%s'\n", info);
+        DDFError("Bad frame definition: '%s'\n", info);
 }
 
-static void DdfGameGetAnim(const char *info, void *storage)
+static void DDFGameGetAnim(const char *info, void *storage)
 {
     IntermissionFrameInfo *f = (IntermissionFrameInfo *)storage;
 
-    if (DdfCompareName(info, "#END") == 0)
+    if (DDFCompareName(info, "#END") == 0)
     {
-        DdfGameAddAnim();
+        DDFGameAddAnim();
         return;
     }
 
@@ -240,11 +240,11 @@ static void DdfGameGetAnim(const char *info, void *storage)
     if (info[0] == '#')
     {
         if (buffer_animdef.frames_.size() > 0)
-            DdfError("Invalid # command: '%s'\n", info);
+            DDFError("Invalid # command: '%s'\n", info);
 
         p = strchr(info, ':');
         if (!p || p <= info + 1)
-            DdfError("Invalid # command: '%s'\n", info);
+            DDFError("Invalid # command: '%s'\n", info);
 
         buffer_animdef.level_ = std::string(info + 1, p - (info + 1));
 
@@ -254,24 +254,24 @@ static void DdfGameGetAnim(const char *info, void *storage)
     ParseFrame(p, f);
 
     // this assumes 'f' points to buffer_framedef
-    DdfGameAddFrame();
+    DDFGameAddFrame();
 }
 
 static void ParseMap(const char *info, IntermissionMapPositionInfo *mp)
 {
     const char *p = strchr(info, ':');
     if (!p || p == info)
-        DdfError("Bad map def: '%s' (missing level name)\n", info);
+        DDFError("Bad map def: '%s' (missing level name)\n", info);
 
     mp->name_ = std::string(info, p - info);
 
     p++;
 
     if (sscanf(p, " %d : %d ", &mp->x_, &mp->y_) != 2)
-        DdfError("Bad map definition: '%s'\n", info);
+        DDFError("Bad map definition: '%s'\n", info);
 }
 
-static void DdfGameGetMap(const char *info, void *storage)
+static void DDFGameGetMap(const char *info, void *storage)
 {
     IntermissionMapPositionInfo *mp = new IntermissionMapPositionInfo();
 
@@ -280,7 +280,7 @@ static void DdfGameGetMap(const char *info, void *storage)
     dynamic_gamedef->mappos_.push_back(mp);
 }
 
-static void DdfGameGetPic(const char *info, void *storage)
+static void DDFGameGetPic(const char *info, void *storage)
 {
     dynamic_gamedef->titlepics_.push_back(info);
 }
@@ -291,13 +291,13 @@ static DDFSpecialFlags lighting_names[] = {{"DOOM", kLightingModelDoom, 0},
                                            {"VERTEX", kLightingModelVertex, 0},
                                            {nullptr, 0, 0}};
 
-void DdfGameGetLighting(const char *info, void *storage)
+void DDFGameGetLighting(const char *info, void *storage)
 {
     int flag_value;
 
-    if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(info, lighting_names, &flag_value, false, false))
+    if (kDDFCheckFlagPositive != DDFMainCheckSpecialFlag(info, lighting_names, &flag_value, false, false))
     {
-        DdfWarnError("GAMES.DDF LIGHTING: Unknown model: %s", info);
+        DDFWarnError("GAMES.DDF LIGHTING: Unknown model: %s", info);
         return;
     }
 
@@ -807,7 +807,7 @@ GameDefinition *GameDefinitionContainer::Lookup(const char *refname)
     for (std::vector<GameDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
     {
         GameDefinition *game = *iter;
-        if (DdfCompareName(game->name_.c_str(), refname) == 0)
+        if (DDFCompareName(game->name_.c_str(), refname) == 0)
             return game;
     }
 

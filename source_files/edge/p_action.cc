@@ -125,7 +125,7 @@ void A_EnableRadTrig(MapObject *mo)
 
     int *value = (int *)mo->state_->action_par;
 
-    ScriptEnableByTag(mo, value[0], false, (TriggerScriptTag)mo->state_->rts_tag_type);
+    ScriptEnableByTag(mo, value[0], false, (RADScriptTag)mo->state_->rts_tag_type);
 }
 
 void A_DisableRadTrig(MapObject *mo)
@@ -135,7 +135,7 @@ void A_DisableRadTrig(MapObject *mo)
 
     int *value = (int *)mo->state_->action_par;
 
-    ScriptEnableByTag(mo, value[0], true, (TriggerScriptTag)mo->state_->rts_tag_type);
+    ScriptEnableByTag(mo, value[0], true, (RADScriptTag)mo->state_->rts_tag_type);
 }
 
 //

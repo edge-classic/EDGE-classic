@@ -71,7 +71,7 @@ struct SpeakerSoundHeader
     uint16_t samples;
 };
 
-uint8_t *ConvertPcSpeakerSound(const uint8_t *data, int *length)
+uint8_t *ConvertPCSpeakerSound(const uint8_t *data, int *length)
 {
     static const double   ORIG_RATE     = 140.0;
     static const int      FACTOR        = 315; // 315*140 = 44100
@@ -207,7 +207,7 @@ bool SoundLoadWAV(SoundData *buf, uint8_t *data, int length, bool pc_speaker)
     drwav wav;
 
     if (pc_speaker)
-        data = ConvertPcSpeakerSound(data, &length);
+        data = ConvertPCSpeakerSound(data, &length);
 
     if (!drwav_init_memory(&wav, data, length, nullptr))
     {

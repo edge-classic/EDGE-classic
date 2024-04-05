@@ -121,40 +121,40 @@ extern bool lax_errors;
 // if true, disable warning messages
 extern bool no_warnings;
 
-void DdfInit();
-void DdfCleanUp();
+void DDFInit();
+void DDFCleanUp();
 
-bool        DdfMainParseCondition(const char *str, ConditionCheck *cond);
-void        DdfMainGetWhenAppear(const char *info, void *storage);
-void        DdfMainGetRGB(const char *info, void *storage);
-bool        DdfMainDecodeBrackets(const char *info, char *outer, char *inner, int buf_len);
-const char *DdfMainDecodeList(const char *info, char divider, bool simple);
-void        DdfGetLumpNameForFile(const char *filename, char *lumpname);
+bool        DDFMainParseCondition(const char *str, ConditionCheck *cond);
+void        DDFMainGetWhenAppear(const char *info, void *storage);
+void        DDFMainGetRGB(const char *info, void *storage);
+bool        DDFMainDecodeBrackets(const char *info, char *outer, char *inner, int buf_len);
+const char *DDFMainDecodeList(const char *info, char divider, bool simple);
+void        DDFGetLumpNameForFile(const char *filename, char *lumpname);
 
-int DdfCompareName(const char *A, const char *B);
+int DDFCompareName(const char *A, const char *B);
 
-void        DdfMainAddDefine(const char *name, const char *value);
-void        DdfMainAddDefine(const std::string &name, const std::string &value);
-const char *DdfMainGetDefine(const char *name);
-void        DdfMainFreeDefines();
+void        DDFMainAddDefine(const char *name, const char *value);
+void        DDFMainAddDefine(const std::string &name, const std::string &value);
+const char *DDFMainGetDefine(const char *name);
+void        DDFMainFreeDefines();
 
-bool DdfWeaponIsUpgrade(WeaponDefinition *weap, WeaponDefinition *old);
+bool DDFWeaponIsUpgrade(WeaponDefinition *weap, WeaponDefinition *old);
 
-bool        DdfIsBoomLineType(int num);
-bool        DdfIsBoomSectorType(int num);
-void        DdfBoomClearGeneralizedTypes(void);
-LineType   *DdfBoomGetGeneralizedLine(int number);
-SectorType *DdfBoomGetGeneralizedSector(int number);
+bool        DDFIsBoomLineType(int num);
+bool        DDFIsBoomSectorType(int num);
+void        DDFBoomClearGeneralizedTypes(void);
+LineType   *DDFBoomGetGeneralizedLine(int number);
+SectorType *DDFBoomGetGeneralizedSector(int number);
 
-DdfType DdfLumpToType(const std::string &name);
-DdfType DdfFilenameToType(const std::string &path);
+DDFType DDFLumpToType(const std::string &name);
+DDFType DDFFilenameToType(const std::string &path);
 
-void DdfAddFile(DdfType type, std::string &data, const std::string &source);
-void DdfAddCollection(std::vector<DdfFile> &col, const std::string &source);
-void DdfParseEverything();
+void DDFAddFile(DDFType type, std::string &data, const std::string &source);
+void DDFAddCollection(std::vector<DDFFile> &col, const std::string &source);
+void DDFParseEverything();
 
-void DdfDumpFile(const std::string &data);
-void DdfDumpCollection(const std::vector<DdfFile> &col);
+void DDFDumpFile(const std::string &data);
+void DDFDumpCollection(const std::vector<DDFFile> &col);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

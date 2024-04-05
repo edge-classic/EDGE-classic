@@ -26,7 +26,11 @@ General Improvements/Changes
   - Support for exceptions/RTTI removed from program with compiler flags/options set accordingly
     - Primesynth swapped back to Fluidlite for MIDI playback due to Primesynth's heavy reliance on exceptions
   - Use of C++17 filesystem functions removed and replaced with Windows/POSIX specific functions
-  - Consistent code style and formatting performed on all files under the /source_files project folder
+  - All uses of streams replaced with EPI file or memory I/O
+  - Superfluous typedefs removed in favor of standard types (i.e., uint8_t instead of byte, etc)
+  - Simple macros converted to either inline functions or constexpr values as appropriate
+    - Remaining macros use consistent naming scheme (EDGE_*, DDF_*, EPI_*, etc)
+  - Consistent code styling and formatting performed on all files under the /source_files project folder
 
 
 Bugs fixed

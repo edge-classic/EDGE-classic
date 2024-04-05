@@ -98,14 +98,14 @@ static bool LoadWav(SoundData *buf, uint8_t *lump, int length, bool pc_speaker)
     return SoundLoadWAV(buf, lump, length, pc_speaker);
 }
 
-static bool LoadOgg(SoundData *buf, const uint8_t *lump, int length)
+static bool LoadOGG(SoundData *buf, const uint8_t *lump, int length)
 {
-    return LoadOggSound(buf, lump, length);
+    return LoadOGGSound(buf, lump, length);
 }
 
-static bool LoadMp3(SoundData *buf, const uint8_t *lump, int length)
+static bool LoadMP3(SoundData *buf, const uint8_t *lump, int length)
 {
-    return LoadMp3Sound(buf, lump, length);
+    return LoadMP3Sound(buf, lump, length);
 }
 
 //----------------------------------------------------------------------------
@@ -227,21 +227,21 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
 
     switch (fmt)
     {
-    case kSoundWav:
+    case kSoundWAV:
         OK = LoadWav(buf, data, length, false);
         break;
 
-    case kSoundOgg:
-        OK = LoadOgg(buf, data, length);
+    case kSoundOGG:
+        OK = LoadOGG(buf, data, length);
         break;
 
-    case kSoundMp3:
-        OK = LoadMp3(buf, data, length);
+    case kSoundMP3:
+        OK = LoadMP3(buf, data, length);
         break;
 
     // Double-check first byte here because pack filename detection could
-    // return kSoundPcSpeaker for either
-    case kSoundPcSpeaker:
+    // return kSoundPCSpeaker for either
+    case kSoundPCSpeaker:
         if (data[0] == 0x3)
             OK = LoadDoom(buf, data, length);
         else

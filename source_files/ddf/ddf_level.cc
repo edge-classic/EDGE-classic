@@ -26,28 +26,28 @@
 #include "epi_str_compare.h"
 #include "w_wad.h"
 
-static void DdfLevelGetSpecials(const char *info);
-static void DdfLevelGetPic(const char *info, void *storage);
-static void DdfLevelGetSkyStretch(const char *info, void *storage);
-static void DdfLevelGetWistyle(const char *info, void *storage);
+static void DDFLevelGetSpecials(const char *info);
+static void DDFLevelGetPic(const char *info, void *storage);
+static void DDFLevelGetSkyStretch(const char *info, void *storage);
+static void DDFLevelGetWistyle(const char *info, void *storage);
 
 MapDefinitionContainer mapdefs;
 
 static FinaleDefinition dummy_finale;
 
 static const DDFCommandList finale_commands[] = {
-    DDF_FIELD("TEXT", dummy_finale, text_, DdfMainGetString),
-    DDF_FIELD("TEXT_GRAPHIC", dummy_finale, text_back_, DdfMainGetLumpName),
-    DDF_FIELD("TEXT_FLAT", dummy_finale, text_flat_, DdfMainGetLumpName),
-    DDF_FIELD("TEXT_SPEED", dummy_finale, text_speed_, DdfMainGetFloat),
-    DDF_FIELD("TEXT_WAIT", dummy_finale, text_wait_, DdfMainGetNumeric),
-    DDF_FIELD("COLOURMAP", dummy_finale, text_colmap_, DdfMainGetColourmap),
-    DDF_FIELD("GRAPHIC", dummy_finale, pics_, DdfLevelGetPic),
-    DDF_FIELD("GRAPHIC_WAIT", dummy_finale, picwait_, DdfMainGetTime),
-    DDF_FIELD("MOVIE", dummy_finale, movie_, DdfMainGetString),
-    DDF_FIELD("CAST", dummy_finale, docast_, DdfMainGetBoolean),
-    DDF_FIELD("BUNNY", dummy_finale, dobunny_, DdfMainGetBoolean),
-    DDF_FIELD("MUSIC", dummy_finale, music_, DdfMainGetNumeric),
+    DDF_FIELD("TEXT", dummy_finale, text_, DDFMainGetString),
+    DDF_FIELD("TEXT_GRAPHIC", dummy_finale, text_back_, DDFMainGetLumpName),
+    DDF_FIELD("TEXT_FLAT", dummy_finale, text_flat_, DDFMainGetLumpName),
+    DDF_FIELD("TEXT_SPEED", dummy_finale, text_speed_, DDFMainGetFloat),
+    DDF_FIELD("TEXT_WAIT", dummy_finale, text_wait_, DDFMainGetNumeric),
+    DDF_FIELD("COLOURMAP", dummy_finale, text_colmap_, DDFMainGetColourmap),
+    DDF_FIELD("GRAPHIC", dummy_finale, pics_, DDFLevelGetPic),
+    DDF_FIELD("GRAPHIC_WAIT", dummy_finale, picwait_, DDFMainGetTime),
+    DDF_FIELD("MOVIE", dummy_finale, movie_, DDFMainGetString),
+    DDF_FIELD("CAST", dummy_finale, docast_, DDFMainGetBoolean),
+    DDF_FIELD("BUNNY", dummy_finale, dobunny_, DDFMainGetBoolean),
+    DDF_FIELD("MUSIC", dummy_finale, music_, DDFMainGetNumeric),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -62,26 +62,26 @@ static const DDFCommandList level_commands[] = {
     DDF_SUB_LIST("PRE", dummy_level, f_pre_, finale_commands),
     DDF_SUB_LIST("END", dummy_level, f_end_, finale_commands),
 
-    DDF_FIELD("LUMPNAME", dummy_level, lump_, DdfMainGetLumpName),
-    DDF_FIELD("DESCRIPTION", dummy_level, description_, DdfMainGetString),
-    DDF_FIELD("AUTHOR", dummy_level, author_, DdfMainGetString),
-    DDF_FIELD("NAME_GRAPHIC", dummy_level, namegraphic_, DdfMainGetLumpName),
-    DDF_FIELD("SKY_TEXTURE", dummy_level, sky_, DdfMainGetLumpName),
-    DDF_FIELD("SKY_STRETCH", dummy_level, forced_skystretch_, DdfLevelGetSkyStretch),
-    DDF_FIELD("MUSIC_ENTRY", dummy_level, music_, DdfMainGetNumeric),
-    DDF_FIELD("SURROUND_FLAT", dummy_level, surround_, DdfMainGetLumpName),
-    DDF_FIELD("NEXT_MAP", dummy_level, next_mapname_, DdfMainGetLumpName),
-    DDF_FIELD("SECRET_MAP", dummy_level, secretmapname_, DdfMainGetLumpName),
-    DDF_FIELD("AUTOTAG", dummy_level, autotag_, DdfMainGetNumeric),
-    DDF_FIELD("PARTIME", dummy_level, partime_, DdfMainGetTime),
-    DDF_FIELD("EPISODE", dummy_level, episode_name_, DdfMainGetString),
-    DDF_FIELD("STATS", dummy_level, wistyle_, DdfLevelGetWistyle),
-    DDF_FIELD("LEAVING_BACKGROUND", dummy_level, leavingbggraphic_, DdfMainGetLumpName),
-    DDF_FIELD("ENTERING_BACKGROUND", dummy_level, enteringbggraphic_, DdfMainGetLumpName),
-    DDF_FIELD("INDOOR_FOG_COLOR", dummy_level, indoor_fog_cmap_, DdfMainGetColourmap),
-    DDF_FIELD("INDOOR_FOG_DENSITY", dummy_level, indoor_fog_density_, DdfMainGetPercent),
-    DDF_FIELD("OUTDOOR_FOG_COLOR", dummy_level, outdoor_fog_cmap_, DdfMainGetColourmap),
-    DDF_FIELD("OUTDOOR_FOG_DENSITY", dummy_level, outdoor_fog_density_, DdfMainGetPercent),
+    DDF_FIELD("LUMPNAME", dummy_level, lump_, DDFMainGetLumpName),
+    DDF_FIELD("DESCRIPTION", dummy_level, description_, DDFMainGetString),
+    DDF_FIELD("AUTHOR", dummy_level, author_, DDFMainGetString),
+    DDF_FIELD("NAME_GRAPHIC", dummy_level, namegraphic_, DDFMainGetLumpName),
+    DDF_FIELD("SKY_TEXTURE", dummy_level, sky_, DDFMainGetLumpName),
+    DDF_FIELD("SKY_STRETCH", dummy_level, forced_skystretch_, DDFLevelGetSkyStretch),
+    DDF_FIELD("MUSIC_ENTRY", dummy_level, music_, DDFMainGetNumeric),
+    DDF_FIELD("SURROUND_FLAT", dummy_level, surround_, DDFMainGetLumpName),
+    DDF_FIELD("NEXT_MAP", dummy_level, next_mapname_, DDFMainGetLumpName),
+    DDF_FIELD("SECRET_MAP", dummy_level, secretmapname_, DDFMainGetLumpName),
+    DDF_FIELD("AUTOTAG", dummy_level, autotag_, DDFMainGetNumeric),
+    DDF_FIELD("PARTIME", dummy_level, partime_, DDFMainGetTime),
+    DDF_FIELD("EPISODE", dummy_level, episode_name_, DDFMainGetString),
+    DDF_FIELD("STATS", dummy_level, wistyle_, DDFLevelGetWistyle),
+    DDF_FIELD("LEAVING_BACKGROUND", dummy_level, leavingbggraphic_, DDFMainGetLumpName),
+    DDF_FIELD("ENTERING_BACKGROUND", dummy_level, enteringbggraphic_, DDFMainGetLumpName),
+    DDF_FIELD("INDOOR_FOG_COLOR", dummy_level, indoor_fog_cmap_, DDFMainGetColourmap),
+    DDF_FIELD("INDOOR_FOG_DENSITY", dummy_level, indoor_fog_density_, DDFMainGetPercent),
+    DDF_FIELD("OUTDOOR_FOG_COLOR", dummy_level, outdoor_fog_cmap_, DDFMainGetColourmap),
+    DDF_FIELD("OUTDOOR_FOG_DENSITY", dummy_level, outdoor_fog_density_, DDFMainGetPercent),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -116,7 +116,7 @@ static void LevelStartEntry(const char *name, bool extend)
 {
     if (!name || !name[0])
     {
-        DdfWarnError("New level entry is missing a name!");
+        DDFWarnError("New level entry is missing a name!");
         name = "LEVEL_WITH_NO_NAME";
     }
 
@@ -129,7 +129,7 @@ static void LevelStartEntry(const char *name, bool extend)
     if (extend)
     {
         if (!dynamic_level)
-            DdfError("Unknown level to extend: %s\n", name);
+            DDFError("Unknown level to extend: %s\n", name);
         return;
     }
 
@@ -150,7 +150,7 @@ static void LevelDoTemplate(const char *contents)
     MapDefinition *other = mapdefs.Lookup(contents);
 
     if (!other || other == dynamic_level)
-        DdfError("Unknown level template: '%s'\n", contents);
+        DDFError("Unknown level template: '%s'\n", contents);
 
     dynamic_level->CopyDetail(*other);
 }
@@ -161,34 +161,34 @@ static void LevelParseField(const char *field, const char *contents, int index, 
     LogDebug("LEVEL_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DdfCompareName(field, "TEMPLATE") == 0)
+    if (DDFCompareName(field, "TEMPLATE") == 0)
     {
         LevelDoTemplate(contents);
         return;
     }
 
     // -AJA- ignore this for backwards compatibility
-    if (DdfCompareName(field, "LIGHTING") == 0)
+    if (DDFCompareName(field, "LIGHTING") == 0)
         return;
 
     // -AJA- this needs special handling (it modifies TWO fields)
-    if (DdfCompareName(field, "SPECIAL") == 0)
+    if (DDFCompareName(field, "SPECIAL") == 0)
     {
-        DdfLevelGetSpecials(contents);
+        DDFLevelGetSpecials(contents);
         return;
     }
 
-    if (DdfMainParseField(level_commands, field, contents, (uint8_t *)dynamic_level))
+    if (DDFMainParseField(level_commands, field, contents, (uint8_t *)dynamic_level))
         return; // OK
 
-    DdfWarnError("Unknown levels.ddf command: %s\n", field);
+    DDFWarnError("Unknown levels.ddf command: %s\n", field);
 }
 
 static void LevelFinishEntry(void)
 {
     // check stuff
     if (dynamic_level->episode_name_.empty())
-        DdfError("Level entry must have an EPISODE name!\n");
+        DDFError("Level entry must have an EPISODE name!\n");
 
     if (dynamic_level->indoor_fog_cmap_)
         dynamic_level->indoor_fog_color_ = dynamic_level->indoor_fog_cmap_->gl_color_;
@@ -208,7 +208,7 @@ static void LevelClearAll(void)
     mapdefs.clear();
 }
 
-void DdfReadLevels(const std::string &data)
+void DDFReadLevels(const std::string &data)
 {
     DDFReadInfo levels;
 
@@ -220,15 +220,15 @@ void DdfReadLevels(const std::string &data)
     levels.finish_entry = LevelFinishEntry;
     levels.clear_all    = LevelClearAll;
 
-    DdfMainReadFile(&levels, data);
+    DDFMainReadFile(&levels, data);
 }
 
-void DdfLevelInit(void)
+void DDFLevelInit(void)
 {
     LevelClearAll();
 }
 
-void DdfLevelCleanUp(void)
+void DDFLevelCleanUp(void)
 {
     if (mapdefs.empty())
         FatalError("There are no levels defined in DDF !\n");
@@ -252,50 +252,50 @@ void DdfLevelCleanUp(void)
 //
 // Adds finale pictures to the level's list.
 //
-void DdfLevelGetPic(const char *info, void *storage)
+void DDFLevelGetPic(const char *info, void *storage)
 {
     std::vector<std::string> *list = (std::vector<std::string> *)storage;
 
     list->push_back(info);
 }
 
-void DdfLevelGetSpecials(const char *info)
+void DDFLevelGetSpecials(const char *info)
 {
     // -AJA- 2000/02/02: reworked this for new system.
 
     int flag_value;
 
     // check for depreciated flags...
-    if (DdfCompareName(info, "TRANSLUCENCY") == 0)
+    if (DDFCompareName(info, "TRANSLUCENCY") == 0)
     {
-        DdfWarning("Level special '%s' is deprecated.\n", info);
+        DDFWarning("Level special '%s' is deprecated.\n", info);
         return;
     }
 
-    switch (DdfMainCheckSpecialFlag(info, map_specials, &flag_value, true, true))
+    switch (DDFMainCheckSpecialFlag(info, map_specials, &flag_value, true, true))
     {
-    case kDdfCheckFlagPositive:
+    case kDDFCheckFlagPositive:
         dynamic_level->force_on_ |= flag_value;
         dynamic_level->force_off_ &= ~flag_value;
         break;
 
-    case kDdfCheckFlagNegative:
+    case kDDFCheckFlagNegative:
         dynamic_level->force_on_ &= ~flag_value;
         dynamic_level->force_off_ |= flag_value;
         break;
 
-    case kDdfCheckFlagUser:
+    case kDDFCheckFlagUser:
         dynamic_level->force_on_ &= ~flag_value;
         dynamic_level->force_off_ &= ~flag_value;
         break;
 
-    case kDdfCheckFlagUnknown:
-        DdfWarnError("DdfLevelGetSpecials: Unknown level special: %s", info);
+    case kDDFCheckFlagUnknown:
+        DDFWarnError("DDFLevelGetSpecials: Unknown level special: %s", info);
         break;
     }
 }
 
-void DdfLevelGetSkyStretch(const char *info, void *storage)
+void DDFLevelGetSkyStretch(const char *info, void *storage)
 {
     SkyStretch *stretch = (SkyStretch *)storage;
 
@@ -314,13 +314,13 @@ void DdfLevelGetSkyStretch(const char *info, void *storage)
 static DDFSpecialFlags wistyle_names[] = {
     {"DOOM", kIntermissionStyleDoom, 0}, {"NONE", kIntermissionStyleNone, 0}, {nullptr, 0, 0}};
 
-void DdfLevelGetWistyle(const char *info, void *storage)
+void DDFLevelGetWistyle(const char *info, void *storage)
 {
     int flag_value;
 
-    if (kDdfCheckFlagPositive != DdfMainCheckSpecialFlag(info, wistyle_names, &flag_value, false, false))
+    if (kDDFCheckFlagPositive != DDFMainCheckSpecialFlag(info, wistyle_names, &flag_value, false, false))
     {
-        DdfWarnError("DdfLevelGetWistyle: Unknown stats: %s", info);
+        DDFWarnError("DDFLevelGetWistyle: Unknown stats: %s", info);
         return;
     }
 
@@ -504,7 +504,7 @@ MapDefinition *MapDefinitionContainer::Lookup(const char *refname)
         // Lobo 2022: Allow warping and IDCLEVing to arbitrarily
         //  named maps. We have to have a levels.ddf entry AND an episode
         //  so we need to create them on the fly if they are missing.
-        if (DdfCompareName(m->name_.c_str(), refname) == 0)
+        if (DDFCompareName(m->name_.c_str(), refname) == 0)
         {
             // Invent a temp episode if we don't have one
             if (m->episode_name_.empty())

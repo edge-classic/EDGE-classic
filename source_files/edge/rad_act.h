@@ -24,47 +24,47 @@
 //  ACTIONS
 //
 
-void ScriptNoOperation(TriggerScriptTrigger *R, void *param);
-void ScriptShowTip(TriggerScriptTrigger *R, void *param);
-void ScriptUpdateTipProperties(TriggerScriptTrigger *R, void *param);
-void ScriptSpawnThing(TriggerScriptTrigger *R, void *param);
-void ScriptPlaySound(TriggerScriptTrigger *R, void *param);
-void ScriptKillSound(TriggerScriptTrigger *R, void *param);
-void ScriptChangeMusic(TriggerScriptTrigger *R, void *param);
-void ScriptPlayMovie(TriggerScriptTrigger *R, void *param);
-void ScriptChangeTexture(TriggerScriptTrigger *R, void *param);
+void ScriptNoOperation(RADScriptTrigger *R, void *param);
+void ScriptShowTip(RADScriptTrigger *R, void *param);
+void ScriptUpdateTipProperties(RADScriptTrigger *R, void *param);
+void ScriptSpawnThing(RADScriptTrigger *R, void *param);
+void ScriptPlaySound(RADScriptTrigger *R, void *param);
+void ScriptKillSound(RADScriptTrigger *R, void *param);
+void ScriptChangeMusic(RADScriptTrigger *R, void *param);
+void ScriptPlayMovie(RADScriptTrigger *R, void *param);
+void ScriptChangeTexture(RADScriptTrigger *R, void *param);
 
-void ScriptMoveSector(TriggerScriptTrigger *R, void *param);
-void ScriptLightSector(TriggerScriptTrigger *R, void *param);
-void ScriptFogSector(TriggerScriptTrigger *R, void *param);
-void ScriptEnableScript(TriggerScriptTrigger *R, void *param);
-void ScriptActivateLinetype(TriggerScriptTrigger *R, void *param);
-void ScriptUnblockLines(TriggerScriptTrigger *R, void *param);
-void ScriptBlockLines(TriggerScriptTrigger *R, void *param);
-void ScriptJump(TriggerScriptTrigger *R, void *param);
-void ScriptSleep(TriggerScriptTrigger *R, void *param);
-void ScriptRetrigger(TriggerScriptTrigger *R, void *param);
+void ScriptMoveSector(RADScriptTrigger *R, void *param);
+void ScriptLightSector(RADScriptTrigger *R, void *param);
+void ScriptFogSector(RADScriptTrigger *R, void *param);
+void ScriptEnableScript(RADScriptTrigger *R, void *param);
+void ScriptActivateLinetype(RADScriptTrigger *R, void *param);
+void ScriptUnblockLines(RADScriptTrigger *R, void *param);
+void ScriptBlockLines(RADScriptTrigger *R, void *param);
+void ScriptJump(RADScriptTrigger *R, void *param);
+void ScriptSleep(RADScriptTrigger *R, void *param);
+void ScriptRetrigger(RADScriptTrigger *R, void *param);
 
-void ScriptDamagePlayers(TriggerScriptTrigger *R, void *param);
-void ScriptHealPlayers(TriggerScriptTrigger *R, void *param);
-void ScriptArmourPlayers(TriggerScriptTrigger *R, void *param);
-void ScriptBenefitPlayers(TriggerScriptTrigger *R, void *param);
-void ScriptDamageMonsters(TriggerScriptTrigger *R, void *param);
-void ScriptThingEvent(TriggerScriptTrigger *R, void *param);
-void ScriptSkill(TriggerScriptTrigger *R, void *param);
-void ScriptGotoMap(TriggerScriptTrigger *R, void *param);
-void ScriptExitLevel(TriggerScriptTrigger *R, void *param);
-void ScriptExitGame(TriggerScriptTrigger *R, void *param);
-void ScriptShowMenu(TriggerScriptTrigger *R, void *param);
-void ScriptUpdateMenuStyle(TriggerScriptTrigger *R, void *param);
-void ScriptJumpOn(TriggerScriptTrigger *R, void *param);
-void ScriptWaitUntilDead(TriggerScriptTrigger *R, void *param);
+void ScriptDamagePlayers(RADScriptTrigger *R, void *param);
+void ScriptHealPlayers(RADScriptTrigger *R, void *param);
+void ScriptArmourPlayers(RADScriptTrigger *R, void *param);
+void ScriptBenefitPlayers(RADScriptTrigger *R, void *param);
+void ScriptDamageMonsters(RADScriptTrigger *R, void *param);
+void ScriptThingEvent(RADScriptTrigger *R, void *param);
+void ScriptSkill(RADScriptTrigger *R, void *param);
+void ScriptGotoMap(RADScriptTrigger *R, void *param);
+void ScriptExitLevel(RADScriptTrigger *R, void *param);
+void ScriptExitGame(RADScriptTrigger *R, void *param);
+void ScriptShowMenu(RADScriptTrigger *R, void *param);
+void ScriptUpdateMenuStyle(RADScriptTrigger *R, void *param);
+void ScriptJumpOn(RADScriptTrigger *R, void *param);
+void ScriptWaitUntilDead(RADScriptTrigger *R, void *param);
 
-void ScriptSwitchWeapon(TriggerScriptTrigger *R, void *param);
-void ScriptTeleportToStart(TriggerScriptTrigger *R, void *param);
-void ScriptReplaceWeapon(TriggerScriptTrigger *R, void *param);
-void ScriptWeaponEvent(TriggerScriptTrigger *R, void *param);
-void ScriptReplaceThing(TriggerScriptTrigger *R, void *param);
+void ScriptSwitchWeapon(RADScriptTrigger *R, void *param);
+void ScriptTeleportToStart(RADScriptTrigger *R, void *param);
+void ScriptReplaceWeapon(RADScriptTrigger *R, void *param);
+void ScriptWeaponEvent(RADScriptTrigger *R, void *param);
+void ScriptReplaceThing(RADScriptTrigger *R, void *param);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

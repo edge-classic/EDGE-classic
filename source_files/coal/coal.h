@@ -28,21 +28,21 @@
 namespace coal
 {
 
-class Vm;
+class VM;
 
 typedef void (*PrintFunction)(const char *msg, ...);
 
-typedef void (*NativeFunction)(Vm *vm, int argc);
+typedef void (*NativeFunction)(VM *vm, int argc);
 
-class Vm
+class VM
 {
     /* this is an abstract base class */
 
   public:
-    Vm()
+    VM()
     {
     }
-    virtual ~Vm()
+    virtual ~VM()
     {
     }
 
@@ -89,7 +89,7 @@ class Vm
 };
 
 // create a new Coal virtual machine
-Vm *CreateVM();
+VM *CreateVM();
 
 } // namespace coal
 

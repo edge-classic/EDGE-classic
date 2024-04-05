@@ -121,8 +121,8 @@ static int *temp_line_sides;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(goobers, "0", kConsoleVariableFlagNone)
 
-// "Musinfo" is used here to refer to the traditional MUSINFO lump
-struct MusinfoMapping
+// "MUSINFO" is used here to refer to the traditional MUSINFO lump
+struct MUSINFOMapping
 {
     std::unordered_map<int, int> mappings;
     bool                         processed = false;
@@ -131,9 +131,9 @@ struct MusinfoMapping
 // This is wonky, but essentially the idea is to not continually create
 // duplicate RTS music changing scripts for the same level if warping back and
 // forth, or using a hub or somesuch that happens to have music changers
-static std::unordered_map<std::string, MusinfoMapping> musinfo_tracks;
+static std::unordered_map<std::string, MUSINFOMapping> musinfo_tracks;
 
-static void GetMusinfoTracksForLevel(void)
+static void GetMUSINFOTracksForLevel(void)
 {
     if (musinfo_tracks.count(current_map->name_) && musinfo_tracks[current_map->name_].processed)
         return;
@@ -191,8 +191,8 @@ static void GetMusinfoTracksForLevel(void)
                     dynamic_plentry            = new PlaylistEntry;
                     dynamic_plentry->number_   = playlist.FindFree();
                     dynamic_plentry->info_     = value;
-                    dynamic_plentry->type_     = kDdfMusicUnknown;
-                    dynamic_plentry->infotype_ = kDdfMusicDataLump;
+                    dynamic_plentry->type_     = kDDFMusicUnknown;
+                    dynamic_plentry->infotype_ = kDDFMusicDataLump;
                     playlist.push_back(dynamic_plentry);
                     musinfo_tracks[current_map->name_].mappings.try_emplace(mus_number, dynamic_plentry->number_);
                 }
@@ -754,7 +754,7 @@ static void LoadThings(int lump)
                     mus_rts.append("    RETRIGGER\n");
                     mus_rts.append("  END_SECTOR_TRIGGER\n");
                     mus_rts.append("END_MAP\n\n");
-                    ReadTriggerScript(mus_rts, "MUSINFO");
+                    ReadRADScript(mus_rts, "MUSINFO");
                 }
             }
         }
@@ -2352,7 +2352,7 @@ static void LoadUDMFThings()
                         mus_rts.append("    RETRIGGER\n");
                         mus_rts.append("  END_SECTOR_TRIGGER\n");
                         mus_rts.append("END_MAP\n\n");
-                        ReadTriggerScript(mus_rts, "MUSINFO");
+                        ReadRADScript(mus_rts, "MUSINFO");
                     }
                 }
             }
@@ -3318,7 +3318,7 @@ void ShutdownLevel(void)
     DestroyAllSliders();
     DestroyAllAmbientSounds();
 
-    DdfBoomClearGeneralizedTypes();
+    DDFBoomClearGeneralizedTypes();
 
     delete[] level_segs;
     level_segs = nullptr;
@@ -3490,7 +3490,7 @@ void LevelSetup(void)
     unknown_thing_map.clear();
 
     // Must do before loading things
-    GetMusinfoTracksForLevel();
+    GetMUSINFOTracksForLevel();
 
     if (!udmf_level)
         LoadThings(lumpnum + kLumpThings);
@@ -3545,8 +3545,8 @@ LineType *LookupLineType(int num)
     if (def)
         return def;
 
-    if (DdfIsBoomLineType(num))
-        return DdfBoomGetGeneralizedLine(num);
+    if (DDFIsBoomLineType(num))
+        return DDFBoomGetGeneralizedLine(num);
 
     LogWarning("P_LookupLineType(): Unknown linedef type %d\n", num);
 
@@ -3564,8 +3564,8 @@ SectorType *LookupSectorType(int num)
     if (def)
         return def;
 
-    if (DdfIsBoomSectorType(num))
-        return DdfBoomGetGeneralizedSector(num);
+    if (DDFIsBoomSectorType(num))
+        return DDFBoomGetGeneralizedSector(num);
 
     LogWarning("P_LookupSectorType(): Unknown sector type %d\n", num);
 

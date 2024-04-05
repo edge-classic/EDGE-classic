@@ -209,7 +209,7 @@ void Font::LoadPatches()
         /*std::string atlas_png = epi::PathAppend(home_directory,
         epi::StringFormat("atlas_%s.png", definition_->name.c_str())); if
         (epi::FileExists(atlas_png)) epi::FS_Remove(atlas_png);
-        ImageSavePng(atlas_png, atlas->data);*/
+        ImageSavePNG(atlas_png, atlas->data);*/
         patch_font_cache_.atlas_rectangles = atlas->rectangles_;
         glGenTextures(1, &patch_font_cache_.atlas_texture_id);
         glBindTexture(GL_TEXTURE_2D, patch_font_cache_.atlas_texture_id);

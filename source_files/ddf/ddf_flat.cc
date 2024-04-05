@@ -30,13 +30,13 @@ FlatDefinitionContainer flatdefs;
 static FlatDefinition dummy_flatdef;
 
 static const DDFCommandList flat_commands[] = {
-    DDF_FIELD("LIQUID", dummy_flatdef, liquid_, DdfMainGetString),
-    DDF_FIELD("FOOTSTEP", dummy_flatdef, footstep_, DdfMainLookupSound),
-    DDF_FIELD("SPLASH", dummy_flatdef, splash_, DdfMainGetLumpName),
-    DDF_FIELD("IMPACT_OBJECT", dummy_flatdef, impactobject_ref_, DdfMainGetString),
-    DDF_FIELD("GLOW_OBJECT", dummy_flatdef, glowobject_ref_, DdfMainGetString),
-    DDF_FIELD("SINK_DEPTH", dummy_flatdef, sink_depth_, DdfMainGetPercent),
-    DDF_FIELD("BOB_DEPTH", dummy_flatdef, bob_depth_, DdfMainGetPercent),
+    DDF_FIELD("LIQUID", dummy_flatdef, liquid_, DDFMainGetString),
+    DDF_FIELD("FOOTSTEP", dummy_flatdef, footstep_, DDFMainLookupSound),
+    DDF_FIELD("SPLASH", dummy_flatdef, splash_, DDFMainGetLumpName),
+    DDF_FIELD("IMPACT_OBJECT", dummy_flatdef, impactobject_ref_, DDFMainGetString),
+    DDF_FIELD("GLOW_OBJECT", dummy_flatdef, glowobject_ref_, DDFMainGetString),
+    DDF_FIELD("SINK_DEPTH", dummy_flatdef, sink_depth_, DDFMainGetPercent),
+    DDF_FIELD("BOB_DEPTH", dummy_flatdef, bob_depth_, DDFMainGetPercent),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -48,7 +48,7 @@ static void FlatStartEntry(const char *name, bool extend)
 {
     if (!name || !name[0])
     {
-        DdfWarnError("New flat entry is missing a name!");
+        DDFWarnError("New flat entry is missing a name!");
         name = "FLAT_WITH_NO_NAME";
     }
 
@@ -57,7 +57,7 @@ static void FlatStartEntry(const char *name, bool extend)
     if (extend)
     {
         if (!dynamic_flatdef)
-            DdfError("Unknown flat to extend: %s\n", name);
+            DDFError("Unknown flat to extend: %s\n", name);
         return;
     }
 
@@ -86,10 +86,10 @@ static void FlatParseField(const char *field, const char *contents, int index, b
     LogDebug("FLAT_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DdfMainParseField(flat_commands, field, contents, (uint8_t *)dynamic_flatdef))
+    if (DDFMainParseField(flat_commands, field, contents, (uint8_t *)dynamic_flatdef))
         return;
 
-    DdfWarnError("Unknown flat.ddf command: %s\n", field);
+    DDFWarnError("Unknown flat.ddf command: %s\n", field);
 }
 
 static void FlatClearAll(void)
@@ -102,7 +102,7 @@ static void FlatClearAll(void)
     flatdefs.clear();
 }
 
-void DdfReadFlat(const std::string &data)
+void DDFReadFlat(const std::string &data)
 {
     DDFReadInfo flats;
 
@@ -114,18 +114,18 @@ void DdfReadFlat(const std::string &data)
     flats.finish_entry = FlatFinishEntry;
     flats.clear_all    = FlatClearAll;
 
-    DdfMainReadFile(&flats, data);
+    DDFMainReadFile(&flats, data);
 }
 
-void DdfFlatInit(void)
+void DDFFlatInit(void)
 {
     FlatClearAll();
 }
 
 //
-// DdfFlatCleanUp
+// DDFFlatCleanUp
 //
-void DdfFlatCleanUp(void)
+void DDFFlatCleanUp(void)
 {
     for (FlatDefinition *f : flatdefs)
     {
@@ -143,7 +143,7 @@ void DdfFlatCleanUp(void)
     flatdefs.shrink_to_fit();
 }
 
-void DdfParseFlats(const uint8_t *data, int size)
+void DDFParseFlats(const uint8_t *data, int size)
 {
     for (; size >= 20; data += 20, size -= 20)
     {
@@ -211,7 +211,7 @@ FlatDefinition *FlatDefinitionContainer::Find(const char *name)
     for (std::vector<FlatDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
     {
         FlatDefinition *flt = *iter;
-        if (DdfCompareName(flt->name_.c_str(), name) == 0)
+        if (DDFCompareName(flt->name_.c_str(), name) == 0)
             return flt;
     }
 

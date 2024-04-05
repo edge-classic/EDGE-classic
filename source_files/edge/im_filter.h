@@ -40,12 +40,12 @@
 
 ImageData *ImageBlur(ImageData *image, float sigma);
 
-void Hq2xPaletteSetup(const uint8_t *palette, int transparent_pixel);
+void HQ2xPaletteSetup(const uint8_t *palette, int transparent_pixel);
 // initialises look-up tables based on the given palette.
 // The 'trans_pixel' gives a pixel index which is fully
 // transparent, or none when -1.
 
-ImageData *ImageHq2x(ImageData *image, bool solid, bool invert = false);
+ImageData *ImageHQ2x(ImageData *image, bool solid, bool invert = false);
 // converts a single palettised image into an RGB or RGBA
 // image (depending on the solid parameter).  The Setup()
 // method must be called sometime prior to calling this

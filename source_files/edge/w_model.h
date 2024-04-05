@@ -20,8 +20,8 @@
 
 #include "r_defs.h"
 
-class Md2Model;
-class MdlModel;
+class MD2Model;
+class MDLModel;
 
 constexpr uint8_t kMaximumModelSkins = 10;
 
@@ -31,8 +31,8 @@ class ModelDefinition
     // four letter model name (e.g. "TROO").
     char name_[6];
 
-    Md2Model *md2_model_;
-    MdlModel *mdl_model_;
+    MD2Model *md2_model_;
+    MDLModel *mdl_model_;
 
     const Image *skins_[kMaximumModelSkins];
 

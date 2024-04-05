@@ -203,7 +203,7 @@ class StyleDefinitionContainer : public std::vector<StyleDefinition *>
 extern StyleDefinitionContainer styledefs;
 extern StyleDefinition         *default_style;
 
-void DdfReadStyles(const std::string &data);
+void DDFReadStyles(const std::string &data);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -38,11 +38,11 @@
 extern bool sound_device_stereo; // FIXME: encapsulation
 extern int  sound_device_frequency;
 
-class FlacPlayer : public AbstractMusicPlayer
+class FLACPlayer : public AbstractMusicPlayer
 {
   public:
-    FlacPlayer();
-    ~FlacPlayer();
+    FLACPlayer();
+    ~FLACPlayer();
 
   private:
     enum Status
@@ -83,12 +83,12 @@ class FlacPlayer : public AbstractMusicPlayer
 
 //----------------------------------------------------------------------------
 
-FlacPlayer::FlacPlayer() : status_(kNotLoaded)
+FLACPlayer::FLACPlayer() : status_(kNotLoaded)
 {
     mono_buffer_ = new int16_t[kMusicBuffer * 2];
 }
 
-FlacPlayer::~FlacPlayer()
+FLACPlayer::~FLACPlayer()
 {
     Close();
 
@@ -96,7 +96,7 @@ FlacPlayer::~FlacPlayer()
         delete[] mono_buffer_;
 }
 
-void FlacPlayer::PostOpen()
+void FLACPlayer::PostOpen()
 {
     // Loaded, but not playing
 
@@ -114,7 +114,7 @@ static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
     }
 }
 
-bool FlacPlayer::StreamIntoBuffer(SoundData *buf)
+bool FLACPlayer::StreamIntoBuffer(SoundData *buf)
 {
     int16_t *data_buf;
 
@@ -148,7 +148,7 @@ bool FlacPlayer::StreamIntoBuffer(SoundData *buf)
     return (true);
 }
 
-bool FlacPlayer::OpenMemory(uint8_t *data, int length)
+bool FLACPlayer::OpenMemory(uint8_t *data, int length)
 {
     EPI_ASSERT(data);
 
@@ -156,7 +156,7 @@ bool FlacPlayer::OpenMemory(uint8_t *data, int length)
 
     if (!flac_track_)
     {
-        LogWarning("PlayFlacMusic: Error opening song!\n");
+        LogWarning("PlayFLACMusic: Error opening song!\n");
         return false;
     }
 
@@ -167,7 +167,7 @@ bool FlacPlayer::OpenMemory(uint8_t *data, int length)
     return true;
 }
 
-void FlacPlayer::Close()
+void FLACPlayer::Close()
 {
     if (status_ == kNotLoaded)
         return;
@@ -185,7 +185,7 @@ void FlacPlayer::Close()
     status_ = kNotLoaded;
 }
 
-void FlacPlayer::Pause()
+void FLACPlayer::Pause()
 {
     if (status_ != kPlaying)
         return;
@@ -193,7 +193,7 @@ void FlacPlayer::Pause()
     status_ = kPaused;
 }
 
-void FlacPlayer::Resume()
+void FLACPlayer::Resume()
 {
     if (status_ != kPaused)
         return;
@@ -201,7 +201,7 @@ void FlacPlayer::Resume()
     status_ = kPlaying;
 }
 
-void FlacPlayer::Play(bool loop)
+void FLACPlayer::Play(bool loop)
 {
     if (status_ != kNotLoaded && status_ != kStopped)
         return;
@@ -216,7 +216,7 @@ void FlacPlayer::Play(bool loop)
     Ticker();
 }
 
-void FlacPlayer::Stop()
+void FLACPlayer::Stop()
 {
     if (status_ != kPlaying && status_ != kPaused)
         return;
@@ -226,7 +226,7 @@ void FlacPlayer::Stop()
     status_ = kStopped;
 }
 
-void FlacPlayer::Ticker()
+void FLACPlayer::Ticker()
 {
     while (status_ == kPlaying && !pc_speaker_mode)
     {
@@ -257,9 +257,9 @@ void FlacPlayer::Ticker()
 
 //----------------------------------------------------------------------------
 
-AbstractMusicPlayer *PlayFlacMusic(uint8_t *data, int length, bool looping)
+AbstractMusicPlayer *PlayFLACMusic(uint8_t *data, int length, bool looping)
 {
-    FlacPlayer *player = new FlacPlayer();
+    FLACPlayer *player = new FLACPlayer();
 
     if (!player->OpenMemory(data, length))
     {

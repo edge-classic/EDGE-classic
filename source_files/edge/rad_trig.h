@@ -23,8 +23,8 @@
 
 #define EDGE_DEBUG_TRIGGER_SCRIPTS 0
 
-extern TriggerScript        *current_scripts;
-extern TriggerScriptTrigger *active_triggers;
+extern RADScript        *current_scripts;
+extern RADScriptTrigger *active_triggers;
 
 // Tip Prototypes
 void InitializeScriptTips(void);
@@ -32,11 +32,11 @@ void ResetScriptTips(void);
 void DisplayScriptTips(void);
 
 // RadiusTrigger & Scripting Prototypes
-void InitializeTriggerScripts(void);
-void ReadTriggerScript(const std::string &_data, const std::string &source);
+void InitializeRADScripts(void);
+void ReadRADScript(const std::string &_data, const std::string &source);
 void SpawnScriptTriggers(const char *map_name);
 void ClearScriptTriggers(void);
-void GroupTriggerTags(TriggerScriptTrigger *trig);
+void GroupTriggerTags(RADScriptTrigger *trig);
 
 // For UMAPINFO bossaction "clear" directive
 void ClearDeathTriggersByMap(const std::string &mapname);
@@ -45,17 +45,17 @@ void                  RunScriptTriggers(void);
 void                  ScriptTicker(void);
 void                  ScriptDrawer(void);
 bool                  ScriptResponder(InputEvent *ev);
-bool                  ScriptRadiusCheck(MapObject *mo, TriggerScript *r);
-TriggerScript        *FindScriptByName(const char *map_name, const char *name);
-TriggerScriptTrigger *FindScriptTriggerByName(const char *name);
-TriggerScriptState   *FindScriptStateByLabel(TriggerScript *scr, char *label);
-void                  ScriptEnableByTag(MapObject *actor, uint32_t tag, bool disable, TriggerScriptTag tagtype);
+bool                  ScriptRadiusCheck(MapObject *mo, RADScript *r);
+RADScript        *FindScriptByName(const char *map_name, const char *name);
+RADScriptTrigger *FindScriptTriggerByName(const char *name);
+RADScriptState   *FindScriptStateByLabel(RADScript *scr, char *label);
+void                  ScriptEnableByTag(MapObject *actor, uint32_t tag, bool disable, RADScriptTag tagtype);
 void                  ScriptEnableByTag(MapObject *actor, const char *name, bool disable);
 bool                  CheckActiveScriptByTag(MapObject *actor, const char *name);
 void                  ScriptUpdateMonsterDeaths(MapObject *mo);
 
 // Menu support
-void ScriptMenuStart(TriggerScriptTrigger *R, ScriptShowMenuParameter *menu);
+void ScriptMenuStart(RADScriptTrigger *R, ScriptShowMenuParameter *menu);
 void ScriptMenuFinish(int result);
 
 // Path support

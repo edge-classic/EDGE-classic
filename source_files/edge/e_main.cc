@@ -1173,7 +1173,7 @@ static void IdentifyVersion(void)
     {
         if (!epi::TestFileAccess(epkfile))
             FatalError("IdentifyVersion: Could not find required %s.%s!\n", kRequiredEPK, "epk");
-        AddDataFile(epkfile, kFileKindEEpk);
+        AddDataFile(epkfile, kFileKindEEPK);
     }
 
     LogDebug("- Identify Version\n");
@@ -1237,12 +1237,12 @@ static void IdentifyVersion(void)
             }
             else if (epi::StringCaseCompareASCII(epi::GetExtension(dnd), ".epk") == 0)
             {
-                test_index = CheckPackForGameFiles(dnd, kFileKindIpk);
+                test_index = CheckPackForGameFiles(dnd, kFileKindIPK);
                 if (test_index >= 0)
                 {
                     if (!game_paths.count(test_index))
                     {
-                        game_paths.try_emplace(test_index, std::make_pair(dnd, kFileKindIpk));
+                        game_paths.try_emplace(test_index, std::make_pair(dnd, kFileKindIPK));
                         SDL_MessageBoxButtonData temp_button;
                         temp_button.buttonid = test_index;
                         temp_button.text     = game_checker[test_index].display_name.c_str();
@@ -1260,7 +1260,7 @@ static void IdentifyVersion(void)
                 {
                     if (!game_paths.count(test_index))
                     {
-                        game_paths.try_emplace(test_index, std::make_pair(dnd, kFileKindIWad));
+                        game_paths.try_emplace(test_index, std::make_pair(dnd, kFileKindIWAD));
                         SDL_MessageBoxButtonData temp_button;
                         temp_button.buttonid = test_index;
                         temp_button.text     = game_checker[test_index].display_name.c_str();
@@ -1412,7 +1412,7 @@ static void IdentifyVersion(void)
             if (test_score >= 0)
             {
                 game_base = game_checker[test_score].base;
-                AddDataFile(iwad_file, kFileKindIWad);
+                AddDataFile(iwad_file, kFileKindIWAD);
             }
             else
                 FatalError("IdentifyVersion: Could not identify '%s' as a valid "
@@ -1421,11 +1421,11 @@ static void IdentifyVersion(void)
         }
         else
         {
-            test_score = CheckPackForGameFiles(iwad_file, kFileKindIpk);
+            test_score = CheckPackForGameFiles(iwad_file, kFileKindIPK);
             if (test_score >= 0)
             {
                 game_base = game_checker[test_score].base;
-                AddDataFile(iwad_file, kFileKindIpk);
+                AddDataFile(iwad_file, kFileKindIPK);
             }
             else
                 FatalError("IdentifyVersion: Could not identify '%s' as a valid "
@@ -1481,7 +1481,7 @@ static void IdentifyVersion(void)
                         {
                             if (!game_paths.count(test_score))
                             {
-                                game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, kFileKindIWad));
+                                game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, kFileKindIWAD));
                                 SDL_MessageBoxButtonData temp_button;
                                 temp_button.buttonid = test_score;
                                 temp_button.text     = game_checker[test_score].display_name.c_str();
@@ -1501,12 +1501,12 @@ static void IdentifyVersion(void)
                 {
                     if (!fsd[j].is_dir)
                     {
-                        int test_score = CheckPackForGameFiles(fsd[j].name, kFileKindIpk);
+                        int test_score = CheckPackForGameFiles(fsd[j].name, kFileKindIPK);
                         if (test_score >= 0)
                         {
                             if (!game_paths.count(test_score))
                             {
-                                game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, kFileKindIpk));
+                                game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, kFileKindIPK));
                                 SDL_MessageBoxButtonData temp_button;
                                 temp_button.buttonid = test_score;
                                 temp_button.text     = game_checker[test_score].display_name.c_str();
@@ -1547,7 +1547,7 @@ static void IdentifyVersion(void)
                             {
                                 if (!game_paths.count(test_score))
                                 {
-                                    game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, kFileKindIWad));
+                                    game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, kFileKindIWAD));
                                     SDL_MessageBoxButtonData temp_button;
                                     temp_button.buttonid = test_score;
                                     temp_button.text     = game_checker[test_score].display_name.c_str();
@@ -1567,12 +1567,12 @@ static void IdentifyVersion(void)
                     {
                         if (!fsd[j].is_dir)
                         {
-                            int test_score = CheckPackForGameFiles(fsd[j].name, kFileKindIpk);
+                            int test_score = CheckPackForGameFiles(fsd[j].name, kFileKindIPK);
                             if (test_score >= 0)
                             {
                                 if (!game_paths.count(test_score))
                                 {
-                                    game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, kFileKindIpk));
+                                    game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, kFileKindIPK));
                                     SDL_MessageBoxButtonData temp_button;
                                     temp_button.buttonid = test_score;
                                     temp_button.text     = game_checker[test_score].display_name.c_str();
@@ -1646,7 +1646,7 @@ static void AddBasePack(void)
     {
         epi::ReplaceExtension(base_path, ".epk");
         if (epi::TestFileAccess(base_path))
-            AddDataFile(base_path, kFileKindEEpk);
+            AddDataFile(base_path, kFileKindEEPK);
         else
         {
             FatalError("%s not found for the %s IWAD! Check the /edge_base folder of "
@@ -1757,13 +1757,13 @@ static void AddSingleCommandLineFile(std::string name, bool ignore_unknown)
     FileKind kind;
 
     if (ext == ".wad")
-        kind = kFileKindPWad;
+        kind = kFileKindPWAD;
     else if (ext == ".pk3" || ext == ".epk" || ext == ".zip" || ext == ".vwad")
-        kind = kFileKindEpk;
+        kind = kFileKindEPK;
     else if (ext == ".rts")
-        kind = kFileKindRts;
+        kind = kFileKindRTS;
     else if (ext == ".ddf" || ext == ".ldf")
-        kind = kFileKindDdf;
+        kind = kFileKindDDF;
     else if (ext == ".deh" || ext == ".bex")
         kind = kFileKindDehacked;
     else
@@ -1825,7 +1825,7 @@ static void AddCommandLineFiles(void)
             }
 
             std::string filename = epi::PathAppendIfNotAbsolute(game_directory, program_argument_list[p]);
-            AddDataFile(filename, kFileKindRts);
+            AddDataFile(filename, kFileKindRTS);
         }
 
         p++;
@@ -1957,11 +1957,11 @@ static void AddAutoload(void)
     }
 }
 
-static void InitializeDdf(void)
+static void InitializeDDF(void)
 {
     LogDebug("- Initialising DDF\n");
 
-    DdfInit();
+    DDFInit();
 }
 
 void EdgeShutdown(void)
@@ -2010,16 +2010,16 @@ static void EdgeStartup(void)
 
     DoSystemStartup();
 
-    InitializeDdf();
+    InitializeDDF();
     IdentifyVersion();
     AddBasePack();
     AddAutoload();
     AddCommandLineFiles();
     CheckTurbo();
 
-    InitializeTriggerScripts();
+    InitializeRADScripts();
     ProcessMultipleFiles();
-    DdfParseEverything();
+    DDFParseEverything();
     // Must be done after WAD and DDF loading to check for potential
     // overrides of lump-specific image/sound/DDF defines
     DoPackSubstitutions();
@@ -2027,9 +2027,9 @@ static void EdgeStartup(void)
                     // appropriate GENMIDI lump
     InitializePalette();
 
-    DdfCleanUp();
+    DDFCleanUp();
     SetLanguage();
-    ReadUmapinfoLumps();
+    ReadUMAPINFOLumps();
 
     InitializeFlats();
     InitializeTextures();

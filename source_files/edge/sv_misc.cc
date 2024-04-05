@@ -54,7 +54,7 @@ void  SV_LightCreateElems(int num_elems);
 void  SV_LightFinaliseElems(void);
 
 int   SV_TriggerCountElems(void);
-int   SV_TriggerGetIndex(TriggerScriptTrigger *elem);
+int   SV_TriggerGetIndex(RADScriptTrigger *elem);
 void *SV_TriggerFindByIndex(int index);
 void  SV_TriggerCreateElems(int num_elems);
 void  SV_TriggerFinaliseElems(void);
@@ -80,8 +80,8 @@ void  SV_SliderMoveFinaliseElems(void);
 bool SR_LightGetType(void *storage, int index, void *extra);
 void SR_LightPutType(void *storage, int index, void *extra);
 
-bool SaveGameGetTriggerScript(void *storage, int index, void *extra);
-void SaveGamePutTriggerScript(void *storage, int index, void *extra);
+bool SaveGameGetRADScript(void *storage, int index, void *extra);
+void SaveGamePutRADScript(void *storage, int index, void *extra);
 
 bool SaveGameTriggerGetState(void *storage, int index, void *extra);
 void SaveGameTriggerPutState(void *storage, int index, void *extra);
@@ -196,11 +196,11 @@ SaveArray sv_array_light = {
 //
 //  TRIGGER STRUCTURE
 //
-static TriggerScriptTrigger dummy_trigger;
+static RADScriptTrigger dummy_trigger;
 
 static SaveField sv_fields_trigger[] = {
-    EDGE_SAVE_FIELD(dummy_trigger, info, "info", 1, kSaveFieldString, 0, nullptr, SaveGameGetTriggerScript,
-                    SaveGamePutTriggerScript),
+    EDGE_SAVE_FIELD(dummy_trigger, info, "info", 1, kSaveFieldString, 0, nullptr, SaveGameGetRADScript,
+                    SaveGamePutRADScript),
 
     EDGE_SAVE_FIELD(dummy_trigger, disabled, "disabled", 1, kSaveFieldNumeric, 4, nullptr, SaveGameGetBoolean,
                     SaveGamePutBoolean),
@@ -565,7 +565,7 @@ void SV_LightFinaliseElems(void)
 
 int SV_TriggerCountElems(void)
 {
-    TriggerScriptTrigger *cur;
+    RADScriptTrigger *cur;
     int                   count;
 
     for (cur = active_triggers, count = 0; cur; cur = cur->next, count++)
@@ -577,7 +577,7 @@ int SV_TriggerCountElems(void)
 
 void *SV_TriggerFindByIndex(int index)
 {
-    TriggerScriptTrigger *cur;
+    RADScriptTrigger *cur;
 
     for (cur = active_triggers; cur && index > 0; cur = cur->next)
         index--;
@@ -589,9 +589,9 @@ void *SV_TriggerFindByIndex(int index)
     return cur;
 }
 
-int SV_TriggerGetIndex(TriggerScriptTrigger *elem)
+int SV_TriggerGetIndex(RADScriptTrigger *elem)
 {
-    TriggerScriptTrigger *cur;
+    RADScriptTrigger *cur;
     int                   index;
 
     for (cur = active_triggers, index = 0; cur && cur != elem; cur = cur->next)
@@ -609,7 +609,7 @@ void SV_TriggerCreateElems(int num_elems)
 
     for (; num_elems > 0; num_elems--)
     {
-        TriggerScriptTrigger *cur = new TriggerScriptTrigger;
+        RADScriptTrigger *cur = new RADScriptTrigger;
 
         // link it in
         cur->next = active_triggers;
@@ -897,11 +897,11 @@ void SR_LightPutType(void *storage, int index, void *extra)
 
 bool SaveGameTriggerGetState(void *storage, int index, void *extra)
 {
-    const TriggerScriptState **dest = (const TriggerScriptState **)storage + index;
-    const TriggerScriptState  *temp;
+    const RADScriptState **dest = (const RADScriptState **)storage + index;
+    const RADScriptState  *temp;
 
     int                         value;
-    const TriggerScriptTrigger *trig = (TriggerScriptTrigger *)sv_current_elem;
+    const RADScriptTrigger *trig = (RADScriptTrigger *)sv_current_elem;
 
     value = SaveChunkGetInteger();
 
@@ -929,11 +929,11 @@ bool SaveGameTriggerGetState(void *storage, int index, void *extra)
 
 void SaveGameTriggerPutState(void *storage, int index, void *extra)
 {
-    const TriggerScriptState *src = ((const TriggerScriptState **)storage)[index];
-    const TriggerScriptState *temp;
+    const RADScriptState *src = ((const RADScriptState **)storage)[index];
+    const RADScriptState *temp;
 
     int                         value;
-    const TriggerScriptTrigger *trig = (TriggerScriptTrigger *)sv_current_elem;
+    const RADScriptTrigger *trig = (RADScriptTrigger *)sv_current_elem;
 
     if (!src)
     {
@@ -954,10 +954,10 @@ void SaveGameTriggerPutState(void *storage, int index, void *extra)
     SaveChunkPutInteger(value);
 }
 
-bool SaveGameGetTriggerScript(void *storage, int index, void *extra)
+bool SaveGameGetRADScript(void *storage, int index, void *extra)
 {
-    const TriggerScript **dest = (const TriggerScript **)storage + index;
-    const TriggerScript  *temp;
+    const RADScript **dest = (const RADScript **)storage + index;
+    const RADScript  *temp;
 
     const char *swizzle;
     char        buffer[256];
@@ -1014,7 +1014,7 @@ bool SaveGameGetTriggerScript(void *storage, int index, void *extra)
 
     for (temp = current_scripts; temp; temp = temp->next)
     {
-        if (DdfCompareName(temp->mapid, map_name) != 0)
+        if (DDFCompareName(temp->mapid, map_name) != 0)
             continue;
 
         if (temp->crc.GetCRC() != crc)
@@ -1037,7 +1037,7 @@ bool SaveGameGetTriggerScript(void *storage, int index, void *extra)
 }
 
 //
-// SaveGamePutTriggerScript
+// SaveGamePutRADScript
 //
 // Format of the string:
 //
@@ -1049,10 +1049,10 @@ bool SaveGameGetTriggerScript(void *storage, int index, void *extra)
 // used to differentiate them.  Index values begin at 1.  The CRC
 // value is in hexadecimal.
 //
-void SaveGamePutTriggerScript(void *storage, int index, void *extra)
+void SaveGamePutRADScript(void *storage, int index, void *extra)
 {
-    const TriggerScript *src = ((const TriggerScript **)storage)[index];
-    const TriggerScript *temp;
+    const RADScript *src = ((const RADScript **)storage)[index];
+    const RADScript *temp;
 
     int  idx_val;
     char buffer[256];
@@ -1067,7 +1067,7 @@ void SaveGamePutTriggerScript(void *storage, int index, void *extra)
     // FIXME: move into RTS code
     for (temp = current_scripts, idx_val = 1; temp; temp = temp->next)
     {
-        if (DdfCompareName(src->mapid, temp->mapid) != 0)
+        if (DDFCompareName(src->mapid, temp->mapid) != 0)
             continue;
 
         if (temp == src)
@@ -1078,7 +1078,7 @@ void SaveGamePutTriggerScript(void *storage, int index, void *extra)
     }
 
     if (!temp)
-        FatalError("SaveGamePutTriggerScript: invalid ScriptPtr %p\n", src);
+        FatalError("SaveGamePutRADScript: invalid ScriptPtr %p\n", src);
 
     sprintf(buffer, "B:%s:%d:%X", src->mapid, idx_val, src->crc.GetCRC());
 

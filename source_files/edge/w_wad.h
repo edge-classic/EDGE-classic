@@ -102,7 +102,7 @@ bool IsLumpInAnyWad(const char *name);
 int CheckForUniqueGameLumps(epi::File *file);
 
 void BuildXglNodes(void);
-void ReadUmapinfoLumps(void);
+void ReadUMAPINFOLumps(void);
 
 int GetKindForLump(int lump);
 

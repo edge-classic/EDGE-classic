@@ -32,8 +32,8 @@ SectorTypeContainer sectortypes; // <-- User-defined
 
 static SectorType *default_sector;
 
-void        DdfSectGetSpecialFlags(const char *info, void *storage);
-static void DdfSectMakeCrush(const char *info);
+void        DDFSectGetSpecialFlags(const char *info, void *storage);
+static void DDFSectMakeCrush(const char *info);
 
 static SectorType dummy_sector;
 
@@ -43,43 +43,43 @@ static const DDFCommandList sect_commands[] = {
     DDF_SUB_LIST("CEILING", dummy_sector, c_, floor_commands),
     DDF_SUB_LIST("DAMAGE", dummy_sector, damage_, damage_commands),
 
-    DDF_FIELD("SECRET", dummy_sector, secret_, DdfMainGetBoolean),
-    DDF_FIELD("HUB", dummy_sector, hub_, DdfMainGetBoolean),
-    DDF_FIELD("SPECIAL", dummy_sector, special_flags_, DdfSectGetSpecialFlags),
+    DDF_FIELD("SECRET", dummy_sector, secret_, DDFMainGetBoolean),
+    DDF_FIELD("HUB", dummy_sector, hub_, DDFMainGetBoolean),
+    DDF_FIELD("SPECIAL", dummy_sector, special_flags_, DDFSectGetSpecialFlags),
 
-    DDF_FIELD("LIGHT_TYPE", dummy_sector, l_.type_, DdfSectGetLighttype),
-    DDF_FIELD("LIGHT_LEVEL", dummy_sector, l_.level_, DdfMainGetNumeric),
-    DDF_FIELD("LIGHT_DARKTIME", dummy_sector, l_.darktime_, DdfMainGetTime),
-    DDF_FIELD("LIGHT_BRIGHTTIME", dummy_sector, l_.brighttime_, DdfMainGetTime),
-    DDF_FIELD("LIGHT_CHANCE", dummy_sector, l_.chance_, DdfMainGetPercent),
-    DDF_FIELD("LIGHT_SYNC", dummy_sector, l_.sync_, DdfMainGetTime),
-    DDF_FIELD("LIGHT_STEP", dummy_sector, l_.step_, DdfMainGetNumeric),
-    DDF_FIELD("EXIT", dummy_sector, e_exit_, DdfSectGetExit),
-    DDF_FIELD("USE_COLOURMAP", dummy_sector, use_colourmap_, DdfMainGetColourmap),
-    DDF_FIELD("GRAVITY", dummy_sector, gravity_, DdfMainGetFloat),
-    DDF_FIELD("FRICTION", dummy_sector, friction_, DdfMainGetFloat),
-    DDF_FIELD("VISCOSITY", dummy_sector, viscosity_, DdfMainGetFloat),
-    DDF_FIELD("DRAG", dummy_sector, drag_, DdfMainGetFloat),
-    DDF_FIELD("AMBIENT_SOUND", dummy_sector, ambient_sfx_, DdfMainLookupSound),
-    DDF_FIELD("SPLASH_SOUND", dummy_sector, splash_sfx_, DdfMainLookupSound),
-    DDF_FIELD("WHEN_APPEAR", dummy_sector, appear_, DdfMainGetWhenAppear),
-    DDF_FIELD("PUSH_ANGLE", dummy_sector, push_angle_, DdfMainGetAngle),
-    DDF_FIELD("PUSH_SPEED", dummy_sector, push_speed_, DdfMainGetFloat),
-    DDF_FIELD("PUSH_ZSPEED", dummy_sector, push_zspeed_, DdfMainGetFloat),
+    DDF_FIELD("LIGHT_TYPE", dummy_sector, l_.type_, DDFSectGetLighttype),
+    DDF_FIELD("LIGHT_LEVEL", dummy_sector, l_.level_, DDFMainGetNumeric),
+    DDF_FIELD("LIGHT_DARKTIME", dummy_sector, l_.darktime_, DDFMainGetTime),
+    DDF_FIELD("LIGHT_BRIGHTTIME", dummy_sector, l_.brighttime_, DDFMainGetTime),
+    DDF_FIELD("LIGHT_CHANCE", dummy_sector, l_.chance_, DDFMainGetPercent),
+    DDF_FIELD("LIGHT_SYNC", dummy_sector, l_.sync_, DDFMainGetTime),
+    DDF_FIELD("LIGHT_STEP", dummy_sector, l_.step_, DDFMainGetNumeric),
+    DDF_FIELD("EXIT", dummy_sector, e_exit_, DDFSectGetExit),
+    DDF_FIELD("USE_COLOURMAP", dummy_sector, use_colourmap_, DDFMainGetColourmap),
+    DDF_FIELD("GRAVITY", dummy_sector, gravity_, DDFMainGetFloat),
+    DDF_FIELD("FRICTION", dummy_sector, friction_, DDFMainGetFloat),
+    DDF_FIELD("VISCOSITY", dummy_sector, viscosity_, DDFMainGetFloat),
+    DDF_FIELD("DRAG", dummy_sector, drag_, DDFMainGetFloat),
+    DDF_FIELD("AMBIENT_SOUND", dummy_sector, ambient_sfx_, DDFMainLookupSound),
+    DDF_FIELD("SPLASH_SOUND", dummy_sector, splash_sfx_, DDFMainLookupSound),
+    DDF_FIELD("WHEN_APPEAR", dummy_sector, appear_, DDFMainGetWhenAppear),
+    DDF_FIELD("PUSH_ANGLE", dummy_sector, push_angle_, DDFMainGetAngle),
+    DDF_FIELD("PUSH_SPEED", dummy_sector, push_speed_, DDFMainGetFloat),
+    DDF_FIELD("PUSH_ZSPEED", dummy_sector, push_zspeed_, DDFMainGetFloat),
 
     // -AJA- backwards compatibility cruft...
-    DDF_FIELD("DAMAGE", dummy_sector, damage_.nominal_, DdfMainGetFloat),
-    DDF_FIELD("DAMAGETIME", dummy_sector, damage_.delay_, DdfMainGetTime),
+    DDF_FIELD("DAMAGE", dummy_sector, damage_.nominal_, DDFMainGetFloat),
+    DDF_FIELD("DAMAGETIME", dummy_sector, damage_.delay_, DDFMainGetTime),
 
-    DDF_FIELD("REVERB_TYPE", dummy_sector, reverb_type_, DdfMainGetString),
-    DDF_FIELD("REVERB_RATIO", dummy_sector, reverb_ratio_, DdfMainGetFloat),
-    DDF_FIELD("REVERB_DELAY", dummy_sector, reverb_delay_, DdfMainGetFloat),
+    DDF_FIELD("REVERB_TYPE", dummy_sector, reverb_type_, DDFMainGetString),
+    DDF_FIELD("REVERB_RATIO", dummy_sector, reverb_ratio_, DDFMainGetFloat),
+    DDF_FIELD("REVERB_DELAY", dummy_sector, reverb_delay_, DDFMainGetFloat),
 
-    DDF_FIELD("FLOOR_BOB", dummy_sector, floor_bob_, DdfMainGetFloat),
-    DDF_FIELD("CEILING_BOB", dummy_sector, ceiling_bob_, DdfMainGetFloat),
+    DDF_FIELD("FLOOR_BOB", dummy_sector, floor_bob_, DDFMainGetFloat),
+    DDF_FIELD("CEILING_BOB", dummy_sector, ceiling_bob_, DDFMainGetFloat),
 
-    DDF_FIELD("FOG_COLOR", dummy_sector, fog_cmap_, DdfMainGetColourmap),
-    DDF_FIELD("FOG_DENSITY", dummy_sector, fog_density_, DdfMainGetPercent),
+    DDF_FIELD("FOG_COLOR", dummy_sector, fog_cmap_, DDFMainGetColourmap),
+    DDF_FIELD("FOG_DENSITY", dummy_sector, fog_density_, DDFMainGetPercent),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -95,14 +95,14 @@ static void SectorStartEntry(const char *name, bool extend)
     int number = HMM_MAX(0, atoi(name));
 
     if (number == 0)
-        DdfError("Bad sectortype number in sectors.ddf: %s\n", name);
+        DDFError("Bad sectortype number in sectors.ddf: %s\n", name);
 
     dynamic_sector = sectortypes.Lookup(number);
 
     if (extend)
     {
         if (!dynamic_sector)
-            DdfError("Unknown sectortype to extend: %s\n", name);
+            DDFError("Unknown sectortype to extend: %s\n", name);
         return;
     }
 
@@ -124,12 +124,12 @@ static void SectorDoTemplate(const char *contents)
 {
     int number = HMM_MAX(0, atoi(contents));
     if (number == 0)
-        DdfError("Bad sectortype number for template: %s\n", contents);
+        DDFError("Bad sectortype number for template: %s\n", contents);
 
     SectorType *other = sectortypes.Lookup(number);
 
     if (!other || other == dynamic_sector)
-        DdfError("Unknown sector template: '%s'\n", contents);
+        DDFError("Unknown sector template: '%s'\n", contents);
 
     dynamic_sector->CopyDetail(*other);
 }
@@ -143,23 +143,23 @@ static void SectorParseField(const char *field, const char *contents, int index,
     LogDebug("SECTOR_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DdfCompareName(field, "TEMPLATE") == 0)
+    if (DDFCompareName(field, "TEMPLATE") == 0)
     {
         SectorDoTemplate(contents);
         return;
     }
 
     // backwards compatibility...
-    if (DdfCompareName(field, "CRUSH") == 0 || DdfCompareName(field, "CRUSH_DAMAGE") == 0)
+    if (DDFCompareName(field, "CRUSH") == 0 || DDFCompareName(field, "CRUSH_DAMAGE") == 0)
     {
-        DdfSectMakeCrush(contents);
+        DDFSectMakeCrush(contents);
         return;
     }
 
-    if (DdfMainParseField(sect_commands, field, contents, (uint8_t *)dynamic_sector))
+    if (DDFMainParseField(sect_commands, field, contents, (uint8_t *)dynamic_sector))
         return; // OK
 
-    DdfWarnError("Unknown sectors.ddf command: %s\n", field);
+    DDFWarnError("Unknown sectors.ddf command: %s\n", field);
 }
 
 //
@@ -180,7 +180,7 @@ static void SectorClearAll(void)
     sectortypes.Reset();
 }
 
-void DdfReadSectors(const std::string &data)
+void DDFReadSectors(const std::string &data)
 {
     DDFReadInfo sects;
 
@@ -192,13 +192,13 @@ void DdfReadSectors(const std::string &data)
     sects.finish_entry = SectorFinishEntry;
     sects.clear_all    = SectorClearAll;
 
-    DdfMainReadFile(&sects, data);
+    DDFMainReadFile(&sects, data);
 }
 
 //
-// DdfSectorInit
+// DDFSectorInit
 //
-void DdfSectorInit(void)
+void DDFSectorInit(void)
 {
     sectortypes.Reset();
 
@@ -207,9 +207,9 @@ void DdfSectorInit(void)
 }
 
 //
-// DdfSectorCleanUp
+// DDFSectorCleanUp
 //
-void DdfSectorCleanUp(void)
+void DDFSectorCleanUp(void)
 {
     sectortypes.shrink_to_fit();
 }
@@ -228,31 +228,31 @@ static DDFSpecialFlags sector_specials[] = {{"WHOLE_REGION", kSectorFlagWholeReg
                                             {nullptr, 0, 0}};
 
 //
-// DdfSectGetSpecialFlags
+// DDFSectGetSpecialFlags
 //
 // Gets the sector specials.
 //
-void DdfSectGetSpecialFlags(const char *info, void *storage)
+void DDFSectGetSpecialFlags(const char *info, void *storage)
 {
     SectorFlag *special = (SectorFlag *)storage;
 
     int flag_value;
 
-    switch (DdfMainCheckSpecialFlag(info, sector_specials, &flag_value, true, false))
+    switch (DDFMainCheckSpecialFlag(info, sector_specials, &flag_value, true, false))
     {
-    case kDdfCheckFlagPositive:
+    case kDDFCheckFlagPositive:
         *special = (SectorFlag)(*special | flag_value);
 
         break;
 
-    case kDdfCheckFlagNegative:
+    case kDDFCheckFlagNegative:
         *special = (SectorFlag)(*special & ~flag_value);
 
         break;
 
-    case kDdfCheckFlagUser:
-    case kDdfCheckFlagUnknown:
-        DdfWarnError("Unknown sector special: %s", info);
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDFWarnError("Unknown sector special: %s", info);
         break;
     }
 }
@@ -266,25 +266,25 @@ static DDFSpecialFlags exit_types[] = {{"NONE", kExitTypeNone, 0},
                                        {nullptr, 0, 0}};
 
 //
-// DdfSectGetExit
+// DDFSectGetExit
 //
 // Get the exit type
 //
-void DdfSectGetExit(const char *info, void *storage)
+void DDFSectGetExit(const char *info, void *storage)
 {
     int *dest = (int *)storage;
     int  flag_value;
 
-    switch (DdfMainCheckSpecialFlag(info, exit_types, &flag_value, false, false))
+    switch (DDFMainCheckSpecialFlag(info, exit_types, &flag_value, false, false))
     {
-    case kDdfCheckFlagPositive:
-    case kDdfCheckFlagNegative:
+    case kDDFCheckFlagPositive:
+    case kDDFCheckFlagNegative:
         (*dest) = flag_value;
         break;
 
-    case kDdfCheckFlagUser:
-    case kDdfCheckFlagUnknown:
-        DdfWarnError("Unknown Exit type: %s\n", info);
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDFWarnError("Unknown Exit type: %s\n", info);
         break;
     }
 }
@@ -296,25 +296,25 @@ static DDFSpecialFlags light_types[] = {
     {"FLICKER", kLightSpecialTypeFireFlicker, 0}, {nullptr, 0, 0}};
 
 //
-// DdfSectGetLighttype
+// DDFSectGetLighttype
 //
 // Get the light type
 //
-void DdfSectGetLighttype(const char *info, void *storage)
+void DDFSectGetLighttype(const char *info, void *storage)
 {
     int *dest = (int *)storage;
     int  flag_value;
 
-    switch (DdfMainCheckSpecialFlag(info, light_types, &flag_value, false, false))
+    switch (DDFMainCheckSpecialFlag(info, light_types, &flag_value, false, false))
     {
-    case kDdfCheckFlagPositive:
-    case kDdfCheckFlagNegative:
+    case kDDFCheckFlagPositive:
+    case kDDFCheckFlagNegative:
         (*dest) = flag_value;
         break;
 
-    case kDdfCheckFlagUser:
-    case kDdfCheckFlagUnknown:
-        DdfWarnError("Unknown light type: %s\n", info);
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDFWarnError("Unknown light type: %s\n", info);
         break;
     }
 }
@@ -330,25 +330,25 @@ static DDFSpecialFlags movement_types[] = {{"MOVE", kPlaneMoverOnce, 0},
                                            {nullptr, 0, 0}};
 
 //
-// DdfSectGetMType
+// DDFSectGetMType
 //
 // Get movement types: MoveWaitReturn etc
 //
-void DdfSectGetMType(const char *info, void *storage)
+void DDFSectGetMType(const char *info, void *storage)
 {
     int *dest = (int *)storage;
     int  flag_value;
 
-    switch (DdfMainCheckSpecialFlag(info, movement_types, &flag_value, false, false))
+    switch (DDFMainCheckSpecialFlag(info, movement_types, &flag_value, false, false))
     {
-    case kDdfCheckFlagPositive:
-    case kDdfCheckFlagNegative:
+    case kDDFCheckFlagPositive:
+    case kDDFCheckFlagNegative:
         (*dest) = flag_value;
         break;
 
-    case kDdfCheckFlagUser:
-    case kDdfCheckFlagUnknown:
-        DdfWarnError("Unknown Movement type: %s\n", info);
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDFWarnError("Unknown Movement type: %s\n", info);
         break;
     }
 }
@@ -389,42 +389,42 @@ static DDFSpecialFlags reference_types[] = {
     {"LOWESTBOTTOMTEXTURE", kTriggerHeightReferenceLowestLowTexture, false}};
 
 //
-// DdfSectGetDestRef
+// DDFSectGetDestRef
 //
 // Get surroundingsectorceiling/floorheight etc
 //
-void DdfSectGetDestRef(const char *info, void *storage)
+void DDFSectGetDestRef(const char *info, void *storage)
 {
     int *dest = (int *)storage;
     int  flag_value;
 
     // check for modifier flags
-    if (DdfCompareName(info, "INCLUDE") == 0)
+    if (DDFCompareName(info, "INCLUDE") == 0)
     {
         *dest |= kTriggerHeightReferenceInclude;
         return;
     }
-    else if (DdfCompareName(info, "EXCLUDE") == 0)
+    else if (DDFCompareName(info, "EXCLUDE") == 0)
     {
         *dest &= ~kTriggerHeightReferenceInclude;
         return;
     }
 
-    switch (DdfMainCheckSpecialFlag(info, reference_types, &flag_value, false, false))
+    switch (DDFMainCheckSpecialFlag(info, reference_types, &flag_value, false, false))
     {
-    case kDdfCheckFlagPositive:
-    case kDdfCheckFlagNegative:
+    case kDDFCheckFlagPositive:
+    case kDDFCheckFlagNegative:
         (*dest) = flag_value;
         break;
 
-    case kDdfCheckFlagUser:
-    case kDdfCheckFlagUnknown:
-        DdfWarnError("Unknown Reference Point: %s\n", info);
+    case kDDFCheckFlagUser:
+    case kDDFCheckFlagUnknown:
+        DDFWarnError("Unknown Reference Point: %s\n", info);
         break;
     }
 }
 
-static void DdfSectMakeCrush(const char *info)
+static void DDFSectMakeCrush(const char *info)
 {
     dynamic_sector->f_.crush_damage_ = 10;
     dynamic_sector->c_.crush_damage_ = 10;

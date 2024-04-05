@@ -246,19 +246,19 @@ static void ChangeGame(NewGameParameters *param, int dir)
         const char *old_name = param->map_->episode_->name_.c_str();
         const char *new_name = def->name_.c_str();
 
-        int compare = DdfCompareName(new_name, old_name);
+        int compare = DDFCompareName(new_name, old_name);
 
         if (compare == 0)
             continue;
 
         if (compare * dir > 0)
         {
-            if (!closest || dir * DdfCompareName(new_name, closest->name_.c_str()) < 0)
+            if (!closest || dir * DDFCompareName(new_name, closest->name_.c_str()) < 0)
                 closest = def;
         }
         else
         {
-            if (!furthest || dir * DdfCompareName(new_name, furthest->name_.c_str()) < 0)
+            if (!furthest || dir * DDFCompareName(new_name, furthest->name_.c_str()) < 0)
                 furthest = def;
         }
     }
@@ -296,19 +296,19 @@ static void ChangeLevel(NewGameParameters *param, int dir)
         const char *old_name = param->map_->name_.c_str();
         const char *new_name = def->name_.c_str();
 
-        int compare = DdfCompareName(new_name, old_name);
+        int compare = DDFCompareName(new_name, old_name);
 
         if (compare == 0)
             continue;
 
         if (compare * dir > 0)
         {
-            if (!closest || dir * DdfCompareName(new_name, closest->name_.c_str()) < 0)
+            if (!closest || dir * DDFCompareName(new_name, closest->name_.c_str()) < 0)
                 closest = def;
         }
         else
         {
-            if (!furthest || dir * DdfCompareName(new_name, furthest->name_.c_str()) < 0)
+            if (!furthest || dir * DDFCompareName(new_name, furthest->name_.c_str()) < 0)
                 furthest = def;
         }
     }

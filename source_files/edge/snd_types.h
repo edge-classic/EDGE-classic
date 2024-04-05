@@ -25,18 +25,18 @@
 enum SoundFormat
 {
     kSoundUnknown = 0,
-    kSoundWav,
-    kSoundFlac,
-    kSoundOgg,
-    kSoundMp3,
-    kSoundM4p,
-    kSoundSid,
-    kSoundRad,
-    kSoundMus,
-    kSoundMidi,
-    kSoundImf, // Used with DDFPLAY; not in auto-detection
+    kSoundWAV,
+    kSoundFLAC,
+    kSoundOGG,
+    kSoundMP3,
+    kSoundM4P,
+    kSoundSID,
+    kSoundRAD,
+    kSoundMUS,
+    kSoundMIDI,
+    kSoundIMF, // Used with DDFPLAY; not in auto-detection
     kSoundDoom,
-    kSoundPcSpeaker
+    kSoundPCSpeaker
 };
 
 // determine sound format from the file.

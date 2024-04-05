@@ -45,7 +45,7 @@ namespace coal
 
 static constexpr uint32_t kMaximumRunaway = 1000000;
 
-int RealVm::GetNativeFunc(const char *name, const char *module)
+int RealVM::GetNativeFunc(const char *name, const char *module)
 {
     char buffer[256];
 
@@ -61,7 +61,7 @@ int RealVm::GetNativeFunc(const char *name, const char *module)
     return -1; // NOT FOUND
 }
 
-void RealVm::AddNativeFunction(const char *name, NativeFunction func)
+void RealVM::AddNativeFunction(const char *name, NativeFunction func)
 {
     // already registered?
     int prev = GetNativeFunc(name, nullptr);
@@ -80,12 +80,12 @@ void RealVm::AddNativeFunction(const char *name, NativeFunction func)
     native_funcs_.push_back(reg);
 }
 
-void RealVm::SetTrace(bool enable)
+void RealVM::SetTrace(bool enable)
 {
     exec_.tracing = enable;
 }
 
-int RealVm::FindFunction(const char *func_name)
+int RealVM::FindFunction(const char *func_name)
 {
     for (int i = (int)functions_.size() - 1; i >= 1; i--)
     {
@@ -95,18 +95,18 @@ int RealVm::FindFunction(const char *func_name)
             return i;
     }
 
-    return Vm::NOT_FOUND;
+    return VM::NOT_FOUND;
 }
 
-int RealVm::FindVariable(const char *var_name)
+int RealVM::FindVariable(const char *var_name)
 {
     // FIXME
 
-    return Vm::NOT_FOUND;
+    return VM::NOT_FOUND;
 }
 
 // returns an offset from the string heap
-int RealVm::InternaliseString(const char *new_s)
+int RealVM::InternaliseString(const char *new_s)
 {
     if (new_s[0] == 0)
         return 0;
@@ -117,7 +117,7 @@ int RealVm::InternaliseString(const char *new_s)
     return ofs;
 }
 
-double *RealVm::AccessParam(int p)
+double *RealVM::AccessParam(int p)
 {
     assert(exec_.func);
 
@@ -130,7 +130,7 @@ double *RealVm::AccessParam(int p)
         return &exec_.stack[exec_.stack_depth + functions_[exec_.func]->parm_ofs[p]];
 }
 
-const char *RealVm::AccessParamString(int p)
+const char *RealVM::AccessParamString(int p)
 {
     double *d = AccessParam(p);
 
@@ -140,12 +140,12 @@ const char *RealVm::AccessParamString(int p)
         return nullptr;
 }
 
-void RealVm::ReturnFloat(double f)
+void RealVM::ReturnFloat(double f)
 {
     COAL_G_FLOAT(kReturnOffset * 8) = f;
 }
 
-void RealVm::ReturnVector(double *v)
+void RealVM::ReturnVector(double *v)
 {
     double *c = COAL_G_VECTOR(kReturnOffset * 8);
 
@@ -154,7 +154,7 @@ void RealVm::ReturnVector(double *v)
     c[2] = v[2];
 }
 
-void RealVm::ReturnString(const char *s, int len)
+void RealVM::ReturnString(const char *s, int len)
 {
     // TODO: turn this code into a utility function
 
@@ -181,7 +181,7 @@ void RealVm::ReturnString(const char *s, int len)
 //
 // Aborts the currently executing functions
 //
-void RealVm::RunError(const char *error, ...)
+void RealVM::RunError(const char *error, ...)
 {
     va_list argptr;
     char    buffer[1024];
@@ -201,7 +201,7 @@ void RealVm::RunError(const char *error, ...)
     FatalError(buffer);
 }
 
-int RealVm::STR_Concat(const char *s1, const char *s2)
+int RealVM::STR_Concat(const char *s1, const char *s2)
 {
     int len1 = strlen(s1);
     int len2 = strlen(s2);
@@ -218,7 +218,7 @@ int RealVm::STR_Concat(const char *s1, const char *s2)
     return -(1 + index);
 }
 
-int RealVm::STR_ConcatFloat(const char *s, double f)
+int RealVM::STR_ConcatFloat(const char *s, double f)
 {
     char buffer[100];
 
@@ -234,7 +234,7 @@ int RealVm::STR_ConcatFloat(const char *s, double f)
     return STR_Concat(s, buffer);
 }
 
-int RealVm::STR_ConcatVector(const char *s, double *v)
+int RealVM::STR_ConcatVector(const char *s, double *v)
 {
     char buffer[200];
 
@@ -254,7 +254,7 @@ int RealVm::STR_ConcatVector(const char *s, double *v)
 //  EXECUTION ENGINE
 //================================================================
 
-void RealVm::EnterFunction(int func)
+void RealVM::EnterFunction(int func)
 {
     assert(func > 0);
 
@@ -279,7 +279,7 @@ void RealVm::EnterFunction(int func)
     exec_.func = func;
 }
 
-void RealVm::LeaveFunction()
+void RealVM::LeaveFunction()
 {
     if (exec_.call_depth <= 0)
         RunError("stack underflow");
@@ -293,7 +293,7 @@ void RealVm::LeaveFunction()
         exec_.stack_depth -= functions_[exec_.func]->locals_end;
 }
 
-void RealVm::EnterNative(int func, int argc)
+void RealVM::EnterNative(int func, int argc)
 {
     Function *newf = functions_[func];
 
@@ -315,7 +315,7 @@ void RealVm::EnterNative(int func, int argc)
 #define COAL_OPERAND(a)                                                                                                \
     (((a) > 0) ? COAL_REF_GLOBAL(a) : ((a) < 0) ? &exec_.stack[exec_.stack_depth - ((a) + 1)] : nullptr)
 
-void RealVm::DoExecute(int fnum)
+void RealVM::DoExecute(int fnum)
 {
     Function *f = functions_[fnum];
 
@@ -610,14 +610,14 @@ void RealVm::DoExecute(int fnum)
     }
 }
 
-int RealVm::Execute(int func_id)
+int RealVM::Execute(int func_id)
 {
     // re-use the temporary string space
     temp_strings_.Reset();
 
     if (func_id < 1 || func_id >= (int)functions_.size())
     {
-        RunError("Vm::Execute: NULL function");
+        RunError("VM::Execute: NULL function");
     }
 
     DoExecute(func_id);
@@ -655,7 +655,7 @@ static const char *OpcodeName(int16_t op)
     return opcode_names[op];
 }
 
-void RealVm::StackTrace()
+void RealVM::StackTrace()
 {
     Printer("Stack Trace:\n");
 
@@ -679,7 +679,7 @@ void RealVm::StackTrace()
     Printer("\n");
 }
 
-const char *RealVm::RegString(Statement *st, int who)
+const char *RealVM::RegString(Statement *st, int who)
 {
     static char buffer[100];
 
@@ -695,7 +695,7 @@ const char *RealVm::RegString(Statement *st, int who)
     return buffer;
 }
 
-void RealVm::PrintStatement(Function *f, int s)
+void RealVM::PrintStatement(Function *f, int s)
 {
     Statement *st = COAL_REF_OP(s);
 
@@ -760,7 +760,7 @@ void RealVm::PrintStatement(Function *f, int s)
     Printer("\n");
 }
 
-void RealVm::ASM_DumpFunction(Function *f)
+void RealVM::ASM_DumpFunction(Function *f)
 {
     Printer("Function %s()\n", f->name);
 
@@ -778,7 +778,7 @@ void RealVm::ASM_DumpFunction(Function *f)
     Printer("\n");
 }
 
-void RealVm::ASM_DumpAll()
+void RealVM::ASM_DumpAll()
 {
     for (int i = 1; i < (int)functions_.size(); i++)
     {

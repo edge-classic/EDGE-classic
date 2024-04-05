@@ -114,7 +114,7 @@ class WadFile
     std::vector<int> skin_markers_;
 
     // ddf and rts lump list
-    int ddf_lumps_[kTotalDdfTypes];
+    int ddf_lumps_[kTotalDDFTypes];
 
     // texture information
     WadTextureResource wadtex_;
@@ -143,7 +143,7 @@ class WadFile
           level_markers_(), skin_markers_(), wadtex_(), dehacked_lump_(-1), coal_huds_(-1), lua_huds_(-1),
           umapinfo_lump_(-1), animated_(-1), switches_(-1), md5_string_()
     {
-        for (int d = 0; d < kTotalDdfTypes; d++)
+        for (int d = 0; d < kTotalDDFTypes; d++)
             ddf_lumps_[d] = -1;
     }
 
@@ -159,7 +159,7 @@ enum LumpKind
     kLumpNormal   = 0,  // fallback value
     kLumpMarker   = 3,  // X_START, X_END, S_SKIN, level name
     kLumpWadTex   = 6,  // palette, pnames, texture1/2
-    kLumpDdfRts   = 10, // DDF, RTS, DEHACKED lump
+    kLumpDDFRTS   = 10, // DDF, RTS, DEHACKED lump
     kLumpTx       = 14,
     kLumpColormap = 15,
     kLumpFlat     = 16,
@@ -553,21 +553,21 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
     }
     else if (strcmp(info.name, "DEHACKED") == 0)
     {
-        lump_p->kind = kLumpDdfRts;
+        lump_p->kind = kLumpDDFRTS;
         if (wad != nullptr && info.size > 0)
             wad->dehacked_lump_ = lump;
         return;
     }
     else if (strcmp(info.name, "COALHUDS") == 0)
     {
-        lump_p->kind = kLumpDdfRts;
+        lump_p->kind = kLumpDDFRTS;
         if (wad != nullptr)
             wad->coal_huds_ = lump;
         return;
     }
     else if (strcmp(info.name, "LUAHUDS") == 0)
     {
-        lump_p->kind = kLumpDdfRts;
+        lump_p->kind = kLumpDDFRTS;
         if (wad != nullptr)
             wad->lua_huds_ = lump;
         return;
@@ -581,14 +581,14 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
     }
     else if (strcmp(info.name, "ANIMATED") == 0)
     {
-        lump_p->kind = kLumpDdfRts;
+        lump_p->kind = kLumpDDFRTS;
         if (wad != nullptr)
             wad->animated_ = lump;
         return;
     }
     else if (strcmp(info.name, "SWITCHES") == 0)
     {
-        lump_p->kind = kLumpDdfRts;
+        lump_p->kind = kLumpDDFRTS;
         if (wad != nullptr)
             wad->switches_ = lump;
         return;
@@ -597,11 +597,11 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
     // -KM- 1998/12/16 Load DDF/RSCRIPT file from wad.
     if (allow_ddf && wad != nullptr)
     {
-        DdfType type = DdfLumpToType(info.name);
+        DDFType type = DDFLumpToType(info.name);
 
-        if (type != kDdfTypeUnknown)
+        if (type != kDDFTypeUnknown)
         {
-            lump_p->kind          = kLumpDdfRts;
+            lump_p->kind          = kLumpDDFRTS;
             wad->ddf_lumps_[type] = lump;
             return;
         }
@@ -921,14 +921,14 @@ int CheckForUniqueGameLumps(epi::File *file)
 void ProcessFixersForWad(DataFile *df)
 {
     // Special handling for Doom 2 BFG Edition
-    if (df->kind_ == kFileKindIWad || df->kind_ == kFileKindIPackWad)
+    if (df->kind_ == kFileKindIWAD || df->kind_ == kFileKindIPackWAD)
     {
         if (CheckLumpNumberForName("MAP33") > -1 && CheckLumpNumberForName("DMENUPIC") > -1)
         {
             std::string fix_path = epi::PathAppend(game_directory, "edge_fixes/doom2_bfg.epk");
             if (epi::TestFileAccess(fix_path))
             {
-                AddPendingFile(fix_path, kFileKindEpk);
+                AddPendingFile(fix_path, kFileKindEPK);
 
                 LogPrint("WADFIXES: Applying fixes for Doom 2 BFG Edition\n");
             }
@@ -954,7 +954,7 @@ void ProcessFixersForWad(DataFile *df)
             fix_path             = epi::PathAppend(fix_path, fix_checker.append(".epk"));
             if (epi::TestFileAccess(fix_path))
             {
-                AddPendingFile(fix_path, kFileKindEpk);
+                AddPendingFile(fix_path, kFileKindEPK);
 
                 LogPrint("WADFIXES: Applying fixes for %s\n", fixdefs[i]->name_.c_str());
             }
@@ -997,7 +997,7 @@ static void ProcessDDFInWad(DataFile *df)
 {
     std::string bare_filename = epi::GetFilename(df->name_);
 
-    for (size_t d = 0; d < kTotalDdfTypes; d++)
+    for (size_t d = 0; d < kTotalDDFTypes; d++)
     {
         int lump = df->wad_->ddf_lumps_[d];
 
@@ -1011,7 +1011,7 @@ static void ProcessDDFInWad(DataFile *df)
             source += " in ";
             source += bare_filename;
 
-            DdfAddFile((DdfType)d, data, source);
+            DDFAddFile((DDFType)d, data, source);
         }
     }
 }
@@ -1074,7 +1074,7 @@ static void ProcessBoomStuffInWad(DataFile *df)
         int      length = -1;
         uint8_t *data   = LoadLumpIntoMemory(animated, &length);
 
-        DdfConvertAnimatedLump(data, length);
+        DDFConvertAnimatedLump(data, length);
         delete[] data;
     }
 
@@ -1085,14 +1085,14 @@ static void ProcessBoomStuffInWad(DataFile *df)
         int      length = -1;
         uint8_t *data   = LoadLumpIntoMemory(switches, &length);
 
-        DdfConvertSwitchesLump(data, length);
+        DDFConvertSwitchesLump(data, length);
         delete[] data;
     }
 
     // handle BOOM Colourmaps (between C_START and C_END)
     for (int lump : df->wad_->colormap_lumps_)
     {
-        DdfAddRawColourmap(GetLumpNameFromIndex(lump), GetLumpLength(lump), nullptr);
+        DDFAddRawColourmap(GetLumpNameFromIndex(lump), GetLumpLength(lump), nullptr);
     }
 }
 
@@ -1141,7 +1141,7 @@ void ProcessWad(DataFile *df, size_t file_index)
         RawWadEntry &entry = raw_info[i];
 
         bool allow_ddf = (epi::StringCompare(game_base, "custom") == 0 ||
-                          df->kind_ == kFileKindPWad || df->kind_ == kFileKindPackWad || df->kind_ == kFileKindIpk ||
+                          df->kind_ == kFileKindPWAD || df->kind_ == kFileKindPackWAD || df->kind_ == kFileKindIPK ||
                           df->kind_ == kFileKindIFolder);
 
         AddLump(df, entry.name, AlignedLittleEndianS32(entry.position), AlignedLittleEndianS32(entry.size),
@@ -1222,7 +1222,7 @@ std::string BuildXglNodesForWad(DataFile *df)
         uint8_t   *raw_wad    = nullptr;
         int        raw_length = 0;
 
-        if (df->kind_ == kFileKindPackWad)
+        if (df->kind_ == kFileKindPackWAD)
         {
             mem_wad    = OpenFileFromPack(df->name_);
             raw_length = mem_wad->GetLength();
@@ -1240,7 +1240,7 @@ std::string BuildXglNodesForWad(DataFile *df)
         ajbsp::FinishXWA();
         ajbsp::CloseWad();
 
-        if (df->kind_ == kFileKindPackWad)
+        if (df->kind_ == kFileKindPackWAD)
         {
             delete[] raw_wad;
             delete mem_wad;
@@ -1254,7 +1254,7 @@ std::string BuildXglNodesForWad(DataFile *df)
     return xwa_filename;
 }
 
-void ReadUmapinfoLumps(void)
+void ReadUMAPINFOLumps(void)
 {
     for (auto df : data_files)
     {
@@ -1265,7 +1265,7 @@ void ReadUmapinfoLumps(void)
             else
             {
                 LogDebug("Parsing UMAPINFO lump in %s\n", df->name_.c_str());
-                ParseUmapinfo(LoadLumpAsString(df->wad_->umapinfo_lump_));
+                ParseUMAPINFO(LoadLumpAsString(df->wad_->umapinfo_lump_));
             }
         }
         else if (df->pack_)
@@ -1278,7 +1278,7 @@ void ReadUmapinfoLumps(void)
                 epi::File *uinfo = PackOpenFile(df->pack_, "UMAPINFO.txt");
                 if (uinfo)
                 {
-                    ParseUmapinfo(uinfo->ReadText());
+                    ParseUMAPINFO(uinfo->ReadText());
                     delete uinfo;
                 }
                 else
@@ -1364,8 +1364,8 @@ void ReadUmapinfoLumps(void)
                     dynamic_plentry            = new PlaylistEntry;
                     dynamic_plentry->number_   = playlist.FindFree();
                     dynamic_plentry->info_     = Maps.maps[i].music;
-                    dynamic_plentry->type_     = kDdfMusicUnknown;
-                    dynamic_plentry->infotype_ = kDdfMusicDataLump;
+                    dynamic_plentry->type_     = kDDFMusicUnknown;
+                    dynamic_plentry->infotype_ = kDDFMusicDataLump;
                     temp_level->music_         = dynamic_plentry->number_;
                     playlist.push_back(dynamic_plentry);
                 }
@@ -1473,8 +1473,8 @@ void ReadUmapinfoLumps(void)
                     dynamic_plentry            = new PlaylistEntry;
                     dynamic_plentry->number_   = playlist.FindFree();
                     dynamic_plentry->info_     = Maps.maps[i].intermusic;
-                    dynamic_plentry->type_     = kDdfMusicUnknown;
-                    dynamic_plentry->infotype_ = kDdfMusicDataLump;
+                    dynamic_plentry->type_     = kDDFMusicUnknown;
+                    dynamic_plentry->infotype_ = kDDFMusicDataLump;
                     temp_level->f_end_.music_  = dynamic_plentry->number_;
                     playlist.push_back(dynamic_plentry);
                 }
@@ -1667,7 +1667,7 @@ void ReadUmapinfoLumps(void)
                         }
                     }
                 }
-                ReadTriggerScript(ba_rts, "UMAPINFO");
+                ReadRADScript(ba_rts, "UMAPINFO");
             }
 
             // If a TEMPEPI gamedef had to be created, grab some details from
@@ -2327,7 +2327,7 @@ static const char *LumpKindString(LumpKind kind)
         return "marker";
     case kLumpWadTex:
         return "wadtex";
-    case kLumpDdfRts:
+    case kLumpDDFRTS:
         return "ddf";
 
     case kLumpTx:
@@ -2412,7 +2412,7 @@ bool DisableStockSkybox(const char *ActualSky)
             if (filenum != -1) // make sure we actually have a file
             {
                 // we only want pwads
-                if (data_files[filenum]->kind_ == kFileKindPWad || data_files[filenum]->kind_ == kFileKindPackWad)
+                if (data_files[filenum]->kind_ == kFileKindPWAD || data_files[filenum]->kind_ == kFileKindPackWAD)
                 {
                     LogDebug("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name_.c_str(),
                              tempImage->source_type_, lumpnum, filenum);
@@ -2462,7 +2462,7 @@ bool DisableStockSkybox(const char *ActualSky)
         if (filenum != -1) // make sure we actually have a file
         {
             // we only want pwads
-            if (data_files[filenum]->kind_ == kFileKindPWad || data_files[filenum]->kind_ == kFileKindPackWad)
+            if (data_files[filenum]->kind_ == kFileKindPWAD || data_files[filenum]->kind_ == kFileKindPackWAD)
             {
                 TurnOffSkyBox = true;
             }
@@ -2510,7 +2510,7 @@ bool IsLumpInPwad(const char *name)
             DataFile *df = data_files[filenum];
 
             // we only want pwads
-            if (df->kind_ == kFileKindPWad || df->kind_ == kFileKindPackWad)
+            if (df->kind_ == kFileKindPWAD || df->kind_ == kFileKindPackWAD)
             {
                 in_pwad = true;
             }
@@ -2523,8 +2523,8 @@ bool IsLumpInPwad(const char *name)
         for (int i = (int)data_files.size() - 1; i >= 2; i--) // ignore edge_defs and the IWAD itself
         {
             DataFile *df = data_files[i];
-            if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEpk ||
-                df->kind_ == kFileKindEEpk)
+            if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
+                df->kind_ == kFileKindEEPK)
             {
                 if (PackFindStem(df->pack_, name))
                 {
@@ -2560,8 +2560,8 @@ bool IsLumpInAnyWad(const char *name)
         for (int i = 0; i < (int)data_files.size() - 1; i++)
         {
             DataFile *df = data_files[i];
-            if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEpk ||
-                df->kind_ == kFileKindEEpk || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIpk)
+            if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
+                df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIPK)
             {
                 if (PackFindStem(df->pack_, name))
                 {

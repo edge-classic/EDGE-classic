@@ -24,9 +24,9 @@
 #include "s_music.h"
 #include "snd_data.h"
 
-AbstractMusicPlayer *PlayOggMusic(uint8_t *data, int length, bool looping);
+AbstractMusicPlayer *PlayOGGMusic(uint8_t *data, int length, bool looping);
 
-bool LoadOggSound(SoundData *buf, const uint8_t *data, int length);
+bool LoadOGGSound(SoundData *buf, const uint8_t *data, int length);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

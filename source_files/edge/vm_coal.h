@@ -29,7 +29,7 @@ void CoalInitialize();
 void CoalAddScript(int type, std::string &data, const std::string &source);
 void CoalLoadScripts();
 
-void CoalRegisterHud();
+void CoalRegisterHUD();
 void CoalRegisterPlaysim();
 
 // HUD stuff
@@ -38,7 +38,7 @@ void CoalLoadGame(void);
 void CoalSaveGame(void);
 void CoalBeginLevel(void);
 void CoalEndLevel(void);
-void CoalRunHud(void);
+void CoalRunHUD(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

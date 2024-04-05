@@ -23,7 +23,7 @@ void LuaInit()
     global_lua_state = LuaCreateVM();
 
     LuaRegisterCoreLibraries(global_lua_state);
-    LuaRegisterHudLibrary(global_lua_state);
+    LuaRegisterHUDLibrary(global_lua_state);
     LuaRegisterPlayerLibrary(global_lua_state);
 }
 
@@ -34,7 +34,7 @@ void LuaAddScript(const std::string &data, const std::string &source)
 
 void LuaLoadScripts()
 {
-    if (LuaGetLuaHudDetected() && GetCoalDetected())
+    if (LuaGetLuaHUDDetected() && GetCoalDetected())
     {
         LogWarning("Lua and COAL huds detected, selecting Lua hud\n");
     }
@@ -65,7 +65,7 @@ lua_State *LuaGetGlobalVM()
 }
 
 static bool lua_detected = false;
-void        LuaSetLuaHudDetected(bool detected)
+void        LuaSetLuaHUDDetected(bool detected)
 {
     // check whether redundant call, once enabled stays enabled
     if (lua_detected)
@@ -76,12 +76,12 @@ void        LuaSetLuaHudDetected(bool detected)
     lua_detected = detected;
 }
 
-bool LuaGetLuaHudDetected()
+bool LuaGetLuaHUDDetected()
 {
     return lua_detected;
 }
 
-bool LuaUseLuaHud()
+bool LuaUseLuaHUD()
 {
     return lua_detected || !GetCoalDetected();
 }

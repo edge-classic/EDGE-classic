@@ -799,7 +799,7 @@ static void ProcessLuaHUDInPack(PackFile *pack)
             {
                 if (epi::StringPrefixCaseCompareASCII(bare_filename, "edge_defs") != 0)
                 {
-                    LuaSetLuaHudDetected(true);
+                    LuaSetLuaHUDDetected(true);
                 }
 
                 int            length   = -1;

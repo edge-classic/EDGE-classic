@@ -97,7 +97,7 @@ size_t AddPendingFile(std::string file, FileKind kind)
 extern void ProcessFixersForWad(DataFile *df);
 extern void ProcessWad(DataFile *df, size_t file_index);
 
-extern std::string BuildXglNodesForWad(DataFile *df);
+extern std::string BuildXGLNodesForWad(DataFile *df);
 
 static void DEH_ConvertFile(std::string &filename)
 {
@@ -251,7 +251,7 @@ void ProcessMultipleFiles()
     }
 }
 
-void BuildXglNodes(void)
+void BuildXGLNodes(void)
 {
     for (size_t i = 0; i < data_files.size(); i++)
     {
@@ -260,7 +260,7 @@ void BuildXglNodes(void)
         if (df->kind_ == kFileKindIWAD || df->kind_ == kFileKindPWAD || df->kind_ == kFileKindPackWAD ||
             df->kind_ == kFileKindIPackWAD)
         {
-            std::string xwa_filename = BuildXglNodesForWad(df);
+            std::string xwa_filename = BuildXGLNodesForWad(df);
 
             if (!xwa_filename.empty())
             {

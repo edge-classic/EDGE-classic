@@ -388,16 +388,16 @@ static void DrawLevelFinished(void)
     if (leaving_background_image)
     {
         if (tile_leaving_background)
-            HudTileImage(-240, 0, 820, 200, leaving_background_image);
+            HUDTileImage(-240, 0, 820, 200, leaving_background_image);
         else
         {
             if (title_scaling.d_) // Fill Border
             {
                 if (!leaving_background_image->blurred_version_)
                     StoreBlurredImage(leaving_background_image);
-                HudStretchImage(-320, -200, 960, 600, leaving_background_image->blurred_version_, 0, 0);
+                HUDStretchImage(-320, -200, 960, 600, leaving_background_image->blurred_version_, 0, 0);
             }
-            HudDrawImageTitleWS(leaving_background_image);
+            HUDDrawImageTitleWS(leaving_background_image);
         }
     }
 
@@ -410,7 +410,7 @@ static void DrawLevelFinished(void)
     style      = single_player_intermission_style;
     int t_type = StyleDefinition::kTextSectionText;
 
-    HudSetAlignment(0, -1); // center it
+    HUDSetAlignment(0, -1); // center it
 
     // If we have a custom mapname graphic e.g.CWILVxx then use that
     if (level_names[0])
@@ -419,11 +419,11 @@ static void DrawLevelFinished(void)
         {
             w1 = level_names[0]->ScaledWidthActual();
             h1 = level_names[0]->ScaledHeightActual();
-            HudSetAlignment(-1, -1); // center it
+            HUDSetAlignment(-1, -1); // center it
             if (w1 > 320)            // Too big? Shrink it to fit the screen
-                HudStretchImage(0, y, 320, h1, level_names[0], 0.0, 0.0);
+                HUDStretchImage(0, y, 320, h1, level_names[0], 0.0, 0.0);
             else
-                HudDrawImage(160 - w1 / 2, y, level_names[0]);
+                HUDDrawImage(160 - w1 / 2, y, level_names[0]);
         }
         else
         {
@@ -444,11 +444,11 @@ static void DrawLevelFinished(void)
                 float TempScale = 0;
                 TempScale       = 310;
                 TempScale /= txtWidth;
-                HudWriteText(style, t_type, 160, y, language[intermission_stats.current_level->description_.c_str()],
+                HUDWriteText(style, t_type, 160, y, language[intermission_stats.current_level->description_.c_str()],
                              TempScale);
             }
             else
-                HudWriteText(style, t_type, 160, y, language[intermission_stats.current_level->description_.c_str()]);
+                HUDWriteText(style, t_type, 160, y, language[intermission_stats.current_level->description_.c_str()]);
         }
     }
     else
@@ -470,13 +470,13 @@ static void DrawLevelFinished(void)
             float TempScale = 0;
             TempScale       = 310;
             TempScale /= txtWidth;
-            HudWriteText(style, t_type, 160, y, language[intermission_stats.current_level->description_.c_str()],
+            HUDWriteText(style, t_type, 160, y, language[intermission_stats.current_level->description_.c_str()],
                          TempScale);
         }
         else
-            HudWriteText(style, t_type, 160, y, language[intermission_stats.current_level->description_.c_str()]);
+            HUDWriteText(style, t_type, 160, y, language[intermission_stats.current_level->description_.c_str()]);
     }
-    HudSetAlignment(-1, -1); // set it back to usual
+    HUDSetAlignment(-1, -1); // set it back to usual
 
     t_type = StyleDefinition::kTextSectionTitle;
     if (!style->fonts_[t_type])
@@ -488,21 +488,21 @@ static void DrawLevelFinished(void)
     y = y + h1;
     y += y_shift;
 
-    HudSetAlignment(0, -1); // center it
+    HUDSetAlignment(0, -1); // center it
     // If we have a custom Finished graphic e.g.WIF then use that
     if (IsLumpInPwad(finished->name_.c_str()))
     {
         w1 = finished->ScaledWidthActual();
         h1 = finished->ScaledHeightActual();
-        HudSetAlignment(-1, -1); // center it
-        HudDrawImage(160 - w1 / 2, y * 5 / 4, finished);
+        HUDSetAlignment(-1, -1); // center it
+        HUDDrawImage(160 - w1 / 2, y * 5 / 4, finished);
     }
     else
     {
         h1 = style->fonts_[t_type]->NominalHeight();
-        HudWriteText(style, t_type, 160, y * 5 / 4, language["IntermissionFinished"]);
+        HUDWriteText(style, t_type, 160, y * 5 / 4, language["IntermissionFinished"]);
     }
-    HudSetAlignment(-1, -1); // set it back to usual
+    HUDSetAlignment(-1, -1); // set it back to usual
 }
 
 static void DrawOnLnode(IntermissionMapPosition *mappos, const Image *images[2])
@@ -532,7 +532,7 @@ static void DrawOnLnode(IntermissionMapPosition *mappos, const Image *images[2])
 
     if (i < 2)
     {
-        HudDrawImage(mappos->info->x_, mappos->info->y_, images[i]);
+        HUDDrawImage(mappos->info->x_, mappos->info->y_, images[i]);
     }
     else
     {
@@ -557,16 +557,16 @@ static void DrawEnteringLevel(void)
     if (entering_background_image)
     {
         if (tile_entering_background)
-            HudTileImage(-240, 0, 820, 200, entering_background_image);
+            HUDTileImage(-240, 0, 820, 200, entering_background_image);
         else
         {
             if (title_scaling.d_) // Fill Border
             {
                 if (!entering_background_image->blurred_version_)
                     StoreBlurredImage(entering_background_image);
-                HudStretchImage(-320, -200, 960, 600, entering_background_image->blurred_version_, 0, 0);
+                HUDStretchImage(-320, -200, 960, 600, entering_background_image->blurred_version_, 0, 0);
             }
-            HudDrawImageTitleWS(entering_background_image);
+            HUDDrawImageTitleWS(entering_background_image);
         }
     }
 
@@ -580,22 +580,22 @@ static void DrawEnteringLevel(void)
     if (!style->fonts_[t_type])
         t_type = StyleDefinition::kTextSectionText;
 
-    HudSetAlignment(0, -1); // center it
+    HUDSetAlignment(0, -1); // center it
 
     // If we have a custom Entering graphic e.g.WIENTER then use that
     if (IsLumpInPwad(entering->name_.c_str()))
     {
         w1 = entering->ScaledWidthActual();
         h1 = entering->ScaledHeightActual();
-        HudSetAlignment(-1, -1); // center it
-        HudDrawImage(160 - w1 / 2, y, entering);
+        HUDSetAlignment(-1, -1); // center it
+        HUDDrawImage(160 - w1 / 2, y, entering);
     }
     else
     {
         h1 = style->fonts_[t_type]->NominalHeight();
-        HudWriteText(style, t_type, 160, y, language["IntermissionEntering"]);
+        HUDWriteText(style, t_type, 160, y, language["IntermissionEntering"]);
     }
-    HudSetAlignment(-1, -1); // set it back to usual
+    HUDSetAlignment(-1, -1); // set it back to usual
 
     for (int i = 0; i < world_intermission.total_map_positions_; i++)
     {
@@ -615,7 +615,7 @@ static void DrawEnteringLevel(void)
 
     t_type = StyleDefinition::kTextSectionText;
 
-    HudSetAlignment(0, -1); // center it
+    HUDSetAlignment(0, -1); // center it
 
     // If we have a custom mapname graphic e.g.CWILVxx then use that
     if (level_names[1])
@@ -624,11 +624,11 @@ static void DrawEnteringLevel(void)
         {
             w1 = level_names[1]->ScaledWidthActual();
             h1 = level_names[1]->ScaledHeightActual();
-            HudSetAlignment(-1, -1); // center it
+            HUDSetAlignment(-1, -1); // center it
             if (w1 > 320)            // Too big? Shrink it to fit the screen
-                HudStretchImage(0, y * 5 / 4, 320, h1, level_names[1], 0.0, 0.0);
+                HUDStretchImage(0, y * 5 / 4, 320, h1, level_names[1], 0.0, 0.0);
             else
-                HudDrawImage(160 - w1 / 2, y * 5 / 4, level_names[1]);
+                HUDDrawImage(160 - w1 / 2, y * 5 / 4, level_names[1]);
         }
         else
         {
@@ -647,11 +647,11 @@ static void DrawEnteringLevel(void)
                 float TempScale = 0;
                 TempScale       = 310;
                 TempScale /= txtWidth;
-                HudWriteText(style, t_type, 160, y * 5 / 4,
+                HUDWriteText(style, t_type, 160, y * 5 / 4,
                              language[intermission_stats.next_level->description_.c_str()], TempScale);
             }
             else
-                HudWriteText(style, t_type, 160, y * 5 / 4,
+                HUDWriteText(style, t_type, 160, y * 5 / 4,
                              language[intermission_stats.next_level->description_.c_str()]);
         }
     }
@@ -671,13 +671,13 @@ static void DrawEnteringLevel(void)
             float TempScale = 0;
             TempScale       = 310;
             TempScale /= txtWidth;
-            HudWriteText(style, t_type, 160, y * 5 / 4, language[intermission_stats.next_level->description_.c_str()],
+            HUDWriteText(style, t_type, 160, y * 5 / 4, language[intermission_stats.next_level->description_.c_str()],
                          TempScale);
         }
         else
-            HudWriteText(style, t_type, 160, y * 5 / 4, language[intermission_stats.next_level->description_.c_str()]);
+            HUDWriteText(style, t_type, 160, y * 5 / 4, language[intermission_stats.next_level->description_.c_str()]);
     }
-    HudSetAlignment(-1, -1); // set it back to usual
+    HUDSetAlignment(-1, -1); // set it back to usual
 }
 
 static float PercentWidth(std::string &s)
@@ -703,12 +703,12 @@ static void DrawPercent(float x, float y, std::string &s)
     {
         if (c == '%')
         {
-            HudDrawImage(x, y, percent);
+            HUDDrawImage(x, y, percent);
             x += percent->ScaledWidthActual();
         }
         else if (epi::IsDigitASCII(c))
         {
-            HudDrawImage(x, y, digits[c - 48]);
+            HUDDrawImage(x, y, digits[c - 48]);
             x += digits[c - 48]->ScaledWidthActual();
         }
     }
@@ -841,11 +841,11 @@ static void DrawTime(float x, float y, int t, bool drawText = false)
     {
         if (t > 3599)
         {
-            HudWriteText(single_player_intermission_style, StyleDefinition::kTextSectionTitle, x, y, "Sucks");
+            HUDWriteText(single_player_intermission_style, StyleDefinition::kTextSectionTitle, x, y, "Sucks");
         }
         else
         {
-            HudWriteText(single_player_intermission_style, StyleDefinition::kTextSectionAlternate, x, y, s.c_str());
+            HUDWriteText(single_player_intermission_style, StyleDefinition::kTextSectionAlternate, x, y, s.c_str());
         }
     }
     else
@@ -854,9 +854,9 @@ static void DrawTime(float x, float y, int t, bool drawText = false)
         {
             // "sucks"
             if ((sucks) && (IsLumpInPwad(sucks->name_.c_str())))
-                HudDrawImage(x, y, sucks);
+                HUDDrawImage(x, y, sucks);
             else
-                HudWriteText(single_player_intermission_style, StyleDefinition::kTextSectionTitle, x, y, "Sucks");
+                HUDWriteText(single_player_intermission_style, StyleDefinition::kTextSectionTitle, x, y, "Sucks");
         }
         else
         {
@@ -864,12 +864,12 @@ static void DrawTime(float x, float y, int t, bool drawText = false)
             {
                 if (c == ':')
                 {
-                    HudDrawImage(x, y, colon);
+                    HUDDrawImage(x, y, colon);
                     x += colon->ScaledWidthActual();
                 }
                 else if (epi::IsDigitASCII(c))
                 {
-                    HudDrawImage(x, y, digits[c - 48]);
+                    HUDDrawImage(x, y, digits[c - 48]);
                     x += digits[c - 48]->ScaledWidthActual();
                 }
             }
@@ -1108,9 +1108,9 @@ static void DrawDeathmatchStats(void)
     int t_type = StyleDefinition::kTextSectionTitle;
     int y      = kSinglePlayerStateStatsY; // 40;
 
-    HudWriteText(multiplayer_intermission_style, t_type, 20, y, "Player");
-    HudWriteText(multiplayer_intermission_style, t_type, 100, y, "Frags");
-    HudWriteText(multiplayer_intermission_style, t_type, 200, y, "Total");
+    HUDWriteText(multiplayer_intermission_style, t_type, 20, y, "Player");
+    HUDWriteText(multiplayer_intermission_style, t_type, 100, y, "Frags");
+    HUDWriteText(multiplayer_intermission_style, t_type, 200, y, "Total");
 
     for (int i = 0; i < kNumberOfPlayersShown; i++)
     {
@@ -1135,13 +1135,13 @@ static void DrawDeathmatchStats(void)
         char temp[40];
 
         sprintf(temp, "%s", players[p]->player_name_);
-        HudWriteText(multiplayer_intermission_style, t_type, 20, y, temp);
+        HUDWriteText(multiplayer_intermission_style, t_type, 20, y, temp);
 
         sprintf(temp, "%5d", deathmatch_frags[i]);
-        HudWriteText(multiplayer_intermission_style, t_type, 100, y, temp);
+        HUDWriteText(multiplayer_intermission_style, t_type, 100, y, temp);
 
         sprintf(temp, "%11d", deathmatch_totals[i]);
-        HudWriteText(multiplayer_intermission_style, t_type, 200, y, temp);
+        HUDWriteText(multiplayer_intermission_style, t_type, 200, y, temp);
     }
 }
 
@@ -1377,15 +1377,15 @@ static void DrawCoopStats(void)
 
     // FIXME: better alignment
 
-    HudWriteText(multiplayer_intermission_style, t_type, 6, y, "Player");
-    HudWriteText(multiplayer_intermission_style, t_type, 56, y, language["IntermissionKills"]);
-    HudWriteText(multiplayer_intermission_style, t_type, 98, y, language["IntermissionItems"]);
-    HudWriteText(multiplayer_intermission_style, t_type, 142, y, language["IntermissionSecrets"]);
+    HUDWriteText(multiplayer_intermission_style, t_type, 6, y, "Player");
+    HUDWriteText(multiplayer_intermission_style, t_type, 56, y, language["IntermissionKills"]);
+    HUDWriteText(multiplayer_intermission_style, t_type, 98, y, language["IntermissionItems"]);
+    HUDWriteText(multiplayer_intermission_style, t_type, 142, y, language["IntermissionSecrets"]);
 
     if (do_frags)
     {
-        HudWriteText(multiplayer_intermission_style, t_type, 190, y, "Frags");
-        HudWriteText(multiplayer_intermission_style, t_type, 232, y, "Total");
+        HUDWriteText(multiplayer_intermission_style, t_type, 190, y, "Frags");
+        HUDWriteText(multiplayer_intermission_style, t_type, 232, y, "Total");
     }
 
     for (int i = 0; i < kNumberOfPlayersShown; i++)
@@ -1411,24 +1411,24 @@ static void DrawCoopStats(void)
         char temp[40];
 
         sprintf(temp, "%s", players[p]->player_name_);
-        HudWriteText(multiplayer_intermission_style, t_type, 6, y, temp);
+        HUDWriteText(multiplayer_intermission_style, t_type, 6, y, temp);
 
         sprintf(temp, "%3d%%", count_kills[i]);
-        HudWriteText(multiplayer_intermission_style, t_type, 64, y, temp);
+        HUDWriteText(multiplayer_intermission_style, t_type, 64, y, temp);
 
         sprintf(temp, "%3d%%", count_items[i]);
-        HudWriteText(multiplayer_intermission_style, t_type, 106, y, temp);
+        HUDWriteText(multiplayer_intermission_style, t_type, 106, y, temp);
 
         sprintf(temp, "%3d%%", count_secrets[i]);
-        HudWriteText(multiplayer_intermission_style, t_type, 158, y, temp);
+        HUDWriteText(multiplayer_intermission_style, t_type, 158, y, temp);
 
         if (do_frags)
         {
             sprintf(temp, "%5d", count_frags[i]);
-            HudWriteText(multiplayer_intermission_style, t_type, 190, y, temp);
+            HUDWriteText(multiplayer_intermission_style, t_type, 190, y, temp);
 
             sprintf(temp, "%11d", count_totals[i]);
-            HudWriteText(multiplayer_intermission_style, t_type, 232, y, temp);
+            HUDWriteText(multiplayer_intermission_style, t_type, 232, y, temp);
         }
     }
 }
@@ -1591,16 +1591,16 @@ static void DrawSinglePlayerStats(void)
 
     if (drawTextBased == false)
     {
-        HudDrawImage(kSinglePlayerStateStatsX, kSinglePlayerStateStatsY, kills);
+        HUDDrawImage(kSinglePlayerStateStatsX, kSinglePlayerStateStatsY, kills);
         if (!s.empty())
             DrawPercent(320 - kSinglePlayerStateStatsX - PercentWidth(s), kSinglePlayerStateStatsY, s);
     }
     else
     {
-        HudWriteText(single_player_intermission_style, StyleDefinition::kTextSectionAlternate, kSinglePlayerStateStatsX,
+        HUDWriteText(single_player_intermission_style, StyleDefinition::kTextSectionAlternate, kSinglePlayerStateStatsX,
                      kSinglePlayerStateStatsY, language["IntermissionKills"]);
         if (!s.empty())
-            HudWriteText(
+            HUDWriteText(
                 single_player_intermission_style, StyleDefinition::kTextSectionAlternate,
                 320 - kSinglePlayerStateStatsX -
                     single_player_intermission_style->fonts_[StyleDefinition::kTextSectionAlternate]->StringWidth(
@@ -1618,16 +1618,16 @@ static void DrawSinglePlayerStats(void)
 
     if ((items) && (IsLumpInPwad(items->name_.c_str())))
     {
-        HudDrawImage(kSinglePlayerStateStatsX, kSinglePlayerStateStatsY + lh, items);
+        HUDDrawImage(kSinglePlayerStateStatsX, kSinglePlayerStateStatsY + lh, items);
         if (!s.empty())
             DrawPercent(320 - kSinglePlayerStateStatsX - PercentWidth(s), kSinglePlayerStateStatsY + lh, s);
     }
     else
     {
-        HudWriteText(single_player_intermission_style, StyleDefinition::kTextSectionAlternate, kSinglePlayerStateStatsX,
+        HUDWriteText(single_player_intermission_style, StyleDefinition::kTextSectionAlternate, kSinglePlayerStateStatsX,
                      kSinglePlayerStateStatsY + lh, language["IntermissionItems"]);
         if (!s.empty())
-            HudWriteText(
+            HUDWriteText(
                 single_player_intermission_style, StyleDefinition::kTextSectionAlternate,
                 320 - kSinglePlayerStateStatsX -
                     single_player_intermission_style->fonts_[StyleDefinition::kTextSectionAlternate]->StringWidth(
@@ -1645,16 +1645,16 @@ static void DrawSinglePlayerStats(void)
 
     if ((single_player_secret) && (IsLumpInPwad(single_player_secret->name_.c_str())))
     {
-        HudDrawImage(kSinglePlayerStateStatsX, kSinglePlayerStateStatsY + 2 * lh, single_player_secret);
+        HUDDrawImage(kSinglePlayerStateStatsX, kSinglePlayerStateStatsY + 2 * lh, single_player_secret);
         if (!s.empty())
             DrawPercent(320 - kSinglePlayerStateStatsX - PercentWidth(s), kSinglePlayerStateStatsY + 2 * lh, s);
     }
     else
     {
-        HudWriteText(single_player_intermission_style, StyleDefinition::kTextSectionAlternate, kSinglePlayerStateStatsX,
+        HUDWriteText(single_player_intermission_style, StyleDefinition::kTextSectionAlternate, kSinglePlayerStateStatsX,
                      kSinglePlayerStateStatsY + 2 * lh, language["IntermissionSecrets"]);
         if (!s.empty())
-            HudWriteText(
+            HUDWriteText(
                 single_player_intermission_style, StyleDefinition::kTextSectionAlternate,
                 320 - kSinglePlayerStateStatsX -
                     single_player_intermission_style->fonts_[StyleDefinition::kTextSectionAlternate]->StringWidth(
@@ -1664,12 +1664,12 @@ static void DrawSinglePlayerStats(void)
 
     if ((time_image) && (IsLumpInPwad(time_image->name_.c_str())))
     {
-        HudDrawImage(kSinglePlayerStateTimeX, kSinglePlayerStateTimeY, time_image);
+        HUDDrawImage(kSinglePlayerStateTimeX, kSinglePlayerStateTimeY, time_image);
         DrawTime(160 - kSinglePlayerStateTimeX - TimeWidth(count_time), kSinglePlayerStateTimeY, count_time);
     }
     else
     {
-        HudWriteText(single_player_intermission_style, StyleDefinition::kTextSectionAlternate, kSinglePlayerStateTimeX,
+        HUDWriteText(single_player_intermission_style, StyleDefinition::kTextSectionAlternate, kSinglePlayerStateTimeX,
                      kSinglePlayerStateTimeY, language["IntermissionTime"]);
         DrawTime(160 - kSinglePlayerStateTimeX - TimeWidth(count_time, true), kSinglePlayerStateTimeY, count_time,
                  true);
@@ -1680,12 +1680,12 @@ static void DrawSinglePlayerStats(void)
     {
         if ((par) && (IsLumpInPwad(par->name_.c_str())))
         {
-            HudDrawImage(170, kSinglePlayerStateTimeY, par);
+            HUDDrawImage(170, kSinglePlayerStateTimeY, par);
             DrawTime(320 - kSinglePlayerStateTimeX - TimeWidth(count_par), kSinglePlayerStateTimeY, count_par);
         }
         else
         {
-            HudWriteText(single_player_intermission_style, StyleDefinition::kTextSectionAlternate, 170,
+            HUDWriteText(single_player_intermission_style, StyleDefinition::kTextSectionAlternate, 170,
                          kSinglePlayerStateTimeY, "Par");
             DrawTime(320 - kSinglePlayerStateTimeX - TimeWidth(count_par, true), kSinglePlayerStateTimeY, count_par,
                      true);
@@ -1790,19 +1790,19 @@ void IntermissionDrawer(void)
 {
     EPI_ASSERT(game_state == kGameStateIntermission);
 
-    HudReset();
+    HUDReset();
 
     if (background_camera_map_object)
     {
-        HudRenderWorld(0, 0, 320, 200, background_camera_map_object, 0);
+        HUDRenderWorld(0, 0, 320, 200, background_camera_map_object, 0);
     }
     else
     {
-        // HudStretchImage(0, 0, 320, 200, background_image);
+        // HUDStretchImage(0, 0, 320, 200, background_image);
         if (background_image)
         {
             if (tile_background)
-                HudTileImage(-240, 0, 820, 200,
+                HUDTileImage(-240, 0, 820, 200,
                              background_image); // Lobo: Widescreen support
             else
             {
@@ -1810,9 +1810,9 @@ void IntermissionDrawer(void)
                 {
                     if (!background_image->blurred_version_)
                         StoreBlurredImage(background_image);
-                    HudStretchImage(-320, -200, 960, 600, background_image->blurred_version_, 0, 0);
+                    HUDStretchImage(-320, -200, 960, 600, background_image->blurred_version_, 0, 0);
                 }
-                HudDrawImageTitleWS(background_image);
+                HUDDrawImageTitleWS(background_image);
             }
 
             for (int i = 0; i < world_intermission.total_animations_; i++)
@@ -1836,7 +1836,7 @@ void IntermissionDrawer(void)
                     f = &a->frames_[a->frame_on_];
 
                 if (f)
-                    HudDrawImage(f->info->x_, f->info->y_, f->image);
+                    HUDDrawImage(f->info->x_, f->info->y_, f->image);
             }
         }
     }

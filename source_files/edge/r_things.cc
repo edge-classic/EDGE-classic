@@ -203,7 +203,7 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player, Re
 
     float ty1 = -psp->screen_y + image->ScaledOffsetY() - ((h - image->ScaledHeightActual()) * 0.5f);
 
-    if (LuaUseLuaHud())
+    if (LuaUseLuaHUD())
     {
         // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
         if ((state->flags & kStateFrameFlagWeapon) && (player->ready_weapon_ >= 0))
@@ -638,7 +638,7 @@ void RendererDrawWeaponModel(Player *p)
 
     float bias = 0.0f;
 
-    if (LuaUseLuaHud())
+    if (LuaUseLuaHUD())
     {
         bias =
             LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") + p->weapons_[p->ready_weapon_].info->y_adjust_;

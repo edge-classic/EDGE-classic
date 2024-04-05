@@ -47,8 +47,8 @@
 // -ACB- 1998/08/09 Removed the HUDTITLE stuff; Use current_map->description.
 //
 
-static constexpr uint16_t kHudMessageTimeout          = (4 * kTicRate);
-static constexpr uint16_t kHudImportantMessageTimeout = (4 * kTicRate);
+static constexpr uint16_t kHUDMessageTimeout          = (4 * kTicRate);
+static constexpr uint16_t kHUDImportantMessageTimeout = (4 * kTicRate);
 
 std::string current_map_title;
 
@@ -68,7 +68,7 @@ Style *important_message_style;
 //
 // Heads-up Init
 //
-void HudInit(void)
+void HUDInit(void)
 {
     // should use language["HeadsUpInit"], but LDF hasn't been loaded yet
     StartupProgressMessage("Setting up HUD...\n");
@@ -76,7 +76,7 @@ void HudInit(void)
 }
 
 // -ACB- 1998/08/09 Used current_map to set the map name in string
-void HudStart(void)
+void HUDStart(void)
 {
     const char *string;
 
@@ -121,7 +121,7 @@ void HudStart(void)
     hud_tic = 0;
 }
 
-void HudDrawer(void)
+void HUDDrawer(void)
 {
     ConsoleShowFPS();
     ConsoleShowPosition();
@@ -140,11 +140,11 @@ void HudDrawer(void)
         y = tempY;
 
         message_style->DrawBackground();
-        HudSetAlignment(0, 0); // center it
-        HudSetAlpha(message_style->definition_->text_->translucency_);
-        HudWriteText(message_style, 0, 160, y, current_message.c_str());
-        HudSetAlignment();
-        HudSetAlpha();
+        HUDSetAlignment(0, 0); // center it
+        HUDSetAlpha(message_style->definition_->text_->translucency_);
+        HUDWriteText(message_style, 0, 160, y, current_message.c_str());
+        HUDSetAlignment();
+        HUDSetAlpha();
     }
 
     if (important_message_on)
@@ -156,18 +156,18 @@ void HudDrawer(void)
         tempY /= 2;
         y = 90 - tempY;
         important_message_style->DrawBackground();
-        HudSetAlignment(0, 0); // center it
-        HudSetAlpha(important_message_style->definition_->text_->translucency_);
-        HudWriteText(important_message_style, 0, 160, y, current_important_message_message.c_str());
-        HudSetAlignment();
-        HudSetAlpha();
+        HUDSetAlignment(0, 0); // center it
+        HUDSetAlpha(important_message_style->definition_->text_->translucency_);
+        HUDWriteText(important_message_style, 0, 160, y, current_important_message_message.c_str());
+        HUDSetAlignment();
+        HUDSetAlpha();
     }
 
     // TODO: chat messages
 }
 
 // Starts displaying the message.
-void HudStartMessage(const char *msg)
+void HUDStartMessage(const char *msg)
 {
     // only display message if necessary
     if (!message_no_overwrite)
@@ -175,13 +175,13 @@ void HudStartMessage(const char *msg)
         current_message = std::string(msg);
 
         message_on           = true;
-        message_counter      = kHudMessageTimeout;
+        message_counter      = kHUDMessageTimeout;
         message_no_overwrite = false;
     }
 }
 
 // Starts displaying the message.
-void HudStartImportantMessage(const char *msg)
+void HUDStartImportantMessage(const char *msg)
 {
     // only display message if necessary
     if (!message_no_overwrite)
@@ -189,12 +189,12 @@ void HudStartImportantMessage(const char *msg)
         current_important_message_message = std::string(msg);
 
         important_message_on      = true;
-        important_message_counter = kHudImportantMessageTimeout;
+        important_message_counter = kHUDImportantMessageTimeout;
         message_no_overwrite      = false;
     }
 }
 
-void HudTicker(void)
+void HUDTicker(void)
 {
     // tick down message counter if message is up
     if (message_counter && !--message_counter)

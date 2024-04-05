@@ -160,7 +160,7 @@ static void SendTip(RADScriptTrigger *R, ScriptTip *tip, int slot)
 //
 void DisplayScriptTips(void)
 {
-    HudReset();
+    HUDReset();
 
     // lookup styles
     StyleDefinition *def;
@@ -206,30 +206,30 @@ void DisplayScriptTips(void)
         if (alpha < 0.02f)
             continue;
 
-        HudSetScale(current->scale);
-        HudSetTextColor(current->color);
-        HudSetAlpha(alpha);
+        HUDSetScale(current->scale);
+        HUDSetTextColor(current->color);
+        HUDSetAlpha(alpha);
 
         if (current->p.left_just)
-            HudSetAlignment(-1, 0);
+            HUDSetAlignment(-1, 0);
         else
-            HudSetAlignment(0, 0);
+            HUDSetAlignment(0, 0);
 
         float x = current->p.x_pos * 320.0f;
         float y = current->p.y_pos * 200.0f;
 
         if (rts_tip_style->fonts_[StyleDefinition::kTextSectionText])
-            HudSetFont(rts_tip_style->fonts_[StyleDefinition::kTextSectionText]);
+            HUDSetFont(rts_tip_style->fonts_[StyleDefinition::kTextSectionText]);
 
         if (current->tip_graphic)
-            HudDrawImage(x, y, current->tip_graphic);
+            HUDDrawImage(x, y, current->tip_graphic);
         else
-            HudDrawText(x, y, current->tip_text);
+            HUDDrawText(x, y, current->tip_text);
 
-        HudSetAlignment();
-        HudSetAlpha();
-        HudSetScale();
-        HudSetTextColor();
+        HUDSetAlignment();
+        HUDSetAlpha();
+        HUDSetScale();
+        HUDSetTextColor();
     }
 }
 

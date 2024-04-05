@@ -859,7 +859,7 @@ bool PlayerThink(Player *player, bool extra_tic)
     player->action_button_down_[0] = (cmd->extended_buttons & kExtendedButtonCodeAction1) ? true : false;
     player->action_button_down_[1] = (cmd->extended_buttons & kExtendedButtonCodeAction2) ? true : false;
 
-    if (LuaUseLuaHud())
+    if (LuaUseLuaHUD())
         LuaSetVector3(LuaGetGlobalVM(), "player", "inventory_event_handler",
                       HMM_Vec3{{cmd->extended_buttons & kExtendedButtonCodeInventoryPrevious ? 1.0f : 0.0f,
                                 cmd->extended_buttons & kExtendedButtonCodeInventoryUse ? 1.0f : 0.0f,

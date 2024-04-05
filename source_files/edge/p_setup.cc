@@ -3386,7 +3386,7 @@ void LevelSetup(void)
         FatalError("No such level: %s\n", current_map->lump_.c_str());
 
     // get lump for XGL3 nodes from an XWA file
-    int xgl_lump = CheckXglLumpNumberForName(current_map->lump_.c_str());
+    int xgl_lump = CheckXGLLumpNumberForName(current_map->lump_.c_str());
 
     // ignore XGL nodes if it occurs _before_ the normal level marker.
     // [ something has gone horribly wrong if this happens! ]

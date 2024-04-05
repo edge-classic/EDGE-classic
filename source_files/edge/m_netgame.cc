@@ -84,25 +84,25 @@ static void DrawKeyword(int index, Style *style, int y, const char *keyword, con
     x = x - 10;
     x = x - (style->fonts_[StyleDefinition::kTextSectionText]->StringWidth(keyword) *
              style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
-    HudWriteText(style, (index < 0) ? 3 : is_selected ? 2 : 0, x, y, keyword);
+    HUDWriteText(style, (index < 0) ? 3 : is_selected ? 2 : 0, x, y, keyword);
 
     x = 160;
-    HudWriteText(style, StyleDefinition::kTextSectionAlternate, x + 10, y, value);
+    HUDWriteText(style, StyleDefinition::kTextSectionAlternate, x + 10, y, value);
 
     if (is_selected)
     {
         if (style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeImage)
         {
             int cursor = 16;
-            HudWriteText(style, StyleDefinition::kTextSectionTitle,
+            HUDWriteText(style, StyleDefinition::kTextSectionTitle,
                          x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth((const char *)&cursor) / 2,
                          y, (const char *)&cursor);
         }
         else if (style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType)
-            HudWriteText(style, StyleDefinition::kTextSectionTitle,
+            HUDWriteText(style, StyleDefinition::kTextSectionTitle,
                          x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth("+") / 2, y, "+");
         else
-            HudWriteText(style, StyleDefinition::kTextSectionTitle,
+            HUDWriteText(style, StyleDefinition::kTextSectionTitle,
                          x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth("*") / 2, y, "*");
     }
 }
@@ -437,7 +437,7 @@ void OptionMenuDrawHostMenu(void)
          network_game_host_style->definition_->text_[StyleDefinition::kTextSectionHeader].scale_) /
         2;
 
-    HudWriteText(network_game_host_style, StyleDefinition::kTextSectionHeader, CenterX, 25, "Bot Match Settings");
+    HUDWriteText(network_game_host_style, StyleDefinition::kTextSectionHeader, CenterX, 25, "Bot Match Settings");
 
     int y      = 40;
     int idx    = 0;
@@ -486,7 +486,7 @@ void OptionMenuDrawHostMenu(void)
     int x =
         150 - (network_game_host_style->fonts_[StyleDefinition::kTextSectionText]->StringWidth("(Deathmatch Only)") *
                network_game_host_style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
-    HudWriteText(network_game_host_style, idx - 1 == host_position ? 2 : 0, x, y, "(Deathmatch Only)");
+    HUDWriteText(network_game_host_style, idx - 1 == host_position ? 2 : 0, x, y, "(Deathmatch Only)");
     y += deltay;
 
     DrawKeyword(idx, network_game_host_style, y, "Monsters",
@@ -511,7 +511,7 @@ void OptionMenuDrawHostMenu(void)
                 network_game_host_style->definition_->text_[StyleDefinition::kTextSectionText].scale_) /
                2;
 
-    HudWriteText(network_game_host_style,
+    HUDWriteText(network_game_host_style,
                  (host_position == idx) ? StyleDefinition::kTextSectionHelp : StyleDefinition::kTextSectionText,
                  CenterX, y, "Start");
 }
@@ -569,11 +569,11 @@ static void NetGameStartLevel(void)
 
 void OptionMenuDrawPlayerList(void)
 {
-    HudSetAlpha(0.64f);
-    HudSolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
-    HudSetAlpha();
+    HUDSetAlpha(0.64f);
+    HUDSolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
+    HUDSetAlpha();
 
-    HudWriteText(network_game_list_style, 2, 80, 10, "PLAYER LIST");
+    HUDWriteText(network_game_list_style, 2, 80, 10, "PLAYER LIST");
 
     int y = 30;
     int i;
@@ -601,17 +601,17 @@ void OptionMenuDrawPlayerList(void)
                 bots_here++;
         }
 
-        HudWriteText(network_game_list_style, (flags & kPlayerFlagNetwork) ? 0 : 3, 20, y,
+        HUDWriteText(network_game_list_style, (flags & kPlayerFlagNetwork) ? 0 : 3, 20, y,
                      epi::StringFormat("PLAYER %d", humans).c_str());
 
-        HudWriteText(network_game_list_style, 1, 100, y, "Local");
+        HUDWriteText(network_game_list_style, 1, 100, y, "Local");
 
-        HudWriteText(network_game_list_style, (flags & kPlayerFlagNetwork) ? 0 : 3, 200, y,
+        HUDWriteText(network_game_list_style, (flags & kPlayerFlagNetwork) ? 0 : 3, 200, y,
                      epi::StringFormat("%d BOTS", bots_here).c_str());
         y += 10;
     }
 
-    HudWriteText(network_game_list_style, 2, 40, 140, "Press <ENTER> to Start Game");
+    HUDWriteText(network_game_list_style, 2, 40, 140, "Press <ENTER> to Start Game");
 }
 
 static void ListAccept()

@@ -449,7 +449,7 @@ void CoalInitialize()
     ui_vm->SetPrinter(CoalPrinter);
 
     CoalRegisterBASE(ui_vm);
-    CoalRegisterHud();
+    CoalRegisterHUD();
     CoalRegisterPlaysim();
 }
 

@@ -168,58 +168,58 @@ class rts_menu_c
     {
         style->DrawBackground();
 
-        HudReset();
+        HUDReset();
 
-        HudSetAlignment(0, -1);
+        HUDSetAlignment(0, -1);
 
-        HudSetScale(style->definition_->text_[2].scale_); // LOBO: Use TITLE.SCALE from styles.ddf
-        HudSetFont(style->fonts_[2]);                     // LOBO: Use TITLE.FONT from styles.ddf
+        HUDSetScale(style->definition_->text_[2].scale_); // LOBO: Use TITLE.SCALE from styles.ddf
+        HUDSetFont(style->fonts_[2]);                     // LOBO: Use TITLE.FONT from styles.ddf
 
-        float total_h = HudStringHeight(title.c_str());
-        total_h += HudFontHeight() * (NumChoices() + 1);
+        float total_h = HUDStringHeight(title.c_str());
+        total_h += HUDFontHeight() * (NumChoices() + 1);
 
         float y = 100 - total_h / 2.0f;
 
         if (style->definition_->text_[2].colmap_)
         {
-            HudSetTextColor(
+            HUDSetTextColor(
                 GetFontColor(style->definition_->text_[2].colmap_)); // LOBO: Use TITLE.COLOURMAP from styles.ddf
         }
         else
         {
-            HudSetTextColor(SG_WHITE_RGBA32);
+            HUDSetTextColor(SG_WHITE_RGBA32);
         }
 
-        HudDrawText(160, y, title.c_str());
+        HUDDrawText(160, y, title.c_str());
 
-        HudSetScale();
-        HudSetFont();
-        HudSetTextColor();
+        HUDSetScale();
+        HUDSetFont();
+        HUDSetTextColor();
 
-        HudSetScale(style->definition_->text_[0].scale_); // LOBO: Use TEXT.SCALE from styles.ddf
-        HudSetFont(style->fonts_[0]);                     // LOBO: Use TEXT.FONT from styles.ddf
+        HUDSetScale(style->definition_->text_[0].scale_); // LOBO: Use TEXT.SCALE from styles.ddf
+        HUDSetFont(style->fonts_[0]);                     // LOBO: Use TEXT.FONT from styles.ddf
 
-        y += HudStringHeight(title.c_str());
-        y += HudFontHeight();
+        y += HUDStringHeight(title.c_str());
+        y += HUDFontHeight();
 
         if (style->definition_->text_[0].colmap_)
         {
-            HudSetTextColor(
+            HUDSetTextColor(
                 GetFontColor(style->definition_->text_[0].colmap_)); // LOBO: Use TEXT.COLOURMAP from styles.ddf
         }
         else
         {
-            HudSetTextColor(SG_LIGHT_BLUE_RGBA32);
+            HUDSetTextColor(SG_LIGHT_BLUE_RGBA32);
         }
 
-        for (int c = 0; c < NumChoices(); c++, y += HudFontHeight())
+        for (int c = 0; c < NumChoices(); c++, y += HUDFontHeight())
         {
-            HudDrawText(160, y, choices[c].c_str());
+            HUDDrawText(160, y, choices[c].c_str());
         }
-        HudSetScale();
-        HudSetFont();
-        HudSetAlignment();
-        HudSetTextColor();
+        HUDSetScale();
+        HUDSetFont();
+        HUDSetAlignment();
+        HUDSetTextColor();
     }
 
     int Check(int key)

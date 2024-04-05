@@ -204,7 +204,7 @@ static SaveSlotExtendedInformation save_extended_information_slots[kTotalSaveSlo
 static constexpr int8_t kSliderLeft  = -1;
 static constexpr int8_t kSliderRight = -2;
 
-static constexpr uint8_t kTotalScreenHuds = 120;
+static constexpr uint8_t kTotalScreenHUDs = 120;
 
 //
 // MENU TYPEDEFS
@@ -657,18 +657,18 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style, float LineHe
     std::string temp_string = epi::StringFormat("PAGE %d", save_page + 1);
 
     if (save_page > 0)
-        HudWriteText(style, text_type, x - 4, y, "< PREV");
+        HUDWriteText(style, text_type, x - 4, y, "< PREV");
 
     x += style->fonts_[text_type]->StringWidth("< PREV") * txtscale;
     x += 30;
 
-    HudWriteText(style, text_type, x, y, temp_string.c_str());
+    HUDWriteText(style, text_type, x, y, temp_string.c_str());
 
     x += style->fonts_[text_type]->StringWidth(temp_string.c_str()) * txtscale;
     x += 30;
 
     if (save_page < kTotalSavePages - 1)
-        HudWriteText(style, text_type, x, y, "NEXT >");
+        HUDWriteText(style, text_type, x, y, "NEXT >");
 
     info = save_extended_information_slots + item_on;
     EPI_ASSERT(0 <= item_on && item_on < kTotalSaveSlots);
@@ -687,8 +687,8 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style, float LineHe
 
     const Colormap *colmap = style->definition_->text_[text_type].colmap_;
     RGBAColor       col    = GetFontColor(colmap);
-    // HudThinBox(x - 5, y - 5, x + 95, y + 50, col);
-    HudThinBox(x - 5, y - 5, x + 95, y + 115, col);
+    // HUDThinBox(x - 5, y - 5, x + 95, y + 50, col);
+    HUDThinBox(x - 5, y - 5, x + 95, y + 115, col);
 
     if (entering_save_string || info->empty || info->corrupt)
         return;
@@ -698,22 +698,22 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style, float LineHe
         temp_string = temp_string.substr(1);
     size_t timesplit = temp_string.find("  ");
     EPI_ASSERT(timesplit != std::string::npos && temp_string.size() > timesplit + 2);
-    HudWriteText(style, text_type, x, y, temp_string.substr(0, timesplit).c_str());
+    HUDWriteText(style, text_type, x, y, temp_string.substr(0, timesplit).c_str());
     y += LineHeight;
     y += style->definition_->entry_spacing_;
-    HudWriteText(style, text_type, x, y, temp_string.substr(timesplit + 2).c_str());
+    HUDWriteText(style, text_type, x, y, temp_string.substr(timesplit + 2).c_str());
     y += LineHeight;
     y += style->definition_->entry_spacing_;
 
     temp_string = info->game_name;
     temp_string = LoboStringReplaceAll(temp_string, std::string("_"), std::string(" "));
-    HudWriteText(style, text_type, x, y, temp_string.c_str());
+    HUDWriteText(style, text_type, x, y, temp_string.c_str());
 
     y += LineHeight;
     y += style->definition_->entry_spacing_;
 
     temp_string = info->map_name;
-    HudWriteText(style, text_type, x, y, temp_string.c_str());
+    HUDWriteText(style, text_type, x, y, temp_string.c_str());
 
     y += LineHeight;
     y += style->definition_->entry_spacing_;
@@ -736,7 +736,7 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style, float LineHe
         temp_string = language["MenuDifficulty5"];
         break;
     }
-    HudWriteText(style, text_type, x, y, temp_string.c_str());
+    HUDWriteText(style, text_type, x, y, temp_string.c_str());
 
     /*int BottomY = 0;
     BottomY =
@@ -748,7 +748,7 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style, float LineHe
     {
         y += 20;
         // BottomY -= y;
-        HudStretchFromImageData(
+        HUDStretchFromImageData(
             x - 3, y, 95,
             (style->definition_->text_[text_type].y_offset_ + style->definition_->entry_spacing_ + 114) - y,
             info->save_image_data, info->save_texture_id, kOpacitySolid);
@@ -764,7 +764,7 @@ void MenuDrawLoad(void)
     int   TempX = 0;
     int   TempY = 0;
 
-    float old_alpha = HudGetAlpha();
+    float old_alpha = HUDGetAlpha();
 
     Style *style = LoadMenuDefinition.style_variable[0];
 
@@ -776,16 +776,16 @@ void MenuDrawLoad(void)
     else
         fontType = StyleDefinition::kTextSectionHeader;
 
-    HudSetAlpha(style->definition_->text_[fontType].translucency_);
+    HUDSetAlpha(style->definition_->text_[fontType].translucency_);
 
     // 1. Draw the header i.e. "Load Game"
     TempX = CenterMenuText(style, fontType, language["MainLoadGame"]);
     TempY = 5;
     TempY += style->definition_->text_[fontType].y_offset_;
 
-    HudWriteText(style, fontType, TempX, TempY, language["MainLoadGame"]);
+    HUDWriteText(style, fontType, TempX, TempY, language["MainLoadGame"]);
 
-    HudSetAlpha(old_alpha);
+    HUDSetAlpha(old_alpha);
 
     TempX = 0;
     TempY = 0;
@@ -797,7 +797,7 @@ void MenuDrawLoad(void)
     TempY += style->definition_->entry_spacing_;
 
     RGBAColor col = GetFontColor(style->definition_->text_[fontType].colmap_);
-    HudThinBox(TempX - 5, TempY - 5, TempX + 175, TempY + 115, col);
+    HUDThinBox(TempX - 5, TempY - 5, TempX + 175, TempY + 115, col);
 
     // 2. draw the save games
     for (i = 0; i < kTotalSaveSlots; i++)
@@ -819,22 +819,22 @@ void MenuDrawLoad(void)
                 float y_shift = style->fonts_[StyleDefinition::kTextSectionSelected]
                                     ->truetype_reference_yshift_[current_font_size]; // * txtscale;
 
-                HudSetAlpha(0.33f);
-                HudSolidBox(TempX - 3, TempY - 2 + (y_shift / 2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
-                HudSetAlpha(old_alpha);
+                HUDSetAlpha(0.33f);
+                HUDSolidBox(TempX - 3, TempY - 2 + (y_shift / 2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
+                HUDSetAlpha(old_alpha);
             }
             else
             {
-                HudSetAlpha(0.33f);
-                HudSolidBox(TempX - 3, TempY - 2, TempX + 173, TempY + LineHeight + 2, col);
-                HudSetAlpha(old_alpha);
+                HUDSetAlpha(0.33f);
+                HUDSolidBox(TempX - 3, TempY - 2, TempX + 173, TempY + LineHeight + 2, col);
+                HUDSetAlpha(old_alpha);
             }
         }
         if (style->fonts_[fontType]->definition_->type_ == kFontTypeTrueType)
-            HudWriteText(style, fontType, TempX, TempY - (LineHeight / 2),
+            HUDWriteText(style, fontType, TempX, TempY - (LineHeight / 2),
                          save_extended_information_slots[i].description);
         else
-            HudWriteText(style, fontType, TempX, TempY - 1, save_extended_information_slots[i].description);
+            HUDWriteText(style, fontType, TempX, TempY - 1, save_extended_information_slots[i].description);
         TempY += LineHeight + (LineHeight / 2);
         TempY += style->definition_->entry_spacing_;
     }
@@ -883,7 +883,7 @@ void MenuDrawSave(void)
     int   TempX = 0;
     int   TempY = 0;
 
-    float old_alpha = HudGetAlpha();
+    float old_alpha = HUDGetAlpha();
 
     Style *style = SaveMenuDefinition.style_variable[0];
 
@@ -897,16 +897,16 @@ void MenuDrawSave(void)
 
     float txtscale = style->definition_->text_[fontType].scale_;
 
-    HudSetAlpha(style->definition_->text_[fontType].translucency_);
+    HUDSetAlpha(style->definition_->text_[fontType].translucency_);
 
     // 1. Draw the header i.e. "Load Game"
     TempX = CenterMenuText(style, fontType, language["MainSaveGame"]);
     TempY = 5;
     TempY += style->definition_->text_[fontType].y_offset_;
 
-    HudWriteText(style, fontType, TempX, TempY, language["MainSaveGame"]);
+    HUDWriteText(style, fontType, TempX, TempY, language["MainSaveGame"]);
 
-    HudSetAlpha(old_alpha);
+    HUDSetAlpha(old_alpha);
 
     fontType = StyleDefinition::kTextSectionText;
     TempX    = 0;
@@ -916,7 +916,7 @@ void MenuDrawSave(void)
     TempY += style->definition_->entry_spacing_;
 
     RGBAColor col = GetFontColor(style->definition_->text_[fontType].colmap_);
-    HudThinBox(TempX - 5, TempY - 5, TempX + 175, TempY + 115, col);
+    HUDThinBox(TempX - 5, TempY - 5, TempX + 175, TempY + 115, col);
 
     // 2. draw the save games
     for (i = 0; i < kTotalSaveSlots; i++)
@@ -941,15 +941,15 @@ void MenuDrawSave(void)
                 // truetype_reference_yshift_ is important for TTF fonts.
                 float y_shift = style->fonts_[fontType]->truetype_reference_yshift_[current_font_size]; // * txtscale;
 
-                HudSetAlpha(0.33f);
-                HudSolidBox(TempX - 3, TempY - 2 + (y_shift / 2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
-                HudSetAlpha(old_alpha);
+                HUDSetAlpha(0.33f);
+                HUDSolidBox(TempX - 3, TempY - 2 + (y_shift / 2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
+                HUDSetAlpha(old_alpha);
             }
             else
             {
-                HudSetAlpha(0.33f);
-                HudSolidBox(TempX - 3, TempY - 2, TempX + 173, TempY + LineHeight + 2, col);
-                HudSetAlpha(old_alpha);
+                HUDSetAlpha(0.33f);
+                HUDSolidBox(TempX - 3, TempY - 2, TempX + 173, TempY + LineHeight + 2, col);
+                HUDSetAlpha(old_alpha);
             }
         }
 
@@ -975,21 +975,21 @@ void MenuDrawSave(void)
 
         if (style->fonts_[fontType]->definition_->type_ == kFontTypeTrueType)
         {
-            HudWriteText(style, fontType, TempX, TempY - (LineHeight / 2),
+            HUDWriteText(style, fontType, TempX, TempY - (LineHeight / 2),
                          save_extended_information_slots[i].description);
 
             if (entering_save)
             {
-                HudWriteText(style, fontType, TempX + len, TempY - (LineHeight / 2), "_");
+                HUDWriteText(style, fontType, TempX + len, TempY - (LineHeight / 2), "_");
             }
         }
         else
         {
-            HudWriteText(style, fontType, TempX, TempY - 1, save_extended_information_slots[i].description);
+            HUDWriteText(style, fontType, TempX, TempY - 1, save_extended_information_slots[i].description);
 
             if (entering_save)
             {
-                HudWriteText(style, fontType, TempX + len, TempY - 1, "_");
+                HUDWriteText(style, fontType, TempX + len, TempY - 1, "_");
             }
         }
 
@@ -1148,7 +1148,7 @@ void MenuQuickLoad(void)
 //
 void MenuDrawReadThis1(void)
 {
-    HudDrawImageTitleWS(menu_read_this[0]);
+    HUDDrawImageTitleWS(menu_read_this[0]);
 }
 
 //
@@ -1156,7 +1156,7 @@ void MenuDrawReadThis1(void)
 //
 void MenuDrawReadThis2(void)
 {
-    HudDrawImageTitleWS(menu_read_this[1]);
+    HUDDrawImageTitleWS(menu_read_this[1]);
 }
 
 void MenuDrawMainMenu(void)
@@ -1167,7 +1167,7 @@ void MenuDrawMainMenu(void)
     else
         CenterX = CenterMenuImage(menu_doom);
 
-    HudDrawImage(CenterX, 2, menu_doom);
+    HUDDrawImage(CenterX, 2, menu_doom);
 }
 
 void MenuDrawNewGame(void)
@@ -1184,9 +1184,9 @@ void MenuDrawNewGame(void)
 
     float txtscale = style->definition_->text_[fontType].scale_;
 
-    float old_alpha = HudGetAlpha();
+    float old_alpha = HUDGetAlpha();
 
-    HudSetAlpha(style->definition_->text_[fontType].translucency_);
+    HUDSetAlpha(style->definition_->text_[fontType].translucency_);
 
     if (custom_MenuDifficulty == false)
     {
@@ -1194,20 +1194,20 @@ void MenuDrawNewGame(void)
             x = CenterMenuText(style, fontType, language["MainNewGame"]);
         else
             x = 94;
-        HudWriteText(style, fontType, x + style->definition_->text_[fontType].x_offset_,
+        HUDWriteText(style, fontType, x + style->definition_->text_[fontType].x_offset_,
                      14 + style->definition_->text_[fontType].y_offset_, language["MainNewGame"]);
 
-        HudSetAlpha(old_alpha);
+        HUDSetAlpha(old_alpha);
         fontType = StyleDefinition::kTextSectionTitle;
         txtscale = style->definition_->text_[fontType].scale_;
-        HudSetAlpha(style->definition_->text_[fontType].translucency_);
+        HUDSetAlpha(style->definition_->text_[fontType].translucency_);
 
         if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentCenter)
             x = CenterMenuText(style, fontType, language["MenuSkill"]);
         else
             x = 54;
 
-        HudWriteText(style, fontType, x + style->definition_->text_[fontType].x_offset_,
+        HUDWriteText(style, fontType, x + style->definition_->text_[fontType].x_offset_,
                      38 + style->definition_->text_[fontType].y_offset_, language["MenuSkill"]);
     }
     else
@@ -1218,18 +1218,18 @@ void MenuDrawNewGame(void)
         else
             x = CenterMenuImage2(style, fontType, menu_new_game);
 
-        HudStretchImage(x, 14 + style->definition_->text_[fontType].y_offset_,
+        HUDStretchImage(x, 14 + style->definition_->text_[fontType].y_offset_,
                         menu_new_game->ScaledWidthActual() * txtscale, menu_new_game->ScaledHeightActual() * txtscale,
                         menu_new_game, 0.0, 0.0, colmap);
 
-        // HudDrawImage(x + style->definition_->text[fontType].x_offset,
+        // HUDDrawImage(x + style->definition_->text[fontType].x_offset,
         //	14 + style->definition_->text[fontType].y_offset, menu_new_game,
         // colmap);
 
-        HudSetAlpha(old_alpha);
+        HUDSetAlpha(old_alpha);
         fontType = StyleDefinition::kTextSectionTitle;
         txtscale = style->definition_->text_[fontType].scale_;
-        HudSetAlpha(style->definition_->text_[fontType].translucency_);
+        HUDSetAlpha(style->definition_->text_[fontType].translucency_);
 
         x = 54;
         if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentCenter)
@@ -1240,15 +1240,15 @@ void MenuDrawNewGame(void)
                 x = CenterMenuImage2(style, fontType, menu_skill);
         }
         colmap = style->definition_->text_[fontType].colmap_;
-        HudStretchImage(x, 38 + style->definition_->text_[fontType].y_offset_,
+        HUDStretchImage(x, 38 + style->definition_->text_[fontType].y_offset_,
                         menu_skill->ScaledWidthActual() * txtscale, menu_skill->ScaledHeightActual() * txtscale,
                         menu_skill, 0.0, 0.0, colmap);
 
-        // HudDrawImage(x + style->definition_->text[fontType].x_offset,
+        // HUDDrawImage(x + style->definition_->text[fontType].x_offset,
         //	38 + style->definition_->text[fontType].y_offset, menu_skill,
         // colmap);
     }
-    HudSetAlpha(old_alpha);
+    HUDSetAlpha(old_alpha);
 }
 
 //
@@ -1351,15 +1351,15 @@ void MenuDrawEpisode(void)
 
     float txtscale = style->definition_->text_[fontType].scale_;
 
-    float old_alpha = HudGetAlpha();
-    HudSetAlpha(style->definition_->text_[fontType].translucency_);
+    float old_alpha = HUDGetAlpha();
+    HUDSetAlpha(style->definition_->text_[fontType].translucency_);
 
     if (custom_MenuEpisode == false)
     {
         if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentCenter)
             x = CenterMenuText(style, fontType, language["MenuWhichEpisode"]);
 
-        HudWriteText(style, fontType, x + style->definition_->text_[fontType].x_offset_,
+        HUDWriteText(style, fontType, x + style->definition_->text_[fontType].x_offset_,
                      38 + style->definition_->text_[fontType].y_offset_, language["MenuWhichEpisode"]);
     }
     else
@@ -1373,16 +1373,16 @@ void MenuDrawEpisode(void)
         }
 
         const Colormap *colmap = style->definition_->text_[fontType].colmap_;
-        HudStretchImage(x, 38 + style->definition_->text_[fontType].y_offset_,
+        HUDStretchImage(x, 38 + style->definition_->text_[fontType].y_offset_,
                         menu_episode->ScaledWidthActual() * txtscale, menu_episode->ScaledHeightActual() * txtscale,
                         menu_episode, 0.0, 0.0, colmap);
 
-        // HudDrawImage(x + episode_style->definition_->text[fontType].x_offset,
+        // HUDDrawImage(x + episode_style->definition_->text[fontType].x_offset,
         //	38 + episode_style->definition_->text[fontType].y_offset,
         // menu_episode, colmap);
     }
 
-    HudSetAlpha(old_alpha);
+    HUDSetAlpha(old_alpha);
 }
 
 static void ReallyDoStartLevel(SkillLevel skill, GameDefinition *g)
@@ -1728,7 +1728,7 @@ void MenuDrawSlider(int x, int y, float slider_position, float increment, int di
         if (colmap)
             slider_color = GetFontColor(colmap);
 
-        HudThinBox(
+        HUDThinBox(
             x,
             y + (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType
                      ? opt_style->fonts_[StyleDefinition::kTextSectionAlternate]
@@ -1742,7 +1742,7 @@ void MenuDrawSlider(int x, int y, float slider_position, float increment, int di
                            2
                      : 0),
             slider_color);
-        HudSolidBox(
+        HUDSolidBox(
             x,
             y + (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType
                      ? opt_style->fonts_[StyleDefinition::kTextSectionAlternate]
@@ -1757,7 +1757,7 @@ void MenuDrawSlider(int x, int y, float slider_position, float increment, int di
                      : 0),
             slider_color);
         if (!actual_val.empty())
-            HudWriteText(opt_style, StyleDefinition::kTextSectionAlternate, x + 50.0f + step, y, actual_val.c_str());
+            HUDWriteText(opt_style, StyleDefinition::kTextSectionAlternate, x + 50.0f + step, y, actual_val.c_str());
     }
     else
     {
@@ -1766,20 +1766,20 @@ void MenuDrawSlider(int x, int y, float slider_position, float increment, int di
 
         int i = 0;
 
-        HudStretchImage(x, y, step + 1, therm_l->ScaledHeightActual() / div, therm_l, 0.0, 0.0);
+        HUDStretchImage(x, y, step + 1, therm_l->ScaledHeightActual() / div, therm_l, 0.0, 0.0);
 
         for (x += step; i < (50 / step); i++, x += step)
         {
-            HudStretchImage(x, y, step + 1, therm_m->ScaledHeightActual() / div, therm_m, 0.0, 0.0);
+            HUDStretchImage(x, y, step + 1, therm_m->ScaledHeightActual() / div, therm_m, 0.0, 0.0);
         }
 
-        HudStretchImage(x, y, step + 1, therm_r->ScaledHeightActual() / div, therm_r, 0.0, 0.0);
+        HUDStretchImage(x, y, step + 1, therm_r->ScaledHeightActual() / div, therm_r, 0.0, 0.0);
 
-        HudStretchImage(basex + ((slider_position - min) / increment) * scale_step + 1, y, step + 1,
+        HUDStretchImage(basex + ((slider_position - min) / increment) * scale_step + 1, y, step + 1,
                         therm_o->ScaledHeightActual() / div, therm_o, 0.0, 0.0);
 
         if (!actual_val.empty())
-            HudWriteText(opt_style, StyleDefinition::kTextSectionAlternate,
+            HUDWriteText(opt_style, StyleDefinition::kTextSectionAlternate,
                          basex + (((max - min) / increment) * scale_step) + (step * 2 + 2), y, actual_val.c_str());
     }
 }
@@ -2045,7 +2045,7 @@ bool MenuResponder(InputEvent *ev)
             if (automap_active)
                 return false;
 
-            screen_hud = (screen_hud - 1 + kTotalScreenHuds) % kTotalScreenHuds;
+            screen_hud = (screen_hud - 1 + kTotalScreenHUDs) % kTotalScreenHUDs;
 
             StartSoundEffect(sound_effect_stnmov);
             return true;
@@ -2055,7 +2055,7 @@ bool MenuResponder(InputEvent *ev)
             if (automap_active)
                 return false;
 
-            screen_hud = (screen_hud + 1) % kTotalScreenHuds;
+            screen_hud = (screen_hud + 1) % kTotalScreenHUDs;
 
             StartSoundEffect(sound_effect_stnmov);
             return true;
@@ -2367,16 +2367,16 @@ static void DrawMessage(void)
 
         if (exit_style->definition_->text_[StyleDefinition::kTextSectionText].colmap_)
         {
-            HudSetTextColor(GetFontColor(exit_style->definition_->text_[StyleDefinition::kTextSectionText].colmap_));
+            HUDSetTextColor(GetFontColor(exit_style->definition_->text_[StyleDefinition::kTextSectionText].colmap_));
         }
 
         if (exit_style->fonts_[StyleDefinition::kTextSectionText])
         {
-            HudSetFont(exit_style->fonts_[StyleDefinition::kTextSectionText]);
+            HUDSetFont(exit_style->fonts_[StyleDefinition::kTextSectionText]);
         }
-        HudSetScale(exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
+        HUDSetScale(exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
 
-        HudDrawQuitScreen();
+        HUDDrawQuitScreen();
         return;
     }
 
@@ -2420,9 +2420,9 @@ static void DrawMessage(void)
 
             if (s.size() > 0)
             {
-                HudSetAlignment(0, -1);  // center it
-                HudWriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str());
-                HudSetAlignment(-1, -1); // set it back to usual
+                HUDSetAlignment(0, -1);  // center it
+                HUDWriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str());
+                HUDSetAlignment(-1, -1); // set it back to usual
             }
 
             y += exit_style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight() * 1.5f;
@@ -2447,9 +2447,9 @@ static void DrawMessage(void)
 
             if (s.size() > 0)
             {
-                HudSetAlignment(0, -1);  // center it
-                HudWriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str());
-                HudSetAlignment(-1, -1); // set it back to usual
+                HUDSetAlignment(0, -1);  // center it
+                HUDWriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str());
+                HUDSetAlignment(-1, -1); // set it back to usual
             }
 
             y += exit_style->fonts_[0]->NominalHeight();
@@ -2478,7 +2478,7 @@ void MenuDrawCursor(Style *style, bool graphical_item)
     short TempX            = 0;
     short TempY            = 0;
 
-    float old_alpha = HudGetAlpha();
+    float old_alpha = HUDGetAlpha();
 
     float txtscale = style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
 
@@ -2501,7 +2501,7 @@ void MenuDrawCursor(Style *style, bool graphical_item)
     if (cursor) // we're using a graphic for the cursor
         graphical_cursor = true;
 
-    HudSetAlpha(style->definition_->cursor_.translucency_);
+    HUDSetAlpha(style->definition_->cursor_.translucency_);
 
     //-------------------------------------------------------------
     // 2. Start drawing our cursor. We have to check if the
@@ -2584,10 +2584,10 @@ void MenuDrawCursor(Style *style, bool graphical_item)
 
             if (graphical_cursor == true)
             {
-                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+                HUDStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
             }
             else
-                HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
+                HUDWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
                              style->definition_->cursor_.cursor_string_.c_str());
 
             // Right cursor
@@ -2607,10 +2607,10 @@ void MenuDrawCursor(Style *style, bool graphical_item)
 
             if (graphical_cursor == true)
             {
-                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+                HUDStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
             }
             else
-                HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
+                HUDWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
                              style->definition_->cursor_.cursor_string_.c_str());
         }
         else
@@ -2632,10 +2632,10 @@ void MenuDrawCursor(Style *style, bool graphical_item)
 
             if (graphical_cursor == true)
             {
-                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+                HUDStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
             }
             else
-                HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
+                HUDWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
                              style->definition_->cursor_.cursor_string_.c_str());
 
             // Right cursor
@@ -2660,10 +2660,10 @@ void MenuDrawCursor(Style *style, bool graphical_item)
             }
             if (graphical_cursor == true)
             {
-                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+                HUDStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
             }
             else
-                HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
+                HUDWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
                              style->definition_->cursor_.cursor_string_.c_str());
         }
     }
@@ -2684,10 +2684,10 @@ void MenuDrawCursor(Style *style, bool graphical_item)
             TempY -= (cursor->offset_y_ * txtscale);
 
             if (style->definition_->cursor_.border_)
-                HudStretchImage(current_menu->menu_items[item_on].x, TempY, WidestLine, TallestLine, cursor, 0.0, 0.0,
+                HUDStretchImage(current_menu->menu_items[item_on].x, TempY, WidestLine, TallestLine, cursor, 0.0, 0.0,
                                 colmap);
             else
-                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+                HUDStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
         }
         else
         {
@@ -2698,7 +2698,7 @@ void MenuDrawCursor(Style *style, bool graphical_item)
             {
                 TempY -= (current_menu->menu_items[item_on].image->offset_y_ * txtscale);
             }
-            HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
+            HUDWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
                          style->definition_->cursor_.cursor_string_.c_str());
         }
     }
@@ -2734,10 +2734,10 @@ void MenuDrawCursor(Style *style, bool graphical_item)
 
         if (graphical_cursor == true)
         {
-            HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+            HUDStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
         }
         else
-            HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
+            HUDWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
                          style->definition_->cursor_.cursor_string_.c_str());
     }
     else
@@ -2756,10 +2756,10 @@ void MenuDrawCursor(Style *style, bool graphical_item)
         }
         if (graphical_cursor == true)
         {
-            HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+            HUDStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
         }
         else
-            HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
+            HUDWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
                          style->definition_->cursor_.cursor_string_.c_str());
     }
 
@@ -2768,7 +2768,7 @@ void MenuDrawCursor(Style *style, bool graphical_item)
         cursor->offset_x_ = old_offset_x;
         cursor->offset_y_ = old_offset_y;
     }
-    HudSetAlpha(old_alpha);
+    HUDSetAlpha(old_alpha);
 }
 
 //
@@ -2792,7 +2792,7 @@ void MenuDrawItems(Style *style, bool graphical_item)
 
     max = current_menu->total_items;
 
-    float old_alpha = HudGetAlpha();
+    float old_alpha = HUDGetAlpha();
 
     float txtscale = style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
 
@@ -2873,7 +2873,7 @@ void MenuDrawItems(Style *style, bool graphical_item)
             ShortestLine = 20.0f;
             TallestLine  = 20.0f;
             WidestLine   = 121.0f;
-            HudSetAlpha(old_alpha);
+            HUDSetAlpha(old_alpha);
             // We have empty menu items so don't draw anything...
             return;
         }
@@ -2904,7 +2904,7 @@ void MenuDrawItems(Style *style, bool graphical_item)
             }
         }
 
-        HudSetAlpha(style->definition_->text_[textstyle].translucency_);
+        HUDSetAlpha(style->definition_->text_[textstyle].translucency_);
 
         if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentRight)
             TempX = current_menu->menu_items[j].x + WidestLine - current_menu->menu_items[j].width;
@@ -2913,7 +2913,7 @@ void MenuDrawItems(Style *style, bool graphical_item)
 
         if (graphical_item == false) // We're going text-based menu items
         {
-            HudWriteText(style, textstyle, TempX, current_menu->menu_items[j].y, current_menu->menu_items[j].name);
+            HUDWriteText(style, textstyle, TempX, current_menu->menu_items[j].y, current_menu->menu_items[j].name);
         }
         else // We're going graphical menu items
         {
@@ -2936,15 +2936,15 @@ void MenuDrawItems(Style *style, bool graphical_item)
             const Colormap *colmap = style->definition_->text_[textstyle].colmap_;
             // colourmap_c *colmap = nullptr;
 
-            // HudStretchImage() will apply image.offset_x again so subtract it
+            // HUDStretchImage() will apply image.offset_x again so subtract it
             // first
             TempX -= (current_menu->menu_items[j].image->offset_x_ * txtscale);
-            HudStretchImage(TempX, current_menu->menu_items[j].y, current_menu->menu_items[j].width,
+            HUDStretchImage(TempX, current_menu->menu_items[j].y, current_menu->menu_items[j].width,
                             current_menu->menu_items[j].height, current_menu->menu_items[j].image, 0.0, 0.0, colmap);
         }
-        HudSetAlpha(old_alpha);
+        HUDSetAlpha(old_alpha);
     }
-    HudSetAlpha(old_alpha);
+    HUDSetAlpha(old_alpha);
 }
 
 //
@@ -2963,11 +2963,11 @@ void MenuDrawer(void)
         {
             if (!menu_backdrop->blurred_version_)
                 StoreBlurredImage(menu_backdrop);
-            HudStretchImage(-320, -200, 960, 600, menu_backdrop->blurred_version_, 0, 0);
+            HUDStretchImage(-320, -200, 960, 600, menu_backdrop->blurred_version_, 0, 0);
         }
         else
-            HudSolidBox(-320, -200, 960, 600, 0);
-        HudDrawImageTitleWS(menu_backdrop);
+            HUDSolidBox(-320, -200, 960, 600, 0);
+        HUDDrawImageTitleWS(menu_backdrop);
     }
 
     // Horiz. & Vertically center string and print it.

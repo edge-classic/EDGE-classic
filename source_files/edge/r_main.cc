@@ -63,7 +63,7 @@ void RendererSetupMatrices2D(void)
 // RendererSetupMatricesWorld2D
 //
 // Setup the GL matrices for drawing 2D stuff within the "world" rendered by
-// HudRenderWorld
+// HUDRenderWorld
 //
 void RendererSetupMatricesWorld2D(void)
 {

@@ -272,7 +272,7 @@ void LoadLevel_Bits(void)
 //
 void GameDoLoadLevel(void)
 {
-    HudStart();
+    HUDStart();
 
     if (current_hub_tag == 0)
         SaveClearSlot("current");
@@ -306,7 +306,7 @@ void GameDoLoadLevel(void)
     LoadLevel_Bits();
 
     SpawnInitialPlayers();
-    if (LuaUseLuaHud())
+    if (LuaUseLuaHUD())
         LuaBeginLevel();
     else
         CoalBeginLevel();
@@ -507,7 +507,7 @@ void GameTicker(void)
 
         MapObjectTicker(false);
         AutomapTicker();
-        HudTicker();
+        HUDTicker();
         ScriptTicker();
 
         // do player reborns if needed
@@ -867,11 +867,11 @@ static void GameDoLoadGame(void)
         // !!! FIXME: what to do?
     }
 
-    HudStart();
+    HUDStart();
 
     SetPalette(kPaletteNormal, 0);
 
-    if (LuaUseLuaHud())
+    if (LuaUseLuaHUD())
         LuaLoadGame();
     else
         CoalLoadGame();
@@ -968,7 +968,7 @@ static bool GameSaveGameToFile(std::string filename, const char *description)
 
 static void GameDoSaveGame(void)
 {
-    if (LuaUseLuaHud())
+    if (LuaUseLuaHUD())
         LuaSaveGame();
     else
         CoalSaveGame();
@@ -1101,7 +1101,7 @@ static void GameDoNewGame(void)
     delete defer_params;
     defer_params = nullptr;
 
-    if (LuaUseLuaHud())
+    if (LuaUseLuaHUD())
         LuaNewGame();
     else
         CoalNewGame();

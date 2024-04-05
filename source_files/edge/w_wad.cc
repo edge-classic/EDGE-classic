@@ -166,7 +166,7 @@ enum LumpKind
     kLumpSprite   = 17,
     kLumpPatch    = 18,
     kLumpHiRes    = 19,
-    kLumpXgl      = 20,
+    kLumpXGL      = 20,
 };
 
 struct LumpInfo
@@ -768,7 +768,7 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
 
     if (within_xgl_list)
     {
-        lump_p->kind = kLumpXgl;
+        lump_p->kind = kLumpXGL;
         wad->xgl_lumps_.push_back(lump);
     }
 }
@@ -1048,7 +1048,7 @@ static void ProcessLuaInWad(DataFile *df)
     {
         int lump = wad->lua_huds_;
 
-        LuaSetLuaHudDetected(true);
+        LuaSetLuaHUDDetected(true);
 
         std::string data   = LoadLumpAsString(lump);
         std::string source = GetLumpNameFromIndex(lump);
@@ -1191,7 +1191,7 @@ void ProcessWad(DataFile *df, size_t file_index)
     ProcessLuaInWad(df);
 }
 
-std::string BuildXglNodesForWad(DataFile *df)
+std::string BuildXGLNodesForWad(DataFile *df)
 {
     if (df->wad_->level_markers_.empty())
         return "";
@@ -1946,7 +1946,7 @@ int CheckGraphicLumpNumberForName(const char *name)
     return -1; // not found
 }
 
-int CheckXglLumpNumberForName(const char *name)
+int CheckXGLLumpNumberForName(const char *name)
 {
     // limit search to stuff between XG_START and XG_END.
 
@@ -1968,7 +1968,7 @@ int CheckXglLumpNumberForName(const char *name)
     // search backwards
     for (i = (int)lump_info.size() - 1; i >= 0; i--)
     {
-        if (lump_info[i].kind == kLumpXgl)
+        if (lump_info[i].kind == kLumpXGL)
             if (strncmp(lump_info[i].name, buf, 8) == 0)
                 return i;
     }
@@ -1998,7 +1998,7 @@ int CheckMapLumpNumberForName(const char *name)
     // search backwards
     for (i = (int)lump_info.size() - 1; i >= 0; i--)
     {
-        if (lump_info[i].kind != kLumpXgl)
+        if (lump_info[i].kind != kLumpXGL)
             if (strncmp(lump_info[i].name, buf, 8) == 0)
                 return i;
     }

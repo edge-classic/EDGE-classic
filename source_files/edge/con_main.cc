@@ -372,7 +372,7 @@ int ConsoleCommandShowVars(char **argv, int argc)
     return 0;
 }
 
-int ConsoleCommandShowCmds(char **argv, int argc)
+int ConsoleCommandShowCommands(char **argv, int argc)
 {
     char *match = nullptr;
 
@@ -557,7 +557,7 @@ const ConsoleCommand builtin_commands[] = {{"args", ConsoleCommandArgList},
                                            {"showfiles", ConsoleCommandShowFiles},
                                            {"showgamepads", ConsoleCommandShowGamepads},
                                            {"showlumps", ConsoleCommandShowLumps},
-                                           {"showcmds", ConsoleCommandShowCmds},
+                                           {"showcmds", ConsoleCommandShowCommands},
                                            {"showmaps", ConsoleCommandShowMaps},
                                            {"showvars", ConsoleCommandShowVars},
                                            {"screenshot", ConsoleCommandScreenShot},
@@ -641,7 +641,7 @@ void ConsoleTryCommand(const char *cmd)
     return;
 }
 
-int ConsoleMatchAllCmds(std::vector<const char *> &list, const char *pattern)
+int ConsoleMatchAllCommands(std::vector<const char *> &list, const char *pattern)
 {
     list.clear();
 

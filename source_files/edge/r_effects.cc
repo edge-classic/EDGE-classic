@@ -189,12 +189,12 @@ void RendererColourmapEffect(Player *player)
         }
         else
         {
-            float old_alpha = HudGetAlpha();
-            HudSetAlpha(0.0f);
+            float old_alpha = HUDGetAlpha();
+            HUDSetAlpha(0.0f);
             s = HMM_MAX(0.5f, s);
-            HudThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
+            HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
                        epi::MakeRGBA(RoundToInteger(s * 255), RoundToInteger(s * 255), RoundToInteger(s * 255)), 25.0f);
-            HudSetAlpha(old_alpha);
+            HUDSetAlpha(old_alpha);
         }
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
@@ -211,7 +211,7 @@ void RendererPaletteEffect(Player *player)
 
     float s = EffectStrength(player);
 
-    float old_alpha = HudGetAlpha();
+    float old_alpha = HUDGetAlpha();
 
     if (s > 0 && player->powers_[kPowerTypeInvulnerable] > 0 && player->effect_colourmap_ &&
         (player->effect_left_ & 8 || reduce_flash))
@@ -226,8 +226,8 @@ void RendererPaletteEffect(Player *player)
             glColor4f(r, g, b, 0.20f * s);
         else
         {
-            HudSetAlpha(0.20f * s);
-            HudThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
+            HUDSetAlpha(0.20f * s);
+            HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
                        epi::MakeRGBA(RoundToInteger(r * 255), RoundToInteger(g * 255), RoundToInteger(b * 255)), 25.0f);
         }
     }
@@ -247,8 +247,8 @@ void RendererPaletteEffect(Player *player)
                       (float)rgb_data[2] / (float)rgb_max, (float)rgb_max / 255.0f);
         else
         {
-            HudSetAlpha((float)rgb_max / 255.0f);
-            HudThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
+            HUDSetAlpha((float)rgb_max / 255.0f);
+            HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
                        epi::MakeRGBA(RoundToInteger((float)rgb_data[0] / rgb_max * 255),
                                      RoundToInteger((float)rgb_data[1] / rgb_max * 255),
                                      RoundToInteger((float)rgb_data[2] / rgb_max * 255)),
@@ -256,7 +256,7 @@ void RendererPaletteEffect(Player *player)
         }
     }
 
-    HudSetAlpha(old_alpha);
+    HUDSetAlpha(old_alpha);
 
     if (!reduce_flash)
     {

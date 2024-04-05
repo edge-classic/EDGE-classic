@@ -230,25 +230,25 @@ class StartupProgress
     void DrawIt()
     {
         StartFrame();
-        HudFrameSetup();
+        HUDFrameSetup();
         if (loading_image)
         {
             if (title_scaling.d_) // Fill Border
             {
                 if (!loading_image->blurred_version_)
                     StoreBlurredImage(loading_image);
-                HudStretchImage(-320, -200, 960, 600, loading_image->blurred_version_, 0, 0);
+                HUDStretchImage(-320, -200, 960, 600, loading_image->blurred_version_, 0, 0);
             }
-            HudDrawImageTitleWS(loading_image);
-            HudSolidBox(25, 25, 295, 175, SG_BLACK_RGBA32);
+            HUDDrawImageTitleWS(loading_image);
+            HUDSolidBox(25, 25, 295, 175, SG_BLACK_RGBA32);
         }
         int y = 26;
         for (int i = 0; i < (int)startup_messages_.size(); i++)
         {
             if (startup_messages_[i].size() > 32)
-                HudDrawText(26, y, startup_messages_[i].substr(0, 29).append("...").c_str());
+                HUDDrawText(26, y, startup_messages_[i].substr(0, 29).append("...").c_str());
             else
-                HudDrawText(26, y, startup_messages_[i].c_str());
+                HUDDrawText(26, y, startup_messages_[i].c_str());
             y += 10;
         }
 
@@ -257,7 +257,7 @@ class StartupProgress
             const Image *overlay =
                 ImageLookup(hud_overlays.at(video_overlay.d_).c_str(), kImageNamespaceGraphic, kImageLookupNull);
             if (overlay)
-                HudRawImage(0, 0, current_screen_width, current_screen_height, overlay, 0, 0,
+                HUDRawImage(0, 0, current_screen_width, current_screen_height, overlay, 0, 0,
                             current_screen_width / overlay->ScaledWidthActual(),
                             current_screen_height / overlay->ScaledHeightActual());
         }
@@ -267,7 +267,7 @@ class StartupProgress
             int col = (1.0f + gamma_correction.f_) * 255;
             glEnable(GL_BLEND);
             glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-            HudSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
+            HUDSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDisable(GL_BLEND);
         }
@@ -276,7 +276,7 @@ class StartupProgress
             int col = gamma_correction.f_ * 255;
             glEnable(GL_BLEND);
             glBlendFunc(GL_DST_COLOR, GL_ONE);
-            HudSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
+            HUDSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDisable(GL_BLEND);
         }
@@ -547,7 +547,7 @@ static void DisplayPauseImage(void)
     float x = 160 - w / 2;
     float y = 10;
 
-    HudStretchImage(x, y, w, h, pause_image, 0.0, 0.0);
+    HUDStretchImage(x, y, w, h, pause_image, 0.0, 0.0);
 }
 
 ScreenWipe wipe_method = kScreenWipeMelt;
@@ -589,17 +589,17 @@ void EdgeDisplay(void)
     // Start the frame - should we need to.
     StartFrame();
 
-    HudFrameSetup();
+    HUDFrameSetup();
 
     switch (game_state)
     {
     case kGameStateLevel:
         PaletteTicker();
 
-        if (LuaUseLuaHud())
-            LuaRunHud();
+        if (LuaUseLuaHUD())
+            LuaRunHUD();
         else
-            CoalRunHud();
+            CoalRunHUD();
 
         if (need_save_screenshot)
         {
@@ -607,7 +607,7 @@ void EdgeDisplay(void)
             need_save_screenshot = false;
         }
 
-        HudDrawer();
+        HUDDrawer();
         ScriptDrawer();
         break;
 
@@ -664,7 +664,7 @@ void EdgeDisplay(void)
         const Image *overlay =
             ImageLookup(hud_overlays.at(video_overlay.d_).c_str(), kImageNamespaceGraphic, kImageLookupNull);
         if (overlay)
-            HudRawImage(0, 0, current_screen_width, current_screen_height, overlay, 0, 0,
+            HUDRawImage(0, 0, current_screen_width, current_screen_height, overlay, 0, 0,
                         current_screen_width / overlay->ScaledWidthActual(),
                         current_screen_height / overlay->ScaledHeightActual());
     }
@@ -674,7 +674,7 @@ void EdgeDisplay(void)
         int col = (1.0f + gamma_correction.f_) * 255;
         glEnable(GL_BLEND);
         glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-        HudSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
+        HUDSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_BLEND);
     }
@@ -683,7 +683,7 @@ void EdgeDisplay(void)
         int col = gamma_correction.f_ * 255;
         glEnable(GL_BLEND);
         glBlendFunc(GL_DST_COLOR, GL_ONE);
-        HudSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
+        HUDSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_BLEND);
     }
@@ -721,13 +721,13 @@ static void TitleDrawer(void)
         {
             if (!title_image->blurred_version_)
                 StoreBlurredImage(title_image);
-            HudStretchImage(-320, -200, 960, 600, title_image->blurred_version_, 0, 0);
+            HUDStretchImage(-320, -200, 960, 600, title_image->blurred_version_, 0, 0);
         }
-        HudDrawImageTitleWS(title_image);
+        HUDDrawImageTitleWS(title_image);
     }
     else
     {
-        HudSolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
+        HUDSolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
     }
 }
 
@@ -2037,11 +2037,11 @@ static void EdgeStartup(void)
     PickLoadingScreen();
     PickMenuBackdrop();
 
-    HudInit();
+    HUDInit();
     ConsoleStart();
     ConsoleCreateQuitScreen();
     SpecialWadVerify();
-    BuildXglNodes();
+    BuildXGLNodes();
     ShowNotice();
 
     SaveSystemInitialize();
@@ -2058,7 +2058,7 @@ static void EdgeStartup(void)
     SoundInitialize();
     NetworkInitialize();
     CheatInitialize();
-    if (LuaUseLuaHud())
+    if (LuaUseLuaHUD())
     {
         LuaInit();
         LuaLoadScripts();

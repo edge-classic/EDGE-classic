@@ -109,7 +109,7 @@ void ConsoleMessageColor(RGBAColor col);
 // Displays/Hides the console.
 void ConsoleSetVisible(ConsoleVisibility v);
 
-int ConsoleMatchAllCmds(std::vector<const char *> &list, const char *pattern);
+int ConsoleMatchAllCommands(std::vector<const char *> &list, const char *pattern);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

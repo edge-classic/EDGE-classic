@@ -65,7 +65,7 @@ class StyleContainer : public std::vector<Style *>
 
 extern StyleContainer hud_styles;
 
-void HudWriteText(Style *style, int text_type, int x, int y, const char *str, float scale = 1.0f);
+void HUDWriteText(Style *style, int text_type, int x, int y, const char *str, float scale = 1.0f);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

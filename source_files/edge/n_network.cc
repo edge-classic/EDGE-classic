@@ -166,7 +166,7 @@ void NetworkGrabTicCommands(void)
 
         memcpy(&p->command_, p->input_commands_ + buf, sizeof(EventTicCommand));
     }
-    if (LuaUseLuaHud())
+    if (LuaUseLuaHUD())
         LuaSetFloat(LuaGetGlobalVM(), "sys", "gametic", game_tic / (double_framerate.d_ ? 2 : 1));
     else
         CoalSetFloat(ui_vm, "sys", "gametic", game_tic / (double_framerate.d_ ? 2 : 1));

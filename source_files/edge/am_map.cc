@@ -552,7 +552,7 @@ static void DrawMLine(AutomapLine *ml, RGBAColor rgb, bool thick = true)
     float dx = MapToFrameDistanceX(-map_center_x);
     float dy = MapToFrameDistanceY(-map_center_y);
 
-    HudSolidLine(x1, y1, x2, y2, rgb, thick ? 1.5f : 1.0f, thick, dx, dy);
+    HUDSolidLine(x1, y1, x2, y2, rgb, thick ? 1.5f : 1.0f, thick, dx, dy);
 }
 
 // Lobo 2022: keyed doors automap colouring
@@ -583,7 +583,7 @@ static void DrawMLineDoor(AutomapLine *ml, RGBAColor rgb)
             linewidth = 2.0 - (linewidth * 0.1f);
     }
 
-    HudSolidLine(x1, y1, x2, y2, rgb, linewidth, true, dx, dy);
+    HUDSolidLine(x1, y1, x2, y2, rgb, linewidth, true, dx, dy);
 }
 
 static AutomapLine player_dagger[] = {
@@ -633,7 +633,7 @@ static void DrawLineCharacter(AutomapLine *lineguy, int lineguylines, float radi
         bx = bx * MapToFrameDistanceX(radius);
         by = by * MapToFrameDistanceY(radius);
 
-        HudSolidLine(cx + ax, cy - ay, cx + bx, cy - by, rgb);
+        HUDSolidLine(cx + ax, cy - ay, cx + bx, cy - by, rgb);
     }
 }
 
@@ -687,15 +687,15 @@ static void DrawKeyOnLine(AutomapLine *ml, int theKey, RGBAColor rgb = SG_WHITE_
 
     Font *am_font = automap_style->fonts_[0];
 
-    HudSetFont(am_font);
-    HudSetAlignment(0, 0); // centre the characters
-    HudSetTextColor(rgb);
+    HUDSetFont(am_font);
+    HUDSetAlignment(0, 0); // centre the characters
+    HUDSetTextColor(rgb);
     float TextSize = 0.4f * map_scale;
     if (map_scale > 5.0f)  // only draw the text if we're zoomed in?
     {
         if (automap_keydoor_text.d_ == 1)
         {
-            HudDrawText(x1, y1, CleanName.c_str(), TextSize);
+            HUDDrawText(x1, y1, CleanName.c_str(), TextSize);
         }
         else if (automap_keydoor_text.d_ > 1)
         {
@@ -709,16 +709,16 @@ static void DrawKeyOnLine(AutomapLine *ml, int theKey, RGBAColor rgb = SG_WHITE_
                     const Image *img = RendererGetOtherSprite(idlestate->sprite, idlestate->frame, &flip);
 
                     if (epi::StringCaseCompareASCII("DUMMY_SPRITE", img->name_) != 0)
-                        HudDrawImageNoOffset(x1, y1, img);
-                    // HudStretchImage(x1, y1, 16, 16, img, 0.0, 0.0);
+                        HUDDrawImageNoOffset(x1, y1, img);
+                    // HUDStretchImage(x1, y1, 16, 16, img, 0.0, 0.0);
                 }
             }
         }
     }
 
-    HudSetFont();
-    HudSetTextColor();
-    HudSetAlignment();
+    HUDSetFont();
+    HUDSetTextColor();
+    HUDSetAlignment();
 
     /*
     // *********************
@@ -1237,8 +1237,8 @@ static void DrawMarks(void)
 {
     Font *am_font = automap_style->fonts_[0];
 
-    HudSetFont(am_font);
-    HudSetAlignment(0, 0); // centre the characters
+    HUDSetFont(am_font);
+    HUDSetAlignment(0, 0); // centre the characters
 
     char buffer[4];
 
@@ -1254,11 +1254,11 @@ static void DrawMarks(void)
         buffer[0] = ('1' + i);
         buffer[1] = 0;
 
-        HudDrawText(MapToFrameCoordinatesX(mx, map_center_x), MapToFrameCoordinatesY(my, map_center_y), buffer);
+        HUDDrawText(MapToFrameCoordinatesX(mx, map_center_x), MapToFrameCoordinatesY(my, map_center_y), buffer);
     }
 
-    HudSetFont();
-    HudSetAlignment();
+    HUDSetFont();
+    HUDSetAlignment();
 }
 
 void AutomapRender(float x, float y, float w, float h, MapObject *focus)
@@ -1281,20 +1281,20 @@ void AutomapRender(float x, float y, float w, float h, MapObject *focus)
 
     if (automap_style->background_image_)
     {
-        float old_alpha = HudGetAlpha();
-        HudSetAlpha(automap_style->definition_->bg_.translucency_);
+        float old_alpha = HUDGetAlpha();
+        HUDSetAlpha(automap_style->definition_->bg_.translucency_);
         if (automap_style->definition_->special_ == 0)
-            HudStretchImage(-90, 0, 500, 200, automap_style->background_image_, 0.0, 0.0);
+            HUDStretchImage(-90, 0, 500, 200, automap_style->background_image_, 0.0, 0.0);
         else
-            HudTileImage(-90, 0, 500, 200, automap_style->background_image_, 0.0, 0.0);
-        HudSetAlpha(old_alpha);
+            HUDTileImage(-90, 0, 500, 200, automap_style->background_image_, 0.0, 0.0);
+        HUDSetAlpha(old_alpha);
     }
     else if (automap_style->definition_->bg_.colour_ != kRGBANoValue)
     {
-        float old_alpha = HudGetAlpha();
-        HudSetAlpha(automap_style->definition_->bg_.translucency_);
-        HudSolidBox(x, y, x + w, y + h, automap_style->definition_->bg_.colour_);
-        HudSetAlpha(old_alpha);
+        float old_alpha = HUDGetAlpha();
+        HUDSetAlpha(automap_style->definition_->bg_.translucency_);
+        HUDSolidBox(x, y, x + w, y + h, automap_style->definition_->bg_.colour_);
+        HUDSetAlpha(old_alpha);
     }
 
     if (grid && !rotate_map)

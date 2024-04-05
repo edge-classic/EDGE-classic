@@ -28,9 +28,9 @@ void LuaRegisterCoreLibraries(lua_State *L);
 // Player
 void LuaRegisterPlayerLibrary(lua_State *L);
 
-// Hud
-void LuaRunHud(void);
-void LuaRegisterHudLibrary(lua_State *L);
+// HUD
+void LuaRunHUD(void);
+void LuaRegisterHUDLibrary(lua_State *L);
 
 // VM
 
@@ -95,8 +95,8 @@ inline void LuaSetBoolean(lua_State *L, const char *module, const char *variable
 }
 
 // Detects LUA in a pwad or epk
-bool LuaGetLuaHudDetected();
-void LuaSetLuaHudDetected(bool detected);
-bool LuaUseLuaHud();
+bool LuaGetLuaHUDDetected();
+void LuaSetLuaHUDDetected(bool detected);
+bool LuaUseLuaHUD();
 
 extern lua_State *global_lua_state;

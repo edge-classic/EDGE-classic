@@ -325,10 +325,10 @@ void PlayMovie(const std::string &name)
             if (skip_bar_active)
             {
                 // Draw black box at bottom of screen
-                HudSolidBox(hud_x_left, 196, hud_x_right, 200, SG_BLACK_RGBA32);
+                HUDSolidBox(hud_x_left, 196, hud_x_right, 200, SG_BLACK_RGBA32);
 
                 // Draw progress
-                HudSolidBox(hud_x_left, 197, hud_x_right * (skip_time / 0.9f), 199, SG_WHITE_RGBA32);
+                HUDSolidBox(hud_x_left, 197, hud_x_right * (skip_time / 0.9f), 199, SG_WHITE_RGBA32);
             }
 
             FinishFrame();

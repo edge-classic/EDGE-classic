@@ -33,14 +33,14 @@ extern int show_messages;
 // HEADS UP TEXT
 //
 
-void HudInit(void);
-void HudStart(void);
+void HUDInit(void);
+void HUDStart(void);
 
-void HudStartMessage(const char *msg);
-void HudStartImportantMessage(const char *msg);
+void HUDStartMessage(const char *msg);
+void HUDStartImportantMessage(const char *msg);
 
-void HudTicker(void);
-void HudDrawer(void);
+void HUDTicker(void);
+void HUDDrawer(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

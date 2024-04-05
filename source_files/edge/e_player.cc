@@ -145,7 +145,7 @@ void PlayerFinishLevel(Player *p, bool keep_cards)
     //  "INTERNAL ERROR: player has a removed attacker"
     p->attacker_ = nullptr;
 
-    if (LuaUseLuaHud())
+    if (LuaUseLuaHUD())
         LuaEndLevel();
     else
         CoalEndLevel();

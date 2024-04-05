@@ -502,7 +502,7 @@ void ConsoleMessage(const char *message, ...)
 
     va_end(argptr);
 
-    HudStartMessage(buffer);
+    HUDStartMessage(buffer);
 
     strcat(buffer, "\n");
 
@@ -520,7 +520,7 @@ void ConsoleMessageLDF(const char *lookup, ...)
     vsprintf(buffer, lookup, argptr);
     va_end(argptr);
 
-    HudStartMessage(buffer);
+    HUDStartMessage(buffer);
 
     strcat(buffer, "\n");
 
@@ -538,7 +538,7 @@ void ConsoleImportantMessageLDF(const char *lookup, ...)
     vsprintf(buffer, lookup, argptr);
     va_end(argptr);
 
-    HudStartImportantMessage(buffer);
+    HUDStartImportantMessage(buffer);
 
     strcat(buffer, "\n");
 
@@ -868,7 +868,7 @@ void ConsoleDrawer(void)
     {
         const Image *img = console_style->background_image_;
 
-        HudRawImage(0, y, current_screen_width, y + CON_GFX_HT, img, 0.0, 0.0, img->Right(), img->Top(),
+        HUDRawImage(0, y, current_screen_width, y + CON_GFX_HT, img, 0.0, 0.0, img->Right(), img->Top(),
                     console_style->definition_->bg_.translucency_, kRGBANoValue, nullptr, 0, 0);
     }
     else
@@ -1130,7 +1130,7 @@ static void TabComplete(void)
     std::vector<const char *> match_vars;
     std::vector<const char *> match_keys;
 
-    int num_cmd = ConsoleMatchAllCmds(match_cmds, input_line);
+    int num_cmd = ConsoleMatchAllCommands(match_cmds, input_line);
     int num_var = ConsoleMatchAllVariables(match_vars, input_line);
     int num_key = 0; ///  E_MatchAllKeys(match_keys, input_line);
 

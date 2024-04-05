@@ -369,15 +369,15 @@ static void TextWrite(void)
     // 98-7-10 KM erase the entire screen to a tiled background
     if (finale_text_background)
     {
-        HudSetScale(finale_text_background_scale);
+        HUDSetScale(finale_text_background_scale);
 
         if (finale->text_flat_[0])
         {
             // AJA 2022: make the flats be square, not squished
-            HudSetCoordinateSystem(266, 200);
+            HUDSetCoordinateSystem(266, 200);
 
             // Lobo: if it's a flat, tile it
-            HudTileImage(hud_x_left, 0, hud_x_right - hud_x_left, 200,
+            HUDTileImage(hud_x_left, 0, hud_x_right - hud_x_left, 200,
                          finale_text_background); // Lobo: Widescreen support
         }
         else
@@ -386,13 +386,13 @@ static void TextWrite(void)
             {
                 if (!finale_text_background->blurred_version_)
                     StoreBlurredImage(finale_text_background);
-                HudStretchImage(-320, -200, 960, 600, finale_text_background->blurred_version_, 0, 0);
+                HUDStretchImage(-320, -200, 960, 600, finale_text_background->blurred_version_, 0, 0);
             }
-            HudDrawImageTitleWS(finale_text_background);
+            HUDDrawImageTitleWS(finale_text_background);
         }
 
         // reset coordinate system
-        HudReset();
+        HUDReset();
     }
 
     Style *style;
@@ -411,27 +411,27 @@ static void TextWrite(void)
 
     EPI_ASSERT(finale);
 
-    // HudSetFont();
-    // HudSetScale();
-    HudSetTextColor(finale_text_color); // set a default
+    // HUDSetFont();
+    // HUDSetScale();
+    HUDSetTextColor(finale_text_color); // set a default
 
     float txtscale = 0.9;               // set a default
     if (style->definition_->text_[t_type].scale_)
     {
         txtscale = style->definition_->text_[t_type].scale_;
-        HudSetScale(txtscale);
+        HUDSetScale(txtscale);
     }
 
     if (style->definition_->text_[t_type].colmap_)
     {
         const Colormap *colmap = style->definition_->text_[t_type].colmap_;
-        HudSetTextColor(GetFontColor(colmap));
+        HUDSetTextColor(GetFontColor(colmap));
     }
 
     int h = 11; // set a default
     if (style->fonts_[t_type])
     {
-        HudSetFont(style->fonts_[t_type]);
+        HUDSetFont(style->fonts_[t_type]);
         h = style->fonts_[t_type]->NominalHeight();
         h = h + (3 * txtscale); // bit of spacing
         h = h * txtscale;
@@ -448,7 +448,7 @@ static void TextWrite(void)
     {
         if (count == 0 || *ch == 0)
         {
-            HudDrawText(cx, cy, line);
+            HUDDrawText(cx, cy, line);
             break;
         }
 
@@ -457,7 +457,7 @@ static void TextWrite(void)
 
         if (c == '\n' || pos > (int)sizeof(line) - 4)
         {
-            HudDrawText(cx, cy, line);
+            HUDDrawText(cx, cy, line);
 
             pos     = 0;
             line[0] = 0;
@@ -471,9 +471,9 @@ static void TextWrite(void)
     }
 
     // set back to defaults
-    HudSetFont();
-    HudSetScale();
-    HudSetTextColor();
+    HUDSetFont();
+    HUDSetScale();
+    HUDSetTextColor();
 }
 
 //
@@ -725,33 +725,33 @@ static void CastDrawer(void)
         {
             if (!image->blurred_version_)
                 StoreBlurredImage(image);
-            HudStretchImage(-320, -200, 960, 600, image->blurred_version_, 0, 0);
+            HUDStretchImage(-320, -200, 960, 600, image->blurred_version_, 0, 0);
         }
-        HudDrawImageTitleWS(image);
+        HUDDrawImageTitleWS(image);
     }
 
-    HudSetAlignment(0, -1);
+    HUDSetAlignment(0, -1);
 
     if (finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText].colmap_)
     {
-        HudSetTextColor(GetFontColor(finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText].colmap_));
+        HUDSetTextColor(GetFontColor(finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText].colmap_));
     }
     else
     {
-        HudSetTextColor(SG_YELLOW_RGBA32);
+        HUDSetTextColor(SG_YELLOW_RGBA32);
     }
 
     TempScale = finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
-    HudSetScale(TempScale);
+    HUDSetScale(TempScale);
 
     if (finale_cast_style->fonts_[StyleDefinition::kTextSectionText])
     {
-        HudSetFont(finale_cast_style->fonts_[StyleDefinition::kTextSectionText]);
+        HUDSetFont(finale_cast_style->fonts_[StyleDefinition::kTextSectionText]);
     }
 
-    HudDrawText(160, 180, cast_title);
+    HUDDrawText(160, 180, cast_title);
 
-    HudReset();
+    HUDReset();
 
     bool flip;
 
@@ -766,7 +766,7 @@ static void CastDrawer(void)
     else
         scale_y = 3;
 
-    HudGetCastPosition(&pos_x, &pos_y, &scale_x, &scale_y);
+    HUDGetCastPosition(&pos_x, &pos_y, &scale_x, &scale_y);
 
     if (cast_state->flags & kStateFrameFlagModel)
     {
@@ -854,8 +854,8 @@ static void BunnyScroll(void)
     if (scrolled < 0)
         scrolled = 0;
 
-    HudStretchImage(CenterX - scrolled, 0, TempWidth, TempHeight, p1, 0.0, 0.0);
-    HudStretchImage((CenterX + TempWidth) - (scrolled + 1), 0, TempWidth, TempHeight, p2, 0.0, 0.0);
+    HUDStretchImage(CenterX - scrolled, 0, TempWidth, TempHeight, p1, 0.0, 0.0);
+    HUDStretchImage((CenterX + TempWidth) - (scrolled + 1), 0, TempWidth, TempHeight, p2, 0.0, 0.0);
 
     if (finale_count < 1130)
         return;
@@ -864,7 +864,7 @@ static void BunnyScroll(void)
     {
         p1 = ImageLookup("END0");
 
-        HudDrawImage((320 - 13 * 8) / 2, (200 - 8 * 8) / 2, p1);
+        HUDDrawImage((320 - 13 * 8) / 2, (200 - 8 * 8) / 2, p1);
         laststage = 0;
         return;
     }
@@ -884,7 +884,7 @@ static void BunnyScroll(void)
 
     p1 = ImageLookup(name);
 
-    HudDrawImage((320 - 13 * 8) / 2, (200 - 8 * 8) / 2, p1);
+    HUDDrawImage((320 - 13 * 8) / 2, (200 - 8 * 8) / 2, p1);
 }
 
 void FinaleDrawer(void)
@@ -909,9 +909,9 @@ void FinaleDrawer(void)
         {
             if (!image->blurred_version_)
                 StoreBlurredImage(image);
-            HudStretchImage(-320, -200, 960, 600, image->blurred_version_, 0, 0);
+            HUDStretchImage(-320, -200, 960, 600, image->blurred_version_, 0, 0);
         }
-        HudDrawImageTitleWS(image);
+        HUDDrawImageTitleWS(image);
         break;
     }
 

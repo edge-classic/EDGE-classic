@@ -85,17 +85,17 @@ std::vector<std::string> hud_overlays = {
     "OVERLAY_GRILL_2X",
 };
 
-static inline float HudToRealCoordinatesX(float x)
+static inline float HUDToRealCoordinatesX(float x)
 {
     return margin_x + x * margin_x_multiplier;
 }
 
-static inline float HudToRealCoordinatesY(float y)
+static inline float HUDToRealCoordinatesY(float y)
 {
     return margin_y - y * margin_y_multiplier;
 }
 
-void HudSetCoordinateSystem(int width, int height)
+void HUDSetCoordinateSystem(int width, int height)
 {
     if (width < 1 || height < 1)
         return;
@@ -133,40 +133,40 @@ void HudSetCoordinateSystem(int width, int height)
     margin_x            = 0.0f - hud_x_left * margin_x_multiplier;
 }
 
-void HudSetFont(Font *font)
+void HUDSetFont(Font *font)
 {
     current_font = font ? font : default_font;
 }
 
-void HudSetScale(float scale)
+void HUDSetScale(float scale)
 {
     current_scale = scale;
 }
 
-void HudSetTextColor(RGBAColor color)
+void HUDSetTextColor(RGBAColor color)
 {
     current_color = color;
 }
 
-void HudSetAlpha(float alpha)
+void HUDSetAlpha(float alpha)
 {
     current_alpha = alpha;
 }
 
-float HudGetAlpha()
+float HUDGetAlpha()
 {
     return current_alpha;
 }
 
-void HudSetAlignment(int xa, int ya)
+void HUDSetAlignment(int xa, int ya)
 {
     current_x_alignment = xa;
     current_y_alignment = ya;
 }
 
-void HudReset()
+void HUDReset()
 {
-    HudSetCoordinateSystem(320, 200);
+    HUDSetCoordinateSystem(320, 200);
 
     current_font        = default_font;
     current_color       = kRGBANoValue;
@@ -176,7 +176,7 @@ void HudReset()
     current_y_alignment = -1;
 }
 
-void HudFrameSetup(void)
+void HUDFrameSetup(void)
 {
     if (default_font == nullptr)
     {
@@ -188,7 +188,7 @@ void HudFrameSetup(void)
         EPI_ASSERT(default_font);
     }
 
-    HudReset();
+    HUDReset();
 
     hud_tic++;
 }
@@ -197,7 +197,7 @@ static constexpr uint8_t kScissorStackMaximum = 10;
 static int               scissor_stack[kScissorStackMaximum][4];
 static int               scissor_stack_top = 0;
 
-void HudPushScissor(float x1, float y1, float x2, float y2, bool expand)
+void HUDPushScissor(float x1, float y1, float x2, float y2, bool expand)
 {
     EPI_ASSERT(scissor_stack_top < kScissorStackMaximum);
 
@@ -209,14 +209,14 @@ void HudPushScissor(float x1, float y1, float x2, float y2, bool expand)
     }
     else
     {
-        x1 = HudToRealCoordinatesX(x1);
-        x2 = HudToRealCoordinatesX(x2);
+        x1 = HUDToRealCoordinatesX(x1);
+        x2 = HUDToRealCoordinatesX(x2);
     }
 
     std::swap(y1, y2);
 
-    y1 = HudToRealCoordinatesY(y1);
-    y2 = HudToRealCoordinatesY(y2);
+    y1 = HUDToRealCoordinatesY(y1);
+    y2 = HUDToRealCoordinatesY(y2);
 
     int sx1 = RoundToInteger(x1);
     int sy1 = RoundToInteger(y1);
@@ -261,7 +261,7 @@ void HudPushScissor(float x1, float y1, float x2, float y2, bool expand)
     scissor_stack_top++;
 }
 
-void HudPopScissor()
+void HUDPopScissor()
 {
     EPI_ASSERT(scissor_stack_top > 0);
 
@@ -281,7 +281,7 @@ void HudPopScissor()
 }
 
 // Adapted from Quake 3 GPL release
-void HudCalcScrollTexCoords(float x_scroll, float y_scroll, float *tx1, float *ty1, float *tx2, float *ty2)
+void HUDCalcScrollTexCoords(float x_scroll, float y_scroll, float *tx1, float *ty1, float *tx2, float *ty2)
 {
     float timeScale, adjustedScrollS, adjustedScrollT;
 
@@ -301,7 +301,7 @@ void HudCalcScrollTexCoords(float x_scroll, float y_scroll, float *tx1, float *t
 }
 
 // Adapted from Quake 3 GPL release
-void HudCalcTurbulentTexCoords(float *tx, float *ty, float x, float y)
+void HUDCalcTurbulentTexCoords(float *tx, float *ty, float x, float y)
 {
     float now;
     float phase     = 0;
@@ -360,7 +360,7 @@ void HudCalcTurbulentTexCoords(float *tx, float *ty, float x, float y)
 
 //----------------------------------------------------------------------------
 
-void HudRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image, float tx1, float ty1, float tx2,
+void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image, float tx1, float ty1, float tx2,
                  float ty2, float alpha, RGBAColor text_col, const Colormap *palremap, float sx, float sy, char ch)
 {
     int x1 = RoundToInteger(hx1);
@@ -471,7 +471,7 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-        HudCalcScrollTexCoords(sx, sy, &tx1, &ty1, &tx2, &ty2);
+        HUDCalcScrollTexCoords(sx, sy, &tx1, &ty1, &tx2, &ty2);
     }
 
     if (epi::StringCaseCompareASCII(image->name_, hud_overlays.at(video_overlay.d_)) == 0)
@@ -497,8 +497,8 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
 
     if (hud_swirl)
     {
-        HudCalcTurbulentTexCoords(&tx1, &ty1, x1, y1);
-        HudCalcTurbulentTexCoords(&tx2, &ty2, x2, y2);
+        HUDCalcTurbulentTexCoords(&tx1, &ty1, x1, y1);
+        HUDCalcTurbulentTexCoords(&tx2, &ty2, x2, y2);
     }
 
     glTexCoord2f(tx1, ty1);
@@ -522,8 +522,8 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
         tx2 += 0.2;
         ty1 += 0.2;
         ty2 += 0.2;
-        HudCalcTurbulentTexCoords(&tx1, &ty1, x1, y1);
-        HudCalcTurbulentTexCoords(&tx2, &ty2, x2, y2);
+        HUDCalcTurbulentTexCoords(&tx1, &ty1, x1, y1);
+        HUDCalcTurbulentTexCoords(&tx2, &ty2, x2, y2);
         alpha /= 2;
         glEnable(GL_ALPHA_TEST);
 
@@ -561,7 +561,7 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
     glAlphaFunc(GL_GREATER, 0);
 }
 
-void HudRawFromTexID(float hx1, float hy1, float hx2, float hy2, unsigned int tex_id, ImageOpacity opacity, float tx1,
+void HUDRawFromTexID(float hx1, float hy1, float hx2, float hy2, unsigned int tex_id, ImageOpacity opacity, float tx1,
                      float ty1, float tx2, float ty2, float alpha)
 {
     int x1 = RoundToInteger(hx1);
@@ -616,7 +616,7 @@ void HudRawFromTexID(float hx1, float hy1, float hx2, float hy2, unsigned int te
     glAlphaFunc(GL_GREATER, 0);
 }
 
-void HudStretchFromImageData(float x, float y, float w, float h, const ImageData *img, unsigned int tex_id,
+void HUDStretchFromImageData(float x, float y, float w, float h, const ImageData *img, unsigned int tex_id,
                              ImageOpacity opacity)
 {
     if (current_x_alignment >= 0)
@@ -625,17 +625,17 @@ void HudStretchFromImageData(float x, float y, float w, float h, const ImageData
     if (current_y_alignment >= 0)
         y -= h / (current_y_alignment == 0 ? 2.0f : 1.0f);
 
-    float x1 = HudToRealCoordinatesX(x);
-    float x2 = HudToRealCoordinatesX(x + w);
+    float x1 = HUDToRealCoordinatesX(x);
+    float x2 = HUDToRealCoordinatesX(x + w);
 
-    float y1 = HudToRealCoordinatesY(y + h);
-    float y2 = HudToRealCoordinatesY(y);
+    float y1 = HUDToRealCoordinatesY(y + h);
+    float y2 = HUDToRealCoordinatesY(y);
 
-    HudRawFromTexID(x1, y1, x2, y2, tex_id, opacity, 0, 0, (float)img->used_width_ / img->width_,
+    HUDRawFromTexID(x1, y1, x2, y2, tex_id, opacity, 0, 0, (float)img->used_width_ / img->width_,
                     (float)img->used_height_ / img->height_, current_alpha);
 }
 
-void HudStretchImage(float x, float y, float w, float h, const Image *img, float sx, float sy, const Colormap *colmap)
+void HUDStretchImage(float x, float y, float w, float h, const Image *img, float sx, float sy, const Colormap *colmap)
 {
     if (current_x_alignment >= 0)
         x -= w / (current_x_alignment == 0 ? 2.0f : 1.0f);
@@ -646,11 +646,11 @@ void HudStretchImage(float x, float y, float w, float h, const Image *img, float
     x -= img->ScaledOffsetX();
     y -= img->ScaledOffsetY();
 
-    float x1 = HudToRealCoordinatesX(x);
-    float x2 = HudToRealCoordinatesX(x + w);
+    float x1 = HUDToRealCoordinatesX(x);
+    float x2 = HUDToRealCoordinatesX(x + w);
 
-    float y1 = HudToRealCoordinatesY(y + h);
-    float y2 = HudToRealCoordinatesY(y);
+    float y1 = HUDToRealCoordinatesY(y + h);
+    float y2 = HUDToRealCoordinatesY(y);
 
     RGBAColor text_col = kRGBANoValue;
 
@@ -659,12 +659,12 @@ void HudStretchImage(float x, float y, float w, float h, const Image *img, float
         text_col = GetFontColor(colmap);
     }
 
-    // HudRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(),
+    // HUDRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(),
     // current_alpha, text_col, colmap, sx, sy);
-    HudRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(), current_alpha, text_col, nullptr, sx, sy);
+    HUDRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(), current_alpha, text_col, nullptr, sx, sy);
 }
 
-void HudStretchImageNoOffset(float x, float y, float w, float h, const Image *img, float sx, float sy)
+void HUDStretchImageNoOffset(float x, float y, float w, float h, const Image *img, float sx, float sy)
 {
     if (current_x_alignment >= 0)
         x -= w / (current_x_alignment == 0 ? 2.0f : 1.0f);
@@ -675,16 +675,16 @@ void HudStretchImageNoOffset(float x, float y, float w, float h, const Image *im
     // x -= img->ScaledOffsetX();
     // y -= img->ScaledOffsetY();
 
-    float x1 = HudToRealCoordinatesX(x);
-    float x2 = HudToRealCoordinatesX(x + w);
+    float x1 = HUDToRealCoordinatesX(x);
+    float x2 = HUDToRealCoordinatesX(x + w);
 
-    float y1 = HudToRealCoordinatesY(y + h);
-    float y2 = HudToRealCoordinatesY(y);
+    float y1 = HUDToRealCoordinatesY(y + h);
+    float y2 = HUDToRealCoordinatesY(y);
 
-    HudRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(), current_alpha, kRGBANoValue, nullptr, sx, sy);
+    HUDRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(), current_alpha, kRGBANoValue, nullptr, sx, sy);
 }
 
-void HudDrawImageTitleWS(const Image *title_image)
+void HUDDrawImageTitleWS(const Image *title_image)
 {
     // Lobo: Widescreen titlescreen support.
     // In the case of titlescreens we will ignore any scaling
@@ -709,52 +709,52 @@ void HudDrawImageTitleWS(const Image *title_image)
     CenterX -= TempWidth / 2;
 
     // 3. Draw it.
-    HudStretchImage(CenterX, -0.1f, TempWidth, TempHeight + 0.1f, title_image, 0.0, 0.0);
+    HUDStretchImage(CenterX, -0.1f, TempWidth, TempHeight + 0.1f, title_image, 0.0, 0.0);
 }
 
-float HudGetImageWidth(const Image *img)
+float HUDGetImageWidth(const Image *img)
 {
     return (img->ScaledWidthActual() * current_scale);
 }
 
-float HudGetImageHeight(const Image *img)
+float HUDGetImageHeight(const Image *img)
 {
     return (img->ScaledHeightActual() * current_scale);
 }
 
-void HudDrawImage(float x, float y, const Image *img, const Colormap *colmap)
+void HUDDrawImage(float x, float y, const Image *img, const Colormap *colmap)
 {
     float w = img->ScaledWidthActual() * current_scale;
     float h = img->ScaledHeightActual() * current_scale;
 
-    HudStretchImage(x, y, w, h, img, 0.0, 0.0, colmap);
+    HUDStretchImage(x, y, w, h, img, 0.0, 0.0, colmap);
 }
 
-void HudDrawImageNoOffset(float x, float y, const Image *img)
+void HUDDrawImageNoOffset(float x, float y, const Image *img)
 {
     float w = img->ScaledWidthActual() * current_scale;
     float h = img->ScaledHeightActual() * current_scale;
 
-    HudStretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
+    HUDStretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
 }
 
-void HudScrollImage(float x, float y, const Image *img, float sx, float sy)
+void HUDScrollImage(float x, float y, const Image *img, float sx, float sy)
 {
     float w = img->ScaledWidthActual() * current_scale;
     float h = img->ScaledHeightActual() * current_scale;
 
-    HudStretchImage(x, y, w, h, img, sx, sy);
+    HUDStretchImage(x, y, w, h, img, sx, sy);
 }
 
-void HudScrollImageNoOffset(float x, float y, const Image *img, float sx, float sy)
+void HUDScrollImageNoOffset(float x, float y, const Image *img, float sx, float sy)
 {
     float w = img->ScaledWidthActual() * current_scale;
     float h = img->ScaledHeightActual() * current_scale;
 
-    HudStretchImageNoOffset(x, y, w, h, img, sx, sy);
+    HUDStretchImageNoOffset(x, y, w, h, img, sx, sy);
 }
 
-void HudTileImage(float x, float y, float w, float h, const Image *img, float offset_x, float offset_y)
+void HUDTileImage(float x, float y, float w, float h, const Image *img, float offset_x, float offset_y)
 {
     if (current_x_alignment >= 0)
         x -= w / (current_x_alignment == 0 ? 2.0f : 1.0f);
@@ -768,17 +768,17 @@ void HudTileImage(float x, float y, float w, float h, const Image *img, float of
     float tx_scale = w / img->ScaledWidthTotal() / current_scale;
     float ty_scale = h / img->ScaledHeightTotal() / current_scale;
 
-    float x1 = HudToRealCoordinatesX(x);
-    float x2 = HudToRealCoordinatesX(x + w);
+    float x1 = HUDToRealCoordinatesX(x);
+    float x2 = HUDToRealCoordinatesX(x + w);
 
-    float y1 = HudToRealCoordinatesY(y + h);
-    float y2 = HudToRealCoordinatesY(y);
+    float y1 = HUDToRealCoordinatesY(y + h);
+    float y2 = HUDToRealCoordinatesY(y);
 
-    HudRawImage(x1, y1, x2, y2, img, (offset_x)*tx_scale, (offset_y)*ty_scale, (offset_x + 1) * tx_scale,
+    HUDRawImage(x1, y1, x2, y2, img, (offset_x)*tx_scale, (offset_y)*ty_scale, (offset_x + 1) * tx_scale,
                 (offset_y + 1) * ty_scale, current_alpha);
 }
 
-void HudSolidBox(float x1, float y1, float x2, float y2, RGBAColor col)
+void HUDSolidBox(float x1, float y1, float x2, float y2, RGBAColor col)
 {
     // expand to cover wide screens
     if (x1 < hud_x_left && x2 > hud_x_right - 1 && y1 < hud_y_top + 1 && y2 > hud_y_bottom - 1)
@@ -792,10 +792,10 @@ void HudSolidBox(float x1, float y1, float x2, float y2, RGBAColor col)
     {
         std::swap(y1, y2);
 
-        x1 = HudToRealCoordinatesX(x1);
-        y1 = HudToRealCoordinatesY(y1);
-        x2 = HudToRealCoordinatesX(x2);
-        y2 = HudToRealCoordinatesY(y2);
+        x1 = HUDToRealCoordinatesX(x1);
+        y1 = HUDToRealCoordinatesY(y1);
+        x2 = HUDToRealCoordinatesX(x2);
+        y2 = HUDToRealCoordinatesY(y2);
     }
 
     if (current_alpha < 0.99f)
@@ -817,16 +817,16 @@ void HudSolidBox(float x1, float y1, float x2, float y2, RGBAColor col)
     glDisable(GL_BLEND);
 }
 
-void HudSolidLine(float x1, float y1, float x2, float y2, RGBAColor col, float thickness, bool smooth, float dx,
+void HUDSolidLine(float x1, float y1, float x2, float y2, RGBAColor col, float thickness, bool smooth, float dx,
                   float dy)
 {
-    x1 = HudToRealCoordinatesX(x1);
-    y1 = HudToRealCoordinatesY(y1);
-    x2 = HudToRealCoordinatesX(x2);
-    y2 = HudToRealCoordinatesY(y2);
+    x1 = HUDToRealCoordinatesX(x1);
+    y1 = HUDToRealCoordinatesY(y1);
+    x2 = HUDToRealCoordinatesX(x2);
+    y2 = HUDToRealCoordinatesY(y2);
 
-    dx = HudToRealCoordinatesX(dx) - HudToRealCoordinatesX(0);
-    dy = HudToRealCoordinatesY(0) - HudToRealCoordinatesY(dy);
+    dx = HUDToRealCoordinatesX(dx) - HUDToRealCoordinatesX(0);
+    dy = HUDToRealCoordinatesY(0) - HUDToRealCoordinatesY(dy);
 
     glLineWidth(thickness);
 
@@ -852,14 +852,14 @@ void HudSolidLine(float x1, float y1, float x2, float y2, RGBAColor col, float t
     glLineWidth(1.0f);
 }
 
-void HudThinBox(float x1, float y1, float x2, float y2, RGBAColor col, float thickness)
+void HUDThinBox(float x1, float y1, float x2, float y2, RGBAColor col, float thickness)
 {
     std::swap(y1, y2);
 
-    x1 = HudToRealCoordinatesX(x1);
-    y1 = HudToRealCoordinatesY(y1);
-    x2 = HudToRealCoordinatesX(x2);
-    y2 = HudToRealCoordinatesY(y2);
+    x1 = HUDToRealCoordinatesX(x1);
+    y1 = HUDToRealCoordinatesY(y1);
+    x2 = HUDToRealCoordinatesX(x2);
+    y2 = HUDToRealCoordinatesY(y2);
 
     if (current_alpha < 0.99f)
         glEnable(GL_BLEND);
@@ -899,14 +899,14 @@ void HudThinBox(float x1, float y1, float x2, float y2, RGBAColor col, float thi
     glDisable(GL_BLEND);
 }
 
-void HudGradientBox(float x1, float y1, float x2, float y2, RGBAColor *cols)
+void HUDGradientBox(float x1, float y1, float x2, float y2, RGBAColor *cols)
 {
     std::swap(y1, y2);
 
-    x1 = HudToRealCoordinatesX(x1);
-    y1 = HudToRealCoordinatesY(y1);
-    x2 = HudToRealCoordinatesX(x2);
-    y2 = HudToRealCoordinatesY(y2);
+    x1 = HUDToRealCoordinatesX(x1);
+    y1 = HUDToRealCoordinatesY(y1);
+    x2 = HUDToRealCoordinatesX(x2);
+    y2 = HUDToRealCoordinatesY(y2);
 
     if (current_alpha < 0.99f)
         glEnable(GL_BLEND);
@@ -934,29 +934,29 @@ void HudGradientBox(float x1, float y1, float x2, float y2, RGBAColor *cols)
     glDisable(GL_BLEND);
 }
 
-float HudFontWidth(void)
+float HUDFontWidth(void)
 {
     return current_scale * current_font->NominalWidth();
 }
 
-float HudFontHeight(void)
+float HUDFontHeight(void)
 {
     return current_scale * current_font->NominalHeight();
 }
 
-float HudStringWidth(const char *str)
+float HUDStringWidth(const char *str)
 {
     return current_scale * current_font->StringWidth(str);
 }
 
-float HudStringHeight(const char *str)
+float HUDStringHeight(const char *str)
 {
     int slines = current_font->StringLines(str);
 
-    return slines * HudFontHeight() + (slines - 1) * kVerticalSpacing;
+    return slines * HUDFontHeight() + (slines - 1) * kVerticalSpacing;
 }
 
-void HudDrawChar(float left_x, float top_y, const Image *img, char ch, float size)
+void HUDDrawChar(float left_x, float top_y, const Image *img, char ch, float size)
 {
     float sc_x = current_scale; // TODO * aspect;
     float sc_y = current_scale;
@@ -1022,16 +1022,16 @@ void HudDrawChar(float left_x, float top_y, const Image *img, char ch, float siz
         ty2 = (py + 1) * current_font->font_image_->height_ratio_;
     }
 
-    float x1 = HudToRealCoordinatesX(x);
-    float x2 = HudToRealCoordinatesX(x + w);
+    float x1 = HUDToRealCoordinatesX(x);
+    float x2 = HUDToRealCoordinatesX(x + w);
 
-    float y1 = HudToRealCoordinatesY(y + h);
-    float y2 = HudToRealCoordinatesY(y);
+    float y1 = HUDToRealCoordinatesY(y + h);
+    float y2 = HUDToRealCoordinatesY(y);
 
-    HudRawImage(x1, y1, x2, y2, img, tx1, ty1, tx2, ty2, current_alpha, current_color, nullptr, 0.0, 0.0, ch);
+    HUDRawImage(x1, y1, x2, y2, img, tx1, ty1, tx2, ty2, current_alpha, current_color, nullptr, 0.0, 0.0, ch);
 }
 
-void HudDrawEndoomChar(float left_x, float top_y, float FNX, const Image *img, char ch, RGBAColor color1,
+void HUDDrawEndoomChar(float left_x, float top_y, float FNX, const Image *img, char ch, RGBAColor color1,
                        RGBAColor color2, bool blink)
 {
     float w, h;
@@ -1117,7 +1117,7 @@ void HudDrawEndoomChar(float left_x, float top_y, float FNX, const Image *img, c
 //
 // Write a string using the current font
 //
-void HudDrawText(float x, float y, const char *str, float size)
+void HUDDrawText(float x, float y, const char *str, float size)
 {
     EPI_ASSERT(current_font);
 
@@ -1125,7 +1125,7 @@ void HudDrawText(float x, float y, const char *str, float size)
 
     if (current_y_alignment >= 0)
     {
-        float total_h = HudStringHeight(str);
+        float total_h = HUDStringHeight(str);
 
         if (current_y_alignment == 0)
             total_h /= 2.0f;
@@ -1187,7 +1187,7 @@ void HudDrawText(float x, float y, const char *str, float size)
             const Image *img = current_font->CharImage(ch);
 
             if (img)
-                HudDrawChar(cx, cy, img, ch, size);
+                HUDDrawChar(cx, cy, img, ch, size);
 
             if (current_font->definition_->type_ == kFontTypeTrueType)
             {
@@ -1214,11 +1214,11 @@ void HudDrawText(float x, float y, const char *str, float size)
             break;
 
         str += (len + 1);
-        cy += (size > 0 ? size : HudFontHeight()) + kVerticalSpacing;
+        cy += (size > 0 ? size : HUDFontHeight()) + kVerticalSpacing;
     }
 }
 
-void HudDrawQuitText(int line, float FNX, float FNY, float cx)
+void HUDDrawQuitText(int line, float FNX, float FNY, float cx)
 {
     EPI_ASSERT(quit_lines[line]);
 
@@ -1232,7 +1232,7 @@ void HudDrawQuitText(int line, float FNX, float FNY, float cx)
     {
         uint8_t info = quit_lines[line]->endoom_bytes_.at(i);
 
-        HudDrawEndoomChar(cx, cy, FNX, img, quit_lines[line]->line_.at(i), endoom_colors[info & 15],
+        HUDDrawEndoomChar(cx, cy, FNX, img, quit_lines[line]->line_.at(i), endoom_colors[info & 15],
                           endoom_colors[(info >> 4) & 7], info & 128);
 
         cx += FNX;
@@ -1243,7 +1243,7 @@ void HudDrawQuitText(int line, float FNX, float FNY, float cx)
 // Draw the ENDOOM screen
 //
 
-void HudDrawQuitScreen()
+void HUDDrawQuitScreen()
 {
     EPI_ASSERT(endoom_font);
 
@@ -1255,23 +1255,23 @@ void HudDrawQuitScreen()
         float cx  = HMM_MAX(0, (((float)current_screen_width - (FNX * 80.0f)) / 2.0f));
         for (int i = 0; i < kEndoomLines; i++)
         {
-            HudDrawQuitText(i, FNX, FNY, cx);
+            HUDDrawQuitText(i, FNX, FNY, cx);
         }
-        HudSetAlignment(0, -1);
-        HudDrawText(160, 195 - HudStringHeight("Are you sure you want to quit? (Y/N)"),
+        HUDSetAlignment(0, -1);
+        HUDDrawText(160, 195 - HUDStringHeight("Are you sure you want to quit? (Y/N)"),
                     "Are you sure you want to quit? (Y/N)");
     }
     else
     {
-        HudSetAlignment(0, -1);
-        HudDrawText(160, 100 - (HudStringHeight("Are you sure you want to quit? (Y/N)") / 2),
+        HUDSetAlignment(0, -1);
+        HUDDrawText(160, 100 - (HUDStringHeight("Are you sure you want to quit? (Y/N)") / 2),
                     "Are you sure you want to quit? (Y/N)");
     }
 }
 
-void HudRenderWorld(float x, float y, float w, float h, MapObject *camera, int flags)
+void HUDRenderWorld(float x, float y, float w, float h, MapObject *camera, int flags)
 {
-    HudPushScissor(x, y, x + w, y + h, (flags & 1) == 0);
+    HUDPushScissor(x, y, x + w, y + h, (flags & 1) == 0);
 
     hud_visible_bottom = y + h;
     hud_visible_top    = 200 - hud_visible_bottom;
@@ -1281,24 +1281,24 @@ void HudRenderWorld(float x, float y, float w, float h, MapObject *camera, int f
     bool full_height = h > (hud_y_bottom - hud_y_top) * 0.95;
 
     // FIXME explain this weirdness
-    float width    = HudToRealCoordinatesX(x + w) - HudToRealCoordinatesX(x);
+    float width    = HUDToRealCoordinatesX(x + w) - HUDToRealCoordinatesX(x);
     float expand_w = (xy[2] - xy[0]) / width;
 
     // renderer needs true (OpenGL) coordinates.
     // get from scissor due to the expansion thing [ FIXME: HACKY ]
-    float x1 = xy[0]; // HudToRealCoordinatesX(x);
-    float y1 = xy[1]; // HudToRealCoordinatesY(y);
-    float x2 = xy[2]; // HudToRealCoordinatesX(x+w);
-    float y2 = xy[3]; // HudToRealCoordinatesY(y+h);
+    float x1 = xy[0]; // HUDToRealCoordinatesX(x);
+    float y1 = xy[1]; // HUDToRealCoordinatesY(y);
+    float x2 = xy[2]; // HUDToRealCoordinatesX(x+w);
+    float y2 = xy[3]; // HUDToRealCoordinatesY(y+h);
 
     RenderView(x1, y1, x2 - x1, y2 - y1, camera, full_height, expand_w);
 
-    HudPopScissor();
+    HUDPopScissor();
 }
 
-void HudRenderAutomap(float x, float y, float w, float h, MapObject *player, int flags)
+void HUDRenderAutomap(float x, float y, float w, float h, MapObject *player, int flags)
 {
-    HudPushScissor(x, y, x + w, y + h, (flags & 1) == 0);
+    HUDPushScissor(x, y, x + w, y + h, (flags & 1) == 0);
 
     // [ FIXME HACKY ]
     if ((flags & 1) == 0)
@@ -1312,13 +1312,13 @@ void HudRenderAutomap(float x, float y, float w, float h, MapObject *player, int
 
     AutomapRender(x, y, w, h, player);
 
-    HudPopScissor();
+    HUDPopScissor();
 }
 
-void HudGetCastPosition(float *x, float *y, float *scale_x, float *scale_y)
+void HUDGetCastPosition(float *x, float *y, float *scale_x, float *scale_y)
 {
-    *x = HudToRealCoordinatesX(160);
-    *y = HudToRealCoordinatesY(170);
+    *x = HUDToRealCoordinatesX(160);
+    *y = HUDToRealCoordinatesY(170);
 
     // FIXME REVIEW THIS
     //*scale_y = 4.0;

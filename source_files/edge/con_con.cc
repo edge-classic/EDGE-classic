@@ -279,7 +279,7 @@ static void ConsoleClearInputLine(void)
     input_position = 0;
 }
 
-void ConsoleSetVisible(ConsoleVisibility v)
+void SetConsoleVisible(ConsoleVisibility v)
 {
     if (v == kConsoleVisibilityToggle)
     {
@@ -527,7 +527,7 @@ void ConsoleMessageLDF(const char *lookup, ...)
     SplitIntoLines(buffer);
 }
 
-void ConsoleImportantMessageLDF(const char *lookup, ...)
+void ImportantConsoleMessageLDF(const char *lookup, ...)
 {
     va_list argptr;
     char    buffer[1024];
@@ -1130,8 +1130,8 @@ static void TabComplete(void)
     std::vector<const char *> match_vars;
     std::vector<const char *> match_keys;
 
-    int num_cmd = ConsoleMatchAllCommands(match_cmds, input_line);
-    int num_var = ConsoleMatchAllVariables(match_vars, input_line);
+    int num_cmd = MatchConsoleCommands(match_cmds, input_line);
+    int num_var = MatchConsoleVariables(match_vars, input_line);
     int num_key = 0; ///  E_MatchAllKeys(match_keys, input_line);
 
     // we have an unambiguous match, no need to print anything
@@ -1334,7 +1334,7 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
             ConsolePrint(">%s\n", input_line);
 
             // Run it!
-            ConsoleTryCommand(input_line);
+            TryConsoleCommand(input_line);
         }
 
         ConsoleClearInputLine();
@@ -1393,7 +1393,7 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
         command_history_position = -1;
         tabbed_last              = false;
 
-        ConsoleSetVisible(kConsoleVisibilityNotVisible);
+        SetConsoleVisible(kConsoleVisibilityNotVisible);
         break;
 
     // Allow screenshotting of console too - Dasho
@@ -1464,10 +1464,10 @@ bool ConsoleResponder(InputEvent *ev)
     if (ev->type != kInputEventKeyUp && ev->type != kInputEventKeyDown)
         return false;
 
-    if (ev->type == kInputEventKeyDown && EventMatchesKey(key_console, ev->value.key.sym))
+    if (ev->type == kInputEventKeyDown && CheckKeyMatch(key_console, ev->value.key.sym))
     {
-        EventClearInput();
-        ConsoleSetVisible(kConsoleVisibilityToggle);
+        ClearEventInput();
+        SetConsoleVisible(kConsoleVisibilityToggle);
         return true;
     }
 
@@ -1583,7 +1583,7 @@ void ConsoleTicker(void)
 //
 void ConsoleInit(void)
 {
-    ConsoleSortVariables();
+    SortConsoleVariables();
 
     console_used_lines   = 0;
     command_used_history = 0;
@@ -1850,7 +1850,7 @@ void ConsoleCreateQuitScreen()
     delete[] data;
 }
 
-void ConsoleClearLines()
+void ClearConsoleLines()
 {
     for (int i = 0; i < console_used_lines; i++)
     {

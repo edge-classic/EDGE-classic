@@ -172,7 +172,7 @@ void SystemShutdown(void)
     // make sure audio is unlocked (e.g. FatalError occurred)
     UnlockAudio();
 
-    SoundShutdown();
+    ShutdownSound();
     ShutdownControl();
     ShutdownGraphics();
 

@@ -1769,12 +1769,12 @@ static void OptionMenuKeyToString(int key, char *deststring)
         return;
     }
 
-    strcpy(deststring, EventGetKeyName(key1));
+    strcpy(deststring, GetKeyName(key1));
 
     if (key2 != 0)
     {
         strcat(deststring, " or ");
-        strcat(deststring, EventGetKeyName(key2));
+        strcat(deststring, GetKeyName(key2));
     }
 }
 

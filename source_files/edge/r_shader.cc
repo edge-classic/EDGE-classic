@@ -337,7 +337,7 @@ class dynlight_shader_c : public AbstractShader
 
             RendererVertex *glvert =
                 RendererBeginUnit(shape, num_vert,
-                                  (is_additive && masked) ? (GLuint)kTextureEnvironmentSkipRgb
+                                  (is_additive && masked) ? (GLuint)kTextureEnvironmentSkipRGB
                                   : is_additive           ? (GLuint)kTextureEnvironmentDisable
                                                           : GL_MODULATE,
                                   (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim[DL]->TextureId(), *pass_var,
@@ -522,7 +522,7 @@ class plane_glow_c : public AbstractShader
 
             RendererVertex *glvert =
                 RendererBeginUnit(shape, num_vert,
-                                  (is_additive && masked) ? (GLuint)kTextureEnvironmentSkipRgb
+                                  (is_additive && masked) ? (GLuint)kTextureEnvironmentSkipRGB
                                   : is_additive           ? (GLuint)kTextureEnvironmentDisable
                                                           : GL_MODULATE,
                                   (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim[DL]->TextureId(), *pass_var,
@@ -689,7 +689,7 @@ class wall_glow_c : public AbstractShader
 
             RendererVertex *glvert =
                 RendererBeginUnit(shape, num_vert,
-                                  (is_additive && masked) ? (GLuint)kTextureEnvironmentSkipRgb
+                                  (is_additive && masked) ? (GLuint)kTextureEnvironmentSkipRGB
                                   : is_additive           ? (GLuint)kTextureEnvironmentDisable
                                                           : GL_MODULATE,
                                   (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim[DL]->TextureId(), *pass_var,

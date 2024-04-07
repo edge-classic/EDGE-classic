@@ -97,10 +97,10 @@ static void CaptureScreenAsTexture(bool speckly, bool spooky)
         }
     }
 
-    current_wipe_texture = RendererUploadTexture(&img);
+    current_wipe_texture = UploadTexture(&img);
 }
 
-void RendererBlackoutWipeTexture(void)
+void BlackoutWipeTexture(void)
 {
     int total_w = MakeValidTextureSize(current_screen_width);
     int total_h = MakeValidTextureSize(current_screen_height);
@@ -120,7 +120,7 @@ void RendererBlackoutWipeTexture(void)
         dest[3]                     = 1;
     }
 
-    current_wipe_texture = RendererUploadTexture(&img);
+    current_wipe_texture = UploadTexture(&img);
 }
 
 static void RendererInitializeMelt(void)
@@ -160,7 +160,7 @@ static void RendererUpdateMelt(int tics)
     }
 }
 
-void RendererInitializeWipe(ScreenWipe effect)
+void InitializeWipe(ScreenWipe effect)
 {
     current_wipe_effect = effect;
 
@@ -176,7 +176,7 @@ void RendererInitializeWipe(ScreenWipe effect)
         RendererInitializeMelt();
 }
 
-void RendererStopWipe(void)
+void StopWipe(void)
 {
     current_wipe_effect = kScreenWipeNone;
 
@@ -356,7 +356,7 @@ static void RendererWipeDoors(float how_far)
     glDisable(GL_TEXTURE_2D);
 }
 
-bool RendererDoWipe(void)
+bool DoWipe(void)
 {
     //
     // NOTE: we assume 2D project matrix is already setup.

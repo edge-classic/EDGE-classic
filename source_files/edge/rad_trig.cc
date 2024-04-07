@@ -240,7 +240,7 @@ class rts_menu_c
             return key - '0';
 
         if (key == kSpace || key == kEnter || key == 'Y' || key == kGamepadA || key == kMouse1 ||
-            EventMatchesKey(key_use, key))
+            CheckKeyMatch(key_use, key))
             return current_choice + 1;
 
         return -1; /* invalid */

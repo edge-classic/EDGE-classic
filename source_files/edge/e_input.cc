@@ -218,12 +218,12 @@ static void UpdateJoystickAxis(int n)
     joy_forces[axis] = force;
 }
 
-bool EventMatchesKey(int keyvar, int key)
+bool CheckKeyMatch(int keyvar, int key)
 {
     return ((keyvar >> 16) == key) || ((keyvar & 0xffff) == key);
 }
 
-bool EventIsKeyPressed(int keyvar)
+bool IsKeyPressed(int keyvar)
 {
 #ifdef DEVELOPERS
     if ((keyvar >> 16) > kTotalKeys)
@@ -244,11 +244,11 @@ bool EventIsKeyPressed(int keyvar)
 static inline void AddKeyForce(int axis, int upkeys, int downkeys, float qty = 1.0f)
 {
     // let movement keys cancel each other out
-    if (EventIsKeyPressed(upkeys))
+    if (IsKeyPressed(upkeys))
     {
         joy_forces[axis] += qty;
     }
-    if (EventIsKeyPressed(downkeys))
+    if (IsKeyPressed(downkeys))
     {
         joy_forces[axis] -= qty;
     }
@@ -273,7 +273,7 @@ static void UpdateForces(void)
 }
 
 //
-// EventBuildTicCommand
+// BuildEventTicCommand
 //
 // Builds a ticcmd from all of the available inputs
 //
@@ -288,14 +288,14 @@ static bool allow_inventory_previous = true;
 static bool allow_inventory_use      = true;
 static bool allow_inventory_next     = true;
 
-void EventBuildTicCommand(EventTicCommand *cmd)
+void BuildEventTicCommand(EventTicCommand *cmd)
 {
     UpdateForces();
 
     *cmd = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-    bool strafe = EventIsKeyPressed(key_strafe);
-    int  speed  = EventIsKeyPressed(key_speed) ? 1 : 0;
+    bool strafe = IsKeyPressed(key_strafe);
+    int  speed  = IsKeyPressed(key_speed) ? 1 : 0;
 
     if (in_running.d_)
         speed = !speed;
@@ -402,40 +402,40 @@ void EventBuildTicCommand(EventTicCommand *cmd)
 
     // ---Buttons---
 
-    if (EventIsKeyPressed(key_fire))
+    if (IsKeyPressed(key_fire))
         cmd->buttons |= kButtonCodeAttack;
 
-    if (EventIsKeyPressed(key_use) &&
+    if (IsKeyPressed(key_use) &&
         players[cmd->player_index]->player_state_ != kPlayerAwaitingRespawn) // Prevent passing use action when hitting
                                                                              // 'use' to respawn
         cmd->buttons |= kButtonCodeUse;
 
-    if (EventIsKeyPressed(key_second_attack))
+    if (IsKeyPressed(key_second_attack))
         cmd->extended_buttons |= kExtendedButtonCodeSecondAttack;
 
-    if (EventIsKeyPressed(key_third_attack))
+    if (IsKeyPressed(key_third_attack))
         cmd->extended_buttons |= kExtendedButtonCodeThirdAttack;
 
-    if (EventIsKeyPressed(key_fourth_attack))
+    if (IsKeyPressed(key_fourth_attack))
         cmd->extended_buttons |= kExtendedButtonCodeFourthAttack;
 
-    if (EventIsKeyPressed(key_reload))
+    if (IsKeyPressed(key_reload))
         cmd->extended_buttons |= kExtendedButtonCodeReload;
 
-    if (EventIsKeyPressed(key_action1))
+    if (IsKeyPressed(key_action1))
         cmd->extended_buttons |= kExtendedButtonCodeAction1;
 
-    if (EventIsKeyPressed(key_action2))
+    if (IsKeyPressed(key_action2))
         cmd->extended_buttons |= kExtendedButtonCodeAction2;
 
     // -ACB- 1998/07/02 Use CENTER flag to center the vertical look.
-    if (EventIsKeyPressed(key_look_center))
+    if (IsKeyPressed(key_look_center))
         cmd->extended_buttons |= kExtendedButtonCodeCenter;
 
     // -KM- 1998/11/25 Weapon change key
     for (int w = 0; w < 10; w++)
     {
-        if (EventIsKeyPressed(key_weapons[w]))
+        if (IsKeyPressed(key_weapons[w]))
         {
             cmd->buttons |= kButtonCodeChangeWeapon;
             cmd->buttons |= w << kButtonCodeWeaponMaskShift;
@@ -443,19 +443,19 @@ void EventBuildTicCommand(EventTicCommand *cmd)
         }
     }
 
-    if (EventIsKeyPressed(key_next_weapon))
+    if (IsKeyPressed(key_next_weapon))
     {
         cmd->buttons |= kButtonCodeChangeWeapon;
         cmd->buttons |= (kButtonCodeNextWeapon << kButtonCodeWeaponMaskShift);
     }
-    else if (EventIsKeyPressed(key_previous_weapon))
+    else if (IsKeyPressed(key_previous_weapon))
     {
         cmd->buttons |= kButtonCodeChangeWeapon;
         cmd->buttons |= (kButtonCodePreviousWeapon << kButtonCodeWeaponMaskShift);
     }
 
     // You have to release the 180 deg turn key before you can press it again
-    if (EventIsKeyPressed(key_180))
+    if (IsKeyPressed(key_180))
     {
         if (allow_180)
             cmd->angle_turn ^= 0x8000;
@@ -466,7 +466,7 @@ void EventBuildTicCommand(EventTicCommand *cmd)
         allow_180 = true;
 
     // -ES- 1999/03/28 Zoom Key
-    if (EventIsKeyPressed(key_zoom))
+    if (IsKeyPressed(key_zoom))
     {
         if (allow_zoom)
         {
@@ -478,7 +478,7 @@ void EventBuildTicCommand(EventTicCommand *cmd)
         allow_zoom = true;
 
     // -AJA- 2000/04/14: Autorun toggle
-    if (EventIsKeyPressed(key_autorun))
+    if (IsKeyPressed(key_autorun))
     {
         if (allow_autorun)
         {
@@ -489,7 +489,7 @@ void EventBuildTicCommand(EventTicCommand *cmd)
     else
         allow_autorun = true;
 
-    if (EventIsKeyPressed(key_inventory_previous))
+    if (IsKeyPressed(key_inventory_previous))
     {
         if (allow_inventory_previous)
         {
@@ -500,7 +500,7 @@ void EventBuildTicCommand(EventTicCommand *cmd)
     else
         allow_inventory_previous = true;
 
-    if (EventIsKeyPressed(key_inventory_use))
+    if (IsKeyPressed(key_inventory_use))
     {
         if (allow_inventory_use)
         {
@@ -511,7 +511,7 @@ void EventBuildTicCommand(EventTicCommand *cmd)
     else
         allow_inventory_use = true;
 
-    if (EventIsKeyPressed(key_inventory_next))
+    if (IsKeyPressed(key_inventory_next))
     {
         if (allow_inventory_next)
         {
@@ -531,7 +531,7 @@ void EventBuildTicCommand(EventTicCommand *cmd)
 //
 // Get info needed to make ticcmd_ts for the players.
 //
-bool EventInputResponder(InputEvent *ev)
+bool InputResponder(InputEvent *ev)
 {
     switch (ev->type)
     {
@@ -571,7 +571,7 @@ bool EventInputResponder(InputEvent *ev)
             LogPrint("Mouse %+04d %+04d --> %+7.2f %+7.2f\n", ev->value.mouse.dx, ev->value.mouse.dy, dx, dy);
 
         // -AJA- 1999/07/27: Mlook key like quake's.
-        if (EventIsKeyPressed(key_mouselook))
+        if (IsKeyPressed(key_mouselook))
         {
             ball_deltas[kAxisTurn] += dx;
             ball_deltas[kAxisMouselook] += dy;
@@ -595,7 +595,7 @@ bool EventInputResponder(InputEvent *ev)
 //
 // Sets the turbo scale (100 is normal)
 //
-void EventSetTurboScale(int scale)
+void SetTurboScale(int scale)
 {
     forward_move[0] = 25 * scale / 100;
     forward_move[1] = 50 * scale / 100;
@@ -604,7 +604,7 @@ void EventSetTurboScale(int scale)
     side_move[1] = 40 * scale / 100;
 }
 
-void EventClearInput(void)
+void ClearEventInput(void)
 {
     std::fill(game_key_down, game_key_down + kTotalKeys, 0);
 
@@ -614,13 +614,13 @@ void EventClearInput(void)
 
 //
 // Finds all keys in the game_key_down[] array which have been released
-// and clears them.  The value is NOT cleared by EventInputResponder()
+// and clears them.  The value is NOT cleared by InputResponder()
 // since that prevents very fast presses (also the mousewheel) from being down
-// long enough to be noticed by EventBuildTicCommand().
+// long enough to be noticed by BuildEventTicCommand().
 //
 // -AJA- 2005/02/17: added this.
 //
-void EventUpdateKeyState(void)
+void UpdateKeyState(void)
 {
     for (int k = 0; k < kTotalKeys; k++)
         if (game_key_down[k] & kGameKeyUp)
@@ -630,7 +630,7 @@ void EventUpdateKeyState(void)
 //
 // Generate events which should release all current keys.
 //
-void EventReleaseAllKeys(void)
+void ReleaseAllKeys(void)
 {
     int i;
     for (i = 0; i < kTotalKeys; i++)
@@ -642,7 +642,7 @@ void EventReleaseAllKeys(void)
             ev.type          = kInputEventKeyUp;
             ev.value.key.sym = i;
 
-            EventPostEvent(&ev);
+            PostEvent(&ev);
         }
     }
 }
@@ -650,7 +650,7 @@ void EventReleaseAllKeys(void)
 //
 // Called by the I/O functions when input is detected
 //
-void EventPostEvent(InputEvent *ev)
+void PostEvent(InputEvent *ev)
 {
     events[event_head] = *ev;
     event_head         = (event_head + 1) % kMaximumInputEvents;
@@ -667,7 +667,7 @@ void EventPostEvent(InputEvent *ev)
 //
 // Send all the events of the given timestamp down the responder chain
 //
-void EventProcessEvents(void)
+void ProcessInputEvents(void)
 {
     InputEvent *ev;
 
@@ -795,7 +795,7 @@ static EventSpecialKey special_keys[] = {{kRightArrow, "Right Arrow"},
                                          // THE END
                                          {-1, nullptr}};
 
-const char *EventGetKeyName(int key)
+const char *GetKeyName(int key)
 {
     static char buffer[32];
 

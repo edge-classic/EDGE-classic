@@ -276,7 +276,7 @@ void SoftInitializeResolution(void)
 
 static bool DoExecuteChangeResolution(DisplayMode *mode)
 {
-    RendererStopWipe(); // delete any wipe texture too
+    StopWipe(); // delete any wipe texture too
 
     DeleteAllImages();
 

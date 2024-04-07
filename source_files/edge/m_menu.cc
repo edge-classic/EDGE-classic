@@ -81,11 +81,11 @@ int key_quick_load;
 int key_quit_edge;
 int key_gamma_toggle;
 
-extern bool EventMatchesKey(int keyvar, int key);
+extern bool CheckKeyMatch(int keyvar, int key);
 
 extern ConsoleVariable sector_brightness_correction;
 
-extern unsigned int RendererUploadTexture(ImageData *img, int flags, int max_pix);
+extern unsigned int UploadTexture(ImageData *img, int flags, int max_pix);
 
 extern const Image *menu_backdrop;
 
@@ -552,7 +552,7 @@ void MenuReadSaveStrings(void)
                 if (save_extended_information_slots[i].save_image_data)
                 {
                     save_extended_information_slots[i].save_texture_id =
-                        RendererUploadTexture(save_extended_information_slots[i].save_image_data, 2, (1 << 30));
+                        UploadTexture(save_extended_information_slots[i].save_image_data, 2, (1 << 30));
                     save_extended_information_slots[i].save_image_page = save_page;
                     delete svimg_file;
                 }
@@ -1793,7 +1793,7 @@ void MenuStartMessage(const char *string, void (*routine)(int response), bool in
     message_input_routine = nullptr;
     message_needs_input   = input;
     menu_active           = true;
-    ConsoleSetVisible(kConsoleVisibilityNotVisible);
+    SetConsoleVisible(kConsoleVisibilityNotVisible);
     return;
 }
 
@@ -1817,7 +1817,7 @@ void MenuStartMessageInput(const char *string, void (*routine)(const char *respo
     message_key_routine   = nullptr;
     message_needs_input   = true;
     menu_active           = true;
-    ConsoleSetVisible(kConsoleVisibilityNotVisible);
+    SetConsoleVisible(kConsoleVisibilityNotVisible);
     return;
 }
 
@@ -1993,47 +1993,47 @@ bool MenuResponder(InputEvent *ev)
     // F-Keys
     if (!menu_active)
     {
-        if (EventMatchesKey(key_screenshot, ch))
+        if (CheckKeyMatch(key_screenshot, ch))
         {
             ch = kScreenshot;
         }
-        if (EventMatchesKey(key_save_game, ch))
+        if (CheckKeyMatch(key_save_game, ch))
         {
             ch = kSaveGame;
         }
-        if (EventMatchesKey(key_load_game, ch))
+        if (CheckKeyMatch(key_load_game, ch))
         {
             ch = kLoadGame;
         }
-        if (EventMatchesKey(key_sound_controls, ch))
+        if (CheckKeyMatch(key_sound_controls, ch))
         {
             ch = kSoundControls;
         }
-        if (EventMatchesKey(key_options_menu, ch))
+        if (CheckKeyMatch(key_options_menu, ch))
         {
             ch = kOptionsMenu;
         }
-        if (EventMatchesKey(key_quick_save, ch))
+        if (CheckKeyMatch(key_quick_save, ch))
         {
             ch = kQuickSave;
         }
-        if (EventMatchesKey(key_end_game, ch))
+        if (CheckKeyMatch(key_end_game, ch))
         {
             ch = kEndGame;
         }
-        if (EventMatchesKey(key_message_toggle, ch))
+        if (CheckKeyMatch(key_message_toggle, ch))
         {
             ch = kMessageToggle;
         }
-        if (EventMatchesKey(key_quick_load, ch))
+        if (CheckKeyMatch(key_quick_load, ch))
         {
             ch = kQuickLoad;
         }
-        if (EventMatchesKey(key_quit_edge, ch))
+        if (CheckKeyMatch(key_quit_edge, ch))
         {
             ch = kQuitEdge;
         }
-        if (EventMatchesKey(key_gamma_toggle, ch))
+        if (CheckKeyMatch(key_gamma_toggle, ch))
         {
             ch = kGammaToggle;
         }
@@ -2326,7 +2326,7 @@ void MenuStartControlPanel(void)
         return;
 
     menu_active = true;
-    ConsoleSetVisible(kConsoleVisibilityNotVisible);
+    SetConsoleVisible(kConsoleVisibilityNotVisible);
 
     current_menu = &MainMenuDefinition;   // JDC
     item_on      = current_menu->last_on; // JDC

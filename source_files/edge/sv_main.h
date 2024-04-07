@@ -262,7 +262,7 @@ void         SaveGlobalsFree(SaveGlobals *globs);
 //  ADMININISTRATION
 //
 
-void SaveSystemInitialize(void);
+void InitializeSaveSystem(void);
 
 SaveStruct *SaveStructLookup(const char *name);
 SaveArray  *SaveArrayLookup(const char *name);

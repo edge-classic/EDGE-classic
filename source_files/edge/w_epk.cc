@@ -228,7 +228,7 @@ class PackFile
     epi::File *OpenZipEntryByName(const std::string &name);
 };
 
-int PackFindStem(PackFile *pack, const std::string &name)
+int FindStemInPack(PackFile *pack, const std::string &name)
 {
     return pack->search_files_.count(name);
 }
@@ -683,7 +683,7 @@ static void ProcessDDFInPack(PackFile *pack)
     }
 }
 
-static void ProcessCoalAPIInPack(PackFile *pack)
+static void ProcessCOALAPIInPack(PackFile *pack)
 {
     DataFile *df = pack->parent_;
 
@@ -706,7 +706,7 @@ static void ProcessCoalAPIInPack(PackFile *pack)
                 const uint8_t *raw_data = pack->LoadEntry(dir, entry, length);
                 std::string    data((const char *)raw_data);
                 delete[] raw_data;
-                CoalAddScript(0, data, source);
+                COALAddScript(0, data, source);
                 return; // Should only be present once
             }
         }
@@ -714,7 +714,7 @@ static void ProcessCoalAPIInPack(PackFile *pack)
     FatalError("coal_api.ec not found in edge_defs; unable to initialize COAL!\n");
 }
 
-static void ProcessCoalHUDInPack(PackFile *pack)
+static void ProcessCOALHUDInPack(PackFile *pack)
 {
     DataFile *df = pack->parent_;
 
@@ -737,14 +737,14 @@ static void ProcessCoalHUDInPack(PackFile *pack)
             {
                 if (epi::StringPrefixCaseCompareASCII(bare_filename, "edge_defs") != 0)
                 {
-                    SetCoalDetected(true);
+                    SetCOALDetected(true);
                 }
 
                 int            length   = -1;
                 const uint8_t *raw_data = pack->LoadEntry(dir, entry, length);
                 std::string    data((const char *)raw_data);
                 delete[] raw_data;
-                CoalAddScript(0, data, source);
+                COALAddScript(0, data, source);
                 return; // Should only be present once
             }
         }
@@ -813,7 +813,7 @@ static void ProcessLuaHUDInPack(PackFile *pack)
     }
 }
 
-void PackProcessSubstitutions(PackFile *pack, int pack_index)
+void ProcessPackSubstitutions(PackFile *pack, int pack_index)
 {
     int d = -1;
     for (const std::string &dir_name : known_image_directories)
@@ -953,7 +953,7 @@ void PackProcessSubstitutions(PackFile *pack, int pack_index)
     }
 }
 
-void PackProcessHiresSubstitutions(PackFile *pack, int pack_index)
+void ProcessHiresPackSubstitutions(PackFile *pack, int pack_index)
 {
     int d = pack->FindDirectory("hires");
 
@@ -1024,7 +1024,7 @@ void PackProcessHiresSubstitutions(PackFile *pack, int pack_index)
     }
 }
 
-bool PackFindFile(PackFile *pack, const std::string &name)
+bool FindPackFile(PackFile *pack, const std::string &name)
 {
     // when file does not exist, this returns false.
 
@@ -1056,7 +1056,7 @@ bool PackFindFile(PackFile *pack, const std::string &name)
     epi::StringUpperASCII(find_stem);
 
     // quick file stem check to see if it's present at all
-    if (!PackFindStem(pack, find_stem))
+    if (!FindStemInPack(pack, find_stem))
         return false;
 
     // Specific path given; attempt to find as-is, otherwise return false
@@ -1099,7 +1099,7 @@ bool PackFindFile(PackFile *pack, const std::string &name)
     return false;
 }
 
-epi::File *PackOpenFile(PackFile *pack, const std::string &name)
+epi::File *OpenPackFile(PackFile *pack, const std::string &name)
 {
     // when file does not exist, this returns nullptr.
 
@@ -1131,7 +1131,7 @@ epi::File *PackOpenFile(PackFile *pack, const std::string &name)
     epi::StringUpperASCII(open_stem);
 
     // quick file stem check to see if it's present at all
-    if (!PackFindStem(pack, open_stem))
+    if (!FindStemInPack(pack, open_stem))
         return nullptr;
 
     // Specific path given; attempt to open as-is, otherwise return nullptr
@@ -1168,7 +1168,7 @@ epi::File *PackOpenFile(PackFile *pack, const std::string &name)
 }
 
 // Like the above, but is in the form of a stem + acceptable extensions
-epi::File *PackOpenMatch(PackFile *pack, const std::string &name, const std::vector<std::string> &extensions)
+epi::File *OpenPackMatch(PackFile *pack, const std::string &name, const std::vector<std::string> &extensions)
 {
     // when file does not exist, this returns nullptr.
 
@@ -1180,7 +1180,7 @@ epi::File *PackOpenMatch(PackFile *pack, const std::string &name, const std::vec
     epi::StringUpperASCII(open_stem);
 
     // quick file stem check to see if it's present at all
-    if (!PackFindStem(pack, open_stem))
+    if (!FindStemInPack(pack, open_stem))
         return nullptr;
 
     std::string stem_match = open_stem;
@@ -1199,7 +1199,7 @@ epi::File *PackOpenMatch(PackFile *pack, const std::string &name, const std::vec
     return nullptr;
 }
 
-std::vector<std::string> PackGetSpriteList(PackFile *pack)
+std::vector<std::string> GetPackSpriteList(PackFile *pack)
 {
     std::vector<std::string> found_sprites;
 
@@ -1252,7 +1252,7 @@ static void ProcessWADsInPack(PackFile *pack)
             if (!entry.HasExtension(".wad"))
                 continue;
 
-            epi::File *pack_wad = PackOpenFile(pack, entry.pack_path_);
+            epi::File *pack_wad = OpenPackFile(pack, entry.pack_path_);
 
             if (pack_wad)
             {
@@ -1273,7 +1273,7 @@ static void ProcessWADsInPack(PackFile *pack)
     }
 }
 
-void PackPopulateOnly(DataFile *df)
+void PopulatePackOnly(DataFile *df)
 {
     if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindIFolder)
         df->pack_ = ProcessFolder(df);
@@ -1283,7 +1283,7 @@ void PackPopulateOnly(DataFile *df)
     df->pack_->SortEntries();
 }
 
-int PackCheckForIwads(DataFile *df)
+int CheckPackForIWADs(DataFile *df)
 {
     PackFile *pack = df->pack_;
     for (size_t d = 0; d < pack->directories_.size(); d++)
@@ -1295,7 +1295,7 @@ int PackCheckForIwads(DataFile *df)
             if (!entry.HasExtension(".wad"))
                 continue;
 
-            epi::File *pack_wad = PackOpenFile(pack, entry.pack_path_);
+            epi::File *pack_wad = OpenPackFile(pack, entry.pack_path_);
 
             if (pack_wad)
             {
@@ -1312,7 +1312,7 @@ int PackCheckForIwads(DataFile *df)
     return -1;
 }
 
-void PackProcessAll(DataFile *df, size_t file_index)
+void ProcessAllInPack(DataFile *df, size_t file_index)
 {
     if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindIFolder)
         df->pack_ = ProcessFolder(df);
@@ -1326,7 +1326,7 @@ void PackProcessAll(DataFile *df, size_t file_index)
     if ((df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEEPK) && file_index == 0)
     {
         LogPrint("Loading WADFIXES\n");
-        epi::File *wadfixes = PackOpenFile(df->pack_, "wadfixes.ddf");
+        epi::File *wadfixes = OpenPackFile(df->pack_, "wadfixes.ddf");
         if (wadfixes)
             DDFReadFixes(wadfixes->ReadText());
         delete wadfixes;
@@ -1340,8 +1340,8 @@ void PackProcessAll(DataFile *df, size_t file_index)
 
     // parse COALAPI only from edge_defs folder or `edge_defs.epk`
     if ((df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEEPK) && file_index == 0)
-        ProcessCoalAPIInPack(df->pack_);
-    ProcessCoalHUDInPack(df->pack_);
+        ProcessCOALAPIInPack(df->pack_);
+    ProcessCOALHUDInPack(df->pack_);
 
     // LUA
 

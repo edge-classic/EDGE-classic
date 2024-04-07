@@ -187,7 +187,7 @@ void ChangeMusic(int entry_number, bool loop)
 
     case kSoundM4P:
         delete F;
-        music_player = S_PlayM4PMusic(data, length, loop);
+        music_player = PlayM4PMusic(data, length, loop);
         break;
 
     case kSoundRAD:

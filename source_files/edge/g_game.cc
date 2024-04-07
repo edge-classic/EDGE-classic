@@ -248,10 +248,10 @@ void LoadLevel_Bits(void)
 
     game_state = kGameStateLevel;
 
-    ConsoleSetVisible(kConsoleVisibilityNotVisible);
+    SetConsoleVisible(kConsoleVisibilityNotVisible);
 
     // clear cmd building stuff
-    EventClearInput();
+    ClearEventInput();
 
 #ifdef EDGE_WEB
     ResumeAudioDevice();
@@ -293,7 +293,7 @@ void GameDoLoadLevel(void)
 
             SpawnInitialPlayers();
 
-            // Need to investigate if CoalBeginLevel() needs to go here too now
+            // Need to investigate if COALBeginLevel() needs to go here too now
             // - Dasho
 
             RemoveOldAvatars();
@@ -309,7 +309,7 @@ void GameDoLoadLevel(void)
     if (LuaUseLuaHUD())
         LuaBeginLevel();
     else
-        CoalBeginLevel();
+        COALBeginLevel();
 }
 
 //
@@ -332,7 +332,7 @@ bool GameResponder(InputEvent *ev)
         return false;
     }
 
-    if (ev->type == kInputEventKeyDown && EventMatchesKey(key_show_players, ev->value.key.sym))
+    if (ev->type == kInputEventKeyDown && CheckKeyMatch(key_show_players, ev->value.key.sym))
     {
         if (game_state == kGameStateLevel) //!!!! && !InDeathmatch())
         {
@@ -341,7 +341,7 @@ bool GameResponder(InputEvent *ev)
         }
     }
 
-    if (!network_game && ev->type == kInputEventKeyDown && EventMatchesKey(key_pause, ev->value.key.sym))
+    if (!network_game && ev->type == kInputEventKeyDown && CheckKeyMatch(key_pause, ev->value.key.sym))
     {
         paused = !paused;
 
@@ -381,7 +381,7 @@ bool GameResponder(InputEvent *ev)
             return true; // finale ate the event
     }
 
-    return EventInputResponder(ev);
+    return InputResponder(ev);
 }
 
 static void CheckPlayersReborn(void)
@@ -874,7 +874,7 @@ static void GameDoLoadGame(void)
     if (LuaUseLuaHUD())
         LuaLoadGame();
     else
-        CoalLoadGame();
+        COALLoadGame();
 }
 
 //
@@ -971,7 +971,7 @@ static void GameDoSaveGame(void)
     if (LuaUseLuaHUD())
         LuaSaveGame();
     else
-        CoalSaveGame();
+        COALSaveGame();
 
     std::string fn(SaveFilename("current", "head"));
 
@@ -1104,7 +1104,7 @@ static void GameDoNewGame(void)
     if (LuaUseLuaHUD())
         LuaNewGame();
     else
-        CoalNewGame();
+        COALNewGame();
 
     // -AJA- 2003/10/09: support for pre-level briefing screen on first map.
     //       FIXME: kludgy. All this game logic desperately needs rethinking.

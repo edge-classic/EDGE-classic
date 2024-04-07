@@ -190,7 +190,7 @@ void AudioShutdown(void)
     if (no_sound)
         return;
 
-    SoundShutdown();
+    ShutdownSound();
 
     no_sound = true;
 

@@ -75,7 +75,7 @@ int ConsoleCommandExec(char **argv, int argc)
 
     while (fgets(buffer, sizeof(buffer) - 1, script))
     {
-        ConsoleTryCommand(buffer);
+        TryConsoleCommand(buffer);
     }
 
     fclose(script);
@@ -307,7 +307,7 @@ int ConsoleCommandPlaySound(char **argv, int argc)
 
 int ConsoleCommandResetVars(char **argv, int argc)
 {
-    ConsoleResetAllVariables();
+    ResetAllConsoleVariables();
     ConfigurationResetDefaults(0);
     return 0;
 }
@@ -364,7 +364,7 @@ int ConsoleCommandShowVars(char **argv, int argc)
 
     LogPrint("Console Variables:\n");
 
-    int total = ConsolePrintVariables(match, show_default);
+    int total = PrintConsoleVariables(match, show_default);
 
     if (total == 0)
         LogPrint("Nothing matched.\n");
@@ -467,7 +467,7 @@ int ConsoleCommandEndoom(char **argv, int argc)
 
 int ConsoleCommandClear(char **argv, int argc)
 {
-    ConsoleClearLines();
+    ClearConsoleLines();
     return 0;
 }
 
@@ -580,7 +580,7 @@ static int FindCommand(const char *name)
     return -1; // not found
 }
 
-void ConsoleTryCommand(const char *cmd)
+void TryConsoleCommand(const char *cmd)
 {
     char *argv[kMaximumConsoleArguments];
     int   argc = GetArgs(cmd, argv, kMaximumConsoleArguments);
@@ -597,7 +597,7 @@ void ConsoleTryCommand(const char *cmd)
         return;
     }
 
-    ConsoleVariable *var = ConsoleFindVariable(argv[0]);
+    ConsoleVariable *var = FindConsoleVariable(argv[0]);
     if (var != nullptr)
     {
         if (argc <= 1)
@@ -641,7 +641,7 @@ void ConsoleTryCommand(const char *cmd)
     return;
 }
 
-int ConsoleMatchAllCommands(std::vector<const char *> &list, const char *pattern)
+int MatchConsoleCommands(std::vector<const char *> &list, const char *pattern)
 {
     list.clear();
 
@@ -681,13 +681,13 @@ void ConsolePlayerMessage(int plyr, const char *message, ...)
 }
 
 //
-// ConsolePlayerMessageLDF
+// PlayerConsoleMessageLDF
 //
 // -ACB- 1999/09/22 Console Player Message Only. Changed from
 //                  #define to procedure because of compiler
 //                  differences.
 //
-void ConsolePlayerMessageLDF(int plyr, const char *message, ...)
+void PlayerConsoleMessageLDF(int plyr, const char *message, ...)
 {
     va_list argptr;
     char    buffer[256];

@@ -202,7 +202,7 @@ uint8_t *ConvertPCSpeakerSound(const uint8_t *data, int *length)
     return new_data;
 }
 
-bool SoundLoadWAV(SoundData *buf, uint8_t *data, int length, bool pc_speaker)
+bool LoadWAVSound(SoundData *buf, uint8_t *data, int length, bool pc_speaker)
 {
     drwav wav;
 

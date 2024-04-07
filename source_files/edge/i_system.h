@@ -55,7 +55,7 @@ void FatalError(const char *error, ...);
 
 // The opposite of the SystemStartup routine.  This will shutdown
 // everything running in the platform code, by calling the other
-// termination functions (SoundShutdown, ShutdownMusic,
+// termination functions (ShutdownSound, ShutdownMusic,
 // ShutdownGraphics and ShutdownControl), and doing anything else
 // the platform code needs to (e.g. freeing all other resources).
 void SystemShutdown(void);
@@ -86,7 +86,7 @@ extern std::string executable_path;
 void StartupControl(void);
 
 // Causes all control devices to send their events to the engine via
-// the EventPostEvent() function.
+// the PostEvent() function.
 void ControlGetEvents(void);
 
 // Shuts down all control devices.  This is the opposite of

@@ -76,7 +76,7 @@ class ConsoleLine
     }
 };
 
-void ConsoleTryCommand(const char *cmd);
+void TryConsoleCommand(const char *cmd);
 
 #ifdef __GNUC__
 void ConsolePrint(const char *message, ...) __attribute__((format(printf, 1, 2)));
@@ -92,24 +92,24 @@ void ConsolePrintEndoom();
 
 void ConsoleCreateQuitScreen();
 
-void ConsoleClearLines();
+void ClearConsoleLines();
 
 // Looks up the string in LDF, appends an extra '\n', and then writes it to
 // the console. Should be used for most player messages.
 void ConsoleMessageLDF(const char *lookup, ...);
 
-void ConsoleImportantMessageLDF(const char *lookup, ...);
+void ImportantConsoleMessageLDF(const char *lookup, ...);
 
 // Looks up in LDF.
-void ConsolePlayerMessageLDF(int plyr, const char *message, ...);
+void PlayerConsoleMessageLDF(int plyr, const char *message, ...);
 
 // this color will apply to the next ConsoleMessage or ConsolePrint call.
 void ConsoleMessageColor(RGBAColor col);
 
 // Displays/Hides the console.
-void ConsoleSetVisible(ConsoleVisibility v);
+void SetConsoleVisible(ConsoleVisibility v);
 
-int ConsoleMatchAllCommands(std::vector<const char *> &list, const char *pattern);
+int MatchConsoleCommands(std::vector<const char *> &list, const char *pattern);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

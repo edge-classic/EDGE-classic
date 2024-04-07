@@ -31,11 +31,11 @@ enum TextureUploadFlag
     kUploadThresh = (1 << 3), // threshhold alpha (to 0 or 255)
 };
 
-GLuint RendererUploadTexture(ImageData *img, int flags = kUploadNone, int max_pix = (1 << 30));
+GLuint UploadTexture(ImageData *img, int flags = kUploadNone, int max_pix = (1 << 30));
 
-ImageData *RgbFromPalettised(ImageData *src, const uint8_t *palette, int opacity);
+ImageData *RGBFromPalettised(ImageData *src, const uint8_t *palette, int opacity);
 
-void PaletteRemapRgba(ImageData *img, const uint8_t *new_pal, const uint8_t *old_pal);
+void PaletteRemapRGBA(ImageData *img, const uint8_t *new_pal, const uint8_t *old_pal);
 
 int DetermineOpacity(ImageData *img, bool *is_empty_);
 

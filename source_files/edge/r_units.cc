@@ -229,7 +229,7 @@ static void EnableCustomEnvironment(GLuint env, bool enable)
     RenderState *state = RendererGetState();
     switch (env)
     {
-    case uint32_t(kTextureEnvironmentSkipRgb):
+    case uint32_t(kTextureEnvironmentSkipRGB):
         if (enable)
         {
             state->TextureEnvironmentMode(GL_COMBINE);
@@ -471,12 +471,12 @@ void RendererDrawUnits(void)
 
             if (active_env[t] != unit->environment_mode[t])
             {
-                if (active_env[t] == kTextureEnvironmentSkipRgb)
+                if (active_env[t] == kTextureEnvironmentSkipRGB)
                 {
                     EnableCustomEnvironment(active_env[t], false);
                 }
 
-                if (unit->environment_mode[t] == kTextureEnvironmentSkipRgb)
+                if (unit->environment_mode[t] == kTextureEnvironmentSkipRGB)
                 {
                     EnableCustomEnvironment(unit->environment_mode[t], true);
                 }
@@ -512,7 +512,7 @@ void RendererDrawUnits(void)
     {
         state->ActiveTexture(GL_TEXTURE0 + t);
 
-        if (active_env[t] == kTextureEnvironmentSkipRgb)
+        if (active_env[t] == kTextureEnvironmentSkipRGB)
         {
             EnableCustomEnvironment(active_env[t], false);
         }

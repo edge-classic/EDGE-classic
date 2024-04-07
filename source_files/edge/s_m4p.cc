@@ -234,7 +234,7 @@ void M4PPlayer::Ticker()
 
 //----------------------------------------------------------------------------
 
-AbstractMusicPlayer *S_PlayM4PMusic(uint8_t *data, int length, bool looping)
+AbstractMusicPlayer *PlayM4PMusic(uint8_t *data, int length, bool looping)
 {
     M4PPlayer *player = new M4PPlayer();
 

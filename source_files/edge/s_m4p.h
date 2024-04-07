@@ -20,7 +20,7 @@
 
 #include "s_music.h"
 
-AbstractMusicPlayer *S_PlayM4PMusic(uint8_t *data, int length, bool looping);
+AbstractMusicPlayer *PlayM4PMusic(uint8_t *data, int length, bool looping);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

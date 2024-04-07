@@ -77,7 +77,7 @@ int MakeValidTextureSize(int value)
     return -1; /* NOT REACHED */
 }
 
-ImageData *RgbFromPalettised(ImageData *src, const uint8_t *palette, int opacity)
+ImageData *RGBFromPalettised(ImageData *src, const uint8_t *palette, int opacity)
 {
     if (src->depth_ == 1)
     {
@@ -115,7 +115,7 @@ ImageData *RgbFromPalettised(ImageData *src, const uint8_t *palette, int opacity
         return src;
 }
 
-GLuint RendererUploadTexture(ImageData *img, int flags, int max_pix)
+GLuint UploadTexture(ImageData *img, int flags, int max_pix)
 {
     /* Send the texture data to the GL, and returns the texture ID
      * assigned to it.
@@ -218,7 +218,7 @@ GLuint RendererUploadTexture(ImageData *img, int flags, int max_pix)
 
 //----------------------------------------------------------------------------
 
-void PaletteRemapRgba(ImageData *img, const uint8_t *new_pal, const uint8_t *old_pal)
+void PaletteRemapRGBA(ImageData *img, const uint8_t *new_pal, const uint8_t *old_pal)
 {
     const int max_prev = 16;
 

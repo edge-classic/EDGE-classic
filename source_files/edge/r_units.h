@@ -67,7 +67,7 @@ enum CustomTextureEnvironment
     kTextureEnvironmentDisable,
     // the texture unit is disabled (complete pass-through).
 
-    kTextureEnvironmentSkipRgb,
+    kTextureEnvironmentSkipRGB,
     // causes the RGB of the texture to be skipped, i.e. the
     // output of the texture unit is the same as the input
     // for the RGB components.  The alpha component is treated

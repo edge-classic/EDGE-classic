@@ -242,7 +242,7 @@ void ConfigurationSaveDefaults(void)
     fprintf(f, "#VERSION %d\n", kInternalConfigVersion);
 
     // console variables
-    ConsoleWriteVariables(f);
+    WriteConsoleVariables(f);
 
     // normal variables
     for (int i = 0; i < total_defaults; i++)
@@ -299,7 +299,7 @@ void ConfigurationResetDefaults(int dummy, ConsoleVariable *dummy_cvar)
         SetToBaseValue(defaults + i);
     }
 
-    ConsoleResetAllVariables();
+    ResetAllConsoleVariables();
 
     // Set default SF2 location in midi_soundfont CVAR
     // We can't store this as a CVAR default since it is path-dependent
@@ -343,7 +343,7 @@ static void ParseConfigBlock(epi::Lexer &lex)
         {
             std::string try_cvar = key;
             try_cvar.append(" ").append(value);
-            ConsoleTryCommand(try_cvar.c_str());
+            TryConsoleCommand(try_cvar.c_str());
         }
         else if (tok == epi::kTokenNumber)
         {

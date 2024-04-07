@@ -41,8 +41,8 @@
 
 extern coal::VM *ui_vm;
 
-extern void CoalSetFloat(coal::VM *vm, const char *mod_name, const char *var_name, double value);
-extern void CoalCallFunction(coal::VM *vm, const char *name);
+extern void COALSetFloat(coal::VM *vm, const char *mod_name, const char *var_name, double value);
+extern void COALCallFunction(coal::VM *vm, const char *name);
 
 Player *ui_player_who = nullptr;
 
@@ -1551,7 +1551,7 @@ static void PL_is_outside(coal::VM *vm, int argc)
 
 //------------------------------------------------------------------------
 
-void CoalRegisterPlaysim()
+void COALRegisterPlaysim()
 {
     ui_vm->AddNativeFunction("player.num_players", PL_num_players);
     ui_vm->AddNativeFunction("player.set_who", PL_set_who);

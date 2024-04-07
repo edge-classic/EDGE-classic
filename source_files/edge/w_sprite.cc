@@ -349,7 +349,7 @@ static void FillSpriteFrames(int file)
     }
     else if (data_files[file]->pack_)
     {
-        std::vector<std::string> packsprites = PackGetSpriteList(data_files[file]->pack_);
+        std::vector<std::string> packsprites = GetPackSpriteList(data_files[file]->pack_);
         if (!packsprites.empty())
         {
             std::sort(packsprites.begin(), packsprites.end());

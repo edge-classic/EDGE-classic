@@ -58,7 +58,7 @@
 #include "w_sprite.h"
 
 extern coal::VM *ui_vm;
-extern double    CoalGetFloat(coal::VM *vm, const char *mod_name, const char *var_name);
+extern double    COALGetFloat(coal::VM *vm, const char *mod_name, const char *var_name);
 
 extern bool erraticism_active;
 
@@ -214,7 +214,7 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player, Re
     {
         // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
         if ((state->flags & kStateFrameFlagWeapon) && (player->ready_weapon_ >= 0))
-            ty1 += CoalGetFloat(ui_vm, "hud", "universal_y_adjust") +
+            ty1 += COALGetFloat(ui_vm, "hud", "universal_y_adjust") +
                    player->weapons_[player->ready_weapon_].info->y_adjust_;
     }
 
@@ -371,7 +371,7 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player, Re
         GLuint fuzz_tex = is_fuzzy ? ImageCache(fuzz_image, false) : 0;
 
         RendererVertex *glvert =
-            RendererBeginUnit(GL_POLYGON, 4, is_additive ? (GLuint)kTextureEnvironmentSkipRgb : GL_MODULATE, tex_id,
+            RendererBeginUnit(GL_POLYGON, 4, is_additive ? (GLuint)kTextureEnvironmentSkipRGB : GL_MODULATE, tex_id,
                               is_fuzzy ? GL_MODULATE : (GLuint)kTextureEnvironmentDisable, fuzz_tex, pass, blending,
                               pass > 0 ? kRGBANoValue : fc_to_use, fd_to_use);
 
@@ -645,7 +645,7 @@ void RendererDrawWeaponModel(Player *p)
     }
     else
     {
-        bias = CoalGetFloat(ui_vm, "hud", "universal_y_adjust") + p->weapons_[p->ready_weapon_].info->y_adjust_;
+        bias = COALGetFloat(ui_vm, "hud", "universal_y_adjust") + p->weapons_[p->ready_weapon_].info->y_adjust_;
     }
 
     bias /= 5;
@@ -1289,7 +1289,7 @@ void RendererDrawThing(DrawFloor *dfloor, DrawThing *dthing)
         GLuint fuzz_tex = is_fuzzy ? ImageCache(fuzz_image, false) : 0;
 
         RendererVertex *glvert =
-            RendererBeginUnit(GL_POLYGON, 4, is_additive ? (GLuint)kTextureEnvironmentSkipRgb : GL_MODULATE, tex_id,
+            RendererBeginUnit(GL_POLYGON, 4, is_additive ? (GLuint)kTextureEnvironmentSkipRGB : GL_MODULATE, tex_id,
                               is_fuzzy ? GL_MODULATE : (GLuint)kTextureEnvironmentDisable, fuzz_tex, pass, blending,
                               pass > 0 ? kRGBANoValue : fc_to_use, fd_to_use);
 

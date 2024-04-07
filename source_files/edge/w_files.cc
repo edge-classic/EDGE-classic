@@ -204,7 +204,7 @@ void ProcessFile(DataFile *df)
     else if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
              df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIPK || df->kind_ == kFileKindIFolder)
     {
-        PackProcessAll(df, file_index);
+        ProcessAllInPack(df, file_index);
     }
     else if (df->kind_ == kFileKindDDF)
     {
@@ -281,7 +281,7 @@ int CheckPackFilesForName(const std::string &name)
         if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
             df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIPK)
         {
-            if (PackFindFile(df->pack_, name))
+            if (FindPackFile(df->pack_, name))
                 return i;
         }
     }
@@ -299,7 +299,7 @@ epi::File *OpenFileFromPack(const std::string &name)
         if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
             df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIPK)
         {
-            epi::File *F = PackOpenFile(df->pack_, name);
+            epi::File *F = OpenPackFile(df->pack_, name);
             if (F != nullptr)
                 return F;
         }
@@ -326,7 +326,7 @@ uint8_t *OpenPackOrLumpInMemory(const std::string &name, const std::vector<std::
             if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
                 df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIPK)
             {
-                epi::File *F = PackOpenMatch(df->pack_, name, extensions);
+                epi::File *F = OpenPackMatch(df->pack_, name, extensions);
                 if (F != nullptr)
                 {
                     uint8_t *raw_packfile = F->LoadIntoMemory();
@@ -352,7 +352,7 @@ void DoPackSubstitutions()
     for (size_t i = 0; i < data_files.size(); i++)
     {
         if (data_files[i]->pack_)
-            PackProcessSubstitutions(data_files[i]->pack_, i);
+            ProcessPackSubstitutions(data_files[i]->pack_, i);
     }
 }
 

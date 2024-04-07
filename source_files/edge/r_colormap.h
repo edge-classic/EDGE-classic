@@ -53,7 +53,7 @@ void PaletteTicker(void);
 
 void TranslatePalette(uint8_t *new_pal, const uint8_t *old_pal, const Colormap *trans);
 
-void GetColormapRgb(const Colormap *colmap, float *r, float *g, float *b);
+void GetColormapRGB(const Colormap *colmap, float *r, float *g, float *b);
 
 RGBAColor GetFontColor(const Colormap *colmap);
 RGBAColor ParseFontColor(const char *name, bool strict = false);

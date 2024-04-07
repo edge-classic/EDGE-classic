@@ -22,35 +22,35 @@ class DataFile;
 
 class PackFile;
 
-epi::File *PackOpenFile(PackFile *pack, const std::string &name);
+epi::File *OpenPackFile(PackFile *pack, const std::string &name);
 
-epi::File *PackOpenMatch(PackFile *pack, const std::string &name, const std::vector<std::string> &extensions);
+epi::File *OpenPackMatch(PackFile *pack, const std::string &name, const std::vector<std::string> &extensions);
 
 // Equivalent to IsLumpInPwad....doesn't care or check filetype itself
-int PackFindStem(PackFile *pack, const std::string &name);
+int FindStemInPack(PackFile *pack, const std::string &name);
 
 // Checks if exact filename is found in a pack; used to help load order
 // determination
-bool PackFindFile(PackFile *pack, const std::string &name);
+bool FindPackFile(PackFile *pack, const std::string &name);
 
 // Check images/sound/etc that may override WAD-oriented lumps or definitions
-void PackProcessSubstitutions(PackFile *pack, int pack_index);
+void ProcessPackSubstitutions(PackFile *pack, int pack_index);
 
 // Process /hires folder contents
-void PackProcessHiresSubstitutions(PackFile *pack, int pack_index);
+void ProcessHiresPackSubstitutions(PackFile *pack, int pack_index);
 
 // Check /sprites directory for sprites to automatically add during
 // InitializeSprites
-std::vector<std::string> PackGetSpriteList(PackFile *pack);
+std::vector<std::string> GetPackSpriteList(PackFile *pack);
 
 // Only populate the pack directory; used for ad-hoc folder/EPK checks
-void PackPopulateOnly(DataFile *df);
+void PopulatePackOnly(DataFile *df);
 
 // Check pack for valid IWADs. Return associated game_checker index if found
-int PackCheckForIwads(DataFile *df);
+int CheckPackForIWADs(DataFile *df);
 
 // Populate pack directory and process appropriate files (COAL, DDF, etc)
-void PackProcessAll(DataFile *df, size_t file_index);
+void ProcessAllInPack(DataFile *df, size_t file_index);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -223,7 +223,7 @@ static void AddKnownArray(SaveArray *A)
     sv_known_arrays = A;
 }
 
-void SaveSystemInitialize(void)
+void InitializeSaveSystem(void)
 {
     // One-time initialisation.  Sets up lists of known structures
     // and arrays.

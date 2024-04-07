@@ -487,7 +487,7 @@ void SoundMixAllChannels(void *stream, int len)
 
 //----------------------------------------------------------------------------
 
-void SoundInitializeChannels(int total)
+void InitializeSoundChannels(int total)
 {
     // NOTE: assumes audio is locked!
 

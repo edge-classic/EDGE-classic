@@ -208,7 +208,7 @@ class DeathBot
     float EvalEnemy(const MapObject *mo);
 };
 
-void P_BotCreate(class Player *pl, bool recreate);
+void CreateBotPlayer(class Player *pl, bool recreate);
 
 void BotBeginLevel(void);
 void BotEndLevel(void);

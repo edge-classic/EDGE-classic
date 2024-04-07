@@ -95,7 +95,7 @@ void RendererRainbowEffect(Player *player)
     {
         float r, g, b;
 
-        GetColormapRgb(player->effect_colourmap_, &r, &g, &b);
+        GetColormapRGB(player->effect_colourmap_, &r, &g, &b);
 
         render_view_red_multiplier   = 1.0f - (1.0f - r) * s;
         render_view_green_multiplier = 1.0f - (1.0f - g) * s;
@@ -116,7 +116,7 @@ void RendererRainbowEffect(Player *player)
     {
         float r, g, b;
 
-        GetColormapRgb(player->effect_colourmap_, &r, &g, &b);
+        GetColormapRGB(player->effect_colourmap_, &r, &g, &b);
 
         render_view_red_multiplier   = 1.0f - (1.0f - r) * s;
         render_view_green_multiplier = 1.0f - (1.0f - g) * s;
@@ -221,7 +221,7 @@ void RendererPaletteEffect(Player *player)
     else if (s > 0 && player->powers_[kPowerTypeNightVision] > 0 && player->effect_colourmap_)
     {
         float r, g, b;
-        GetColormapRgb(player->effect_colourmap_, &r, &g, &b);
+        GetColormapRGB(player->effect_colourmap_, &r, &g, &b);
         if (!reduce_flash)
             glColor4f(r, g, b, 0.20f * s);
         else

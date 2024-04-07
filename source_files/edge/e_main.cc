@@ -599,7 +599,7 @@ void EdgeDisplay(void)
         if (LuaUseLuaHUD())
             LuaRunHUD();
         else
-            CoalRunHUD();
+            COALRunHUD();
 
         if (need_save_screenshot)
         {
@@ -632,9 +632,9 @@ void EdgeDisplay(void)
         // -AJA- Wipe code for GL.  Sorry for all this ugliness, but it just
         //       didn't fit into the existing wipe framework.
         //
-        if (RendererDoWipe())
+        if (DoWipe())
         {
-            RendererStopWipe();
+            StopWipe();
             wipe_gl_active = false;
         }
     }
@@ -645,7 +645,7 @@ void EdgeDisplay(void)
         need_wipe      = false;
         wipe_gl_active = true;
 
-        RendererInitializeWipe(wipe_method);
+        InitializeWipe(wipe_method);
     }
 
     if (paused)
@@ -1145,15 +1145,15 @@ static int CheckPackForGameFiles(std::string check_pack, FileKind check_kind)
 {
     DataFile *check_pack_df = new DataFile(check_pack, check_kind);
     EPI_ASSERT(check_pack_df);
-    PackPopulateOnly(check_pack_df);
-    if (PackFindStem(check_pack_df->pack_, "EDGEGAME"))
+    PopulatePackOnly(check_pack_df);
+    if (FindStemInPack(check_pack_df->pack_, "EDGEGAME"))
     {
         delete check_pack_df;
         return 0; // Custom game index value in game_checker vector
     }
     else
     {
-        int check_base = PackCheckForIwads(check_pack_df);
+        int check_base = CheckPackForIWADs(check_pack_df);
         delete check_pack_df;
         return check_base;
     }
@@ -1677,7 +1677,7 @@ static void CheckTurbo(void)
         ConsoleMessageLDF("TurboScale", turbo_scale);
     }
 
-    EventSetTurboScale(turbo_scale);
+    SetTurboScale(turbo_scale);
 }
 
 static void ShowDateAndVersion(void)
@@ -1976,7 +1976,7 @@ void EdgeShutdown(void)
     }
 
     LevelShutdown();
-    SoundShutdown();
+    ShutdownSound();
     RendererShutdown();
     NetworkShutdown();
 }
@@ -2005,7 +2005,7 @@ static void EdgeStartup(void)
 
     ConfigurationLoadDefaults();
 
-    ConsoleHandleProgramArguments();
+    HandleProgramArguments();
     SetGlobalVariables();
 
     DoSystemStartup();
@@ -2044,7 +2044,7 @@ static void EdgeStartup(void)
     BuildXGLNodes();
     ShowNotice();
 
-    SaveSystemInitialize();
+    InitializeSaveSystem();
     PrecacheSounds();
     InitializeSprites();
     ProcessTxHiNamespaces();
@@ -2055,7 +2055,7 @@ static void EdgeStartup(void)
     PlayerStateInit();
     InitializeSwitchList();
     InitializeAnimations();
-    SoundInitialize();
+    InitializeSound();
     NetworkInitialize();
     CheatInitialize();
     if (LuaUseLuaHUD())
@@ -2065,8 +2065,8 @@ static void EdgeStartup(void)
     }
     else
     {
-        CoalInitialize();
-        CoalLoadScripts();
+        InitializeCOAL();
+        COALLoadScripts();
     }
 }
 
@@ -2225,7 +2225,7 @@ void EdgeMain(int argc, const char **argv)
 //
 void EdgeIdle(void)
 {
-    EventReleaseAllKeys();
+    ReleaseAllKeys();
 }
 
 //
@@ -2243,7 +2243,7 @@ void EdgeTicker(void)
     // Update display, next frame, with current state.
     EdgeDisplay();
 
-    // this also runs the responder chain via EventProcessEvents
+    // this also runs the responder chain via ProcessInputEvents
     int counts = NetworkTryRunTicCommands();
 
     // run the tics

@@ -255,7 +255,7 @@ static int FindChannelToKill(int kill_cat, int real_cat, int new_score)
     return -1;
 }
 
-void SoundInitialize(void)
+void InitializeSound(void)
 {
     if (no_sound)
         return;
@@ -267,7 +267,7 @@ void SoundInitialize(void)
     LogPrint("StartupSound: Init %d mixing channels\n", want_chan);
 
     // setup channels
-    SoundInitializeChannels(want_chan);
+    InitializeSoundChannels(want_chan);
 
     SetupCategoryLimits();
 
@@ -277,7 +277,7 @@ void SoundInitialize(void)
     SDL_PauseAudioDevice(current_sound_device, 0);
 }
 
-void SoundShutdown(void)
+void ShutdownSound(void)
 {
     if (no_sound)
         return;

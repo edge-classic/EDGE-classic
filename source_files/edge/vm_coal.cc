@@ -42,7 +42,7 @@ extern ConsoleVariable double_framerate;
 // user interface VM
 coal::VM *ui_vm = nullptr;
 
-void CoalPrinter(const char *msg, ...)
+void COALPrinter(const char *msg, ...)
 {
     static char buffer[1024];
 
@@ -57,78 +57,78 @@ void CoalPrinter(const char *msg, ...)
     LogPrint("COAL: %s", buffer);
 }
 
-// CoalGetFloat/CoalGetString/CoalGetVector usage:
+// COALGetFloat/COALGetString/COALGetVector usage:
 // mod_name = nullptr to search global scope or a module name such as "hud",
 // "math", etc var_name = Variable name, without the module prefix, i.e.
 // "custom_stbar" instead of "hud.custom_stbar"
 
-double CoalGetFloat(coal::VM *vm, const char *mod_name, const char *var_name)
+double COALGetFloat(coal::VM *vm, const char *mod_name, const char *var_name)
 {
     return vm->GetFloat(mod_name, var_name);
 }
 
-const char *CoalGetString(coal::VM *vm, const char *mod_name, const char *var_name)
+const char *COALGetString(coal::VM *vm, const char *mod_name, const char *var_name)
 {
     return vm->GetString(mod_name, var_name);
 }
 
-double *CoalGetVector(coal::VM *vm, const char *mod_name, const char *var_name)
+double *COALGetVector(coal::VM *vm, const char *mod_name, const char *var_name)
 {
     return vm->GetVector(mod_name, var_name);
 }
 
-double CoalGetVectorX(coal::VM *vm, const char *mod_name, const char *var_name)
+double COALGetVectorX(coal::VM *vm, const char *mod_name, const char *var_name)
 {
     return vm->GetVectorX(mod_name, var_name);
 }
 
-double CoalGetVectorY(coal::VM *vm, const char *mod_name, const char *var_name)
+double COALGetVectorY(coal::VM *vm, const char *mod_name, const char *var_name)
 {
     return vm->GetVectorY(mod_name, var_name);
 }
 
-double CoalGetVectorZ(coal::VM *vm, const char *mod_name, const char *var_name)
+double COALGetVectorZ(coal::VM *vm, const char *mod_name, const char *var_name)
 {
     return vm->GetVectorZ(mod_name, var_name);
 }
 
-// CoalSetFloat/CoalSetString/CoalSetVector usage:
+// COALSetFloat/COALSetString/COALSetVector usage:
 // mod_name = nullptr to search global scope or a module name such as "hud",
 // "math", etc var_name = Variable name, without the module prefix, i.e.
 // "custom_stbar" instead of "hud.custom_stbar" value = Whatever is appropriate.
 // SetString should allow a nullptr string as this may be desired
 
-void CoalSetFloat(coal::VM *vm, const char *mod_name, const char *var_name, double value)
+void COALSetFloat(coal::VM *vm, const char *mod_name, const char *var_name, double value)
 {
     vm->SetFloat(mod_name, var_name, value);
 }
 
-void CoalSetString(coal::VM *vm, const char *mod_name, const char *var_name, const char *value)
+void COALSetString(coal::VM *vm, const char *mod_name, const char *var_name, const char *value)
 {
     vm->SetString(mod_name, var_name, value);
 }
 
-void CoalSetVector(coal::VM *vm, const char *mod_name, const char *var_name, double val_1, double val_2, double val_3)
+void COALSetVector(coal::VM *vm, const char *mod_name, const char *var_name, double val_1, double val_2, double val_3)
 {
     vm->SetVector(mod_name, var_name, val_1, val_2, val_3);
 }
 
-void CoalSetVectorX(coal::VM *vm, const char *mod_name, const char *var_name, double val)
+void COALSetVectorX(coal::VM *vm, const char *mod_name, const char *var_name, double val)
 {
     vm->SetVectorX(mod_name, var_name, val);
 }
 
-void CoalSetVectorY(coal::VM *vm, const char *mod_name, const char *var_name, double val)
+void COALSetVectorY(coal::VM *vm, const char *mod_name, const char *var_name, double val)
 {
     vm->SetVectorY(mod_name, var_name, val);
 }
 
-void CoalSetVectorZ(coal::VM *vm, const char *mod_name, const char *var_name, double val)
+void COALSetVectorZ(coal::VM *vm, const char *mod_name, const char *var_name, double val)
 {
     vm->SetVectorZ(mod_name, var_name, val);
 }
 
-void CoalCallFunction(coal::VM *vm, const char *name)
+void COALCallFunction(coal::VM *vm, const char *name)
 {
     int func = vm->FindFunction(name);
 
@@ -136,7 +136,7 @@ void CoalCallFunction(coal::VM *vm, const char *name)
         FatalError("Missing coal function: %s\n", name);
 
     if (vm->Execute(func) != 0)
-        FatalError("Coal script terminated with an error.\n");
+        FatalError("COAL script terminated with an error.\n");
 }
 
 //------------------------------------------------------------------------
@@ -395,7 +395,7 @@ static void STRINGS_tonumber(coal::VM *vm, int argc)
     vm->ReturnFloat(atof(s));
 }
 
-void CoalRegisterBASE(coal::VM *vm)
+void COALRegisterBASE(coal::VM *vm)
 {
     // SYSTEM
     vm->AddNativeFunction("sys.error", SYS_error);
@@ -431,39 +431,39 @@ void CoalRegisterBASE(coal::VM *vm)
 
 //------------------------------------------------------------------------
 
-struct PendingCoalScript
+struct PendingCOALScript
 {
     int         type   = 0;
     std::string data   = "";
     std::string source = "";
 };
 
-static std::vector<PendingCoalScript> unread_scripts;
+static std::vector<PendingCOALScript> unread_scripts;
 
-void CoalInitialize()
+void InitializeCOAL()
 {
     StartupProgressMessage("Starting COAL VM...");
 
     ui_vm = coal::CreateVM();
 
-    ui_vm->SetPrinter(CoalPrinter);
+    ui_vm->SetPrinter(COALPrinter);
 
-    CoalRegisterBASE(ui_vm);
-    CoalRegisterHUD();
-    CoalRegisterPlaysim();
+    COALRegisterBASE(ui_vm);
+    COALRegisterHUD();
+    COALRegisterPlaysim();
 }
 
-void CoalAddScript(int type, std::string &data, const std::string &source)
+void COALAddScript(int type, std::string &data, const std::string &source)
 {
-    unread_scripts.push_back(PendingCoalScript{type, "", source});
+    unread_scripts.push_back(PendingCOALScript{type, "", source});
 
     // transfer the caller's data
     unread_scripts.back().data.swap(data);
 }
 
-void CoalLoadScripts()
+void COALLoadScripts()
 {
-    for (PendingCoalScript &info : unread_scripts)
+    for (PendingCOALScript &info : unread_scripts)
     {
         const char *name = info.source.c_str();
         char       *data = (char *)info.data.c_str(); // FIXME make param to CompileFile be a std::string&
@@ -476,16 +476,16 @@ void CoalLoadScripts()
 
     unread_scripts.clear();
 
-    CoalSetFloat(ui_vm, "sys", "gametic", game_tic / (double_framerate.d_ ? 2 : 1));
+    COALSetFloat(ui_vm, "sys", "gametic", game_tic / (double_framerate.d_ ? 2 : 1));
 
     if (IsLumpInPwad("STBAR"))
     {
-        CoalSetFloat(ui_vm, "hud", "custom_stbar", 1);
+        COALSetFloat(ui_vm, "hud", "custom_stbar", 1);
     }
 }
 
 static bool coal_detected = false;
-void        SetCoalDetected(bool detected)
+void        SetCOALDetected(bool detected)
 {
     // check whether redundant call, once enabled stays enabled
     if (coal_detected)
@@ -496,7 +496,7 @@ void        SetCoalDetected(bool detected)
     coal_detected = detected;
 }
 
-bool GetCoalDetected()
+bool GetCOALDetected()
 {
     return coal_detected;
 }

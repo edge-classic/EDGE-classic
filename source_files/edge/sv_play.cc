@@ -477,7 +477,7 @@ void SaveGamePlayerFinaliseElems(void)
         if (p->player_flags_ & kPlayerFlagBot)
         {
             total_bots++;
-            P_BotCreate(p, true);
+            CreateBotPlayer(p, true);
         }
         else
             p->Builder = ConsolePlayerBuilder;

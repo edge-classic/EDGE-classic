@@ -181,7 +181,7 @@ float DeathBot::EvalItem(const MapObject *mo)
         if (B->type == kBenefitTypeWeapon)
         {
             if (!HasWeapon(B->sub.weap))
-                return BotNavigateEvaluateBigItem(mo);
+                return BotEvaluateBigItem(mo);
 
             // try to get ammo from a dropped weapon
             if (mo->flags_ & kMapObjectFlagDropped)
@@ -221,7 +221,7 @@ float DeathBot::EvalItem(const MapObject *mo)
             return 90;
 
         case kBenefitTypePowerup:
-            return BotNavigateEvaluateBigItem(mo);
+            return BotEvaluateBigItem(mo);
 
         case kBenefitTypeArmour:
             // ignore when fighting
@@ -231,7 +231,7 @@ float DeathBot::EvalItem(const MapObject *mo)
             if (!CanGetArmour(B, mo->extended_flags_))
                 continue;
 
-            return BotNavigateEvaluateBigItem(mo);
+            return BotEvaluateBigItem(mo);
 
         case kBenefitTypeHealth: {
             // cannot get it?
@@ -453,7 +453,7 @@ void DeathBot::LookForEnemies(float radius)
     // pick a random nearby monster, then check sight, since the enemy
     // may be on the other side of a wall.
 
-    MapObject *enemy = BotNavigateFindEnemy(this, radius);
+    MapObject *enemy = BotFindEnemy(this, radius);
 
     if (enemy != nullptr)
     {
@@ -469,7 +469,7 @@ void DeathBot::LookForEnemies(float radius)
 void DeathBot::LookForItems(float radius)
 {
     MapObject *item      = nullptr;
-    BotPath   *item_path = BotNavigateFindThing(this, radius, item);
+    BotPath   *item_path = BotFindThing(this, radius, item);
 
     if (item_path == nullptr)
         return;
@@ -856,7 +856,7 @@ void DeathBot::PathToLeader()
 
     DeletePath();
 
-    path_ = BotNavigateFindPath(pl_->map_object_, leader, 0);
+    path_ = BotFindPath(pl_->map_object_, leader, 0);
 
     if (path_ != nullptr)
     {
@@ -1048,13 +1048,13 @@ void DeathBot::ThinkRoam()
     {
         path_wait_ = 30 + RandomShort() % 10;
 
-        if (!BotNavigateNextRoamPoint(roam_goal_))
+        if (!BotNextRoamPoint(roam_goal_))
         {
             roam_goal_ = Position{0, 0, 0};
             return;
         }
 
-        path_ = BotNavigateFindPath(pl_->map_object_, &roam_goal_, 0);
+        path_ = BotFindPath(pl_->map_object_, &roam_goal_, 0);
 
         // if no path found, try again soon
         if (path_ == nullptr)
@@ -1097,7 +1097,7 @@ void DeathBot::FinishGetItem()
     // otherwise we were roaming about, so re-establish path
     if (!(AlmostEquals(roam_goal_.x, 0.0f) && AlmostEquals(roam_goal_.y, 0.0f) && AlmostEquals(roam_goal_.z, 0.0f)))
     {
-        path_ = BotNavigateFindPath(pl_->map_object_, &roam_goal_, 0);
+        path_ = BotFindPath(pl_->map_object_, &roam_goal_, 0);
 
         // if no path found, try again soon
         if (path_ == nullptr)
@@ -1521,7 +1521,7 @@ void DeathBot::EndLevel()
 // or console player) to a bot.  Recreate is true for bot players
 // loaded from a savegame.
 //
-void P_BotCreate(Player *p, bool recreate)
+void CreateBotPlayer(Player *p, bool recreate)
 {
     DeathBot *bot = new DeathBot;
 
@@ -1552,7 +1552,7 @@ void BotPlayerBuilder(const Player *p, void *data, EventTicCommand *cmd)
 void BotBeginLevel(void)
 {
     if (total_bots > 0)
-        BotNavigateAnalyseLevel();
+        BotAnalyseLevel();
 }
 
 //
@@ -1573,7 +1573,7 @@ void BotEndLevel(void)
         }
     }
 
-    BotNavigateFreeLevel();
+    BotFreeLevel();
 }
 
 //--- editor settings ---

@@ -1123,7 +1123,7 @@ void KillMapObject(MapObject *source, MapObject *target, const DamageClass *damt
 
         // don't immediately restart when USE key was pressed
         if (target->player_ == players[console_player])
-            EventClearInput();
+            ClearEventInput();
     }
 
     int  state    = 0;

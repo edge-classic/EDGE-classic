@@ -61,21 +61,21 @@ class BotPath
     bool ReachedDestination(const Position *pos) const;
 };
 
-void BotNavigateAnalyseLevel();
-void BotNavigateFreeLevel();
+void BotAnalyseLevel();
+void BotFreeLevel();
 
-float BotNavigateEvaluateBigItem(const MapObject *mo);
-bool  BotNavigateNextRoamPoint(Position &out);
+float BotEvaluateBigItem(const MapObject *mo);
+bool  BotNextRoamPoint(Position &out);
 
 // attempt to find a traversible path, returns nullptr if failed.
-BotPath *BotNavigateFindPath(const Position *start, const Position *finish, int flags);
+BotPath *BotFindPath(const Position *start, const Position *finish, int flags);
 
 // find an pickup item in a nearby area, returns nullptr if none found.
-BotPath *BotNavigateFindThing(DeathBot *bot, float radius, MapObject *&best);
+BotPath *BotFindThing(DeathBot *bot, float radius, MapObject *&best);
 
 // find an enemy to fight, or nullptr if none found.
 // caller is responsible to do a sight checks.
-MapObject *BotNavigateFindEnemy(DeathBot *bot, float radius);
+MapObject *BotFindEnemy(DeathBot *bot, float radius);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

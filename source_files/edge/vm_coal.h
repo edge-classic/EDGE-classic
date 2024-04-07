@@ -21,24 +21,24 @@
 #include <string>
 
 // Detects COAL in a pwad or epk
-bool GetCoalDetected();
-void SetCoalDetected(bool detected);
+bool GetCOALDetected();
+void SetCOALDetected(bool detected);
 
-void CoalInitialize();
+void InitializeCOAL();
 
-void CoalAddScript(int type, std::string &data, const std::string &source);
-void CoalLoadScripts();
+void COALAddScript(int type, std::string &data, const std::string &source);
+void COALLoadScripts();
 
-void CoalRegisterHUD();
-void CoalRegisterPlaysim();
+void COALRegisterHUD();
+void COALRegisterPlaysim();
 
 // HUD stuff
-void CoalNewGame(void);
-void CoalLoadGame(void);
-void CoalSaveGame(void);
-void CoalBeginLevel(void);
-void CoalEndLevel(void);
-void CoalRunHUD(void);
+void COALNewGame(void);
+void COALLoadGame(void);
+void COALSaveGame(void);
+void COALBeginLevel(void);
+void COALEndLevel(void);
+void COALRunHUD(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

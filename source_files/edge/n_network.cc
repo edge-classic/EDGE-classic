@@ -40,7 +40,7 @@
 #include "vm_coal.h" // for coal::vm_c
 
 extern coal::VM *ui_vm;
-extern void      CoalSetFloat(coal::VM *vm, const char *mod_name, const char *var_name, double value);
+extern void      COALSetFloat(coal::VM *vm, const char *mod_name, const char *var_name, double value);
 
 // only true if packets are exchanged with a server
 bool network_game = false;
@@ -103,12 +103,12 @@ static void PreInput()
 {
     // process input
     ControlGetEvents();
-    EventProcessEvents();
+    ProcessInputEvents();
 }
 
 static void PostInput()
 {
-    EventUpdateKeyState();
+    UpdateKeyState();
 }
 
 static bool NetworkBuildTicCommands(void)
@@ -169,7 +169,7 @@ void NetworkGrabTicCommands(void)
     if (LuaUseLuaHUD())
         LuaSetFloat(LuaGetGlobalVM(), "sys", "gametic", game_tic / (double_framerate.d_ ? 2 : 1));
     else
-        CoalSetFloat(ui_vm, "sys", "gametic", game_tic / (double_framerate.d_ ? 2 : 1));
+        COALSetFloat(ui_vm, "sys", "gametic", game_tic / (double_framerate.d_ ? 2 : 1));
 
     game_tic++;
 }

@@ -5,7 +5,7 @@
 #include "epi_file.h"
 #include "w_wad.h"
 
-bool GetCoalDetected();
+bool GetCOALDetected();
 
 lua_State *global_lua_state = nullptr;
 
@@ -34,7 +34,7 @@ void LuaAddScript(const std::string &data, const std::string &source)
 
 void LuaLoadScripts()
 {
-    if (LuaGetLuaHUDDetected() && GetCoalDetected())
+    if (LuaGetLuaHUDDetected() && GetCOALDetected())
     {
         LogWarning("Lua and COAL huds detected, selecting Lua hud\n");
     }
@@ -83,5 +83,5 @@ bool LuaGetLuaHUDDetected()
 
 bool LuaUseLuaHUD()
 {
-    return lua_detected || !GetCoalDetected();
+    return lua_detected || !GetCOALDetected();
 }

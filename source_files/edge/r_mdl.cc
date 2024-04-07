@@ -303,7 +303,7 @@ MDLModel *MDLLoad(epi::File *f)
             }
         }
         delete[] pixels;
-        md->skin_id_list_.push_back(RendererUploadTexture(tmp_img, kUploadMipMap | kUploadSmooth));
+        md->skin_id_list_.push_back(UploadTexture(tmp_img, kUploadMipMap | kUploadSmooth));
         delete tmp_img;
     }
 
@@ -592,7 +592,7 @@ static void MDLDynamicLightCallback(MapObject *mo, void *dataptr)
     ShadeNormals(mo->dynamic_light_.shader, data, false);
 }
 
-static int MDLMulticolorMaximumRgb(MDLCoordinateData *data, bool additive)
+static int MDLMulticolorMaximumRGB(MDLCoordinateData *data, bool additive)
 {
     int result = 0;
 
@@ -907,12 +907,12 @@ void MDLRenderModel(MDLModel *md, const Image *skin_img, bool is_weapon, int fra
         if (pass > 0 && pass < num_pass - 1)
         {
             UpdateMulticols(&data);
-            if (MDLMulticolorMaximumRgb(&data, false) <= 0)
+            if (MDLMulticolorMaximumRGB(&data, false) <= 0)
                 continue;
         }
         else if (data.is_additive_)
         {
-            if (MDLMulticolorMaximumRgb(&data, true) <= 0)
+            if (MDLMulticolorMaximumRGB(&data, true) <= 0)
                 continue;
         }
 

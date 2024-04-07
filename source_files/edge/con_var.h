@@ -106,13 +106,13 @@ class ConsoleVariable
 };
 
 // called by ConsoleInitConsole.
-void ConsoleSortVariables();
+void SortConsoleVariables();
 
 // sets all cvars to their default value.
-void ConsoleResetAllVariables();
+void ResetAllConsoleVariables();
 
 // look for a CVAR with the given name.
-ConsoleVariable *ConsoleFindVariable(const char *name);
+ConsoleVariable *FindConsoleVariable(const char *name);
 
 bool ConsoleMatchPattern(const char *name, const char *pat);
 
@@ -122,16 +122,16 @@ bool ConsoleMatchPattern(const char *name, const char *pat);
 // and/or uppercase letters to require the flag to be absent.
 //
 // Returns number of matches found.
-int ConsoleMatchAllVariables(std::vector<const char *> &list, const char *pattern);
+int MatchConsoleVariables(std::vector<const char *> &list, const char *pattern);
 
 // scan the program arguments and set matching cvars.
-void ConsoleHandleProgramArguments(void);
+void HandleProgramArguments(void);
 
 // display value of matching cvars.  match can be nullptr to match everything.
-int ConsolePrintVariables(const char *match, bool show_default);
+int PrintConsoleVariables(const char *match, bool show_default);
 
 // write all cvars to the config file.
-void ConsoleWriteVariables(FILE *f);
+void WriteConsoleVariables(FILE *f);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

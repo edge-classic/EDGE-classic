@@ -95,7 +95,7 @@ static bool LoadDoom(SoundData *buf, const uint8_t *lump, int length)
 
 static bool LoadWav(SoundData *buf, uint8_t *lump, int length, bool pc_speaker)
 {
-    return SoundLoadWAV(buf, lump, length, pc_speaker);
+    return LoadWAVSound(buf, lump, length, pc_speaker);
 }
 
 static bool LoadOGG(SoundData *buf, const uint8_t *lump, int length)

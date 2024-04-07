@@ -225,12 +225,12 @@ static ConsoleVariable *MergeSort(ConsoleVariable *list)
     return list;
 }
 
-void ConsoleSortVariables()
+void SortConsoleVariables()
 {
     all_console_variables = MergeSort(all_console_variables);
 }
 
-void ConsoleResetAllVariables()
+void ResetAllConsoleVariables()
 {
     for (ConsoleVariable *var = all_console_variables; var != nullptr; var = var->next_)
     {
@@ -239,7 +239,7 @@ void ConsoleResetAllVariables()
     }
 }
 
-ConsoleVariable *ConsoleFindVariable(const char *name)
+ConsoleVariable *FindConsoleVariable(const char *name)
 {
     for (ConsoleVariable *var = all_console_variables; var != nullptr; var = var->next_)
     {
@@ -264,7 +264,7 @@ bool ConsoleMatchPattern(const char *name, const char *pat)
     return (*pat == 0);
 }
 
-int ConsoleMatchAllVariables(std::vector<const char *> &list, const char *pattern)
+int MatchConsoleVariables(std::vector<const char *> &list, const char *pattern)
 {
     list.clear();
 
@@ -279,7 +279,7 @@ int ConsoleMatchAllVariables(std::vector<const char *> &list, const char *patter
     return (int)list.size();
 }
 
-void ConsoleHandleProgramArguments(void)
+void HandleProgramArguments(void)
 {
     for (size_t p = 1; p < program_argument_list.size(); p++)
     {
@@ -288,7 +288,7 @@ void ConsoleHandleProgramArguments(void)
 
         std::string s = program_argument_list[p];
 
-        ConsoleVariable *var = ConsoleFindVariable(s.data() + 1);
+        ConsoleVariable *var = FindConsoleVariable(s.data() + 1);
 
         if (var == nullptr)
             continue;
@@ -307,7 +307,7 @@ void ConsoleHandleProgramArguments(void)
     }
 }
 
-int ConsolePrintVariables(const char *match, bool show_default)
+int PrintConsoleVariables(const char *match, bool show_default)
 {
     int total = 0;
 
@@ -328,7 +328,7 @@ int ConsolePrintVariables(const char *match, bool show_default)
     return total;
 }
 
-void ConsoleWriteVariables(FILE *f)
+void WriteConsoleVariables(FILE *f)
 {
     for (ConsoleVariable *var = all_console_variables; var != nullptr; var = var->next_)
     {

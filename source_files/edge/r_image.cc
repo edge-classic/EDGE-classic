@@ -1293,7 +1293,7 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
     }
     else if (tmp_img->depth_ == 1)
     {
-        ImageData *rgb_img = RgbFromPalettised(tmp_img, what_palette, rim->opacity_);
+        ImageData *rgb_img = RGBFromPalettised(tmp_img, what_palette, rim->opacity_);
 
         if (rim->is_font_)
         {
@@ -1325,7 +1325,7 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
             tmp_img = blurred_img;
         }
         if (trans != nullptr)
-            PaletteRemapRgba(tmp_img, what_palette, (const uint8_t *)&playpal_data[0]);
+            PaletteRemapRGBA(tmp_img, what_palette, (const uint8_t *)&playpal_data[0]);
     }
 
     if (rim->hsv_rotation_ || rim->hsv_saturation_ > -1 || rim->hsv_value_)
@@ -1335,7 +1335,7 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
         tmp_img->Whiten();
 
     GLuint tex_id =
-        RendererUploadTexture(tmp_img,
+        UploadTexture(tmp_img,
                               (clamp ? kUploadClamp : 0) | (mip ? kUploadMipMap : 0) | (smooth ? kUploadSmooth : 0) |
                                   ((rim->opacity_ == kOpacityMasked) ? kUploadThresh : 0),
                               max_pix);

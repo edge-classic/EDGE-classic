@@ -45,7 +45,7 @@
 #include "vm_coal.h"
 
 extern coal::VM *ui_vm;
-extern void      CoalSetVector(coal::VM *vm, const char *mod_name, const char *var_name, double val_1, double val_2,
+extern void      COALSetVector(coal::VM *vm, const char *mod_name, const char *var_name, double val_1, double val_2,
                                double val_3);
 
 extern ConsoleVariable double_framerate;
@@ -654,7 +654,7 @@ static void UpdatePowerups(Player *player)
 // Does the thinking of the console player, i.e. read from input
 void ConsolePlayerBuilder(const Player *pl, void *data, EventTicCommand *dest)
 {
-    EventBuildTicCommand(dest);
+    BuildEventTicCommand(dest);
 
     dest->player_index = pl->player_number_;
 }
@@ -865,7 +865,7 @@ bool PlayerThink(Player *player, bool extra_tic)
                                 cmd->extended_buttons & kExtendedButtonCodeInventoryUse ? 1.0f : 0.0f,
                                 cmd->extended_buttons & kExtendedButtonCodeInventoryNext ? 1.0f : 0.0f}});
     else
-        CoalSetVector(ui_vm, "player", "inventory_event_handler",
+        COALSetVector(ui_vm, "player", "inventory_event_handler",
                       cmd->extended_buttons & kExtendedButtonCodeInventoryPrevious ? 1 : 0,
                       cmd->extended_buttons & kExtendedButtonCodeInventoryUse ? 1 : 0,
                       cmd->extended_buttons & kExtendedButtonCodeInventoryNext ? 1 : 0);
@@ -971,7 +971,7 @@ void CreatePlayer(int pnum, bool is_bot)
     }
 
     if (is_bot)
-        P_BotCreate(p, false);
+        CreateBotPlayer(p, false);
 
     if (!sfx_jpidle)
     {

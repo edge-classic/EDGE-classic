@@ -137,7 +137,7 @@ void Font::LoadPatches()
         ImageData *tmp_img = ReadAsEpiBlock((Image *)(missing));
         if (tmp_img->depth_ == 1)
         {
-            ImageData *rgb_img = RgbFromPalettised(tmp_img, (const uint8_t *)&playpal_data[0], missing->opacity_);
+            ImageData *rgb_img = RGBFromPalettised(tmp_img, (const uint8_t *)&playpal_data[0], missing->opacity_);
             delete tmp_img;
             missing_imdata = rgb_img;
         }
@@ -171,7 +171,7 @@ void Font::LoadPatches()
                 if (tmp_img->depth_ == 1)
                 {
                     ImageData *rgb_img =
-                        RgbFromPalettised(tmp_img, (const uint8_t *)&playpal_data[0], images[idx]->opacity_);
+                        RGBFromPalettised(tmp_img, (const uint8_t *)&playpal_data[0], images[idx]->opacity_);
                     delete tmp_img;
                     tmp_img = rgb_img;
                 }

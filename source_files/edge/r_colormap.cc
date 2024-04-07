@@ -74,7 +74,7 @@ int playpal_black, playpal_white, playpal_gray;
 //
 // Find the closest matching colour in the palette.
 //
-static int FindBestRgbMatch(int r, int g, int b)
+static int FindBestRGBMatch(int r, int g, int b)
 {
     int i;
 
@@ -127,9 +127,9 @@ void InitializePalette(void)
     loaded_playpal = true;
 
     // lookup useful colours
-    playpal_black = FindBestRgbMatch(0, 0, 0);
-    playpal_white = FindBestRgbMatch(255, 255, 255);
-    playpal_gray  = FindBestRgbMatch(239, 239, 239);
+    playpal_black = FindBestRGBMatch(0, 0, 0);
+    playpal_white = FindBestRGBMatch(255, 255, 255);
+    playpal_gray  = FindBestRGBMatch(239, 239, 239);
 
     LogPrint("Loaded global palette.\n");
 
@@ -381,7 +381,7 @@ void TransformColourmap(Colormap *colmap)
     LogDebug("- gl_color_   = #%06x\n", colmap->gl_color_);
 }
 
-void GetColormapRgb(const Colormap *colmap, float *r, float *g, float *b)
+void GetColormapRGB(const Colormap *colmap, float *r, float *g, float *b)
 {
     if (colmap->gl_color_ == kRGBANoValue)
     {
@@ -746,7 +746,7 @@ class ColormapShader : public AbstractShader
             }
         }
 
-        fade_texture_ = RendererUploadTexture(&img, kUploadSmooth | kUploadClamp);
+        fade_texture_ = UploadTexture(&img, kUploadSmooth | kUploadClamp);
     }
 
   public:

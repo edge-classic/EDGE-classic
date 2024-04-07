@@ -88,7 +88,7 @@ extern int   ddf_reverb_ratio;
 extern int   ddf_reverb_delay;
 extern float music_player_gain;
 
-void SoundInitializeChannels(int total);
+void InitializeSoundChannels(int total);
 void SoundFreeChannels(void);
 
 void SoundKillChannel(int k);

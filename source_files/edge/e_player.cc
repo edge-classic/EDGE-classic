@@ -44,7 +44,7 @@
 #include "p_local.h"
 #include "script/compat/lua_compat.h"
 #include "sokol_color.h"
-#include "vm_coal.h" // For CoalEndLevel()
+#include "vm_coal.h" // For COALEndLevel()
 
 //
 // PLAYER ARRAY
@@ -148,7 +148,7 @@ void PlayerFinishLevel(Player *p, bool keep_cards)
     if (LuaUseLuaHUD())
         LuaEndLevel();
     else
-        CoalEndLevel();
+        COALEndLevel();
 }
 
 //
@@ -289,7 +289,7 @@ void SetConsolePlayer(int player_number_)
 
     if (ArgumentFind("testbot") > 0)
     {
-        P_BotCreate(players[player_number_], false);
+        CreateBotPlayer(players[player_number_], false);
     }
     else
     {

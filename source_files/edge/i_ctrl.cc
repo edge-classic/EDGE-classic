@@ -231,10 +231,10 @@ void HandleKeyEvent(SDL_Event *ev)
         if (ev->type != SDL_KEYDOWN)
             return;
         event.type = kInputEventKeyDown;
-        EventPostEvent(&event);
+        PostEvent(&event);
 
         event.type = kInputEventKeyUp;
-        EventPostEvent(&event);
+        PostEvent(&event);
         return;
     }
 
@@ -269,7 +269,7 @@ void HandleKeyEvent(SDL_Event *ev)
     if (event.value.key.sym == kLeftAlt)
         alt_is_down = (event.type == kInputEventKeyDown);
 
-    EventPostEvent(&event);
+    PostEvent(&event);
 }
 
 void HandleMouseButtonEvent(SDL_Event *ev)
@@ -308,7 +308,7 @@ void HandleMouseButtonEvent(SDL_Event *ev)
         return;
     }
 
-    EventPostEvent(&event);
+    PostEvent(&event);
 }
 
 void HandleMouseWheelEvent(SDL_Event *ev)
@@ -333,8 +333,8 @@ void HandleMouseWheelEvent(SDL_Event *ev)
     {
         return;
     }
-    EventPostEvent(&event);
-    EventPostEvent(&release);
+    PostEvent(&event);
+    PostEvent(&release);
 }
 
 static void HandleGamepadButtonEvent(SDL_Event *ev)
@@ -357,7 +357,7 @@ static void HandleGamepadButtonEvent(SDL_Event *ev)
 
     event.value.key.sym = kGamepadA + ev->cbutton.button;
 
-    EventPostEvent(&event);
+    PostEvent(&event);
 }
 
 static void HandleGamepadTriggerEvent(SDL_Event *ev)
@@ -414,7 +414,7 @@ static void HandleGamepadTriggerEvent(SDL_Event *ev)
         }
     }
 
-    EventPostEvent(&event);
+    PostEvent(&event);
 }
 
 void HandleMouseMotionEvent(SDL_Event *ev)
@@ -432,7 +432,7 @@ void HandleMouseMotionEvent(SDL_Event *ev)
         event.value.mouse.dx = dx;
         event.value.mouse.dy = -dy; // -AJA- positive should be "up"
 
-        EventPostEvent(&event);
+        PostEvent(&event);
     }
 }
 

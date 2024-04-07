@@ -1016,7 +1016,7 @@ static void ProcessDDFInWad(DataFile *df)
     }
 }
 
-static void ProcessCoalInWad(DataFile *df)
+static void ProcessCOALInWad(DataFile *df)
 {
     std::string bare_filename = epi::GetFilename(df->name_);
 
@@ -1026,7 +1026,7 @@ static void ProcessCoalInWad(DataFile *df)
     {
         int lump = wad->coal_huds_;
 
-        SetCoalDetected(true);
+        SetCOALDetected(true);
 
         std::string data   = LoadLumpAsString(lump);
         std::string source = GetLumpNameFromIndex(lump);
@@ -1034,7 +1034,7 @@ static void ProcessCoalInWad(DataFile *df)
         source += " in ";
         source += bare_filename;
 
-        CoalAddScript(0, data, source);
+        COALAddScript(0, data, source);
     }
 }
 
@@ -1187,7 +1187,7 @@ void ProcessWad(DataFile *df, size_t file_index)
     ProcessDehackedInWad(df);
     ProcessBoomStuffInWad(df);
     ProcessDDFInWad(df);
-    ProcessCoalInWad(df);
+    ProcessCOALInWad(df);
     ProcessLuaInWad(df);
 }
 
@@ -1270,12 +1270,12 @@ void ReadUMAPINFOLumps(void)
         }
         else if (df->pack_)
         {
-            if (!PackFindFile(df->pack_, "UMAPINFO.txt"))
+            if (!FindPackFile(df->pack_, "UMAPINFO.txt"))
                 continue;
             else
             {
                 LogDebug("Parsing UMAPINFO.txt in %s\n", df->name_.c_str());
-                epi::File *uinfo = PackOpenFile(df->pack_, "UMAPINFO.txt");
+                epi::File *uinfo = OpenPackFile(df->pack_, "UMAPINFO.txt");
                 if (uinfo)
                 {
                     ParseUMAPINFO(uinfo->ReadText());
@@ -2312,7 +2312,7 @@ void ProcessTxHiNamespaces(void)
         }
         else if (df->pack_)
         {
-            PackProcessHiresSubstitutions(df->pack_, file);
+            ProcessHiresPackSubstitutions(df->pack_, file);
         }
     }
 }
@@ -2526,7 +2526,7 @@ bool IsLumpInPwad(const char *name)
             if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
                 df->kind_ == kFileKindEEPK)
             {
-                if (PackFindStem(df->pack_, name))
+                if (FindStemInPack(df->pack_, name))
                 {
                     in_pwad = true;
                     break;
@@ -2563,7 +2563,7 @@ bool IsLumpInAnyWad(const char *name)
             if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
                 df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIPK)
             {
-                if (PackFindStem(df->pack_, name))
+                if (FindStemInPack(df->pack_, name))
                 {
                     in_anywad = true;
                     break;

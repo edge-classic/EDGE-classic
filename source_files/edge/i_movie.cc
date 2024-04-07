@@ -241,7 +241,7 @@ void PlayMovie(const std::string &name)
         plm_set_audio_stream(decoder, 0);
     }
 
-    RendererBlackoutWipeTexture();
+    BlackoutWipeTexture();
 
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

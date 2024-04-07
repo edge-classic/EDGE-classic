@@ -29,21 +29,21 @@
 #include "e_event.h"
 #include "e_ticcmd.h"
 
-void EventClearInput(void);
-void EventBuildTicCommand(EventTicCommand *cmd);
-void EventReleaseAllKeys(void);
-void EventSetTurboScale(int scale);
-void EventUpdateKeyState(void);
+void ClearEventInput(void);
+void BuildEventTicCommand(EventTicCommand *cmd);
+void ReleaseAllKeys(void);
+void SetTurboScale(int scale);
+void UpdateKeyState(void);
 
-void EventProcessEvents(void);
-void EventPostEvent(InputEvent *ev);
+void ProcessInputEvents(void);
+void PostEvent(InputEvent *ev);
 
-bool EventIsKeyPressed(int keyvar);
-bool EventMatchesKey(int keyvar, int key);
+bool IsKeyPressed(int keyvar);
+bool CheckKeyMatch(int keyvar, int key);
 
-const char *EventGetKeyName(int key);
+const char *GetKeyName(int key);
 
-bool EventInputResponder(InputEvent *ev);
+bool InputResponder(InputEvent *ev);
 
 // -KM- 1998/09/01 Analogue binding stuff, These hold what axis they bind to.
 extern int mouse_x_axis;

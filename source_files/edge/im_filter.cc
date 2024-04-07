@@ -60,7 +60,7 @@ static void SigmaToBox(int boxes[], float sigma, int n)
         boxes[i] = ((i < m ? wl : wu) - 1) / 2;
 }
 
-static void HorizontalBlurRgb(uint8_t *in, uint8_t *out, int w, int h, int c, int r)
+static void HorizontalBlurRGB(uint8_t *in, uint8_t *out, int w, int h, int c, int r)
 {
     float iarr = 1.f / (r + r + 1);
     for (int i = 0; i < h; i++)
@@ -112,7 +112,7 @@ static void HorizontalBlurRgb(uint8_t *in, uint8_t *out, int w, int h, int c, in
     }
 }
 
-static void TotalBlurRgb(uint8_t *in, uint8_t *out, int w, int h, int c, int r)
+static void TotalBlurRGB(uint8_t *in, uint8_t *out, int w, int h, int c, int r)
 {
     // radius range on either side of a pixel + the pixel itself
     float iarr = 1.f / (r + r + 1);
@@ -165,11 +165,11 @@ static void TotalBlurRgb(uint8_t *in, uint8_t *out, int w, int h, int c, int r)
     }
 }
 
-static void BoxBlurRgb(uint8_t *&in, uint8_t *&out, int w, int h, int c, int r)
+static void BoxBlurRGB(uint8_t *&in, uint8_t *&out, int w, int h, int c, int r)
 {
     std::swap(in, out);
-    HorizontalBlurRgb(out, in, w, h, c, r);
-    TotalBlurRgb(in, out, w, h, c, r);
+    HorizontalBlurRGB(out, in, w, h, c, r);
+    TotalBlurRGB(in, out, w, h, c, r);
 }
 
 ImageData *ImageBlur(ImageData *image, float sigma)
@@ -184,7 +184,7 @@ ImageData *ImageBlur(ImageData *image, float sigma)
 
     int box;
     SigmaToBox(&box, sigma, 1);
-    BoxBlurRgb(image->pixels_, result->pixels_, w, h, c, box);
+    BoxBlurRGB(image->pixels_, result->pixels_, w, h, c, box);
 
     return result;
 }

@@ -64,11 +64,11 @@ extern ScreenWipe wipe_method;
 // for enum cvars
 extern const char kScreenWipeEnumStr[];
 
-void RendererInitializeWipe(ScreenWipe effect);
-void RendererStopWipe(void);
-bool RendererDoWipe(void);
+void InitializeWipe(ScreenWipe effect);
+void StopWipe(void);
+bool DoWipe(void);
 // Primarily for movie use; replaces the initial wipe texture with all black
-void RendererBlackoutWipeTexture(void);
+void BlackoutWipeTexture(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

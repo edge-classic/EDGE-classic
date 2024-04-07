@@ -287,7 +287,7 @@ void SetConsolePlayer(int player_number_)
 
     players[player_number_]->player_flags_ |= kPlayerFlagConsole;
 
-    if (ArgumentFind("testbot") > 0)
+    if (FindArgument("testbot") > 0)
     {
         CreateBotPlayer(players[player_number_], false);
     }

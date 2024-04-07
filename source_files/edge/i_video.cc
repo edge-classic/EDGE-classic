@@ -145,7 +145,7 @@ void StartupGraphics(void)
     if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
         FatalError("Couldn't init SDL VIDEO!\n%s\n", SDL_GetError());
 
-    if (ArgumentFind("nograb") > 0)
+    if (FindArgument("nograb") > 0)
         grab_mouse = 0;
 
     // -AJA- FIXME these are wrong (probably ignored though)

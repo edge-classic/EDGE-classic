@@ -1651,7 +1651,7 @@ void A_WeaponPlaySound(MapObject *mo)
 
     if (!sound)
     {
-        PrintWarningOrError("A_WeaponPlaySound: missing sound name !\n");
+        WarningOrError("A_WeaponPlaySound: missing sound name !\n");
         return;
     }
 
@@ -1716,7 +1716,7 @@ void A_WeaponJump(MapObject *mo)
 
     if (!psp->state || !psp->state->action_par)
     {
-        PrintWarningOrError("JUMP used in weapon [%s] without a label !\n", info->name_.c_str());
+        WarningOrError("JUMP used in weapon [%s] without a label !\n", info->name_.c_str());
         return;
     }
 
@@ -1743,7 +1743,7 @@ void A_WeaponDJNE(MapObject *mo)
 
     if (!psp->state || !psp->state->action_par)
     {
-        PrintWarningOrError("DJNE used in weapon [%s] without a label !\n", info->name_.c_str());
+        WarningOrError("DJNE used in weapon [%s] without a label !\n", info->name_.c_str());
         return;
     }
 

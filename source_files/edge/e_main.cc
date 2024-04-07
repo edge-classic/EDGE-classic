@@ -302,11 +302,11 @@ static void SetGlobalVariables(void)
     std::string s;
 
     // Screen Resolution Check...
-    if (ArgumentFind("borderless") > 0)
+    if (FindArgument("borderless") > 0)
         current_window_mode = 2;
-    else if (ArgumentFind("fullscreen") > 0)
+    else if (FindArgument("fullscreen") > 0)
         current_window_mode = 1;
-    else if (ArgumentFind("windowed") > 0)
+    else if (FindArgument("windowed") > 0)
         current_window_mode = 0;
 
     s = ArgumentValue("width");
@@ -331,7 +331,7 @@ static void SetGlobalVariables(void)
             current_screen_height = atoi(s.c_str());
     }
 
-    p = ArgumentFind("res");
+    p = FindArgument("res");
     if (p > 0 && p + 2 < int(program_argument_list.size()) && !ArgumentIsOption(p + 1) && !ArgumentIsOption(p + 2))
     {
         if (current_window_mode == 2)
@@ -370,7 +370,7 @@ static void SetGlobalVariables(void)
     }
 
     // sprite kludge (TrueBSP)
-    p = ArgumentFind("spritekludge");
+    p = FindArgument("spritekludge");
     if (p > 0)
     {
         if (p + 1 < int(program_argument_list.size()) && !ArgumentIsOption(p + 1))
@@ -387,51 +387,51 @@ static void SetGlobalVariables(void)
         single_tics     = true;
     }
 
-    // -AJA- 1999/10/18: Reworked these with ArgumentCheckBooleanParameter
-    ArgumentCheckBooleanParameter("rotate_map", &rotate_map, false);
-    ArgumentCheckBooleanParameter("sound", &no_sound, true);
-    ArgumentCheckBooleanParameter("music", &no_music, true);
-    ArgumentCheckBooleanParameter("items_respawn", &global_flags.items_respawn, false);
-    ArgumentCheckBooleanParameter("mlook", &global_flags.mouselook, false);
-    ArgumentCheckBooleanParameter("monsters", &global_flags.no_monsters, true);
-    ArgumentCheckBooleanParameter("fast", &global_flags.fast_monsters, false);
-    ArgumentCheckBooleanParameter("extras", &global_flags.have_extra, false);
-    ArgumentCheckBooleanParameter("kick", &global_flags.kicking, false);
-    ArgumentCheckBooleanParameter("single_tics", &single_tics, false);
-    ArgumentCheckBooleanParameter("true3d", &global_flags.true_3d_gameplay, false);
-    ArgumentCheckBooleanParameter("blood", &global_flags.more_blood, false);
-    ArgumentCheckBooleanParameter("cheats", &global_flags.cheats, false);
-    ArgumentCheckBooleanParameter("jumping", &global_flags.jump, false);
-    ArgumentCheckBooleanParameter("crouching", &global_flags.crouch, false);
-    ArgumentCheckBooleanParameter("weaponswitch", &global_flags.weapon_switch, false);
+    // -AJA- 1999/10/18: Reworked these with CheckBooleanParameter
+    CheckBooleanParameter("rotate_map", &rotate_map, false);
+    CheckBooleanParameter("sound", &no_sound, true);
+    CheckBooleanParameter("music", &no_music, true);
+    CheckBooleanParameter("items_respawn", &global_flags.items_respawn, false);
+    CheckBooleanParameter("mlook", &global_flags.mouselook, false);
+    CheckBooleanParameter("monsters", &global_flags.no_monsters, true);
+    CheckBooleanParameter("fast", &global_flags.fast_monsters, false);
+    CheckBooleanParameter("extras", &global_flags.have_extra, false);
+    CheckBooleanParameter("kick", &global_flags.kicking, false);
+    CheckBooleanParameter("single_tics", &single_tics, false);
+    CheckBooleanParameter("true3d", &global_flags.true_3d_gameplay, false);
+    CheckBooleanParameter("blood", &global_flags.more_blood, false);
+    CheckBooleanParameter("cheats", &global_flags.cheats, false);
+    CheckBooleanParameter("jumping", &global_flags.jump, false);
+    CheckBooleanParameter("crouching", &global_flags.crouch, false);
+    CheckBooleanParameter("weaponswitch", &global_flags.weapon_switch, false);
 
-    ArgumentCheckBooleanParameter("automap_keydoor_blink", &automap_keydoor_blink, false);
+    CheckBooleanParameter("automap_keydoor_blink", &automap_keydoor_blink, false);
 
-    if (ArgumentFind("infight") > 0)
+    if (FindArgument("infight") > 0)
         force_infighting = 1;
 
-    if (ArgumentFind("dlights") > 0)
+    if (FindArgument("dlights") > 0)
         use_dynamic_lights = 1;
-    else if (ArgumentFind("nodlights") > 0)
+    else if (FindArgument("nodlights") > 0)
         use_dynamic_lights = 0;
 
     if (!global_flags.enemies_respawn)
     {
-        if (ArgumentFind("newnmrespawn") > 0)
+        if (FindArgument("newnmrespawn") > 0)
         {
             global_flags.enemy_respawn_mode = true;
             global_flags.enemies_respawn    = true;
         }
-        else if (ArgumentFind("respawn") > 0)
+        else if (FindArgument("respawn") > 0)
         {
             global_flags.enemies_respawn = true;
         }
     }
 
     // check for strict and no-warning options
-    ArgumentCheckBooleanConsoleVariable("strict", &ddf_strict, false);
-    ArgumentCheckBooleanConsoleVariable("lax", &ddf_lax, false);
-    ArgumentCheckBooleanConsoleVariable("warn", &ddf_quiet, true);
+    CheckBooleanConsoleVariable("strict", &ddf_strict, false);
+    CheckBooleanConsoleVariable("lax", &ddf_lax, false);
+    CheckBooleanConsoleVariable("warn", &ddf_quiet, true);
 
     strict_errors = ddf_strict.d_ ? true : false;
     lax_errors    = ddf_lax.d_ ? true : false;
@@ -930,7 +930,7 @@ void AdvanceTitle(void)
 
         if (show_old_config_warning && startup_progress.IsEmpty())
         {
-            MenuStartMessage(language["OldConfig"], nullptr, false);
+            StartMenuMessage(language["OldConfig"], nullptr, false);
             show_old_config_warning = false;
         }
 
@@ -1028,7 +1028,7 @@ static void InitializeDirectories(void)
 
     branding_file = epi::PathAppend(game_directory, kBrandingFileName);
 
-    ConfigurationLoadBranding();
+    LoadBranding();
 
     // add parameter file "appdir/parms" if it exists.
     std::string parms = epi::PathAppend(game_directory, "parms");
@@ -1036,7 +1036,7 @@ static void InitializeDirectories(void)
     if (epi::TestFileAccess(parms))
     {
         // Insert it right after the app parameter
-        ArgumentApplyResponseFile(parms);
+        ApplyResponseFile(parms);
     }
 
     // config file - check for portable config
@@ -1048,7 +1048,7 @@ static void InitializeDirectories(void)
     else
     {
         configuration_file = epi::PathAppend(game_directory, config_filename.s_);
-        if (epi::TestFileAccess(configuration_file) || ArgumentFind("portable") > 0)
+        if (epi::TestFileAccess(configuration_file) || FindArgument("portable") > 0)
             home_directory = game_directory;
         else
             configuration_file.clear();
@@ -1660,7 +1660,7 @@ static void CheckTurbo(void)
 {
     int turbo_scale = 100;
 
-    int p = ArgumentFind("turbo");
+    int p = FindArgument("turbo");
 
     if (p > 0)
     {
@@ -1696,7 +1696,7 @@ static void ShowDateAndVersion(void)
 
     LogPrint("Executable path: '%s'\n", executable_path.c_str());
 
-    ArgumentDebugDump();
+    DumpArguments();
 }
 
 static void SetupLogAndDebugFiles(void)
@@ -1710,7 +1710,7 @@ static void SetupLogAndDebugFiles(void)
     log_file   = nullptr;
     debug_file = nullptr;
 
-    if (ArgumentFind("nolog") < 0)
+    if (FindArgument("nolog") < 0)
     {
         log_file = epi::FileOpenRaw(log_fn, epi::kFileAccessWrite);
 
@@ -1729,7 +1729,7 @@ static void SetupLogAndDebugFiles(void)
     // -ACB- 1999/10/02 Don't print to console, since we don't have a console
     // yet.
 
-    /// int p = ArgumentFind("debug");
+    /// int p = FindArgument("debug");
     if (true)
     {
         debug_file = epi::FileOpenRaw(debug_fn, epi::kFileAccessWrite);
@@ -1790,7 +1790,7 @@ static void AddCommandLineFiles(void)
 
     // next handle the -file option (we allow multiple uses)
 
-    p = ArgumentFind("file");
+    p = FindArgument("file");
 
     while (p > 0 && p < int(program_argument_list.size()) &&
            (!ArgumentIsOption(p) || epi::StringCompare(program_argument_list[p], "-file") == 0))
@@ -1805,7 +1805,7 @@ static void AddCommandLineFiles(void)
 
     // scripts....
 
-    p = ArgumentFind("script");
+    p = FindArgument("script");
 
     while (p > 0 && p < int(program_argument_list.size()) &&
            (!ArgumentIsOption(p) || epi::StringCompare(program_argument_list[p], "-script") == 0))
@@ -1833,7 +1833,7 @@ static void AddCommandLineFiles(void)
 
     // dehacked/bex....
 
-    p = ArgumentFind("deh");
+    p = FindArgument("deh");
 
     while (p > 0 && p < int(program_argument_list.size()) &&
            (!ArgumentIsOption(p) || epi::StringCompare(program_argument_list[p], "-deh") == 0))
@@ -1861,7 +1861,7 @@ static void AddCommandLineFiles(void)
 
     // directories....
 
-    p = ArgumentFind("dir");
+    p = FindArgument("dir");
 
     while (p > 0 && p < int(program_argument_list.size()) &&
            (!ArgumentIsOption(p) || epi::StringCompare(program_argument_list[p], "-dir") == 0))
@@ -1991,7 +1991,7 @@ static void EdgeStartup(void)
     InitializeDirectories();
 
     // Version check ?
-    if (ArgumentFind("version") > 0)
+    if (FindArgument("version") > 0)
     {
         // -AJA- using FatalError here, since LogPrint crashes this early on
         FatalError("\n%s version is %s\n", application_name.c_str(), edge_version.c_str());
@@ -2003,7 +2003,7 @@ static void EdgeStartup(void)
 
     ShowDateAndVersion();
 
-    ConfigurationLoadDefaults();
+    LoadDefaults();
 
     HandleProgramArguments();
     SetGlobalVariables();
@@ -2079,7 +2079,7 @@ static void InitialState(void)
     // do loadgames first, as they contain all of the
     // necessary state already (in the savegame).
 
-    if (ArgumentFind("playdemo") > 0 || ArgumentFind("timedemo") > 0 || ArgumentFind("record") > 0)
+    if (FindArgument("playdemo") > 0 || FindArgument("timedemo") > 0 || FindArgument("record") > 0)
     {
         FatalError("Demos are no longer supported\n");
     }
@@ -2087,7 +2087,7 @@ static void InitialState(void)
     ps = ArgumentValue("loadgame");
     if (!ps.empty())
     {
-        GameDeferredLoadGame(atoi(ps.c_str()));
+        DeferredLoadGame(atoi(ps.c_str()));
         return;
     }
 
@@ -2120,7 +2120,7 @@ static void InitialState(void)
     }
 
     // deathmatch check...
-    int pp = ArgumentFind("deathmatch");
+    int pp = FindArgument("deathmatch");
     if (pp > 0)
     {
         warp_deathmatch = 1;
@@ -2130,7 +2130,7 @@ static void InitialState(void)
 
         warp = true;
     }
-    else if (ArgumentFind("altdeath") > 0)
+    else if (FindArgument("altdeath") > 0)
     {
         warp_deathmatch = 2;
 
@@ -2153,21 +2153,21 @@ static void InitialState(void)
     params.level_skip_ = true;
 
     if (warp_map.length() > 0)
-        params.map_ = GameLookupMap(warp_map.c_str());
+        params.map_ = LookupMap(warp_map.c_str());
     else
-        params.map_ = GameLookupMap("1");
+        params.map_ = LookupMap("1");
 
     if (!params.map_)
         FatalError("-warp: no such level '%s'\n", warp_map.c_str());
 
-    EPI_ASSERT(GameMapExists(params.map_));
+    EPI_ASSERT(MapExists(params.map_));
     EPI_ASSERT(params.map_->episode_);
 
     params.random_seed_ = PureRandomNumber();
 
     params.SinglePlayer(bots);
 
-    GameDeferredNewGame(params);
+    DeferredNewGame(params);
 }
 
 //
@@ -2186,11 +2186,11 @@ static void InitialState(void)
 void EdgeMain(int argc, const char **argv)
 {
     // Seed RandomByte RNG
-    RandomInit();
+    InitRandomState();
 
     // Implemented here - since we need to bring the memory manager up first
     // -ACB- 2004/05/31
-    ArgumentParse(argc, argv);
+    ParseArguments(argc, argv);
 
     EdgeStartup();
 
@@ -2238,13 +2238,13 @@ void EdgeTicker(void)
 {
     EDGE_ZoneScoped;
 
-    GameBigStuff();
+    DoBigGameStuff();
 
     // Update display, next frame, with current state.
     EdgeDisplay();
 
     // this also runs the responder chain via ProcessInputEvents
-    int counts = NetworkTryRunTicCommands();
+    int counts = TryRunTicCommands();
 
     // run the tics
     for (; counts > 0; counts--)

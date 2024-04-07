@@ -1399,7 +1399,7 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
     // Allow screenshotting of console too - Dasho
     case kFunction1:
     case kPrintScreen:
-        GameDeferredScreenShot();
+        DeferredScreenShot();
         break;
 
     default: {

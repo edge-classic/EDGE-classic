@@ -136,7 +136,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
             }
             if (!F)
             {
-                PrintDebugOrError("SFX Loader: Missing sound: '%s'\n", def->pc_speaker_sound_.c_str());
+                DebugOrError("SFX Loader: Missing sound: '%s'\n", def->pc_speaker_sound_.c_str());
                 return false;
             }
             fmt = SoundFilenameToFormat(def->pc_speaker_sound_);
@@ -149,7 +149,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
             {
                 // Just write a debug message for SFX lumps; this prevents spam
                 // amongst the various IWADs
-                PrintDebugOrError("SFX Loader: Missing sound lump: %s\n", def->pc_speaker_sound_.c_str());
+                DebugOrError("SFX Loader: Missing sound lump: %s\n", def->pc_speaker_sound_.c_str());
                 return false;
             }
             F = LoadLumpAsFile(lump);
@@ -163,7 +163,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
             F = OpenFileFromPack(def->pack_name_);
             if (!F)
             {
-                PrintDebugOrError("SFX Loader: Missing sound in EPK: '%s'\n", def->pack_name_.c_str());
+                DebugOrError("SFX Loader: Missing sound in EPK: '%s'\n", def->pack_name_.c_str());
                 return false;
             }
             fmt = SoundFilenameToFormat(def->pack_name_);
@@ -175,7 +175,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
             F              = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
             if (!F)
             {
-                PrintDebugOrError("SFX Loader: Can't Find File '%s'\n", fn.c_str());
+                DebugOrError("SFX Loader: Can't Find File '%s'\n", fn.c_str());
                 return false;
             }
             fmt = SoundFilenameToFormat(def->file_name_);
@@ -188,7 +188,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
             {
                 // Just write a debug message for SFX lumps; this prevents spam
                 // amongst the various IWADs
-                PrintDebugOrError("SFX Loader: Missing sound lump: %s\n", def->lump_name_.c_str());
+                DebugOrError("SFX Loader: Missing sound lump: %s\n", def->lump_name_.c_str());
                 return false;
             }
             F = LoadLumpAsFile(lump);
@@ -206,13 +206,13 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
 
     if (!data)
     {
-        PrintWarningOrError("SFX Loader: Error loading data.\n");
+        WarningOrError("SFX Loader: Error loading data.\n");
         return false;
     }
     if (length < 4)
     {
         delete[] data;
-        PrintWarningOrError("SFX Loader: Ignored short data (%d bytes).\n", length);
+        WarningOrError("SFX Loader: Ignored short data (%d bytes).\n", length);
         return false;
     }
 

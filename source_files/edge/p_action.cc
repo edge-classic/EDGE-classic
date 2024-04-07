@@ -807,7 +807,7 @@ void A_PlaySound(MapObject *mo)
 
     if (!sound)
     {
-        PrintWarningOrError("A_PlaySound: missing sound name in %s.\n", mo->info_->name_.c_str());
+        WarningOrError("A_PlaySound: missing sound name in %s.\n", mo->info_->name_.c_str());
         return;
     }
 
@@ -828,7 +828,7 @@ void A_PlaySoundBoss(MapObject *mo)
 
     if (!sound)
     {
-        PrintWarningOrError("A_PlaySoundBoss: missing sound name in %s.\n", mo->info_->name_.c_str());
+        WarningOrError("A_PlaySoundBoss: missing sound name in %s.\n", mo->info_->name_.c_str());
         return;
     }
 
@@ -1594,7 +1594,7 @@ void A_CreateSmokeTrail(MapObject *projectile)
 
     if (attack->puff_ == nullptr)
     {
-        PrintWarningOrError("A_CreateSmokeTrail: attack %s has no PUFF object\n", attack->name_.c_str());
+        WarningOrError("A_CreateSmokeTrail: attack %s has no PUFF object\n", attack->name_.c_str());
         return;
     }
 
@@ -2180,7 +2180,7 @@ static void ShootToSpot(MapObject *object)
 
     if (spot_type == nullptr)
     {
-        PrintWarningOrError("Thing [%s] used SHOOT_TO_SPOT attack, but has no SPIT_SPOT\n",
+        WarningOrError("Thing [%s] used SHOOT_TO_SPOT attack, but has no SPIT_SPOT\n",
                             object->info_->name_.c_str());
         return;
     }
@@ -2523,7 +2523,7 @@ void A_DropItem(MapObject *mo)
 
     if (!info)
     {
-        PrintWarningOrError("A_DropItem: %s specifies no item to drop.\n", mo->info_->name_.c_str());
+        WarningOrError("A_DropItem: %s specifies no item to drop.\n", mo->info_->name_.c_str());
         return;
     }
 
@@ -2810,9 +2810,9 @@ void A_ComboAttack(MapObject *object)
     else
     {
         if (!object->info_->closecombat_)
-            PrintWarningOrError("%s hasn't got a close combat attack\n", object->info_->name.c_str());
+            WarningOrError("%s hasn't got a close combat attack\n", object->info_->name.c_str());
         else
-            PrintWarningOrError("%s hasn't got a range attack\n", object->info_->name.c_str());
+            WarningOrError("%s hasn't got a range attack\n", object->info_->name.c_str());
     }
 #endif
 }
@@ -2836,7 +2836,7 @@ void A_MeleeAttack(MapObject *object)
 
     if (!attack)
     {
-        PrintWarningOrError("A_MeleeAttack: %s has no close combat attack.\n", object->info_->name_.c_str());
+        WarningOrError("A_MeleeAttack: %s has no close combat attack.\n", object->info_->name_.c_str());
         return;
     }
 
@@ -2872,7 +2872,7 @@ void A_RangeAttack(MapObject *object)
 
     if (!attack)
     {
-        PrintWarningOrError("A_RangeAttack: %s hasn't got a range attack.\n", object->info_->name_.c_str());
+        WarningOrError("A_RangeAttack: %s hasn't got a range attack.\n", object->info_->name_.c_str());
         return;
     }
 
@@ -2925,7 +2925,7 @@ void A_SpareAttack(MapObject *object)
 #ifdef DEVELOPERS
     else
     {
-        PrintWarningOrError("A_SpareAttack: %s hasn't got a spare attack\n", object->info_->name.c_str());
+        WarningOrError("A_SpareAttack: %s hasn't got a spare attack\n", object->info_->name.c_str());
         return;
     }
 #endif
@@ -3580,7 +3580,7 @@ void A_Jump(MapObject *mo)
 
     if (!mo->state_ || !mo->state_->action_par)
     {
-        PrintWarningOrError("JUMP action used in [%s] without a label !\n", mo->info_->name_.c_str());
+        WarningOrError("JUMP action used in [%s] without a label !\n", mo->info_->name_.c_str());
         return;
     }
 
@@ -3608,7 +3608,7 @@ void A_JumpLiquid(MapObject *mo)
 
     if (!mo->state_ || !mo->state_->action_par)
     {
-        PrintWarningOrError("JUMP_LIQUID action used in [%s] without a label !\n", mo->info_->name_.c_str());
+        WarningOrError("JUMP_LIQUID action used in [%s] without a label !\n", mo->info_->name_.c_str());
         return;
     }
 
@@ -3635,7 +3635,7 @@ void A_JumpSky(MapObject *mo)
     }
     if (!mo->state_ || !mo->state_->action_par)
     {
-        PrintWarningOrError("JUMP_SKY action used in [%s] without a label !\n", mo->info_->name_.c_str());
+        WarningOrError("JUMP_SKY action used in [%s] without a label !\n", mo->info_->name_.c_str());
         return;
     }
 

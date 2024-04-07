@@ -226,7 +226,7 @@ static ConfigurationDefault defaults[] = {
 
 static int total_defaults = sizeof(defaults) / sizeof(defaults[0]);
 
-void ConfigurationSaveDefaults(void)
+void SaveDefaults(void)
 {
     // -ACB- 1999/09/24 idiot proof checking as required by MSVC
     EPI_ASSERT(!configuration_file.empty());
@@ -286,7 +286,7 @@ static void SetToBaseValue(ConfigurationDefault *def)
     }
 }
 
-void ConfigurationResetDefaults(int dummy, ConsoleVariable *dummy_cvar)
+void ResetDefaults(int dummy, ConsoleVariable *dummy_cvar)
 {
     (void)dummy;
     (void)dummy_cvar;
@@ -411,12 +411,12 @@ static void ParseConfig(const std::string &data, bool check_config_version)
     }
 }
 
-void ConfigurationLoadDefaults(void)
+void LoadDefaults(void)
 {
     // set everything to base values
-    ConfigurationResetDefaults(0);
+    ResetDefaults(0);
 
-    LogPrint("ConfigurationLoadDefaults from %s\n", configuration_file.c_str());
+    LogPrint("LoadDefaults from %s\n", configuration_file.c_str());
 
     epi::File *file = epi::FileOpen(configuration_file, epi::kFileAccessRead);
 
@@ -436,7 +436,7 @@ void ConfigurationLoadDefaults(void)
     return;
 }
 
-void ConfigurationLoadBranding(void)
+void LoadBranding(void)
 {
     epi::File *file = FileOpen(branding_file, epi::kFileAccessRead);
 
@@ -487,11 +487,11 @@ void TakeScreenshot(bool show_msg)
 
     if (png_screenshots)
     {
-        result = ImageSavePNG(fn, img);
+        result = SavePNG(fn, img);
     }
     else
     {
-        result = ImageSaveJPEG(fn, img);
+        result = SaveJPEG(fn, img);
     }
 
     if (show_msg)
@@ -522,7 +522,7 @@ void CreateSaveScreenshot(void)
     img->Invert();
 
     bool result;
-    result = ImageSaveJPEG(filename, img);
+    result = SaveJPEG(filename, img);
 
     if (result)
         LogPrint("Captured to file: %s\n", filename.c_str());
@@ -538,7 +538,7 @@ void CreateSaveScreenshot(void)
     delete replace_touch;
 }
 
-void PrintWarningOrError(const char *error, ...)
+void WarningOrError(const char *error, ...)
 {
     // Either displays a warning or produces a fatal error, depending
     // on whether the "-strict" option is used.
@@ -562,7 +562,7 @@ void PrintWarningOrError(const char *error, ...)
         LogWarning("%s", message_buf);
 }
 
-void PrintDebugOrError(const char *error, ...)
+void DebugOrError(const char *error, ...)
 {
     // Either writes a debug message or produces a fatal error, depending
     // on whether the "-strict" option is used.

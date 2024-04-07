@@ -29,7 +29,7 @@
 // The "Deterministic" suffixes increment and track the index and step
 // for its random number generator so that loading/saving a game
 // does not change the outcomes of functions that use them - Dasho
-void RandomInit(void);
+void InitRandomState(void);
 int  RandomByte(void);
 int  RandomByteSkewToZero(void);
 int  RandomByteDeterministic(void);

@@ -53,7 +53,7 @@ static AddedParameter *added_parameters;
 //       using ArgvFind() will only return the first usage.
 //
 #ifdef _WIN32
-void ArgumentParse(const int argc, const char *const *argv)
+void ParseArguments(const int argc, const char *const *argv)
 {
     (void)argc;
     (void)argv;
@@ -63,7 +63,7 @@ void ArgumentParse(const int argc, const char *const *argv)
     wchar_t **win_argv = CommandLineToArgvW(GetCommandLineW(), &win_argc);
 
     if (!win_argv)
-        FatalError("ArgumentParse: Could not retrieve command line arguments!\n");
+        FatalError("ParseArguments: Could not retrieve command line arguments!\n");
 
     program_argument_list.reserve(win_argc);
 
@@ -88,7 +88,7 @@ void ArgumentParse(const int argc, const char *const *argv)
 
         if (argv_block[i][0] == '@')
         { // add it as a response file
-            ArgumentApplyResponseFile(&argv_block[i][1]);
+            ApplyResponseFile(&argv_block[i][1]);
             continue;
         }
 
@@ -96,7 +96,7 @@ void ArgumentParse(const int argc, const char *const *argv)
     }
 }
 #else
-void ArgumentParse(const int argc, const char *const *argv)
+void ParseArguments(const int argc, const char *const *argv)
 {
     EPI_ASSERT(argc >= 0);
     program_argument_list.reserve(argc);
@@ -119,7 +119,7 @@ void ArgumentParse(const int argc, const char *const *argv)
 
         if (argv[i][0] == '@')
         { // add it as a response file
-            ArgumentApplyResponseFile(&argv[i][1]);
+            ApplyResponseFile(&argv[i][1]);
             continue;
         }
 
@@ -128,7 +128,7 @@ void ArgumentParse(const int argc, const char *const *argv)
 }
 #endif
 
-int ArgumentFind(std::string_view long_name, int *total_parameters)
+int FindArgument(std::string_view long_name, int *total_parameters)
 {
     EPI_ASSERT(!long_name.empty());
 
@@ -166,7 +166,7 @@ std::string ArgumentValue(std::string_view long_name, int *total_parameters)
 {
     EPI_ASSERT(!long_name.empty());
 
-    int pos = ArgumentFind(long_name, total_parameters);
+    int pos = FindArgument(long_name, total_parameters);
 
     if (pos <= 0)
         return "";
@@ -181,30 +181,30 @@ std::string ArgumentValue(std::string_view long_name, int *total_parameters)
 // present, sets it to false if parm prefixed with `-no' is present,
 // otherwise leaves it unchanged.
 //
-void ArgumentCheckBooleanParameter(const std::string &parameter, bool *boolean_value, bool reverse)
+void CheckBooleanParameter(const std::string &parameter, bool *boolean_value, bool reverse)
 {
-    if (ArgumentFind(parameter) > 0)
+    if (FindArgument(parameter) > 0)
     {
         *boolean_value = !reverse;
         return;
     }
 
-    if (ArgumentFind(epi::StringFormat("no%s", parameter.c_str())) > 0)
+    if (FindArgument(epi::StringFormat("no%s", parameter.c_str())) > 0)
     {
         *boolean_value = reverse;
         return;
     }
 }
 
-void ArgumentCheckBooleanConsoleVariable(const std::string &parameter, ConsoleVariable *variable, bool reverse)
+void CheckBooleanConsoleVariable(const std::string &parameter, ConsoleVariable *variable, bool reverse)
 {
-    if (ArgumentFind(parameter) > 0)
+    if (FindArgument(parameter) > 0)
     {
         *variable = (reverse ? 0 : 1);
         return;
     }
 
-    if (ArgumentFind(epi::StringFormat("no%s", parameter.c_str())) > 0)
+    if (FindArgument(epi::StringFormat("no%s", parameter.c_str())) > 0)
     {
         *variable = (reverse ? 1 : 0);
         return;
@@ -254,7 +254,7 @@ static int ParseOneFilename(FILE *fp, char *buf)
 //
 // Adds a response file
 //
-void ArgumentApplyResponseFile(std::string_view name)
+void ApplyResponseFile(std::string_view name)
 {
     char            buf[1024];
     FILE           *f;
@@ -286,7 +286,7 @@ void ArgumentApplyResponseFile(std::string_view name)
     fclose(f);
 }
 
-void ArgumentDebugDump(void)
+void DumpArguments(void)
 {
     LogPrint("Command-line Options:\n");
 

@@ -63,7 +63,7 @@ void WebTick(void)
     {
         if (web_deferred_menu)
         {
-            MenuStartControlPanel();
+            StartControlPanel();
         }
         else
         {

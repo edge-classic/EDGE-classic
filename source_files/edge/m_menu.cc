@@ -301,7 +301,7 @@ static void MenuDrawSave(void);
 
 static void MenuSetupNextMenu(Menu *menudef);
 void        MenuClear(void);
-void        MenuStartControlPanel(void);
+void        StartControlPanel(void);
 // static void MenuStopMessage(void);
 
 //
@@ -324,7 +324,7 @@ static MenuItem MainMenu[] = {{1, "M_NGAME", nullptr, MenuNewGame, 'n', language
                               {1, "M_SAVEG", nullptr, MenuSaveGame, 's', language["MainSaveGame"]},
                               // Another hickup with Special edition.
                               {1, "M_RDTHIS", nullptr, MenuReadThis, 'r', language["MainReadThis"]},
-                              {1, "M_QUITG", nullptr, MenuQuitEdge, 'q', language["MainQuitGame"]}};
+                              {1, "M_QUITG", nullptr, QuitEdge, 'q', language["MainQuitGame"]}};
 
 static Menu MainMenuDefinition = {kTotalMainMenuCategories, nullptr, MainMenu, &main_menu_style,
                                   MenuDrawMainMenu,         94,      64,       0};
@@ -548,7 +548,7 @@ void MenuReadSaveStrings(void)
             epi::File *svimg_file = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
             if (svimg_file)
             {
-                save_extended_information_slots[i].save_image_data = ImageLoad(svimg_file);
+                save_extended_information_slots[i].save_image_data = LoadImage(svimg_file);
                 if (save_extended_information_slots[i].save_image_data)
                 {
                     save_extended_information_slots[i].save_texture_id =
@@ -855,7 +855,7 @@ void MenuLoadSelect(int choice)
         return;
     }
 
-    GameDeferredLoadGame(save_page * kTotalSaveSlots + choice);
+    DeferredLoadGame(save_page * kTotalSaveSlots + choice);
     MenuClear();
 }
 
@@ -866,7 +866,7 @@ void MenuLoadGame(int choice)
 {
     if (network_game)
     {
-        MenuStartMessage(language["NoLoadInNetGame"], nullptr, false);
+        StartMenuMessage(language["NoLoadInNetGame"], nullptr, false);
         return;
     }
 
@@ -1007,7 +1007,7 @@ void MenuDrawSave(void)
 //
 static void M_DoSave(int page, int slot)
 {
-    GameDeferredSaveGame(page * kTotalSaveSlots + slot, save_extended_information_slots[slot].description);
+    DeferredSaveGame(page * kTotalSaveSlots + slot, save_extended_information_slots[slot].description);
     MenuClear();
 
     // PICK QUICKSAVE SLOT YET?
@@ -1050,14 +1050,14 @@ void MenuSaveGame(int choice)
 {
     if (game_state != kGameStateLevel)
     {
-        MenuStartMessage(language["SaveWhenNotPlaying"], nullptr, false);
+        StartMenuMessage(language["SaveWhenNotPlaying"], nullptr, false);
         return;
     }
 
     // -AJA- big cop-out here (add RTS menu stuff to MainMenuSaveGame ?)
     if (rts_menu_active)
     {
-        MenuStartMessage("You can't save during an RTS menu.\npress a key.", nullptr, false);
+        StartMenuMessage("You can't save during an RTS menu.\npress a key.", nullptr, false);
         return;
     }
 
@@ -1091,7 +1091,7 @@ void MenuQuickSave(void)
 
     if (quicksave_slot < 0)
     {
-        MenuStartControlPanel();
+        StartControlPanel();
         MenuReadSaveStrings();
         MenuSetupNextMenu(&SaveMenuDefinition);
 
@@ -1105,7 +1105,7 @@ void MenuQuickSave(void)
     std::string s(
         epi::StringFormat(language["QuickSaveOver"], save_extended_information_slots[quicksave_slot].description));
 
-    MenuStartMessage(s.c_str(), QuickSaveResponse, true);
+    StartMenuMessage(s.c_str(), QuickSaveResponse, true);
 }
 
 static void QuickLoadResponse(int ch)
@@ -1126,20 +1126,20 @@ void MenuQuickLoad(void)
 {
     if (network_game)
     {
-        MenuStartMessage(language["NoQLoadInNet"], nullptr, false);
+        StartMenuMessage(language["NoQLoadInNet"], nullptr, false);
         return;
     }
 
     if (quicksave_slot < 0)
     {
-        MenuStartMessage(language["NoQuickSaveSlot"], nullptr, false);
+        StartMenuMessage(language["NoQuickSaveSlot"], nullptr, false);
         return;
     }
 
     std::string s(
         epi::StringFormat(language["QuickLoad"], save_extended_information_slots[quicksave_slot].description));
 
-    MenuStartMessage(s.c_str(), QuickLoadResponse, true);
+    StartMenuMessage(s.c_str(), QuickLoadResponse, true);
 }
 
 //
@@ -1322,7 +1322,7 @@ void MenuNewGame(int choice)
 {
     if (network_game)
     {
-        MenuStartMessage(language["NewNetGame"], nullptr, false);
+        StartMenuMessage(language["NewNetGame"], nullptr, false);
         return;
     }
 
@@ -1396,20 +1396,20 @@ static void ReallyDoStartLevel(SkillLevel skill, GameDefinition *g)
 
     params.SinglePlayer(0);
 
-    params.map_ = GameLookupMap(g->firstmap_.c_str());
+    params.map_ = LookupMap(g->firstmap_.c_str());
 
     if (!params.map_)
     {
         // 23-6-98 KM Fixed this.
         MenuSetupNextMenu(&EpisodeMenuDefinition);
-        MenuStartMessage(language["EpisodeNonExist"], nullptr, false);
+        StartMenuMessage(language["EpisodeNonExist"], nullptr, false);
         return;
     }
 
-    EPI_ASSERT(GameMapExists(params.map_));
+    EPI_ASSERT(MapExists(params.map_));
     EPI_ASSERT(params.map_->episode_);
 
-    GameDeferredNewGame(params);
+    DeferredNewGame(params);
 
     MenuClear();
 }
@@ -1463,7 +1463,7 @@ static void DoStartLevel(SkillLevel skill)
         return;
     }
 
-    const MapDefinition *map = GameLookupMap(g->firstmap_.c_str());
+    const MapDefinition *map = LookupMap(g->firstmap_.c_str());
     if (!map)
     {
         LogWarning("Cannot find map for '%s' (episode %s)\n", g->firstmap_.c_str(), chosen_episodesode.c_str());
@@ -1486,7 +1486,7 @@ void MenuChooseSkill(int choice)
 {
     if (choice == kSkillNightmare)
     {
-        MenuStartMessage(language["NightMareCheck"], VerifyNightmare, true);
+        StartMenuMessage(language["NightMareCheck"], VerifyNightmare, true);
         return;
     }
 
@@ -1523,7 +1523,7 @@ static void EndGameResponse(int ch)
     if (ch != 'y' && ch != kGamepadA && ch != kMouse1)
         return;
 
-    GameDeferredEndGame();
+    DeferredEndGame();
 
     current_menu->last_on = item_on;
     MenuClear();
@@ -1542,11 +1542,11 @@ void MenuEndGame(int choice, ConsoleVariable *cvar)
 
     if (network_game)
     {
-        MenuStartMessage(language["EndNetGame"], nullptr, false);
+        StartMenuMessage(language["EndNetGame"], nullptr, false);
         return;
     }
 
-    MenuStartMessage(language["EndGameCheck"], EndGameResponse, true);
+    StartMenuMessage(language["EndGameCheck"], EndGameResponse, true);
 }
 
 void MenuReadThis(int choice)
@@ -1612,7 +1612,7 @@ static void QuitResponse(int ch)
     // -ACB- 1999/09/20 New exit code order
     // Write the default config file first
     LogPrint("Saving system defaults...\n");
-    ConfigurationSaveDefaults();
+    SaveDefaults();
 
     LogPrint("Exiting...\n");
 
@@ -1635,7 +1635,7 @@ static void QuitResponse(int ch)
 // -KM- 1998/07/31 Removed Limit. So there.
 // -KM- 1999/01/31 Load quit messages from default.ldf
 //
-void MenuQuitEdge(int choice)
+void QuitEdge(int choice)
 {
 #if EDGE_WEB
     LogPrint("Quit ignored on web platform\n");
@@ -1674,11 +1674,11 @@ void MenuQuitEdge(int choice)
     }
 
     // Trigger the message
-    MenuStartMessage(msg.c_str(), QuitResponse, true);
+    StartMenuMessage(msg.c_str(), QuitResponse, true);
 }
 
 // Accessible from console's 'quit now' command
-void MenuImmediateQuit()
+void ImmediateQuit()
 {
 #if EDGE_WEB
     LogPrint("Quit ignored on web platform\n");
@@ -1686,7 +1686,7 @@ void MenuImmediateQuit()
 #endif
 
     LogPrint("Saving system defaults...\n");
-    ConfigurationSaveDefaults();
+    SaveDefaults();
 
     LogPrint("Exiting...\n");
 
@@ -1699,7 +1699,7 @@ void MenuImmediateQuit()
 //   MENU FUNCTIONS
 //----------------------------------------------------------------------------
 
-void MenuDrawSlider(int x, int y, float slider_position, float increment, int div, float min, float max,
+void DrawMenuSlider(int x, int y, float slider_position, float increment, int div, float min, float max,
                     std::string format_string)
 {
     float basex      = x;
@@ -1784,7 +1784,7 @@ void MenuDrawSlider(int x, int y, float slider_position, float increment, int di
     }
 }
 
-void MenuStartMessage(const char *string, void (*routine)(int response), bool input)
+void StartMenuMessage(const char *string, void (*routine)(int response), bool input)
 {
     message_last_menu     = menu_active;
     message_mode          = 1;
@@ -1808,7 +1808,7 @@ void MenuStartMessage(const char *string, void (*routine)(int response), bool in
 //          with a pointer to the input in s.  s will be nullptr if the user
 //          pressed ESCAPE to cancel the input.
 //
-void MenuStartMessageInput(const char *string, void (*routine)(const char *response))
+void StartMenuMessageInput(const char *string, void (*routine)(const char *response))
 {
     message_last_menu     = menu_active;
     message_mode          = 2;
@@ -1842,7 +1842,7 @@ bool MenuResponder(InputEvent *ev)
     // -ACB- 1999/10/11 F1 is responsible for print screen at any time
     if (ch == kFunction1 || ch == kPrintScreen)
     {
-        GameDeferredScreenShot();
+        DeferredScreenShot();
         return true;
     }
 
@@ -2062,14 +2062,14 @@ bool MenuResponder(InputEvent *ev)
 
         case kSaveGame: // Save
 
-            MenuStartControlPanel();
+            StartControlPanel();
             StartSoundEffect(sound_effect_swtchn);
             MenuSaveGame(0);
             return true;
 
         case kLoadGame: // Load
 
-            MenuStartControlPanel();
+            StartControlPanel();
             StartSoundEffect(sound_effect_swtchn);
             MenuLoadGame(0);
             return true;
@@ -2077,7 +2077,7 @@ bool MenuResponder(InputEvent *ev)
         case kSoundControls: // Sound Volume
 
             StartSoundEffect(sound_effect_swtchn);
-            MenuStartControlPanel();
+            StartControlPanel();
             MenuF4SoundOptions(0);
             return true;
 
@@ -2087,7 +2087,7 @@ bool MenuResponder(InputEvent *ev)
             // obsolete.
 
             StartSoundEffect(sound_effect_swtchn);
-            MenuStartControlPanel();
+            StartControlPanel();
             MenuOptions(1);
             return true;
 
@@ -2118,7 +2118,7 @@ bool MenuResponder(InputEvent *ev)
         case kQuitEdge: // Quit DOOM
 
             StartSoundEffect(sound_effect_swtchn);
-            MenuQuitEdge(0);
+            QuitEdge(0);
             return true;
 
         case kGammaToggle: // gamma toggle
@@ -2167,7 +2167,7 @@ bool MenuResponder(InputEvent *ev)
         // Pop-up menu?
         if (ch == kEscape || ch == kGamepadStart)
         {
-            MenuStartControlPanel();
+            StartControlPanel();
             StartSoundEffect(sound_effect_swtchn);
             return true;
         }
@@ -2319,7 +2319,7 @@ bool MenuResponder(InputEvent *ev)
     return false;
 }
 
-void MenuStartControlPanel(void)
+void StartControlPanel(void)
 {
     // intro might call this repeatedly
     if (menu_active)
@@ -3028,7 +3028,7 @@ void MenuClear(void)
     // -AJA- 2007/12/24: save user changes ASAP (in case of crash)
     if (menu_active)
     {
-        ConfigurationSaveDefaults();
+        SaveDefaults();
     }
 
     menu_active           = false;

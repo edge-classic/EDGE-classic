@@ -27,22 +27,22 @@
 
 extern std::vector<std::string> program_argument_list;
 
-void ArgumentParse(int argc, const char *const *argv);
+void ParseArguments(int argc, const char *const *argv);
 
 // Return position in arg list, if found
-int ArgumentFind(std::string_view long_name, int *total_parameters = nullptr);
+int FindArgument(std::string_view long_name, int *total_parameters = nullptr);
 
 //  Same as above, but return the value of position + 1 if valid, else an empty
 //  string
 std::string ArgumentValue(std::string_view long_name, int *total_parameters = nullptr);
 
-void ArgumentCheckBooleanParameter(const std::string &parameter, bool *boolean_value, bool reverse);
+void CheckBooleanParameter(const std::string &parameter, bool *boolean_value, bool reverse);
 
-void ArgumentCheckBooleanConsoleVariable(const std::string &parameter, ConsoleVariable *variable, bool reverse);
+void CheckBooleanConsoleVariable(const std::string &parameter, ConsoleVariable *variable, bool reverse);
 
-void ArgumentApplyResponseFile(std::string_view name);
+void ApplyResponseFile(std::string_view name);
 
-void ArgumentDebugDump(void);
+void DumpArguments(void);
 
 bool ArgumentIsOption(int index);
 

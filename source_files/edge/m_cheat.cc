@@ -89,12 +89,12 @@ static CheatSequence cheat_give_weapon[11] = {
 };
 
 //
-// CheatCheckSequence
+// CheckCheatSequence
 //
 // Called in CheatResponder module, which handles the input.
 // Returns a 1 if the cheat was successful, 0 if failed.
 //
-int CheatCheckSequence(CheatSequence *cht, char key)
+int CheckCheatSequence(CheatSequence *cht, char key)
 {
     int rc = 0;
 
@@ -129,14 +129,14 @@ void M_ChangeLevelCheat(const char *string)
     params.skill_      = game_skill;
     params.deathmatch_ = deathmatch;
 
-    params.map_ = GameLookupMap(string);
+    params.map_ = LookupMap(string);
     if (!params.map_)
     {
         ConsoleMessageLDF("ImpossibleChange");
         return;
     }
 
-    EPI_ASSERT(GameMapExists(params.map_));
+    EPI_ASSERT(MapExists(params.map_));
     EPI_ASSERT(params.map_->episode_);
 
     params.random_seed_ = PureRandomNumber();
@@ -145,7 +145,7 @@ void M_ChangeLevelCheat(const char *string)
 
     params.level_skip_ = true;
 
-    GameDeferredNewGame(params);
+    DeferredNewGame(params);
 
     ConsoleMessageLDF("LevelChange");
 }
@@ -216,7 +216,7 @@ bool CheatResponder(InputEvent *ev)
         return false;
 
     // 'dqd' cheat for toggleable god mode
-    if (CheatCheckSequence(&cheat_god, key))
+    if (CheckCheatSequence(&cheat_god, key))
     {
         pl->cheats_ ^= kCheatingGodMode;
         if (pl->cheats_ & kCheatingGodMode)
@@ -235,7 +235,7 @@ bool CheatResponder(InputEvent *ev)
     //
     // -ACB- 1998/06/26 removed backpack from this as backpack is variable
     //
-    else if (CheatCheckSequence(&cheat_ammo_no_keys, key))
+    else if (CheckCheatSequence(&cheat_ammo_no_keys, key))
     {
         pl->armours_[kArmourTypeBlue] = kMaximumArmor;
 
@@ -253,7 +253,7 @@ bool CheatResponder(InputEvent *ev)
     //
     // -ACB- 1998/06/26 removed backpack from this as backpack is variable
     //
-    else if (CheatCheckSequence(&cheat_ammo, key))
+    else if (CheckCheatSequence(&cheat_ammo, key))
     {
         pl->armours_[kArmourTypeBlue] = kMaximumArmor;
 
@@ -268,13 +268,13 @@ bool CheatResponder(InputEvent *ev)
 
         ConsoleMessageLDF("VeryHappyAmmo");
     }
-    else if (CheatCheckSequence(&cheat_keys, key))
+    else if (CheckCheatSequence(&cheat_keys, key))
     {
         pl->cards_ = kDoorKeyBitmask;
 
         ConsoleMessageLDF("UnlockCheat");
     }
-    else if (CheatCheckSequence(&cheat_loaded, key))
+    else if (CheckCheatSequence(&cheat_loaded, key))
     {
         for (i = 0; i < kTotalAmmunitionTypes; i++)
             pl->ammo_[i].count = pl->ammo_[i].maximum;
@@ -282,7 +282,7 @@ bool CheatResponder(InputEvent *ev)
         ConsoleMessageLDF("LoadedCheat");
     }
 #if 0 // FIXME: this crashes ?
-	else if (CheatCheckSequence(&cheat_take_all, key))
+	else if (CheckCheatSequence(&cheat_take_all, key))
 	{
 		P_GiveInitialBenefits(pl, pl->map_object_->info_);
 
@@ -290,7 +290,7 @@ bool CheatResponder(InputEvent *ev)
 		ConsoleMessageLDF("StuffRemoval");
 	}
 #endif
-    else if (CheatCheckSequence(&cheat_suicide, key))
+    else if (CheckCheatSequence(&cheat_suicide, key))
     {
         TelefragMapObject(pl->map_object_, pl->map_object_, nullptr);
 
@@ -298,7 +298,7 @@ bool CheatResponder(InputEvent *ev)
         ConsoleMessageLDF("SuicideCheat");
     }
     // -ACB- 1998/08/27 Used Mobj linked-list code, much cleaner.
-    else if (CheatCheckSequence(&cheat_kill_all, key))
+    else if (CheckCheatSequence(&cheat_kill_all, key))
     {
         int killcount = 0;
 
@@ -320,7 +320,7 @@ bool CheatResponder(InputEvent *ev)
     }
     // Simplified, accepting both "noclip" and "idspispopd".
     // no clipping mode cheat
-    else if (CheatCheckSequence(&cheat_no_clipping, key) || CheatCheckSequence(&cheat_no_clipping2, key))
+    else if (CheckCheatSequence(&cheat_no_clipping, key) || CheckCheatSequence(&cheat_no_clipping2, key))
     {
         pl->cheats_ ^= kCheatingNoClip;
 
@@ -329,7 +329,7 @@ bool CheatResponder(InputEvent *ev)
         else
             ConsoleMessageLDF("ClipOff");
     }
-    else if (CheatCheckSequence(&cheat_hall_of_mirrors, key))
+    else if (CheckCheatSequence(&cheat_hall_of_mirrors, key))
     {
         debug_hall_of_mirrors = debug_hall_of_mirrors.d_ ? 0 : 1;
 
@@ -342,7 +342,7 @@ bool CheatResponder(InputEvent *ev)
     // 'behold?' power-up cheats
     for (i = 0; i < 9; i++)
     {
-        if (CheatCheckSequence(&cheat_powerup[i], key))
+        if (CheckCheatSequence(&cheat_powerup[i], key))
         {
             if (!pl->powers_[i])
                 pl->powers_[i] = 60 * kTicRate;
@@ -359,14 +359,14 @@ bool CheatResponder(InputEvent *ev)
     // 'give#' power-up cheats
     for (i = 0; i < 10; i++)
     {
-        if (!CheatCheckSequence(&cheat_give_weapon[i + 1], key))
+        if (!CheckCheatSequence(&cheat_give_weapon[i + 1], key))
             continue;
 
         CheatGiveWeapons(pl, i);
     }
 
     // 'choppers' invulnerability & chainsaw
-    if (CheatCheckSequence(&cheat_choppers, key))
+    if (CheckCheatSequence(&cheat_choppers, key))
     {
         WeaponDefinition *w = weapondefs.Lookup("CHAINSAW");
         if (w)
@@ -378,23 +378,23 @@ bool CheatResponder(InputEvent *ev)
     }
 
     // 'mypos' for player position
-    else if (CheatCheckSequence(&cheat_my_position, key))
+    else if (CheckCheatSequence(&cheat_my_position, key))
     {
         ConsoleMessage("ang=%f;x,y=(%f,%f)", epi::DegreesFromBAM(pl->map_object_->angle_), pl->map_object_->x,
                        pl->map_object_->y);
     }
 
-    if (CheatCheckSequence(&cheat_change_level, key))
+    if (CheckCheatSequence(&cheat_change_level, key))
     {
         // 'clev' change-level cheat
-        MenuStartMessageInput(language["LevelQ"], M_ChangeLevelCheat);
+        StartMenuMessageInput(language["LevelQ"], M_ChangeLevelCheat);
     }
-    else if (CheatCheckSequence(&cheat_music, key))
+    else if (CheckCheatSequence(&cheat_music, key))
     {
         // 'mus' cheat for changing music
-        MenuStartMessageInput(language["MusicQ"], M_ChangeMusicCheat);
+        StartMenuMessageInput(language["MusicQ"], M_ChangeMusicCheat);
     }
-    else if (CheatCheckSequence(&cheat_show_stats, key))
+    else if (CheckCheatSequence(&cheat_show_stats, key))
     {
         debug_fps      = debug_fps.d_ ? 0 : 1;
         debug_position = debug_fps.d_;

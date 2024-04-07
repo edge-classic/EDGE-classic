@@ -223,7 +223,7 @@ void OptionMenuNetworkHostBegun(void)
 
     network_game_parameters->CopyFlags(&global_flags);
 
-    network_game_parameters->map_ = GameLookupMap("1");
+    network_game_parameters->map_ = LookupMap("1");
 
     if (!network_game_parameters->map_)
         network_game_parameters->map_ = mapdefs[0];
@@ -240,7 +240,7 @@ static void ChangeGame(NewGameParameters *param, int dir)
     {
         MapDefinition *first_map = mapdefs.Lookup(def->firstmap_.c_str());
 
-        if (!first_map || !GameMapExists(first_map))
+        if (!first_map || !MapExists(first_map))
             continue;
 
         const char *old_name = param->map_->episode_->name_.c_str();
@@ -564,7 +564,7 @@ static void NetGameStartLevel(void)
     // -KM- 1998/12/17 Clear the intermission.
     IntermissionClear();
 
-    GameDeferredNewGame(*network_game_parameters);
+    DeferredNewGame(*network_game_parameters);
 }
 
 void OptionMenuDrawPlayerList(void)

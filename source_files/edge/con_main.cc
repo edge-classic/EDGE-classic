@@ -231,7 +231,7 @@ int ConsoleCommandArgList(char **argv, int argc)
 
 int ConsoleCommandScreenShot(char **argv, int argc)
 {
-    GameDeferredScreenShot();
+    DeferredScreenShot();
 
     return 0;
 }
@@ -240,9 +240,9 @@ int ConsoleCommandQuitEDGE(char **argv, int argc)
 {
     if (argc >= 2 && epi::StringCaseCompareASCII(argv[1], "now") == 0)
         // this never returns
-        MenuImmediateQuit();
+        ImmediateQuit();
     else
-        MenuQuitEdge(0);
+        QuitEdge(0);
 
     return 0;
 }
@@ -308,7 +308,7 @@ int ConsoleCommandPlaySound(char **argv, int argc)
 int ConsoleCommandResetVars(char **argv, int argc)
 {
     ResetAllConsoleVariables();
-    ConfigurationResetDefaults(0);
+    ResetDefaults(0);
     return 0;
 }
 
@@ -405,7 +405,7 @@ int ConsoleCommandShowMaps(char **argv, int argc)
 
     for (int i = 0; i < mapdefs.size(); i++)
     {
-        if (GameMapExists(mapdefs[i]) && mapdefs[i]->episode_)
+        if (MapExists(mapdefs[i]) && mapdefs[i]->episode_)
             LogPrint("  %s           %s\n", mapdefs[i]->name_.c_str(), language[mapdefs[i]->description_.c_str()]);
     }
 

@@ -894,7 +894,7 @@ void SpawnScriptTriggers(const char *map_name)
             continue;
 
         // -AJA- 1999/09/25: Added skill checks.
-        if (!GameCheckWhenAppear(scr->appear))
+        if (!CheckWhenAppear(scr->appear))
             continue;
 
         // -AJA- 2000/02/03: Added player num checks.

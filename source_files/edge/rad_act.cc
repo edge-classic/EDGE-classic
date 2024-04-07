@@ -379,7 +379,7 @@ void ScriptSpawnThing(RADScriptTrigger *R, void *param)
     }
 
     // -AJA- 2007/09/04: allow individual when_appear flags
-    if (!GameCheckWhenAppear(t->appear))
+    if (!CheckWhenAppear(t->appear))
         return;
 
     // -AJA- 1999/10/02: -nomonsters check.
@@ -625,9 +625,9 @@ void ScriptGotoMap(RADScriptTrigger *R, void *param)
 
     // Warp to level n
     if (go->is_hub)
-        GameExitToHub(go->map_name, go->tag);
+        ExitToHub(go->map_name, go->tag);
     else
-        GameExitToLevel(go->map_name, 5, go->skip_all);
+        ExitToLevel(go->map_name, 5, go->skip_all);
 }
 
 void ScriptExitLevel(RADScriptTrigger *R, void *param)
@@ -635,15 +635,15 @@ void ScriptExitLevel(RADScriptTrigger *R, void *param)
     ScriptExitParameter *exit = (ScriptExitParameter *)param;
 
     if (exit->is_secret)
-        GameSecretExitLevel(exit->exit_time);
+        ExitLevelSecret(exit->exit_time);
     else
-        GameExitLevel(exit->exit_time);
+        ExitLevel(exit->exit_time);
 }
 
 // Lobo November 2021
 void ScriptExitGame(RADScriptTrigger *R, void *param)
 {
-    GameDeferredEndGame();
+    DeferredEndGame();
 }
 
 void ScriptPlaySound(RADScriptTrigger *R, void *param)

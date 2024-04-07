@@ -753,9 +753,9 @@ bool PlayerThink(Player *player, bool extra_tic)
             player->map_object_->subsector_->sector->properties.special = nullptr;
 
             if (do_exit == kExitTypeSecret)
-                GameSecretExitLevel(1);
+                ExitLevelSecret(1);
             else
-                GameExitLevel(1);
+                ExitLevel(1);
         }
         return true;
     }

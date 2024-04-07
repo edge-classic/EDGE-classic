@@ -62,7 +62,7 @@ class ImageAtlas
 // determine image format from the first 32 bytes (or so) of the file.
 // the file_size is the total size of the file or lump, and helps to
 // distinguish DOOM patch format from other things.
-ImageFormat ImageDetectFormat(uint8_t *header, int header_lengh, int file_size);
+ImageFormat DetectImageFormat(uint8_t *header, int header_lengh, int file_size);
 
 // determine image format from the filename (by its extension).
 ImageFormat ImageFormatFromFilename(const std::string &filename);
@@ -71,7 +71,7 @@ ImageFormat ImageFormatFromFilename(const std::string &filename);
 // Returns nullptr if something went wrong.  The result image will be RGB
 // or RGBA (never paletted).  The image size (width and height) will be
 // rounded to the next power-of-two.
-ImageData *ImageLoad(epi::File *file);
+ImageData *LoadImage(epi::File *file);
 
 // given a collection of loaded images, pack and return the image data
 // for an atlas containing all of them. Does not assume that the incoming
@@ -80,7 +80,7 @@ ImageData *ImageLoad(epi::File *file);
 // The integer keys for the associated image data can vary based on need, but
 // are generally a way of tracking which part of the atlas you are trying to
 // retrieve
-ImageAtlas *ImagePack(const std::unordered_map<int, ImageData *> &image_pack_data);
+ImageAtlas *PackImages(const std::unordered_map<int, ImageData *> &image_pack_data);
 
 // reads the principle information from the image header.
 // (should be much faster than loading the whole image).
@@ -89,16 +89,16 @@ ImageAtlas *ImagePack(const std::unordered_map<int, ImageData *> &image_pack_dat
 //
 // NOTE: size returned here is the real size, and may be different
 // from the image returned by Load() which rounds to power-of-two.
-bool ImageGetInfo(epi::File *file, int *width, int *height, int *depth);
+bool GetImageInfo(epi::File *file, int *width, int *height, int *depth);
 
 // saves the image (in JPEG format) to the given file.  Returns false if
 // something went wrong.  The image _MUST_ be RGB (bpp == 3).
-bool ImageSaveJPEG(std::string filename, ImageData *image);
+bool SaveJPEG(std::string filename, ImageData *image);
 
 // saves the image (in PNG format) to the given file.
 // Returns false if failed to save (e.g. file already exists).
 // The image _MUST_ be RGB or RGBA.
-bool ImageSavePNG(std::string filename, ImageData *image);
+bool SavePNG(std::string filename, ImageData *image);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

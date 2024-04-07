@@ -364,7 +364,7 @@ bool AutomapResponder(InputEvent *ev)
     // Had to move the automap cheat check up here thanks to Heretic's 'ravmap'
     // cheat - Dasho -ACB- 1999/09/28 Proper casting -AJA- 2022: allow this in
     // deathmatch (as we don't have real multiplayer)
-    if (CheatCheckSequence(&cheat_automap, (char)sym))
+    if (CheckCheatSequence(&cheat_automap, (char)sym))
     {
         cheating = (cheating + 1) % 3;
 

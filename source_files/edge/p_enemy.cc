@@ -583,7 +583,7 @@ void A_BrainMissileExplode(MapObject *mo)
 
 void A_BrainDie(MapObject *bossbrain)
 {
-    GameExitLevel(kTicRate);
+    ExitLevel(kTicRate);
 }
 
 void A_BrainSpit(MapObject *shooter)

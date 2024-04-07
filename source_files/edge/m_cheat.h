@@ -37,7 +37,7 @@ struct CheatSequence
     const char *p;
 };
 
-int  CheatCheckSequence(CheatSequence *cheat, char key);
+int  CheckCheatSequence(CheatSequence *cheat, char key);
 bool CheatResponder(InputEvent *event);
 void CheatInitialize(void);
 

@@ -306,7 +306,7 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
     bool solid    = false;
 
     int  header_len = HMM_MIN((int)sizeof(header), packfile_len);
-    auto fmt        = ImageDetectFormat(header, header_len, packfile_len);
+    auto fmt        = DetectImageFormat(header, header_len, packfile_len);
 
     if (fmt == kImageOther)
     {
@@ -367,7 +367,7 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
     }
     else // PNG, TGA or JPEG
     {
-        if (!ImageGetInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
+        if (!GetImageInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
         {
             LogWarning("Error scanning image in '%s'\n", packfile_name);
             return nullptr;
@@ -448,7 +448,7 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump, std::
     bool solid    = false;
 
     int  header_len = HMM_MIN((int)sizeof(header), lump_len);
-    auto fmt        = ImageDetectFormat(header, header_len, lump_len);
+    auto fmt        = DetectImageFormat(header, header_len, lump_len);
 
     if (fmt == kImageOther)
     {
@@ -509,7 +509,7 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump, std::
     }
     else // PNG, TGA or JPEG
     {
-        if (!ImageGetInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
+        if (!GetImageInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
         {
             LogWarning("Error scanning image in '%s' lump\n", GetLumpNameFromIndex(lump));
             return nullptr;
@@ -778,7 +778,7 @@ static Image *AddImageUser(ImageDefinition *def)
             f->Seek(0, epi::File::kSeekpointStart);
 
             int header_len = HMM_MIN((int)sizeof(header), file_size);
-            fmt            = ImageDetectFormat(header, header_len, file_size);
+            fmt            = DetectImageFormat(header, header_len, file_size);
         }
         else
             fmt = ImageFormatFromFilename(def->info_);
@@ -804,7 +804,7 @@ static Image *AddImageUser(ImageDefinition *def)
             return nullptr;
         }
 
-        if (!ImageGetInfo(f, &width, &height, &bpp))
+        if (!GetImageInfo(f, &width, &height, &bpp))
         {
             delete f;
             LogWarning("Error occurred scanning image: %s\n", filename);
@@ -1392,7 +1392,7 @@ static const Image *BackupTexture(const char *tex_name, int flags)
     if (flags & kImageLookupNull)
         return nullptr;
 
-    PrintWarningOrError("Unknown texture found in level: '%s'\n", tex_name);
+    WarningOrError("Unknown texture found in level: '%s'\n", tex_name);
 
     Image *dummy;
 
@@ -1443,7 +1443,7 @@ static const Image *BackupFlat(const char *flat_name, int flags)
     if (flags & kImageLookupNull)
         return nullptr;
 
-    PrintWarningOrError("Unknown flat found in level: '%s'\n", flat_name);
+    WarningOrError("Unknown flat found in level: '%s'\n", flat_name);
 
     Image *dummy = CreateDummyImage(flat_name, 0x11AA11, 0x115511);
 
@@ -1492,7 +1492,7 @@ static const Image *BackupGraphic(const char *gfx_name, int flags)
     if (flags & kImageLookupNull)
         return nullptr;
 
-    PrintDebugOrError("Unknown graphic: '%s'\n", gfx_name);
+    DebugOrError("Unknown graphic: '%s'\n", gfx_name);
 
     Image *dummy;
 
@@ -1853,14 +1853,14 @@ static void W_CreateDummyImages(void)
 bool InitializeImages(void)
 {
     // check options
-    if (ArgumentFind("nosmoothing") > 0)
+    if (FindArgument("nosmoothing") > 0)
         image_smoothing = 0;
-    else if (ArgumentFind("smoothing") > 0)
+    else if (FindArgument("smoothing") > 0)
         image_smoothing = 1;
 
-    if (ArgumentFind("hqscale") > 0 || ArgumentFind("hqall") > 0)
+    if (FindArgument("hqscale") > 0 || FindArgument("hqall") > 0)
         hq2x_scaling = 3;
-    else if (ArgumentFind("nohqscale") > 0)
+    else if (FindArgument("nohqscale") > 0)
         hq2x_scaling = 0;
 
     W_CreateDummyImages();

@@ -1272,7 +1272,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special, int tag, 
     }
 #endif
 
-    if (!GameCheckWhenAppear(special->appear_))
+    if (!CheckWhenAppear(special->appear_))
     {
         if (line)
             line->special = nullptr;
@@ -1453,17 +1453,17 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special, int tag, 
 
     if (special->e_exit_ == kExitTypeNormal)
     {
-        GameExitLevel(5);
+        ExitLevel(5);
         texSwitch = true;
     }
     else if (special->e_exit_ == kExitTypeSecret)
     {
-        GameSecretExitLevel(5);
+        ExitLevelSecret(5);
         texSwitch = true;
     }
     else if (special->e_exit_ == kExitTypeHub)
     {
-        GameExitToHub(special->hub_exit_, line ? line->tag : tag);
+        ExitToHub(special->hub_exit_, line ? line->tag : tag);
         texSwitch = true;
     }
 
@@ -1750,7 +1750,7 @@ static inline void PlayerInProperties(Player *player, float bz, float tz, float 
     if (!special || ceiling_height < floor_height)
         return;
 
-    if (!GameCheckWhenAppear(special->appear_))
+    if (!CheckWhenAppear(special->appear_))
         return;
 
     // breathing support
@@ -1892,9 +1892,9 @@ static inline void PlayerInProperties(Player *player, float bz, float tz, float 
             props->special = nullptr;
 
             if (special->e_exit_ == kExitTypeSecret)
-                GameSecretExitLevel(1);
+                ExitLevelSecret(1);
             else
-                GameExitLevel(1);
+                ExitLevel(1);
         }
     }
 }
@@ -2021,7 +2021,7 @@ void UpdateSpecials(bool extra_tic)
         level_time_count -= (double_framerate.d_ && extra_tic) ? 0 : 1;
 
         if (!level_time_count)
-            GameExitLevel(1);
+            ExitLevel(1);
     }
 
     for (size_t i = 0; i < light_animations.size(); i++)
@@ -2495,7 +2495,7 @@ void SpawnMapSpecials1(void)
     // See if -TIMER needs to be used.
     level_timer = false;
 
-    i = ArgumentFind("avg");
+    i = FindArgument("avg");
     if (i > 0 && InDeathmatch())
     {
         level_timer      = true;
@@ -2524,7 +2524,7 @@ void SpawnMapSpecials1(void)
         }
 
         // -AJA- 1999/10/23: weed out non-appearing lines.
-        if (!GameCheckWhenAppear(special->appear_))
+        if (!CheckWhenAppear(special->appear_))
         {
             level_lines[i].special = nullptr;
             continue;
@@ -2608,7 +2608,7 @@ void SpawnMapSpecials2(int autotag)
 
         secSpecial = sector->properties.special;
 
-        if (!GameCheckWhenAppear(secSpecial->appear_))
+        if (!CheckWhenAppear(secSpecial->appear_))
         {
             SectorChangeSpecial(sector, 0);
             continue;

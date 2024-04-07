@@ -67,7 +67,7 @@ int game_tic;
 int make_tic;
 
 static int last_update_tic;  // last time NetworkUpdate  was called
-static int last_try_run_tic; // last time NetworkTryRunTicCommands was called
+static int last_try_run_tic; // last time TryRunTicCommands was called
 
 //----------------------------------------------------------------------------
 //  TIC HANDLING
@@ -77,7 +77,7 @@ void NetworkInitialize(void)
 {
     srand(PureRandomNumber());
 
-    NetworkResetTics();
+    ResetTics();
 
 #if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
     windows_timer = CreateWaitableTimerExW(nullptr, nullptr, CREATE_WAITABLE_TIMER_HIGH_RESOLUTION, TIMER_ALL_ACCESS);
@@ -140,7 +140,7 @@ static bool NetworkBuildTicCommands(void)
     return true;
 }
 
-void NetworkGrabTicCommands(void)
+void GrabTicCommands(void)
 {
     // this is called from G_Ticker, and is the only place allowed to
     // bump `game_tic` (allowing the game simulation to advance).
@@ -207,7 +207,7 @@ int NetworkUpdate()
     return now_time;
 }
 
-int NetworkTryRunTicCommands()
+int TryRunTicCommands()
 {
     EDGE_ZoneScoped;
 
@@ -224,7 +224,7 @@ int NetworkTryRunTicCommands()
     last_try_run_tic = now_time;
 
 #ifdef EDGE_DEBUG_TICS
-    LogDebug("NetworkTryRunTicCommands: now %d last_try_run %d --> real %d\n", now_time, now_time - real_tics,
+    LogDebug("TryRunTicCommands: now %d last_try_run %d --> real %d\n", now_time, now_time - real_tics,
              real_tics);
 #endif
 
@@ -281,7 +281,7 @@ int NetworkTryRunTicCommands()
     return tics;
 }
 
-void NetworkResetTics(void)
+void ResetTics(void)
 {
     make_tic = game_tic = 0;
 

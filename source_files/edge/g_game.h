@@ -97,36 +97,36 @@ class NewGameParameters
 //
 // -ACB- 1998/08/10 New DDF Structure, Use map reference name.
 //
-void GameDeferredNewGame(NewGameParameters &params);
+void DeferredNewGame(NewGameParameters &params);
 
 // Can be called by the startup code or MenuResponder,
 // calls LevelSetup or W_EnterWorld.
-void GameDeferredLoadGame(int slot);
-void GameDeferredSaveGame(int slot, const char *description);
-void GameDeferredScreenShot(void);
-void GameDeferredEndGame(void);
+void DeferredLoadGame(int slot);
+void DeferredSaveGame(int slot, const char *description);
+void DeferredScreenShot(void);
+void DeferredEndGame(void);
 
-bool GameMapExists(const MapDefinition *map);
+bool MapExists(const MapDefinition *map);
 
 // -KM- 1998/11/25 Added Time param
-void GameExitLevel(int time);
-void GameSecretExitLevel(int time);
-void GameExitToLevel(char *name, int time, bool skip_all);
-void GameExitToHub(const char *map_name, int tag);
-void GameExitToHub(int map_number, int tag);
+void ExitLevel(int time);
+void ExitLevelSecret(int time);
+void ExitToLevel(char *name, int time, bool skip_all);
+void ExitToHub(const char *map_name, int tag);
+void ExitToHub(int map_number, int tag);
 
-void GameBigStuff(void);
+void DoBigGameStuff(void);
 void GameTicker(void);
 bool GameResponder(InputEvent *ev);
 
-bool GameCheckWhenAppear(AppearsFlag appear);
+bool CheckWhenAppear(AppearsFlag appear);
 
 extern const MapDefinition *current_map;
 extern const MapDefinition *next_map;
 
-MapDefinition *GameLookupMap(const char *refname);
+MapDefinition *LookupMap(const char *refname);
 
-void GameDoLoadLevel(void);
+void DoLoadLevel(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -291,7 +291,7 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
         else
             f = LoadLumpAsFile(lump);
 
-        ImageData *img = ImageLoad(f);
+        ImageData *img = LoadImage(f);
 
         // close it
         delete f;
@@ -468,7 +468,7 @@ static ImageData *CreateUserFileImage(Image *rim, ImageDefinition *def)
     if (!f)
         FatalError("Missing image file: %s\n", def->info_.c_str());
 
-    ImageData *img = ImageLoad(f);
+    ImageData *img = LoadImage(f);
 
     // close it
     delete f;

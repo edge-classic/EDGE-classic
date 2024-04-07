@@ -117,9 +117,9 @@ void StartupAudio(void)
     int  want_freq   = 44100;
     bool want_stereo = (var_sound_stereo >= 1);
 
-    if (ArgumentFind("mono") > 0)
+    if (FindArgument("mono") > 0)
         want_stereo = false;
-    if (ArgumentFind("stereo") > 0)
+    if (FindArgument("stereo") > 0)
         want_stereo = true;
 
     bool success = false;

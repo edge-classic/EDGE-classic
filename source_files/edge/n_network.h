@@ -29,12 +29,12 @@ void NetworkShutdown(void);
 int NetworkUpdate();
 
 // returns number of ticks to run (always > 0).
-int NetworkTryRunTicCommands();
+int TryRunTicCommands();
 
 // restart tic counters (make_tic, game_tic) at zero.
-void NetworkResetTics(void);
+void ResetTics(void);
 
-void NetworkGrabTicCommands(void);
+void GrabTicCommands(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

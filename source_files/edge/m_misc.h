@@ -49,20 +49,20 @@ struct ConfigurationDefault
     int         default_value;
 };
 
-void ConfigurationResetDefaults(int dummy, ConsoleVariable *dummy_cvar = nullptr);
-void ConfigurationLoadDefaults(void);
-void ConfigurationLoadBranding(void);
-void ConfigurationSaveDefaults(void);
+void ResetDefaults(int dummy, ConsoleVariable *dummy_cvar = nullptr);
+void LoadDefaults(void);
+void LoadBranding(void);
+void SaveDefaults(void);
 
 void TakeScreenshot(bool show_msg);
 void CreateSaveScreenshot(void);
 
 #ifdef __GNUC__
-void PrintWarningOrError(const char *error, ...) __attribute__((format(printf, 1, 2)));
-void PrintDebugOrError(const char *error, ...) __attribute__((format(printf, 1, 2)));
+void WarningOrError(const char *error, ...) __attribute__((format(printf, 1, 2)));
+void DebugOrError(const char *error, ...) __attribute__((format(printf, 1, 2)));
 #else
-void PrintWarningOrError(const char *error, ...);
-void PrintDebugOrError(const char *error, ...);
+void WarningOrError(const char *error, ...);
+void DebugOrError(const char *error, ...);
 #endif
 
 extern bool save_screenshot_valid;

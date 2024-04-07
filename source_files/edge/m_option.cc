@@ -354,7 +354,7 @@ static OptionMenuItem mainoptions[] = {
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeFunction, "MenuStartBotmatch", nullptr, 0, nullptr, OptionMenuHostNetGame, nullptr},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeFunction, "MenuResetToDefault", nullptr, 0, nullptr, ConfigurationResetDefaults, nullptr}};
+    {kOptionMenuItemTypeFunction, "MenuResetToDefault", nullptr, 0, nullptr, ResetDefaults, nullptr}};
 
 static OptionMenuDefinition main_optmenu = {mainoptions,
                                             sizeof(mainoptions) / sizeof(OptionMenuItem),
@@ -1170,7 +1170,7 @@ void OptionMenuDrawer()
         }
 
         case kOptionMenuItemTypeSlider: {
-            MenuDrawSlider(current_menu->menu_center + 15, curry, *(float *)current_menu->items[i].switch_variable,
+            DrawMenuSlider(current_menu->menu_center + 15, curry, *(float *)current_menu->items[i].switch_variable,
                            current_menu->items[i].increment, 2, current_menu->items[i].min, current_menu->items[i].max,
                            current_menu->items[i].format_string);
 
@@ -2168,7 +2168,7 @@ static void OptionMenuionSetResolution(int key_pressed, ConsoleVariable *console
         std::string msg(epi::StringFormat(language["ModeSelErr"], new_window_mode.width, new_window_mode.height,
                                           (new_window_mode.depth < 20) ? 16 : 32));
 
-        MenuStartMessage(msg.c_str(), nullptr, false);
+        StartMenuMessage(msg.c_str(), nullptr, false);
     }
 }
 

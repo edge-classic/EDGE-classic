@@ -45,7 +45,7 @@ ImageAtlas::~ImageAtlas()
     data_ = nullptr;
 }
 
-ImageFormat ImageDetectFormat(uint8_t *header, int header_length, int file_size)
+ImageFormat DetectImageFormat(uint8_t *header, int header_length, int file_size)
 {
     // AJA 2022: based on code I wrote for Eureka...
 
@@ -143,7 +143,7 @@ ImageFormat ImageFormatFromFilename(const std::string &filename)
     return kImageUnknown;
 }
 
-ImageData *ImageLoad(epi::File *file)
+ImageData *LoadImage(epi::File *file)
 {
     int width  = 0;
     int height = 0;
@@ -207,7 +207,7 @@ ImageData *ImageLoad(epi::File *file)
     return img;
 }
 
-ImageAtlas *ImagePack(const std::unordered_map<int, ImageData *> &image_pack_data)
+ImageAtlas *PackImages(const std::unordered_map<int, ImageData *> &image_pack_data)
 {
     stbrp_node              nodes[4096]; // Max OpenGL texture width we allow
     std::vector<stbrp_rect> rects;
@@ -250,7 +250,7 @@ ImageAtlas *ImagePack(const std::unordered_map<int, ImageData *> &image_pack_dat
         if (atlas_h < atlas_w)
             atlas_h = atlas_w;
         if (atlas_w > 4096 || atlas_h > 4096)
-            FatalError("ImagePack: Atlas exceeds maximum allowed texture size "
+            FatalError("PackImages: Atlas exceeds maximum allowed texture size "
                        "(4096x4096)!");
         stbrp_init_target(&ctx, atlas_w, atlas_h, nodes, 4096);
         packres = stbrp_pack_rects(&ctx, rects.data(), rects.size());
@@ -283,7 +283,7 @@ ImageAtlas *ImagePack(const std::unordered_map<int, ImageData *> &image_pack_dat
     return atlas;
 }
 
-bool ImageGetInfo(epi::File *file, int *width, int *height, int *depth)
+bool GetImageInfo(epi::File *file, int *width, int *height, int *depth)
 {
     int      length    = file->GetLength();
     uint8_t *raw_image = file->LoadIntoMemory();
@@ -304,7 +304,7 @@ static void StbImageEpiFileWrite(void *context, void *data, int size)
     dest->Write(data, size);
 }
 
-bool ImageSaveJPEG(std::string filename, ImageData *image)
+bool SaveJPEG(std::string filename, ImageData *image)
 {
     EPI_ASSERT(image->depth_ == 3);
 
@@ -328,7 +328,7 @@ bool ImageSaveJPEG(std::string filename, ImageData *image)
         return true;
 }
 
-bool ImageSavePNG(std::string filename, ImageData *image)
+bool SavePNG(std::string filename, ImageData *image)
 {
     EPI_ASSERT(image->depth_ >= 3);
 

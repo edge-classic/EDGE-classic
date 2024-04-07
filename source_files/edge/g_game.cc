@@ -143,7 +143,7 @@ static void HandleLevelFlag(bool *special, MapFlag flag)
 void LoadLevel_Bits(void)
 {
     if (current_map == nullptr)
-        FatalError("GameDoLoadLevel: No Current Map selected");
+        FatalError("DoLoadLevel: No Current Map selected");
 
 #ifdef EDGE_WEB
     PauseAudioDevice();
@@ -211,7 +211,7 @@ void LoadLevel_Bits(void)
     // Note: It should be noted that only the game_skill is
     // passed as the level is already defined in current_map,
     // The method for changing current_map, is using by
-    // GameDeferredNewGame.
+    // DeferredNewGame.
     //
     // -ACB- 1998/08/09 New LevelSetup
     // -KM- 1998/11/25 LevelSetup accepts the autotag
@@ -270,7 +270,7 @@ void LoadLevel_Bits(void)
 //
 //   ??  exit_time
 //
-void GameDoLoadLevel(void)
+void DoLoadLevel(void)
 {
     HUDStart();
 
@@ -324,7 +324,7 @@ bool GameResponder(InputEvent *ev)
     {
         if (ev->type == kInputEventKeyDown)
         {
-            MenuStartControlPanel();
+            StartControlPanel();
             StartSoundEffect(sound_effect_swtchn, kCategoryUi);
             return true;
         }
@@ -414,7 +414,7 @@ static void CheckPlayersReborn(void)
     }
 }
 
-void GameBigStuff(void)
+void DoBigGameStuff(void)
 {
     // do things to change the game state
     while (game_action != kGameActionNothing)
@@ -429,7 +429,7 @@ void GameBigStuff(void)
             break;
 
         case kGameActionLoadLevel:
-            GameDoLoadLevel();
+            DoLoadLevel();
             break;
 
         case kGameActionLoadGame:
@@ -457,7 +457,7 @@ void GameBigStuff(void)
             break;
 
         default:
-            FatalError("GameBigStuff: Unknown game_action %d", game_action);
+            FatalError("DoBigGameStuff: Unknown game_action %d", game_action);
             break;
         }
     }
@@ -473,7 +473,7 @@ void GameTicker(void)
         {
         case kGameStateLevel:
             // get commands
-            NetworkGrabTicCommands();
+            GrabTicCommands();
 
             //!!!  MapObjectTicker();
             MapObjectTicker(true);
@@ -481,7 +481,7 @@ void GameTicker(void)
 
         case kGameStateIntermission:
         case kGameStateFinale:
-            NetworkGrabTicCommands();
+            GrabTicCommands();
             break;
         default:
             break;
@@ -503,7 +503,7 @@ void GameTicker(void)
 
     case kGameStateLevel:
         // get commands
-        NetworkGrabTicCommands();
+        GrabTicCommands();
 
         MapObjectTicker(false);
         AutomapTicker();
@@ -515,12 +515,12 @@ void GameTicker(void)
         break;
 
     case kGameStateIntermission:
-        NetworkGrabTicCommands();
+        GrabTicCommands();
         IntermissionTicker();
         break;
 
     case kGameStateFinale:
-        NetworkGrabTicCommands();
+        GrabTicCommands();
         FinaleTicker();
         break;
 
@@ -574,16 +574,16 @@ static void SpawnInitialPlayers(void)
     SetDisplayPlayer(console_player); // view the guy you are playing
 }
 
-void GameDeferredScreenShot(void)
+void DeferredScreenShot(void)
 {
     m_screenshot_required = true;
 }
 
 // -KM- 1998/11/25 Added time param which is the time to wait before
 //  actually exiting level.
-void GameExitLevel(int time)
+void ExitLevel(int time)
 {
-    next_map      = GameLookupMap(current_map->next_mapname_.c_str());
+    next_map      = LookupMap(current_map->next_mapname_.c_str());
     exit_time     = level_time_elapsed + time;
     exit_skip_all = false;
     exit_hub_tag  = 0;
@@ -591,37 +591,37 @@ void GameExitLevel(int time)
 
 // -ACB- 1998/08/08 We don't have support for the german edition
 //                  removed the check for map31.
-void GameSecretExitLevel(int time)
+void ExitLevelSecret(int time)
 {
-    next_map      = GameLookupMap(current_map->secretmapname_.c_str());
+    next_map      = LookupMap(current_map->secretmapname_.c_str());
     exit_time     = level_time_elapsed + time;
     exit_skip_all = false;
     exit_hub_tag  = 0;
 }
 
-void GameExitToLevel(char *name, int time, bool skip_all)
+void ExitToLevel(char *name, int time, bool skip_all)
 {
-    next_map      = GameLookupMap(name);
+    next_map      = LookupMap(name);
     exit_time     = level_time_elapsed + time;
     exit_skip_all = skip_all;
     exit_hub_tag  = 0;
 }
 
-void GameExitToHub(const char *map_name, int tag)
+void ExitToHub(const char *map_name, int tag)
 {
     if (tag <= 0)
         FatalError("Hub exit line/command: bad tag %d\n", tag);
 
-    next_map = GameLookupMap(map_name);
+    next_map = LookupMap(map_name);
     if (!next_map)
-        FatalError("GameExitToHub: No such map %s !\n", map_name);
+        FatalError("ExitToHub: No such map %s !\n", map_name);
 
     exit_time     = level_time_elapsed + 5;
     exit_skip_all = true;
     exit_hub_tag  = tag;
 }
 
-void GameExitToHub(int map_number, int tag)
+void ExitToHub(int map_number, int tag)
 {
     EPI_ASSERT(current_map);
 
@@ -635,7 +635,7 @@ void GameExitToHub(int map_number, int tag)
     else
         sprintf(name_buf, "MAP%02d", map_number);
 
-    GameExitToHub(name_buf, tag);
+    ExitToHub(name_buf, tag);
 }
 
 //
@@ -725,7 +725,7 @@ static void GameDoCompleted(void)
     IntermissionStart();
 }
 
-void GameDeferredLoadGame(int slot)
+void DeferredLoadGame(int slot)
 {
     // Can be called by the startup code or the menu task.
 
@@ -761,20 +761,20 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
 
     if (is_hub)
     {
-        current_map = GameLookupMap(globs->level);
+        current_map = LookupMap(globs->level);
         if (!current_map)
             FatalError("LOAD-HUB: No such map %s !  Check WADS\n", globs->level);
 
         SetDisplayPlayer(console_player);
         automap_active = false;
 
-        NetworkResetTics();
+        ResetTics();
     }
     else
     {
         NewGameParameters params;
 
-        params.map_ = GameLookupMap(globs->level);
+        params.map_ = LookupMap(globs->level);
         if (!params.map_)
             FatalError("LOAD-GAME: No such map %s !  Check WADS\n", globs->level);
 
@@ -793,7 +793,7 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
         InitNew(params);
 
         current_hub_tag   = globs->hub_tag;
-        current_hub_first = globs->hub_first ? GameLookupMap(globs->hub_first) : nullptr;
+        current_hub_first = globs->hub_first ? LookupMap(globs->hub_first) : nullptr;
     }
 
     LoadLevel_Bits();
@@ -878,12 +878,12 @@ static void GameDoLoadGame(void)
 }
 
 //
-// GameDeferredSaveGame
+// DeferredSaveGame
 //
 // Called by the menu task.
 // Description is a 24 byte text string
 //
-void GameDeferredSaveGame(int slot, const char *description)
+void DeferredSaveGame(int slot, const char *description)
 {
     defer_save_slot = slot;
     strcpy(defer_save_description, description);
@@ -1064,7 +1064,7 @@ void NewGameParameters::CopyFlags(const GameFlags *F)
 // progression of the game. All thats needed is the
 // skill and the name (The name in the DDF File itself).
 //
-void GameDeferredNewGame(NewGameParameters &params)
+void DeferredNewGame(NewGameParameters &params)
 {
     EPI_ASSERT(params.map_);
 
@@ -1076,7 +1076,7 @@ void GameDeferredNewGame(NewGameParameters &params)
     game_action = kGameActionNewGame;
 }
 
-bool GameMapExists(const MapDefinition *map)
+bool MapExists(const MapDefinition *map)
 {
     return (CheckLumpNumberForName(map->lump_.c_str()) >= 0);
 }
@@ -1190,10 +1190,10 @@ static void InitNew(NewGameParameters &params)
         level_flags.enemies_respawn = true;
     }
 
-    NetworkResetTics();
+    ResetTics();
 }
 
-void GameDeferredEndGame(void)
+void DeferredEndGame(void)
 {
     if (game_state == kGameStateLevel || game_state == kGameStateIntermission || game_state == kGameStateFinale)
     {
@@ -1231,7 +1231,7 @@ static void GameDoEndGame(void)
     StartTitle();
 }
 
-bool GameCheckWhenAppear(AppearsFlag appear)
+bool CheckWhenAppear(AppearsFlag appear)
 {
     if (!(appear & (1 << game_skill)))
         return false;
@@ -1248,11 +1248,11 @@ bool GameCheckWhenAppear(AppearsFlag appear)
     return true;
 }
 
-MapDefinition *GameLookupMap(const char *refname)
+MapDefinition *LookupMap(const char *refname)
 {
     MapDefinition *m = mapdefs.Lookup(refname);
 
-    if (m && GameMapExists(m))
+    if (m && MapExists(m))
         return m;
 
     // -AJA- handle numbers (like original DOOM)
@@ -1267,7 +1267,7 @@ MapDefinition *GameLookupMap(const char *refname)
             {
                 if (epi::StringCaseCompareASCII(map_check, mapdefs[i]->name_.substr(mapdefs[i]->name_.size() - 2)) ==
                         0 &&
-                    GameMapExists(mapdefs[i]) && mapdefs[i]->episode_)
+                    MapExists(mapdefs[i]) && mapdefs[i]->episode_)
                     return mapdefs[i];
             }
         }
@@ -1281,7 +1281,7 @@ MapDefinition *GameLookupMap(const char *refname)
             if (mapdefs[i]->name_.size() == 4)
             {
                 if (mapdefs[i]->name_[1] == map_check[1] && mapdefs[i]->name_[3] == map_check[3] &&
-                    GameMapExists(mapdefs[i]) && mapdefs[i]->episode_)
+                    MapExists(mapdefs[i]) && mapdefs[i]->episode_)
                     return mapdefs[i];
             }
         }

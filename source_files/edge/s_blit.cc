@@ -451,7 +451,7 @@ static void MixQueues(int pairs)
     }
 }
 
-void SoundMixAllChannels(void *stream, int len)
+void MixAllSoundChannels(void *stream, int len)
 {
     if (no_sound || len <= 0)
         return;
@@ -504,7 +504,7 @@ void InitializeSoundChannels(int total)
     mix_buffer        = new int[mix_buffer_length];
 }
 
-void SoundFreeChannels(void)
+void FreeSoundChannels(void)
 {
     // NOTE: assumes audio is locked!
 
@@ -523,7 +523,7 @@ void SoundFreeChannels(void)
     memset(mix_channels, 0, sizeof(mix_channels));
 }
 
-void SoundKillChannel(int k)
+void KillSoundChannel(int k)
 {
     SoundChannel *chan = mix_channels[k];
 
@@ -534,7 +534,7 @@ void SoundKillChannel(int k)
     }
 }
 
-void SoundReallocateChannels(int total)
+void ReallocateSoundChannels(int total)
 {
     // NOTE: assumes audio is locked!
 
@@ -561,7 +561,7 @@ void SoundReallocateChannels(int total)
             if (chan->state_ == kChannelPlaying)
             {
                 if (chan->category_ != kCategoryUi)
-                    SoundKillChannel(i);
+                    KillSoundChannel(i);
             }
         }
 
@@ -580,7 +580,7 @@ void SoundReallocateChannels(int total)
         for (i = total; i < total_channels; i++)
         {
             if (mix_channels[i]->state_ == kChannelPlaying)
-                SoundKillChannel(i);
+                KillSoundChannel(i);
 
             delete mix_channels[i];
             mix_channels[i] = nullptr;
@@ -608,7 +608,7 @@ void UpdateSounds(Position *listener, BAMAngle angle)
             chan->ComputeVolume();
 
         else if (chan->state_ == kChannelFinished)
-            SoundKillChannel(i);
+            KillSoundChannel(i);
     }
 
     if (queue_channel)

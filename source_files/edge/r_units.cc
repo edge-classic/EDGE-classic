@@ -95,7 +95,7 @@ static bool batch_sort;
 sg_color culling_fog_color;
 
 //
-// RendererStartUnits
+// StartUnitBatch
 //
 // Starts a fresh batch of units.
 //
@@ -103,7 +103,7 @@ sg_color culling_fog_color;
 // texture changes to a minimum.  Otherwise, the batch is
 // drawn in the same order as given.
 //
-void RendererStartUnits(bool sort_em)
+void StartUnitBatch(bool sort_em)
 {
     current_render_vert = current_render_unit = 0;
 
@@ -113,17 +113,17 @@ void RendererStartUnits(bool sort_em)
 }
 
 //
-// RendererFinishUnits
+// FinishUnitBatch
 //
 // Finishes a batch of units, drawing any that haven't been drawn yet.
 //
-void RendererFinishUnits(void)
+void FinishUnitBatch(void)
 {
-    RenderUnits();
+    RenderCurrentUnits();
 }
 
 //
-// RendererBeginUnit
+// BeginRenderUnit
 //
 // Begin a new unit, with the given parameters (mode and texture ID).
 // `max_vert' is the maximum expected vertices of the quad/poly (the
@@ -132,7 +132,7 @@ void RendererFinishUnits(void)
 // contains "holes" (like sprites).  `blended' should be true if the
 // texture should be blended (like for translucent water or sprites).
 //
-RendererVertex *RendererBeginUnit(GLuint shape, int max_vert, GLuint env1, GLuint tex1, GLuint env2, GLuint tex2,
+RendererVertex *BeginRenderUnit(GLuint shape, int max_vert, GLuint env1, GLuint tex1, GLuint env2, GLuint tex2,
                                   int pass, int blending, RGBAColor fog_color, float fog_density)
 {
     RendererUnit *unit;
@@ -145,7 +145,7 @@ RendererVertex *RendererBeginUnit(GLuint shape, int max_vert, GLuint env1, GLuin
     // check we have enough space left
     if (current_render_vert + max_vert > kMaximumLocalVertices || current_render_unit >= kMaximumLocalUnits)
     {
-        RenderUnits();
+        RenderCurrentUnits();
     }
 
     unit = local_units + current_render_unit;
@@ -172,9 +172,9 @@ RendererVertex *RendererBeginUnit(GLuint shape, int max_vert, GLuint env1, GLuin
 }
 
 //
-// RendererEndUnit
+// EndRenderUnit
 //
-void RendererEndUnit(int actual_vert)
+void EndRenderUnit(int actual_vert)
 {
     RendererUnit *unit;
 
@@ -226,7 +226,7 @@ struct Compare_Unit_pred
 
 static void EnableCustomEnvironment(GLuint env, bool enable)
 {
-    RenderState *state = RendererGetState();
+    RenderState *state = GetRenderState();
     switch (env)
     {
     case uint32_t(kTextureEnvironmentSkipRGB):
@@ -263,19 +263,19 @@ static inline void RendererSendRawVector(const RendererVertex *V)
 }
 
 //
-// RenderUnits
+// RenderCurrentUnits
 //
 // Forces the set of current units to be drawn.  This call is
 // optional (it never _needs_ to be called by client code).
 //
-void RenderUnits(void)
+void RenderCurrentUnits(void)
 {
     EDGE_ZoneScoped;
 
     if (current_render_unit == 0)
         return;
 
-    RenderState *state = RendererGetState();
+    RenderState *state = GetRenderState();
 
     GLuint active_tex[2] = {0, 0};
     GLuint active_env[2] = {0, 0};

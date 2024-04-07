@@ -1341,7 +1341,7 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon_, int fr
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, old_clamp);
     }
 
-    RenderState *state = RendererGetState();
+    RenderState *state = GetRenderState();
     state->SetDefaultStateFull();
 }
 

@@ -637,7 +637,7 @@ class ColormapShader : public AbstractShader
             }
         }
 
-        RendererVertex *glvert = RendererBeginUnit(shape, num_vert, GL_MODULATE, tex, GL_MODULATE, fade_texture_,
+        RendererVertex *glvert = BeginRenderUnit(shape, num_vert, GL_MODULATE, tex, GL_MODULATE, fade_texture_,
                                                    *pass_var, blending, fc_to_use, fd_to_use);
 
         for (int v_idx = 0; v_idx < num_vert; v_idx++)
@@ -654,7 +654,7 @@ class ColormapShader : public AbstractShader
             TextureCoordinates(dest, 1, &lit_pos);
         }
 
-        RendererEndUnit(num_vert);
+        EndRenderUnit(num_vert);
 
         (*pass_var) += 1;
     }

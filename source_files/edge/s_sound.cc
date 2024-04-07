@@ -128,7 +128,7 @@ static int FindFreeChannel(void)
         SoundChannel *chan = mix_channels[i];
 
         if (chan->state_ == kChannelFinished)
-            SoundKillChannel(i);
+            KillSoundChannel(i);
 
         if (chan->state_ == kChannelEmpty)
             return i;
@@ -290,7 +290,7 @@ void ShutdownSound(void)
 
     SoundQueueShutdown();
 
-    SoundFreeChannels();
+    FreeSoundChannels();
 }
 
 // Not-rejigged-yet stuff..
@@ -363,7 +363,7 @@ static void DoStartFX(SoundEffectDefinition *def, int category, Position *pos, i
                 return;
 
             // LogPrint("@@ Killing sound for SINGULAR\n");
-            SoundKillChannel(k);
+            KillSoundChannel(k);
             S_PlaySound(k, def, category, pos, flags, buf);
             return;
         }
@@ -405,7 +405,7 @@ static void DoStartFX(SoundEffectDefinition *def, int category, Position *pos, i
 
         // LogPrint("- killing channel %d (kill_cat:%d)  my_cat:%d\n", k,
         // kill_cat, category);
-        SoundKillChannel(k);
+        KillSoundChannel(k);
     }
 
     S_PlaySound(k, def, category, pos, flags, buf);
@@ -486,7 +486,7 @@ void StopSoundEffect(Position *pos)
             if (chan->state_ == kChannelPlaying && chan->position_ == pos)
             {
                 // LogPrint("StopSoundEffect: killing #%d\n", i);
-                SoundKillChannel(i);
+                KillSoundChannel(i);
             }
         }
     }
@@ -506,7 +506,7 @@ void StopLevelSoundEffects(void)
 
             if (chan->state_ != kChannelEmpty && chan->category_ != kCategoryUi)
             {
-                SoundKillChannel(i);
+                KillSoundChannel(i);
             }
         }
     }
@@ -526,7 +526,7 @@ void StopAllSoundEffects(void)
 
             if (chan->state_ != kChannelEmpty)
             {
-                SoundKillChannel(i);
+                KillSoundChannel(i);
             }
         }
     }
@@ -566,7 +566,7 @@ void UpdateSoundCategoryLimits(void)
     {
         int want_chan = channel_counts[sound_mixing_channels];
 
-        SoundReallocateChannels(want_chan);
+        ReallocateSoundChannels(want_chan);
 
         SetupCategoryLimits();
     }

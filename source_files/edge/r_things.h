@@ -30,7 +30,7 @@
 #include "r_gldefs.h"
 
 void RendererWalkThing(DrawSubsector *dsub, MapObject *mo);
-void RenderSortThings(DrawFloor *dfloor);
+void SortRenderThings(DrawFloor *dfloor);
 
 void RenderWeaponSprites(Player *p);
 void RenderWeaponModel(Player *p);

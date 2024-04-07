@@ -57,7 +57,7 @@ void SoundFillCallback(void *udata, Uint8 *stream, int len)
 {
     (void)udata;
     SDL_memset(stream, 0, len);
-    SoundMixAllChannels(stream, len);
+    MixAllSoundChannels(stream, len);
 }
 
 static bool TryOpenSound(int want_freq, bool want_stereo)

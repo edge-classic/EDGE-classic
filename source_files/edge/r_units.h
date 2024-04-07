@@ -43,9 +43,9 @@ struct RendererVertex
 
 extern sg_color culling_fog_color;
 
-void RendererStartUnits(bool sort_em);
-void RendererFinishUnits(void);
-void RenderUnits(void);
+void StartUnitBatch(bool sort_em);
+void FinishUnitBatch(void);
+void RenderCurrentUnits(void);
 
 enum BlendingMode
 {
@@ -74,9 +74,9 @@ enum CustomTextureEnvironment
     // normally, i.e. passed on to next texture unit.
 };
 
-RendererVertex *RendererBeginUnit(GLuint shape, int max_vert, GLuint env1, GLuint tex1, GLuint env2, GLuint tex2,
+RendererVertex *BeginRenderUnit(GLuint shape, int max_vert, GLuint env1, GLuint tex1, GLuint env2, GLuint tex2,
                                   int pass, int blending, RGBAColor fog_color = kRGBANoValue, float fog_density = 0);
-void            RendererEndUnit(int actual_vert);
+void            EndRenderUnit(int actual_vert);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

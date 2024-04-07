@@ -343,7 +343,7 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
 
     /* draw the weapon */
 
-    RendererStartUnits(false);
+    StartUnitBatch(false);
 
     int num_pass = is_fuzzy ? 1 : (detail_level > 0 ? 4 : 3);
 
@@ -371,7 +371,7 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
         GLuint fuzz_tex = is_fuzzy ? ImageCache(fuzz_image, false) : 0;
 
         RendererVertex *glvert =
-            RendererBeginUnit(GL_POLYGON, 4, is_additive ? (GLuint)kTextureEnvironmentSkipRGB : GL_MODULATE, tex_id,
+            BeginRenderUnit(GL_POLYGON, 4, is_additive ? (GLuint)kTextureEnvironmentSkipRGB : GL_MODULATE, tex_id,
                               is_fuzzy ? GL_MODULATE : (GLuint)kTextureEnvironmentDisable, fuzz_tex, pass, blending,
                               pass > 0 ? kRGBANoValue : fc_to_use, fd_to_use);
 
@@ -413,10 +413,10 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
             dest->rgba_color[3] = trans;
         }
 
-        RendererEndUnit(4);
+        EndRenderUnit(4);
     }
 
-    RendererFinishUnits();
+    FinishUnitBatch();
 
     glDisable(GL_SCISSOR_TEST);
 }
@@ -1289,7 +1289,7 @@ void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
         GLuint fuzz_tex = is_fuzzy ? ImageCache(fuzz_image, false) : 0;
 
         RendererVertex *glvert =
-            RendererBeginUnit(GL_POLYGON, 4, is_additive ? (GLuint)kTextureEnvironmentSkipRGB : GL_MODULATE, tex_id,
+            BeginRenderUnit(GL_POLYGON, 4, is_additive ? (GLuint)kTextureEnvironmentSkipRGB : GL_MODULATE, tex_id,
                               is_fuzzy ? GL_MODULATE : (GLuint)kTextureEnvironmentDisable, fuzz_tex, pass, blending,
                               pass > 0 ? kRGBANoValue : fc_to_use, fd_to_use);
 
@@ -1332,11 +1332,11 @@ void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
             dest->rgba_color[3] = trans;
         }
 
-        RendererEndUnit(4);
+        EndRenderUnit(4);
     }
 }
 
-void RenderSortThings(DrawFloor *dfloor)
+void SortRenderThings(DrawFloor *dfloor)
 {
     //
     // As part my move to strip out Z_Zone usage and replace

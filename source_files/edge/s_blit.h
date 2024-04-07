@@ -89,12 +89,12 @@ extern int   ddf_reverb_delay;
 extern float music_player_gain;
 
 void InitializeSoundChannels(int total);
-void SoundFreeChannels(void);
+void FreeSoundChannels(void);
 
-void SoundKillChannel(int k);
-void SoundReallocateChannels(int total);
+void KillSoundChannel(int k);
+void ReallocateSoundChannels(int total);
 
-void SoundMixAllChannels(void *stream, int len);
+void MixAllSoundChannels(void *stream, int len);
 // mix all active channels into the output stream.
 // 'len' is the number of samples (for stereo: pairs)
 // to mix into the stream.

@@ -336,7 +336,7 @@ class dynlight_shader_c : public AbstractShader
             float B = L * epi::GetRGBABlue(col) / 255.0;
 
             RendererVertex *glvert =
-                RendererBeginUnit(shape, num_vert,
+                BeginRenderUnit(shape, num_vert,
                                   (is_additive && masked) ? (GLuint)kTextureEnvironmentSkipRGB
                                   : is_additive           ? (GLuint)kTextureEnvironmentDisable
                                                           : GL_MODULATE,
@@ -363,7 +363,7 @@ class dynlight_shader_c : public AbstractShader
                 dest->rgba_color[3] = alpha;
             }
 
-            RendererEndUnit(num_vert);
+            EndRenderUnit(num_vert);
 
             (*pass_var) += 1;
         }
@@ -521,7 +521,7 @@ class plane_glow_c : public AbstractShader
             float B = L * epi::GetRGBABlue(col) / 255.0;
 
             RendererVertex *glvert =
-                RendererBeginUnit(shape, num_vert,
+                BeginRenderUnit(shape, num_vert,
                                   (is_additive && masked) ? (GLuint)kTextureEnvironmentSkipRGB
                                   : is_additive           ? (GLuint)kTextureEnvironmentDisable
                                                           : GL_MODULATE,
@@ -546,7 +546,7 @@ class plane_glow_c : public AbstractShader
                 dest->rgba_color[3] = alpha;
             }
 
-            RendererEndUnit(num_vert);
+            EndRenderUnit(num_vert);
 
             (*pass_var) += 1;
         }
@@ -688,7 +688,7 @@ class wall_glow_c : public AbstractShader
             float B = L * epi::GetRGBABlue(col) / 255.0;
 
             RendererVertex *glvert =
-                RendererBeginUnit(shape, num_vert,
+                BeginRenderUnit(shape, num_vert,
                                   (is_additive && masked) ? (GLuint)kTextureEnvironmentSkipRGB
                                   : is_additive           ? (GLuint)kTextureEnvironmentDisable
                                                           : GL_MODULATE,
@@ -713,7 +713,7 @@ class wall_glow_c : public AbstractShader
                 dest->rgba_color[3] = alpha;
             }
 
-            RendererEndUnit(num_vert);
+            EndRenderUnit(num_vert);
 
             (*pass_var) += 1;
         }

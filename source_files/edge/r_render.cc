@@ -2797,25 +2797,25 @@ static void RenderSubList(std::list<DrawSubsector *> &dsubs, bool for_mirror = f
 {
     // draw all solid walls and planes
     solid_mode = true;
-    RendererStartUnits(solid_mode);
+    StartUnitBatch(solid_mode);
 
     std::list<DrawSubsector *>::iterator FI; // Forward Iterator
 
     for (FI = dsubs.begin(); FI != dsubs.end(); FI++)
         RenderSubsector(*FI, for_mirror);
 
-    RendererFinishUnits();
+    FinishUnitBatch();
 
     // draw all sprites and masked/translucent walls/planes
     solid_mode = false;
-    RendererStartUnits(solid_mode);
+    StartUnitBatch(solid_mode);
 
     std::list<DrawSubsector *>::reverse_iterator RI;
 
     for (RI = dsubs.rbegin(); RI != dsubs.rend(); RI++)
         RenderSubsector(*RI, for_mirror);
 
-    RendererFinishUnits();
+    FinishUnitBatch();
 }
 
 static void DrawMirrorPolygon(DrawMirror *mir)
@@ -2948,7 +2948,7 @@ static void RenderMirror(DrawMirror *mir)
     // mark the segment on the automap
     mir->seg->linedef->flags |= kLineFlagMapped;
 
-    RendererFinishUnits();
+    FinishUnitBatch();
 
 #if defined(EDGE_GL_ES2)
     // GL4ES mirror fix for renderlist
@@ -2972,7 +2972,7 @@ static void RenderMirror(DrawMirror *mir)
 #endif
 
     solid_mode = true;
-    RendererStartUnits(solid_mode);
+    StartUnitBatch(solid_mode);
 }
 
 static void RenderSubsector(DrawSubsector *dsub, bool mirror_sub)
@@ -3015,7 +3015,7 @@ static void RenderSubsector(DrawSubsector *dsub, bool mirror_sub)
 
         if (!solid_mode)
         {
-            RenderSortThings(dfloor);
+            SortRenderThings(dfloor);
         }
     }
 }
@@ -3035,11 +3035,11 @@ static void DoWeaponModel(void)
     glClear(GL_DEPTH_BUFFER_BIT);
 
     solid_mode = false;
-    RendererStartUnits(solid_mode);
+    StartUnitBatch(solid_mode);
 
     RenderWeaponModel(pl);
 
-    RendererFinishUnits();
+    FinishUnitBatch();
 }
 
 //
@@ -3140,7 +3140,7 @@ static void RenderTrueBsp(void)
 
     FinishSky();
 
-    RenderState *state = RendererGetState();
+    RenderState *state = GetRenderState();
     state->SetDefaultStateFull();
 
     RenderSubList(draw_subsector_list);

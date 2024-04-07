@@ -537,7 +537,7 @@ class RenderState
     GLfloat fog_color_[4];
 };
 
-RenderState *RendererGetState();
+RenderState *GetRenderState();
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

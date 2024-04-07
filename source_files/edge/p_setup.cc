@@ -324,7 +324,7 @@ static void SegCommonStuff(Seg *seg, int linedef_in)
         float sx = seg->side ? seg->linedef->vertex_2->X : seg->linedef->vertex_1->X;
         float sy = seg->side ? seg->linedef->vertex_2->Y : seg->linedef->vertex_1->Y;
 
-        seg->offset = RendererPointToDistance(sx, sy, seg->vertex_1->X, seg->vertex_1->Y);
+        seg->offset = PointToDistance(sx, sy, seg->vertex_1->X, seg->vertex_1->Y);
 
         seg->sidedef = seg->linedef->side[seg->side];
 
@@ -727,7 +727,7 @@ static void LoadThings(int lump)
             continue;
         }
 
-        Sector *sec = RendererPointInSubsector(x, y)->sector;
+        Sector *sec = PointInSubsector(x, y)->sector;
 
         if ((objtype->hyper_flags_ & kHyperFlagMusicChanger) && !musinfo_tracks[current_map->name_].processed)
         {
@@ -805,7 +805,7 @@ static inline void ComputeLinedefData(Line *ld, int side0, int side1)
     else
         ld->slope_type = kLineClipNegative;
 
-    ld->length = RendererPointToDistance(0, 0, ld->delta_x, ld->delta_y);
+    ld->length = PointToDistance(0, 0, ld->delta_x, ld->delta_y);
 
     if (v1->X < v2->X)
     {
@@ -1240,10 +1240,10 @@ static void LoadXGL3Nodes(int lumpnum)
             seg->vertex_2 =
                 j == (countsegs - 1) ? level_segs[firstseg].vertex_1 : level_segs[firstseg + j + 1].vertex_1;
 
-            seg->angle = RendererPointToAngle(seg->vertex_1->X, seg->vertex_1->Y, seg->vertex_2->X, seg->vertex_2->Y);
+            seg->angle = PointToAngle(seg->vertex_1->X, seg->vertex_1->Y, seg->vertex_2->X, seg->vertex_2->Y);
 
             seg->length =
-                RendererPointToDistance(seg->vertex_1->X, seg->vertex_1->Y, seg->vertex_2->X, seg->vertex_2->Y);
+                PointToDistance(seg->vertex_1->X, seg->vertex_1->Y, seg->vertex_2->X, seg->vertex_2->Y);
         }
 
         // -AJA- 1999/09/23: New linked list for the segs of a subsector
@@ -1301,7 +1301,7 @@ static void LoadXGL3Nodes(int lumpnum)
         nd->divider.delta_y = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
         td += 4;
 
-        nd->divider_length = RendererPointToDistance(0, 0, nd->divider.delta_x, nd->divider.delta_y);
+        nd->divider_length = PointToDistance(0, 0, nd->divider.delta_x, nd->divider.delta_y);
 
         for (int j = 0; j < 2; j++)
             for (int k = 0; k < 4; k++)
@@ -2323,7 +2323,7 @@ static void LoadUDMFThings()
                 continue;
             }
 
-            Sector *sec = RendererPointInSubsector(x, y)->sector;
+            Sector *sec = PointInSubsector(x, y)->sector;
 
             if ((objtype->hyper_flags_ & kHyperFlagMusicChanger) && !musinfo_tracks[current_map->name_].processed)
             {
@@ -3508,7 +3508,7 @@ void LevelSetup(void)
 
     AutomapInitLevel();
 
-    RendererUpdateSkyBoxTextures();
+    UpdateSkyboxTextures();
 
     // preload graphics
     if (precache)

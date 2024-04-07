@@ -41,11 +41,11 @@ EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(r_culldist, "3000", kConsoleVariableFlagArc
 EDGE_DEFINE_CONSOLE_VARIABLE(cull_fog_color, "0", kConsoleVariableFlagArchive)
 
 //
-// RendererSetupMatrices2D
+// SetupMatrices2D
 //
 // Setup the GL matrices for drawing 2D stuff.
 //
-void RendererSetupMatrices2D(void)
+void SetupMatrices2D(void)
 {
     glViewport(0, 0, current_screen_width, current_screen_height);
 
@@ -60,12 +60,12 @@ void RendererSetupMatrices2D(void)
 }
 
 //
-// RendererSetupMatricesWorld2D
+// SetupWorldMatrices2D
 //
 // Setup the GL matrices for drawing 2D stuff within the "world" rendered by
 // HUDRenderWorld
 //
-void RendererSetupMatricesWorld2D(void)
+void SetupWorldMatrices2D(void)
 {
     glViewport(view_window_x, view_window_y, view_window_width, view_window_height);
 
@@ -81,11 +81,11 @@ void RendererSetupMatricesWorld2D(void)
 }
 
 //
-// RendererSetupMatrices3d
+// SetupMatrices3d
 //
 // Setup the GL matrices for drawing 3D stuff.
 //
-void RendererSetupMatrices3d(void)
+void SetupMatrices3d(void)
 {
     GLfloat ambient[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
@@ -214,9 +214,9 @@ void RendererInit(void)
 
     RendererSoftInit();
 
-    RendererInitialize();
+    AllocateDrawStructs();
 
-    RendererSetupMatrices2D();
+    SetupMatrices2D();
 }
 
 //--- editor settings ---

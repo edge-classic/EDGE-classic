@@ -365,9 +365,9 @@ void A_FaceTarget(MapObject *object)
 
     object->flags_ &= ~kMapObjectFlagAmbush;
 
-    object->angle_ = RendererPointToAngle(object->x, object->y, target->x, target->y);
+    object->angle_ = PointToAngle(object->x, object->y, target->x, target->y);
 
-    float dist = RendererPointToDistance(object->x, object->y, target->x, target->y);
+    float dist = PointToDistance(object->x, object->y, target->x, target->y);
 
     if (dist >= 0.1f)
     {
@@ -415,9 +415,9 @@ void P_ForceFaceTarget(MapObject *object)
 
     object->flags_ &= ~kMapObjectFlagAmbush;
 
-    object->angle_ = RendererPointToAngle(object->x, object->y, target->x, target->y);
+    object->angle_ = PointToAngle(object->x, object->y, target->x, target->y);
 
-    float dist = RendererPointToDistance(object->x, object->y, target->x, target->y);
+    float dist = PointToDistance(object->x, object->y, target->x, target->y);
 
     if (dist >= 0.1f)
     {
@@ -1156,7 +1156,7 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty, floa
         StartSoundEffect(projectile->info_->seesound_, category, sfx_source, flags);
     }
 
-    angle = RendererPointToAngle(projx, projy, tx, ty);
+    angle = PointToAngle(projx, projy, tx, ty);
 
     // Now add the fact that the target may be difficult to spot and
     // make the projectile's target the same as the sources. Only
@@ -1340,7 +1340,7 @@ static inline bool Weakness_CheckHit(MapObject *target, const AttackDefinition *
     if (z < weak->height_[0] || z > weak->height_[1])
         return false;
 
-    BAMAngle ang = RendererPointToAngle(target->x, target->y, x, y);
+    BAMAngle ang = PointToAngle(target->x, target->y, x, y);
 
     ang -= target->angle_;
 
@@ -1663,7 +1663,7 @@ void A_HomingProjectile(MapObject *projectile)
         return;
 
     // change angle
-    BAMAngle exact = RendererPointToAngle(projectile->x, projectile->y, destination->x, destination->y);
+    BAMAngle exact = PointToAngle(projectile->x, projectile->y, destination->x, destination->y);
 
     if (exact != projectile->angle_)
     {
@@ -1729,7 +1729,7 @@ void A_HomeToSpot(MapObject *projectile)
     }
 
     // calculate new angles
-    BAMAngle angle = RendererPointToAngle(0, 0, dx, dy);
+    BAMAngle angle = PointToAngle(0, 0, dx, dy);
     float    slope = ApproximateSlope(dx, dy, dz);
 
     MapObjectSetDirectionAndSpeed(projectile, angle, slope, projectile->speed_);
@@ -2607,7 +2607,7 @@ void A_PathFollow(MapObject *mo)
     float dx = mo->path_trigger_->x - mo->x;
     float dy = mo->path_trigger_->y - mo->y;
 
-    BAMAngle diff = RendererPointToAngle(0, 0, dx, dy) - mo->angle_;
+    BAMAngle diff = PointToAngle(0, 0, dx, dy) - mo->angle_;
 
     // movedir value:
     //   0 for slow turning.
@@ -3395,7 +3395,7 @@ void A_ResurrectChase(MapObject *object)
 
     if (corpse)
     {
-        object->angle_ = RendererPointToAngle(object->x, object->y, corpse->x, corpse->y);
+        object->angle_ = PointToAngle(object->x, object->y, corpse->x, corpse->y);
         if (object->info_->res_state_)
             MapObjectSetStateDeferred(object, object->info_->res_state_, 0);
 

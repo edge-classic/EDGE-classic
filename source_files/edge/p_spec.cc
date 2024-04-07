@@ -611,7 +611,7 @@ static void P_SpawnLineEffectDebris(Line *TheLine, const LineType *special)
 //
 static void P_LineEffect(Line *target, Line *source, const LineType *special)
 {
-    float length = RendererPointToDistance(0, 0, source->delta_x, source->delta_y);
+    float length = PointToDistance(0, 0, source->delta_x, source->delta_y);
     float factor = 64.0 / length;
 
     if ((special->line_effect_ & kLineEffectTypeTranslucency) && (target->flags & kLineFlagTwoSided))
@@ -814,8 +814,8 @@ static void SectorEffect(Sector *target, Line *source, const LineType *special)
     if (!target)
         return;
 
-    float    length  = RendererPointToDistance(0, 0, source->delta_x, source->delta_y);
-    BAMAngle angle   = kBAMAngle360 - RendererPointToAngle(0, 0, -source->delta_x, -source->delta_y);
+    float    length  = PointToDistance(0, 0, source->delta_x, source->delta_y);
+    BAMAngle angle   = kBAMAngle360 - PointToAngle(0, 0, -source->delta_x, -source->delta_y);
     bool     is_vert = fabs(source->delta_y) > fabs(source->delta_x);
 
     if (special->sector_effect_ & kSectorEffectTypeLightFloor)

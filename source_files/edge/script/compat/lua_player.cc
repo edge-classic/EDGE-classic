@@ -901,7 +901,7 @@ static int PL_hurt_dir(lua_State *L)
         MapObject *badguy = ui_player_who->attacker_;
         MapObject *pmo    = ui_player_who->map_object_;
 
-        BAMAngle diff = RendererPointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) - pmo->angle_;
+        BAMAngle diff = PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) - pmo->angle_;
 
         if (diff >= kBAMAngle45 && diff <= kBAMAngle135)
         {
@@ -928,7 +928,7 @@ static int PL_hurt_angle(lua_State *L)
         MapObject *badguy = ui_player_who->attacker_;
         MapObject *pmo    = ui_player_who->map_object_;
 
-        BAMAngle real_a = RendererPointToAngle(pmo->x, pmo->y, badguy->x, badguy->y);
+        BAMAngle real_a = PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y);
 
         value = epi::DegreesFromBAM(real_a);
 

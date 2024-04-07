@@ -30,11 +30,11 @@
 #include "r_gldefs.h"
 
 void RendererWalkThing(DrawSubsector *dsub, MapObject *mo);
-void RendererDrawSortThings(DrawFloor *dfloor);
+void RenderSortThings(DrawFloor *dfloor);
 
-void RendererDrawWeaponSprites(Player *p);
-void RendererDrawWeaponModel(Player *p);
-void RendererDrawCrosshair(Player *p);
+void RenderWeaponSprites(Player *p);
+void RenderWeaponModel(Player *p);
+void RenderCrosshair(Player *p);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

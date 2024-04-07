@@ -427,7 +427,7 @@ void PrecacheLevelGraphics(void)
     if (precache_models.d_)
         PrecacheModels();
 
-    RendererPreCacheSky();
+    PrecacheSky();
 }
 
 //--- editor settings ---

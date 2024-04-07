@@ -45,7 +45,7 @@ extern sg_color culling_fog_color;
 
 void RendererStartUnits(bool sort_em);
 void RendererFinishUnits(void);
-void RendererDrawUnits(void);
+void RenderUnits(void);
 
 enum BlendingMode
 {

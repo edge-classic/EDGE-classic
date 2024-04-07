@@ -214,8 +214,8 @@ static void BounceOffWall(MapObject *mo, Line *wall)
     DividingLine div;
     float        dest_x, dest_y;
 
-    angle      = RendererPointToAngle(0, 0, mo->momentum_.X, mo->momentum_.Y);
-    wall_angle = RendererPointToAngle(0, 0, wall->delta_x, wall->delta_y);
+    angle      = PointToAngle(0, 0, mo->momentum_.X, mo->momentum_.Y);
+    wall_angle = PointToAngle(0, 0, wall->delta_x, wall->delta_y);
 
     diff = wall_angle - angle;
 
@@ -1920,7 +1920,7 @@ void RunMapObjectThinkers(bool extra_tic)
             {
                 if (!distance_cull_thinkers.d_ ||
                     (game_tic / 2 %
-                         RoundToInteger(1 + RendererPointToDistance(players[console_player]->map_object_->x,
+                         RoundToInteger(1 + PointToDistance(players[console_player]->map_object_->x,
                                                                     players[console_player]->map_object_->y, mo->x,
                                                                     mo->y) /
                                                 1500) ==
@@ -1935,7 +1935,7 @@ void RunMapObjectThinkers(bool extra_tic)
                         continue;
                     else if (!distance_cull_thinkers.d_ ||
                              ((game_tic / 4) %
-                                  RoundToInteger(1 + RendererPointToDistance(players[console_player]->map_object_->x,
+                                  RoundToInteger(1 + PointToDistance(players[console_player]->map_object_->x,
                                                                              players[console_player]->map_object_->y,
                                                                              mo->x, mo->y) /
                                                          1500) ==
@@ -1944,7 +1944,7 @@ void RunMapObjectThinkers(bool extra_tic)
                 }
                 else if (!distance_cull_thinkers.d_ ||
                          ((game_tic / 4) %
-                              RoundToInteger(1 + RendererPointToDistance(players[console_player]->map_object_->x,
+                              RoundToInteger(1 + PointToDistance(players[console_player]->map_object_->x,
                                                                          players[console_player]->map_object_->y, mo->x,
                                                                          mo->y) /
                                                      1500) ==

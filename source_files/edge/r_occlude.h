@@ -20,9 +20,9 @@
 
 #include "epi_bam.h"
 
-void RendererOcclusionClear(void);
-void RendererOcclusionSet(BAMAngle low, BAMAngle high);
-bool RendererOcclusionTest(BAMAngle low, BAMAngle high);
+void OcclusionClear(void);
+void OcclusionSet(BAMAngle low, BAMAngle high);
+bool OcclusionTest(BAMAngle low, BAMAngle high);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

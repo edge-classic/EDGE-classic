@@ -122,7 +122,7 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing, const TeleportDefi
     BAMAngle new_ang;
 
     BAMAngle dest_ang;
-    BAMAngle source_ang = kBAMAngle90 + (line ? RendererPointToAngle(0, 0, line->delta_x, line->delta_y) : 0);
+    BAMAngle source_ang = kBAMAngle90 + (line ? PointToAngle(0, 0, line->delta_x, line->delta_y) : 0);
 
     MapObject *currmobj = nullptr;
     Line      *currline = nullptr;
@@ -151,7 +151,7 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing, const TeleportDefi
         if (currline->back_sector)
             new_z = HMM_MAX(new_z, currline->back_sector->floor_height);
 
-        dest_ang = RendererPointToAngle(0, 0, currline->delta_x, currline->delta_y) + kBAMAngle90;
+        dest_ang = PointToAngle(0, 0, currline->delta_x, currline->delta_y) + kBAMAngle90;
 
         flipped = !flipped; // match Boom's logic
     }

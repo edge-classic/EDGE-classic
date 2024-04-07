@@ -31,17 +31,17 @@
 #include "r_units.h"
 #include "sokol_color.h"
 
-void RendererNewScreenSize(int width, int height, int bits)
+void NewScreenSize(int width, int height, int bits)
 {
     //!!! quick hack
-    RendererSetupMatrices2D();
+    SetupMatrices2D();
 
     // prevent a visible border with certain cards/drivers
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void RendererDrawImage(float x, float y, float w, float h, const Image *image, float tx1, float ty1, float tx2,
+void RenderImage(float x, float y, float w, float h, const Image *image, float tx1, float ty1, float tx2,
                        float ty2, const Colormap *textmap, float alpha, const Colormap *palremap)
 {
     int x1 = RoundToInteger(x);
@@ -101,7 +101,7 @@ void RendererDrawImage(float x, float y, float w, float h, const Image *image, f
     glAlphaFunc(GL_GREATER, 0);
 }
 
-void RendererReadScreen(int x, int y, int w, int h, uint8_t *rgb_buffer)
+void ReadScreen(int x, int y, int w, int h, uint8_t *rgb_buffer)
 {
     glFlush();
 

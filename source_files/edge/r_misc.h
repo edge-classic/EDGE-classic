@@ -75,10 +75,10 @@ extern float sine_table[kSineTableSize];
 
 //
 // Utility functions.
-BAMAngle          RendererPointToAngle(float x1, float y1, float x2, float y2, bool precise = false);
-float             RendererPointToDistance(float x1, float y1, float x2, float y2);
-Subsector        *RendererPointInSubsector(float x, float y);
-RegionProperties *RendererPointGetProps(Subsector *sub, float z);
+BAMAngle          PointToAngle(float x1, float y1, float x2, float y2, bool precise = false);
+float             PointToDistance(float x1, float y1, float x2, float y2);
+Subsector        *PointInSubsector(float x, float y);
+RegionProperties *GetPointProperties(Subsector *sub, float z);
 
 //
 // REFRESH - the actual rendering functions.

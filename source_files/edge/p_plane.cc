@@ -1368,7 +1368,7 @@ bool RunSlidingDoor(Line *door, Line *act_line, MapObject *thing, const LineType
     smov->info        = &special->s_;
     smov->line        = door;
     smov->opening     = 0.0f;
-    smov->line_length = RendererPointToDistance(0, 0, door->delta_x, door->delta_y);
+    smov->line_length = PointToDistance(0, 0, door->delta_x, door->delta_y);
     smov->target      = smov->line_length * smov->info->distance_;
 
     smov->direction            = kPlaneDirectionUp;

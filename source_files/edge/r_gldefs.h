@@ -44,9 +44,9 @@ extern int maximum_texture_size;
 
 void RendererInit(void);
 void RendererSoftInit(void);
-void RendererSetupMatrices2D(void);
-void RendererSetupMatricesWorld2D(void);
-void RendererSetupMatrices3d(void);
+void SetupMatrices2D(void);
+void SetupWorldMatrices2D(void);
+void SetupMatrices3d(void);
 
 //
 //  RendererBSP
@@ -149,7 +149,7 @@ struct DrawFloor
     RegionProperties *properties;
 
     // list of things
-    // (not sorted until RendererDrawFloor is called).
+    // (not sorted until RenderFloor is called).
     DrawThing *things;
 };
 
@@ -191,20 +191,20 @@ extern int detail_level;
 extern int use_dynamic_lights;
 extern int sprite_kludge;
 
-const Image *RendererGetOtherSprite(int sprite, int frame, bool *flip);
+const Image *GetOtherSprite(int sprite, int frame, bool *flip);
 
 //
 //  RendererUTIL
 //
 
-void RendererInitialize(void);
-void RendererClearBsp(void);
+void AllocateDrawStructs(void);
+void ClearBSP(void);
 
-DrawThing     *RendererGetDrawThing();
-DrawFloor     *RendererGetDrawFloor();
-DrawSeg       *RendererGetDrawSeg();
-DrawSubsector *RendererGetDrawSub();
-DrawMirror    *RendererGetDrawMirror();
+DrawThing     *GetDrawThing();
+DrawFloor     *GetDrawFloor();
+DrawSeg       *GetDrawSeg();
+DrawSubsector *GetDrawSub();
+DrawMirror    *GetDrawMirror();
 
 //
 //  MIRRORS

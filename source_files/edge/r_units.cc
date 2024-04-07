@@ -119,7 +119,7 @@ void RendererStartUnits(bool sort_em)
 //
 void RendererFinishUnits(void)
 {
-    RendererDrawUnits();
+    RenderUnits();
 }
 
 //
@@ -145,7 +145,7 @@ RendererVertex *RendererBeginUnit(GLuint shape, int max_vert, GLuint env1, GLuin
     // check we have enough space left
     if (current_render_vert + max_vert > kMaximumLocalVertices || current_render_unit >= kMaximumLocalUnits)
     {
-        RendererDrawUnits();
+        RenderUnits();
     }
 
     unit = local_units + current_render_unit;
@@ -263,12 +263,12 @@ static inline void RendererSendRawVector(const RendererVertex *V)
 }
 
 //
-// RendererDrawUnits
+// RenderUnits
 //
 // Forces the set of current units to be drawn.  This call is
 // optional (it never _needs_ to be called by client code).
 //
-void RendererDrawUnits(void)
+void RenderUnits(void)
 {
     EDGE_ZoneScoped;
 

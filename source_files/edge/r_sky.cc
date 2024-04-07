@@ -226,7 +226,7 @@ void DeleteSkyTextures(void)
     }
 }
 
-static void RendererSetupSkyMatrices(void)
+static void SetupSkyMatrices(void)
 {
     if (custom_skybox)
     {
@@ -280,7 +280,7 @@ static void RendererRevertSkyMatrices(void)
     glPopMatrix();
 }
 
-void RendererBeginSky(void)
+void BeginSky(void)
 {
     need_to_draw_sky = false;
 
@@ -290,8 +290,8 @@ void RendererBeginSky(void)
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     // Draw the entire sky using only one glBegin/glEnd clause.
-    // glEnd is called in RendererFinishSky and this code assumes that only
-    // RendererDrawSkyWall and RendererDrawSkyPlane is doing OpenGL calls in
+    // glEnd is called in FinishSky and this code assumes that only
+    // RenderSkyWall and RenderSkyPlane is doing OpenGL calls in
     // between.
     glBegin(GL_TRIANGLES);
 }
@@ -369,7 +369,7 @@ static void RenderSkySlice(float top, float bottom, float atop, float abottom, f
     glEnd();
 }
 
-static void RendererDrawSkyCylinder(void)
+static void RenderSkyCylinder(void)
 {
     GLuint sky = ImageCache(sky_image, false, render_view_effect_colormap);
 
@@ -381,7 +381,7 @@ static void RendererDrawSkyCylinder(void)
         current_sky_stretch = (SkyStretch)sky_stretch_mode.d_;
 
     // Center skybox a bit below the camera view
-    RendererSetupSkyMatrices();
+    SetupSkyMatrices();
 
     glDisable(GL_TEXTURE_2D);
 
@@ -552,15 +552,15 @@ static void RendererDrawSkyCylinder(void)
     RendererRevertSkyMatrices();
 }
 
-static void RendererDrawSkyBox(void)
+static void RenderSkybox(void)
 {
     float dist = renderer_far_clip.f_ / 2.0f;
 
-    int SK = RendererUpdateSkyBoxTextures();
+    int SK = UpdateSkyboxTextures();
 
     EPI_ASSERT(SK >= 0);
 
-    RendererSetupSkyMatrices();
+    SetupSkyMatrices();
 
     float v0 = 0.0f;
     float v1 = 1.0f;
@@ -718,9 +718,9 @@ static void RendererDrawSkyBox(void)
     RendererRevertSkyMatrices();
 }
 
-void RendererFinishSky(void)
+void FinishSky(void)
 {
-    glEnd(); // End glBegin(GL_TRIANGLES) from RendererBeginSky
+    glEnd(); // End glBegin(GL_TRIANGLES) from BeginSky
 
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
@@ -744,9 +744,9 @@ void RendererFinishSky(void)
 #endif
 
     if (custom_skybox)
-        RendererDrawSkyBox();
+        RenderSkybox();
     else
-        RendererDrawSkyCylinder();
+        RenderSkyCylinder();
 
     if (draw_culling.d_)
         glEnable(GL_DEPTH_TEST);
@@ -757,7 +757,7 @@ void RendererFinishSky(void)
     glDisable(GL_TEXTURE_2D);
 }
 
-void RendererDrawSkyPlane(Subsector *sub, float h)
+void RenderSkyPlane(Subsector *sub, float h)
 {
     need_to_draw_sky = true;
 
@@ -802,7 +802,7 @@ void RendererDrawSkyPlane(Subsector *sub, float h)
     }
 }
 
-void RendererDrawSkyWall(Seg *seg, float h1, float h2)
+void RenderSkyWall(Seg *seg, float h1, float h2)
 {
     need_to_draw_sky = true;
 
@@ -842,7 +842,7 @@ static const char *UserSkyFaceName(const char *base, int face)
     return buffer;
 }
 
-int RendererUpdateSkyBoxTextures(void)
+int UpdateSkyboxTextures(void)
 {
     int SK = render_view_effect_colormap ? 1 : 0;
 
@@ -903,7 +903,7 @@ int RendererUpdateSkyBoxTextures(void)
     }
 }
 
-void RendererPreCacheSky(void)
+void PrecacheSky(void)
 {
     BuildSkyCircle();
 }

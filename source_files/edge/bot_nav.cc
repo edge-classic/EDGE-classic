@@ -399,7 +399,7 @@ static void BotCreateLinks()
             auto p1 = area.get_middle();
             auto p2 = nav_areas[dest_id].get_middle();
 
-            float length = RendererPointToDistance(p1.x, p1.y, p2.x, p2.y);
+            float length = PointToDistance(p1.x, p1.y, p2.x, p2.y);
 
             // determine if a manual door, a lift, or a teleporter
             int flags   = BotCheckDoorOrLift(seg);
@@ -491,7 +491,7 @@ static float BotEstimateH(const Subsector *cur_sub)
     int  id = (int)(cur_sub - level_subsectors);
     auto p  = nav_areas[id].get_middle();
 
-    float dist = RendererPointToDistance(p.x, p.y, nav_finish_mid.x, nav_finish_mid.y);
+    float dist = PointToDistance(p.x, p.y, nav_finish_mid.x, nav_finish_mid.y);
     float time = dist / kRunningSpeed;
 
     // over-estimate, to account for height changes, obstacles etc
@@ -639,8 +639,8 @@ BotPath *BotFindPath(const Position *start, const Position *finish, int flags)
     EPI_ASSERT(start);
     EPI_ASSERT(finish);
 
-    Subsector *start_sub  = RendererPointInSubsector(start->x, start->y);
-    Subsector *finish_sub = RendererPointInSubsector(finish->x, finish->y);
+    Subsector *start_sub  = PointInSubsector(start->x, start->y);
+    Subsector *finish_sub = PointInSubsector(finish->x, finish->y);
 
     int start_id  = (int)(start_sub - level_subsectors);
     int finish_id = (int)(finish_sub - level_subsectors);
@@ -711,7 +711,7 @@ static void BotItemsInSubsector(Subsector *sub, DeathBot *bot, Position &pos, fl
         if (score < 0)
             continue;
 
-        float dist = RendererPointToDistance(pos.x, pos.y, mo->x, mo->y);
+        float dist = PointToDistance(pos.x, pos.y, mo->x, mo->y);
         if (dist > radius)
             continue;
 
@@ -739,7 +739,7 @@ BotPath *BotFindThing(DeathBot *bot, float radius, MapObject *&best)
 
     Position pos{bot->pl_->map_object_->x, bot->pl_->map_object_->y, bot->pl_->map_object_->z};
 
-    Subsector *start    = RendererPointInSubsector(pos.x, pos.y);
+    Subsector *start    = PointInSubsector(pos.x, pos.y);
     int        start_id = (int)(start - level_subsectors);
 
     // the best thing so far...
@@ -901,7 +901,7 @@ BAMAngle BotPath::CurrentAngle() const
     Position src  = nodes_.at(along_ - 1).pos;
     Position dest = nodes_.at(along_ + 0).pos;
 
-    return RendererPointToAngle(src.x, src.y, dest.x, dest.y);
+    return PointToAngle(src.x, src.y, dest.x, dest.y);
 }
 
 bool BotPath::ReachedDestination(const Position *pos) const

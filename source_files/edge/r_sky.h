@@ -46,14 +46,14 @@ enum SkyboxFace
 
 void ComputeSkyHeights(void);
 
-void RendererBeginSky(void);
-void RendererFinishSky(void);
+void BeginSky(void);
+void FinishSky(void);
 
-void RendererDrawSkyPlane(Subsector *sub, float h);
-void RendererDrawSkyWall(Seg *seg, float h1, float h2);
+void RenderSkyPlane(Subsector *sub, float h);
+void RenderSkyWall(Seg *seg, float h1, float h2);
 
-int  RendererUpdateSkyBoxTextures(void);
-void RendererPreCacheSky(void);
+int  UpdateSkyboxTextures(void);
+void PrecacheSky(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

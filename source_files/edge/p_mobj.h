@@ -96,7 +96,7 @@ constexpr float kStopSpeed = 0.07f;
 //
 // Every MapObject is linked into a single sector
 // based on its origin coordinates.
-// The subsector_t is found with RendererPointInSubsector(x,y),
+// The subsector_t is found with PointInSubsector(x,y),
 // and the sector_t can be found with subsector->sector.
 // The sector links are only used by the rendering code,
 // the play simulation does not care about them at all.

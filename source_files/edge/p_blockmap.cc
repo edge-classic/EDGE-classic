@@ -563,11 +563,11 @@ void SetThingPosition(MapObject *mo)
     EPI_ASSERT(!(mo->dynamic_light_next_ || mo->dynamic_light_previous_));
 
     // link into subsector
-    ss             = RendererPointInSubsector(mo->x, mo->y);
+    ss             = PointInSubsector(mo->x, mo->y);
     mo->subsector_ = ss;
 
     // determine properties
-    mo->region_properties_ = RendererPointGetProps(ss, mo->z + mo->height_ / 2);
+    mo->region_properties_ = GetPointProperties(ss, mo->z + mo->height_ / 2);
 
     if (!(mo->flags_ & kMapObjectFlagNoSector))
     {
@@ -848,7 +848,7 @@ void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, floa
                 if (mo->state_->bright <= 0 || mo->dynamic_light_.r <= 0)
                     continue;
 
-                if (draw_culling.d_ && RendererPointToDistance(view_x, view_y, mo->x, mo->y) > renderer_far_clip.f_)
+                if (draw_culling.d_ && PointToDistance(view_x, view_y, mo->x, mo->y) > renderer_far_clip.f_)
                     continue;
 
                 // check whether radius touches the given bbox
@@ -893,7 +893,7 @@ void SectorGlowIterator(Sector *sec, float x1, float y1, float z1, float x2, flo
         if (mo->state_->bright <= 0 || mo->dynamic_light_.r <= 0)
             continue;
 
-        if (draw_culling.d_ && RendererPointToDistance(view_x, view_y, mo->x, mo->y) > renderer_far_clip.f_)
+        if (draw_culling.d_ && PointToDistance(view_x, view_y, mo->x, mo->y) > renderer_far_clip.f_)
             continue;
 
         // check whether radius touches the given bbox

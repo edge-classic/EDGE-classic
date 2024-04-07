@@ -72,7 +72,7 @@ static void ValidateBuffer(void)
 }
 #endif // DEBUG_OCCLUSION
 
-void RendererOcclusionClear(void)
+void OcclusionClear(void)
 {
     // Clear all angles in the whole buffer
     // (i.e. mark them as open / non-blocking).
@@ -205,7 +205,7 @@ static void DoSet(BAMAngle low, BAMAngle high)
     LinkInTail(GetNewRange(low, high));
 }
 
-void RendererOcclusionSet(BAMAngle low, BAMAngle high)
+void OcclusionSet(BAMAngle low, BAMAngle high)
 {
     // Set all angles in the given range, i.e. mark them as blocking.
     // The angles are relative to the VIEW angle.
@@ -239,7 +239,7 @@ static inline bool DoTest(BAMAngle low, BAMAngle high)
     return false;
 }
 
-bool RendererOcclusionTest(BAMAngle low, BAMAngle high)
+bool OcclusionTest(BAMAngle low, BAMAngle high)
 {
     // Check whether all angles in the given range are set (i.e. blocked).
     // Returns true if the entire range is blocked, false otherwise.

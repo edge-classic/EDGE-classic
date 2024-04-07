@@ -582,7 +582,7 @@ static bool ScriptCheckHeightTrigger(RADScriptTrigger *trig, ScriptOnHeightParam
         }
         else
         {
-            cond->cached_sector = RendererPointInSubsector(trig->info->x, trig->info->y)->sector;
+            cond->cached_sector = PointInSubsector(trig->info->x, trig->info->y)->sector;
         }
     }
 

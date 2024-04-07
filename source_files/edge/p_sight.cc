@@ -489,7 +489,7 @@ bool CheckSight(MapObject *src, MapObject *dest)
         return CheckSightSameSubsector(src, dest);
     }
 
-    sight_check.angle = RendererPointToAngle(sight_check.source.x, sight_check.source.y, sight_check.destination.X,
+    sight_check.angle = PointToAngle(sight_check.source.x, sight_check.source.y, sight_check.destination.X,
                                              sight_check.destination.Y);
 
     sight_check.bounding_box[kBoundingBoxLeft]   = HMM_MIN(sight_check.source.x, sight_check.destination.X);
@@ -575,7 +575,7 @@ bool CheckSight(MapObject *src, MapObject *dest)
 
 bool CheckSightToPoint(MapObject *src, float x, float y, float z)
 {
-    Subsector *dest_sub = RendererPointInSubsector(x, y);
+    Subsector *dest_sub = PointInSubsector(x, y);
 
     if (dest_sub == src->subsector_)
         return true;
@@ -597,7 +597,7 @@ bool CheckSightToPoint(MapObject *src, float x, float y, float z)
     sight_check.bottom_slope = z - 1.0f - sight_check.source_z;
     sight_check.top_slope    = z + 1.0f - sight_check.source_z;
 
-    sight_check.angle = RendererPointToAngle(sight_check.source.x, sight_check.source.y, sight_check.destination.X,
+    sight_check.angle = PointToAngle(sight_check.source.x, sight_check.source.y, sight_check.destination.X,
                                              sight_check.destination.Y);
 
     sight_check.bounding_box[kBoundingBoxLeft]   = HMM_MIN(sight_check.source.x, sight_check.destination.X);

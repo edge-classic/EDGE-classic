@@ -34,7 +34,7 @@
 #include "m_misc.h"
 #include "p_blockmap.h"
 #include "p_local.h" // ApproximateDistance
-#include "r_misc.h"  // RendererPointToAngle
+#include "r_misc.h"  // PointToAngle
 #include "s_cache.h"
 #include "s_music.h"
 #include "s_sound.h"
@@ -122,7 +122,7 @@ void SoundChannel::ComputeVolume()
     {
         if (sound_device_stereo)
         {
-            BAMAngle angle = RendererPointToAngle(listen_x, listen_y, position_->x, position_->y);
+            BAMAngle angle = PointToAngle(listen_x, listen_y, position_->x, position_->y);
 
             // same equation from original DOOM
             sep = 0.5f - 0.38f * epi::BAMSin(angle - listen_angle);

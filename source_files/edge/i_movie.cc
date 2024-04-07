@@ -251,7 +251,7 @@ void PlayMovie(const std::string &name)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     FinishFrame();
 
-    RendererSetupMatrices2D();
+    SetupMatrices2D();
 
     double last_time = (double)SDL_GetTicks() / 1000.0;
 

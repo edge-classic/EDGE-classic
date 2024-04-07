@@ -478,7 +478,7 @@ void TakeScreenshot(bool show_msg)
 
     ImageData *img = new ImageData(current_screen_width, current_screen_height, 3);
 
-    RendererReadScreen(0, 0, current_screen_width, current_screen_height, img->PixelAt(0, 0));
+    ReadScreen(0, 0, current_screen_width, current_screen_height, img->PixelAt(0, 0));
 
     // ReadScreen produces a bottom-up image, need to invert it
     img->Invert();
@@ -516,7 +516,7 @@ void CreateSaveScreenshot(void)
 
     ImageData *img = new ImageData(current_screen_width, current_screen_height, 3);
 
-    RendererReadScreen(0, 0, current_screen_width, current_screen_height, img->PixelAt(0, 0));
+    ReadScreen(0, 0, current_screen_width, current_screen_height, img->PixelAt(0, 0));
 
     // ReadScreen produces a bottom-up image, need to invert it
     img->Invert();

@@ -2373,7 +2373,7 @@ void ShowLoadedLumps(int for_file, const char *match)
     LogPrint("Total: %d\n", total);
 }
 
-static const char *UserSkyBoxName(const char *base, int face)
+static const char *UserSkyboxName(const char *base, int face)
 {
     static char       buffer[64];
     static const char letters[] = "NESWTB";
@@ -2390,14 +2390,14 @@ static const char *UserSkyBoxName(const char *base, int face)
 // Returns true if found
 bool DisableStockSkybox(const char *ActualSky)
 {
-    bool         TurnOffSkyBox = false;
+    bool         TurnOffSkybox = false;
     const Image *tempImage;
     int          filenum = -1;
     int          lumpnum = -1;
 
     // First we should try for "SKY1_N" type names but only
     // use it if it's in a pwad i.e. a users skybox
-    tempImage = ImageLookup(UserSkyBoxName(ActualSky, 0), kImageNamespaceTexture, kImageLookupNull);
+    tempImage = ImageLookup(UserSkyboxName(ActualSky, 0), kImageNamespaceTexture, kImageLookupNull);
     if (tempImage)
     {
         if (tempImage->source_type_ == kImageSourceUser) // from images.ddf
@@ -2416,8 +2416,8 @@ bool DisableStockSkybox(const char *ActualSky)
                 {
                     LogDebug("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name_.c_str(),
                              tempImage->source_type_, lumpnum, filenum);
-                    TurnOffSkyBox = false;
-                    return TurnOffSkyBox; // get out of here
+                    TurnOffSkybox = false;
+                    return TurnOffSkybox; // get out of here
                 }
             }
         }
@@ -2436,8 +2436,8 @@ bool DisableStockSkybox(const char *ActualSky)
         else if (tempImage->source_type_ == kImageSourceUser) // texture from images.ddf
         {
             LogDebug("SKYBOX: Sky is: %s. Type:%d  \n", tempImage->name_.c_str(), tempImage->source_type_);
-            TurnOffSkyBox = true;                             // turn off or not? hmmm...
-            return TurnOffSkyBox;
+            TurnOffSkybox = true;                             // turn off or not? hmmm...
+            return TurnOffSkybox;
         }
         else                                                  // could be a png or jpg i.e. TX_ or HI_
         {
@@ -2451,12 +2451,12 @@ bool DisableStockSkybox(const char *ActualSky)
 
         if (tempImage->source_type_ == kImageSourceDummy) // probably a skybox?
         {
-            TurnOffSkyBox = false;
+            TurnOffSkybox = false;
         }
 
         if (filenum == 0) // it's the IWAD so we're done
         {
-            TurnOffSkyBox = false;
+            TurnOffSkybox = false;
         }
 
         if (filenum != -1) // make sure we actually have a file
@@ -2464,14 +2464,14 @@ bool DisableStockSkybox(const char *ActualSky)
             // we only want pwads
             if (data_files[filenum]->kind_ == kFileKindPWAD || data_files[filenum]->kind_ == kFileKindPackWAD)
             {
-                TurnOffSkyBox = true;
+                TurnOffSkybox = true;
             }
         }
     }
 
     LogDebug("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name_.c_str(), tempImage->source_type_,
              lumpnum, filenum);
-    return TurnOffSkyBox;
+    return TurnOffSkybox;
 }
 
 // IsLumpInPwad

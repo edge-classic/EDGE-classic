@@ -221,7 +221,7 @@ bool TeleportMove(MapObject *thing, float x, float y, float z)
     move_check.y = y;
     move_check.z = z;
 
-    move_check.subsector = RendererPointInSubsector(x, y);
+    move_check.subsector = PointInSubsector(x, y);
 
     ComputeThingGap(thing, move_check.subsector->sector, z, &move_check.floor_z, &move_check.ceiling_z);
 
@@ -413,7 +413,7 @@ bool CheckAbsolutePosition(MapObject *thing, float x, float y, float z)
     move_check.y = y;
     move_check.z = z;
 
-    move_check.subsector = RendererPointInSubsector(x, y);
+    move_check.subsector = PointInSubsector(x, y);
 
     float r = move_check.mover->radius_;
 
@@ -574,7 +574,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
                                      move_check.mover->radius_) == 2)
             return true;
         if (ld->front_sector->floor_vertex_slope && ld->front_sector->line_count == 4 &&
-            RendererPointInSubsector(move_check.mover->x, move_check.mover->y)->sector != ld->front_sector)
+            PointInSubsector(move_check.mover->x, move_check.mover->y)->sector != ld->front_sector)
         {
             float ix = 0;
             float iy = 0;
@@ -594,7 +594,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
             }
         }
         else if (ld->back_sector->floor_vertex_slope && ld->back_sector->line_count == 4 &&
-                 RendererPointInSubsector(move_check.mover->x, move_check.mover->y)->sector != ld->back_sector)
+                 PointInSubsector(move_check.mover->x, move_check.mover->y)->sector != ld->back_sector)
         {
             float ix = 0;
             float iy = 0;
@@ -614,7 +614,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
             }
         }
         else if (ld->front_sector->floor_vertex_slope && ld->front_sector->line_count == 4 &&
-                 RendererPointInSubsector(move_check.mover->x, move_check.mover->y)->sector == ld->front_sector)
+                 PointInSubsector(move_check.mover->x, move_check.mover->y)->sector == ld->front_sector)
         {
             if (!ld->back_sector->floor_vertex_slope)
             {
@@ -646,7 +646,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
             }
         }
         else if (ld->back_sector->floor_vertex_slope && ld->back_sector->line_count == 4 &&
-                 RendererPointInSubsector(move_check.mover->x, move_check.mover->y)->sector == ld->back_sector)
+                 PointInSubsector(move_check.mover->x, move_check.mover->y)->sector == ld->back_sector)
         {
             if (!ld->front_sector->floor_vertex_slope)
             {
@@ -678,7 +678,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
             }
         }
         if (ld->front_sector->ceiling_vertex_slope && ld->front_sector->line_count == 4 &&
-            RendererPointInSubsector(move_check.mover->x, move_check.mover->y)->sector != ld->front_sector)
+            PointInSubsector(move_check.mover->x, move_check.mover->y)->sector != ld->front_sector)
         {
             float ix = 0;
             float iy = 0;
@@ -698,7 +698,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
             }
         }
         else if (ld->back_sector->ceiling_vertex_slope && ld->back_sector->line_count == 4 &&
-                 RendererPointInSubsector(move_check.mover->x, move_check.mover->y)->sector != ld->back_sector)
+                 PointInSubsector(move_check.mover->x, move_check.mover->y)->sector != ld->back_sector)
         {
             float ix = 0;
             float iy = 0;
@@ -718,7 +718,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
             }
         }
         else if (ld->front_sector->ceiling_vertex_slope && ld->front_sector->line_count == 4 &&
-                 RendererPointInSubsector(move_check.mover->x, move_check.mover->y)->sector == ld->front_sector)
+                 PointInSubsector(move_check.mover->x, move_check.mover->y)->sector == ld->front_sector)
         {
             if (!ld->back_sector->ceiling_vertex_slope)
             {
@@ -749,7 +749,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
             }
         }
         else if (ld->back_sector->ceiling_vertex_slope && ld->back_sector->line_count == 4 &&
-                 RendererPointInSubsector(move_check.mover->x, move_check.mover->y)->sector == ld->back_sector)
+                 PointInSubsector(move_check.mover->x, move_check.mover->y)->sector == ld->back_sector)
         {
             if (!ld->front_sector->ceiling_vertex_slope)
             {
@@ -994,7 +994,7 @@ static bool CheckRelativePosition(MapObject *thing, float x, float y)
     move_check.y = y;
     move_check.z = thing->z;
 
-    move_check.subsector = RendererPointInSubsector(x, y);
+    move_check.subsector = PointInSubsector(x, y);
 
     move_check.floor_slope_z   = 0;
     move_check.ceiling_slope_z = 0;
@@ -1275,12 +1275,12 @@ static void HitSlideLine(Line *ld)
 
     int side = PointOnLineSide(slide_map_object->x, slide_map_object->y, ld);
 
-    BAMAngle lineangle = RendererPointToAngle(0, 0, ld->delta_x, ld->delta_y);
+    BAMAngle lineangle = PointToAngle(0, 0, ld->delta_x, ld->delta_y);
 
     if (side == 1)
         lineangle += kBAMAngle180;
 
-    BAMAngle moveangle  = RendererPointToAngle(0, 0, slide_move_x, slide_move_y);
+    BAMAngle moveangle  = PointToAngle(0, 0, slide_move_x, slide_move_y);
     BAMAngle deltaangle = moveangle - lineangle;
 
     if (deltaangle > kBAMAngle180)
@@ -1799,7 +1799,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
             HMM_Vec3 shoota = LinePlaneIntersection(
                 {{shoot_check.source->x, shoot_check.source->y, shoot_check.start_z}}, {{sx, sy, z}},
                 sec_check->floor_z_vertices[2], sec_check->floor_vertex_slope_normal);
-            Sector *shoota_sec = RendererPointInSubsector(shoota.X, shoota.Y)->sector;
+            Sector *shoota_sec = PointInSubsector(shoota.X, shoota.Y)->sector;
             if (shoota_sec && shoota_sec == sec_check && shoota.Z <= sec_check->floor_vertex_slope_high_low.X &&
                 shoota.Z >= sec_check->floor_vertex_slope_high_low.Y)
             {
@@ -1818,7 +1818,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                 shoota = LinePlaneIntersection(
                     {{shoot_check.source->x, shoot_check.source->y, shoot_check.start_z}}, {{sx, sy, z}},
                     sec_check->ceiling_z_vertices[2], sec_check->ceiling_vertex_slope_normal);
-                shoota_sec = RendererPointInSubsector(shoota.X, shoota.Y)->sector;
+                shoota_sec = PointInSubsector(shoota.X, shoota.Y)->sector;
                 if (shoota_sec && shoota_sec == sec_check && shoota.Z <= sec_check->ceiling_vertex_slope_high_low.X &&
                     shoota.Z >= sec_check->ceiling_vertex_slope_high_low.Y)
                 {
@@ -1843,7 +1843,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
             HMM_Vec3 shoota = LinePlaneIntersection(
                 {{shoot_check.source->x, shoot_check.source->y, shoot_check.start_z}}, {{sx, sy, z}},
                 sec_check->ceiling_z_vertices[2], sec_check->ceiling_vertex_slope_normal);
-            Sector *shoota_sec = RendererPointInSubsector(shoota.X, shoota.Y)->sector;
+            Sector *shoota_sec = PointInSubsector(shoota.X, shoota.Y)->sector;
             if (shoota_sec && shoota_sec == sec_check && shoota.Z <= sec_check->ceiling_vertex_slope_high_low.X &&
                 shoota.Z >= sec_check->ceiling_vertex_slope_high_low.Y)
             {
@@ -1875,7 +1875,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
     z = (z < shoot_check.previous_z) ? floor_height + 2 : floor_height - 2;
 
     // Check for vert slope at potential puff point
-    Sector *last_shoota_sec = RendererPointInSubsector(x, y)->sector;
+    Sector *last_shoota_sec = PointInSubsector(x, y)->sector;
 
     if (last_shoota_sec && (last_shoota_sec->floor_vertex_slope || last_shoota_sec->ceiling_vertex_slope))
     {
@@ -2144,7 +2144,7 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
             }
         }
 
-        Sector *last_shoota_sec = RendererPointInSubsector(x, y)->sector;
+        Sector *last_shoota_sec = PointInSubsector(x, y)->sector;
 
         if (last_shoota_sec &&
             ((ld->front_sector && (ld->front_sector->floor_vertex_slope || ld->front_sector->ceiling_vertex_slope)) ||
@@ -3245,7 +3245,7 @@ static bool CheckBlockingLineCallback(Line *line, void *data)
     }
 
     // Vertex slope check
-    Sector *slope_sec = RendererPointInSubsector(mx2, my2)->sector;
+    Sector *slope_sec = PointInSubsector(mx2, my2)->sector;
 
     if (slope_sec && (slope_sec->floor_vertex_slope || slope_sec->ceiling_vertex_slope))
     {

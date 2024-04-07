@@ -219,7 +219,7 @@ class MirrorInfo
         float by2 = other->vertex_2->Y - other->delta_y * along2;
 
         // compute rotation angle
-        tc_ = kBAMAngle180 + RendererPointToAngle(0, 0, other->delta_x, other->delta_y) - seg->angle;
+        tc_ = kBAMAngle180 + PointToAngle(0, 0, other->delta_x, other->delta_y) - seg->angle;
 
         xx_ = epi::BAMCos(tc_);
         xy_ = epi::BAMSin(tc_);
@@ -228,7 +228,7 @@ class MirrorInfo
 
         // scaling
         float a_len = seg->length;
-        float b_len = RendererPointToDistance(bx1, by1, bx2, by2);
+        float b_len = PointToDistance(bx1, by1, bx2, by2);
 
         xy_scale_ = a_len / HMM_MAX(1, b_len);
 
@@ -1886,7 +1886,7 @@ static void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref, 
     }
 }
 
-static void RendererDrawSeg(DrawFloor *dfloor, Seg *seg, bool mirror_sub = false)
+static void RenderSeg(DrawFloor *dfloor, Seg *seg, bool mirror_sub = false)
 {
     //
     // Analyses floor/ceiling heights, and add corresponding walls/floors
@@ -1954,7 +1954,7 @@ static void RendererWalkBspNode(unsigned int bspnum);
 
 static void RendererWalkMirror(DrawSubsector *dsub, Seg *seg, BAMAngle left, BAMAngle right, bool is_portal)
 {
-    DrawMirror *mir = RendererGetDrawMirror();
+    DrawMirror *mir = GetDrawMirror();
     mir->seg        = seg;
     mir->draw_subsectors.clear();
 
@@ -2076,8 +2076,8 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
         precise = (seg->linedef->flags & kLineFlagMirror) || (seg->linedef->portal_pair);
     }
 
-    BAMAngle angle_L = RendererPointToAngle(view_x, view_y, sx1, sy1, precise);
-    BAMAngle angle_R = RendererPointToAngle(view_x, view_y, sx2, sy2, precise);
+    BAMAngle angle_L = PointToAngle(view_x, view_y, sx1, sy1, precise);
+    BAMAngle angle_R = PointToAngle(view_x, view_y, sx2, sy2, precise);
 
     // Clip to view edges.
 
@@ -2121,7 +2121,7 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
 
 #if 1
     // check if visible
-    if (span > (kBAMAngle1 / 4) && RendererOcclusionTest(angle_R, angle_L))
+    if (span > (kBAMAngle1 / 4) && OcclusionTest(angle_R, angle_L))
     {
         return;
     }
@@ -2137,18 +2137,18 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
         if (seg->linedef->flags & kLineFlagMirror)
         {
             RendererWalkMirror(dsub, seg, angle_L, angle_R, false);
-            RendererOcclusionSet(angle_R, angle_L);
+            OcclusionSet(angle_R, angle_L);
             return;
         }
         else if (seg->linedef->portal_pair)
         {
             RendererWalkMirror(dsub, seg, angle_L, angle_R, true);
-            RendererOcclusionSet(angle_R, angle_L);
+            OcclusionSet(angle_R, angle_L);
             return;
         }
     }
 
-    DrawSeg *dseg = RendererGetDrawSeg();
+    DrawSeg *dseg = GetDrawSeg();
     dseg->seg     = seg;
 
     dsub->segs.push_back(dseg);
@@ -2162,7 +2162,7 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
     // only 1 sided walls affect the 1D occlusion buffer
 
     if (seg->linedef->blocked)
-        RendererOcclusionSet(angle_R, angle_L);
+        OcclusionSet(angle_R, angle_L);
 
     // --- handle sky (using the depth buffer) ---
 
@@ -2170,7 +2170,7 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
     {
         if (fsector->floor_height < bsector->floor_height)
         {
-            RendererDrawSkyWall(seg, fsector->floor_height, bsector->floor_height);
+            RenderSkyWall(seg, fsector->floor_height, bsector->floor_height);
         }
     }
 
@@ -2179,7 +2179,7 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
         if (fsector->ceiling_height < fsector->sky_height &&
             (!bsector || !EDGE_IMAGE_IS_SKY(bsector->ceiling) || bsector->floor_height >= fsector->ceiling_height))
         {
-            RendererDrawSkyWall(seg, fsector->ceiling_height, fsector->sky_height);
+            RenderSkyWall(seg, fsector->ceiling_height, fsector->sky_height);
         }
         else if (bsector && EDGE_IMAGE_IS_SKY(bsector->ceiling) && fsector->height_sector == nullptr &&
                  bsector->height_sector == nullptr)
@@ -2188,7 +2188,7 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
 
             if (bsector->ceiling_height <= max_f && max_f < fsector->sky_height)
             {
-                RendererDrawSkyWall(seg, max_f, fsector->sky_height);
+                RenderSkyWall(seg, max_f, fsector->sky_height);
             }
         }
     }
@@ -2196,7 +2196,7 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
     else if (!debug_hall_of_mirrors.d_ && bsector && EDGE_IMAGE_IS_SKY(bsector->ceiling) &&
              seg->sidedef->top.image == nullptr && bsector->ceiling_height < fsector->ceiling_height)
     {
-        RendererDrawSkyWall(seg, bsector->ceiling_height, fsector->ceiling_height);
+        RenderSkyWall(seg, bsector->ceiling_height, fsector->ceiling_height);
     }
 }
 
@@ -2263,8 +2263,8 @@ bool RendererCheckBBox(float *bspcoord)
     float y2 = bspcoord[check_coordinates[boxpos][3]];
 
     // check clip list for an open space
-    BAMAngle angle_L = RendererPointToAngle(view_x, view_y, x1, y1);
-    BAMAngle angle_R = RendererPointToAngle(view_x, view_y, x2, y2);
+    BAMAngle angle_L = PointToAngle(view_x, view_y, x1, y1);
+    BAMAngle angle_R = PointToAngle(view_x, view_y, x2, y2);
 
     BAMAngle span = angle_L - angle_R;
 
@@ -2322,10 +2322,10 @@ bool RendererCheckBBox(float *bspcoord)
         }
     }
 
-    return !RendererOcclusionTest(angle_R, angle_L);
+    return !OcclusionTest(angle_R, angle_L);
 }
 
-static void RendererDrawPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_dir)
+static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_dir)
 {
     EDGE_ZoneScoped;
 
@@ -2545,7 +2545,7 @@ static inline void AddNewDrawFloor(DrawSubsector *dsub, Extrafloor *ef, float fl
 {
     DrawFloor *dfloor;
 
-    dfloor = RendererGetDrawFloor();
+    dfloor = GetDrawFloor();
 
     dfloor->is_highest      = false;
     dfloor->is_lowest       = false;
@@ -2618,7 +2618,7 @@ static void RendererWalkSubsector(int num)
     LogDebug("\nVISITING SUBSEC %d (sector %d)\n\n", num, sub->sector - level_sectors);
 #endif
 
-    DrawSubsector *K = RendererGetDrawSub();
+    DrawSubsector *K = GetDrawSub();
     K->subsector     = sub;
     K->visible       = false;
     K->sorted        = false;
@@ -2632,12 +2632,12 @@ static void RendererWalkSubsector(int num)
 
     if (EDGE_IMAGE_IS_SKY(sub->sector->floor) && view_z > sub->sector->floor_height)
     {
-        RendererDrawSkyPlane(sub, sub->sector->floor_height);
+        RenderSkyPlane(sub, sub->sector->floor_height);
     }
 
     if (EDGE_IMAGE_IS_SKY(sub->sector->ceiling) && view_z < sub->sector->sky_height)
     {
-        RendererDrawSkyPlane(sub, sub->sector->sky_height);
+        RenderSkyPlane(sub, sub->sector->sky_height);
     }
 
     float floor_h = sector->floor_height;
@@ -2791,9 +2791,9 @@ static void RendererWalkSubsector(int num)
     }
 }
 
-static void RendererDrawSubsector(DrawSubsector *dsub, bool mirror_sub = false);
+static void RenderSubsector(DrawSubsector *dsub, bool mirror_sub = false);
 
-static void RendererDrawSubList(std::list<DrawSubsector *> &dsubs, bool for_mirror = false)
+static void RenderSubList(std::list<DrawSubsector *> &dsubs, bool for_mirror = false)
 {
     // draw all solid walls and planes
     solid_mode = true;
@@ -2802,7 +2802,7 @@ static void RendererDrawSubList(std::list<DrawSubsector *> &dsubs, bool for_mirr
     std::list<DrawSubsector *>::iterator FI; // Forward Iterator
 
     for (FI = dsubs.begin(); FI != dsubs.end(); FI++)
-        RendererDrawSubsector(*FI, for_mirror);
+        RenderSubsector(*FI, for_mirror);
 
     RendererFinishUnits();
 
@@ -2813,7 +2813,7 @@ static void RendererDrawSubList(std::list<DrawSubsector *> &dsubs, bool for_mirr
     std::list<DrawSubsector *>::reverse_iterator RI;
 
     for (RI = dsubs.rbegin(); RI != dsubs.rend(); RI++)
-        RendererDrawSubsector(*RI, for_mirror);
+        RenderSubsector(*RI, for_mirror);
 
     RendererFinishUnits();
 }
@@ -2943,7 +2943,7 @@ static void DrawPortalPolygon(DrawMirror *mir)
     glDisable(GL_TEXTURE_2D);
 }
 
-static void RendererDrawMirror(DrawMirror *mir)
+static void RenderMirror(DrawMirror *mir)
 {
     // mark the segment on the automap
     mir->seg->linedef->flags |= kLineFlagMapped;
@@ -2957,7 +2957,7 @@ static void RendererDrawMirror(DrawMirror *mir)
 
     MirrorPush(mir);
     {
-        RendererDrawSubList(mir->draw_subsectors, true);
+        RenderSubList(mir->draw_subsectors, true);
     }
     MirrorPop();
 
@@ -2975,7 +2975,7 @@ static void RendererDrawMirror(DrawMirror *mir)
     RendererStartUnits(solid_mode);
 }
 
-static void RendererDrawSubsector(DrawSubsector *dsub, bool mirror_sub)
+static void RenderSubsector(DrawSubsector *dsub, bool mirror_sub)
 {
     EDGE_ZoneScoped;
 
@@ -2993,7 +2993,7 @@ static void RendererDrawSubsector(DrawSubsector *dsub, bool mirror_sub)
 
         for (MRI = dsub->mirrors.begin(); MRI != dsub->mirrors.end(); MRI++)
         {
-            RendererDrawMirror(*MRI);
+            RenderMirror(*MRI);
         }
     }
 
@@ -3007,15 +3007,15 @@ static void RendererDrawSubsector(DrawSubsector *dsub, bool mirror_sub)
         for (std::list<DrawSeg *>::iterator iter = dsub->segs.begin(), iter_end = dsub->segs.end(); iter != iter_end;
              iter++)
         {
-            RendererDrawSeg(dfloor, (*iter)->seg, mirror_sub);
+            RenderSeg(dfloor, (*iter)->seg, mirror_sub);
         }
 
-        RendererDrawPlane(dfloor, dfloor->ceiling_height, dfloor->ceiling, -1);
-        RendererDrawPlane(dfloor, dfloor->floor_height, dfloor->floor, +1);
+        RenderPlane(dfloor, dfloor->ceiling_height, dfloor->ceiling, -1);
+        RenderPlane(dfloor, dfloor->floor_height, dfloor->floor, +1);
 
         if (!solid_mode)
         {
-            RendererDrawSortThings(dfloor);
+            RenderSortThings(dfloor);
         }
     }
 }
@@ -3037,7 +3037,7 @@ static void DoWeaponModel(void)
     solid_mode = false;
     RendererStartUnits(solid_mode);
 
-    RendererDrawWeaponModel(pl);
+    RenderWeaponModel(pl);
 
     RendererFinishUnits();
 }
@@ -3114,8 +3114,8 @@ static void RenderTrueBsp(void)
 
     FuzzUpdate();
 
-    RendererClearBsp();
-    RendererOcclusionClear();
+    ClearBSP();
+    OcclusionClear();
 
     draw_subsector_list.clear();
 
@@ -3124,7 +3124,7 @@ static void RenderTrueBsp(void)
     // handle powerup effects and BOOM colormaps
     RendererRainbowEffect(v_player);
 
-    RendererSetupMatrices3d();
+    SetupMatrices3d();
 
     frame_texture_ids.clear();
     frame_texture_ids.reserve(1024);
@@ -3133,23 +3133,23 @@ static void RenderTrueBsp(void)
     glEnable(GL_DEPTH_TEST);
 
     // needed for drawing the sky
-    RendererBeginSky();
+    BeginSky();
 
     // walk the bsp tree
     RendererWalkBspNode(root_node);
 
-    RendererFinishSky();
+    FinishSky();
 
     RenderState *state = RendererGetState();
     state->SetDefaultStateFull();
 
-    RendererDrawSubList(draw_subsector_list);
+    RenderSubList(draw_subsector_list);
 
     state->SetDefaultStateFull();
 
     // Lobo 2022:
     // Allow changing the order of weapon model rendering to be
-    // after RendererDrawWeaponSprites() so that FLASH states are
+    // after RenderWeaponSprites() so that FLASH states are
     // drawn in front of the weapon
     bool FlashFirst = false;
 
@@ -3169,26 +3169,26 @@ static void RenderTrueBsp(void)
     glDisable(GL_DEPTH_TEST);
 
     // now draw 2D stuff like psprites, and add effects
-    RendererSetupMatricesWorld2D();
+    SetupWorldMatrices2D();
 
     if (v_player)
     {
-        RendererDrawWeaponSprites(v_player);
+        RenderWeaponSprites(v_player);
 
         RendererColourmapEffect(v_player);
         RendererPaletteEffect(v_player);
-        RendererSetupMatrices2D();
-        RendererDrawCrosshair(v_player);
+        SetupMatrices2D();
+        RenderCrosshair(v_player);
     }
 
     if (FlashFirst == true)
     {
-        RendererSetupMatrices3d();
+        SetupMatrices3d();
         glClear(GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
         DoWeaponModel();
         glDisable(GL_DEPTH_TEST);
-        RendererSetupMatrices2D();
+        SetupMatrices2D();
     }
 
 #if (DEBUG >= 3)
@@ -3247,7 +3247,7 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
 
     view_subsector      = mo->subsector_;
     view_vertical_angle = mo->vertical_angle_;
-    view_properties     = RendererPointGetProps(view_subsector, view_z);
+    view_properties     = GetPointProperties(view_subsector, view_z);
 
     if (mo->player_)
     {

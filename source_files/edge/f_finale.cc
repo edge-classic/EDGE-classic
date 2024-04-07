@@ -790,7 +790,7 @@ static void CastDrawer(void)
     }
 
     // draw the current frame in the middle of the screen
-    image = RendererGetOtherSprite(cast_state->sprite, cast_state->frame, &flip);
+    image = GetOtherSprite(cast_state->sprite, cast_state->frame, &flip);
 
     if (!image)
         return;
@@ -813,7 +813,7 @@ static void CastDrawer(void)
     width *= scale_x;
     height *= scale_y;
 
-    RendererDrawImage(pos_x - offset_x, pos_y + offset_y, width, height, image, flip ? image->Right() : 0, 0,
+    RenderImage(pos_x - offset_x, pos_y + offset_y, width, height, image, flip ? image->Right() : 0, 0,
                       flip ? 0 : image->Right(), image->Top(), nullptr, 1.0f, cast_order->palremap_);
 }
 

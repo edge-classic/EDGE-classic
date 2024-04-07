@@ -660,7 +660,7 @@ void ScriptPlaySound(RADScriptTrigger *R, void *param)
     R->sound_effects_origin.y = ambient->y;
 
     if (AlmostEquals(ambient->z, kOnFloorZ))
-        R->sound_effects_origin.z = RendererPointInSubsector(ambient->x, ambient->y)->sector->floor_height;
+        R->sound_effects_origin.z = PointInSubsector(ambient->x, ambient->y)->sector->floor_height;
     else
         R->sound_effects_origin.z = ambient->z;
 
@@ -713,7 +713,7 @@ void ScriptChangeTexture(RADScriptTrigger *R, void *param)
         if (image)
         {
             sky_image = image;
-            RendererUpdateSkyBoxTextures();
+            UpdateSkyboxTextures();
         }
         return;
     }

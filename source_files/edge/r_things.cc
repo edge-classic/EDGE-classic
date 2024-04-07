@@ -135,7 +135,7 @@ static int GetMulticolMaxRGB(ColorMixer *cols, int num, bool additive)
     return result;
 }
 
-static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player, RegionProperties *props,
+static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionProperties *props,
                                 const State *state)
 {
     if (state->flags & kStateFrameFlagModel)
@@ -143,7 +143,7 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, Player *player, Re
 
     // determine sprite patch
     bool         flip;
-    const Image *image = RendererGetOtherSprite(state->sprite, state->frame, &flip);
+    const Image *image = GetOtherSprite(state->sprite, state->frame, &flip);
 
     if (!image)
         return;
@@ -497,7 +497,7 @@ static void DrawStdCrossHair(void)
     glDisable(GL_BLEND);
 }
 
-void RendererDrawWeaponSprites(Player *p)
+void RenderWeaponSprites(Player *p)
 {
     // special handling for zoom: show viewfinder
     if (view_is_zoomed)
@@ -513,7 +513,7 @@ void RendererDrawWeaponSprites(Player *p)
         // regular psprite drawing routines to occur (old EDGE behavior)
         if (w->zoom_state_ > 0)
         {
-            RendererDrawPSprite(psp, kPlayerSpriteWeapon, p, view_properties, states + w->zoom_state_);
+            RenderPSprite(psp, kPlayerSpriteWeapon, p, view_properties, states + w->zoom_state_);
             return;
         }
     }
@@ -540,7 +540,7 @@ void RendererDrawWeaponSprites(Player *p)
             if ((p->ready_weapon_ < 0) || (psp->state == 0))
                 continue;
 
-            RendererDrawPSprite(psp, i, p, view_properties, psp->state);
+            RenderPSprite(psp, i, p, view_properties, psp->state);
         }
     }
     else
@@ -552,12 +552,12 @@ void RendererDrawWeaponSprites(Player *p)
             if ((p->ready_weapon_ < 0) || (psp->state == 0))
                 continue;
 
-            RendererDrawPSprite(psp, i, p, view_properties, psp->state);
+            RenderPSprite(psp, i, p, view_properties, psp->state);
         }
     }
 }
 
-void RendererDrawCrosshair(Player *p)
+void RenderCrosshair(Player *p)
 {
     if (view_is_zoomed && p->weapons_[p->ready_weapon_].info->zoom_state_ > 0)
     {
@@ -577,7 +577,7 @@ void RendererDrawCrosshair(Player *p)
         DrawStdCrossHair();
 }
 
-void RendererDrawWeaponModel(Player *p)
+void RenderWeaponModel(Player *p)
 {
     if (view_is_zoomed && p->weapons_[p->ready_weapon_].info->zoom_state_ > 0)
         return;
@@ -704,7 +704,7 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my, b
 
         MirrorAngle(ang);
 
-        BAMAngle from_view = RendererPointToAngle(view_x, view_y, mx, my);
+        BAMAngle from_view = PointToAngle(view_x, view_y, mx, my);
 
         ang = from_view - ang + kBAMAngle180;
 
@@ -734,7 +734,7 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my, b
     return frame->images_[rot];
 }
 
-const Image *RendererGetOtherSprite(int spritenum, int framenum, bool *flip)
+const Image *GetOtherSprite(int spritenum, int framenum, bool *flip)
 {
     /* Used for non-object stuff, like weapons and finale */
 
@@ -759,7 +759,7 @@ static void RendererClipSpriteVertically(DrawSubsector *dsub, DrawThing *dthing)
     DrawFloor *dfloor = nullptr;
 
     // find the thing's nominal region.  This section is equivalent to
-    // the RendererPointInVertRegion() code (but using drawfloors).
+    // the PointInVertRegion() code (but using drawfloors).
 
     float z = (dthing->top + dthing->bottom) / 2.0f;
 
@@ -961,7 +961,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
 
     // create new draw thing
 
-    DrawThing *dthing       = RendererGetDrawThing();
+    DrawThing *dthing       = GetDrawThing();
     dthing->next            = nullptr;
     dthing->previous        = nullptr;
     dthing->map_object      = nullptr;
@@ -999,7 +999,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     RendererClipSpriteVertically(dsub, dthing);
 }
 
-static void RendererDrawModel(DrawThing *dthing)
+static void RenderModel(DrawThing *dthing)
 {
     EDGE_ZoneScoped;
 
@@ -1086,7 +1086,7 @@ static void DLIT_Thing(MapObject *mo, void *dataptr)
     }
 }
 
-void RendererDrawThing(DrawFloor *dfloor, DrawThing *dthing)
+void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
 {
     EDGE_ZoneScoped;
 
@@ -1094,7 +1094,7 @@ void RendererDrawThing(DrawFloor *dfloor, DrawThing *dthing)
 
     if (dthing->is_model)
     {
-        RendererDrawModel(dthing);
+        RenderModel(dthing);
         return;
     }
 
@@ -1336,7 +1336,7 @@ void RendererDrawThing(DrawFloor *dfloor, DrawThing *dthing)
     }
 }
 
-void RendererDrawSortThings(DrawFloor *dfloor)
+void RenderSortThings(DrawFloor *dfloor)
 {
     //
     // As part my move to strip out Z_Zone usage and replace
@@ -1442,7 +1442,7 @@ void RendererDrawSortThings(DrawFloor *dfloor)
 
     // Draw...
     for (dt = head_dt; dt; dt = dt->render_next)
-        RendererDrawThing(dfloor, dt);
+        RenderThing(dfloor, dt);
 }
 
 //--- editor settings ---

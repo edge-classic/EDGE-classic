@@ -515,7 +515,7 @@ static void DeathThink(Player *player, bool extra_tic)
         dy = player->attacker_->y - player->map_object_->y;
         dz = (player->attacker_->z + player->attacker_->height_ / 2) - (player->map_object_->z + player->view_height_);
 
-        angle = RendererPointToAngle(0, 0, dx, dy);
+        angle = PointToAngle(0, 0, dx, dy);
         delta = angle - player->map_object_->angle_;
 
         slope   = ApproximateSlope(dx, dy, dz);
@@ -915,18 +915,18 @@ bool PlayerThink(Player *player, bool extra_tic)
         line_lengths += abs(room_checker.Y - player_y);
         PathTraverse(player_x, player_y, 32768.0f + player_x, 32768.0f + player_y, kPathAddLines, P_RoomPath,
                      &room_checker);
-        line_lengths += RendererPointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
+        line_lengths += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
         PathTraverse(player_x, player_y, -32768.0f + player_x, 32768.0f + player_y, kPathAddLines, P_RoomPath,
                      &room_checker);
-        line_lengths += RendererPointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
+        line_lengths += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
         PathTraverse(player_x, player_y, player_x, -32768.0f, kPathAddLines, P_RoomPath, &room_checker);
         line_lengths += abs(player_y - room_checker.Y);
         PathTraverse(player_x, player_y, -32768.0f + player_x, -32768.0f + player_y, kPathAddLines, P_RoomPath,
                      &room_checker);
-        line_lengths += RendererPointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
+        line_lengths += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
         PathTraverse(player_x, player_y, 32768.0f + player_x, -32768.0f + player_y, kPathAddLines, P_RoomPath,
                      &room_checker);
-        line_lengths += RendererPointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
+        line_lengths += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
         PathTraverse(player_x, player_y, -32768.0f, player_y, kPathAddLines, P_RoomPath, &room_checker);
         line_lengths += abs(player_x - room_checker.X);
         PathTraverse(player_x, player_y, 32768.0f, player_y, kPathAddLines, P_RoomPath, &room_checker);

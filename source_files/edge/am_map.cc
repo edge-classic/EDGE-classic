@@ -706,7 +706,7 @@ static void DrawKeyOnLine(AutomapLine *ml, int theKey, RGBAColor rgb = SG_WHITE_
                 if (!(idlestate->flags & kStateFrameFlagModel)) // Can't handle 3d models...yet
                 {
                     bool         flip;
-                    const Image *img = RendererGetOtherSprite(idlestate->sprite, idlestate->frame, &flip);
+                    const Image *img = GetOtherSprite(idlestate->sprite, idlestate->frame, &flip);
 
                     if (epi::StringCaseCompareASCII("DUMMY_SPRITE", img->name_) != 0)
                         HUDDrawImageNoOffset(x1, y1, img);

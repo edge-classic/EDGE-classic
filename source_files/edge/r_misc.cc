@@ -98,7 +98,7 @@ int invulnerability_effect;
 
 float sine_table[kSineTableSize];
 
-void RendererFreeupBSP(void);
+void FreeBSP(void);
 
 //
 // To get a global angle from cartesian coordinates,
@@ -134,7 +134,7 @@ static float ApproximateAtan2(float y, float x)
         return (angle);
 }
 //
-BAMAngle RendererPointToAngle(float x1, float y1, float x, float y, bool precise)
+BAMAngle PointToAngle(float x1, float y1, float x, float y, bool precise)
 {
     x -= x1;
     y -= y1;
@@ -147,7 +147,7 @@ BAMAngle RendererPointToAngle(float x1, float y1, float x, float y, bool precise
     return epi::BAMFromDegrees(ApproximateAtan2(y, x) * (180 / HMM_PI));
 }
 
-float RendererPointToDistance(float x1, float y1, float x2, float y2)
+float PointToDistance(float x1, float y1, float x2, float y2)
 {
     BAMAngle angle;
     float    dx;
@@ -201,10 +201,10 @@ void RendererStartup(void)
 //
 void RendererShutdown(void)
 {
-    RendererFreeupBSP();
+    FreeBSP();
 }
 
-Subsector *RendererPointInSubsector(float x, float y)
+Subsector *PointInSubsector(float x, float y)
 {
     BspNode     *node;
     int          side;
@@ -222,7 +222,7 @@ Subsector *RendererPointInSubsector(float x, float y)
     return &level_subsectors[nodenum & ~kLeafSubsector];
 }
 
-RegionProperties *RendererPointGetProps(Subsector *sub, float z)
+RegionProperties *GetPointProperties(Subsector *sub, float z)
 {
     Extrafloor *S, *L, *C;
     float       floor_h;
@@ -287,11 +287,11 @@ static int draw_subsector_position;
 static int draw_mirror_position;
 
 //
-// RendererInitialize
+// AllocateDrawStructs
 //
 // One-time initialisation routine.
 //
-void RendererInitialize(void)
+void AllocateDrawStructs(void)
 {
     draw_things.resize(kMaximumDrawThings);
     draw_floors.resize(kMaximumDrawFloors);
@@ -302,7 +302,7 @@ void RendererInitialize(void)
 
 // bsp clear function
 
-void RendererClearBsp(void)
+void ClearBSP(void)
 {
     draw_thing_position     = 0;
     draw_floor_position     = 0;
@@ -311,7 +311,7 @@ void RendererClearBsp(void)
     draw_mirror_position    = 0;
 }
 
-void RendererFreeupBSP(void)
+void FreeBSP(void)
 {
     draw_things.clear();
     draw_floors.clear();
@@ -319,10 +319,10 @@ void RendererFreeupBSP(void)
     draw_subsectors.clear();
     draw_mirrors.clear();
 
-    RendererClearBsp();
+    ClearBSP();
 }
 
-DrawThing *RendererGetDrawThing()
+DrawThing *GetDrawThing()
 {
     if (draw_thing_position >= kMaximumDrawThings)
     {
@@ -332,7 +332,7 @@ DrawThing *RendererGetDrawThing()
     return &draw_things[draw_thing_position++];
 }
 
-DrawFloor *RendererGetDrawFloor()
+DrawFloor *GetDrawFloor()
 {
     if (draw_floor_position >= kMaximumDrawFloors)
     {
@@ -342,7 +342,7 @@ DrawFloor *RendererGetDrawFloor()
     return &draw_floors[draw_floor_position++];
 }
 
-DrawSeg *RendererGetDrawSeg()
+DrawSeg *GetDrawSeg()
 {
     if (draw_seg_position >= kMaximumDrawSegs)
     {
@@ -352,7 +352,7 @@ DrawSeg *RendererGetDrawSeg()
     return &draw_segs[draw_seg_position++];
 }
 
-DrawSubsector *RendererGetDrawSub()
+DrawSubsector *GetDrawSub()
 {
     if (draw_subsector_position >= kMaximumDrawSubsectors)
     {
@@ -362,7 +362,7 @@ DrawSubsector *RendererGetDrawSub()
     return &draw_subsectors[draw_subsector_position++];
 }
 
-DrawMirror *RendererGetDrawMirror()
+DrawMirror *GetDrawMirror()
 {
     if (draw_mirror_position >= kMaximumDrawMirrors)
     {

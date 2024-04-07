@@ -473,7 +473,7 @@ bool LookForPlayers(MapObject *actor, BAMAngle range)
 
         if (range < kBAMAngle180)
         {
-            an = RendererPointToAngle(actor->x, actor->y, player->map_object_->x, player->map_object_->y) -
+            an = PointToAngle(actor->x, actor->y, player->map_object_->x, player->map_object_->y) -
                  actor->angle_;
 
             if (range <= an && an <= (range * -1))

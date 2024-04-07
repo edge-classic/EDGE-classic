@@ -254,7 +254,7 @@ void SoftInitializeResolution(void)
 {
     LogDebug("SoftInitializeResolution...\n");
 
-    RendererNewScreenSize(current_screen_width, current_screen_height, current_screen_depth);
+    NewScreenSize(current_screen_width, current_screen_height, current_screen_depth);
 
     if (current_screen_width < 720)
         current_font_size = 0;

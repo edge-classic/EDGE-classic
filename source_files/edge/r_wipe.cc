@@ -123,7 +123,7 @@ void BlackoutWipeTexture(void)
     current_wipe_texture = UploadTexture(&img);
 }
 
-static void RendererInitializeMelt(void)
+static void AllocateDrawStructsMelt(void)
 {
     int x, r;
 
@@ -138,7 +138,7 @@ static void RendererInitializeMelt(void)
     }
 }
 
-static void RendererUpdateMelt(int tics)
+static void UpdateMelt(int tics)
 {
     int x, r;
 
@@ -173,7 +173,7 @@ void InitializeWipe(ScreenWipe effect)
     CaptureScreenAsTexture(effect == kScreenWipePixelfade, effect == kScreenWipeSpooky);
 
     if (current_wipe_effect == kScreenWipeMelt)
-        RendererInitializeMelt();
+        AllocateDrawStructsMelt();
 }
 
 void StopWipe(void)
@@ -389,7 +389,7 @@ bool DoWipe(void)
     {
     case kScreenWipeMelt:
         RendererWipeMelt();
-        RendererUpdateMelt(tics);
+        UpdateMelt(tics);
         break;
 
     case kScreenWipeTop:

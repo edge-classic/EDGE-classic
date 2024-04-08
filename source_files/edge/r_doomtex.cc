@@ -276,7 +276,7 @@ static ImageData *ReadTextureAsEpiBlock(Image *rim)
 static ImageData *ReadPatchAsEpiBlock(Image *rim)
 {
     EPI_ASSERT(rim->source_type_ == kImageSourceGraphic || rim->source_type_ == kImageSourceSprite ||
-               rim->source_type_ == kImageSourceTxHi);
+               rim->source_type_ == kImageSourceTXHI);
 
     int         lump          = rim->source_.graphic.lump;
     const char *packfile_name = rim->source_.graphic.packfile_name;
@@ -553,7 +553,7 @@ ImageData *ReadAsEpiBlock(Image *rim)
 
     case kImageSourceGraphic:
     case kImageSourceSprite:
-    case kImageSourceTxHi:
+    case kImageSourceTXHI:
         return ReadPatchAsEpiBlock(rim);
 
     case kImageSourceDummy:

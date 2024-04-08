@@ -2047,7 +2047,7 @@ static void EdgeStartup(void)
     InitializeSaveSystem();
     PrecacheSounds();
     InitializeSprites();
-    ProcessTxHiNamespaces();
+    ProcessTXHINamespaces();
     InitializeModels();
 
     MenuInitialize();

@@ -1001,21 +1001,21 @@ void ImageAddTxHx(int lump, const char *name, bool hires)
         const Image *rim = ImageContainerLookup(real_textures, name, -2);
         if (rim && rim->source_type_ != kImageSourceUser)
         {
-            AddImage_Smart(name, kImageSourceTxHi, lump, real_textures, rim);
+            AddImage_Smart(name, kImageSourceTXHI, lump, real_textures, rim);
             return;
         }
 
         rim = ImageContainerLookup(real_flats, name, -2);
         if (rim && rim->source_type_ != kImageSourceUser)
         {
-            AddImage_Smart(name, kImageSourceTxHi, lump, real_flats, rim);
+            AddImage_Smart(name, kImageSourceTXHI, lump, real_flats, rim);
             return;
         }
 
         rim = ImageContainerLookup(real_sprites, name, -2);
         if (rim && rim->source_type_ != kImageSourceUser)
         {
-            AddImage_Smart(name, kImageSourceTxHi, lump, real_sprites, rim);
+            AddImage_Smart(name, kImageSourceTXHI, lump, real_sprites, rim);
             return;
         }
 
@@ -1024,14 +1024,14 @@ void ImageAddTxHx(int lump, const char *name, bool hires)
 
         if (rim && rim->source_type_ != kImageSourceUser)
         {
-            AddImage_Smart(name, kImageSourceTxHi, lump, real_graphics, rim);
+            AddImage_Smart(name, kImageSourceTXHI, lump, real_graphics, rim);
             return;
         }
 
         LogDebug("HIRES replacement '%s' has no counterpart.\n", name);
     }
 
-    AddImage_Smart(name, kImageSourceTxHi, lump, real_textures);
+    AddImage_Smart(name, kImageSourceTXHI, lump, real_textures);
 }
 
 //
@@ -1120,7 +1120,7 @@ static bool IM_ShouldMipmap(Image *rim)
     {
     case kImageSourceTexture:
     case kImageSourceFlat:
-    case kImageSourceTxHi:
+    case kImageSourceTXHI:
         return true;
 
     case kImageSourceUser:
@@ -1377,7 +1377,7 @@ static const Image *BackupTexture(const char *tex_name, int flags)
         int checklump = CheckLumpNumberForName(tex_name);
         if (checkfile > -1 && checklump > -1)
         {
-            for (auto patch_lump : *GetPatchListForWad(checkfile))
+            for (auto patch_lump : *GetPatchListForWAD(checkfile))
             {
                 if (patch_lump == checklump)
                 {
@@ -1670,7 +1670,7 @@ void ImageMakeSaveString(const Image *image, char *type, char *namebuf)
         (*type) = 'P';
         return;
 
-    case kImageSourceTxHi:
+    case kImageSourceTXHI:
     case kImageSourceTexture:
         (*type) = 'T';
         return;

@@ -382,7 +382,7 @@ bool WadFile::HasLevel(const char *name) const
     return false;
 }
 
-void GetTextureLumpsForWad(int file, WadTextureResource *res)
+void GetTextureLumpsForWAD(int file, WadTextureResource *res)
 {
     EPI_ASSERT(0 <= file && file < (int)data_files.size());
     EPI_ASSERT(res);
@@ -918,7 +918,7 @@ int CheckForUniqueGameLumps(epi::File *file)
     return -1;
 }
 
-void ProcessFixersForWad(DataFile *df)
+void ProcessFixersForWAD(DataFile *df)
 {
     // Special handling for Doom 2 BFG Edition
     if (df->kind_ == kFileKindIWAD || df->kind_ == kFileKindIPackWAD)
@@ -1191,7 +1191,7 @@ void ProcessWad(DataFile *df, size_t file_index)
     ProcessLuaInWad(df);
 }
 
-std::string BuildXGLNodesForWad(DataFile *df)
+std::string BuildXGLNodesForWAD(DataFile *df)
 {
     if (df->wad_->level_markers_.empty())
         return "";
@@ -2145,7 +2145,7 @@ int FindFlatSequence(const char *start, const char *end, int *s_offset, int *e_o
 }
 
 // returns nullptr for an empty list.
-std::vector<int> *GetFlatListForWad(int file)
+std::vector<int> *GetFlatListForWAD(int file)
 {
     EPI_ASSERT(0 <= file && file < (int)data_files.size());
 
@@ -2158,7 +2158,7 @@ std::vector<int> *GetFlatListForWad(int file)
     return nullptr;
 }
 
-std::vector<int> *GetSpriteListForWad(int file)
+std::vector<int> *GetSpriteListForWAD(int file)
 {
     EPI_ASSERT(0 <= file && file < (int)data_files.size());
 
@@ -2171,7 +2171,7 @@ std::vector<int> *GetSpriteListForWad(int file)
     return nullptr;
 }
 
-std::vector<int> *GetPatchListForWad(int file)
+std::vector<int> *GetPatchListForWAD(int file)
 {
     EPI_ASSERT(0 <= file && file < (int)data_files.size());
 
@@ -2271,7 +2271,7 @@ const char *GetLumpNameFromIndex(int lump)
     return lump_info[lump].name;
 }
 
-void ProcessTxHiNamespaces(void)
+void ProcessTXHINamespaces(void)
 {
     // Add the textures that occur in between TX_START/TX_END markers
 

@@ -316,13 +316,13 @@ class MidiSequencer
      * @brief Prepare internal events storage for track data building
      * @param track_count Count of tracks
      */
-    void BuildSmfSetupReset(size_t track_count);
+    void BuildSMFSetupReset(size_t track_count);
 
     /**
      * @brief Build MIDI track data from the raw track data storage
      * @return true if everything successfully processed, or false on any error
      */
-    bool BuildSmfTrackData(const std::vector<std::vector<uint8_t>> &track_data);
+    bool BuildSMFTrackData(const std::vector<std::vector<uint8_t>> &track_data);
 
     /**
      * @brief Build the time line from off loaded events
@@ -386,7 +386,7 @@ class MidiSequencer
         //! Id-Software Music File
         kFormatIMF,
         //! EA-MUS format
-        kFormatRsxx,
+        kFormatRSXX,
         //! AIL's XMIDI format (act same as MIDI, but with exceptions)
         kFormatXMidi
     };
@@ -870,40 +870,40 @@ class MidiSequencer
      * @param mfr mem_file_c with opened source file
      * @return true on successful load
      */
-    bool ParseRsxx(epi::MemFile *mfr);
+    bool ParseRSXX(epi::MemFile *mfr);
 
     /**
      * @brief Load file as GMD/MUS files (ScummVM)
      * @param mfr mem_file_c with opened source file
      * @return true on successful load
      */
-    bool ParseGmf(epi::MemFile *mfr);
+    bool ParseGMF(epi::MemFile *mfr);
 
     /**
      * @brief Load file as Standard MIDI file
      * @param mfr mem_file_c with opened source file
      * @return true on successful load
      */
-    bool ParseSmf(epi::MemFile *mfr);
+    bool ParseSMF(epi::MemFile *mfr);
 
     /**
      * @brief Load file as RIFF MIDI
      * @param mfr mem_file_c with opened source file
      * @return true on successful load
      */
-    bool ParseRmi(epi::MemFile *mfr);
+    bool ParseRMI(epi::MemFile *mfr);
 
     /**
      * @brief Load file as DMX MUS file (Doom)
      * @param mfr mem_file_c with opened source file
      * @return true on successful load
      */
-    bool ParseMus(epi::MemFile *mfr);
+    bool ParseMUS(epi::MemFile *mfr);
 
     /**
      * @brief Load file as AIL eXtended MIdi
      * @param mfr mem_file_c with opened source file
      * @return true on successful load
      */
-    bool ParseXmi(epi::MemFile *mfr);
+    bool ParseXMI(epi::MemFile *mfr);
 };

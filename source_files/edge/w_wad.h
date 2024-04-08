@@ -83,11 +83,11 @@ epi::File *LoadLumpAsFile(const char *name);
 
 int               GetPaletteForLump(int lump);
 int               FindFlatSequence(const char *start, const char *end, int *s_offset, int *e_offset);
-std::vector<int> *GetFlatListForWad(int file);
-std::vector<int> *GetSpriteListForWad(int file);
-std::vector<int> *GetPatchListForWad(int file);
-void              GetTextureLumpsForWad(int file, WadTextureResource *res);
-void              ProcessTxHiNamespaces(void);
+std::vector<int> *GetFlatListForWAD(int file);
+std::vector<int> *GetSpriteListForWAD(int file);
+std::vector<int> *GetPatchListForWAD(int file);
+void              GetTextureLumpsForWAD(int file, WadTextureResource *res);
+void              ProcessTXHINamespaces(void);
 int               GetDataFileIndexForLump(int lump);
 void              ShowLoadedLumps(int for_file, const char *match);
 

@@ -402,7 +402,7 @@ void MidiSequencer::SetSongNum(int track)
 
         epi::MemFile *mfr = new epi::MemFile(midi_raw_songs_data_[midi_load_track_number_].data(),
                                              midi_raw_songs_data_[midi_load_track_number_].size());
-        ParseSmf(mfr);
+        ParseSMF(mfr);
 
         midi_format_ = kFormatXMidi;
     }
@@ -481,7 +481,7 @@ double MidiSequencer::GetTempoMultiplier()
     return midi_tempo_multiplier_;
 }
 
-void MidiSequencer::BuildSmfSetupReset(size_t track_count)
+void MidiSequencer::BuildSMFSetupReset(size_t track_count)
 {
     midi_full_song_time_length_ = 0.0;
     midi_loop_start_time_       = -1.0;
@@ -509,10 +509,10 @@ void MidiSequencer::BuildSmfSetupReset(size_t track_count)
     midi_current_position_.track.resize(track_count);
 }
 
-bool MidiSequencer::BuildSmfTrackData(const std::vector<std::vector<uint8_t>> &track_data)
+bool MidiSequencer::BuildSMFTrackData(const std::vector<std::vector<uint8_t>> &track_data)
 {
     const size_t track_count = track_data.size();
-    BuildSmfSetupReset(track_count);
+    BuildSMFSetupReset(track_count);
 
     bool gotGlobalLoopStart = false, gotGlobalLoopEnd = false, gotStackLoopStart = false, gotLoopEventInThisRow = false;
 
@@ -555,7 +555,7 @@ bool MidiSequencer::BuildSmfTrackData(const std::vector<std::vector<uint8_t>> &t
         // Time delay that follows the first event in the track
         {
             MidiTrackRow evtPos;
-            if (midi_format_ == kFormatRsxx)
+            if (midi_format_ == kFormatRSXX)
                 ok = true;
             else
                 evtPos.delay_ = ReadVariableLengthValue(&trackPtr, end, ok);
@@ -2035,31 +2035,31 @@ bool MidiSequencer::LoadMidi(epi::MemFile *mfr, uint16_t rate)
     if (memcmp(headerBuf, "MThd\0\0\0\6", 8) == 0)
     {
         mfr->Seek(0, epi::File::kSeekpointStart);
-        return ParseSmf(mfr);
+        return ParseSMF(mfr);
     }
 
     if (memcmp(headerBuf, "RIFF", 4) == 0)
     {
         mfr->Seek(0, epi::File::kSeekpointStart);
-        return ParseRmi(mfr);
+        return ParseRMI(mfr);
     }
 
     if (memcmp(headerBuf, "GMF\x1", 4) == 0)
     {
         mfr->Seek(0, epi::File::kSeekpointStart);
-        return ParseGmf(mfr);
+        return ParseGMF(mfr);
     }
 
     if (memcmp(headerBuf, "MUS\x1A", 4) == 0)
     {
         mfr->Seek(0, epi::File::kSeekpointStart);
-        return ParseMus(mfr);
+        return ParseMUS(mfr);
     }
 
     if ((memcmp(headerBuf, "FORM", 4) == 0) && (memcmp(headerBuf + 8, "XDIR", 4) == 0))
     {
         mfr->Seek(0, epi::File::kSeekpointStart);
-        return ParseXmi(mfr);
+        return ParseXMI(mfr);
     }
 
     if (detectIMF(headerBuf, mfr))
@@ -2071,7 +2071,7 @@ bool MidiSequencer::LoadMidi(epi::MemFile *mfr, uint16_t rate)
     if (detectRSXX(headerBuf, mfr))
     {
         mfr->Seek(0, epi::File::kSeekpointStart);
-        return ParseRsxx(mfr);
+        return ParseRSXX(mfr);
     }
 
     midi_error_string_ = "Unknown or unsupported file format";
@@ -2111,7 +2111,7 @@ bool MidiSequencer::ParseIMF(epi::MemFile *mfr, uint16_t rate)
 
     midi_format_ = kFormatIMF;
 
-    BuildSmfSetupReset(track_count);
+    BuildSMFSetupReset(track_count);
 
     midi_individual_tick_delta_ = MidiFraction(1, 1000000l * (uint64_t)(deltaTicks));
     midi_tempo_                 = MidiFraction(1, (uint64_t)(deltaTicks) * 2);
@@ -2186,7 +2186,7 @@ bool MidiSequencer::ParseIMF(epi::MemFile *mfr, uint16_t rate)
     return true;
 }
 
-bool MidiSequencer::ParseRsxx(epi::MemFile *mfr)
+bool MidiSequencer::ParseRSXX(epi::MemFile *mfr)
 {
     const size_t                      headerSize            = 14;
     char                              headerBuf[headerSize] = "";
@@ -2216,7 +2216,7 @@ bool MidiSequencer::ParseRsxx(epi::MemFile *mfr)
         mfr->Read(headerBuf, 6);
         if (memcmp(headerBuf, "rsxx}u", 6) == 0)
         {
-            midi_format_ = kFormatRsxx;
+            midi_format_ = kFormatRSXX;
             mfr->Seek(start, epi::File::kSeekpointStart);
             track_count = 1;
             deltaTicks  = 60;
@@ -2273,7 +2273,7 @@ bool MidiSequencer::ParseRsxx(epi::MemFile *mfr)
     }
 
     // Build new MIDI events table
-    if (!BuildSmfTrackData(rawTrackData))
+    if (!BuildSMFTrackData(rawTrackData))
     {
         midi_error_string_ = "MIDI Loader: MIDI data parsing error has occouped!\n" + midi_parsing_errors_string_;
         delete mfr;
@@ -2288,7 +2288,7 @@ bool MidiSequencer::ParseRsxx(epi::MemFile *mfr)
     return true;
 }
 
-bool MidiSequencer::ParseGmf(epi::MemFile *mfr)
+bool MidiSequencer::ParseGMF(epi::MemFile *mfr)
 {
     const size_t                      headerSize            = 14;
     char                              headerBuf[headerSize] = "";
@@ -2355,7 +2355,7 @@ bool MidiSequencer::ParseGmf(epi::MemFile *mfr)
     }
 
     // Build new MIDI events table
-    if (!BuildSmfTrackData(rawTrackData))
+    if (!BuildSMFTrackData(rawTrackData))
     {
         midi_error_string_ = "MIDI Loader: : MIDI data parsing error has occouped!\n" + midi_parsing_errors_string_;
         delete mfr;
@@ -2367,7 +2367,7 @@ bool MidiSequencer::ParseGmf(epi::MemFile *mfr)
     return true;
 }
 
-bool MidiSequencer::ParseSmf(epi::MemFile *mfr)
+bool MidiSequencer::ParseSMF(epi::MemFile *mfr)
 {
     const size_t                      headerSize            = 14; // 4 + 4 + 2 + 2 + 2
     char                              headerBuf[headerSize] = "";
@@ -2444,7 +2444,7 @@ bool MidiSequencer::ParseSmf(epi::MemFile *mfr)
     }
 
     // Build new MIDI events table
-    if (!BuildSmfTrackData(rawTrackData))
+    if (!BuildSMFTrackData(rawTrackData))
     {
         midi_error_string_ = "MIDI Loader: MIDI data parsing error has occouped!\n" + midi_parsing_errors_string_;
         delete mfr;
@@ -2459,7 +2459,7 @@ bool MidiSequencer::ParseSmf(epi::MemFile *mfr)
     return true;
 }
 
-bool MidiSequencer::ParseRmi(epi::MemFile *mfr)
+bool MidiSequencer::ParseRMI(epi::MemFile *mfr)
 {
     const size_t headerSize            = 4 + 4 + 2 + 2 + 2; // 14
     char         headerBuf[headerSize] = "";
@@ -2482,10 +2482,10 @@ bool MidiSequencer::ParseRmi(epi::MemFile *mfr)
     midi_format_ = kFormatMidi;
 
     mfr->Seek(6l, epi::File::kSeekpointCurrent);
-    return ParseSmf(mfr);
+    return ParseSMF(mfr);
 }
 
-bool MidiSequencer::ParseMus(epi::MemFile *mfr)
+bool MidiSequencer::ParseMUS(epi::MemFile *mfr)
 {
     const size_t         headerSize            = 14;
     char                 headerBuf[headerSize] = "";
@@ -2548,10 +2548,10 @@ bool MidiSequencer::ParseMus(epi::MemFile *mfr)
     // Open converted MIDI file
     mfr = new epi::MemFile(mid, (size_t)(mid_len));
 
-    return ParseSmf(mfr);
+    return ParseSMF(mfr);
 }
 
-bool MidiSequencer::ParseXmi(epi::MemFile *mfr)
+bool MidiSequencer::ParseXMI(epi::MemFile *mfr)
 {
     const size_t                      headerSize            = 14;
     char                              headerBuf[headerSize] = "";
@@ -2606,7 +2606,7 @@ bool MidiSequencer::ParseXmi(epi::MemFile *mfr)
     delete mfr;
     mfr = nullptr;
 
-    int m2mret = ConvertXmiToMidi(mus, (uint32_t)(mus_len + 20), song_buf, kXmiNoConversion);
+    int m2mret = ConvertXMIToMidi(mus, (uint32_t)(mus_len + 20), song_buf, kXMINoConversion);
     if (mus)
         free(mus);
     if (m2mret < 0)
@@ -2632,7 +2632,7 @@ bool MidiSequencer::ParseXmi(epi::MemFile *mfr)
     // Set format as XMIDI
     midi_format_ = kFormatXMidi;
 
-    ret = ParseSmf(mfr);
+    ret = ParseSMF(mfr);
 
     return ret;
 }

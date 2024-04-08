@@ -301,7 +301,7 @@ static void FillSpriteFrames(int file)
 {
     if (data_files[file]->wad_)
     {
-        std::vector<int> *lumps = GetSpriteListForWad(file);
+        std::vector<int> *lumps = GetSpriteListForWAD(file);
         if (lumps == nullptr)
             return;
 

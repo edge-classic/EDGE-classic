@@ -99,7 +99,7 @@ static void AddFlatAnimation(AnimationDefinition *anim)
             return;
         }
 
-        std::vector<int> *lumps = GetFlatListForWad(file);
+        std::vector<int> *lumps = GetFlatListForWAD(file);
         if (lumps == nullptr)
             return;
 
@@ -275,7 +275,7 @@ void InitializeFlats(void)
 
     for (file = 0; file < max_file; file++)
     {
-        std::vector<int> *lumps = GetFlatListForWad(file);
+        std::vector<int> *lumps = GetFlatListForWAD(file);
         if (lumps == nullptr)
             continue;
 

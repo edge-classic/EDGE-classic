@@ -94,10 +94,10 @@ size_t AddPendingFile(std::string file, FileKind kind)
 }
 
 // TODO tidy this
-extern void ProcessFixersForWad(DataFile *df);
+extern void ProcessFixersForWAD(DataFile *df);
 extern void ProcessWad(DataFile *df, size_t file_index);
 
-extern std::string BuildXGLNodesForWad(DataFile *df);
+extern std::string BuildXGLNodesForWAD(DataFile *df);
 
 static void DEH_ConvertFile(std::string &filename)
 {
@@ -226,7 +226,7 @@ void ProcessFile(DataFile *df)
 
     // handle fixer-uppers   [ TODO support it for EPK files too ]
     if (df->wad_ != nullptr)
-        ProcessFixersForWad(df);
+        ProcessFixersForWAD(df);
 }
 
 void ProcessMultipleFiles()
@@ -260,7 +260,7 @@ void BuildXGLNodes(void)
         if (df->kind_ == kFileKindIWAD || df->kind_ == kFileKindPWAD || df->kind_ == kFileKindPackWAD ||
             df->kind_ == kFileKindIPackWAD)
         {
-            std::string xwa_filename = BuildXGLNodesForWad(df);
+            std::string xwa_filename = BuildXGLNodesForWAD(df);
 
             if (!xwa_filename.empty())
             {

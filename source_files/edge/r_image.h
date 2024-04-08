@@ -112,7 +112,7 @@ class Image
     union {
         // case kImageSourceGraphic:
         // case kImageSourceSprite:
-        // case kImageSourceTxHi:
+        // case kImageSourceTXHI:
         struct
         {
             int          lump;
@@ -313,7 +313,7 @@ enum ImageSource
     kImageSourceUser,
 
     // INTERNAL ONLY: Source is from TX_START/END or HI_START/END
-    kImageSourceTxHi,
+    kImageSourceTXHI,
 
     // INTERNAL ONLY: Source is dummy image
     kImageSourceDummy,

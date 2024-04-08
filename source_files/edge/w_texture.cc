@@ -411,7 +411,7 @@ void InitializeTextures(void)
     {
         WadTextureResource WT;
 
-        GetTextureLumpsForWad(file, &WT);
+        GetTextureLumpsForWAD(file, &WT);
 
         if (WT.pnames < 0)
             continue;

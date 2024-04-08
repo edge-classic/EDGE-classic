@@ -35,36 +35,36 @@
 
 #include <vector>
 
-enum XmiConversionType
+enum XMIConversionType
 {
-    kXmiNoConversion           = 0x00,
-    kXmiConvertMt32ToGm        = 0x01,
-    kXmiConvertMt32ToGs        = 0x02,
-    kXmiConvertMt32ToGs127     = 0x03,
-    kXmiConvertMt32ToGs127Drum = 0x04,
-    kXmiConvertGs127ToGs       = 0x05
+    kXMINoConversion           = 0x00,
+    kXMIConvertMt32ToGm        = 0x01,
+    kXMIConvertMt32ToGs        = 0x02,
+    kXMIConvertMt32ToGs127     = 0x03,
+    kXMIConvertMt32ToGs127Drum = 0x04,
+    kXMIConvertGs127ToGs       = 0x05
 };
 
-enum XmiStatusByte
+enum XMIStatusByte
 {
-    kXmiStatusNoteOff       = 0x8,
-    kXmiStatusNoteOn        = 0x9,
-    kXmiStatusAftertouch    = 0xA,
-    kXmiStatusController    = 0xB,
-    kXmiStatusProgramChange = 0xC,
-    kXmiStatusPressure      = 0xD,
-    kXmiStatusPitchWheel    = 0xE,
-    kXmiStatusSysex         = 0xF
+    kXMIStatusNoteOff       = 0x8,
+    kXMIStatusNoteOn        = 0x9,
+    kXMIStatusAftertouch    = 0xA,
+    kXMIStatusController    = 0xB,
+    kXMIStatusProgramChange = 0xC,
+    kXMIStatusPressure      = 0xD,
+    kXMIStatusPitchWheel    = 0xE,
+    kXMIStatusSysex         = 0xF
 };
 
-struct XmiToMidiEvent
+struct XMIToMidiEvent
 {
     int32_t         time;
     uint8_t         status;
     uint8_t         data[2];
     uint32_t        len;
     uint8_t        *buffer;
-    XmiToMidiEvent *next;
+    XMIToMidiEvent *next;
 };
 
 struct MidiDescriptor
@@ -73,7 +73,7 @@ struct MidiDescriptor
     uint16_t tracks;
 };
 
-struct XmiToMidiConversionContext
+struct XMIToMidiConversionContext
 {
     uint8_t                           *src, *src_ptr, *src_end;
     uint32_t                           srcsize;
@@ -83,15 +83,15 @@ struct XmiToMidiConversionContext
     uint32_t                           convert_type;
     MidiDescriptor                     info;
     int                                bank127[16];
-    XmiToMidiEvent                   **events;
+    XMIToMidiEvent                   **events;
     int16_t                           *timing;
-    XmiToMidiEvent                    *list;
-    XmiToMidiEvent                    *current;
+    XMIToMidiEvent                    *list;
+    XMIToMidiEvent                    *current;
     std::vector<std::vector<uint8_t>> *dyn_out;
     std::vector<uint8_t>              *dyn_out_cur;
 };
 
-struct XmiToMidiBranch
+struct XMIToMidiBranch
 {
     unsigned count;
     uint8_t  id[128];
@@ -99,22 +99,22 @@ struct XmiToMidiBranch
 };
 
 /* forward declarations of private functions */
-static void    XmiToMidiDeleteEventList(XmiToMidiEvent *mlist);
-static void    XmiToMidiCreateNewEvent(struct XmiToMidiConversionContext *ctx, int32_t time); /* List manipulation */
-static int     XmiToMidiGetVlq(struct XmiToMidiConversionContext *ctx, uint32_t *quant);  /* Variable length quantity */
-static int     XmiToMidiGetVlq2(struct XmiToMidiConversionContext *ctx, uint32_t *quant); /* Variable length quantity */
-static int     XmiToMidiPutVlq(struct XmiToMidiConversionContext *ctx, uint32_t value);   /* Variable length quantity */
-static int     XmiToMidiConvertEvent(struct XmiToMidiConversionContext *ctx, const int32_t time, const uint8_t status,
+static void    XMIToMidiDeleteEventList(XMIToMidiEvent *mlist);
+static void    XMIToMidiCreateNewEvent(struct XMIToMidiConversionContext *ctx, int32_t time); /* List manipulation */
+static int     XMIToMidiGetVlq(struct XMIToMidiConversionContext *ctx, uint32_t *quant);  /* Variable length quantity */
+static int     XMIToMidiGetVlq2(struct XMIToMidiConversionContext *ctx, uint32_t *quant); /* Variable length quantity */
+static int     XMIToMidiPutVlq(struct XMIToMidiConversionContext *ctx, uint32_t value);   /* Variable length quantity */
+static int     XMIToMidiConvertEvent(struct XMIToMidiConversionContext *ctx, const int32_t time, const uint8_t status,
                                      const int size);
-static int32_t XmiToMidiConvertSystemMessage(struct XmiToMidiConversionContext *ctx, const int32_t time,
+static int32_t XMIToMidiConvertSystemMessage(struct XMIToMidiConversionContext *ctx, const int32_t time,
                                              const uint8_t status);
-static int32_t XmiToMidiConvertFiletoList(struct XmiToMidiConversionContext *ctx, const XmiToMidiBranch *rbrn);
-static uint32_t XmiToMidiConvertListToMidiTrack(struct XmiToMidiConversionContext *ctx, XmiToMidiEvent *mlist);
-static int      XmiToMidiParseXmi(struct XmiToMidiConversionContext *ctx);
-static int      XmiToMidiExtractTracks(struct XmiToMidiConversionContext *ctx, int32_t dstTrackNumber);
-static uint32_t XmiToMidiExtractTracksFromXmi(struct XmiToMidiConversionContext *ctx);
+static int32_t XMIToMidiConvertFiletoList(struct XMIToMidiConversionContext *ctx, const XMIToMidiBranch *rbrn);
+static uint32_t XMIToMidiConvertListToMidiTrack(struct XMIToMidiConversionContext *ctx, XMIToMidiEvent *mlist);
+static int      XMIToMidiParseXMI(struct XMIToMidiConversionContext *ctx);
+static int      XMIToMidiExtractTracks(struct XMIToMidiConversionContext *ctx, int32_t dstTrackNumber);
+static uint32_t XMIToMidiExtractTracksFromXMI(struct XMIToMidiConversionContext *ctx);
 
-static uint32_t XmiToMidiRead1(struct XmiToMidiConversionContext *ctx)
+static uint32_t XMIToMidiRead1(struct XMIToMidiConversionContext *ctx)
 {
     uint8_t b0;
     assert(ctx->src_ptr + 1 < ctx->src_end);
@@ -122,7 +122,7 @@ static uint32_t XmiToMidiRead1(struct XmiToMidiConversionContext *ctx)
     return (b0);
 }
 
-static uint32_t XmiToMidiRead2(struct XmiToMidiConversionContext *ctx)
+static uint32_t XMIToMidiRead2(struct XMIToMidiConversionContext *ctx)
 {
     uint8_t b0, b1;
     assert(ctx->src_ptr + 2 < ctx->src_end);
@@ -131,7 +131,7 @@ static uint32_t XmiToMidiRead2(struct XmiToMidiConversionContext *ctx)
     return (b0 + ((uint32_t)b1 << 8));
 }
 
-static uint32_t XmiToMidiRead4(struct XmiToMidiConversionContext *ctx)
+static uint32_t XMIToMidiRead4(struct XMIToMidiConversionContext *ctx)
 {
     uint8_t b0, b1, b2, b3;
     assert(ctx->src_ptr + 4 < ctx->src_end);
@@ -142,7 +142,7 @@ static uint32_t XmiToMidiRead4(struct XmiToMidiConversionContext *ctx)
     return (b0 + ((uint32_t)b1 << 8) + ((uint32_t)b2 << 16) + ((uint32_t)b3 << 24));
 }
 
-static uint32_t XmiToMidiRead4LittleEndian(struct XmiToMidiConversionContext *ctx)
+static uint32_t XMIToMidiRead4LittleEndian(struct XMIToMidiConversionContext *ctx)
 {
     uint8_t b0, b1, b2, b3;
     assert(ctx->src_ptr + 4 < ctx->src_end);
@@ -153,7 +153,7 @@ static uint32_t XmiToMidiRead4LittleEndian(struct XmiToMidiConversionContext *ct
     return (b3 + ((uint32_t)b2 << 8) + ((uint32_t)b1 << 16) + ((uint32_t)b0 << 24));
 }
 
-static void XmiToMidiCopy(struct XmiToMidiConversionContext *ctx, char *b, uint32_t len)
+static void XMIToMidiCopy(struct XMIToMidiConversionContext *ctx, char *b, uint32_t len)
 {
     assert(ctx->src_ptr + len < ctx->src_end);
     memcpy(b, ctx->src_ptr, len);
@@ -161,7 +161,7 @@ static void XmiToMidiCopy(struct XmiToMidiConversionContext *ctx, char *b, uint3
 }
 
 static constexpr uint16_t kDestinationChunkSize = 8192;
-static void               XmiToMidiResizeDestination(struct XmiToMidiConversionContext *ctx)
+static void               XMIToMidiResizeDestination(struct XMIToMidiConversionContext *ctx)
 {
     uint32_t pos = (uint32_t)(ctx->dst_ptr - ctx->dst);
     if (ctx->dyn_out && ctx->dyn_out_cur)
@@ -176,27 +176,27 @@ static void               XmiToMidiResizeDestination(struct XmiToMidiConversionC
     ctx->dst_ptr = ctx->dst + pos;
 }
 
-static void XmiToMidiWrite1(struct XmiToMidiConversionContext *ctx, uint32_t val)
+static void XMIToMidiWrite1(struct XMIToMidiConversionContext *ctx, uint32_t val)
 {
     if (ctx->dstrem < 1)
-        XmiToMidiResizeDestination(ctx);
+        XMIToMidiResizeDestination(ctx);
     *ctx->dst_ptr++ = val & 0xff;
     ctx->dstrem--;
 }
 
-static void XmiToMidiWrite2(struct XmiToMidiConversionContext *ctx, uint32_t val)
+static void XMIToMidiWrite2(struct XMIToMidiConversionContext *ctx, uint32_t val)
 {
     if (ctx->dstrem < 2)
-        XmiToMidiResizeDestination(ctx);
+        XMIToMidiResizeDestination(ctx);
     *ctx->dst_ptr++ = (val >> 8) & 0xff;
     *ctx->dst_ptr++ = val & 0xff;
     ctx->dstrem -= 2;
 }
 
-static void XmiToMidiWrite4(struct XmiToMidiConversionContext *ctx, uint32_t val)
+static void XMIToMidiWrite4(struct XMIToMidiConversionContext *ctx, uint32_t val)
 {
     if (ctx->dstrem < 4)
-        XmiToMidiResizeDestination(ctx);
+        XMIToMidiResizeDestination(ctx);
     *ctx->dst_ptr++ = (val >> 24) & 0xff;
     *ctx->dst_ptr++ = (val >> 16) & 0xff;
     *ctx->dst_ptr++ = (val >> 8) & 0xff;
@@ -204,45 +204,45 @@ static void XmiToMidiWrite4(struct XmiToMidiConversionContext *ctx, uint32_t val
     ctx->dstrem -= 4;
 }
 
-static void XmiToMidiSeekSource(struct XmiToMidiConversionContext *ctx, uint32_t pos)
+static void XMIToMidiSeekSource(struct XMIToMidiConversionContext *ctx, uint32_t pos)
 {
     ctx->src_ptr = ctx->src + pos;
 }
 
-static void XmiToMidiSeekDestination(struct XmiToMidiConversionContext *ctx, uint32_t pos)
+static void XMIToMidiSeekDestination(struct XMIToMidiConversionContext *ctx, uint32_t pos)
 {
     ctx->dst_ptr = ctx->dst + pos;
     while (ctx->dstsize < pos)
-        XmiToMidiResizeDestination(ctx);
+        XMIToMidiResizeDestination(ctx);
     ctx->dstrem = ctx->dstsize - pos;
 }
 
-static void XmiToMidiSkipSource(struct XmiToMidiConversionContext *ctx, int32_t pos)
+static void XMIToMidiSkipSource(struct XMIToMidiConversionContext *ctx, int32_t pos)
 {
     ctx->src_ptr += pos;
 }
 
-static void XmiToMidiSkipDestination(struct XmiToMidiConversionContext *ctx, int32_t pos)
+static void XMIToMidiSkipDestination(struct XMIToMidiConversionContext *ctx, int32_t pos)
 {
     size_t newpos;
     ctx->dst_ptr += pos;
     newpos = ctx->dst_ptr - ctx->dst;
     while (ctx->dstsize < newpos)
-        XmiToMidiResizeDestination(ctx);
+        XMIToMidiResizeDestination(ctx);
     ctx->dstrem = (uint32_t)(ctx->dstsize - newpos);
 }
 
-static uint32_t XmiToMidiGetSourceSize(struct XmiToMidiConversionContext *ctx)
+static uint32_t XMIToMidiGetSourceSize(struct XMIToMidiConversionContext *ctx)
 {
     return (ctx->srcsize);
 }
 
-static uint32_t XmiToMidiGetSourcePosition(struct XmiToMidiConversionContext *ctx)
+static uint32_t XMIToMidiGetSourcePosition(struct XMIToMidiConversionContext *ctx)
 {
     return (uint32_t)(ctx->src_ptr - ctx->src);
 }
 
-static uint32_t XmiToMidiGetDestinationPosition(struct XmiToMidiConversionContext *ctx)
+static uint32_t XMIToMidiGetDestinationPosition(struct XMIToMidiConversionContext *ctx)
 {
     return (uint32_t)(ctx->dst_ptr - ctx->dst);
 }
@@ -650,34 +650,34 @@ static constexpr char Mt32ToGsMap[256] = {
     0  /* 127 Jungle Tune set to Breath Noise */
 };
 
-static int ConvertXmiToMidi(uint8_t *in, uint32_t insize, std::vector<std::vector<uint8_t>> &out, uint32_t convert_type)
+static int ConvertXMIToMidi(uint8_t *in, uint32_t insize, std::vector<std::vector<uint8_t>> &out, uint32_t convert_type)
 {
-    struct XmiToMidiConversionContext ctx;
+    struct XMIToMidiConversionContext ctx;
     unsigned int                      i;
     int                               ret = -1;
 
-    if (convert_type > kXmiConvertMt32ToGs)
+    if (convert_type > kXMIConvertMt32ToGs)
     {
         /*_WM_ERROR_NEW("%s:%i:  %d is an invalid conversion type.",
          * __FUNCTION__, __LINE__, convert_type);*/
         return (ret);
     }
 
-    memset(&ctx, 0, sizeof(struct XmiToMidiConversionContext));
+    memset(&ctx, 0, sizeof(struct XMIToMidiConversionContext));
     ctx.src = ctx.src_ptr = in;
     ctx.srcsize           = insize;
     ctx.src_end           = ctx.src + insize;
     ctx.convert_type      = convert_type;
     ctx.dyn_out           = &out;
 
-    if (XmiToMidiParseXmi(&ctx) < 0)
+    if (XMIToMidiParseXMI(&ctx) < 0)
     {
         /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_NOT_XMI, nullptr,
          * 0);*/
         goto _end;
     }
 
-    if (XmiToMidiExtractTracks(&ctx, 0) < 0)
+    if (XMIToMidiExtractTracks(&ctx, 0) < 0)
     {
         /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_NOT_MIDI, nullptr,
          * 0);*/
@@ -695,18 +695,18 @@ static int ConvertXmiToMidi(uint8_t *in, uint32_t insize, std::vector<std::vecto
         ctx.dstrem  = kDestinationChunkSize;
 
         /* Header is 14 bytes long and add the rest as well */
-        XmiToMidiWrite1(&ctx, 'M');
-        XmiToMidiWrite1(&ctx, 'T');
-        XmiToMidiWrite1(&ctx, 'h');
-        XmiToMidiWrite1(&ctx, 'd');
+        XMIToMidiWrite1(&ctx, 'M');
+        XMIToMidiWrite1(&ctx, 'T');
+        XMIToMidiWrite1(&ctx, 'h');
+        XMIToMidiWrite1(&ctx, 'd');
 
-        XmiToMidiWrite4(&ctx, 6);
+        XMIToMidiWrite4(&ctx, 6);
 
-        XmiToMidiWrite2(&ctx, ctx.info.type);
-        XmiToMidiWrite2(&ctx, 1);
-        XmiToMidiWrite2(&ctx, ctx.timing[i]); /* write divisions from track0 */
+        XMIToMidiWrite2(&ctx, ctx.info.type);
+        XMIToMidiWrite2(&ctx, 1);
+        XMIToMidiWrite2(&ctx, ctx.timing[i]); /* write divisions from track0 */
 
-        XmiToMidiConvertListToMidiTrack(&ctx, ctx.events[i]);
+        XMIToMidiConvertListToMidiTrack(&ctx, ctx.events[i]);
         ctx.dyn_out_cur->resize(ctx.dstsize - ctx.dstrem);
     }
 
@@ -720,7 +720,7 @@ _end: /* cleanup */
     if (ctx.events)
     {
         for (i = 0; i < ctx.info.tracks; i++)
-            XmiToMidiDeleteEventList(ctx.events[i]);
+            XMIToMidiDeleteEventList(ctx.events[i]);
         free(ctx.events);
     }
     free(ctx.timing);
@@ -728,10 +728,10 @@ _end: /* cleanup */
     return (ret);
 }
 
-static void XmiToMidiDeleteEventList(XmiToMidiEvent *mlist)
+static void XMIToMidiDeleteEventList(XMIToMidiEvent *mlist)
 {
-    XmiToMidiEvent *event;
-    XmiToMidiEvent *next;
+    XMIToMidiEvent *event;
+    XMIToMidiEvent *next;
 
     next = mlist;
 
@@ -744,18 +744,18 @@ static void XmiToMidiDeleteEventList(XmiToMidiEvent *mlist)
 }
 
 /* Sets current to the new event and updates list */
-static void XmiToMidiCreateNewEvent(struct XmiToMidiConversionContext *ctx, int32_t time)
+static void XMIToMidiCreateNewEvent(struct XMIToMidiConversionContext *ctx, int32_t time)
 {
     if (!ctx->list)
     {
-        ctx->list = ctx->current = (XmiToMidiEvent *)calloc(1, sizeof(XmiToMidiEvent));
+        ctx->list = ctx->current = (XMIToMidiEvent *)calloc(1, sizeof(XMIToMidiEvent));
         ctx->current->time       = (time < 0) ? 0 : time;
         return;
     }
 
     if (time < 0)
     {
-        XmiToMidiEvent *event = (XmiToMidiEvent *)calloc(1, sizeof(XmiToMidiEvent));
+        XMIToMidiEvent *event = (XMIToMidiEvent *)calloc(1, sizeof(XMIToMidiEvent));
         event->next           = ctx->list;
         ctx->list = ctx->current = event;
         return;
@@ -768,7 +768,7 @@ static void XmiToMidiCreateNewEvent(struct XmiToMidiConversionContext *ctx, int3
     {
         if (ctx->current->next->time > time)
         {
-            XmiToMidiEvent *event = (XmiToMidiEvent *)calloc(1, sizeof(XmiToMidiEvent));
+            XMIToMidiEvent *event = (XMIToMidiEvent *)calloc(1, sizeof(XMIToMidiEvent));
             event->next           = ctx->current->next;
             ctx->current->next    = event;
             ctx->current          = event;
@@ -779,13 +779,13 @@ static void XmiToMidiCreateNewEvent(struct XmiToMidiConversionContext *ctx, int3
         ctx->current = ctx->current->next;
     }
 
-    ctx->current->next = (XmiToMidiEvent *)calloc(1, sizeof(XmiToMidiEvent));
+    ctx->current->next = (XMIToMidiEvent *)calloc(1, sizeof(XMIToMidiEvent));
     ctx->current       = ctx->current->next;
     ctx->current->time = time;
 }
 
 /* Conventional Variable Length Quantity */
-static int XmiToMidiGetVlq(struct XmiToMidiConversionContext *ctx, uint32_t *quant)
+static int XMIToMidiGetVlq(struct XMIToMidiConversionContext *ctx, uint32_t *quant)
 {
     int      i;
     uint32_t data;
@@ -795,7 +795,7 @@ static int XmiToMidiGetVlq(struct XmiToMidiConversionContext *ctx, uint32_t *qua
     {
         if (ctx->src_ptr + 1 >= ctx->src + ctx->srcsize)
             break;
-        data = XmiToMidiRead1(ctx);
+        data = XMIToMidiRead1(ctx);
         *quant <<= 7;
         *quant |= data & 0x7F;
 
@@ -809,18 +809,18 @@ static int XmiToMidiGetVlq(struct XmiToMidiConversionContext *ctx, uint32_t *qua
 }
 
 /* XMIDI Delta Variable Length Quantity */
-static int XmiToMidiGetVlq2(struct XmiToMidiConversionContext *ctx, uint32_t *quant)
+static int XMIToMidiGetVlq2(struct XMIToMidiConversionContext *ctx, uint32_t *quant)
 {
     int     i;
     int32_t data;
 
     *quant = 0;
-    for (i = 0; XmiToMidiGetSourcePosition(ctx) != XmiToMidiGetSourceSize(ctx); ++i)
+    for (i = 0; XMIToMidiGetSourcePosition(ctx) != XMIToMidiGetSourceSize(ctx); ++i)
     {
-        data = XmiToMidiRead1(ctx);
+        data = XMIToMidiRead1(ctx);
         if (data & 0x80)
         {
-            XmiToMidiSkipSource(ctx, -1);
+            XMIToMidiSkipSource(ctx, -1);
             break;
         }
         *quant += data;
@@ -828,7 +828,7 @@ static int XmiToMidiGetVlq2(struct XmiToMidiConversionContext *ctx, uint32_t *qu
     return (i);
 }
 
-static int XmiToMidiPutVlq(struct XmiToMidiConversionContext *ctx, uint32_t value)
+static int XMIToMidiPutVlq(struct XMIToMidiConversionContext *ctx, uint32_t value)
 {
     int32_t buffer;
     int     i = 1, j;
@@ -841,7 +841,7 @@ static int XmiToMidiPutVlq(struct XmiToMidiConversionContext *ctx, uint32_t valu
     }
     for (j = 0; j < i; j++)
     {
-        XmiToMidiWrite1(ctx, buffer & 0xFF);
+        XMIToMidiWrite1(ctx, buffer & 0xFF);
         buffer >>= 8;
     }
 
@@ -855,15 +855,15 @@ static int XmiToMidiPutVlq(struct XmiToMidiConversionContext *ctx, uint32_t valu
  * size 2 is dual data byte
  * size 3 is XMI Note on
  * Returns bytes converted  */
-static int XmiToMidiConvertEvent(struct XmiToMidiConversionContext *ctx, const int32_t time, const uint8_t status,
+static int XMIToMidiConvertEvent(struct XMIToMidiConversionContext *ctx, const int32_t time, const uint8_t status,
                                  const int size)
 {
     uint32_t        delta = 0;
     int32_t         data;
-    XmiToMidiEvent *prev;
+    XMIToMidiEvent *prev;
     int             i;
 
-    data = XmiToMidiRead1(ctx);
+    data = XMIToMidiRead1(ctx);
 
     /*HACK!*/
     if (((status >> 4) == 0xB) && (status & 0xF) != 9 && (data == 114))
@@ -874,21 +874,21 @@ static int XmiToMidiConvertEvent(struct XmiToMidiConversionContext *ctx, const i
     /* Bank changes are handled here */
     if ((status >> 4) == 0xB && data == 0)
     {
-        data = XmiToMidiRead1(ctx);
+        data = XMIToMidiRead1(ctx);
 
         ctx->bank127[status & 0xF] = 0;
 
-        if (ctx->convert_type == kXmiConvertMt32ToGm || ctx->convert_type == kXmiConvertMt32ToGs ||
-            ctx->convert_type == kXmiConvertMt32ToGs127 ||
-            (ctx->convert_type == kXmiConvertMt32ToGs127Drum && (status & 0xF) == 9))
+        if (ctx->convert_type == kXMIConvertMt32ToGm || ctx->convert_type == kXMIConvertMt32ToGs ||
+            ctx->convert_type == kXMIConvertMt32ToGs127 ||
+            (ctx->convert_type == kXMIConvertMt32ToGs127Drum && (status & 0xF) == 9))
             return (2);
 
-        XmiToMidiCreateNewEvent(ctx, time);
+        XMIToMidiCreateNewEvent(ctx, time);
         ctx->current->status  = status;
         ctx->current->data[0] = 0;
         ctx->current->data[1] = data == 127 ? 0 : data; /*HACK:*/
 
-        if (ctx->convert_type == kXmiConvertGs127ToGs && data == 127)
+        if (ctx->convert_type == kXMIConvertGs127ToGs && data == 127)
             ctx->bank127[status & 0xF] = 1;
 
         return (2);
@@ -896,25 +896,25 @@ static int XmiToMidiConvertEvent(struct XmiToMidiConversionContext *ctx, const i
 
     /* Handling for patch change mt32 conversion, probably should go elsewhere
      */
-    if ((status >> 4) == 0xC && (status & 0xF) != 9 && ctx->convert_type != kXmiNoConversion)
+    if ((status >> 4) == 0xC && (status & 0xF) != 9 && ctx->convert_type != kXMINoConversion)
     {
-        if (ctx->convert_type == kXmiConvertMt32ToGm)
+        if (ctx->convert_type == kXMIConvertMt32ToGm)
         {
             data = Mt32ToGmMap[data];
         }
-        else if ((ctx->convert_type == kXmiConvertGs127ToGs && ctx->bank127[status & 0xF]) ||
-                 ctx->convert_type == kXmiConvertMt32ToGs || ctx->convert_type == kXmiConvertMt32ToGs127Drum)
+        else if ((ctx->convert_type == kXMIConvertGs127ToGs && ctx->bank127[status & 0xF]) ||
+                 ctx->convert_type == kXMIConvertMt32ToGs || ctx->convert_type == kXMIConvertMt32ToGs127Drum)
         {
-            XmiToMidiCreateNewEvent(ctx, time);
+            XMIToMidiCreateNewEvent(ctx, time);
             ctx->current->status  = 0xB0 | (status & 0xF);
             ctx->current->data[0] = 0;
             ctx->current->data[1] = Mt32ToGsMap[data * 2 + 1];
 
             data = Mt32ToGsMap[data * 2];
         }
-        else if (ctx->convert_type == kXmiConvertMt32ToGs127)
+        else if (ctx->convert_type == kXMIConvertMt32ToGs127)
         {
-            XmiToMidiCreateNewEvent(ctx, time);
+            XMIToMidiCreateNewEvent(ctx, time);
             ctx->current->status  = 0xB0 | (status & 0xF);
             ctx->current->data[0] = 0;
             ctx->current->data[1] = 127;
@@ -922,15 +922,15 @@ static int XmiToMidiConvertEvent(struct XmiToMidiConversionContext *ctx, const i
     }
     /* Drum track handling */
     else if ((status >> 4) == 0xC && (status & 0xF) == 9 &&
-             (ctx->convert_type == kXmiConvertMt32ToGs127Drum || ctx->convert_type == kXmiConvertMt32ToGs127))
+             (ctx->convert_type == kXMIConvertMt32ToGs127Drum || ctx->convert_type == kXMIConvertMt32ToGs127))
     {
-        XmiToMidiCreateNewEvent(ctx, time);
+        XMIToMidiCreateNewEvent(ctx, time);
         ctx->current->status  = 0xB9;
         ctx->current->data[0] = 0;
         ctx->current->data[1] = 127;
     }
 
-    XmiToMidiCreateNewEvent(ctx, time);
+    XMIToMidiCreateNewEvent(ctx, time);
     ctx->current->status = status;
 
     ctx->current->data[0] = data;
@@ -938,15 +938,15 @@ static int XmiToMidiConvertEvent(struct XmiToMidiConversionContext *ctx, const i
     if (size == 1)
         return (1);
 
-    ctx->current->data[1] = XmiToMidiRead1(ctx);
+    ctx->current->data[1] = XMIToMidiRead1(ctx);
 
     if (size == 2)
         return (2);
 
     /* XMI Note On handling */
     prev = ctx->current;
-    i    = XmiToMidiGetVlq(ctx, &delta);
-    XmiToMidiCreateNewEvent(ctx, time + delta * 3);
+    i    = XMIToMidiGetVlq(ctx, &delta);
+    XMIToMidiCreateNewEvent(ctx, time + delta * 3);
 
     ctx->current->status  = status;
     ctx->current->data[0] = data;
@@ -957,35 +957,35 @@ static int XmiToMidiConvertEvent(struct XmiToMidiConversionContext *ctx, const i
 }
 
 /* Simple routine to convert system messages */
-static int32_t XmiToMidiConvertSystemMessage(struct XmiToMidiConversionContext *ctx, const int32_t time,
+static int32_t XMIToMidiConvertSystemMessage(struct XMIToMidiConversionContext *ctx, const int32_t time,
                                              const uint8_t status)
 {
     int32_t i = 0;
 
-    XmiToMidiCreateNewEvent(ctx, time);
+    XMIToMidiCreateNewEvent(ctx, time);
     ctx->current->status = status;
 
     /* Handling of Meta events */
     if (status == 0xFF)
     {
-        ctx->current->data[0] = XmiToMidiRead1(ctx);
+        ctx->current->data[0] = XMIToMidiRead1(ctx);
         i++;
     }
 
-    i += XmiToMidiGetVlq(ctx, &ctx->current->len);
+    i += XMIToMidiGetVlq(ctx, &ctx->current->len);
 
     if (!ctx->current->len)
         return (i);
 
     ctx->current->buffer = (uint8_t *)malloc(sizeof(uint8_t) * ctx->current->len);
-    XmiToMidiCopy(ctx, (char *)ctx->current->buffer, ctx->current->len);
+    XMIToMidiCopy(ctx, (char *)ctx->current->buffer, ctx->current->len);
 
     return (i + ctx->current->len);
 }
 
 /* XMIDI and Midi to List
  * Returns XMIDI PPQN   */
-static int32_t XmiToMidiConvertFiletoList(struct XmiToMidiConversionContext *ctx, const XmiToMidiBranch *rbrn)
+static int32_t XMIToMidiConvertFiletoList(struct XMIToMidiConversionContext *ctx, const XMIToMidiBranch *rbrn)
 {
     int32_t  time = 0;
     uint32_t data;
@@ -993,21 +993,21 @@ static int32_t XmiToMidiConvertFiletoList(struct XmiToMidiConversionContext *ctx
     int32_t  tempo     = 500000;
     int32_t  tempo_set = 0;
     uint32_t status    = 0;
-    uint32_t file_size = XmiToMidiGetSourceSize(ctx);
-    uint32_t begin     = XmiToMidiGetSourcePosition(ctx);
+    uint32_t file_size = XMIToMidiGetSourceSize(ctx);
+    uint32_t begin     = XMIToMidiGetSourcePosition(ctx);
 
     /* Set Drum track to correct setting if required */
-    if (ctx->convert_type == kXmiConvertMt32ToGs127)
+    if (ctx->convert_type == kXMIConvertMt32ToGs127)
     {
-        XmiToMidiCreateNewEvent(ctx, 0);
+        XMIToMidiCreateNewEvent(ctx, 0);
         ctx->current->status  = 0xB9;
         ctx->current->data[0] = 0;
         ctx->current->data[1] = 127;
     }
 
-    while (!end && XmiToMidiGetSourcePosition(ctx) < file_size)
+    while (!end && XMIToMidiGetSourcePosition(ctx) < file_size)
     {
-        uint32_t offset = XmiToMidiGetSourcePosition(ctx) - begin;
+        uint32_t offset = XMIToMidiGetSourcePosition(ctx) - begin;
 
         /* search for branch to this offset */
         for (unsigned i = 0, n = rbrn->count; i < n; ++i)
@@ -1016,7 +1016,7 @@ static int32_t XmiToMidiConvertFiletoList(struct XmiToMidiConversionContext *ctx
             {
                 unsigned id = rbrn->id[i];
 
-                XmiToMidiCreateNewEvent(ctx, time);
+                XMIToMidiCreateNewEvent(ctx, time);
 
                 uint8_t *marker = (uint8_t *)malloc(sizeof(uint8_t) * 8);
                 memcpy(marker, ":XBRN:", 6);
@@ -1032,58 +1032,58 @@ static int32_t XmiToMidiConvertFiletoList(struct XmiToMidiConversionContext *ctx
             }
         }
 
-        XmiToMidiGetVlq2(ctx, &data);
+        XMIToMidiGetVlq2(ctx, &data);
         time += data * 3;
 
-        status = XmiToMidiRead1(ctx);
+        status = XMIToMidiRead1(ctx);
 
         switch (status >> 4)
         {
-        case kXmiStatusNoteOn:
-            XmiToMidiConvertEvent(ctx, time, status, 3);
+        case kXMIStatusNoteOn:
+            XMIToMidiConvertEvent(ctx, time, status, 3);
             break;
 
         /* 2 byte data */
-        case kXmiStatusNoteOff:
-        case kXmiStatusAftertouch:
-        case kXmiStatusController:
-        case kXmiStatusPitchWheel:
-            XmiToMidiConvertEvent(ctx, time, status, 2);
+        case kXMIStatusNoteOff:
+        case kXMIStatusAftertouch:
+        case kXMIStatusController:
+        case kXMIStatusPitchWheel:
+            XMIToMidiConvertEvent(ctx, time, status, 2);
             break;
 
         /* 1 byte data */
-        case kXmiStatusProgramChange:
-        case kXmiStatusPressure:
-            XmiToMidiConvertEvent(ctx, time, status, 1);
+        case kXMIStatusProgramChange:
+        case kXMIStatusPressure:
+            XMIToMidiConvertEvent(ctx, time, status, 1);
             break;
 
-        case kXmiStatusSysex:
+        case kXMIStatusSysex:
             if (status == 0xFF)
             {
-                int32_t  pos = XmiToMidiGetSourcePosition(ctx);
-                uint32_t dat = XmiToMidiRead1(ctx);
+                int32_t  pos = XMIToMidiGetSourcePosition(ctx);
+                uint32_t dat = XMIToMidiRead1(ctx);
 
                 if (dat == 0x2F)                    /* End */
                     end = 1;
                 else if (dat == 0x51 && !tempo_set) /* Tempo. Need it for PPQN */
                 {
-                    XmiToMidiSkipSource(ctx, 1);
-                    tempo = XmiToMidiRead1(ctx) << 16;
-                    tempo += XmiToMidiRead1(ctx) << 8;
-                    tempo += XmiToMidiRead1(ctx);
+                    XMIToMidiSkipSource(ctx, 1);
+                    tempo = XMIToMidiRead1(ctx) << 16;
+                    tempo += XMIToMidiRead1(ctx) << 8;
+                    tempo += XMIToMidiRead1(ctx);
                     tempo *= 3;
                     tempo_set = 1;
                 }
                 else if (dat == 0x51 && tempo_set) /* Skip any other tempo changes */
                 {
-                    XmiToMidiGetVlq(ctx, &dat);
-                    XmiToMidiSkipSource(ctx, dat);
+                    XMIToMidiGetVlq(ctx, &dat);
+                    XMIToMidiSkipSource(ctx, dat);
                     break;
                 }
 
-                XmiToMidiSeekSource(ctx, pos);
+                XMIToMidiSeekSource(ctx, pos);
             }
-            XmiToMidiConvertSystemMessage(ctx, time, status);
+            XMIToMidiConvertSystemMessage(ctx, time, status);
             break;
 
         default:
@@ -1096,10 +1096,10 @@ static int32_t XmiToMidiConvertFiletoList(struct XmiToMidiConversionContext *ctx
 /* Converts and event list to a MidiTrack
  * Returns bytes of the array
  * buf can be nullptr */
-static uint32_t XmiToMidiConvertListToMidiTrack(struct XmiToMidiConversionContext *ctx, XmiToMidiEvent *mlist)
+static uint32_t XMIToMidiConvertListToMidiTrack(struct XMIToMidiConversionContext *ctx, XMIToMidiEvent *mlist)
 {
     int32_t         time = 0;
-    XmiToMidiEvent *event;
+    XMIToMidiEvent *event;
     uint32_t        delta;
     uint8_t         last_status = 0;
     uint32_t        i           = 8;
@@ -1107,24 +1107,24 @@ static uint32_t XmiToMidiConvertListToMidiTrack(struct XmiToMidiConversionContex
     uint32_t        size_pos, cur_pos;
     int             end = 0;
 
-    XmiToMidiWrite1(ctx, 'M');
-    XmiToMidiWrite1(ctx, 'T');
-    XmiToMidiWrite1(ctx, 'r');
-    XmiToMidiWrite1(ctx, 'k');
+    XMIToMidiWrite1(ctx, 'M');
+    XMIToMidiWrite1(ctx, 'T');
+    XMIToMidiWrite1(ctx, 'r');
+    XMIToMidiWrite1(ctx, 'k');
 
-    size_pos = XmiToMidiGetDestinationPosition(ctx);
-    XmiToMidiSkipDestination(ctx, 4);
+    size_pos = XMIToMidiGetDestinationPosition(ctx);
+    XMIToMidiSkipDestination(ctx, 4);
 
     for (event = mlist; event && !end; event = event->next)
     {
         delta = (event->time - time);
         time  = event->time;
 
-        i += XmiToMidiPutVlq(ctx, delta);
+        i += XMIToMidiPutVlq(ctx, delta);
 
         if ((event->status != last_status) || (event->status >= 0xF0))
         {
-            XmiToMidiWrite1(ctx, event->status);
+            XMIToMidiWrite1(ctx, event->status);
             i++;
         }
 
@@ -1139,8 +1139,8 @@ static uint32_t XmiToMidiConvertListToMidiTrack(struct XmiToMidiConversionContex
         case 0xA:
         case 0xB:
         case 0xE:
-            XmiToMidiWrite1(ctx, event->data[0]);
-            XmiToMidiWrite1(ctx, event->data[1]);
+            XMIToMidiWrite1(ctx, event->data[0]);
+            XMIToMidiWrite1(ctx, event->data[1]);
             i += 2;
             break;
 
@@ -1148,7 +1148,7 @@ static uint32_t XmiToMidiConvertListToMidiTrack(struct XmiToMidiConversionContex
          * Program Change and Channel Pressure */
         case 0xC:
         case 0xD:
-            XmiToMidiWrite1(ctx, event->data[0]);
+            XMIToMidiWrite1(ctx, event->data[0]);
             i++;
             break;
 
@@ -1159,15 +1159,15 @@ static uint32_t XmiToMidiConvertListToMidiTrack(struct XmiToMidiConversionContex
             {
                 if (event->data[0] == 0x2f)
                     end = 1;
-                XmiToMidiWrite1(ctx, event->data[0]);
+                XMIToMidiWrite1(ctx, event->data[0]);
                 i++;
             }
-            i += XmiToMidiPutVlq(ctx, event->len);
+            i += XMIToMidiPutVlq(ctx, event->len);
             if (event->len)
             {
                 for (j = 0; j < event->len; j++)
                 {
-                    XmiToMidiWrite1(ctx, event->buffer[j]);
+                    XMIToMidiWrite1(ctx, event->buffer[j]);
                     i++;
                 }
             }
@@ -1180,16 +1180,16 @@ static uint32_t XmiToMidiConvertListToMidiTrack(struct XmiToMidiConversionContex
         }
     }
 
-    cur_pos = XmiToMidiGetDestinationPosition(ctx);
-    XmiToMidiSeekDestination(ctx, size_pos);
-    XmiToMidiWrite4(ctx, i - 8);
-    XmiToMidiSeekDestination(ctx, cur_pos);
+    cur_pos = XMIToMidiGetDestinationPosition(ctx);
+    XMIToMidiSeekDestination(ctx, size_pos);
+    XMIToMidiWrite4(ctx, i - 8);
+    XMIToMidiSeekDestination(ctx, cur_pos);
 
     return (i);
 }
 
 /* Assumes correct xmidi */
-static uint32_t XmiToMidiExtractTracksFromXmi(struct XmiToMidiConversionContext *ctx)
+static uint32_t XMIToMidiExtractTracksFromXMI(struct XMIToMidiConversionContext *ctx)
 {
     uint32_t     num = 0;
     signed short ppqn;
@@ -1202,23 +1202,23 @@ static uint32_t XmiToMidiExtractTracksFromXmi(struct XmiToMidiConversionContext 
     for (unsigned i = 0; i < 128; ++i)
         branch[i] = ~0u;
 
-    while (XmiToMidiGetSourcePosition(ctx) < XmiToMidiGetSourceSize(ctx) && num != ctx->info.tracks)
+    while (XMIToMidiGetSourcePosition(ctx) < XMIToMidiGetSourceSize(ctx) && num != ctx->info.tracks)
     {
         /* Read first 4 bytes of name */
-        XmiToMidiCopy(ctx, buf, 4);
-        len = XmiToMidiRead4(ctx);
+        XMIToMidiCopy(ctx, buf, 4);
+        len = XMIToMidiRead4(ctx);
 
         /* Skip the FORM entries */
         if (!memcmp(buf, "FORM", 4))
         {
-            XmiToMidiSkipSource(ctx, 4);
-            XmiToMidiCopy(ctx, buf, 4);
-            len = XmiToMidiRead4(ctx);
+            XMIToMidiSkipSource(ctx, 4);
+            XMIToMidiCopy(ctx, buf, 4);
+            len = XMIToMidiRead4(ctx);
         }
 
         if (!memcmp(buf, "RBRN", 4))
         {
-            begin = XmiToMidiGetSourcePosition(ctx);
+            begin = XMIToMidiGetSourcePosition(ctx);
             uint32_t count;
 
             if (len < 2)
@@ -1227,7 +1227,7 @@ static uint32_t XmiToMidiExtractTracksFromXmi(struct XmiToMidiConversionContext 
                 goto rbrn_nodata;
             }
 
-            count = XmiToMidiRead2(ctx);
+            count = XMIToMidiRead2(ctx);
             if (len - 2 < 6 * count)
             {
                 /* insufficient data */
@@ -1237,28 +1237,28 @@ static uint32_t XmiToMidiExtractTracksFromXmi(struct XmiToMidiConversionContext 
             for (uint32_t i = 0; i < count; ++i)
             {
                 /* read branch point as byte offset */
-                uint32_t ctlvalue  = XmiToMidiRead2(ctx);
-                uint32_t evtoffset = XmiToMidiRead4LittleEndian(ctx);
+                uint32_t ctlvalue  = XMIToMidiRead2(ctx);
+                uint32_t evtoffset = XMIToMidiRead4LittleEndian(ctx);
                 if (ctlvalue < 128)
                     branch[ctlvalue] = evtoffset;
             }
 
         rbrn_nodata:
-            XmiToMidiSeekSource(ctx, begin + ((len + 1) & ~1));
+            XMIToMidiSeekSource(ctx, begin + ((len + 1) & ~1));
             continue;
         }
 
         if (memcmp(buf, "EVNT", 4))
         {
-            XmiToMidiSkipSource(ctx, (len + 1) & ~1);
+            XMIToMidiSkipSource(ctx, (len + 1) & ~1);
             continue;
         }
 
         ctx->list = nullptr;
-        begin     = XmiToMidiGetSourcePosition(ctx);
+        begin     = XMIToMidiGetSourcePosition(ctx);
 
         /* Rearrange branches as structure */
-        XmiToMidiBranch rbrn;
+        XMIToMidiBranch rbrn;
         rbrn.count = 0;
         for (unsigned i = 0; i < 128; ++i)
         {
@@ -1272,7 +1272,7 @@ static uint32_t XmiToMidiExtractTracksFromXmi(struct XmiToMidiConversionContext 
         }
 
         /* Convert it */
-        if ((ppqn = XmiToMidiConvertFiletoList(ctx, &rbrn)) == 0)
+        if ((ppqn = XMIToMidiConvertFiletoList(ctx, &rbrn)) == 0)
         {
             /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_CORUPT, nullptr,
              * 0);*/
@@ -1285,7 +1285,7 @@ static uint32_t XmiToMidiExtractTracksFromXmi(struct XmiToMidiConversionContext 
         num++;
 
         /* go to start of next track */
-        XmiToMidiSeekSource(ctx, begin + ((len + 1) & ~1));
+        XMIToMidiSeekSource(ctx, begin + ((len + 1) & ~1));
 
         /* clear branch points */
         for (unsigned i = 0; i < 128; ++i)
@@ -1296,7 +1296,7 @@ static uint32_t XmiToMidiExtractTracksFromXmi(struct XmiToMidiConversionContext 
     return (num);
 }
 
-static int XmiToMidiParseXmi(struct XmiToMidiConversionContext *ctx)
+static int XMIToMidiParseXMI(struct XMIToMidiConversionContext *ctx)
 {
     uint32_t i;
     uint32_t start;
@@ -1305,8 +1305,8 @@ static int XmiToMidiParseXmi(struct XmiToMidiConversionContext *ctx)
     uint32_t file_size;
     char     buf[32];
 
-    file_size = XmiToMidiGetSourceSize(ctx);
-    if (XmiToMidiGetSourcePosition(ctx) + 8 > file_size)
+    file_size = XMIToMidiGetSourceSize(ctx);
+    if (XMIToMidiGetSourcePosition(ctx) + 8 > file_size)
     {
     badfile: /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_CORUPT, "(too
                 short)", 0);*/
@@ -1314,20 +1314,20 @@ static int XmiToMidiParseXmi(struct XmiToMidiConversionContext *ctx)
     }
 
     /* Read first 4 bytes of header */
-    XmiToMidiCopy(ctx, buf, 4);
+    XMIToMidiCopy(ctx, buf, 4);
 
     /* Could be XMIDI */
     if (!memcmp(buf, "FORM", 4))
     {
         /* Read length of */
-        len = XmiToMidiRead4(ctx);
+        len = XMIToMidiRead4(ctx);
 
-        start = XmiToMidiGetSourcePosition(ctx);
+        start = XMIToMidiGetSourcePosition(ctx);
         if (start + 4 > file_size)
             goto badfile;
 
         /* Read 4 bytes of type */
-        XmiToMidiCopy(ctx, buf, 4);
+        XMIToMidiCopy(ctx, buf, 4);
 
         /* XDIRless XMIDI, we can handle them here. */
         if (!memcmp(buf, "XMID", 4))
@@ -1347,14 +1347,14 @@ static int XmiToMidiParseXmi(struct XmiToMidiConversionContext *ctx)
             for (i = 4; i < len; i++)
             {
                 /* check too short files */
-                if (XmiToMidiGetSourcePosition(ctx) + 10 > file_size)
+                if (XMIToMidiGetSourcePosition(ctx) + 10 > file_size)
                     break;
 
                 /* Read 4 bytes of type */
-                XmiToMidiCopy(ctx, buf, 4);
+                XMIToMidiCopy(ctx, buf, 4);
 
                 /* Read length of chunk */
-                chunk_len = XmiToMidiRead4(ctx);
+                chunk_len = XMIToMidiRead4(ctx);
 
                 /* Add eight bytes */
                 i += 8;
@@ -1362,7 +1362,7 @@ static int XmiToMidiParseXmi(struct XmiToMidiConversionContext *ctx)
                 if (memcmp(buf, "INFO", 4))
                 {
                     /* Must align */
-                    XmiToMidiSkipSource(ctx, (chunk_len + 1) & ~1);
+                    XMIToMidiSkipSource(ctx, (chunk_len + 1) & ~1);
                     i += (chunk_len + 1) & ~1;
                     continue;
                 }
@@ -1371,7 +1371,7 @@ static int XmiToMidiParseXmi(struct XmiToMidiConversionContext *ctx)
                 if (chunk_len < 2)
                     break;
 
-                ctx->info.tracks = XmiToMidiRead2(ctx);
+                ctx->info.tracks = XMIToMidiRead2(ctx);
                 break;
             }
 
@@ -1383,12 +1383,12 @@ static int XmiToMidiParseXmi(struct XmiToMidiConversionContext *ctx)
 
             /* Ok now to start part 2
              * Goto the right place */
-            XmiToMidiSeekSource(ctx, start + ((len + 1) & ~1));
-            if (XmiToMidiGetSourcePosition(ctx) + 12 > file_size)
+            XMIToMidiSeekSource(ctx, start + ((len + 1) & ~1));
+            if (XMIToMidiGetSourcePosition(ctx) + 12 > file_size)
                 goto badfile;
 
             /* Read 4 bytes of type */
-            XmiToMidiCopy(ctx, buf, 4);
+            XMIToMidiCopy(ctx, buf, 4);
 
             if (memcmp(buf, "CAT ", 4))
             {
@@ -1398,10 +1398,10 @@ static int XmiToMidiParseXmi(struct XmiToMidiConversionContext *ctx)
             }
 
             /* Now read length of this track */
-            XmiToMidiRead4(ctx);
+            XMIToMidiRead4(ctx);
 
             /* Read 4 bytes of type */
-            XmiToMidiCopy(ctx, buf, 4);
+            XMIToMidiCopy(ctx, buf, 4);
 
             if (memcmp(buf, "XMID", 4))
             {
@@ -1411,7 +1411,7 @@ static int XmiToMidiParseXmi(struct XmiToMidiConversionContext *ctx)
             }
 
             /* Valid XMID */
-            ctx->datastart = XmiToMidiGetSourcePosition(ctx);
+            ctx->datastart = XMIToMidiGetSourcePosition(ctx);
             return (0);
         }
     }
@@ -1419,17 +1419,17 @@ static int XmiToMidiParseXmi(struct XmiToMidiConversionContext *ctx)
     return (-1);
 }
 
-static int XmiToMidiExtractTracks(struct XmiToMidiConversionContext *ctx, int32_t dstTrackNumber)
+static int XMIToMidiExtractTracks(struct XMIToMidiConversionContext *ctx, int32_t dstTrackNumber)
 {
     uint32_t i;
 
-    ctx->events = (XmiToMidiEvent **)calloc(ctx->info.tracks, sizeof(XmiToMidiEvent *));
+    ctx->events = (XMIToMidiEvent **)calloc(ctx->info.tracks, sizeof(XMIToMidiEvent *));
     ctx->timing = (int16_t *)calloc(ctx->info.tracks, sizeof(int16_t));
     /* type-2 for multi-tracks, type-0 otherwise */
     ctx->info.type = (ctx->info.tracks > 1 && (dstTrackNumber < 0 || ctx->info.tracks >= dstTrackNumber)) ? 2 : 0;
 
-    XmiToMidiSeekSource(ctx, ctx->datastart);
-    i = XmiToMidiExtractTracksFromXmi(ctx);
+    XMIToMidiSeekSource(ctx, ctx->datastart);
+    i = XMIToMidiExtractTracksFromXMI(ctx);
 
     if (i != ctx->info.tracks)
     {

@@ -1480,13 +1480,13 @@ Subsector *CreateSubsec(QuadTree *tree)
     return sub;
 }
 
-int ComputeBspHeight(const Node *node)
+int ComputeBSPHeight(const Node *node)
 {
     if (node == nullptr)
         return 1;
 
-    int right = ComputeBspHeight(node->r_.node);
-    int left  = ComputeBspHeight(node->l_.node);
+    int right = ComputeBSPHeight(node->r_.node);
+    int left  = ComputeBSPHeight(node->l_.node);
 
     return HMM_MAX(left, right) + 1;
 }
@@ -1589,7 +1589,7 @@ BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */, N
     return kBuildOK;
 }
 
-void ClockwiseBspTree()
+void ClockwiseBSPTree()
 {
     int cur_seg_index = 0;
 

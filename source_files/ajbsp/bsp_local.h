@@ -472,7 +472,7 @@ Seg *CreateSegs(void);
 BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */, Node **N, Subsector **S);
 
 // compute the height of the bsp tree, starting at 'node'.
-int ComputeBspHeight(const Node *node);
+int ComputeBSPHeight(const Node *node);
 
 // put all the segs in each subsector into clockwise order, and renumber
 // the seg indices.
@@ -480,7 +480,7 @@ int ComputeBspHeight(const Node *node);
 // [ This cannot be done DURING BuildNodes() since splitting a seg with
 //   a partner will insert another seg into that partner's list, usually
 //   in the wrong place order-wise. ]
-void ClockwiseBspTree();
+void ClockwiseBSPTree();
 
 } // namespace ajbsp
 

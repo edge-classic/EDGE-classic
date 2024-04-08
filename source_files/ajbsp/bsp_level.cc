@@ -1288,11 +1288,11 @@ BuildResult BuildLevel(int level_index)
 
         if (root_node != nullptr)
         {
-            LogDebug("    Heights of subtrees: %d / %d\n", ComputeBspHeight(root_node->r_.node),
-                     ComputeBspHeight(root_node->l_.node));
+            LogDebug("    Heights of subtrees: %d / %d\n", ComputeBSPHeight(root_node->r_.node),
+                     ComputeBSPHeight(root_node->l_.node));
         }
 
-        ClockwiseBspTree();
+        ClockwiseBSPTree();
 
         if (xwa_wad != nullptr)
             ret = SaveXWA(root_node);

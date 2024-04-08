@@ -201,7 +201,7 @@ void RealVM::RunError(const char *error, ...)
     FatalError(buffer);
 }
 
-int RealVM::STR_Concat(const char *s1, const char *s2)
+int RealVM::StringConcat(const char *s1, const char *s2)
 {
     int len1 = strlen(s1);
     int len2 = strlen(s2);
@@ -218,7 +218,7 @@ int RealVM::STR_Concat(const char *s1, const char *s2)
     return -(1 + index);
 }
 
-int RealVM::STR_ConcatFloat(const char *s, double f)
+int RealVM::StringConcatFloat(const char *s, double f)
 {
     char buffer[100];
 
@@ -231,10 +231,10 @@ int RealVM::STR_ConcatFloat(const char *s, double f)
         sprintf(buffer, "%8.6f", f);
     }
 
-    return STR_Concat(s, buffer);
+    return StringConcat(s, buffer);
 }
 
-int RealVM::STR_ConcatVector(const char *s, double *v)
+int RealVM::StringConcatVector(const char *s, double *v)
 {
     char buffer[200];
 
@@ -247,7 +247,7 @@ int RealVM::STR_ConcatVector(const char *s, double *v)
         sprintf(buffer, "'%6.4f %6.4f %6.4f'", v[0], v[1], v[2]);
     }
 
-    return STR_Concat(s, buffer);
+    return StringConcat(s, buffer);
 }
 
 //================================================================
@@ -482,7 +482,7 @@ void RealVM::DoExecute(int fnum)
             break;
 
         case OP_ADD_S:
-            *c = STR_Concat(COAL_REF_STRING((int)*a), COAL_REF_STRING((int)*b));
+            *c = StringConcat(COAL_REF_STRING((int)*a), COAL_REF_STRING((int)*b));
             // temp strings must be internalised when assigned
             // to a global variable.
             if (st->c > kReturnOffset * 8)
@@ -490,13 +490,13 @@ void RealVM::DoExecute(int fnum)
             break;
 
         case OP_ADD_SF:
-            *c = STR_ConcatFloat(COAL_REF_STRING((int)*a), *b);
+            *c = StringConcatFloat(COAL_REF_STRING((int)*a), *b);
             if (st->c > kReturnOffset * 8)
                 *c = InternaliseString(COAL_REF_STRING((int)*c));
             break;
 
         case OP_ADD_SV:
-            *c = STR_ConcatVector(COAL_REF_STRING((int)*a), b);
+            *c = StringConcatVector(COAL_REF_STRING((int)*a), b);
             if (st->c > kReturnOffset * 8)
                 *c = InternaliseString(COAL_REF_STRING((int)*c));
             break;
@@ -760,7 +760,7 @@ void RealVM::PrintStatement(Function *f, int s)
     Printer("\n");
 }
 
-void RealVM::ASM_DumpFunction(Function *f)
+void RealVM::ASMDumpFunction(Function *f)
 {
     Printer("Function %s()\n", f->name);
 
@@ -778,13 +778,13 @@ void RealVM::ASM_DumpFunction(Function *f)
     Printer("\n");
 }
 
-void RealVM::ASM_DumpAll()
+void RealVM::ASMDumpAll()
 {
     for (int i = 1; i < (int)functions_.size(); i++)
     {
         Function *f = functions_[i];
 
-        ASM_DumpFunction(f);
+        ASMDumpFunction(f);
     }
 }
 

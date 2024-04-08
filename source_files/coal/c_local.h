@@ -329,7 +329,7 @@ struct Compiler
     int   bracelevel;
     int   fol_level;            // fol = first on line
 
-    // current token (from LEX_Next)
+    // current token (from LexNext)
     char  token_buf[2048];
     Token token_type;
     bool  token_is_first;
@@ -444,29 +444,29 @@ class RealVM : public VM
 
     // c_compile.cc
   private:
-    void GLOB_Globals();
-    void GLOB_Module();
-    void GLOB_Constant();
-    void GLOB_Variable();
-    void GLOB_Function();
-    int  GLOB_FunctionBody(Definition *func_def, Type *type, const char *func_name);
+    void GLOBGlobals();
+    void GLOBModule();
+    void GLOBConstant();
+    void GLOBVariable();
+    void GLOBFunction();
+    int  GLOBFunctionBody(Definition *func_def, Type *type, const char *func_name);
 
-    void STAT_Statement(bool allow_def);
-    void STAT_Assignment(Definition *e);
-    void STAT_If_Else();
-    void STAT_Assert();
-    void STAT_WhileLoop();
-    void STAT_RepeatLoop();
-    void STAT_ForLoop();
-    void STAT_Return();
+    void STATStatement(bool allow_def);
+    void STATAssignment(Definition *e);
+    void STATIf_Else();
+    void STATAssert();
+    void STATWhileLoop();
+    void STATRepeatLoop();
+    void STATForLoop();
+    void STATReturn();
 
-    Definition *EXP_Expression(int priority, bool *lvalue = nullptr);
-    Definition *EXP_FieldQuery(Definition *e, bool lvalue);
-    Definition *EXP_ShortCircuit(Definition *e, int n);
-    Definition *EXP_Term();
-    Definition *EXP_VarValue();
-    Definition *EXP_FunctionCall(Definition *func);
-    Definition *EXP_Literal();
+    Definition *EXPExpression(int priority, bool *lvalue = nullptr);
+    Definition *EXPFieldQuery(Definition *e, bool lvalue);
+    Definition *EXPShortCircuit(Definition *e, int n);
+    Definition *EXPTerm();
+    Definition *EXPVarValue();
+    Definition *EXPFunctionCall(Definition *func);
+    Definition *EXPLiteral();
 
     Definition *DeclareDef(Type *type, char *name, Scope *scope);
     Definition *FindDef(Type *type, char *name, Scope *scope);
@@ -487,18 +487,18 @@ class RealVM : public VM
     int EmitCode(int16_t op, int a = 0, int b = 0, int c = 0);
     int EmitMove(Type *type, int a, int b);
 
-    void LEX_Next();
-    void LEX_Whitespace();
-    void LEX_NewLine();
+    void LexNext();
+    void LexWhitespace();
+    void LexNewLine();
 
-    bool LEX_Check(const char *str);
-    void LEX_Expect(const char *str);
+    bool LexCheck(const char *str);
+    void LexExpect(const char *str);
 
-    void  LEX_String();
-    float LEX_Number();
-    void  LEX_Vector();
-    void  LEX_Name();
-    void  LEX_Punctuation();
+    void  LexString();
+    float LexNumber();
+    void  LexVector();
+    void  LexName();
+    void  LexPunctuation();
 
     void CompileError(const char *error, ...);
 
@@ -513,9 +513,9 @@ class RealVM : public VM
     int GetNativeFunc(const char *name, const char *module);
     int InternaliseString(const char *new_s);
 
-    int STR_Concat(const char *s1, const char *s2);
-    int STR_ConcatFloat(const char *s, double f);
-    int STR_ConcatVector(const char *s, double *v);
+    int StringConcat(const char *s1, const char *s2);
+    int StringConcatFloat(const char *s, double f);
+    int StringConcatVector(const char *s, double *v);
 
     void RunError(const char *error, ...);
 
@@ -523,8 +523,8 @@ class RealVM : public VM
     void        PrintStatement(Function *f, int s);
     const char *RegString(Statement *st, int who);
 
-    void ASM_DumpFunction(Function *f);
-    void ASM_DumpAll();
+    void ASMDumpFunction(Function *f);
+    void ASMDumpAll();
 };
 
 } // namespace coal

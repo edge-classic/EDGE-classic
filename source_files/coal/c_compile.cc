@@ -128,7 +128,7 @@ static OpCode all_operators[] = {
 static constexpr uint8_t kTopPriority = 6;
 static constexpr uint8_t kNotPriority = 1;
 
-void RealVM::LEX_NewLine()
+void RealVM::LexNewLine()
 {
     // Called when *comp_.parse_p == '\n'
 
@@ -154,7 +154,7 @@ void RealVM::CompileError(const char *error, ...)
     FatalError("%s:%i: %s", comp_.source_file, comp_.source_line, buffer);
 }
 
-void RealVM::LEX_String()
+void RealVM::LexString()
 {
     // Parses a quoted string
 
@@ -194,7 +194,7 @@ void RealVM::LEX_String()
     }
 }
 
-float RealVM::LEX_Number()
+float RealVM::LexNumber()
 {
     int len = 0;
     int c   = *comp_.parse_p;
@@ -212,7 +212,7 @@ float RealVM::LEX_Number()
     return atof(comp_.token_buf);
 }
 
-void RealVM::LEX_Vector()
+void RealVM::LexVector()
 {
     // Parses a single quoted vector
 
@@ -224,7 +224,7 @@ void RealVM::LEX_Vector()
     {
         // FIXME: check for digits etc!
 
-        comp_.literal_value[i] = LEX_Number();
+        comp_.literal_value[i] = LexNumber();
 
         while (((*comp_.parse_p > 0x8 && *comp_.parse_p < 0xE) || *comp_.parse_p == 0x20) && *comp_.parse_p != '\n')
             comp_.parse_p++;
@@ -236,7 +236,7 @@ void RealVM::LEX_Vector()
     comp_.parse_p++;
 }
 
-void RealVM::LEX_Name()
+void RealVM::LexName()
 {
     // Parses an identifier
 
@@ -255,7 +255,7 @@ void RealVM::LEX_Name()
     comp_.token_type     = tt_name;
 }
 
-void RealVM::LEX_Punctuation()
+void RealVM::LexPunctuation()
 {
     comp_.token_type = tt_punct;
 
@@ -285,7 +285,7 @@ void RealVM::LEX_Punctuation()
     CompileError("unknown punctuation: %c\n", ch);
 }
 
-void RealVM::LEX_Whitespace(void)
+void RealVM::LexWhitespace(void)
 {
     int c;
 
@@ -298,7 +298,7 @@ void RealVM::LEX_Whitespace(void)
                 return;
 
             if (c == '\n')
-                LEX_NewLine();
+                LexNewLine();
 
             comp_.parse_p++;
         }
@@ -309,7 +309,7 @@ void RealVM::LEX_Whitespace(void)
             while (*comp_.parse_p && *comp_.parse_p != '\n')
                 comp_.parse_p++;
 
-            LEX_NewLine();
+            LexNewLine();
 
             comp_.parse_p++;
             continue;
@@ -323,7 +323,7 @@ void RealVM::LEX_Whitespace(void)
                 comp_.parse_p++;
 
                 if (comp_.parse_p[0] == '\n')
-                    LEX_NewLine();
+                    LexNewLine();
 
                 if (comp_.parse_p[1] == 0)
                     return;
@@ -342,11 +342,11 @@ void RealVM::LEX_Whitespace(void)
 // Parse the next token in the file.
 // Sets token_type and token_buf, and possibly the literal_xxx fields
 //
-void RealVM::LEX_Next()
+void RealVM::LexNext()
 {
     assert(comp_.parse_p);
 
-    LEX_Whitespace();
+    LexWhitespace();
 
     comp_.token_buf[0]   = 0;
     comp_.token_is_first = (comp_.fol_level == 0);
@@ -365,14 +365,14 @@ void RealVM::LEX_Next()
     // handle quoted strings as a unit
     if (c == '\"')
     {
-        LEX_String();
+        LexString();
         return;
     }
 
     // handle quoted vectors as a unit
     if (c == '\'')
     {
-        LEX_Vector();
+        LexVector();
         return;
     }
 
@@ -382,30 +382,30 @@ void RealVM::LEX_Next()
     {
         comp_.token_type       = tt_literal;
         comp_.literal_type     = &type_float;
-        comp_.literal_value[0] = LEX_Number();
+        comp_.literal_value[0] = LexNumber();
         return;
     }
 
     if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_')
     {
-        LEX_Name();
+        LexName();
         return;
     }
 
     // parse symbol strings until a non-symbol is found
-    LEX_Punctuation();
+    LexPunctuation();
 }
 
 //
 // Issues an error if the current token isn't what we want.
 // On success, automatically skips to the next token.
 //
-void RealVM::LEX_Expect(const char *str)
+void RealVM::LexExpect(const char *str)
 {
     if (strcmp(comp_.token_buf, str) != 0)
         CompileError("expected %s got %s\n", str, comp_.token_buf);
 
-    LEX_Next();
+    LexNext();
 }
 
 //
@@ -415,12 +415,12 @@ void RealVM::LEX_Expect(const char *str)
 // Returns true on a match (skipping to the next token),
 // otherwise returns false and does nothing.
 //
-bool RealVM::LEX_Check(const char *str)
+bool RealVM::LexCheck(const char *str)
 {
     if (strcmp(comp_.token_buf, str) != 0)
         return false;
 
-    LEX_Next();
+    LexNext();
 
     return true;
 }
@@ -440,7 +440,7 @@ char *RealVM::ParseName()
 
     strcpy(ident, comp_.token_buf);
 
-    LEX_Next();
+    LexNext();
 
     return ident;
 }
@@ -504,9 +504,9 @@ Type *RealVM::ParseType()
         type = &type_float; // shut up compiler warning
         CompileError("unknown type: %s\n", comp_.token_buf);
     }
-    LEX_Next();
+    LexNext();
 
-    if (!LEX_Check("("))
+    if (!LexCheck("("))
         return type;
 
     // function type
@@ -515,9 +515,9 @@ Type *RealVM::ParseType()
     t_new.aux_type = type; // return type
     t_new.parm_num = 0;
 
-    if (!LEX_Check(")"))
+    if (!LexCheck(")"))
     {
-        if (LEX_Check("..."))
+        if (LexCheck("..."))
             t_new.parm_num = -1; // variable args
         else
             do
@@ -529,9 +529,9 @@ Type *RealVM::ParseType()
 
                 t_new.parm_types[t_new.parm_num] = type;
                 t_new.parm_num++;
-            } while (LEX_Check(","));
+            } while (LexCheck(","));
 
-        LEX_Expect(")");
+        LexExpect(")");
     }
 
     return FindType(&t_new);
@@ -702,7 +702,7 @@ void RealVM::StoreLiteral(int ofs)
     }
 }
 
-Definition *RealVM::EXP_Literal()
+Definition *RealVM::EXPLiteral()
 {
     // Looks for a preexisting constant
     Definition *cn = FindLiteral();
@@ -723,11 +723,11 @@ Definition *RealVM::EXP_Literal()
         comp_.all_literals.push_back(cn);
     }
 
-    LEX_Next();
+    LexNext();
     return cn;
 }
 
-Definition *RealVM::EXP_FunctionCall(Definition *func)
+Definition *RealVM::EXPFunctionCall(Definition *func)
 {
     Type *t = func->type;
 
@@ -741,7 +741,7 @@ Definition *RealVM::EXP_FunctionCall(Definition *func)
 
     int arg = 0;
 
-    if (!LEX_Check(")"))
+    if (!LexCheck(")"))
     {
         do
         {
@@ -750,7 +750,7 @@ Definition *RealVM::EXP_FunctionCall(Definition *func)
 
             assert(arg < kMaximumParameters);
 
-            Definition *e = EXP_Expression(kTopPriority);
+            Definition *e = EXPExpression(kTopPriority);
 
             if (e->type != t->parm_types[arg])
                 CompileError("type mismatch on parameter %i\n", arg + 1);
@@ -758,9 +758,9 @@ Definition *RealVM::EXP_FunctionCall(Definition *func)
             assert(e->type->type != ev_void);
 
             exprs[arg++] = e;
-        } while (LEX_Check(","));
+        } while (LexCheck(","));
 
-        LEX_Expect(")");
+        LexExpect(")");
 
         if (arg != t->parm_num)
         {
@@ -822,11 +822,11 @@ Definition *RealVM::EXP_FunctionCall(Definition *func)
     return &def_void;
 }
 
-void RealVM::STAT_Return(void)
+void RealVM::STATReturn(void)
 {
     Definition *func_def = comp_.scope->def_;
 
-    if (comp_.token_is_first || comp_.token_buf[0] == '}' || LEX_Check(";"))
+    if (comp_.token_is_first || comp_.token_buf[0] == '}' || LexCheck(";"))
     {
         if (func_def->type->aux_type->type != ev_void)
             CompileError("missing value for return\n");
@@ -835,7 +835,7 @@ void RealVM::STAT_Return(void)
         return;
     }
 
-    Definition *e = EXP_Expression(kTopPriority);
+    Definition *e = EXPExpression(kTopPriority);
 
     if (func_def->type->aux_type->type == ev_void)
         CompileError("return with value in void function\n");
@@ -849,7 +849,7 @@ void RealVM::STAT_Return(void)
 
     // -AJA- optional semicolons
     if (!(comp_.token_is_first || comp_.token_buf[0] == '}'))
-        LEX_Expect(";");
+        LexExpect(";");
 }
 
 Definition *RealVM::FindDef(Type *type, char *name, Scope *scope)
@@ -893,7 +893,7 @@ Definition *RealVM::DeclareDef(Type *type, char *name, Scope *scope)
     return def;
 }
 
-Definition *RealVM::EXP_VarValue()
+Definition *RealVM::EXPVarValue()
 {
     char *name = ParseName();
 
@@ -914,19 +914,19 @@ Definition *RealVM::EXP_VarValue()
     }
 }
 
-Definition *RealVM::EXP_Term()
+Definition *RealVM::EXPTerm()
 {
     // if the token is a literal, Allocate a constant for it
     if (comp_.token_type == tt_literal)
-        return EXP_Literal();
+        return EXPLiteral();
 
     if (comp_.token_type == tt_name)
-        return EXP_VarValue();
+        return EXPVarValue();
 
-    if (LEX_Check("("))
+    if (LexCheck("("))
     {
-        Definition *e = EXP_Expression(kTopPriority);
-        LEX_Expect(")");
+        Definition *e = EXPExpression(kTopPriority);
+        LexExpect(")");
         return e;
     }
 
@@ -939,10 +939,10 @@ Definition *RealVM::EXP_Term()
         if (op->priority != -1)
             continue;
 
-        if (!LEX_Check(op->name))
+        if (!LexCheck(op->name))
             continue;
 
-        Definition *e = EXP_Expression(kNotPriority);
+        Definition *e = EXPExpression(kNotPriority);
 
         for (int i = 0; i == 0 || strcmp(op->name, op[i].name) == 0; i++)
         {
@@ -964,7 +964,7 @@ Definition *RealVM::EXP_Term()
     return nullptr; /* NOT REACHED */
 }
 
-Definition *RealVM::EXP_ShortCircuit(Definition *e, int n)
+Definition *RealVM::EXPShortCircuit(Definition *e, int n)
 {
     OpCode *op = &all_operators[n];
 
@@ -991,7 +991,7 @@ Definition *RealVM::EXP_ShortCircuit(Definition *e, int n)
     else
         patch = EmitCode(OP_IF, result->ofs);
 
-    Definition *e2 = EXP_Expression(op->priority - 1);
+    Definition *e2 = EXPExpression(op->priority - 1);
     if (e2->type->type != ev_float)
         CompileError("type mismatch for %s\n", op->name);
 
@@ -1002,7 +1002,7 @@ Definition *RealVM::EXP_ShortCircuit(Definition *e, int n)
     return result;
 }
 
-Definition *RealVM::EXP_FieldQuery(Definition *e, bool lvalue)
+Definition *RealVM::EXPFieldQuery(Definition *e, bool lvalue)
 {
     char *name = ParseName();
 
@@ -1042,12 +1042,12 @@ Definition *RealVM::EXP_FieldQuery(Definition *e, bool lvalue)
     return nullptr; // NOT REACHED
 }
 
-Definition *RealVM::EXP_Expression(int priority, bool *lvalue)
+Definition *RealVM::EXPExpression(int priority, bool *lvalue)
 {
     if (priority == 0)
-        return EXP_Term();
+        return EXPTerm();
 
-    Definition *e = EXP_Expression(priority - 1, lvalue);
+    Definition *e = EXPExpression(priority - 1, lvalue);
 
     // loop through a sequence of same-priority operators
     bool found;
@@ -1056,14 +1056,14 @@ Definition *RealVM::EXP_Expression(int priority, bool *lvalue)
     {
         found = false;
 
-        while (priority == 1 && LEX_Check("."))
-            e = EXP_FieldQuery(e, lvalue);
+        while (priority == 1 && LexCheck("."))
+            e = EXPFieldQuery(e, lvalue);
 
-        if (priority == 1 && LEX_Check("("))
+        if (priority == 1 && LexCheck("("))
         {
             if (lvalue)
                 *lvalue = false;
-            return EXP_FunctionCall(e);
+            return EXPFunctionCall(e);
         }
 
         if (lvalue)
@@ -1076,18 +1076,18 @@ Definition *RealVM::EXP_Expression(int priority, bool *lvalue)
             if (op->priority != priority)
                 continue;
 
-            if (!LEX_Check(op->name))
+            if (!LexCheck(op->name))
                 continue;
 
             found = true;
 
             if (strcmp(op->name, "&&") == 0 || strcmp(op->name, "||") == 0)
             {
-                e = EXP_ShortCircuit(e, n);
+                e = EXPShortCircuit(e, n);
                 break;
             }
 
-            Definition *e2 = EXP_Expression(priority - 1);
+            Definition *e2 = EXPExpression(priority - 1);
 
             // type check
 
@@ -1120,18 +1120,18 @@ Definition *RealVM::EXP_Expression(int priority, bool *lvalue)
     return e;
 }
 
-void RealVM::STAT_If_Else()
+void RealVM::STATIf_Else()
 {
-    LEX_Expect("(");
-    Definition *e = EXP_Expression(kTopPriority);
-    LEX_Expect(")");
+    LexExpect("(");
+    Definition *e = EXPExpression(kTopPriority);
+    LexExpect(")");
 
     int patch = EmitCode(OP_IFNOT, e->ofs);
 
-    STAT_Statement(false);
+    STATStatement(false);
     FreeTemporaries();
 
-    if (LEX_Check("else"))
+    if (LexCheck("else"))
     {
         // use GOTO to skip over the else statements
         int patch2 = EmitCode(OP_GOTO);
@@ -1140,22 +1140,22 @@ void RealVM::STAT_If_Else()
 
         patch = patch2;
 
-        STAT_Statement(false);
+        STATStatement(false);
         FreeTemporaries();
     }
 
     COAL_REF_OP(patch)->b = EmitCode(OP_NULL);
 }
 
-void RealVM::STAT_Assert()
+void RealVM::STATAssert()
 {
     // TODO: only internalise the filename ONCE
     int file_str = InternaliseString(comp_.source_file);
     int line_num = comp_.source_line;
 
-    LEX_Expect("(");
-    Definition *e = EXP_Expression(kTopPriority);
-    LEX_Expect(")");
+    LexExpect("(");
+    Definition *e = EXPExpression(kTopPriority);
+    LexExpect(")");
 
     int patch = EmitCode(OP_IF, e->ofs);
 
@@ -1165,17 +1165,17 @@ void RealVM::STAT_Assert()
     COAL_REF_OP(patch)->b = EmitCode(OP_NULL);
 }
 
-void RealVM::STAT_WhileLoop()
+void RealVM::STATWhileLoop()
 {
     int begin = EmitCode(OP_NULL);
 
-    LEX_Expect("(");
-    Definition *e = EXP_Expression(kTopPriority);
-    LEX_Expect(")");
+    LexExpect("(");
+    Definition *e = EXPExpression(kTopPriority);
+    LexExpect(")");
 
     int patch = EmitCode(OP_IFNOT, e->ofs);
 
-    STAT_Statement(false);
+    STATStatement(false);
     FreeTemporaries();
 
     EmitCode(OP_GOTO, 0, begin);
@@ -1183,30 +1183,30 @@ void RealVM::STAT_WhileLoop()
     COAL_REF_OP(patch)->b = EmitCode(OP_NULL);
 }
 
-void RealVM::STAT_RepeatLoop()
+void RealVM::STATRepeatLoop()
 {
     int begin = EmitCode(OP_NULL);
 
-    STAT_Statement(false);
+    STATStatement(false);
     FreeTemporaries();
 
-    LEX_Expect("until");
-    LEX_Expect("(");
+    LexExpect("until");
+    LexExpect("(");
 
-    Definition *e = EXP_Expression(kTopPriority);
+    Definition *e = EXPExpression(kTopPriority);
 
     EmitCode(OP_IFNOT, e->ofs, begin);
 
-    LEX_Expect(")");
+    LexExpect(")");
 
     // -AJA- optional semicolons
     if (!(comp_.token_is_first || comp_.token_buf[0] == '}'))
-        LEX_Expect(";");
+        LexExpect(";");
 }
 
-void RealVM::STAT_ForLoop()
+void RealVM::STATForLoop()
 {
-    LEX_Expect("(");
+    LexExpect("(");
 
     char *var_name = strdup(ParseName());
 
@@ -1215,18 +1215,18 @@ void RealVM::STAT_ForLoop()
     if (!var || (var->flags & DF_Constant))
         CompileError("unknown variable in for loop: %s\n", var_name);
 
-    LEX_Expect("=");
+    LexExpect("=");
 
-    Definition *e1 = EXP_Expression(kTopPriority);
+    Definition *e1 = EXPExpression(kTopPriority);
     if (e1->type != var->type)
         CompileError("type mismatch in for loop\n");
 
     // assign first value to the variable
     EmitCode(OP_MOVE_F, e1->ofs, var->ofs);
 
-    LEX_Expect(",");
+    LexExpect(",");
 
-    Definition *e2 = EXP_Expression(kTopPriority);
+    Definition *e2 = EXPExpression(kTopPriority);
     if (e2->type != var->type)
         CompileError("type mismatch in for loop\n");
 
@@ -1234,14 +1234,14 @@ void RealVM::STAT_ForLoop()
     Definition *target = NewLocal(&type_float);
     EmitCode(OP_MOVE_F, e2->ofs, target->ofs);
 
-    LEX_Expect(")");
+    LexExpect(")");
 
     Definition *cond_temp = NewTemporary(&type_float);
 
     int begin = EmitCode(OP_LE, var->ofs, target->ofs, cond_temp->ofs);
     int patch = EmitCode(OP_IFNOT, cond_temp->ofs);
 
-    STAT_Statement(false);
+    STATStatement(false);
     FreeTemporaries();
 
     // increment the variable
@@ -1251,12 +1251,12 @@ void RealVM::STAT_ForLoop()
     COAL_REF_OP(patch)->b = EmitCode(OP_NULL);
 }
 
-void RealVM::STAT_Assignment(Definition *e)
+void RealVM::STATAssignment(Definition *e)
 {
     if (e->flags & DF_Constant)
         CompileError("assignment to a constant\n");
 
-    Definition *e2 = EXP_Expression(kTopPriority);
+    Definition *e2 = EXPExpression(kTopPriority);
 
     if (e2->type != e->type)
         CompileError("type mismatch in assignment\n");
@@ -1264,91 +1264,91 @@ void RealVM::STAT_Assignment(Definition *e)
     EmitMove(e->type, e2->ofs, e->ofs);
 }
 
-void RealVM::STAT_Statement(bool allow_def)
+void RealVM::STATStatement(bool allow_def)
 {
-    if (allow_def && LEX_Check("var"))
+    if (allow_def && LexCheck("var"))
     {
-        GLOB_Variable();
+        GLOBVariable();
         return;
     }
 
-    if (allow_def && LEX_Check("function"))
+    if (allow_def && LexCheck("function"))
     {
         CompileError("functions must be global\n");
         return;
     }
 
-    if (allow_def && LEX_Check("constant"))
+    if (allow_def && LexCheck("constant"))
     {
         CompileError("constants must be global\n");
         return;
     }
 
-    if (LEX_Check("{"))
+    if (LexCheck("{"))
     {
         do
         {
-            STAT_Statement(true);
+            STATStatement(true);
             FreeTemporaries();
-        } while (!LEX_Check("}"));
+        } while (!LexCheck("}"));
 
         return;
     }
 
-    if (LEX_Check("return"))
+    if (LexCheck("return"))
     {
-        STAT_Return();
+        STATReturn();
         return;
     }
 
-    if (LEX_Check("if"))
+    if (LexCheck("if"))
     {
-        STAT_If_Else();
+        STATIf_Else();
         return;
     }
 
-    if (LEX_Check("assert"))
+    if (LexCheck("assert"))
     {
-        STAT_Assert();
+        STATAssert();
         return;
     }
 
-    if (LEX_Check("while"))
+    if (LexCheck("while"))
     {
-        STAT_WhileLoop();
+        STATWhileLoop();
         return;
     }
 
-    if (LEX_Check("repeat"))
+    if (LexCheck("repeat"))
     {
-        STAT_RepeatLoop();
+        STATRepeatLoop();
         return;
     }
 
-    if (LEX_Check("for"))
+    if (LexCheck("for"))
     {
-        STAT_ForLoop();
+        STATForLoop();
         return;
     }
 
     bool        lvalue = true;
-    Definition *e      = EXP_Expression(kTopPriority, &lvalue);
+    Definition *e      = EXPExpression(kTopPriority, &lvalue);
 
     // lvalue is false for a plain function call
 
     if (lvalue)
     {
-        LEX_Expect("=");
+        LexExpect("=");
 
-        STAT_Assignment(e);
+        STATAssignment(e);
     }
 
     // -AJA- optional semicolons
     if (!(comp_.token_is_first || comp_.token_buf[0] == '}'))
-        LEX_Expect(";");
+        LexExpect(";");
 }
 
-int RealVM::GLOB_FunctionBody(Definition *func_def, Type *type, const char *func_name)
+int RealVM::GLOBFunctionBody(Definition *func_def, Type *type, const char *func_name)
 {
     // Returns the first_statement value
 
@@ -1359,7 +1359,7 @@ int RealVM::GLOB_FunctionBody(Definition *func_def, Type *type, const char *func
     //
     // check for native function definition
     //
-    if (LEX_Check("native"))
+    if (LexCheck("native"))
     {
         const char *module = nullptr;
         if (func_def->scope->kind_ == 'm')
@@ -1395,14 +1395,14 @@ int RealVM::GLOB_FunctionBody(Definition *func_def, Type *type, const char *func
     //
     // parse regular statements
     //
-    LEX_Expect("{");
+    LexExpect("{");
 
-    while (!LEX_Check("}"))
+    while (!LexCheck("}"))
     {
         if (comp_.token_type == tt_error)
-            LEX_Next();
+            LexNext();
         else
-            STAT_Statement(true);
+            STATStatement(true);
 
         if (comp_.token_type == tt_eof)
             CompileError("unfinished function body (hit EOF)\n");
@@ -1423,11 +1423,11 @@ int RealVM::GLOB_FunctionBody(Definition *func_def, Type *type, const char *func
     return code;
 }
 
-void RealVM::GLOB_Function()
+void RealVM::GLOBFunction()
 {
     char *func_name = strdup(ParseName());
 
-    LEX_Expect("(");
+    LexExpect("(");
 
     Type t_new;
 
@@ -1437,7 +1437,7 @@ void RealVM::GLOB_Function()
     t_new.aux_type     = &type_void;
     int optional_start = -1;
 
-    if (!LEX_Check(")"))
+    if (!LexCheck(")"))
     {
         do
         {
@@ -1462,19 +1462,19 @@ void RealVM::GLOB_Function()
             strcpy(comp_.parm_names[t_new.parm_num], name);
 
             // parameter type (defaults to float)
-            if (LEX_Check(":"))
+            if (LexCheck(":"))
                 t_new.parm_types[t_new.parm_num] = ParseType();
             else
                 t_new.parm_types[t_new.parm_num] = &type_float;
 
             t_new.parm_num++;
-        } while (LEX_Check(","));
+        } while (LexCheck(","));
 
-        LEX_Expect(")");
+        LexExpect(")");
     }
 
     // return type (defaults to void)
-    if (LEX_Check(":"))
+    if (LexCheck(":"))
     {
         t_new.aux_type = ParseType();
     }
@@ -1485,7 +1485,7 @@ void RealVM::GLOB_Function()
 
     assert(func_type->type == ev_function);
 
-    LEX_Expect("=");
+    LexExpect("=");
 
     // fill in the dfunction
     COAL_G_FLOAT(def->ofs) = (double)functions_.size();
@@ -1531,7 +1531,7 @@ void RealVM::GLOB_Function()
     comp_.scope->kind_ = 'f';
     comp_.scope->def_  = def;
     //  {
-    df->first_statement = GLOB_FunctionBody(def, func_type, func_name);
+    df->first_statement = GLOBFunctionBody(def, func_type, func_name);
     df->last_statement  = comp_.last_statement;
     //  }
     comp_.scope = OLD_scope;
@@ -1540,18 +1540,18 @@ void RealVM::GLOB_Function()
     df->locals_end  = comp_.locals_end;
 
     if (comp_.asm_dump)
-        ASM_DumpFunction(df);
+        ASMDumpFunction(df);
 
     // debugprintf(stderr, "FUNCTION %s locals:%d\n", func_name, comp_.locals_end);
 }
 
-void RealVM::GLOB_Variable()
+void RealVM::GLOBVariable()
 {
     char *var_name = strdup(ParseName());
 
     Type *type = &type_float;
 
-    if (LEX_Check(":"))
+    if (LexCheck(":"))
     {
         type = ParseType();
     }
@@ -1561,7 +1561,7 @@ void RealVM::GLOB_Variable()
     if (def->flags & DF_Constant)
         CompileError("%s previously defined as a constant\n");
 
-    if (LEX_Check("="))
+    if (LexCheck("="))
     {
         // global variables can only be initialised with a constant
         if (def->ofs > 0)
@@ -1574,12 +1574,12 @@ void RealVM::GLOB_Variable()
 
             StoreLiteral(def->ofs);
 
-            LEX_Next();
+            LexNext();
         }
         else // local variables can take an expression
              // it is equivalent to: var XX ; XX = ...
         {
-            Definition *e2 = EXP_Expression(kTopPriority);
+            Definition *e2 = EXPExpression(kTopPriority);
 
             if (e2->type != def->type)
                 CompileError("type mismatch for %s\n", var_name);
@@ -1596,14 +1596,14 @@ void RealVM::GLOB_Variable()
 
     // -AJA- optional semicolons
     if (!(comp_.token_is_first || comp_.token_buf[0] == '}'))
-        LEX_Expect(";");
+        LexExpect(";");
 }
 
-void RealVM::GLOB_Constant()
+void RealVM::GLOBConstant()
 {
     char *const_name = strdup(ParseName());
 
-    LEX_Expect("=");
+    LexExpect("=");
 
     if (comp_.token_type != tt_literal)
         CompileError("expected value for constant, got %s\n", comp_.token_buf);
@@ -1614,14 +1614,14 @@ void RealVM::GLOB_Constant()
 
     StoreLiteral(cn->ofs);
 
-    LEX_Next();
+    LexNext();
 
     // -AJA- optional semicolons
     if (!(comp_.token_is_first || comp_.token_buf[0] == '}'))
-        LEX_Expect(";");
+        LexExpect(";");
 }
 
-void RealVM::GLOB_Module()
+void RealVM::GLOBModule()
 {
     if (comp_.scope->kind_ != 'g')
         CompileError("modules cannot contain other modules\n");
@@ -1658,15 +1658,15 @@ void RealVM::GLOB_Module()
 
     comp_.scope = mod;
 
-    LEX_Expect("{");
+    LexExpect("{");
 
-    while (!LEX_Check("}"))
+    while (!LexCheck("}"))
     {
         // handle a previous error
         if (comp_.token_type == tt_error)
-            LEX_Next();
+            LexNext();
         else
-            GLOB_Globals();
+            GLOBGlobals();
 
         if (comp_.token_type == tt_eof)
             CompileError("unfinished module (hit EOF)\n");
@@ -1675,29 +1675,29 @@ void RealVM::GLOB_Module()
     comp_.scope = OLD_scope;
 }
 
-void RealVM::GLOB_Globals()
+void RealVM::GLOBGlobals()
 {
-    if (LEX_Check("function"))
+    if (LexCheck("function"))
     {
-        GLOB_Function();
+        GLOBFunction();
         return;
     }
 
-    if (LEX_Check("var"))
+    if (LexCheck("var"))
     {
-        GLOB_Variable();
+        GLOBVariable();
         return;
     }
 
-    if (LEX_Check("constant"))
+    if (LexCheck("constant"))
     {
-        GLOB_Constant();
+        GLOBConstant();
         return;
     }
 
-    if (LEX_Check("module"))
+    if (LexCheck("module"))
     {
-        GLOB_Module();
+        GLOBModule();
         return;
     }
 
@@ -1718,7 +1718,7 @@ bool RealVM::CompileFile(char *buffer, const char *filename)
     comp_.bracelevel = 0;
     comp_.fol_level  = 0;
 
-    LEX_Next(); // read first token
+    LexNext(); // read first token
 
     while (comp_.token_type != tt_eof)
     {
@@ -1726,9 +1726,9 @@ bool RealVM::CompileFile(char *buffer, const char *filename)
 
         // handle a previous error
         if (comp_.token_type == tt_error)
-            LEX_Next();
+            LexNext();
         else
-            GLOB_Globals();
+            GLOBGlobals();
     }
 
     comp_.source_file = nullptr;

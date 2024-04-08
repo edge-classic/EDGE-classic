@@ -71,7 +71,7 @@ ImageFormat ImageFormatFromFilename(const std::string &filename);
 // Returns nullptr if something went wrong.  The result image will be RGB
 // or RGBA (never paletted).  The image size (width and height) will be
 // rounded to the next power-of-two.
-ImageData *LoadImage(epi::File *file);
+ImageData *LoadImageData(epi::File *file);
 
 // given a collection of loaded images, pack and return the image data
 // for an atlas containing all of them. Does not assume that the incoming

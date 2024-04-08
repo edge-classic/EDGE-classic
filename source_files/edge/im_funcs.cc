@@ -143,7 +143,7 @@ ImageFormat ImageFormatFromFilename(const std::string &filename)
     return kImageUnknown;
 }
 
-ImageData *LoadImage(epi::File *file)
+ImageData *LoadImageData(epi::File *file)
 {
     int width  = 0;
     int height = 0;

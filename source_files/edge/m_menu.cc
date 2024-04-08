@@ -548,7 +548,7 @@ void MenuReadSaveStrings(void)
             epi::File *svimg_file = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
             if (svimg_file)
             {
-                save_extended_information_slots[i].save_image_data = LoadImage(svimg_file);
+                save_extended_information_slots[i].save_image_data = LoadImageData(svimg_file);
                 if (save_extended_information_slots[i].save_image_data)
                 {
                     save_extended_information_slots[i].save_texture_id =

@@ -51,7 +51,7 @@ fluid_sfloader_t *edge_fluid_sf2_loader = nullptr;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(midi_soundfont, "", kConsoleVariableFlagArchive)
 
-EDGE_DEFINE_CONSOLE_VARIABLE(fluid_player_gain, "0.3",
+EDGE_DEFINE_CONSOLE_VARIABLE(fluid_player_gain, "0.6",
                              (ConsoleVariableFlag)(kConsoleVariableFlagArchive | kConsoleVariableFlagFilepath))
 
 extern std::vector<std::string> available_soundfonts;

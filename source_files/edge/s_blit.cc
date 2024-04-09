@@ -165,8 +165,7 @@ void SoundChannel::ComputeMusicVolume()
 {
     float MAX_VOL = (1 << (16 - kSafeClippingBits)) - 3;
 
-    MAX_VOL = MAX_VOL * music_volume.f_ * music_player_gain; // This last one is an internal value and won't
-                                                             // exceed 1.0, so MAX_VOL should be consistent
+    MAX_VOL = MAX_VOL * music_volume.f_ * music_player_gain; // This last one is an internal value that depends on music format
 
     volume_left_  = (int)MAX_VOL;
     volume_right_ = (int)MAX_VOL;

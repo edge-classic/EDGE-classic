@@ -327,6 +327,8 @@ class OpalPlayer : public AbstractMusicPlayer
             opl_interface_ = nullptr;
         }
 
+        music_player_gain = 1.0f;
+
         status_ = kNotLoaded;
     }
 
@@ -337,6 +339,8 @@ class OpalPlayer : public AbstractMusicPlayer
 
         status_  = kPlaying;
         looping_ = loop;
+
+        music_player_gain = 4.0f;
 
         // Load up initial buffer data
         Ticker();

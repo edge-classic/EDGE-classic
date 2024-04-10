@@ -32,7 +32,45 @@ BotLow="Low";
 BotMedium="Medium";
 BotHigh="High";
  
- 
+E1M1Desc="Sinking";
+E1M2Desc="Down";
+E1M3Desc="Flurrious";
+E1M4Desc="Blade Swamp";
+E1M5Desc="Fielding";
+E1M6Desc="Rampart";
+E1M7Desc="Dripstone Wharf";
+E1M8Desc="Hazardous Coast";
+E1M9Desc="Pop Some Hops";
+
+E2M1Desc="On Fire";
+E2M2Desc="Drained";
+E2M3Desc="Sequester";
+E2M4Desc="Metal";
+E2M5Desc="Marketplace";
+E2M6Desc="Magnus Avenue";
+E2M7Desc="Mistory";
+E2M8Desc="Audience";
+E2M9Desc="Addle";
+
+E3M1Desc="Isolation";
+E3M2Desc="Claustrophilia";
+E3M3Desc="Dungeon";
+E3M4Desc="Acrophobinox";
+E3M5Desc="Shine On";
+E3M6Desc="Seeing Red";
+E3M7Desc="Siege";
+E3M8Desc="Rok";
+E3M9Desc="Begin";
+
+E4M1Desc="Delusion";
+E4M2Desc="Ice Melt";
+E4M3Desc="Quick";
+E4M4Desc="Window Pain";
+E4M5Desc="Mal Arena";
+E4M6Desc="Cliffusion";
+E4M7Desc="Dance Macabre";
+E4M8Desc="Eyebrawl";
+E4M9Desc="Home"; 
  
  
  

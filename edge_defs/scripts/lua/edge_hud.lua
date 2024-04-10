@@ -438,12 +438,19 @@ function doom_automap()
     hud.text_font("DOOM")
     hud.text_color(hud.GREEN)
 
+	local TempMapName = hud.map_title()
+    
+    if (DoesNameStartWith(hud.map_title(),hud.map_name()) == 0) then
+    	TempMapName = hud.map_name() .. ": " ..  hud.map_title()
+    end
+
     if (#hud.map_author() > 0) then
-        hud.draw_text(0, 200 - 32 - 20, hud.map_title())
+        hud.draw_text(0, 200 - 32 - 20, TempMapName)
         hud.draw_text(0, 200 - 32 - 10, " Author: " .. hud.map_author())
     else
-        hud.draw_text(0, 200 - 32 - 10, hud.map_title())
+        hud.draw_text(0, 200 - 32 - 10, TempMapName)
     end
+	
 
     hud.set_scale(0.75)
     hud.draw_text(10, 20, "Kills:    " .. player.kills() .. "/" .. player.map_enemies())

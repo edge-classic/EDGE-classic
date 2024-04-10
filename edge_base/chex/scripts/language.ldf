@@ -88,11 +88,11 @@ GodModeOFF = "Invincible Mode Off";
 GodModeON = "Invincible Mode On";
 AmmoAdded = "Zorch Added";
 VeryHappyAmmo = "Super Zorch Added";
-E1M1Desc = "E1M1: Landing Zone";
-E1M2Desc = "E1M2: Storage Facility";
-E1M3Desc = "E1M3: Experimental Lab";
-E1M4Desc = "E1M4: Arboretum";
-E1M5Desc = "E1M5: Caverns of Bazoik";
+E1M1Desc = "Landing Zone";
+E1M2Desc = "Storage Facility";
+E1M3Desc = "Experimental Lab";
+E1M4Desc = "Arboretum";
+E1M5Desc = "Caverns of Bazoik";
 Episode1Text = "Mission accomplished.\n"
   "\n"
   "Are you prepared for the next mission?\n"

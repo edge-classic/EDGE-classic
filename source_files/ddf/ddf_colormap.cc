@@ -30,6 +30,7 @@ void DDFColmapGetSpecial(const char *info, void *storage);
 static Colormap dummy_colmap;
 
 static const DDFCommandList colmap_commands[] = {DDF_FIELD("LUMP", dummy_colmap, lump_name_, DDFMainGetLumpName),
+                                                 DDF_FIELD("LUMP_INDEX", dummy_colmap, lump_index_, DDFMainGetNumeric),
                                                  DDF_FIELD("PACK", dummy_colmap, pack_name_, DDFMainGetString),
                                                  DDF_FIELD("START", dummy_colmap, start_, DDFMainGetNumeric),
                                                  DDF_FIELD("LENGTH", dummy_colmap, length_, DDFMainGetNumeric),
@@ -114,9 +115,9 @@ static void ColmapFinishEntry(void)
     }
 
     if (dynamic_colmap->lump_name_.empty() && dynamic_colmap->pack_name_.empty() &&
-        dynamic_colmap->gl_color_ == kRGBANoValue)
+        dynamic_colmap->gl_color_ == kRGBANoValue && dynamic_colmap->lump_index_ == -1)
     {
-        DDFWarnError("Colourmap entry missing LUMP, PACK or GL_COLOUR.\n");
+        DDFWarnError("Colourmap entry missing LUMP, PACK, LUMP_INDEX or GL_COLOUR.\n");
         // We are now assuming that the intent is to remove all
         // colmaps with this name (i.e., "null" it), as the only way to get here
         // is to create an empty entry or use gl_color_=NONE; - Dasho
@@ -230,6 +231,8 @@ Colormap::~Colormap()
 void Colormap::CopyDetail(Colormap &src)
 {
     lump_name_ = src.lump_name_;
+    pack_name_ = src.pack_name_;
+    lump_index_ = src.lump_index_;
 
     start_   = src.start_;
     length_  = src.length_;
@@ -248,6 +251,8 @@ void Colormap::CopyDetail(Colormap &src)
 void Colormap::Default()
 {
     lump_name_.clear();
+    pack_name_.clear();
+    lump_index_ = -1;
 
     start_   = 0;
     length_  = 0;
@@ -306,7 +311,7 @@ Colormap *ColormapContainer::Lookup(const char *refname)
 // This is used to make entries for lumps between C_START and C_END
 // markers in a (BOOM) WAD file.
 //
-void DDFAddRawColourmap(const char *name, int size, const char *pack_name)
+void DDFAddRawColourmap(const char *name, int size, const char *pack_name, int index)
 {
     if (size < 256)
     {
@@ -328,6 +333,12 @@ void DDFAddRawColourmap(const char *name, int size, const char *pack_name)
         text += "pack   = \"";
         text += pack_name;
         text += "\";\n";
+    }
+    else if (index > -1)
+    {
+        text += "lump_index = ";
+        text += std::to_string(index);
+        text += ";\n";
     }
     else
     {

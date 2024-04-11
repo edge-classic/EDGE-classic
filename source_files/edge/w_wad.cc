@@ -1092,7 +1092,7 @@ static void ProcessBoomStuffInWad(DataFile *df)
     // handle BOOM Colourmaps (between C_START and C_END)
     for (int lump : df->wad_->colormap_lumps_)
     {
-        DDFAddRawColourmap(GetLumpNameFromIndex(lump), GetLumpLength(lump), nullptr);
+        DDFAddRawColourmap(GetLumpNameFromIndex(lump), GetLumpLength(lump), nullptr, lump);
     }
 }
 

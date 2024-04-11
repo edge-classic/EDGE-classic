@@ -50,6 +50,7 @@ class Colormap
     std::string name_;
 
     std::string lump_name_;
+    int lump_index_; // for raw BOOM colourmaps
     std::string pack_name_;
 
     int start_;
@@ -93,7 +94,7 @@ extern ColormapContainer colormaps; // -ACB- 2004/06/10 Implemented
 
 void DDFReadColourMaps(const std::string &data);
 
-void DDFAddRawColourmap(const char *name, int size, const char *pack_name);
+void DDFAddRawColourmap(const char *name, int size, const char *pack_name, int index = -1);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

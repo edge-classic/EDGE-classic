@@ -40,3 +40,4 @@ Bugs fixed
 - Fixed DDFLEVEL fog density using wrong multiplier when being applied to sectors
 - Fixed DDFLANG entries not being applied to Option Menu entry names
 - Fixed several factors preventing standalone games using the EDGEGAME lump/file from loading
+- Fixed BOOM Colourmaps with lump name collisions potentially having assertion errors on load

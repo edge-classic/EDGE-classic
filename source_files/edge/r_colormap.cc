@@ -189,6 +189,10 @@ static void LoadColourmap(const Colormap *colm)
         data = f->LoadIntoMemory();
         delete f; // close file
     }
+    else if (colm->lump_index_ > -1)
+    {
+        data = LoadLumpIntoMemory(colm->lump_index_, &size);
+    }
     else
     {
         data = LoadLumpIntoMemory(colm->lump_name_.c_str(), &size);

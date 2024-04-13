@@ -16,12 +16,14 @@ General Improvements/Changes
 --------------------
 - Optimized GL state caching and other rendering-related factors to improve performance with the current renderer
 - Reduced CPU load when frame limiting (i.e., regular 35/70FPS modes)
+- Reduced renderer near clipping distance to prevent graphical oddities when traversing in and out of deep water
 - Removed voxel loader and rendering functions due to performance concerns
 - Improved sector fogwall appearance/coverage when adjacent to detail slopes
 - Added one-time startup message/warning to user if loading a configuration file from a previous version of the program
 - Disabled default support for Strife (it is now a compile-time option for developers)
 - Limited fallback IWAD selection dialog to 8 options, even if more valid games are found.
   - This is to account for a hardcoded SDL limitation for some backends
+- Tweaked MIDI/OPL default gain levels to be more consistent with each other
 - Developers:
   - Support for exceptions/RTTI removed from program with compiler flags/options set accordingly
     - Primesynth swapped back to Fluidlite for MIDI playback due to Primesynth's heavy reliance on exceptions
@@ -41,3 +43,7 @@ Bugs fixed
 - Fixed DDFLANG entries not being applied to Option Menu entry names
 - Fixed several factors preventing standalone games using the EDGEGAME lump/file from loading
 - Fixed BOOM Colourmaps with lump name collisions potentially having assertion errors on load
+- Fixed MBF dog replacement sound lumps not overriding the stock OGG files
+- Added entries for multiple missing BEX strings
+- Fixed Boom all-key door failure messages not distinguishing between whether or not 3 or 6 keys are required
+- Fixed Dehacked code pointer entries with trailing spaces not matching defined actions

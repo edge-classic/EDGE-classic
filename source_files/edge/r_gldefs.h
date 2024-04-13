@@ -60,8 +60,8 @@ extern float render_view_blue_multiplier;
 
 extern const Colormap *render_view_effect_colormap;
 
-extern ConsoleVariable renderer_near_clip;
 extern ConsoleVariable renderer_far_clip;
+constexpr float renderer_near_clip = 0.1f;
 
 inline float FastApproximateDistance(float delta_x, float delta_y)
 {

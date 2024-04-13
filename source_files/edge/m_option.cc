@@ -126,7 +126,7 @@ extern ConsoleVariable video_overlay;
 extern ConsoleVariable erraticism;
 extern ConsoleVariable double_framerate;
 extern ConsoleVariable draw_culling;
-extern ConsoleVariable r_culldist;
+extern ConsoleVariable draw_culling_distance;
 extern ConsoleVariable cull_fog_color;
 extern ConsoleVariable distance_cull_thinkers;
 extern ConsoleVariable max_dynamic_lights;
@@ -602,8 +602,8 @@ static OptionMenuItem perfoptions[] = {
     {kOptionMenuItemTypeSwitch, "Detail Level", "Low/Medium/High", 3, &detail_level, OptionMenuChangeMipMap, nullptr},
     {kOptionMenuItemTypeBoolean, "Draw Distance Culling", YesNo, 2, &draw_culling.d_,
      OptionMenuUpdateConsoleVariableFromInt, "Sector/Level Fog will be disabled when this is On", &draw_culling},
-    {kOptionMenuItemTypeSlider, "Maximum Draw Distance", nullptr, 0, &r_culldist.f_,
-     OptionMenuUpdateConsoleVariableFromFloat, "Only effective when Draw Distance Culling is On", &r_culldist, 200.0f,
+    {kOptionMenuItemTypeSlider, "Maximum Draw Distance", nullptr, 0, &draw_culling_distance.f_,
+     OptionMenuUpdateConsoleVariableFromFloat, "Only effective when Draw Distance Culling is On", &draw_culling_distance, 200.0f,
      1000.0f, 8000.0f, "%g Units"},
     {kOptionMenuItemTypeSwitch, "Outdoor Culling Fog Color", "Match Sky/White/Grey/Black", 4, &cull_fog_color.d_,
      OptionMenuUpdateConsoleVariableFromInt, "Only effective when Draw Distance Culling is On", &cull_fog_color},

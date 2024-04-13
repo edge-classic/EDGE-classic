@@ -59,7 +59,7 @@ static bool grab_state;
 
 extern ConsoleVariable renderer_far_clip;
 extern ConsoleVariable draw_culling;
-extern ConsoleVariable r_culldist;
+extern ConsoleVariable draw_culling_distance;
 
 void GrabCursor(bool enable)
 {
@@ -387,7 +387,7 @@ void StartFrame(void)
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (draw_culling.d_)
-        renderer_far_clip.f_ = r_culldist.f_;
+        renderer_far_clip.f_ = draw_culling_distance.f_;
     else
         renderer_far_clip.f_ = 64000.0;
 }

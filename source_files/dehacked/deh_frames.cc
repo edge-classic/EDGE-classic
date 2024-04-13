@@ -47,6 +47,7 @@
 #include "deh_weapons.h"
 #include "epi.h"
 #include "epi_str_compare.h"
+#include "epi_str_util.h"
 namespace dehacked
 {
 
@@ -118,7 +119,7 @@ struct ActionInfo
 };
 
 const ActionInfo action_info[kTotalMBF21Actions] = {
-    {"A_nullptr", 0, "NOTHING", nullptr, nullptr},
+    {"A_NULL", 0, "NOTHING", nullptr, nullptr},
 
     // weapon actions...
     {"A_Light0", 0, "W:LIGHT0", nullptr, nullptr},
@@ -1381,10 +1382,21 @@ void frames::AlterBexCodePtr(const char *new_action)
 
     int action;
 
+    std::string action_check = new_action;
+
+    // trim whitespace from end of line
+    for (;;)
+    {
+        if (epi::IsSpaceASCII(action_check.back()))
+            action_check.pop_back();
+        else
+            break;
+    }
+
     for (action = 0; action < kTotalMBF21Actions; action++)
     {
         // use +2 here to ignore the "A_" prefix
-        if (epi::StringCaseCompareASCII(action_info[action].bex_name + 2, new_action) == 0)
+        if (epi::StringCaseCompareASCII(action_info[action].bex_name + 2, action_check) == 0)
         {
             // found it!
             st->action = action;

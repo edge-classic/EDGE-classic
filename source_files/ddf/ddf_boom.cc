@@ -570,7 +570,7 @@ static void MakeBoomLockedDoor(LineType *line, int number)
                                     (kDoorKeyRedCard | kDoorKeyBlueCard | kDoorKeyYellowCard | kDoorKeyRedSkull |
                                      kDoorKeyBlueSkull | kDoorKeyYellowSkull));
 
-        line->failedmessage_ = "NeedAllForDoor";
+        line->failedmessage_ = sk_ck ? "NeedAll3ForDoor" : "NeedAll6ForDoor";
         break;
     }
 }

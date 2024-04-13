@@ -228,6 +228,7 @@ void StoreBlurredImage(const Image *image)
         img->blurred_version_->animation_.next    = nullptr;
         img->blurred_version_->animation_.count   = 0;
         img->blurred_version_->animation_.speed   = 0;
+        img->blurred_version_->grayscale_         = img->grayscale_;
         if (img->blur_sigma_ > 0.0f)
         {
             img->blurred_version_->blur_sigma_ = img->blur_sigma_;

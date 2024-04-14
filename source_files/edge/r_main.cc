@@ -34,7 +34,7 @@ static int maximum_clip_planes;
 static int maximum_texture_units;
 int        maximum_texture_size;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(renderer_near_clip, "0.1", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(renderer_near_clip, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(renderer_far_clip, "64000", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(draw_culling, "0", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(draw_culling_distance, "3000", kConsoleVariableFlagArchive, 1000.0f, 16000.0f)

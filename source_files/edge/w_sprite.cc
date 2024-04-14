@@ -236,8 +236,10 @@ static void InstallSpriteLump(SpriteDefinition *def, int lump, const char *lumpn
     }
 
     frame->images_[rot] = CreateSprite(lumpname, lump, frame->is_weapon_);
-
     frame->flip_[rot] = flip;
+
+    if (rot == 0 && frame->rotations_ == 1)
+        frame->finished_ = true;
 }
 
 static void InstallSpritePack(SpriteDefinition *def, PackFile *pack, std::string spritebase, std::string packname,
@@ -265,8 +267,10 @@ static void InstallSpritePack(SpriteDefinition *def, PackFile *pack, std::string
     }
 
     frame->images_[rot] = CreatePackSprite(packname, pack, frame->is_weapon_);
-
     frame->flip_[rot] = flip;
+
+    if (rot == 0 && frame->rotations_ == 1)
+        frame->finished_ = true;
 }
 
 static void InstallSpriteImage(SpriteDefinition *def, const Image *img, const char *img_name, int pos, uint8_t flip)
@@ -292,6 +296,9 @@ static void InstallSpriteImage(SpriteDefinition *def, const Image *img, const ch
 
     frame->images_[rot] = img;
     frame->flip_[rot]   = flip;
+
+    if (rot == 0 && frame->rotations_ == 1)
+        frame->finished_ = true;
 }
 
 //

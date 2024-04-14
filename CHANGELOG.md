@@ -47,3 +47,4 @@ Bugs fixed
 - Added entries for multiple missing BEX strings
 - Fixed Boom all-key door failure messages not distinguishing between whether or not 3 or 6 keys are required
 - Fixed Dehacked code pointer entries with trailing spaces not matching defined actions
+- Fixed frames with a valid '0' rotation sprite still using other rotations if found elsewhere in the load order

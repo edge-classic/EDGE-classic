@@ -34,6 +34,7 @@ static int maximum_clip_planes;
 static int maximum_texture_units;
 int        maximum_texture_size;
 
+EDGE_DEFINE_CONSOLE_VARIABLE(renderer_near_clip, "0.1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(renderer_far_clip, "64000", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(draw_culling, "0", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(draw_culling_distance, "3000", kConsoleVariableFlagArchive, 1000.0f, 16000.0f)
@@ -96,8 +97,8 @@ void SetupMatrices3d(void)
 
     glLoadIdentity();
 
-    glFrustum(-view_x_slope * renderer_near_clip, view_x_slope * renderer_near_clip,
-              -view_y_slope * renderer_near_clip, view_y_slope * renderer_near_clip, renderer_near_clip,
+    glFrustum(-view_x_slope * renderer_near_clip.f_, view_x_slope * renderer_near_clip.f_,
+              -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
               renderer_far_clip.f_);
 
     // calculate look-at matrix

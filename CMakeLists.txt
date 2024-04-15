@@ -95,9 +95,13 @@ else()
     set(CMAKE_EXE_LINKER_FLAGS "-fsanitize=address -static-libasan")
   endif()
 
+  if (MSYS)
+    set(CMAKE_EXE_LINKER_FLAGS "-static -mwindows")
+  endif()
+
 endif()
 
-if (WIN32)
+if (MSVC)
   set(SDL2_DIR "${CMAKE_SOURCE_DIR}/libraries/sdl2")
 endif()
 

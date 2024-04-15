@@ -21,14 +21,15 @@ This section assumes that you have completed the steps at https://www.msys2.org/
 From an MSYS prompt for your target architecture:
 
 Install the following additional packages:
-* `mingw-w64-(arch)-gcc` (if not performed during initial MSYS2 install/setup)
+* `base-devel` (if not performed during initial MSYS2 install/setup)
+* `mingw-w64-(arch)-toolchain` (if not performed during initial MSYS2 install/setup)
 * `mingw-w64-(arch)-cmake`
 * `mingw-w64-(arch)-SDL2`
 
 Then, after navigating to the project directory:
 
 ```
-> cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXE_LINKER_FLAGS="-static -lmingw32 -lSDL2main -lSDL2.dll -mwindows" -DCMAKE_C_COMPILER_WORKS=1 -DCMAKE_CXX_COMPILER_WORKS=1
+> cmake -B build -G "MSYS Makefiles" -DCMAKE_BUILD_TYPE=Release
 > cmake --build build (-j# optional, with # being the number of threads/cores you'd like to use)
 > strip edge-classic.exe (if desired)
 ```

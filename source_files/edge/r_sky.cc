@@ -874,12 +874,16 @@ int UpdateSkyboxTextures(void)
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
     if (sky_image->source_palette_ >= 0)
         what_palette = (const uint8_t *)LoadLumpIntoMemory(sky_image->source_palette_);
-    ImageData *tmp_img_data = RGBFromPalettised(ReadAsEpiBlock((Image *)sky_image), what_palette, sky_image->opacity_);
+    ImageData *tmp_img_data = ReadAsEpiBlock((Image *)sky_image);
+    ImageData *tmp_rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, sky_image->opacity_);
     culling_fog_color =
-        sg_make_color_1i(tmp_img_data->AverageColor(0, sky_image->actual_width_, 0, sky_image->actual_height_ / 2));
-    sky_cap_color = sg_make_color_1i(tmp_img_data->AverageColor(
+        sg_make_color_1i(tmp_rgb_img_data->AverageColor(0, sky_image->actual_width_, 0, sky_image->actual_height_ / 2));
+    sky_cap_color = sg_make_color_1i(tmp_rgb_img_data->AverageColor(
         0, sky_image->actual_width_, sky_image->actual_height_ * 3 / 4, sky_image->actual_height_));
     delete tmp_img_data;
+    delete tmp_rgb_img_data;
+    if (what_palette != (const uint8_t *)&playpal_data[0])
+        delete[] what_palette;
 
     if (info->face[kSkyboxNorth])
     {

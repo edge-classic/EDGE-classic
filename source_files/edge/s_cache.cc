@@ -257,6 +257,8 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
         break;
     }
 
+    delete[] data;
+
     // Tag sound as SFX for environmental effects - Dasho
     if (OK)
         buf->is_sound_effect_ = true;

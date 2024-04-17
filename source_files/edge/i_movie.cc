@@ -47,6 +47,7 @@ static plm_t           *decoder            = nullptr;
 static SDL_AudioStream *movie_audio_stream = nullptr;
 static int              movie_sample_rate  = 0;
 static float            skip_time;
+static uint8_t         *movie_bytes        = nullptr;
 
 static bool MovieSetupAudioStream(int rate)
 {
@@ -119,22 +120,21 @@ void PlayMovie(const std::string &name)
     skip_time          = 0;
 
     int      length = 0;
-    uint8_t *bytes  = nullptr;
 
     if (movie->type_ == kMovieDataLump)
-        bytes = LoadLumpIntoMemory(movie->info_.c_str(), &length);
+        movie_bytes = LoadLumpIntoMemory(movie->info_.c_str(), &length);
     else
     {
         epi::File *mf = OpenFileFromPack(movie->info_.c_str());
         if (mf)
         {
-            bytes  = mf->LoadIntoMemory();
+            movie_bytes  = mf->LoadIntoMemory();
             length = mf->GetLength();
         }
         delete mf;
     }
 
-    if (!bytes)
+    if (!movie_bytes)
     {
         LogWarning("PlayMovie: Could not open %s!\n", movie->info_.c_str());
         return;
@@ -152,12 +152,13 @@ void PlayMovie(const std::string &name)
         movie_audio_stream = nullptr;
     }
 
-    decoder = plm_create_with_memory(bytes, length, TRUE);
+    decoder = plm_create_with_memory(movie_bytes, length, FALSE);
 
     if (!decoder)
     {
         LogWarning("PlayMovie: Could not open %s!\n", name.c_str());
-        delete[] bytes;
+        delete[] movie_bytes;
+        movie_bytes = nullptr;
         return;
     }
 
@@ -167,6 +168,8 @@ void PlayMovie(const std::string &name)
         if (!MovieSetupAudioStream(movie_sample_rate))
         {
             plm_destroy(decoder);
+            delete[] movie_bytes;
+            movie_bytes = nullptr;
             decoder = nullptr;
             return;
         }
@@ -419,6 +422,8 @@ void PlayMovie(const std::string &name)
     }
     plm_destroy(decoder);
     decoder = nullptr;
+    delete[] movie_bytes;
+    movie_bytes = nullptr;
     if (movie_audio_stream)
     {
         SDL_FreeAudioStream(movie_audio_stream);

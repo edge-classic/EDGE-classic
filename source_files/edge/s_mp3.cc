@@ -175,6 +175,7 @@ bool MP3Player::OpenMemory(uint8_t *data, int length)
         return false;
     }
 
+    mp3_data_ = data;
     PostOpen();
     return true;
 }

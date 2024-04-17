@@ -517,9 +517,6 @@ bool LoadOGGSound(SoundData *buf, const uint8_t *data, int length)
 
     ov_clear(&ogg_stream);
 
-    // free the data
-    delete[] data;
-
     return true;
 }
 

@@ -851,15 +851,17 @@ int CheckForUniqueGameLumps(epi::File *file)
     for (size_t check = 0; check < game_checker.size(); check++)
     {
         GameCheck gamecheck = game_checker[check];
+        const char *lump0 = gamecheck.unique_lumps[0];
+        const char *lump1 = gamecheck.unique_lumps[1];
 
         // Do not require IWAD header if loading Harmony, REKKR, BFG Edition
         // WADs, Chex Quest or a custom standalone IWAD
-        if (epi::StringPrefixCompare(header.magic, "IWAD") != 0 &&
-            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "DMENUPIC") != 0 &&
-            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "REKCREDS") != 0 &&
-            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "0HAWK01") != 0 &&
-            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "EDGEGAME") != 0 &&
-            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "ENDOOM") != 0)
+        if (strncmp(header.magic, "IWAD", 4) != 0 &&
+            epi::StringCompare(lump0, "DMENUPIC") != 0 &&
+            epi::StringCompare(lump0, "REKCREDS") != 0 &&
+            epi::StringCompare(lump0, "0HAWK01") != 0 &&
+            epi::StringCompare(lump0, "EDGEGAME") != 0 &&
+            epi::StringCompare(lump0, "ENDOOM") != 0)
         {
             continue;
         }
@@ -869,13 +871,15 @@ int CheckForUniqueGameLumps(epi::File *file)
 
         for (size_t i = 0; i < header.total_entries; i++)
         {
+            if (lump1_found && lump2_found)
+                break;
+
             RawWadEntry &entry = raw_info[i];
 
-            if (epi::StringCompareMax(gamecheck.unique_lumps[0], entry.name,
-                                      gamecheck.unique_lumps[0].size() < 8 ? gamecheck.unique_lumps[0].size() : 8) == 0)
+            if (strncmp(lump0, entry.name, 8) == 0)
             {
                 // EDGEGAME is the only lump needed for custom standalones
-                if (epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "EDGEGAME") == 0)
+                if (epi::StringCompare(lump0, "EDGEGAME") == 0)
                 {
                     delete[] raw_info;
                     file->Seek(0, epi::File::kSeekpointStart);
@@ -883,7 +887,7 @@ int CheckForUniqueGameLumps(epi::File *file)
                 }
                 // Either really smart or really dumb Chex Quest detection
                 // method
-                else if (epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "ENDOOM") == 0)
+                else if (epi::StringCompare(lump0, "ENDOOM") == 0)
                 {
                     EPI_ASSERT(entry.size == 4000);
                     file->Seek(entry.position, epi::File::kSeekpointStart);
@@ -900,8 +904,7 @@ int CheckForUniqueGameLumps(epi::File *file)
                 else
                     lump1_found = true;
             }
-            if (epi::StringCompareMax(gamecheck.unique_lumps[1], entry.name,
-                                      gamecheck.unique_lumps[1].size() < 8 ? gamecheck.unique_lumps[1].size() : 8) == 0)
+            if (strncmp(lump1, entry.name, 8) == 0)
                 lump2_found = true;
         }
 

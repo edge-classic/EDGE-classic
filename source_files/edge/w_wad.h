@@ -43,13 +43,13 @@ struct GameCheck
 {
     // Friendly string for selector dialog box (if multiple games found)
     // TODO: Read EDGEGAME file/lump for custom friendly title
-    const std::string display_name;
+    const char *display_name;
 
     // game_base to set if this IWAD is used
-    const std::string base;
+    const char *base;
 
     // (usually) unique lumps to check for in a potential IWAD
-    const std::string unique_lumps[2];
+    const char *unique_lumps[2];
 };
 
 extern const std::vector<GameCheck> game_checker;

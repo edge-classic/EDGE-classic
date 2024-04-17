@@ -1229,7 +1229,7 @@ static void IdentifyVersion(void)
                         game_paths.try_emplace(test_index, std::make_pair(dnd, kFileKindIFolder));
                         SDL_MessageBoxButtonData temp_button;
                         temp_button.buttonid = test_index;
-                        temp_button.text     = game_checker[test_index].display_name.c_str();
+                        temp_button.text     = game_checker[test_index].display_name;
                         game_buttons.push_back(temp_button);
                     }
                     program_argument_list.erase(program_argument_list.begin() + p--);
@@ -1245,7 +1245,7 @@ static void IdentifyVersion(void)
                         game_paths.try_emplace(test_index, std::make_pair(dnd, kFileKindIPK));
                         SDL_MessageBoxButtonData temp_button;
                         temp_button.buttonid = test_index;
-                        temp_button.text     = game_checker[test_index].display_name.c_str();
+                        temp_button.text     = game_checker[test_index].display_name;
                         game_buttons.push_back(temp_button);
                     }
                     program_argument_list.erase(program_argument_list.begin() + p--);
@@ -1263,7 +1263,7 @@ static void IdentifyVersion(void)
                         game_paths.try_emplace(test_index, std::make_pair(dnd, kFileKindIWAD));
                         SDL_MessageBoxButtonData temp_button;
                         temp_button.buttonid = test_index;
-                        temp_button.text     = game_checker[test_index].display_name.c_str();
+                        temp_button.text     = game_checker[test_index].display_name;
                         game_buttons.push_back(temp_button);
                     }
                     program_argument_list.erase(program_argument_list.begin() + p--);
@@ -1484,7 +1484,7 @@ static void IdentifyVersion(void)
                                 game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, kFileKindIWAD));
                                 SDL_MessageBoxButtonData temp_button;
                                 temp_button.buttonid = test_score;
-                                temp_button.text     = game_checker[test_score].display_name.c_str();
+                                temp_button.text     = game_checker[test_score].display_name;
                                 game_buttons.push_back(temp_button);
                             }
                         }
@@ -1509,7 +1509,7 @@ static void IdentifyVersion(void)
                                 game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, kFileKindIPK));
                                 SDL_MessageBoxButtonData temp_button;
                                 temp_button.buttonid = test_score;
-                                temp_button.text     = game_checker[test_score].display_name.c_str();
+                                temp_button.text     = game_checker[test_score].display_name;
                                 game_buttons.push_back(temp_button);
                             }
                         }
@@ -1550,7 +1550,7 @@ static void IdentifyVersion(void)
                                     game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, kFileKindIWAD));
                                     SDL_MessageBoxButtonData temp_button;
                                     temp_button.buttonid = test_score;
-                                    temp_button.text     = game_checker[test_score].display_name.c_str();
+                                    temp_button.text     = game_checker[test_score].display_name;
                                     game_buttons.push_back(temp_button);
                                 }
                             }
@@ -1575,7 +1575,7 @@ static void IdentifyVersion(void)
                                     game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, kFileKindIPK));
                                     SDL_MessageBoxButtonData temp_button;
                                     temp_button.buttonid = test_score;
-                                    temp_button.text     = game_checker[test_score].display_name.c_str();
+                                    temp_button.text     = game_checker[test_score].display_name;
                                     game_buttons.push_back(temp_button);
                                 }
                             }

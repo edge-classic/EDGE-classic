@@ -491,7 +491,6 @@ void DetectOverlappingLines(void)
 
     int  i;
     int *array = (int *)UtilCalloc(level_linedefs.size() * sizeof(int));
-    int  count = 0;
 
     // sort array of indices
     for (i = 0; i < level_linedefs.size(); i++)
@@ -516,8 +515,6 @@ void DetectOverlappingLines(void)
                 Linedef *B = level_linedefs[array[j]];
 
                 B->overlap = A->overlap ? A->overlap : A;
-
-                count++;
             }
         }
     }

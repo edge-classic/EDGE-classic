@@ -709,7 +709,6 @@ void DDFMainReadFile(DDFReadInfo *readinfo, const std::string &data)
     char *value = nullptr;
 
     int current_index = 0;
-    int entry_count   = 0;
 
 #if (DDF_DEBUG_READ)
     char charcount = 0;
@@ -884,8 +883,6 @@ void DDFMainReadFile(DDFReadInfo *readinfo, const std::string &data)
         case kDDFReadCharReturnDefinitionStart:
             if (bracket_level > 0)
                 DDFError("Unclosed () brackets detected.\n");
-
-            entry_count++;
 
             if (firstgo)
             {

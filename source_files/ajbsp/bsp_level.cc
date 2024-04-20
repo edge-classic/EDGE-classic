@@ -755,7 +755,7 @@ void SortSegs()
     // do a sanity check
     for (int i = 0; i < level_segs.size(); i++)
         if (level_segs[i]->index_ < 0)
-            FatalError("AJBSP: Seg %p never reached a subsector!\n", i);
+            FatalError("AJBSP: Seg %d never reached a subsector!\n", i);
 
     // sort segs into ascending index
     std::sort(level_segs.begin(), level_segs.end(), CompareSegPredicate());

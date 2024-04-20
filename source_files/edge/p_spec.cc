@@ -2001,12 +2001,6 @@ void PlayerInSpecialSector(Player *player, Sector *sec, bool should_choke)
     }
 }
 
-static inline void ApplyScroll(HMM_Vec2 &offset, const HMM_Vec2 &delta, unsigned short tex_w, unsigned short tex_h)
-{
-    offset.X = fmod(offset.X + delta.X, tex_w);
-    offset.Y = fmod(offset.Y + delta.Y, tex_h);
-}
-
 //
 // Animate planes, scroll walls, etc.
 //

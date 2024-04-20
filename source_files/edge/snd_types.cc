@@ -37,7 +37,7 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
         return kSoundFLAC;
     }
 
-    if (data[0] == 'O' && data[1] == 'g' && data[2] == 'g')
+    if (data[0] == 'O' && data[1] == 'g' && data[2] == 'g' && data[3] == 'S')
     {
         return kSoundOGG;
     }

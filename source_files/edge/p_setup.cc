@@ -291,6 +291,11 @@ static void LoadVertexes(int lump)
     ml = (const RawVertex *)data;
     li = level_vertexes;
 
+    int min_x = 0;
+    int min_y = 0;
+    int max_x = 0;
+    int max_y = 0;
+
     // Copy and convert vertex coordinates,
     // internal representation as fixed.
     for (i = 0; i < total_level_vertexes; i++, li++, ml++)
@@ -299,7 +304,15 @@ static void LoadVertexes(int lump)
         li->Y = AlignedLittleEndianS16(ml->y);
         li->Z = -40000.0f;
         li->W = 40000.0f;
+        min_x = HMM_MIN((int)li->X, min_x);
+        min_y = HMM_MIN((int)li->Y, min_y);
+        max_x = HMM_MAX((int)li->X, max_x);
+        max_y = HMM_MAX((int)li->Y, max_y);
     }
+
+    GenerateBlockmap(min_x, min_y, max_x, max_y);
+
+    CreateThingBlockmap();
 
     // Free buffer memory.
     delete[] data;
@@ -995,7 +1008,6 @@ static bool AssignSubsectorsPass(int pass)
     //
     // returns true if progress was made.
 
-    int  null_count = 0;
     bool progress   = false;
 
     for (int i = 0; i < total_level_subsectors; i++)
@@ -1004,8 +1016,6 @@ static bool AssignSubsectorsPass(int pass)
 
         if (ss->sector == nullptr)
         {
-            null_count += 1;
-
             ss->sector = DetermineSubsectorSector(ss, pass);
 
             if (ss->sector != nullptr)
@@ -1019,11 +1029,6 @@ static bool AssignSubsectorsPass(int pass)
             }
         }
     }
-
-    /* DEBUG
-    fprintf(stderr, "** pass %d : %d : %d\n", pass, null_count, progress ? 1 :
-    0);
-    */
 
     return progress;
 }
@@ -1340,6 +1345,10 @@ static void LoadUDMFVertexes()
 
     LogDebug("LoadUDMFVertexes: parsing TEXTMAP\n");
     int cur_vertex = 0;
+    int min_x = 0;
+    int min_y = 0;
+    int max_x = 0;
+    int max_y = 0;
 
     for (;;)
     {
@@ -1400,9 +1409,13 @@ static void LoadUDMFVertexes()
                 {
                 case epi::kENameX:
                     x = epi::LexDouble(value);
+                    min_x = HMM_MIN((int)x, min_x);
+                    max_x = HMM_MAX((int)x, max_x);
                     break;
                 case epi::kENameY:
                     y = epi::LexDouble(value);
+                    min_y = HMM_MIN((int)y, min_y);
+                    max_y = HMM_MAX((int)y, max_y);
                     break;
                 case epi::kENameZfloor:
                     zf = epi::LexDouble(value);
@@ -1428,6 +1441,10 @@ static void LoadUDMFVertexes()
         }
     }
     EPI_ASSERT(cur_vertex == total_level_vertexes);
+
+    GenerateBlockmap(min_x, min_y, max_x, max_y);
+
+    CreateThingBlockmap();  
 
     LogDebug("LoadUDMFVertexes: finished parsing TEXTMAP\n");
 }
@@ -2844,29 +2861,6 @@ static void DetectDeepWaterTrick(void)
     delete[] self_subs;
 }
 
-static void DoBlockMap()
-{
-    int min_x = (int)level_vertexes[0].X;
-    int min_y = (int)level_vertexes[0].Y;
-
-    int max_x = (int)level_vertexes[0].X;
-    int max_y = (int)level_vertexes[0].Y;
-
-    for (int i = 1; i < total_level_vertexes; i++)
-    {
-        Vertex *v = level_vertexes + i;
-
-        min_x = HMM_MIN((int)v->X, min_x);
-        min_y = HMM_MIN((int)v->Y, min_y);
-        max_x = HMM_MAX((int)v->X, max_x);
-        max_y = HMM_MAX((int)v->Y, max_y);
-    }
-
-    GenerateBlockmap(min_x, min_y, max_x, max_y);
-
-    CreateThingBlockmap();
-}
-
 //
 // GroupLines
 //
@@ -3463,10 +3457,6 @@ void LevelSetup(void)
     delete[] temp_line_sides;
 
     LoadXGL3Nodes(xgl_lump);
-
-    // REJECT is ignored, and we generate our own BLOCKMAP
-
-    DoBlockMap();
 
     GroupLines();
 

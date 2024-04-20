@@ -17,7 +17,7 @@ static void LuaError(const char *msg, const char *luaerror)
     std::string error(luaerror);
     std::replace(error.begin(), error.end(), '\t', '>');
 
-    FatalError((msg + error).c_str());
+    FatalError("%s", (msg + error).c_str());
 }
 
 static void LuaGetRequirePackPath(const char *name, std::string &out)

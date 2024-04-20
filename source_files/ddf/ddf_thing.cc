@@ -2378,7 +2378,7 @@ int MapObjectDefinitionContainer::FindFirst(const char *name, int startpos)
 {
     startpos = HMM_MAX(startpos, 0);
 
-    for (startpos; startpos < size(); startpos++)
+    for (; startpos < size(); startpos++)
     {
         MapObjectDefinition *m = at(startpos);
         if (DDFCompareName(m->name_.c_str(), name) == 0)
@@ -2392,7 +2392,7 @@ int MapObjectDefinitionContainer::FindLast(const char *name, int startpos)
 {
     startpos = HMM_MIN(startpos, size() - 1);
 
-    for (startpos; startpos >= 0; startpos--)
+    for (; startpos >= 0; startpos--)
     {
         MapObjectDefinition *m = at(startpos);
         if (DDFCompareName(m->name_.c_str(), name) == 0)

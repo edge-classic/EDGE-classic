@@ -215,17 +215,6 @@ static inline void TouchNodeUnlinkFromSector(TouchNode *tn)
         tn->sector->touch_things = tn->sector_next;
 }
 
-static inline void TouchNodeUnlinkFromThing(TouchNode *tn)
-{
-    if (tn->map_object_next)
-        tn->map_object_next->map_object_previous = tn->map_object_previous;
-
-    if (tn->map_object_previous)
-        tn->map_object_previous->map_object_next = tn->map_object_next;
-    else
-        tn->map_object->touch_sectors_ = tn->map_object_next;
-}
-
 struct BspThingPosition
 {
     MapObject *thing;

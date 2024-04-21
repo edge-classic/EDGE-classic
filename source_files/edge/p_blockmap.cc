@@ -1271,13 +1271,11 @@ static void BlockAdd(int bnum, Line *ld)
     // blk_total_lines++;
 }
 
-static void BlockAddLine(int line_num)
+void BlockmapAddLine(Line *ld)
 {
     int i, j;
     int x0, y0;
     int x1, y1;
-
-    Line *ld = level_lines + line_num;
 
     int blocknum;
 
@@ -1383,12 +1381,6 @@ void GenerateBlockmap(int min_x, int min_y, int max_x, int max_y)
     blockmap_lines = new std::list<Line *> *[btotal];
 
     EPI_CLEAR_MEMORY(blockmap_lines, std::list<Line *> *, btotal);
-
-    // process each linedef of the map
-    for (int i = 0; i < total_level_lines; i++)
-        BlockAddLine(i);
-
-    // LogDebug("GenerateBlockmap: TOTAL DATA=%d\n", blk_total_lines);
 }
 
 //--- editor settings ---

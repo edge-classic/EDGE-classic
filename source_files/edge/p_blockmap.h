@@ -76,6 +76,7 @@ extern DividingLine trace;
 
 void CreateThingBlockmap(void);
 void DestroyBlockmap(void);
+void BlockmapAddLine(Line *ld);
 
 void SetThingPosition(MapObject *mo);
 void UnsetThingPosition(MapObject *mo);

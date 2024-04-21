@@ -950,6 +950,8 @@ static void LoadLineDefs(int lump)
                 total_level_extrafloors++;
             }
         }
+
+        BlockmapAddLine(ld);
     }
 
     delete[] data;

@@ -2179,6 +2179,9 @@ static void LoadUDMFLineDefs()
                     total_level_extrafloors++;
                 }
             }
+
+            BlockmapAddLine(ld);
+
             cur_line++;
         }
         else // consume other blocks

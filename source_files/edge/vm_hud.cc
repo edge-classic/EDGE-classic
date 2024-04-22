@@ -772,7 +772,13 @@ static void HD_get_average_color(coal::VM *vm, int argc)
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
         what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
-    ImageData *tmp_img_data = RGBFromPalettised(ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    ImageData *tmp_img_data = ReadAsEpiBlock((Image *)tmp_img_c);
+    if (tmp_img_data->depth_ == 1)
+    {
+        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, tmp_img_c->opacity_);
+        delete tmp_img_data;
+        tmp_img_data = rgb_img_data;
+    }
     RGBAColor  col = tmp_img_data->AverageColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
                                                to_y ? *to_y : 1000000);
     rgb[0] = epi::GetRGBARed(col);
@@ -796,7 +802,13 @@ static void HD_get_lightest_color(coal::VM *vm, int argc)
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
         what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
-    ImageData *tmp_img_data = RGBFromPalettised(ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    ImageData *tmp_img_data = ReadAsEpiBlock((Image *)tmp_img_c);
+    if (tmp_img_data->depth_ == 1)
+    {
+        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, tmp_img_c->opacity_);
+        delete tmp_img_data;
+        tmp_img_data = rgb_img_data;
+    }
     RGBAColor  col = tmp_img_data->LightestColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
                                                 to_y ? *to_y : 1000000);
     rgb[0] = epi::GetRGBARed(col);
@@ -820,7 +832,13 @@ static void HD_get_darkest_color(coal::VM *vm, int argc)
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
         what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
-    ImageData *tmp_img_data = RGBFromPalettised(ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    ImageData *tmp_img_data = ReadAsEpiBlock((Image *)tmp_img_c);
+    if (tmp_img_data->depth_ == 1)
+    {
+        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, tmp_img_c->opacity_);
+        delete tmp_img_data;
+        tmp_img_data = rgb_img_data;
+    }
     RGBAColor  col = tmp_img_data->DarkestColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
                                                to_y ? *to_y : 1000000);
     rgb[0] = epi::GetRGBARed(col);
@@ -844,7 +862,13 @@ static void HD_get_average_hue(coal::VM *vm, int argc)
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
         what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
-    ImageData *tmp_img_data = RGBFromPalettised(ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    ImageData *tmp_img_data = ReadAsEpiBlock((Image *)tmp_img_c);
+    if (tmp_img_data->depth_ == 1)
+    {
+        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, tmp_img_c->opacity_);
+        delete tmp_img_data;
+        tmp_img_data = rgb_img_data;
+    }
     uint8_t   *temp_rgb     = new uint8_t[3];
     tmp_img_data->AverageHue(temp_rgb, nullptr, from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
                              to_y ? *to_y : 1000000);
@@ -868,7 +892,13 @@ static void HD_get_average_top_border_color(coal::VM *vm, int argc)
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
         what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
-    ImageData *tmp_img_data = RGBFromPalettised(ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    ImageData *tmp_img_data = ReadAsEpiBlock((Image *)tmp_img_c);
+    if (tmp_img_data->depth_ == 1)
+    {
+        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, tmp_img_c->opacity_);
+        delete tmp_img_data;
+        tmp_img_data = rgb_img_data;
+    }
     RGBAColor  col          = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, tmp_img_c->actual_height_ - 1,
                                                          tmp_img_c->actual_height_);
     rgb[0]                  = epi::GetRGBARed(col);
@@ -887,7 +917,13 @@ static void HD_get_average_bottom_border_color(coal::VM *vm, int argc)
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
         what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
-    ImageData *tmp_img_data = RGBFromPalettised(ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    ImageData *tmp_img_data = ReadAsEpiBlock((Image *)tmp_img_c);
+    if (tmp_img_data->depth_ == 1)
+    {
+        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, tmp_img_c->opacity_);
+        delete tmp_img_data;
+        tmp_img_data = rgb_img_data;
+    }
     RGBAColor  col          = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, 0, 1);
     rgb[0]                  = epi::GetRGBARed(col);
     rgb[1]                  = epi::GetRGBAGreen(col);

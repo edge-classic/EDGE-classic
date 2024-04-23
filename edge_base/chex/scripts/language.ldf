@@ -9,7 +9,11 @@ MenuDifficulty3="Gobs of Goo";
 MenuDifficulty4="Extreme Ooze";
 MenuDifficulty5="Super Slimey!";
 
-M_EPI1_Desc = "Chex Quest";
+IntermissionKills="Returns";
+
+M_EPI1_Desc = "Rescue on Bazoik";
+M_EPI2_Desc = "Terror in Chex City";
+M_EPI3_Desc = "Invasion!";
 
 // Converted from Dehacked
 EndGameCheck = "are you sure you want to end the quest?\n"

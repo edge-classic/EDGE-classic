@@ -1,0 +1,19 @@
+//
+//    EDGE Radius Triggers
+//
+//    These scripts replace hardcoded events for both DOOM 1 and 2.
+//    For documentation, see https://edge-classic.github.io/
+//
+
+#VERSION 1.3
+
+// prevent invuln flash with vanilla CQ3 method
+
+START_MAP e2m8
+  RADIUS_TRIGGER 0 0 -1
+    WAIT_UNTIL_DEAD BARON_OF_HELL
+    EXIT_LEVEL 1
+  END_RADIUS_TRIGGER
+END_MAP
+
+// --------EOF-----------

@@ -126,12 +126,7 @@ static int PL_get_mlook(lua_State *L)
 //
 static int PL_health(lua_State *L)
 {
-    float h = ui_player_who->health_ * 100 / ui_player_who->map_object_->spawn_health_;
-
-    if (h < 98)
-        h += 0.99f;
-
-    lua_pushinteger(L, floor(h));
+    lua_pushinteger(L, (int)floor(ui_player_who->health_));
     return 1;
 }
 

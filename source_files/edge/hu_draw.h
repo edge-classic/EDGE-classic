@@ -100,6 +100,8 @@ extern int hud_tic;
 float HUDFontWidth(void);
 float HUDFontHeight(void);
 
+float HUDFontWidthNew(float size = 0);
+
 float HUDStringWidth(const char *str);
 float HUDStringHeight(const char *str);
 

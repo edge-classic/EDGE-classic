@@ -944,6 +944,46 @@ float HUDFontHeight(void)
     return current_scale * current_font->NominalHeight();
 }
 
+float HUDFontWidthNew(float size)
+{
+    float factor = 1;
+    float TheWidth = 0;
+
+    if (current_font->definition_->type_ == kFontTypeTrueType)
+    {
+        if (size > 0)
+           factor = size / current_font->definition_->default_size_;
+
+        TheWidth = (current_scale * current_font->CharWidth('A')) * factor;
+    }
+    else if (current_font->definition_->type_ == kFontTypeImage)
+    {
+        if (size > 0)
+        {
+            factor = size * (current_font->CharRatio('A') + current_font->spacing_);
+        }
+        else
+        {
+            factor = current_font->CharWidth('A');
+        }
+        TheWidth = current_scale * factor;
+    }
+    else
+    {
+        if (size > 0)
+        {
+            factor = size * current_font->patch_font_cache_.ratio + current_font->spacing_;
+        }
+        else
+        {
+            factor = current_font->CharWidth('A');
+        }
+        TheWidth = current_scale * factor;
+    }
+    return (TheWidth);
+}
+
+
 float HUDStringWidth(const char *str)
 {
     return current_scale * current_font->StringWidth(str);
@@ -955,6 +995,7 @@ float HUDStringHeight(const char *str)
 
     return slines * HUDFontHeight() + (slines - 1) * kVerticalSpacing;
 }
+
 
 void HUDDrawChar(float left_x, float top_y, const Image *img, char ch, float size)
 {

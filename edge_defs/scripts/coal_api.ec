@@ -267,6 +267,8 @@ module hud
 	
 	function lookup_LDF(languageEntry : string) : string = native
 	
+	function get_text_width(text : string, optional size)    : float = native
+	
 }
 
 

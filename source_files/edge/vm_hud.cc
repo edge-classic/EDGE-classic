@@ -245,6 +245,33 @@ static void HD_set_alpha(coal::VM *vm, int argc)
     HUDSetAlpha(alpha);
 }
 
+// hud.get_text_width(String,Size)
+//
+static void HD_get_text_width(coal::VM *vm, int argc)
+{
+    (void)argc;
+
+    const char *str = vm->AccessParamString(0);
+    double *size = vm->AccessParam(1);
+
+    float TheWidth = HUDFontWidthNew(size ? *size : 0);
+
+    if (!str)
+        TheWidth = 0;
+    else
+    {
+        // get the length of the line
+        int len = 0;
+        while (str[len] && str[len] != '\n')
+            len++;
+        TheWidth *= len;
+    }
+
+    vm->ReturnFloat(TheWidth);
+}
+
+
+
 // hud.solid_box(x, y, w, h, color)
 //
 static void HD_solid_box(coal::VM *vm, int argc)
@@ -1095,6 +1122,8 @@ void COALRegisterHUD()
     ui_vm->AddNativeFunction("hud.get_image_width", HD_get_image_width);
     ui_vm->AddNativeFunction("hud.get_image_height", HD_get_image_height);
     ui_vm->AddNativeFunction("hud.lookup_LDF", HD_lookup_LDF);
+
+    ui_vm->AddNativeFunction("hud.get_text_width", HD_get_text_width);
 }
 
 void COALNewGame(void)

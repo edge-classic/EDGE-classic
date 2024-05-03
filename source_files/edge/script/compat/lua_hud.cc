@@ -227,7 +227,8 @@ static int HD_get_text_width(lua_State *L)
 {
     const char *str = luaL_checkstring(L, 1);
     double size = luaL_optnumber(L, 2, 0);
-
+    float TheWidth = 0;
+/*
     float TheWidth = HUDFontWidthNew(size);
 
     if (!str)
@@ -240,6 +241,8 @@ static int HD_get_text_width(lua_State *L)
             len++;
         TheWidth *= len;
     }
+*/
+    TheWidth=HUDStringWidthNew(str,size);
     lua_pushnumber(L, TheWidth);
 
     return 1;

@@ -105,6 +105,8 @@ float HUDFontWidthNew(float size = 0);
 float HUDStringWidth(const char *str);
 float HUDStringHeight(const char *str);
 
+float HUDStringWidthNew(const char *str, float size = 0);
+
 void HUDDrawChar(float left_x, float top_y, const Image *img, char ch, float size = 0);
 
 // draw a text string with the current font, current color (etc).

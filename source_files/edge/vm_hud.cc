@@ -252,9 +252,11 @@ static void HD_get_text_width(coal::VM *vm, int argc)
     (void)argc;
 
     const char *str = vm->AccessParamString(0);
-    double *size = vm->AccessParam(1);
+    float size = *vm->AccessParam(1);
 
-    float TheWidth = HUDFontWidthNew(size ? *size : 0);
+    float TheWidth = 0;
+/*    
+    TheWidth = HUDFontWidthNew(size ? *size : 0);
 
     if (!str)
         TheWidth = 0;
@@ -266,7 +268,8 @@ static void HD_get_text_width(coal::VM *vm, int argc)
             len++;
         TheWidth *= len;
     }
-
+*/
+    TheWidth=HUDStringWidthNew(str,size);
     vm->ReturnFloat(TheWidth);
 }
 

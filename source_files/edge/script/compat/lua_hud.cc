@@ -221,6 +221,34 @@ static int HD_set_alpha(lua_State *L)
     return 0;
 }
 
+// hud.get_text_width(string,size)
+//
+static int HD_get_text_width(lua_State *L)
+{
+    const char *str = luaL_checkstring(L, 1);
+    double size = luaL_optnumber(L, 2, 0);
+    float TheWidth = 0;
+/*
+    float TheWidth = HUDFontWidthNew(size);
+
+    if (!str)
+        TheWidth = 0;
+    else
+    {
+        // get the length of the line
+        int len = 0;
+        while (str[len] && str[len] != '\n')
+            len++;
+        TheWidth *= len;
+    }
+*/
+    TheWidth=HUDStringWidthNew(str,size);
+    lua_pushnumber(L, TheWidth);
+
+    return 1;
+}
+
+
 // hud.solid_box(x, y, w, h, color)
 //
 static int HD_solid_box(lua_State *L)
@@ -1045,6 +1073,9 @@ static const luaL_Reg hudlib[] = {{"game_mode", HD_game_mode},
                                   {"get_image_height", HD_get_image_height},
 
                                   {"lookup_LDF", HD_lookup_LDF},
+
+                                  {"get_text_width", HD_get_text_width},
+
                                   {nullptr, nullptr}};
 
 static int luaopen_hud(lua_State *L)

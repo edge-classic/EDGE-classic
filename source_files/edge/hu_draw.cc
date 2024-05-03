@@ -944,9 +944,86 @@ float HUDFontHeight(void)
     return current_scale * current_font->NominalHeight();
 }
 
+float HUDFontWidthNew(float size)
+{
+    float factor = 1;
+    float TheWidth = 0;
+
+    if (current_font->definition_->type_ == kFontTypeTrueType)
+    {
+        if (size > 0)
+           factor = size / current_font->definition_->default_size_;
+
+        TheWidth = current_font->CharWidth('W') * factor;
+    }
+    else if (current_font->definition_->type_ == kFontTypeImage)
+    {
+        if (size > 0)
+        {
+            factor = size * (current_font->CharRatio('W') + current_font->spacing_);
+        }
+        else
+        {
+            factor = current_font->CharWidth('W');
+        }
+        TheWidth = factor;
+    }
+    else
+    {
+        if (size > 0)
+        {
+            factor = size * current_font->patch_font_cache_.ratio + current_font->spacing_;
+        }
+        else
+        {
+            factor = current_font->CharWidth('W');
+        }
+        TheWidth = factor;
+    }
+    return (TheWidth * current_scale);
+}
+
+
 float HUDStringWidth(const char *str)
 {
     return current_scale * current_font->StringWidth(str);
+}
+
+float HUDStringWidthNew(const char *str, float size)
+{
+    float factor = 1;
+
+    if (current_font->definition_->type_ == kFontTypeTrueType)
+    {
+        if (size > 0)
+        {
+            factor = size / current_font->definition_->default_size_;  
+        }
+        return (current_scale * current_font->StringWidth(str)) * factor;
+    }
+    else if (current_font->definition_->type_ == kFontTypeImage)
+    {
+        factor = current_font->CharWidth('W');
+        if (size > 0)
+        {
+            factor = size * (current_font->CharRatio('W') + current_font->spacing_);
+        }
+    }
+    else
+    {
+        factor = current_font->CharWidth('W');
+        if (size > 0)
+        {
+            factor = size * current_font->patch_font_cache_.ratio + current_font->spacing_;
+        }
+    }
+    // get the length of the line
+    int len = 0;
+    while (str[len] && str[len] != '\n')
+        len++;
+
+    factor *= len;
+    return current_scale * factor;
 }
 
 float HUDStringHeight(const char *str)
@@ -955,6 +1032,7 @@ float HUDStringHeight(const char *str)
 
     return slines * HUDFontHeight() + (slines - 1) * kVerticalSpacing;
 }
+
 
 void HUDDrawChar(float left_x, float top_y, const Image *img, char ch, float size)
 {

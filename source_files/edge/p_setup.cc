@@ -1915,14 +1915,6 @@ static void LoadUDMFSideDefs()
             sd->middle.image = ImageLookup(middle_tex, kImageNamespaceTexture);
             sd->bottom.image = ImageLookup(bottom_tex, kImageNamespaceTexture);
 
-            // granular offsets
-            sd->bottom.offset.X += lowx;
-            sd->middle.offset.X += midx;
-            sd->top.offset.X += highx;
-            sd->bottom.offset.Y += lowy;
-            sd->middle.offset.Y += midy;
-            sd->top.offset.Y += highy;
-
             // granular scaling
             sd->bottom.x_matrix.X = low_scx;
             sd->middle.x_matrix.X = mid_scx;
@@ -1930,6 +1922,14 @@ static void LoadUDMFSideDefs()
             sd->bottom.y_matrix.Y = low_scy;
             sd->middle.y_matrix.Y = mid_scy;
             sd->top.y_matrix.Y    = high_scy;
+
+            // granular offsets
+            sd->bottom.offset.X += floor(lowx/low_scx);
+            sd->middle.offset.X += floor(midx/mid_scx);
+            sd->top.offset.X += floor(highx/high_scx);
+            sd->bottom.offset.Y += floor(lowy/low_scy);
+            sd->middle.offset.Y += floor(midy/mid_scy);
+            sd->top.offset.Y += floor(highy/high_scy);
 
             // handle BOOM colormaps with [242] linetype
             sd->top.boom_colormap    = colormaps.Lookup(top_tex);

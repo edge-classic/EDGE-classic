@@ -1614,12 +1614,6 @@ static void LoadUDMFSectors()
 
             ss->ceiling = ss->floor;
 
-            // granular offsets
-            ss->floor.offset.X += fx;
-            ss->floor.offset.Y += fy;
-            ss->ceiling.offset.X += cx;
-            ss->ceiling.offset.Y += cy;
-
             // rotations
             if (!AlmostEquals(rf, 0.0f))
                 ss->floor.rotation = epi::BAMFromDegrees(rf);
@@ -1632,6 +1626,12 @@ static void LoadUDMFSectors()
             ss->floor.y_matrix.Y   = fy_sc;
             ss->ceiling.x_matrix.X = cx_sc;
             ss->ceiling.y_matrix.Y = cy_sc;
+
+            // granular offsets
+            ss->floor.offset.X += (fx/fx_sc);
+            ss->floor.offset.Y -= (fy/fy_sc);
+            ss->ceiling.offset.X += (cx/cx_sc);
+            ss->ceiling.offset.Y -= (cy/cy_sc);
 
             ss->floor.image = ImageLookup(floor_tex, kImageNamespaceFlat);
 

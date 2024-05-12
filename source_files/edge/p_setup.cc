@@ -1486,6 +1486,7 @@ static void LoadUDMFSectors()
             int       cz = 0, fz = 0;
             float     fx = 0.0f, fy = 0.0f, cx = 0.0f, cy = 0.0f;
             float     fx_sc = 1.0f, fy_sc = 1.0f, cx_sc = 1.0f, cy_sc = 1.0f;
+            float     falph = 1.0f, calph = 1.0f;
             float     rf = 0.0f, rc = 0.0f;
             float     gravfactor = 1.0f;
             int       light = 160, type = 0, tag = 0;
@@ -1580,6 +1581,12 @@ static void LoadUDMFSectors()
                 case epi::kENameYscaleceiling:
                     cy_sc = epi::LexDouble(value);
                     break;
+                case epi::kENameAlphafloor:
+                    falph = epi::LexDouble(value);
+                    break;
+                case epi::kENameAlphaceiling:
+                    calph = epi::LexDouble(value);
+                    break;
                 case epi::kENameRotationfloor:
                     rf = epi::LexDouble(value);
                     break;
@@ -1606,13 +1613,14 @@ static void LoadUDMFSectors()
 
             ss->original_height = (ss->floor_height + ss->ceiling_height);
 
-            ss->floor.translucency = 1.0f;
+            ss->floor.translucency = falph;
             ss->floor.x_matrix.X   = 1;
             ss->floor.x_matrix.Y   = 0;
             ss->floor.y_matrix.X   = 0;
             ss->floor.y_matrix.Y   = 1;
 
             ss->ceiling = ss->floor;
+            ss->ceiling.translucency = calph;
 
             // rotations
             if (!AlmostEquals(rf, 0.0f))

@@ -1933,12 +1933,12 @@ static void LoadUDMFSideDefs()
             sd->top.y_matrix.Y    = high_scy;
 
             // granular offsets
-            sd->bottom.offset.X += floor(lowx/low_scx);
-            sd->middle.offset.X += floor(midx/mid_scx);
-            sd->top.offset.X += floor(highx/high_scx);
-            sd->bottom.offset.Y += floor(lowy/low_scy);
-            sd->middle.offset.Y += floor(midy/mid_scy);
-            sd->top.offset.Y += floor(highy/high_scy);
+            sd->bottom.offset.X += lowx/low_scx;
+            sd->middle.offset.X += midx/mid_scx;
+            sd->top.offset.X += highx/high_scx;
+            sd->bottom.offset.Y += lowy/low_scy;
+            sd->middle.offset.Y += midy/mid_scy;
+            sd->top.offset.Y += highy/high_scy;
 
             // handle BOOM colormaps with [242] linetype
             sd->top.boom_colormap    = colormaps.Lookup(top_tex);

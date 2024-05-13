@@ -10,6 +10,8 @@ New Features
     - game.info()
     - map.info()
     - sector.info()
+- UDMF: Linedef 'alpha' field now supported; governs translucency of associated sidedef surfaces
+- UDMF: Sector 'alphafloor' and 'alphaceiling' fields now supported; governs translucency of associated planes
 
 
 General Improvements/Changes
@@ -48,3 +50,4 @@ Bugs fixed
 - Fixed Boom all-key door failure messages not distinguishing between whether or not 3 or 6 keys are required
 - Fixed Dehacked code pointer entries with trailing spaces not matching defined actions
 - Fixed frames with a valid '0' rotation sprite still using other rotations if found elsewhere in the load order
+- Fixed UDMF 'ypanningfloor' and 'ypanningceiling' using inverted values.

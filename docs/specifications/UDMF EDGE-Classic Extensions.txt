@@ -1,5 +1,5 @@
 ===============================================================================
-Universal Doom Map Format EDGE-Classic extensions v1.0 - 2023.10.08
+Universal Doom Map Format EDGE-Classic extensions v1.1 - 2024.05.13
 
     Copyright (c) 2023-2024 The EDGE Team.
     Permission is granted to copy, distribute and/or modify this document
@@ -72,6 +72,7 @@ Note: All <bool> fields default to false unless mentioned otherwise.
    {
       blockplayers = <bool>;    // Line blocks players' movement.
       blocksight = <bool>;      // Line blocks monster line of sight
+      alpha = <float>;          // Sets translucency of line. Default is 1.0 (fully visible)
    }
 
    sidedef
@@ -107,6 +108,9 @@ Note: All <bool> fields default to false unless mentioned otherwise.
 
       rotationfloor = <float>;   // Rotation of floor texture in degrees, Default = 0.0.
       rotationceiling = <float>; // Rotation of ceiling texture in degrees, Default = 0.0.
+
+      alphafloor = <float>;      // Translucency of floor plane. Default is 1.0 (fully visible)
+      alphaceiling = <float>;    // Translucency of ceiling plane. Default is 1.0 (fully visible)
 
       gravity = <float>;         // Sector's gravity. Default is 1.0.
                                  // For EDGE-Classic, this is treated as a multiplier against the internal default gravity of 8.0,
@@ -149,6 +153,7 @@ Note: All <bool> fields default to false unless mentioned otherwise.
 =======================================
 Changelog
 =======================================
+2024.05.13 - Set version to 1.1, added linedef and sector alpha fields
 2023.09.22 - Set version to 1.0, added notes to thing scaling comments
 2023.09.18 - Addition of alpha, scale, scalex and scaley thing fields
 2023.09.14 - Updated sidedef, sector, linedef and thing sections

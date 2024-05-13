@@ -93,6 +93,7 @@ int                 total_level_nodes;
 BspNode            *level_nodes;
 int                 total_level_lines;
 Line               *level_lines;
+float              *level_line_alphas; // UDMF processing
 int                 total_level_sides;
 Side               *level_sides;
 static int          total_level_vertical_gaps;
@@ -2000,6 +2001,9 @@ static void LoadUDMFSideDefs()
             sd->middle.offset.Y    = 0;
         }
         ld->front_sector = sd->sector;
+        sd->top.translucency = level_line_alphas[i];
+        sd->middle.translucency = level_line_alphas[i];
+        sd->bottom.translucency = level_line_alphas[i];
         sd++;
 
         if (side1 != -1)
@@ -2011,6 +2015,9 @@ static void LoadUDMFSideDefs()
                 sd->middle.offset.Y    = 0;
             }
             ld->back_sector = sd->sector;
+            sd->top.translucency = level_line_alphas[i];
+            sd->middle.translucency = level_line_alphas[i];
+            sd->bottom.translucency = level_line_alphas[i];
             sd++;
         }
 
@@ -2018,6 +2025,9 @@ static void LoadUDMFSideDefs()
     }
 
     EPI_ASSERT(sd == level_sides + total_level_sides);
+
+    delete[] level_line_alphas;
+    level_line_alphas = nullptr;
 
     LogDebug("LoadUDMFSideDefs: finished parsing TEXTMAP\n");
 }
@@ -2057,6 +2067,7 @@ static void LoadUDMFLineDefs()
         {
             int flags = 0, v1 = 0, v2 = 0;
             int side0 = -1, side1 = -1, tag = -1;
+            float alpha = 1.0f;
             int special = 0;
             for (;;)
             {
@@ -2105,6 +2116,9 @@ static void LoadUDMFLineDefs()
                     break;
                 case epi::kENameSideback:
                     side1 = epi::LexInteger(value);
+                    break;
+                case epi::kENameAlpha:
+                    alpha = epi::LexDouble(value);
                     break;
                 case epi::kENameBlocking:
                     flags |= (epi::LexBoolean(value) ? kLineFlagBlocking : 0);
@@ -2189,6 +2203,8 @@ static void LoadUDMFLineDefs()
             }
 
             BlockmapAddLine(ld);
+
+            level_line_alphas[ld - level_lines] = alpha;
 
             cur_line++;
         }
@@ -2528,6 +2544,7 @@ static void LoadUDMFCounts()
     EPI_CLEAR_MEMORY(level_sectors, Sector, total_level_sectors);
     level_lines = new Line[total_level_lines];
     EPI_CLEAR_MEMORY(level_lines, Line, total_level_lines);
+    level_line_alphas = new float[total_level_lines];
     temp_line_sides = new int[total_level_lines * 2];
 }
 

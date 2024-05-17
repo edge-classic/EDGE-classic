@@ -184,6 +184,7 @@ module hud
 
 	function game_mode() : string = native
 	function game_name() : string = native
+	function game_skill() : float = native
 	function map_name()  : string = native
 	function map_title() : string = native
 	function map_author() : string = native

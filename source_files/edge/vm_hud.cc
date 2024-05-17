@@ -129,6 +129,17 @@ static void HD_game_name(coal::VM *vm, int argc)
     vm->ReturnString(g->name_.c_str());
 }
 
+// hud.game_skill()
+// Lobo: May 2024
+static void HD_game_skill(coal::VM *vm, int argc)
+{
+    (void)argc;
+
+    vm->ReturnFloat((double)game_skill);
+}
+
+
+
 // hud.map_name()
 //
 static void HD_map_name(coal::VM *vm, int argc)
@@ -1127,6 +1138,8 @@ void COALRegisterHUD()
     ui_vm->AddNativeFunction("hud.lookup_LDF", HD_lookup_LDF);
 
     ui_vm->AddNativeFunction("hud.get_text_width", HD_get_text_width);
+
+    ui_vm->AddNativeFunction("hud.game_skill", HD_game_skill);
 }
 
 void COALNewGame(void)

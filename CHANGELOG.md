@@ -3,9 +3,11 @@ CHANGELOG for EDGE-Classic 1.38 (since EDGE-Classic 1.37)
 
 New Features
 ------------
-- COALHUDS/LUAHUDS: New function hud.lookup_LDF(languageEntry) which will return the language.ldf entry
-- New LUAHUDS-specific commands:
-  - hud.game_skill() which will return a number from 0 to 4 reflecting the current game skill
+- COALHUDS/LUAHUDS: New commands 
+	- hud.lookup_LDF(languageEntry) which will return the language.ldf entry
+	- hud.game_skill() which will return a number from 0 to 4 reflecting the current game skill
+	- hud.get_text_width(string,size) will return the width in pixels of the given string, taking into account the current font
+- LUAHUDS-specific commands:
   - Several functions which will return a table containing useful information:
     - game.info()
     - map.info()

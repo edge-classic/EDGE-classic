@@ -3708,6 +3708,10 @@ void A_Become(MapObject *mo)
         mo->current_attack_    = nullptr;
         mo->model_skin_        = mo->info_->model_skin_;
         mo->model_last_frame_  = -1;
+        mo->model_scale_       = mo->info_->model_scale_;
+        mo->model_aspect_      = mo->info_->model_aspect_;
+        mo->scale_             = mo->info_->scale_;
+        mo->aspect_            = mo->info_->aspect_;
 
         mo->pain_chance_ = mo->info_->pain_chance_;
 
@@ -3783,6 +3787,10 @@ void A_UnBecome(MapObject *mo)
         mo->current_attack_    = nullptr;
         mo->model_skin_        = mo->info_->model_skin_;
         mo->model_last_frame_  = -1;
+        mo->model_scale_       = mo->info_->model_scale_;
+        mo->model_aspect_      = mo->info_->model_aspect_;
+        mo->scale_             = mo->info_->scale_;
+        mo->aspect_            = mo->info_->aspect_;
 
         mo->pain_chance_ = mo->info_->pain_chance_;
 
@@ -3862,6 +3870,10 @@ void A_Morph(MapObject *mo)
         mo->current_attack_    = nullptr;
         mo->model_skin_        = mo->info_->model_skin_;
         mo->model_last_frame_  = -1;
+        mo->model_scale_       = mo->info_->model_scale_;
+        mo->model_aspect_      = mo->info_->model_aspect_;
+        mo->scale_             = mo->info_->scale_;
+        mo->aspect_            = mo->info_->aspect_;
 
         mo->pain_chance_ = mo->info_->pain_chance_;
 
@@ -3941,6 +3953,10 @@ void A_UnMorph(MapObject *mo)
         mo->current_attack_    = nullptr;
         mo->model_skin_        = mo->info_->model_skin_;
         mo->model_last_frame_  = -1;
+        mo->model_scale_       = mo->info_->model_scale_;
+        mo->model_aspect_      = mo->info_->model_aspect_;
+        mo->scale_             = mo->info_->scale_;
+        mo->aspect_            = mo->info_->aspect_;
 
         mo->pain_chance_ = mo->info_->pain_chance_;
 

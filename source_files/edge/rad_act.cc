@@ -1411,6 +1411,12 @@ void P_ActReplace(MapObject *mo, const MapObjectDefinition *newThing)
         mo->current_attack_    = nullptr;
         mo->model_skin_        = mo->info_->model_skin_;
         mo->model_last_frame_  = -1;
+        mo->model_scale_       = mo->info_->model_scale_;
+        mo->model_aspect_      = mo->info_->model_aspect_;
+        mo->scale_             = mo->info_->scale_;
+        mo->aspect_            = mo->info_->aspect_;
+
+        mo->pain_chance_ = mo->info_->pain_chance_;
 
         // handle dynamic lights
         {

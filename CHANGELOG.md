@@ -53,3 +53,4 @@ Bugs fixed
 - Fixed Dehacked code pointer entries with trailing spaces not matching defined actions
 - Fixed frames with a valid '0' rotation sprite still using other rotations if found elsewhere in the load order
 - Fixed UDMF 'ypanningfloor' and 'ypanningceiling' using inverted values.
+- Fixed COAL/Lua functions hud.get_image_width() and hud.get_image_height() not returning 0 if image does not exist.

@@ -91,7 +91,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Configure CMake MSVC ES2
-        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DEDGE_GL_ES2=ON -G"Visual Studio 16 2019"
+        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DEDGE_GL_ES2=ON
       - name: Build MSVC GLES2
         run: cmake --build build --config ${{env.BUILD_TYPE}}
       - name: Clone and copy ANGLE binaries

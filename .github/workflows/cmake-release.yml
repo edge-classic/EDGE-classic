@@ -13,16 +13,16 @@ env:
 jobs:
 
   build-msvc:
-    runs-on: windows-2019
+    runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Configure CMake MSVC
         run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G"Visual Studio 16 2019"
       - name: Build MSVC
         run: |
           cmake --build build --target GenerateEPKS
           cmake --build build --config ${{env.BUILD_TYPE}}
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: edge-classic-msvc
           path: |
@@ -35,4 +35,43 @@ jobs:
             *.dll
             *.epk
             CHANGELOG.md
-          retention-days: ${{env.RETENTION_DAYS}}      
+          retention-days: ${{env.RETENTION_DAYS}} 
+  build-mingw:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download w64devkit
+        run: invoke-webrequest https://github.com/skeeto/w64devkit/releases/download/v1.23.0/w64devkit-i686-1.23.0.zip -outfile ${{github.workspace}}\w64devkit.zip
+      - name: Extract w64devkit
+        run: expand-archive -path ${{github.workspace}}\w64devkit.zip -destinationpath ${{github.workspace}}
+      - name: Download SDL2-devel
+        run: invoke-webrequest https://github.com/libsdl-org/SDL/releases/download/release-2.30.3/SDL2-devel-2.30.3-mingw.zip -outfile ${{github.workspace}}\sdl2-devel.zip
+      - name: Extract SDL2-devel
+        run: expand-archive -path ${{github.workspace}}\sdl2-devel.zip -destinationpath ${{github.workspace}}
+      - name: Copy SDL2-devel contents to w64devkit
+        run: |
+          robocopy ${{github.workspace}}\SDL2-2.30.3\i686-w64-mingw32 ${{github.workspace}}\w64devkit\i686-w64-mingw32 /s ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
+          robocopy ${{github.workspace}}\SDL2-2.30.3\i686-w64-mingw32 ${{github.workspace}}\w64devkit /s ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
+      - name: Set environment variables and build
+        run: |
+          $env:Path = "${{github.workspace}}\w64devkit\bin;" + $env:Path
+          cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_FLAGS="-isystem ${{github.workspace}}\w64devkit\include" -G "MinGW Makefiles"
+          cmake --build build --target GenerateEPKS
+          cmake --build build --config ${{env.BUILD_TYPE}}
+          strip ${{github.workspace}}\edge-classic.exe
+      - name: Copy SDL2 DLL
+        run: copy-item -path ${{github.workspace}}\SDL2-2.30.3\i686-w64-mingw32\bin\SDL2.dll -destination ${{github.workspace}}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: edge-classic-mingw
+          path: |
+            autoload
+            docs
+            edge_base/*.epk
+            edge_fixes
+            soundfont
+            edge-classic.exe
+            *.dll
+            *.epk
+            CHANGELOG.md
+          retention-days: ${{env.RETENTION_DAYS}}     

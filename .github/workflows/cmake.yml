@@ -87,7 +87,7 @@ jobs:
           retention-days: ${{env.RETENTION_DAYS}}
 
   build-msvc-es2:
-    runs-on: windows-2019
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - name: Configure CMake MSVC ES2

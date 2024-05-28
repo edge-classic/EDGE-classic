@@ -86,8 +86,8 @@ Bugfixes and detailed changes can be found in CHANGELOG.txt
 
 # Currently Supported Platforms
 
-- Windows 32/64-bit (x86 architecture), Vista or later
-  - Windows XP support has been deprecated; build instructions are in COMPILING.md but are not guaranteed to work with future versions
+- Windows 32/64-bit (x86 architecture), XP or later
+  - Windows XP builds are created with w64devkit; instructions are in COMPILING.md
 - [Web Browsers](https://edge-classic.github.io/play.html) (Desktop browsers are supported, mobile browsers require future touch and gamepad input work)
 - Linux 32/64-bit (x86 and ARM architecture - ARM tested with Raspberry Pi OS on a Pi 4B)
 - BSD 32/64-bit (x86 and ARM64 architecture - tested with FreeBSD 13.1; ARM64 tested on a Pi 4B but not recommended unless proper video acceleration is available
@@ -98,7 +98,7 @@ Bugfixes and detailed changes can be found in CHANGELOG.txt
 
 - The Ultimate Doom/Doom 1/Freedoom Phase 1
 - Doom 2/Freedoom Phase 2
-- Chex Quest 1
+- Chex Quest 3: Vanilla Edition
 - Heretic/Blasphemer
 - HacX 1.2
 - Harmony

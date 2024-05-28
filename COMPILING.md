@@ -38,8 +38,6 @@ Then, after navigating to the project directory:
 
 WARNING: w64devkit's bundled tools such as GNU Make can produce false positives in Windows Defender; please see https://github.com/skeeto/w64devkit/issues/79 for more information and steps to validate that the Make executable is valid. Any Windows Defender exceptions that are created to account for this are the responsibility of the user and the user alone, and are NOT recommended actions by the development team!
 
-NOTE: Windows XP support has been deprecated; the steps below may fail with future versions of EDGE-Classic. Issues that prevent EDGE-Classic from running in Windows XP outside of legitimate bugs (i.e., an otherwise good function needs compiler defines and a separate code path to work with XP) will not be addressed by the development team.
-
 This section assumes that you have downloaded the `i686` release from https://github.com/skeeto/w64devkit/releases and extracted it to a folder of your choosing. You will also need to download the `SDL2-devel-<version>-mingw` package from https://github.com/libsdl-org/SDL/releases/latest and placed the contents of its `i686-w64-mingw32` folder into the `i686-w64-mingw32` folder of your w64devkit installation.
 
 Launch w64devkit.exe from your extracted w64devkit folder.
@@ -118,6 +116,4 @@ In all cases (barring the WebGL build per the previous section), the executable 
 * soundfont
 * edge-classic/edge-classic.exe (OS-dependent)
 * edge_defs.epk
-* SDL2.dll (Windows-only, w64devkit builds must have this file moved here manually; see below instructions for details)
-
-W64DEVKIT BUILDS: You will need to copy SDL2.dll from the /i686-w64-mingw32/bin of your w64devkit install to the directory containing edge-classic.exe 
+* SDL2.dll (Windows-only, w64devkit builds will need to copy SDL2.dll from the /i686-w64-mingw32/bin of your w64devkit install to the directory containing edge-classic.exe)

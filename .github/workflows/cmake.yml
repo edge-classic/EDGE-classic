@@ -54,29 +54,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Download w64devkit
-        run: invoke-webrequest https://github.com/skeeto/w64devkit/releases/download/v1.23.0/w64devkit-i686-1.23.0.zip -outfile w64devkit.zip
+        run: invoke-webrequest https://github.com/skeeto/w64devkit/releases/download/v1.23.0/w64devkit-i686-1.23.0.zip -outfile ${{github.workspace}}\w64devkit.zip
       - name: Extract w64devkit
-        run: expand-archive -path .\w64devkit.zip -destinationpath .\w64devkit
+        run: expand-archive -path ${{github.workspace}}\w64devkit.zip -destinationpath ${{github.workspace}}\w64devkit
       - name: Download SDL2-devel
-        run: invoke-webrequest https://github.com/libsdl-org/SDL/releases/download/release-2.30.3/SDL2-devel-2.30.3-mingw.zip -outfile sdl2-devel.zip
+        run: invoke-webrequest https://github.com/libsdl-org/SDL/releases/download/release-2.30.3/SDL2-devel-2.30.3-mingw.zip -outfile ${{github.workspace}}\sdl2-devel.zip
       - name: Extract SDL2-devel
-        run: expand-archive -path .\sdl2-devel.zip -destinationpath .\sdl2-devel
+        run: expand-archive -path ${{github.workspace}}\sdl2-devel.zip -destinationpath ${{github.workspace}}\sdl2-devel
       - name: Copy SDL2-devel contents to w64devkit
         run: |
-          copy-item -path .\sdl2-devel\SDL2-2.30.3\i686-w64-mingw32\* -destination .\w64devkit\i686-w64-mingw32 -force -Recurse
-          copy-item -path .\sdl2-devel\SDL2-2.30.3\i686-w64-mingw32\* -destination .\w64devkit -force -Recurse
+          copy-item -path ${{github.workspace}}\sdl2-devel\SDL2-2.30.3\i686-w64-mingw32\* -destination ${{github.workspace}}\w64devkit\i686-w64-mingw32 -force -Recurse
+          copy-item -path ${{github.workspace}}\sdl2-devel\SDL2-2.30.3\i686-w64-mingw32\* -destination ${{github.workspace}}\w64devkit -force -Recurse
       - name: Set environment variables
         run: |
-          $env:Path = $($pwd.ToString() + "\w64devkit\bin;") + $env:Path
-          $env:Include = $($pwd.ToString() + "\w64devkit\include;") + $env:Include
+          $env:Path = $(${{github.workspace}} + "\w64devkit\bin;") + $env:Path
+          $env:Include = $(${{github.workspace}} + "\w64devkit\include;") + $env:Include
       - name: Configure CMake w64devkit
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G "MinGW Makefiles"
       - name: Build w64devkit
         run: cmake --build build --config ${{env.BUILD_TYPE}}
       - name: Strip executable
-        run: strip .\edge-classic.exe
+        run: strip ${{github.workspace}}\edge-classic.exe
       - name: Copy SDL2 DLL
-        run: copy-item -path .\sdl2-devel\SDL2-2.30.3\i686-w64-mingw32\bin\SDL2.dll -destination .
+        run: copy-item -path ${{github.workspace}}\sdl2-devel\SDL2-2.30.3\i686-w64-mingw32\bin\SDL2.dll -destination ${{github.workspace}}
       - uses: actions/upload-artifact@v4
         with:
           name: edge-classic-w64devkit

@@ -67,12 +67,11 @@ jobs:
           robocopy ${{github.workspace}}\sdl2-devel\SDL2-2.30.3\i686-w64-mingw32 ${{github.workspace}}\w64devkit /s ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
       - name: Set environment variables and build
         run: |
-          $env:Path = $(${{github.workspace}} + "\w64devkit\bin;") + $env:Path
-          $env:Include = $(${{github.workspace}} + "\w64devkit\include;") + $env:Include
+          $env:Path = "${{github.workspace}}\w64devkit\bin;" + $env:Path
+          $env:Include = "${{github.workspace}}\w64devkit\include;" + $env:Include
           cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G "MinGW Makefiles"
           cmake --build build --config ${{env.BUILD_TYPE}}
-      - name: Strip executable
-        run: strip ${{github.workspace}}\edge-classic.exe
+          strip ${{github.workspace}}\edge-classic.exe
       - name: Copy SDL2 DLL
         run: copy-item -path ${{github.workspace}}\sdl2-devel\SDL2-2.30.3\i686-w64-mingw32\bin\SDL2.dll -destination ${{github.workspace}}
       - uses: actions/upload-artifact@v4

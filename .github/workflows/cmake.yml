@@ -63,16 +63,14 @@ jobs:
         run: expand-archive -path ${{github.workspace}}\sdl2-devel.zip -destinationpath ${{github.workspace}}\sdl2-devel
       - name: Copy SDL2-devel contents to w64devkit
         run: |
-          copy-item -path ${{github.workspace}}\sdl2-devel\SDL2-2.30.3\i686-w64-mingw32\* -destination ${{github.workspace}}\w64devkit\i686-w64-mingw32 -force -Recurse
-          copy-item -path ${{github.workspace}}\sdl2-devel\SDL2-2.30.3\i686-w64-mingw32\* -destination ${{github.workspace}}\w64devkit -force -Recurse
-      - name: Set environment variables
+          robocopy ${{github.workspace}}\sdl2-devel\SDL2-2.30.3\i686-w64-mingw32 ${{github.workspace}}\w64devkit\i686-w64-mingw32 /s
+          robocopy ${{github.workspace}}\sdl2-devel\SDL2-2.30.3\i686-w64-mingw32 ${{github.workspace}}\w64devkit /s
+      - name: Set environment variables and build
         run: |
           $env:Path = $(${{github.workspace}} + "\w64devkit\bin;") + $env:Path
           $env:Include = $(${{github.workspace}} + "\w64devkit\include;") + $env:Include
-      - name: Configure CMake w64devkit
-        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G "MinGW Makefiles"
-      - name: Build w64devkit
-        run: cmake --build build --config ${{env.BUILD_TYPE}}
+          cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G "MinGW Makefiles"
+          cmake --build build --config ${{env.BUILD_TYPE}}
       - name: Strip executable
         run: strip ${{github.workspace}}\edge-classic.exe
       - name: Copy SDL2 DLL

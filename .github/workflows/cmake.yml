@@ -63,8 +63,8 @@ jobs:
         run: expand-archive -path ${{github.workspace}}\sdl2-devel.zip -destinationpath ${{github.workspace}}\sdl2-devel
       - name: Copy SDL2-devel contents to w64devkit
         run: |
-          robocopy ${{github.workspace}}\sdl2-devel\SDL2-2.30.3\i686-w64-mingw32 ${{github.workspace}}\w64devkit\i686-w64-mingw32 /s
-          robocopy ${{github.workspace}}\sdl2-devel\SDL2-2.30.3\i686-w64-mingw32 ${{github.workspace}}\w64devkit /s
+          robocopy ${{github.workspace}}\sdl2-devel\SDL2-2.30.3\i686-w64-mingw32 ${{github.workspace}}\w64devkit\i686-w64-mingw32 /s ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
+          robocopy ${{github.workspace}}\sdl2-devel\SDL2-2.30.3\i686-w64-mingw32 ${{github.workspace}}\w64devkit /s ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
       - name: Set environment variables and build
         run: |
           $env:Path = $(${{github.workspace}} + "\w64devkit\bin;") + $env:Path

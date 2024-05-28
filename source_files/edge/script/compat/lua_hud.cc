@@ -972,7 +972,7 @@ static int HD_get_image_width(lua_State *L)
 {
     const char *name = luaL_checkstring(L, 1);
 
-    const Image *img = ImageLookup(name, kImageNamespaceGraphic);
+    const Image *img = ImageLookup(name, kImageNamespaceGraphic, kImageLookupNull);
 
     if (img)
     {
@@ -992,7 +992,7 @@ static int HD_get_image_height(lua_State *L)
 {
     const char *name = luaL_checkstring(L, 1);
 
-    const Image *img = ImageLookup(name, kImageNamespaceGraphic);
+    const Image *img = ImageLookup(name, kImageNamespaceGraphic, kImageLookupNull);
 
     if (img)
     {

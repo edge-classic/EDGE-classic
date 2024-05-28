@@ -1021,7 +1021,7 @@ static void HD_get_image_width(coal::VM *vm, int argc)
     (void)argc;
     const char *name = vm->AccessParamString(0);
 
-    const Image *img = ImageLookup(name, kImageNamespaceGraphic);
+    const Image *img = ImageLookup(name, kImageNamespaceGraphic, kImageLookupNull);
 
     if (img)
     {
@@ -1040,7 +1040,7 @@ static void HD_get_image_height(coal::VM *vm, int argc)
     (void)argc;
     const char *name = vm->AccessParamString(0);
 
-    const Image *img = ImageLookup(name, kImageNamespaceGraphic);
+    const Image *img = ImageLookup(name, kImageNamespaceGraphic, kImageLookupNull);
 
     if (img)
     {

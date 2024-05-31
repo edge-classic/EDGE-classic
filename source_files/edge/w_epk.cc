@@ -1035,6 +1035,10 @@ bool FindPackFile(PackFile *pack, const std::string &name)
     if (epi::IsPathAbsolute(name) && name[0] != '/')
         return false;
 
+    // disallow path traversal with ..
+    if (name.find("..") != std::string::npos)
+        return false;
+
     // do not accept filenames without extensions
     if (epi::GetExtension(name).empty())
         return false;
@@ -1108,6 +1112,10 @@ epi::File *OpenPackFile(PackFile *pack, const std::string &name)
     // disallow absolute (real filesystem) paths,
     // although we have to let a leading '/' slide to be caught later
     if (epi::IsPathAbsolute(name) && name[0] != '/')
+        return nullptr;
+
+    // disallow path traversal with ..
+    if (name.find("..") != std::string::npos)
         return nullptr;
 
     // do not accept filenames without extensions

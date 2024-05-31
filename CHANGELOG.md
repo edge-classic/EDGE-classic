@@ -37,6 +37,8 @@ General Improvements/Changes
   - Simple macros converted to either inline functions or constexpr values as appropriate
     - Remaining macros use consistent naming scheme (EDGE_*, DDF_*, EPI_*, etc)
   - Consistent code styling and formatting performed on all files under the /source_files project folder
+  - Remove support for absolute paths and path traversal with '..' for the exec, ls/dir, and cat/type console commands
+  - Remove support for path traversal with '..' when searching for or opening pack files
 
 
 Bugs fixed

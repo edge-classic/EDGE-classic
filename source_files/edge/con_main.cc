@@ -60,8 +60,20 @@ int ConsoleCommandExec(char **argv, int argc)
 {
     if (argc != 2)
     {
-        ConsolePrint("Usage: exec <script.cfg>\n");
+        ConsolePrint("Usage: exec <filename>\n");
         return 1;
+    }
+
+    if (epi::IsPathAbsolute(argv[1]))
+    {
+        LogPrint("Absolute path %s not allowed!\n", argv[1]);
+        return 1;
+    }
+
+    if (strstr(argv[1], "..") != NULL)
+    {
+        LogPrint("Path traversal with .. is not allowed!\n");
+        return 1; 
     }
 
     FILE *script = epi::FileOpenRaw(argv[1], epi::kFileAccessRead | epi::kFileAccessBinary);
@@ -89,8 +101,20 @@ int ConsoleCommandType(char **argv, int argc)
 
     if (argc != 2)
     {
-        ConsolePrint("Usage: %s <filename.txt>\n", argv[0]);
+        ConsolePrint("Usage: %s <filename>\n", argv[0]);
         return 2;
+    }
+
+    if (epi::IsPathAbsolute(argv[1]))
+    {
+        LogPrint("Absolute path %s not allowed!\n", argv[1]);
+        return 1;
+    }
+
+    if (strstr(argv[1], "..") != NULL)
+    {
+        LogPrint("Path traversal with .. is not allowed!\n");
+        return 1; 
     }
 
     script = epi::FileOpenRaw(argv[1], epi::kFileAccessRead);
@@ -193,6 +217,18 @@ int ConsoleCommandDir(char **argv, int argc)
 
     if (argc >= 3)
         mask = argv[2];
+
+    if (epi::IsPathAbsolute(path))
+    {
+        LogPrint("Absolute path %s not allowed!\n", path.c_str());
+        return 1;
+    }
+
+    if (path.find("..") != std::string::npos)
+    {
+        LogPrint("Path traversal with .. is not allowed!\n");
+        return 1; 
+    }
 
     std::vector<epi::DirectoryEntry> fsd;
 

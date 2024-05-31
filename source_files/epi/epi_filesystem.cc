@@ -54,6 +54,10 @@ bool IsPathAbsolute(std::string_view path)
     {
         return true;
     }
+    else if (path.size() == 2 && path[1] == ':' && IsAlphaASCII(path[0]))
+    {
+        return true;
+    }
 
     // Check for share name...
     if (path.size() > 1 && path[0] == '\\' && path[1] == '\\')

@@ -369,32 +369,32 @@ static const char *FileKindString(FileKind kind)
     case kFileKindEEPK:
         return "edge";
     case kFileKindXWAD:
-        return "xwa";
+        return "xwad";
     case kFileKindPackWAD:
         return "pwad";
     case kFileKindIPackWAD:
         return "iwad";
 
     case kFileKindFolder:
-        return "DIR";
+        return "dir  ";
     case kFileKindEFolder:
         return "edge";
     case kFileKindIFolder:
-        return "DIR";
+        return "dir  ";
     case kFileKindEPK:
-        return "epk";
+        return "epk  ";
     case kFileKindIPK:
-        return "epk";
+        return "epk  ";
 
     case kFileKindDDF:
-        return "ddf";
+        return "ddf  ";
     case kFileKindRTS:
-        return "rts";
+        return "rts  ";
     case kFileKindDehacked:
-        return "deh";
+        return "deh  ";
 
     default:
-        return "???";
+        return "??? ";
     }
 }
 
@@ -406,7 +406,7 @@ void ShowLoadedFiles()
     {
         DataFile *df = data_files[i];
 
-        LogPrint(" %2d: %-4s \"%s\"\n", i + 1, FileKindString(df->kind_), df->name_.c_str());
+        LogPrint(" %2d:  %-4s  \"%s\"\n", i + 1, FileKindString(df->kind_), epi::SanitizePath(df->name_).c_str());
     }
 }
 

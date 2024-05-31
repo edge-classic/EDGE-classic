@@ -24,6 +24,8 @@
 #include "epi_color.h"
 #include "sokol_color.h"
 
+extern std::string working_directory;
+
 constexpr uint8_t kEndoomLines = 25;
 
 const RGBAColor endoom_colors[16] = {0x000000FF, 0x0000AAFF, 0x00AA00FF, 0x00AAAAFF, 0xAA0000FF, 0xAA00AAFF,

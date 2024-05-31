@@ -26,7 +26,6 @@
 #include "ddf_sfx.h"
 #include "dm_state.h"
 #include "e_input.h"
-#include "epi_crc.h"
 #include "epi_filesystem.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
@@ -42,6 +41,8 @@
 static constexpr uint8_t kMaximumConsoleArguments = 64;
 
 static std::string readme_names[4] = {"readme.txt", "readme.1st", "read.me", "readme.md"};
+
+std::string working_directory;
 
 struct ConsoleCommand
 {
@@ -73,10 +74,12 @@ int ConsoleCommandExec(char **argv, int argc)
     if (strstr(argv[1], "..") != NULL)
     {
         LogPrint("Path traversal with .. is not allowed!\n");
-        return 1; 
+        return 1;
     }
 
-    FILE *script = epi::FileOpenRaw(argv[1], epi::kFileAccessRead | epi::kFileAccessBinary);
+    std::string path = epi::PathAppend(working_directory, argv[1]);
+
+    FILE *script = epi::FileOpenRaw(path, epi::kFileAccessRead | epi::kFileAccessBinary);
     if (!script)
     {
         ConsolePrint("Unable to open file: %s\n", argv[1]);
@@ -114,10 +117,12 @@ int ConsoleCommandType(char **argv, int argc)
     if (strstr(argv[1], "..") != NULL)
     {
         LogPrint("Path traversal with .. is not allowed!\n");
-        return 1; 
+        return 1;
     }
 
-    script = epi::FileOpenRaw(argv[1], epi::kFileAccessRead);
+    std::string path = epi::PathAppend(working_directory, argv[1]);
+
+    script = epi::FileOpenRaw(path, epi::kFileAccessRead);
     if (!script)
     {
         ConsolePrint("Unable to open \'%s\'!\n", argv[1]);
@@ -201,6 +206,59 @@ int ConsoleCommandReadme(char **argv, int argc)
     return 0;
 }
 
+int ConsoleCommandChangeDir(char **argv, int argc)
+{
+    if (argc == 1 || argc > 2)
+    {
+        LogPrint("Usage: %s <home or game>\n", argv[0]);
+        return 1;
+    }
+
+    if (home_directory == game_directory)
+    {
+        LogPrint("Home and game directory are both %s!\nRemaining in current directory.\n", epi::SanitizePath(working_directory).c_str());
+        return 1;
+    }
+    else if (epi::StringCaseCompareASCII(argv[1], "game") == 0)
+    {
+        working_directory = game_directory;
+        LogPrint("Switched to game directory %s\n", epi::SanitizePath(working_directory).c_str());
+    }
+    else if (epi::StringCaseCompareASCII(argv[1], "home") == 0)
+    {
+        working_directory = home_directory;
+        LogPrint("Switched to home directory %s\n", epi::SanitizePath(working_directory).c_str());
+    }
+    else
+    {
+        LogPrint("Unknown cd target %s (must be \"home\" or \"game\")\n", argv[1]);
+        return 1;
+    }
+
+    return 0;
+}
+
+int ConsoleCommandPrintWorkingDir(char **argv, int argc)
+{
+    if (argc > 1)
+    {
+        LogPrint("Usage: %s\n", argv[0]);
+        return 1;
+    }
+
+    if (home_directory != game_directory)
+    {
+        if (working_directory == game_directory)
+            LogPrint("Using game directory %s\n", epi::SanitizePath(working_directory).c_str());
+        else
+            LogPrint("Using home directory %s\n", epi::SanitizePath(working_directory).c_str());
+    }
+    else
+        LogPrint("Using directory %s\n", epi::SanitizePath(working_directory).c_str());
+
+    return 0;
+}
+
 int ConsoleCommandDir(char **argv, int argc)
 {
     std::string path = ".";
@@ -227,8 +285,10 @@ int ConsoleCommandDir(char **argv, int argc)
     if (path.find("..") != std::string::npos)
     {
         LogPrint("Path traversal with .. is not allowed!\n");
-        return 1; 
+        return 1;
     }
+
+    path = epi::PathAppend(working_directory, path);
 
     std::vector<epi::DirectoryEntry> fsd;
 
@@ -244,11 +304,11 @@ int ConsoleCommandDir(char **argv, int argc)
         return 0;
     }
 
-    LogPrint("Directory contents for %s matching %s\n", epi::GetDirectory(fsd[0].name).c_str(), mask.c_str());
+    LogPrint("Directory contents for %s matching %s\n", epi::SanitizePath(epi::GetDirectory(path)).c_str(), mask.c_str());
 
     for (size_t i = 0; i < fsd.size(); i++)
     {
-        LogPrint("%4d: %10d  %s  \"%s\"\n", (int)i + 1, (int)fsd[i].size, fsd[i].is_dir ? "DIR" : "   ",
+        LogPrint("%4d:  %-4s  \"%s\"\n", (int)i + 1, fsd[i].is_dir ? "dir  " : "file",
                  epi::GetFilename(fsd[i].name).c_str());
     }
 
@@ -279,41 +339,6 @@ int ConsoleCommandQuitEDGE(char **argv, int argc)
         ImmediateQuit();
     else
         QuitEdge(0);
-
-    return 0;
-}
-
-int ConsoleCommandCrc(char **argv, int argc)
-{
-    if (argc < 2)
-    {
-        ConsolePrint("Usage: crc <lump>\n");
-        return 1;
-    }
-
-    for (int i = 1; i < argc; i++)
-    {
-        int lump = CheckLumpNumberForName(argv[i]);
-
-        if (lump == -1)
-        {
-            ConsolePrint("No such lump: %s\n", argv[i]);
-        }
-        else
-        {
-            int      length;
-            uint8_t *data = (uint8_t *)LoadLumpIntoMemory(lump, &length);
-
-            epi::CRC32 result;
-
-            result.Reset();
-            result.AddBlock(data, length);
-
-            delete[] data;
-
-            ConsolePrint("  %s  %d bytes  crc = %08x\n", argv[i], length, result.GetCRC());
-        }
-    }
 
     return 0;
 }
@@ -357,28 +382,6 @@ int ConsoleCommandShowFiles(char **argv, int argc)
 int ConsoleCommandOpenHome(char **argv, int argc)
 {
     epi::OpenDirectory(home_directory);
-    return 0;
-}
-
-int ConsoleCommandShowLumps(char **argv, int argc)
-{
-    int for_file = -1; // all files
-
-    char *match = nullptr;
-
-    if (argc >= 2 && epi::IsDigitASCII(argv[1][0]))
-        for_file = atoi(argv[1]);
-
-    if (argc >= 3)
-    {
-        match = argv[2];
-        for (size_t i = 0; i < strlen(match); i++)
-        {
-            match[i] = epi::ToUpperASCII(match[i]);
-        }
-    }
-
-    ShowLoadedLumps(for_file, match);
     return 0;
 }
 
@@ -442,7 +445,7 @@ int ConsoleCommandShowMaps(char **argv, int argc)
     for (int i = 0; i < mapdefs.size(); i++)
     {
         if (MapExists(mapdefs[i]) && mapdefs[i]->episode_)
-            LogPrint("  %s           %s\n", mapdefs[i]->name_.c_str(), language[mapdefs[i]->description_.c_str()]);
+            LogPrint("  %s                     %s\n", mapdefs[i]->name_.c_str(), language[mapdefs[i]->description_.c_str()]);
     }
 
     return 0;
@@ -576,9 +579,10 @@ static void KillArgs(char **argv, int argc)
 //
 const ConsoleCommand builtin_commands[] = {{"args", ConsoleCommandArgList},
                                            {"cat", ConsoleCommandType},
+                                           {"cd", ConsoleCommandChangeDir},
+                                           {"chdir", ConsoleCommandChangeDir},
                                            {"cls", ConsoleCommandClear},
                                            {"clear", ConsoleCommandClear},
-                                           {"crc", ConsoleCommandCrc},
                                            {"dir", ConsoleCommandDir},
                                            {"ls", ConsoleCommandDir},
                                            {"endoom", ConsoleCommandEndoom},
@@ -589,10 +593,10 @@ const ConsoleCommand builtin_commands[] = {{"args", ConsoleCommandArgList},
                                            {"playsound", ConsoleCommandPlaySound},
                                            {"readme", ConsoleCommandReadme},
                                            {"openhome", ConsoleCommandOpenHome},
+                                           {"pwd", ConsoleCommandPrintWorkingDir},
                                            {"resetvars", ConsoleCommandResetVars},
                                            {"showfiles", ConsoleCommandShowFiles},
                                            {"showgamepads", ConsoleCommandShowGamepads},
-                                           {"showlumps", ConsoleCommandShowLumps},
                                            {"showcmds", ConsoleCommandShowCommands},
                                            {"showmaps", ConsoleCommandShowMaps},
                                            {"showvars", ConsoleCommandShowVars},

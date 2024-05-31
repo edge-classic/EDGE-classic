@@ -2353,31 +2353,6 @@ static const char *LumpKindString(LumpKind kind)
     }
 }
 
-void ShowLoadedLumps(int for_file, const char *match)
-{
-    LogPrint("Lump list:\n");
-
-    int total = 0;
-
-    for (int i = 0; i < (int)lump_info.size(); i++)
-    {
-        LumpInfo *L = &lump_info[i];
-
-        if (for_file >= 1 && L->file != for_file - 1)
-            continue;
-
-        if (match && *match)
-            if (!strstr(L->name, match))
-                continue;
-
-        LogPrint(" %4d %-9s %2d %-6s %7d @ 0x%08x\n", i + 1, L->name, L->file + 1, LumpKindString(L->kind), L->size,
-                 L->position);
-        total++;
-    }
-
-    LogPrint("Total: %d\n", total);
-}
-
 static const char *UserSkyboxName(const char *base, int face)
 {
     static char       buffer[64];

@@ -89,7 +89,6 @@ std::vector<int> *GetPatchListForWAD(int file);
 void              GetTextureLumpsForWAD(int file, WadTextureResource *res);
 void              ProcessTXHINamespaces(void);
 int               GetDataFileIndexForLump(int lump);
-void              ShowLoadedLumps(int for_file, const char *match);
 
 // auxiliary functions to help us deal with when to use skyboxes
 bool DisableStockSkybox(const char *ActualSky);

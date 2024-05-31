@@ -31,6 +31,7 @@
 #include "con_var.h"
 #include "ddf_font.h"
 #include "ddf_language.h"
+#include "dm_state.h"
 #include "e_input.h"
 #include "e_player.h"
 #include "edge_profiling.h"
@@ -1601,8 +1602,9 @@ void ConsoleInit(void)
 
 void ConsoleStart(void)
 {
-    console_visible = kConsoleVisibilityNotVisible;
-    console_cursor  = 0;
+    working_directory = home_directory;
+    console_visible   = kConsoleVisibilityNotVisible;
+    console_cursor    = 0;
     StartupProgressMessage("Starting console...");
 }
 

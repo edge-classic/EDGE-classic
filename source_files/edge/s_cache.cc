@@ -126,7 +126,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
 
     if (pc_speaker_mode)
     {
-        if (epi::GetExtension(def->pc_speaker_sound_).empty())
+        if (!epi::GetExtension(def->pc_speaker_sound_).empty())
         {
             F = OpenFileFromPack(def->pc_speaker_sound_);
             if (!F)

@@ -315,16 +315,6 @@ int ConsoleCommandDir(char **argv, int argc)
     return 0;
 }
 
-int ConsoleCommandArgList(char **argv, int argc)
-{
-    LogPrint("Arguments:\n");
-
-    for (int i = 0; i < argc; i++)
-        LogPrint(" %2d len:%d text:\"%s\"\n", i, (int)strlen(argv[i]), argv[i]);
-
-    return 0;
-}
-
 int ConsoleCommandScreenShot(char **argv, int argc)
 {
     DeferredScreenShot();
@@ -577,8 +567,7 @@ static void KillArgs(char **argv, int argc)
 //
 // Current console commands:
 //
-const ConsoleCommand builtin_commands[] = {{"args", ConsoleCommandArgList},
-                                           {"cat", ConsoleCommandType},
+const ConsoleCommand builtin_commands[] = {{"cat", ConsoleCommandType},
                                            {"cd", ConsoleCommandChangeDir},
                                            {"chdir", ConsoleCommandChangeDir},
                                            {"cls", ConsoleCommandClear},

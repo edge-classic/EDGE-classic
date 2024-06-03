@@ -133,6 +133,7 @@ extern ConsoleVariable max_dynamic_lights;
 extern ConsoleVariable vsync;
 extern ConsoleVariable view_bobbing;
 extern ConsoleVariable gore_level;
+extern ConsoleVariable skip_intros;
 
 // extern console_variable_c automap_keydoor_text;
 
@@ -405,6 +406,8 @@ static OptionMenuItem vidoptions[] = {
     {kOptionMenuItemTypeBoolean, "Screenshot Format", "JPEG/PNG", 2, &png_screenshots, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Animated Liquid Type", "Vanilla/SMMU/SMMU+Swirl/Parallax", 4, &swirling_flats, nullptr,
      nullptr},
+    {kOptionMenuItemTypeBoolean, "Play Intro Movies on Startup", YesNo, 2, &skip_intros.d_,
+     OptionMenuUpdateConsoleVariableFromInt, nullptr, &skip_intros},
 };
 
 static OptionMenuDefinition video_optmenu = {

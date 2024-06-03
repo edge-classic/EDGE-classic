@@ -189,7 +189,11 @@ EDGE_DEFINE_CONSOLE_VARIABLE(ddf_strict, "0", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(ddf_lax, "0", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(ddf_quiet, "0", kConsoleVariableFlagArchive)
 
+#ifdef EDGE_WEB
+EDGE_DEFINE_CONSOLE_VARIABLE(skip_intros, "1", kConsoleVariableFlagArchive)
+#else
 EDGE_DEFINE_CONSOLE_VARIABLE(skip_intros, "0", kConsoleVariableFlagArchive)
+#endif
 
 static const Image *loading_image = nullptr;
 const Image        *menu_backdrop = nullptr;

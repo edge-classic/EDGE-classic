@@ -23,23 +23,45 @@
 #include "hu_stuff.h"
 #include "r_defs.h"
 
-struct RADScriptState;
-struct RADScript;
-struct RADScriptTrigger;
-
 enum RADScriptTag
 {
     kTriggerTagNumber = 0,
     kTriggerTagHash
 };
 
-struct ScriptWeaponParameter
+struct RADScriptState;
+struct RADScript;
+struct RADScriptTrigger;
+
+struct RADScriptParameter
 {
+    RADScriptParameter(){};
+    virtual ~RADScriptParameter(){};
+};
+
+struct ScriptWeaponParameter : public RADScriptParameter
+{
+    ~ScriptWeaponParameter()
+    {
+        if (name)
+            free(name);
+    }
+
     char *name = nullptr;
 };
 
-struct ScriptTip
+struct ScriptTip : public RADScriptParameter
 {
+    ~ScriptTip()
+    {
+        if (tip_text)
+            free((void *)tip_text);
+        if (tip_ldf)
+            free(tip_ldf);
+        if (tip_graphic)
+            free(tip_graphic);
+    }
+
     // tip text or graphic.  Two of these must be nullptr.
     const char *tip_text    = nullptr;
     char       *tip_ldf     = nullptr;
@@ -77,29 +99,59 @@ struct ScriptTipProperties
     int time = 0;
 };
 
-struct ScriptShowMenuParameter
+struct ScriptShowMenuParameter : public RADScriptParameter
 {
+    ~ScriptShowMenuParameter()
+    {
+        if (title)
+            free(title);
+        for (size_t i = 0; i < 9; i++)
+        {
+            if (options[i])
+                free(options[i]);
+        }
+    }
+
     bool use_ldf = false;
 
     char *title      = nullptr;
     char *options[9] = {nullptr};
 };
 
-struct ScriptMenuStyle
+struct ScriptMenuStyle : public RADScriptParameter
 {
+    ~ScriptMenuStyle()
+    {
+        if (style)
+            free(style);
+    }
+
     char *style = nullptr;
 };
 
-struct ScriptJumpOnParameter
+struct ScriptJumpOnParameter : public RADScriptParameter
 {
-    // int vartype;  /* only MENU currently supported */
+    ~ScriptJumpOnParameter()
+    {
+        for (size_t i = 0; i < 9; i++)
+        {
+            if (labels[i])
+                free(labels[i]);
+        }
+    }
 
     char *labels[9] = {nullptr};
 };
 
 // SpawnThing Function
-struct ScriptThingParameter
+struct ScriptThingParameter : public RADScriptParameter
 {
+    ~ScriptThingParameter()
+    {
+        if (thing_name)
+            free(thing_name);
+    }
+
     // spawn coordinates.  z can be kOnFloorZ or kOnCeilingZ.
     float x = 0;
     float y = 0;
@@ -124,20 +176,20 @@ struct ScriptThingParameter
 };
 
 // Radius Damage Player Trigger
-struct ScriptDamagePlayerParameter
+struct ScriptDamagePlayerParameter : public RADScriptParameter
 {
     float damage_amount = 0;
 };
 
 // Radius Heal Player Trigger
-struct ScriptHealParameter
+struct ScriptHealParameter : public RADScriptParameter
 {
     float limit       = 0;
     float heal_amount = 0;
 };
 
 // Radius GiveArmour Player Trigger
-struct ScriptArmourParameter
+struct ScriptArmourParameter : public RADScriptParameter
 {
     ArmourType type          = kArmourTypeGreen;
     float      limit         = 0;
@@ -145,15 +197,27 @@ struct ScriptArmourParameter
 };
 
 // Radius Give/Lose Benefit
-struct ScriptBenefitParameter
+struct ScriptBenefitParameter : public RADScriptParameter
 {
+    ~ScriptBenefitParameter()
+    {
+        delete benefit;
+        benefit = nullptr;
+    }
+
     Benefit *benefit = nullptr;
     bool     lose_it = false; // or use_it :)
 };
 
 // Radius Damage Monster Trigger
-struct ScriptDamangeMonstersParameter
+struct ScriptDamangeMonstersParameter : public RADScriptParameter
 {
+    ~ScriptDamangeMonstersParameter()
+    {
+        if (thing_name)
+            free(thing_name);
+    }
+
     // type of monster to damage: DDF name, or if nullptr, then the
     // monster's mapnumber, or if -1 then ANY monster can be damaged.
     char *thing_name = nullptr;
@@ -165,7 +229,7 @@ struct ScriptDamangeMonstersParameter
 };
 
 // Set Skill
-struct ScriptSkillParameter
+struct ScriptSkillParameter : public RADScriptParameter
 {
     SkillLevel skill        = kSkillBaby;
     bool       respawn      = false;
@@ -173,8 +237,14 @@ struct ScriptSkillParameter
 };
 
 // Go to map
-struct ScriptGoToMapParameter
+struct ScriptGoToMapParameter : public RADScriptParameter
 {
+    ~ScriptGoToMapParameter()
+    {
+        if (map_name)
+            free(map_name);
+    }
+
     char *map_name = nullptr;
 
     bool skip_all = false;
@@ -190,7 +260,7 @@ enum ScriptSoundKind
     kScriptSoundBossMan
 };
 
-struct ScriptSoundParameter
+struct ScriptSoundParameter : public RADScriptParameter
 {
     int kind = 0;
 
@@ -203,7 +273,7 @@ struct ScriptSoundParameter
 };
 
 // Change Music function
-struct ScriptMusicParameter
+struct ScriptMusicParameter : public RADScriptParameter
 {
     // playlist entry number
     int playnum = 0;
@@ -213,14 +283,14 @@ struct ScriptMusicParameter
 };
 
 // Play Movie function
-struct ScriptMovieParameter
+struct ScriptMovieParameter : public RADScriptParameter
 {
     // lump or packfile name
     std::string movie;
 };
 
 // Sector Vertical movement
-struct ScriptMoveSectorParameter
+struct ScriptMoveSectorParameter : public RADScriptParameter
 {
     // tag to apply to.  When tag == 0, use the exact sector number
     // (deprecated, but kept for backwards compat).
@@ -237,7 +307,7 @@ struct ScriptMoveSectorParameter
 };
 
 // Sector Light change
-struct ScriptSectorLightParameter
+struct ScriptSectorLightParameter : public RADScriptParameter
 {
     // tag to apply to.  When tag == 0, use the exact sector number
     // (deprecated, but kept for backwards compat).
@@ -251,8 +321,14 @@ struct ScriptSectorLightParameter
 };
 
 // Sector Fog change
-struct ScriptFogSectorParameter
+struct ScriptFogSectorParameter : public RADScriptParameter
 {
+    ~ScriptFogSectorParameter()
+    {
+        if (colmap_color)
+            free((void *)colmap_color);
+    }
+
     // tag to apply to
     int tag = 0;
 
@@ -270,8 +346,14 @@ struct ScriptFogSectorParameter
 };
 
 // Enable/Disable
-struct ScriptEnablerParameter
+struct ScriptEnablerParameter : public RADScriptParameter
 {
+    ~ScriptEnablerParameter()
+    {
+        if (script_name)
+            free(script_name);
+    }
+
     // script to enable/disable.  If script_name is nullptr, then `tag' is
     // the tag number to enable/disable.
     char    *script_name = nullptr;
@@ -282,7 +364,7 @@ struct ScriptEnablerParameter
 };
 
 // ActivateLine
-struct ScriptActivateLineParameter
+struct ScriptActivateLineParameter : public RADScriptParameter
 {
     // line type
     int typenum = 0;
@@ -292,15 +374,21 @@ struct ScriptActivateLineParameter
 };
 
 // UnblockLines
-struct ScriptLineBlockParameter
+struct ScriptLineBlockParameter : public RADScriptParameter
 {
     // line tag
     int tag = 0;
 };
 
 // Jump
-struct ScriptJumpParameter
+struct ScriptJumpParameter : public RADScriptParameter
 {
+    ~ScriptJumpParameter()
+    {
+        if (label)
+            free(label);
+    }
+
     // label name
     char *label = nullptr;
 
@@ -314,7 +402,7 @@ struct ScriptJumpParameter
 };
 
 // Exit
-struct ScriptExitParameter
+struct ScriptExitParameter : public RADScriptParameter
 {
     // exit time, in tics
     int exit_time = 0;
@@ -343,7 +431,7 @@ enum ScriptChangeTexturetureType
     kChangeTextureCeiling = 8,
 };
 
-struct ScriptChangeTexturetureParameter
+struct ScriptChangeTexturetureParameter : public RADScriptParameter
 {
     // what to change
     ScriptChangeTexturetureType what = kChangeTextureRightUpper;
@@ -362,8 +450,16 @@ struct ScriptChangeTexturetureParameter
 };
 
 // Thing Event
-struct ScriptThingEventParameter
+struct ScriptThingEventParameter : public RADScriptParameter
 {
+    ~ScriptThingEventParameter()
+    {
+        if (thing_name)
+            free((void *)thing_name);
+        if (label)
+            free((void *)label);
+    }
+
     // DDF type name of thing to cause the event.  If nullptr, then the
     // thing map number is used instead.
     const char *thing_name = nullptr;
@@ -376,8 +472,16 @@ struct ScriptThingEventParameter
 };
 
 // Weapon Event
-struct ScriptWeaponEventParameter
+struct ScriptWeaponEventParameter : public RADScriptParameter
 {
+    ~ScriptWeaponEventParameter()
+    {
+        if (weapon_name)
+            free((void *)weapon_name);
+        if (label)
+            free((void *)label);
+    }
+
     // DDF type name of weapon to cause the event.
     const char *weapon_name = nullptr;
 
@@ -386,14 +490,30 @@ struct ScriptWeaponEventParameter
     int         offset = 0;
 };
 
-struct ScriptWeaponReplaceParameter
+struct ScriptWeaponReplaceParameter : public RADScriptParameter
 {
+    ~ScriptWeaponReplaceParameter()
+    {
+        if (old_weapon)
+            free((void *)old_weapon);
+        if (new_weapon)
+            free((void *)new_weapon);
+    }
+
     const char *old_weapon = nullptr;
     const char *new_weapon = nullptr;
 };
 
-struct ScriptThingReplaceParameter
+struct ScriptThingReplaceParameter : public RADScriptParameter
 {
+    ~ScriptThingReplaceParameter()
+    {
+        if (old_thing_name)
+            free((void *)old_thing_name);
+        if (new_thing_name)
+            free((void *)new_thing_name);
+    }
+
     const char *old_thing_name = nullptr;
     const char *new_thing_name = nullptr;
     int         old_thing_type = -1;
@@ -434,8 +554,14 @@ struct RADScriptPath
 };
 
 // ONDEATH info
-struct ScriptOnDeathParameter
+struct ScriptOnDeathParameter : public RADScriptParameter
 {
+    ~ScriptOnDeathParameter()
+    {
+        if (thing_name)
+            free(thing_name);
+    }
+
     // next in link (order is unimportant)
     struct ScriptOnDeathParameter *next = nullptr;
 
@@ -453,7 +579,7 @@ struct ScriptOnDeathParameter
 };
 
 // ONHEIGHT info
-struct ScriptOnHeightParameter
+struct ScriptOnHeightParameter : public RADScriptParameter
 {
     // next in link (order is unimportant)
     struct ScriptOnHeightParameter *next = nullptr;
@@ -475,8 +601,17 @@ struct ScriptOnHeightParameter
 };
 
 // WAIT_UNTIL_DEAD info
-struct ScriptWaitUntilDeadParameter
+struct ScriptWaitUntilDeadParameter : public RADScriptParameter
 {
+    ~ScriptWaitUntilDeadParameter()
+    {
+        for (int n = 0; n < 10; n++)
+        {
+            if (mon_names[n])
+                free((void *)mon_names[n]);
+        }
+    }
+
     // tag number to give the monsters which we'll wait on
     int tag = 0;
 
@@ -551,7 +686,7 @@ struct RADScript
 
     // Path info
     RADScriptPath *next_in_path    = nullptr;
-    int                next_path_total = 0;
+    int            next_path_total = 0;
 
     const char *path_event_label  = nullptr;
     int         path_event_offset = 0;
@@ -594,7 +729,7 @@ struct RADScriptTrigger
 
     // current state info
     RADScriptState *state     = nullptr;
-    int                 wait_tics = 0;
+    int             wait_tics = 0;
 
     // current tip slot (each tip slot works independently).
     int tip_slot = 0;

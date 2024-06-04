@@ -71,7 +71,7 @@ static constexpr const char *rad_level_names[3] = {"outer area", "map area", "tr
 
 // Location of current script
 static RADScript *this_script;
-static char          *this_map = nullptr;
+static char      *this_map = nullptr;
 
 // Pending state info for current script
 static int   pending_wait_tics = 0;
@@ -266,8 +266,8 @@ static void ScriptCheckForTime(const char *info, void *storage)
     float val;
     if (sscanf(info, "%f", &val) != 1)
     {
-        //LogWarning("Bad time value '%s'.\n", info);
-        LogWarning("RTS: Bad time value '%s' near line %d.\n", info,current_script_line_number);
+        // LogWarning("Bad time value '%s'.\n", info);
+        LogWarning("RTS: Bad time value '%s' near line %d.\n", info, current_script_line_number);
         return;
     }
 
@@ -432,10 +432,13 @@ static void ClearOneScript(RADScript *scr)
     while (scr->first_state)
     {
         RADScriptState *cur = scr->first_state;
-        scr->first_state        = cur->next;
+        scr->first_state    = cur->next;
 
         if (cur->param)
-            delete cur->param;
+        {
+            RADScriptParameter *param_pointer = (RADScriptParameter *)cur->param;
+            delete param_pointer;
+        }
 
         delete cur;
     }
@@ -485,8 +488,8 @@ static void ClearAllScripts(void)
 {
     while (current_scripts)
     {
-        RADScript *scr = current_scripts;
-        current_scripts    = scr->next;
+        RADScript *scr  = current_scripts;
+        current_scripts = scr->next;
 
         ClearOneScript(scr);
 

@@ -850,18 +850,15 @@ int CheckForUniqueGameLumps(epi::File *file)
 
     for (size_t check = 0; check < game_checker.size(); check++)
     {
-        GameCheck gamecheck = game_checker[check];
-        const char *lump0 = gamecheck.unique_lumps[0];
-        const char *lump1 = gamecheck.unique_lumps[1];
+        GameCheck   gamecheck = game_checker[check];
+        const char *lump0     = gamecheck.unique_lumps[0];
+        const char *lump1     = gamecheck.unique_lumps[1];
 
         // Do not require IWAD header if loading Harmony, REKKR, BFG Edition
         // WADs, Chex Quest or a custom standalone IWAD
-        if (strncmp(header.magic, "IWAD", 4) != 0 &&
-            epi::StringCompare(lump0, "DMENUPIC") != 0 &&
-            epi::StringCompare(lump0, "REKCREDS") != 0 &&
-            epi::StringCompare(lump0, "0HAWK01") != 0 &&
-            epi::StringCompare(lump0, "EDGEGAME") != 0 &&
-            epi::StringCompare(lump0, "ENDOOM") != 0)
+        if (strncmp(header.magic, "IWAD", 4) != 0 && epi::StringCompare(lump0, "DMENUPIC") != 0 &&
+            epi::StringCompare(lump0, "REKCREDS") != 0 && epi::StringCompare(lump0, "0HAWK01") != 0 &&
+            epi::StringCompare(lump0, "EDGEGAME") != 0 && epi::StringCompare(lump0, "ENDOOM") != 0)
         {
             continue;
         }
@@ -1145,9 +1142,8 @@ void ProcessWad(DataFile *df, size_t file_index)
     {
         RawWadEntry &entry = raw_info[i];
 
-        bool allow_ddf = (epi::StringCompare(game_base, "custom") == 0 ||
-                          df->kind_ == kFileKindPWAD || df->kind_ == kFileKindPackWAD || df->kind_ == kFileKindIPK ||
-                          df->kind_ == kFileKindIFolder);
+        bool allow_ddf = (epi::StringCompare(game_base, "custom") == 0 || df->kind_ == kFileKindPWAD ||
+                          df->kind_ == kFileKindPackWAD || df->kind_ == kFileKindIPK || df->kind_ == kFileKindIFolder);
 
         AddLump(df, entry.name, AlignedLittleEndianS32(entry.position), AlignedLittleEndianS32(entry.size),
                 (int)file_index, allow_ddf);
@@ -2319,37 +2315,6 @@ void ProcessTXHINamespaces(void)
         {
             ProcessHiresPackSubstitutions(df->pack_, file);
         }
-    }
-}
-
-static const char *LumpKindString(LumpKind kind)
-{
-    switch (kind)
-    {
-    case kLumpNormal:
-        return "normal";
-    case kLumpMarker:
-        return "marker";
-    case kLumpWadTex:
-        return "wadtex";
-    case kLumpDDFRTS:
-        return "ddf";
-
-    case kLumpTx:
-        return "tx";
-    case kLumpColormap:
-        return "cmap";
-    case kLumpFlat:
-        return "flat";
-    case kLumpSprite:
-        return "sprite";
-    case kLumpPatch:
-        return "patch";
-    case kLumpHiRes:
-        return "hires";
-
-    default:
-        return "???";
     }
 }
 

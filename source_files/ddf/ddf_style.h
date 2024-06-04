@@ -195,9 +195,14 @@ class StyleDefinitionContainer : public std::vector<StyleDefinition *>
         }
     }
 
-  public:
     // Search Functions
     StyleDefinition *Lookup(const char *refname);
+
+  public:
+    // If false, always use DDFFONT based menu entries instead of patch
+    // graphics; this is mostly for wadfixes or other EC-specific modifcations
+    // for projects not targeting EC
+    bool patch_menus_allowed_ = true;
 };
 
 extern StyleDefinitionContainer styledefs;

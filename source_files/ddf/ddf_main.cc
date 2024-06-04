@@ -833,6 +833,16 @@ void DDFMainReadFile(DDFReadInfo *readinfo, const std::string &data)
                 memfileptr += l_len;
                 continue;
             }
+
+            if (epi::StringPrefixCaseCompareASCII(std::string_view(memfileptr, 13), "#NOPATCHMENUS") == 0)
+            {
+                if (epi::StringCaseCompareASCII(readinfo->lumpname, "DDFSTYLE") == 0)
+                {
+                    styledefs.patch_menus_allowed_ = false;
+                }
+                memfileptr += l_len;
+                continue;
+            }
         }
 
         int response = DDFMainProcessChar(character, token, status);

@@ -3139,38 +3139,41 @@ void MenuInitialize(void)
     menu_skull[0]     = (Image *)ImageLookup("M_SKULL1");
     menu_skull[1]     = (Image *)ImageLookup("M_SKULL2");
 
-    // Check for custom menu graphics in pwads:
-    // If we have them then use them instead of our
-    //  text-based ones.
-    if (IsLumpInPwad("M_NEWG"))
-        custom_MenuMain = true;
+    if (styledefs.patch_menus_allowed_)
+    {
+        // Check for custom menu graphics in pwads:
+        // If we have them then use them instead of our
+        //  text-based ones.
+        if (IsLumpInPwad("M_NEWG"))
+            custom_MenuMain = true;
 
-    if (IsLumpInPwad("M_LOADG"))
-        custom_MenuMain = true;
+        if (IsLumpInPwad("M_LOADG"))
+            custom_MenuMain = true;
 
-    if (IsLumpInPwad("M_SAVEG"))
-        custom_MenuMain = true;
+        if (IsLumpInPwad("M_SAVEG"))
+            custom_MenuMain = true;
 
-    if (IsLumpInPwad("M_EPISOD"))
-        custom_MenuEpisode = true;
+        if (IsLumpInPwad("M_EPISOD"))
+            custom_MenuEpisode = true;
 
-    if (IsLumpInPwad("M_EPI1"))
-        custom_MenuEpisode = true;
+        if (IsLumpInPwad("M_EPI1"))
+            custom_MenuEpisode = true;
 
-    if (IsLumpInPwad("M_EPI2"))
-        custom_MenuEpisode = true;
+        if (IsLumpInPwad("M_EPI2"))
+            custom_MenuEpisode = true;
 
-    if (IsLumpInPwad("M_EPI3"))
-        custom_MenuEpisode = true;
+        if (IsLumpInPwad("M_EPI3"))
+            custom_MenuEpisode = true;
 
-    if (IsLumpInPwad("M_EPI4"))
-        custom_MenuEpisode = true;
+        if (IsLumpInPwad("M_EPI4"))
+            custom_MenuEpisode = true;
 
-    if (IsLumpInPwad("M_JKILL"))
-        custom_MenuDifficulty = true;
+        if (IsLumpInPwad("M_JKILL"))
+            custom_MenuDifficulty = true;
 
-    if (IsLumpInPwad("M_NMARE"))
-        custom_MenuDifficulty = true;
+        if (IsLumpInPwad("M_NMARE"))
+            custom_MenuDifficulty = true;
+    }
 
     LogDebug("custom_MenuMain =%d \n", custom_MenuMain);
     LogDebug("custom_MenuEpisode =%d \n", custom_MenuEpisode);

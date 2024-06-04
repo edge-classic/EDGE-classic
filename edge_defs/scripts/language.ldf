@@ -26,6 +26,7 @@ MainLoadGame="Load Game";
 MainSaveGame="Save Game";
 MainReadThis="Read This!";
 MainQuitGame="Quit Game";
+MainEndBotMatch="End Bot Match";
 
 MenuOptions="Options";
 MenuVideo="Video Options";
@@ -80,6 +81,7 @@ PressYorN="Press Y or N";
 QuickSaveOver="quicksave over your game named\n\n'%s'?\n\npress y or n.";
 NoQuickSaveSlot="you haven't picked a quicksave slot yet!\n\npress a key.";
 SaveWhenNotPlaying="you can't save if you aren't playing!\n\npress a key.";
+QuitWhenWebPlayer="You can't quit from the web player!\nPress Escape to release the cursor and close your browser.";
 
 NoLoadInNetGame="you can't load while in a net game!\n\npress a key.";
 NoQLoadInNetGame="you can't quickload during a netgame!\n\npress a key." ;

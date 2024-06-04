@@ -1637,8 +1637,8 @@ static void QuitResponse(int ch)
 //
 void QuitEdge(int choice)
 {
-#if EDGE_WEB
-    LogPrint("Quit ignored on web platform\n");
+#ifdef EDGE_WEB
+    StartMenuMessage(language["QuitWhenWebPlayer"], nullptr, false);
     return;
 #endif
 
@@ -2118,7 +2118,11 @@ bool MenuResponder(InputEvent *ev)
         case kQuitEdge: // Quit DOOM
 
             StartSoundEffect(sound_effect_swtchn);
+#ifdef EDGE_WEB
+            StartMenuMessage(language["QuitWhenWebPlayer"], nullptr, false);
+#else
             QuitEdge(0);
+#endif
             return true;
 
         case kGammaToggle: // gamma toggle

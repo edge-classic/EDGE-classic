@@ -330,8 +330,13 @@ static int OptionMenuGetCurrentSwitchValue(OptionMenuItem *item)
 //
 //  MAIN MENU
 //
+#ifdef EDGE_WEB
+static constexpr uint8_t kOptionMenuLanguagePosition    = 9;
+static constexpr uint8_t kOptionMenuNetworkHostPosition = 12;
+#else
 static constexpr uint8_t kOptionMenuLanguagePosition    = 10;
 static constexpr uint8_t kOptionMenuNetworkHostPosition = 13;
+#endif
 
 static OptionMenuItem mainoptions[] = {
     {kOptionMenuItemTypeFunction, "MenuBinding", nullptr, 0, nullptr, OptionMenuKeyboardOptions, "Controls"},
@@ -888,7 +893,7 @@ void OptionMenuCheckNetworkGame(void)
 {
     if (game_state >= kGameStateLevel)
     {
-        mainoptions[kOptionMenuNetworkHostPosition + 0].name = language["MainQuitGame"]; // "Leave Game";
+        mainoptions[kOptionMenuNetworkHostPosition + 0].name = language["MainEndBotMatch"];
         mainoptions[kOptionMenuNetworkHostPosition + 0].routine = &MenuEndGame;
         mainoptions[kOptionMenuNetworkHostPosition + 0].help    = nullptr;
     }
@@ -1263,13 +1268,6 @@ static void OptionMenuResOptDrawer(Style *style, int topy, int bottomy, int dy, 
 
 static void OptionMenuLanguageDrawer(int x, int y, int deltay)
 {
-    // This seems unused for now - Dasho
-    /*float ALTscale = 1.0;
-
-    if(options_menu_default_style->definition_->text[StyleDefinition::kTextSectionAlternate].scale)
-    {
-        ALTscale=options_menu_default_style->definition_->text[StyleDefinition::kTextSectionAlternate].scale;
-    }*/
     HUDWriteText(options_menu_default_style, StyleDefinition::kTextSectionAlternate, x + 15,
                  y + deltay * kOptionMenuLanguagePosition, language.GetName());
 }

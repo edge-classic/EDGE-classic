@@ -99,13 +99,13 @@ When adding files to the preload folder, building is required as the data is pro
 Now, configure and build:
 
 ```
-> cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -G "Unix Makefiles"
+> cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=<path to Emscripten SDK folder>/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -G "Unix Makefiles"
 > cmake --build build (-j# optional, with # being the number of threads/cores you'd like to use)
 ```
 
-Once the build is complete, all the required files should be in the ```/web/site``` folder, change directory to this folder and run ```python -m http.server```
+Once the build is complete, all the required files should be in the ```/web/site``` folder, change directory to this folder and run ```python webplayer.py``` (webplayer.py is a small Python script that ensures correct MIME typing of JavaScript modules)
 
-Open a web browser, navigate to ```http://127.0.0.1:8000```, and play Edge Classic!   
+Open a web browser, navigate to ```http://localhost:8000```, and play Edge Classic!   
 
 # Launching EDGE-Classic
 

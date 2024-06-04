@@ -406,7 +406,7 @@ static OptionMenuItem vidoptions[] = {
     {kOptionMenuItemTypeBoolean, "Screenshot Format", "JPEG/PNG", 2, &png_screenshots, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Animated Liquid Type", "Vanilla/SMMU/SMMU+Swirl/Parallax", 4, &swirling_flats, nullptr,
      nullptr},
-    {kOptionMenuItemTypeBoolean, "Play Intro Movies on Startup", YesNo, 2, &skip_intros.d_,
+    {kOptionMenuItemTypeBoolean, "Skip Startup Movies", YesNo, 2, &skip_intros.d_,
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &skip_intros},
 };
 

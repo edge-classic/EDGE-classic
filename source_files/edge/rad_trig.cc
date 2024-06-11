@@ -331,7 +331,10 @@ void ClearDeathTriggersByMap(const std::string &mapname)
                     ScriptWaitUntilDeadParameter *wud = (ScriptWaitUntilDeadParameter *)state->param;
                     wud->tag                          = 0;
                     for (int n = 0; n < 10; n++)
-                        delete wud->mon_names[n];
+                    {
+                        if (wud->mon_names[n])
+                            free((void *)wud->mon_names[n]);
+                    }
                 }
             }
         }
@@ -600,7 +603,7 @@ bool ScriptUpdatePath(MapObject *thing)
     RADScriptTrigger *trig;
 
     RADScriptPath *path;
-    int                choice;
+    int            choice;
 
     if (!ScriptRadiusCheck(thing, scr))
         return false;
@@ -934,7 +937,7 @@ void SpawnScriptTriggers(const char *map_name)
 
 static void ScriptClearCachedInfo(void)
 {
-    RADScript           *scr;
+    RADScript               *scr;
     ScriptOnDeathParameter  *d_cur;
     ScriptOnHeightParameter *h_cur;
 
@@ -960,7 +963,7 @@ void ClearScriptTriggers(void)
     while (active_triggers)
     {
         RADScriptTrigger *trig = active_triggers;
-        active_triggers            = trig->next;
+        active_triggers        = trig->next;
 
         delete trig;
     }

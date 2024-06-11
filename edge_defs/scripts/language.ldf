@@ -26,7 +26,7 @@ MainLoadGame="Load Game";
 MainSaveGame="Save Game";
 MainReadThis="Read This!";
 MainQuitGame="Quit Game";
-MainEndBotMatch="End Bot Match";
+MainEndBotMatch="End Game";
 
 MenuOptions="Options";
 MenuVideo="Video Options";

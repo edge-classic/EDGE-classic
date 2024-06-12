@@ -142,7 +142,13 @@ static void PL_get_mlook(coal::VM *vm, int argc)
 //
 static void PL_health(coal::VM *vm, int argc)
 {
-    vm->ReturnFloat((int)floor(ui_player_who->health_));
+    float health = ui_player_who->health_;
+    if (health < 1 && health > 0)
+        vm->ReturnFloat(1);
+    else if (health > 99 && health < 100)
+        vm->ReturnFloat(99);
+    else
+        vm->ReturnFloat((int)health);
 }
 
 // player.armor(type)

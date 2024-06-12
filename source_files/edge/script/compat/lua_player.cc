@@ -126,7 +126,13 @@ static int PL_get_mlook(lua_State *L)
 //
 static int PL_health(lua_State *L)
 {
-    lua_pushinteger(L, (int)floor(ui_player_who->health_));
+    float health = ui_player_who->health_;
+    if (health < 1 && health > 0)
+        lua_pushinteger(L, 1);
+    else if (health > 99 && health < 100)
+        lua_pushinteger(L, 99);
+    else
+        lua_pushinteger(L, (int)health);
     return 1;
 }
 

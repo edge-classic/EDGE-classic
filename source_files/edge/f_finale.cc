@@ -78,9 +78,6 @@ static bool skip_finale;
 static int  finale_count;
 static int  picture_number;
 
-static constexpr uint8_t kFinaleTextSpeed    = 3;
-static constexpr uint8_t kFinaleTextWaitTime = 250;
-
 static const char *finale_text;
 
 static GameAction              new_game_action;
@@ -300,12 +297,12 @@ void FinaleTicker(void)
     switch (finale_stage)
     {
     case kFinaleStageText:
-        if (skip_finale && finale_count < (int)strlen(finale_text) * kFinaleTextSpeed)
+        if (skip_finale && finale_count < (int)(strlen(finale_text) * finale->text_speed_))
         {
-            finale_count = kFinaleTextSpeed * strlen(finale_text);
+            finale_count = (int)(strlen(finale_text) * finale->text_speed_);
             skip_finale  = false;
         }
-        else if (skip_finale || finale_count > kFinaleTextWaitTime + (int)strlen(finale_text) * kFinaleTextSpeed)
+        else if (skip_finale || finale_count > finale->text_wait_ + (int)(strlen(finale_text) * finale->text_speed_))
         {
             DoBumpFinale();
             skip_finale = false;

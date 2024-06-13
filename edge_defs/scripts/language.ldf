@@ -27,6 +27,7 @@ MainSaveGame="Save Game";
 MainReadThis="Read This!";
 MainQuitGame="Quit Game";
 MainEndBotMatch="End Game";
+NoBrowseFromWeb="Cannot open a file browser from the web player!";
 
 MenuOptions="Options";
 MenuVideo="Video Options";

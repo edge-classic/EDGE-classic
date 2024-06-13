@@ -371,7 +371,7 @@ void FinaleDefinition::Default()
     text_back_.clear();
     text_flat_.clear();
     text_speed_  = 3.0f;
-    text_wait_   = 150;
+    text_wait_   = 250;
     text_colmap_ = nullptr;
 
     movie_.clear();

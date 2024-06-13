@@ -40,7 +40,7 @@ std::wstring UTF8ToWString(std::string_view instring)
     while (utf8pos < utf8len)
     {
         u32c       = 0;
-        size_t res = utf8proc_iterate(utf8ptr + utf8pos, utf8len - utf8pos, &u32c);
+        int res = utf8proc_iterate(utf8ptr + utf8pos, utf8len - utf8pos, &u32c);
         if (res < 0)
             FatalError("Failed to convert %s to a wide string!\n", std::string(instring).c_str());
         else

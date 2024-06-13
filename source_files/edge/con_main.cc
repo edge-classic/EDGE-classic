@@ -374,10 +374,15 @@ int ConsoleCommandShowFiles(char **argv, int argc)
     return 0;
 }
 
-int ConsoleCommandOpenHome(char **argv, int argc)
+int ConsoleCommandBrowse(char **argv, int argc)
 {
-    epi::OpenDirectory(home_directory);
+#ifdef EDGE_WEB
+    ConsolePrint("%s\n", language["NoBrowseFromWeb"]);
+    return 1;
+#else
+    epi::OpenDirectory(working_directory);
     return 0;
+#endif
 }
 
 int ConsoleCommandShowVars(char **argv, int argc)
@@ -586,7 +591,7 @@ const ConsoleCommand builtin_commands[] = {{"cat", ConsoleCommandType},
                                            {"warp", ConsoleCommandMap}, // compatibility
                                            {"playsound", ConsoleCommandPlaySound},
                                            {"readme", ConsoleCommandReadme},
-                                           {"openhome", ConsoleCommandOpenHome},
+                                           {"browse", ConsoleCommandBrowse},
                                            {"pwd", ConsoleCommandPrintWorkingDir},
                                            {"resetvars", ConsoleCommandResetVars},
                                            {"showfiles", ConsoleCommandShowFiles},

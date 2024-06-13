@@ -753,7 +753,7 @@ static void DrawText(int x, int y, const char *s, RGBAColor col)
 
         if (console_font->definition_->type_ == kFontTypeTrueType)
         {
-            if (s + 1)
+            if (*(s + 1))
             {
                 x += (float)stbtt_GetGlyphKernAdvance(console_font->truetype_info_, console_font->GetGlyphIndex(*s),
                                                       console_font->GetGlyphIndex(*(s + 1))) *

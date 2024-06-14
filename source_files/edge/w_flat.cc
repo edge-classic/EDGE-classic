@@ -52,6 +52,52 @@ EDGE_DEFINE_CONSOLE_VARIABLE(precache_textures, "1", kConsoleVariableFlagArchive
 EDGE_DEFINE_CONSOLE_VARIABLE(precache_sprites, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(precache_models, "1", kConsoleVariableFlagArchive)
 
+
+static void AddTXAnimation(AnimationDefinition *anim, ImageNamespace NStype)
+{
+    int start_offset= -1;
+    int end_offset = -1;
+
+    int total = (int)TX_names.size();
+
+    if (total == 1)
+        return;
+
+    for (int i = 0; i < total; i++)
+    {
+        if (DDFCompareName(anim->start_name_.c_str(), TX_names[i].c_str()) == 0)
+            start_offset = i;
+
+        if (DDFCompareName(anim->end_name_.c_str(), TX_names[i].c_str()) == 0)
+            end_offset = i;
+
+        if (end_offset != -1 && start_offset != -1) //all done
+            break;
+    }
+
+    if (end_offset == -1 || start_offset == -1)
+        return;
+
+    if (start_offset >= end_offset)
+        return;
+
+
+    total = end_offset - start_offset + 1;
+    
+    const Image **texs = new const Image *[total];
+    int indexer = 0;
+
+    for (int i = start_offset; i < end_offset + 1; i++)
+    {
+        texs[indexer] = ImageLookup(TX_names[i].c_str(), NStype, kImageLookupNull);
+        indexer++;
+    }
+
+    AnimateImageSet(texs, total, anim->speed_);
+    delete[] texs;
+    
+}
+
 //
 // AddFlatAnimation
 //
@@ -87,6 +133,8 @@ static void AddFlatAnimation(AnimationDefinition *anim)
         if (start == -1 || end == -1)
         {
             // sequence not valid.  Maybe it is the DOOM 1 IWAD.
+
+            //AddTXAnimation(anim, kImageNamespaceFlat); //Lobo 2024: try plan B here too?
             return;
         }
 
@@ -96,6 +144,8 @@ static void AddFlatAnimation(AnimationDefinition *anim)
         {
             LogWarning("Missing flat animation: %s-%s not in any wad.\n", anim->start_name_.c_str(),
                        anim->end_name_.c_str());
+            
+            AddTXAnimation(anim, kImageNamespaceFlat); //Lobo 2024: try plan B
             return;
         }
 
@@ -148,6 +198,9 @@ static void AddFlatAnimation(AnimationDefinition *anim)
     delete[] flats;
 }
 
+
+
+
 //
 // AddTextureAnimation
 //
@@ -183,6 +236,9 @@ static void AddTextureAnimation(AnimationDefinition *anim)
         if (set < 0)
         {
             // sequence not valid.  Maybe it is the DOOM 1 IWAD.
+
+            AddTXAnimation(anim, kImageNamespaceTexture); //Lobo 2024: try plan B
+
             return;
         }
 

@@ -324,6 +324,8 @@ extern std::list<Image *> real_graphics;
 extern std::list<Image *> real_textures;
 extern std::list<Image *> real_flats;
 extern std::list<Image *> real_sprites;
+extern std::vector<std::string> TX_names;
+
 
 Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfile_name, std::list<Image *> &container,
                          const Image *replaces = nullptr);

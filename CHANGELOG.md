@@ -39,6 +39,7 @@ General Improvements/Changes
   - Consistent code styling and formatting performed on all files under the /source_files project folder
   - Remove support for absolute paths and path traversal with '..' for the exec, ls/dir, and cat/type console commands
   - Remove support for path traversal with '..' when searching for or opening pack files
+  - FIRST and LAST fields in anims.ddf now work with TX textures
 
 
 Bugs fixed

@@ -171,6 +171,8 @@ std::list<Image *> real_textures;
 std::list<Image *> real_flats;
 std::list<Image *> real_sprites;
 
+std::vector<std::string> TX_names;
+
 const Image *sky_flat_image;
 
 static const Image *dummy_sprite;
@@ -1031,6 +1033,8 @@ void ImageAddTxHx(int lump, const char *name, bool hires)
 
         LogDebug("HIRES replacement '%s' has no counterpart.\n", name);
     }
+
+    TX_names.push_back(name);
 
     AddImage_Smart(name, kImageSourceTXHI, lump, real_textures);
 }

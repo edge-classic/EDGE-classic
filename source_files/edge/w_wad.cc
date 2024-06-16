@@ -83,7 +83,10 @@ const std::vector<GameCheck> game_checker = {{
     {"HacX", "hacx", {"HACX-R", "MAP01"}},
     {"Harmony", "harmony", {"0HAWK01", "DBIGFONT"}}, // Only the original, not
                                                      // Harmony-Compatible, should have DBIGFONT
-    {"Chex Quest 3", "chex", {"ENDOOM", "ENDOOM"}},  // Chex Quest 3: Vanilla Edition
+    {"Chex Quest 1", "chex1", {"ENDOOM", "_DEUTEX_"}},  // Chex Quest 1
+    {"Chex Quest 3", "chex3v", {"ENDOOM", "E1M1"}},  // Chex Quest 3: Vanilla Edition
+    {"Chex Quest 3", "chex3vm", {"ENDOOM", "MAP01"}},  // Chex Quest 3: Vanilla Edition
+                                                       // Modder/Doom 2 Base
     {"Heretic", "heretic", {"MUS_E1M1", "E1M1"}},
     {"Plutonia", "plutonia", {"CAMO1", "MAP01"}},
     {"Evilution", "tnt", {"REDTNT2", "MAP01"}},
@@ -890,13 +893,20 @@ int CheckForUniqueGameLumps(epi::File *file)
                     file->Seek(entry.position, epi::File::kSeekpointStart);
                     uint8_t *endoom = new uint8_t[entry.size];
                     file->Read(endoom, entry.size);
+                    // CQ3: Vanilla
                     if (endoom[1174] == 'c' && endoom[1176] == 'h' && endoom[1178] == 'e' && endoom[1180] == 'x' &&
                         endoom[1182] == 'q' && endoom[1184] == 'u' && endoom[1186] == 'e' && endoom[1188] == 's' &&
                         endoom[1190] == 't' && endoom[1192] == '.' && endoom[1194] == 'o' && endoom[1196] == 'r' &&
                         endoom[1198] == 'g')
                     {
-                        delete[] endoom;
-                        return check;
+                        lump1_found = true;
+                    }
+                    // CQ1
+                    else if (endoom[1026] == 'c' && endoom[1028] == 'h' && endoom[1030] == 'e' && endoom[1032] == 'x' &&
+                        endoom[1034] == 'q' && endoom[1036] == 'u' && endoom[1038] == 'e' && endoom[1040] == 's' &&
+                        endoom[1042] == 't')
+                    {
+                        lump1_found = true;
                     }
                     delete[] endoom;
                 }

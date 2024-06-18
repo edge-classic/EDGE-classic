@@ -83,10 +83,10 @@ const std::vector<GameCheck> game_checker = {{
     {"HacX", "hacx", {"HACX-R", "MAP01"}},
     {"Harmony", "harmony", {"0HAWK01", "DBIGFONT"}}, // Only the original, not
                                                      // Harmony-Compatible, should have DBIGFONT
-    {"Chex Quest 1", "chex1", {"ENDOOM", "_DEUTEX_"}},  // Chex Quest 1
-    {"Chex Quest 3", "chex3v", {"ENDOOM", "E1M1"}},  // Chex Quest 3: Vanilla Edition
-    {"Chex Quest 3", "chex3vm", {"ENDOOM", "MAP01"}},  // Chex Quest 3: Vanilla Edition
-                                                       // Modder/Doom 2 Base
+    {"Chex Quest 3M", "chex3vm", {"ENDOOM", "MAP01"}},  // Chex Quest 3: Vanilla Edition
+                                                        // Modder/Doom 2 Base
+    {"Chex Quest 3", "chex3v", {"ENDOOM", "BOSSBACK"}},  // Chex Quest 3: Vanilla Edition
+    {"Chex Quest 1", "chex1", {"ENDOOM", "E4M1"}},  // Chex Quest 1
     {"Heretic", "heretic", {"MUS_E1M1", "E1M1"}},
     {"Plutonia", "plutonia", {"CAMO1", "MAP01"}},
     {"Evilution", "tnt", {"REDTNT2", "MAP01"}},

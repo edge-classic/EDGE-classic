@@ -3181,14 +3181,15 @@ void MenuInitialize(void)
 
     menu_doom = ImageLookup("M_DOOM");
 
-    // Here we could catch other version dependencies,
-    //  like HELP1/2, and four episodes.
-    //    if (CheckLumpNumberForName("M_EPI4") < 0)
-    //      EpisodeMenuDefinition.total_items -= 2;
-    //    else if (CheckLumpNumberForName("M_EPI5") < 0)
-    //      EpisodeMenuDefinition.total_items--;
-
-    if (IsLumpInAnyWad("HELP"))                              // doom2
+    if (IsLumpInAnyWad("HELP1")) // doom or shareware doom
+    {
+        menu_read_this[0] = ImageLookup("HELP1");
+        if (IsLumpInAnyWad("HELP2"))
+            menu_read_this[1] = ImageLookup("HELP2");  // Shareware doom
+        else
+            menu_read_this[1] = ImageLookup("CREDIT"); // Full doom
+    }
+    else if (IsLumpInAnyWad("HELP")) // doom 2
     {
         menu_read_this[0]           = ImageLookup("HELP");
         menu_read_this[1]           = ImageLookup("CREDIT"); // Unnecessary since we won't see it anyway...
@@ -3200,14 +3201,6 @@ void MenuInitialize(void)
         ReadThisMenuDefinition1.x             = 330;
         ReadThisMenuDefinition1.y             = 165;
         ReadMenu1[0].select_function          = MenuFinishReadThis;
-    }
-    else // doom or shareware doom
-    {
-        menu_read_this[0] = ImageLookup("HELP1");
-        if (IsLumpInAnyWad("HELP2"))
-            menu_read_this[1] = ImageLookup("HELP2");  // Shareware doom
-        else
-            menu_read_this[1] = ImageLookup("CREDIT"); // Full doom
     }
 
     // Lobo 2022: Use new sfx definitions so we don't have to share names with

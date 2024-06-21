@@ -81,20 +81,20 @@ const std::vector<GameCheck> game_checker = {{
     {"Freedoom 2", "freedoom2", {"FREEDOOM", "MAP01"}},
     {"REKKR", "rekkr", {"REKCREDS", "E1M1"}},
     {"HacX", "hacx", {"HACX-R", "MAP01"}},
-    {"Harmony", "harmony", {"0HAWK01", "DBIGFONT"}}, // Only the original, not
-                                                     // Harmony-Compatible, should have DBIGFONT
+    {"Harmony", "harmony", {"0HAWK01", "DBIGFONT"}}, // Original Harmony Release
+    {"Harmony Compat", "harmonyc", {"0HAWK01", "DMAPINFO"}}, // Harmony Compatible Release
     {"Chex Quest 3M", "chex3vm", {"ENDOOM", "MAP01"}},  // Chex Quest 3: Vanilla Edition
                                                         // Modder/Doom 2 Base
     {"Chex Quest 3", "chex3v", {"ENDOOM", "BOSSBACK"}},  // Chex Quest 3: Vanilla Edition
-    {"Chex Quest 1", "chex1", {"ENDOOM", "E4M1"}},  // Chex Quest 1
+    {"Chex Quest 1", "chex1", {"ENDOOM", "E4M1"}},
     {"Heretic", "heretic", {"MUS_E1M1", "E1M1"}},
     {"Plutonia", "plutonia", {"CAMO1", "MAP01"}},
     {"Evilution", "tnt", {"REDTNT2", "MAP01"}},
     {"Doom", "doom", {"BFGGA0", "E2M1"}},
-    {"Doom BFG", "doom", {"DMENUPIC", "M_MULTI"}},   // BFG Edition
+    {"Doom BFG", "doom", {"DMENUPIC", "M_MULTI"}},
     {"Doom Demo", "doom1", {"SHOTA0", "E1M1"}},
     {"Doom II", "doom2", {"BFGGA0", "MAP01"}},
-    {"Doom II BFG", "doom2", {"DMENUPIC", "MAP33"}}, // BFG Edition
+    {"Doom II BFG", "doom2", {"DMENUPIC", "MAP33"}},
 #if EDGE_ENABLE_STRIFE
     {"Strife", "strife", {"VELLOGO", "RGELOGO"}}     // Dev/internal use - Definitely nowhwere near playable
 #endif

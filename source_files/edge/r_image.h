@@ -288,9 +288,6 @@ int MakeValidTextureSize(int value);
 // Store a duplicate version of the image_c with smoothing forced
 void StoreBlurredImage(const Image *image);
 
-// Store the image_c's average color
-void StoreColorMatchAverage(const Image *image);
-
 enum ImageSource
 {
     // Source was a graphic name

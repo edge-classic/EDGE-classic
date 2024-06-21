@@ -376,7 +376,33 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
             return nullptr;
         }
 
-        solid = (bpp == 3);
+        solid = (bpp == 3);      
+
+        // PNG grAb check
+        if (fmt == kImagePNG)
+        {
+            f->Seek(0, epi::File::kSeekpointStart);
+            uint8_t *raw_image = f->LoadIntoMemory();
+            int i = 0;
+            int j = 0;
+            for (; i < packfile_len && j < 5; i++)
+            {
+                static uint8_t pgs[5] = { 0x08, 'g', 'r', 'A', 'b' };
+                if (raw_image[i] == pgs[j])
+                    j++;
+                else
+                    j = 0;
+            }
+            if (j == 5)
+            {
+                memcpy(&offset_x, &raw_image[i], 4);
+                i+=4;
+                memcpy(&offset_y, &raw_image[i], 4);
+                offset_x = AlignedBigEndianS32(offset_x);
+                offset_y = AlignedBigEndianS32(offset_y);
+            }
+            delete[] raw_image;
+        }
 
         // close it
         delete f;
@@ -518,6 +544,32 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump, std::
         }
 
         solid = (bpp == 3);
+
+        // PNG grAb check
+        if (fmt == kImagePNG)
+        {
+            f->Seek(0, epi::File::kSeekpointStart);
+            uint8_t *raw_image = f->LoadIntoMemory();
+            int i = 0;
+            int j = 0;
+            for (; i < lump_len && j < 5; i++)
+            {
+                static uint8_t pgs[5] = { 0x08, 'g', 'r', 'A', 'b' };
+                if (raw_image[i] == pgs[j])
+                    j++;
+                else
+                    j = 0;
+            }
+            if (j == 5)
+            {
+                memcpy(&offset_x, &raw_image[i], 4);
+                i+=4;
+                memcpy(&offset_y, &raw_image[i], 4);
+                offset_x = AlignedBigEndianS32(offset_x);
+                offset_y = AlignedBigEndianS32(offset_y);
+            }
+            delete[] raw_image;
+        }
 
         // close it
         delete f;

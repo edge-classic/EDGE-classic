@@ -147,25 +147,25 @@ ImageData *LoadImageData(epi::File *file)
 {
     int width  = 0;
     int height = 0;
-    int depth_ = 0;
+    int depth = 0;
 
     int      length    = file->GetLength();
     uint8_t *raw_image = file->LoadIntoMemory();
 
-    uint8_t *decoded_img = stbi_load_from_memory(raw_image, length, &width, &height, &depth_, 0);
+    uint8_t *decoded_img = stbi_load_from_memory(raw_image, length, &width, &height, &depth, 0);
 
     // we don't want no grayscale here, force STB to convert
-    if (decoded_img != nullptr && (depth_ == 1 || depth_ == 2))
+    if (decoded_img != nullptr && (depth == 1 || depth == 2))
     {
         stbi_image_free(decoded_img);
 
         // depth_ 1 = grayscale, so force RGB
         // depth_ 2 = grayscale + alpha, so force RGBA
-        int new_depth_ = depth_ + 2;
+        int new_depth = depth + 2;
 
-        decoded_img = stbi_load_from_memory(raw_image, length, &width, &height, &depth_, new_depth_);
+        decoded_img = stbi_load_from_memory(raw_image, length, &width, &height, &depth, new_depth);
 
-        depth_ = new_depth_; // sigh...
+        depth = new_depth; // sigh...
     }
 
     delete[] raw_image;
@@ -187,7 +187,7 @@ ImageData *LoadImageData(epi::File *file)
             total_h <<= 1;
     }
 
-    ImageData *img = new ImageData(total_w, total_h, depth_);
+    ImageData *img = new ImageData(total_w, total_h, depth);
 
     img->used_width_  = width;
     img->used_height_ = height;
@@ -198,8 +198,8 @@ ImageData *LoadImageData(epi::File *file)
     // copy the image data, inverting it at the same time
     for (int y = 0; y < height; y++)
     {
-        const uint8_t *source = &decoded_img[(height - 1 - y) * width * depth_];
-        memcpy(img->PixelAt(0, y), source, width * depth_);
+        const uint8_t *source = &decoded_img[(height - 1 - y) * width * depth];
+        memcpy(img->PixelAt(0, y), source, width * depth);
     }
 
     stbi_image_free(decoded_img);
@@ -297,7 +297,7 @@ bool GetImageInfo(epi::File *file, int *width, int *height, int *depth)
 
 //------------------------------------------------------------------------
 
-static void StbImageEpiFileWrite(void *context, void *data, int size)
+static void STBImageEPIFileWrite(void *context, void *data, int size)
 {
     EPI_ASSERT(context && data && size);
     epi::File *dest = (epi::File *)context;
@@ -314,7 +314,7 @@ bool SaveJPEG(std::string filename, ImageData *image)
         return false;
 
     // zero means failure here
-    int result = stbi_write_jpg_to_func(StbImageEpiFileWrite, dest, image->used_width_, image->used_height_,
+    int result = stbi_write_jpg_to_func(STBImageEPIFileWrite, dest, image->used_width_, image->used_height_,
                                         image->depth_, image->pixels_, 95);
 
     delete dest;
@@ -338,7 +338,7 @@ bool SavePNG(std::string filename, ImageData *image)
         return false;
 
     // zero means failure here
-    int result = stbi_write_png_to_func(StbImageEpiFileWrite, dest, image->used_width_, image->used_height_,
+    int result = stbi_write_png_to_func(STBImageEPIFileWrite, dest, image->used_width_, image->used_height_,
                                         image->depth_, image->pixels_, 0);
 
     delete dest;

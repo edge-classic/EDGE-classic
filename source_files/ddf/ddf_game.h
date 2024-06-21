@@ -192,6 +192,10 @@ class GameDefinition
     // Episode description, a reference to languages.ldf
     std::string description_;
 
+    // Define a default damage flash color (mostly to remap Chex Quest
+    // from red->green) - Dasho
+    RGBAColor default_damage_flash_;
+
   private:
     // disable copy construct and assignment operator
     explicit GameDefinition(GameDefinition &rhs)

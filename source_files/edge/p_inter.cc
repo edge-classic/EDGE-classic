@@ -32,6 +32,7 @@
 #include "e_input.h"
 #include "epi.h"
 #include "epi_str_util.h"
+#include "g_game.h"
 #include "m_random.h"
 #include "p_local.h"
 #include "r_misc.h"
@@ -1564,10 +1565,10 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
             // current processed damage
             if (damage >= player->damage_count_)
             {
-                if (damtype)
+                if (damtype && damtype->damage_flash_colour_ != kRGBANoValue)
                     player->last_damage_colour_ = damtype->damage_flash_colour_;
                 else
-                    player->last_damage_colour_ = SG_RED_RGBA32;
+                    player->last_damage_colour_ = current_map->episode_->default_damage_flash_;
             }
 
             player->damage_count_ += (int)HMM_MAX(damage, kDamageAddMinimum);

@@ -241,9 +241,6 @@ static void InstallSpriteLump(SpriteDefinition *def, int lump, const char *lumpn
 static void InstallSpritePack(SpriteDefinition *def, PackFile *pack, std::string spritebase, std::string packname,
                               int pos, uint8_t flip)
 {
-    if (epi::StringPrefixCompare(spritebase, "DOGS") == 0)
-        LogPrint("dawg\n");
-
     SpriteFrame *frame = WhatFrame(def, spritebase.c_str(), pos);
     if (!frame)
         return;

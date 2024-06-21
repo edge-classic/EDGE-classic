@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "ddf_local.h"
+#include "sokol_color.h"
 
 GameDefinitionContainer gamedefs;
 
@@ -59,6 +60,7 @@ static const DDFCommandList gamedef_commands[] = {
     DDF_FIELD("LIGHTING", dummy_gamedef, lighting_, DDFGameGetLighting),
     DDF_FIELD("DESCRIPTION", dummy_gamedef, description_, DDFMainGetString),
     DDF_FIELD("NO_SKILL_MENU", dummy_gamedef, no_skill_menu_, DDFMainGetBoolean),
+    DDF_FIELD("DEFAULT_DAMAGE_FLASH", dummy_gamedef, default_damage_flash_, DDFMainGetRGB),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -721,6 +723,7 @@ void GameDefinition::CopyDetail(GameDefinition &src)
     special_music_ = src.special_music_;
     lighting_      = src.lighting_;
     description_   = src.description_;
+    default_damage_flash_ = src.default_damage_flash_;
 }
 
 //
@@ -770,6 +773,7 @@ void GameDefinition::Default()
     special_music_ = 0;
     lighting_      = kLightingModelDoomish;
     description_.clear();
+    default_damage_flash_ = SG_RED_RGBA32;
 }
 
 // --> game definition container class

@@ -1811,7 +1811,7 @@ void DamageClass::Default(DamageClassDefault def)
         damage_unless_       = nullptr;
         damage_if_           = nullptr;
         grounded_monsters_   = false;
-        damage_flash_colour_ = SG_RED_RGBA32;
+        damage_flash_colour_ = kRGBANoValue;
         all_players_         = false;
         break;
     }
@@ -1827,7 +1827,7 @@ void DamageClass::Default(DamageClassDefault def)
         damage_unless_       = nullptr;
         damage_if_           = nullptr;
         grounded_monsters_   = false;
-        damage_flash_colour_ = SG_RED_RGBA32;
+        damage_flash_colour_ = kRGBANoValue;
         all_players_         = false;
         break;
     }
@@ -1845,7 +1845,7 @@ void DamageClass::Default(DamageClassDefault def)
         damage_unless_       = nullptr;
         damage_if_           = nullptr;
         grounded_monsters_   = false;
-        damage_flash_colour_ = SG_RED_RGBA32;
+        damage_flash_colour_ = kRGBANoValue;
         all_players_         = false;
         break;
     }

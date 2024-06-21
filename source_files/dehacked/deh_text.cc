@@ -466,7 +466,8 @@ void text_strings::Shutdown()
 
 bool text_strings::ReplaceString(const char *before, const char *after)
 {
-    EPI_ASSERT(after[0]);
+    if (!after[0])
+        return false;
 
     for (int i = 0; lang_list[i].orig_text; i++)
     {
@@ -490,7 +491,8 @@ bool text_strings::ReplaceString(const char *before, const char *after)
 
 bool text_strings::ReplaceBexString(const char *bex_name, const char *after)
 {
-    EPI_ASSERT(after[0]);
+    if (!after[0])
+        return false;
 
     for (int i = 0; lang_list[i].orig_text; i++)
     {

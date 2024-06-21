@@ -141,8 +141,31 @@ Shareware = "this is Chex(R) Quest. look for\n"
   "press a key.";
 ZombiemanName = "FLEMOIDUS COMMONUS";
 ShotgunGuyName = "FLEMOIDUS BIPEDICUS";
-DemonName = "FLEMOIDUS BIPEDICUS WITH ARMOR";
+DemonName = "FLEMOIDUS CYCLOPTIS";
+ImpName = "FLEMOIDUS BIPEDICUS WITH ARMOR";
 BaronOfHellName = "THE FLEMBRANE";
+
+OB_SECTOR   = "%o sinks into some slime.";
+OB_SUICIDE  = "%o prefers the flemoid dimension.";
+OB_LAVA     = "%o got stuck in quick-slime.";
+
+OB_Baron      = "%o was defeated by the Flembrane.";
+OB_BaronClaw  = "%o was defeated by the Flembrane.";
+OB_Demon      = "%o was slimed by a cycloptis.";
+OB_Dog        = "%o was gooed by a friendly larva.";
+OB_Imp        = "%o was slimed by an armored bipedicus.";
+OB_ImpClaw    = "%o was slimed by an armored bipedicus.";
+OB_ShotgunGuy = "%o was slimed by a bipedicus.";
+OB_Zombie     = "%o was slimed by a flemoid.";
+
+OB_Chaingun  = "%o was rapid zorched by %k.";
+OB_Pistol    = "%o was hit by %k's mini-zorcher.";
+OB_Missile   = "%o was zorched by %k's propulsor.";
+OB_Plasma    = "%o was phase zorched by %k.";
+OB_Punch     = "%o was spoon fed by %k.";
+OB_Saw       = "%o was thouroughly mixed with %k's bootspork.";
+OB_Shotgun   = "%o was hit by %k's large-zorcher.";
+OB_BFG       = "%o fell prey to %k's LAZ device.";
 
 idbehold5 = "digitalcafe";
 idbehold3 = "marybregi";

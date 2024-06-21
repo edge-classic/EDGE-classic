@@ -407,7 +407,6 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
     rim->source_.graphic.is_patch     = is_patch;
     rim->source_.graphic.user_defined = false; // This should only get set to true with DDFIMAGE specified DOOM
                                                // format images
-    // rim->source_palette_ = GetPaletteForLump(lump);
     rim->source_palette_ = -1;
 
     if (replaces)
@@ -967,12 +966,11 @@ const Image *CreatePackSprite(std::string packname, PackFile *pack, bool is_weap
     // adjust sprite offsets so that (0,0) is normal
     if (is_weapon)
     {
-        rim->offset_x_ += (320.0f / 2.0f - rim->actual_width_ / 2.0f); // loss of accuracy
+        rim->offset_x_ += (320.0f / 2.0f - rim->actual_width_ / 2.0f);
         rim->offset_y_ += (200.0f - 32.0f - rim->actual_height_);
     }
     else
     {
-        // rim->offset_x_ -= rim->actual_width_ / 2;   // loss of accuracy
         rim->offset_x_ -= ((float)rim->actual_width_) / 2.0f; // Lobo 2023: dancing eye fix
         rim->offset_y_ -= rim->actual_height_;
     }

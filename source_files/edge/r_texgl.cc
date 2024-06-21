@@ -88,7 +88,7 @@ ImageData *RGBFromPalettised(ImageData *src, const uint8_t *palette, int opacity
         for (int y = 0; y < src->height_; y++)
             for (int x = 0; x < src->width_; x++)
             {
-                uint8_t src_pix = src->PixelAt(x, y)[0];
+                uint8_t src_pix = *src->PixelAt(x, y);
 
                 uint8_t *dest_pix = dest->PixelAt(x, y);
 

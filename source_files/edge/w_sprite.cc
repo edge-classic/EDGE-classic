@@ -229,11 +229,7 @@ static void InstallSpriteLump(SpriteDefinition *def, int lump, const char *lumpn
     EPI_ASSERT(0 <= rot && rot < 16);
 
     if (frame->images_[rot])
-    {
-        // LogWarning("Sprite %s has two lumps mapped to it (frame %c).\n",
-        // lumpname, lumpname[pos]);
         return;
-    }
 
     frame->images_[rot] = CreateSprite(lumpname, lump, frame->is_weapon_);
     frame->flip_[rot] = flip;
@@ -245,6 +241,9 @@ static void InstallSpriteLump(SpriteDefinition *def, int lump, const char *lumpn
 static void InstallSpritePack(SpriteDefinition *def, PackFile *pack, std::string spritebase, std::string packname,
                               int pos, uint8_t flip)
 {
+    if (epi::StringPrefixCompare(spritebase, "DOGS") == 0)
+        LogPrint("dawg\n");
+
     SpriteFrame *frame = WhatFrame(def, spritebase.c_str(), pos);
     if (!frame)
         return;
@@ -260,11 +259,7 @@ static void InstallSpritePack(SpriteDefinition *def, PackFile *pack, std::string
     EPI_ASSERT(0 <= rot && rot < 16);
 
     if (frame->images_[rot])
-    {
-        // LogWarning("Sprite %s has two lumps mapped to it (frame %c).\n",
-        // lumpname, lumpname[pos]);
         return;
-    }
 
     frame->images_[rot] = CreatePackSprite(packname, pack, frame->is_weapon_);
     frame->flip_[rot] = flip;
@@ -288,11 +283,7 @@ static void InstallSpriteImage(SpriteDefinition *def, const Image *img, const ch
         return;
 
     if (frame->images_[rot])
-    {
-        // LogWarning("Sprite %s has two images mapped to it (frame %c)\n",
-        // img_name, img_name[pos]);
         return;
-    }
 
     frame->images_[rot] = img;
     frame->flip_[rot]   = flip;

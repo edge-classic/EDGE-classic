@@ -292,39 +292,6 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
             f = LoadLumpAsFile(lump);
 
         ImageData *img = LoadImageData(f);
-        int length = f->GetLength();
-
-        // determine format and size information
-        uint8_t header[32];
-        memset(header, 255, sizeof(header));
-        int  header_len = HMM_MIN((int)sizeof(header), length);
-        auto fmt        = DetectImageFormat(header, header_len, length);
-
-        // PNG grAb check
-        if (fmt == kImagePNG)
-        {
-            f->Seek(0, epi::File::kSeekpointStart);
-            uint8_t *raw_image = f->LoadIntoMemory();
-            int i = 0;
-            int j = 0;
-            for (; i < length && j < 5; i++)
-            {
-                static uint8_t pgs[5] = { 0x08, 'g', 'r', 'A', 'b' };
-                if (raw_image[i] == pgs[j])
-                    j++;
-                else
-                    j = 0;
-            }
-            if (j == 5)
-            {
-                memcpy(&rim->offset_x_, &raw_image[i], 4);
-                i+=4;
-                memcpy(&rim->offset_y_, &raw_image[i], 4);
-                rim->offset_x_ = AlignedBigEndianS32(rim->offset_x_);
-                rim->offset_x_ = AlignedBigEndianS32(rim->offset_x_);
-            }
-            delete[] raw_image;
-        }
 
         // close it
         delete f;

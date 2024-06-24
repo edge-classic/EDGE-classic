@@ -515,7 +515,7 @@ static void COAL_SetPlayerSpriteDeferred(Player *p, int position, int stnum)
     psp->next_state = (states + stnum);
 }
 
-// player.weapon_state()
+// player.weapon_state(weapon name, weapon state)
 //
 static void PL_weapon_state(coal::VM *vm, int argc)
 {

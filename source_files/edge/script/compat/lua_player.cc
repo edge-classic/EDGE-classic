@@ -2274,16 +2274,17 @@ static int Sector_info(lua_State *L)
     HMM_Vec3  rgb;
     RGBAColor tempcolor = ui_player_who->map_object_->subsector_->sector->properties.fog_color;
 
-    rgb.X = -1;
-    rgb.Y = -1;
-    rgb.Z = -1;
+
+    rgb.R = -1;
+    rgb.G = -1;
+    rgb.B = -1;
     if (tempcolor != 0)
     {
         if (tempcolor != kRGBANoValue)
         {
-            rgb.X = epi::GetRGBARed(tempcolor);
-            rgb.Y = epi::GetRGBAGreen(tempcolor);
-            rgb.Z = epi::GetRGBABlue(tempcolor);
+            rgb.R = epi::GetRGBARed(tempcolor);
+            rgb.G = epi::GetRGBAGreen(tempcolor);
+            rgb.B = epi::GetRGBABlue(tempcolor);
         }
     }
 

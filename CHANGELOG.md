@@ -14,6 +14,9 @@ New Features
     - sector.info()
 - UDMF: Linedef 'alpha' field now supported; governs translucency of associated sidedef surfaces
 - UDMF: Sector 'alphafloor' and 'alphaceiling' fields now supported; governs translucency of associated planes
+- GAMES.DDF: New command 
+	- DEFAULT_DAMAGE_FLASH = (hex) which will set damage flashes from all sources to this color unless specified otherwise in an individual DDFATK entry.
+
 
 
 General Improvements/Changes

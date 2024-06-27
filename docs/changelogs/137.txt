@@ -22,9 +22,9 @@ New Features
       - STRETCH: Will match the movie's dimensions to the display without preserving aspect ratio
   - DDFGAME: TITLE_MOVIE=\<movie definition\> command added
     - Movies will always play before any defined TITLE_GRAPHIC entry in the same definition
-  - DDFLEVL: PRE.MOVIE=\<movie definition\> and POST.MOVIE=\<movie definition\> commands added
+  - DDFLEVL: PRE.MOVIE=\<movie definition\> and END.MOVIE=\<movie definition\> commands added
     - Text will always be printed first, followed by movie playback, followed by any defined graphics
-      for a DDFLEVL PRE/POST entry
+      for a DDFLEVL PRE/END entry
   - RSCRIPT: PLAY_MOVIE \<movie definition\> command added
   - `skip_intros` CVAR added to disable movies that play as part of a title sequence if desired
     - Default is 0 (off)

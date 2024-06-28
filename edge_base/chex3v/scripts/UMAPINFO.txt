@@ -1,0 +1,223 @@
+MAP E1M1
+{
+	label = "CQ1M0"
+	levelname = "Intro"
+	levelpic = "WILV00"
+	next = "E1M9"
+	nextsecret = "E1M9"
+	partime = 15
+	episode = clear
+	episode = "M_EPI1", "Rescue on Bazoik", "r"
+}
+
+MAP E1M9
+{
+	label = "CQ1M1"
+	levelname = "Landing Zone"
+	levelpic = "WILV08"
+	next = "E1M4"
+	nextsecret = "E1M4"
+	partime = 110
+}
+
+MAP E1M4
+{
+	label = "CQ1M2"
+	levelname = "Storage Facility"
+	levelpic = "WILV03"
+	partime = 180
+	next = "E1M5"
+	nextsecret = "E1M5"
+}
+
+MAP E1M5
+{
+	label = "CQ1M3"
+	levelname = "Laboratory"
+	levelpic = "WILV04"
+	partime = 200
+	next = "E1M6"
+	nextsecret = "E1M6"
+}
+
+MAP E1M6
+{
+	label = "CQ1M4"
+	levelname = "Arboretum"
+	levelpic = "WILV05"
+	skytexture = "SKY1B"
+	partime = 240
+	next = "E1M7"
+	nextsecret = "E1M7"
+}
+
+MAP E1M7
+{
+	label = "CQ1M5"
+	levelname = "Caverns of Bazoik"
+	levelpic = "WILV06"
+	partime = 300
+	next = "E1M8"
+	nextsecret = "E1M8"
+}
+
+MAP E1M8
+{
+	label = "CQ1M6"
+	levelname = "Ending"
+	levelpic = "WILV07"
+	partime = 15
+	endpic = "ENDPIC"
+	intertext = "After sending the monstrous Flembrane
+back to his own dimension, you free the
+captives. Yet flemoids are everywhere!
+You and the captives make a break for
+your spaceship. The flemoids slime your
+ship, but you narrowly escape into orbit.
+During the return you are congratulated
+for the daring rescue, but you issue a
+warning...
+We haven't seen the last of the Flemoids.
+
+Unfortunately you are correct. For as you
+return home, you find that the Flemoids
+have somehow followed you here. Prepare
+for Chex Quest 2: Terror in Chex City!"
+	interbackdrop = "FLOOR4_8"
+	intermusic = "D_VICTOR"
+}
+
+MAP E2M1
+{
+	label = "CQ2M1"
+	levelname = "Spaceport"
+	levelpic = "WILV10"
+	next = "E2M9"
+	nextsecret = "E2M9"
+	partime = 240
+	episode = "M_EPI2", "Terror in Chex City", "t"
+}
+
+MAP E2M9
+{
+	label = "CQ2M2"
+	levelname = "Cinema"
+	levelpic = "WILV18"
+	next = "E2M6"
+	nextsecret = "E2M6"
+	partime = 200
+}
+
+MAP E2M6
+{
+	label = "CQ2M3"
+	levelname = "Chex Museum"
+	levelpic = "WILV15"
+	partime = 240
+	next = "E2M7"
+	nextsecret = "E2M7"
+}
+
+MAP E2M7
+{
+	label = "CQ2M4"
+	levelname = "City Streets"
+	levelpic = "WILV16"
+	partime = 360
+	next = "E2M8"
+	nextsecret = "E2M8"
+}
+
+MAP E2M8
+{
+	label = "CQ2M5"
+	levelname = "Sewer System"
+	levelpic = "WILV17"
+	partime = 340
+	endpic = "VICTORY2"
+	intertext = "You zorch the remaining flemoids who had
+gathered in the sewers. Chex City has been
+saved. It seems that the Flemoid threat
+has finally ended.
+
+
+Ten years pass in peace and prosperity.
+But the Flemoids were not defeated and
+their desire to control the nutritionally
+rich cereal dimension has not diminished.
+They have gathered all their forces, opened
+a gigantic inter-dimensional rift in space
+and now a great ball of slime is headed
+straight for the cereals' planet!
+
+Get ready for
+Chex Quest 3: Invasion!"
+	interbackdrop = "SFLR6_1"
+	intermusic = "D_VICTOR"
+}
+
+MAP E3M1
+{
+	label = "CQ3M1"
+	levelname = "Central Command"
+	levelpic = "WILV20"
+	partime = 240
+	episode = "M_EPI3", "Invasion!", "i"
+	next = "E3M2"
+	nextsecret = "E3M2"
+}
+
+MAP E3M2
+{
+	label = "CQ3M2"
+	levelname = "United Cereals"
+	levelpic = "WILV21"
+	next = "E3M9"
+	nextsecret = "E3M9"
+	partime = 300
+}
+
+MAP E3M9
+{
+	label = "CQ3M3"
+	levelname = "Villa Chex"
+	levelpic = "WILV28"
+	next = "E3M7"
+	nextsecret = "E3M7"
+	partime = 360
+}
+
+MAP E3M7
+{
+	label = "CQ3M4"
+	levelname = "Provincial Park"
+	levelpic = "WILV26"
+	partime = 360
+	next = "E3M8"
+	nextsecret = "E3M8"
+}
+
+MAP E3M8
+{
+	label = "CQ3M5"
+	levelname = "Meteor Spaceship"
+	levelpic = "WILV27"
+	partime = 420
+	endbunny = true
+	intertext = "With one final blast, you zorch Lord
+Snotfolus back to his own dimension!
+Against all the odds you have single-
+handedly foiled the invasion!
+
+You truly hope that the Flemoids have
+finally learned their lesson and will
+never again return to the cereal
+dimension.
+
+
+
+But if they do you know you will be
+ready for them!"
+	interbackdrop = "MFLR8_4"
+	intermusic = "D_VICTOR"
+}

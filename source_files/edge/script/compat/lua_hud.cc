@@ -169,17 +169,13 @@ static int HD_text_font(lua_State *L)
     const char *font_name = luaL_checkstring(L, 1);
 
     FontDefinition *DEF = fontdefs.Lookup(font_name);
-    EPI_ASSERT(DEF);
-
     if (!DEF)
-        FatalError("hud.text_font: Bad font name: %s\n", font_name);
-
+        return 0;
+        
     Font *font = hud_fonts.Lookup(DEF);
-    EPI_ASSERT(font);
-
     if (!font)
-        FatalError("hud.text_font: Bad font name: %s\n", font_name);
-
+        return 0;
+        
     HUDSetFont(font);
 
     return 0;

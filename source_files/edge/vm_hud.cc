@@ -201,21 +201,19 @@ static void HD_text_font(coal::VM *vm, int argc)
 {
     (void)argc;
 
+    bool ErrorHit = false;
     const char *font_name = vm->AccessParamString(0);
 
     FontDefinition *DEF = fontdefs.Lookup(font_name);
-    EPI_ASSERT(DEF);
-
     if (!DEF)
-        FatalError("hud.text_font: Bad font name: %s\n", font_name);
+        ErrorHit = true;
 
     Font *font = hud_fonts.Lookup(DEF);
-    EPI_ASSERT(font);
-
     if (!font)
-        FatalError("hud.text_font: Bad font name: %s\n", font_name);
+        ErrorHit = true;
 
-    HUDSetFont(font);
+    if (ErrorHit == false)
+        HUDSetFont(font);
 }
 
 // hud.text_color(rgb)

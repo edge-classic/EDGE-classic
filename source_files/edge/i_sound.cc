@@ -34,7 +34,7 @@
 #include "s_sound.h"
 #include "w_wad.h"
 
-EDGE_DEFINE_CONSOLE_VARIABLE(skip_audio_lock, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(skip_audio_lock, "1", kConsoleVariableFlagArchive)
 
 // If true, sound system is off/not working. Changed to false if sound init ok.
 bool no_sound = false;

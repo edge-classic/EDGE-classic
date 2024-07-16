@@ -43,6 +43,7 @@ General Improvements/Changes
   - Remove support for absolute paths and path traversal with '..' for the exec, ls/dir, and cat/type console commands
   - Remove support for path traversal with '..' when searching for or opening pack files
   - FIRST and LAST fields in anims.ddf now work with TX textures
+  - Autoswitch to a new weapon even if the clip is not full
 
 
 Bugs fixed

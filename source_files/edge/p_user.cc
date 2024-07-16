@@ -1110,12 +1110,14 @@ bool AddWeapon(Player *player, WeaponDefinition *info, int *index)
     player->weapons_[slot].flags        = kPlayerWeaponNoFlag;
     player->weapons_[slot].clip_size[0] = 0;
     player->weapons_[slot].clip_size[1] = 0;
+    player->weapons_[slot].clip_size[2] = 0;
+    player->weapons_[slot].clip_size[3] = 0;
     player->weapons_[slot].model_skin   = info->model_skin_;
 
     UpdateAvailWeapons(player);
 
     // for NoAmmo+Clip weapons, always begin with a full clip
-    for (int ATK = 0; ATK < 2; ATK++)
+    for (int ATK = 0; ATK < 4; ATK++)
     {
         if (info->clip_size_[ATK] > 0 && info->ammo_[ATK] == kAmmunitionTypeNoAmmo)
             player->weapons_[slot].clip_size[ATK] = info->clip_size_[ATK];

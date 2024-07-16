@@ -755,11 +755,17 @@ bool TryFillNewWeapon(Player *p, int idx, AmmunitionType ammo, int *qty)
 
         EPI_ASSERT(qty);
 
+        // New weapon has at least a full clip and (maybe) a bit extra
         if (info->clip_size_[ATK] <= *qty)
         {
             p->weapons_[idx].clip_size[ATK] = info->clip_size_[ATK];
             *qty -= info->clip_size_[ATK];
-
+            result = true;
+        }
+        else //New weapon has only a partially full clip
+        {
+            p->weapons_[idx].clip_size[ATK] = *qty;
+            *qty = 0;
             result = true;
         }
     }

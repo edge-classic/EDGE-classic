@@ -1229,16 +1229,9 @@ std::string BuildXGLNodesForWAD(DataFile *df)
 
         ajbsp::ResetInfo();
 
-        epi::File *mem_wad    = nullptr;
-        uint8_t   *raw_wad    = nullptr;
-        int        raw_length = 0;
-
-        if (df->kind_ == kFileKindPackWAD)
+        if ((df->kind_ == kFileKindPackWAD || df->kind_ == kFileKindIPackWAD))
         {
-            mem_wad    = OpenFileFromPack(df->name_);
-            raw_length = mem_wad->GetLength();
-            raw_wad    = mem_wad->LoadIntoMemory();
-            ajbsp::OpenMem(df->name_, raw_wad, raw_length);
+            ajbsp::OpenMem(df->name_, df->file_);
         }
         else
             ajbsp::OpenWad(df->name_);
@@ -1250,12 +1243,6 @@ std::string BuildXGLNodesForWAD(DataFile *df)
 
         ajbsp::FinishXWA();
         ajbsp::CloseWad();
-
-        if (df->kind_ == kFileKindPackWAD)
-        {
-            delete[] raw_wad;
-            delete mem_wad;
-        }
 
         LogDebug("AJ_BuildNodes: FINISHED\n");
 

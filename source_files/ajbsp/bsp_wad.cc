@@ -206,7 +206,7 @@ bool Lump::Finish()
 //  WAD Reading Interface
 //------------------------------------------------------------------------
 
-WadFile::WadFile(std::string name, char mode, FILE *file_pointer, epi::MemFile *memory_file_pointer)
+WadFile::WadFile(std::string name, char mode, FILE *file_pointer, epi::File *memory_file_pointer)
     : mode_(mode), file_pointer_(file_pointer), memory_file_pointer_(memory_file_pointer), kind_('P'), total_size_(0),
       directory_(), directory_start_(0), directory_count_(0), levels_(), patches_(), sprites_(), flats_(),
       tx_textures_(), begun_write_(false), insert_point_(-1)
@@ -220,8 +220,11 @@ WadFile::~WadFile()
 
     if (file_pointer_)
         fclose(file_pointer_);
-    if (memory_file_pointer_)
-        delete memory_file_pointer_;
+    file_pointer_ = nullptr;
+
+    // We do not delete this; it was passed to AJBSP and is retained for
+    // the life of the program
+    memory_file_pointer_ = nullptr;
 
     // free the directory_
     for (int k = 0; k < NumLumps(); k++)
@@ -290,23 +293,15 @@ retry:
     return w;
 }
 
-WadFile *WadFile::OpenMem(std::string filename, uint8_t *raw_wad, int raw_length)
+WadFile *WadFile::OpenMem(std::string filename, epi::File *memfile)
 {
-    EPI_ASSERT(raw_wad);
+    EPI_ASSERT(memfile);
 
     FileMessage("Opening WAD from memory: %s\n", filename.c_str());
 
-    epi::MemFile *memory_file_pointer_ = new epi::MemFile(raw_wad, raw_length, false);
+    WadFile *w = new WadFile(filename, 'r', nullptr, memfile);
 
-    if (!memory_file_pointer_)
-    {
-        FileMessage("Open memfile failed: %s\n", filename.c_str());
-        return nullptr;
-    }
-
-    WadFile *w = new WadFile(filename, 'r', nullptr, memory_file_pointer_);
-
-    w->total_size_ = raw_length;
+    w->total_size_ = memfile->GetLength();
 
     if (w->total_size_ < 0)
         FatalError("AJBSP: Nonsensical WAD size.\n");

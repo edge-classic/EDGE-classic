@@ -26,6 +26,7 @@
 
 #include "AlmostEquals.h"
 #include "epi.h"
+#include "epi_file.h"
 //
 // Node Build Information Structure
 //
@@ -65,7 +66,7 @@ void OpenWad(std::string filename);
 
 // attempt to open a wad from memory; only intended for the use
 // of WAD files inside archives
-void OpenMem(std::string filename, uint8_t *raw_wad, int raw_length);
+void OpenMem(std::string filename, epi::File *memfile);
 
 // close a previously opened wad.
 void CloseWad();

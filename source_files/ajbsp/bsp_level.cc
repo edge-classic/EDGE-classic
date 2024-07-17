@@ -1206,9 +1206,9 @@ void OpenWad(std::string filename)
         FatalError("AJBSP: Cannot open file: %s\n", filename.c_str());
 }
 
-void OpenMem(std::string filename, uint8_t *Rawdata, int Rawlength)
+void OpenMem(std::string filename, epi::File *memfile)
 {
-    cur_wad = WadFile::OpenMem(filename, Rawdata, Rawlength);
+    cur_wad = WadFile::OpenMem(filename, memfile);
     if (cur_wad == nullptr)
         FatalError("AJBSP: Cannot open file from memory: %s\n", filename.c_str());
 }

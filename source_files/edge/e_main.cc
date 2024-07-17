@@ -1328,10 +1328,9 @@ static void IdentifyVersion(void)
         iwad_dir_vector.push_back(s);
 
     // Should the IWAD directory not be set by now, then we
-    // use our standby option of the current directory.
+    // use our standby option of the home directory.
     if (iwad_dir.empty())
-        iwad_dir = "."; // should this be hardcoded to the game or home
-                        // directory instead? - Dasho
+        iwad_dir = home_directory;
 
     // Add DOOMWADPATH directories if they exist
     s.clear();
@@ -1520,6 +1519,28 @@ static void IdentifyVersion(void)
                     }
                 }
             }
+            // Check directories (only at top level of home/game directory)
+            if (ReadDirectory(fsd, location, "*.*"))
+            {
+                for (size_t j = 0; j < fsd.size(); j++)
+                {
+                    if (fsd[j].is_dir)
+                    {
+                        int test_score = CheckPackForGameFiles(fsd[j].name, kFileKindIFolder);
+                        if (test_score >= 0)
+                        {
+                            if (!game_paths.count(test_score))
+                            {
+                                game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, kFileKindIFolder));
+                                SDL_MessageBoxButtonData temp_button;
+                                temp_button.buttonid = test_score;
+                                temp_button.text     = game_checker[test_score].display_name;
+                                game_buttons.push_back(temp_button);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         // Separate check for DOOMWADPATH stuff if it exists - didn't want to
@@ -1577,6 +1598,27 @@ static void IdentifyVersion(void)
                                 if (!game_paths.count(test_score))
                                 {
                                     game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, kFileKindIPK));
+                                    SDL_MessageBoxButtonData temp_button;
+                                    temp_button.buttonid = test_score;
+                                    temp_button.text     = game_checker[test_score].display_name;
+                                    game_buttons.push_back(temp_button);
+                                }
+                            }
+                        }
+                    }
+                }
+                if (ReadDirectory(fsd, location, "*.*"))
+                {
+                    for (size_t j = 0; j < fsd.size(); j++)
+                    {
+                        if (fsd[j].is_dir)
+                        {
+                            int test_score = CheckPackForGameFiles(fsd[j].name, kFileKindIFolder);
+                            if (test_score >= 0)
+                            {
+                                if (!game_paths.count(test_score))
+                                {
+                                    game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, kFileKindIFolder));
                                     SDL_MessageBoxButtonData temp_button;
                                     temp_button.buttonid = test_score;
                                     temp_button.text     = game_checker[test_score].display_name;

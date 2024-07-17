@@ -121,7 +121,7 @@ class WadFile
 
     FILE *file_pointer_;
 
-    epi::MemFile *memory_file_pointer_;
+    epi::File *memory_file_pointer_;
 
     char kind_; // 'P' for PWAD, 'I' for IWAD
 
@@ -149,7 +149,7 @@ class WadFile
     int insert_point_;
 
     // constructor is private
-    WadFile(std::string name, char mode, FILE *file_pointer, epi::MemFile *memory_file_pointer);
+    WadFile(std::string name, char mode, FILE *file_pointer, epi::File *memory_file_pointer);
 
   public:
     ~WadFile();
@@ -166,7 +166,7 @@ class WadFile
     //
     static WadFile *Open(std::string filename, char mode = 'a');
 
-    static WadFile *OpenMem(std::string filename, uint8_t *raw_wad, int raw_length);
+    static WadFile *OpenMem(std::string filename, epi::File *memfile);
 
     bool IsReadOnly() const
     {

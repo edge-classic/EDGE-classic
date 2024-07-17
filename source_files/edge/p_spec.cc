@@ -1322,10 +1322,23 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special, int tag, 
             // Monsters don't trigger secrets
             if (line && (line->flags & kLineFlagSecret))
                 return false;
-
+            
             // Monster is not allowed to trigger lines
             if (thing->info_->hyper_flags_ & kHyperFlagNoTriggerLines)
-                return false;
+            {
+                //Except maybe teleporters
+                if (special->t_.teleport_)
+                {
+                    if (!(thing->info_->hyper_flags_ & kHyperFlagTriggerTeleports))
+                    {
+                        return false;  
+                    }
+                }
+                else
+                {
+                     return false;         
+                }
+            }
         }
         else
         {

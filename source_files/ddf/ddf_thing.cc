@@ -1552,6 +1552,7 @@ static DDFSpecialFlags hyper_specials[] = {
     {"DEHACKED_COMPAT", kHyperFlagDehackedCompatibility, 0},
     {"IMMOVABLE", kHyperFlagImmovable, 0},
     {"MUSIC_CHANGER", kHyperFlagMusicChanger, 0},
+    {"TRIGGER_TELEPORTS", kHyperFlagTriggerTeleports, 0}, // Lobo: Can always activate teleporters.
     {nullptr, 0, 0}};
 
 static DDFSpecialFlags mbf21_specials[] = {{"LOGRAV", kMBF21FlagLowGravity, 0}, {nullptr, 0, 0}};

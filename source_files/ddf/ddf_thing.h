@@ -234,6 +234,8 @@ enum HyperFlag
     // This flag is present because we cannot assume a thing is a
     // music changer just because it has an ID of 14100-14164
     kHyperFlagMusicChanger = (1 << 23),
+    // -Lobo- 2024/07/17: this thing can trigger teleports even if NO_TRIGGER_LINES is set
+    kHyperFlagTriggerTeleports = (1 << 24),
 };
 
 // MBF21 flags not already covered by extended/hyper flags

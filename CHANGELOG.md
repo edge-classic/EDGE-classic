@@ -16,6 +16,8 @@ New Features
 - UDMF: Sector 'alphafloor' and 'alphaceiling' fields now supported; governs translucency of associated planes
 - GAMES.DDF: New command 
 	- DEFAULT_DAMAGE_FLASH = (hex) which will set damage flashes from all sources to this color unless specified otherwise in an individual DDFATK entry.
+- THINGS.DDF: 
+  - New Special flag: TRIGGER_TELEPORTS which will allow this thing to use teleports even if NO_TRIGGER_LINES is set. i.e. you want a dog that cannot open a door, but can teleport for example.
 
 
 

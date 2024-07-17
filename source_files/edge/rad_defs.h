@@ -54,8 +54,6 @@ struct ScriptTip : public RADScriptParameter
 {
     ~ScriptTip()
     {
-        if (tip_text)
-            free((void *)tip_text);
         if (tip_ldf)
             free(tip_ldf);
         if (tip_graphic)
@@ -77,8 +75,34 @@ struct ScriptTip : public RADScriptParameter
     float gfx_scale = 0;
 };
 
-struct ScriptTipProperties
+struct ScriptTipProperties : public RADScriptParameter
 {
+    ScriptTipProperties()
+    {
+        slot_num = -1;
+        x_pos = -1;
+        y_pos = -1;
+        left_just = -1;
+        color_name = nullptr;
+        translucency = -1.0f;
+        time = 0;
+    }
+
+    ScriptTipProperties(int slot, float x, float y, int just, const char *color, float trans, int t)
+    {
+        slot_num = slot;
+        x_pos = x;
+        y_pos = y;
+        left_just = just;
+        color_name = color;
+        translucency = trans;
+        time = t;
+    }
+
+    ~ScriptTipProperties()
+    {
+    }
+
     // new slot number, or < 0 for no change.
     int slot_num = 0;
 
@@ -325,8 +349,6 @@ struct ScriptFogSectorParameter : public RADScriptParameter
 {
     ~ScriptFogSectorParameter()
     {
-        if (colmap_color)
-            free((void *)colmap_color);
     }
 
     // tag to apply to
@@ -454,10 +476,6 @@ struct ScriptThingEventParameter : public RADScriptParameter
 {
     ~ScriptThingEventParameter()
     {
-        if (thing_name)
-            free((void *)thing_name);
-        if (label)
-            free((void *)label);
     }
 
     // DDF type name of thing to cause the event.  If nullptr, then the
@@ -476,10 +494,6 @@ struct ScriptWeaponEventParameter : public RADScriptParameter
 {
     ~ScriptWeaponEventParameter()
     {
-        if (weapon_name)
-            free((void *)weapon_name);
-        if (label)
-            free((void *)label);
     }
 
     // DDF type name of weapon to cause the event.
@@ -494,10 +508,6 @@ struct ScriptWeaponReplaceParameter : public RADScriptParameter
 {
     ~ScriptWeaponReplaceParameter()
     {
-        if (old_weapon)
-            free((void *)old_weapon);
-        if (new_weapon)
-            free((void *)new_weapon);
     }
 
     const char *old_weapon = nullptr;
@@ -508,10 +518,6 @@ struct ScriptThingReplaceParameter : public RADScriptParameter
 {
     ~ScriptThingReplaceParameter()
     {
-        if (old_thing_name)
-            free((void *)old_thing_name);
-        if (new_thing_name)
-            free((void *)new_thing_name);
     }
 
     const char *old_thing_name = nullptr;
@@ -605,11 +611,6 @@ struct ScriptWaitUntilDeadParameter : public RADScriptParameter
 {
     ~ScriptWaitUntilDeadParameter()
     {
-        for (int n = 0; n < 10; n++)
-        {
-            if (mon_names[n])
-                free((void *)mon_names[n]);
-        }
     }
 
     // tag number to give the monsters which we'll wait on

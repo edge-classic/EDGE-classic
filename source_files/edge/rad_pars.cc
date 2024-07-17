@@ -77,9 +77,6 @@ static char      *this_map = nullptr;
 static int   pending_wait_tics = 0;
 static char *pending_label     = nullptr;
 
-// Default tip properties (position, colour, etc)
-static constexpr ScriptTipProperties default_tip_properties = {-1, -1, -1, -1, nullptr, -1.0f, 0};
-
 void ScriptError(const char *err, ...)
 {
     va_list argptr;
@@ -418,6 +415,7 @@ static void ClearOneScript(RADScript *scr)
         scr->boss_trig              = cur->next;
 
         delete cur;
+        cur = nullptr;
     }
 
     while (scr->height_trig)
@@ -426,6 +424,7 @@ static void ClearOneScript(RADScript *scr)
         scr->height_trig             = cur->next;
 
         delete cur;
+        cur = nullptr;
     }
 
     // free all states
@@ -438,9 +437,11 @@ static void ClearOneScript(RADScript *scr)
         {
             RADScriptParameter *param_pointer = (RADScriptParameter *)cur->param;
             delete param_pointer;
+            cur->param = nullptr;
         }
 
         delete cur;
+        cur = nullptr;
     }
 }
 
@@ -494,6 +495,8 @@ static void ClearAllScripts(void)
         ClearOneScript(scr);
 
         delete scr;
+
+        scr = nullptr;
     }
 }
 
@@ -1341,7 +1344,6 @@ static void ScriptParseTipSlot(std::vector<const char *> &pars)
     ScriptTipProperties *tp;
 
     tp    = new ScriptTipProperties;
-    tp[0] = default_tip_properties;
 
     ScriptCheckForInt(pars[1], &tp->slot_num);
 
@@ -1361,7 +1363,6 @@ static void ScriptParseTipPos(std::vector<const char *> &pars)
     ScriptTipProperties *tp;
 
     tp    = new ScriptTipProperties;
-    tp[0] = default_tip_properties;
 
     ScriptCheckForPercentAny(pars[1], &tp->x_pos);
     ScriptCheckForPercentAny(pars[2], &tp->y_pos);
@@ -1380,7 +1381,6 @@ static void ScriptParseTipColour(std::vector<const char *> &pars)
     ScriptTipProperties *tp;
 
     tp    = new ScriptTipProperties;
-    tp[0] = default_tip_properties;
 
     tp->color_name = epi::CStringDuplicate(pars[1]);
 
@@ -1398,7 +1398,6 @@ static void ScriptParseTipTrans(std::vector<const char *> &pars)
     ScriptTipProperties *tp;
 
     tp    = new ScriptTipProperties;
-    tp[0] = default_tip_properties;
 
     ScriptCheckForPercent(pars[1], &tp->translucency);
 
@@ -1415,7 +1414,6 @@ static void ScriptParseTipAlign(std::vector<const char *> &pars)
     ScriptTipProperties *tp;
 
     tp    = new ScriptTipProperties;
-    tp[0] = default_tip_properties;
 
     if (DDFCompareName(pars[1], "CENTER") == 0 || DDFCompareName(pars[1], "CENTRE") == 0)
     {

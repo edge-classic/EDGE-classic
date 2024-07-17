@@ -419,6 +419,10 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
     FinishUnitBatch();
 
     glDisable(GL_SCISSOR_TEST);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_ALPHA_TEST);
+    glDisable(GL_BLEND);
+    glAlphaFunc(GL_GREATER, 0);
 }
 
 static const RGBAColor crosshair_colors[8] = {

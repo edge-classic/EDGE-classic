@@ -353,20 +353,15 @@ void ScriptEnableByTag(MapObject *actor, uint32_t tag, bool disable, RADScriptTa
     for (trig = active_triggers; trig; trig = trig->next)
     {
         if (trig->info->tag[tagtype] == tag)
-            break;
+        {
+            if (disable)
+                trig->disabled = true;
+            else
+                trig->disabled = false;
+        }
     }
 
-    // were there any ?
-    if (!trig)
-        return;
 
-    for (; trig; trig = trig->tag_next)
-    {
-        if (disable)
-            trig->disabled = true;
-        else
-            trig->disabled = false;
-    }
 }
 
 //
@@ -383,20 +378,15 @@ void ScriptEnableByTag(MapObject *actor, const char *name, bool disable)
     for (trig = active_triggers; trig; trig = trig->next)
     {
         if (trig->info->tag[kTriggerTagHash] == tag)
-            break;
+        {
+            if (disable)
+                trig->disabled = true;
+            else
+                trig->disabled = false;  
+        }
     }
 
-    // were there any ?
-    if (!trig)
-        return;
-
-    for (; trig; trig = trig->tag_next)
-    {
-        if (disable)
-            trig->disabled = true;
-        else
-            trig->disabled = false;
-    }
+    
 }
 
 //
@@ -413,26 +403,14 @@ bool CheckActiveScriptByTag(MapObject *actor, const char *name)
     for (trig = active_triggers; trig; trig = trig->next)
     {
         if (trig->info->tag[1] == tag)
-            break;
+        {
+            if (trig->disabled == false)
+                return true;
+        }
     }
 
-    // were there any ?
-    if (!trig)
-        return false;
-
-    if (trig->disabled == false)
-        return true;
-
     return false;
-    /*
-        for (; trig; trig=trig->tag_next)
-        {
-            if (disable)
-                trig->disabled = true;
-            else
-                trig->disabled = false;
-        }
-    */
+
 }
 
 bool ScriptRadiusCheck(MapObject *mo, RADScript *r)

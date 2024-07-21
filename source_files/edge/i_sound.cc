@@ -34,8 +34,6 @@
 #include "s_sound.h"
 #include "w_wad.h"
 
-EDGE_DEFINE_CONSOLE_VARIABLE(skip_audio_lock, "1", kConsoleVariableFlagArchive)
-
 // If true, sound system is off/not working. Changed to false if sound init ok.
 bool no_sound = false;
 
@@ -201,8 +199,6 @@ void AudioShutdown(void)
 
 void LockAudio(void)
 {
-    if (skip_audio_lock.d_)
-        return;
     if (audio_is_locked)
     {
         UnlockAudio();
@@ -215,8 +211,6 @@ void LockAudio(void)
 
 void UnlockAudio(void)
 {
-    if (skip_audio_lock.d_)
-        return;
     if (audio_is_locked)
     {
         SDL_UnlockAudioDevice(current_sound_device);

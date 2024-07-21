@@ -896,7 +896,9 @@ void SpawnScriptTriggers(const char *map_name)
         trig->tip_slot     = 0;
         trig->wud_tag = trig->wud_count = 0;
 
-        GroupTriggerTags(trig);
+    //Lobo 2024: removed call to GroupTriggerTags() since we are not actually using it right now.
+    // Left the code for posterity just in case we need it again.
+        //GroupTriggerTags(trig);
 
         // initialise state machine
         trig->state     = scr->first_state;

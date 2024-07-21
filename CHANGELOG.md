@@ -63,3 +63,5 @@ Bugs fixed
 - Fixed frames with a valid '0' rotation sprite still using other rotations if found elsewhere in the load order
 - Fixed UDMF 'ypanningfloor' and 'ypanningceiling' using inverted values.
 - Fixed COAL/Lua functions hud.get_image_width() and hud.get_image_height() not returning 0 if image does not exist.
+- Fixed multiple RTS scripts with the same tag not running simultaneously: we were only running the first one basically.
+

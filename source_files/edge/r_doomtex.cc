@@ -161,8 +161,20 @@ static ImageData *ReadFlatAsEpiBlock(Image *rim)
     // clear initial image to black
     img->Clear(playpal_black);
 
-    // read in pixels
-    const uint8_t *src = (const uint8_t *)LoadLumpIntoMemory(rim->source_.flat.lump);
+    const uint8_t *src = nullptr;
+
+    if (rim->source_.graphic.packfile_name)
+    {
+        epi::File *f = OpenFileFromPack(rim->source_.graphic.packfile_name);
+        if (f)
+            src = (const uint8_t *)f->LoadIntoMemory();
+        delete f;
+    }
+    else
+        src = (const uint8_t *)LoadLumpIntoMemory(rim->source_.flat.lump);
+
+    if (!src)
+        FatalError("ReadFlatAsEpiBlock: Failed to load %s!\n", rim->name_.c_str());
 
     for (int y = 0; y < h; y++)
         for (int x = 0; x < w; x++)

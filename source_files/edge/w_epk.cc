@@ -832,7 +832,7 @@ void ProcessPackSubstitutions(PackFile *pack, int pack_index)
             epi::StringLowerASCII(ext);
 
             if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" ||
-                ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
+                ext == ".lmp" || ext == ".raw") // Note: .lmp is assumed to be Doom-format image
             {
                 std::string texname;
 
@@ -868,7 +868,7 @@ void ProcessPackSubstitutions(PackFile *pack, int pack_index)
                 else if (dir_name == "graphics")
                     AddPackImageSmart(texname.c_str(), kImageSourceGraphic, entry.pack_path_.c_str(), real_graphics);
                 else if (dir_name == "flats")
-                    AddPackImageSmart(texname.c_str(), kImageSourceFlat, entry.pack_path_.c_str(), real_flats);
+                    AddPackImageSmart(texname.c_str(), kImageSourceGraphic, entry.pack_path_.c_str(), real_flats);
                 else if (dir_name == "skins") // Not sure about this still
                     AddPackImageSmart(texname.c_str(), kImageSourceSprite, entry.pack_path_.c_str(), real_sprites);
             }
@@ -971,7 +971,7 @@ void ProcessHiresPackSubstitutions(PackFile *pack, int pack_index)
         epi::StringLowerASCII(ext);
 
         if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" ||
-            ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
+            ext == ".lmp" || ext == ".raw") // Note: .lmp is assumed to be Doom-format image
         {
             std::string texname;
 

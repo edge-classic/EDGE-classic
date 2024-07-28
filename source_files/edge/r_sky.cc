@@ -258,21 +258,20 @@ static void SetupSkyMatrices(void)
         glPushMatrix();
 
         glLoadIdentity();
-        if (fliplevels.d_)
-            glFrustum(view_x_slope * renderer_near_clip.f_, -view_x_slope * renderer_near_clip.f_,
-                    -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
-                    renderer_far_clip.f_ * 4.0);
-        else
-            glFrustum(-view_x_slope * renderer_near_clip.f_, view_x_slope * renderer_near_clip.f_,
-                    -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
-                    renderer_far_clip.f_);
+
+        glFrustum(-view_x_slope * renderer_near_clip.f_, view_x_slope * renderer_near_clip.f_,
+                  -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
+                  renderer_far_clip.f_ * 4.0);
 
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
         glLoadIdentity();
 
         glRotatef(270.0f - epi::DegreesFromBAM(view_vertical_angle), 1.0f, 0.0f, 0.0f);
-        glRotatef(90.0f - epi::DegreesFromBAM(view_angle), 0.0f, 0.0f, 1.0f);
+        if (fliplevels.d_)
+            glRotatef(90.0f + epi::DegreesFromBAM(view_angle), 0.0f, 0.0f, 1.0f);
+        else
+            glRotatef(90.0f - epi::DegreesFromBAM(view_angle), 0.0f, 0.0f, 1.0f);
         if (current_sky_stretch == kSkyStretchStretch)
             glTranslatef(0.0f, 0.0f,
                          (renderer_far_clip.f_ * 2 * 0.15));  // Draw center above horizon a little

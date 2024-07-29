@@ -52,6 +52,7 @@ extern float ApproximateDistance(float dx, float dy, float dz);
 
 extern ConsoleVariable draw_culling;
 extern ConsoleVariable cull_fog_color;
+extern ConsoleVariable fliplevels;
 extern bool            need_to_draw_sky;
 
 /*============== MD2 FORMAT DEFINITIONS ====================*/
@@ -1035,9 +1036,19 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon_, int fr
         blending |= kBlendingNoZBuffer;
 
     if (MirrorReflective())
-        blending |= kBlendingCullFront;
+    {
+        if (fliplevels.d_)
+            blending |= kBlendingCullBack;
+        else
+            blending |= kBlendingCullFront;
+    }
     else
-        blending |= kBlendingCullBack;
+    {
+        if (fliplevels.d_)
+            blending |= kBlendingCullFront;
+        else
+            blending |= kBlendingCullBack;
+    }
 
     data.map_object_ = mo;
     data.model_      = md;

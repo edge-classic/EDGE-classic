@@ -54,6 +54,7 @@ extern float ApproximateDistance(float dx, float dy, float dz);
 
 extern ConsoleVariable draw_culling;
 extern ConsoleVariable cull_fog_color;
+extern ConsoleVariable fliplevels;
 extern bool            need_to_draw_sky;
 
 /*============== MDL FORMAT DEFINITIONS ====================*/
@@ -721,9 +722,19 @@ void MDLRenderModel(MDLModel *md, const Image *skin_img, bool is_weapon, int fra
         blending |= kBlendingNoZBuffer;
 
     if (MirrorReflective())
-        blending |= kBlendingCullFront;
+    {
+        if (fliplevels.d_)
+            blending |= kBlendingCullBack;
+        else
+            blending |= kBlendingCullFront;
+    }
     else
-        blending |= kBlendingCullBack;
+    {
+        if (fliplevels.d_)
+            blending |= kBlendingCullFront;
+        else
+            blending |= kBlendingCullBack;
+    }
 
     data.map_object_ = mo;
     data.model_      = md;

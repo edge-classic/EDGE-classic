@@ -72,8 +72,12 @@ void SetupWorldMatrices2D(void)
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho((float)view_window_x, (float)view_window_width, (float)view_window_y, (float)view_window_height, -1.0f,
-            1.0f);
+    if (fliplevels.d_)
+        glOrtho((float)view_window_width, (float)view_window_x, (float)view_window_y, (float)view_window_height, -1.0f,
+                1.0f);
+    else
+        glOrtho((float)view_window_x, (float)view_window_width, (float)view_window_y, (float)view_window_height, -1.0f,
+                1.0f);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();

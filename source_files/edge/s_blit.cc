@@ -91,6 +91,8 @@ extern int sound_device_samples_per_buffer;
 
 extern bool sound_device_stereo;
 
+extern ConsoleVariable fliplevels;
+
 SoundChannel::SoundChannel() : state_(kChannelEmpty), data_(nullptr)
 {
 }
@@ -154,6 +156,15 @@ void SoundChannel::ComputeVolume()
     volume_right_ = (int)(MAX_VOL * (0.0 + sep));
 
     if (var_sound_stereo == 2) /* SWAP ! */
+    {
+        if (!fliplevels.d_)
+        {
+            int tmp       = volume_left_;
+            volume_left_  = volume_right_;
+            volume_right_ = tmp;
+        }
+    }
+    else if (fliplevels.d_)
     {
         int tmp       = volume_left_;
         volume_left_  = volume_right_;

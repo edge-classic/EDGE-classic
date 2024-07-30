@@ -18,6 +18,12 @@
 
 #include "i_video.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#include <dwmapi.h>
+#include <VersionHelpers.h>
+#endif
+
 #include "edge_profiling.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
@@ -392,9 +398,57 @@ void StartFrame(void)
         renderer_far_clip.f_ = 64000.0;
 }
 
+static void SwapBuffers(void)
+{
+    EDGE_ZoneScoped;
+
+#ifdef _WIN32
+    bool useDwmFlush = false;
+	int swapInterval = SDL_GL_GetSwapInterval();
+
+	if (current_window_mode == 0)
+	{
+		BOOL compositionEnabled = IsWindows8OrGreater();
+		if (compositionEnabled || (SUCCEEDED(DwmIsCompositionEnabled(&compositionEnabled)) && compositionEnabled))
+		{
+			DWM_TIMING_INFO info = {};
+			info.cbSize = sizeof(DWM_TIMING_INFO);
+			double dwmRefreshRate = 0;
+			if (SUCCEEDED(DwmGetCompositionTimingInfo(nullptr, &info)))
+				dwmRefreshRate = (double)info.rateRefresh.uiNumerator / (double)info.rateRefresh.uiDenominator;
+
+			SDL_DisplayMode dmode = {};
+			int displayindex = SDL_GetWindowDisplayIndex(program_window);
+
+			if (displayindex >= 0)
+				SDL_GetCurrentDisplayMode(displayindex, &dmode);
+
+			if (dmode.refresh_rate > 0 && dwmRefreshRate > 0 && (fabs(dmode.refresh_rate - dwmRefreshRate) < 2))
+			{
+				SDL_GL_SetSwapInterval(0);
+				if (SDL_GL_GetSwapInterval() == 0)
+					useDwmFlush = true;
+				else
+					SDL_GL_SetSwapInterval(swapInterval);
+			}
+		}
+	}
+#endif
+
+    SDL_GL_SwapWindow(program_window);
+
+#ifdef _WIN32
+	if (useDwmFlush)
+	{
+		DwmFlush();
+		SDL_GL_SetSwapInterval(swapInterval);
+	}
+#endif
+}
+
 void FinishFrame(void)
 {
-    SDL_GL_SwapWindow(program_window);
+    SwapBuffers();
 
     EDGE_TracyPlot("draw_render_units", (int64_t)ec_frame_stats.draw_render_units);
     EDGE_TracyPlot("draw_wall_parts", (int64_t)ec_frame_stats.draw_wall_parts);

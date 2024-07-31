@@ -19,6 +19,7 @@
 #include "i_video.h"
 
 #ifdef _WIN32
+#include <math.h>
 #include <windows.h>
 #include <dwmapi.h>
 #include <VersionHelpers.h>

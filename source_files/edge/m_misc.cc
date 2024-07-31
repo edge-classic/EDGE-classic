@@ -119,6 +119,7 @@ static ConfigurationDefault defaults[] = {
     {kConfigBoolean, "jumping", &global_flags.jump, EDGE_DEFAULT_JUMP},
     {kConfigBoolean, "crouching", &global_flags.crouch, EDGE_DEFAULT_CROUCH},
     {kConfigInteger, "smoothing", &image_smoothing, EDGE_DEFAULT_USE_SMOOTHING},
+    {kConfigInteger, "mipmapping", &image_mipmapping, EDGE_DEFAULT_USE_MIPMAPPING},
     {kConfigInteger, "dlights", &use_dynamic_lights, EDGE_DEFAULT_USE_DLIGHTS},
     {kConfigInteger, "detail_level", &detail_level, EDGE_DEFAULT_DETAIL_LEVEL},
     {kConfigInteger, "hq2x_scaling", &hq2x_scaling, EDGE_DEFAULT_HQ2X_SCALING},

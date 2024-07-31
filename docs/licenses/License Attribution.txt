@@ -164,4 +164,6 @@ WidePix (various assets) - Copyright (c) 2020-2021 Nash Muhandes
 zlib License
 ===========================================================================================
 
+LOVE2D (Windows swapbuffers code) - Copyright (c) 2006-2024 LOVE Development Team
+
 SDL2 library - Copyright (c) 1997-2020 Sam Lantinga

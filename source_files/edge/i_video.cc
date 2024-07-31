@@ -18,6 +18,13 @@
 
 #include "i_video.h"
 
+#ifdef _WIN32
+#include <math.h>
+#include <windows.h>
+#include <dwmapi.h>
+#include <VersionHelpers.h>
+#endif
+
 #include "edge_profiling.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
@@ -35,7 +42,7 @@ int graphics_shutdown = 0;
 // I think grab_mouse should be an internal bool instead of a cvar...why would a
 // user need to adjust this on the fly? - Dasho
 EDGE_DEFINE_CONSOLE_VARIABLE(grab_mouse, "1", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(vsync, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(vsync, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(gamma_correction, "0", kConsoleVariableFlagArchive, -1.0, 1.0)
 
 // this is the Monitor Size setting, really an aspect ratio.
@@ -392,9 +399,58 @@ void StartFrame(void)
         renderer_far_clip.f_ = 64000.0;
 }
 
+static void SwapBuffers(void)
+{
+    EDGE_ZoneScoped;
+
+#ifdef _WIN32
+    bool useDwmFlush = false;
+    int swapInterval = SDL_GL_GetSwapInterval();
+
+    // If user manually disables vsync, respect that and don't try to check for/execute DwmFlush
+    if (vsync.d_ > 0)
+    {
+        BOOL compositionEnabled = IsWindows8OrGreater();
+        if (compositionEnabled || (SUCCEEDED(DwmIsCompositionEnabled(&compositionEnabled)) && compositionEnabled))
+        {
+            DWM_TIMING_INFO info = {};
+            info.cbSize = sizeof(DWM_TIMING_INFO);
+            double dwmRefreshRate = 0;
+            if (SUCCEEDED(DwmGetCompositionTimingInfo(nullptr, &info)))
+                dwmRefreshRate = (double)info.rateRefresh.uiNumerator / (double)info.rateRefresh.uiDenominator;
+
+            SDL_DisplayMode dmode = {};
+            int displayindex = SDL_GetWindowDisplayIndex(program_window);
+
+            if (displayindex >= 0)
+                SDL_GetCurrentDisplayMode(displayindex, &dmode);
+
+            if (dmode.refresh_rate > 0 && dwmRefreshRate > 0 && (fabs(dmode.refresh_rate - dwmRefreshRate) < 2))
+            {
+                SDL_GL_SetSwapInterval(0);
+                if (SDL_GL_GetSwapInterval() == 0)
+                    useDwmFlush = true;
+                else
+                    SDL_GL_SetSwapInterval(swapInterval);
+            }
+        }
+    }
+#endif
+
+    SDL_GL_SwapWindow(program_window);
+
+#ifdef _WIN32
+    if (useDwmFlush)
+    {
+        DwmFlush();
+        SDL_GL_SetSwapInterval(swapInterval);
+    }
+#endif
+}
+
 void FinishFrame(void)
 {
-    SDL_GL_SwapWindow(program_window);
+    SwapBuffers();
 
     EDGE_TracyPlot("draw_render_units", (int64_t)ec_frame_stats.draw_render_units);
     EDGE_TracyPlot("draw_wall_parts", (int64_t)ec_frame_stats.draw_wall_parts);

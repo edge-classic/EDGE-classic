@@ -248,6 +248,7 @@ void         ImageMakeSaveString(const Image *image, char *type, char *namebuf);
 //  IMAGE USAGE
 //
 
+extern int image_mipmapping;
 extern int image_smoothing;
 extern int hq2x_scaling;
 

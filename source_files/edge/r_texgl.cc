@@ -170,7 +170,7 @@ GLuint UploadTexture(ImageData *img, int flags, int max_pix)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, smooth ? GL_LINEAR : GL_NEAREST);
 
     // minification mode
-    int mip_level = HMM_Clamp(0, detail_level, 2);
+    int mip_level = HMM_Clamp(0, image_mipmapping, 2);
 
     // special logic for mid-masked textures.  The kUploadThresh flag
     // guarantees that each texture level has simple alpha (0 or 255),
@@ -199,7 +199,7 @@ GLuint UploadTexture(ImageData *img, int flags, int max_pix)
                      (img->depth_ == 3) ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, img->PixelAt(0, 0));
 
         // stop if mipmapping disabled or we have reached the end
-        if (nomip || !detail_level || (new_w == 1 && new_h == 1))
+        if (nomip || !image_mipmapping || (new_w == 1 && new_h == 1))
             break;
 
         new_w = HMM_MAX(1, new_w / 2);

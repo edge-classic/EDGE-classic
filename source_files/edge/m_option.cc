@@ -385,6 +385,7 @@ static OptionMenuItem vidoptions[] = {
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &force_flat_lighting},
     {kOptionMenuItemTypeSwitch, "Framerate Target", "35 FPS/70 FPS", 2, &double_framerate.d_,
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &double_framerate},
+    {kOptionMenuItemTypeSwitch, "Mipmapping", "Off/Bilinear/Trilinear",  3, &image_mipmapping, OptionMenuChangeMipMap, nullptr},
     {kOptionMenuItemTypeSwitch, "Smoothing", YesNo, 2, &image_smoothing, OptionMenuChangeMipMap, nullptr},
     {kOptionMenuItemTypeSwitch, "Upscale Textures", "Off/UI Only/UI & Sprites/All", 4, &hq2x_scaling,
      OptionMenuChangeMipMap, "Only affects paletted (Doom format) textures"},

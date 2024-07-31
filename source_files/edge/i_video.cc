@@ -41,7 +41,7 @@ int graphics_shutdown = 0;
 // I think grab_mouse should be an internal bool instead of a cvar...why would a
 // user need to adjust this on the fly? - Dasho
 EDGE_DEFINE_CONSOLE_VARIABLE(grab_mouse, "1", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(vsync, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(vsync, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(gamma_correction, "0", kConsoleVariableFlagArchive, -1.0, 1.0)
 
 // this is the Monitor Size setting, really an aspect ratio.
@@ -404,45 +404,46 @@ static void SwapBuffers(void)
 
 #ifdef _WIN32
     bool useDwmFlush = false;
-	int swapInterval = SDL_GL_GetSwapInterval();
+    int swapInterval = SDL_GL_GetSwapInterval();
 
-	if (current_window_mode == 0)
-	{
-		BOOL compositionEnabled = IsWindows8OrGreater();
-		if (compositionEnabled || (SUCCEEDED(DwmIsCompositionEnabled(&compositionEnabled)) && compositionEnabled))
-		{
-			DWM_TIMING_INFO info = {};
-			info.cbSize = sizeof(DWM_TIMING_INFO);
-			double dwmRefreshRate = 0;
-			if (SUCCEEDED(DwmGetCompositionTimingInfo(nullptr, &info)))
-				dwmRefreshRate = (double)info.rateRefresh.uiNumerator / (double)info.rateRefresh.uiDenominator;
+    // If user manually disables vsync, respect that and don't try to check for/execute DwmFlush
+    if (vsync.d_ > 0)
+    {
+        BOOL compositionEnabled = IsWindows8OrGreater();
+        if (compositionEnabled || (SUCCEEDED(DwmIsCompositionEnabled(&compositionEnabled)) && compositionEnabled))
+        {
+            DWM_TIMING_INFO info = {};
+            info.cbSize = sizeof(DWM_TIMING_INFO);
+            double dwmRefreshRate = 0;
+            if (SUCCEEDED(DwmGetCompositionTimingInfo(nullptr, &info)))
+                dwmRefreshRate = (double)info.rateRefresh.uiNumerator / (double)info.rateRefresh.uiDenominator;
 
-			SDL_DisplayMode dmode = {};
-			int displayindex = SDL_GetWindowDisplayIndex(program_window);
+            SDL_DisplayMode dmode = {};
+            int displayindex = SDL_GetWindowDisplayIndex(program_window);
 
-			if (displayindex >= 0)
-				SDL_GetCurrentDisplayMode(displayindex, &dmode);
+            if (displayindex >= 0)
+                SDL_GetCurrentDisplayMode(displayindex, &dmode);
 
-			if (dmode.refresh_rate > 0 && dwmRefreshRate > 0 && (fabs(dmode.refresh_rate - dwmRefreshRate) < 2))
-			{
-				SDL_GL_SetSwapInterval(0);
-				if (SDL_GL_GetSwapInterval() == 0)
-					useDwmFlush = true;
-				else
-					SDL_GL_SetSwapInterval(swapInterval);
-			}
-		}
-	}
+            if (dmode.refresh_rate > 0 && dwmRefreshRate > 0 && (fabs(dmode.refresh_rate - dwmRefreshRate) < 2))
+            {
+                SDL_GL_SetSwapInterval(0);
+                if (SDL_GL_GetSwapInterval() == 0)
+                    useDwmFlush = true;
+                else
+                    SDL_GL_SetSwapInterval(swapInterval);
+            }
+        }
+    }
 #endif
 
     SDL_GL_SwapWindow(program_window);
 
 #ifdef _WIN32
-	if (useDwmFlush)
-	{
-		DwmFlush();
-		SDL_GL_SetSwapInterval(swapInterval);
-	}
+    if (useDwmFlush)
+    {
+        DwmFlush();
+        SDL_GL_SetSwapInterval(swapInterval);
+    }
 #endif
 }
 

@@ -161,9 +161,13 @@ static void do_Animate(std::list<Image *> &bucket)
     }
 }
 
-int image_smoothing = 1;
+// mipmapping enabled ?
+// 0 off, 1 bilinear, 2 trilinear
+int image_mipmapping = 2;
 
-int hq2x_scaling = 1;
+int image_smoothing = 0;
+
+int hq2x_scaling = 0;
 
 // total set of images
 std::list<Image *> real_graphics;
@@ -1117,6 +1121,9 @@ static bool IM_ShouldMipmap(Image *rim)
 {
     // the "SKY" check here is a hack...
     if (epi::StringPrefixCaseCompareASCII(rim->name_, "SKY") == 0)
+        return false;
+
+    if (image_mipmapping == 0)
         return false;
 
     switch (rim->source_type_)

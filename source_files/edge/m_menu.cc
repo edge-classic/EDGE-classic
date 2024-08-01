@@ -89,6 +89,8 @@ extern unsigned int UploadTexture(ImageData *img, int flags, int max_pix);
 
 extern const Image *menu_backdrop;
 
+EDGE_DEFINE_CONSOLE_VARIABLE(use_menu_backdrop, "1", kConsoleVariableFlagArchive)
+
 //
 // defaulted values
 //
@@ -2960,7 +2962,7 @@ void MenuDrawer(void)
     if (!menu_active)
         return;
 
-    if (menu_backdrop && (option_menu_on || network_game_menu_on ||
+    if (use_menu_backdrop.d_ && menu_backdrop && (option_menu_on || network_game_menu_on ||
                           (current_menu->draw_function == MenuDrawLoad || current_menu->draw_function == MenuDrawSave)))
     {
         if (title_scaling.d_) // Fill Border

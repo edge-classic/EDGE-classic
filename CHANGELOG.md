@@ -18,7 +18,9 @@ New Features
 	- DEFAULT_DAMAGE_FLASH = (hex) which will set damage flashes from all sources to this color unless specified otherwise in an individual DDFATK entry.
 - THINGS.DDF: 
   - New Special flag: TRIGGER_TELEPORTS which will allow this thing to use teleports even if NO_TRIGGER_LINES is set. i.e. you want a dog that cannot open a door, but can teleport for example.
-
+- New CVARs/params:
+  - "use_menu_backdrop" which governs the use of the auto-generated monochrome backdrop for option menus
+  - "fliplevels" allows you to play a mirrored version of the map. All textures will also be mirrored.
 
 
 General Improvements/Changes
@@ -46,6 +48,7 @@ General Improvements/Changes
   - Remove support for path traversal with '..' when searching for or opening pack files
   - FIRST and LAST fields in anims.ddf now work with TX textures
   - Autoswitch to a new weapon even if the clip is not full
+ - Restore mipmapping as independent menu option
 
 
 Bugs fixed

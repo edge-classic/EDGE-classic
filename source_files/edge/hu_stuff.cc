@@ -25,6 +25,8 @@
 
 #include "hu_stuff.h"
 
+#include <deque>
+
 #include "con_gui.h"
 #include "con_main.h"
 #include "dm_state.h"
@@ -52,9 +54,7 @@ static constexpr uint16_t kHUDImportantMessageTimeout = (4 * kTicRate);
 
 std::string current_map_title;
 
-static bool message_on;
 static bool important_message_on;
-static bool message_no_overwrite;
 
 static std::string current_message;
 static std::string current_important_message_message;
@@ -64,6 +64,14 @@ static int         important_message_counter;
 Style *automap_style;
 Style *message_style;
 Style *important_message_style;
+
+struct HUDMessage
+{
+    std::string message;
+    int counter;
+};
+
+static std::deque<HUDMessage> queued_messages;
 
 //
 // Heads-up Init
@@ -97,9 +105,7 @@ void HUDStart(void)
         important_messages_styledef = default_style;
     important_message_style = hud_styles.Lookup(important_messages_styledef);
 
-    message_on           = false;
     important_message_on = false;
-    message_no_overwrite = false;
 
     // -ACB- 1998/08/09 Use current_map settings
     // if (current_map->description &&
@@ -128,7 +134,7 @@ void HUDDrawer(void)
 
     short tempY;
     short y;
-    if (message_on)
+    if (!queued_messages.empty())
     {
         tempY = 0;
         tempY += message_style->fonts_[0]->StringLines(current_message.c_str()) *
@@ -139,10 +145,21 @@ void HUDDrawer(void)
 
         y = tempY;
 
+        tempY *= 2;
+
+        // review to see if this works with mulitple messages - Dasho
         message_style->DrawBackground();
         HUDSetAlignment(0, 0); // center it
-        HUDSetAlpha(message_style->definition_->text_->translucency_);
-        HUDWriteText(message_style, 0, 160, y, current_message.c_str());
+        float alpha = message_style->definition_->text_->translucency_;
+
+        for (const HUDMessage &msg : queued_messages)
+        {
+            if (msg.counter < kTicRate)
+                HUDSetAlpha(alpha * msg.counter / kTicRate);
+            HUDWriteText(message_style, 0, 160, y, msg.message.c_str());
+            y += tempY;
+        }
+
         HUDSetAlignment();
         HUDSetAlpha();
     }
@@ -170,43 +187,34 @@ void HUDDrawer(void)
 void HUDStartMessage(const char *msg)
 {
     // only display message if necessary
-    if (!message_no_overwrite)
-    {
-        current_message = std::string(msg);
-
-        message_on           = true;
-        message_counter      = kHUDMessageTimeout;
-        message_no_overwrite = false;
-    }
+    queued_messages.push_front({msg, kHUDMessageTimeout});
+    if (queued_messages.size() > 4)
+        queued_messages.pop_back();
 }
 
 // Starts displaying the message.
 void HUDStartImportantMessage(const char *msg)
 {
-    // only display message if necessary
-    if (!message_no_overwrite)
-    {
-        current_important_message_message = std::string(msg);
+    current_important_message_message = std::string(msg);
 
-        important_message_on      = true;
-        important_message_counter = kHUDImportantMessageTimeout;
-        message_no_overwrite      = false;
-    }
+    important_message_on      = true;
+    important_message_counter = kHUDImportantMessageTimeout;
 }
 
 void HUDTicker(void)
 {
-    // tick down message counter if message is up
-    if (message_counter && !--message_counter)
+    // tick down messages
+    for (std::deque<HUDMessage>::reverse_iterator rbegin = queued_messages.rbegin(), rend = queued_messages.rend(); rbegin != rend; rbegin++)
     {
-        message_on           = false;
-        message_no_overwrite = false;
+        HUDMessage &msg = *rbegin;
+        msg.counter--;
+        if (msg.counter <= 0)
+            queued_messages.pop_back();
     }
 
     if (important_message_counter && !--important_message_counter)
     {
         important_message_on = false;
-        message_no_overwrite = false;
     }
 }
 

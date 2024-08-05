@@ -110,6 +110,9 @@ gl_colour = #FF2222;
 [TEXT_WHITE]
 gl_colour = #FFFFFF;
 
+[TEXT_BLACK]
+gl_colour = #111111;
+
 [TEXT_GREY]
 gl_colour = #AAAAAA;
 

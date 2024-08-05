@@ -49,6 +49,7 @@ General Improvements/Changes
   - FIRST and LAST fields in anims.ddf now work with TX textures
   - Autoswitch to a new weapon even if the clip is not full
  - Restore mipmapping as independent menu option
+ - Stacked pickup messages now allow multiple messages on screen simultaneously
 
 
 Bugs fixed

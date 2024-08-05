@@ -139,6 +139,10 @@ void HUDDrawer(void)
         tempY = 0;
         tempY += message_style->fonts_[0]->StringLines(current_message.c_str()) *
                  (message_style->fonts_[0]->NominalHeight() * message_style->definition_->text_[0].scale_);
+        // truetype_reference_yshift_ is important for TTF fonts.
+        tempY += message_style->fonts_[0]->StringLines(current_message.c_str()) * 
+                message_style->fonts_[0]->truetype_reference_yshift_[current_font_size];
+
         tempY /= 2;
         if (message_style->fonts_[0]->StringLines(current_message.c_str()) > 1)
             tempY += message_style->fonts_[0]->NominalHeight() * message_style->definition_->text_[0].scale_;

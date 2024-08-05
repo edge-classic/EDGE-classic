@@ -3,24 +3,28 @@ CHANGELOG for EDGE-Classic 1.38 (since EDGE-Classic 1.37)
 
 New Features
 ------------
-- COALHUDS/LUAHUDS: New commands 
++ COALHUDS/LUAHUDS: New commands 
 	- hud.lookup_LDF(languageEntry) which will return the language.ldf entry
 	- hud.game_skill() which will return a number from 0 to 4 reflecting the current game skill
 	- hud.get_text_width(string,size) will return the width in pixels of the given string, taking into account the current font
-- LUAHUDS-specific commands:
++ LUAHUDS-specific commands:
   - Several functions which will return a table containing useful information:
     - game.info()
     - map.info()
     - sector.info()
-- UDMF: Linedef 'alpha' field now supported; governs translucency of associated sidedef surfaces
-- UDMF: Sector 'alphafloor' and 'alphaceiling' fields now supported; governs translucency of associated planes
-- GAMES.DDF: New command 
++ UDMF: Linedef 'alpha' field now supported; governs translucency of associated sidedef surfaces
++ UDMF: Sector 'alphafloor' and 'alphaceiling' fields now supported; governs translucency of associated planes
++ GAMES.DDF: New command 
 	- DEFAULT_DAMAGE_FLASH = (hex) which will set damage flashes from all sources to this color unless specified otherwise in an individual DDFATK entry.
-- THINGS.DDF: 
++ THINGS.DDF: 
   - New Special flag: TRIGGER_TELEPORTS which will allow this thing to use teleports even if NO_TRIGGER_LINES is set. i.e. you want a dog that cannot open a door, but can teleport for example.
-- New CVARs/params:
++ New CVARs/params:
   - "use_menu_backdrop" which governs the use of the auto-generated monochrome backdrop for option menus
   - "fliplevels" allows you to play a mirrored version of the map. All textures will also be mirrored.
++ STYLES.DDF: able to add a dropshadow effect to TEXT, ALT, TITLE, HELP, HEADER or SELECTED strings via 2 new sub-commands
+  - .DROPSHADOW_COLOURMAP = [colourmap];  //"TEXT_BLACK" colmap generally looks good with everything
+  - .DROPSHADOW_OFFSET = [float]; //smaller values like 1 or 2 are best
+
 
 
 General Improvements/Changes

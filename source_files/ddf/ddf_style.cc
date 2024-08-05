@@ -52,6 +52,8 @@ static const DDFCommandList text_commands[] = {
     DDF_FIELD("ASPECT", dummy_textstyle, aspect_, DDFMainGetFloat),
     DDF_FIELD("X_OFFSET", dummy_textstyle, x_offset_, DDFMainGetNumeric),
     DDF_FIELD("Y_OFFSET", dummy_textstyle, y_offset_, DDFMainGetNumeric),
+    DDF_FIELD("DROPSHADOW_COLOURMAP", dummy_textstyle, dropshadow_colmap_, DDFMainGetColourmap),
+    DDF_FIELD("DROPSHADOW_OFFSET", dummy_textstyle, dropshadow_offset_, DDFMainGetFloat),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -349,6 +351,8 @@ void TextStyle::Default()
     aspect_   = 1.0f;
     x_offset_ = 0;
     y_offset_ = 0;
+    dropshadow_colmap_       = nullptr;
+    dropshadow_offset_ = 1.0f;
 }
 
 //
@@ -366,6 +370,8 @@ TextStyle &TextStyle::operator=(const TextStyle &rhs)
         aspect_   = rhs.aspect_;
         x_offset_ = rhs.x_offset_;
         y_offset_ = rhs.y_offset_;
+        dropshadow_colmap_       = rhs.dropshadow_colmap_;
+        dropshadow_offset_ = rhs.dropshadow_offset_;
     }
 
     return *this;

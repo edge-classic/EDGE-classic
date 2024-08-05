@@ -65,6 +65,10 @@ class TextStyle
     float aspect_;
     int   x_offset_;
     int   y_offset_;
+
+    const Colormap *dropshadow_colmap_;
+    float   dropshadow_offset_;
+
 };
 
 class CursorStyle

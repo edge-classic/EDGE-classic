@@ -2407,7 +2407,7 @@ static void DrawMessage(void)
 
     std::string s = msg + input;
 
-    y = 100 - (exit_style->fonts_[StyleDefinition::kTextSectionText]->StringLines(s.c_str()) *
+    y = 100 - (StringLines(s) *
                exit_style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight() * 1.5f / 2);
 
     if (!msg.empty())

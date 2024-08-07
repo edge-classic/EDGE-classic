@@ -711,13 +711,21 @@ float Font::StringWidth(const char *str)
 //
 // Find number of lines in string.
 //
-int Font::StringLines(const char *str) const
+int StringLines(std::string_view str)
 {
     int slines = 1;
+    std::string_view::size_type oldpos = 0;
+    std::string_view::size_type pos    = 0;
 
-    for (; *str; str++)
-        if (*str == '\n')
+    while (pos != std::string_view::npos)
+    {
+        pos = str.find('\n', oldpos);
+        if (pos != std::string_view::npos)
+        {
             slines++;
+            oldpos = pos + 1;
+        }
+    }
 
     return slines;
 }

@@ -34,7 +34,7 @@
 #include "r_units.h"
 
 // FIXME: this seems totally arbitrary, review it.
-static constexpr float kVerticalSpacing = 2.0f;
+static constexpr float kVerticalSpacing = 1.0f;
 
 extern ConsoleLine    *quit_lines[kEndoomLines];
 extern int             console_cursor;
@@ -1029,7 +1029,7 @@ float HUDStringWidthNew(const char *str, float size)
 
 float HUDStringHeight(const char *str)
 {
-    int slines = current_font->StringLines(str);
+    int slines = StringLines(str);
 
     return slines * HUDFontHeight() + (slines - 1) * kVerticalSpacing;
 }

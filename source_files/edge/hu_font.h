@@ -24,6 +24,8 @@
 #include "r_image.h"
 #include "stb_truetype.h"
 
+int  StringLines(std::string_view str);
+
 class FontDefinition;
 
 struct TrueTypeCharacter
@@ -70,7 +72,6 @@ class Font
     float CharRatio(char ch);
     float CharWidth(char ch);
     float StringWidth(const char *str);
-    int   StringLines(const char *str) const;
     int   MaxFit(int pixel_w, const char *str);
     int   GetGlyphIndex(char ch);
 

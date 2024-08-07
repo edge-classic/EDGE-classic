@@ -56,9 +56,7 @@ std::string current_map_title;
 
 static bool important_message_on;
 
-static std::string current_message;
-static std::string current_important_message_message;
-static int         message_counter;
+static std::string current_important_message;
 static int         important_message_counter;
 
 Style *automap_style;
@@ -120,7 +118,7 @@ void HUDStart(void)
         string = language[current_map->description_];
         LogPrint("Entering %s\n", string);
 
-        current_map_title = std::string(string);
+        current_map_title = string;
     }
 
     // Reset hud_tic each map so it doesn't go super high? - Dasho
@@ -132,36 +130,23 @@ void HUDDrawer(void)
     ConsoleShowFPS();
     ConsoleShowPosition();
 
-    short tempY;
-    short y;
+    short y = 0;
     if (!queued_messages.empty())
     {
-        tempY = 0;
-        tempY += message_style->fonts_[0]->StringLines(current_message.c_str()) *
-                 (message_style->fonts_[0]->NominalHeight() * message_style->definition_->text_[0].scale_);
-        // truetype_reference_yshift_ is important for TTF fonts.
-        tempY += message_style->fonts_[0]->StringLines(current_message.c_str()) * 
-                message_style->fonts_[0]->truetype_reference_yshift_[current_font_size];
-
-        tempY /= 2;
-        if (message_style->fonts_[0]->StringLines(current_message.c_str()) > 1)
-            tempY += message_style->fonts_[0]->NominalHeight() * message_style->definition_->text_[0].scale_;
-
-        y = tempY;
-
-        tempY *= 2;
-
         // review to see if this works with mulitple messages - Dasho
         message_style->DrawBackground();
-        HUDSetAlignment(0, 0); // center it
+        HUDSetAlignment(0, -1); // center it
         float alpha = message_style->definition_->text_->translucency_;
 
-        for (const HUDMessage &msg : queued_messages)
+        for (size_t i = 0, i_end = queued_messages.size(); i < i_end; i++)
         {
+            const HUDMessage &msg = queued_messages[i];
+            const char *current_message = msg.message.c_str();
+            if (i > 0)
+                y += HUDStringHeight(queued_messages[i-1].message.c_str());
             if (msg.counter < kTicRate)
                 HUDSetAlpha(alpha * msg.counter / kTicRate);
-            HUDWriteText(message_style, 0, 160, y, msg.message.c_str());
-            y += tempY;
+            HUDWriteText(message_style, 0, 160, y, current_message);
         }
 
         HUDSetAlignment();
@@ -170,8 +155,8 @@ void HUDDrawer(void)
 
     if (important_message_on)
     {
-        tempY = 0;
-        tempY -= important_message_style->fonts_[0]->StringLines(current_important_message_message.c_str()) *
+        short tempY = 0;
+        tempY -= StringLines(current_important_message) *
                  (important_message_style->fonts_[0]->NominalHeight() *
                   important_message_style->definition_->text_[0].scale_);
         tempY /= 2;
@@ -179,7 +164,7 @@ void HUDDrawer(void)
         important_message_style->DrawBackground();
         HUDSetAlignment(0, 0); // center it
         HUDSetAlpha(important_message_style->definition_->text_->translucency_);
-        HUDWriteText(important_message_style, 0, 160, y, current_important_message_message.c_str());
+        HUDWriteText(important_message_style, 0, 160, y, current_important_message.c_str());
         HUDSetAlignment();
         HUDSetAlpha();
     }
@@ -192,14 +177,14 @@ void HUDStartMessage(const char *msg)
 {
     // only display message if necessary
     queued_messages.push_front({msg, kHUDMessageTimeout});
-    if (queued_messages.size() > 4)
+    if (queued_messages.size() > 3)
         queued_messages.pop_back();
 }
 
 // Starts displaying the message.
 void HUDStartImportantMessage(const char *msg)
 {
-    current_important_message_message = std::string(msg);
+    current_important_message = msg;
 
     important_message_on      = true;
     important_message_counter = kHUDImportantMessageTimeout;

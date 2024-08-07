@@ -452,7 +452,12 @@ static void TextWrite(void)
                 Dropshadow_Offset *= style->definition_->text_[t_type].scale_ * txtscale;
                 HUDSetTextColor(GetFontColor(Dropshadow_colmap));
                 HUDDrawText(cx + Dropshadow_Offset, cy + Dropshadow_Offset, line);
-                HUDSetTextColor();
+                HUDSetTextColor(finale_text_color); // set to default
+                if (style->definition_->text_[t_type].colmap_)
+                {
+                    const Colormap *colmap = style->definition_->text_[t_type].colmap_;
+                    HUDSetTextColor(GetFontColor(colmap));
+                }
             }
             HUDDrawText(cx, cy, line);
             break;
@@ -469,7 +474,12 @@ static void TextWrite(void)
                 Dropshadow_Offset *= style->definition_->text_[t_type].scale_ * txtscale;
                 HUDSetTextColor(GetFontColor(Dropshadow_colmap));
                 HUDDrawText(cx + Dropshadow_Offset, cy + Dropshadow_Offset, line);
-                HUDSetTextColor();
+                HUDSetTextColor(finale_text_color); // set to default
+                if (style->definition_->text_[t_type].colmap_)
+                {
+                    const Colormap *colmap = style->definition_->text_[t_type].colmap_;
+                    HUDSetTextColor(GetFontColor(colmap));
+                }
             }
             HUDDrawText(cx, cy, line);
 

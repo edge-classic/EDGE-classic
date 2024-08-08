@@ -134,6 +134,7 @@ extern ConsoleVariable vsync;
 extern ConsoleVariable view_bobbing;
 extern ConsoleVariable gore_level;
 extern ConsoleVariable skip_intros;
+extern ConsoleVariable maximum_pickup_messages;
 
 // extern console_variable_c automap_keydoor_text;
 
@@ -414,6 +415,8 @@ static OptionMenuItem vidoptions[] = {
      nullptr},
     {kOptionMenuItemTypeBoolean, "Skip Startup Movies", YesNo, 2, &skip_intros.d_,
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &skip_intros},
+    {kOptionMenuItemTypeSwitch, "Max Pickup Messages", "1/2/3/4", 4,
+     &maximum_pickup_messages.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &maximum_pickup_messages},
 };
 
 static OptionMenuDefinition video_optmenu = {

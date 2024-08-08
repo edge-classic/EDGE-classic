@@ -43,12 +43,6 @@
 #include "s_sound.h"
 #include "w_wad.h"
 
-//
-// Locally used constants, shortcuts.
-//
-// -ACB- 1998/08/09 Removed the HUDTITLE stuff; Use current_map->description.
-//
-
 static constexpr uint16_t kHUDMessageTimeout          = (4 * kTicRate);
 static constexpr uint16_t kHUDImportantMessageTimeout = (4 * kTicRate);
 
@@ -70,6 +64,15 @@ struct HUDMessage
 };
 
 static std::deque<HUDMessage> queued_messages;
+
+static void UpdatePickupMessages(ConsoleVariable *self)
+{
+    // Account for 0 index from options menu
+    while (queued_messages.size() > self->d_ + 1)
+        queued_messages.pop_back();
+}
+
+EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK_CLAMPED(maximum_pickup_messages, "3", kConsoleVariableFlagArchive, UpdatePickupMessages, 0, 3);
 
 //
 // Heads-up Init
@@ -163,7 +166,10 @@ void HUDDrawer(void)
         y = 90 - tempY;
         important_message_style->DrawBackground();
         HUDSetAlignment(0, 0); // center it
-        HUDSetAlpha(important_message_style->definition_->text_->translucency_);
+        if (important_message_counter < kTicRate)
+            HUDSetAlpha(important_message_style->definition_->text_->translucency_ * important_message_counter / kTicRate);
+        else
+            HUDSetAlpha(important_message_style->definition_->text_->translucency_);
         HUDWriteText(important_message_style, 0, 160, y, current_important_message.c_str());
         HUDSetAlignment();
         HUDSetAlpha();
@@ -177,7 +183,7 @@ void HUDStartMessage(const char *msg)
 {
     // only display message if necessary
     queued_messages.push_front({msg, kHUDMessageTimeout});
-    if (queued_messages.size() > 3)
+    if (queued_messages.size() > maximum_pickup_messages.d_ + 1)
         queued_messages.pop_back();
 }
 

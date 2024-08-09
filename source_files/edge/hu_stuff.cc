@@ -136,20 +136,72 @@ void HUDDrawer(void)
     short y = 0;
     if (!queued_messages.empty())
     {
-        // review to see if this works with mulitple messages - Dasho
-        message_style->DrawBackground();
-        HUDSetAlignment(0, -1); // center it
         float alpha = message_style->definition_->text_->translucency_;
-
-        for (size_t i = 0, i_end = queued_messages.size(); i < i_end; i++)
+        message_style->DrawBackground();
+        if (!message_style->definition_->entry_align_string_.empty())
         {
-            const HUDMessage &msg = queued_messages[i];
-            const char *current_message = msg.message.c_str();
-            if (i > 0)
-                y += HUDStringHeight(queued_messages[i-1].message.c_str());
-            if (msg.counter < kTicRate)
-                HUDSetAlpha(alpha * msg.counter / kTicRate);
-            HUDWriteText(message_style, 0, 160, y, current_message);
+            switch (message_style->definition_->entry_alignment_)
+            {
+                case StyleDefinition::kAlignmentLeft:
+                {
+                    HUDSetAlignment(-1, -1);
+                    for (size_t i = 0, i_end = queued_messages.size(); i < i_end; i++)
+                    {
+                        const HUDMessage &msg = queued_messages[i];
+                        const char *current_message = msg.message.c_str();
+                        if (i > 0)
+                            y += HUDStringHeight(queued_messages[i-1].message.c_str());
+                        if (msg.counter < kTicRate)
+                            HUDSetAlpha(alpha * msg.counter / kTicRate);
+                        HUDWriteText(message_style, 0, hud_x_left, y, current_message);
+                    }
+                    break;
+                }
+                case StyleDefinition::kAlignmentRight:
+                {
+                    HUDSetAlignment(1, -1);
+                    for (size_t i = 0, i_end = queued_messages.size(); i < i_end; i++)
+                    {
+                        const HUDMessage &msg = queued_messages[i];
+                        const char *current_message = msg.message.c_str();
+                        if (i > 0)
+                            y += HUDStringHeight(queued_messages[i-1].message.c_str());
+                        if (msg.counter < kTicRate)
+                            HUDSetAlpha(alpha * msg.counter / kTicRate);
+                        HUDWriteText(message_style, 0, hud_x_right, y, current_message);
+                    }
+                    break;
+                }
+                default:
+                {
+                    HUDSetAlignment(0, -1);
+                    for (size_t i = 0, i_end = queued_messages.size(); i < i_end; i++)
+                    {
+                        const HUDMessage &msg = queued_messages[i];
+                        const char *current_message = msg.message.c_str();
+                        if (i > 0)
+                            y += HUDStringHeight(queued_messages[i-1].message.c_str());
+                        if (msg.counter < kTicRate)
+                            HUDSetAlpha(alpha * msg.counter / kTicRate);
+                        HUDWriteText(message_style, 0, 160, y, current_message);
+                    }
+                    break;
+                }
+            }
+        }
+        else
+        {
+            HUDSetAlignment(0, -1); // center it
+            for (size_t i = 0, i_end = queued_messages.size(); i < i_end; i++)
+            {
+                const HUDMessage &msg = queued_messages[i];
+                const char *current_message = msg.message.c_str();
+                if (i > 0)
+                    y += HUDStringHeight(queued_messages[i-1].message.c_str());
+                if (msg.counter < kTicRate)
+                    HUDSetAlpha(alpha * msg.counter / kTicRate);
+                HUDWriteText(message_style, 0, 160, y, current_message);
+            }
         }
 
         HUDSetAlignment();

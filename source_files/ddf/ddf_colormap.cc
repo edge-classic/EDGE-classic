@@ -122,7 +122,7 @@ static void ColmapFinishEntry(void)
         // colmaps with this name (i.e., "null" it), as the only way to get here
         // is to create an empty entry or use gl_color_=NONE; - Dasho
         std::string doomed_name = dynamic_colmap->name_;
-        for (std::vector<Colormap *>::iterator iter = colormaps.begin(); iter != colormaps.end(); iter++)
+        for (std::vector<Colormap *>::iterator iter = colormaps.begin(); iter != colormaps.end();)
         {
             Colormap *cmap = *iter;
             if (DDFCompareName(doomed_name.c_str(), cmap->name_.c_str()) == 0)

@@ -251,9 +251,9 @@ void HUDStartImportantMessage(const char *msg)
 void HUDTicker(void)
 {
     // tick down messages
-    for (std::deque<HUDMessage>::reverse_iterator rbegin = queued_messages.rbegin(), rend = queued_messages.rend(); rbegin != rend; rbegin++)
+    for (int i = queued_messages.size() - 1; i >= 0; i--)
     {
-        HUDMessage &msg = *rbegin;
+        HUDMessage &msg = queued_messages[i];
         msg.counter--;
         if (msg.counter <= 0)
             queued_messages.pop_back();

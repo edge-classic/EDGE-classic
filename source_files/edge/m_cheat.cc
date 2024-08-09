@@ -134,7 +134,7 @@ void M_ChangeLevelCheat(const char *string)
     params.map_ = LookupMap(string);
     if (!params.map_)
     {
-        ConsoleMessageLDF("ImpossibleChange");
+        ImportantConsoleMessageLDF("ImpossibleChange");
         return;
     }
 
@@ -149,7 +149,7 @@ void M_ChangeLevelCheat(const char *string)
 
     DeferredNewGame(params);
 
-    ConsoleMessageLDF("LevelChange");
+    ImportantConsoleMessageLDF("LevelChange");
 }
 
 //
@@ -169,7 +169,7 @@ static void M_ChangeMusicCheat(const char *string)
         return;
 
     ChangeMusic(entry_num, true);
-    ConsoleMessageLDF("MusChange");
+    ImportantConsoleMessageLDF("MusChange");
 }
 
 static void CheatGiveWeapons(Player *pl, int key = -2)
@@ -227,10 +227,12 @@ bool CheatResponder(InputEvent *ev)
             {
                 pl->health_ = pl->map_object_->health_ = pl->map_object_->spawn_health_;
             }
-            ConsoleMessageLDF("GodModeOn");
+            //ConsoleMessageLDF("GodModeOn");
+            ImportantConsoleMessageLDF("GodModeOn");
         }
         else
-            ConsoleMessageLDF("GodModeOff");
+            ImportantConsoleMessageLDF("GodModeOff");
+            //ConsoleMessageLDF("GodModeOff");
     }
 
     // 'fa' cheat for killer fucking arsenal
@@ -248,7 +250,8 @@ bool CheatResponder(InputEvent *ev)
 
         CheatGiveWeapons(pl);
 
-        ConsoleMessageLDF("AmmoAdded");
+        ImportantConsoleMessageLDF("AmmoAdded");
+        //ConsoleMessageLDF("AmmoAdded");
     }
 
     // 'kfa' cheat for key full ammo
@@ -268,20 +271,21 @@ bool CheatResponder(InputEvent *ev)
 
         CheatGiveWeapons(pl);
 
-        ConsoleMessageLDF("VeryHappyAmmo");
+        ImportantConsoleMessageLDF("VeryHappyAmmo");
+        //ConsoleMessageLDF("VeryHappyAmmo");
     }
     else if (CheckCheatSequence(&cheat_keys, key))
     {
         pl->cards_ = kDoorKeyBitmask;
 
-        ConsoleMessageLDF("UnlockCheat");
+        ImportantConsoleMessageLDF("UnlockCheat");
     }
     else if (CheckCheatSequence(&cheat_loaded, key))
     {
         for (i = 0; i < kTotalAmmunitionTypes; i++)
             pl->ammo_[i].count = pl->ammo_[i].maximum;
 
-        ConsoleMessageLDF("LoadedCheat");
+        ImportantConsoleMessageLDF("LoadedCheat");
     }
 #if 0 // FIXME: this crashes ?
 	else if (CheckCheatSequence(&cheat_take_all, key))
@@ -297,7 +301,7 @@ bool CheatResponder(InputEvent *ev)
         TelefragMapObject(pl->map_object_, pl->map_object_, nullptr);
 
         // -ACB- 1998/08/26 Suicide language reference
-        ConsoleMessageLDF("SuicideCheat");
+        ImportantConsoleMessageLDF("SuicideCheat");
     }
     // -ACB- 1998/08/27 Used Mobj linked-list code, much cleaner.
     else if (CheckCheatSequence(&cheat_kill_all, key))
@@ -318,7 +322,7 @@ bool CheatResponder(InputEvent *ev)
             }
         }
 
-        ConsoleMessageLDF("MonstersKilled", killcount);
+        ImportantConsoleMessageLDF("MonstersKilled", killcount);
     }
     // Simplified, accepting both "noclip" and "idspispopd".
     // no clipping mode cheat
@@ -327,18 +331,18 @@ bool CheatResponder(InputEvent *ev)
         pl->cheats_ ^= kCheatingNoClip;
 
         if (pl->cheats_ & kCheatingNoClip)
-            ConsoleMessageLDF("ClipOn");
+            ImportantConsoleMessageLDF("ClipOn");
         else
-            ConsoleMessageLDF("ClipOff");
+            ImportantConsoleMessageLDF("ClipOff");
     }
     else if (CheckCheatSequence(&cheat_hall_of_mirrors, key))
     {
         debug_hall_of_mirrors = debug_hall_of_mirrors.d_ ? 0 : 1;
 
         if (debug_hall_of_mirrors.d_)
-            ConsoleMessageLDF("HomDetectOn");
+            ImportantConsoleMessageLDF("HomDetectOn");
         else
-            ConsoleMessageLDF("HomDetectOff");
+            ImportantConsoleMessageLDF("HomDetectOff");
     }
 
     // 'behold?' power-up cheats
@@ -354,7 +358,7 @@ bool CheatResponder(InputEvent *ev)
             if (i == kPowerTypeBerserk)
                 pl->keep_powers_ |= (1 << kPowerTypeBerserk);
 
-            ConsoleMessageLDF("BeholdUsed");
+            ImportantConsoleMessageLDF("BeholdUsed");
         }
     }
 
@@ -375,7 +379,7 @@ bool CheatResponder(InputEvent *ev)
         {
             AddWeapon(pl, w, nullptr);
             pl->powers_[kPowerTypeInvulnerable] = 1;
-            ConsoleMessageLDF("CHOPPERSNote");
+            ImportantConsoleMessageLDF("CHOPPERSNote");
         }
     }
 

@@ -1408,7 +1408,8 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special, int tag, 
             if (failedsecurity)
             {
                 if (special->failedmessage_ != "")
-                    PlayerConsoleMessageLDF(thing->player_->player_number_, special->failedmessage_.c_str());
+                    ImportantConsoleMessageLDF(special->failedmessage_.c_str());
+                    //PlayerConsoleMessageLDF(thing->player_->player_number_, special->failedmessage_.c_str());
 
                 if (special->failed_sfx_)
                     StartSoundEffect(special->failed_sfx_, kCategoryLevel, thing);

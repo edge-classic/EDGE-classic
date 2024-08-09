@@ -50,10 +50,12 @@ General Improvements/Changes
   - Consistent code styling and formatting performed on all files under the /source_files project folder
   - Remove support for absolute paths and path traversal with '..' for the exec, ls/dir, and cat/type console commands
   - Remove support for path traversal with '..' when searching for or opening pack files
-  - FIRST and LAST fields in anims.ddf now work with TX textures
-  - Autoswitch to a new weapon even if the clip is not full
- - Restore mipmapping as independent menu option
- - Stacked pickup messages now allow multiple messages on screen simultaneously
+- FIRST and LAST fields in anims.ddf now work with TX textures
+- Autoswitch to a new weapon even if the clip is not full
+- Restore mipmapping as independent menu option
+- Stacked pickup messages now allow multiple messages on screen simultaneously. Number of simultaneous messages can be changed from options menu
+- Keylocked doors and Cheat messages moved to middle of the screen (same as "Found a Secret" message)
+ 
 
 
 Bugs fixed

@@ -555,7 +555,7 @@ function draw_all()
     InventoryScreenMultiItem()
 
     if (player.has_power(player.JET_PACK)) then --wings
-        hud.stretch_image(10, 5, 20, 20, "SPFLY0", 1)
+        hud.stretch_image(10, 5, 30, 10, "SPFLY0", 1)
     end
 
 

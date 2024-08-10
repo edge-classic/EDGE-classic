@@ -32,6 +32,7 @@
 #include "AlmostEquals.h"
 #include "con_main.h"
 #include "con_var.h"
+#include "dm_state.h"
 #include "e_input.h"
 #include "epi.h"
 #include "epi_doomdefs.h"
@@ -362,9 +363,8 @@ bool AutomapResponder(InputEvent *ev)
         return false;
 
     // Had to move the automap cheat check up here thanks to Heretic's 'ravmap'
-    // cheat - Dasho -ACB- 1999/09/28 Proper casting -AJA- 2022: allow this in
-    // deathmatch (as we don't have real multiplayer)
-    if (CheckCheatSequence(&cheat_automap, (char)sym))
+    // cheat - Dasho -ACB- 1999/09/28 Proper casting
+    if (CheckCheatSequence(&cheat_automap, (char)sym) && !InDeathmatch())
     {
         cheating = (cheating + 1) % 3;
 
@@ -1118,7 +1118,7 @@ static void AutomapWalkThing(MapObject *mo)
 {
     int index = kAutomapColorScenery;
 
-    if (mo->player_ && mo->player_->map_object_ == mo)
+    if (mo->player_ && (InCooperativeMatch() || (mo->player_ == players[display_player])) && mo->player_->map_object_ == mo)
     {
         AutomapDrawPlayer(mo);
         return;

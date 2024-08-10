@@ -311,6 +311,13 @@ class AttackDefinition
     const MapObjectDefinition *puff_;
     std::string                puff_ref_;
 
+    // blood object. The mobjdef pointer only becomes valid after
+    // DDFAttackCleanUp() has been called.  Can be nullptr.
+    // If defined, this will override any blood that a thing would normally
+    // spawn after being hit by this attack
+    const MapObjectDefinition *blood_;
+    std::string                blood_ref_;
+
     // For DUALATTACK type only
     AttackDefinition *dualattack1_;
     AttackDefinition *dualattack2_;

@@ -1599,12 +1599,11 @@ void A_CreateSmokeTrail(MapObject *projectile)
     }
 
     // spawn a puff of smoke behind the rocket
-    MapObject *smoke = CreateMapObject(projectile->x - projectile->momentum_.X / 2.0f,
-                                       projectile->y - projectile->momentum_.Y / 2.0f, projectile->z, attack->puff_);
+    MapObject *smoke = CreateMapObject((projectile->x - projectile->momentum_.X / 2.0f) + (RandomByteSkewToZero() % 10),
+                                       (projectile->y - projectile->momentum_.Y / 2.0f) + (RandomByteSkewToZero() % 10), projectile->z + (RandomByteSkewToZero() % 4), attack->puff_);
 
-    smoke->momentum_.Z = smoke->info_->float_speed_;
+    smoke->momentum_.Z = smoke->info_->float_speed_ + (RandomByte() % 3);
     smoke->tics_ -= RandomByte() & 3;
-
     if (smoke->tics_ < 1)
         smoke->tics_ = 1;
 }
@@ -1878,7 +1877,7 @@ static void ShotAttack(MapObject *mo)
         if (mo->player_ && !AlmostEquals(mo->player_->powers_[kPowerTypeBerserk], 0.0f))
             damage *= attack->berserk_mul_;
 
-        LineAttack(mo, angle, range, slope, damage, &attack->damage_, attack->puff_);
+        LineAttack(mo, angle, range, slope, damage, &attack->damage_, attack->puff_, attack->blood_);
     }
 }
 
@@ -1944,7 +1943,7 @@ static void DoMeleeAttack(MapObject *mo)
 
     if (!DecideMeleeAttack(mo, attack))
     {
-        LineAttack(mo, mo->angle_, range, epi::BAMTan(mo->vertical_angle_), damage, &attack->damage_, attack->puff_);
+        LineAttack(mo, mo->angle_, range, epi::BAMTan(mo->vertical_angle_), damage, &attack->damage_, attack->puff_, attack->blood_);
         return;
     }
 
@@ -1955,7 +1954,7 @@ static void DoMeleeAttack(MapObject *mo)
 
     AimLineAttack(mo, mo->angle_, range, &slope);
 
-    LineAttack(mo, mo->angle_, range, slope, damage, &attack->damage_, attack->puff_);
+    LineAttack(mo, mo->angle_, range, slope, damage, &attack->damage_, attack->puff_, attack->blood_);
 }
 
 //-------------------------------------------------------------------

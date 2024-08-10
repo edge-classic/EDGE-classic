@@ -138,6 +138,7 @@ struct ShootAttempt
     float                      damage;
     const DamageClass         *damage_type;
     const MapObjectDefinition *puff;
+    const MapObjectDefinition *blood;
     float                      previous_z;
 
     // output field:
@@ -2269,7 +2270,9 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
 
     if (use_blood)
     {
-        if (mo->info_->blood_ != nullptr)
+        if (shoot_check.blood)
+            SpawnBlood(x, y, z, shoot_check.damage, shoot_check.angle, shoot_check.blood);
+        else if (mo->info_->blood_)
             SpawnBlood(x, y, z, shoot_check.damage, shoot_check.angle, mo->info_->blood_);
     }
     else
@@ -2322,7 +2325,7 @@ MapObject *AimLineAttack(MapObject *t1, BAMAngle angle, float distance, float *s
 }
 
 void LineAttack(MapObject *t1, BAMAngle angle, float distance, float slope, float damage, const DamageClass *damtype,
-                const MapObjectDefinition *puff)
+                const MapObjectDefinition *puff, const MapObjectDefinition *blood)
 {
     // Note: Damtype can be nullptr.
 
@@ -2344,6 +2347,7 @@ void LineAttack(MapObject *t1, BAMAngle angle, float distance, float slope, floa
     shoot_check.damage_type = damtype;
     shoot_check.previous_z  = shoot_check.start_z;
     shoot_check.puff        = puff;
+    shoot_check.blood       = blood;
 
     PathTraverse(t1->x, t1->y, x2, y2, kPathAddLines | kPathAddThings, ShootTraverseCallback);
 }

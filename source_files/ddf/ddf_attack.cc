@@ -101,6 +101,7 @@ static const DDFCommandList attack_commands[] = {
     DDF_FIELD("SPAWN_OBJECT_STATE", dummy_atk, objinitstate_ref_, DDFMainGetString),
     DDF_FIELD("SPAWN_LIMIT", dummy_atk, spawn_limit_, DDFMainGetNumeric),
     DDF_FIELD("PUFF", dummy_atk, puff_ref_, DDFMainGetString),
+    DDF_FIELD("BLOOD", dummy_atk, blood_ref_, DDFMainGetString),
     DDF_FIELD("ATTACK_CLASS", dummy_atk, attack_class_, DDFMainGetBitSet),
     DDF_FIELD("DUALATTACK1", dummy_atk, dualattack1_, DDFMainRefAttack),
     DDF_FIELD("DUALATTACK2", dummy_atk, dualattack2_, DDFMainRefAttack),
@@ -360,6 +361,8 @@ void DDFAttackCleanUp(void)
 
         a->puff_ = a->puff_ref_.empty() ? nullptr : mobjtypes.Lookup(a->puff_ref_.c_str());
 
+        a->blood_ = a->blood_ref_.empty() ? nullptr : mobjtypes.Lookup(a->blood_ref_.c_str());
+
         a->spawnedobj_ = a->spawnedobj_ref_.empty() ? nullptr : mobjtypes.Lookup(a->spawnedobj_ref_.c_str());
 
         if (a->spawnedobj_)
@@ -519,6 +522,8 @@ void AttackDefinition::CopyDetail(AttackDefinition &src)
     spawn_limit_      = src.spawn_limit_;
     puff_             = src.puff_;
     puff_ref_         = src.puff_ref_;
+    blood_             = src.blood_;
+    blood_ref_         = src.blood_ref_;
     dualattack1_      = src.dualattack1_;
     dualattack2_      = src.dualattack2_;
 }
@@ -559,6 +564,8 @@ void AttackDefinition::Default()
     spawn_limit_ = 0; // unlimited
     puff_        = nullptr;
     puff_ref_.clear();
+    blood_        = nullptr;
+    blood_ref_.clear();
     dualattack1_ = nullptr;
     dualattack2_ = nullptr;
 }

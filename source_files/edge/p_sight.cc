@@ -518,7 +518,7 @@ bool CheckSight(MapObject *src, MapObject *dest)
     {
         float objslope;
         AimLineAttack(src, sight_check.angle, 64000, &objslope);
-        LineAttack(src, sight_check.angle, 64000, objslope, 0, nullptr, nullptr);
+        LineAttack(src, sight_check.angle, 64000, objslope, 0, nullptr, nullptr, nullptr);
         bool slope_sight_good = dest->slope_sight_hit_;
         if (slope_sight_good)
         {

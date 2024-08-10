@@ -220,7 +220,7 @@ bool TryMove(MapObject *thing, float x, float y);
 void SlideMove(MapObject *mo, float x, float y);
 void UseLines(Player *player);
 void LineAttack(MapObject *t1, BAMAngle angle, float distance, float slope, float damage, const DamageClass *damtype,
-                const MapObjectDefinition *puff);
+                const MapObjectDefinition *puff, const MapObjectDefinition *blood);
 
 void UnblockLineEffectDebris(Line *TheLine, const LineType *special);
 

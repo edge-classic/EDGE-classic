@@ -3,6 +3,15 @@ CHANGELOG for EDGE-Classic 1.38 (since EDGE-Classic 1.37)
 
 New Features
 ------------
++ IWAD support added for Chex Quest 3: Vanilla and Chex Quest 3: Modding (both can be found at https://melodic-spaceship.neocities.org/chex3v/downloads)
+  - MBF dog sprites from CQ3 Vanilla also added to original Chex Quest 1 base
++ IWAD support added for Harmony Compatible (https://www.doomworld.com/idgames/levels/doom2/Ports/g-i/harmonyc)
+  - Support for the original Harmony release remains unchanged
++ Console: New commands
+  - cd : Allows switching directory contexts for the ls/dir, exec, pwd, and cat/type commands. Valid options are 'game' and 'home'
+    - Note that when running in portable mode these will resolve to the same path.
+  - pwd : Print real path to either home or game directory
+    - As above, in portable mode these are the same thing.
 + COALHUDS/LUAHUDS: New commands 
 	- hud.lookup_LDF(languageEntry) which will return the language.ldf entry
 	- hud.game_skill() which will return a number from 0 to 4 reflecting the current game skill
@@ -21,9 +30,13 @@ New Features
 + New CVARs/params:
   - "use_menu_backdrop" which governs the use of the auto-generated monochrome backdrop for option menus
   - "fliplevels" allows you to play a mirrored version of the map. All textures will also be mirrored.
+    - New "flipme" cheat code also allows this to be toggled during gameplay
 + STYLES.DDF: able to add a dropshadow effect to TEXT, ALT, TITLE, HELP, HEADER or SELECTED strings via 2 new sub-commands
   - .DROPSHADOW_COLOURMAP = [colourmap];  //"TEXT_BLACK" colmap generally looks good with everything
   - .DROPSHADOW_OFFSET = [float]; //smaller values like 1 or 2 are best
++ STYLES.DDF: ENTRY_ALIGNMENT will now work with the MESSAGE style (pickup messages)
+  - Values other than "LEFT" or "RIGHT" will center the messages as usual
+  - Only X alignment can be altered; pickup messages will always be at the top of the screen
 
 
 
@@ -39,6 +52,13 @@ General Improvements/Changes
 - Limited fallback IWAD selection dialog to 8 options, even if more valid games are found.
   - This is to account for a hardcoded SDL limitation for some backends
 - Tweaked MIDI/OPL default gain levels to be more consistent with each other
+- FIRST and LAST fields in anims.ddf now work with TX textures
+- Autoswitch to a new weapon works even if the new weapon's clip is not full
+- Restore mipmapping as independent menu option
+- Stacked pickup messages now allow multiple messages on screen simultaneously. Number of simultaneous messages can be changed from options menu
+- Keylocked doors and Cheat messages moved to middle of the screen (same as "Found a Secret" message)
+- Chex Quest
+- Updated Blasphemer base files to support the latest Catoptromancy fork (https://github.com/Catoptromancy/blasphemer/releases/tag/006 as of 1.38)
 - Developers:
   - Support for exceptions/RTTI removed from program with compiler flags/options set accordingly
     - Primesynth swapped back to Fluidlite for MIDI playback due to Primesynth's heavy reliance on exceptions
@@ -48,13 +68,8 @@ General Improvements/Changes
   - Simple macros converted to either inline functions or constexpr values as appropriate
     - Remaining macros use consistent naming scheme (EDGE_*, DDF_*, EPI_*, etc)
   - Consistent code styling and formatting performed on all files under the /source_files project folder
-  - Remove support for absolute paths and path traversal with '..' for the exec, ls/dir, and cat/type console commands
-  - Remove support for path traversal with '..' when searching for or opening pack files
-- FIRST and LAST fields in anims.ddf now work with TX textures
-- Autoswitch to a new weapon even if the clip is not full
-- Restore mipmapping as independent menu option
-- Stacked pickup messages now allow multiple messages on screen simultaneously. Number of simultaneous messages can be changed from options menu
-- Keylocked doors and Cheat messages moved to middle of the screen (same as "Found a Secret" message)
+  - Removed support for absolute paths and path traversal with '..' for the exec, ls/dir, and cat/type console commands
+  - Removed support for path traversal with '..' when searching for or opening pack files
  
 
 
@@ -74,4 +89,5 @@ Bugs fixed
 - Fixed UDMF 'ypanningfloor' and 'ypanningceiling' using inverted values.
 - Fixed COAL/Lua functions hud.get_image_width() and hud.get_image_height() not returning 0 if image does not exist.
 - Fixed multiple RTS scripts with the same tag not running simultaneously: we were only running the first one basically.
-
+- Fixed bot automap arrows being drawn in deathmatch; reinstated disabling of automap cheats when in deathmatch
+- Fixed raw flats exported from SLADE (.raw extension) from being recognized and loaded properly when in an EPK/folder

@@ -1599,10 +1599,10 @@ void A_CreateSmokeTrail(MapObject *projectile)
     }
 
     // spawn a puff of smoke behind the rocket
-    MapObject *smoke = CreateMapObject((projectile->x - projectile->momentum_.X / 2.0f) + (RandomByteSkewToZero() % 10),
-                                       (projectile->y - projectile->momentum_.Y / 2.0f) + (RandomByteSkewToZero() % 10), projectile->z + (RandomByteSkewToZero() % 4), attack->puff_);
+    MapObject *smoke = CreateMapObject(projectile->x - projectile->momentum_.X / 2.0f,
+                                       projectile->y - projectile->momentum_.Y / 2.0f, projectile->z, attack->puff_);
 
-    smoke->momentum_.Z = smoke->info_->float_speed_ + (RandomByte() % 3);
+    smoke->momentum_.Z = smoke->info_->float_speed_;
     smoke->tics_ -= RandomByte() & 3;
     if (smoke->tics_ < 1)
         smoke->tics_ = 1;

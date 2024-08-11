@@ -37,7 +37,8 @@ New Features
 + STYLES.DDF: ENTRY_ALIGNMENT will now work with the MESSAGE style (pickup messages)
   - Values other than "LEFT" or "RIGHT" will center the messages as usual
   - Only X alignment can be altered; pickup messages will always be at the top of the screen
-
++ ATTACKS.DDF: 
+  - BLOOD=[things.ddf entry] command added to allow overriding how the monsters bleeds. Any monster hit with this attack will use this blood object instead of its own.
 
 
 General Improvements/Changes

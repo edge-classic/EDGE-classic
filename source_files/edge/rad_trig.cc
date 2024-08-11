@@ -172,18 +172,28 @@ class rts_menu_c
 
         HUDSetAlignment(0, -1);
 
-        HUDSetScale(style->definition_->text_[2].scale_); // LOBO: Use TITLE.SCALE from styles.ddf
-        HUDSetFont(style->fonts_[2]);                     // LOBO: Use TITLE.FONT from styles.ddf
+        HUDSetScale(style->definition_->text_[StyleDefinition::kTextSectionTitle].scale_); // LOBO: Use TITLE.SCALE from styles.ddf
+        HUDSetFont(style->fonts_[StyleDefinition::kTextSectionTitle]);                     // LOBO: Use TITLE.FONT from styles.ddf
 
         float total_h = HUDStringHeight(title.c_str());
         total_h += HUDFontHeight() * (NumChoices() + 1);
 
         float y = 100 - total_h / 2.0f;
 
-        if (style->definition_->text_[2].colmap_)
+        //Dropshadow code
+        const Colormap *Dropshadow_colmap_Title = style->definition_->text_[StyleDefinition::kTextSectionTitle].dropshadow_colmap_;
+        if (Dropshadow_colmap_Title) //we want a dropshadow
+        {
+            float Dropshadow_Offset = style->definition_->text_[StyleDefinition::kTextSectionTitle].dropshadow_offset_;
+            Dropshadow_Offset *= style->definition_->text_[StyleDefinition::kTextSectionTitle].scale_;
+            HUDSetTextColor(GetFontColor(Dropshadow_colmap_Title));
+            HUDDrawText(160 + Dropshadow_Offset, y + Dropshadow_Offset, title.c_str());
+        }
+
+        if (style->definition_->text_[StyleDefinition::kTextSectionTitle].colmap_)
         {
             HUDSetTextColor(
-                GetFontColor(style->definition_->text_[2].colmap_)); // LOBO: Use TITLE.COLOURMAP from styles.ddf
+                GetFontColor(style->definition_->text_[StyleDefinition::kTextSectionTitle].colmap_)); // LOBO: Use TITLE.COLOURMAP from styles.ddf
         }
         else
         {
@@ -196,24 +206,34 @@ class rts_menu_c
         HUDSetFont();
         HUDSetTextColor();
 
-        HUDSetScale(style->definition_->text_[0].scale_); // LOBO: Use TEXT.SCALE from styles.ddf
-        HUDSetFont(style->fonts_[0]);                     // LOBO: Use TEXT.FONT from styles.ddf
+        HUDSetScale(style->definition_->text_[StyleDefinition::kTextSectionText].scale_); // LOBO: Use TEXT.SCALE from styles.ddf
+        HUDSetFont(style->fonts_[StyleDefinition::kTextSectionText]);                     // LOBO: Use TEXT.FONT from styles.ddf
 
         y += HUDStringHeight(title.c_str());
         y += HUDFontHeight();
 
-        if (style->definition_->text_[0].colmap_)
-        {
-            HUDSetTextColor(
-                GetFontColor(style->definition_->text_[0].colmap_)); // LOBO: Use TEXT.COLOURMAP from styles.ddf
-        }
-        else
-        {
-            HUDSetTextColor(SG_LIGHT_BLUE_RGBA32);
-        }
+        
+        const Colormap *Dropshadow_colmap_Text = style->definition_->text_[StyleDefinition::kTextSectionText].dropshadow_colmap_;
 
         for (int c = 0; c < NumChoices(); c++, y += HUDFontHeight())
         {
+            if (Dropshadow_colmap_Text) //we want a dropshadow
+            {
+                float Dropshadow_Offset = style->definition_->text_[StyleDefinition::kTextSectionText].dropshadow_offset_;
+                Dropshadow_Offset *= style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
+                HUDSetTextColor(GetFontColor(Dropshadow_colmap_Text));
+                HUDDrawText(160 + Dropshadow_Offset, y + Dropshadow_Offset, choices[c].c_str());
+            }
+
+            if (style->definition_->text_[StyleDefinition::kTextSectionText].colmap_)
+            {
+                HUDSetTextColor(
+                GetFontColor(style->definition_->text_[StyleDefinition::kTextSectionText].colmap_)); // LOBO: Use TEXT.COLOURMAP from styles.ddf
+            }
+            else
+            {
+                HUDSetTextColor(SG_LIGHT_BLUE_RGBA32);
+            }
             HUDDrawText(160, y, choices[c].c_str());
         }
         HUDSetScale();

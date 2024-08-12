@@ -388,6 +388,7 @@ const DDFSpecialFlags armourtype_names[] = {
 const DDFSpecialFlags powertype_names[] = {
     {"POWERUP_INVULNERABLE", kPowerTypeInvulnerable, 0}, {"POWERUP_BARE_BERSERK", kPowerTypeBerserk, 0},
     {"POWERUP_BERSERK", kPowerTypeBerserk, 0},           {"POWERUP_PARTINVIS", kPowerTypePartInvis, 0},
+    {"POWERUP_TRANSLUCENT", kPowerTypePartInvisTranslucent, 0},
     {"POWERUP_ACIDSUIT", kPowerTypeAcidSuit, 0},         {"POWERUP_AUTOMAP", kPowerTypeAllMap, 0},
     {"POWERUP_LIGHTGOGGLES", kPowerTypeInfrared, 0},     {"POWERUP_JETPACK", kPowerTypeJetpack, 0},
     {"POWERUP_NIGHTVISION", kPowerTypeNightVision, 0},   {"POWERUP_SCUBA", kPowerTypeScuba, 0},

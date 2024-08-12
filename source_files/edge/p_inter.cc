@@ -587,9 +587,13 @@ static void GivePower(PickupInfo *pu, Benefit *be)
 
     // special handling for scuba...
     if (be->sub.type == kPowerTypeScuba)
-    {
         pu->player->air_in_lungs_ = pu->player->map_object_->info_->lung_capacity_;
-    }
+
+    // deconflict fuzzy and translucent style partial invis
+    if (be->sub.type == kPowerTypePartInvisTranslucent)
+        pu->player->powers_[kPowerTypePartInvis] = 0;
+    else if (be->sub.type == kPowerTypePartInvis)
+        pu->player->powers_[kPowerTypePartInvisTranslucent] = 0;
 
     pu->got_it = true;
 }

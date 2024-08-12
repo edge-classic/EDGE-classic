@@ -495,13 +495,13 @@ enum PowerType
     kPowerTypeNightVision,
     kPowerTypeScuba,
     kPowerTypeTimeStop,
-    kPowerTypeUnused10,
+    // Heretic "shadow" effect, same as PartInvis with different aesthetics
+    kPowerTypePartInvisTranslucent,
     kPowerTypeUnused11,
     kPowerTypeUnused12,
     kPowerTypeUnused13,
     kPowerTypeUnused14,
     kPowerTypeUnused15,
-    // -AJA- Note: Savegame code relies on kTotalPowerTypes == 16.
     kTotalPowerTypes
 };
 

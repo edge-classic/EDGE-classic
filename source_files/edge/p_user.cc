@@ -606,10 +606,20 @@ static void UpdatePowerups(Player *player)
         }
     }
 
-    if (player->powers_[kPowerTypePartInvis] >= 128 || fmod(player->powers_[kPowerTypePartInvis], 16) >= 8)
-        player->map_object_->flags_ |= kMapObjectFlagFuzzy;
+    if (player->powers_[kPowerTypePartInvisTranslucent] > 0)
+    {
+        if (player->powers_[kPowerTypePartInvisTranslucent] >= 128 || fmod(player->powers_[kPowerTypePartInvisTranslucent], 16) >= 8)
+            player->map_object_->flags_ |= kMapObjectFlagFuzzy;
+        else
+            player->map_object_->flags_ &= ~kMapObjectFlagFuzzy;
+    }
     else
-        player->map_object_->flags_ &= ~kMapObjectFlagFuzzy;
+    {
+        if (player->powers_[kPowerTypePartInvis] >= 128 || fmod(player->powers_[kPowerTypePartInvis], 16) >= 8)
+            player->map_object_->flags_ |= kMapObjectFlagFuzzy;
+        else
+            player->map_object_->flags_ &= ~kMapObjectFlagFuzzy;
+    }
 
     // Handling colormaps.
     //

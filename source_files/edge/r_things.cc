@@ -160,6 +160,12 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
 
     float trans = player->map_object_->visibility_;
 
+    if (is_fuzzy && player->powers_[kPowerTypePartInvisTranslucent] > 0)
+    {
+        is_fuzzy = false;
+        trans *= 0.3f;
+    }
+
     if (which == kPlayerSpriteCrosshair)
     {
         if (!player->weapons_[player->ready_weapon_].info->ignore_crosshair_scaling_)

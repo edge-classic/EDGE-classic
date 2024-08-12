@@ -72,7 +72,7 @@ static void UpdatePickupMessages(ConsoleVariable *self)
         queued_messages.pop_back();
 }
 
-EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK_CLAMPED(maximum_pickup_messages, "3", kConsoleVariableFlagArchive, UpdatePickupMessages, 0, 3);
+EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK_CLAMPED(maximum_pickup_messages, "2", kConsoleVariableFlagArchive, UpdatePickupMessages, 0, 3);
 
 //
 // Heads-up Init

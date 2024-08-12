@@ -476,7 +476,7 @@ class MDLCoordinateData
     float lerp_;
     float x_, y_, z_;
 
-    bool is_weapon_;
+    bool is_weapon;
     bool is_fuzzy_;
 
     // scaling
@@ -576,7 +576,7 @@ static void ShadeNormals(AbstractShader *shader, MDLCoordinateData *data, bool s
             nz = nz2;
         }
 
-        shader->Corner(data->normal_colors_ + n, nx, ny, nz, data->map_object_, data->is_weapon_);
+        shader->Corner(data->normal_colors_ + n, nx, ny, nz, data->map_object_, data->is_weapon);
     }
 }
 
@@ -713,6 +713,12 @@ void MDLRenderModel(MDLModel *md, const Image *skin_img, bool is_weapon, int fra
 
     float trans = mo->visibility_;
 
+    if (is_weapon && data.is_fuzzy_ && mo->player_ && mo->player_->powers_[kPowerTypePartInvisTranslucent] > 0)
+    {
+        data.is_fuzzy_ = false;
+        trans *= 0.3f;
+    }
+
     if (trans <= 0)
         return;
 
@@ -748,7 +754,7 @@ void MDLRenderModel(MDLModel *md, const Image *skin_img, bool is_weapon, int fra
     data.y_ = y;
     data.z_ = z;
 
-    data.is_weapon_ = is_weapon;
+    data.is_weapon = is_weapon;
 
     data.xy_scale_ = scale * aspect * MirrorXYScale();
     data.z_scale_  = scale * MirrorZScale();
@@ -780,7 +786,7 @@ void MDLRenderModel(MDLModel *md, const Image *skin_img, bool is_weapon, int fra
         data.image_right_ = 1.0;
         data.image_top_   = 1.0;
 
-        if (!data.is_weapon_ && !view_is_zoomed)
+        if (!data.is_weapon && !view_is_zoomed)
         {
             float dist = ApproximateDistance(mo->x - view_x, mo->y - view_y, mo->z - view_z);
 

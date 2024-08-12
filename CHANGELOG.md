@@ -26,6 +26,9 @@ New Features
 + GAMES.DDF: New command 
 	- DEFAULT_DAMAGE_FLASH = (hex) which will set damage flashes from all sources to this color unless specified otherwise in an individual DDFATK entry.
 + THINGS.DDF: 
+  - New Powerup type: POWERUP_TRANSLUCENT
+    - Functions identically to POWERUP_PARTINVIS, but uses translucency instead of the Doom "fuzzy" effect
+    - POWERUP_TRANSLUCENT and POWERUP_PARTINVIS are mutually exclusive
   - New Special flag: TRIGGER_TELEPORTS which will allow this thing to use teleports even if NO_TRIGGER_LINES is set. i.e. you want a dog that cannot open a door, but can teleport for example.
 + New CVARs/params:
   - "use_menu_backdrop" which governs the use of the auto-generated monochrome backdrop for option menus

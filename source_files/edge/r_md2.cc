@@ -780,7 +780,7 @@ class MD2CoordinateData
     float lerp_;
     float x_, y_, z_;
 
-    bool is_weapon_;
+    bool is_weapon;
     bool is_fuzzy_;
 
     // scaling
@@ -880,7 +880,7 @@ static void ShadeNormals(AbstractShader *shader, MD2CoordinateData *data, bool s
             nz = nz2;
         }
 
-        shader->Corner(data->normal_colors_ + n, nx, ny, nz, data->map_object_, data->is_weapon_);
+        shader->Corner(data->normal_colors_ + n, nx, ny, nz, data->map_object_, data->is_weapon);
     }
 }
 
@@ -995,7 +995,7 @@ static inline void ModelCoordFunc(MD2CoordinateData *data, int v_idx, HMM_Vec3 *
     rgb[2] *= render_view_blue_multiplier;
 }
 
-void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon_, int frame1, int frame2, float lerp, float x,
+void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int frame1, int frame2, float lerp, float x,
                     float y, float z, MapObject *mo, RegionProperties *props, float scale, float aspect, float bias_,
                     int rotation)
 {
@@ -1016,6 +1016,12 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon_, int fr
     data.is_fuzzy_ = (mo->flags_ & kMapObjectFlagFuzzy) ? true : false;
 
     float trans = mo->visibility_;
+
+    if (is_weapon && data.is_fuzzy_ && mo->player_ && mo->player_->powers_[kPowerTypePartInvisTranslucent] > 0)
+    {
+        data.is_fuzzy_ = false;
+        trans *= 0.3f;
+    }
 
     if (trans <= 0)
         return;
@@ -1062,13 +1068,13 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon_, int fr
     data.y_ = y;
     data.z_ = z;
 
-    data.is_weapon_ = is_weapon_;
+    data.is_weapon = is_weapon;
 
     data.xy_scale_ = scale * aspect * MirrorXYScale();
     data.z_scale_  = scale * MirrorZScale();
     data.bias_     = bias_;
 
-    bool tilt = is_weapon_ || (mo->flags_ & kMapObjectFlagMissile) || (mo->hyper_flags_ & kHyperFlagForceModelTilt);
+    bool tilt = is_weapon || (mo->flags_ & kMapObjectFlagMissile) || (mo->hyper_flags_ & kHyperFlagForceModelTilt);
 
     BAMAngleToMatrix(tilt ? ~mo->vertical_angle_ : 0, &data.mouselook_x_matrix_, &data.mouselook_z_matrix_);
 
@@ -1094,7 +1100,7 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon_, int fr
         data.image_right_ = 1.0;
         data.image_top_   = 1.0;
 
-        if (!data.is_weapon_ && !view_is_zoomed)
+        if (!data.is_weapon && !view_is_zoomed)
         {
             float dist = ApproximateDistance(mo->x - view_x, mo->y - view_y, mo->z - view_z);
 
@@ -1112,7 +1118,7 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon_, int fr
     {
         skin_tex = ImageCache(skin_img, false,
                               render_view_effect_colormap ? render_view_effect_colormap
-                              : is_weapon_                ? nullptr
+                              : is_weapon                ? nullptr
                                                           : mo->info_->palremap_);
 
         data.image_right_ = skin_img->Right();

@@ -1337,14 +1337,14 @@ void HUDDrawQuitScreen()
             HUDDrawQuitText(i, FNX, FNY, cx);
         }
         HUDSetAlignment(0, -1);
-        HUDDrawText(160, 195 - HUDStringHeight("Are you sure you want to quit? (Y/N)"),
-                    "Are you sure you want to quit? (Y/N)");
+        HUDDrawText(160, 195 - HUDStringHeight(language["PressToQuit"]),
+                    language["PressToQuit"]);
     }
     else
     {
         HUDSetAlignment(0, -1);
-        HUDDrawText(160, 100 - (HUDStringHeight("Are you sure you want to quit? (Y/N)") / 2),
-                    "Are you sure you want to quit? (Y/N)");
+        HUDDrawText(160, 100 - (HUDStringHeight(language["PressToQuit"]) / 2),
+                    language["PressToQuit"]);
     }
 }
 

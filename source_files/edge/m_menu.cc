@@ -90,6 +90,7 @@ extern unsigned int UploadTexture(ImageData *img, int flags, int max_pix);
 extern const Image *menu_backdrop;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(use_menu_backdrop, "1", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(show_endoom, "1", kConsoleVariableFlagArchive)
 
 //
 // defaulted values
@@ -2334,8 +2335,8 @@ static std::string GetMiddle(std::string &str, int pos, int len)
 
 static void DrawMessage(void)
 {
-    if (message_key_routine == QuitResponse && !exit_style->background_image_) // Respect dialog styles with custom
-                                                                               // backgrounds
+    if (message_key_routine == QuitResponse && !exit_style->background_image_ && show_endoom.d_) // Respect dialog styles with custom
+                                                                               // backgrounds and user preference
     {
         StartFrame(); // To clear and ensure solid black background regardless
                       // of style

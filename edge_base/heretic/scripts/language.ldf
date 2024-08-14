@@ -238,6 +238,8 @@ idkillall="massacre";
 idsuicide="iddqd";
 
 SuicideCheat="Trying to cheat, eh? Now you die!";
+
+ENDOOMOnQuit="Show ENDTEXT on Quit";
  
  
  

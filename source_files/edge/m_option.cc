@@ -135,6 +135,7 @@ extern ConsoleVariable view_bobbing;
 extern ConsoleVariable gore_level;
 extern ConsoleVariable skip_intros;
 extern ConsoleVariable maximum_pickup_messages;
+extern ConsoleVariable show_endoom;
 
 // extern console_variable_c automap_keydoor_text;
 
@@ -418,6 +419,8 @@ static OptionMenuDefinition video_optmenu = {
 // -ACB- 1998/07/15 Altered menu structure
 
 static OptionMenuItem uioptions[] = {
+    {kOptionMenuItemTypeBoolean, language["ENDOOMOnQuit"], YesNo, 2, &show_endoom.d_,
+     OptionMenuUpdateConsoleVariableFromInt, nullptr, &show_endoom},
     {kOptionMenuItemTypeBoolean, "Map Rotation", YesNo, 2, &rotate_map, nullptr, nullptr},
     {kOptionMenuItemTypeBoolean, "Obituary Messages", YesNo, 2, &show_obituaries, nullptr, nullptr},
     {kOptionMenuItemTypeBoolean, "Screenshot Format", "JPEG/PNG", 2, &png_screenshots, nullptr, nullptr},

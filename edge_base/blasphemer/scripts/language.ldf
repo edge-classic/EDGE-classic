@@ -142,7 +142,9 @@ idkillall="massacre";
 idsuicide="iddqd";
 
 GodModeON="God Mode On";
-GodModeOFF="God Mode Off"; 
+GodModeOFF="God Mode Off";
+
+ENDOOMOnQuit="Show ENDTEXT on Quit";
  
  
  

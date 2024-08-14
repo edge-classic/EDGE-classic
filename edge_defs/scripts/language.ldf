@@ -102,6 +102,7 @@ EndNetGame="you can't end a netgame!\n\npress a key.";
 EndGameCheck="are you sure you want to end the game?\n\npress y or n.";
 
 PressToQuit="(press y to quit)";
+ENDOOMOnQuit="Show ENDOOM on Quit";
 
 GammaOff="Gamma correction OFF";
 GammaLevelOne  ="Gamma correction level 1";

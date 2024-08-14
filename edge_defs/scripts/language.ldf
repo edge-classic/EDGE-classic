@@ -31,6 +31,7 @@ NoBrowseFromWeb="Cannot open a file browser from the web player!";
 
 MenuOptions="Options";
 MenuVideo="Video Options";
+MenuUI="UI Options";
 MenuResolution="Screen Options";
 MenuScreen="Screen Options";
 MenuMouse="Mouse / Controller";

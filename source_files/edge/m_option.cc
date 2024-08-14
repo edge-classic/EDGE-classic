@@ -163,6 +163,7 @@ extern int entry_playing;
 // submenus
 static void OptionMenuKeyboardOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuVideoOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
+static void OptionMenuUIOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuGameplayOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuPerformanceOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuAccessibilityOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
@@ -332,10 +333,10 @@ static int OptionMenuGetCurrentSwitchValue(OptionMenuItem *item)
 //  MAIN MENU
 //
 #ifdef EDGE_WEB
-static constexpr uint8_t kOptionMenuLanguagePosition    = 9;
+static constexpr uint8_t kOptionMenuLanguagePosition    = 10;
 static constexpr uint8_t kOptionMenuNetworkHostPosition = 12;
 #else
-static constexpr uint8_t kOptionMenuLanguagePosition    = 10;
+static constexpr uint8_t kOptionMenuLanguagePosition    = 11;
 static constexpr uint8_t kOptionMenuNetworkHostPosition = 13;
 #endif
 
@@ -349,6 +350,7 @@ static OptionMenuItem mainoptions[] = {
      "PerformanceOptions"},
     {kOptionMenuItemTypeFunction, "MenuAccessibility", nullptr, 0, nullptr, OptionMenuAccessibilityOptions,
      "AccessibilityOptions"},
+    {kOptionMenuItemTypeFunction, "MenuUI", nullptr, 0, nullptr, OptionMenuUIOptions, "UIOptions"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeFunction, "MenuSound", nullptr, 0, nullptr, OptionMenuSoundOptions, "SoundOptions"},
     {kOptionMenuItemTypeFunction, "MenuVideo", nullptr, 0, nullptr, OptionMenuVideoOptions, "VideoOptions"},
@@ -357,7 +359,6 @@ static OptionMenuItem mainoptions[] = {
 #endif
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeFunction, "MenuLanguage", nullptr, 0, nullptr, OptionMenuChangeLanguage, nullptr},
-    {kOptionMenuItemTypeSwitch, "MenuMessages", YesNo, 2, &show_messages, nullptr, "Messages"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeFunction, "MenuStartBotmatch", nullptr, 0, nullptr, OptionMenuHostNetGame, nullptr},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
@@ -397,31 +398,44 @@ static OptionMenuItem vidoptions[] = {
     {kOptionMenuItemTypeSwitch, "Dynamic Lighting", YesNo, 2, &use_dynamic_lights, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Overlay", "None/Lines 1x/Lines 2x/Vertical 1x/Vertical 2x/Grill 1x/Grill 2x", 7,
      &video_overlay.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &video_overlay},
-    {kOptionMenuItemTypeSwitch, "Crosshair", "None/Dot/Angle/Plus/Spiked/Thin/Cross/Carat/Circle/Double", 10,
-     &crosshair_style.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &crosshair_style},
-    {kOptionMenuItemTypeSwitch, "Crosshair Color", "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange", 8,
-     &crosshair_color.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &crosshair_color},
-    {kOptionMenuItemTypeSlider, "Crosshair Size", nullptr, 0, &crosshair_size.f_,
-     OptionMenuUpdateConsoleVariableFromFloat, nullptr, &crosshair_size, 1.0f, 2.0f, 64.0f, "%g Pixels"},
-    {kOptionMenuItemTypeBoolean, "Map Rotation", YesNo, 2, &rotate_map, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Invulnerability", "Simple/Textured", kTotalInvulnerabilityEffects,
      &invulnerability_effect, nullptr, nullptr},
 #ifndef EDGE_WEB
     {kOptionMenuItemTypeSwitch, "Wipe method", "None/Melt/Crossfade/Pixelfade/Top/Bottom/Left/Right/Spooky/Doors",
      kTotalScreenWipeTypes, &wipe_method, nullptr, nullptr},
 #endif
-    {kOptionMenuItemTypeBoolean, "Screenshot Format", "JPEG/PNG", 2, &png_screenshots, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Animated Liquid Type", "Vanilla/SMMU/SMMU+Swirl/Parallax", 4, &swirling_flats, nullptr,
-     nullptr},
-    {kOptionMenuItemTypeBoolean, "Skip Startup Movies", YesNo, 2, &skip_intros.d_,
-     OptionMenuUpdateConsoleVariableFromInt, nullptr, &skip_intros},
-    {kOptionMenuItemTypeSwitch, "Max Pickup Messages", "1/2/3/4", 4,
-     &maximum_pickup_messages.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &maximum_pickup_messages},
+     nullptr}
 };
 
 static OptionMenuDefinition video_optmenu = {
     vidoptions,           sizeof(vidoptions) / sizeof(OptionMenuItem), &options_menu_default_style, 150, 77, 0, "",
     language["MenuVideo"]};
+
+//
+//  UI OPTIONS
+//
+// -ACB- 1998/07/15 Altered menu structure
+
+static OptionMenuItem uioptions[] = {
+    {kOptionMenuItemTypeBoolean, "Map Rotation", YesNo, 2, &rotate_map, nullptr, nullptr},
+    {kOptionMenuItemTypeBoolean, "Obituary Messages", YesNo, 2, &show_obituaries, nullptr, nullptr},
+    {kOptionMenuItemTypeBoolean, "Screenshot Format", "JPEG/PNG", 2, &png_screenshots, nullptr, nullptr},
+    {kOptionMenuItemTypeBoolean, "Skip Startup Movies", YesNo, 2, &skip_intros.d_,
+     OptionMenuUpdateConsoleVariableFromInt, nullptr, &skip_intros},
+    {kOptionMenuItemTypeSwitch, "Max Pickup Messages", "1/2/3/4", 4,
+     &maximum_pickup_messages.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &maximum_pickup_messages},
+    {kOptionMenuItemTypeSwitch, "Crosshair", "None/Dot/Angle/Plus/Spiked/Thin/Cross/Carat/Circle/Double", 10,
+     &crosshair_style.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &crosshair_style},
+    {kOptionMenuItemTypeSwitch, "Crosshair Color", "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange", 8,
+     &crosshair_color.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &crosshair_color},
+    {kOptionMenuItemTypeSlider, "Crosshair Size", nullptr, 0, &crosshair_size.f_,
+     OptionMenuUpdateConsoleVariableFromFloat, nullptr, &crosshair_size, 1.0f, 2.0f, 64.0f, "%g Pixels"},
+};
+
+static OptionMenuDefinition ui_optmenu = {
+    uioptions,           sizeof(uioptions) / sizeof(OptionMenuItem), &options_menu_default_style, 150, 77, 0, "",
+    language["MenuUI"]};
 
 //
 //  SCREEN OPTIONS MENU
@@ -565,8 +579,6 @@ static OptionMenuItem playoptions[] = {
 
     {kOptionMenuItemTypeBoolean, "Weapon Auto-Switch", YesNo, 2, &global_flags.weapon_switch,
      OptionMenuChangeWeaponSwitch, nullptr},
-
-    {kOptionMenuItemTypeBoolean, "Obituary Messages", YesNo, 2, &show_obituaries, nullptr, nullptr},
 
     {kOptionMenuItemTypeSwitch, "Blood Level", "Normal/Extra/None", 3, &gore_level.d_,
      OptionMenuUpdateConsoleVariableFromInt, "Blood", &gore_level},
@@ -930,6 +942,7 @@ void OptionMenuInitialize()
     // Lobo 2022: load our ddflang stuff
     main_optmenu.name          = language["MenuOptions"];
     video_optmenu.name         = language["MenuVideo"];
+    ui_optmenu.name            = language["MenuUI"];
     res_optmenu.name           = language["MenuResolution"];
     analogue_optmenu.name      = language["MenuMouse"];
     sound_optmenu.name         = language["MenuSound"];
@@ -1655,6 +1668,17 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
 static void OptionMenuVideoOptions(int key_pressed, ConsoleVariable *console_variable)
 {
     current_menu = &video_optmenu;
+    current_item = current_menu->items + current_menu->pos;
+}
+
+// ===== SUB-MENU SETUP ROUTINES =====
+
+//
+// OptionMenuVideoOptions
+//
+static void OptionMenuUIOptions(int key_pressed, ConsoleVariable *console_variable)
+{
+    current_menu = &ui_optmenu;
     current_item = current_menu->items + current_menu->pos;
 }
 

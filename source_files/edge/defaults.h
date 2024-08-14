@@ -67,7 +67,6 @@
 
 // Misc
 #define EDGE_DEFAULT_MENULANGUAGE (0)
-#define EDGE_DEFAULT_SHOWMESSAGES (1)
 
 // Sound and Music
 #define EDGE_DEFAULT_SOUND_STEREO (1) // Stereo

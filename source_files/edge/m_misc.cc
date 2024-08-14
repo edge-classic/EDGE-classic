@@ -48,7 +48,6 @@
 #include "epi_str_util.h"
 #include "g_game.h"
 #include "hu_draw.h"
-#include "hu_stuff.h" // only for show_messages
 #include "im_data.h"
 #include "im_funcs.h"
 #include "m_argv.h"
@@ -90,8 +89,6 @@ static ConfigurationDefault defaults[] = {
     {kConfigInteger, "midi_player", &var_midi_player, 0},
     {kConfigBoolean, "dynamic_reverb", &dynamic_reverb, 0},
     {kConfigInteger, "mix_channels", &sound_mixing_channels, EDGE_DEFAULT_MIX_CHANNELS},
-
-    {kConfigInteger, "show_messages", &show_messages, EDGE_DEFAULT_SHOWMESSAGES},
 
     // -ES- 1998/11/28 Save fade settings
     {kConfigInteger, "reduce_flash", &reduce_flash, 0},

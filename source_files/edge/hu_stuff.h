@@ -27,8 +27,6 @@
 
 #include "e_event.h"
 
-extern int show_messages;
-
 //
 // HEADS UP TEXT
 //

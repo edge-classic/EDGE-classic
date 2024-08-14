@@ -95,9 +95,6 @@ EDGE_DEFINE_CONSOLE_VARIABLE(use_menu_backdrop, "1", kConsoleVariableFlagArchive
 // defaulted values
 //
 
-// Show messages has default, 0 = off, 1 = on
-int show_messages;
-
 extern ConsoleVariable m_language;
 
 int screen_hud; // has default
@@ -283,8 +280,6 @@ static void MenuLoadSavePage(int choice);
 static void MenuReadThis(int choice);
 static void MenuReadThis2(int choice);
 void        MenuEndGame(int choice, ConsoleVariable *cvar);
-
-static void MenuChangeMessages(int choice);
 
 static void MenuFinishReadThis(int choice);
 static void MenuLoadSelect(int choice);
@@ -1504,22 +1499,6 @@ void MenuEpisode(int choice)
         MenuSetupNextMenu(&SkillMenuDefinition);
 }
 
-//
-// Toggle messages on/off
-//
-void MenuChangeMessages(int choice)
-{
-    // warning: unused parameter `int choice'
-    (void)choice;
-
-    show_messages = 1 - show_messages;
-
-    if (show_messages)
-        ConsolePrint("%s\n", language["MessagesOn"]);
-    else
-        ConsolePrint("%s\n", language["MessagesOff"]);
-}
-
 static void EndGameResponse(int ch)
 {
     if (ch != 'y' && ch != kGamepadA && ch != kMouse1)
@@ -2023,10 +2002,6 @@ bool MenuResponder(InputEvent *ev)
         {
             ch = kEndGame;
         }
-        if (CheckKeyMatch(key_message_toggle, ch))
-        {
-            ch = kMessageToggle;
-        }
         if (CheckKeyMatch(key_quick_load, ch))
         {
             ch = kQuickLoad;
@@ -2103,12 +2078,6 @@ bool MenuResponder(InputEvent *ev)
 
             StartSoundEffect(sound_effect_swtchn);
             MenuEndGame(0);
-            return true;
-
-        case kMessageToggle: // Toggle messages
-
-            MenuChangeMessages(0);
-            StartSoundEffect(sound_effect_swtchn);
             return true;
 
         case kQuickLoad: // Quickload

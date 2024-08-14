@@ -209,7 +209,7 @@ constexpr uint16_t kSoundControls = (0x110 + 32);
 constexpr uint16_t kOptionsMenu   = (0x110 + 33);
 constexpr uint16_t kQuickSave     = (0x110 + 34);
 constexpr uint16_t kEndGame       = (0x110 + 35);
-constexpr uint16_t kMessageToggle = (0x110 + 36);
+
 constexpr uint16_t kQuickLoad     = (0x110 + 37);
 constexpr uint16_t kQuitEdge      = (0x110 + 38);
 constexpr uint16_t kGammaToggle   = (0x110 + 39);

@@ -91,6 +91,8 @@ extern const Image *menu_backdrop;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(use_menu_backdrop, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(show_endoom, "1", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(confirm_quickload, "1", kConsoleVariableFlagArchive);
+EDGE_DEFINE_CONSOLE_VARIABLE(confirm_quicksave, "1", kConsoleVariableFlagArchive);
 
 //
 // defaulted values
@@ -1100,10 +1102,18 @@ void MenuQuickSave(void)
         return;
     }
 
-    std::string s(
-        epi::StringFormat(language["QuickSaveOver"], save_extended_information_slots[quicksave_slot].description));
+    if (confirm_quicksave.d_)
+    {
+        std::string s(
+            epi::StringFormat(language["QuickSaveOver"], save_extended_information_slots[quicksave_slot].description));
 
-    StartMenuMessage(s.c_str(), QuickSaveResponse, true);
+        StartMenuMessage(s.c_str(), QuickSaveResponse, true);
+    }
+    else
+    {
+        M_DoSave(quicksave_page, quicksave_slot);
+        StartSoundEffect(sound_effect_swtchx);
+    }
 }
 
 static void QuickLoadResponse(int ch)
@@ -1134,10 +1144,23 @@ void MenuQuickLoad(void)
         return;
     }
 
-    std::string s(
-        epi::StringFormat(language["QuickLoad"], save_extended_information_slots[quicksave_slot].description));
+    if (confirm_quickload.d_)
+    {
+        std::string s(
+            epi::StringFormat(language["QuickLoad"], save_extended_information_slots[quicksave_slot].description));
 
-    StartMenuMessage(s.c_str(), QuickLoadResponse, true);
+        StartMenuMessage(s.c_str(), QuickLoadResponse, true);
+    }
+    else
+    {
+        int tempsavepage = save_page;
+
+        save_page = quicksave_page;
+        MenuLoadSelect(quicksave_slot);
+
+        save_page = tempsavepage;
+        StartSoundEffect(sound_effect_swtchx);
+    }
 }
 
 //

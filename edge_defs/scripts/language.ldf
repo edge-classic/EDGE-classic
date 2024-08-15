@@ -686,6 +686,7 @@ OptMultiplayTalk="Multiplay Talk";
 Controls="Setup standard and extended controls";
 Controls2="Setup Extended EDGE Controls";
 VideoOptions="Setup smoothing, gamma, etc...";
+UIOptions="Tweak user interface elements";
 SoundOptions="Setup volume, MIDI player, stereo, etc...";
 AccessibilityOptions="Adjust options to address various concerns";
 GameplayOptions="Setup respawn, gravity, 3D options etc...";

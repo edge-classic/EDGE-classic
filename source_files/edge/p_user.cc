@@ -58,7 +58,7 @@ float room_area;
 
 static constexpr float    kMaximumBob       = 16.0f;
 static constexpr uint8_t  kZoomAngleDivisor = 4;
-static constexpr BAMAngle kMouseLookLimit   = 0x53333355; // 75 degrees
+static const BAMAngle kMouseLookLimit   = epi::BAMFromDegrees(75);
 static constexpr float    kCrouchSlowdown   = 0.5f;
 
 static SoundEffect *sfx_jpidle;

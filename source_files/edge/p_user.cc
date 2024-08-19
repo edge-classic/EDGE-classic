@@ -161,8 +161,7 @@ static void CalcHeight(Player *player, bool extra_tic)
             player->view_height_       = player->standard_view_height_;
             player->delta_view_height_ = 0;
         }
-        else if (sink_mult < 1.0f && !(player->map_object_->extended_flags_ & kExtendedFlagCrouching) &&
-                 player->view_height_ < player->standard_view_height_ * sink_mult)
+        else if (sink_mult < 1.0f && player->view_height_ < player->standard_view_height_ * sink_mult)
         {
             player->view_height_ = player->standard_view_height_ * sink_mult;
             if (player->delta_view_height_ <= 0)

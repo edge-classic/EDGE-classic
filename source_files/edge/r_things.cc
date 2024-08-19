@@ -849,8 +849,11 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     Sector *cur_sec   = mo->subsector_->sector;
     if (!cur_sec->extrafloor_used && !cur_sec->height_sector && abs(mo->z - cur_sec->floor_height) < 1)
     {
-        sink_mult = cur_sec->sink_depth;
-        bob_mult  = cur_sec->bob_depth;
+        if (!(mo->flags_ & kMapObjectFlagNoGravity))
+        {
+            sink_mult = cur_sec->sink_depth;
+            bob_mult  = cur_sec->bob_depth;
+        }
     }
 
     float hover_dz = 0;
@@ -1034,8 +1037,11 @@ static void RenderModel(DrawThing *dthing)
     Sector *cur_sec   = mo->subsector_->sector;
     if (!cur_sec->extrafloor_used && !cur_sec->height_sector && abs(mo->z - cur_sec->floor_height) < 1)
     {
-        sink_mult = cur_sec->sink_depth;
-        bob_mult  = cur_sec->bob_depth;
+        if (!(mo->flags_ & kMapObjectFlagNoGravity))
+        {
+            sink_mult = cur_sec->sink_depth;
+            bob_mult  = cur_sec->bob_depth;
+        }
     }
 
     if (sink_mult > 0)

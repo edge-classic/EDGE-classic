@@ -402,7 +402,7 @@ static void TextWrite(void)
 
     const char *ch = finale_text;
 
-    int count = (int)((finale_count - 10) / finale->text_speed_);
+    int count = (int)((float)finale_count / finale->text_speed_);
     if (count < 0)
         count = 0;
 

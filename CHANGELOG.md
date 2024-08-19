@@ -3,6 +3,12 @@ CHANGELOG for EDGE-Classic 1.38 (since EDGE-Classic 1.37)
 
 New Features
 ------------
++ "UI Options" menu added, with some new options and others relocated from elsewhere. 
+  - New options:
+    - Show ENDOOM On Quit: Yes by default; 'endoom' console command will work regardless of this setting
+    - Confirm Quickloads: On by default; if disabled will skip confirmation prompt when quickloading
+    - Confirm Quicksaves: On by default; if disabled will skip confirmation prompt when quicksaving
+    - Max Pickup Messages: 4 by default; governs how many item/ammo/etc pickup messages to display simultaneously
 + IWAD support added for Chex Quest 3: Vanilla and Chex Quest 3: Modding (both can be found at https://melodic-spaceship.neocities.org/chex3v/downloads)
   - MBF dog sprites from CQ3 Vanilla also added to original Chex Quest 1 base
 + IWAD support added for Harmony Compatible (https://www.doomworld.com/idgames/levels/doom2/Ports/g-i/harmonyc)
@@ -61,8 +67,11 @@ General Improvements/Changes
 - Restore mipmapping as independent menu option
 - Stacked pickup messages now allow multiple messages on screen simultaneously. Number of simultaneous messages can be changed from options menu
 - Keylocked doors and Cheat messages moved to middle of the screen (same as "Found a Secret" message)
-- Chex Quest
 - Updated Blasphemer base files to support the latest Catoptromancy fork (https://github.com/Catoptromancy/blasphemer/releases/tag/006 as of 1.38)
+- Renamed "Autoaim" menu item to "Aim Assist" and changed behavior of possible values:
+  - Vertical+Horizontal: Previously "On"; no changes to behavior.
+  - Vertical: Previously "Mlook"; horizontal assist component removed. Player will no longer have their viewpoint force-centered on the target that they are hitting.
+  - Off: Behavior and name unchanged.
 - Developers:
   - Support for exceptions/RTTI removed from program with compiler flags/options set accordingly
     - Primesynth swapped back to Fluidlite for MIDI playback due to Primesynth's heavy reliance on exceptions
@@ -95,3 +104,7 @@ Bugs fixed
 - Fixed multiple RTS scripts with the same tag not running simultaneously: we were only running the first one basically.
 - Fixed bot automap arrows being drawn in deathmatch; reinstated disabling of automap cheats when in deathmatch
 - Fixed raw flats exported from SLADE (.raw extension) from being recognized and loaded properly when in an EPK/folder
+- Fixed erratic view height change when rising from a crouch while standing on a flat with the SINK_DEPTH DDF special
+- Fixed quicksaves not correctly updating the save screenshot for the relevant slot
+- Fixed "Press Y To Quit" message on exit not using DDFLANG value
+- Fixed intermission text screens advancing too early if a sufficiently high TEXT_WAIT value was not present

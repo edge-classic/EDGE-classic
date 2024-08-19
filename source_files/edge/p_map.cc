@@ -2407,28 +2407,12 @@ MapObject *GetMapTargetAimInfo(MapObject *source, BAMAngle angle, float distance
     float vertslope        = epi::BAMTan(source->vertical_angle_);
     aim_check.top_slope    = (100 + vertslope * 320) / 160.0f;
     aim_check.bottom_slope = (-100 + vertslope * 576) / 160.0f;
-    // aim_check.top_slope = 100.0f / 160.0f;
-    // aim_check.bottom_slope = -100.0f / 160.0f;
 
     PathTraverse(source->x, source->y, x2, y2, kPathAddLines | kPathAddThings, PTR_AimTraverse2);
 
     if (!aim_check.target)
         return nullptr;
 
-    /*
-        // -KM- 1999/01/31 Look at the thing you aimed at.  Is sometimes
-        //   useful, sometimes annoying :-)
-        if (source->player && level_flags.autoaim == AA_MLOOK)
-        {
-            float slope = ApproximateSlope(source->x - aim_check.target->x,
-                    source->y - aim_check.target->y, aim_check.target->z -
-       source->z);
-
-            slope = HMM_Clamp(-1.0f, slope, 1.0f);
-
-            source->vertical_angle_ = M_ATan(slope);
-        }
-    */
     return aim_check.target;
 }
 
@@ -2485,18 +2469,6 @@ MapObject *DoMapTargetAutoAim(MapObject *source, BAMAngle angle, float distance,
     if (!aim_check.target)
         return nullptr;
 
-    // -KM- 1999/01/31 Look at the thing you aimed at.  Is sometimes
-    //   useful, sometimes annoying :-)
-    if (source->player_ && level_flags.autoaim == kAutoAimMouselook)
-    {
-        float slope = ApproximateSlope(source->x - aim_check.target->x, source->y - aim_check.target->y,
-                                       aim_check.target->z - source->z);
-
-        slope = HMM_Clamp(-1.0f, slope, 1.0f);
-
-        source->vertical_angle_ = epi::BAMFromATan(slope);
-    }
-
     return aim_check.target;
 }
 
@@ -2504,8 +2476,8 @@ MapObject *MapTargetAutoAim(MapObject *source, BAMAngle angle, float distance, b
 {
     MapObject *target = DoMapTargetAutoAim(source, angle, distance, force_aim);
 
-    // If that is a miss, aim slightly to the left or right
-    if (!target)
+    // If that is a miss, aim slightly to the left or right in full autoaim
+    if (!target && source->player_ && level_flags.autoaim == kAutoAimOn)
     {
         BAMAngle diff = kBAMAngle180 / 32;
 

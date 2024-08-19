@@ -1065,7 +1065,6 @@ void MenuSaveGame(int choice)
     MenuSetupNextMenu(&SaveMenuDefinition);
 
     need_save_screenshot  = true;
-    save_screenshot_valid = false;
 }
 
 //
@@ -1078,10 +1077,11 @@ static void QuickSaveResponse(int ch)
     {
         M_DoSave(quicksave_page, quicksave_slot);
         StartSoundEffect(sound_effect_swtchx);
+        CreateSaveScreenshot();
     }
 }
 
-void MenuQuickSave(void)
+static void MenuQuickSave(void)
 {
     if (game_state != kGameStateLevel)
     {
@@ -1094,11 +1094,8 @@ void MenuQuickSave(void)
         StartControlPanel();
         MenuReadSaveStrings();
         MenuSetupNextMenu(&SaveMenuDefinition);
-
-        need_save_screenshot  = true;
-        save_screenshot_valid = false;
-
         quicksave_slot = -2; // means to pick a slot now
+        CreateSaveScreenshot();
         return;
     }
 
@@ -1113,6 +1110,7 @@ void MenuQuickSave(void)
     {
         M_DoSave(quicksave_page, quicksave_slot);
         StartSoundEffect(sound_effect_swtchx);
+        CreateSaveScreenshot();
     }
 }
 
@@ -3031,7 +3029,6 @@ void MenuClear(void)
     }
 
     menu_active           = false;
-    save_screenshot_valid = false;
     option_menu_on        = 0;
 }
 

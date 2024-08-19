@@ -67,7 +67,6 @@
 //
 // DEFAULTS
 //
-bool save_screenshot_valid   = false;
 bool show_old_config_warning = false;
 
 extern ConsoleVariable midi_soundfont;

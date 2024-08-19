@@ -65,7 +65,6 @@ void WarningOrError(const char *error, ...);
 void DebugOrError(const char *error, ...);
 #endif
 
-extern bool save_screenshot_valid;
 extern bool show_obituaries;
 extern int  var_midi_player;
 extern int  var_sound_stereo;

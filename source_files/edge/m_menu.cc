@@ -2399,7 +2399,7 @@ static void DrawMessage(void)
     std::string s = msg + input;
 
     y = 100 - (StringLines(s) *
-               exit_style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight() * 1.5f / 2);
+               exit_style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight() * exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_ / 2);
 
     if (!msg.empty())
     {
@@ -2418,11 +2418,11 @@ static void DrawMessage(void)
             if (s.size() > 0)
             {
                 HUDSetAlignment(0, -1);  // center it
-                HUDWriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str());
+                HUDWriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str(), exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
                 HUDSetAlignment(-1, -1); // set it back to usual
             }
 
-            y += exit_style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight() * 1.5f;
+            y += exit_style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight() * exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
 
             oldpos = pos + 1;
         } while (pos >= 0 && oldpos < (int)msg.size());
@@ -2445,11 +2445,11 @@ static void DrawMessage(void)
             if (s.size() > 0)
             {
                 HUDSetAlignment(0, -1);  // center it
-                HUDWriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str());
+                HUDWriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str(), exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
                 HUDSetAlignment(-1, -1); // set it back to usual
             }
 
-            y += exit_style->fonts_[0]->NominalHeight();
+            y += exit_style->fonts_[0]->NominalHeight() * exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
 
             oldpos = pos + 1;
         } while (pos >= 0 && oldpos < (int)input.size());

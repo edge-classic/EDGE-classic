@@ -2049,16 +2049,16 @@ void SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const M
 
 FlatDefinition *P_IsThingOnLiquidFloor(MapObject *thing)
 {
-    if (thing->flags_ & kMapObjectFlagFloat)
-        return false;
- 
     FlatDefinition *current_flatdef = nullptr;
 
+    if (thing->flags_ & kMapObjectFlagFloat)
+        return current_flatdef;
+ 
     // If no 3D floors, just return the flat
     if (thing->subsector_->sector->extrafloor_used == 0)
     {
         if (thing->z > thing->floor_z_) //are we actually touching the floor
-            return false;
+            return current_flatdef;
 
         current_flatdef = flatdefs.Find(thing->subsector_->sector->floor.image->name_.c_str());
     }

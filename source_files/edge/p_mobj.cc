@@ -2049,6 +2049,9 @@ void SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const M
 
 FlatDefinition *P_IsThingOnLiquidFloor(MapObject *thing)
 {
+    if (thing->flags_ & kMapObjectFlagFloat)
+        return false;
+        
     FlatDefinition *current_flatdef = nullptr;
 
     // If no 3D floors, just return the flat

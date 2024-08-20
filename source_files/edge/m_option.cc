@@ -578,7 +578,7 @@ static OptionMenuItem playoptions[] = {
 
     {kOptionMenuItemTypeBoolean, "Mouse Look", YesNo, 2, &global_flags.mouselook, OptionMenuChangeMLook, nullptr},
 
-    {kOptionMenuItemTypeSwitch, "Aim Assist", "Off/Vertical+Horizontal/Vertical", 3, &global_flags.autoaim, OptionMenuChangeAutoAim, "\"Off\" not recommended when mouselook is disabled"},
+    {kOptionMenuItemTypeSwitch, "Aim Assist", "Off/Vertical/Vertical+Snap To/Vertical+Horizontal/Vertical+Horizontal+Snap To", 5, &global_flags.autoaim, OptionMenuChangeAutoAim, "\"Off\" not recommended when mouselook is disabled"},
 
     {kOptionMenuItemTypeBoolean, "Jumping", YesNo, 2, &global_flags.jump, OptionMenuChangeJumping, nullptr},
 
@@ -1907,7 +1907,7 @@ static void OptionMenuChangeTrue3d(int key_pressed, ConsoleVariable *console_var
 
 static void OptionMenuChangeAutoAim(int key_pressed, ConsoleVariable *console_variable)
 {
-    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagAutoAim))
+    if (current_map && ((current_map->force_on_ | current_map->force_off_) & (kMapFlagAutoAimFull | kMapFlagAutoAimFullSnap | kMapFlagAutoAimVertical | kMapFlagAutoAimVerticalSnap)))
         return;
 
     level_flags.autoaim = global_flags.autoaim;

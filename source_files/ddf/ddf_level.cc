@@ -98,8 +98,12 @@ static DDFSpecialFlags map_specials[] = {{"JUMPING", kMapFlagJumping, 0},
                                          {"MORE_BLOOD", kMapFlagMoreBlood, 0},
                                          {"NORMAL_BLOOD", kMapFlagMoreBlood, 1},
                                          {"RESPAWN", kMapFlagRespawn, 0},
-                                         {"AUTOAIM", kMapFlagAutoAim, 0},
-                                         {"AA_MLOOK", kMapFlagAutoAimMlook, 0},
+                                         {"AUTOAIM", kMapFlagAutoAimFull, 0},
+                                         {"AUTOAIM_FULL", kMapFlagAutoAimFull, 0},
+                                         {"AA_MLOOK", kMapFlagAutoAimVerticalSnap, 0},
+                                         {"AUTOAIM_VERTICAL", kMapFlagAutoAimVertical, 0},
+                                         {"AUTOAIM_FULL_SNAP", kMapFlagAutoAimFullSnap, 0},
+                                         {"AUTOAIM_VERTICAL_SNAP", kMapFlagAutoAimVerticalSnap, 0},
                                          {"EXTRAS", kMapFlagExtras, 0},
                                          {"RESET_PLAYER", kMapFlagResetPlayer, 0},
                                          {"LIMIT_ZOOM", kMapFlagLimitZoom, 0},
@@ -195,6 +199,20 @@ static void LevelFinishEntry(void)
 
     if (dynamic_level->outdoor_fog_cmap_)
         dynamic_level->outdoor_fog_color_ = dynamic_level->outdoor_fog_cmap_->gl_color_;
+
+    // Resolve autoaim stuff
+    if (dynamic_level->force_on_ & kMapFlagAutoAimFullSnap)
+        dynamic_level->force_on_ &= ~(kMapFlagAutoAimFull | kMapFlagAutoAimVerticalSnap | kMapFlagAutoAimVertical);
+    else if (dynamic_level->force_on_ & kMapFlagAutoAimFull)
+        dynamic_level->force_on_ &= ~(kMapFlagAutoAimVerticalSnap | kMapFlagAutoAimVertical);
+    else if (dynamic_level->force_on_ & kMapFlagAutoAimVerticalSnap)
+        dynamic_level->force_on_ &= ~(kMapFlagAutoAimVertical);
+
+    if (dynamic_level->force_off_ & (kMapFlagAutoAimFullSnap | kMapFlagAutoAimFull | kMapFlagAutoAimVerticalSnap | kMapFlagAutoAimVertical))
+    {
+        dynamic_level->force_off_ &= ~(kMapFlagAutoAimFullSnap | kMapFlagAutoAimVerticalSnap | kMapFlagAutoAimVertical);
+        dynamic_level->force_off_ |= kMapFlagAutoAimFull;
+    }
 }
 
 static void LevelClearAll(void)

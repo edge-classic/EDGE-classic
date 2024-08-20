@@ -164,8 +164,15 @@ static void SaveGlobalGetLevelFlags(const char *info, void *storage)
     dest->weapon_switch      = (flags & kMapFlagWeaponSwitch) ? true : false;
     dest->pass_missile       = (flags & kMapFlagPassMissile) ? true : false;
     dest->team_damage        = (flags & kMapFlagTeamDamage) ? true : false;
-    dest->autoaim =
-        (flags & kMapFlagAutoAim) ? ((flags & kMapFlagAutoAimMlook) ? kAutoAimMouselook : kAutoAimOn) : kAutoAimOff;
+    dest->autoaim = kAutoAimOff;
+    if (flags & kMapFlagAutoAimVertical) 
+        dest->autoaim = kAutoAimVertical;
+    if (flags & kMapFlagAutoAimVerticalSnap) 
+        dest->autoaim = kAutoAimVerticalSnap;
+    if (flags & kMapFlagAutoAimFull)
+        dest->autoaim = kAutoAimFull;
+    if (flags & kMapFlagAutoAimFullSnap)
+        dest->autoaim = kAutoAimFullSnap;
 }
 
 static void SaveGlobalGetImage(const char *info, void *storage)
@@ -271,9 +278,16 @@ static const char *SaveGlobalPutLevelFlags(void *storage)
     if (src->team_damage)
         flags |= kMapFlagTeamDamage;
     if (src->autoaim != kAutoAimOff)
-        flags |= kMapFlagAutoAim;
-    if (src->autoaim == kAutoAimMouselook)
-        flags |= kMapFlagAutoAimMlook;
+    {
+        if (src->autoaim == kAutoAimVertical)
+            flags |= kMapFlagAutoAimVertical;
+        else if (src->autoaim == kAutoAimVerticalSnap)
+            flags |= kMapFlagAutoAimVerticalSnap;
+        else if (src->autoaim == kAutoAimFull)
+            flags |= kMapFlagAutoAimFull;
+        else if (src->autoaim == kAutoAimFullSnap);
+            flags |= kMapFlagAutoAimFullSnap;
+    }
 
     return SaveGlobalPutInteger(&flags);
 }

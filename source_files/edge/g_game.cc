@@ -197,14 +197,16 @@ void LoadLevel_Bits(void)
     HandleLevelFlag(&level_flags.pass_missile, kMapFlagPassMissile);
     HandleLevelFlag(&level_flags.team_damage, kMapFlagTeamDamage);
 
-    if (current_map->force_on_ & kMapFlagAutoAim)
-    {
-        if (current_map->force_on_ & kMapFlagAutoAimMlook)
-            level_flags.autoaim = kAutoAimMouselook;
-        else
-            level_flags.autoaim = kAutoAimOn;
-    }
-    else if (current_map->force_off_ & kMapFlagAutoAim)
+    if (current_map->force_on_ & kMapFlagAutoAimVertical)
+        level_flags.autoaim = kAutoAimVertical;
+    if (current_map->force_on_ & kMapFlagAutoAimVerticalSnap)
+        level_flags.autoaim = kAutoAimVerticalSnap;
+    if (current_map->force_on_ & kMapFlagAutoAimFull)
+        level_flags.autoaim = kAutoAimFull;
+    if (current_map->force_on_ & kMapFlagAutoAimFullSnap)
+        level_flags.autoaim = kAutoAimFullSnap;
+
+    if (current_map->force_off_ & kMapFlagAutoAimFull)
         level_flags.autoaim = kAutoAimOff;
 
     //

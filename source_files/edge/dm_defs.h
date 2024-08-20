@@ -62,8 +62,10 @@ enum SkillLevel
 enum AutoAimState
 {
     kAutoAimOff,
-    kAutoAimOn,
-    kAutoAimMouselook
+    kAutoAimVertical,
+    kAutoAimVerticalSnap,
+    kAutoAimFull,
+    kAutoAimFullSnap
 };
 
 struct GameFlags

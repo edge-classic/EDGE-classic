@@ -75,16 +75,18 @@ enum MapFlag
     kMapFlagStomp        = (1 << 7), // Monsters can stomp players
     kMapFlagMoreBlood    = (1 << 8), // Make a bloody mess
     kMapFlagRespawn      = (1 << 9),
-    kMapFlagAutoAim      = (1 << 10),
-    kMapFlagAutoAimMlook = (1 << 11),
-    kMapFlagResetPlayer  = (1 << 12), // Force player back to square #1
-    kMapFlagExtras       = (1 << 13),
-    kMapFlagLimitZoom    = (1 << 14), // Limit zoom to certain weapons
-    kMapFlagCrouching    = (1 << 15),
-    kMapFlagKicking      = (1 << 16), // Weapon recoil
-    kMapFlagWeaponSwitch = (1 << 17),
-    kMapFlagPassMissile  = (1 << 18),
-    kMapFlagTeamDamage   = (1 << 19),
+    kMapFlagAutoAimFull      = (1 << 10),
+    kMapFlagAutoAimFullSnap      = (1 << 11),
+    kMapFlagAutoAimVertical = (1 << 12),
+    kMapFlagAutoAimVerticalSnap = (1 << 13),
+    kMapFlagResetPlayer  = (1 << 14), // Force player back to square #1
+    kMapFlagExtras       = (1 << 15),
+    kMapFlagLimitZoom    = (1 << 16), // Limit zoom to certain weapons
+    kMapFlagCrouching    = (1 << 17),
+    kMapFlagKicking      = (1 << 18), // Weapon recoil
+    kMapFlagWeaponSwitch = (1 << 19),
+    kMapFlagPassMissile  = (1 << 20),
+    kMapFlagTeamDamage   = (1 << 21),
 };
 
 enum SkyStretch

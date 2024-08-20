@@ -136,7 +136,7 @@ GameFlags default_game_flags = {
     true,       // jump
     true,       // crouch
     true,       // mlook
-    kAutoAimOn, // autoaim
+    kAutoAimOff, // autoaim
 
     true,       // cheats
     true,       // have_extra

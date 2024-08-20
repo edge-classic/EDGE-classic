@@ -2469,6 +2469,22 @@ MapObject *DoMapTargetAutoAim(MapObject *source, BAMAngle angle, float distance,
     if (!aim_check.target)
         return nullptr;
 
+    // -KM- 1999/01/31 Look at the thing you aimed at.  Is sometimes
+    //   useful, sometimes annoying :-)
+    // Dasho: Updated to have the player know of and be able to choose "Snap To" behavior
+    if (source->player_ && (level_flags.autoaim == kAutoAimVerticalSnap || level_flags.autoaim == kAutoAimFullSnap))
+    {
+        float slope = ApproximateSlope(source->x - aim_check.target->x, source->y - aim_check.target->y,
+                                       aim_check.target->z - source->z);
+
+        slope = HMM_Clamp(-1.0f, slope, 1.0f);
+
+        source->vertical_angle_ = epi::BAMFromATan(slope);
+
+        if (level_flags.autoaim == kAutoAimFullSnap)
+            source->angle_ = angle;
+    }
+
     return aim_check.target;
 }
 
@@ -2477,9 +2493,9 @@ MapObject *MapTargetAutoAim(MapObject *source, BAMAngle angle, float distance, b
     MapObject *target = DoMapTargetAutoAim(source, angle, distance, force_aim);
 
     // If that is a miss, aim slightly to the left or right in full autoaim
-    if (!target && source->player_ && level_flags.autoaim == kAutoAimOn)
+    if (!target && source->player_ && level_flags.autoaim > kAutoAimVerticalSnap)
     {
-        BAMAngle diff = kBAMAngle180 / 32;
+        BAMAngle diff = kBAMAngle5;
 
         if (level_time_elapsed & 1)
             diff = 0 - diff;

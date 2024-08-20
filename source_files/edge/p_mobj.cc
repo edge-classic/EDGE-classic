@@ -2051,9 +2051,15 @@ FlatDefinition *P_IsThingOnLiquidFloor(MapObject *thing)
 {
     FlatDefinition *current_flatdef = nullptr;
 
+    if (thing->flags_ & kMapObjectFlagFloat)
+        return current_flatdef;
+ 
     // If no 3D floors, just return the flat
     if (thing->subsector_->sector->extrafloor_used == 0)
     {
+        if (thing->z > thing->floor_z_) //are we actually touching the floor
+            return current_flatdef;
+
         current_flatdef = flatdefs.Find(thing->subsector_->sector->floor.image->name_.c_str());
     }
     // Start from the lowest exfloor and check if the player is standing on it,
@@ -2090,8 +2096,6 @@ FlatDefinition *P_IsThingOnLiquidFloor(MapObject *thing)
 
 bool HitLiquidFloor(MapObject *thing)
 {
-    if (thing->flags_ & kMapObjectFlagFloat)
-        return false;
 
     // marked as not making splashes (e.g. a leaf)
     if (thing->hyper_flags_ & kHyperFlagNoSplash)

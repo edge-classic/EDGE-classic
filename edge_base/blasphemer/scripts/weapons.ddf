@@ -360,16 +360,16 @@ AUTOMATIC=TRUE;
 BINDKEY=7;
 PRIORITY=8;
 DANGEROUS=TRUE;
-ATTACK=PLAYER_MACE;
+ATTACK=PLAYER_MACE_A;
 KICK=0.2;
 Y_ADJUST=-15;
 STATES(UP)=MACE:A:1:NORMAL:RAISE;
 STATES(DOWN)=MACE:A:1:NORMAL:LOWER;
 STATES(READY)=MACE:A:1:NORMAL:READY;
+
 STATES(WARMUP)=MACE:B:4:NORMAL:NOTHING;
 
-
-STATES(ATTACK)=
+STATES(ATTACK_old)=
                MACE:C:3:NORMAL:SHOOT,
                MACE:D:3:NORMAL:SHOOT,
                MACE:E:3:NORMAL:SHOOT,
@@ -380,6 +380,30 @@ STATES(ATTACK)=
                MACE:F:4:NORMAL:NOTHING,
                MACE:B:4:NORMAL:NOTHING,
                #READY;
+			   
+STATES(ATTACK)=MACE:C:0:NORMAL:JUMP(ATTACK:14,11%), // Either 21% or 11% but the latter feels more correct
+               MACE:C:3:NORMAL:SHOOT,
+               MACE:D:0:NORMAL:JUMP(ATTACK:15,11%),
+               MACE:D:3:NORMAL:SHOOT,
+               MACE:E:0:NORMAL:JUMP(ATTACK:16,11%),
+               MACE:E:3:NORMAL:SHOOT,
+               MACE:F:0:NORMAL:JUMP(ATTACK:17,11%),
+               MACE:F:3:NORMAL:SHOOT,
+               MACE:C:4:NORMAL:REFIRE,
+               MACE:D:4:NORMAL:NOTHING,
+               MACE:E:4:NORMAL:NOTHING,
+               MACE:F:4:NORMAL:NOTHING,
+               MACE:B:4:NORMAL:NOTHING,
+               #READY,
+               MACE:C:3:NORMAL:SHOOT(PLAYER_MACE_B),
+               #ATTACK:3,
+               MACE:D:3:NORMAL:SHOOT(PLAYER_MACE_B),
+               #ATTACK:5,
+               MACE:E:3:NORMAL:SHOOT(PLAYER_MACE_B),
+               #ATTACK:7,
+               MACE:F:3:NORMAL:SHOOT(PLAYER_MACE_B),
+               #ATTACK:9;			   
+			   
 
 [MACE_TOMED]
 AMMOTYPE=AMMO5;

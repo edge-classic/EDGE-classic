@@ -83,8 +83,8 @@ General Improvements/Changes
   - Consistent code styling and formatting performed on all files under the /source_files project folder
   - Removed support for absolute paths and path traversal with '..' for the exec, ls/dir, and cat/type console commands
   - Removed support for path traversal with '..' when searching for or opening pack files
+- JUMP_LIQUID() action now only triggers if the object is touching the floor
  
-
 
 Bugs fixed
 ----------

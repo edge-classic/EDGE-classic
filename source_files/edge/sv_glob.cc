@@ -285,7 +285,7 @@ static const char *SaveGlobalPutLevelFlags(void *storage)
             flags |= kMapFlagAutoAimVerticalSnap;
         else if (src->autoaim == kAutoAimFull)
             flags |= kMapFlagAutoAimFull;
-        else if (src->autoaim == kAutoAimFullSnap);
+        else if (src->autoaim == kAutoAimFullSnap)
             flags |= kMapFlagAutoAimFullSnap;
     }
 

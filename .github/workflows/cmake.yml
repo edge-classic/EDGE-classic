@@ -154,7 +154,7 @@ jobs:
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE="${EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
 
     - name: Setup Preloads
-      run: git clone https://github.com/edge-classic/web-player-wads ${{github.workspace}}/web-player-wads && cp ${{github.workspace}}/web-player-wads/freedoom/freedoom2.wad ${{github.workspace}}/web/preload/
+      run: git clone https://github.com/edge-classic/web-player-wads ${{github.workspace}}/web-player-wads && cp ${{github.workspace}}/web-player-wads/freedoom/freedoom2.wad ${{github.workspace}}/web/preload/ && cp ${{github.workspace}}/web-player-wads/blasphemer/blasphem.wad ${{github.workspace}}/web/preload/
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}

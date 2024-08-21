@@ -576,7 +576,7 @@ std::string GetDirectory(std::string_view path)
     {
         if (IsDirectorySeparator(path[p]))
         {
-            directory = path.substr(0, p);
+            directory = path.substr(0, p+1);
             break;
         }
     }

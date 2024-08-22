@@ -306,6 +306,7 @@ module player
 	constant NIGHT_VIS = 8
 	constant SCUBA     = 9
 	constant STOP_TIME     = 10
+	constant TRANSLUCENT = 11
 	
 	// keys
 	constant BLUE_CARD    = 1

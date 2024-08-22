@@ -162,7 +162,7 @@ player.JET_PACK                = 7
 player.NIGHT_VIS               = 8
 player.SCUBA                   = 9
 player.STOP_TIME               = 10
-player.TRANSLUCENT               = 10
+player.TRANSLUCENT               = 11
 
 -- keys
 player.BLUE_CARD               = 1

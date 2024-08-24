@@ -1551,6 +1551,10 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
         if (!level_flags.enemies_respawn)
             return;
 
+        // check for NO_RESPAWN flag
+        if (mobj->extended_flags_ & kExtendedFlagNoRespawn)
+            return;
+
         mobj->move_count_++;
 
         //

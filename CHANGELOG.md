@@ -108,3 +108,5 @@ Bugs fixed
 - Fixed quicksaves not correctly updating the save screenshot for the relevant slot
 - Fixed "Press Y To Quit" message on exit not using DDFLANG value
 - Fixed intermission text screens advancing too early if a sufficiently high TEXT_WAIT value was not present
+- Fixed NO_RESPAWN special in things.ddf being ignored
+

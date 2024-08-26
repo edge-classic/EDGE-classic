@@ -639,15 +639,10 @@ std::string LoboStringReplaceAll(std::string str, const std::string &from, const
 
 static void MenuDrawSaveLoadCommon(int row, int row2, Style *style, float LineHeight)
 {
-    int   y         = 0; // LoadMenuDefinition.y + LineHeight * row;
+    int   y         = 0;
     int   x         = 0;
     int   text_type = StyleDefinition::kTextSectionTitle;
     float txtscale  = style->definition_->text_[text_type].scale_;
-
-    // TITLE.FONT="EDGE3"; // next page text
-    // TEXT.FONT="EDGE3"; // save name & slot
-    // ALT.FONT="EDGE3";  // when we edit the save name
-    // HELP.FONT="EDGE3"; // save info text
 
     y = style->definition_->text_[text_type].y_offset_;
     y += style->definition_->entry_spacing_;
@@ -673,12 +668,11 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style, float LineHe
     info = save_extended_information_slots + item_on;
     EPI_ASSERT(0 <= item_on && item_on < kTotalSaveSlots);
 
-    // show some info about the MainMenuSaveGame
+    // show some info about the Save Game
 
     text_type = StyleDefinition::kTextSectionHelp;
     txtscale  = style->definition_->text_[text_type].scale_;
 
-    // y = LoadMenuDefinition.y + LineHeight * (row2 + 1);
     y = style->definition_->text_[text_type].y_offset_;
     y += style->definition_->entry_spacing_;
     x = style->definition_->text_[text_type].x_offset_;
@@ -687,7 +681,6 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style, float LineHe
 
     const Colormap *colmap = style->definition_->text_[text_type].colmap_;
     RGBAColor       col    = GetFontColor(colmap);
-    // HUDThinBox(x - 5, y - 5, x + 95, y + 50, col);
     HUDThinBox(x - 5, y - 5, x + 95, y + 115, col);
 
     if (entering_save_string || info->empty || info->corrupt)
@@ -707,13 +700,41 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style, float LineHe
 
     temp_string = info->game_name;
     temp_string = LoboStringReplaceAll(temp_string, std::string("_"), std::string(" "));
-    HUDWriteText(style, text_type, x, y, temp_string.c_str());
+    if (style->fonts_[text_type]->StringWidth(temp_string.c_str()) * txtscale > 90)
+    {
+        // truncate, add ellipsis
+        for(size_t i = temp_string.size() - 1; i > 0; i--)
+        {
+            std::string test = temp_string.substr(0, i);
+            if (style->fonts_[text_type]->StringWidth(test.append("...").c_str()) * txtscale <= 90)
+            {
+                HUDWriteText(style, text_type, x, y, test.c_str());
+                break;
+            }
+        }
+    }
+    else
+        HUDWriteText(style, text_type, x, y, temp_string.c_str());
 
     y += LineHeight;
     y += style->definition_->entry_spacing_;
 
     temp_string = info->map_name;
-    HUDWriteText(style, text_type, x, y, temp_string.c_str());
+    if (style->fonts_[text_type]->StringWidth(temp_string.c_str()) * txtscale > 90)
+    {
+        // truncate, add ellipsis
+        for(size_t i = temp_string.size() - 1; i > 0; i--)
+        {
+            std::string test = temp_string.substr(0, i);
+            if (style->fonts_[text_type]->StringWidth(test.append("...").c_str()) * txtscale <= 90)
+            {
+                HUDWriteText(style, text_type, x, y, test.c_str());
+                break;
+            }
+        }
+    }
+    else
+        HUDWriteText(style, text_type, x, y, temp_string.c_str());
 
     y += LineHeight;
     y += style->definition_->entry_spacing_;
@@ -736,21 +757,32 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style, float LineHe
         temp_string = language["MenuDifficulty5"];
         break;
     }
-    HUDWriteText(style, text_type, x, y, temp_string.c_str());
+    
+    if (style->fonts_[text_type]->StringWidth(temp_string.c_str()) * txtscale > 90)
+    {
+        // truncate, add ellipsis
+        for(size_t i = temp_string.size() - 1; i > 0; i--)
+        {
+            std::string test = temp_string.substr(0, i);
+            if (style->fonts_[text_type]->StringWidth(test.append("...").c_str()) * txtscale <= 90)
+            {
+                HUDWriteText(style, text_type, x, y, test.c_str());
+                break;
+            }
+        }
+    }
+    else
+        HUDWriteText(style, text_type, x, y, temp_string.c_str());
 
-    /*int BottomY = 0;
-    BottomY =
-    style->definition_->text[StyleDefinition::kTextSectionHelp].y_offset;
-    BottomY += style->definition_->entry_spacing;
-    BottomY += 114;*/
+    y += LineHeight;
+    y += style->definition_->entry_spacing_ + 1;
 
     if (info->save_image_data && info->save_texture_id)
     {
-        y += 20;
-        // BottomY -= y;
+        float height = 95.0f * info->save_image_data->used_height_ / info->save_image_data->used_width_;
         HUDStretchFromImageData(
-            x - 3, y, 95,
-            (style->definition_->text_[text_type].y_offset_ + style->definition_->entry_spacing_ + 114) - y,
+            x - 3, y + ((style->definition_->text_[text_type].y_offset_ + style->definition_->entry_spacing_ + 114) - y - height), 95,
+            height,
             info->save_image_data, info->save_texture_id, kOpacitySolid);
     }
 }
@@ -1982,7 +2014,7 @@ bool MenuResponder(InputEvent *ev)
                 ch = epi::ToUpperASCII(ch);
             EPI_ASSERT(save_style);
             if (ch >= 32 && ch <= 127 && save_string_character_index < kSaveStringSize - 1 &&
-                save_style->fonts_[1]->StringWidth(save_extended_information_slots[save_slot].description) <
+                save_style->fonts_[StyleDefinition::kTextSectionText]->StringWidth(save_extended_information_slots[save_slot].description) <
                     (kSaveStringSize - 2) * 8)
             {
                 save_extended_information_slots[save_slot].description[save_string_character_index++] = ch;

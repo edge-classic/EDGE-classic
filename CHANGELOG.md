@@ -68,9 +68,11 @@ General Improvements/Changes
 - Stacked pickup messages now allow multiple messages on screen simultaneously. Number of simultaneous messages can be changed from options menu
 - Keylocked doors and Cheat messages moved to middle of the screen (same as "Found a Secret" message)
 - Updated Blasphemer base files to support the latest Catoptromancy fork (https://github.com/Catoptromancy/blasphemer/releases/tag/006 as of 1.38)
-- Renamed "Autoaim" menu item to "Aim Assist" and changed behavior of possible values:
+- Renamed "Autoaim" menu item to "Aim Assist" and added/changed behavior of possible values:
   - Vertical+Horizontal: Previously "On"; no changes to behavior.
-  - Vertical: Previously "Mlook"; horizontal assist component removed. Player will no longer have their viewpoint force-centered on the target that they are hitting.
+  - Vertical+Horizontal+Snap To: Same as above, but will snap player view to be centered on the current target when firing.
+  - Vertical: Previously "Mlook"; horizontal assist component removed.
+  - Vertical+Snap To: Same as above, but will snap player view to be centered on the current target when firing.
   - Off: Behavior and name unchanged.
 - Developers:
   - Support for exceptions/RTTI removed from program with compiler flags/options set accordingly
@@ -84,6 +86,8 @@ General Improvements/Changes
   - Removed support for absolute paths and path traversal with '..' for the exec, ls/dir, and cat/type console commands
   - Removed support for path traversal with '..' when searching for or opening pack files
 - JUMP_LIQUID() action now only triggers if the object is touching the floor
+- Savegame screenshots will properly match the original aspect ratio in which they were taken when scaling
+- Save game info/description strings will be truncated instead of extending beyond the box that contains them
  
 
 Bugs fixed
@@ -109,4 +113,5 @@ Bugs fixed
 - Fixed "Press Y To Quit" message on exit not using DDFLANG value
 - Fixed intermission text screens advancing too early if a sufficiently high TEXT_WAIT value was not present
 - Fixed NO_RESPAWN special in things.ddf being ignored
-
+- Fixed CTD when using a LOAD_SAVE_MENU DDFSTYLE definition that did not have an ALTERNATE text style defined
+- Fixed text scaling not being used when rendering non-ENDOOM quit messages

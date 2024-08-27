@@ -1102,7 +1102,7 @@ static void InitializeDirectories(void)
         if (epi::IsDirectory(defs_test))
             epkfile = defs_test;
         else
-            epkfile.append(".epk");
+            epkfile = defs_test.append(".epk");
     }
 
     // cache directory

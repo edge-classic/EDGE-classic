@@ -68,8 +68,8 @@ function heretic_status_bar()
     tempwidth = hud.get_image_width("BARBACK")
     centerOffsetX = tempwidth / 2;
 
-    hud.draw_image(-53, 158, "STBARL") -- Widescreen border
-    hud.draw_image(320, 158, "STBARR") -- Widescreen border
+    hud.draw_image(-83, 158, "STBARL") -- Widescreen border
+    hud.draw_image(320, 158, "STBARR")  -- Widescreen border
 
     --order is important because some of them overlap
     --hud.draw_image(0, 158, "BARBACK")

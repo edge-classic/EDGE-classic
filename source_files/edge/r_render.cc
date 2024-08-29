@@ -67,7 +67,6 @@ EDGE_DEFINE_CONSOLE_VARIABLE(debug_hall_of_mirrors, "0", kConsoleVariableFlagChe
 EDGE_DEFINE_CONSOLE_VARIABLE(force_flat_lighting, "0", kConsoleVariableFlagArchive)
 
 extern ConsoleVariable draw_culling;
-extern ConsoleVariable double_framerate;
 
 static Sector *front_sector;
 static Sector *back_sector;

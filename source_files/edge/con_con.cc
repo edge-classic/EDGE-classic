@@ -96,7 +96,6 @@ static char input_line[kMaximumConsoleInput + 2];
 static int  input_position = 0;
 
 int                    console_cursor;
-extern ConsoleVariable double_framerate;
 
 static constexpr uint8_t kConsoleKeyRepeatDelay = ((250 * kTicRate) / 1000);
 static constexpr uint8_t kConsoleKeyRepeatRate  = (kTicRate / 15);
@@ -1509,7 +1508,7 @@ bool ConsoleResponder(InputEvent *ev)
         case kSpace:
         case kBackspace:
         case kDelete:
-            repeat_countdown = kConsoleKeyRepeatDelay * (double_framerate.d_ ? 2 : 1);
+            repeat_countdown = kConsoleKeyRepeatDelay;
             break;
         default:
             repeat_countdown = 0;
@@ -1526,11 +1525,7 @@ bool ConsoleResponder(InputEvent *ev)
 
 void ConsoleTicker(void)
 {
-    int add = 1;
-    if (double_framerate.d_ && !(hud_tic & 1))
-        add = 0;
-
-    console_cursor = (console_cursor + add) & 31;
+    console_cursor = (console_cursor + 1) & 31;
 
     if (console_visible != kConsoleVisibilityNotVisible)
     {
@@ -1554,7 +1549,7 @@ void ConsoleTicker(void)
 
                 while (repeat_countdown <= 0)
                 {
-                    repeat_countdown += kConsoleKeyRepeatRate * (double_framerate.d_ ? 2 : 1);
+                    repeat_countdown += kConsoleKeyRepeatRate;
                     ConsoleHandleKey(repeat_key, keys_shifted, false);
                 }
             }

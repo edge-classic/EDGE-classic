@@ -52,8 +52,6 @@
 #include "s_music.h"
 #include "s_sound.h"
 
-extern ConsoleVariable double_framerate;
-
 // Level exit timer
 bool level_timer;
 int  level_time_count;
@@ -1759,8 +1757,6 @@ static inline void PlayerInProperties(Player *player, float bz, float tz, float 
     const SectorType *special = props->special;
     float             damage, factor;
 
-    bool extra_tic = ((game_tic & 1) == 1);
-
     if (!special || ceiling_height < floor_height)
         return;
 
@@ -1776,7 +1772,7 @@ static inline void PlayerInProperties(Player *player, float bz, float tz, float 
         player->powers_[kPowerTypeScuba] <= 0)
     {
         int subtract = 1;
-        if ((double_framerate.d_ && extra_tic) || !should_choke)
+        if (!should_choke)
             subtract = 0;
         player->air_in_lungs_ -= subtract;
         player->underwater_ = true;
@@ -1865,9 +1861,6 @@ static inline void PlayerInProperties(Player *player, float bz, float tz, float 
             factor = 0;
     }
     else if (player->powers_[kPowerTypeAcidSuit] && !special->damage_.bypass_all_)
-        factor = 0;
-
-    if (double_framerate.d_ && extra_tic)
         factor = 0;
 
     if (factor > 0 && (level_time_elapsed % (1 + special->damage_.delay_)) == 0)
@@ -2018,15 +2011,15 @@ void PlayerInSpecialSector(Player *player, Sector *sec, bool should_choke)
 //
 // Animate planes, scroll walls, etc.
 //
-void UpdateSpecials(bool extra_tic)
+void UpdateSpecials()
 {
     // For anim stuff
-    float factor = double_framerate.d_ ? 0.5f : 1.0f;
+    float factor = 1.0f;
 
     // LEVEL TIMER
     if (level_timer == true)
     {
-        level_time_count -= (double_framerate.d_ && extra_tic) ? 0 : 1;
+        level_time_count--;
 
         if (!level_time_count)
             ExitLevel(1);
@@ -2117,11 +2110,6 @@ void UpdateSpecials(bool extra_tic)
                                                                                        : sec_ref->original_height;
                 float sy        = tdy * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
                 float sx        = tdx * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
-                if (double_framerate.d_ && special_ref->scroll_type_ & BoomScrollerTypeDisplace)
-                {
-                    sy *= 2;
-                    sx *= 2;
-                }
                 if (ld->side[0])
                 {
                     if (ld->side[0]->top.image)
@@ -2167,11 +2155,6 @@ void UpdateSpecials(bool extra_tic)
                                                                                        : sec_ref->original_height;
                 float sy        = x_speed * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
                 float sx        = y_speed * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
-                if (double_framerate.d_ && special_ref->scroll_type_ & BoomScrollerTypeDisplace)
-                {
-                    sy *= 2;
-                    sx *= 2;
-                }
                 if (ld->side[0])
                 {
                     if (ld->side[0]->top.image)
@@ -2395,11 +2378,6 @@ void UpdateSpecials(bool extra_tic)
                        ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
             float sx = line_ref->length / 32.0f * line_ref->delta_x / line_ref->length *
                        ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
-            if (double_framerate.d_ && special_ref->scroll_type_ & BoomScrollerTypeDisplace)
-            {
-                sy *= 2;
-                sx *= 2;
-            }
             if (special_ref->sector_effect_ & kSectorEffectTypePushThings)
             {
                 sec->properties.net_push.Y += kBoomCarryFactor * sy;
@@ -2468,8 +2446,7 @@ void UpdateSpecials(bool extra_tic)
     }
 
     // DO BUTTONS
-    if (!double_framerate.d_ || !extra_tic)
-        UpdateButtons();
+    UpdateButtons();
 }
 
 //
@@ -2654,7 +2631,7 @@ void SpawnMapSpecials2(int autotag)
 
             sector->properties.push.X += epi::BAMCos(secSpecial->push_angle_) * mul;
             sector->properties.push.Y += epi::BAMSin(secSpecial->push_angle_) * mul;
-            sector->properties.push.Z += secSpecial->push_zspeed_ / (double_framerate.d_ ? 89.2f : 100.0f);
+            sector->properties.push.Z += secSpecial->push_zspeed_ / 100.0f;
         }
 
         // Scrollers

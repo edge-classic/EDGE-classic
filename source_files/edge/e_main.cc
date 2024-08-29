@@ -92,7 +92,6 @@
 #include "w_texture.h"
 #include "w_wad.h"
 
-extern ConsoleVariable double_framerate;
 extern ConsoleVariable busy_wait;
 
 extern ConsoleVariable gamma_correction;
@@ -988,14 +987,14 @@ void AdvanceTitle(void)
         if (title_pic == 0 && g->titlemusic_ > 0)
             ChangeMusic(g->titlemusic_, false);
 
-        title_countdown = g->titletics_ * (double_framerate.d_ ? 2 : 1);
+        title_countdown = g->titletics_;
         return;
     }
 
     // not found
 
     title_image     = nullptr;
-    title_countdown = kTicRate * (double_framerate.d_ ? 2 : 1);
+    title_countdown = kTicRate;
 }
 
 void StartTitle(void)

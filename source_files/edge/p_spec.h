@@ -161,7 +161,7 @@ void SpawnMapSpecials1(void);
 void SpawnMapSpecials2(int autotag);
 
 // every tic
-void UpdateSpecials(bool extra_tic);
+void UpdateSpecials();
 
 // when needed
 bool UseSpecialLine(MapObject *thing, Line *line, int side, float open_bottom, float open_top);
@@ -210,7 +210,7 @@ bool RunPlaneMover(Sector *sec, const PlaneMoverDefinition *type, Sector *model)
 bool RunSlidingDoor(Line *door, Line *act_line, MapObject *thing, const LineType *special);
 bool SectorIsLowering(Sector *sec);
 
-void RunForces(bool extra_tic);
+void RunForces();
 void DestroyAllForces(void);
 void AddPointForce(Sector *sec, float length);
 void AddSectorForce(Sector *sec, bool is_wind, float x_mag, float y_mag);

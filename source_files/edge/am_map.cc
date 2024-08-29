@@ -178,8 +178,6 @@ static AutomapArrowStyle current_arrow_type = kAutomapArrowStyleDoom;
 bool rotate_map            = false;
 bool automap_keydoor_blink = false;
 
-extern ConsoleVariable double_framerate;
-
 extern Style *automap_style; // FIXME: put in header
 
 // translates between frame-buffer and map distances
@@ -575,7 +573,7 @@ static void DrawMLineDoor(AutomapLine *ml, RGBAColor rgb)
     // Lobo 2023: Make keyed doors pulse
     if (automap_keydoor_blink)
     {
-        linewidth = game_tic % (32 * (double_framerate.d_ ? 2 : 1));
+        linewidth = game_tic % 32;
 
         if (linewidth >= 16)
             linewidth = 2.0 + (linewidth * 0.1f);

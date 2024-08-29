@@ -34,8 +34,6 @@
 #include "r_modes.h"
 #include "r_texgl.h"
 
-extern ConsoleVariable double_framerate;
-
 // we're limited to one wipe at a time...
 static ScreenWipe current_wipe_effect = kScreenWipeNone;
 
@@ -367,7 +365,7 @@ bool DoWipe(void)
 
     // determine how many tics since we started.  If this is the first
     // call to DoWipe() since InitWipe(), then the clock starts now.
-    int now_time = GetTime() / (double_framerate.d_ ? 2 : 1);
+    int now_time = GetTime();
     int tics     = 0;
 
     if (current_wipe_last_time >= 0)

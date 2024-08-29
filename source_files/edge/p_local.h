@@ -92,7 +92,7 @@ void CreatePlayer(int pnum, bool is_bot);
 void DestroyAllPlayers(void);
 void GiveInitialBenefits(Player *player, const MapObjectDefinition *info);
 
-bool PlayerThink(Player *player, bool extra_tic);
+bool PlayerThink(Player *player);
 void UpdateAvailWeapons(Player *p);
 void UpdateTotalArmour(Player *p);
 
@@ -116,7 +116,7 @@ int  MapObjectFindLabel(MapObject *mobj, const char *label);
 bool MapObjectSetState(MapObject *mobj, int state);
 bool MapObjectSetStateDeferred(MapObject *mobj, int state, int tic_skip);
 void MapObjectSetDirectionAndSpeed(MapObject *mobj, BAMAngle angle, float slope, float speed);
-void RunMapObjectThinkers(bool extra_tic);
+void RunMapObjectThinkers();
 void SpawnDebris(float x, float y, float z, BAMAngle angle, const MapObjectDefinition *debris);
 void SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff, BAMAngle angle);
 void SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const MapObjectDefinition *blood);

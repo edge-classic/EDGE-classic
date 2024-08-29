@@ -49,7 +49,6 @@ extern bool GameResponder(InputEvent *ev);
 
 extern int JoystickGetAxis(int n);
 
-extern ConsoleVariable double_framerate;
 extern ConsoleVariable fliplevels;
 
 //
@@ -332,7 +331,7 @@ void BuildEventTicCommand(EventTicCommand *cmd)
     // Turning
     if (!strafe)
     {
-        float turn = angle_turn[t_speed] / (double_framerate.d_ ? 2 : 1) * joy_forces[kAxisTurn];
+        float turn = angle_turn[t_speed] * joy_forces[kAxisTurn];
 
         turn *= turn_speed.f_;
 

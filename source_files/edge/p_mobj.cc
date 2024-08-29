@@ -84,8 +84,6 @@ static constexpr float   kMaximumMove  = 200.0f;
 static constexpr float   kStepMove     = 16.0f;
 static constexpr uint8_t kRespawnDelay = (kTicRate / 2);
 
-extern ConsoleVariable double_framerate;
-
 EDGE_DEFINE_CONSOLE_VARIABLE(distance_cull_thinkers, "0", kConsoleVariableFlagArchive)
 
 EDGE_DEFINE_CONSOLE_VARIABLE(gravity_factor, "1.0", kConsoleVariableFlagArchive)
@@ -794,14 +792,8 @@ void CalculateFullRegionProperties(const MapObject *mo, RegionProperties *new_p)
 //
 // P_XYMovement
 //
-static void P_XYMovement(MapObject *mo, const RegionProperties *props, bool extra_tic)
+static void P_XYMovement(MapObject *mo, const RegionProperties *props)
 {
-    bool do_extra = mo->player_ != nullptr; // 70 Hz
-
-    // missiles should run every tic too
-    if (mo->flags_ & kMapObjectFlagMissile)
-        do_extra = true;
-
     float orig_x = mo->x;
     float orig_y = mo->y;
 
@@ -828,12 +820,6 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props, bool extr
 
     float xmove = mo->momentum_.X;
     float ymove = mo->momentum_.Y;
-
-    if (do_extra && double_framerate.d_) // 70Hz
-    {
-        xmove *= 0.52;
-        ymove *= 0.52;
-    }
 
     // -AJA- 1999/07/31: Ride that rawhide :->
     if (mo->above_object_ && !(mo->above_object_->flags_ & kMapObjectFlagFloat) &&
@@ -1062,12 +1048,6 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props, bool extr
         friction = props->drag;
     }
 
-    // 70hz : adjust friction to account for extra tic
-    if (do_extra && double_framerate.d_)
-    {
-        friction = sqrt(friction);
-    }
-
     // when we are confident that a mikoportal is being used, do not apply
     // friction or drag to the voodoo doll
     if (!mo->is_voodoo_ || !AlmostEquals(mo->floor_z_, -32768.0f) || AlmostEquals(mo->momentum_.Z, 0.0f))
@@ -1098,13 +1078,8 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props, bool extr
 //
 // P_ZMovement
 //
-static void P_ZMovement(MapObject *mo, const RegionProperties *props, bool extra_tic)
+static void P_ZMovement(MapObject *mo, const RegionProperties *props)
 {
-    bool do_extra = mo->player_ != nullptr; // 70 Hz
-
-    if (mo->flags_ & kMapObjectFlagMissile)
-        do_extra = true;
-
     float dist;
     float delta;
     float zmove;
@@ -1124,9 +1099,6 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props, bool extra
     }
 
     zmove = mo->momentum_.Z * (1.0f - props->viscosity);
-
-    if (do_extra && double_framerate.d_)                                                // 70 Hz
-        zmove *= 0.52;
 
     if (mo->on_slope_ && mo->z > mo->floor_z_ && std::abs(mo->z - mo->floor_z_) < 6.0f) // 1/4 of default step size
         zmove_vs = mo->floor_z_ - mo->z;
@@ -1172,11 +1144,11 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props, bool extra
             bool  fly_or_swim = mo->player_ && (mo->player_->swimming_ || mo->player_->powers_[kPowerTypeJetpack] > 0 ||
                                                mo->on_ladder_ >= 0);
 
-            if (mo->player_ && gravity > 0 && -zmove > (kOofSpeed / (double_framerate.d_ ? 2 : 1)) && !fly_or_swim)
+            if (mo->player_ && gravity > 0 && -zmove > kOofSpeed && !fly_or_swim)
             {
                 // Squat down. Decrease viewheight for a moment after hitting
                 // the ground (hard), and utter appropriate sound.
-                mo->player_->delta_view_height_ = zmove / 8.0f * (double_framerate.d_ ? 2.0 : 1.0); // 70Hz
+                mo->player_->delta_view_height_ = zmove / 8.0f;
                 if (mo->info_->maxfall_ > 0 && -mo->momentum_.Z > hurt_momz)
                 {
                     if (!(mo->player_->cheats_ & kCheatingGodMode) && mo->player_->powers_[kPowerTypeInvulnerable] < 1)
@@ -1259,9 +1231,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props, bool extra
         if (!(mo->flags_ & kMapObjectFlagNoGravity) && !(mo->player_ && mo->player_->powers_[kPowerTypeJetpack] > 0) &&
             !(mo->on_ladder_ >= 0))
         {
-            // 70 Hz: apply gravity only on real tics
-            if (!extra_tic || !double_framerate.d_)
-                mo->momentum_.Z -= gravity / (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1);
+            mo->momentum_.Z -= gravity / (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1);
         }
     }
 
@@ -1281,7 +1251,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props, bool extra
             bool  fly_or_swim = mo->player_ && (mo->player_->swimming_ || mo->player_->powers_[kPowerTypeJetpack] > 0 ||
                                                mo->on_ladder_ >= 0);
 
-            if (mo->player_ && gravity < 0 && zmove > (kOofSpeed / (double_framerate.d_ ? 2 : 1)) && !fly_or_swim)
+            if (mo->player_ && gravity < 0 && zmove > kOofSpeed && !fly_or_swim)
             {
                 mo->player_->delta_view_height_ = zmove / 8.0f;
                 StartSoundEffect(mo->info_->oof_sound_, GetSoundEffectCategory(mo), mo);
@@ -1343,9 +1313,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props, bool extra
         if (!(mo->flags_ & kMapObjectFlagNoGravity) && !(mo->player_ && mo->player_->powers_[kPowerTypeJetpack] > 0) &&
             !(mo->on_ladder_ >= 0))
         {
-            // 70 Hz: apply gravity only on real tics
-            if (!extra_tic || !double_framerate.d_)
-                mo->momentum_.Z += -gravity / (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1);
+            mo->momentum_.Z += -gravity / (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1);
         }
     }
 
@@ -1376,7 +1344,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props, bool extra
 //
 // P_MobjThinker
 //
-static void P_MobjThinker(MapObject *mobj, bool extra_tic)
+static void P_MobjThinker(MapObject *mobj)
 {
     if (mobj->next_ == (MapObject *)-1)
         FatalError("P_MobjThinker INTERNAL ERROR: mobj has been freed");
@@ -1393,38 +1361,35 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
 
     mobj->ClearStaleReferences();
 
-    if (!extra_tic || !double_framerate.d_)
+    EPI_ASSERT(mobj->state_);
+    EPI_ASSERT(mobj->reference_count_ >= 0);
+
+    mobj->visibility_      = (15 * mobj->visibility_ + mobj->target_visibility_) / 16;
+    mobj->dynamic_light_.r = (15 * mobj->dynamic_light_.r + mobj->dynamic_light_.target) / 16;
+
+    // position interpolation
+    if (mobj->interpolation_number_ > 1)
     {
-        EPI_ASSERT(mobj->state_);
-        EPI_ASSERT(mobj->reference_count_ >= 0);
+        mobj->interpolation_position_++;
 
-        mobj->visibility_      = (15 * mobj->visibility_ + mobj->target_visibility_) / 16;
-        mobj->dynamic_light_.r = (15 * mobj->dynamic_light_.r + mobj->dynamic_light_.target) / 16;
-
-        // position interpolation
-        if (mobj->interpolation_number_ > 1)
+        if (mobj->interpolation_position_ >= mobj->interpolation_number_)
         {
-            mobj->interpolation_position_++;
-
-            if (mobj->interpolation_position_ >= mobj->interpolation_number_)
-            {
-                mobj->interpolation_position_ = mobj->interpolation_number_ = 0;
-            }
+            mobj->interpolation_position_ = mobj->interpolation_number_ = 0;
         }
+    }
 
-        // handle SKULLFLY attacks
-        if ((mobj->flags_ & kMapObjectFlagSkullFly) && AlmostEquals(mobj->momentum_.X, 0.0f) &&
-            AlmostEquals(mobj->momentum_.Y, 0.0f))
-        {
-            // the skull slammed into something
-            mobj->flags_ &= ~kMapObjectFlagSkullFly;
-            mobj->momentum_.X = mobj->momentum_.Y = mobj->momentum_.Z = 0;
+    // handle SKULLFLY attacks
+    if ((mobj->flags_ & kMapObjectFlagSkullFly) && AlmostEquals(mobj->momentum_.X, 0.0f) &&
+        AlmostEquals(mobj->momentum_.Y, 0.0f))
+    {
+        // the skull slammed into something
+        mobj->flags_ &= ~kMapObjectFlagSkullFly;
+        mobj->momentum_.X = mobj->momentum_.Y = mobj->momentum_.Z = 0;
 
-            MapObjectSetState(mobj, mobj->info_->idle_state_);
+        MapObjectSetState(mobj, mobj->info_->idle_state_);
 
-            if (mobj->IsRemoved())
-                return;
-        }
+        if (mobj->IsRemoved())
+            return;
     }
 
     // determine properties, & handle push sectors
@@ -1435,12 +1400,9 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
     {
         CalculateFullRegionProperties(mobj, &player_props);
 
-        if (!extra_tic || !double_framerate.d_)
-        {
-            mobj->momentum_.X += player_props.push.X;
-            mobj->momentum_.Y += player_props.push.Y;
-            mobj->momentum_.Z += player_props.push.Z;
-        }
+        mobj->momentum_.X += player_props.push.X;
+        mobj->momentum_.Y += player_props.push.Y;
+        mobj->momentum_.Z += player_props.push.Z;
 
         props = &player_props;
     }
@@ -1459,18 +1421,15 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
                     if (!((mobj->flags_ & kMapObjectFlagNoGravity) || (flags & kSectorFlagPushAll)) &&
                         (mobj->z <= mobj->floor_z_ + 1.0f || (flags & kSectorFlagWholeRegion)))
                     {
-                        if (!extra_tic || !double_framerate.d_)
-                        {
-                            float push_mul = 1.0f;
+                        float push_mul = 1.0f;
 
-                            EPI_ASSERT(mobj->info_->mass_ > 0);
-                            if (!(flags & kSectorFlagPushConstant))
-                                push_mul = 100.0f / mobj->info_->mass_;
+                        EPI_ASSERT(mobj->info_->mass_ > 0);
+                        if (!(flags & kSectorFlagPushConstant))
+                            push_mul = 100.0f / mobj->info_->mass_;
 
-                            mobj->momentum_.X += push_mul * tn_props.push.X;
-                            mobj->momentum_.Y += push_mul * tn_props.push.Y;
-                            mobj->momentum_.Z += push_mul * tn_props.push.Z;
-                        }
+                        mobj->momentum_.X += push_mul * tn_props.push.X;
+                        mobj->momentum_.Y += push_mul * tn_props.push.Y;
+                        mobj->momentum_.Z += push_mul * tn_props.push.Z;
                     }
                 }
             }
@@ -1485,40 +1444,27 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
         }
     }
 
-    // momentum movement
-
-    bool do_extra = mobj->player_ != nullptr; // 70 Hz
-    if (mobj->flags_ & kMapObjectFlagMissile)
-        do_extra = true;
-
-    if (!double_framerate.d_ || !extra_tic || do_extra)
+    if (mobj->subsector_->sector->floor_vertex_slope)
     {
-        if (do_extra && mobj->subsector_->sector->floor_vertex_slope)
-        {
-            if (AlmostEquals(mobj->old_z_, mobj->old_floor_z_))
-                mobj->on_slope_ = true;
-        }
-
-        if (!AlmostEquals(mobj->momentum_.X, 0.0f) || !AlmostEquals(mobj->momentum_.Y, 0.0f) || mobj->player_)
-        {
-            P_XYMovement(mobj, props, extra_tic);
-
-            if (mobj->IsRemoved())
-                return;
-        }
-
-        if ((!AlmostEquals(mobj->z, mobj->floor_z_)) || !AlmostEquals(mobj->momentum_.Z, 0.0f)) //  || mobj->ride_em)
-        {
-            P_ZMovement(mobj, props, extra_tic);
-
-            if (mobj->IsRemoved())
-                return;
-        }
+        if (AlmostEquals(mobj->old_z_, mobj->old_floor_z_))
+            mobj->on_slope_ = true;
     }
 
-    // FIXME factor out the player-related code from the rest
-    if (extra_tic && double_framerate.d_)
-        return;
+    if (!AlmostEquals(mobj->momentum_.X, 0.0f) || !AlmostEquals(mobj->momentum_.Y, 0.0f) || mobj->player_)
+    {
+        P_XYMovement(mobj, props);
+
+        if (mobj->IsRemoved())
+            return;
+    }
+
+    if ((!AlmostEquals(mobj->z, mobj->floor_z_)) || !AlmostEquals(mobj->momentum_.Z, 0.0f)) //  || mobj->ride_em)
+    {
+        P_ZMovement(mobj, props);
+
+        if (mobj->IsRemoved())
+            return;
+    }
 
     if (mobj->fuse_ >= 0)
     {
@@ -1879,7 +1825,7 @@ void ClearRespawnQueue(void)
 // Cycle through all mobjs and let them think.
 // Also handles removed objects which have no more references.
 //
-void RunMapObjectThinkers(bool extra_tic)
+void RunMapObjectThinkers()
 {
     MapObject *mo;
     MapObject *next;
@@ -1915,46 +1861,19 @@ void RunMapObjectThinkers(bool extra_tic)
         }
 
         if (mo->player_)
-            P_MobjThinker(mo, extra_tic);
+            P_MobjThinker(mo);
         else
         {
             if (time_stop_active)
                 continue;
-            if (!double_framerate.d_)
-            {
-                if (!distance_cull_thinkers.d_ ||
-                    (game_tic / 2 %
-                         RoundToInteger(1 + PointToDistance(players[console_player]->map_object_->x,
-                                                                    players[console_player]->map_object_->y, mo->x,
-                                                                    mo->y) /
-                                                1500) ==
-                     0))
-                    P_MobjThinker(mo, extra_tic);
-            }
-            else
-            {
-                if (extra_tic)
-                {
-                    if (!(mo->flags_ & kMapObjectFlagMissile))
-                        continue;
-                    else if (!distance_cull_thinkers.d_ ||
-                             ((game_tic / 4) %
-                                  RoundToInteger(1 + PointToDistance(players[console_player]->map_object_->x,
-                                                                             players[console_player]->map_object_->y,
-                                                                             mo->x, mo->y) /
-                                                         1500) ==
-                              0))
-                        P_MobjThinker(mo, extra_tic);
-                }
-                else if (!distance_cull_thinkers.d_ ||
-                         ((game_tic / 4) %
-                              RoundToInteger(1 + PointToDistance(players[console_player]->map_object_->x,
-                                                                         players[console_player]->map_object_->y, mo->x,
-                                                                         mo->y) /
-                                                     1500) ==
-                          0))
-                    P_MobjThinker(mo, extra_tic);
-            }
+            if (!distance_cull_thinkers.d_ ||
+                (game_tic / 2 %
+                        RoundToInteger(1 + PointToDistance(players[console_player]->map_object_->x,
+                                                                players[console_player]->map_object_->y, mo->x,
+                                                                mo->y) /
+                                            1500) ==
+                    0))
+                P_MobjThinker(mo);
         }
     }
 }

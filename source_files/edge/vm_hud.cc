@@ -39,7 +39,6 @@
 #include "vm_coal.h"
 #include "w_wad.h"
 
-extern ConsoleVariable double_framerate;
 extern coal::VM       *ui_vm;
 
 extern void COALSetFloat(coal::VM *vm, const char *mod, const char *name, double value);
@@ -191,7 +190,7 @@ static void HD_get_time(coal::VM *vm, int argc)
 {
     (void)argc;
 
-    int time = GetTime() / (double_framerate.d_ ? 2 : 1);
+    int time = GetTime();
     vm->ReturnFloat((double)time);
 }
 

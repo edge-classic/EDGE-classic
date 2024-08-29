@@ -46,12 +46,11 @@ bool fast_forward_active;
 bool erraticism_active = false;
 
 extern ConsoleVariable erraticism;
-extern ConsoleVariable double_framerate;
 
 //
 // MapObjectTicker
 //
-void MapObjectTicker(bool extra_tic)
+void MapObjectTicker()
 {
     if (paused)
         return;
@@ -67,7 +66,7 @@ void MapObjectTicker(bool extra_tic)
 
     if (erraticism.d_)
     {
-        bool keep_thinking = PlayerThink(players[console_player], extra_tic);
+        bool keep_thinking = PlayerThink(players[console_player]);
 
         if (!keep_thinking)
         {
@@ -78,35 +77,29 @@ void MapObjectTicker(bool extra_tic)
         for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
         {
             if (players[pnum] && players[pnum] != players[console_player])
-                PlayerThink(players[pnum], extra_tic);
+                PlayerThink(players[pnum]);
         }
     }
     else
     {
         for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
             if (players[pnum])
-                PlayerThink(players[pnum], extra_tic);
+                PlayerThink(players[pnum]);
     }
 
-    if (!extra_tic || !double_framerate.d_)
-        RunScriptTriggers();
+    RunScriptTriggers();
 
-    RunForces(extra_tic);
-    RunMapObjectThinkers(extra_tic);
+    RunForces();
+    RunMapObjectThinkers();
 
-    if (!extra_tic || !double_framerate.d_)
-        RunLights();
+    RunLights();
 
     RunActivePlanes();
     RunActiveSliders();
 
-    if (!extra_tic || !double_framerate.d_)
-        RunAmbientSounds();
+    RunAmbientSounds();
 
-    UpdateSpecials(extra_tic);
-
-    if (extra_tic && double_framerate.d_)
-        return;
+    UpdateSpecials();
 
     ItemRespawn();
 
@@ -131,7 +124,7 @@ void HubFastForward(void)
     }
 
     for (int k = 0; k < kTicRate / 3; k++)
-        MapObjectTicker(false);
+        MapObjectTicker();
 
     fast_forward_active = false;
 }

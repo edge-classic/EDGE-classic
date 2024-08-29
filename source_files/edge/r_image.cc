@@ -75,8 +75,6 @@ extern ImageData *ReadAsEpiBlock(Image *rim);
 
 extern epi::File *OpenUserFileOrLump(ImageDefinition *def);
 
-extern ConsoleVariable double_framerate;
-
 extern void DeleteSkyTextures(void);
 extern void DeleteColourmapTextures(void);
 
@@ -151,7 +149,7 @@ static void do_Animate(std::list<Image *> &bucket)
 
         EPI_ASSERT(rim->animation_.count > 0);
 
-        rim->animation_.count -= (!double_framerate.d_ || !(hud_tic & 1)) ? 1 : 0;
+        rim->animation_.count--;
 
         if (rim->animation_.count == 0 && rim->animation_.current->animation_.next)
         {
@@ -1268,7 +1266,7 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
     if (rim->liquid_type_ > kLiquidImageNone &&
         (swirling_flats == kLiquidSwirlSmmu || swirling_flats == kLiquidSwirlSmmuSlosh))
     {
-        rim->swirled_game_tic_ = hud_tic / (double_framerate.d_ ? 2 : 1);
+        rim->swirled_game_tic_ = hud_tic;
         tmp_img->Swirl(rim->swirled_game_tic_,
                        rim->liquid_type_); // Using leveltime disabled swirl
                                            // for intermission screens
@@ -1768,7 +1766,7 @@ static CachedImage *ImageCacheOGL(Image *rim, const Colormap *trans, bool do_whi
         (swirling_flats == kLiquidSwirlSmmu || swirling_flats == kLiquidSwirlSmmuSlosh))
     {
         if (!erraticism_active && !time_stop_active &&
-            rim->swirled_game_tic_ != hud_tic / (double_framerate.d_ ? 2 : 1))
+            rim->swirled_game_tic_ != hud_tic)
         {
             if (rc->texture_id != 0)
             {

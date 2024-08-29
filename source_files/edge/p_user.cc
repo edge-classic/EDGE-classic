@@ -706,6 +706,15 @@ bool PlayerThink(Player *player)
 
     EPI_ASSERT(player->map_object_);
 
+    player->map_object_->interpolate_ = true;
+    player->map_object_->old_x_ = player->map_object_->x;
+    player->map_object_->old_y_ = player->map_object_->y;
+    player->map_object_->old_z_ = player->map_object_->z;
+    player->map_object_->old_angle_ = player->map_object_->angle_;
+    player->map_object_->old_vertical_angle_ = player->map_object_->vertical_angle_;
+
+    player->old_view_z_ = player->view_z_;
+
     bool should_think = true;
 
     if (player->attacker_ && player->attacker_->IsRemoved())

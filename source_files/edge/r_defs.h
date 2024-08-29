@@ -224,6 +224,11 @@ struct Sector
 {
     float floor_height, ceiling_height;
 
+    // Uncapped test - Dasho
+    float old_floor_height, old_ceiling_height;
+    float interpolated_floor_height, interpolated_ceiling_height;
+    int old_game_tic;
+
     MapSurface floor, ceiling;
 
     RegionProperties properties;

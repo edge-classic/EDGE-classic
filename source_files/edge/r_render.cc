@@ -1949,6 +1949,27 @@ static void RenderSeg(DrawFloor *dfloor, Seg *seg, bool mirror_sub = false)
 
 static void RendererWalkBspNode(unsigned int bspnum);
 
+static void UpdateSectorInterpolation(Sector *sector)
+{
+    if (uncapped_frames.d_ && sector->old_game_tic == game_tic - 1)
+    {
+        // Interpolate between current and last floor/ceiling position.
+        if (!AlmostEquals(sector->floor_height, sector->old_floor_height))
+            sector->interpolated_floor_height = HMM_Lerp(sector->old_floor_height, fractional_tic, sector->floor_height);
+        else
+            sector->interpolated_floor_height = sector->floor_height;
+        if (!AlmostEquals(sector->ceiling_height, sector->old_ceiling_height))
+            sector->interpolated_ceiling_height = HMM_Lerp(sector->old_ceiling_height, fractional_tic, sector->ceiling_height);
+        else
+            sector->interpolated_ceiling_height = sector->ceiling_height;
+    }
+    else
+    {
+        sector->interpolated_floor_height = sector->floor_height;
+        sector->interpolated_ceiling_height = sector->ceiling_height;
+    }
+}
+
 static void RendererWalkMirror(DrawSubsector *dsub, Seg *seg, BAMAngle left, BAMAngle right, bool is_portal)
 {
     DrawMirror *mir = GetDrawMirror();
@@ -2161,29 +2182,32 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
     if (seg->linedef->blocked)
         OcclusionSet(angle_R, angle_L);
 
+    if (bsector)
+        UpdateSectorInterpolation(bsector);
+
     // --- handle sky (using the depth buffer) ---
 
     if (bsector && EDGE_IMAGE_IS_SKY(fsector->floor) && EDGE_IMAGE_IS_SKY(bsector->floor))
     {
-        if (fsector->floor_height < bsector->floor_height)
+        if (fsector->interpolated_floor_height < bsector->interpolated_floor_height)
         {
-            RenderSkyWall(seg, fsector->floor_height, bsector->floor_height);
+            RenderSkyWall(seg, fsector->interpolated_floor_height, bsector->interpolated_floor_height);
         }
     }
 
     if (EDGE_IMAGE_IS_SKY(fsector->ceiling))
     {
-        if (fsector->ceiling_height < fsector->sky_height &&
-            (!bsector || !EDGE_IMAGE_IS_SKY(bsector->ceiling) || bsector->floor_height >= fsector->ceiling_height))
+        if (fsector->interpolated_ceiling_height < fsector->sky_height &&
+            (!bsector || !EDGE_IMAGE_IS_SKY(bsector->ceiling) || bsector->interpolated_floor_height >= fsector->interpolated_ceiling_height))
         {
-            RenderSkyWall(seg, fsector->ceiling_height, fsector->sky_height);
+            RenderSkyWall(seg, fsector->interpolated_ceiling_height, fsector->sky_height);
         }
         else if (bsector && EDGE_IMAGE_IS_SKY(bsector->ceiling) && fsector->height_sector == nullptr &&
                  bsector->height_sector == nullptr)
         {
-            float max_f = HMM_MAX(fsector->floor_height, bsector->floor_height);
+            float max_f = HMM_MAX(fsector->interpolated_floor_height, bsector->interpolated_floor_height);
 
-            if (bsector->ceiling_height <= max_f && max_f < fsector->sky_height)
+            if (bsector->interpolated_ceiling_height <= max_f && max_f < fsector->sky_height)
             {
                 RenderSkyWall(seg, max_f, fsector->sky_height);
             }
@@ -2191,9 +2215,9 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
     }
     // -AJA- 2004/08/29: Emulate Sky-Flooding TRICK
     else if (!debug_hall_of_mirrors.d_ && bsector && EDGE_IMAGE_IS_SKY(bsector->ceiling) &&
-             seg->sidedef->top.image == nullptr && bsector->ceiling_height < fsector->ceiling_height)
+             seg->sidedef->top.image == nullptr && bsector->interpolated_ceiling_height < fsector->interpolated_ceiling_height)
     {
-        RenderSkyWall(seg, bsector->ceiling_height, fsector->ceiling_height);
+        RenderSkyWall(seg, bsector->interpolated_ceiling_height, fsector->interpolated_ceiling_height);
     }
 }
 
@@ -2625,11 +2649,13 @@ static void RendererWalkSubsector(int num)
     K->segs.clear();
     K->mirrors.clear();
 
+    UpdateSectorInterpolation(sector);
+
     // --- handle sky (using the depth buffer) ---
 
-    if (EDGE_IMAGE_IS_SKY(sub->sector->floor) && view_z > sub->sector->floor_height)
+    if (EDGE_IMAGE_IS_SKY(sub->sector->floor) && view_z > sub->sector->interpolated_floor_height)
     {
-        RenderSkyPlane(sub, sub->sector->floor_height);
+        RenderSkyPlane(sub, sub->sector->interpolated_floor_height);
     }
 
     if (EDGE_IMAGE_IS_SKY(sub->sector->ceiling) && view_z < sub->sector->sky_height)
@@ -2637,8 +2663,8 @@ static void RendererWalkSubsector(int num)
         RenderSkyPlane(sub, sub->sector->sky_height);
     }
 
-    float floor_h = sector->floor_height;
-    float ceil_h  = sector->ceiling_height;
+    float floor_h = sector->interpolated_floor_height;
+    float ceil_h  = sector->interpolated_ceiling_height;
 
     MapSurface *floor_s = &sector->floor;
     MapSurface *ceil_s  = &sector->ceiling;
@@ -2649,33 +2675,33 @@ static void RendererWalkSubsector(int num)
     if (sector->height_sector != nullptr)
     {
         // check which region the camera is in...
-        if (view_z > sector->height_sector->ceiling_height) // A : above
+        if (view_z > sector->height_sector->interpolated_ceiling_height) // A : above
         {
-            floor_h = sector->height_sector->ceiling_height;
+            floor_h = sector->height_sector->interpolated_ceiling_height;
             floor_s = &sector->height_sector->floor;
             ceil_s  = &sector->height_sector->ceiling;
             props   = sector->height_sector->active_properties;
         }
-        else if (view_z < sector->height_sector->floor_height) // C : below
+        else if (view_z < sector->height_sector->interpolated_floor_height) // C : below
         {
-            ceil_h  = sector->height_sector->floor_height;
+            ceil_h  = sector->height_sector->interpolated_floor_height;
             floor_s = &sector->height_sector->floor;
             ceil_s  = &sector->height_sector->ceiling;
             props   = sector->height_sector->active_properties;
         }
         else // B : middle for diddle
         {
-            floor_h = sector->height_sector->floor_height;
-            ceil_h  = sector->height_sector->ceiling_height;
+            floor_h = sector->height_sector->interpolated_floor_height;
+            ceil_h  = sector->height_sector->interpolated_ceiling_height;
         }
     }
     // -AJA- 2004/04/22: emulate the Deep-Water TRICK
     else if (sub->deep_water_reference != nullptr)
     {
-        floor_h = sub->deep_water_reference->floor_height;
+        floor_h = sub->deep_water_reference->interpolated_floor_height;
         floor_s = &sub->deep_water_reference->floor;
 
-        ceil_h = sub->deep_water_reference->ceiling_height;
+        ceil_h = sub->deep_water_reference->interpolated_ceiling_height;
         ceil_s = &sub->deep_water_reference->ceiling;
     }
 
@@ -2709,7 +2735,7 @@ static void RendererWalkSubsector(int num)
         // ignore liquids in the middle of THICK solids, or below real
         // floor or above real ceiling
         //
-        if (C->bottom_height < floor_h || C->bottom_height > sector->ceiling_height)
+        if (C->bottom_height < floor_h || C->bottom_height > sector->interpolated_ceiling_height)
             continue;
 
         AddNewDrawFloor(K, C, floor_h, C->bottom_height, C->top_height, floor_s, C->bottom, C->properties);
@@ -3232,18 +3258,29 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
 
     view_x_slope *= widescreen_view_width_multiplier;
 
-    view_x     = mo->x;
-    view_y     = mo->y;
-    view_z     = mo->z;
-    view_angle = mo->angle_;
-
-    if (mo->player_)
-        view_z += mo->player_->view_z_;
+    if (uncapped_frames.d_ && level_time_elapsed && mo->interpolate_ && !paused && !menu_active)
+    {
+        view_x     = HMM_Lerp(mo->old_x_, fractional_tic, mo->x);
+        view_y     = HMM_Lerp(mo->old_y_, fractional_tic, mo->y);
+        view_z     = HMM_Lerp(mo->old_z_, fractional_tic, mo->z);
+        view_angle = epi::BAMInterpolate(mo->old_angle_, mo->angle_, fractional_tic);
+        view_z += HMM_Lerp(mo->player_->old_view_z_, fractional_tic, mo->player_->view_z_);
+        view_vertical_angle = epi::BAMInterpolate(mo->old_vertical_angle_, mo->vertical_angle_, fractional_tic);
+    }
     else
-        view_z += mo->height_ * 9 / 10;
+    {
+        view_x     = mo->x;
+        view_y     = mo->y;
+        view_z     = mo->z;
+        view_angle = mo->angle_;
+        if (mo->player_)
+            view_z += mo->player_->view_z_;
+        else
+            view_z += mo->height_ * 9 / 10;
+        view_vertical_angle = mo->vertical_angle_;
+    }
 
     view_subsector      = mo->subsector_;
-    view_vertical_angle = mo->vertical_angle_;
     view_properties     = GetPointProperties(view_subsector, view_z);
 
     if (mo->player_)

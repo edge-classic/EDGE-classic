@@ -37,6 +37,7 @@
 #include "im_data.h"
 #include "im_funcs.h"
 #include "m_misc.h" // !!!! model test
+#include "n_network.h"
 #include "p_local.h"
 #include "r_colormap.h"
 #include "r_defs.h"
@@ -710,7 +711,12 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my, b
 
     if (frame->rotations_ >= 8)
     {
-        BAMAngle ang = mo->angle_;
+        BAMAngle ang;
+
+        if (uncapped_frames.d_ && mo->interpolate_ && !paused && !menu_active)
+            ang = epi::BAMInterpolate(mo->old_angle_, mo->angle_, fractional_tic);
+        else
+            ang = mo->angle_;
 
         MirrorAngle(ang);
 
@@ -812,16 +818,20 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     bool is_model = (mo->state_->flags & kStateFrameFlagModel) ? true : false;
 
     // transform the origin point
-    float mx = mo->x, my = mo->y, mz = mo->z;
+    float mx, my, mz;
 
     // position interpolation
-    if (mo->interpolation_number_ > 1)
+    if (uncapped_frames.d_ && mo->interpolate_ && !paused && !menu_active)
     {
-        float along = mo->interpolation_position_ / (float)mo->interpolation_number_;
-
-        mx = mo->interpolation_from_.X + (mx - mo->interpolation_from_.X) * along;
-        my = mo->interpolation_from_.Y + (my - mo->interpolation_from_.Y) * along;
-        mz = mo->interpolation_from_.Z + (mz - mo->interpolation_from_.Z) * along;
+        mx = HMM_Lerp(mo->old_x_, fractional_tic, mo->x);
+        my = HMM_Lerp(mo->old_y_, fractional_tic, mo->y);
+        mz = HMM_Lerp(mo->old_z_, fractional_tic, mo->z);
+    }
+    else
+    {
+        mx = mo->x;
+        my = mo->y;
+        mz = mo->z;
     }
 
     MirrorCoordinate(mx, my);

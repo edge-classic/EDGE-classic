@@ -147,6 +147,9 @@ class Player
     // will be kFloatUnused until the first think.
     float view_z_;
 
+    // Uncapped test - Dasho
+    float old_view_z_;
+
     // Base height above floor for view_z.  Tracks `std_viewheight' but
     // is different when squatting (i.e. after a fall).
     float view_height_;

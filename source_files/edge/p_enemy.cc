@@ -249,14 +249,6 @@ bool DoMove(MapObject *actor, bool path)
         else
             actor->z = actor->floor_z_;
     }
-    // -AJA- 2008/01/16: position interpolation
-    if ((actor->state_->flags & kStateFrameFlagModel) || (actor->flags_ & kMapObjectFlagFloat))
-    {
-        actor->interpolation_number_   = HMM_Clamp(2, actor->state_->tics, 10);
-        actor->interpolation_position_ = 1;
-
-        actor->interpolation_from_ = orig_pos;
-    }
 
     return true;
 }

@@ -1352,6 +1352,19 @@ static void P_MobjThinker(MapObject *mobj)
     if (mobj->IsRemoved())
         return;
 
+    if (!(mobj->player_ != NULL && mobj == mobj->player_->map_object_))
+    {
+        // Assume we can interpolate at the beginning
+        // of the tic.
+        mobj->interpolate_ = true;
+
+        // Store starting position for mobj interpolation.
+        mobj->old_x_ = mobj->x;
+        mobj->old_y_ = mobj->y;
+        mobj->old_z_ = mobj->z;
+        mobj->old_angle_ = mobj->angle_;
+    }
+
     const RegionProperties *props;
     RegionProperties        player_props;
 
@@ -1366,17 +1379,6 @@ static void P_MobjThinker(MapObject *mobj)
 
     mobj->visibility_      = (15 * mobj->visibility_ + mobj->target_visibility_) / 16;
     mobj->dynamic_light_.r = (15 * mobj->dynamic_light_.r + mobj->dynamic_light_.target) / 16;
-
-    // position interpolation
-    if (mobj->interpolation_number_ > 1)
-    {
-        mobj->interpolation_position_++;
-
-        if (mobj->interpolation_position_ >= mobj->interpolation_number_)
-        {
-            mobj->interpolation_position_ = mobj->interpolation_number_ = 0;
-        }
-    }
 
     // handle SKULLFLY attacks
     if ((mobj->flags_ & kMapObjectFlagSkullFly) && AlmostEquals(mobj->momentum_.X, 0.0f) &&

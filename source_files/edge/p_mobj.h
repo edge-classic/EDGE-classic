@@ -208,6 +208,12 @@ class MapObject : public Position
     // properties from extrafloor the thing is in
     struct RegionProperties *region_properties_ = nullptr;
 
+    // Uncapped stuff - Dasho
+    float old_x_        = 0;
+    float old_y_        = 0;
+    BAMAngle old_angle_ = 0;
+    BAMAngle old_vertical_angle_ = 0;
+
     // Vert slope stuff maybe
     float old_z_       = 0;
     float old_floor_z_ = 0;
@@ -339,12 +345,6 @@ class MapObject : public Position
     // hash values for TUNNEL missiles
     uint32_t tunnel_hash_[2] = {0, 0};
 
-    // position interpolation (disabled when lerp_num <= 1)
-    short interpolation_number_   = 0;
-    short interpolation_position_ = 0;
-
-    HMM_Vec3 interpolation_from_ = {{0, 0, 0}};
-
     // touch list: sectors this thing is in or touches
     struct TouchNode *touch_sectors_ = nullptr;
 
@@ -373,6 +373,9 @@ class MapObject : public Position
     bool slope_sight_hit_ = false;
 
     int teleport_tic_ = 0;
+
+    // Uncapped test - Dasho
+    bool interpolate_ = false;
 
   public:
     bool IsRemoved() const;

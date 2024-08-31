@@ -357,9 +357,6 @@ static void InstallTextureLumpsStrife(int file, const WadTextureResource *WT)
             patch->origin_y = AlignedLittleEndianS16(mpatch->y_origin);
             patch->patch    = patchlookup[pname];
 
-            // work-around for strange Y offset in SKY1 of DOOM 1
-            if (is_sky && patch->origin_y < 0)
-                patch->origin_y = 0;
 
             if (patch->patch == -1)
             {

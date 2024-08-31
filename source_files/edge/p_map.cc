@@ -2034,7 +2034,7 @@ void UnblockLineEffectDebris(Line *TheLine, const LineType *special)
         {
             // clear standard flags
             TheLine->flags &=
-                ~(kLineFlagBlocking | kLineFlagBlockMonsters | kLineFlagBlockGroundedMonsters | kLineFlagBlockPlayers);
+                ~(kLineFlagBlocking | kLineFlagBlockMonsters | kLineFlagBlockGroundedMonsters | kLineFlagBlockPlayers | kLineFlagSoundBlock);
 
             // clear EDGE's extended lineflags too
             TheLine->flags &= ~(kLineFlagSightBlock | kLineFlagShootBlock);

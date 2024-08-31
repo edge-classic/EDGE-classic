@@ -256,8 +256,11 @@ static ImageData *ReadTextureAsEpiBlock(Image *rim)
         {
             int offset = AlignedLittleEndianS32(realpatch->column_offset[x - x1]);
 
-            if (offset < 0 || offset >= realsize)
-                FatalError("Bad image offset 0x%08x in image [%s]\n", offset, rim->name_.c_str());
+            if (offset < 0)
+                FatalError("Negative image offset 0x%08x in image [%s]\n", offset, rim->name_.c_str());
+            
+            if (offset >= realsize)
+                FatalError("Excessive image offset 0x%08x in image [%s]\n", offset, rim->name_.c_str());
 
             const TexturePost *patchcol = (const TexturePost *)((const uint8_t *)realpatch + offset);
 

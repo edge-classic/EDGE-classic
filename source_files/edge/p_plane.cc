@@ -322,9 +322,14 @@ static bool MovePlane(PlaneMover *plane)
 
     move_result_e res;
 
-    plane->sector->old_ceiling_height = plane->sector->ceiling_height;
-    plane->sector->old_floor_height = plane->sector->floor_height;
-    plane->sector->old_game_tic = game_tic;
+    Sector *sec = plane->sector;
+
+    if (sec->old_game_tic != game_tic)
+    {
+        plane->sector->old_ceiling_height = plane->sector->ceiling_height;
+        plane->sector->old_floor_height = plane->sector->floor_height;
+        plane->sector->old_game_tic = game_tic;
+    }
 
     switch (plane->direction)
     {
@@ -1210,6 +1215,8 @@ static bool MoveSlider(SlidingDoorMover *smov)
 {
     // RETURNS true if SlidingDoorMover should be removed.
 
+    smov->old_opening = smov->opening;
+
     Sector *sec = smov->line->front_sector;
 
     float factor = 1.0f;
@@ -1367,6 +1374,7 @@ bool RunSlidingDoor(Line *door, Line *act_line, MapObject *thing, const LineType
     smov->info        = &special->s_;
     smov->line        = door;
     smov->opening     = 0.0f;
+    smov->old_opening = 0.0f;
     smov->line_length = PointToDistance(0, 0, door->delta_x, door->delta_y);
     smov->target      = smov->line_length * smov->info->distance_;
 

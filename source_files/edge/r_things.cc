@@ -713,7 +713,7 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my, b
     {
         BAMAngle ang;
 
-        if (uncapped_frames.d_ && mo->interpolate_ && !paused && !menu_active)
+        if (uncapped_frames.d_ && mo->interpolate_ && !paused && !menu_active && !erraticism_active)
             ang = epi::BAMInterpolate(mo->old_angle_, mo->angle_, fractional_tic);
         else
             ang = mo->angle_;
@@ -818,20 +818,22 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     bool is_model = (mo->state_->flags & kStateFrameFlagModel) ? true : false;
 
     // transform the origin point
-    float mx, my, mz;
+    float mx, my, mz, fz;
 
     // position interpolation
-    if (uncapped_frames.d_ && mo->interpolate_ && !paused && !menu_active)
+    if (uncapped_frames.d_ && mo->interpolate_ && !paused && !menu_active && !erraticism_active)
     {
         mx = HMM_Lerp(mo->old_x_, fractional_tic, mo->x);
         my = HMM_Lerp(mo->old_y_, fractional_tic, mo->y);
         mz = HMM_Lerp(mo->old_z_, fractional_tic, mo->z);
+        fz = HMM_Lerp(mo->old_floor_z_, fractional_tic, mo->floor_z_);
     }
     else
     {
         mx = mo->x;
         my = mo->y;
         mz = mo->z;
+        fz = mo->floor_z_;
     }
 
     MirrorCoordinate(mx, my);
@@ -857,7 +859,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     float   sink_mult = 0;
     float   bob_mult  = 0;
     Sector *cur_sec   = mo->subsector_->sector;
-    if (!cur_sec->extrafloor_used && !cur_sec->height_sector && abs(mo->z - cur_sec->floor_height) < 1)
+    if (!cur_sec->extrafloor_used && !cur_sec->height_sector && abs(mz - cur_sec->floor_height) < 1)
     {
         if (!(mo->flags_ & kMapObjectFlagNoGravity))
         {
@@ -905,12 +907,12 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
         switch (mo->info_->yalign_)
         {
         case SpriteYAlignmentTopDown:
-            gzt = mo->z + mo->height_ + top_offset * mo->scale_;
+            gzt = mz + mo->height_ + top_offset * mo->scale_;
             gzb = gzt - sprite_height * mo->scale_;
             break;
 
         case SpriteYAlignmentMiddle: {
-            float _mz = mo->z + mo->height_ * 0.5 + top_offset * mo->scale_;
+            float _mz = mz + mo->height_ * 0.5 + top_offset * mo->scale_;
             float dz  = sprite_height * 0.5 * mo->scale_;
 
             gzt = _mz + dz;
@@ -920,7 +922,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
 
         case SpriteYAlignmentBottomUp:
         default:
-            gzb = mo->z + top_offset * mo->scale_;
+            gzb = mz + top_offset * mo->scale_;
             gzt = gzb + sprite_height * mo->scale_;
             break;
         }
@@ -946,7 +948,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
         // do nothing? just skip the other elseifs below
         y_clipping = kVerticalClipHard;
     }
-    else if (sprite_kludge == 0 && gzb < mo->floor_z_)
+    else if (sprite_kludge == 0 && gzb < fz)
     {
         // explosion ?
         if (mo->info_->flags_ & kMapObjectFlagMissile)
@@ -955,8 +957,8 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
         }
         else
         {
-            gzt += mo->floor_z_ - gzb;
-            gzb = mo->floor_z_;
+            gzt += fz - gzb;
+            gzb = fz;
         }
     }
     else if (sprite_kludge == 0 && gzt > mo->ceiling_z_)

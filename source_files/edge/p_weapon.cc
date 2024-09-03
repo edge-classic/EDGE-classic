@@ -819,6 +819,7 @@ void SetupPlayerSprites(Player *p)
         psp->state      = nullptr;
         psp->next_state = nullptr;
         psp->screen_x = psp->screen_y = 0;
+        psp->old_screen_x = psp->old_screen_y = 0;
         psp->visibility = psp->target_visibility = 1.0f;
     }
 
@@ -842,6 +843,9 @@ void MovePlayerSprites(Player *p)
     }
 
     PlayerSprite *psp = &p->player_sprites_[0];
+
+    p->player_sprites_[kPlayerSpriteFlash].old_screen_x = p->player_sprites_[kPlayerSpriteWeapon].old_screen_x = p->player_sprites_[kPlayerSpriteWeapon].screen_x;
+    p->player_sprites_[kPlayerSpriteFlash].old_screen_y = p->player_sprites_[kPlayerSpriteWeapon].old_screen_y = p->player_sprites_[kPlayerSpriteWeapon].screen_y;
 
     for (int i = 0; i < kTotalPlayerSpriteTypes; i++, psp++)
     {

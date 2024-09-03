@@ -1955,6 +1955,8 @@ static void OptionMenuChangeBobbing(int key_pressed, ConsoleVariable *console_va
         {
             psp->screen_x = 0;
             psp->screen_y = 0;
+            psp->old_screen_x = 0;
+            psp->old_screen_y = 0;
         }
     }
 }

@@ -205,10 +205,23 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
     float coord_W = 320.0f * widescreen_view_width_multiplier;
     float coord_H = 200.0f;
 
-    float tx1 = (coord_W - w) / 2.0 + psp->screen_x - image->ScaledOffsetX();
+    float psp_x, psp_y;
+
+    if (uncapped_frames.d_ && !paused && !menu_active)
+    {
+        psp_x = HMM_Lerp(psp->old_screen_x, fractional_tic, psp->screen_x);
+        psp_y = HMM_Lerp(psp->old_screen_y, fractional_tic, psp->screen_y);
+    }
+    else
+    {
+        psp_x = psp->screen_x;
+        psp_y = psp->screen_y;
+    }
+
+    float tx1 = (coord_W - w) / 2.0 + psp_x - image->ScaledOffsetX();
     float tx2 = tx1 + w;
 
-    float ty1 = -psp->screen_y + image->ScaledOffsetY() - ((h - image->ScaledHeightActual()) * 0.5f);
+    float ty1 = -psp_y + image->ScaledOffsetY() - ((h - image->ScaledHeightActual()) * 0.5f);
 
     if (LuaUseLuaHUD())
     {
@@ -617,13 +630,26 @@ void RenderWeaponModel(Player *p)
         skin_img = ImageForDummySkin();
     }
 
-    float x = view_x + view_right.X * psp->screen_x / 8.0;
-    float y = view_y + view_right.Y * psp->screen_x / 8.0;
-    float z = view_z + view_right.Z * psp->screen_x / 8.0;
+    float psp_x, psp_y;
 
-    x -= view_up.X * psp->screen_y / 10.0;
-    y -= view_up.Y * psp->screen_y / 10.0;
-    z -= view_up.Z * psp->screen_y / 10.0;
+    if (uncapped_frames.d_ && !paused && !menu_active && !erraticism_active)
+    {
+        psp_x = HMM_Lerp(psp->old_screen_x, fractional_tic, psp->screen_x);
+        psp_y = HMM_Lerp(psp->old_screen_y, fractional_tic, psp->screen_y);
+    }
+    else
+    {
+        psp_x = psp->screen_x;
+        psp_y = psp->screen_y;
+    }
+
+    float x = view_x + view_right.X * psp_x / 8.0;
+    float y = view_y + view_right.Y * psp_x / 8.0;
+    float z = view_z + view_right.Z * psp_x / 8.0;
+
+    x -= view_up.X * psp_y / 10.0;
+    y -= view_up.Y * psp_y / 10.0;
+    z -= view_up.Z * psp_y / 10.0;
 
     x += view_forward.X * w->model_forward_;
     y += view_forward.Y * w->model_forward_;

@@ -1380,6 +1380,17 @@ static void P_MobjThinker(MapObject *mobj)
     mobj->visibility_      = (15 * mobj->visibility_ + mobj->target_visibility_) / 16;
     mobj->dynamic_light_.r = (15 * mobj->dynamic_light_.r + mobj->dynamic_light_.target) / 16;
 
+    // position interpolation
+    if (mobj->interpolation_number_ > 1)
+    {
+        mobj->interpolation_position_++;
+
+        if (mobj->interpolation_position_ >= mobj->interpolation_number_)
+        {
+            mobj->interpolation_position_ = mobj->interpolation_number_ = 0;
+        }
+    }
+
     // handle SKULLFLY attacks
     if ((mobj->flags_ & kMapObjectFlagSkullFly) && AlmostEquals(mobj->momentum_.X, 0.0f) &&
         AlmostEquals(mobj->momentum_.Y, 0.0f))

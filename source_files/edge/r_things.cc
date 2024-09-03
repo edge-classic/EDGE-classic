@@ -836,6 +836,15 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
         fz = mo->floor_z_;
     }
 
+    if (mo->interpolation_number_ > 1)
+    {
+        float along = mo->interpolation_position_ / (float)mo->interpolation_number_;
+
+        mx = mo->interpolation_from_.X + (mx - mo->interpolation_from_.X) * along;
+        my = mo->interpolation_from_.Y + (my - mo->interpolation_from_.Y) * along;
+        mz = mo->interpolation_from_.Z + (mz - mo->interpolation_from_.Z) * along;
+    }
+
     MirrorCoordinate(mx, my);
 
     float tr_x = mx - view_x;

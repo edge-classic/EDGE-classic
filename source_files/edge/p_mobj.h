@@ -345,6 +345,12 @@ class MapObject : public Position
     // hash values for TUNNEL missiles
     uint32_t tunnel_hash_[2] = {0, 0};
 
+    // position interpolation (disabled when lerp_num <= 1)
+    short interpolation_number_   = 0;
+    short interpolation_position_ = 0;
+
+    HMM_Vec3 interpolation_from_ = {{0, 0, 0}};
+
     // touch list: sectors this thing is in or touches
     struct TouchNode *touch_sectors_ = nullptr;
 

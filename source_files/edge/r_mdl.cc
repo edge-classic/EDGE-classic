@@ -764,7 +764,7 @@ void MDLRenderModel(MDLModel *md, const Image *skin_img, bool is_weapon, int fra
 
     bool tilt = is_weapon || (mo->flags_ & kMapObjectFlagMissile) || (mo->hyper_flags_ & kHyperFlagForceModelTilt);
 
-    if (uncapped_frames.d_ && !paused && !menu_active && (is_weapon || (!time_stop_active && !erraticism_active)))
+    if (uncapped_frames.d_ && !paused && !menu_active && !rts_menu_active && (is_weapon || (!time_stop_active && !erraticism_active)))
     {
         BAMAngleToMatrix(tilt ? ~epi::BAMInterpolate(mo->old_vertical_angle_, mo->vertical_angle_, fractional_tic) : 0, &data.mouselook_x_vector_, &data.mouselook_z_vector_);
         BAMAngle ang = epi::BAMInterpolate(mo->old_angle_, mo->angle_, fractional_tic) + rotation;

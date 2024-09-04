@@ -1039,7 +1039,7 @@ static void DrawSlidingDoor(DrawFloor *dfloor, float c, float f, float tex_top_h
 
     if (smov)
     {
-        if (uncapped_frames.d_ && !menu_active && !paused && !time_stop_active && !erraticism_active)
+        if (uncapped_frames.d_ && !menu_active && !paused && !time_stop_active && !erraticism_active && !rts_menu_active)
             opening = HMM_Lerp(smov->old_opening, fractional_tic, smov->opening);
         else
             opening = smov->opening;
@@ -1960,7 +1960,7 @@ static void RendererWalkBspNode(unsigned int bspnum);
 
 static void UpdateSectorInterpolation(Sector *sector)
 {
-    if (uncapped_frames.d_ && !time_stop_active && !paused && !erraticism_active && !menu_active)
+    if (uncapped_frames.d_ && !time_stop_active && !paused && !erraticism_active && !menu_active && !rts_menu_active)
     {
         // Interpolate between current and last floor/ceiling position.
         if (sector->floor_move && !AlmostEquals(sector->floor_height, sector->old_floor_height))
@@ -3267,7 +3267,7 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
 
     view_x_slope *= widescreen_view_width_multiplier;
 
-    if (uncapped_frames.d_ && level_time_elapsed && mo->interpolate_ && !paused && !menu_active)
+    if (uncapped_frames.d_ && level_time_elapsed && mo->interpolate_ && !paused && !menu_active && !rts_menu_active)
     {
         view_x     = HMM_Lerp(mo->old_x_, fractional_tic, mo->x);
         view_y     = HMM_Lerp(mo->old_y_, fractional_tic, mo->y);

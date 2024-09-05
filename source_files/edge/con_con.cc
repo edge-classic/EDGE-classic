@@ -45,6 +45,7 @@
 #include "i_defs_gl.h"
 #include "i_system.h"
 #include "m_argv.h"
+#include "n_network.h"
 #include "r_draw.h"
 #include "r_image.h"
 #include "r_modes.h"
@@ -62,6 +63,7 @@ static ConsoleVisibility console_visible;
 // stores the console toggle effect
 static int   console_wipe_active   = 0;
 static int   console_wipe_position = 0;
+static int   old_console_wipe_position = 0;
 static Font *console_font;
 Font        *endoom_font;
 
@@ -303,6 +305,7 @@ void SetConsoleVisible(ConsoleVisibility v)
     {
         console_wipe_active   = true;
         console_wipe_position = (v == kConsoleVisibilityMaximal) ? 0 : kConsoleWipeTics;
+        old_console_wipe_position = console_wipe_position;
     }
 }
 
@@ -860,7 +863,12 @@ void ConsoleDrawer(void)
     int y = current_screen_height;
 
     if (console_wipe_active)
-        y = y - CON_GFX_HT * (console_wipe_position) / kConsoleWipeTics;
+    {   
+        if (uncapped_frames.d_)
+            y = (int)((float)y - CON_GFX_HT * HMM_Lerp(old_console_wipe_position, fractional_tic, console_wipe_position) / kConsoleWipeTics);
+        else
+            y = y - CON_GFX_HT * console_wipe_position / kConsoleWipeTics;
+    }
     else
         y = y - CON_GFX_HT;
 
@@ -1559,6 +1567,7 @@ void ConsoleTicker(void)
 
     if (console_wipe_active)
     {
+        old_console_wipe_position = console_wipe_position;
         if (console_visible == kConsoleVisibilityNotVisible)
         {
             console_wipe_position--;

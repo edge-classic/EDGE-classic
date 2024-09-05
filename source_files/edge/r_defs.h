@@ -143,6 +143,7 @@ struct MapSurface
 
     // current offset and scrolling deltas (world coords)
     HMM_Vec2 offset;
+    HMM_Vec2 old_offset;
     HMM_Vec2 scroll;
 
     HMM_Vec2 net_scroll = {{0, 0}};

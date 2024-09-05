@@ -819,9 +819,6 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
 
     (void)opaque;
 
-    // if (! props)
-    //	props = surf->override_properties ? surf->override_properties :
-    // dfloor->properties;
     if (surf->override_properties)
         props = surf->override_properties;
 
@@ -1000,8 +997,8 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
 
     if (surf->image && surf->image->liquid_type_ > kLiquidImageNone && swirling_flats == kLiquidSwirlParallax)
     {
-        data.tx0        = surf->offset.X + 25;
-        data.ty0        = surf->offset.Y + 25;
+        data.tx0        = data.tx0 + 25;
+        data.ty0        = data.ty0 + 25;
         swirl_pass      = 2;
         int   old_blend = data.blending;
         float old_dt    = data.trans;
@@ -1212,8 +1209,19 @@ static void DrawTile(Seg *seg, DrawFloor *dfloor, float lz1, float lz2, float rz
     if (!image)
         image = ImageForHomDetect();
 
-    float tex_top_h = tex_z + surf->offset.Y;
-    float x_offset  = surf->offset.X;
+    float offx, offy;
+
+    if (uncapped_frames.d_ && !AlmostEquals(surf->old_offset.X, surf->offset.X) && !paused && !menu_active && !time_stop_active && !erraticism_active)
+        offx = fmod(HMM_Lerp(surf->old_offset.X, fractional_tic, surf->offset.X), surf->image->actual_width_);
+    else
+        offx = surf->offset.X;
+    if (uncapped_frames.d_ && !AlmostEquals(surf->old_offset.Y, surf->offset.Y) && !paused && !menu_active && !time_stop_active && !erraticism_active)
+        offy = fmod(HMM_Lerp(surf->old_offset.Y, fractional_tic, surf->offset.Y), surf->image->actual_height_);
+    else
+        offy = surf->offset.Y;
+
+    float tex_top_h = tex_z + offy;
+    float x_offset  = offx;
 
     if (flags & kWallTileExtraX)
     {
@@ -1785,6 +1793,7 @@ static void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref, 
 
     data.plane_h = (face_dir > 0) ? h2 : h1;
 
+    // I don't think we need interpolation here...are there Boom scrollers which are also flat flooding hacks? - Dasho
     data.tx0     = surf->offset.X;
     data.ty0     = surf->offset.Y;
     data.image_w = surf->image->ScaledWidthActual();
@@ -2501,8 +2510,14 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
     data.v_count  = v_count;
     data.vertices = vertices;
     data.R = data.G = data.B = 1.0f;
-    data.tx0                 = surf->offset.X;
-    data.ty0                 = surf->offset.Y;
+    if (uncapped_frames.d_ && !AlmostEquals(surf->old_offset.X, surf->offset.X) && !paused && !menu_active && !time_stop_active && !erraticism_active)
+        data.tx0 = fmod(HMM_Lerp(surf->old_offset.X, fractional_tic, surf->offset.X), surf->image->actual_width_);
+    else
+        data.tx0 = surf->offset.X;
+    if (uncapped_frames.d_ && !AlmostEquals(surf->old_offset.Y, surf->offset.Y) && !paused && !menu_active && !time_stop_active && !erraticism_active)
+        data.ty0 = fmod(HMM_Lerp(surf->old_offset.Y, fractional_tic, surf->offset.Y), surf->image->actual_height_);
+    else
+        data.ty0 = surf->offset.Y;
     data.image_w             = surf->image->ScaledWidthActual();
     data.image_h             = surf->image->ScaledHeightActual();
     data.x_mat               = surf->x_matrix;
@@ -2544,8 +2559,8 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
     if (surf->image->liquid_type_ > kLiquidImageNone &&
         swirling_flats == kLiquidSwirlParallax) // Kept as an example for future effects
     {
-        data.tx0        = surf->offset.X + 25;
-        data.ty0        = surf->offset.Y + 25;
+        data.tx0        = data.tx0 + 25;
+        data.ty0        = data.ty0 + 25;
         swirl_pass      = 2;
         int   old_blend = data.blending;
         float old_dt    = data.trans;

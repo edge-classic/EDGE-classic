@@ -772,6 +772,8 @@ static void P_LineEffect(Line *target, Line *source, const LineType *special)
         {
             source->side[0]->middle.offset.X = 0;
             source->side[0]->bottom.offset.X = 0;
+            source->side[0]->middle.old_offset.X = 0;
+            source->side[0]->bottom.old_offset.X = 0;
         }
     }
 
@@ -920,6 +922,7 @@ static void SectorEffect(Sector *target, Line *source, const LineType *special)
             target->floor.offset.X += source->side[0]->bottom.offset.X;
             target->floor.offset.Y += source->side[0]->bottom.offset.Y;
         }
+        target->floor.old_offset = target->floor.offset;
         target->floor.rotation = angle;
     }
     if (special->sector_effect_ & kSectorEffectTypeAlignCeiling)
@@ -932,6 +935,7 @@ static void SectorEffect(Sector *target, Line *source, const LineType *special)
             target->ceiling.offset.X += source->side[0]->bottom.offset.X;
             target->ceiling.offset.Y += source->side[0]->bottom.offset.Y;
         }
+        target->ceiling.old_offset = target->ceiling.offset;
         target->ceiling.rotation = angle;
     }
 
@@ -2272,36 +2276,27 @@ void UpdateSpecials()
         {
             if (ld->side[0]->top.image)
             {
-                ld->side[0]->top.offset.X = fmod(
-                    ld->side[0]->top.offset.X + (ld->side[0]->top.scroll.X + ld->side[0]->top.net_scroll.X) * factor,
-                    ld->side[0]->top.image->actual_width_);
-                ld->side[0]->top.offset.Y = fmod(
-                    ld->side[0]->top.offset.Y + (ld->side[0]->top.scroll.Y + ld->side[0]->top.net_scroll.Y) * factor,
-                    ld->side[0]->top.image->actual_height_);
+                ld->side[0]->top.old_offset = ld->side[0]->top.offset;
+                ld->side[0]->top.offset.X = ld->side[0]->top.offset.X + (ld->side[0]->top.scroll.X + ld->side[0]->top.net_scroll.X) * factor;
+                ld->side[0]->top.offset.Y = ld->side[0]->top.offset.Y + (ld->side[0]->top.scroll.Y + ld->side[0]->top.net_scroll.Y) * factor;
                 ld->side[0]->top.net_scroll = {{0, 0}};
             }
             if (ld->side[0]->middle.image)
             {
-                ld->side[0]->middle.offset.X =
-                    fmod(ld->side[0]->middle.offset.X +
-                             (ld->side[0]->middle.scroll.X + ld->side[0]->middle.net_scroll.X) * factor,
-                         ld->side[0]->middle.image->actual_width_);
-                ld->side[0]->middle.offset.Y =
-                    fmod(ld->side[0]->middle.offset.Y +
-                             (ld->side[0]->middle.scroll.Y + ld->side[0]->middle.net_scroll.Y) * factor,
-                         ld->side[0]->middle.image->actual_height_);
+                ld->side[0]->middle.old_offset = ld->side[0]->middle.offset;
+                ld->side[0]->middle.offset.X = ld->side[0]->middle.offset.X +
+                             (ld->side[0]->middle.scroll.X + ld->side[0]->middle.net_scroll.X) * factor;
+                ld->side[0]->middle.offset.Y = ld->side[0]->middle.offset.Y +
+                             (ld->side[0]->middle.scroll.Y + ld->side[0]->middle.net_scroll.Y) * factor;
                 ld->side[0]->middle.net_scroll = {{0, 0}};
             }
             if (ld->side[0]->bottom.image)
             {
-                ld->side[0]->bottom.offset.X =
-                    fmod(ld->side[0]->bottom.offset.X +
-                             (ld->side[0]->bottom.scroll.X + ld->side[0]->bottom.net_scroll.X) * factor,
-                         ld->side[0]->bottom.image->actual_width_);
-                ld->side[0]->bottom.offset.Y =
-                    fmod(ld->side[0]->bottom.offset.Y +
-                             (ld->side[0]->bottom.scroll.Y + ld->side[0]->bottom.net_scroll.Y) * factor,
-                         ld->side[0]->bottom.image->actual_height_);
+                ld->side[0]->bottom.old_offset = ld->side[0]->bottom.offset;
+                ld->side[0]->bottom.offset.X = ld->side[0]->bottom.offset.X +
+                             (ld->side[0]->bottom.scroll.X + ld->side[0]->bottom.net_scroll.X) * factor;
+                ld->side[0]->bottom.offset.Y = ld->side[0]->bottom.offset.Y +
+                             (ld->side[0]->bottom.scroll.Y + ld->side[0]->bottom.net_scroll.Y) * factor;
                 ld->side[0]->bottom.net_scroll = {{0, 0}};
             }
         }
@@ -2310,36 +2305,27 @@ void UpdateSpecials()
         {
             if (ld->side[1]->top.image)
             {
-                ld->side[1]->top.offset.X = fmod(
-                    ld->side[1]->top.offset.X + (ld->side[1]->top.scroll.X + ld->side[1]->top.net_scroll.X) * factor,
-                    ld->side[1]->top.image->actual_width_);
-                ld->side[1]->top.offset.Y = fmod(
-                    ld->side[1]->top.offset.Y + (ld->side[1]->top.scroll.Y + ld->side[1]->top.net_scroll.Y) * factor,
-                    ld->side[1]->top.image->actual_height_);
+                ld->side[1]->top.old_offset = ld->side[1]->top.offset;
+                ld->side[1]->top.offset.X = ld->side[1]->top.offset.X + (ld->side[1]->top.scroll.X + ld->side[1]->top.net_scroll.X) * factor;
+                ld->side[1]->top.offset.Y = ld->side[1]->top.offset.Y + (ld->side[1]->top.scroll.Y + ld->side[1]->top.net_scroll.Y) * factor;
                 ld->side[1]->top.net_scroll = {{0, 0}};
             }
             if (ld->side[1]->middle.image)
             {
-                ld->side[1]->middle.offset.X =
-                    fmod(ld->side[1]->middle.offset.X +
-                             (ld->side[1]->middle.scroll.X + ld->side[1]->middle.net_scroll.X) * factor,
-                         ld->side[1]->middle.image->actual_width_);
-                ld->side[1]->middle.offset.Y =
-                    fmod(ld->side[1]->middle.offset.Y +
-                             (ld->side[1]->middle.scroll.Y + ld->side[1]->middle.net_scroll.Y) * factor,
-                         ld->side[1]->middle.image->actual_height_);
+                ld->side[1]->middle.old_offset = ld->side[1]->middle.offset;
+                ld->side[1]->middle.offset.X = ld->side[1]->middle.offset.X +
+                             (ld->side[1]->middle.scroll.X + ld->side[1]->middle.net_scroll.X) * factor;
+                ld->side[1]->middle.offset.Y = ld->side[1]->middle.offset.Y +
+                             (ld->side[1]->middle.scroll.Y + ld->side[1]->middle.net_scroll.Y) * factor;
                 ld->side[1]->middle.net_scroll = {{0, 0}};
             }
             if (ld->side[1]->bottom.image)
             {
-                ld->side[1]->bottom.offset.X =
-                    fmod(ld->side[1]->bottom.offset.X +
-                             (ld->side[1]->bottom.scroll.X + ld->side[1]->bottom.net_scroll.X) * factor,
-                         ld->side[1]->bottom.image->actual_width_);
-                ld->side[1]->bottom.offset.Y =
-                    fmod(ld->side[1]->bottom.offset.Y +
-                             (ld->side[1]->bottom.scroll.Y + ld->side[1]->bottom.net_scroll.Y) * factor,
-                         ld->side[1]->bottom.image->actual_height_);
+                ld->side[1]->bottom.old_offset = ld->side[1]->bottom.offset;
+                ld->side[1]->bottom.offset.X = ld->side[1]->bottom.offset.X +
+                             (ld->side[1]->bottom.scroll.X + ld->side[1]->bottom.net_scroll.X) * factor;
+                ld->side[1]->bottom.offset.Y = ld->side[1]->bottom.offset.Y +
+                             (ld->side[1]->bottom.scroll.Y + ld->side[1]->bottom.net_scroll.Y) * factor;
                 ld->side[1]->bottom.net_scroll = {{0, 0}};
             }
         }
@@ -2426,16 +2412,13 @@ void UpdateSpecials()
             sec->properties.push.Z = sec->properties.old_push.Z;
         }
 
-        sec->floor.offset.X = fmod(sec->floor.offset.X + (sec->floor.scroll.X + sec->floor.net_scroll.X) * factor,
-                                   sec->floor.image->actual_width_);
-        sec->floor.offset.Y = fmod(sec->floor.offset.Y + (sec->floor.scroll.Y + sec->floor.net_scroll.Y) * factor,
-                                   sec->floor.image->actual_height_);
-        sec->ceiling.offset.X =
-            fmod(sec->ceiling.offset.X + (sec->ceiling.scroll.X + sec->ceiling.net_scroll.X) * factor,
-                 sec->ceiling.image->actual_width_);
-        sec->ceiling.offset.Y =
-            fmod(sec->ceiling.offset.Y + (sec->ceiling.scroll.Y + sec->ceiling.net_scroll.Y) * factor,
-                 sec->ceiling.image->actual_height_);
+        sec->floor.old_offset = sec->floor.offset;
+        sec->ceiling.old_offset = sec->ceiling.offset;
+
+        sec->floor.offset.X = sec->floor.offset.X + (sec->floor.scroll.X + sec->floor.net_scroll.X) * factor;
+        sec->floor.offset.Y = sec->floor.offset.Y + (sec->floor.scroll.Y + sec->floor.net_scroll.Y) * factor;
+        sec->ceiling.offset.X = sec->ceiling.offset.X + (sec->ceiling.scroll.X + sec->ceiling.net_scroll.X) * factor;
+        sec->ceiling.offset.Y = sec->ceiling.offset.Y + (sec->ceiling.scroll.Y + sec->ceiling.net_scroll.Y) * factor;
         sec->properties.push.X = sec->properties.push.X + sec->properties.net_push.X;
         sec->properties.push.Y = sec->properties.push.Y + sec->properties.net_push.Y;
 

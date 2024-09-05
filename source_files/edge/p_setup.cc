@@ -1651,8 +1651,10 @@ static void LoadUDMFSectors()
             // granular offsets
             ss->floor.offset.X += (fx/fx_sc);
             ss->floor.offset.Y -= (fy/fy_sc);
+            ss->floor.old_offset = ss->floor.offset;
             ss->ceiling.offset.X += (cx/cx_sc);
             ss->ceiling.offset.Y -= (cy/cy_sc);
+            ss->ceiling.old_offset = ss->ceiling.offset;
 
             ss->floor.image = ImageLookup(floor_tex, kImageNamespaceFlat);
 
@@ -1957,20 +1959,14 @@ static void LoadUDMFSideDefs()
             sd->bottom.offset.Y += lowy/low_scy;
             sd->middle.offset.Y += midy/mid_scy;
             sd->top.offset.Y += highy/high_scy;
+            sd->top.old_offset = sd->top.offset;
+            sd->middle.old_offset = sd->middle.offset;
+            sd->bottom.old_offset = sd->bottom.offset;
 
             // handle BOOM colormaps with [242] linetype
             sd->top.boom_colormap    = colormaps.Lookup(top_tex);
             sd->middle.boom_colormap = colormaps.Lookup(middle_tex);
             sd->bottom.boom_colormap = colormaps.Lookup(bottom_tex);
-
-            /*if (sd->top.image && fabs(sd->top.offset.Y) > sd->top.image->ScaledHeightActual())
-                sd->top.offset.Y = fmodf(sd->top.offset.Y, sd->top.image->ScaledHeightActual());
-
-            if (sd->middle.image && fabs(sd->middle.offset.Y) > sd->middle.image->ScaledHeightActual())
-                sd->middle.offset.Y = fmodf(sd->middle.offset.Y, sd->middle.image->ScaledHeightActual());
-
-            if (sd->bottom.image && fabs(sd->bottom.offset.Y) > sd->bottom.image->ScaledHeightActual())
-                sd->bottom.offset.Y = fmodf(sd->bottom.offset.Y, sd->bottom.image->ScaledHeightActual());*/
         }
         else // consume other blocks
         {
@@ -2577,6 +2573,7 @@ static void TransferMapSideDef(const RawSidedef *msd, Side *sd, bool two_sided)
     sd->top.translucency = 1.0f;
     sd->top.offset.X     = AlignedLittleEndianS16(msd->x_offset);
     sd->top.offset.Y     = AlignedLittleEndianS16(msd->y_offset);
+    sd->top.old_offset = sd->top.offset;
     sd->top.x_matrix.X   = 1;
     sd->top.x_matrix.Y   = 0;
     sd->top.y_matrix.X   = 0;
@@ -2618,16 +2615,8 @@ static void TransferMapSideDef(const RawSidedef *msd, Side *sd, bool two_sided)
     {
         sd->middle_mask_offset = sd->middle.offset.Y;
         sd->middle.offset.Y    = 0;
+        sd->middle.old_offset.Y = 0;
     }
-
-    /*if (sd->top.image && fabs(sd->top.offset.Y) > sd->top.image->ScaledHeightActual())
-        sd->top.offset.Y = fmodf(sd->top.offset.Y, sd->top.image->ScaledHeightActual());
-
-    if (sd->middle.image && fabs(sd->middle.offset.Y) > sd->middle.image->ScaledHeightActual())
-        sd->middle.offset.Y = fmodf(sd->middle.offset.Y, sd->middle.image->ScaledHeightActual());
-
-    if (sd->bottom.image && fabs(sd->bottom.offset.Y) > sd->bottom.image->ScaledHeightActual())
-        sd->bottom.offset.Y = fmodf(sd->bottom.offset.Y, sd->bottom.image->ScaledHeightActual());*/
 }
 
 static void LoadSideDefs(int lump)

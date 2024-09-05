@@ -1181,8 +1181,6 @@ void DeferredEndGame(void)
 //
 static void GameDoEndGame(void)
 {
-    ForceWipe();
-
     DestroyAllPlayers();
 
     SaveClearSlot("current");

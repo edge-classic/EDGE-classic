@@ -246,6 +246,8 @@ bool TeleportMove(MapObject *thing, float x, float y, float z)
     thing->floor_z_   = move_check.floor_z;
     thing->ceiling_z_ = move_check.ceiling_z;
 
+    thing->interpolate_ = false;
+
     ChangeThingPosition(thing, x, y, z);
 
     return true;

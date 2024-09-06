@@ -45,6 +45,7 @@
 #include "i_defs_gl.h"
 #include "i_system.h"
 #include "m_argv.h"
+#include "n_network.h"
 #include "r_draw.h"
 #include "r_image.h"
 #include "r_modes.h"
@@ -62,6 +63,7 @@ static ConsoleVisibility console_visible;
 // stores the console toggle effect
 static int   console_wipe_active   = 0;
 static int   console_wipe_position = 0;
+static int   old_console_wipe_position = 0;
 static Font *console_font;
 Font        *endoom_font;
 
@@ -96,7 +98,6 @@ static char input_line[kMaximumConsoleInput + 2];
 static int  input_position = 0;
 
 int                    console_cursor;
-extern ConsoleVariable double_framerate;
 
 static constexpr uint8_t kConsoleKeyRepeatDelay = ((250 * kTicRate) / 1000);
 static constexpr uint8_t kConsoleKeyRepeatRate  = (kTicRate / 15);
@@ -304,6 +305,7 @@ void SetConsoleVisible(ConsoleVisibility v)
     {
         console_wipe_active   = true;
         console_wipe_position = (v == kConsoleVisibilityMaximal) ? 0 : kConsoleWipeTics;
+        old_console_wipe_position = console_wipe_position;
     }
 }
 
@@ -861,7 +863,12 @@ void ConsoleDrawer(void)
     int y = current_screen_height;
 
     if (console_wipe_active)
-        y = y - CON_GFX_HT * (console_wipe_position) / kConsoleWipeTics;
+    {   
+        if (uncapped_frames.d_)
+            y = (int)((float)y - CON_GFX_HT * HMM_Lerp(old_console_wipe_position, fractional_tic, console_wipe_position) / kConsoleWipeTics);
+        else
+            y = y - CON_GFX_HT * console_wipe_position / kConsoleWipeTics;
+    }
     else
         y = y - CON_GFX_HT;
 
@@ -1509,7 +1516,7 @@ bool ConsoleResponder(InputEvent *ev)
         case kSpace:
         case kBackspace:
         case kDelete:
-            repeat_countdown = kConsoleKeyRepeatDelay * (double_framerate.d_ ? 2 : 1);
+            repeat_countdown = kConsoleKeyRepeatDelay;
             break;
         default:
             repeat_countdown = 0;
@@ -1526,11 +1533,7 @@ bool ConsoleResponder(InputEvent *ev)
 
 void ConsoleTicker(void)
 {
-    int add = 1;
-    if (double_framerate.d_ && !(hud_tic & 1))
-        add = 0;
-
-    console_cursor = (console_cursor + add) & 31;
+    console_cursor = (console_cursor + 1) & 31;
 
     if (console_visible != kConsoleVisibilityNotVisible)
     {
@@ -1554,7 +1557,7 @@ void ConsoleTicker(void)
 
                 while (repeat_countdown <= 0)
                 {
-                    repeat_countdown += kConsoleKeyRepeatRate * (double_framerate.d_ ? 2 : 1);
+                    repeat_countdown += kConsoleKeyRepeatRate;
                     ConsoleHandleKey(repeat_key, keys_shifted, false);
                 }
             }
@@ -1564,6 +1567,7 @@ void ConsoleTicker(void)
 
     if (console_wipe_active)
     {
+        old_console_wipe_position = console_wipe_position;
         if (console_visible == kConsoleVisibilityNotVisible)
         {
             console_wipe_position--;

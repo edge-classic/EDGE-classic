@@ -208,6 +208,12 @@ class MapObject : public Position
     // properties from extrafloor the thing is in
     struct RegionProperties *region_properties_ = nullptr;
 
+    // Uncapped stuff - Dasho
+    float old_x_        = 0;
+    float old_y_        = 0;
+    BAMAngle old_angle_ = 0;
+    BAMAngle old_vertical_angle_ = 0;
+
     // Vert slope stuff maybe
     float old_z_       = 0;
     float old_floor_z_ = 0;
@@ -373,6 +379,9 @@ class MapObject : public Position
     bool slope_sight_hit_ = false;
 
     int teleport_tic_ = 0;
+
+    // Uncapped test - Dasho
+    bool interpolate_ = false;
 
   public:
     bool IsRemoved() const;

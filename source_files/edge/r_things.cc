@@ -37,6 +37,7 @@
 #include "im_data.h"
 #include "im_funcs.h"
 #include "m_misc.h" // !!!! model test
+#include "n_network.h"
 #include "p_local.h"
 #include "r_colormap.h"
 #include "r_defs.h"
@@ -204,10 +205,23 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
     float coord_W = 320.0f * widescreen_view_width_multiplier;
     float coord_H = 200.0f;
 
-    float tx1 = (coord_W - w) / 2.0 + psp->screen_x - image->ScaledOffsetX();
+    float psp_x, psp_y;
+
+    if (uncapped_frames.d_ && !paused && !menu_active && !rts_menu_active)
+    {
+        psp_x = HMM_Lerp(psp->old_screen_x, fractional_tic, psp->screen_x);
+        psp_y = HMM_Lerp(psp->old_screen_y, fractional_tic, psp->screen_y);
+    }
+    else
+    {
+        psp_x = psp->screen_x;
+        psp_y = psp->screen_y;
+    }
+
+    float tx1 = (coord_W - w) / 2.0 + psp_x - image->ScaledOffsetX();
     float tx2 = tx1 + w;
 
-    float ty1 = -psp->screen_y + image->ScaledOffsetY() - ((h - image->ScaledHeightActual()) * 0.5f);
+    float ty1 = -psp_y + image->ScaledOffsetY() - ((h - image->ScaledHeightActual()) * 0.5f);
 
     if (LuaUseLuaHUD())
     {
@@ -616,13 +630,26 @@ void RenderWeaponModel(Player *p)
         skin_img = ImageForDummySkin();
     }
 
-    float x = view_x + view_right.X * psp->screen_x / 8.0;
-    float y = view_y + view_right.Y * psp->screen_x / 8.0;
-    float z = view_z + view_right.Z * psp->screen_x / 8.0;
+    float psp_x, psp_y;
 
-    x -= view_up.X * psp->screen_y / 10.0;
-    y -= view_up.Y * psp->screen_y / 10.0;
-    z -= view_up.Z * psp->screen_y / 10.0;
+    if (uncapped_frames.d_ && !paused && !menu_active && !erraticism_active && !rts_menu_active)
+    {
+        psp_x = HMM_Lerp(psp->old_screen_x, fractional_tic, psp->screen_x);
+        psp_y = HMM_Lerp(psp->old_screen_y, fractional_tic, psp->screen_y);
+    }
+    else
+    {
+        psp_x = psp->screen_x;
+        psp_y = psp->screen_y;
+    }
+
+    float x = view_x + view_right.X * psp_x / 8.0;
+    float y = view_y + view_right.Y * psp_x / 8.0;
+    float z = view_z + view_right.Z * psp_x / 8.0;
+
+    x -= view_up.X * psp_y / 10.0;
+    y -= view_up.Y * psp_y / 10.0;
+    z -= view_up.Z * psp_y / 10.0;
 
     x += view_forward.X * w->model_forward_;
     y += view_forward.Y * w->model_forward_;
@@ -710,7 +737,12 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my, b
 
     if (frame->rotations_ >= 8)
     {
-        BAMAngle ang = mo->angle_;
+        BAMAngle ang;
+
+        if (uncapped_frames.d_ && mo->interpolate_ && !paused && !menu_active && !erraticism_active && !rts_menu_active)
+            ang = epi::BAMInterpolate(mo->old_angle_, mo->angle_, fractional_tic);
+        else
+            ang = mo->angle_;
 
         MirrorAngle(ang);
 
@@ -812,9 +844,24 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     bool is_model = (mo->state_->flags & kStateFrameFlagModel) ? true : false;
 
     // transform the origin point
-    float mx = mo->x, my = mo->y, mz = mo->z;
+    float mx, my, mz, fz;
 
     // position interpolation
+    if (uncapped_frames.d_ && mo->interpolate_ && !paused && !menu_active && !erraticism_active && !rts_menu_active)
+    {
+        mx = HMM_Lerp(mo->old_x_, fractional_tic, mo->x);
+        my = HMM_Lerp(mo->old_y_, fractional_tic, mo->y);
+        mz = HMM_Lerp(mo->old_z_, fractional_tic, mo->z);
+        fz = HMM_Lerp(mo->old_floor_z_, fractional_tic, mo->floor_z_);
+    }
+    else
+    {
+        mx = mo->x;
+        my = mo->y;
+        mz = mo->z;
+        fz = mo->floor_z_;
+    }
+
     if (mo->interpolation_number_ > 1)
     {
         float along = mo->interpolation_position_ / (float)mo->interpolation_number_;
@@ -847,7 +894,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     float   sink_mult = 0;
     float   bob_mult  = 0;
     Sector *cur_sec   = mo->subsector_->sector;
-    if (!cur_sec->extrafloor_used && !cur_sec->height_sector && abs(mo->z - cur_sec->floor_height) < 1)
+    if (!cur_sec->extrafloor_used && !cur_sec->height_sector && abs(mz - cur_sec->floor_height) < 1)
     {
         if (!(mo->flags_ & kMapObjectFlagNoGravity))
         {
@@ -895,12 +942,12 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
         switch (mo->info_->yalign_)
         {
         case SpriteYAlignmentTopDown:
-            gzt = mo->z + mo->height_ + top_offset * mo->scale_;
+            gzt = mz + mo->height_ + top_offset * mo->scale_;
             gzb = gzt - sprite_height * mo->scale_;
             break;
 
         case SpriteYAlignmentMiddle: {
-            float _mz = mo->z + mo->height_ * 0.5 + top_offset * mo->scale_;
+            float _mz = mz + mo->height_ * 0.5 + top_offset * mo->scale_;
             float dz  = sprite_height * 0.5 * mo->scale_;
 
             gzt = _mz + dz;
@@ -910,7 +957,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
 
         case SpriteYAlignmentBottomUp:
         default:
-            gzb = mo->z + top_offset * mo->scale_;
+            gzb = mz + top_offset * mo->scale_;
             gzt = gzb + sprite_height * mo->scale_;
             break;
         }
@@ -936,7 +983,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
         // do nothing? just skip the other elseifs below
         y_clipping = kVerticalClipHard;
     }
-    else if (sprite_kludge == 0 && gzb < mo->floor_z_)
+    else if (sprite_kludge == 0 && gzb < fz)
     {
         // explosion ?
         if (mo->info_->flags_ & kMapObjectFlagMissile)
@@ -945,8 +992,8 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
         }
         else
         {
-            gzt += mo->floor_z_ - gzb;
-            gzb = mo->floor_z_;
+            gzt += fz - gzb;
+            gzb = fz;
         }
     }
     else if (sprite_kludge == 0 && gzt > mo->ceiling_z_)

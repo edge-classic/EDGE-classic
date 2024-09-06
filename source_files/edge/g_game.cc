@@ -63,8 +63,6 @@
 #include "vm_coal.h"
 #include "w_wad.h"
 
-extern ConsoleVariable double_framerate;
-
 GameState game_state = kGameStateNothing;
 
 GameAction game_action = kGameActionNothing;
@@ -467,32 +465,6 @@ void DoBigGameStuff(void)
 
 void GameTicker(void)
 {
-    bool extra_tic = (game_tic & 1) == 1;
-
-    if (extra_tic && double_framerate.d_)
-    {
-        switch (game_state)
-        {
-        case kGameStateLevel:
-            // get commands
-            GrabTicCommands();
-
-            //!!!  MapObjectTicker();
-            MapObjectTicker(true);
-            break;
-
-        case kGameStateIntermission:
-        case kGameStateFinale:
-            GrabTicCommands();
-            break;
-        default:
-            break;
-        }
-        // ANIMATE FLATS AND TEXTURES GLOBALLY
-        AnimationTicker();
-        return;
-    }
-
     // ANIMATE FLATS AND TEXTURES GLOBALLY
     AnimationTicker();
 
@@ -507,7 +479,7 @@ void GameTicker(void)
         // get commands
         GrabTicCommands();
 
-        MapObjectTicker(false);
+        MapObjectTicker();
         AutomapTicker();
         HUDTicker();
         ScriptTicker();
@@ -1209,8 +1181,6 @@ void DeferredEndGame(void)
 //
 static void GameDoEndGame(void)
 {
-    ForceWipe();
-
     DestroyAllPlayers();
 
     SaveClearSlot("current");

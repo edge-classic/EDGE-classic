@@ -29,12 +29,11 @@
 #include "i_system.h"
 #include "im_data.h"
 #include "m_random.h"
+#include "n_network.h"
 #include "r_gldefs.h"
 #include "r_image.h"
 #include "r_modes.h"
 #include "r_texgl.h"
-
-extern ConsoleVariable double_framerate;
 
 // we're limited to one wipe at a time...
 static ScreenWipe current_wipe_effect = kScreenWipeNone;
@@ -48,6 +47,7 @@ static float  current_wipe_top;
 
 static constexpr uint8_t kMeltSections = 128;
 static int               melt_yoffs[kMeltSections + 1];
+static int               old_melt_yoffs[kMeltSections + 1];
 
 static inline uint8_t SpookyAlpha(int x, int y)
 {
@@ -135,6 +135,7 @@ static void AllocateDrawStructsMelt(void)
 
         melt_yoffs[x] = melt_yoffs[x - 1] + r;
         melt_yoffs[x] = HMM_MAX(-15, HMM_MIN(0, melt_yoffs[x]));
+        old_melt_yoffs[x] = melt_yoffs[x];
     }
 }
 
@@ -147,6 +148,8 @@ static void UpdateMelt(int tics)
         for (x = 0; x <= kMeltSections; x++)
         {
             r = melt_yoffs[x];
+
+            old_melt_yoffs[x] = r;
 
             if (r < 0)
                 r = 1;
@@ -257,7 +260,12 @@ static void RendererWipeMelt(void)
 
     for (int x = 0; x <= kMeltSections; x++)
     {
-        int yoffs = HMM_MAX(0, melt_yoffs[x]);
+        int yoffs = 0;
+
+        if (uncapped_frames.d_)
+            yoffs = HMM_MAX(0, HMM_Lerp(old_melt_yoffs[x], fractional_tic, melt_yoffs[x]));
+        else
+            yoffs = HMM_MAX(0, melt_yoffs[x]);
 
         float sx = (float)x * current_screen_width / kMeltSections;
         float sy = (float)(200 - yoffs) * current_screen_height / 200.0f;
@@ -367,7 +375,7 @@ bool DoWipe(void)
 
     // determine how many tics since we started.  If this is the first
     // call to DoWipe() since InitWipe(), then the clock starts now.
-    int now_time = GetTime() / (double_framerate.d_ ? 2 : 1);
+    int now_time = GetTime();
     int tics     = 0;
 
     if (current_wipe_last_time >= 0)
@@ -383,7 +391,12 @@ bool DoWipe(void)
     if (current_wipe_progress > 40) // FIXME: have option for wipe time
         return true;
 
-    float how_far = (float)current_wipe_progress / 40.0f;
+    float how_far = 0.0f;
+
+    if (uncapped_frames.d_ && tics == 0)
+        how_far = ((float)current_wipe_progress  + fractional_tic) / 40.0f;
+    else
+        how_far = (float)current_wipe_progress / 40.0f;
 
     switch (current_wipe_effect)
     {

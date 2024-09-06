@@ -40,7 +40,6 @@ extern ConsoleLine    *quit_lines[kEndoomLines];
 extern int             console_cursor;
 extern Font           *endoom_font;
 extern ConsoleVariable video_overlay;
-extern ConsoleVariable double_framerate;
 extern ConsoleVariable fliplevels;
 
 static Font *default_font;
@@ -286,7 +285,7 @@ void HUDCalcScrollTexCoords(float x_scroll, float y_scroll, float *tx1, float *t
 {
     float timeScale, adjustedScrollS, adjustedScrollT;
 
-    timeScale = game_tic / (double_framerate.d_ ? 200.0f : 100.0f);
+    timeScale = game_tic / 100.0f;
 
     adjustedScrollS = x_scroll * timeScale;
     adjustedScrollT = y_scroll * timeScale;

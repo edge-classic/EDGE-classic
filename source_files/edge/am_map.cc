@@ -178,8 +178,6 @@ static AutomapArrowStyle current_arrow_type = kAutomapArrowStyleDoom;
 bool rotate_map            = false;
 bool automap_keydoor_blink = false;
 
-extern ConsoleVariable double_framerate;
-
 extern Style *automap_style; // FIXME: put in header
 
 // translates between frame-buffer and map distances
@@ -575,7 +573,7 @@ static void DrawMLineDoor(AutomapLine *ml, RGBAColor rgb)
     // Lobo 2023: Make keyed doors pulse
     if (automap_keydoor_blink)
     {
-        linewidth = game_tic % (32 * (double_framerate.d_ ? 2 : 1));
+        linewidth = game_tic % 32;
 
         if (linewidth >= 16)
             linewidth = 2.0 + (linewidth * 0.1f);
@@ -1089,29 +1087,44 @@ static void AutomapDrawPlayer(MapObject *mo)
     if (automap_debug_collisions.d_)
         DrawObjectBounds(mo, am_colors[kAutomapColorPlayer]);
 
+    float mx, my, ma;
+
+    if (uncapped_frames.d_ && !paused && !menu_active)
+    {
+        mx = HMM_Lerp(mo->old_x_, fractional_tic, mo->x);
+        my = HMM_Lerp(mo->old_y_, fractional_tic, mo->y);
+        ma = epi::BAMInterpolate(mo->old_angle_, mo->angle_, fractional_tic);
+    }
+    else
+    {
+        mx = mo->x;
+        my = mo->y;
+        ma = mo->angle_;
+    }
+
     if (!network_game)
     {
         switch (current_arrow_type)
         {
         case kAutomapArrowStyleHeretic:
-            DrawLineCharacter(player_dagger, kAutomapPlayerDaggerLines, mo->radius_, mo->angle_,
-                              am_colors[kAutomapColorPlayer], mo->x, mo->y);
+            DrawLineCharacter(player_dagger, kAutomapPlayerDaggerLines, mo->radius_, ma,
+                              am_colors[kAutomapColorPlayer], mx, my);
             break;
         case kAutomapArrowStyleDoom:
         default:
             if (cheating)
-                DrawLineCharacter(cheat_player_arrow, kAutomapCheatPlayerArrowLines, mo->radius_, mo->angle_,
-                                  am_colors[kAutomapColorPlayer], mo->x, mo->y);
+                DrawLineCharacter(cheat_player_arrow, kAutomapCheatPlayerArrowLines, mo->radius_, ma,
+                                  am_colors[kAutomapColorPlayer], mx, my);
             else
-                DrawLineCharacter(player_arrow, kAutomapPlayerArrowLines, mo->radius_, mo->angle_,
-                                  am_colors[kAutomapColorPlayer], mo->x, mo->y);
+                DrawLineCharacter(player_arrow, kAutomapPlayerArrowLines, mo->radius_, ma,
+                                  am_colors[kAutomapColorPlayer], mx, my);
             break;
         }
         return;
     }
 
-    DrawLineCharacter(player_arrow, kAutomapPlayerArrowLines, mo->radius_, mo->angle_,
-                      player_colors[mo->player_->player_number_ & 0x07], mo->x, mo->y);
+    DrawLineCharacter(player_arrow, kAutomapPlayerArrowLines, mo->radius_, ma,
+                      player_colors[mo->player_->player_number_ & 0x07], mx, my);
 }
 
 static void AutomapWalkThing(MapObject *mo)
@@ -1143,8 +1156,23 @@ static void AutomapWalkThing(MapObject *mo)
         return;
     }
 
-    DrawLineCharacter(thin_triangle_guy, kAutomapThinTriangleGuyLines, mo->radius_, mo->angle_, am_colors[index], mo->x,
-                      mo->y);
+    float mx, my, ma;
+
+    if (uncapped_frames.d_ && !paused && !menu_active)
+    {
+        mx = HMM_Lerp(mo->old_x_, fractional_tic, mo->x);
+        my = HMM_Lerp(mo->old_y_, fractional_tic, mo->y);
+        ma = epi::BAMInterpolate(mo->old_angle_, mo->angle_, fractional_tic);
+    }
+    else
+    {
+        mx = mo->x;
+        my = mo->y;
+        ma = mo->angle_;
+    }
+
+    DrawLineCharacter(thin_triangle_guy, kAutomapThinTriangleGuyLines, mo->radius_, ma, am_colors[index], mx,
+                      my);
 }
 
 //
@@ -1273,8 +1301,16 @@ void AutomapRender(float x, float y, float w, float h, MapObject *focus)
 
     if (follow_player)
     {
-        map_center_x = frame_focus->x;
-        map_center_y = frame_focus->y;
+        if (uncapped_frames.d_ && !paused && !menu_active)
+        {
+            map_center_x = HMM_Lerp(frame_focus->old_x_, fractional_tic, frame_focus->x);
+            map_center_y = HMM_Lerp(frame_focus->old_y_, fractional_tic, frame_focus->y);
+        }
+        else
+        {
+            map_center_x = frame_focus->x;
+            map_center_y = frame_focus->y;
+        }
     }
 
     EPI_ASSERT(automap_style);

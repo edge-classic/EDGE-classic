@@ -58,6 +58,7 @@ struct PlayerSprite
 
     // screen position values (0 is normal)
     float screen_x, screen_y;
+    float old_screen_x, old_screen_y;    
 
     // translucency values
     float visibility;

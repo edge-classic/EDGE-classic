@@ -31,8 +31,6 @@
 
 // FIXME: Combine all these SDL bool vars into an int/enum'd flags structure
 
-extern ConsoleVariable double_framerate;
-
 // Work around for alt-tabbing
 bool alt_is_down;
 bool eat_mouse_motion = true;
@@ -796,10 +794,8 @@ int GetTime(void)
 {
     Uint32 t = SDL_GetTicks();
 
-    int factor = (double_framerate.d_ ? 70 : 35);
-
-    // more complex than "t*70/1000" to give more accuracy
-    return (t / 1000) * factor + (t % 1000) * factor / 1000;
+    // more complex than "t*35/1000" to give more accuracy
+    return (t / 1000) * kTicRate + (t % 1000) * kTicRate / 1000;
 }
 
 int GetMilliseconds(void)

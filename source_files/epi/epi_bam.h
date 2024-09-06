@@ -97,6 +97,26 @@ inline float BAMTan(BAMAngle bam)
     return HMM_TANF(RadiansFromBAM(bam));
 }
 
+inline BAMAngle BAMInterpolate(BAMAngle old_angle, BAMAngle new_angle, float along)
+{
+    if (new_angle == old_angle)
+        return new_angle;
+    else if (new_angle > old_angle)
+    {
+        if (new_angle - old_angle < kBAMAngle270)
+            return old_angle + (BAMAngle)(along * (new_angle - old_angle));
+        else
+            return old_angle - (BAMAngle)(along * (old_angle - new_angle));
+    }
+    else
+    {
+        if (old_angle - new_angle < kBAMAngle270)
+            return old_angle - (BAMAngle)(along * (old_angle - new_angle));
+        else
+            return old_angle + (BAMAngle)(along * (new_angle - old_angle));
+    }
+}
+
 } // namespace epi
 
 //--- editor settings ---

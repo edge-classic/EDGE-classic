@@ -143,6 +143,7 @@ struct MapSurface
 
     // current offset and scrolling deltas (world coords)
     HMM_Vec2 offset;
+    HMM_Vec2 old_offset;
     HMM_Vec2 scroll;
 
     HMM_Vec2 net_scroll = {{0, 0}};
@@ -223,6 +224,11 @@ struct SlopePlane
 struct Sector
 {
     float floor_height, ceiling_height;
+
+    // Uncapped test - Dasho
+    float old_floor_height, old_ceiling_height;
+    float interpolated_floor_height, interpolated_ceiling_height;
+    int old_game_tic;
 
     MapSurface floor, ceiling;
 

@@ -32,6 +32,7 @@
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_misc.h"
+#include "n_network.h"
 #include "r_modes.h"
 #include "version.h"
 
@@ -463,6 +464,9 @@ void FinishFrame(void)
 
     if (grab_mouse.CheckModified())
         GrabCursor(grab_state);
+
+    if (uncapped_frames.d_)
+        fractional_tic = (float)(GetMilliseconds() * 35 % 1000) / 1000;
 
     if (vsync.CheckModified())
     {

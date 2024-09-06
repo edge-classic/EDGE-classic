@@ -13,7 +13,6 @@
 #include "s_sound.h"
 #include "w_wad.h"
 
-extern ConsoleVariable double_framerate;
 extern bool            erraticism_active;
 extern std::string     current_map_title;
 
@@ -157,7 +156,7 @@ static int HD_check_automap(lua_State *L)
 //
 static int HD_get_time(lua_State *L)
 {
-    int time = GetTime() / (double_framerate.d_ ? 2 : 1);
+    int time = GetTime();
     lua_pushnumber(L, (double)time);
     return 1;
 }

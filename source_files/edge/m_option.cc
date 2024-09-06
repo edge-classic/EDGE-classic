@@ -124,7 +124,6 @@ extern ConsoleVariable opl_instrument_bank;
 extern ConsoleVariable midi_soundfont;
 extern ConsoleVariable video_overlay;
 extern ConsoleVariable erraticism;
-extern ConsoleVariable double_framerate;
 extern ConsoleVariable draw_culling;
 extern ConsoleVariable draw_culling_distance;
 extern ConsoleVariable cull_fog_color;
@@ -388,8 +387,6 @@ static OptionMenuItem vidoptions[] = {
      &sector_brightness_correction.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &sector_brightness_correction},
     {kOptionMenuItemTypeBoolean, "Lighting Mode", "Indexed/Flat", 2, &force_flat_lighting.d_,
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &force_flat_lighting},
-    {kOptionMenuItemTypeSwitch, "Framerate Target", "35 FPS/70 FPS", 2, &double_framerate.d_,
-     OptionMenuUpdateConsoleVariableFromInt, nullptr, &double_framerate},
     {kOptionMenuItemTypeSwitch, "Mipmapping", "Off/Bilinear/Trilinear",  3, &image_mipmapping, OptionMenuChangeMipMap, nullptr},
     {kOptionMenuItemTypeSwitch, "Smoothing", YesNo, 2, &image_smoothing, OptionMenuChangeMipMap, nullptr},
     {kOptionMenuItemTypeSwitch, "Upscale Textures", "Off/UI Only/UI & Sprites/All", 4, &hq2x_scaling,
@@ -1958,6 +1955,8 @@ static void OptionMenuChangeBobbing(int key_pressed, ConsoleVariable *console_va
         {
             psp->screen_x = 0;
             psp->screen_y = 0;
+            psp->old_screen_x = 0;
+            psp->old_screen_y = 0;
         }
     }
 }

@@ -37,8 +37,6 @@
 #include "version.h"
 #include "w_wad.h"
 
-extern ConsoleVariable double_framerate;
-
 // user interface VM
 coal::VM *ui_vm = nullptr;
 
@@ -476,7 +474,7 @@ void COALLoadScripts()
 
     unread_scripts.clear();
 
-    COALSetFloat(ui_vm, "sys", "gametic", game_tic / (double_framerate.d_ ? 2 : 1));
+    COALSetFloat(ui_vm, "sys", "gametic", game_tic);
 
     if (IsLumpInPwad("STBAR"))
     {

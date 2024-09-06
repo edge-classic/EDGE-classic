@@ -37,7 +37,9 @@
 #include "g_game.h" //current_map
 #include "i_defs_gl.h"
 #include "im_data.h"
+#include "n_network.h"
 #include "p_blockmap.h"
+#include "p_tick.h"
 #include "r_colormap.h"
 #include "r_effects.h"
 #include "r_gldefs.h"
@@ -762,13 +764,20 @@ void MDLRenderModel(MDLModel *md, const Image *skin_img, bool is_weapon, int fra
 
     bool tilt = is_weapon || (mo->flags_ & kMapObjectFlagMissile) || (mo->hyper_flags_ & kHyperFlagForceModelTilt);
 
-    BAMAngleToMatrix(tilt ? ~mo->vertical_angle_ : 0, &data.mouselook_x_vector_, &data.mouselook_z_vector_);
-
-    BAMAngle ang = mo->angle_ + rotation;
-
-    MirrorAngle(ang);
-
-    BAMAngleToMatrix(~ang, &data.rotation_vector_x_, &data.rotation_vector_y_);
+    if (uncapped_frames.d_ && !paused && !menu_active && !rts_menu_active && (is_weapon || (!time_stop_active && !erraticism_active)))
+    {
+        BAMAngleToMatrix(tilt ? ~epi::BAMInterpolate(mo->old_vertical_angle_, mo->vertical_angle_, fractional_tic) : 0, &data.mouselook_x_vector_, &data.mouselook_z_vector_);
+        BAMAngle ang = epi::BAMInterpolate(mo->old_angle_, mo->angle_, fractional_tic) + rotation;
+        MirrorAngle(ang);
+        BAMAngleToMatrix(~ang, &data.rotation_vector_x_, &data.rotation_vector_y_);
+    }
+    else
+    {
+        BAMAngleToMatrix(tilt ? ~mo->vertical_angle_ : 0, &data.mouselook_x_vector_, &data.mouselook_z_vector_);
+        BAMAngle ang = mo->angle_ + rotation;
+        MirrorAngle(ang);
+        BAMAngleToMatrix(~ang, &data.rotation_vector_x_, &data.rotation_vector_y_);
+    }
 
     data.used_normals_ = (lerp < 0.5) ? data.frame1_->used_normals : data.frame2_->used_normals;
 

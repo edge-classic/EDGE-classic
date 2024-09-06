@@ -28,7 +28,7 @@
 // Called by C_Ticker,
 // can call G_PlayerExited.
 // Carries out all thinking of monsters and players.
-void MapObjectTicker(bool extra_tic);
+void MapObjectTicker(void);
 
 void HubFastForward(void);
 

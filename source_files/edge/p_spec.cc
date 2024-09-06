@@ -52,8 +52,6 @@
 #include "s_music.h"
 #include "s_sound.h"
 
-extern ConsoleVariable double_framerate;
-
 // Level exit timer
 bool level_timer;
 int  level_time_count;
@@ -774,6 +772,8 @@ static void P_LineEffect(Line *target, Line *source, const LineType *special)
         {
             source->side[0]->middle.offset.X = 0;
             source->side[0]->bottom.offset.X = 0;
+            source->side[0]->middle.old_offset.X = 0;
+            source->side[0]->bottom.old_offset.X = 0;
         }
     }
 
@@ -922,6 +922,7 @@ static void SectorEffect(Sector *target, Line *source, const LineType *special)
             target->floor.offset.X += source->side[0]->bottom.offset.X;
             target->floor.offset.Y += source->side[0]->bottom.offset.Y;
         }
+        target->floor.old_offset = target->floor.offset;
         target->floor.rotation = angle;
     }
     if (special->sector_effect_ & kSectorEffectTypeAlignCeiling)
@@ -934,6 +935,7 @@ static void SectorEffect(Sector *target, Line *source, const LineType *special)
             target->ceiling.offset.X += source->side[0]->bottom.offset.X;
             target->ceiling.offset.Y += source->side[0]->bottom.offset.Y;
         }
+        target->ceiling.old_offset = target->ceiling.offset;
         target->ceiling.rotation = angle;
     }
 
@@ -1759,8 +1761,6 @@ static inline void PlayerInProperties(Player *player, float bz, float tz, float 
     const SectorType *special = props->special;
     float             damage, factor;
 
-    bool extra_tic = ((game_tic & 1) == 1);
-
     if (!special || ceiling_height < floor_height)
         return;
 
@@ -1776,7 +1776,7 @@ static inline void PlayerInProperties(Player *player, float bz, float tz, float 
         player->powers_[kPowerTypeScuba] <= 0)
     {
         int subtract = 1;
-        if ((double_framerate.d_ && extra_tic) || !should_choke)
+        if (!should_choke)
             subtract = 0;
         player->air_in_lungs_ -= subtract;
         player->underwater_ = true;
@@ -1865,9 +1865,6 @@ static inline void PlayerInProperties(Player *player, float bz, float tz, float 
             factor = 0;
     }
     else if (player->powers_[kPowerTypeAcidSuit] && !special->damage_.bypass_all_)
-        factor = 0;
-
-    if (double_framerate.d_ && extra_tic)
         factor = 0;
 
     if (factor > 0 && (level_time_elapsed % (1 + special->damage_.delay_)) == 0)
@@ -2018,15 +2015,15 @@ void PlayerInSpecialSector(Player *player, Sector *sec, bool should_choke)
 //
 // Animate planes, scroll walls, etc.
 //
-void UpdateSpecials(bool extra_tic)
+void UpdateSpecials()
 {
     // For anim stuff
-    float factor = double_framerate.d_ ? 0.5f : 1.0f;
+    float factor = 1.0f;
 
     // LEVEL TIMER
     if (level_timer == true)
     {
-        level_time_count -= (double_framerate.d_ && extra_tic) ? 0 : 1;
+        level_time_count--;
 
         if (!level_time_count)
             ExitLevel(1);
@@ -2117,11 +2114,6 @@ void UpdateSpecials(bool extra_tic)
                                                                                        : sec_ref->original_height;
                 float sy        = tdy * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
                 float sx        = tdx * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
-                if (double_framerate.d_ && special_ref->scroll_type_ & BoomScrollerTypeDisplace)
-                {
-                    sy *= 2;
-                    sx *= 2;
-                }
                 if (ld->side[0])
                 {
                     if (ld->side[0]->top.image)
@@ -2167,11 +2159,6 @@ void UpdateSpecials(bool extra_tic)
                                                                                        : sec_ref->original_height;
                 float sy        = x_speed * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
                 float sx        = y_speed * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
-                if (double_framerate.d_ && special_ref->scroll_type_ & BoomScrollerTypeDisplace)
-                {
-                    sy *= 2;
-                    sx *= 2;
-                }
                 if (ld->side[0])
                 {
                     if (ld->side[0]->top.image)
@@ -2289,36 +2276,27 @@ void UpdateSpecials(bool extra_tic)
         {
             if (ld->side[0]->top.image)
             {
-                ld->side[0]->top.offset.X = fmod(
-                    ld->side[0]->top.offset.X + (ld->side[0]->top.scroll.X + ld->side[0]->top.net_scroll.X) * factor,
-                    ld->side[0]->top.image->actual_width_);
-                ld->side[0]->top.offset.Y = fmod(
-                    ld->side[0]->top.offset.Y + (ld->side[0]->top.scroll.Y + ld->side[0]->top.net_scroll.Y) * factor,
-                    ld->side[0]->top.image->actual_height_);
+                ld->side[0]->top.old_offset = ld->side[0]->top.offset;
+                ld->side[0]->top.offset.X = ld->side[0]->top.offset.X + (ld->side[0]->top.scroll.X + ld->side[0]->top.net_scroll.X) * factor;
+                ld->side[0]->top.offset.Y = ld->side[0]->top.offset.Y + (ld->side[0]->top.scroll.Y + ld->side[0]->top.net_scroll.Y) * factor;
                 ld->side[0]->top.net_scroll = {{0, 0}};
             }
             if (ld->side[0]->middle.image)
             {
-                ld->side[0]->middle.offset.X =
-                    fmod(ld->side[0]->middle.offset.X +
-                             (ld->side[0]->middle.scroll.X + ld->side[0]->middle.net_scroll.X) * factor,
-                         ld->side[0]->middle.image->actual_width_);
-                ld->side[0]->middle.offset.Y =
-                    fmod(ld->side[0]->middle.offset.Y +
-                             (ld->side[0]->middle.scroll.Y + ld->side[0]->middle.net_scroll.Y) * factor,
-                         ld->side[0]->middle.image->actual_height_);
+                ld->side[0]->middle.old_offset = ld->side[0]->middle.offset;
+                ld->side[0]->middle.offset.X = ld->side[0]->middle.offset.X +
+                             (ld->side[0]->middle.scroll.X + ld->side[0]->middle.net_scroll.X) * factor;
+                ld->side[0]->middle.offset.Y = ld->side[0]->middle.offset.Y +
+                             (ld->side[0]->middle.scroll.Y + ld->side[0]->middle.net_scroll.Y) * factor;
                 ld->side[0]->middle.net_scroll = {{0, 0}};
             }
             if (ld->side[0]->bottom.image)
             {
-                ld->side[0]->bottom.offset.X =
-                    fmod(ld->side[0]->bottom.offset.X +
-                             (ld->side[0]->bottom.scroll.X + ld->side[0]->bottom.net_scroll.X) * factor,
-                         ld->side[0]->bottom.image->actual_width_);
-                ld->side[0]->bottom.offset.Y =
-                    fmod(ld->side[0]->bottom.offset.Y +
-                             (ld->side[0]->bottom.scroll.Y + ld->side[0]->bottom.net_scroll.Y) * factor,
-                         ld->side[0]->bottom.image->actual_height_);
+                ld->side[0]->bottom.old_offset = ld->side[0]->bottom.offset;
+                ld->side[0]->bottom.offset.X = ld->side[0]->bottom.offset.X +
+                             (ld->side[0]->bottom.scroll.X + ld->side[0]->bottom.net_scroll.X) * factor;
+                ld->side[0]->bottom.offset.Y = ld->side[0]->bottom.offset.Y +
+                             (ld->side[0]->bottom.scroll.Y + ld->side[0]->bottom.net_scroll.Y) * factor;
                 ld->side[0]->bottom.net_scroll = {{0, 0}};
             }
         }
@@ -2327,36 +2305,27 @@ void UpdateSpecials(bool extra_tic)
         {
             if (ld->side[1]->top.image)
             {
-                ld->side[1]->top.offset.X = fmod(
-                    ld->side[1]->top.offset.X + (ld->side[1]->top.scroll.X + ld->side[1]->top.net_scroll.X) * factor,
-                    ld->side[1]->top.image->actual_width_);
-                ld->side[1]->top.offset.Y = fmod(
-                    ld->side[1]->top.offset.Y + (ld->side[1]->top.scroll.Y + ld->side[1]->top.net_scroll.Y) * factor,
-                    ld->side[1]->top.image->actual_height_);
+                ld->side[1]->top.old_offset = ld->side[1]->top.offset;
+                ld->side[1]->top.offset.X = ld->side[1]->top.offset.X + (ld->side[1]->top.scroll.X + ld->side[1]->top.net_scroll.X) * factor;
+                ld->side[1]->top.offset.Y = ld->side[1]->top.offset.Y + (ld->side[1]->top.scroll.Y + ld->side[1]->top.net_scroll.Y) * factor;
                 ld->side[1]->top.net_scroll = {{0, 0}};
             }
             if (ld->side[1]->middle.image)
             {
-                ld->side[1]->middle.offset.X =
-                    fmod(ld->side[1]->middle.offset.X +
-                             (ld->side[1]->middle.scroll.X + ld->side[1]->middle.net_scroll.X) * factor,
-                         ld->side[1]->middle.image->actual_width_);
-                ld->side[1]->middle.offset.Y =
-                    fmod(ld->side[1]->middle.offset.Y +
-                             (ld->side[1]->middle.scroll.Y + ld->side[1]->middle.net_scroll.Y) * factor,
-                         ld->side[1]->middle.image->actual_height_);
+                ld->side[1]->middle.old_offset = ld->side[1]->middle.offset;
+                ld->side[1]->middle.offset.X = ld->side[1]->middle.offset.X +
+                             (ld->side[1]->middle.scroll.X + ld->side[1]->middle.net_scroll.X) * factor;
+                ld->side[1]->middle.offset.Y = ld->side[1]->middle.offset.Y +
+                             (ld->side[1]->middle.scroll.Y + ld->side[1]->middle.net_scroll.Y) * factor;
                 ld->side[1]->middle.net_scroll = {{0, 0}};
             }
             if (ld->side[1]->bottom.image)
             {
-                ld->side[1]->bottom.offset.X =
-                    fmod(ld->side[1]->bottom.offset.X +
-                             (ld->side[1]->bottom.scroll.X + ld->side[1]->bottom.net_scroll.X) * factor,
-                         ld->side[1]->bottom.image->actual_width_);
-                ld->side[1]->bottom.offset.Y =
-                    fmod(ld->side[1]->bottom.offset.Y +
-                             (ld->side[1]->bottom.scroll.Y + ld->side[1]->bottom.net_scroll.Y) * factor,
-                         ld->side[1]->bottom.image->actual_height_);
+                ld->side[1]->bottom.old_offset = ld->side[1]->bottom.offset;
+                ld->side[1]->bottom.offset.X = ld->side[1]->bottom.offset.X +
+                             (ld->side[1]->bottom.scroll.X + ld->side[1]->bottom.net_scroll.X) * factor;
+                ld->side[1]->bottom.offset.Y = ld->side[1]->bottom.offset.Y +
+                             (ld->side[1]->bottom.scroll.Y + ld->side[1]->bottom.net_scroll.Y) * factor;
                 ld->side[1]->bottom.net_scroll = {{0, 0}};
             }
         }
@@ -2395,11 +2364,6 @@ void UpdateSpecials(bool extra_tic)
                        ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
             float sx = line_ref->length / 32.0f * line_ref->delta_x / line_ref->length *
                        ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
-            if (double_framerate.d_ && special_ref->scroll_type_ & BoomScrollerTypeDisplace)
-            {
-                sy *= 2;
-                sx *= 2;
-            }
             if (special_ref->sector_effect_ & kSectorEffectTypePushThings)
             {
                 sec->properties.net_push.Y += kBoomCarryFactor * sy;
@@ -2448,16 +2412,13 @@ void UpdateSpecials(bool extra_tic)
             sec->properties.push.Z = sec->properties.old_push.Z;
         }
 
-        sec->floor.offset.X = fmod(sec->floor.offset.X + (sec->floor.scroll.X + sec->floor.net_scroll.X) * factor,
-                                   sec->floor.image->actual_width_);
-        sec->floor.offset.Y = fmod(sec->floor.offset.Y + (sec->floor.scroll.Y + sec->floor.net_scroll.Y) * factor,
-                                   sec->floor.image->actual_height_);
-        sec->ceiling.offset.X =
-            fmod(sec->ceiling.offset.X + (sec->ceiling.scroll.X + sec->ceiling.net_scroll.X) * factor,
-                 sec->ceiling.image->actual_width_);
-        sec->ceiling.offset.Y =
-            fmod(sec->ceiling.offset.Y + (sec->ceiling.scroll.Y + sec->ceiling.net_scroll.Y) * factor,
-                 sec->ceiling.image->actual_height_);
+        sec->floor.old_offset = sec->floor.offset;
+        sec->ceiling.old_offset = sec->ceiling.offset;
+
+        sec->floor.offset.X = sec->floor.offset.X + (sec->floor.scroll.X + sec->floor.net_scroll.X) * factor;
+        sec->floor.offset.Y = sec->floor.offset.Y + (sec->floor.scroll.Y + sec->floor.net_scroll.Y) * factor;
+        sec->ceiling.offset.X = sec->ceiling.offset.X + (sec->ceiling.scroll.X + sec->ceiling.net_scroll.X) * factor;
+        sec->ceiling.offset.Y = sec->ceiling.offset.Y + (sec->ceiling.scroll.Y + sec->ceiling.net_scroll.Y) * factor;
         sec->properties.push.X = sec->properties.push.X + sec->properties.net_push.X;
         sec->properties.push.Y = sec->properties.push.Y + sec->properties.net_push.Y;
 
@@ -2468,8 +2429,7 @@ void UpdateSpecials(bool extra_tic)
     }
 
     // DO BUTTONS
-    if (!double_framerate.d_ || !extra_tic)
-        UpdateButtons();
+    UpdateButtons();
 }
 
 //
@@ -2654,7 +2614,7 @@ void SpawnMapSpecials2(int autotag)
 
             sector->properties.push.X += epi::BAMCos(secSpecial->push_angle_) * mul;
             sector->properties.push.Y += epi::BAMSin(secSpecial->push_angle_) * mul;
-            sector->properties.push.Z += secSpecial->push_zspeed_ / (double_framerate.d_ ? 89.2f : 100.0f);
+            sector->properties.push.Z += secSpecial->push_zspeed_ / 100.0f;
         }
 
         // Scrollers

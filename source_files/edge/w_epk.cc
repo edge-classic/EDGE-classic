@@ -34,6 +34,7 @@
 #include "script/compat/lua_compat.h"
 #include "snd_types.h"
 #include "vm_coal.h"
+#include "vwadvfs.h"
 #include "w_files.h"
 #include "w_wad.h"
 
@@ -54,8 +55,11 @@ class PackEntry
     // only for ZIP: the index into the archive.
     mz_uint zip_index_;
 
-    PackEntry(const std::string &name, const std::string &path, const std::string &ppath, mz_uint idx)
-        : name_(name), full_path_(path), pack_path_(ppath), zip_index_(idx)
+    // only for VWAD: the index into the archive.
+	vwad_fidx vwad_index_;
+
+    PackEntry(const std::string &name, const std::string &path, const std::string &ppath, mz_uint idx, vwad_fidx vidx)
+        : name_(name), full_path_(path), pack_path_(ppath), zip_index_(idx), vwad_index_(vidx)
     {
     }
 
@@ -91,14 +95,14 @@ class PackDirectory
 
     void SortEntries();
 
-    size_t AddEntry(const std::string &name, const std::string &path, const std::string &ppath, mz_uint idx)
+    size_t AddEntry(const std::string &name, const std::string &path, const std::string &ppath, mz_uint idx, vwad_fidx vidx)
     {
         // check if already there
         for (size_t i = 0; i < entries_.size(); i++)
             if (entries_[i] == name)
                 return i;
 
-        entries_.push_back(PackEntry(name, path, ppath, idx));
+        entries_.push_back(PackEntry(name, path, ppath, idx, vidx));
         return entries_.size() - 1;
     }
 
@@ -123,6 +127,7 @@ class PackFile
     DataFile *parent_;
 
     bool is_folder_;
+    bool is_zip_;
 
     // first entry here is always the top-level (with no name).
     // everything else is from a second-level directory.
@@ -135,8 +140,10 @@ class PackFile
 
     mz_zip_archive *archive_;
 
+    vwad_handle *vwad_archive_;
+
   public:
-    PackFile(DataFile *par, bool folder) : parent_(par), is_folder_(folder), directories_(), archive_(nullptr)
+    PackFile(DataFile *par, bool folder, bool is_zip) : parent_(par), is_folder_(folder), is_zip_(is_zip_), directories_(), archive_(nullptr), vwad_archive_(nullptr)
     {
     }
 
@@ -144,6 +151,8 @@ class PackFile
     {
         if (archive_ != nullptr)
             delete archive_;
+        if (vwad_archive_ != nullptr)
+            vwad_close_archive(&vwad_archive_);
     }
 
     size_t AddDirectory(const std::string &name)
@@ -172,16 +181,20 @@ class PackFile
     {
         if (is_folder_)
             return OpenFolderEntry(dir, index);
-        else
+        else if (is_zip_)
             return OpenZipEntry(dir, index);
+        else
+            return OpenVWADEntry(dir, index);
     }
 
     epi::File *OpenEntryByName(const std::string &name)
     {
         if (is_folder_)
             return OpenFolderEntryByName(name);
-        else
+        else if (is_zip_)
             return OpenZipEntryByName(name);
+        else
+            return OpenVWADEntryByName(name);
     }
 
     int EntryLength(size_t dir, size_t index)
@@ -223,9 +236,11 @@ class PackFile
   private:
     epi::File *OpenFolderEntry(size_t dir, size_t index);
     epi::File *OpenZipEntry(size_t dir, size_t index);
+    epi::File *OpenVWADEntry(size_t dir, size_t index);
 
     epi::File *OpenFolderEntryByName(const std::string &name);
     epi::File *OpenZipEntryByName(const std::string &name);
+    epi::File *OpenVWADEntryByName(const std::string &name);
 };
 
 int FindStemInPack(PackFile *pack, const std::string &name)
@@ -321,7 +336,7 @@ static void ProcessSubDirectory(PackFile *pack, std::string &fullpath)
             std::string packpath = epi::MakePathRelative(pack->parent_->name_, fsd[i].name);
             std::string stem     = epi::GetStem(filename);
             epi::StringUpperASCII(stem);
-            pack->directories_[d].AddEntry(filename, fsd[i].name, packpath, 0);
+            pack->directories_[d].AddEntry(filename, fsd[i].name, packpath, 0, 0);
             pack->search_files_.insert({stem, packpath});
         }
     }
@@ -336,7 +351,7 @@ static PackFile *ProcessFolder(DataFile *df)
         FatalError("Failed to read dir: %s\n", df->name_.c_str());
     }
 
-    PackFile *pack = new PackFile(df, true);
+    PackFile *pack = new PackFile(df, true, false);
 
     // top-level files go in here
     pack->AddDirectory("");
@@ -360,7 +375,7 @@ static PackFile *ProcessFolder(DataFile *df)
             std::string packpath = epi::MakePathRelative(df->name_, fsd[i].name);
             std::string stem     = epi::GetStem(filename);
             epi::StringUpperASCII(stem);
-            pack->directories_[0].AddEntry(filename, fsd[i].name, packpath, 0);
+            pack->directories_[0].AddEntry(filename, fsd[i].name, packpath, 0, 0);
             pack->search_files_.insert({stem, packpath});
         }
     }
@@ -397,7 +412,7 @@ epi::File *PackFile::OpenFolderEntryByName(const std::string &name)
 
 static PackFile *ProcessZip(DataFile *df)
 {
-    PackFile *pack = new PackFile(df, false);
+    PackFile *pack = new PackFile(df, false, true);
 
     pack->archive_ = new mz_zip_archive;
 
@@ -466,14 +481,14 @@ static PackFile *ProcessZip(DataFile *df)
         std::string add_name = basename;
         std::string stem     = epi::GetStem(basename);
         epi::StringUpperASCII(stem);
-        pack->directories_[dir_idx].AddEntry(epi::GetFilename(add_name), "", packpath, idx);
+        pack->directories_[dir_idx].AddEntry(epi::GetFilename(add_name), "", packpath, idx, 0);
         pack->search_files_.insert({stem, packpath});
     }
 
     return pack;
 }
 
-class epk_file_c : public epi::File
+class ZIPFile : public epi::File
 {
   private:
     PackFile *pack;
@@ -486,7 +501,7 @@ class epk_file_c : public epi::File
     mz_zip_reader_extract_iter_state *iter = nullptr;
 
   public:
-    epk_file_c(PackFile *_pack, mz_uint _idx) : pack(_pack), zip_idx(_idx)
+    ZIPFile(PackFile *_pack, mz_uint _idx) : pack(_pack), zip_idx(_idx)
     {
         // determine length
         mz_zip_archive_file_stat stat;
@@ -497,7 +512,7 @@ class epk_file_c : public epi::File
         EPI_ASSERT(iter);
     }
 
-    ~epk_file_c()
+    ~ZIPFile()
     {
         if (iter != nullptr)
             mz_zip_reader_extract_iter_free(iter);
@@ -534,7 +549,7 @@ class epk_file_c : public epi::File
         (void)src;
         (void)count;
         // not implemented
-        FatalError("epk_file_c::Write called, but this is not implemented!\n");
+        FatalError("ZIPFile::Write called, but this is not implemented!\n");
         return 0;
     }
 
@@ -615,7 +630,7 @@ class epk_file_c : public epi::File
 
 epi::File *PackFile::OpenZipEntry(size_t dir, size_t index)
 {
-    epk_file_c *F = new epk_file_c(this, directories_[dir].entries_[index].zip_index_);
+    ZIPFile *F = new ZIPFile(this, directories_[dir].entries_[index].zip_index_);
     return F;
 }
 
@@ -626,8 +641,219 @@ epi::File *PackFile::OpenZipEntryByName(const std::string &name)
     if (idx < 0)
         return nullptr;
 
-    epk_file_c *F = new epk_file_c(this, (mz_uint)idx);
+    ZIPFile *F = new ZIPFile(this, (mz_uint)idx);
     return F;
+}
+
+//----------------------------------------------------------------------------
+//  VWAD READING
+//----------------------------------------------------------------------------
+
+static int ioseek (vwad_iostream *strm, int pos) {
+  EPI_ASSERT(pos >= 0);
+  FILE *fl = (FILE *)strm->udata;
+  EPI_ASSERT(fl != nullptr);
+  if (fseek(fl, pos, SEEK_SET) != 0) return -1;
+  return 0;
+}
+
+static int ioread (vwad_iostream *strm, void *buf, int bufsize) {
+  EPI_ASSERT(bufsize > 0);
+  FILE *fl = (FILE *)strm->udata;
+  EPI_ASSERT(fl != nullptr);
+  if (fread(buf, bufsize, 1, fl) != 1) return -1;
+  return 0;
+}
+
+static PackFile *ProcessVWAD(DataFile *df)
+{
+	PackFile *pack = new PackFile(df, false, false);
+
+	vwad_iostream *strm = (vwad_iostream *)calloc(1, sizeof(vwad_iostream));
+	strm->udata = epi::FileOpenRaw(df->name_, epi::kFileAccessRead | epi::kFileAccessBinary);
+	strm->seek = ioseek;
+	strm->read = ioread;
+
+	pack->vwad_archive_ = vwad_open_archive(strm, VWAD_OPEN_DEFAULT, nullptr);
+
+	if (!pack->vwad_archive_)
+		FatalError("Failed reading VWAD: %s\n", df->name_.c_str());
+
+	// create the top-level directory
+	pack->AddDirectory("");
+
+	vwad_fidx total = vwad_get_archive_file_count(pack->vwad_archive_); // Accounts for 0-index
+
+	for (vwad_fidx idx = 0 ; idx < total ; idx++)
+	{
+		// get the filename
+		char filename[1024];
+		memset(filename, 0, 1024);
+
+		std::string packpath = vwad_get_file_name(pack->vwad_archive_, idx);
+
+		if (epi::GetExtension(packpath).empty())
+		{
+			LogWarning("%s has no extension. Bare VWAD filenames are not supported.\n", filename);
+			continue;
+		}
+
+		memcpy(filename, packpath.c_str(), packpath.size());
+
+		// decode into DIR + FILE
+		char *p = filename;
+		while (*p != 0 && *p != '/' && *p != '\\')
+			p++;
+
+		if (p == filename)
+			continue;
+
+		size_t dir_idx  = 0;
+		char * basename = filename;
+
+		if (*p != 0)
+		{
+			*p++ = 0;
+
+			basename = p;
+			if (basename[0] == 0)
+				continue;
+
+			dir_idx = pack->AddDirectory(filename);
+		}
+		std::string add_name = basename;
+		epi::StringUpperASCII(add_name);
+		pack->directories_[dir_idx].AddEntry(epi::GetFilename(add_name), "", packpath, 0, idx);
+		pack->search_files_.insert({epi::GetStem(add_name), packpath});
+	}
+
+	return pack;
+}
+
+class VWADFile : public epi::File
+{
+private:
+	PackFile * pack_;
+
+	vwad_fidx vwad_index_;
+	vwad_fd vwad_file_descriptor_ = -1;
+
+	int length_ = 0;
+	int position_    = 0;
+
+public:
+	VWADFile(PackFile *pack, vwad_fidx idx) : pack_(pack), vwad_index_(idx)
+	{
+		// determine length
+		length_ = vwad_get_file_size(pack->vwad_archive_, vwad_index_);
+		EPI_ASSERT(length_ >= 0);
+		// grab "handle" for future functions
+		vwad_file_descriptor_ = vwad_open_fidx(pack->vwad_archive_, vwad_index_);
+		EPI_ASSERT(vwad_file_descriptor_ >= 0);
+	}
+
+	~VWADFile()
+	{
+		vwad_fclose(pack_->vwad_archive_, vwad_file_descriptor_);
+	}
+
+	int GetLength()
+	{
+		return length_;
+	}
+
+	int GetPosition()
+	{
+		return position_;
+	}
+
+	unsigned int Read(void *dest, unsigned int count)
+	{
+		if (position_ >= length_)
+			return 0;
+
+		// never read more than what GetLength() reports
+		if (count > length_ - position_)
+			count = length_ - position_;
+
+		int got = vwad_read(pack_->vwad_archive_, vwad_file_descriptor_, dest, count);
+
+		EPI_ASSERT(got >= 0);
+
+		position_ += got;
+
+		return got;
+	}
+
+	unsigned int Write(const void *src, unsigned int count)
+	{
+		// not implemented
+		return count;
+	}
+
+	bool Seek(int offset, int seekpoint)
+	{
+		int want_pos = position_;
+
+		if (seekpoint == epi::File::kSeekpointStart) want_pos = 0;
+		if (seekpoint == epi::File::kSeekpointEnd)   want_pos = length_;
+
+		if (offset < 0)
+		{
+			offset = -offset;
+			if (offset >= want_pos)
+				want_pos = 0;
+			else
+				want_pos -= offset;
+		}
+		else
+		{
+			want_pos += offset;
+		}
+
+		// cannot go beyond the end (except TO very end)
+		if (want_pos > length_)
+			return false;
+
+		if (want_pos == length_)
+		{
+			position_ = length_;
+			return true;
+		}
+
+		// trivial success when already there
+		if (want_pos == position_)
+			return true;
+
+		if (vwad_seek(pack_->vwad_archive_, vwad_file_descriptor_, want_pos) == 0)
+		{
+			position_ = want_pos;
+			return true;
+		}
+		else
+		{
+			position_ = vwad_tell(pack_->vwad_archive_, vwad_file_descriptor_);
+			return false;
+		}
+	}
+};
+
+epi::File *PackFile::OpenVWADEntry(size_t dir, size_t index)
+{
+	VWADFile *F = new VWADFile(this, directories_[dir].entries_[index].vwad_index_);
+	return F;
+}
+
+
+epi::File *PackFile::OpenVWADEntryByName(const std::string& name)
+{
+	// this ignores case by default
+	int idx = vwad_find_file(this->vwad_archive_, name.c_str());
+	if (idx < 0)
+		return NULL;
+
+	VWADFile *F = new VWADFile(this, idx);
+	return F;
 }
 
 //----------------------------------------------------------------------------
@@ -1286,7 +1512,18 @@ void PopulatePackOnly(DataFile *df)
     if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindIFolder)
         df->pack_ = ProcessFolder(df);
     else
-        df->pack_ = ProcessZip(df);
+	{
+		FILE* df_fp = epi::FileOpenRaw(df->name_, epi::kFileAccessBinary | epi::kFileAccessRead);
+		EPI_ASSERT(df_fp);
+		uint8_t vwad_check[4];
+		fread(vwad_check, 4, 1, df_fp);
+		fclose(df_fp);
+		if (vwad_check[0] == 'V' && vwad_check[1] == 'W' && 
+			vwad_check[2] == 'A' && vwad_check[3] == 'D')
+			df->pack_ = ProcessVWAD(df);
+		else
+			df->pack_ = ProcessZip(df);
+	}
 
     df->pack_->SortEntries();
 }
@@ -1325,7 +1562,18 @@ void ProcessAllInPack(DataFile *df, size_t file_index)
     if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindIFolder)
         df->pack_ = ProcessFolder(df);
     else
-        df->pack_ = ProcessZip(df);
+	{
+		FILE* df_fp = epi::FileOpenRaw(df->name_, epi::kFileAccessBinary | epi::kFileAccessRead);
+		EPI_ASSERT(df_fp);
+		uint8_t vwad_check[4];
+		fread(vwad_check, 4, 1, df_fp);
+		fclose(df_fp);
+		if (vwad_check[0] == 'V' && vwad_check[1] == 'W' && 
+			vwad_check[2] == 'A' && vwad_check[3] == 'D')
+			df->pack_ = ProcessVWAD(df);
+		else
+			df->pack_ = ProcessZip(df);
+	}
 
     df->pack_->SortEntries();
 

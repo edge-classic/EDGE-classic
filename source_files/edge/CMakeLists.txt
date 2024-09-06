@@ -137,6 +137,7 @@ set (EDGE_LINK_LIBRARIES
   crsid
   fluidlite
   libRAD
+  libvwad
   m4p
   miniz
   edge_coal
@@ -184,6 +185,7 @@ target_include_directories(edge-classic PRIVATE ../epi)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/fluidlite/include)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/hmm)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/libRAD)
+target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/libvwad)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/m4p)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/minivorbis)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/miniz)

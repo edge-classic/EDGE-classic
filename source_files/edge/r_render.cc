@@ -3282,7 +3282,7 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
 
     view_x_slope *= widescreen_view_width_multiplier;
 
-    if (uncapped_frames.d_ && level_time_elapsed && mo->interpolate_ && !paused && !menu_active && !rts_menu_active)
+    if (uncapped_frames.d_ && level_time_elapsed && mo->player_ && mo->interpolate_ && !paused && !menu_active && !rts_menu_active)
     {
         view_x     = HMM_Lerp(mo->old_x_, fractional_tic, mo->x);
         view_y     = HMM_Lerp(mo->old_y_, fractional_tic, mo->y);

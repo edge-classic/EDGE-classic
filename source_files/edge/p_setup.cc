@@ -2013,6 +2013,7 @@ static void LoadUDMFSideDefs()
         {
             sd->middle_mask_offset = sd->middle.offset.Y;
             sd->middle.offset.Y    = 0;
+            sd->middle.old_offset.Y = 0;
         }
         ld->front_sector = sd->sector;
         sd->top.translucency = level_line_alphas[i];
@@ -2027,6 +2028,7 @@ static void LoadUDMFSideDefs()
             {
                 sd->middle_mask_offset = sd->middle.offset.Y;
                 sd->middle.offset.Y    = 0;
+                sd->middle.old_offset.Y = 0;
             }
             ld->back_sector = sd->sector;
             sd->top.translucency = level_line_alphas[i];

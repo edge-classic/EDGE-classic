@@ -10,6 +10,8 @@ AlmostEquals Google Test Framework Component - Copyright (c) 2005 Google, Inc.
 
 Blasphemer (various assets) - Copyright (c) 2021 Contributors to the Blasphemer project
 
+FMMIDI library - Copyright (c) 2003-2006 yuno
+
 Freedoom (various assets) - Copyright (c) 2001-2019 Contributors to the Freedoom project
 
 libRAD (patches.cpp/radmidi.cpp) - Copyright (c) 2021-2023 Devin Acker

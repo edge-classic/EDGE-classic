@@ -86,6 +86,7 @@ set (EDGE_SOURCE_FILES
   s_music.cc
   s_ogg.cc
   s_fluid.cc
+  s_fmm.cc
   s_m4p.cc
   s_opl.cc
   s_rad.cc
@@ -136,6 +137,7 @@ set (EDGE_LINK_LIBRARIES
   ${SDL2_LIBRARIES}
   crsid
   fluidlite
+  fmmidi
   libRAD
   libvwad
   m4p
@@ -182,6 +184,7 @@ target_include_directories(edge-classic PRIVATE ../ddf)
 target_include_directories(edge-classic PRIVATE ../dehacked)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/dr_libs)
 target_include_directories(edge-classic PRIVATE ../epi)
+target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/fmmidi)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/fluidlite/include)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/hmm)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/libRAD)

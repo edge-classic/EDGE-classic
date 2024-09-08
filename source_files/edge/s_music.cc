@@ -32,6 +32,7 @@
 #include "m_misc.h"
 #include "s_flac.h"
 #include "s_fluid.h"
+#include "s_fmm.h"
 #include "s_m4p.h"
 #include "s_mp3.h"
 #include "s_ogg.h"
@@ -215,9 +216,13 @@ void ChangeMusic(int entry_number, bool loop)
         {
             music_player = PlayFluidMusic(data, length, loop);
         }
-        else
+        else if (var_midi_player == 1)
         {
             music_player = PlayOPLMusic(data, length, loop, play->type_);
+        }
+        else
+        {
+           music_player = PlayFMMMusic(data, length, loop);
         }
         break;
 

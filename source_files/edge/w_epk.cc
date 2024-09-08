@@ -143,7 +143,7 @@ class PackFile
     vwad_handle *vwad_archive_;
 
   public:
-    PackFile(DataFile *par, bool folder, bool is_zip) : parent_(par), is_folder_(folder), is_zip_(is_zip_), directories_(), archive_(nullptr), vwad_archive_(nullptr)
+    PackFile(DataFile *par, bool folder, bool is_zip) : parent_(par), is_folder_(folder), is_zip_(is_zip), directories_(), archive_(nullptr), vwad_archive_(nullptr)
     {
     }
 

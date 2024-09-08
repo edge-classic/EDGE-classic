@@ -48,7 +48,6 @@ bool sound_device_stereo;
 static bool audio_is_locked = false;
 
 std::vector<std::string> available_soundfonts;
-std::vector<std::string> available_opl_banks;
 extern std::string       game_directory;
 extern std::string       home_directory;
 extern ConsoleVariable   midi_soundfont;
@@ -224,13 +223,11 @@ void StartupMusic(void)
     std::vector<epi::DirectoryEntry> sfd;
     std::string                      soundfont_dir = epi::PathAppend(game_directory, "soundfont");
 
-    // Always add the default/internal GENMIDI lump choice
-    available_opl_banks.push_back("GENMIDI");
     // Set default SF2 location in CVAR if needed
     if (midi_soundfont.s_.empty())
         midi_soundfont = epi::SanitizePath(epi::PathAppend(soundfont_dir, "Default.sf2"));
 
-    if (!ReadDirectory(sfd, soundfont_dir, "*.*"))
+    if (!ReadDirectory(sfd, soundfont_dir, "*.sf2"))
     {
         LogWarning("StartupMusic: Failed to read '%s' directory!\n", soundfont_dir.c_str());
     }
@@ -239,16 +236,7 @@ void StartupMusic(void)
         for (size_t i = 0; i < sfd.size(); i++)
         {
             if (!sfd[i].is_dir)
-            {
-                std::string ext = epi::GetExtension(sfd[i].name);
-                epi::StringLowerASCII(ext);
-                if (ext == ".sf2")
-                {
-                    available_soundfonts.push_back(epi::SanitizePath(sfd[i].name));
-                }
-                else if (ext == ".op2" || ext == ".ad" || ext == ".opl" || ext == ".tmb")
-                    available_opl_banks.push_back(epi::SanitizePath(sfd[i].name));
-            }
+                available_soundfonts.push_back(epi::SanitizePath(sfd[i].name));
         }
     }
 
@@ -261,7 +249,7 @@ void StartupMusic(void)
         if (!epi::IsDirectory(soundfont_dir))
             epi::MakeDirectory(soundfont_dir);
 
-        if (!ReadDirectory(sfd, soundfont_dir, "*.*"))
+        if (!ReadDirectory(sfd, soundfont_dir, "*.sf2"))
         {
             LogWarning("StartupMusic: Failed to read '%s' directory!\n", soundfont_dir.c_str());
         }
@@ -270,14 +258,7 @@ void StartupMusic(void)
             for (size_t i = 0; i < sfd.size(); i++)
             {
                 if (!sfd[i].is_dir)
-                {
-                    std::string ext = epi::GetExtension(sfd[i].name);
-                    epi::StringLowerASCII(ext);
-                    if (ext == ".sf2")
-                        available_soundfonts.push_back(epi::SanitizePath(sfd[i].name));
-                    else if (ext == ".op2" || ext == ".ad" || ext == ".opl" || ext == ".tmb")
-                        available_opl_banks.push_back(epi::SanitizePath(sfd[i].name));
-                }
+                    available_soundfonts.push_back(epi::SanitizePath(sfd[i].name));
             }
         }
     }

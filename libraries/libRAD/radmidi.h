@@ -63,8 +63,8 @@ public:
 	OPLPlayer(int frequency);
 	virtual ~OPLPlayer();
 	
-	// load instrument patches from a block of memory
-	bool loadPatches(const uint8_t *data, size_t size);
+	// load built-in instrument patches
+	bool loadPatches();
 	
 	void generate(int16_t *data, unsigned numSamples);
 	

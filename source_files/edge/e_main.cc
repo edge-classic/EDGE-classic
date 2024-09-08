@@ -2076,8 +2076,7 @@ static void EdgeStartup(void)
     // Must be done after WAD and DDF loading to check for potential
     // overrides of lump-specific image/sound/DDF defines
     DoPackSubstitutions();
-    StartupMusic(); // Must be done after all files loaded to locate
-                    // appropriate GENMIDI lump
+    StartupMusic();
     InitializePalette();
 
     DDFCleanUp();

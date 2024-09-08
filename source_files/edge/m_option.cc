@@ -212,7 +212,6 @@ static void OptionMenuLanguageDrawer(int x, int y, int deltay);
 static void OptionMenuChangeLanguage(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuChangeMidiPlayer(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void OptionMenuChangeSoundfont(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeOPLInstrumentBank(int key_pressed, ConsoleVariable *console_variable = nullptr);
 static void InitMonitorSize();
 
 static constexpr char YesNo[]        = "Off/On"; // basic on/off
@@ -226,7 +225,6 @@ static constexpr char JoystickAxis[] = "Off/Turn/Turn (Reversed)/Look (Inverted)
 static DisplayMode new_window_mode;
 
 extern std::vector<std::string> available_soundfonts;
-extern std::vector<std::string> available_opl_banks;
 
 //
 //  OPTION STRUCTURES
@@ -532,8 +530,6 @@ static OptionMenuItem soundoptions[] = {
     {kOptionMenuItemTypeSwitch, "MIDI Player", "Fluidlite/Opal", 2, &var_midi_player, OptionMenuChangeMidiPlayer,
      nullptr},
     {kOptionMenuItemTypeFunction, "Fluidlite Soundfont", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr},
-    {kOptionMenuItemTypeFunction, "Opal Instrument Bank", nullptr, 0, nullptr, OptionMenuChangeOPLInstrumentBank,
-     nullptr},
     {kOptionMenuItemTypeBoolean, "PC Speaker Mode", YesNo, 2, &pc_speaker_mode, OptionMenuChangePCSpeakerMode,
      "Music will be Off while this is enabled"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
@@ -1100,15 +1096,6 @@ void OptionMenuDrawer()
             TEXTscale = style->definition_->text_[fontType].scale_;
             HUDWriteText(style, fontType, (current_menu->menu_center) + 15, curry,
                          epi::GetStem(midi_soundfont.s_).c_str());
-        }
-
-        // Draw current GENMIDI
-        if (current_menu == &sound_optmenu && current_menu->items[i].routine == OptionMenuChangeOPLInstrumentBank)
-        {
-            fontType  = StyleDefinition::kTextSectionAlternate;
-            TEXTscale = style->definition_->text_[fontType].scale_;
-            HUDWriteText(style, fontType, (current_menu->menu_center) + 15, curry,
-                         opl_instrument_bank.s_.empty() ? "Default" : epi::GetStem(opl_instrument_bank.s_).c_str());
         }
 
         // -ACB- 1998/07/15 Menu Cursor is colour indexed.
@@ -2096,51 +2083,6 @@ static void OptionMenuChangeSoundfont(int key_pressed, ConsoleVariable *console_
     // update console_variable
     midi_soundfont = available_soundfonts.at(sf_pos);
     RestartFluid();
-}
-
-//
-// OptionMenuChangeOPLInstrumentBank
-//
-//
-static void OptionMenuChangeOPLInstrumentBank(int key_pressed, ConsoleVariable *console_variable)
-{
-    int op2_pos = -1;
-    for (int i = 0; i < (int)available_opl_banks.size(); i++)
-    {
-        if (epi::StringCaseCompareASCII(opl_instrument_bank.s_, available_opl_banks.at(i)) == 0)
-        {
-            op2_pos = i;
-            break;
-        }
-    }
-
-    if (op2_pos < 0)
-    {
-        LogWarning("OptionMenuChangeOPLInstrumentBank: Could not read list of "
-                   "available GENMIDIs. "
-                   "Falling back to default!\n");
-        opl_instrument_bank.s_ = "";
-        return;
-    }
-
-    if (key_pressed == kLeftArrow || key_pressed == kGamepadLeft)
-    {
-        if (op2_pos - 1 >= 0)
-            op2_pos--;
-        else
-            op2_pos = available_opl_banks.size() - 1;
-    }
-    else if (key_pressed == kRightArrow || key_pressed == kGamepadRight)
-    {
-        if (op2_pos + 1 >= (int)available_opl_banks.size())
-            op2_pos = 0;
-        else
-            op2_pos++;
-    }
-
-    // update console_variable
-    opl_instrument_bank = available_opl_banks.at(op2_pos);
-    RestartOpal();
 }
 
 //

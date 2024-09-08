@@ -12,10 +12,7 @@ Blasphemer (various assets) - Copyright (c) 2021 Contributors to the Blasphemer 
 
 Freedoom (various assets) - Copyright (c) 2001-2019 Contributors to the Freedoom project
 
-"FDDMX" instrument bank - Copyright (c) 2023 Contributors to the Freedoom project
-						  Copyright (c) ConSiGno ("DMXOPL" instrument bank which formed the basis for FDDMX)
-
-libRAD (patches.cpp/radmidi.cpp, adapted from YMFMIDI) - Copyright (c) 2021-2023 Devin Acker
+libRAD (patches.cpp/radmidi.cpp) - Copyright (c) 2021-2023 Devin Acker
 
 Mod4Play library - 	Copyright (c) 2024 dashodanger
 					Copyright (c) 2022 Olav Sørensen
@@ -54,9 +51,6 @@ CC-BY-SA-4.0 International License
 ===========================================================================================
 GPL3 License
 ===========================================================================================
-
-"Apogee" instrument bank -  Melodic instruments Copyright (C) 1994-1995 Apogee Software, Ltd.
-							Percussion instruments Copyright (C) 1999, 2000, 2001 Simon Peter, et al.
 
 AJBSP - Copyright (c) 2000-2023 Andrew Apted, et al
 	 	Copyright (c) 1994-1998 Colin Reed

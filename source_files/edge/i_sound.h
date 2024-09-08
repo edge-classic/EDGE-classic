@@ -25,6 +25,4 @@
 
 extern std::vector<std::string> available_soundfonts;
 
-extern std::vector<std::string> available_opl_banks;
-
 extern SDL_AudioDeviceID current_sound_device;

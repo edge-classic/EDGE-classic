@@ -46,11 +46,6 @@ extern int  sound_device_frequency;
 
 bool opl_disabled = false;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(opl_instrument_bank, "GENMIDI",
-                             (ConsoleVariableFlag)(kConsoleVariableFlagArchive | kConsoleVariableFlagFilepath))
-
-extern std::vector<std::string> available_opl_banks;
-
 bool StartupOpal(void)
 {
     LogPrint("Initializing OPL player...\n");
@@ -63,76 +58,17 @@ bool StartupOpal(void)
     if (!edge_opl)
         return false;
 
-    // Check if CVAR value is still good
-    bool cvar_good = false;
-    if (opl_instrument_bank.s_ == "GENMIDI")
-        cvar_good = true;
-    else
-    {
-        for (size_t i = 0; i < available_opl_banks.size(); i++)
-        {
-            if (epi::StringCaseCompareASCII(opl_instrument_bank.s_, available_opl_banks.at(i)) == 0)
-                cvar_good = true;
-        }
-    }
-
-    if (!cvar_good)
-    {
-        LogWarning("Cannot find previously used GENMIDI %s, falling back to "
-                   "default!\n",
-                   opl_instrument_bank.c_str());
-        opl_instrument_bank = "GENMIDI";
-    }
-
-    int        length;
-    uint8_t   *data = nullptr;
-    epi::File *F    = nullptr;
-
-    if (opl_instrument_bank.s_ == "GENMIDI")
-    {
-        data = OpenPackOrLumpInMemory("GENMIDI", {".op2"}, &length);
-        if (!data)
-        {
-            LogDebug("no GENMIDI lump !\n");
-            return false;
-        }
-    }
-    else
-    {
-        F = epi::FileOpen(opl_instrument_bank.s_, epi::kFileAccessRead | epi::kFileAccessBinary);
-        if (!F)
-        {
-            LogWarning("StartupOpal: Error opening GENMIDI!\n");
-            return false;
-        }
-        length = F->GetLength();
-        data   = F->LoadIntoMemory();
-    }
-
-    if (!data)
+    if (!edge_opl->loadPatches())
     {
         LogWarning("StartupOpal: Error loading instruments!\n");
-        if (F)
-            delete F;
         return false;
     }
-
-    if (!edge_opl->loadPatches((const uint8_t *)data, (size_t)length))
-    {
-        LogWarning("StartupOpal: Error loading instruments!\n");
-        delete F;
-        delete[] data;
-        return false;
-    }
-
-    delete F;
-    delete[] data;
 
     // OK
     return true;
 }
 
-// Should only be invoked when switching GENMIDI lumps
+// Should only be invoked when changing MIDI player options
 void RestartOpal(void)
 {
     if (opl_disabled)

@@ -36,13 +36,7 @@ struct OPLPatch
 	// default names
 	static const char* names[256];
 	
-	static bool load(OPLPatchSet& patches, const uint8_t *data, size_t size);
-
-private:
-	// individual format loaders
-	static bool loadOP2(OPLPatchSet& patches, const uint8_t *data, size_t size);
-	static bool loadAIL(OPLPatchSet& patches, const uint8_t *data, size_t size);
-	static bool loadTMB(OPLPatchSet& patches, const uint8_t *data, size_t size);
+	static bool load(OPLPatchSet& patches);
 };
 
 #endif // __PATCHES_H

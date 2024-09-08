@@ -32,9 +32,9 @@ OPLPlayer::~OPLPlayer()
 }
 
 // ----------------------------------------------------------------------------
-bool OPLPlayer::loadPatches(const uint8_t *data, size_t size)
+bool OPLPlayer::loadPatches()
 {
-	return OPLPatch::load(m_patches, data, size);
+	return OPLPatch::load(m_patches);
 }
 
 // ----------------------------------------------------------------------------

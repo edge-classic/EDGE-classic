@@ -19,6 +19,7 @@
 #include "s_fmm.h"
 
 #include <stdint.h>
+#include <string.h>
 
 #include "dm_state.h"
 #include "epi_file.h"
@@ -171,7 +172,7 @@ public:
 	{
 		fmm_sequencer_ = new FMMSequencer;
 		fmm_interface_ = new FMMInterface;
-		std::memset(fmm_interface_, 0, sizeof(MidiRealTimeInterface));
+		memset(fmm_interface_, 0, sizeof(MidiRealTimeInterface));
 
 		fmm_interface_->rtUserData = this;
 		fmm_interface_->rt_noteOn  = rtNoteOn;

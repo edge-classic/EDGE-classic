@@ -190,7 +190,7 @@ void HUDFrameSetup(void)
 
     HUDReset();
 
-    hud_tic++;
+    hud_tic = game_tic;
 }
 
 static constexpr uint8_t kScissorStackMaximum = 10;

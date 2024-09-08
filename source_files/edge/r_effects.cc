@@ -22,6 +22,7 @@
 #include "hu_draw.h" // HUD* functions
 #include "i_defs_gl.h"
 #include "m_misc.h"
+#include "n_network.h"
 #include "r_colormap.h"
 #include "r_image.h"
 #include "r_misc.h"
@@ -292,13 +293,21 @@ void FuzzUpdate(void)
             FatalError("Cannot find essential image: FUZZ_MAP\n");
     }
 
-    fuzz_y_offset = ((render_frame_count * 3) & 1023) / 256.0;
+    fuzz_y_offset = ((hud_tic * 3) & 1023) / 256.0;
 }
 
 void FuzzAdjust(HMM_Vec2 *tc, MapObject *mo)
 {
-    tc->X += fmod(mo->x / 520.0, 1.0);
-    tc->Y += fmod(mo->y / 520.0, 1.0) + fuzz_y_offset;
+    if (uncapped_frames.d_)
+    {
+        tc->X += fmod(HMM_Lerp(mo->old_x_, fractional_tic, mo->x) / 520.0, 1.0);
+        tc->Y += fmod(HMM_Lerp(mo->old_y_, fractional_tic, mo->y) / 520.0, 1.0) + fuzz_y_offset;
+    }
+    else
+    {
+        tc->X += fmod(mo->x / 520.0, 1.0);
+        tc->Y += fmod(mo->y / 520.0, 1.0) + fuzz_y_offset;
+    }
 }
 
 //--- editor settings ---

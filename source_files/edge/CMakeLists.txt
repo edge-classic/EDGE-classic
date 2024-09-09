@@ -144,7 +144,6 @@ set (EDGE_LINK_LIBRARIES
   miniz
   edge_coal
   lua
-  utf8proc
 )
 
 if (WIN32)

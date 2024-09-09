@@ -1,8 +1,7 @@
 #include "filter.hpp"
 
-#include <assert.h>
-
 #include <algorithm>
+#include <cassert>
 
 using namespace std;
 

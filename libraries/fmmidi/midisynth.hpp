@@ -2,8 +2,7 @@
 // Copyright(c)2003-2005 yuno
 #pragma once
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <vector>

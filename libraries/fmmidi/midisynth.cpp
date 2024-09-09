@@ -2,10 +2,9 @@
 // Copyright(c)2003-2005 yuno
 #include "midisynth.hpp"
 
-#include <assert.h>
-#include <string.h>
-
+#include <cassert>
 #include <cmath>
+#include <cstring>
 #include <utility>
 
 #ifndef M_PI

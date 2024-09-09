@@ -1,10 +1,9 @@
 #pragma once
 
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
-
 #include <complex>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
 #include <map>
 #include <vector>
 

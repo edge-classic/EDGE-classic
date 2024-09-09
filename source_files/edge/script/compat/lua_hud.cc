@@ -1096,5 +1096,7 @@ void LuaRunHUD(void)
 
     LuaCallGlobalFunction(global_lua_state, "draw_all");
 
+    LuaSetVector3(LuaGetGlobalVM(), "player", "inventory_event_handler", HMM_Vec3{{0, 0, 0}});
+
     HUDReset();
 }

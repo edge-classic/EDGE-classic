@@ -41,6 +41,8 @@
 
 extern coal::VM *ui_vm;
 
+extern void COALSetVector(coal::VM *vm, const char *mod_name, const char *var_name, double val_1, double val_2,
+                          double val_3);
 extern void COALSetFloat(coal::VM *vm, const char *mod, const char *name, double value);
 extern void COALCallFunction(coal::VM *vm, const char *name);
 
@@ -1180,6 +1182,8 @@ void COALRunHUD(void)
     ui_hud_automap_zoom     = -1;
 
     COALCallFunction(ui_vm, "draw_all");
+
+    COALSetVector(ui_vm, "player", "inventory_event_handler", 0, 0, 0);
 
     HUDReset();
 }

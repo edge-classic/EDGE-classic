@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "con_var.h"
-
 #include <stdint.h>
+
+#include "con_var.h"
 
 constexpr uint16_t kMusicBuffer = 1024;
 

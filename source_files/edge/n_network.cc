@@ -62,8 +62,8 @@ HANDLE windows_timer = nullptr;
 // NOTE 2: make_tic - game_tic is number of buffered (un-run) ticcmds,
 //         and it must be <= kBackupTics (the maximum buffered ticcmds).
 
-int game_tic;
-int make_tic;
+int   game_tic;
+int   make_tic;
 float fractional_tic;
 
 static int last_update_tic;  // last time NetworkUpdate  was called
@@ -224,8 +224,7 @@ int TryRunTicCommands()
     last_try_run_tic = now_time;
 
 #ifdef EDGE_DEBUG_TICS
-    LogDebug("TryRunTicCommands: now %d last_try_run %d --> real %d\n", now_time, now_time - real_tics,
-             real_tics);
+    LogDebug("TryRunTicCommands: now %d last_try_run %d --> real %d\n", now_time, now_time - real_tics, real_tics);
 #endif
 
     // simpler handling when no game in progress

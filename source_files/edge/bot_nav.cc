@@ -702,8 +702,8 @@ BotPath *BotFindPath(const Position *start, const Position *finish, int flags)
 
 //----------------------------------------------------------------------------
 
-static void BotItemsInSubsector(Subsector *sub, DeathBot *bot, Position &pos, float radius, int sub_id,
-                                        int &best_id, float &best_score, MapObject *&best_mo)
+static void BotItemsInSubsector(Subsector *sub, DeathBot *bot, Position &pos, float radius, int sub_id, int &best_id,
+                                float &best_score, MapObject *&best_mo)
 {
     for (MapObject *mo = sub->thing_list; mo != nullptr; mo = mo->subsector_next_)
     {
@@ -808,7 +808,7 @@ BotPath *BotFindThing(DeathBot *bot, float radius, MapObject *&best)
 //----------------------------------------------------------------------------
 
 static void BotEnemiesInSubsector(const Subsector *sub, DeathBot *bot, float radius, MapObject *&best_mo,
-                                          float &best_score)
+                                  float &best_score)
 {
     for (MapObject *mo = sub->thing_list; mo != nullptr; mo = mo->subsector_next_)
     {
@@ -832,8 +832,7 @@ static void BotEnemiesInSubsector(const Subsector *sub, DeathBot *bot, float rad
     }
 }
 
-static void BotEnemiesInNode(unsigned int bspnum, DeathBot *bot, float radius, MapObject *&best_mo,
-                                     float &best_score)
+static void BotEnemiesInNode(unsigned int bspnum, DeathBot *bot, float radius, MapObject *&best_mo, float &best_score)
 {
     if (bspnum & kLeafSubsector)
     {

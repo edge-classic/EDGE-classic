@@ -23,17 +23,16 @@
 #include "i_defs_gl.h"
 #include "i_sound.h"
 #include "i_system.h"
+#include "pl_mpeg.h"
 #include "r_gldefs.h"
 #include "r_modes.h"
 #include "r_wipe.h"
 #include "s_blit.h"
 #include "s_music.h"
 #include "s_sound.h"
+#include "sokol_color.h"
 #include "w_files.h"
 #include "w_wad.h"
-#define PL_MPEG_IMPLEMENTATION
-#include "pl_mpeg.h"
-#include "sokol_color.h"
 
 extern bool sound_device_stereo;
 extern int  sound_device_frequency;
@@ -47,7 +46,7 @@ static plm_t           *decoder            = nullptr;
 static SDL_AudioStream *movie_audio_stream = nullptr;
 static int              movie_sample_rate  = 0;
 static float            skip_time;
-static uint8_t         *movie_bytes        = nullptr;
+static uint8_t         *movie_bytes = nullptr;
 
 static bool MovieSetupAudioStream(int rate)
 {
@@ -119,7 +118,7 @@ void PlayMovie(const std::string &name)
     skip_bar_active    = false;
     skip_time          = 0;
 
-    int      length = 0;
+    int length = 0;
 
     if (movie->type_ == kMovieDataLump)
         movie_bytes = LoadLumpIntoMemory(movie->info_.c_str(), &length);
@@ -128,8 +127,8 @@ void PlayMovie(const std::string &name)
         epi::File *mf = OpenFileFromPack(movie->info_.c_str());
         if (mf)
         {
-            movie_bytes  = mf->LoadIntoMemory();
-            length = mf->GetLength();
+            movie_bytes = mf->LoadIntoMemory();
+            length      = mf->GetLength();
         }
         delete mf;
     }
@@ -152,7 +151,7 @@ void PlayMovie(const std::string &name)
         movie_audio_stream = nullptr;
     }
 
-    decoder = plm_create_with_memory(movie_bytes, length, FALSE);
+    decoder = plm_create_with_memory(movie_bytes, length, 0);
 
     if (!decoder)
     {
@@ -170,7 +169,7 @@ void PlayMovie(const std::string &name)
             plm_destroy(decoder);
             delete[] movie_bytes;
             movie_bytes = nullptr;
-            decoder = nullptr;
+            decoder     = nullptr;
             return;
         }
     }
@@ -240,7 +239,7 @@ void PlayMovie(const std::string &name)
     plm_set_audio_decode_callback(decoder, MovieAudioCallback, nullptr);
     if (!no_sound && movie_audio_stream)
     {
-        plm_set_audio_enabled(decoder, TRUE);
+        plm_set_audio_enabled(decoder, 1);
         plm_set_audio_stream(decoder, 0);
     }
 

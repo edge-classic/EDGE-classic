@@ -60,7 +60,7 @@ Style *important_message_style;
 struct HUDMessage
 {
     std::string message;
-    int counter;
+    int         counter;
 };
 
 static std::deque<HUDMessage> queued_messages;
@@ -72,7 +72,8 @@ static void UpdatePickupMessages(ConsoleVariable *self)
         queued_messages.pop_back();
 }
 
-EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK_CLAMPED(maximum_pickup_messages, "2", kConsoleVariableFlagArchive, UpdatePickupMessages, 0, 3);
+EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK_CLAMPED(maximum_pickup_messages, "2", kConsoleVariableFlagArchive,
+                                                   UpdatePickupMessages, 0, 3);
 
 //
 // Heads-up Init
@@ -142,51 +143,48 @@ void HUDDrawer(void)
         {
             switch (message_style->definition_->entry_alignment_)
             {
-                case StyleDefinition::kAlignmentLeft:
+            case StyleDefinition::kAlignmentLeft: {
+                HUDSetAlignment(-1, -1);
+                for (size_t i = 0, i_end = queued_messages.size(); i < i_end; i++)
                 {
-                    HUDSetAlignment(-1, -1);
-                    for (size_t i = 0, i_end = queued_messages.size(); i < i_end; i++)
-                    {
-                        const HUDMessage &msg = queued_messages[i];
-                        const char *current_message = msg.message.c_str();
-                        if (i > 0)
-                            y += HUDStringHeight(queued_messages[i-1].message.c_str());
-                        if (msg.counter < kTicRate)
-                            HUDSetAlpha(alpha * msg.counter / kTicRate);
-                        HUDWriteText(message_style, 0, hud_x_left, y, current_message);
-                    }
-                    break;
+                    const HUDMessage &msg             = queued_messages[i];
+                    const char       *current_message = msg.message.c_str();
+                    if (i > 0)
+                        y += HUDStringHeight(queued_messages[i - 1].message.c_str());
+                    if (msg.counter < kTicRate)
+                        HUDSetAlpha(alpha * msg.counter / kTicRate);
+                    HUDWriteText(message_style, 0, hud_x_left, y, current_message);
                 }
-                case StyleDefinition::kAlignmentRight:
+                break;
+            }
+            case StyleDefinition::kAlignmentRight: {
+                HUDSetAlignment(1, -1);
+                for (size_t i = 0, i_end = queued_messages.size(); i < i_end; i++)
                 {
-                    HUDSetAlignment(1, -1);
-                    for (size_t i = 0, i_end = queued_messages.size(); i < i_end; i++)
-                    {
-                        const HUDMessage &msg = queued_messages[i];
-                        const char *current_message = msg.message.c_str();
-                        if (i > 0)
-                            y += HUDStringHeight(queued_messages[i-1].message.c_str());
-                        if (msg.counter < kTicRate)
-                            HUDSetAlpha(alpha * msg.counter / kTicRate);
-                        HUDWriteText(message_style, 0, hud_x_right, y, current_message);
-                    }
-                    break;
+                    const HUDMessage &msg             = queued_messages[i];
+                    const char       *current_message = msg.message.c_str();
+                    if (i > 0)
+                        y += HUDStringHeight(queued_messages[i - 1].message.c_str());
+                    if (msg.counter < kTicRate)
+                        HUDSetAlpha(alpha * msg.counter / kTicRate);
+                    HUDWriteText(message_style, 0, hud_x_right, y, current_message);
                 }
-                default:
+                break;
+            }
+            default: {
+                HUDSetAlignment(0, -1);
+                for (size_t i = 0, i_end = queued_messages.size(); i < i_end; i++)
                 {
-                    HUDSetAlignment(0, -1);
-                    for (size_t i = 0, i_end = queued_messages.size(); i < i_end; i++)
-                    {
-                        const HUDMessage &msg = queued_messages[i];
-                        const char *current_message = msg.message.c_str();
-                        if (i > 0)
-                            y += HUDStringHeight(queued_messages[i-1].message.c_str());
-                        if (msg.counter < kTicRate)
-                            HUDSetAlpha(alpha * msg.counter / kTicRate);
-                        HUDWriteText(message_style, 0, 160, y, current_message);
-                    }
-                    break;
+                    const HUDMessage &msg             = queued_messages[i];
+                    const char       *current_message = msg.message.c_str();
+                    if (i > 0)
+                        y += HUDStringHeight(queued_messages[i - 1].message.c_str());
+                    if (msg.counter < kTicRate)
+                        HUDSetAlpha(alpha * msg.counter / kTicRate);
+                    HUDWriteText(message_style, 0, 160, y, current_message);
                 }
+                break;
+            }
             }
         }
         else
@@ -194,10 +192,10 @@ void HUDDrawer(void)
             HUDSetAlignment(0, -1); // center it
             for (size_t i = 0, i_end = queued_messages.size(); i < i_end; i++)
             {
-                const HUDMessage &msg = queued_messages[i];
-                const char *current_message = msg.message.c_str();
+                const HUDMessage &msg             = queued_messages[i];
+                const char       *current_message = msg.message.c_str();
                 if (i > 0)
-                    y += HUDStringHeight(queued_messages[i-1].message.c_str());
+                    y += HUDStringHeight(queued_messages[i - 1].message.c_str());
                 if (msg.counter < kTicRate)
                     HUDSetAlpha(alpha * msg.counter / kTicRate);
                 HUDWriteText(message_style, 0, 160, y, current_message);
@@ -211,15 +209,15 @@ void HUDDrawer(void)
     if (important_message_on)
     {
         short tempY = 0;
-        tempY -= StringLines(current_important_message) *
-                 (important_message_style->fonts_[0]->NominalHeight() *
-                  important_message_style->definition_->text_[0].scale_);
+        tempY -= StringLines(current_important_message) * (important_message_style->fonts_[0]->NominalHeight() *
+                                                           important_message_style->definition_->text_[0].scale_);
         tempY /= 2;
         y = 90 - tempY;
         important_message_style->DrawBackground();
         HUDSetAlignment(0, 0); // center it
         if (important_message_counter < kTicRate)
-            HUDSetAlpha(important_message_style->definition_->text_->translucency_ * important_message_counter / kTicRate);
+            HUDSetAlpha(important_message_style->definition_->text_->translucency_ * important_message_counter /
+                        kTicRate);
         else
             HUDSetAlpha(important_message_style->definition_->text_->translucency_);
         HUDWriteText(important_message_style, 0, 160, y, current_important_message.c_str());

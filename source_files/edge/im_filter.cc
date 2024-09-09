@@ -2862,7 +2862,7 @@ void ConvertLine(int y, int w, int h, bool invert, uint8_t *dest, const uint8_t 
             break;
         }
         } // switch (pattern)
-    }     // for (x)
+    } // for (x)
 }
 
 void StripAlpha(uint8_t *dest, const uint8_t *src, int width)

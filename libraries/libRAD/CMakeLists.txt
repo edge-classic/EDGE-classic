@@ -9,3 +9,5 @@ add_library(
   patches.cpp
   radmidi.cpp
 )
+
+target_include_directories(libRAD PUBLIC ./)

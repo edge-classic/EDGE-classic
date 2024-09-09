@@ -720,9 +720,9 @@ void GameDefinition::CopyDetail(GameDefinition &src)
     titlemusic_ = src.titlemusic_;
     titletics_  = src.titletics_;
 
-    special_music_ = src.special_music_;
-    lighting_      = src.lighting_;
-    description_   = src.description_;
+    special_music_        = src.special_music_;
+    lighting_             = src.lighting_;
+    description_          = src.description_;
     default_damage_flash_ = src.default_damage_flash_;
 }
 

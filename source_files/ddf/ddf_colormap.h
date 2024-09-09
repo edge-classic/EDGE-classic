@@ -50,7 +50,7 @@ class Colormap
     std::string name_;
 
     std::string lump_name_;
-    int lump_index_; // for raw BOOM colourmaps
+    int         lump_index_; // for raw BOOM colourmaps
     std::string pack_name_;
 
     int start_;

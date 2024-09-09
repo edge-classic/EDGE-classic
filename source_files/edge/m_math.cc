@@ -79,8 +79,7 @@ HMM_Vec3 LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_
     return HMM_AddV3(line_a, HMM_MulV3F(line_subtract, n / d));
 }
 
-HMM_Vec3 LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_a, HMM_Vec3 plane_b,
-                                   HMM_Vec3 plane_c)
+HMM_Vec3 LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_a, HMM_Vec3 plane_b, HMM_Vec3 plane_c)
 {
     HMM_Vec3 plane_normal  = TripleCrossProduct(plane_a, plane_b, plane_c);
     float    n             = HMM_DotV3(plane_normal, HMM_SubV3(plane_c, line_a));

@@ -77,7 +77,7 @@ constexpr const char *kGOTYELWCARD = "Picked up a yellow keycard.";
 constexpr const char *kGOTREDCARD  = "Picked up a red keycard.";
 constexpr const char *kGOTBLUESKUL = "Picked up a blue skull key.";
 constexpr const char *kGOTYELWSKUL = "Picked up a yellow skull key.";
-constexpr const char *kGOTREDSKUL = "Picked up a red skull key.";
+constexpr const char *kGOTREDSKUL  = "Picked up a red skull key.";
 constexpr const char *kGOTINVUL    = "Invulnerability!";
 constexpr const char *kGOTBERSERK  = "Berserk!";
 constexpr const char *kGOTINVIS    = "Partial Invisibility";
@@ -105,27 +105,27 @@ constexpr const char *kGOTSHOTGUN2 = "You got the super shotgun!";
 //
 // P_Doors.C
 //
-constexpr const char *kPD_BLUEC   = "You need a blue card to open this door";
-constexpr const char *kPD_REDC    = "You need a red card to open this door";
-constexpr const char *kPD_YELLOWC = "You need a yellow card to open this door";
+constexpr const char *kPD_BLUEC    = "You need a blue card to open this door";
+constexpr const char *kPD_REDC     = "You need a red card to open this door";
+constexpr const char *kPD_YELLOWC  = "You need a yellow card to open this door";
 constexpr const char *kPD_BLUECO   = "You need a blue card to activate this object";
 constexpr const char *kPD_REDCO    = "You need a red card to activate this object";
 constexpr const char *kPD_YELLOWCO = "You need a yellow card to activate this object";
-constexpr const char *kPD_BLUEO   = "You need a blue key to activate this object";
-constexpr const char *kPD_REDO    = "You need a red key to activate this object";
-constexpr const char *kPD_YELLOWO = "You need a yellow key to activate this object";
-constexpr const char *kPD_BLUEK   = "You need a blue key to open this door";
-constexpr const char *kPD_BLUES   = "You need a blue skull to open this door";
-constexpr const char *kPD_REDK    = "You need a red key to open this door";
-constexpr const char *kPD_REDS    = "You need a red skull to open this door";
-constexpr const char *kPD_YELLOWK = "You need a yellow key to open this door";
-constexpr const char *kPD_YELLOWS = "You need a yellow skull to open this door";
+constexpr const char *kPD_BLUEO    = "You need a blue key to activate this object";
+constexpr const char *kPD_REDO     = "You need a red key to activate this object";
+constexpr const char *kPD_YELLOWO  = "You need a yellow key to activate this object";
+constexpr const char *kPD_BLUEK    = "You need a blue key to open this door";
+constexpr const char *kPD_BLUES    = "You need a blue skull to open this door";
+constexpr const char *kPD_REDK     = "You need a red key to open this door";
+constexpr const char *kPD_REDS     = "You need a red skull to open this door";
+constexpr const char *kPD_YELLOWK  = "You need a yellow key to open this door";
+constexpr const char *kPD_YELLOWS  = "You need a yellow skull to open this door";
 constexpr const char *kPD_BLUESO   = "You need a blue skull to activate this object";
 constexpr const char *kPD_REDSO    = "You need a red skull to activate this object";
 constexpr const char *kPD_YELLOWSO = "You need a yellow skull to activate this object";
-constexpr const char *kPD_ANY = "Any key will open this door";
-constexpr const char *kPD_ALL3 = "You need all three keys to open this door";
-constexpr const char *kPD_ALL6 = "You need all six keys to open this door";
+constexpr const char *kPD_ANY      = "Any key will open this door";
+constexpr const char *kPD_ALL3     = "You need all three keys to open this door";
+constexpr const char *kPD_ALL6     = "You need all six keys to open this door";
 
 //
 //  G_game.C
@@ -628,8 +628,8 @@ constexpr const char *kOB_BABY          = "%o was melted by an Arachnotron.";
 constexpr const char *kOB_VILE          = "%o was charred by an Archvile.";
 constexpr const char *kOB_BARON         = "%o was killed by a Baron of Hell.";
 constexpr const char *kOB_BARONHIT      = "%o was clawed by a Baron of Hell.";
-constexpr const char *kOB_KNIGHT         = "%o was killed by a Hell Knight.";
-constexpr const char *kOB_KNIGHTHIT      = "%o was clawed by a Hell Knight.";
+constexpr const char *kOB_KNIGHT        = "%o was killed by a Hell Knight.";
+constexpr const char *kOB_KNIGHTHIT     = "%o was clawed by a Hell Knight.";
 constexpr const char *kOB_CACOHIT       = "A Cacodemon chewed up %o!";
 constexpr const char *kOB_CACO          = "%o was killed by a Cacodemon.";
 constexpr const char *kOB_CHAINGUY      = "%o was mowed down by a Chaingunner.";

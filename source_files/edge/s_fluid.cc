@@ -376,8 +376,7 @@ class FluidPlayer : public AbstractMusicPlayer
 
         while (status_ == kPlaying && !pc_speaker_mode)
         {
-            SoundData *buf =
-                SoundQueueGetFreeBuffer(kMusicBuffer, sound_device_stereo ? kMixInterleaved : kMixMono);
+            SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer, sound_device_stereo ? kMixInterleaved : kMixMono);
 
             if (!buf)
                 break;

@@ -1806,7 +1806,7 @@ void IntermissionDrawer(void)
                              background_image); // Lobo: Widescreen support
             else
             {
-                if (title_scaling.d_) // Fill Border
+                if (title_scaling.d_)           // Fill Border
                 {
                     if (!background_image->blurred_version_)
                         StoreBlurredImage(background_image);

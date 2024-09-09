@@ -1343,7 +1343,7 @@ static void ScriptParseTipSlot(std::vector<const char *> &pars)
 
     ScriptTipProperties *tp;
 
-    tp    = new ScriptTipProperties;
+    tp = new ScriptTipProperties;
 
     ScriptCheckForInt(pars[1], &tp->slot_num);
 
@@ -1362,7 +1362,7 @@ static void ScriptParseTipPos(std::vector<const char *> &pars)
 
     ScriptTipProperties *tp;
 
-    tp    = new ScriptTipProperties;
+    tp = new ScriptTipProperties;
 
     ScriptCheckForPercentAny(pars[1], &tp->x_pos);
     ScriptCheckForPercentAny(pars[2], &tp->y_pos);
@@ -1380,7 +1380,7 @@ static void ScriptParseTipColour(std::vector<const char *> &pars)
 
     ScriptTipProperties *tp;
 
-    tp    = new ScriptTipProperties;
+    tp = new ScriptTipProperties;
 
     tp->color_name = epi::CStringDuplicate(pars[1]);
 
@@ -1397,7 +1397,7 @@ static void ScriptParseTipTrans(std::vector<const char *> &pars)
 
     ScriptTipProperties *tp;
 
-    tp    = new ScriptTipProperties;
+    tp = new ScriptTipProperties;
 
     ScriptCheckForPercent(pars[1], &tp->translucency);
 
@@ -1413,7 +1413,7 @@ static void ScriptParseTipAlign(std::vector<const char *> &pars)
 
     ScriptTipProperties *tp;
 
-    tp    = new ScriptTipProperties;
+    tp = new ScriptTipProperties;
 
     if (DDFCompareName(pars[1], "CENTER") == 0 || DDFCompareName(pars[1], "CENTRE") == 0)
     {

@@ -39,7 +39,7 @@
 #include "vm_coal.h"
 #include "w_wad.h"
 
-extern coal::VM       *ui_vm;
+extern coal::VM *ui_vm;
 
 extern void COALSetFloat(coal::VM *vm, const char *mod, const char *name, double value);
 extern void COALCallFunction(coal::VM *vm, const char *name);
@@ -137,8 +137,6 @@ static void HD_game_skill(coal::VM *vm, int argc)
     vm->ReturnFloat((double)game_skill);
 }
 
-
-
 // hud.map_name()
 //
 static void HD_map_name(coal::VM *vm, int argc)
@@ -200,7 +198,7 @@ static void HD_text_font(coal::VM *vm, int argc)
 {
     (void)argc;
 
-    bool ErrorHit = false;
+    bool        ErrorHit  = false;
     const char *font_name = vm->AccessParamString(0);
 
     FontDefinition *DEF = fontdefs.Lookup(font_name);
@@ -259,29 +257,27 @@ static void HD_get_text_width(coal::VM *vm, int argc)
 {
     (void)argc;
 
-    const char *str = vm->AccessParamString(0);
-    float size = *vm->AccessParam(1);
+    const char *str  = vm->AccessParamString(0);
+    float       size = *vm->AccessParam(1);
 
     float TheWidth = 0;
-/*    
-    TheWidth = HUDFontWidthNew(size ? *size : 0);
+    /*
+        TheWidth = HUDFontWidthNew(size ? *size : 0);
 
-    if (!str)
-        TheWidth = 0;
-    else
-    {
-        // get the length of the line
-        int len = 0;
-        while (str[len] && str[len] != '\n')
-            len++;
-        TheWidth *= len;
-    }
-*/
-    TheWidth=HUDStringWidthNew(str,size);
+        if (!str)
+            TheWidth = 0;
+        else
+        {
+            // get the length of the line
+            int len = 0;
+            while (str[len] && str[len] != '\n')
+                len++;
+            TheWidth *= len;
+        }
+    */
+    TheWidth = HUDStringWidthNew(str, size);
     vm->ReturnFloat(TheWidth);
 }
-
-
 
 // hud.solid_box(x, y, w, h, color)
 //
@@ -817,7 +813,7 @@ static void HD_get_average_color(coal::VM *vm, int argc)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    RGBAColor  col = tmp_img_data->AverageColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
+    RGBAColor col = tmp_img_data->AverageColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
                                                to_y ? *to_y : 1000000);
     rgb[0] = epi::GetRGBARed(col);
     rgb[1] = epi::GetRGBAGreen(col);
@@ -847,7 +843,7 @@ static void HD_get_lightest_color(coal::VM *vm, int argc)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    RGBAColor  col = tmp_img_data->LightestColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
+    RGBAColor col = tmp_img_data->LightestColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
                                                 to_y ? *to_y : 1000000);
     rgb[0] = epi::GetRGBARed(col);
     rgb[1] = epi::GetRGBAGreen(col);
@@ -877,7 +873,7 @@ static void HD_get_darkest_color(coal::VM *vm, int argc)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    RGBAColor  col = tmp_img_data->DarkestColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
+    RGBAColor col = tmp_img_data->DarkestColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
                                                to_y ? *to_y : 1000000);
     rgb[0] = epi::GetRGBARed(col);
     rgb[1] = epi::GetRGBAGreen(col);
@@ -907,7 +903,7 @@ static void HD_get_average_hue(coal::VM *vm, int argc)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    uint8_t   *temp_rgb     = new uint8_t[3];
+    uint8_t *temp_rgb = new uint8_t[3];
     tmp_img_data->AverageHue(temp_rgb, nullptr, from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
                              to_y ? *to_y : 1000000);
     rgb[0] = temp_rgb[0];
@@ -937,11 +933,11 @@ static void HD_get_average_top_border_color(coal::VM *vm, int argc)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    RGBAColor  col          = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, tmp_img_c->actual_height_ - 1,
-                                                         tmp_img_c->actual_height_);
-    rgb[0]                  = epi::GetRGBARed(col);
-    rgb[1]                  = epi::GetRGBAGreen(col);
-    rgb[2]                  = epi::GetRGBABlue(col);
+    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, tmp_img_c->actual_height_ - 1,
+                                               tmp_img_c->actual_height_);
+    rgb[0]        = epi::GetRGBARed(col);
+    rgb[1]        = epi::GetRGBAGreen(col);
+    rgb[2]        = epi::GetRGBABlue(col);
     delete tmp_img_data;
     vm->ReturnVector(rgb);
 }
@@ -962,10 +958,10 @@ static void HD_get_average_bottom_border_color(coal::VM *vm, int argc)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    RGBAColor  col          = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, 0, 1);
-    rgb[0]                  = epi::GetRGBARed(col);
-    rgb[1]                  = epi::GetRGBAGreen(col);
-    rgb[2]                  = epi::GetRGBABlue(col);
+    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, 0, 1);
+    rgb[0]        = epi::GetRGBARed(col);
+    rgb[1]        = epi::GetRGBAGreen(col);
+    rgb[2]        = epi::GetRGBABlue(col);
     delete tmp_img_data;
     vm->ReturnVector(rgb);
 }
@@ -1059,7 +1055,6 @@ static void HD_lookup_LDF(coal::VM *vm, int argc)
 
     vm->ReturnString(language[name]);
 }
-
 
 //------------------------------------------------------------------------
 // HUD Functions

@@ -2274,7 +2274,6 @@ static int Sector_info(lua_State *L)
     HMM_Vec3  rgb;
     RGBAColor tempcolor = ui_player_who->map_object_->subsector_->sector->properties.fog_color;
 
-
     rgb.R = -1;
     rgb.G = -1;
     rgb.B = -1;

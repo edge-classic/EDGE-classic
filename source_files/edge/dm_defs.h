@@ -212,9 +212,9 @@ constexpr uint16_t kOptionsMenu   = (0x110 + 33);
 constexpr uint16_t kQuickSave     = (0x110 + 34);
 constexpr uint16_t kEndGame       = (0x110 + 35);
 
-constexpr uint16_t kQuickLoad     = (0x110 + 37);
-constexpr uint16_t kQuitEdge      = (0x110 + 38);
-constexpr uint16_t kGammaToggle   = (0x110 + 39);
+constexpr uint16_t kQuickLoad   = (0x110 + 37);
+constexpr uint16_t kQuitEdge    = (0x110 + 38);
+constexpr uint16_t kGammaToggle = (0x110 + 39);
 
 // -KM- 1998/09/27 Analogue binding, added a fly axis
 constexpr uint8_t kAxisDisable   = 0;

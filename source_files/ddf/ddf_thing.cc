@@ -289,7 +289,7 @@ const DDFActionCode thing_actions[] = {{"NOTHING", nullptr, nullptr},
                                        {"BECOME", A_Become, DDFStateGetBecome},
                                        {"UNBECOME", A_UnBecome, nullptr},
                                        {"MORPH", A_Morph, DDFStateGetMorph}, // same as BECOME but resets health
-                                       {"UNMORPH", A_UnMorph, nullptr},       // same as UNBECOME but resets health
+                                       {"UNMORPH", A_UnMorph, nullptr},      // same as UNBECOME but resets health
 
                                        {"EXPLODE", A_Explode, nullptr},
                                        {"ACTIVATE_LINETYPE", A_ActivateLineType, DDFStateGetIntPair},
@@ -385,14 +385,19 @@ const DDFSpecialFlags armourtype_names[] = {
     {"PURPLE_ARMOUR", kArmourTypePurple, 0}, {"YELLOW_ARMOUR", kArmourTypeYellow, 0},
     {"RED_ARMOUR", kArmourTypeRed, 0},       {nullptr, 0, 0}};
 
-const DDFSpecialFlags powertype_names[] = {
-    {"POWERUP_INVULNERABLE", kPowerTypeInvulnerable, 0}, {"POWERUP_BARE_BERSERK", kPowerTypeBerserk, 0},
-    {"POWERUP_BERSERK", kPowerTypeBerserk, 0},           {"POWERUP_PARTINVIS", kPowerTypePartInvis, 0},
-    {"POWERUP_TRANSLUCENT", kPowerTypePartInvisTranslucent, 0},
-    {"POWERUP_ACIDSUIT", kPowerTypeAcidSuit, 0},         {"POWERUP_AUTOMAP", kPowerTypeAllMap, 0},
-    {"POWERUP_LIGHTGOGGLES", kPowerTypeInfrared, 0},     {"POWERUP_JETPACK", kPowerTypeJetpack, 0},
-    {"POWERUP_NIGHTVISION", kPowerTypeNightVision, 0},   {"POWERUP_SCUBA", kPowerTypeScuba, 0},
-    {"POWERUP_TIMESTOP", kPowerTypeTimeStop, 0},         {nullptr, 0, 0}};
+const DDFSpecialFlags powertype_names[] = {{"POWERUP_INVULNERABLE", kPowerTypeInvulnerable, 0},
+                                           {"POWERUP_BARE_BERSERK", kPowerTypeBerserk, 0},
+                                           {"POWERUP_BERSERK", kPowerTypeBerserk, 0},
+                                           {"POWERUP_PARTINVIS", kPowerTypePartInvis, 0},
+                                           {"POWERUP_TRANSLUCENT", kPowerTypePartInvisTranslucent, 0},
+                                           {"POWERUP_ACIDSUIT", kPowerTypeAcidSuit, 0},
+                                           {"POWERUP_AUTOMAP", kPowerTypeAllMap, 0},
+                                           {"POWERUP_LIGHTGOGGLES", kPowerTypeInfrared, 0},
+                                           {"POWERUP_JETPACK", kPowerTypeJetpack, 0},
+                                           {"POWERUP_NIGHTVISION", kPowerTypeNightVision, 0},
+                                           {"POWERUP_SCUBA", kPowerTypeScuba, 0},
+                                           {"POWERUP_TIMESTOP", kPowerTypeTimeStop, 0},
+                                           {nullptr, 0, 0}};
 
 const DDFSpecialFlags simplecond_names[] = {
     {"JUMPING", kConditionCheckTypeJumping, 0},     {"CROUCHING", kConditionCheckTypeCrouching, 0},
@@ -667,7 +672,7 @@ void ThingParseField(const char *field, const char *contents, int index, bool is
         return;
 
     if (DDFMainParseState((uint8_t *)dynamic_mobj, dynamic_mobj->state_grp_, field, contents, index, is_last,
-                           false /* is_weapon */, thing_starters, thing_actions))
+                          false /* is_weapon */, thing_starters, thing_actions))
         return;
 
     DDFWarnError("Unknown thing/attack command: %s\n", field);

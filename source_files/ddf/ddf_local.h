@@ -44,20 +44,11 @@ struct DDFCommandList
 };
 
 // NOTE: requires an instantiated base struct
-#define DDF_FIELD(name, base, field, parser)                                                                           \
-    {                                                                                                                  \
-        name, parser, ((char *)&base.field - (char *)&base), nullptr                                                   \
-    }
+#define DDF_FIELD(name, base, field, parser) {name, parser, ((char *)&base.field - (char *)&base), nullptr}
 
-#define DDF_SUB_LIST(name, base, field, subcomms)                                                                      \
-    {                                                                                                                  \
-        "*" name, nullptr, ((char *)&base.field - (char *)&base), subcomms                                             \
-    }
+#define DDF_SUB_LIST(name, base, field, subcomms) {"*" name, nullptr, ((char *)&base.field - (char *)&base), subcomms}
 
-#define DDF_STATE(name, redir, base, field)                                                                            \
-    {                                                                                                                  \
-        name, redir, ((char *)&base.field - (char *)&base)                                                             \
-    }
+#define DDF_STATE(name, redir, base, field) {name, redir, ((char *)&base.field - (char *)&base)}
 
 //
 // This structure passes the information needed to DDFMainReadFile, so that
@@ -218,7 +209,7 @@ void DDFMainRefAttack(const char *info, void *storage);
 void DDFDummyFunction(const char *info, void *storage);
 
 DDFCheckFlagResult DDFMainCheckSpecialFlag(const char *name, const DDFSpecialFlags *flag_set, int *flag_value,
-                                            bool allow_prefixes, bool allow_user);
+                                           bool allow_prefixes, bool allow_user);
 
 int DDFMainLookupDirector(const MapObjectDefinition *obj, const char *info);
 
@@ -285,8 +276,8 @@ void DDFStateGetSlope(const char *arg, State *cur_state);
 void DDFStateGetRGB(const char *arg, State *cur_state);
 
 bool DDFMainParseState(uint8_t *object, std::vector<StateRange> &group, const char *field, const char *contents,
-                        int index, bool is_last, bool is_weapon, const DDFStateStarter *starters,
-                        const DDFActionCode *actions);
+                       int index, bool is_last, bool is_weapon, const DDFStateStarter *starters,
+                       const DDFActionCode *actions);
 
 void DDFStateBeginRange(std::vector<StateRange> &group);
 void DDFStateFinishRange(std::vector<StateRange> &group);

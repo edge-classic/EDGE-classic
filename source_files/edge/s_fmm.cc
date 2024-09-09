@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
 //  EDGE FMMIDI Music Player
 //----------------------------------------------------------------------------
-// 
+//
 //  Copyright (c) 2023-2024  The EDGE Team.
-// 
+//
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 3
@@ -42,30 +42,30 @@ extern int  sound_device_frequency;
 // Should only be invoked when switching MIDI players
 void RestartFMM(void)
 {
-	int old_entry = entry_playing;
+    int old_entry = entry_playing;
 
-	StopMusic();
+    StopMusic();
 
-	ChangeMusic(old_entry, true); // Restart track that was kPlaying when switched
+    ChangeMusic(old_entry, true); // Restart track that was kPlaying when switched
 
-	return; // OK!
+    return;                       // OK!
 }
 
 static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
 {
-	const int16_t *s_end = src + len*2;
+    const int16_t *s_end = src + len * 2;
 
-	for (; src < s_end; src += 2)
-	{
-		// compute average of samples
-		*dest++ = ( (int)src[0] + (int)src[1] ) >> 1;
-	}
+    for (; src < s_end; src += 2)
+    {
+        // compute average of samples
+        *dest++ = ((int)src[0] + (int)src[1]) >> 1;
+    }
 }
 
 class FMMPlayer : public AbstractMusicPlayer
 {
-private:
-	private:
+  private:
+  private:
     enum status_
     {
         kNotLoaded,
@@ -81,302 +81,302 @@ private:
 
     int16_t *mono_buffer_;
 
-public:
-	FMMPlayer(uint8_t *data, int length, bool looping) : status_(kNotLoaded), looping_(looping)
-	{ 
-		mono_buffer_ = new int16_t[kMusicBuffer * 2];
-		SequencerInit(); 
-	}
+  public:
+    FMMPlayer(uint8_t *data, int length, bool looping) : status_(kNotLoaded), looping_(looping)
+    {
+        mono_buffer_ = new int16_t[kMusicBuffer * 2];
+        SequencerInit();
+    }
 
-	~FMMPlayer()
-	{
-		Close();
+    ~FMMPlayer()
+    {
+        Close();
 
-		if (mono_buffer_)
-			delete[] mono_buffer_;
-	}
+        if (mono_buffer_)
+            delete[] mono_buffer_;
+    }
 
-public:
+  public:
+    FMMSequencer               *fmm_sequencer_;
+    midisynth::synthesizer     *fmm_synth_;
+    midisynth::fm_note_factory *fmm_note_factory_;
 
-	FMMSequencer *fmm_sequencer_;
-	midisynth::synthesizer *fmm_synth_;
-	midisynth::fm_note_factory *fmm_note_factory_;
+    static void rtNoteOn(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity)
+    {
+        FMMPlayer *player = (FMMPlayer *)userdata;
+        player->fmm_synth_->note_on(channel, note, velocity);
+    }
 
-	static void rtNoteOn(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity)
-	{
-		FMMPlayer *player = (FMMPlayer *)userdata;
-		player->fmm_synth_->note_on(channel, note, velocity);
-	}
+    static void rtNoteOff(void *userdata, uint8_t channel, uint8_t note)
+    {
+        FMMPlayer *player = (FMMPlayer *)userdata;
+        player->fmm_synth_->note_off(channel, note, 0);
+    }
 
-	static void rtNoteOff(void *userdata, uint8_t channel, uint8_t note)
-	{
-		FMMPlayer *player = (FMMPlayer *)userdata;
-		player->fmm_synth_->note_off(channel, note, 0);
-	}
+    static void rtNoteAfterTouch(void *userdata, uint8_t channel, uint8_t note, uint8_t atVal)
+    {
+        FMMPlayer *player = (FMMPlayer *)userdata;
+        player->fmm_synth_->polyphonic_key_pressure(channel, note, atVal);
+    }
 
-	static void rtNoteAfterTouch(void *userdata, uint8_t channel, uint8_t note, uint8_t atVal)
-	{
-		FMMPlayer *player = (FMMPlayer *)userdata;
-		player->fmm_synth_->polyphonic_key_pressure(channel, note, atVal);
-	}
+    static void rtChannelAfterTouch(void *userdata, uint8_t channel, uint8_t atVal)
+    {
+        FMMPlayer *player = (FMMPlayer *)userdata;
+        player->fmm_synth_->channel_pressure(channel, atVal);
+    }
 
-	static void rtChannelAfterTouch(void *userdata, uint8_t channel, uint8_t atVal)
-	{
-		FMMPlayer *player = (FMMPlayer *)userdata;
-		player->fmm_synth_->channel_pressure(channel, atVal);
-	}
+    static void rtControllerChange(void *userdata, uint8_t channel, uint8_t type, uint8_t value)
+    {
+        FMMPlayer *player = (FMMPlayer *)userdata;
+        player->fmm_synth_->control_change(channel, type, value);
+    }
 
-	static void rtControllerChange(void *userdata, uint8_t channel, uint8_t type, uint8_t value)
-	{
-		FMMPlayer *player = (FMMPlayer *)userdata;
-		player->fmm_synth_->control_change(channel, type, value);
-	}
+    static void rtPatchChange(void *userdata, uint8_t channel, uint8_t patch)
+    {
+        FMMPlayer *player = (FMMPlayer *)userdata;
+        player->fmm_synth_->program_change(channel, patch);
+    }
 
-	static void rtPatchChange(void *userdata, uint8_t channel, uint8_t patch)
-	{
-		FMMPlayer *player = (FMMPlayer *)userdata;
-		player->fmm_synth_->program_change(channel, patch);
-	}
+    static void rtPitchBend(void *userdata, uint8_t channel, uint8_t msb, uint8_t lsb)
+    {
+        FMMPlayer *player = (FMMPlayer *)userdata;
+        player->fmm_synth_->pitch_bend_change(channel, (msb << 7) | lsb);
+    }
 
-	static void rtPitchBend(void *userdata, uint8_t channel, uint8_t msb, uint8_t lsb)
-	{
-		FMMPlayer *player = (FMMPlayer *)userdata;
-		player->fmm_synth_->pitch_bend_change(channel, (msb << 7) | lsb);
-	}
+    static void rtSysEx(void *userdata, const uint8_t *msg, size_t size)
+    {
+        FMMPlayer *player = (FMMPlayer *)userdata;
+        player->fmm_synth_->sysex_message(msg, size);
+    }
 
-	static void rtSysEx(void *userdata, const uint8_t *msg, size_t size)
-	{
-		FMMPlayer *player = (FMMPlayer *)userdata;
-		player->fmm_synth_->sysex_message(msg, size);
-	}
+    static void rtDeviceSwitch(void *userdata, size_t track, const char *data, size_t length)
+    {
+        (void)userdata;
+        (void)track;
+        (void)data;
+        (void)length;
+    }
 
-	static void rtDeviceSwitch(void *userdata, size_t track, const char *data, size_t length)
-	{
-		(void)userdata; (void)track; (void)data; (void)length;
-	}
+    static size_t rtCurrentDevice(void *userdata, size_t track)
+    {
+        (void)userdata;
+        (void)track;
+        return 0;
+    }
 
-	static size_t rtCurrentDevice(void *userdata, size_t track)
-	{
-		(void)userdata; (void)track;
-		return 0;
-	}
+    static void playSynth(void *userdata, uint8_t *stream, size_t length)
+    {
+        FMMPlayer *player = (FMMPlayer *)userdata;
+        player->fmm_synth_->synthesize(reinterpret_cast<int_least16_t *>(stream), length / 4, sound_device_frequency);
+    }
 
-	static void playSynth(void *userdata, uint8_t *stream, size_t length)
-	{
-		FMMPlayer *player = (FMMPlayer *)userdata;
-		player->fmm_synth_->synthesize(reinterpret_cast<int_least16_t*>(stream), length / 4,
-			sound_device_frequency);
-	}
+    void SequencerInit()
+    {
+        fmm_sequencer_ = new FMMSequencer;
+        fmm_interface_ = new FMMInterface;
+        memset(fmm_interface_, 0, sizeof(MidiRealTimeInterface));
 
-	void SequencerInit()
-	{
-		fmm_sequencer_ = new FMMSequencer;
-		fmm_interface_ = new FMMInterface;
-		memset(fmm_interface_, 0, sizeof(MidiRealTimeInterface));
+        fmm_interface_->rtUserData           = this;
+        fmm_interface_->rt_noteOn            = rtNoteOn;
+        fmm_interface_->rt_noteOff           = rtNoteOff;
+        fmm_interface_->rt_noteAfterTouch    = rtNoteAfterTouch;
+        fmm_interface_->rt_channelAfterTouch = rtChannelAfterTouch;
+        fmm_interface_->rt_controllerChange  = rtControllerChange;
+        fmm_interface_->rt_patchChange       = rtPatchChange;
+        fmm_interface_->rt_pitchBend         = rtPitchBend;
+        fmm_interface_->rt_systemExclusive   = rtSysEx;
 
-		fmm_interface_->rtUserData = this;
-		fmm_interface_->rt_noteOn  = rtNoteOn;
-		fmm_interface_->rt_noteOff = rtNoteOff;
-		fmm_interface_->rt_noteAfterTouch = rtNoteAfterTouch;
-		fmm_interface_->rt_channelAfterTouch = rtChannelAfterTouch;
-		fmm_interface_->rt_controllerChange = rtControllerChange;
-		fmm_interface_->rt_patchChange = rtPatchChange;
-		fmm_interface_->rt_pitchBend = rtPitchBend;
-		fmm_interface_->rt_systemExclusive = rtSysEx;
+        fmm_interface_->onPcmRender          = playSynth;
+        fmm_interface_->onPcmRender_userdata = this;
 
-		fmm_interface_->onPcmRender = playSynth;
-		fmm_interface_->onPcmRender_userdata = this;
+        fmm_interface_->pcmSampleRate = sound_device_frequency;
+        fmm_interface_->pcmFrameSize  = 2 /*channels*/ * 2 /*size of one sample*/;
 
-		fmm_interface_->pcmSampleRate = sound_device_frequency;
-		fmm_interface_->pcmFrameSize = 2 /*channels*/ * 2 /*size of one sample*/;
+        fmm_interface_->rt_deviceSwitch  = rtDeviceSwitch;
+        fmm_interface_->rt_currentDevice = rtCurrentDevice;
 
-		fmm_interface_->rt_deviceSwitch = rtDeviceSwitch;
-		fmm_interface_->rt_currentDevice = rtCurrentDevice;
+        fmm_sequencer_->SetInterface(fmm_interface_);
+    }
 
-		fmm_sequencer_->SetInterface(fmm_interface_);
-	}
+    bool LoadTrack(const uint8_t *data, int length)
+    {
+        return fmm_sequencer_->LoadMidi(data, length);
+    }
 
-	bool LoadTrack(const uint8_t *data, int length)
-	{
-		return fmm_sequencer_->LoadMidi(data, length);
-	}
+    void Close(void)
+    {
+        if (status_ == kNotLoaded)
+            return;
 
-	void Close(void)
-	{
-		if (status_ == kNotLoaded)
-			return;
+        // Stop playback
+        if (status_ != kStopped)
+            Stop();
 
-		// Stop playback
-		if (status_ != kStopped)
-		  Stop();
-	
-		if (fmm_sequencer_)
-		{
-			delete fmm_sequencer_;
-			fmm_sequencer_ = nullptr;
-		}
-		if (fmm_interface_)
-		{
-			delete fmm_interface_;
-			fmm_interface_ = nullptr;
-		}
-		if (fmm_note_factory_)
-		{
-			delete fmm_note_factory_;
-			fmm_note_factory_ = nullptr;
-		}
-		if (fmm_synth_)
-		{
-			delete fmm_synth_;
-			fmm_synth_ = nullptr;
-		}
+        if (fmm_sequencer_)
+        {
+            delete fmm_sequencer_;
+            fmm_sequencer_ = nullptr;
+        }
+        if (fmm_interface_)
+        {
+            delete fmm_interface_;
+            fmm_interface_ = nullptr;
+        }
+        if (fmm_note_factory_)
+        {
+            delete fmm_note_factory_;
+            fmm_note_factory_ = nullptr;
+        }
+        if (fmm_synth_)
+        {
+            delete fmm_synth_;
+            fmm_synth_ = nullptr;
+        }
 
-		status_ = kNotLoaded;
-	}
+        status_ = kNotLoaded;
+    }
 
-	void Play(bool loop)
-	{
-		if (! (status_ == kNotLoaded || status_ == kStopped))
-			return;
+    void Play(bool loop)
+    {
+        if (!(status_ == kNotLoaded || status_ == kStopped))
+            return;
 
-		status_ = kPlaying;
-		looping_ = loop;
+        status_  = kPlaying;
+        looping_ = loop;
 
-		// Load up initial buffer data
-		Ticker();
-	}
+        // Load up initial buffer data
+        Ticker();
+    }
 
-	void Stop(void)
-	{
-		if (! (status_ == kPlaying || status_ == kPaused))
-			return;
+    void Stop(void)
+    {
+        if (!(status_ == kPlaying || status_ == kPaused))
+            return;
 
-		fmm_synth_->all_sound_off_immediately();
+        fmm_synth_->all_sound_off_immediately();
 
-		SoundQueueStop();
+        SoundQueueStop();
 
-		status_ = kStopped;
-	}
+        status_ = kStopped;
+    }
 
-	void Pause(void)
-	{
-		if (status_ != kPlaying)
-			return;
+    void Pause(void)
+    {
+        if (status_ != kPlaying)
+            return;
 
-		fmm_synth_->all_sound_off();
+        fmm_synth_->all_sound_off();
 
-		status_ = kPaused;
-	}
+        status_ = kPaused;
+    }
 
-	void Resume(void)
-	{
-		if (status_ != kPaused)
-			return;
+    void Resume(void)
+    {
+        if (status_ != kPaused)
+            return;
 
-		status_ = kPlaying;
-	}
+        status_ = kPlaying;
+    }
 
-	void Ticker(void)
-	{
-		while (status_ == kPlaying && !pc_speaker_mode)
-		{
-				SoundData *buf =
-						SoundQueueGetFreeBuffer(kMusicBuffer, sound_device_stereo ? kMixInterleaved : kMixMono);
+    void Ticker(void)
+    {
+        while (status_ == kPlaying && !pc_speaker_mode)
+        {
+            SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer, sound_device_stereo ? kMixInterleaved : kMixMono);
 
-				if (!buf)
-						break;
+            if (!buf)
+                break;
 
-				if (StreamIntoBuffer(buf))
-				{
-						SoundQueueAddBuffer(buf, sound_device_frequency);
-				}
-				else
-				{
-						// finished playing
-						SoundQueueReturnBuffer(buf);
+            if (StreamIntoBuffer(buf))
+            {
+                SoundQueueAddBuffer(buf, sound_device_frequency);
+            }
+            else
+            {
+                // finished playing
+                SoundQueueReturnBuffer(buf);
 
-						Stop();
-				}
-		}
-	}
+                Stop();
+            }
+        }
+    }
 
-private:
+  private:
+    bool StreamIntoBuffer(SoundData *buf)
+    {
+        int16_t *data_buf;
 
-	bool StreamIntoBuffer(SoundData *buf)
-	{
-		int16_t *data_buf;
+        bool song_done = false;
 
-		bool song_done = false;
+        if (!sound_device_stereo)
+            data_buf = mono_buffer_;
+        else
+            data_buf = buf->data_left_;
 
-		if (!sound_device_stereo)
-			data_buf = mono_buffer_;
-		else
-			data_buf = buf->data_left_;
+        int played = fmm_sequencer_->PlayStream((uint8_t *)data_buf, kMusicBuffer);
 
-		int played = fmm_sequencer_->PlayStream((uint8_t *)data_buf, kMusicBuffer);
+        if (fmm_sequencer_->PositionAtEnd())
+            song_done = true;
 
-		if (fmm_sequencer_->PositionAtEnd())
-			song_done = true;
+        buf->length_ = played / 4;
 
-		buf->length_ = played / 4;
+        if (!sound_device_stereo)
+            ConvertToMono(buf->data_left_, mono_buffer_, buf->length_);
 
-		if (!sound_device_stereo)
-			ConvertToMono(buf->data_left_, mono_buffer_, buf->length_);
+        if (song_done) /* EOF */
+        {
+            if (!looping_)
+                return false;
+            fmm_sequencer_->Rewind();
+            return true;
+        }
 
-		if (song_done)  /* EOF */
-		{
-			if (!looping_)
-				return false;
-			fmm_sequencer_->Rewind();
-			return true;
-		}
-
-    	return true;
-	}
+        return true;
+    }
 };
 
 AbstractMusicPlayer *PlayFMMMusic(uint8_t *data, int length, bool loop)
 {
-	FMMPlayer *player = new FMMPlayer(data, length, loop);
+    FMMPlayer *player = new FMMPlayer(data, length, loop);
 
-	if (!player)
-	{
-		LogDebug("FMMIDI player: error initializing!\n");
-		delete[] data;
-		return nullptr;
-	}
+    if (!player)
+    {
+        LogDebug("FMMIDI player: error initializing!\n");
+        delete[] data;
+        return nullptr;
+    }
 
-	player->fmm_note_factory_ = new midisynth::fm_note_factory;
-	if (!player->fmm_note_factory_)
-	{
-		LogDebug("FMMIDI player: error initializing!\n");
-		delete[] data;
-		delete player;
-		return nullptr;
-	}
+    player->fmm_note_factory_ = new midisynth::fm_note_factory;
+    if (!player->fmm_note_factory_)
+    {
+        LogDebug("FMMIDI player: error initializing!\n");
+        delete[] data;
+        delete player;
+        return nullptr;
+    }
 
-	player->fmm_synth_ = new midisynth::synthesizer(player->fmm_note_factory_);
-	if (!player->fmm_synth_)
-	{
-		LogDebug("FMMIDI player: error initializing!\n");
-		delete[] data;
-		delete player;
-		return nullptr;
-	}
+    player->fmm_synth_ = new midisynth::synthesizer(player->fmm_note_factory_);
+    if (!player->fmm_synth_)
+    {
+        LogDebug("FMMIDI player: error initializing!\n");
+        delete[] data;
+        delete player;
+        return nullptr;
+    }
 
-	if (!player->LoadTrack(data, length)) //Lobo: quietly log it instead of completely exiting EDGE
-	{
-		LogDebug("FMMIDI player: failed to load MIDI file!\n");
-		delete[] data;
-		delete player;
-		return nullptr;
-	}
+    if (!player->LoadTrack(data, length)) // Lobo: quietly log it instead of completely exiting EDGE
+    {
+        LogDebug("FMMIDI player: failed to load MIDI file!\n");
+        delete[] data;
+        delete player;
+        return nullptr;
+    }
 
-	delete[] data;
+    delete[] data;
 
-	player->Play(loop);
+    player->Play(loop);
 
-	return player;
+    return player;
 }
 
 //--- editor settings ---

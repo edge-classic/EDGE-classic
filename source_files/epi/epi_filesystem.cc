@@ -40,7 +40,7 @@
 namespace epi
 {
 
-#ifdef _WIN32                                    // Windows API
+#ifdef _WIN32                                   // Windows API
 static inline bool IsDirectorySeparator(const char c)
 {
     return (c == '\\' || c == '/' || c == ':'); // Kester added ':'
@@ -417,10 +417,12 @@ bool ReadDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir, const cha
     return true;
 }
 static std::vector<DirectoryEntry> *nftw_fsd = nullptr;
-static int WalkDirectoryCallback(const char *filename, const struct stat *stat_pointer, int file_flags, FTW *walk_pointer)
+static int WalkDirectoryCallback(const char *filename, const struct stat *stat_pointer, int file_flags,
+                                 FTW *walk_pointer)
 {
     EPI_ASSERT(nftw_fsd);
-    if (file_flags == FTW_F) // The documentation for nftw refers to these as flags but I think it can only be one of them - Dasho
+    if (file_flags ==
+        FTW_F) // The documentation for nftw refers to these as flags but I think it can only be one of them - Dasho
     {
         epi::DirectoryEntry new_entry;
         new_entry.name   = filename;
@@ -437,7 +439,7 @@ bool WalkDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir)
 
     nftw_fsd = &fsd;
 
-    int result = nftw(dir.c_str(), WalkDirectoryCallback, 10, (FTW_DEPTH|FTW_MOUNT|FTW_PHYS));
+    int result = nftw(dir.c_str(), WalkDirectoryCallback, 10, (FTW_DEPTH | FTW_MOUNT | FTW_PHYS));
 
     nftw_fsd = nullptr;
 
@@ -576,7 +578,7 @@ std::string GetDirectory(std::string_view path)
     {
         if (IsDirectorySeparator(path[p]))
         {
-            directory = path.substr(0, p+1);
+            directory = path.substr(0, p + 1);
             break;
         }
     }

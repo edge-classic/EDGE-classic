@@ -225,18 +225,20 @@ void DisplayScriptTips(void)
             HUDDrawImage(x, y, current->tip_graphic);
         else
         {
-            const Colormap *Dropshadow_colmap = rts_tip_style->definition_->text_[StyleDefinition::kTextSectionText].dropshadow_colmap_;
-            if (Dropshadow_colmap) //we want a dropshadow
+            const Colormap *Dropshadow_colmap =
+                rts_tip_style->definition_->text_[StyleDefinition::kTextSectionText].dropshadow_colmap_;
+            if (Dropshadow_colmap) // we want a dropshadow
             {
-                float Dropshadow_Offset = rts_tip_style->definition_->text_[StyleDefinition::kTextSectionText].dropshadow_offset_;
-                Dropshadow_Offset *= rts_tip_style->definition_->text_[StyleDefinition::kTextSectionText].scale_ * current->scale;
+                float Dropshadow_Offset =
+                    rts_tip_style->definition_->text_[StyleDefinition::kTextSectionText].dropshadow_offset_;
+                Dropshadow_Offset *=
+                    rts_tip_style->definition_->text_[StyleDefinition::kTextSectionText].scale_ * current->scale;
                 HUDSetTextColor(GetFontColor(Dropshadow_colmap));
                 HUDDrawText(x + Dropshadow_Offset, y + Dropshadow_Offset, current->tip_text);
                 HUDSetTextColor(current->color);
             }
             HUDDrawText(x, y, current->tip_text);
         }
-            
 
         HUDSetAlignment();
         HUDSetAlpha();
@@ -960,7 +962,7 @@ void ScriptFogSector(RADScriptTrigger *R, void *param)
 void ScriptEnableScript(RADScriptTrigger *R, void *param)
 {
     ScriptEnablerParameter *t = (ScriptEnablerParameter *)param;
-    RADScriptTrigger   *other;
+    RADScriptTrigger       *other;
 
     // Enable/Disable Scripts
     if (t->script_name)
@@ -1107,7 +1109,7 @@ void ScriptJumpOn(RADScriptTrigger *R, void *param)
         return;
 
     RADScriptState *cache_state;
-    char               *label = nullptr;
+    char           *label = nullptr;
 
     if (R->menu_result > 0)
     {

@@ -1078,9 +1078,11 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
 
     bool tilt = is_weapon || (mo->flags_ & kMapObjectFlagMissile) || (mo->hyper_flags_ & kHyperFlagForceModelTilt);
 
-    if (uncapped_frames.d_ && !paused && !menu_active && !rts_menu_active && (is_weapon || (!time_stop_active && !erraticism_active)))
+    if (uncapped_frames.d_ && !paused && !menu_active && !rts_menu_active &&
+        (is_weapon || (!time_stop_active && !erraticism_active)))
     {
-        BAMAngleToMatrix(tilt ? ~epi::BAMInterpolate(mo->old_vertical_angle_, mo->vertical_angle_, fractional_tic) : 0, &data.mouselook_x_matrix_, &data.mouselook_z_matrix_);
+        BAMAngleToMatrix(tilt ? ~epi::BAMInterpolate(mo->old_vertical_angle_, mo->vertical_angle_, fractional_tic) : 0,
+                         &data.mouselook_x_matrix_, &data.mouselook_z_matrix_);
         BAMAngle ang = epi::BAMInterpolate(mo->old_angle_, mo->angle_, fractional_tic) + rotation;
         MirrorAngle(ang);
         BAMAngleToMatrix(~ang, &data.rotation_x_matrix_, &data.rotation_y_matrix_);
@@ -1127,7 +1129,7 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
     {
         skin_tex = ImageCache(skin_img, false,
                               render_view_effect_colormap ? render_view_effect_colormap
-                              : is_weapon                ? nullptr
+                              : is_weapon                 ? nullptr
                                                           : mo->info_->palremap_);
 
         data.image_right_ = skin_img->Right();

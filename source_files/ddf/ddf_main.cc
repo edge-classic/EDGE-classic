@@ -1134,7 +1134,7 @@ bool DDFMainParseField(const DDFCommandList *commands, const char *field, const 
             {
                 // recursively parse the sub-field
                 return DDFMainParseField(commands[i].sub_comms, field + len + 1, contents,
-                                          obj_base + commands[i].offset);
+                                         obj_base + commands[i].offset);
             }
 
             continue;
@@ -1164,8 +1164,8 @@ void DDFMainGetLumpName(const char *info, void *storage)
 
     if (strlen(info) > 8)
         DDFDebug("Name %s too long for a lump; this is acceptable if referring to a "
-                  "pack file or other special value.\n",
-                  info);
+                 "pack file or other special value.\n",
+                 info);
 
     (*LN) = info;
 }
@@ -1541,7 +1541,7 @@ static int FindSpecialFlag(const char *prefix, const char *name, const DDFSpecia
 }
 
 DDFCheckFlagResult DDFMainCheckSpecialFlag(const char *name, const DDFSpecialFlags *flag_set, int *flag_value,
-                                            bool allow_prefixes, bool allow_user)
+                                           bool allow_prefixes, bool allow_user)
 {
     int index;
     int negate = 0;

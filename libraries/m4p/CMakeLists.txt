@@ -21,3 +21,5 @@ add_library(
   pmplay.c
   snd_masm.c
 )
+
+target_include_directories(m4p PUBLIC ./)

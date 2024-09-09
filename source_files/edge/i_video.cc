@@ -19,10 +19,12 @@
 #include "i_video.h"
 
 #ifdef _WIN32
+// clang-format off
 #include <math.h>
 #include <windows.h>
 #include <dwmapi.h>
 #include <VersionHelpers.h>
+// clang-format on
 #endif
 
 #include "edge_profiling.h"
@@ -405,8 +407,8 @@ static void SwapBuffers(void)
     EDGE_ZoneScoped;
 
 #ifdef _WIN32
-    bool useDwmFlush = false;
-    int swapInterval = SDL_GL_GetSwapInterval();
+    bool useDwmFlush  = false;
+    int  swapInterval = SDL_GL_GetSwapInterval();
 
     // If user manually disables vsync, respect that and don't try to check for/execute DwmFlush
     if (vsync.d_ > 0)
@@ -414,14 +416,14 @@ static void SwapBuffers(void)
         BOOL compositionEnabled = IsWindows8OrGreater();
         if (compositionEnabled || (SUCCEEDED(DwmIsCompositionEnabled(&compositionEnabled)) && compositionEnabled))
         {
-            DWM_TIMING_INFO info = {};
-            info.cbSize = sizeof(DWM_TIMING_INFO);
+            DWM_TIMING_INFO info  = {};
+            info.cbSize           = sizeof(DWM_TIMING_INFO);
             double dwmRefreshRate = 0;
             if (SUCCEEDED(DwmGetCompositionTimingInfo(nullptr, &info)))
                 dwmRefreshRate = (double)info.rateRefresh.uiNumerator / (double)info.rateRefresh.uiDenominator;
 
-            SDL_DisplayMode dmode = {};
-            int displayindex = SDL_GetWindowDisplayIndex(program_window);
+            SDL_DisplayMode dmode        = {};
+            int             displayindex = SDL_GetWindowDisplayIndex(program_window);
 
             if (displayindex >= 0)
                 SDL_GetCurrentDisplayMode(displayindex, &dmode);

@@ -35,8 +35,8 @@ struct RADScriptTrigger;
 
 struct RADScriptParameter
 {
-    RADScriptParameter(){};
-    virtual ~RADScriptParameter(){};
+    RADScriptParameter() {};
+    virtual ~RADScriptParameter() {};
 };
 
 struct ScriptWeaponParameter : public RADScriptParameter
@@ -79,24 +79,24 @@ struct ScriptTipProperties : public RADScriptParameter
 {
     ScriptTipProperties()
     {
-        slot_num = -1;
-        x_pos = -1;
-        y_pos = -1;
-        left_just = -1;
-        color_name = nullptr;
+        slot_num     = -1;
+        x_pos        = -1;
+        y_pos        = -1;
+        left_just    = -1;
+        color_name   = nullptr;
         translucency = -1.0f;
-        time = 0;
+        time         = 0;
     }
 
     ScriptTipProperties(int slot, float x, float y, int just, const char *color, float trans, int t)
     {
-        slot_num = slot;
-        x_pos = x;
-        y_pos = y;
-        left_just = just;
-        color_name = color;
+        slot_num     = slot;
+        x_pos        = x;
+        y_pos        = y;
+        left_just    = just;
+        color_name   = color;
         translucency = trans;
-        time = t;
+        time         = t;
     }
 
     ~ScriptTipProperties()

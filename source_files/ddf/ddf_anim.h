@@ -24,7 +24,7 @@ class AnimationDefinition
 {
   public:
     AnimationDefinition();
-    ~AnimationDefinition(){};
+    ~AnimationDefinition() {};
 
   public:
     void Default(void);

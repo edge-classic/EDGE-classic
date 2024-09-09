@@ -24,7 +24,7 @@
 #include "r_image.h"
 #include "stb_truetype.h"
 
-int  StringLines(std::string_view str);
+int StringLines(std::string_view str);
 
 class FontDefinition;
 

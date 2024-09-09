@@ -167,7 +167,7 @@ void ChangeSwitchTexture(Line *line, bool useAgain, LineSpecial specials, bool n
                 break;
             }
         } // it.IsValid() - switchdefs
-    }     // j < total_level_lines
+    } // j < total_level_lines
 }
 
 #undef EDGE_CHECK_SWITCH

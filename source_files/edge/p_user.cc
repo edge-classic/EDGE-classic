@@ -54,10 +54,10 @@ EDGE_DEFINE_CONSOLE_VARIABLE(view_bobbing, "0", kConsoleVariableFlagArchive)
 
 float room_area;
 
-static constexpr float    kMaximumBob       = 16.0f;
-static constexpr uint8_t  kZoomAngleDivisor = 4;
-static const BAMAngle kMouseLookLimit   = epi::BAMFromDegrees(75);
-static constexpr float    kCrouchSlowdown   = 0.5f;
+static constexpr float   kMaximumBob       = 16.0f;
+static constexpr uint8_t kZoomAngleDivisor = 4;
+static const BAMAngle    kMouseLookLimit   = epi::BAMFromDegrees(75);
+static constexpr float   kCrouchSlowdown   = 0.5f;
 
 static SoundEffect *sfx_jpidle;
 static SoundEffect *sfx_jpmove;
@@ -416,8 +416,7 @@ static void MovePlayer(Player *player)
     {
         if (!jumping && !crouching && !swimming && !flying && onground && !onladder)
         {
-            PlayerJump(player, player->map_object_->info_->jumpheight_ / 1.4f,
-                        player->map_object_->info_->jump_delay_);
+            PlayerJump(player, player->map_object_->info_->jumpheight_ / 1.4f, player->map_object_->info_->jump_delay_);
         }
     }
 
@@ -429,7 +428,7 @@ static void MovePlayer(Player *player)
     {
         if (mo->height_ > mo->info_->crouchheight_)
         {
-            mo->height_ = HMM_MAX(mo->height_ - 2.0f, mo->info_->crouchheight_);
+            mo->height_                     = HMM_MAX(mo->height_ - 2.0f, mo->info_->crouchheight_);
             mo->player_->delta_view_height_ = -1.0f;
         }
     }
@@ -532,8 +531,7 @@ static void DeathThink(Player *player)
                 delta_s = (BAMAngle)(0 - (BAMAngle)(0 - delta_s) / 5);
 
             if (delta_s > (kBAMAngle5 / 2) && delta_s < (BAMAngle)(0 - kBAMAngle5 / 2))
-                delta_s =
-                    (delta_s < kBAMAngle180) ? (kBAMAngle5 / 2) : (BAMAngle)(0 - kBAMAngle5 / 2);
+                delta_s = (delta_s < kBAMAngle180) ? (kBAMAngle5 / 2) : (BAMAngle)(0 - kBAMAngle5 / 2);
 
             player->map_object_->angle_ += delta;
             player->map_object_->vertical_angle_ += delta_s;
@@ -591,7 +589,8 @@ static void UpdatePowerups(Player *player)
 
     if (player->powers_[kPowerTypePartInvisTranslucent] > 0)
     {
-        if (player->powers_[kPowerTypePartInvisTranslucent] >= 128 || fmod(player->powers_[kPowerTypePartInvisTranslucent], 16) >= 8)
+        if (player->powers_[kPowerTypePartInvisTranslucent] >= 128 ||
+            fmod(player->powers_[kPowerTypePartInvisTranslucent], 16) >= 8)
             player->map_object_->flags_ |= kMapObjectFlagFuzzy;
         else
             player->map_object_->flags_ &= ~kMapObjectFlagFuzzy;
@@ -706,11 +705,11 @@ bool PlayerThink(Player *player)
 
     EPI_ASSERT(player->map_object_);
 
-    player->map_object_->interpolate_ = true;
-    player->map_object_->old_x_ = player->map_object_->x;
-    player->map_object_->old_y_ = player->map_object_->y;
-    player->map_object_->old_z_ = player->map_object_->z;
-    player->map_object_->old_angle_ = player->map_object_->angle_;
+    player->map_object_->interpolate_        = true;
+    player->map_object_->old_x_              = player->map_object_->x;
+    player->map_object_->old_y_              = player->map_object_->y;
+    player->map_object_->old_z_              = player->map_object_->z;
+    player->map_object_->old_angle_          = player->map_object_->angle_;
     player->map_object_->old_vertical_angle_ = player->map_object_->vertical_angle_;
 
     player->old_view_z_ = player->view_z_;

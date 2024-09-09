@@ -343,10 +343,8 @@ static constexpr uint8_t kOptionMenuNetworkHostPosition = 13;
 
 static OptionMenuItem mainoptions[] = {
     {kOptionMenuItemTypeFunction, "MenuBinding", nullptr, 0, nullptr, OptionMenuKeyboardOptions, "Controls"},
-    {kOptionMenuItemTypeFunction, "MenuMouse", nullptr, 0, nullptr, OptionMenuAnalogueOptions,
-     "AnalogueOptions"},
-    {kOptionMenuItemTypeFunction, "MenuGameplay", nullptr, 0, nullptr, OptionMenuGameplayOptions,
-     "GameplayOptions"},
+    {kOptionMenuItemTypeFunction, "MenuMouse", nullptr, 0, nullptr, OptionMenuAnalogueOptions, "AnalogueOptions"},
+    {kOptionMenuItemTypeFunction, "MenuGameplay", nullptr, 0, nullptr, OptionMenuGameplayOptions, "GameplayOptions"},
     {kOptionMenuItemTypeFunction, "MenuPerformance", nullptr, 0, nullptr, OptionMenuPerformanceOptions,
      "PerformanceOptions"},
     {kOptionMenuItemTypeFunction, "MenuAccessibility", nullptr, 0, nullptr, OptionMenuAccessibilityOptions,
@@ -386,7 +384,8 @@ static OptionMenuItem vidoptions[] = {
      &sector_brightness_correction.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &sector_brightness_correction},
     {kOptionMenuItemTypeBoolean, "Lighting Mode", "Indexed/Flat", 2, &force_flat_lighting.d_,
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &force_flat_lighting},
-    {kOptionMenuItemTypeSwitch, "Mipmapping", "Off/Bilinear/Trilinear",  3, &image_mipmapping, OptionMenuChangeMipMap, nullptr},
+    {kOptionMenuItemTypeSwitch, "Mipmapping", "Off/Bilinear/Trilinear", 3, &image_mipmapping, OptionMenuChangeMipMap,
+     nullptr},
     {kOptionMenuItemTypeSwitch, "Smoothing", YesNo, 2, &image_smoothing, OptionMenuChangeMipMap, nullptr},
     {kOptionMenuItemTypeSwitch, "Upscale Textures", "Off/UI Only/UI & Sprites/All", 4, &hq2x_scaling,
      OptionMenuChangeMipMap, "Only affects paletted (Doom format) textures"},
@@ -404,8 +403,7 @@ static OptionMenuItem vidoptions[] = {
      kTotalScreenWipeTypes, &wipe_method, nullptr, nullptr},
 #endif
     {kOptionMenuItemTypeSwitch, "Animated Liquid Type", "Vanilla/SMMU/SMMU+Swirl/Parallax", 4, &swirling_flats, nullptr,
-     nullptr}
-};
+     nullptr}};
 
 static OptionMenuDefinition video_optmenu = {
     vidoptions,           sizeof(vidoptions) / sizeof(OptionMenuItem), &options_menu_default_style, 150, 77, 0, "",
@@ -419,17 +417,17 @@ static OptionMenuDefinition video_optmenu = {
 static OptionMenuItem uioptions[] = {
     {kOptionMenuItemTypeBoolean, language["ENDOOMOnQuit"], YesNo, 2, &show_endoom.d_,
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &show_endoom},
-     {kOptionMenuItemTypeBoolean, "Confirm Quickloads", YesNo, 2, &confirm_quickload.d_,
+    {kOptionMenuItemTypeBoolean, "Confirm Quickloads", YesNo, 2, &confirm_quickload.d_,
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &confirm_quickload},
-     {kOptionMenuItemTypeBoolean, "Confirm Quicksaves", YesNo, 2, &confirm_quicksave.d_,
+    {kOptionMenuItemTypeBoolean, "Confirm Quicksaves", YesNo, 2, &confirm_quicksave.d_,
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &confirm_quicksave},
     {kOptionMenuItemTypeBoolean, "Map Rotation", YesNo, 2, &rotate_map, nullptr, nullptr},
     {kOptionMenuItemTypeBoolean, "Obituary Messages", YesNo, 2, &show_obituaries, nullptr, nullptr},
     {kOptionMenuItemTypeBoolean, "Screenshot Format", "JPEG/PNG", 2, &png_screenshots, nullptr, nullptr},
     {kOptionMenuItemTypeBoolean, "Skip Startup Movies", YesNo, 2, &skip_intros.d_,
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &skip_intros},
-    {kOptionMenuItemTypeSwitch, "Max Pickup Messages", "1/2/3/4", 4,
-     &maximum_pickup_messages.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &maximum_pickup_messages},
+    {kOptionMenuItemTypeSwitch, "Max Pickup Messages", "1/2/3/4", 4, &maximum_pickup_messages.d_,
+     OptionMenuUpdateConsoleVariableFromInt, nullptr, &maximum_pickup_messages},
     {kOptionMenuItemTypeSwitch, "Crosshair", "None/Dot/Angle/Plus/Spiked/Thin/Cross/Carat/Circle/Double", 10,
      &crosshair_style.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &crosshair_style},
     {kOptionMenuItemTypeSwitch, "Crosshair Color", "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange", 8,
@@ -439,7 +437,7 @@ static OptionMenuItem uioptions[] = {
 };
 
 static OptionMenuDefinition ui_optmenu = {
-    uioptions,           sizeof(uioptions) / sizeof(OptionMenuItem), &options_menu_default_style, 150, 77, 0, "",
+    uioptions,         sizeof(uioptions) / sizeof(OptionMenuItem), &options_menu_default_style, 150, 77, 0, "",
     language["MenuUI"]};
 
 //
@@ -572,7 +570,9 @@ static OptionMenuItem playoptions[] = {
 
     {kOptionMenuItemTypeBoolean, "Mouse Look", YesNo, 2, &global_flags.mouselook, OptionMenuChangeMLook, nullptr},
 
-    {kOptionMenuItemTypeSwitch, "Aim Assist", "Off/Vertical/Vertical+Snap To/Vertical+Horizontal/Vertical+Horizontal+Snap To", 5, &global_flags.autoaim, OptionMenuChangeAutoAim, "\"Off\" not recommended when mouselook is disabled"},
+    {kOptionMenuItemTypeSwitch, "Aim Assist",
+     "Off/Vertical/Vertical+Snap To/Vertical+Horizontal/Vertical+Horizontal+Snap To", 5, &global_flags.autoaim,
+     OptionMenuChangeAutoAim, "\"Off\" not recommended when mouselook is disabled"},
 
     {kOptionMenuItemTypeBoolean, "Jumping", YesNo, 2, &global_flags.jump, OptionMenuChangeJumping, nullptr},
 
@@ -630,8 +630,8 @@ static OptionMenuItem perfoptions[] = {
     {kOptionMenuItemTypeBoolean, "Draw Distance Culling", YesNo, 2, &draw_culling.d_,
      OptionMenuUpdateConsoleVariableFromInt, "Sector/Level Fog will be disabled when this is On", &draw_culling},
     {kOptionMenuItemTypeSlider, "Maximum Draw Distance", nullptr, 0, &draw_culling_distance.f_,
-     OptionMenuUpdateConsoleVariableFromFloat, "Only effective when Draw Distance Culling is On", &draw_culling_distance, 200.0f,
-     1000.0f, 8000.0f, "%g Units"},
+     OptionMenuUpdateConsoleVariableFromFloat, "Only effective when Draw Distance Culling is On",
+     &draw_culling_distance, 200.0f, 1000.0f, 8000.0f, "%g Units"},
     {kOptionMenuItemTypeSwitch, "Outdoor Culling Fog Color", "Match Sky/White/Grey/Black", 4, &cull_fog_color.d_,
      OptionMenuUpdateConsoleVariableFromInt, "Only effective when Draw Distance Culling is On", &cull_fog_color},
     {kOptionMenuItemTypeBoolean, "Slow Thinkers Over Distance", YesNo, 2, &distance_cull_thinkers.d_,
@@ -896,8 +896,8 @@ static OptionMenuDefinition program_optmenu2 = {program_keyconfig2,
 static constexpr uint8_t kTotalKeyMenus = 9;
 
 static OptionMenuDefinition *all_key_menus[kTotalKeyMenus] = {&movement_optmenu,  &attack_optmenu,   &look_optmenu,
-                                                             &otherkey_optmenu,  &weapon_optmenu,   &automap_optmenu,
-                                                             &inventory_optmenu, &program_optmenu1, &program_optmenu2};
+                                                              &otherkey_optmenu,  &weapon_optmenu,   &automap_optmenu,
+                                                              &inventory_optmenu, &program_optmenu1, &program_optmenu2};
 
 static char keystring1[] = "Enter/A Button to change, Backspace/Back Button to clear";
 static char keystring2[] = "Press a key for this action";
@@ -912,13 +912,13 @@ void OptionMenuCheckNetworkGame(void)
 {
     if (game_state >= kGameStateLevel)
     {
-        mainoptions[kOptionMenuNetworkHostPosition + 0].name = language["MainEndBotMatch"];
+        mainoptions[kOptionMenuNetworkHostPosition + 0].name    = language["MainEndBotMatch"];
         mainoptions[kOptionMenuNetworkHostPosition + 0].routine = &MenuEndGame;
         mainoptions[kOptionMenuNetworkHostPosition + 0].help    = nullptr;
     }
     else
     {
-        mainoptions[kOptionMenuNetworkHostPosition + 0].name = language["MenuStartBotmatch"]; //"Start Bot Match";
+        mainoptions[kOptionMenuNetworkHostPosition + 0].name    = language["MenuStartBotmatch"]; //"Start Bot Match";
         mainoptions[kOptionMenuNetworkHostPosition + 0].routine = &OptionMenuHostNetGame;
         mainoptions[kOptionMenuNetworkHostPosition + 0].help    = nullptr;
     }
@@ -1086,8 +1086,7 @@ void OptionMenuDrawer()
         const char *name_entry = language[current_menu->items[i].name];
 
         HUDWriteText(style, fontType,
-                     (current_menu->menu_center) -
-                         (style->fonts_[fontType]->StringWidth(name_entry) * TEXTscale),
+                     (current_menu->menu_center) - (style->fonts_[fontType]->StringWidth(name_entry) * TEXTscale),
                      curry, name_entry);
 
         // Draw current soundfont
@@ -1892,7 +1891,9 @@ static void OptionMenuChangeTrue3d(int key_pressed, ConsoleVariable *console_var
 
 static void OptionMenuChangeAutoAim(int key_pressed, ConsoleVariable *console_variable)
 {
-    if (current_map && ((current_map->force_on_ | current_map->force_off_) & (kMapFlagAutoAimFull | kMapFlagAutoAimFullSnap | kMapFlagAutoAimVertical | kMapFlagAutoAimVerticalSnap)))
+    if (current_map &&
+        ((current_map->force_on_ | current_map->force_off_) &
+         (kMapFlagAutoAimFull | kMapFlagAutoAimFullSnap | kMapFlagAutoAimVertical | kMapFlagAutoAimVerticalSnap)))
         return;
 
     level_flags.autoaim = global_flags.autoaim;
@@ -1941,8 +1942,8 @@ static void OptionMenuChangeBobbing(int key_pressed, ConsoleVariable *console_va
         PlayerSprite *psp   = &player->player_sprites_[player->action_player_sprite_];
         if (psp)
         {
-            psp->screen_x = 0;
-            psp->screen_y = 0;
+            psp->screen_x     = 0;
+            psp->screen_y     = 0;
             psp->old_screen_x = 0;
             psp->old_screen_y = 0;
         }

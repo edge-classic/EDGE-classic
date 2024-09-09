@@ -346,12 +346,12 @@ void TextStyle::Default()
     colmap_       = nullptr;
     translucency_ = 1.0f;
 
-    font_     = nullptr;
-    scale_    = 1.0f;
-    aspect_   = 1.0f;
-    x_offset_ = 0;
-    y_offset_ = 0;
-    dropshadow_colmap_       = nullptr;
+    font_              = nullptr;
+    scale_             = 1.0f;
+    aspect_            = 1.0f;
+    x_offset_          = 0;
+    y_offset_          = 0;
+    dropshadow_colmap_ = nullptr;
     dropshadow_offset_ = 1.0f;
 }
 
@@ -365,12 +365,12 @@ TextStyle &TextStyle::operator=(const TextStyle &rhs)
         colmap_       = rhs.colmap_;
         translucency_ = rhs.translucency_;
 
-        font_     = rhs.font_;
-        scale_    = rhs.scale_;
-        aspect_   = rhs.aspect_;
-        x_offset_ = rhs.x_offset_;
-        y_offset_ = rhs.y_offset_;
-        dropshadow_colmap_       = rhs.dropshadow_colmap_;
+        font_              = rhs.font_;
+        scale_             = rhs.scale_;
+        aspect_            = rhs.aspect_;
+        x_offset_          = rhs.x_offset_;
+        y_offset_          = rhs.y_offset_;
+        dropshadow_colmap_ = rhs.dropshadow_colmap_;
         dropshadow_offset_ = rhs.dropshadow_offset_;
     }
 

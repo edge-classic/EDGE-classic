@@ -227,12 +227,12 @@ bool CheatResponder(InputEvent *ev)
             {
                 pl->health_ = pl->map_object_->health_ = pl->map_object_->spawn_health_;
             }
-            //ConsoleMessageLDF("GodModeOn");
+            // ConsoleMessageLDF("GodModeOn");
             ImportantConsoleMessageLDF("GodModeOn");
         }
         else
             ImportantConsoleMessageLDF("GodModeOff");
-            //ConsoleMessageLDF("GodModeOff");
+        // ConsoleMessageLDF("GodModeOff");
     }
 
     // 'fa' cheat for killer fucking arsenal
@@ -251,7 +251,7 @@ bool CheatResponder(InputEvent *ev)
         CheatGiveWeapons(pl);
 
         ImportantConsoleMessageLDF("AmmoAdded");
-        //ConsoleMessageLDF("AmmoAdded");
+        // ConsoleMessageLDF("AmmoAdded");
     }
 
     // 'kfa' cheat for key full ammo
@@ -272,7 +272,7 @@ bool CheatResponder(InputEvent *ev)
         CheatGiveWeapons(pl);
 
         ImportantConsoleMessageLDF("VeryHappyAmmo");
-        //ConsoleMessageLDF("VeryHappyAmmo");
+        // ConsoleMessageLDF("VeryHappyAmmo");
     }
     else if (CheckCheatSequence(&cheat_keys, key))
     {
@@ -451,7 +451,7 @@ void CheatInitialize(void)
     cheat_loaded.sequence     = language["idloaded"];
     cheat_take_all.sequence   = language["idtakeall"];
 
-    cheat_flip_level.sequence   = language["flipme"];
+    cheat_flip_level.sequence = language["flipme"];
 
     for (i = 0; i < 11; i++)
     {

@@ -230,8 +230,8 @@ Colormap::~Colormap()
 //
 void Colormap::CopyDetail(Colormap &src)
 {
-    lump_name_ = src.lump_name_;
-    pack_name_ = src.pack_name_;
+    lump_name_  = src.lump_name_;
+    pack_name_  = src.pack_name_;
     lump_index_ = src.lump_index_;
 
     start_   = src.start_;

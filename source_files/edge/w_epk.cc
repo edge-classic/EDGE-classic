@@ -56,7 +56,7 @@ class PackEntry
     mz_uint zip_index_;
 
     // only for VWAD: the index into the archive.
-	vwad_fidx vwad_index_;
+    vwad_fidx vwad_index_;
 
     PackEntry(const std::string &name, const std::string &path, const std::string &ppath, mz_uint idx, vwad_fidx vidx)
         : name_(name), full_path_(path), pack_path_(ppath), zip_index_(idx), vwad_index_(vidx)
@@ -95,7 +95,8 @@ class PackDirectory
 
     void SortEntries();
 
-    size_t AddEntry(const std::string &name, const std::string &path, const std::string &ppath, mz_uint idx, vwad_fidx vidx)
+    size_t AddEntry(const std::string &name, const std::string &path, const std::string &ppath, mz_uint idx,
+                    vwad_fidx vidx)
     {
         // check if already there
         for (size_t i = 0; i < entries_.size(); i++)
@@ -143,7 +144,8 @@ class PackFile
     vwad_handle *vwad_archive_;
 
   public:
-    PackFile(DataFile *par, bool folder, bool is_zip) : parent_(par), is_folder_(folder), is_zip_(is_zip), directories_(), archive_(nullptr), vwad_archive_(nullptr)
+    PackFile(DataFile *par, bool folder, bool is_zip)
+        : parent_(par), is_folder_(folder), is_zip_(is_zip), directories_(), archive_(nullptr), vwad_archive_(nullptr)
     {
     }
 
@@ -649,211 +651,216 @@ epi::File *PackFile::OpenZipEntryByName(const std::string &name)
 //  VWAD READING
 //----------------------------------------------------------------------------
 
-static int ioseek (vwad_iostream *strm, int pos) {
-  EPI_ASSERT(pos >= 0);
-  FILE *fl = (FILE *)strm->udata;
-  EPI_ASSERT(fl != nullptr);
-  if (fseek(fl, pos, SEEK_SET) != 0) return -1;
-  return 0;
+static int ioseek(vwad_iostream *strm, int pos)
+{
+    EPI_ASSERT(pos >= 0);
+    FILE *fl = (FILE *)strm->udata;
+    EPI_ASSERT(fl != nullptr);
+    if (fseek(fl, pos, SEEK_SET) != 0)
+        return -1;
+    return 0;
 }
 
-static int ioread (vwad_iostream *strm, void *buf, int bufsize) {
-  EPI_ASSERT(bufsize > 0);
-  FILE *fl = (FILE *)strm->udata;
-  EPI_ASSERT(fl != nullptr);
-  if (fread(buf, bufsize, 1, fl) != 1) return -1;
-  return 0;
+static int ioread(vwad_iostream *strm, void *buf, int bufsize)
+{
+    EPI_ASSERT(bufsize > 0);
+    FILE *fl = (FILE *)strm->udata;
+    EPI_ASSERT(fl != nullptr);
+    if (fread(buf, bufsize, 1, fl) != 1)
+        return -1;
+    return 0;
 }
 
 static PackFile *ProcessVWAD(DataFile *df)
 {
-	PackFile *pack = new PackFile(df, false, false);
+    PackFile *pack = new PackFile(df, false, false);
 
-	vwad_iostream *strm = (vwad_iostream *)calloc(1, sizeof(vwad_iostream));
-	strm->udata = epi::FileOpenRaw(df->name_, epi::kFileAccessRead | epi::kFileAccessBinary);
-	strm->seek = ioseek;
-	strm->read = ioread;
+    vwad_iostream *strm = (vwad_iostream *)calloc(1, sizeof(vwad_iostream));
+    strm->udata         = epi::FileOpenRaw(df->name_, epi::kFileAccessRead | epi::kFileAccessBinary);
+    strm->seek          = ioseek;
+    strm->read          = ioread;
 
-	pack->vwad_archive_ = vwad_open_archive(strm, VWAD_OPEN_DEFAULT, nullptr);
+    pack->vwad_archive_ = vwad_open_archive(strm, VWAD_OPEN_DEFAULT, nullptr);
 
-	if (!pack->vwad_archive_)
-		FatalError("Failed reading VWAD: %s\n", df->name_.c_str());
+    if (!pack->vwad_archive_)
+        FatalError("Failed reading VWAD: %s\n", df->name_.c_str());
 
-	// create the top-level directory
-	pack->AddDirectory("");
+    // create the top-level directory
+    pack->AddDirectory("");
 
-	vwad_fidx total = vwad_get_archive_file_count(pack->vwad_archive_); // Accounts for 0-index
+    vwad_fidx total = vwad_get_archive_file_count(pack->vwad_archive_); // Accounts for 0-index
 
-	for (vwad_fidx idx = 0 ; idx < total ; idx++)
-	{
-		// get the filename
-		char filename[1024];
-		memset(filename, 0, 1024);
+    for (vwad_fidx idx = 0; idx < total; idx++)
+    {
+        // get the filename
+        char filename[1024];
+        memset(filename, 0, 1024);
 
-		std::string packpath = vwad_get_file_name(pack->vwad_archive_, idx);
+        std::string packpath = vwad_get_file_name(pack->vwad_archive_, idx);
 
-		if (epi::GetExtension(packpath).empty())
-		{
-			LogWarning("%s has no extension. Bare VWAD filenames are not supported.\n", filename);
-			continue;
-		}
+        if (epi::GetExtension(packpath).empty())
+        {
+            LogWarning("%s has no extension. Bare VWAD filenames are not supported.\n", filename);
+            continue;
+        }
 
-		memcpy(filename, packpath.c_str(), packpath.size());
+        memcpy(filename, packpath.c_str(), packpath.size());
 
-		// decode into DIR + FILE
-		char *p = filename;
-		while (*p != 0 && *p != '/' && *p != '\\')
-			p++;
+        // decode into DIR + FILE
+        char *p = filename;
+        while (*p != 0 && *p != '/' && *p != '\\')
+            p++;
 
-		if (p == filename)
-			continue;
+        if (p == filename)
+            continue;
 
-		size_t dir_idx  = 0;
-		char * basename = filename;
+        size_t dir_idx  = 0;
+        char  *basename = filename;
 
-		if (*p != 0)
-		{
-			*p++ = 0;
+        if (*p != 0)
+        {
+            *p++ = 0;
 
-			basename = p;
-			if (basename[0] == 0)
-				continue;
+            basename = p;
+            if (basename[0] == 0)
+                continue;
 
-			dir_idx = pack->AddDirectory(filename);
-		}
-		std::string add_name = basename;
-		epi::StringUpperASCII(add_name);
-		pack->directories_[dir_idx].AddEntry(epi::GetFilename(add_name), "", packpath, 0, idx);
-		pack->search_files_.insert({epi::GetStem(add_name), packpath});
-	}
+            dir_idx = pack->AddDirectory(filename);
+        }
+        std::string add_name = basename;
+        epi::StringUpperASCII(add_name);
+        pack->directories_[dir_idx].AddEntry(epi::GetFilename(add_name), "", packpath, 0, idx);
+        pack->search_files_.insert({epi::GetStem(add_name), packpath});
+    }
 
-	return pack;
+    return pack;
 }
 
 class VWADFile : public epi::File
 {
-private:
-	PackFile * pack_;
+  private:
+    PackFile *pack_;
 
-	vwad_fidx vwad_index_;
-	vwad_fd vwad_file_descriptor_ = -1;
+    vwad_fidx vwad_index_;
+    vwad_fd   vwad_file_descriptor_ = -1;
 
-	int length_ = 0;
-	int position_    = 0;
+    int length_   = 0;
+    int position_ = 0;
 
-public:
-	VWADFile(PackFile *pack, vwad_fidx idx) : pack_(pack), vwad_index_(idx)
-	{
-		// determine length
-		length_ = vwad_get_file_size(pack->vwad_archive_, vwad_index_);
-		EPI_ASSERT(length_ >= 0);
-		// grab "handle" for future functions
-		vwad_file_descriptor_ = vwad_open_fidx(pack->vwad_archive_, vwad_index_);
-		EPI_ASSERT(vwad_file_descriptor_ >= 0);
-	}
+  public:
+    VWADFile(PackFile *pack, vwad_fidx idx) : pack_(pack), vwad_index_(idx)
+    {
+        // determine length
+        length_ = vwad_get_file_size(pack->vwad_archive_, vwad_index_);
+        EPI_ASSERT(length_ >= 0);
+        // grab "handle" for future functions
+        vwad_file_descriptor_ = vwad_open_fidx(pack->vwad_archive_, vwad_index_);
+        EPI_ASSERT(vwad_file_descriptor_ >= 0);
+    }
 
-	~VWADFile()
-	{
-		vwad_fclose(pack_->vwad_archive_, vwad_file_descriptor_);
-	}
+    ~VWADFile()
+    {
+        vwad_fclose(pack_->vwad_archive_, vwad_file_descriptor_);
+    }
 
-	int GetLength()
-	{
-		return length_;
-	}
+    int GetLength()
+    {
+        return length_;
+    }
 
-	int GetPosition()
-	{
-		return position_;
-	}
+    int GetPosition()
+    {
+        return position_;
+    }
 
-	unsigned int Read(void *dest, unsigned int count)
-	{
-		if (position_ >= length_)
-			return 0;
+    unsigned int Read(void *dest, unsigned int count)
+    {
+        if (position_ >= length_)
+            return 0;
 
-		// never read more than what GetLength() reports
-		if (count > length_ - position_)
-			count = length_ - position_;
+        // never read more than what GetLength() reports
+        if (count > length_ - position_)
+            count = length_ - position_;
 
-		int got = vwad_read(pack_->vwad_archive_, vwad_file_descriptor_, dest, count);
+        int got = vwad_read(pack_->vwad_archive_, vwad_file_descriptor_, dest, count);
 
-		EPI_ASSERT(got >= 0);
+        EPI_ASSERT(got >= 0);
 
-		position_ += got;
+        position_ += got;
 
-		return got;
-	}
+        return got;
+    }
 
-	unsigned int Write(const void *src, unsigned int count)
-	{
-		// not implemented
-		return count;
-	}
+    unsigned int Write(const void *src, unsigned int count)
+    {
+        // not implemented
+        return count;
+    }
 
-	bool Seek(int offset, int seekpoint)
-	{
-		int want_pos = position_;
+    bool Seek(int offset, int seekpoint)
+    {
+        int want_pos = position_;
 
-		if (seekpoint == epi::File::kSeekpointStart) want_pos = 0;
-		if (seekpoint == epi::File::kSeekpointEnd)   want_pos = length_;
+        if (seekpoint == epi::File::kSeekpointStart)
+            want_pos = 0;
+        if (seekpoint == epi::File::kSeekpointEnd)
+            want_pos = length_;
 
-		if (offset < 0)
-		{
-			offset = -offset;
-			if (offset >= want_pos)
-				want_pos = 0;
-			else
-				want_pos -= offset;
-		}
-		else
-		{
-			want_pos += offset;
-		}
+        if (offset < 0)
+        {
+            offset = -offset;
+            if (offset >= want_pos)
+                want_pos = 0;
+            else
+                want_pos -= offset;
+        }
+        else
+        {
+            want_pos += offset;
+        }
 
-		// cannot go beyond the end (except TO very end)
-		if (want_pos > length_)
-			return false;
+        // cannot go beyond the end (except TO very end)
+        if (want_pos > length_)
+            return false;
 
-		if (want_pos == length_)
-		{
-			position_ = length_;
-			return true;
-		}
+        if (want_pos == length_)
+        {
+            position_ = length_;
+            return true;
+        }
 
-		// trivial success when already there
-		if (want_pos == position_)
-			return true;
+        // trivial success when already there
+        if (want_pos == position_)
+            return true;
 
-		if (vwad_seek(pack_->vwad_archive_, vwad_file_descriptor_, want_pos) == 0)
-		{
-			position_ = want_pos;
-			return true;
-		}
-		else
-		{
-			position_ = vwad_tell(pack_->vwad_archive_, vwad_file_descriptor_);
-			return false;
-		}
-	}
+        if (vwad_seek(pack_->vwad_archive_, vwad_file_descriptor_, want_pos) == 0)
+        {
+            position_ = want_pos;
+            return true;
+        }
+        else
+        {
+            position_ = vwad_tell(pack_->vwad_archive_, vwad_file_descriptor_);
+            return false;
+        }
+    }
 };
 
 epi::File *PackFile::OpenVWADEntry(size_t dir, size_t index)
 {
-	VWADFile *F = new VWADFile(this, directories_[dir].entries_[index].vwad_index_);
-	return F;
+    VWADFile *F = new VWADFile(this, directories_[dir].entries_[index].vwad_index_);
+    return F;
 }
 
-
-epi::File *PackFile::OpenVWADEntryByName(const std::string& name)
+epi::File *PackFile::OpenVWADEntryByName(const std::string &name)
 {
-	// this ignores case by default
-	int idx = vwad_find_file(this->vwad_archive_, name.c_str());
-	if (idx < 0)
-		return NULL;
+    // this ignores case by default
+    int idx = vwad_find_file(this->vwad_archive_, name.c_str());
+    if (idx < 0)
+        return NULL;
 
-	VWADFile *F = new VWADFile(this, idx);
-	return F;
+    VWADFile *F = new VWADFile(this, idx);
+    return F;
 }
 
 //----------------------------------------------------------------------------
@@ -1057,8 +1064,8 @@ void ProcessPackSubstitutions(PackFile *pack, int pack_index)
 
             epi::StringLowerASCII(ext);
 
-            if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" ||
-                ext == ".lmp" || ext == ".raw") // Note: .lmp is assumed to be Doom-format image
+            if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" || ext == ".lmp" ||
+                ext == ".raw") // Note: .lmp is assumed to be Doom-format image
             {
                 std::string texname;
 
@@ -1196,8 +1203,8 @@ void ProcessHiresPackSubstitutions(PackFile *pack, int pack_index)
 
         epi::StringLowerASCII(ext);
 
-        if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" ||
-            ext == ".lmp" || ext == ".raw") // Note: .lmp is assumed to be Doom-format image
+        if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" || ext == ".lmp" ||
+            ext == ".raw") // Note: .lmp is assumed to be Doom-format image
         {
             std::string texname;
 
@@ -1512,18 +1519,17 @@ void PopulatePackOnly(DataFile *df)
     if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindIFolder)
         df->pack_ = ProcessFolder(df);
     else
-	{
-		FILE* df_fp = epi::FileOpenRaw(df->name_, epi::kFileAccessBinary | epi::kFileAccessRead);
-		EPI_ASSERT(df_fp);
-		uint8_t vwad_check[4];
-		fread(vwad_check, 4, 1, df_fp);
-		fclose(df_fp);
-		if (vwad_check[0] == 'V' && vwad_check[1] == 'W' && 
-			vwad_check[2] == 'A' && vwad_check[3] == 'D')
-			df->pack_ = ProcessVWAD(df);
-		else
-			df->pack_ = ProcessZip(df);
-	}
+    {
+        FILE *df_fp = epi::FileOpenRaw(df->name_, epi::kFileAccessBinary | epi::kFileAccessRead);
+        EPI_ASSERT(df_fp);
+        uint8_t vwad_check[4];
+        fread(vwad_check, 4, 1, df_fp);
+        fclose(df_fp);
+        if (vwad_check[0] == 'V' && vwad_check[1] == 'W' && vwad_check[2] == 'A' && vwad_check[3] == 'D')
+            df->pack_ = ProcessVWAD(df);
+        else
+            df->pack_ = ProcessZip(df);
+    }
 
     df->pack_->SortEntries();
 }
@@ -1562,18 +1568,17 @@ void ProcessAllInPack(DataFile *df, size_t file_index)
     if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindIFolder)
         df->pack_ = ProcessFolder(df);
     else
-	{
-		FILE* df_fp = epi::FileOpenRaw(df->name_, epi::kFileAccessBinary | epi::kFileAccessRead);
-		EPI_ASSERT(df_fp);
-		uint8_t vwad_check[4];
-		fread(vwad_check, 4, 1, df_fp);
-		fclose(df_fp);
-		if (vwad_check[0] == 'V' && vwad_check[1] == 'W' && 
-			vwad_check[2] == 'A' && vwad_check[3] == 'D')
-			df->pack_ = ProcessVWAD(df);
-		else
-			df->pack_ = ProcessZip(df);
-	}
+    {
+        FILE *df_fp = epi::FileOpenRaw(df->name_, epi::kFileAccessBinary | epi::kFileAccessRead);
+        EPI_ASSERT(df_fp);
+        uint8_t vwad_check[4];
+        fread(vwad_check, 4, 1, df_fp);
+        fclose(df_fp);
+        if (vwad_check[0] == 'V' && vwad_check[1] == 'W' && vwad_check[2] == 'A' && vwad_check[3] == 'D')
+            df->pack_ = ProcessVWAD(df);
+        else
+            df->pack_ = ProcessZip(df);
+    }
 
     df->pack_->SortEntries();
 

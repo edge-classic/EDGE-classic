@@ -39,7 +39,7 @@ class FontDefinition
 {
   public:
     FontDefinition();
-    ~FontDefinition(){};
+    ~FontDefinition() {};
 
   public:
     void Default(void);

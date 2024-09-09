@@ -208,7 +208,8 @@ static void LevelFinishEntry(void)
     else if (dynamic_level->force_on_ & kMapFlagAutoAimVerticalSnap)
         dynamic_level->force_on_ &= ~(kMapFlagAutoAimVertical);
 
-    if (dynamic_level->force_off_ & (kMapFlagAutoAimFullSnap | kMapFlagAutoAimFull | kMapFlagAutoAimVerticalSnap | kMapFlagAutoAimVertical))
+    if (dynamic_level->force_off_ &
+        (kMapFlagAutoAimFullSnap | kMapFlagAutoAimFull | kMapFlagAutoAimVerticalSnap | kMapFlagAutoAimVertical))
     {
         dynamic_level->force_off_ &= ~(kMapFlagAutoAimFullSnap | kMapFlagAutoAimVerticalSnap | kMapFlagAutoAimVertical);
         dynamic_level->force_off_ |= kMapFlagAutoAimFull;

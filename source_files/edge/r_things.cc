@@ -136,8 +136,7 @@ static int GetMulticolMaxRGB(ColorMixer *cols, int num, bool additive)
     return result;
 }
 
-static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionProperties *props,
-                                const State *state)
+static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionProperties *props, const State *state)
 {
     if (state->flags & kStateFrameFlagModel)
         return;
@@ -392,8 +391,8 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
 
         RendererVertex *glvert =
             BeginRenderUnit(GL_POLYGON, 4, is_additive ? (GLuint)kTextureEnvironmentSkipRGB : GL_MODULATE, tex_id,
-                              is_fuzzy ? GL_MODULATE : (GLuint)kTextureEnvironmentDisable, fuzz_tex, pass, blending,
-                              pass > 0 ? kRGBANoValue : fc_to_use, fd_to_use);
+                            is_fuzzy ? GL_MODULATE : (GLuint)kTextureEnvironmentDisable, fuzz_tex, pass, blending,
+                            pass > 0 ? kRGBANoValue : fc_to_use, fd_to_use);
 
         for (int v_idx = 0; v_idx < 4; v_idx++)
         {
@@ -1353,8 +1352,8 @@ void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
 
         RendererVertex *glvert =
             BeginRenderUnit(GL_POLYGON, 4, is_additive ? (GLuint)kTextureEnvironmentSkipRGB : GL_MODULATE, tex_id,
-                              is_fuzzy ? GL_MODULATE : (GLuint)kTextureEnvironmentDisable, fuzz_tex, pass, blending,
-                              pass > 0 ? kRGBANoValue : fc_to_use, fd_to_use);
+                            is_fuzzy ? GL_MODULATE : (GLuint)kTextureEnvironmentDisable, fuzz_tex, pass, blending,
+                            pass > 0 ? kRGBANoValue : fc_to_use, fd_to_use);
 
         for (int v_idx = 0; v_idx < 4; v_idx++)
         {

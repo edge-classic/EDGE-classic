@@ -946,13 +946,13 @@ float HUDFontHeight(void)
 
 float HUDFontWidthNew(float size)
 {
-    float factor = 1;
+    float factor   = 1;
     float TheWidth = 0;
 
     if (current_font->definition_->type_ == kFontTypeTrueType)
     {
         if (size > 0)
-           factor = size / current_font->definition_->default_size_;
+            factor = size / current_font->definition_->default_size_;
 
         TheWidth = current_font->CharWidth('W') * factor;
     }
@@ -983,7 +983,6 @@ float HUDFontWidthNew(float size)
     return (TheWidth * current_scale);
 }
 
-
 float HUDStringWidth(const char *str)
 {
     return current_scale * current_font->StringWidth(str);
@@ -997,7 +996,7 @@ float HUDStringWidthNew(const char *str, float size)
     {
         if (size > 0)
         {
-            factor = size / current_font->definition_->default_size_;  
+            factor = size / current_font->definition_->default_size_;
         }
         return (current_scale * current_font->StringWidth(str)) * factor;
     }
@@ -1032,7 +1031,6 @@ float HUDStringHeight(const char *str)
 
     return slines * HUDFontHeight() + (slines - 1) * kVerticalSpacing;
 }
-
 
 void HUDDrawChar(float left_x, float top_y, const Image *img, char ch, float size)
 {
@@ -1336,14 +1334,12 @@ void HUDDrawQuitScreen()
             HUDDrawQuitText(i, FNX, FNY, cx);
         }
         HUDSetAlignment(0, -1);
-        HUDDrawText(160, 195 - HUDStringHeight(language["PressToQuit"]),
-                    language["PressToQuit"]);
+        HUDDrawText(160, 195 - HUDStringHeight(language["PressToQuit"]), language["PressToQuit"]);
     }
     else
     {
         HUDSetAlignment(0, -1);
-        HUDDrawText(160, 100 - (HUDStringHeight(language["PressToQuit"]) / 2),
-                    language["PressToQuit"]);
+        HUDDrawText(160, 100 - (HUDStringHeight(language["PressToQuit"]) / 2), language["PressToQuit"]);
     }
 }
 
@@ -1403,7 +1399,7 @@ void HUDRenderAutomap(float x, float y, float w, float h, MapObject *player, int
         glLoadIdentity();
         glOrtho(0.0f, (float)current_screen_width, 0.0f, (float)current_screen_height, -1.0f, 1.0f);
     }
-    
+
     HUDPopScissor();
 }
 

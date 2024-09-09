@@ -64,29 +64,29 @@ class FinaleDefinition
 
 enum MapFlag
 {
-    kMapFlagNone         = 0x0,
-    kMapFlagJumping      = (1 << 0),
-    kMapFlagMlook        = (1 << 1),
-    kMapFlagCheats       = (1 << 2),
-    kMapFlagItemRespawn  = (1 << 3),
-    kMapFlagFastParm     = (1 << 4), // Fast Monsters
-    kMapFlagResRespawn   = (1 << 5), // Resurrect Monsters (else Teleport)
-    kMapFlagTrue3D       = (1 << 6), // True 3D Gameplay
-    kMapFlagStomp        = (1 << 7), // Monsters can stomp players
-    kMapFlagMoreBlood    = (1 << 8), // Make a bloody mess
-    kMapFlagRespawn      = (1 << 9),
-    kMapFlagAutoAimFull      = (1 << 10),
-    kMapFlagAutoAimFullSnap      = (1 << 11),
-    kMapFlagAutoAimVertical = (1 << 12),
+    kMapFlagNone                = 0x0,
+    kMapFlagJumping             = (1 << 0),
+    kMapFlagMlook               = (1 << 1),
+    kMapFlagCheats              = (1 << 2),
+    kMapFlagItemRespawn         = (1 << 3),
+    kMapFlagFastParm            = (1 << 4), // Fast Monsters
+    kMapFlagResRespawn          = (1 << 5), // Resurrect Monsters (else Teleport)
+    kMapFlagTrue3D              = (1 << 6), // True 3D Gameplay
+    kMapFlagStomp               = (1 << 7), // Monsters can stomp players
+    kMapFlagMoreBlood           = (1 << 8), // Make a bloody mess
+    kMapFlagRespawn             = (1 << 9),
+    kMapFlagAutoAimFull         = (1 << 10),
+    kMapFlagAutoAimFullSnap     = (1 << 11),
+    kMapFlagAutoAimVertical     = (1 << 12),
     kMapFlagAutoAimVerticalSnap = (1 << 13),
-    kMapFlagResetPlayer  = (1 << 14), // Force player back to square #1
-    kMapFlagExtras       = (1 << 15),
-    kMapFlagLimitZoom    = (1 << 16), // Limit zoom to certain weapons
-    kMapFlagCrouching    = (1 << 17),
-    kMapFlagKicking      = (1 << 18), // Weapon recoil
-    kMapFlagWeaponSwitch = (1 << 19),
-    kMapFlagPassMissile  = (1 << 20),
-    kMapFlagTeamDamage   = (1 << 21),
+    kMapFlagResetPlayer         = (1 << 14), // Force player back to square #1
+    kMapFlagExtras              = (1 << 15),
+    kMapFlagLimitZoom           = (1 << 16), // Limit zoom to certain weapons
+    kMapFlagCrouching           = (1 << 17),
+    kMapFlagKicking             = (1 << 18), // Weapon recoil
+    kMapFlagWeaponSwitch        = (1 << 19),
+    kMapFlagPassMissile         = (1 << 20),
+    kMapFlagTeamDamage          = (1 << 21),
 };
 
 enum SkyStretch

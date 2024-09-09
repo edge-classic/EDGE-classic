@@ -347,8 +347,6 @@ static void InstallTextureLumpsStrife(int file, const WadTextureResource *WT)
         const RawStrifePatchDefinition *mpatch = &mtexture->patches[0];
         TexturePatch                   *patch  = &texture->patches[0];
 
-        bool is_sky = (epi::StringPrefixCaseCompareASCII(texture->name, "SKY") == 0);
-
         for (int k = 0; k < texture->patch_count; k++, mpatch++, patch++)
         {
             int pname = AlignedLittleEndianS16(mpatch->pname);
@@ -356,7 +354,6 @@ static void InstallTextureLumpsStrife(int file, const WadTextureResource *WT)
             patch->origin_x = AlignedLittleEndianS16(mpatch->x_origin);
             patch->origin_y = AlignedLittleEndianS16(mpatch->y_origin);
             patch->patch    = patchlookup[pname];
-
 
             if (patch->patch == -1)
             {

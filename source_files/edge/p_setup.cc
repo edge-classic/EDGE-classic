@@ -501,11 +501,11 @@ static void LoadSectors(int lump)
 
         ss->sound_player = -1;
 
-        ss->old_floor_height = ss->floor_height;
-        ss->interpolated_floor_height = ss->floor_height;
-        ss->old_ceiling_height = ss->ceiling_height;
+        ss->old_floor_height            = ss->floor_height;
+        ss->interpolated_floor_height   = ss->floor_height;
+        ss->old_ceiling_height          = ss->ceiling_height;
         ss->interpolated_ceiling_height = ss->ceiling_height;
-        ss->old_game_tic = 0;
+        ss->old_game_tic                = 0;
 
         // -AJA- 1999/07/29: Keep sectors with same tag in a list.
         GroupSectorTags(ss, level_sectors, i);
@@ -683,10 +683,10 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x, float 
         mo->tag_ = tag;
 
     mo->interpolate_ = false;
-    mo->old_x_ = mo->x;
-    mo->old_y_ = mo->y;
-    mo->old_z_ = mo->z;
-    mo->old_angle_ = mo->angle_;
+    mo->old_x_       = mo->x;
+    mo->old_y_       = mo->y;
+    mo->old_z_       = mo->z;
+    mo->old_angle_   = mo->angle_;
 
     return mo;
 }
@@ -1023,7 +1023,7 @@ static bool AssignSubsectorsPass(int pass)
     //
     // returns true if progress was made.
 
-    bool progress   = false;
+    bool progress = false;
 
     for (int i = 0; i < total_level_subsectors; i++)
     {
@@ -1262,8 +1262,7 @@ static void LoadXGL3Nodes(int lumpnum)
 
             seg->angle = PointToAngle(seg->vertex_1->X, seg->vertex_1->Y, seg->vertex_2->X, seg->vertex_2->Y);
 
-            seg->length =
-                PointToDistance(seg->vertex_1->X, seg->vertex_1->Y, seg->vertex_2->X, seg->vertex_2->Y);
+            seg->length = PointToDistance(seg->vertex_1->X, seg->vertex_1->Y, seg->vertex_2->X, seg->vertex_2->Y);
         }
 
         // -AJA- 1999/09/23: New linked list for the segs of a subsector
@@ -1360,10 +1359,10 @@ static void LoadUDMFVertexes()
 
     LogDebug("LoadUDMFVertexes: parsing TEXTMAP\n");
     int cur_vertex = 0;
-    int min_x = 0;
-    int min_y = 0;
-    int max_x = 0;
-    int max_y = 0;
+    int min_x      = 0;
+    int min_y      = 0;
+    int max_x      = 0;
+    int max_y      = 0;
 
     for (;;)
     {
@@ -1423,12 +1422,12 @@ static void LoadUDMFVertexes()
                 switch (key_ename.GetIndex())
                 {
                 case epi::kENameX:
-                    x = epi::LexDouble(value);
+                    x     = epi::LexDouble(value);
                     min_x = HMM_MIN((int)x, min_x);
                     max_x = HMM_MAX((int)x, max_x);
                     break;
                 case epi::kENameY:
-                    y = epi::LexDouble(value);
+                    y     = epi::LexDouble(value);
                     min_y = HMM_MIN((int)y, min_y);
                     max_y = HMM_MAX((int)y, max_y);
                     break;
@@ -1459,7 +1458,7 @@ static void LoadUDMFVertexes()
 
     GenerateBlockmap(min_x, min_y, max_x, max_y);
 
-    CreateThingBlockmap();  
+    CreateThingBlockmap();
 
     LogDebug("LoadUDMFVertexes: finished parsing TEXTMAP\n");
 }
@@ -1632,7 +1631,7 @@ static void LoadUDMFSectors()
             ss->floor.y_matrix.X   = 0;
             ss->floor.y_matrix.Y   = 1;
 
-            ss->ceiling = ss->floor;
+            ss->ceiling              = ss->floor;
             ss->ceiling.translucency = calph;
 
             // rotations
@@ -1649,11 +1648,11 @@ static void LoadUDMFSectors()
             ss->ceiling.y_matrix.Y = cy_sc;
 
             // granular offsets
-            ss->floor.offset.X += (fx/fx_sc);
-            ss->floor.offset.Y -= (fy/fy_sc);
+            ss->floor.offset.X += (fx / fx_sc);
+            ss->floor.offset.Y -= (fy / fy_sc);
             ss->floor.old_offset = ss->floor.offset;
-            ss->ceiling.offset.X += (cx/cx_sc);
-            ss->ceiling.offset.Y -= (cy/cy_sc);
+            ss->ceiling.offset.X += (cx / cx_sc);
+            ss->ceiling.offset.Y -= (cy / cy_sc);
             ss->ceiling.old_offset = ss->ceiling.offset;
 
             ss->floor.image = ImageLookup(floor_tex, kImageNamespaceFlat);
@@ -1752,11 +1751,11 @@ static void LoadUDMFSectors()
 
             ss->sound_player = -1;
 
-            ss->old_floor_height = ss->floor_height;
-            ss->interpolated_floor_height = ss->floor_height;
-            ss->old_ceiling_height = ss->ceiling_height;
+            ss->old_floor_height            = ss->floor_height;
+            ss->interpolated_floor_height   = ss->floor_height;
+            ss->old_ceiling_height          = ss->ceiling_height;
             ss->interpolated_ceiling_height = ss->ceiling_height;
-            ss->old_game_tic = 0;
+            ss->old_game_tic                = 0;
 
             // -AJA- 1999/07/29: Keep sectors with same tag in a list.
             GroupSectorTags(ss, level_sectors, cur_sector);
@@ -1953,13 +1952,13 @@ static void LoadUDMFSideDefs()
             sd->top.y_matrix.Y    = high_scy;
 
             // granular offsets
-            sd->bottom.offset.X += lowx/low_scx;
-            sd->middle.offset.X += midx/mid_scx;
-            sd->top.offset.X += highx/high_scx;
-            sd->bottom.offset.Y += lowy/low_scy;
-            sd->middle.offset.Y += midy/mid_scy;
-            sd->top.offset.Y += highy/high_scy;
-            sd->top.old_offset = sd->top.offset;
+            sd->bottom.offset.X += lowx / low_scx;
+            sd->middle.offset.X += midx / mid_scx;
+            sd->top.offset.X += highx / high_scx;
+            sd->bottom.offset.Y += lowy / low_scy;
+            sd->middle.offset.Y += midy / mid_scy;
+            sd->top.offset.Y += highy / high_scy;
+            sd->top.old_offset    = sd->top.offset;
             sd->middle.old_offset = sd->middle.offset;
             sd->bottom.old_offset = sd->bottom.offset;
 
@@ -2011,12 +2010,12 @@ static void LoadUDMFSideDefs()
         ld->side[0] = sd;
         if (sd->middle.image && (side1 != -1))
         {
-            sd->middle_mask_offset = sd->middle.offset.Y;
-            sd->middle.offset.Y    = 0;
+            sd->middle_mask_offset  = sd->middle.offset.Y;
+            sd->middle.offset.Y     = 0;
             sd->middle.old_offset.Y = 0;
         }
-        ld->front_sector = sd->sector;
-        sd->top.translucency = level_line_alphas[i];
+        ld->front_sector        = sd->sector;
+        sd->top.translucency    = level_line_alphas[i];
         sd->middle.translucency = level_line_alphas[i];
         sd->bottom.translucency = level_line_alphas[i];
         sd++;
@@ -2026,12 +2025,12 @@ static void LoadUDMFSideDefs()
             ld->side[1] = sd;
             if (sd->middle.image)
             {
-                sd->middle_mask_offset = sd->middle.offset.Y;
-                sd->middle.offset.Y    = 0;
+                sd->middle_mask_offset  = sd->middle.offset.Y;
+                sd->middle.offset.Y     = 0;
                 sd->middle.old_offset.Y = 0;
             }
-            ld->back_sector = sd->sector;
-            sd->top.translucency = level_line_alphas[i];
+            ld->back_sector         = sd->sector;
+            sd->top.translucency    = level_line_alphas[i];
             sd->middle.translucency = level_line_alphas[i];
             sd->bottom.translucency = level_line_alphas[i];
             sd++;
@@ -2081,10 +2080,10 @@ static void LoadUDMFLineDefs()
 
         if (section == "linedef")
         {
-            int flags = 0, v1 = 0, v2 = 0;
-            int side0 = -1, side1 = -1, tag = -1;
-            float alpha = 1.0f;
-            int special = 0;
+            int   flags = 0, v1 = 0, v2 = 0;
+            int   side0 = -1, side1 = -1, tag = -1;
+            float alpha   = 1.0f;
+            int   special = 0;
             for (;;)
             {
                 if (lex.Match("}"))
@@ -2561,7 +2560,7 @@ static void LoadUDMFCounts()
     level_lines = new Line[total_level_lines];
     EPI_CLEAR_MEMORY(level_lines, Line, total_level_lines);
     level_line_alphas = new float[total_level_lines];
-    temp_line_sides = new int[total_level_lines * 2];
+    temp_line_sides   = new int[total_level_lines * 2];
 }
 
 static void TransferMapSideDef(const RawSidedef *msd, Side *sd, bool two_sided)
@@ -2575,7 +2574,7 @@ static void TransferMapSideDef(const RawSidedef *msd, Side *sd, bool two_sided)
     sd->top.translucency = 1.0f;
     sd->top.offset.X     = AlignedLittleEndianS16(msd->x_offset);
     sd->top.offset.Y     = AlignedLittleEndianS16(msd->y_offset);
-    sd->top.old_offset = sd->top.offset;
+    sd->top.old_offset   = sd->top.offset;
     sd->top.x_matrix.X   = 1;
     sd->top.x_matrix.Y   = 0;
     sd->top.y_matrix.X   = 0;
@@ -2615,8 +2614,8 @@ static void TransferMapSideDef(const RawSidedef *msd, Side *sd, bool two_sided)
 
     if (sd->middle.image && two_sided)
     {
-        sd->middle_mask_offset = sd->middle.offset.Y;
-        sd->middle.offset.Y    = 0;
+        sd->middle_mask_offset  = sd->middle.offset.Y;
+        sd->middle.offset.Y     = 0;
         sd->middle.old_offset.Y = 0;
     }
 }

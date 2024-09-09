@@ -28,9 +28,11 @@ add_library(
   ddf_weapon.cc
 )
 
-target_include_directories(edge_ddf PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
+target_link_libraries(edge_ddf PRIVATE almostequals edge_epi HandmadeMath sokol_color)
+
 target_include_directories(edge_ddf PRIVATE ../edge)
-target_include_directories(edge_ddf PRIVATE ../epi)
+
+target_include_directories(edge_ddf PUBLIC ./)
 
 target_compile_options(edge_ddf PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:${EDGE_WARNINGS}>

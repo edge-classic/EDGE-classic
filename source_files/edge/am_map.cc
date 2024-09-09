@@ -1107,8 +1107,8 @@ static void AutomapDrawPlayer(MapObject *mo)
         switch (current_arrow_type)
         {
         case kAutomapArrowStyleHeretic:
-            DrawLineCharacter(player_dagger, kAutomapPlayerDaggerLines, mo->radius_, ma,
-                              am_colors[kAutomapColorPlayer], mx, my);
+            DrawLineCharacter(player_dagger, kAutomapPlayerDaggerLines, mo->radius_, ma, am_colors[kAutomapColorPlayer],
+                              mx, my);
             break;
         case kAutomapArrowStyleDoom:
         default:
@@ -1131,7 +1131,8 @@ static void AutomapWalkThing(MapObject *mo)
 {
     int index = kAutomapColorScenery;
 
-    if (mo->player_ && (InCooperativeMatch() || (mo->player_ == players[display_player])) && mo->player_->map_object_ == mo)
+    if (mo->player_ && (InCooperativeMatch() || (mo->player_ == players[display_player])) &&
+        mo->player_->map_object_ == mo)
     {
         AutomapDrawPlayer(mo);
         return;
@@ -1171,8 +1172,7 @@ static void AutomapWalkThing(MapObject *mo)
         ma = mo->angle_;
     }
 
-    DrawLineCharacter(thin_triangle_guy, kAutomapThinTriangleGuyLines, mo->radius_, ma, am_colors[index], mx,
-                      my);
+    DrawLineCharacter(thin_triangle_guy, kAutomapThinTriangleGuyLines, mo->radius_, ma, am_colors[index], mx, my);
 }
 
 //

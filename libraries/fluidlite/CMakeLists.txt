@@ -20,5 +20,5 @@ add_library(fluidlite
     src/fluid_voice.c
 )
 
-target_include_directories(fluidlite PRIVATE src)
-target_include_directories(fluidlite PRIVATE include)
+target_include_directories(fluidlite PRIVATE ./src)
+target_include_directories(fluidlite PUBLIC ./include)

@@ -762,11 +762,11 @@ bool TryFillNewWeapon(Player *p, int idx, AmmunitionType ammo, int *qty)
             *qty -= info->clip_size_[ATK];
             result = true;
         }
-        else //New weapon has only a partially full clip
+        else // New weapon has only a partially full clip
         {
             p->weapons_[idx].clip_size[ATK] = *qty;
-            *qty = 0;
-            result = true;
+            *qty                            = 0;
+            result                          = true;
         }
     }
 
@@ -844,8 +844,10 @@ void MovePlayerSprites(Player *p)
 
     PlayerSprite *psp = &p->player_sprites_[0];
 
-    p->player_sprites_[kPlayerSpriteFlash].old_screen_x = p->player_sprites_[kPlayerSpriteWeapon].old_screen_x = p->player_sprites_[kPlayerSpriteWeapon].screen_x;
-    p->player_sprites_[kPlayerSpriteFlash].old_screen_y = p->player_sprites_[kPlayerSpriteWeapon].old_screen_y = p->player_sprites_[kPlayerSpriteWeapon].screen_y;
+    p->player_sprites_[kPlayerSpriteFlash].old_screen_x = p->player_sprites_[kPlayerSpriteWeapon].old_screen_x =
+        p->player_sprites_[kPlayerSpriteWeapon].screen_x;
+    p->player_sprites_[kPlayerSpriteFlash].old_screen_y = p->player_sprites_[kPlayerSpriteWeapon].old_screen_y =
+        p->player_sprites_[kPlayerSpriteWeapon].screen_y;
 
     for (int i = 0; i < kTotalPlayerSpriteTypes; i++, psp++)
     {
@@ -1053,7 +1055,7 @@ void A_WeaponReady(MapObject *mo)
             }
         } // for (ATK)
 
-    }     // (! fire_0 && ! fire_1)
+    } // (! fire_0 && ! fire_1)
 
     BobWeapon(p, info);
 }

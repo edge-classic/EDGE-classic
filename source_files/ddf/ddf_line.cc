@@ -393,16 +393,16 @@ static void LinedefFinishEntry(void)
     if (!AlmostEquals(dynamic_line->friction_, kFloatUnused) && dynamic_line->friction_ < 0.05f)
     {
         DDFWarnError("Friction value too low (%1.2f), it would prevent "
-                      "all movement.\n",
-                      dynamic_line->friction_);
+                     "all movement.\n",
+                     dynamic_line->friction_);
         dynamic_line->friction_ = 0.05f;
     }
 
     if (!AlmostEquals(dynamic_line->viscosity_, kFloatUnused) && dynamic_line->viscosity_ > 0.95f)
     {
         DDFWarnError("Viscosity value too high (%1.2f), it would prevent "
-                      "all movement.\n",
-                      dynamic_line->viscosity_);
+                     "all movement.\n",
+                     dynamic_line->viscosity_);
         dynamic_line->viscosity_ = 0.95f;
     }
 

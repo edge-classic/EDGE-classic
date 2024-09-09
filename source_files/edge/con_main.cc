@@ -216,7 +216,8 @@ int ConsoleCommandChangeDir(char **argv, int argc)
 
     if (home_directory == game_directory)
     {
-        LogPrint("Home and game directory are both %s!\nRemaining in current directory.\n", epi::SanitizePath(working_directory).c_str());
+        LogPrint("Home and game directory are both %s!\nRemaining in current directory.\n",
+                 epi::SanitizePath(working_directory).c_str());
         return 1;
     }
     else if (epi::StringCaseCompareASCII(argv[1], "game") == 0)
@@ -304,7 +305,8 @@ int ConsoleCommandDir(char **argv, int argc)
         return 0;
     }
 
-    LogPrint("Directory contents for %s matching %s\n", epi::SanitizePath(epi::GetDirectory(path)).c_str(), mask.c_str());
+    LogPrint("Directory contents for %s matching %s\n", epi::SanitizePath(epi::GetDirectory(path)).c_str(),
+             mask.c_str());
 
     for (size_t i = 0; i < fsd.size(); i++)
     {
@@ -445,7 +447,8 @@ int ConsoleCommandShowMaps(char **argv, int argc)
     for (int i = 0; i < mapdefs.size(); i++)
     {
         if (MapExists(mapdefs[i]) && mapdefs[i]->episode_)
-            LogPrint("  %s                     %s\n", mapdefs[i]->name_.c_str(), language[mapdefs[i]->description_.c_str()]);
+            LogPrint("  %s                     %s\n", mapdefs[i]->name_.c_str(),
+                     language[mapdefs[i]->description_.c_str()]);
     }
 
     return 0;

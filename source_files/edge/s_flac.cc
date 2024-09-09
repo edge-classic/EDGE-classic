@@ -18,13 +18,8 @@
 
 #include "s_flac.h"
 
-// clang-format off
-#define DR_FLAC_NO_CRC      1
-#define DR_FLAC_NO_WIN32_IO 1
-#define DR_FLAC_IMPLEMENTATION
-#include "dr_flac.h"
-// clang-format on
 #include "ddf_playlist.h"
+#include "dr_flac.h"
 #include "epi.h"
 #include "epi_endian.h"
 #include "epi_file.h"

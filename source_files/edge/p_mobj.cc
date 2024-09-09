@@ -295,7 +295,7 @@ static bool CorpseShouldSlide(MapObject *mo)
         HMM_Vec3 line_a{{mo->x, mo->y, -40000}};
         HMM_Vec3 line_b{{mo->x, mo->y, 40000}};
         float    z_test = LinePlaneIntersection(line_a, line_b, mo->subsector_->sector->floor_z_vertices[2],
-                                                    mo->subsector_->sector->floor_vertex_slope_normal)
+                                                mo->subsector_->sector->floor_vertex_slope_normal)
                            .Z;
         if (isfinite(z_test))
             floor_slope_z = z_test - mo->subsector_->sector->floor_height;
@@ -306,7 +306,7 @@ static bool CorpseShouldSlide(MapObject *mo)
         HMM_Vec3 line_a{{mo->x, mo->y, -40000}};
         HMM_Vec3 line_b{{mo->x, mo->y, 40000}};
         float    z_test = LinePlaneIntersection(line_a, line_b, mo->subsector_->sector->ceiling_z_vertices[2],
-                                                    mo->subsector_->sector->ceiling_vertex_slope_normal)
+                                                mo->subsector_->sector->ceiling_vertex_slope_normal)
                            .Z;
         if (isfinite(z_test))
             ceiling_slope_z = mo->subsector_->sector->ceiling_height - z_test;
@@ -1359,9 +1359,9 @@ static void P_MobjThinker(MapObject *mobj)
         mobj->interpolate_ = true;
 
         // Store starting position for mobj interpolation.
-        mobj->old_x_ = mobj->x;
-        mobj->old_y_ = mobj->y;
-        mobj->old_z_ = mobj->z;
+        mobj->old_x_     = mobj->x;
+        mobj->old_y_     = mobj->y;
+        mobj->old_z_     = mobj->z;
         mobj->old_angle_ = mobj->angle_;
     }
 
@@ -1881,11 +1881,10 @@ void RunMapObjectThinkers()
                 continue;
             if (!distance_cull_thinkers.d_ ||
                 (game_tic / 2 %
-                        RoundToInteger(1 + PointToDistance(players[console_player]->map_object_->x,
-                                                                players[console_player]->map_object_->y, mo->x,
-                                                                mo->y) /
+                     RoundToInteger(1 + PointToDistance(players[console_player]->map_object_->x,
+                                                        players[console_player]->map_object_->y, mo->x, mo->y) /
                                             1500) ==
-                    0))
+                 0))
                 P_MobjThinker(mo);
         }
     }
@@ -1989,11 +1988,11 @@ FlatDefinition *P_IsThingOnLiquidFloor(MapObject *thing)
 
     if (thing->flags_ & kMapObjectFlagFloat)
         return current_flatdef;
- 
+
     // If no 3D floors, just return the flat
     if (thing->subsector_->sector->extrafloor_used == 0)
     {
-        if (thing->z > thing->floor_z_) //are we actually touching the floor
+        if (thing->z > thing->floor_z_) // are we actually touching the floor
             return current_flatdef;
 
         current_flatdef = flatdefs.Find(thing->subsector_->sector->floor.image->name_.c_str());
@@ -2277,7 +2276,7 @@ MapObject *CreateMapObject(float x, float y, float z, const MapObjectDefinition 
     if (sec->floor_vertex_slope)
     {
         float sz = LinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, sec->floor_z_vertices[2],
-                                             sec->floor_vertex_slope_normal)
+                                         sec->floor_vertex_slope_normal)
                        .Z;
         if (isfinite(sz))
             floor_slope_z = sz - sec->floor_height;
@@ -2285,7 +2284,7 @@ MapObject *CreateMapObject(float x, float y, float z, const MapObjectDefinition 
     if (sec->ceiling_vertex_slope)
     {
         float sz = LinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, sec->ceiling_z_vertices[2],
-                                             sec->ceiling_vertex_slope_normal)
+                                         sec->ceiling_vertex_slope_normal)
                        .Z;
         if (isfinite(sz))
             ceiling_slope_z = sec->ceiling_height - sz;

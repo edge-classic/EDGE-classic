@@ -164,10 +164,10 @@ static void SaveGlobalGetLevelFlags(const char *info, void *storage)
     dest->weapon_switch      = (flags & kMapFlagWeaponSwitch) ? true : false;
     dest->pass_missile       = (flags & kMapFlagPassMissile) ? true : false;
     dest->team_damage        = (flags & kMapFlagTeamDamage) ? true : false;
-    dest->autoaim = kAutoAimOff;
-    if (flags & kMapFlagAutoAimVertical) 
+    dest->autoaim            = kAutoAimOff;
+    if (flags & kMapFlagAutoAimVertical)
         dest->autoaim = kAutoAimVertical;
-    if (flags & kMapFlagAutoAimVerticalSnap) 
+    if (flags & kMapFlagAutoAimVerticalSnap)
         dest->autoaim = kAutoAimVerticalSnap;
     if (flags & kMapFlagAutoAimFull)
         dest->autoaim = kAutoAimFull;

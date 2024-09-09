@@ -41,8 +41,8 @@ void NewScreenSize(int width, int height, int bits)
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void RenderImage(float x, float y, float w, float h, const Image *image, float tx1, float ty1, float tx2,
-                       float ty2, const Colormap *textmap, float alpha, const Colormap *palremap)
+void RenderImage(float x, float y, float w, float h, const Image *image, float tx1, float ty1, float tx2, float ty2,
+                 const Colormap *textmap, float alpha, const Colormap *palremap)
 {
     int x1 = RoundToInteger(x);
     int y1 = RoundToInteger(y);

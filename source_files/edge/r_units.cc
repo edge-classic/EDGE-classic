@@ -133,7 +133,7 @@ void FinishUnitBatch(void)
 // texture should be blended (like for translucent water or sprites).
 //
 RendererVertex *BeginRenderUnit(GLuint shape, int max_vert, GLuint env1, GLuint tex1, GLuint env2, GLuint tex2,
-                                  int pass, int blending, RGBAColor fog_color, float fog_density)
+                                int pass, int blending, RGBAColor fog_color, float fog_density)
 {
     RendererUnit *unit;
 

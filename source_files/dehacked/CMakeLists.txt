@@ -24,8 +24,9 @@ add_library(
   deh_weapons.cc
 )
 
-target_include_directories(edge_deh PRIVATE ../epi)
-target_include_directories(edge_deh PRIVATE ../ddf)
+target_link_libraries(edge_deh PRIVATE edge_ddf edge_epi)
+
+target_include_directories(edge_deh PUBLIC ./)
 
 target_compile_options(edge_deh PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:${EDGE_WARNINGS}>

@@ -34,13 +34,13 @@ static constexpr uint32_t kBadUnicodeValue = 0xFFFFFFFF;
 
 static int GetNextUTF8Codepoint(const char *_str, size_t length, uint32_t *u32c)
 {
-    const char *str = _str;
-    uint32_t retval = 0;
-    uint32_t octet = 0;
-    uint32_t octet2 = 0;
-    uint32_t octet3 = 0;
-    uint32_t octet4 = 0;
-    int advance = 0;
+    const char *str     = _str;
+    uint32_t    retval  = 0;
+    uint32_t    octet   = 0;
+    uint32_t    octet2  = 0;
+    uint32_t    octet3  = 0;
+    uint32_t    octet4  = 0;
+    int         advance = 0;
 
     if (length == 0)
     {
@@ -48,19 +48,19 @@ static int GetNextUTF8Codepoint(const char *_str, size_t length, uint32_t *u32c)
         return 0;
     }
     else
-        octet = (uint32_t) ((uint8_t) *str);
+        octet = (uint32_t)((uint8_t)*str);
 
-    if (octet == 0)  /* null terminator, end of string. */
+    if (octet == 0) /* null terminator, end of string. */
     {
         *u32c = 0;
         return 1;
     }
-    else if (octet < 128)  /* one octet char: 0 to 127 */
+    else if (octet < 128) /* one octet char: 0 to 127 */
     {
         *u32c = octet;
         return 1;
     } /* else if */
-    else if ((octet > 127) && (octet < 192))  /* bad (starts with 10xxxxxx). */
+    else if ((octet > 127) && (octet < 192)) /* bad (starts with 10xxxxxx). */
     {
         /*
          * Apparently each of these is supposed to be flagged as a bogus
@@ -69,16 +69,16 @@ static int GetNextUTF8Codepoint(const char *_str, size_t length, uint32_t *u32c)
         *u32c = kBadUnicodeValue;
         return 1;
     } /* else if */
-    else if (octet < 224)  /* two octets */
+    else if (octet < 224) /* two octets */
     {
         advance = 1;
-        octet -= (128+64);
+        octet -= (128 + 64);
         if (length > 1)
         {
-            octet2 = (uint32_t) ((uint8_t) *(++str));
+            octet2 = (uint32_t)((uint8_t) * (++str));
             advance++;
         }
-        if ((octet2 & (128+64)) != 128)  /* Format isn't 10xxxxxx? */
+        if ((octet2 & (128 + 64)) != 128) /* Format isn't 10xxxxxx? */
         {
             *u32c = kBadUnicodeValue;
             return advance;
@@ -96,16 +96,16 @@ static int GetNextUTF8Codepoint(const char *_str, size_t length, uint32_t *u32c)
             return advance;
         }
     } /* else if */
-    else if (octet < 240)  /* three octets */
+    else if (octet < 240) /* three octets */
     {
         advance = 1;
-        octet -= (128+64+32);
+        octet -= (128 + 64 + 32);
         if (length > 1)
         {
-            octet2 = (uint32_t) ((uint8_t) *(++str));
+            octet2 = (uint32_t)((uint8_t) * (++str));
             advance++;
         }
-        if ((octet2 & (128+64)) != 128)  /* Format isn't 10xxxxxx? */
+        if ((octet2 & (128 + 64)) != 128) /* Format isn't 10xxxxxx? */
         {
             *u32c = kBadUnicodeValue;
             return advance;
@@ -113,31 +113,30 @@ static int GetNextUTF8Codepoint(const char *_str, size_t length, uint32_t *u32c)
 
         if (length > 2)
         {
-            octet3 = (uint32_t) ((uint8_t) *(++str));
+            octet3 = (uint32_t)((uint8_t) * (++str));
             advance++;
         }
-        if ((octet3 & (128+64)) != 128)  /* Format isn't 10xxxxxx? */
+        if ((octet3 & (128 + 64)) != 128) /* Format isn't 10xxxxxx? */
         {
             *u32c = kBadUnicodeValue;
             return advance;
         }
 
-        retval = ( ((octet << 12)) | ((octet2-128) << 6) | ((octet3-128)) );
+        retval = (((octet << 12)) | ((octet2 - 128) << 6) | ((octet3 - 128)));
 
         /* There are seven "UTF-16 surrogates" that are illegal in UTF-8. */
         switch (retval)
         {
-            case 0xD800:
-            case 0xDB7F:
-            case 0xDB80:
-            case 0xDBFF:
-            case 0xDC00:
-            case 0xDF80:
-            case 0xDFFF:
-            {
-                *u32c = kBadUnicodeValue;
-                return advance;
-            }
+        case 0xD800:
+        case 0xDB7F:
+        case 0xDB80:
+        case 0xDBFF:
+        case 0xDC00:
+        case 0xDF80:
+        case 0xDFFF: {
+            *u32c = kBadUnicodeValue;
+            return advance;
+        }
         } /* switch */
 
         /* 0xFFFE and 0xFFFF are illegal, too, so we check them at the edge. */
@@ -152,16 +151,16 @@ static int GetNextUTF8Codepoint(const char *_str, size_t length, uint32_t *u32c)
             return advance;
         }
     } /* else if */
-    else if (octet < 248)  /* four octets */
+    else if (octet < 248) /* four octets */
     {
         advance = 1;
-        octet -= (128+64+32+16);
+        octet -= (128 + 64 + 32 + 16);
         if (length > 1)
         {
-            octet2 = (uint32_t) ((uint8_t) *(++str));
+            octet2 = (uint32_t)((uint8_t) * (++str));
             advance++;
         }
-        if ((octet2 & (128+64)) != 128)  /* Format isn't 10xxxxxx? */
+        if ((octet2 & (128 + 64)) != 128) /* Format isn't 10xxxxxx? */
         {
             *u32c = kBadUnicodeValue;
             return advance;
@@ -169,10 +168,10 @@ static int GetNextUTF8Codepoint(const char *_str, size_t length, uint32_t *u32c)
 
         if (length > 2)
         {
-            octet3 = (uint32_t) ((uint8_t) *(++str));
+            octet3 = (uint32_t)((uint8_t) * (++str));
             advance++;
         }
-        if ((octet3 & (128+64)) != 128)  /* Format isn't 10xxxxxx? */
+        if ((octet3 & (128 + 64)) != 128) /* Format isn't 10xxxxxx? */
         {
             *u32c = kBadUnicodeValue;
             return advance;
@@ -180,17 +179,16 @@ static int GetNextUTF8Codepoint(const char *_str, size_t length, uint32_t *u32c)
 
         if (length > 3)
         {
-            octet4 = (uint32_t) ((uint8_t) *(++str));
+            octet4 = (uint32_t)((uint8_t) * (++str));
             advance++;
         }
-        if ((octet4 & (128+64)) != 128)  /* Format isn't 10xxxxxx? */
+        if ((octet4 & (128 + 64)) != 128) /* Format isn't 10xxxxxx? */
         {
             *u32c = kBadUnicodeValue;
             return advance;
         }
 
-        retval = ( ((octet << 18)) | ((octet2 - 128) << 12) |
-                   ((octet3 - 128) << 6) | ((octet4 - 128)) );
+        retval = (((octet << 18)) | ((octet2 - 128) << 12) | ((octet3 - 128) << 6) | ((octet4 - 128)));
         if ((retval >= 0x10000) && (retval <= 0x10FFFF))
         {
             *u32c = retval;
@@ -203,14 +201,14 @@ static int GetNextUTF8Codepoint(const char *_str, size_t length, uint32_t *u32c)
         }
     } /* else if */
 
-// Shouldn't get here, but ok
+    // Shouldn't get here, but ok
     *u32c = kBadUnicodeValue;
     return 0;
 }
 
 static bool CodepointToUTF8(uint32_t cp, char *_dst, uint64_t *_len)
 {
-    char *dst = _dst;
+    char    *dst = _dst;
     uint64_t len = *_len;
 
     if (len == 0)
@@ -218,28 +216,28 @@ static bool CodepointToUTF8(uint32_t cp, char *_dst, uint64_t *_len)
 
     if (cp > 0x10FFFF)
         cp = kBadUnicodeValue;
-    else if ((cp == 0xFFFE) || (cp == 0xFFFF))  /* illegal values. */
+    else if ((cp == 0xFFFE) || (cp == 0xFFFF)) /* illegal values. */
         cp = kBadUnicodeValue;
     else
     {
         /* There are seven "UTF-16 surrogates" that are illegal in UTF-8. */
         switch (cp)
         {
-            case 0xD800:
-            case 0xDB7F:
-            case 0xDB80:
-            case 0xDBFF:
-            case 0xDC00:
-            case 0xDF80:
-            case 0xDFFF:
-                cp = kBadUnicodeValue;
+        case 0xD800:
+        case 0xDB7F:
+        case 0xDB80:
+        case 0xDBFF:
+        case 0xDC00:
+        case 0xDF80:
+        case 0xDFFF:
+            cp = kBadUnicodeValue;
         } /* switch */
     } /* else */
 
     /* Do the encoding... */
     if (cp < 0x80)
     {
-        *(dst++) = (char) cp;
+        *(dst++) = (char)cp;
         len--;
     } /* if */
 
@@ -249,8 +247,8 @@ static bool CodepointToUTF8(uint32_t cp, char *_dst, uint64_t *_len)
             len = 0;
         else
         {
-            *(dst++) = (char) ((cp >> 6) | 128 | 64);
-            *(dst++) = (char) (cp & 0x3F) | 128;
+            *(dst++) = (char)((cp >> 6) | 128 | 64);
+            *(dst++) = (char)(cp & 0x3F) | 128;
             len -= 2;
         } /* else */
     } /* else if */
@@ -261,9 +259,9 @@ static bool CodepointToUTF8(uint32_t cp, char *_dst, uint64_t *_len)
             len = 0;
         else
         {
-            *(dst++) = (char) ((cp >> 12) | 128 | 64 | 32);
-            *(dst++) = (char) ((cp >> 6) & 0x3F) | 128;
-            *(dst++) = (char) (cp & 0x3F) | 128;
+            *(dst++) = (char)((cp >> 12) | 128 | 64 | 32);
+            *(dst++) = (char)((cp >> 6) & 0x3F) | 128;
+            *(dst++) = (char)(cp & 0x3F) | 128;
             len -= 3;
         } /* else */
     } /* else if */
@@ -274,15 +272,15 @@ static bool CodepointToUTF8(uint32_t cp, char *_dst, uint64_t *_len)
             len = 0;
         else
         {
-            *(dst++) = (char) ((cp >> 18) | 128 | 64 | 32 | 16);
-            *(dst++) = (char) ((cp >> 12) & 0x3F) | 128;
-            *(dst++) = (char) ((cp >> 6) & 0x3F) | 128;
-            *(dst++) = (char) (cp & 0x3F) | 128;
+            *(dst++) = (char)((cp >> 18) | 128 | 64 | 32 | 16);
+            *(dst++) = (char)((cp >> 12) & 0x3F) | 128;
+            *(dst++) = (char)((cp >> 6) & 0x3F) | 128;
+            *(dst++) = (char)(cp & 0x3F) | 128;
             len -= 4;
         } /* else if */
     } /* else */
 
-    _dst = dst;
+    _dst  = dst;
     *_len = len;
     if (cp == kBadUnicodeValue)
         return false;
@@ -292,14 +290,14 @@ static bool CodepointToUTF8(uint32_t cp, char *_dst, uint64_t *_len)
 
 std::wstring UTF8ToWString(std::string_view instring)
 {
-    size_t                  utf8pos = 0;
-    const char             *utf8ptr = (const char *)instring.data();
-    size_t                  utf8len = instring.size();
-    std::wstring            outstring;
+    size_t       utf8pos = 0;
+    const char  *utf8ptr = (const char *)instring.data();
+    size_t       utf8len = instring.size();
+    std::wstring outstring;
     while (utf8pos < utf8len)
     {
         uint32_t u32c = 0;
-        int res = GetNextUTF8Codepoint(utf8ptr + utf8pos, utf8len - utf8pos, &u32c);
+        int      res  = GetNextUTF8Codepoint(utf8ptr + utf8pos, utf8len - utf8pos, &u32c);
         if (u32c == kBadUnicodeValue)
             FatalError("Failed to convert %s to a wide string!\n", std::string(instring).c_str());
         else
@@ -317,15 +315,15 @@ std::wstring UTF8ToWString(std::string_view instring)
 }
 std::string WStringToUTF8(std::wstring_view instring)
 {
-    std::string      outstring;
-    size_t           inpos = 0;
-    size_t           inlen = instring.size();
-    const wchar_t   *inptr = instring.data();
-    uint8_t          u8c[4];
+    std::string    outstring;
+    size_t         inpos = 0;
+    size_t         inlen = instring.size();
+    const wchar_t *inptr = instring.data();
+    uint8_t        u8c[4];
     while (inpos < inlen)
     {
         uint32_t u32c = 0;
-        uint64_t len = 0;
+        uint64_t len  = 0;
         if ((*(inptr + inpos) & 0xD800) == 0xD800)                              // High surrogate
         {
             if (inpos + 1 < inlen && (*(inptr + inpos + 1) & 0xDC00) == 0xDC00) // Low surrogate
@@ -347,7 +345,7 @@ std::string WStringToUTF8(std::wstring_view instring)
         {
             u32c = *(inptr + inpos);
             inpos++;
-            len+=2;
+            len += 2;
         }
         memset(u8c, 0, 4);
         if (!CodepointToUTF8(u32c, (char *)u8c, &len))

@@ -9,7 +9,8 @@ add_library(
   c_memory.cc
 )
 
-target_include_directories(edge_coal PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
+target_link_libraries(edge_coal PRIVATE almostequals)
+
 target_include_directories(edge_coal PUBLIC ./)
 
 target_compile_options(edge_coal PRIVATE

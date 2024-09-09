@@ -1943,7 +1943,8 @@ static void DoMeleeAttack(MapObject *mo)
 
     if (!DecideMeleeAttack(mo, attack))
     {
-        LineAttack(mo, mo->angle_, range, epi::BAMTan(mo->vertical_angle_), damage, &attack->damage_, attack->puff_, attack->blood_);
+        LineAttack(mo, mo->angle_, range, epi::BAMTan(mo->vertical_angle_), damage, &attack->damage_, attack->puff_,
+                   attack->blood_);
         return;
     }
 
@@ -2179,8 +2180,7 @@ static void ShootToSpot(MapObject *object)
 
     if (spot_type == nullptr)
     {
-        WarningOrError("Thing [%s] used SHOOT_TO_SPOT attack, but has no SPIT_SPOT\n",
-                            object->info_->name_.c_str());
+        WarningOrError("Thing [%s] used SHOOT_TO_SPOT attack, but has no SPIT_SPOT\n", object->info_->name_.c_str());
         return;
     }
 

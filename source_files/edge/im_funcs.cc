@@ -21,17 +21,9 @@
 #include "epi.h"
 #include "epi_filesystem.h"
 #include "epi_str_util.h"
-#define STB_RECT_PACK_IMPLEMENTATION
-#include "stb_rect_pack.h"
-#define STBI_ONLY_PNG
-#define STBI_ONLY_TGA
-#define STBI_ONLY_JPEG
-#define STBI_NO_STDIO
-#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-#define STBI_WRITE_NO_STDIO
-#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
+#include "stb_rect_pack.h"
 
 ImageAtlas::ImageAtlas(int w, int h)
 {
@@ -147,7 +139,7 @@ ImageData *LoadImageData(epi::File *file)
 {
     int width  = 0;
     int height = 0;
-    int depth = 0;
+    int depth  = 0;
 
     int      length    = file->GetLength();
     uint8_t *raw_image = file->LoadIntoMemory();

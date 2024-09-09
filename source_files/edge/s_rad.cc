@@ -167,8 +167,7 @@ bool RadPlayer::OpenMemory(uint8_t *data, int length)
 
     edge_opal = new Opal(sound_device_frequency);
     edge_rad  = new RADPlayer;
-    edge_rad->Init(
-        data, [](void *arg, uint16_t reg_num, uint8_t val) { edge_opal->Port(reg_num, val); }, 0);
+    edge_rad->Init(data, [](void *arg, uint16_t reg_num, uint8_t val) { edge_opal->Port(reg_num, val); }, 0);
 
     sample_rate_ = edge_rad->GetHertz();
 

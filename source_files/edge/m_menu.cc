@@ -703,7 +703,7 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style, float LineHe
     if (style->fonts_[text_type]->StringWidth(temp_string.c_str()) * txtscale > 90)
     {
         // truncate, add ellipsis
-        for(size_t i = temp_string.size() - 1; i > 0; i--)
+        for (size_t i = temp_string.size() - 1; i > 0; i--)
         {
             std::string test = temp_string.substr(0, i);
             if (style->fonts_[text_type]->StringWidth(test.append("...").c_str()) * txtscale <= 90)
@@ -723,7 +723,7 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style, float LineHe
     if (style->fonts_[text_type]->StringWidth(temp_string.c_str()) * txtscale > 90)
     {
         // truncate, add ellipsis
-        for(size_t i = temp_string.size() - 1; i > 0; i--)
+        for (size_t i = temp_string.size() - 1; i > 0; i--)
         {
             std::string test = temp_string.substr(0, i);
             if (style->fonts_[text_type]->StringWidth(test.append("...").c_str()) * txtscale <= 90)
@@ -757,11 +757,11 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style, float LineHe
         temp_string = language["MenuDifficulty5"];
         break;
     }
-    
+
     if (style->fonts_[text_type]->StringWidth(temp_string.c_str()) * txtscale > 90)
     {
         // truncate, add ellipsis
-        for(size_t i = temp_string.size() - 1; i > 0; i--)
+        for (size_t i = temp_string.size() - 1; i > 0; i--)
         {
             std::string test = temp_string.substr(0, i);
             if (style->fonts_[text_type]->StringWidth(test.append("...").c_str()) * txtscale <= 90)
@@ -781,9 +781,10 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style, float LineHe
     {
         float height = 95.0f * info->save_image_data->used_height_ / info->save_image_data->used_width_;
         HUDStretchFromImageData(
-            x - 3, y + ((style->definition_->text_[text_type].y_offset_ + style->definition_->entry_spacing_ + 114) - y - height), 95,
-            height,
-            info->save_image_data, info->save_texture_id, kOpacitySolid);
+            x - 3,
+            y + ((style->definition_->text_[text_type].y_offset_ + style->definition_->entry_spacing_ + 114) - y -
+                 height),
+            95, height, info->save_image_data, info->save_texture_id, kOpacitySolid);
     }
 }
 
@@ -1096,7 +1097,7 @@ void MenuSaveGame(int choice)
     MenuReadSaveStrings();
     MenuSetupNextMenu(&SaveMenuDefinition);
 
-    need_save_screenshot  = true;
+    need_save_screenshot = true;
 }
 
 //
@@ -2014,8 +2015,8 @@ bool MenuResponder(InputEvent *ev)
                 ch = epi::ToUpperASCII(ch);
             EPI_ASSERT(save_style);
             if (ch >= 32 && ch <= 127 && save_string_character_index < kSaveStringSize - 1 &&
-                save_style->fonts_[StyleDefinition::kTextSectionText]->StringWidth(save_extended_information_slots[save_slot].description) <
-                    (kSaveStringSize - 2) * 8)
+                save_style->fonts_[StyleDefinition::kTextSectionText]->StringWidth(
+                    save_extended_information_slots[save_slot].description) < (kSaveStringSize - 2) * 8)
             {
                 save_extended_information_slots[save_slot].description[save_string_character_index++] = ch;
                 save_extended_information_slots[save_slot].description[save_string_character_index]   = 0;
@@ -2388,11 +2389,12 @@ static std::string GetMiddle(std::string &str, int pos, int len)
 
 static void DrawMessage(void)
 {
-    if (message_key_routine == QuitResponse && !exit_style->background_image_ && show_endoom.d_) // Respect dialog styles with custom
-                                                                               // backgrounds and user preference
+    if (message_key_routine == QuitResponse && !exit_style->background_image_ &&
+        show_endoom.d_) // Respect dialog styles with custom
+                        // backgrounds and user preference
     {
-        StartFrame(); // To clear and ensure solid black background regardless
-                      // of style
+        StartFrame();   // To clear and ensure solid black background regardless
+                        // of style
 
         if (exit_style->definition_->text_[StyleDefinition::kTextSectionText].colmap_)
         {
@@ -2430,8 +2432,8 @@ static void DrawMessage(void)
 
     std::string s = msg + input;
 
-    y = 100 - (StringLines(s) *
-               exit_style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight() * exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_ / 2);
+    y = 100 - (StringLines(s) * exit_style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight() *
+               exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_ / 2);
 
     if (!msg.empty())
     {
@@ -2450,11 +2452,13 @@ static void DrawMessage(void)
             if (s.size() > 0)
             {
                 HUDSetAlignment(0, -1);  // center it
-                HUDWriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str(), exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
+                HUDWriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str(),
+                             exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
                 HUDSetAlignment(-1, -1); // set it back to usual
             }
 
-            y += exit_style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight() * exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
+            y += exit_style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight() *
+                 exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
 
             oldpos = pos + 1;
         } while (pos >= 0 && oldpos < (int)msg.size());
@@ -2477,11 +2481,13 @@ static void DrawMessage(void)
             if (s.size() > 0)
             {
                 HUDSetAlignment(0, -1);  // center it
-                HUDWriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str(), exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
+                HUDWriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str(),
+                             exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
                 HUDSetAlignment(-1, -1); // set it back to usual
             }
 
-            y += exit_style->fonts_[0]->NominalHeight() * exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
+            y += exit_style->fonts_[0]->NominalHeight() *
+                 exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
 
             oldpos = pos + 1;
         } while (pos >= 0 && oldpos < (int)input.size());
@@ -2985,8 +2991,9 @@ void MenuDrawer(void)
     if (!menu_active)
         return;
 
-    if (use_menu_backdrop.d_ && menu_backdrop && (option_menu_on || network_game_menu_on ||
-                          (current_menu->draw_function == MenuDrawLoad || current_menu->draw_function == MenuDrawSave)))
+    if (use_menu_backdrop.d_ && menu_backdrop &&
+        (option_menu_on || network_game_menu_on ||
+         (current_menu->draw_function == MenuDrawLoad || current_menu->draw_function == MenuDrawSave)))
     {
         if (title_scaling.d_) // Fill Border
         {
@@ -3060,8 +3067,8 @@ void MenuClear(void)
         SaveDefaults();
     }
 
-    menu_active           = false;
-    option_menu_on        = 0;
+    menu_active    = false;
+    option_menu_on = 0;
 }
 
 void MenuSetupNextMenu(Menu *menudef)
@@ -3209,11 +3216,11 @@ void MenuInitialize(void)
     {
         menu_read_this[0] = ImageLookup("HELP1");
         if (IsLumpInAnyWad("HELP2"))
-            menu_read_this[1] = ImageLookup("HELP2");  // Shareware doom
+            menu_read_this[1] = ImageLookup("HELP2");        // Shareware doom
         else
-            menu_read_this[1] = ImageLookup("CREDIT"); // Full doom
+            menu_read_this[1] = ImageLookup("CREDIT");       // Full doom
     }
-    else if (IsLumpInAnyWad("HELP")) // doom 2
+    else if (IsLumpInAnyWad("HELP"))                         // doom 2
     {
         menu_read_this[0]           = ImageLookup("HELP");
         menu_read_this[1]           = ImageLookup("CREDIT"); // Unnecessary since we won't see it anyway...

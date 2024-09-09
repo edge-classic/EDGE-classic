@@ -209,9 +209,9 @@ class MapObject : public Position
     struct RegionProperties *region_properties_ = nullptr;
 
     // Uncapped stuff - Dasho
-    float old_x_        = 0;
-    float old_y_        = 0;
-    BAMAngle old_angle_ = 0;
+    float    old_x_              = 0;
+    float    old_y_              = 0;
+    BAMAngle old_angle_          = 0;
     BAMAngle old_vertical_angle_ = 0;
 
     // Vert slope stuff maybe

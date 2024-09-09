@@ -24,17 +24,12 @@
 
 #include "s_ogg.h"
 
+#include "ddf_playlist.h"
 #include "epi.h"
 #include "epi_endian.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
-// clang-format off
-#define OV_EXCLUDE_STATIC_CALLBACKS
-#define OGG_IMPL
-#define VORBIS_IMPL
 #include "minivorbis.h"
-// clang-format on
-#include "ddf_playlist.h"
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_music.h"
@@ -253,9 +248,9 @@ bool OGGPlayer::StreamIntoBuffer(SoundData *buf)
             data_buf = buf->data_left_ + samples * (is_stereo_ ? 2 : 1);
 
         int section;
-        int got_size = ov_read(&ogg_stream_, (char *)data_buf,
-                               (kMusicBuffer - samples) * (is_stereo_ ? 2 : 1) * sizeof(int16_t), ogg_endian,
-                               sizeof(int16_t), 1 /* signed data */, &section);
+        int got_size =
+            ov_read(&ogg_stream_, (char *)data_buf, (kMusicBuffer - samples) * (is_stereo_ ? 2 : 1) * sizeof(int16_t),
+                    ogg_endian, sizeof(int16_t), 1 /* signed data */, &section);
 
         if (got_size == OV_HOLE) // ignore corruption
             continue;

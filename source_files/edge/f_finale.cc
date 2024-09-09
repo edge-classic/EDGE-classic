@@ -446,7 +446,7 @@ static void TextWrite(void)
     {
         if (count == 0 || *ch == 0)
         {
-            if (Dropshadow_colmap) //we want a dropshadow
+            if (Dropshadow_colmap) // we want a dropshadow
             {
                 float Dropshadow_Offset = style->definition_->text_[t_type].dropshadow_offset_;
                 Dropshadow_Offset *= style->definition_->text_[t_type].scale_ * txtscale;
@@ -468,7 +468,7 @@ static void TextWrite(void)
 
         if (c == '\n' || pos > (int)sizeof(line) - 4)
         {
-            if (Dropshadow_colmap) //we want a dropshadow
+            if (Dropshadow_colmap) // we want a dropshadow
             {
                 float Dropshadow_Offset = style->definition_->text_[t_type].dropshadow_offset_;
                 Dropshadow_Offset *= style->definition_->text_[t_type].scale_ * txtscale;
@@ -838,7 +838,7 @@ static void CastDrawer(void)
     height *= scale_y;
 
     RenderImage(pos_x - offset_x, pos_y + offset_y, width, height, image, flip ? image->Right() : 0, 0,
-                      flip ? 0 : image->Right(), image->Top(), nullptr, 1.0f, cast_order->palremap_);
+                flip ? 0 : image->Right(), image->Top(), nullptr, 1.0f, cast_order->palremap_);
 }
 
 //

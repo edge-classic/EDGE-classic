@@ -232,7 +232,7 @@ static void InstallSpriteLump(SpriteDefinition *def, int lump, const char *lumpn
         return;
 
     frame->images_[rot] = CreateSprite(lumpname, lump, frame->is_weapon_);
-    frame->flip_[rot] = flip;
+    frame->flip_[rot]   = flip;
 
     if (rot == 0 && frame->rotations_ == 1)
         frame->finished_ = true;
@@ -259,7 +259,7 @@ static void InstallSpritePack(SpriteDefinition *def, PackFile *pack, std::string
         return;
 
     frame->images_[rot] = CreatePackSprite(packname, pack, frame->is_weapon_);
-    frame->flip_[rot] = flip;
+    frame->flip_[rot]   = flip;
 
     if (rot == 0 && frame->rotations_ == 1)
         frame->finished_ = true;

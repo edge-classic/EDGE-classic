@@ -18,11 +18,7 @@
 
 #include "s_wav.h"
 
-// clang-format off
-#define DR_WAV_NO_STDIO
-#define DR_WAV_IMPLEMENTATION
 #include "dr_wav.h"
-// clang-format on
 #include "epi.h"
 #include "epi_endian.h"
 #include "epi_file.h"

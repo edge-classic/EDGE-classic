@@ -130,20 +130,29 @@ else()
 endif()
 
 set (EDGE_LINK_LIBRARIES
-  edge_ajbsp  
+  edge_ajbsp
+  edge_coal  
   edge_ddf
   edge_deh
   edge_epi
+  edge_tracy
   ${SDL2_LIBRARIES}
+  almostequals
   crsid
+  dr_libs
   fluidlite
   fmmidi
+  HandmadeMath
   libRAD
   libvwad
-  m4p
-  miniz
-  edge_coal
   lua
+  m4p
+  minivorbis
+  miniz
+  pl_mpeg
+  sokol_color
+  stb
+  superfasthash
 )
 
 if (WIN32)
@@ -166,8 +175,6 @@ else()
   target_compile_definitions(edge-classic PRIVATE UNIX)
 endif()
 
-target_include_directories(edge-classic PRIVATE ./)
-
 if (NOT EDGE_GL_ES2)
   target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/glad/include/glad)
 	set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} glad ${OPENGL_LIBRARIES})
@@ -176,26 +183,11 @@ else()
 	set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} gl4es)
 endif()
 
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
-target_include_directories(edge-classic PRIVATE ../ajbsp)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/crsid)
-target_include_directories(edge-classic PRIVATE ../ddf)
-target_include_directories(edge-classic PRIVATE ../dehacked)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/dr_libs)
-target_include_directories(edge-classic PRIVATE ../epi)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/fmmidi)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/fluidlite/include)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/hmm)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/libRAD)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/libvwad)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/m4p)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/minivorbis)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/miniz)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/pl_mpeg)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/stb)
 if(WIN32 AND (MSVC OR CLANG))
   target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/include)
 endif()
+
+target_include_directories(edge-classic PRIVATE ./)
 
 target_link_libraries(edge-classic PRIVATE ${EDGE_LINK_LIBRARIES})
 

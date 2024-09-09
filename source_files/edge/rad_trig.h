@@ -41,18 +41,18 @@ void GroupTriggerTags(RADScriptTrigger *trig);
 // For UMAPINFO bossaction "clear" directive
 void ClearDeathTriggersByMap(const std::string &mapname);
 
-void                  RunScriptTriggers(void);
-void                  ScriptTicker(void);
-void                  ScriptDrawer(void);
-bool                  ScriptResponder(InputEvent *ev);
-bool                  ScriptRadiusCheck(MapObject *mo, RADScript *r);
+void              RunScriptTriggers(void);
+void              ScriptTicker(void);
+void              ScriptDrawer(void);
+bool              ScriptResponder(InputEvent *ev);
+bool              ScriptRadiusCheck(MapObject *mo, RADScript *r);
 RADScript        *FindScriptByName(const char *map_name, const char *name);
 RADScriptTrigger *FindScriptTriggerByName(const char *name);
 RADScriptState   *FindScriptStateByLabel(RADScript *scr, char *label);
-void                  ScriptEnableByTag(MapObject *actor, uint32_t tag, bool disable, RADScriptTag tagtype);
-void                  ScriptEnableByTag(MapObject *actor, const char *name, bool disable);
-bool                  CheckActiveScriptByTag(MapObject *actor, const char *name);
-void                  ScriptUpdateMonsterDeaths(MapObject *mo);
+void              ScriptEnableByTag(MapObject *actor, uint32_t tag, bool disable, RADScriptTag tagtype);
+void              ScriptEnableByTag(MapObject *actor, const char *name, bool disable);
+bool              CheckActiveScriptByTag(MapObject *actor, const char *name);
+void              ScriptUpdateMonsterDeaths(MapObject *mo);
 
 // Menu support
 void ScriptMenuStart(RADScriptTrigger *R, ScriptShowMenuParameter *menu);

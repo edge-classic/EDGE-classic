@@ -133,8 +133,8 @@ static void AllocateDrawStructsMelt(void)
     {
         r = (RandomByte() % 3) - 1;
 
-        melt_yoffs[x] = melt_yoffs[x - 1] + r;
-        melt_yoffs[x] = HMM_MAX(-15, HMM_MIN(0, melt_yoffs[x]));
+        melt_yoffs[x]     = melt_yoffs[x - 1] + r;
+        melt_yoffs[x]     = HMM_MAX(-15, HMM_MIN(0, melt_yoffs[x]));
         old_melt_yoffs[x] = melt_yoffs[x];
     }
 }
@@ -394,7 +394,7 @@ bool DoWipe(void)
     float how_far = 0.0f;
 
     if (uncapped_frames.d_ && tics == 0)
-        how_far = ((float)current_wipe_progress  + fractional_tic) / 40.0f;
+        how_far = ((float)current_wipe_progress + fractional_tic) / 40.0f;
     else
         how_far = (float)current_wipe_progress / 40.0f;
 

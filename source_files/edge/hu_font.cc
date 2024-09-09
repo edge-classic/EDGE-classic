@@ -34,10 +34,9 @@
 #include "r_misc.h"
 #include "r_modes.h"
 #include "r_texgl.h"
+#include "stb_truetype.h"
 #include "w_files.h"
 #include "w_wad.h"
-#define STB_TRUETYPE_IMPLEMENTATION
-#include "stb_truetype.h"
 
 static constexpr uint8_t kDummyCharacterWidth = 8;
 
@@ -651,7 +650,7 @@ int Font::MaxFit(int pixel_w, const char *str)
 //
 int Font::GetGlyphIndex(char ch)
 {
-    assert(definition_->type_ == kFontTypeTrueType);
+    EPI_ASSERT(definition_->type_ == kFontTypeTrueType);
 
     auto find_glyph = truetype_glyph_map_.find((uint8_t)ch);
     if (find_glyph != truetype_glyph_map_.end())
@@ -713,7 +712,7 @@ float Font::StringWidth(const char *str)
 //
 int StringLines(std::string_view str)
 {
-    int slines = 1;
+    int                         slines = 1;
     std::string_view::size_type oldpos = 0;
     std::string_view::size_type pos    = 0;
 

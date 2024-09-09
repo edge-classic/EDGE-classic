@@ -121,30 +121,30 @@ FILE *log_file   = nullptr;
 FILE *debug_file = nullptr;
 
 GameFlags default_game_flags = {
-    false,      // nomonsters
-    false,      // fast_monsters
+    false,       // nomonsters
+    false,       // fast_monsters
 
-    false,      // respawn
-    false,      // enemy_respawn_mode
-    false,      // item respawn
+    false,       // respawn
+    false,       // enemy_respawn_mode
+    false,       // item respawn
 
-    false,      // true 3d gameplay
-    8,          // gravity
-    false,      // more blood
+    false,       // true 3d gameplay
+    8,           // gravity
+    false,       // more blood
 
-    true,       // jump
-    true,       // crouch
-    true,       // mlook
+    true,        // jump
+    true,        // crouch
+    true,        // mlook
     kAutoAimOff, // autoaim
 
-    true,       // cheats
-    true,       // have_extra
-    false,      // limit_zoom
+    true,        // cheats
+    true,        // have_extra
+    false,       // limit_zoom
 
-    true,       // kicking
-    true,       // weapon_switch
-    true,       // pass_missile
-    false,      // team_damage
+    true,        // kicking
+    true,        // weapon_switch
+    true,        // pass_missile
+    false,       // team_damage
 };
 
 // -KM- 1998/12/16 These flags are the users prefs and are copied to

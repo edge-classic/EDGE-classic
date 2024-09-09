@@ -566,7 +566,7 @@ void SV_LightFinaliseElems(void)
 int SV_TriggerCountElems(void)
 {
     RADScriptTrigger *cur;
-    int                   count;
+    int               count;
 
     for (cur = active_triggers, count = 0; cur; cur = cur->next, count++)
     { /* nothing here */
@@ -592,7 +592,7 @@ void *SV_TriggerFindByIndex(int index)
 int SV_TriggerGetIndex(RADScriptTrigger *elem)
 {
     RADScriptTrigger *cur;
-    int                   index;
+    int               index;
 
     for (cur = active_triggers, index = 0; cur && cur != elem; cur = cur->next)
         index++;
@@ -900,7 +900,7 @@ bool SaveGameTriggerGetState(void *storage, int index, void *extra)
     const RADScriptState **dest = (const RADScriptState **)storage + index;
     const RADScriptState  *temp;
 
-    int                         value;
+    int                     value;
     const RADScriptTrigger *trig = (RADScriptTrigger *)sv_current_elem;
 
     value = SaveChunkGetInteger();
@@ -932,7 +932,7 @@ void SaveGameTriggerPutState(void *storage, int index, void *extra)
     const RADScriptState *src = ((const RADScriptState **)storage)[index];
     const RADScriptState *temp;
 
-    int                         value;
+    int                     value;
     const RADScriptTrigger *trig = (RADScriptTrigger *)sv_current_elem;
 
     if (!src)

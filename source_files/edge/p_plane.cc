@@ -327,8 +327,8 @@ static bool MovePlane(PlaneMover *plane)
     if (sec->old_game_tic != game_tic)
     {
         plane->sector->old_ceiling_height = plane->sector->ceiling_height;
-        plane->sector->old_floor_height = plane->sector->floor_height;
-        plane->sector->old_game_tic = game_tic;
+        plane->sector->old_floor_height   = plane->sector->floor_height;
+        plane->sector->old_game_tic       = game_tic;
     }
 
     switch (plane->direction)

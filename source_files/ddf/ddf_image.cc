@@ -246,7 +246,7 @@ static void ImageParseLump(const char *spec)
         if (DDFCompareName(keyword, "PNG") == 0 || DDFCompareName(keyword, "TGA") == 0 ||
             DDFCompareName(keyword, "JPG") == 0 || DDFCompareName(keyword, "JPEG") == 0 ||
             DDFCompareName(keyword, "EXT") == 0) // 2.x used this for auto-detection of regular images, but
-                                                  // we do this regardless of the extension
+                                                 // we do this regardless of the extension
         {
             dynamic_image->format_ = kLumpImageFormatStandard;
         }

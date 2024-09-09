@@ -163,7 +163,7 @@ void HUDWriteText(Style *style, int text_type, int x, int y, const char *str, fl
     HUDSetScale(scale * style->definition_->text_[text_type].scale_);
 
     const Colormap *Dropshadow_colmap = style->definition_->text_[text_type].dropshadow_colmap_;
-    if (Dropshadow_colmap) //we want a dropshadow
+    if (Dropshadow_colmap) // we want a dropshadow
     {
         float Dropshadow_Offset = style->definition_->text_[text_type].dropshadow_offset_;
         Dropshadow_Offset *= style->definition_->text_[text_type].scale_ * scale;
@@ -172,7 +172,7 @@ void HUDWriteText(Style *style, int text_type, int x, int y, const char *str, fl
         HUDDrawText(x + Dropshadow_Offset, y + Dropshadow_Offset, str);
     }
 
-    HUDSetTextColor(); //set it back to normal just in case
+    HUDSetTextColor(); // set it back to normal just in case
     const Colormap *colmap = style->definition_->text_[text_type].colmap_;
     if (colmap)
         HUDSetTextColor(GetFontColor(colmap));
@@ -182,7 +182,6 @@ void HUDWriteText(Style *style, int text_type, int x, int y, const char *str, fl
     HUDSetFont();
     HUDSetScale();
     HUDSetTextColor();
-
 }
 
 //--- editor settings ---

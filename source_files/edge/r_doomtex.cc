@@ -258,7 +258,7 @@ static ImageData *ReadTextureAsEpiBlock(Image *rim)
 
             if (offset < 0)
                 FatalError("Negative image offset 0x%08x in image [%s]\n", offset, rim->name_.c_str());
-            
+
             if (offset >= realsize)
                 FatalError("Excessive image offset 0x%08x in image [%s]\n", offset, rim->name_.c_str());
 

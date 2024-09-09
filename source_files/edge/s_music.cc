@@ -222,7 +222,7 @@ void ChangeMusic(int entry_number, bool loop)
         }
         else
         {
-           music_player = PlayFMMMusic(data, length, loop);
+            music_player = PlayFMMMusic(data, length, loop);
         }
         break;
 

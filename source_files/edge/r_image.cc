@@ -378,7 +378,7 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
             return nullptr;
         }
 
-        solid = (bpp == 3);      
+        solid = (bpp == 3);
 
         // close it
         delete f;
@@ -1344,9 +1344,9 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
 
     GLuint tex_id =
         UploadTexture(tmp_img,
-                              (clamp ? kUploadClamp : 0) | (mip ? kUploadMipMap : 0) | (smooth ? kUploadSmooth : 0) |
-                                  ((rim->opacity_ == kOpacityMasked) ? kUploadThresh : 0),
-                              max_pix);
+                      (clamp ? kUploadClamp : 0) | (mip ? kUploadMipMap : 0) | (smooth ? kUploadSmooth : 0) |
+                          ((rim->opacity_ == kOpacityMasked) ? kUploadThresh : 0),
+                      max_pix);
 
     delete tmp_img;
 
@@ -1765,8 +1765,7 @@ static CachedImage *ImageCacheOGL(Image *rim, const Colormap *trans, bool do_whi
     if (rim->liquid_type_ > kLiquidImageNone &&
         (swirling_flats == kLiquidSwirlSmmu || swirling_flats == kLiquidSwirlSmmuSlosh))
     {
-        if (!erraticism_active && !time_stop_active &&
-            rim->swirled_game_tic_ != hud_tic)
+        if (!erraticism_active && !time_stop_active && rim->swirled_game_tic_ != hud_tic)
         {
             if (rc->texture_id != 0)
             {

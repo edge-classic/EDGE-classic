@@ -13,8 +13,8 @@
 #include "s_sound.h"
 #include "w_wad.h"
 
-extern bool            erraticism_active;
-extern std::string     current_map_title;
+extern bool        erraticism_active;
+extern std::string current_map_title;
 
 extern ImageData *ReadAsEpiBlock(Image *rim);
 extern ImageData *RGBFromPalettised(ImageData *src, const uint8_t *palette, int opacity);
@@ -79,7 +79,6 @@ static int HD_game_mode(lua_State *L)
 
     return 1;
 }
-
 
 // hud.lookup_LDF(languageEntry)
 //
@@ -170,11 +169,11 @@ static int HD_text_font(lua_State *L)
     FontDefinition *DEF = fontdefs.Lookup(font_name);
     if (!DEF)
         return 0;
-        
+
     Font *font = hud_fonts.Lookup(DEF);
     if (!font)
         return 0;
-        
+
     HUDSetFont(font);
 
     return 0;
@@ -220,29 +219,28 @@ static int HD_set_alpha(lua_State *L)
 //
 static int HD_get_text_width(lua_State *L)
 {
-    const char *str = luaL_checkstring(L, 1);
-    double size = luaL_optnumber(L, 2, 0);
-    float TheWidth = 0;
-/*
-    float TheWidth = HUDFontWidthNew(size);
+    const char *str      = luaL_checkstring(L, 1);
+    double      size     = luaL_optnumber(L, 2, 0);
+    float       TheWidth = 0;
+    /*
+        float TheWidth = HUDFontWidthNew(size);
 
-    if (!str)
-        TheWidth = 0;
-    else
-    {
-        // get the length of the line
-        int len = 0;
-        while (str[len] && str[len] != '\n')
-            len++;
-        TheWidth *= len;
-    }
-*/
-    TheWidth=HUDStringWidthNew(str,size);
+        if (!str)
+            TheWidth = 0;
+        else
+        {
+            // get the length of the line
+            int len = 0;
+            while (str[len] && str[len] != '\n')
+                len++;
+            TheWidth *= len;
+        }
+    */
+    TheWidth = HUDStringWidthNew(str, size);
     lua_pushnumber(L, TheWidth);
 
     return 1;
 }
-
 
 // hud.solid_box(x, y, w, h, color)
 //
@@ -769,10 +767,10 @@ static int HD_get_average_color(lua_State *L)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    RGBAColor  col          = tmp_img_data->AverageColor(from_x, to_x, from_y, to_y);
-    rgb.X                   = epi::GetRGBARed(col);
-    rgb.Y                   = epi::GetRGBAGreen(col);
-    rgb.Z                   = epi::GetRGBABlue(col);
+    RGBAColor col = tmp_img_data->AverageColor(from_x, to_x, from_y, to_y);
+    rgb.X         = epi::GetRGBARed(col);
+    rgb.Y         = epi::GetRGBAGreen(col);
+    rgb.Z         = epi::GetRGBABlue(col);
     delete tmp_img_data;
 
     LuaPushVector3(L, rgb);
@@ -799,10 +797,10 @@ static int HD_get_lightest_color(lua_State *L)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    RGBAColor  col          = tmp_img_data->LightestColor(from_x, to_x, from_y, to_y);
-    rgb.X                   = epi::GetRGBARed(col);
-    rgb.Y                   = epi::GetRGBAGreen(col);
-    rgb.Z                   = epi::GetRGBABlue(col);
+    RGBAColor col = tmp_img_data->LightestColor(from_x, to_x, from_y, to_y);
+    rgb.X         = epi::GetRGBARed(col);
+    rgb.Y         = epi::GetRGBAGreen(col);
+    rgb.Z         = epi::GetRGBABlue(col);
     delete tmp_img_data;
 
     LuaPushVector3(L, rgb);
@@ -828,10 +826,10 @@ static int HD_get_darkest_color(lua_State *L)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    RGBAColor  col          = tmp_img_data->DarkestColor(from_x, to_x, from_y, to_y);
-    rgb.X                   = epi::GetRGBARed(col);
-    rgb.Y                   = epi::GetRGBAGreen(col);
-    rgb.Z                   = epi::GetRGBABlue(col);
+    RGBAColor col = tmp_img_data->DarkestColor(from_x, to_x, from_y, to_y);
+    rgb.X         = epi::GetRGBARed(col);
+    rgb.Y         = epi::GetRGBAGreen(col);
+    rgb.Z         = epi::GetRGBABlue(col);
     delete tmp_img_data;
 
     LuaPushVector3(L, rgb);
@@ -857,7 +855,7 @@ static int HD_get_average_hue(lua_State *L)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    uint8_t    temp_rgb[3];
+    uint8_t temp_rgb[3];
     tmp_img_data->AverageHue(temp_rgb, nullptr, from_x, to_x, from_y, to_y);
     rgb.X = temp_rgb[0];
     rgb.Y = temp_rgb[1];
@@ -885,11 +883,11 @@ static int HD_get_average_top_border_color(lua_State *L)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    RGBAColor  col          = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, tmp_img_c->actual_height_ - 1,
-                                                         tmp_img_c->actual_height_);
-    rgb.X                   = epi::GetRGBARed(col);
-    rgb.Y                   = epi::GetRGBAGreen(col);
-    rgb.Z                   = epi::GetRGBABlue(col);
+    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, tmp_img_c->actual_height_ - 1,
+                                               tmp_img_c->actual_height_);
+    rgb.X         = epi::GetRGBARed(col);
+    rgb.Y         = epi::GetRGBAGreen(col);
+    rgb.Z         = epi::GetRGBABlue(col);
     delete tmp_img_data;
 
     LuaPushVector3(L, rgb);
@@ -910,10 +908,10 @@ static int HD_get_average_bottom_border_color(lua_State *L)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    RGBAColor  col          = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, 0, 1);
-    rgb.X                   = epi::GetRGBARed(col);
-    rgb.Y                   = epi::GetRGBAGreen(col);
-    rgb.Z                   = epi::GetRGBABlue(col);
+    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, 0, 1);
+    rgb.X         = epi::GetRGBARed(col);
+    rgb.Y         = epi::GetRGBAGreen(col);
+    rgb.Z         = epi::GetRGBABlue(col);
     delete tmp_img_data;
 
     LuaPushVector3(L, rgb);

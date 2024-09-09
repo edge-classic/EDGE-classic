@@ -18,12 +18,8 @@
 
 #include "s_mp3.h"
 
-// clang-format off
-#define DR_MP3_NO_STDIO
-#define DR_MP3_IMPLEMENTATION
-#include "dr_mp3.h"
-// clang-format on
 #include "ddf_playlist.h"
+#include "dr_mp3.h"
 #include "epi.h"
 #include "epi_endian.h"
 #include "epi_file.h"

@@ -436,7 +436,7 @@ static void WeaponParseField(const char *field, const char *contents, int index,
         return;
 
     if (DDFMainParseState((uint8_t *)dynamic_weapon, dynamic_weapon->state_grp_, field, contents, index, is_last,
-                           true /* is_weapon */, weapon_starters, weapon_actions))
+                          true /* is_weapon */, weapon_starters, weapon_actions))
         return;
 
     DDFWarnError("Unknown weapons.ddf command: %s\n", field);
@@ -459,7 +459,7 @@ static void WeaponFinishEntry(void)
         if (dynamic_weapon->ammopershot_[ATK] < 0)
         {
             DDFWarnError("Bad %sAMMOPERSHOT value for weapon: %d\n", ATK ? "XXX_" : "",
-                          dynamic_weapon->ammopershot_[ATK]);
+                         dynamic_weapon->ammopershot_[ATK]);
             dynamic_weapon->ammopershot_[ATK] = 0;
         }
 
@@ -479,7 +479,7 @@ static void WeaponFinishEntry(void)
              (dynamic_weapon->clip_size_[ATK] % dynamic_weapon->ammopershot_[ATK] != 0)))
         {
             DDFWarnError("%sAMMOPERSHOT=%d incompatible with %sCLIPSIZE=%d\n", ATK ? "XXX_" : "",
-                          dynamic_weapon->ammopershot_[ATK], ATK ? "XXX_" : "", dynamic_weapon->clip_size_[ATK]);
+                         dynamic_weapon->ammopershot_[ATK], ATK ? "XXX_" : "", dynamic_weapon->clip_size_[ATK]);
             dynamic_weapon->ammopershot_[ATK] = 1;
         }
 
@@ -503,21 +503,21 @@ static void WeaponFinishEntry(void)
             dynamic_weapon->clip_size_[1] != 0)
         {
             DDFError("SHARED_CLIP cannot be used with SEC_AMMO or SEC_AMMOPERSHOT "
-                      "or SEC_CLIPSIZE commands.\n");
+                     "or SEC_CLIPSIZE commands.\n");
         }
 
         if (dynamic_weapon->ammo_[2] != kAmmunitionTypeNoAmmo || dynamic_weapon->ammopershot_[2] != 0 ||
             dynamic_weapon->clip_size_[2] != 0)
         {
             DDFError("SHARED_CLIP cannot be used with 3RD_AMMO or 3RD_AMMOPERSHOT "
-                      "or 3RD_CLIPSIZE commands.\n");
+                     "or 3RD_CLIPSIZE commands.\n");
         }
 
         if (dynamic_weapon->ammo_[3] != kAmmunitionTypeNoAmmo || dynamic_weapon->ammopershot_[3] != 0 ||
             dynamic_weapon->clip_size_[3] != 0)
         {
             DDFError("SHARED_CLIP cannot be used with 4TH_AMMO or 4TH_AMMOPERSHOT "
-                      "or 4TH_CLIPSIZE commands.\n");
+                     "or 4TH_CLIPSIZE commands.\n");
         }
     }
 

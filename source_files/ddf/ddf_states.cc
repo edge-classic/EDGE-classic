@@ -292,7 +292,7 @@ int DDFStateFindLabel(const std::vector<StateRange> &group, const char *label, b
 // DDFStateReadState
 //
 void DDFStateReadState(const char *info, const char *label, std::vector<StateRange> &group, int *state_num, int index,
-                        const char *redir, const DDFActionCode *action_list, bool is_weapon)
+                       const char *redir, const DDFActionCode *action_list, bool is_weapon)
 {
     EPI_ASSERT(group.size() > 0);
 
@@ -506,8 +506,8 @@ void DDFStateReadState(const char *info, const char *label, std::vector<StateRan
 }
 
 bool DDFMainParseState(uint8_t *object, std::vector<StateRange> &group, const char *field, const char *contents,
-                        int index, bool is_last, bool is_weapon, const DDFStateStarter *starters,
-                        const DDFActionCode *actions)
+                       int index, bool is_last, bool is_weapon, const DDFStateStarter *starters,
+                       const DDFActionCode *actions)
 {
     if (epi::StringPrefixCaseCompareASCII(field, "STATES(") != 0)
         return false;

@@ -61,8 +61,8 @@ EDGE_DEFINE_CONSOLE_VARIABLE(debug_position, "0", kConsoleVariableFlagArchive)
 static ConsoleVisibility console_visible;
 
 // stores the console toggle effect
-static int   console_wipe_active   = 0;
-static int   console_wipe_position = 0;
+static int   console_wipe_active       = 0;
+static int   console_wipe_position     = 0;
 static int   old_console_wipe_position = 0;
 static Font *console_font;
 Font        *endoom_font;
@@ -97,7 +97,7 @@ static constexpr uint8_t kMaximumConsoleInput = 255;
 static char input_line[kMaximumConsoleInput + 2];
 static int  input_position = 0;
 
-int                    console_cursor;
+int console_cursor;
 
 static constexpr uint8_t kConsoleKeyRepeatDelay = ((250 * kTicRate) / 1000);
 static constexpr uint8_t kConsoleKeyRepeatRate  = (kTicRate / 15);
@@ -303,8 +303,8 @@ void SetConsoleVisible(ConsoleVisibility v)
 
     if (!console_wipe_active)
     {
-        console_wipe_active   = true;
-        console_wipe_position = (v == kConsoleVisibilityMaximal) ? 0 : kConsoleWipeTics;
+        console_wipe_active       = true;
+        console_wipe_position     = (v == kConsoleVisibilityMaximal) ? 0 : kConsoleWipeTics;
         old_console_wipe_position = console_wipe_position;
     }
 }
@@ -863,9 +863,11 @@ void ConsoleDrawer(void)
     int y = current_screen_height;
 
     if (console_wipe_active)
-    {   
+    {
         if (uncapped_frames.d_)
-            y = (int)((float)y - CON_GFX_HT * HMM_Lerp(old_console_wipe_position, fractional_tic, console_wipe_position) / kConsoleWipeTics);
+            y = (int)((float)y - CON_GFX_HT *
+                                     HMM_Lerp(old_console_wipe_position, fractional_tic, console_wipe_position) /
+                                     kConsoleWipeTics);
         else
             y = y - CON_GFX_HT * console_wipe_position / kConsoleWipeTics;
     }

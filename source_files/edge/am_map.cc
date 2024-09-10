@@ -100,7 +100,7 @@ static constexpr uint8_t kAutomapTotalMarkPoints = 9;
 
 // scale on entry
 static constexpr float kAutomapMinimumScale = 0.5f;
-static constexpr float kAutomapInitialScale = 4.0f;
+static constexpr float kAutomapInitialScale = 2.0f;
 static constexpr float kAutomapMaximumScale = 100.0f;
 
 // how much the automap moves window per tic in frame-buffer coordinates
@@ -270,7 +270,11 @@ void AutomapInitLevel(void)
 
     FindMinMaxBoundaries();
 
-    map_scale = kAutomapInitialScale;
+    if (map_scale == 0.0f)  //Not been changed yet so set a default
+    {
+        map_scale = kAutomapInitialScale;
+    }
+        
 }
 
 void AutomapStop(void)

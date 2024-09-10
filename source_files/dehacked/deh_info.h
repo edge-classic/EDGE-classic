@@ -123,8 +123,39 @@ enum Actions
 
     kTotalMBFActions, // Keep this around in case we need to delineate - Dasho
 
-    // MBF21 actions:
+    // MBF21 actions
+
+    // This range is for weapons
     kA_RefireTo = kTotalMBFActions,
+    kA_WeaponMeleeAttack,
+    kA_WeaponSound,
+    kA_WeaponBulletAttack,
+    kA_WeaponProjectile,
+    kA_ConsumeAmmo,
+    kA_CheckAmmo,
+    kA_WeaponJump,
+    kA_GunFlashTo,
+    kA_WeaponAlert,
+
+    // Thing codepointers start here
+    kA_RadiusDamage,
+    kA_NoiseAlert,
+    kA_HealChase,
+    kA_SpawnObject,
+    kA_MonsterProjectile,
+    kA_MonsterBulletAttack,
+    kA_MonsterMeleeAttack,
+    kA_ClearTracer,
+    kA_JumpIfHealthBelow,
+    kA_SeekTracer,
+    kA_FindTracer,
+    kA_JumpIfTargetInSight,
+    kA_JumpIfTargetCloser,
+    kA_JumpIfTracerInSight,
+    kA_JumpIfTracerCloser,
+    kA_JumpIfFlagsSet,
+    kA_AddFlags,
+    kA_RemoveFlags,
 
     kTotalMBF21Actions
 };

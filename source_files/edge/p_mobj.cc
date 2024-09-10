@@ -1678,11 +1678,7 @@ void MapObject::SetBelowObject(MapObject *other)
 //
 void MapObject::SetRealSource(MapObject *ref)
 {
-    if (ref && ref->source_ && (ref->flags_ & kMapObjectFlagMissile))
-        ref = ref->source_;
-    if (ref && ref->source_ && (ref->flags_ & kMapObjectFlagMissile))
-        ref = ref->source_;
-    if (ref && ref->source_ && (ref->flags_ & kMapObjectFlagMissile))
+    while (ref && ref->source_ && (ref->flags_ & kMapObjectFlagMissile))
         ref = ref->source_;
 
     SetSource(ref);

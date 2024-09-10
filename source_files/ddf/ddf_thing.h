@@ -873,15 +873,14 @@ class MapObjectDefinition
 
     int morphtimeout_;     // lobo 2023: Go to MORPH states when times up
 
-    // DEHEXTRA
-    float gib_health_;
-
     // MBF 21
     int infight_group_;
     int proj_group_;
     int splash_group_;
     int fast_speed_;
-    int melee_range_;
+    float melee_range_;
+
+    int deh_thing_id_;
 
   public:
     MapObjectDefinition();
@@ -904,6 +903,18 @@ class MapObjectDefinition
         (void)rhs;
         return *this;
     }
+};
+
+struct DEHSpawnParameters
+{
+  const char *spawn_name = nullptr;
+  BAMAngle angle = kBAMAngle0;
+  float x_offset = 0.0f;
+  float y_offset = 0.0f;
+  float z_offset = 0.0f;
+  float x_velocity = 0.0f;
+  float y_velocity = 0.0f;
+  float z_velocity = 0.0f;
 };
 
 class MapObjectDefinitionContainer : public std::vector<MapObjectDefinition *>

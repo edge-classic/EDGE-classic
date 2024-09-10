@@ -67,11 +67,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                            // Rip sound
         0,                                                                    // Fast speed
         0,                                                                    // Melee range
-        0,                                                                    // Gib health
-        -1,                                                                   // Dropped item
-        0,                                                                    // Pickup width
-        0,                                                                    // Projectile pass height
-        0,                                                                    // Fullbright
         kS_NULL                                                               // raisestate
     },
 
@@ -107,11 +102,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                         // Gib health
-        -1,                                        // Dropped item
-        0,                                         // Pickup width
-        0,                                         // Projectile pass height
-        0,                                         // Fullbright
         kS_POSS_RAISE1                             // raisestate
     },
 
@@ -147,11 +137,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                         // Gib health
-        -1,                                        // Dropped item
-        0,                                         // Pickup width
-        0,                                         // Projectile pass height
-        0,                                         // Fullbright
         kS_SPOS_RAISE1                             // raisestate
     },
 
@@ -187,11 +172,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                         // Gib health
-        -1,                                        // Dropped item
-        0,                                         // Pickup width
-        0,                                         // Projectile pass height
-        0,                                         // Fullbright
         kS_NULL                                    // raisestate
     },
 
@@ -227,11 +207,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                      // Rip sound
         0,                              // Fast speed
         0,                              // Melee range
-        0,                              // Gib health
-        -1,                             // Dropped item
-        0,                              // Pickup width
-        0,                              // Projectile pass height
-        0,                              // Fullbright
         kS_NULL                         // raisestate
     },
 
@@ -267,11 +242,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                         // Gib health
-        -1,                                        // Dropped item
-        0,                                         // Pickup width
-        0,                                         // Projectile pass height
-        0,                                         // Fullbright
         kS_SKEL_RAISE1                             // raisestate
     },
 
@@ -307,11 +277,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                  // Rip sound
         0,                                                          // Fast speed
         0,                                                          // Melee range
-        0,                                                          // Gib health
-        -1,                                                         // Dropped item
-        0,                                                          // Pickup width
-        0,                                                          // Projectile pass height
-        0,                                                          // Fullbright
         kS_NULL                                                     // raisestate
     },
 
@@ -347,11 +312,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                      // Rip sound
         0,                              // Fast speed
         0,                              // Melee range
-        0,                              // Gib health
-        -1,                             // Dropped item
-        0,                              // Pickup width
-        0,                              // Projectile pass height
-        0,                              // Fullbright
         kS_NULL                         // raisestate
     },
 
@@ -387,11 +347,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                         // Gib health
-        -1,                                        // Dropped item
-        0,                                         // Pickup width
-        0,                                         // Projectile pass height
-        0,                                         // Fullbright
         kS_FATT_RAISE1                             // raisestate
     },
 
@@ -427,11 +382,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                  // Rip sound
         0,                                                          // Fast speed
         0,                                                          // Melee range
-        0,                                                          // Gib health
-        -1,                                                         // Dropped item
-        0,                                                          // Pickup width
-        0,                                                          // Projectile pass height
-        0,                                                          // Fullbright
         kS_NULL                                                     // raisestate
     },
 
@@ -467,11 +417,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                         // Gib health
-        -1,                                        // Dropped item
-        0,                                         // Pickup width
-        0,                                         // Projectile pass height
-        0,                                         // Fullbright
         kS_CPOS_RAISE1                             // raisestate
     },
 
@@ -507,11 +452,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                         // Gib health
-        -1,                                        // Dropped item
-        0,                                         // Pickup width
-        0,                                         // Projectile pass height
-        0,                                         // Fullbright
         kS_TROO_RAISE1                             // raisestate
     },
 
@@ -547,11 +487,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                         // Gib health
-        -1,                                        // Dropped item
-        0,                                         // Pickup width
-        0,                                         // Projectile pass height
-        0,                                         // Fullbright
         kS_SARG_RAISE1                             // raisestate
     },
 
@@ -587,11 +522,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                              // Rip sound
         0,                                                      // Fast speed
         0,                                                      // Melee range
-        0,                                                      // Gib health
-        -1,                                                     // Dropped item
-        0,                                                      // Pickup width
-        0,                                                      // Projectile pass height
-        0,                                                      // Fullbright
         kS_SARG_RAISE1                                          // raisestate
     },
 
@@ -627,11 +557,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                             // Rip sound
         0,                                                                     // Fast speed
         0,                                                                     // Melee range
-        0,                                                                     // Gib health
-        -1,                                                                    // Dropped item
-        0,                                                                     // Pickup width
-        0,                                                                     // Projectile pass height
-        0,                                                                     // Fullbright
         kS_HEAD_RAISE1                                                         // raisestate
     },
 
@@ -667,11 +592,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                         // Gib health
-        -1,                                        // Dropped item
-        0,                                         // Pickup width
-        0,                                         // Projectile pass height
-        0,                                         // Fullbright
         kS_BOSS_RAISE1                             // raisestate
     },
 
@@ -707,11 +627,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                  // Rip sound
         0,                                                          // Fast speed
         0,                                                          // Melee range
-        0,                                                          // Gib health
-        -1,                                                         // Dropped item
-        0,                                                          // Pickup width
-        0,                                                          // Projectile pass height
-        0,                                                          // Fullbright
         kS_NULL                                                     // raisestate
     },
 
@@ -747,11 +662,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                         // Gib health
-        -1,                                        // Dropped item
-        0,                                         // Pickup width
-        0,                                         // Projectile pass height
-        0,                                         // Fullbright
         kS_BOS2_RAISE1                             // raisestate
     },
 
@@ -787,11 +697,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                             // Rip sound
         0,                                                     // Fast speed
         0,                                                     // Melee range
-        0,                                                     // Gib health
-        -1,                                                    // Dropped item
-        0,                                                     // Pickup width
-        0,                                                     // Projectile pass height
-        0,                                                     // Fullbright
         kS_NULL                                                // raisestate
     },
 
@@ -827,11 +732,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                         // Gib health
-        -1,                                        // Dropped item
-        0,                                         // Pickup width
-        0,                                         // Projectile pass height
-        0,                                         // Fullbright
         kS_NULL                                    // raisestate
     },
 
@@ -867,11 +767,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                         // Gib health
-        -1,                                        // Dropped item
-        0,                                         // Pickup width
-        0,                                         // Projectile pass height
-        0,                                         // Fullbright
         kS_BSPI_RAISE1                             // raisestate
     },
 
@@ -907,11 +802,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                         // Gib health
-        -1,                                        // Dropped item
-        0,                                         // Pickup width
-        0,                                         // Projectile pass height
-        0,                                         // Fullbright
         kS_NULL                                    // raisestate
     },
 
@@ -947,11 +837,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                             // Rip sound
         0,                                                                     // Fast speed
         0,                                                                     // Melee range
-        0,                                                                     // Gib health
-        -1,                                                                    // Dropped item
-        0,                                                                     // Pickup width
-        0,                                                                     // Projectile pass height
-        0,                                                                     // Fullbright
         kS_PAIN_RAISE1                                                         // raisestate
     },
 
@@ -987,11 +872,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                         // Gib health
-        -1,                                        // Dropped item
-        0,                                         // Pickup width
-        0,                                         // Projectile pass height
-        0,                                         // Fullbright
         kS_SSWV_RAISE1                             // raisestate
     },
 
@@ -1027,11 +907,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                                    // Rip sound
         0,                                                                            // Fast speed
         0,                                                                            // Melee range
-        0,                                                                            // Gib health
-        -1,                                                                           // Dropped item
-        0,                                                                            // Pickup width
-        0,                                                                            // Projectile pass height
-        0,                                                                            // Fullbright
         kS_NULL                                                                       // raisestate
     },
 
@@ -1067,11 +942,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                 // Rip sound
         0,                         // Fast speed
         0,                         // Melee range
-        0,                         // Gib health
-        -1,                        // Dropped item
-        0,                         // Pickup width
-        0,                         // Projectile pass height
-        0,                         // Fullbright
         kS_NULL                    // raisestate
     },
 
@@ -1107,11 +977,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                     // Rip sound
         0,                             // Fast speed
         0,                             // Melee range
-        0,                             // Gib health
-        -1,                            // Dropped item
-        0,                             // Pickup width
-        0,                             // Projectile pass height
-        0,                             // Fullbright
         kS_NULL                        // raisestate
     },
 
@@ -1147,11 +1012,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                     // Rip sound
         0,                             // Fast speed
         0,                             // Melee range
-        0,                             // Gib health
-        -1,                            // Dropped item
-        0,                             // Pickup width
-        0,                             // Projectile pass height
-        0,                             // Fullbright
         kS_NULL                        // raisestate
     },
 
@@ -1187,11 +1047,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                               // Rip sound
         0,                                                                       // Fast speed
         0,                                                                       // Melee range
-        0,                                                                       // Gib health
-        -1,                                                                      // Dropped item
-        0,                                                                       // Pickup width
-        0,                                                                       // Projectile pass height
-        0,                                                                       // Fullbright
         kS_NULL                                                                  // raisestate
     },
 
@@ -1227,11 +1082,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                      // Rip sound
         0,                              // Fast speed
         0,                              // Melee range
-        0,                              // Gib health
-        -1,                             // Dropped item
-        0,                              // Pickup width
-        0,                              // Projectile pass height
-        0,                              // Fullbright
         kS_NULL                         // raisestate
     },
 
@@ -1267,11 +1117,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                               // Rip sound
         0,                                       // Fast speed
         0,                                       // Melee range
-        0,                                       // Gib health
-        -1,                                      // Dropped item
-        0,                                       // Pickup width
-        0,                                       // Projectile pass height
-        0,                                       // Fullbright
         kS_NULL                                  // raisestate
     },
 
@@ -1307,11 +1152,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                  // Rip sound
         0,                                                          // Fast speed
         0,                                                          // Melee range
-        0,                                                          // Gib health
-        -1,                                                         // Dropped item
-        0,                                                          // Pickup width
-        0,                                                          // Projectile pass height
-        0,                                                          // Fullbright
         kS_NULL                                                     // raisestate
     },
 
@@ -1347,11 +1187,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                  // Rip sound
         0,                                                          // Fast speed
         0,                                                          // Melee range
-        0,                                                          // Gib health
-        -1,                                                         // Dropped item
-        0,                                                          // Pickup width
-        0,                                                          // Projectile pass height
-        0,                                                          // Fullbright
         kS_NULL                                                     // raisestate
     },
 
@@ -1387,11 +1222,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                  // Rip sound
         0,                                                          // Fast speed
         0,                                                          // Melee range
-        0,                                                          // Gib health
-        -1,                                                         // Dropped item
-        0,                                                          // Pickup width
-        0,                                                          // Projectile pass height
-        0,                                                          // Fullbright
         kS_NULL                                                     // raisestate
     },
 
@@ -1427,11 +1257,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                  // Rip sound
         0,                                                          // Fast speed
         0,                                                          // Melee range
-        0,                                                          // Gib health
-        -1,                                                         // Dropped item
-        0,                                                          // Pickup width
-        0,                                                          // Projectile pass height
-        0,                                                          // Fullbright
         kS_NULL                                                     // raisestate
     },
 
@@ -1467,11 +1292,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                  // Rip sound
         0,                                                          // Fast speed
         0,                                                          // Melee range
-        0,                                                          // Gib health
-        -1,                                                         // Dropped item
-        0,                                                          // Pickup width
-        0,                                                          // Projectile pass height
-        0,                                                          // Fullbright
         kS_NULL                                                     // raisestate
     },
 
@@ -1507,11 +1327,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                  // Rip sound
         0,                                                          // Fast speed
         0,                                                          // Melee range
-        0,                                                          // Gib health
-        -1,                                                         // Dropped item
-        0,                                                          // Pickup width
-        0,                                                          // Projectile pass height
-        0,                                                          // Fullbright
         kS_NULL                                                     // raisestate
     },
 
@@ -1547,11 +1362,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                      // Rip sound
         0,                              // Fast speed
         0,                              // Melee range
-        0,                              // Gib health
-        -1,                             // Dropped item
-        0,                              // Pickup width
-        0,                              // Projectile pass height
-        0,                              // Fullbright
         kS_NULL                         // raisestate
     },
 
@@ -1587,11 +1397,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -1627,11 +1432,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                      // Rip sound
         0,                              // Fast speed
         0,                              // Melee range
-        0,                              // Gib health
-        -1,                             // Dropped item
-        0,                              // Pickup width
-        0,                              // Projectile pass height
-        0,                              // Fullbright
         kS_NULL                         // raisestate
     },
 
@@ -1667,11 +1467,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                      // Rip sound
         0,                              // Fast speed
         0,                              // Melee range
-        0,                              // Gib health
-        -1,                             // Dropped item
-        0,                              // Pickup width
-        0,                              // Projectile pass height
-        0,                              // Fullbright
         kS_NULL                         // raisestate
     },
 
@@ -1707,11 +1502,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                     // Rip sound
         0,                             // Fast speed
         0,                             // Melee range
-        0,                             // Gib health
-        -1,                            // Dropped item
-        0,                             // Pickup width
-        0,                             // Projectile pass height
-        0,                             // Fullbright
         kS_NULL                        // raisestate
     },
 
@@ -1747,11 +1537,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                      // Rip sound
         0,                              // Fast speed
         0,                              // Melee range
-        0,                              // Gib health
-        -1,                             // Dropped item
-        0,                              // Pickup width
-        0,                              // Projectile pass height
-        0,                              // Fullbright
         kS_NULL                         // raisestate
     },
 
@@ -1787,11 +1572,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -1827,11 +1607,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -1867,11 +1642,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                           // Gib health
-        -1,                          // Dropped item
-        0,                           // Pickup width
-        0,                           // Projectile pass height
-        0,                           // Fullbright
         kS_NULL                      // raisestate
     },
 
@@ -1907,11 +1677,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                           // Gib health
-        -1,                          // Dropped item
-        0,                           // Pickup width
-        0,                           // Projectile pass height
-        0,                           // Fullbright
         kS_NULL                      // raisestate
     },
 
@@ -1947,11 +1712,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                           // Gib health
-        -1,                          // Dropped item
-        0,                           // Pickup width
-        0,                           // Projectile pass height
-        0,                           // Fullbright
         kS_NULL                      // raisestate
     },
 
@@ -1987,11 +1747,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                           // Gib health
-        -1,                          // Dropped item
-        0,                           // Pickup width
-        0,                           // Projectile pass height
-        0,                           // Fullbright
         kS_NULL                      // raisestate
     },
 
@@ -2027,11 +1782,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                           // Gib health
-        -1,                          // Dropped item
-        0,                           // Pickup width
-        0,                           // Projectile pass height
-        0,                           // Fullbright
         kS_NULL                      // raisestate
     },
 
@@ -2067,11 +1817,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                           // Gib health
-        -1,                          // Dropped item
-        0,                           // Pickup width
-        0,                           // Projectile pass height
-        0,                           // Fullbright
         kS_NULL                      // raisestate
     },
 
@@ -2107,11 +1852,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                           // Gib health
-        -1,                          // Dropped item
-        0,                           // Pickup width
-        0,                           // Projectile pass height
-        0,                           // Fullbright
         kS_NULL                      // raisestate
     },
 
@@ -2147,11 +1887,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                           // Gib health
-        -1,                          // Dropped item
-        0,                           // Pickup width
-        0,                           // Projectile pass height
-        0,                           // Fullbright
         kS_NULL                      // raisestate
     },
 
@@ -2187,11 +1922,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -2227,11 +1957,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -2267,11 +1992,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                           // Gib health
-        -1,                          // Dropped item
-        0,                           // Pickup width
-        0,                           // Projectile pass height
-        0,                           // Fullbright
         kS_NULL                      // raisestate
     },
 
@@ -2307,11 +2027,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                           // Gib health
-        -1,                          // Dropped item
-        0,                           // Pickup width
-        0,                           // Projectile pass height
-        0,                           // Fullbright
         kS_NULL                      // raisestate
     },
 
@@ -2347,11 +2062,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                           // Gib health
-        -1,                          // Dropped item
-        0,                           // Pickup width
-        0,                           // Projectile pass height
-        0,                           // Fullbright
         kS_NULL                      // raisestate
     },
 
@@ -2387,11 +2097,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                           // Gib health
-        -1,                          // Dropped item
-        0,                           // Pickup width
-        0,                           // Projectile pass height
-        0,                           // Fullbright
         kS_NULL                      // raisestate
     },
 
@@ -2427,11 +2132,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,        // Rip sound
         0,                // Fast speed
         0,                // Melee range
-        0,                // Gib health
-        -1,               // Dropped item
-        0,                // Pickup width
-        0,                // Projectile pass height
-        0,                // Fullbright
         kS_NULL           // raisestate
     },
 
@@ -2467,11 +2167,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                           // Gib health
-        -1,                          // Dropped item
-        0,                           // Pickup width
-        0,                           // Projectile pass height
-        0,                           // Fullbright
         kS_NULL                      // raisestate
     },
 
@@ -2507,11 +2202,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                           // Gib health
-        -1,                          // Dropped item
-        0,                           // Pickup width
-        0,                           // Projectile pass height
-        0,                           // Fullbright
         kS_NULL                      // raisestate
     },
 
@@ -2547,11 +2237,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                           // Gib health
-        -1,                          // Dropped item
-        0,                           // Pickup width
-        0,                           // Projectile pass height
-        0,                           // Fullbright
         kS_NULL                      // raisestate
     },
 
@@ -2587,11 +2272,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -2627,11 +2307,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,        // Rip sound
         0,                // Fast speed
         0,                // Melee range
-        0,                // Gib health
-        -1,               // Dropped item
-        0,                // Pickup width
-        0,                // Projectile pass height
-        0,                // Fullbright
         kS_NULL           // raisestate
     },
 
@@ -2667,11 +2342,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -2707,11 +2377,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,        // Rip sound
         0,                // Fast speed
         0,                // Melee range
-        0,                // Gib health
-        -1,               // Dropped item
-        0,                // Pickup width
-        0,                // Projectile pass height
-        0,                // Fullbright
         kS_NULL           // raisestate
     },
 
@@ -2747,11 +2412,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -2787,11 +2447,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -2827,11 +2482,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -2867,11 +2517,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,       // Rip sound
         0,               // Fast speed
         0,               // Melee range
-        0,               // Gib health
-        -1,              // Dropped item
-        0,               // Pickup width
-        0,               // Projectile pass height
-        0,               // Fullbright
         kS_NULL          // raisestate
     },
 
@@ -2907,11 +2552,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -2947,11 +2587,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -2987,11 +2622,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -3027,11 +2657,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -3067,11 +2692,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,          // Rip sound
         0,                  // Fast speed
         0,                  // Melee range
-        0,                  // Gib health
-        -1,                 // Dropped item
-        0,                  // Pickup width
-        0,                  // Projectile pass height
-        0,                  // Fullbright
         kS_NULL             // raisestate
     },
 
@@ -3107,11 +2727,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -3147,11 +2762,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -3187,11 +2797,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,       // Rip sound
         0,               // Fast speed
         0,               // Melee range
-        0,               // Gib health
-        -1,              // Dropped item
-        0,               // Pickup width
-        0,               // Projectile pass height
-        0,               // Fullbright
         kS_NULL          // raisestate
     },
 
@@ -3227,11 +2832,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,        // Rip sound
         0,                // Fast speed
         0,                // Melee range
-        0,                // Gib health
-        -1,               // Dropped item
-        0,                // Pickup width
-        0,                // Projectile pass height
-        0,                // Fullbright
         kS_NULL           // raisestate
     },
 
@@ -3267,11 +2867,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,         // Rip sound
         0,                 // Fast speed
         0,                 // Melee range
-        0,                 // Gib health
-        -1,                // Dropped item
-        0,                 // Pickup width
-        0,                 // Projectile pass height
-        0,                 // Fullbright
         kS_NULL            // raisestate
     },
 
@@ -3307,11 +2902,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,            // Rip sound
         0,                    // Fast speed
         0,                    // Melee range
-        0,                    // Gib health
-        -1,                   // Dropped item
-        0,                    // Pickup width
-        0,                    // Projectile pass height
-        0,                    // Fullbright
         kS_NULL               // raisestate
     },
 
@@ -3347,11 +2937,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,           // Rip sound
         0,                   // Fast speed
         0,                   // Melee range
-        0,                   // Gib health
-        -1,                  // Dropped item
-        0,                   // Pickup width
-        0,                   // Projectile pass height
-        0,                   // Fullbright
         kS_NULL              // raisestate
     },
 
@@ -3387,11 +2972,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,            // Rip sound
         0,                    // Fast speed
         0,                    // Melee range
-        0,                    // Gib health
-        -1,                   // Dropped item
-        0,                    // Pickup width
-        0,                    // Projectile pass height
-        0,                    // Fullbright
         kS_NULL               // raisestate
     },
 
@@ -3427,11 +3007,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,         // Rip sound
         0,                 // Fast speed
         0,                 // Melee range
-        0,                 // Gib health
-        -1,                // Dropped item
-        0,                 // Pickup width
-        0,                 // Projectile pass height
-        0,                 // Fullbright
         kS_NULL            // raisestate
     },
 
@@ -3467,11 +3042,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,          // Rip sound
         0,                  // Fast speed
         0,                  // Melee range
-        0,                  // Gib health
-        -1,                 // Dropped item
-        0,                  // Pickup width
-        0,                  // Projectile pass height
-        0,                  // Fullbright
         kS_NULL             // raisestate
     },
 
@@ -3507,11 +3077,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,         // Rip sound
         0,                 // Fast speed
         0,                 // Melee range
-        0,                 // Gib health
-        -1,                // Dropped item
-        0,                 // Pickup width
-        0,                 // Projectile pass height
-        0,                 // Fullbright
         kS_NULL            // raisestate
     },
 
@@ -3547,11 +3112,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,              // Rip sound
         0,                      // Fast speed
         0,                      // Melee range
-        0,                      // Gib health
-        -1,                     // Dropped item
-        0,                      // Pickup width
-        0,                      // Projectile pass height
-        0,                      // Fullbright
         kS_NULL                 // raisestate
     },
 
@@ -3587,11 +3147,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -3627,11 +3182,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,            // Rip sound
         0,                    // Fast speed
         0,                    // Melee range
-        0,                    // Gib health
-        -1,                   // Dropped item
-        0,                    // Pickup width
-        0,                    // Projectile pass height
-        0,                    // Fullbright
         kS_NULL               // raisestate
     },
 
@@ -3667,11 +3217,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -3707,11 +3252,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,           // Rip sound
         0,                   // Fast speed
         0,                   // Melee range
-        0,                   // Gib health
-        -1,                  // Dropped item
-        0,                   // Pickup width
-        0,                   // Projectile pass height
-        0,                   // Fullbright
         kS_NULL              // raisestate
     },
 
@@ -3747,11 +3287,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,            // Rip sound
         0,                    // Fast speed
         0,                    // Melee range
-        0,                    // Gib health
-        -1,                   // Dropped item
-        0,                    // Pickup width
-        0,                    // Projectile pass height
-        0,                    // Fullbright
         kS_NULL               // raisestate
     },
 
@@ -3787,11 +3322,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,          // Rip sound
         0,                  // Fast speed
         0,                  // Melee range
-        0,                  // Gib health
-        -1,                 // Dropped item
-        0,                  // Pickup width
-        0,                  // Projectile pass height
-        0,                  // Fullbright
         kS_NULL             // raisestate
     },
 
@@ -3827,11 +3357,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,           // Rip sound
         0,                   // Fast speed
         0,                   // Melee range
-        0,                   // Gib health
-        -1,                  // Dropped item
-        0,                   // Pickup width
-        0,                   // Projectile pass height
-        0,                   // Fullbright
         kS_NULL              // raisestate
     },
 
@@ -3867,11 +3392,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,            // Rip sound
         0,                    // Fast speed
         0,                    // Melee range
-        0,                    // Gib health
-        -1,                   // Dropped item
-        0,                    // Pickup width
-        0,                    // Projectile pass height
-        0,                    // Fullbright
         kS_NULL               // raisestate
     },
 
@@ -3907,11 +3427,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,          // Rip sound
         0,                  // Fast speed
         0,                  // Melee range
-        0,                  // Gib health
-        -1,                 // Dropped item
-        0,                  // Pickup width
-        0,                  // Projectile pass height
-        0,                  // Fullbright
         kS_NULL             // raisestate
     },
 
@@ -3947,11 +3462,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -3987,11 +3497,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -4027,11 +3532,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -4067,11 +3567,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -4107,11 +3602,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                            // Gib health
-        -1,                                           // Dropped item
-        0,                                            // Pickup width
-        0,                                            // Projectile pass height
-        0,                                            // Fullbright
         kS_NULL                                       // raisestate
     },
 
@@ -4147,11 +3637,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                            // Gib health
-        -1,                                           // Dropped item
-        0,                                            // Pickup width
-        0,                                            // Projectile pass height
-        0,                                            // Fullbright
         kS_NULL                                       // raisestate
     },
 
@@ -4187,11 +3672,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                            // Gib health
-        -1,                                           // Dropped item
-        0,                                            // Pickup width
-        0,                                            // Projectile pass height
-        0,                                            // Fullbright
         kS_NULL                                       // raisestate
     },
 
@@ -4227,11 +3707,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                            // Gib health
-        -1,                                           // Dropped item
-        0,                                            // Pickup width
-        0,                                            // Projectile pass height
-        0,                                            // Fullbright
         kS_NULL                                       // raisestate
     },
 
@@ -4267,11 +3742,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                            // Gib health
-        -1,                                           // Dropped item
-        0,                                            // Pickup width
-        0,                                            // Projectile pass height
-        0,                                            // Fullbright
         kS_NULL                                       // raisestate
     },
 
@@ -4307,11 +3777,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                        // Rip sound
         0,                                // Fast speed
         0,                                // Melee range
-        0,                                // Gib health
-        -1,                               // Dropped item
-        0,                                // Pickup width
-        0,                                // Projectile pass height
-        0,                                // Fullbright
         kS_NULL                           // raisestate
     },
 
@@ -4347,11 +3812,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                        // Rip sound
         0,                                // Fast speed
         0,                                // Melee range
-        0,                                // Gib health
-        -1,                               // Dropped item
-        0,                                // Pickup width
-        0,                                // Projectile pass height
-        0,                                // Fullbright
         kS_NULL                           // raisestate
     },
 
@@ -4387,11 +3847,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                        // Rip sound
         0,                                // Fast speed
         0,                                // Melee range
-        0,                                // Gib health
-        -1,                               // Dropped item
-        0,                                // Pickup width
-        0,                                // Projectile pass height
-        0,                                // Fullbright
         kS_NULL                           // raisestate
     },
 
@@ -4427,11 +3882,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                        // Rip sound
         0,                                // Fast speed
         0,                                // Melee range
-        0,                                // Gib health
-        -1,                               // Dropped item
-        0,                                // Pickup width
-        0,                                // Projectile pass height
-        0,                                // Fullbright
         kS_NULL                           // raisestate
     },
 
@@ -4467,11 +3917,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                        // Rip sound
         0,                                // Fast speed
         0,                                // Melee range
-        0,                                // Gib health
-        -1,                               // Dropped item
-        0,                                // Pickup width
-        0,                                // Projectile pass height
-        0,                                // Fullbright
         kS_NULL                           // raisestate
     },
 
@@ -4507,11 +3952,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,        // Rip sound
         0,                // Fast speed
         0,                // Melee range
-        0,                // Gib health
-        -1,               // Dropped item
-        0,                // Pickup width
-        0,                // Projectile pass height
-        0,                // Fullbright
         kS_NULL           // raisestate
     },
 
@@ -4547,11 +3987,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -4587,11 +4022,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,           // Rip sound
         0,                   // Fast speed
         0,                   // Melee range
-        0,                   // Gib health
-        -1,                  // Dropped item
-        0,                   // Pickup width
-        0,                   // Projectile pass height
-        0,                   // Fullbright
         kS_NULL              // raisestate
     },
 
@@ -4627,11 +4057,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -4667,11 +4092,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,       // Rip sound
         0,               // Fast speed
         0,               // Melee range
-        0,               // Gib health
-        -1,              // Dropped item
-        0,               // Pickup width
-        0,               // Projectile pass height
-        0,               // Fullbright
         kS_NULL          // raisestate
     },
 
@@ -4707,11 +4127,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -4747,11 +4162,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,          // Rip sound
         0,                  // Fast speed
         0,                  // Melee range
-        0,                  // Gib health
-        -1,                 // Dropped item
-        0,                  // Pickup width
-        0,                  // Projectile pass height
-        0,                  // Fullbright
         kS_NULL             // raisestate
     },
 
@@ -4787,11 +4197,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,             // Rip sound
         0,                     // Fast speed
         0,                     // Melee range
-        0,                     // Gib health
-        -1,                    // Dropped item
-        0,                     // Pickup width
-        0,                     // Projectile pass height
-        0,                     // Fullbright
         kS_NULL                // raisestate
     },
 
@@ -4827,11 +4232,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,             // Rip sound
         0,                     // Fast speed
         0,                     // Melee range
-        0,                     // Gib health
-        -1,                    // Dropped item
-        0,                     // Pickup width
-        0,                     // Projectile pass height
-        0,                     // Fullbright
         kS_NULL                // raisestate
     },
 
@@ -4867,11 +4267,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,          // Rip sound
         0,                  // Fast speed
         0,                  // Melee range
-        0,                  // Gib health
-        -1,                 // Dropped item
-        0,                  // Pickup width
-        0,                  // Projectile pass height
-        0,                  // Fullbright
         kS_NULL             // raisestate
     },
 
@@ -4907,11 +4302,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,       // Rip sound
         0,               // Fast speed
         0,               // Melee range
-        0,               // Gib health
-        -1,              // Dropped item
-        0,               // Pickup width
-        0,               // Projectile pass height
-        0,               // Fullbright
         kS_NULL          // raisestate
     },
 
@@ -4947,11 +4337,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,          // Rip sound
         0,                  // Fast speed
         0,                  // Melee range
-        0,                  // Gib health
-        -1,                 // Dropped item
-        0,                  // Pickup width
-        0,                  // Projectile pass height
-        0,                  // Fullbright
         kS_NULL             // raisestate
     },
 
@@ -4987,11 +4372,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,           // Rip sound
         0,                   // Fast speed
         0,                   // Melee range
-        0,                   // Gib health
-        -1,                  // Dropped item
-        0,                   // Pickup width
-        0,                   // Projectile pass height
-        0,                   // Fullbright
         kS_NULL              // raisestate
     },
 
@@ -5027,11 +4407,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,        // Rip sound
         0,                // Fast speed
         0,                // Melee range
-        0,                // Gib health
-        -1,               // Dropped item
-        0,                // Pickup width
-        0,                // Projectile pass height
-        0,                // Fullbright
         kS_NULL           // raisestate
     },
 
@@ -5067,11 +4442,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,              // Rip sound
         0,                      // Fast speed
         0,                      // Melee range
-        0,                      // Gib health
-        -1,                     // Dropped item
-        0,                      // Pickup width
-        0,                      // Projectile pass height
-        0,                      // Fullbright
         kS_NULL                 // raisestate
     },
 
@@ -5107,11 +4477,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -5147,11 +4512,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,        // Rip sound
         0,                // Fast speed
         0,                // Melee range
-        0,                // Gib health
-        -1,               // Dropped item
-        0,                // Pickup width
-        0,                // Projectile pass height
-        0,                // Fullbright
         kS_NULL           // raisestate
     },
 
@@ -5187,11 +4547,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                            // Gib health
-        -1,                                           // Dropped item
-        0,                                            // Pickup width
-        0,                                            // Projectile pass height
-        0,                                            // Fullbright
         kS_NULL                                       // raisestate
     },
 
@@ -5227,11 +4582,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                            // Gib health
-        -1,                                           // Dropped item
-        0,                                            // Pickup width
-        0,                                            // Projectile pass height
-        0,                                            // Fullbright
         kS_NULL                                       // raisestate
     },
 
@@ -5267,11 +4617,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                            // Gib health
-        -1,                                           // Dropped item
-        0,                                            // Pickup width
-        0,                                            // Projectile pass height
-        0,                                            // Fullbright
         kS_NULL                                       // raisestate
     },
 
@@ -5307,11 +4652,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                            // Gib health
-        -1,                                           // Dropped item
-        0,                                            // Pickup width
-        0,                                            // Projectile pass height
-        0,                                            // Fullbright
         kS_NULL                                       // raisestate
     },
 
@@ -5347,11 +4687,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                            // Gib health
-        -1,                                           // Dropped item
-        0,                                            // Pickup width
-        0,                                            // Projectile pass height
-        0,                                            // Fullbright
         kS_NULL                                       // raisestate
     },
 
@@ -5387,11 +4722,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                            // Gib health
-        -1,                                           // Dropped item
-        0,                                            // Pickup width
-        0,                                            // Projectile pass height
-        0,                                            // Fullbright
         kS_NULL                                       // raisestate
     },
 
@@ -5427,11 +4757,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,         // Rip sound
         0,                 // Fast speed
         0,                 // Melee range
-        0,                 // Gib health
-        -1,                // Dropped item
-        0,                 // Pickup width
-        0,                 // Projectile pass height
-        0,                 // Fullbright
         kS_NULL            // raisestate
     },
 
@@ -5467,11 +4792,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,          // Rip sound
         0,                  // Fast speed
         0,                  // Melee range
-        0,                  // Gib health
-        -1,                 // Dropped item
-        0,                  // Pickup width
-        0,                  // Projectile pass height
-        0,                  // Fullbright
         kS_NULL             // raisestate
     },
 
@@ -5507,11 +4827,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -5549,11 +4864,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -5589,11 +4899,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -5631,11 +4936,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                         // Gib health
-        -1,                                        // Dropped item
-        0,                                         // Pickup width
-        0,                                         // Projectile pass height
-        0,                                         // Fullbright
         kS_DOGS_RAISE1                             // raisestate
     },
 
@@ -5671,11 +4971,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                // Rip sound
         0,                                                        // Fast speed
         0,                                                        // Melee range
-        0,                                                        // Gib health
-        -1,                                                       // Dropped item
-        0,                                                        // Pickup width
-        0,                                                        // Projectile pass height
-        0,                                                        // Fullbright
         kS_NULL                                                   // raisestate
     },
 
@@ -5711,11 +5006,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                // Rip sound
         0,                                                        // Fast speed
         0,                                                        // Melee range
-        0,                                                        // Gib health
-        -1,                                                       // Dropped item
-        0,                                                        // Pickup width
-        0,                                                        // Projectile pass height
-        0,                                                        // Fullbright
         kS_NULL                                                   // raisestate
     },
 
@@ -5751,11 +5041,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                           // Gib health
-        -1,                          // Dropped item
-        0,                           // Pickup width
-        0,                           // Projectile pass height
-        0,                           // Fullbright
         kS_NULL                      // raisestate
     },
 
@@ -5791,11 +5076,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                           // Gib health
-        -1,                          // Dropped item
-        0,                           // Pickup width
-        0,                           // Projectile pass height
-        0,                           // Fullbright
         kS_NULL                      // raisestate
     },
 
@@ -5831,11 +5111,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,              // Gib health
-        -1,             // Dropped item
-        0,              // Pickup width
-        0,              // Projectile pass height
-        0,              // Fullbright
         kS_NULL         // raisestate
     },
 
@@ -5871,11 +5146,6 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                    // Rip sound
         0,                            // Fast speed
         0,                            // Melee range
-        0,                            // Gib health
-        -1,                           // Dropped item
-        0,                            // Pickup width
-        0,                            // Projectile pass height
-        0,                            // Fullbright
         kS_NULL                       // raisestate
     },
 };
@@ -5911,11 +5181,6 @@ DehackedMapObjectDefinition brain_explode_mobj = {
     ksfx_None,                                                  // Rip sound
     0,                                                          // Fast speed
     0,                                                          // Melee range
-    0,                                                          // Gib health
-    -1,                                                         // Dropped item
-    0,                                                          // Pickup width
-    0,                                                          // Projectile pass height
-    0,                                                          // Fullbright
     kS_NULL                                                     // raisestate
 };
 

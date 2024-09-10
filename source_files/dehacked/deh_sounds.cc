@@ -475,6 +475,7 @@ void sounds::WriteSound(int sound_id)
     }
 
     wad::Printf("LUMP_NAME = \"DS%s\";\n", epi::CStringUpper(lump));
+    wad::Printf("DEH_SOUND_ID = %d;\n", sound_id);
     wad::Printf("PRIORITY = %d;\n", sound->priority);
 
     if (sound->singularity != 0)

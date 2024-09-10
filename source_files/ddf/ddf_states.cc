@@ -692,6 +692,29 @@ void DDFStateGetIntPair(const char *arg, State *cur_state)
     cur_state->action_par = values;
 }
 
+void DDFStateGetDEHParams(const char *arg, State *cur_state)
+{
+    // Parses up to eight integers separated by commas
+    int *values;
+
+    if (!arg)
+        return;
+
+    values = new int[8]{0,0,0,0,0,0,0,0};
+
+    std::vector<std::string> args = epi::SeparatedStringVector(arg, ',');
+
+    for (int i = 0, i_end = args.size(); i < i_end; i++)
+    {
+        if (i >= 8)
+            break;
+        if (sscanf(args[i].c_str(), "%d", &values[i]) != 1)
+            values[i] = 0;
+    }
+
+    cur_state->action_par = values;
+}
+
 void DDFStateGetFloat(const char *arg, State *cur_state)
 {
     if (!arg || !arg[0])
@@ -747,6 +770,113 @@ void DDFStateGetJump(const char *arg, State *cur_state)
         // convert chance value
         DDFMainGetPercentAny(s + 1, &jump->chance);
 
+        len = s - arg;
+    }
+
+    if (len == 0)
+        DDFError("DDFStateGetJump: missing label!\n");
+
+    if (len > 75)
+        DDFError("DDFStateGetJump: label name too long!\n");
+
+    // copy label name
+    char buffer[80];
+
+    for (len = 0; *arg && (*arg != ':') && (*arg != ','); len++, arg++)
+        buffer[len] = *arg;
+
+    buffer[len] = 0;
+
+    if (*arg == ':')
+        offset = HMM_MAX(0, atoi(arg + 1) - 1);
+
+    // set the jump state
+    cur_state->jumpstate  = ((StateGetRedirector(buffer) + 1) << 16) + offset;
+    cur_state->action_par = jump;
+}
+
+// Like the above, but accepts an arbtrary int for the second parameter
+void DDFStateGetJumpInt(const char *arg, State *cur_state)
+{
+    // JUMP(label)
+    // JUMP(label,value)
+
+    if (!arg || !arg[0])
+        return;
+
+    JumpActionInfo *jump = new JumpActionInfo;
+
+    int len;
+    int offset = 0;
+
+    const char *s = strchr(arg, ',');
+
+    if (!s)
+    {
+        len = strlen(arg);
+    }
+    else
+    {
+        DDFMainGetNumeric(s+1, &jump->amount);
+        len = s - arg;
+    }
+
+    if (len == 0)
+        DDFError("DDFStateGetJump: missing label!\n");
+
+    if (len > 75)
+        DDFError("DDFStateGetJump: label name too long!\n");
+
+    // copy label name
+    char buffer[80];
+
+    for (len = 0; *arg && (*arg != ':') && (*arg != ','); len++, arg++)
+        buffer[len] = *arg;
+
+    buffer[len] = 0;
+
+    if (*arg == ':')
+        offset = HMM_MAX(0, atoi(arg + 1) - 1);
+
+    // set the jump state
+    cur_state->jumpstate  = ((StateGetRedirector(buffer) + 1) << 16) + offset;
+    cur_state->action_par = jump;
+}
+
+// Like the above, but accepts a pair of arbtrary ints for the second and third parameters
+void DDFStateGetJumpIntPair(const char *arg, State *cur_state)
+{
+    // JUMP(label)
+    // JUMP(label,value)
+    // JUMP(label,value,value)
+
+    if (!arg || !arg[0])
+        return;
+
+    JumpActionInfo *jump = new JumpActionInfo;
+
+    int len;
+    int offset = 0;
+
+    const char *s = strchr(arg, ',');
+
+    if (!s)
+    {
+        len = strlen(arg);
+    }
+    else
+    {
+        const char *s2 = strchr(s+1, ',');
+        if (!s2)
+        {
+            DDFMainGetNumeric(s+1, &jump->amount);
+            jump->amount2 = 0;
+        }
+        else
+        {
+            if (sscanf(s+1, " %i , %i ", &jump->amount, &jump->amount2) != 2)
+                DDFError("DDFStateGetJumpIntPair: bad values: %s\n", s+1);
+        }
         len = s - arg;
     }
 

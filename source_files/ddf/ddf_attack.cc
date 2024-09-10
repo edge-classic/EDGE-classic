@@ -359,6 +359,18 @@ void DDFAttackCleanUp(void)
 
         // lookup thing references
 
+        // This should only happen via MBF21 A_WeaponProjectile, as the
+        // atk_mobj_ref shouldn't be populated otherwise
+        if (!a->atk_mobj_ref_.empty())
+        {
+            a->atk_mobj_ = mobjtypes.Lookup(a->atk_mobj_ref_.c_str());
+            if (a->atk_mobj_)
+            {
+                a->damage_.nominal_ = a->atk_mobj_->explode_damage_.nominal_;
+                a->damage_.linear_max_ = a->atk_mobj_->explode_damage_.linear_max_;
+            }
+        }
+
         a->puff_ = a->puff_ref_.empty() ? nullptr : mobjtypes.Lookup(a->puff_ref_.c_str());
 
         a->blood_ = a->blood_ref_.empty() ? nullptr : mobjtypes.Lookup(a->blood_ref_.c_str());
@@ -517,6 +529,7 @@ void AttackDefinition::CopyDetail(AttackDefinition &src)
     notracechance_    = src.notracechance_;
     keepfirechance_   = src.keepfirechance_;
     atk_mobj_         = src.atk_mobj_;
+    atk_mobj_ref_     = src.atk_mobj_ref_;
     spawnedobj_       = src.spawnedobj_;
     spawnedobj_ref_   = src.spawnedobj_ref_;
     spawn_limit_      = src.spawn_limit_;
@@ -559,6 +572,7 @@ void AttackDefinition::Default()
     notracechance_  = 0.0f;
     keepfirechance_ = 0.0f;
     atk_mobj_       = nullptr;
+    atk_mobj_ref_.clear();
     spawnedobj_     = nullptr;
     spawnedobj_ref_.clear();
     spawn_limit_ = 0; // unlimited

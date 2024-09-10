@@ -104,6 +104,8 @@ static int FindBestRGBMatch(int r, int g, int b)
 
 void InitializePalette(void)
 {
+    memset(&playpal_data[0], 0, 14*256*3);
+
     int t, i;
 
     int            pal_length = 0;
@@ -117,9 +119,13 @@ void InitializePalette(void)
     {
         for (i = 0; i < 256; i++)
         {
-            playpal_data[t][i][0] = pal[(t * 256 + i) * 3 + 0];
-            playpal_data[t][i][1] = pal[(t * 256 + i) * 3 + 1];
-            playpal_data[t][i][2] = pal[(t * 256 + i) * 3 + 2];
+            int index = (t * 256 + i) * 3;
+            if (index + 2 < pal_length)
+            {
+                playpal_data[t][i][0] = pal[index];
+                playpal_data[t][i][1] = pal[index+1];
+                playpal_data[t][i][2] = pal[index+2];
+            }
         }
     }
 

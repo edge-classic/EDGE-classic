@@ -252,6 +252,8 @@ enum AttackFlags
     kAttackFlagSilentToMonsters = (1 << 10),
     kAttackFlagNoTarget         = (1 << 11),
     kAttackFlagVampire          = (1 << 12),
+    // MBF21 stuff
+    kAttackFlagInheritTracerFromTarget = (1 << 13)
 };
 
 class AttackDefinition
@@ -299,6 +301,7 @@ class AttackDefinition
 
     // the MOBJ that is integrated with this attack, or nullptr
     const MapObjectDefinition *atk_mobj_;
+    std::string                atk_mobj_ref_;
 
     // spawned object (for spawners).  The mobjdef pointer only becomes
     // valid after DDFAttackCleanUp().  Can be nullptr.

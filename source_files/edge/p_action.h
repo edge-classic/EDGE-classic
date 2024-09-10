@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include "epi_bam.h"
+
 class MapObject;
 
 // Function names in this file deviate from the style guide in order to reflect
@@ -214,6 +216,7 @@ void A_HomingProjectile(MapObject *mo);
 void A_CreateSmokeTrail(MapObject *mo);
 void A_HomeToSpot(MapObject *mo);
 bool A_LookForTargets(MapObject *mo);
+MapObject *A_LookForBlockmapTarget(MapObject *mo, float radius, BAMAngle fov = 0);
 
 // Trackers
 void A_EffectTracker(MapObject *mo);
@@ -221,9 +224,37 @@ void A_TrackerActive(MapObject *mo);
 void A_TrackerFollow(MapObject *mo);
 void A_TrackerStart(MapObject *mo);
 
+// Dehacked
+void A_CloseShotgun2(MapObject *mo);
+
 // MBF / MBF21
 void A_Mushroom(MapObject *mo);
 void A_NoiseAlert(MapObject *mo);
+void A_WeaponMeleeAttack(MapObject *mo);
+void A_WeaponSound(MapObject *mo);
+void A_WeaponBulletAttack(MapObject *mo);
+void A_WeaponProjectile(MapObject *mo);
+void A_ConsumeAmmo(MapObject *mo);
+void A_CheckAmmo(MapObject *mo);
+void A_RadiusDamage(MapObject *mo);
+void A_GunFlashTo(MapObject *mo);
+void WA_NoiseAlert(MapObject *mo);
+void A_HealChase(MapObject *mo);
+void A_SpawnObject(MapObject *mo);
+void A_MonsterProjectile(MapObject *mo);
+void A_MonsterBulletAttack(MapObject *mo);
+void A_MonsterMeleeAttack(MapObject *mo);
+void A_ClearTracer(MapObject *mo);
+void A_JumpIfHealthBelow(MapObject *mo);
+void A_SeekTracer(MapObject *mo);
+void A_FindTracer(MapObject *mo);
+void A_JumpIfTargetInSight(MapObject *mo);
+void A_JumpIfTargetCloser(MapObject *mo);
+void A_JumpIfTracerInSight(MapObject *mo);
+void A_JumpIfTracerCloser(MapObject *mo);
+void A_JumpIfFlagsSet(MapObject *mo);
+void A_AddFlags(MapObject *mo);
+void A_RemoveFlags(MapObject *mo);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

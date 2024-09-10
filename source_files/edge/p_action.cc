@@ -217,6 +217,80 @@ bool A_LookForTargets(MapObject *we)
     return false;
 }
 
+// Same as above, but iterate through the blockmap within a 
+// given radius and return the first valid target (or nullptr if none)
+// Also, does not actually set the target unlike A_LookForTargets
+MapObject *A_LookForBlockmapTarget(MapObject *we, float radius, BAMAngle fov)
+{
+    MapObject *them = nullptr;
+
+    float x1 = we->x - radius;
+    float x2 = we->x + radius;
+    float y1 = we->y - radius;
+    float y2 = we->y + radius;
+
+    int lx = BlockmapGetX(x1) - 1;
+    int ly = BlockmapGetY(y1) - 1;
+    int hx = BlockmapGetX(x2) + 1;
+    int hy = BlockmapGetY(y2) + 1;
+
+    lx = HMM_MAX(0, lx);
+    hx = HMM_MIN(blockmap_width - 1, hx);
+    ly = HMM_MAX(0, ly);
+    hy = HMM_MIN(blockmap_height - 1, hy);
+
+    float we_x = we->x;
+    float we_y = we->y;
+    float we_angle = we->angle_;
+
+    for (int by = ly; by <= hy; by++)
+        for (int bx = lx; bx <= hx; bx++)
+        {
+            for (MapObject *mo = blockmap_things[by * blockmap_width + bx]; mo; mo = mo->blockmap_next_)
+            {
+                // check whether thing touches the given bbox
+                float r = mo->radius_;
+
+                if (mo->x + r <= x1 || mo->x - r >= x2 || mo->y + r <= y1 || mo->y - r >= y2)
+                    continue;
+
+                if (mo == we)
+                    continue;
+
+                if (we->source_ == mo)
+                    continue;
+
+                bool same_side = ((mo->side_ & we->side_) != 0);
+
+                    // only target monsters or players (not barrels)
+                if (!(mo->extended_flags_ & kExtendedFlagMonster) && !mo->player_)
+                    continue;
+
+                if (!(mo->flags_ & kMapObjectFlagShootable))
+                    continue;
+
+                if (same_side)
+                    continue;
+
+                if ((we->info_ == mo->info_) && !(we->extended_flags_ & kExtendedFlagDisloyalToOwnType))
+                    continue;
+
+                if (CheckSight(we, mo))
+                {
+                    if (fov != 0)
+                    {
+                        if (!epi::BAMCheckFOV(PointToAngle(we_x, we_y, mo->x, mo->y), fov, we_angle))
+                            continue;
+                    }
+                    them = mo;
+                    return them;
+                }
+            }
+        }
+
+    return them;
+}
+
 //
 // DecideMeleeAttack
 //
@@ -290,7 +364,27 @@ static bool DecideRangeAttack(MapObject *object)
 
     if (object->info_->rangeattack_)
         attack = object->info_->rangeattack_;
-    else
+    else // MBF21 check
+    {
+        State *check = states + object->info_->missile_state_;
+        for (;;)
+        {
+            if (check->action && (check->action == A_MonsterProjectile || check->action == A_MonsterBulletAttack))
+            {
+                attack = (const AttackDefinition *)check->action_par;
+                break;
+            }
+            else
+            { 
+                if (check->nextstate)
+                    check = states + check->nextstate;
+                else
+                    break;
+            }
+        }
+    }
+   
+    if (!attack)
         return false; // cannot evaluate range with no attack range
 
     // Just been hit (and have felt pain), so in true tit-for-tat
@@ -1166,6 +1260,9 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty, floa
 
     projectile->SetTarget(target);
 
+    if (attack->flags_ & kAttackFlagInheritTracerFromTarget) // MBF21
+        projectile->SetTracer(source->target_);
+
     if (!target)
     {
         tz += attack->height_;
@@ -1398,8 +1495,15 @@ int MissileContact(MapObject *object, MapObject *target)
                 return 0;
         }
 
+        // "Real" missile source check
+        if (source->source_ && source->source_->info_ == target->info_)
+        {
+            if (!(target->extended_flags_ & kExtendedFlagDisloyalToOwnType) && (source->source_->info_->proj_group_ != -1))
+                return 0;
+        }
+
         // MBF21: If in same projectile group, attack does no damage
-        if (source->info_->proj_group_ >= 0 && target->info_->proj_group_ >= 0 &&
+        if (source->info_->proj_group_ > 0 && target->info_->proj_group_ > 0 &&
             (source->info_->proj_group_ == target->info_->proj_group_))
         {
             if (object->extended_flags_ & kExtendedFlagTunnel)
@@ -2349,7 +2453,6 @@ static void ObjectTripleSpawn(MapObject *object)
 static void ObjectDoubleSpawn(MapObject *object)
 {
     ObjectSpawning(object, object->angle_ + kBAMAngle90);
-    // ObjectSpawning(object, object->angle_ + kBAMAngle180);
     ObjectSpawning(object, object->angle_ + kBAMAngle270);
 }
 
@@ -2565,7 +2668,7 @@ void A_Spawn(MapObject *mo)
     item->angle_ = mo->angle_;
     item->side_  = mo->side_;
 
-    item->SetSource(mo);
+    item->SetRealSource(mo);
 }
 
 void A_PathCheck(MapObject *mo)
@@ -3063,7 +3166,7 @@ static bool CreateAggression(MapObject *mo)
 
         // MBF21: If in same infighting group, never target each other even if
         // hit with 'friendly fire'
-        if (mo->info_->infight_group_ >= 0 && other->info_->infight_group_ >= 0 &&
+        if (mo->info_->infight_group_ > 0 && other->info_->infight_group_ > 0 &&
             (mo->info_->infight_group_ == other->info_->infight_group_))
         {
             continue;
@@ -4088,6 +4191,612 @@ void PlayerAttack(MapObject *p_obj, const AttackDefinition *attack)
 //-------------------------------------------------------------------
 //----------------------   MBF / MBF21  -----------------------------
 //-------------------------------------------------------------------
+
+void A_AddFlags(MapObject *mo)
+{
+    if (!mo->state_->action_par)
+    {
+        WarningOrError("A_AddFlags used for thing [%s] without values !\n", mo->info_->name_.c_str());
+        return;
+    }
+
+    int *args = (int *)mo->state_->action_par;
+
+    mo->flags_ |= args[0];
+    mo->mbf21_flags_ |= args[1];
+
+    // Unlink from blockmap if necessary
+    if (args[0] & kMapObjectFlagNoBlockmap)
+    {
+        if (mo->blockmap_next_)
+        {
+            if (mo->blockmap_next_->blockmap_previous_)
+            {
+                EPI_ASSERT(mo->blockmap_next_->blockmap_previous_ == mo);
+
+                mo->blockmap_next_->blockmap_previous_ = mo->blockmap_previous_;
+            }
+        }
+
+        if (mo->blockmap_previous_)
+        {
+            if (mo->blockmap_previous_->blockmap_next_)
+            {
+                EPI_ASSERT(mo->blockmap_previous_->blockmap_next_ == mo);
+
+                mo->blockmap_previous_->blockmap_next_ = mo->blockmap_next_;
+            }
+        }
+        else
+        {
+            int blockx = BlockmapGetX(mo->x);
+            int blocky = BlockmapGetY(mo->y);
+
+            if (blockx >= 0 && blockx < blockmap_width && blocky >= 0 && blocky < blockmap_height)
+            {
+                int bnum = blocky * blockmap_width + blockx;
+
+                EPI_ASSERT(blockmap_things[bnum] == mo);
+
+                blockmap_things[bnum] = mo->blockmap_next_;
+            }
+        }
+
+        mo->blockmap_previous_ = nullptr;
+        mo->blockmap_next_     = nullptr;
+    }
+
+    // Unlink from subsector if necessary
+    if (args[0] & kMapObjectFlagNoSector)
+    {
+        if (mo->subsector_next_)
+        {
+            if (mo->subsector_next_->subsector_previous_)
+            {
+                EPI_ASSERT(mo->subsector_next_->subsector_previous_ == mo);
+
+                mo->subsector_next_->subsector_previous_ = mo->subsector_previous_;
+            }
+        }
+
+        if (mo->subsector_previous_)
+        {
+            if (mo->subsector_previous_->subsector_next_)
+            {
+                EPI_ASSERT(mo->subsector_previous_->subsector_next_ == mo);
+
+                mo->subsector_previous_->subsector_next_ = mo->subsector_next_;
+            }
+        }
+        else
+        {
+            if (mo->subsector_->thing_list)
+            {
+                EPI_ASSERT(mo->subsector_->thing_list == mo);
+
+                mo->subsector_->thing_list = mo->subsector_next_;
+            }
+        }
+
+        mo->subsector_next_     = nullptr;
+        mo->subsector_previous_ = nullptr;
+    }
+}
+
+void A_RemoveFlags(MapObject *mo)
+{
+    if (!mo->state_->action_par)
+    {
+        WarningOrError("A_AddFlags used for thing [%s] without values !\n", mo->info_->name_.c_str());
+        return;
+    }
+
+    int *args = (int *)mo->state_->action_par;
+
+    mo->flags_ &= ~(args[0]);
+    mo->mbf21_flags_ &= ~(args[1]);
+
+    // Link into blockmap if necessary
+    if (args[0] & kMapObjectFlagNoBlockmap)
+    {
+        int blockx = BlockmapGetX(mo->x);
+        int blocky = BlockmapGetY(mo->y);
+
+        if (blockx >= 0 && blockx < blockmap_width && blocky >= 0 && blocky < blockmap_height)
+        {
+            int bnum = blocky * blockmap_width + blockx;
+
+            mo->blockmap_previous_ = nullptr;
+            mo->blockmap_next_     = blockmap_things[bnum];
+
+            if (blockmap_things[bnum])
+                (blockmap_things[bnum])->blockmap_previous_ = mo;
+
+            blockmap_things[bnum] = mo;
+        }
+        else
+        {
+            // thing is off the map
+            mo->blockmap_next_ = mo->blockmap_previous_ = nullptr;
+        }
+    }
+
+    // Link into sector if necessary
+    if (args[0] & kMapObjectFlagNoSector)
+    {
+        mo->subsector_next_     = mo->subsector_->thing_list;
+        mo->subsector_previous_ = nullptr;
+
+        if (mo->subsector_->thing_list)
+            mo->subsector_->thing_list->subsector_previous_ = mo;
+
+        mo->subsector_->thing_list = mo;
+    }
+}
+
+void A_JumpIfFlagsSet(MapObject *mo)
+{
+    if (mo->state_->jumpstate == 0)
+        return;
+
+    JumpActionInfo *jump = nullptr;
+
+    if (!mo->state_->action_par)
+    {
+        WarningOrError("A_JumpIfTracerCloser used for thing [%s] without a label !\n", mo->info_->name_.c_str());
+        return;
+    }
+    else
+        jump = (JumpActionInfo *)mo->state_->action_par;
+
+    if (!jump->amount && !jump->amount2)
+        return;
+
+    bool jumpit = true;
+
+    if (jump->amount)
+    {
+        if ((mo->flags_ & jump->amount) != jump->amount)
+            jumpit = false;
+    }
+    if (jump->amount2)
+    {
+        if ((mo->mbf21_flags_& jump->amount2) != jump->amount2)
+            jumpit = false;
+    }
+
+    if (jumpit)
+        mo->next_state_ = states + mo->state_->jumpstate;
+}
+
+void A_JumpIfTracerCloser(MapObject *mo)
+{
+    if (mo->state_->jumpstate == 0)
+        return;
+
+    JumpActionInfo *jump = nullptr;
+
+    if (!mo->state_->action_par)
+    {
+        WarningOrError("A_JumpIfTracerCloser used for thing [%s] without a label !\n", mo->info_->name_.c_str());
+        return;
+    }
+    else
+        jump = (JumpActionInfo *)mo->state_->action_par;
+
+    if (mo->tracer_ && ApproximateDistance(mo->tracer_->x - mo->x, mo->tracer_->y - mo->y) < (float)jump->amount / 65536.0f)
+        mo->next_state_ = states + mo->state_->jumpstate;
+}
+
+void A_JumpIfTracerInSight(MapObject *mo)
+{
+    if (mo->state_->jumpstate == 0)
+        return;
+
+    JumpActionInfo *jump = nullptr;
+
+    if (!mo->state_->action_par)
+    {
+        WarningOrError("A_JumpIfTracerInSight used for thing [%s] without a label !\n", mo->info_->name_.c_str());
+        return;
+    }
+    else
+        jump = (JumpActionInfo *)mo->state_->action_par;
+
+    if (mo->tracer_ && CheckSight(mo, mo->tracer_) && (!jump->amount || epi::BAMCheckFOV(PointToAngle(mo->x, mo->y, mo->tracer_->x, mo->tracer_->y), epi::BAMFromDegrees((float)jump->amount / 65536.0f), mo->angle_)))
+        mo->next_state_ = states + mo->state_->jumpstate;
+}
+
+void A_JumpIfTargetCloser(MapObject *mo)
+{
+    if (mo->state_->jumpstate == 0)
+        return;
+
+    JumpActionInfo *jump = nullptr;
+
+    if (!mo->state_->action_par)
+    {
+        WarningOrError("A_JumpIfTargetCloser used for thing [%s] without a label !\n", mo->info_->name_.c_str());
+        return;
+    }
+    else
+        jump = (JumpActionInfo *)mo->state_->action_par;
+
+    if (mo->target_ && ApproximateDistance(mo->target_->x - mo->x, mo->target_->y - mo->y) < (float)jump->amount / 65536.0f)
+        mo->next_state_ = states + mo->state_->jumpstate;
+}
+
+void A_JumpIfTargetInSight(MapObject *mo)
+{
+    if (mo->state_->jumpstate == 0)
+        return;
+
+    JumpActionInfo *jump = nullptr;
+
+    if (!mo->state_->action_par)
+    {
+        WarningOrError("A_JumpIfTargetInSight used for thing [%s] without a label !\n", mo->info_->name_.c_str());
+        return;
+    }
+    else
+        jump = (JumpActionInfo *)mo->state_->action_par;
+
+    if (mo->target_ && CheckSight(mo, mo->target_) && (!jump->amount || epi::BAMCheckFOV(PointToAngle(mo->x, mo->y, mo->target_->x, mo->target_->y), epi::BAMFromDegrees((float)jump->amount / 65536.0f), mo->angle_)))
+        mo->next_state_ = states + mo->state_->jumpstate;
+}
+
+void A_FindTracer(MapObject *mo)
+{
+    MapObject *destination = mo->tracer_;
+
+    if (destination)
+        return;
+
+    if (!mo->state_->action_par)
+    {
+        WarningOrError("A_FindTracer used for thing [%s] without values !\n", mo->info_->name_.c_str());
+        return;
+    }
+
+    int *args = (int *)mo->state_->action_par;
+
+    BAMAngle fov = args[0] == 0 ? kBAMAngle0 : epi::BAMFromDegrees((float)args[0] / 65536.0f);
+    uint32_t rangeblocks = args[1] != 0 ? args[1] : 10;
+
+    MapObject *target = A_LookForBlockmapTarget(mo, kBlockmapUnitSize * rangeblocks, fov);
+
+    if (target)
+        mo->SetTracer(target);
+}
+
+void A_SeekTracer(MapObject *mo)
+{
+    MapObject *destination = mo->tracer_;
+
+    if (!destination || destination->health_ <= 0)
+        return;
+
+    if (!mo->state_->action_par)
+    {
+        WarningOrError("A_SeekTracer used for thing [%s] without values !\n", mo->info_->name_.c_str());
+        return;
+    }
+
+    int *args = (int *)mo->state_->action_par;
+
+    BAMAngle threshold = epi::BAMFromDegrees((float)args[0] / 65536.0f);
+    BAMAngle maxturn = epi::BAMFromDegrees((float)args[1] / 65536.0f);
+
+    // change angle
+    BAMAngle exact = PointToAngle(mo->x, mo->y, destination->x, destination->y);
+
+    if (exact != mo->angle_)
+    {
+        if (exact - mo->angle_ > kBAMAngle180)
+        {
+            mo->angle_ -= maxturn;
+
+            if (exact - mo->angle_ < kBAMAngle180)
+                mo->angle_ = exact;
+        }
+        else
+        {
+            mo->angle_ += maxturn;
+
+            if (exact - mo->angle_ > kBAMAngle180)
+                mo->angle_ = exact;
+        }
+    }
+
+    mo->momentum_.X = mo->speed_ * epi::BAMCos(mo->angle_);
+    mo->momentum_.Y = mo->speed_ * epi::BAMSin(mo->angle_);
+
+    // change slope
+    float slope = ApproximateSlope(destination->x - mo->x, destination->y - mo->y,
+                                   MapObjectMidZ(destination) - mo->z);
+
+    slope *= mo->speed_;
+
+    if (slope < mo->momentum_.Z)
+        mo->momentum_.Z -= 0.125f;
+    else
+        mo->momentum_.Z += 0.125f;
+}
+
+void A_JumpIfHealthBelow(MapObject *mo)
+{
+    if (mo->state_->jumpstate == 0)
+        return;
+
+    JumpActionInfo *jump = nullptr;
+
+    if (!mo->state_->action_par)
+    {
+        WarningOrError("A_JumpIfHealthBelow used for thing [%s] without a label !\n", mo->info_->name_.c_str());
+        return;
+    }
+    else
+        jump = (JumpActionInfo *)mo->state_->action_par;
+
+    if (mo->health_ < jump->amount)
+        mo->next_state_ = states + mo->state_->jumpstate;
+}
+
+void A_ClearTracer(MapObject *object)
+{
+    object->SetTracer(nullptr);
+}
+
+void A_MonsterMeleeAttack(MapObject *object)
+{
+    const AttackDefinition *attack = nullptr;
+
+    if (object->state_ && object->state_->action_par)
+        attack = (const AttackDefinition *)object->state_->action_par;
+
+    if (!attack)
+    {
+        WarningOrError("A_MonsterMeleeAttack: %s has no melee attack.\n", object->info_->name_.c_str());
+        return;
+    }
+
+    if (attack->flags_ & kAttackFlagFaceTarget)
+        A_FaceTarget(object);
+
+    if (attack->flags_ & kAttackFlagNeedSight)
+    {
+        if (!object->target_ || !CheckSight(object, object->target_))
+            return;
+    }
+
+    object->current_attack_ = attack;
+    P_DoAttack(object);
+}
+
+void A_MonsterProjectile(MapObject *object)
+{
+    const AttackDefinition *attack = nullptr;
+
+    if (object->state_ && object->state_->action_par)
+        attack = (const AttackDefinition *)object->state_->action_par;
+
+    if (!attack || !attack->atk_mobj_)
+    {
+        WarningOrError("A_MonsterProjectile: %s has an invalid projectile attack.\n", object->info_->name_.c_str());
+        return;
+    }
+
+    if (attack->flags_ & kAttackFlagFaceTarget)
+        A_FaceTarget(object);
+
+    object->current_attack_ = attack;
+    P_DoAttack(object);
+}
+
+void A_MonsterBulletAttack(MapObject *object)
+{
+    const AttackDefinition *attack = nullptr;
+
+    if (object->state_ && object->state_->action_par)
+        attack = (const AttackDefinition *)object->state_->action_par;
+
+    if (!attack)
+    {
+        WarningOrError("A_MonsterBulletAttack: %s has no hitscan attack defined.\n", object->info_->name_.c_str());
+        return;
+    }
+
+    if (attack->flags_ & kAttackFlagFaceTarget)
+        A_FaceTarget(object);
+
+    object->current_attack_ = attack;
+    P_DoAttack(object);
+}
+
+void A_WeaponMeleeAttack(MapObject *mo)
+{
+    Player       *p   = mo->player_;
+    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
+    WeaponDefinition *info   = p->weapons_[p->ready_weapon_].info;
+    const AttackDefinition *atk = nullptr;
+
+    if (psp->state && psp->state->action_par)
+        atk = (const AttackDefinition *)psp->state->action_par;
+
+    if (!atk)
+        FatalError("Weapon [%s] missing attack for A_WeaponMeleeAttack.\n", info->name_.c_str());
+
+    // wake up monsters
+    if (!(info->specials_[0] & WeaponFlagSilentToMonsters))
+        NoiseAlert(p);
+
+    PlayerAttack(mo, atk);
+}
+
+void A_WeaponBulletAttack(MapObject *mo)
+{
+    Player       *p   = mo->player_;
+    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
+    WeaponDefinition *info   = p->weapons_[p->ready_weapon_].info;
+    const AttackDefinition *atk = nullptr;
+
+    if (psp->state && psp->state->action_par)
+        atk = (const AttackDefinition *)psp->state->action_par;
+
+    if (!atk)
+        FatalError("Weapon [%s] missing attack for A_WeaponBulletAttack.\n", info->name_.c_str());
+
+    // wake up monsters
+    if (!(info->specials_[0] & WeaponFlagSilentToMonsters))
+        NoiseAlert(p);
+
+    PlayerAttack(mo, atk);
+}
+
+void A_WeaponProjectile(MapObject *mo)
+{
+    Player       *p   = mo->player_;
+    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
+    WeaponDefinition *info   = p->weapons_[p->ready_weapon_].info;
+    const AttackDefinition *atk = nullptr;
+
+    if (psp->state && psp->state->action_par)
+        atk = (const AttackDefinition *)psp->state->action_par;
+
+    if (!atk)
+        FatalError("Weapon [%s] missing attack for A_WeaponProjectile.\n", info->name_.c_str());
+
+    if (!atk->atk_mobj_)
+        FatalError("Weapon [%s] missing projectile map object for A_WeaponProjectile.\n", info->name_.c_str());
+
+    // wake up monsters
+    if (!(info->specials_[0] & WeaponFlagSilentToMonsters))
+        NoiseAlert(p);
+
+    PlayerAttack(mo, atk);
+}
+
+//
+// A_RadiusDamage
+//
+// Radius attack from MBF21
+//
+void A_RadiusDamage(MapObject *mo)
+{
+    int *args = (int *)mo->state_->action_par;
+
+    if (!args)
+        FatalError("Map Object [%s] given no parameters for A_RadiusDamage.\n", mo->info_->name_.c_str());
+
+#ifdef DEVELOPERS
+    if (!damage)
+    {
+        LogDebug("%s caused no explosion damage\n", mo->info_->name.c_str());
+        return;
+    }
+#endif
+
+    RadiusAttack(mo, mo, (float)args[1], (float)args[0], nullptr, false);
+}
+
+//
+// A_HealChase
+//
+//
+void A_HealChase(MapObject *object)
+{
+    if (object->state_->jumpstate == 0)
+        return;
+
+    JumpActionInfo *jump = nullptr;
+
+    if (!object->state_->action_par)
+    {
+        WarningOrError("A_HealChase used for map object [%s] without a label !\n", object->info_->name_.c_str());
+        return;
+    }
+    else
+        jump = (JumpActionInfo *)object->state_->action_par;
+
+    MapObject *corpse;
+
+    corpse = FindCorpseForResurrection(object);
+
+    if (corpse)
+    {
+        object->angle_ = PointToAngle(object->x, object->y, corpse->x, corpse->y);
+        if (object->info_->res_state_)
+            MapObjectSetStateDeferred(object, object->info_->res_state_, 0);
+        SoundEffectDefinition *def = sfxdefs.DEHLookup(jump->amount);
+        if (def)
+            StartSoundEffect(sfxdefs.GetEffect(def->name_.c_str()), GetSoundEffectCategory(object), object);
+
+        // corpses without raise states should be skipped
+        EPI_ASSERT(corpse->info_->raise_state_);
+
+        BringCorpseToLife(corpse);
+
+        // -ACB- 1998/09/05 Support Check: Res creatures to support that object
+        if (object->support_object_)
+        {
+            corpse->SetSupportObject(object->support_object_);
+            corpse->SetTarget(object->target_);
+        }
+        else
+        {
+            corpse->SetSupportObject(nullptr);
+            corpse->SetTarget(nullptr);
+        }
+
+        // -AJA- Resurrected creatures are on Archvile's side (like MBF)
+        corpse->side_ = object->side_;
+        return;
+    }
+
+    A_StandardChase(object);
+}
+
+void A_SpawnObject(MapObject *mo)
+{
+    if (!mo->state_->action_par)
+        FatalError("A_SpawnObject action used without a object name!\n");
+
+    DEHSpawnParameters *ref = (DEHSpawnParameters *)mo->state_->action_par;
+
+    const MapObjectDefinition *type = mobjtypes.Lookup(ref->spawn_name);
+
+    if (!type)
+        FatalError("A_SpawnObject action used with %s, but it doesn't exist?\n", ref->spawn_name);
+
+    BAMAngle newangle = mo->angle_ + ref->angle;
+    float newcos = epi::BAMCos(newangle);
+    float newsin = epi::BAMSin(newangle);
+
+    MapObject *spawn = CreateMapObject(mo->x + (ref->x_offset * newcos - ref->y_offset * newsin), mo->y + (ref->x_offset * newsin + ref->y_offset * newcos), mo->z + ref->z_offset, type);
+    EPI_ASSERT(spawn);
+
+    MapObjectSetDirectionAndSpeed(spawn, newangle, 0, type->speed_);
+    spawn->momentum_.X += newcos * ref->x_velocity - ref->y_velocity * newsin;
+    spawn->momentum_.Y += newsin * ref->x_velocity + newcos * ref->y_velocity;
+    spawn->momentum_.Z += ref->z_velocity;
+    spawn->side_  = mo->side_;
+
+    spawn->SetRealSource(mo);
+
+    if (spawn->flags_ & kMapObjectFlagMissile)
+    {
+        if (mo->flags_ & kMapObjectFlagMissile)
+        {
+            spawn->SetTarget(mo->target_);
+            spawn->SetTracer(mo->tracer_);
+        }
+        else
+        {
+            spawn->SetTarget(mo);
+            spawn->SetTracer(mo->target_);
+        }
+    }
+}
 
 //
 // killough 9/98: a mushroom explosion effect, sorta :)

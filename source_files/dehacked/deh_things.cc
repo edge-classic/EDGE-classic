@@ -177,9 +177,6 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
 {
     frames::ResetGroups();
 
-    if (info->fullbright)
-        frames::force_fullbright = true;
-
     // special cases...
 
     if (mt_num == kMT_SPAWNSHOT)
@@ -200,17 +197,13 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
                      "states.\n");
 
         if (count == 0)
-        {
-            frames::force_fullbright = false;
             return;
-        }
 
         frames::SpreadGroups();
 
         frames::OutputGroup('S');
         frames::OutputGroup('D');
 
-        frames::force_fullbright = false;
         return;
     }
 
@@ -225,7 +218,6 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
     if (count == 0)
     {
         LogDebug("Dehacked: Warning - Attack [%s] has no states.\n", things::GetMobjName(mt_num) + 1);
-        frames::force_fullbright = false;
         return;
     }
 
@@ -234,9 +226,6 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
     frames::OutputGroup('S');
     frames::OutputGroup('E');
     frames::OutputGroup('D');
-
-    // reset fullbright
-    frames::force_fullbright = false;
 }
 
 void AddAtkSpecial(const char *name)
@@ -490,7 +479,10 @@ void Attacks::ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num,
     if (frames::act_flags & kActionFlagExplode)
         wad::Printf("EXPLODE_DAMAGE.VAL = 128;\n");
     else if (frames::act_flags & kActionFlagDetonate)
+    {
         wad::Printf("EXPLODE_DAMAGE.VAL = %d;\n", info->damage);
+        wad::Printf("EXPLODE_DAMAGE.MAX = %d;\n", info->damage * 8);
+    }
 
     wad::Printf("\n");
 }
@@ -592,6 +584,9 @@ void things::MarkThing(int mt_num)
         {
             entry->doomednum = mt_num;
         }
+
+        // Set some default MBF21 values to be non-applicable unless actually set
+        entry->proj_group = entry->splash_group = entry->infight_group = entry->fast_speed = entry->melee_range = -2;
     }
 }
 
@@ -633,7 +628,7 @@ const char *things::GetMobjName(int mt_num)
     static char buffer[64];
 
     if (kMT_EXTRA00 <= mt_num && mt_num <= kMT_EXTRA99)
-        snprintf(buffer, sizeof(buffer), "kMT_EXTRA%02d", mt_num - kMT_EXTRA00);
+        snprintf(buffer, sizeof(buffer), "MT_EXTRA%02d", mt_num - kMT_EXTRA00);
     else
         snprintf(buffer, sizeof(buffer), "DEHACKED_%d", mt_num + 1);
 
@@ -1571,20 +1566,8 @@ void things::HandleDropItem(const DehackedMapObjectDefinition *info, int mt_num)
 {
     const char *item = nullptr;
 
-    if (info->dropped_item == 0)
+    switch (mt_num)
     {
-        return; // I think '0' is used to clear out normal drops
-    }
-    else if (info->dropped_item - 1 > kMT_PLAYER)
-    {
-        item = GetMobjName(info->dropped_item - 1);
-        if (!item)
-            return;
-    }
-    else
-    {
-        switch (mt_num)
-        {
         case kMT_WOLFSS:
         case kMT_POSSESSED:
             item = "CLIP";
@@ -1599,7 +1582,6 @@ void things::HandleDropItem(const DehackedMapObjectDefinition *info, int mt_num)
 
         default:
             return;
-        }
     }
 
     EPI_ASSERT(item);
@@ -1653,15 +1635,11 @@ void things::ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num, in
     else
         wad::Printf("[%s:%d]\n", ddf_name, info->doomednum);
 
-    if (info->pickup_width != 0)
-        wad::Printf("RADIUS = %1.1f;\n", FixedToFloat(info->pickup_width));
-    else
-        wad::Printf("RADIUS = %1.1f;\n", FixedToFloat(info->radius));
+    wad::Printf("DEH_THING_ID = %d;\n", mt_num+1);
 
-    if (info->projectile_pass_height != 0)
-        wad::Printf("HEIGHT = %1.1f;\n", FixedToFloat(info->projectile_pass_height));
-    else
-        wad::Printf("HEIGHT = %1.1f;\n", FixedToFloat(info->height));
+    wad::Printf("RADIUS = %1.1f;\n", FixedToFloat(info->radius));
+
+    wad::Printf("HEIGHT = %1.1f;\n", FixedToFloat(info->height));
 
     if (info->spawnhealth != 1000)
         wad::Printf("SPAWNHEALTH = %d;\n", info->spawnhealth);
@@ -1670,6 +1648,12 @@ void things::ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num, in
         wad::Printf("SPEED = 1;\n");
     else if (info->speed != 0)
         wad::Printf("SPEED = %s;\n", GetSpeed(info->speed));
+
+    if (info->fast_speed > 0)
+        wad::Printf("FAST_SPEED = %s;\n", GetSpeed(info->fast_speed));
+
+    if (info->melee_range > 0)
+        wad::Printf("MELEE_RANGE = %f;\n", FixedToFloat(info->melee_range));
 
     if (info->mass != 100 && info->mass > 0)
         wad::Printf("MASS = %d;\n", info->mass);
@@ -1682,8 +1666,14 @@ void things::ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num, in
     else if (info->painchance > 0)
         wad::Printf("PAINCHANCE = %1.1f%%;\n", (float)info->painchance * 100.0 / 256.0);
 
-    if (info->gib_health != 0)
-        wad::Printf("GIB_HEALTH = %d;\n", info->gib_health);
+    if (info->splash_group >= 0)
+        wad::Printf("SPLASH_GROUP = %d;\n", info->splash_group+1); // We don't want a '0' splash group when it hits DDF
+
+    if (info->infight_group >= 0)
+        wad::Printf("INFIGHTING_GROUP = %d;\n", info->infight_group+1); // We don't want a '0' infighting group when it hits DDF
+
+    if (info->proj_group > -2) // -1 is a special value here, so negative is still valid
+        wad::Printf("PROJECTILE_GROUP = %d;\n", info->proj_group);
 
     if (mt_num == kMT_BOSSSPIT)
         wad::Printf("SPIT_SPOT = BRAIN_SPAWNSPOT;\n");
@@ -1702,8 +1692,11 @@ void things::ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num, in
 
     if (frames::act_flags & kActionFlagExplode)
         wad::Printf("EXPLODE_DAMAGE.VAL = 128;\n");
-    else if (frames::act_flags & kActionFlagDetonate)
+    else if (((patch::doom_ver == 21 || patch::doom_ver == 2021) && info->damage) || (frames::act_flags & kActionFlagDetonate))
+    {
         wad::Printf("EXPLODE_DAMAGE.VAL = %d;\n", info->damage);
+        wad::Printf("EXPLODE_DAMAGE.MAX = %d;\n", info->damage * 8);
+    }
 
     if ((frames::act_flags & kActionFlagKeenDie))
         rscript::MarkKeenDie(mt_num);
@@ -1820,11 +1813,6 @@ const FieldReference mobj_field[] = {
     {"Rip sound", offsetof(DehackedMapObjectDefinition, rip_sound), kFieldTypeSoundNumber},
     {"Fast speed", offsetof(DehackedMapObjectDefinition, fast_speed), kFieldTypeZeroOrGreater},
     {"Melee range", offsetof(DehackedMapObjectDefinition, melee_range), kFieldTypeZeroOrGreater},
-    {"Gib health", offsetof(DehackedMapObjectDefinition, gib_health), kFieldTypeAny},
-    {"Dropped item", offsetof(DehackedMapObjectDefinition, dropped_item), kFieldTypeZeroOrGreater},
-    {"Pickup width", offsetof(DehackedMapObjectDefinition, pickup_width), kFieldTypeZeroOrGreater},
-    {"Projectile pass height", offsetof(DehackedMapObjectDefinition, projectile_pass_height), kFieldTypeZeroOrGreater},
-    {"Fullbright", offsetof(DehackedMapObjectDefinition, fullbright), kFieldTypeZeroOrGreater},
     {"Respawn frame", offsetof(DehackedMapObjectDefinition, raisestate), kFieldTypeFrameNumber},
 
     {nullptr, 0, kFieldTypeAny} // End sentinel

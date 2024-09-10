@@ -2038,7 +2038,6 @@ static ddf_reader_t ddf_readers[kTotalDDFTypes] = {
     {kDDFTypeAttack, "DDFATK", "attacks.ddf", "Attacks", DDFReadAtks},
     {kDDFTypeWeapon, "DDFWEAP", "weapons.ddf", "Weapons", DDFReadWeapons},
     {kDDFTypeThing, "DDFTHING", "things.ddf", "Things", DDFReadThings},
-
     {kDDFTypePlaylist, "DDFPLAY", "playlist.ddf", "Playlists", DDFReadMusicPlaylist},
     {kDDFTypeLine, "DDFLINE", "lines.ddf", "Lines", DDFReadLines},
     {kDDFTypeSector, "DDFSECT", "sectors.ddf", "Sectors", DDFReadSectors},

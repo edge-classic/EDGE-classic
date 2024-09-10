@@ -1134,9 +1134,7 @@ void KillMapObject(MapObject *source, MapObject *target, const DamageClass *damt
     int  state    = 0;
     bool overkill = false;
 
-    if (target->info_->gib_health_ < 0 && target->health_ < target->info_->gib_health_)
-        overkill = true;
-    else if (target->health_ < -target->spawn_health_)
+    if (target->health_ < -target->spawn_health_)
         overkill = true;
 
     if (weak_spot)

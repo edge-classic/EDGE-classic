@@ -205,7 +205,8 @@ void HandleSounds(const WeaponInfo *info, int w_num)
     if (w_num == kwp_chainsaw)
     {
         wad::Printf("START_SOUND = \"%s\";\n", sounds::GetSound(ksfx_sawup));
-        wad::Printf("IDLE_SOUND = \"%s\";\n", sounds::GetSound(ksfx_sawidl));
+        if (info->readystate == kS_SAW)
+            wad::Printf("IDLE_SOUND = \"%s\";\n", sounds::GetSound(ksfx_sawidl));
         wad::Printf("ENGAGED_SOUND = \"%s\";\n", sounds::GetSound(ksfx_sawful));
         return;
     }
@@ -294,7 +295,13 @@ void ConvertWeapon(int w_num)
     wad::Printf("AMMOTYPE = %s;\n", ammo::GetAmmo(info->ammo));
 
     if (w_num == kwp_bfg)
-        wad::Printf("AMMOPERSHOT = %d;\n", miscellaneous::bfg_cells_per_shot);
+    {
+        // Allow ammo per shot field to govern BFG if using the newest Dehacked versions
+        if ((patch::doom_ver == 21 || patch::doom_ver == 2021) && info->ammo_per_shot != 0)
+            wad::Printf("AMMOPERSHOT = %d;\n", info->ammo_per_shot);
+        else
+            wad::Printf("AMMOPERSHOT = %d;\n", miscellaneous::bfg_cells_per_shot);
+    }
     else if (info->ammo_per_shot != 0)
         wad::Printf("AMMOPERSHOT = %d;\n", info->ammo_per_shot);
 

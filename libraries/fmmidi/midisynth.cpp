@@ -538,7 +538,7 @@ void synthesizer::reset()
 void synthesizer::reset_all_parameters()
 {
     active_sensing              = -1;
-    main_volume                 = 6144;
+    main_volume                 = 8192;
     master_volume               = 16383;
     master_balance              = 8192;
     master_fine_tuning          = 8192;

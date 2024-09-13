@@ -321,7 +321,10 @@ static bool InitializeWindow(DisplayMode *mode)
         SDL_GL_SetSwapInterval(vsync.d_);
 
 #ifndef EDGE_GL_ES2
-    gladLoaderLoadGL();
+    gladLoadGL();
+
+    if (GLVersion.major < 2 || (GLVersion.major == 2 && GLVersion.minor < 1))
+        FatalError("System only support GL %d.%d. Minimum GL version 2.1 required!\n", GLVersion.major, GLVersion.minor);
 #endif
 
     return true;
@@ -503,9 +506,7 @@ void ShutdownGraphics(void)
         SDL_Quit();
     }
 
-#ifndef EDGE_GL_ES2
-    gladLoaderUnloadGL();
-#else
+#ifdef EDGE_GL_ES2
     close_gl4es();
 #endif
 }

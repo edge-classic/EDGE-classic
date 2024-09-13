@@ -466,21 +466,9 @@ static void DrawStdCrossHair(void)
 
     GLuint tex_id = ImageCache(crosshair_image);
 
-    static int xh_count = 0;
-    static int xh_dir   = 1;
-
-    // -jc- Pulsating
-    if (xh_count == 31)
-        xh_dir = -1;
-    else if (xh_count == 0)
-        xh_dir = 1;
-
-    xh_count += xh_dir;
-
     RGBAColor color     = crosshair_colors[crosshair_color.d_ & 7];
-    float     intensity = 1.0f - xh_count / 100.0f;
 
-    intensity *= crosshair_brightness.f_;
+    float intensity = 1.0f * crosshair_brightness.f_;
 
     float r = epi::GetRGBARed(color) * intensity / 255.0f;
     float g = epi::GetRGBAGreen(color) * intensity / 255.0f;

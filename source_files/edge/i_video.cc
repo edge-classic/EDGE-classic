@@ -27,6 +27,8 @@
 // clang-format on
 #endif
 
+#include "ddf_main.h"
+#include "dm_state.h"
 #include "edge_profiling.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
@@ -64,6 +66,8 @@ EDGE_DEFINE_CONSOLE_VARIABLE(pixel_aspect_ratio, "1.0", kConsoleVariableFlagRead
 // cases where a normal logic fails.  however, it will apply to *all* modes,
 // including windowed mode.
 EDGE_DEFINE_CONSOLE_VARIABLE(forced_pixel_aspect_ratio, "0", kConsoleVariableFlagArchive)
+
+EDGE_DEFINE_CONSOLE_VARIABLE(framerate_limit, "500", kConsoleVariableFlagArchive)
 
 static bool grab_state;
 
@@ -470,8 +474,37 @@ void FinishFrame(void)
     if (grab_mouse.CheckModified())
         GrabCursor(grab_state);
 
+    if (uncapped_frames.d_ && !single_tics)
+    {
+        if (framerate_limit.d_ >= kTicRate)
+        {
+            uint64_t target_time = 1000000ull / framerate_limit.d_;
+            static uint64_t start_time;
+
+            while (1)
+            {
+                uint64_t current_time = GetMicroseconds();
+                uint64_t elapsed_time = current_time - start_time;
+                uint64_t remaining_time = 0;
+
+                if (elapsed_time >= target_time)
+                {
+                    start_time = current_time;
+                    break;
+                }
+
+                remaining_time = target_time - elapsed_time;
+
+                if (remaining_time > 1000)
+                {
+                    SleepForMilliseconds((remaining_time - 1000) / 1000);
+                }
+            }
+        }
+    }
+
     if (uncapped_frames.d_)
-        fractional_tic = (float)(GetMilliseconds() * 35 % 1000) / 1000;
+        fractional_tic = (float)(GetMilliseconds() * kTicRate % 1000) / 1000;
 
     if (vsync.CheckModified())
     {

@@ -251,10 +251,6 @@ static bool WeaponCouldAutoFire(Player *p, int idx, int ATK, bool skip_ammo_chec
     if (!info->attack_state_[ATK])
         return false;
 
-    // MBF21 NOAUTOFIRE flag
-    if (info->specials_[ATK] & WeaponFlagNoAutoFire)
-        return false;
-
     if (skip_ammo_check)
         return true;
 

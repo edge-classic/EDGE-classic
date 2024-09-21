@@ -420,11 +420,6 @@ struct DehackedMapObjectDefinition
     int rip_sound;
     int fast_speed;
     int melee_range;
-    int gib_health;
-    int dropped_item;
-    int pickup_width;
-    int projectile_pass_height;
-    int fullbright;
     int raisestate;
 };
 

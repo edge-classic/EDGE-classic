@@ -2660,7 +2660,7 @@ static bool RadiusAttackCallback(MapObject *thing, void *data)
     }
 
     // MBF21: If in same splash group, don't damage it
-    if (thing->info_->splash_group_ >= 0 && radius_attack_check.source->info_->splash_group_ >= 0 &&
+    if (thing->info_->splash_group_ > 0 && radius_attack_check.source && radius_attack_check.source->info_->splash_group_ > 0 &&
         (thing->info_->splash_group_ == radius_attack_check.source->info_->splash_group_))
     {
         return true;

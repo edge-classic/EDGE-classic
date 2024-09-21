@@ -180,8 +180,11 @@ static bool ButtonDown(Player *p, int ATK)
     return tempbuttons;
 }
 
-static bool WeaponCanFire(Player *p, int idx, int ATK)
+static bool WeaponCanFire(Player *p, int idx, int ATK, bool skip_ammo_check = false)
 {
+    if (skip_ammo_check)
+        return true;
+
     WeaponDefinition *info = p->weapons_[idx].info;
 
     if (info->shared_clip_)
@@ -238,7 +241,7 @@ static bool WeaponCanReload(Player *p, int idx, int ATK, bool allow_top_up)
     return (info->clip_size_[ATK] - p->weapons_[idx].clip_size[ATK] <= total);
 }
 
-static bool WeaponCouldAutoFire(Player *p, int idx, int ATK)
+static bool WeaponCouldAutoFire(Player *p, int idx, int ATK, bool skip_ammo_check = false)
 {
     // Returns true when weapon will either fire or reload
     // (assuming the button is held down).
@@ -251,6 +254,9 @@ static bool WeaponCouldAutoFire(Player *p, int idx, int ATK)
     // MBF21 NOAUTOFIRE flag
     if (info->specials_[ATK] & WeaponFlagNoAutoFire)
         return false;
+
+    if (skip_ammo_check)
+        return true;
 
     if (info->shared_clip_)
         ATK = 0;
@@ -1133,6 +1139,8 @@ void A_ReFireFA(MapObject *mo)
 //
 // The player can re-fire the weapon without lowering it entirely.
 // Unlike A_ReFire, this can re-fire to an arbitrary state
+// If the second parameter to the jump command is non-zero,
+// skips the check for ammo (probably just MBF21)
 //
 static void DoReFireTo(MapObject *mo, int ATK)
 {
@@ -1152,6 +1160,11 @@ static void DoReFireTo(MapObject *mo, int ATK)
 
     p->remember_attack_state_[ATK] = -1;
 
+    JumpActionInfo *jump = nullptr;
+
+    if (psp->state->action_par)
+        jump = (JumpActionInfo *)psp->state->action_par;
+
     // check for fire
     // (if a weaponchange is pending, let it go through instead)
 
@@ -1163,7 +1176,7 @@ static void DoReFireTo(MapObject *mo, int ATK)
             p->refire_++;
             p->flash_ = false;
 
-            if (WeaponCanFire(p, p->ready_weapon_, ATK))
+            if (WeaponCanFire(p, p->ready_weapon_, ATK, (jump && jump->amount != 0)))
                 SetPlayerSpriteDeferred(p, kPlayerSpriteWeapon, psp->state->jumpstate);
             // do the crosshair too?
             else
@@ -1174,7 +1187,7 @@ static void DoReFireTo(MapObject *mo, int ATK)
 
     p->refire_ = info->refire_inacc_ ? 0 : 1;
 
-    if (!WeaponCouldAutoFire(p, p->ready_weapon_, ATK))
+    if (!WeaponCouldAutoFire(p, p->ready_weapon_, ATK, (jump && jump->amount != 0)))
         SwitchAway(p, ATK, 0);
 }
 
@@ -1519,6 +1532,22 @@ void A_GunFlashFA(MapObject *mo)
     DoGunFlash(mo, 3);
 }
 
+void A_GunFlashTo(MapObject *mo)
+{
+    Player       *p   = mo->player_;
+    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
+
+    if (psp->state->jumpstate == 0)
+        return;
+
+    // Not sure what to do with 'nothirdperson' yet - Dasho
+
+    // Set flash to true (it may already be true, but this code pointer does not
+    // do anything different if flash is already true unlike our regular GunFlash)
+    p->flash_ = true; 
+    SetPlayerSpriteDeferred(p, kPlayerSpriteFlash, psp->state->jumpstate);
+}
+
 static void DoWeaponShoot(MapObject *mo, int ATK)
 {
     Player       *p   = mo->player_;
@@ -1647,6 +1676,103 @@ void A_WeaponEject(MapObject *mo)
         FatalError("Weapon [%s] missing attack for EJECT action.\n", info->name_.c_str());
 
     PlayerAttack(mo, attack);
+}
+
+void A_CloseShotgun2(MapObject *mo)
+{
+    Player       *p   = mo->player_;
+
+    SoundEffect *sound = sfxdefs.GetEffect("DBCLS");
+
+    if (!sound)
+        WarningOrError("A_CloseShotgun2: DBCLS sound missing !\n");
+    else
+        StartSoundEffect(sound, WeaponSoundEffectCategory(p), mo, kSoundEffectNormal);
+
+    A_ReFire(mo);
+}
+
+void A_WeaponSound(MapObject *mo)
+{
+    // Generate an arbitrary sound from this weapon.
+    Player       *p   = mo->player_;
+    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
+    WeaponDefinition *info   = p->weapons_[p->ready_weapon_].info;
+    SoundEffect *sound = nullptr;
+    int *args = nullptr;
+
+    if (psp->state && psp->state->action_par)
+        args = (int *)psp->state->action_par;
+
+    if (!args)
+        FatalError("Weapon [%s] missing args for A_WeaponSound.\n", info->name_.c_str());
+
+    SoundEffectDefinition *def = sfxdefs.DEHLookup(args[0]);
+    if (def)
+        sound = sfxdefs.GetEffect(def->name_.c_str());
+
+    if (!sound)
+    {
+        WarningOrError("A_WeaponSound: missing sound name !\n");
+        return;
+    }
+
+    StartSoundEffect(sound, WeaponSoundEffectCategory(p), mo, args[1] ? kSoundEffectBoss : kSoundEffectNormal);
+}
+
+void A_ConsumeAmmo(MapObject *mo)
+{
+    Player       *p   = mo->player_;
+    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
+    WeaponDefinition *info   = p->weapons_[p->ready_weapon_].info;
+    AmmunitionType ammotype = info->ammo_[0];
+
+    if (ammotype == kAmmunitionTypeNoAmmo)
+        return;
+
+    int *args = nullptr;
+
+    if (psp->state && psp->state->action_par)
+        args = (int *)psp->state->action_par;
+
+    if (!args)
+        FatalError("Weapon [%s] missing args for A_ConsumeAmmo.\n", info->name_.c_str());
+
+    int count = args[0] == 0 ? info->ammopershot_[0] : args[0];
+
+    p->ammo_[ammotype].count -= count;
+    EPI_ASSERT(p->ammo_[ammotype].count >= 0);
+}
+
+void A_CheckAmmo(MapObject *mo)
+{
+    Player       *p   = mo->player_;
+    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
+    WeaponDefinition *info   = p->weapons_[p->ready_weapon_].info;
+    AmmunitionType ammotype = info->ammo_[0];
+
+    if (ammotype == kAmmunitionTypeNoAmmo)
+        return;
+
+    if (psp->state->jumpstate == 0)
+        return;
+
+    JumpActionInfo *jump = nullptr;
+
+    if (!psp->state->action_par)
+    {
+        WarningOrError("A_CheckAmmo used in weapon [%s] without a label !\n", info->name_.c_str());
+        return;
+    }
+    else
+        jump = (JumpActionInfo *)psp->state->action_par;
+
+    int amount = jump->amount;
+    if (amount == 0)
+        amount = info->ammopershot_[0];
+
+    if (p->ammo_[ammotype].count < amount)
+        psp->next_state = states + psp->state->jumpstate;
 }
 
 void A_WeaponPlaySound(MapObject *mo)

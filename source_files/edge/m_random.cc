@@ -29,8 +29,8 @@
 
 #include "i_system.h"
 
-std::ranlux24_base                            stateless_ranlux24_generator;
-std::ranlux24_base                            stateful_ranlux24_generator;
+std::mt19937                                  stateless_mersenne_generator;
+std::mt19937                                  stateful_mersenne_generator;
 std::uniform_int_distribution<unsigned short> unsigned_8_bit_roll(0, 255);
 std::uniform_int_distribution<unsigned short> unsigned_16_bit_roll(0, 0xFFFF);
 
@@ -39,7 +39,7 @@ static int state_step  = 1;
 
 void InitRandomState(void)
 {
-    stateless_ranlux24_generator.seed(GetMicroseconds());
+    stateless_mersenne_generator.seed(GetMicroseconds());
 }
 
 //
@@ -53,7 +53,7 @@ void InitRandomState(void)
 //
 int RandomByte(void)
 {
-    return unsigned_8_bit_roll(stateless_ranlux24_generator);
+    return unsigned_8_bit_roll(stateless_mersenne_generator);
 }
 
 //
@@ -92,9 +92,9 @@ int RandomByteDeterministic(void)
     if (state_index == 0)
         state_step += (47 * 2);
 
-    stateful_ranlux24_generator.seed(state_index + state_step);
+    stateful_mersenne_generator.seed(state_index + state_step);
 
-    return unsigned_8_bit_roll(stateful_ranlux24_generator);
+    return unsigned_8_bit_roll(stateful_mersenne_generator);
 }
 
 //
@@ -104,7 +104,7 @@ int RandomByteDeterministic(void)
 //
 int RandomShort(void)
 {
-    return unsigned_16_bit_roll(stateless_ranlux24_generator);
+    return unsigned_16_bit_roll(stateless_mersenne_generator);
 }
 
 //

@@ -267,6 +267,8 @@ void DDFStateGetIntPair(const char *arg, State *cur_state);
 void DDFStateGetFloat(const char *arg, State *cur_state);
 void DDFStateGetPercent(const char *arg, State *cur_state);
 void DDFStateGetJump(const char *arg, State *cur_state);
+void DDFStateGetJumpInt(const char *arg, State *cur_state);
+void DDFStateGetJumpIntPair(const char *arg, State *cur_state);
 void DDFStateGetBecome(const char *arg, State *cur_state);
 void DDFStateGetMorph(const char *arg, State *cur_state);
 void DDFStateGetBecomeWeapon(const char *arg, State *cur_state);
@@ -274,6 +276,9 @@ void DDFStateGetFrame(const char *arg, State *cur_state);
 void DDFStateGetAngle(const char *arg, State *cur_state);
 void DDFStateGetSlope(const char *arg, State *cur_state);
 void DDFStateGetRGB(const char *arg, State *cur_state);
+// For MBF21 mostly, but in theory backwards compatible with the DEH parser rework;
+// grab up to 8 integer arguments separated by commas
+void DDFStateGetDEHParams(const char *arg, State *cur_state);
 
 bool DDFMainParseState(uint8_t *object, std::vector<StateRange> &group, const char *field, const char *contents,
                        int index, bool is_last, bool is_weapon, const DDFStateStarter *starters,

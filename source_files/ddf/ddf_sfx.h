@@ -80,6 +80,9 @@ class SoundEffectDefinition
     // then the this sound won't be played at all.
     float max_distance_;
 
+    // DEH support
+    uint32_t deh_sound_id_;
+
   private:
     // disable copy construct and assignment operator
     explicit SoundEffectDefinition(SoundEffectDefinition &rhs)
@@ -115,6 +118,7 @@ class SoundEffectDefinitionContainer : public std::vector<SoundEffectDefinition 
     // Lookup functions
     SoundEffect           *GetEffect(const char *name, bool error = true);
     SoundEffectDefinition *Lookup(const char *name);
+    SoundEffectDefinition *DEHLookup(uint32_t id);
 };
 
 // ----------EXTERNALISATIONS----------

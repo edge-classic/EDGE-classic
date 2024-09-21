@@ -33,6 +33,8 @@ extern int blockmap_height;
 extern float blockmap_origin_x; // origin of block map
 extern float blockmap_origin_y;
 
+extern MapObject **blockmap_things;
+
 constexpr uint8_t  kBlockmapUnitSize = 128;
 constexpr uint16_t kLightmapUnitSize = 512;
 

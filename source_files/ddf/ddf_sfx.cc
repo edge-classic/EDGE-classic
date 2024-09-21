@@ -43,6 +43,7 @@ static const DDFCommandList sfx_commands[] = {
     DDF_FIELD("LOOP", dummy_sfx, looping_, DDFMainGetBoolean),
     DDF_FIELD("PRECIOUS", dummy_sfx, precious_, DDFMainGetBoolean),
     DDF_FIELD("MAX_DISTANCE", dummy_sfx, max_distance_, DDFMainGetFloat),
+    DDF_FIELD("DEH_SOUND_ID", dummy_sfx, deh_sound_id_, DDFMainGetNumeric),
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -207,6 +208,7 @@ void SoundEffectDefinition::CopyDetail(SoundEffectDefinition &src)
     looping_      = src.looping_;      // looping
     precious_     = src.precious_;     // precious
     max_distance_ = src.max_distance_; // max_distance
+    deh_sound_id_ = src.deh_sound_id_;
 }
 
 //
@@ -228,6 +230,7 @@ void SoundEffectDefinition::Default()
     looping_      = false;   // looping
     precious_     = false;   // precious
     max_distance_ = 4000.0f; // max_distance
+    deh_sound_id_ = 0;
 }
 
 // --> Sound Effect Definition Containter Class
@@ -333,6 +336,22 @@ SoundEffectDefinition *SoundEffectDefinitionContainer::Lookup(const char *name)
         SoundEffectDefinition *s = *iter;
 
         if (DDFCompareName(s->name_.c_str(), name) == 0)
+            return s;
+    }
+
+    return nullptr;
+}
+
+//
+// SoundEffectDefinitionContainer::DEHLookup()
+//
+SoundEffectDefinition *SoundEffectDefinitionContainer::DEHLookup(uint32_t id)
+{
+    for (std::vector<SoundEffectDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
+    {
+        SoundEffectDefinition *s = *iter;
+
+        if (s->deh_sound_id_ == id)
             return s;
     }
 

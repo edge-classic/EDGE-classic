@@ -51,6 +51,11 @@ static void DDFMobjGetYAlign(const char *info, void *storage);
 static void DDFMobjGetPercentRange(const char *info, void *storage);
 static void DDFMobjGetAngleRange(const char *info, void *storage);
 static void DDFMobjStateGetRADTrigger(const char *arg, State *cur_state);
+static void DDFMobjStateGetDEHSpawn(const char *arg, State *cur_state);
+static void DDFMobjStateGetDEHProjectile(const char *arg, State *cur_state);
+static void DDFMobjStateGetDEHBullet(const char *arg, State *cur_state);
+static void DDFMobjStateGetDEHMelee(const char *arg, State *cur_state);
+static void DDFMobjStateGetDEHFlagJump(const char *arg, State *cur_state);
 
 static void AddPickupEffect(PickupEffect **list, PickupEffect *cur);
 
@@ -199,14 +204,13 @@ const DDFCommandList thing_commands[] = {
     DDF_FIELD("MORPH_TIMEOUT", dummy_mobj, morphtimeout_,
               DDFMainGetTime),       // Lobo 2023
 
-    // DEHEXTRA
-    DDF_FIELD("GIB_HEALTH", dummy_mobj, gib_health_, DDFMainGetFloat),
-
+    // MBF21/DEHEXTRA
     DDF_FIELD("INFIGHTING_GROUP", dummy_mobj, infight_group_, DDFMainGetNumeric),
     DDF_FIELD("PROJECTILE_GROUP", dummy_mobj, proj_group_, DDFMainGetNumeric),
     DDF_FIELD("SPLASH_GROUP", dummy_mobj, splash_group_, DDFMainGetNumeric),
     DDF_FIELD("FAST_SPEED", dummy_mobj, fast_speed_, DDFMainGetNumeric),
-    DDF_FIELD("MELEE_RANGE", dummy_mobj, melee_range_, DDFMainGetNumeric),
+    DDF_FIELD("MELEE_RANGE", dummy_mobj, melee_range_, DDFMainGetFloat),
+    DDF_FIELD("DEH_THING_ID", dummy_mobj, deh_thing_id_, DDFMainGetNumeric),
 
     // -AJA- backwards compatibility cruft...
     DDF_FIELD("EXPLOD_DAMAGE", dummy_mobj, explode_damage_.nominal_, DDFMainGetFloat),
@@ -333,6 +337,23 @@ const DDFActionCode thing_actions[] = {{"NOTHING", nullptr, nullptr},
                                        {"KEEN_DIE", A_KeenDie, nullptr},
                                        {"MUSHROOM", A_Mushroom, nullptr},
                                        {"NOISE_ALERT", A_NoiseAlert, nullptr},
+                                       {"DEH_RADIUS_DAMAGE", A_RadiusDamage, DDFStateGetDEHParams},
+                                       {"DEH_HEAL_CHASE", A_HealChase, DDFStateGetJumpInt},
+                                       {"DEH_SPAWN_OBJECT", A_SpawnObject, DDFMobjStateGetDEHSpawn},
+                                       {"DEH_MONSTER_PROJECTILE", A_MonsterProjectile, DDFMobjStateGetDEHProjectile},
+                                       {"DEH_MONSTER_BULLET", A_MonsterBulletAttack, DDFMobjStateGetDEHBullet},
+                                       {"DEH_MONSTER_MELEE", A_MonsterMeleeAttack, DDFMobjStateGetDEHMelee},
+                                       {"CLEAR_TRACER", A_ClearTracer, nullptr},
+                                       {"DEH_HEALTH_JUMP", A_JumpIfHealthBelow, DDFStateGetJumpInt},
+                                       {"DEH_SEEK_TRACER", A_SeekTracer, DDFStateGetIntPair},
+                                       {"DEH_FIND_TRACER", A_FindTracer, DDFStateGetIntPair},
+                                       {"DEH_TARGET_SIGHT_JUMP", A_JumpIfTargetInSight, DDFStateGetJumpInt},
+                                       {"DEH_TARGET_CLOSER_JUMP", A_JumpIfTargetCloser, DDFStateGetJumpInt},
+                                       {"DEH_TRACER_SIGHT_JUMP", A_JumpIfTracerInSight, DDFStateGetJumpInt},
+                                       {"DEH_TRACER_CLOSER_JUMP", A_JumpIfTracerCloser, DDFStateGetJumpInt},
+                                       {"DEH_FLAG_JUMP", A_JumpIfTracerCloser, DDFStateGetJumpIntPair},
+                                       {"DEH_ADD_FLAGS", A_AddFlags, DDFStateGetIntPair},
+                                       {"DEH_REMOVE_FLAGS", A_RemoveFlags, DDFStateGetIntPair},
 
                                        // bossbrain actions
                                        {"BRAINSPIT", A_BrainSpit, nullptr},
@@ -1561,7 +1582,14 @@ static DDFSpecialFlags hyper_specials[] = {
     {"TRIGGER_TELEPORTS", kHyperFlagTriggerTeleports, 0}, // Lobo: Can always activate teleporters.
     {nullptr, 0, 0}};
 
-static DDFSpecialFlags mbf21_specials[] = {{"LOGRAV", kMBF21FlagLowGravity, 0}, {nullptr, 0, 0}};
+// MBF21 Boss Flags are already handled and converted to RTS in the Dehacked processor,
+// so they do not appear here
+static DDFSpecialFlags mbf21_specials[] = {
+    {"LOGRAV", kMBF21FlagLowGravity, 0},
+    {"SHORTMRANGE", kMBF21FlagShortMissileRange, 0},
+    {"LONGMELEE", kMBF21FlagLongMeleeRange, 0},
+    {"FORCERADIUSDMG", kMBF21FlagForceRadiusDamage, 0},
+    {nullptr, 0, 0}};
 
 //
 // DDFMobjGetSpecial
@@ -1796,6 +1824,265 @@ static void DDFMobjStateGetRADTrigger(const char *arg, State *cur_state)
     }
 
     cur_state->action_par = val_ptr;
+}
+
+//
+// DDFMobjStateGetDEHSpawn
+//
+static void DDFMobjStateGetDEHSpawn(const char *arg, State *cur_state)
+{
+    if (!arg || !arg[0])
+        return;
+
+    std::vector<std::string> args = epi::SeparatedStringVector(arg, ',');
+
+    if (args.empty())
+        return;
+
+    DEHSpawnParameters *params = new DEHSpawnParameters;
+
+    params->spawn_name = epi::CStringDuplicate(args[0].c_str());
+
+    size_t arg_size = args.size();
+
+    if (arg_size > 1)
+    {
+        int angle = 0;
+        if (sscanf(args[1].c_str(), "%d", &angle) == 1 && angle != 0)
+            params->angle = epi::BAMFromDegrees((float)angle / 65536.0f);
+    }
+    if (arg_size > 2)
+    {
+        int x_offset = 0;
+        if (sscanf(args[2].c_str(), "%d", &x_offset) == 1 && x_offset != 0)
+            params->x_offset = (float)x_offset / 65536.0f;
+    }
+    if (arg_size > 3)
+    {
+        int y_offset = 0;
+        if (sscanf(args[3].c_str(), "%d", &y_offset) == 1 && y_offset != 0)
+            params->y_offset = (float)y_offset / 65536.0f;
+    }
+    if (arg_size > 4)
+    {
+        int z_offset = 0;
+        if (sscanf(args[4].c_str(), "%d", &z_offset) == 1 && z_offset != 0)
+            params->z_offset = (float)z_offset / 65536.0f;
+    }
+    if (arg_size > 5)
+    {
+        int x_velocity = 0;
+        if (sscanf(args[5].c_str(), "%d", &x_velocity) == 1 && x_velocity != 0)
+            params->x_velocity = (float)x_velocity / 65536.0f;
+    }
+    if (arg_size > 6)
+    {
+        int y_velocity = 0;
+        if (sscanf(args[6].c_str(), "%d", &y_velocity) == 1 && y_velocity != 0)
+            params->y_velocity = (float)y_velocity / 65536.0f;
+    }
+    if (arg_size > 7)
+    {
+        int z_velocity = 0;
+        if (sscanf(args[7].c_str(), "%d", &z_velocity) == 1 && z_velocity != 0)
+            params->z_velocity = (float)z_velocity / 65536.0f;
+    }
+
+    cur_state->action_par = params;
+}
+
+//
+// DDFMobjStateGetDEHMelee
+//
+static void DDFMobjStateGetDEHMelee(const char *arg, State *cur_state)
+{
+    if (!arg || !arg[0])
+        return;
+
+    if (atkdefs.Lookup(arg))
+    {
+        cur_state->action_par = atkdefs.Lookup(arg);
+        return;
+    }
+
+    std::vector<std::string> args = epi::SeparatedStringVector(arg, ',');
+
+    if (args.empty())
+        return;
+
+    AttackDefinition *atk = new AttackDefinition();
+    atk->name_ = arg;
+    atk->attackstyle_ = kAttackStyleCloseCombat;
+    atk->attack_class_ = epi::BitSetFromChar('C');
+    atk->flags_ = (AttackFlags)(kAttackFlagFaceTarget | kAttackFlagNeedSight);
+    atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
+    atk->damage_.nominal_ = 3.0f;
+    atk->damage_.linear_max_ = 24.0f;
+    atk->puff_ref_ = "PUFF";
+    atk->range_ = 64.0f;
+
+    size_t arg_size = args.size();
+
+    if (arg_size > 0)
+    {
+        int damagebase = 0;
+        if (sscanf(args[0].c_str(), "%d", &damagebase) == 1 && damagebase != 0)
+            atk->damage_.nominal_ = (float)damagebase;
+    }
+    if (arg_size > 1)
+    {
+        int damagedice = 0;
+        if (sscanf(args[1].c_str(), "%d", &damagedice) == 1 && damagedice != 0)
+            atk->damage_.linear_max_ = atk->damage_.nominal_ * damagedice;
+    }
+    if (arg_size > 2)
+    {
+        int sound_id = 0;
+        if (sscanf(args[2].c_str(), "%d", &sound_id) == 1 && sound_id != 0)
+        {
+            SoundEffectDefinition *sound = sfxdefs.DEHLookup(sound_id);
+            atk->sound_ = sfxdefs.GetEffect(sound->name_.c_str());
+        }
+    }
+    if (arg_size > 3)
+    {
+        int range = 0;
+        if (sscanf(args[3].c_str(), "%d", &range) == 1 && range != 0)
+            atk->range_ = (float)range / 65536.0f;
+    }
+
+    atkdefs.push_back(atk);
+    cur_state->action_par = atk;
+}
+
+//
+// DDFMobjStateGetDEHProjectile
+//
+static void DDFMobjStateGetDEHProjectile(const char *arg, State *cur_state)
+{
+    if (!arg || !arg[0])
+        return;
+
+    // Todo: Attack name needs the caller name as well since heights will be different
+    if (atkdefs.Lookup(arg))
+    {
+        cur_state->action_par = atkdefs.Lookup(arg);
+        return;
+    }
+
+    std::vector<std::string> args = epi::SeparatedStringVector(arg, ',');
+
+    if (args.empty())
+        return;
+
+    AttackDefinition *atk = new AttackDefinition();
+    atk->name_ = arg;
+    atk->atk_mobj_ref_ = args[0];
+
+    size_t arg_size = args.size();
+
+    atk->range_ = 2048.0f;
+    atk->attackstyle_ = kAttackStyleProjectile;
+    atk->attack_class_ = epi::BitSetFromChar('M');
+    atk->flags_ = (AttackFlags)(kAttackFlagFaceTarget|kAttackFlagInheritTracerFromTarget);
+    atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
+    atk->height_ = 32.0f; // Todo: pass along caller for this attack and calc correctly
+
+    if (arg_size > 1)
+    {
+        int angle = 0;
+        if (sscanf(args[1].c_str(), "%d", &angle) == 1 && angle != 0)
+            atk->angle_offset_ = epi::BAMFromDegrees((float)angle / 65536.0f);
+    }
+    if (arg_size > 2)
+    {
+        int slope = 0;
+        if (sscanf(args[2].c_str(), "%d", &slope) == 1 && slope != 0)
+            atk->slope_offset_ = tan((float)slope / 65536.0f * HMM_PI / 180.0);
+    }
+    if (arg_size > 3)
+    {
+        int xoffset = 0;
+        if (sscanf(args[3].c_str(), "%d", &xoffset) == 1 && xoffset != 0)
+            atk->xoffset_ = (float)xoffset / 65536.0f;
+    }
+    if (arg_size > 4)
+    {
+        int height = 0;
+        if (sscanf(args[4].c_str(), "%d", &height) == 1 && height != 0)
+            atk->height_ += (float)height / 65536.0f;
+    }
+
+    atkdefs.push_back(atk);
+    cur_state->action_par = atk;
+}
+
+//
+// DDFMobjStateGetDEHBullet
+//
+static void DDFMobjStateGetDEHBullet(const char *arg, State *cur_state)
+{
+    if (!arg || !arg[0])
+        return;
+
+    if (atkdefs.Lookup(arg))
+    {
+        cur_state->action_par = atkdefs.Lookup(arg);
+        return;
+    }
+
+    std::vector<std::string> args = epi::SeparatedStringVector(arg, ',');
+
+    if (args.empty())
+        return;
+
+    AttackDefinition *atk = new AttackDefinition();
+    atk->name_ = arg;
+    atk->range_ = 2048.0f;
+    atk->attackstyle_ = kAttackStyleShot;
+    atk->attack_class_ = epi::BitSetFromChar('B');
+    atk->flags_ = kAttackFlagFaceTarget;
+    atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
+    atk->count_ = 1;
+    atk->damage_.nominal_ = 3.0f;
+    atk->damage_.linear_max_ = 15.0f;
+    atk->puff_ref_ = "PUFF";
+
+    size_t arg_size = args.size();
+
+    if (arg_size > 0)
+    {
+        int hspread = 0;
+        if (sscanf(args[0].c_str(), "%d", &hspread) == 1 && hspread != 0)
+            atk->accuracy_angle_ = epi::BAMFromDegrees((float)hspread / 65536.0f);
+    }
+    if (arg_size > 1)
+    {
+        int vspread = 0;
+        if (sscanf(args[1].c_str(), "%d", &vspread) == 1 && vspread != 0)
+            atk->accuracy_slope_ = tan((float)vspread / 65536.0f * HMM_PI / 180.0);
+    }
+    if (arg_size > 2)
+    {
+        int shots = 0;
+        if (sscanf(args[2].c_str(), "%d", &shots) == 1 && shots != 0)
+            atk->count_ = shots;
+    }
+    if (arg_size > 3)
+    {
+        int damagebase = 0;
+        if (sscanf(args[3].c_str(), "%d", &damagebase) == 1 && damagebase != 0)
+            atk->damage_.nominal_ = (float)damagebase;
+    }
+    if (arg_size > 4)
+    {
+        int damagedice = 0;
+        if (sscanf(args[4].c_str(), "%d", &damagedice) == 1 && damagedice != 0)
+            atk->damage_.linear_max_ = atk->damage_.nominal_ * damagedice;
+    }
+
+    atkdefs.push_back(atk);
+    cur_state->action_par = atk;
 }
 
 //
@@ -2172,13 +2459,12 @@ void MapObjectDefinition::CopyDetail(MapObjectDefinition &src)
 
     morphtimeout_ = src.morphtimeout_;
 
-    gib_health_ = src.gib_health_;
-
     infight_group_ = src.infight_group_;
     proj_group_    = src.proj_group_;
     splash_group_  = src.splash_group_;
     fast_speed_    = src.fast_speed_;
     melee_range_   = src.melee_range_;
+    deh_thing_id_  = src.deh_thing_id_;
 }
 
 void MapObjectDefinition::Default()
@@ -2315,8 +2601,6 @@ void MapObjectDefinition::Default()
     spitspot_ = nullptr;
     spitspot_ref_.clear();
 
-    gib_health_ = 0;
-
     sight_distance_ = -1;
     hear_distance_  = -1;
 
@@ -2327,6 +2611,7 @@ void MapObjectDefinition::Default()
     splash_group_  = -2;
     fast_speed_    = -1;
     melee_range_   = -1;
+    deh_thing_id_  =  0;
 }
 
 void MapObjectDefinition::DLightCompatibility(void)

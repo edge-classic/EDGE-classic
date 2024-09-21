@@ -41,6 +41,9 @@ static void DDFWGetAmmo(const char *info, void *storage);
 static void DDFWGetUpgrade(const char *info, void *storage);
 static void DDFWGetSpecialFlags(const char *info, void *storage);
 static void DDFWStateGetRADTrigger(const char *arg, State *cur_state);
+static void DDFWStateGetDEHMelee(const char *arg, State *cur_state);
+static void DDFWStateGetDEHBullet(const char *arg, State *cur_state);
+static void DDFWStateGetDEHProjectile(const char *arg, State *cur_state);
 
 static WeaponDefinition dummy_weapon;
 
@@ -172,7 +175,7 @@ static const DDFActionCode weapon_actions[] = {{"NOTHING", nullptr, nullptr},
                                                {"SHOOT", A_WeaponShoot, DDFStateGetAttack},
                                                {"EJECT", A_WeaponEject, DDFStateGetAttack},
                                                {"REFIRE", A_ReFire, nullptr},
-                                               {"REFIRE_TO", A_ReFireTo, DDFStateGetJump},
+                                               {"REFIRE_TO", A_ReFireTo, DDFStateGetJumpInt},
                                                {"NOFIRE", A_NoFire, nullptr},
                                                {"NOFIRE_RETURN", A_NoFireReturn, nullptr},
                                                {"KICK", A_WeaponKick, DDFStateGetFloat},
@@ -249,6 +252,17 @@ static const DDFActionCode weapon_actions[] = {{"NOTHING", nullptr, nullptr},
                                                {"SOUND3", A_SFXWeapon3, nullptr},
 
                                                {"BECOME", A_WeaponBecome, DDFStateGetBecomeWeapon},
+
+                                               // Internal: Dehacked direct codepointer testing
+                                               {"DEH_CLOSE_SHOTGUN2", A_CloseShotgun2, nullptr},
+                                               {"DEH_WEAPON_MELEE", A_WeaponMeleeAttack, DDFWStateGetDEHMelee},
+                                               {"DEH_WEAPON_SOUND", A_WeaponSound, DDFStateGetDEHParams},
+                                               {"DEH_WEAPON_BULLET", A_WeaponBulletAttack, DDFWStateGetDEHBullet},
+                                               {"DEH_WEAPON_PROJECTILE", A_WeaponProjectile, DDFWStateGetDEHProjectile},
+                                               {"DEH_WEAPON_CONSUMEAMMO", A_ConsumeAmmo, DDFStateGetDEHParams},
+                                               {"DEH_WEAPON_CHECKAMMO", A_CheckAmmo, DDFStateGetJumpInt},
+                                               {"DEH_WEAPON_GUNFLASH_TO", A_GunFlashTo, DDFStateGetJumpInt},
+                                               {"DEH_WEAPON_NOISE_ALERT", WA_NoiseAlert, nullptr},
 
                                                {nullptr, nullptr, nullptr}};
 
@@ -639,6 +653,231 @@ static DDFSpecialFlags weapon_specials[] = {{"SILENT_TO_MONSTERS", WeaponFlagSil
                                             {"PARTIAL", WeaponFlagPartialReload, 0},
                                             {"NOAUTOFIRE", WeaponFlagNoAutoFire, 0},
                                             {nullptr, WeaponFlagNone, 0}};
+
+
+//
+// DDFWStateGetDEHMelee
+//
+static void DDFWStateGetDEHMelee(const char *arg, State *cur_state)
+{
+    if (!arg || !arg[0])
+        return;
+
+    if (atkdefs.Lookup(arg))
+    {
+        cur_state->action_par = atkdefs.Lookup(arg);
+        return;
+    }
+
+    std::vector<std::string> args = epi::SeparatedStringVector(arg, ',');
+
+    if (args.empty())
+        return;
+
+    AttackDefinition *atk = new AttackDefinition();
+    atk->name_ = arg;
+    atk->attackstyle_ = kAttackStyleCloseCombat;
+    atk->attack_class_ = epi::BitSetFromChar('C');
+    atk->flags_ = kAttackFlagPlayer;
+    atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
+    atk->damage_.nominal_ = 2.0f;
+    atk->damage_.linear_max_ = 20.0f;
+    atk->puff_ref_ = "PUFF";
+    atk->range_ = 64.0f;
+    // In case player melee range has been modified, find the first
+    // player mobj and use its range to calculate the default.
+    // This shouldn't really fail or else it would be hard to 
+    // play the game
+    for (int i = 0, i_end = mobjtypes.size(); i < i_end; i++)
+    {
+        if (mobjtypes[i]->playernum_ > 0)
+        {
+            if (mobjtypes[i]->melee_range_ > 0)
+                atk->range_ = mobjtypes[i]->melee_range_;
+            break;
+        }
+    }
+
+    size_t arg_size = args.size();
+
+    if (arg_size > 0)
+    {
+        int damagebase = 0;
+        if (sscanf(args[0].c_str(), "%d", &damagebase) == 1 && damagebase != 0)
+            atk->damage_.nominal_ = (float)damagebase;
+    }
+    if (arg_size > 1)
+    {
+        int damagedice = 0;
+        if (sscanf(args[1].c_str(), "%d", &damagedice) == 1 && damagedice != 0)
+            atk->damage_.linear_max_ = atk->damage_.nominal_ * damagedice;
+    }
+    if (arg_size > 2)
+    {
+        int zerkfactor = 0;
+        if (sscanf(args[2].c_str(), "%d", &zerkfactor) == 1 && zerkfactor != 0)
+            atk->berserk_mul_ = (float)zerkfactor / 65536.0f;
+    }
+    if (arg_size > 3)
+    {
+        int sound_id = 0;
+        if (sscanf(args[3].c_str(), "%d", &sound_id) == 1 && sound_id != 0)
+        {
+            SoundEffectDefinition *sound = sfxdefs.DEHLookup(sound_id);
+            atk->sound_ = sfxdefs.GetEffect(sound->name_.c_str());
+        }
+    }
+    if (arg_size > 4)
+    {
+        int range = 0;
+        if (sscanf(args[4].c_str(), "%d", &range) == 1 && range != 0)
+            atk->range_ = (float)range / 65536.0f;
+    }
+
+    atkdefs.push_back(atk);
+    cur_state->action_par = atk;
+}
+
+//
+// DDFWStateGetDEHBullet
+//
+static void DDFWStateGetDEHBullet(const char *arg, State *cur_state)
+{
+    if (!arg || !arg[0])
+        return;
+
+    if (atkdefs.Lookup(arg))
+    {
+        cur_state->action_par = atkdefs.Lookup(arg);
+        return;
+    }
+
+    std::vector<std::string> args = epi::SeparatedStringVector(arg, ',');
+
+    if (args.empty())
+        return;
+
+    AttackDefinition *atk = new AttackDefinition();
+    atk->name_ = arg;
+    atk->range_ = 2048.0f;
+    atk->attackstyle_ = kAttackStyleShot;
+    atk->attack_class_ = epi::BitSetFromChar('B');
+    atk->flags_ = kAttackFlagPlayer;
+    atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
+    atk->count_ = 1;
+    atk->damage_.nominal_ = 5.0f;
+    atk->damage_.linear_max_ = 15.0f;
+    atk->puff_ref_ = "PUFF";
+
+    size_t arg_size = args.size();
+
+    if (arg_size > 0)
+    {
+        int hspread = 0;
+        if (sscanf(args[0].c_str(), "%d", &hspread) == 1 && hspread != 0)
+            atk->accuracy_angle_ = epi::BAMFromDegrees((float)hspread / 65536.0f);
+    }
+    if (arg_size > 1)
+    {
+        int vspread = 0;
+        if (sscanf(args[1].c_str(), "%d", &vspread) == 1 && vspread != 0)
+            atk->accuracy_slope_ = tan((float)vspread / 65536.0f * HMM_PI / 180.0);
+    }
+    if (arg_size > 2)
+    {
+        int shots = 0;
+        if (sscanf(args[2].c_str(), "%d", &shots) == 1 && shots != 0)
+            atk->count_ = shots;
+    }
+    if (arg_size > 3)
+    {
+        int damagebase = 0;
+        if (sscanf(args[3].c_str(), "%d", &damagebase) == 1 && damagebase != 0)
+            atk->damage_.nominal_ = (float)damagebase;
+    }
+    if (arg_size > 4)
+    {
+        int damagedice = 0;
+        if (sscanf(args[4].c_str(), "%d", &damagedice) == 1 && damagedice != 0)
+            atk->damage_.linear_max_ = atk->damage_.nominal_ * damagedice;
+    }
+
+    atkdefs.push_back(atk);
+    cur_state->action_par = atk;
+}
+
+//
+// DDFWStateGetDEHProjectile
+//
+static void DDFWStateGetDEHProjectile(const char *arg, State *cur_state)
+{
+    if (!arg || !arg[0])
+        return;
+
+    if (atkdefs.Lookup(arg))
+    {
+        cur_state->action_par = atkdefs.Lookup(arg);
+        return;
+    }
+
+    std::vector<std::string> args = epi::SeparatedStringVector(arg, ',');
+
+    if (args.empty())
+        return;
+
+    AttackDefinition *atk = new AttackDefinition();
+    atk->name_ = arg;
+    atk->atk_mobj_ref_ = args[0];
+
+    size_t arg_size = args.size();
+
+    atk->range_ = 2048.0f;
+    atk->attackstyle_ = kAttackStyleProjectile;
+    atk->attack_class_ = epi::BitSetFromChar('M');
+    atk->flags_ = (AttackFlags)(kAttackFlagPlayer|kAttackFlagInheritTracerFromTarget);
+    atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
+    atk->height_ = 32.0f;
+    // In case player heights have been modified, find the first
+    // player mobj and use its height to calculate the default.
+    // This shouldn't really fail or else it would be hard to 
+    // play the game
+    for (int i = 0, i_end = mobjtypes.size(); i < i_end; i++)
+    {
+        if (mobjtypes[i]->playernum_ > 0)
+        {
+            atk->height_ = mobjtypes[i]->height_ * 0.5f;
+            break;
+        }
+    }
+
+    if (arg_size > 1)
+    {
+        int angle = 0;
+        if (sscanf(args[1].c_str(), "%d", &angle) == 1 && angle != 0)
+            atk->angle_offset_ = epi::BAMFromDegrees((float)angle / 65536.0f);
+    }
+    if (arg_size > 2)
+    {
+        int slope = 0;
+        if (sscanf(args[2].c_str(), "%d", &slope) == 1 && slope != 0)
+            atk->slope_offset_ = tan((float)slope / 65536.0f * HMM_PI / 180.0);
+    }
+    if (arg_size > 3)
+    {
+        int xoffset = 0;
+        if (sscanf(args[3].c_str(), "%d", &xoffset) == 1 && xoffset != 0)
+            atk->xoffset_ = (float)xoffset / 65536.0f;
+    }
+    if (arg_size > 4)
+    {
+        int height = 0;
+        if (sscanf(args[4].c_str(), "%d", &height) == 1 && height != 0)
+            atk->height_ += (float)height / 65536.0f;
+    }
+
+    atkdefs.push_back(atk);
+    cur_state->action_par = atk;
+}
 
 //
 // DDFWStateGetRADTrigger

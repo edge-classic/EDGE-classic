@@ -149,6 +149,16 @@ void NoiseAlert(Player *p)
     RecurseSound(p->map_object_->subsector_->sector, 0, p->player_number_);
 }
 
+// MBF21
+void WA_NoiseAlert(MapObject *actor)
+{
+    EPI_ASSERT(actor->player_);
+
+    valid_count++;
+
+    RecurseSound(actor->subsector_->sector, 0, actor->player_->player_number_);
+}
+
 // Called by new NOISE_ALERT ddf action
 void A_NoiseAlert(MapObject *actor)
 {

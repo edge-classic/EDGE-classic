@@ -75,7 +75,6 @@ std::unordered_map<int, int>        offset_for_state;
 
 const char *attack_slot[3];
 int         act_flags;
-bool        force_fullbright = false;
 
 // forward decls
 const State *NewStateElseOld(int st_num);
@@ -136,7 +135,7 @@ const ActionInfo action_info[kTotalMBF21Actions] = {
     {"A_CheckReload", 0, "W:CHECKRELOAD", nullptr, nullptr},
     {"A_OpenShotgun2", 0, "W:PLAYSOUND(DBOPN)", nullptr, nullptr},
     {"A_LoadShotgun2", 0, "W:PLAYSOUND(DBLOAD)", nullptr, nullptr},
-    {"A_CloseShotgun2", 0, "W:PLAYSOUND(DBCLS)", nullptr, nullptr},
+    {"A_CloseShotgun2", 0, "W:DEH_CLOSE_SHOTGUN2", nullptr, nullptr},
     {"A_FireCGun", kActionFlagFlash, "W:SHOOT", "R:PLAYER_CHAINGUN", nullptr},
     {"A_GunFlash", kActionFlagFlash, "W:FLASH", nullptr, nullptr},
     {"A_FireMissile", 0, "W:SHOOT", "R:PLAYER_MISSILE", nullptr},
@@ -218,7 +217,34 @@ const ActionInfo action_info[kTotalMBF21Actions] = {
     {"A_BetaSkullAttack", 0, "RANGE_ATTACK", "R:INTERNAL_BETA_LOST_SOUL_ATTACK", nullptr},
 
     // MBF21 actions...
-    {"A_RefireTo", kActionFlagSpecial, "", nullptr, nullptr}};
+    {"A_RefireTo", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_WeaponMeleeAttack", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_WeaponSound", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_WeaponBulletAttack", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_WeaponProjectile", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_ConsumeAmmo", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_CheckAmmo", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_WeaponJump", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_GunFlashTo", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_WeaponAlert", 0, "W:DEH_WEAPON_NOISE_ALERT", nullptr, nullptr},
+    {"A_RadiusDamage", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_NoiseAlert", 0, "NOISE_ALERT", nullptr, nullptr},
+    {"A_HealChase", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_SpawnObject", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_MonsterProjectile", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_MonsterBulletAttack", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_MonsterMeleeAttack", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_ClearTracer", 0, "CLEAR_TRACER", nullptr, nullptr},
+    {"A_JumpIfHealthBelow", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_SeekTracer", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_FindTracer", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_JumpIfTargetInSight", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_JumpIfTargetCloser", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_JumpIfTracerInSight", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_JumpIfTracerCloser", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_JumpIfFlagsSet", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_AddFlags", kActionFlagSpecial, "", nullptr, nullptr},
+    {"A_RemoveFlags", kActionFlagSpecial, "", nullptr, nullptr}};
 
 //------------------------------------------------------------------------
 
@@ -674,8 +700,8 @@ bool frames::SpreadGroupPass(bool alt_jumps)
         if (alt_jumps)
         {
             next = kS_NULL;
-            if (st->action == kA_RandomJump)
-                next = ReadArg(st, 0); // misc1
+            if (st->action == kA_RandomJump || st->action == kA_WeaponJump || st->action == kA_RefireTo || st->action == kA_CheckAmmo || st->action == kA_GunFlashTo || st->action == kA_HealChase || st->action == kA_JumpIfHealthBelow || st->action == kA_JumpIfTargetInSight || st->action == kA_JumpIfTargetCloser || st->action == kA_JumpIfTracerCloser || st->action == kA_JumpIfTracerInSight || st->action == kA_JumpIfFlagsSet)
+                next = ReadArg(st, 0); // arg0
         }
 
         if (next == kS_NULL)
@@ -928,7 +954,8 @@ void frames::SpecialAction(char *act_name, const State *st)
         strcpy(act_name, "KEEN_DIE");
         break;
 
-    case kA_RandomJump: {
+    case kA_RandomJump:
+    case kA_WeaponJump: {
         int next = ReadArg(st, 0); // misc1
         int perc = ReadArg(st, 1); // misc2
 
@@ -1001,17 +1028,17 @@ void frames::SpecialAction(char *act_name, const State *st)
     break;
 
     case kA_Spawn: {
-        int kMT_num = ReadArg(st, 0);
+        int mt_num = ReadArg(st, 0) - 1;
 
-        if (!things::IsSpawnable(kMT_num))
+        if (!things::IsSpawnable(mt_num))
         {
-            LogDebug("Dehacked: Warning - Action kA_SPAWN unusable type (%d)\n", kMT_num);
+            LogDebug("Dehacked: Warning - Action kA_SPAWN unusable type (%d)\n", mt_num);
             strcpy(act_name, "NOTHING");
         }
         else
         {
-            things::UseThing(kMT_num);
-            sprintf(act_name, "SPAWN(%s)", things::GetMobjName(kMT_num));
+            things::UseThing(mt_num);
+            sprintf(act_name, "SPAWN(%s)", things::GetMobjName(mt_num));
         }
     }
     break;
@@ -1033,6 +1060,277 @@ void frames::SpecialAction(char *act_name, const State *st)
 
             sprintf(act_name, "REFIRE_TO(%s,%d%%)", RedirectorName(next), perc);
         }
+    }
+    break;
+
+    case kA_WeaponMeleeAttack: {
+        int damagebase = ReadArg(st, 0);
+        int damagedice = ReadArg(st, 1);
+        int zerkfactor = ReadArg(st, 2);
+        int sound = ReadArg(st, 3);
+        int range = ReadArg(st, 4);
+
+        sounds::MarkSound(sound);
+
+        sprintf(act_name, "DEH_WEAPON_MELEE(%d,%d,%d,%d,%d)", damagebase, damagedice, zerkfactor, sound, range);
+    }
+    break;
+
+    case kA_WeaponSound: {
+        int sound = ReadArg(st, 0);
+        int full_volume = ReadArg(st, 1);
+
+        sounds::MarkSound(sound);
+
+        sprintf(act_name, "DEH_WEAPON_SOUND(%d,%d)", sound, full_volume);
+    }
+    break;
+
+    case kA_WeaponBulletAttack: {
+        int hspread = ReadArg(st, 0);
+        int vspread = ReadArg(st, 1);
+        int numbullets = ReadArg(st, 2);
+        int damagebase = ReadArg(st, 3);
+        int damagedice = ReadArg(st, 4);
+
+        sprintf(act_name, "DEH_WEAPON_BULLET(%d,%d,%d,%d,%d)", hspread, vspread, numbullets, damagebase, damagedice);
+    }
+    break;
+
+    case kA_WeaponProjectile: {
+        int type = ReadArg(st, 0) - 1;
+        int angle = ReadArg(st, 1);
+        int pitch = ReadArg(st, 2);
+        int hoffset = ReadArg(st, 3);
+        int voffset = ReadArg(st, 4);
+
+        things::MarkThing(type);
+
+        std::string name = things::GetMobjName(type);
+
+        if (name[0] == '*')
+            name = name.substr(1);
+
+        sprintf(act_name, "DEH_WEAPON_PROJECTILE(%s,%d,%d,%d,%d)", name.c_str(), angle, pitch, hoffset, voffset);
+    }
+    break;
+
+    case kA_ConsumeAmmo: {
+        int amount = ReadArg(st, 0);
+
+        sprintf(act_name, "DEH_WEAPON_CONSUMEAMMO(%d)", amount);
+    }
+    break;
+
+    case kA_CheckAmmo: {
+        int next = ReadArg(st, 0); // state
+        int amount = ReadArg(st, 1); // ammocheck
+
+        if (next <= 0 || NewStateElseOld(next) == nullptr)
+            strcpy(act_name, "NOTHING");
+        else
+            sprintf(act_name, "DEH_WEAPON_CHECKAMMO(%s,%d)", RedirectorName(next), amount);
+    }
+    break;
+
+    case kA_GunFlashTo: {
+        int state = ReadArg(st, 0);
+        int nothirdperson = ReadArg(st, 1);
+
+        if (state <= 0 || NewStateElseOld(state) == nullptr)
+        {
+            strcpy(act_name, "NOTHING");
+        }
+        else
+        {
+            sprintf(act_name, "DEH_WEAPON_GUNFLASH_TO(%s,%d)", RedirectorName(state), nothirdperson);
+        }
+    }
+    break;
+
+    case kA_RadiusDamage: {
+        int damage = ReadArg(st, 0);
+        int radius = ReadArg(st, 1);
+
+        sprintf(act_name, "DEH_RADIUS_DAMAGE(%d,%d)", damage, radius);
+    }
+    break;
+
+    case kA_HealChase: {
+        int state = ReadArg(st, 0);
+        int sound = ReadArg(st, 1);
+
+        sounds::MarkSound(sound);
+
+        if (state <= 0 || NewStateElseOld(state) == nullptr)
+        {
+            strcpy(act_name, "NOTHING");
+        }
+        else
+        {
+            sprintf(act_name, "DEH_HEAL_CHASE(%s,%d)", RedirectorName(state), sound);
+        }
+    }
+    break;
+
+    case kA_SpawnObject: {
+        int type = ReadArg(st, 0) - 1;
+        int angle = ReadArg(st, 1);
+        int x_offset = ReadArg(st, 2);
+        int y_offset = ReadArg(st, 3);
+        int z_offset = ReadArg(st, 4);
+        int x_velocity = ReadArg(st, 5);
+        int y_velocity = ReadArg(st, 6);
+        int z_velocity = ReadArg(st, 7);
+
+        things::MarkThing(type);
+
+        std::string name = things::GetMobjName(type);
+
+        if (name[0] == '*')
+            name = name.substr(1);
+
+        sprintf(act_name, "DEH_SPAWN_OBJECT(%s,%d,%d,%d,%d,%d,%d,%d)", name.c_str(), angle, x_offset, y_offset, z_offset, x_velocity, y_velocity, z_velocity);
+    }
+    break;
+
+    case kA_MonsterProjectile: {
+        int type = ReadArg(st, 0) - 1;
+        int angle = ReadArg(st, 1);
+        int pitch = ReadArg(st, 2);
+        int hoffset = ReadArg(st, 3);
+        int voffset = ReadArg(st, 4);
+
+        things::MarkThing(type);
+
+        std::string name = things::GetMobjName(type);
+
+        if (name[0] == '*')
+            name = name.substr(1);
+
+        sprintf(act_name, "DEH_MONSTER_PROJECTILE(%s,%d,%d,%d,%d)", name.c_str(), angle, pitch, hoffset, voffset);
+    }
+    break;
+
+    case kA_MonsterBulletAttack: {
+        int hspread = ReadArg(st, 0);
+        int vspread = ReadArg(st, 1);
+        int numbullets = ReadArg(st, 2);
+        int damagebase = ReadArg(st, 3);
+        int damagedice = ReadArg(st, 4);
+
+        sprintf(act_name, "DEH_MONSTER_BULLET(%d,%d,%d,%d,%d)", hspread, vspread, numbullets, damagebase, damagedice);
+    }
+    break;
+
+    case kA_MonsterMeleeAttack: {
+        int damagebase = ReadArg(st, 0);
+        int damagedice = ReadArg(st, 1);
+        int sound = ReadArg(st, 2);
+        int range = ReadArg(st, 3);
+
+        sounds::MarkSound(sound);
+
+        sprintf(act_name, "DEH_MONSTER_MELEE(%d,%d,%d,%d)", damagebase, damagedice, sound, range);
+    }
+    break;
+
+    case kA_JumpIfHealthBelow: {
+        int next = ReadArg(st, 0);
+        int health = ReadArg(st, 1);
+
+        if (next <= 0 || NewStateElseOld(next) == nullptr)
+            strcpy(act_name, "NOTHING");
+        else
+            sprintf(act_name, "DEH_HEALTH_JUMP(%s,%d)", RedirectorName(next), health);
+    }
+    break;
+
+    case kA_SeekTracer: {
+        int threshold = ReadArg(st, 0);
+        int maxturnangle = ReadArg(st, 1);
+
+        sprintf(act_name, "DEH_SEEK_TRACER(%d,%d)", threshold, maxturnangle);
+    }
+    break;
+
+    case kA_FindTracer: {
+        int fov = ReadArg(st, 0);
+        int rangeblocks = ReadArg(st, 1);
+
+        sprintf(act_name, "DEH_FIND_TRACER(%d,%d)", fov, rangeblocks);
+    }
+    break;
+
+    case kA_JumpIfTargetInSight: {
+        int next = ReadArg(st, 0);
+        int fov = ReadArg(st, 1);
+
+        if (next <= 0 || NewStateElseOld(next) == nullptr)
+            strcpy(act_name, "NOTHING");
+        else
+            sprintf(act_name, "DEH_TARGET_SIGHT_JUMP(%s,%d)", RedirectorName(next), fov);
+    }
+    break;
+
+    case kA_JumpIfTargetCloser: {
+        int next = ReadArg(st, 0);
+        int distance = ReadArg(st, 1);
+
+        if (next <= 0 || NewStateElseOld(next) == nullptr)
+            strcpy(act_name, "NOTHING");
+        else
+            sprintf(act_name, "DEH_TARGET_CLOSER_JUMP(%s,%d)", RedirectorName(next), distance);
+    }
+    break;
+
+    case kA_JumpIfTracerInSight: {
+        int next = ReadArg(st, 0);
+        int fov = ReadArg(st, 1);
+
+        if (next <= 0 || NewStateElseOld(next) == nullptr)
+            strcpy(act_name, "NOTHING");
+        else
+            sprintf(act_name, "DEH_TRACER_SIGHT_JUMP(%s,%d)", RedirectorName(next), fov);
+    }
+    break;
+
+    case kA_JumpIfTracerCloser: {
+        int next = ReadArg(st, 0);
+        int distance = ReadArg(st, 1);
+
+        if (next <= 0 || NewStateElseOld(next) == nullptr)
+            strcpy(act_name, "NOTHING");
+        else
+            sprintf(act_name, "DEH_TRACER_CLOSER_JUMP(%s,%d)", RedirectorName(next), distance);
+    }
+    break;
+
+    case kA_JumpIfFlagsSet: {
+        int next = ReadArg(st, 0);
+        int flags = ReadArg(st, 1);
+        int flags2 = ReadArg(st, 2);
+
+        if (next <= 0 || NewStateElseOld(next) == nullptr)
+            strcpy(act_name, "NOTHING");
+        else
+            sprintf(act_name, "DEH_FLAG_JUMP(%s,%d,%d)", RedirectorName(next), flags, flags2);
+    }
+    break;
+
+    case kA_AddFlags: {
+        int flags1 = ReadArg(st, 0);
+        int flags2 = ReadArg(st, 1);
+
+        sprintf(act_name, "DEH_ADD_FLAGS(%d,%d)", flags1, flags2);
+    }
+    break;
+
+    case kA_RemoveFlags: {
+        int flags1 = ReadArg(st, 0);
+        int flags2 = ReadArg(st, 1);
+
+        sprintf(act_name, "DEH_REMOVE_FLAGS(%d,%d)", flags1, flags2);
     }
     break;
 
@@ -1070,6 +1368,8 @@ void frames::OutputState(char group, int cur, bool do_action)
     if (action_info[action].act_flags & kActionFlagSpecial)
     {
         SpecialAction(act_name, st);
+        if (action >= kTotalMBFActions && action <= kA_WeaponAlert)
+            weap_act = true;
     }
     else
     {
@@ -1105,14 +1405,14 @@ void frames::OutputState(char group, int cur, bool do_action)
     if (action_info[action].act_flags & kActionFlagMakeDead)
     {
         wad::Printf("    %s:%c:0:%s:MAKEDEAD,  // %s\n", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31),
-                    (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL",
+                    st->frame >= 32768 ? "BRIGHT" : "NORMAL",
                     (action == kA_PainDie) ? "A_PainDie" : "A_KeenDie");
     }
 
     if (action_info[action].act_flags & kActionFlagFaceTarget)
     {
         wad::Printf("    %s:%c:0:%s:FACE_TARGET,\n", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31),
-                    (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL");
+                    st->frame >= 32768 ? "BRIGHT" : "NORMAL");
     }
 
     // special handling for Mancubus attacks...
@@ -1121,24 +1421,12 @@ void frames::OutputState(char group, int cur, bool do_action)
         if ((act_flags & kActionFlagSpread) == 0)
         {
             wad::Printf("    %s:%c:0:%s:RESET_SPREADER,\n", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31),
-                        (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL");
+                        st->frame >= 32768 ? "BRIGHT" : "NORMAL");
         }
 
         wad::Printf("    %s:%c:0:%s:%s,  // kA_FatAttack\n", sprites::GetSprite(st->sprite),
-                    'A' + ((int)st->frame & 31), (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL",
+                    'A' + ((int)st->frame & 31), st->frame >= 32768 ? "BRIGHT" : "NORMAL",
                     act_name);
-    }
-
-    // special handling for kA_CloseShotgun2
-    // 2023.11.13: This is not stricly accurate; the real kA_CloseShotgun2 will
-    // play the sound before refiring, but with our current sound channel
-    // handling this causes the DBCLS sound to play repeatedly and persist even
-    // with the refire noises (ex: Harmony re-release chaingun will constantly
-    // play its wind-down noise)
-    if (epi::StringCaseCompareASCII(action_info[action].bex_name, "A_CloseShotgun2") == 0)
-    {
-        wad::Printf("    %s:%c:0:%s:REFIRE,\n", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31),
-                    (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL");
     }
 
     int tics = (int)st->tics;
@@ -1150,7 +1438,7 @@ void frames::OutputState(char group, int cur, bool do_action)
         tics = 44;
 
     wad::Printf("    %s:%c:%d:%s:%s", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31), tics,
-                (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL", act_name);
+                st->frame >= 32768 ? "BRIGHT" : "NORMAL", act_name);
 
     if (action != kA_NULL && weap_act == !IS_WEAPON(group))
         return;

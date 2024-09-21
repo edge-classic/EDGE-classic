@@ -100,7 +100,6 @@ static constexpr uint8_t kAutomapTotalMarkPoints = 9;
 
 // scale on entry
 static constexpr float kAutomapMinimumScale = 0.5f;
-static constexpr float kAutomapInitialScale = 2.0f;
 
 static constexpr float kAutomapInitialScale = 2.0f;
 static constexpr float kAutomapMaximumScale = 100.0f;

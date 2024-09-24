@@ -1311,7 +1311,7 @@ void DDFMainGetPercentAny(const char *info, void *storage)
 
     // check that the string is valid
     epi::CStringCopyMax(s, info, 100);
-    for (p = s; epi::IsDigitASCII(*p) || *p == '.'; p++)
+    for (p = s; epi::IsDigitASCII(*p) || *p == '-' || *p == '.'; p++)
     { /* do nothing */
     }
 

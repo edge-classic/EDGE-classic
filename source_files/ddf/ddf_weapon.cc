@@ -102,7 +102,7 @@ static const DDFCommandList weapon_commands[] = {
     DDF_FIELD("REFIRE_INACCURATE", dummy_weapon, refire_inacc_, DDFMainGetBoolean),
     DDF_FIELD("SHOW_CLIP", dummy_weapon, show_clip_, DDFMainGetBoolean),
     DDF_FIELD("SHARED_CLIP", dummy_weapon, shared_clip_, DDFMainGetBoolean),
-    DDF_FIELD("BOBBING", dummy_weapon, bobbing_, DDFMainGetPercent),
+    DDF_FIELD("BOBBING", dummy_weapon, bobbing_, DDFMainGetPercentAny),
     DDF_FIELD("SWAYING", dummy_weapon, swaying_, DDFMainGetPercent),
     DDF_FIELD("IDLE_WAIT", dummy_weapon, idle_wait_, DDFMainGetTime),
     DDF_FIELD("IDLE_CHANCE", dummy_weapon, idle_chance_, DDFMainGetPercent),

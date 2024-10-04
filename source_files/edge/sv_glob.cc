@@ -31,12 +31,14 @@
 #include "sv_main.h"
 
 // forward decls:
+static void SaveGlobalGetU64(const char *info, void *storage);
 static void SaveGlobalGetInteger(const char *info, void *storage);
 static void SaveGlobalGetString(const char *info, void *storage);
 static void SaveGlobalGetCheckCRC(const char *info, void *storage);
 static void SaveGlobalGetLevelFlags(const char *info, void *storage);
 static void SaveGlobalGetImage(const char *info, void *storage);
 
+static const char *SaveGlobalPutU64(void *storage);
 static const char *SaveGlobalPutInteger(void *storage);
 static const char *SaveGlobalPutString(void *storage);
 static const char *SaveGlobalPutCheckCRC(void *storage);
@@ -71,7 +73,7 @@ static const GlobalCommand global_commands[] = {
     {"GRAVITY", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, flags.menu_gravity_factor)},
     {"LEVEL_TIME", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, level_time)},
     {"EXIT_TIME", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, exit_time)},
-    {"P_RANDOM", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, p_random)},
+    {"P_RANDOM", SaveGlobalGetU64, SaveGlobalPutU64, offsetof(SaveGlobals, p_random)},
 
     {"TOTAL_KILLS", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, total_kills)},
     {"TOTAL_ITEMS", SaveGlobalGetInteger, SaveGlobalPutInteger, offsetof(SaveGlobals, total_items)},
@@ -103,6 +105,15 @@ static const GlobalCommand global_commands[] = {
 //
 //  PARSERS
 //
+
+static void SaveGlobalGetU64(const char *info, void *storage)
+{
+    uint64_t *dest = (uint64_t *)storage;
+
+    EPI_ASSERT(info && storage);
+
+    *dest = strtoull(info, nullptr, 0);
+}
 
 static void SaveGlobalGetInteger(const char *info, void *storage)
 {
@@ -199,6 +210,18 @@ static void SaveGlobalGetImage(const char *info, void *storage)
 //
 //  STRINGIFIERS
 //
+
+static const char *SaveGlobalPutU64(void *storage)
+{
+    uint64_t *src = (uint64_t *)storage;
+    char buffer[40];
+
+    EPI_ASSERT(storage);
+
+    sprintf(buffer, "%llu", *src);
+
+    return SaveChunkCopyString(buffer);
+}
 
 static const char *SaveGlobalPutInteger(void *storage)
 {

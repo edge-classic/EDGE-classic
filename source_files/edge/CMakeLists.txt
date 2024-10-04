@@ -150,6 +150,7 @@ set (EDGE_LINK_LIBRARIES
   minivorbis
   miniz
   pl_mpeg
+  prns
   sokol_color
   stb
   superfasthash
@@ -157,7 +158,6 @@ set (EDGE_LINK_LIBRARIES
 
 if (WIN32)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} w32_res.rc)
-  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} Dwmapi.lib)
 endif()
 
 if (EDGE_PROFILING)

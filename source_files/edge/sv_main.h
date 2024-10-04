@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include "dm_defs.h"
 #include "e_player.h"
 #include "p_local.h"
@@ -216,7 +218,7 @@ struct SaveGlobals
 
     int level_time;
     int exit_time;
-    int p_random;
+    uint64_t p_random;
     int total_kills;
     int total_items;
     int total_secrets;

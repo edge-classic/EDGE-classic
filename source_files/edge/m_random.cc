@@ -25,21 +25,19 @@
 
 #include "m_random.h"
 
-#include <random>
+#include <stdint.h>
 
 #include "i_system.h"
+#include "prns.h"
 
-std::mt19937                                  stateless_mersenne_generator;
-std::mt19937                                  stateful_mersenne_generator;
-std::uniform_int_distribution<unsigned short> unsigned_8_bit_roll(0, 255);
-std::uniform_int_distribution<unsigned short> unsigned_16_bit_roll(0, 0xFFFF);
-
-static int state_index = 0;
-static int state_step  = 1;
+prns_t stateful_rng;
+prns_down_t stateless_rng;
 
 void InitRandomState(void)
 {
-    stateless_mersenne_generator.seed(GetMicroseconds());
+    srand(GetMicroseconds());
+    prns_set(&stateful_rng, rand());
+    prns_down_init(&stateless_rng, &stateful_rng);
 }
 
 //
@@ -53,7 +51,7 @@ void InitRandomState(void)
 //
 int RandomByte(void)
 {
-    return unsigned_8_bit_roll(stateless_mersenne_generator);
+    return prns_down_next(&stateless_rng) % 256;
 }
 
 //
@@ -86,15 +84,7 @@ int RandomByteSkewToZero(void)
 //
 int RandomByteDeterministic(void)
 {
-    state_index += state_step;
-    state_index &= 0xff;
-
-    if (state_index == 0)
-        state_step += (47 * 2);
-
-    stateful_mersenne_generator.seed(state_index + state_step);
-
-    return unsigned_8_bit_roll(stateful_mersenne_generator);
+    return prns_next(&stateful_rng) % 256;
 }
 
 //
@@ -104,7 +94,7 @@ int RandomByteDeterministic(void)
 //
 int RandomShort(void)
 {
-    return unsigned_16_bit_roll(stateless_mersenne_generator);
+    return prns_down_next(&stateless_rng) % 65536;
 }
 
 //
@@ -147,18 +137,17 @@ bool RandomByteTestDeterministic(float chance)
 //
 // These two routines are used for savegames.
 //
-int RandomStateRead(void)
+uint64_t RandomStateRead(void)
 {
-    return (state_index & 0xff) | ((state_step & 0xff) << 8);
+    return prns_tell(&stateful_rng);
 }
 
 //
 // RandomStateWrite
 //
-void RandomStateWrite(int value)
+void RandomStateWrite(uint64_t value)
 {
-    state_index = (value & 0xff);
-    state_step  = 1 + ((value >> 8) & 0xfe);
+    prns_set(&stateful_rng, value);
 }
 
 //--- editor settings ---

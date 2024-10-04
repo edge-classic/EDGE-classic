@@ -357,7 +357,7 @@ static bool DecideRangeAttack(MapObject *object)
 {
     float                   chance;
     float                   distance;
-    const AttackDefinition *attack;
+    const AttackDefinition *attack = nullptr;
 
     if (!object->target_)
         return false;

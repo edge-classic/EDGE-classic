@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 // A bit verbose, but hopefully describes what they do decently.
 // The "Deterministic" suffixes increment and track the index and step
 // for its random number generator so that loading/saving a game
@@ -39,8 +41,8 @@ bool RandomByteTest(float chance);
 bool RandomByteTestDeterministic(float chance);
 
 // Savegame support
-int  RandomStateRead(void);
-void RandomStateWrite(int value);
+uint64_t  RandomStateRead(void);
+void RandomStateWrite(uint64_t value);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

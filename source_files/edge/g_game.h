@@ -67,7 +67,7 @@ class NewGameParameters
     const MapDefinition *map_;
     // gamedef_c is implied (== map->episode)
 
-    int random_seed_;
+    uint64_t random_seed_;
     int total_players_;
 
     PlayerFlag players_[kMaximumPlayers];

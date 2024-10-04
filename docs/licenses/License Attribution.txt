@@ -131,6 +131,8 @@ Fraction.hpp - Bisqwit
 
 libRAD (opal.cpp/radplay.cpp) - Reality Productions
 
+prns.h - Marc B. Reynolds
+
 "sf_GMbank" soundfont (renamed to Default.sf2) - The Csound Developers
 
 stb_image, stb_image_write, stb_rect_pack and stb_truetype libraries - Sean Barrett

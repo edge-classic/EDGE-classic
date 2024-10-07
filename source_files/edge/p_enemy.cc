@@ -193,8 +193,16 @@ bool DoMove(MapObject *actor, bool path)
         if (actor->move_direction_ == kDirectionNone)
             return false;
 
+
         if ((unsigned)actor->move_direction_ >= 8)
-            FatalError("Weird actor->move_direction_!");
+        {
+            //FatalError("Weird actor->move_direction_! = %d",(int)actor->move_direction_);
+            actor->move_direction_ = kDirectionNone;
+            return false;
+           
+        }
+            
+
 
         tryx = actor->x + actor->speed_ * xspeed[actor->move_direction_];
         tryy = actor->y + actor->speed_ * yspeed[actor->move_direction_];

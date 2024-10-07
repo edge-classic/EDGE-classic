@@ -38,6 +38,7 @@
 #include "epi.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
+#include "stb_sprintf.h"
 namespace dehacked
 {
 
@@ -396,7 +397,7 @@ const char *sounds::GetEdgeSfxName(int sound_id)
 
     // create a suitable name
     static char name_buf[64];
-    snprintf(name_buf, sizeof(name_buf), "BEX_%d", sound_id);
+    stbsp_snprintf(name_buf, sizeof(name_buf), "BEX_%d", sound_id);
     return name_buf;
 }
 

@@ -24,7 +24,7 @@ add_library(
   deh_weapons.cc
 )
 
-target_link_libraries(edge_deh PRIVATE edge_ddf edge_epi)
+target_link_libraries(edge_deh PRIVATE edge_ddf edge_epi stb)
 
 target_include_directories(edge_deh PUBLIC ./)
 

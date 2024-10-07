@@ -27,6 +27,7 @@
 #include <stddef.h>
 
 #include "epi.h"
+#include "stb_sprintf.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
 
@@ -218,7 +219,7 @@ static const char *SaveGlobalPutU64(void *storage)
 
     EPI_ASSERT(storage);
 
-    sprintf(buffer, "%llu", *src);
+    stbsp_sprintf(buffer, "%llu", *src);
 
     return SaveChunkCopyString(buffer);
 }
@@ -230,7 +231,7 @@ static const char *SaveGlobalPutInteger(void *storage)
 
     EPI_ASSERT(storage);
 
-    sprintf(buffer, "%d", *src);
+    stbsp_sprintf(buffer, "%d", *src);
 
     return SaveChunkCopyString(buffer);
 }
@@ -254,7 +255,7 @@ static const char *SaveGlobalPutCheckCRC(void *storage)
 
     EPI_ASSERT(storage);
 
-    sprintf(buffer, "%d %u", src->count, src->crc);
+    stbsp_sprintf(buffer, "%d %u", src->count, src->crc);
 
     return SaveChunkCopyString(buffer);
 }

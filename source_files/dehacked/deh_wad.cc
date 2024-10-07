@@ -35,6 +35,7 @@
 #include "deh_edge.h"
 #include "deh_system.h"
 #include "epi.h"
+#include "stb_sprintf.h"
 
 namespace dehacked
 {
@@ -66,7 +67,7 @@ void Printf(const char *str, ...)
     va_list args;
 
     va_start(args, str);
-    vsprintf(wad_msg_buf, str, args);
+    stbsp_vsprintf(wad_msg_buf, str, args);
     va_end(args);
 
     cur_lump->data += (const char *)wad_msg_buf;

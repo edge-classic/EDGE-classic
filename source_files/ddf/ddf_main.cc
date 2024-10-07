@@ -27,15 +27,13 @@
 #include "ddf_local.h"
 #include "ddf_style.h"
 #include "ddf_switch.h"
-// EPI
 #include "epi.h"
 #include "epi_filesystem.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
-#include "sokol_color.h"
-
-// EDGE
 #include "p_action.h"
+#include "sokol_color.h"
+#include "stb_sprintf.h"
 
 void ReadRADScript(const std::string &_data, const std::string &source);
 
@@ -98,26 +96,26 @@ void DDFError(const char *err, ...)
 
     // put actual error message on first line
     va_start(argptr, err);
-    vsprintf(buffer, err, argptr);
+    stbsp_vsprintf(buffer, err, argptr);
     va_end(argptr);
 
     pos = buffer + strlen(buffer);
 
     if (cur_ddf_filename != "")
     {
-        sprintf(pos, "Error occurred near line %d of %s\n", cur_ddf_line_num, cur_ddf_filename.c_str());
+        stbsp_sprintf(pos, "Error occurred near line %d of %s\n", cur_ddf_line_num, cur_ddf_filename.c_str());
         pos += strlen(pos);
     }
 
     if (cur_ddf_entryname != "")
     {
-        sprintf(pos, "Error occurred in entry: %s\n", cur_ddf_entryname.c_str());
+        stbsp_sprintf(pos, "Error occurred in entry: %s\n", cur_ddf_entryname.c_str());
         pos += strlen(pos);
     }
 
     if (cur_ddf_linedata != "")
     {
-        sprintf(pos, "Line contents: %s\n", cur_ddf_linedata.c_str());
+        stbsp_sprintf(pos, "Line contents: %s\n", cur_ddf_linedata.c_str());
         pos += strlen(pos);
     }
 
@@ -140,7 +138,7 @@ void DDFWarning(const char *err, ...)
         return;
 
     va_start(argptr, err);
-    vsprintf(buffer, err, argptr);
+    stbsp_vsprintf(buffer, err, argptr);
     va_end(argptr);
 
     LogWarning("%s", buffer);
@@ -170,7 +168,7 @@ void DDFDebug(const char *err, ...)
         return;
 
     va_start(argptr, err);
-    vsprintf(buffer, err, argptr);
+    stbsp_vsprintf(buffer, err, argptr);
     va_end(argptr);
 
     LogDebug("%s", buffer);
@@ -197,7 +195,7 @@ void DDFWarnError(const char *err, ...)
     char    buffer[1024];
 
     va_start(argptr, err);
-    vsprintf(buffer, err, argptr);
+    stbsp_vsprintf(buffer, err, argptr);
     va_end(argptr);
 
     if (strict_errors)
@@ -1531,7 +1529,7 @@ static int FindSpecialFlag(const char *prefix, const char *name, const DDFSpecia
         if (current[0] == '!')
             current++;
 
-        sprintf(try_name, "%s%s", prefix, current);
+        stbsp_sprintf(try_name, "%s%s", prefix, current);
 
         if (DDFCompareName(name, try_name) == 0)
             return i;

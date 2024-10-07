@@ -48,6 +48,7 @@
 #include "r_modes.h"
 #include "s_music.h"
 #include "s_sound.h"
+#include "stb_sprintf.h"
 #include "w_wad.h"
 
 //
@@ -1134,13 +1135,13 @@ static void DrawDeathmatchStats(void)
 
         char temp[40];
 
-        sprintf(temp, "%s", players[p]->player_name_);
+        stbsp_sprintf(temp, "%s", players[p]->player_name_);
         HUDWriteText(multiplayer_intermission_style, t_type, 20, y, temp);
 
-        sprintf(temp, "%5d", deathmatch_frags[i]);
+        stbsp_sprintf(temp, "%5d", deathmatch_frags[i]);
         HUDWriteText(multiplayer_intermission_style, t_type, 100, y, temp);
 
-        sprintf(temp, "%11d", deathmatch_totals[i]);
+        stbsp_sprintf(temp, "%11d", deathmatch_totals[i]);
         HUDWriteText(multiplayer_intermission_style, t_type, 200, y, temp);
     }
 }
@@ -1410,24 +1411,24 @@ static void DrawCoopStats(void)
 
         char temp[40];
 
-        sprintf(temp, "%s", players[p]->player_name_);
+        stbsp_sprintf(temp, "%s", players[p]->player_name_);
         HUDWriteText(multiplayer_intermission_style, t_type, 6, y, temp);
 
-        sprintf(temp, "%3d%%", count_kills[i]);
+        stbsp_sprintf(temp, "%3d%%", count_kills[i]);
         HUDWriteText(multiplayer_intermission_style, t_type, 64, y, temp);
 
-        sprintf(temp, "%3d%%", count_items[i]);
+        stbsp_sprintf(temp, "%3d%%", count_items[i]);
         HUDWriteText(multiplayer_intermission_style, t_type, 106, y, temp);
 
-        sprintf(temp, "%3d%%", count_secrets[i]);
+        stbsp_sprintf(temp, "%3d%%", count_secrets[i]);
         HUDWriteText(multiplayer_intermission_style, t_type, 158, y, temp);
 
         if (do_frags)
         {
-            sprintf(temp, "%5d", count_frags[i]);
+            stbsp_sprintf(temp, "%5d", count_frags[i]);
             HUDWriteText(multiplayer_intermission_style, t_type, 190, y, temp);
 
-            sprintf(temp, "%11d", count_totals[i]);
+            stbsp_sprintf(temp, "%11d", count_totals[i]);
             HUDWriteText(multiplayer_intermission_style, t_type, 232, y, temp);
         }
     }
@@ -1965,7 +1966,7 @@ static void LoadData(void)
     {
         // numbers 0-9
         char name[64];
-        sprintf(name, "WINUM%d", i);
+        stbsp_sprintf(name, "WINUM%d", i);
         digits[i] = ImageLookup(name);
     }
 

@@ -50,6 +50,7 @@
 #include "r_image.h"
 #include "r_modes.h"
 #include "r_wipe.h"
+#include "stb_sprintf.h"
 #include "w_files.h"
 #include "w_wad.h"
 
@@ -451,7 +452,7 @@ void ConsolePrint(const char *message, ...)
     char    buffer[1024];
 
     va_start(argptr, message);
-    vsprintf(buffer, message, argptr);
+    stbsp_vsprintf(buffer, message, argptr);
     va_end(argptr);
 
     SplitIntoLines(buffer);
@@ -463,7 +464,7 @@ void ConsoleEndoomPrintf(uint8_t endoom_byte, const char *message, ...)
     char    buffer[1024];
 
     va_start(argptr, message);
-    vsprintf(buffer, message, argptr);
+    stbsp_vsprintf(buffer, message, argptr);
     va_end(argptr);
 
     EndoomSplitIntoLines(endoom_byte, buffer);
@@ -475,7 +476,7 @@ void ConsoleQuitPrintf(const char *message, ...)
     char    buffer[1024];
 
     va_start(argptr, message);
-    vsprintf(buffer, message, argptr);
+    stbsp_vsprintf(buffer, message, argptr);
     va_end(argptr);
 
     QuitSplitIntoLines(buffer);
@@ -487,7 +488,7 @@ void ConsoleQuitEndoomPrintf(uint8_t endoom_byte, const char *message, ...)
     char    buffer[1024];
 
     va_start(argptr, message);
-    vsprintf(buffer, message, argptr);
+    stbsp_vsprintf(buffer, message, argptr);
     va_end(argptr);
 
     QuitEndoomSplitIntoLines(endoom_byte, buffer);
@@ -501,7 +502,7 @@ void ConsoleMessage(const char *message, ...)
     va_start(argptr, message);
 
     // Print the message into a text string
-    vsprintf(buffer, message, argptr);
+    stbsp_vsprintf(buffer, message, argptr);
 
     va_end(argptr);
 
@@ -520,7 +521,7 @@ void ConsoleMessageLDF(const char *lookup, ...)
     lookup = language[lookup];
 
     va_start(argptr, lookup);
-    vsprintf(buffer, lookup, argptr);
+    stbsp_vsprintf(buffer, lookup, argptr);
     va_end(argptr);
 
     HUDStartMessage(buffer);
@@ -538,7 +539,7 @@ void ImportantConsoleMessageLDF(const char *lookup, ...)
     lookup = language[lookup];
 
     va_start(argptr, lookup);
-    vsprintf(buffer, lookup, argptr);
+    stbsp_vsprintf(buffer, lookup, argptr);
     va_end(argptr);
 
     HUDStartImportantMessage(buffer);
@@ -1675,9 +1676,9 @@ void ConsoleShowFPS(void)
     char textbuf[128];
 
     if (debug_fps.d_ < 0)
-        sprintf(textbuf, " %6.2f ms", avg_shown);
+        stbsp_sprintf(textbuf, " %6.2f ms", avg_shown);
     else
-        sprintf(textbuf, " %6.2f fps", 1000 / avg_shown);
+        stbsp_sprintf(textbuf, " %6.2f fps", 1000 / avg_shown);
 
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
@@ -1688,9 +1689,9 @@ void ConsoleShowFPS(void)
         y -= FNSZ;
 
         if (debug_fps.d_ < 0)
-            sprintf(textbuf, " %6.2f max", worst_shown);
+            stbsp_sprintf(textbuf, " %6.2f max", worst_shown);
         else if (worst_shown > 0)
-            sprintf(textbuf, " %6.2f min", 1000 / worst_shown);
+            stbsp_sprintf(textbuf, " %6.2f min", 1000 / worst_shown);
 
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
     }
@@ -1700,22 +1701,22 @@ void ConsoleShowFPS(void)
     if (abs(debug_fps.d_) >= 3)
     {
         y -= FNSZ;
-        sprintf(textbuf, "%i runit", ec_frame_stats.draw_render_units);
+        stbsp_sprintf(textbuf, "%i runit", ec_frame_stats.draw_render_units);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
         y -= FNSZ;
-        sprintf(textbuf, "%i wall", ec_frame_stats.draw_wall_parts);
+        stbsp_sprintf(textbuf, "%i wall", ec_frame_stats.draw_wall_parts);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
         y -= FNSZ;
-        sprintf(textbuf, "%i plane", ec_frame_stats.draw_planes);
+        stbsp_sprintf(textbuf, "%i plane", ec_frame_stats.draw_planes);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
         y -= FNSZ;
-        sprintf(textbuf, "%i thing", ec_frame_stats.draw_things);
+        stbsp_sprintf(textbuf, "%i thing", ec_frame_stats.draw_things);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
         y -= FNSZ;
-        sprintf(textbuf, "%i state", ec_frame_stats.draw_state_change);
+        stbsp_sprintf(textbuf, "%i state", ec_frame_stats.draw_state_change);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
         y -= FNSZ;
-        sprintf(textbuf, "%i texture", ec_frame_stats.draw_texture_change);
+        stbsp_sprintf(textbuf, "%i texture", ec_frame_stats.draw_texture_change);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
     }
 }
@@ -1740,39 +1741,39 @@ void ConsoleShowPosition(void)
 
     x += XMUL;
     y -= FNSZ * (console_font->definition_->type_ == kFontTypeTrueType ? 0.25 : 1.25);
-    sprintf(textbuf, "    x: %d", (int)p->map_object_->x);
+    stbsp_sprintf(textbuf, "    x: %d", (int)p->map_object_->x);
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "    y: %d", (int)p->map_object_->y);
+    stbsp_sprintf(textbuf, "    y: %d", (int)p->map_object_->y);
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "    z: %d", (int)p->map_object_->z);
+    stbsp_sprintf(textbuf, "    z: %d", (int)p->map_object_->z);
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "angle: %d", (int)epi::DegreesFromBAM(p->map_object_->angle_));
+    stbsp_sprintf(textbuf, "angle: %d", (int)epi::DegreesFromBAM(p->map_object_->angle_));
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "x mom: %.4f", p->map_object_->momentum_.X);
+    stbsp_sprintf(textbuf, "x mom: %.4f", p->map_object_->momentum_.X);
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "y mom: %.4f", p->map_object_->momentum_.Y);
+    stbsp_sprintf(textbuf, "y mom: %.4f", p->map_object_->momentum_.Y);
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "z mom: %.4f", p->map_object_->momentum_.Z);
+    stbsp_sprintf(textbuf, "z mom: %.4f", p->map_object_->momentum_.Z);
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "  sec: %d", (int)(p->map_object_->subsector_->sector - level_sectors));
+    stbsp_sprintf(textbuf, "  sec: %d", (int)(p->map_object_->subsector_->sector - level_sectors));
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "  sub: %d", (int)(p->map_object_->subsector_ - level_subsectors));
+    stbsp_sprintf(textbuf, "  sub: %d", (int)(p->map_object_->subsector_ - level_subsectors));
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 }
 

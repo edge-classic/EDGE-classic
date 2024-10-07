@@ -37,6 +37,7 @@
 
 #include "AlmostEquals.h"
 #include "c_local.h"
+#include "stb_sprintf.h"
 
 extern void FatalError(const char *error, ...);
 
@@ -148,7 +149,7 @@ void RealVM::CompileError(const char *error, ...)
     char    buffer[1024];
 
     va_start(argptr, error);
-    vsprintf(buffer, error, argptr);
+    stbsp_vsprintf(buffer, error, argptr);
     va_end(argptr);
 
     FatalError("%s:%i: %s", comp_.source_file, comp_.source_line, buffer);

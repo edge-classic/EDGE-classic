@@ -37,6 +37,7 @@
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "r_image.h"
+#include "stb_sprintf.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
 
@@ -760,13 +761,13 @@ void SaveGameLevelPutSurfPtr(void *storage, int index, void *extra)
     {
         if (src == &level_sectors[i].floor)
         {
-            sprintf(buffer, "F:%d", i);
+            stbsp_sprintf(buffer, "F:%d", i);
             SaveChunkPutString(buffer);
             return;
         }
         else if (src == &level_sectors[i].ceiling)
         {
-            sprintf(buffer, "C:%d", i);
+            stbsp_sprintf(buffer, "C:%d", i);
             SaveChunkPutString(buffer);
             return;
         }
@@ -1022,7 +1023,7 @@ void SaveGameSectorPutPropRef(void *storage, int index, void *extra)
         i = 0;
     }
 
-    sprintf(buffer, "%d", i);
+    stbsp_sprintf(buffer, "%d", i);
     SaveChunkPutString(buffer);
 }
 

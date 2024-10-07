@@ -57,6 +57,7 @@
 #include "s_music.h"
 #include "s_sound.h"
 #include "sokol_color.h"
+#include "stb_sprintf.h"
 #include "w_model.h"
 #include "w_wad.h"
 
@@ -904,7 +905,7 @@ static void BunnyScroll(void)
         laststage = stage;
     }
 
-    sprintf(name, "END%i", stage);
+    stbsp_sprintf(name, "END%i", stage);
 
     p1 = ImageLookup(name);
 

@@ -32,6 +32,7 @@
 #include "ddf_main.h"
 #include "epi.h"
 #include "epi_str_util.h"
+#include "stb_sprintf.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
 
@@ -408,7 +409,7 @@ void SaveGamePlayerCreateElems(int num_elems)
         // initialise defaults
 
         p->player_number_ = -1; // checked during finalisation.
-        sprintf(p->player_name_, "Player%d", 1 + p->player_number_);
+        stbsp_sprintf(p->player_name_, "Player%d", 1 + p->player_number_);
 
         p->remember_attack_state_[0] = -1;
         p->remember_attack_state_[1] = -1;

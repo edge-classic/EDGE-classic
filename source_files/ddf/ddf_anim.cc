@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "ddf_local.h"
+#include "stb_sprintf.h"
 
 static AnimationDefinition *dynamic_anim;
 
@@ -301,7 +302,7 @@ void DDFConvertAnimatedLump(const uint8_t *data, int size)
         text += "\";\n";
 
         char speed_buf[64];
-        snprintf(speed_buf, sizeof(speed_buf), "%dT", speed);
+        stbsp_snprintf(speed_buf, sizeof(speed_buf), "%dT", speed);
 
         text += "speed = ";
         text += speed_buf;

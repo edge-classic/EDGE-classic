@@ -62,6 +62,7 @@
 #include "rad_act.h"
 #include "s_sound.h"
 #include "sokol_color.h"
+#include "stb_sprintf.h"
 #include "w_wad.h"
 
 // Static Scripts.  Never change once all scripts have been read in.
@@ -125,7 +126,7 @@ class rts_menu_c
         if (key)
         {
             char buffer[8];
-            sprintf(buffer, "%c. ", key);
+            stbsp_sprintf(buffer, "%c. ", key);
 
             choice_line = "  " + std::string(buffer) + choice_line;
         }

@@ -26,6 +26,7 @@
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "m_argv.h"
+#include "stb_sprintf.h"
 
 // NOTE: we must use a plain linked list (and not std::vector) here,
 //       because constructors run very early (before main is called)
@@ -129,7 +130,7 @@ ConsoleVariable &ConsoleVariable::operator=(std::string value)
 void ConsoleVariable::FormatInteger(int value)
 {
     char buffer[64];
-    sprintf(buffer, "%d", value);
+    stbsp_sprintf(buffer, "%d", value);
     s_ = buffer;
 }
 
@@ -141,15 +142,15 @@ void ConsoleVariable::FormatFloat(float value)
     float ab = fabs(value);
 
     if (ab >= 1e10) // handle huge numbers
-        sprintf(buffer, "%1.5e", value);
+        stbsp_sprintf(buffer, "%1.5e", value);
     else if (ab >= 1e5)
-        sprintf(buffer, "%1.1f", value);
+        stbsp_sprintf(buffer, "%1.1f", value);
     else if (ab >= 1e3)
-        sprintf(buffer, "%1.3f", value);
+        stbsp_sprintf(buffer, "%1.3f", value);
     else if (ab >= 1.0)
-        sprintf(buffer, "%1.5f", value);
+        stbsp_sprintf(buffer, "%1.5f", value);
     else
-        sprintf(buffer, "%1.7f", value);
+        stbsp_sprintf(buffer, "%1.7f", value);
 
     s_ = buffer;
 }

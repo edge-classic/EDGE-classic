@@ -66,6 +66,7 @@
 #include "r_image.h"
 #include "rad_trig.h"
 #include "script/compat/lua_compat.h"
+#include "stb_sprintf.h"
 #include "vm_coal.h"
 #include "w_epk.h"
 #include "w_files.h"
@@ -2320,7 +2321,7 @@ static const char *UserSkyboxName(const char *base, int face)
     static char       buffer[64];
     static const char letters[] = "NESWTB";
 
-    sprintf(buffer, "%s_%c", base, letters[face]);
+    stbsp_sprintf(buffer, "%s_%c", base, letters[face]);
     return buffer;
 }
 

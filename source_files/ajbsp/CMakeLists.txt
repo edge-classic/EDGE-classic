@@ -14,7 +14,7 @@ add_library(edge_ajbsp
 	bsp_wad.cc
 )
 
-target_link_libraries(edge_ajbsp PRIVATE almostequals edge_epi HandmadeMath miniz)
+target_link_libraries(edge_ajbsp PRIVATE almostequals edge_epi HandmadeMath miniz stb)
 
 target_include_directories(edge_ajbsp PUBLIC ./)
 

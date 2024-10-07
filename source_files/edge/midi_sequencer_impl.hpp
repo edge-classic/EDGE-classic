@@ -38,6 +38,7 @@
 #include "midi_convert_mus.hpp"
 #include "midi_convert_xmi.hpp"
 #include "midi_sequencer.hpp"
+#include "stb_sprintf.h"
 
 /**
  * @brief Utility function to read Big-Endian integer from raw binary data
@@ -561,7 +562,7 @@ bool MidiSequencer::BuildSMFTrackData(const std::vector<std::vector<uint8_t>> &t
                 evtPos.delay_ = ReadVariableLengthValue(&trackPtr, end, ok);
             if (!ok)
             {
-                int len = snprintf(error, 150,
+                int len = stbsp_snprintf(error, 150,
                                    "buildTrackData: Can't read variable-length "
                                    "value at begin of track %d.\n",
                                    (int)tk);
@@ -591,7 +592,7 @@ bool MidiSequencer::BuildSMFTrackData(const std::vector<std::vector<uint8_t>> &t
             event = ParseEvent(&trackPtr, end, status);
             if (!event.is_valid)
             {
-                int len = snprintf(error, 150, "buildTrackData: Fail to parse event in the track %d.\n", (int)tk);
+                int len = stbsp_snprintf(error, 150, "buildTrackData: Fail to parse event in the track %d.\n", (int)tk);
                 if ((len > 0) && (len < 150))
                     midi_parsing_errors_string_ += std::string(error, (size_t)len);
                 return false;

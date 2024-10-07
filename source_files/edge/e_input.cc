@@ -42,6 +42,7 @@
 #include "m_math.h"
 #include "m_misc.h"
 #include "r_misc.h"
+#include "stb_sprintf.h"
 
 extern bool ConsoleResponder(InputEvent *ev);
 extern bool MenuResponder(InputEvent *ev);
@@ -819,7 +820,7 @@ const char *GetKeyName(int key)
             return special_keys[i].name;
     }
 
-    sprintf(buffer, "Key%03d", key);
+    stbsp_sprintf(buffer, "Key%03d", key);
 
     return buffer;
 }

@@ -35,6 +35,7 @@
 #include "p_local.h"
 #include "p_spec.h"
 #include "r_state.h"
+#include "stb_sprintf.h"
 #include "sv_chunk.h"
 #include "w_wad.h"
 
@@ -307,7 +308,7 @@ const char *SaveSlotName(int slot)
 
     static char buffer[256];
 
-    sprintf(buffer, "slot%03d", slot);
+    stbsp_sprintf(buffer, "slot%03d", slot);
 
     return buffer;
 }

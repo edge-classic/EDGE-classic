@@ -42,6 +42,7 @@
 #include "s_blit.h"
 #include "s_sound.h"
 #include "script/compat/lua_compat.h"
+#include "stb_sprintf.h"
 #include "vm_coal.h"
 
 extern coal::VM *ui_vm;
@@ -947,7 +948,7 @@ void CreatePlayer(int pnum, bool is_bot)
 
     // determine name
     char namebuf[32];
-    sprintf(namebuf, "Player%dName", pnum + 1);
+    stbsp_sprintf(namebuf, "Player%dName", pnum + 1);
 
     if (language.IsValidRef(namebuf))
     {
@@ -957,7 +958,7 @@ void CreatePlayer(int pnum, bool is_bot)
     else
     {
         // -ES- Default to player##
-        sprintf(p->player_name_, "Player%d", pnum + 1);
+        stbsp_sprintf(p->player_name_, "Player%d", pnum + 1);
     }
 
     if (is_bot)

@@ -34,6 +34,7 @@
 #include "m_menu.h"
 #include "m_misc.h"
 #include "s_sound.h"
+#include "stb_sprintf.h"
 #include "version.h"
 #include "w_files.h"
 #include "w_wad.h"
@@ -715,7 +716,7 @@ void ConsolePlayerMessage(int plyr, const char *message, ...)
         return;
 
     va_start(argptr, message);
-    vsnprintf(buffer, sizeof(buffer), message, argptr);
+    stbsp_vsnprintf(buffer, sizeof(buffer), message, argptr);
     va_end(argptr);
 
     buffer[sizeof(buffer) - 1] = 0;
@@ -741,7 +742,7 @@ void PlayerConsoleMessageLDF(int plyr, const char *message, ...)
     message = language[message];
 
     va_start(argptr, message);
-    vsnprintf(buffer, sizeof(buffer), message, argptr);
+    stbsp_vsnprintf(buffer, sizeof(buffer), message, argptr);
     va_end(argptr);
 
     buffer[sizeof(buffer) - 1] = 0;

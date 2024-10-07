@@ -37,6 +37,7 @@
 
 #include "AlmostEquals.h"
 #include "c_local.h"
+#include "stb_sprintf.h"
 
 extern void FatalError(const char *error, ...);
 
@@ -50,7 +51,7 @@ int RealVM::GetNativeFunc(const char *name, const char *module)
     char buffer[256];
 
     if (module)
-        sprintf(buffer, "%s.%s", module, name);
+        stbsp_sprintf(buffer, "%s.%s", module, name);
     else
         strcpy(buffer, name);
 
@@ -187,7 +188,7 @@ void RealVM::RunError(const char *error, ...)
     char    buffer[1024];
 
     va_start(argptr, error);
-    vsnprintf(buffer, sizeof(buffer), error, argptr);
+    stbsp_vsnprintf(buffer, sizeof(buffer), error, argptr);
     va_end(argptr);
 
     Printer("COAL ERROR: %s\n", buffer);
@@ -224,11 +225,11 @@ int RealVM::StringConcatFloat(const char *s, double f)
 
     if (AlmostEquals(f, round(f)))
     {
-        sprintf(buffer, "%1.0f", f);
+        stbsp_sprintf(buffer, "%1.0f", f);
     }
     else
     {
-        sprintf(buffer, "%8.6f", f);
+        stbsp_sprintf(buffer, "%8.6f", f);
     }
 
     return StringConcat(s, buffer);
@@ -240,11 +241,11 @@ int RealVM::StringConcatVector(const char *s, double *v)
 
     if (AlmostEquals(v[0], round(v[0])) && AlmostEquals(v[1], round(v[1])) && AlmostEquals(v[2], round(v[2])))
     {
-        sprintf(buffer, "'%1.0f %1.0f %1.0f'", v[0], v[1], v[2]);
+        stbsp_sprintf(buffer, "'%1.0f %1.0f %1.0f'", v[0], v[1], v[2]);
     }
     else
     {
-        sprintf(buffer, "'%6.4f %6.4f %6.4f'", v[0], v[1], v[2]);
+        stbsp_sprintf(buffer, "'%6.4f %6.4f %6.4f'", v[0], v[1], v[2]);
     }
 
     return StringConcat(s, buffer);
@@ -691,7 +692,7 @@ const char *RealVM::RegString(Statement *st, int who)
     if (val == kDefaultOffset * 8)
         return "default";
 
-    sprintf(buffer, "%s[%d]", (val < 0) ? "stack" : "glob", abs(val));
+    stbsp_sprintf(buffer, "%s[%d]", (val < 0) ? "stack" : "glob", abs(val));
     return buffer;
 }
 

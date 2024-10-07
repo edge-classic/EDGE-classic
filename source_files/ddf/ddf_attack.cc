@@ -26,6 +26,7 @@
 #include "ddf_local.h"
 #include "epi_bitset.h"
 #include "epi_str_util.h"
+#include "stb_sprintf.h"
 
 AttackDefinitionContainer atkdefs;
 
@@ -118,7 +119,7 @@ static MapObjectDefinition *CreateAtkMobj(const char *atk_name)
     // determine a name
     char mobj_name[256];
 
-    snprintf(mobj_name, sizeof(mobj_name) - 2, "atk:%s", atk_name);
+    stbsp_snprintf(mobj_name, sizeof(mobj_name) - 2, "atk:%s", atk_name);
     mobj_name[255] = 0;
 
     mobj->name_   = mobj_name; // copies it

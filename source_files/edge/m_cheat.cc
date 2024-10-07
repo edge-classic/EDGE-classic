@@ -49,6 +49,7 @@
 #include "p_mobj.h"
 #include "s_music.h"
 #include "s_sound.h"
+#include "stb_sprintf.h"
 #include "w_wad.h"
 
 extern ConsoleVariable debug_fps;
@@ -435,7 +436,7 @@ void CheatInitialize(void)
 
     for (i = 0; i < 9; i++)
     {
-        sprintf(temp, "idbehold%d", i + 1);
+        stbsp_sprintf(temp, "idbehold%d", i + 1);
         cheat_powerup[i].sequence = language[temp];
     }
 
@@ -455,7 +456,7 @@ void CheatInitialize(void)
 
     for (i = 0; i < 11; i++)
     {
-        sprintf(temp, "idgive%d", i);
+        stbsp_sprintf(temp, "idgive%d", i);
         cheat_give_weapon[i].sequence = language[temp];
     }
 }

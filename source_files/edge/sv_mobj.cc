@@ -31,6 +31,7 @@
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "p_setup.h"
+#include "stb_sprintf.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
 
@@ -870,7 +871,7 @@ void SaveGameMapObjectPutState(void *storage, int index, void *extra)
         base--;
     }
 
-    sprintf(swizzle, "%s:%s:%d", (actual == mo->info_) ? "*" : actual->name_.c_str(),
+    stbsp_sprintf(swizzle, "%s:%s:%d", (actual == mo->info_) ? "*" : actual->name_.c_str(),
             states[base].label ? states[base].label : "*", 1 + s_num - base);
 
     SaveChunkPutString(swizzle);

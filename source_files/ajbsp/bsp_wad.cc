@@ -30,6 +30,7 @@
 #include "epi_endian.h"
 #include "epi_filesystem.h"
 #include "epi_str_compare.h"
+#include "stb_sprintf.h"
 
 #define AJBSP_DEBUG_WAD 0
 
@@ -186,7 +187,7 @@ void Lump::Printf(const char *message, ...)
     va_list args;
 
     va_start(args, message);
-    vsnprintf(buffer, sizeof(buffer), message, args);
+    stbsp_vsnprintf(buffer, sizeof(buffer), message, args);
     va_end(args);
 
     buffer[sizeof(buffer) - 1] = 0;
@@ -480,14 +481,14 @@ int WadFile::LevelFindByNumber(int number)
     int  index;
 
     // try MAP## first
-    sprintf(buffer, "MAP%02d", number);
+    stbsp_sprintf(buffer, "MAP%02d", number);
 
     index = LevelFind(buffer);
     if (index >= 0)
         return index;
 
     // otherwise try E#M#
-    sprintf(buffer, "E%dM%d", HMM_MAX(1, number / 10), number % 10);
+    stbsp_sprintf(buffer, "E%dM%d", HMM_MAX(1, number / 10), number % 10);
 
     index = LevelFind(buffer);
     if (index >= 0)

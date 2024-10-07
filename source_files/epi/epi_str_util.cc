@@ -21,6 +21,7 @@
 #include <stdarg.h>
 
 #include "epi.h"
+#include "stb_sprintf.h"
 #include "superfasthash.h"
 
 namespace epi
@@ -420,10 +421,10 @@ std::string StringFormat(const char *fmt, ...)
         va_list args;
 
         va_start(args, fmt);
-        int out_len = vsnprintf(buf, buf_size, fmt, args);
+        int out_len = stbsp_vsnprintf(buf, buf_size, fmt, args);
         va_end(args);
 
-        // old versions of vsnprintf() simply return -1 when
+        // old versions of stbsp_vsnprintf() simply return -1 when
         // the output doesn't fit.
         if (out_len >= 0 && out_len < buf_size)
         {

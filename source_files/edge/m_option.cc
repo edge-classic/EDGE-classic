@@ -112,6 +112,7 @@
 #include "s_music.h"
 #include "s_opl.h"
 #include "s_sound.h"
+#include "stb_sprintf.h"
 #include "w_wad.h"
 
 int  option_menu_on    = 0;
@@ -1179,7 +1180,7 @@ void OptionMenuDrawer()
             }
             else
             {
-                sprintf(tempstring, "Invalid");
+                stbsp_sprintf(tempstring, "Invalid");
             }
 
             HUDWriteText(style, StyleDefinition::kTextSectionAlternate, (current_menu->menu_center) + 15, curry,
@@ -1230,7 +1231,7 @@ static void OptionMenuResOptDrawer(Style *style, int topy, int bottomy, int dy, 
     int   fontType  = StyleDefinition::kTextSectionAlternate;
     float TEXTscale = style->definition_->text_[fontType].scale_;
 
-    sprintf(tempstring, "%s",
+    stbsp_sprintf(tempstring, "%s",
             new_window_mode.window_mode == 2
                 ? "Borderless Fullscreen"
                 : (new_window_mode.window_mode == kWindowModeFullscreen ? "Exclusive Fullscreen" : "Windowed"));
@@ -1239,7 +1240,7 @@ static void OptionMenuResOptDrawer(Style *style, int topy, int bottomy, int dy, 
     if (new_window_mode.window_mode < 2)
     {
         y += dy;
-        sprintf(tempstring, "%dx%d", new_window_mode.width, new_window_mode.height);
+        stbsp_sprintf(tempstring, "%dx%d", new_window_mode.width, new_window_mode.height);
         HUDWriteText(style, fontType, centrex + 15, y, tempstring);
     }
 
@@ -1249,7 +1250,7 @@ static void OptionMenuResOptDrawer(Style *style, int topy, int bottomy, int dy, 
     fontType  = StyleDefinition::kTextSectionHelp;
     TEXTscale = style->definition_->text_[fontType].scale_;
 
-    sprintf(tempstring, "Current Resolution:");
+    stbsp_sprintf(tempstring, "Current Resolution:");
     HUDWriteText(style, fontType, 160 - (style->fonts_[fontType]->StringWidth(tempstring) * TEXTscale / 2), y,
                  tempstring);
 
@@ -1259,9 +1260,9 @@ static void OptionMenuResOptDrawer(Style *style, int topy, int bottomy, int dy, 
     y += dy;
     y += 5;
     if (current_window_mode == 2)
-        sprintf(tempstring, "%s", "Borderless Fullscreen");
+        stbsp_sprintf(tempstring, "%s", "Borderless Fullscreen");
     else
-        sprintf(tempstring, "%d x %d %s", current_screen_width, current_screen_height,
+        stbsp_sprintf(tempstring, "%d x %d %s", current_screen_width, current_screen_height,
                 current_window_mode == 1 ? "Exclusive Fullscreen" : "Windowed");
 
     HUDWriteText(style, fontType, 160 - (style->fonts_[fontType]->StringWidth(tempstring) * TEXTscale / 2), y,

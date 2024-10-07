@@ -64,6 +64,7 @@
 #include "r_modes.h"
 #include "s_music.h"
 #include "s_sound.h"
+#include "stb_sprintf.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
 #include "w_wad.h"
@@ -1619,7 +1620,7 @@ static void QuitResponse(int ch)
         // Count the quit messages
         do
         {
-            sprintf(refname, "QuitSnd%d", numsounds + 1);
+            stbsp_sprintf(refname, "QuitSnd%d", numsounds + 1);
             if (language.IsValidRef(refname))
                 numsounds++;
             else
@@ -1633,8 +1634,8 @@ static void QuitResponse(int ch)
             start = i = RandomByte() % numsounds;
             do
             {
-                sprintf(refname, "QuitSnd%d", i + 1);
-                sprintf(sound, "DS%s", language[refname]);
+                stbsp_sprintf(refname, "QuitSnd%d", i + 1);
+                stbsp_sprintf(sound, "DS%s", language[refname]);
                 if (CheckLumpNumberForName(sound) != -1)
                 {
                     StartSoundEffect(sfxdefs.GetEffect(language[refname]));
@@ -1689,7 +1690,7 @@ void QuitEdge(int choice)
     {
         num_quitmessages++;
 
-        sprintf(ref, "QUITMSG%d", num_quitmessages);
+        stbsp_sprintf(ref, "QUITMSG%d", num_quitmessages);
     } while (language.IsValidRef(ref));
 
     // we stopped at one higher than the last
@@ -1699,7 +1700,7 @@ void QuitEdge(int choice)
     if (num_quitmessages > 0)
     {
         // Pick one at random
-        sprintf(ref, "QUITMSG%d", 1 + (RandomByte() % num_quitmessages));
+        stbsp_sprintf(ref, "QUITMSG%d", 1 + (RandomByte() % num_quitmessages));
 
         // Construct the quit message in full
         msg = epi::StringFormat("%s\n\n%s", language[ref], language["PressToQuit"]);

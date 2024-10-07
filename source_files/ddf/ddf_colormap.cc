@@ -20,6 +20,7 @@
 
 #include "ddf_local.h"
 #include "epi_str_compare.h"
+#include "stb_sprintf.h"
 
 static Colormap *dynamic_colmap;
 
@@ -348,7 +349,7 @@ void DDFAddRawColourmap(const char *name, int size, const char *pack_name, int i
     }
 
     char length_buf[64];
-    snprintf(length_buf, sizeof(length_buf), "%d", size);
+    stbsp_snprintf(length_buf, sizeof(length_buf), "%d", size);
 
     text += "start  = 0;\n";
     text += "length = ";

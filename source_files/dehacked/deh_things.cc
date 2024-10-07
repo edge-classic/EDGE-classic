@@ -53,6 +53,7 @@
 #include "epi.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
+#include "stb_sprintf.h"
 namespace dehacked
 {
 
@@ -329,7 +330,7 @@ const char *Attacks::AddScratchAttack(int damage, const char *sfx)
     }
 
     static char namebuf[256];
-    snprintf(namebuf, sizeof(namebuf), "SCRATCH_%s_%d", safe_sfx.c_str(), damage);
+    stbsp_snprintf(namebuf, sizeof(namebuf), "SCRATCH_%s_%d", safe_sfx.c_str(), damage);
 
     // already have it?
     for (size_t i = 0; i < scratchers.size(); i++)
@@ -628,9 +629,9 @@ const char *things::GetMobjName(int mt_num)
     static char buffer[64];
 
     if (kMT_EXTRA00 <= mt_num && mt_num <= kMT_EXTRA99)
-        snprintf(buffer, sizeof(buffer), "MT_EXTRA%02d", mt_num - kMT_EXTRA00);
+        stbsp_snprintf(buffer, sizeof(buffer), "MT_EXTRA%02d", mt_num - kMT_EXTRA00);
     else
-        snprintf(buffer, sizeof(buffer), "DEHACKED_%d", mt_num + 1);
+        stbsp_snprintf(buffer, sizeof(buffer), "DEHACKED_%d", mt_num + 1);
 
     return buffer;
 }
@@ -1160,9 +1161,9 @@ const char *GetSpeed(int speed)
     static char num_buf[128];
 
     if (speed >= 1024)
-        sprintf(num_buf, "%1.2f", FixedToFloat(speed));
+        stbsp_sprintf(num_buf, "%1.2f", FixedToFloat(speed));
     else
-        sprintf(num_buf, "%d", speed);
+        stbsp_sprintf(num_buf, "%d", speed);
 
     return num_buf;
 }

@@ -36,6 +36,7 @@
 #include "rad_act.h"
 #include "rad_trig.h"
 #include "s_sound.h"
+#include "stb_sprintf.h"
 #include "version.h"
 #include "w_wad.h"
 
@@ -87,15 +88,15 @@ void ScriptError(const char *err, ...)
 
     // put actual message on first line
     va_start(argptr, err);
-    vsprintf(buffer, err, argptr);
+    stbsp_vsprintf(buffer, err, argptr);
     va_end(argptr);
 
     pos = buffer + strlen(buffer);
 
-    sprintf(pos, "Error occurred near line %d of %s\n", current_script_line_number, current_script_filename);
+    stbsp_sprintf(pos, "Error occurred near line %d of %s\n", current_script_line_number, current_script_filename);
     pos += strlen(pos);
 
-    sprintf(pos, "Line contents: %s\n", current_script_line.c_str());
+    stbsp_sprintf(pos, "Line contents: %s\n", current_script_line.c_str());
     pos += strlen(pos);
 
     // check for buffer overflow
@@ -117,7 +118,7 @@ void ScriptWarning(const char *err, ...)
     char    buffer[1024];
 
     va_start(argptr, err);
-    vsprintf(buffer, err, argptr);
+    stbsp_vsprintf(buffer, err, argptr);
     va_end(argptr);
 
     LogWarning("\n");
@@ -132,7 +133,7 @@ void ScriptWarnError(const char *err, ...)
     char    buffer[1024];
 
     va_start(argptr, err);
-    vsprintf(buffer, err, argptr);
+    stbsp_vsprintf(buffer, err, argptr);
     va_end(argptr);
 
     if (strict_errors)

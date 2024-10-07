@@ -48,6 +48,7 @@
 #include "epi.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
+#include "stb_sprintf.h"
 namespace dehacked
 {
 
@@ -935,9 +936,9 @@ const char *frames::RedirectorName(int next_st)
     EPI_ASSERT(next_ofs > 0);
 
     if (next_ofs == 1)
-        snprintf(name_buf, sizeof(name_buf), "%s", GroupToName(next_group));
+        stbsp_snprintf(name_buf, sizeof(name_buf), "%s", GroupToName(next_group));
     else
-        snprintf(name_buf, sizeof(name_buf), "%s:%d", GroupToName(next_group), next_ofs);
+        stbsp_snprintf(name_buf, sizeof(name_buf), "%s:%d", GroupToName(next_group), next_ofs);
 
     return name_buf;
 }
@@ -971,17 +972,17 @@ void frames::SpecialAction(char *act_name, const State *st)
             if (perc > 100)
                 perc = 100;
 
-            sprintf(act_name, "JUMP(%s,%d%%)", RedirectorName(next), perc);
+            stbsp_sprintf(act_name, "JUMP(%s,%d%%)", RedirectorName(next), perc);
         }
     }
     break;
 
     case kA_Turn:
-        sprintf(act_name, "TURN(%d)", MISC_TO_ANGLE(ReadArg(st, 0)));
+        stbsp_sprintf(act_name, "TURN(%d)", MISC_TO_ANGLE(ReadArg(st, 0)));
         break;
 
     case kA_Face:
-        sprintf(act_name, "FACE(%d)", MISC_TO_ANGLE(ReadArg(st, 0)));
+        stbsp_sprintf(act_name, "FACE(%d)", MISC_TO_ANGLE(ReadArg(st, 0)));
         break;
 
     case kA_PlaySound: {
@@ -990,7 +991,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         if (epi::StringCaseCompareASCII(sfx, "NULL") == 0)
             strcpy(act_name, "NOTHING");
         else
-            sprintf(act_name, "PLAYSOUND(\"%s\")", sfx);
+            stbsp_sprintf(act_name, "PLAYSOUND(\"%s\")", sfx);
     }
     break;
 
@@ -1000,7 +1001,7 @@ void frames::SpecialAction(char *act_name, const State *st)
 
         if (damage == 0 && sfx_id == 0)
         {
-            sprintf(act_name, "NOTHING");
+            stbsp_sprintf(act_name, "NOTHING");
         }
         else
         {
@@ -1011,7 +1012,7 @@ void frames::SpecialAction(char *act_name, const State *st)
                 sfx = nullptr;
 
             const char *atk_name = things::AddScratchAttack(damage, sfx);
-            sprintf(act_name, "CLOSE_ATTACK(%s)", atk_name);
+            stbsp_sprintf(act_name, "CLOSE_ATTACK(%s)", atk_name);
         }
     }
     break;
@@ -1023,7 +1024,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         if (misc1 <= 0)
             strcpy(act_name, "NOTHING");
         else
-            sprintf(act_name, "ACTIVATE_LINETYPE(%d,%d)", misc1, misc2);
+            stbsp_sprintf(act_name, "ACTIVATE_LINETYPE(%d,%d)", misc1, misc2);
     }
     break;
 
@@ -1038,7 +1039,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         else
         {
             things::UseThing(mt_num);
-            sprintf(act_name, "SPAWN(%s)", things::GetMobjName(mt_num));
+            stbsp_sprintf(act_name, "SPAWN(%s)", things::GetMobjName(mt_num));
         }
     }
     break;
@@ -1058,7 +1059,7 @@ void frames::SpecialAction(char *act_name, const State *st)
                 perc = -1; // We use the negative percentage in kA_RefireTo
                            // to denote skipping the ammo check (or will)
 
-            sprintf(act_name, "REFIRE_TO(%s,%d%%)", RedirectorName(next), perc);
+            stbsp_sprintf(act_name, "REFIRE_TO(%s,%d%%)", RedirectorName(next), perc);
         }
     }
     break;
@@ -1072,7 +1073,7 @@ void frames::SpecialAction(char *act_name, const State *st)
 
         sounds::MarkSound(sound);
 
-        sprintf(act_name, "DEH_WEAPON_MELEE(%d,%d,%d,%d,%d)", damagebase, damagedice, zerkfactor, sound, range);
+        stbsp_sprintf(act_name, "DEH_WEAPON_MELEE(%d,%d,%d,%d,%d)", damagebase, damagedice, zerkfactor, sound, range);
     }
     break;
 
@@ -1082,7 +1083,7 @@ void frames::SpecialAction(char *act_name, const State *st)
 
         sounds::MarkSound(sound);
 
-        sprintf(act_name, "DEH_WEAPON_SOUND(%d,%d)", sound, full_volume);
+        stbsp_sprintf(act_name, "DEH_WEAPON_SOUND(%d,%d)", sound, full_volume);
     }
     break;
 
@@ -1093,7 +1094,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         int damagebase = ReadArg(st, 3);
         int damagedice = ReadArg(st, 4);
 
-        sprintf(act_name, "DEH_WEAPON_BULLET(%d,%d,%d,%d,%d)", hspread, vspread, numbullets, damagebase, damagedice);
+        stbsp_sprintf(act_name, "DEH_WEAPON_BULLET(%d,%d,%d,%d,%d)", hspread, vspread, numbullets, damagebase, damagedice);
     }
     break;
 
@@ -1111,14 +1112,14 @@ void frames::SpecialAction(char *act_name, const State *st)
         if (name[0] == '*')
             name = name.substr(1);
 
-        sprintf(act_name, "DEH_WEAPON_PROJECTILE(%s,%d,%d,%d,%d)", name.c_str(), angle, pitch, hoffset, voffset);
+        stbsp_sprintf(act_name, "DEH_WEAPON_PROJECTILE(%s,%d,%d,%d,%d)", name.c_str(), angle, pitch, hoffset, voffset);
     }
     break;
 
     case kA_ConsumeAmmo: {
         int amount = ReadArg(st, 0);
 
-        sprintf(act_name, "DEH_WEAPON_CONSUMEAMMO(%d)", amount);
+        stbsp_sprintf(act_name, "DEH_WEAPON_CONSUMEAMMO(%d)", amount);
     }
     break;
 
@@ -1129,7 +1130,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         if (next <= 0 || NewStateElseOld(next) == nullptr)
             strcpy(act_name, "NOTHING");
         else
-            sprintf(act_name, "DEH_WEAPON_CHECKAMMO(%s,%d)", RedirectorName(next), amount);
+            stbsp_sprintf(act_name, "DEH_WEAPON_CHECKAMMO(%s,%d)", RedirectorName(next), amount);
     }
     break;
 
@@ -1143,7 +1144,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         }
         else
         {
-            sprintf(act_name, "DEH_WEAPON_GUNFLASH_TO(%s,%d)", RedirectorName(state), nothirdperson);
+            stbsp_sprintf(act_name, "DEH_WEAPON_GUNFLASH_TO(%s,%d)", RedirectorName(state), nothirdperson);
         }
     }
     break;
@@ -1152,7 +1153,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         int damage = ReadArg(st, 0);
         int radius = ReadArg(st, 1);
 
-        sprintf(act_name, "DEH_RADIUS_DAMAGE(%d,%d)", damage, radius);
+        stbsp_sprintf(act_name, "DEH_RADIUS_DAMAGE(%d,%d)", damage, radius);
     }
     break;
 
@@ -1168,7 +1169,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         }
         else
         {
-            sprintf(act_name, "DEH_HEAL_CHASE(%s,%d)", RedirectorName(state), sound);
+            stbsp_sprintf(act_name, "DEH_HEAL_CHASE(%s,%d)", RedirectorName(state), sound);
         }
     }
     break;
@@ -1190,7 +1191,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         if (name[0] == '*')
             name = name.substr(1);
 
-        sprintf(act_name, "DEH_SPAWN_OBJECT(%s,%d,%d,%d,%d,%d,%d,%d)", name.c_str(), angle, x_offset, y_offset, z_offset, x_velocity, y_velocity, z_velocity);
+        stbsp_sprintf(act_name, "DEH_SPAWN_OBJECT(%s,%d,%d,%d,%d,%d,%d,%d)", name.c_str(), angle, x_offset, y_offset, z_offset, x_velocity, y_velocity, z_velocity);
     }
     break;
 
@@ -1208,7 +1209,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         if (name[0] == '*')
             name = name.substr(1);
 
-        sprintf(act_name, "DEH_MONSTER_PROJECTILE(%s,%d,%d,%d,%d)", name.c_str(), angle, pitch, hoffset, voffset);
+        stbsp_sprintf(act_name, "DEH_MONSTER_PROJECTILE(%s,%d,%d,%d,%d)", name.c_str(), angle, pitch, hoffset, voffset);
     }
     break;
 
@@ -1219,7 +1220,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         int damagebase = ReadArg(st, 3);
         int damagedice = ReadArg(st, 4);
 
-        sprintf(act_name, "DEH_MONSTER_BULLET(%d,%d,%d,%d,%d)", hspread, vspread, numbullets, damagebase, damagedice);
+        stbsp_sprintf(act_name, "DEH_MONSTER_BULLET(%d,%d,%d,%d,%d)", hspread, vspread, numbullets, damagebase, damagedice);
     }
     break;
 
@@ -1231,7 +1232,7 @@ void frames::SpecialAction(char *act_name, const State *st)
 
         sounds::MarkSound(sound);
 
-        sprintf(act_name, "DEH_MONSTER_MELEE(%d,%d,%d,%d)", damagebase, damagedice, sound, range);
+        stbsp_sprintf(act_name, "DEH_MONSTER_MELEE(%d,%d,%d,%d)", damagebase, damagedice, sound, range);
     }
     break;
 
@@ -1242,7 +1243,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         if (next <= 0 || NewStateElseOld(next) == nullptr)
             strcpy(act_name, "NOTHING");
         else
-            sprintf(act_name, "DEH_HEALTH_JUMP(%s,%d)", RedirectorName(next), health);
+            stbsp_sprintf(act_name, "DEH_HEALTH_JUMP(%s,%d)", RedirectorName(next), health);
     }
     break;
 
@@ -1250,7 +1251,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         int threshold = ReadArg(st, 0);
         int maxturnangle = ReadArg(st, 1);
 
-        sprintf(act_name, "DEH_SEEK_TRACER(%d,%d)", threshold, maxturnangle);
+        stbsp_sprintf(act_name, "DEH_SEEK_TRACER(%d,%d)", threshold, maxturnangle);
     }
     break;
 
@@ -1258,7 +1259,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         int fov = ReadArg(st, 0);
         int rangeblocks = ReadArg(st, 1);
 
-        sprintf(act_name, "DEH_FIND_TRACER(%d,%d)", fov, rangeblocks);
+        stbsp_sprintf(act_name, "DEH_FIND_TRACER(%d,%d)", fov, rangeblocks);
     }
     break;
 
@@ -1269,7 +1270,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         if (next <= 0 || NewStateElseOld(next) == nullptr)
             strcpy(act_name, "NOTHING");
         else
-            sprintf(act_name, "DEH_TARGET_SIGHT_JUMP(%s,%d)", RedirectorName(next), fov);
+            stbsp_sprintf(act_name, "DEH_TARGET_SIGHT_JUMP(%s,%d)", RedirectorName(next), fov);
     }
     break;
 
@@ -1280,7 +1281,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         if (next <= 0 || NewStateElseOld(next) == nullptr)
             strcpy(act_name, "NOTHING");
         else
-            sprintf(act_name, "DEH_TARGET_CLOSER_JUMP(%s,%d)", RedirectorName(next), distance);
+            stbsp_sprintf(act_name, "DEH_TARGET_CLOSER_JUMP(%s,%d)", RedirectorName(next), distance);
     }
     break;
 
@@ -1291,7 +1292,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         if (next <= 0 || NewStateElseOld(next) == nullptr)
             strcpy(act_name, "NOTHING");
         else
-            sprintf(act_name, "DEH_TRACER_SIGHT_JUMP(%s,%d)", RedirectorName(next), fov);
+            stbsp_sprintf(act_name, "DEH_TRACER_SIGHT_JUMP(%s,%d)", RedirectorName(next), fov);
     }
     break;
 
@@ -1302,7 +1303,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         if (next <= 0 || NewStateElseOld(next) == nullptr)
             strcpy(act_name, "NOTHING");
         else
-            sprintf(act_name, "DEH_TRACER_CLOSER_JUMP(%s,%d)", RedirectorName(next), distance);
+            stbsp_sprintf(act_name, "DEH_TRACER_CLOSER_JUMP(%s,%d)", RedirectorName(next), distance);
     }
     break;
 
@@ -1314,7 +1315,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         if (next <= 0 || NewStateElseOld(next) == nullptr)
             strcpy(act_name, "NOTHING");
         else
-            sprintf(act_name, "DEH_FLAG_JUMP(%s,%d,%d)", RedirectorName(next), flags, flags2);
+            stbsp_sprintf(act_name, "DEH_FLAG_JUMP(%s,%d,%d)", RedirectorName(next), flags, flags2);
     }
     break;
 
@@ -1322,7 +1323,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         int flags1 = ReadArg(st, 0);
         int flags2 = ReadArg(st, 1);
 
-        sprintf(act_name, "DEH_ADD_FLAGS(%d,%d)", flags1, flags2);
+        stbsp_sprintf(act_name, "DEH_ADD_FLAGS(%d,%d)", flags1, flags2);
     }
     break;
 
@@ -1330,7 +1331,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         int flags1 = ReadArg(st, 0);
         int flags2 = ReadArg(st, 1);
 
-        sprintf(act_name, "DEH_REMOVE_FLAGS(%d,%d)", flags1, flags2);
+        stbsp_sprintf(act_name, "DEH_REMOVE_FLAGS(%d,%d)", flags1, flags2);
     }
     break;
 

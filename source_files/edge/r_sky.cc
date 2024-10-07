@@ -34,6 +34,7 @@
 #include "r_sky.h"
 #include "r_texgl.h"
 #include "r_units.h"
+#include "stb_sprintf.h"
 #include "w_flat.h"
 #include "w_wad.h"
 
@@ -848,7 +849,7 @@ static const char *UserSkyFaceName(const char *base, int face)
     static char       buffer[64];
     static const char letters[] = "NESWTB";
 
-    sprintf(buffer, "%s_%c", base, letters[face]);
+    stbsp_sprintf(buffer, "%s_%c", base, letters[face]);
     return buffer;
 }
 

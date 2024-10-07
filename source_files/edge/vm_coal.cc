@@ -34,6 +34,7 @@
 #include "m_random.h"
 #include "n_network.h"
 #include "r_modes.h"
+#include "stb_sprintf.h"
 #include "version.h"
 #include "w_wad.h"
 
@@ -47,7 +48,7 @@ void COALPrinter(const char *msg, ...)
     va_list argptr;
 
     va_start(argptr, msg);
-    vsnprintf(buffer, sizeof(buffer), msg, argptr);
+    stbsp_vsnprintf(buffer, sizeof(buffer), msg, argptr);
     va_end(argptr);
 
     buffer[sizeof(buffer) - 1] = 0;

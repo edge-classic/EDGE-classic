@@ -28,7 +28,7 @@ add_library(
   ddf_weapon.cc
 )
 
-target_link_libraries(edge_ddf PRIVATE almostequals edge_epi HandmadeMath sokol_color)
+target_link_libraries(edge_ddf PRIVATE almostequals edge_epi HandmadeMath sokol_color stb)
 
 target_include_directories(edge_ddf PRIVATE ../edge)
 

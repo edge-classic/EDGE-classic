@@ -43,6 +43,7 @@
 #include "r_state.h"
 #include "rad_trig.h"
 #include "s_sound.h"
+#include "stb_sprintf.h"
 #include "w_wad.h"
 
 // this ranges from 0 (VERY EASY) to 4 (VERY HARD)
@@ -1532,7 +1533,7 @@ void CreateBotPlayer(Player *p, bool recreate)
     p->player_flags_ |= kPlayerFlagBot;
 
     if (!recreate)
-        sprintf(p->player_name_, "Bot%d", p->player_number_ + 1);
+        stbsp_sprintf(p->player_name_, "Bot%d", p->player_number_ + 1);
 }
 
 void BotPlayerBuilder(const Player *p, void *data, EventTicCommand *cmd)

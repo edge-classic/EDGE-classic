@@ -57,6 +57,7 @@
 #include "s_music.h"
 #include "s_sound.h"
 #include "script/compat/lua_compat.h"
+#include "stb_sprintf.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
 #include "version.h"
@@ -604,10 +605,10 @@ void ExitToHub(int map_number, int tag)
     // bit hackish: decided whether to use MAP## or E#M#
     if (current_map->name_[0] == 'E')
     {
-        sprintf(name_buf, "E%dM%d", 1 + (map_number / 10), map_number % 10);
+        stbsp_sprintf(name_buf, "E%dM%d", 1 + (map_number / 10), map_number % 10);
     }
     else
-        sprintf(name_buf, "MAP%02d", map_number);
+        stbsp_sprintf(name_buf, "MAP%02d", map_number);
 
     ExitToHub(name_buf, tag);
 }

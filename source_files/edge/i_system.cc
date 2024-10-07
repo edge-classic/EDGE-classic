@@ -32,6 +32,7 @@
 #include "m_menu.h"
 #include "m_misc.h"
 #include "s_sound.h"
+#include "stb_sprintf.h"
 #include "version.h"
 #include "w_wad.h"
 
@@ -63,7 +64,7 @@ void LogWarning(const char *warning, ...)
     va_list argptr;
 
     va_start(argptr, warning);
-    vsprintf(message_buffer, warning, argptr);
+    stbsp_vsprintf(message_buffer, warning, argptr);
     va_end(argptr);
 
     LogPrint("WARNING: %s", message_buffer);
@@ -74,7 +75,7 @@ void FatalError(const char *error, ...)
     va_list argptr;
 
     va_start(argptr, error);
-    vsprintf(message_buffer, error, argptr);
+    stbsp_vsprintf(message_buffer, error, argptr);
     va_end(argptr);
 
     if (log_file)
@@ -104,7 +105,7 @@ void LogPrint(const char *message, ...)
     printbuf[kMessageBufferSize - 1] = 0;
 
     va_start(argptr, message);
-    vsnprintf(printbuf, sizeof(printbuf), message, argptr);
+    stbsp_vsnprintf(printbuf, sizeof(printbuf), message, argptr);
     va_end(argptr);
 
     EPI_ASSERT(printbuf[kMessageBufferSize - 1] == 0);

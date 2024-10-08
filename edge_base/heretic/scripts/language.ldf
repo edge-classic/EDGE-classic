@@ -230,16 +230,36 @@ Heretic5Text="As the final maulotaur bellows his\n"
  
 iddt="ravmap";
 iddqd="quicken";
-idkfa="skel"; // Not really accurate, this should give only keys
+idunlock="skel";
 idfa="rambo";
 idclip="kitty";
 idclev="engage";
 idkillall="massacre";
 idsuicide="iddqd";
 idtakeall="idkfa";
+idbehold2="shazam";
+
+// These are sequences that are unlikely to be entered
+// to override Doom cheats that we do not yet have an
+// equivalent for
+idkfa="_+{}|:";
+idbehold1="_+{}|:";
+idbehold3="_+{}|:";
+idbehold4="_+{}|:";
+idbehold5="_+{}|:";
+idbehold6="_+{}|:";
+idbehold7="_+{}|:";
+idbehold8="_+{}|:";
+idbehold9="_+{}|:";
+
+GodModeON="God Mode On";
+GodModeOFF="God Mode Off";
 
 SuicideCheat="Trying to cheat, eh? Now you die!";
 StuffRemoval="Cheater - You don't deserve weapons";
+UnlockCheat="all keys";
+AmmoAdded="all weapons";
+LevelQ="level warp";
 
 ENDOOMOnQuit="Show ENDTEXT on Quit";
  

@@ -1,4 +1,10 @@
 ===========================================================================================
+BSD 2-Clause License
+===========================================================================================
+
+xxHash library - Copyright (c) 2012-2021 Yann Collet
+
+===========================================================================================
 BSD 3-Clause License
 ===========================================================================================
 
@@ -73,8 +79,6 @@ EPI library - Copyright (c) 2002-2024 The EDGE Team
 Fluidlite - Copyright (c) 2016 Robin Lobel
 
 SLADE (IMF->WAV conversion and sky drawing routines) - Copyright (c) 2008 - 2023 Simon Judd
-
-SuperFastHash - Copyright (c) 2004-2010 Paul Hsieh
 
 XMIDI library (MIDI conversion) - Copyright (c) 2015-2022 Vitaly Novichkov
 								  Copyright (c) 2015-2016 WildMIDI Developers
@@ -158,7 +162,5 @@ WidePix (various assets) - Copyright (c) 2020-2021 Nash Muhandes
 ===========================================================================================
 zlib License
 ===========================================================================================
-
-LOVE2D (Windows swapbuffers code) - Copyright (c) 2006-2024 LOVE Development Team
 
 SDL2 library - Copyright (c) 1997-2020 Sam Lantinga

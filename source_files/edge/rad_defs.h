@@ -379,7 +379,7 @@ struct ScriptEnablerParameter : public RADScriptParameter
     // script to enable/disable.  If script_name is nullptr, then `tag' is
     // the tag number to enable/disable.
     char    *script_name = nullptr;
-    uint32_t tag[2]      = {0, 0};
+    uint64_t tag[2]      = {0, 0};
 
     // true to disable, false to enable
     bool new_disabled = false;
@@ -659,7 +659,7 @@ struct RADScript
     char *script_name = nullptr;
 
     // Script tag (or 0 for none)
-    uint32_t tag[2] = {0, 0};
+    uint64_t tag[2] = {0, 0};
 
     // ABSOLUTE mode: minimum players needed to trigger, -1 for ALL
     int absolute_req_players = 0;

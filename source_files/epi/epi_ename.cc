@@ -98,16 +98,18 @@ int EName::NameManager::FindName(std::string_view text, bool no_create)
         return 0;
     }
 
-    uint32_t hash     = StringHash32(text);
-    uint32_t bucket   = hash % kHashSize;
+    std::string upper_text(text);
+    epi::StringUpperASCII(upper_text);
+    uint64_t hash     = StringHash64(upper_text);
+    uint16_t bucket   = hash % kHashSize;
     int      scanner  = buckets_[bucket];
-    size_t   text_len = text.size();
+    size_t   text_len = upper_text.size();
 
     // See if the name already exists.
     while (scanner >= 0)
     {
         if (name_array_[scanner].hash == hash &&
-            StringCaseCompareMaxASCII(name_array_[scanner].text, text, text_len) == 0 &&
+            StringCompareMax(name_array_[scanner].text, upper_text, text_len) == 0 &&
             name_array_[scanner].text[text_len] == '\0')
         {
             return scanner;
@@ -121,7 +123,7 @@ int EName::NameManager::FindName(std::string_view text, bool no_create)
         return 0;
     }
 
-    return AddName(text, text_len, hash, bucket);
+    return AddName(upper_text, text_len, hash, bucket);
 }
 
 // Sets up the hash table and inserts all the default names into the table.
@@ -141,7 +143,7 @@ void EName::NameManager::InitBuckets()
 }
 
 // Adds a new name to the name table.
-int EName::NameManager::AddName(std::string_view text, size_t text_len, unsigned int hash, unsigned int bucket)
+int EName::NameManager::AddName(std::string_view text, size_t text_len, uint64_t hash, uint16_t bucket)
 {
     char      *textstore;
     NameBlock *block = blocks_;

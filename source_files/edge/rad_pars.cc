@@ -999,7 +999,7 @@ static void ScriptParseTag(std::vector<const char *> &pars)
     // Is the value an integer?
     if (length != count)
     {
-        this_script->tag[1] = epi::StringHash32(pars[1]);
+        this_script->tag[1] = epi::StringHash64(pars[1]);
         parsed_string_tags.try_emplace(this_script->tag[1], pars[1]);
     }
     else
@@ -1248,7 +1248,7 @@ static void ScriptParseEnableTagged(std::vector<const char *> &pars)
 
     // Is the value an integer?
     if (length != count)
-        t->tag[1] = epi::StringHash32(pars[1]);
+        t->tag[1] = epi::StringHash64(pars[1]);
     else
         t->tag[0] = atoi(pars[1]);
 

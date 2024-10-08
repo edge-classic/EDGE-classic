@@ -371,7 +371,7 @@ void ClearDeathTriggersByMap(const std::string &mapname)
 // either enables them or disables them (based on `disable').
 // Actor can be nullptr.
 //
-void ScriptEnableByTag(MapObject *actor, uint32_t tag, bool disable, RADScriptTag tagtype)
+void ScriptEnableByTag(MapObject *actor, uint64_t tag, bool disable, RADScriptTag tagtype)
 {
     RADScriptTrigger *trig;
 
@@ -396,7 +396,7 @@ void ScriptEnableByTag(MapObject *actor, const char *name, bool disable)
 {
     RADScriptTrigger *trig;
 
-    uint32_t tag = epi::StringHash32(name);
+    uint64_t tag = epi::StringHash64(name);
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
@@ -419,7 +419,7 @@ bool CheckActiveScriptByTag(MapObject *actor, const char *name)
 {
     RADScriptTrigger *trig;
 
-    uint32_t tag = epi::StringHash32(name);
+    uint64_t tag = epi::StringHash64(name);
 
     for (trig = active_triggers; trig; trig = trig->next)
     {

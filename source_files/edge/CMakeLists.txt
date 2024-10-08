@@ -153,7 +153,7 @@ set (EDGE_LINK_LIBRARIES
   prns
   sokol_color
   stb
-  superfasthash
+  xxhash
 )
 
 if (WIN32)

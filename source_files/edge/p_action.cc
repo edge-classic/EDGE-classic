@@ -123,7 +123,7 @@ void A_EnableRadTrig(MapObject *mo)
     if (!mo->state_ || !mo->state_->action_par)
         return;
 
-    int *value = (int *)mo->state_->action_par;
+    uint64_t *value = (uint64_t *)mo->state_->action_par;
 
     ScriptEnableByTag(mo, value[0], false, (RADScriptTag)mo->state_->rts_tag_type);
 }
@@ -133,7 +133,7 @@ void A_DisableRadTrig(MapObject *mo)
     if (!mo->state_ || !mo->state_->action_par)
         return;
 
-    int *value = (int *)mo->state_->action_par;
+    uint64_t *value = (uint64_t *)mo->state_->action_par;
 
     ScriptEnableByTag(mo, value[0], true, (RADScriptTag)mo->state_->rts_tag_type);
 }

@@ -46,6 +46,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include <string>
 
 #include "epi.h"
@@ -170,7 +172,7 @@ class EName
     struct NameEntry
     {
         char        *text;
-        unsigned int hash;
+        uint64_t     hash;
         int          next_hash;
     };
 
@@ -184,7 +186,7 @@ class EName
         // means this class must only exist in the program's BSS section.
         ~NameManager();
 
-        static constexpr int kHashSize = 1024;
+        static constexpr uint16_t kHashSize = 1024;
         struct NameBlock;
 
         NameBlock *blocks_;
@@ -193,7 +195,7 @@ class EName
         int        buckets_[kHashSize];
 
         int           FindName(std::string_view text, bool no_create);
-        int           AddName(std::string_view text, size_t text_len, unsigned int hash, unsigned int bucket);
+        int           AddName(std::string_view text, size_t text_len, uint64_t hash, uint16_t bucket);
         NameBlock    *AddBlock(size_t len);
         void          InitBuckets();
         static bool   inited_;

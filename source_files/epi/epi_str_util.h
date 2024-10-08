@@ -99,7 +99,16 @@ std::string StringFormat(const char *fmt, ...) __attribute__((format(printf, 1, 
 std::string StringFormat(const char *fmt, ...);
 #endif
 std::vector<std::string> SeparatedStringVector(std::string_view str, char separator);
-uint32_t                 StringHash32(std::string_view str_to_hash);
+uint64_t                 StringHash64(std::string_view str_to_hash);
+
+//struct to pass when creating unordered_map, etc, to use xxHash with strings
+struct ContainerStringHash
+{
+    uint64_t operator()(const std::string &k) const
+    {
+        return StringHash64(k);
+    }
+};
 } // namespace epi
 
 //--- editor settings ---

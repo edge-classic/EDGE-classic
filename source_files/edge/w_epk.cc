@@ -137,7 +137,7 @@ class PackFile
 
     // for faster file lookups
     // stored as filename stems as keys; packpath as values
-    std::unordered_multimap<std::string, std::string> search_files_;
+    std::unordered_multimap<std::string, std::string, epi::ContainerStringHash> search_files_;
 
     mz_zip_archive *archive_;
 

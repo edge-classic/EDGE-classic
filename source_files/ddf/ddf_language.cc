@@ -67,7 +67,7 @@ class LanguageChoice
 {
   public:
     std::string                                  name;
-    std::unordered_map<std::string, std::string> refs;
+    std::unordered_map<std::string, std::string, epi::ContainerStringHash> refs;
 
     LanguageChoice() : name(), refs()
     {

@@ -132,7 +132,7 @@ struct MUSINFOMapping
 // This is wonky, but essentially the idea is to not continually create
 // duplicate RTS music changing scripts for the same level if warping back and
 // forth, or using a hub or somesuch that happens to have music changers
-static std::unordered_map<std::string, MUSINFOMapping> musinfo_tracks;
+static std::unordered_map<std::string, MUSINFOMapping, epi::ContainerStringHash> musinfo_tracks;
 
 static void GetMUSINFOTracksForLevel(void)
 {

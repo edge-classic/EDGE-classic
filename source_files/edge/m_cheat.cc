@@ -288,15 +288,18 @@ bool CheatResponder(InputEvent *ev)
 
         ImportantConsoleMessageLDF("LoadedCheat");
     }
-#if 0 // FIXME: this crashes ?
 	else if (CheckCheatSequence(&cheat_take_all, key))
 	{
-		P_GiveInitialBenefits(pl, pl->map_object_->info_);
-
+        for (WeaponDefinition *weap : weapondefs)
+        {
+            RemoveWeapon(pl, weap);
+        }
+		GiveInitialBenefits(pl, pl->map_object_->info_);
+        pl->ready_weapon_ = KWeaponSelectionNone;
+        SelectNewWeapon(pl, -100, kAmmunitionTypeDontCare);
 		// -ACB- 1998/08/26 Stuff removed language reference
 		ConsoleMessageLDF("StuffRemoval");
 	}
-#endif
     else if (CheckCheatSequence(&cheat_suicide, key))
     {
         TelefragMapObject(pl->map_object_, pl->map_object_, nullptr);

@@ -37,8 +37,7 @@ enum ImageDataType
     kImageDataColor = 0, // solid colour
     kImageDataFile,      // load from an image file
     kImageDataLump,      // load from lump in a WAD
-    kImageDataPackage,   // load from an EPK package
-    kImageDataCompose    // compose from patches
+    kImageDataPackage    // load from an EPK package
 };
 
 enum ImageSpecial
@@ -67,13 +66,6 @@ enum LumpImageFormat
     kLumpImageFormatDoom     = 1, // the DOOM "patch" format (in a wad lump)
 };
 
-struct ComposePatch
-{
-    std::string name;
-    int         x = 0;
-    int         y = 0;
-};
-
 class ImageDefinition
 {
   public:
@@ -93,9 +85,6 @@ class ImageDefinition
 
     std::string     info_;                            // kImageDataPackage, kImageDataFile, kImageDataLump
     LumpImageFormat format_;                          //
-
-    int                       compose_w_, compose_h_; // kImageDataCompose
-    std::vector<ComposePatch> patches_;               //
 
     ImageSpecial special_;
 

@@ -32,7 +32,6 @@ static ImageDefinition *dynamic_image;
 static void DDFImageGetType(const char *info, void *storage);
 static void DDFImageGetSpecial(const char *info, void *storage);
 static void DDFImageGetFixTrans(const char *info, void *storage);
-static void DDFImageGetPatches(const char *info, void *storage);
 
 // -ACB- 1998/08/10 Use DDFMainGetLumpName for getting the..lump name.
 // -KM- 1998/09/27 Use DDFMainGetTime for getting tics
@@ -41,7 +40,6 @@ static ImageDefinition dummy_image;
 
 static const DDFCommandList image_commands[] = {
     DDF_FIELD("IMAGE_DATA", dummy_image, type_, DDFImageGetType),
-    DDF_FIELD("PATCHES", dummy_image, patches_, DDFImageGetPatches),
     DDF_FIELD("SPECIAL", dummy_image, special_, DDFImageGetSpecial),
     DDF_FIELD("X_OFFSET", dummy_image, x_offset_, DDFMainGetFloat),
     DDF_FIELD("Y_OFFSET", dummy_image, y_offset_, DDFMainGetFloat),
@@ -142,10 +140,6 @@ static void ImageParseField(const char *field, const char *contents, int index, 
 #if (DDF_DEBUG)
     LogDebug("IMAGE_PARSE: %s = %s;\n", field, contents);
 #endif
-
-    // ensure previous patches are cleared when beginning a new set
-    if (DDFCompareName(field, "PATCHES") == 0 && index == 0)
-        dynamic_image->patches_.clear();
 
     if (DDFMainParseField(image_commands, field, contents, (uint8_t *)dynamic_image))
         return; // OK
@@ -261,20 +255,6 @@ static void ImageParseLump(const char *spec)
     }
 }
 
-static void ImageParseCompose(const char *info)
-{
-    const char *colon = DDFMainDecodeList(info, ':', true);
-
-    if (colon == nullptr || colon == info || colon[1] == 0)
-        DDFError("Malformed image compose spec: %s\n", info);
-
-    dynamic_image->compose_w_ = atoi(info);
-    dynamic_image->compose_h_ = atoi(colon + 1);
-
-    if (dynamic_image->compose_w_ <= 0 || dynamic_image->compose_h_ <= 0)
-        DDFError("Illegal image compose size: %d x %d\n", dynamic_image->compose_w_, dynamic_image->compose_h_);
-}
-
 static void DDFImageGetType(const char *info, void *storage)
 {
     const char *colon = DDFMainDecodeList(info, ':', true);
@@ -312,11 +292,6 @@ static void DDFImageGetType(const char *info, void *storage)
     {
         dynamic_image->type_ = kImageDataPackage;
         ImageParseInfo(colon + 1);
-    }
-    else if (DDFCompareName(keyword, "COMPOSE") == 0)
-    {
-        dynamic_image->type_ = kImageDataCompose;
-        ImageParseCompose(colon + 1);
     }
     else
         DDFError("Unknown image type: %s\n", keyword);
@@ -368,28 +343,6 @@ static void DDFImageGetFixTrans(const char *info, void *storage)
         DDFError("Unknown FIX_TRANS type: %s\n", info);
 }
 
-static void DDFImageGetPatches(const char *info, void *storage)
-{
-    // the syntax is: `NAME : XOFFSET : YOFFSET`.
-    // in the future we may accept more stuff at the end.
-
-    const char *colon1 = DDFMainDecodeList(info, ':', true);
-    if (colon1 == nullptr || colon1 == info || colon1[1] == 0)
-        DDFError("Malformed patch spec: %s\n", info);
-
-    const char *colon2 = DDFMainDecodeList(colon1 + 1, ':', true);
-    if (colon2 == nullptr || colon2 == colon1 + 1 || colon2[1] == 0)
-        DDFError("Malformed patch spec: %s\n", info);
-
-    ComposePatch patch;
-
-    patch.name = std::string(info, (int)(colon1 - info));
-    patch.x    = atoi(colon1 + 1);
-    patch.y    = atoi(colon2 + 1);
-
-    dynamic_image->patches_.push_back(patch);
-}
-
 // ---> imagedef_c class
 
 ImageDefinition::ImageDefinition() : name_(), belong_(kImageNamespaceGraphic), info_()
@@ -406,10 +359,6 @@ void ImageDefinition::CopyDetail(const ImageDefinition &src)
     colour_ = src.colour_;
     info_   = src.info_;
     format_ = src.format_;
-
-    compose_w_ = src.compose_w_;
-    compose_h_ = src.compose_h_;
-    patches_   = src.patches_;
 
     special_        = src.special_;
     x_offset_       = src.x_offset_;
@@ -431,9 +380,6 @@ void ImageDefinition::Default()
     type_   = kImageDataColor;
     colour_ = SG_BLACK_RGBA32;
     format_ = kLumpImageFormatStandard;
-
-    compose_w_ = compose_h_ = 0;
-    patches_.clear();
 
     special_  = kImageSpecialNone;
     x_offset_ = y_offset_ = 0;

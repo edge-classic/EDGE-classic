@@ -1363,6 +1363,10 @@ void A_Lower(MapObject *mo)
 
     WeaponDefinition *info = p->weapons_[p->ready_weapon_].info;
 
+    // This *should* only happen with the 'idtakeall' cheat - Dasho
+    if (!info)
+        return;
+
     if (p->zoom_field_of_view_ > 0)
         p->zoom_field_of_view_ = 0;
 

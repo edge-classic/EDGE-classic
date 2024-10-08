@@ -236,8 +236,10 @@ idclip="kitty";
 idclev="engage";
 idkillall="massacre";
 idsuicide="iddqd";
+idtakeall="idkfa";
 
 SuicideCheat="Trying to cheat, eh? Now you die!";
+StuffRemoval="Cheater - You don't deserve weapons";
 
 ENDOOMOnQuit="Show ENDTEXT on Quit";
  

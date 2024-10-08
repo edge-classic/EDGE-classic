@@ -77,6 +77,7 @@
 #include "r_image.h"
 #include "r_misc.h"
 #include "r_modes.h"
+#include "r_texgl.h"
 #include "r_wipe.h"
 #include "rad_trig.h"
 #include "s_music.h"
@@ -91,6 +92,8 @@
 #include "w_sprite.h"
 #include "w_texture.h"
 #include "w_wad.h"
+
+extern ImageData *ReadAsEpiBlock(Image *rim);
 
 extern ConsoleVariable busy_wait;
 
@@ -739,6 +742,67 @@ static void TitleDrawer(void)
     else
     {
         HUDSolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
+    }
+}
+
+static void AutocolourForMapObject(MapObjectDefinition *mobj)
+{
+    if (mobj->dlight_[0].type_ != kDynamicLightTypeNone && !mobj->dlight_[0].autocolour_reference_.empty())
+    {
+        const Image *img = ImageLookup(mobj->dlight_[0].autocolour_reference_.c_str());
+        if (img)
+        {
+            const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
+            if (img->source_palette_ >= 0)
+                what_palette = (const uint8_t *)LoadLumpIntoMemory(img->source_palette_);
+            ImageData *tmp_img_data = ReadAsEpiBlock((Image *)img);
+            if (tmp_img_data->depth_ == 1)
+            {
+                ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, img->opacity_);
+                delete tmp_img_data;
+                tmp_img_data = rgb_img_data;
+            }
+            mobj->dlight_[0].colour_ = tmp_img_data->AverageHue();
+            delete tmp_img_data;
+            if (what_palette != (const uint8_t *)&playpal_data[0])
+                delete[] what_palette;
+            mobj->dlight_[0].autocolour_reference_.clear();
+        }
+    }
+    if (mobj->dlight_[1].type_ != kDynamicLightTypeNone && !mobj->dlight_[1].autocolour_reference_.empty())
+    {
+        const Image *img = ImageLookup(mobj->dlight_[1].autocolour_reference_.c_str());
+        if (img)
+        {
+            const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
+            if (img->source_palette_ >= 0)
+                what_palette = (const uint8_t *)LoadLumpIntoMemory(img->source_palette_);
+            ImageData *tmp_img_data = ReadAsEpiBlock((Image *)img);
+            if (tmp_img_data->depth_ == 1)
+            {
+                ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, img->opacity_);
+                delete tmp_img_data;
+                tmp_img_data = rgb_img_data;
+            }
+            mobj->dlight_[1].colour_ = tmp_img_data->AverageHue();
+            delete tmp_img_data;
+            if (what_palette != (const uint8_t *)&playpal_data[0])
+                delete[] what_palette;
+            mobj->dlight_[1].autocolour_reference_.clear();
+        }
+    }
+}
+
+static void DoAutocolours()
+{
+    for (MapObjectDefinition *mobj : mobjtypes)
+    {
+        AutocolourForMapObject(mobj);
+    }
+    for (AttackDefinition *atk : atkdefs)
+    {
+        if (atk->atk_mobj_)
+            AutocolourForMapObject((MapObjectDefinition *)atk->atk_mobj_);
     }
 }
 
@@ -2086,6 +2150,9 @@ static void EdgeStartup(void)
     InitializeFlats();
     InitializeTextures();
     CreateUserImages();
+    // Must be done after palette/images are initialized so that
+    // color matching can be done properly
+    DoAutocolours();
     PickLoadingScreen();
     PickMenuBackdrop();
 

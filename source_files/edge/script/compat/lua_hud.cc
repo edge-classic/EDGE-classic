@@ -855,12 +855,12 @@ static int HD_get_average_hue(lua_State *L)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    uint8_t temp_rgb[3];
-    tmp_img_data->AverageHue(temp_rgb, nullptr, from_x, to_x, from_y, to_y);
-    rgb.X = temp_rgb[0];
-    rgb.Y = temp_rgb[1];
-    rgb.Z = temp_rgb[2];
+
+    RGBAColor hue = tmp_img_data->AverageHue(from_x, to_x, from_y, to_y);
     delete tmp_img_data;
+    rgb.X = epi::GetRGBARed(hue);
+    rgb.Y = epi::GetRGBAGreen(hue);
+    rgb.Z = epi::GetRGBABlue(hue);
 
     LuaPushVector3(L, rgb);
     return 1;

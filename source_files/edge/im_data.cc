@@ -437,7 +437,7 @@ int ImageData::ImageCharacterWidth(int x1, int y1, int x2, int y2)
     return HMM_MAX(last_last - first_first, 0) + 3; // Some padding on each side of the letter
 }
 
-void ImageData::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x, int from_y, int to_y)
+RGBAColor ImageData::AverageHue(int from_x, int to_x, int from_y, int to_y)
 {
     // make sure we don't overflow
     EPI_ASSERT(used_width_ * used_height_ <= 2048 * 2048);
@@ -448,6 +448,8 @@ void ImageData::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x, int
     int i_sum = 0;
 
     int weight = 0;
+
+    uint8_t hue[3] = {0,0,0};
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
     from_x = HMM_Clamp(0, from_x, used_width_ - 1);
@@ -514,12 +516,7 @@ void ImageData::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x, int
         hue[2] = 0;
     }
 
-    if (ity)
-    {
-        weight = (used_width_ * used_height_ + 1) / 2;
-
-        *ity = i_sum / weight;
-    }
+    return epi::MakeRGBA(hue[0], hue[1], hue[2]);
 }
 
 RGBAColor ImageData::AverageColor(int from_x, int to_x, int from_y, int to_y)

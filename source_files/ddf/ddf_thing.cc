@@ -69,6 +69,7 @@ const DDFCommandList dlight_commands[] = {DDF_FIELD("TYPE", dummy_dlight, type_,
                                           DDF_FIELD("COLOUR", dummy_dlight, colour_, DDFMainGetRGB),
                                           DDF_FIELD("HEIGHT", dummy_dlight, height_, DDFMainGetPercent),
                                           DDF_FIELD("LEAKY", dummy_dlight, leaky_, DDFMainGetBoolean),
+                                          DDF_FIELD("AUTOCOLOUR", dummy_dlight, autocolour_reference_, DDFMainGetString),
 
                                           // backwards compatibility
                                           DDF_FIELD("INTENSITY", dummy_dlight, radius_, DDFMainGetFloat),

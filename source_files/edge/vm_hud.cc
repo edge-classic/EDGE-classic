@@ -905,14 +905,13 @@ static void HD_get_average_hue(coal::VM *vm, int argc)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    uint8_t *temp_rgb = new uint8_t[3];
-    tmp_img_data->AverageHue(temp_rgb, nullptr, from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
+
+    RGBAColor hue = tmp_img_data->AverageHue(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
                              to_y ? *to_y : 1000000);
-    rgb[0] = temp_rgb[0];
-    rgb[1] = temp_rgb[1];
-    rgb[2] = temp_rgb[2];
     delete tmp_img_data;
-    delete[] temp_rgb;
+    rgb[0] = epi::GetRGBARed(hue);
+    rgb[1] = epi::GetRGBAGreen(hue);
+    rgb[2] = epi::GetRGBABlue(hue);
     vm->ReturnVector(rgb);
 }
 

@@ -669,6 +669,7 @@ class DynamicLightDefinition
     RGBAColor        colour_;
     float            height_;
     bool             leaky_;
+    std::string      autocolour_reference_; // IMAGES.DDF reference
 
     void *cache_data_;
 };

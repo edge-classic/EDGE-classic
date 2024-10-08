@@ -1939,6 +1939,7 @@ void DynamicLightDefinition::Copy(DynamicLightDefinition &src)
     colour_ = src.colour_;
     height_ = src.height_;
     leaky_  = src.leaky_;
+    autocolour_reference_ = src.autocolour_reference_;
 
     cache_data_ = nullptr;
 }
@@ -1951,6 +1952,7 @@ void DynamicLightDefinition::Default()
     height_ = 0.5f;
     leaky_  = false;
     shape_  = "DLIGHT_EXP";
+    autocolour_reference_.clear();
 
     cache_data_ = nullptr;
 }

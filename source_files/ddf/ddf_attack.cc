@@ -369,6 +369,13 @@ void DDFAttackCleanUp(void)
             {
                 a->damage_.nominal_ = a->atk_mobj_->explode_damage_.nominal_;
                 a->damage_.linear_max_ = a->atk_mobj_->explode_damage_.linear_max_;
+                MapObjectDefinition *atk_mod = (MapObjectDefinition *)a->atk_mobj_; // const override
+                if (atk_mod->dlight_[0].type_ == kDynamicLightTypeNone)
+                {
+                    atk_mod->dlight_[0].type_ = kDynamicLightTypeModulate;
+                    atk_mod->dlight_[0].radius_ = atk_mod->radius_ * 4;
+                    atk_mod->dlight_[0].autocolour_sprite_ = states[atk_mod->idle_state_].sprite;
+                }
             }
         }
 

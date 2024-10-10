@@ -95,7 +95,7 @@ static void StartButton(SwitchDefinition *sw, Line *line, ButtonPosition w, cons
 // -KM- 1998/09/01 All switches referencing a certain tag are switched
 //
 
-#define EDGE_CHECK_SWITCH(PART) (sw->cache_.image[k] == side->PART.image)
+#define EDGE_CHECK_SWITCH(PART) ((sw->cache_.image[k] && side->PART.image) && sw->cache_.image[k] == side->PART.image)
 #define EDGE_SET_SWITCH(PART)   side->PART.image = sw->cache_.image[k ^ 1]
 
 void ChangeSwitchTexture(Line *line, bool useAgain, LineSpecial specials, bool noSound)

@@ -220,33 +220,117 @@ bool A_LookForTargets(MapObject *we)
 // Same as above, but iterate through the blockmap within a 
 // given radius and return the first valid target (or nullptr if none)
 // Also, does not actually set the target unlike A_LookForTargets
-MapObject *A_LookForBlockmapTarget(MapObject *we, float radius, BAMAngle fov)
+MapObject *A_LookForBlockmapTarget(MapObject *we, uint32_t rangeblocks, BAMAngle fov)
 {
     MapObject *them = nullptr;
-
-    float x1 = we->x - radius;
-    float x2 = we->x + radius;
-    float y1 = we->y - radius;
-    float y2 = we->y + radius;
-
-    int lx = BlockmapGetX(x1) - 1;
-    int ly = BlockmapGetY(y1) - 1;
-    int hx = BlockmapGetX(x2) + 1;
-    int hy = BlockmapGetY(y2) + 1;
-
-    lx = HMM_MAX(0, lx);
-    hx = HMM_MIN(blockmap_width - 1, hx);
-    ly = HMM_MAX(0, ly);
-    hy = HMM_MIN(blockmap_height - 1, hy);
 
     float we_x = we->x;
     float we_y = we->y;
     float we_angle = we->angle_;
 
-    for (int by = ly; by <= hy; by++)
-        for (int bx = lx; bx <= hx; bx++)
+    float radius = kBlockmapUnitSize * rangeblocks;
+    float x1 = we_x - radius;
+    float x2 = we_x + radius;
+    float y1 = we_y - radius;
+    float y2 = we_y + radius;
+
+    int we_bx = BlockmapGetX(we_x);
+    int we_by = BlockmapGetY(we_y);
+    we_bx = HMM_Clamp(0, we_bx, blockmap_width - 1);
+    we_by = HMM_Clamp(0, we_by, blockmap_height - 1);
+    int lx = we_bx - rangeblocks - 1;
+    int ly = we_by - rangeblocks - 1;
+    int hx = we_bx + rangeblocks + 1;
+    int hy = we_by + rangeblocks + 1;
+    lx = HMM_MAX(0, lx);
+    hx = HMM_MIN(blockmap_width - 1, hx);
+    ly = HMM_MAX(0, ly);
+    hy = HMM_MIN(blockmap_height - 1, hy);
+
+    // first check the blockmap in our immediate vicinity
+    for (MapObject *mo = blockmap_things[we_by * blockmap_width + we_bx]; mo; mo = mo->blockmap_next_)
+    {
+        // check whether thing touches the given bbox
+        float r = mo->radius_;
+
+        if (mo->x + r <= x1 || mo->x - r >= x2 || mo->y + r <= y1 || mo->y - r >= y2)
+            continue;
+
+        if (mo == we)
+            continue;
+
+        if (we->source_ == mo)
+            continue;
+
+        bool same_side = ((mo->side_ & we->side_) != 0);
+
+            // only target monsters or players (not barrels)
+        if (!(mo->extended_flags_ & kExtendedFlagMonster) && !mo->player_)
+            continue;
+
+        if (!(mo->flags_ & kMapObjectFlagShootable))
+            continue;
+
+        if (same_side)
+            continue;
+
+        if ((we->info_ == mo->info_) && !(we->extended_flags_ & kExtendedFlagDisloyalToOwnType))
+            continue;
+
+        if (CheckSight(we, mo))
         {
-            for (MapObject *mo = blockmap_things[by * blockmap_width + bx]; mo; mo = mo->blockmap_next_)
+            if (fov != 0)
+            {
+                if (!epi::BAMCheckFOV(PointToAngle(we_x, we_y, mo->x, mo->y), fov, we_angle))
+                    continue;
+            }
+            them = mo;
+            return them;
+        }
+    }
+
+    int blockX;
+	int blockY;
+	int blockIndex;
+	int firstStop;
+	int secondStop;
+	int thirdStop;
+	int finalStop;
+	int count;
+
+    for (count = 1; count <= rangeblocks; count++)
+	{
+		blockX = HMM_Clamp(we_bx-count, 0, blockmap_width-1);
+		blockY = HMM_Clamp(we_by-count, 0, blockmap_height-1);
+
+		blockIndex = blockY*blockmap_width+blockX;
+		firstStop = we_bx+count;
+		if (firstStop < 0)
+		{
+			continue;
+		}
+		if (firstStop >= blockmap_width)
+		{
+			firstStop = blockmap_width-1;
+		}
+		secondStop = we_by+count;
+		if (secondStop < 0)
+		{
+			continue;
+		}
+		if (secondStop >= blockmap_height)
+		{
+			secondStop = blockmap_height-1;
+		}
+		thirdStop = secondStop*blockmap_width+blockX;
+		secondStop = secondStop*blockmap_width+firstStop;
+		firstStop += blockY*blockmap_width;
+		finalStop = blockIndex;		
+
+		// Trace the first block section (along the top)
+		for (; blockIndex <= firstStop; blockIndex++)
+		{
+			for (MapObject *mo = blockmap_things[blockIndex]; mo; mo = mo->blockmap_next_)
             {
                 // check whether thing touches the given bbox
                 float r = mo->radius_;
@@ -286,7 +370,140 @@ MapObject *A_LookForBlockmapTarget(MapObject *we, float radius, BAMAngle fov)
                     return them;
                 }
             }
-        }
+		}
+		// Trace the second block section (right edge)
+		for (blockIndex--; blockIndex <= secondStop; blockIndex += blockmap_width)
+		{
+			for (MapObject *mo = blockmap_things[blockIndex]; mo; mo = mo->blockmap_next_)
+            {
+                // check whether thing touches the given bbox
+                float r = mo->radius_;
+
+                if (mo->x + r <= x1 || mo->x - r >= x2 || mo->y + r <= y1 || mo->y - r >= y2)
+                    continue;
+
+                if (mo == we)
+                    continue;
+
+                if (we->source_ == mo)
+                    continue;
+
+                bool same_side = ((mo->side_ & we->side_) != 0);
+
+                    // only target monsters or players (not barrels)
+                if (!(mo->extended_flags_ & kExtendedFlagMonster) && !mo->player_)
+                    continue;
+
+                if (!(mo->flags_ & kMapObjectFlagShootable))
+                    continue;
+
+                if (same_side)
+                    continue;
+
+                if ((we->info_ == mo->info_) && !(we->extended_flags_ & kExtendedFlagDisloyalToOwnType))
+                    continue;
+
+                if (CheckSight(we, mo))
+                {
+                    if (fov != 0)
+                    {
+                        if (!epi::BAMCheckFOV(PointToAngle(we_x, we_y, mo->x, mo->y), fov, we_angle))
+                            continue;
+                    }
+                    them = mo;
+                    return them;
+                }
+            }
+		}		
+		// Trace the third block section (bottom edge)
+		for (blockIndex -= blockmap_width; blockIndex >= thirdStop; blockIndex--)
+		{
+			for (MapObject *mo = blockmap_things[blockIndex]; mo; mo = mo->blockmap_next_)
+            {
+                // check whether thing touches the given bbox
+                float r = mo->radius_;
+
+                if (mo->x + r <= x1 || mo->x - r >= x2 || mo->y + r <= y1 || mo->y - r >= y2)
+                    continue;
+
+                if (mo == we)
+                    continue;
+
+                if (we->source_ == mo)
+                    continue;
+
+                bool same_side = ((mo->side_ & we->side_) != 0);
+
+                    // only target monsters or players (not barrels)
+                if (!(mo->extended_flags_ & kExtendedFlagMonster) && !mo->player_)
+                    continue;
+
+                if (!(mo->flags_ & kMapObjectFlagShootable))
+                    continue;
+
+                if (same_side)
+                    continue;
+
+                if ((we->info_ == mo->info_) && !(we->extended_flags_ & kExtendedFlagDisloyalToOwnType))
+                    continue;
+
+                if (CheckSight(we, mo))
+                {
+                    if (fov != 0)
+                    {
+                        if (!epi::BAMCheckFOV(PointToAngle(we_x, we_y, mo->x, mo->y), fov, we_angle))
+                            continue;
+                    }
+                    them = mo;
+                    return them;
+                }
+            }
+		}
+		// Trace the final block section (left edge)
+		for (blockIndex++; blockIndex > finalStop; blockIndex -= blockmap_width)
+		{
+			for (MapObject *mo = blockmap_things[blockIndex]; mo; mo = mo->blockmap_next_)
+            {
+                // check whether thing touches the given bbox
+                float r = mo->radius_;
+
+                if (mo->x + r <= x1 || mo->x - r >= x2 || mo->y + r <= y1 || mo->y - r >= y2)
+                    continue;
+
+                if (mo == we)
+                    continue;
+
+                if (we->source_ == mo)
+                    continue;
+
+                bool same_side = ((mo->side_ & we->side_) != 0);
+
+                    // only target monsters or players (not barrels)
+                if (!(mo->extended_flags_ & kExtendedFlagMonster) && !mo->player_)
+                    continue;
+
+                if (!(mo->flags_ & kMapObjectFlagShootable))
+                    continue;
+
+                if (same_side)
+                    continue;
+
+                if ((we->info_ == mo->info_) && !(we->extended_flags_ & kExtendedFlagDisloyalToOwnType))
+                    continue;
+
+                if (CheckSight(we, mo))
+                {
+                    if (fov != 0)
+                    {
+                        if (!epi::BAMCheckFOV(PointToAngle(we_x, we_y, mo->x, mo->y), fov, we_angle))
+                            continue;
+                    }
+                    them = mo;
+                    return them;
+                }
+            }
+		}
+	}
 
     return them;
 }
@@ -4463,7 +4680,7 @@ void A_FindTracer(MapObject *mo)
     BAMAngle fov = args[0] == 0 ? kBAMAngle0 : epi::BAMFromDegrees((float)args[0] / 65536.0f);
     uint32_t rangeblocks = args[1] != 0 ? args[1] : 10;
 
-    MapObject *target = A_LookForBlockmapTarget(mo, kBlockmapUnitSize * rangeblocks, fov);
+    MapObject *target = A_LookForBlockmapTarget(mo, rangeblocks, fov);
 
     if (target)
         mo->SetTracer(target);

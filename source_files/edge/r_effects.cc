@@ -39,6 +39,7 @@ float render_view_blue_multiplier;
 const Colormap *render_view_effect_colormap;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(power_fade_out, "1", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(extra_light_step, "16", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(debug_fullbright, "0", kConsoleVariableFlagCheat)
 
 static inline float EffectStrength(Player *player)
@@ -61,7 +62,7 @@ static inline float EffectStrength(Player *player)
 //
 void RendererRainbowEffect(Player *player)
 {
-    render_view_extra_light = debug_fullbright.d_ ? 255 : player ? player->extra_light_ * 4 : 0;
+    render_view_extra_light = debug_fullbright.d_ ? 255 : player ? player->extra_light_ * extra_light_step.d_ : 0;
 
     render_view_red_multiplier = render_view_green_multiplier = render_view_blue_multiplier = 1.0f;
 

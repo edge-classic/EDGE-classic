@@ -403,11 +403,7 @@ void DeathBot::LookForLeader()
     {
         Player *p2 = players[i];
 
-        if (p2 == nullptr || p2->IsBot())
-            continue;
-
-        // when multiple humans, make it random who is picked
-        if (RandomShort() % 100 < 90)
+        if (p2 == nullptr || p2->IsBot() || p2->map_object_->is_voodoo_)
             continue;
 
         pl_->map_object_->SetSupportObject(p2->map_object_);
@@ -454,16 +450,15 @@ void DeathBot::LookForEnemies(float radius)
     // pick a random nearby monster, then check sight, since the enemy
     // may be on the other side of a wall.
 
-    MapObject *enemy = BotFindEnemy(this, radius);
+    //MapObject *enemy = BotFindEnemy(this, radius);
+
+    MapObject *enemy = A_LookForBlockmapTarget(pl_->map_object_, (uint32_t)radius / kBlockmapUnitSize);
 
     if (enemy != nullptr)
     {
-        if (IsEnemyVisible(enemy))
-        {
-            pl_->map_object_->SetTarget(enemy);
-            UpdateEnemy();
-            patience_ = kTicRate;
-        }
+        pl_->map_object_->SetTarget(enemy);
+        UpdateEnemy();
+        patience_ = kTicRate;
     }
 }
 
@@ -492,7 +487,7 @@ void DeathBot::LookAround()
 {
     look_time_--;
 
-    LookForEnemies(1024);
+    LookForEnemies(2048);
 
     if ((look_time_ & 3) == 2)
         LookForLeader();
@@ -885,6 +880,12 @@ void DeathBot::ThinkHelp()
 
     Position pos  = {leader->x, leader->y, leader->z};
     float    dist = DistTo(pos);
+
+    if (!InDeathmatch() && dist > 1024)
+    {
+        TeleportMove(pl_->map_object_, pos.x, pos.y, pos.z);
+        dist = 0;
+    }
 
     // allow a bit of "hysteresis"
     float check_dist = near_leader_ ? 224.0 : 160.0;

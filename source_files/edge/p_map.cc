@@ -178,6 +178,10 @@ static bool StompThingCallback(MapObject *thing, void *data)
     if (thing->hyper_flags_ & kHyperFlagRememberOldAvatars)
         return true;
 
+    // In COOP: Bots and human players will not stomp each other
+    if (InCooperativeMatch() && thing->player_ && move_check.mover->player_ && (!thing->is_voodoo_ && !move_check.mover->is_voodoo_))
+        return true;
+
     float blockdist = thing->radius_ + move_check.mover->radius_;
 
     // check to see we hit it
@@ -330,6 +334,10 @@ static bool CheckAbsoluteThingCallback(MapObject *thing, void *data)
     bool  solid;
 
     if (thing == move_check.mover)
+        return true;
+
+    // In COOP: Bots and human players will not clip each other
+    if (InCooperativeMatch() && thing->player_ && move_check.mover->player_ && (!thing->is_voodoo_ && !move_check.mover->is_voodoo_))
         return true;
 
     if (!(thing->flags_ & (kMapObjectFlagSolid | kMapObjectFlagShootable)))
@@ -832,6 +840,10 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
     bool  solid = (thing->flags_ & kMapObjectFlagSolid) ? true : false;
 
     if (thing == move_check.mover)
+        return true;
+
+    // In COOP: Bots and human players will not clip each other
+    if (InCooperativeMatch() && thing->player_ && move_check.mover->player_ && (!thing->is_voodoo_ && !move_check.mover->is_voodoo_))
         return true;
 
     if (0 == (thing->flags_ &

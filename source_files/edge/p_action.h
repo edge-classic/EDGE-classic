@@ -216,7 +216,7 @@ void A_HomingProjectile(MapObject *mo);
 void A_CreateSmokeTrail(MapObject *mo);
 void A_HomeToSpot(MapObject *mo);
 bool A_LookForTargets(MapObject *mo);
-MapObject *A_LookForBlockmapTarget(MapObject *mo, float radius, BAMAngle fov = 0);
+MapObject *A_LookForBlockmapTarget(MapObject *mo, uint32_t rangeblocks, BAMAngle fov = 0);
 
 // Trackers
 void A_EffectTracker(MapObject *mo);

@@ -500,6 +500,7 @@ void CoopSpawnPlayer(Player *p)
     int begin = p->player_number_;
 
     // try to spawn at one of the other players spots
+    // if unobstructed
     for (int j = 0; j < (int)coop_starts.size(); j++)
     {
         int i = (begin + j) % (int)coop_starts.size();
@@ -508,7 +509,9 @@ void CoopSpawnPlayer(Player *p)
             return;
     }
 
-    FatalError("No usable player start found!\n");
+    // last resort, just pick one at random (in co-op bots and players
+    // will not clip or telefrag so this should be fine)
+    P_SpawnPlayer(p, &coop_starts[RandomByte() % (int)coop_starts.size()], false);
 }
 
 static SpawnPoint *GameFindHubPlayer(int player_number_, int tag)

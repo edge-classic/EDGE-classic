@@ -64,8 +64,6 @@ static void DoLight(LightSpecial *light)
     }
 
     case kLightSpecialTypeFade: {
-        light->minimum_light = light->sector->properties.light_level;
-        light->maximum_light = type->level_;
         int diff = light->maximum_light - light->minimum_light;
 
         if (HMM_ABS(diff) < type->step_)
@@ -88,8 +86,6 @@ static void DoLight(LightSpecial *light)
     }
 
     case kLightSpecialTypeFlash: {
-        light->minimum_light = FindMinimumSurroundingLight(light->sector, light->sector->properties.light_level);
-        light->maximum_light = light->sector->properties.light_level;
         // Dark
         if (RandomByteTest(type->chance_))
         {
@@ -111,10 +107,6 @@ static void DoLight(LightSpecial *light)
     }
 
     case kLightSpecialTypeStrobe:
-        light->minimum_light = FindMinimumSurroundingLight(light->sector, light->sector->properties.light_level);
-        light->maximum_light = light->sector->properties.light_level;
-        if (light->minimum_light == light->maximum_light)
-            light->minimum_light = 0;
         if (light->sector->properties.light_level >= light->maximum_light)
         {
             // Go dark

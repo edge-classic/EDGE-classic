@@ -881,12 +881,6 @@ void DeathBot::ThinkHelp()
     Position pos  = {leader->x, leader->y, leader->z};
     float    dist = DistTo(pos);
 
-    if (!InDeathmatch() && dist > 1024)
-    {
-        TeleportMove(pl_->map_object_, pos.x, pos.y, pos.z);
-        dist = 0;
-    }
-
     // allow a bit of "hysteresis"
     float check_dist = near_leader_ ? 224.0 : 160.0;
 
@@ -1394,7 +1388,36 @@ void DeathBot::Think()
         PainResponse();
     }
 
-    DetectObstacle();
+    MapObject *leader = pl_->map_object_->support_object_;
+
+    // Clear task and catch up to player if too far away and not engaged
+    // in combat
+    if (!mo->target_ && leader && leader->player_ && !InDeathmatch())
+    {
+        Position pos  = {leader->x, leader->y, leader->z};
+        if (DistTo(pos) > 1024)
+        {
+            switch (task_)
+            {
+            case kBotTaskGetItem:
+                FinishGetItem();
+                break;
+
+            case kBotTaskOpenDoor:
+            case kBotTaskUseLift:
+                FinishDoorOrLift(false);
+                break;
+
+            default:
+                break;
+            }
+            TeleportMove(pl_->map_object_, pos.x, pos.y, pos.z);
+        }
+        else
+            DetectObstacle();
+    }
+    else
+        DetectObstacle();
 
     // doing a task?
     switch (task_)

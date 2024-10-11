@@ -115,7 +115,7 @@ static void DoLight(LightSpecial *light)
         light->maximum_light = light->sector->properties.light_level;
         if (light->minimum_light == light->maximum_light)
             light->minimum_light = 0;
-        if (light->sector->properties.light_level == light->maximum_light)
+        if (light->sector->properties.light_level >= light->maximum_light)
         {
             // Go dark
             if (reduce_flash)
@@ -171,10 +171,8 @@ static void DoLight(LightSpecial *light)
         break;
 
     case kLightSpecialTypeFireFlicker: {
-        light->minimum_light = FindMinimumSurroundingLight(light->sector, light->sector->properties.light_level);
-        light->maximum_light = light->sector->properties.light_level;
         // -ES- 2000/02/13 Changed this to original DOOM style flicker
-        int amount = (RandomByte() & 7) * type->step_;
+        int amount = (RandomByte() & 3) * type->step_;
 
         if (light->sector->properties.light_level - amount < light->minimum_light)
         {

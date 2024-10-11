@@ -479,7 +479,7 @@ void Attacks::ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num,
 
     if (frames::act_flags & kActionFlagExplode)
         wad::Printf("EXPLODE_DAMAGE.VAL = 128;\n");
-    else if (frames::act_flags & kActionFlagDetonate)
+    else if (info->damage)
     {
         wad::Printf("EXPLODE_DAMAGE.VAL = %d;\n", info->damage);
         wad::Printf("EXPLODE_DAMAGE.MAX = %d;\n", info->damage * 8);
@@ -1693,7 +1693,7 @@ void things::ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num, in
 
     if (frames::act_flags & kActionFlagExplode)
         wad::Printf("EXPLODE_DAMAGE.VAL = 128;\n");
-    else if (((patch::doom_ver == 21 || patch::doom_ver == 2021) && info->damage) || (frames::act_flags & kActionFlagDetonate))
+    else if (info->damage)
     {
         wad::Printf("EXPLODE_DAMAGE.VAL = %d;\n", info->damage);
         wad::Printf("EXPLODE_DAMAGE.MAX = %d;\n", info->damage * 8);

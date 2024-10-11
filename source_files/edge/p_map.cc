@@ -348,11 +348,11 @@ static bool CheckAbsoluteThingCallback(MapObject *thing, void *data)
         if ((move_check.flags & kMapObjectFlagMissile) || level_flags.true_3d_gameplay)
         {
             // overhead ?
-            if (move_check.z >= thing->z + thing->height_)
+            if (move_check.z > thing->z + thing->height_)
                 return true;
 
             // underneath ?
-            if (move_check.z + move_check.mover->height_ <= thing->z)
+            if (move_check.z + move_check.mover->height_ < thing->z)
                 return true;
         }
     }
@@ -829,7 +829,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
 static bool CheckRelativeThingCallback(MapObject *thing, void *data)
 {
     float blockdist;
-    bool  solid;
+    bool  solid = (thing->flags_ & kMapObjectFlagSolid) ? true : false;
 
     if (thing == move_check.mover)
         return true;
@@ -850,7 +850,7 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
         float top_z = thing->z + thing->height_;
 
         // see if we went over
-        if (move_check.z >= top_z)
+        if (move_check.z > top_z)
         {
             if (top_z > move_check.floor_z && !(thing->flags_ & kMapObjectFlagMissile))
             {
@@ -861,13 +861,32 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
         }
 
         // see if we went underneath
-        if (move_check.z + move_check.mover->height_ <= thing->z)
+        if (move_check.z + move_check.mover->height_ < thing->z)
         {
             if (thing->z < move_check.ceiling_z && !(thing->flags_ & kMapObjectFlagMissile))
             {
                 move_check.ceiling_z = thing->z;
             }
             return true;
+        }
+
+        if (move_check.flags & kMapObjectFlagMissile)
+        {
+            // ignore the missile's shooter
+            if (move_check.mover->source_ && move_check.mover->source_ == thing)
+                return true;
+
+            if ((thing->hyper_flags_ & kHyperFlagMissilesPassThrough) && level_flags.pass_missile)
+                return true;
+
+            // thing isn't shootable, return depending on if the thing is solid.
+            if (!(thing->flags_ & kMapObjectFlagShootable))
+                return !solid;
+
+            if (MissileContact(move_check.mover, thing) < 0)
+                return true;
+
+            return (move_check.extended_flags & kExtendedFlagTunnel) ? true : false;
         }
 
         // -AJA- 1999/07/21: allow climbing on top of things.
@@ -886,8 +905,6 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
     // check for skulls slamming into things
     // -ACB- 1998/08/04 Use procedure
     // -KM- 1998/09/01 After I noticed Skulls slamming into boxes of rockets...
-
-    solid = (thing->flags_ & kMapObjectFlagSolid) ? true : false;
 
     if ((move_check.flags & kMapObjectFlagSkullFly) && solid)
     {
@@ -1207,14 +1224,7 @@ static bool ThingHeightClip(MapObject *thing)
 {
     bool onfloor = (fabs(thing->z - thing->floor_z_) < 1);
 
-    if (!(thing->flags_ & kMapObjectFlagSolid))
-    {
-        thing->radius_ = thing->radius_ / 2 - 1;
-        CheckRelativePosition(thing, thing->x, thing->y);
-        thing->radius_ = (thing->radius_ + 1) * 2;
-    }
-    else
-        CheckRelativePosition(thing, thing->x, thing->y);
+    CheckRelativePosition(thing, thing->x, thing->y);
 
     thing->floor_z_   = move_check.floor_z;
     thing->ceiling_z_ = move_check.ceiling_z;

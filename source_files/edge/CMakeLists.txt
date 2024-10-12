@@ -184,7 +184,7 @@ else()
 endif()
 
 if(WIN32 AND (MSVC OR CLANG))
-  target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/include)
+  target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/include)
 endif()
 
 target_include_directories(edge-classic PRIVATE ./)
@@ -228,7 +228,7 @@ else()
 
 endif()
 
-# Copy appropriate SDL2.dll to local install directory when built with MSVC/Clang
+# Copy appropriate SDL2.dll to local install directory when built with MSVC/Clang or MSYS2
 if (WIN32)
   if(MSVC OR CLANG)
     if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)

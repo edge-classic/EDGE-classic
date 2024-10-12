@@ -18,9 +18,7 @@
 
 #pragma once
 
-#ifdef _MSC_VER
-#include "SDL.h"
-#elif __APPLE__
+#ifdef __APPLE__
 #include <SDL.h>
 #else
 #include <SDL2/SDL.h>

@@ -862,9 +862,9 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
         float top_z = thing->z + thing->height_;
 
         // see if we went over
-        if (move_check.z > top_z)
+        if (move_check.z >= top_z)
         {
-            if (top_z > move_check.floor_z && !(thing->flags_ & kMapObjectFlagMissile))
+            if (top_z > move_check.floor_z && !((move_check.flags & kMapObjectFlagMissile) || (thing->flags_ & kMapObjectFlagMissile)))
             {
                 move_check.floor_z = top_z;
                 move_check.below   = thing;
@@ -873,36 +873,16 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
         }
 
         // see if we went underneath
-        if (move_check.z + move_check.mover->height_ < thing->z)
+        if (move_check.z + move_check.mover->height_ <= thing->z)
         {
-            if (thing->z < move_check.ceiling_z && !(thing->flags_ & kMapObjectFlagMissile))
+            if (thing->z < move_check.ceiling_z && !((move_check.flags & kMapObjectFlagMissile) || (thing->flags_ & kMapObjectFlagMissile)))
             {
                 move_check.ceiling_z = thing->z;
             }
             return true;
         }
 
-        if (move_check.flags & kMapObjectFlagMissile)
-        {
-            // ignore the missile's shooter
-            if (move_check.mover->source_ && move_check.mover->source_ == thing)
-                return true;
-
-            if ((thing->hyper_flags_ & kHyperFlagMissilesPassThrough) && level_flags.pass_missile)
-                return true;
-
-            // thing isn't shootable, return depending on if the thing is solid.
-            if (!(thing->flags_ & kMapObjectFlagShootable))
-                return !solid;
-
-            if (MissileContact(move_check.mover, thing) < 0)
-                return true;
-
-            return (move_check.extended_flags & kExtendedFlagTunnel) ? true : false;
-        }
-
         // -AJA- 1999/07/21: allow climbing on top of things.
-
         if (top_z > move_check.floor_z && (thing->extended_flags_ & kExtendedFlagClimbable) &&
             (move_check.mover->player_ || (move_check.extended_flags & kExtendedFlagMonster)) &&
             ((move_check.flags & kMapObjectFlagDropOff) || (move_check.extended_flags & kExtendedFlagEdgeWalker)) &&

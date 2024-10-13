@@ -1583,7 +1583,7 @@ const Image *ImageForDummySkin(void)
 
 const Image *ImageForHomDetect(void)
 {
-    return dummy_hom[(render_frame_count & 0x10) ? 1 : 0];
+    return dummy_hom[(hud_tic & 0x10) ? 1 : 0];
 }
 
 const Image *ImageForFogWall(RGBAColor fog_color)

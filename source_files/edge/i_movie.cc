@@ -26,6 +26,7 @@
 #include "pl_mpeg.h"
 #include "r_gldefs.h"
 #include "r_modes.h"
+#include "r_state.h"
 #include "r_wipe.h"
 #include "s_blit.h"
 #include "s_music.h"
@@ -37,16 +38,20 @@
 extern bool sound_device_stereo;
 extern int  sound_device_frequency;
 
-bool                    playing_movie;
-static bool             need_canvas_update;
-static bool             skip_bar_active;
-static GLuint           canvas             = 0;
-static uint8_t         *rgb_data           = nullptr;
+bool                    playing_movie = false;
+static bool             need_canvas_update = false;
+static bool             skip_bar_active = false;
 static plm_t           *decoder            = nullptr;
 static SDL_AudioStream *movie_audio_stream = nullptr;
 static int              movie_sample_rate  = 0;
 static float            skip_time;
 static uint8_t         *movie_bytes = nullptr;
+static GLuint movie_shader_program = 0;
+static GLuint movie_vertex_shader = 0;
+static GLuint movie_fragment_shader = 0;
+static GLuint texture_y = 0;
+static GLuint texture_cb = 0;
+static GLuint texture_cr = 0;
 
 static bool MovieSetupAudioStream(int rate)
 {
@@ -70,7 +75,7 @@ static bool MovieSetupAudioStream(int rate)
     return true;
 }
 
-void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
+static void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
 {
     (void)mpeg;
     (void)user;
@@ -91,20 +96,106 @@ void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
     }
 }
 
-void MovieVideoCallback(plm_t *mpeg, plm_frame_t *frame, void *user)
+static constexpr const char *kMovieVertexShader =
+	"attribute vec2 vertex;\n"
+	"varying vec2 tex_coord;\n\n"
+	"void main() {\n"
+	"	tex_coord = vertex;\n"
+	"	gl_Position = vec4((vertex * 2.0 - 1.0) * vec2(1, -1), 0.0, 1.0);\n"
+    "}";
+
+static constexpr const char *kMovieFragmentShader = 
+	"uniform sampler2D texture_y;\n"
+	"uniform sampler2D texture_cb;\n"
+	"uniform sampler2D texture_cr;\n"
+	"varying vec2 tex_coord;\n\n"
+	"mat4 rec601 = mat4(\n"
+	"	1.16438,  0.00000,  1.59603, -0.87079,\n"
+	"	1.16438, -0.39176, -0.81297,  0.52959,\n"
+	"	1.16438,  2.01723,  0.00000, -1.08139,\n"
+	"	0, 0, 0, 1\n"
+	");\n\n"
+	"void main() {\n"
+	"	float y = texture2D(texture_y, tex_coord).r;\n"
+	"	float cb = texture2D(texture_cb, tex_coord).r;\n"
+	"	float cr = texture2D(texture_cr, tex_coord).r;\n\n"
+	"	gl_FragColor = vec4(y, cb, cr, 1.0) * rec601;\n"
+	"}";
+
+static GLuint CreateMovieTexture(GLuint index, const char *name) {
+	GLuint texture;
+    glGenTextures(1, &texture);
+	
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	
+	glUniform1i(glGetUniformLocation(movie_shader_program, name), index);
+	return texture;
+}
+
+static GLuint CompileMovieShader(GLenum type, const char *source) {
+	GLuint shader = glCreateShader(type);
+	glShaderSource(shader, 1, &source, NULL);
+	glCompileShader(shader);
+	
+	GLint success;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+	if (!success) {
+		int log_written;
+		char log[256];
+		glGetShaderInfoLog(shader, 256, &log_written, log);
+		FatalError("PlayMovie: Error compiling shader: %s.\n", log);
+	}
+	return shader;
+}
+
+static void UpdateComponentTexture(GLuint unit, GLuint texture, plm_plane_t *plane) {
+	glActiveTexture(unit);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(
+		GL_TEXTURE_2D, 0, GL_LUMINANCE, plane->width, plane->height, 0,
+		GL_LUMINANCE, GL_UNSIGNED_BYTE, plane->data
+	);
+}
+
+static void MovieVideoCallback(plm_t *mpeg, plm_frame_t *frame, void *user)
 {
     (void)mpeg;
     (void)user;
-
-    plm_frame_to_rgb(frame, rgb_data, frame->width * 3);
-
-    glBindTexture(GL_TEXTURE_2D, canvas);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame->width, frame->height, 0, GL_RGB, GL_UNSIGNED_BYTE, rgb_data);
+    UpdateComponentTexture(GL_TEXTURE0, texture_y, &frame->y);
+    UpdateComponentTexture(GL_TEXTURE1, texture_cb, &frame->cb);
+    UpdateComponentTexture(GL_TEXTURE2, texture_cr, &frame->cr);
     need_canvas_update = true;
 }
 
 void PlayMovie(const std::string &name)
 {
+    GLint main_shader_program = 0;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &main_shader_program);
+
+    // gen up shaders, etc, if not already done
+    if (!movie_vertex_shader)
+        movie_vertex_shader = CompileMovieShader(GL_VERTEX_SHADER, kMovieVertexShader);
+    if (!movie_fragment_shader)
+        movie_fragment_shader = CompileMovieShader(GL_FRAGMENT_SHADER, kMovieFragmentShader);
+    if (!movie_shader_program)
+    {
+        movie_shader_program = glCreateProgram();
+        glAttachShader(movie_shader_program, movie_vertex_shader);
+        glAttachShader(movie_shader_program, movie_fragment_shader);
+        glLinkProgram(movie_shader_program);
+        glUseProgram(movie_shader_program);
+    }
+    if (!texture_y)
+        texture_y = CreateMovieTexture(0, "texture_y");
+    if (!texture_cb)
+        texture_cb = CreateMovieTexture(1, "texture_cb");
+    if (!texture_cr)
+        texture_cr = CreateMovieTexture(2, "texture_cr");
+
     MovieDefinition *movie = moviedefs.Lookup(name.c_str());
 
     if (!movie)
@@ -174,17 +265,6 @@ void PlayMovie(const std::string &name)
         }
     }
 
-    if (canvas)
-        glDeleteTextures(1, &canvas);
-
-    glGenTextures(1, &canvas);
-
-    if (rgb_data)
-    {
-        delete[] rgb_data;
-        rgb_data = nullptr;
-    }
-
     int   movie_width  = plm_get_width(decoder);
     int   movie_height = plm_get_height(decoder);
     float movie_ratio  = (float)movie_width / movie_height;
@@ -232,9 +312,6 @@ void PlayMovie(const std::string &name)
     int vy1 = current_screen_height / 2 + frame_height / 2;
     int vy2 = current_screen_height / 2 - frame_height / 2;
 
-    int num_pixels = movie_width * movie_height * 3;
-    rgb_data       = new uint8_t[num_pixels];
-    memset(rgb_data, 0, num_pixels);
     plm_set_video_decode_callback(decoder, MovieVideoCallback, nullptr);
     plm_set_audio_decode_callback(decoder, MovieAudioCallback, nullptr);
     if (!no_sound && movie_audio_stream)
@@ -279,36 +356,16 @@ void PlayMovie(const std::string &name)
         {
             StartFrame();
 
-            glEnable(GL_TEXTURE_2D);
-            glBindTexture(GL_TEXTURE_2D, canvas);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glDisable(GL_ALPHA_TEST);
-
-            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-            glBegin(GL_QUADS);
-
-            glTexCoord2f(tx1, ty2);
-            glVertex2i(vx1, vy2);
-
-            glTexCoord2f(tx2, ty2);
-            glVertex2i(vx2, vy2);
-
-            glTexCoord2f(tx2, ty1);
-            glVertex2i(vx2, vy1);
-
-            glTexCoord2f(tx1, ty1);
-            glVertex2i(vx1, vy1);
-
-            glEnd();
-
-            glDisable(GL_TEXTURE_2D);
+            glUseProgram(movie_shader_program);
+            glClear(GL_COLOR_BUFFER_BIT);
+	        glRectf(tx1, ty1, tx2, ty2);
+            glUseProgram(main_shader_program);
 
             // Fade-in
             float fadein = plm_get_time(decoder);
             if (fadein <= 0.25f)
             {
+                glDisable(GL_TEXTURE);
                 glColor4f(0, 0, 0, (0.25f - fadein) / 0.25f);
                 glEnable(GL_BLEND);
 
@@ -376,32 +433,11 @@ void PlayMovie(const std::string &name)
         fadeout             = current_time - last_time;
         StartFrame();
 
-        glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, canvas);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glDisable(GL_ALPHA_TEST);
-
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-        glBegin(GL_QUADS);
-
-        glTexCoord2f(tx1, ty2);
-        glVertex2i(vx1, vy2);
-
-        glTexCoord2f(tx2, ty2);
-        glVertex2i(vx2, vy2);
-
-        glTexCoord2f(tx2, ty1);
-        glVertex2i(vx2, vy1);
-
-        glTexCoord2f(tx1, ty1);
-        glVertex2i(vx1, vy1);
-
-        glEnd();
-
-        glDisable(GL_TEXTURE_2D);
-
+        glUseProgram(movie_shader_program);
+        glClear(GL_COLOR_BUFFER_BIT);
+	    glRectf(tx1, ty1, tx2, ty2);
+        glUseProgram(main_shader_program);
+        glDisable(GL_TEXTURE);
         // Fade-out
         glColor4f(0, 0, 0, HMM_MAX(0.0f, 1.0f - ((0.25f - fadeout) / 0.25f)));
         glEnable(GL_BLEND);
@@ -428,16 +464,6 @@ void PlayMovie(const std::string &name)
         SDL_FreeAudioStream(movie_audio_stream);
         movie_audio_stream = nullptr;
     }
-    if (rgb_data)
-    {
-        delete[] rgb_data;
-        rgb_data = nullptr;
-    }
-    if (canvas)
-    {
-        glDeleteTextures(1, &canvas);
-        canvas = 0;
-    }
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     FinishFrame();
@@ -446,5 +472,6 @@ void PlayMovie(const std::string &name)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     FinishFrame();
     ResumeMusic();
+    GetRenderState()->SetDefaultStateFull();
     return;
 }

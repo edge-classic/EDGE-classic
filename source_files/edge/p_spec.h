@@ -53,6 +53,8 @@ struct LightSpecial
 
     // countdown value for FADE type
     int fade_count;
+
+    bool using_boom_light_transfer = false;
 };
 
 enum ButtonPosition

@@ -296,7 +296,7 @@ MapObject *A_LookForBlockmapTarget(MapObject *we, uint32_t rangeblocks, BAMAngle
 	int secondStop;
 	int thirdStop;
 	int finalStop;
-	int count;
+	uint32_t count;
 
     for (count = 1; count <= rangeblocks; count++)
 	{

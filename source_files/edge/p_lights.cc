@@ -128,15 +128,13 @@ static void DoLight(LightSpecial *light)
         break;
 
     case kLightSpecialTypeGlow:
-        light->minimum_light = FindMinimumSurroundingLight(light->sector, light->sector->properties.light_level);
-        light->maximum_light = light->sector->properties.light_level;
         if (light->direction == -1)
         {
             // Go dark
             light->sector->properties.light_level -= type->step_;
             if (light->sector->properties.light_level <= light->minimum_light)
             {
-                light->sector->properties.light_level = light->minimum_light;
+                light->sector->properties.light_level += type->step_;
                 light->count                          = type->brighttime_;
                 light->direction                      = +1;
             }
@@ -151,7 +149,7 @@ static void DoLight(LightSpecial *light)
             light->sector->properties.light_level += type->step_;
             if (light->sector->properties.light_level >= light->maximum_light)
             {
-                light->sector->properties.light_level = light->maximum_light;
+                light->sector->properties.light_level -= type->step_;
                 light->count                          = type->darktime_;
                 light->direction                      = -1;
             }

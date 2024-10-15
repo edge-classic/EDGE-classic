@@ -583,20 +583,21 @@ static bool DecideRangeAttack(MapObject *object)
         attack = object->info_->rangeattack_;
     else // MBF21 check
     {
-        State *check = states + object->info_->missile_state_;
-        for (;;)
+        int missile_check = object->info_->missile_state_;
+        if (missile_check)
         {
-            if (check->action && (check->action == A_MonsterProjectile || check->action == A_MonsterBulletAttack))
+            for (StateRange group : object->info_->state_grp_)
             {
-                attack = (const AttackDefinition *)check->action_par;
-                break;
-            }
-            else
-            { 
-                if (check->nextstate)
-                    check = states + check->nextstate;
-                else
-                    break;
+                for (int state_check = missile_check; state_check < group.last; state_check++)
+                {
+                    State *check = states + state_check;
+                    if (check && check->action && (check->action == A_MonsterProjectile || check->action == A_MonsterBulletAttack))
+                    {
+                        // TODO: Store this to avoid repeat checks
+                        attack = (const AttackDefinition *)check->action_par;
+                        break;
+                    }
+                }
             }
         }
     }

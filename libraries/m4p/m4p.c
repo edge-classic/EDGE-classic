@@ -6,6 +6,7 @@ extern bool Music_Init(int32_t mixingFrequency, int32_t mixingBufferSize);
 extern bool Music_LoadFromData(uint8_t *Data, uint32_t DataLen);
 extern void Music_PlaySong(uint16_t order);
 extern void Music_FillAudioBuffer(int16_t *buffer, int32_t numSamples);
+extern void Music_FillAudioBufferFloat(float *buffer, int32_t numSamples);
 extern void Music_Close(void);
 extern void Music_Stop(void);
 extern void Music_FreeSong(void);
@@ -16,6 +17,7 @@ extern bool loadMusicFromData(const uint8_t *data, uint32_t dataLength);
 extern void startPlaying(void);
 extern void stopPlaying(void);
 extern void mix_UpdateBuffer(int16_t *buffer, int32_t numSamples);
+extern void mix_UpdateBufferFloat(float *buffer, int32_t numSamples);
 extern void stopMusic();
 extern void freeMusic(void);
 
@@ -102,6 +104,14 @@ void m4p_GenerateSamples(int16_t *buffer, int32_t numSamples)
 		Music_FillAudioBuffer(buffer, numSamples);
 	else
 		mix_UpdateBuffer(buffer, numSamples);
+}
+
+void m4p_GenerateFloatSamples(float *buffer, int32_t numSamples)
+{
+	if (current_format == FORMAT_IT_S3M)
+		Music_FillAudioBufferFloat(buffer, numSamples);
+	else
+		mix_UpdateBufferFloat(buffer, numSamples);
 }
 
 void m4p_Stop(void)

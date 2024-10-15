@@ -68,14 +68,14 @@ static void *edge_fluid_fopen(fluid_fileapi_t *fileapi, const char *filename)
     return fp;
 }
 
-static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
+static void ConvertToMono(float *dest, const float *src, int len)
 {
-    const int16_t *s_end = src + len * 2;
+    const float *s_end = src + len * 2;
 
     for (; src < s_end; src += 2)
     {
         // compute average of samples
-        *dest++ = ((int)src[0] + (int)src[1]) >> 1;
+        *dest++ = (src[0] + src[1]) * 0.5f;
     }
 }
 
@@ -186,12 +186,12 @@ class FluidPlayer : public AbstractMusicPlayer
 
     FluidInterface *fluid_interface_;
 
-    int16_t *mono_buffer_;
+    float *mono_buffer_;
 
   public:
     FluidPlayer(uint8_t *data, int _length, bool looping) : status_(kNotLoaded), looping_(looping)
     {
-        mono_buffer_ = new int16_t[kMusicBuffer * 2];
+        mono_buffer_ = new float[kMusicBuffer * 2];
         SequencerInit();
     }
 
@@ -263,7 +263,7 @@ class FluidPlayer : public AbstractMusicPlayer
 
     static void playSynth(void *userdata, uint8_t *stream, size_t length)
     {
-        fluid_synth_write_s16(edge_fluid, (int)length / 4, stream, 0, 2, stream + 2, 0, 2);
+        fluid_synth_write_float(edge_fluid, (int)length / 8, stream, 0, 2, stream + 4, 0, 2);
     }
 
     void SequencerInit()
@@ -286,7 +286,7 @@ class FluidPlayer : public AbstractMusicPlayer
         fluid_interface_->onPcmRender_userdata = this;
 
         fluid_interface_->pcmSampleRate = sound_device_frequency;
-        fluid_interface_->pcmFrameSize  = 2 /*channels*/ * 2 /*size of one sample*/;
+        fluid_interface_->pcmFrameSize  = 2 /*channels*/ * 4 /*size of one sample*/;
 
         fluid_interface_->rt_deviceSwitch  = rtDeviceSwitch;
         fluid_interface_->rt_currentDevice = rtCurrentDevice;
@@ -397,24 +397,24 @@ class FluidPlayer : public AbstractMusicPlayer
   private:
     bool StreamIntoBuffer(SoundData *buf)
     {
-        int16_t *data_buf;
+        float *data_buf;
 
         bool song_done = false;
 
         if (!sound_device_stereo)
             data_buf = mono_buffer_;
         else
-            data_buf = buf->data_left_;
+            data_buf = buf->data_;
 
         int played = fluid_sequencer_->PlayStream((uint8_t *)data_buf, kMusicBuffer);
 
         if (fluid_sequencer_->PositionAtEnd())
             song_done = true;
 
-        buf->length_ = played / 4;
+        buf->length_ = played / 8;
 
         if (!sound_device_stereo)
-            ConvertToMono(buf->data_left_, mono_buffer_, buf->length_);
+            ConvertToMono(buf->data_, mono_buffer_, buf->length_);
 
         if (song_done) /* EOF */
         {

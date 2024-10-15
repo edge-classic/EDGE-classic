@@ -332,7 +332,7 @@ static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, Posit
     chan->volume_right_ = 0;
 
     chan->offset_ = 0;
-    chan->length_ = chan->data_->length_ << 10;
+    chan->length_ = chan->data_->length_;
 
     chan->loop_ = false;
     chan->boss_ = (flags & kSoundEffectBoss) ? true : false;
@@ -451,19 +451,6 @@ void StartSoundEffect(SoundEffect *sfx, int category, Position *pos, int flags)
     SoundData *buf = SoundCacheLoad(def);
     if (!buf)
         return;
-
-    if (vacuum_sound_effects)
-        buf->MixVacuum();
-    else if (submerged_sound_effects)
-        buf->MixSubmerged();
-    else
-    {
-        if (ddf_reverb)
-            buf->MixReverb(dynamic_reverb, room_area, outdoor_reverb, ddf_reverb_type, ddf_reverb_ratio,
-                           ddf_reverb_delay);
-        else
-            buf->MixReverb(dynamic_reverb, room_area, outdoor_reverb, 0, 0, 0);
-    }
 
     LockAudio();
     {

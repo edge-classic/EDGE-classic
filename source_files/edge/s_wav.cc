@@ -232,13 +232,15 @@ bool LoadWAVSound(SoundData *buf, uint8_t *data, int length, bool pc_speaker)
 
     buf->frequency_ = wav.sampleRate;
 
+    buf->mode_ = sound_device_stereo ? kMixInterleaved : kMixMono;
+
     SoundGatherer gather;
 
-    int16_t *buffer = gather.MakeChunk(wav.totalPCMFrameCount, is_stereo);
+    float *buffer = gather.MakeChunk(wav.totalPCMFrameCount, is_stereo);
 
-    gather.CommitChunk(drwav_read_pcm_frames_s16(&wav, wav.totalPCMFrameCount, buffer));
+    gather.CommitChunk(drwav_read_pcm_frames_f32(&wav, wav.totalPCMFrameCount, buffer));
 
-    if (!gather.Finalise(buf, is_stereo))
+    if (!gather.Finalise(buf, sound_device_stereo))
         LogWarning("WAV SFX Loader: no samples!\n");
 
     drwav_uninit(&wav);

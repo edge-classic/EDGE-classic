@@ -52,7 +52,7 @@ class SIDPlayer : public AbstractMusicPlayer
     int  status_;
     bool looping_;
 
-    int16_t *mono_buffer_;
+    float *mono_buffer_;
 
     cRSID_C64instance *C64_      = nullptr;
     cRSID_SIDheader   *C64_song_ = nullptr;
@@ -80,7 +80,7 @@ class SIDPlayer : public AbstractMusicPlayer
 
 SIDPlayer::SIDPlayer() : status_(kNotLoaded)
 {
-    mono_buffer_ = new int16_t[kMusicBuffer * 2];
+    mono_buffer_ = new float[kMusicBuffer * 2];
 }
 
 SIDPlayer::~SIDPlayer()
@@ -99,32 +99,32 @@ void SIDPlayer::PostOpenInit()
     status_ = kStopped;
 }
 
-static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
+static void ConvertToMono(float *dest, const float *src, int len)
 {
-    const int16_t *s_end = src + len * 2;
+    const float *s_end = src + len * 2;
 
     for (; src < s_end; src += 2)
     {
         // compute average of samples
-        *dest++ = ((int)src[0] + (int)src[1]) >> 1;
+        *dest++ = (src[0] + src[1]) * 0.5f;
     }
 }
 
 bool SIDPlayer::StreamIntoBuffer(SoundData *buf)
 {
-    int16_t *data_buf;
+    float *data_buf;
 
     if (!sound_device_stereo)
         data_buf = mono_buffer_;
     else
-        data_buf = buf->data_left_;
+        data_buf = buf->data_;
 
-    cRSID_generateSound(C64_, (unsigned char *)data_buf, kMusicBuffer);
+    cRSID_generateFloat(C64_, data_buf, kMusicBuffer);
 
-    buf->length_ = kMusicBuffer / sizeof(int16_t) / 2;
+    buf->length_ = kMusicBuffer / sizeof(float) / 2;
 
     if (!sound_device_stereo)
-        ConvertToMono(buf->data_left_, mono_buffer_, buf->length_);
+        ConvertToMono(buf->data_, mono_buffer_, buf->length_);
 
     return true;
 }

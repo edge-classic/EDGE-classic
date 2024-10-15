@@ -18,6 +18,9 @@ void m4p_PlaySong(void);
 // Generate samples and fill buffer
 void m4p_GenerateSamples(int16_t *buffer, int32_t numSamples);
 
+// Generate samples and fill buffer
+void m4p_GenerateFloatSamples(float *buffer, int32_t numSamples);
+
 // Set replayer status to Stop
 void m4p_Stop(void);
 

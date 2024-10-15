@@ -40,8 +40,10 @@ enum
 // 8bb: globalized
 void (*DriverClose)(void) = NULL;
 void (*DriverMix)(int32_t, int16_t *) = NULL;
+void (*DriverMixFloat)(int32_t, float *) = NULL;
 void (*DriverResetMixer)(void) = NULL;
 int32_t (*DriverPostMix)(int16_t *, int32_t) = NULL;
+int32_t (*DriverPostMixFloat)(float *, int32_t) = NULL;
 void (*DriverMixSamples)(void) = NULL;
 void (*DriverSetTempo)(uint8_t) = NULL;
 void (*DriverSetMixVolume)(uint8_t) = NULL;
@@ -1958,6 +1960,18 @@ void Music_FillAudioBuffer(int16_t *buffer, int32_t numSamples)
 
 	if (DriverMix != NULL)
 		DriverMix(numSamples, buffer);
+}
+
+void Music_FillAudioBufferFloat(float *buffer, int32_t numSamples)
+{
+	if (!Song.Playing)
+	{
+		memset(buffer, 0, numSamples * 2 * sizeof (float));
+		return;
+	}
+
+	if (DriverMixFloat != NULL)
+		DriverMixFloat(numSamples, buffer);
 }
 
 bool Music_Init(int32_t mixingFrequency, int32_t mixingBufferSize)

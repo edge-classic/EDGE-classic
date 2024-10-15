@@ -52,6 +52,7 @@ void mix_Free(void);
 
 void mix_ClearChannels(void);
 void mix_UpdateBuffer(int16_t *buffer, int32_t numSamples);
+void mix_UpdateBufferFloat(float *buffer, int32_t numSamples);
 
 bool dump_Init(int32_t frq, int32_t amp, int16_t songPos);
 void dump_Close(void);

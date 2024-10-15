@@ -90,14 +90,14 @@ void RestartOpal(void)
     return;            // OK!
 }
 
-static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
+static void ConvertToMono(float *dest, const float *src, int len)
 {
-    const int16_t *s_end = src + len * 2;
+    const float *s_end = src + len * 2;
 
     for (; src < s_end; src += 2)
     {
         // compute average of samples
-        *dest++ = ((int)src[0] + (int)src[1]) >> 1;
+        *dest++ = (src[0] + src[1]) * 0.5f;
     }
 }
 
@@ -115,14 +115,14 @@ class OpalPlayer : public AbstractMusicPlayer
     int  status_;
     bool looping_;
 
-    int16_t *mono_buffer_;
+    float *mono_buffer_;
 
     OPLInterface *opl_interface_;
 
   public:
     OpalPlayer(bool looping) : status_(kNotLoaded), looping_(looping)
     {
-        mono_buffer_ = new int16_t[2 * kMusicBuffer];
+        mono_buffer_ = new float[2 * kMusicBuffer];
         SequencerInit();
     }
 
@@ -205,7 +205,7 @@ class OpalPlayer : public AbstractMusicPlayer
     static void playSynth(void *userdata, uint8_t *stream, size_t length)
     {
         (void)userdata;
-        edge_opl->generate((int16_t *)(stream), length / (2 * sizeof(int16_t)));
+        edge_opl->generate((float *)(stream), length / (2 * sizeof(float)));
     }
 
     void SequencerInit()
@@ -228,7 +228,7 @@ class OpalPlayer : public AbstractMusicPlayer
         opl_interface_->onPcmRender_userdata = this;
 
         opl_interface_->pcmSampleRate = sound_device_frequency;
-        opl_interface_->pcmFrameSize  = 2 /*channels*/ * 2 /*size of one sample*/; // OPL3 is 2 'channels' regardless of
+        opl_interface_->pcmFrameSize  = 2 /*channels*/ * 4 /*size of one sample*/; // OPL3 is 2 'channels' regardless of
                                                                                    // the sound_device_stereo setting
 
         opl_interface_->rt_deviceSwitch  = rtDeviceSwitch;
@@ -336,24 +336,24 @@ class OpalPlayer : public AbstractMusicPlayer
   private:
     bool StreamIntoBuffer(SoundData *buf)
     {
-        int16_t *data_buf;
+        float *data_buf;
 
         bool song_done = false;
 
         if (!sound_device_stereo)
             data_buf = mono_buffer_;
         else
-            data_buf = buf->data_left_;
+            data_buf = buf->data_;
 
         int played = opl_sequencer_->PlayStream((uint8_t *)(data_buf), kMusicBuffer);
 
         if (opl_sequencer_->PositionAtEnd())
             song_done = true;
 
-        buf->length_ = played / (2 * sizeof(int16_t));
+        buf->length_ = played / 8;
 
         if (!sound_device_stereo)
-            ConvertToMono(buf->data_left_, mono_buffer_, buf->length_);
+            ConvertToMono(buf->data_, mono_buffer_, buf->length_);
 
         if (song_done) /* EOF */
         {

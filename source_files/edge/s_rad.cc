@@ -54,7 +54,7 @@ class RadPlayer : public AbstractMusicPlayer
     int  status_;
     bool looping_;
 
-    int16_t *mono_buffer_;
+    float *mono_buffer_;
 
     int      sample_count_;
     int      sample_update_;
@@ -84,7 +84,7 @@ class RadPlayer : public AbstractMusicPlayer
 
 RadPlayer::RadPlayer() : status_(kNotLoaded), tune_(nullptr)
 {
-    mono_buffer_ = new int16_t[kMusicBuffer * 2];
+    mono_buffer_ = new float[kMusicBuffer * 2];
 }
 
 RadPlayer::~RadPlayer()
@@ -103,20 +103,20 @@ void RadPlayer::PostOpen()
     status_ = kStopped;
 }
 
-static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
+static void ConvertToMono(float *dest, const float *src, int len)
 {
-    const int16_t *s_end = src + len * 2;
+    const float *s_end = src + len * 2;
 
     for (; src < s_end; src += 2)
     {
         // compute average of samples
-        *dest++ = ((int)src[0] + (int)src[1]) >> 1;
+        *dest++ = (src[0] + src[1]) * 0.5f;
     }
 }
 
 bool RadPlayer::StreamIntoBuffer(SoundData *buf)
 {
-    int16_t *data_buf;
+    float *data_buf;
 
     bool song_done = false;
     int  samples   = 0;
@@ -124,7 +124,7 @@ bool RadPlayer::StreamIntoBuffer(SoundData *buf)
     if (!sound_device_stereo)
         data_buf = mono_buffer_;
     else
-        data_buf = buf->data_left_;
+        data_buf = buf->data_;
 
     for (int i = 0; i < kMusicBuffer; i += 2)
     {
@@ -141,7 +141,7 @@ bool RadPlayer::StreamIntoBuffer(SoundData *buf)
     buf->length_ = samples;
 
     if (!sound_device_stereo)
-        ConvertToMono(buf->data_left_, mono_buffer_, buf->length_);
+        ConvertToMono(buf->data_, mono_buffer_, buf->length_);
 
     if (song_done) /* EOF */
     {

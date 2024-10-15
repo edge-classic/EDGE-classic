@@ -49,7 +49,7 @@ class M4PPlayer : public AbstractMusicPlayer
     int  status_;
     bool looping_;
 
-    int16_t *mono_buffer_;
+    float *mono_buffer_;
 
   public:
     bool OpenMemory(uint8_t *data, int length);
@@ -74,7 +74,7 @@ class M4PPlayer : public AbstractMusicPlayer
 
 M4PPlayer::M4PPlayer() : status_(kNotLoaded)
 {
-    mono_buffer_ = new int16_t[kMusicBuffer * 2];
+    mono_buffer_ = new float[kMusicBuffer * 2];
 }
 
 M4PPlayer::~M4PPlayer()
@@ -91,34 +91,34 @@ void M4PPlayer::PostOpen()
     status_ = kStopped;
 }
 
-static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
+static void ConvertToMono(float *dest, const float *src, int len)
 {
-    const int16_t *s_end = src + len * 2;
+    const float *s_end = src + len * 2;
 
     for (; src < s_end; src += 2)
     {
         // compute average of samples
-        *dest++ = ((int)src[0] + (int)src[1]) >> 1;
+        *dest++ = (src[0] + src[1]) * 0.5f;
     }
 }
 
 bool M4PPlayer::StreamIntoBuffer(SoundData *buf)
 {
-    int16_t *data_buf;
+    float *data_buf;
 
     bool song_done = false;
 
     if (!sound_device_stereo)
         data_buf = mono_buffer_;
     else
-        data_buf = buf->data_left_;
+        data_buf = buf->data_;
 
-    m4p_GenerateSamples(data_buf, kMusicBuffer / sizeof(int16_t));
+    m4p_GenerateFloatSamples(data_buf, kMusicBuffer / sizeof(float));
 
-    buf->length_ = kMusicBuffer / 2;
+    buf->length_ = kMusicBuffer / 4;
 
     if (!sound_device_stereo)
-        ConvertToMono(buf->data_left_, mono_buffer_, buf->length_);
+        ConvertToMono(buf->data_, mono_buffer_, buf->length_);
 
     if (song_done) /* EOF */
     {

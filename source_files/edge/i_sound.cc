@@ -67,9 +67,9 @@ static bool TryOpenSound(int want_freq, bool want_stereo)
     LogPrint("StartupSound: trying %d Hz %s\n", want_freq, want_stereo ? "Stereo" : "Mono");
 
     trydev.freq     = want_freq;
-    trydev.format   = AUDIO_S16SYS;
+    trydev.format   = AUDIO_F32SYS;
     trydev.channels = want_stereo ? 2 : 1;
-    trydev.samples  = 1024;
+    trydev.samples  = 512;
     trydev.callback = SoundFillCallback;
 
     current_sound_device = SDL_OpenAudioDevice(nullptr, 0, &trydev, &sound_device_check, 0);
@@ -137,7 +137,7 @@ void StartupAudio(void)
     // desired format and convert silently if needed, but they might end up
     // being a good safety net - Dasho
 
-    if (sound_device_check.format != AUDIO_S16SYS)
+    if (sound_device_check.format != AUDIO_F32SYS)
     {
         LogPrint("StartupSound: unsupported format: %d\n", sound_device_check.format);
         SDL_CloseAudioDevice(current_sound_device);
@@ -159,13 +159,12 @@ void StartupAudio(void)
     else if (!want_stereo && sound_device_check.channels != 1)
         LogPrint("StartupSound: mono sound not available.\n");
 
-    if (sound_device_check.freq < (want_freq - want_freq / 100) ||
-        sound_device_check.freq > (want_freq + want_freq / 100))
+    if (sound_device_check.freq != want_freq)
     {
         LogPrint("StartupSound: %d Hz sound not available.\n", want_freq);
     }
 
-    sound_device_bytes_per_sample   = (sound_device_check.channels) * 2;
+    sound_device_bytes_per_sample   = sound_device_check.channels * sizeof(float);
     sound_device_samples_per_buffer = sound_device_check.size / sound_device_bytes_per_sample;
 
     EPI_ASSERT(sound_device_bytes_per_sample > 0);

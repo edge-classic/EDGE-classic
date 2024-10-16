@@ -190,46 +190,8 @@ static void BlitToF32(const float *src, float *dest, int length)
     memcpy(dest, src, length * sizeof(float));
 }
 
-static void MixMono(SoundChannel *chan, float *dest, int pairs)
-{
-    EPI_ASSERT(pairs > 0);
-
-    float *src = chan->data_->data_;
-
-    /*if (paused || menu_active)
-        src_L = chan->data_->data_left_;
-    else
-    {
-        if (!chan->data_->is_sound_effect_ || chan->category_ == kCategoryUi ||
-            chan->data_->current_filter_ == kFilterNone)
-            src_L = chan->data_->data_left_;
-        else
-            src_L = chan->data_->filter_data_left_;
-    }*/
-
-    float *d_pos = dest;
-    float *d_end = d_pos + pairs;
-
-    uint32_t offset = chan->offset_;
-
-    while (d_pos < d_end)
-    {
-        *d_pos++ += src[offset >> 10] * chan->volume_left_;
-
-        offset += chan->delta_;
-    }
-
-    chan->offset_ = offset;
-
-    EPI_ASSERT(offset - chan->delta_ < chan->length_);
-}
-
 static void MixInterleaved(SoundChannel *chan, float *dest, int pairs)
 {
-    if (!sound_device_stereo)
-        FatalError("INTERNAL ERROR: tried to mix an interleaved buffer in MONO "
-                   "mode.\n");
-
     EPI_ASSERT(pairs > 0);
 
     float *src = chan->data_->data_;
@@ -246,18 +208,32 @@ static void MixInterleaved(SoundChannel *chan, float *dest, int pairs)
     }*/
 
     float *d_pos = dest;
-    float *d_end = d_pos + pairs * 2;
+    float *d_end = d_pos + pairs * (sound_device_stereo ? 2 : 1);
 
     uint32_t offset = chan->offset_;
 
-    while (d_pos < d_end)
+    if (sound_device_stereo)
     {
-        uint32_t pos = (offset >> 9) & ~1;
+        while (d_pos < d_end)
+        {
+            uint32_t pos = (offset >> 9) & ~1;
 
-        *d_pos++ += src[pos] * chan->volume_left_;
-        *d_pos++ += src[pos | 1] * chan->volume_right_;
+            *d_pos++ += src[pos] * chan->volume_left_;
+            *d_pos++ += src[pos | 1] * chan->volume_right_;
 
-        offset += chan->delta_;
+            offset += chan->delta_;
+        }
+    }
+    else
+    {
+        while (d_pos < d_end)
+        {
+            uint32_t pos = (offset >> 9) & ~1;
+
+            *d_pos++ += ((src[pos] * chan->volume_left_) + (src[pos | 1] * chan->volume_right_)) * 0.5f;
+
+            offset += chan->delta_;
+        }
     }
 
     chan->offset_ = offset;
@@ -295,10 +271,7 @@ static void MixOneChannel(SoundChannel *chan, int pairs)
             EPI_ASSERT(chan->offset_ + count * chan->delta_ >= chan->length_);
         }
 
-        if (chan->data_->mode_ == kMixInterleaved)
-            MixInterleaved(chan, dest, count);
-        else
-            MixMono(chan, dest, count);
+        MixInterleaved(chan, dest, count);
 
         if (chan->offset_ >= chan->length_)
         {
@@ -374,10 +347,7 @@ static void MixQueues(int pairs)
             EPI_ASSERT(chan->offset_ + count * chan->delta_ >= chan->length_);
         }
 
-        if (chan->data_->mode_ == kMixInterleaved)
-            MixInterleaved(chan, dest, count);
-        else
-            MixMono(chan, dest, count);
+        MixInterleaved(chan, dest, count);
 
         if (chan->offset_ >= chan->length_)
         {
@@ -653,7 +623,7 @@ void SoundQueueStop(void)
     UnlockAudio();
 }
 
-SoundData *SoundQueueGetFreeBuffer(int samples, int buf_mode)
+SoundData *SoundQueueGetFreeBuffer(int samples)
 {
     if (no_sound)
         return nullptr;
@@ -667,7 +637,7 @@ SoundData *SoundQueueGetFreeBuffer(int samples, int buf_mode)
             buf = free_queue_buffers.front();
             free_queue_buffers.pop_front();
 
-            buf->Allocate(samples, buf_mode);
+            buf->Allocate(samples);
         }
     }
     UnlockAudio();

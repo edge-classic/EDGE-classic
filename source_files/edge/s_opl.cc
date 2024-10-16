@@ -41,7 +41,6 @@ typedef struct MidiRealTimeInterface OPLInterface;
 
 OPLPlayer *edge_opl = nullptr;
 
-extern bool sound_device_stereo;
 extern int  sound_device_frequency;
 
 bool opl_disabled = false;
@@ -115,23 +114,17 @@ class OpalPlayer : public AbstractMusicPlayer
     int  status_;
     bool looping_;
 
-    float *mono_buffer_;
-
     OPLInterface *opl_interface_;
 
   public:
     OpalPlayer(bool looping) : status_(kNotLoaded), looping_(looping)
     {
-        mono_buffer_ = new float[2 * kMusicBuffer];
         SequencerInit();
     }
 
     ~OpalPlayer()
     {
         Close();
-
-        if (mono_buffer_)
-            delete[] mono_buffer_;
     }
 
   public:
@@ -228,8 +221,7 @@ class OpalPlayer : public AbstractMusicPlayer
         opl_interface_->onPcmRender_userdata = this;
 
         opl_interface_->pcmSampleRate = sound_device_frequency;
-        opl_interface_->pcmFrameSize  = 2 /*channels*/ * 4 /*size of one sample*/; // OPL3 is 2 'channels' regardless of
-                                                                                   // the sound_device_stereo setting
+        opl_interface_->pcmFrameSize  = 2 /*channels*/ * sizeof(float) /*size of one sample*/;
 
         opl_interface_->rt_deviceSwitch  = rtDeviceSwitch;
         opl_interface_->rt_currentDevice = rtCurrentDevice;
@@ -314,7 +306,7 @@ class OpalPlayer : public AbstractMusicPlayer
     {
         while (status_ == kPlaying && !pc_speaker_mode)
         {
-            SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer, sound_device_stereo ? kMixInterleaved : kMixMono);
+            SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer);
 
             if (!buf)
                 break;
@@ -336,24 +328,14 @@ class OpalPlayer : public AbstractMusicPlayer
   private:
     bool StreamIntoBuffer(SoundData *buf)
     {
-        float *data_buf;
-
         bool song_done = false;
 
-        if (!sound_device_stereo)
-            data_buf = mono_buffer_;
-        else
-            data_buf = buf->data_;
-
-        int played = opl_sequencer_->PlayStream((uint8_t *)(data_buf), kMusicBuffer);
+        int played = opl_sequencer_->PlayStream((uint8_t *)(buf->data_), kMusicBuffer);
 
         if (opl_sequencer_->PositionAtEnd())
             song_done = true;
 
-        buf->length_ = played / 8;
-
-        if (!sound_device_stereo)
-            ConvertToMono(buf->data_, mono_buffer_, buf->length_);
+        buf->length_ = played / 2 / sizeof(float);
 
         if (song_done) /* EOF */
         {

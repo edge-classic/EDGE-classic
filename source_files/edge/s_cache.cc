@@ -49,7 +49,6 @@
 #include "w_files.h"
 #include "w_wad.h"
 
-extern bool sound_device_stereo;
 extern int  sound_device_frequency;
 extern bool pc_speaker_mode;
 
@@ -60,9 +59,9 @@ static void LoadSilence(SoundData *buf)
     int length = 256;
 
     buf->frequency_ = sound_device_frequency;
-    buf->Allocate(length, sound_device_stereo ? kMixInterleaved : kMixMono);
+    buf->Allocate(length);
 
-    memset(buf->data_, 0, length * sizeof(float) * (sound_device_stereo ? 2 : 1));
+    memset(buf->data_, 0, length * sizeof(float) * 2);
 }
 
 static bool LoadDoom(SoundData *buf, const uint8_t *lump, int length)
@@ -80,37 +79,23 @@ static bool LoadDoom(SoundData *buf, const uint8_t *lump, int length)
     if (length <= 0)
         return false;
 
-    buf->Allocate(length, sound_device_stereo ? kMixInterleaved : kMixMono);
+    buf->Allocate(length);
 
     // convert to signed 16-bit format
     const uint8_t *src   = lump + 8;
     const uint8_t *s_end = src + length;
 
     float *dest = buf->data_;
-
-    if (sound_device_stereo)
+    float src_f = 0;
+    
+    for (; src < s_end; src++)
     {
-        float src_f = 0;
-        for (; src < s_end; src++)
-        {
-            int16_t in = ((*src ^ 0x80) << 8);
-            *(uint32_t *)&src_f=0x43818000^((uint16_t)in);
-            src_f -= 259.0f;
-            *dest++ = src_f;
-            *dest++ = src_f;
-        }
+        int16_t in = ((*src ^ 0x80) << 8);
+        *(uint32_t *)&src_f=0x43818000^((uint16_t)in);
+        src_f -= 259.0f;
+        *dest++ = src_f;
+        *dest++ = src_f;
     }
-    else
-    {
-        for (; src < s_end; src++)
-        {
-            int16_t in = ((*src ^ 0x80) << 8);
-            *(uint32_t *)dest=0x43818000^((uint16_t)in);
-            *dest++ -= 259.0f;
-        }
-    }
-
-//65540
 
     return true;
 }

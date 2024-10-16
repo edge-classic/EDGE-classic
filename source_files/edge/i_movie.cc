@@ -35,8 +35,6 @@
 #include "w_files.h"
 #include "w_wad.h"
 
-extern bool sound_device_stereo;
-
 bool                    playing_movie = false;
 static bool             need_canvas_update = false;
 static bool             skip_bar_active = false;
@@ -66,26 +64,12 @@ void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
 {
     (void)mpeg;
     (void)user;
-    SoundData *movie_buf = SoundQueueGetFreeBuffer(PLM_AUDIO_SAMPLES_PER_FRAME, sound_device_stereo ? kMixInterleaved : kMixMono);
+    SoundData *movie_buf = SoundQueueGetFreeBuffer(PLM_AUDIO_SAMPLES_PER_FRAME);
     if (movie_buf)
     {
         movie_buf->length_ = PLM_AUDIO_SAMPLES_PER_FRAME;
-        if (sound_device_stereo)
-        {
-            memcpy(movie_buf->data_, samples->interleaved, PLM_AUDIO_SAMPLES_PER_FRAME * 2 * sizeof(float));
-            SoundQueueAddBuffer(movie_buf, movie_sample_rate);
-        }
-        else
-        {
-            float *src = samples->interleaved;
-            float *dest = movie_buf->data_;
-            float *dest_end = movie_buf->data_ + PLM_AUDIO_SAMPLES_PER_FRAME;
-            for (; dest < dest_end; src += 2)
-            {
-                *dest++ = (src[0] + src[1]) * 0.5f;
-            }
-            SoundQueueAddBuffer(movie_buf, movie_sample_rate);
-        }
+        memcpy(movie_buf->data_, samples->interleaved, PLM_AUDIO_SAMPLES_PER_FRAME * 2 * sizeof(float));
+        SoundQueueAddBuffer(movie_buf, movie_sample_rate);
     }
 }
 

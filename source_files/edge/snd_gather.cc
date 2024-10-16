@@ -96,49 +96,24 @@ void SoundGatherer::DiscardChunk()
     request_ = nullptr;
 }
 
-bool SoundGatherer::Finalise(SoundData *buf, bool want_stereo)
+bool SoundGatherer::Finalise(SoundData *buf)
 {
     if (total_samples_ == 0)
         return false;
 
-    buf->Allocate(total_samples_, want_stereo ? kMixInterleaved : kMixMono);
+    buf->Allocate(total_samples_);
 
     int pos = 0;
 
     for (unsigned int i = 0; i < chunks_.size(); i++)
     {
-        if (want_stereo)
-            TransferStereo(chunks_[i], buf, pos);
-        else
-            TransferMono(chunks_[i], buf, pos);
-
+        TransferStereo(chunks_[i], buf, pos);
         pos += chunks_[i]->total_samples_;
     }
 
     EPI_ASSERT(pos == total_samples_);
 
     return true;
-}
-
-void SoundGatherer::TransferMono(GatherChunk *chunk, SoundData *buf, int pos)
-{
-    int count = chunk->total_samples_;
-
-    float *dest = buf->data_ + pos;
-    float *src = chunk->samples_;
-
-    if (chunk->is_stereo_)
-    {
-        const float *dest_end = dest + count;
-        for (;dest < dest_end; src += 2)
-        {
-            *dest++ = (src[0] + src[1]) * 0.5f;
-        }
-    }
-    else
-    {
-        memcpy(dest, src, count * sizeof(float));
-    }
 }
 
 void SoundGatherer::TransferStereo(GatherChunk *chunk, SoundData *buf, int pos)

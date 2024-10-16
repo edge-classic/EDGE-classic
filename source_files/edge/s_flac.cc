@@ -30,7 +30,6 @@
 #include "snd_gather.h"
 #include "w_wad.h"
 
-extern bool sound_device_stereo; // FIXME: encapsulation
 extern int  sound_device_frequency;
 
 class FLACPlayer : public AbstractMusicPlayer
@@ -56,8 +55,6 @@ class FLACPlayer : public AbstractMusicPlayer
 
     uint8_t *flac_data_; // Passed in from s_music; must be deleted on close
 
-    float *mono_buffer_;
-
   public:
     bool OpenMemory(uint8_t *data, int length);
 
@@ -81,15 +78,11 @@ class FLACPlayer : public AbstractMusicPlayer
 
 FLACPlayer::FLACPlayer() : status_(kNotLoaded)
 {
-    mono_buffer_ = new float[kMusicBuffer * 2];
 }
 
 FLACPlayer::~FLACPlayer()
 {
     Close();
-
-    if (mono_buffer_)
-        delete[] mono_buffer_;
 }
 
 void FLACPlayer::PostOpen()
@@ -108,29 +101,11 @@ void FLACPlayer::PostOpen()
     status_ = kStopped;
 }
 
-static void ConvertToMono(float *dest, const float *src, int len)
-{
-    const float *s_end = src + len * 2;
-
-    for (; src < s_end; src += 2)
-    {
-        // compute average of samples
-        *dest++ = (src[0] + src[1]) * 0.5f;
-    }
-}
-
 bool FLACPlayer::StreamIntoBuffer(SoundData *buf)
 {
-    float *data_buf;
-
     bool song_done = false;
 
-    if (!sound_device_stereo)
-        data_buf = mono_buffer_;
-    else
-        data_buf = buf->data_;
-
-    drflac_uint64 frames = drflac_read_pcm_frames_f32(flac_track_, kMusicBuffer, data_buf);
+    drflac_uint64 frames = drflac_read_pcm_frames_f32(flac_track_, kMusicBuffer, buf->data_);
 
     if (frames < kMusicBuffer)
         song_done = true;
@@ -138,9 +113,6 @@ bool FLACPlayer::StreamIntoBuffer(SoundData *buf)
     buf->length_ = frames;
 
     buf->frequency_ = flac_track_->sampleRate;
-
-    if (is_stereo_ && !sound_device_stereo)
-        ConvertToMono(buf->data_, mono_buffer_, buf->length_);
 
     if (song_done) /* EOF */
     {
@@ -235,7 +207,7 @@ void FLACPlayer::Ticker()
 {
     while (status_ == kPlaying && !pc_speaker_mode)
     {
-        SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer, (sound_device_stereo) ? kMixInterleaved : kMixMono);
+        SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer);
 
         if (!buf)
             break;

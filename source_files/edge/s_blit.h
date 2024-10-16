@@ -114,11 +114,11 @@ void SoundQueueStop(void);
 // stop the currently playing queue.  All playing buffers
 // are moved into the free list.
 
-SoundData *SoundQueueGetFreeBuffer(int samples, int buf_mode);
+SoundData *SoundQueueGetFreeBuffer(int samples);
 // returns the next unused (or finished) buffer, or nullptr
-// if there are none.  The data_left_/data_right_ fields will be
+// if there are none.  The data_ field will be
 // updated to ensure they hold the requested number of
-// samples and conform to the wanted buffer mode.
+// samples.
 
 void SoundQueueAddBuffer(SoundData *buf, int freq);
 // add a new buffer to be end of the queue.

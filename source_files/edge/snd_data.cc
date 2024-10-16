@@ -19,7 +19,7 @@
 #include "snd_data.h"
 
 SoundData::SoundData()
-    : length_(0), frequency_(0), mode_(0), data_(nullptr),
+    : length_(0), frequency_(0), data_(nullptr),
       definition_data_(nullptr), is_sound_effect_(false)
 {
 }
@@ -39,10 +39,10 @@ void SoundData::Free()
     data_ = nullptr;
 }
 
-void SoundData::Allocate(int samples, int buf_mode)
+void SoundData::Allocate(int samples)
 {
     // early out when requirements are already met
-    if (data_ && length_ >= samples && mode_ == buf_mode)
+    if (data_ && length_ >= samples)
     {
         length_ = samples; // FIXME: perhaps keep allocated count
         return;
@@ -54,9 +54,8 @@ void SoundData::Allocate(int samples, int buf_mode)
     }
 
     length_ = samples;
-    mode_   = buf_mode;
 
-    data_ = new float[samples * (buf_mode == kMixMono ? 1 : 2)];
+    data_ = new float[samples * 2];
 }
 
 //--- editor settings ---

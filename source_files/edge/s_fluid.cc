@@ -38,7 +38,6 @@ typedef struct MidiRealTimeInterface FluidInterface;
 #include "s_blit.h"
 #include "s_music.h"
 
-extern bool sound_device_stereo;
 extern int  sound_device_frequency;
 
 bool fluid_disabled = false;
@@ -66,17 +65,6 @@ static void *edge_fluid_fopen(fluid_fileapi_t *fileapi, const char *filename)
     if (!fp)
         return nullptr;
     return fp;
-}
-
-static void ConvertToMono(float *dest, const float *src, int len)
-{
-    const float *s_end = src + len * 2;
-
-    for (; src < s_end; src += 2)
-    {
-        // compute average of samples
-        *dest++ = (src[0] + src[1]) * 0.5f;
-    }
 }
 
 bool StartupFluid(void)
@@ -186,21 +174,15 @@ class FluidPlayer : public AbstractMusicPlayer
 
     FluidInterface *fluid_interface_;
 
-    float *mono_buffer_;
-
   public:
     FluidPlayer(uint8_t *data, int _length, bool looping) : status_(kNotLoaded), looping_(looping)
     {
-        mono_buffer_ = new float[kMusicBuffer * 2];
         SequencerInit();
     }
 
     ~FluidPlayer()
     {
         Close();
-
-        if (mono_buffer_)
-            delete[] mono_buffer_;
     }
 
   public:
@@ -286,7 +268,7 @@ class FluidPlayer : public AbstractMusicPlayer
         fluid_interface_->onPcmRender_userdata = this;
 
         fluid_interface_->pcmSampleRate = sound_device_frequency;
-        fluid_interface_->pcmFrameSize  = 2 /*channels*/ * 4 /*size of one sample*/;
+        fluid_interface_->pcmFrameSize  = 2 /*channels*/ * sizeof(float) /*size of one sample*/;
 
         fluid_interface_->rt_deviceSwitch  = rtDeviceSwitch;
         fluid_interface_->rt_currentDevice = rtCurrentDevice;
@@ -375,7 +357,7 @@ class FluidPlayer : public AbstractMusicPlayer
 
         while (status_ == kPlaying && !pc_speaker_mode)
         {
-            SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer, sound_device_stereo ? kMixInterleaved : kMixMono);
+            SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer);
 
             if (!buf)
                 break;
@@ -397,24 +379,14 @@ class FluidPlayer : public AbstractMusicPlayer
   private:
     bool StreamIntoBuffer(SoundData *buf)
     {
-        float *data_buf;
-
         bool song_done = false;
 
-        if (!sound_device_stereo)
-            data_buf = mono_buffer_;
-        else
-            data_buf = buf->data_;
-
-        int played = fluid_sequencer_->PlayStream((uint8_t *)data_buf, kMusicBuffer);
+        int played = fluid_sequencer_->PlayStream((uint8_t *)buf->data_, kMusicBuffer);
 
         if (fluid_sequencer_->PositionAtEnd())
             song_done = true;
 
-        buf->length_ = played / 8;
-
-        if (!sound_device_stereo)
-            ConvertToMono(buf->data_, mono_buffer_, buf->length_);
+        buf->length_ = played / 2 / sizeof(float);
 
         if (song_done) /* EOF */
         {

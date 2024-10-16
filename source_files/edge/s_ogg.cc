@@ -32,8 +32,6 @@
 #include "stb_vorbis.h"
 // clang-format on
 
-extern bool sound_device_stereo; // FIXME: encapsulation
-
 class OGGPlayer : public AbstractMusicPlayer
 {
   public:
@@ -94,7 +92,7 @@ void OGGPlayer::PostOpen()
 
 bool OGGPlayer::StreamIntoBuffer(SoundData *buf)
 {
-    int got_size = stb_vorbis_get_samples_float_interleaved(ogg_decoder_, sound_device_stereo ? 2 : 1, buf->data_, kMusicBuffer);
+    int got_size = stb_vorbis_get_samples_float_interleaved(ogg_decoder_, ogg_decoder_->channels, buf->data_, kMusicBuffer);
 
     if (got_size == 0) /* EOF */
     {
@@ -212,7 +210,7 @@ void OGGPlayer::Ticker()
     while (status_ == kPlaying)
     {
         SoundData *buf =
-            SoundQueueGetFreeBuffer(kMusicBuffer, sound_device_stereo ? kMixInterleaved : kMixMono);
+            SoundQueueGetFreeBuffer(kMusicBuffer);
 
         if (!buf)
             break;
@@ -274,8 +272,6 @@ bool LoadOGGSound(SoundData *buf, const uint8_t *data, int length)
 
     buf->frequency_ = ogg->sample_rate;
 
-    buf->mode_ = sound_device_stereo ? kMixInterleaved : kMixMono;
-
     uint32_t total_samples = stb_vorbis_stream_length_in_samples(ogg);
 
     SoundGatherer gather;
@@ -284,7 +280,7 @@ bool LoadOGGSound(SoundData *buf, const uint8_t *data, int length)
 
     gather.CommitChunk(stb_vorbis_get_samples_float_interleaved(ogg, is_stereo ? 2 : 1, buffer, total_samples));
 
-    if (!gather.Finalise(buf, sound_device_stereo))
+    if (!gather.Finalise(buf))
         FatalError("OGG SFX Loader: no samples!\n");
 
     stb_vorbis_close(ogg);

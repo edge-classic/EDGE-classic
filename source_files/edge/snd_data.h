@@ -20,12 +20,6 @@
 
 #include <stdint.h>
 
-enum SoundBufferMix
-{
-    kMixMono        = 0,
-    kMixInterleaved = 1
-};
-
 enum SoundFilter
 {
     kFilterNone      = 0,
@@ -47,7 +41,6 @@ class SoundData
   public:
     int length_;    // number of samples
     int frequency_; // frequency
-    int mode_;      // one of the kMixxxx values
 
     // 32-bit floating point samples.
     float *data_;
@@ -61,7 +54,7 @@ class SoundData
     SoundData();
     ~SoundData();
 
-    void Allocate(int samples, int buf_mode);
+    void Allocate(int samples);
     void Free();
 };
 

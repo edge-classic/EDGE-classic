@@ -270,6 +270,8 @@ bool LoadOGGSound(SoundData *buf, const uint8_t *data, int length)
 
     LogDebug("OGG SFX Loader: freq %d Hz, %d channels\n", ogg->sample_rate, ogg->channels);
 
+    bool is_stereo = ogg->channels > 1;
+
     buf->frequency_ = ogg->sample_rate;
 
     buf->mode_ = sound_device_stereo ? kMixInterleaved : kMixMono;
@@ -278,9 +280,9 @@ bool LoadOGGSound(SoundData *buf, const uint8_t *data, int length)
 
     SoundGatherer gather;
 
-    float *buffer = gather.MakeChunk(total_samples, sound_device_stereo);
+    float *buffer = gather.MakeChunk(total_samples, is_stereo);
 
-    gather.CommitChunk(stb_vorbis_get_samples_float_interleaved(ogg, sound_device_stereo ? 2 : 1, buffer, total_samples));
+    gather.CommitChunk(stb_vorbis_get_samples_float_interleaved(ogg, is_stereo ? 2 : 1, buffer, total_samples));
 
     if (!gather.Finalise(buf, sound_device_stereo))
         FatalError("OGG SFX Loader: no samples!\n");

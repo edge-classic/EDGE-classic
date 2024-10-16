@@ -104,7 +104,16 @@ SoundChannel::~SoundChannel()
 
 void SoundChannel::ComputeDelta()
 {
-    delta_ = (float)data_->frequency_ * (1.0f / (float)sound_device_frequency);
+    // frequency close enough ?
+    if (data_->frequency_ > (sound_device_frequency - sound_device_frequency / 100) &&
+        data_->frequency_ < (sound_device_frequency + sound_device_frequency / 100))
+    {
+        delta_ = (1 << 10);
+    }
+    else
+    {
+        delta_ = (uint32_t)floor((float)data_->frequency_ * 1024.0f / sound_device_frequency);
+    }
 }
 
 void SoundChannel::ComputeVolume()
@@ -201,18 +210,18 @@ static void MixMono(SoundChannel *chan, float *dest, int pairs)
     float *d_pos = dest;
     float *d_end = d_pos + pairs;
 
-    float offset = chan->offset_;
+    uint32_t offset = chan->offset_;
 
     while (d_pos < d_end)
     {
-        *d_pos++ += src[(uint32_t)offset] * chan->volume_left_;
+        *d_pos++ += src[offset >> 10] * chan->volume_left_;
 
         offset += chan->delta_;
     }
 
     chan->offset_ = offset;
 
-    EPI_ASSERT((uint32_t)(offset - chan->delta_) < chan->length_);
+    EPI_ASSERT(offset - chan->delta_ < chan->length_);
 }
 
 static void MixInterleaved(SoundChannel *chan, float *dest, int pairs)
@@ -239,20 +248,21 @@ static void MixInterleaved(SoundChannel *chan, float *dest, int pairs)
     float *d_pos = dest;
     float *d_end = d_pos + pairs * 2;
 
-    float offset = chan->offset_;
+    uint32_t offset = chan->offset_;
 
     while (d_pos < d_end)
     {
-        uint32_t pos = (uint32_t)(offset * 2.0f) & ~1;
+        uint32_t pos = (offset >> 9) & ~1;
 
         *d_pos++ += src[pos] * chan->volume_left_;
-        *d_pos++ += src[pos|1] * chan->volume_right_;
+        *d_pos++ += src[pos | 1] * chan->volume_right_;
+
         offset += chan->delta_;
     }
 
     chan->offset_ = offset;
 
-    EPI_ASSERT((uint32_t)(offset - chan->delta_) < chan->length_);
+    EPI_ASSERT(offset - chan->delta_ < chan->length_);
 }
 
 static void MixOneChannel(SoundChannel *chan, int pairs)
@@ -263,7 +273,7 @@ static void MixOneChannel(SoundChannel *chan, int pairs)
     if (AlmostEquals(chan->volume_left_, 0.0f) && AlmostEquals(chan->volume_right_, 0.0f))
         return;
 
-    EPI_ASSERT((uint32_t)chan->offset_ < chan->length_);
+    EPI_ASSERT(chan->offset_ < chan->length_);
 
     float *dest = mix_buffer;
 
@@ -272,17 +282,17 @@ static void MixOneChannel(SoundChannel *chan, int pairs)
         int count = pairs;
 
         // check if enough sound data is left
-        if ((uint32_t)(chan->offset_ + count * chan->delta_) >= chan->length_)
+        if (chan->offset_ + count * chan->delta_ >= chan->length_)
         {
             // find minimum number of samples we can play
-            double avail = (chan->length_ - (uint32_t)(chan->offset_)) / (double)chan->delta_;
+            double avail = (chan->length_ - chan->offset_ + chan->delta_ - 1) / (double)chan->delta_;
 
             count = (int)floor(avail);
 
             EPI_ASSERT(count > 0);
             EPI_ASSERT(count <= pairs);
 
-            EPI_ASSERT((uint32_t)RoundToInteger(chan->offset_ + count * chan->delta_) >= chan->length_);
+            EPI_ASSERT(chan->offset_ + count * chan->delta_ >= chan->length_);
         }
 
         if (chan->data_->mode_ == kMixInterleaved)
@@ -290,7 +300,7 @@ static void MixOneChannel(SoundChannel *chan, int pairs)
         else
             MixMono(chan, dest, count);
 
-        if ((uint32_t)chan->offset_ >= chan->length_)
+        if (chan->offset_ >= chan->length_)
         {
             if (!chan->loop_)
             {
@@ -324,7 +334,7 @@ static bool QueueNextBuffer(void)
     queue_channel->data_ = buf;
 
     queue_channel->offset_ = 0;
-    queue_channel->length_ = buf->length_;
+    queue_channel->length_ = buf->length_ << 10;
 
     queue_channel->ComputeDelta();
 
@@ -339,10 +349,10 @@ static void MixQueues(int pairs)
     if (!chan || !chan->data_ || chan->state_ != kChannelPlaying)
         return;
 
-    if (chan->volume_left_ == 0 && chan->volume_right_ == 0)
+    if (AlmostEquals(chan->volume_left_, 0.0f) && AlmostEquals(chan->volume_right_, 0.0f))
         return;
 
-    EPI_ASSERT((uint32_t)chan->offset_ < chan->length_);
+    EPI_ASSERT(chan->offset_ < chan->length_);
 
     float *dest = mix_buffer;
 
@@ -351,17 +361,17 @@ static void MixQueues(int pairs)
         int count = pairs;
 
         // check if enough sound data is left
-        if ((uint32_t)(chan->offset_ + count * chan->delta_) >= chan->length_)
+        if (chan->offset_ + count * chan->delta_ >= chan->length_)
         {
             // find minimum number of samples we can play
-            double avail = (chan->length_ - (uint32_t)(chan->offset_)) / (double)chan->delta_;
+            double avail = (chan->length_ - chan->offset_ + chan->delta_ - 1) / (double)chan->delta_;
 
             count = (int)floor(avail);
 
             EPI_ASSERT(count > 0);
             EPI_ASSERT(count <= pairs);
 
-            EPI_ASSERT((uint32_t)RoundToInteger(chan->offset_ + count * chan->delta_) >= chan->length_);
+            EPI_ASSERT(chan->offset_ + count * chan->delta_ >= chan->length_);
         }
 
         if (chan->data_->mode_ == kMixInterleaved)
@@ -369,7 +379,7 @@ static void MixQueues(int pairs)
         else
             MixMono(chan, dest, count);
 
-        if ((uint32_t)chan->offset_ >= chan->length_)
+        if (chan->offset_ >= chan->length_)
         {
             // reached end of current queued buffer.
             // Place current buffer onto free list,

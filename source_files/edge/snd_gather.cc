@@ -124,13 +124,12 @@ void SoundGatherer::TransferMono(GatherChunk *chunk, SoundData *buf, int pos)
 {
     int count = chunk->total_samples_;
 
-    float *dest     = buf->data_ + pos;
-    float *dest_end = dest + count;
-
+    float *dest = buf->data_ + pos;
     float *src = chunk->samples_;
 
     if (chunk->is_stereo_)
     {
+        const float *dest_end = dest + count;
         for (;dest < dest_end; src += 2)
         {
             *dest++ = (src[0] + src[1]) * 0.5f;
@@ -147,20 +146,15 @@ void SoundGatherer::TransferStereo(GatherChunk *chunk, SoundData *buf, int pos)
     int count = chunk->total_samples_;
 
     float *dest = buf->data_ + pos;
-
-    const float *src     = chunk->samples_;
-    const float *src_end = src + count * (chunk->is_stereo_ ? 2 : 1);
+    float *src  = chunk->samples_;
 
     if (chunk->is_stereo_)
     {
-        for (; src < src_end; src += 2)
-        {
-            *dest++ = src[0];
-            *dest++ = src[1];
-        }
+        memcpy(dest, src, count * 2 * sizeof(float));
     }
     else
     {
+        const float *src_end = src + count;
         while (src < src_end)
         {
             *dest++ = *src;

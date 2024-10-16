@@ -52,9 +52,11 @@ class SoundChannel
     SoundEffectDefinition *definition_;
     Position              *position_;
 
-    float offset_;
-    float delta_;
+    // We use a 22.10 fixed point for sound offsets.  It's a reasonable
+    // compromise between longest sound and accumulated round-off error.
+    uint32_t offset_;
     uint32_t length_;
+    uint32_t delta_;
 
     float volume_left_; // mixing volume
     float volume_right_;

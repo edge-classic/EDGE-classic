@@ -332,7 +332,7 @@ static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, Posit
     chan->volume_right_ = 0;
 
     chan->offset_ = 0;
-    chan->length_ = chan->data_->length_;
+    chan->length_ = chan->data_->length_ << 10;
 
     chan->loop_ = false;
     chan->boss_ = (flags & kSoundEffectBoss) ? true : false;

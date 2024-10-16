@@ -419,11 +419,15 @@ void Opal::Sample(float *left, float *right)
 
     // Mix with the partial accumulation
     int32_t omblend = SampleRate - SampleAccum;
+#if defined _MSC_VER || (defined __SIZEOF_FLOAT__ && __SIZEOF_FLOAT__ == 4)
     *(uint32_t *)left  = 0x43818000^(uint16_t)((LastOutput[0] * omblend + CurrOutput[0] * SampleAccum) / SampleRate);
     *left -= 259.0f;
     *(uint32_t *)right = 0x43818000^(uint16_t)((LastOutput[1] * omblend + CurrOutput[1] * SampleAccum) / SampleRate);
     *right -= 259.0f;
-
+#else
+    *left  = (float)((LastOutput[0] * omblend + CurrOutput[0] * SampleAccum) / SampleRate) * 0.000030517578125f;
+    *right = (float)((LastOutput[1] * omblend + CurrOutput[1] * SampleAccum) / SampleRate) * 0.000030517578125f;
+#endif
     SampleAccum += OPL3SampleRate;
 }
 

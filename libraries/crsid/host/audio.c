@@ -31,10 +31,15 @@ void cRSID_generateFloat(cRSID_C64instance *C64, float *buf, unsigned short len)
     {
         for (j = 0; j < C64->PlaybackSpeed; ++j)
             Output = cRSID_generateSample(C64);
+#if defined _MSC_VER || (defined __SIZEOF_FLOAT__ && __SIZEOF_FLOAT__ == 4)
         *(uint32_t *)buf=0x43818000^((uint16_t)Output.L * C64->MainVolume / 256);
         *buf++ -= 259.0f;
         *(uint32_t *)buf=0x43818000^((uint16_t)Output.R * C64->MainVolume / 256);
         *buf++ -= 259.0f;
+#else   
+        *buf++ = (float)(Output.L * C64->MainVolume / 256) * 0.000030517578125f;
+        *buf++ = (float)(Output.R * C64->MainVolume / 256) * 0.000030517578125f;
+#endif
     }
 }
 

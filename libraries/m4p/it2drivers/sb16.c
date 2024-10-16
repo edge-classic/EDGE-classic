@@ -285,9 +285,12 @@ static int32_t SB16_PostMix_Float(float *AudioOut32, int32_t SamplesToOutput)
 			Sample = INT16_MIN;
 		else if (Sample > INT16_MAX)
 			Sample = INT16_MAX;
-
+#if defined _MSC_VER || (defined __SIZEOF_FLOAT__ && __SIZEOF_FLOAT__ == 4)
 		*(uint32_t *)AudioOut32=0x43818000^((uint16_t)Sample);
 		*AudioOut32++ -= 259.0f;
+#else
+		*AudioOut32++ = (float)Sample * 0.000030517578125f;
+#endif
 	}
 
 	return SamplesTodo;

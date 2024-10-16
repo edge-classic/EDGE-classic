@@ -358,14 +358,15 @@ void mix_UpdateBufferFloat(float *buffer, int32_t numSamples)
 	** Instead we change the amplitude here.
 	*/
 
+#if defined _MSC_VER || (defined __SIZEOF_FLOAT__ && __SIZEOF_FLOAT__ == 4)
 	if (masterVol == 256) // 8bb: max master volume, no need to change amp
 	{
 		for (int32_t i = 0; i < numSamples; i++)
 		{
 			int32_t out32 = CDA_MixBuffer[i] >> 8;
 			CLAMP16(out32);
-			*(uint32_t *)&buffer[i] = 0x43818000^((uint16_t)out32);
-			buffer[i] -= 259.0f;
+			*(uint32_t *)buffer = 0x43818000^((uint16_t)out32);
+			*buffer++ -= 259.0f;
 		}
 	}
 	else
@@ -375,10 +376,31 @@ void mix_UpdateBufferFloat(float *buffer, int32_t numSamples)
 			int32_t out32 = CDA_MixBuffer[i] >> 8;
 			CLAMP16(out32);
 			out32 = (out32 * masterVol) >> 8;
-			*(uint32_t *)&buffer[i] = 0x43818000^((uint16_t)out32);
-			buffer[i] -= 259.0f;
+			*(uint32_t *)buffer = 0x43818000^((uint16_t)out32);
+			*buffer++ -= 259.0f;
 		}
 	}
+#else
+	if (masterVol == 256) // 8bb: max master volume, no need to change amp
+	{
+		for (int32_t i = 0; i < numSamples; i++)
+		{
+			int32_t out32 = CDA_MixBuffer[i] >> 8;
+			CLAMP16(out32);
+			*buffer++ = (float)out32 * 0.000030517578125f;
+		}
+	}
+	else
+	{
+		for (int32_t i = 0; i < numSamples; i++)
+		{
+			int32_t out32 = CDA_MixBuffer[i] >> 8;
+			CLAMP16(out32);
+			out32 = (out32 * masterVol) >> 8;
+			*buffer++ = (float)out32 * 0.000030517578125f;
+		}
+	}
+#endif
 }
 
 bool dump_Init(int32_t frq, int32_t amp, int16_t songPos)

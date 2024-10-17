@@ -28,8 +28,6 @@
 #include "snd_gather.h"
 #include "w_wad.h"
 
-extern bool sound_device_stereo; // FIXME: encapsulation
-
 // The following structs and PC Speaker Conversion routine are adapted from the
 // SLADE codebase, specifically
 // https://github.com/sirjuddington/SLADE/blob/master/src/MainEditor/Conversions.cpp
@@ -234,11 +232,11 @@ bool LoadWAVSound(SoundData *buf, uint8_t *data, int length, bool pc_speaker)
 
     SoundGatherer gather;
 
-    int16_t *buffer = gather.MakeChunk(wav.totalPCMFrameCount, is_stereo);
+    float *buffer = gather.MakeChunk(wav.totalPCMFrameCount, is_stereo);
 
-    gather.CommitChunk(drwav_read_pcm_frames_s16(&wav, wav.totalPCMFrameCount, buffer));
+    gather.CommitChunk(drwav_read_pcm_frames_f32(&wav, wav.totalPCMFrameCount, buffer));
 
-    if (!gather.Finalise(buf, is_stereo))
+    if (!gather.Finalise(buf))
         LogWarning("WAV SFX Loader: no samples!\n");
 
     drwav_uninit(&wav);

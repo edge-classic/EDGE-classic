@@ -312,6 +312,97 @@ void mix_UpdateBuffer(int16_t *buffer, int32_t numSamples)
 	}
 }
 
+void mix_UpdateBufferFloat(float *buffer, int32_t numSamples)
+{
+	if (numSamples <= 0)
+		return;
+
+	if (musicPaused) // silence output
+	{
+		memset(buffer, 0, numSamples * (2 * sizeof (int16_t)));
+		return;
+	}
+
+	memset(CDA_MixBuffer, 0, numSamples * (2 * sizeof (int32_t)));
+
+	int32_t c = 0;
+	int32_t a = numSamples;
+
+	while (a > 0)
+	{
+		if (PMPLeft == 0)
+		{
+			mix_SaveIPVolumes();
+			mainPlayer();
+			mix_UpdateChannelVolPanFrq();
+			PMPLeft = speedVal;
+		}
+
+		int32_t b = a;
+		if (b > PMPLeft)
+			b = PMPLeft;
+
+		CIType *v = CI;
+		for (int32_t i = 0; i < song.antChn*2; i++, v++)
+			PMPMix32Proc(v, b, c);
+
+		c += b;
+		a -= b;
+		PMPLeft -= b;
+	}
+
+	numSamples *= 2; // 8bb: stereo
+
+	/* 8bb: Done a bit differently since we don't use a
+	** Sound Blaster with its master volume setting.
+	** Instead we change the amplitude here.
+	*/
+
+#if defined _MSC_VER || (defined __SIZEOF_FLOAT__ && __SIZEOF_FLOAT__ == 4)
+	if (masterVol == 256) // 8bb: max master volume, no need to change amp
+	{
+		for (int32_t i = 0; i < numSamples; i++)
+		{
+			int32_t out32 = CDA_MixBuffer[i] >> 8;
+			CLAMP16(out32);
+			*(uint32_t *)buffer = 0x43818000^((uint16_t)out32);
+			*buffer++ -= 259.0f;
+		}
+	}
+	else
+	{
+		for (int32_t i = 0; i < numSamples; i++)
+		{
+			int32_t out32 = CDA_MixBuffer[i] >> 8;
+			CLAMP16(out32);
+			out32 = (out32 * masterVol) >> 8;
+			*(uint32_t *)buffer = 0x43818000^((uint16_t)out32);
+			*buffer++ -= 259.0f;
+		}
+	}
+#else
+	if (masterVol == 256) // 8bb: max master volume, no need to change amp
+	{
+		for (int32_t i = 0; i < numSamples; i++)
+		{
+			int32_t out32 = CDA_MixBuffer[i] >> 8;
+			CLAMP16(out32);
+			*buffer++ = (float)out32 * 0.000030517578125f;
+		}
+	}
+	else
+	{
+		for (int32_t i = 0; i < numSamples; i++)
+		{
+			int32_t out32 = CDA_MixBuffer[i] >> 8;
+			CLAMP16(out32);
+			out32 = (out32 * masterVol) >> 8;
+			*buffer++ = (float)out32 * 0.000030517578125f;
+		}
+	}
+#endif
+}
+
 bool dump_Init(int32_t frq, int32_t amp, int16_t songPos)
 {
 	setPos(songPos, 0);

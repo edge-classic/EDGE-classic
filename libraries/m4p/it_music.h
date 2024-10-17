@@ -36,8 +36,10 @@ enum
 // 8bb: globalized
 extern void (*DriverClose)(void);
 extern void (*DriverMix)(int32_t, int16_t *);
+extern void (*DriverMixFloat)(int32_t, float *);
 extern void (*DriverResetMixer)(void);
 extern int32_t (*DriverPostMix)(int16_t *, int32_t);
+extern int32_t (*DriverPostMixFloat)(float *, int32_t);
 extern void (*DriverMixSamples)(void);
 extern void (*DriverSetTempo)(uint8_t);
 extern void (*DriverSetMixVolume)(uint8_t);
@@ -60,6 +62,7 @@ void PitchSlideDown(hostChn_t *hc, slaveChn_t *sc, int16_t SlideValue);
 
 void Update(void);
 void Music_FillAudioBuffer(int16_t *buffer, int32_t numSamples);
+void Music_FillAudioBufferFloat(float *buffer, int32_t numSamples);
 
 bool Music_Init(int32_t mixingFrequency, int32_t mixingBufferSize);
 void Music_Close(void); // 8bb: added this

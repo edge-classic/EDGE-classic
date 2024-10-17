@@ -25,9 +25,6 @@ libRAD (patches.cpp/radmidi.cpp) - Copyright (c) 2021-2023 Devin Acker
 Mod4Play library - 	Copyright (c) 2024 dashodanger
 					Copyright (c) 2022 Olav Sørensen
 
-minivorbis library - Copyright (c) 2020 Eduardo Bart
-		     		 Copyright (c) 2002-2020 Xiph.org Foundation
-
 ZDoom FName implementation - Copyright (c) 2005-2007 Randy Heit
 
 ===========================================================================================
@@ -139,7 +136,7 @@ prns.h - Marc B. Reynolds
 
 "sf_GMbank" soundfont (renamed to Default.sf2) - The Csound Developers
 
-stb_image, stb_image_write, stb_rect_pack, stb_sprintf and stb_truetype libraries - Sean Barrett
+stb_image, stb_image_write, stb_rect_pack, stb_sprintf, stb_truetype and stb_vorbis libraries - Sean Barrett
 
 ===========================================================================================
 SIL Open Font License

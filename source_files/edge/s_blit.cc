@@ -27,6 +27,7 @@
 
 #include <list>
 
+#include "AlmostEquals.h"
 #include "dm_state.h"
 #include "epi.h"
 #include "epi_sdl.h"
@@ -38,16 +39,6 @@
 #include "s_cache.h"
 #include "s_music.h"
 #include "s_sound.h"
-
-// Sound must be clipped to prevent distortion (clipping is
-// a kind of distortion of course, but it's much better than
-// the "white noise" you get when values overflow).
-//
-// The more safe bits there are, the less likely the final
-// output sum will overflow into white noise, but the less
-// precision you have left for the volume multiplier.
-static constexpr uint8_t kSafeClippingBits   = 4;
-static constexpr int32_t kSoundClipThreshold = ((1 << (31 - kSafeClippingBits)) - 1);
 
 static constexpr uint8_t  kMinimumSoundChannels = 32;
 static constexpr uint16_t kMaximumSoundChannels = 256;
@@ -65,8 +56,8 @@ int   ddf_reverb_ratio        = 0;
 int   ddf_reverb_delay        = 0;
 float music_player_gain       = 1.0f;
 
-static int *mix_buffer;
-static int  mix_buffer_length;
+static float *mix_buffer;
+static int    mix_buffer_length;
 
 static constexpr uint8_t kMaximumQueueBuffers = 16;
 
@@ -144,7 +135,7 @@ void SoundChannel::ComputeVolume()
         }
     }
 
-    float MAX_VOL = (1 << (16 - kSafeClippingBits)) - 3;
+    float MAX_VOL = 1.0f;
 
     MAX_VOL = (boss_ ? MAX_VOL : MAX_VOL / dist) * sound_effect_volume.f_;
 
@@ -152,21 +143,21 @@ void SoundChannel::ComputeVolume()
         MAX_VOL *= definition_->volume_;
 
     // strictly linear equations
-    volume_left_  = (int)(MAX_VOL * (1.0 - sep));
-    volume_right_ = (int)(MAX_VOL * (0.0 + sep));
+    volume_left_  = (MAX_VOL * (1.0 - sep));
+    volume_right_ = (MAX_VOL * (0.0 + sep));
 
     if (var_sound_stereo == 2) /* SWAP ! */
     {
         if (!fliplevels.d_)
         {
-            int tmp       = volume_left_;
+            float tmp       = volume_left_;
             volume_left_  = volume_right_;
             volume_right_ = tmp;
         }
     }
     else if (fliplevels.d_)
     {
-        int tmp       = volume_left_;
+        float tmp       = volume_left_;
         volume_left_  = volume_right_;
         volume_right_ = tmp;
     }
@@ -174,147 +165,60 @@ void SoundChannel::ComputeVolume()
 
 void SoundChannel::ComputeMusicVolume()
 {
-    float MAX_VOL = (1 << (16 - kSafeClippingBits)) - 3;
+    float MAX_VOL = 1.0f;
 
-    MAX_VOL = MAX_VOL * music_volume.f_ *
-              music_player_gain; // This last one is an internal value that depends on music format
+    MAX_VOL = MAX_VOL * music_volume.f_ * music_player_gain; // This last one is an internal value that depends on music format
 
-    volume_left_  = (int)MAX_VOL;
-    volume_right_ = (int)MAX_VOL;
+    volume_left_  = MAX_VOL;
+    volume_right_ = MAX_VOL;
 }
 
 //----------------------------------------------------------------------------
 
-static void BlitToS16(const int *src, int16_t *dest, int length)
-{
-    const int *s_end = src + length;
-
-    while (src < s_end)
-    {
-        int val = *src++;
-
-        if (val > kSoundClipThreshold)
-            val = kSoundClipThreshold;
-        else if (val < -kSoundClipThreshold)
-            val = -kSoundClipThreshold;
-
-        *dest++ = (int16_t)(val >> (16 - kSafeClippingBits));
-    }
-}
-
-static void MixMono(SoundChannel *chan, int *dest, int pairs)
+static void MixInterleaved(SoundChannel *chan, float *dest, int pairs)
 {
     EPI_ASSERT(pairs > 0);
 
-    int16_t *src_L;
+    float *src = nullptr;
 
     if (paused || menu_active)
-        src_L = chan->data_->data_left_;
+        src = chan->data_->data_;
     else
     {
         if (!chan->data_->is_sound_effect_ || chan->category_ == kCategoryUi ||
             chan->data_->current_filter_ == kFilterNone)
-            src_L = chan->data_->data_left_;
+            src = chan->data_->data_;
         else
-            src_L = chan->data_->filter_data_left_;
+            src = chan->data_->filter_data_;
     }
 
-    int *d_pos = dest;
-    int *d_end = d_pos + pairs;
+    float *d_pos = dest;
+    float *d_end = d_pos + pairs * (sound_device_stereo ? 2 : 1);
 
     uint32_t offset = chan->offset_;
 
-    while (d_pos < d_end)
+    if (sound_device_stereo)
     {
-        *d_pos++ += src_L[offset >> 10] * chan->volume_left_;
-
-        offset += chan->delta_;
-    }
-
-    chan->offset_ = offset;
-
-    EPI_ASSERT(offset - chan->delta_ < chan->length_);
-}
-
-static void MixStereo(SoundChannel *chan, int *dest, int pairs)
-{
-    EPI_ASSERT(pairs > 0);
-
-    int16_t *src_L;
-    int16_t *src_R;
-
-    if (paused || menu_active)
-    {
-        src_L = chan->data_->data_left_;
-        src_R = chan->data_->data_right_;
-    }
-    else
-    {
-        if (!chan->data_->is_sound_effect_ || chan->category_ == kCategoryUi ||
-            chan->data_->current_filter_ == kFilterNone)
+        while (d_pos < d_end)
         {
-            src_L = chan->data_->data_left_;
-            src_R = chan->data_->data_right_;
-        }
-        else
-        {
-            src_L = chan->data_->filter_data_left_;
-            src_R = chan->data_->filter_data_right_;
+            uint32_t pos = (offset >> 9) & ~1;
+
+            *d_pos++ += src[pos] * chan->volume_left_;
+            *d_pos++ += src[pos | 1] * chan->volume_right_;
+
+            offset += chan->delta_;
         }
     }
-
-    int *d_pos = dest;
-    int *d_end = d_pos + pairs * 2;
-
-    uint32_t offset = chan->offset_;
-
-    while (d_pos < d_end)
-    {
-        *d_pos++ += src_L[offset >> 10] * chan->volume_left_;
-        *d_pos++ += src_R[offset >> 10] * chan->volume_right_;
-
-        offset += chan->delta_;
-    }
-
-    chan->offset_ = offset;
-
-    EPI_ASSERT(offset - chan->delta_ < chan->length_);
-}
-
-static void MixInterleaved(SoundChannel *chan, int *dest, int pairs)
-{
-    if (!sound_device_stereo)
-        FatalError("INTERNAL ERROR: tried to mix an interleaved buffer in MONO "
-                   "mode.\n");
-
-    EPI_ASSERT(pairs > 0);
-
-    int16_t *src_L;
-
-    if (paused || menu_active)
-        src_L = chan->data_->data_left_;
     else
     {
-        if (!chan->data_->is_sound_effect_ || chan->category_ == kCategoryUi ||
-            chan->data_->current_filter_ == kFilterNone)
-            src_L = chan->data_->data_left_;
-        else
-            src_L = chan->data_->filter_data_left_;
-    }
+        while (d_pos < d_end)
+        {
+            uint32_t pos = (offset >> 9) & ~1;
 
-    int *d_pos = dest;
-    int *d_end = d_pos + pairs * 2;
+            *d_pos++ += ((src[pos] * chan->volume_left_) + (src[pos | 1] * chan->volume_right_)) * 0.5f;
 
-    uint32_t offset = chan->offset_;
-
-    while (d_pos < d_end)
-    {
-        uint32_t pos = (offset >> 9) & ~1;
-
-        *d_pos++ += src_L[pos] * chan->volume_left_;
-        *d_pos++ += src_L[pos | 1] * chan->volume_right_;
-
-        offset += chan->delta_;
+            offset += chan->delta_;
+        }
     }
 
     chan->offset_ = offset;
@@ -327,12 +231,12 @@ static void MixOneChannel(SoundChannel *chan, int pairs)
     if (sound_effects_paused && chan->category_ >= kCategoryPlayer)
         return;
 
-    if (chan->volume_left_ == 0 && chan->volume_right_ == 0)
+    if (AlmostEquals(chan->volume_left_, 0.0f) && AlmostEquals(chan->volume_right_, 0.0f))
         return;
 
     EPI_ASSERT(chan->offset_ < chan->length_);
 
-    int *dest = mix_buffer;
+    float *dest = mix_buffer;
 
     while (pairs > 0)
     {
@@ -352,12 +256,7 @@ static void MixOneChannel(SoundChannel *chan, int pairs)
             EPI_ASSERT(chan->offset_ + count * chan->delta_ >= chan->length_);
         }
 
-        if (chan->data_->mode_ == kMixInterleaved)
-            MixInterleaved(chan, dest, count);
-        else if (sound_device_stereo)
-            MixStereo(chan, dest, count);
-        else
-            MixMono(chan, dest, count);
+        MixInterleaved(chan, dest, count);
 
         if (chan->offset_ >= chan->length_)
         {
@@ -408,12 +307,12 @@ static void MixQueues(int pairs)
     if (!chan || !chan->data_ || chan->state_ != kChannelPlaying)
         return;
 
-    if (chan->volume_left_ == 0 && chan->volume_right_ == 0)
+    if (AlmostEquals(chan->volume_left_, 0.0f) && AlmostEquals(chan->volume_right_, 0.0f))
         return;
 
     EPI_ASSERT(chan->offset_ < chan->length_);
 
-    int *dest = mix_buffer;
+    float *dest = mix_buffer;
 
     while (pairs > 0)
     {
@@ -433,12 +332,7 @@ static void MixQueues(int pairs)
             EPI_ASSERT(chan->offset_ + count * chan->delta_ >= chan->length_);
         }
 
-        if (chan->data_->mode_ == kMixInterleaved)
-            MixInterleaved(chan, dest, count);
-        else if (sound_device_stereo)
-            MixStereo(chan, dest, count);
-        else
-            MixMono(chan, dest, count);
+        MixInterleaved(chan, dest, count);
 
         if (chan->offset_ >= chan->length_)
         {
@@ -479,7 +373,7 @@ void MixAllSoundChannels(void *stream, int len)
     EPI_ASSERT(mix_buffer && samples <= mix_buffer_length);
 
     // clear mixer buffer
-    memset(mix_buffer, 0, mix_buffer_length * sizeof(int));
+    memset(mix_buffer, 0, mix_buffer_length * sizeof(float));
 
     // add each channel
     for (int i = 0; i < total_channels; i++)
@@ -492,8 +386,8 @@ void MixAllSoundChannels(void *stream, int len)
 
     MixQueues(pairs);
 
-    // blit to the SDL stream
-    BlitToS16(mix_buffer, (int16_t *)stream, samples);
+    // copy to the SDL stream
+    memcpy((float *)stream, mix_buffer, samples * sizeof(float));
 }
 
 //----------------------------------------------------------------------------
@@ -512,7 +406,7 @@ void InitializeSoundChannels(int total)
 
     // allocate mixer buffer
     mix_buffer_length = sound_device_samples_per_buffer * (sound_device_stereo ? 2 : 1);
-    mix_buffer        = new int[mix_buffer_length];
+    mix_buffer        = new float[mix_buffer_length];
 }
 
 void FreeSoundChannels(void)
@@ -714,7 +608,7 @@ void SoundQueueStop(void)
     UnlockAudio();
 }
 
-SoundData *SoundQueueGetFreeBuffer(int samples, int buf_mode)
+SoundData *SoundQueueGetFreeBuffer(int samples)
 {
     if (no_sound)
         return nullptr;
@@ -728,7 +622,7 @@ SoundData *SoundQueueGetFreeBuffer(int samples, int buf_mode)
             buf = free_queue_buffers.front();
             free_queue_buffers.pop_front();
 
-            buf->Allocate(samples, buf_mode);
+            buf->Allocate(samples);
         }
     }
     UnlockAudio();

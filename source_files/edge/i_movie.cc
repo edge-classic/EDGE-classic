@@ -35,14 +35,10 @@
 #include "w_files.h"
 #include "w_wad.h"
 
-extern bool sound_device_stereo;
-extern int  sound_device_frequency;
-
 bool                    playing_movie = false;
 static bool             need_canvas_update = false;
 static bool             skip_bar_active = false;
 static plm_t           *decoder            = nullptr;
-static SDL_AudioStream *movie_audio_stream = nullptr;
 static int              movie_sample_rate  = 0;
 static float            skip_time;
 static uint8_t         *movie_bytes = nullptr;
@@ -53,17 +49,8 @@ static GLuint texture_y = 0;
 static GLuint texture_cb = 0;
 static GLuint texture_cr = 0;
 
-static bool MovieSetupAudioStream(int rate)
+static void MovieSetupAudio(int rate)
 {
-    movie_audio_stream =
-        SDL_NewAudioStream(AUDIO_F32, 2, rate, AUDIO_S16, sound_device_stereo ? 2 : 1, sound_device_frequency);
-
-    if (!movie_audio_stream)
-    {
-        LogWarning("PlayMovie: Failed to setup audio stream: %s\n", SDL_GetError());
-        return false;
-    }
-
     plm_set_audio_lead_time(decoder, (double)1024 / (double)rate);
 
     PauseMusic();
@@ -71,28 +58,18 @@ static bool MovieSetupAudioStream(int rate)
     // think) - Dasho
     SoundQueueStop();
     SoundQueueInitialize();
-
-    return true;
 }
 
-static void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
+void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
 {
     (void)mpeg;
     (void)user;
-    SDL_AudioStreamPut(movie_audio_stream, samples->interleaved, sizeof(float) * samples->count * 2);
-    int avail = SDL_AudioStreamAvailable(movie_audio_stream);
-    if (avail)
+    SoundData *movie_buf = SoundQueueGetFreeBuffer(PLM_AUDIO_SAMPLES_PER_FRAME);
+    if (movie_buf)
     {
-        SoundData *movie_buf = SoundQueueGetFreeBuffer(avail / 2, sound_device_stereo ? kMixInterleaved : kMixMono);
-        if (movie_buf)
-        {
-            movie_buf->length_ =
-                SDL_AudioStreamGet(movie_audio_stream, movie_buf->data_left_, avail) / (sound_device_stereo ? 4 : 2);
-            if (movie_buf->length_ > 0)
-                SoundQueueAddBuffer(movie_buf, sound_device_frequency);
-            else
-                SoundQueueReturnBuffer(movie_buf);
-        }
+        movie_buf->length_ = PLM_AUDIO_SAMPLES_PER_FRAME;
+        memcpy(movie_buf->data_, samples->interleaved, PLM_AUDIO_SAMPLES_PER_FRAME * 2 * sizeof(float));
+        SoundQueueAddBuffer(movie_buf, movie_sample_rate);
     }
 }
 
@@ -236,12 +213,6 @@ void PlayMovie(const std::string &name)
         decoder = nullptr;
     }
 
-    if (movie_audio_stream)
-    {
-        SDL_FreeAudioStream(movie_audio_stream);
-        movie_audio_stream = nullptr;
-    }
-
     decoder = plm_create_with_memory(movie_bytes, length, 0);
 
     if (!decoder)
@@ -255,14 +226,7 @@ void PlayMovie(const std::string &name)
     if (!no_sound && !(movie->special_ & kMovieSpecialMute) && plm_get_num_audio_streams(decoder) > 0)
     {
         movie_sample_rate = plm_get_samplerate(decoder);
-        if (!MovieSetupAudioStream(movie_sample_rate))
-        {
-            plm_destroy(decoder);
-            delete[] movie_bytes;
-            movie_bytes = nullptr;
-            decoder     = nullptr;
-            return;
-        }
+        MovieSetupAudio(movie_sample_rate);
     }
 
     int   movie_width  = plm_get_width(decoder);
@@ -314,7 +278,7 @@ void PlayMovie(const std::string &name)
 
     plm_set_video_decode_callback(decoder, MovieVideoCallback, nullptr);
     plm_set_audio_decode_callback(decoder, MovieAudioCallback, nullptr);
-    if (!no_sound && movie_audio_stream)
+    if (!no_sound)
     {
         plm_set_audio_enabled(decoder, 1);
         plm_set_audio_stream(decoder, 0);
@@ -459,11 +423,6 @@ void PlayMovie(const std::string &name)
     decoder = nullptr;
     delete[] movie_bytes;
     movie_bytes = nullptr;
-    if (movie_audio_stream)
-    {
-        SDL_FreeAudioStream(movie_audio_stream);
-        movie_audio_stream = nullptr;
-    }
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     FinishFrame();

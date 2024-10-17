@@ -38,7 +38,7 @@ class SoundGatherer
     SoundGatherer();
     ~SoundGatherer();
 
-    int16_t *MakeChunk(int max_samples, bool stereo);
+    float *MakeChunk(int max_samples, bool stereo);
     // prepare to add a chunk of sound samples.  Returns a buffer
     // containing the number of samples (* 2 for stereo) which the
     // user can fill up.
@@ -53,7 +53,7 @@ class SoundGatherer
     // get rid of current chunk (because it wasn't needed, e.g.
     // the sound file you were reading hit EOF).
 
-    bool Finalise(SoundData *buf, bool want_stereo);
+    bool Finalise(SoundData *buf);
     // take all the stored sound data and transfer it to the
     // SoundData object, making it all contiguous, and
     // converting from/to stereoness where needed.
@@ -62,7 +62,6 @@ class SoundGatherer
     // otherwise returns true (success).
 
   private:
-    void TransferMono(GatherChunk *chunk, SoundData *buf, int pos);
     void TransferStereo(GatherChunk *chunk, SoundData *buf, int pos);
 };
 

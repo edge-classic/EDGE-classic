@@ -15,35 +15,22 @@
 //  GNU General Public License for more details.
 //
 //----------------------------------------------------------------------------
-//
-// -ACB- 2004/08/18 Written:
-//
-// Based on a tutorial at DevMaster.net:
-// http://www.devmaster.net/articles/openal-tutorials/lesson8.php
-//
 
 #include "s_ogg.h"
 
-#include "ddf_playlist.h"
 #include "epi.h"
 #include "epi_endian.h"
-#include "epi_file.h"
 #include "epi_filesystem.h"
-#include "minivorbis.h"
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_music.h"
 #include "snd_gather.h"
-#include "w_wad.h"
-
-extern bool sound_device_stereo; // FIXME: encapsulation
-
-struct OGGDataLump
-{
-    const uint8_t *data;
-    size_t         position;
-    size_t         size;
-};
+// clang-format off
+#define STB_VORBIS_NO_INTEGER_CONVERSION
+#define STB_VORBIS_NO_PUSHDATA_API
+#define STB_VORBIS_NO_STDIO
+#include "stb_vorbis.h"
+// clang-format on
 
 class OGGPlayer : public AbstractMusicPlayer
 {
@@ -65,11 +52,7 @@ class OGGPlayer : public AbstractMusicPlayer
     bool looping_;
     bool is_stereo_;
 
-    OGGDataLump   *ogg_lump_ = nullptr;
-    OggVorbis_File ogg_stream_;
-    vorbis_info   *vorbis_info_ = nullptr;
-
-    int16_t *mono_buffer_;
+    stb_vorbis *ogg_decoder_;
 
   public:
     bool OpenMemory(uint8_t *data, int length);
@@ -85,206 +68,49 @@ class OGGPlayer : public AbstractMusicPlayer
     virtual void Ticker(void);
 
   private:
-    const char *GetError(int code);
-
     void PostOpen(void);
 
     bool StreamIntoBuffer(SoundData *buf);
 };
 
 //----------------------------------------------------------------------------
-//
-// oggplayer memory operations
-//
 
-size_t oggplayer_memread(void *ptr, size_t size, size_t nmemb, void *datasource)
+OGGPlayer::OGGPlayer() : status_(kNotLoaded), ogg_decoder_(nullptr)
 {
-    OGGDataLump *d  = (OGGDataLump *)datasource;
-    size_t       rb = size * nmemb;
-
-    if (d->position >= d->size)
-        return 0;
-
-    if (d->position + rb > d->size)
-        rb = d->size - d->position;
-
-    memcpy(ptr, d->data + d->position, rb);
-    d->position += rb;
-
-    return rb / size;
-}
-
-int oggplayer_memseek(void *datasource, ogg_int64_t offset, int whence)
-{
-    OGGDataLump *d = (OGGDataLump *)datasource;
-    size_t       newpos;
-
-    switch (whence)
-    {
-    case SEEK_SET: {
-        newpos = (int)offset;
-        break;
-    }
-    case SEEK_CUR: {
-        newpos = d->position + (int)offset;
-        break;
-    }
-    case SEEK_END: {
-        newpos = d->size + (int)offset;
-        break;
-    }
-    default: {
-        return -1;
-    } // WTF?
-    }
-
-    if (newpos > d->size)
-        return -1;
-
-    d->position = newpos;
-    return 0;
-}
-
-int oggplayer_memclose(void *datasource)
-{
-    // we don't free the data here
-
-    return 0;
-}
-
-long oggplayer_memtell(void *datasource)
-{
-    OGGDataLump *d = (OGGDataLump *)datasource;
-
-    if (d->position > d->size)
-        return -1;
-
-    return d->position;
-}
-
-//----------------------------------------------------------------------------
-
-OGGPlayer::OGGPlayer() : status_(kNotLoaded), vorbis_info_(nullptr)
-{
-    mono_buffer_ = new int16_t[kMusicBuffer * 2];
 }
 
 OGGPlayer::~OGGPlayer()
 {
     Close();
-
-    if (mono_buffer_)
-        delete[] mono_buffer_;
-}
-
-const char *OGGPlayer::GetError(int code)
-{
-    switch (code)
-    {
-    case OV_EREAD:
-        return ("Read from media error.");
-
-    case OV_ENOTVORBIS:
-        return ("Not Vorbis data.");
-
-    case OV_EVERSION:
-        return ("Vorbis version mismatch.");
-
-    case OV_EBADHEADER:
-        return ("Invalid Vorbis header.");
-
-    case OV_EFAULT:
-        return ("Internal error.");
-
-    default:
-        break;
-    }
-
-    return ("Unknown OGG error.");
 }
 
 void OGGPlayer::PostOpen()
 {
-    vorbis_info_ = ov_info(&ogg_stream_, -1);
-    EPI_ASSERT(vorbis_info_);
-
-    if (vorbis_info_->channels == 1)
-    {
-        is_stereo_ = false;
-    }
-    else
-    {
-        is_stereo_ = true;
-    }
-
     // Loaded, but not playing
     status_ = kStopped;
 }
 
-static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
-{
-    const int16_t *s_end = src + len * 2;
-
-    for (; src < s_end; src += 2)
-    {
-        // compute average of samples
-        *dest++ = ((int)src[0] + (int)src[1]) >> 1;
-    }
-}
-
 bool OGGPlayer::StreamIntoBuffer(SoundData *buf)
 {
-    int ogg_endian = (kByteOrder == kLittleEndian) ? 0 : 1;
+    int got_size = stb_vorbis_get_samples_float_interleaved(ogg_decoder_, ogg_decoder_->channels, buf->data_, kMusicBuffer);
 
-    int samples = 0;
-
-    while (samples < kMusicBuffer)
+    if (got_size == 0) /* EOF */
     {
-        int16_t *data_buf;
-
-        if (is_stereo_ && !sound_device_stereo)
-            data_buf = mono_buffer_;
-        else
-            data_buf = buf->data_left_ + samples * (is_stereo_ ? 2 : 1);
-
-        int section;
-        int got_size =
-            ov_read(&ogg_stream_, (char *)data_buf, (kMusicBuffer - samples) * (is_stereo_ ? 2 : 1) * sizeof(int16_t),
-                    ogg_endian, sizeof(int16_t), 1 /* signed data */, &section);
-
-        if (got_size == OV_HOLE) // ignore corruption
-            continue;
-
-        if (got_size == 0)       /* EOF */
-        {
-            if (!looping_)
-                break;
-
-            ov_raw_seek(&ogg_stream_, 0);
-            continue;     // try again
-        }
-
-        if (got_size < 0) /* ERROR */
-        {
-            // Construct an error message
-            std::string err_msg("[oggplayer_c::StreamIntoBuffer] Failed: ");
-
-            err_msg += GetError(got_size);
-
-            // FIXME: using FatalError is too harsh
-            FatalError("%s", err_msg.c_str());
-            return false; /* NOT REACHED */
-        }
-
-        got_size /= (is_stereo_ ? 2 : 1) * sizeof(int16_t);
-
-        if (is_stereo_ && !sound_device_stereo)
-            ConvertToMono(buf->data_left_ + samples, mono_buffer_, got_size);
-
-        samples += got_size;
+        if (!looping_)
+            return false;
+        stb_vorbis_seek_start(ogg_decoder_);
+        return true;
     }
 
-    return (samples > 0);
+    if (got_size < 0) /* ERROR */
+    {
+        LogDebug("[oggplayer_c::StreamIntoBuffer] Failed\n");
+        return false;
+    }
+
+    buf->length_ = got_size;
+
+    return true;
 }
 
 bool OGGPlayer::OpenMemory(uint8_t *data, int length)
@@ -292,30 +118,25 @@ bool OGGPlayer::OpenMemory(uint8_t *data, int length)
     if (status_ != kNotLoaded)
         Close();
 
-    ogg_lump_ = new OGGDataLump;
+    int ogg_error = 0;
+    ogg_decoder_ = stb_vorbis_open_memory(data, length, &ogg_error, nullptr);
 
-    ogg_lump_->data     = data;
-    ogg_lump_->size     = length;
-    ogg_lump_->position = 0;
-
-    ov_callbacks CB;
-
-    CB.read_func  = oggplayer_memread;
-    CB.seek_func  = oggplayer_memseek;
-    CB.close_func = oggplayer_memclose;
-    CB.tell_func  = oggplayer_memtell;
-
-    int result = ov_open_callbacks((void *)ogg_lump_, &ogg_stream_, nullptr, 0, CB);
-
-    if (result < 0)
+    if (ogg_error || !ogg_decoder_)
     {
-        std::string err_msg("[oggplayer_c::OpenMemory] Failed: ");
+        LogWarning("OGGPlayer: unable to load file\n");
+        if (ogg_decoder_)
+        {
+            stb_vorbis_close(ogg_decoder_);
+            ogg_decoder_ = nullptr;
+        }
+        return false;
+    }
 
-        err_msg += GetError(result);
-        LogWarning("%s\n", err_msg.c_str());
-        ov_clear(&ogg_stream_);
-        ogg_lump_->data = nullptr; // this is deleted after the function returns false
-        delete ogg_lump_;
+    if (ogg_decoder_->channels > 2 || ogg_decoder_->channels < 1)
+    {
+        LogWarning("OGGPlayer: unsupported number of channels: %d\n", ogg_decoder_->channels);
+        stb_vorbis_close(ogg_decoder_);
+        ogg_decoder_ = nullptr;
         return false;
     }
 
@@ -331,11 +152,11 @@ void OGGPlayer::Close()
     // Stop playback
     Stop();
 
-    ov_clear(&ogg_stream_);
-
-    delete[] ogg_lump_->data;
-    delete ogg_lump_;
-    ogg_lump_ = nullptr;
+    if (ogg_decoder_)
+    {
+        stb_vorbis_close(ogg_decoder_);
+        ogg_decoder_ = nullptr;
+    }
 
     // Reset player gain
     music_player_gain = 1.0f;
@@ -386,17 +207,17 @@ void OGGPlayer::Stop()
 
 void OGGPlayer::Ticker()
 {
-    while (status_ == kPlaying && !pc_speaker_mode)
+    while (status_ == kPlaying)
     {
         SoundData *buf =
-            SoundQueueGetFreeBuffer(kMusicBuffer, (is_stereo_ && sound_device_stereo) ? kMixInterleaved : kMixMono);
+            SoundQueueGetFreeBuffer(kMusicBuffer);
 
         if (!buf)
             break;
 
         if (StreamIntoBuffer(buf))
         {
-            SoundQueueAddBuffer(buf, vorbis_info_->rate);
+            SoundQueueAddBuffer(buf, ogg_decoder_->sample_rate);
         }
         else
         {
@@ -427,90 +248,42 @@ AbstractMusicPlayer *PlayOGGMusic(uint8_t *data, int length, bool looping)
 
 bool LoadOGGSound(SoundData *buf, const uint8_t *data, int length)
 {
-    OGGDataLump ogg_lump;
+    int ogg_error = 0;
+    stb_vorbis *ogg = stb_vorbis_open_memory(data, length, &ogg_error, nullptr);
 
-    ogg_lump.data     = data;
-    ogg_lump.size     = length;
-    ogg_lump.position = 0;
-
-    ov_callbacks CB;
-
-    CB.read_func  = oggplayer_memread;
-    CB.seek_func  = oggplayer_memseek;
-    CB.close_func = oggplayer_memclose;
-    CB.tell_func  = oggplayer_memtell;
-
-    OggVorbis_File ogg_stream;
-
-    int result = ov_open_callbacks((void *)&ogg_lump, &ogg_stream, nullptr, 0, CB);
-
-    if (result < 0)
+    if (ogg_error || !ogg)
     {
-        LogWarning("Failed to load OGG sound (corrupt ogg?) error=%d\n", result);
-
+        LogWarning("OGG SFX Loader: unable to load file\n");
+        if (ogg)
+            stb_vorbis_close(ogg);
         return false;
     }
 
-    vorbis_info *vorbis_inf = ov_info(&ogg_stream, -1);
-    EPI_ASSERT(vorbis_inf);
-
-    LogDebug("OGG SFX Loader: freq %d Hz, %d channels\n", (int)vorbis_inf->rate, (int)vorbis_inf->channels);
-
-    if (vorbis_inf->channels > 2)
+    if (ogg->channels > 2 || ogg->channels < 1)
     {
-        LogWarning("OGG Sfx Loader: too many channels: %d\n", vorbis_inf->channels);
-
-        ogg_lump.size = 0;
-        ov_clear(&ogg_stream);
-
+        LogWarning("OGG SFX Loader: unsupported number of channels: %d\n", ogg->channels);
+        stb_vorbis_close(ogg);
         return false;
     }
 
-    bool is_stereo  = (vorbis_inf->channels > 1);
-    int  ogg_endian = (kByteOrder == kLittleEndian) ? 0 : 1;
+    LogDebug("OGG SFX Loader: freq %d Hz, %d channels\n", ogg->sample_rate, ogg->channels);
 
-    buf->frequency_ = vorbis_inf->rate;
+    bool is_stereo = ogg->channels > 1;
+
+    buf->frequency_ = ogg->sample_rate;
+
+    uint32_t total_samples = stb_vorbis_stream_length_in_samples(ogg);
 
     SoundGatherer gather;
 
-    for (;;)
-    {
-        int want = 2048;
+    float *buffer = gather.MakeChunk(total_samples, is_stereo);
 
-        int16_t *buffer = gather.MakeChunk(want, is_stereo);
+    gather.CommitChunk(stb_vorbis_get_samples_float_interleaved(ogg, is_stereo ? 2 : 1, buffer, total_samples));
 
-        int section;
-        int got_size = ov_read(&ogg_stream, (char *)buffer, want * (is_stereo ? 2 : 1) * sizeof(int16_t), ogg_endian,
-                               sizeof(int16_t), 1 /* signed data */, &section);
-
-        if (got_size == OV_HOLE) // ignore corruption
-        {
-            gather.DiscardChunk();
-            continue;
-        }
-
-        if (got_size == 0) /* EOF */
-        {
-            gather.DiscardChunk();
-            break;
-        }
-        else if (got_size < 0) /* ERROR */
-        {
-            gather.DiscardChunk();
-
-            LogWarning("Problem occurred while loading OGG (%d)\n", got_size);
-            break;
-        }
-
-        got_size /= (is_stereo ? 2 : 1) * sizeof(int16_t);
-
-        gather.CommitChunk(got_size);
-    }
-
-    if (!gather.Finalise(buf, is_stereo))
+    if (!gather.Finalise(buf))
         FatalError("OGG SFX Loader: no samples!\n");
 
-    ov_clear(&ogg_stream);
+    stb_vorbis_close(ogg);
 
     return true;
 }

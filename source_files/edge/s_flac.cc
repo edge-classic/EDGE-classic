@@ -30,7 +30,6 @@
 #include "snd_gather.h"
 #include "w_wad.h"
 
-extern bool sound_device_stereo; // FIXME: encapsulation
 extern int  sound_device_frequency;
 
 class FLACPlayer : public AbstractMusicPlayer
@@ -50,12 +49,11 @@ class FLACPlayer : public AbstractMusicPlayer
 
     int  status_;
     bool looping_;
+    bool is_stereo_;
 
     drflac *flac_track_; // I had to make it rhyme
 
     uint8_t *flac_data_; // Passed in from s_music; must be deleted on close
-
-    int16_t *mono_buffer_;
 
   public:
     bool OpenMemory(uint8_t *data, int length);
@@ -80,47 +78,34 @@ class FLACPlayer : public AbstractMusicPlayer
 
 FLACPlayer::FLACPlayer() : status_(kNotLoaded)
 {
-    mono_buffer_ = new int16_t[kMusicBuffer * 2];
 }
 
 FLACPlayer::~FLACPlayer()
 {
     Close();
-
-    if (mono_buffer_)
-        delete[] mono_buffer_;
 }
 
 void FLACPlayer::PostOpen()
 {
+    if (flac_track_->channels == 1)
+    {
+        is_stereo_ = false;
+    }
+    else
+    {
+        is_stereo_ = true;
+    }
+
     // Loaded, but not playing
 
     status_ = kStopped;
 }
 
-static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
-{
-    const int16_t *s_end = src + len * 2;
-
-    for (; src < s_end; src += 2)
-    {
-        // compute average of samples
-        *dest++ = ((int)src[0] + (int)src[1]) >> 1;
-    }
-}
-
 bool FLACPlayer::StreamIntoBuffer(SoundData *buf)
 {
-    int16_t *data_buf;
-
     bool song_done = false;
 
-    if (!sound_device_stereo)
-        data_buf = mono_buffer_;
-    else
-        data_buf = buf->data_left_;
-
-    drflac_uint64 frames = drflac_read_pcm_frames_s16(flac_track_, kMusicBuffer, data_buf);
+    drflac_uint64 frames = drflac_read_pcm_frames_f32(flac_track_, kMusicBuffer, buf->data_);
 
     if (frames < kMusicBuffer)
         song_done = true;
@@ -128,9 +113,6 @@ bool FLACPlayer::StreamIntoBuffer(SoundData *buf)
     buf->length_ = frames;
 
     buf->frequency_ = flac_track_->sampleRate;
-
-    if (!sound_device_stereo)
-        ConvertToMono(buf->data_left_, mono_buffer_, buf->length_);
 
     if (song_done) /* EOF */
     {
@@ -225,7 +207,7 @@ void FLACPlayer::Ticker()
 {
     while (status_ == kPlaying && !pc_speaker_mode)
     {
-        SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer, (sound_device_stereo) ? kMixInterleaved : kMixMono);
+        SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer);
 
         if (!buf)
             break;

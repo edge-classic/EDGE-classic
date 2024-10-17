@@ -23,7 +23,7 @@
 class GatherChunk
 {
   public:
-    int16_t *samples_;
+    float *samples_;
 
     int total_samples_; // total number is *2 for stereo
 
@@ -34,7 +34,7 @@ class GatherChunk
     {
         EPI_ASSERT(total_samples_ > 0);
 
-        samples_ = new int16_t[total_samples_ * (is_stereo_ ? 2 : 1)];
+        samples_ = new float[total_samples_ * (is_stereo_ ? 2 : 1)];
     }
 
     ~GatherChunk()
@@ -58,7 +58,7 @@ SoundGatherer::~SoundGatherer()
         delete chunks_[i];
 }
 
-int16_t *SoundGatherer::MakeChunk(int max_samples, bool _stereo)
+float *SoundGatherer::MakeChunk(int max_samples, bool _stereo)
 {
     EPI_ASSERT(!request_);
     EPI_ASSERT(max_samples > 0);
@@ -96,22 +96,18 @@ void SoundGatherer::DiscardChunk()
     request_ = nullptr;
 }
 
-bool SoundGatherer::Finalise(SoundData *buf, bool want_stereo)
+bool SoundGatherer::Finalise(SoundData *buf)
 {
     if (total_samples_ == 0)
         return false;
 
-    buf->Allocate(total_samples_, want_stereo ? kMixStereo : kMixMono);
+    buf->Allocate(total_samples_);
 
     int pos = 0;
 
     for (unsigned int i = 0; i < chunks_.size(); i++)
     {
-        if (want_stereo)
-            TransferStereo(chunks_[i], buf, pos);
-        else
-            TransferMono(chunks_[i], buf, pos);
-
+        TransferStereo(chunks_[i], buf, pos);
         pos += chunks_[i]->total_samples_;
     }
 
@@ -120,52 +116,24 @@ bool SoundGatherer::Finalise(SoundData *buf, bool want_stereo)
     return true;
 }
 
-void SoundGatherer::TransferMono(GatherChunk *chunk, SoundData *buf, int pos)
-{
-    int count = chunk->total_samples_;
-
-    int16_t *dest     = buf->data_left_ + pos;
-    int16_t *dest_end = dest + count;
-
-    const int16_t *src = chunk->samples_;
-
-    if (chunk->is_stereo_)
-    {
-        for (; dest < dest_end; src += 2)
-        {
-            *dest++ = ((int)src[0] + (int)src[1]) >> 1;
-        }
-    }
-    else
-    {
-        memcpy(dest, src, count * sizeof(int16_t));
-    }
-}
-
 void SoundGatherer::TransferStereo(GatherChunk *chunk, SoundData *buf, int pos)
 {
     int count = chunk->total_samples_;
 
-    int16_t *dest_L = buf->data_left_ + pos;
-    int16_t *dest_R = buf->data_right_ + pos;
-
-    const int16_t *src     = chunk->samples_;
-    const int16_t *src_end = src + count * (chunk->is_stereo_ ? 2 : 1);
+    float *dest = buf->data_ + pos;
+    float *src  = chunk->samples_;
 
     if (chunk->is_stereo_)
     {
-        for (; src < src_end; src += 2)
-        {
-            *dest_L++ = src[0];
-            *dest_R++ = src[1];
-        }
+        memcpy(dest, src, count * 2 * sizeof(float));
     }
     else
     {
+        const float *src_end = src + count;
         while (src < src_end)
         {
-            *dest_L++ = *src;
-            *dest_R++ = *src++;
+            *dest++ = *src;
+            *dest++ = *src++;
         }
     }
 }

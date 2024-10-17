@@ -272,6 +272,30 @@ static int32_t SB16_PostMix(int16_t *AudioOut16, int32_t SamplesToOutput) // 8bb
 	return SamplesTodo;
 }
 
+static int32_t SB16_PostMix_Float(float *AudioOut32, int32_t SamplesToOutput)
+{
+	const uint8_t SampleShiftValue = (Song.Header.Flags & ITF_STEREO) ? 13 : 14;
+
+	int32_t SamplesTodo = (SamplesToOutput == 0) ? BytesToMix : SamplesToOutput;
+	for (int32_t i = 0; i < SamplesTodo * 2; i++)
+	{
+		int32_t Sample = MixBuffer[MixTransferOffset++] >> SampleShiftValue;
+
+		if (Sample < INT16_MIN)
+			Sample = INT16_MIN;
+		else if (Sample > INT16_MAX)
+			Sample = INT16_MAX;
+#if defined _MSC_VER || (defined __SIZEOF_FLOAT__ && __SIZEOF_FLOAT__ == 4)
+		*(uint32_t *)AudioOut32=0x43818000^((uint16_t)Sample);
+		*AudioOut32++ -= 259.0f;
+#else
+		*AudioOut32++ = (float)Sample * 0.000030517578125f;
+#endif
+	}
+
+	return SamplesTodo;
+}
+
 static void SB16_Mix(int32_t numSamples, int16_t *audioOut) // 8bb: added this (original SB16 driver uses IRQ callback)
 {
 	int32_t SamplesLeft = numSamples;
@@ -289,6 +313,30 @@ static void SB16_Mix(int32_t numSamples, int16_t *audioOut) // 8bb: added this (
 			SamplesToTransfer = MixTransferRemaining;
 
 		SB16_PostMix(audioOut, SamplesToTransfer);
+		audioOut += SamplesToTransfer * 2;
+
+		MixTransferRemaining -= SamplesToTransfer;
+		SamplesLeft -= SamplesToTransfer;
+	}
+}
+
+static void SB16_Mix_Float(int32_t numSamples, float *audioOut)
+{
+	int32_t SamplesLeft = numSamples;
+	while (SamplesLeft > 0)
+	{
+		if (MixTransferRemaining == 0)
+		{
+			Update();
+			SB16_MixSamples();
+			MixTransferRemaining = BytesToMix;
+		}
+
+		int32_t SamplesToTransfer = SamplesLeft;
+		if (SamplesToTransfer > MixTransferRemaining)
+			SamplesToTransfer = MixTransferRemaining;
+
+		SB16_PostMix_Float(audioOut, SamplesToTransfer);
 		audioOut += SamplesToTransfer * 2;
 
 		MixTransferRemaining -= SamplesToTransfer;
@@ -361,11 +409,13 @@ static void SB16_CloseDriver(void)
 
 	DriverClose = NULL;
 	DriverMix = NULL;
+	DriverMixFloat = NULL;
 	DriverSetTempo = NULL;
 	DriverSetMixVolume = NULL;
 	DriverFixSamples = NULL;
 	DriverResetMixer = NULL;
 	DriverPostMix = NULL;
+	DriverPostMixFloat = NULL;
 	DriverMixSamples = NULL;
 }
 
@@ -389,11 +439,13 @@ bool SB16_InitDriver(int32_t mixingFrequency)
 	// 8bb: setup driver functions
 	DriverClose = SB16_CloseDriver;
 	DriverMix = SB16_Mix; // 8bb: added this (original driver uses IRQ callback)
+	DriverMixFloat = SB16_Mix_Float;
 	DriverSetTempo = SB16_SetTempo;
 	DriverSetMixVolume = SB16_SetMixVolume;
 	DriverFixSamples = SB16_FixSamples;
 	DriverResetMixer = SB16_ResetMixer; // 8bb: added this
 	DriverPostMix = SB16_PostMix; // 8bb: added this
+	DriverPostMixFloat = SB16_PostMix_Float;
 	DriverMixSamples = SB16_MixSamples; // 8bb: added this
 
 	/*

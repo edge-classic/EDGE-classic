@@ -1,6 +1,0 @@
-*.tar.gz
-libogg-*
-libvorbis-*
-miniaudio.h
-miniaudio_engine.h
-stb_vorbis.*

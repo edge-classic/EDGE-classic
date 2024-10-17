@@ -31,7 +31,6 @@
 #include "snd_gather.h"
 #include "w_wad.h"
 
-extern bool sound_device_stereo; // FIXME: encapsulation
 extern int  sound_device_frequency;
 
 class SIDPlayer : public AbstractMusicPlayer
@@ -51,8 +50,6 @@ class SIDPlayer : public AbstractMusicPlayer
 
     int  status_;
     bool looping_;
-
-    int16_t *mono_buffer_;
 
     cRSID_C64instance *C64_      = nullptr;
     cRSID_SIDheader   *C64_song_ = nullptr;
@@ -80,15 +77,11 @@ class SIDPlayer : public AbstractMusicPlayer
 
 SIDPlayer::SIDPlayer() : status_(kNotLoaded)
 {
-    mono_buffer_ = new int16_t[kMusicBuffer * 2];
 }
 
 SIDPlayer::~SIDPlayer()
 {
     Close();
-
-    if (mono_buffer_)
-        delete[] mono_buffer_;
 }
 
 void SIDPlayer::PostOpenInit()
@@ -99,32 +92,11 @@ void SIDPlayer::PostOpenInit()
     status_ = kStopped;
 }
 
-static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
-{
-    const int16_t *s_end = src + len * 2;
-
-    for (; src < s_end; src += 2)
-    {
-        // compute average of samples
-        *dest++ = ((int)src[0] + (int)src[1]) >> 1;
-    }
-}
-
 bool SIDPlayer::StreamIntoBuffer(SoundData *buf)
 {
-    int16_t *data_buf;
+    cRSID_generateFloat(C64_, buf->data_, kMusicBuffer);
 
-    if (!sound_device_stereo)
-        data_buf = mono_buffer_;
-    else
-        data_buf = buf->data_left_;
-
-    cRSID_generateSound(C64_, (unsigned char *)data_buf, kMusicBuffer);
-
-    buf->length_ = kMusicBuffer / sizeof(int16_t) / 2;
-
-    if (!sound_device_stereo)
-        ConvertToMono(buf->data_left_, mono_buffer_, buf->length_);
+    buf->length_ = kMusicBuffer / 2 / sizeof(float);
 
     return true;
 }
@@ -216,7 +188,7 @@ void SIDPlayer::Ticker()
 {
     while (status_ == kPlaying && !pc_speaker_mode)
     {
-        SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer, (sound_device_stereo) ? kMixInterleaved : kMixMono);
+        SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer);
 
         if (!buf)
             break;

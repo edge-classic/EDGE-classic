@@ -20,13 +20,6 @@
 
 #include <stdint.h>
 
-enum SoundBufferMix
-{
-    kMixMono        = 0,
-    kMixStereo      = 1,
-    kMixInterleaved = 2
-};
-
 enum SoundFilter
 {
     kFilterNone      = 0,
@@ -48,18 +41,15 @@ class SoundData
   public:
     int length_;    // number of samples
     int frequency_; // frequency
-    int mode_;      // one of the kMixxxx values
 
-    // signed 16-bit samples.
-    // For kMixMono, both pointers refer to the same memory.
-    // For kMixInterleaved, only data_left_ is used and contains
-    // both channels, left samples before right samples.
-    int16_t *data_left_;
-    int16_t *data_right_;
+    // 32-bit floating point samples.
+    float *data_;
 
     // Temp buffer for mixed SFX. Will be overwritten as needed.
-    int16_t *filter_data_left_;
-    int16_t *filter_data_right_;
+    float *filter_data_;
+
+    // Circular buffer used for reverb processing, if needed
+    float *reverb_buffer_;
 
     // values for the engine to use
     void *definition_data_;
@@ -80,9 +70,8 @@ class SoundData
     SoundData();
     ~SoundData();
 
-    void Allocate(int samples, int buf_mode);
+    void Allocate(int samples);
     void Free();
-    void FreeFilter();
     void MixVacuum();
     void MixSubmerged();
     void MixReverb(bool dynamic_reverb, float room_area, bool outdoor_reverb, int ddf_reverb_type, int ddf_reverb_ratio,

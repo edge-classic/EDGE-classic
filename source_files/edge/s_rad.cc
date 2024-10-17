@@ -29,7 +29,6 @@
 #include "snd_gather.h"
 #include "w_wad.h"
 
-extern bool sound_device_stereo; // FIXME: encapsulation
 extern int  sound_device_frequency;
 
 // Works better with the RAD code if these are 'global'
@@ -53,8 +52,6 @@ class RadPlayer : public AbstractMusicPlayer
 
     int  status_;
     bool looping_;
-
-    int16_t *mono_buffer_;
 
     int      sample_count_;
     int      sample_update_;
@@ -84,15 +81,11 @@ class RadPlayer : public AbstractMusicPlayer
 
 RadPlayer::RadPlayer() : status_(kNotLoaded), tune_(nullptr)
 {
-    mono_buffer_ = new int16_t[kMusicBuffer * 2];
 }
 
 RadPlayer::~RadPlayer()
 {
     Close();
-
-    if (mono_buffer_)
-        delete[] mono_buffer_;
 }
 
 void RadPlayer::PostOpen()
@@ -103,28 +96,12 @@ void RadPlayer::PostOpen()
     status_ = kStopped;
 }
 
-static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
-{
-    const int16_t *s_end = src + len * 2;
-
-    for (; src < s_end; src += 2)
-    {
-        // compute average of samples
-        *dest++ = ((int)src[0] + (int)src[1]) >> 1;
-    }
-}
-
 bool RadPlayer::StreamIntoBuffer(SoundData *buf)
 {
-    int16_t *data_buf;
+    float *data_buf = buf->data_;
 
     bool song_done = false;
     int  samples   = 0;
-
-    if (!sound_device_stereo)
-        data_buf = mono_buffer_;
-    else
-        data_buf = buf->data_left_;
 
     for (int i = 0; i < kMusicBuffer; i += 2)
     {
@@ -139,9 +116,6 @@ bool RadPlayer::StreamIntoBuffer(SoundData *buf)
     }
 
     buf->length_ = samples;
-
-    if (!sound_device_stereo)
-        ConvertToMono(buf->data_left_, mono_buffer_, buf->length_);
 
     if (song_done) /* EOF */
     {
@@ -250,7 +224,7 @@ void RadPlayer::Ticker()
 {
     while (status_ == kPlaying && !pc_speaker_mode)
     {
-        SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer, (sound_device_stereo) ? kMixInterleaved : kMixMono);
+        SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer);
 
         if (!buf)
             break;

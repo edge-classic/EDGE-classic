@@ -30,8 +30,6 @@
 #include "snd_gather.h"
 #include "w_wad.h"
 
-extern bool sound_device_stereo; // FIXME: encapsulation
-
 class MP3Player : public AbstractMusicPlayer
 {
   public:
@@ -54,8 +52,6 @@ class MP3Player : public AbstractMusicPlayer
 
     uint8_t *mp3_data_    = nullptr;
     drmp3   *mp3_decoder_ = nullptr;
-
-    int16_t *mono_buffer_;
 
   public:
     bool OpenMemory(uint8_t *data, int length);
@@ -80,15 +76,11 @@ class MP3Player : public AbstractMusicPlayer
 
 MP3Player::MP3Player() : status_(kNotLoaded)
 {
-    mono_buffer_ = new int16_t[kMusicBuffer * 2];
 }
 
 MP3Player::~MP3Player()
 {
     Close();
-
-    if (mono_buffer_)
-        delete[] mono_buffer_;
 }
 
 void MP3Player::PostOpen()
@@ -106,27 +98,9 @@ void MP3Player::PostOpen()
     status_ = kStopped;
 }
 
-static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
-{
-    const int16_t *s_end = src + len * 2;
-
-    for (; src < s_end; src += 2)
-    {
-        // compute average of samples
-        *dest++ = ((int)src[0] + (int)src[1]) >> 1;
-    }
-}
-
 bool MP3Player::StreamIntoBuffer(SoundData *buf)
 {
-    int16_t *data_buf;
-
-    if (is_stereo_ && !sound_device_stereo)
-        data_buf = mono_buffer_;
-    else
-        data_buf = buf->data_left_;
-
-    int got_size = drmp3_read_pcm_frames_s16(mp3_decoder_, kMusicBuffer, data_buf);
+    int got_size = drmp3_read_pcm_frames_f32(mp3_decoder_, kMusicBuffer, buf->data_);
 
     if (got_size == 0) /* EOF */
     {
@@ -144,10 +118,7 @@ bool MP3Player::StreamIntoBuffer(SoundData *buf)
 
     buf->length_ = got_size;
 
-    if (is_stereo_ && !sound_device_stereo)
-        ConvertToMono(buf->data_left_, mono_buffer_, got_size);
-
-    return (true);
+    return true;
 }
 
 bool MP3Player::OpenMemory(uint8_t *data, int length)
@@ -244,7 +215,7 @@ void MP3Player::Ticker()
     while (status_ == kPlaying && !pc_speaker_mode)
     {
         SoundData *buf =
-            SoundQueueGetFreeBuffer(kMusicBuffer, (is_stereo_ && sound_device_stereo) ? kMixInterleaved : kMixMono);
+            SoundQueueGetFreeBuffer(kMusicBuffer);
 
         if (!buf)
             break;
@@ -312,17 +283,17 @@ bool LoadMP3Sound(SoundData *buf, const uint8_t *data, int length)
 
     LogDebug("MP3 SFX Loader: freq %d Hz, %d channels\n", mp3.sampleRate, mp3.channels);
 
-    bool is_stereo_ = (mp3.channels > 1);
+    bool is_stereo = (mp3.channels > 1);
 
     buf->frequency_ = mp3.sampleRate;
 
     SoundGatherer gather;
 
-    int16_t *buffer = gather.MakeChunk(framecount, is_stereo_);
+    float *buffer = gather.MakeChunk(framecount, is_stereo);
 
-    gather.CommitChunk(drmp3_read_pcm_frames_s16(&mp3, framecount, buffer));
+    gather.CommitChunk(drmp3_read_pcm_frames_f32(&mp3, framecount, buffer));
 
-    if (!gather.Finalise(buf, is_stereo_))
+    if (!gather.Finalise(buf))
         LogWarning("MP3 SFX Loader: no samples!\n");
 
     drmp3_uninit(&mp3);

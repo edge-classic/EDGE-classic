@@ -102,6 +102,7 @@ extern "C"
 
     // host/audio.c
     void cRSID_generateSound(cRSID_C64instance *C64, unsigned char *buf, unsigned short len);
+    void cRSID_generateFloat(cRSID_C64instance *C64, float *buf, unsigned short len);
 
     struct cRSID_SIDheader
     {                             // Offset:   default/info:

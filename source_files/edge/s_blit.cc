@@ -40,16 +40,6 @@
 #include "s_music.h"
 #include "s_sound.h"
 
-// Sound must be clipped to prevent distortion (clipping is
-// a kind of distortion of course, but it's much better than
-// the "white noise" you get when values overflow).
-//
-// The more safe bits there are, the less likely the final
-// output sum will overflow into white noise, but the less
-// precision you have left for the volume multiplier.
-static constexpr float kSoundClipMaximum =  1.0f;
-static constexpr float kSoundClipMinimum = -1.0f;
-
 static constexpr uint8_t  kMinimumSoundChannels = 32;
 static constexpr uint16_t kMaximumSoundChannels = 256;
 
@@ -184,11 +174,6 @@ void SoundChannel::ComputeMusicVolume()
 }
 
 //----------------------------------------------------------------------------
-
-static void BlitToF32(const float *src, float *dest, int length)
-{
-    memcpy(dest, src, length * sizeof(float));
-}
 
 static void MixInterleaved(SoundChannel *chan, float *dest, int pairs)
 {
@@ -401,8 +386,8 @@ void MixAllSoundChannels(void *stream, int len)
 
     MixQueues(pairs);
 
-    // blit to the SDL stream
-    BlitToF32(mix_buffer, (float *)stream, samples);
+    // copy to the SDL stream
+    memcpy((float *)stream, mix_buffer, samples * sizeof(float));
 }
 
 //----------------------------------------------------------------------------

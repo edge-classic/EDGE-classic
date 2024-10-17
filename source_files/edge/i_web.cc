@@ -149,10 +149,7 @@ extern "C"
 
     void EMSCRIPTEN_KEEPALIVE WebMain(int argc, const char **argv)
     {
-        // Note: We're using the max framerate which feels smoother in testing
-        // Though raises a console error in debug warning about not using
-        // requestAnimationFrame
-        emscripten_set_main_loop(WebTick, 70, 0);
+        emscripten_set_main_loop(WebTick, 0, 0);
 
         emscripten_set_pointerlockchange_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT, nullptr, 0,
                                                   WebHandlePointerLockChange);

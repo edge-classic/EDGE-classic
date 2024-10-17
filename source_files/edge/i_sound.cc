@@ -69,7 +69,7 @@ static bool TryOpenSound(int want_freq, bool want_stereo)
     trydev.freq     = want_freq;
     trydev.format   = AUDIO_F32SYS;
     trydev.channels = want_stereo ? 2 : 1;
-    trydev.samples  = 512;
+    trydev.samples  = 1024;
     trydev.callback = SoundFillCallback;
 
     current_sound_device = SDL_OpenAudioDevice(nullptr, 0, &trydev, &sound_device_check, 0);

@@ -194,18 +194,18 @@ static void MixInterleaved(SoundChannel *chan, float *dest, int pairs)
 {
     EPI_ASSERT(pairs > 0);
 
-    float *src = chan->data_->data_;
+    float *src = nullptr;
 
-    /*if (paused || menu_active)
-        src_L = chan->data_->data_left_;
+    if (paused || menu_active)
+        src = chan->data_->data_;
     else
     {
         if (!chan->data_->is_sound_effect_ || chan->category_ == kCategoryUi ||
             chan->data_->current_filter_ == kFilterNone)
-            src_L = chan->data_->data_left_;
+            src = chan->data_->data_;
         else
-            src_L = chan->data_->filter_data_left_;
-    }*/
+            src = chan->data_->filter_data_;
+    }
 
     float *d_pos = dest;
     float *d_end = d_pos + pairs * (sound_device_stereo ? 2 : 1);

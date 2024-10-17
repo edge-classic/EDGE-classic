@@ -45,10 +45,26 @@ class SoundData
     // 32-bit floating point samples.
     float *data_;
 
+    // Temp buffer for mixed SFX. Will be overwritten as needed.
+    float *filter_data_;
+
+    // Circular buffer used for reverb processing, if needed
+    float *reverb_buffer_;
+
     // values for the engine to use
     void *definition_data_;
 
     bool is_sound_effect_;
+
+    SoundFilter current_filter_;
+
+    ReverbRoomSize reverbed_room_size_;
+
+    int current_ddf_reverb_ratio_;
+    int current_ddf_reverb_delay_;
+    int current_ddf_reverb_type_;
+
+    bool reverb_is_outdoors_;
 
   public:
     SoundData();
@@ -56,6 +72,10 @@ class SoundData
 
     void Allocate(int samples);
     void Free();
+    void MixVacuum();
+    void MixSubmerged();
+    void MixReverb(bool dynamic_reverb, float room_area, bool outdoor_reverb, int ddf_reverb_type, int ddf_reverb_ratio,
+                   int ddf_reverb_delay);
 };
 
 //--- editor settings ---

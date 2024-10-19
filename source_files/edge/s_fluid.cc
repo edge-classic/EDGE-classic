@@ -245,7 +245,7 @@ class FluidPlayer : public AbstractMusicPlayer
 
     static void playSynth(void *userdata, uint8_t *stream, size_t length)
     {
-        fluid_synth_write_float(edge_fluid, (int)length / 8, stream, 0, 2, stream + 4, 0, 2);
+        fluid_synth_write_s16(edge_fluid, (int)length / 2 / sizeof(int16_t), stream, 0, 2, stream + 2, 0, 2);
     }
 
     void SequencerInit()
@@ -268,7 +268,7 @@ class FluidPlayer : public AbstractMusicPlayer
         fluid_interface_->onPcmRender_userdata = this;
 
         fluid_interface_->pcmSampleRate = sound_device_frequency;
-        fluid_interface_->pcmFrameSize  = 2 /*channels*/ * sizeof(float) /*size of one sample*/;
+        fluid_interface_->pcmFrameSize  = 2 /*channels*/ * sizeof(int16_t) /*size of one sample*/;
 
         fluid_interface_->rt_deviceSwitch  = rtDeviceSwitch;
         fluid_interface_->rt_currentDevice = rtCurrentDevice;
@@ -386,7 +386,7 @@ class FluidPlayer : public AbstractMusicPlayer
         if (fluid_sequencer_->PositionAtEnd())
             song_done = true;
 
-        buf->length_ = played / 2 / sizeof(float);
+        buf->length_ = played / 2 / sizeof(int16_t);
 
         if (song_done) /* EOF */
         {

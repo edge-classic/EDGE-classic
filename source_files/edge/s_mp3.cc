@@ -100,7 +100,7 @@ void MP3Player::PostOpen()
 
 bool MP3Player::StreamIntoBuffer(SoundData *buf)
 {
-    int got_size = drmp3_read_pcm_frames_f32(mp3_decoder_, kMusicBuffer, buf->data_);
+    int got_size = drmp3_read_pcm_frames_s16(mp3_decoder_, kMusicBuffer, buf->data_);
 
     if (got_size == 0) /* EOF */
     {
@@ -289,9 +289,9 @@ bool LoadMP3Sound(SoundData *buf, const uint8_t *data, int length)
 
     SoundGatherer gather;
 
-    float *buffer = gather.MakeChunk(framecount, is_stereo);
+    int16_t *buffer = gather.MakeChunk(framecount, is_stereo);
 
-    gather.CommitChunk(drmp3_read_pcm_frames_f32(&mp3, framecount, buffer));
+    gather.CommitChunk(drmp3_read_pcm_frames_s16(&mp3, framecount, buffer));
 
     if (!gather.Finalise(buf))
         LogWarning("MP3 SFX Loader: no samples!\n");

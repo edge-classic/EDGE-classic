@@ -61,7 +61,7 @@ static void LoadSilence(SoundData *buf)
     buf->frequency_ = sound_device_frequency;
     buf->Allocate(length);
 
-    memset(buf->data_, 0, length * sizeof(float) * 2);
+    memset(buf->data_, 0, length * sizeof(int16_t) * 2);
 }
 
 static bool LoadDoom(SoundData *buf, const uint8_t *lump, int length)
@@ -85,16 +85,14 @@ static bool LoadDoom(SoundData *buf, const uint8_t *lump, int length)
     const uint8_t *src   = lump + 8;
     const uint8_t *s_end = src + length;
 
-    float *dest = buf->data_;
-    float src_f = 0;
+    int16_t *dest = buf->data_;
+    int16_t out = 0;
     
     for (; src < s_end; src++)
     {
-        int16_t in = ((*src ^ 0x80) << 8);
-        *(uint32_t *)&src_f=0x43818000^((uint16_t)in);
-        src_f -= 259.0f;
-        *dest++ = src_f;
-        *dest++ = src_f;
+        out = (*src ^ 0x80) << 8;
+        *dest++ = out;
+        *dest++ = out;
     }
 
     return true;

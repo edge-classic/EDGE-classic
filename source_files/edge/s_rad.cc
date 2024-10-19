@@ -98,7 +98,7 @@ void RadPlayer::PostOpen()
 
 bool RadPlayer::StreamIntoBuffer(SoundData *buf)
 {
-    float *data_buf = buf->data_;
+    int16_t *data_buf = buf->data_;
 
     bool song_done = false;
     int  samples   = 0;

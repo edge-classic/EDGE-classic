@@ -88,9 +88,9 @@ bool M4PPlayer::StreamIntoBuffer(SoundData *buf)
 {
     bool song_done = false;
 
-    m4p_GenerateFloatSamples(buf->data_, kMusicBuffer / sizeof(float));
+    m4p_GenerateSamples(buf->data_, kMusicBuffer / sizeof(int16_t));
 
-    buf->length_ = kMusicBuffer / sizeof(float);
+    buf->length_ = kMusicBuffer / sizeof(int16_t);
 
     if (song_done) /* EOF */
     {

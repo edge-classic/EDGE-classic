@@ -94,9 +94,9 @@ void SIDPlayer::PostOpenInit()
 
 bool SIDPlayer::StreamIntoBuffer(SoundData *buf)
 {
-    cRSID_generateFloat(C64_, buf->data_, kMusicBuffer);
+    cRSID_generateSound(C64_, (unsigned char *)buf->data_, kMusicBuffer);
 
-    buf->length_ = kMusicBuffer / 2 / sizeof(float);
+    buf->length_ = kMusicBuffer / 2 / sizeof(int16_t);
 
     return true;
 }

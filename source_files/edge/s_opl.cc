@@ -89,17 +89,6 @@ void RestartOpal(void)
     return;            // OK!
 }
 
-static void ConvertToMono(float *dest, const float *src, int len)
-{
-    const float *s_end = src + len * 2;
-
-    for (; src < s_end; src += 2)
-    {
-        // compute average of samples
-        *dest++ = (src[0] + src[1]) * 0.5f;
-    }
-}
-
 class OpalPlayer : public AbstractMusicPlayer
 {
   private:
@@ -198,7 +187,7 @@ class OpalPlayer : public AbstractMusicPlayer
     static void playSynth(void *userdata, uint8_t *stream, size_t length)
     {
         (void)userdata;
-        edge_opl->generate((float *)(stream), length / (2 * sizeof(float)));
+        edge_opl->generate((int16_t *)(stream), length / (2 * sizeof(int16_t)));
     }
 
     void SequencerInit()
@@ -221,7 +210,7 @@ class OpalPlayer : public AbstractMusicPlayer
         opl_interface_->onPcmRender_userdata = this;
 
         opl_interface_->pcmSampleRate = sound_device_frequency;
-        opl_interface_->pcmFrameSize  = 2 /*channels*/ * sizeof(float) /*size of one sample*/;
+        opl_interface_->pcmFrameSize  = 2 /*channels*/ * sizeof(int16_t) /*size of one sample*/;
 
         opl_interface_->rt_deviceSwitch  = rtDeviceSwitch;
         opl_interface_->rt_currentDevice = rtCurrentDevice;
@@ -335,7 +324,7 @@ class OpalPlayer : public AbstractMusicPlayer
         if (opl_sequencer_->PositionAtEnd())
             song_done = true;
 
-        buf->length_ = played / 2 / sizeof(float);
+        buf->length_ = played / 2 / sizeof(int16_t);
 
         if (song_done) /* EOF */
         {

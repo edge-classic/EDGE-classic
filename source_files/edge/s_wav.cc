@@ -232,9 +232,9 @@ bool LoadWAVSound(SoundData *buf, uint8_t *data, int length, bool pc_speaker)
 
     SoundGatherer gather;
 
-    float *buffer = gather.MakeChunk(wav.totalPCMFrameCount, is_stereo);
+    int16_t *buffer = gather.MakeChunk(wav.totalPCMFrameCount, is_stereo);
 
-    gather.CommitChunk(drwav_read_pcm_frames_f32(&wav, wav.totalPCMFrameCount, buffer));
+    gather.CommitChunk(drwav_read_pcm_frames_s16(&wav, wav.totalPCMFrameCount, buffer));
 
     if (!gather.Finalise(buf))
         LogWarning("WAV SFX Loader: no samples!\n");

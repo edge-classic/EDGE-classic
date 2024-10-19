@@ -66,7 +66,7 @@ class OPLPlayer
     // load built-in instrument patches
     bool loadPatches();
 
-    void generate(float *data, unsigned numSamples);
+    void generate(int16_t *data, unsigned numSamples);
 
     // reset OPL and midi file
     void reset();
@@ -146,9 +146,9 @@ class OPLPlayer
     Opal *m_opl3 = nullptr;
     int   rate;
 
-    std::pair<float, float> m_output; // output sample data
+    std::pair<int16_t, int16_t> m_output; // output sample data
     // if we need to clock one of the OPLs between register writes, save the resulting sample
-    std::queue<std::pair<float, float>> m_sampleFIFO;
+    std::queue<std::pair<int16_t, int16_t>> m_sampleFIFO;
 
     MIDIChannel           m_channels[16];
     std::vector<OPLVoice> m_voices;

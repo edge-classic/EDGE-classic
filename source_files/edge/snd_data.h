@@ -42,14 +42,14 @@ class SoundData
     int length_;    // number of samples
     int frequency_; // frequency
 
-    // 32-bit floating point samples.
-    float *data_;
+    // 16-bit signed samples.
+    int16_t *data_;
 
     // Temp buffer for mixed SFX. Will be overwritten as needed.
-    float *filter_data_;
+    int16_t *filter_data_;
 
     // Circular buffer used for reverb processing, if needed
-    float *reverb_buffer_;
+    int *reverb_buffer_;
 
     // values for the engine to use
     void *definition_data_;

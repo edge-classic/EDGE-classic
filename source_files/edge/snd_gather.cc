@@ -23,7 +23,7 @@
 class GatherChunk
 {
   public:
-    float *samples_;
+    int16_t *samples_;
 
     int total_samples_; // total number is *2 for stereo
 
@@ -34,7 +34,7 @@ class GatherChunk
     {
         EPI_ASSERT(total_samples_ > 0);
 
-        samples_ = new float[total_samples_ * (is_stereo_ ? 2 : 1)];
+        samples_ = new int16_t[total_samples_ * (is_stereo_ ? 2 : 1)];
     }
 
     ~GatherChunk()
@@ -58,7 +58,7 @@ SoundGatherer::~SoundGatherer()
         delete chunks_[i];
 }
 
-float *SoundGatherer::MakeChunk(int max_samples, bool _stereo)
+int16_t *SoundGatherer::MakeChunk(int max_samples, bool _stereo)
 {
     EPI_ASSERT(!request_);
     EPI_ASSERT(max_samples > 0);
@@ -120,16 +120,16 @@ void SoundGatherer::TransferStereo(GatherChunk *chunk, SoundData *buf, int pos)
 {
     int count = chunk->total_samples_;
 
-    float *dest = buf->data_ + pos;
-    float *src  = chunk->samples_;
+    int16_t *dest = buf->data_ + pos;
+    int16_t *src  = chunk->samples_;
 
     if (chunk->is_stereo_)
     {
-        memcpy(dest, src, count * 2 * sizeof(float));
+        memcpy(dest, src, count * 2 * sizeof(int16_t));
     }
     else
     {
-        const float *src_end = src + count;
+        const int16_t *src_end = src + count;
         while (src < src_end)
         {
             *dest++ = *src;

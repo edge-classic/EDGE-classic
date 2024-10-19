@@ -58,8 +58,8 @@ class SoundChannel
     uint32_t length_;
     uint32_t delta_;
 
-    float volume_left_; // mixing volume
-    float volume_right_;
+    int volume_left_; // mixing volume
+    int volume_right_;
 
     bool loop_;       // will loop *one* more time
     bool boss_;

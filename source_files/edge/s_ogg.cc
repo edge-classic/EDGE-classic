@@ -26,7 +26,6 @@
 #include "s_music.h"
 #include "snd_gather.h"
 // clang-format off
-#define STB_VORBIS_NO_INTEGER_CONVERSION
 #define STB_VORBIS_NO_PUSHDATA_API
 #define STB_VORBIS_NO_STDIO
 #include "stb_vorbis.h"
@@ -92,7 +91,7 @@ void OGGPlayer::PostOpen()
 
 bool OGGPlayer::StreamIntoBuffer(SoundData *buf)
 {
-    int got_size = stb_vorbis_get_samples_float_interleaved(ogg_decoder_, ogg_decoder_->channels, buf->data_, kMusicBuffer);
+    int got_size = stb_vorbis_get_samples_short_interleaved(ogg_decoder_, 2, buf->data_, kMusicBuffer);
 
     if (got_size == 0) /* EOF */
     {
@@ -268,17 +267,15 @@ bool LoadOGGSound(SoundData *buf, const uint8_t *data, int length)
 
     LogDebug("OGG SFX Loader: freq %d Hz, %d channels\n", ogg->sample_rate, ogg->channels);
 
-    bool is_stereo = ogg->channels > 1;
-
     buf->frequency_ = ogg->sample_rate;
 
     uint32_t total_samples = stb_vorbis_stream_length_in_samples(ogg);
 
     SoundGatherer gather;
 
-    float *buffer = gather.MakeChunk(total_samples, is_stereo);
+    int16_t *buffer = gather.MakeChunk(total_samples, true);
 
-    gather.CommitChunk(stb_vorbis_get_samples_float_interleaved(ogg, is_stereo ? 2 : 1, buffer, total_samples));
+    gather.CommitChunk(stb_vorbis_get_samples_short_interleaved(ogg, 2, buffer, total_samples));
 
     if (!gather.Finalise(buf))
         FatalError("OGG SFX Loader: no samples!\n");

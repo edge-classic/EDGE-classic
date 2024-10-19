@@ -105,7 +105,7 @@ bool FLACPlayer::StreamIntoBuffer(SoundData *buf)
 {
     bool song_done = false;
 
-    drflac_uint64 frames = drflac_read_pcm_frames_f32(flac_track_, kMusicBuffer, buf->data_);
+    drflac_uint64 frames = drflac_read_pcm_frames_s16(flac_track_, kMusicBuffer, buf->data_);
 
     if (frames < kMusicBuffer)
         song_done = true;

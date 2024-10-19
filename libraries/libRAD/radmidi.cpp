@@ -34,7 +34,7 @@ bool OPLPlayer::loadPatches()
 }
 
 // ----------------------------------------------------------------------------
-void OPLPlayer::generate(float *data, unsigned numSamples)
+void OPLPlayer::generate(int16_t *data, unsigned numSamples)
 {
     unsigned int samp = 0;
 
@@ -127,7 +127,7 @@ void OPLPlayer::runSamples(unsigned count)
     // (i.e. when forcing a voice off, changing 4op flags, etc.)
     while (count--)
     {
-        std::pair<float, float> output;
+        std::pair<int16_t, int16_t> output;
         m_opl3->Sample(&output.first, &output.second);
         m_sampleFIFO.push(output);
     }

@@ -248,9 +248,11 @@ typedef void(*plm_video_decode_callback)
 typedef struct {
 	double time;
 	unsigned int count;
-	#ifdef PLM_AUDIO_SEPARATE_CHANNELS
+	#if defined PLM_AUDIO_SEPARATE_CHANNELS
 		float left[PLM_AUDIO_SAMPLES_PER_FRAME];
 		float right[PLM_AUDIO_SAMPLES_PER_FRAME];
+	#elif defined PLM_AUDIO_INTERLEAVED_SHORT
+		int16_t interleaved[PLM_AUDIO_SAMPLES_PER_FRAME * 2];
 	#else
 		float interleaved[PLM_AUDIO_SAMPLES_PER_FRAME * 2];
 	#endif
@@ -4120,6 +4122,20 @@ void plm_audio_decode_frame(plm_audio_t *self) {
 							: self->samples.right;
 						for (int j = 0; j < 32; j++) {
 							out_channel[out_pos + j] = self->U[j] / 2147418112.0f;
+						}
+					#elif defined PLM_AUDIO_INTERLEAVED_SHORT
+						for (int j = 0; j < 32; j++) {
+							float x = self->U[j] / 2147418112.0f + 384.0f;
+						#if defined _MSC_VER || (defined __SIZEOF_FLOAT__ && __SIZEOF_FLOAT__ == 4)
+							uint32_t y =  *(uint32_t *)&x - 0x43C00000u;
+							uint32_t z = 0x7FFFu - (y ^ (0u - (y >> 31)));
+							y = y ^ (z & (0u - (z >> 31)));
+							self->samples.interleaved[((out_pos + j) << 1) + ch] = 
+								(int16_t)(y & 0xFFFF);
+						#else
+							self->samples.interleaved[((out_pos + j) << 1) + ch] = 
+								(int16)(x * 0x8000);
+						#endif
 						}
 					#else
 						for (int j = 0; j < 32; j++) {

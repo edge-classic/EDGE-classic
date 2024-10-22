@@ -108,6 +108,7 @@
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_fluid.h"
+#include "s_fmm.h"
 #include "s_music.h"
 #include "s_opl.h"
 #include "s_sound.h"
@@ -526,7 +527,7 @@ static OptionMenuItem soundoptions[] = {
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Stereo", "Off/On/Swapped", 3, &var_sound_stereo, nullptr, "NeedRestart"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "MIDI Player", "Fluidlite/Opal", 2, &var_midi_player, OptionMenuChangeMidiPlayer,
+    {kOptionMenuItemTypeSwitch, "MIDI Player", "Fluidlite/Opal/FMMIDI", 3, &var_midi_player, OptionMenuChangeMidiPlayer,
      nullptr},
     {kOptionMenuItemTypeFunction, "Fluidlite Soundfont", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr},
     {kOptionMenuItemTypeBoolean, "PC Speaker Mode", YesNo, 2, &pc_speaker_mode, OptionMenuChangePCSpeakerMode,
@@ -2038,8 +2039,10 @@ static void OptionMenuChangeMidiPlayer(int key_pressed, ConsoleVariable *console
     if (var_midi_player == 1 || (playing && (playing->type_ == kDDFMusicIMF280 || playing->type_ == kDDFMusicIMF560 ||
                                              playing->type_ == kDDFMusicIMF700)))
         RestartOpal();
-    else
+    else if (var_midi_player == 0)
         RestartFluid();
+    else
+        RestartFMM();
 }
 
 //

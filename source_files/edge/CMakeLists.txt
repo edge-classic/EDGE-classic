@@ -86,6 +86,7 @@ set (EDGE_SOURCE_FILES
   s_music.cc
   s_ogg.cc
   s_fluid.cc
+  s_fmm.cc
   s_m4p.cc
   s_opl.cc
   s_rad.cc
@@ -140,6 +141,7 @@ set (EDGE_LINK_LIBRARIES
   crsid
   dr_libs
   fluidlite
+  fmmidi
   HandmadeMath
   libRAD
   libvwad

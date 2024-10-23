@@ -4,12 +4,6 @@
 #include <math.h>
 #include <string.h>
 
-#if defined(_MSC_VER)
-#if defined(_DEBUG)
-#define new new (_CLIENT_BLOCK, __FILE__, __LINE__)
-#endif
-#endif
-
 using namespace dsa;
 using namespace dsa::C;
 
@@ -155,7 +149,7 @@ bool CSccDevice::Reset(void)
         {
             SCC_reset(m_scc[i]);
             SCC_set_type(m_scc[i], SCC_ENHANCED);
-            memset(m_reg_cache[i], 0, 128);
+            memset(m_reg_cache[i],0,256);
             m_rbuf[i].clear();
         }
     }

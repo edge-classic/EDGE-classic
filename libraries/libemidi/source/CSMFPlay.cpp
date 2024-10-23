@@ -2,6 +2,7 @@
 #include <limits.h>
 #include "CSMFPlay.hpp"
 #include "COpllDevice.hpp"
+#include "CPSGDrum.hpp"
 #include "CSccDevice.hpp"
 
 using namespace dsa;

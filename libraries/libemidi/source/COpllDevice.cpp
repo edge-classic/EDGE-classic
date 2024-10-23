@@ -5,12 +5,6 @@
 
 #include <cstdio>
 
-#if defined(_MSC_VER)
-#if defined(_DEBUG)
-#define new new (_NORMAL_BLOCK, __FILE__, __LINE__)
-#endif
-#endif
-
 using namespace dsa;
 using namespace dsa::C;
 
@@ -87,7 +81,11 @@ COpllDevice::COpllDevice(uint32_t rate, uint32_t nch)
         m_nch = 1;
 
     for (uint32_t i = 0; i < m_nch; i++)
+    {
         m_opll[i] = OPLL_new(3579545, rate);
+        memset(m_reg_cache[i],0,128);
+        m_rbuf[i].clear();
+    }
     Reset();
 }
 
@@ -344,25 +342,27 @@ void COpllDevice::PercSetVelocity(uint8_t note, uint8_t velo)
 {
     note = perc_table[note];
     if (0 < note)
+    {
         m_pi.velocity[note - 1] = velo;
-    _PercUpdateVolume(note);
+        _PercUpdateVolume(note);
+    }
 }
 
 void COpllDevice::_PercUpdateVolume(uint8_t note)
 {
 
-    if (note > 5)
+    if (note < 1 || note > 5)
         return;
 
-    int vol = 13 - m_pi.volume / 16 - m_pi.velocity[note] / 16;
+    int vol = 13 - m_pi.volume / 16 - m_pi.velocity[note-1] / 16;
     if (vol < 0)
-        m_pi.vcache[note] = 0;
+        m_pi.vcache[note-1] = 0;
     else if (15 < vol)
-        m_pi.vcache[note] = 15;
+        m_pi.vcache[note-1] = 15;
     else
-        m_pi.vcache[note] = vol;
+        m_pi.vcache[note-1] = vol;
 
-    switch (note)
+    switch (note-1)
     {
     case 4: // B.D
         _WriteReg(0x30 + 6, m_pi.vcache[4]);
@@ -389,7 +389,7 @@ void COpllDevice::PercSetProgram(uint8_t bank, uint8_t prog)
 void COpllDevice::PercSetVolume(uint8_t vol)
 {
     m_pi.volume = vol;
-    for (int i = 0; i < 5; i++)
+    for (int i = 1; i < 6; i++)
         _PercUpdateVolume(i);
 }
 

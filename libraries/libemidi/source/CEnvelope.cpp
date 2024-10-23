@@ -1,11 +1,5 @@
 #include "CEnvelope.hpp"
 
-#if defined(_MSC_VER)
-#if defined(_DEBUG)
-#define new new (_CLIENT_BLOCK, __FILE__, __LINE__)
-#endif
-#endif
-
 using namespace dsa;
 
 #define GETA_BITS 20

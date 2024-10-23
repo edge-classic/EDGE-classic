@@ -123,7 +123,7 @@ class EMIDIPlayer : public AbstractMusicPlayer
     static void rtPitchBend(void *userdata, uint8_t channel, uint8_t msb, uint8_t lsb)
     {
         EMIDIPlayer *player = (EMIDIPlayer *)userdata;
-        player->emidi_synth_->SendMIDIMessage({dsa::CMIDIMsg::PITCH_BEND_CHANGE, channel, msb, lsb});
+        player->emidi_synth_->SendMIDIMessage({dsa::CMIDIMsg::PITCH_BEND_CHANGE, channel, lsb, msb});
     }
 
     static void rtSysEx(void *userdata, const uint8_t *msg, size_t size)

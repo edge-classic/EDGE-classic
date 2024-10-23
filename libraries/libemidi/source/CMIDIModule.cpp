@@ -1,11 +1,5 @@
 #include "CMIDIModule.hpp"
 
-#if defined(_MSC_VER)
-#if defined(_DEBUG)
-#define new new (_NORMAL_BLOCK, __FILE__, __LINE__)
-#endif
-#endif
-
 using namespace dsa;
 
 CMIDIModule::CMIDIModule() : m_device(NULL)

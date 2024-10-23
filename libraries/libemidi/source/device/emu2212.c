@@ -524,8 +524,10 @@ EMU2212_API void SCC_calc_stereo(SCC *scc, e_int16 buf[2])
                 else if (scc->ch_pan[i] == 2)
                     buf[1] += b;
                 else
+                {
                     buf[0] += b;
-                buf[1] += b;
+                    buf[1] += b;
+                }
             }
         }
     }

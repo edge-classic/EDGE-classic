@@ -119,8 +119,10 @@ bool CPSGDrum::Render(int32_t buf[2])
             }
         }
         else
+        {
             buf[0] += m_rbuf[i].front();
-        m_rbuf[i].pop_front();
+            m_rbuf[i].pop_front();
+        }
     }
     buf[0] <<= 1;
     buf[1] = buf[0];

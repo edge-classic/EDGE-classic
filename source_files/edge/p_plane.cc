@@ -324,8 +324,10 @@ static bool MovePlane(PlaneMover *plane)
 
     Sector *sec = plane->sector;
 
-    sec->old_ceiling_height = sec->ceiling_height;
-    sec->old_floor_height   = sec->floor_height;
+    if (plane->is_ceiling || plane->is_elevator)
+        sec->old_ceiling_height = sec->ceiling_height;
+    if (!plane->is_ceiling)
+        sec->old_floor_height = sec->floor_height;
 
     switch (plane->direction)
     {
@@ -1580,13 +1582,16 @@ void RunActivePlanes(void)
             }
 
             if (pmov->is_ceiling || pmov->is_elevator)
+            {
                 pmov->sector->ceiling_move = nullptr;
+                pmov->sector->old_ceiling_height = pmov->sector->ceiling_height;
+            }
 
             if (!pmov->is_ceiling)
+            {
                 pmov->sector->floor_move = nullptr;
-
-            pmov->sector->old_ceiling_height = pmov->sector->ceiling_height;
-            pmov->sector->old_floor_height   = pmov->sector->floor_height;
+                pmov->sector->old_floor_height   = pmov->sector->floor_height;
+            }
 
             *PMI = nullptr;
             delete pmov;

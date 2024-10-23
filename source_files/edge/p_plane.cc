@@ -1585,6 +1585,9 @@ void RunActivePlanes(void)
             if (!pmov->is_ceiling)
                 pmov->sector->floor_move = nullptr;
 
+            pmov->sector->old_ceiling_height = pmov->sector->ceiling_height;
+            pmov->sector->old_floor_height   = pmov->sector->floor_height;
+
             *PMI = nullptr;
             delete pmov;
 

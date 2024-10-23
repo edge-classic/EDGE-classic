@@ -505,7 +505,6 @@ static void LoadSectors(int lump)
         ss->interpolated_floor_height   = ss->floor_height;
         ss->old_ceiling_height          = ss->ceiling_height;
         ss->interpolated_ceiling_height = ss->ceiling_height;
-        ss->old_game_tic                = 0;
 
         // -AJA- 1999/07/29: Keep sectors with same tag in a list.
         GroupSectorTags(ss, level_sectors, i);
@@ -1755,7 +1754,6 @@ static void LoadUDMFSectors()
             ss->interpolated_floor_height   = ss->floor_height;
             ss->old_ceiling_height          = ss->ceiling_height;
             ss->interpolated_ceiling_height = ss->ceiling_height;
-            ss->old_game_tic                = 0;
 
             // -AJA- 1999/07/29: Keep sectors with same tag in a list.
             GroupSectorTags(ss, level_sectors, cur_sector);

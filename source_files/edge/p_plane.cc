@@ -324,12 +324,8 @@ static bool MovePlane(PlaneMover *plane)
 
     Sector *sec = plane->sector;
 
-    if (sec->old_game_tic != game_tic)
-    {
-        plane->sector->old_ceiling_height = plane->sector->ceiling_height;
-        plane->sector->old_floor_height   = plane->sector->floor_height;
-        plane->sector->old_game_tic       = game_tic;
-    }
+    sec->old_ceiling_height = sec->ceiling_height;
+    sec->old_floor_height   = sec->floor_height;
 
     switch (plane->direction)
     {
@@ -338,29 +334,29 @@ static bool MovePlane(PlaneMover *plane)
         break;
 
     case kPlaneDirectionDown:
-        res = AttemptMoveSector(plane->sector, plane, HMM_MIN(plane->start_height, plane->destination_height),
+        res = AttemptMoveSector(sec, plane, HMM_MIN(plane->start_height, plane->destination_height),
                                 plane->is_ceiling ? plane->crush : 0);
 
         if (!AlmostEquals(plane->destination_height, plane->start_height))
         {
-            MakeMovingSound(&plane->sound_effect_started, plane->type->sfxdown_, &plane->sector->sound_effects_origin);
+            MakeMovingSound(&plane->sound_effect_started, plane->type->sfxdown_, &sec->sound_effects_origin);
         }
 
         if (res == RES_PastDest)
         {
             if (!AlmostEquals(plane->destination_height, plane->start_height))
             {
-                StartSoundEffect(plane->type->sfxstop_, kCategoryLevel, &plane->sector->sound_effects_origin);
+                StartSoundEffect(plane->type->sfxstop_, kCategoryLevel, &sec->sound_effects_origin);
             }
 
             plane->speed = plane->type->speed_up_;
 
             if (plane->new_special != -1)
             {
-                SectorChangeSpecial(plane->sector, plane->new_special);
+                SectorChangeSpecial(sec, plane->new_special);
             }
 
-            SECPIC(plane->sector, plane->is_ceiling, plane->new_image);
+            SECPIC(sec, plane->is_ceiling, plane->new_image);
 
             switch (plane->type->type_)
             {
@@ -372,7 +368,7 @@ static bool MovePlane(PlaneMover *plane)
                 break;
 
             case kPlaneMoverMoveWaitReturn:
-                if (AlmostEquals(HEIGHT(plane->sector, plane->is_ceiling), plane->start_height))
+                if (AlmostEquals(HEIGHT(sec, plane->is_ceiling), plane->start_height))
                 {
                     return true; // REMOVE ME
                 }
@@ -420,12 +416,12 @@ static bool MovePlane(PlaneMover *plane)
             int   dir;
             float dest;
 
-            if (AlmostEquals(HEIGHT(plane->sector, plane->is_ceiling), plane->destination_height))
+            if (AlmostEquals(HEIGHT(sec, plane->is_ceiling), plane->destination_height))
                 dest = plane->start_height;
             else
                 dest = plane->destination_height;
 
-            if (HEIGHT(plane->sector, plane->is_ceiling) > dest)
+            if (HEIGHT(sec, plane->is_ceiling) > dest)
             {
                 dir          = kPlaneDirectionDown;
                 plane->speed = plane->type->speed_down_;
@@ -438,7 +434,7 @@ static bool MovePlane(PlaneMover *plane)
 
             if (dir)
             {
-                StartSoundEffect(plane->type->sfxstart_, kCategoryLevel, &plane->sector->sound_effects_origin);
+                StartSoundEffect(plane->type->sfxstart_, kCategoryLevel, &sec->sound_effects_origin);
             }
 
             plane->direction            = dir; // time to go back
@@ -447,27 +443,27 @@ static bool MovePlane(PlaneMover *plane)
         break;
 
     case kPlaneDirectionUp:
-        res = AttemptMoveSector(plane->sector, plane, HMM_MAX(plane->start_height, plane->destination_height),
+        res = AttemptMoveSector(sec, plane, HMM_MAX(plane->start_height, plane->destination_height),
                                 plane->is_ceiling ? 0 : plane->crush);
 
         if (!AlmostEquals(plane->destination_height, plane->start_height))
         {
-            MakeMovingSound(&plane->sound_effect_started, plane->type->sfxup_, &plane->sector->sound_effects_origin);
+            MakeMovingSound(&plane->sound_effect_started, plane->type->sfxup_, &sec->sound_effects_origin);
         }
 
         if (res == RES_PastDest)
         {
             if (!AlmostEquals(plane->destination_height, plane->start_height))
             {
-                StartSoundEffect(plane->type->sfxstop_, kCategoryLevel, &plane->sector->sound_effects_origin);
+                StartSoundEffect(plane->type->sfxstop_, kCategoryLevel, &sec->sound_effects_origin);
             }
 
             if (plane->new_special != -1)
             {
-                SectorChangeSpecial(plane->sector, plane->new_special);
+                SectorChangeSpecial(sec, plane->new_special);
             }
 
-            SECPIC(plane->sector, plane->is_ceiling, plane->new_image);
+            SECPIC(sec, plane->is_ceiling, plane->new_image);
 
             switch (plane->type->type_)
             {
@@ -479,7 +475,7 @@ static bool MovePlane(PlaneMover *plane)
                 break;
 
             case kPlaneMoverMoveWaitReturn:
-                if (AlmostEquals(HEIGHT(plane->sector, plane->is_ceiling), plane->start_height))
+                if (AlmostEquals(HEIGHT(sec, plane->is_ceiling), plane->start_height))
                 {
                     return true; // REMOVE ME
                 }

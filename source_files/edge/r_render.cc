@@ -1987,12 +1987,12 @@ static void UpdateSectorInterpolation(Sector *sector)
     if (uncapped_frames.d_ && !time_stop_active && !paused && !erraticism_active && !menu_active && !rts_menu_active)
     {
         // Interpolate between current and last floor/ceiling position.
-        if (sector->floor_move && !AlmostEquals(sector->floor_height, sector->old_floor_height))
+        if (!AlmostEquals(sector->floor_height, sector->old_floor_height))
             sector->interpolated_floor_height =
                 HMM_Lerp(sector->old_floor_height, fractional_tic, sector->floor_height);
         else
             sector->interpolated_floor_height = sector->floor_height;
-        if (sector->ceiling_move && !AlmostEquals(sector->ceiling_height, sector->old_ceiling_height))
+        if (!AlmostEquals(sector->ceiling_height, sector->old_ceiling_height))
             sector->interpolated_ceiling_height =
                 HMM_Lerp(sector->old_ceiling_height, fractional_tic, sector->ceiling_height);
         else

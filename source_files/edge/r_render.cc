@@ -237,11 +237,11 @@ class MirrorInfo
         yc_ = ay1 - bx1 * yx_ - by1 * yy_;
 
         // heights
-        float a_h = (seg->front_sector->ceiling_height - seg->front_sector->floor_height);
-        float b_h = (other->front_sector->ceiling_height - other->front_sector->floor_height);
+        float a_h = (seg->front_sector->interpolated_ceiling_height - seg->front_sector->interpolated_floor_height);
+        float b_h = (other->front_sector->interpolated_ceiling_height - other->front_sector->interpolated_floor_height);
 
         z_scale_ = a_h / HMM_MAX(1, b_h);
-        zc_      = seg->front_sector->floor_height - other->front_sector->floor_height * z_scale_;
+        zc_      = seg->front_sector->interpolated_floor_height - other->front_sector->interpolated_floor_height * z_scale_;
     }
 
     void Compute()
@@ -759,7 +759,7 @@ static inline void GreetNeighbourSector(float *hts, int &num, VertexSectorList *
     {
         Sector *sec = level_sectors + seclist->sectors[k / 2];
 
-        float h = (k & 1) ? sec->ceiling_height : sec->floor_height;
+        float h = (k & 1) ? sec->interpolated_ceiling_height : sec->interpolated_floor_height;
 
         // does not intersect current height range?
         if (h <= hts[0] + 0.1 || h >= hts[num - 1] - 0.1)
@@ -1788,7 +1788,7 @@ static void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref, 
         return;
 
     // ignore transparent doors (TNT MAP02)
-    if (flood_ref->floor_height >= flood_ref->ceiling_height)
+    if (flood_ref->interpolated_floor_height >= flood_ref->interpolated_ceiling_height)
         return;
 
     // ignore fake 3D bridges (Batman MAP03)
@@ -1957,26 +1957,26 @@ static void RenderSeg(DrawFloor *dfloor, Seg *seg, bool mirror_sub = false)
     // -AJA- 2004/04/21: Emulate Flat-Flooding TRICK
     if (!debug_hall_of_mirrors.d_ && solid_mode && dfloor->is_lowest && sd->bottom.image == nullptr &&
         current_seg->back_subsector &&
-        current_seg->back_subsector->sector->floor_height > current_seg->front_subsector->sector->floor_height &&
-        current_seg->back_subsector->sector->floor_height < view_z &&
+        current_seg->back_subsector->sector->interpolated_floor_height > current_seg->front_subsector->sector->interpolated_floor_height &&
+        current_seg->back_subsector->sector->interpolated_floor_height < view_z &&
         current_seg->back_subsector->sector->height_sector == nullptr &&
         current_seg->front_subsector->sector->height_sector == nullptr)
     {
         EmulateFloodPlane(dfloor, current_seg->back_subsector->sector, +1,
-                          current_seg->front_subsector->sector->floor_height,
-                          current_seg->back_subsector->sector->floor_height);
+                          current_seg->front_subsector->sector->interpolated_floor_height,
+                          current_seg->back_subsector->sector->interpolated_floor_height);
     }
 
     if (!debug_hall_of_mirrors.d_ && solid_mode && dfloor->is_highest && sd->top.image == nullptr &&
         current_seg->back_subsector &&
-        current_seg->back_subsector->sector->ceiling_height < current_seg->front_subsector->sector->ceiling_height &&
-        current_seg->back_subsector->sector->ceiling_height > view_z &&
+        current_seg->back_subsector->sector->interpolated_ceiling_height < current_seg->front_subsector->sector->interpolated_ceiling_height &&
+        current_seg->back_subsector->sector->interpolated_ceiling_height > view_z &&
         current_seg->back_subsector->sector->height_sector == nullptr &&
         current_seg->front_subsector->sector->height_sector == nullptr)
     {
         EmulateFloodPlane(dfloor, current_seg->back_subsector->sector, -1,
-                          current_seg->back_subsector->sector->ceiling_height,
-                          current_seg->front_subsector->sector->ceiling_height);
+                          current_seg->back_subsector->sector->interpolated_ceiling_height,
+                          current_seg->front_subsector->sector->interpolated_ceiling_height);
     }
 }
 
@@ -2914,11 +2914,11 @@ static void DrawMirrorPolygon(DrawMirror *mir)
 
     float x1 = mir->seg->vertex_1->X;
     float y1 = mir->seg->vertex_1->Y;
-    float z1 = ld->front_sector->floor_height;
+    float z1 = ld->front_sector->interpolated_floor_height;
 
     float x2 = mir->seg->vertex_2->X;
     float y2 = mir->seg->vertex_2->Y;
-    float z2 = ld->front_sector->ceiling_height;
+    float z2 = ld->front_sector->interpolated_ceiling_height;
 
     MirrorCoordinate(x1, y1);
     MirrorCoordinate(x2, y2);
@@ -2968,11 +2968,11 @@ static void DrawPortalPolygon(DrawMirror *mir)
     // get polygon coordinates
     float x1 = mir->seg->vertex_1->X;
     float y1 = mir->seg->vertex_1->Y;
-    float z1 = ld->front_sector->floor_height;
+    float z1 = ld->front_sector->interpolated_floor_height;
 
     float x2 = mir->seg->vertex_2->X;
     float y2 = mir->seg->vertex_2->Y;
-    float z2 = ld->front_sector->ceiling_height;
+    float z2 = ld->front_sector->interpolated_ceiling_height;
 
     MirrorCoordinate(x1, y1);
     MirrorCoordinate(x2, y2);

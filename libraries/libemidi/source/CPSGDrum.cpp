@@ -82,7 +82,7 @@ void CPSGDrum::_WriteReg(uint8_t reg, uint8_t val, uint32_t id)
         m_reg_cache[id][reg] = val;
         if (m_rbuf[id].size() < 8192)
         {
-            m_rbuf[id].push_back(PSG_calc(m_psg[id]) << 16);
+            m_rbuf[id].push_back(PSG_calc(m_psg[id]));
             if (m_env.Update())
             {
                 for (int ch = 0; ch < 6; ch++)
@@ -111,7 +111,7 @@ bool CPSGDrum::Render(int32_t buf[2])
     {
         if (m_rbuf[i].empty())
         {
-            buf[0] += PSG_calc(m_psg[i]) << 16;
+            buf[0] += PSG_calc(m_psg[i]);
             if (m_env.Update())
             {
                 for (int ch = 0; ch < 6; ch++)

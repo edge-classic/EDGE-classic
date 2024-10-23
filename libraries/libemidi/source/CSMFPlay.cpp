@@ -7,13 +7,20 @@
 
 using namespace dsa;
 
-CSMFPlay::CSMFPlay(uint32_t rate, int mods) {
+CSMFPlay::CSMFPlay(uint32_t rate, CSMFPlay::PlayerMode mode, int mods) {
   m_mods = mods;
-  for(int i=0;i<m_mods;i++){
-    if(i&1)
-      m_module[i].AttachDevice(new CSccDevice(rate,2));
-    else
-      m_module[i].AttachDevice(new COpllDevice(rate,2));
+  if (mode == SCC_PSG_MODE)
+    for(int i=0;i<m_mods;i++){
+      if(i&1)
+        m_module[i].AttachDevice(new CSccDevice(rate,2));
+      else
+        m_module[i].AttachDevice(new CPSGDrum(rate,1));
+    }
+  else
+  {
+    for(int i=0;i<m_mods;i++){
+      m_module[i].AttachDevice(new COpllDevice(rate, 2));
+    }
   }
 }
 

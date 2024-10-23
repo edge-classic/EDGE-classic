@@ -12,7 +12,13 @@ class CSMFPlay {
   int m_mods;
 
 public:  
-  CSMFPlay(uint32_t rate, int mods=4);
+  enum PlayerMode
+  {
+      OPLL_MODE,
+      SCC_PSG_MODE
+  };
+
+  CSMFPlay(uint32_t rate, PlayerMode mode = SCC_PSG_MODE, int mods=4);
   ~CSMFPlay();
   void Start(bool reset = true);
   void SendMIDIMessage(const CMIDIMsg &msg);

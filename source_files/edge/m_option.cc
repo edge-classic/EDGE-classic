@@ -528,7 +528,7 @@ static OptionMenuItem soundoptions[] = {
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Stereo", "Off/On/Swapped", 3, &var_sound_stereo, nullptr, "NeedRestart"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "MIDI Player", "Fluidlite/Opal/FMMIDI/Emu de MIDI", 4, &var_midi_player, OptionMenuChangeMidiPlayer,
+    {kOptionMenuItemTypeSwitch, "MIDI Player", "Fluidlite/Opal/FMMIDI/Emu de MIDI (OPLL Mode)/Emu de MIDI (SCC-PSG Mode)", 5, &var_midi_player, OptionMenuChangeMidiPlayer,
      nullptr},
     {kOptionMenuItemTypeFunction, "Fluidlite Soundfont", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr},
     {kOptionMenuItemTypeBoolean, "PC Speaker Mode", YesNo, 2, &pc_speaker_mode, OptionMenuChangePCSpeakerMode,

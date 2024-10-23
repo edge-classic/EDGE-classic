@@ -16,6 +16,8 @@ AlmostEquals Google Test Framework Component - Copyright (c) 2005 Google, Inc.
 
 Blasphemer (various assets) - Copyright (c) 2021 Contributors to the Blasphemer project
 
+Emu de MIDI library - Copyright (C) 2004 Mitsutaka Okazaki
+
 FMMIDI library - Copyright (c) 2003-2006 yuno
 
 Freedoom (various assets) - Copyright (c) 2001-2019 Contributors to the Freedoom project

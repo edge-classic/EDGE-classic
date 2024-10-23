@@ -107,6 +107,7 @@
 #include "r_wipe.h"
 #include "s_blit.h"
 #include "s_cache.h"
+#include "s_emidi.h"
 #include "s_fluid.h"
 #include "s_fmm.h"
 #include "s_music.h"
@@ -527,7 +528,7 @@ static OptionMenuItem soundoptions[] = {
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Stereo", "Off/On/Swapped", 3, &var_sound_stereo, nullptr, "NeedRestart"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "MIDI Player", "Fluidlite/Opal/FMMIDI", 3, &var_midi_player, OptionMenuChangeMidiPlayer,
+    {kOptionMenuItemTypeSwitch, "MIDI Player", "Fluidlite/Opal/FMMIDI/Emu de MIDI", 4, &var_midi_player, OptionMenuChangeMidiPlayer,
      nullptr},
     {kOptionMenuItemTypeFunction, "Fluidlite Soundfont", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr},
     {kOptionMenuItemTypeBoolean, "PC Speaker Mode", YesNo, 2, &pc_speaker_mode, OptionMenuChangePCSpeakerMode,
@@ -2041,8 +2042,10 @@ static void OptionMenuChangeMidiPlayer(int key_pressed, ConsoleVariable *console
         RestartOpal();
     else if (var_midi_player == 0)
         RestartFluid();
-    else
+    else if (var_midi_player == 2)
         RestartFMM();
+    else
+        RestartEMIDI();
 }
 
 //

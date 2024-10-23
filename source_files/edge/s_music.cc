@@ -30,6 +30,7 @@
 #include "epi_str_util.h"
 #include "i_system.h"
 #include "m_misc.h"
+#include "s_emidi.h"
 #include "s_flac.h"
 #include "s_fluid.h"
 #include "s_fmm.h"
@@ -220,9 +221,13 @@ void ChangeMusic(int entry_number, bool loop)
         {
             music_player = PlayOPLMusic(data, length, loop, play->type_);
         }
-        else
+        else if (var_midi_player == 2)
         {
             music_player = PlayFMMMusic(data, length, loop);
+        }
+        else
+        {
+            music_player = PlayEMIDIMusic(data, length, loop);
         }
         break;
 

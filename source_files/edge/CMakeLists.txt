@@ -85,6 +85,7 @@ set (EDGE_SOURCE_FILES
   s_mp3.cc
   s_music.cc
   s_ogg.cc
+  s_emidi.cc
   s_fluid.cc
   s_fmm.cc
   s_m4p.cc
@@ -143,6 +144,7 @@ set (EDGE_LINK_LIBRARIES
   fluidlite
   fmmidi
   HandmadeMath
+  libemidi
   libRAD
   libvwad
   lua

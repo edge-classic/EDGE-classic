@@ -48,7 +48,6 @@ class MP3Player : public AbstractMusicPlayer
     int status_;
 
     bool looping_;
-    bool is_stereo_;
 
     uint8_t *mp3_data_    = nullptr;
     drmp3   *mp3_decoder_ = nullptr;
@@ -85,15 +84,6 @@ MP3Player::~MP3Player()
 
 void MP3Player::PostOpen()
 {
-    if (mp3_decoder_->channels == 1)
-    {
-        is_stereo_ = false;
-    }
-    else
-    {
-        is_stereo_ = true;
-    }
-
     // Loaded, but not playing
     status_ = kStopped;
 }
@@ -142,6 +132,8 @@ bool MP3Player::OpenMemory(uint8_t *data, int length)
         return false;
     }
 
+    // Force stereo for MP3 music if not already the case
+    mp3_decoder_->channels = 2;
     mp3_data_ = data;
     PostOpen();
     return true;

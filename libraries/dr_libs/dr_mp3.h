@@ -3655,7 +3655,30 @@ static drmp3_uint64 drmp3_read_pcm_frames_raw(drmp3* pMP3, drmp3_uint64 framesTo
             /* s16 */
             drmp3_int16* pFramesOutS16 = (drmp3_int16*)DRMP3_OFFSET_PTR(pBufferOut,          sizeof(drmp3_int16) * totalFramesRead                   * pMP3->channels);
             drmp3_int16* pFramesInS16  = (drmp3_int16*)DRMP3_OFFSET_PTR(&pMP3->pcmFrames[0], sizeof(drmp3_int16) * pMP3->pcmFramesConsumedInMP3Frame * pMP3->mp3FrameChannels);
-            DRMP3_COPY_MEMORY(pFramesOutS16, pFramesInS16, sizeof(drmp3_int16) * framesToConsume * pMP3->channels);
+            if (pMP3->mp3FrameChannels == pMP3->channels) {
+                /* Fast path. */
+                DRMP3_COPY_MEMORY(pFramesOutS16, pFramesInS16, sizeof(drmp3_int16) * framesToConsume * pMP3->channels);
+            } else {
+                /* Slow path. Channel conversion required. */
+                drmp3_uint32 iFrame;
+                if (pMP3->mp3FrameChannels == 1) {
+                    /* Mono -> Stereo */
+                    DRMP3_ASSERT(pMP3->channels == 2);
+                    for (iFrame = 0; iFrame < framesToConsume; iFrame += 1) {
+                        pFramesOutS16[iFrame*2 + 0] = pFramesInS16[iFrame];
+                        pFramesOutS16[iFrame*2 + 1] = pFramesInS16[iFrame];
+                    }
+                } else {
+                    /* Stereo -> Mono */
+                    DRMP3_ASSERT(pMP3->channels == 1);
+                    for (iFrame = 0; iFrame < framesToConsume; iFrame += 1) {
+                        drmp3_int32 sample = 0;
+                        sample += pFramesInS16[iFrame*pMP3->mp3FrameChannels + 0];
+                        sample += pFramesInS16[iFrame*pMP3->mp3FrameChannels + 1];
+                        pFramesOutS16[iFrame] = (drmp3_int16)(sample / 2);
+                    }
+                }
+            }
         #endif
         }
 

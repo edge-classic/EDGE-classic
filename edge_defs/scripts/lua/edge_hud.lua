@@ -18,7 +18,7 @@ local custom_stbar_average_hue = vec3(0, 0, 0)
 
 local lua_state_test = 0
 
-function lua_state_call_test(info)
+function LUA_STATE_CALL_TEST(info)
     if info ~= nil then
         lua_state_test = lua_state_test + 1
     end

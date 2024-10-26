@@ -60,6 +60,7 @@ void A_WeaponTransSet(MapObject *mo);
 void A_WeaponTransFade(MapObject *mo);
 void A_WeaponEnableRadTrig(MapObject *mo);
 void A_WeaponDisableRadTrig(MapObject *mo);
+void A_WeaponRunLuaScript(MapObject *mo);
 
 void A_SetCrosshair(MapObject *mo);
 void A_TargetJump(MapObject *mo);
@@ -166,6 +167,7 @@ void A_Explode(MapObject *mo);
 void A_ActivateLineType(MapObject *mo);
 void A_EnableRadTrig(MapObject *mo);
 void A_DisableRadTrig(MapObject *mo);
+void A_RunLuaScript(MapObject *mo);
 void A_TouchyRearm(MapObject *mo);
 void A_TouchyDisarm(MapObject *mo);
 void A_BounceRearm(MapObject *mo);

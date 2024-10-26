@@ -4,6 +4,7 @@
 #include "con_var.h"
 #include "epi.h"
 #include "lua.hpp"
+#include "p_mobj.h"
 
 lua_State *LuaCreateVM();
 
@@ -13,7 +14,7 @@ void LuaLoadScripts();
 
 // Do a file, returns the number of return values on stack
 int  LuaDoFile(lua_State *L, const char *filename, const char *source);
-void LuaCallGlobalFunction(lua_State *L, const char *function_name);
+void LuaCallGlobalFunction(lua_State *L, const char *function_name, MapObject *mo = nullptr);
 
 // Game
 void LuaNewGame(void);
@@ -21,6 +22,7 @@ void LuaLoadGame(void);
 void LuaSaveGame(void);
 void LuaBeginLevel(void);
 void LuaEndLevel(void);
+void CreateLuaTable_Mobj(lua_State *L, MapObject *mo);
 
 // Core
 void LuaRegisterCoreLibraries(lua_State *L);

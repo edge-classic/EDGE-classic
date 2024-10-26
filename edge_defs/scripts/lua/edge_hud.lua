@@ -16,6 +16,14 @@ local custom_stbar_darkest_color = vec3(0, 0, 0)
 local custom_stbar_lightest_color = vec3(0, 0, 0)
 local custom_stbar_average_hue = vec3(0, 0, 0)
 
+local lua_state_test = 0
+
+function lua_state_call_test(info)
+    if info ~= nil then
+        lua_state_test = lua_state_test + 1
+    end
+end
+
 function doom_weapon_icon(slot, x, y, off_pic, on_pic)
     if (player.has_weapon_slot(slot)) then
         hud.draw_image(x, y, on_pic)
@@ -206,6 +214,8 @@ function doom_status_bar_common()
     hud.draw_num2(44, 171, 3, player.main_ammo(1))
     hud.draw_num2(90, 171, 3, player.health())
     hud.draw_num2(221, 171, 3, player.total_armor())
+
+    hud.draw_num2(50, 50, 3, lua_state_test)
 
     if (hud.game_mode() == "dm") then
         hud.draw_num2(138, 171, 2, player.frags())

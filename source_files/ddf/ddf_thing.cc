@@ -56,6 +56,7 @@ static void DDFMobjStateGetDEHProjectile(const char *arg, State *cur_state);
 static void DDFMobjStateGetDEHBullet(const char *arg, State *cur_state);
 static void DDFMobjStateGetDEHMelee(const char *arg, State *cur_state);
 static void DDFMobjStateGetDEHFlagJump(const char *arg, State *cur_state);
+static void DDFMobjStateGetString(const char *arg, State *cur_state);
 
 static void AddPickupEffect(PickupEffect **list, PickupEffect *cur);
 
@@ -300,6 +301,7 @@ const DDFActionCode thing_actions[] = {{"NOTHING", nullptr, nullptr},
                                        {"ACTIVATE_LINETYPE", A_ActivateLineType, DDFStateGetIntPair},
                                        {"RTS_ENABLE_TAGGED", A_EnableRadTrig, DDFMobjStateGetRADTrigger},
                                        {"RTS_DISABLE_TAGGED", A_DisableRadTrig, DDFMobjStateGetRADTrigger},
+                                       {"LUA_RUN_SCRIPT", A_RunLuaScript, DDFMobjStateGetString},
                                        {"TOUCHY_REARM", A_TouchyRearm, nullptr},
                                        {"TOUCHY_DISARM", A_TouchyDisarm, nullptr},
                                        {"BOUNCE_REARM", A_BounceRearm, nullptr},
@@ -1792,6 +1794,17 @@ static void DDFMobjGetAngleRange(const char *info, void *storage)
 
     dest[0] = epi::BAMFromDegrees(val1);
     dest[1] = epi::BAMFromDegrees(val2);
+}
+
+//
+// DDFMobjStateGetString
+//
+static void DDFMobjStateGetString(const char *arg, State *cur_state)
+{
+    if (!arg || !arg[0])
+        return;
+
+    cur_state->action_par = epi::CStringDuplicate(arg);
 }
 
 //

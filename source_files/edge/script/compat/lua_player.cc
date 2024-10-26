@@ -1562,7 +1562,7 @@ static void CreateLuaTable_Benefits(lua_State *L, MapObject *obj, bool KillBenef
 
 // CreateLuaTable_Mobj(LuaState, mobj)
 //
-static void CreateLuaTable_Mobj(lua_State *L, MapObject *mo)
+void CreateLuaTable_Mobj(lua_State *L, MapObject *mo)
 {
     std::string temp_value;
     int         NumberOfItems = 12;       // how many fields in a row

@@ -38,6 +38,7 @@
 #include "p_local.h"
 #include "rad_trig.h"
 #include "s_sound.h"
+#include "script/compat/lua_compat.h"
 #include "w_sprite.h"
 #include "w_wad.h"
 
@@ -1927,6 +1928,18 @@ void A_WeaponTransFade(MapObject *mo)
     }
 
     psp->target_visibility = value;
+}
+
+void A_WeaponRunLuaScript(MapObject *mo)
+{
+    Player       *p   = mo->player_;
+    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
+
+    if (psp->state && psp->state->action_par)
+    {
+        const char *script = (const char *)mo->state_->action_par;
+        LuaCallGlobalFunction(LuaGetGlobalVM(), script, mo);
+    }
 }
 
 void A_WeaponEnableRadTrig(MapObject *mo)

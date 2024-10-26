@@ -145,7 +145,7 @@ static int  LuaDbgNOP(lua_State *L)
     return 0;
 }
 
-void LuaCallGlobalFunction(lua_State *L, const char *function_name)
+void LuaCallGlobalFunction(lua_State *L, const char *function_name, MapObject *mo)
 {
     EDGE_ZoneScoped;
 
@@ -154,7 +154,13 @@ void LuaCallGlobalFunction(lua_State *L, const char *function_name)
     int status = 0;
     if (lua_debug.d_)
     {
-        status = dbg_pcall(L, 0, 0, 0);
+        if (mo)
+        {
+            CreateLuaTable_Mobj(L, mo);
+            status = dbg_pcall(L, 1, 0, 0);
+        }
+        else
+            status = dbg_pcall(L, 0, 0, 0);
     }
     else
     {
@@ -162,7 +168,13 @@ void LuaCallGlobalFunction(lua_State *L, const char *function_name)
         lua_pushcfunction(L, LuaMsgHandler); // push message handler */
         lua_insert(L, base);                 // put it under function and args */
 
-        status = lua_pcall(L, 0, 0, base);
+        if (mo)
+        {
+            CreateLuaTable_Mobj(L, mo);
+            status = lua_pcall(L, 1, 0, base);
+        }
+        else
+            status = lua_pcall(L, 0, 0, base);
     }
 
     if (status != LUA_OK)

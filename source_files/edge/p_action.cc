@@ -58,6 +58,7 @@
 #include "r_state.h"
 #include "rad_trig.h"
 #include "s_sound.h"
+#include "script/compat/lua_compat.h"
 #include "w_wad.h"
 
 extern FlatDefinition *P_IsThingOnLiquidFloor(MapObject *thing);
@@ -136,6 +137,22 @@ void A_DisableRadTrig(MapObject *mo)
     uint64_t *value = (uint64_t *)mo->state_->action_par;
 
     ScriptEnableByTag(mo, value[0], true, (RADScriptTag)mo->state_->rts_tag_type);
+}
+
+//
+// A_RunLuaScript
+//
+// Allows things to execute Lua scripts, passing themselves
+// as a parameter
+//
+void A_RunLuaScript(MapObject *mo)
+{
+    if (!mo->state_ || !mo->state_->action_par)
+        return;
+
+    const char *script = (const char *)mo->state_->action_par;
+
+    LuaCallGlobalFunction(LuaGetGlobalVM(), script, mo);
 }
 
 //

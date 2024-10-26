@@ -44,6 +44,7 @@ static void DDFWStateGetRADTrigger(const char *arg, State *cur_state);
 static void DDFWStateGetDEHMelee(const char *arg, State *cur_state);
 static void DDFWStateGetDEHBullet(const char *arg, State *cur_state);
 static void DDFWStateGetDEHProjectile(const char *arg, State *cur_state);
+static void DDFWStateGetString(const char *arg, State *cur_state);
 
 static WeaponDefinition dummy_weapon;
 
@@ -201,6 +202,7 @@ static const DDFActionCode weapon_actions[] = {{"NOTHING", nullptr, nullptr},
 
                                                {"RTS_ENABLE_TAGGED", A_WeaponEnableRadTrig, DDFWStateGetRADTrigger},
                                                {"RTS_DISABLE_TAGGED", A_WeaponDisableRadTrig, DDFWStateGetRADTrigger},
+                                               {"LUA_RUN_SCRIPT", A_WeaponRunLuaScript, DDFWStateGetString},
                                                {"SEC_SHOOT", A_WeaponShootSA, DDFStateGetAttack},
                                                {"SEC_REFIRE", A_ReFireSA, nullptr},
                                                {"SEC_REFIRE_TO", A_ReFireToSA, DDFStateGetJump},
@@ -877,6 +879,17 @@ static void DDFWStateGetDEHProjectile(const char *arg, State *cur_state)
 
     atkdefs.push_back(atk);
     cur_state->action_par = atk;
+}
+
+//
+// DDFWStateGetString
+//
+static void DDFWStateGetString(const char *arg, State *cur_state)
+{
+    if (!arg || !arg[0])
+        return;
+
+    cur_state->action_par = epi::CStringDuplicate(arg);
 }
 
 //

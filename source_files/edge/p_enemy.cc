@@ -452,13 +452,14 @@ void NewChaseDir(MapObject *object)
     object->move_direction_ = kDirectionNone;
 }
 
+
 //
+// Used to find a player, either to set as support object or to set as a target.
 // Range is angle range on either side of eyes, 90 degrees for normal
 // view, 180 degrees for total sight in all dirs.
+// Returns true if a player is found.
 //
-// Returns true if a player is targeted.
-//
-bool LookForPlayers(MapObject *actor, BAMAngle range)
+bool LookForPlayers(MapObject *actor, BAMAngle range, bool ToSupport)
 {
     int      c;
     int      stop;
@@ -488,7 +489,10 @@ bool LookForPlayers(MapObject *actor, BAMAngle range)
 
         // on the same team ?
         if ((actor->side_ & player->map_object_->side_) != 0)
-            continue;
+        {
+            if (!ToSupport) //not looking to support a player
+                continue;
+        }
 
         if (range < kBAMAngle180)
         {
@@ -509,12 +513,18 @@ bool LookForPlayers(MapObject *actor, BAMAngle range)
         if (!CheckSight(actor, player->map_object_))
             continue;
 
-        actor->SetTarget(player->map_object_);
-        return true;
+        if (ToSupport) //support the player
+            actor->SetSupportObject(player->map_object_);
+        else // target the player
+            actor->SetTarget(player->map_object_);
+           
+         return true;
+       
     }
 
     return false;
 }
+
 
 //
 //   BOSS-BRAIN HANDLING

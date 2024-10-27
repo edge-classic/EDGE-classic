@@ -5084,5 +5084,86 @@ void A_PainChanceSet(MapObject *mo)
     mo->pain_chance_ = value;
 }
 
+
+// Thing will forget both current target and supported player
+void A_ClearTarget(MapObject *object)
+{
+    object->SetTarget(nullptr);
+    object->SetSupportObject(nullptr);
+}
+
+//
+// Similar to SUPPORT_LOOKOUT but will not go to MEANDER states automatically.
+// Look for players AND enemies.
+// - If we have no player to support we try and find one.
+// - If we have no SIDE set then we will get one.
+// - If we see an enemy then we target him.
+void A_FriendLook(MapObject *object)
+{
+    object->threshold_ = 0; // any shot will wake up
+
+    if (!object->support_object_)  //no player to support yet
+    {
+        if (FindPlayerToSupport(object)) //try and find a player. One way or the other we will have a side at least
+        {
+            if (object->info_->seesound_)
+            {
+                StartSoundEffect(object->info_->seesound_, GetSoundEffectCategory(object), object, SfxFlags(object->info_));
+            }
+        }
+    }
+
+/*
+    if (object->flags_ & kMapObjectFlagStealth)
+        object->target_visibility_ = 1.0f;
+
+    if (force_infighting.d_)
+        if (CreateAggression(object) || CreateAggression(object))
+            return;
+*/
+
+    if (!A_LookForTargets(object)) //No target found
+        return;
+    else
+    {
+        if (object->info_->seesound_)
+        {
+            StartSoundEffect(object->info_->seesound_, GetSoundEffectCategory(object), object, SfxFlags(object->info_));
+        }
+    }
+
+    
+}
+
+//
+// FindPlayerToSupport
+//
+// Look for a Player to support
+//
+bool FindPlayerToSupport(MapObject *object)
+{
+    if (object->flags_ & kMapObjectFlagStealth)
+        object->target_visibility_ = 1.0f;
+
+    if (LookForPlayers(object, object->info_->sight_angle_, true)) //any players around to support?
+    {
+        // join the player's side
+        if (object->side_ == 0)
+        {
+            if (object->support_object_ && object->support_object_->player_)
+                object->side_ = object->support_object_->side_;
+        }
+
+        return true;
+    }
+
+    //default to something at least
+    object->side_ = 1;
+
+    return false;
+
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

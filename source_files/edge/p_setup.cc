@@ -670,6 +670,8 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x, float 
     {
         mo->side_ = 1; //~0;
         mo->hyper_flags_ |= kHyperFlagUltraLoyal;
+		//mo->extended_flags_ &= ~kExtendedFlagDisloyalToOwnType; //remove this flag just in case
+		
         /*
         player_t *player;
         player = players[0];

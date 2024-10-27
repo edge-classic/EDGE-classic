@@ -200,6 +200,10 @@ void A_ClearInvuln(MapObject *mo);
 
 void A_PainChanceSet(MapObject *mo);
 
+void A_ClearTarget(MapObject *mo);
+void A_FriendLook(MapObject *mo);
+bool FindPlayerToSupport(MapObject *mo);
+
 // Movement actions
 void A_FaceDir(MapObject *mo);
 void A_TurnDir(MapObject *mo);

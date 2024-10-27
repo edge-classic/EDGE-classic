@@ -149,7 +149,8 @@ extern float         yspeed[8];
 void       NoiseAlert(Player *p);
 void       NewChaseDir(MapObject *actor);
 bool       DoMove(MapObject *actor, bool path);
-bool       LookForPlayers(MapObject *actor, BAMAngle range);
+bool       LookForPlayers(MapObject *actor, BAMAngle range, bool ToSupport = false);
+
 MapObject *LookForShootSpot(const MapObjectDefinition *spot_type);
 
 //

@@ -174,7 +174,11 @@ enum ExtendedFlag
     kExtendedFlagCrouching = (1 << 25),
     // Missile can tunnel through enemies.  -AJA- 2000/10/23
     kExtendedFlagTunnel = (1 << 26),
-    // NO LONGER USED (1 << 27),  // was: DLIGHT
+    // Missile tunnels through enemies, but damages each enemy for as long
+    // as it is in contact. This differs from the above in that TUNNEL
+    // only damages each mobj that it passes through once by keeping a simple
+    // hash list - Dasho
+    kExtendedFlagBore = (1 << 27),
     // Thing has been gibbed.
     kExtendedFlagGibbed = (1 << 28),
     // -AJA- 2004/07/22: play the monster sounds at full volume

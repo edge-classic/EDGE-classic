@@ -1790,14 +1790,18 @@ int MissileContact(MapObject *object, MapObject *target)
     // the first impact.
     if (object->extended_flags_ & kExtendedFlagTunnel)
     {
-        // this hash is very basic, but should work OK
-        uint32_t hash = (uint32_t)(long long)target;
+        // unless it uses the new BORE special - Dasho
+        if (!(object->extended_flags_ & kExtendedFlagBore))
+        {
+            // this hash is very basic, but should work OK
+            uint32_t hash = (uint32_t)(long long)target;
 
-        if (object->tunnel_hash_[0] == hash || object->tunnel_hash_[1] == hash)
-            return -1;
+            if (object->tunnel_hash_[0] == hash || object->tunnel_hash_[1] == hash)
+                return -1;
 
-        object->tunnel_hash_[0] = object->tunnel_hash_[1];
-        object->tunnel_hash_[1] = hash;
+            object->tunnel_hash_[0] = object->tunnel_hash_[1];
+            object->tunnel_hash_[1] = hash;
+        }
         if (object->info_->rip_sound_)
             StartSoundEffect(object->info_->rip_sound_, kCategoryObject, object, 0);
     }

@@ -757,7 +757,7 @@ const FlagName mbf21flag_list[] = {
     {kMBF21_RANGEHALF, "RANGEHALF", "TRIGGER_HAPPY"},
     {kMBF21_NOTHRESHOLD, "NOTHRESHOLD", "NOGRUDGE"},
     {kMBF21_BOSS, "BOSS", "BOSSMAN"},
-    {kMBF21_RIP, "RIP", "TUNNEL"},
+    {kMBF21_RIP, "RIP", "BORE"},
     {kMBF21_FULLVOLSOUNDS, "FULLVOLSOUNDS", "ALWAYS_LOUD"},
 
     // flags which don't produce an Edge special

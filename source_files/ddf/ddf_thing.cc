@@ -1560,6 +1560,7 @@ static DDFSpecialFlags extended_specials[] = {{"RESPAWN", kExtendedFlagNoRespawn
                                               {"USABLE", kExtendedFlagUsable, 0},
                                               {"BLOCK_SHOTS", kExtendedFlagBlockShots, 0},
                                               {"TUNNEL", kExtendedFlagTunnel, 0},
+                                              {"BORE", (kExtendedFlagTunnel|kExtendedFlagBore), 0},
                                               {"SIMPLE_ARMOUR", kExtendedFlagSimpleArmour, 0},
                                               {nullptr, 0, 0}};
 

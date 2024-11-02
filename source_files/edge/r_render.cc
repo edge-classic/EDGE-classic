@@ -2232,13 +2232,13 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
 
     if (EDGE_IMAGE_IS_SKY(fsector->ceiling))
     {
-        if (seg->sidedef->top.image == nullptr && fsector->interpolated_ceiling_height < fsector->sky_height &&
+        if (fsector->interpolated_ceiling_height < fsector->sky_height &&
             (!bsector || !EDGE_IMAGE_IS_SKY(bsector->ceiling) ||
              bsector->interpolated_floor_height >= fsector->interpolated_ceiling_height))
         {
             RenderSkyWall(seg, fsector->interpolated_ceiling_height, fsector->sky_height);
         }
-        else if (seg->sidedef->bottom.image == nullptr && bsector && EDGE_IMAGE_IS_SKY(bsector->ceiling) && fsector->height_sector == nullptr &&
+        else if (bsector && EDGE_IMAGE_IS_SKY(bsector->ceiling) && fsector->height_sector == nullptr &&
                  bsector->height_sector == nullptr)
         {
             float max_f = HMM_MAX(fsector->interpolated_floor_height, bsector->interpolated_floor_height);

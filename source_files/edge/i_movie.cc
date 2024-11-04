@@ -37,7 +37,6 @@
 extern int sound_device_frequency;
 
 bool                  playing_movie      = false;
-static bool           need_canvas_update = false;
 static bool           skip_bar_active;
 static GLuint         canvas            = 0;
 static uint8_t       *rgb_data          = nullptr;
@@ -57,13 +56,40 @@ static float          tx2           = 1.0f;
 static float          ty1           = 0.0f;
 static float          ty2           = 1.0f;
 static double         last_time     = 0;
-static plm_frame_t   *movie_frame   = nullptr;
-static plm_samples_t *movie_samples = nullptr;
 
 static bool MovieSetupAudioStream(int rate)
 {
     plm_set_audio_lead_time(decoder, (double)1024 / (double)rate);
+    PauseMusic();
+    SoundQueueStop();
+    SoundQueueInitialize();
     return true;
+}
+
+void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
+{
+    (void)mpeg;
+    (void)user;
+    if (samples)
+    {
+        SoundData *movie_buf = SoundQueueGetFreeBuffer(PLM_AUDIO_SAMPLES_PER_FRAME);
+        if (movie_buf)
+        {
+            movie_buf->length_ = PLM_AUDIO_SAMPLES_PER_FRAME;
+            memcpy(movie_buf->data_, samples->interleaved, PLM_AUDIO_SAMPLES_PER_FRAME * 2 * sizeof(int16_t));
+            SoundQueueAddBuffer(movie_buf, movie_sample_rate);
+        }
+    }
+}
+
+void MovieVideoCallback(plm_t *mpeg, plm_frame_t *frame, void *user)
+{
+    (void)mpeg;
+    (void)user;
+
+    plm_frame_to_rgb(frame, rgb_data, frame->width * 3);
+    glBindTexture(GL_TEXTURE_2D, canvas);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame->width, frame->height, 0, GL_RGB, GL_UNSIGNED_BYTE, rgb_data);
 }
 
 void PlayMovie(const std::string &name)
@@ -191,6 +217,8 @@ void PlayMovie(const std::string &name)
     int num_pixels = movie_width * movie_height * 3;
     rgb_data       = new uint8_t[num_pixels];
     memset(rgb_data, 0, num_pixels);
+    plm_set_video_decode_callback(decoder, MovieVideoCallback, nullptr);
+    plm_set_audio_decode_callback(decoder, MovieAudioCallback, nullptr);
     if (!no_sound)
     {
         plm_set_audio_enabled(decoder, 1);
@@ -209,8 +237,6 @@ void PlayMovie(const std::string &name)
 static void EndMovie()
 {
     plm_destroy(decoder);
-    movie_frame = nullptr;
-    movie_samples = nullptr;
     decoder = nullptr;
     delete[] movie_bytes;
     movie_bytes = nullptr;
@@ -224,23 +250,15 @@ static void EndMovie()
         glDeleteTextures(1, &canvas);
         canvas = 0;
     }
+    ResumeMusic();
 }
 
 void MovieDrawer()
 {
     if (!playing_movie)
         return;
-    if (!plm_has_ended(decoder) && movie_frame)
+    if (!plm_has_ended(decoder))
     {
-        if (need_canvas_update)
-        {
-            plm_frame_to_rgb(movie_frame, rgb_data, movie_frame->width * 3);
-            glBindTexture(GL_TEXTURE_2D, canvas);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, movie_frame->width, movie_frame->height, 0, GL_RGB, GL_UNSIGNED_BYTE,
-                         rgb_data);
-            need_canvas_update = false;
-        }
-
         SetupMatrices2D();
 
         glEnable(GL_TEXTURE_2D);
@@ -397,22 +415,7 @@ void MovieTicker()
             elapsed_time = 1.0 / 30.0;
         last_time = current_time;
 
-        movie_frame = plm_decode_video(decoder);
-        if (movie_frame)
-            need_canvas_update = true;
-        movie_samples        = plm_decode_audio(decoder);
-        SoundData *movie_buf = SoundQueueGetFreeBuffer(PLM_AUDIO_SAMPLES_PER_FRAME);
-        if (movie_buf)
-        {
-            movie_buf->length_ = PLM_AUDIO_SAMPLES_PER_FRAME;
-            if (movie_samples)
-            {
-                memcpy(movie_buf->data_, movie_samples->interleaved, PLM_AUDIO_SAMPLES_PER_FRAME * 2 * sizeof(int16_t));
-                SoundQueueAddBuffer(movie_buf, movie_sample_rate);
-            }
-            else
-                SoundQueueReturnBuffer(movie_buf);
-        }
+        plm_decode(decoder, elapsed_time);
 
         if (skip_bar_active)
         {

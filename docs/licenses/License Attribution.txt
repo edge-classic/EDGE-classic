@@ -22,6 +22,9 @@ FMMIDI library - Copyright (c) 2003-2006 yuno
 
 Freedoom (various assets) - Copyright (c) 2001-2019 Contributors to the Freedoom project
 
+libRAD (instruments.h) - Copyright (c) 2023 Contributors to the Freedoom project
+						  Copyright (c) ConSiGno ("DMXOPL" instrument bank which formed the basis for Freedoom's GENMIDI)
+
 libRAD (patches.cpp/radmidi.cpp) - Copyright (c) 2021-2023 Devin Acker
 
 Mod4Play library - 	Copyright (c) 2024 dashodanger

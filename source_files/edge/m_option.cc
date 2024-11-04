@@ -629,6 +629,8 @@ static OptionMenuDefinition gameplay_optmenu = {playoptions,
 //
 static OptionMenuItem perfoptions[] = {
     {kOptionMenuItemTypeSwitch, "Detail Level", "Low/Medium/High", 3, &detail_level, OptionMenuChangeMipMap, nullptr},
+    {kOptionMenuItemTypeBoolean, "Simple Skies", YesNo, 2, &renderer_dumb_sky.d_,
+     OptionMenuUpdateConsoleVariableFromInt, "Speeds up sky drawing, but breaks sky flooding and other hacks", &renderer_dumb_sky},
     {kOptionMenuItemTypeBoolean, "Draw Distance Culling", YesNo, 2, &draw_culling.d_,
      OptionMenuUpdateConsoleVariableFromInt, "Sector/Level Fog will be disabled when this is On", &draw_culling},
     {kOptionMenuItemTypeSlider, "Maximum Draw Distance", nullptr, 0, &draw_culling_distance.f_,

@@ -212,6 +212,8 @@ class EMIDIPlayer : public AbstractMusicPlayer
             emidi_synth_ = nullptr;
         }
 
+        music_player_gain = 1.0f;
+
         status_ = kNotLoaded;
     }
 
@@ -222,6 +224,8 @@ class EMIDIPlayer : public AbstractMusicPlayer
 
         status_  = kPlaying;
         looping_ = loop;
+
+        music_player_gain = 2.0f;
 
         // Load up initial buffer data
         Ticker();

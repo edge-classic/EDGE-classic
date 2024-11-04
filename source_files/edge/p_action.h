@@ -200,6 +200,9 @@ void A_ClearInvuln(MapObject *mo);
 
 void A_PainChanceSet(MapObject *mo);
 
+void A_Gravity(MapObject *mo);
+void A_NoGravity(MapObject *mo);
+
 void A_ClearTarget(MapObject *mo);
 void A_FriendLook(MapObject *mo);
 bool FindPlayerToSupport(MapObject *mo);

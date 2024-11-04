@@ -312,6 +312,9 @@ const DDFActionCode thing_actions[] = {{"NOTHING", nullptr, nullptr},
                                        {"CLEAR_INVULNERABLE", A_ClearInvuln, nullptr},
                                        {"SET_PAINCHANCE", A_PainChanceSet, DDFStateGetPercent},
 									   
+                                       {"GRAVITY", A_Gravity, nullptr},
+                                       {"NO_GRAVITY", A_NoGravity, nullptr},
+
 									   {"CLEAR_TARGET", A_ClearTarget, nullptr},
                                        {"FRIEND_LOOKOUT", A_FriendLook, nullptr},
 

@@ -5088,6 +5088,15 @@ void A_PainChanceSet(MapObject *mo)
     mo->pain_chance_ = value;
 }
 
+void A_Gravity(MapObject *mo)
+{
+    mo->flags_ &= ~kMapObjectFlagNoGravity; //Remove NoGravity flag
+}
+
+void A_NoGravity(MapObject *mo)
+{
+    mo->flags_ |= kMapObjectFlagNoGravity; //Set NoGravity flag
+}
 
 // Thing will forget both current target and supported player
 void A_ClearTarget(MapObject *object)

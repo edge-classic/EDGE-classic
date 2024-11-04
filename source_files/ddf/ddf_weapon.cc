@@ -192,6 +192,10 @@ static const DDFActionCode weapon_actions[] = {{"NOTHING", nullptr, nullptr},
                                                {"ZOOM", A_WeaponZoom, nullptr},
                                                {"SET_INVULNERABLE", A_SetInvuln, nullptr},
                                                {"CLEAR_INVULNERABLE", A_ClearInvuln, nullptr},
+
+                                               {"GRAVITY", A_Gravity, nullptr},
+                                               {"NO_GRAVITY", A_NoGravity, nullptr},
+
                                                {"MOVE_FWD", WA_MoveFwd, DDFStateGetFloat},
                                                {"MOVE_RIGHT", WA_MoveRight, DDFStateGetFloat},
                                                {"MOVE_UP", WA_MoveUp, DDFStateGetFloat},

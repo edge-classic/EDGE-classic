@@ -40,7 +40,7 @@ enum GameState
     kGameStateTitleScreen,
     kGameStateLevel,
     kGameStateIntermission,
-    kGameStateFinale,
+    kGameStateFinale
 };
 
 //

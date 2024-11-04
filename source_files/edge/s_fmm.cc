@@ -25,6 +25,7 @@
 #include "epi_file.h"
 #include "epi_filesystem.h"
 #include "epi_str_util.h"
+#include "i_movie.h"
 #include "i_system.h"
 #include "m_misc.h"
 #include "midisynth.hpp"
@@ -262,7 +263,7 @@ class FMMPlayer : public AbstractMusicPlayer
 
     void Ticker(void)
     {
-        while (status_ == kPlaying && !pc_speaker_mode)
+        while (status_ == kPlaying && !pc_speaker_mode && !playing_movie)
         {
             SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer);
 

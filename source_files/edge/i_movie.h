@@ -15,14 +15,19 @@
 //  GNU General Public License for more details.
 //
 //----------------------------------------------------------------------------
-//  Adapted from the EDGE 2.x RoQ/FFMPEG implementation
-//----------------------------------------------------------------------------
 
 #pragma once
 
 #include <string>
 
+#include "e_event.h"
+
+extern bool playing_movie;
+
 void PlayMovie(const std::string &name);
+void MovieTicker(void);
+void MovieDrawer(void);
+bool MovieResponder(InputEvent *ev);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

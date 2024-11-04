@@ -24,6 +24,7 @@
 #include "epi_endian.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
+#include "i_movie.h"
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_music.h"
@@ -204,7 +205,7 @@ void MP3Player::Stop()
 
 void MP3Player::Ticker()
 {
-    while (status_ == kPlaying && !pc_speaker_mode)
+    while (status_ == kPlaying && !pc_speaker_mode && !playing_movie)
     {
         SoundData *buf =
             SoundQueueGetFreeBuffer(kMusicBuffer);

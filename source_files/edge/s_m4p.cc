@@ -21,6 +21,7 @@
 #include "epi_endian.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
+#include "i_movie.h"
 #include "m4p.h"
 #include "s_blit.h"
 #include "s_cache.h"
@@ -177,7 +178,7 @@ void M4PPlayer::Stop()
 
 void M4PPlayer::Ticker()
 {
-    while (status_ == kPlaying && !pc_speaker_mode)
+    while (status_ == kPlaying && !pc_speaker_mode && !playing_movie)
     {
         SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer);
 

@@ -139,20 +139,6 @@ void RendererCheckExtensions(void)
     LogPrint("OpenGL: Version: %s\n", glstr_version.c_str());
     LogPrint("OpenGL: Renderer: %s\n", glstr_renderer.c_str());
     LogPrint("OpenGL: Vendor: %s\n", glstr_vendor.c_str());
-
-    // Check for a windows software renderer
-    if (epi::StringCaseCompareASCII(glstr_vendor, "Microsoft Corporation") == 0)
-    {
-        if (epi::StringCaseCompareASCII(glstr_renderer, "GDI Generic") == 0)
-        {
-            FatalError("OpenGL: SOFTWARE Renderer!\n");
-        }
-    }
-
-#ifndef EDGE_GL_ES2
-    if (!GLAD_GL_VERSION_1_5)
-        FatalError("OpenGL supported version below minimum! (Requires OpenGL 1.5).\n");
-#endif
 }
 
 //

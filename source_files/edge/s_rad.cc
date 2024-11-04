@@ -21,6 +21,7 @@
 #include "epi_endian.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
+#include "i_movie.h"
 #include "opal.h"
 #include "radplay.h"
 #include "s_blit.h"
@@ -222,7 +223,7 @@ void RadPlayer::Stop()
 
 void RadPlayer::Ticker()
 {
-    while (status_ == kPlaying && !pc_speaker_mode)
+    while (status_ == kPlaying && !pc_speaker_mode && !playing_movie)
     {
         SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer);
 

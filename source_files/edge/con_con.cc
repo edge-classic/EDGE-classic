@@ -43,6 +43,7 @@
 #include "hu_stuff.h"
 #include "hu_style.h"
 #include "i_defs_gl.h"
+#include "i_movie.h"
 #include "i_system.h"
 #include "m_argv.h"
 #include "n_network.h"
@@ -1536,6 +1537,9 @@ bool ConsoleResponder(InputEvent *ev)
 
 void ConsoleTicker(void)
 {
+    if (playing_movie)
+        return;
+
     console_cursor = (console_cursor + 1) & 31;
 
     if (console_visible != kConsoleVisibilityNotVisible)

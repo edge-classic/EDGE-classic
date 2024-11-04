@@ -39,6 +39,7 @@
 #include "epi_sdl.h"
 #include "epi_str_util.h"
 #include "hu_stuff.h"
+#include "i_movie.h"
 #include "m_math.h"
 #include "m_misc.h"
 #include "r_misc.h"
@@ -681,6 +682,9 @@ void ProcessInputEvents(void)
     for (; event_tail != event_head; event_tail = (event_tail + 1) % kMaximumInputEvents)
     {
         ev = &events[event_tail];
+
+        if (MovieResponder(ev))
+            continue;
 
         if (ConsoleResponder(ev))
             continue;      // Console ate the event

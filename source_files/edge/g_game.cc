@@ -42,6 +42,7 @@
 #include "epi_str_util.h"
 #include "f_finale.h"
 #include "f_interm.h"
+#include "i_movie.h"
 #include "i_system.h"
 #include "m_cheat.h"
 #include "m_menu.h"
@@ -417,6 +418,9 @@ static void CheckPlayersReborn(void)
 
 void DoBigGameStuff(void)
 {
+    if (playing_movie)
+        return;
+
     // do things to change the game state
     while (game_action != kGameActionNothing)
     {
@@ -466,6 +470,9 @@ void DoBigGameStuff(void)
 
 void GameTicker(void)
 {
+    if (playing_movie)
+        return;
+
     // ANIMATE FLATS AND TEXTURES GLOBALLY
     AnimationTicker();
 

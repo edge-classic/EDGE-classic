@@ -318,8 +318,8 @@ static bool InitializeWindow(DisplayMode *mode)
 #ifndef EDGE_GL_ES2
     gladLoadGL();
 
-    if (GLVersion.major < 2)
-        FatalError("System only supports GL %d.%d. Minimum GL version 2.0 required!\n", GLVersion.major, GLVersion.minor);
+    if (GLVersion.major == 1 && GLVersion.minor < 5)
+        FatalError("System only supports GL %d.%d. Minimum GL version 1.5 required!\n", GLVersion.major, GLVersion.minor);
 #endif
 
     return true;

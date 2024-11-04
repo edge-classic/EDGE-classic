@@ -25,6 +25,7 @@
 #include "epi_file.h"
 #include "epi_filesystem.h"
 #include "fluidlite.h"
+#include "i_movie.h"
 #include "i_system.h"
 #include "m_misc.h"
 // clang-format off
@@ -355,7 +356,7 @@ class FluidPlayer : public AbstractMusicPlayer
             fluid_synth_set_gain(edge_fluid, fluid_player_gain.f_);
         }
 
-        while (status_ == kPlaying && !pc_speaker_mode)
+        while (status_ == kPlaying && !pc_speaker_mode && !playing_movie)
         {
             SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer);
 

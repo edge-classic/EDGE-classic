@@ -50,6 +50,7 @@
 #include "hu_stuff.h"
 #include "hu_style.h"
 #include "i_defs_gl.h"
+#include "i_movie.h"
 #include "i_system.h"
 #include "im_funcs.h"
 #include "m_argv.h"
@@ -3080,6 +3081,9 @@ void MenuSetupNextMenu(Menu *menudef)
 
 void MenuTicker(void)
 {
+    if (playing_movie)
+        return;
+
     // update language if it changed
     if (m_language.CheckModified())
         if (!language.Select(m_language.c_str()))

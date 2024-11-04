@@ -89,6 +89,7 @@ struct PlaneMover
 
     bool is_ceiling;
     bool is_elevator;
+    bool is_instant = false;
 
     float start_height;
     float destination_height;

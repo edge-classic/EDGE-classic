@@ -21,6 +21,7 @@
 #include "epi.h"
 #include "epi_endian.h"
 #include "epi_filesystem.h"
+#include "i_movie.h"
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_music.h"
@@ -206,7 +207,7 @@ void OGGPlayer::Stop()
 
 void OGGPlayer::Ticker()
 {
-    while (status_ == kPlaying)
+    while (status_ == kPlaying && !pc_speaker_mode && !playing_movie)
     {
         SoundData *buf =
             SoundQueueGetFreeBuffer(kMusicBuffer);

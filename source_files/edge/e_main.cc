@@ -605,73 +605,79 @@ void EdgeDisplay(void)
 
     HUDFrameSetup();
 
-    switch (game_state)
+    if (!playing_movie)
     {
-    case kGameStateLevel:
-        PaletteTicker();
-
-        if (LuaUseLuaHUD())
-            LuaRunHUD();
-        else
-            COALRunHUD();
-
-        if (need_save_screenshot)
+        switch (game_state)
         {
-            CreateSaveScreenshot();
-            need_save_screenshot = false;
+        case kGameStateLevel:
+            PaletteTicker();
+
+            if (LuaUseLuaHUD())
+                LuaRunHUD();
+            else
+                COALRunHUD();
+
+            if (need_save_screenshot)
+            {
+                CreateSaveScreenshot();
+                need_save_screenshot = false;
+            }
+
+            HUDDrawer();
+            ScriptDrawer();
+            break;
+
+        case kGameStateIntermission:
+            IntermissionDrawer();
+            break;
+
+        case kGameStateFinale:
+            FinaleDrawer();
+            break;
+
+        case kGameStateTitleScreen:
+            TitleDrawer();
+            break;
+
+        case kGameStateNothing:
+            break;
         }
 
-        HUDDrawer();
-        ScriptDrawer();
-        break;
-
-    case kGameStateIntermission:
-        IntermissionDrawer();
-        break;
-
-    case kGameStateFinale:
-        FinaleDrawer();
-        break;
-
-    case kGameStateTitleScreen:
-        TitleDrawer();
-        break;
-
-    case kGameStateNothing:
-        break;
-    }
-
-    if (wipe_gl_active)
-    {
-        // -AJA- Wipe code for GL.  Sorry for all this ugliness, but it just
-        //       didn't fit into the existing wipe framework.
-        //
-        if (DoWipe())
+        if (wipe_gl_active)
         {
-            StopWipe();
-            wipe_gl_active = false;
+            // -AJA- Wipe code for GL.  Sorry for all this ugliness, but it just
+            //       didn't fit into the existing wipe framework.
+            //
+            if (DoWipe())
+            {
+                StopWipe();
+                wipe_gl_active = false;
+            }
         }
+
+        // save the current screen if about to wipe
+        if (need_wipe)
+        {
+            need_wipe      = false;
+            wipe_gl_active = true;
+
+            InitializeWipe(wipe_method);
+        }
+
+        if (paused)
+            DisplayPauseImage();
+
+        // menus go directly to the screen
+        MenuDrawer(); // menu is drawn even on top of everything (except console)
     }
-
-    // save the current screen if about to wipe
-    if (need_wipe)
-    {
-        need_wipe      = false;
-        wipe_gl_active = true;
-
-        InitializeWipe(wipe_method);
-    }
-
-    if (paused)
-        DisplayPauseImage();
-
-    // menus go directly to the screen
-    MenuDrawer(); // menu is drawn even on top of everything (except console)
+    else
+        MovieDrawer();
 
     // process mouse and keyboard events
     NetworkUpdate();
 
-    ConsoleDrawer();
+    if (!playing_movie)
+        ConsoleDrawer();
 
     if (!hud_overlays.at(video_overlay.d_).empty())
     {
@@ -2447,6 +2453,7 @@ void EdgeTicker(void)
         GameTicker();
 
         // user interface stuff (skull anim, etc)
+        MovieTicker();
         ConsoleTicker();
         MenuTicker();
         SoundTicker();

@@ -28,6 +28,7 @@
 #include "epi_file.h"
 #include "epi_filesystem.h"
 #include "epi_str_util.h"
+#include "i_movie.h"
 #include "i_system.h"
 #include "m_misc.h"
 #include "s_emidi.h"

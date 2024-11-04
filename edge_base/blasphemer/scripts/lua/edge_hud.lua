@@ -471,10 +471,39 @@ end
 
 
 function begin_level()
-    --	player.set_who(0)--need to hook our player mobj first
-    --	
-    --	if (player.inventory(1) > 0)
-    --		hud.rts_enable("REMOVEFLASKS")
+
+    --	Heretic trims your inventory on each new map
+    if (player.inventory(1) > 0) then
+    	hud.rts_enable("REMOVEFLASKS")
+	end
+	if (player.inventory(2) > 0) then
+    	hud.rts_enable("REMOVESHADOWSPHERES")
+	end
+	if (player.inventory(3) > 0) then
+    	hud.rts_enable("REMOVETOMES")
+	end
+	if (player.inventory(4) > 0) then
+    	hud.rts_enable("REMOVEURNS")
+	end
+	if (player.inventory(5) > 0) then
+    	hud.rts_enable("REMOVEWINGS")
+	end
+	if (player.inventory(6) > 0) then
+    	hud.rts_enable("REMOVERINGS")
+	end
+	if (player.inventory(7) > 0) then
+    	hud.rts_enable("REMOVETORCH")
+	end
+	if (player.inventory(8) > 0) then
+    	hud.rts_enable("REMOVEBOMBS")
+	end
+	if (player.inventory(9) > 0) then
+    	hud.rts_enable("REMOVECHAOS")
+	end
+	if (player.inventory(10) > 0) then
+    	hud.rts_enable("REMOVEOVUMS")
+	end
+	
 end
 
 --************************

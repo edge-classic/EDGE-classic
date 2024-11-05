@@ -58,7 +58,11 @@ EDGE_DEFINE_CONSOLE_VARIABLE(pixel_aspect_ratio, "1.0", kConsoleVariableFlagRead
 // including windowed mode.
 EDGE_DEFINE_CONSOLE_VARIABLE(forced_pixel_aspect_ratio, "0", kConsoleVariableFlagArchive)
 
+#ifdef EDGE_WEB
+EDGE_DEFINE_CONSOLE_VARIABLE(framerate_limit, "0", kConsoleVariableFlagReadOnly)
+#else
 EDGE_DEFINE_CONSOLE_VARIABLE(framerate_limit, "500", kConsoleVariableFlagArchive)
+#endif
 
 static bool grab_state;
 

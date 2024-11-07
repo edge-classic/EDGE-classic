@@ -739,15 +739,13 @@ void FinishSky(void)
     if (!need_to_draw_sky)
         return;
 
-    // draw sky picture, but DON'T affect the depth buffering
-
-    glDepthMask(GL_FALSE);
+    if (!renderer_dumb_sky.d_)
+        glDepthFunc(GL_ALWAYS);
+    else
+        glDepthMask(GL_FALSE);
 
     if (draw_culling.d_)
         glDisable(GL_DEPTH_TEST);
-
-    if (!renderer_dumb_sky.d_)
-        glDepthFunc(GL_ALWAYS);
 
     if (custom_skybox)
         RenderSkybox();
@@ -757,8 +755,10 @@ void FinishSky(void)
     if (draw_culling.d_)
         glEnable(GL_DEPTH_TEST);
 
-    glDepthFunc(GL_LEQUAL);
-    glDepthMask(GL_TRUE);
+    if (!renderer_dumb_sky.d_)
+        glDepthFunc(GL_LEQUAL);
+    else
+        glDepthMask(GL_TRUE);
 
     glDisable(GL_TEXTURE_2D);
 }

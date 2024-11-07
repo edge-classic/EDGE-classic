@@ -324,6 +324,10 @@ static bool MovePlane(PlaneMover *plane)
 
     Sector *sec = plane->sector;
 
+    // track if move went from start to dest in one move; if so
+    // do not interpolate the sector height
+    bool maybe_instant = false;
+
     if (plane->is_ceiling || plane->is_elevator)
         sec->old_ceiling_height = sec->ceiling_height;
     if (!plane->is_ceiling)
@@ -336,8 +340,33 @@ static bool MovePlane(PlaneMover *plane)
         break;
 
     case kPlaneDirectionDown:
+        if (plane->is_ceiling || plane->is_elevator)
+        {
+            if (AlmostEquals(plane->start_height, sec->ceiling_height))
+                maybe_instant = true;
+        }
+        if (!plane->is_ceiling)
+        {
+            if (AlmostEquals(plane->start_height, sec->floor_height))
+                maybe_instant = true;
+        }
+
         res = AttemptMoveSector(sec, plane, HMM_MIN(plane->start_height, plane->destination_height),
                                 plane->is_ceiling ? plane->crush : 0);
+
+        if (maybe_instant)
+        {
+            if (plane->is_ceiling || plane->is_elevator)
+            {
+                if (AlmostEquals(plane->destination_height, sec->ceiling_height))
+                    sec->old_ceiling_height = sec->ceiling_height;
+            }
+            if (!plane->is_ceiling)
+            {
+                if (AlmostEquals(plane->destination_height, sec->floor_height))
+                    sec->old_floor_height = sec->floor_height;
+            }
+        }
 
         if (!AlmostEquals(plane->destination_height, plane->start_height))
         {
@@ -445,8 +474,34 @@ static bool MovePlane(PlaneMover *plane)
         break;
 
     case kPlaneDirectionUp:
+        if (plane->is_ceiling || plane->is_elevator)
+        {
+            if (AlmostEquals(plane->start_height, sec->ceiling_height))
+                maybe_instant = true;
+        }
+        if (!plane->is_ceiling)
+        {
+            if (AlmostEquals(plane->start_height, sec->floor_height))
+                maybe_instant = true;
+        }
+
+
         res = AttemptMoveSector(sec, plane, HMM_MAX(plane->start_height, plane->destination_height),
                                 plane->is_ceiling ? 0 : plane->crush);
+
+        if (maybe_instant)
+        {
+            if (plane->is_ceiling || plane->is_elevator)
+            {
+                if (AlmostEquals(plane->destination_height, sec->ceiling_height))
+                    sec->old_ceiling_height = sec->ceiling_height;
+            }
+            if (!plane->is_ceiling)
+            {
+                if (AlmostEquals(plane->destination_height, sec->floor_height))
+                    sec->old_floor_height = sec->floor_height;
+            }
+        }
 
         if (!AlmostEquals(plane->destination_height, plane->start_height))
         {

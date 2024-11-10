@@ -27,6 +27,7 @@
 
 #include <stddef.h>
 
+#include <unordered_map>
 #include <vector>
 
 #include "ddf_types.h"
@@ -49,6 +50,10 @@
 #include "r_shader.h"
 #include "r_state.h"
 #include "r_units.h"
+
+// clamp cache used by runits to avoid an extremely expensive gl tex param
+// lookup
+extern std::unordered_map<GLuint, GLint> texture_clamp_t;
 
 extern float ApproximateDistance(float dx, float dy, float dz);
 
@@ -981,20 +986,16 @@ static inline void ModelCoordFunc(MD2CoordinateData *data, int v_idx, HMM_Vec3 *
 
     if (!data->is_additive_)
     {
-        rgb[0] = col->modulate_red_ / 255.0;
-        rgb[1] = col->modulate_green_ / 255.0;
-        rgb[2] = col->modulate_blue_ / 255.0;
+        rgb[0] = col->modulate_red_ / 255.0 * render_view_red_multiplier;
+        rgb[1] = col->modulate_green_ / 255.0 * render_view_green_multiplier;
+        rgb[2] = col->modulate_blue_ / 255.0 * render_view_blue_multiplier;
     }
     else
     {
-        rgb[0] = col->add_red_ / 255.0;
-        rgb[1] = col->add_green_ / 255.0;
-        rgb[2] = col->add_blue_ / 255.0;
+        rgb[0] = col->add_red_ / 255.0 * render_view_red_multiplier;
+        rgb[1] = col->add_green_ / 255.0 * render_view_green_multiplier;
+        rgb[2] = col->add_blue_ / 255.0 * render_view_blue_multiplier;
     }
-
-    rgb[0] *= render_view_red_multiplier;
-    rgb[1] *= render_view_green_multiplier;
-    rgb[2] *= render_view_blue_multiplier;
 }
 
 void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int frame1, int frame2, float lerp, float x,
@@ -1179,11 +1180,11 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         fc[1] = (float)epi::GetRGBAGreen(fc_to_use) / 255.0f;
         fc[2] = (float)epi::GetRGBABlue(fc_to_use) / 255.0f;
         fc[3] = 1.0f;
-        glClearColor(fc[0], fc[1], fc[2], 1.0f);
-        glFogi(GL_FOG_MODE, GL_EXP);
-        glFogfv(GL_FOG_COLOR, fc);
-        glFogf(GL_FOG_DENSITY, std::log1p(fd_to_use));
-        glEnable(GL_FOG);
+        global_render_state->ClearColor(fc[0], fc[1], fc[2], 1.0f);
+        global_render_state->FogColor(fc[0], fc[1], fc[2], fc[3]);
+        global_render_state->FogMode(GL_EXP);
+        global_render_state->FogDensity(std::log1p(fd_to_use));
+        global_render_state->Enable(GL_FOG);
     }
     else if (draw_culling.d_)
     {
@@ -1214,15 +1215,15 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         {
             fogColor = sg_black;
         }
-        glClearColor(fogColor.r, fogColor.g, fogColor.b, 1.0f);
-        glFogi(GL_FOG_MODE, GL_LINEAR);
-        glFogfv(GL_FOG_COLOR, &fogColor.r);
-        glFogf(GL_FOG_START, renderer_far_clip.f_ - 750.0f);
-        glFogf(GL_FOG_END, renderer_far_clip.f_ - 250.0f);
-        glEnable(GL_FOG);
+        global_render_state->ClearColor(fogColor.r, fogColor.g, fogColor.b, 1.0f);
+        global_render_state->FogMode(GL_LINEAR);
+        global_render_state->FogColor(fogColor.r, fogColor.g, fogColor.b, fogColor.a);
+        global_render_state->FogStart(renderer_far_clip.f_ - 750.0f);
+        global_render_state->FogEnd(renderer_far_clip.f_ - 250.0f);
+        global_render_state->Enable(GL_FOG);
     }
     else
-        glDisable(GL_FOG);
+        global_render_state->Disable(GL_FOG);
 
     for (int pass = 0; pass < num_pass; pass++)
     {
@@ -1230,7 +1231,7 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         {
             blending &= ~kBlendingAlpha;
             blending |= kBlendingAdd;
-            glDisable(GL_FOG);
+            global_render_state->Disable(GL_FOG);
         }
 
         data.is_additive_ = (pass > 0 && pass == num_pass - 1);
@@ -1247,87 +1248,91 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
                 continue;
         }
 
-        glPolygonOffset(0, -pass);
+        global_render_state->PolygonOffset(0, -pass);
 
         if (blending & (kBlendingMasked | kBlendingLess))
         {
             if (blending & kBlendingLess)
             {
-                glEnable(GL_ALPHA_TEST);
+                global_render_state->Enable(GL_ALPHA_TEST);
             }
             else if (blending & kBlendingMasked)
             {
-                glEnable(GL_ALPHA_TEST);
-                glAlphaFunc(GL_GREATER, 0);
+                global_render_state->Enable(GL_ALPHA_TEST);
+                global_render_state->AlphaFunction(GL_GREATER, 0);
             }
-            else
-                glDisable(GL_ALPHA_TEST);
         }
+        else
+            global_render_state->Disable(GL_ALPHA_TEST);
 
         if (blending & (kBlendingAlpha | kBlendingAdd))
         {
             if (blending & kBlendingAdd)
             {
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+                global_render_state->Enable(GL_BLEND);
+                global_render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE);
             }
             else if (blending & kBlendingAlpha)
             {
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                global_render_state->Enable(GL_BLEND);
+                global_render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             }
-            else
-                glDisable(GL_BLEND);
         }
+        else
+            global_render_state->Disable(GL_BLEND);
 
         if (blending & (kBlendingCullBack | kBlendingCullFront))
         {
             if (blending & (kBlendingCullBack | kBlendingCullFront))
             {
-                glEnable(GL_CULL_FACE);
-                glCullFace((blending & kBlendingCullFront) ? GL_FRONT : GL_BACK);
+                global_render_state->Enable(GL_CULL_FACE);
+                global_render_state->CullFace((blending & kBlendingCullFront) ? GL_FRONT : GL_BACK);
             }
-            else
-                glDisable(GL_CULL_FACE);
         }
+        else
+            global_render_state->Disable(GL_CULL_FACE);
 
         if (blending & kBlendingNoZBuffer)
         {
-            glDepthMask((blending & kBlendingNoZBuffer) ? GL_FALSE : GL_TRUE);
+            global_render_state->DepthMask((blending & kBlendingNoZBuffer) ? GL_FALSE : GL_TRUE);
         }
 
         if (blending & kBlendingLess)
         {
             // NOTE: assumes alpha is constant over whole model
-            glAlphaFunc(GL_GREATER, trans * 0.66f);
+            global_render_state->AlphaFunction(GL_GREATER, trans * 0.66f);
         }
 
-        glActiveTexture(GL_TEXTURE1);
-        glDisable(GL_TEXTURE_2D);
-        glActiveTexture(GL_TEXTURE0);
-        glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, skin_tex);
+        global_render_state->ActiveTexture(GL_TEXTURE1);
+        global_render_state->Disable(GL_TEXTURE_2D);
+        global_render_state->ActiveTexture(GL_TEXTURE0);
+        global_render_state->Enable(GL_TEXTURE_2D);
+        global_render_state->BindTexture(skin_tex);
 
         if (data.is_additive_)
         {
-            glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
-            glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_REPLACE);
-            glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_PREVIOUS);
+            global_render_state->TextureEnvironmentMode(GL_COMBINE);
+            global_render_state->TextureEnvironmentCombineRGB(GL_REPLACE);
+            global_render_state->TextureEnvironmentSource0RGB(GL_PREVIOUS);
         }
         else
         {
-            glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-            glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
-            glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_TEXTURE);
+            global_render_state->TextureEnvironmentMode(GL_MODULATE);
+            global_render_state->TextureEnvironmentCombineRGB(GL_MODULATE);
+            global_render_state->TextureEnvironmentSource0RGB(GL_TEXTURE);
         }
 
-        GLint old_clamp = 789;
+        GLint old_clamp = kDummyClamp;
 
         if (blending & kBlendingClampY)
         {
-            glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &old_clamp);
+            auto existing = texture_clamp_t.find(skin_tex);
+            if (existing != texture_clamp_t.end())
+            {
+                old_clamp = existing->second;
+            }
 
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE);
+            global_render_state->TextureWrapT(renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE);
         }
 
         RendererVertex *start = md->gl_vertices_;
@@ -1365,12 +1370,11 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         glDrawArrays(GL_TRIANGLES, 0, md->total_triangles_ * 3);
 
         // restore the clamping mode
-        if (old_clamp != 789)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, old_clamp);
+        if (old_clamp != kDummyClamp)
+        {
+            global_render_state->TextureWrapT(old_clamp);
+        }
     }
-
-    RenderState *state = GetRenderState();
-    state->SetDefaultStateFull();
 }
 
 void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, float y, float xscale, float yscale,
@@ -1388,16 +1392,16 @@ void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, f
     xscale = yscale * info->model_scale_ * info->model_aspect_;
     yscale = yscale * info->model_scale_;
 
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, skin_tex);
+    global_render_state->Enable(GL_TEXTURE_2D);
+    global_render_state->BindTexture(skin_tex);
 
-    glEnable(GL_BLEND);
-    glEnable(GL_CULL_FACE);
+    global_render_state->Enable(GL_BLEND);
+    global_render_state->Enable(GL_CULL_FACE);
 
     if (info->flags_ & kMapObjectFlagFuzzy)
-        glColor4f(0, 0, 0, 0.5f);
+        global_render_state->GLColor(0, 0, 0, 0.5f);
     else
-        glColor4f(1, 1, 1, 1.0f);
+        global_render_state->GLColor(1, 1, 1, 1.0f);
 
     for (int i = 0; i < md->total_triangles_; i++)
     {
@@ -1419,11 +1423,7 @@ void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, f
 
             short n = vert->normal_idx;
 
-            float norm_x = md_normals[n].X;
-            float norm_y = md_normals[n].Y;
-            float norm_z = md_normals[n].Z;
-
-            glNormal3f(norm_y, norm_z, norm_x);
+            global_render_state->SetNormal(md_normals[n]);
 
             float dx = vert->x * xscale;
             float dy = vert->y * xscale;
@@ -1435,9 +1435,9 @@ void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, f
         glEnd();
     }
 
-    glDisable(GL_BLEND);
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_CULL_FACE);
+    global_render_state->Disable(GL_BLEND);
+    global_render_state->Disable(GL_TEXTURE_2D);
+    global_render_state->Disable(GL_CULL_FACE);
 }
 
 //--- editor settings ---

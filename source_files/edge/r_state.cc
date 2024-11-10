@@ -1,9 +1,6 @@
 
 #include "r_state.h"
 
-static RenderState state;
+RenderState state;
 
-RenderState *GetRenderState()
-{
-    return &state;
-}
+RenderState *global_render_state = &state;

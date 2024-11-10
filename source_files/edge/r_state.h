@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <unordered_map>
+
 // Need data structure definitions.
 
 #include "AlmostEquals.h"
@@ -58,6 +60,9 @@ extern Line *level_lines;
 
 extern int   total_level_sides;
 extern Side *level_sides;
+
+extern std::unordered_map<GLuint, GLint> texture_clamp_s;
+extern std::unordered_map<GLuint, GLint> texture_clamp_t;
 
 //
 // POV data.
@@ -122,6 +127,53 @@ class RenderState
                 return;
             enable_scissor_test_ = enabled;
             break;
+        case GL_LIGHTING:
+            if (enable_lighting_ == enabled)
+                return;
+            enable_lighting_ = enabled;
+            break;
+        case GL_COLOR_MATERIAL:
+            if (enable_color_material_ == enabled)
+                return;
+            enable_color_material_ = enabled;
+            break;
+        case GL_DEPTH_TEST:
+            if (enable_depth_test_ == enabled)
+                return;
+            enable_depth_test_ = enabled;
+            break;
+        case GL_STENCIL_TEST:
+            if (enable_stencil_test_ == enabled)
+                return;
+            enable_stencil_test_ = enabled;
+            break;
+        case GL_LINE_SMOOTH:
+            if (enable_line_smooth_ == enabled)
+                return;
+            enable_line_smooth_ = enabled;
+            break;
+        case GL_NORMALIZE:
+            if (enable_normalize_ == enabled)
+                return;
+            enable_normalize_ = enabled;
+            break;
+        case GL_CLIP_PLANE0:
+        case GL_CLIP_PLANE1:
+        case GL_CLIP_PLANE2:
+        case GL_CLIP_PLANE3:
+        case GL_CLIP_PLANE4:
+        case GL_CLIP_PLANE5:
+            if (enable_clip_plane_[cap - GL_CLIP_PLANE0] == enabled)
+                return;
+            enable_clip_plane_[cap - GL_CLIP_PLANE0] = enabled;
+            break;
+#ifndef EDGE_GL_ES2
+        case GL_POLYGON_SMOOTH:
+            if (enable_polygon_smooth_ == enabled)
+                return;
+            enable_polygon_smooth_ = enabled;
+            break;
+#endif
         default:
             FatalError("Unknown GL State %i", cap);
         }
@@ -152,6 +204,19 @@ class RenderState
 
         depth_mask_ = enable;
         glDepthMask(enable ? GL_TRUE : GL_FALSE);
+        ec_frame_stats.draw_state_change++;
+    }
+
+    void DepthFunction(GLenum func)
+    {
+        if (func == depth_function_)
+        {
+            return;
+        }
+
+        depth_function_           = func;
+
+        glDepthFunc(depth_function_);
         ec_frame_stats.draw_state_change++;
     }
 
@@ -301,6 +366,49 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
+    void SetNormal(const HMM_Vec3 &normal)
+    {
+        if (AlmostEquals(normal_vector_.X, normal.X) && AlmostEquals(normal_vector_.Y, normal.Y)
+            && AlmostEquals(normal_vector_.Z, normal.Z))
+        {
+            return;
+        }
+        normal_vector_ = normal;
+        glNormal3fv((GLfloat *)&normal_vector_);
+        ec_frame_stats.draw_state_change++;
+    }
+
+    void GLColor(const GLfloat *color)
+    {
+        if (AlmostEquals(color[0], gl_color_[0]) && AlmostEquals(color[1], gl_color_[1]) &&
+            AlmostEquals(color[2], gl_color_[2]) && AlmostEquals(color[3], gl_color_[3]))
+        {
+            return;
+        }
+
+        memcpy(gl_color_, color, 4 * sizeof(float));
+
+        glColor4fv(gl_color_);
+        ec_frame_stats.draw_state_change++;
+    }
+
+    void GLColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
+    {
+        if (AlmostEquals(r, gl_color_[0]) && AlmostEquals(g, gl_color_[1]) &&
+            AlmostEquals(b, gl_color_[2]) && AlmostEquals(a, gl_color_[3]))
+        {
+            return;
+        }
+
+        gl_color_[0] = r;
+        gl_color_[1] = g;
+        gl_color_[2] = b;
+        gl_color_[3] = a;
+
+        glColor4fv(gl_color_);
+        ec_frame_stats.draw_state_change++;
+    }
+
     void BlendFunction(GLenum sfactor, GLenum dfactor)
     {
         if (blend_source_factor_ == sfactor && blend_destination_factor_ == dfactor)
@@ -356,140 +464,90 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
+    void TextureMinFilter(GLint param)
+    {
+        GLuint index = active_texture_ - GL_TEXTURE0;
+
+        texture_min_filter_[index] = param;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_min_filter_[index]);
+        ec_frame_stats.draw_state_change++;
+    }
+
+    void TextureMagFilter(GLint param)
+    {
+        GLuint index = active_texture_ - GL_TEXTURE0;
+
+        texture_mag_filter_[index] = param;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_mag_filter_[index]);
+        ec_frame_stats.draw_state_change++;
+    }
+
+    void TextureWrapS(GLint param)
+    {
+        GLuint index = active_texture_ - GL_TEXTURE0;
+
+        // We do it regardless of the cached value; functions should check
+        // texture environments against the appropriate unordered_map and 
+        // know if a change needs to occur
+        texture_wrap_s_[index] = param;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_wrap_s_[index]);
+        ec_frame_stats.draw_state_change++;
+    }
+
     void TextureWrapT(GLint param)
     {
         GLuint index = active_texture_ - GL_TEXTURE0;
 
-        if (texture_wrap_t_[index] == param)
-        {
-            return;
-        }
-
+        // We do it regardless of the cached value; functions should check
+        // texture environments against the appropriate unordered_map and 
+        // know if a change needs to occur
         texture_wrap_t_[index] = param;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_wrap_t_[index]);
         ec_frame_stats.draw_state_change++;
     }
 
-    void ResetDefaultState()
+    void MultiTexCoord(GLuint tex, const HMM_Vec2 *coords)
     {
-        Disable(GL_BLEND);
-        BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        Disable(GL_ALPHA_TEST);
-
-        DepthMask(true);
-
-        CullFace(GL_BACK);
-        Disable(GL_CULL_FACE);
-
-        Disable(GL_FOG);
-
-        PolygonOffset(0, 0);
-
-        for (int i = 0; i < 2; i++)
-        {
-            bind_texture_2d_[i]                  = 0;
-            texture_environment_mode_[i]         = 0;
-            texture_environment_combine_rgb_[i]  = 0;
-            texture_environment_source_0_rgb_[i] = 0;
-            texture_wrap_t_[i]                   = 0;
-        }
+        if (enable_texture_2d_[tex - GL_TEXTURE0] == false)
+            return;
+        if (tex == GL_TEXTURE0 && enable_texture_2d_[1] == false)
+            glTexCoord2fv((GLfloat *)coords);
+        else
+            glMultiTexCoord2fv(tex, (GLfloat *)coords);
+        ec_frame_stats.draw_state_change++;
     }
 
-    void SetDefaultStateFull()
+    void Hint(GLenum target, GLenum mode)
     {
-        enable_blend_ = false;
-        glDisable(GL_BLEND);
+        glHint(target, mode);
         ec_frame_stats.draw_state_change++;
+    }
 
-        blend_source_factor_      = GL_SRC_ALPHA;
-        blend_destination_factor_ = GL_ONE_MINUS_SRC_ALPHA;
-        glBlendFunc(blend_source_factor_, blend_destination_factor_);
-        ec_frame_stats.draw_state_change++;
-
-        for (int i = 0; i < 2; i++)
+    void LineWidth(float width)
+    {
+        if (AlmostEquals(width, line_width_))
         {
-            enable_texture_2d_[i] = false;
-            bind_texture_2d_[i]   = 0;
-            glActiveTexture(GL_TEXTURE0 + i);
-            ec_frame_stats.draw_state_change++;
-            glBindTexture(GL_TEXTURE_2D, 0);
-            ec_frame_stats.draw_texture_change++;
-            ec_frame_stats.draw_state_change++;
-            glDisable(GL_TEXTURE_2D);
-            ec_frame_stats.draw_state_change++;
-
-            texture_environment_mode_[i]         = 0;
-            texture_environment_combine_rgb_[i]  = 0;
-            texture_environment_source_0_rgb_[i] = 0;
-            texture_wrap_t_[i]                   = 0;
+            return;
         }
+        line_width_ = width;
+        glLineWidth(line_width_);
+        ec_frame_stats.draw_state_change++;
+    }
 
-        active_texture_ = GL_TEXTURE0;
-        glActiveTexture(active_texture_);
-        ec_frame_stats.draw_state_change++;
-
-        enable_alpha_test_ = false;
-        glDisable(GL_ALPHA_TEST);
-        ec_frame_stats.draw_state_change++;
-
-        alpha_function_           = GL_GREATER;
-        alpha_function_reference_ = 0.0f;
-
-        glAlphaFunc(alpha_function_, alpha_function_reference_);
-        ec_frame_stats.draw_state_change++;
-
-        depth_mask_ = true;
-        glDepthMask(GL_TRUE);
-        ec_frame_stats.draw_state_change++;
-
-        cull_face_ = GL_BACK;
-        glCullFace(cull_face_);
-        ec_frame_stats.draw_state_change++;
-        enable_cull_face_ = false;
-        glDisable(GL_CULL_FACE);
-        ec_frame_stats.draw_state_change++;
-
-        clear_red_   = 0.0f;
-        clear_green_ = 0.0f;
-        clear_blue_  = 0.0f;
-        clear_alpha_ = 1.0f;
-        glClearColor(clear_red_, clear_green_, clear_blue_, clear_alpha_);
-        ec_frame_stats.draw_state_change++;
-
-        fog_mode_ = GL_LINEAR;
-        glFogi(GL_FOG_MODE, fog_mode_);
-        ec_frame_stats.draw_state_change++;
-
-        fog_color_[0] = 0.0f;
-        fog_color_[1] = 0.0f;
-        fog_color_[2] = 0.0f;
-        fog_color_[3] = 1.0f;
-        glFogfv(GL_FOG_COLOR, fog_color_);
-        ec_frame_stats.draw_state_change++;
-
-        enable_fog_ = false;
-        glDisable(GL_FOG);
-        ec_frame_stats.draw_state_change++;
-        fog_start_ = 0.0f;
-        fog_end_   = 0.0f;
-        glFogf(GL_FOG_START, fog_start_);
-        ec_frame_stats.draw_state_change++;
-        glFogf(GL_FOG_END, fog_end_);
-        ec_frame_stats.draw_state_change++;
-
-        fog_density_ = 0.0f;
-        glFogf(GL_FOG_DENSITY, fog_density_);
-        ec_frame_stats.draw_state_change++;
-
-        polygon_offset_factor_ = 0;
-        polygon_offset_units_  = 0;
-        glPolygonOffset(polygon_offset_factor_, polygon_offset_units_);
-        ec_frame_stats.draw_state_change++;
-
-        enable_scissor_test_ = false;
-        glDisable(GL_SCISSOR_TEST);
-        ec_frame_stats.draw_state_change++;
+    void DeleteTexture(const GLuint *tex_id)
+    {
+        if (tex_id && *tex_id > 0)
+        {
+            texture_clamp_s.erase(*tex_id);
+            texture_clamp_t.erase(*tex_id);
+            glDeleteTextures(1, tex_id);
+            // We don't need to actually perform a texture bind,
+            // but these should be cleared out to ensure
+            // we aren't mistakenly using a tex_id that does not
+            // correlate to the same texture anymore
+            bind_texture_2d_[0] = 0;
+            bind_texture_2d_[1] = 0;
+        }
     }
 
     int frameStateChanges_ = 0;
@@ -504,6 +562,8 @@ class RenderState
 
     bool enable_scissor_test_;
 
+    bool enable_clip_plane_[6];
+
     GLfloat clear_red_;
     GLfloat clear_green_;
     GLfloat clear_blue_;
@@ -515,12 +575,17 @@ class RenderState
     GLint texture_environment_mode_[2];
     GLint texture_environment_combine_rgb_[2];
     GLint texture_environment_source_0_rgb_[2];
+    GLint texture_min_filter_[2];
+    GLint texture_mag_filter_[2];
+    GLint texture_wrap_s_[2];
     GLint texture_wrap_t_[2];
 
     GLuint bind_texture_2d_[2];
-    GLenum active_texture_;
+    GLenum active_texture_ = GL_TEXTURE0;
 
+    bool enable_depth_test_;
     bool depth_mask_;
+    GLenum  depth_function_;
 
     GLfloat polygon_offset_factor_;
     GLfloat polygon_offset_units_;
@@ -529,15 +594,34 @@ class RenderState
     GLenum  alpha_function_;
     GLfloat alpha_function_reference_;
 
+    bool enable_lighting_;
+    
+    bool enable_color_material_;
+
+    bool enable_stencil_test_;
+
+    bool enable_line_smooth_;
+    float line_width_;
+
+    bool enable_normalize_;
+
+#ifndef EDGE_GL_ES2
+    bool enable_polygon_smooth_;
+#endif
+
     bool    enable_fog_;
     GLint   fog_mode_;
     GLfloat fog_start_;
     GLfloat fog_end_;
     GLfloat fog_density_;
     GLfloat fog_color_[4];
+
+    HMM_Vec3 normal_vector_;
+
+    GLfloat gl_color_[4];
 };
 
-RenderState *GetRenderState();
+extern RenderState *global_render_state;
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

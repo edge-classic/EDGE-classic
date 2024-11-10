@@ -225,7 +225,7 @@ void HUDPushScissor(float x1, float y1, float x2, float y2, bool expand)
 
     if (scissor_stack_top == 0)
     {
-        glEnable(GL_SCISSOR_TEST);
+        global_render_state->Enable(GL_SCISSOR_TEST);
 
         sx1 = HMM_MAX(sx1, 0);
         sy1 = HMM_MAX(sy1, 0);
@@ -269,7 +269,7 @@ void HUDPopScissor()
 
     if (scissor_stack_top == 0)
     {
-        glDisable(GL_SCISSOR_TEST);
+        global_render_state->Disable(GL_SCISSOR_TEST);
     }
     else
     {
@@ -363,25 +363,23 @@ void HUDCalcTurbulentTexCoords(float *tx, float *ty, float x, float y)
 void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image, float tx1, float ty1, float tx2,
                  float ty2, float alpha, RGBAColor text_col, const Colormap *palremap, float sx, float sy, char ch)
 {
-    int x1 = RoundToInteger(hx1);
-    int y1 = RoundToInteger(hy1);
-    int x2 = RoundToInteger(hx2 + 0.25f);
-    int y2 = RoundToInteger(hy2 + 0.25f);
-
-    if (x1 >= x2 || y1 >= y2)
+    if (hx1 >= hx2 || hy1 >= hy2)
         return;
 
-    if (x2 < 0 || x1 > current_screen_width || y2 < 0 || y1 > current_screen_height)
+    if (hx2 < 0 || hx1 > current_screen_width || hy2 < 0 || hy1 > current_screen_height)
         return;
 
     sg_color sgcol = sg_white;
+    sgcol.a = alpha;
+    BlendingMode blend;
+    GLuint tex_id = 0;
 
     bool do_whiten = false;
 
     if (text_col != kRGBANoValue)
     {
         sgcol     = sg_make_color_1i(text_col);
-        sgcol.a   = 1.0f;
+        sgcol.a   = alpha;
         do_whiten = true;
     }
 
@@ -389,95 +387,87 @@ void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
     {
         if (current_font->definition_->type_ == kFontTypeTrueType)
         {
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glEnable(GL_TEXTURE_2D);
+            blend = kBlendingAlpha;
             if ((image_smoothing &&
                  current_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothOnDemand) ||
                 current_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothAlways)
-                glBindTexture(GL_TEXTURE_2D, current_font->truetype_smoothed_texture_id_[current_font_size]);
+                tex_id = current_font->truetype_smoothed_texture_id_[current_font_size];
             else
-                glBindTexture(GL_TEXTURE_2D, current_font->truetype_texture_id_[current_font_size]);
+                tex_id = current_font->truetype_texture_id_[current_font_size];
         }
         else // patch font
         {
-            glEnable(GL_ALPHA_TEST);
             if (!(alpha < 0.11f || image->opacity_ == kOpacityComplex))
-                glAlphaFunc(GL_GREATER, alpha * 0.66f);
-            glEnable(GL_BLEND);
-            glEnable(GL_TEXTURE_2D);
+                blend = kBlendingLess;
+            else
+                blend = kBlendingMasked;
+            blend = (BlendingMode)(blend|kBlendingAlpha);
             if ((image_smoothing &&
                  current_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothOnDemand) ||
                 current_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothAlways)
             {
                 if (do_whiten)
-                    glBindTexture(GL_TEXTURE_2D, current_font->patch_font_cache_.atlas_whitened_smoothed_texture_id);
+                    tex_id = current_font->patch_font_cache_.atlas_whitened_smoothed_texture_id;
                 else
-                    glBindTexture(GL_TEXTURE_2D, current_font->patch_font_cache_.atlas_smoothed_texture_id);
+                    tex_id = current_font->patch_font_cache_.atlas_smoothed_texture_id;
             }
             else
             {
                 if (do_whiten)
-                    glBindTexture(GL_TEXTURE_2D, current_font->patch_font_cache_.atlas_whitened_texture_id);
+                    tex_id = current_font->patch_font_cache_.atlas_whitened_texture_id;
                 else
-                    glBindTexture(GL_TEXTURE_2D, current_font->patch_font_cache_.atlas_texture_id);
+                    tex_id = current_font->patch_font_cache_.atlas_texture_id;
             }
         }
-        glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
-        glBegin(GL_QUADS);
-        glTexCoord2f(tx1, ty2);
-        glVertex2f(hx1, hy1);
-        glTexCoord2f(tx2, ty2);
-        glVertex2f(hx2, hy1);
-        glTexCoord2f(tx2, ty1);
-        glVertex2f(hx2, hy2);
-        glTexCoord2f(tx1, ty1);
-        glVertex2f(hx1, hy2);
-        glEnd();
-        glDisable(GL_TEXTURE_2D);
-        glDisable(GL_ALPHA_TEST);
-        glDisable(GL_BLEND);
-        glAlphaFunc(GL_GREATER, 0);
+
+        StartUnitBatch(false);
+
+        RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
+
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->texture_coordinates[0] = {{tx1, ty2}};
+        glvert++->position = {{hx1, hy1, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->texture_coordinates[0] = {{tx2, ty2}};
+        glvert++->position = {{hx2, hy1, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->texture_coordinates[0] = {{tx2, ty1}};
+        glvert++->position = {{hx2, hy2, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->texture_coordinates[0] = {{tx1, ty1}};
+        glvert->position = {{hx1, hy2, 0}};
+
+        EndRenderUnit(4);
+
+        FinishUnitBatch();
         return;
     }
 
-    // GLuint tex_id = ImageCache(image, true, palremap, do_whiten);
-    GLuint tex_id = ImageCache(image, true, nullptr, do_whiten);
-
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, tex_id);
+    tex_id = ImageCache(image, true, nullptr, do_whiten);
 
     if (alpha >= 0.99f && image->opacity_ == kOpacitySolid)
-        glDisable(GL_ALPHA_TEST);
+        blend = kBlendingNone;
     else
     {
-        glEnable(GL_ALPHA_TEST);
-
         if (!(alpha < 0.11f || image->opacity_ == kOpacityComplex))
-            glAlphaFunc(GL_GREATER, alpha * 0.66f);
+            blend = kBlendingLess;
+        else
+            blend = kBlendingMasked;
     }
 
     if (image->opacity_ == kOpacityComplex || alpha < 0.99f)
-        glEnable(GL_BLEND);
-
-    GLint old_s_clamp = kDummyClamp;
-    GLint old_t_clamp = kDummyClamp;
+       blend = (BlendingMode)(blend|kBlendingAlpha);
 
     if (sx != 0.0 || sy != 0.0)
     {
-        glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, &old_s_clamp);
-        glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &old_t_clamp);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        blend = (BlendingMode)(blend|kBlendingRepeatX|kBlendingRepeatY);
 
         HUDCalcScrollTexCoords(sx, sy, &tx1, &ty1, &tx2, &ty2);
     }
 
     if (epi::StringCaseCompareASCII(image->name_, hud_overlays.at(video_overlay.d_)) == 0)
     {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        blend = (BlendingMode)(blend|kBlendingRepeatX|kBlendingRepeatY);
     }
 
     bool hud_swirl = false;
@@ -491,29 +481,30 @@ void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
     if (image->liquid_type_ == kLiquidImageThick)
         hud_thick_liquid = true;
 
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
+    StartUnitBatch(false);
 
-    glBegin(GL_QUADS);
+    RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
 
     if (hud_swirl)
     {
-        HUDCalcTurbulentTexCoords(&tx1, &ty1, x1, y1);
-        HUDCalcTurbulentTexCoords(&tx2, &ty2, x2, y2);
+        HUDCalcTurbulentTexCoords(&tx1, &ty1, hx1, hy1);
+        HUDCalcTurbulentTexCoords(&tx2, &ty2, hx2, hy2);
     }
 
-    glTexCoord2f(tx1, ty1);
-    glVertex2i(x1, y1);
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->texture_coordinates[0] = {{tx1, ty1}};
+    glvert++->position = {{hx1, hy1, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->texture_coordinates[0] = {{tx2, ty1}};
+    glvert++->position = {{hx2, hy1, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->texture_coordinates[0] = {{tx2, ty2}};
+    glvert++->position = {{hx2, hy2, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->texture_coordinates[0] = {{tx1, ty2}};
+    glvert->position = {{hx1, hy2, 0}};
 
-    glTexCoord2f(tx2, ty1);
-    glVertex2i(x2, y1);
-
-    glTexCoord2f(tx2, ty2);
-    glVertex2i(x2, y2);
-
-    glTexCoord2f(tx1, ty2);
-    glVertex2i(x1, y2);
-
-    glEnd();
+    EndRenderUnit(4);
 
     if (hud_swirl && swirling_flats == kLiquidSwirlParallax)
     {
@@ -522,98 +513,81 @@ void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
         tx2 += 0.2;
         ty1 += 0.2;
         ty2 += 0.2;
-        HUDCalcTurbulentTexCoords(&tx1, &ty1, x1, y1);
-        HUDCalcTurbulentTexCoords(&tx2, &ty2, x2, y2);
+        HUDCalcTurbulentTexCoords(&tx1, &ty1, hx1, hy1);
+        HUDCalcTurbulentTexCoords(&tx2, &ty2, hx2, hy2);
         alpha /= 2;
-        glEnable(GL_ALPHA_TEST);
+        blend = (BlendingMode)(blend|kBlendingMasked|kBlendingAlpha);
 
-        glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
+        glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
 
-        glEnable(GL_BLEND);
-        glBegin(GL_QUADS);
-        glTexCoord2f(tx1, ty1);
-        glVertex2i(x1, y1);
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->texture_coordinates[0] = {{tx1, ty1}};
+        glvert++->position = {{hx1, hy1, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->texture_coordinates[0] = {{tx2, ty1}};
+        glvert++->position = {{hx2, hy1, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->texture_coordinates[0] = {{tx2, ty2}};
+        glvert++->position = {{hx2, hy2, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->texture_coordinates[0] = {{tx1, ty2}};
+        glvert->position = {{hx1, hy2, 0}};
 
-        glTexCoord2f(tx2, ty1);
-        glVertex2i(x2, y1);
-
-        glTexCoord2f(tx2, ty2);
-        glVertex2i(x2, y2);
-
-        glTexCoord2f(tx1, ty2);
-        glVertex2i(x1, y2);
-        glEnd();
+        EndRenderUnit(4);
     }
+
+    FinishUnitBatch();
 
     hud_swirl_pass   = 0;
     hud_thick_liquid = false;
-
-    if (old_s_clamp != kDummyClamp)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, old_s_clamp);
-
-    if (old_t_clamp != kDummyClamp)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, old_t_clamp);
-
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_ALPHA_TEST);
-    glDisable(GL_BLEND);
-
-    glAlphaFunc(GL_GREATER, 0);
 }
 
 void HUDRawFromTexID(float hx1, float hy1, float hx2, float hy2, unsigned int tex_id, ImageOpacity opacity, float tx1,
                      float ty1, float tx2, float ty2, float alpha)
 {
-    int x1 = RoundToInteger(hx1);
-    int y1 = RoundToInteger(hy1);
-    int x2 = RoundToInteger(hx2 + 0.25f);
-    int y2 = RoundToInteger(hy2 + 0.25f);
+    sg_color sgcol = sg_white;
+    sgcol.a = alpha;
+    BlendingMode blend = kBlendingNone;
 
-    if (x1 >= x2 || y1 >= y2)
+    if (hx1 >= hx2 || hy1 >= hy2)
         return;
 
-    if (x2 < 0 || x1 > current_screen_width || y2 < 0 || y1 > current_screen_height)
+    if (hx2 < 0 || hx1 > current_screen_width || hy2 < 0 || hy1 > current_screen_height)
         return;
-
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, tex_id);
 
     if (alpha >= 0.99f && opacity == kOpacitySolid)
-        glDisable(GL_ALPHA_TEST);
+        blend = kBlendingNone;
     else
     {
-        glEnable(GL_ALPHA_TEST);
-
         if (!(alpha < 0.11f || opacity == kOpacityComplex))
-            glAlphaFunc(GL_GREATER, alpha * 0.66f);
+            blend = kBlendingLess;
+        else
+            blend = kBlendingMasked;
     }
 
     if (opacity == kOpacityComplex || alpha < 0.99f)
-        glEnable(GL_BLEND);
+       blend = (BlendingMode(blend|kBlendingAlpha));
 
-    glColor4f(1.0f, 1.0f, 1.0f, alpha);
+    StartUnitBatch(false);
 
-    glBegin(GL_QUADS);
+    RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
 
-    glTexCoord2f(tx1, ty1);
-    glVertex2i(x1, y1);
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->texture_coordinates[0] = {{tx1, ty1}};
+    glvert++->position = {{hx1, hy1, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->texture_coordinates[0] = {{tx2, ty1}};
+    glvert++->position = {{hx2, hy1, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->texture_coordinates[0] = {{tx2, ty2}};
+    glvert++->position = {{hx2, hy2, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->texture_coordinates[0] = {{tx1, ty2}};
+    glvert->position = {{hx1, hy2, 0}};
 
-    glTexCoord2f(tx2, ty1);
-    glVertex2i(x2, y1);
+    EndRenderUnit(4);
 
-    glTexCoord2f(tx2, ty2);
-    glVertex2i(x2, y2);
-
-    glTexCoord2f(tx1, ty2);
-    glVertex2i(x1, y2);
-
-    glEnd();
-
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_ALPHA_TEST);
-    glDisable(GL_BLEND);
-
-    glAlphaFunc(GL_GREATER, 0);
+    FinishUnitBatch();
 }
 
 void HUDStretchFromImageData(float x, float y, float w, float h, const ImageData *img, unsigned int tex_id,
@@ -798,23 +772,26 @@ void HUDSolidBox(float x1, float y1, float x2, float y2, RGBAColor col)
         y2 = HUDToRealCoordinatesY(y2);
     }
 
-    if (current_alpha < 0.99f)
-        glEnable(GL_BLEND);
+    StartUnitBatch(false);
+
+    RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0,
+                                                 0, current_alpha < 0.99f ? kBlendingAlpha : kBlendingNone);
 
     sg_color sgcol = sg_make_color_1i(col);
+    sgcol.a = current_alpha;
 
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, current_alpha);
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x1, y1, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x1, y2, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x2, y2, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x2, y1, 0}};
 
-    glBegin(GL_QUADS);
+    EndRenderUnit(4);
 
-    glVertex2f(x1, y1);
-    glVertex2f(x1, y2);
-    glVertex2f(x2, y2);
-    glVertex2f(x2, y1);
-
-    glEnd();
-
-    glDisable(GL_BLEND);
+    FinishUnitBatch();
 }
 
 void HUDSolidLine(float x1, float y1, float x2, float y2, RGBAColor col, float thickness, bool smooth, float dx,
@@ -828,31 +805,35 @@ void HUDSolidLine(float x1, float y1, float x2, float y2, RGBAColor col, float t
     dx = HUDToRealCoordinatesX(dx) - HUDToRealCoordinatesX(0);
     dy = HUDToRealCoordinatesY(0) - HUDToRealCoordinatesY(dy);
 
-    glLineWidth(thickness);
+    global_render_state->LineWidth(thickness);
 
     if (smooth)
-        glEnable(GL_LINE_SMOOTH);
+        global_render_state->Enable(GL_LINE_SMOOTH);
 
-    if (smooth || current_alpha < 0.99f)
-        glEnable(GL_BLEND);
+    StartUnitBatch(false);
 
     sg_color sgcol = sg_make_color_1i(col);
+    sgcol.a = current_alpha;
+    BlendingMode blend = kBlendingNone;
 
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, current_alpha);
+    if (smooth || current_alpha < 0.99f)
+        blend= kBlendingAlpha;
 
-    glBegin(GL_LINES);
+    RendererVertex *glvert = BeginRenderUnit(GL_LINES, 2, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
 
-    glVertex2i((int)x1 + (int)dx, (int)y1 + (int)dy);
-    glVertex2i((int)x2 + (int)dx, (int)y2 + (int)dy);
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x1+dx, y1+dy, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->position = {{x2+dx, y2+dy, 0}};
 
-    glEnd();
+    EndRenderUnit(2);
 
-    glDisable(GL_BLEND);
-    glDisable(GL_LINE_SMOOTH);
-    glLineWidth(1.0f);
+    FinishUnitBatch();
+    global_render_state->Disable(GL_LINE_SMOOTH);
+    global_render_state->LineWidth(1.0f);
 }
 
-void HUDThinBox(float x1, float y1, float x2, float y2, RGBAColor col, float thickness)
+void HUDThinBox(float x1, float y1, float x2, float y2, RGBAColor col, float thickness, BlendingMode special_blend)
 {
     std::swap(y1, y2);
 
@@ -861,42 +842,70 @@ void HUDThinBox(float x1, float y1, float x2, float y2, RGBAColor col, float thi
     x2 = HUDToRealCoordinatesX(x2);
     y2 = HUDToRealCoordinatesY(y2);
 
-    if (current_alpha < 0.99f)
-        glEnable(GL_BLEND);
-
+    StartUnitBatch(false);
     sg_color sgcol = sg_make_color_1i(col);
+    sgcol.a = current_alpha;
+    BlendingMode blend = kBlendingNone;
 
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, current_alpha);
+    if (current_alpha < 0.99f)
+        blend = kBlendingAlpha;
 
-    glBegin(GL_QUADS);
-    glVertex2f(x1, y1);
-    glVertex2f(x1, y2);
-    glVertex2f(x1 + 2 + thickness, y2);
-    glVertex2f(x1 + 2 + thickness, y1);
-    glEnd();
+    if (special_blend != kBlendingNone)
+        blend = special_blend;
 
-    glBegin(GL_QUADS);
-    glVertex2f(x2 - 2 - thickness, y1);
-    glVertex2f(x2 - 2 - thickness, y2);
-    glVertex2f(x2, y2);
-    glVertex2f(x2, y1);
-    glEnd();
+    RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
 
-    glBegin(GL_QUADS);
-    glVertex2f(x1 + 2 + thickness, y1);
-    glVertex2f(x1 + 2 + thickness, y1 + 2 + thickness);
-    glVertex2f(x2 - 2 - thickness, y1 + 2 + thickness);
-    glVertex2f(x2 - 2 - thickness, y1);
-    glEnd();
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x1, y1, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x1, y2, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x1 + 2 + thickness, y2, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->position = {{x1 + 2 + thickness, y1, 0}};
+  
+    EndRenderUnit(4);
 
-    glBegin(GL_QUADS);
-    glVertex2f(x1 + 2 + thickness, y2 - 2 - thickness);
-    glVertex2f(x1 + 2 + thickness, y2);
-    glVertex2f(x2 - 2 - thickness, y2);
-    glVertex2f(x2 - 2 - thickness, y2 - 2 - thickness);
-    glEnd();
+    glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
 
-    glDisable(GL_BLEND);
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x2 - 2 - thickness, y1, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x2 - 2 - thickness, y2, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x2, y2, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->position = {{x2, y1, 0}};
+  
+    EndRenderUnit(4);
+
+    glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
+
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x1 + 2 + thickness, y1, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x1 + 2 + thickness, y1 + 2 + thickness, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x2 - 2 - thickness, y1 + 2 + thickness, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->position = {{x2 - 2 - thickness, y1, 0}};
+  
+    EndRenderUnit(4);
+
+    glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
+
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x1 + 2 + thickness, y2 - 2 - thickness, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x1 + 2 + thickness, y2, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x2 - 2 - thickness, y2, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->position = {{x2 - 2 - thickness, y2 - 2 - thickness, 0}};
+  
+    EndRenderUnit(4);
+
+    FinishUnitBatch();
 }
 
 void HUDGradientBox(float x1, float y1, float x2, float y2, RGBAColor *cols)
@@ -908,30 +917,38 @@ void HUDGradientBox(float x1, float y1, float x2, float y2, RGBAColor *cols)
     x2 = HUDToRealCoordinatesX(x2);
     y2 = HUDToRealCoordinatesY(y2);
 
-    if (current_alpha < 0.99f)
-        glEnable(GL_BLEND);
+    StartUnitBatch(false);
+    BlendingMode blend = kBlendingNone;
 
-    glBegin(GL_QUADS);
+    if (current_alpha < 0.99f)
+        blend = kBlendingAlpha;
 
     sg_color sgcol = sg_make_color_1i(cols[1]);
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, current_alpha);
-    glVertex2f(x1, y1);
+    sgcol.a = current_alpha;
+
+    RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
+
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x1, y1, 0}};
 
     sgcol = sg_make_color_1i(cols[0]);
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, current_alpha);
-    glVertex2f(x1, y2);
+    sgcol.a = current_alpha;
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x1, y2, 0}};
 
     sgcol = sg_make_color_1i(cols[2]);
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, current_alpha);
-    glVertex2f(x2, y2);
+    sgcol.a = current_alpha;
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x2, y2, 0}};
 
     sgcol = sg_make_color_1i(cols[3]);
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, current_alpha);
-    glVertex2f(x2, y1);
+    sgcol.a = current_alpha;
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x2, y1, 0}};
 
-    glEnd();
+    EndRenderUnit(4);
 
-    glDisable(GL_BLEND);
+    FinishUnitBatch();
 }
 
 float HUDFontWidth(void)
@@ -1130,64 +1147,54 @@ void HUDDrawEndoomChar(float left_x, float top_y, float FNX, const Image *img, c
 
     sg_color sgcol = sg_make_color_1i(color2);
 
-    glDisable(GL_TEXTURE_2D);
+    RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
 
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, current_alpha);
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{left_x, top_y, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{left_x, top_y + h, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{left_x + w, top_y + h, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->position = {{left_x + w, top_y, 0}};
 
-    glBegin(GL_QUADS);
-
-    glVertex2f(left_x, top_y);
-
-    glVertex2f(left_x, top_y + h);
-
-    glVertex2f(left_x + w, top_y + h);
-
-    glVertex2f(left_x + w, top_y);
-
-    glEnd();
+    EndRenderUnit(4);
 
     sgcol = sg_make_color_1i(color1);
 
-    glEnable(GL_TEXTURE_2D);
-
     GLuint tex_id = ImageCache(img, true, (const Colormap *)0, true);
-    glBindTexture(GL_TEXTURE_2D, tex_id);
+    BlendingMode blend = kBlendingNone;
 
     if (img->opacity_ == kOpacitySolid)
-        glDisable(GL_ALPHA_TEST);
+        blend = kBlendingNone;
     else
     {
-        glEnable(GL_ALPHA_TEST);
-
         if (img->opacity_ != kOpacityComplex)
-            glAlphaFunc(GL_GREATER, 0.66f);
+            blend = kBlendingLess;
+        else
+            blend = kBlendingAlpha;
     }
 
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, current_alpha);
-
-    glBegin(GL_QUADS);
+    glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
 
     float width_adjust = FNX / 2 + .5;
 
-    glTexCoord2f(tx1, ty1);
-    glVertex2f(left_x - width_adjust, top_y);
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->texture_coordinates[0] = {{tx1, ty1}};
+    glvert++->position = {{left_x - width_adjust, top_y, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->texture_coordinates[0] = {{tx2, ty1}};
+    glvert++->position = {{left_x + w + width_adjust, top_y, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->texture_coordinates[0] = {{tx2, ty2}};
+    glvert++->position = {{left_x + w + width_adjust, top_y + h, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->texture_coordinates[0] = {{tx1, ty2}};
+    glvert->position = {{left_x - width_adjust, top_y + h, 0}};
 
-    glTexCoord2f(tx2, ty1);
-    glVertex2f(left_x + w + width_adjust, top_y);
+    EndRenderUnit(4);
 
-    glTexCoord2f(tx2, ty2);
-    glVertex2f(left_x + w + width_adjust, top_y + h);
-
-    glTexCoord2f(tx1, ty2);
-    glVertex2f(left_x - width_adjust, top_y + h);
-
-    glEnd();
-
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_ALPHA_TEST);
-    glDisable(GL_BLEND);
-
-    glAlphaFunc(GL_GREATER, 0);
+    FinishUnitBatch();
 }
 
 //

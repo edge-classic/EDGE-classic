@@ -269,20 +269,60 @@ class StartupProgress
         if (gamma_correction.f_ < 0)
         {
             int col = (1.0f + gamma_correction.f_) * 255;
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-            HUDSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glDisable(GL_BLEND);
+            sg_color sgcol = sg_make_color_4b(col, col, col, 255);
+            sgcol.a = HUDGetAlpha();
+
+            StartUnitBatch(false);
+
+            RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNegativeGamma);
+
+            float x1 = 0;
+            float x2 = current_screen_width;
+
+            float y1 = current_screen_height;
+            float y2 = 0;
+
+            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert++->position = {{x1, y1, 0}};
+            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert++->position = {{x2, y1, 0}};
+            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert++->position = {{x2, y2, 0}};
+            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->position = {{x1, y2, 0}};
+
+            EndRenderUnit(4);
+
+            FinishUnitBatch();
         }
         else if (gamma_correction.f_ > 0)
         {
             int col = gamma_correction.f_ * 255;
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_DST_COLOR, GL_ONE);
-            HUDSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glDisable(GL_BLEND);
+            sg_color sgcol = sg_make_color_4b(col, col, col, 255);
+            sgcol.a = HUDGetAlpha();
+
+            StartUnitBatch(false);
+
+            RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingPositiveGamma);
+
+            float x1 = 0;
+            float x2 = current_screen_width;
+
+            float y1 = current_screen_height;
+            float y2 = 0;
+
+            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert++->position = {{x1, y1, 0}};
+            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert++->position = {{x2, y1, 0}};
+            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert++->position = {{x2, y2, 0}};
+            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->position = {{x1, y2, 0}};
+
+            EndRenderUnit(4);
+
+            FinishUnitBatch();
         }
 
         FinishFrame();
@@ -688,20 +728,60 @@ void EdgeDisplay(void)
     if (gamma_correction.f_ < 0)
     {
         int col = (1.0f + gamma_correction.f_) * 255;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-        HUDSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glDisable(GL_BLEND);
+        sg_color sgcol = sg_make_color_4b(col, col, col, 255);
+        sgcol.a = HUDGetAlpha();
+
+        StartUnitBatch(false);
+
+        RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNegativeGamma);
+
+        float x1 = 0;
+        float x2 = current_screen_width;
+
+        float y1 = current_screen_height;
+        float y2 = 0;
+
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert++->position = {{x1, y1, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert++->position = {{x2, y1, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert++->position = {{x2, y2, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->position = {{x1, y2, 0}};
+
+        EndRenderUnit(4);
+
+        FinishUnitBatch();
     }
     else if (gamma_correction.f_ > 0)
     {
         int col = gamma_correction.f_ * 255;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_DST_COLOR, GL_ONE);
-        HUDSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glDisable(GL_BLEND);
+        sg_color sgcol = sg_make_color_4b(col, col, col, 255);
+        sgcol.a = HUDGetAlpha();
+
+        StartUnitBatch(false);
+
+        RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingPositiveGamma);
+
+        float x1 = 0;
+        float x2 = current_screen_width;
+
+        float y1 = current_screen_height;
+        float y2 = 0;
+
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert++->position = {{x1, y1, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert++->position = {{x2, y1, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert++->position = {{x2, y2, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->position = {{x1, y2, 0}};
+
+        EndRenderUnit(4);
+
+        FinishUnitBatch();
     }
 
     if (m_screenshot_required)

@@ -29,6 +29,7 @@
 #include "m_misc.h"
 #include "n_network.h"
 #include "r_modes.h"
+#include "r_state.h"
 #include "version.h"
 
 SDL_Window *program_window;
@@ -385,7 +386,7 @@ bool SetScreenSize(DisplayMode *mode)
     signal(SIGSEGV, SIG_DFL);
 #endif
 
-    glClearColor(0, 0, 0, 1.0f);
+    global_render_state->ClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     SDL_GL_SwapWindow(program_window);
@@ -396,7 +397,7 @@ bool SetScreenSize(DisplayMode *mode)
 void StartFrame(void)
 {
     ec_frame_stats.Clear();
-    glClearColor(0, 0, 0, 1.0f);
+    global_render_state->ClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (draw_culling.d_)
         renderer_far_clip.f_ = draw_culling_distance.f_;

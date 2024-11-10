@@ -59,8 +59,6 @@ static constexpr float kDoomYSlopeFull = 0.625f;
 
 static constexpr float kWavetableIncrement = 0.0009765625f;
 
-static constexpr uint8_t kMaximumPolygonVertices = 64;
-
 EDGE_DEFINE_CONSOLE_VARIABLE(debug_hall_of_mirrors, "0", kConsoleVariableFlagCheat)
 EDGE_DEFINE_CONSOLE_VARIABLE(force_flat_lighting, "0", kConsoleVariableFlagArchive)
 
@@ -115,8 +113,6 @@ static Seg       *current_seg;
 static bool solid_mode;
 
 static std::list<DrawSubsector *> draw_subsector_list;
-
-static std::unordered_map<const Image *, GLuint> frame_texture_ids;
 
 // ========= MIRROR STUFF ===========
 
@@ -353,12 +349,12 @@ static bool MirrorSegOnPortal(Seg *seg)
 
 static void MirrorSetClippers()
 {
-    glDisable(GL_CLIP_PLANE0);
-    glDisable(GL_CLIP_PLANE1);
-    glDisable(GL_CLIP_PLANE2);
-    glDisable(GL_CLIP_PLANE3);
-    glDisable(GL_CLIP_PLANE4);
-    glDisable(GL_CLIP_PLANE5);
+    global_render_state->Disable(GL_CLIP_PLANE0);
+    global_render_state->Disable(GL_CLIP_PLANE1);
+    global_render_state->Disable(GL_CLIP_PLANE2);
+    global_render_state->Disable(GL_CLIP_PLANE3);
+    global_render_state->Disable(GL_CLIP_PLANE4);
+    global_render_state->Disable(GL_CLIP_PLANE5);
 
     if (total_active_mirrors == 0)
         return;
@@ -375,8 +371,8 @@ static void MirrorSetClippers()
     ClipPlaneEyeAngle(left_p, inner.draw_mirror_->left);
     ClipPlaneEyeAngle(right_p, inner.draw_mirror_->right + kBAMAngle180);
 
-    glEnable(GL_CLIP_PLANE0);
-    glEnable(GL_CLIP_PLANE1);
+    global_render_state->Enable(GL_CLIP_PLANE0);
+    global_render_state->Enable(GL_CLIP_PLANE1);
 
     glClipPlane(GL_CLIP_PLANE0, left_p);
     glClipPlane(GL_CLIP_PLANE1, right_p);
@@ -411,7 +407,7 @@ static void MirrorSetClippers()
 
         ClipPlaneHorizontalLine(front_p, v2, v1);
 
-        glEnable(GL_CLIP_PLANE2 + i);
+        global_render_state->Enable(GL_CLIP_PLANE2 + i);
 
         glClipPlane(GL_CLIP_PLANE2 + i, front_p);
     }
@@ -439,22 +435,6 @@ static void MirrorPop()
     total_active_mirrors--;
 
     MirrorSetClippers();
-}
-
-static GLuint R_ImageCache(const Image *image, bool anim = true, const Colormap *trans = nullptr)
-{
-    // (need to load the image to know the opacity)
-    auto frameid = frame_texture_ids.find(image);
-    if (frameid == frame_texture_ids.end())
-    {
-        GLuint tex_id = ImageCache(image, true, render_view_effect_colormap);
-        frame_texture_ids.emplace(image, tex_id);
-        return tex_id;
-    }
-    else
-    {
-        return frameid->second;
-    }
 }
 
 float Slope_GetHeight(SlopePlane *slope, float x, float y)
@@ -827,7 +807,7 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
     EPI_ASSERT(image);
 
     // (need to load the image to know the opacity)
-    GLuint tex_id = R_ImageCache(image, true, render_view_effect_colormap);
+    GLuint tex_id = ImageCache(image, true, render_view_effect_colormap);
 
     // ignore non-solid walls in solid mode (& vice versa)
     if ((trans < 0.99f || image->opacity_ >= kOpacityMasked) == solid_mode)
@@ -970,7 +950,6 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
     data.tx_mul = tx_mul;
     data.ty_mul = ty_mul;
 
-    // TODO: make a unit vector
     data.normal = {{(y2 - y1), (x1 - x2), 0}};
 
     data.tex_id     = tex_id;
@@ -1807,7 +1786,7 @@ static void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref, 
 
     FloodEmulationData data;
 
-    data.tex_id = R_ImageCache(surf->image, true, render_view_effect_colormap);
+    data.tex_id = ImageCache(surf->image, true, render_view_effect_colormap);
     data.pass   = 0;
 
     data.R = data.G = data.B = 1.0f;
@@ -2447,7 +2426,7 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
         return;
 
     // (need to load the image to know the opacity)
-    GLuint tex_id = R_ImageCache(surf->image, true, render_view_effect_colormap);
+    GLuint tex_id = ImageCache(surf->image, true, render_view_effect_colormap);
 
     // ignore non-solid planes in solid_mode (& vice versa)
     if ((trans < 0.99f || surf->image->opacity_ >= kOpacityMasked) == solid_mode)
@@ -2893,18 +2872,16 @@ static void RenderSubList(std::list<DrawSubsector *> &dsubs, bool for_mirror = f
 
 static void DrawMirrorPolygon(DrawMirror *mir)
 {
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     float alpha = 0.15 + 0.10 * total_active_mirrors;
 
     Line *ld = mir->seg->linedef;
     EPI_ASSERT(ld);
+    sg_color sgcol;
+
 
     if (ld->special)
     {
-        sg_color sgcol = sg_make_color_1i(ld->special->fx_color_);
+        sgcol = sg_make_color_1i(ld->special->fx_color_);
 
         // looks better with reduced color in multiple reflections
         float reduce = 1.0f / (1 + 1.5 * total_active_mirrors);
@@ -2913,10 +2890,10 @@ static void DrawMirrorPolygon(DrawMirror *mir)
         sgcol.g *= reduce;
         sgcol.b *= reduce;
 
-        glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
+        sgcol.a = alpha;
     }
     else
-        glColor4f(1.0, 0.0, 0.0, alpha);
+       sgcol = {1.0, 0.0, 0.0, alpha};
 
     float x1 = mir->seg->vertex_1->X;
     float y1 = mir->seg->vertex_1->Y;
@@ -2929,16 +2906,19 @@ static void DrawMirrorPolygon(DrawMirror *mir)
     MirrorCoordinate(x1, y1);
     MirrorCoordinate(x2, y2);
 
-    glBegin(GL_POLYGON);
+    RendererVertex *glvert = BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0,
+                                                 0, alpha < 0.99f ? kBlendingAlpha : kBlendingNone);
 
-    glVertex3f(x1, y1, z1);
-    glVertex3f(x1, y1, z2);
-    glVertex3f(x2, y2, z2);
-    glVertex3f(x2, y2, z1);
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x1, y1, z1}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x1, y1, z2}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x2, y2, z2}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->position = {{x2, y2, z1}};
 
-    glEnd();
-
-    glDisable(GL_BLEND);
+    EndRenderUnit(4);
 }
 
 static void DrawPortalPolygon(DrawMirror *mir)
@@ -2954,22 +2934,14 @@ static void DrawPortalPolygon(DrawMirror *mir)
         return;
     }
 
-    glDisable(GL_ALPHA_TEST);
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     // set texture
-    GLuint tex_id = R_ImageCache(surf->image);
-
-    glBindTexture(GL_TEXTURE_2D, tex_id);
+    GLuint tex_id = ImageCache(surf->image);
 
     // set colour & alpha
     float alpha = ld->special->translucency_ * surf->translucency;
 
     sg_color sgcol = sg_make_color_1i(ld->special->fx_color_);
-
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
+    sgcol.a = alpha;
 
     // get polygon coordinates
     float x1 = mir->seg->vertex_1->X;
@@ -2999,21 +2971,23 @@ static void DrawPortalPolygon(DrawMirror *mir)
     ty1 = ty1 * surf->y_matrix.Y / total_h;
     ty2 = ty2 * surf->y_matrix.Y / total_h;
 
-    glBegin(GL_POLYGON);
+    RendererVertex *glvert = BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0,
+                                                 0, alpha < 0.99f ? kBlendingAlpha : kBlendingNone);
 
-    glTexCoord2f(tx1, ty1);
-    glVertex3f(x1, y1, z1);
-    glTexCoord2f(tx1, ty2);
-    glVertex3f(x1, y1, z2);
-    glTexCoord2f(tx2, ty2);
-    glVertex3f(x2, y2, z2);
-    glTexCoord2f(tx2, ty1);
-    glVertex3f(x2, y2, z1);
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->position = {{x1, y1, z1}};
+    glvert++->texture_coordinates[0] = {{tx1, ty1}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->position = {{x1, y1, z2}};
+    glvert++->texture_coordinates[0] = {{tx1, ty2}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->position = {{x2, y2, z2}};
+    glvert++->texture_coordinates[0] = {{tx2, ty2}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->position = {{x2, y2, z1}};
+    glvert->texture_coordinates[0] = {{tx2, ty1}};
 
-    glEnd();
-
-    glDisable(GL_BLEND);
-    glDisable(GL_TEXTURE_2D);
+    EndRenderUnit(4);
 }
 
 static void RenderMirror(DrawMirror *mir)
@@ -3034,10 +3008,14 @@ static void RenderMirror(DrawMirror *mir)
     }
     MirrorPop();
 
+    StartUnitBatch(false);
+
     if (mir->is_portal)
         DrawPortalPolygon(mir);
     else
         DrawMirrorPolygon(mir);
+
+    FinishUnitBatch();
 
 #if defined(EDGE_GL_ES2)
     // GL4ES mirror fix for renderlist
@@ -3199,11 +3177,8 @@ static void RenderTrueBsp(void)
 
     SetupMatrices3d();
 
-    frame_texture_ids.clear();
-    frame_texture_ids.reserve(1024);
-
     glClear(GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
+    global_render_state->Enable(GL_DEPTH_TEST);
 
     // needed for drawing the sky
     BeginSky();
@@ -3213,12 +3188,7 @@ static void RenderTrueBsp(void)
 
     FinishSky();
 
-    RenderState *state = GetRenderState();
-    state->SetDefaultStateFull();
-
     RenderSubList(draw_subsector_list);
-
-    state->SetDefaultStateFull();
 
     // Lobo 2022:
     // Allow changing the order of weapon model rendering to be
@@ -3239,7 +3209,7 @@ static void RenderTrueBsp(void)
         DoWeaponModel();
     }
 
-    glDisable(GL_DEPTH_TEST);
+    global_render_state->Disable(GL_DEPTH_TEST);
 
     // now draw 2D stuff like psprites, and add effects
     SetupWorldMatrices2D();
@@ -3258,9 +3228,9 @@ static void RenderTrueBsp(void)
     {
         SetupMatrices3d();
         glClear(GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST);
+        global_render_state->Enable(GL_DEPTH_TEST);
         DoWeaponModel();
-        glDisable(GL_DEPTH_TEST);
+        global_render_state->Disable(GL_DEPTH_TEST);
         SetupMatrices2D();
     }
 

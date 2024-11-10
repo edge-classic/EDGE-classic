@@ -38,9 +38,10 @@
 #include "w_texture.h"
 #include "w_wad.h"
 
-// clamp cache used by runits to avoid an extremely expensive gl tex param
-// lookup
-extern std::unordered_map<GLuint, GLint> texture_clamp;
+// clamp cache used by runits to avoid extremely expensive gl tex param
+// lookups
+extern std::unordered_map<GLuint, GLint> texture_clamp_s;
+extern std::unordered_map<GLuint, GLint> texture_clamp_t;
 
 int MakeValidTextureSize(int value)
 {
@@ -154,20 +155,21 @@ GLuint UploadTexture(ImageData *img, int flags, int max_pix)
     GLuint id;
 
     glGenTextures(1, &id);
-    glBindTexture(GL_TEXTURE_2D, id);
+    global_render_state->BindTexture(id);
 
     GLint tmode = GL_REPEAT;
 
     if (clamp)
         tmode = renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE;
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, tmode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, tmode);
+    global_render_state->TextureWrapS(tmode);
+    global_render_state->TextureWrapT(tmode);
 
-    texture_clamp.emplace(id, tmode);
+    texture_clamp_s.emplace(id, tmode);
+    texture_clamp_t.emplace(id, tmode);
 
     // magnification mode
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, smooth ? GL_LINEAR : GL_NEAREST);
+    global_render_state->TextureMagFilter(smooth ? GL_LINEAR : GL_NEAREST);
 
     // minification mode
     int mip_level = HMM_Clamp(0, image_mipmapping, 2);
@@ -183,7 +185,7 @@ GLuint UploadTexture(ImageData *img, int flags, int max_pix)
 
                                         GL_LINEAR,  GL_LINEAR_MIPMAP_NEAREST,  GL_LINEAR_MIPMAP_LINEAR};
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minif_modes[(smooth ? 3 : 0) + (nomip ? 0 : mip_level)]);
+    global_render_state->TextureMinFilter(minif_modes[(smooth ? 3 : 0) + (nomip ? 0 : mip_level)]);
 
     for (int mip = 0;; mip++)
     {
@@ -204,13 +206,6 @@ GLuint UploadTexture(ImageData *img, int flags, int max_pix)
 
         new_w = HMM_MAX(1, new_w / 2);
         new_h = HMM_MAX(1, new_h / 2);
-
-        // -AJA- 2003/12/05: workaround for Radeon 7500 driver bug, which
-        //       incorrectly draws the 1x1 mip texture as black.
-#ifndef _WIN32
-        if (new_w == 1 && new_h == 1)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mip);
-#endif
     }
 
     return id;

@@ -1595,6 +1595,12 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
         }
 
         // hack for "see-through" lines (same sector on both sides)
+        if (sec != other && !lower_invis)
+        {
+            f2 = HMM_MAX(f2, f1);
+            c2 = HMM_MIN(c2, c1);
+        }
+
         if (sec == other)
         {
             f2 = HMM_MAX(f2, f1);

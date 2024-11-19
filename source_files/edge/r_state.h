@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <string.h>
+
 #include <unordered_map>
 
 // Need data structure definitions.

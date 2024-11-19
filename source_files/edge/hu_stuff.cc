@@ -224,8 +224,6 @@ void HUDDrawer(void)
         HUDSetAlignment();
         HUDSetAlpha();
     }
-
-    // TODO: chat messages
 }
 
 // Starts displaying the message.

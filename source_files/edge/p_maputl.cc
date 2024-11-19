@@ -31,8 +31,6 @@
 //   Gap/extrafloor utility functions.
 //   Touch Node code.
 //
-// TODO HERE:
-//   + make gap routines FatalError if overflow limit.
 //
 
 #include <float.h>

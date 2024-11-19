@@ -26,6 +26,7 @@
 #include "r_gldefs.h"
 #include "r_modes.h"
 #include "r_state.h"
+#include "r_units.h"
 #include "r_wipe.h"
 #include "s_blit.h"
 #include "s_music.h"
@@ -47,10 +48,10 @@ static uint8_t       *movie_bytes   = nullptr;
 static double         fadein        = 0;
 static double         fadeout       = 0;
 static double         elapsed_time  = 0;
-static int            vx1           = 0;
-static int            vx2           = 0;
-static int            vy1           = 0;
-static int            vy2           = 0;
+static float          vx1           = 0.0f;
+static float          vx2           = 0.0f;
+static float          vy1           = 0.0f;
+static float          vy2           = 0.0f;
 static float          tx1           = 0.0f;
 static float          tx2           = 1.0f;
 static float          ty1           = 0.0f;
@@ -88,7 +89,7 @@ void MovieVideoCallback(plm_t *mpeg, plm_frame_t *frame, void *user)
     (void)user;
 
     plm_frame_to_rgb(frame, rgb_data, frame->width * 3);
-    glBindTexture(GL_TEXTURE_2D, canvas);
+    global_render_state->BindTexture(canvas);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame->width, frame->height, 0, GL_RGB, GL_UNSIGNED_BYTE, rgb_data);
 }
 
@@ -157,9 +158,12 @@ void PlayMovie(const std::string &name)
     }
 
     if (canvas)
-        glDeleteTextures(1, &canvas);
+        global_render_state->DeleteTexture(&canvas);
 
     glGenTextures(1, &canvas);
+    global_render_state->BindTexture(canvas);
+    global_render_state->TextureMagFilter(GL_LINEAR);
+    global_render_state->TextureMinFilter(GL_LINEAR);
 
     if (rgb_data)
     {
@@ -247,7 +251,7 @@ static void EndMovie()
     }
     if (canvas)
     {
-        glDeleteTextures(1, &canvas);
+        global_render_state->DeleteTexture(&canvas);
         canvas = 0;
     }
     ResumeMusic();
@@ -257,54 +261,51 @@ void MovieDrawer()
 {
     if (!playing_movie)
         return;
+
     if (!plm_has_ended(decoder))
     {
-        SetupMatrices2D();
+        StartUnitBatch (false);
 
-        glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, canvas);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glDisable(GL_ALPHA_TEST);
+        sg_color sgcol = sg_white;
 
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, canvas, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
 
-        glBegin(GL_QUADS);
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->texture_coordinates[0] = {{tx1, ty2}};
+        glvert++->position = {{vx1, vy2, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->texture_coordinates[0] = {{tx2, ty2}};
+        glvert++->position = {{vx2, vy2, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->texture_coordinates[0] = {{tx2, ty1}};
+        glvert++->position = {{vx2, vy1, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->texture_coordinates[0] = {{tx1, ty1}};
+        glvert->position = {{vx1, vy1, 0}};
 
-        glTexCoord2f(tx1, ty2);
-        glVertex2i(vx1, vy2);
-
-        glTexCoord2f(tx2, ty2);
-        glVertex2i(vx2, vy2);
-
-        glTexCoord2f(tx2, ty1);
-        glVertex2i(vx2, vy1);
-
-        glTexCoord2f(tx1, ty1);
-        glVertex2i(vx1, vy1);
-
-        glEnd();
-
-        glDisable(GL_TEXTURE_2D);
+        EndRenderUnit(4);
 
         // Fade-in
         fadein = plm_get_time(decoder);
         if (fadein <= 0.25f)
         {
-            glColor4f(0, 0, 0, (0.25f - fadein) / 0.25f);
-            glEnable(GL_BLEND);
+            sgcol = { 0, 0, 0, (0.25f - (float)fadein) / 0.25f };
+            
+            glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAlpha);
 
-            glBegin(GL_QUADS);
+            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert++->position = {{vx1, vy2, 0}};
+            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert++->position = {{vx2, vy2, 0}};
+            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert++->position = {{vx2, vy1, 0}};
+            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->position = {{vx1, vy1, 0}};
 
-            glVertex2i(vx1, vy2);
-            glVertex2i(vx2, vy2);
-            glVertex2i(vx2, vy1);
-            glVertex2i(vx1, vy1);
-
-            glEnd();
-
-            glDisable(GL_BLEND);
+            EndRenderUnit(4);
         }
+
+        FinishUnitBatch();
 
         if (skip_bar_active)
         {
@@ -314,58 +315,50 @@ void MovieDrawer()
             // Draw progress
             HUDSolidBox(hud_x_left, 197, hud_x_right * (skip_time / 0.9f), 199, SG_WHITE_RGBA32);
         }
-
-        GetRenderState()->SetDefaultStateFull();
     }
     else
     {
-        SetupMatrices2D();
-
         double current_time = (double)SDL_GetTicks() / 1000.0;
         fadeout             = current_time - last_time;
 
-        glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, canvas);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glDisable(GL_ALPHA_TEST);
+        StartUnitBatch(false);
 
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        sg_color sgcol = sg_white;
 
-        glBegin(GL_QUADS);
+        RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, canvas, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
 
-        glTexCoord2f(tx1, ty2);
-        glVertex2i(vx1, vy2);
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->texture_coordinates[0] = {{tx1, ty2}};
+        glvert++->position = {{vx1, vy2, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->texture_coordinates[0] = {{tx2, ty2}};
+        glvert++->position = {{vx2, vy2, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->texture_coordinates[0] = {{tx2, ty1}};
+        glvert++->position = {{vx2, vy1, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->texture_coordinates[0] = {{tx1, ty1}};
+        glvert->position = {{vx1, vy1, 0}};
 
-        glTexCoord2f(tx2, ty2);
-        glVertex2i(vx2, vy2);
-
-        glTexCoord2f(tx2, ty1);
-        glVertex2i(vx2, vy1);
-
-        glTexCoord2f(tx1, ty1);
-        glVertex2i(vx1, vy1);
-
-        glEnd();
-
-        glDisable(GL_TEXTURE_2D);
+        EndRenderUnit(4);
 
         // Fade-out
-        glColor4f(0, 0, 0, HMM_MAX(0.0f, 1.0f - ((0.25f - fadeout) / 0.25f)));
-        glEnable(GL_BLEND);
+        sgcol = { 0, 0, 0, HMM_MAX(0.0f, 1.0f - ((0.25f - (float)fadeout) / 0.25f)) };
+            
+        glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAlpha);
 
-        glBegin(GL_QUADS);
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert++->position = {{vx1, vy2, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert++->position = {{vx2, vy2, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert++->position = {{vx2, vy1, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->position = {{vx1, vy1, 0}};
 
-        glVertex2i(vx1, vy2);
-        glVertex2i(vx2, vy2);
-        glVertex2i(vx2, vy1);
-        glVertex2i(vx1, vy1);
+        EndRenderUnit(4);
 
-        glEnd();
-
-        glDisable(GL_BLEND);
-
-        GetRenderState()->SetDefaultStateFull();
+        FinishUnitBatch();
     }
 }
 

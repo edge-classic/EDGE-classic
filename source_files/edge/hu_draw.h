@@ -26,6 +26,7 @@
 #pragma once
 
 #include "hu_font.h"
+#include "r_units.h"
 
 // X coordinates of left and right edges of screen.
 // updated by calls to HUDSetCoordinateSystem() or HUDReset().
@@ -75,7 +76,7 @@ void HUDSolidLine(float x1, float y1, float x2, float y2, RGBAColor col, float t
                   float dx = 0, float dy = 0);
 
 // Draw a thin outline of a box.
-void HUDThinBox(float x1, float y1, float x2, float y2, RGBAColor col, float thickness = 0.0f);
+void HUDThinBox(float x1, float y1, float x2, float y2, RGBAColor col, float thickness = 0.0f, BlendingMode special_blend = kBlendingNone);
 
 // Like HUDSolidBox but the colors of each corner (TL, BL, TR, BR) can
 // be specified individually.

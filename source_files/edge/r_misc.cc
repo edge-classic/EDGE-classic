@@ -268,11 +268,11 @@ RegionProperties *GetPointProperties(Subsector *sub, float z)
 //----------------------------------------------------------------------------
 
 // large buffers for cache coherency vs allocating each on heap
-static constexpr uint16_t kMaximumDrawThings     = 32768;
-static constexpr uint16_t kMaximumDrawFloors     = 32768;
-static constexpr uint32_t kMaximumDrawSegs       = 65536;
-static constexpr uint32_t kMaximumDrawSubsectors = 65536;
-static constexpr uint16_t kMaximumDrawMirrors    = 512;
+static constexpr uint16_t kDefaultDrawThings     = 32768;
+static constexpr uint16_t kDefaultDrawFloors     = 32768;
+static constexpr uint32_t kDefaultDrawSegs       = 65536;
+static constexpr uint32_t kDefaultDrawSubsectors = 65536;
+static constexpr uint16_t kDefaultDrawMirrors    = 512;
 
 static std::vector<DrawThing>     draw_things;
 static std::vector<DrawFloor>     draw_floors;
@@ -293,11 +293,11 @@ static int draw_mirror_position;
 //
 void AllocateDrawStructs(void)
 {
-    draw_things.resize(kMaximumDrawThings);
-    draw_floors.resize(kMaximumDrawFloors);
-    draw_segs.resize(kMaximumDrawSegs);
-    draw_subsectors.resize(kMaximumDrawSubsectors);
-    draw_mirrors.resize(kMaximumDrawMirrors);
+    draw_things.resize(kDefaultDrawThings);
+    draw_floors.resize(kDefaultDrawFloors);
+    draw_segs.resize(kDefaultDrawSegs);
+    draw_subsectors.resize(kDefaultDrawSubsectors);
+    draw_mirrors.resize(kDefaultDrawMirrors);
 }
 
 // bsp clear function
@@ -324,50 +324,40 @@ void FreeBSP(void)
 
 DrawThing *GetDrawThing()
 {
-    if (draw_thing_position >= kMaximumDrawThings)
-    {
-        FatalError("Max Draw Things Exceeded");
-    }
+    if (draw_thing_position == draw_things.size())
+        draw_things.push_back(DrawThing());
 
     return &draw_things[draw_thing_position++];
 }
 
 DrawFloor *GetDrawFloor()
 {
-    if (draw_floor_position >= kMaximumDrawFloors)
-    {
-        FatalError("Max Draw Floors Exceeded");
-    }
+    if (draw_floor_position == draw_floors.size())
+        draw_floors.push_back(DrawFloor());
 
     return &draw_floors[draw_floor_position++];
 }
 
 DrawSeg *GetDrawSeg()
 {
-    if (draw_seg_position >= kMaximumDrawSegs)
-    {
-        FatalError("Max Draw Segs Exceeded");
-    }
+    if (draw_seg_position == draw_segs.size())
+        draw_segs.push_back(DrawSeg());
 
     return &draw_segs[draw_seg_position++];
 }
 
 DrawSubsector *GetDrawSub()
 {
-    if (draw_subsector_position >= kMaximumDrawSubsectors)
-    {
-        FatalError("Max Draw Subs Exceeded");
-    }
+    if (draw_subsector_position == draw_subsectors.size())
+        draw_subsectors.push_back(DrawSubsector());
 
     return &draw_subsectors[draw_subsector_position++];
 }
 
 DrawMirror *GetDrawMirror()
 {
-    if (draw_mirror_position >= kMaximumDrawMirrors)
-    {
-        FatalError("Max Draw Mirrors Exceeded");
-    }
+    if (draw_mirror_position == draw_mirrors.size())
+        draw_mirrors.push_back(DrawMirror());
 
     return &draw_mirrors[draw_mirror_position++];
 }

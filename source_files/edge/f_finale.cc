@@ -803,14 +803,14 @@ static void CastDrawer(void)
             skin_img = ImageForDummySkin();
 
         glClear(GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST);
+        global_render_state->Enable(GL_DEPTH_TEST);
 
         if (md->md2_model_)
             MD2RenderModel2D(md->md2_model_, skin_img, cast_state->frame, pos_x, pos_y, scale_x, scale_y, cast_order);
         else if (md->mdl_model_)
             MDLRenderModel2D(md->mdl_model_, skin_img, cast_state->frame, pos_x, pos_y, scale_x, scale_y, cast_order);
 
-        glDisable(GL_DEPTH_TEST);
+        global_render_state->Disable(GL_DEPTH_TEST);
         return;
     }
 
@@ -838,8 +838,8 @@ static void CastDrawer(void)
     width *= scale_x;
     height *= scale_y;
 
-    RenderImage(pos_x - offset_x, pos_y + offset_y, width, height, image, flip ? image->Right() : 0, 0,
-                flip ? 0 : image->Right(), image->Top(), nullptr, 1.0f, cast_order->palremap_);
+    HUDRawImage(pos_x - offset_x, pos_y + offset_y, pos_x - offset_x + width, pos_y + offset_y + height, image,  flip ? image->Right() : 0, 0,
+                flip ? 0 : image->Right(), image->Top(), 1.0f, kRGBANoValue, cast_order->palremap_);
 }
 
 //

@@ -28,13 +28,14 @@
 #include "r_misc.h"
 #include "r_modes.h"
 #include "r_texgl.h"
+#include "r_units.h"
 #include "w_wad.h"
 
 int render_view_extra_light;
 
-float render_view_red_multiplier;
-float render_view_green_multiplier;
-float render_view_blue_multiplier;
+float render_view_red_multiplier = 1.0f;
+float render_view_green_multiplier = 1.0f;
+float render_view_blue_multiplier = 1.0f;
 
 const Colormap *render_view_effect_colormap;
 
@@ -82,9 +83,6 @@ void RendererRainbowEffect(Player *player)
         else
         {
             render_view_red_multiplier = 0.90f;
-            ///???		render_view_red_multiplier += (1.0f -
-            /// render_view_red_multiplier) * (1.0f - s);
-
             render_view_green_multiplier = render_view_red_multiplier;
             render_view_blue_multiplier  = render_view_red_multiplier;
         }
@@ -153,8 +151,8 @@ void RendererRainbowEffect(Player *player)
 //
 void RendererColourmapEffect(Player *player)
 {
-    int x1, y1;
-    int x2, y2;
+    float x1, y1;
+    float x2, y2;
 
     float s = EffectStrength(player);
 
@@ -164,15 +162,13 @@ void RendererColourmapEffect(Player *player)
         if (invulnerability_effect == kInvulnerabilityTextured && !reduce_flash)
             return;
 
-        glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
-
         if (!reduce_flash)
         {
-            glColor4f(1.0f, 1.0f, 1.0f, 0.0f);
+            StartUnitBatch(false);
 
-            glEnable(GL_BLEND);
+            sg_color sgcol = sg_white;
 
-            glBegin(GL_QUADS);
+            RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingInvert);
 
             x1 = view_window_x;
             x2 = view_window_x + view_window_width;
@@ -180,14 +176,18 @@ void RendererColourmapEffect(Player *player)
             y1 = view_window_y + view_window_height;
             y2 = view_window_y;
 
-            glVertex2i(x1, y1);
-            glVertex2i(x2, y1);
-            glVertex2i(x2, y2);
-            glVertex2i(x1, y2);
+            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert++->position = {{x1, y1, 0}};
+            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert++->position = {{x2, y1, 0}};
+            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert++->position = {{x2, y2, 0}};
+            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->position = {{x1, y2, 0}};
 
-            glEnd();
+            EndRenderUnit(4);
 
-            glDisable(GL_BLEND);
+            FinishUnitBatch();
         }
         else
         {
@@ -195,10 +195,9 @@ void RendererColourmapEffect(Player *player)
             HUDSetAlpha(0.0f);
             s = HMM_MAX(0.5f, s);
             HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                       epi::MakeRGBA(RoundToInteger(s * 255), RoundToInteger(s * 255), RoundToInteger(s * 255)), 25.0f);
+                       epi::MakeRGBA(RoundToInteger(s * 255), RoundToInteger(s * 255), RoundToInteger(s * 255)), 25.0f, kBlendingInvert);
             HUDSetAlpha(old_alpha);
         }
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 }
 
@@ -215,6 +214,8 @@ void RendererPaletteEffect(Player *player)
 
     float old_alpha = HUDGetAlpha();
 
+    sg_color sgcol = sg_white;
+
     if (s > 0 && player->powers_[kPowerTypeInvulnerable] > 0 && player->effect_colourmap_ &&
         (player->effect_left_ & 8 || reduce_flash))
     {
@@ -225,7 +226,7 @@ void RendererPaletteEffect(Player *player)
         float r, g, b;
         GetColormapRGB(player->effect_colourmap_, &r, &g, &b);
         if (!reduce_flash)
-            glColor4f(r, g, b, 0.20f * s);
+            sgcol = { r, g, b, 0.20f * s };
         else
         {
             HUDSetAlpha(0.20f * s);
@@ -245,8 +246,8 @@ void RendererPaletteEffect(Player *player)
         rgb_max = HMM_MIN(200, rgb_max);
 
         if (!reduce_flash)
-            glColor4f((float)rgb_data[0] / (float)rgb_max, (float)rgb_data[1] / (float)rgb_max,
-                      (float)rgb_data[2] / (float)rgb_max, (float)rgb_max / 255.0f);
+            sgcol = { (float)rgb_data[0] / (float)rgb_max, (float)rgb_data[1] / (float)rgb_max,
+                      (float)rgb_data[2] / (float)rgb_max, (float)rgb_max / 255.0f };
         else
         {
             HUDSetAlpha((float)rgb_max / 255.0f);
@@ -262,18 +263,22 @@ void RendererPaletteEffect(Player *player)
 
     if (!reduce_flash)
     {
-        glEnable(GL_BLEND);
+        StartUnitBatch(false);
 
-        glBegin(GL_QUADS);
+        RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAlpha);
 
-        glVertex2i(0, current_screen_height);
-        glVertex2i(current_screen_width, current_screen_height);
-        glVertex2i(current_screen_width, 0);
-        glVertex2i(0, 0);
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert++->position = {{0, (float)current_screen_height, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert++->position = {{(float)current_screen_width, (float)current_screen_height, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert++->position = {{(float)current_screen_width, 0, 0}};
+        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->position = {{0, 0, 0}};
 
-        glEnd();
+        EndRenderUnit(4);
 
-        glDisable(GL_BLEND);
+        FinishUnitBatch();
     }
 }
 

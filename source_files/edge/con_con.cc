@@ -50,6 +50,7 @@
 #include "r_draw.h"
 #include "r_image.h"
 #include "r_modes.h"
+#include "r_units.h"
 #include "r_wipe.h"
 #include "stb_sprintf.h"
 #include "w_files.h"
@@ -572,25 +573,24 @@ static void CalcSizes()
                               (FNSZ / console_font->image_character_height_));
 }
 
-static void SolidBox(int x, int y, int w, int h, RGBAColor col, float alpha)
+static void SolidBox(float x, float y, float w, float h, RGBAColor col, float alpha)
 {
-    if (alpha < 0.99f)
-        glEnable(GL_BLEND);
+    RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0,
+                                                 0, alpha < 0.99f ? kBlendingAlpha : kBlendingNone);
 
     sg_color sgcol = sg_make_color_1i(col);
+    sgcol.a = alpha;
 
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x, y, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x, y + h, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x + w, y + h, 0}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->position = {{x + w, y, 0}};
 
-    glBegin(GL_QUADS);
-
-    glVertex2i(x, y);
-    glVertex2i(x, y + h);
-    glVertex2i(x + w, y + h);
-    glVertex2i(x + w, y);
-
-    glEnd();
-
-    glDisable(GL_BLEND);
+    EndRenderUnit(4);
 }
 
 static void HorizontalLine(int y, RGBAColor col)
@@ -600,14 +600,10 @@ static void HorizontalLine(int y, RGBAColor col)
     SolidBox(0, y, current_screen_width - 1, 1, col, alpha);
 }
 
-static void DrawChar(int x, int y, char ch, RGBAColor col)
+static void DrawChar(float x, float y, char ch, RendererVertex *glvert, sg_color *col)
 {
     if (x + FNSZ < 0)
         return;
-
-    sg_color sgcol = sg_make_color_1i(col);
-
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, 1.0f);
 
     if (console_font->definition_->type_ == kFontTypeTrueType)
     {
@@ -618,16 +614,18 @@ static void DrawChar(int x, int y, char ch, RGBAColor col)
         float y_adjust = console_font->truetype_glyph_map_.at((uint8_t)ch).y_shift[current_font_size] * FNSZ_ratio;
         float height   = console_font->truetype_glyph_map_.at((uint8_t)ch).height[current_font_size] * FNSZ_ratio;
         stbtt_aligned_quad *q = console_font->truetype_glyph_map_.at((uint8_t)ch).character_quad[current_font_size];
-        glBegin(GL_POLYGON);
-        glTexCoord2f(q->s0, q->t0);
-        glVertex2f(x + x_adjust, y - y_adjust);
-        glTexCoord2f(q->s1, q->t0);
-        glVertex2f(x + x_adjust + width, y - y_adjust);
-        glTexCoord2f(q->s1, q->t1);
-        glVertex2f(x + x_adjust + width, y - y_adjust - height);
-        glTexCoord2f(q->s0, q->t1);
-        glVertex2f(x + x_adjust, y - y_adjust - height);
-        glEnd();
+        memcpy(&glvert->rgba_color, col, 4 * sizeof(float));
+        glvert->position = {{x + x_adjust, y - y_adjust, 0}};
+        glvert++->texture_coordinates[0] = {{q->s0, q->t0}};
+        memcpy(&glvert->rgba_color, col, 4 * sizeof(float));
+        glvert->position = {{x + x_adjust + width, y - y_adjust, 0}};
+        glvert++->texture_coordinates[0] = {{q->s1, q->t0}};
+        memcpy(&glvert->rgba_color, col, 4 * sizeof(float));
+        glvert->position = {{x + x_adjust + width, y - y_adjust - height, 0}};
+        glvert++->texture_coordinates[0] = {{q->s1, q->t1}};
+        memcpy(&glvert->rgba_color, col, 4 * sizeof(float));
+        glvert->position = {{x + x_adjust, y - y_adjust - height, 0}};
+        glvert->texture_coordinates[0] = {{q->s0, q->t1}};
         return;
     }
 
@@ -639,51 +637,45 @@ static void DrawChar(int x, int y, char ch, RGBAColor col)
     float ty1 = (py)*console_font->font_image_->height_ratio_;
     float ty2 = (py + 1) * console_font->font_image_->height_ratio_;
 
-    glBegin(GL_POLYGON);
-
-    glTexCoord2f(tx1, ty1);
-    glVertex2i(x, y);
-
-    glTexCoord2f(tx1, ty2);
-    glVertex2i(x, y + FNSZ);
-
-    glTexCoord2f(tx2, ty2);
-    glVertex2i(x + FNSZ, y + FNSZ);
-
-    glTexCoord2f(tx2, ty1);
-    glVertex2i(x + FNSZ, y);
-
-    glEnd();
+    memcpy(&glvert->rgba_color, col, 4 * sizeof(float));
+    glvert->position = {{x, y, 0}};
+    glvert++->texture_coordinates[0] = {{tx1, ty1}};
+    memcpy(&glvert->rgba_color, col, 4 * sizeof(float));
+    glvert->position = {{x, y + FNSZ, 0}};
+    glvert++->texture_coordinates[0] = {{tx1, ty2}};
+    memcpy(&glvert->rgba_color, col, 4 * sizeof(float));
+    glvert->position = {{x + FNSZ, y + FNSZ, 0}};
+    glvert++->texture_coordinates[0] = {{tx2, ty2}};
+    memcpy(&glvert->rgba_color, col, 4 * sizeof(float));
+    glvert->position = {{x + FNSZ, y, 0}};
+    glvert->texture_coordinates[0] = {{tx2, ty1}};
 }
 
-static void DrawEndoomChar(float x, float y, char ch, RGBAColor col, RGBAColor col2, bool blink, int enwidth)
+static void DrawEndoomChar(float x, float y, char ch, RGBAColor col, RGBAColor col2, bool blink, int enwidth, GLuint tex_id)
 {
     if (x + FNSZ < 0)
         return;
 
     sg_color sgcol = sg_make_color_1i(col2);
+    sgcol.a = 1.0f;
 
-    glDisable(GL_TEXTURE_2D);
+    RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0,
+                                                 0, kBlendingNone);
 
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, 1.0f);
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x - (enwidth / 2), y}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x - (enwidth / 2), y + FNSZ}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert++->position = {{x + (enwidth / 2), y + FNSZ}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->position = {{x + (enwidth / 2), y}};
 
-    glBegin(GL_QUADS);
 
-    glVertex2i(x - (enwidth / 2), y);
-
-    glVertex2i(x - (enwidth / 2), y + FNSZ);
-
-    glVertex2i(x + (enwidth / 2), y + FNSZ);
-
-    glVertex2i(x + (enwidth / 2), y);
-
-    glEnd();
-
-    glEnable(GL_TEXTURE_2D);
+    EndRenderUnit(4);
 
     sgcol = sg_make_color_1i(col);
-
-    glColor4f(sgcol.r, sgcol.g, sgcol.b, 1.0f);
+    sgcol.a = 1.0f;
 
     if (blink && console_cursor >= 16)
         ch = 0x20;
@@ -697,49 +689,47 @@ static void DrawEndoomChar(float x, float y, char ch, RGBAColor col, RGBAColor c
     float ty1 = (py)*endoom_font->font_image_->height_ratio_;
     float ty2 = (py + 1) * endoom_font->font_image_->height_ratio_;
 
-    glBegin(GL_POLYGON);
+    glvert = BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0,
+                                                 0, kBlendingMasked);
 
-    glTexCoord2f(tx1, ty1);
-    glVertex2i(x - enwidth, y);
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->texture_coordinates[0] = {{tx1, ty1}};
+    glvert++->position = {{x - enwidth, y}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->texture_coordinates[0] = {{tx1, ty2}};
+    glvert++->position = {{x - enwidth, y + FNSZ}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->texture_coordinates[0] = {{tx2, ty2}};
+    glvert++->position = {{x + enwidth, y + FNSZ}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->texture_coordinates[0] = {{tx2, ty1}};
+    glvert->position = {{x + enwidth, y}};
 
-    glTexCoord2f(tx1, ty2);
-    glVertex2i(x - enwidth, y + FNSZ);
-
-    glTexCoord2f(tx2, ty2);
-    glVertex2i(x + enwidth, y + FNSZ);
-
-    glTexCoord2f(tx2, ty1);
-    glVertex2i(x + enwidth, y);
-
-    glEnd();
+    EndRenderUnit(4);
 }
 
 // writes the text on coords (x,y) of the console
-static void DrawText(int x, int y, const char *s, RGBAColor col)
+static void DrawText(float x, float y, const char *s, RGBAColor col)
 {
+    GLuint tex_id = 0;
+    BlendingMode blend = kBlendingNone;
+
     if (console_font->definition_->type_ == kFontTypeImage)
     {
         // Always whiten the font when used with console output
-        GLuint tex_id = ImageCache(console_font->font_image_, true, (const Colormap *)0, true);
-
-        glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, tex_id);
-
-        glEnable(GL_BLEND);
-        glEnable(GL_ALPHA_TEST);
-        glAlphaFunc(GL_GREATER, 0);
+        tex_id = ImageCache(console_font->font_image_, true, (const Colormap *)0, true);
+        blend = kBlendingMasked;
     }
     else if (console_font->definition_->type_ == kFontTypeTrueType)
     {
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_TEXTURE_2D);
         if ((image_smoothing &&
              console_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothOnDemand) ||
             console_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothAlways)
-            glBindTexture(GL_TEXTURE_2D, console_font->truetype_smoothed_texture_id_[current_font_size]);
+            tex_id = console_font->truetype_smoothed_texture_id_[current_font_size];
         else
-            glBindTexture(GL_TEXTURE_2D, console_font->truetype_texture_id_[current_font_size]);
+            tex_id = console_font->truetype_texture_id_[current_font_size];
+
+        blend = kBlendingAlpha;
     }
 
     bool draw_cursor = false;
@@ -750,10 +740,18 @@ static void DrawText(int x, int y, const char *s, RGBAColor col)
             draw_cursor = true;
     }
 
+    sg_color sgcol = sg_make_color_1i(col);
+    RendererVertex *glvert = nullptr;
+
     int pos = 0;
     for (; *s; s++, pos++)
     {
-        DrawChar(x, y, *s, col);
+        glvert = BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0,
+                                                 0, blend);
+
+        DrawChar(x, y, *s, glvert, &sgcol);
+
+        EndRenderUnit(4);
 
         if (console_font->definition_->type_ == kFontTypeTrueType)
         {
@@ -767,7 +765,13 @@ static void DrawText(int x, int y, const char *s, RGBAColor col)
 
         if (pos == input_position && draw_cursor)
         {
-            DrawChar(x, y, 95, col);
+            glvert = BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0,
+                                                 0, blend);
+
+            DrawChar(x, y, 95, glvert, &sgcol);
+
+            EndRenderUnit(4);
+
             draw_cursor = false;
         }
 
@@ -778,11 +782,14 @@ static void DrawText(int x, int y, const char *s, RGBAColor col)
     }
 
     if (draw_cursor)
-        DrawChar(x, y, 95, col);
+    {
+        glvert = BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0,
+                                                 0, blend);
 
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_ALPHA_TEST);
-    glDisable(GL_BLEND);
+        DrawChar(x, y, 95, glvert, &sgcol);
+
+        EndRenderUnit(4);
+    }
 }
 
 static void EndoomDrawText(int x, int y, ConsoleLine *endoom_line)
@@ -793,29 +800,18 @@ static void EndoomDrawText(int x, int y, ConsoleLine *endoom_line)
     int enwidth = RoundToInteger((float)endoom_font->image_monospace_width_ *
                                  ((float)FNSZ / endoom_font->image_monospace_width_) / 2);
 
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, tex_id);
-
-    glEnable(GL_BLEND);
-    glEnable(GL_ALPHA_TEST);
-    glAlphaFunc(GL_GREATER, 0);
-
     for (int i = 0; i < 80; i++)
     {
         uint8_t info = endoom_line->endoom_bytes_.at(i);
 
         DrawEndoomChar(x, y, endoom_line->line_.at(i), endoom_colors[info & 15], endoom_colors[(info >> 4) & 7],
-                       info & 128, enwidth);
+                       info & 128, enwidth, tex_id);
 
         x += enwidth;
 
         if (x >= current_screen_width)
             break;
     }
-
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_ALPHA_TEST);
-    glDisable(GL_BLEND);
 }
 
 void ConsoleSetupFont(void)
@@ -859,6 +855,8 @@ void ConsoleDrawer(void)
         return;
 
     // -- background --
+
+    StartUnitBatch(false);
 
     int CON_GFX_HT = (current_screen_height * 3 / 5);
 
@@ -939,6 +937,8 @@ void ConsoleDrawer(void)
         if (y >= current_screen_height)
             break;
     }
+
+    FinishUnitBatch();
 }
 
 static void GotoEndOfLine(void)
@@ -1624,6 +1624,8 @@ void ConsoleShowFPS(void)
     if (debug_fps.d_ == 0)
         return;
 
+    StartUnitBatch(false);
+
     ConsoleSetupFont();
 
     // -AJA- 2022: reworked for better accuracy, ability to show WORST time
@@ -1723,12 +1725,16 @@ void ConsoleShowFPS(void)
         stbsp_sprintf(textbuf, "%i texture", ec_frame_stats.draw_texture_change);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
     }
+
+    FinishUnitBatch();
 }
 
 void ConsoleShowPosition(void)
 {
     if (debug_position.d_ <= 0)
         return;
+
+    StartUnitBatch(false);
 
     ConsoleSetupFont();
 
@@ -1779,6 +1785,8 @@ void ConsoleShowPosition(void)
     y -= FNSZ;
     stbsp_sprintf(textbuf, "  sub: %d", (int)(p->map_object_->subsector_ - level_subsectors));
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
+
+    FinishUnitBatch();
 }
 
 void ConsolePrintEndoom()

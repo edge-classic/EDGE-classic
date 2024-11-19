@@ -31,6 +31,8 @@
 #include "sokol_color.h"
 
 constexpr uint16_t kDummyClamp = 789;
+constexpr uint8_t kMaximumPolygonVertices = 64;
+constexpr uint16_t kMaximumLocalVertices = 65535;
 
 // a single vertex to pass to the GPU
 struct RendererVertex
@@ -60,6 +62,19 @@ enum BlendingMode
     kBlendingCullFront = (1 << 5), // enable front-face culling
     kBlendingNoZBuffer = (1 << 6), // don't update the Z buffer
     kBlendingClampY    = (1 << 7), // force texture to be Y clamped
+
+    kBlendingNoFog     = (1 << 8),  // force disable fog (including culling fog)
+
+    kBlendingRepeatX   = (1 << 9),  // force texture to repeat on X axis
+    kBlendingRepeatY   = (1 << 10), // force texture to repeat on Y axis
+
+    kBlendingGEqual    = (1 << 11), // drop fragments when alpha >= 1.0f - color.a
+                                    // Dasho - This is super specific and only 
+                                    // used by the "pixelfade" wipe :/
+
+    kBlendingInvert    = (1 << 12), // color inversion (simple invuln fx)
+    kBlendingNegativeGamma = (1 << 13),
+    kBlendingPositiveGamma = (1 << 14)
 };
 
 enum CustomTextureEnvironment

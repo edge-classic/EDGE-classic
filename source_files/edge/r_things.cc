@@ -248,7 +248,7 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
     y1t = y2t = view_window_height * ty2 / coord_H;
 
     // clip psprite to view window
-    glEnable(GL_SCISSOR_TEST);
+    global_render_state->Enable(GL_SCISSOR_TEST);
 
     glScissor(view_window_x, view_window_y, view_window_width, view_window_height);
 
@@ -437,11 +437,7 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
 
     FinishUnitBatch();
 
-    glDisable(GL_SCISSOR_TEST);
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_ALPHA_TEST);
-    glDisable(GL_BLEND);
-    glAlphaFunc(GL_GREATER, 0);
+    global_render_state->Disable(GL_SCISSOR_TEST);
 }
 
 static const RGBAColor crosshair_colors[8] = {
@@ -474,38 +470,35 @@ static void DrawStdCrossHair(void)
     float g = epi::GetRGBAGreen(color) * intensity / 255.0f;
     float b = epi::GetRGBABlue(color) * intensity / 255.0f;
 
+    sg_color sgcol = {r, g, b, 1.0f};
+
     float x = view_window_x + view_window_width / 2;
     float y = view_window_y + view_window_height / 2;
 
     float w = RoundToInteger(current_screen_width * crosshair_size.f_ / 640.0f);
 
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
+    StartUnitBatch(false);
 
-    glBindTexture(GL_TEXTURE_2D, tex_id);
+    RendererVertex *glvert =
+            BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, tex_id,
+                            (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAdd);
 
-    // additive blending
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->position = {{x - w, y - w, 0.0f}};
+    glvert++->texture_coordinates[0] = {{0.0f, 0.0f}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->position = {{x - w, y + w, 0.0f}};
+    glvert++->texture_coordinates[0] = {{0.0f, 1.0f}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->position = {{x + w, y + w, 0.0f}};
+    glvert++->texture_coordinates[0] = {{1.0f, 1.0f}};
+    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->position = {{x + w, y - w, 0.0f}};
+    glvert++->texture_coordinates[0] = {{1.0f, 0.0f}};
 
-    glColor3f(r, g, b);
+    EndRenderUnit(4);
 
-    glBegin(GL_POLYGON);
-
-    glTexCoord2f(0.0f, 0.0f);
-    glVertex2f(x - w, y - w);
-    glTexCoord2f(0.0f, 1.0f);
-    glVertex2f(x - w, y + w);
-    glTexCoord2f(1.0f, 1.0f);
-    glVertex2f(x + w, y + w);
-    glTexCoord2f(1.0f, 0.0f);
-    glVertex2f(x + w, y - w);
-
-    glEnd();
-
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_BLEND);
+    FinishUnitBatch();
 }
 
 void RenderWeaponSprites(Player *p)

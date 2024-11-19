@@ -56,8 +56,6 @@ void SetupMatrices2D(void)
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 //
@@ -81,8 +79,6 @@ void SetupWorldMatrices2D(void)
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 //
@@ -148,32 +144,32 @@ void RendererCheckExtensions(void)
 //
 void RendererSoftInit(void)
 {
-    glDisable(GL_BLEND);
-    glDisable(GL_LIGHTING);
-    glDisable(GL_COLOR_MATERIAL);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_SCISSOR_TEST);
-    glDisable(GL_STENCIL_TEST);
+    global_render_state->Disable(GL_BLEND);
+    global_render_state->Disable(GL_LIGHTING);
+    global_render_state->Disable(GL_COLOR_MATERIAL);
+    global_render_state->Disable(GL_CULL_FACE);
+    global_render_state->Disable(GL_DEPTH_TEST);
+    global_render_state->Disable(GL_SCISSOR_TEST);
+    global_render_state->Disable(GL_STENCIL_TEST);
 
-    glDisable(GL_LINE_SMOOTH);
+    global_render_state->Disable(GL_LINE_SMOOTH);
 
 #ifndef EDGE_GL_ES2
-    glDisable(GL_POLYGON_SMOOTH);
+    global_render_state->Disable(GL_POLYGON_SMOOTH);
 #endif
 
-    glEnable(GL_NORMALIZE);
+    global_render_state->Enable(GL_NORMALIZE);
 
     glShadeModel(GL_SMOOTH);
-    glDepthFunc(GL_LEQUAL);
-    glAlphaFunc(GL_GREATER, 0);
+    global_render_state->DepthFunction(GL_LEQUAL);
+    global_render_state->AlphaFunction(GL_GREATER, 0);
 
     glFrontFace(GL_CW);
-    glCullFace(GL_BACK);
-    glDisable(GL_CULL_FACE);
+    global_render_state->CullFace(GL_BACK);
+    global_render_state->Disable(GL_CULL_FACE);
 
-    glHint(GL_FOG_HINT, GL_NICEST);
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    global_render_state->Hint(GL_FOG_HINT, GL_NICEST);
+    global_render_state->Hint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 }
 
 //

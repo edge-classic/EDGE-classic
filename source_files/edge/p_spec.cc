@@ -971,7 +971,9 @@ static void SectorEffect(Sector *target, Line *source, const LineType *special)
         if (target->ceiling_height - target->floor_height < 1)
         {
             target->ceiling_height = source->front_sector->ceiling_height;
+            target->old_ceiling_height = source->front_sector->ceiling_height;
             target->floor_height   = source->front_sector->floor_height;
+            target->old_floor_height = source->front_sector->floor_height;
             for (int i = 0; i < target->line_count; i++)
             {
                 if (target->lines[i]->side[1])

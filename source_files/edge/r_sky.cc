@@ -104,9 +104,12 @@ void ComputeSkyHeights(void)
         if (!EDGE_IMAGE_IS_SKY(sec->ceiling))
             continue;
 
+        // leave some room for tall sprites
+        static const float SPR_H_MAX = 256.0f;
+
         rings[i].group = (i + 1);
         rings[i].next = rings[i].previous = rings + i;
-        rings[i].maximum_height           = sec->ceiling_height;
+        rings[i].maximum_height           = sec->ceiling_height + SPR_H_MAX;
     }
 
     // --- make the pass over linedefs ---
@@ -762,7 +765,7 @@ void FinishSky(void)
         global_render_state->Disable(GL_DEPTH_TEST);
 
     if (!renderer_dumb_sky.d_)
-        global_render_state->DepthFunction(GL_ALWAYS);
+        global_render_state->DepthFunction(GL_GREATER);
     else
         global_render_state->DepthMask(false);
 

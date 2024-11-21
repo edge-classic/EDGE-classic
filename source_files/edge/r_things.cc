@@ -414,9 +414,9 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
             }
             else if (!is_additive)
             {
-                dest->rgba_color[0] = data.colors[v_idx].modulate_red_ / 255.0;
-                dest->rgba_color[1] = data.colors[v_idx].modulate_green_ / 255.0;
-                dest->rgba_color[2] = data.colors[v_idx].modulate_blue_ / 255.0;
+                dest->rgba_color[0] = data.colors[v_idx].modulate_red_ / 255.0 * render_view_red_multiplier;
+                dest->rgba_color[1] = data.colors[v_idx].modulate_green_ / 255.0 * render_view_green_multiplier;
+                dest->rgba_color[2] = data.colors[v_idx].modulate_blue_ / 255.0 * render_view_blue_multiplier;
 
                 data.colors[v_idx].modulate_red_ -= 256;
                 data.colors[v_idx].modulate_green_ -= 256;
@@ -424,9 +424,9 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
             }
             else
             {
-                dest->rgba_color[0] = data.colors[v_idx].add_red_ / 255.0;
-                dest->rgba_color[1] = data.colors[v_idx].add_green_ / 255.0;
-                dest->rgba_color[2] = data.colors[v_idx].add_blue_ / 255.0;
+                dest->rgba_color[0] = data.colors[v_idx].add_red_ / 255.0 * render_view_red_multiplier;
+                dest->rgba_color[1] = data.colors[v_idx].add_green_ / 255.0 * render_view_green_multiplier;
+                dest->rgba_color[2] = data.colors[v_idx].add_blue_ / 255.0 * render_view_blue_multiplier;
             }
 
             dest->rgba_color[3] = trans;
@@ -1357,9 +1357,9 @@ void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
             }
             else if (!is_additive)
             {
-                dest->rgba_color[0] = data.colors[v_idx].modulate_red_ / 255.0;
-                dest->rgba_color[1] = data.colors[v_idx].modulate_green_ / 255.0;
-                dest->rgba_color[2] = data.colors[v_idx].modulate_blue_ / 255.0;
+                dest->rgba_color[0] = data.colors[v_idx].modulate_red_ / 255.0 * render_view_red_multiplier;
+                dest->rgba_color[1] = data.colors[v_idx].modulate_green_ / 255.0 * render_view_green_multiplier;
+                dest->rgba_color[2] = data.colors[v_idx].modulate_blue_ / 255.0 * render_view_blue_multiplier;
 
                 data.colors[v_idx].modulate_red_ -= 256;
                 data.colors[v_idx].modulate_green_ -= 256;
@@ -1367,9 +1367,9 @@ void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
             }
             else
             {
-                dest->rgba_color[0] = data.colors[v_idx].add_red_ / 255.0;
-                dest->rgba_color[1] = data.colors[v_idx].add_green_ / 255.0;
-                dest->rgba_color[2] = data.colors[v_idx].add_blue_ / 255.0;
+                dest->rgba_color[0] = data.colors[v_idx].add_red_ / 255.0 * render_view_red_multiplier;
+                dest->rgba_color[1] = data.colors[v_idx].add_green_ / 255.0 * render_view_green_multiplier;
+                dest->rgba_color[2] = data.colors[v_idx].add_blue_ / 255.0 * render_view_blue_multiplier;
             }
 
             dest->rgba_color[3] = trans;

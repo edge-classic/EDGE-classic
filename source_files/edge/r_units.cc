@@ -184,16 +184,6 @@ void EndRenderUnit(int actual_vert)
 
     unit->count = actual_vert;
 
-    // adjust colors (for special effects)
-    for (int i = 0; i < actual_vert; i++)
-    {
-        RendererVertex *v = &local_verts[current_render_vert + i];
-
-        v->rgba_color[0] *= render_view_red_multiplier;
-        v->rgba_color[1] *= render_view_green_multiplier;
-        v->rgba_color[2] *= render_view_blue_multiplier;
-    }
-
     current_render_vert += actual_vert;
     current_render_unit++;
 

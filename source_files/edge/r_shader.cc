@@ -357,9 +357,9 @@ class dynlight_shader_c : public AbstractShader
 
                 float ity = exp(-5.44 * dist * dist);
 
-                dest->rgba_color[0] = R * ity;
-                dest->rgba_color[1] = G * ity;
-                dest->rgba_color[2] = B * ity;
+                dest->rgba_color[0] = R * ity * render_view_red_multiplier;
+                dest->rgba_color[1] = G * ity * render_view_green_multiplier;
+                dest->rgba_color[2] = B * ity * render_view_blue_multiplier;
                 dest->rgba_color[3] = alpha;
             }
 
@@ -540,9 +540,9 @@ class plane_glow_c : public AbstractShader
 
                 TexCoord(&dest->texture_coordinates[1], WhatRadius(DL), sec, &lit_pos, &dest->normal);
 
-                dest->rgba_color[0] = R;
-                dest->rgba_color[1] = G;
-                dest->rgba_color[2] = B;
+                dest->rgba_color[0] = R * render_view_red_multiplier;
+                dest->rgba_color[1] = G * render_view_green_multiplier;
+                dest->rgba_color[2] = B * render_view_blue_multiplier;
                 dest->rgba_color[3] = alpha;
             }
 
@@ -707,9 +707,9 @@ class wall_glow_c : public AbstractShader
 
                 TexCoord(&dest->texture_coordinates[1], WhatRadius(DL), sec, &lit_pos, &dest->normal);
 
-                dest->rgba_color[0] = R;
-                dest->rgba_color[1] = G;
-                dest->rgba_color[2] = B;
+                dest->rgba_color[0] = R * render_view_red_multiplier;
+                dest->rgba_color[1] = G * render_view_green_multiplier;
+                dest->rgba_color[2] = B * render_view_blue_multiplier;
                 dest->rgba_color[3] = alpha;
             }
 

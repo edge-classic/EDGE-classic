@@ -305,7 +305,7 @@ void RenderCurrentUnits(void)
             global_render_state->ClearColor(fc.r, fc.g, fc.b, 1.0f);
             global_render_state->FogColor(fc.r, fc.g, fc.b, 1.0f);
             global_render_state->FogDensity(std::log1p(density));
-            if (density > 0.00009f)
+            if (!AlmostEquals(density, 0.0f))
                 global_render_state->Enable(GL_FOG);
             else
                 global_render_state->Disable(GL_FOG);

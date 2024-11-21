@@ -342,7 +342,7 @@ static void RenderSkySlice(float top, float bottom, float atop, float abottom, f
     sg_color topcol = {1.0f, 1.0f, 1.0f, atop};
     sg_color bottomcol = {1.0f, 1.0f, 1.0f, abottom};
 
-    RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 128, GL_MODULATE, sky_tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, blend|kBlendingAlpha, fc_to_use, fd_to_use);
+    RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 128, GL_MODULATE, sky_tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, blend, fc_to_use, fd_to_use);
 
     // Go through circular points
     for (unsigned a = 0; a < 31; a++)
@@ -432,6 +432,10 @@ static void RenderSkyCylinder(void)
         fd_to_use = 0.0f;
         blend = (BlendingMode)(blend|kBlendingNoFog);
     }
+    else if (fc_to_use != kRGBANoValue)
+    {
+       fd_to_use *= 0.005f;
+    }
 
     // Render top cap
     RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, blend, fc_to_use, fd_to_use);
@@ -468,6 +472,8 @@ static void RenderSkyCylinder(void)
     EndRenderUnit(4);
 
     // Render skybox sides
+
+    blend = (BlendingMode)(blend|kBlendingAlpha);
 
     // Check for odd sky sizes
     float tx = 0.125f;
@@ -756,7 +762,7 @@ void FinishSky(void)
         global_render_state->Disable(GL_DEPTH_TEST);
 
     if (!renderer_dumb_sky.d_)
-        global_render_state->DepthFunction(GL_GREATER);
+        global_render_state->DepthFunction(GL_ALWAYS);
     else
         global_render_state->DepthMask(false);
 

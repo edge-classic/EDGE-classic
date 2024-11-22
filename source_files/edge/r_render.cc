@@ -549,15 +549,15 @@ static void WallCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec
 
     if (swirl_pass > 1)
     {
-        rgb[0] = 1.0 / data->R;
-        rgb[1] = 1.0 / data->G;
-        rgb[2] = 1.0 / data->B;
+        rgb[0] = 1.0 / data->R * render_view_red_multiplier;
+        rgb[1] = 1.0 / data->G * render_view_green_multiplier;
+        rgb[2] = 1.0 / data->B * render_view_blue_multiplier;
     }
     else
     {
-        rgb[0] = data->R;
-        rgb[1] = data->G;
-        rgb[2] = data->B;
+        rgb[0] = data->R * render_view_red_multiplier;
+        rgb[1] = data->G * render_view_green_multiplier;
+        rgb[2] = data->B * render_view_blue_multiplier;
     }
 
     float along;
@@ -619,15 +619,15 @@ static void PlaneCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Ve
 
     if (swirl_pass > 1)
     {
-        rgb[0] = 1.0 / data->R;
-        rgb[1] = 1.0 / data->G;
-        rgb[2] = 1.0 / data->B;
+        rgb[0] = 1.0 / data->R * render_view_red_multiplier;
+        rgb[1] = 1.0 / data->G * render_view_green_multiplier;
+        rgb[2] = 1.0 / data->B * render_view_blue_multiplier;
     }
     else
     {
-        rgb[0] = data->R;
-        rgb[1] = data->G;
-        rgb[2] = data->B;
+        rgb[0] = data->R * render_view_red_multiplier;
+        rgb[1] = data->G * render_view_green_multiplier;
+        rgb[2] = data->B * render_view_blue_multiplier;
     }
 
     HMM_Vec2 rxy = {{(data->tx0 + pos->X), (data->ty0 + pos->Y)}};
@@ -1695,9 +1695,9 @@ static void FloodCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Ve
     *pos    = data->vertices[v_idx];
     *normal = data->normal;
 
-    rgb[0] = data->R;
-    rgb[1] = data->G;
-    rgb[2] = data->B;
+    rgb[0] = data->R * render_view_red_multiplier;
+    rgb[1] = data->G * render_view_green_multiplier;
+    rgb[2] = data->B * render_view_blue_multiplier;
 
     float along = (view_z - data->plane_h) / (view_z - pos->Z);
 

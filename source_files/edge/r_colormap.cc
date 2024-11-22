@@ -654,9 +654,6 @@ class ColormapShader : public AbstractShader
         {
             RendererVertex *dest = glvert + v_idx;
 
-            dest->rgba_color[0] *= render_view_red_multiplier;
-            dest->rgba_color[1] *= render_view_green_multiplier;
-            dest->rgba_color[2] *= render_view_blue_multiplier;
             dest->rgba_color[3]  = alpha;
 
             HMM_Vec3 lit_pos;

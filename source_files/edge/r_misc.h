@@ -34,12 +34,22 @@
 //
 // POV related.
 //
+// Used for Boom 242 height_sector checks
+enum ViewHeightZone
+{
+    kHeightZoneNone,
+    kHeightZoneA,
+    kHeightZoneB,
+    kHeightZoneC
+};
+
 extern float    view_cosine;
 extern float    view_sine;
 extern BAMAngle view_vertical_angle;
 
 extern Subsector        *view_subsector;
 extern RegionProperties *view_properties;
+extern ViewHeightZone    view_height_zone;
 
 extern int view_window_x;
 extern int view_window_y;

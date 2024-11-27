@@ -217,7 +217,6 @@ struct Compare_Unit_pred
 static inline void RendererSendRawVector(const RendererVertex *V)
 {
     global_render_state->GLColor(V->rgba_color);
-    global_render_state->SetNormal(V->normal);
 
     global_render_state->MultiTexCoord(GL_TEXTURE0, &V->texture_coordinates[0]);
     global_render_state->MultiTexCoord(GL_TEXTURE1, &V->texture_coordinates[1]);

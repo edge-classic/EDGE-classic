@@ -368,18 +368,6 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void SetNormal(const HMM_Vec3 &normal)
-    {
-        if (AlmostEquals(normal_vector_.X, normal.X) && AlmostEquals(normal_vector_.Y, normal.Y)
-            && AlmostEquals(normal_vector_.Z, normal.Z))
-        {
-            return;
-        }
-        normal_vector_ = normal;
-        glNormal3fv((GLfloat *)&normal_vector_);
-        ec_frame_stats.draw_state_change++;
-    }
-
     void GLColor(const GLfloat *color)
     {
         if (AlmostEquals(color[0], gl_color_[0]) && AlmostEquals(color[1], gl_color_[1]) &&
@@ -617,8 +605,6 @@ class RenderState
     GLfloat fog_end_;
     GLfloat fog_density_;
     GLfloat fog_color_[4];
-
-    HMM_Vec3 normal_vector_;
 
     GLfloat gl_color_[4];
 };

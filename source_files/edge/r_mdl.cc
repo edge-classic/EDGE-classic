@@ -1055,10 +1055,8 @@ void MDLRenderModel(MDLModel *md, const Image *skin_img, bool is_weapon, int fra
                      GL_STREAM_DRAW);
         glVertexPointer(3, GL_FLOAT, sizeof(RendererVertex), (void *)(offsetof(RendererVertex, position.X)));
         glColorPointer(4, GL_FLOAT, sizeof(RendererVertex), (void *)(offsetof(RendererVertex, rgba_color)));
-        glNormalPointer(GL_FLOAT, sizeof(RendererVertex), (void *)(offsetof(RendererVertex, normal.X)));
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_COLOR_ARRAY);
-        glEnableClientState(GL_NORMAL_ARRAY);
         glClientActiveTexture(GL_TEXTURE0);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
         glTexCoordPointer(2, GL_FLOAT, sizeof(RendererVertex),
@@ -1117,10 +1115,6 @@ void MDLRenderModel2D(MDLModel *md, const Image *skin_img, int frame, float x, f
             const MDLVertex *vert  = &frame_ptr->vertices[point->vert_idx];
 
             glTexCoord2f(point->skin_s, point->skin_t);
-
-            short n = vert->normal_idx;
-
-            global_render_state->SetNormal(md_normals[n]);
 
             float dx = vert->x * xscale;
             float dy = vert->y * xscale;

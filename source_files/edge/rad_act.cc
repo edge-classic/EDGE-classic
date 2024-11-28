@@ -857,6 +857,11 @@ static void MoveOneSector(Sector *sec, ScriptMoveSectorParameter *t)
         return;
 
     SolidSectorMove(sec, t->is_ceiling, dh);
+
+    if (t->is_ceiling)
+        sec->old_ceiling_height = sec->ceiling_height;
+    else
+        sec->old_floor_height = sec->floor_height;
 }
 
 void ScriptMoveSector(RADScriptTrigger *R, void *param)

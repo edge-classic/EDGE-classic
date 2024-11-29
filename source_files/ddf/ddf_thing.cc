@@ -1822,7 +1822,8 @@ static void DDFMobjStateGetRADTrigger(const char *arg, State *cur_state)
     if (!arg || !arg[0])
         return;
 
-    int *val_ptr = new int;
+    //int *val_ptr = new int;
+    uint64_t *val_ptr = new uint64_t;
 
     // Modified RAD_CheckForInt
     const char *pos    = arg;

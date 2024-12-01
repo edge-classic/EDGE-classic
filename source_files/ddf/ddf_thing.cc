@@ -318,6 +318,8 @@ const DDFActionCode thing_actions[] = {{"NOTHING", nullptr, nullptr},
 									   {"CLEAR_TARGET", A_ClearTarget, nullptr},
                                        {"FRIEND_LOOKOUT", A_FriendLook, nullptr},
 
+                                       {"SET_SCALE", A_ScaleSet, DDFStateGetFloat},
+
                                        {"DROPITEM", A_DropItem, DDFStateGetMobj},
                                        {"SPAWN", A_Spawn, DDFStateGetMobj},
                                        {"TRANS_SET", A_TransSet, DDFStateGetPercent},

@@ -105,6 +105,8 @@ static int check_coordinates[12][4] = {{kBoundingBoxRight, kBoundingBoxTop, kBou
 
 extern float sprite_skew;
 
+ViewHeightZone view_height_zone;
+
 // common stuff
 
 static Subsector *current_subsector;
@@ -1310,24 +1312,110 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
     sec   = sd->sector;
     other = sidenum ? ld->front_sector : ld->back_sector;
 
-    float slope_fh = sec->interpolated_floor_height;
-    if (sec->floor_slope)
+    float slope_fh = 0;
+    float slope_ch = 0;
+    float other_fh = 0;
+    float other_ch = 0;
+    MapSurface *slope_ceil = nullptr;
+    MapSurface *other_ceil = nullptr;
+    
+    slope_fh = sec->interpolated_floor_height;
+    if (sec->height_sector)
+    {
+        if (view_height_zone == kHeightZoneA && view_z > sec->height_sector->interpolated_ceiling_height)
+        {
+            slope_fh = sec->height_sector->interpolated_ceiling_height;
+        }
+        else if (view_height_zone == kHeightZoneC && view_z < sec->height_sector->interpolated_floor_height)
+        {
+        
+        }
+        else
+        {
+            slope_fh = sec->height_sector->interpolated_floor_height;
+        }
+    }
+    else if (sec->floor_slope)
+    {
         slope_fh += HMM_MIN(sec->floor_slope->delta_z1, sec->floor_slope->delta_z2);
+    }
 
-    float slope_ch = sec->interpolated_ceiling_height;
-    if (sec->ceiling_slope)
+    slope_ch = sec->interpolated_ceiling_height;
+    slope_ceil = &sec->ceiling;
+    if (sec->height_sector)
+    {
+        if (view_height_zone == kHeightZoneA && view_z > sec->height_sector->interpolated_ceiling_height)
+        {
+            slope_ceil = &sec->height_sector->ceiling;
+        }
+        else if (view_height_zone == kHeightZoneC && view_z < sec->height_sector->interpolated_floor_height)
+        {
+            slope_ch = sec->height_sector->interpolated_floor_height;
+            slope_ceil = &sec->height_sector->ceiling;
+        }
+        else
+        {
+            slope_ch = sec->height_sector->interpolated_ceiling_height;
+        }
+    }
+    else if (sec->ceiling_slope)
+    {
         slope_ch += HMM_MAX(sec->ceiling_slope->delta_z1, sec->ceiling_slope->delta_z2);
+    }
 
-    // Boom compatibility -- invisible walkways
-    if (sec->height_sector != nullptr)
-        slope_fh = HMM_MIN(slope_fh, sec->height_sector->interpolated_floor_height);
+    if (other)
+    {
+        other_fh = other->interpolated_floor_height;
+        if (other->height_sector)
+        {
+            if (view_height_zone == kHeightZoneA && view_z > other->height_sector->interpolated_ceiling_height)
+            {
+                other_fh = other->height_sector->interpolated_ceiling_height;
+            }
+            else if (view_height_zone == kHeightZoneC && view_z < other->height_sector->interpolated_floor_height)
+            {
+
+            }
+            else
+            {
+                other_fh = other->height_sector->interpolated_floor_height;
+            }
+        }
+        else if (other->floor_slope)
+        {
+            other_fh += HMM_MIN(other->floor_slope->delta_z1, other->floor_slope->delta_z2);
+        }
+
+        other_ch = other->interpolated_ceiling_height;
+        other_ceil = &other->ceiling;
+        if (other->height_sector)
+        {
+            if (view_height_zone == kHeightZoneA && view_z > other->height_sector->interpolated_ceiling_height)
+            {
+                other_ceil = &other->height_sector->ceiling;
+            }
+            else if (view_height_zone == kHeightZoneC && view_z < other->height_sector->interpolated_floor_height)
+            {
+                other_ch = other->height_sector->interpolated_floor_height;
+                other_ceil = &other->height_sector->ceiling;
+            }
+            else
+            {
+                other_ch = other->height_sector->interpolated_ceiling_height;
+            }
+        }
+        else if (other->ceiling_slope)
+        {
+            other_ch += HMM_MAX(other->ceiling_slope->delta_z1, other->ceiling_slope->delta_z2);
+        }
+    }
 
     RGBAColor sec_fc = sec->properties.fog_color;
     float     sec_fd = sec->properties.fog_density;
     // check for DDFLEVL fog
     if (sec_fc == kRGBANoValue)
     {
-        if (EDGE_IMAGE_IS_SKY(seg->sidedef->sector->ceiling))
+        if (EDGE_IMAGE_IS_SKY(*slope_ceil))
         {
             sec_fc = current_map->outdoor_fog_color_;
             sec_fd = 0.01f * current_map->outdoor_fog_density_;
@@ -1344,7 +1432,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
     {
         if (other)
         {
-            if (EDGE_IMAGE_IS_SKY(other->ceiling))
+            if (EDGE_IMAGE_IS_SKY(*other_ceil))
             {
                 other_fc = current_map->outdoor_fog_color_;
                 other_fd = 0.01f * current_map->outdoor_fog_density_;
@@ -1395,7 +1483,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
 
     // handle lower, upper and mid-masker
 
-    if (slope_fh < other->interpolated_floor_height || (sec->floor_vertex_slope || other->floor_vertex_slope))
+    if (slope_fh < other_fh || (sec->floor_vertex_slope || other->floor_vertex_slope))
     {
         if (!sec->floor_vertex_slope && other->floor_vertex_slope)
         {
@@ -1457,15 +1545,15 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
         }
         else
         {
-            AddWallTile(seg, dfloor, &sd->bottom, slope_fh, other->interpolated_floor_height,
+            AddWallTile(seg, dfloor, &sd->bottom, slope_fh, other_fh,
                         (ld->flags & kLineFlagLowerUnpegged) ? sec->interpolated_ceiling_height
                                                              : other->interpolated_floor_height,
                         0, f_min, c_max);
         }
     }
 
-    if ((slope_ch > other->interpolated_ceiling_height || (sec->ceiling_vertex_slope || other->ceiling_vertex_slope)) &&
-        !(EDGE_IMAGE_IS_SKY(sec->ceiling) && EDGE_IMAGE_IS_SKY(other->ceiling)))
+    if ((slope_ch > other_ch || (sec->ceiling_vertex_slope || other->ceiling_vertex_slope)) &&
+        !(EDGE_IMAGE_IS_SKY(*slope_ceil) && EDGE_IMAGE_IS_SKY(*other_ceil)))
     {
         if (!sec->ceiling_vertex_slope && other->ceiling_vertex_slope)
         {
@@ -1514,7 +1602,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
         }
         else
         {
-            AddWallTile(seg, dfloor, &sd->top, other->interpolated_ceiling_height, slope_ch,
+            AddWallTile(seg, dfloor, &sd->top, other_ch, slope_ch,
                         (ld->flags & kLineFlagUpperUnpegged)
                             ? sec->interpolated_ceiling_height
                             : other->interpolated_ceiling_height + SafeImageHeight(sd->top.image),
@@ -1574,17 +1662,17 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
         }
 
         // hack for "see-through" lines (same sector on both sides)
-        if (sec != other && !lower_invis)
+        if (sec != other && !(sec->height_sector || other->height_sector))// && !lower_invis)
         {
             f2 = HMM_MAX(f2, f1);
             c2 = HMM_MIN(c2, c1);
         }
 
-        if (sec == other)
+        /*if (sec == other)
         {
             f2 = HMM_MAX(f2, f1);
             c2 = HMM_MIN(c2, c1);
-        }
+        }*/
 
         if (c2 > f2)
         {
@@ -1939,29 +2027,73 @@ static void RenderSeg(DrawFloor *dfloor, Seg *seg, bool mirror_sub = false)
 
     ComputeWallTiles(seg, dfloor, seg->side, f_min, c_max, mirror_sub);
 
-    // -AJA- 2004/04/21: Emulate Flat-Flooding TRICK
-    if (!debug_hall_of_mirrors.d_ && solid_mode && dfloor->is_lowest && sd->bottom.image == nullptr &&
-        current_seg->back_subsector &&
-        current_seg->back_subsector->sector->interpolated_floor_height > current_seg->front_subsector->sector->interpolated_floor_height &&
-        current_seg->back_subsector->sector->interpolated_floor_height < view_z &&
-        current_seg->back_subsector->sector->height_sector == nullptr &&
-        current_seg->front_subsector->sector->height_sector == nullptr)
-    {
-        EmulateFloodPlane(dfloor, current_seg->back_subsector->sector, +1,
-                          current_seg->front_subsector->sector->interpolated_floor_height,
-                          current_seg->back_subsector->sector->interpolated_floor_height);
-    }
+    if ((sd->bottom.image == nullptr || sd->top.image == nullptr) && back_sector)
+    { 
+        float f_fh = 0;
+        float b_fh = 0;
+        float f_ch = 0;
+        float b_ch = 0;
 
-    if (!debug_hall_of_mirrors.d_ && solid_mode && dfloor->is_highest && sd->top.image == nullptr &&
-        current_seg->back_subsector &&
-        current_seg->back_subsector->sector->interpolated_ceiling_height < current_seg->front_subsector->sector->interpolated_ceiling_height &&
-        current_seg->back_subsector->sector->interpolated_ceiling_height > view_z &&
-        current_seg->back_subsector->sector->height_sector == nullptr &&
-        current_seg->front_subsector->sector->height_sector == nullptr)
-    {
-        EmulateFloodPlane(dfloor, current_seg->back_subsector->sector, -1,
-                          current_seg->back_subsector->sector->interpolated_ceiling_height,
-                          current_seg->front_subsector->sector->interpolated_ceiling_height);
+        // Unlike other places where we check Line 242 stuff, it seems to look "right" when using
+        // the control sector heights regardless of being in view zone A/B/C. To be fair I have
+        // only tested this with Firerainbow MAP01 - Dasho
+        if (!front_sector->height_sector)
+        {
+            if (seg->front_subsector->deep_water_reference)
+            {
+                f_fh = seg->front_subsector->deep_water_reference->interpolated_floor_height;
+                f_ch = seg->front_subsector->deep_water_reference->interpolated_ceiling_height;
+            }
+            else
+            {
+                f_fh = front_sector->interpolated_floor_height;
+                f_ch = front_sector->interpolated_ceiling_height;
+            }
+        }
+        else
+        {
+            f_fh = front_sector->height_sector->interpolated_floor_height;
+            f_ch = front_sector->height_sector->interpolated_ceiling_height;
+        }
+        if (!back_sector->height_sector)
+        {
+            if (seg->back_subsector->deep_water_reference)
+            {
+                b_fh = seg->back_subsector->deep_water_reference->interpolated_floor_height;
+                b_ch = seg->back_subsector->deep_water_reference->interpolated_ceiling_height;
+            }
+            else
+            {
+                b_fh = back_sector->interpolated_floor_height;
+                b_ch = back_sector->interpolated_ceiling_height;
+            }
+        }
+        else
+        {
+            b_fh = back_sector->height_sector->interpolated_floor_height;
+            b_ch = back_sector->height_sector->interpolated_ceiling_height;
+        }
+
+        // -AJA- 2004/04/21: Emulate Flat-Flooding TRICK
+        if (!debug_hall_of_mirrors.d_ && solid_mode && dfloor->is_lowest && sd->bottom.image == nullptr &&
+            current_seg->back_subsector &&
+            b_fh > f_fh &&
+            b_fh < view_z)
+        {
+            EmulateFloodPlane(dfloor, current_seg->back_subsector->sector, +1,
+                            f_fh,
+                            b_fh);
+        }
+
+        if (!debug_hall_of_mirrors.d_ && solid_mode && dfloor->is_highest && sd->top.image == nullptr &&
+            current_seg->back_subsector &&
+            b_ch < f_ch &&
+            b_ch > view_z)
+        {
+            EmulateFloodPlane(dfloor, current_seg->back_subsector->sector, -1,
+                            b_ch,
+                            f_ch);
+        }
     }
 }
 
@@ -2206,40 +2338,114 @@ static void RendererWalkSeg(DrawSubsector *dsub, Seg *seg)
         UpdateSectorInterpolation(bsector);
 
     // --- handle sky (using the depth buffer) ---
+    float f_fh = 0;
+    float f_ch = 0;
+    float b_fh = 0;
+    float b_ch = 0;
+    MapSurface *f_floor = nullptr;
+    MapSurface *f_ceil = nullptr;
+    MapSurface *b_floor = nullptr;
+    MapSurface *b_ceil = nullptr;
 
-    if (bsector && EDGE_IMAGE_IS_SKY(fsector->floor) && EDGE_IMAGE_IS_SKY(bsector->floor) && seg->sidedef->bottom.image == nullptr)
+    if (!fsector->height_sector)
     {
-        if (fsector->interpolated_floor_height < bsector->interpolated_floor_height)
+        f_fh = fsector->interpolated_floor_height;
+        f_floor = &fsector->floor;
+        f_ch = fsector->interpolated_ceiling_height;
+        f_ceil = &fsector->ceiling;
+    }
+    else
+    {
+        if (view_height_zone == kHeightZoneA && view_z > fsector->height_sector->interpolated_ceiling_height)
         {
-            RenderSkyWall(seg, fsector->interpolated_floor_height, bsector->interpolated_floor_height);
+            f_fh = fsector->height_sector->interpolated_ceiling_height;
+            f_ch = fsector->interpolated_ceiling_height;
+            f_floor = &fsector->height_sector->floor;
+            f_ceil = &fsector->height_sector->ceiling;
+        }
+        else if (view_height_zone == kHeightZoneC && view_z < fsector->height_sector->interpolated_floor_height)
+        {
+            f_fh = fsector->interpolated_floor_height;
+            f_ch = fsector->height_sector->interpolated_floor_height;
+            f_floor = &fsector->height_sector->floor;
+            f_ceil = &fsector->height_sector->ceiling;
+        }
+        else
+        {
+            f_fh = fsector->height_sector->interpolated_floor_height;
+            f_ch = fsector->height_sector->interpolated_ceiling_height;
+            f_floor = &fsector->floor;
+            f_ceil = &fsector->ceiling;
         }
     }
 
-    if (EDGE_IMAGE_IS_SKY(fsector->ceiling))
+    if (bsector)
     {
-        if (fsector->interpolated_ceiling_height < fsector->sky_height &&
-            (!bsector || !EDGE_IMAGE_IS_SKY(bsector->ceiling) ||
-             bsector->interpolated_floor_height >= fsector->interpolated_ceiling_height))
+        if (!bsector->height_sector)
         {
-            RenderSkyWall(seg, fsector->interpolated_ceiling_height, fsector->sky_height);
+            b_fh = bsector->interpolated_floor_height;
+            b_floor = &bsector->floor;
+            b_ch = bsector->interpolated_ceiling_height;
+            b_ceil = &bsector->ceiling;
         }
-        else if (bsector && EDGE_IMAGE_IS_SKY(bsector->ceiling) && fsector->height_sector == nullptr &&
-                 bsector->height_sector == nullptr)
+        else
         {
-            float max_f = HMM_MAX(fsector->interpolated_floor_height, bsector->interpolated_floor_height);
+            if (view_height_zone == kHeightZoneA && view_z > bsector->height_sector->interpolated_ceiling_height)
+            {
+                b_fh = bsector->height_sector->interpolated_ceiling_height;
+                b_ch = bsector->interpolated_ceiling_height;
+                b_floor = &bsector->height_sector->floor;
+                b_ceil = &bsector->height_sector->ceiling;
+            }
+            else if (view_height_zone == kHeightZoneC && view_z < bsector->height_sector->interpolated_floor_height)
+            {
+                b_fh = bsector->interpolated_floor_height;
+                b_ch = bsector->height_sector->interpolated_floor_height;
+                b_floor = &bsector->height_sector->floor;
+                b_ceil = &bsector->height_sector->ceiling;
+            }
+            else
+            {
+                b_fh = bsector->height_sector->interpolated_floor_height;
+                b_ch = bsector->height_sector->interpolated_ceiling_height;
+                b_floor = &bsector->floor;
+                b_ceil = &bsector->ceiling;
+            }
+        }
+    }
 
-            if (bsector->interpolated_ceiling_height <= max_f && max_f < fsector->sky_height)
+    if (bsector && EDGE_IMAGE_IS_SKY(*f_floor) && EDGE_IMAGE_IS_SKY(*b_floor) && seg->sidedef->bottom.image == nullptr)
+    {
+        if (f_fh < b_fh)
+        {
+            RenderSkyWall(seg, f_fh, b_fh);
+        }
+    }
+
+    if (EDGE_IMAGE_IS_SKY(*f_ceil))
+    {
+        if (f_ch < fsector->sky_height &&
+            (!bsector || !EDGE_IMAGE_IS_SKY(*b_ceil) ||
+             b_fh >= f_ch))
+        {
+            RenderSkyWall(seg, f_ch, fsector->sky_height);
+        }
+        else if (bsector && EDGE_IMAGE_IS_SKY(*b_ceil))
+        {
+            float max_f = HMM_MAX(f_fh, b_fh);
+
+            if (b_ch <= max_f && max_f < fsector->sky_height)
             {
                 RenderSkyWall(seg, max_f, fsector->sky_height);
             }
         }
     }
     // -AJA- 2004/08/29: Emulate Sky-Flooding TRICK
-    else if (!debug_hall_of_mirrors.d_ && bsector && EDGE_IMAGE_IS_SKY(bsector->ceiling) &&
+    else if (!debug_hall_of_mirrors.d_ && bsector && EDGE_IMAGE_IS_SKY(*b_ceil) &&
              seg->sidedef->top.image == nullptr &&
-             bsector->interpolated_ceiling_height < fsector->interpolated_ceiling_height)
+             b_ch < f_ch)
     {
-        RenderSkyWall(seg, bsector->interpolated_ceiling_height, fsector->interpolated_ceiling_height);
+        RenderSkyWall(seg, b_ch, f_ch);
     }
 }
 
@@ -2390,7 +2596,7 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
     RegionProperties *props = dfloor->properties;
 
     // more deep water hackitude
-    if (current_subsector->deep_water_reference &&
+    if (current_subsector->deep_water_reference && !current_subsector->sector->height_sector &&
         ((face_dir > 0 && dfloor->render_previous == nullptr) || (face_dir < 0 && dfloor->render_next == nullptr)))
     {
         props = &current_subsector->deep_water_reference->properties;
@@ -2683,14 +2889,17 @@ static void RendererWalkSubsector(int num)
 
     // --- handle sky (using the depth buffer) ---
 
-    if (EDGE_IMAGE_IS_SKY(sub->sector->floor) && view_z > sub->sector->interpolated_floor_height)
+    if (!sector->height_sector)
     {
-        RenderSkyPlane(sub, sub->sector->interpolated_floor_height);
-    }
+        if (EDGE_IMAGE_IS_SKY(sub->sector->floor) && view_z > sub->sector->interpolated_floor_height)
+        {
+            RenderSkyPlane(sub, sub->sector->interpolated_floor_height);
+        }
 
-    if (EDGE_IMAGE_IS_SKY(sub->sector->ceiling) && view_z < sub->sector->sky_height)
-    {
-        RenderSkyPlane(sub, sub->sector->sky_height);
+        if (EDGE_IMAGE_IS_SKY(sub->sector->ceiling) && view_z < sub->sector->sky_height)
+        {
+            RenderSkyPlane(sub, sub->sector->sky_height);
+        }
     }
 
     float floor_h = sector->interpolated_floor_height;
@@ -2704,25 +2913,34 @@ static void RendererWalkSubsector(int num)
     // Boom compatibility -- deep water FX
     if (sector->height_sector != nullptr)
     {
-        // check which region the camera is in...
-        if (view_z > sector->height_sector->interpolated_ceiling_height) // A : above
+        if (view_height_zone == kHeightZoneA && view_z > sector->height_sector->interpolated_ceiling_height)
         {
             floor_h = sector->height_sector->interpolated_ceiling_height;
+            ceil_h = sector->interpolated_ceiling_height;
             floor_s = &sector->height_sector->floor;
             ceil_s  = &sector->height_sector->ceiling;
             props   = sector->height_sector->active_properties;
         }
-        else if (view_z < sector->height_sector->interpolated_floor_height) // C : below
+        else if (view_height_zone == kHeightZoneC && view_z < sector->height_sector->interpolated_floor_height)
         {
+            floor_h = sector->interpolated_floor_height;
             ceil_h  = sector->height_sector->interpolated_floor_height;
             floor_s = &sector->height_sector->floor;
             ceil_s  = &sector->height_sector->ceiling;
             props   = sector->height_sector->active_properties;
         }
-        else // B : middle for diddle
+        else
         {
             floor_h = sector->height_sector->interpolated_floor_height;
             ceil_h  = sector->height_sector->interpolated_ceiling_height;
+        }
+        if (EDGE_IMAGE_IS_SKY(*floor_s) && view_z > floor_h)
+        {
+            RenderSkyPlane(sub, floor_h);
+        }
+        if (EDGE_IMAGE_IS_SKY(*ceil_s) && view_z < sub->sector->sky_height)
+        {
+            RenderSkyPlane(sub, sub->sector->sky_height);
         }
     }
     // -AJA- 2004/04/22: emulate the Deep-Water TRICK
@@ -3302,6 +3520,23 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
     }
 
     view_subsector  = mo->subsector_;
+    if (view_subsector->sector->height_sector)
+    {
+        if (view_z > view_subsector->sector->height_sector->interpolated_ceiling_height)
+        {
+            view_height_zone = kHeightZoneA;
+        }
+        else if (view_z < view_subsector->sector->height_sector->interpolated_floor_height)
+        {
+            view_height_zone = kHeightZoneC;
+        }
+        else
+        {
+            view_height_zone = kHeightZoneB;
+        }
+    }   
+    else
+        view_height_zone = kHeightZoneNone;
     view_properties = GetPointProperties(view_subsector, view_z);
 
     if (mo->player_)

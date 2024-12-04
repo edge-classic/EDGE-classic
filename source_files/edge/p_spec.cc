@@ -967,39 +967,10 @@ static void SectorEffect(Sector *target, Line *source, const LineType *special)
     {
         target->height_sector      = source->front_sector;
         target->height_sector_side = source->side[0];
-        // Quick band-aid fix for Line 242 "windows" - Dasho
-        if (target->ceiling_height - target->floor_height < 1)
+        for (int i = 0; i < target->line_count; i++)
         {
-            target->ceiling_height = source->front_sector->ceiling_height;
-            target->old_ceiling_height = source->front_sector->ceiling_height;
-            target->floor_height   = source->front_sector->floor_height;
-            target->old_floor_height = source->front_sector->floor_height;
-            for (int i = 0; i < target->line_count; i++)
-            {
-                if (target->lines[i]->side[1])
-                {
-                    target->lines[i]->blocked = false;
-                    if (target->lines[i]->side[0]->middle.image && target->lines[i]->side[1]->middle.image &&
-                        target->lines[i]->side[0]->middle.image == target->lines[i]->side[1]->middle.image)
-                    {
-                        target->lines[i]->side[0]->middle_mask_offset = 0;
-                        target->lines[i]->side[1]->middle_mask_offset = 0;
-                        for (Seg *seg = target->subsectors->segs; seg != nullptr; seg = seg->subsector_next)
-                        {
-                            if (seg->linedef == target->lines[i])
-                                seg->linedef->flags |= kLineFlagLowerUnpegged;
-                        }
-                    }
-                }
-            }
-        }
-        else
-        {
-            for (int i = 0; i < target->line_count; i++)
-            {
-                if (target->lines[i]->side[1])
-                    target->lines[i]->blocked = false;
-            }
+            if (target->lines[i]->side[1])
+                target->lines[i]->blocked = false;
         }
     }
 }

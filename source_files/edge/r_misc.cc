@@ -224,45 +224,62 @@ Subsector *PointInSubsector(float x, float y)
 
 RegionProperties *GetPointProperties(Subsector *sub, float z)
 {
-    Extrafloor *S, *L, *C;
-    float       floor_h;
-
-    // traverse extrafloors upwards
-
-    floor_h = sub->sector->floor_height;
-
-    S = sub->sector->bottom_extrafloor;
-    L = sub->sector->bottom_liquid;
-
-    while (S || L)
+    if (sub->sector->height_sector)
     {
-        if (!L || (S && S->bottom_height < L->bottom_height))
+        if (view_height_zone == kHeightZoneA && view_z > sub->sector->height_sector->interpolated_ceiling_height)
         {
-            C = S;
-            S = S->higher;
+            return sub->sector->height_sector->active_properties;
+        }
+        else if (view_height_zone == kHeightZoneC && view_z < sub->sector->height_sector->interpolated_floor_height)
+        {
+            return sub->sector->height_sector->active_properties;
         }
         else
         {
-            C = L;
-            L = L->higher;
+            return sub->sector->active_properties;
+        }
+    }
+    else
+    {
+        Extrafloor *S, *L, *C;
+        float       floor_h;
+        // traverse extrafloors upwards
+        
+        floor_h = sub->sector->floor_height;
+
+        S = sub->sector->bottom_extrafloor;
+        L = sub->sector->bottom_liquid;
+
+        while (S || L)
+        {
+            if (!L || (S && S->bottom_height < L->bottom_height))
+            {
+                C = S;
+                S = S->higher;
+            }
+            else
+            {
+                C = L;
+                L = L->higher;
+            }
+
+            EPI_ASSERT(C);
+
+            // ignore liquids in the middle of THICK solids, or below real
+            // floor or above real ceiling
+            //
+            if (C->bottom_height < floor_h || C->bottom_height > sub->sector->ceiling_height)
+                continue;
+
+            if (z < C->top_height)
+                return C->properties;
+
+            floor_h = C->top_height;
         }
 
-        EPI_ASSERT(C);
-
-        // ignore liquids in the middle of THICK solids, or below real
-        // floor or above real ceiling
-        //
-        if (C->bottom_height < floor_h || C->bottom_height > sub->sector->ceiling_height)
-            continue;
-
-        if (z < C->top_height)
-            return C->properties;
-
-        floor_h = C->top_height;
+        // extrafloors were exhausted, must be top area
+        return sub->sector->active_properties;
     }
-
-    // extrafloors were exhausted, must be top area
-    return sub->sector->active_properties;
 }
 
 //----------------------------------------------------------------------------

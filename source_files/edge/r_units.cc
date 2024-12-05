@@ -178,7 +178,9 @@ void EndRenderUnit(int actual_vert)
 {
     RendererUnit *unit;
 
-    EPI_ASSERT(actual_vert > 0);
+    EPI_ASSERT(actual_vert >= 0);
+
+    if (actual_vert == 0) return;
 
     unit = local_units + current_render_unit;
 

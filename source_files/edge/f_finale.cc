@@ -437,6 +437,7 @@ static void TextWrite(void)
 
      //Autoscale if there are too many lines of text to fit onscreen
     float TempHeight = StringLines(finale_text) * h;
+    TempHeight += h;
     if (TempHeight > 200)
     {
         //Too big, need to scale

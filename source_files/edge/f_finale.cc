@@ -435,6 +435,28 @@ static void TextWrite(void)
         h = h * txtscale;
     }
 
+     //Autoscale if there are too many lines of text to fit onscreen
+    float TempHeight = StringLines(finale_text) * h;
+    if (TempHeight > 200)
+    {
+        //Too big, need to scale
+        float TempScale = 1.0f;
+
+        TempScale = 200.0f / TempHeight;
+        txtscale = TempScale;
+        HUDSetScale(txtscale);
+
+        //Need to recalculate this
+        h = 11; // set a default
+        if (style->fonts_[t_type])
+        {
+            HUDSetFont(style->fonts_[t_type]);
+            h = style->fonts_[t_type]->NominalHeight();
+            h = h + (3 * txtscale); // bit of spacing
+            h = h * txtscale;
+        }
+    }
+
     int cy = h;
 
     char line[200];

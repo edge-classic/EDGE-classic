@@ -1483,7 +1483,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
 
     // handle lower, upper and mid-masker
 
-    if (slope_fh < other_fh || (sec->floor_vertex_slope || other->floor_vertex_slope))
+    if (slope_fh < other->interpolated_floor_height || (sec->floor_vertex_slope || other->floor_vertex_slope))
     {
         if (!sec->floor_vertex_slope && other->floor_vertex_slope)
         {
@@ -1552,7 +1552,7 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
         }
     }
 
-    if ((slope_ch > other_ch || (sec->ceiling_vertex_slope || other->ceiling_vertex_slope)) &&
+    if ((slope_ch > other->interpolated_ceiling_height || (sec->ceiling_vertex_slope || other->ceiling_vertex_slope)) &&
         !(EDGE_IMAGE_IS_SKY(*slope_ceil) && EDGE_IMAGE_IS_SKY(*other_ceil)))
     {
         if (!sec->ceiling_vertex_slope && other->ceiling_vertex_slope)

@@ -1355,8 +1355,14 @@ static void P_MobjThinker(MapObject *mobj)
     if (!(mobj->player_ != NULL && mobj == mobj->player_->map_object_))
     {
         // Assume we can interpolate at the beginning
-        // of the tic.
-        mobj->interpolate_ = true;
+        // of the tic unless mid-teleport
+        if (mobj->teleport_tic_)
+        {
+            mobj->teleport_tic_--;
+            mobj->interpolate_ = false;
+        }
+        else
+            mobj->interpolate_ = true;
 
         // Store starting position for mobj interpolation.
         mobj->old_x_     = mobj->x;

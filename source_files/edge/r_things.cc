@@ -818,7 +818,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
         return;
 
     // ignore things that are mid-teleport
-    if (mo->teleport_tic_-- > 0)
+    if (mo->teleport_tic_ > 0)
         return;
 
     bool is_model = (mo->state_->flags & kStateFrameFlagModel) ? true : false;

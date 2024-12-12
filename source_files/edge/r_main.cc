@@ -160,16 +160,21 @@ void RendererSoftInit(void)
 
     global_render_state->Enable(GL_NORMALIZE);
 
-    glShadeModel(GL_SMOOTH);
+    global_render_state->ShadeModel(GL_SMOOTH);
     global_render_state->DepthFunction(GL_LEQUAL);
     global_render_state->AlphaFunction(GL_GREATER, 0);
 
-    glFrontFace(GL_CW);
+    global_render_state->FrontFace(GL_CW);
     global_render_state->CullFace(GL_BACK);
     global_render_state->Disable(GL_CULL_FACE);
 
     global_render_state->Hint(GL_FOG_HINT, GL_NICEST);
     global_render_state->Hint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glClientActiveTexture(GL_TEXTURE0);
 }
 
 //

@@ -540,6 +540,43 @@ class RenderState
         }
     }
 
+    void FrontFace(GLenum wind)
+    {
+        if (front_face_== wind)
+        {
+            return;
+        }
+
+        front_face_ = wind;
+        glFrontFace(wind);
+        ec_frame_stats.draw_state_change++;
+    }
+
+    void ShadeModel(GLenum model)
+    {
+        if (shade_model_== model)
+        {
+            return;
+        }
+
+        shade_model_ = model;
+        glShadeModel(model);
+        ec_frame_stats.draw_state_change++;
+    }
+
+    bool BindBuffer(GLuint buffer)
+    {
+        if (bound_buffer_ == buffer)
+        {
+            return false; // already bound
+        }
+
+        bound_buffer_ = buffer;
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        ec_frame_stats.draw_state_change++;
+        return true;
+    }
+
     int frameStateChanges_ = 0;
 
   private:
@@ -549,6 +586,12 @@ class RenderState
 
     bool   enable_cull_face_;
     GLenum cull_face_;
+
+    GLenum front_face_;
+
+    GLenum shade_model_;
+
+    GLuint bound_buffer_;
 
     bool enable_scissor_test_;
 

@@ -507,7 +507,7 @@ MD2Model *MD2Load(epi::File *f)
     glGenBuffers(1, &md->vertex_buffer_object_);
     if (md->vertex_buffer_object_ == 0)
         FatalError("MD2LoadModel: Failed to bind VBO!\n");
-    glBindBuffer(GL_ARRAY_BUFFER, md->vertex_buffer_object_);
+    global_render_state->BindBuffer(md->vertex_buffer_object_);
     glBufferData(GL_ARRAY_BUFFER, md->total_triangles_ * 3 * sizeof(RendererVertex), nullptr, GL_STREAM_DRAW);
 
     return md;
@@ -766,7 +766,7 @@ MD2Model *MD3Load(epi::File *f)
     glGenBuffers(1, &md->vertex_buffer_object_);
     if (md->vertex_buffer_object_ == 0)
         FatalError("MD3LoadModel: Failed to create VBO!\n");
-    glBindBuffer(GL_ARRAY_BUFFER, md->vertex_buffer_object_);
+    global_render_state->BindBuffer(md->vertex_buffer_object_);
     glBufferData(GL_ARRAY_BUFFER, md->total_triangles_ * 3 * sizeof(RendererVertex), nullptr, GL_STREAM_DRAW);
     return md;
 }
@@ -1250,52 +1250,40 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
 
         global_render_state->PolygonOffset(0, -pass);
 
-        if (blending & (kBlendingMasked | kBlendingLess))
+        if (blending & kBlendingLess)
         {
-            if (blending & kBlendingLess)
-            {
-                global_render_state->Enable(GL_ALPHA_TEST);
-            }
-            else if (blending & kBlendingMasked)
-            {
-                global_render_state->Enable(GL_ALPHA_TEST);
-                global_render_state->AlphaFunction(GL_GREATER, 0);
-            }
+            global_render_state->Enable(GL_ALPHA_TEST);
+        }
+        else if (blending & kBlendingMasked)
+        {
+            global_render_state->Enable(GL_ALPHA_TEST);
+            global_render_state->AlphaFunction(GL_GREATER, 0);
         }
         else
             global_render_state->Disable(GL_ALPHA_TEST);
 
-        if (blending & (kBlendingAlpha | kBlendingAdd))
+        if (blending & kBlendingAdd)
         {
-            if (blending & kBlendingAdd)
-            {
-                global_render_state->Enable(GL_BLEND);
-                global_render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE);
-            }
-            else if (blending & kBlendingAlpha)
-            {
-                global_render_state->Enable(GL_BLEND);
-                global_render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            }
+            global_render_state->Enable(GL_BLEND);
+            global_render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE);
+        }
+        else if (blending & kBlendingAlpha)
+        {
+            global_render_state->Enable(GL_BLEND);
+            global_render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
         else
             global_render_state->Disable(GL_BLEND);
 
         if (blending & (kBlendingCullBack | kBlendingCullFront))
         {
-            if (blending & (kBlendingCullBack | kBlendingCullFront))
-            {
-                global_render_state->Enable(GL_CULL_FACE);
-                global_render_state->CullFace((blending & kBlendingCullFront) ? GL_FRONT : GL_BACK);
-            }
+            global_render_state->Enable(GL_CULL_FACE);
+            global_render_state->CullFace((blending & kBlendingCullFront) ? GL_FRONT : GL_BACK);
         }
         else
             global_render_state->Disable(GL_CULL_FACE);
 
-        if (blending & kBlendingNoZBuffer)
-        {
-            global_render_state->DepthMask((blending & kBlendingNoZBuffer) ? GL_FALSE : GL_TRUE);
-        }
+        global_render_state->DepthMask((blending & kBlendingNoZBuffer) ? false : true);
 
         if (blending & kBlendingLess)
         {
@@ -1353,17 +1341,16 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         }
 
         // setup client state
-        glBindBuffer(GL_ARRAY_BUFFER, md->vertex_buffer_object_);
+        bool needed_bound = global_render_state->BindBuffer(md->vertex_buffer_object_);
         glBufferData(GL_ARRAY_BUFFER, md->total_triangles_ * 3 * sizeof(RendererVertex), md->gl_vertices_,
                      GL_STREAM_DRAW);
-        glVertexPointer(3, GL_FLOAT, sizeof(RendererVertex), (void *)(offsetof(RendererVertex, position.X)));
-        glColorPointer(4, GL_FLOAT, sizeof(RendererVertex), (void *)(offsetof(RendererVertex, rgba_color)));
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glEnableClientState(GL_COLOR_ARRAY);
-        glClientActiveTexture(GL_TEXTURE0);
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        glTexCoordPointer(2, GL_FLOAT, sizeof(RendererVertex),
-                          (void *)(offsetof(RendererVertex, texture_coordinates[0])));
+        if (needed_bound)
+        {
+            glVertexPointer(3, GL_FLOAT, sizeof(RendererVertex), (void *)(offsetof(RendererVertex, position.X)));
+            glColorPointer(4, GL_FLOAT, sizeof(RendererVertex), (void *)(offsetof(RendererVertex, rgba_color)));
+            glTexCoordPointer(2, GL_FLOAT, sizeof(RendererVertex),
+                            (void *)(offsetof(RendererVertex, texture_coordinates[0])));
+        }
 
         glDrawArrays(GL_TRIANGLES, 0, md->total_triangles_ * 3);
 

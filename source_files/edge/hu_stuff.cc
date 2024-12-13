@@ -117,7 +117,7 @@ void HUDStart(void)
         LogPrint("\n");
         LogPrint("--------------------------------------------------\n");
 
-        ConsoleMessageColor(SG_GREEN_RGBA32);
+        ConsoleMessageColor(kRGBAGreen);
 
         string = language[current_map->description_];
         LogPrint("Entering %s\n", string);

@@ -369,8 +369,8 @@ void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
     if (hx2 < 0 || hx1 > current_screen_width || hy2 < 0 || hy1 > current_screen_height)
         return;
 
-    sg_color sgcol = sg_white;
-    sgcol.a = alpha;
+    RGBAColor unit_col = kRGBAWhite;
+    epi::SetRGBAAlpha(unit_col, alpha);
     BlendingMode blend;
     GLuint tex_id = 0;
 
@@ -378,8 +378,8 @@ void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
 
     if (text_col != kRGBANoValue)
     {
-        sgcol     = sg_make_color_1i(text_col);
-        sgcol.a   = alpha;
+        unit_col = text_col;
+        epi::SetRGBAAlpha(unit_col, alpha);
         do_whiten = true;
     }
 
@@ -424,16 +424,16 @@ void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
 
         RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
 
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->texture_coordinates[0] = {{tx1, ty2}};
         glvert++->position = {{hx1, hy1, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->texture_coordinates[0] = {{tx2, ty2}};
         glvert++->position = {{hx2, hy1, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->texture_coordinates[0] = {{tx2, ty1}};
         glvert++->position = {{hx2, hy2, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->texture_coordinates[0] = {{tx1, ty1}};
         glvert->position = {{hx1, hy2, 0}};
 
@@ -491,16 +491,16 @@ void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
         HUDCalcTurbulentTexCoords(&tx2, &ty2, hx2, hy2);
     }
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{tx1, ty1}};
     glvert++->position = {{hx1, hy1, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{tx2, ty1}};
     glvert++->position = {{hx2, hy1, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{tx2, ty2}};
     glvert++->position = {{hx2, hy2, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{tx1, ty2}};
     glvert->position = {{hx1, hy2, 0}};
 
@@ -520,16 +520,16 @@ void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
 
         glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
 
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->texture_coordinates[0] = {{tx1, ty1}};
         glvert++->position = {{hx1, hy1, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->texture_coordinates[0] = {{tx2, ty1}};
         glvert++->position = {{hx2, hy1, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->texture_coordinates[0] = {{tx2, ty2}};
         glvert++->position = {{hx2, hy2, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->texture_coordinates[0] = {{tx1, ty2}};
         glvert->position = {{hx1, hy2, 0}};
 
@@ -545,8 +545,8 @@ void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
 void HUDRawFromTexID(float hx1, float hy1, float hx2, float hy2, unsigned int tex_id, ImageOpacity opacity, float tx1,
                      float ty1, float tx2, float ty2, float alpha)
 {
-    sg_color sgcol = sg_white;
-    sgcol.a = alpha;
+    RGBAColor unit_col = kRGBAWhite;
+    epi::SetRGBAAlpha(unit_col, alpha);
     BlendingMode blend = kBlendingNone;
 
     if (hx1 >= hx2 || hy1 >= hy2)
@@ -572,16 +572,16 @@ void HUDRawFromTexID(float hx1, float hy1, float hx2, float hy2, unsigned int te
 
     RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{tx1, ty1}};
     glvert++->position = {{hx1, hy1, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{tx2, ty1}};
     glvert++->position = {{hx2, hy1, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{tx2, ty2}};
     glvert++->position = {{hx2, hy2, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{tx1, ty2}};
     glvert->position = {{hx1, hy2, 0}};
 
@@ -777,16 +777,16 @@ void HUDSolidBox(float x1, float y1, float x2, float y2, RGBAColor col)
     RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0,
                                                  0, current_alpha < 0.99f ? kBlendingAlpha : kBlendingNone);
 
-    sg_color sgcol = sg_make_color_1i(col);
-    sgcol.a = current_alpha;
+    RGBAColor unit_col = col;
+    epi::SetRGBAAlpha(unit_col, current_alpha);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x1, y1, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x1, y2, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x2, y2, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x2, y1, 0}};
 
     EndRenderUnit(4);
@@ -812,8 +812,8 @@ void HUDSolidLine(float x1, float y1, float x2, float y2, RGBAColor col, float t
 
     StartUnitBatch(false);
 
-    sg_color sgcol = sg_make_color_1i(col);
-    sgcol.a = current_alpha;
+    RGBAColor unit_col = col;
+    epi::SetRGBAAlpha(unit_col, current_alpha);
     BlendingMode blend = kBlendingNone;
 
     if (smooth || current_alpha < 0.99f)
@@ -821,9 +821,9 @@ void HUDSolidLine(float x1, float y1, float x2, float y2, RGBAColor col, float t
 
     RendererVertex *glvert = BeginRenderUnit(GL_LINES, 2, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x1+dx, y1+dy, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->position = {{x2+dx, y2+dy, 0}};
 
     EndRenderUnit(2);
@@ -843,8 +843,8 @@ void HUDThinBox(float x1, float y1, float x2, float y2, RGBAColor col, float thi
     y2 = HUDToRealCoordinatesY(y2);
 
     StartUnitBatch(false);
-    sg_color sgcol = sg_make_color_1i(col);
-    sgcol.a = current_alpha;
+    RGBAColor unit_col = col;
+    epi::SetRGBAAlpha(unit_col, current_alpha);
     BlendingMode blend = kBlendingNone;
 
     if (current_alpha < 0.99f)
@@ -855,52 +855,52 @@ void HUDThinBox(float x1, float y1, float x2, float y2, RGBAColor col, float thi
 
     RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x1, y1, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x1, y2, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x1 + 2 + thickness, y2, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->position = {{x1 + 2 + thickness, y1, 0}};
   
     EndRenderUnit(4);
 
     glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x2 - 2 - thickness, y1, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x2 - 2 - thickness, y2, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x2, y2, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->position = {{x2, y1, 0}};
   
     EndRenderUnit(4);
 
     glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x1 + 2 + thickness, y1, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x1 + 2 + thickness, y1 + 2 + thickness, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x2 - 2 - thickness, y1 + 2 + thickness, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->position = {{x2 - 2 - thickness, y1, 0}};
   
     EndRenderUnit(4);
 
     glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x1 + 2 + thickness, y2 - 2 - thickness, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x1 + 2 + thickness, y2, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x2 - 2 - thickness, y2, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->position = {{x2 - 2 - thickness, y2 - 2 - thickness, 0}};
   
     EndRenderUnit(4);
@@ -923,27 +923,27 @@ void HUDGradientBox(float x1, float y1, float x2, float y2, RGBAColor *cols)
     if (current_alpha < 0.99f)
         blend = kBlendingAlpha;
 
-    sg_color sgcol = sg_make_color_1i(cols[1]);
-    sgcol.a = current_alpha;
+    RGBAColor unit_col = cols[1];
+    epi::SetRGBAAlpha(unit_col, current_alpha);
 
     RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x1, y1, 0}};
 
-    sgcol = sg_make_color_1i(cols[0]);
-    sgcol.a = current_alpha;
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    unit_col = cols[0];
+    epi::SetRGBAAlpha(unit_col, current_alpha);
+    glvert->rgba = unit_col;
     glvert++->position = {{x1, y2, 0}};
 
-    sgcol = sg_make_color_1i(cols[2]);
-    sgcol.a = current_alpha;
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    unit_col = cols[2];
+    epi::SetRGBAAlpha(unit_col, current_alpha);
+    glvert->rgba = unit_col;
     glvert++->position = {{x2, y2, 0}};
 
-    sgcol = sg_make_color_1i(cols[3]);
-    sgcol.a = current_alpha;
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    unit_col = cols[3];
+    epi::SetRGBAAlpha(unit_col, current_alpha);
+    glvert->rgba = unit_col;
     glvert++->position = {{x2, y1, 0}};
 
     EndRenderUnit(4);
@@ -1145,22 +1145,22 @@ void HUDDrawEndoomChar(float left_x, float top_y, float FNX, const Image *img, c
     w = FNX;
     h = FNX * 2;
 
-    sg_color sgcol = sg_make_color_1i(color2);
+    RGBAColor unit_col = color2;
 
     RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{left_x, top_y, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{left_x, top_y + h, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{left_x + w, top_y + h, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->position = {{left_x + w, top_y, 0}};
 
     EndRenderUnit(4);
 
-    sgcol = sg_make_color_1i(color1);
+    unit_col = color1;
 
     GLuint tex_id = ImageCache(img, true, (const Colormap *)0, true);
     BlendingMode blend = kBlendingNone;
@@ -1179,16 +1179,16 @@ void HUDDrawEndoomChar(float left_x, float top_y, float FNX, const Image *img, c
 
     float width_adjust = FNX / 2 + .5;
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{tx1, ty1}};
     glvert++->position = {{left_x - width_adjust, top_y, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{tx2, ty1}};
     glvert++->position = {{left_x + w + width_adjust, top_y, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{tx2, ty2}};
     glvert++->position = {{left_x + w + width_adjust, top_y + h, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{tx1, ty2}};
     glvert->position = {{left_x - width_adjust, top_y + h, 0}};
 

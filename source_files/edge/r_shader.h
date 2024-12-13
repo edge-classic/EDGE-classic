@@ -63,7 +63,7 @@ class ColorMixer
         return HMM_MAX(add_red_, HMM_MAX(add_green_, add_blue_));
     }
 
-    void modulate_green_ive(RGBAColor rgb, float qty)
+    void modulate_GIVE(RGBAColor rgb, float qty)
     {
         if (qty > 1.0f)
             qty = 1.0f;
@@ -73,7 +73,7 @@ class ColorMixer
         modulate_blue_ += (int)(epi::GetRGBABlue(rgb) * qty);
     }
 
-    void add_green_ive(RGBAColor rgb, float qty)
+    void add_GIVE(RGBAColor rgb, float qty)
     {
         if (qty > 1.0f)
             qty = 1.0f;
@@ -84,7 +84,7 @@ class ColorMixer
     }
 };
 
-typedef void (*ShaderCoordinateFunction)(void *data, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc,
+typedef void (*ShaderCoordinateFunction)(void *data, int v_idx, HMM_Vec3 *pos, RGBAColor *rgb, HMM_Vec2 *texc,
                                          HMM_Vec3 *normal, HMM_Vec3 *lit_pos);
 
 /* abstract base class */

@@ -287,19 +287,16 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void ClearColor(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha)
+    void ClearColor(RGBAColor color)
     {
-        if (AlmostEquals(red, clear_red_) && AlmostEquals(green, clear_green_) && AlmostEquals(blue, clear_blue_) &&
-            AlmostEquals(alpha, clear_alpha_))
+        if (color == clear_color_)
         {
             return;
         }
 
-        clear_red_   = red;
-        clear_green_ = green;
-        clear_blue_  = blue;
-        clear_alpha_ = alpha;
-        glClearColor(clear_red_, clear_green_, clear_blue_, clear_alpha_);
+        clear_color_ = color;
+        glClearColor(epi::GetRGBARed(clear_color_) / 255.0f, epi::GetRGBAGreen(clear_color_) / 255.0f, 
+            epi::GetRGBABlue(clear_color_) / 255.0f, epi::GetRGBAAlpha(clear_color_) / 255.0f);
         ec_frame_stats.draw_state_change++;
     }
 
@@ -315,20 +312,18 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void FogColor(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha)
+    void FogColor(RGBAColor color)
     {
-        if (AlmostEquals(red, fog_color_[0]) && AlmostEquals(green, fog_color_[1]) &&
-            AlmostEquals(blue, fog_color_[2]) && AlmostEquals(alpha, fog_color_[3]))
+        if (fog_color_ == color)
         {
             return;
         }
 
-        fog_color_[0] = red;
-        fog_color_[1] = green;
-        fog_color_[2] = blue;
-        fog_color_[3] = alpha;
+        fog_color_ = color;
 
-        glFogfv(GL_FOG_COLOR, fog_color_);
+        float gl_fc[4] = { epi::GetRGBARed(fog_color_) / 255.0f, epi::GetRGBAGreen(fog_color_) / 255.0f, 
+            epi::GetRGBABlue(fog_color_) / 255.0f, epi::GetRGBAAlpha(fog_color_) / 255.0f };
+        glFogfv(GL_FOG_COLOR, gl_fc);
         ec_frame_stats.draw_state_change++;
     }
 
@@ -368,34 +363,16 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void GLColor(const GLfloat *color)
+    void GLColor(RGBAColor color)
     {
-        if (AlmostEquals(color[0], gl_color_[0]) && AlmostEquals(color[1], gl_color_[1]) &&
-            AlmostEquals(color[2], gl_color_[2]) && AlmostEquals(color[3], gl_color_[3]))
+        if (color == gl_color_)
         {
             return;
         }
 
-        memcpy(gl_color_, color, 4 * sizeof(float));
-
-        glColor4fv(gl_color_);
-        ec_frame_stats.draw_state_change++;
-    }
-
-    void GLColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
-    {
-        if (AlmostEquals(r, gl_color_[0]) && AlmostEquals(g, gl_color_[1]) &&
-            AlmostEquals(b, gl_color_[2]) && AlmostEquals(a, gl_color_[3]))
-        {
-            return;
-        }
-
-        gl_color_[0] = r;
-        gl_color_[1] = g;
-        gl_color_[2] = b;
-        gl_color_[3] = a;
-
-        glColor4fv(gl_color_);
+        gl_color_ = color;
+        glColor4ub(epi::GetRGBARed(color), epi::GetRGBAGreen(color), epi::GetRGBABlue(color),
+            epi::GetRGBAAlpha(color));
         ec_frame_stats.draw_state_change++;
     }
 
@@ -597,10 +574,7 @@ class RenderState
 
     bool enable_clip_plane_[6];
 
-    GLfloat clear_red_;
-    GLfloat clear_green_;
-    GLfloat clear_blue_;
-    GLfloat clear_alpha_;
+    RGBAColor clear_color_;
 
     // texture
     bool enable_texture_2d_[2];
@@ -647,9 +621,9 @@ class RenderState
     GLfloat fog_start_;
     GLfloat fog_end_;
     GLfloat fog_density_;
-    GLfloat fog_color_[4];
+    RGBAColor fog_color_;
 
-    GLfloat gl_color_[4];
+    RGBAColor gl_color_;
 };
 
 extern RenderState *global_render_state;

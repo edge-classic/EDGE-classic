@@ -43,7 +43,6 @@
 #include "m_random.h"
 #include "p_local.h"
 #include "script/compat/lua_compat.h"
-#include "sokol_color.h"
 #include "vm_coal.h" // For COALEndLevel()
 
 //
@@ -139,7 +138,7 @@ void PlayerFinishLevel(Player *p, bool keep_cards)
     p->damage_pain_        = 0;
     p->bonus_count_        = 0;
     p->grin_count_         = 0;
-    p->last_damage_colour_ = SG_RED_RGBA32;
+    p->last_damage_colour_ = kRGBARed;
 
     // Lobo 2023: uncomment if still getting
     //  "INTERNAL ERROR: player has a removed attacker"
@@ -196,7 +195,7 @@ void Player::Reborn()
     damage_pain_        = 0;
     extra_light_        = 0;
     flash_              = false;
-    last_damage_colour_ = SG_RED_RGBA32;
+    last_damage_colour_ = kRGBARed;
 
     attacker_ = nullptr;
 

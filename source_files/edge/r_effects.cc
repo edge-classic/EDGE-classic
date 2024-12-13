@@ -166,7 +166,7 @@ void RendererColourmapEffect(Player *player)
         {
             StartUnitBatch(false);
 
-            sg_color sgcol = sg_white;
+            RGBAColor unit_col = kRGBAWhite;
 
             RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingInvert);
 
@@ -176,13 +176,13 @@ void RendererColourmapEffect(Player *player)
             y1 = view_window_y + view_window_height;
             y2 = view_window_y;
 
-            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->rgba = unit_col;
             glvert++->position = {{x1, y1, 0}};
-            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->rgba = unit_col;
             glvert++->position = {{x2, y1, 0}};
-            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->rgba = unit_col;
             glvert++->position = {{x2, y2, 0}};
-            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->rgba = unit_col;
             glvert->position = {{x1, y2, 0}};
 
             EndRenderUnit(4);
@@ -195,7 +195,7 @@ void RendererColourmapEffect(Player *player)
             HUDSetAlpha(0.0f);
             s = HMM_MAX(0.5f, s);
             HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                       epi::MakeRGBA(RoundToInteger(s * 255), RoundToInteger(s * 255), RoundToInteger(s * 255)), 25.0f, kBlendingInvert);
+                       epi::MakeRGBAFloat(s, s, s, 0.25f), kBlendingInvert);
             HUDSetAlpha(old_alpha);
         }
     }
@@ -214,7 +214,7 @@ void RendererPaletteEffect(Player *player)
 
     float old_alpha = HUDGetAlpha();
 
-    sg_color sgcol = sg_white;
+    RGBAColor unit_col = kRGBAWhite;
 
     if (s > 0 && player->powers_[kPowerTypeInvulnerable] > 0 && player->effect_colourmap_ &&
         (player->effect_left_ & 8 || reduce_flash))
@@ -226,12 +226,12 @@ void RendererPaletteEffect(Player *player)
         float r, g, b;
         GetColormapRGB(player->effect_colourmap_, &r, &g, &b);
         if (!reduce_flash)
-            sgcol = { r, g, b, 0.20f * s };
+            unit_col = epi::MakeRGBAFloat(r, g , b , 0.20f * s);
         else
         {
             HUDSetAlpha(0.20f * s);
             HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                       epi::MakeRGBA(RoundToInteger(r * 255), RoundToInteger(g * 255), RoundToInteger(b * 255)), 25.0f);
+                       epi::MakeRGBAFloat(r, g, b, 0.25f));
         }
     }
     else
@@ -246,16 +246,15 @@ void RendererPaletteEffect(Player *player)
         rgb_max = HMM_MIN(200, rgb_max);
 
         if (!reduce_flash)
-            sgcol = { (float)rgb_data[0] / (float)rgb_max, (float)rgb_data[1] / (float)rgb_max,
-                      (float)rgb_data[2] / (float)rgb_max, (float)rgb_max / 255.0f };
+            unit_col = epi::MakeRGBAFloat((float)rgb_data[0] / (float)rgb_max, (float)rgb_data[1] / (float)rgb_max,
+                      (float)rgb_data[2] / (float)rgb_max, (float)rgb_max / 255.0f);
         else
         {
             HUDSetAlpha((float)rgb_max / 255.0f);
             HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                       epi::MakeRGBA(RoundToInteger((float)rgb_data[0] / rgb_max * 255),
-                                     RoundToInteger((float)rgb_data[1] / rgb_max * 255),
-                                     RoundToInteger((float)rgb_data[2] / rgb_max * 255)),
-                       25.0f);
+                       epi::MakeRGBAFloat((float)rgb_data[0] / rgb_max,
+                                     (float)rgb_data[1] / rgb_max,
+                                     (float)rgb_data[2] / rgb_max), 0.25f);
         }
     }
 
@@ -267,13 +266,13 @@ void RendererPaletteEffect(Player *player)
 
         RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAlpha);
 
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert++->position = {{0, (float)current_screen_height, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert++->position = {{(float)current_screen_width, (float)current_screen_height, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert++->position = {{(float)current_screen_width, 0, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->position = {{0, 0, 0}};
 
         EndRenderUnit(4);

@@ -50,7 +50,6 @@
 #include "r_draw.h"
 #include "r_gldefs.h"
 #include "r_modes.h"
-#include "sokol_color.h"
 
 EDGE_DEFINE_CONSOLE_VARIABLE(automap_debug_bsp, "0", kConsoleVariableFlagNone)
 EDGE_DEFINE_CONSOLE_VARIABLE(automap_debug_collisions, "0", kConsoleVariableFlagNone)
@@ -654,7 +653,7 @@ std::string Aux2StringReplaceAll(std::string str, const std::string &from, const
 }
 
 // Lobo 2023: draw some key info in the middle of a line
-static void DrawKeyOnLine(AutomapLine *ml, int theKey, RGBAColor rgb = SG_WHITE_RGBA32)
+static void DrawKeyOnLine(AutomapLine *ml, int theKey, RGBAColor rgb = kRGBAWhite)
 {
     if (hide_lines)
         return;
@@ -887,12 +886,12 @@ static void AutomapWalkSeg(Seg *seg)
                 {
                     if (line->special->keys_ & kDoorKeyStrictlyAllKeys)
                     {
-                        DrawMLineDoor(&l, SG_PURPLE_RGBA32); // purple
+                        DrawMLineDoor(&l, kRGBAPurple); // purple
                         DrawKeyOnLine(&l, kDoorKeyStrictlyAllKeys);
                     }
                     else if (line->special->keys_ & kDoorKeyBlueCard || line->special->keys_ & kDoorKeyBlueSkull)
                     {
-                        DrawMLineDoor(&l, SG_BLUE_RGBA32); // blue
+                        DrawMLineDoor(&l, kRGBABlue); // blue
                         if (line->special->keys_ & (kDoorKeyBlueSkull | kDoorKeyBlueCard))
                         {
                             DrawKeyOnLine(&l, kDoorKeyBlueCard);
@@ -905,7 +904,7 @@ static void AutomapWalkSeg(Seg *seg)
                     }
                     else if (line->special->keys_ & kDoorKeyYellowCard || line->special->keys_ & kDoorKeyYellowSkull)
                     {
-                        DrawMLineDoor(&l, SG_YELLOW_RGBA32); // yellow
+                        DrawMLineDoor(&l, kRGBAYellow); // yellow
                         if (line->special->keys_ & (kDoorKeyYellowSkull | kDoorKeyYellowCard))
                         {
                             DrawKeyOnLine(&l, kDoorKeyYellowCard);
@@ -918,7 +917,7 @@ static void AutomapWalkSeg(Seg *seg)
                     }
                     else if (line->special->keys_ & kDoorKeyRedCard || line->special->keys_ & kDoorKeyRedSkull)
                     {
-                        DrawMLineDoor(&l, SG_RED_RGBA32); // red
+                        DrawMLineDoor(&l, kRGBARed); // red
                         if (line->special->keys_ & (kDoorKeyRedSkull | kDoorKeyRedCard))
                         {
                             DrawKeyOnLine(&l, kDoorKeyRedCard);
@@ -931,7 +930,7 @@ static void AutomapWalkSeg(Seg *seg)
                     }
                     else if (line->special->keys_ & kDoorKeyGreenCard || line->special->keys_ & kDoorKeyGreenSkull)
                     {
-                        DrawMLineDoor(&l, SG_GREEN_RGBA32); // green
+                        DrawMLineDoor(&l, kRGBAGreen); // green
                         if (line->special->keys_ & (kDoorKeyGreenSkull | kDoorKeyGreenCard))
                         {
                             DrawKeyOnLine(&l, kDoorKeyGreenCard);
@@ -944,7 +943,7 @@ static void AutomapWalkSeg(Seg *seg)
                     }
                     else
                     {
-                        DrawMLineDoor(&l, SG_PURPLE_RGBA32); // purple
+                        DrawMLineDoor(&l, kRGBAPurple); // purple
                     }
                     return;
                 }

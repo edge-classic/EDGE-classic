@@ -61,7 +61,6 @@
 #include "r_modes.h"
 #include "rad_act.h"
 #include "s_sound.h"
-#include "sokol_color.h"
 #include "stb_sprintf.h"
 #include "w_wad.h"
 
@@ -200,7 +199,7 @@ class rts_menu_c
         }
         else
         {
-            HUDSetTextColor(SG_WHITE_RGBA32);
+            HUDSetTextColor(kRGBAWhite);
         }
 
         HUDDrawText(160, y, title.c_str());
@@ -237,7 +236,7 @@ class rts_menu_c
             }
             else
             {
-                HUDSetTextColor(SG_LIGHT_BLUE_RGBA32);
+                HUDSetTextColor(kRGBALightBlue);
             }
             HUDDrawText(160, y, choices[c].c_str());
         }

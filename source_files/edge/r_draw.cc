@@ -29,7 +29,6 @@
 #include "r_misc.h"
 #include "r_modes.h"
 #include "r_units.h"
-#include "sokol_color.h"
 
 void NewScreenSize(int width, int height, int bits)
 {
@@ -37,7 +36,7 @@ void NewScreenSize(int width, int height, int bits)
     SetupMatrices2D();
 
     // prevent a visible border with certain cards/drivers
-    global_render_state->ClearColor(0, 0, 0, 0);
+    global_render_state->ClearColor(kRGBATransparent);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 

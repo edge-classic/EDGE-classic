@@ -447,7 +447,7 @@ RGBAColor ParseFontColor(const char *name, bool strict)
             else
                 LogDebug("Unknown colormap: '%s'\n", name);
 
-            return SG_MAGENTA_RGBA32;
+            return kRGBAMagenta;
         }
 
         rgb = GetFontColor(colmap);
@@ -606,14 +606,10 @@ class ColormapShader : public AbstractShader
         col->modulate_red_ += epi::GetRGBARed(WH);
         col->modulate_green_ += epi::GetRGBAGreen(WH);
         col->modulate_blue_ += epi::GetRGBABlue(WH);
-
-        // FIXME: for foggy maps, need to adjust add_red_/G/B too
     }
 
     virtual void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon)
     {
-        // TODO: improve this (normal-ise a little bit)
-
         float mx = mod_pos->x;
         float my = mod_pos->y;
         float mz = mod_pos->z + mod_pos->height_ / 2;
@@ -654,11 +650,11 @@ class ColormapShader : public AbstractShader
         {
             RendererVertex *dest = glvert + v_idx;
 
-            dest->rgba_color[3]  = alpha;
+            epi::SetRGBAAlpha(dest->rgba, alpha);
 
             HMM_Vec3 lit_pos;
 
-            (*func)(data, v_idx, &dest->position, dest->rgba_color, &dest->texture_coordinates[0], &dest->normal,
+            (*func)(data, v_idx, &dest->position, &dest->rgba, &dest->texture_coordinates[0], &dest->normal,
                     &lit_pos);
 
             TextureCoordinates(dest, 1, &lit_pos);

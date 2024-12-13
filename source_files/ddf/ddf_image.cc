@@ -25,7 +25,6 @@
 
 #include "ddf_local.h"
 #include "epi_filesystem.h"
-#include "sokol_color.h"
 
 static ImageDefinition *dynamic_image;
 
@@ -378,7 +377,7 @@ void ImageDefinition::Default()
     info_.clear();
 
     type_   = kImageDataColor;
-    colour_ = SG_BLACK_RGBA32;
+    colour_ = kRGBABlack;
     format_ = kLumpImageFormatStandard;
 
     special_  = kImageSpecialNone;

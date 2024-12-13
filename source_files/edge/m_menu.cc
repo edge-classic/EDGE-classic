@@ -1759,7 +1759,7 @@ void DrawMenuSlider(int x, int y, float slider_position, float increment, int di
     if (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeImage ||
         opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType)
     {
-        RGBAColor slider_color = SG_WHITE_RGBA32;
+        RGBAColor slider_color = kRGBAWhite;
 
         const Colormap *colmap = opt_style->definition_->text_[StyleDefinition::kTextSectionAlternate].colmap_;
 

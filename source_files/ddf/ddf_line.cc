@@ -37,7 +37,6 @@
 #include "AlmostEquals.h"
 #include "ddf_local.h"
 #include "epi_str_util.h"
-#include "sokol_color.h"
 
 // -KM- 1999/01/29 Improved scrolling.
 // Scrolling
@@ -1658,7 +1657,7 @@ void LineType::Default(void)
     sector_effect_  = kSectorEffectTypeNone;
     portal_effect_  = kPortalEffectTypeNone;
     slope_type_     = kSlopeTypeNONE;
-    fx_color_       = SG_BLACK_RGBA32;
+    fx_color_       = kRGBABlack;
 
     // lobo 2022
     effectobject_ = nullptr;

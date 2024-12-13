@@ -25,7 +25,6 @@
 #include "HandmadeMath.h"
 #include "epi.h"
 #include "epi_color.h"
-#include "sokol_color.h"
 #include "swirl_table.h"
 
 ImageData::ImageData(int width, int height, int depth)
@@ -549,7 +548,7 @@ RGBAColor ImageData::AverageColor(int from_x, int to_x, int from_y, int to_y)
     }
 
     unsigned int highest_count = 0;
-    RGBAColor    average_color = SG_BLACK_RGBA32;
+    RGBAColor    average_color = kRGBABlack;
     for (auto color : seen_colors)
     {
         if (color.second > highest_count)

@@ -22,7 +22,6 @@
 #include <string.h>
 
 #include "ddf_local.h"
-#include "sokol_color.h"
 
 GameDefinitionContainer gamedefs;
 
@@ -773,7 +772,7 @@ void GameDefinition::Default()
     special_music_ = 0;
     lighting_      = kLightingModelDoomish;
     description_.clear();
-    default_damage_flash_ = SG_RED_RGBA32;
+    default_damage_flash_ = kRGBARed;
 }
 
 // --> game definition container class

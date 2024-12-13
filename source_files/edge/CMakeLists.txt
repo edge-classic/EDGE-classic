@@ -152,7 +152,6 @@ set (EDGE_LINK_LIBRARIES
   miniz
   pl_mpeg
   prns
-  sokol_color
   stb
   xxhash
 )

@@ -570,7 +570,7 @@ static void NetGameStartLevel(void)
 void OptionMenuDrawPlayerList(void)
 {
     HUDSetAlpha(0.64f);
-    HUDSolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
+    HUDSolidBox(0, 0, 320, 200, kRGBABlack);
     HUDSetAlpha();
 
     HUDWriteText(network_game_list_style, 2, 80, 10, "PLAYER LIST");

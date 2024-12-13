@@ -52,7 +52,6 @@
 #include "r_sky.h"
 #include "r_things.h"
 #include "r_units.h"
-#include "sokol_color.h"
 
 static constexpr float kDoomYSlope     = 0.525f;
 static constexpr float kDoomYSlopeFull = 0.625f;
@@ -528,8 +527,8 @@ struct WallCoordinateData
     int pass;
     int blending;
 
-    float R, G, B;
-    float trans;
+    uint8_t R, G, B;
+    uint8_t trans;
 
     DividingLine div;
 
@@ -541,7 +540,7 @@ struct WallCoordinateData
     bool mid_masked;
 };
 
-static void WallCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc, HMM_Vec3 *normal,
+static void WallCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, RGBAColor *rgb, HMM_Vec2 *texc, HMM_Vec3 *normal,
                           HMM_Vec3 *lit_pos)
 {
     const WallCoordinateData *data = (WallCoordinateData *)d;
@@ -551,15 +550,13 @@ static void WallCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec
 
     if (swirl_pass > 1)
     {
-        rgb[0] = 1.0 / data->R * render_view_red_multiplier;
-        rgb[1] = 1.0 / data->G * render_view_green_multiplier;
-        rgb[2] = 1.0 / data->B * render_view_blue_multiplier;
+        *rgb = epi::MakeRGBA((uint8_t)(255.0f / data->R * render_view_red_multiplier), (uint8_t)(255.0f / data->G * render_view_green_multiplier), 
+            (uint8_t)(255.0f / data->B * render_view_blue_multiplier));
     }
     else
     {
-        rgb[0] = data->R * render_view_red_multiplier;
-        rgb[1] = data->G * render_view_green_multiplier;
-        rgb[2] = data->B * render_view_blue_multiplier;
+        *rgb = epi::MakeRGBA((uint8_t)(data->R * render_view_red_multiplier), (uint8_t)(data->G * render_view_green_multiplier), 
+            (uint8_t)(data->B * render_view_blue_multiplier));
     }
 
     float along;
@@ -611,7 +608,7 @@ struct PlaneCoordinateData
     BAMAngle rotation = 0;
 };
 
-static void PlaneCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc, HMM_Vec3 *normal,
+static void PlaneCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, RGBAColor *rgb, HMM_Vec2 *texc, HMM_Vec3 *normal,
                            HMM_Vec3 *lit_pos)
 {
     PlaneCoordinateData *data = (PlaneCoordinateData *)d;
@@ -621,15 +618,13 @@ static void PlaneCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Ve
 
     if (swirl_pass > 1)
     {
-        rgb[0] = 1.0 / data->R * render_view_red_multiplier;
-        rgb[1] = 1.0 / data->G * render_view_green_multiplier;
-        rgb[2] = 1.0 / data->B * render_view_blue_multiplier;
+        *rgb = epi::MakeRGBA((uint8_t)(255.0f / data->R * render_view_red_multiplier), (uint8_t)(255.0f / data->G * render_view_green_multiplier), 
+            (uint8_t)(255.0f / data->B * render_view_blue_multiplier));
     }
     else
     {
-        rgb[0] = data->R * render_view_red_multiplier;
-        rgb[1] = data->G * render_view_green_multiplier;
-        rgb[2] = data->B * render_view_blue_multiplier;
+        *rgb = epi::MakeRGBA((uint8_t)(data->R * render_view_red_multiplier), (uint8_t)(data->G * render_view_green_multiplier), 
+            (uint8_t)(data->B * render_view_blue_multiplier));
     }
 
     HMM_Vec2 rxy = {{(data->tx0 + pos->X), (data->ty0 + pos->Y)}};
@@ -940,7 +935,7 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
     data.v_count  = v_count;
     data.vertices = vertices;
 
-    data.R = data.G = data.B = 1.0f;
+    data.R = data.G = data.B = 255;
 
     data.div.x       = x1;
     data.div.y       = y1;
@@ -1775,17 +1770,15 @@ struct FloodEmulationData
     float h1, dh;
 };
 
-static void FloodCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc, HMM_Vec3 *normal,
+static void FloodCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, RGBAColor *rgb, HMM_Vec2 *texc, HMM_Vec3 *normal,
                            HMM_Vec3 *lit_pos)
 {
     const FloodEmulationData *data = (FloodEmulationData *)d;
 
     *pos    = data->vertices[v_idx];
     *normal = data->normal;
-
-    rgb[0] = data->R * render_view_red_multiplier;
-    rgb[1] = data->G * render_view_green_multiplier;
-    rgb[2] = data->B * render_view_blue_multiplier;
+    *rgb = epi::MakeRGBA((uint8_t)(data->R * render_view_red_multiplier), (uint8_t)(data->G * render_view_green_multiplier), 
+        (uint8_t)(data->B * render_view_blue_multiplier));
 
     float along = (view_z - data->plane_h) / (view_z - pos->Z);
 
@@ -1877,7 +1870,7 @@ static void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref, 
     data.tex_id = ImageCache(surf->image, true, render_view_effect_colormap);
     data.pass   = 0;
 
-    data.R = data.G = data.B = 1.0f;
+    data.R = data.G = data.B = 255;
 
     data.plane_h = (face_dir > 0) ? h2 : h1;
 
@@ -2719,7 +2712,7 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
 
     data.v_count  = v_count;
     data.vertices = vertices;
-    data.R = data.G = data.B = 1.0f;
+    data.R = data.G = data.B = 255;
     if (uncapped_frames.d_ && !AlmostEquals(surf->old_offset.X, surf->offset.X) && !paused && !menu_active &&
         !time_stop_active && !erraticism_active)
         data.tx0 = fmod(HMM_Lerp(surf->old_offset.X, fractional_tic, surf->offset.X), surf->image->actual_width_);
@@ -3094,24 +3087,22 @@ static void DrawMirrorPolygon(DrawMirror *mir)
 
     Line *ld = mir->seg->linedef;
     EPI_ASSERT(ld);
-    sg_color sgcol;
-
+    RGBAColor unit_col;
 
     if (ld->special)
     {
-        sgcol = sg_make_color_1i(ld->special->fx_color_);
+        uint8_t col_r = epi::GetRGBARed(ld->special->fx_color_);
+        uint8_t col_g = epi::GetRGBAGreen(ld->special->fx_color_);
+        uint8_t col_b = epi::GetRGBABlue(ld->special->fx_color_);
 
         // looks better with reduced color in multiple reflections
         float reduce = 1.0f / (1 + 1.5 * total_active_mirrors);
 
-        sgcol.r *= reduce;
-        sgcol.g *= reduce;
-        sgcol.b *= reduce;
-
-        sgcol.a = alpha;
+        unit_col = epi::MakeRGBA((uint8_t)(reduce * col_r), (uint8_t)(reduce * col_g), 
+            (uint8_t)(reduce * col_b), (uint8_t)(alpha * 255.0f));
     }
     else
-       sgcol = {1.0, 0.0, 0.0, alpha};
+       unit_col = epi::MakeRGBA(255, 0, 0, (uint8_t)(alpha * 255.0f));
 
     float x1 = mir->seg->vertex_1->X;
     float y1 = mir->seg->vertex_1->Y;
@@ -3127,13 +3118,13 @@ static void DrawMirrorPolygon(DrawMirror *mir)
     RendererVertex *glvert = BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0,
                                                  0, alpha < 0.99f ? kBlendingAlpha : kBlendingNone);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x1, y1, z1}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x1, y1, z2}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x2, y2, z2}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->position = {{x2, y2, z1}};
 
     EndRenderUnit(4);
@@ -3158,8 +3149,8 @@ static void DrawPortalPolygon(DrawMirror *mir)
     // set colour & alpha
     float alpha = ld->special->translucency_ * surf->translucency;
 
-    sg_color sgcol = sg_make_color_1i(ld->special->fx_color_);
-    sgcol.a = alpha;
+    RGBAColor unit_col = ld->special->fx_color_;
+    epi::SetRGBAAlpha(unit_col, alpha);
 
     // get polygon coordinates
     float x1 = mir->seg->vertex_1->X;
@@ -3192,16 +3183,16 @@ static void DrawPortalPolygon(DrawMirror *mir)
     RendererVertex *glvert = BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0,
                                                  0, alpha < 0.99f ? kBlendingAlpha : kBlendingNone);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->position = {{x1, y1, z1}};
     glvert++->texture_coordinates[0] = {{tx1, ty1}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->position = {{x1, y1, z2}};
     glvert++->texture_coordinates[0] = {{tx1, ty2}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->position = {{x2, y2, z2}};
     glvert++->texture_coordinates[0] = {{tx2, ty2}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->position = {{x2, y2, z1}};
     glvert->texture_coordinates[0] = {{tx2, ty1}};
 

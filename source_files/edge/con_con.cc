@@ -150,8 +150,8 @@ static void ConsoleAddLine(const char *s, bool partial)
 
     RGBAColor col = current_color;
 
-    if (col == SG_GRAY_RGBA32 && (epi::StringPrefixCaseCompareASCII(s, "WARNING") == 0))
-        col = SG_DARK_ORANGE_RGBA32;
+    if (col == kRGBAGray && (epi::StringPrefixCaseCompareASCII(s, "WARNING") == 0))
+        col = kRGBADarkOrange;
 
     console_lines[0] = new ConsoleLine(s, col);
 
@@ -184,8 +184,8 @@ static void ConsoleEndoomAddLine(uint8_t endoom_byte, const char *s, bool partia
 
     RGBAColor col = current_color;
 
-    if (col == SG_GRAY_RGBA32 && (epi::StringPrefixCaseCompareASCII(s, "WARNING") == 0))
-        col = SG_DARK_ORANGE_RGBA32;
+    if (col == kRGBAGray && (epi::StringPrefixCaseCompareASCII(s, "WARNING") == 0))
+        col = kRGBADarkOrange;
 
     console_lines[0] = new ConsoleLine(s, col);
 
@@ -361,7 +361,7 @@ static void SplitIntoLines(char *src)
         ConsoleAddLine(line, true);
     }
 
-    current_color = SG_GRAY_RGBA32;
+    current_color = kRGBAGray;
 }
 
 static void EndoomSplitIntoLines(uint8_t endoom_byte, char *src)
@@ -393,7 +393,7 @@ static void EndoomSplitIntoLines(uint8_t endoom_byte, char *src)
         ConsoleEndoomAddLine(endoom_byte, line, true);
     }
 
-    current_color = SG_GRAY_RGBA32;
+    current_color = kRGBAGray;
 }
 
 static void QuitSplitIntoLines(char *src)
@@ -425,7 +425,7 @@ static void QuitSplitIntoLines(char *src)
         ConsoleQuitAddLine(line, true);
     }
 
-    current_color = SG_GRAY_RGBA32;
+    current_color = kRGBAGray;
 }
 
 static void QuitEndoomSplitIntoLines(uint8_t endoom_byte, char *src)
@@ -445,7 +445,7 @@ static void QuitEndoomSplitIntoLines(uint8_t endoom_byte, char *src)
         ConsoleQuitEndoomAddLine(endoom_byte, line, true);
     }
 
-    current_color = SG_GRAY_RGBA32;
+    current_color = kRGBAGray;
 }
 
 void ConsolePrint(const char *message, ...)
@@ -578,16 +578,16 @@ static void SolidBox(float x, float y, float w, float h, RGBAColor col, float al
     RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0,
                                                  0, alpha < 0.99f ? kBlendingAlpha : kBlendingNone);
 
-    sg_color sgcol = sg_make_color_1i(col);
-    sgcol.a = alpha;
+    RGBAColor unit_col = col;
+    epi::SetRGBAAlpha(unit_col, alpha);    
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x, y, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x, y + h, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{x + w, y + h, 0}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->position = {{x + w, y, 0}};
 
     EndRenderUnit(4);
@@ -600,7 +600,7 @@ static void HorizontalLine(int y, RGBAColor col)
     SolidBox(0, y, current_screen_width - 1, 1, col, alpha);
 }
 
-static void DrawChar(float x, float y, char ch, RendererVertex *glvert, sg_color *col)
+static void DrawChar(float x, float y, char ch, RendererVertex *glvert, RGBAColor col)
 {
     if (x + FNSZ < 0)
         return;
@@ -614,16 +614,16 @@ static void DrawChar(float x, float y, char ch, RendererVertex *glvert, sg_color
         float y_adjust = console_font->truetype_glyph_map_.at((uint8_t)ch).y_shift[current_font_size] * FNSZ_ratio;
         float height   = console_font->truetype_glyph_map_.at((uint8_t)ch).height[current_font_size] * FNSZ_ratio;
         stbtt_aligned_quad *q = console_font->truetype_glyph_map_.at((uint8_t)ch).character_quad[current_font_size];
-        memcpy(&glvert->rgba_color, col, 4 * sizeof(float));
+        glvert->rgba = col;
         glvert->position = {{x + x_adjust, y - y_adjust, 0}};
         glvert++->texture_coordinates[0] = {{q->s0, q->t0}};
-        memcpy(&glvert->rgba_color, col, 4 * sizeof(float));
+        glvert->rgba = col;
         glvert->position = {{x + x_adjust + width, y - y_adjust, 0}};
         glvert++->texture_coordinates[0] = {{q->s1, q->t0}};
-        memcpy(&glvert->rgba_color, col, 4 * sizeof(float));
+        glvert->rgba = col;
         glvert->position = {{x + x_adjust + width, y - y_adjust - height, 0}};
         glvert++->texture_coordinates[0] = {{q->s1, q->t1}};
-        memcpy(&glvert->rgba_color, col, 4 * sizeof(float));
+        glvert->rgba = col;
         glvert->position = {{x + x_adjust, y - y_adjust - height, 0}};
         glvert->texture_coordinates[0] = {{q->s0, q->t1}};
         return;
@@ -637,16 +637,16 @@ static void DrawChar(float x, float y, char ch, RendererVertex *glvert, sg_color
     float ty1 = (py)*console_font->font_image_->height_ratio_;
     float ty2 = (py + 1) * console_font->font_image_->height_ratio_;
 
-    memcpy(&glvert->rgba_color, col, 4 * sizeof(float));
+    glvert->rgba = col;
     glvert->position = {{x, y, 0}};
     glvert++->texture_coordinates[0] = {{tx1, ty1}};
-    memcpy(&glvert->rgba_color, col, 4 * sizeof(float));
+    glvert->rgba = col;
     glvert->position = {{x, y + FNSZ, 0}};
     glvert++->texture_coordinates[0] = {{tx1, ty2}};
-    memcpy(&glvert->rgba_color, col, 4 * sizeof(float));
+    glvert->rgba = col;
     glvert->position = {{x + FNSZ, y + FNSZ, 0}};
     glvert++->texture_coordinates[0] = {{tx2, ty2}};
-    memcpy(&glvert->rgba_color, col, 4 * sizeof(float));
+    glvert->rgba = col;
     glvert->position = {{x + FNSZ, y, 0}};
     glvert->texture_coordinates[0] = {{tx2, ty1}};
 }
@@ -656,26 +656,20 @@ static void DrawEndoomChar(float x, float y, char ch, RGBAColor col, RGBAColor c
     if (x + FNSZ < 0)
         return;
 
-    sg_color sgcol = sg_make_color_1i(col2);
-    sgcol.a = 1.0f;
-
     RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0,
                                                  0, kBlendingNone);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = col2;
     glvert++->position = {{x - (enwidth / 2), y}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = col2;
     glvert++->position = {{x - (enwidth / 2), y + FNSZ}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = col2;
     glvert++->position = {{x + (enwidth / 2), y + FNSZ}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = col2;
     glvert->position = {{x + (enwidth / 2), y}};
 
 
     EndRenderUnit(4);
-
-    sgcol = sg_make_color_1i(col);
-    sgcol.a = 1.0f;
 
     if (blink && console_cursor >= 16)
         ch = 0x20;
@@ -692,16 +686,16 @@ static void DrawEndoomChar(float x, float y, char ch, RGBAColor col, RGBAColor c
     glvert = BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0,
                                                  0, kBlendingMasked);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = col;
     glvert->texture_coordinates[0] = {{tx1, ty1}};
     glvert++->position = {{x - enwidth, y}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = col;
     glvert->texture_coordinates[0] = {{tx1, ty2}};
     glvert++->position = {{x - enwidth, y + FNSZ}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = col;
     glvert->texture_coordinates[0] = {{tx2, ty2}};
     glvert++->position = {{x + enwidth, y + FNSZ}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = col;
     glvert->texture_coordinates[0] = {{tx2, ty1}};
     glvert->position = {{x + enwidth, y}};
 
@@ -740,7 +734,6 @@ static void DrawText(float x, float y, const char *s, RGBAColor col)
             draw_cursor = true;
     }
 
-    sg_color sgcol = sg_make_color_1i(col);
     RendererVertex *glvert = nullptr;
 
     int pos = 0;
@@ -749,7 +742,7 @@ static void DrawText(float x, float y, const char *s, RGBAColor col)
         glvert = BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0,
                                                  0, blend);
 
-        DrawChar(x, y, *s, glvert, &sgcol);
+        DrawChar(x, y, *s, glvert, col);
 
         EndRenderUnit(4);
 
@@ -768,7 +761,7 @@ static void DrawText(float x, float y, const char *s, RGBAColor col)
             glvert = BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0,
                                                  0, blend);
 
-            DrawChar(x, y, 95, glvert, &sgcol);
+            DrawChar(x, y, 95, glvert, col);
 
             EndRenderUnit(4);
 
@@ -786,7 +779,7 @@ static void DrawText(float x, float y, const char *s, RGBAColor col)
         glvert = BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0,
                                                  0, blend);
 
-        DrawChar(x, y, 95, glvert, &sgcol);
+        DrawChar(x, y, 95, glvert, col);
 
         EndRenderUnit(4);
     }
@@ -885,7 +878,7 @@ void ConsoleDrawer(void)
     {
         SolidBox(0, y, current_screen_width, current_screen_height - y,
                  console_style->definition_->bg_.colour_ != kRGBANoValue ? console_style->definition_->bg_.colour_
-                                                                         : SG_BLACK_RGBA32,
+                                                                         : kRGBABlack,
                  console_style->definition_->bg_.translucency_);
     }
 
@@ -895,7 +888,7 @@ void ConsoleDrawer(void)
 
     if (bottom_row == -1)
     {
-        DrawText(0, y, ">", SG_MAGENTA_RGBA32);
+        DrawText(0, y, ">", kRGBAMagenta);
 
         if (command_history_position >= 0)
         {
@@ -904,11 +897,11 @@ void ConsoleDrawer(void)
             if (console_cursor < 16)
                 text.append("_");
 
-            DrawText(XMUL, y, text.c_str(), SG_MAGENTA_RGBA32);
+            DrawText(XMUL, y, text.c_str(), kRGBAMagenta);
         }
         else
         {
-            DrawText(XMUL, y, input_line, SG_MAGENTA_RGBA32);
+            DrawText(XMUL, y, input_line, kRGBAMagenta);
         }
 
         y += FNSZ;
@@ -1166,7 +1159,7 @@ static void TabComplete(void)
     }
 
     // show what we were trying to match
-    ConsoleMessageColor(SG_LIGHT_BLUE_RGBA32);
+    ConsoleMessageColor(kRGBALightBlue);
     ConsolePrint(">%s\n", input_line);
 
     input_line[input_position] = save_ch;
@@ -1181,21 +1174,21 @@ static void TabComplete(void)
     {
         ConsolePrint("%u Possible variables:\n", (int)match_vars.size());
 
-        ListCompletions(match_vars, input_position, 7, SG_SPRING_GREEN_RGBA32);
+        ListCompletions(match_vars, input_position, 7, kRGBASpringGreen);
     }
 
     if (match_keys.size() > 0)
     {
         ConsolePrint("%u Possible keys:\n", (int)match_keys.size());
 
-        ListCompletions(match_keys, input_position, 4, SG_SPRING_GREEN_RGBA32);
+        ListCompletions(match_keys, input_position, 4, kRGBASpringGreen);
     }
 
     if (match_cmds.size() > 0)
     {
         ConsolePrint("%u Possible commands:\n", (int)match_cmds.size());
 
-        ListCompletions(match_cmds, input_position, 3, SG_SPRING_GREEN_RGBA32);
+        ListCompletions(match_cmds, input_position, 3, kRGBASpringGreen);
     }
 
     // Add as many common characters as possible
@@ -1334,7 +1327,7 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
 
         if (strlen(input_line) == 0)
         {
-            ConsoleMessageColor(SG_LIGHT_BLUE_RGBA32);
+            ConsoleMessageColor(kRGBALightBlue);
             ConsolePrint(">\n");
         }
         else
@@ -1342,7 +1335,7 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
             // Add it to history & draw it
             ConsoleAddCmdHistory(input_line);
 
-            ConsoleMessageColor(SG_LIGHT_BLUE_RGBA32);
+            ConsoleMessageColor(kRGBALightBlue);
             ConsolePrint(">%s\n", input_line);
 
             // Run it!
@@ -1605,7 +1598,7 @@ void ConsoleInit(void)
 
     ConsoleClearInputLine();
 
-    current_color = SG_GRAY_RGBA32;
+    current_color = kRGBAGray;
 
     ConsoleAddLine("", false);
     ConsoleAddLine("", false);
@@ -1672,7 +1665,7 @@ void ConsoleShowFPS(void)
     if (abs(debug_fps.d_) >= 3)
         y -= (FNSZ * 4);
 
-    SolidBox(x, y, current_screen_width, current_screen_height, SG_BLACK_RGBA32, 0.5);
+    SolidBox(x, y, current_screen_width, current_screen_height, kRGBABlack, 0.5);
 
     x += XMUL;
     y = current_screen_height - FNSZ - FNSZ * (console_font->definition_->type_ == kFontTypeTrueType ? -0.5 : 0.5);
@@ -1686,7 +1679,7 @@ void ConsoleShowFPS(void)
     else
         stbsp_sprintf(textbuf, " %6.2f fps", 1000 / avg_shown);
 
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
+    DrawText(x, y, textbuf, kRGBAWebGray);
 
     // show worst...
 
@@ -1699,7 +1692,7 @@ void ConsoleShowFPS(void)
         else if (worst_shown > 0)
             stbsp_sprintf(textbuf, " %6.2f min", 1000 / worst_shown);
 
-        DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
+        DrawText(x, y, textbuf, kRGBAWebGray);
     }
 
     // show frame metrics...
@@ -1708,22 +1701,22 @@ void ConsoleShowFPS(void)
     {
         y -= FNSZ;
         stbsp_sprintf(textbuf, "%i runit", ec_frame_stats.draw_render_units);
-        DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
+        DrawText(x, y, textbuf, kRGBAWebGray);
         y -= FNSZ;
         stbsp_sprintf(textbuf, "%i wall", ec_frame_stats.draw_wall_parts);
-        DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
+        DrawText(x, y, textbuf, kRGBAWebGray);
         y -= FNSZ;
         stbsp_sprintf(textbuf, "%i plane", ec_frame_stats.draw_planes);
-        DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
+        DrawText(x, y, textbuf, kRGBAWebGray);
         y -= FNSZ;
         stbsp_sprintf(textbuf, "%i thing", ec_frame_stats.draw_things);
-        DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
+        DrawText(x, y, textbuf, kRGBAWebGray);
         y -= FNSZ;
         stbsp_sprintf(textbuf, "%i state", ec_frame_stats.draw_state_change);
-        DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
+        DrawText(x, y, textbuf, kRGBAWebGray);
         y -= FNSZ;
         stbsp_sprintf(textbuf, "%i texture", ec_frame_stats.draw_texture_change);
-        DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
+        DrawText(x, y, textbuf, kRGBAWebGray);
     }
 
     FinishUnitBatch();
@@ -1747,44 +1740,44 @@ void ConsoleShowPosition(void)
     int x = current_screen_width - XMUL * 16;
     int y = current_screen_height - FNSZ * 5;
 
-    SolidBox(x, y - FNSZ * 10, XMUL * 16, FNSZ * 10 + 2, SG_BLACK_RGBA32, 0.5);
+    SolidBox(x, y - FNSZ * 10, XMUL * 16, FNSZ * 10 + 2, kRGBABlack, 0.5);
 
     x += XMUL;
     y -= FNSZ * (console_font->definition_->type_ == kFontTypeTrueType ? 0.25 : 1.25);
     stbsp_sprintf(textbuf, "    x: %d", (int)p->map_object_->x);
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
+    DrawText(x, y, textbuf, kRGBAWebGray);
 
     y -= FNSZ;
     stbsp_sprintf(textbuf, "    y: %d", (int)p->map_object_->y);
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
+    DrawText(x, y, textbuf, kRGBAWebGray);
 
     y -= FNSZ;
     stbsp_sprintf(textbuf, "    z: %d", (int)p->map_object_->z);
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
+    DrawText(x, y, textbuf, kRGBAWebGray);
 
     y -= FNSZ;
     stbsp_sprintf(textbuf, "angle: %d", (int)epi::DegreesFromBAM(p->map_object_->angle_));
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
+    DrawText(x, y, textbuf, kRGBAWebGray);
 
     y -= FNSZ;
     stbsp_sprintf(textbuf, "x mom: %.4f", p->map_object_->momentum_.X);
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
+    DrawText(x, y, textbuf, kRGBAWebGray);
 
     y -= FNSZ;
     stbsp_sprintf(textbuf, "y mom: %.4f", p->map_object_->momentum_.Y);
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
+    DrawText(x, y, textbuf, kRGBAWebGray);
 
     y -= FNSZ;
     stbsp_sprintf(textbuf, "z mom: %.4f", p->map_object_->momentum_.Z);
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
+    DrawText(x, y, textbuf, kRGBAWebGray);
 
     y -= FNSZ;
     stbsp_sprintf(textbuf, "  sec: %d", (int)(p->map_object_->subsector_->sector - level_sectors));
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
+    DrawText(x, y, textbuf, kRGBAWebGray);
 
     y -= FNSZ;
     stbsp_sprintf(textbuf, "  sub: %d", (int)(p->map_object_->subsector_ - level_subsectors));
-    DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
+    DrawText(x, y, textbuf, kRGBAWebGray);
 
     FinishUnitBatch();
 }

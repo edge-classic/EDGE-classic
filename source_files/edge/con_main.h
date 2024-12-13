@@ -22,7 +22,6 @@
 #include <vector>
 
 #include "epi_color.h"
-#include "sokol_color.h"
 
 extern std::string working_directory;
 
@@ -49,11 +48,11 @@ class ConsoleLine
     std::vector<uint8_t> endoom_bytes_;
 
   public:
-    ConsoleLine(const std::string &text, RGBAColor col = SG_LIGHT_GRAY_RGBA32) : line_(text), color_(col)
+    ConsoleLine(const std::string &text, RGBAColor col = kRGBALightGray) : line_(text), color_(col)
     {
     }
 
-    ConsoleLine(const char *text, RGBAColor col = SG_LIGHT_GRAY_RGBA32) : line_(text), color_(col)
+    ConsoleLine(const char *text, RGBAColor col = kRGBALightGray) : line_(text), color_(col)
     {
     }
 

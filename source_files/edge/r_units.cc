@@ -40,7 +40,6 @@
 #include "r_shader.h"
 #include "r_sky.h"
 #include "r_texgl.h"
-#include "sokol_color.h"
 
 EDGE_DEFINE_CONSOLE_VARIABLE(renderer_dumb_sky, "0", kConsoleVariableFlagArchive)
 #ifdef APPLE_SILICON
@@ -92,7 +91,7 @@ static int current_render_unit;
 
 static bool batch_sort;
 
-sg_color culling_fog_color;
+RGBAColor culling_fog_color;
 
 //
 // StartUnitBatch
@@ -218,7 +217,7 @@ struct Compare_Unit_pred
 
 static inline void RendererSendRawVector(const RendererVertex *V)
 {
-    global_render_state->GLColor(V->rgba_color);
+    global_render_state->GLColor(V->rgba);
 
     global_render_state->MultiTexCoord(GL_TEXTURE0, &V->texture_coordinates[0]);
     global_render_state->MultiTexCoord(GL_TEXTURE1, &V->texture_coordinates[1]);
@@ -250,7 +249,7 @@ void RenderCurrentUnits(void)
 
     if (draw_culling.d_)
     {
-        sg_color fogColor;
+        RGBAColor fogColor;
         switch (cull_fog_color.d_)
         {
         case 0:
@@ -258,22 +257,22 @@ void RenderCurrentUnits(void)
             break;
         case 1:
             // Not pure white, but 1.0f felt like a little much - Dasho
-            fogColor = sg_silver;
+            fogColor = kRGBASilver;
             break;
         case 2:
-            fogColor = {0.25f, 0.25f, 0.25f, 1.0f};
+            fogColor = 0x404040FF; // Find a constant to call this
             break;
         case 3:
-            fogColor = sg_black;
+            fogColor = kRGBABlack;
             break;
         default:
             fogColor = culling_fog_color;
             break;
         }
 
-        global_render_state->ClearColor(fogColor.r, fogColor.g, fogColor.b, 1.0f);
+        global_render_state->ClearColor(fogColor);
         global_render_state->FogMode(GL_LINEAR);
-        global_render_state->FogColor(fogColor.r, fogColor.g, fogColor.b, 1.0f);
+        global_render_state->FogColor(fogColor);
         global_render_state->FogStart(renderer_far_clip.f_ - 750.0f);
         global_render_state->FogEnd(renderer_far_clip.f_ - 250.0f);
         global_render_state->Enable(GL_FOG);
@@ -292,9 +291,8 @@ void RenderCurrentUnits(void)
         if (!draw_culling.d_ && unit->fog_color != kRGBANoValue && !(unit->blending & kBlendingNoFog))
         {
             float density = unit->fog_density;
-            sg_color fc    = sg_make_color_1i(unit->fog_color);
-            global_render_state->ClearColor(fc.r, fc.g, fc.b, 1.0f);
-            global_render_state->FogColor(fc.r, fc.g, fc.b, 1.0f);
+            global_render_state->ClearColor(unit->fog_color);
+            global_render_state->FogColor(unit->fog_color);
             global_render_state->FogDensity(std::log1p(density));
             if (!AlmostEquals(density, 0.0f))
                 global_render_state->Enable(GL_FOG);
@@ -321,7 +319,7 @@ void RenderCurrentUnits(void)
         else if (unit->blending & kBlendingGEqual)
         {
             global_render_state->Enable(GL_ALPHA_TEST);
-            global_render_state->AlphaFunction(GL_GEQUAL, 1.0f - local_verts[unit->first].rgba_color[3]);
+            global_render_state->AlphaFunction(GL_GEQUAL, 1.0f - (epi::GetRGBAAlpha(local_verts[unit->first].rgba) / 255.0f));
         }
         else
             global_render_state->Disable(GL_ALPHA_TEST);
@@ -367,7 +365,7 @@ void RenderCurrentUnits(void)
         if (unit->blending & kBlendingLess)
         {
             // NOTE: assumes alpha is constant over whole polygon
-            float a = local_verts[unit->first].rgba_color[3];
+            float a = epi::GetRGBAAlpha(local_verts[unit->first].rgba) / 255.0f;
             global_render_state->AlphaFunction(GL_GREATER, a * 0.66f);
         }
 

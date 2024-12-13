@@ -48,9 +48,7 @@ extern ImageData *ReadAsEpiBlock(Image *rim);
 extern ConsoleVariable draw_culling;
 extern ConsoleVariable fliplevels;
 
-static sg_color sky_cap_color;
-
-static constexpr sg_color sky_white = sg_white;
+static RGBAColor sky_cap_color;
 
 static uint32_t total_sky_verts = 0;
 
@@ -342,8 +340,8 @@ static void RenderSkySlice(float top, float bottom, float atop, float abottom, f
         tc_y2 = -tc_y2;
     }
 
-    sg_color topcol = {1.0f, 1.0f, 1.0f, atop};
-    sg_color bottomcol = {1.0f, 1.0f, 1.0f, abottom};
+    RGBAColor topcol = epi::MakeRGBA(255, 255, 255, (uint8_t)(atop * 255.0f));
+    RGBAColor bottomcol = epi::MakeRGBA(255, 255, 255, (uint8_t)(abottom * 255.0f));
 
     RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 128, GL_MODULATE, sky_tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, blend, fc_to_use, fd_to_use);
 
@@ -351,18 +349,18 @@ static void RenderSkySlice(float top, float bottom, float atop, float abottom, f
     for (unsigned a = 0; a < 31; a++)
     {
         // Top
-        memcpy(&glvert->rgba_color, &topcol, 4 * sizeof(float));
+        glvert->rgba = topcol;
         glvert->texture_coordinates[0] = {{tc_x + tx, tc_y1}};
         glvert++->position = {{(sky_circle[a + 1].X * dist), -(sky_circle[a + 1].Y * dist), (top * dist)}};
-        memcpy(&glvert->rgba_color, &topcol, 4 * sizeof(float));
+        glvert->rgba = topcol;
         glvert->texture_coordinates[0] = {{tc_x, tc_y1}};
         glvert++->position = {{(sky_circle[a].X * dist), -(sky_circle[a].Y * dist), (top * dist)}};
 
         // Bottom
-        memcpy(&glvert->rgba_color, &bottomcol, 4 * sizeof(float));
+        glvert->rgba = bottomcol;
         glvert->texture_coordinates[0] = {{tc_x, tc_y2}};
         glvert++->position = {{(sky_circle[a].X * dist), -(sky_circle[a].Y * dist), (bottom * dist)}};
-        memcpy(&glvert->rgba_color, &bottomcol, 4 * sizeof(float));
+        glvert->rgba = bottomcol;
         glvert->texture_coordinates[0] = {{tc_x + tx, tc_y2}};
         glvert++->position = {{(sky_circle[a + 1].X * dist), -(sky_circle[a + 1].Y * dist), (bottom * dist)}};
 
@@ -371,18 +369,18 @@ static void RenderSkySlice(float top, float bottom, float atop, float abottom, f
 
     // Link last point -> first
     // Top
-    memcpy(&glvert->rgba_color, &topcol, 4 * sizeof(float));
+    glvert->rgba = topcol;
     glvert->texture_coordinates[0] = {{tc_x + tx, tc_y1}};
     glvert++->position = {{(sky_circle[0].X * dist), -(sky_circle[0].Y * dist), (top * dist)}};
-    memcpy(&glvert->rgba_color, &topcol, 4 * sizeof(float));
+    glvert->rgba = topcol;
     glvert->texture_coordinates[0] = {{tc_x, tc_y1}};
     glvert++->position = {{(sky_circle[31].X * dist), -(sky_circle[31].Y * dist), (top * dist)}};
 
     // Bottom
-    memcpy(&glvert->rgba_color, &bottomcol, 4 * sizeof(float));
+    glvert->rgba = bottomcol;
     glvert->texture_coordinates[0] = {{tc_x, tc_y2}};
     glvert++->position = {{(sky_circle[31].X * dist), -(sky_circle[31].Y * dist), (bottom * dist)}};
-    memcpy(&glvert->rgba_color, &bottomcol, 4 * sizeof(float));
+    glvert->rgba = bottomcol;
     glvert->texture_coordinates[0] = {{tc_x + tx, tc_y2}};
     glvert->position = {{(sky_circle[0].X * dist), -(sky_circle[0].Y * dist), (bottom * dist)}};
 
@@ -442,34 +440,34 @@ static void RenderSkyCylinder(void)
 
     // Render top cap
     RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, blend, fc_to_use, fd_to_use);
-    sg_color sgcol = { sky_cap_color.r, sky_cap_color.g, sky_cap_color.b, 1.0f };
+    RGBAColor unit_col = sky_cap_color;
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{-cap_dist, -cap_dist, cap_z}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{-cap_dist, cap_dist, cap_z}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{cap_dist, cap_dist, cap_z}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->position = {{cap_dist, -cap_dist, cap_z}};
    
     EndRenderUnit(4);
 
     // Render bottom cap
     if (current_sky_stretch > kSkyStretchMirror)
-        sgcol = { culling_fog_color.r, culling_fog_color.g, culling_fog_color.b, 1.0f };
+        unit_col = culling_fog_color;
     if (current_sky_stretch == kSkyStretchVanilla)
         cap_z = 0;
         
     glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, blend, fc_to_use, fd_to_use);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{-cap_dist, -cap_dist, -cap_z}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{-cap_dist, cap_dist, -cap_z}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert++->position = {{cap_dist, cap_dist, -cap_z}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->position = {{cap_dist, -cap_dist, -cap_z}};
 
     EndRenderUnit(4);
@@ -602,140 +600,111 @@ static void RenderSkybox(void)
         fd_to_use = view_properties->fog_density;
     }
 
-    sg_color sgcol = { render_view_red_multiplier, render_view_green_multiplier, render_view_blue_multiplier, 1.0f };
+    RGBAColor unit_col = epi::MakeRGBA((uint8_t)(render_view_red_multiplier * 255.0f), 
+        (uint8_t)(render_view_green_multiplier * 255.0f), (uint8_t)(render_view_blue_multiplier * 255.0f));
     // top
-    HMM_Vec3 norm = {{ 0, 0, -1 }};
     RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxTop], (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v0, v0}};
     glvert++->position = {{-dist, dist, +dist}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v0, v1}};
     glvert++->position = {{-dist, -dist, +dist}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v1, v1}};
     glvert++->position = {{dist, -dist, +dist}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v1, v0}};
     glvert++->position = {{dist, dist, +dist}};
     
     EndRenderUnit(4);
 
     // bottom
-    norm = {{0, 0, +1}};
     glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxBottom], (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v0, v0}};
     glvert++->position = {{-dist, -dist, -dist}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v0, v1}};
     glvert++->position = {{-dist, dist, -dist}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v1, v1}};
     glvert++->position = {{dist, dist, -dist}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v1, v0}};
     glvert++->position = {{dist, -dist, -dist}};
     
     EndRenderUnit(4);
 
     // north
-    norm = {{0, -1, 0}};
     glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxNorth], (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v0, v0}};
     glvert++->position = {{-dist, dist, -dist}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v0, v1}};
     glvert++->position = {{-dist, dist, +dist}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v1, v1}};
     glvert++->position = {{dist, dist, +dist}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v1, v0}};
     glvert++->position = {{dist, dist, -dist}};
     
     EndRenderUnit(4);
 
     // east
-    norm = {{-1, 0, 0}};
     glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxEast], (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v0, v0}};
     glvert++->position = {{dist, dist, -dist}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v0, v1}};
     glvert++->position = {{dist, dist, +dist}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v1, v1}};
     glvert++->position = {{dist, -dist, +dist}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v1, v0}};
     glvert++->position = {{dist, -dist, -dist}};
     
     EndRenderUnit(4);
 
     // south
-    norm = {{0, +1, 0}};
     glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxSouth], (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v0, v0}};
     glvert++->position = {{dist, -dist, -dist}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v0, v1}};
     glvert++->position = {{dist, -dist, +dist}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v1, v1}};
     glvert++->position = {{-dist, -dist, +dist}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v1, v0}};
     glvert++->position = {{-dist, -dist, -dist}};
     
     EndRenderUnit(4);
 
     // west
-    norm = {{+1, 0, 0}};
     glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxWest], (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v0, v0}};
     glvert++->position = {{-dist, -dist, -dist}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v0, v1}};
     glvert++->position = {{-dist, -dist, +dist}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v1, v1}};
     glvert++->position = {{-dist, dist, +dist}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
-    memcpy(&glvert->normal, &norm, 3 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->texture_coordinates[0] = {{v1, v0}};
     glvert++->position = {{-dist, dist, -dist}};
     
@@ -826,7 +795,7 @@ void RenderSkyPlane(Subsector *sub, float h)
         BeginSkyUnit();
 
     MirrorHeight(h);
-    HMM_Vec3 norm = {{0, 0, (view_z > h) ? 1.0f : -1.0f}};
+    RGBAColor unit_col = kRGBAWhite;
 
     while (seg)
     {
@@ -834,14 +803,11 @@ void RenderSkyPlane(Subsector *sub, float h)
         float y2 = seg->vertex_1->Y;
         MirrorCoordinate(x2, y2);
 
-        memcpy(&sky_glvert->normal, &norm, 3 * sizeof(float));
-        memcpy(&sky_glvert->rgba_color, &sky_white, 4 * sizeof(float));
+        sky_glvert->rgba = unit_col;
         sky_glvert++->position = {{x0, y0, h}};
-        memcpy(&sky_glvert->normal, &norm, 3 * sizeof(float));
-        memcpy(&sky_glvert->rgba_color, &sky_white, 4 * sizeof(float));
+        sky_glvert->rgba = unit_col;
         sky_glvert++->position = {{x1, y1, h}};
-        memcpy(&sky_glvert->normal, &norm, 3 * sizeof(float));
-        memcpy(&sky_glvert->rgba_color, &sky_white, 4 * sizeof(float));
+        sky_glvert->rgba = unit_col;
         sky_glvert++->position = {{x2, y2, h}};
 
         total_sky_verts += 3;
@@ -883,25 +849,19 @@ void RenderSkyWall(Seg *seg, float h1, float h2)
     MirrorHeight(h1);
     MirrorHeight(h2);
 
-    HMM_Vec3 norm = {{y2 - y1, x1 - x2, 0}};
+    RGBAColor unit_col = kRGBAWhite;
 
-    memcpy(&sky_glvert->normal, &norm, 3 * sizeof(float));
-    memcpy(&sky_glvert->rgba_color, &sky_white, 4 * sizeof(float));
+    sky_glvert->rgba = unit_col;
     sky_glvert++->position = {{x1, y1, h1}};
-    memcpy(&sky_glvert->normal, &norm, 3 * sizeof(float));
-    memcpy(&sky_glvert->rgba_color, &sky_white, 4 * sizeof(float));
+    sky_glvert->rgba = unit_col;
     sky_glvert++->position = {{x1, y1, h2}};
-    memcpy(&sky_glvert->normal, &norm, 3 * sizeof(float));
-    memcpy(&sky_glvert->rgba_color, &sky_white, 4 * sizeof(float));
+    sky_glvert->rgba = unit_col;
     sky_glvert++->position = {{x2, y2, h2}};
-    memcpy(&sky_glvert->normal, &norm, 3 * sizeof(float));
-    memcpy(&sky_glvert->rgba_color, &sky_white, 4 * sizeof(float));
+    sky_glvert->rgba = unit_col;
     sky_glvert++->position = {{x2, y2, h1}};
-    memcpy(&sky_glvert->normal, &norm, 3 * sizeof(float));
-    memcpy(&sky_glvert->rgba_color, &sky_white, 4 * sizeof(float));
+    sky_glvert->rgba = unit_col;
     sky_glvert++->position = {{x2, y2, h2}};
-    memcpy(&sky_glvert->normal, &norm, 3 * sizeof(float));
-    memcpy(&sky_glvert->rgba_color, &sky_white, 4 * sizeof(float));
+    sky_glvert->rgba = unit_col;
     sky_glvert++->position = {{x1, y1, h1}};
 
     total_sky_verts += 6;
@@ -967,11 +927,10 @@ int UpdateSkyboxTextures(void)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    culling_fog_color =
-        sg_make_color_1i(tmp_img_data->AverageColor(0, sky_image->actual_width_, 0, sky_image->actual_height_ / 2));
-    sky_cap_color = sg_make_color_1i(tmp_img_data->AverageColor(
-        0, sky_image->actual_width_, sky_image->actual_height_ * 3 / 4, sky_image->actual_height_));
+    culling_fog_color = tmp_img_data->AverageColor(0, sky_image->actual_width_, 0, sky_image->actual_height_ / 2);
+    sky_cap_color = tmp_img_data->AverageColor(0, sky_image->actual_width_, sky_image->actual_height_ * 3 / 4, sky_image->actual_height_);
     delete tmp_img_data;
+    
     if (what_palette != (const uint8_t *)&playpal_data[0])
         delete[] what_palette;
 

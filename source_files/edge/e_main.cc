@@ -244,7 +244,7 @@ class StartupProgress
                 HUDStretchImage(-320, -200, 960, 600, loading_image->blurred_version_, 0, 0);
             }
             HUDDrawImageTitleWS(loading_image);
-            HUDSolidBox(25, 25, 295, 175, SG_BLACK_RGBA32);
+            HUDSolidBox(25, 25, 295, 175, kRGBABlack);
         }
         int y = 26;
         for (int i = 0; i < (int)startup_messages_.size(); i++)
@@ -269,8 +269,8 @@ class StartupProgress
         if (gamma_correction.f_ < 0)
         {
             int col = (1.0f + gamma_correction.f_) * 255;
-            sg_color sgcol = sg_make_color_4b(col, col, col, 255);
-            sgcol.a = HUDGetAlpha();
+            RGBAColor unit_col = epi::MakeRGBA(col, col, col);
+            epi::SetRGBAAlpha(unit_col, HUDGetAlpha());
 
             StartUnitBatch(false);
 
@@ -282,13 +282,13 @@ class StartupProgress
             float y1 = current_screen_height;
             float y2 = 0;
 
-            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->rgba = unit_col;
             glvert++->position = {{x1, y1, 0}};
-            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->rgba = unit_col;
             glvert++->position = {{x2, y1, 0}};
-            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->rgba = unit_col;
             glvert++->position = {{x2, y2, 0}};
-            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->rgba = unit_col;
             glvert->position = {{x1, y2, 0}};
 
             EndRenderUnit(4);
@@ -298,8 +298,8 @@ class StartupProgress
         else if (gamma_correction.f_ > 0)
         {
             int col = gamma_correction.f_ * 255;
-            sg_color sgcol = sg_make_color_4b(col, col, col, 255);
-            sgcol.a = HUDGetAlpha();
+            RGBAColor unit_col = epi::MakeRGBA(col, col, col);
+            epi::SetRGBAAlpha(unit_col, HUDGetAlpha());
 
             StartUnitBatch(false);
 
@@ -311,13 +311,13 @@ class StartupProgress
             float y1 = current_screen_height;
             float y2 = 0;
 
-            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->rgba = unit_col;
             glvert++->position = {{x1, y1, 0}};
-            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->rgba = unit_col;
             glvert++->position = {{x2, y1, 0}};
-            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->rgba = unit_col;
             glvert++->position = {{x2, y2, 0}};
-            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->rgba = unit_col;
             glvert->position = {{x1, y2, 0}};
 
             EndRenderUnit(4);
@@ -728,8 +728,8 @@ void EdgeDisplay(void)
     if (gamma_correction.f_ < 0)
     {
         int col = (1.0f + gamma_correction.f_) * 255;
-        sg_color sgcol = sg_make_color_4b(col, col, col, 255);
-        sgcol.a = HUDGetAlpha();
+        RGBAColor unit_col = epi::MakeRGBA(col, col, col);
+        epi::SetRGBAAlpha(unit_col, HUDGetAlpha());
 
         StartUnitBatch(false);
 
@@ -741,13 +741,13 @@ void EdgeDisplay(void)
         float y1 = current_screen_height;
         float y2 = 0;
 
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert++->position = {{x1, y1, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert++->position = {{x2, y1, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert++->position = {{x2, y2, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->position = {{x1, y2, 0}};
 
         EndRenderUnit(4);
@@ -757,8 +757,8 @@ void EdgeDisplay(void)
     else if (gamma_correction.f_ > 0)
     {
         int col = gamma_correction.f_ * 255;
-        sg_color sgcol = sg_make_color_4b(col, col, col, 255);
-        sgcol.a = HUDGetAlpha();
+        RGBAColor unit_col = epi::MakeRGBA(col, col, col);
+        epi::SetRGBAAlpha(unit_col, HUDGetAlpha());
 
         StartUnitBatch(false);
 
@@ -770,13 +770,13 @@ void EdgeDisplay(void)
         float y1 = current_screen_height;
         float y2 = 0;
 
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert++->position = {{x1, y1, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert++->position = {{x2, y1, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert++->position = {{x2, y2, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->position = {{x1, y2, 0}};
 
         EndRenderUnit(4);
@@ -823,7 +823,7 @@ static void TitleDrawer(void)
     }
     else
     {
-        HUDSolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
+        HUDSolidBox(0, 0, 320, 200, kRGBABlack);
     }
 }
 
@@ -2472,7 +2472,7 @@ void EdgeMain(int argc, const char **argv)
 
     InitialState();
 
-    ConsoleMessageColor(SG_YELLOW_RGBA32);
+    ConsoleMessageColor(kRGBAYellow);
     LogPrint("%s v%s initialisation complete.\n", application_name.c_str(), edge_version.c_str());
 
     LogDebug("- Entering game loop...\n");

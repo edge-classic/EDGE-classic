@@ -28,7 +28,6 @@
 #include "HandmadeMath.h"
 #include "epi_color.h"
 #include "i_defs_gl.h"
-#include "sokol_color.h"
 
 constexpr uint16_t kDummyClamp = 789;
 constexpr uint8_t kMaximumPolygonVertices = 64;
@@ -37,13 +36,13 @@ constexpr uint16_t kMaximumLocalVertices = 65535;
 // a single vertex to pass to the GPU
 struct RendererVertex
 {
-    GLfloat  rgba_color[4];
+    RGBAColor rgba;
     HMM_Vec3 position;
     HMM_Vec2 texture_coordinates[2];
     HMM_Vec3 normal;
 };
 
-extern sg_color culling_fog_color;
+extern RGBAColor culling_fog_color;
 
 void StartUnitBatch(bool sort_em);
 void FinishUnitBatch(void);

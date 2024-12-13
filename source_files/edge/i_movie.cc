@@ -31,7 +31,6 @@
 #include "s_blit.h"
 #include "s_music.h"
 #include "s_sound.h"
-#include "sokol_color.h"
 #include "w_files.h"
 #include "w_wad.h"
 
@@ -266,20 +265,20 @@ void MovieDrawer()
     {
         StartUnitBatch (false);
 
-        sg_color sgcol = sg_white;
+        RGBAColor unit_col = kRGBAWhite;
 
         RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, canvas, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
 
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->texture_coordinates[0] = {{tx1, ty2}};
         glvert++->position = {{vx1, vy2, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->texture_coordinates[0] = {{tx2, ty2}};
         glvert++->position = {{vx2, vy2, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->texture_coordinates[0] = {{tx2, ty1}};
         glvert++->position = {{vx2, vy1, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->texture_coordinates[0] = {{tx1, ty1}};
         glvert->position = {{vx1, vy1, 0}};
 
@@ -289,17 +288,17 @@ void MovieDrawer()
         fadein = plm_get_time(decoder);
         if (fadein <= 0.25f)
         {
-            sgcol = { 0, 0, 0, (0.25f - (float)fadein) / 0.25f };
+            unit_col = epi::MakeRGBAFloat(0.0f, 0.0f, 0.0f, ((0.25f - (float)fadein) / 0.25f));
             
             glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAlpha);
 
-            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->rgba = unit_col;
             glvert++->position = {{vx1, vy2, 0}};
-            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->rgba = unit_col;
             glvert++->position = {{vx2, vy2, 0}};
-            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->rgba = unit_col;
             glvert++->position = {{vx2, vy1, 0}};
-            memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+            glvert->rgba = unit_col;
             glvert->position = {{vx1, vy1, 0}};
 
             EndRenderUnit(4);
@@ -310,10 +309,10 @@ void MovieDrawer()
         if (skip_bar_active)
         {
             // Draw black box at bottom of screen
-            HUDSolidBox(hud_x_left, 196, hud_x_right, 200, SG_BLACK_RGBA32);
+            HUDSolidBox(hud_x_left, 196, hud_x_right, 200, kRGBABlack);
 
             // Draw progress
-            HUDSolidBox(hud_x_left, 197, hud_x_right * (skip_time / 0.9f), 199, SG_WHITE_RGBA32);
+            HUDSolidBox(hud_x_left, 197, hud_x_right * (skip_time / 0.9f), 199, kRGBAWhite);
         }
     }
     else
@@ -323,37 +322,37 @@ void MovieDrawer()
 
         StartUnitBatch(false);
 
-        sg_color sgcol = sg_white;
+        RGBAColor unit_col = kRGBAWhite;
 
         RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, canvas, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
 
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->texture_coordinates[0] = {{tx1, ty2}};
         glvert++->position = {{vx1, vy2, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->texture_coordinates[0] = {{tx2, ty2}};
         glvert++->position = {{vx2, vy2, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->texture_coordinates[0] = {{tx2, ty1}};
         glvert++->position = {{vx2, vy1, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->texture_coordinates[0] = {{tx1, ty1}};
         glvert->position = {{vx1, vy1, 0}};
 
         EndRenderUnit(4);
 
         // Fade-out
-        sgcol = { 0, 0, 0, HMM_MAX(0.0f, 1.0f - ((0.25f - (float)fadeout) / 0.25f)) };
+        unit_col = epi::MakeRGBAFloat(0.0f, 0.0f, 0.0f, (HMM_MAX(0.0f, 1.0f - ((0.25f - (float)fadeout) / 0.25f))));
             
         glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAlpha);
 
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert++->position = {{vx1, vy2, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert++->position = {{vx2, vy2, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert++->position = {{vx2, vy1, 0}};
-        memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+        glvert->rgba = unit_col;
         glvert->position = {{vx1, vy1, 0}};
 
         EndRenderUnit(4);

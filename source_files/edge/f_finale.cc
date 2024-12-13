@@ -56,7 +56,6 @@
 #include "r_state.h"
 #include "s_music.h"
 #include "s_sound.h"
-#include "sokol_color.h"
 #include "stb_sprintf.h"
 #include "w_model.h"
 #include "w_wad.h"
@@ -786,7 +785,7 @@ static void CastDrawer(void)
     }
     else
     {
-        HUDSetTextColor(SG_YELLOW_RGBA32);
+        HUDSetTextColor(kRGBAYellow);
     }
 
     TempScale = finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText].scale_;

@@ -30,7 +30,6 @@
 #include "r_state.h"
 #include "r_texgl.h"
 #include "r_units.h"
-#include "sokol_color.h"
 
 //----------------------------------------------------------------------------
 //  LIGHT IMAGES
@@ -76,7 +75,7 @@ class LightImage
             curve_[i] = epi::MakeRGBA(r, g, b);
         }
 
-        curve_[kLightImageCurveSize - 1] = SG_BLACK_RGBA32;
+        curve_[kLightImageCurveSize - 1] = kRGBABlack;
     }
 
     RGBAColor CurvePoint(float d, RGBAColor tint)
@@ -252,12 +251,12 @@ class dynlight_shader_c : public AbstractShader
 
             float L = mo->state_->bright / 255.0;
 
-            if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
+            if (new_col != kRGBABlack && L > 1 / 256.0)
             {
                 if (WhatType(DL) == kDynamicLightTypeAdd)
-                    col->add_green_ive(new_col, L);
+                    col->add_GIVE(new_col, L);
                 else
-                    col->modulate_green_ive(new_col, L);
+                    col->modulate_GIVE(new_col, L);
             }
         }
     }
@@ -307,12 +306,12 @@ class dynlight_shader_c : public AbstractShader
 
             RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
-            if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
+            if (new_col != kRGBABlack && L > 1 / 256.0)
             {
                 if (WhatType(DL) == kDynamicLightTypeAdd)
-                    col->add_green_ive(new_col, L);
+                    col->add_GIVE(new_col, L);
                 else
-                    col->modulate_green_ive(new_col, L);
+                    col->modulate_GIVE(new_col, L);
             }
         }
     }
@@ -331,9 +330,9 @@ class dynlight_shader_c : public AbstractShader
 
             float L = mo->state_->bright / 255.0;
 
-            float R = L * epi::GetRGBARed(col) / 255.0;
-            float G = L * epi::GetRGBAGreen(col) / 255.0;
-            float B = L * epi::GetRGBABlue(col) / 255.0;
+            float R = L * epi::GetRGBARed(col);
+            float G = L * epi::GetRGBAGreen(col);
+            float B = L * epi::GetRGBABlue(col);
 
             RendererVertex *glvert =
                 BeginRenderUnit(shape, num_vert,
@@ -350,17 +349,14 @@ class dynlight_shader_c : public AbstractShader
 
                 HMM_Vec3 lit_pos;
 
-                (*func)(data, v_idx, &dest->position, dest->rgba_color, &dest->texture_coordinates[0], &dest->normal,
+                (*func)(data, v_idx, &dest->position, &dest->rgba, &dest->texture_coordinates[0], &dest->normal,
                         &lit_pos);
 
                 float dist = TexCoord(&dest->texture_coordinates[1], WhatRadius(DL), &lit_pos, &dest->normal);
 
                 float ity = exp(-5.44 * dist * dist);
 
-                dest->rgba_color[0] = R * ity;
-                dest->rgba_color[1] = G * ity;
-                dest->rgba_color[2] = B * ity;
-                dest->rgba_color[3] = alpha;
+                dest->rgba = epi::MakeRGBA((uint8_t)(R * ity), (uint8_t)(G * ity), (uint8_t)(B * ity), (uint8_t)(alpha * 255.0f));
             }
 
             EndRenderUnit(num_vert);
@@ -446,12 +442,12 @@ class plane_glow_c : public AbstractShader
 
             float L = mo->state_->bright / 255.0;
 
-            if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
+            if (new_col != kRGBABlack && L > 1 / 256.0)
             {
                 if (WhatType(DL) == kDynamicLightTypeAdd)
-                    col->add_green_ive(new_col, L);
+                    col->add_GIVE(new_col, L);
                 else
-                    col->modulate_green_ive(new_col, L);
+                    col->modulate_GIVE(new_col, L);
             }
         }
     }
@@ -490,12 +486,12 @@ class plane_glow_c : public AbstractShader
 
             RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
-            if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
+            if (new_col != kRGBABlack && L > 1 / 256.0)
             {
                 if (WhatType(DL) == kDynamicLightTypeAdd)
-                    col->add_green_ive(new_col, L);
+                    col->add_GIVE(new_col, L);
                 else
-                    col->modulate_green_ive(new_col, L);
+                    col->modulate_GIVE(new_col, L);
             }
         }
     }
@@ -516,9 +512,9 @@ class plane_glow_c : public AbstractShader
 
             float L = mo->state_->bright / 255.0;
 
-            float R = L * epi::GetRGBARed(col) / 255.0;
-            float G = L * epi::GetRGBAGreen(col) / 255.0;
-            float B = L * epi::GetRGBABlue(col) / 255.0;
+            float R = L * epi::GetRGBARed(col);
+            float G = L * epi::GetRGBAGreen(col);
+            float B = L * epi::GetRGBABlue(col);
 
             RendererVertex *glvert =
                 BeginRenderUnit(shape, num_vert,
@@ -535,15 +531,12 @@ class plane_glow_c : public AbstractShader
 
                 HMM_Vec3 lit_pos;
 
-                (*func)(data, v_idx, &dest->position, dest->rgba_color, &dest->texture_coordinates[0], &dest->normal,
+                (*func)(data, v_idx, &dest->position, &dest->rgba, &dest->texture_coordinates[0], &dest->normal,
                         &lit_pos);
 
                 TexCoord(&dest->texture_coordinates[1], WhatRadius(DL), sec, &lit_pos, &dest->normal);
 
-                dest->rgba_color[0] = R;
-                dest->rgba_color[1] = G;
-                dest->rgba_color[2] = B;
-                dest->rgba_color[3] = alpha;
+                dest->rgba = epi::MakeRGBA((uint8_t)R, (uint8_t)G, (uint8_t)B, (uint8_t)(alpha * 255.0f));
             }
 
             EndRenderUnit(num_vert);
@@ -632,12 +625,12 @@ class wall_glow_c : public AbstractShader
 
             RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
-            if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
+            if (new_col != kRGBABlack && L > 1 / 256.0)
             {
                 if (WhatType(DL) == kDynamicLightTypeAdd)
-                    col->add_green_ive(new_col, L);
+                    col->add_GIVE(new_col, L);
                 else
-                    col->modulate_green_ive(new_col, L);
+                    col->modulate_GIVE(new_col, L);
             }
         }
     }
@@ -657,12 +650,12 @@ class wall_glow_c : public AbstractShader
 
             RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
-            if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
+            if (new_col != kRGBABlack && L > 1 / 256.0)
             {
                 if (WhatType(DL) == kDynamicLightTypeAdd)
-                    col->add_green_ive(new_col, L);
+                    col->add_GIVE(new_col, L);
                 else
-                    col->modulate_green_ive(new_col, L);
+                    col->modulate_GIVE(new_col, L);
             }
         }
     }
@@ -683,9 +676,9 @@ class wall_glow_c : public AbstractShader
 
             float L = mo->state_->bright / 255.0;
 
-            float R = L * epi::GetRGBARed(col) / 255.0;
-            float G = L * epi::GetRGBAGreen(col) / 255.0;
-            float B = L * epi::GetRGBABlue(col) / 255.0;
+            float R = L * epi::GetRGBARed(col);
+            float G = L * epi::GetRGBAGreen(col);
+            float B = L * epi::GetRGBABlue(col);
 
             RendererVertex *glvert =
                 BeginRenderUnit(shape, num_vert,
@@ -702,15 +695,13 @@ class wall_glow_c : public AbstractShader
 
                 HMM_Vec3 lit_pos;
 
-                (*func)(data, v_idx, &dest->position, dest->rgba_color, &dest->texture_coordinates[0], &dest->normal,
+                (*func)(data, v_idx, &dest->position, &dest->rgba, &dest->texture_coordinates[0], &dest->normal,
                         &lit_pos);
 
                 TexCoord(&dest->texture_coordinates[1], WhatRadius(DL), sec, &lit_pos, &dest->normal);
 
-                dest->rgba_color[0] = R * render_view_red_multiplier;
-                dest->rgba_color[1] = G * render_view_green_multiplier;
-                dest->rgba_color[2] = B * render_view_blue_multiplier;
-                dest->rgba_color[3] = alpha;
+                dest->rgba = epi::MakeRGBA((uint8_t)(R * render_view_red_multiplier), (uint8_t)(G * render_view_green_multiplier), 
+                    (uint8_t)(B * render_view_blue_multiplier), (uint8_t)(alpha * 255.0f));
             }
 
             EndRenderUnit(num_vert);

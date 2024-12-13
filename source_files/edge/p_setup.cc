@@ -58,7 +58,6 @@
 #include "rad_trig.h" // MUSINFO changers
 #include "s_music.h"
 #include "s_sound.h"
-#include "sokol_color.h"
 #include "sv_main.h"
 #include "w_files.h"
 #include "w_texture.h"
@@ -1503,8 +1502,8 @@ static void LoadUDMFSectors()
             float     rf = 0.0f, rc = 0.0f;
             float     gravfactor = 1.0f;
             int       light = 160, type = 0, tag = 0;
-            RGBAColor fog_color   = SG_BLACK_RGBA32;
-            RGBAColor light_color = SG_WHITE_RGBA32;
+            RGBAColor fog_color   = kRGBABlack;
+            RGBAColor light_color = kRGBAWhite;
             int       fog_density = 0;
             char      floor_tex[10];
             char      ceil_tex[10];
@@ -1700,7 +1699,7 @@ static void LoadUDMFSectors()
             ss->properties.drag      = kDragDefault;
 
             // Allow UDMF sector light/fog information to override DDFSECT types
-            if (fog_color != SG_BLACK_RGBA32) // All black is the established
+            if (fog_color != kRGBABlack) // All black is the established
                                               // UDMF "no fog" color
             {
                 // Prevent UDMF-specified fog color from having our internal 'no
@@ -1725,7 +1724,7 @@ static void LoadUDMFSectors()
                 ss->properties.fog_color   = kRGBANoValue;
                 ss->properties.fog_density = 0;
             }
-            if (light_color != SG_WHITE_RGBA32)
+            if (light_color != kRGBAWhite)
             {
                 if (light_color == kRGBANoValue)
                     light_color ^= 0x00010100;

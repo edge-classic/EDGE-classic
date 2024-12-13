@@ -32,7 +32,6 @@
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "p_action.h"
-#include "sokol_color.h"
 #include "stb_sprintf.h"
 
 void ReadRADScript(const std::string &_data, const std::string &source);
@@ -1949,7 +1948,7 @@ void DynamicLightDefinition::Default()
 {
     type_   = kDynamicLightTypeNone;
     radius_ = 32;
-    colour_ = SG_WHITE_RGBA32;
+    colour_ = kRGBAWhite;
     height_ = 0.5f;
     leaky_  = false;
     shape_  = "DLIGHT_EXP";

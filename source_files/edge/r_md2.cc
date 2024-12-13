@@ -256,6 +256,8 @@ class MD2Model
 
     RendererVertex *gl_vertices_;
 
+    bool color_flipped_;
+
   public:
     MD2Model(int nframe, int npoint, int ntriangles_)
         : total_frames_(nframe), total_points_(npoint), total_triangles_(ntriangles_), vertices_per_frame_(0),
@@ -941,7 +943,7 @@ static inline float LerpIt(float v1, float v2, float lerp)
     return v1 * (1.0f - lerp) + v2 * lerp;
 }
 
-static inline void ModelCoordFunc(MD2CoordinateData *data, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc,
+static inline void ModelCoordFunc(MD2CoordinateData *data, int v_idx, HMM_Vec3 *pos, RGBAColor *rgb, HMM_Vec2 *texc,
                                   HMM_Vec3 *normal)
 {
     const MD2Model *md = data->model_;
@@ -976,7 +978,7 @@ static inline void ModelCoordFunc(MD2CoordinateData *data, int v_idx, HMM_Vec3 *
         texc->X = point->skin_s * data->fuzz_multiplier_ + data->fuzz_add_.X;
         texc->Y = point->skin_t * data->fuzz_multiplier_ + data->fuzz_add_.Y;
 
-        rgb[0] = rgb[1] = rgb[2] = 0;
+        *rgb = kRGBABlack;
         return;
     }
 
@@ -986,15 +988,13 @@ static inline void ModelCoordFunc(MD2CoordinateData *data, int v_idx, HMM_Vec3 *
 
     if (!data->is_additive_)
     {
-        rgb[0] = col->modulate_red_ / 255.0 * render_view_red_multiplier;
-        rgb[1] = col->modulate_green_ / 255.0 * render_view_green_multiplier;
-        rgb[2] = col->modulate_blue_ / 255.0 * render_view_blue_multiplier;
+        *rgb = epi::MakeRGBAClamped(col->modulate_red_ * render_view_red_multiplier, col->modulate_green_ * render_view_green_multiplier,
+            col->modulate_blue_ * render_view_blue_multiplier);
     }
     else
     {
-        rgb[0] = col->add_red_ / 255.0 * render_view_red_multiplier;
-        rgb[1] = col->add_green_ / 255.0 * render_view_green_multiplier;
-        rgb[2] = col->add_blue_ / 255.0 * render_view_blue_multiplier;
+        *rgb = epi::MakeRGBAClamped(col->add_red_ * render_view_red_multiplier, col->add_green_ * render_view_green_multiplier,
+            col->add_blue_ * render_view_blue_multiplier);
     }
 }
 
@@ -1175,20 +1175,15 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
 
     if (!draw_culling.d_ && fc_to_use != kRGBANoValue)
     {
-        GLfloat fc[4];
-        fc[0] = (float)epi::GetRGBARed(fc_to_use) / 255.0f;
-        fc[1] = (float)epi::GetRGBAGreen(fc_to_use) / 255.0f;
-        fc[2] = (float)epi::GetRGBABlue(fc_to_use) / 255.0f;
-        fc[3] = 1.0f;
-        global_render_state->ClearColor(fc[0], fc[1], fc[2], 1.0f);
-        global_render_state->FogColor(fc[0], fc[1], fc[2], fc[3]);
+        global_render_state->ClearColor(fc_to_use);
+        global_render_state->FogColor(fc_to_use);
         global_render_state->FogMode(GL_EXP);
         global_render_state->FogDensity(std::log1p(fd_to_use));
         global_render_state->Enable(GL_FOG);
     }
     else if (draw_culling.d_)
     {
-        sg_color fogColor;
+        RGBAColor fogColor;
         if (need_to_draw_sky)
         {
             switch (cull_fog_color.d_)
@@ -1198,13 +1193,13 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
                 break;
             case 1:
                 // Not pure white, but 1.0f felt like a little much - Dasho
-                fogColor = sg_silver;
+                fogColor = kRGBASilver;
                 break;
             case 2:
-                fogColor = {0.25f, 0.25f, 0.25f, 1.0f};
+                fogColor = 0x404040FF; // Find a constant to call this
                 break;
             case 3:
-                fogColor = sg_black;
+                fogColor = kRGBABlack;
                 break;
             default:
                 fogColor = culling_fog_color;
@@ -1213,11 +1208,11 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         }
         else
         {
-            fogColor = sg_black;
+            fogColor = kRGBABlack;
         }
-        global_render_state->ClearColor(fogColor.r, fogColor.g, fogColor.b, 1.0f);
+        global_render_state->ClearColor(fogColor);
         global_render_state->FogMode(GL_LINEAR);
-        global_render_state->FogColor(fogColor.r, fogColor.g, fogColor.b, fogColor.a);
+        global_render_state->FogColor(fogColor);
         global_render_state->FogStart(renderer_far_clip.f_ - 750.0f);
         global_render_state->FogEnd(renderer_far_clip.f_ - 250.0f);
         global_render_state->Enable(GL_FOG);
@@ -1333,10 +1328,11 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
             {
                 RendererVertex *dest = start + (i * 3) + v_idx;
 
-                ModelCoordFunc(&data, v_idx, &dest->position, dest->rgba_color, &dest->texture_coordinates[0],
+                ModelCoordFunc(&data, v_idx, &dest->position, &dest->rgba, &dest->texture_coordinates[0],
                                &dest->normal);
 
-                dest->rgba_color[3] = trans;
+                epi::SetRGBAAlpha(dest->rgba, trans);
+                dest->rgba = AlignedBigEndianU32(dest->rgba);
             }
         }
 
@@ -1347,7 +1343,7 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         if (needed_bound)
         {
             glVertexPointer(3, GL_FLOAT, sizeof(RendererVertex), (void *)(offsetof(RendererVertex, position.X)));
-            glColorPointer(4, GL_FLOAT, sizeof(RendererVertex), (void *)(offsetof(RendererVertex, rgba_color)));
+            glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(RendererVertex), (void *)(offsetof(RendererVertex, rgba)));
             glTexCoordPointer(2, GL_FLOAT, sizeof(RendererVertex),
                             (void *)(offsetof(RendererVertex, texture_coordinates[0])));
         }
@@ -1384,9 +1380,9 @@ void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, f
     global_render_state->Enable(GL_CULL_FACE);
 
     if (info->flags_ & kMapObjectFlagFuzzy)
-        global_render_state->GLColor(0, 0, 0, 0.5f);
+        global_render_state->GLColor(epi::MakeRGBA(0, 0, 0, 128));
     else
-        global_render_state->GLColor(1, 1, 1, 1.0f);
+        global_render_state->GLColor(kRGBAWhite);
 
     for (int i = 0; i < md->total_triangles_; i++)
     {

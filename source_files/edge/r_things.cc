@@ -53,7 +53,6 @@
 #include "r_texgl.h"
 #include "r_units.h"
 #include "script/compat/lua_compat.h"
-#include "sokol_color.h"
 #include "vm_coal.h"
 #include "w_model.h"
 #include "w_sprite.h"
@@ -323,14 +322,14 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
         if (fc_to_use != kRGBANoValue)
         {
             int       mix_factor = RoundToInteger(255.0f * (fd_to_use * 75));
-            RGBAColor mixme = epi::MixRGBA(epi::MakeRGBA(data.colors[0].modulate_red_, data.colors[0].modulate_green_,
+            RGBAColor mixme = epi::MixRGBA(epi::MakeRGBAClamped(data.colors[0].modulate_red_, data.colors[0].modulate_green_,
                                                          data.colors[0].modulate_blue_),
                                            fc_to_use, mix_factor);
             data.colors[0].modulate_red_   = epi::GetRGBARed(mixme);
             data.colors[0].modulate_green_ = epi::GetRGBAGreen(mixme);
             data.colors[0].modulate_blue_  = epi::GetRGBABlue(mixme);
             mixme                          = epi::MixRGBA(
-                epi::MakeRGBA(data.colors[0].add_red_, data.colors[0].add_green_, data.colors[0].add_blue_), fc_to_use,
+                epi::MakeRGBAClamped(data.colors[0].add_red_, data.colors[0].add_green_, data.colors[0].add_blue_), fc_to_use,
                 mix_factor);
             data.colors[0].add_red_   = epi::GetRGBARed(mixme);
             data.colors[0].add_green_ = epi::GetRGBAGreen(mixme);
@@ -410,13 +409,12 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
 
                 FuzzAdjust(&dest->texture_coordinates[1], player->map_object_);
 
-                dest->rgba_color[0] = dest->rgba_color[1] = dest->rgba_color[2] = 0;
+                dest->rgba = kRGBABlack;
             }
             else if (!is_additive)
             {
-                dest->rgba_color[0] = data.colors[v_idx].modulate_red_ / 255.0 * render_view_red_multiplier;
-                dest->rgba_color[1] = data.colors[v_idx].modulate_green_ / 255.0 * render_view_green_multiplier;
-                dest->rgba_color[2] = data.colors[v_idx].modulate_blue_ / 255.0 * render_view_blue_multiplier;
+                dest->rgba = epi::MakeRGBAClamped(data.colors[v_idx].modulate_red_ * render_view_red_multiplier, (data.colors[v_idx].modulate_green_ * render_view_green_multiplier),
+                    data.colors[v_idx].modulate_blue_ * render_view_blue_multiplier);
 
                 data.colors[v_idx].modulate_red_ -= 256;
                 data.colors[v_idx].modulate_green_ -= 256;
@@ -424,12 +422,11 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
             }
             else
             {
-                dest->rgba_color[0] = data.colors[v_idx].add_red_ / 255.0 * render_view_red_multiplier;
-                dest->rgba_color[1] = data.colors[v_idx].add_green_ / 255.0 * render_view_green_multiplier;
-                dest->rgba_color[2] = data.colors[v_idx].add_blue_ / 255.0 * render_view_blue_multiplier;
+                dest->rgba = epi::MakeRGBAClamped(data.colors[v_idx].add_red_ * render_view_red_multiplier, (data.colors[v_idx].add_green_ * render_view_green_multiplier),
+                    data.colors[v_idx].add_blue_ * render_view_blue_multiplier);
             }
 
-            dest->rgba_color[3] = trans;
+            epi::SetRGBAAlpha(dest->rgba, trans);
         }
 
         EndRenderUnit(4);
@@ -441,8 +438,8 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
 }
 
 static const RGBAColor crosshair_colors[8] = {
-    SG_LIGHT_GRAY_RGBA32, SG_BLUE_RGBA32,    SG_GREEN_RGBA32,  SG_CYAN_RGBA32,
-    SG_RED_RGBA32,        SG_FUCHSIA_RGBA32, SG_YELLOW_RGBA32, SG_DARK_ORANGE_RGBA32,
+    kRGBALightGray, kRGBABlue,    kRGBAGreen,  kRGBACyan,
+    kRGBARed, kRGBAFuchsia, kRGBAYellow, kRGBADarkOrange
 };
 
 static void DrawStdCrossHair(void)
@@ -466,11 +463,8 @@ static void DrawStdCrossHair(void)
 
     float intensity = 1.0f * crosshair_brightness.f_;
 
-    float r = epi::GetRGBARed(color) * intensity / 255.0f;
-    float g = epi::GetRGBAGreen(color) * intensity / 255.0f;
-    float b = epi::GetRGBABlue(color) * intensity / 255.0f;
-
-    sg_color sgcol = {r, g, b, 1.0f};
+    RGBAColor unit_col = epi::MakeRGBA((uint8_t)(epi::GetRGBARed(color) * intensity), (uint8_t)(epi::GetRGBAGreen(color) * intensity), 
+        (uint8_t)(epi::GetRGBABlue(color) * intensity));
 
     float x = view_window_x + view_window_width / 2;
     float y = view_window_y + view_window_height / 2;
@@ -483,16 +477,16 @@ static void DrawStdCrossHair(void)
             BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, tex_id,
                             (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAdd);
 
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->position = {{x - w, y - w, 0.0f}};
     glvert++->texture_coordinates[0] = {{0.0f, 0.0f}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->position = {{x - w, y + w, 0.0f}};
     glvert++->texture_coordinates[0] = {{0.0f, 1.0f}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->position = {{x + w, y + w, 0.0f}};
     glvert++->texture_coordinates[0] = {{1.0f, 1.0f}};
-    memcpy(&glvert->rgba_color, &sgcol, 4 * sizeof(float));
+    glvert->rgba = unit_col;
     glvert->position = {{x + w, y - w, 0.0f}};
     glvert++->texture_coordinates[0] = {{1.0f, 0.0f}};
 
@@ -1351,15 +1345,13 @@ void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
 
                 dest->texture_coordinates[1].X = ftx * fuzz_mul + fuzz_add.X;
                 dest->texture_coordinates[1].Y = fty * fuzz_mul + fuzz_add.Y;
-                ;
 
-                dest->rgba_color[0] = dest->rgba_color[1] = dest->rgba_color[2] = 0;
+                dest->rgba = kRGBABlack;
             }
             else if (!is_additive)
             {
-                dest->rgba_color[0] = data.colors[v_idx].modulate_red_ / 255.0 * render_view_red_multiplier;
-                dest->rgba_color[1] = data.colors[v_idx].modulate_green_ / 255.0 * render_view_green_multiplier;
-                dest->rgba_color[2] = data.colors[v_idx].modulate_blue_ / 255.0 * render_view_blue_multiplier;
+                dest->rgba = epi::MakeRGBAClamped(data.colors[v_idx].modulate_red_ * render_view_red_multiplier, (data.colors[v_idx].modulate_green_ * render_view_green_multiplier),
+                    data.colors[v_idx].modulate_blue_ * render_view_blue_multiplier);
 
                 data.colors[v_idx].modulate_red_ -= 256;
                 data.colors[v_idx].modulate_green_ -= 256;
@@ -1367,12 +1359,11 @@ void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
             }
             else
             {
-                dest->rgba_color[0] = data.colors[v_idx].add_red_ / 255.0 * render_view_red_multiplier;
-                dest->rgba_color[1] = data.colors[v_idx].add_green_ / 255.0 * render_view_green_multiplier;
-                dest->rgba_color[2] = data.colors[v_idx].add_blue_ / 255.0 * render_view_blue_multiplier;
+                dest->rgba = epi::MakeRGBAClamped(data.colors[v_idx].add_red_ * render_view_red_multiplier, (data.colors[v_idx].add_green_ * render_view_green_multiplier),
+                    data.colors[v_idx].add_blue_ * render_view_blue_multiplier);
             }
 
-            dest->rgba_color[3] = trans;
+            epi::SetRGBAAlpha(dest->rgba, trans);
         }
 
         EndRenderUnit(4);

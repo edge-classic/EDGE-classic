@@ -215,17 +215,6 @@ struct Compare_Unit_pred
     }
 };
 
-static inline void RendererSendRawVector(const RendererVertex *V)
-{
-    global_render_state->GLColor(V->rgba);
-
-    global_render_state->MultiTexCoord(GL_TEXTURE0, &V->texture_coordinates[0]);
-    global_render_state->MultiTexCoord(GL_TEXTURE1, &V->texture_coordinates[1]);
-
-    // vertex must be last
-    glVertex3fv((const GLfloat *)(&V->position));
-}
-
 //
 // RenderCurrentUnits
 //
@@ -455,9 +444,15 @@ void RenderCurrentUnits(void)
 
         glBegin(unit->shape);
 
-        for (int v_idx = 0; v_idx < unit->count; v_idx++)
+        const RendererVertex *V = local_verts + unit->first;
+
+        for (int v_idx = 0, v_last_idx = unit->count; v_idx < v_last_idx; v_idx++, V++)
         {
-            RendererSendRawVector(local_verts + unit->first + v_idx);
+            global_render_state->GLColor(V->rgba);
+            global_render_state->MultiTexCoord(GL_TEXTURE0, &V->texture_coordinates[0]);
+            global_render_state->MultiTexCoord(GL_TEXTURE1, &V->texture_coordinates[1]);
+            // vertex must be last
+            glVertex3fv((const GLfloat *)(&V->position));
         }
 
         glEnd();

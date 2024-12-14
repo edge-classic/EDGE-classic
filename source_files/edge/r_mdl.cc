@@ -100,9 +100,9 @@ struct RawMDLHeader
     int32_t skin_width;
     int32_t skin_height;
 
-    int32_t num_vertices; // per frame
-    int32_t total_triangles_;
-    int32_t total_frames_;
+    int32_t num_verts; // per frame
+    int32_t num_tris;
+    int32_t num_frames;
 
     int32_t  synctype;
     int32_t  flags;
@@ -193,19 +193,17 @@ class MDLModel
 
     std::vector<uint32_t> skin_id_list_;
 
-    GLuint vertex_buffer_object_;
-
     RendererVertex *gl_vertices_;
 
   public:
-    MDLModel(int nframe, int npoint, int ntris, int swidth, int sheight)
-        : total_frames_(nframe), total_points_(npoint), total_triangles_(ntris), skin_width_(swidth),
-          skin_height_(sheight), vertices_per_frame_(0), vertex_buffer_object_(0), gl_vertices_(nullptr)
+    MDLModel(int nframes, int npoints, int ntris, int swidth, int sheight)
+        : total_frames_(nframes), total_points_(npoints), total_triangles_(ntris), skin_width_(swidth),
+          skin_height_(sheight), vertices_per_frame_(npoints), gl_vertices_(nullptr)
     {
         frames_      = new MDLFrame[total_frames_];
         points_      = new MDLPoint[total_points_];
         triangles_   = new MDLTriangle[total_triangles_];
-        gl_vertices_ = new RendererVertex[total_triangles_ * 3];
+        gl_vertices_ = new RendererVertex[vertices_per_frame_];
     }
 
     ~MDLModel()
@@ -213,6 +211,7 @@ class MDLModel
         delete[] frames_;
         delete[] points_;
         delete[] triangles_;
+        delete[] gl_vertices_;
     }
 };
 
@@ -276,14 +275,14 @@ MDLModel *MDLLoad(epi::File *f)
         return nullptr; /* NOT REACHED */
     }
 
-    int total_frames_    = AlignedLittleEndianS32(header.total_frames_);
-    int total_triangles_ = AlignedLittleEndianS32(header.total_triangles_);
-    int num_verts        = AlignedLittleEndianS32(header.num_vertices);
+    int num_frames        = AlignedLittleEndianS32(header.num_frames);
+    int num_tris         = AlignedLittleEndianS32(header.num_tris);
+    int num_verts        = AlignedLittleEndianS32(header.num_verts);
     int swidth           = AlignedLittleEndianS32(header.skin_width);
     int sheight          = AlignedLittleEndianS32(header.skin_height);
-    int total_points_    = total_triangles_ * 3;
+    int num_points       = num_tris * 3;
 
-    MDLModel *md = new MDLModel(total_frames_, total_points_, total_triangles_, swidth, sheight);
+    MDLModel *md = new MDLModel(num_frames, num_points, num_tris, swidth, sheight);
 
     /* PARSE SKINS */
 
@@ -321,14 +320,14 @@ MDLModel *MDLLoad(epi::File *f)
 
     /* PARSE TRIANGLES */
 
-    RawMDLTriangle *tris = new RawMDLTriangle[total_triangles_];
-    f->Read(tris, total_triangles_ * sizeof(RawMDLTriangle));
+    RawMDLTriangle *tris = new RawMDLTriangle[num_tris];
+    f->Read(tris, num_tris * sizeof(RawMDLTriangle));
 
     /* PARSE FRAMES */
 
-    RawMDLFrame *frames = new RawMDLFrame[total_frames_];
+    RawMDLFrame *frames = new RawMDLFrame[num_frames];
 
-    for (int fr = 0; fr < total_frames_; fr++)
+    for (int fr = 0; fr < num_frames; fr++)
     {
         frames[fr].frame.verts = new RawMDLVertex[num_verts];
         f->Read(&frames[fr].type, sizeof(int));
@@ -338,9 +337,7 @@ MDLModel *MDLLoad(epi::File *f)
         f->Read(frames[fr].frame.verts, num_verts * sizeof(RawMDLVertex));
     }
 
-    LogDebug("  frames:%d  points:%d  tris: %d\n", total_frames_, total_triangles_ * 3, total_triangles_);
-
-    md->vertices_per_frame_ = num_verts;
+    LogDebug("  frames:%d  points:%d  tris: %d\n", num_frames, num_points, num_tris);
 
     LogDebug("  vertices_per_frame_:%d\n", md->vertices_per_frame_);
 
@@ -348,7 +345,7 @@ MDLModel *MDLLoad(epi::File *f)
     MDLTriangle *tri   = md->triangles_;
     MDLPoint    *point = md->points_;
 
-    for (int i = 0; i < total_triangles_; i++)
+    for (int i = 0; i < num_tris; i++)
     {
         EPI_ASSERT(tri < md->triangles_ + md->total_triangles_);
         EPI_ASSERT(point < md->points_ + md->total_points_);
@@ -403,7 +400,7 @@ MDLModel *MDLLoad(epi::File *f)
     translate[1] = f_ptr[1];
     translate[2] = f_ptr[2];
 
-    for (int i = 0; i < total_frames_; i++)
+    for (int i = 0; i < num_frames; i++)
     {
         RawMDLFrame raw_frame = frames[i];
 
@@ -444,11 +441,6 @@ MDLModel *MDLLoad(epi::File *f)
     delete[] texcoords;
     delete[] tris;
     delete[] frames;
-    glGenBuffers(1, &md->vertex_buffer_object_);
-    if (md->vertex_buffer_object_ == 0)
-        FatalError("MDL_LoadModel: Failed to bind VBO!\n");
-    global_render_state->BindBuffer(md->vertex_buffer_object_);
-    glBufferData(GL_ARRAY_BUFFER, md->total_triangles_ * 3 * sizeof(RendererVertex), nullptr, GL_STREAM_DRAW);
     return md;
 }
 
@@ -527,23 +519,6 @@ class MDLCoordinateData
         pos->X = x_ + x2 * rotation_vector_x_.X + y2 * rotation_vector_x_.Y;
         pos->Y = y_ + x2 * rotation_vector_y_.X + y2 * rotation_vector_y_.Y;
         pos->Z = z_ + z2;
-    }
-
-    void CalculateNormal(HMM_Vec3 *normal, const MDLVertex *vert) const
-    {
-        short n = vert->normal_idx;
-
-        float nx1 = md_normals[n].X;
-        float ny1 = md_normals[n].Y;
-        float nz1 = md_normals[n].Z;
-
-        float nx2 = nx1 * mouselook_x_vector_.X + nz1 * mouselook_x_vector_.Y;
-        float nz2 = nx1 * mouselook_z_vector_.X + nz1 * mouselook_z_vector_.Y;
-        float ny2 = ny1;
-
-        normal->X = nx2 * rotation_vector_x_.X + ny2 * rotation_vector_x_.Y;
-        normal->Y = nx2 * rotation_vector_y_.X + ny2 * rotation_vector_y_.Y;
-        normal->Z = nz2;
     }
 };
 
@@ -632,13 +607,7 @@ static void UpdateMulticols(MDLCoordinateData *data)
     }
 }
 
-static inline float LerpIt(float v1, float v2, float lerp)
-{
-    return v1 * (1.0f - lerp) + v2 * lerp;
-}
-
-static inline void ModelCoordFunc(MDLCoordinateData *data, int v_idx, HMM_Vec3 *pos, RGBAColor *rgb, HMM_Vec2 *texc,
-                                  HMM_Vec3 *normal)
+static inline void ModelCoordFunc(MDLCoordinateData *data, int v_idx, HMM_Vec3 *pos, RGBAColor *rgb, HMM_Vec2 *texc)
 {
     const MDLModel *md = data->model_;
 
@@ -654,18 +623,14 @@ static inline void ModelCoordFunc(MDLCoordinateData *data, int v_idx, HMM_Vec3 *
     const MDLVertex *vert1 = &frame1->vertices[point->vert_idx];
     const MDLVertex *vert2 = &frame2->vertices[point->vert_idx];
 
-    float x1 = LerpIt(vert1->x, vert2->x, data->lerp_);
-    float y1 = LerpIt(vert1->y, vert2->y, data->lerp_);
-    float z1 = LerpIt(vert1->z, vert2->z, data->lerp_) + data->bias_;
+    float x1 = HMM_Lerp(vert1->x, data->lerp_, vert2->x);
+    float y1 = HMM_Lerp(vert1->y, data->lerp_, vert2->y);
+    float z1 = HMM_Lerp(vert1->z, data->lerp_, vert2->z) + data->bias_;
 
     if (MirrorReflective())
         y1 = -y1;
 
     data->CalculatePosition(pos, x1, y1, z1);
-
-    const MDLVertex *n_vert = (data->lerp_ < 0.5) ? vert1 : vert2;
-
-    data->CalculateNormal(normal, n_vert);
 
     if (data->is_fuzzy_)
     {
@@ -678,7 +643,7 @@ static inline void ModelCoordFunc(MDLCoordinateData *data, int v_idx, HMM_Vec3 *
 
     *texc = {{point->skin_s, point->skin_t}};
 
-    ColorMixer *col = &data->normal_colors_[n_vert->normal_idx];
+    ColorMixer *col = &data->normal_colors_[(data->lerp_ < 0.5) ? vert1->normal_idx : vert2->normal_idx];
 
     if (!data->is_additive_)
     {
@@ -1013,37 +978,32 @@ void MDLRenderModel(MDLModel *md, const Image *skin_img, bool is_weapon, int fra
             global_render_state->TextureWrapT(renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE);
         }
 
-        RendererVertex *start = md->gl_vertices_;
+        glBegin(GL_TRIANGLES);
+
+        RendererVertex *dest = md->gl_vertices_;
 
         for (int i = 0; i < md->total_triangles_; i++)
         {
             data.strip_ = &md->triangles_[i];
 
-            for (int v_idx = 0; v_idx < 3; v_idx++)
+            for (int v_idx = 0; v_idx < 3; v_idx++, dest++)
             {
-                RendererVertex *dest = start + (i * 3) + v_idx;
+                HMM_Vec3 *position = &dest->position;
+                RGBAColor *rgba = &dest->rgba;
+                HMM_Vec2 *texc = &dest->texture_coordinates[0];
 
-                ModelCoordFunc(&data, v_idx, &dest->position, &dest->rgba, &dest->texture_coordinates[0],
-                               &dest->normal);
+                ModelCoordFunc(&data, v_idx, position, rgba, texc);
 
-                epi::SetRGBAAlpha(dest->rgba, trans);
-                dest->rgba = AlignedBigEndianU32(dest->rgba);
+                epi::SetRGBAAlpha(*rgba, trans);
+
+                global_render_state->GLColor(*rgba);
+                global_render_state->MultiTexCoord(GL_TEXTURE0, texc);
+                // vertex must be last
+                glVertex3fv((const GLfloat *)(position));
             }
         }
 
-        // setup client state
-        bool needed_bound = global_render_state->BindBuffer(md->vertex_buffer_object_);
-        glBufferData(GL_ARRAY_BUFFER, md->total_triangles_ * 3 * sizeof(RendererVertex), md->gl_vertices_,
-                     GL_STREAM_DRAW);
-        if (needed_bound)
-        {
-            glVertexPointer(3, GL_FLOAT, sizeof(RendererVertex), (void *)(offsetof(RendererVertex, position.X)));
-            glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(RendererVertex), (void *)(offsetof(RendererVertex, rgba)));
-            glTexCoordPointer(2, GL_FLOAT, sizeof(RendererVertex),
-                            (void *)(offsetof(RendererVertex, texture_coordinates[0])));
-        }
-
-        glDrawArrays(GL_TRIANGLES, 0, md->total_triangles_ * 3);
+        glEnd();
 
         // restore the clamping mode
         if (old_clamp != kDummyClamp)

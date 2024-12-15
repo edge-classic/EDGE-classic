@@ -95,7 +95,7 @@ extern ECFrameStats ec_frame_stats;
 class RenderState
 {
   public:
-    void Enable(GLenum cap, bool enabled = true)
+    inline void Enable(GLenum cap, bool enabled = true)
     {
         switch (cap)
         {
@@ -192,12 +192,12 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void Disable(GLenum cap)
+    inline void Disable(GLenum cap)
     {
         Enable(cap, false);
     }
 
-    void DepthMask(bool enable)
+    inline void DepthMask(bool enable)
     {
         if (depth_mask_ == enable)
         {
@@ -209,7 +209,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void DepthFunction(GLenum func)
+    inline void DepthFunction(GLenum func)
     {
         if (func == depth_function_)
         {
@@ -222,7 +222,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void CullFace(GLenum mode)
+    inline void CullFace(GLenum mode)
     {
         if (cull_face_ == mode)
         {
@@ -234,7 +234,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void AlphaFunction(GLenum func, GLfloat ref)
+    inline void AlphaFunction(GLenum func, GLfloat ref)
     {
         if (func == alpha_function_ && AlmostEquals(ref, alpha_function_reference_))
         {
@@ -248,7 +248,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void ActiveTexture(GLenum activeTexture)
+    inline void ActiveTexture(GLenum activeTexture)
     {
         if (activeTexture == active_texture_)
         {
@@ -260,7 +260,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void BindTexture(GLuint textureid)
+    inline void BindTexture(GLuint textureid)
     {
         GLuint index = active_texture_ - GL_TEXTURE0;
         if (bind_texture_2d_[index] == textureid)
@@ -274,7 +274,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void PolygonOffset(GLfloat factor, GLfloat units)
+    inline void PolygonOffset(GLfloat factor, GLfloat units)
     {
         if (factor == polygon_offset_factor_ && units == polygon_offset_units_)
         {
@@ -287,7 +287,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void ClearColor(RGBAColor color)
+    inline void ClearColor(RGBAColor color)
     {
         if (color == clear_color_)
         {
@@ -300,7 +300,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void FogMode(GLint fogMode)
+    inline void FogMode(GLint fogMode)
     {
         if (fog_mode_ == fogMode)
         {
@@ -312,7 +312,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void FogColor(RGBAColor color)
+    inline void FogColor(RGBAColor color)
     {
         if (fog_color_ == color)
         {
@@ -327,7 +327,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void FogStart(GLfloat start)
+    inline void FogStart(GLfloat start)
     {
         if (fog_start_ == start)
         {
@@ -339,7 +339,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void FogEnd(GLfloat end)
+    inline void FogEnd(GLfloat end)
     {
         if (fog_end_ == end)
         {
@@ -351,7 +351,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void FogDensity(GLfloat density)
+    inline void FogDensity(GLfloat density)
     {
         if (fog_density_ == density)
         {
@@ -363,7 +363,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void GLColor(RGBAColor color)
+    inline void GLColor(RGBAColor color)
     {
         if (color == gl_color_)
         {
@@ -376,7 +376,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void BlendFunction(GLenum sfactor, GLenum dfactor)
+    inline void BlendFunction(GLenum sfactor, GLenum dfactor)
     {
         if (blend_source_factor_ == sfactor && blend_destination_factor_ == dfactor)
         {
@@ -389,7 +389,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void TextureEnvironmentMode(GLint param)
+    inline void TextureEnvironmentMode(GLint param)
     {
         GLuint index = active_texture_ - GL_TEXTURE0;
 
@@ -403,7 +403,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void TextureEnvironmentCombineRGB(GLint param)
+    inline void TextureEnvironmentCombineRGB(GLint param)
     {
         GLuint index = active_texture_ - GL_TEXTURE0;
 
@@ -417,7 +417,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void TextureEnvironmentSource0RGB(GLint param)
+    inline void TextureEnvironmentSource0RGB(GLint param)
     {
         GLuint index = active_texture_ - GL_TEXTURE0;
 
@@ -431,7 +431,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void TextureMinFilter(GLint param)
+    inline void TextureMinFilter(GLint param)
     {
         GLuint index = active_texture_ - GL_TEXTURE0;
 
@@ -440,7 +440,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void TextureMagFilter(GLint param)
+    inline void TextureMagFilter(GLint param)
     {
         GLuint index = active_texture_ - GL_TEXTURE0;
 
@@ -449,7 +449,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void TextureWrapS(GLint param)
+    inline void TextureWrapS(GLint param)
     {
         GLuint index = active_texture_ - GL_TEXTURE0;
 
@@ -461,7 +461,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void TextureWrapT(GLint param)
+    inline void TextureWrapT(GLint param)
     {
         GLuint index = active_texture_ - GL_TEXTURE0;
 
@@ -473,7 +473,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void MultiTexCoord(GLuint tex, const HMM_Vec2 *coords)
+    inline void MultiTexCoord(GLuint tex, const HMM_Vec2 *coords)
     {
         if (enable_texture_2d_[tex - GL_TEXTURE0] == false)
             return;
@@ -484,13 +484,13 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void Hint(GLenum target, GLenum mode)
+    inline void Hint(GLenum target, GLenum mode)
     {
         glHint(target, mode);
         ec_frame_stats.draw_state_change++;
     }
 
-    void LineWidth(float width)
+    inline void LineWidth(float width)
     {
         if (AlmostEquals(width, line_width_))
         {
@@ -501,7 +501,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void DeleteTexture(const GLuint *tex_id)
+    inline void DeleteTexture(const GLuint *tex_id)
     {
         if (tex_id && *tex_id > 0)
         {
@@ -517,7 +517,7 @@ class RenderState
         }
     }
 
-    void FrontFace(GLenum wind)
+    inline void FrontFace(GLenum wind)
     {
         if (front_face_== wind)
         {
@@ -529,7 +529,7 @@ class RenderState
         ec_frame_stats.draw_state_change++;
     }
 
-    void ShadeModel(GLenum model)
+    inline void ShadeModel(GLenum model)
     {
         if (shade_model_== model)
         {

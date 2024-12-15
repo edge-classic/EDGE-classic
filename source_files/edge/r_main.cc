@@ -170,11 +170,6 @@ void RendererSoftInit(void)
 
     global_render_state->Hint(GL_FOG_HINT, GL_NICEST);
     global_render_state->Hint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glClientActiveTexture(GL_TEXTURE0);
 }
 
 //

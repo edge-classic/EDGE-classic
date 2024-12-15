@@ -193,17 +193,14 @@ class MDLModel
 
     std::vector<uint32_t> skin_id_list_;
 
-    RendererVertex *gl_vertices_;
-
   public:
     MDLModel(int nframes, int npoints, int ntris, int swidth, int sheight)
         : total_frames_(nframes), total_points_(npoints), total_triangles_(ntris), skin_width_(swidth),
-          skin_height_(sheight), vertices_per_frame_(npoints), gl_vertices_(nullptr)
+          skin_height_(sheight), vertices_per_frame_(npoints)
     {
         frames_      = new MDLFrame[total_frames_];
         points_      = new MDLPoint[total_points_];
         triangles_   = new MDLTriangle[total_triangles_];
-        gl_vertices_ = new RendererVertex[vertices_per_frame_];
     }
 
     ~MDLModel()
@@ -211,9 +208,12 @@ class MDLModel
         delete[] frames_;
         delete[] points_;
         delete[] triangles_;
-        delete[] gl_vertices_;
     }
 };
+
+static HMM_Vec3 render_position;
+static RGBAColor render_rgba;
+static HMM_Vec2 render_texture_coordinates;
 
 /*============== LOADING CODE ====================*/
 
@@ -506,7 +506,7 @@ class MDLCoordinateData
     bool is_additive_;
 
   public:
-    void CalculatePosition(HMM_Vec3 *pos, float x1, float y1, float z1) const
+    void CalculatePosition(HMM_Vec3 &pos, float x1, float y1, float z1) const
     {
         x1 *= xy_scale_;
         y1 *= xy_scale_;
@@ -516,9 +516,9 @@ class MDLCoordinateData
         float z2 = x1 * mouselook_z_vector_.X + z1 * mouselook_z_vector_.Y;
         float y2 = y1;
 
-        pos->X = x_ + x2 * rotation_vector_x_.X + y2 * rotation_vector_x_.Y;
-        pos->Y = y_ + x2 * rotation_vector_y_.X + y2 * rotation_vector_y_.Y;
-        pos->Z = z_ + z2;
+        pos.X = x_ + x2 * rotation_vector_x_.X + y2 * rotation_vector_x_.Y;
+        pos.Y = y_ + x2 * rotation_vector_y_.X + y2 * rotation_vector_y_.Y;
+        pos.Z = z_ + z2;
     }
 };
 
@@ -607,7 +607,7 @@ static void UpdateMulticols(MDLCoordinateData *data)
     }
 }
 
-static inline void ModelCoordFunc(MDLCoordinateData *data, int v_idx, HMM_Vec3 *pos, RGBAColor *rgb, HMM_Vec2 *texc)
+static inline void ModelCoordFunc(MDLCoordinateData *data, int v_idx)
 {
     const MDLModel *md = data->model_;
 
@@ -630,29 +630,29 @@ static inline void ModelCoordFunc(MDLCoordinateData *data, int v_idx, HMM_Vec3 *
     if (MirrorReflective())
         y1 = -y1;
 
-    data->CalculatePosition(pos, x1, y1, z1);
+    data->CalculatePosition(render_position, x1, y1, z1);
 
     if (data->is_fuzzy_)
     {
-        texc->X = point->skin_s * data->fuzz_multiplier_ + data->fuzz_add_.X;
-        texc->Y = point->skin_t * data->fuzz_multiplier_ + data->fuzz_add_.Y;
+        render_texture_coordinates.X = point->skin_s * data->fuzz_multiplier_ + data->fuzz_add_.X;
+        render_texture_coordinates.Y = point->skin_t * data->fuzz_multiplier_ + data->fuzz_add_.Y;
 
-        *rgb = kRGBABlack;
+        render_rgba = kRGBABlack;
         return;
     }
 
-    *texc = {{point->skin_s, point->skin_t}};
+    render_texture_coordinates = { point->skin_s, point->skin_t };
 
     ColorMixer *col = &data->normal_colors_[(data->lerp_ < 0.5) ? vert1->normal_idx : vert2->normal_idx];
 
     if (!data->is_additive_)
     {
-        *rgb = epi::MakeRGBAClamped(col->modulate_red_ * render_view_red_multiplier, col->modulate_green_ * render_view_green_multiplier,
+        render_rgba = epi::MakeRGBAClamped(col->modulate_red_ * render_view_red_multiplier, col->modulate_green_ * render_view_green_multiplier,
             col->modulate_blue_ * render_view_blue_multiplier);
     }
     else
     {
-        *rgb = epi::MakeRGBAClamped(col->add_red_ * render_view_red_multiplier, col->add_green_ * render_view_green_multiplier,
+        render_rgba = epi::MakeRGBAClamped(col->add_red_ * render_view_red_multiplier, col->add_green_ * render_view_green_multiplier,
             col->add_blue_ * render_view_blue_multiplier);
     }
 }
@@ -980,26 +980,20 @@ void MDLRenderModel(MDLModel *md, const Image *skin_img, bool is_weapon, int fra
 
         glBegin(GL_TRIANGLES);
 
-        RendererVertex *dest = md->gl_vertices_;
-
         for (int i = 0; i < md->total_triangles_; i++)
         {
             data.strip_ = &md->triangles_[i];
 
-            for (int v_idx = 0; v_idx < 3; v_idx++, dest++)
+            for (int v_idx = 0; v_idx < 3; v_idx++)
             {
-                HMM_Vec3 *position = &dest->position;
-                RGBAColor *rgba = &dest->rgba;
-                HMM_Vec2 *texc = &dest->texture_coordinates[0];
+                ModelCoordFunc(&data, v_idx);
 
-                ModelCoordFunc(&data, v_idx, position, rgba, texc);
+                epi::SetRGBAAlpha(render_rgba, trans);
 
-                epi::SetRGBAAlpha(*rgba, trans);
-
-                global_render_state->GLColor(*rgba);
-                global_render_state->MultiTexCoord(GL_TEXTURE0, texc);
+                global_render_state->GLColor(render_rgba);
+                global_render_state->MultiTexCoord(GL_TEXTURE0, &render_texture_coordinates);
                 // vertex must be last
-                glVertex3fv((const GLfloat *)(position));
+                glVertex3fv((const GLfloat *)(&render_position));
             }
         }
 

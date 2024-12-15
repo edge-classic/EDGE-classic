@@ -264,17 +264,13 @@ class MD2Model
 
     int vertices_per_frame_;
 
-    RendererVertex *gl_vertices_;
-
   public:
     MD2Model(int nframes, int npoints, int nstrips, int nverts)
-        : total_frames_(nframes), total_points_(npoints), total_strips_(nstrips), vertices_per_frame_(nverts),
-          gl_vertices_(nullptr)
+        : total_frames_(nframes), total_points_(npoints), total_strips_(nstrips), vertices_per_frame_(nverts)
     {
         frames_      = new MD2Frame[total_frames_];
         points_      = new MD2Point[total_points_];
         strips_      = new MD2Strip[total_strips_];
-        gl_vertices_ = new RendererVertex[vertices_per_frame_];
     }
 
     ~MD2Model()
@@ -282,9 +278,12 @@ class MD2Model
         delete[] frames_;
         delete[] points_;
         delete[] strips_;
-        delete[] gl_vertices_;
     }
 };
+
+static HMM_Vec3 render_position;
+static RGBAColor render_rgba;
+static HMM_Vec2 render_texture_coordinates;
 
 /*============== LOADING CODE ====================*/
 
@@ -821,7 +820,7 @@ class MD2CoordinateData
     bool is_additive_;
 
   public:
-    void CalcPos(HMM_Vec3 *pos, float x1, float y1, float z1) const
+    void CalculatePosition(HMM_Vec3 &pos, float x1, float y1, float z1) const
     {
         x1 *= xy_scale_;
         y1 *= xy_scale_;
@@ -831,9 +830,9 @@ class MD2CoordinateData
         float z2 = x1 * mouselook_z_matrix_.X + z1 * mouselook_z_matrix_.Y;
         float y2 = y1;
 
-        pos->X = x_ + x2 * rotation_x_matrix_.X + y2 * rotation_x_matrix_.Y;
-        pos->Y = y_ + x2 * rotation_y_matrix_.X + y2 * rotation_y_matrix_.Y;
-        pos->Z = z_ + z2;
+        pos.X = x_ + x2 * rotation_x_matrix_.X + y2 * rotation_x_matrix_.Y;
+        pos.Y = y_ + x2 * rotation_y_matrix_.X + y2 * rotation_y_matrix_.Y;
+        pos.Z = z_ + z2;
     }
 };
 
@@ -922,7 +921,7 @@ static void UpdateMulticols(MD2CoordinateData *data)
     }
 }
 
-static inline void ModelCoordFunc(MD2CoordinateData *data, int v_idx, HMM_Vec3 *pos, RGBAColor *rgb, HMM_Vec2 *texc)
+static inline void ModelCoordFunc(MD2CoordinateData *data, int v_idx)
 {
     const MD2Model *md = data->model_;
 
@@ -945,29 +944,29 @@ static inline void ModelCoordFunc(MD2CoordinateData *data, int v_idx, HMM_Vec3 *
     if (MirrorReflective())
         y1 = -y1;
 
-    data->CalcPos(pos, x1, y1, z1);
+    data->CalculatePosition(render_position, x1, y1, z1);
 
     if (data->is_fuzzy_)
     {
-        texc->X = point->skin_s * data->fuzz_multiplier_ + data->fuzz_add_.X;
-        texc->Y = point->skin_t * data->fuzz_multiplier_ + data->fuzz_add_.Y;
+        render_texture_coordinates.X = point->skin_s * data->fuzz_multiplier_ + data->fuzz_add_.X;
+        render_texture_coordinates.Y = point->skin_t * data->fuzz_multiplier_ + data->fuzz_add_.Y;
 
-        *rgb = kRGBABlack;
+        render_rgba = kRGBABlack;
         return;
     }
 
-    *texc = {{point->skin_s * data->image_right_, point->skin_t * data->image_top_}};
+    render_texture_coordinates = { point->skin_s * data->image_right_, point->skin_t * data->image_top_ };
 
     ColorMixer *col = &data->normal_colors_[(data->lerp_ < 0.5) ? vert1->normal_idx : vert2->normal_idx];
 
     if (!data->is_additive_)
     {
-        *rgb = epi::MakeRGBAClamped(col->modulate_red_ * render_view_red_multiplier, col->modulate_green_ * render_view_green_multiplier,
+        render_rgba = epi::MakeRGBAClamped(col->modulate_red_ * render_view_red_multiplier, col->modulate_green_ * render_view_green_multiplier,
             col->modulate_blue_ * render_view_blue_multiplier);
     }
     else
     {
-        *rgb = epi::MakeRGBAClamped(col->add_red_ * render_view_red_multiplier, col->add_green_ * render_view_green_multiplier,
+        render_rgba = epi::MakeRGBAClamped(col->add_red_ * render_view_red_multiplier, col->add_green_ * render_view_green_multiplier,
             col->add_blue_ * render_view_blue_multiplier);
     }
 }
@@ -1296,26 +1295,20 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         {
             glBegin(GL_TRIANGLES);
 
-            RendererVertex *dest = md->gl_vertices_;
-
             for (int i = 0; i < md->total_strips_; i++)
             {
                 data.strip_ = &md->strips_[i];
 
-                for (int v_idx=0; v_idx < 3; v_idx++, dest++)
+                for (int v_idx=0; v_idx < 3; v_idx++)
                 {
-                    HMM_Vec3 *position = &dest->position;
-                    RGBAColor *rgba = &dest->rgba;
-                    HMM_Vec2 *texc = &dest->texture_coordinates[0];
+                    ModelCoordFunc(&data, v_idx);
 
-                    ModelCoordFunc(&data, v_idx, position, rgba, texc);
+                    epi::SetRGBAAlpha(render_rgba, trans);
 
-                    epi::SetRGBAAlpha(*rgba, trans);
-
-                    global_render_state->GLColor(*rgba);
-                    global_render_state->MultiTexCoord(GL_TEXTURE0, texc);
+                    global_render_state->GLColor(render_rgba);
+                    global_render_state->MultiTexCoord(GL_TEXTURE0, &render_texture_coordinates);
                     // vertex must be last
-                    glVertex3fv((const GLfloat *)(position));
+                    glVertex3fv((const GLfloat *)(&render_position));
                 }
             }
 
@@ -1323,8 +1316,6 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         }
         else
         {
-            RendererVertex *dest = md->gl_vertices_;
-
             for (int i = 0; i < md->total_strips_; i++)
             {
                 data.strip_ = & md->strips_[i];
@@ -1333,18 +1324,14 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
 
                 for (int v_idx=0; v_idx < md->strips_[i].count; v_idx++)
                 {
-                    HMM_Vec3 *position = &dest->position;
-                    RGBAColor *rgba = &dest->rgba;
-                    HMM_Vec2 *texc = &dest->texture_coordinates[0];
+                    ModelCoordFunc(&data, v_idx);
 
-                    ModelCoordFunc(&data, v_idx, position, rgba, texc);
+                    epi::SetRGBAAlpha(render_rgba, trans);
 
-                    epi::SetRGBAAlpha(*rgba, trans);
-
-                    global_render_state->GLColor(*rgba);
-                    global_render_state->MultiTexCoord(GL_TEXTURE0, texc);
+                    global_render_state->GLColor(render_rgba);
+                    global_render_state->MultiTexCoord(GL_TEXTURE0, &render_texture_coordinates);
                     // vertex must be last
-                    glVertex3fv((const GLfloat *)(position));
+                    glVertex3fv((const GLfloat *)(&render_position));
                 }
 
                 glEnd();

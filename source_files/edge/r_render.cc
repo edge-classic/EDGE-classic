@@ -551,12 +551,12 @@ static void WallCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, RGBAColor *rgb, HMM
     if (swirl_pass > 1)
     {
         *rgb = epi::MakeRGBA((uint8_t)(255.0f / data->R * render_view_red_multiplier), (uint8_t)(255.0f / data->G * render_view_green_multiplier), 
-            (uint8_t)(255.0f / data->B * render_view_blue_multiplier));
+            (uint8_t)(255.0f / data->B * render_view_blue_multiplier), epi::GetRGBAAlpha(*rgb));
     }
     else
     {
         *rgb = epi::MakeRGBA((uint8_t)(data->R * render_view_red_multiplier), (uint8_t)(data->G * render_view_green_multiplier), 
-            (uint8_t)(data->B * render_view_blue_multiplier));
+            (uint8_t)(data->B * render_view_blue_multiplier), epi::GetRGBAAlpha(*rgb));
     }
 
     float along;
@@ -619,12 +619,12 @@ static void PlaneCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, RGBAColor *rgb, HM
     if (swirl_pass > 1)
     {
         *rgb = epi::MakeRGBA((uint8_t)(255.0f / data->R * render_view_red_multiplier), (uint8_t)(255.0f / data->G * render_view_green_multiplier), 
-            (uint8_t)(255.0f / data->B * render_view_blue_multiplier));
+            (uint8_t)(255.0f / data->B * render_view_blue_multiplier), epi::GetRGBAAlpha(*rgb));
     }
     else
     {
         *rgb = epi::MakeRGBA((uint8_t)(data->R * render_view_red_multiplier), (uint8_t)(data->G * render_view_green_multiplier), 
-            (uint8_t)(data->B * render_view_blue_multiplier));
+            (uint8_t)(data->B * render_view_blue_multiplier), epi::GetRGBAAlpha(*rgb));
     }
 
     HMM_Vec2 rxy = {{(data->tx0 + pos->X), (data->ty0 + pos->Y)}};
@@ -1778,7 +1778,7 @@ static void FloodCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, RGBAColor *rgb, HM
     *pos    = data->vertices[v_idx];
     *normal = data->normal;
     *rgb = epi::MakeRGBA((uint8_t)(data->R * render_view_red_multiplier), (uint8_t)(data->G * render_view_green_multiplier), 
-        (uint8_t)(data->B * render_view_blue_multiplier));
+        (uint8_t)(data->B * render_view_blue_multiplier), epi::GetRGBAAlpha(*rgb));
 
     float along = (view_z - data->plane_h) / (view_z - pos->Z);
 

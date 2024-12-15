@@ -1054,8 +1054,9 @@ void MDLRenderModel2D(MDLModel *md, const Image *skin_img, int frame, float x, f
 
             const MDLPoint  *point = &md->points_[strip->first + v_idx];
             const MDLVertex *vert  = &frame_ptr->vertices[point->vert_idx];
+            const HMM_Vec2   texc  = { point->skin_s, point->skin_t };
 
-            glTexCoord2f(point->skin_s, point->skin_t);
+            global_render_state->MultiTexCoord(GL_TEXTURE0, &texc);
 
             float dx = vert->x * xscale;
             float dy = vert->y * xscale;

@@ -13,6 +13,7 @@ add_library(
   epi_md5.cc
   epi_str_compare.cc
   epi_str_util.cc
+  epi_scanner.cpp
 )
 
 target_link_libraries(edge_epi PRIVATE almostequals HandmadeMath stb xxhash)

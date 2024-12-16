@@ -200,19 +200,17 @@ static void HD_text_font(coal::VM *vm, int argc)
 {
     (void)argc;
 
-    bool        ErrorHit  = false;
     const char *font_name = vm->AccessParamString(0);
 
     FontDefinition *DEF = fontdefs.Lookup(font_name);
     if (!DEF)
-        ErrorHit = true;
+        return;
 
     Font *font = hud_fonts.Lookup(DEF);
     if (!font)
-        ErrorHit = true;
+        return;
 
-    if (ErrorHit == false)
-        HUDSetFont(font);
+    HUDSetFont(font);
 }
 
 // hud.text_color(rgb)

@@ -32,7 +32,7 @@
 #include "ddf_thing.h"
 #include "deh_text.h"
 #include "epi_ename.h"
-#include "epi_lexer.h"
+#include "epi_scanner.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 
@@ -325,53 +325,34 @@ void FreeMapList()
     Maps.mapcount = 0;
 }
 
-static void SkipToNextLine(epi::Lexer &lex, epi::TokenKind &tok, std::string &value)
-{
-    int skip_line = lex.LastLine();
-    for (;;)
-    {
-        lex.MatchKeep("linecheck");
-        if (lex.LastLine() == skip_line)
-        {
-            tok = lex.Next(value);
-            if (tok == epi::kTokenEOF)
-                break;
-        }
-        else
-            break;
-    }
-}
-
 // -----------------------------------------------
 //
 // Parses a complete UMAPINFO entry
 //
 // -----------------------------------------------
 
-static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
+static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
 {
     for (;;)
     {
-        if (lex.Match("}"))
+        if (lex.CheckToken('}'))
             break;
 
         std::string key;
         std::string value;
 
-        epi::TokenKind tok = lex.Next(key);
-
-        if (tok == epi::kTokenEOF)
+        if (!lex.GetNextToken())
             FatalError("Malformed UMAPINFO lump: unclosed block\n");
 
-        if (tok != epi::kTokenIdentifier)
+        if (lex.state.token != epi::Scanner::kIdentifier)
             FatalError("Malformed UMAPINFO lump: missing key\n");
 
-        if (!lex.Match("="))
-            FatalError("Malformed UMAPINFO lump: missing '='\n");
+        key = lex.state.str;
 
-        tok = lex.Next(value);
+        if (!lex.CheckToken('='))
+            FatalError("Malformed UMAPINFO lump: missing '='\n");   
 
-        if (tok == epi::kTokenEOF || tok == epi::kTokenError || value == "}")
+        if (!lex.GetNextToken() || lex.state.token == '}')
             FatalError("Malformed UMAPINFO lump: missing value\n");
 
         epi::EName key_ename(key, true);
@@ -381,6 +362,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
         case epi::kENameLevelname: {
             if (val->levelname)
                 free(val->levelname);
+            value = lex.state.str;
             val->levelname = (char *)calloc(value.size() + 1, sizeof(char));
             epi::CStringCopyMax(val->levelname, value.c_str(), value.size());
         }
@@ -397,6 +379,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
             {
                 if (val->label)
                     free(val->label);
+                value = lex.state.str;
                 val->label = (char *)calloc(value.size() + 1, sizeof(char));
                 epi::CStringCopyMax(val->label, value.c_str(), value.size());
             }
@@ -404,6 +387,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
         break;
         case epi::kENameNext: {
             EPI_CLEAR_MEMORY(val->next_map, char, 9);
+            value = lex.state.str;
             if (value.size() > 8)
                 FatalError("UMAPINFO: Mapname for \"next\" over 8 characters!\n");
             epi::CStringCopyMax(val->next_map, value.data(), 8);
@@ -411,6 +395,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
         break;
         case epi::kENameNextsecret: {
             EPI_CLEAR_MEMORY(val->nextsecret, char, 9);
+            value = lex.state.str;
             if (value.size() > 8)
                 FatalError("UMAPINFO: Mapname for \"nextsecret\" over 8 "
                            "characters!\n");
@@ -419,6 +404,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
         break;
         case epi::kENameLevelpic: {
             EPI_CLEAR_MEMORY(val->levelpic, char, 9);
+            value = lex.state.str;
             if (value.size() > 8)
                 FatalError("UMAPINFO: Entry for \"levelpic\" over 8 "
                            "characters!\n");
@@ -427,6 +413,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
         break;
         case epi::kENameSkytexture: {
             EPI_CLEAR_MEMORY(val->skytexture, char, 9);
+            value = lex.state.str;
             if (value.size() > 8)
                 FatalError("UMAPINFO: Entry for \"skytexture\" over 8 "
                            "characters!\n");
@@ -435,6 +422,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
         break;
         case epi::kENameMusic: {
             EPI_CLEAR_MEMORY(val->music, char, 9);
+            value = lex.state.str;
             if (value.size() > 8)
                 FatalError("UMAPINFO: Entry for \"music\" over 8 characters!\n");
             epi::CStringCopyMax(val->music, value.data(), 8);
@@ -442,22 +430,24 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
         break;
         case epi::kENameEndpic: {
             EPI_CLEAR_MEMORY(val->endpic, char, 9);
+            value = lex.state.str;
             if (value.size() > 8)
                 FatalError("UMAPINFO: Entry for \"endpic\" over 8 characters!\n");
             epi::CStringCopyMax(val->endpic, value.data(), 8);
         }
         break;
         case epi::kENameEndcast:
-            val->docast = epi::LexBoolean(value);
+            val->docast = lex.state.boolean;
             break;
         case epi::kENameEndbunny:
-            val->dobunny = epi::LexBoolean(value);
+            val->dobunny = lex.state.boolean;
             break;
         case epi::kENameEndgame:
-            val->endgame = epi::LexBoolean(value);
+            val->endgame = lex.state.boolean;
             break;
         case epi::kENameExitpic: {
             EPI_CLEAR_MEMORY(val->exitpic, char, 9);
+            value = lex.state.str;
             if (value.size() > 8)
                 FatalError("UMAPINFO: Entry for \"exitpic\" over 8 characters!\n");
             epi::CStringCopyMax(val->exitpic, value.data(), 8);
@@ -465,6 +455,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
         break;
         case epi::kENameEnterpic: {
             EPI_CLEAR_MEMORY(val->enterpic, char, 9);
+            value = lex.state.str;
             if (value.size() > 8)
                 FatalError("UMAPINFO: Entry for \"enterpic\" over 8 "
                            "characters!\n");
@@ -472,18 +463,18 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
         }
         break;
         case epi::kENameNointermission:
-            val->nointermission = epi::LexBoolean(value);
+            val->nointermission = lex.state.boolean;
             break;
         case epi::kENamePartime:
-            val->partime = 35 * epi::LexInteger(value);
+            val->partime = 35 * lex.state.number;
             break;
         case epi::kENameIntertext: {
             std::string it_builder = value;
-            while (lex.Match(","))
+            while (lex.CheckToken(','))
             {
                 it_builder.append("\n");
-                lex.Next(value);
-                it_builder.append(value);
+                lex.GetNextToken();
+                it_builder.append(lex.state.str);
             }
             if (val->intertext)
                 free(val->intertext);
@@ -493,11 +484,11 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
         break;
         case epi::kENameIntertextsecret: {
             std::string it_builder = value;
-            while (lex.Match(","))
+            while (lex.CheckToken(','))
             {
                 it_builder.append("\n");
-                lex.Next(value);
-                it_builder.append(value);
+                lex.GetNextToken();
+                it_builder.append(lex.state.str);
             }
             if (val->intertextsecret)
                 free(val->intertextsecret);
@@ -507,6 +498,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
         break;
         case epi::kENameInterbackdrop: {
             EPI_CLEAR_MEMORY(val->interbackdrop, char, 9);
+            value = lex.state.str;
             if (value.size() > 8)
                 FatalError("UMAPINFO: Entry for \"interbackdrop\" over 8 "
                            "characters!\n");
@@ -515,6 +507,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
         break;
         case epi::kENameIntermusic: {
             EPI_CLEAR_MEMORY(val->intermusic, char, 9);
+            value = lex.state.str;
             if (value.size() > 8)
                 FatalError("UMAPINFO: Entry for \"intermusic\" over 8 "
                            "characters!\n");
@@ -522,6 +515,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
         }
         break;
         case epi::kENameEpisode: {
+            value = lex.state.str;
             if (epi::StringCaseCompareASCII(value, "clear") == 0)
             {
                 // This should leave the initial [EDGE] episode and nothing
@@ -582,11 +576,15 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                     FatalError("UMAPINFO: Entry for \"enterpic\" over 8 "
                                "characters!\n");
                 epi::CStringCopyMax(lumpname, value.data(), 8);
-                if (lex.Match(","))
+                if (lex.CheckToken(','))
                 {
-                    lex.Next(alttext);
-                    if (lex.Match(","))
-                        lex.Next(epikey);
+                    lex.GetNextToken();
+                    alttext = lex.state.str;
+                    if (lex.CheckToken(','))
+                    {
+                        lex.GetNextToken();
+                        epikey = lex.state.str;
+                    }
                 }
                 new_epi->namegraphic_ = lumpname;
                 new_epi->description_ = alttext;
@@ -597,6 +595,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
         case epi::kENameBossaction: {
             int special = 0;
             int tag     = 0;
+            value = lex.state.str;
             if (epi::StringCaseCompareASCII(value, "clear") == 0)
             {
                 special = tag = -1;
@@ -629,18 +628,18 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                     }
                 }
                 if (actor_num == -1)
-                    SkipToNextLine(lex, tok, value);
+                    lex.SkipLine();
                 else
                 {
-                    if (!lex.Match(","))
+                    if (!lex.CheckToken(','))
                         FatalError("UMAPINFO: \"bossaction\" key missing line "
                                    "special!\n");
-                    lex.Next(value);
-                    special = epi::LexInteger(value);
-                    if (!lex.Match(","))
+                    lex.GetNextToken();
+                    special = lex.state.number;
+                    if (!lex.CheckToken(','))
                         FatalError("UMAPINFO: \"bossaction\" key missing tag!\n");
-                    lex.Next(value);
-                    tag = epi::LexInteger(value);
+                    lex.GetNextToken();
+                    tag = lex.state.number;
                     if (tag != 0 || special == 11 || special == 51 || special == 52 || special == 124)
                     {
                         if (val->numbossactions == -1)
@@ -696,30 +695,27 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
 
 void ParseUMAPINFO(const std::string &buffer)
 {
-    epi::Lexer lex(buffer);
+    epi::Scanner lex(buffer);
 
-    for (;;)
+    while(lex.TokensLeft())
     {
-        std::string    section;
-        epi::TokenKind tok = lex.Next(section);
-
-        if (tok == epi::kTokenEOF)
+        if (!lex.GetNextToken())
             break;
 
-        if (tok != epi::kTokenIdentifier || epi::StringCaseCompareASCII(section, "MAP") != 0)
+        if (lex.state.token != epi::Scanner::kIdentifier || epi::StringCaseCompareASCII(lex.state.str, "MAP") != 0)
             FatalError("Malformed UMAPINFO lump.\n");
 
-        tok = lex.Next(section);
+        lex.GetNextToken();
 
-        if (tok != epi::kTokenIdentifier)
+        if (lex.state.token != epi::Scanner::kIdentifier)
             FatalError("UMAPINFO: No mapname for map entry!\n");
 
         unsigned int i      = 0;
         MapEntry     parsed = {0};
-        parsed.mapname      = (char *)calloc(section.size() + 1, sizeof(char));
-        epi::CStringCopyMax(parsed.mapname, section.data(), section.size());
+        parsed.mapname      = (char *)calloc(lex.state.str.size() + 1, sizeof(char));
+        epi::CStringCopyMax(parsed.mapname, lex.state.str.data(), lex.state.str.size());
 
-        if (!lex.Match("{"))
+        if (!lex.CheckToken('{'))
             FatalError("Malformed UMAPINFO lump: missing '{'\n");
 
         ParseUMAPINFOEntry(lex, &parsed);

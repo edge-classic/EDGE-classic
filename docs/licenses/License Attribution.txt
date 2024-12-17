@@ -133,7 +133,7 @@ prns.h - Marc B. Reynolds
 
 "sf_GMbank" soundfont (renamed to Default.sf2) - The Csound Developers
 
-stb_image, stb_image_write, stb_rect_pack, stb_sprintf, stb_truetype and stb_vorbis libraries - Sean Barrett
+stb_image, stb_rect_pack, stb_sprintf, stb_truetype and stb_vorbis libraries - Sean Barrett
 
 ===========================================================================================
 SIL Open Font License

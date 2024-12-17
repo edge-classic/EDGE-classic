@@ -158,7 +158,6 @@ GameFlags default_game_flags = {
 GameFlags global_flags;
 
 bool mus_pause_stop  = false;
-bool png_screenshots = false;
 
 std::string branding_file;
 std::string configuration_file;

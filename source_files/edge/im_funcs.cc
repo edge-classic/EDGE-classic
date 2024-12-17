@@ -21,8 +21,8 @@
 #include "epi.h"
 #include "epi_filesystem.h"
 #include "epi_str_util.h"
+#include "miniz.h"
 #include "stb_image.h"
-#include "stb_image_write.h"
 #include "stb_rect_pack.h"
 
 ImageAtlas::ImageAtlas(int w, int h)
@@ -289,37 +289,6 @@ bool GetImageInfo(epi::File *file, int *width, int *height, int *depth)
 
 //------------------------------------------------------------------------
 
-static void STBImageEPIFileWrite(void *context, void *data, int size)
-{
-    EPI_ASSERT(context && data && size);
-    epi::File *dest = (epi::File *)context;
-    dest->Write(data, size);
-}
-
-bool SaveJPEG(std::string filename, ImageData *image)
-{
-    EPI_ASSERT(image->depth_ == 3);
-
-    epi::File *dest = epi::FileOpen(filename, epi::kFileAccessBinary | epi::kFileAccessWrite);
-
-    if (!dest)
-        return false;
-
-    // zero means failure here
-    int result = stbi_write_jpg_to_func(STBImageEPIFileWrite, dest, image->used_width_, image->used_height_,
-                                        image->depth_, image->pixels_, 95);
-
-    delete dest;
-
-    if (result == 0)
-    {
-        epi::FileDelete(filename);
-        return false;
-    }
-    else
-        return true;
-}
-
 bool SavePNG(std::string filename, ImageData *image)
 {
     EPI_ASSERT(image->depth_ >= 3);
@@ -329,19 +298,23 @@ bool SavePNG(std::string filename, ImageData *image)
     if (!dest)
         return false;
 
-    // zero means failure here
-    int result = stbi_write_png_to_func(STBImageEPIFileWrite, dest, image->used_width_, image->used_height_,
-                                        image->depth_, image->pixels_, 0);
+    size_t png_size = 0;
+    void *png_out = tdefl_write_image_to_png_file_in_memory_ex(image->pixels_, image->width_, image->height_, 
+        image->depth_, &png_size, MZ_DEFAULT_LEVEL, MZ_FALSE);
 
-    delete dest;
-
-    if (result == 0)
+    if (png_out)
     {
+        dest->Write(png_out, png_size);
+        mz_free(png_out);
+        delete dest;
+        return true;
+    }
+    else
+    {
+        delete dest;
         epi::FileDelete(filename);
         return false;
     }
-    else
-        return true;
 }
 
 //--- editor settings ---

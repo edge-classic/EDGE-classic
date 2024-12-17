@@ -133,7 +133,6 @@ static ConfigurationDefault defaults[] = {
 
     {kConfigInteger, "screen_hud", &screen_hud, EDGE_DEFAULT_SCREEN_HUD},
     {kConfigInteger, "save_page", &save_page, 0},
-    {kConfigBoolean, "png_screenshots", &png_screenshots, EDGE_DEFAULT_PNG_SCRSHOTS},
 
     // -------------------- VARS --------------------
 
@@ -432,19 +431,12 @@ void LoadBranding(void)
 
 void TakeScreenshot(bool show_msg)
 {
-    const char *extension;
-
-    if (png_screenshots)
-        extension = "png";
-    else
-        extension = "jpg";
-
     std::string fn;
 
     // find a file name to save it to
     for (int i = 1; i <= 9999; i++)
     {
-        std::string base(epi::StringFormat("shot%02d.%s", i, extension));
+        std::string base(epi::StringFormat("shot%02d.png", i));
 
         fn = epi::PathAppend(screenshot_directory, base);
 
@@ -461,16 +453,7 @@ void TakeScreenshot(bool show_msg)
     // ReadScreen produces a bottom-up image, need to invert it
     img->Invert();
 
-    bool result;
-
-    if (png_screenshots)
-    {
-        result = SavePNG(fn, img);
-    }
-    else
-    {
-        result = SaveJPEG(fn, img);
-    }
+    bool result = SavePNG(fn, img);
 
     if (show_msg)
     {
@@ -485,9 +468,7 @@ void TakeScreenshot(bool show_msg)
 
 void CreateSaveScreenshot(void)
 {
-    const char *extension = "jpg";
-
-    std::string temp(epi::StringFormat("%s/%s.%s", "current", "head", extension));
+    std::string temp(epi::StringFormat("%s/%s.png", "current", "head"));
     std::string filename = epi::PathAppend(save_directory, temp);
 
     epi::FileDelete(filename);
@@ -499,8 +480,7 @@ void CreateSaveScreenshot(void)
     // ReadScreen produces a bottom-up image, need to invert it
     img->Invert();
 
-    bool result;
-    result = SaveJPEG(filename, img);
+    bool result = SavePNG(filename, img);
 
     if (result)
         LogPrint("Captured to file: %s\n", filename.c_str());

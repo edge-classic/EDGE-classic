@@ -539,7 +539,7 @@ void MenuReadSaveStrings(void)
         }
 
         // Save screenshot
-        epi::ReplaceExtension(fn, ".jpg");
+        epi::ReplaceExtension(fn, ".png");
 
         if (epi::FileExists(fn) && (!save_extended_information_slots[i].save_image_data ||
                                     save_page != save_extended_information_slots[i].save_image_page))

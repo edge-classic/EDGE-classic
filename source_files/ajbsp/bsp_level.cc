@@ -26,7 +26,7 @@
 #include "epi_doomdefs.h"
 #include "epi_ename.h"
 #include "epi_endian.h"
-#include "epi_lexer.h"
+#include "epi_scanner.h"
 #include "epi_str_util.h"
 #include "miniz.h"
 
@@ -470,33 +470,33 @@ void GetLinedefs()
 
 /* ----- UDMF reading routines ------------------------- */
 
-void ParseThingField(Thing *thing, const int &key, const std::string &value)
+void ParseThingField(Thing *thing, const int &key, epi::Scanner &lex)
 {
     // Do we need more precision than an int for things? I think this would only
     // be an issue if/when polyobjects happen, as I think other thing types are
     // ignored - Dasho
 
     if (key == epi::kENameX)
-        thing->x = RoundToInteger(epi::LexDouble(value));
+        thing->x = RoundToInteger(lex.state_.decimal);
     else if (key == epi::kENameY)
-        thing->y = RoundToInteger(epi::LexDouble(value));
+        thing->y = RoundToInteger(lex.state_.decimal);
     else if (key == epi::kENameType)
-        thing->type = epi::LexInteger(value);
+        thing->type = lex.state_.number;
 }
 
-void ParseVertexField(Vertex *vertex, const int &key, const std::string &value)
+void ParseVertexField(Vertex *vertex, const int &key, epi::Scanner &lex)
 {
     if (key == epi::kENameX)
-        vertex->x_ = epi::LexDouble(value);
+        vertex->x_ = lex.state_.decimal;
     else if (key == epi::kENameY)
-        vertex->y_ = epi::LexDouble(value);
+        vertex->y_ = lex.state_.decimal;
 }
 
-void ParseSidedefField(Sidedef *side, const int &key, const std::string &value)
+void ParseSidedefField(Sidedef *side, const int &key, epi::Scanner &lex)
 {
     if (key == epi::kENameSector)
     {
-        int num = epi::LexInteger(value);
+        int num = lex.state_.number;
 
         if (num < 0 || num >= level_sectors.size())
             FatalError("AJBSP: illegal sector number #%d\n", (int)num);
@@ -505,24 +505,24 @@ void ParseSidedefField(Sidedef *side, const int &key, const std::string &value)
     }
 }
 
-void ParseLinedefField(Linedef *line, const int &key, const std::string &value)
+void ParseLinedefField(Linedef *line, const int &key, epi::Scanner &lex)
 {
     switch (key)
     {
     case epi::kENameV1:
-        line->start = SafeLookupVertex(epi::LexInteger(value));
+        line->start = SafeLookupVertex(lex.state_.number);
         break;
     case epi::kENameV2:
-        line->end = SafeLookupVertex(epi::LexInteger(value));
+        line->end = SafeLookupVertex(lex.state_.number);
         break;
     case epi::kENameSpecial:
-        line->type = epi::LexInteger(value);
+        line->type = lex.state_.number;
         break;
     case epi::kENameTwosided:
-        line->two_sided = epi::LexBoolean(value);
+        line->two_sided = lex.state_.boolean;
         break;
     case epi::kENameSidefront: {
-        int num = epi::LexInteger(value);
+        int num = lex.state_.number;
 
         if (num < 0 || num >= (int)level_sidedefs.size())
             line->right = nullptr;
@@ -531,7 +531,7 @@ void ParseLinedefField(Linedef *line, const int &key, const std::string &value)
     }
     break;
     case epi::kENameSideback: {
-        int num = epi::LexInteger(value);
+        int num = lex.state_.number;
 
         if (num < 0 || num >= (int)level_sidedefs.size())
             line->left = nullptr;
@@ -544,7 +544,7 @@ void ParseLinedefField(Linedef *line, const int &key, const std::string &value)
     }
 }
 
-void ParseUDMF_Block(epi::Lexer &lex, int cur_type)
+void ParseUDMF_Block(epi::Scanner &lex, int cur_type)
 {
     Vertex  *vertex = nullptr;
     Thing   *thing  = nullptr;
@@ -572,31 +572,31 @@ void ParseUDMF_Block(epi::Lexer &lex, int cur_type)
         break;
     }
 
-    for (;;)
+    while (lex.TokensLeft())
     {
-        if (lex.Match("}"))
+        if (lex.CheckToken('}'))
             break;
 
         std::string key;
         std::string value;
 
-        epi::TokenKind tok = lex.Next(key);
-
-        if (tok == epi::kTokenEOF)
+        if (!lex.GetNextToken())
             FatalError("AJBSP: Malformed TEXTMAP lump: unclosed block\n");
 
-        if (tok != epi::kTokenIdentifier)
+        if (lex.state_.token != epi::Scanner::kIdentifier)
             FatalError("AJBSP: Malformed TEXTMAP lump: missing key\n");
 
-        if (!lex.Match("="))
+        key = lex.state_.string;
+
+        if (!lex.CheckToken('='))
             FatalError("AJBSP: Malformed TEXTMAP lump: missing '='\n");
 
-        tok = lex.Next(value);
-
-        if (tok == epi::kTokenEOF || tok == epi::kTokenError || value == "}")
+        if (!lex.GetNextToken() || lex.state_.token == '}')
             FatalError("AJBSP: Malformed TEXTMAP lump: missing value\n");
 
-        if (!lex.Match(";"))
+        value = lex.state_.string;
+
+        if (!lex.CheckToken(';'))
             FatalError("AJBSP: Malformed TEXTMAP lump: missing ';'\n");
 
         epi::EName key_ename(key, true);
@@ -604,16 +604,16 @@ void ParseUDMF_Block(epi::Lexer &lex, int cur_type)
         switch (cur_type)
         {
         case kUDMFVertex:
-            ParseVertexField(vertex, key_ename.GetIndex(), value);
+            ParseVertexField(vertex, key_ename.GetIndex(), lex);
             break;
         case kUDMFThing:
-            ParseThingField(thing, key_ename.GetIndex(), value);
+            ParseThingField(thing, key_ename.GetIndex(), lex);
             break;
         case kUDMFSidedef:
-            ParseSidedefField(side, key_ename.GetIndex(), value);
+            ParseSidedefField(side, key_ename.GetIndex(), lex);
             break;
         case kUDMFLinedef:
-            ParseLinedefField(line, key_ename.GetIndex(), value);
+            ParseLinedefField(line, key_ename.GetIndex(), lex);
             break;
         case kUDMFSector:
         default: /* just skip it */
@@ -644,32 +644,34 @@ void ParseUDMF_Pass(const std::string &data, int pass)
     // pass = 2 : sidedefs
     // pass = 3 : linedefs
 
-    epi::Lexer lex(data);
+    epi::Scanner lex(data);
 
-    for (;;)
+    while (lex.TokensLeft())
     {
         std::string    section;
-        epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF)
+        if (!lex.GetNextToken())
             return;
 
-        if (tok != epi::kTokenIdentifier)
+        if (lex.state_.token != epi::Scanner::kIdentifier)
         {
             FatalError("AJBSP: Malformed TEXTMAP lump.\n");
             return;
         }
 
+        section = lex.state_.string;
+
         // ignore top-level assignments
-        if (lex.Match("="))
+        if (lex.CheckToken('='))
         {
-            lex.Next(section);
-            if (!lex.Match(";"))
+            lex.GetNextToken();
+            section = lex.state_.string;
+            if (!lex.CheckToken(';'))
                 FatalError("AJBSP: Malformed TEXTMAP lump: missing ';'\n");
             continue;
         }
 
-        if (!lex.Match("{"))
+        if (!lex.CheckToken('{'))
             FatalError("AJBSP: Malformed TEXTMAP lump: missing '{'\n");
 
         int cur_type = 0;

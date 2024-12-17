@@ -43,7 +43,7 @@
 #include "epi_endian.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
-#include "epi_lexer.h"
+#include "epi_scanner.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "g_game.h"
@@ -309,41 +309,65 @@ void ResetDefaults(int dummy, ConsoleVariable *dummy_cvar)
     done_first_init = true;
 }
 
-static void ParseConfigBlock(epi::Lexer &lex)
+static void ParseConfig(const std::string &data, bool check_config_version)
 {
-    for (;;)
+    epi::Scanner lex(data);
+
+    // Check the first line of a config file for the #VERSION entry. If not
+    // present, assume it is from a version that predates this concept
+    if (check_config_version)
+    {
+        if (!lex.GetNextToken() || lex.state_.token != '#')
+        {
+            show_old_config_warning = true;
+        }
+
+        if (!lex.GetNextToken() || lex.state_.token != epi::Scanner::kIdentifier || lex.state_.string != "VERSION")
+        {
+            show_old_config_warning = true;
+        }
+
+        if (!lex.GetNextToken() || lex.state_.token != epi::Scanner::kIntConst || lex.state_.number < kInternalConfigVersion)
+        {
+            show_old_config_warning = true;
+        }
+    }
+
+    while (lex.TokensLeft())
     {
         std::string key;
         std::string value;
 
-        epi::TokenKind tok = lex.Next(key);
-
-        if (key == "/") // CVAR keys will start with this, but we need to discard it
-            continue;
-
-        if (tok == epi::kTokenEOF)
-            return;
-
-        if (tok == epi::kTokenError)
+        if (!lex.GetNextToken())
             FatalError("ParseConfig: error parsing file!\n");
 
-        tok = lex.Next(value);
+        // Discard leading / for cvars
+        // Todo: Convert everything to CVARs and then get
+        // rid of the leading slash
+        if (lex.state_.token == '/')
+        {
+            if (!lex.GetNextToken())
+                FatalError("ParseConfig: error parsing file!\n");
+        }
 
-        // The last line of the config writer causes a weird blank key with an
-        // EOF value, so just return here
-        if (tok == epi::kTokenEOF)
-            return;
+        key = lex.state_.string;
 
-        if (tok == epi::kTokenError)
-            FatalError("ParseConfig: malformed value for key %s!\n", key.c_str());
+        LogPrint("%s\n", lex.state_.string.c_str());
 
-        if (tok == epi::kTokenString)
+        if (!lex.GetNextToken())
+            FatalError("ParseConfig: missing value for key %s!\n", key.c_str());
+
+        value = lex.state_.string;
+
+        LogPrint("%s\n", lex.state_.string.c_str());
+
+        if (lex.state_.token == epi::Scanner::kStringConst)
         {
             std::string try_cvar = key;
             try_cvar.append(" ").append(value);
             TryConsoleCommand(try_cvar.c_str());
         }
-        else if (tok == epi::kTokenNumber)
+        else if (lex.state_.token == epi::Scanner::kIntConst)
         {
             for (int i = 0; i < total_defaults; i++)
             {
@@ -351,61 +375,17 @@ static void ParseConfigBlock(epi::Lexer &lex)
                 {
                     if (defaults[i].type == kConfigBoolean)
                     {
-                        *(bool *)defaults[i].location = epi::LexInteger(value) ? true : false;
+                        *(bool *)defaults[i].location = lex.state_.boolean ? true : false;
                     }
                     else /* kConfigInteger and
                             kConfigKey */
                     {
-                        *(int *)defaults[i].location = epi::LexInteger(value);
+                        *(int *)defaults[i].location = lex.state_.number;
                     }
                     break;
                 }
             }
         }
-    }
-}
-
-static void ParseConfig(const std::string &data, bool check_config_version)
-{
-    epi::Lexer lex(data);
-
-    // Check the first line of a config file for the #VERSION entry. If not
-    // present, assume it is from a version that predates this concept
-    if (check_config_version)
-    {
-        std::string    version;
-        epi::TokenKind tok = lex.Next(version);
-
-        if (tok != epi::kTokenSymbol || version != "#")
-        {
-            show_old_config_warning = true;
-        }
-
-        tok = lex.Next(version);
-
-        if (tok != epi::kTokenIdentifier || version != "version")
-        {
-            show_old_config_warning = true;
-        }
-
-        tok = lex.Next(version);
-
-        if (tok != epi::kTokenNumber || epi::LexInteger(version) < kInternalConfigVersion)
-        {
-            show_old_config_warning = true;
-        }
-    }
-
-    for (;;)
-    {
-        std::string    section;
-        epi::TokenKind tok = lex.Next(section);
-
-        if (tok == epi::kTokenEOF)
-            return;
-
-        // process the block
-        ParseConfigBlock(lex);
     }
 }
 

@@ -39,7 +39,7 @@
 #include "epi_doomdefs.h"
 #include "epi_ename.h"
 #include "epi_endian.h"
-#include "epi_lexer.h"
+#include "epi_scanner.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "g_game.h"
@@ -145,29 +145,35 @@ static void GetMUSINFOTracksForLevel(void)
     musinfo.resize(raw_length);
     memcpy(musinfo.data(), raw_musinfo, raw_length);
     delete[] raw_musinfo;
-    epi::Lexer lex(musinfo);
+    epi::Scanner lex(musinfo);
     if (!musinfo_tracks.count(current_map->name_))
         musinfo_tracks.try_emplace({current_map->name_, {}});
     for (;;)
     {
         std::string    section;
-        epi::TokenKind tok = lex.Next(section);
+        
+        lex.GetNextToken();
 
-        if (tok != epi::kTokenNumber && tok != epi::kTokenIdentifier)
+        if (lex.state_.token != epi::Scanner::kIntConst && lex.state_.token != epi::Scanner::kIdentifier)
             break;
+
+        section = lex.state_.string;
 
         if (epi::StringCaseCompareASCII(section, current_map->name_) != 0)
             continue;
 
         // Parse "block" for current map
         int mus_number = -1;
-        for (;;)
+        while (lex.TokensLeft())
         {
             std::string    value;
-            epi::TokenKind block_tok = lex.Next(value);
+            
+            lex.GetNextToken();
 
-            if (block_tok != epi::kTokenNumber && block_tok != epi::kTokenIdentifier)
+            if (lex.state_.token != epi::Scanner::kIntConst && lex.state_.token != epi::Scanner::kIdentifier)
                 return;
+
+            value = lex.state_.string;
 
             // A valid map name should be the end of this block
             if (mapdefs.Lookup(value.c_str()))
@@ -176,7 +182,7 @@ static void GetMUSINFOTracksForLevel(void)
             // This does have a bit of faith that the MUSINFO lump isn't
             // malformed
             if (mus_number == -1)
-                mus_number = epi::LexInteger(value);
+                mus_number = lex.state_.number;
             else
             {
                 // This mimics Lobo's ad-hoc playlist stuff for UMAPINFO
@@ -1355,7 +1361,7 @@ static void LoadXGL3Nodes(int lumpnum)
 
 static void LoadUDMFVertexes()
 {
-    epi::Lexer lex(udmf_lump);
+    epi::Scanner lex(udmf_lump);
 
     LogDebug("LoadUDMFVertexes: parsing TEXTMAP\n");
     int cur_vertex = 0;
@@ -1364,27 +1370,28 @@ static void LoadUDMFVertexes()
     int max_x      = 0;
     int max_y      = 0;
 
-    for (;;)
+    while (lex.TokensLeft())
     {
         std::string    section;
-        epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF)
+        if (!lex.GetNextToken())
             break;
 
-        if (tok != epi::kTokenIdentifier)
+        if (lex.state_.token != epi::Scanner::kIdentifier)
             FatalError("Malformed TEXTMAP lump.\n");
 
         // check namespace
-        if (lex.Match("="))
+        if (lex.CheckToken('='))
         {
-            lex.Next(section);
-            if (!lex.Match(";"))
+            lex.GetNextToken();
+            if (!lex.CheckToken(';'))
                 FatalError("Malformed TEXTMAP lump: missing ';'\n");
             continue;
         }
 
-        if (!lex.Match("{"))
+        section = lex.state_.string;
+
+        if (!lex.CheckToken('{'))
             FatalError("Malformed TEXTMAP lump: missing '{'\n");
 
         if (section == "vertex")
@@ -1393,28 +1400,29 @@ static void LoadUDMFVertexes()
             float zf = -40000.0f, zc = 40000.0f;
             for (;;)
             {
-                if (lex.Match("}"))
+                if (lex.CheckToken('}'))
                     break;
 
                 std::string    key;
                 std::string    value;
-                epi::TokenKind block_tok = lex.Next(key);
 
-                if (block_tok == epi::kTokenEOF)
+                if (!lex.GetNextToken())
                     FatalError("Malformed TEXTMAP lump: unclosed block\n");
 
-                if (block_tok != epi::kTokenIdentifier)
+                if (lex.state_.token != epi::Scanner::kIdentifier)
                     FatalError("Malformed TEXTMAP lump: missing key\n");
 
-                if (!lex.Match("="))
+                key = lex.state_.string;
+
+                if (!lex.CheckToken('='))
                     FatalError("Malformed TEXTMAP lump: missing '='\n");
 
-                block_tok = lex.Next(value);
-
-                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
+                if (!lex.GetNextToken() || lex.state_.token == '}')
                     FatalError("Malformed TEXTMAP lump: missing value\n");
 
-                if (!lex.Match(";"))
+                value = lex.state_.string;
+
+                if (!lex.CheckToken(';'))
                     FatalError("Malformed TEXTMAP lump: missing ';'\n");
 
                 epi::EName key_ename(key, true);
@@ -1422,20 +1430,20 @@ static void LoadUDMFVertexes()
                 switch (key_ename.GetIndex())
                 {
                 case epi::kENameX:
-                    x     = epi::LexDouble(value);
+                    x     = lex.state_.decimal;
                     min_x = HMM_MIN((int)x, min_x);
                     max_x = HMM_MAX((int)x, max_x);
                     break;
                 case epi::kENameY:
-                    y     = epi::LexDouble(value);
+                    y     = lex.state_.decimal;
                     min_y = HMM_MIN((int)y, min_y);
                     max_y = HMM_MAX((int)y, max_y);
                     break;
                 case epi::kENameZfloor:
-                    zf = epi::LexDouble(value);
+                    zf = lex.state_.decimal;
                     break;
                 case epi::kENameZceiling:
-                    zc = epi::LexDouble(value);
+                    zc = lex.state_.decimal;
                     break;
                 default:
                     break;
@@ -1448,8 +1456,7 @@ static void LoadUDMFVertexes()
         {
             for (;;)
             {
-                tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::kTokenEOF)
+                if (!lex.GetNextToken() || lex.state_.token == '}')
                     break;
             }
         }
@@ -1465,32 +1472,33 @@ static void LoadUDMFVertexes()
 
 static void LoadUDMFSectors()
 {
-    epi::Lexer lex(udmf_lump);
+    epi::Scanner lex(udmf_lump);
 
     LogDebug("LoadUDMFSectors: parsing TEXTMAP\n");
     int cur_sector = 0;
 
-    for (;;)
+    while (lex.TokensLeft())
     {
         std::string    section;
-        epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF)
+        if (!lex.GetNextToken())
             break;
 
-        if (tok != epi::kTokenIdentifier)
+        if (lex.state_.token != epi::Scanner::kIdentifier)
             FatalError("Malformed TEXTMAP lump.\n");
 
         // check namespace
-        if (lex.Match("="))
+        if (lex.CheckToken('='))
         {
-            lex.Next(section);
-            if (!lex.Match(";"))
+            lex.GetNextToken();
+            if (!lex.CheckToken(';'))
                 FatalError("Malformed TEXTMAP lump: missing ';'\n");
             continue;
         }
 
-        if (!lex.Match("{"))
+        section = lex.state_.string;
+
+        if (!lex.CheckToken('{'))
             FatalError("Malformed TEXTMAP lump: missing '{'\n");
 
         if (section == "sector")
@@ -1511,28 +1519,29 @@ static void LoadUDMFSectors()
             strcpy(ceil_tex, "-");
             for (;;)
             {
-                if (lex.Match("}"))
+                if (lex.CheckToken('}'))
                     break;
 
                 std::string    key;
                 std::string    value;
-                epi::TokenKind block_tok = lex.Next(key);
 
-                if (block_tok == epi::kTokenEOF)
+                if (!lex.GetNextToken())
                     FatalError("Malformed TEXTMAP lump: unclosed block\n");
 
-                if (block_tok != epi::kTokenIdentifier)
+                if (lex.state_.token != epi::Scanner::kIdentifier)
                     FatalError("Malformed TEXTMAP lump: missing key\n");
 
-                if (!lex.Match("="))
+                key = lex.state_.string;
+
+                if (!lex.CheckToken('='))
                     FatalError("Malformed TEXTMAP lump: missing '='\n");
 
-                block_tok = lex.Next(value);
-
-                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
+                if (!lex.GetNextToken() || lex.state_.token == '}')
                     FatalError("Malformed TEXTMAP lump: missing value\n");
 
-                if (!lex.Match(";"))
+                value = lex.state_.string;
+
+                if (!lex.CheckToken(';'))
                     FatalError("Malformed TEXTMAP lump: missing ';'\n");
 
                 epi::EName key_ename(key, true);
@@ -1540,10 +1549,10 @@ static void LoadUDMFSectors()
                 switch (key_ename.GetIndex())
                 {
                 case epi::kENameHeightfloor:
-                    fz = epi::LexInteger(value);
+                    fz = lex.state_.number;
                     break;
                 case epi::kENameHeightceiling:
-                    cz = epi::LexInteger(value);
+                    cz = lex.state_.number;
                     break;
                 case epi::kENameTexturefloor:
                     epi::CStringCopyMax(floor_tex, value.c_str(), 8);
@@ -1552,61 +1561,61 @@ static void LoadUDMFSectors()
                     epi::CStringCopyMax(ceil_tex, value.c_str(), 8);
                     break;
                 case epi::kENameLightlevel:
-                    light = epi::LexInteger(value);
+                    light = lex.state_.number;
                     break;
                 case epi::kENameSpecial:
-                    type = epi::LexInteger(value);
+                    type = lex.state_.number;
                     break;
                 case epi::kENameId:
-                    tag = epi::LexInteger(value);
+                    tag = lex.state_.number;
                     break;
                 case epi::kENameLightcolor:
-                    light_color = ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
+                    light_color = ((uint32_t)lex.state_.number << 8 | 0xFF);
                     break;
                 case epi::kENameFadecolor:
-                    fog_color = ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
+                    fog_color = ((uint32_t)lex.state_.number << 8 | 0xFF);
                     break;
                 case epi::kENameFogdensity:
-                    fog_density = HMM_Clamp(0, epi::LexInteger(value), 1020);
+                    fog_density = HMM_Clamp(0, lex.state_.number, 1020);
                     break;
                 case epi::kENameXpanningfloor:
-                    fx = epi::LexDouble(value);
+                    fx = lex.state_.decimal;
                     break;
                 case epi::kENameYpanningfloor:
-                    fy = epi::LexDouble(value);
+                    fy = lex.state_.decimal;
                     break;
                 case epi::kENameXpanningceiling:
-                    cx = epi::LexDouble(value);
+                    cx = lex.state_.decimal;
                     break;
                 case epi::kENameYpanningceiling:
-                    cy = epi::LexDouble(value);
+                    cy = lex.state_.decimal;
                     break;
                 case epi::kENameXscalefloor:
-                    fx_sc = epi::LexDouble(value);
+                    fx_sc = lex.state_.decimal;
                     break;
                 case epi::kENameYscalefloor:
-                    fy_sc = epi::LexDouble(value);
+                    fy_sc = lex.state_.decimal;
                     break;
                 case epi::kENameXscaleceiling:
-                    cx_sc = epi::LexDouble(value);
+                    cx_sc = lex.state_.decimal;
                     break;
                 case epi::kENameYscaleceiling:
-                    cy_sc = epi::LexDouble(value);
+                    cy_sc = lex.state_.decimal;
                     break;
                 case epi::kENameAlphafloor:
-                    falph = epi::LexDouble(value);
+                    falph = lex.state_.decimal;
                     break;
                 case epi::kENameAlphaceiling:
-                    calph = epi::LexDouble(value);
+                    calph = lex.state_.decimal;
                     break;
                 case epi::kENameRotationfloor:
-                    rf = epi::LexDouble(value);
+                    rf = lex.state_.decimal;
                     break;
                 case epi::kENameRotationceiling:
-                    rc = epi::LexDouble(value);
+                    rc = lex.state_.decimal;
                     break;
                 case epi::kENameGravity:
-                    gravfactor = epi::LexDouble(value);
+                    gravfactor = lex.state_.decimal;
                     break;
                 default:
                     break;
@@ -1764,8 +1773,7 @@ static void LoadUDMFSectors()
         {
             for (;;)
             {
-                tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::kTokenEOF)
+                if (!lex.GetNextToken() || lex.state_.token == '}')
                     break;
             }
         }
@@ -1777,7 +1785,7 @@ static void LoadUDMFSectors()
 
 static void LoadUDMFSideDefs()
 {
-    epi::Lexer lex(udmf_lump);
+    epi::Scanner lex(udmf_lump);
 
     LogDebug("LoadUDMFSectors: parsing TEXTMAP\n");
 
@@ -1789,24 +1797,25 @@ static void LoadUDMFSideDefs()
     for (;;)
     {
         std::string    section;
-        epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF)
+        if (!lex.GetNextToken())
             break;
 
-        if (tok != epi::kTokenIdentifier)
+        if (lex.state_.token != epi::Scanner::kIdentifier)
             FatalError("Malformed TEXTMAP lump.\n");
 
         // check namespace
-        if (lex.Match("="))
+        if (lex.CheckToken('='))
         {
-            lex.Next(section);
-            if (!lex.Match(";"))
+            lex.GetNextToken();
+            if (!lex.CheckToken(';'))
                 FatalError("Malformed TEXTMAP lump: missing ';'\n");
             continue;
         }
 
-        if (!lex.Match("{"))
+        section = lex.state_.string;
+
+        if (!lex.CheckToken('{'))
             FatalError("Malformed TEXTMAP lump: missing '{'\n");
 
         if (section == "sidedef")
@@ -1826,28 +1835,29 @@ static void LoadUDMFSideDefs()
             strcpy(middle_tex, "-");
             for (;;)
             {
-                if (lex.Match("}"))
+                if (lex.CheckToken('}'))
                     break;
 
                 std::string    key;
                 std::string    value;
-                epi::TokenKind block_tok = lex.Next(key);
 
-                if (block_tok == epi::kTokenEOF)
+                if (!lex.GetNextToken())
                     FatalError("Malformed TEXTMAP lump: unclosed block\n");
 
-                if (block_tok != epi::kTokenIdentifier)
+                if (lex.state_.token != epi::Scanner::kIdentifier)
                     FatalError("Malformed TEXTMAP lump: missing key\n");
 
-                if (!lex.Match("="))
+                key = lex.state_.string;
+
+                if (!lex.CheckToken('='))
                     FatalError("Malformed TEXTMAP lump: missing '='\n");
 
-                block_tok = lex.Next(value);
-
-                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
+                if (!lex.GetNextToken() || lex.state_.token == '}')
                     FatalError("Malformed TEXTMAP lump: missing value\n");
 
-                if (!lex.Match(";"))
+                value = lex.state_.string;
+
+                if (!lex.CheckToken(';'))
                     FatalError("Malformed TEXTMAP lump: missing ';'\n");
 
                 epi::EName key_ename(key, true);
@@ -1855,46 +1865,46 @@ static void LoadUDMFSideDefs()
                 switch (key_ename.GetIndex())
                 {
                 case epi::kENameOffsetx:
-                    x = epi::LexInteger(value);
+                    x = lex.state_.number;
                     break;
                 case epi::kENameOffsety:
-                    y = epi::LexInteger(value);
+                    y = lex.state_.number;
                     break;
                 case epi::kENameOffsetx_bottom:
-                    lowx = epi::LexDouble(value);
+                    lowx = lex.state_.decimal;
                     break;
                 case epi::kENameOffsetx_mid:
-                    midx = epi::LexDouble(value);
+                    midx = lex.state_.decimal;
                     break;
                 case epi::kENameOffsetx_top:
-                    highx = epi::LexDouble(value);
+                    highx = lex.state_.decimal;
                     break;
                 case epi::kENameOffsety_bottom:
-                    lowy = epi::LexDouble(value);
+                    lowy = lex.state_.decimal;
                     break;
                 case epi::kENameOffsety_mid:
-                    midy = epi::LexDouble(value);
+                    midy = lex.state_.decimal;
                     break;
                 case epi::kENameOffsety_top:
-                    highy = epi::LexDouble(value);
+                    highy = lex.state_.decimal;
                     break;
                 case epi::kENameScalex_bottom:
-                    low_scx = epi::LexDouble(value);
+                    low_scx = lex.state_.decimal;
                     break;
                 case epi::kENameScalex_mid:
-                    mid_scx = epi::LexDouble(value);
+                    mid_scx = lex.state_.decimal;
                     break;
                 case epi::kENameScalex_top:
-                    high_scx = epi::LexDouble(value);
+                    high_scx = lex.state_.decimal;
                     break;
                 case epi::kENameScaley_bottom:
-                    low_scy = epi::LexDouble(value);
+                    low_scy = lex.state_.decimal;
                     break;
                 case epi::kENameScaley_mid:
-                    mid_scy = epi::LexDouble(value);
+                    mid_scy = lex.state_.decimal;
                     break;
                 case epi::kENameScaley_top:
-                    high_scy = epi::LexDouble(value);
+                    high_scy = lex.state_.decimal;
                     break;
                 case epi::kENameTexturetop:
                     epi::CStringCopyMax(top_tex, value.c_str(), 8);
@@ -1906,7 +1916,7 @@ static void LoadUDMFSideDefs()
                     epi::CStringCopyMax(middle_tex, value.c_str(), 8);
                     break;
                 case epi::kENameSector:
-                    sec_num = epi::LexInteger(value);
+                    sec_num = lex.state_.number;
                     break;
                 default:
                     break;
@@ -1970,8 +1980,7 @@ static void LoadUDMFSideDefs()
         {
             for (;;)
             {
-                tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::kTokenEOF)
+                if (!lex.GetNextToken() || lex.state_.token == '}')
                     break;
             }
         }
@@ -2048,7 +2057,7 @@ static void LoadUDMFSideDefs()
 
 static void LoadUDMFLineDefs()
 {
-    epi::Lexer lex(udmf_lump);
+    epi::Scanner lex(udmf_lump);
 
     LogDebug("LoadUDMFLineDefs: parsing TEXTMAP\n");
 
@@ -2057,24 +2066,25 @@ static void LoadUDMFLineDefs()
     for (;;)
     {
         std::string    section;
-        epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF)
+        if (!lex.GetNextToken())
             break;
 
-        if (tok != epi::kTokenIdentifier)
+        if (lex.state_.token != epi::Scanner::kIdentifier)
             FatalError("Malformed TEXTMAP lump.\n");
 
         // check namespace
-        if (lex.Match("="))
+        if (lex.CheckToken('='))
         {
-            lex.Next(section);
-            if (!lex.Match(";"))
+            lex.GetNextToken();
+            if (!lex.CheckToken(';'))
                 FatalError("Malformed TEXTMAP lump: missing ';'\n");
             continue;
         }
 
-        if (!lex.Match("{"))
+        section = lex.state_.string;
+
+        if (!lex.CheckToken('{'))
             FatalError("Malformed TEXTMAP lump: missing '{'\n");
 
         if (section == "linedef")
@@ -2085,28 +2095,29 @@ static void LoadUDMFLineDefs()
             int   special = 0;
             for (;;)
             {
-                if (lex.Match("}"))
+                if (lex.CheckToken('}'))
                     break;
 
                 std::string    key;
                 std::string    value;
-                epi::TokenKind block_tok = lex.Next(key);
 
-                if (block_tok == epi::kTokenEOF)
+                if (!lex.GetNextToken())
                     FatalError("Malformed TEXTMAP lump: unclosed block\n");
 
-                if (block_tok != epi::kTokenIdentifier)
+                if (lex.state_.token != epi::Scanner::kIdentifier)
                     FatalError("Malformed TEXTMAP lump: missing key\n");
 
-                if (!lex.Match("="))
+                key = lex.state_.string;
+
+                if (!lex.CheckToken('='))
                     FatalError("Malformed TEXTMAP lump: missing '='\n");
 
-                block_tok = lex.Next(value);
-
-                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
+                if (!lex.GetNextToken() || lex.state_.token == '}')
                     FatalError("Malformed TEXTMAP lump: missing value\n");
 
-                if (!lex.Match(";"))
+                value = lex.state_.string;
+
+                if (!lex.CheckToken(';'))
                     FatalError("Malformed TEXTMAP lump: missing ';'\n");
 
                 epi::EName key_ename(key, true);
@@ -2114,61 +2125,61 @@ static void LoadUDMFLineDefs()
                 switch (key_ename.GetIndex())
                 {
                 case epi::kENameId:
-                    tag = epi::LexInteger(value);
+                    tag = lex.state_.number;
                     break;
                 case epi::kENameV1:
-                    v1 = epi::LexInteger(value);
+                    v1 = lex.state_.number;
                     break;
                 case epi::kENameV2:
-                    v2 = epi::LexInteger(value);
+                    v2 = lex.state_.number;
                     break;
                 case epi::kENameSpecial:
-                    special = epi::LexInteger(value);
+                    special = lex.state_.number;
                     break;
                 case epi::kENameSidefront:
-                    side0 = epi::LexInteger(value);
+                    side0 = lex.state_.number;
                     break;
                 case epi::kENameSideback:
-                    side1 = epi::LexInteger(value);
+                    side1 = lex.state_.number;
                     break;
                 case epi::kENameAlpha:
-                    alpha = epi::LexDouble(value);
+                    alpha = lex.state_.decimal;
                     break;
                 case epi::kENameBlocking:
-                    flags |= (epi::LexBoolean(value) ? kLineFlagBlocking : 0);
+                    flags |= (lex.state_.boolean ? kLineFlagBlocking : 0);
                     break;
                 case epi::kENameBlockmonsters:
-                    flags |= (epi::LexBoolean(value) ? kLineFlagBlockMonsters : 0);
+                    flags |= (lex.state_.boolean ? kLineFlagBlockMonsters : 0);
                     break;
                 case epi::kENameTwosided:
-                    flags |= (epi::LexBoolean(value) ? kLineFlagTwoSided : 0);
+                    flags |= (lex.state_.boolean ? kLineFlagTwoSided : 0);
                     break;
                 case epi::kENameDontpegtop:
-                    flags |= (epi::LexBoolean(value) ? kLineFlagUpperUnpegged : 0);
+                    flags |= (lex.state_.boolean ? kLineFlagUpperUnpegged : 0);
                     break;
                 case epi::kENameDontpegbottom:
-                    flags |= (epi::LexBoolean(value) ? kLineFlagLowerUnpegged : 0);
+                    flags |= (lex.state_.boolean ? kLineFlagLowerUnpegged : 0);
                     break;
                 case epi::kENameSecret:
-                    flags |= (epi::LexBoolean(value) ? kLineFlagSecret : 0);
+                    flags |= (lex.state_.boolean ? kLineFlagSecret : 0);
                     break;
                 case epi::kENameBlocksound:
-                    flags |= (epi::LexBoolean(value) ? kLineFlagSoundBlock : 0);
+                    flags |= (lex.state_.boolean ? kLineFlagSoundBlock : 0);
                     break;
                 case epi::kENameDontdraw:
-                    flags |= (epi::LexBoolean(value) ? kLineFlagDontDraw : 0);
+                    flags |= (lex.state_.boolean ? kLineFlagDontDraw : 0);
                     break;
                 case epi::kENameMapped:
-                    flags |= (epi::LexBoolean(value) ? kLineFlagMapped : 0);
+                    flags |= (lex.state_.boolean ? kLineFlagMapped : 0);
                     break;
                 case epi::kENamePassuse:
-                    flags |= (epi::LexBoolean(value) ? kLineFlagBoomPassThrough : 0);
+                    flags |= (lex.state_.boolean ? kLineFlagBoomPassThrough : 0);
                     break;
                 case epi::kENameBlockplayers:
-                    flags |= (epi::LexBoolean(value) ? kLineFlagBlockPlayers : 0);
+                    flags |= (lex.state_.boolean ? kLineFlagBlockPlayers : 0);
                     break;
                 case epi::kENameBlocksight:
-                    flags |= (epi::LexBoolean(value) ? kLineFlagSightBlock : 0);
+                    flags |= (lex.state_.boolean ? kLineFlagSightBlock : 0);
                     break;
                 default:
                     break;
@@ -2226,8 +2237,7 @@ static void LoadUDMFLineDefs()
         {
             for (;;)
             {
-                tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::kTokenEOF)
+                if (!lex.GetNextToken() || lex.state_.token == '}')
                     break;
             }
         }
@@ -2239,30 +2249,31 @@ static void LoadUDMFLineDefs()
 
 static void LoadUDMFThings()
 {
-    epi::Lexer lex(udmf_lump);
+    epi::Scanner lex(udmf_lump);
 
     LogDebug("LoadUDMFThings: parsing TEXTMAP\n");
-    for (;;)
+    while (lex.TokensLeft())
     {
         std::string    section;
-        epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF)
+        if (!lex.GetNextToken())
             break;
 
-        if (tok != epi::kTokenIdentifier)
+        if (lex.state_.token != epi::Scanner::kIdentifier)
             FatalError("Malformed TEXTMAP lump.\n");
 
         // check namespace
-        if (lex.Match("="))
+        if (lex.CheckToken('='))
         {
-            lex.Next(section);
-            if (!lex.Match(";"))
+            lex.GetNextToken();
+            if (!lex.CheckToken(';'))
                 FatalError("Malformed TEXTMAP lump: missing ';'\n");
             continue;
         }
 
-        if (!lex.Match("{"))
+        section = lex.state_.string;
+
+        if (!lex.CheckToken('{'))
             FatalError("Malformed TEXTMAP lump: missing '{'\n");
 
         if (section == "thing")
@@ -2278,28 +2289,29 @@ static void LoadUDMFThings()
             const MapObjectDefinition *objtype;
             for (;;)
             {
-                if (lex.Match("}"))
+                if (lex.CheckToken('}'))
                     break;
 
                 std::string    key;
                 std::string    value;
-                epi::TokenKind block_tok = lex.Next(key);
 
-                if (block_tok == epi::kTokenEOF)
+                if (!lex.GetNextToken())
                     FatalError("Malformed TEXTMAP lump: unclosed block\n");
 
-                if (block_tok != epi::kTokenIdentifier)
+                if (lex.state_.token != epi::Scanner::kIdentifier)
                     FatalError("Malformed TEXTMAP lump: missing key\n");
 
-                if (!lex.Match("="))
+                key = lex.state_.string;
+
+                if (!lex.CheckToken('='))
                     FatalError("Malformed TEXTMAP lump: missing '='\n");
 
-                block_tok = lex.Next(value);
-
-                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
+                if (!lex.GetNextToken() || lex.state_.token == '}')
                     FatalError("Malformed TEXTMAP lump: missing value\n");
 
-                if (!lex.Match(";"))
+                value = lex.state_.string;
+
+                if (!lex.CheckToken(';'))
                     FatalError("Malformed TEXTMAP lump: missing ';'\n");
 
                 epi::EName key_ename(key, true);
@@ -2307,67 +2319,67 @@ static void LoadUDMFThings()
                 switch (key_ename.GetIndex())
                 {
                 case epi::kENameId:
-                    tag = epi::LexInteger(value);
+                    tag = lex.state_.number;
                     break;
                 case epi::kENameX:
-                    x = epi::LexDouble(value);
+                    x = lex.state_.decimal;
                     break;
                 case epi::kENameY:
-                    y = epi::LexDouble(value);
+                    y = lex.state_.decimal;
                     break;
                 case epi::kENameHeight:
-                    z = epi::LexDouble(value);
+                    z = lex.state_.decimal;
                     break;
                 case epi::kENameAngle:
-                    angle = epi::BAMFromDegrees(epi::LexInteger(value));
+                    angle = epi::BAMFromDegrees(lex.state_.number);
                     break;
                 case epi::kENameType:
-                    typenum = epi::LexInteger(value);
+                    typenum = lex.state_.number;
                     break;
                 case epi::kENameSkill1:
-                    options |= (epi::LexBoolean(value) ? kThingEasy : 0);
+                    options |= (lex.state_.boolean ? kThingEasy : 0);
                     break;
                 case epi::kENameSkill2:
-                    options |= (epi::LexBoolean(value) ? kThingEasy : 0);
+                    options |= (lex.state_.boolean  ? kThingEasy : 0);
                     break;
                 case epi::kENameSkill3:
-                    options |= (epi::LexBoolean(value) ? kThingMedium : 0);
+                    options |= (lex.state_.boolean  ? kThingMedium : 0);
                     break;
                 case epi::kENameSkill4:
-                    options |= (epi::LexBoolean(value) ? kThingHard : 0);
+                    options |= (lex.state_.boolean  ? kThingHard : 0);
                     break;
                 case epi::kENameSkill5:
-                    options |= (epi::LexBoolean(value) ? kThingHard : 0);
+                    options |= (lex.state_.boolean  ? kThingHard : 0);
                     break;
                 case epi::kENameAmbush:
-                    options |= (epi::LexBoolean(value) ? kThingAmbush : 0);
+                    options |= (lex.state_.boolean  ? kThingAmbush : 0);
                     break;
                 case epi::kENameSingle:
-                    options &= (epi::LexBoolean(value) ? ~kThingNotSinglePlayer : options);
+                    options &= (lex.state_.boolean  ? ~kThingNotSinglePlayer : options);
                     break;
                 case epi::kENameDm:
-                    options &= (epi::LexBoolean(value) ? ~kThingNotDeathmatch : options);
+                    options &= (lex.state_.boolean  ? ~kThingNotDeathmatch : options);
                     break;
                 case epi::kENameCoop:
-                    options &= (epi::LexBoolean(value) ? ~kThingNotCooperative : options);
+                    options &= (lex.state_.boolean  ? ~kThingNotCooperative : options);
                     break;
                 case epi::kENameFriend:
-                    options |= (epi::LexBoolean(value) ? kThingFriend : 0);
+                    options |= (lex.state_.boolean  ? kThingFriend : 0);
                     break;
                 case epi::kENameHealth:
-                    healthfac = epi::LexDouble(value);
+                    healthfac = lex.state_.decimal;
                     break;
                 case epi::kENameAlpha:
-                    alpha = epi::LexDouble(value);
+                    alpha = lex.state_.decimal;
                     break;
                 case epi::kENameScale:
-                    scale = epi::LexDouble(value);
+                    scale = lex.state_.decimal;
                     break;
                 case epi::kENameScalex:
-                    scalex = epi::LexDouble(value);
+                    scalex = lex.state_.decimal;
                     break;
                 case epi::kENameScaley:
-                    scaley = epi::LexDouble(value);
+                    scaley = lex.state_.decimal;
                     break;
                 default:
                     break;
@@ -2467,8 +2479,7 @@ static void LoadUDMFThings()
         {
             for (;;)
             {
-                tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::kTokenEOF)
+                if (!lex.GetNextToken() || lex.state_.token == '}')
                     break;
             }
         }
@@ -2483,23 +2494,26 @@ static void LoadUDMFThings()
 
 static void LoadUDMFCounts()
 {
-    epi::Lexer lex(udmf_lump);
+    epi::Scanner lex(udmf_lump);
 
-    for (;;)
+    while (lex.TokensLeft())
     {
         std::string    section;
-        epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF)
+        if (!lex.GetNextToken())
             break;
 
-        if (tok != epi::kTokenIdentifier)
+        if (lex.state_.token != epi::Scanner::kIdentifier)
             FatalError("Malformed TEXTMAP lump.\n");
 
+        section = lex.state_.string;
+
         // check namespace
-        if (lex.Match("="))
+        if (lex.CheckToken('='))
         {
-            lex.Next(section);
+            lex.GetNextToken();
+
+            section = lex.state_.string;
 
             if (udmf_strict_namespace.d_)
             {
@@ -2514,12 +2528,12 @@ static void LoadUDMFCounts()
                 }
             }
 
-            if (!lex.Match(";"))
+            if (!lex.CheckToken(';'))
                 FatalError("Malformed TEXTMAP lump: missing ';'\n");
             continue;
         }
 
-        if (!lex.Match("{"))
+        if (!lex.CheckToken('{'))
             FatalError("Malformed TEXTMAP lump: missing '{'\n");
 
         epi::EName section_ename(section, true);
@@ -2546,8 +2560,7 @@ static void LoadUDMFCounts()
         // ignore block contents
         for (;;)
         {
-            tok = lex.Next(section);
-            if (lex.Match("}") || tok == epi::kTokenEOF)
+            if (!lex.GetNextToken() || lex.state_.token == '}')
                 break;
         }
     }

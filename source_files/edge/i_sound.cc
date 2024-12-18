@@ -30,7 +30,6 @@
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_fluid.h"
-#include "s_opl.h"
 #include "s_sound.h"
 #include "w_wad.h"
 
@@ -265,9 +264,6 @@ void StartupMusic(void)
 
     if (!StartupFluid())
         fluid_disabled = true;
-
-    if (!StartupOpal())
-        opl_disabled = true;
 
     return;
 }

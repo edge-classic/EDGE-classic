@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------------
-//  EDGE MOD4PLAY Music Player
+//  EDGE IBXM (Tracker Module) Music Player
 //----------------------------------------------------------------------------
 //
-//  Copyright (c) 2023 - The EDGE Team.
+//  Copyright (c) 2022-2024 - The EDGE Team.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -22,7 +22,7 @@
 #include "epi_file.h"
 #include "epi_filesystem.h"
 #include "i_movie.h"
-#include "m4p.h"
+#include "ibxm.h"
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_music.h"
@@ -31,11 +31,39 @@
 
 extern int  sound_device_frequency;
 
-class M4PPlayer : public AbstractMusicPlayer
+bool CheckIBXMFormat (uint8_t *data, int length)
+{
+	ibxm_data mod_check;
+	mod_check.buffer = (char *)data;
+	mod_check.length = length;
+	bool is_mod_music = false;
+	// Check for MOD format
+	switch( ibxm_data_u16be(&mod_check, 1082)) 
+	{
+		case 0x4b2e: /* M.K. */
+		case 0x4b21: /* M!K! */
+		case 0x5434: /* FLT4 */
+		case 0x484e: /* xCHN */
+		case 0x4348: /* xxCH */
+			is_mod_music = true;
+			break;
+		default:
+			break;
+	}
+	// Check for XM format
+	if( ibxm_data_u16le(&mod_check, 58) == 0x0104 )
+		is_mod_music = true;
+	// Check for S3M format
+	if( ibxm_data_u32le(&mod_check, 44) == 0x4d524353 )
+		is_mod_music = true;
+	return is_mod_music;
+}
+
+class IBXMPlayer : public AbstractMusicPlayer
 {
   public:
-    M4PPlayer();
-    ~M4PPlayer();
+    IBXMPlayer();
+    ~IBXMPlayer();
 
   private:
     enum Status
@@ -48,6 +76,11 @@ class M4PPlayer : public AbstractMusicPlayer
 
     int  status_;
     bool looping_;
+
+    ibxm_module *ibxm_track_;
+	ibxm_replay *ibxm_replayer_;
+	ibxm_data *ibxm_raw_track_;
+	int ibxm_buffer_length_;
 
   public:
     bool OpenMemory(uint8_t *data, int length);
@@ -70,48 +103,77 @@ class M4PPlayer : public AbstractMusicPlayer
 
 //----------------------------------------------------------------------------
 
-M4PPlayer::M4PPlayer() : status_(kNotLoaded)
+IBXMPlayer::IBXMPlayer() : status_(kNotLoaded)
 {
 }
 
-M4PPlayer::~M4PPlayer()
+IBXMPlayer::~IBXMPlayer()
 {
     Close();
 }
 
-void M4PPlayer::PostOpen()
+void IBXMPlayer::PostOpen()
 {
     // Loaded, but not playing
+    ibxm_buffer_length_ = ibxm_calculate_mix_buf_len(sound_device_frequency);
     status_ = kStopped;
 }
 
-bool M4PPlayer::StreamIntoBuffer(SoundData *buf)
+bool IBXMPlayer::StreamIntoBuffer(SoundData *buf)
 {
     bool song_done = false;
 
-    m4p_GenerateSamples(buf->data_, kMusicBuffer / sizeof(int16_t));
+    int got_size = ibxm_replay_get_audio(ibxm_replayer_, (int *)buf->data_, 0);
 
-    buf->length_ = kMusicBuffer / sizeof(int16_t);
+    if (got_size < 0) // ERROR
+	{
+		LogDebug("[ibxmplayer_c::StreamIntoBuffer] Failed\n");
+		return false;
+	}
 
-    if (song_done) /* EOF */
-    {
-        if (!looping_)
-            return false;
-        m4p_Stop();
-        m4p_PlaySong();
-        return true;
-    }
+    if (got_size == 0)
+        song_done = true;
+
+    buf->length_ = got_size * 2;
+
+    if (song_done)  /* EOF */
+	{
+		if (!looping_)
+			return false;
+		ibxm_replay_set_sequence_pos(ibxm_replayer_, 0);
+	}
 
     return true;
 }
 
-bool M4PPlayer::OpenMemory(uint8_t *data, int length)
+bool IBXMPlayer::OpenMemory(uint8_t *data, int length)
 {
     EPI_ASSERT(data);
 
-    if (!m4p_LoadFromData(data, length, sound_device_frequency, kMusicBuffer))
+    ibxm_raw_track_ = (ibxm_data *)calloc(1, sizeof(ibxm_data));
+
+    ibxm_raw_track_->length = length;
+    ibxm_raw_track_->buffer = (char *)data;
+    std::string load_error;
+    load_error.resize(64);
+    ibxm_track_ = ibxm_module_load(ibxm_raw_track_, load_error.data());
+
+    if (!ibxm_track_)
     {
-        LogWarning("M4P: failure to load song!\n");
+        LogWarning("IBXMPlayer: failure to load module: %s\n", load_error.c_str());
+        delete[] data;
+        free(ibxm_raw_track_);
+        return false;
+    }
+
+    ibxm_replayer_ = ibxm_new_replay(ibxm_track_, sound_device_frequency / 2, 0);
+
+    if (!ibxm_replayer_)
+    {
+        LogWarning("IBXMPlayer::OpenMemory failed!\n");
+        ibxm_dispose_module(ibxm_track_);
+        delete[] data;
+        free(ibxm_raw_track_);
         return false;
     }
 
@@ -119,7 +181,7 @@ bool M4PPlayer::OpenMemory(uint8_t *data, int length)
     return true;
 }
 
-void M4PPlayer::Close()
+void IBXMPlayer::Close()
 {
     if (status_ == kNotLoaded)
         return;
@@ -128,13 +190,15 @@ void M4PPlayer::Close()
     if (status_ != kStopped)
         Stop();
 
-    m4p_Close();
-    m4p_FreeSong();
+    ibxm_dispose_replay(ibxm_replayer_);
+	ibxm_dispose_module(ibxm_track_);
+	delete[] ibxm_raw_track_->buffer;
+    free(ibxm_raw_track_);
 
     status_ = kNotLoaded;
 }
 
-void M4PPlayer::Pause()
+void IBXMPlayer::Pause()
 {
     if (status_ != kPlaying)
         return;
@@ -142,7 +206,7 @@ void M4PPlayer::Pause()
     status_ = kPaused;
 }
 
-void M4PPlayer::Resume()
+void IBXMPlayer::Resume()
 {
     if (status_ != kPaused)
         return;
@@ -150,7 +214,7 @@ void M4PPlayer::Resume()
     status_ = kPlaying;
 }
 
-void M4PPlayer::Play(bool loop)
+void IBXMPlayer::Play(bool loop)
 {
     if (status_ != kNotLoaded && status_ != kStopped)
         return;
@@ -158,29 +222,25 @@ void M4PPlayer::Play(bool loop)
     status_  = kPlaying;
     looping_ = loop;
 
-    m4p_PlaySong();
-
     // Load up initial buffer data
     Ticker();
 }
 
-void M4PPlayer::Stop()
+void IBXMPlayer::Stop()
 {
     if (status_ != kPlaying && status_ != kPaused)
         return;
 
     SoundQueueStop();
 
-    m4p_Stop();
-
     status_ = kStopped;
 }
 
-void M4PPlayer::Ticker()
+void IBXMPlayer::Ticker()
 {
     while (status_ == kPlaying && !pc_speaker_mode && !playing_movie)
     {
-        SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer);
+        SoundData *buf = SoundQueueGetFreeBuffer(ibxm_buffer_length_);
 
         if (!buf)
             break;
@@ -207,9 +267,9 @@ void M4PPlayer::Ticker()
 
 //----------------------------------------------------------------------------
 
-AbstractMusicPlayer *PlayM4PMusic(uint8_t *data, int length, bool looping)
+AbstractMusicPlayer *PlayIBXMMusic(uint8_t *data, int length, bool looping)
 {
-    M4PPlayer *player = new M4PPlayer();
+    IBXMPlayer *player = new IBXMPlayer();
 
     if (!player->OpenMemory(data, length))
     {
@@ -217,8 +277,6 @@ AbstractMusicPlayer *PlayM4PMusic(uint8_t *data, int length, bool looping)
         delete player;
         return nullptr;
     }
-
-    delete[] data;
 
     player->Play(looping);
 

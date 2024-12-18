@@ -111,7 +111,6 @@
 #include "s_fluid.h"
 #include "s_fmm.h"
 #include "s_music.h"
-#include "s_opl.h"
 #include "s_sound.h"
 #include "stb_sprintf.h"
 #include "w_wad.h"
@@ -527,7 +526,7 @@ static OptionMenuItem soundoptions[] = {
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Stereo", "Off/On/Swapped", 3, &var_sound_stereo, nullptr, "NeedRestart"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "MIDI Player", "Fluidlite/Opal/FMMIDI/Emu de MIDI (OPLL Mode)/Emu de MIDI (SCC-PSG Mode)", 5, &var_midi_player, OptionMenuChangeMidiPlayer,
+    {kOptionMenuItemTypeSwitch, "MIDI Player", "Fluidlite/FMMIDI/Emu de MIDI (OPLL Mode)/Emu de MIDI (SCC-PSG Mode)", 4, &var_midi_player, OptionMenuChangeMidiPlayer,
      nullptr},
     {kOptionMenuItemTypeFunction, "Fluidlite Soundfont", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr},
     {kOptionMenuItemTypeBoolean, "PC Speaker Mode", YesNo, 2, &pc_speaker_mode, OptionMenuChangePCSpeakerMode,
@@ -2037,13 +2036,9 @@ static void OptionMenuChangeLanguage(int key_pressed, ConsoleVariable *console_v
 //
 static void OptionMenuChangeMidiPlayer(int key_pressed, ConsoleVariable *console_variable)
 {
-    PlaylistEntry *playing = playlist.Find(entry_playing);
-    if (var_midi_player == 1 || (playing && (playing->type_ == kDDFMusicIMF280 || playing->type_ == kDDFMusicIMF560 ||
-                                             playing->type_ == kDDFMusicIMF700)))
-        RestartOpal();
-    else if (var_midi_player == 0)
+    if (var_midi_player == 0)
         RestartFluid();
-    else if (var_midi_player == 2)
+    else if (var_midi_player == 1)
         RestartFMM();
     else
         RestartEMIDI();

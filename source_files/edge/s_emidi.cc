@@ -318,7 +318,7 @@ AbstractMusicPlayer *PlayEMIDIMusic(uint8_t *data, int length, bool loop)
         return nullptr;
     }
 
-    player->emidi_synth_ = new dsa::CSMFPlay(sound_device_frequency, var_midi_player == 3 ? dsa::CSMFPlay::OPLL_MODE : dsa::CSMFPlay::SCC_PSG_MODE);
+    player->emidi_synth_ = new dsa::CSMFPlay(sound_device_frequency, var_midi_player == 2 ? dsa::CSMFPlay::OPLL_MODE : dsa::CSMFPlay::SCC_PSG_MODE);
     if (!player->emidi_synth_)
     {
         LogDebug("Emu de MIDI player: error initializing!\n");

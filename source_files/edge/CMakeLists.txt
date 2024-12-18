@@ -88,8 +88,8 @@ set (EDGE_SOURCE_FILES
   s_emidi.cc
   s_fluid.cc
   s_fmm.cc
-  s_m4p.cc
-  s_opl.cc
+  s_ibxm.cc
+  s_imf.cc
   s_rad.cc
   s_sid.cc
   s_wav.cc
@@ -144,11 +144,11 @@ set (EDGE_LINK_LIBRARIES
   fluidlite
   fmmidi
   HandmadeMath
+  ibxm
   libemidi
   libRAD
   libvwad
   lua
-  m4p
   miniz
   pl_mpeg
   prns

@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------------
-//  EDGE Opal Music Player
+//  EDGE IBXM (Tracker Module) Music Player
 //----------------------------------------------------------------------------
 //
-//  Copyright (c) 2022-2024 The EDGE Team.
+//  Copyright (c) 2022-2024 - The EDGE Team.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -18,17 +18,11 @@
 
 #pragma once
 
-#include <stdint.h>
-
 #include "s_music.h"
 
-extern bool opl_disabled;
+bool CheckIBXMFormat (uint8_t *data, int length);
 
-bool StartupOpal(void);
-
-void RestartOpal(void);
-
-AbstractMusicPlayer *PlayOPLMusic(uint8_t *data, int length, bool loop, int type);
+AbstractMusicPlayer *PlayIBXMMusic(uint8_t *data, int length, bool looping);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

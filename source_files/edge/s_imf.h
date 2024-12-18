@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------------
-//  EDGE MOD4PLAY Music Player (HEADER)
+//  EDGE IMF Music Player
 //----------------------------------------------------------------------------
 //
-//  Copyright (c) 2023 - The EDGE Team.
+//  Copyright (c) 2022-2024 The EDGE Team.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -18,9 +18,11 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include "s_music.h"
 
-AbstractMusicPlayer *PlayM4PMusic(uint8_t *data, int length, bool looping);
+AbstractMusicPlayer *PlayIMFMusic(uint8_t *data, int length, bool loop, int type);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

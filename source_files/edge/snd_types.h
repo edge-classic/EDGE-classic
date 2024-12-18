@@ -29,7 +29,7 @@ enum SoundFormat
     kSoundFLAC,
     kSoundOGG,
     kSoundMP3,
-    kSoundM4P,
+    kSoundIBXM,
     kSoundSID,
     kSoundRAD,
     kSoundMUS,

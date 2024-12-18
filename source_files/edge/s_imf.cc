@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-//  EDGE Opal Music Player
+//  EDGE IMF Music Player
 //----------------------------------------------------------------------------
 //
 //  Copyright (c) 2022-2024 The EDGE Team.
@@ -16,7 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#include "s_opl.h"
+#include "s_imf.h"
 
 #include "dm_state.h"
 #include "epi_file.h"
@@ -25,72 +25,26 @@
 #include "i_system.h"
 #include "m_misc.h"
 // clang-format off
-#define MidiFraction OPLFraction
-#define MidiSequencer OPLSequencer
-typedef struct MidiRealTimeInterface OPLInterface;
+#define MidiFraction IMFFraction
+#define MidiSequencer IMFSequencer
+typedef struct MidiRealTimeInterface IMFInterface;
 #include "midi_sequencer_impl.hpp"
 // clang-format on
 #include "ddf_playlist.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
-#include "radmidi.h"
+#include "opal.h"
 #include "s_blit.h"
 #include "s_music.h"
 #include "snd_types.h"
 #include "w_files.h"
 #include "w_wad.h"
 
-OPLPlayer *edge_opl = nullptr;
-
 extern int  sound_device_frequency;
 
-bool opl_disabled = false;
+static Opal *imf_opl = nullptr;
 
-bool StartupOpal(void)
-{
-    LogPrint("Initializing OPL player...\n");
-
-    if (edge_opl)
-        delete edge_opl;
-
-    edge_opl = new OPLPlayer(sound_device_frequency);
-
-    if (!edge_opl)
-        return false;
-
-    if (!edge_opl->loadPatches())
-    {
-        LogWarning("StartupOpal: Error loading instruments!\n");
-        return false;
-    }
-
-    // OK
-    return true;
-}
-
-// Should only be invoked when changing MIDI player options
-void RestartOpal(void)
-{
-    if (opl_disabled)
-        return;
-
-    int old_entry = entry_playing;
-
-    StopMusic();
-
-    if (!StartupOpal())
-    {
-        opl_disabled = true;
-        return;
-    }
-
-    ChangeMusic(old_entry,
-                true); // Restart track that was playing when switched
-
-    return;            // OK!
-}
-
-class OpalPlayer : public AbstractMusicPlayer
+class IMFPlayer : public AbstractMusicPlayer
 {
   private:
     enum Status
@@ -104,30 +58,35 @@ class OpalPlayer : public AbstractMusicPlayer
     int  status_;
     bool looping_;
 
-    OPLInterface *opl_interface_;
+    IMFInterface *imf_interface_;
 
   public:
-    OpalPlayer(bool looping) : status_(kNotLoaded), looping_(looping)
+    IMFPlayer(bool looping) : status_(kNotLoaded), looping_(looping)
     {
         SequencerInit();
     }
 
-    ~OpalPlayer()
+    ~IMFPlayer()
     {
         Close();
     }
 
   public:
-    OPLSequencer *opl_sequencer_;
+    IMFSequencer *imf_sequencer__;
 
     static void rtNoteOn(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity)
     {
-        edge_opl->midiNoteOn(channel, note, velocity);
+        (void)userdata;
+        (void)channel;
+        (void)note;
+        (void)velocity;
     }
 
     static void rtNoteOff(void *userdata, uint8_t channel, uint8_t note)
     {
-        edge_opl->midiNoteOff(channel, note);
+        (void)userdata;
+        (void)channel;
+        (void)note;
     }
 
     static void rtNoteAfterTouch(void *userdata, uint8_t channel, uint8_t note, uint8_t atVal)
@@ -147,22 +106,32 @@ class OpalPlayer : public AbstractMusicPlayer
 
     static void rtControllerChange(void *userdata, uint8_t channel, uint8_t type, uint8_t value)
     {
-        edge_opl->midiControlChange(channel, type, value);
+        (void)userdata;
+        (void)channel;
+        (void)type;
+        (void)value;
     }
 
     static void rtPatchChange(void *userdata, uint8_t channel, uint8_t patch)
     {
-        edge_opl->midiProgramChange(channel, patch);
+        (void)userdata;
+        (void)channel;
+        (void)patch;
     }
 
     static void rtPitchBend(void *userdata, uint8_t channel, uint8_t msb, uint8_t lsb)
     {
-        edge_opl->midiPitchControl(channel, (msb - 64) / 127.0);
+        (void)userdata;
+        (void)channel;
+        (void)msb;
+        (void)lsb;
     }
 
     static void rtSysEx(void *userdata, const uint8_t *msg, size_t size)
     {
-        edge_opl->midiSysEx(msg, size);
+        (void)userdata;
+        (void)msg;
+        (void)size;
     }
 
     static void rtDeviceSwitch(void *userdata, size_t track, const char *data, size_t length)
@@ -182,47 +151,51 @@ class OpalPlayer : public AbstractMusicPlayer
 
     static void rtRawOPL(void *userdata, uint8_t reg, uint8_t value)
     {
-        edge_opl->midiRawOPL(reg, value);
+        (void)userdata;
+        if ((reg & 0xF0) == 0xC0)
+            value |= 0x30;
+        imf_opl->Port(reg, value);
     }
 
     static void playSynth(void *userdata, uint8_t *stream, size_t length)
     {
         (void)userdata;
-        edge_opl->generate((int16_t *)(stream), length / (2 * sizeof(int16_t)));
+        for (size_t i = 0; i < length / 2; i += 2)
+            imf_opl->Sample((int16_t *)stream + i, (int16_t *)stream + i + 1);
     }
 
     void SequencerInit()
     {
-        opl_sequencer_ = new OPLSequencer;
-        opl_interface_ = new OPLInterface;
-        memset(opl_interface_, 0, sizeof(MidiRealTimeInterface));
+        imf_sequencer__ = new IMFSequencer;
+        imf_interface_ = new IMFInterface;
+        memset(imf_interface_, 0, sizeof(MidiRealTimeInterface));
 
-        opl_interface_->rtUserData           = this;
-        opl_interface_->rt_noteOn            = rtNoteOn;
-        opl_interface_->rt_noteOff           = rtNoteOff;
-        opl_interface_->rt_noteAfterTouch    = rtNoteAfterTouch;
-        opl_interface_->rt_channelAfterTouch = rtChannelAfterTouch;
-        opl_interface_->rt_controllerChange  = rtControllerChange;
-        opl_interface_->rt_patchChange       = rtPatchChange;
-        opl_interface_->rt_pitchBend         = rtPitchBend;
-        opl_interface_->rt_systemExclusive   = rtSysEx;
+        imf_interface_->rtUserData           = this;
+        imf_interface_->rt_noteOn            = rtNoteOn;
+        imf_interface_->rt_noteOff           = rtNoteOff;
+        imf_interface_->rt_noteAfterTouch    = rtNoteAfterTouch;
+        imf_interface_->rt_channelAfterTouch = rtChannelAfterTouch;
+        imf_interface_->rt_controllerChange  = rtControllerChange;
+        imf_interface_->rt_patchChange       = rtPatchChange;
+        imf_interface_->rt_pitchBend         = rtPitchBend;
+        imf_interface_->rt_systemExclusive   = rtSysEx;
 
-        opl_interface_->onPcmRender          = playSynth;
-        opl_interface_->onPcmRender_userdata = this;
+        imf_interface_->onPcmRender          = playSynth;
+        imf_interface_->onPcmRender_userdata = this;
 
-        opl_interface_->pcmSampleRate = sound_device_frequency;
-        opl_interface_->pcmFrameSize  = 2 /*channels*/ * sizeof(int16_t) /*size of one sample*/;
+        imf_interface_->pcmSampleRate = sound_device_frequency;
+        imf_interface_->pcmFrameSize  = 2 /*channels*/ * sizeof(int16_t) /*size of one sample*/;
 
-        opl_interface_->rt_deviceSwitch  = rtDeviceSwitch;
-        opl_interface_->rt_currentDevice = rtCurrentDevice;
-        opl_interface_->rt_rawOPL        = rtRawOPL;
+        imf_interface_->rt_deviceSwitch  = rtDeviceSwitch;
+        imf_interface_->rt_currentDevice = rtCurrentDevice;
+        imf_interface_->rt_rawOPL        = rtRawOPL;
 
-        opl_sequencer_->SetInterface(opl_interface_);
+        imf_sequencer__->SetInterface(imf_interface_);
     }
 
     bool LoadTrack(const uint8_t *data, int length, uint16_t rate)
     {
-        return opl_sequencer_->LoadMidi(data, length, rate);
+        return imf_sequencer__->LoadMidi(data, length, rate);
     }
 
     void Close(void)
@@ -234,15 +207,20 @@ class OpalPlayer : public AbstractMusicPlayer
         if (status_ != kStopped)
             Stop();
 
-        if (opl_sequencer_)
+        if (imf_opl)
         {
-            delete opl_sequencer_;
-            opl_sequencer_ = nullptr;
+            delete imf_opl;
+            imf_opl = nullptr;
         }
-        if (opl_interface_)
+        if (imf_sequencer__)
         {
-            delete opl_interface_;
-            opl_interface_ = nullptr;
+            delete imf_sequencer__;
+            imf_sequencer__ = nullptr;
+        }
+        if (imf_interface_)
+        {
+            delete imf_interface_;
+            imf_interface_ = nullptr;
         }
 
         music_player_gain = 1.0f;
@@ -268,8 +246,6 @@ class OpalPlayer : public AbstractMusicPlayer
     {
         if (!(status_ == kPlaying || status_ == kPaused))
             return;
-
-        edge_opl->reset();
 
         SoundQueueStop();
 
@@ -320,9 +296,9 @@ class OpalPlayer : public AbstractMusicPlayer
     {
         bool song_done = false;
 
-        int played = opl_sequencer_->PlayStream((uint8_t *)(buf->data_), kMusicBuffer);
+        int played = imf_sequencer__->PlayStream((uint8_t *)(buf->data_), kMusicBuffer);
 
-        if (opl_sequencer_->PositionAtEnd())
+        if (imf_sequencer__->PositionAtEnd())
             song_done = true;
 
         buf->length_ = played / 2 / sizeof(int16_t);
@@ -331,7 +307,7 @@ class OpalPlayer : public AbstractMusicPlayer
         {
             if (!looping_)
                 return false;
-            opl_sequencer_->Rewind();
+            imf_sequencer__->Rewind();
             return true;
         }
 
@@ -339,19 +315,21 @@ class OpalPlayer : public AbstractMusicPlayer
     }
 };
 
-AbstractMusicPlayer *PlayOPLMusic(uint8_t *data, int length, bool loop, int type)
+AbstractMusicPlayer *PlayIMFMusic(uint8_t *data, int length, bool loop, int type)
 {
-    if (opl_disabled)
-    {
-        delete[] data;
-        return nullptr;
-    }
+    imf_opl = new Opal(sound_device_frequency);
+    IMFPlayer *player = new IMFPlayer(loop);
 
-    OpalPlayer *player = new OpalPlayer(loop);
-
-    if (!player)
+    if (!imf_opl || !player)
     {
-        LogDebug("OPL player: error initializing!\n");
+        LogDebug("IMF player: error initializing!\n");
+        if (imf_opl)
+        {
+            delete imf_opl;
+            imf_opl = nullptr;
+        }
+        if (player)
+            delete player;
         delete[] data;
         return nullptr;
     }
@@ -374,11 +352,23 @@ AbstractMusicPlayer *PlayOPLMusic(uint8_t *data, int length, bool loop, int type
         break;
     }
 
+    if (rate == 0)
+    {
+        LogDebug("IMF player: no IMF sample rate provided!\n");
+        delete[] data;
+        delete imf_opl;
+        imf_opl = nullptr;
+        delete player;
+        return nullptr;  
+    }
+
     if (!player->LoadTrack(data, length,
                            rate)) // Lobo: quietly log it instead of completely exiting EDGE
     {
-        LogDebug("OPL player: failed to load MIDI file!\n");
+        LogDebug("IMF player: failed to load IMF file!\n");
         delete[] data;
+        delete imf_opl;
+        imf_opl = nullptr;
         delete player;
         return nullptr;
     }

@@ -64,8 +64,6 @@ EDGE-Classic - Copyright (c) 1999-2024 The EDGE Team
 
 EPI library - Copyright (c) 2002-2024 The EDGE Team
 
-Fluidlite - Copyright (c) 2016 Robin Lobel
-
 SLADE (IMF->WAV conversion and sky drawing routines) - Copyright (c) 2008 - 2023 Simon Judd
 
 XMIDI library (MIDI conversion) - Copyright (c) 2015-2022 Vitaly Novichkov
@@ -112,6 +110,9 @@ miniz library - Copyright (c) 2013-2014 RAD Game Tools and Valve Software
 PL_MPEG library - Copyright(c) 2019 Dominic Szablewski
 
 PNPOLY algorithm - Copyright (c) 1970-2003 Wm. Randolph Franklin
+
+TinySoundFont library - Copyright (C) 2017-2023 Bernhard Schelling 
+						(Based on SFZero, Copyright (C) 2012 Steve Folta, https://github.com/stevefolta/SFZero)
 
 ===========================================================================================
 Public Domain

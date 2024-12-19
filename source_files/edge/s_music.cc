@@ -33,12 +33,12 @@
 #include "m_misc.h"
 #include "s_emidi.h"
 #include "s_flac.h"
-#include "s_fluid.h"
+#include "s_tsf.h"
 #include "s_fmm.h"
-#include "s_m4p.h"
+#include "s_ibxm.h"
 #include "s_mp3.h"
 #include "s_ogg.h"
-#include "s_opl.h"
+#include "s_imf.h"
 #include "s_rad.h"
 #include "s_sid.h"
 #include "s_sound.h"
@@ -188,9 +188,9 @@ void ChangeMusic(int entry_number, bool loop)
         music_player = PlayFLACMusic(data, length, loop);
         break;
 
-    case kSoundM4P:
+    case kSoundIBXM:
         delete F;
-        music_player = PlayM4PMusic(data, length, loop);
+        music_player = PlayIBXMMusic(data, length, loop);
         break;
 
     case kSoundRAD:
@@ -203,11 +203,9 @@ void ChangeMusic(int entry_number, bool loop)
         music_player = PlaySIDMusic(data, length, loop);
         break;
 
-    // IMF writes raw OPL registers, so must use the OPL player
-    // unconditionally
     case kSoundIMF:
         delete F;
-        music_player = PlayOPLMusic(data, length, loop, play->type_);
+        music_player = PlayIMFMusic(data, length, loop, play->type_);
         break;
 
     case kSoundMIDI:
@@ -216,13 +214,9 @@ void ChangeMusic(int entry_number, bool loop)
         delete F;
         if (var_midi_player == 0)
         {
-            music_player = PlayFluidMusic(data, length, loop);
+            music_player = PlayTSFMusic(data, length, loop);
         }
         else if (var_midi_player == 1)
-        {
-            music_player = PlayOPLMusic(data, length, loop, play->type_);
-        }
-        else if (var_midi_player == 2)
         {
             music_player = PlayFMMMusic(data, length, loop);
         }

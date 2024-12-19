@@ -35,7 +35,7 @@ enum DDFMusicType
     kDDFMusicMP3,
     kDDFMusicSID,
     kDDFMusicFLAC,
-    kDDFMusicM4P,
+    kDDFMusicIBXM,
     kDDFMusicRAD,
     kDDFMusicIMF280,
     kDDFMusicIMF560,

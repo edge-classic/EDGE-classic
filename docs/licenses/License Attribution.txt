@@ -22,13 +22,7 @@ FMMIDI library - Copyright (c) 2003-2006 yuno
 
 Freedoom (various assets) - Copyright (c) 2001-2019 Contributors to the Freedoom project
 
-libRAD (instruments.h) - Copyright (c) 2023 Contributors to the Freedoom project
-						  Copyright (c) ConSiGno ("DMXOPL" instrument bank which formed the basis for Freedoom's GENMIDI)
-
-libRAD (patches.cpp/radmidi.cpp) - Copyright (c) 2021-2023 Devin Acker
-
-Mod4Play library - 	Copyright (c) 2024 dashodanger
-					Copyright (c) 2022 Olav Sørensen
+IBXM - Copyright (c) 2019 Martin Cameron
 
 ZDoom FName implementation - Copyright (c) 2005-2007 Randy Heit
 
@@ -69,8 +63,6 @@ DEH_EDGE library - Copyright (c) 2004-2024 The EDGE Team
 EDGE-Classic - Copyright (c) 1999-2024 The EDGE Team
 
 EPI library - Copyright (c) 2002-2024 The EDGE Team
-
-Fluidlite - Copyright (c) 2016 Robin Lobel
 
 SLADE (IMF->WAV conversion and sky drawing routines) - Copyright (c) 2008 - 2023 Simon Judd
 
@@ -119,6 +111,9 @@ PL_MPEG library - Copyright(c) 2019 Dominic Szablewski
 
 PNPOLY algorithm - Copyright (c) 1970-2003 Wm. Randolph Franklin
 
+TinySoundFont library - Copyright (C) 2017-2023 Bernhard Schelling 
+						(Based on SFZero, Copyright (C) 2012 Steve Folta, https://github.com/stevefolta/SFZero)
+
 ===========================================================================================
 Public Domain
 ===========================================================================================
@@ -127,7 +122,7 @@ dr_wav, dr_mp3, and dr_flac libraries - David Reid
 
 Fraction.hpp - Bisqwit
 
-libRAD (opal.cpp/radplay.cpp) - Reality Productions
+libRAD - Reality Productions
 
 prns.h - Marc B. Reynolds
 

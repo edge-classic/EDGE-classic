@@ -8,9 +8,6 @@
 namespace dsa {
 
 class CSMFPlay {
-  CMIDIModule m_module[16];
-  int m_mods;
-
 public:  
   enum PlayerMode
   {
@@ -18,7 +15,11 @@ public:
       SCC_PSG_MODE
   };
 
-  CSMFPlay(uint32_t rate, PlayerMode mode = SCC_PSG_MODE, int mods=4);
+  CMIDIModule m_module[2];
+  int m_mods;
+  PlayerMode m_mode;
+
+  CSMFPlay(uint32_t rate, PlayerMode mode = SCC_PSG_MODE);
   ~CSMFPlay();
   void Start(bool reset = true);
   void SendMIDIMessage(const CMIDIMsg &msg);

@@ -29,7 +29,7 @@
 #include "m_random.h"
 #include "s_blit.h"
 #include "s_cache.h"
-#include "s_fluid.h"
+#include "s_tsf.h"
 #include "s_sound.h"
 #include "w_wad.h"
 
@@ -262,8 +262,8 @@ void StartupMusic(void)
         }
     }
 
-    if (!StartupFluid())
-        fluid_disabled = true;
+    if (!StartupTSF())
+        tsf_disabled = true;
 
     return;
 }

@@ -33,7 +33,7 @@
 #include "m_misc.h"
 #include "s_emidi.h"
 #include "s_flac.h"
-#include "s_fluid.h"
+#include "s_tsf.h"
 #include "s_fmm.h"
 #include "s_ibxm.h"
 #include "s_mp3.h"
@@ -214,7 +214,7 @@ void ChangeMusic(int entry_number, bool loop)
         delete F;
         if (var_midi_player == 0)
         {
-            music_player = PlayFluidMusic(data, length, loop);
+            music_player = PlayTSFMusic(data, length, loop);
         }
         else if (var_midi_player == 1)
         {

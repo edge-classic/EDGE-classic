@@ -86,7 +86,7 @@ set (EDGE_SOURCE_FILES
   s_music.cc
   s_ogg.cc
   s_emidi.cc
-  s_fluid.cc
+  s_tsf.cc
   s_fmm.cc
   s_ibxm.cc
   s_imf.cc
@@ -141,7 +141,6 @@ set (EDGE_LINK_LIBRARIES
   almostequals
   crsid
   dr_libs
-  fluidlite
   fmmidi
   HandmadeMath
   ibxm
@@ -153,6 +152,7 @@ set (EDGE_LINK_LIBRARIES
   pl_mpeg
   prns
   stb
+  tsf
   xxhash
 )
 

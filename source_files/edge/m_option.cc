@@ -108,7 +108,7 @@
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_emidi.h"
-#include "s_fluid.h"
+#include "s_tsf.h"
 #include "s_fmm.h"
 #include "s_music.h"
 #include "s_sound.h"
@@ -526,9 +526,9 @@ static OptionMenuItem soundoptions[] = {
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Stereo", "Off/On/Swapped", 3, &var_sound_stereo, nullptr, "NeedRestart"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "MIDI Player", "Fluidlite/FMMIDI/Emu de MIDI (OPLL Mode)/Emu de MIDI (SCC-PSG Mode)", 4, &var_midi_player, OptionMenuChangeMidiPlayer,
+    {kOptionMenuItemTypeSwitch, "MIDI Player", "TinySoundFont/FMMIDI/Emu de MIDI (OPLL Mode)/Emu de MIDI (SCC-PSG Mode)", 4, &var_midi_player, OptionMenuChangeMidiPlayer,
      nullptr},
-    {kOptionMenuItemTypeFunction, "Fluidlite Soundfont", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr},
+    {kOptionMenuItemTypeFunction, "TinySoundFont Bank", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr},
     {kOptionMenuItemTypeBoolean, "PC Speaker Mode", YesNo, 2, &pc_speaker_mode, OptionMenuChangePCSpeakerMode,
      "Music will be Off while this is enabled"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
@@ -2037,7 +2037,7 @@ static void OptionMenuChangeLanguage(int key_pressed, ConsoleVariable *console_v
 static void OptionMenuChangeMidiPlayer(int key_pressed, ConsoleVariable *console_variable)
 {
     if (var_midi_player == 0)
-        RestartFluid();
+        RestartTSF();
     else if (var_midi_player == 1)
         RestartFMM();
     else
@@ -2086,7 +2086,7 @@ static void OptionMenuChangeSoundfont(int key_pressed, ConsoleVariable *console_
 
     // update console_variable
     midi_soundfont = available_soundfonts.at(sf_pos);
-    RestartFluid();
+    RestartTSF();
 }
 
 //

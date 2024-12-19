@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-//  EDGE FluidLite Music Player
+//  EDGE TinySoundFont Music Player
 //----------------------------------------------------------------------------
 //
 //  Copyright (c) 2022-2024 The EDGE Team.
@@ -20,13 +20,13 @@
 
 #include "s_music.h"
 
-extern bool fluid_disabled;
+extern bool tsf_disabled;
 
-bool StartupFluid(void);
+bool StartupTSF(void);
 
-void RestartFluid(void);
+void RestartTSF(void);
 
-AbstractMusicPlayer *PlayFluidMusic(uint8_t *data, int length, bool loop);
+AbstractMusicPlayer *PlayTSFMusic(uint8_t *data, int length, bool loop);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

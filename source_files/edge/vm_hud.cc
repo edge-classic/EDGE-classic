@@ -743,7 +743,7 @@ static void HD_set_render_who(coal::VM *vm, int argc)
 
     int index = (int)*vm->AccessParam(0);
 
-    if (index < 0 || index >= total_players)
+    if (index < 0 || index > total_players)
         FatalError("hud.set_render_who: bad index value: %d (numplayers=%d)\n", index, total_players);
 
     if (index == 0)

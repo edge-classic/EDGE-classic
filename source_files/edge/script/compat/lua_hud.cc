@@ -588,6 +588,8 @@ static int HD_time_stop_active(lua_State *L)
     return 1;
 }
 
+// hud.render_world(x, y, w, h, [flags])
+//
 static int HD_render_world(lua_State *L)
 {
     float x     = (float)luaL_checknumber(L, 1);
@@ -700,7 +702,7 @@ static int HD_set_render_who(lua_State *L)
 {
     int index = (int)luaL_checknumber(L, 1);
 
-    if (index < 0 || index >= total_players)
+    if (index < 0 || index > total_players)
         FatalError("hud.set_render_who: bad index value: %d (numplayers=%d)\n", index, total_players);
 
     if (index == 0)
@@ -998,6 +1000,7 @@ static int HD_get_image_height(lua_State *L)
 
     return 1;
 }
+
 
 static const luaL_Reg hudlib[] = {{"game_mode", HD_game_mode},
                                   {"game_name", HD_game_name},

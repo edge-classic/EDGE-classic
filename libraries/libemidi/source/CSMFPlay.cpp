@@ -7,20 +7,15 @@
 
 using namespace dsa;
 
-CSMFPlay::CSMFPlay(uint32_t rate, CSMFPlay::PlayerMode mode, int mods) {
-  m_mods = mods;
-  if (mode == SCC_PSG_MODE)
-    for(int i=0;i<m_mods;i++){
-      if(i&1)
-        m_module[i].AttachDevice(new CSccDevice(rate,2));
-      else
-        m_module[i].AttachDevice(new CPSGDrum(rate,1));
-    }
-  else
-  {
-    for(int i=0;i<m_mods;i++){
-      m_module[i].AttachDevice(new COpllDevice(rate, 2));
-    }
+CSMFPlay::CSMFPlay(uint32_t rate, CSMFPlay::PlayerMode mode) {
+  m_mode = mode;
+  if (m_mode == SCC_PSG_MODE) {
+    m_mods = 2;
+    m_module[0].AttachDevice(new CSccDevice(rate,2));
+    m_module[1].AttachDevice(new CPSGDrum(rate,1));
+  } else {
+    m_mods = 1;
+    m_module[0].AttachDevice(new COpllDevice(rate, 2));
   }
 }
 
@@ -33,9 +28,14 @@ void CSMFPlay::Start(bool reset) {
 }
 
 void CSMFPlay::SendMIDIMessage(const CMIDIMsg &msg) {
-  m_module[(msg.m_ch*2)%m_mods].SendMIDIMsg(msg);
-  if(msg.m_ch!=9)
-    m_module[(msg.m_ch*2+1)%m_mods].SendMIDIMsg(msg);
+  if (m_mode == SCC_PSG_MODE) {
+    if (msg.m_ch == 9)
+      m_module[1].SendMIDIMsg(msg);
+    else
+      m_module[0].SendMIDIMsg(msg);
+  } else {
+    m_module[0].SendMIDIMsg(msg);
+  }
 }
 
 uint32_t CSMFPlay::Render16(int16_t *buf, uint32_t length) {

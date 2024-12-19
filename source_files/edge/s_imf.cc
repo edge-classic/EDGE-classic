@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------------
-//  EDGE Emu de MIDI Music Player
+//  EDGE IMF Music Player
 //----------------------------------------------------------------------------
 //
-//  Copyright (c) 2024  The EDGE Team.
+//  Copyright (c) 2022-2024 The EDGE Team.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -16,46 +16,38 @@
 //
 //----------------------------------------------------------------------------
 
-#include "s_emidi.h"
+#include "s_imf.h"
 
-#include <stdint.h>
-#include <string.h>
-
-#include "CSMFPlay.hpp"
 #include "dm_state.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
-#include "epi_str_util.h"
 #include "i_movie.h"
 #include "i_system.h"
 #include "m_misc.h"
 // clang-format off
-#define MidiFraction EMIDIFraction
-#define MidiSequencer EMIDISequencer
-typedef struct MidiRealTimeInterface EMIDIInterface;
+#define MidiFraction IMFFraction
+#define MidiSequencer IMFSequencer
+typedef struct MidiRealTimeInterface IMFInterface;
 #include "midi_sequencer_impl.hpp"
 // clang-format on
+#include "ddf_playlist.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
+#include "opal.h"
 #include "s_blit.h"
+#include "s_music.h"
+#include "snd_types.h"
+#include "w_files.h"
+#include "w_wad.h"
 
 extern int  sound_device_frequency;
 
-// Should only be invoked when switching MIDI players
-void RestartEMIDI(void)
-{
-    int old_entry = entry_playing;
+static Opal *imf_opl = nullptr;
 
-    StopMusic();
-
-    ChangeMusic(old_entry, true); // Restart track that was kPlaying when switched
-
-    return;                       // OK!
-}
-
-class EMIDIPlayer : public AbstractMusicPlayer
+class IMFPlayer : public AbstractMusicPlayer
 {
   private:
-  private:
-    enum status_
+    enum Status
     {
         kNotLoaded,
         kPlaying,
@@ -66,33 +58,35 @@ class EMIDIPlayer : public AbstractMusicPlayer
     int  status_;
     bool looping_;
 
-    EMIDIInterface *emidi_interface_;
+    IMFInterface *imf_interface_;
 
   public:
-    EMIDIPlayer(uint8_t *data, int length, bool looping) : status_(kNotLoaded), looping_(looping)
+    IMFPlayer(bool looping) : status_(kNotLoaded), looping_(looping)
     {
         SequencerInit();
     }
 
-    ~EMIDIPlayer()
+    ~IMFPlayer()
     {
         Close();
     }
 
   public:
-    EMIDISequencer             *emidi_sequencer_;
-    dsa::CSMFPlay              *emidi_synth_;
+    IMFSequencer *imf_sequencer__;
 
     static void rtNoteOn(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity)
     {
-        EMIDIPlayer *player = (EMIDIPlayer *)userdata;
-        player->emidi_synth_->SendMIDIMessage({dsa::CMIDIMsg::NOTE_ON, channel, note, velocity});
+        (void)userdata;
+        (void)channel;
+        (void)note;
+        (void)velocity;
     }
 
     static void rtNoteOff(void *userdata, uint8_t channel, uint8_t note)
     {
-        EMIDIPlayer *player = (EMIDIPlayer *)userdata;
-        player->emidi_synth_->SendMIDIMessage({dsa::CMIDIMsg::NOTE_OFF, channel, note});
+        (void)userdata;
+        (void)channel;
+        (void)note;
     }
 
     static void rtNoteAfterTouch(void *userdata, uint8_t channel, uint8_t note, uint8_t atVal)
@@ -105,26 +99,32 @@ class EMIDIPlayer : public AbstractMusicPlayer
 
     static void rtChannelAfterTouch(void *userdata, uint8_t channel, uint8_t atVal)
     {
-        EMIDIPlayer *player = (EMIDIPlayer *)userdata;
-        player->emidi_synth_->SendMIDIMessage({dsa::CMIDIMsg::CHANNEL_PRESSURE, channel, atVal});
+        (void)userdata;
+        (void)channel;
+        (void)atVal;
     }
 
     static void rtControllerChange(void *userdata, uint8_t channel, uint8_t type, uint8_t value)
     {
-        EMIDIPlayer *player = (EMIDIPlayer *)userdata;
-        player->emidi_synth_->SendMIDIMessage({dsa::CMIDIMsg::CONTROL_CHANGE, channel, type, value});
+        (void)userdata;
+        (void)channel;
+        (void)type;
+        (void)value;
     }
 
     static void rtPatchChange(void *userdata, uint8_t channel, uint8_t patch)
     {
-        EMIDIPlayer *player = (EMIDIPlayer *)userdata;
-        player->emidi_synth_->SendMIDIMessage({dsa::CMIDIMsg::PROGRAM_CHANGE, channel, patch});
+        (void)userdata;
+        (void)channel;
+        (void)patch;
     }
 
     static void rtPitchBend(void *userdata, uint8_t channel, uint8_t msb, uint8_t lsb)
     {
-        EMIDIPlayer *player = (EMIDIPlayer *)userdata;
-        player->emidi_synth_->SendMIDIMessage({dsa::CMIDIMsg::PITCH_BEND_CHANGE, channel, lsb, msb});
+        (void)userdata;
+        (void)channel;
+        (void)msb;
+        (void)lsb;
     }
 
     static void rtSysEx(void *userdata, const uint8_t *msg, size_t size)
@@ -149,43 +149,53 @@ class EMIDIPlayer : public AbstractMusicPlayer
         return 0;
     }
 
+    static void rtRawOPL(void *userdata, uint8_t reg, uint8_t value)
+    {
+        (void)userdata;
+        if ((reg & 0xF0) == 0xC0)
+            value |= 0x30;
+        imf_opl->Port(reg, value);
+    }
+
     static void playSynth(void *userdata, uint8_t *stream, size_t length)
     {
-        EMIDIPlayer *player = (EMIDIPlayer *)userdata;
-        player->emidi_synth_->Render16((int16_t *)stream, length / 4);
+        (void)userdata;
+        for (size_t i = 0; i < length / 2; i += 2)
+            imf_opl->Sample((int16_t *)stream + i, (int16_t *)stream + i + 1);
     }
 
     void SequencerInit()
     {
-        emidi_sequencer_ = new EMIDISequencer;
-        emidi_interface_ = new EMIDIInterface;
-        memset(emidi_interface_, 0, sizeof(MidiRealTimeInterface));
+        imf_sequencer__ = new IMFSequencer;
+        imf_interface_ = new IMFInterface;
+        memset(imf_interface_, 0, sizeof(MidiRealTimeInterface));
 
-        emidi_interface_->rtUserData           = this;
-        emidi_interface_->rt_noteOn            = rtNoteOn;
-        emidi_interface_->rt_noteOff           = rtNoteOff;
-        emidi_interface_->rt_noteAfterTouch    = rtNoteAfterTouch;
-        emidi_interface_->rt_channelAfterTouch = rtChannelAfterTouch;
-        emidi_interface_->rt_controllerChange  = rtControllerChange;
-        emidi_interface_->rt_patchChange       = rtPatchChange;
-        emidi_interface_->rt_pitchBend         = rtPitchBend;
-        emidi_interface_->rt_systemExclusive   = rtSysEx;
+        imf_interface_->rtUserData           = this;
+        imf_interface_->rt_noteOn            = rtNoteOn;
+        imf_interface_->rt_noteOff           = rtNoteOff;
+        imf_interface_->rt_noteAfterTouch    = rtNoteAfterTouch;
+        imf_interface_->rt_channelAfterTouch = rtChannelAfterTouch;
+        imf_interface_->rt_controllerChange  = rtControllerChange;
+        imf_interface_->rt_patchChange       = rtPatchChange;
+        imf_interface_->rt_pitchBend         = rtPitchBend;
+        imf_interface_->rt_systemExclusive   = rtSysEx;
 
-        emidi_interface_->onPcmRender          = playSynth;
-        emidi_interface_->onPcmRender_userdata = this;
+        imf_interface_->onPcmRender          = playSynth;
+        imf_interface_->onPcmRender_userdata = this;
 
-        emidi_interface_->pcmSampleRate = sound_device_frequency;
-        emidi_interface_->pcmFrameSize  = 2 /*channels*/ * 2 /*size of one sample*/;
+        imf_interface_->pcmSampleRate = sound_device_frequency;
+        imf_interface_->pcmFrameSize  = 2 /*channels*/ * sizeof(int16_t) /*size of one sample*/;
 
-        emidi_interface_->rt_deviceSwitch  = rtDeviceSwitch;
-        emidi_interface_->rt_currentDevice = rtCurrentDevice;
+        imf_interface_->rt_deviceSwitch  = rtDeviceSwitch;
+        imf_interface_->rt_currentDevice = rtCurrentDevice;
+        imf_interface_->rt_rawOPL        = rtRawOPL;
 
-        emidi_sequencer_->SetInterface(emidi_interface_);
+        imf_sequencer__->SetInterface(imf_interface_);
     }
 
-    bool LoadTrack(const uint8_t *data, int length)
+    bool LoadTrack(const uint8_t *data, int length, uint16_t rate)
     {
-        return emidi_sequencer_->LoadMidi(data, length);
+        return imf_sequencer__->LoadMidi(data, length, rate);
     }
 
     void Close(void)
@@ -197,20 +207,20 @@ class EMIDIPlayer : public AbstractMusicPlayer
         if (status_ != kStopped)
             Stop();
 
-        if (emidi_sequencer_)
+        if (imf_opl)
         {
-            delete emidi_sequencer_;
-            emidi_sequencer_ = nullptr;
+            delete imf_opl;
+            imf_opl = nullptr;
         }
-        if (emidi_interface_)
+        if (imf_sequencer__)
         {
-            delete emidi_interface_;
-            emidi_interface_ = nullptr;
+            delete imf_sequencer__;
+            imf_sequencer__ = nullptr;
         }
-        if (emidi_synth_)
+        if (imf_interface_)
         {
-            delete emidi_synth_;
-            emidi_synth_ = nullptr;
+            delete imf_interface_;
+            imf_interface_ = nullptr;
         }
 
         music_player_gain = 1.0f;
@@ -226,7 +236,7 @@ class EMIDIPlayer : public AbstractMusicPlayer
         status_  = kPlaying;
         looping_ = loop;
 
-        music_player_gain = 2.0f;
+        music_player_gain = 4.0f;
 
         // Load up initial buffer data
         Ticker();
@@ -284,22 +294,20 @@ class EMIDIPlayer : public AbstractMusicPlayer
   private:
     bool StreamIntoBuffer(SoundData *buf)
     {
-        int16_t *data_buf = buf->data_;
-
         bool song_done = false;
 
-        int played = emidi_sequencer_->PlayStream((uint8_t *)data_buf, kMusicBuffer);
+        int played = imf_sequencer__->PlayStream((uint8_t *)(buf->data_), kMusicBuffer);
 
-        if (emidi_sequencer_->PositionAtEnd())
+        if (imf_sequencer__->PositionAtEnd())
             song_done = true;
 
-        buf->length_ = played / 4;
+        buf->length_ = played / 2 / sizeof(int16_t);
 
         if (song_done) /* EOF */
         {
             if (!looping_)
                 return false;
-            emidi_sequencer_->Rewind();
+            imf_sequencer__->Rewind();
             return true;
         }
 
@@ -307,37 +315,65 @@ class EMIDIPlayer : public AbstractMusicPlayer
     }
 };
 
-AbstractMusicPlayer *PlayEMIDIMusic(uint8_t *data, int length, bool loop)
+AbstractMusicPlayer *PlayIMFMusic(uint8_t *data, int length, bool loop, int type)
 {
-    EMIDIPlayer *player = new EMIDIPlayer(data, length, loop);
+    imf_opl = new Opal(sound_device_frequency);
+    IMFPlayer *player = new IMFPlayer(loop);
 
-    if (!player)
+    if (!imf_opl || !player)
     {
-        LogDebug("Emu de MIDI player: error initializing!\n");
+        LogDebug("IMF player: error initializing!\n");
+        if (imf_opl)
+        {
+            delete imf_opl;
+            imf_opl = nullptr;
+        }
+        if (player)
+            delete player;
         delete[] data;
         return nullptr;
     }
 
-    player->emidi_synth_ = new dsa::CSMFPlay(sound_device_frequency, var_midi_player == 2 ? dsa::CSMFPlay::OPLL_MODE : dsa::CSMFPlay::SCC_PSG_MODE);
-    if (!player->emidi_synth_)
+    uint16_t rate;
+
+    switch (type)
     {
-        LogDebug("Emu de MIDI player: error initializing!\n");
+    case kDDFMusicIMF280:
+        rate = 280;
+        break;
+    case kDDFMusicIMF560:
+        rate = 560;
+        break;
+    case kDDFMusicIMF700:
+        rate = 700;
+        break;
+    default:
+        rate = 0;
+        break;
+    }
+
+    if (rate == 0)
+    {
+        LogDebug("IMF player: no IMF sample rate provided!\n");
         delete[] data;
+        delete imf_opl;
+        imf_opl = nullptr;
         delete player;
-        return nullptr;
+        return nullptr;  
     }
 
-    if (!player->LoadTrack(data, length)) // Lobo: quietly log it instead of completely exiting EDGE
+    if (!player->LoadTrack(data, length,
+                           rate)) // Lobo: quietly log it instead of completely exiting EDGE
     {
-        LogDebug("Emu de MIDI player: failed to load MIDI file!\n");
+        LogDebug("IMF player: failed to load IMF file!\n");
         delete[] data;
+        delete imf_opl;
+        imf_opl = nullptr;
         delete player;
         return nullptr;
     }
 
     delete[] data;
-
-    player->emidi_synth_->Start();
 
     player->Play(loop);
 

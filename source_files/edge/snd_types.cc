@@ -21,7 +21,7 @@
 #include "epi.h"
 #include "epi_filesystem.h"
 #include "epi_str_util.h"
-#include "m4p.h"
+#include "s_ibxm.h"
 
 SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
 {
@@ -98,9 +98,9 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
 
     // Moving on to more specialized or less reliable detections
 
-    if (m4p_TestFromData(data, song_len))
+    if (CheckIBXMFormat(data, song_len))
     {
-        return kSoundM4P;
+        return kSoundIBXM;
     }
 
     if ((data[0] == 'I' && data[1] == 'D' && data[2] == '3') || (data[0] == 0xFF && ((data[1] >> 4 & 0xF) == 0xF)))
@@ -149,8 +149,8 @@ SoundFormat SoundFilenameToFormat(std::string_view filename)
     if (ext == ".mid" || ext == ".midi" || ext == ".xmi" || ext == ".rmi" || ext == ".rmid")
         return kSoundMIDI;
 
-    if (ext == ".mod" || ext == ".s3m" || ext == ".xm" || ext == ".it")
-        return kSoundM4P;
+    if (ext == ".mod" || ext == ".s3m" || ext == ".xm")
+        return kSoundIBXM;
 
     if (ext == ".rad")
         return kSoundRAD;

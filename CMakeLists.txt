@@ -22,6 +22,7 @@ option(EDGE_COAL_SUPPORT "Enable support for COAL scripting" ON)
 option(EDGE_DEHACKED_SUPPORT "Enable support for Dehacked patch conversion" ON)
 option(EDGE_IMF_SUPPORT "Enable support for IMF music format" ON)
 option(EDGE_MUS_SUPPORT "Enable support for MUS MIDI format" ON)
+option(EDGE_RAD_SUPPORT "Enable support for Reality Adlib Tracker v2 music" ON)
 option(EDGE_XMI_SUPPORT "Enable support for XMI MIDI format" ON)
 option(EDGE_VWAD_SUPPORT "Enable support for k8vavoom VWAD archives" ON)
 
@@ -160,6 +161,10 @@ endif()
 
 if (EDGE_MUS_SUPPORT)
   add_definitions(-DEDGE_MUS_SUPPORT)
+endif()
+
+if (EDGE_RAD_SUPPORT)
+  add_definitions(-DEDGE_RAD_SUPPORT)
 endif()
 
 if (EDGE_VWAD_SUPPORT)

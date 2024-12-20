@@ -78,7 +78,7 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
             data[offset + 4] == '}' && data[offset + 5] == 'u')
             return kSoundMIDI;
     }
-
+#if EDGE_RAD_SUPPORT
     // Reality Adlib Tracker 2
     if (song_len > 16)
     {
@@ -95,7 +95,7 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
         if (is_rad)
             return kSoundRAD;
     }
-
+#endif
     // Moving on to more specialized or less reliable detections
 
     if (CheckIBXMFormat(data, song_len))
@@ -157,10 +157,10 @@ SoundFormat SoundFilenameToFormat(std::string_view filename)
 
     if (ext == ".mod" || ext == ".s3m" || ext == ".xm")
         return kSoundIBXM;
-
+#if EDGE_RAD_SUPPORT
     if (ext == ".rad")
         return kSoundRAD;
-
+#endif
     // Not sure if these will ever be encountered in the wild, but according to
     // the VGMPF Wiki they are valid DMX file extensions
     if (ext == ".dsp" || ext == ".pcs" || ext == ".gsp" || ext == ".gsw")

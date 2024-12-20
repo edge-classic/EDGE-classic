@@ -38,7 +38,9 @@ enum DDFMusicType
     kDDFMusicSID,
     kDDFMusicFLAC,
     kDDFMusicIBXM,
+#if EDGE_RAD_SUPPORT
     kDDFMusicRAD,
+#endif
 #if EDGE_IMF_SUPPORT
     kDDFMusicIMF280,
     kDDFMusicIMF560,

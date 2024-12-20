@@ -31,7 +31,9 @@ enum SoundFormat
     kSoundMP3,
     kSoundIBXM,
     kSoundSID,
+#if EDGE_RAD_SUPPORT
     kSoundRAD,
+#endif
 #if EDGE_MUS_SUPPORT
     kSoundMUS,
 #endif

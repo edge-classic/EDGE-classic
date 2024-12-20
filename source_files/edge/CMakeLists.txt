@@ -88,7 +88,6 @@ set (EDGE_SOURCE_FILES
   s_tsf.cc
   s_fmm.cc
   s_ibxm.cc
-  s_rad.cc
   s_sid.cc
   s_wav.cc
   s_flac.cc
@@ -131,6 +130,10 @@ if (EDGE_IMF_SUPPORT)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_imf.cc)
 endif()
 
+if (EDGE_RAD_SUPPORT)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_rad.cc)
+endif()
+
 if (EMSCRIPTEN)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} i_web.cc)
 else()
@@ -150,7 +153,6 @@ set (EDGE_LINK_LIBRARIES
   HandmadeMath
   ibxm
   libemidi
-  libRAD
   lua
   miniz
   pl_mpeg
@@ -166,6 +168,10 @@ endif()
 
 if (EDGE_DEHACKED_SUPPORT)
   set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} edge_deh)
+endif()
+
+if (EDGE_IMF_SUPPORT OR EDGE_RAD_SUPPORT)
+  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} libRAD)
 endif()
 
 if (EDGE_VWAD_SUPPORT)

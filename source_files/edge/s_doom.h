@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------------
-//  EDGE WAV Sound Loader (HEADER)
+//  EDGE Doom/PC Speaker Sound Loader (HEADER)
 //----------------------------------------------------------------------------
 //
-//  Copyright (c) 2022-2024 The EDGE Team.
+//  Copyright (c) 2024 The EDGE Team.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,9 @@
 
 #include "snd_data.h"
 
-bool LoadWAVSound(SoundData *buf, uint8_t *data, int length);
+bool LoadDoomSound(SoundData *buf, uint8_t *data, int length);
+
+bool LoadPCSpeakerSound(SoundData *buf, uint8_t *data, int length);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

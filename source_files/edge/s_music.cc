@@ -32,15 +32,29 @@
 #include "i_system.h"
 #include "m_misc.h"
 #include "s_emidi.h"
+#if EDGE_FLAC_SUPPORT
 #include "s_flac.h"
+#endif
 #include "s_tsf.h"
 #include "s_fmm.h"
+#if EDGE_TRACKER_SUPPORT
 #include "s_ibxm.h"
+#endif
+#if EDGE_MP3_SUPPORT
 #include "s_mp3.h"
+#endif
+#if EDGE_OGG_SUPPORT
 #include "s_ogg.h"
+#endif
+#if EDGE_IMF_SUPPORT
 #include "s_imf.h"
+#endif
+#if EDGE_RAD_SUPPORT
 #include "s_rad.h"
+#endif
+#if EDGE_SID_SUPPORT
 #include "s_sid.h"
+#endif
 #include "s_sound.h"
 #include "snd_types.h"
 #include "w_files.h"
@@ -150,6 +164,7 @@ void ChangeMusic(int entry_number, bool loop)
 
     SoundFormat fmt = kSoundUnknown;
 
+#if EDGE_IMF_SUPPORT
     // IMF Music is the outlier in that it must be predefined in DDFPLAY with
     // the appropriate IMF frequency, as there is no way of determining this
     // from file information alone
@@ -168,49 +183,68 @@ void ChangeMusic(int entry_number, bool loop)
             fmt = SoundFilenameToFormat(play->info_);
         }
     }
-
+#else
+    if (play->infotype_ == kDDFMusicDataLump)
+    {
+        // lumps must use auto-detection based on their contents
+        fmt = DetectSoundFormat(data, length);
+    }
+    else
+    {
+        // for FILE and PACK, use the file extension
+        fmt = SoundFilenameToFormat(play->info_);
+    }
+#endif
     // NOTE: players are responsible for freeing 'data'
 
     switch (fmt)
     {
+#if EDGE_OGG_SUPPORT
     case kSoundOGG:
         delete F;
         music_player = PlayOGGMusic(data, length, loop);
         break;
-
+#endif
+#if EDGE_MP3_SUPPORT
     case kSoundMP3:
         delete F;
         music_player = PlayMP3Music(data, length, loop);
         break;
-
+#endif
+#if EDGE_FLAC_SUPPORT
     case kSoundFLAC:
         delete F;
         music_player = PlayFLACMusic(data, length, loop);
         break;
-
+#endif
+#if EDGE_TRACKER_SUPPORT
     case kSoundIBXM:
         delete F;
         music_player = PlayIBXMMusic(data, length, loop);
         break;
-
+#endif
+#if EDGE_RAD_SUPPORT
     case kSoundRAD:
         delete F;
         music_player = PlayRADMusic(data, length, loop);
         break;
-
+#endif
+#if EDGE_SID_SUPPORT
     case kSoundSID:
         delete F;
         music_player = PlaySIDMusic(data, length, loop);
         break;
-
+#endif
+#if EDGE_IMF_SUPPORT
     case kSoundIMF:
         delete F;
         music_player = PlayIMFMusic(data, length, loop, play->type_);
         break;
-
+#endif
     case kSoundMIDI:
+#if EDGE_MUS_SUPPORT
     case kSoundMUS:
-    case kSoundWAV: // RIFF MIDI has the same header as WAV
+#endif
         delete F;
         if (var_midi_player == 0)
         {

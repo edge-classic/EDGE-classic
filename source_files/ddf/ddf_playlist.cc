@@ -24,6 +24,40 @@ static PlaylistEntry *dynamic_plentry;
 
 PlaylistEntryContainer playlist;
 
+static std::vector<std::string> supported_music_types;
+
+static void InitializeMusicTypes()
+{
+    supported_music_types.push_back("UNKNOWN");
+    supported_music_types.push_back("MIDI");
+#if EDGE_MUS_SUPPORT
+    supported_music_types.push_back("MUS");
+#endif
+#if EDGE_OGG_SUPPORT
+    supported_music_types.push_back("OGG");
+#endif
+#if EDGE_MP3_SUPPORT
+    supported_music_types.push_back("MP3");
+#endif
+#if EDGE_SID_SUPPORT
+    supported_music_types.push_back("SID");
+#endif
+#if EDGE_FLAC_SUPPORT
+    supported_music_types.push_back("FLAC");
+#endif
+#if EDGE_TRACKER_SUPPORT
+    supported_music_types.push_back("TRACKER");
+#endif
+#if EDGE_RAD_SUPPORT
+    supported_music_types.push_back("RAD");
+#endif
+#if EDGE_IMF_SUPPORT
+    supported_music_types.push_back("IMF280");
+    supported_music_types.push_back("IMF560");
+    supported_music_types.push_back("IMF700");
+#endif
+}
+
 //
 // DDFMusicParseInfo
 //
@@ -31,8 +65,9 @@ PlaylistEntryContainer playlist;
 //
 static void DDFMusicParseInfo(const char *info)
 {
-    static const char *const musstrtype[] = {"UNKNOWN", "MIDI", "MUS",    "OGG",    "MP3",    "SID",  "FLAC",
-                                             "IBXM",     "RAD",  "IMF280", "IMF560", "IMF700", nullptr};
+    if (supported_music_types.empty())
+        InitializeMusicTypes();
+
     static const char *const musinftype[] = {"UNKNOWN", "LUMP", "FILE", "PACK", nullptr};
 
     char charbuff[256];
@@ -60,7 +95,7 @@ static void DDFMusicParseInfo(const char *info)
     charbuff[i] = 0;
 
     i = kDDFMusicUnknown;
-    while (i != kTotalDDFMusicTypes && epi::StringCaseCompareASCII(charbuff, musstrtype[i]) != 0)
+    while (i != kTotalDDFMusicTypes && epi::StringCaseCompareASCII(charbuff, supported_music_types[i]) != 0)
         i++;
 
     if (i == kTotalDDFMusicTypes)

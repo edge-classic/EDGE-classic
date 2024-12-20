@@ -529,8 +529,10 @@ static OptionMenuItem soundoptions[] = {
     {kOptionMenuItemTypeSwitch, "MIDI Player", "TinySoundFont/FMMIDI/Emu de MIDI (OPLL Mode)/Emu de MIDI (SCC-PSG Mode)", 4, &var_midi_player, OptionMenuChangeMidiPlayer,
      nullptr},
     {kOptionMenuItemTypeFunction, "TinySoundFont Bank", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr},
+#if EDGE_DOOM_SFX_SUPPORT
     {kOptionMenuItemTypeBoolean, "PC Speaker Mode", YesNo, 2, &pc_speaker_mode, OptionMenuChangePCSpeakerMode,
      "Music will be Off while this is enabled"},
+#endif
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeBoolean, "Dynamic Reverb", YesNo, 2, &dynamic_reverb, nullptr, nullptr},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},

@@ -24,17 +24,17 @@
 #include "i_movie.h"
 #include "i_system.h"
 #include "m_misc.h"
-// clang-format off
-#define MidiFraction IMFFraction
-#define MidiSequencer IMFSequencer
-typedef struct MidiRealTimeInterface IMFInterface;
-#include "midi_sequencer_impl.hpp"
-// clang-format on
 #include "ddf_playlist.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "opal.h"
 #include "s_blit.h"
+// clang-format off
+#define MidiFraction IMFFraction
+#define MidiSequencer IMFSequencer
+typedef struct MidiRealTimeInterface IMFInterface;
+#include "s_midi.h"
+// clang-format on
 #include "s_music.h"
 #include "snd_types.h"
 #include "w_files.h"

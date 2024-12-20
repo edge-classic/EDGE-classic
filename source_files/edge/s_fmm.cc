@@ -29,13 +29,13 @@
 #include "i_system.h"
 #include "m_misc.h"
 #include "midisynth.hpp"
+#include "s_blit.h"
 // clang-format off
 #define MidiFraction FMMFraction
 #define MidiSequencer FMMSequencer
 typedef struct MidiRealTimeInterface FMMInterface;
-#include "midi_sequencer_impl.hpp"
+#include "s_midi.h"
 // clang-format on
-#include "s_blit.h"
 
 extern int  sound_device_frequency;
 

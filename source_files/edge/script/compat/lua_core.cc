@@ -14,7 +14,9 @@
 #include "m_random.h"
 #include "r_modes.h"
 #include "version.h"
+#if EDGE_COAL_SUPPORT
 #include "vm_coal.h"
+#endif
 #include "w_wad.h"
 
 //------------------------------------------------------------------------

@@ -41,10 +41,10 @@
 
 extern coal::VM *ui_vm;
 
+extern Player *ui_player_who;
+
 extern void COALSetFloat(coal::VM *vm, const char *mod_name, const char *var_name, double value);
 extern void COALCallFunction(coal::VM *vm, const char *name);
-
-Player *ui_player_who = nullptr;
 
 //------------------------------------------------------------------------
 //  PLAYER MODULE

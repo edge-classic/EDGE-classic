@@ -60,14 +60,18 @@
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "i_system.h"
+#if EDGE_DEHACKED_SUPPORT
 #include "l_deh.h"
+#endif
 #include "m_misc.h"
 #include "p_umapinfo.h" //Lobo 2022
 #include "r_image.h"
 #include "rad_trig.h"
 #include "script/compat/lua_compat.h"
 #include "stb_sprintf.h"
+#if EDGE_COAL_SUPPORT
 #include "vm_coal.h"
+#endif
 #include "w_epk.h"
 #include "w_files.h"
 #include "w_texture.h"
@@ -981,7 +985,7 @@ void ProcessFixersForWAD(DataFile *df)
         }
     }
 }
-
+#if EDGE_DEHACKED_SUPPORT
 void ProcessDehackedInWad(DataFile *df)
 {
     int deh_lump = df->wad_->dehacked_lump_;
@@ -1005,7 +1009,7 @@ void ProcessDehackedInWad(DataFile *df)
 
     delete[] data;
 }
-
+#endif
 static void ProcessDDFInWad(DataFile *df)
 {
     std::string bare_filename = epi::GetFilename(df->name_);
@@ -1028,7 +1032,7 @@ static void ProcessDDFInWad(DataFile *df)
         }
     }
 }
-
+#if EDGE_COAL_SUPPORT
 static void ProcessCOALInWad(DataFile *df)
 {
     std::string bare_filename = epi::GetFilename(df->name_);
@@ -1050,7 +1054,7 @@ static void ProcessCOALInWad(DataFile *df)
         COALAddScript(0, data, source);
     }
 }
-
+#endif
 static void ProcessLuaInWad(DataFile *df)
 {
     std::string bare_filename = epi::GetFilename(df->name_);
@@ -1060,9 +1064,9 @@ static void ProcessLuaInWad(DataFile *df)
     if (wad->lua_huds_ >= 0)
     {
         int lump = wad->lua_huds_;
-
+#if EDGE_COAL_SUPPORT // This part only matters if in a potentially mixed Lua/COAL environment
         LuaSetLuaHUDDetected(true);
-
+#endif
         std::string data   = LoadLumpAsString(lump);
         std::string source = GetLumpNameFromIndex(lump);
 
@@ -1195,11 +1199,14 @@ void ProcessWad(DataFile *df, size_t file_index)
     LogDebug("   md5hash = %s\n", wad->md5_string_.c_str());
 
     delete[] raw_info;
-
+#if EDGE_DEHACKED_SUPPORT
     ProcessDehackedInWad(df);
+#endif
     ProcessBoomStuffInWad(df);
     ProcessDDFInWad(df);
+#if EDGE_COAL_SUPPORT
     ProcessCOALInWad(df);
+#endif
     ProcessLuaInWad(df);
 }
 

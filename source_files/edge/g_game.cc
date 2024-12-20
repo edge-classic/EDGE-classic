@@ -62,7 +62,9 @@
 #include "sv_chunk.h"
 #include "sv_main.h"
 #include "version.h"
+#if EDGE_COAL_SUPPORT
 #include "vm_coal.h"
+#endif
 #include "w_wad.h"
 
 GameState game_state = kGameStateNothing;
@@ -308,10 +310,14 @@ void DoLoadLevel(void)
     LoadLevel_Bits();
 
     SpawnInitialPlayers();
+#if EDGE_COAL_SUPPORT
     if (LuaUseLuaHUD())
         LuaBeginLevel();
     else
         COALBeginLevel();
+#else
+    LuaBeginLevel();
+#endif
 }
 
 //
@@ -852,11 +858,14 @@ static void GameDoLoadGame(void)
     HUDStart();
 
     SetPalette(kPaletteNormal, 0);
-
+#if EDGE_COAL_SUPPORT
     if (LuaUseLuaHUD())
         LuaLoadGame();
     else
         COALLoadGame();
+#else
+    LuaLoadGame();
+#endif
 }
 
 //
@@ -950,10 +959,14 @@ static bool GameSaveGameToFile(std::string filename, const char *description)
 
 static void GameDoSaveGame(void)
 {
+#if EDGE_COAL_SUPPORT
     if (LuaUseLuaHUD())
         LuaSaveGame();
     else
         COALSaveGame();
+#else
+    LuaSaveGame();
+#endif
 
     std::string fn(SaveFilename("current", "head"));
 
@@ -1082,11 +1095,14 @@ static void GameDoNewGame(void)
 
     delete defer_params;
     defer_params = nullptr;
-
+#if EDGE_COAL_SUPPORT
     if (LuaUseLuaHUD())
         LuaNewGame();
     else
         COALNewGame();
+#else
+    LuaNewGame();
+#endif
 
     // -AJA- 2003/10/09: support for pre-level briefing screen on first map.
     //       FIXME: kludgy. All this game logic desperately needs rethinking.

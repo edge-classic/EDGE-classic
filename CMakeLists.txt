@@ -18,6 +18,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 option(EDGE_GL_ES2 "Enable GLES2 Rendering Backend" OFF)
 option(EDGE_SANITIZE "Enable code sanitizing" OFF)
 option(EDGE_PROFILING "Enable Profiling" OFF)
+option(EDGE_COAL_SUPPORT "Enable support for COAL scripting" ON)
+option(EDGE_DEHACKED_SUPPORT "Enable support for Dehacked patch conversion" ON)
 
 include("${CMAKE_SOURCE_DIR}/cmake/EDGEClassic.cmake")
 
@@ -103,11 +105,19 @@ else()
 
 endif()
 
+# set some directory values for various situations
+
+if(${CMAKE_SYSTEM} MATCHES "BSD")
+  include_directories("/usr/local/include")  
+endif()
+
 if (MSVC)
   set(SDL2_DIR "${CMAKE_SOURCE_DIR}/libraries/sdl2")
 endif()
 
 find_package(SDL2 REQUIRED)
+
+# set certain definitions (if appropriate)
 
 if (APPLE)
   include_directories(${SDL2_INCLUDE_DIR})  
@@ -118,14 +128,18 @@ if (APPLE)
   endif()
 endif()
 
-if(${CMAKE_SYSTEM} MATCHES "BSD")
-  include_directories("/usr/local/include")  
-endif()
-
 if (NOT EDGE_GL_ES2)
   find_package(OpenGL REQUIRED)
 else()
   add_definitions(-DEDGE_GL_ES2)
+endif()
+
+if (EDGE_COAL_SUPPORT)
+  add_definitions(-DEDGE_COAL_SUPPORT)
+endif()
+
+if (EDGE_DEHACKED_SUPPORT)
+  add_definitions(-DEDGE_DEHACKED_SUPPORT)
 endif()
 
 add_subdirectory(libraries)

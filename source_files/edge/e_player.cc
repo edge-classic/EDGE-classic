@@ -43,7 +43,9 @@
 #include "m_random.h"
 #include "p_local.h"
 #include "script/compat/lua_compat.h"
-#include "vm_coal.h" // For COALEndLevel()
+#if EDGE_COAL_SUPPORT
+#include "vm_coal.h"
+#endif
 
 //
 // PLAYER ARRAY
@@ -63,6 +65,10 @@ int     total_bots;
 
 int console_player = -1; // player taking events
 int display_player = -1; // view being displayed
+
+// For COAL/Lua VMs
+Player *ui_hud_who = nullptr;
+Player *ui_player_who = nullptr;
 
 static constexpr uint8_t kMaximumBodies = 50;
 
@@ -143,11 +149,14 @@ void PlayerFinishLevel(Player *p, bool keep_cards)
     // Lobo 2023: uncomment if still getting
     //  "INTERNAL ERROR: player has a removed attacker"
     p->attacker_ = nullptr;
-
+#if EDGE_COAL_SUPPORT
     if (LuaUseLuaHUD())
         LuaEndLevel();
     else
         COALEndLevel();
+#else
+    LuaEndLevel();
+#endif
 }
 
 //

@@ -27,7 +27,6 @@ set (EDGE_SOURCE_FILES
   im_filter.cc
   im_data.cc
   im_funcs.cc
-  l_deh.cc
   m_argv.cc
   m_bbox.cc
   m_cheat.cc
@@ -113,9 +112,6 @@ set (EDGE_SOURCE_FILES
   w_sprite.cc
   w_texture.cc
   w_wad.cc
-  vm_coal.cc
-  vm_hud.cc 
-  vm_player.cc
   script/lua_debugger.cc
   script/compat/lua_vm.cc
   script/compat/lua_compat.cc
@@ -123,6 +119,14 @@ set (EDGE_SOURCE_FILES
   script/compat/lua_game.cc
   script/compat/lua_player.cc
   script/compat/lua_hud.cc)
+
+if (EDGE_COAL_SUPPORT)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} vm_coal.cc vm_hud.cc vm_player.cc)
+endif()
+
+if (EDGE_DEHACKED_SUPPORT)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} l_deh.cc)
+endif()
 
 if (EMSCRIPTEN)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} i_web.cc)
@@ -132,9 +136,7 @@ endif()
 
 set (EDGE_LINK_LIBRARIES
   edge_ajbsp
-  edge_coal  
   edge_ddf
-  edge_deh
   edge_epi
   edge_tracy
   ${SDL2_LIBRARIES}
@@ -155,6 +157,14 @@ set (EDGE_LINK_LIBRARIES
   tsf
   xxhash
 )
+
+if (EDGE_COAL_SUPPORT)
+  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} edge_coal)
+endif()
+
+if (EDGE_DEHACKED_SUPPORT)
+  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} edge_deh)
+endif()
 
 if (WIN32)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} w32_res.rc)

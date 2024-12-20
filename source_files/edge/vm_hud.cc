@@ -51,9 +51,9 @@ extern ImageData *ReadAsEpiBlock(Image *rim);
 
 extern ImageData *RGBFromPalettised(ImageData *src, const uint8_t *palette, int opacity);
 
-Player *ui_hud_who = nullptr;
-
 extern Player *ui_player_who;
+
+extern Player *ui_hud_who;
 
 extern std::string current_map_title;
 

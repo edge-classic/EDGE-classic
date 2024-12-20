@@ -46,24 +46,24 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
     {
         return kSoundSID;
     }
-
+#if EDGE_MUS_SUPPORT
     if (data[0] == 'M' && data[1] == 'U' && data[2] == 'S')
     {
         return kSoundMUS;
     }
-
+#endif
     if (data[0] == 'M' && data[1] == 'T' && data[2] == 'h' && data[3] == 'd')
     {
         return kSoundMIDI;
     }
-
+#if EDGE_XMI_SUPPORT
     // XMI MIDI
     if (song_len > 12 && data[0] == 'F' && data[1] == 'O' && data[2] == 'R' && data[3] == 'M' && data[8] == 'X' &&
         data[9] == 'D' && data[10] == 'I' && data[11] == 'R')
     {
         return kSoundMIDI;
     }
-
+#endif
     // GMF MIDI
     if (data[0] == 'G' && data[1] == 'M' && data[2] == 'F' && data[3] == '\x1')
     {
@@ -142,12 +142,18 @@ SoundFormat SoundFilenameToFormat(std::string_view filename)
     if (ext == ".sid" || ext == ".psid")
         return kSoundSID;
 
-    // Test MUS vs EA-MIDI MUS ?
+#if EDGE_MUS_SUPPORT
     if (ext == ".mus")
         return kSoundMUS;
+#endif
 
-    if (ext == ".mid" || ext == ".midi" || ext == ".xmi" || ext == ".rmi" || ext == ".rmid")
+    if (ext == ".mid" || ext == ".midi" || ext == ".rmi" || ext == ".rmid")
         return kSoundMIDI;
+
+#if EDGE_XMI_SUPPORT
+    if (ext == ".xmi")
+        return kSoundMIDI;
+#endif
 
     if (ext == ".mod" || ext == ".s3m" || ext == ".xm")
         return kSoundIBXM;

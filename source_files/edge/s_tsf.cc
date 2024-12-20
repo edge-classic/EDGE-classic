@@ -27,15 +27,15 @@
 #include "i_movie.h"
 #include "i_system.h"
 #include "m_misc.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
+#include "s_blit.h"
 // clang-format off
 #define MidiFraction TSFFraction
 #define MidiSequencer TSFSequencer
 typedef struct MidiRealTimeInterface TSFInterface;
-#include "midi_sequencer_impl.hpp"
+#include "s_midi.h"
 // clang-format on
-#include "epi_str_compare.h"
-#include "epi_str_util.h"
-#include "s_blit.h"
 #include "s_music.h"
 #include "tsf.h"
 

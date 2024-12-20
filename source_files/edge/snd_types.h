@@ -32,9 +32,13 @@ enum SoundFormat
     kSoundIBXM,
     kSoundSID,
     kSoundRAD,
+#if EDGE_MUS_SUPPORT
     kSoundMUS,
+#endif
     kSoundMIDI,
+#if EDGE_IMF_SUPPORT
     kSoundIMF, // Used with DDFPLAY; not in auto-detection
+#endif
     kSoundDoom,
     kSoundPCSpeaker
 };

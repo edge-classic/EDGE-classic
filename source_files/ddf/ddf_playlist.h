@@ -30,16 +30,20 @@ enum DDFMusicType
 {
     kDDFMusicUnknown = 0,
     kDDFMusicMIDI,
+#if EDGE_MUS_SUPPORT
     kDDFMusicMUS,
+#endif
     kDDFMusicOGG,
     kDDFMusicMP3,
     kDDFMusicSID,
     kDDFMusicFLAC,
     kDDFMusicIBXM,
     kDDFMusicRAD,
+#if EDGE_IMF_SUPPORT
     kDDFMusicIMF280,
     kDDFMusicIMF560,
     kDDFMusicIMF700,
+#endif
     kTotalDDFMusicTypes
 };
 

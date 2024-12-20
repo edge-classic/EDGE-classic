@@ -38,7 +38,9 @@
 #include "s_ibxm.h"
 #include "s_mp3.h"
 #include "s_ogg.h"
+#if EDGE_IMF_SUPPORT
 #include "s_imf.h"
+#endif
 #include "s_rad.h"
 #include "s_sid.h"
 #include "s_sound.h"
@@ -150,6 +152,7 @@ void ChangeMusic(int entry_number, bool loop)
 
     SoundFormat fmt = kSoundUnknown;
 
+#if EDGE_IMF_SUPPORT
     // IMF Music is the outlier in that it must be predefined in DDFPLAY with
     // the appropriate IMF frequency, as there is no way of determining this
     // from file information alone
@@ -168,7 +171,18 @@ void ChangeMusic(int entry_number, bool loop)
             fmt = SoundFilenameToFormat(play->info_);
         }
     }
-
+#else
+    if (play->infotype_ == kDDFMusicDataLump)
+    {
+        // lumps must use auto-detection based on their contents
+        fmt = DetectSoundFormat(data, length);
+    }
+    else
+    {
+        // for FILE and PACK, use the file extension
+        fmt = SoundFilenameToFormat(play->info_);
+    }
+#endif
     // NOTE: players are responsible for freeing 'data'
 
     switch (fmt)
@@ -202,14 +216,16 @@ void ChangeMusic(int entry_number, bool loop)
         delete F;
         music_player = PlaySIDMusic(data, length, loop);
         break;
-
+#if EDGE_IMF_SUPPORT
     case kSoundIMF:
         delete F;
         music_player = PlayIMFMusic(data, length, loop, play->type_);
         break;
-
+#endif
     case kSoundMIDI:
+#if EDGE_MUS_SUPPORT
     case kSoundMUS:
+#endif
     case kSoundWAV: // RIFF MIDI has the same header as WAV
         delete F;
         if (var_midi_player == 0)

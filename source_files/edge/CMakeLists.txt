@@ -88,7 +88,6 @@ set (EDGE_SOURCE_FILES
   s_tsf.cc
   s_fmm.cc
   s_ibxm.cc
-  s_imf.cc
   s_rad.cc
   s_sid.cc
   s_wav.cc
@@ -126,6 +125,10 @@ endif()
 
 if (EDGE_DEHACKED_SUPPORT)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} l_deh.cc)
+endif()
+
+if (EDGE_IMF_SUPPORT)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_imf.cc)
 endif()
 
 if (EMSCRIPTEN)

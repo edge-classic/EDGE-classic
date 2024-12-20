@@ -20,6 +20,9 @@ option(EDGE_SANITIZE "Enable code sanitizing" OFF)
 option(EDGE_PROFILING "Enable Profiling" OFF)
 option(EDGE_COAL_SUPPORT "Enable support for COAL scripting" ON)
 option(EDGE_DEHACKED_SUPPORT "Enable support for Dehacked patch conversion" ON)
+option(EDGE_IMF_SUPPORT "Enable support for IMF music format" ON)
+option(EDGE_MUS_SUPPORT "Enable support for MUS MIDI format" ON)
+option(EDGE_XMI_SUPPORT "Enable support for XMI MIDI format" ON)
 option(EDGE_VWAD_SUPPORT "Enable support for k8vavoom VWAD archives" ON)
 
 include("${CMAKE_SOURCE_DIR}/cmake/EDGEClassic.cmake")
@@ -151,8 +154,20 @@ if (EDGE_DEHACKED_SUPPORT)
   add_definitions(-DEDGE_DEHACKED_SUPPORT)
 endif()
 
+if (EDGE_IMF_SUPPORT)
+  add_definitions(-DEDGE_IMF_SUPPORT)
+endif()
+
+if (EDGE_MUS_SUPPORT)
+  add_definitions(-DEDGE_MUS_SUPPORT)
+endif()
+
 if (EDGE_VWAD_SUPPORT)
   add_definitions(-DEDGE_VWAD_SUPPORT)
+endif()
+
+if (EDGE_XMI_SUPPORT)
+  add_definitions(-DEDGE_XMI_SUPPORT)
 endif()
 
 add_subdirectory(libraries)

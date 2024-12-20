@@ -29,13 +29,13 @@
 #include "i_movie.h"
 #include "i_system.h"
 #include "m_misc.h"
+#include "s_blit.h"
 // clang-format off
 #define MidiFraction EMIDIFraction
 #define MidiSequencer EMIDISequencer
 typedef struct MidiRealTimeInterface EMIDIInterface;
-#include "midi_sequencer_impl.hpp"
+#include "s_midi.h"
 // clang-format on
-#include "s_blit.h"
 
 extern int  sound_device_frequency;
 

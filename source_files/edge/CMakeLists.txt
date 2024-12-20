@@ -148,7 +148,6 @@ set (EDGE_LINK_LIBRARIES
   ibxm
   libemidi
   libRAD
-  libvwad
   lua
   miniz
   pl_mpeg
@@ -164,6 +163,10 @@ endif()
 
 if (EDGE_DEHACKED_SUPPORT)
   set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} edge_deh)
+endif()
+
+if (EDGE_VWAD_SUPPORT)
+  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} libvwad)
 endif()
 
 if (WIN32)

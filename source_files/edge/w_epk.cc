@@ -38,7 +38,9 @@
 #if EDGE_COAL_SUPPORT
 #include "vm_coal.h"
 #endif
+#if EDGE_VWAD_SUPPORT
 #include "vwadvfs.h"
+#endif
 #include "w_files.h"
 #include "w_wad.h"
 
@@ -59,13 +61,20 @@ class PackEntry
     // only for ZIP: the index into the archive.
     mz_uint zip_index_;
 
+#if EDGE_VWAD_SUPPORT
     // only for VWAD: the index into the archive.
     vwad_fidx vwad_index_;
 
     PackEntry(const std::string &name, const std::string &path, const std::string &ppath, mz_uint idx, vwad_fidx vidx)
-        : name_(name), full_path_(path), pack_path_(ppath), zip_index_(idx), vwad_index_(vidx)
+    : name_(name), full_path_(path), pack_path_(ppath), zip_index_(idx), vwad_index_(vidx)
     {
     }
+#else
+    PackEntry(const std::string &name, const std::string &path, const std::string &ppath, mz_uint idx)
+        : name_(name), full_path_(path), pack_path_(ppath), zip_index_(idx)
+    {
+    }
+#endif
 
     ~PackEntry()
     {
@@ -98,7 +107,7 @@ class PackDirectory
     }
 
     void SortEntries();
-
+#ifdef EDGE_VWAD_SUPPORT
     size_t AddEntry(const std::string &name, const std::string &path, const std::string &ppath, mz_uint idx,
                     vwad_fidx vidx)
     {
@@ -110,7 +119,18 @@ class PackDirectory
         entries_.push_back(PackEntry(name, path, ppath, idx, vidx));
         return entries_.size() - 1;
     }
+#else
+    size_t AddEntry(const std::string &name, const std::string &path, const std::string &ppath, mz_uint idx)
+    {
+        // check if already there
+        for (size_t i = 0; i < entries_.size(); i++)
+            if (entries_[i] == name)
+                return i;
 
+        entries_.push_back(PackEntry(name, path, ppath, idx));
+        return entries_.size() - 1;
+    }
+#endif
     int Find(const std::string &name_in) const
     {
         for (int i = 0; i < (int)entries_.size(); i++)
@@ -144,7 +164,7 @@ class PackFile
     std::unordered_multimap<std::string, std::string, epi::ContainerStringHash> search_files_;
 
     mz_zip_archive *archive_;
-
+#if EDGE_VWAD_SUPPORT
     vwad_handle *vwad_archive_;
 
   public:
@@ -160,7 +180,19 @@ class PackFile
         if (vwad_archive_ != nullptr)
             vwad_close_archive(&vwad_archive_);
     }
+#else
+public:
+    PackFile(DataFile *par, bool folder, bool is_zip)
+        : parent_(par), is_folder_(folder), is_zip_(is_zip), directories_(), archive_(nullptr)
+    {
+    }
 
+    ~PackFile()
+    {
+        if (archive_ != nullptr)
+            delete archive_;
+    }
+#endif
     size_t AddDirectory(const std::string &name)
     {
         // check if already there
@@ -189,8 +221,13 @@ class PackFile
             return OpenFolderEntry(dir, index);
         else if (is_zip_)
             return OpenZipEntry(dir, index);
+#if EDGE_VWAD_SUPPORT
         else
             return OpenVWADEntry(dir, index);
+#else
+        else // Should not get here, trying to load a VWAD without support is fatal
+            return nullptr;
+#endif
     }
 
     epi::File *OpenEntryByName(const std::string &name)
@@ -199,8 +236,13 @@ class PackFile
             return OpenFolderEntryByName(name);
         else if (is_zip_)
             return OpenZipEntryByName(name);
+#if EDGE_VWAD_SUPPORT
         else
             return OpenVWADEntryByName(name);
+#else
+        else // Should not get here, trying to load a VWAD without support is fatal
+            return nullptr;
+#endif
     }
 
     int EntryLength(size_t dir, size_t index)
@@ -242,11 +284,15 @@ class PackFile
   private:
     epi::File *OpenFolderEntry(size_t dir, size_t index);
     epi::File *OpenZipEntry(size_t dir, size_t index);
+#if EDGE_VWAD_SUPPORT
     epi::File *OpenVWADEntry(size_t dir, size_t index);
+#endif
 
     epi::File *OpenFolderEntryByName(const std::string &name);
     epi::File *OpenZipEntryByName(const std::string &name);
+#if EDGE_VWAD_SUPPORT
     epi::File *OpenVWADEntryByName(const std::string &name);
+#endif
 };
 
 int FindStemInPack(PackFile *pack, const std::string &name)
@@ -342,7 +388,11 @@ static void ProcessSubDirectory(PackFile *pack, std::string &fullpath)
             std::string packpath = epi::MakePathRelative(pack->parent_->name_, fsd[i].name);
             std::string stem     = epi::GetStem(filename);
             epi::StringUpperASCII(stem);
+#if EDGE_VWAD_SUPPORT
             pack->directories_[d].AddEntry(filename, fsd[i].name, packpath, 0, 0);
+#else
+            pack->directories_[d].AddEntry(filename, fsd[i].name, packpath, 0);
+#endif
             pack->search_files_.insert({stem, packpath});
         }
     }
@@ -381,7 +431,11 @@ static PackFile *ProcessFolder(DataFile *df)
             std::string packpath = epi::MakePathRelative(df->name_, fsd[i].name);
             std::string stem     = epi::GetStem(filename);
             epi::StringUpperASCII(stem);
+#if EDGE_VWAD_SUPPORT
             pack->directories_[0].AddEntry(filename, fsd[i].name, packpath, 0, 0);
+#else
+            pack->directories_[0].AddEntry(filename, fsd[i].name, packpath, 0);
+#endif
             pack->search_files_.insert({stem, packpath});
         }
     }
@@ -487,7 +541,11 @@ static PackFile *ProcessZip(DataFile *df)
         std::string add_name = basename;
         std::string stem     = epi::GetStem(basename);
         epi::StringUpperASCII(stem);
+#if EDGE_VWAD_SUPPORT
         pack->directories_[dir_idx].AddEntry(epi::GetFilename(add_name), "", packpath, idx, 0);
+#else
+        pack->directories_[dir_idx].AddEntry(epi::GetFilename(add_name), "", packpath, idx);
+#endif
         pack->search_files_.insert({stem, packpath});
     }
 
@@ -654,7 +712,7 @@ epi::File *PackFile::OpenZipEntryByName(const std::string &name)
 //----------------------------------------------------------------------------
 //  VWAD READING
 //----------------------------------------------------------------------------
-
+#ifdef EDGE_VWAD_SUPPORT
 static int ioseek(vwad_iostream *strm, int pos)
 {
     EPI_ASSERT(pos >= 0);
@@ -866,7 +924,7 @@ epi::File *PackFile::OpenVWADEntryByName(const std::string &name)
     VWADFile *F = new VWADFile(this, idx);
     return F;
 }
-
+#endif
 //----------------------------------------------------------------------------
 //  GENERAL STUFF
 //----------------------------------------------------------------------------
@@ -1526,13 +1584,17 @@ void PopulatePackOnly(DataFile *df)
         df->pack_ = ProcessFolder(df);
     else
     {
-        FILE *df_fp = epi::FileOpenRaw(df->name_, epi::kFileAccessBinary | epi::kFileAccessRead);
-        EPI_ASSERT(df_fp);
+        epi::File *df_file = epi::FileOpen(df->name_, epi::kFileAccessBinary | epi::kFileAccessRead);
+        EPI_ASSERT(df_file);
         uint8_t vwad_check[4];
-        fread(vwad_check, 4, 1, df_fp);
-        fclose(df_fp);
-        if (vwad_check[0] == 'V' && vwad_check[1] == 'W' && vwad_check[2] == 'A' && vwad_check[3] == 'D')
+        size_t bytes_read = df_file->Read(vwad_check, 4);
+        delete df_file;
+        if (bytes_read == 4 && vwad_check[0] == 'V' && vwad_check[1] == 'W' && vwad_check[2] == 'A' && vwad_check[3] == 'D')
+#if EDGE_VWAD_SUPPORT
             df->pack_ = ProcessVWAD(df);
+#else
+            FatalError("Cannot load %s; please compile with EDGE_VWAD_SUPPORT enabled\n", df->name_.c_str());
+#endif
         else
             df->pack_ = ProcessZip(df);
     }
@@ -1575,13 +1637,17 @@ void ProcessAllInPack(DataFile *df, size_t file_index)
         df->pack_ = ProcessFolder(df);
     else
     {
-        FILE *df_fp = epi::FileOpenRaw(df->name_, epi::kFileAccessBinary | epi::kFileAccessRead);
-        EPI_ASSERT(df_fp);
+        epi::File *df_file = epi::FileOpen(df->name_, epi::kFileAccessBinary | epi::kFileAccessRead);
+        EPI_ASSERT(df_file);
         uint8_t vwad_check[4];
-        fread(vwad_check, 4, 1, df_fp);
-        fclose(df_fp);
-        if (vwad_check[0] == 'V' && vwad_check[1] == 'W' && vwad_check[2] == 'A' && vwad_check[3] == 'D')
+        size_t bytes_read = df_file->Read(vwad_check, 4);
+        delete df_file;
+        if (bytes_read == 4 && vwad_check[0] == 'V' && vwad_check[1] == 'W' && vwad_check[2] == 'A' && vwad_check[3] == 'D')
+#if EDGE_VWAD_SUPPORT
             df->pack_ = ProcessVWAD(df);
+#else
+            FatalError("Cannot load %s; please compile with EDGE_VWAD_SUPPORT enabled\n", df->name_.c_str());
+#endif
         else
             df->pack_ = ProcessZip(df);
     }

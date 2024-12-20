@@ -35,9 +35,15 @@ enum DDFMusicType
 #endif
     kDDFMusicOGG,
     kDDFMusicMP3,
+#if EDGE_SID_SUPPORT
     kDDFMusicSID,
+#endif
+#if EDGE_FLAC_SUPPORT
     kDDFMusicFLAC,
+#endif
+#if EDGE_TRACKER_SUPPORT
     kDDFMusicIBXM,
+#endif
 #if EDGE_RAD_SUPPORT
     kDDFMusicRAD,
 #endif

@@ -21,7 +21,9 @@
 #include "epi.h"
 #include "epi_filesystem.h"
 #include "epi_str_util.h"
+#if EDGE_TRACKER_SUPPORT
 #include "s_ibxm.h"
+#endif
 
 SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
 {
@@ -31,21 +33,22 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
     {
         return kSoundWAV;
     }
-
+#if EDGE_FLAC_SUPPORT
     if (data[0] == 'f' && data[1] == 'L' && data[2] == 'a' && data[3] == 'C')
     {
         return kSoundFLAC;
     }
-
+#endif
     if (data[0] == 'O' && data[1] == 'g' && data[2] == 'g' && data[3] == 'S')
     {
         return kSoundOGG;
     }
-
+#if EDGE_SID_SUPPORT
     if ((data[0] == 'P' || data[0] == 'R') && data[1] == 'S' && data[2] == 'I' && data[3] == 'D')
     {
         return kSoundSID;
     }
+#endif
 #if EDGE_MUS_SUPPORT
     if (data[0] == 'M' && data[1] == 'U' && data[2] == 'S')
     {
@@ -97,12 +100,12 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
     }
 #endif
     // Moving on to more specialized or less reliable detections
-
+#if EDGE_TRACKER_SUPPORT
     if (CheckIBXMFormat(data, song_len))
     {
         return kSoundIBXM;
     }
-
+#endif
     if ((data[0] == 'I' && data[1] == 'D' && data[2] == '3') || (data[0] == 0xFF && ((data[1] >> 4 & 0xF) == 0xF)))
     {
         return kSoundMP3;
@@ -129,19 +132,19 @@ SoundFormat SoundFilenameToFormat(std::string_view filename)
 
     if (ext == ".wav" || ext == ".wave")
         return kSoundWAV;
-
+#if EDGE_FLAC_SUPPORT
     if (ext == ".flac")
         return kSoundFLAC;
-
+#endif
     if (ext == ".ogg")
         return kSoundOGG;
 
     if (ext == ".mp3")
         return kSoundMP3;
-
+#if EDGE_SID_SUPPORT
     if (ext == ".sid" || ext == ".psid")
         return kSoundSID;
-
+#endif
 #if EDGE_MUS_SUPPORT
     if (ext == ".mus")
         return kSoundMUS;
@@ -154,9 +157,10 @@ SoundFormat SoundFilenameToFormat(std::string_view filename)
     if (ext == ".xmi")
         return kSoundMIDI;
 #endif
-
+#if EDGE_TRACKER_SUPPORT
     if (ext == ".mod" || ext == ".s3m" || ext == ".xm")
         return kSoundIBXM;
+#endif
 #if EDGE_RAD_SUPPORT
     if (ext == ".rad")
         return kSoundRAD;

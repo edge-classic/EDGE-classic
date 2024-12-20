@@ -20,9 +20,12 @@ option(EDGE_SANITIZE "Enable code sanitizing" OFF)
 option(EDGE_PROFILING "Enable Profiling" OFF)
 option(EDGE_COAL_SUPPORT "Enable support for COAL scripting" ON)
 option(EDGE_DEHACKED_SUPPORT "Enable support for Dehacked patch conversion" ON)
+option(EDGE_FLAC_SUPPORT "Enable support for FLAC music format" ON)
 option(EDGE_IMF_SUPPORT "Enable support for IMF music format" ON)
 option(EDGE_MUS_SUPPORT "Enable support for MUS MIDI format" ON)
 option(EDGE_RAD_SUPPORT "Enable support for Reality Adlib Tracker v2 music" ON)
+option(EDGE_SID_SUPPORT "Enable support for C64 SID music" ON)
+option(EDGE_TRACKER_SUPPORT "Enable support for Tracker music (MOD/XM/S3M/IT)" ON)
 option(EDGE_XMI_SUPPORT "Enable support for XMI MIDI format" ON)
 option(EDGE_VWAD_SUPPORT "Enable support for k8vavoom VWAD archives" ON)
 
@@ -155,6 +158,10 @@ if (EDGE_DEHACKED_SUPPORT)
   add_definitions(-DEDGE_DEHACKED_SUPPORT)
 endif()
 
+if (EDGE_FLAC_SUPPORT)
+  add_definitions(-DEDGE_FLAC_SUPPORT)
+endif()
+
 if (EDGE_IMF_SUPPORT)
   add_definitions(-DEDGE_IMF_SUPPORT)
 endif()
@@ -165,6 +172,14 @@ endif()
 
 if (EDGE_RAD_SUPPORT)
   add_definitions(-DEDGE_RAD_SUPPORT)
+endif()
+
+if (EDGE_SID_SUPPORT)
+  add_definitions(-DEDGE_SID_SUPPORT)
+endif()
+
+if (EDGE_TRACKER_SUPPORT)
+  add_definitions(-DEDGE_TRACKER_SUPPORT)
 endif()
 
 if (EDGE_VWAD_SUPPORT)

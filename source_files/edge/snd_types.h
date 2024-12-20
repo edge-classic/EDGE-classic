@@ -26,11 +26,17 @@ enum SoundFormat
 {
     kSoundUnknown = 0,
     kSoundWAV,
+#if EDGE_FLAC_SUPPORT
     kSoundFLAC,
+#endif
     kSoundOGG,
     kSoundMP3,
+#if EDGE_TRACKER_SUPPORT
     kSoundIBXM,
+#endif
+#if EDGE_SID_SUPPORT
     kSoundSID,
+#endif
 #if EDGE_RAD_SUPPORT
     kSoundRAD,
 #endif

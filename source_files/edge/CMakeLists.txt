@@ -87,10 +87,7 @@ set (EDGE_SOURCE_FILES
   s_emidi.cc
   s_tsf.cc
   s_fmm.cc
-  s_ibxm.cc
-  s_sid.cc
   s_wav.cc
-  s_flac.cc
   sv_chunk.cc
   sv_glob.cc
   sv_level.cc
@@ -126,12 +123,24 @@ if (EDGE_DEHACKED_SUPPORT)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} l_deh.cc)
 endif()
 
+if (EDGE_FLAC_SUPPORT)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_flac.cc)
+endif()
+
 if (EDGE_IMF_SUPPORT)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_imf.cc)
 endif()
 
 if (EDGE_RAD_SUPPORT)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_rad.cc)
+endif()
+
+if (EDGE_SID_SUPPORT)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_sid.cc)
+endif()
+
+if (EDGE_TRACKER_SUPPORT)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_ibxm.cc)
 endif()
 
 if (EMSCRIPTEN)
@@ -147,11 +156,9 @@ set (EDGE_LINK_LIBRARIES
   edge_tracy
   ${SDL2_LIBRARIES}
   almostequals
-  crsid
   dr_libs
   fmmidi
   HandmadeMath
-  ibxm
   libemidi
   lua
   miniz
@@ -172,6 +179,14 @@ endif()
 
 if (EDGE_IMF_SUPPORT OR EDGE_RAD_SUPPORT)
   set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} libRAD)
+endif()
+
+if (EDGE_SID_SUPPORT)
+  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} crsid)
+endif()
+
+if (EDGE_TRACKER_SUPPORT)
+  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} ibxm)
 endif()
 
 if (EDGE_VWAD_SUPPORT)

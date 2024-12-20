@@ -32,10 +32,14 @@
 #include "i_system.h"
 #include "m_misc.h"
 #include "s_emidi.h"
+#if EDGE_FLAC_SUPPORT
 #include "s_flac.h"
+#endif
 #include "s_tsf.h"
 #include "s_fmm.h"
+#if EDGE_TRACKER_SUPPORT
 #include "s_ibxm.h"
+#endif
 #include "s_mp3.h"
 #include "s_ogg.h"
 #if EDGE_IMF_SUPPORT
@@ -44,7 +48,9 @@
 #if EDGE_RAD_SUPPORT
 #include "s_rad.h"
 #endif
+#if EDGE_SID_SUPPORT
 #include "s_sid.h"
+#endif
 #include "s_sound.h"
 #include "snd_types.h"
 #include "w_files.h"
@@ -198,26 +204,30 @@ void ChangeMusic(int entry_number, bool loop)
         delete F;
         music_player = PlayMP3Music(data, length, loop);
         break;
-
+#if EDGE_FLAC_SUPPORT
     case kSoundFLAC:
         delete F;
         music_player = PlayFLACMusic(data, length, loop);
         break;
-
+#endif
+#if EDGE_TRACKER_SUPPORT
     case kSoundIBXM:
         delete F;
         music_player = PlayIBXMMusic(data, length, loop);
         break;
+#endif
 #if EDGE_RAD_SUPPORT
     case kSoundRAD:
         delete F;
         music_player = PlayRADMusic(data, length, loop);
         break;
 #endif
+#if EDGE_SID_SUPPORT
     case kSoundSID:
         delete F;
         music_player = PlaySIDMusic(data, length, loop);
         break;
+#endif
 #if EDGE_IMF_SUPPORT
     case kSoundIMF:
         delete F;

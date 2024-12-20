@@ -35,9 +35,15 @@ static void InitializeMusicTypes()
 #endif
     supported_music_types.push_back("OGG");
     supported_music_types.push_back("MP3");
+#if EDGE_SID_SUPPORT
     supported_music_types.push_back("SID");
+#endif
+#if EDGE_FLAC_SUPPORT
     supported_music_types.push_back("FLAC");
-    supported_music_types.push_back("IBXM");
+#endif
+#if EDGE_TRACKER_SUPPORT
+    supported_music_types.push_back("TRACKER");
+#endif
 #if EDGE_RAD_SUPPORT
     supported_music_types.push_back("RAD");
 #endif

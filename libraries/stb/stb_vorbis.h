@@ -76,6 +76,14 @@
 #ifndef STB_VORBIS_INCLUDE_STB_VORBIS_H
 #define STB_VORBIS_INCLUDE_STB_VORBIS_H
 
+// EDGE - Disable some finicky warnings from MSVC
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4456)
+#pragma warning(disable: 4457)
+#pragma warning(disable: 4701)
+#endif
+
 #if defined(STB_VORBIS_NO_CRT) && !defined(STB_VORBIS_NO_STDIO)
 #define STB_VORBIS_NO_STDIO 1
 #endif
@@ -5651,6 +5659,11 @@ int stb_vorbis_get_samples_float(stb_vorbis *f, int channels, float **buffer, in
     0.91 - conditional compiles to omit parts of the API and the infrastructure to support them: STB_VORBIS_NO_PULLDATA_API, STB_VORBIS_NO_PUSHDATA_API, STB_VORBIS_NO_STDIO, STB_VORBIS_NO_INTEGER_CONVERSION
     0.90 - first public release
 */
+
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #endif // STB_VORBIS_HEADER_ONLY
 

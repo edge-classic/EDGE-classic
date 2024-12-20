@@ -779,7 +779,7 @@ class VWADFile : public epi::File
             return 0;
 
         // never read more than what GetLength() reports
-        if (count > length_ - position_)
+        if (count > (unsigned int) length_ - position_)
             count = length_ - position_;
 
         int got = vwad_read(pack_->vwad_archive_, vwad_file_descriptor_, dest, count);

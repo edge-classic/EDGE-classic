@@ -4723,7 +4723,6 @@ void A_SeekTracer(MapObject *mo)
 
     int *args = (int *)mo->state_->action_par;
 
-    BAMAngle threshold = epi::BAMFromDegrees((float)args[0] / 65536.0f);
     BAMAngle maxturn = epi::BAMFromDegrees((float)args[1] / 65536.0f);
 
     // change angle

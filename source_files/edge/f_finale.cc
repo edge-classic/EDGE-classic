@@ -302,7 +302,7 @@ void FinaleTicker(void)
             finale_count = (int)(strlen(finale_text) * finale->text_speed_);
             skip_finale  = false;
         }
-        else if (skip_finale || finale_count > finale->text_wait_ + (int)(strlen(finale_text) * finale->text_speed_))
+        else if (skip_finale || finale_count > (int) finale->text_wait_ + (int)(strlen(finale_text) * finale->text_speed_))
         {
             DoBumpFinale();
             skip_finale = false;

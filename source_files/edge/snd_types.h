@@ -29,8 +29,12 @@ enum SoundFormat
 #if EDGE_FLAC_SUPPORT
     kSoundFLAC,
 #endif
+#if EDGE_OGG_SUPPORT
     kSoundOGG,
+#endif
+#if EDGE_MP3_SUPPORT
     kSoundMP3,
+#endif
 #if EDGE_TRACKER_SUPPORT
     kSoundIBXM,
 #endif

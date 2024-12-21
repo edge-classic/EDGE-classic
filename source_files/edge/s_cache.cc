@@ -40,8 +40,12 @@
 #include "m_random.h"
 #include "p_mobj.h"
 #include "r_defs.h"
+#if EDGE_MP3_SUPPORT
 #include "s_mp3.h"
+#endif
+#if EDGE_OGG_SUPPORT
 #include "s_ogg.h"
+#endif
 #include "s_sound.h"
 #include "s_wav.h"
 #include "snd_data.h"
@@ -102,16 +106,18 @@ static bool LoadWav(SoundData *buf, uint8_t *lump, int length, bool pc_speaker)
 {
     return LoadWAVSound(buf, lump, length, pc_speaker);
 }
-
+#if EDGE_OGG_SUPPORT
 static bool LoadOGG(SoundData *buf, const uint8_t *lump, int length)
 {
     return LoadOGGSound(buf, lump, length);
 }
-
+#endif
+#if EDGE_MP3_SUPPORT
 static bool LoadMP3(SoundData *buf, const uint8_t *lump, int length)
 {
     return LoadMP3Sound(buf, lump, length);
 }
+#endif
 
 //----------------------------------------------------------------------------
 
@@ -235,15 +241,16 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
     case kSoundWAV:
         OK = LoadWav(buf, data, length, false);
         break;
-
+#if EDGE_OGG_SUPPORT
     case kSoundOGG:
         OK = LoadOGG(buf, data, length);
         break;
-
+#endif
+#if EDGE_MP3_SUPPORT
     case kSoundMP3:
         OK = LoadMP3(buf, data, length);
         break;
-
+#endif
     // Double-check first byte here because pack filename detection could
     // return kSoundPCSpeaker for either
     case kSoundPCSpeaker:

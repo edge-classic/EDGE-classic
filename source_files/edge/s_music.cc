@@ -40,8 +40,12 @@
 #if EDGE_TRACKER_SUPPORT
 #include "s_ibxm.h"
 #endif
+#if EDGE_MP3_SUPPORT
 #include "s_mp3.h"
+#endif
+#if EDGE_OGG_SUPPORT
 #include "s_ogg.h"
+#endif
 #if EDGE_IMF_SUPPORT
 #include "s_imf.h"
 #endif
@@ -195,15 +199,18 @@ void ChangeMusic(int entry_number, bool loop)
 
     switch (fmt)
     {
+#if EDGE_OGG_SUPPORT
     case kSoundOGG:
         delete F;
         music_player = PlayOGGMusic(data, length, loop);
         break;
-
+#endif
+#if EDGE_MP3_SUPPORT
     case kSoundMP3:
         delete F;
         music_player = PlayMP3Music(data, length, loop);
         break;
+#endif
 #if EDGE_FLAC_SUPPORT
     case kSoundFLAC:
         delete F;

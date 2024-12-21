@@ -33,8 +33,12 @@ static void InitializeMusicTypes()
 #if EDGE_MUS_SUPPORT
     supported_music_types.push_back("MUS");
 #endif
+#if EDGE_OGG_SUPPORT
     supported_music_types.push_back("OGG");
+#endif
+#if EDGE_MP3_SUPPORT
     supported_music_types.push_back("MP3");
+#endif
 #if EDGE_SID_SUPPORT
     supported_music_types.push_back("SID");
 #endif

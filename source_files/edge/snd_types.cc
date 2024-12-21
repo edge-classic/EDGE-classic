@@ -39,10 +39,12 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
         return kSoundFLAC;
     }
 #endif
+#if EDGE_OGG_SUPPORT
     if (data[0] == 'O' && data[1] == 'g' && data[2] == 'g' && data[3] == 'S')
     {
         return kSoundOGG;
     }
+#endif
 #if EDGE_SID_SUPPORT
     if ((data[0] == 'P' || data[0] == 'R') && data[1] == 'S' && data[2] == 'I' && data[3] == 'D')
     {
@@ -106,11 +108,12 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
         return kSoundIBXM;
     }
 #endif
+#if EDGE_MP3_SUPPORT
     if ((data[0] == 'I' && data[1] == 'D' && data[2] == '3') || (data[0] == 0xFF && ((data[1] >> 4 & 0xF) == 0xF)))
     {
         return kSoundMP3;
     }
-
+#endif
     if (data[0] == 0x3)
     {
         return kSoundDoom;
@@ -136,11 +139,14 @@ SoundFormat SoundFilenameToFormat(std::string_view filename)
     if (ext == ".flac")
         return kSoundFLAC;
 #endif
+#if EDGE_OGG_SUPPORT
     if (ext == ".ogg")
         return kSoundOGG;
-
+#endif
+#if EDGE_MP3_SUPPORT
     if (ext == ".mp3")
         return kSoundMP3;
+#endif
 #if EDGE_SID_SUPPORT
     if (ext == ".sid" || ext == ".psid")
         return kSoundSID;

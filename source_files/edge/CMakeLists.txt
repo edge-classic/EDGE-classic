@@ -81,7 +81,6 @@ set (EDGE_SOURCE_FILES
   s_blit.cc
   s_cache.cc
   s_sound.cc
-  s_mp3.cc
   s_music.cc
   s_ogg.cc
   s_emidi.cc
@@ -129,6 +128,14 @@ endif()
 
 if (EDGE_IMF_SUPPORT)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_imf.cc)
+endif()
+
+if (EDGE_MP3_SUPPORT)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_mp3.cc)
+endif()
+
+if (EDGE_OGG_SUPPORT)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_ogg.cc)
 endif()
 
 if (EDGE_RAD_SUPPORT)

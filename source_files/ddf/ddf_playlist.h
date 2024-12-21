@@ -33,8 +33,12 @@ enum DDFMusicType
 #if EDGE_MUS_SUPPORT
     kDDFMusicMUS,
 #endif
+#if EDGE_OGG_SUPPORT
     kDDFMusicOGG,
+#endif
+#if EDGE_MP3_SUPPORT
     kDDFMusicMP3,
+#endif
 #if EDGE_SID_SUPPORT
     kDDFMusicSID,
 #endif

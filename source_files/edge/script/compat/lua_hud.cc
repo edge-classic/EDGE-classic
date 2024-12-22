@@ -168,15 +168,21 @@ static int HD_text_font(lua_State *L)
 
     FontDefinition *DEF = fontdefs.Lookup(font_name);
     if (!DEF)
-        return 0;
-
+    {
+        lua_pushboolean(L, 0);
+        return 1;  
+    }
+       
     Font *font = hud_fonts.Lookup(DEF);
     if (!font)
-        return 0;
+    {
+        lua_pushboolean(L, 0);
+        return 1;
+    }
 
     HUDSetFont(font);
 
-    return 0;
+    return 1;
 }
 
 // hud.text_color(rgb)
@@ -331,9 +337,15 @@ static int HD_draw_image(lua_State *L)
             HUDDrawImageNoOffset(x, y, img);
         else
             HUDDrawImage(x, y, img);
+
+        lua_pushboolean(L, 1); 
+    }
+    else
+    {
+        lua_pushboolean(L, 0); 
     }
 
-    return 0;
+    return 1;
 }
 
 // Dasho 2022: Same as above but adds x/y texcoord scrolling
@@ -360,9 +372,14 @@ static int HD_scroll_image(lua_State *L)
             HUDScrollImage(x, y, img, -sx,
                            -sy);         // Invert sx/sy so that user can enter
                                          // positive X for right and positive Y for up
+        lua_pushboolean(L, 1);
+    }
+    else
+    {
+        lua_pushboolean(L, 0); 
     }
 
-    return 0;
+    return 1;
 }
 
 // hud.stretch_image(x, y, w, h, name, [noOffset])
@@ -387,9 +404,14 @@ static int HD_stretch_image(lua_State *L)
             HUDStretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
         else
             HUDStretchImage(x, y, w, h, img, 0.0, 0.0);
+        lua_pushboolean(L, 1);
+    }
+    else
+    {
+        lua_pushboolean(L, 0); 
     }
 
-    return 0;
+    return 1;
 }
 
 // hud.tile_image(x, y, w, h, name, offset_x, offset_y)
@@ -411,9 +433,14 @@ static int HD_tile_image(lua_State *L)
     if (img)
     {
         HUDTileImage(x, y, w, h, img, offset_x, offset_y);
+        lua_pushboolean(L, 1);
+    }
+    else
+    {
+        lua_pushboolean(L, 0); 
     }
 
-    return 0;
+    return 1;
 }
 
 // hud.draw_text(x, y, str, [size])
@@ -735,11 +762,17 @@ static int HD_play_sound(lua_State *L)
     SoundEffect *fx = sfxdefs.GetEffect(name);
 
     if (fx)
+    {
         StartSoundEffect(fx);
+        lua_pushboolean(L, 1);
+    } 
     else
+    {
         LogWarning("hud.play_sound: unknown sfx '%s'\n", name);
-
-    return 0;
+        lua_pushboolean(L, 0);
+    }
+        
+    return 1;
 }
 
 // hud.screen_aspect()

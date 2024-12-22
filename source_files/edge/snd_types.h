@@ -25,18 +25,38 @@
 enum SoundFormat
 {
     kSoundUnknown = 0,
+#if EDGE_WAV_SUPPORT
     kSoundWAV,
+#endif
+#if EDGE_FLAC_SUPPORT
     kSoundFLAC,
+#endif
+#if EDGE_OGG_SUPPORT
     kSoundOGG,
+#endif
+#if EDGE_MP3_SUPPORT
     kSoundMP3,
+#endif
+#if EDGE_TRACKER_SUPPORT
     kSoundIBXM,
+#endif
+#if EDGE_SID_SUPPORT
     kSoundSID,
+#endif
+#if EDGE_RAD_SUPPORT
     kSoundRAD,
+#endif
+#if EDGE_MUS_SUPPORT
     kSoundMUS,
+#endif
     kSoundMIDI,
+#if EDGE_IMF_SUPPORT
     kSoundIMF, // Used with DDFPLAY; not in auto-detection
+#endif
+#if EDGE_DOOM_SFX_SUPPORT
     kSoundDoom,
     kSoundPCSpeaker
+#endif
 };
 
 // determine sound format from the file.

@@ -81,18 +81,11 @@ set (EDGE_SOURCE_FILES
   s_blit.cc
   s_cache.cc
   s_sound.cc
-  s_mp3.cc
   s_music.cc
   s_ogg.cc
   s_emidi.cc
   s_tsf.cc
   s_fmm.cc
-  s_ibxm.cc
-  s_imf.cc
-  s_rad.cc
-  s_sid.cc
-  s_wav.cc
-  s_flac.cc
   sv_chunk.cc
   sv_glob.cc
   sv_level.cc
@@ -128,6 +121,42 @@ if (EDGE_DEHACKED_SUPPORT)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} l_deh.cc)
 endif()
 
+if (EDGE_DOOM_SFX_SUPPORT)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_doom.cc)
+endif()
+
+if (EDGE_FLAC_SUPPORT)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_flac.cc)
+endif()
+
+if (EDGE_IMF_SUPPORT)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_imf.cc)
+endif()
+
+if (EDGE_MP3_SUPPORT)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_mp3.cc)
+endif()
+
+if (EDGE_OGG_SUPPORT)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_ogg.cc)
+endif()
+
+if (EDGE_RAD_SUPPORT)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_rad.cc)
+endif()
+
+if (EDGE_SID_SUPPORT)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_sid.cc)
+endif()
+
+if (EDGE_TRACKER_SUPPORT)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_ibxm.cc)
+endif()
+
+if (EDGE_WAV_SUPPORT)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_wav.cc)
+endif()
+
 if (EMSCRIPTEN)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} i_web.cc)
 else()
@@ -141,13 +170,10 @@ set (EDGE_LINK_LIBRARIES
   edge_tracy
   ${SDL2_LIBRARIES}
   almostequals
-  crsid
   dr_libs
   fmmidi
   HandmadeMath
-  ibxm
   libemidi
-  libRAD
   lua
   miniz
   pl_mpeg
@@ -163,6 +189,18 @@ endif()
 
 if (EDGE_DEHACKED_SUPPORT)
   set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} edge_deh)
+endif()
+
+if (EDGE_IMF_SUPPORT OR EDGE_RAD_SUPPORT)
+  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} libRAD)
+endif()
+
+if (EDGE_SID_SUPPORT)
+  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} crsid)
+endif()
+
+if (EDGE_TRACKER_SUPPORT)
+  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} ibxm)
 endif()
 
 if (EDGE_VWAD_SUPPORT)

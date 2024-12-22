@@ -40,8 +40,15 @@
 #include "m_random.h"
 #include "p_mobj.h"
 #include "r_defs.h"
+#if EDGE_DOOM_SFX_SUPPORT
+#include "s_doom.h"
+#endif
+#if EDGE_MP3_SUPPORT
 #include "s_mp3.h"
+#endif
+#if EDGE_OGG_SUPPORT
 #include "s_ogg.h"
+#endif
 #include "s_sound.h"
 #include "s_wav.h"
 #include "snd_data.h"
@@ -63,55 +70,34 @@ static void LoadSilence(SoundData *buf)
 
     memset(buf->data_, 0, length * sizeof(int16_t) * 2);
 }
-
-static bool LoadDoom(SoundData *buf, const uint8_t *lump, int length)
+#if EDGE_DOOM_SFX_SUPPORT
+static bool LoadDoom(SoundData *buf, uint8_t *lump, int length)
 {
-    buf->frequency_ = lump[2] + (lump[3] << 8);
-
-    if (buf->frequency_ < 8000 || buf->frequency_ > 48000)
-        LogWarning("Sound Load: weird frequency: %d Hz\n", buf->frequency_);
-
-    if (buf->frequency_ < 4000)
-        buf->frequency_ = 4000;
-
-    length -= 8;
-
-    if (length <= 0)
-        return false;
-
-    buf->Allocate(length);
-
-    // convert to signed 16-bit format
-    const uint8_t *src   = lump + 8;
-    const uint8_t *s_end = src + length;
-
-    int16_t *dest = buf->data_;
-    int16_t out = 0;
-    
-    for (; src < s_end; src++)
-    {
-        out = (*src ^ 0x80) << 8;
-        *dest++ = out;
-        *dest++ = out;
-    }
-
-    return true;
+    return LoadDoomSound(buf, lump, length);
 }
-
-static bool LoadWav(SoundData *buf, uint8_t *lump, int length, bool pc_speaker)
+static bool LoadPCSpeaker(SoundData *buf, uint8_t *lump, int length)
 {
-    return LoadWAVSound(buf, lump, length, pc_speaker);
+    return LoadPCSpeakerSound(buf, lump, length);
 }
-
+#endif
+#if EDGE_WAV_SUPPORT
+static bool LoadWav(SoundData *buf, uint8_t *lump, int length)
+{
+    return LoadWAVSound(buf, lump, length);
+}
+#endif
+#if EDGE_OGG_SUPPORT
 static bool LoadOGG(SoundData *buf, const uint8_t *lump, int length)
 {
     return LoadOGGSound(buf, lump, length);
 }
-
+#endif
+#if EDGE_MP3_SUPPORT
 static bool LoadMP3(SoundData *buf, const uint8_t *lump, int length)
 {
     return LoadMP3Sound(buf, lump, length);
 }
+#endif
 
 //----------------------------------------------------------------------------
 
@@ -232,31 +218,35 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
 
     switch (fmt)
     {
+#if EDGE_WAV_SUPPORT
     case kSoundWAV:
-        OK = LoadWav(buf, data, length, false);
+        OK = LoadWav(buf, data, length);
         break;
-
+#endif
+#if EDGE_OGG_SUPPORT
     case kSoundOGG:
         OK = LoadOGG(buf, data, length);
         break;
-
+#endif
+#if EDGE_MP3_SUPPORT
     case kSoundMP3:
         OK = LoadMP3(buf, data, length);
         break;
-
+#endif
+#if EDGE_DOOM_SFX_SUPPORT
     // Double-check first byte here because pack filename detection could
     // return kSoundPCSpeaker for either
     case kSoundPCSpeaker:
         if (data[0] == 0x3)
             OK = LoadDoom(buf, data, length);
         else
-            OK = LoadWav(buf, data, length, true);
+            OK = LoadPCSpeaker(buf, data, length);
         break;
 
     case kSoundDoom:
         OK = LoadDoom(buf, data, length);
         break;
-
+#endif
     default:
         OK = false;
         break;

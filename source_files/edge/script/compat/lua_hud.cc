@@ -170,14 +170,14 @@ static int HD_text_font(lua_State *L)
     if (!DEF)
     {
         lua_pushboolean(L, 0);
-        return 0;  
+        return 1;  
     }
        
     Font *font = hud_fonts.Lookup(DEF);
     if (!font)
     {
         lua_pushboolean(L, 0);
-        return 0;
+        return 1;
     }
 
     HUDSetFont(font);

@@ -1923,9 +1923,12 @@ static int MO_render_view(lua_State *L)
     if (!temp_value.empty())
     {
         HUDRenderWorld(x, y, w, h, mo, 1);
+        lua_pushboolean(L, 1);
     }
+    else
+        lua_pushboolean(L, 0);
 
-    return 0;
+    return 1;
 }
 
 

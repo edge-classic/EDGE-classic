@@ -40,7 +40,6 @@ extern ConsoleLine    *quit_lines[kEndoomLines];
 extern int             console_cursor;
 extern Font           *endoom_font;
 extern ConsoleVariable video_overlay;
-extern ConsoleVariable fliplevels;
 
 static Font *default_font;
 
@@ -1391,21 +1390,7 @@ void HUDRenderAutomap(float x, float y, float w, float h, MapObject *player, int
         }
     }
 
-    if (fliplevels.d_)
-    {
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho((float)current_screen_width, 0.0f, 0.0f, (float)current_screen_height, -1.0f, 1.0f);
-    }
-
     AutomapRender(x, y, w, h, player);
-
-    if (fliplevels.d_)
-    {
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(0.0f, (float)current_screen_width, 0.0f, (float)current_screen_height, -1.0f, 1.0f);
-    }
 
     HUDPopScissor();
 }

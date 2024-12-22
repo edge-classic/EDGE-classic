@@ -51,8 +51,6 @@ extern bool GameResponder(InputEvent *ev);
 
 extern int JoystickGetAxis(int n);
 
-extern ConsoleVariable fliplevels;
-
 //
 // EVENT HANDLING
 //
@@ -340,10 +338,7 @@ void BuildEventTicCommand(EventTicCommand *cmd)
         // -ACB- 1998/09/06 Angle Turn Speed Control
         turn += angle_turn[t_speed] * ball_deltas[kAxisTurn] / 64.0;
 
-        if (fliplevels.d_)
-            cmd->angle_turn = -RoundToInteger(turn);
-        else
-            cmd->angle_turn = RoundToInteger(turn);
+        cmd->angle_turn = RoundToInteger(turn);
     }
 
     // MLook
@@ -389,10 +384,7 @@ void BuildEventTicCommand(EventTicCommand *cmd)
 
         side = HMM_Clamp(-forward_move[1], side, forward_move[1]);
 
-        if (fliplevels.d_)
-            cmd->side_move = -RoundToInteger(side);
-        else
-            cmd->side_move = RoundToInteger(side);
+        cmd->side_move = RoundToInteger(side);
     }
 
     // Upwards  -MH- 1998/08/18 Fly Up/Down movement

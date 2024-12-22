@@ -119,8 +119,6 @@ static std::string udmf_lump;
 // There is two values for every line: side0 and side1.
 static int *temp_line_sides;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(goobers, "0", kConsoleVariableFlagNone)
-
 // "MUSINFO" is used here to refer to the traditional MUSINFO lump
 struct MUSINFOMapping
 {
@@ -427,13 +425,6 @@ static void LoadSectors(int lump)
 
         ss->floor_height   = AlignedLittleEndianS16(ms->floor_height);
         ss->ceiling_height = AlignedLittleEndianS16(ms->ceiling_height);
-
-        // return to wolfenstein?
-        if (goobers.d_)
-        {
-            ss->floor_height   = 0;
-            ss->ceiling_height = (ms->floor_height == ms->ceiling_height) ? 0 : 128.0f;
-        }
 
         ss->original_height = (ss->floor_height + ss->ceiling_height);
 
@@ -1625,13 +1616,6 @@ static void LoadUDMFSectors()
             ss->floor_height   = fz;
             ss->ceiling_height = cz;
 
-            // return to wolfenstein?
-            if (goobers.d_)
-            {
-                ss->floor_height   = 0;
-                ss->ceiling_height = (AlmostEquals(fz, cz)) ? 0 : 128.0f;
-            }
-
             ss->original_height = (ss->floor_height + ss->ceiling_height);
 
             ss->floor.translucency = falph;
@@ -1942,12 +1926,7 @@ static void LoadUDMFSideDefs()
             sd->top.image = ImageLookup(top_tex, kImageNamespaceTexture, kImageLookupNull);
 
             if (sd->top.image == nullptr)
-            {
-                if (goobers.d_)
-                    sd->top.image = ImageLookup(bottom_tex, kImageNamespaceTexture);
-                else
-                    sd->top.image = ImageLookup(top_tex, kImageNamespaceTexture);
-            }
+                sd->top.image = ImageLookup(top_tex, kImageNamespaceTexture);
 
             sd->middle.image = ImageLookup(middle_tex, kImageNamespaceTexture);
             sd->bottom.image = ImageLookup(bottom_tex, kImageNamespaceTexture);
@@ -2609,12 +2588,7 @@ static void TransferMapSideDef(const RawSidedef *msd, Side *sd, bool two_sided)
     sd->top.image = ImageLookup(upper_tex, kImageNamespaceTexture, kImageLookupNull);
 
     if (sd->top.image == nullptr)
-    {
-        if (goobers.d_)
-            sd->top.image = ImageLookup(upper_tex, kImageNamespaceTexture);
-        else
-            sd->top.image = ImageLookup(upper_tex, kImageNamespaceTexture);
-    }
+        sd->top.image = ImageLookup(upper_tex, kImageNamespaceTexture);
 
     sd->middle.image = ImageLookup(middle_tex, kImageNamespaceTexture);
     sd->bottom.image = ImageLookup(lower_tex, kImageNamespaceTexture);

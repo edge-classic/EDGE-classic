@@ -46,7 +46,6 @@ bool custom_skybox;
 extern ImageData *ReadAsEpiBlock(Image *rim);
 
 extern ConsoleVariable draw_culling;
-extern ConsoleVariable fliplevels;
 
 static RGBAColor sky_cap_color;
 
@@ -236,14 +235,9 @@ static void SetupSkyMatrices(void)
         glPushMatrix();
         glLoadIdentity();
 
-        if (fliplevels.d_)
-            glFrustum(-view_x_slope * renderer_near_clip.f_, view_x_slope * renderer_near_clip.f_,
-                      -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_,
-                      renderer_near_clip.f_, renderer_far_clip.f_);
-        else
-            glFrustum(view_x_slope * renderer_near_clip.f_, -view_x_slope * renderer_near_clip.f_,
-                      -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_,
-                      renderer_near_clip.f_, renderer_far_clip.f_);
+        glFrustum(view_x_slope * renderer_near_clip.f_, -view_x_slope * renderer_near_clip.f_,
+                    -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_,
+                    renderer_near_clip.f_, renderer_far_clip.f_);
 
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
@@ -258,14 +252,9 @@ static void SetupSkyMatrices(void)
         glPushMatrix();
         glLoadIdentity();
 
-        if (fliplevels.d_)
-            glFrustum(view_x_slope * renderer_near_clip.f_, -view_x_slope * renderer_near_clip.f_,
-                    -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
-                    renderer_far_clip.f_ * 4.0);
-        else
-            glFrustum(-view_x_slope * renderer_near_clip.f_, view_x_slope * renderer_near_clip.f_,
-                    -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
-                    renderer_far_clip.f_ * 4.0);
+        glFrustum(-view_x_slope * renderer_near_clip.f_, view_x_slope * renderer_near_clip.f_,
+                -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
+                renderer_far_clip.f_ * 4.0);
 
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();

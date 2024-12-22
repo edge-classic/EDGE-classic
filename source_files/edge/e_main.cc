@@ -100,8 +100,6 @@ extern ImageData *ReadAsEpiBlock(Image *rim);
 extern ConsoleVariable busy_wait;
 
 extern ConsoleVariable gamma_correction;
-extern ConsoleVariable goobers;
-extern ConsoleVariable fliplevels;
 
 ECFrameStats ec_frame_stats;
 
@@ -481,12 +479,6 @@ static void SetGlobalVariables(void)
     strict_errors = ddf_strict.d_ ? true : false;
     lax_errors    = ddf_lax.d_ ? true : false;
     no_warnings   = ddf_quiet.d_ ? true : false;
-
-    if (FindArgument("goobers") > 0)
-        goobers = 1;
-
-    if (FindArgument("fliplevels") > 0)
-        fliplevels = 1;
 }
 
 //

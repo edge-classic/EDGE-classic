@@ -22,7 +22,7 @@
 #include "epi_filesystem.h"
 #include "epi_str_util.h"
 #if EDGE_TRACKER_SUPPORT
-#include "s_ibxm.h"
+#include "m4p.h"
 #endif
 
 SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
@@ -103,9 +103,9 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
 #endif
     // Moving on to more specialized or less reliable detections
 #if EDGE_TRACKER_SUPPORT
-    if (CheckIBXMFormat(data, song_len))
+    if (m4p_TestFromData(data, song_len))
     {
-        return kSoundIBXM;
+        return kSoundM4P;
     }
 #endif
 #if EDGE_MP3_SUPPORT
@@ -163,8 +163,8 @@ SoundFormat SoundFilenameToFormat(std::string_view filename)
         return kSoundMIDI;
 #endif
 #if EDGE_TRACKER_SUPPORT
-    if (ext == ".mod" || ext == ".s3m" || ext == ".xm")
-        return kSoundIBXM;
+    if (ext == ".mod" || ext == ".s3m" || ext == ".xm" || ext == ".it")
+        return kSoundM4P;
 #endif
 #if EDGE_RAD_SUPPORT
     if (ext == ".rad")

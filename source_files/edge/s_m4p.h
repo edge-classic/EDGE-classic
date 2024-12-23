@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-//  EDGE IBXM (Tracker Module) Music Player
+//  EDGE Mod4Play (Tracker Module) Music Player
 //----------------------------------------------------------------------------
 //
 //  Copyright (c) 2022-2024 - The EDGE Team.
@@ -20,9 +20,7 @@
 
 #include "s_music.h"
 
-bool CheckIBXMFormat (uint8_t *data, int length);
-
-AbstractMusicPlayer *PlayIBXMMusic(uint8_t *data, int length, bool looping);
+AbstractMusicPlayer *PlayM4PMusic(uint8_t *data, int length, bool looping);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

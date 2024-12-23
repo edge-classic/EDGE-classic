@@ -38,7 +38,7 @@
 #include "s_tsf.h"
 #include "s_fmm.h"
 #if EDGE_TRACKER_SUPPORT
-#include "s_ibxm.h"
+#include "s_m4p.h"
 #endif
 #if EDGE_MP3_SUPPORT
 #include "s_mp3.h"
@@ -218,9 +218,9 @@ void ChangeMusic(int entry_number, bool loop)
         break;
 #endif
 #if EDGE_TRACKER_SUPPORT
-    case kSoundIBXM:
+    case kSoundM4P:
         delete F;
-        music_player = PlayIBXMMusic(data, length, loop);
+        music_player = PlayM4PMusic(data, length, loop);
         break;
 #endif
 #if EDGE_RAD_SUPPORT

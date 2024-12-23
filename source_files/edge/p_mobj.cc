@@ -2254,7 +2254,7 @@ MapObject *CreateMapObject(float x, float y, float z, const MapObjectDefinition 
 
     // handle dynamic lights
     {
-        const DynamicLightDefinition *dinfo = &info->dlight_[0];
+        const DynamicLightDefinition *dinfo = &info->dlight_;
 
         if (dinfo->type_ != kDynamicLightTypeNone)
         {

@@ -1439,7 +1439,7 @@ void P_ActReplace(MapObject *mo, const MapObjectDefinition *newThing)
 
         // handle dynamic lights
         {
-            const DynamicLightDefinition *dinfo = &mo->info_->dlight_[0];
+            const DynamicLightDefinition *dinfo = &mo->info_->dlight_;
 
             if (dinfo->type_ != kDynamicLightTypeNone)
             {

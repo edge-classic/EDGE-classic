@@ -825,11 +825,11 @@ static void TitleDrawer(void)
 
 static void AutocolourForMapObject(MapObjectDefinition *mobj)
 {
-    if (mobj->dlight_[0].type_ != kDynamicLightTypeNone)
+    if (mobj->dlight_.type_ != kDynamicLightTypeNone)
     {
-        if (!mobj->dlight_[0].autocolour_reference_.empty())
+        if (!mobj->dlight_.autocolour_reference_.empty())
         {
-            const Image *img = ImageLookup(mobj->dlight_[0].autocolour_reference_.c_str());
+            const Image *img = ImageLookup(mobj->dlight_.autocolour_reference_.c_str());
             if (img)
             {
                 const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
@@ -842,16 +842,16 @@ static void AutocolourForMapObject(MapObjectDefinition *mobj)
                     delete tmp_img_data;
                     tmp_img_data = rgb_img_data;
                 }
-                mobj->dlight_[0].colour_ = tmp_img_data->AverageHue();
+                mobj->dlight_.colour_ = tmp_img_data->AverageHue();
                 delete tmp_img_data;
                 if (what_palette != (const uint8_t *)&playpal_data[0])
                     delete[] what_palette;
-                mobj->dlight_[0].autocolour_reference_.clear();
+                mobj->dlight_.autocolour_reference_.clear();
             }
         }
-        else if (mobj->dlight_[0].autocolour_sprite_ > 0)
+        else if (mobj->dlight_.autocolour_sprite_ > 0)
         {
-            SpriteFrame *ref_frame = GetSpriteFrame(mobj->dlight_[0].autocolour_sprite_, 0);
+            SpriteFrame *ref_frame = GetSpriteFrame(mobj->dlight_.autocolour_sprite_, 0);
             if (ref_frame)
             {
                 const Image *img = nullptr;
@@ -875,70 +875,11 @@ static void AutocolourForMapObject(MapObjectDefinition *mobj)
                         delete tmp_img_data;
                         tmp_img_data = rgb_img_data;
                     }
-                    mobj->dlight_[0].colour_ = tmp_img_data->AverageHue();
+                    mobj->dlight_.colour_ = tmp_img_data->AverageHue();
                     delete tmp_img_data;
                     if (what_palette != (const uint8_t *)&playpal_data[0])
                         delete[] what_palette;
-                    mobj->dlight_[0].autocolour_sprite_ = -1;
-                }
-            }
-        }
-    }
-    if (mobj->dlight_[1].type_ != kDynamicLightTypeNone)
-    {
-        if (!mobj->dlight_[1].autocolour_reference_.empty())
-        {
-            const Image *img = ImageLookup(mobj->dlight_[1].autocolour_reference_.c_str());
-            if (img)
-            {
-                const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-                if (img->source_palette_ >= 0)
-                    what_palette = (const uint8_t *)LoadLumpIntoMemory(img->source_palette_);
-                ImageData *tmp_img_data = ReadAsEpiBlock((Image *)img);
-                if (tmp_img_data->depth_ == 1)
-                {
-                    ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, img->opacity_);
-                    delete tmp_img_data;
-                    tmp_img_data = rgb_img_data;
-                }
-                mobj->dlight_[1].colour_ = tmp_img_data->AverageHue();
-                delete tmp_img_data;
-                if (what_palette != (const uint8_t *)&playpal_data[0])
-                    delete[] what_palette;
-                mobj->dlight_[1].autocolour_reference_.clear();
-            }
-        }
-        else if (mobj->dlight_[1].autocolour_sprite_ > 0)
-        {
-            SpriteFrame *ref_frame = GetSpriteFrame(mobj->dlight_[1].autocolour_sprite_, 0);
-            if (ref_frame)
-            {
-                const Image *img = nullptr;
-                for (int i = 0; i < 16; i++)
-                {
-                    if (ref_frame->images_[i])
-                    {
-                        img = ref_frame->images_[i];
-                        break;
-                    }
-                }
-                if (img)
-                {
-                    const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-                    if (img->source_palette_ >= 0)
-                        what_palette = (const uint8_t *)LoadLumpIntoMemory(img->source_palette_);
-                    ImageData *tmp_img_data = ReadAsEpiBlock((Image *)img);
-                    if (tmp_img_data->depth_ == 1)
-                    {
-                        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, img->opacity_);
-                        delete tmp_img_data;
-                        tmp_img_data = rgb_img_data;
-                    }
-                    mobj->dlight_[1].colour_ = tmp_img_data->AverageHue();
-                    delete tmp_img_data;
-                    if (what_palette != (const uint8_t *)&playpal_data[0])
-                        delete[] what_palette;
-                    mobj->dlight_[1].autocolour_sprite_ = -1;
+                    mobj->dlight_.autocolour_sprite_ = -1;
                 }
             }
         }

@@ -174,9 +174,11 @@ class StyleDefinition
     // disable copy construct and assignment operator
     explicit StyleDefinition(StyleDefinition &rhs)
     {
+        (void)rhs;
     }
     StyleDefinition &operator=(StyleDefinition &rhs)
     {
+        (void)rhs;
         return *this;
     }
 };

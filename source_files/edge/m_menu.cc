@@ -639,7 +639,7 @@ std::string LoboStringReplaceAll(std::string str, const std::string &from, const
     return str;
 }
 
-static void MenuDrawSaveLoadCommon(int row, int row2, Style *style, float LineHeight)
+static void MenuDrawSaveLoadCommon(Style *style, float LineHeight)
 {
     int   y         = 0;
     int   x         = 0;
@@ -874,7 +874,7 @@ void MenuDrawLoad(void)
         TempY += style->definition_->entry_spacing_;
     }
 
-    MenuDrawSaveLoadCommon(i, i + 1, load_style, LineHeight);
+    MenuDrawSaveLoadCommon(load_style, LineHeight);
 }
 
 //
@@ -1032,7 +1032,7 @@ void MenuDrawSave(void)
         TempY += style->definition_->entry_spacing_;
     }
 
-    MenuDrawSaveLoadCommon(i, i + 1, save_style, LineHeight);
+    MenuDrawSaveLoadCommon(save_style, LineHeight);
 }
 
 //

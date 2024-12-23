@@ -30,7 +30,7 @@
 #include "r_modes.h"
 #include "r_units.h"
 
-void NewScreenSize(int width, int height, int bits)
+void NewScreenSize()
 {
     //!!! quick hack
     SetupMatrices2D();

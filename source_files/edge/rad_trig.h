@@ -49,9 +49,9 @@ bool              ScriptRadiusCheck(MapObject *mo, RADScript *r);
 RADScript        *FindScriptByName(const char *map_name, const char *name);
 RADScriptTrigger *FindScriptTriggerByName(const char *name);
 RADScriptState   *FindScriptStateByLabel(RADScript *scr, char *label);
-void              ScriptEnableByTag(MapObject *actor, uint64_t tag, bool disable, RADScriptTag tagtype);
-void              ScriptEnableByTag(MapObject *actor, const char *name, bool disable);
-bool              CheckActiveScriptByTag(MapObject *actor, const char *name);
+void              ScriptEnableByTag(uint64_t tag, bool disable, RADScriptTag tagtype);
+void              ScriptEnableByTag(const char *name, bool disable);
+bool              CheckActiveScriptByTag(const char *name);
 void              ScriptUpdateMonsterDeaths(MapObject *mo);
 
 // Menu support

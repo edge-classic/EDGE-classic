@@ -974,7 +974,7 @@ static void HD_rts_enable(coal::VM *vm, int argc)
     std::string name = vm->AccessParamString(0);
 
     if (!name.empty())
-        ScriptEnableByTag(nullptr, name.c_str(), false);
+        ScriptEnableByTag(name.c_str(), false);
 }
 
 // hud.rts_disable(tag)
@@ -986,7 +986,7 @@ static void HD_rts_disable(coal::VM *vm, int argc)
     std::string name = vm->AccessParamString(0);
 
     if (!name.empty())
-        ScriptEnableByTag(nullptr, name.c_str(), true);
+        ScriptEnableByTag(name.c_str(), true);
 }
 
 // hud.rts_isactive(tag)
@@ -999,7 +999,7 @@ static void HD_rts_isactive(coal::VM *vm, int argc)
 
     if (!name.empty())
     {
-        if (CheckActiveScriptByTag(nullptr, name.c_str()))
+        if (CheckActiveScriptByTag(name.c_str()))
             vm->ReturnFloat(1);
         else
             vm->ReturnFloat(0);

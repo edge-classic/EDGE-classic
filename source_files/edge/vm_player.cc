@@ -1048,12 +1048,12 @@ static void PL_use_inventory(coal::VM *vm, int argc)
     //******
     // If the same inventory script is already running then
     // don't start the same one again
-    if (!CheckActiveScriptByTag(nullptr, script_name.c_str()))
+    if (!CheckActiveScriptByTag(script_name.c_str()))
     {
         if (ui_player_who->inventory_[inv].count > 0)
         {
             ui_player_who->inventory_[inv].count -= 1;
-            ScriptEnableByTag(nullptr, script_name.c_str(), false);
+            ScriptEnableByTag(script_name.c_str(), false);
         }
     }
 }
@@ -1065,7 +1065,7 @@ static void PL_rts_enable_tagged(coal::VM *vm, int argc)
     std::string name = vm->AccessParamString(0);
 
     if (!name.empty())
-        ScriptEnableByTag(nullptr, name.c_str(), false);
+        ScriptEnableByTag(name.c_str(), false);
 }
 
 // AuxStringReplaceAll("Our_String", std::string("_"), std::string(" "));

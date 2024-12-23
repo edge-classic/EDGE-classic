@@ -54,9 +54,11 @@ class SwitchDefinition
     // disable copy construct and assignment operator
     explicit SwitchDefinition(SwitchDefinition &rhs)
     {
+        (void)rhs;
     }
     SwitchDefinition &operator=(SwitchDefinition &rhs)
     {
+        (void)rhs;
         return *this;
     }
 };

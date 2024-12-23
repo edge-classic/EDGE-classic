@@ -667,6 +667,7 @@ int SV_TipGetIndex(ScriptDrawTip *elem)
 
 void SV_TipCreateElems(int num_elems)
 {
+    (void)num_elems;
     ResetScriptTips();
 }
 

@@ -1082,12 +1082,12 @@ static int PL_use_inventory(lua_State *L)
     //******
     // If the same inventory script is already running then
     // don't start the same one again
-    if (!CheckActiveScriptByTag(nullptr, script_name.c_str()))
+    if (!CheckActiveScriptByTag(script_name.c_str()))
     {
         if (ui_player_who->inventory_[inv].count > 0)
         {
             ui_player_who->inventory_[inv].count -= 1;
-            ScriptEnableByTag(nullptr, script_name.c_str(), false);
+            ScriptEnableByTag(script_name.c_str(), false);
         }
     }
 
@@ -1101,7 +1101,7 @@ static int PL_rts_enable_tagged(lua_State *L)
     std::string name = luaL_checkstring(L, 1);
 
     if (!name.empty())
-        ScriptEnableByTag(nullptr, name.c_str(), false);
+        ScriptEnableByTag(name.c_str(), false);
 
     return 0;
 }

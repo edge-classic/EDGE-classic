@@ -41,9 +41,11 @@ class WadFixDefinition
     // disable copy construct and assignment operator
     explicit WadFixDefinition(WadFixDefinition &rhs)
     {
+        (void)rhs;
     }
     WadFixDefinition &operator=(WadFixDefinition &rhs)
     {
+        (void)rhs;
         return *this;
     }
 };

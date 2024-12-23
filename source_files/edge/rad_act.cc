@@ -982,9 +982,9 @@ void ScriptEnableScript(RADScriptTrigger *R, void *param)
     else
     {
         if (t->tag[0] != 0)
-            ScriptEnableByTag(nullptr, t->tag[0], t->new_disabled, kTriggerTagNumber);
+            ScriptEnableByTag(t->tag[0], t->new_disabled, kTriggerTagNumber);
         else
-            ScriptEnableByTag(nullptr, t->tag[1], t->new_disabled, kTriggerTagHash);
+            ScriptEnableByTag(t->tag[1], t->new_disabled, kTriggerTagHash);
     }
 }
 

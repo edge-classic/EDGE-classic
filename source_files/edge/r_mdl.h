@@ -29,11 +29,11 @@ MDLModel *MDLLoad(epi::File *f);
 
 short MDLFindFrame(MDLModel *md, const char *name);
 
-void MDLRenderModel(MDLModel *md, const Image *skin_img, bool is_weapon, int frame1, int frame2, float lerp, float x,
+void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float lerp, float x,
                     float y, float z, MapObject *mo, RegionProperties *props, float scale, float aspect, float bias,
                     int rotation);
 
-void MDLRenderModel2D(MDLModel *md, const Image *skin_img, int frame, float x, float y, float xscale, float yscale,
+void MDLRenderModel2D(MDLModel *md, int frame, float x, float y, float xscale, float yscale,
                       const MapObjectDefinition *info);
 
 //--- editor settings ---

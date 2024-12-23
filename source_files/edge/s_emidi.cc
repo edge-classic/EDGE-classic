@@ -69,7 +69,7 @@ class EMIDIPlayer : public AbstractMusicPlayer
     EMIDIInterface *emidi_interface_;
 
   public:
-    EMIDIPlayer(uint8_t *data, int length, bool looping) : status_(kNotLoaded), looping_(looping)
+    EMIDIPlayer(bool looping) : status_(kNotLoaded), looping_(looping)
     {
         SequencerInit();
     }
@@ -309,7 +309,7 @@ class EMIDIPlayer : public AbstractMusicPlayer
 
 AbstractMusicPlayer *PlayEMIDIMusic(uint8_t *data, int length, bool loop)
 {
-    EMIDIPlayer *player = new EMIDIPlayer(data, length, loop);
+    EMIDIPlayer *player = new EMIDIPlayer(loop);
 
     if (!player)
     {

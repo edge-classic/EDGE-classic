@@ -1620,7 +1620,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special, int tag, 
 
     if (special->trigger_effect_ && tag > 0)
     {
-        ScriptEnableByTag(thing, tag, special->trigger_effect_ < 0, kTriggerTagNumber);
+        ScriptEnableByTag(tag, special->trigger_effect_ < 0, kTriggerTagNumber);
         texSwitch = true;
     }
 

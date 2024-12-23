@@ -30,10 +30,9 @@
 void ReadScreen(int x, int y, int w, int h, uint8_t *rgb_buffer);
 
 // This routine should inform the lower level system(s) that the
-// screen has changed size/depth.  New size/depth is given.  Must be
-// called before any rendering has occurred (e.g. just before
-// StartFrame).
-void NewScreenSize(int width, int height, int bits);
+// screen has changed size/depth.  Must be
+// called before any rendering has occurred (e.g. just before StartFrame).
+void NewScreenSize();
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

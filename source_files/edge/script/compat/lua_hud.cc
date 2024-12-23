@@ -960,7 +960,7 @@ static int HD_rts_enable(lua_State *L)
     std::string name = luaL_checkstring(L, 1);
 
     if (!name.empty())
-        ScriptEnableByTag(nullptr, name.c_str(), false);
+        ScriptEnableByTag(name.c_str(), false);
 
     return 0;
 }
@@ -972,7 +972,7 @@ static int HD_rts_disable(lua_State *L)
     std::string name = luaL_checkstring(L, 1);
 
     if (!name.empty())
-        ScriptEnableByTag(nullptr, name.c_str(), true);
+        ScriptEnableByTag(name.c_str(), true);
 
     return 0;
 }
@@ -985,7 +985,7 @@ static int HD_rts_isactive(lua_State *L)
 
     if (!name.empty())
     {
-        if (CheckActiveScriptByTag(nullptr, name.c_str()))
+        if (CheckActiveScriptByTag(name.c_str()))
             lua_pushboolean(L, 1);
         else
             lua_pushboolean(L, 0);

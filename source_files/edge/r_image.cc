@@ -1192,7 +1192,7 @@ static bool IM_ShouldHQ2X(Image *rim)
     return false;
 }
 
-static int IM_PixelLimit(Image *rim)
+static int IM_PixelLimit()
 {
     if (detail_level == 0)
         return (1 << 18);
@@ -1208,7 +1208,7 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
     bool mip    = IM_ShouldMipmap(rim);
     bool smooth = IM_ShouldSmooth(rim);
 
-    int max_pix = IM_PixelLimit(rim);
+    int max_pix = IM_PixelLimit();
 
     if (rim->source_type_ == kImageSourceUser)
     {
@@ -1514,7 +1514,7 @@ static const Image *BackupGraphic(const char *gfx_name, int flags)
     return dummy;
 }
 
-static const Image *BackupSprite(const char *spr_name, int flags)
+static const Image *BackupSprite(int flags)
 {
     if (flags & kImageLookupNull)
         return nullptr;
@@ -1562,7 +1562,7 @@ const Image *ImageLookup(const char *name, ImageNamespace type, int flags)
     if (type == kImageNamespaceSprite)
     {
         rim = ImageContainerLookup(real_sprites, name);
-        return rim ? rim : BackupSprite(name, flags);
+        return rim ? rim : BackupSprite(flags);
     }
 
     /* kImageNamespaceGraphic */

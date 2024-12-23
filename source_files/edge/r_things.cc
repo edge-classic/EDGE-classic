@@ -680,7 +680,7 @@ void RenderWeaponModel(Player *p)
         MD2RenderModel(md->md2_model_, skin_img, true, last_frame, psp->state->frame, lerp, x, y, z, p->map_object_,
                        view_properties, 1.0f /* scale */, w->model_aspect_, bias, w->model_rotate_);
     else if (md->mdl_model_)
-        MDLRenderModel(md->mdl_model_, skin_img, true, last_frame, psp->state->frame, lerp, x, y, z, p->map_object_,
+        MDLRenderModel(md->mdl_model_, true, last_frame, psp->state->frame, lerp, x, y, z, p->map_object_,
                        view_properties, 1.0f /* scale */, w->model_aspect_, bias, w->model_rotate_);
 }
 
@@ -1104,7 +1104,7 @@ static void RenderModel(DrawThing *dthing)
                        dthing->map_y, z, mo, mo->region_properties_, mo->model_scale_, mo->model_aspect_,
                        mo->info_->model_bias_, mo->info_->model_rotate_);
     else if (md->mdl_model_)
-        MDLRenderModel(md->mdl_model_, skin_img, false, last_frame, mo->state_->frame, lerp, dthing->map_x,
+        MDLRenderModel(md->mdl_model_, false, last_frame, mo->state_->frame, lerp, dthing->map_x,
                        dthing->map_y, z, mo, mo->region_properties_, mo->model_scale_, mo->model_aspect_,
                        mo->info_->model_bias_, mo->info_->model_rotate_);
 }
@@ -1137,7 +1137,7 @@ static void DLIT_Thing(MapObject *mo, void *dataptr)
     }
 }
 
-void RenderThing(DrawFloor *dfloor, DrawThing *dthing)
+void RenderThing(DrawThing *dthing)
 {
     EDGE_ZoneScoped;
 
@@ -1490,7 +1490,7 @@ void SortRenderThings(DrawFloor *dfloor)
 
     // Draw...
     for (dt = head_dt; dt; dt = dt->render_next)
-        RenderThing(dfloor, dt);
+        RenderThing(dt);
 }
 
 //--- editor settings ---

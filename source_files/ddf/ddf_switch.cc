@@ -81,6 +81,8 @@ static void SwitchStartEntry(const char *name, bool extend)
 
 static void SwitchParseField(const char *field, const char *contents, int index, bool is_last)
 {
+    (void)index;
+    (void)is_last;
 #if (DDF_DEBUG)
     LogDebug("SWITCH_PARSE: %s = %s;\n", field, contents);
 #endif

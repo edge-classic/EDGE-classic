@@ -140,7 +140,7 @@ class TSFPlayer : public AbstractMusicPlayer
     TSFInterface *tsf_interface_;
 
   public:
-    TSFPlayer(uint8_t *data, int _length, bool looping) : status_(kNotLoaded), looping_(looping)
+    TSFPlayer(bool looping) : status_(kNotLoaded), looping_(looping)
     {
         SequencerInit();
     }
@@ -155,11 +155,13 @@ class TSFPlayer : public AbstractMusicPlayer
 
     static void rtNoteOn(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity)
     {
+        (void)userdata;
         tsf_channel_note_on(edge_tsf, channel, note, static_cast<float>(velocity) / 127.0f);
     }
 
     static void rtNoteOff(void *userdata, uint8_t channel, uint8_t note)
     {
+        (void)userdata;
         tsf_channel_note_off(edge_tsf, channel, note);
     }
 
@@ -175,16 +177,19 @@ class TSFPlayer : public AbstractMusicPlayer
 
     static void rtControllerChange(void *userdata, uint8_t channel, uint8_t type, uint8_t value)
     {
+        (void)userdata;
         tsf_channel_midi_control(edge_tsf, channel, type, value);
     }
 
     static void rtPatchChange(void *userdata, uint8_t channel, uint8_t patch)
     {
+        (void)userdata;
         tsf_channel_set_presetnumber(edge_tsf, channel, patch, channel == 9);
     }
 
     static void rtPitchBend(void *userdata, uint8_t channel, uint8_t msb, uint8_t lsb)
     {
+        (void)userdata;
         tsf_channel_set_pitchwheel(edge_tsf, channel, (msb << 7) | lsb);
     }
 
@@ -206,6 +211,7 @@ class TSFPlayer : public AbstractMusicPlayer
 
     static void playSynth(void *userdata, uint8_t *stream, size_t length)
     {
+        (void)userdata;
         tsf_render_short(edge_tsf, (short *)stream, length / 2 / sizeof(int16_t), 0);
     }
 
@@ -371,7 +377,7 @@ AbstractMusicPlayer *PlayTSFMusic(uint8_t *data, int length, bool loop)
         return nullptr;
     }
 
-    TSFPlayer *player = new TSFPlayer(data, length, loop);
+    TSFPlayer *player = new TSFPlayer(loop);
 
     if (!player)
     {

@@ -425,7 +425,7 @@ void UnsetThingPosition(MapObject *mo)
     }
 
     // unlink from dynamic light blockmap
-    if (mo->info_ && (mo->info_->dlight_[0].type_ != kDynamicLightTypeNone) &&
+    if (mo->info_ && (mo->info_->dlight_.type_ != kDynamicLightTypeNone) &&
         (mo->info_->glow_type_ == kSectorGlowTypeNone))
     {
         if (mo->dynamic_light_next_)
@@ -467,7 +467,7 @@ void UnsetThingPosition(MapObject *mo)
     }
 
     // unlink from sector glow list
-    if (mo->info_ && (mo->info_->dlight_[0].type_ != kDynamicLightTypeNone) &&
+    if (mo->info_ && (mo->info_->dlight_.type_ != kDynamicLightTypeNone) &&
         (mo->info_->glow_type_ != kSectorGlowTypeNone))
     {
         Sector *sec = mo->subsector_->sector;
@@ -634,7 +634,7 @@ void SetThingPosition(MapObject *mo)
     }
 
     // link into dynamic light blockmap
-    if (mo->info_ && (mo->info_->dlight_[0].type_ != kDynamicLightTypeNone) &&
+    if (mo->info_ && (mo->info_->dlight_.type_ != kDynamicLightTypeNone) &&
         (mo->info_->glow_type_ == kSectorGlowTypeNone))
     {
         blockx = LightmapGetX(mo->x);
@@ -661,7 +661,7 @@ void SetThingPosition(MapObject *mo)
     }
 
     // link into sector glow list
-    if (mo->info_ && (mo->info_->dlight_[0].type_ != kDynamicLightTypeNone) &&
+    if (mo->info_ && (mo->info_->dlight_.type_ != kDynamicLightTypeNone) &&
         (mo->info_->glow_type_ != kSectorGlowTypeNone))
     {
         Sector *sec = mo->subsector_->sector;

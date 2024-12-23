@@ -4058,7 +4058,7 @@ void A_Become(MapObject *mo)
 
         // handle dynamic lights
         {
-            const DynamicLightDefinition *dinfo = &mo->info_->dlight_[0];
+            const DynamicLightDefinition *dinfo = &mo->info_->dlight_;
 
             if (dinfo->type_ != kDynamicLightTypeNone)
             {
@@ -4137,7 +4137,7 @@ void A_UnBecome(MapObject *mo)
 
         // handle dynamic lights
         {
-            const DynamicLightDefinition *dinfo = &mo->info_->dlight_[0];
+            const DynamicLightDefinition *dinfo = &mo->info_->dlight_;
 
             if (dinfo->type_ != kDynamicLightTypeNone)
             {
@@ -4220,7 +4220,7 @@ void A_Morph(MapObject *mo)
 
         // handle dynamic lights
         {
-            const DynamicLightDefinition *dinfo = &mo->info_->dlight_[0];
+            const DynamicLightDefinition *dinfo = &mo->info_->dlight_;
 
             if (dinfo->type_ != kDynamicLightTypeNone)
             {
@@ -4303,7 +4303,7 @@ void A_UnMorph(MapObject *mo)
 
         // handle dynamic lights
         {
-            const DynamicLightDefinition *dinfo = &mo->info_->dlight_[0];
+            const DynamicLightDefinition *dinfo = &mo->info_->dlight_;
 
             if (dinfo->type_ != kDynamicLightTypeNone)
             {

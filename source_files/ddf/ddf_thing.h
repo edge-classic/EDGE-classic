@@ -848,7 +848,7 @@ class MapObjectDefinition
     const AttackDefinition *rangeattack_;
     const AttackDefinition *spareattack_;
 
-    DynamicLightDefinition dlight_[2];
+    DynamicLightDefinition dlight_;
     int                    glow_type_;
 
     // -AJA- 2007/08/21: weakness support (head-shots etc)

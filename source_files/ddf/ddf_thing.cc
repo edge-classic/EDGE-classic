@@ -93,8 +93,7 @@ static MapObjectDefinition dummy_mobj;
 
 const DDFCommandList thing_commands[] = {
     // sub-commands
-    DDF_SUB_LIST("DLIGHT", dummy_mobj, dlight_[0], dlight_commands),
-    DDF_SUB_LIST("DLIGHT2", dummy_mobj, dlight_[1], dlight_commands),
+    DDF_SUB_LIST("DLIGHT", dummy_mobj, dlight_, dlight_commands),
     DDF_SUB_LIST("WEAKNESS", dummy_mobj, weak_, weakness_commands),
     DDF_SUB_LIST("EXPLODE_DAMAGE", dummy_mobj, explode_damage_, damage_commands),
     DDF_SUB_LIST("CHOKE_DAMAGE", dummy_mobj, choke_damage_, damage_commands),
@@ -768,10 +767,10 @@ static void ThingFinishEntry(void)
     if (dynamic_mobj->model_skin_ < 0 || dynamic_mobj->model_skin_ > 9)
         DDFError("Bad MODEL_SKIN value %d in DDF (must be 0-9).\n", dynamic_mobj->model_skin_);
 
-    if (dynamic_mobj->dlight_[0].radius_ > 512)
+    if (dynamic_mobj->dlight_.radius_ > 512)
     {
         if (dlight_radius_warnings < 3)
-            DDFWarning("DLIGHT_RADIUS value %1.1f too large (over 512).\n", dynamic_mobj->dlight_[0].radius_);
+            DDFWarning("DLIGHT_RADIUS value %1.1f too large (over 512).\n", dynamic_mobj->dlight_.radius_);
         else if (dlight_radius_warnings == 3)
             LogWarning("More too large DLIGHT_RADIUS values found....\n");
 
@@ -2470,8 +2469,7 @@ void MapObjectDefinition::CopyDetail(MapObjectDefinition &src)
     spareattack_ = src.spareattack_;
 
     // dynamic light info
-    dlight_[0] = src.dlight_[0];
-    dlight_[1] = src.dlight_[1];
+    dlight_ = src.dlight_;
 
     weak_ = src.weak_;
 
@@ -2617,8 +2615,7 @@ void MapObjectDefinition::Default()
     spareattack_ = nullptr;
 
     // dynamic light info
-    dlight_[0].Default();
-    dlight_[1].Default();
+    dlight_.Default();
 
     weak_.Default();
 
@@ -2646,36 +2643,33 @@ void MapObjectDefinition::Default()
 
 void MapObjectDefinition::DLightCompatibility(void)
 {
-    for (int DL = 0; DL < 2; DL++)
+    int r = epi::GetRGBARed(dlight_.colour_);
+    int g = epi::GetRGBAGreen(dlight_.colour_);
+    int b = epi::GetRGBABlue(dlight_.colour_);
+
+    // dim the colour
+    r = int(r * 0.8f);
+    g = int(g * 0.8f);
+    b = int(b * 0.8f);
+
+    switch (dlight_.type_)
     {
-        int r = epi::GetRGBARed(dlight_[DL].colour_);
-        int g = epi::GetRGBAGreen(dlight_[DL].colour_);
-        int b = epi::GetRGBABlue(dlight_[DL].colour_);
+    case kDynamicLightTypeCompatibilityQuadratic:
+        dlight_.type_   = kDynamicLightTypeModulate;
+        dlight_.radius_ = DynamicLightCompatibilityRadius(dlight_.radius_);
+        dlight_.colour_ = epi::MakeRGBA(r, g, b);
 
-        // dim the colour
-        r = int(r * 0.8f);
-        g = int(g * 0.8f);
-        b = int(b * 0.8f);
+        hyper_flags_ |= kHyperFlagQuadraticDynamicLight;
+        break;
 
-        switch (dlight_[DL].type_)
-        {
-        case kDynamicLightTypeCompatibilityQuadratic:
-            dlight_[DL].type_   = kDynamicLightTypeModulate;
-            dlight_[DL].radius_ = DynamicLightCompatibilityRadius(dlight_[DL].radius_);
-            dlight_[DL].colour_ = epi::MakeRGBA(r, g, b);
+    case kDynamicLightTypeCompatibilityLinear:
+        dlight_.type_ = kDynamicLightTypeModulate;
+        dlight_.radius_ *= 1.3;
+        dlight_.colour_ = epi::MakeRGBA(r, g, b);
+        break;
 
-            hyper_flags_ |= kHyperFlagQuadraticDynamicLight;
-            break;
-
-        case kDynamicLightTypeCompatibilityLinear:
-            dlight_[DL].type_ = kDynamicLightTypeModulate;
-            dlight_[DL].radius_ *= 1.3;
-            dlight_[DL].colour_ = epi::MakeRGBA(r, g, b);
-            break;
-
-        default: // nothing to do
-            break;
-        }
+    default: // nothing to do
+        break;
     }
 }
 

@@ -652,7 +652,7 @@ static void DLIT_Wall(MapObject *mo, void *dataptr)
     WallCoordinateData *data = (WallCoordinateData *)dataptr;
 
     // light behind the plane ?
-    if (!mo->info_->dlight_[0].leaky_ && !data->mid_masked &&
+    if (!mo->info_->dlight_.leaky_ && !data->mid_masked &&
         !(mo->subsector_->sector->floor_vertex_slope || mo->subsector_->sector->ceiling_vertex_slope))
     {
         float mx = mo->x;
@@ -691,7 +691,7 @@ static void DLIT_Plane(MapObject *mo, void *dataptr)
     PlaneCoordinateData *data = (PlaneCoordinateData *)dataptr;
 
     // light behind the plane ?
-    if (!mo->info_->dlight_[0].leaky_ &&
+    if (!mo->info_->dlight_.leaky_ &&
         !(mo->subsector_->sector->floor_vertex_slope || mo->subsector_->sector->ceiling_vertex_slope))
     {
         float z = data->vertices[0].Z;
@@ -1798,7 +1798,7 @@ static void DLIT_Flood(MapObject *mo, void *dataptr)
     FloodEmulationData *data = (FloodEmulationData *)dataptr;
 
     // light behind the plane ?
-    if (!mo->info_->dlight_[0].leaky_ &&
+    if (!mo->info_->dlight_.leaky_ &&
         !(mo->subsector_->sector->floor_vertex_slope || mo->subsector_->sector->ceiling_vertex_slope))
     {
         if ((MapObjectMidZ(mo) > data->plane_h) != (data->normal.Z > 0))

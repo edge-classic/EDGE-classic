@@ -263,8 +263,8 @@ static void AttackFinishEntry(void)
         if (dynamic_mobj->model_skin_ < 0 || dynamic_mobj->model_skin_ > 9)
             DDFError("Bad MODEL_SKIN value %d in DDF (must be 0-9).\n", dynamic_mobj->model_skin_);
 
-        if (dynamic_mobj->dlight_[0].radius_ > 512)
-            DDFWarning("DLIGHT RADIUS value %1.1f too large (over 512).\n", dynamic_mobj->dlight_[0].radius_);
+        if (dynamic_mobj->dlight_.radius_ > 512)
+            DDFWarning("DLIGHT RADIUS value %1.1f too large (over 512).\n", dynamic_mobj->dlight_.radius_);
     }
 
     // check DAMAGE stuff
@@ -370,11 +370,11 @@ void DDFAttackCleanUp(void)
                 a->damage_.nominal_ = a->atk_mobj_->explode_damage_.nominal_;
                 a->damage_.linear_max_ = a->atk_mobj_->explode_damage_.linear_max_;
                 MapObjectDefinition *atk_mod = (MapObjectDefinition *)a->atk_mobj_; // const override
-                if (atk_mod->dlight_[0].type_ == kDynamicLightTypeNone)
+                if (atk_mod->dlight_.type_ == kDynamicLightTypeNone)
                 {
-                    atk_mod->dlight_[0].type_ = kDynamicLightTypeModulate;
-                    atk_mod->dlight_[0].radius_ = atk_mod->radius_ * 4;
-                    atk_mod->dlight_[0].autocolour_sprite_ = states[atk_mod->idle_state_].sprite;
+                    atk_mod->dlight_.type_ = kDynamicLightTypeModulate;
+                    atk_mod->dlight_.radius_ = atk_mod->radius_ * 4;
+                    atk_mod->dlight_.autocolour_sprite_ = states[atk_mod->idle_state_].sprite;
                 }
             }
         }

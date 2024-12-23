@@ -18,8 +18,6 @@ Blasphemer (various assets) - Copyright (c) 2021 Contributors to the Blasphemer 
 
 Emu de MIDI library - Copyright (C) 2004 Mitsutaka Okazaki
 
-FMMIDI library - Copyright (c) 2003-2006 yuno
-
 Freedoom (various assets) - Copyright (c) 2001-2019 Contributors to the Freedoom project
 
 Mod4Play library - 	Copyright (c) 2024 dashodanger
@@ -94,6 +92,8 @@ BW_Midi_Sequencer library - Copyright (c) 2015-2022 Vitaly Novichkov
 	- Copyright (C) 2017 Basile Fraboni
 	- Copyright (C) 2014 Ivan Kutskir
 
+Dear ImGUI - Copyright (c) 2014-2023 Omar Cornut
+
 debugger.lua -Copyright (c) 2023 Scott Lembcke and Howling Moon Software
 
 gl4es library - Copyright (c) 2016-2018 Sebastien Chevalier
@@ -154,3 +154,5 @@ zlib License
 ===========================================================================================
 
 SDL2 library - Copyright (c) 1997-2020 Sam Lantinga
+
+Sokol libraries - Copyright (c) 2018 Andre Weissflog

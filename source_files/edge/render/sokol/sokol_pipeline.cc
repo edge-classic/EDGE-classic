@@ -1,5 +1,7 @@
 #include "sokol_pipeline.h"
 
+#include "epi.h"
+
 typedef std::unordered_map<uint32_t, std::unordered_map<uint32_t, uint32_t>> PipelineMap;
 
 // flags => pipeline
@@ -19,7 +21,8 @@ sgl_pipeline GetPipeline(sgl_context context, uint32_t pipeline_flags)
     uint32_t                                         pipeline_id  = 0xFFFFFFFF;
     if (pipeline_itr == context_itr->second.end())
     {
-        sg_pipeline_desc pipeline_desc = {0};
+        sg_pipeline_desc pipeline_desc;
+        EPI_CLEAR_MEMORY(&pipeline_desc, sg_pipeline_desc, 1);
         if (pipeline_flags & kPipelineDepthGreater)
             pipeline_desc.depth.compare = SG_COMPAREFUNC_GREATER;
         else

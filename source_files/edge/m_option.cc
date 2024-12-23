@@ -109,7 +109,6 @@
 #include "s_cache.h"
 #include "s_emidi.h"
 #include "s_tsf.h"
-#include "s_fmm.h"
 #include "s_music.h"
 #include "s_sound.h"
 #include "stb_sprintf.h"
@@ -165,55 +164,55 @@ extern void          OptionMenuNetworkHostBegun(void);
 extern int entry_playing;
 
 // submenus
-static void OptionMenuKeyboardOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuVideoOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuUIOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuGameplayOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuPerformanceOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuAccessibilityOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuAnalogueOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuSoundOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
+static void OptionMenuKeyboardOptions(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuVideoOptions(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuUIOptions(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuGameplayOptions(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuPerformanceOptions(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuAccessibilityOptions(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuAnalogueOptions(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuSoundOptions(int key_pressed, ConsoleVariable *console_variable);
 
 static void OptionMenuKeyToString(int key, char *deststring);
 
 // Use these when a menu option does nothing special other than update a value
-static void OptionMenuUpdateConsoleVariableFromFloat(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuUpdateConsoleVariableFromInt(int key_pressed, ConsoleVariable *console_variable = nullptr);
+static void OptionMenuUpdateConsoleVariableFromFloat(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuUpdateConsoleVariableFromInt(int key_pressed, ConsoleVariable *console_variable);
 
 // -ACB- 1998/08/09 "Does Map allow these changes?" procedures.
-static void OptionMenuChangeMonsterRespawn(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeItemRespawn(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeTrue3d(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeAutoAim(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeFastparm(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeRespawn(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangePassMissile(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeBobbing(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeMLook(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeJumping(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeCrouching(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeExtra(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeMonitorSize(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeKicking(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeWeaponSwitch(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeMipMap(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangePCSpeakerMode(int key_pressed, ConsoleVariable *console_variable = nullptr);
+static void OptionMenuChangeMonsterRespawn(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeItemRespawn(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeTrue3d(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeAutoAim(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeFastparm(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeRespawn(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangePassMissile(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeBobbing(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeMLook(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeJumping(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeCrouching(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeExtra(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeMonitorSize(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeKicking(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeWeaponSwitch(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeMipMap(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangePCSpeakerMode(int key_pressed, ConsoleVariable *console_variable);
 
 // -ES- 1998/08/20 Added resolution options
 // -ACB- 1998/08/29 Moved to top and tried different system
 
 static void OptionMenuResOptDrawer(Style *style, int topy, int bottomy, int dy, int centrex);
-static void OptionMenuResolutionOptions(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuionSetResolution(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeResSize(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeResFull(int key_pressed, ConsoleVariable *console_variable = nullptr);
+static void OptionMenuResolutionOptions(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuionSetResolution(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeResSize(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeResFull(int key_pressed, ConsoleVariable *console_variable);
 
-void OptionMenuHostNetGame(int key_pressed, ConsoleVariable *console_variable = nullptr);
+void OptionMenuHostNetGame(int key_pressed, ConsoleVariable *console_variable);
 
 static void OptionMenuLanguageDrawer(int x, int y, int deltay);
-static void OptionMenuChangeLanguage(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeMidiPlayer(int key_pressed, ConsoleVariable *console_variable = nullptr);
-static void OptionMenuChangeSoundfont(int key_pressed, ConsoleVariable *console_variable = nullptr);
+static void OptionMenuChangeLanguage(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeMidiPlayer(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeSoundfont(int key_pressed, ConsoleVariable *console_variable);
 static void InitMonitorSize();
 
 static constexpr char YesNo[]        = "Off/On"; // basic on/off
@@ -302,6 +301,8 @@ static Style *options_menu_default_style;
 
 static void OptionMenuChangeMixChan(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     UpdateSoundCategoryLimits();
 }
 
@@ -343,26 +344,26 @@ static constexpr uint8_t kOptionMenuNetworkHostPosition = 13;
 #endif
 
 static OptionMenuItem mainoptions[] = {
-    {kOptionMenuItemTypeFunction, "MenuBinding", nullptr, 0, nullptr, OptionMenuKeyboardOptions, "Controls"},
-    {kOptionMenuItemTypeFunction, "MenuMouse", nullptr, 0, nullptr, OptionMenuAnalogueOptions, "AnalogueOptions"},
-    {kOptionMenuItemTypeFunction, "MenuGameplay", nullptr, 0, nullptr, OptionMenuGameplayOptions, "GameplayOptions"},
+    {kOptionMenuItemTypeFunction, "MenuBinding", nullptr, 0, nullptr, OptionMenuKeyboardOptions, "Controls", nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeFunction, "MenuMouse", nullptr, 0, nullptr, OptionMenuAnalogueOptions, "AnalogueOptions", nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeFunction, "MenuGameplay", nullptr, 0, nullptr, OptionMenuGameplayOptions, "GameplayOptions", nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeFunction, "MenuPerformance", nullptr, 0, nullptr, OptionMenuPerformanceOptions,
-     "PerformanceOptions"},
+     "PerformanceOptions", nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeFunction, "MenuAccessibility", nullptr, 0, nullptr, OptionMenuAccessibilityOptions,
-     "AccessibilityOptions"},
-    {kOptionMenuItemTypeFunction, "MenuUI", nullptr, 0, nullptr, OptionMenuUIOptions, "UIOptions"},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeFunction, "MenuSound", nullptr, 0, nullptr, OptionMenuSoundOptions, "SoundOptions"},
-    {kOptionMenuItemTypeFunction, "MenuVideo", nullptr, 0, nullptr, OptionMenuVideoOptions, "VideoOptions"},
+     "AccessibilityOptions", nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeFunction, "MenuUI", nullptr, 0, nullptr, OptionMenuUIOptions, "UIOptions", nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeFunction, "MenuSound", nullptr, 0, nullptr, OptionMenuSoundOptions, "SoundOptions", nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeFunction, "MenuVideo", nullptr, 0, nullptr, OptionMenuVideoOptions, "VideoOptions", nullptr, 0, 0, 0, ""},
 #ifndef EDGE_WEB
-    {kOptionMenuItemTypeFunction, "MenuResolution", nullptr, 0, nullptr, OptionMenuResolutionOptions, "ChangeRes"},
+    {kOptionMenuItemTypeFunction, "MenuResolution", nullptr, 0, nullptr, OptionMenuResolutionOptions, "ChangeRes", nullptr, 0, 0, 0, ""},
 #endif
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeFunction, "MenuLanguage", nullptr, 0, nullptr, OptionMenuChangeLanguage, nullptr},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeFunction, "MenuStartBotmatch", nullptr, 0, nullptr, OptionMenuHostNetGame, nullptr},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeFunction, "MenuResetToDefault", nullptr, 0, nullptr, ResetDefaults, nullptr}};
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeFunction, "MenuLanguage", nullptr, 0, nullptr, OptionMenuChangeLanguage, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeFunction, "MenuStartBotmatch", nullptr, 0, nullptr, OptionMenuHostNetGame, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeFunction, "MenuResetToDefault", nullptr, 0, nullptr, ResetDefaults, nullptr, nullptr, 0, 0, 0, ""}};
 
 static OptionMenuDefinition main_optmenu = {mainoptions,
                                             sizeof(mainoptions) / sizeof(OptionMenuItem),
@@ -382,29 +383,29 @@ static OptionMenuItem vidoptions[] = {
     {kOptionMenuItemTypeSlider, "Gamma Adjustment", nullptr, 0, &gamma_correction.f_,
      OptionMenuUpdateConsoleVariableFromFloat, nullptr, &gamma_correction, 0.10f, -1.0f, 1.0f, "%0.2f"},
     {kOptionMenuItemTypeSwitch, "Sector Brightness", "-50/-40/-30/-20/-10/Default/+10/+20/+30/+40/+50", 11,
-     &sector_brightness_correction.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &sector_brightness_correction},
+     &sector_brightness_correction.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &sector_brightness_correction, 0, 0, 0, ""},
     {kOptionMenuItemTypeBoolean, "Lighting Mode", "Indexed/Flat", 2, &force_flat_lighting.d_,
-     OptionMenuUpdateConsoleVariableFromInt, nullptr, &force_flat_lighting},
+     OptionMenuUpdateConsoleVariableFromInt, nullptr, &force_flat_lighting, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Mipmapping", "Off/Bilinear/Trilinear", 3, &image_mipmapping, OptionMenuChangeMipMap,
-     nullptr},
-    {kOptionMenuItemTypeSwitch, "Smoothing", YesNo, 2, &image_smoothing, OptionMenuChangeMipMap, nullptr},
+     nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeSwitch, "Smoothing", YesNo, 2, &image_smoothing, OptionMenuChangeMipMap, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Upscale Textures", "Off/UI Only/UI & Sprites/All", 4, &hq2x_scaling,
-     OptionMenuChangeMipMap, "Only affects paletted (Doom format) textures"},
+     OptionMenuChangeMipMap, "Only affects paletted (Doom format) textures", nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Title/Intermission Scaling", "Normal/Border Fill", 2, &title_scaling.d_,
-     OptionMenuUpdateConsoleVariableFromInt, nullptr, &title_scaling},
+     OptionMenuUpdateConsoleVariableFromInt, nullptr, &title_scaling, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Sky Scaling", "Mirror/Repeat/Stretch/Vanilla", 4, &sky_stretch_mode.d_,
-     OptionMenuUpdateConsoleVariableFromInt, "Vanilla will be forced when Mouselook is Off", &sky_stretch_mode},
-    {kOptionMenuItemTypeSwitch, "Dynamic Lighting", YesNo, 2, &use_dynamic_lights, nullptr, nullptr},
+     OptionMenuUpdateConsoleVariableFromInt, "Vanilla will be forced when Mouselook is Off", &sky_stretch_mode, 0, 0, 0, ""},
+    {kOptionMenuItemTypeSwitch, "Dynamic Lighting", YesNo, 2, &use_dynamic_lights, nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Overlay", "None/Lines 1x/Lines 2x/Vertical 1x/Vertical 2x/Grill 1x/Grill 2x", 7,
-     &video_overlay.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &video_overlay},
+     &video_overlay.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &video_overlay, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Invulnerability", "Simple/Textured", kTotalInvulnerabilityEffects,
-     &invulnerability_effect, nullptr, nullptr},
+     &invulnerability_effect, nullptr, nullptr, nullptr, 0, 0, 0, ""},
 #ifndef EDGE_WEB
     {kOptionMenuItemTypeSwitch, "Wipe method", "None/Melt/Crossfade/Pixelfade/Top/Bottom/Left/Right/Spooky/Doors",
-     kTotalScreenWipeTypes, &wipe_method, nullptr, nullptr},
+     kTotalScreenWipeTypes, &wipe_method, nullptr, nullptr, nullptr, 0, 0, 0, ""},
 #endif
     {kOptionMenuItemTypeSwitch, "Animated Liquid Type", "Vanilla/SMMU/SMMU+Swirl/Parallax", 4, &swirling_flats, nullptr,
-     nullptr}};
+     nullptr, nullptr, 0, 0, 0, ""}};
 
 static OptionMenuDefinition video_optmenu = {
     vidoptions,           sizeof(vidoptions) / sizeof(OptionMenuItem), &options_menu_default_style, 150, 77, 0, "",
@@ -417,21 +418,21 @@ static OptionMenuDefinition video_optmenu = {
 
 static OptionMenuItem uioptions[] = {
     {kOptionMenuItemTypeBoolean, language["ENDOOMOnQuit"], YesNo, 2, &show_endoom.d_,
-     OptionMenuUpdateConsoleVariableFromInt, nullptr, &show_endoom},
+     OptionMenuUpdateConsoleVariableFromInt, nullptr, &show_endoom, 0, 0, 0, ""},
     {kOptionMenuItemTypeBoolean, "Confirm Quickloads", YesNo, 2, &confirm_quickload.d_,
-     OptionMenuUpdateConsoleVariableFromInt, nullptr, &confirm_quickload},
+     OptionMenuUpdateConsoleVariableFromInt, nullptr, &confirm_quickload, 0, 0, 0, ""},
     {kOptionMenuItemTypeBoolean, "Confirm Quicksaves", YesNo, 2, &confirm_quicksave.d_,
-     OptionMenuUpdateConsoleVariableFromInt, nullptr, &confirm_quicksave},
-    {kOptionMenuItemTypeBoolean, "Map Rotation", YesNo, 2, &rotate_map, nullptr, nullptr},
-    {kOptionMenuItemTypeBoolean, "Obituary Messages", YesNo, 2, &show_obituaries, nullptr, nullptr},
+     OptionMenuUpdateConsoleVariableFromInt, nullptr, &confirm_quicksave, 0, 0, 0, ""},
+    {kOptionMenuItemTypeBoolean, "Map Rotation", YesNo, 2, &rotate_map, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeBoolean, "Obituary Messages", YesNo, 2, &show_obituaries, nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeBoolean, "Skip Startup Movies", YesNo, 2, &skip_intros.d_,
-     OptionMenuUpdateConsoleVariableFromInt, nullptr, &skip_intros},
+     OptionMenuUpdateConsoleVariableFromInt, nullptr, &skip_intros, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Max Pickup Messages", "1/2/3/4", 4, &maximum_pickup_messages.d_,
-     OptionMenuUpdateConsoleVariableFromInt, nullptr, &maximum_pickup_messages},
+     OptionMenuUpdateConsoleVariableFromInt, nullptr, &maximum_pickup_messages, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Crosshair", "None/Dot/Angle/Plus/Spiked/Thin/Cross/Carat/Circle/Double", 10,
-     &crosshair_style.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &crosshair_style},
+     &crosshair_style.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &crosshair_style, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Crosshair Color", "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange", 8,
-     &crosshair_color.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &crosshair_color},
+     &crosshair_color.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &crosshair_color, 0, 0, 0, ""},
     {kOptionMenuItemTypeSlider, "Crosshair Size", nullptr, 0, &crosshair_size.f_,
      OptionMenuUpdateConsoleVariableFromFloat, nullptr, &crosshair_size, 1.0f, 2.0f, 64.0f, "%g Pixels"},
 };
@@ -444,17 +445,17 @@ static OptionMenuDefinition ui_optmenu = {
 //  SCREEN OPTIONS MENU
 //
 static OptionMenuItem resoptions[] = {
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "V-Sync", "Off/Standard/Adaptive", 3, &vsync.d_, OptionMenuUpdateConsoleVariableFromInt,
-     "Will fallback to Standard if Adaptive is not supported", &vsync},
+     "Will fallback to Standard if Adaptive is not supported", &vsync, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Aspect Ratio", "5:4/4:3/3:2/16:10/16:9/21:9", 6, &monitor_size,
-     OptionMenuChangeMonitorSize, "Only applies to Fullscreen Modes"},
-    {kOptionMenuItemTypeFunction, "New Mode", nullptr, 0, nullptr, OptionMenuChangeResFull, nullptr},
-    {kOptionMenuItemTypeFunction, "New Resolution", nullptr, 0, nullptr, OptionMenuChangeResSize, nullptr},
-    {kOptionMenuItemTypeFunction, "Apply Mode/Resolution", nullptr, 0, nullptr, OptionMenuionSetResolution, nullptr},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr}};
+     OptionMenuChangeMonitorSize, "Only applies to Fullscreen Modes", nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeFunction, "New Mode", nullptr, 0, nullptr, OptionMenuChangeResFull, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeFunction, "New Resolution", nullptr, 0, nullptr, OptionMenuChangeResSize, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeFunction, "Apply Mode/Resolution", nullptr, 0, nullptr, OptionMenuionSetResolution, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""}};
 
 static OptionMenuDefinition res_optmenu = {resoptions,
                                            sizeof(resoptions) / sizeof(OptionMenuItem),
@@ -474,18 +475,18 @@ static OptionMenuDefinition res_optmenu = {resoptions,
 //
 
 static OptionMenuItem analogueoptions[] = {
-    {kOptionMenuItemTypeSwitch, "Mouse X Axis", MouseAxis, 11, &mouse_x_axis, nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "Mouse Y Axis", MouseAxis, 11, &mouse_y_axis, nullptr, nullptr},
+    {kOptionMenuItemTypeSwitch, "Mouse X Axis", MouseAxis, 11, &mouse_x_axis, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeSwitch, "Mouse Y Axis", MouseAxis, 11, &mouse_y_axis, nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeSlider, "X Sensitivity", nullptr, 0, &mouse_x_sensitivity.f_,
      OptionMenuUpdateConsoleVariableFromFloat, nullptr, &mouse_x_sensitivity, 0.25f, 1.0f, 15.0f, "%0.2f"},
     {kOptionMenuItemTypeSlider, "Y Sensitivity", nullptr, 0, &mouse_y_sensitivity.f_,
      OptionMenuUpdateConsoleVariableFromFloat, nullptr, &mouse_y_sensitivity, 0.25f, 1.0f, 15.0f, "%0.2f"},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "Gamepad", "None/1/2/3/4/5/6", 5, &joystick_device, nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "Left Stick X", JoystickAxis, 13, &joystick_axis[0], nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "Left Stick Y", JoystickAxis, 13, &joystick_axis[1], nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "Right Stick X", JoystickAxis, 13, &joystick_axis[2], nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "Right Stick Y", JoystickAxis, 13, &joystick_axis[3], nullptr, nullptr},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeSwitch, "Gamepad", "None/1/2/3/4/5/6", 5, &joystick_device, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeSwitch, "Left Stick X", JoystickAxis, 13, &joystick_axis[0], nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeSwitch, "Left Stick Y", JoystickAxis, 13, &joystick_axis[1], nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeSwitch, "Right Stick X", JoystickAxis, 13, &joystick_axis[2], nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeSwitch, "Right Stick Y", JoystickAxis, 13, &joystick_axis[3], nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeSlider, "Left X Deadzone", nullptr, 0, &joystick_deadzone_axis_0.f_,
      OptionMenuUpdateConsoleVariableFromFloat, nullptr, &joystick_deadzone_axis_0, 0.01f, 0.0f, 0.99f, "%0.2f"},
     {kOptionMenuItemTypeSlider, "Left Y Deadzone", nullptr, 0, &joystick_deadzone_axis_1.f_,
@@ -498,7 +499,7 @@ static OptionMenuItem analogueoptions[] = {
      OptionMenuUpdateConsoleVariableFromFloat, nullptr, &joystick_deadzone_axis_4, 0.01f, 0.0f, 0.99f, "%0.2f"},
     {kOptionMenuItemTypeSlider, "Right Trigger Deadzone", nullptr, 0, &joystick_deadzone_axis_5.f_,
      OptionMenuUpdateConsoleVariableFromFloat, nullptr, &joystick_deadzone_axis_5, 0.01f, 0.0f, 0.99f, "%0.2f"},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeSlider, "Turning Speed", nullptr, 0, &turn_speed.f_, OptionMenuUpdateConsoleVariableFromFloat,
      nullptr, &turn_speed, 0.10f, 0.10f, 3.0f, "%0.2f"},
     {kOptionMenuItemTypeSlider, "Vertical Look Speed", nullptr, 0, &vertical_look_speed.f_,
@@ -523,23 +524,23 @@ static OptionMenuItem soundoptions[] = {
      OptionMenuUpdateConsoleVariableFromFloat, nullptr, &sound_effect_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
     {kOptionMenuItemTypeSlider, "Movie/Music Volume", nullptr, 0, &music_volume.f_,
      OptionMenuUpdateConsoleVariableFromFloat, nullptr, &music_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "Stereo", "Off/On/Swapped", 3, &var_sound_stereo, nullptr, "NeedRestart"},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeSwitch, "MIDI Player", "TinySoundFont/FMMIDI/Emu de MIDI (OPLL Mode)/Emu de MIDI (SCC-PSG Mode)", 4, &var_midi_player, OptionMenuChangeMidiPlayer,
-     nullptr},
-    {kOptionMenuItemTypeFunction, "TinySoundFont Bank", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeSwitch, "Stereo", "Off/On/Swapped", 3, &var_sound_stereo, nullptr, "NeedRestart", nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeSwitch, "MIDI Player", "TinySoundFont/Emu de MIDI (OPLL Mode)/Emu de MIDI (SCC-PSG Mode)", 3, &var_midi_player, OptionMenuChangeMidiPlayer,
+     nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeFunction, "TinySoundFont Bank", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr, nullptr, 0, 0, 0, ""},
 #if EDGE_DOOM_SFX_SUPPORT
     {kOptionMenuItemTypeBoolean, "PC Speaker Mode", YesNo, 2, &pc_speaker_mode, OptionMenuChangePCSpeakerMode,
-     "Music will be Off while this is enabled"},
+     "Music will be Off while this is enabled", nullptr, 0, 0, 0, ""},
 #endif
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeBoolean, "Dynamic Reverb", YesNo, 2, &dynamic_reverb, nullptr, nullptr},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeBoolean, "Dynamic Reverb", YesNo, 2, &dynamic_reverb, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Mix Channels", "32/64/96/128/160/192/224/256", 8, &sound_mixing_channels,
-     OptionMenuChangeMixChan, nullptr},
-    {kOptionMenuItemTypeBoolean, "Precache SFX", YesNo, 2, &precache_sound_effects, nullptr, "NeedRestart"},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
+     OptionMenuChangeMixChan, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeBoolean, "Precache SFX", YesNo, 2, &precache_sound_effects, nullptr, "NeedRestart", nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
 };
 
 static OptionMenuDefinition sound_optmenu = {
@@ -568,51 +569,51 @@ static OptionMenuDefinition f4sound_optmenu = {
 // -KM- 1998/07/21 Change blood to switch
 //
 static OptionMenuItem playoptions[] = {
-    {kOptionMenuItemTypeBoolean, "Pistol Starts", YesNo, 2, &pistol_starts, nullptr, nullptr},
+    {kOptionMenuItemTypeBoolean, "Pistol Starts", YesNo, 2, &pistol_starts, nullptr, nullptr, nullptr, 0, 0, 0, ""},
 
-    {kOptionMenuItemTypeBoolean, "Mouse Look", YesNo, 2, &global_flags.mouselook, OptionMenuChangeMLook, nullptr},
+    {kOptionMenuItemTypeBoolean, "Mouse Look", YesNo, 2, &global_flags.mouselook, OptionMenuChangeMLook, nullptr, nullptr, 0, 0, 0, ""},
 
     {kOptionMenuItemTypeSwitch, "Aim Assist",
      "Off/Vertical/Vertical+Snap To/Vertical+Horizontal/Vertical+Horizontal+Snap To", 5, &global_flags.autoaim,
-     OptionMenuChangeAutoAim, "\"Off\" not recommended when mouselook is disabled"},
+     OptionMenuChangeAutoAim, "\"Off\" not recommended when mouselook is disabled", nullptr, 0, 0, 0, ""},
 
-    {kOptionMenuItemTypeBoolean, "Jumping", YesNo, 2, &global_flags.jump, OptionMenuChangeJumping, nullptr},
+    {kOptionMenuItemTypeBoolean, "Jumping", YesNo, 2, &global_flags.jump, OptionMenuChangeJumping, nullptr, nullptr, 0, 0, 0, ""},
 
-    {kOptionMenuItemTypeBoolean, "Crouching", YesNo, 2, &global_flags.crouch, OptionMenuChangeCrouching, nullptr},
+    {kOptionMenuItemTypeBoolean, "Crouching", YesNo, 2, &global_flags.crouch, OptionMenuChangeCrouching, nullptr, nullptr, 0, 0, 0, ""},
 
-    {kOptionMenuItemTypeBoolean, "Weapon Kick", YesNo, 2, &global_flags.kicking, OptionMenuChangeKicking, nullptr},
+    {kOptionMenuItemTypeBoolean, "Weapon Kick", YesNo, 2, &global_flags.kicking, OptionMenuChangeKicking, nullptr, nullptr, 0, 0, 0, ""},
 
     {kOptionMenuItemTypeBoolean, "Weapon Auto-Switch", YesNo, 2, &global_flags.weapon_switch,
-     OptionMenuChangeWeaponSwitch, nullptr},
+     OptionMenuChangeWeaponSwitch, nullptr, nullptr, 0, 0, 0, ""},
 
     {kOptionMenuItemTypeSwitch, "Blood Level", "Normal/Extra/None", 3, &gore_level.d_,
-     OptionMenuUpdateConsoleVariableFromInt, "Blood", &gore_level},
+     OptionMenuUpdateConsoleVariableFromInt, "Blood", &gore_level, 0, 0, 0, ""},
 
-    {kOptionMenuItemTypeBoolean, "Extras", YesNo, 2, &global_flags.have_extra, OptionMenuChangeExtra, nullptr},
+    {kOptionMenuItemTypeBoolean, "Extras", YesNo, 2, &global_flags.have_extra, OptionMenuChangeExtra, nullptr, nullptr, 0, 0, 0, ""},
 
     {kOptionMenuItemTypeBoolean, "True 3D Gameplay", YesNo, 2, &global_flags.true_3d_gameplay, OptionMenuChangeTrue3d,
-     "True3d"},
+     "True3d", nullptr, 0, 0, 0, ""},
 
     {kOptionMenuItemTypeBoolean, "Shoot-thru Scenery", YesNo, 2, &global_flags.pass_missile,
-     OptionMenuChangePassMissile, nullptr},
+     OptionMenuChangePassMissile, nullptr, nullptr, 0, 0, 0, ""},
 
     {kOptionMenuItemTypeBoolean, "Erraticism", YesNo, 2, &erraticism.d_, OptionMenuUpdateConsoleVariableFromInt,
-     "Time only advances when you move or fire", &erraticism},
+     "Time only advances when you move or fire", &erraticism, 0, 0, 0, ""},
 
     {kOptionMenuItemTypeSlider, "OptGravity", nullptr, 0, &gravity_factor.f_, OptionMenuUpdateConsoleVariableFromFloat,
      "Gravity", &gravity_factor, 0.10f, 0.0f, 2.0f, "%gx"},
 
     {kOptionMenuItemTypeBoolean, "Respawn Enemies", YesNo, 2, &global_flags.enemies_respawn, OptionMenuChangeRespawn,
-     nullptr},
+     nullptr, nullptr, 0, 0, 0, ""},
 
     {kOptionMenuItemTypeBoolean, "Enemy Respawn Mode", "Teleport/Resurrect", 2, &global_flags.enemy_respawn_mode,
-     OptionMenuChangeMonsterRespawn, nullptr},
+     OptionMenuChangeMonsterRespawn, nullptr, nullptr, 0, 0, 0, ""},
 
     {kOptionMenuItemTypeBoolean, "Item Respawn", YesNo, 2, &global_flags.items_respawn, OptionMenuChangeItemRespawn,
-     nullptr},
+     nullptr, nullptr, 0, 0, 0, ""},
 
     {kOptionMenuItemTypeBoolean, "Fast Monsters", YesNo, 2, &global_flags.fast_monsters, OptionMenuChangeFastparm,
-     nullptr}};
+     nullptr, nullptr, 0, 0, 0, ""}};
 
 static OptionMenuDefinition gameplay_optmenu = {playoptions,
                                                 sizeof(playoptions) / sizeof(OptionMenuItem),
@@ -628,22 +629,22 @@ static OptionMenuDefinition gameplay_optmenu = {playoptions,
 //
 //
 static OptionMenuItem perfoptions[] = {
-    {kOptionMenuItemTypeSwitch, "Detail Level", "Low/Medium/High", 3, &detail_level, OptionMenuChangeMipMap, nullptr},
+    {kOptionMenuItemTypeSwitch, "Detail Level", "Low/Medium/High", 3, &detail_level, OptionMenuChangeMipMap, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeBoolean, "Simple Skies", YesNo, 2, &renderer_dumb_sky.d_,
-     OptionMenuUpdateConsoleVariableFromInt, "Speeds up sky drawing, but breaks sky flooding and other hacks", &renderer_dumb_sky},
+     OptionMenuUpdateConsoleVariableFromInt, "Speeds up sky drawing, but breaks sky flooding and other hacks", &renderer_dumb_sky, 0, 0, 0, ""},
     {kOptionMenuItemTypeBoolean, "Draw Distance Culling", YesNo, 2, &draw_culling.d_,
-     OptionMenuUpdateConsoleVariableFromInt, "Sector/Level Fog will be disabled when this is On", &draw_culling},
+     OptionMenuUpdateConsoleVariableFromInt, "Sector/Level Fog will be disabled when this is On", &draw_culling, 0, 0, 0, ""},
     {kOptionMenuItemTypeSlider, "Maximum Draw Distance", nullptr, 0, &draw_culling_distance.f_,
      OptionMenuUpdateConsoleVariableFromFloat, "Only effective when Draw Distance Culling is On",
      &draw_culling_distance, 200.0f, 1000.0f, 8000.0f, "%g Units"},
     {kOptionMenuItemTypeSwitch, "Outdoor Culling Fog Color", "Match Sky/White/Grey/Black", 4, &cull_fog_color.d_,
-     OptionMenuUpdateConsoleVariableFromInt, "Only effective when Draw Distance Culling is On", &cull_fog_color},
+     OptionMenuUpdateConsoleVariableFromInt, "Only effective when Draw Distance Culling is On", &cull_fog_color, 0, 0, 0, ""},
     {kOptionMenuItemTypeBoolean, "Slow Thinkers Over Distance", YesNo, 2, &distance_cull_thinkers.d_,
      OptionMenuUpdateConsoleVariableFromInt, "Only recommended for extreme monster/projectile counts",
-     &distance_cull_thinkers},
+     &distance_cull_thinkers, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Maximum Dynamic Lights", "Unlimited/20/40/60/80/100", 6, &max_dynamic_lights.d_,
      OptionMenuUpdateConsoleVariableFromInt, "Control how many dynamic lights are rendered per tick",
-     &max_dynamic_lights},
+     &max_dynamic_lights, 0, 0, 0, ""},
 };
 
 static OptionMenuDefinition perf_optmenu = {perfoptions,
@@ -661,13 +662,13 @@ static OptionMenuDefinition perf_optmenu = {perfoptions,
 //
 static OptionMenuItem accessibilityoptions[] = {
     {kOptionMenuItemTypeSwitch, "View Bobbing", "Full/Head Only/Weapon Only/None", 4, &view_bobbing.d_,
-     OptionMenuChangeBobbing, "May help with motion sickness"},
+     OptionMenuChangeBobbing, "May help with motion sickness", nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Reduce Flashing", YesNo, 2, &reduce_flash, nullptr,
-     "May help with epilepsy or photosensitivity"},
+     "May help with epilepsy or photosensitivity", nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeBoolean, "Automap: Keyed Doors Pulse", YesNo, 2, &automap_keydoor_blink, nullptr,
-     "Can help locate doors more easily"},
+     "Can help locate doors more easily", nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Automap: Keyed Doors Overlay", "Nothing/Text/Graphic", 3, &automap_keydoor_text.d_,
-     OptionMenuUpdateConsoleVariableFromInt, "Required key shown visually", &automap_keydoor_text},
+     OptionMenuUpdateConsoleVariableFromInt, "Required key shown visually", &automap_keydoor_text, 0, 0, 0, ""},
 };
 
 static OptionMenuDefinition accessibility_optmenu = {accessibilityoptions,
@@ -686,17 +687,17 @@ static OptionMenuDefinition accessibility_optmenu = {accessibilityoptions,
 // -KM- 1998/07/10 Used better names :-)
 //
 static OptionMenuItem move_keyconfig[] = {
-    {kOptionMenuItemTypeKeyConfig, "Walk Forward", nullptr, 0, &key_up, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Walk Backwards", nullptr, 0, &key_down, nullptr, nullptr},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Strafe Left", nullptr, 0, &key_strafe_left, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Strafe Right", nullptr, 0, &key_strafe_right, nullptr, nullptr},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Turn Left", nullptr, 0, &key_left, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Turn Right", nullptr, 0, &key_right, nullptr, nullptr},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Up / Jump", nullptr, 0, &key_fly_up, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Down / Crouch", nullptr, 0, &key_fly_down, nullptr, nullptr},
+    {kOptionMenuItemTypeKeyConfig, "Walk Forward", nullptr, 0, &key_up, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Walk Backwards", nullptr, 0, &key_down, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Strafe Left", nullptr, 0, &key_strafe_left, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Strafe Right", nullptr, 0, &key_strafe_right, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Turn Left", nullptr, 0, &key_left, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Turn Right", nullptr, 0, &key_right, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Up / Jump", nullptr, 0, &key_fly_up, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Down / Crouch", nullptr, 0, &key_fly_down, nullptr, nullptr, nullptr, 0, 0, 0, ""},
 };
 
 static OptionMenuDefinition movement_optmenu = {move_keyconfig,
@@ -715,15 +716,15 @@ static OptionMenuDefinition movement_optmenu = {move_keyconfig,
 // -ES- 1999/03/28 Added Zoom Key
 //
 static OptionMenuItem attack_keyconfig[] = {
-    {kOptionMenuItemTypeKeyConfig, "Primary Attack", nullptr, 0, &key_fire, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Secondary Attack", nullptr, 0, &key_second_attack, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Third Attack", nullptr, 0, &key_third_attack, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Fourth Attack", nullptr, 0, &key_fourth_attack, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Next Weapon", nullptr, 0, &key_next_weapon, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Previous Weapon", nullptr, 0, &key_previous_weapon, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Weapon Reload", nullptr, 0, &key_reload, nullptr, nullptr},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Zoom in/out", nullptr, 0, &key_zoom, nullptr, nullptr},
+    {kOptionMenuItemTypeKeyConfig, "Primary Attack", nullptr, 0, &key_fire, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Secondary Attack", nullptr, 0, &key_second_attack, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Third Attack", nullptr, 0, &key_third_attack, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Fourth Attack", nullptr, 0, &key_fourth_attack, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Next Weapon", nullptr, 0, &key_next_weapon, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Previous Weapon", nullptr, 0, &key_previous_weapon, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Weapon Reload", nullptr, 0, &key_reload, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Zoom in/out", nullptr, 0, &key_zoom, nullptr, nullptr, nullptr, 0, 0, 0, ""},
 };
 
 static OptionMenuDefinition attack_optmenu = {attack_keyconfig,
@@ -736,10 +737,10 @@ static OptionMenuDefinition attack_optmenu = {attack_keyconfig,
                                               language["MenuBinding"]};
 
 static OptionMenuItem look_keyconfig[] = {
-    {kOptionMenuItemTypeKeyConfig, "Look Up", nullptr, 0, &key_look_up, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Look Down", nullptr, 0, &key_look_down, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Center View", nullptr, 0, &key_look_center, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Mouse Look", nullptr, 0, &key_mouselook, nullptr, nullptr},
+    {kOptionMenuItemTypeKeyConfig, "Look Up", nullptr, 0, &key_look_up, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Look Down", nullptr, 0, &key_look_down, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Center View", nullptr, 0, &key_look_center, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Mouse Look", nullptr, 0, &key_mouselook, nullptr, nullptr, nullptr, 0, 0, 0, ""},
 };
 
 static OptionMenuDefinition look_optmenu = {look_keyconfig,
@@ -755,15 +756,15 @@ static OptionMenuDefinition look_optmenu = {look_keyconfig,
 //  KEY CONFIG : OTHER STUFF
 //
 static OptionMenuItem other_keyconfig[] = {
-    {kOptionMenuItemTypeKeyConfig, "Use Item", nullptr, 0, &key_use, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Strafe", nullptr, 0, &key_strafe, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Run", nullptr, 0, &key_speed, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Toggle Autorun", nullptr, 0, &key_autorun, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "180 degree turn", nullptr, 0, &key_180, nullptr, nullptr},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Map Toggle", nullptr, 0, &key_map, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Action 1", nullptr, 0, &key_action1, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Action 2", nullptr, 0, &key_action2, nullptr, nullptr},
+    {kOptionMenuItemTypeKeyConfig, "Use Item", nullptr, 0, &key_use, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Strafe", nullptr, 0, &key_strafe, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Run", nullptr, 0, &key_speed, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Toggle Autorun", nullptr, 0, &key_autorun, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "180 degree turn", nullptr, 0, &key_180, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Map Toggle", nullptr, 0, &key_map, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Action 1", nullptr, 0, &key_action1, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Action 2", nullptr, 0, &key_action2, nullptr, nullptr, nullptr, 0, 0, 0, ""},
 
     ///	{kOptionMenuItemTypeKeyConfig, "Multiplayer Talk", nullptr, 0,
     ///&key_talk, nullptr, nullptr},
@@ -782,17 +783,17 @@ static OptionMenuDefinition otherkey_optmenu = {other_keyconfig,
 //  KEY CONFIG : WEAPONS
 //
 static OptionMenuItem weapon_keyconfig[] = {
-    {kOptionMenuItemTypeKeyConfig, "Weapon 1", nullptr, 0, &key_weapons[1], nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Weapon 2", nullptr, 0, &key_weapons[2], nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Weapon 3", nullptr, 0, &key_weapons[3], nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Weapon 4", nullptr, 0, &key_weapons[4], nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Weapon 5", nullptr, 0, &key_weapons[5], nullptr, nullptr},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Weapon 6", nullptr, 0, &key_weapons[6], nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Weapon 7", nullptr, 0, &key_weapons[7], nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Weapon 8", nullptr, 0, &key_weapons[8], nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Weapon 9", nullptr, 0, &key_weapons[9], nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Weapon 0", nullptr, 0, &key_weapons[0], nullptr, nullptr},
+    {kOptionMenuItemTypeKeyConfig, "Weapon 1", nullptr, 0, &key_weapons[1], nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Weapon 2", nullptr, 0, &key_weapons[2], nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Weapon 3", nullptr, 0, &key_weapons[3], nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Weapon 4", nullptr, 0, &key_weapons[4], nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Weapon 5", nullptr, 0, &key_weapons[5], nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Weapon 6", nullptr, 0, &key_weapons[6], nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Weapon 7", nullptr, 0, &key_weapons[7], nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Weapon 8", nullptr, 0, &key_weapons[8], nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Weapon 9", nullptr, 0, &key_weapons[9], nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Weapon 0", nullptr, 0, &key_weapons[0], nullptr, nullptr, nullptr, 0, 0, 0, ""},
 };
 
 static OptionMenuDefinition weapon_optmenu = {weapon_keyconfig,
@@ -808,17 +809,17 @@ static OptionMenuDefinition weapon_optmenu = {weapon_keyconfig,
 //  KEY CONFIG : AUTOMAP
 //
 static OptionMenuItem automap_keyconfig[] = {
-    {kOptionMenuItemTypeKeyConfig, "Pan Up", nullptr, 0, &key_automap_up, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Pan Down", nullptr, 0, &key_automap_down, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Pan Left", nullptr, 0, &key_automap_left, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Pan Right", nullptr, 0, &key_automap_right, nullptr, nullptr},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Follow Mode", nullptr, 0, &key_automap_follow, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Show Grid", nullptr, 0, &key_automap_grid, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Zoom In", nullptr, 0, &key_automap_zoom_in, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Zoom Out", nullptr, 0, &key_automap_zoom_out, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Add Mark", nullptr, 0, &key_automap_mark, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Clear Marks", nullptr, 0, &key_automap_clear, nullptr, nullptr},
+    {kOptionMenuItemTypeKeyConfig, "Pan Up", nullptr, 0, &key_automap_up, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Pan Down", nullptr, 0, &key_automap_down, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Pan Left", nullptr, 0, &key_automap_left, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Pan Right", nullptr, 0, &key_automap_right, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Follow Mode", nullptr, 0, &key_automap_follow, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Show Grid", nullptr, 0, &key_automap_grid, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Zoom In", nullptr, 0, &key_automap_zoom_in, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Zoom Out", nullptr, 0, &key_automap_zoom_out, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Add Mark", nullptr, 0, &key_automap_mark, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Clear Marks", nullptr, 0, &key_automap_clear, nullptr, nullptr, nullptr, 0, 0, 0, ""},
 };
 
 static OptionMenuDefinition automap_optmenu = {automap_keyconfig,
@@ -834,9 +835,9 @@ static OptionMenuDefinition automap_optmenu = {automap_keyconfig,
 //  KEY CONFIG : INVENTORY
 //
 static OptionMenuItem inventory_keyconfig[] = {
-    {kOptionMenuItemTypeKeyConfig, "Previous Item", nullptr, 0, &key_inventory_previous, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Use Item", nullptr, 0, &key_inventory_use, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Next Item", nullptr, 0, &key_inventory_next, nullptr, nullptr},
+    {kOptionMenuItemTypeKeyConfig, "Previous Item", nullptr, 0, &key_inventory_previous, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Use Item", nullptr, 0, &key_inventory_use, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Next Item", nullptr, 0, &key_inventory_next, nullptr, nullptr, nullptr, 0, 0, 0, ""},
 };
 
 static OptionMenuDefinition inventory_optmenu = {inventory_keyconfig,
@@ -852,15 +853,15 @@ static OptionMenuDefinition inventory_optmenu = {inventory_keyconfig,
 //  KEY CONFIG : PROGRAM
 //
 static OptionMenuItem program_keyconfig1[] = {
-    {kOptionMenuItemTypeKeyConfig, "Screenshot", nullptr, 0, &key_screenshot, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Console", nullptr, 0, &key_console, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Pause", nullptr, 0, &key_pause, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Save Game", nullptr, 0, &key_save_game, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Load Game", nullptr, 0, &key_load_game, nullptr, nullptr},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Sound Controls", nullptr, 0, &key_sound_controls, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Options", nullptr, 0, &key_options_menu, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Quicksave", nullptr, 0, &key_quick_save, nullptr, nullptr},
+    {kOptionMenuItemTypeKeyConfig, "Screenshot", nullptr, 0, &key_screenshot, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Console", nullptr, 0, &key_console, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Pause", nullptr, 0, &key_pause, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Save Game", nullptr, 0, &key_save_game, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Load Game", nullptr, 0, &key_load_game, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Sound Controls", nullptr, 0, &key_sound_controls, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Options", nullptr, 0, &key_options_menu, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Quicksave", nullptr, 0, &key_quick_save, nullptr, nullptr, nullptr, 0, 0, 0, ""},
 };
 
 static OptionMenuDefinition program_optmenu1 = {program_keyconfig1,
@@ -876,13 +877,13 @@ static OptionMenuDefinition program_optmenu1 = {program_keyconfig1,
 //  KEY CONFIG : PROGRAM
 //
 static OptionMenuItem program_keyconfig2[] = {
-    {kOptionMenuItemTypeKeyConfig, "End Game", nullptr, 0, &key_end_game, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Toggle Messages", nullptr, 0, &key_message_toggle, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "OptQuickLoad", nullptr, 0, &key_quick_load, nullptr, nullptr},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Quit EDGE", nullptr, 0, &key_quit_edge, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Toggle Gamma", nullptr, 0, &key_gamma_toggle, nullptr, nullptr},
-    {kOptionMenuItemTypeKeyConfig, "Show Players", nullptr, 0, &key_show_players, nullptr, nullptr},
+    {kOptionMenuItemTypeKeyConfig, "End Game", nullptr, 0, &key_end_game, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Toggle Messages", nullptr, 0, &key_message_toggle, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "OptQuickLoad", nullptr, 0, &key_quick_load, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Quit EDGE", nullptr, 0, &key_quit_edge, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Toggle Gamma", nullptr, 0, &key_gamma_toggle, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeKeyConfig, "Show Players", nullptr, 0, &key_show_players, nullptr, nullptr, nullptr, 0, 0, 0, ""},
 };
 
 static OptionMenuDefinition program_optmenu2 = {program_keyconfig2,
@@ -1543,6 +1544,8 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
         default:
             break;
         }
+        FatalError("Invalid menu type!");
+        break;
     }
 
     case kRightArrow:
@@ -1627,6 +1630,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             break;
         }
         FatalError("Invalid menu type!");
+        break;
     }
     case kEscape:
     case kMouse2:
@@ -1663,6 +1667,8 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
 //
 static void OptionMenuVideoOptions(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     current_menu = &video_optmenu;
     current_item = current_menu->items + current_menu->pos;
 }
@@ -1674,6 +1680,8 @@ static void OptionMenuVideoOptions(int key_pressed, ConsoleVariable *console_var
 //
 static void OptionMenuUIOptions(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     current_menu = &ui_optmenu;
     current_item = current_menu->items + current_menu->pos;
 }
@@ -1689,6 +1697,8 @@ static void OptionMenuUIOptions(int key_pressed, ConsoleVariable *console_variab
 //
 static void OptionMenuResolutionOptions(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     new_window_mode.width       = current_screen_width;
     new_window_mode.height      = current_screen_height;
     new_window_mode.depth       = current_screen_depth;
@@ -1703,6 +1713,8 @@ static void OptionMenuResolutionOptions(int key_pressed, ConsoleVariable *consol
 //
 static void OptionMenuAnalogueOptions(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     current_menu = &analogue_optmenu;
     current_item = current_menu->items + current_menu->pos;
 }
@@ -1712,6 +1724,8 @@ static void OptionMenuAnalogueOptions(int key_pressed, ConsoleVariable *console_
 //
 static void OptionMenuSoundOptions(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     current_menu = &sound_optmenu;
     current_item = current_menu->items + current_menu->pos;
 }
@@ -1721,6 +1735,7 @@ static void OptionMenuSoundOptions(int key_pressed, ConsoleVariable *console_var
 //
 void MenuF4SoundOptions(int choice)
 {
+    EPI_UNUSED(choice);
     option_menu_on = 1;
     current_menu   = &f4sound_optmenu;
     current_item   = current_menu->items + current_menu->pos;
@@ -1731,6 +1746,8 @@ void MenuF4SoundOptions(int choice)
 //
 static void OptionMenuGameplayOptions(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     // not allowed in netgames (changing most of these options would
     // break synchronisation with the other machines).
     if (network_game)
@@ -1745,6 +1762,8 @@ static void OptionMenuGameplayOptions(int key_pressed, ConsoleVariable *console_
 //
 static void OptionMenuPerformanceOptions(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     // not allowed in netgames (changing most of these options would
     // break synchronisation with the other machines).
     if (network_game)
@@ -1759,6 +1778,8 @@ static void OptionMenuPerformanceOptions(int key_pressed, ConsoleVariable *conso
 //
 static void OptionMenuAccessibilityOptions(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     // not allowed in netgames (changing most of these options would
     // break synchronisation with the other machines).
     if (network_game)
@@ -1773,6 +1794,8 @@ static void OptionMenuAccessibilityOptions(int key_pressed, ConsoleVariable *con
 //
 static void OptionMenuKeyboardOptions(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     current_menu = all_key_menus[current_key_menu];
 
     current_item = current_menu->items + current_menu->pos;
@@ -1819,8 +1842,10 @@ static void InitMonitorSize()
         monitor_size = 0;
 }
 
-static void OptionMenuChangeMonitorSize(int key, ConsoleVariable *console_variable)
+static void OptionMenuChangeMonitorSize(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     static const float ratios[6] = {
         1.25000, 1.33333, 1.50000, // 5:4     4:3   3:2
         1.60000, 1.77777, 2.33333  // 16:10  16:9  21:9
@@ -1833,6 +1858,8 @@ static void OptionMenuChangeMonitorSize(int key, ConsoleVariable *console_variab
 
 static void OptionMenuChangeMLook(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagMlook))
         return;
 
@@ -1841,6 +1868,8 @@ static void OptionMenuChangeMLook(int key_pressed, ConsoleVariable *console_vari
 
 static void OptionMenuChangeJumping(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagJumping))
         return;
 
@@ -1849,6 +1878,8 @@ static void OptionMenuChangeJumping(int key_pressed, ConsoleVariable *console_va
 
 static void OptionMenuChangeCrouching(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagCrouching))
         return;
 
@@ -1857,6 +1888,8 @@ static void OptionMenuChangeCrouching(int key_pressed, ConsoleVariable *console_
 
 static void OptionMenuChangeExtra(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagExtras))
         return;
 
@@ -1870,6 +1903,8 @@ static void OptionMenuChangeExtra(int key_pressed, ConsoleVariable *console_vari
 //
 static void OptionMenuChangeMonsterRespawn(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagResRespawn))
         return;
 
@@ -1878,6 +1913,8 @@ static void OptionMenuChangeMonsterRespawn(int key_pressed, ConsoleVariable *con
 
 static void OptionMenuChangeItemRespawn(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagItemRespawn))
         return;
 
@@ -1886,6 +1923,8 @@ static void OptionMenuChangeItemRespawn(int key_pressed, ConsoleVariable *consol
 
 static void OptionMenuChangeTrue3d(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagTrue3D))
         return;
 
@@ -1894,6 +1933,8 @@ static void OptionMenuChangeTrue3d(int key_pressed, ConsoleVariable *console_var
 
 static void OptionMenuChangeAutoAim(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     if (current_map &&
         ((current_map->force_on_ | current_map->force_off_) &
          (kMapFlagAutoAimFull | kMapFlagAutoAimFullSnap | kMapFlagAutoAimVertical | kMapFlagAutoAimVerticalSnap)))
@@ -1904,6 +1945,8 @@ static void OptionMenuChangeAutoAim(int key_pressed, ConsoleVariable *console_va
 
 static void OptionMenuChangeRespawn(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     if (game_skill == kSkillNightmare)
         return;
 
@@ -1915,6 +1958,8 @@ static void OptionMenuChangeRespawn(int key_pressed, ConsoleVariable *console_va
 
 static void OptionMenuChangeFastparm(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     if (game_skill == kSkillNightmare)
         return;
 
@@ -1926,17 +1971,23 @@ static void OptionMenuChangeFastparm(int key_pressed, ConsoleVariable *console_v
 
 static void OptionMenuChangePassMissile(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     level_flags.pass_missile = global_flags.pass_missile;
 }
 
 // this used by both MIPMIP, SMOOTHING and DETAIL options
 static void OptionMenuChangeMipMap(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     DeleteAllImages();
 }
 
 static void OptionMenuChangeBobbing(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     view_bobbing   = view_bobbing.d_;
     Player *player = players[console_player];
     if (player)
@@ -1955,18 +2006,22 @@ static void OptionMenuChangeBobbing(int key_pressed, ConsoleVariable *console_va
 
 static void OptionMenuUpdateConsoleVariableFromFloat(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
     EPI_ASSERT(console_variable);
     console_variable->operator=(console_variable->f_);
 }
 
 static void OptionMenuUpdateConsoleVariableFromInt(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
     EPI_ASSERT(console_variable);
     console_variable->operator=(console_variable->d_);
 }
 
 static void OptionMenuChangeKicking(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagKicking))
         return;
 
@@ -1975,6 +2030,8 @@ static void OptionMenuChangeKicking(int key_pressed, ConsoleVariable *console_va
 
 static void OptionMenuChangeWeaponSwitch(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagWeaponSwitch))
         return;
 
@@ -1983,10 +2040,12 @@ static void OptionMenuChangeWeaponSwitch(int key_pressed, ConsoleVariable *conso
 
 static void OptionMenuChangePCSpeakerMode(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     // Clear SFX cache and restart music
     StopAllSoundEffects();
     SoundCacheClearAll();
-    OptionMenuChangeMidiPlayer(0);
+    OptionMenuChangeMidiPlayer(0, nullptr);
 }
 
 //
@@ -1996,6 +2055,7 @@ static void OptionMenuChangePCSpeakerMode(int key_pressed, ConsoleVariable *cons
 //
 static void OptionMenuChangeLanguage(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(console_variable);
     if (key_pressed == kLeftArrow || key_pressed == kGamepadLeft)
     {
         int idx, max;
@@ -2037,10 +2097,10 @@ static void OptionMenuChangeLanguage(int key_pressed, ConsoleVariable *console_v
 //
 static void OptionMenuChangeMidiPlayer(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     if (var_midi_player == 0)
         RestartTSF();
-    else if (var_midi_player == 1)
-        RestartFMM();
     else
         RestartEMIDI();
 }
@@ -2051,6 +2111,7 @@ static void OptionMenuChangeMidiPlayer(int key_pressed, ConsoleVariable *console
 //
 static void OptionMenuChangeSoundfont(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(console_variable);
     int sf_pos = -1;
     for (int i = 0; i < (int)available_soundfonts.size(); i++)
     {
@@ -2097,6 +2158,7 @@ static void OptionMenuChangeSoundfont(int key_pressed, ConsoleVariable *console_
 //
 static void OptionMenuChangeResSize(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(console_variable);
     if (key_pressed == kLeftArrow || key_pressed == kGamepadLeft)
     {
         IncrementResolution(&new_window_mode, kIncrementSize, -1);
@@ -2114,6 +2176,7 @@ static void OptionMenuChangeResSize(int key_pressed, ConsoleVariable *console_va
 //
 static void OptionMenuChangeResFull(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(console_variable);
     if (key_pressed == kLeftArrow || key_pressed == kGamepadLeft)
     {
         IncrementResolution(&new_window_mode, kIncrementWindowMode, -1);
@@ -2129,6 +2192,8 @@ static void OptionMenuChangeResFull(int key_pressed, ConsoleVariable *console_va
 //
 static void OptionMenuionSetResolution(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     if (ChangeResolution(&new_window_mode))
     {
         if (new_window_mode.window_mode == kWindowModeWindowed)
@@ -2151,6 +2216,8 @@ static void OptionMenuionSetResolution(int key_pressed, ConsoleVariable *console
 
 void OptionMenuHostNetGame(int key_pressed, ConsoleVariable *console_variable)
 {
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
     option_menu_on       = 0;
     network_game_menu_on = 1;
 

@@ -518,6 +518,7 @@ void OptionMenuDrawHostMenu(void)
 
 bool OptionMenuNetworkHostResponder(InputEvent *ev, int ch)
 {
+    EPI_UNUSED(ev);
     if (ch == kEnter || ch == kGamepadA || ch == kMouse1)
     {
         if (host_position == (kTotalHostOptions - 1))
@@ -626,6 +627,7 @@ static void ListAccept()
 
 bool OptionMenuNetListResponder(InputEvent *ev, int ch)
 {
+    EPI_UNUSED(ev);
     if (ch == kEnter || ch == kGamepadA)
     {
         ListAccept();

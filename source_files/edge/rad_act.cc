@@ -281,6 +281,7 @@ void ScriptTicker(void)
 
 static Player *GetWhoDunnit(RADScriptTrigger *R)
 {
+    EPI_UNUSED(R);
     return players[console_player];
 
     /*
@@ -310,6 +311,8 @@ static Player *GetWhoDunnit(RADScriptTrigger *R)
 
 void ScriptNoOperation(RADScriptTrigger *R, void *param)
 {
+    EPI_UNUSED(R);
+    EPI_UNUSED(param);
     // No Operation
 }
 
@@ -635,6 +638,7 @@ void ScriptThingEvent(RADScriptTrigger *R, void *param)
 
 void ScriptGotoMap(RADScriptTrigger *R, void *param)
 {
+    EPI_UNUSED(R);
     ScriptGoToMapParameter *go = (ScriptGoToMapParameter *)param;
 
     // Warp to level n
@@ -646,6 +650,7 @@ void ScriptGotoMap(RADScriptTrigger *R, void *param)
 
 void ScriptExitLevel(RADScriptTrigger *R, void *param)
 {
+    EPI_UNUSED(R);
     ScriptExitParameter *exit = (ScriptExitParameter *)param;
 
     if (exit->is_secret)
@@ -657,6 +662,8 @@ void ScriptExitLevel(RADScriptTrigger *R, void *param)
 // Lobo November 2021
 void ScriptExitGame(RADScriptTrigger *R, void *param)
 {
+    EPI_UNUSED(R);
+    EPI_UNUSED(param);
     DeferredEndGame();
 }
 
@@ -691,11 +698,13 @@ void ScriptPlaySound(RADScriptTrigger *R, void *param)
 
 void ScriptKillSound(RADScriptTrigger *R, void *param)
 {
+    EPI_UNUSED(param);
     StopSoundEffect(&R->sound_effects_origin);
 }
 
 void ScriptChangeMusic(RADScriptTrigger *R, void *param)
 {
+    EPI_UNUSED(R);
     ScriptMusicParameter *music = (ScriptMusicParameter *)param;
 
     ChangeMusic(music->playnum, music->looping);
@@ -703,6 +712,7 @@ void ScriptChangeMusic(RADScriptTrigger *R, void *param)
 
 void ScriptPlayMovie(RADScriptTrigger *R, void *param)
 {
+    EPI_UNUSED(R);
     ScriptMovieParameter *mov = (ScriptMovieParameter *)param;
 
     PlayMovie(mov->movie);
@@ -710,6 +720,7 @@ void ScriptPlayMovie(RADScriptTrigger *R, void *param)
 
 void ScriptChangeTexture(RADScriptTrigger *R, void *param)
 {
+    EPI_UNUSED(R);
     ScriptChangeTexturetureParameter *ctex = (ScriptChangeTexturetureParameter *)param;
 
     const Image *image = nullptr;
@@ -830,6 +841,7 @@ void ScriptChangeTexture(RADScriptTrigger *R, void *param)
 
 void ScriptSkill(RADScriptTrigger *R, void *param)
 {
+    EPI_UNUSED(R);
     ScriptSkillParameter *skill = (ScriptSkillParameter *)param;
 
     // Skill selection trigger function
@@ -866,6 +878,7 @@ static void MoveOneSector(Sector *sec, ScriptMoveSectorParameter *t)
 
 void ScriptMoveSector(RADScriptTrigger *R, void *param)
 {
+    EPI_UNUSED(R);
     ScriptMoveSectorParameter *t = (ScriptMoveSectorParameter *)param;
     int                        i;
 
@@ -897,6 +910,7 @@ static void LightOneSector(Sector *sec, ScriptSectorLightParameter *t)
 
 void ScriptLightSector(RADScriptTrigger *R, void *param)
 {
+    EPI_UNUSED(R);
     ScriptSectorLightParameter *t = (ScriptSectorLightParameter *)param;
     int                         i;
 
@@ -920,6 +934,7 @@ void ScriptLightSector(RADScriptTrigger *R, void *param)
 
 void ScriptFogSector(RADScriptTrigger *R, void *param)
 {
+    EPI_UNUSED(R);
     ScriptFogSectorParameter *t = (ScriptFogSectorParameter *)param;
     int                       i;
 
@@ -966,6 +981,7 @@ void ScriptFogSector(RADScriptTrigger *R, void *param)
 
 void ScriptEnableScript(RADScriptTrigger *R, void *param)
 {
+    EPI_UNUSED(R);
     ScriptEnablerParameter *t = (ScriptEnablerParameter *)param;
     RADScriptTrigger       *other;
 
@@ -982,9 +998,9 @@ void ScriptEnableScript(RADScriptTrigger *R, void *param)
     else
     {
         if (t->tag[0] != 0)
-            ScriptEnableByTag(nullptr, t->tag[0], t->new_disabled, kTriggerTagNumber);
+            ScriptEnableByTag(t->tag[0], t->new_disabled, kTriggerTagNumber);
         else
-            ScriptEnableByTag(nullptr, t->tag[1], t->new_disabled, kTriggerTagHash);
+            ScriptEnableByTag(t->tag[1], t->new_disabled, kTriggerTagHash);
     }
 }
 
@@ -999,6 +1015,7 @@ void ScriptActivateLinetype(RADScriptTrigger *R, void *param)
 
 void ScriptUnblockLines(RADScriptTrigger *R, void *param)
 {
+    EPI_UNUSED(R);
     ScriptLineBlockParameter *ub = (ScriptLineBlockParameter *)param;
 
     int i;
@@ -1024,6 +1041,7 @@ void ScriptUnblockLines(RADScriptTrigger *R, void *param)
 
 void ScriptBlockLines(RADScriptTrigger *R, void *param)
 {
+    EPI_UNUSED(R);
     ScriptLineBlockParameter *ub = (ScriptLineBlockParameter *)param;
 
     int i;
@@ -1065,11 +1083,13 @@ void ScriptJump(RADScriptTrigger *R, void *param)
 
 void ScriptSleep(RADScriptTrigger *R, void *param)
 {
+    EPI_UNUSED(param);
     R->disabled = true;
 }
 
 void ScriptRetrigger(RADScriptTrigger *R, void *param)
 {
+    EPI_UNUSED(param);
     R->activated    = false;
     R->acti_players = 0;
 }
@@ -1215,6 +1235,7 @@ void ScriptSwitchWeapon(RADScriptTrigger *R, void *param)
 
 void ScriptTeleportToStart(RADScriptTrigger *R, void *param)
 {
+    EPI_UNUSED(param);
     Player *p = GetWhoDunnit(R);
 
     SpawnPoint *point = FindCoopPlayer(1); // start 1

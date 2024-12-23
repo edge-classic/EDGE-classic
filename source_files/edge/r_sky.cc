@@ -94,7 +94,7 @@ void ComputeSkyHeights(void)
 
     SectorSkyRing *rings = new SectorSkyRing[total_level_sectors];
 
-    memset(rings, 0, total_level_sectors * sizeof(SectorSkyRing));
+    EPI_CLEAR_MEMORY(rings, SectorSkyRing, total_level_sectors); 
 
     for (i = 0, sec = level_sectors; i < total_level_sectors; i++, sec++)
     {

@@ -146,7 +146,8 @@ static void StyleParseField(const char *field, const char *contents, int index, 
 #if (DDF_DEBUG)
     LogDebug("STYLE_PARSE: %s = %s;\n", field, contents);
 #endif
-
+    EPI_UNUSED(index);
+    EPI_UNUSED(is_last);
     if (DDFMainParseField(style_commands, field, contents, (uint8_t *)dynamic_style))
         return; // OK
 

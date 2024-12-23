@@ -54,6 +54,7 @@ extern void COALCallFunction(coal::VM *vm, const char *name);
 //
 static void PL_num_players(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat(total_players);
 }
 
@@ -61,6 +62,7 @@ static void PL_num_players(coal::VM *vm, int argc)
 //
 static void PL_set_who(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int index = (int)*vm->AccessParam(0);
 
     if (index < 0 || index >= total_players)
@@ -89,6 +91,7 @@ static void PL_set_who(coal::VM *vm, int argc)
 //
 static void PL_is_bot(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat((ui_player_who->player_flags_ & kPlayerFlagBot) ? 1 : 0);
 }
 
@@ -96,6 +99,7 @@ static void PL_is_bot(coal::VM *vm, int argc)
 //
 static void PL_get_name(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnString(ui_player_who->player_name_);
 }
 
@@ -103,6 +107,7 @@ static void PL_get_name(coal::VM *vm, int argc)
 //
 static void PL_get_pos(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     double v[3];
 
     v[0] = ui_player_who->map_object_->x;
@@ -116,6 +121,7 @@ static void PL_get_pos(coal::VM *vm, int argc)
 //
 static void PL_get_angle(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     float value = epi::DegreesFromBAM(ui_player_who->map_object_->angle_);
 
     if (value > 360.0f)
@@ -130,6 +136,7 @@ static void PL_get_angle(coal::VM *vm, int argc)
 //
 static void PL_get_mlook(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     float value = epi::DegreesFromBAM(ui_player_who->map_object_->vertical_angle_);
 
     if (value > 180.0f)
@@ -142,6 +149,7 @@ static void PL_get_mlook(coal::VM *vm, int argc)
 //
 static void PL_health(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     float health = ui_player_who->health_;
     if (health < 1 && health > 0)
         vm->ReturnFloat(1);
@@ -155,6 +163,7 @@ static void PL_health(coal::VM *vm, int argc)
 //
 static void PL_armor(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int kind = (int)*vm->AccessParam(0);
 
     if (kind < 1 || kind > kTotalArmourTypes)
@@ -174,6 +183,7 @@ static void PL_armor(coal::VM *vm, int argc)
 //
 static void PL_total_armor(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     // vm->ReturnFloat(floor(ui_player_who->totalarmour + 0.99));
 
     float a = ui_player_who->total_armour_;
@@ -187,6 +197,7 @@ static void PL_total_armor(coal::VM *vm, int argc)
 //
 static void PL_frags(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat(ui_player_who->frags_);
 }
 
@@ -194,6 +205,7 @@ static void PL_frags(coal::VM *vm, int argc)
 //
 static void PL_under_water(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat(ui_player_who->underwater_ ? 1 : 0);
 }
 
@@ -201,6 +213,7 @@ static void PL_under_water(coal::VM *vm, int argc)
 //
 static void PL_on_ground(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     // not a 3D floor?
     if (ui_player_who->map_object_->subsector_->sector->extrafloor_used == 0)
     {
@@ -231,6 +244,7 @@ static void PL_on_ground(coal::VM *vm, int argc)
 //
 static void PL_is_swimming(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat(ui_player_who->swimming_ ? 1 : 0);
 }
 
@@ -238,6 +252,7 @@ static void PL_is_swimming(coal::VM *vm, int argc)
 //
 static void PL_is_jumping(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat((ui_player_who->jump_wait_ > 0) ? 1 : 0);
 }
 
@@ -245,6 +260,7 @@ static void PL_is_jumping(coal::VM *vm, int argc)
 //
 static void PL_is_crouching(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat((ui_player_who->map_object_->extended_flags_ & kExtendedFlagCrouching) ? 1 : 0);
 }
 
@@ -252,6 +268,7 @@ static void PL_is_crouching(coal::VM *vm, int argc)
 //
 static void PL_is_attacking(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat((ui_player_who->attack_button_down_[0] || ui_player_who->attack_button_down_[1] ||
                      ui_player_who->attack_button_down_[2] || ui_player_who->attack_button_down_[3])
                         ? 1
@@ -262,6 +279,7 @@ static void PL_is_attacking(coal::VM *vm, int argc)
 //
 static void PL_is_rampaging(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat((ui_player_who->attack_sustained_count_ >= 70) ? 1 : 0);
 }
 
@@ -269,6 +287,7 @@ static void PL_is_rampaging(coal::VM *vm, int argc)
 //
 static void PL_is_grinning(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat((ui_player_who->grin_count_ > 0) ? 1 : 0);
 }
 
@@ -276,6 +295,7 @@ static void PL_is_grinning(coal::VM *vm, int argc)
 //
 static void PL_is_using(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat(ui_player_who->use_button_down_ ? 1 : 0);
 }
 
@@ -283,6 +303,7 @@ static void PL_is_using(coal::VM *vm, int argc)
 //
 static void PL_is_zoomed(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat(view_is_zoomed ? 1 : 0);
 }
 
@@ -290,6 +311,7 @@ static void PL_is_zoomed(coal::VM *vm, int argc)
 //
 static void PL_is_action1(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat(ui_player_who->action_button_down_[0] ? 1 : 0);
 }
 
@@ -297,6 +319,7 @@ static void PL_is_action1(coal::VM *vm, int argc)
 //
 static void PL_is_action2(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat(ui_player_who->action_button_down_[1] ? 1 : 0);
 }
 
@@ -304,6 +327,7 @@ static void PL_is_action2(coal::VM *vm, int argc)
 //
 static void PL_move_speed(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat(ui_player_who->actual_speed_);
 }
 
@@ -311,6 +335,7 @@ static void PL_move_speed(coal::VM *vm, int argc)
 //
 static void PL_air_in_lungs(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     if (ui_player_who->air_in_lungs_ <= 0)
     {
         vm->ReturnFloat(0);
@@ -328,6 +353,7 @@ static void PL_air_in_lungs(coal::VM *vm, int argc)
 //
 static void PL_has_key(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int key = (int)*vm->AccessParam(0);
 
     if (key < 1 || key > 16)
@@ -344,6 +370,7 @@ static void PL_has_key(coal::VM *vm, int argc)
 //
 static void PL_has_power(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int power = (int)*vm->AccessParam(0);
 
     if (power < 1 || power > kTotalPowerTypes)
@@ -364,6 +391,7 @@ static void PL_has_power(coal::VM *vm, int argc)
 //
 static void PL_power_left(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int power = (int)*vm->AccessParam(0);
 
     if (power < 1 || power > kTotalPowerTypes)
@@ -383,6 +411,7 @@ static void PL_power_left(coal::VM *vm, int argc)
 //
 static void PL_has_weapon_slot(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int slot = (int)*vm->AccessParam(0);
 
     if (slot < 0 || slot > 9)
@@ -397,6 +426,7 @@ static void PL_has_weapon_slot(coal::VM *vm, int argc)
 //
 static void PL_cur_weapon_slot(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int slot;
 
     if (ui_player_who->ready_weapon_ < 0)
@@ -411,6 +441,7 @@ static void PL_cur_weapon_slot(coal::VM *vm, int argc)
 //
 static void PL_has_weapon(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     const char *name = vm->AccessParamString(0);
 
     for (int j = 0; j < kMaximumWeapons; j++)
@@ -431,6 +462,7 @@ static void PL_has_weapon(coal::VM *vm, int argc)
 //
 static void PL_cur_weapon(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     if (ui_player_who->pending_weapon_ >= 0)
     {
         vm->ReturnString("change");
@@ -519,6 +551,7 @@ static void COAL_SetPlayerSpriteDeferred(Player *p, int position, int stnum)
 //
 static void PL_weapon_state(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     const char *weapon_name  = vm->AccessParamString(0);
     const char *weapon_state = vm->AccessParamString(1);
 
@@ -577,6 +610,7 @@ static void PL_weapon_state(coal::VM *vm, int argc)
 //
 static void PL_ammo(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int ammo = (int)*vm->AccessParam(0);
 
     if (ammo < 1 || ammo > kTotalAmmunitionTypes)
@@ -591,6 +625,7 @@ static void PL_ammo(coal::VM *vm, int argc)
 //
 static void PL_ammomax(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int ammo = (int)*vm->AccessParam(0);
 
     if (ammo < 1 || ammo > kTotalAmmunitionTypes)
@@ -605,6 +640,7 @@ static void PL_ammomax(coal::VM *vm, int argc)
 //
 static void PL_inventory(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int inv = (int)*vm->AccessParam(0);
 
     if (inv < 1 || inv > kTotalInventoryTypes)
@@ -619,6 +655,7 @@ static void PL_inventory(coal::VM *vm, int argc)
 //
 static void PL_inventorymax(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int inv = (int)*vm->AccessParam(0);
 
     if (inv < 1 || inv > kTotalInventoryTypes)
@@ -633,6 +670,7 @@ static void PL_inventorymax(coal::VM *vm, int argc)
 //
 static void PL_counter(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int cntr = (int)*vm->AccessParam(0);
 
     if (cntr < 1 || cntr > kTotalCounterTypes)
@@ -647,6 +685,7 @@ static void PL_counter(coal::VM *vm, int argc)
 //
 static void PL_counter_max(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int cntr = (int)*vm->AccessParam(0);
 
     if (cntr < 1 || cntr > kTotalCounterTypes)
@@ -687,6 +726,7 @@ static void PL_set_counter(coal::VM *vm, int argc)
 //
 static void PL_main_ammo(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int value = 0;
 
     if (ui_player_who->ready_weapon_ >= 0)
@@ -718,6 +758,7 @@ static void PL_main_ammo(coal::VM *vm, int argc)
 //
 static void PL_ammo_type(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int ATK = (int)*vm->AccessParam(0);
 
     if (ATK < 1 || ATK > 2)
@@ -741,6 +782,7 @@ static void PL_ammo_type(coal::VM *vm, int argc)
 //
 static void PL_ammo_pershot(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int ATK = (int)*vm->AccessParam(0);
 
     if (ATK < 1 || ATK > 2)
@@ -764,6 +806,7 @@ static void PL_ammo_pershot(coal::VM *vm, int argc)
 //
 static void PL_clip_ammo(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int ATK = (int)*vm->AccessParam(0);
 
     if (ATK < 1 || ATK > 2)
@@ -787,6 +830,7 @@ static void PL_clip_ammo(coal::VM *vm, int argc)
 //
 static void PL_clip_size(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int ATK = (int)*vm->AccessParam(0);
 
     if (ATK < 1 || ATK > 2)
@@ -810,6 +854,7 @@ static void PL_clip_size(coal::VM *vm, int argc)
 //
 static void PL_clip_is_shared(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int value = 0;
 
     if (ui_player_who->ready_weapon_ >= 0)
@@ -827,6 +872,7 @@ static void PL_clip_is_shared(coal::VM *vm, int argc)
 //
 static void PL_hurt_by(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     if (ui_player_who->damage_count_ <= 0)
     {
         vm->ReturnString("");
@@ -848,6 +894,7 @@ static void PL_hurt_by(coal::VM *vm, int argc)
 //
 static void PL_hurt_mon(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     if (ui_player_who->damage_count_ > 0 && ui_player_who->attacker_ &&
         ui_player_who->attacker_ != ui_player_who->map_object_)
     {
@@ -862,6 +909,7 @@ static void PL_hurt_mon(coal::VM *vm, int argc)
 //
 static void PL_hurt_pain(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat(ui_player_who->damage_pain_);
 }
 
@@ -869,6 +917,7 @@ static void PL_hurt_pain(coal::VM *vm, int argc)
 //
 static void PL_hurt_dir(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     int dir = 0;
 
     if (ui_player_who->attacker_ && ui_player_who->attacker_ != ui_player_who->map_object_)
@@ -895,6 +944,7 @@ static void PL_hurt_dir(coal::VM *vm, int argc)
 //
 static void PL_hurt_angle(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     float value = 0;
 
     if (ui_player_who->attacker_ && ui_player_who->attacker_ != ui_player_who->map_object_)
@@ -920,6 +970,7 @@ static void PL_hurt_angle(coal::VM *vm, int argc)
 // Lobo: November 2021
 static void PL_kills(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat(ui_player_who->kill_count_);
 }
 
@@ -927,6 +978,7 @@ static void PL_kills(coal::VM *vm, int argc)
 // Lobo: November 2021
 static void PL_secrets(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat(ui_player_who->secret_count_);
 }
 
@@ -934,6 +986,7 @@ static void PL_secrets(coal::VM *vm, int argc)
 // Lobo: November 2021
 static void PL_items(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat(ui_player_who->item_count_);
 }
 
@@ -941,6 +994,7 @@ static void PL_items(coal::VM *vm, int argc)
 // Lobo: November 2021
 static void PL_map_enemies(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat(intermission_stats.kills);
 }
 
@@ -948,6 +1002,7 @@ static void PL_map_enemies(coal::VM *vm, int argc)
 // Lobo: November 2021
 static void PL_map_secrets(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat(intermission_stats.secrets);
 }
 
@@ -955,6 +1010,7 @@ static void PL_map_secrets(coal::VM *vm, int argc)
 // Lobo: November 2021
 static void PL_map_items(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat(intermission_stats.items);
 }
 
@@ -962,6 +1018,7 @@ static void PL_map_items(coal::VM *vm, int argc)
 // Lobo: November 2021
 static void PL_floor_flat(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     // If no 3D floors, just return the flat
     if (ui_player_who->map_object_->subsector_->sector->extrafloor_used == 0)
     {
@@ -990,6 +1047,7 @@ static void PL_floor_flat(coal::VM *vm, int argc)
 // Lobo: November 2021
 static void PL_sector_tag(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat(ui_player_who->map_object_->subsector_->sector->tag);
 }
 
@@ -998,6 +1056,7 @@ static void PL_sector_tag(coal::VM *vm, int argc)
 // Now uses the new DDFFLAT construct
 static void PL_play_footstep(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     const char *flat = vm->AccessParamString(0);
     if (!flat)
         FatalError("player.play_footstep: No flat name given!\n");
@@ -1027,6 +1086,7 @@ static void PL_play_footstep(coal::VM *vm, int argc)
 //
 static void PL_use_inventory(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     double     *num         = vm->AccessParam(0);
     std::string script_name = "INVENTORY";
     int         inv         = 0;
@@ -1048,12 +1108,12 @@ static void PL_use_inventory(coal::VM *vm, int argc)
     //******
     // If the same inventory script is already running then
     // don't start the same one again
-    if (!CheckActiveScriptByTag(nullptr, script_name.c_str()))
+    if (!CheckActiveScriptByTag(script_name.c_str()))
     {
         if (ui_player_who->inventory_[inv].count > 0)
         {
             ui_player_who->inventory_[inv].count -= 1;
-            ScriptEnableByTag(nullptr, script_name.c_str(), false);
+            ScriptEnableByTag(script_name.c_str(), false);
         }
     }
 }
@@ -1062,10 +1122,11 @@ static void PL_use_inventory(coal::VM *vm, int argc)
 //
 static void PL_rts_enable_tagged(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     std::string name = vm->AccessParamString(0);
 
     if (!name.empty())
-        ScriptEnableByTag(nullptr, name.c_str(), false);
+        ScriptEnableByTag(name.c_str(), false);
 }
 
 // AuxStringReplaceAll("Our_String", std::string("_"), std::string(" "));
@@ -1390,6 +1451,7 @@ static void MO_query_tagged(coal::VM *vm, int argc)
 //
 static void MO_count(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     double *num     = vm->AccessParam(0);
     int     thingid = 0;
 
@@ -1415,6 +1477,7 @@ static void MO_count(coal::VM *vm, int argc)
 //
 static void PL_query_weapon(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     double *maxd      = vm->AccessParam(0);
     double *whati     = vm->AccessParam(1);
     double *secattack = vm->AccessParam(2);
@@ -1467,6 +1530,7 @@ static void PL_query_weapon(coal::VM *vm, int argc)
 // Lobo: May 2023
 static void PL_sector_light(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     vm->ReturnFloat(ui_player_who->map_object_->subsector_->sector->properties.light_level);
 }
 
@@ -1474,6 +1538,7 @@ static void PL_sector_light(coal::VM *vm, int argc)
 // Lobo: May 2023
 static void PL_sector_floor_height(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     // If no 3D floors, just return the current sector floor height
     if (ui_player_who->map_object_->subsector_->sector->extrafloor_used == 0)
     {
@@ -1508,6 +1573,7 @@ static void PL_sector_floor_height(coal::VM *vm, int argc)
 // Lobo: May 2023
 static void PL_sector_ceiling_height(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     // If no 3D floors, just return the current sector ceiling height
     if (ui_player_who->map_object_->subsector_->sector->extrafloor_used == 0)
     {
@@ -1542,6 +1608,7 @@ static void PL_sector_ceiling_height(coal::VM *vm, int argc)
 // Lobo: May 2023
 static void PL_is_outside(coal::VM *vm, int argc)
 {
+    EPI_UNUSED(argc);
     // Doesn't account for extrafloors by design. Reasoning is that usually
     //  extrafloors will be platforms, not roofs...
     if (ui_player_who->map_object_->subsector_->sector->ceiling.image != sky_flat_image) // is it outdoors?

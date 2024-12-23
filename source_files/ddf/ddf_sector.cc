@@ -142,7 +142,8 @@ static void SectorParseField(const char *field, const char *contents, int index,
 #if (DDF_DEBUG)
     LogDebug("SECTOR_PARSE: %s = %s;\n", field, contents);
 #endif
-
+    EPI_UNUSED(index);
+    EPI_UNUSED(is_last);
     if (DDFCompareName(field, "TEMPLATE") == 0)
     {
         SectorDoTemplate(contents);
@@ -426,6 +427,7 @@ void DDFSectGetDestRef(const char *info, void *storage)
 
 static void DDFSectMakeCrush(const char *info)
 {
+    EPI_UNUSED(info);
     dynamic_sector->f_.crush_damage_ = 10;
     dynamic_sector->c_.crush_damage_ = 10;
 }
@@ -596,7 +598,7 @@ void SectorTypeContainer::Reset()
         sec = nullptr;
     }
     clear();
-    memset(lookup_cache_, 0, sizeof(SectorType *) * kLookupCacheSize);
+    EPI_CLEAR_MEMORY(lookup_cache_, SectorType *, kLookupCacheSize);
 }
 
 //--- editor settings ---

@@ -51,7 +51,6 @@ class OGGPlayer : public AbstractMusicPlayer
     int status_;
 
     bool looping_;
-    bool is_stereo_;
 
     stb_vorbis *ogg_decoder_;
 
@@ -155,6 +154,7 @@ void OGGPlayer::Close()
 
     if (ogg_decoder_)
     {
+        delete[] ogg_decoder_->stream_start;
         stb_vorbis_close(ogg_decoder_);
         ogg_decoder_ = nullptr;
     }

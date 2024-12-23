@@ -68,7 +68,7 @@ static void LoadSilence(SoundData *buf)
     buf->frequency_ = sound_device_frequency;
     buf->Allocate(length);
 
-    memset(buf->data_, 0, length * sizeof(int16_t) * 2);
+    EPI_CLEAR_MEMORY(buf->data_, int16_t, length * 2);
 }
 #if EDGE_DOOM_SFX_SUPPORT
 static bool LoadDoom(SoundData *buf, uint8_t *lump, int length)

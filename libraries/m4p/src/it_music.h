@@ -64,7 +64,7 @@ void Update(void);
 void Music_FillAudioBuffer(int16_t *buffer, int32_t numSamples);
 void Music_FillAudioBufferFloat(float *buffer, int32_t numSamples);
 
-bool Music_Init(int32_t mixingFrequency, int32_t mixingBufferSize);
+bool Music_Init(int32_t mixingFrequency);
 void Music_Close(void); // 8bb: added this
 void Music_Stop(void);
 void Music_StopChannels(void);

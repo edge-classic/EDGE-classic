@@ -790,7 +790,7 @@ bool GiveBenefitList(Player *player, MapObject *special, Benefit *list, bool los
 //
 // RunPickupEffects
 //
-static void RunPickupEffects(Player *player, MapObject *special, PickupEffect *list)
+static void RunPickupEffects(Player *player, PickupEffect *list)
 {
     for (; list; list = list->next_)
     {
@@ -923,7 +923,7 @@ void TouchSpecialThing(MapObject *special, MapObject *toucher)
             TrySwitchNewWeapon(info.player, info.new_weapon, (AmmunitionType)info.new_ammo);
     }
 
-    RunPickupEffects(info.player, special, special->info_->pickup_effects_);
+    RunPickupEffects(info.player, special->info_->pickup_effects_);
 }
 
 // FIXME: move this into utility code
@@ -983,6 +983,7 @@ static std::string PatternSubstitution(const char *format, const std::vector<std
 
 static void DoObituary(const char *format, MapObject *victim, MapObject *killer)
 {
+    EPI_UNUSED(killer); // eventually use DDFLANG to actually state the killer - Dasho
     std::vector<std::string> keywords;
 
     keywords.push_back("o");

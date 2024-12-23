@@ -527,9 +527,6 @@ static ImageData *ReadUserAsEpiBlock(Image *rim)
 {
     EPI_ASSERT(rim->source_type_ == kImageSourceUser);
 
-    // clear initial image to black / transparent
-    /// ALREADY DONE: memset(dest, playpal_black, tw * th * bpp);
-
     ImageDefinition *def = rim->source_.user.def;
 
     switch (def->type_)

@@ -651,6 +651,7 @@ static void UpdatePowerups(Player *player)
 // Does the thinking of the console player, i.e. read from input
 void ConsolePlayerBuilder(const Player *pl, void *data, EventTicCommand *dest)
 {
+    EPI_UNUSED(data);
     BuildEventTicCommand(dest);
 
     dest->player_index = pl->player_number_;

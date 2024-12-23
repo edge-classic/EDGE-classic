@@ -19,6 +19,7 @@
 #pragma once
 
 #include "ddf_types.h"
+#include "epi.h"
 
 enum ImageNamespace
 {
@@ -109,11 +110,11 @@ class ImageDefinition
     // disable copy construct and assignment operator
     explicit ImageDefinition(ImageDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
     }
     ImageDefinition &operator=(ImageDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
         return *this;
     }
 };

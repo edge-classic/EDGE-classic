@@ -186,7 +186,7 @@ void MD5Hash::PackHash::Encode(uint8_t *hash)
 
 MD5Hash::MD5Hash()
 {
-    memset(hash_, 0, sizeof(hash_));
+    EPI_CLEAR_MEMORY(hash_, uint8_t, 16);
 }
 
 MD5Hash::MD5Hash(const uint8_t *message, unsigned int len)

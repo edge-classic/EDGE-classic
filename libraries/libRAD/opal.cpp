@@ -543,19 +543,19 @@ void Opal::Channel::Output(int16_t &left, int16_t &right)
             {
 
                 // feedback -> modulator -> modulator -> modulator -> carrier
-                out = Op[0]->Output(KeyScaleNumber, PhaseStep, vibrato, 0, FeedbackShift);
-                out = Op[1]->Output(KeyScaleNumber, PhaseStep, vibrato, out, 0);
-                out = Op[2]->Output(KeyScaleNumber, PhaseStep, vibrato, out, 0);
-                out = Op[3]->Output(KeyScaleNumber, PhaseStep, vibrato, out, 0);
+                out = Op[0]->Output(PhaseStep, vibrato, 0, FeedbackShift);
+                out = Op[1]->Output(PhaseStep, vibrato, out, 0);
+                out = Op[2]->Output(PhaseStep, vibrato, out, 0);
+                out = Op[3]->Output(PhaseStep, vibrato, out, 0);
             }
             else
             {
 
                 // (feedback -> carrier) + (modulator -> modulator -> carrier)
-                out = Op[0]->Output(KeyScaleNumber, PhaseStep, vibrato, 0, FeedbackShift);
-                acc = Op[1]->Output(KeyScaleNumber, PhaseStep, vibrato, 0, 0);
-                acc = Op[2]->Output(KeyScaleNumber, PhaseStep, vibrato, acc, 0);
-                out += Op[3]->Output(KeyScaleNumber, PhaseStep, vibrato, acc, 0);
+                out = Op[0]->Output(PhaseStep, vibrato, 0, FeedbackShift);
+                acc = Op[1]->Output(PhaseStep, vibrato, 0, 0);
+                acc = Op[2]->Output(PhaseStep, vibrato, acc, 0);
+                out += Op[3]->Output(PhaseStep, vibrato, acc, 0);
             }
         }
         else
@@ -565,19 +565,19 @@ void Opal::Channel::Output(int16_t &left, int16_t &right)
             {
 
                 // (feedback -> modulator -> carrier) + (modulator -> carrier)
-                out = Op[0]->Output(KeyScaleNumber, PhaseStep, vibrato, 0, FeedbackShift);
-                out = Op[1]->Output(KeyScaleNumber, PhaseStep, vibrato, out, 0);
-                acc = Op[2]->Output(KeyScaleNumber, PhaseStep, vibrato, 0, 0);
-                out += Op[3]->Output(KeyScaleNumber, PhaseStep, vibrato, acc, 0);
+                out = Op[0]->Output(PhaseStep, vibrato, 0, FeedbackShift);
+                out = Op[1]->Output(PhaseStep, vibrato, out, 0);
+                acc = Op[2]->Output(PhaseStep, vibrato, 0, 0);
+                out += Op[3]->Output(PhaseStep, vibrato, acc, 0);
             }
             else
             {
 
                 // (feedback -> carrier) + (modulator -> carrier) + carrier
-                out = Op[0]->Output(KeyScaleNumber, PhaseStep, vibrato, 0, FeedbackShift);
-                acc = Op[1]->Output(KeyScaleNumber, PhaseStep, vibrato, 0, 0);
-                out += Op[2]->Output(KeyScaleNumber, PhaseStep, vibrato, acc, 0);
-                out += Op[3]->Output(KeyScaleNumber, PhaseStep, vibrato, 0, 0);
+                out = Op[0]->Output(PhaseStep, vibrato, 0, FeedbackShift);
+                acc = Op[1]->Output(PhaseStep, vibrato, 0, 0);
+                out += Op[2]->Output(PhaseStep, vibrato, acc, 0);
+                out += Op[3]->Output(PhaseStep, vibrato, 0, 0);
             }
         }
     }
@@ -589,15 +589,15 @@ void Opal::Channel::Output(int16_t &left, int16_t &right)
         {
 
             // Frequency modulation (well, phase modulation technically)
-            out = Op[0]->Output(KeyScaleNumber, PhaseStep, vibrato, 0, FeedbackShift);
-            out = Op[1]->Output(KeyScaleNumber, PhaseStep, vibrato, out, 0);
+            out = Op[0]->Output(PhaseStep, vibrato, 0, FeedbackShift);
+            out = Op[1]->Output(PhaseStep, vibrato, out, 0);
         }
         else
         {
 
             // Additive
-            out = Op[0]->Output(KeyScaleNumber, PhaseStep, vibrato, 0, FeedbackShift);
-            out += Op[1]->Output(KeyScaleNumber, PhaseStep, vibrato);
+            out = Op[0]->Output(PhaseStep, vibrato, 0, FeedbackShift);
+            out += Op[1]->Output(PhaseStep, vibrato);
         }
     }
 
@@ -747,9 +747,8 @@ Opal::Operator::Operator()
 //==================================================================================================
 // Produce output from operator.
 //==================================================================================================
-int16_t Opal::Operator::Output(uint16_t keyscalenum, uint32_t phase_step, int16_t vibrato, int16_t mod, int16_t fbshift)
+int16_t Opal::Operator::Output(uint32_t phase_step, int16_t vibrato, int16_t mod, int16_t fbshift)
 {
-
     // Advance wave phase
     if (VibratoEnable)
         phase_step += vibrato;
@@ -794,10 +793,9 @@ int16_t Opal::Operator::Output(uint16_t keyscalenum, uint32_t phase_step, int16_
 
     // Sustain stage
     case EnvSus: {
-
         if (SustainMode)
             break;
-
+        
         // Note: fall-through!
     }
 

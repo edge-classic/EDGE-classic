@@ -98,6 +98,7 @@ static LanguageChoice *dynamic_choice;
 //
 static void LanguageStartEntry(const char *name, bool extend)
 {
+    EPI_UNUSED(extend);
     if (!name || !name[0])
     {
         DDFWarnError("New language entry is missing a name!");
@@ -114,7 +115,7 @@ static void LanguageParseField(const char *field, const char *contents, int inde
 #if (DDF_DEBUG)
     DDFDebug("LANGUAGE_PARSE: %s = %s;\n", field, contents);
 #endif
-
+    EPI_UNUSED(index);
     if (!is_last)
     {
         DDFWarnError("Unexpected comma `,' in LANGUAGE.LDF\n");

@@ -2,7 +2,7 @@
 #include <string.h>
 
 // IT/S3M
-extern bool Music_Init(int32_t mixingFrequency, int32_t mixingBufferSize);
+extern bool Music_Init(int32_t mixingFrequency);
 extern bool Music_LoadFromData(uint8_t *Data, uint32_t DataLen);
 extern void Music_PlaySong(uint16_t order);
 extern void Music_FillAudioBuffer(int16_t *buffer, int32_t numSamples);
@@ -74,7 +74,7 @@ bool m4p_LoadFromData(uint8_t *Data, uint32_t DataLen, int32_t mixingFrequency, 
 
 	if (current_format == FORMAT_IT_S3M)
 	{
-		if (Music_Init(mixingFrequency, mixingBufferSize))
+		if (Music_Init(mixingFrequency))
 			return Music_LoadFromData(Data, DataLen);
 		else
 			return false;

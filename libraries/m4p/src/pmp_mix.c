@@ -177,6 +177,7 @@ static void mix_UpdateChannel(int32_t nr, WaveChannelInfoType *WCI)
 static void mix_UpdateChannelVolPanFrq(void)
 {
 	WaveChannelInfoType WCI;
+	memset(&WCI, 0, sizeof(WaveChannelInfoType));
 
 	stmTyp *ch = stm;
 	for (int32_t i = 0; i < song.antChn; i++, ch++)

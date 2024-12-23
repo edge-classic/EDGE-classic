@@ -35,7 +35,7 @@ class WeaponDefinitionContainer : public std::vector<WeaponDefinition *>
 
   public:
     // Search Functions
-    int               FindFirst(const char *name, int startpos = -1);
+    int               FindFirst(const char *name, size_t startpos = 0);
     WeaponDefinition *Lookup(const char *refname);
 };
 

@@ -291,7 +291,7 @@ void GetFlags(int o_kind, int o_num, int *dest)
     *dest = temp;
 }
 
-void GetFrame(int o_kind, int o_num, int *dest)
+void GetFrame(int *dest)
 {
     int temp = GetRawInt();
 
@@ -319,7 +319,7 @@ void GetFrame(int o_kind, int o_num, int *dest)
     *dest = temp;
 }
 
-void GetSprite(int o_kind, int o_num, int *dest)
+void GetSprite(int *dest)
 {
     int temp = GetRawInt();
 
@@ -345,7 +345,7 @@ void GetSprite(int o_kind, int o_num, int *dest)
     *dest = temp;
 }
 
-void GetSound(int o_kind, int o_num, int *dest)
+void GetSound(int *dest)
 {
     int temp = GetRawInt();
 
@@ -373,7 +373,7 @@ void GetSound(int o_kind, int o_num, int *dest)
     *dest = temp;
 }
 
-void GetAmmoType(int o_kind, int o_num, int *dest)
+void GetAmmoType(int *dest)
 {
     int temp = GetRawInt();
 
@@ -449,32 +449,32 @@ void ReadBinaryThing(int mt_num)
     DehackedMapObjectDefinition *mobj = things::GetModifiedMobj(mt_num);
 
     GetInt(kObjectKindMobj, mt_num, &mobj->doomednum);
-    GetFrame(kObjectKindMobj, mt_num, &mobj->spawnstate);
+    GetFrame(&mobj->spawnstate);
     GetInt(kObjectKindMobj, mt_num, &mobj->spawnhealth);
-    GetFrame(kObjectKindMobj, mt_num, &mobj->seestate);
-    GetSound(kObjectKindMobj, mt_num, &mobj->seesound);
+    GetFrame(&mobj->seestate);
+    GetSound(&mobj->seesound);
     GetInt(kObjectKindMobj, mt_num, &mobj->reactiontime);
 
-    GetSound(kObjectKindMobj, mt_num, &mobj->attacksound);
-    GetFrame(kObjectKindMobj, mt_num, &mobj->painstate);
+    GetSound(&mobj->attacksound);
+    GetFrame(&mobj->painstate);
     GetInt(kObjectKindMobj, mt_num, &mobj->painchance);
-    GetSound(kObjectKindMobj, mt_num, &mobj->painsound);
-    GetFrame(kObjectKindMobj, mt_num, &mobj->meleestate);
-    GetFrame(kObjectKindMobj, mt_num, &mobj->missilestate);
-    GetFrame(kObjectKindMobj, mt_num, &mobj->deathstate);
-    GetFrame(kObjectKindMobj, mt_num, &mobj->xdeathstate);
-    GetSound(kObjectKindMobj, mt_num, &mobj->deathsound);
+    GetSound(&mobj->painsound);
+    GetFrame(&mobj->meleestate);
+    GetFrame(&mobj->missilestate);
+    GetFrame(&mobj->deathstate);
+    GetFrame(&mobj->xdeathstate);
+    GetSound(&mobj->deathsound);
 
     GetInt(kObjectKindMobj, mt_num, &mobj->speed);
     GetInt(kObjectKindMobj, mt_num, &mobj->radius);
     GetInt(kObjectKindMobj, mt_num, &mobj->height);
     GetInt(kObjectKindMobj, mt_num, &mobj->mass);
     GetInt(kObjectKindMobj, mt_num, &mobj->damage);
-    GetSound(kObjectKindMobj, mt_num, &mobj->activesound);
+    GetSound(&mobj->activesound);
     GetFlags(kObjectKindMobj, mt_num, &mobj->flags);
 
     if (doom_ver != 12)
-        GetFrame(kObjectKindMobj, mt_num, &mobj->raisestate);
+        GetFrame(&mobj->raisestate);
 }
 
 void ReadBinaryAmmo(void)
@@ -504,13 +504,13 @@ void ReadBinaryWeapon(int wp_num)
 
     WeaponInfo *weap = weapon_info + wp_num;
 
-    GetAmmoType(kObjectKindWeapon, wp_num, &weap->ammo);
+    GetAmmoType(&weap->ammo);
 
-    GetFrame(kObjectKindWeapon, wp_num, &weap->upstate);
-    GetFrame(kObjectKindWeapon, wp_num, &weap->downstate);
-    GetFrame(kObjectKindWeapon, wp_num, &weap->readystate);
-    GetFrame(kObjectKindWeapon, wp_num, &weap->atkstate);
-    GetFrame(kObjectKindWeapon, wp_num, &weap->flashstate);
+    GetFrame(&weap->upstate);
+    GetFrame(&weap->downstate);
+    GetFrame(&weap->readystate);
+    GetFrame(&weap->atkstate);
+    GetFrame(&weap->flashstate);
 }
 
 void ReadBinaryFrame(int st_num)
@@ -522,13 +522,13 @@ void ReadBinaryFrame(int st_num)
 
     State *state = frames::GetModifiedState(st_num);
 
-    GetSprite(kObjectKindFrame, st_num, &state->sprite);
+    GetSprite(&state->sprite);
     GetInt(kObjectKindFrame, st_num, &state->frame);
     GetInt(kObjectKindFrame, st_num, &state->tics);
 
     GetRawInt(); // ignore code-pointer
 
-    GetFrame(kObjectKindFrame, st_num, &state->next_state);
+    GetFrame(&state->next_state);
 
     GetRawInt(); // ignore misc1/misc2 fields
     GetRawInt();
@@ -1360,7 +1360,7 @@ DehackedResult LoadNormal(void)
 {
     char idstr[32];
 
-    memset(idstr, 0, sizeof(idstr));
+    EPI_CLEAR_MEMORY(idstr, char, 32);
 
     pat_buf->Read(idstr, 24);
 
@@ -1371,7 +1371,7 @@ DehackedResult LoadNormal(void)
         return kDehackedConversionParseError;
     }
 
-    memset(idstr, 0, 4);
+    EPI_CLEAR_MEMORY(idstr, char, 4);
 
     pat_buf->Read(idstr, 3);
 

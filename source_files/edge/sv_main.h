@@ -88,8 +88,8 @@ struct SaveField
     // kSaveFieldStruct it is the name of the structure, for kSaveFieldIndex
     // it is the name of the array.  When `field_put' is nullptr, then this
     // field is not saved into the output SDEF chunk.
-    bool (*field_get)(void *storage, int index, void *extra);
-    void (*field_put)(void *storage, int index, void *extra);
+    bool (*field_get)(void *storage, int index);
+    void (*field_put)(void *storage, int index);
 
     // for loaded info, this points to the known version of the field,
     // otherwise nullptr if the loaded field is unknown.
@@ -170,26 +170,26 @@ struct SaveArray
 //
 //  Note the `SR_' prefix.
 //
-bool SaveGameGetInteger(void *storage, int index, void *extra);
-bool SaveGameGetAngle(void *storage, int index, void *extra);
-bool SaveGameGetFloat(void *storage, int index, void *extra);
-bool SaveGameGetBoolean(void *storage, int index, void *extra);
-bool SaveGameGetVec2(void *storage, int index, void *extra);
-bool SaveGameGetVec3(void *storage, int index, void *extra);
-bool SaveGameGetAngleFromSlope(void *storage, int index, void *extra);
+bool SaveGameGetInteger(void *storage, int index);
+bool SaveGameGetAngle(void *storage, int index);
+bool SaveGameGetFloat(void *storage, int index);
+bool SaveGameGetBoolean(void *storage, int index);
+bool SaveGameGetVec2(void *storage, int index);
+bool SaveGameGetVec3(void *storage, int index);
+bool SaveGameGetAngleFromSlope(void *storage, int index);
 
 //
 //  COMMON PUT ROUTINES
 //
 //  Note the `SR_' prefix.
 //
-void SaveGamePutInteger(void *storage, int index, void *extra);
-void SaveGamePutAngle(void *storage, int index, void *extra);
-void SaveGamePutFloat(void *storage, int index, void *extra);
-void SaveGamePutBoolean(void *storage, int index, void *extra);
-void SaveGamePutVec2(void *storage, int index, void *extra);
-void SaveGamePutVec3(void *storage, int index, void *extra);
-void SaveGamePutAngleToSlope(void *storage, int index, void *extra);
+void SaveGamePutInteger(void *storage, int index);
+void SaveGamePutAngle(void *storage, int index);
+void SaveGamePutFloat(void *storage, int index);
+void SaveGamePutBoolean(void *storage, int index);
+void SaveGamePutVec2(void *storage, int index);
+void SaveGamePutVec3(void *storage, int index);
+void SaveGamePutAngleToSlope(void *storage, int index);
 
 //
 //  GLOBAL STUFF
@@ -296,8 +296,8 @@ extern void *sv_current_elem;
 extern SaveStruct *sv_known_structs;
 extern SaveArray  *sv_known_arrays;
 
-bool SaveGameGetMapObject(void *storage, int index, void *extra);
-void SaveGamePutMapObject(void *storage, int index, void *extra);
+bool SaveGameGetMapObject(void *storage, int index);
+void SaveGamePutMapObject(void *storage, int index);
 
 int   SaveGameMapObjectGetIndex(MapObject *elem);
 void *SaveGameMapObjectFindByIndex(int index);
@@ -305,23 +305,23 @@ void *SaveGameMapObjectFindByIndex(int index);
 int   SaveGamePlayerGetIndex(Player *elem);
 void *SaveGamePlayerFindByIndex(int index);
 
-bool SaveGameLevelGetImage(void *storage, int index, void *extra);
-void SaveGameLevelPutImage(void *storage, int index, void *extra);
+bool SaveGameLevelGetImage(void *storage, int index);
+void SaveGameLevelPutImage(void *storage, int index);
 
-bool SaveGameLevelGetColormap(void *storage, int index, void *extra);
-void SaveGameLevelPutColormap(void *storage, int index, void *extra);
+bool SaveGameLevelGetColormap(void *storage, int index);
+void SaveGameLevelPutColormap(void *storage, int index);
 
-bool SaveGameGetLine(void *storage, int index, void *extra);
-void SaveGamePutLine(void *storage, int index, void *extra);
+bool SaveGameGetLine(void *storage, int index);
+void SaveGamePutLine(void *storage, int index);
 
-bool SaveGameGetSector(void *storage, int index, void *extra);
-void SaveGamePutSector(void *storage, int index, void *extra);
+bool SaveGameGetSector(void *storage, int index);
+void SaveGamePutSector(void *storage, int index);
 
-bool SaveGameSectorGetExtrafloor(void *storage, int index, void *extra);
-void SaveGameSectorPutExtrafloor(void *storage, int index, void *extra);
+bool SaveGameSectorGetExtrafloor(void *storage, int index);
+void SaveGameSectorPutExtrafloor(void *storage, int index);
 
-bool SaveGameGetRADScript(void *storage, int index, void *extra);
-void SaveGamePutRADScript(void *storage, int index, void *extra);
+bool SaveGameGetRADScript(void *storage, int index);
+void SaveGamePutRADScript(void *storage, int index);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

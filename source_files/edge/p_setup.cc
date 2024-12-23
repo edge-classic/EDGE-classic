@@ -769,7 +769,7 @@ static void LoadThings(int lump)
                 {
                     std::string mus_rts = "// MUSINFO SCRIPTS\n\n";
                     mus_rts.append(epi::StringFormat("START_MAP %s\n", current_map->name_.c_str()));
-                    mus_rts.append(epi::StringFormat("  SECTOR_TRIGGER_INDEX %d\n", sec - level_sectors));
+                    mus_rts.append(epi::StringFormat("  SECTOR_TRIGGER_INDEX %td\n", sec - level_sectors));
                     mus_rts.append("    TAGGED_INDEPENDENT\n");
                     mus_rts.append("    TAGGED_REPEATABLE\n");
                     mus_rts.append("    WAIT 30T\n");
@@ -1094,7 +1094,7 @@ static void LoadXGL3Nodes(int lumpnum)
         LogDebug(" AJBSP compressed GL nodes v3\n");
         zgldata.resize(xglen);
         z_stream zgl_stream;
-        memset(&zgl_stream, 0, sizeof(z_stream));
+        EPI_CLEAR_MEMORY(&zgl_stream, z_stream, 1);
         zgl_stream.next_in   = &xgldata[4];
         zgl_stream.avail_in  = xglen - 4;
         zgl_stream.next_out  = zgldata.data();
@@ -2395,7 +2395,7 @@ static void LoadUDMFThings()
                     {
                         std::string mus_rts = "// MUSINFO SCRIPTS\n\n";
                         mus_rts.append(epi::StringFormat("START_MAP %s\n", current_map->name_.c_str()));
-                        mus_rts.append(epi::StringFormat("  SECTOR_TRIGGER_INDEX %d\n", sec - level_sectors));
+                        mus_rts.append(epi::StringFormat("  SECTOR_TRIGGER_INDEX %td\n", sec - level_sectors));
                         mus_rts.append("    TAGGED_INDEPENDENT\n");
                         mus_rts.append("    TAGGED_REPEATABLE\n");
                         mus_rts.append("    WAIT 30T\n");
@@ -2817,7 +2817,7 @@ static void DetectDeepWaterTrick(void)
 {
     uint8_t *self_subs = new uint8_t[total_level_subsectors];
 
-    memset(self_subs, 0, total_level_subsectors);
+    EPI_CLEAR_MEMORY(self_subs, uint8_t, total_level_subsectors);
 
     for (int i = 0; i < total_level_segs; i++)
     {

@@ -19,6 +19,7 @@
 #pragma once
 
 #include "ddf_types.h"
+#include "epi.h"
 
 class IntermissionMapPositionInfo
 {
@@ -200,11 +201,11 @@ class GameDefinition
     // disable copy construct and assignment operator
     explicit GameDefinition(GameDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
     }
     GameDefinition &operator=(GameDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
         return *this;
     }
 };

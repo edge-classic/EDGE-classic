@@ -714,7 +714,8 @@ void ParseUMAPINFO(const std::string &buffer)
             FatalError("UMAPINFO: No mapname for map entry!\n");
 
         unsigned int i      = 0;
-        MapEntry     parsed = {0};
+        MapEntry     parsed;
+        EPI_CLEAR_MEMORY(&parsed, MapEntry, 1);
         parsed.mapname      = (char *)calloc(lex.state_.string.size() + 1, sizeof(char));
         epi::CStringCopyMax(parsed.mapname, lex.state_.string.data(), lex.state_.string.size());
 

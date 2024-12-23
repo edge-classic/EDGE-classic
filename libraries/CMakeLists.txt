@@ -3,7 +3,6 @@ if (EDGE_SID_SUPPORT)
   add_subdirectory(crsid)
 endif()
 add_subdirectory(dr_libs)
-add_subdirectory(fmmidi)
 
 if (EDGE_SOKOL)
   add_subdirectory(imgui)

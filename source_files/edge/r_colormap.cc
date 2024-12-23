@@ -104,7 +104,7 @@ static int FindBestRGBMatch(int r, int g, int b)
 
 void InitializePalette(void)
 {
-    memset(&playpal_data[0], 0, 14*256*3);
+    EPI_CLEAR_MEMORY(&playpal_data[0][0][0], uint8_t, 14*256*3);
 
     int t, i;
 
@@ -610,6 +610,9 @@ class ColormapShader : public AbstractShader
 
     virtual void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon)
     {
+        EPI_UNUSED(nx);
+        EPI_UNUSED(ny);
+        EPI_UNUSED(nz);
         float mx = mod_pos->x;
         float my = mod_pos->y;
         float mz = mod_pos->z + mod_pos->height_ / 2;
@@ -626,6 +629,7 @@ class ColormapShader : public AbstractShader
     virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
                           void *data, ShaderCoordinateFunction func)
     {
+        EPI_UNUSED(masked);
         RGBAColor fc_to_use = fog_color_;
         float     fd_to_use = fog_density_;
         // check for DDFLEVL fog

@@ -19,6 +19,7 @@
 #pragma once
 
 #include "ddf_types.h"
+#include "epi.h"
 
 // ----------------------------------------------------------------
 // ------------------------ SOUND EFFECTS -------------------------
@@ -87,11 +88,11 @@ class SoundEffectDefinition
     // disable copy construct and assignment operator
     explicit SoundEffectDefinition(SoundEffectDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
     }
     SoundEffectDefinition &operator=(SoundEffectDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
         return *this;
     }
 };

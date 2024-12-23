@@ -126,7 +126,7 @@ void A_EnableRadTrig(MapObject *mo)
 
     uint64_t *value = (uint64_t *)mo->state_->action_par;
 
-    ScriptEnableByTag(mo, value[0], false, (RADScriptTag)mo->state_->rts_tag_type);
+    ScriptEnableByTag(value[0], false, (RADScriptTag)mo->state_->rts_tag_type);
 }
 
 void A_DisableRadTrig(MapObject *mo)
@@ -136,7 +136,7 @@ void A_DisableRadTrig(MapObject *mo)
 
     uint64_t *value = (uint64_t *)mo->state_->action_par;
 
-    ScriptEnableByTag(mo, value[0], true, (RADScriptTag)mo->state_->rts_tag_type);
+    ScriptEnableByTag(value[0], true, (RADScriptTag)mo->state_->rts_tag_type);
 }
 
 //
@@ -3557,7 +3557,7 @@ void A_StandardMeander(MapObject *object)
         NewChaseDir(object);
 
     // turn towards movement direction if not there yet
-    if (object->move_direction_ < 8)
+    if (object->move_direction_ < kDirectionNone)
     {
         object->angle_ &= (7 << 29);
         delta = object->angle_ - (object->move_direction_ << 29);
@@ -3583,7 +3583,7 @@ void A_PlayerSupportMeander(MapObject *object)
         NewChaseDir(object);
 
     // turn towards movement direction if not there yet
-    if (object->move_direction_ < 8)
+    if (object->move_direction_ < kDirectionNone)
     {
         object->angle_ &= (7 << 29);
         delta = object->angle_ - (object->move_direction_ << 29);
@@ -3639,7 +3639,7 @@ void A_StandardChase(MapObject *object)
         object->target_visibility_ = 0.0f;
 
     // turn towards movement direction if not there yet
-    if (object->move_direction_ < 8)
+    if (object->move_direction_ < kDirectionNone)
     {
         object->angle_ &= (7 << 29);
         delta = object->angle_ - (object->move_direction_ << 29);

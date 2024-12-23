@@ -76,82 +76,82 @@ class IMFPlayer : public AbstractMusicPlayer
 
     static void rtNoteOn(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity)
     {
-        (void)userdata;
-        (void)channel;
-        (void)note;
-        (void)velocity;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(channel);
+        EPI_UNUSED(note);
+        EPI_UNUSED(velocity);
     }
 
     static void rtNoteOff(void *userdata, uint8_t channel, uint8_t note)
     {
-        (void)userdata;
-        (void)channel;
-        (void)note;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(channel);
+        EPI_UNUSED(note);
     }
 
     static void rtNoteAfterTouch(void *userdata, uint8_t channel, uint8_t note, uint8_t atVal)
     {
-        (void)userdata;
-        (void)channel;
-        (void)note;
-        (void)atVal;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(channel);
+        EPI_UNUSED(note);
+        EPI_UNUSED(atVal);
     }
 
     static void rtChannelAfterTouch(void *userdata, uint8_t channel, uint8_t atVal)
     {
-        (void)userdata;
-        (void)channel;
-        (void)atVal;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(channel);
+        EPI_UNUSED(atVal);
     }
 
     static void rtControllerChange(void *userdata, uint8_t channel, uint8_t type, uint8_t value)
     {
-        (void)userdata;
-        (void)channel;
-        (void)type;
-        (void)value;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(channel);
+        EPI_UNUSED(type);
+        EPI_UNUSED(value);
     }
 
     static void rtPatchChange(void *userdata, uint8_t channel, uint8_t patch)
     {
-        (void)userdata;
-        (void)channel;
-        (void)patch;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(channel);
+        EPI_UNUSED(patch);
     }
 
     static void rtPitchBend(void *userdata, uint8_t channel, uint8_t msb, uint8_t lsb)
     {
-        (void)userdata;
-        (void)channel;
-        (void)msb;
-        (void)lsb;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(channel);
+        EPI_UNUSED(msb);
+        EPI_UNUSED(lsb);
     }
 
     static void rtSysEx(void *userdata, const uint8_t *msg, size_t size)
     {
-        (void)userdata;
-        (void)msg;
-        (void)size;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(msg);
+        EPI_UNUSED(size);
     }
 
     static void rtDeviceSwitch(void *userdata, size_t track, const char *data, size_t length)
     {
-        (void)userdata;
-        (void)track;
-        (void)data;
-        (void)length;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(track);
+        EPI_UNUSED(data);
+        EPI_UNUSED(length);
     }
 
     static size_t rtCurrentDevice(void *userdata, size_t track)
     {
-        (void)userdata;
-        (void)track;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(track);
         return 0;
     }
 
     static void rtRawOPL(void *userdata, uint8_t reg, uint8_t value)
     {
-        (void)userdata;
+        EPI_UNUSED(userdata);
         if ((reg & 0xF0) == 0xC0)
             value |= 0x30;
         imf_opl->Port(reg, value);
@@ -159,7 +159,7 @@ class IMFPlayer : public AbstractMusicPlayer
 
     static void playSynth(void *userdata, uint8_t *stream, size_t length)
     {
-        (void)userdata;
+        EPI_UNUSED(userdata);
         for (size_t i = 0; i < length / 2; i += 2)
             imf_opl->Sample((int16_t *)stream + i, (int16_t *)stream + i + 1);
     }
@@ -168,7 +168,7 @@ class IMFPlayer : public AbstractMusicPlayer
     {
         imf_sequencer__ = new IMFSequencer;
         imf_interface_ = new IMFInterface;
-        memset(imf_interface_, 0, sizeof(MidiRealTimeInterface));
+        EPI_CLEAR_MEMORY(imf_interface_, MidiRealTimeInterface, 1);
 
         imf_interface_->rtUserData           = this;
         imf_interface_->rt_noteOn            = rtNoteOn;

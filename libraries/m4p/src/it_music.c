@@ -15,7 +15,7 @@
 #include "it_tables.h"
 #include "it_m_eff.h"
 #include "it_music.h"
-#include "it2drivers/sb16.h"
+#include "sb16.h"
 
 hostChn_t hChn[MAX_HOST_CHANNELS];
 slaveChn_t sChn[MAX_SLAVE_CHANNELS];
@@ -1974,7 +1974,7 @@ void Music_FillAudioBufferFloat(float *buffer, int32_t numSamples)
 		DriverMixFloat(numSamples, buffer);
 }
 
-bool Music_Init(int32_t mixingFrequency, int32_t mixingBufferSize)
+bool Music_Init(int32_t mixingFrequency)
 {
 	if (FirstTimeInit)
 	{

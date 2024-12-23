@@ -333,7 +333,7 @@ void PrecacheModels(void)
         return;
 
     uint8_t *model_present = new uint8_t[total_models];
-    memset(model_present, 0, total_models);
+    EPI_CLEAR_MEMORY(model_present, uint8_t, total_models);
 
     // mark all monsters (etc) in the level
     for (MapObject *mo = map_object_list_head; mo; mo = mo->next_)

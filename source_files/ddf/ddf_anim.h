@@ -19,6 +19,7 @@
 #pragma once
 
 #include "ddf_types.h"
+#include "epi.h"
 
 class AnimationDefinition
 {
@@ -55,11 +56,11 @@ class AnimationDefinition
     // disable copy construct and assignment operator
     explicit AnimationDefinition(AnimationDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
     }
     AnimationDefinition &operator=(AnimationDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
         return *this;
     }
 };

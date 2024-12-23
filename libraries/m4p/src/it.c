@@ -10,9 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../it_music.h"
-#include "../it_structs.h"
-#include "../it_d_rm.h"
+#include "it_music.h"
+#include "it_structs.h"
+#include "it_d_rm.h"
 
 static void Decompress16BitData(int16_t *Dst, const uint8_t *Src, uint32_t BlockLen);
 static void Decompress8BitData(int8_t *Dst, const uint8_t *Src, uint32_t BlockLen);

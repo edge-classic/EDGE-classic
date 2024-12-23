@@ -477,7 +477,7 @@ static PackFile *ProcessZip(DataFile *df)
     pack->archive_ = new mz_zip_archive;
 
     // this is necessary (but stupid)
-    memset(pack->archive_, 0, sizeof(mz_zip_archive));
+    EPI_CLEAR_MEMORY(pack->archive_, mz_zip_archive, 1);
 
     if (!mz_zip_reader_init_file(pack->archive_, df->name_.c_str(), 0))
     {
@@ -610,8 +610,8 @@ class ZIPFile : public epi::File
 
     unsigned int Write(const void *src, unsigned int count)
     {
-        (void)src;
-        (void)count;
+        EPI_UNUSED(src);
+        EPI_UNUSED(count);
         // not implemented
         FatalError("ZIPFile::Write called, but this is not implemented!\n");
         return 0;
@@ -756,7 +756,7 @@ static PackFile *ProcessVWAD(DataFile *df)
     {
         // get the filename
         char filename[1024];
-        memset(filename, 0, 1024);
+        EPI_CLEAR_MEMORY(filename, char, 1024);
 
         std::string packpath = vwad_get_file_name(pack->vwad_archive_, idx);
 
@@ -855,8 +855,11 @@ class VWADFile : public epi::File
 
     unsigned int Write(const void *src, unsigned int count)
     {
+        EPI_UNUSED(src);
+        EPI_UNUSED(count);
         // not implemented
-        return count;
+        FatalError("VWADFile::Write called, but this is not implemented!\n");
+        return 0;
     }
 
     bool Seek(int offset, int seekpoint)

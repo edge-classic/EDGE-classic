@@ -271,9 +271,9 @@ inline bool YuvDiff(const uint8_t p1, const uint8_t p2)
     uint32_t YUV1 = pixel_yuv[p1];
     uint32_t YUV2 = pixel_yuv[p2];
 
-    return (YUV1 & a_mask) != (YUV2 & a_mask) || HMM_ABS((int)((YUV1 & y_mask) - (YUV2 & y_mask))) > tr_y ||
-           HMM_ABS((int)((YUV1 & u_mask) - (YUV2 & u_mask))) > tr_u ||
-           HMM_ABS((int)((YUV1 & v_mask) - (YUV2 & v_mask))) > tr_v;
+    return (YUV1 & a_mask) != (YUV2 & a_mask) || (uint32_t)HMM_ABS((int)((YUV1 & y_mask) - (YUV2 & y_mask))) > tr_y ||
+           (uint32_t)HMM_ABS((int)((YUV1 & u_mask) - (YUV2 & u_mask))) > tr_u ||
+           (uint32_t)HMM_ABS((int)((YUV1 & v_mask) - (YUV2 & v_mask))) > tr_v;
 }
 
 void HQ2xPaletteSetup(const uint8_t *palette, int transparent_pixel)

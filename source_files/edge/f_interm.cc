@@ -1359,6 +1359,12 @@ static void UpdateCoopStats(void)
             else
                 ShowNextLocationInit();
         }
+        if (!--count_pause)
+        {
+            state_ticker_count++;
+            count_pause = kTicRate;
+        }
+        break;
 
     default:
         if (!--count_pause)
@@ -1366,6 +1372,7 @@ static void UpdateCoopStats(void)
             state_ticker_count++;
             count_pause = kTicRate;
         }
+        break;
     }
 }
 

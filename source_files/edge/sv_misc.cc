@@ -78,23 +78,23 @@ void *SV_SliderMoveFindByIndex(int index);
 void  SV_SliderMoveCreateElems(int num_elems);
 void  SV_SliderMoveFinaliseElems(void);
 
-bool SR_LightGetType(void *storage, int index, void *extra);
-void SR_LightPutType(void *storage, int index, void *extra);
+bool SR_LightGetType(void *storage, int index);
+void SR_LightPutType(void *storage, int index);
 
-bool SaveGameGetRADScript(void *storage, int index, void *extra);
-void SaveGamePutRADScript(void *storage, int index, void *extra);
+bool SaveGameGetRADScript(void *storage, int index);
+void SaveGamePutRADScript(void *storage, int index);
 
-bool SaveGameTriggerGetState(void *storage, int index, void *extra);
-void SaveGameTriggerPutState(void *storage, int index, void *extra);
+bool SaveGameTriggerGetState(void *storage, int index);
+void SaveGameTriggerPutState(void *storage, int index);
 
-bool SR_TipGetString(void *storage, int index, void *extra);
-void SR_TipPutString(void *storage, int index, void *extra);
+bool SR_TipGetString(void *storage, int index);
+void SR_TipPutString(void *storage, int index);
 
-bool SR_PlaneMoveGetType(void *storage, int index, void *extra);
-void SR_PlaneMovePutType(void *storage, int index, void *extra);
+bool SR_PlaneMoveGetType(void *storage, int index);
+void SR_PlaneMovePutType(void *storage, int index);
 
-bool SR_SliderGetInfo(void *storage, int index, void *extra);
-void SR_SliderPutInfo(void *storage, int index, void *extra);
+bool SR_SliderGetInfo(void *storage, int index);
+void SR_SliderPutInfo(void *storage, int index);
 
 //----------------------------------------------------------------------------
 //
@@ -667,6 +667,7 @@ int SV_TipGetIndex(ScriptDrawTip *elem)
 
 void SV_TipCreateElems(int num_elems)
 {
+    EPI_UNUSED(num_elems);
     ResetScriptTips();
 }
 
@@ -808,10 +809,8 @@ void SV_SliderMoveFinaliseElems(void)
 
 //----------------------------------------------------------------------------
 
-bool SR_LightGetType(void *storage, int index, void *extra)
+bool SR_LightGetType(void *storage, int index)
 {
-    (void)extra;
-
     const LightSpecialDefinition **dest = (const LightSpecialDefinition **)storage + index;
 
     int         number;
@@ -858,7 +857,7 @@ bool SR_LightGetType(void *storage, int index, void *extra)
 // sector type or `L' in a linedef type.  The source ref is the
 // numeric ID of the sector/line type in DDF.
 //
-void SR_LightPutType(void *storage, int index, void *extra)
+void SR_LightPutType(void *storage, int index)
 {
     const LightSpecialDefinition *src = ((const LightSpecialDefinition **)storage)[index];
 
@@ -896,7 +895,7 @@ void SR_LightPutType(void *storage, int index, void *extra)
     SaveChunkPutString("S:1");
 }
 
-bool SaveGameTriggerGetState(void *storage, int index, void *extra)
+bool SaveGameTriggerGetState(void *storage, int index)
 {
     const RADScriptState **dest = (const RADScriptState **)storage + index;
     const RADScriptState  *temp;
@@ -928,7 +927,7 @@ bool SaveGameTriggerGetState(void *storage, int index, void *extra)
     return true;
 }
 
-void SaveGameTriggerPutState(void *storage, int index, void *extra)
+void SaveGameTriggerPutState(void *storage, int index)
 {
     const RADScriptState *src = ((const RADScriptState **)storage)[index];
     const RADScriptState *temp;
@@ -955,7 +954,7 @@ void SaveGameTriggerPutState(void *storage, int index, void *extra)
     SaveChunkPutInteger(value);
 }
 
-bool SaveGameGetRADScript(void *storage, int index, void *extra)
+bool SaveGameGetRADScript(void *storage, int index)
 {
     const RADScript **dest = (const RADScript **)storage + index;
     const RADScript  *temp;
@@ -1050,7 +1049,7 @@ bool SaveGameGetRADScript(void *storage, int index, void *extra)
 // used to differentiate them.  Index values begin at 1.  The CRC
 // value is in hexadecimal.
 //
-void SaveGamePutRADScript(void *storage, int index, void *extra)
+void SaveGamePutRADScript(void *storage, int index)
 {
     const RADScript *src = ((const RADScript **)storage)[index];
     const RADScript *temp;
@@ -1088,7 +1087,7 @@ void SaveGamePutRADScript(void *storage, int index, void *extra)
 
 //----------------------------------------------------------------------------
 
-bool SR_TipGetString(void *storage, int index, void *extra)
+bool SR_TipGetString(void *storage, int index)
 {
     const char **dest = (const char **)storage + index;
 
@@ -1098,14 +1097,14 @@ bool SR_TipGetString(void *storage, int index, void *extra)
     return true;
 }
 
-void SR_TipPutString(void *storage, int index, void *extra)
+void SR_TipPutString(void *storage, int index)
 {
     const char *src = ((const char **)storage)[index];
 
     SaveChunkPutString(src);
 }
 
-bool SR_PlaneMoveGetType(void *storage, int index, void *extra)
+bool SR_PlaneMoveGetType(void *storage, int index)
 {
     const PlaneMoverDefinition **dest = (const PlaneMoverDefinition **)storage + index;
 
@@ -1168,7 +1167,7 @@ bool SR_PlaneMoveGetType(void *storage, int index, void *extra)
 // field in the line/sectortype, or `C' for the ceiling field.  The
 // last value is the line/sector DDF number.
 //
-void SR_PlaneMovePutType(void *storage, int index, void *extra)
+void SR_PlaneMovePutType(void *storage, int index)
 {
     const PlaneMoverDefinition *src = ((const PlaneMoverDefinition **)storage)[index];
 
@@ -1240,7 +1239,7 @@ void SR_PlaneMovePutType(void *storage, int index, void *extra)
     SaveChunkPutString("L:C:1");
 }
 
-bool SR_SliderGetInfo(void *storage, int index, void *extra)
+bool SR_SliderGetInfo(void *storage, int index)
 {
     const SlidingDoor **dest = (const SlidingDoor **)storage + index;
     const char         *str;
@@ -1268,7 +1267,7 @@ bool SR_SliderGetInfo(void *storage, int index, void *extra)
 // Format of the string will usually be a colon followed by the
 // linedef number (e.g. ":123").
 //
-void SR_SliderPutInfo(void *storage, int index, void *extra)
+void SR_SliderPutInfo(void *storage, int index)
 {
     const SlidingDoor *src = ((const SlidingDoor **)storage)[index];
 

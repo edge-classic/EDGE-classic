@@ -19,6 +19,7 @@
 #pragma once
 
 #include "ddf_types.h"
+#include "epi.h"
 
 enum FontType
 {
@@ -74,11 +75,11 @@ class FontDefinition
     // disable copy construct and assignment operator
     explicit FontDefinition(FontDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
     }
     FontDefinition &operator=(FontDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
         return *this;
     }
 };

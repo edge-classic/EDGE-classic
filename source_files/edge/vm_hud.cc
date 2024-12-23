@@ -90,7 +90,7 @@ RGBAColor COALVectorToColor(double *v)
 //
 static void HD_coord_sys(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     int w = (int)*vm->AccessParam(0);
     int h = (int)*vm->AccessParam(1);
@@ -108,7 +108,7 @@ static void HD_coord_sys(coal::VM *vm, int argc)
 //
 static void HD_game_mode(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     if (InDeathmatch())
         vm->ReturnString("dm");
@@ -122,7 +122,7 @@ static void HD_game_mode(coal::VM *vm, int argc)
 //
 static void HD_game_name(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     GameDefinition *g = current_map->episode_;
     EPI_ASSERT(g);
@@ -134,7 +134,7 @@ static void HD_game_name(coal::VM *vm, int argc)
 // Lobo: May 2024
 static void HD_game_skill(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     vm->ReturnFloat((double)game_skill);
 }
@@ -143,7 +143,7 @@ static void HD_game_skill(coal::VM *vm, int argc)
 //
 static void HD_map_name(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     vm->ReturnString(current_map->name_.c_str());
 }
@@ -152,7 +152,7 @@ static void HD_map_name(coal::VM *vm, int argc)
 //
 static void HD_map_title(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     vm->ReturnString(current_map_title.c_str());
 }
@@ -161,7 +161,7 @@ static void HD_map_title(coal::VM *vm, int argc)
 //
 static void HD_map_author(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     vm->ReturnString(current_map->author_.c_str());
 }
@@ -170,7 +170,7 @@ static void HD_map_author(coal::VM *vm, int argc)
 //
 static void HD_which_hud(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     vm->ReturnFloat((double)screen_hud);
 }
@@ -179,7 +179,7 @@ static void HD_which_hud(coal::VM *vm, int argc)
 //
 static void HD_check_automap(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     vm->ReturnFloat(automap_active ? 1 : 0);
 }
@@ -188,7 +188,7 @@ static void HD_check_automap(coal::VM *vm, int argc)
 //
 static void HD_get_time(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     int time = GetTime();
     vm->ReturnFloat((double)time);
@@ -198,7 +198,7 @@ static void HD_get_time(coal::VM *vm, int argc)
 //
 static void HD_text_font(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     const char *font_name = vm->AccessParamString(0);
 
@@ -217,7 +217,7 @@ static void HD_text_font(coal::VM *vm, int argc)
 //
 static void HD_text_color(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     double *v = vm->AccessParam(0);
 
@@ -230,7 +230,7 @@ static void HD_text_color(coal::VM *vm, int argc)
 //
 static void HD_set_scale(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     float scale = *vm->AccessParam(0);
 
@@ -244,7 +244,7 @@ static void HD_set_scale(coal::VM *vm, int argc)
 //
 static void HD_set_alpha(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     float alpha = *vm->AccessParam(0);
 
@@ -255,7 +255,7 @@ static void HD_set_alpha(coal::VM *vm, int argc)
 //
 static void HD_get_text_width(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     const char *str  = vm->AccessParamString(0);
     float       size = *vm->AccessParam(1);
@@ -283,7 +283,7 @@ static void HD_get_text_width(coal::VM *vm, int argc)
 //
 static void HD_solid_box(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     float x = *vm->AccessParam(0);
     float y = *vm->AccessParam(1);
@@ -299,7 +299,7 @@ static void HD_solid_box(coal::VM *vm, int argc)
 //
 static void HD_solid_line(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     float x1 = *vm->AccessParam(0);
     float y1 = *vm->AccessParam(1);
@@ -315,7 +315,7 @@ static void HD_solid_line(coal::VM *vm, int argc)
 //
 static void HD_thin_box(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     float x = *vm->AccessParam(0);
     float y = *vm->AccessParam(1);
@@ -331,7 +331,7 @@ static void HD_thin_box(coal::VM *vm, int argc)
 //
 static void HD_gradient_box(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     float x = *vm->AccessParam(0);
     float y = *vm->AccessParam(1);
@@ -354,7 +354,7 @@ static void HD_gradient_box(coal::VM *vm, int argc)
 //
 static void HD_draw_image(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     float       x    = *vm->AccessParam(0);
     float       y    = *vm->AccessParam(1);
@@ -378,7 +378,7 @@ static void HD_draw_image(coal::VM *vm, int argc)
 //
 static void HD_scroll_image(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     float       x    = *vm->AccessParam(0);
     float       y    = *vm->AccessParam(1);
@@ -408,7 +408,7 @@ static void HD_scroll_image(coal::VM *vm, int argc)
 //
 static void HD_stretch_image(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     float x = *vm->AccessParam(0);
     float y = *vm->AccessParam(1);
@@ -433,7 +433,7 @@ static void HD_stretch_image(coal::VM *vm, int argc)
 //
 static void HD_tile_image(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     float x = *vm->AccessParam(0);
     float y = *vm->AccessParam(1);
@@ -457,7 +457,7 @@ static void HD_tile_image(coal::VM *vm, int argc)
 //
 static void HD_draw_text(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     float x = *vm->AccessParam(0);
     float y = *vm->AccessParam(1);
@@ -473,7 +473,7 @@ static void HD_draw_text(coal::VM *vm, int argc)
 //
 static void HD_draw_num2(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     float x = *vm->AccessParam(0);
     float y = *vm->AccessParam(1);
@@ -524,7 +524,7 @@ static void HD_draw_num2(coal::VM *vm, int argc)
 //
 static void HD_draw_number(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     float x = *vm->AccessParam(0);
     float y = *vm->AccessParam(1);
@@ -581,7 +581,7 @@ static void HD_draw_number(coal::VM *vm, int argc)
 //
 static void HD_game_paused(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     if (paused || menu_active || rts_menu_active || time_stop_active || erraticism_active)
     {
@@ -597,7 +597,7 @@ static void HD_game_paused(coal::VM *vm, int argc)
 //
 static void HD_erraticism_active(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     if (erraticism_active)
     {
@@ -613,7 +613,7 @@ static void HD_erraticism_active(coal::VM *vm, int argc)
 //
 static void HD_time_stop_active(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     if (time_stop_active)
     {
@@ -629,7 +629,7 @@ static void HD_time_stop_active(coal::VM *vm, int argc)
 //
 static void HD_render_world(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     float x = *vm->AccessParam(0);
     float y = *vm->AccessParam(1);
@@ -645,7 +645,7 @@ static void HD_render_world(coal::VM *vm, int argc)
 //
 static void HD_render_automap(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     float x = *vm->AccessParam(0);
     float y = *vm->AccessParam(1);
@@ -678,7 +678,7 @@ static void HD_render_automap(coal::VM *vm, int argc)
 //
 static void HD_automap_color(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     int which = (int)*vm->AccessParam(0);
 
@@ -696,7 +696,7 @@ static void HD_automap_color(coal::VM *vm, int argc)
 //
 static void HD_automap_option(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     int which = (int)*vm->AccessParam(0);
     int value = (int)*vm->AccessParam(1);
@@ -716,7 +716,7 @@ static void HD_automap_option(coal::VM *vm, int argc)
 //
 static void HD_automap_zoom(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     float zoom = *vm->AccessParam(0);
 
@@ -728,7 +728,7 @@ static void HD_automap_zoom(coal::VM *vm, int argc)
 //
 static void HD_automap_player_arrow(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     int arrow = (int)*vm->AccessParam(0);
 
@@ -739,7 +739,7 @@ static void HD_automap_player_arrow(coal::VM *vm, int argc)
 //
 static void HD_set_render_who(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     int index = (int)*vm->AccessParam(0);
 
@@ -769,7 +769,7 @@ static void HD_set_render_who(coal::VM *vm, int argc)
 //
 static void HD_play_sound(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     const char *name = vm->AccessParamString(0);
 
@@ -785,7 +785,7 @@ static void HD_play_sound(coal::VM *vm, int argc)
 //
 static void HD_screen_aspect(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     float TempAspect = std::ceil(pixel_aspect_ratio.f_ * 100.0) / 100.0;
 
@@ -794,7 +794,7 @@ static void HD_screen_aspect(coal::VM *vm, int argc)
 
 static void HD_get_average_color(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     double         rgb[3];
     const char    *name         = vm->AccessParamString(0);
@@ -824,7 +824,7 @@ static void HD_get_average_color(coal::VM *vm, int argc)
 
 static void HD_get_lightest_color(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     double         rgb[3];
     const char    *name         = vm->AccessParamString(0);
@@ -854,7 +854,7 @@ static void HD_get_lightest_color(coal::VM *vm, int argc)
 
 static void HD_get_darkest_color(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     double         rgb[3];
     const char    *name         = vm->AccessParamString(0);
@@ -884,7 +884,7 @@ static void HD_get_darkest_color(coal::VM *vm, int argc)
 
 static void HD_get_average_hue(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     double         rgb[3];
     const char    *name         = vm->AccessParamString(0);
@@ -917,7 +917,7 @@ static void HD_get_average_hue(coal::VM *vm, int argc)
 // keeping them in case COALHUDS in the wild use them - Dasho
 static void HD_get_average_top_border_color(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     double         rgb[3];
     const char    *name         = vm->AccessParamString(0);
@@ -942,7 +942,7 @@ static void HD_get_average_top_border_color(coal::VM *vm, int argc)
 }
 static void HD_get_average_bottom_border_color(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     double         rgb[3];
     const char    *name         = vm->AccessParamString(0);
@@ -969,37 +969,37 @@ static void HD_get_average_bottom_border_color(coal::VM *vm, int argc)
 //
 static void HD_rts_enable(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     std::string name = vm->AccessParamString(0);
 
     if (!name.empty())
-        ScriptEnableByTag(nullptr, name.c_str(), false);
+        ScriptEnableByTag(name.c_str(), false);
 }
 
 // hud.rts_disable(tag)
 //
 static void HD_rts_disable(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     std::string name = vm->AccessParamString(0);
 
     if (!name.empty())
-        ScriptEnableByTag(nullptr, name.c_str(), true);
+        ScriptEnableByTag(name.c_str(), true);
 }
 
 // hud.rts_isactive(tag)
 //
 static void HD_rts_isactive(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     std::string name = vm->AccessParamString(0);
 
     if (!name.empty())
     {
-        if (CheckActiveScriptByTag(nullptr, name.c_str()))
+        if (CheckActiveScriptByTag(name.c_str()))
             vm->ReturnFloat(1);
         else
             vm->ReturnFloat(0);
@@ -1010,7 +1010,7 @@ static void HD_rts_isactive(coal::VM *vm, int argc)
 //
 static void HD_get_image_width(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
     const char *name = vm->AccessParamString(0);
 
     const Image *img = ImageLookup(name, kImageNamespaceGraphic, kImageLookupNull);
@@ -1029,7 +1029,7 @@ static void HD_get_image_width(coal::VM *vm, int argc)
 //
 static void HD_get_image_height(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
     const char *name = vm->AccessParamString(0);
 
     const Image *img = ImageLookup(name, kImageNamespaceGraphic, kImageLookupNull);
@@ -1048,7 +1048,7 @@ static void HD_get_image_height(coal::VM *vm, int argc)
 //
 static void HD_lookup_LDF(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     const char *name = vm->AccessParamString(0);
 

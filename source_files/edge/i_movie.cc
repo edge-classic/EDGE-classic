@@ -57,6 +57,9 @@ static float          ty1           = 0.0f;
 static float          ty2           = 1.0f;
 static double         last_time     = 0;
 
+// Disabled until Dasho can figure out why the frame size changes between creating the texture and updating it
+// Which is probably also an issue under GL1
+#ifndef EDGE_SOKOL
 static bool MovieSetupAudioStream(int rate)
 {
     plm_set_audio_lead_time(decoder, (double)1024 / (double)rate);
@@ -65,11 +68,12 @@ static bool MovieSetupAudioStream(int rate)
     SoundQueueInitialize();
     return true;
 }
+#endif
 
 void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
 {
-    (void)mpeg;
-    (void)user;
+    EPI_UNUSED(mpeg);
+    EPI_UNUSED(user);
     if (samples)
     {
         SoundData *movie_buf = SoundQueueGetFreeBuffer(PLM_AUDIO_SAMPLES_PER_FRAME);
@@ -84,8 +88,8 @@ void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
 
 void MovieVideoCallback(plm_t *mpeg, plm_frame_t *frame, void *user)
 {
-    (void)mpeg;
-    (void)user;
+    EPI_UNUSED(mpeg);
+    EPI_UNUSED(user);
 
     plm_frame_to_rgba(frame, rgb_data, frame->width * 4);
 
@@ -98,6 +102,7 @@ void PlayMovie(const std::string &name)
 #ifdef EDGE_SOKOL
     // Disabled until Dasho can figure out why the frame size changes between creating the texture and updating it
     // Which is probably also an issue under GL1
+    EPI_UNUSED(name);
     playing_movie   = false;
     skip_bar_active = false;
     return;    
@@ -233,7 +238,7 @@ void PlayMovie(const std::string &name)
 
     int num_pixels = movie_width * movie_height * 4;
     rgb_data       = new uint8_t[num_pixels];
-    memset(rgb_data, 0, num_pixels);
+    EPI_CLEAR_MEMORY(rgb_data, uint8_t, num_pixels);
     plm_set_video_decode_callback(decoder, MovieVideoCallback, nullptr);
     plm_set_audio_decode_callback(decoder, MovieAudioCallback, nullptr);
     if (!no_sound)
@@ -249,7 +254,7 @@ void PlayMovie(const std::string &name)
     fadeout   = 0;
 
     playing_movie = true;
-#endif;    
+#endif
 }
 
 static void EndMovie()

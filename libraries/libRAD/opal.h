@@ -56,7 +56,7 @@ class Opal
             Chan = chan;
         }
 
-        int16_t Output(uint16_t keyscalenum, uint32_t phase_step, int16_t vibrato, int16_t mod = 0,
+        int16_t Output(uint32_t phase_step, int16_t vibrato, int16_t mod = 0,
                        int16_t fbshift = 0);
 
         void SetKeyOn(bool on);

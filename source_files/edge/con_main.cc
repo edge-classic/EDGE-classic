@@ -140,6 +140,8 @@ int ConsoleCommandType(char **argv, int argc)
 
 int ConsoleCommandReadme(char **argv, int argc)
 {
+    EPI_UNUSED(argv);
+    EPI_UNUSED(argc);
     epi::File *readme_file = nullptr;
 
     // Check well known readme filenames
@@ -320,6 +322,8 @@ int ConsoleCommandDir(char **argv, int argc)
 
 int ConsoleCommandScreenShot(char **argv, int argc)
 {
+    EPI_UNUSED(argv);
+    EPI_UNUSED(argc);
     DeferredScreenShot();
 
     return 0;
@@ -366,6 +370,8 @@ int ConsoleCommandPlaySound(char **argv, int argc)
 
 int ConsoleCommandResetVars(char **argv, int argc)
 {
+    EPI_UNUSED(argv);
+    EPI_UNUSED(argc);
     ResetAllConsoleVariables();
     ResetDefaults(0);
     return 0;
@@ -373,12 +379,16 @@ int ConsoleCommandResetVars(char **argv, int argc)
 
 int ConsoleCommandShowFiles(char **argv, int argc)
 {
+    EPI_UNUSED(argv);
+    EPI_UNUSED(argc);
     ShowLoadedFiles();
     return 0;
 }
 
 int ConsoleCommandBrowse(char **argv, int argc)
 {
+    EPI_UNUSED(argv);
+    EPI_UNUSED(argc);
 #ifdef EDGE_WEB
     ConsolePrint("%s\n", language["NoBrowseFromWeb"]);
     return 1;
@@ -443,9 +453,11 @@ int ConsoleCommandShowCommands(char **argv, int argc)
 
 int ConsoleCommandShowMaps(char **argv, int argc)
 {
+    EPI_UNUSED(argv);
+    EPI_UNUSED(argc);
     LogPrint("Warp Name           Description\n");
 
-    for (int i = 0; i < mapdefs.size(); i++)
+    for (size_t i = 0; i < mapdefs.size(); i++)
     {
         if (MapExists(mapdefs[i]) && mapdefs[i]->episode_)
             LogPrint("  %s                     %s\n", mapdefs[i]->name_.c_str(),
@@ -457,8 +469,8 @@ int ConsoleCommandShowMaps(char **argv, int argc)
 
 int ConsoleCommandShowGamepads(char **argv, int argc)
 {
-    (void)argv;
-    (void)argc;
+    EPI_UNUSED(argv);
+    EPI_UNUSED(argc);
 
     I_ShowGamepads();
     return 0;
@@ -466,6 +478,8 @@ int ConsoleCommandShowGamepads(char **argv, int argc)
 
 int ConsoleCommandHelp(char **argv, int argc)
 {
+    EPI_UNUSED(argv);
+    EPI_UNUSED(argc);
     LogPrint("Welcome to the EDGE Console.\n");
     LogPrint("\n");
     LogPrint("Use the 'showcmds' command to list all commands.\n");
@@ -486,6 +500,8 @@ int ConsoleCommandHelp(char **argv, int argc)
 
 int ConsoleCommandVersion(char **argv, int argc)
 {
+    EPI_UNUSED(argv);
+    EPI_UNUSED(argc);
     LogPrint("%s v%s\n", application_name.c_str(), edge_version.c_str());
     return 0;
 }
@@ -504,12 +520,16 @@ int ConsoleCommandMap(char **argv, int argc)
 
 int ConsoleCommandEndoom(char **argv, int argc)
 {
+    EPI_UNUSED(argv);
+    EPI_UNUSED(argc);
     ConsolePrintEndoom();
     return 0;
 }
 
 int ConsoleCommandClear(char **argv, int argc)
 {
+    EPI_UNUSED(argv);
+    EPI_UNUSED(argc);
     ClearConsoleLines();
     return 0;
 }

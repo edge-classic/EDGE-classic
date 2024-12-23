@@ -45,7 +45,7 @@ static void WebSyncScreenSize(int width, int height)
     current_screen_width  = (int)width;
     current_screen_height = (int)height;
     current_screen_depth  = 24;
-    current_window_mode   = 0;
+    current_window_mode   = kWindowModeWindowed;
     DeterminePixelAspect();
 
     SoftInitializeResolution();

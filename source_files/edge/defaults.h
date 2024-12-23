@@ -22,7 +22,7 @@
 #define EDGE_DEFAULT_SCREENWIDTH  (1000000) // Super high number to force scaling to native res
 #define EDGE_DEFAULT_SCREENHEIGHT (1000000) // Super high number to force scaling to native res
 #define EDGE_DEFAULT_SCREENBITS   (32)
-#define EDGE_DEFAULT_DISPLAYMODE  (2)
+#define EDGE_DEFAULT_DISPLAYMODE  (1)
 
 // Controls (Key/Mouse Buttons)
 #define EDGE_DEFAULT_KEY_FIRE        (kMouse1 + (kGamepadTriggerRight << 16))

@@ -1069,7 +1069,7 @@ void OptionMenuDrawer()
 
         if (current_menu == &res_optmenu && current_menu->items[i].routine == OptionMenuChangeResSize)
         {
-            if (new_window_mode.window_mode == 2)
+            if (new_window_mode.window_mode == kWindowModeBorderless)
             {
                 curry += deltay;
                 continue;
@@ -1235,12 +1235,12 @@ static void OptionMenuResOptDrawer(Style *style, int topy, int bottomy, int dy, 
     float TEXTscale = style->definition_->text_[fontType].scale_;
 
     stbsp_sprintf(tempstring, "%s",
-            new_window_mode.window_mode == 2
+            new_window_mode.window_mode == kWindowModeBorderless
                 ? "Borderless Fullscreen"
-                : (new_window_mode.window_mode == kWindowModeFullscreen ? "Exclusive Fullscreen" : "Windowed"));
+                : "Windowed");
     HUDWriteText(style, fontType, centrex + 15, y, tempstring);
 
-    if (new_window_mode.window_mode < 2)
+    if (new_window_mode.window_mode == kWindowModeWindowed)
     {
         y += dy;
         stbsp_sprintf(tempstring, "%dx%d", new_window_mode.width, new_window_mode.height);
@@ -1262,11 +1262,10 @@ static void OptionMenuResOptDrawer(Style *style, int topy, int bottomy, int dy, 
 
     y += dy;
     y += 5;
-    if (current_window_mode == 2)
+    if (current_window_mode == kWindowModeBorderless)
         stbsp_sprintf(tempstring, "%s", "Borderless Fullscreen");
     else
-        stbsp_sprintf(tempstring, "%d x %d %s", current_screen_width, current_screen_height,
-                current_window_mode == 1 ? "Exclusive Fullscreen" : "Windowed");
+        stbsp_sprintf(tempstring, "%d x %d %s", current_screen_width, current_screen_height, "Windowed");
 
     HUDWriteText(style, fontType, 160 - (style->fonts_[fontType]->StringWidth(tempstring) * TEXTscale / 2), y,
                  tempstring);
@@ -1375,7 +1374,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
         do
         {
             current_menu->pos++;
-            if (current_menu == &res_optmenu && new_window_mode.window_mode == 2)
+            if (current_menu == &res_optmenu && new_window_mode.window_mode == kWindowModeBorderless)
             {
                 if (current_menu->pos >= 0 && current_menu->pos < current_menu->item_number)
                 {
@@ -1396,7 +1395,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
         do
         {
             current_menu->pos++;
-            if (current_menu == &res_optmenu && new_window_mode.window_mode == 2)
+            if (current_menu == &res_optmenu && new_window_mode.window_mode == kWindowModeBorderless)
             {
                 if (current_menu->pos >= 0 && current_menu->pos < current_menu->item_number)
                 {
@@ -1426,7 +1425,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
         do
         {
             current_menu->pos--;
-            if (current_menu == &res_optmenu && new_window_mode.window_mode == 2)
+            if (current_menu == &res_optmenu && new_window_mode.window_mode == kWindowModeBorderless)
             {
                 if (current_menu->pos >= 0 && current_menu->pos < current_menu->item_number)
                 {
@@ -1447,7 +1446,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
         do
         {
             current_menu->pos--;
-            if (current_menu == &res_optmenu && new_window_mode.window_mode == 2)
+            if (current_menu == &res_optmenu && new_window_mode.window_mode == kWindowModeBorderless)
             {
                 if (current_menu->pos >= 0 && current_menu->pos < current_menu->item_number)
                 {
@@ -2132,14 +2131,7 @@ static void OptionMenuionSetResolution(int key_pressed, ConsoleVariable *console
 {
     if (ChangeResolution(&new_window_mode))
     {
-        if (new_window_mode.window_mode > kWindowModeWindowed)
-        {
-            toggle_fullscreen_depth       = new_window_mode.depth;
-            toggle_fullscreen_height      = new_window_mode.height;
-            toggle_fullscreen_width       = new_window_mode.width;
-            toggle_fullscreen_window_mode = new_window_mode.window_mode;
-        }
-        else
+        if (new_window_mode.window_mode == kWindowModeWindowed)
         {
             toggle_windowed_depth       = new_window_mode.depth;
             toggle_windowed_height      = new_window_mode.height;

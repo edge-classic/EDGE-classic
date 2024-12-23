@@ -34,7 +34,6 @@ enum WindowMode
 {
     kWindowModeInvalid = -1,
     kWindowModeWindowed,
-    kWindowModeFullscreen,
     kWindowModeBorderless
 };
 
@@ -44,21 +43,17 @@ struct DisplayMode
     int width       = 0;
     int height      = 0;
     int depth       = 0;
-    int window_mode = kWindowModeWindowed;
+    WindowMode window_mode = kWindowModeWindowed;
 };
 
 // Exported Vars
 extern int                        current_screen_width;
 extern int                        current_screen_height;
 extern int                        current_screen_depth;
-extern int                        current_window_mode;
+extern WindowMode                 current_window_mode;
 extern DisplayMode                borderless_mode;
 extern std::vector<DisplayMode *> screen_modes;
 // CVARs related to Alt+Enter toggling
-extern ConsoleVariable toggle_fullscreen_width;
-extern ConsoleVariable toggle_fullscreen_height;
-extern ConsoleVariable toggle_fullscreen_depth;
-extern ConsoleVariable toggle_fullscreen_window_mode;
 extern ConsoleVariable toggle_windowed_width;
 extern ConsoleVariable toggle_windowed_height;
 extern ConsoleVariable toggle_windowed_depth;

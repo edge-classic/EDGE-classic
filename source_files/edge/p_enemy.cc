@@ -609,8 +609,9 @@ void A_BrainMissileExplode(MapObject *mo)
     SpawnDeathMissile(mo->source_, x, y, z);
 }
 
-void A_BrainDie(MapObject *bossbrain)
+void A_BrainDie(MapObject *mo)
 {
+    EPI_UNUSED(mo);
     ExitLevel(kTicRate);
 }
 

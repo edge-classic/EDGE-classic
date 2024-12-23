@@ -792,7 +792,7 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
 
     ec_frame_stats.draw_wall_parts++;
 
-    (void)opaque;
+    EPI_UNUSED(opaque);
 
     if (surf->override_properties)
         props = surf->override_properties;
@@ -977,7 +977,7 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
         int   old_blend = data.blending;
         float old_dt    = data.trans;
         data.blending   = kBlendingMasked | kBlendingAlpha;
-        data.trans      = 0.33f;
+        data.trans      = 85;
         trans           = 0.33f;
         cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id, trans, &data.pass, data.blending, false, &data,
                               WallCoordFunc);
@@ -1840,7 +1840,7 @@ static void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref, 
 {
     EDGE_ZoneScoped;
 
-    (void)dfloor;
+    EPI_UNUSED(dfloor);
 
     if (total_active_mirrors > 0)
         return;

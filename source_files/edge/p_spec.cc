@@ -74,11 +74,13 @@ static bool DoPlaneWrapper(Sector *s, const void *p1, void *p2)
 
 static bool DoLightsWrapper(Sector *s, const void *p1, void *p2)
 {
+    EPI_UNUSED(p2);
     return RunSectorLight(s, (const LightSpecialDefinition *)p1);
 }
 
 static bool DoDonutWrapper(Sector *s, const void *p1, void *p2)
 {
+    EPI_UNUSED(p1);
     return RunDonutSpecial(s, (SoundEffect **)p2);
 }
 
@@ -1620,7 +1622,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special, int tag, 
 
     if (special->trigger_effect_ && tag > 0)
     {
-        ScriptEnableByTag(thing, tag, special->trigger_effect_ < 0, kTriggerTagNumber);
+        ScriptEnableByTag(tag, special->trigger_effect_ < 0, kTriggerTagNumber);
         texSwitch = true;
     }
 

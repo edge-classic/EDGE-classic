@@ -830,7 +830,7 @@ static void CastDrawer(void)
         if (md->md2_model_)
             MD2RenderModel2D(md->md2_model_, skin_img, cast_state->frame, pos_x, pos_y, scale_x, scale_y, cast_order);
         else if (md->mdl_model_)
-            MDLRenderModel2D(md->mdl_model_, skin_img, cast_state->frame, pos_x, pos_y, scale_x, scale_y, cast_order);
+            MDLRenderModel2D(md->mdl_model_, cast_state->frame, pos_x, pos_y, scale_x, scale_y, cast_order);
 
         render_state->Disable(GL_DEPTH_TEST);
         return;
@@ -861,7 +861,7 @@ static void CastDrawer(void)
     height *= scale_y;
 
     HUDRawImage(pos_x - offset_x, pos_y + offset_y, pos_x - offset_x + width, pos_y + offset_y + height, image,  flip ? image->Right() : 0, 0,
-                flip ? 0 : image->Right(), image->Top(), 1.0f, kRGBANoValue, cast_order->palremap_);
+                flip ? 0 : image->Right(), image->Top(), 1.0f, kRGBANoValue);
 }
 
 //

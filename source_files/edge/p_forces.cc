@@ -85,6 +85,7 @@ static void WindCurrentForce(Force *f, MapObject *mo)
 
 static bool PushThingCallback(MapObject *mo, void *dataptr)
 {
+    EPI_UNUSED(dataptr);
     if (!(mo->hyper_flags_ & kHyperFlagPushable))
         return true;
 

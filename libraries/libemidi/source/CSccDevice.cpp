@@ -306,6 +306,7 @@ void CSccDevice::_UpdateProgram(uint32_t ch)
 
 void CSccDevice::SetProgram(uint32_t ch, uint8_t bank, uint8_t prog)
 {
+    (void)bank;
     m_ci[ch].program = prog;
 }
 

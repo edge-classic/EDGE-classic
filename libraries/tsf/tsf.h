@@ -546,8 +546,13 @@ static void tsf_region_operator(struct tsf_region* region, tsf_u16 genOper, unio
 
 		_GEN_MAX = 59
 	};
-	#define _TSFREGIONOFFSET(TYPE, FIELD) (unsigned char)(((TYPE*)&((struct tsf_region*)0)->FIELD) - (TYPE*)0)
-	#define _TSFREGIONENVOFFSET(TYPE, ENV, FIELD) (unsigned char)(((TYPE*)&((&(((struct tsf_region*)0)->ENV))->FIELD)) - (TYPE*)0)
+	static const struct tsf_region dummy_region = 
+	{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}, 
+		{0, 0, 0, 0, 0, 0, 0, 0}, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	};
+	#define _TSFREGIONOFFSET(TYPE, FIELD) (unsigned char)((TYPE*)&dummy_region.FIELD - (TYPE*)&dummy_region)
+	#define _TSFREGIONENVOFFSET(TYPE, ENV, FIELD) (unsigned char)((TYPE*)&dummy_region.ENV.FIELD - (TYPE*)&dummy_region)
 	static const struct { unsigned char mode, offset; } genMetas[_GEN_MAX] =
 	{
 		{ GEN_UINT_ADD                     , _TSFREGIONOFFSET(unsigned int, offset               ) }, // 0 StartAddrsOffset
@@ -985,6 +990,7 @@ static int tsf_load_samples(void** pRawBuffer, float** pFloatBuffer, unsigned in
 	*pSmplCount = resNum;
 	return (*pFloatBuffer ? 1 : 0);
 	#else
+	(void)pRawBuffer;
 	// Inline convert the samples from short to float
 	float *res, *out; const short *in;
 	*pSmplCount = chunkSmpl->size / (unsigned int)sizeof(short);

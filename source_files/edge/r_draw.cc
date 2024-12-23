@@ -31,7 +31,7 @@
 #include "r_modes.h"
 #include "r_units.h"
 
-void NewScreenSize(int width, int height, int bits)
+void NewScreenSize()
 {
     
     render_backend->SetupMatrices2D();

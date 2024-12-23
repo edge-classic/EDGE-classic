@@ -193,7 +193,8 @@ static void PlaylistParseField(const char *field, const char *contents, int inde
 #if (DDF_DEBUG)
     LogDebug("PLAYLIST_PARSE: %s = %s;\n", field, contents);
 #endif
-
+    EPI_UNUSED(index);
+    EPI_UNUSED(is_last);
     if (DDFCompareName(field, "MUSICINFO") == 0)
     {
         DDFMusicParseInfo(contents);

@@ -1182,7 +1182,6 @@ static const char *RADCheckPattern(const uint8_t *&s, const uint8_t *e, bool rif
                     return g_RADPattTruncated;
                 uint8_t note    = *s++;
                 uint8_t notenum = note & 15;
-                uint8_t octave  = (note >> 4) & 7;
                 if (notenum == 0 || notenum == 13 || notenum == 14)
                     return g_RADPattBadNoteNum;
             }
@@ -1414,6 +1413,9 @@ const char *RADValidate(const void *data, size_t data_size)
 //==================================================================================================
 static void RADPlayerDummyOPL3(void *arg, uint16_t reg, uint8_t data)
 {
+    (void)arg;
+    (void)reg;
+    (void)data;
 }
 //--------------------------------------------------------------------------------------------------
 uint32_t RADPlayer::ComputeTotalTime()

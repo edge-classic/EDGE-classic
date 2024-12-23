@@ -1,4 +1,5 @@
 
+#include "epi.h"
 #include "r_backend.h"
 #include "r_state.h"
 #include "sokol_images.h"
@@ -140,14 +141,18 @@ class SokolRenderState : public RenderState
 
     void CullFace(GLenum mode)
     {
+        EPI_UNUSED(mode);
     }
 
     void AlphaFunction(GLenum func, GLfloat ref)
     {
+        EPI_UNUSED(func);
+        EPI_UNUSED(ref);
     }
 
     void ActiveTexture(GLenum activeTexture)
     {
+        EPI_UNUSED(activeTexture);
     }
 
     void Scissor(GLint x, GLint y, GLsizei width, GLsizei height)
@@ -158,14 +163,18 @@ class SokolRenderState : public RenderState
 
     void PolygonOffset(GLfloat factor, GLfloat units)
     {
+        EPI_UNUSED(factor);
+        EPI_UNUSED(units);
     }
 
     void Clear(GLbitfield mask)
     {
+        EPI_UNUSED(mask);
     }
 
     void ClearColor(RGBAColor color)
     {
+        EPI_UNUSED(color);
     }
 
     void FogMode(GLint fogMode)
@@ -195,34 +204,45 @@ class SokolRenderState : public RenderState
 
     void GLColor(RGBAColor color)
     {
+        EPI_UNUSED(color);
     }
 
     void BlendFunction(GLenum sfactor, GLenum dfactor)
     {
+        EPI_UNUSED(sfactor);
+        EPI_UNUSED(dfactor);
     }
 
     void TextureEnvironmentMode(GLint param)
     {
+        EPI_UNUSED(param);
     }
 
     void TextureEnvironmentCombineRGB(GLint param)
     {
+        EPI_UNUSED(param);
     }
 
     void TextureEnvironmentSource0RGB(GLint param)
     {
+        EPI_UNUSED(param);
     }
 
     void MultiTexCoord(GLuint tex, const HMM_Vec2 *coords)
     {
+        EPI_UNUSED(tex);
+        EPI_UNUSED(coords);
     }
 
     void Hint(GLenum target, GLenum mode)
     {
+        EPI_UNUSED(target);
+        EPI_UNUSED(mode);
     }
 
     void LineWidth(float width)
     {
+        EPI_UNUSED(width);
     }
 
     void DeleteTexture(const GLuint *tex_id)
@@ -242,14 +262,20 @@ class SokolRenderState : public RenderState
 
     void FrontFace(GLenum wind)
     {
+        EPI_UNUSED(wind);
     }
 
     void ShadeModel(GLenum model)
     {
+        EPI_UNUSED(model);
     }
 
     void ColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha)
     {
+        EPI_UNUSED(red);
+        EPI_UNUSED(green);
+        EPI_UNUSED(blue);
+        EPI_UNUSED(alpha);
     }
 
     void BindTexture(GLuint textureid)
@@ -267,6 +293,7 @@ class SokolRenderState : public RenderState
 
     void GenTextures(GLsizei n, GLuint *textures)
     {
+        EPI_UNUSED(n);
         generating_texture_ = true;
         texture_level_      = 0;
 
@@ -298,6 +325,7 @@ class SokolRenderState : public RenderState
 
     void FinishTextures(GLsizei n, GLuint *textures)
     {
+        EPI_UNUSED(n);
         if (!mip_levels_.size())
         {
             FatalError("FinishTextures: No mip levels defined");
@@ -312,6 +340,9 @@ class SokolRenderState : public RenderState
         case SG_PIXELFORMAT_R8:
             bpp = 1;
             break;
+        default:
+            bpp = 0;
+            break;
         }
 
         if (!bpp)
@@ -319,9 +350,11 @@ class SokolRenderState : public RenderState
             FatalError("Unknown texture format");
         }
 
-        sg_image_data img_data = {0};
+        sg_image_data img_data;
+        EPI_CLEAR_MEMORY(&img_data, sg_image_data, 1);
 
-        sg_image_desc img_desc = {0};
+        sg_image_desc img_desc;
+        EPI_CLEAR_MEMORY(&img_desc, sg_image_desc, 1);
         img_desc.usage         = texture_usage_;
         img_desc.width         = mip_levels_[0].width_;
         img_desc.height        = mip_levels_[0].height_;
@@ -345,7 +378,8 @@ class SokolRenderState : public RenderState
         sg_image image = sg_make_image(&img_desc);
         *textures      = image.id;
 
-        sg_sampler_desc sampler_desc = {0};
+        sg_sampler_desc sampler_desc;
+        EPI_CLEAR_MEMORY(&sampler_desc, sg_sampler_desc, 1);
 
         sampler_desc.wrap_u = SG_WRAP_REPEAT;
         sampler_desc.wrap_v = SG_WRAP_REPEAT;
@@ -419,6 +453,11 @@ class SokolRenderState : public RenderState
     void TexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border,
                     GLenum format, GLenum type, const void *pixels, RenderUsage usage = kRenderUsageImmutable)
     {
+        EPI_UNUSED(format);
+        EPI_UNUSED(type);
+        EPI_UNUSED(target);
+        EPI_UNUSED(border);
+
         sg_pixel_format sg_texture_format = SG_PIXELFORMAT_NONE;
 
         texture_usage_ = usage == kRenderUsageImmutable ? SG_USAGE_IMMUTABLE : SG_USAGE_DYNAMIC;
@@ -496,7 +535,8 @@ class SokolRenderState : public RenderState
 
         itr->second->update_frame_ = backend_frame;
 
-        sg_image_data image_data = {0};
+        sg_image_data image_data;
+        EPI_CLEAR_MEMORY(&image_data, sg_image_data, 1);
         sg_range      range;
         range.ptr                 = pixels;
         range.size                = width * height * bpp;
@@ -510,14 +550,25 @@ class SokolRenderState : public RenderState
 
     void PixelStorei(GLenum pname, GLint param)
     {
+        EPI_UNUSED(pname);
+        EPI_UNUSED(param);
     }
 
     void ReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, void *pixels)
     {
+        EPI_UNUSED(x);
+        EPI_UNUSED(y);
+        EPI_UNUSED(width);
+        EPI_UNUSED(height);
+        EPI_UNUSED(format);
+        EPI_UNUSED(type);
+        EPI_UNUSED(pixels);
     }
 
     void PixelZoom(GLfloat xfactor, GLfloat yfactor)
     {
+        EPI_UNUSED(xfactor);
+        EPI_UNUSED(yfactor);
     }
 
     void Flush()

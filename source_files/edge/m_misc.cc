@@ -285,8 +285,8 @@ static void SetToBaseValue(ConfigurationDefault *def)
 
 void ResetDefaults(int dummy, ConsoleVariable *dummy_cvar)
 {
-    (void)dummy;
-    (void)dummy_cvar;
+    EPI_UNUSED(dummy);
+    EPI_UNUSED(dummy_cvar);
     for (int i = 0; i < total_defaults; i++)
     {
         // don't reset the first five entries except at startup

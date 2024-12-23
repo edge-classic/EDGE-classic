@@ -87,7 +87,7 @@ class note_factory : uncopyable
     virtual note *note_on(int_least32_t program, int note, int velocity, float frequency_multiplier) = 0;
 
   protected:
-    ~note_factory()
+    virtual ~note_factory()
     {
     }
 };

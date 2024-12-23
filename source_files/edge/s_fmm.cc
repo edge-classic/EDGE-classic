@@ -69,7 +69,7 @@ class FMMPlayer : public AbstractMusicPlayer
     FMMInterface *fmm_interface_;
 
   public:
-    FMMPlayer(uint8_t *data, int length, bool looping) : status_(kNotLoaded), looping_(looping)
+    FMMPlayer(bool looping) : status_(kNotLoaded), looping_(looping)
     {
         SequencerInit();
     }
@@ -134,16 +134,16 @@ class FMMPlayer : public AbstractMusicPlayer
 
     static void rtDeviceSwitch(void *userdata, size_t track, const char *data, size_t length)
     {
-        (void)userdata;
-        (void)track;
-        (void)data;
-        (void)length;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(track);
+        EPI_UNUSED(data);
+        EPI_UNUSED(length);
     }
 
     static size_t rtCurrentDevice(void *userdata, size_t track)
     {
-        (void)userdata;
-        (void)track;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(track);
         return 0;
     }
 
@@ -157,7 +157,7 @@ class FMMPlayer : public AbstractMusicPlayer
     {
         fmm_sequencer_ = new FMMSequencer;
         fmm_interface_ = new FMMInterface;
-        memset(fmm_interface_, 0, sizeof(MidiRealTimeInterface));
+        EPI_CLEAR_MEMORY(fmm_interface_, MidiRealTimeInterface, 1);
 
         fmm_interface_->rtUserData           = this;
         fmm_interface_->rt_noteOn            = rtNoteOn;
@@ -312,7 +312,7 @@ class FMMPlayer : public AbstractMusicPlayer
 
 AbstractMusicPlayer *PlayFMMMusic(uint8_t *data, int length, bool loop)
 {
-    FMMPlayer *player = new FMMPlayer(data, length, loop);
+    FMMPlayer *player = new FMMPlayer(loop);
 
     if (!player)
     {

@@ -109,7 +109,7 @@ class Image
 
     int source_type_; // image_source_e
 
-    union {
+    union ImageSource {
         // case kImageSourceGraphic:
         // case kImageSourceSprite:
         // case kImageSourceTXHI:
@@ -159,7 +159,7 @@ class Image
 
     // --- animation info ---
 
-    struct
+    struct ImageAnimation
     {
         // current version of this image in the animation.  Initially points
         // to self.  For non-animated images, doesn't change.  Otherwise

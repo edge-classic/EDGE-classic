@@ -213,8 +213,8 @@ bool SubFile::Seek(int offset, int seekpoint)
 
 unsigned int SubFile::Write(const void *src, unsigned int size)
 {
-    (void)src;
-    (void)size;
+    EPI_UNUSED(src);
+    EPI_UNUSED(size);
 
     FatalError("SubFile::Write called.\n");
 
@@ -315,8 +315,8 @@ bool MemFile::Seek(int offset, int seekpoint)
 
 unsigned int MemFile::Write(const void *src, unsigned int size)
 {
-    (void)src;
-    (void)size;
+    EPI_UNUSED(src);
+    EPI_UNUSED(size);
 
     FatalError("MemFile::Write called.\n");
 

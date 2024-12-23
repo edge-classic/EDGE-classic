@@ -43,12 +43,12 @@ namespace ajbsp
 #else
 void FileMessage(const char *format, ...)
 {
-    (void)format;
+    EPI_UNUSED(format);
 }
 
 void LumpWarning(const char *format, ...)
 {
-    (void)format;
+    EPI_UNUSED(format);
 }
 #endif
 
@@ -90,7 +90,7 @@ Lump::~Lump()
 void Lump::MakeEntry(struct RawWadEntry *entry)
 {
     // do a dance to avoid a compiler warning from strncpy(), *sigh*
-    memset(entry->name, 0, 8);
+    EPI_CLEAR_MEMORY(entry->name, char, 8);
     memcpy(entry->name, name_, strlen(name_));
 
     entry->position = AlignedLittleEndianU32(lump_start_);
@@ -327,7 +327,7 @@ WadFile *WadFile::Create(std::string filename, char mode)
     // write out base header
     RawWadHeader header;
 
-    memset(&header, 0, sizeof(header));
+    EPI_CLEAR_MEMORY(&header, RawWadHeader, 1);
     memcpy(header.magic, "PWAD", 4);
 
     fwrite(&header, sizeof(header), 1, fp);

@@ -17,7 +17,6 @@
 //
 //----------------------------------------------------------------------
 
-#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,13 +25,14 @@
 #include <vector>
 
 #include "c_local.h"
+#include "epi.h"
 
 namespace coal
 {
 
 MemoryBlockGroup::MemoryBlockGroup() : pos_(0)
 {
-    memset(blocks_, 0, sizeof(blocks_));
+    EPI_CLEAR_MEMORY(blocks_, MemoryBlock *, 256);
 }
 
 MemoryBlockGroup::~MemoryBlockGroup()
@@ -149,7 +149,7 @@ int MemoryBlockGroup::TotalMemory() const
 
 MemoryManager::MemoryManager() : pos_(0)
 {
-    memset(groups_, 0, sizeof(groups_));
+    EPI_CLEAR_MEMORY(groups_, MemoryBlockGroup *, 256);
 }
 
 MemoryManager::~MemoryManager()
@@ -166,7 +166,7 @@ int MemoryManager::Alloc(int len)
 
     for (;;)
     {
-        assert(pos_ < 256);
+        EPI_ASSERT(pos_ < 256);
 
         if (!groups_[pos_])
             groups_[pos_] = new MemoryBlockGroup;

@@ -92,6 +92,8 @@ class GLRenderBackend : public RenderBackend
 
     void StartFrame(int32_t width, int32_t height)
     {
+        EPI_UNUSED(width);
+        EPI_UNUSED(height);
         frame_number_++;
     }
 
@@ -107,7 +109,8 @@ class GLRenderBackend : public RenderBackend
 
     void Resize(int32_t width, int32_t height)
     {
-
+        EPI_UNUSED(width);
+        EPI_UNUSED(height);
     }
 
     void Shutdown()

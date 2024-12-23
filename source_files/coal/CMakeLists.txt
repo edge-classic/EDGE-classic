@@ -9,7 +9,7 @@ add_library(
   c_memory.cc
 )
 
-target_link_libraries(edge_coal PRIVATE almostequals stb)
+target_link_libraries(edge_coal PRIVATE almostequals edge_epi stb)
 
 target_include_directories(edge_coal PUBLIC ./)
 

@@ -309,6 +309,7 @@ void COpllDevice::SetBend(uint32_t ch, int8_t coarse, int8_t fine)
 
 void COpllDevice::SetProgram(uint32_t ch, uint8_t bank, uint8_t prog)
 {
+    (void)bank;
     m_ci[ch].program = program_table[prog];
     _UpdateVolume(ch);
 }

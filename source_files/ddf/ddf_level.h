@@ -20,6 +20,7 @@
 
 #include "ddf_colormap.h"
 #include "ddf_types.h"
+#include "epi.h"
 
 class GameDefinition;
 
@@ -175,11 +176,11 @@ class MapDefinition
     // disable copy construct and assignment operator
     explicit MapDefinition(MapDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
     }
     MapDefinition &operator=(MapDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
         return *this;
     }
 };

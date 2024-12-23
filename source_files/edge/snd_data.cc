@@ -20,6 +20,7 @@
 
 #include <string.h>
 
+#include "epi.h"
 #include "HandmadeMath.h"
 
 SoundData::SoundData()
@@ -85,10 +86,10 @@ void SoundData::MixSubmerged()
         int reverbed = 0;
         if (!filter_data_)
             filter_data_ = new int16_t[length_ * 2];
-        memset(filter_data_, 0, length_ * sizeof(int16_t) * 2);
+        EPI_CLEAR_MEMORY(filter_data_, int16_t, length_ * 2);
         if (!reverb_buffer_)
             reverb_buffer_ = new int[length_ * 2];
-        memset(reverb_buffer_, 0, length_ * sizeof(int) * 2);
+        EPI_CLEAR_MEMORY(reverb_buffer_, int, length_ * 2);
         for (int i = 0; i < length_ * 2; i++)
         {
             filter_data_[i] = out_L = accum_L >> k;
@@ -123,7 +124,7 @@ void SoundData::MixVacuum()
         int k       = 5;
         if (!filter_data_)
             filter_data_ = new int16_t[length_ * 2];
-        memset(filter_data_, 0, length_ * sizeof(int16_t) * 2);
+        EPI_CLEAR_MEMORY(filter_data_, int16_t, length_ * 2);
         for (int i = 0; i < length_ * 2; i += 2)
         {
             filter_data_[i] = out_L = accum_L >> k;
@@ -151,10 +152,10 @@ void SoundData::MixReverb(bool dynamic_reverb, float room_area, bool outdoor_rev
             int  reverbed = 0;
             if (!filter_data_)
                 filter_data_ = new int16_t[length_ * 2];
-            memset(filter_data_, 0, length_ * sizeof(int16_t) * 2);
+            EPI_CLEAR_MEMORY(filter_data_, int16_t, length_ * 2);
             if (!reverb_buffer_)
                 reverb_buffer_ = new int[length_ * 2];
-            memset(reverb_buffer_, 0, length_ * sizeof(int) * 2);
+            EPI_CLEAR_MEMORY(reverb_buffer_, int, length_ * 2);
             for (int i = 0; i < length_ * 2; i++)
             {
                 if (ddf_reverb_type == 2)
@@ -212,10 +213,10 @@ void SoundData::MixReverb(bool dynamic_reverb, float room_area, bool outdoor_rev
             int  reverbed = 0;
             if (!filter_data_)
                 filter_data_ = new int16_t[length_ * 2];
-            memset(filter_data_, 0, length_ * sizeof(int16_t) * 2);
+            EPI_CLEAR_MEMORY(filter_data_, int16_t, length_ * 2);
             if (!reverb_buffer_)
                 reverb_buffer_ = new int[length_ * 2];
-            memset(reverb_buffer_, 0, length_ * sizeof(int) * 2);
+            EPI_CLEAR_MEMORY(reverb_buffer_, int, length_ * 2);
             for (int i = 0; i < length_ * 2; i++)
             {
                 if (outdoor_reverb)

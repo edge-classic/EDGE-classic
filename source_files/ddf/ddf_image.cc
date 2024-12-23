@@ -139,7 +139,8 @@ static void ImageParseField(const char *field, const char *contents, int index, 
 #if (DDF_DEBUG)
     LogDebug("IMAGE_PARSE: %s = %s;\n", field, contents);
 #endif
-
+    EPI_UNUSED(index);
+    EPI_UNUSED(is_last);
     if (DDFMainParseField(image_commands, field, contents, (uint8_t *)dynamic_image))
         return; // OK
 
@@ -256,6 +257,7 @@ static void ImageParseLump(const char *spec)
 
 static void DDFImageGetType(const char *info, void *storage)
 {
+    EPI_UNUSED(storage);
     const char *colon = DDFMainDecodeList(info, ':', true);
 
     if (colon == nullptr || colon == info || (colon - info) >= 16 || colon[1] == 0)

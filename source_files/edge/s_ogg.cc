@@ -51,7 +51,6 @@ class OGGPlayer : public AbstractMusicPlayer
     int status_;
 
     bool looping_;
-    bool is_stereo_;
 
     stb_vorbis *ogg_decoder_;
 

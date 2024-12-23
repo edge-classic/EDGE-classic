@@ -10,6 +10,7 @@
 #include "sokol_d3d11.h"
 #endif
 
+#include "epi.h"
 #include "i_video.h"
 
 // clang-format on
@@ -89,7 +90,7 @@ class SokolRenderBackend : public RenderBackend
         pass_action.depth.load_action = SG_LOADACTION_CLEAR;
         pass_action.depth.clear_value = 1.0f;
 
-        pass_                          = {0};
+        EPI_CLEAR_MEMORY(&pass_, sg_pass, 1);
         pass_.action                   = pass_action;
         pass_.swapchain.width          = width;
         pass_.swapchain.height         = height;
@@ -149,6 +150,9 @@ class SokolRenderBackend : public RenderBackend
         deferred_resize        = true;
         deferred_resize_width  = width;
         deferred_resize_height = height;
+#else
+        EPI_UNUSED(width);
+        EPI_UNUSED(height);
 #endif
     }
 
@@ -167,7 +171,7 @@ class SokolRenderBackend : public RenderBackend
         max_texture_size_ = 4096;
 
         sg_environment env;
-        memset(&env, 0, sizeof(env));
+        EPI_CLEAR_MEMORY(&env, sg_environment, 1);
         env.defaults.color_format = SG_PIXELFORMAT_RGBA8;
         env.defaults.depth_format = SG_PIXELFORMAT_DEPTH;
         env.defaults.sample_count = 1;
@@ -178,7 +182,8 @@ class SokolRenderBackend : public RenderBackend
         env.d3d11.device_context = sapp_d3d11_get_device_context();
 #endif
 
-        sg_desc desc{0};
+        sg_desc desc;
+        EPI_CLEAR_MEMORY(&desc, sg_desc, 1);
         desc.environment        = env;
         desc.logger.func        = slog_func;
         desc.pipeline_pool_size = 512;
@@ -192,7 +197,7 @@ class SokolRenderBackend : public RenderBackend
         }
 
         sgl_desc_t sgl_desc;
-        memset(&sgl_desc, 0, sizeof(sgl_desc));
+        EPI_CLEAR_MEMORY(&sgl_desc, sgl_desc_t, 1);
         sgl_desc.color_format       = SG_PIXELFORMAT_RGBA8;
         sgl_desc.depth_format       = SG_PIXELFORMAT_DEPTH;
         sgl_desc.sample_count       = 1;
@@ -201,7 +206,8 @@ class SokolRenderBackend : public RenderBackend
         sgl_setup(&sgl_desc);
 
         // 2D
-        sgl_context_desc_t context_desc_2d = {0};
+        sgl_context_desc_t context_desc_2d;
+        EPI_CLEAR_MEMORY(&context_desc_2d, sgl_context_desc_t, 1);
         context_desc_2d.color_format       = SG_PIXELFORMAT_RGBA8;
         context_desc_2d.depth_format       = SG_PIXELFORMAT_DEPTH;
         context_desc_2d.sample_count       = 1;
@@ -211,7 +217,8 @@ class SokolRenderBackend : public RenderBackend
         context_2d_ = sgl_make_context(&context_desc_2d);
 
         // 3D
-        sgl_context_desc_t context_desc_3d = {0};
+        sgl_context_desc_t context_desc_3d;
+        EPI_CLEAR_MEMORY(&context_desc_3d, sgl_context_desc_t, 1);
         context_desc_3d.color_format       = SG_PIXELFORMAT_RGBA8;
         context_desc_3d.depth_format       = SG_PIXELFORMAT_DEPTH;
         context_desc_3d.sample_count       = 1;
@@ -242,12 +249,16 @@ class SokolRenderBackend : public RenderBackend
     }
 
   private:
+#ifdef SOKOL_D3D11
     bool    deferred_resize        = false;
     int32_t deferred_resize_width  = 0;
     int32_t deferred_resize_height = 0;
+#endif
 
+/*
     simgui_frame_desc_t imgui_frame_desc_;
     sgimgui_t           sg_imgui_;
+*/
 
     // 2D
     sgl_context context_2d_;

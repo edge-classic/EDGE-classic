@@ -1,5 +1,7 @@
 #include "sokol_images.h"
 
+#include "epi.h"
+
 static constexpr uint32_t kMaxSamplers = 256;
 
 static sg_sampler                             samplers[kMaxSamplers];
@@ -46,8 +48,8 @@ void GetImageSampler(uint32_t imageId, uint32_t *sampler_id)
 void InitImages()
 {
     num_samplers = 0;
-    memset(samplers, 0, sizeof(sg_sampler) * kMaxSamplers);
-    memset(sampler_descs, 0, sizeof(sg_sampler_desc) * kMaxSamplers);
+    EPI_CLEAR_MEMORY(samplers, sg_sampler, kMaxSamplers);
+    EPI_CLEAR_MEMORY(sampler_descs, sg_sampler_desc, kMaxSamplers);
 }
 
 static std::vector<sg_image> deleted_images;

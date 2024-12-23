@@ -472,6 +472,7 @@ class GLRenderState : public RenderState
     void TexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border,
                     GLenum format, GLenum type, const void *pixels, RenderUsage usage = kRenderUsageImmutable)
     {
+        EPI_UNUSED(usage);
         glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
     }
 
@@ -502,12 +503,13 @@ class GLRenderState : public RenderState
 
     void FinishTextures(GLsizei n, GLuint *textures)
     {
-
+        EPI_UNUSED(n);
+        EPI_UNUSED(textures);
     }    
 
     void SetPipeline(uint32_t flags)
     {
-
+        EPI_UNUSED(flags);
     }
 
     int frameStateChanges_ = 0;

@@ -174,9 +174,11 @@ class StyleDefinition
     // disable copy construct and assignment operator
     explicit StyleDefinition(StyleDefinition &rhs)
     {
+        EPI_UNUSED(rhs);
     }
     StyleDefinition &operator=(StyleDefinition &rhs)
     {
+        EPI_UNUSED(rhs);
         return *this;
     }
 };

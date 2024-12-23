@@ -73,11 +73,11 @@ void SaveGameStructSave(void *base, SaveStruct *info)
             {
             case kSaveFieldStruct:
             case kSaveFieldIndex:
-                (*cur->field_put)(storage, i, (char *)cur->type.name);
+                (*cur->field_put)(storage, i);
                 break;
 
             default:
-                (*cur->field_put)(storage, i, nullptr);
+                (*cur->field_put)(storage, i);
                 break;
             }
         }

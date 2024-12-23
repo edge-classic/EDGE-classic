@@ -660,13 +660,13 @@ static void DrawEndoomChar(float x, float y, char ch, RGBAColor col, RGBAColor c
                                                  0, kBlendingNone);
 
     glvert->rgba = col2;
-    glvert++->position = {{x - (enwidth / 2), y}};
+    glvert++->position = {{x - (enwidth / 2), y, 0}};
     glvert->rgba = col2;
-    glvert++->position = {{x - (enwidth / 2), y + FNSZ}};
+    glvert++->position = {{x - (enwidth / 2), y + FNSZ, 0}};
     glvert->rgba = col2;
-    glvert++->position = {{x + (enwidth / 2), y + FNSZ}};
+    glvert++->position = {{x + (enwidth / 2), y + FNSZ, 0}};
     glvert->rgba = col2;
-    glvert->position = {{x + (enwidth / 2), y}};
+    glvert->position = {{x + (enwidth / 2), y, 0}};
 
 
     EndRenderUnit(4);
@@ -688,16 +688,16 @@ static void DrawEndoomChar(float x, float y, char ch, RGBAColor col, RGBAColor c
 
     glvert->rgba = col;
     glvert->texture_coordinates[0] = {{tx1, ty1}};
-    glvert++->position = {{x - enwidth, y}};
+    glvert++->position = {{x - enwidth, y, 0}};
     glvert->rgba = col;
     glvert->texture_coordinates[0] = {{tx1, ty2}};
-    glvert++->position = {{x - enwidth, y + FNSZ}};
+    glvert++->position = {{x - enwidth, y + FNSZ, 0}};
     glvert->rgba = col;
     glvert->texture_coordinates[0] = {{tx2, ty2}};
-    glvert++->position = {{x + enwidth, y + FNSZ}};
+    glvert++->position = {{x + enwidth, y + FNSZ, 0}};
     glvert->rgba = col;
     glvert->texture_coordinates[0] = {{tx2, ty1}};
-    glvert->position = {{x + enwidth, y}};
+    glvert->position = {{x + enwidth, y, 0}};
 
     EndRenderUnit(4);
 }
@@ -872,7 +872,7 @@ void ConsoleDrawer(void)
         const Image *img = console_style->background_image_;
 
         HUDRawImage(0, y, current_screen_width, y + CON_GFX_HT, img, 0.0, 0.0, img->Right(), img->Top(),
-                    console_style->definition_->bg_.translucency_, kRGBANoValue, nullptr, 0, 0);
+                    console_style->definition_->bg_.translucency_, kRGBANoValue, 0, 0);
     }
     else
     {

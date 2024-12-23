@@ -119,7 +119,7 @@ void Font::LoadPatches()
     EPI_ASSERT(total >= 1);
 
     images = new const Image *[total];
-    memset(images, 0, sizeof(const Image *) * total);
+    EPI_CLEAR_MEMORY(images, const Image *, total);
 
     // Atlas Stuff
     std::unordered_map<int, ImageData *> patch_data;

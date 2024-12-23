@@ -171,7 +171,7 @@ void CMIDIModule::NoteOn(uint8_t midi_ch, uint8_t note, uint8_t velo)
     m_used_channels[midi_ch].push_back(ki);
 }
 
-void CMIDIModule::NoteOff(uint8_t midi_ch, uint8_t note, uint8_t velo)
+void CMIDIModule::NoteOff(uint8_t midi_ch, uint8_t note)
 {
 
     if (m_drum[midi_ch])
@@ -242,15 +242,19 @@ void CMIDIModule::ResetRPN(uint8_t midi_ch)
 
 void CMIDIModule::LoadNRPN(uint8_t midi_ch, uint16_t data)
 {
+    (void)midi_ch;
+    (void)data;
 }
 
 uint16_t CMIDIModule::SaveNRPN(uint8_t midi_ch)
 {
+    (void)midi_ch;
     return 0;
 }
 
 void CMIDIModule::ResetNRPN(uint8_t midi_ch)
 {
+    (void)midi_ch;
 }
 
 void CMIDIModule::DataEntry(uint8_t midi_ch, bool is_fine, uint8_t data)
@@ -263,7 +267,7 @@ void CMIDIModule::DataEntry(uint8_t midi_ch, bool is_fine, uint8_t data)
     m_entry_mode ? LoadNRPN(midi_ch, entry) : LoadRPN(midi_ch, entry);
 }
 
-void CMIDIModule::DataIncrement(uint8_t midi_ch, uint8_t data)
+void CMIDIModule::DataIncrement(uint8_t midi_ch)
 {
     int entry = m_entry_mode ? SaveNRPN(midi_ch) : SaveRPN(midi_ch);
     if (entry < 0x3FFF)
@@ -271,7 +275,7 @@ void CMIDIModule::DataIncrement(uint8_t midi_ch, uint8_t data)
     m_entry_mode ? LoadNRPN(midi_ch, entry) : LoadRPN(midi_ch, entry);
 }
 
-void CMIDIModule::DataDecrement(uint8_t midi_ch, uint8_t data)
+void CMIDIModule::DataDecrement(uint8_t midi_ch)
 {
     int entry = m_entry_mode ? SaveNRPN(midi_ch) : SaveRPN(midi_ch);
     if (entry > 0)
@@ -355,10 +359,10 @@ void CMIDIModule::ControlChange(uint8_t midi_ch, uint8_t msb, uint8_t lsb)
         case 0x40:
             break;
         case 0x60:
-            DataIncrement(midi_ch, lsb);
+            DataIncrement(midi_ch);
             break;
         case 0x61:
-            DataDecrement(midi_ch, lsb);
+            DataDecrement(midi_ch);
             break;
         case 0x62:
             NRPN(midi_ch, 0, lsb);
@@ -394,12 +398,12 @@ bool CMIDIModule::SendMIDIMsg(const CMIDIMsg &msg)
 
     if (msg.m_type == CMIDIMsg::NOTE_OFF)
     {
-        NoteOff(msg.m_ch, msg.m_data1, msg.m_data2);
+        NoteOff(msg.m_ch, msg.m_data1);
     }
     else if (msg.m_type == CMIDIMsg::NOTE_ON)
     {
         if (msg.m_data2 == 0)
-            NoteOff(msg.m_ch, msg.m_data1, msg.m_data2);
+            NoteOff(msg.m_ch, msg.m_data1);
         else
             NoteOn(msg.m_ch, msg.m_data1, msg.m_data2);
     }

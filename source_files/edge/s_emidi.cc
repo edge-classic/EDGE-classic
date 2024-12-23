@@ -69,7 +69,7 @@ class EMIDIPlayer : public AbstractMusicPlayer
     EMIDIInterface *emidi_interface_;
 
   public:
-    EMIDIPlayer(uint8_t *data, int length, bool looping) : status_(kNotLoaded), looping_(looping)
+    EMIDIPlayer(bool looping) : status_(kNotLoaded), looping_(looping)
     {
         SequencerInit();
     }
@@ -97,10 +97,10 @@ class EMIDIPlayer : public AbstractMusicPlayer
 
     static void rtNoteAfterTouch(void *userdata, uint8_t channel, uint8_t note, uint8_t atVal)
     {
-        (void)userdata;
-        (void)channel;
-        (void)note;
-        (void)atVal;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(channel);
+        EPI_UNUSED(note);
+        EPI_UNUSED(atVal);
     }
 
     static void rtChannelAfterTouch(void *userdata, uint8_t channel, uint8_t atVal)
@@ -129,23 +129,23 @@ class EMIDIPlayer : public AbstractMusicPlayer
 
     static void rtSysEx(void *userdata, const uint8_t *msg, size_t size)
     {
-        (void)userdata;
-        (void)msg;
-        (void)size;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(msg);
+        EPI_UNUSED(size);
     }
 
     static void rtDeviceSwitch(void *userdata, size_t track, const char *data, size_t length)
     {
-        (void)userdata;
-        (void)track;
-        (void)data;
-        (void)length;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(track);
+        EPI_UNUSED(data);
+        EPI_UNUSED(length);
     }
 
     static size_t rtCurrentDevice(void *userdata, size_t track)
     {
-        (void)userdata;
-        (void)track;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(track);
         return 0;
     }
 
@@ -159,7 +159,7 @@ class EMIDIPlayer : public AbstractMusicPlayer
     {
         emidi_sequencer_ = new EMIDISequencer;
         emidi_interface_ = new EMIDIInterface;
-        memset(emidi_interface_, 0, sizeof(MidiRealTimeInterface));
+        EPI_CLEAR_MEMORY(emidi_interface_, MidiRealTimeInterface, 1);
 
         emidi_interface_->rtUserData           = this;
         emidi_interface_->rt_noteOn            = rtNoteOn;
@@ -309,7 +309,7 @@ class EMIDIPlayer : public AbstractMusicPlayer
 
 AbstractMusicPlayer *PlayEMIDIMusic(uint8_t *data, int length, bool loop)
 {
-    EMIDIPlayer *player = new EMIDIPlayer(data, length, loop);
+    EMIDIPlayer *player = new EMIDIPlayer(loop);
 
     if (!player)
     {

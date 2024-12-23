@@ -37,13 +37,8 @@ namespace coal
 struct MemoryBlock
 {
     int used = 0;
-
-// Prevent SIGBUS errors on ARM32 and heap alignment issues with emscripten
-#if defined(__arm__) || defined(EMSCRIPTEN)
+    
     double data[4096];
-#else
-    char data[4096];
-#endif
 };
 
 class MemoryBlockGroup

@@ -444,7 +444,6 @@ RGBAColor ImageData::AverageHue(int from_x, int to_x, int from_y, int to_y)
     int r_sum = 0;
     int g_sum = 0;
     int b_sum = 0;
-    int i_sum = 0;
 
     int weight = 0;
 
@@ -468,8 +467,6 @@ RGBAColor ImageData::AverageHue(int from_x, int to_x, int from_y, int to_y)
             int a = (depth_ == 4) ? src[3] : 255;
 
             int v = HMM_MAX(r, HMM_MAX(g, b));
-
-            i_sum += (v * (1 + a)) >> 9;
 
             // brighten color
             if (v > 0)

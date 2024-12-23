@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include <assert.h>
 #include <errno.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -36,6 +36,7 @@
 #include <memory>
 #include <set>
 
+#include "epi.h"
 #include "stb_sprintf.h"
 
 #if EDGE_MUS_SUPPORT
@@ -278,7 +279,7 @@ static int ConvertMusToMidi(uint8_t *in, uint32_t insize, uint8_t **out, uint32_
         return (-1);
     }
 
-    memset(&ctx, 0, sizeof(struct MusConversionContext));
+    EPI_CLEAR_MEMORY(&ctx, MusConversionContext, 1);
     ctx.src = ctx.src_ptr = in;
     ctx.srcsize           = insize;
 
@@ -572,7 +573,7 @@ static uint32_t XMIToMidiExtractTracksFromXMI(struct XMIToMidiConversionContext 
 static uint32_t XMIToMidiRead1(struct XMIToMidiConversionContext *ctx)
 {
     uint8_t b0;
-    assert(ctx->src_ptr + 1 < ctx->src_end);
+    EPI_ASSERT(ctx->src_ptr + 1 < ctx->src_end);
     b0 = *ctx->src_ptr++;
     return (b0);
 }
@@ -580,7 +581,7 @@ static uint32_t XMIToMidiRead1(struct XMIToMidiConversionContext *ctx)
 static uint32_t XMIToMidiRead2(struct XMIToMidiConversionContext *ctx)
 {
     uint8_t b0, b1;
-    assert(ctx->src_ptr + 2 < ctx->src_end);
+    EPI_ASSERT(ctx->src_ptr + 2 < ctx->src_end);
     b0 = *ctx->src_ptr++;
     b1 = *ctx->src_ptr++;
     return (b0 + ((uint32_t)b1 << 8));
@@ -589,7 +590,7 @@ static uint32_t XMIToMidiRead2(struct XMIToMidiConversionContext *ctx)
 static uint32_t XMIToMidiRead4(struct XMIToMidiConversionContext *ctx)
 {
     uint8_t b0, b1, b2, b3;
-    assert(ctx->src_ptr + 4 < ctx->src_end);
+    EPI_ASSERT(ctx->src_ptr + 4 < ctx->src_end);
     b3 = *ctx->src_ptr++;
     b2 = *ctx->src_ptr++;
     b1 = *ctx->src_ptr++;
@@ -600,7 +601,7 @@ static uint32_t XMIToMidiRead4(struct XMIToMidiConversionContext *ctx)
 static uint32_t XMIToMidiRead4LittleEndian(struct XMIToMidiConversionContext *ctx)
 {
     uint8_t b0, b1, b2, b3;
-    assert(ctx->src_ptr + 4 < ctx->src_end);
+    EPI_ASSERT(ctx->src_ptr + 4 < ctx->src_end);
     b3 = *ctx->src_ptr++;
     b2 = *ctx->src_ptr++;
     b1 = *ctx->src_ptr++;
@@ -610,7 +611,7 @@ static uint32_t XMIToMidiRead4LittleEndian(struct XMIToMidiConversionContext *ct
 
 static void XMIToMidiCopy(struct XMIToMidiConversionContext *ctx, char *b, uint32_t len)
 {
-    assert(ctx->src_ptr + len < ctx->src_end);
+    EPI_ASSERT(ctx->src_ptr + len < ctx->src_end);
     memcpy(b, ctx->src_ptr, len);
     ctx->src_ptr += len;
 }
@@ -1118,7 +1119,7 @@ static int ConvertXMIToMidi(uint8_t *in, uint32_t insize, std::vector<std::vecto
         return (ret);
     }
 
-    memset(&ctx, 0, sizeof(struct XMIToMidiConversionContext));
+    EPI_CLEAR_MEMORY(&ctx, XMIToMidiConversionContext, 1);
     ctx.src = ctx.src_ptr = in;
     ctx.srcsize           = insize;
     ctx.src_end           = ctx.src + insize;
@@ -3135,24 +3136,24 @@ MidiSequencer::~MidiSequencer()
 void MidiSequencer::SetInterface(const MidiRealTimeInterface *intrf)
 {
     // Interface must NOT be nullptr
-    assert(intrf);
+    EPI_ASSERT(intrf);
 
     // Note ON hook is REQUIRED
-    assert(intrf->rt_noteOn);
+    EPI_ASSERT(intrf->rt_noteOn);
     // Note OFF hook is REQUIRED
-    assert(intrf->rt_noteOff || intrf->rt_noteOffVel);
+    EPI_ASSERT(intrf->rt_noteOff || intrf->rt_noteOffVel);
     // Note Aftertouch hook is REQUIRED
-    assert(intrf->rt_noteAfterTouch);
+    EPI_ASSERT(intrf->rt_noteAfterTouch);
     // Channel Aftertouch hook is REQUIRED
-    assert(intrf->rt_channelAfterTouch);
+    EPI_ASSERT(intrf->rt_channelAfterTouch);
     // Controller change hook is REQUIRED
-    assert(intrf->rt_controllerChange);
+    EPI_ASSERT(intrf->rt_controllerChange);
     // Patch change hook is REQUIRED
-    assert(intrf->rt_patchChange);
+    EPI_ASSERT(intrf->rt_patchChange);
     // Pitch bend hook is REQUIRED
-    assert(intrf->rt_pitchBend);
+    EPI_ASSERT(intrf->rt_pitchBend);
     // System Exclusive hook is REQUIRED
-    assert(intrf->rt_systemExclusive);
+    EPI_ASSERT(intrf->rt_systemExclusive);
 
     if (intrf->pcmSampleRate != 0 && intrf->pcmFrameSize != 0)
     {
@@ -3172,7 +3173,7 @@ int MidiSequencer::PlayStream(uint8_t *stream, size_t length)
     size_t   periodSize = 0;
     uint8_t *stream_pos = stream;
 
-    assert(midi_output_interface_->onPcmRender);
+    EPI_ASSERT(midi_output_interface_->onPcmRender);
 
     while (left > 0)
     {
@@ -3193,7 +3194,7 @@ int MidiSequencer::PlayStream(uint8_t *stream, size_t length)
             stream_pos += generateSize * midi_time_.frame_size_;
             count += generateSize;
             left -= generateSize;
-            assert(left <= samples);
+            EPI_ASSERT(left <= samples);
         }
 
         if (midi_time_.time_rest_ <= 0.0)
@@ -3367,7 +3368,7 @@ void MidiSequencer::BuildSMFSetupReset(size_t track_count)
     midi_loop_end_time_         = -1.0;
     midi_loop_format_           = kLoopDefault;
     midi_track_disabled_.clear();
-    memset(m_channelDisable, 0, sizeof(m_channelDisable));
+    EPI_CLEAR_MEMORY(m_channelDisable, bool, 16);
     midi_track_solo_ = ~(size_t)0;
     midi_music_title_.clear();
     midi_music_copyright_.clear();
@@ -3429,7 +3430,7 @@ bool MidiSequencer::BuildSMFTrackData(const std::vector<std::vector<uint8_t>> &t
         bool           ok       = false;
         const uint8_t *end      = track_data[tk].data() + track_data[tk].size();
         const uint8_t *trackPtr = track_data[tk].data();
-        memset(note_states, 0, sizeof(note_states));
+        EPI_CLEAR_MEMORY(note_states, bool, 4080);
 
         // Time delay that follows the first event in the track
         {
@@ -4650,7 +4651,7 @@ void MidiSequencer::handleEvent(size_t track, const MidiSequencer::MidiEvent &ev
 
 double MidiSequencer::Tick(double s, double granularity)
 {
-    assert(midi_output_interface_); // MIDI output interface must be defined!
+    EPI_ASSERT(midi_output_interface_); // MIDI output interface must be defined!
 
     s *= midi_tempo_multiplier_;
     midi_current_position_.wait -= s;
@@ -4886,11 +4887,9 @@ static bool detectIMF(const char *head, epi::MemFile *mfr)
 #endif
 bool MidiSequencer::LoadMidi(epi::MemFile *mfr, uint16_t rate)
 {
-    size_t fsize = 0;
-    (void)(fsize);
     midi_parsing_errors_string_.clear();
 
-    assert(midi_output_interface_); // MIDI output interface must be defined!
+    EPI_ASSERT(midi_output_interface_); // MIDI output interface must be defined!
 
     midi_at_end_ = false;
     midi_loop_.FullReset();
@@ -4904,7 +4903,7 @@ bool MidiSequencer::LoadMidi(epi::MemFile *mfr, uint16_t rate)
     const size_t headerSize            = 4 + 4 + 2 + 2 + 2; // 14
     char         headerBuf[headerSize] = "";
 
-    fsize = mfr->Read(headerBuf, headerSize);
+    size_t fsize = mfr->Read(headerBuf, headerSize);
     if (fsize < headerSize)
     {
         midi_error_string_ = "Unexpected end of file at header!\n";
@@ -5467,7 +5466,7 @@ bool MidiSequencer::ParseXMI(epi::MemFile *mfr)
     size_t mus_len = mfr->GetLength();
     mfr->Seek(0, epi::File::kSeekpointStart);
 
-    uint8_t *mus = (uint8_t *)std::malloc(mus_len + 20);
+    uint8_t *mus = (uint8_t *)malloc(mus_len + 20);
     if (!mus)
     {
         midi_error_string_ = "Out of memory!";
@@ -5475,7 +5474,7 @@ bool MidiSequencer::ParseXMI(epi::MemFile *mfr)
         return false;
     }
 
-    memset(mus, 0, mus_len + 20);
+    EPI_CLEAR_MEMORY(mus, uint8_t, mus_len + 20);
 
     fsize = mfr->Read(mus, mus_len);
     if (fsize < mus_len)

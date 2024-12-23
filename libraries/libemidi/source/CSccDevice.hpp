@@ -72,11 +72,11 @@ class CSccDevice : public ISoundDevice
     bool                   Reset(void);
     bool                   Render(int32_t buf[2]);
 
-    void PercKeyOn(uint8_t note) {};
-    void PercKeyOff(uint8_t note) {};
-    void PercSetVolume(uint8_t vol) {};
-    void PercSetVelocity(uint8_t note, uint8_t velo) {};
-    void PercSetProgram(uint8_t note, uint8_t velo) {};
+    void PercKeyOn(uint8_t note) {(void)note;};
+    void PercKeyOff(uint8_t note) {(void)note;};
+    void PercSetVolume(uint8_t vol) {(void)vol;};
+    void PercSetVelocity(uint8_t note, uint8_t velo) {(void)note; (void)velo;};
+    void PercSetProgram(uint8_t note, uint8_t velo) {(void)note; (void)velo;};
 
     void SetProgram(uint32_t ch, uint8_t bank, uint8_t prog);
     void SetVelocity(uint32_t ch, uint8_t vel);

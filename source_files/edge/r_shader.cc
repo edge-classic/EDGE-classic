@@ -390,6 +390,7 @@ class plane_glow_c : public AbstractShader
 
     inline void TexCoord(HMM_Vec2 *texc, float r, const Sector *sec, const HMM_Vec3 *lit_pos, const HMM_Vec3 *normal)
     {
+        EPI_UNUSED(normal);
         texc->X = 0.5;
         texc->Y = 0.5 + Dist(sec, lit_pos->Z) / r / 2.0;
     }
@@ -412,6 +413,8 @@ class plane_glow_c : public AbstractShader
   public:
     virtual void Sample(ColorMixer *col, float x, float y, float z)
     {
+        EPI_UNUSED(x);
+        EPI_UNUSED(y);
         const Sector *sec = mo->subsector_->sector;
 
         float dist = Dist(sec, z);
@@ -434,6 +437,8 @@ class plane_glow_c : public AbstractShader
 
     virtual void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon)
     {
+        EPI_UNUSED(nx);
+        EPI_UNUSED(ny);
         const Sector *sec = mo->subsector_->sector;
 
         float dz = (mo->info_->glow_type_ == kSectorGlowTypeFloor) ? +1 : -1;
@@ -546,6 +551,8 @@ class wall_glow_c : public AbstractShader
 
     inline void TexCoord(HMM_Vec2 *texc, float r, const Sector *sec, const HMM_Vec3 *lit_pos, const HMM_Vec3 *normal)
     {
+        EPI_UNUSED(sec);
+        EPI_UNUSED(normal);
         texc->X = 0.5;
         texc->Y = 0.5 + Dist(lit_pos->X, lit_pos->Y) / r / 2.0;
     }
@@ -582,6 +589,7 @@ class wall_glow_c : public AbstractShader
 
     virtual void Sample(ColorMixer *col, float x, float y, float z)
     {
+        EPI_UNUSED(z);
         float dist = Dist(x, y);
 
         float L = std::log1p(dist);
@@ -604,6 +612,10 @@ class wall_glow_c : public AbstractShader
 
     virtual void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon = false)
     {
+        EPI_UNUSED(nx);
+        EPI_UNUSED(ny);
+        EPI_UNUSED(nz);
+        EPI_UNUSED(is_weapon);
         float dist = Dist(mod_pos->x, mod_pos->y);
 
         float L = std::log1p(dist);

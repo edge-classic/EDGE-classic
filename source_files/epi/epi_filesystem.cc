@@ -420,6 +420,7 @@ static std::vector<DirectoryEntry> *nftw_fsd = nullptr;
 static int WalkDirectoryCallback(const char *filename, const struct stat *stat_pointer, int file_flags,
                                  FTW *walk_pointer)
 {
+    EPI_UNUSED(walk_pointer);
     EPI_ASSERT(nftw_fsd);
     if (file_flags ==
         FTW_F) // The documentation for nftw refers to these as flags but I think it can only be one of them - Dasho
@@ -625,7 +626,7 @@ void ReplaceExtension(std::string &path, std::string_view ext)
         if (ch == '.')
         {
             // handle filenames that being with a dot
-            // (un*x style hidden files)
+            // (unix style hidden files)
             if (p == 0 || IsDirectorySeparator(path[p - 1]))
                 break;
 
@@ -637,10 +638,7 @@ void ReplaceExtension(std::string &path, std::string_view ext)
         path.append(ext);
     else
     {
-        while (path.size() > extpos)
-        {
-            path.pop_back();
-        }
+        path.erase(extpos);
         path.append(ext);
     }
 }
@@ -736,7 +734,7 @@ void SyncFilesystem(bool populate)
 #else
 void SyncFilesystem(bool populate)
 {
-    (void)populate;
+    EPI_UNUSED(populate);
 }
 #endif
 

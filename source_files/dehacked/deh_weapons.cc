@@ -75,7 +75,7 @@ bool weapon_modified[kTotalWeapons];
 
 void weapons::Init()
 {
-    memset(weapon_modified, 0, sizeof(weapon_modified));
+    EPI_CLEAR_MEMORY(weapon_modified, bool, 9);
 }
 
 void weapons::Shutdown()
@@ -142,7 +142,7 @@ void FinishLump(void)
     wad::Printf("\n");
 }
 
-void HandleFlags(const WeaponInfo *info, int w_num)
+void HandleFlags(const WeaponInfo *info)
 {
     if (!info->flags)
         return;
@@ -163,7 +163,7 @@ void HandleFlags(const WeaponInfo *info, int w_num)
         wad::Printf("FEEDBACK = TRUE;\n");
 }
 
-void AddOneFlag(const WeaponInfo *info, const char *name, bool &got_a_flag)
+void AddOneFlag(const char *name, bool &got_a_flag)
 {
     if (!got_a_flag)
     {
@@ -190,7 +190,7 @@ void HandleMBF21Flags(const WeaponInfo *info, int w_num)
 
         cur_f &= ~mbf21flagnamelist[i].flag;
 
-        AddOneFlag(info, mbf21flagnamelist[i].name, got_a_flag);
+        AddOneFlag(mbf21flagnamelist[i].name, got_a_flag);
     }
 
     if (got_a_flag)
@@ -214,7 +214,7 @@ void HandleSounds(const WeaponInfo *info, int w_num)
     // otherwise nothing.
 }
 
-void HandleFrames(const WeaponInfo *info, int w_num)
+void HandleFrames(const WeaponInfo *info)
 {
     frames::ResetGroups();
 
@@ -311,10 +311,10 @@ void ConvertWeapon(int w_num)
 
     wad::Printf("PRIORITY = %d;\n", info->priority);
 
-    HandleFlags(info, w_num);
+    HandleFlags(info);
     HandleMBF21Flags(info, w_num);
     HandleSounds(info, w_num);
-    HandleFrames(info, w_num);
+    HandleFrames(info);
     HandleAttacks(info, w_num);
 
     wad::Printf("\n");

@@ -16,6 +16,8 @@
 
 #define SOKOL_ASSERT(c) EPI_ASSERT(c)
 
+#define SOKOL_CLEAR_MEMORY(ptr, type, num) EPI_CLEAR_MEMORY(ptr, type, num)
+
 #define _sapp_d3d11_Release(self) (self)->Release()
 #define _sapp_win32_refiid(iid)   iid
 
@@ -333,7 +335,7 @@ static void _sapp_d3d11_create_default_render_target(void)
 
     /* common desc for MSAA and depth-stencil texture */
     D3D11_TEXTURE2D_DESC tex_desc;
-    memset(&tex_desc, 0, sizeof(tex_desc));
+    SOKOL_CLEAR_MEMORY(&tex_desc, D3D11_TEXTURE2D_DESC, 1);
     tex_desc.Width              = (UINT)_sapp.framebuffer_width;
     tex_desc.Height             = (UINT)_sapp.framebuffer_height;
     tex_desc.MipLevels          = 1;

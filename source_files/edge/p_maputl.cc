@@ -828,16 +828,22 @@ void AddExtraFloor(Sector *sec, Line *line)
         LogWarning("Extrafloor with z range of %1.0f / %1.0f is stuck "
                    "in sector #%d's ceiling.\n",
                    newbie->bottom_height, newbie->top_height, (int)(sec - level_sectors));
+        break;
 
     case kFitStuckInFloor:
         LogWarning("Extrafloor with z range of %1.0f / %1.0f is stuck "
                    "in sector #%d's floor.\n",
                    newbie->bottom_height, newbie->top_height, (int)(sec - level_sectors));
+        break;
 
-    default:
+    case kFitStuckInExtraFloor:
         LogWarning("Extrafloor with z range of %1.0f / %1.0f is stuck "
                    "in sector #%d in another extrafloor.\n",
                    newbie->bottom_height, newbie->top_height, (int)(sec - level_sectors));
+        break;
+
+    default:
+        break;
     }
 
     // find place to link into.  cur will be the next higher extrafloor,

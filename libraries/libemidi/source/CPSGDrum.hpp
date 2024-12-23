@@ -73,13 +73,13 @@ class CPSGDrum : public ISoundDevice
     void PercSetVelocity(uint8_t note, uint8_t velo);
     void PercSetProgram(uint8_t bank, uint8_t prog);
 
-    void SetProgram(uint32_t ch, uint8_t bank, uint8_t prog) {};
-    void SetVelocity(uint32_t ch, uint8_t vel) {};
-    void SetPan(uint32_t ch, uint8_t pan) {};
-    void SetVolume(uint32_t ch, uint8_t vol) {};
-    void SetBend(uint32_t ch, int8_t coarse, int8_t fine) {};
-    void KeyOn(uint32_t ch, uint8_t note) {};
-    void KeyOff(uint32_t ch) {};
+    void SetProgram(uint32_t ch, uint8_t bank, uint8_t prog) {(void)ch; (void)bank; (void)prog;};
+    void SetVelocity(uint32_t ch, uint8_t vel) {(void)ch; (void)vel;};
+    void SetPan(uint32_t ch, uint8_t pan) {(void)ch; (void)pan;};
+    void SetVolume(uint32_t ch, uint8_t vol) {(void)ch; (void)vol;};
+    void SetBend(uint32_t ch, int8_t coarse, int8_t fine) {(void)ch, (void)coarse; (void)fine;};
+    void KeyOn(uint32_t ch, uint8_t note) {(void)ch; (void)note;};
+    void KeyOff(uint32_t ch) {(void)ch;};
 };
 
 } // namespace dsa

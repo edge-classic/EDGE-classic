@@ -53,15 +53,15 @@ extern ConsoleVariable   midi_soundfont;
 
 void SoundFillCallback(void *udata, Uint8 *stream, int len)
 {
-    (void)udata;
-    SDL_memset(stream, 0, len);
+    EPI_UNUSED(udata);
+    EPI_CLEAR_MEMORY(stream, Uint8, len);
     MixAllSoundChannels(stream, len);
 }
 
 static bool TryOpenSound(int want_freq, bool want_stereo)
 {
     SDL_AudioSpec trydev;
-    SDL_zero(trydev);
+    EPI_CLEAR_MEMORY(&trydev, SDL_AudioSpec, 1);
 
     LogPrint("StartupSound: trying %d Hz %s\n", want_freq, want_stereo ? "Stereo" : "Mono");
 

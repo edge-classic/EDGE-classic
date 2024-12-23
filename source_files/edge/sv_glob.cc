@@ -23,6 +23,7 @@
 //   + implement ReadWADS and ReadVIEW.
 //
 
+#include <inttypes.h>
 #include <limits.h>
 #include <stddef.h>
 
@@ -219,7 +220,7 @@ static const char *SaveGlobalPutU64(void *storage)
 
     EPI_ASSERT(storage);
 
-    stbsp_sprintf(buffer, "%llu", *src);
+    stbsp_sprintf(buffer, "%" PRIu64, *src);
 
     return SaveChunkCopyString(buffer);
 }
@@ -420,6 +421,7 @@ static bool GlobalReadVariable(SaveGlobals *globs)
 
 static bool GlobalReadWads(SaveGlobals *glob)
 {
+    EPI_UNUSED(glob);
     if (!SavePushReadChunk("Wads"))
         return false;
 

@@ -871,6 +871,11 @@ void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, floa
 void SectorGlowIterator(Sector *sec, float x1, float y1, float z1, float x2, float y2, float z2,
                         void (*func)(MapObject *, void *), void *data)
 {
+    EPI_UNUSED(x1);
+    EPI_UNUSED(y1);
+    EPI_UNUSED(x2);
+    EPI_UNUSED(y2);
+    EPI_UNUSED(z2);
     EDGE_ZoneScoped;
     ec_frame_stats.draw_sector_glow_iterator++;
 

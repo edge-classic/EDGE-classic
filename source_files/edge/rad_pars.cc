@@ -700,12 +700,13 @@ static void ScriptFreeParameters(std::vector<const char *> &pars)
 static void ScriptParseVersion(std::vector<const char *> &pars)
 {
     // ignored for compatibility
+    EPI_UNUSED(pars);
 }
 
 static void ScriptParseClearAll(std::vector<const char *> &pars)
 {
     // #ClearAll
-
+    EPI_UNUSED(pars);
     ClearAllScripts();
 }
 
@@ -1009,7 +1010,7 @@ static void ScriptParseTag(std::vector<const char *> &pars)
 static void ScriptParseWhenAppear(std::vector<const char *> &pars)
 {
     // When_Appear 1:2:3:4:5:SP:COOP:DM
-
+    
     DDFMainGetWhenAppear(pars[1], &this_script->appear);
 }
 
@@ -1036,6 +1037,7 @@ static void ScriptParseNetMode(std::vector<const char *> &pars)
     // Net_Mode ABSOLUTE
     //
     // NOTE: IGNORED FOR BACKWARDS COMPATIBILITY
+    EPI_UNUSED(pars);
 }
 
 static void ScriptParseTaggedRepeatable(std::vector<const char *> &pars)
@@ -1062,21 +1064,21 @@ static void ScriptParseTaggedRepeatable(std::vector<const char *> &pars)
 static void ScriptParseTaggedUse(std::vector<const char *> &pars)
 {
     // Tagged_Use
-
+    EPI_UNUSED(pars);
     this_script->tagged_use = true;
 }
 
 static void ScriptParseTaggedIndependent(std::vector<const char *> &pars)
 {
     // Tagged_Independent
-
+    EPI_UNUSED(pars);
     this_script->tagged_independent = true;
 }
 
 static void ScriptParseTaggedImmediate(std::vector<const char *> &pars)
 {
     // Tagged_Immediate
-
+    EPI_UNUSED(pars);
     this_script->tagged_immediate = true;
 }
 
@@ -1085,12 +1087,13 @@ static void ScriptParseTaggedPlayerSpecific(std::vector<const char *> &pars)
     // Tagged_Player_Specific
 
     // NOTE: IGNORED FOR BACKWARDS COMPATIBILITY
+    EPI_UNUSED(pars);
 }
 
 static void ScriptParseTaggedDisabled(std::vector<const char *> &pars)
 {
     // Tagged_Disabled
-
+    EPI_UNUSED(pars);
     this_script->tagged_disabled = true;
 }
 
@@ -1285,7 +1288,7 @@ static void ScriptParseExitLevel(std::vector<const char *> &pars)
 static void ScriptParseExitGame(std::vector<const char *> &pars)
 {
     // ExitGame to TitleScreen
-
+    EPI_UNUSED(pars);
     AddStateToScript(this_script, 0, ScriptExitGame, nullptr);
 }
 
@@ -1604,7 +1607,7 @@ static void ScriptParsePlaySound(std::vector<const char *> &pars)
 static void ScriptParseKillSound(std::vector<const char *> &pars)
 {
     // KillSound
-
+    EPI_UNUSED(pars);
     AddStateToScript(this_script, 0, ScriptKillSound, nullptr);
 }
 
@@ -2063,7 +2066,7 @@ static void ScriptParseJump(std::vector<const char *> &pars)
 static void ScriptParseSleep(std::vector<const char *> &pars)
 {
     // Sleep
-
+    EPI_UNUSED(pars);
     AddStateToScript(this_script, 0, ScriptSleep, nullptr);
 }
 
@@ -2199,7 +2202,7 @@ static void ScriptParseSwitchWeapon(std::vector<const char *> &pars)
 static void ScriptParseTeleportToStart(std::vector<const char *> &pars)
 {
     // TELEPORT_TO_START
-
+    EPI_UNUSED(pars);
     AddStateToScript(this_script, 0, ScriptTeleportToStart, nullptr);
 }
 
@@ -2494,7 +2497,7 @@ static void ScriptParserDone()
 void ReadRADScript(const std::string &data, const std::string &source)
 {
     // FIXME store source somewhere, like current_script_filename
-
+    EPI_UNUSED(source);
     LogDebug("RTS: Loading LUMP (size=%d)\n", (int)data.size());
 
     // WISH: a more helpful filename

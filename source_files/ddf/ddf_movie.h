@@ -19,6 +19,7 @@
 #pragma once
 
 #include "ddf_types.h"
+#include "epi.h"
 
 enum MovieDataType
 {
@@ -69,11 +70,11 @@ class MovieDefinition
     // disable copy construct and assignment operator
     explicit MovieDefinition(MovieDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
     }
     MovieDefinition &operator=(MovieDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
         return *this;
     }
 };

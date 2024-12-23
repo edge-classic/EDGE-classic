@@ -47,13 +47,9 @@
 int current_screen_width;
 int current_screen_height;
 int current_screen_depth;
-int current_window_mode;
+WindowMode current_window_mode;
 
 DisplayMode borderless_mode;
-EDGE_DEFINE_CONSOLE_VARIABLE(toggle_fullscreen_width, "0", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(toggle_fullscreen_height, "0", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(toggle_fullscreen_depth, "0", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(toggle_fullscreen_window_mode, "-1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(toggle_windowed_width, "0", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(toggle_windowed_height, "0", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(toggle_windowed_depth, "0", kConsoleVariableFlagArchive)
@@ -135,7 +131,7 @@ void DumpResolutionList(void)
         LogPrint("  %4dx%4d @ %02d %s", cur->width, cur->height, cur->depth,
                  cur->window_mode == kWindowModeBorderless
                      ? "BL"
-                     : (cur->window_mode == kWindowModeFullscreen ? "FS " : "win"));
+                     : "win");
     }
 
     LogPrint("\n");
@@ -160,17 +156,17 @@ bool IncrementResolution(DisplayMode *mode, int what, int dir)
     if (what == kIncrementWindowMode)
     {
         if (dir == 1)
-            window_mode = (window_mode + 1) % 3;
+            window_mode = (window_mode + 1) % 2;
         else
         {
-            if (window_mode > 0)
+            if (window_mode == kWindowModeBorderless)
                 window_mode--;
             else
-                window_mode = 2;
+                window_mode = kWindowModeBorderless;
         }
     }
 
-    if (window_mode == 2)
+    if (window_mode == kWindowModeBorderless)
     {
         mode->width       = borderless_mode.width;
         mode->height      = borderless_mode.height;
@@ -239,10 +235,10 @@ void ToggleFullscreen(void)
     }
     else
     {
-        toggle.depth       = toggle_fullscreen_depth.d_;
-        toggle.height      = toggle_fullscreen_height.d_;
-        toggle.width       = toggle_fullscreen_width.d_;
-        toggle.window_mode = toggle_fullscreen_window_mode.d_;
+        toggle.depth       = borderless_mode.depth;
+        toggle.height      = borderless_mode.height;
+        toggle.width       = borderless_mode.width;
+        toggle.window_mode = kWindowModeBorderless;
         ChangeResolution(&toggle);
     }
     SoftInitializeResolution();
@@ -299,12 +295,6 @@ static bool DoExecuteChangeResolution(DisplayMode *mode)
 
     DeterminePixelAspect();
 
-    LogPrint("Pixel aspect: %1.3f\n", pixel_aspect_ratio.f_);
-
-    // gfx card doesn't like to switch too rapidly
-    SleepForMilliseconds(250);
-    SleepForMilliseconds(250);
-
     return true;
 }
 
@@ -346,7 +336,7 @@ void SetInitialResolution(void)
 {
     LogDebug("SetInitialResolution...\n");
 
-    if (current_window_mode == 2)
+    if (current_window_mode == kWindowModeBorderless)
     {
         if (DoExecuteChangeResolution(&borderless_mode))
             return;
@@ -387,7 +377,7 @@ bool ChangeResolution(DisplayMode *mode)
 {
     LogDebug("ChangeResolution...\n");
 
-    if (DoExecuteChangeResolution(mode->window_mode == 2 ? &borderless_mode : mode))
+    if (DoExecuteChangeResolution(mode->window_mode == kWindowModeBorderless ? &borderless_mode : mode))
         return true;
 
     LogDebug("- Failed : switching back...\n");

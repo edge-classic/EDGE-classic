@@ -588,7 +588,7 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
             current_screen_width  = sdl_ev->window.data1;
             current_screen_height = sdl_ev->window.data2;
             current_screen_depth  = 24;
-            current_window_mode   = 0;
+            current_window_mode   = kWindowModeWindowed;
             DeterminePixelAspect();
         }
 #endif

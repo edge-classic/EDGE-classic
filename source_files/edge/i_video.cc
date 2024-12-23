@@ -112,7 +112,7 @@ void DeterminePixelAspect()
     // will have square pixels (1:1 aspect).
     bool is_crt = (desktop_resolution_width.d_ < desktop_resolution_height.d_ * 7 / 5);
 
-    bool is_fullscreen = (current_window_mode > 0);
+    bool is_fullscreen = (current_window_mode == kWindowModeBorderless);
     if (is_fullscreen && current_screen_width == desktop_resolution_width.d_ &&
         current_screen_height == desktop_resolution_height.d_ && graphics_shutdown)
         is_fullscreen = false;
@@ -193,7 +193,7 @@ void StartupGraphics(void)
         SDL_DisplayMode possible_mode;
         SDL_GetDisplayMode(0, i, &possible_mode);
 
-        if (possible_mode.w > desktop_resolution_width.d_ || possible_mode.h > desktop_resolution_height.d_)
+        if (possible_mode.w >= desktop_resolution_width.d_ || possible_mode.h >= desktop_resolution_height.d_)
             continue;
 
         DisplayMode test_mode;
@@ -201,22 +201,13 @@ void StartupGraphics(void)
         test_mode.width       = possible_mode.w;
         test_mode.height      = possible_mode.h;
         test_mode.depth       = SDL_BITSPERPIXEL(possible_mode.format);
-        test_mode.window_mode = kWindowModeFullscreen;
+        test_mode.window_mode = kWindowModeWindowed;
 
         if ((test_mode.width & 15) != 0)
             continue;
 
         if (test_mode.depth == 15 || test_mode.depth == 16 || test_mode.depth == 24 || test_mode.depth == 32)
-        {
             AddDisplayResolution(&test_mode);
-
-            if (test_mode.width < desktop_resolution_width.d_ && test_mode.height < desktop_resolution_height.d_)
-            {
-                DisplayMode win_mode = test_mode;
-                win_mode.window_mode = kWindowModeWindowed;
-                AddDisplayResolution(&win_mode);
-            }
-        }
     }
 
     // If needed, set the default window toggle mode to the largest non-native
@@ -243,15 +234,6 @@ void StartupGraphics(void)
     borderless_mode.height      = info.h;
     borderless_mode.depth       = SDL_BITSPERPIXEL(info.format);
 
-    // If needed, also make the default fullscreen toggle mode borderless
-    if (toggle_fullscreen_window_mode.d_ == kWindowModeInvalid)
-    {
-        toggle_fullscreen_window_mode = kWindowModeBorderless;
-        toggle_fullscreen_width       = info.w;
-        toggle_fullscreen_height      = info.h;
-        toggle_fullscreen_depth       = (int)SDL_BITSPERPIXEL(info.format);
-    }
-
     LogPrint("StartupGraphics: initialisation OK\n");
 }
 
@@ -271,7 +253,7 @@ static bool InitializeWindow(DisplayMode *mode)
                          SDL_WINDOW_OPENGL |
                              (mode->window_mode == kWindowModeBorderless
                                   ? (SDL_WINDOW_FULLSCREEN_DESKTOP)
-                                  : (mode->window_mode == kWindowModeFullscreen ? SDL_WINDOW_FULLSCREEN : 0)) |
+                                  : (0)) |
                              resizeable);
 
     if (program_window == nullptr)
@@ -289,20 +271,6 @@ static bool InitializeWindow(DisplayMode *mode)
         toggle_windowed_height      = mode->height;
         toggle_windowed_width       = mode->width;
         toggle_windowed_window_mode = kWindowModeWindowed;
-    }
-    else if (mode->window_mode == kWindowModeFullscreen)
-    {
-        toggle_fullscreen_depth       = mode->depth;
-        toggle_fullscreen_height      = mode->height;
-        toggle_fullscreen_width       = mode->width;
-        toggle_fullscreen_window_mode = kWindowModeFullscreen;
-    }
-    else
-    {
-        toggle_fullscreen_depth       = borderless_mode.depth;
-        toggle_fullscreen_height      = borderless_mode.height;
-        toggle_fullscreen_width       = borderless_mode.width;
-        toggle_fullscreen_window_mode = kWindowModeBorderless;
     }
 
     if (SDL_GL_CreateContext(program_window) == nullptr)
@@ -337,7 +305,7 @@ bool SetScreenSize(DisplayMode *mode)
     LogPrint("SetScreenSize: trying %dx%d %dbpp (%s)\n", mode->width, mode->height, mode->depth,
              mode->window_mode == kWindowModeBorderless
                  ? "borderless"
-                 : (mode->window_mode == kWindowModeFullscreen ? "fullscreen" : "windowed"));
+                 : "windowed");
 
     if (program_window == nullptr)
     {
@@ -350,19 +318,6 @@ bool SetScreenSize(DisplayMode *mode)
     {
         SDL_SetWindowFullscreen(program_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
         SDL_GetWindowSize(program_window, &borderless_mode.width, &borderless_mode.height);
-
-        LogPrint("SetScreenSize: mode now %dx%d %dbpp\n", mode->width, mode->height, mode->depth);
-    }
-    else if (mode->window_mode == kWindowModeFullscreen)
-    {
-        SDL_SetWindowFullscreen(program_window, SDL_WINDOW_FULLSCREEN);
-        SDL_DisplayMode *new_mode = new SDL_DisplayMode;
-        new_mode->h               = mode->height;
-        new_mode->w               = mode->width;
-        SDL_SetWindowDisplayMode(program_window, new_mode);
-        SDL_SetWindowSize(program_window, mode->width, mode->height);
-        delete new_mode;
-        new_mode = nullptr;
 
         LogPrint("SetScreenSize: mode now %dx%d %dbpp\n", mode->width, mode->height, mode->depth);
     }

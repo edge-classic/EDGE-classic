@@ -345,17 +345,18 @@ static void SetGlobalVariables(void)
     std::string s;
 
     // Screen Resolution Check...
+    // borderless and fullscreen are synonymous now - Dasho
     if (FindArgument("borderless") > 0)
-        current_window_mode = 2;
+        current_window_mode = kWindowModeBorderless;
     else if (FindArgument("fullscreen") > 0)
-        current_window_mode = 1;
+        current_window_mode = kWindowModeBorderless;
     else if (FindArgument("windowed") > 0)
-        current_window_mode = 0;
+        current_window_mode = kWindowModeWindowed;
 
     s = ArgumentValue("width");
     if (!s.empty())
     {
-        if (current_window_mode == 2)
+        if (current_window_mode == kWindowModeBorderless)
             LogWarning("Current display mode set to borderless fullscreen. Provided "
                        "width of %d will be ignored!\n",
                        atoi(s.c_str()));
@@ -366,7 +367,7 @@ static void SetGlobalVariables(void)
     s = ArgumentValue("height");
     if (!s.empty())
     {
-        if (current_window_mode == 2)
+        if (current_window_mode == kWindowModeBorderless)
             LogWarning("Current display mode set to borderless fullscreen. Provided "
                        "height of %d will be ignored!\n",
                        atoi(s.c_str()));
@@ -377,7 +378,7 @@ static void SetGlobalVariables(void)
     p = FindArgument("res");
     if (p > 0 && p + 2 < int(program_argument_list.size()) && !ArgumentIsOption(p + 1) && !ArgumentIsOption(p + 2))
     {
-        if (current_window_mode == 2)
+        if (current_window_mode == kWindowModeBorderless)
             LogWarning("Current display mode set to borderless fullscreen. Provided "
                        "resolution of %dx%d will be ignored!\n",
                        atoi(program_argument_list[p + 1].c_str()), atoi(program_argument_list[p + 2].c_str()));
@@ -406,7 +407,7 @@ static void SetGlobalVariables(void)
 
     // If borderless fullscreen mode, override any provided dimensions so
     // StartupGraphics will scale to native res
-    if (current_window_mode == 2)
+    if (current_window_mode == kWindowModeBorderless)
     {
         current_screen_width  = 100000;
         current_screen_height = 100000;

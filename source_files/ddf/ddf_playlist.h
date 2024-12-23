@@ -46,7 +46,7 @@ enum DDFMusicType
     kDDFMusicFLAC,
 #endif
 #if EDGE_TRACKER_SUPPORT
-    kDDFMusicIBXM,
+    kDDFMusicM4P,
 #endif
 #if EDGE_RAD_SUPPORT
     kDDFMusicRAD,

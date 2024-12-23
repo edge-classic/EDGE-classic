@@ -38,7 +38,7 @@ enum SoundFormat
     kSoundMP3,
 #endif
 #if EDGE_TRACKER_SUPPORT
-    kSoundIBXM,
+    kSoundM4P,
 #endif
 #if EDGE_SID_SUPPORT
     kSoundSID,

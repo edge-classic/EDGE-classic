@@ -48,21 +48,21 @@ void *SV_ItemqFindByIndex(int index);
 void  SV_ItemqCreateElems(int num_elems);
 void  SV_ItemqFinaliseElems(void);
 
-bool SaveGameMapObjectGetPlayer(void *storage, int index, void *extra);
-bool SaveGameGetMapObject(void *storage, int index, void *extra);
-bool SaveGameMapObjectGetType(void *storage, int index, void *extra);
-bool SaveGameMapObjectGetState(void *storage, int index, void *extra);
-bool SaveGameMapObjectGetSpawnPoint(void *storage, int index, void *extra);
-bool SaveGameMapObjectGetAttack(void *storage, int index, void *extra);
-bool SaveGameMapObjectGetWUDs(void *storage, int index, void *extra);
+bool SaveGameMapObjectGetPlayer(void *storage, int index);
+bool SaveGameGetMapObject(void *storage, int index);
+bool SaveGameMapObjectGetType(void *storage, int index);
+bool SaveGameMapObjectGetState(void *storage, int index);
+bool SaveGameMapObjectGetSpawnPoint(void *storage, int index);
+bool SaveGameMapObjectGetAttack(void *storage, int index);
+bool SaveGameMapObjectGetWUDs(void *storage, int index);
 
-void SaveGameMapObjectPutPlayer(void *storage, int index, void *extra);
-void SaveGamePutMapObject(void *storage, int index, void *extra);
-void SaveGameMapObjectPutType(void *storage, int index, void *extra);
-void SaveGameMapObjectPutState(void *storage, int index, void *extra);
-void SaveGameMapObjectPutSpawnPoint(void *storage, int index, void *extra);
-void SaveGameMapObjectPutAttack(void *storage, int index, void *extra);
-void SaveGameMapObjectPutWUDs(void *storage, int index, void *extra);
+void SaveGameMapObjectPutPlayer(void *storage, int index);
+void SaveGamePutMapObject(void *storage, int index);
+void SaveGameMapObjectPutType(void *storage, int index);
+void SaveGameMapObjectPutState(void *storage, int index);
+void SaveGameMapObjectPutSpawnPoint(void *storage, int index);
+void SaveGameMapObjectPutAttack(void *storage, int index);
+void SaveGameMapObjectPutWUDs(void *storage, int index);
 
 //----------------------------------------------------------------------------
 //
@@ -528,7 +528,7 @@ void SV_ItemqFinaliseElems(void)
 
 //----------------------------------------------------------------------------
 
-bool SaveGameMapObjectGetPlayer(void *storage, int index, void *extra)
+bool SaveGameMapObjectGetPlayer(void *storage, int index)
 {
     Player **dest = (Player **)storage + index;
 
@@ -538,7 +538,7 @@ bool SaveGameMapObjectGetPlayer(void *storage, int index, void *extra)
     return true;
 }
 
-void SaveGameMapObjectPutPlayer(void *storage, int index, void *extra)
+void SaveGameMapObjectPutPlayer(void *storage, int index)
 {
     Player *elem = ((Player **)storage)[index];
 
@@ -547,7 +547,7 @@ void SaveGameMapObjectPutPlayer(void *storage, int index, void *extra)
     SaveChunkPutInteger(swizzle);
 }
 
-bool SaveGameGetMapObject(void *storage, int index, void *extra)
+bool SaveGameGetMapObject(void *storage, int index)
 {
     MapObject **dest = (MapObject **)storage + index;
 
@@ -557,7 +557,7 @@ bool SaveGameGetMapObject(void *storage, int index, void *extra)
     return true;
 }
 
-void SaveGamePutMapObject(void *storage, int index, void *extra)
+void SaveGamePutMapObject(void *storage, int index)
 {
     MapObject *elem = ((MapObject **)storage)[index];
 
@@ -567,7 +567,7 @@ void SaveGamePutMapObject(void *storage, int index, void *extra)
     SaveChunkPutInteger(swizzle);
 }
 
-bool SaveGameMapObjectGetType(void *storage, int index, void *extra)
+bool SaveGameMapObjectGetType(void *storage, int index)
 {
     MapObjectDefinition **dest = (MapObjectDefinition **)storage + index;
 
@@ -600,14 +600,14 @@ bool SaveGameMapObjectGetType(void *storage, int index, void *extra)
     return true;
 }
 
-void SaveGameMapObjectPutType(void *storage, int index, void *extra)
+void SaveGameMapObjectPutType(void *storage, int index)
 {
     MapObjectDefinition *info = ((MapObjectDefinition **)storage)[index];
 
     SaveChunkPutString((info == nullptr) ? nullptr : info->name_.c_str());
 }
 
-bool SaveGameMapObjectGetSpawnPoint(void *storage, int index, void *extra)
+bool SaveGameMapObjectGetSpawnPoint(void *storage, int index)
 {
     SpawnPoint *dest = (SpawnPoint *)storage + index;
 
@@ -617,14 +617,14 @@ bool SaveGameMapObjectGetSpawnPoint(void *storage, int index, void *extra)
     return true; // presumably
 }
 
-void SaveGameMapObjectPutSpawnPoint(void *storage, int index, void *extra)
+void SaveGameMapObjectPutSpawnPoint(void *storage, int index)
 {
     SpawnPoint *src = (SpawnPoint *)storage + index;
 
     SaveGameStructSave(src, &sv_struct_spawnpoint);
 }
 
-bool SaveGameMapObjectGetAttack(void *storage, int index, void *extra)
+bool SaveGameMapObjectGetAttack(void *storage, int index)
 {
     AttackDefinition **dest = (AttackDefinition **)storage + index;
 
@@ -637,14 +637,14 @@ bool SaveGameMapObjectGetAttack(void *storage, int index, void *extra)
     return true;
 }
 
-void SaveGameMapObjectPutAttack(void *storage, int index, void *extra)
+void SaveGameMapObjectPutAttack(void *storage, int index)
 {
     AttackDefinition *info = ((AttackDefinition **)storage)[index];
 
     SaveChunkPutString((info == nullptr) ? nullptr : info->name_.c_str());
 }
 
-bool SaveGameMapObjectGetWUDs(void *storage, int index, void *extra)
+bool SaveGameMapObjectGetWUDs(void *storage, int index)
 {
     std::string *dest = (std::string *)storage;
 
@@ -665,7 +665,7 @@ bool SaveGameMapObjectGetWUDs(void *storage, int index, void *extra)
     return true;
 }
 
-void SaveGameMapObjectPutWUDs(void *storage, int index, void *extra)
+void SaveGameMapObjectPutWUDs(void *storage, int index)
 {
     std::string *src = (std::string *)storage;
 
@@ -679,7 +679,7 @@ void SaveGameMapObjectPutWUDs(void *storage, int index, void *extra)
 //
 // SaveGameMapObjectGetState
 //
-bool SaveGameMapObjectGetState(void *storage, int index, void *extra)
+bool SaveGameMapObjectGetState(void *storage, int index)
 {
     State **dest = (State **)storage + index;
 
@@ -780,7 +780,7 @@ bool SaveGameMapObjectGetState(void *storage, int index, void *extra)
 // Typical example: a new item, monster or weapon gets added to our
 // DDF files causing all state numbers to be shifted upwards.
 //
-void SaveGameMapObjectPutState(void *storage, int index, void *extra)
+void SaveGameMapObjectPutState(void *storage, int index)
 {
     State *S = ((State **)storage)[index];
 

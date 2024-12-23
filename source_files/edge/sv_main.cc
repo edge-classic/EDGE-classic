@@ -96,51 +96,39 @@ extern SaveArray sv_array_slider_move;
 //  GET ROUTINES
 //
 
-bool SaveGameGetInteger(void *storage, int index, void *extra)
+bool SaveGameGetInteger(void *storage, int index)
 {
-    (void)extra;
-
     ((uint32_t *)storage)[index] = SaveChunkGetInteger();
     return true;
 }
 
-bool SaveGameGetAngle(void *storage, int index, void *extra)
+bool SaveGameGetAngle(void *storage, int index)
 {
-    (void)extra;
-
     ((BAMAngle *)storage)[index] = SaveChunkGetAngle();
     return true;
 }
 
-bool SaveGameGetFloat(void *storage, int index, void *extra)
+bool SaveGameGetFloat(void *storage, int index)
 {
-    (void)extra;
-
     ((float *)storage)[index] = SaveChunkGetFloat();
     return true;
 }
 
-bool SaveGameGetBoolean(void *storage, int index, void *extra)
+bool SaveGameGetBoolean(void *storage, int index)
 {
-    (void)extra;
-
     ((bool *)storage)[index] = SaveChunkGetInteger() ? true : false;
     return true;
 }
 
-bool SaveGameGetVec2(void *storage, int index, void *extra)
+bool SaveGameGetVec2(void *storage, int index)
 {
-    (void)extra;
-
     ((HMM_Vec2 *)storage)[index].X = SaveChunkGetFloat();
     ((HMM_Vec2 *)storage)[index].Y = SaveChunkGetFloat();
     return true;
 }
 
-bool SaveGameGetVec3(void *storage, int index, void *extra)
+bool SaveGameGetVec3(void *storage, int index)
 {
-    (void)extra;
-
     ((HMM_Vec3 *)storage)[index].X = SaveChunkGetFloat();
     ((HMM_Vec3 *)storage)[index].Y = SaveChunkGetFloat();
     ((HMM_Vec3 *)storage)[index].Z = SaveChunkGetFloat();
@@ -152,10 +140,8 @@ bool SaveGameGetVec3(void *storage, int index, void *extra)
 // stored in the savegame file as a slope.  Because we forbid looking
 // directly up and down, there is no problem with infinity.
 //
-bool SaveGameGetAngleFromSlope(void *storage, int index, void *extra)
+bool SaveGameGetAngleFromSlope(void *storage, int index)
 {
-    (void)extra;
-
     ((BAMAngle *)storage)[index] = epi::BAMFromATan(SaveChunkGetFloat());
     return true;
 }
@@ -165,40 +151,40 @@ bool SaveGameGetAngleFromSlope(void *storage, int index, void *extra)
 //  COMMON PUT ROUTINES
 //
 
-void SaveGamePutInteger(void *storage, int index, void *extra)
+void SaveGamePutInteger(void *storage, int index)
 {
     SaveChunkPutInteger(((uint32_t *)storage)[index]);
 }
 
-void SaveGamePutAngle(void *storage, int index, void *extra)
+void SaveGamePutAngle(void *storage, int index)
 {
     SaveChunkPutAngle(((BAMAngle *)storage)[index]);
 }
 
-void SaveGamePutFloat(void *storage, int index, void *extra)
+void SaveGamePutFloat(void *storage, int index)
 {
     SaveChunkPutFloat(((float *)storage)[index]);
 }
 
-void SaveGamePutBoolean(void *storage, int index, void *extra)
+void SaveGamePutBoolean(void *storage, int index)
 {
     SaveChunkPutInteger(((bool *)storage)[index] ? 1 : 0);
 }
 
-void SaveGamePutVec2(void *storage, int index, void *extra)
+void SaveGamePutVec2(void *storage, int index)
 {
     SaveChunkPutFloat(((HMM_Vec2 *)storage)[index].X);
     SaveChunkPutFloat(((HMM_Vec2 *)storage)[index].Y);
 }
 
-void SaveGamePutVec3(void *storage, int index, void *extra)
+void SaveGamePutVec3(void *storage, int index)
 {
     SaveChunkPutFloat(((HMM_Vec3 *)storage)[index].X);
     SaveChunkPutFloat(((HMM_Vec3 *)storage)[index].Y);
     SaveChunkPutFloat(((HMM_Vec3 *)storage)[index].Z);
 }
 
-void SaveGamePutAngleToSlope(void *storage, int index, void *extra)
+void SaveGamePutAngleToSlope(void *storage, int index)
 {
     BAMAngle val = ((BAMAngle *)storage)[index];
 

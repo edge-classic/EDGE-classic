@@ -66,26 +66,26 @@ void *SV_SectorFindByIndex(int index);
 void  SV_SectorCreateElems(int num_elems);
 void  SV_SectorFinaliseElems(void);
 
-bool SaveGameLevelGetImage(void *storage, int index, void *extra);
-bool SaveGameLevelGetColormap(void *storage, int index, void *extra);
-bool SaveGameLevelGetSurface(void *storage, int index, void *extra);
-bool SaveGameLevelGetSurfPtr(void *storage, int index, void *extra);
-bool SaveGameLineGetSpecial(void *storage, int index, void *extra);
-bool SaveGameSectorGetSpecial(void *storage, int index, void *extra);
-bool SaveGameSectorGetProps(void *storage, int index, void *extra);
-bool SaveGameSectorGetPropRef(void *storage, int index, void *extra);
+bool SaveGameLevelGetImage(void *storage, int index);
+bool SaveGameLevelGetColormap(void *storage, int index);
+bool SaveGameLevelGetSurface(void *storage, int index);
+bool SaveGameLevelGetSurfPtr(void *storage, int index);
+bool SaveGameLineGetSpecial(void *storage, int index);
+bool SaveGameSectorGetSpecial(void *storage, int index);
+bool SaveGameSectorGetProps(void *storage, int index);
+bool SaveGameSectorGetPropRef(void *storage, int index);
 
-void SaveGameLevelPutImage(void *storage, int index, void *extra);
-void SaveGameLevelPutColormap(void *storage, int index, void *extra);
-void SaveGameLevelPutSurface(void *storage, int index, void *extra);
-void SaveGameLevelPutSurfPtr(void *storage, int index, void *extra);
-void SaveGameLinePutSpecial(void *storage, int index, void *extra);
-void SaveGameSectorPutSpecial(void *storage, int index, void *extra);
-void SaveGameSectorPutProps(void *storage, int index, void *extra);
-void SaveGameSectorPutPropRef(void *storage, int index, void *extra);
+void SaveGameLevelPutImage(void *storage, int index);
+void SaveGameLevelPutColormap(void *storage, int index);
+void SaveGameLevelPutSurface(void *storage, int index);
+void SaveGameLevelPutSurfPtr(void *storage, int index);
+void SaveGameLinePutSpecial(void *storage, int index);
+void SaveGameSectorPutSpecial(void *storage, int index);
+void SaveGameSectorPutProps(void *storage, int index);
+void SaveGameSectorPutPropRef(void *storage, int index);
 
-bool SR_SideGetSide(void *storage, int index, void *extra);
-void SR_SidePutSide(void *storage, int index, void *extra);
+bool SR_SideGetSide(void *storage, int index);
+void SR_SidePutSide(void *storage, int index);
 
 //----------------------------------------------------------------------------
 //
@@ -685,7 +685,7 @@ void SV_SectorFinaliseElems(void)
 
 //----------------------------------------------------------------------------
 
-bool SaveGameLevelGetSurface(void *storage, int index, void *extra)
+bool SaveGameLevelGetSurface(void *storage, int index)
 {
     MapSurface *dest = (MapSurface *)storage + index;
 
@@ -695,7 +695,7 @@ bool SaveGameLevelGetSurface(void *storage, int index, void *extra)
     return SaveGameStructLoad(dest, sv_struct_surface.counterpart);
 }
 
-void SaveGameLevelPutSurface(void *storage, int index, void *extra)
+void SaveGameLevelPutSurface(void *storage, int index)
 {
     MapSurface *src = (MapSurface *)storage + index;
 
@@ -706,7 +706,7 @@ void SaveGameLevelPutSurface(void *storage, int index, void *extra)
     SaveGameStructSave(src, &sv_struct_surface);
 }
 
-bool SaveGameLevelGetSurfPtr(void *storage, int index, void *extra)
+bool SaveGameLevelGetSurfPtr(void *storage, int index)
 {
     MapSurface **dest = (MapSurface **)storage + index;
 
@@ -751,7 +751,7 @@ bool SaveGameLevelGetSurfPtr(void *storage, int index, void *extra)
 // The first character is `F' for the floor surface of the sector,
 // otherwise `C' for its ceiling.
 //
-void SaveGameLevelPutSurfPtr(void *storage, int index, void *extra)
+void SaveGameLevelPutSurfPtr(void *storage, int index)
 {
     MapSurface *src = ((MapSurface **)storage)[index];
 
@@ -785,7 +785,7 @@ void SaveGameLevelPutSurfPtr(void *storage, int index, void *extra)
     SaveChunkPutString("F:0");
 }
 
-bool SaveGameLevelGetImage(void *storage, int index, void *extra)
+bool SaveGameLevelGetImage(void *storage, int index)
 {
     const Image **dest = (const Image **)storage + index;
     const char   *str;
@@ -816,7 +816,7 @@ bool SaveGameLevelGetImage(void *storage, int index, void *extra)
 // Also `*' is valid and means that type is not important.  Some
 // examples: "F:FLAT10" and "T:STARTAN3".
 //
-void SaveGameLevelPutImage(void *storage, int index, void *extra)
+void SaveGameLevelPutImage(void *storage, int index)
 {
     const Image *src = ((const Image **)storage)[index];
 
@@ -834,7 +834,7 @@ void SaveGameLevelPutImage(void *storage, int index, void *extra)
     SaveChunkPutString(buffer);
 }
 
-bool SaveGameLevelGetColormap(void *storage, int index, void *extra)
+bool SaveGameLevelGetColormap(void *storage, int index)
 {
     const Colormap **dest = (const Colormap **)storage + index;
     const char      *str;
@@ -857,7 +857,7 @@ bool SaveGameLevelGetColormap(void *storage, int index, void *extra)
 //
 // The string is the name of the colourmap.
 //
-void SaveGameLevelPutColormap(void *storage, int index, void *extra)
+void SaveGameLevelPutColormap(void *storage, int index)
 {
     const Colormap *src = ((const Colormap **)storage)[index];
 
@@ -867,7 +867,7 @@ void SaveGameLevelPutColormap(void *storage, int index, void *extra)
         SaveChunkPutString(nullptr);
 }
 
-bool SaveGameLineGetSpecial(void *storage, int index, void *extra)
+bool SaveGameLineGetSpecial(void *storage, int index)
 {
     const LineType **dest = (const LineType **)storage + index;
     const char      *str;
@@ -895,7 +895,7 @@ bool SaveGameLineGetSpecial(void *storage, int index, void *extra)
 // name, but this shouldn't be needed currently (reserved for future
 // use).
 //
-void SaveGameLinePutSpecial(void *storage, int index, void *extra)
+void SaveGameLinePutSpecial(void *storage, int index)
 {
     const LineType *src = ((const LineType **)storage)[index];
 
@@ -910,7 +910,7 @@ void SaveGameLinePutSpecial(void *storage, int index, void *extra)
     SaveChunkPutString(s.c_str());
 }
 
-bool SaveGameSectorGetSpecial(void *storage, int index, void *extra)
+bool SaveGameSectorGetSpecial(void *storage, int index)
 {
     const SectorType **dest = (const SectorType **)storage + index;
     const char        *str;
@@ -938,7 +938,7 @@ bool SaveGameSectorGetSpecial(void *storage, int index, void *extra)
 // name, but this shouldn't be needed currently (reserved for future
 // use).
 //
-void SaveGameSectorPutSpecial(void *storage, int index, void *extra)
+void SaveGameSectorPutSpecial(void *storage, int index)
 {
     const SectorType *src = ((const SectorType **)storage)[index];
 
@@ -955,7 +955,7 @@ void SaveGameSectorPutSpecial(void *storage, int index, void *extra)
 
 //----------------------------------------------------------------------------
 
-bool SaveGameSectorGetProps(void *storage, int index, void *extra)
+bool SaveGameSectorGetProps(void *storage, int index)
 {
     RegionProperties *dest = (RegionProperties *)storage + index;
 
@@ -965,14 +965,14 @@ bool SaveGameSectorGetProps(void *storage, int index, void *extra)
     return SaveGameStructLoad(dest, sv_struct_regprops.counterpart);
 }
 
-void SaveGameSectorPutProps(void *storage, int index, void *extra)
+void SaveGameSectorPutProps(void *storage, int index)
 {
     RegionProperties *src = (RegionProperties *)storage + index;
 
     SaveGameStructSave(src, &sv_struct_regprops);
 }
 
-bool SaveGameSectorGetPropRef(void *storage, int index, void *extra)
+bool SaveGameSectorGetPropRef(void *storage, int index)
 {
     RegionProperties **dest = (RegionProperties **)storage + index;
 
@@ -1005,7 +1005,7 @@ bool SaveGameSectorGetPropRef(void *storage, int index, void *extra)
 // Format of the string is just the sector number containing the
 // properties.
 //
-void SaveGameSectorPutPropRef(void *storage, int index, void *extra)
+void SaveGameSectorPutPropRef(void *storage, int index)
 {
     RegionProperties *src = ((RegionProperties **)storage)[index];
 
@@ -1035,7 +1035,7 @@ void SaveGameSectorPutPropRef(void *storage, int index, void *extra)
     SaveChunkPutString(buffer);
 }
 
-bool SaveGameGetLine(void *storage, int index, void *extra)
+bool SaveGameGetLine(void *storage, int index)
 {
     Line **dest = (Line **)storage + index;
 
@@ -1045,7 +1045,7 @@ bool SaveGameGetLine(void *storage, int index, void *extra)
     return true;
 }
 
-void SaveGamePutLine(void *storage, int index, void *extra)
+void SaveGamePutLine(void *storage, int index)
 {
     Line *elem = ((Line **)storage)[index];
 
@@ -1054,7 +1054,7 @@ void SaveGamePutLine(void *storage, int index, void *extra)
     SaveChunkPutInteger(swizzle);
 }
 
-bool SR_SideGetSide(void *storage, int index, void *extra)
+bool SR_SideGetSide(void *storage, int index)
 {
     Side **dest = (Side **)storage + index;
 
@@ -1064,7 +1064,7 @@ bool SR_SideGetSide(void *storage, int index, void *extra)
     return true;
 }
 
-void SR_SidePutSide(void *storage, int index, void *extra)
+void SR_SidePutSide(void *storage, int index)
 {
     Side *elem = ((Side **)storage)[index];
 
@@ -1073,7 +1073,7 @@ void SR_SidePutSide(void *storage, int index, void *extra)
     SaveChunkPutInteger(swizzle);
 }
 
-bool SaveGameGetSector(void *storage, int index, void *extra)
+bool SaveGameGetSector(void *storage, int index)
 {
     Sector **dest = (Sector **)storage + index;
 
@@ -1083,7 +1083,7 @@ bool SaveGameGetSector(void *storage, int index, void *extra)
     return true;
 }
 
-void SaveGamePutSector(void *storage, int index, void *extra)
+void SaveGamePutSector(void *storage, int index)
 {
     Sector *elem = ((Sector **)storage)[index];
 
@@ -1092,7 +1092,7 @@ void SaveGamePutSector(void *storage, int index, void *extra)
     SaveChunkPutInteger(swizzle);
 }
 
-bool SaveGameSectorGetExtrafloor(void *storage, int index, void *extra)
+bool SaveGameSectorGetExtrafloor(void *storage, int index)
 {
     Extrafloor **dest = (Extrafloor **)storage + index;
 
@@ -1102,7 +1102,7 @@ bool SaveGameSectorGetExtrafloor(void *storage, int index, void *extra)
     return true;
 }
 
-void SaveGameSectorPutExtrafloor(void *storage, int index, void *extra)
+void SaveGameSectorPutExtrafloor(void *storage, int index)
 {
     Extrafloor *elem = ((Extrafloor **)storage)[index];
 

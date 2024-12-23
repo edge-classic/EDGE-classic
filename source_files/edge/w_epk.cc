@@ -855,8 +855,11 @@ class VWADFile : public epi::File
 
     unsigned int Write(const void *src, unsigned int count)
     {
+        (void)src;
+        (void)count;
         // not implemented
-        return count;
+        FatalError("VWADFile::Write called, but this is not implemented!\n");
+        return 0;
     }
 
     bool Seek(int offset, int seekpoint)

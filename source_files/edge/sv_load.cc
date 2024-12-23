@@ -237,11 +237,11 @@ bool SaveGameStructLoad(void *base, SaveStruct *info)
             {
             case kSaveFieldStruct:
             case kSaveFieldIndex:
-                (*actual->field_get)(storage, i, (char *)actual->type.name);
+                (*actual->field_get)(storage, i);
                 break;
 
             default:
-                (*actual->field_get)(storage, i, nullptr);
+                (*actual->field_get)(storage, i);
                 break;
             }
         }

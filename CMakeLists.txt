@@ -104,11 +104,7 @@ else()
   endif()
 
   # warning level for edge specific source files 
-  set (EDGE_WARNINGS -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-deprecated-declarations)
-
-  if (NOT CLANG)
-    set (EDGE_WARNINGS ${EDGE_WARNINGS} -Wno-stringop-truncation -Wno-stringop-overflow)
-  endif()
+  set (EDGE_WARNINGS -Wall -Wextra)
 
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-exceptions -fno-strict-aliasing")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti -fno-strict-aliasing")

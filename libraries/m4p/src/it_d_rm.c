@@ -11,12 +11,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "loaders/mmcmp/mmcmp.h"
+#include "mmcmp.h"
 #include "it_structs.h"
 #include "it_music.h"
 #include "it_d_rm.h"
-#include "loaders/it.h"
-#include "loaders/s3m.h"
+#include "it.h"
+#include "s3m.h"
 
 static bool FirstTimeLoading = true;
 

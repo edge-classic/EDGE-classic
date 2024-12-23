@@ -4,13 +4,13 @@
 
 add_library(
   m4p
-  src/it2drivers/sb16_m.c
-  src/it2drivers/sb16.c
-  src/it2drivers/zerovol.c
-  src/loaders/mmcmp/mmcmp.c
-  src/loaders/it.c
-  src/loaders/s3m.c
-  src/m4p.c
+  m4p.c
+  src/sb16_m.c
+  src/sb16.c
+  src/zerovol.c
+  src/mmcmp.c
+  src/it.c
+  src/s3m.c
   src/ft_tables.c
   src/it_d_rm.c
   src/it_m_eff.c
@@ -22,4 +22,4 @@ add_library(
   src/snd_masm.c
 )
 
-target_include_directories(m4p PUBLIC ./src)
+target_include_directories(m4p PUBLIC .)

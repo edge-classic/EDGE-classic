@@ -47,63 +47,6 @@ extern "C"
     typedef struct cRSID_Output       cRSID_Output;
     typedef struct cRSID_SIDwavOutput cRSID_SIDwavOutput;
 
-    // Main API functions (mainly in libcRSID.c)
-    cRSID_C64instance *cRSID_init(unsigned short samplerate); // init emulation objects and sound
-    cRSID_SIDheader   *cRSID_processSIDfile(cRSID_C64instance *C64, unsigned char *filedata,
-                                            int filesize);    // in host/file.c, copy SID-data to C64 memory
-    void cRSID_initSIDtune(cRSID_C64instance *C64, cRSID_SIDheader *SIDheader, char subtune); // init tune/subtune
-    static inline cRSID_Output cRSID_generateSample(
-        cRSID_C64instance *C64); // in host/audio.c, calculate a single sample
-
-    // Internal functions
-
-    // C64/C64.c
-    cRSID_C64instance  *cRSID_createC64(cRSID_C64instance *C64, unsigned short samplerate);
-    void                cRSID_setC64(cRSID_C64instance *C64);  // configure hardware (SIDs) for SID-tune
-    void                cRSID_initC64(cRSID_C64instance *C64); // hard-reset
-    cRSID_Output        cRSID_emulateC64(cRSID_C64instance *C64);
-    static inline short cRSID_playPSIDdigi(cRSID_C64instance *C64);
-    // C64/MEM.c
-    static inline unsigned char *cRSID_getMemReadPtr(unsigned short address); // for global cSID_C64 fast-access
-    static inline unsigned char *cRSID_getMemReadPtrC64(cRSID_C64instance *C64, unsigned short address); // maybe slower
-    static inline unsigned char *cRSID_getMemWritePtr(unsigned short address); // for global cSID_C64 fast-access
-    static inline unsigned char *cRSID_getMemWritePtrC64(cRSID_C64instance *C64, unsigned short address); // maybe
-                                                                                                          // slower
-    static inline unsigned char cRSID_readMem(unsigned short address); // for global cSID_C64 fast-access
-    static inline unsigned char cRSID_readMemC64(cRSID_C64instance *C64, unsigned short address); // maybe slower
-    static inline void cRSID_writeMem(unsigned short address, unsigned char data); // for global cSID_C64 fast-access
-    static inline void cRSID_writeMemC64(cRSID_C64instance *C64, unsigned short address,
-                                         unsigned char data);                      // maybe slower
-    void               cRSID_setROMcontent(cRSID_C64instance *C64);                // KERNAL, BASIC
-    void               cRSID_initMem(cRSID_C64instance *C64);
-    // C64/CPU.c
-    void               cRSID_initCPU(cRSID_CPUinstance *CPU, unsigned short mempos);
-    unsigned char      cRSID_emulateCPU(void); // direct instances inside for hopefully faster operation
-    static inline char cRSID_handleCPUinterrupts(cRSID_CPUinstance *CPU);
-    // C64/SID.c
-    void cRSID_createSIDchip(cRSID_C64instance *C64, cRSID_SIDinstance *SID, unsigned short model, char channel,
-                             unsigned short baseaddress);
-    void cRSID_initSIDchip(cRSID_SIDinstance *SID);
-    void cRSID_emulateADSRs(cRSID_SIDinstance *SID, char cycles);
-    int  cRSID_emulateWaves(cRSID_SIDinstance *SID);
-    cRSID_SIDwavOutput cRSID_emulateHQwaves(cRSID_SIDinstance *SID, char cycles);
-    static inline int  cRSID_emulateSIDoutputStage(cRSID_SIDinstance *SID);
-    // C64/CIA.c
-    void               cRSID_createCIAchip(cRSID_C64instance *C64, cRSID_CIAinstance *CIA, unsigned short baseaddress);
-    void               cRSID_initCIAchip(cRSID_CIAinstance *CIA);
-    static inline char cRSID_emulateCIA(cRSID_CIAinstance *CIA, char cycles);
-    static inline void cRSID_writeCIAIRQmask(cRSID_CIAinstance *CIA, unsigned char value);
-    static inline void cRSID_acknowledgeCIAIRQ(cRSID_CIAinstance *CIA);
-    // C64/VIC.c
-    void               cRSID_createVICchip(cRSID_C64instance *C64, cRSID_VICinstance *VIC, unsigned short baseaddress);
-    void               cRSID_initVICchip(cRSID_VICinstance *VIC);
-    static inline char cRSID_emulateVIC(cRSID_VICinstance *VIC, char cycles);
-    static inline void cRSID_acknowledgeVICrasterIRQ(cRSID_VICinstance *VIC);
-
-    // host/audio.c
-    void cRSID_generateSound(cRSID_C64instance *C64, unsigned char *buf, unsigned short len);
-    void cRSID_generateFloat(cRSID_C64instance *C64, float *buf, unsigned short len);
-
     struct cRSID_SIDheader
     {                             // Offset:   default/info:
         unsigned char
@@ -292,6 +235,15 @@ extern "C"
 
     extern cRSID_C64instance
         cRSID_C64; // the only global object (for faster & simpler access than with struct-pointers, in some places)
+
+    cRSID_C64instance *cRSID_init(unsigned short samplerate); // init emulation objects and sound
+    cRSID_SIDheader   *cRSID_processSIDfile(cRSID_C64instance *C64, unsigned char *filedata,
+                                            int filesize);    // in host/file.c, copy SID-data to C64 memory
+    void cRSID_initSIDtune(cRSID_C64instance *C64, cRSID_SIDheader *SIDheader, char subtune); // init tune/subtune
+    void cRSID_initC64(cRSID_C64instance *C64); // hard-reset
+
+    void cRSID_generateSound(cRSID_C64instance *C64, unsigned char *buf, unsigned short len);
+    void cRSID_generateFloat(cRSID_C64instance *C64, float *buf, unsigned short len);
 
 #ifdef __cplusplus
 }

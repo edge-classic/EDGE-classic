@@ -7,9 +7,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../cpu.h"
-#include "../it_structs.h"
-#include "../it_music.h" // Update()
+#include "cpu.h"
+#include "it_structs.h"
+#include "it_music.h" // Update()
 #include "sb16_m.h"
 #include "zerovol.h"
 

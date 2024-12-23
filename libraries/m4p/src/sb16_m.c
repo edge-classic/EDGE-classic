@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
-#include "../it_structs.h"
-#include "../it_music.h"
+#include "it_structs.h"
+#include "it_music.h"
 #include "sb16_m.h"
 
 static void M32Mix8(slaveChn_t *sc, int32_t *mixBufPtr, int32_t numSamples);

@@ -15,7 +15,7 @@
 #include "it_tables.h"
 #include "it_m_eff.h"
 #include "it_music.h"
-#include "it2drivers/sb16.h"
+#include "sb16.h"
 
 hostChn_t hChn[MAX_HOST_CHANNELS];
 slaveChn_t sChn[MAX_SLAVE_CHANNELS];

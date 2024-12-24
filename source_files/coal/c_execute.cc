@@ -102,7 +102,7 @@ int RealVM::FindFunction(const char *func_name)
 int RealVM::FindVariable(const char *var_name)
 {
     // FIXME
-
+    (void)var_name;
     return VM::NOT_FOUND;
 }
 
@@ -698,6 +698,7 @@ const char *RealVM::RegString(Statement *st, int who)
 
 void RealVM::PrintStatement(Function *f, int s)
 {
+    (void)f;
     Statement *st = COAL_REF_OP(s);
 
     const char *op_name = OpcodeName(st->op);

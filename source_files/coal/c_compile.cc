@@ -50,18 +50,18 @@ static constexpr const char *punctuation[] =
      "^",  "(",  ")",  "-",  "+",  "=",  "[",  "]",  "{",   "}",  ".", "<", ">", "#", "&", "|", nullptr};
 
 // simple types.  function types are dynamically Allocated
-static Type type_void     = {ev_void};
-static Type type_string   = {ev_string};
-static Type type_float    = {ev_float};
-static Type type_vector   = {ev_vector};
-static Type type_function = {ev_function, &type_void};
-static Type type_module   = {ev_module};
-static Type type_null     = {ev_null};
+static Type type_void     = {ev_void, nullptr, 0, nullptr};
+static Type type_string   = {ev_string, nullptr, 0, nullptr};
+static Type type_float    = {ev_float, nullptr, 0, nullptr};
+static Type type_vector   = {ev_vector, nullptr, 0, nullptr};
+static Type type_function = {ev_function, &type_void, 0, nullptr};
+static Type type_module   = {ev_module, nullptr, 0, nullptr};
+static Type type_null     = {ev_null, nullptr, 0, nullptr};
 
 static constexpr int type_size[10] = {1, 1, 1, 3, 1, 1, 1, 1, 1, 1};
 
 // definition used for void return functions
-static Definition def_void = {&type_void, "VOID_SPACE", 0};
+static Definition def_void = {&type_void, "VOID_SPACE", 0, nullptr, 0, nullptr};
 
 //
 //  OPERATOR TABLE
@@ -123,7 +123,7 @@ static OpCode all_operators[] = {
     {"&", OP_BITAND, 2, &type_float, &type_float, &type_float},
     {"|", OP_BITOR, 2, &type_float, &type_float, &type_float},
 
-    {nullptr} // end of list
+    {nullptr, 0, 0, nullptr, nullptr, nullptr} // end of list
 };
 
 static constexpr uint8_t kTopPriority = 6;
@@ -1005,6 +1005,7 @@ Definition *RealVM::EXPShortCircuit(Definition *e, int n)
 
 Definition *RealVM::EXPFieldQuery(Definition *e, bool lvalue)
 {
+    (void)lvalue;
     char *name = ParseName();
 
     if (e->type->type == ev_vector)

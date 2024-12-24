@@ -69,7 +69,7 @@ class FMMPlayer : public AbstractMusicPlayer
     FMMInterface *fmm_interface_;
 
   public:
-    FMMPlayer(uint8_t *data, int length, bool looping) : status_(kNotLoaded), looping_(looping)
+    FMMPlayer(bool looping) : status_(kNotLoaded), looping_(looping)
     {
         SequencerInit();
     }
@@ -312,7 +312,7 @@ class FMMPlayer : public AbstractMusicPlayer
 
 AbstractMusicPlayer *PlayFMMMusic(uint8_t *data, int length, bool loop)
 {
-    FMMPlayer *player = new FMMPlayer(data, length, loop);
+    FMMPlayer *player = new FMMPlayer(loop);
 
     if (!player)
     {

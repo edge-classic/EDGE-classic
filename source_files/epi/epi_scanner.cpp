@@ -303,15 +303,19 @@ bool Scanner::GetNextString()
 			{
 				default:
 					break;
-				case ',':
-					if(scan_position_ == start)
-						break;
 				case ' ':
 				case '\t':
 				case '\n':
 				case '\r':
 					end = scan_position_;
 					break;
+				case ',':
+				{
+					if(scan_position_ == start)
+						break;
+					end = scan_position_;
+					break;
+				}
 			}
 			if(start != end)
 				break;

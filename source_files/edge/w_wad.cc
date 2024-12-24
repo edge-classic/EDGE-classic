@@ -506,6 +506,7 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
     int lump = (int)lump_info.size();
 
     LumpInfo info;
+    EPI_CLEAR_MEMORY(&info, LumpInfo, 1);
 
     info.position = pos;
     info.size     = size;

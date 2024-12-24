@@ -525,7 +525,7 @@ static int ScriptAllPlayersCheckCondition(RADScript *r, int mask)
     return result;
 }
 
-static bool ScriptCheckBossTrigger(RADScriptTrigger *trig, ScriptOnDeathParameter *cond)
+static bool ScriptCheckBossTrigger(ScriptOnDeathParameter *cond)
 {
     MapObject *mo;
 
@@ -745,7 +745,7 @@ void RunScriptTriggers(void)
                 ScriptOnDeathParameter *cur;
 
                 for (cur = trig->info->boss_trig; cur; cur = cur->next)
-                    if (!ScriptCheckBossTrigger(trig, cur))
+                    if (!ScriptCheckBossTrigger(cur))
                         break;
 
                 // if they all succeeded, then cur will be nullptr...

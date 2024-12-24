@@ -74,11 +74,13 @@ static bool DoPlaneWrapper(Sector *s, const void *p1, void *p2)
 
 static bool DoLightsWrapper(Sector *s, const void *p1, void *p2)
 {
+    (void)p2;
     return RunSectorLight(s, (const LightSpecialDefinition *)p1);
 }
 
 static bool DoDonutWrapper(Sector *s, const void *p1, void *p2)
 {
+    (void)p1;
     return RunDonutSpecial(s, (SoundEffect **)p2);
 }
 

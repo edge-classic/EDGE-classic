@@ -23,6 +23,7 @@
 #include "epi.h"
 #include "g_game.h"
 #include "i_defs_gl.h"
+#include "r_backend.h"
 #include "r_colormap.h"
 #include "r_gldefs.h"
 #include "r_image.h"
@@ -32,24 +33,24 @@
 
 void NewScreenSize(int width, int height, int bits)
 {
-    //!!! quick hack
-    SetupMatrices2D();
+    
+    render_backend->SetupMatrices2D();
 
     // prevent a visible border with certain cards/drivers
-    global_render_state->ClearColor(kRGBATransparent);
-    glClear(GL_COLOR_BUFFER_BIT);
+    render_state->ClearColor(kRGBATransparent);
+    render_state->Clear(GL_COLOR_BUFFER_BIT);
 }
 
 void ReadScreen(int x, int y, int w, int h, uint8_t *rgb_buffer)
 {
-    glFlush();
+    render_state->Flush();
 
-    glPixelZoom(1.0f, 1.0f);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    render_state->PixelZoom(1.0f, 1.0f);
+    render_state->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     for (; h > 0; h--, y++)
     {
-        glReadPixels(x, y, w, 1, GL_RGB, GL_UNSIGNED_BYTE, rgb_buffer);
+        render_state->ReadPixels(x, y, w, 1, GL_RGB, GL_UNSIGNED_BYTE, rgb_buffer);
 
         rgb_buffer += w * 3;
     }

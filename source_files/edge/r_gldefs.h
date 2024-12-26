@@ -37,18 +37,6 @@ extern ConsoleVariable renderer_dumb_sky;
 extern ConsoleVariable renderer_dumb_clamp;
 
 //
-//  RendererMAIN
-//
-
-extern int maximum_texture_size;
-
-void RendererInit(void);
-void RendererSoftInit(void);
-void SetupMatrices2D(void);
-void SetupWorldMatrices2D(void);
-void SetupMatrices3d(void);
-
-//
 //  RendererBSP
 //
 

@@ -35,6 +35,7 @@
 #include "hu_font.h" // current_font_size
 #include "i_defs_gl.h"
 #include "i_system.h"
+#include "r_backend.h"
 #include "r_colormap.h"
 #include "r_draw.h"
 #include "r_gldefs.h"
@@ -263,7 +264,7 @@ void SoftInitializeResolution(void)
     SetPalette(kPaletteNormal, 0);
 
     // re-initialise various bits of GL state
-    RendererSoftInit();
+    render_backend->SoftInit();
 
     LogDebug("-  returning true.\n");
 

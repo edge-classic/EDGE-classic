@@ -532,7 +532,7 @@ void MenuReadSaveStrings(void)
             delete save_extended_information_slots[i].save_image_data;
             save_extended_information_slots[i].save_image_data = nullptr;
             if (save_extended_information_slots[i].save_texture_id)
-                global_render_state->DeleteTexture(&save_extended_information_slots[i].save_texture_id);
+                render_state->DeleteTexture(&save_extended_information_slots[i].save_texture_id);
             save_extended_information_slots[i].save_texture_id = 0;
             save_extended_information_slots[i].save_image_page = save_page;
             epi::FileDelete(fn);
@@ -546,7 +546,7 @@ void MenuReadSaveStrings(void)
         {
             delete save_extended_information_slots[i].save_image_data;
             if (save_extended_information_slots[i].save_texture_id)
-                global_render_state->DeleteTexture(&save_extended_information_slots[i].save_texture_id);
+                render_state->DeleteTexture(&save_extended_information_slots[i].save_texture_id);
             epi::File *svimg_file = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
             if (svimg_file)
             {
@@ -2395,8 +2395,12 @@ static void DrawMessage(void)
         show_endoom.d_) // Respect dialog styles with custom
                         // backgrounds and user preference
     {
+
+// We're already in a sokol frame
+#ifndef EDGE_SOKOL        
         StartFrame();   // To clear and ensure solid black background regardless
                         // of style
+#endif                        
 
         if (exit_style->definition_->text_[StyleDefinition::kTextSectionText].colmap_)
         {

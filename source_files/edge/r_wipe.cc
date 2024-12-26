@@ -72,13 +72,13 @@ static void CaptureScreenAsTexture(bool speckly, bool spooky)
     current_wipe_right = current_screen_width / (float)total_w;
     current_wipe_top   = current_screen_height / (float)total_h;
 
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    render_state->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     for (int y = 0; y < current_screen_height; y++)
     {
         uint8_t *dest = img.PixelAt(0, y);
 
-        glReadPixels(0, y, current_screen_width, 1, GL_RGBA, GL_UNSIGNED_BYTE, dest);
+        render_state->ReadPixels(0, y, current_screen_width, 1, GL_RGBA, GL_UNSIGNED_BYTE, dest);
 
         int rnd_val = y;
 
@@ -186,7 +186,7 @@ void StopWipe(void)
 
     if (current_wipe_texture != 0)
     {
-        global_render_state->DeleteTexture(&current_wipe_texture);
+        render_state->DeleteTexture(&current_wipe_texture);
         current_wipe_texture = 0;
     }
 }

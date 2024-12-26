@@ -63,18 +63,15 @@ set (EDGE_SOURCE_FILES
   r_shader.cc
   r_render.cc
   r_effects.cc
-  r_main.cc
+  r_backend.cc
   r_occlude.cc
   r_things.cc
   r_units.cc
   r_wipe.cc
   r_misc.cc
-  r_sky.cc
-  r_state.cc
+  r_sky.cc  
   r_colormap.cc
   r_modes.cc
-  r_mdl.cc
-  r_md2.cc
   r_image.cc
   r_doomtex.cc
   r_texgl.cc
@@ -112,6 +109,39 @@ set (EDGE_SOURCE_FILES
   script/compat/lua_game.cc
   script/compat/lua_player.cc
   script/compat/lua_hud.cc)
+  
+set (EDGE_GL_SOURCE_FILES
+  render/gl/gl_backend.cc
+  render/gl/gl_md2.cc
+  render/gl/gl_mdl.cc
+  render/gl/gl_sky.cc
+  render/gl/gl_state.cc
+  render/gl/gl_units.cc
+)
+
+set (EDGE_SOKOL_SOURCE_FILES
+  render/sokol/sokol_backend.cc
+  render/sokol/sokol_gl.cc  
+  render/sokol/sokol_images.cc
+  render/sokol/sokol_md2.cc
+  render/sokol/sokol_mdl.cc
+  render/sokol/sokol_pipeline.cc
+  render/sokol/sokol_sky.cc
+  render/sokol/sokol_state.cc
+  render/sokol/sokol_units.cc
+)
+
+if (NOT EDGE_SOKOL)
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} ${EDGE_GL_SOURCE_FILES})
+else()
+
+  if (EDGE_SOKOL_D3D11)
+    set (EDGE_SOKOL_SOURCE_FILES ${EDGE_SOKOL_SOURCE_FILES} render/sokol/sokol_d3d11.cc)
+  endif()
+
+  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} ${EDGE_SOKOL_SOURCE_FILES})
+
+endif()
 
 if (EDGE_COAL_SUPPORT)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} vm_coal.cc vm_hud.cc vm_player.cc)
@@ -226,7 +256,9 @@ else()
   target_compile_definitions(edge-classic PRIVATE UNIX)
 endif()
 
-if (NOT EDGE_GL_ES2)
+if (EDGE_SOKOL)
+  set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} sokol imgui)
+elseif (NOT EDGE_GL_ES2)
   target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/glad/include/glad)
 	set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} glad ${OPENGL_LIBRARIES})
 else()

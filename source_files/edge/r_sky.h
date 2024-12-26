@@ -55,5 +55,8 @@ void RenderSkyWall(Seg *seg, float h1, float h2);
 int  UpdateSkyboxTextures(void);
 void PrecacheSky(void);
 
+void SetupSkyMatrices(void);
+void RendererRevertSkyMatrices(void);
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -1769,7 +1769,7 @@ static CachedImage *ImageCacheOGL(Image *rim, const Colormap *trans, bool do_whi
         {
             if (rc->texture_id != 0)
             {
-                global_render_state->DeleteTexture(&rc->texture_id);
+                render_state->DeleteTexture(&rc->texture_id);
                 rc->texture_id = 0;
             }
         }
@@ -1904,7 +1904,7 @@ void DeleteAllImages(void)
 
         if (rc->texture_id != 0)
         {
-            global_render_state->DeleteTexture(&rc->texture_id);
+            render_state->DeleteTexture(&rc->texture_id);
             rc->texture_id = 0;
         }
     }

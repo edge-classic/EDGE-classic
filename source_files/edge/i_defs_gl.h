@@ -25,7 +25,10 @@
 
 #pragma once
 
-#ifdef EDGE_GL_ES2
+#pragma once
+#ifdef EDGE_SOKOL
+#include "render/sokol/sokol_gl_defines.h"
+#elif EDGE_GL_ES2
 #include "gl.h"
 #include "gl4esinit.h"
 #else

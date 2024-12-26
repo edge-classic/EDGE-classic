@@ -94,7 +94,13 @@ void FatalError(const char *error, ...)
 
     ShowMessageBox(message_buffer, "EDGE-Classic Error");
 
+#ifndef NDEBUG
+    // trigger debugger
+    abort();
+#else
     CloseProgram(EXIT_FAILURE);
+#endif    
+
 }
 
 void LogPrint(const char *message, ...)

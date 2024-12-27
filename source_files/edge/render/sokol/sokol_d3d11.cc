@@ -36,6 +36,7 @@ static const IID _sapp_IID_IDXGIFactory = {
 typedef struct
 {
     HWND hwnd;
+    bool          is_win10_or_greater;
 } _sapp_win32_t;
 
 typedef struct
@@ -62,11 +63,26 @@ typedef struct
     int           framebuffer_width;
     int           framebuffer_height;
     int           sample_count;
-    int           swap_interval;
-
+    int           swap_interval;    
 } _sapp_t;
 
 static _sapp_t _sapp;
+
+/* don't laugh, but this seems to be the easiest and most robust
+   way to check if we're running on Win10
+
+   From: https://github.com/videolan/vlc/blob/232fb13b0d6110c4d1b683cde24cf9a7f2c5c2ea/modules/video_output/win32/d3d11_swapchain.c#L263
+*/
+bool _sapp_win32_is_win10_or_greater(void) {
+    HMODULE h = GetModuleHandleW(L"kernel32.dll");
+    if (NULL != h) {
+        return (NULL != GetProcAddress(h, "GetSystemCpuSetInformation"));
+    }
+    else {
+        return false;
+    }
+}
+
 
 static inline HRESULT _sapp_dxgi_GetBuffer(IDXGISwapChain *self, UINT Buffer, REFIID riid, void **ppSurface)
 {
@@ -197,7 +213,7 @@ static void _sapp_d3d11_create_device_and_swapchain(void)
     sc_desc->BufferDesc.RefreshRate.Denominator = 1;
     sc_desc->OutputWindow                       = _sapp.win32.hwnd;
     sc_desc->Windowed                           = true;
-    if (true) //_sapp.win32.is_win10_or_greater)
+    if (_sapp.win32.is_win10_or_greater)
     {
         sc_desc->BufferCount             = 2;
         sc_desc->SwapEffect              = (DXGI_SWAP_EFFECT)_SAPP_DXGI_SWAP_EFFECT_FLIP_DISCARD;
@@ -381,7 +397,7 @@ void sapp_d3d11_resize_default_render_target(int32_t width, int32_t height)
 void sapp_d3d11_present(bool do_not_wait)
 {
     UINT flags = 0;
-    if (/*_sapp.win32.is_win10_or_greater &&*/ do_not_wait)
+    if (_sapp.win32.is_win10_or_greater && do_not_wait)
     {
         /* this hack/workaround somewhat improves window-movement and -sizing
             responsiveness when rendering is controlled via WM_TIMER during window
@@ -402,6 +418,7 @@ void sapp_d3d11_init(SDL_Window *window, int32_t width, int32_t height)
     _sapp.framebuffer_height = height;
     _sapp.sample_count       = 1;
     _sapp.swap_interval      = 0;
+    _sapp.win32.is_win10_or_greater = _sapp_win32_is_win10_or_greater();
 
     _sapp_d3d11_create_device_and_swapchain();
     _sapp_d3d11_create_default_render_target();

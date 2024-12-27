@@ -210,31 +210,38 @@ void Font::LoadPatches()
         (epi::FileExists(atlas_png)) epi::FS_Remove(atlas_png);
         SavePNG(atlas_png, atlas->data);*/
         patch_font_cache_.atlas_rectangles = atlas->rectangles_;
-        glGenTextures(1, &patch_font_cache_.atlas_texture_id);
-        global_render_state->BindTexture(patch_font_cache_.atlas_texture_id);
-        global_render_state->TextureMinFilter(GL_NEAREST);
-        global_render_state->TextureMagFilter(GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data_->width_, atlas->data_->height_, 0, GL_RGBA,
-                     GL_UNSIGNED_BYTE, atlas->data_->pixels_);
-        glGenTextures(1, &patch_font_cache_.atlas_smoothed_texture_id);
-        global_render_state->BindTexture(patch_font_cache_.atlas_smoothed_texture_id);
-        global_render_state->TextureMinFilter(GL_LINEAR);
-        global_render_state->TextureMagFilter(GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data_->width_, atlas->data_->height_, 0, GL_RGBA,
-                     GL_UNSIGNED_BYTE, atlas->data_->pixels_);
+        render_state->GenTextures(1, &patch_font_cache_.atlas_texture_id);
+        render_state->BindTexture(patch_font_cache_.atlas_texture_id);
+        render_state->TextureMinFilter(GL_NEAREST);
+        render_state->TextureMagFilter(GL_NEAREST);
+        render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data_->width_, atlas->data_->height_, 0, GL_RGBA,
+                                 GL_UNSIGNED_BYTE, atlas->data_->pixels_);
+        render_state->FinishTextures(1, &patch_font_cache_.atlas_texture_id);
+
+        render_state->GenTextures(1, &patch_font_cache_.atlas_smoothed_texture_id);
+        render_state->BindTexture(patch_font_cache_.atlas_smoothed_texture_id);
+        render_state->TextureMinFilter(GL_LINEAR);
+        render_state->TextureMagFilter(GL_LINEAR);
+        render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data_->width_, atlas->data_->height_, 0, GL_RGBA,
+                                 GL_UNSIGNED_BYTE, atlas->data_->pixels_);
+        render_state->FinishTextures(1, &patch_font_cache_.atlas_smoothed_texture_id);
+
         atlas->data_->Whiten();
-        glGenTextures(1, &patch_font_cache_.atlas_whitened_texture_id);
-        global_render_state->BindTexture(patch_font_cache_.atlas_whitened_texture_id);
-        global_render_state->TextureMinFilter(GL_NEAREST);
-        global_render_state->TextureMagFilter(GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data_->width_, atlas->data_->height_, 0, GL_RGBA,
-                     GL_UNSIGNED_BYTE, atlas->data_->pixels_);
-        glGenTextures(1, &patch_font_cache_.atlas_whitened_smoothed_texture_id);
-        global_render_state->BindTexture(patch_font_cache_.atlas_whitened_smoothed_texture_id);
-        global_render_state->TextureMinFilter(GL_LINEAR);
-        global_render_state->TextureMagFilter(GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data_->width_, atlas->data_->height_, 0, GL_RGBA,
-                     GL_UNSIGNED_BYTE, atlas->data_->pixels_);
+        render_state->GenTextures(1, &patch_font_cache_.atlas_whitened_texture_id);
+        render_state->BindTexture(patch_font_cache_.atlas_whitened_texture_id);
+        render_state->TextureMinFilter(GL_NEAREST);
+        render_state->TextureMagFilter(GL_NEAREST);
+        render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data_->width_, atlas->data_->height_, 0, GL_RGBA,
+                                 GL_UNSIGNED_BYTE, atlas->data_->pixels_);
+        render_state->FinishTextures(1, &patch_font_cache_.atlas_whitened_texture_id);
+
+        render_state->GenTextures(1, &patch_font_cache_.atlas_whitened_smoothed_texture_id);
+        render_state->BindTexture(patch_font_cache_.atlas_whitened_smoothed_texture_id);
+        render_state->TextureMinFilter(GL_LINEAR);
+        render_state->TextureMagFilter(GL_LINEAR);
+        render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data_->width_, atlas->data_->height_, 0, GL_RGBA,
+                                 GL_UNSIGNED_BYTE, atlas->data_->pixels_);
+        render_state->FinishTextures(1, &patch_font_cache_.atlas_whitened_smoothed_texture_id);
         delete atlas;
     }
     else
@@ -412,36 +419,53 @@ void Font::LoadFontTTF()
 
             truetype_kerning_scale_[i] = stbtt_ScaleForPixelHeight(truetype_info_, definition_->default_size_);
 
-            unsigned char *temp_bitmap =
-                new unsigned char[truetype_scaling_bitmap_sizes[i] * truetype_scaling_bitmap_sizes[i]];
+            const int32_t bitmap_size = truetype_scaling_bitmap_sizes[i];
+
+            uint8_t *temp_bitmap = new uint8_t[bitmap_size * bitmap_size];
 
             stbtt_pack_context *spc = new stbtt_pack_context;
-            stbtt_PackBegin(spc, temp_bitmap, truetype_scaling_bitmap_sizes[i], truetype_scaling_bitmap_sizes[i], 0, 1,
-                            nullptr);
+            stbtt_PackBegin(spc, temp_bitmap, bitmap_size, bitmap_size, 0, 1, nullptr);
             stbtt_PackSetOversampling(spc, 2, 2);
             stbtt_PackFontRanges(spc, truetype_buffer_, 0, truetype_atlas_[i], 1);
             stbtt_PackEnd(spc);
-            glGenTextures(1, &truetype_texture_id_[i]);
-            global_render_state->BindTexture(truetype_texture_id_[i]);
-            global_render_state->TextureMinFilter(GL_NEAREST);
-            global_render_state->TextureMagFilter(GL_NEAREST);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, truetype_scaling_bitmap_sizes[i], truetype_scaling_bitmap_sizes[i],
-                         0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
-            glGenTextures(1, &truetype_smoothed_texture_id_[i]);
-            global_render_state->BindTexture(truetype_smoothed_texture_id_[i]);
-            global_render_state->TextureMinFilter(GL_LINEAR);
-            global_render_state->TextureMagFilter(GL_LINEAR);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, truetype_scaling_bitmap_sizes[i], truetype_scaling_bitmap_sizes[i],
-                         0, GL_ALPHA, GL_UNSIGNED_BYTE, temp_bitmap);
+
+            // Convert to RGBA, couldn't get the pack stride to work properly above
+            uint8_t *font_bitmap = new uint8_t[bitmap_size * bitmap_size * 4];
+            memset(font_bitmap, 255, bitmap_size * bitmap_size * 4);
+
+            uint8_t* src = temp_bitmap;
+            uint8_t* dest = &font_bitmap[3];
+            for (int32_t j = 0; j < bitmap_size * bitmap_size; j++, src++, dest += 4)
+            {
+                *dest = *src;
+            }
+
+            render_state->GenTextures(1, &truetype_texture_id_[i]);
+            render_state->BindTexture(truetype_texture_id_[i]);
+            render_state->TextureMinFilter(GL_NEAREST);
+            render_state->TextureMagFilter(GL_NEAREST);
+            render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap_size, bitmap_size, 0, GL_RGBA,
+                                     GL_UNSIGNED_BYTE, font_bitmap);
+            render_state->FinishTextures(1, &truetype_texture_id_[i]);
+
+            render_state->GenTextures(1, &truetype_smoothed_texture_id_[i]);
+            render_state->BindTexture(truetype_smoothed_texture_id_[i]);
+            render_state->TextureMinFilter(GL_LINEAR);
+            render_state->TextureMagFilter(GL_LINEAR);
+            render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap_size, bitmap_size, 0, GL_RGBA,
+                                     GL_UNSIGNED_BYTE, font_bitmap);
+            render_state->FinishTextures(1, &truetype_smoothed_texture_id_[i]);
+
             delete[] temp_bitmap;
+            delete[] font_bitmap;
             float x               = 0.0f;
             float y               = 0.0f;
             float ascent          = 0.0f;
             float descent         = 0.0f;
             float linegap         = 0.0f;
             ref.character_quad[i] = new stbtt_aligned_quad;
-            stbtt_GetPackedQuad(truetype_atlas_[i]->chardata_for_range, truetype_scaling_bitmap_sizes[i],
-                                truetype_scaling_bitmap_sizes[i], (uint8_t)ch, &x, &y, ref.character_quad[i], 0);
+            stbtt_GetPackedQuad(truetype_atlas_[i]->chardata_for_range, bitmap_size, bitmap_size, (uint8_t)ch, &x, &y,
+                                ref.character_quad[i], 0);
             stbtt_GetScaledFontVMetrics(truetype_buffer_, 0, truetype_scaling_font_sizes[i], &ascent, &descent,
                                         &linegap);
             ref.width[i] = (ref.character_quad[i]->x1 - ref.character_quad[i]->x0) *

@@ -71,6 +71,7 @@
 #include "n_network.h"
 #include "p_setup.h"
 #include "p_spec.h"
+#include "r_backend.h"
 #include "r_colormap.h"
 #include "r_draw.h"
 #include "r_gldefs.h"
@@ -570,7 +571,7 @@ static void DoSystemStartup(void)
 
     SetInitialResolution();
 
-    RendererInit();
+    render_backend->Init();
     SoftInitializeResolution();
 
     LogDebug("- System startup done.\n");

@@ -224,7 +224,7 @@ void HUDPushScissor(float x1, float y1, float x2, float y2, bool expand)
 
     if (scissor_stack_top == 0)
     {
-        global_render_state->Enable(GL_SCISSOR_TEST);
+        render_state->Enable(GL_SCISSOR_TEST);
 
         sx1 = HMM_MAX(sx1, 0);
         sy1 = HMM_MAX(sy1, 0);
@@ -247,7 +247,7 @@ void HUDPushScissor(float x1, float y1, float x2, float y2, bool expand)
     EPI_ASSERT(sx2 >= sx1);
     EPI_ASSERT(sy2 >= sy1);
 
-    glScissor(sx1, sy1, sx2 - sx1, sy2 - sy1);
+    render_state->Scissor(sx1, sy1, sx2 - sx1, sy2 - sy1);
 
     // push current scissor
     int *xy = scissor_stack[scissor_stack_top];
@@ -268,14 +268,14 @@ void HUDPopScissor()
 
     if (scissor_stack_top == 0)
     {
-        global_render_state->Disable(GL_SCISSOR_TEST);
+        render_state->Disable(GL_SCISSOR_TEST);
     }
     else
     {
         // restore previous scissor
         int *xy = scissor_stack[scissor_stack_top];
 
-        glScissor(xy[0], xy[1], xy[2] - xy[0], xy[3] - xy[1]);
+        render_state->Scissor(xy[0], xy[1], xy[2] - xy[0], xy[3] - xy[1]);
     }
 }
 
@@ -804,10 +804,10 @@ void HUDSolidLine(float x1, float y1, float x2, float y2, RGBAColor col, float t
     dx = HUDToRealCoordinatesX(dx) - HUDToRealCoordinatesX(0);
     dy = HUDToRealCoordinatesY(0) - HUDToRealCoordinatesY(dy);
 
-    global_render_state->LineWidth(thickness);
+    render_state->LineWidth(thickness);
 
     if (smooth)
-        global_render_state->Enable(GL_LINE_SMOOTH);
+        render_state->Enable(GL_LINE_SMOOTH);
 
     StartUnitBatch(false);
 
@@ -828,8 +828,8 @@ void HUDSolidLine(float x1, float y1, float x2, float y2, RGBAColor col, float t
     EndRenderUnit(2);
 
     FinishUnitBatch();
-    global_render_state->Disable(GL_LINE_SMOOTH);
-    global_render_state->LineWidth(1.0f);
+    render_state->Disable(GL_LINE_SMOOTH);
+    render_state->LineWidth(1.0f);
 }
 
 void HUDThinBox(float x1, float y1, float x2, float y2, RGBAColor col, float thickness, BlendingMode special_blend)

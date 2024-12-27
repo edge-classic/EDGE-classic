@@ -15,9 +15,17 @@ set(CMAKE_C_STANDARD_REQUIRED True)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+# Rendering Options
+
+# Sokol Renderer (Beta)
+option(EDGE_SOKOL "Enable Sokol Renderer (Beta)" OFF)
+option(EDGE_SOKOL_GL "Sokol GL" OFF)
+option(EDGE_SOKOL_D3D11 "Sokol D3D11" OFF)
+
+# GL4ES Backend 
 option(EDGE_GL_ES2 "Enable GLES2 Rendering Backend" OFF)
-option(EDGE_SANITIZE "Enable code sanitizing" OFF)
-option(EDGE_PROFILING "Enable Profiling" OFF)
+
+# Optional Features
 option(EDGE_COAL_SUPPORT "Enable support for COAL scripting" ON)
 option(EDGE_DEHACKED_SUPPORT "Enable support for Dehacked patch conversion" ON)
 option(EDGE_DOOM_SFX_SUPPORT "Enable support for Doom/PC Speaker sound format" ON)
@@ -32,6 +40,10 @@ option(EDGE_TRACKER_SUPPORT "Enable support for Tracker music (MOD/XM/S3M/IT)" O
 option(EDGE_XMI_SUPPORT "Enable support for XMI MIDI format" ON)
 option(EDGE_VWAD_SUPPORT "Enable support for k8vavoom VWAD archives" ON)
 option(EDGE_WAV_SUPPORT "Enable support for WAV sound format" ON)
+
+# Development 
+option(EDGE_SANITIZE "Enable code sanitizing" OFF)
+option(EDGE_PROFILING "Enable Profiling" OFF)
 
 include("${CMAKE_SOURCE_DIR}/cmake/EDGEClassic.cmake")
 
@@ -148,7 +160,9 @@ if (APPLE)
   endif()
 endif()
 
-if (NOT EDGE_GL_ES2)
+if (EDGE_SOKOL)
+  add_definitions(-DEDGE_SOKOL)
+elseif (NOT EDGE_GL_ES2)
   find_package(OpenGL REQUIRED)
 else()
   add_definitions(-DEDGE_GL_ES2)

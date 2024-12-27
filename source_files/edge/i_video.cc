@@ -28,6 +28,7 @@
 #include "m_argv.h"
 #include "m_misc.h"
 #include "n_network.h"
+#include "r_backend.h"
 #include "r_modes.h"
 #include "r_state.h"
 #include "version.h"
@@ -158,6 +159,7 @@ void StartupGraphics(void)
     if (FindArgument("nograb") > 0)
         grab_mouse = 0;
 
+#ifndef SOKOL_D3D11
     // -AJA- FIXME these are wrong (probably ignored though)
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
@@ -170,6 +172,7 @@ void StartupGraphics(void)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
     initialize_gl4es();
+#endif
 #endif
 
     // -DS- 2005/06/27 Detect SDL Resolutions
@@ -248,13 +251,15 @@ static bool InitializeWindow(DisplayMode *mode)
     int resizeable = 0;
 #endif
 
-    program_window =
-        SDL_CreateWindow(temp_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
-                         SDL_WINDOW_OPENGL |
-                             (mode->window_mode == kWindowModeBorderless
-                                  ? (SDL_WINDOW_FULLSCREEN_DESKTOP)
-                                  : (0)) |
-                             resizeable);
+    uint32_t window_flags =
+        (mode->window_mode == kWindowModeBorderless ? (SDL_WINDOW_FULLSCREEN_DESKTOP) : (0)) | resizeable;
+
+#ifndef SOKOL_D3D11
+    window_flags |= SDL_WINDOW_OPENGL;
+#endif
+
+    program_window = SDL_CreateWindow(temp_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width,
+                                      mode->height, window_flags);
 
     if (program_window == nullptr)
     {
@@ -273,26 +278,37 @@ static bool InitializeWindow(DisplayMode *mode)
         toggle_windowed_window_mode = kWindowModeWindowed;
     }
 
+#ifndef SOKOL_D3D11
     if (SDL_GL_CreateContext(program_window) == nullptr)
         FatalError("Failed to create OpenGL context.\n");
+#endif
 
     if (vsync.d_ == 2)
     {
+#ifndef SOKOL_D3D11        
         // Fallback to normal VSync if Adaptive doesn't work
         if (SDL_GL_SetSwapInterval(-1) == -1)
         {
             vsync = 1;
             SDL_GL_SetSwapInterval(vsync.d_);
         }
+#endif        
     }
     else
+    {
+#ifndef SOKOL_D3D11
         SDL_GL_SetSwapInterval(vsync.d_);
+#endif
+    }
 
+#ifndef EDGE_SOKOL
 #ifndef EDGE_GL_ES2
     gladLoadGL();
 
     if (GLVersion.major == 1 && GLVersion.minor < 3)
-        FatalError("System only supports GL %d.%d. Minimum GL version 1.3 required!\n", GLVersion.major, GLVersion.minor);
+        FatalError("System only supports GL %d.%d. Minimum GL version 1.3 required!\n", GLVersion.major,
+                   GLVersion.minor);
+#endif
 #endif
 
     return true;
@@ -300,15 +316,15 @@ static bool InitializeWindow(DisplayMode *mode)
 
 bool SetScreenSize(DisplayMode *mode)
 {
+    bool initializing = false;
     GrabCursor(false);
 
     LogPrint("SetScreenSize: trying %dx%d %dbpp (%s)\n", mode->width, mode->height, mode->depth,
-             mode->window_mode == kWindowModeBorderless
-                 ? "borderless"
-                 : "windowed");
+             mode->window_mode == kWindowModeBorderless ? "borderless" : "windowed");
 
     if (program_window == nullptr)
     {
+        initializing = true;
         if (!InitializeWindow(mode))
         {
             return false;
@@ -316,6 +332,7 @@ bool SetScreenSize(DisplayMode *mode)
     }
     else if (mode->window_mode == kWindowModeBorderless)
     {
+        SDL_GetWindowSize(program_window, &borderless_mode.width, &borderless_mode.height);
         SDL_SetWindowFullscreen(program_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
         SDL_GetWindowSize(program_window, &borderless_mode.width, &borderless_mode.height);
 
@@ -330,6 +347,11 @@ bool SetScreenSize(DisplayMode *mode)
         LogPrint("SetScreenSize: mode now %dx%d %dbpp\n", mode->width, mode->height, mode->depth);
     }
 
+    if (!initializing)
+    {
+        render_backend->Resize(mode->width, mode->height);
+    }
+    
     // -AJA- turn off cursor -- BIG performance increase.
     //       Plus, the combination of no-cursor + grab gives
     //       continuous relative mouse motion.
@@ -341,10 +363,12 @@ bool SetScreenSize(DisplayMode *mode)
     signal(SIGSEGV, SIG_DFL);
 #endif
 
-    global_render_state->ClearColor(kRGBABlack);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    render_state->ClearColor(kRGBABlack);
+    render_state->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+#ifndef SOKOL_D3D11
     SDL_GL_SwapWindow(program_window);
+#endif
 
     return true;
 }
@@ -352,23 +376,32 @@ bool SetScreenSize(DisplayMode *mode)
 void StartFrame(void)
 {
     ec_frame_stats.Clear();
-    global_render_state->ClearColor(kRGBABlack);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    render_state->ClearColor(kRGBABlack);
+    render_state->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (draw_culling.d_)
         renderer_far_clip.f_ = draw_culling_distance.f_;
     else
         renderer_far_clip.f_ = 64000.0;
+
+    render_backend->StartFrame(current_screen_width, current_screen_height);
 }
 
 static void SwapBuffers(void)
 {
     EDGE_ZoneScoped;
 
+    render_backend->SwapBuffers();
+
+#ifndef SOKOL_D3D11
+    // move me and other SDL_GL to backend
     SDL_GL_SwapWindow(program_window);
+#endif    
 }
 
 void FinishFrame(void)
 {
+    render_backend->FinishFrame();
+
     SwapBuffers();
 
     EDGE_TracyPlot("draw_render_units", (int64_t)ec_frame_stats.draw_render_units);
@@ -387,13 +420,13 @@ void FinishFrame(void)
     {
         if (framerate_limit.d_ >= kTicRate)
         {
-            uint64_t target_time = 1000000ull / framerate_limit.d_;
+            uint64_t        target_time = 1000000ull / framerate_limit.d_;
             static uint64_t start_time;
 
             while (1)
             {
-                uint64_t current_time = GetMicroseconds();
-                uint64_t elapsed_time = current_time - start_time;
+                uint64_t current_time   = GetMicroseconds();
+                uint64_t elapsed_time   = current_time - start_time;
                 uint64_t remaining_time = 0;
 
                 if (elapsed_time >= target_time)
@@ -419,15 +452,21 @@ void FinishFrame(void)
     {
         if (vsync.d_ == 2)
         {
+#ifndef SOKOL_D3D11            
             // Fallback to normal VSync if Adaptive doesn't work
             if (SDL_GL_SetSwapInterval(-1) == -1)
             {
                 vsync = 1;
                 SDL_GL_SetSwapInterval(vsync.d_);
             }
+#endif            
         }
         else
+        {
+#ifndef SOKOL_D3D11            
             SDL_GL_SetSwapInterval(vsync.d_);
+#endif            
+        }
     }
 
     if (monitor_aspect_ratio.CheckModified() || forced_pixel_aspect_ratio.CheckModified())
@@ -440,6 +479,8 @@ void ShutdownGraphics(void)
         return;
 
     graphics_shutdown = 1;
+
+    render_backend->Shutdown();
 
     if (SDL_WasInit(SDL_INIT_EVERYTHING))
     {

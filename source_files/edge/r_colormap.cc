@@ -763,7 +763,7 @@ class ColormapShader : public AbstractShader
         {
             if (fade_texture_ != 0)
             {
-                global_render_state->DeleteTexture(&fade_texture_);
+                render_state->DeleteTexture(&fade_texture_);
             }
 
             if (force_flat_lighting.d_)
@@ -779,7 +779,7 @@ class ColormapShader : public AbstractShader
     {
         if (fade_texture_ != 0)
         {
-            global_render_state->DeleteTexture(&fade_texture_);
+            render_state->DeleteTexture(&fade_texture_);
             fade_texture_ = 0;
         }
     }

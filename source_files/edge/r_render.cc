@@ -40,6 +40,7 @@
 #include "n_network.h" // NetworkUpdate
 #include "p_local.h"
 #include "p_tick.h"
+#include "r_backend.h"
 #include "r_colormap.h"
 #include "r_defs.h"
 #include "r_effects.h"
@@ -350,12 +351,12 @@ static bool MirrorSegOnPortal(Seg *seg)
 
 static void MirrorSetClippers()
 {
-    global_render_state->Disable(GL_CLIP_PLANE0);
-    global_render_state->Disable(GL_CLIP_PLANE1);
-    global_render_state->Disable(GL_CLIP_PLANE2);
-    global_render_state->Disable(GL_CLIP_PLANE3);
-    global_render_state->Disable(GL_CLIP_PLANE4);
-    global_render_state->Disable(GL_CLIP_PLANE5);
+    render_state->Disable(GL_CLIP_PLANE0);
+    render_state->Disable(GL_CLIP_PLANE1);
+    render_state->Disable(GL_CLIP_PLANE2);
+    render_state->Disable(GL_CLIP_PLANE3);
+    render_state->Disable(GL_CLIP_PLANE4);
+    render_state->Disable(GL_CLIP_PLANE5);
 
     if (total_active_mirrors == 0)
         return;
@@ -372,11 +373,11 @@ static void MirrorSetClippers()
     ClipPlaneEyeAngle(left_p, inner.draw_mirror_->left);
     ClipPlaneEyeAngle(right_p, inner.draw_mirror_->right + kBAMAngle180);
 
-    global_render_state->Enable(GL_CLIP_PLANE0);
-    global_render_state->Enable(GL_CLIP_PLANE1);
+    render_state->Enable(GL_CLIP_PLANE0);
+    render_state->Enable(GL_CLIP_PLANE1);
 
-    glClipPlane(GL_CLIP_PLANE0, left_p);
-    glClipPlane(GL_CLIP_PLANE1, right_p);
+    render_state->ClipPlane(GL_CLIP_PLANE0, left_p);
+    render_state->ClipPlane(GL_CLIP_PLANE1, right_p);
 
     // now for each mirror, setup a clip plane that removes
     // everything that gets projected in front of that mirror.
@@ -408,9 +409,9 @@ static void MirrorSetClippers()
 
         ClipPlaneHorizontalLine(front_p, v2, v1);
 
-        global_render_state->Enable(GL_CLIP_PLANE2 + i);
+        render_state->Enable(GL_CLIP_PLANE2 + i);
 
-        glClipPlane(GL_CLIP_PLANE2 + i, front_p);
+        render_state->ClipPlane(GL_CLIP_PLANE2 + i, front_p);
     }
 }
 
@@ -3292,7 +3293,7 @@ static void DoWeaponModel(void)
     // know how any better way to prevent clipping -- the model
     // needs the depth buffer for overlapping parts of itself.
 
-    glClear(GL_DEPTH_BUFFER_BIT);
+    render_state->Clear(GL_DEPTH_BUFFER_BIT);
 
     solid_mode = false;
     StartUnitBatch(solid_mode);
@@ -3384,10 +3385,10 @@ static void RenderTrueBsp(void)
     // handle powerup effects and BOOM colormaps
     RendererRainbowEffect(v_player);
 
-    SetupMatrices3d();
+    render_backend->SetupMatrices3D();
 
-    glClear(GL_DEPTH_BUFFER_BIT);
-    global_render_state->Enable(GL_DEPTH_TEST);
+    render_state->Clear(GL_DEPTH_BUFFER_BIT);
+    render_state->Enable(GL_DEPTH_TEST);
 
     // needed for drawing the sky
     BeginSky();
@@ -3418,10 +3419,10 @@ static void RenderTrueBsp(void)
         DoWeaponModel();
     }
 
-    global_render_state->Disable(GL_DEPTH_TEST);
+    render_state->Disable(GL_DEPTH_TEST);
 
     // now draw 2D stuff like psprites, and add effects
-    SetupWorldMatrices2D();
+    render_backend->SetupWorldMatrices2D();
 
     if (v_player)
     {
@@ -3429,18 +3430,18 @@ static void RenderTrueBsp(void)
 
         RendererColourmapEffect(v_player);
         RendererPaletteEffect(v_player);
-        SetupMatrices2D();
+        render_backend->SetupMatrices2D();
         RenderCrosshair(v_player);
     }
 
     if (FlashFirst == true)
     {
-        SetupMatrices3d();
-        glClear(GL_DEPTH_BUFFER_BIT);
-        global_render_state->Enable(GL_DEPTH_TEST);
+        render_backend->SetupMatrices3D();
+        render_state->Clear(GL_DEPTH_BUFFER_BIT);
+        render_state->Enable(GL_DEPTH_TEST);
         DoWeaponModel();
-        global_render_state->Disable(GL_DEPTH_TEST);
-        SetupMatrices2D();
+        render_state->Disable(GL_DEPTH_TEST);
+        render_backend->SetupMatrices2D();
     }
 
 #if (DEBUG >= 3)

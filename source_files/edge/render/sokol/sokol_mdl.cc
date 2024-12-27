@@ -824,11 +824,11 @@ void MDLRenderModel(MDLModel *md, const Image *skin_img, bool is_weapon, int fra
     }
     if (!draw_culling.d_ && fc_to_use != kRGBANoValue)
     {
-        global_render_state->ClearColor(fc_to_use);
-        global_render_state->FogMode(GL_EXP);
-        global_render_state->FogColor(fc_to_use);
-        global_render_state->FogDensity(std::log1p(fd_to_use));
-        global_render_state->Enable(GL_FOG);
+        render_state->ClearColor(fc_to_use);
+        render_state->FogMode(GL_EXP);
+        render_state->FogColor(fc_to_use);
+        render_state->FogDensity(std::log1p(fd_to_use));
+        render_state->Enable(GL_FOG);
     }
     else if (draw_culling.d_)
     {
@@ -859,15 +859,15 @@ void MDLRenderModel(MDLModel *md, const Image *skin_img, bool is_weapon, int fra
         {
             fogColor = kRGBABlack;
         }
-        global_render_state->ClearColor(fogColor);
-        global_render_state->FogMode(GL_LINEAR);
-        global_render_state->FogColor(fogColor);
-        global_render_state->FogStart(renderer_far_clip.f_ - 750.0f);
-        global_render_state->FogEnd(renderer_far_clip.f_ - 250.0f);
-        global_render_state->Enable(GL_FOG);
+        render_state->ClearColor(fogColor);
+        render_state->FogMode(GL_LINEAR);
+        render_state->FogColor(fogColor);
+        render_state->FogStart(renderer_far_clip.f_ - 750.0f);
+        render_state->FogEnd(renderer_far_clip.f_ - 250.0f);
+        render_state->Enable(GL_FOG);
     }
     else
-        global_render_state->Disable(GL_FOG);
+        render_state->Disable(GL_FOG);
 
     for (int pass = 0; pass < num_pass; pass++)
     {
@@ -875,7 +875,7 @@ void MDLRenderModel(MDLModel *md, const Image *skin_img, bool is_weapon, int fra
         {
             blending &= ~kBlendingAlpha;
             blending |= kBlendingAdd;
-            global_render_state->Disable(GL_FOG);
+            render_state->Disable(GL_FOG);
         }
 
         data.is_additive_ = (pass > 0 && pass == num_pass - 1);
@@ -892,66 +892,66 @@ void MDLRenderModel(MDLModel *md, const Image *skin_img, bool is_weapon, int fra
                 continue;
         }
 
-        global_render_state->PolygonOffset(0, -pass);
+        render_state->PolygonOffset(0, -pass);
 
         if (blending & kBlendingLess)
         {
-            global_render_state->Enable(GL_ALPHA_TEST);
+            render_state->Enable(GL_ALPHA_TEST);
         }
         else if (blending & kBlendingMasked)
         {
-            global_render_state->Enable(GL_ALPHA_TEST);
-            global_render_state->AlphaFunction(GL_GREATER, 0);
+            render_state->Enable(GL_ALPHA_TEST);
+            render_state->AlphaFunction(GL_GREATER, 0);
         }
         else
-            global_render_state->Disable(GL_ALPHA_TEST);
+            render_state->Disable(GL_ALPHA_TEST);
 
         if (blending & kBlendingAdd)
         {
-            global_render_state->Enable(GL_BLEND);
-            global_render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE);
+            render_state->Enable(GL_BLEND);
+            render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE);
         }
         else if (blending & kBlendingAlpha)
         {
-            global_render_state->Enable(GL_BLEND);
-            global_render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            render_state->Enable(GL_BLEND);
+            render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
         else
-            global_render_state->Disable(GL_BLEND);
+            render_state->Disable(GL_BLEND);
 
         if (blending & (kBlendingCullBack | kBlendingCullFront))
         {
-            global_render_state->Enable(GL_CULL_FACE);
-            global_render_state->CullFace((blending & kBlendingCullFront) ? GL_FRONT : GL_BACK);
+            render_state->Enable(GL_CULL_FACE);
+            render_state->CullFace((blending & kBlendingCullFront) ? GL_FRONT : GL_BACK);
         }
         else
-            global_render_state->Disable(GL_CULL_FACE);
+            render_state->Disable(GL_CULL_FACE);
 
-        global_render_state->DepthMask((blending & kBlendingNoZBuffer) ? false : true);
+        render_state->DepthMask((blending & kBlendingNoZBuffer) ? false : true);
 
         if (blending & kBlendingLess)
         {
             // NOTE: assumes alpha is constant over whole model
-            global_render_state->AlphaFunction(GL_GREATER, trans * 0.66f);
+            render_state->AlphaFunction(GL_GREATER, trans * 0.66f);
         }
 
-        global_render_state->ActiveTexture(GL_TEXTURE1);
-        global_render_state->Disable(GL_TEXTURE_2D);
-        global_render_state->ActiveTexture(GL_TEXTURE0);
-        global_render_state->Enable(GL_TEXTURE_2D);
-        global_render_state->BindTexture(skin_tex);
+        render_state->ActiveTexture(GL_TEXTURE1);
+        render_state->Disable(GL_TEXTURE_2D);
+        render_state->ActiveTexture(GL_TEXTURE0);
+        render_state->Enable(GL_TEXTURE_2D);
+        render_state->BindTexture(skin_tex);
 
         if (data.is_additive_)
         {
-            global_render_state->TextureEnvironmentMode(GL_COMBINE);
-            global_render_state->TextureEnvironmentCombineRGB(GL_REPLACE);
-            global_render_state->TextureEnvironmentSource0RGB(GL_PREVIOUS);
+            render_state->TextureEnvironmentMode(GL_COMBINE);
+            render_state->TextureEnvironmentCombineRGB(GL_REPLACE);
+            render_state->TextureEnvironmentSource0RGB(GL_PREVIOUS);
         }
         else
         {
-            global_render_state->TextureEnvironmentMode(GL_MODULATE);
-            global_render_state->TextureEnvironmentCombineRGB(GL_MODULATE);
-            global_render_state->TextureEnvironmentSource0RGB(GL_TEXTURE);
+            render_state->TextureEnvironmentMode(GL_MODULATE);
+            render_state->TextureEnvironmentCombineRGB(GL_MODULATE);
+            render_state->TextureEnvironmentSource0RGB(GL_TEXTURE);
         }
 
         GLint old_clamp = kDummyClamp;
@@ -964,10 +964,10 @@ void MDLRenderModel(MDLModel *md, const Image *skin_img, bool is_weapon, int fra
                 old_clamp = existing->second;
             }
 
-            global_render_state->TextureWrapT(renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE);
+            render_state->TextureWrapT(renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE);
         }
 
-        glBegin(GL_TRIANGLES);
+        //glBegin(GL_TRIANGLES);
 
         for (int i = 0; i < md->total_triangles_; i++)
         {
@@ -979,19 +979,19 @@ void MDLRenderModel(MDLModel *md, const Image *skin_img, bool is_weapon, int fra
 
                 epi::SetRGBAAlpha(render_rgba, trans);
 
-                global_render_state->GLColor(render_rgba);
-                global_render_state->MultiTexCoord(GL_TEXTURE0, &render_texture_coordinates);
+                render_state->GLColor(render_rgba);
+                render_state->MultiTexCoord(GL_TEXTURE0, &render_texture_coordinates);
                 // vertex must be last
-                glVertex3fv((const GLfloat *)(&render_position));
+                //glVertex3fv((const GLfloat *)(&render_position));
             }
         }
 
-        glEnd();
+        //glEnd();
 
         // restore the clamping mode
         if (old_clamp != kDummyClamp)
         {
-            global_render_state->TextureWrapT(old_clamp);
+            render_state->TextureWrapT(old_clamp);
         }
     }
 }
@@ -1011,22 +1011,23 @@ void MDLRenderModel2D(MDLModel *md, const Image *skin_img, int frame, float x, f
     xscale = yscale * info->model_scale_ * info->model_aspect_;
     yscale = yscale * info->model_scale_;
 
-    global_render_state->Enable(GL_TEXTURE_2D);
-    global_render_state->BindTexture(skin_tex);
+    render_state->Enable(GL_TEXTURE_2D);
+    render_state->BindTexture(skin_tex);
 
-    global_render_state->Enable(GL_BLEND);
-    global_render_state->Enable(GL_CULL_FACE);
+    render_state->Enable(GL_BLEND);
+    render_state->Enable(GL_CULL_FACE);
 
     if (info->flags_ & kMapObjectFlagFuzzy)
-        global_render_state->GLColor(epi::MakeRGBA(0, 0, 0, 128));
+        render_state->GLColor(epi::MakeRGBA(0, 0, 0, 128));
     else
-        global_render_state->GLColor(kRGBAWhite);
+        render_state->GLColor(kRGBAWhite);
 
     for (int i = 0; i < md->total_triangles_; i++)
     {
+        /*
         const MDLTriangle *strip = &md->triangles_[i];
 
-        glBegin(GL_TRIANGLES);
+        //glBegin(GL_TRIANGLES);
 
         for (int v_idx = 0; v_idx < 3; v_idx++)
         {
@@ -1039,21 +1040,22 @@ void MDLRenderModel2D(MDLModel *md, const Image *skin_img, int frame, float x, f
             const MDLVertex *vert  = &frame_ptr->vertices[point->vert_idx];
             const HMM_Vec2   texc  = { point->skin_s, point->skin_t };
 
-            global_render_state->MultiTexCoord(GL_TEXTURE0, &texc);
+            render_state->MultiTexCoord(GL_TEXTURE0, &texc);
 
             float dx = vert->x * xscale;
             float dy = vert->y * xscale;
             float dz = (vert->z + info->model_bias_) * yscale;
 
-            glVertex3f(x + dy, y + dz, dx / 256.0f);
+            //glVertex3f(x + dy, y + dz, dx / 256.0f);
         }
 
-        glEnd();
+       // glEnd();
+       */
     }
 
-    global_render_state->Disable(GL_BLEND);
-    global_render_state->Disable(GL_TEXTURE_2D);
-    global_render_state->Disable(GL_CULL_FACE);
+    render_state->Disable(GL_BLEND);
+    render_state->Disable(GL_TEXTURE_2D);
+    render_state->Disable(GL_CULL_FACE);
 }
 
 //--- editor settings ---

@@ -258,9 +258,9 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
     y1t = y2t = view_window_height * ty2 / coord_H;
 
     // clip psprite to view window
-    global_render_state->Enable(GL_SCISSOR_TEST);
+    render_state->Enable(GL_SCISSOR_TEST);
 
-    glScissor(view_window_x, view_window_y, view_window_width, view_window_height);
+    render_state->Scissor(view_window_x, view_window_y, view_window_width, view_window_height);
 
     x1b = (float)view_window_x + x1b;
     x1t = (float)view_window_x + x1t;
@@ -445,7 +445,7 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
 
     FinishUnitBatch();
 
-    global_render_state->Disable(GL_SCISSOR_TEST);
+    render_state->Disable(GL_SCISSOR_TEST);
 }
 
 static const RGBAColor crosshair_colors[8] = {

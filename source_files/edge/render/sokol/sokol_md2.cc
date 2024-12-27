@@ -23,8 +23,6 @@
 //
 //----------------------------------------------------------------------------
 
-#include "r_md2.h"
-
 #include <stddef.h>
 
 #include <unordered_map>
@@ -44,12 +42,16 @@
 #include "r_effects.h"
 #include "r_gldefs.h"
 #include "r_image.h"
+#include "r_md2.h"
 #include "r_mdcommon.h"
 #include "r_misc.h"
 #include "r_modes.h"
 #include "r_shader.h"
 #include "r_state.h"
 #include "r_units.h"
+#include "sokol_local.h"
+#include "sokol_pipeline.h"
+#include "sokol_images.h"
 
 // clamp cache used by runits to avoid an extremely expensive gl tex param
 // lookup
@@ -117,8 +119,8 @@ struct RawMD2Vertex
 
 struct RawMD2GLCommand
 {
-	uint32_t s, t;
-	int32_t vert_index;
+    uint32_t s, t;
+    int32_t  vert_index;
 };
 
 struct RawMD2Frame
@@ -240,10 +242,10 @@ struct MD2Point
 struct MD2Strip
 {
     // either GL_TRIANGLE_STRIP or GL_TRIANGLE_FAN
-	GLenum mode;
+    GLenum mode;
 
-	// number of points in this strip / fan
-	int count;
+    // number of points in this strip / fan
+    int count;
 
     // index to the first point (within md2_model_c::points).
     // All points for the strip are contiguous in that array.
@@ -257,9 +259,9 @@ class MD2Model
     int total_points_;
     int total_strips_;
 
-    MD2Frame    *frames_;
-    MD2Point    *points_;
-    MD2Strip    *strips_;
+    MD2Frame *frames_;
+    MD2Point *points_;
+    MD2Strip *strips_;
 
     int vertices_per_frame_;
 
@@ -267,9 +269,9 @@ class MD2Model
     MD2Model(int nframes, int npoints, int nstrips, int nverts)
         : total_frames_(nframes), total_points_(npoints), total_strips_(nstrips), vertices_per_frame_(nverts)
     {
-        frames_      = new MD2Frame[total_frames_];
-        points_      = new MD2Point[total_points_];
-        strips_      = new MD2Strip[total_strips_];
+        frames_ = new MD2Frame[total_frames_];
+        points_ = new MD2Point[total_points_];
+        strips_ = new MD2Strip[total_strips_];
     }
 
     ~MD2Model()
@@ -280,9 +282,9 @@ class MD2Model
     }
 };
 
-static HMM_Vec3 render_position;
+static HMM_Vec3  render_position;
 static RGBAColor render_rgba;
-static HMM_Vec2 render_texture_coordinates;
+static HMM_Vec2  render_texture_coordinates;
 
 /*============== LOADING CODE ====================*/
 
@@ -360,34 +362,34 @@ MD2Model *MD2Load(epi::File *f)
 
     int num_frames = AlignedLittleEndianS32(header.num_frames);
     int num_verts  = AlignedLittleEndianS32(header.num_vertices);
-	int num_points = 0;
-	int num_strips = 0;
+    int num_points = 0;
+    int num_strips = 0;
 
-	/* PARSE GL COMMANDS */
+    /* PARSE GL COMMANDS */
 
     int num_glcmds = AlignedLittleEndianS32(header.num_glcmds);
 
-	int32_t *glcmds = new int32_t[num_glcmds];
+    int32_t *glcmds = new int32_t[num_glcmds];
 
-	f->Seek(AlignedLittleEndianS32(header.ofs_glcmds), epi::File::kSeekpointStart);
-	f->Read(glcmds, num_glcmds * sizeof(int32_t));
+    f->Seek(AlignedLittleEndianS32(header.ofs_glcmds), epi::File::kSeekpointStart);
+    f->Read(glcmds, num_glcmds * sizeof(int32_t));
 
-	for (int aa = 0; aa < num_glcmds; aa++)
-		glcmds[aa] = AlignedLittleEndianS32(glcmds[aa]);
+    for (int aa = 0; aa < num_glcmds; aa++)
+        glcmds[aa] = AlignedLittleEndianS32(glcmds[aa]);
 
     // determine total number of strips and points
-	for (i = 0; i < num_glcmds && glcmds[i] != 0; )
-	{
-		int count = glcmds[i++];
+    for (i = 0; i < num_glcmds && glcmds[i] != 0;)
+    {
+        int count = glcmds[i++];
 
-		if (count < 0)
-			count = -count;
+        if (count < 0)
+            count = -count;
 
-		num_strips += 1;
-		num_points += count;
+        num_strips += 1;
+        num_points += count;
 
-		i += count*3;
-	}
+        i += count * 3;
+    }
 
     MD2Model *md = new MD2Model(num_frames, num_points, num_strips, num_verts);
 
@@ -396,43 +398,43 @@ MD2Model *MD2Load(epi::File *f)
     LogDebug("  vertices_per_frame_:%d glcmds:%d\n", md->vertices_per_frame_, num_glcmds);
 
     // convert glcmds into strips and points
-	MD2Strip *strip = md->strips_;
-	MD2Point *point = md->points_;
+    MD2Strip *strip = md->strips_;
+    MD2Point *point = md->points_;
 
-	for (i = 0; i < num_glcmds && glcmds[i] != 0; )
-	{
-		int count = glcmds[i++];
+    for (i = 0; i < num_glcmds && glcmds[i] != 0;)
+    {
+        int count = glcmds[i++];
 
-		EPI_ASSERT(strip < md->strips_ + md->total_strips_);
-		EPI_ASSERT(point < md->points_ + md->total_points_);
+        EPI_ASSERT(strip < md->strips_ + md->total_strips_);
+        EPI_ASSERT(point < md->points_ + md->total_points_);
 
-		strip->mode = (count < 0) ? GL_TRIANGLE_FAN : GL_TRIANGLE_STRIP;
+        strip->mode = (count < 0) ? GL_TRIANGLE_FAN : GL_TRIANGLE_STRIP;
 
-		if (count < 0)
-			count = -count;
+        if (count < 0)
+            count = -count;
 
-		strip->count = count;
-		strip->first = point - md->points_;
+        strip->count = count;
+        strip->first = point - md->points_;
 
-		strip++;
+        strip++;
 
-		for (; count > 0; count--, point++, i += 3)
-		{
-			float *f_ptr = (float *) &glcmds[i];
+        for (; count > 0; count--, point++, i += 3)
+        {
+            float *f_ptr = (float *)&glcmds[i];
 
-			point->skin_s   = f_ptr[0];
-			point->skin_t   = 1.0 - f_ptr[1];
-			point->vert_idx = glcmds[i+2];
+            point->skin_s   = f_ptr[0];
+            point->skin_t   = 1.0 - f_ptr[1];
+            point->vert_idx = glcmds[i + 2];
 
-			EPI_ASSERT(point->vert_idx >= 0);
-			EPI_ASSERT(point->vert_idx < md->vertices_per_frame_);
-		}
-	}
+            EPI_ASSERT(point->vert_idx >= 0);
+            EPI_ASSERT(point->vert_idx < md->vertices_per_frame_);
+        }
+    }
 
-	EPI_ASSERT(strip == md->strips_ + md->total_strips_);
-	EPI_ASSERT(point == md->points_ + md->total_points_);
+    EPI_ASSERT(strip == md->strips_ + md->total_strips_);
+    EPI_ASSERT(point == md->points_ + md->total_points_);
 
-	delete[] glcmds;
+    delete[] glcmds;
 
     /* PARSE FRAMES */
 
@@ -658,9 +660,9 @@ MD2Model *MD3Load(epi::File *f)
 
     f->Read(&mesh, sizeof(RawMD3Mesh));
 
-    int num_frames       = AlignedLittleEndianS32(mesh.num_frames);
-    int num_verts        = AlignedLittleEndianS32(mesh.num_verts);
-    int num_strips       = AlignedLittleEndianS32(mesh.num_tris);
+    int num_frames = AlignedLittleEndianS32(mesh.num_frames);
+    int num_verts  = AlignedLittleEndianS32(mesh.num_verts);
+    int num_strips = AlignedLittleEndianS32(mesh.num_tris);
 
     LogDebug("  frames:%d  verts:%d  triangles: %d\n", num_frames, num_verts, num_strips);
 
@@ -707,7 +709,7 @@ MD2Model *MD3Load(epi::File *f)
         EPI_ASSERT(b < num_verts);
         EPI_ASSERT(c < num_verts);
 
-        md->strips_[i].mode = GL_TRIANGLES;
+        md->strips_[i].mode  = GL_TRIANGLES;
         md->strips_[i].first = i * 3;
         md->strips_[i].count = 3;
 
@@ -781,9 +783,9 @@ class MD2CoordinateData
 
     MD2Model *model_;
 
-    const MD2Frame    *frame1_;
-    const MD2Frame    *frame2_;
-    const MD2Strip    *strip_;
+    const MD2Frame *frame1_;
+    const MD2Frame *frame2_;
+    const MD2Strip *strip_;
 
     float lerp_;
     float x_, y_, z_;
@@ -924,9 +926,9 @@ static inline void ModelCoordFunc(MD2CoordinateData *data, int v_idx)
 {
     const MD2Model *md = data->model_;
 
-    const MD2Frame    *frame1 = data->frame1_;
-    const MD2Frame    *frame2 = data->frame2_;
-    const MD2Strip    *strip  = data->strip_;
+    const MD2Frame *frame1 = data->frame1_;
+    const MD2Frame *frame2 = data->frame2_;
+    const MD2Strip *strip  = data->strip_;
 
     EPI_ASSERT(strip->first + v_idx >= 0);
     EPI_ASSERT(strip->first + v_idx < md->total_points_);
@@ -954,19 +956,21 @@ static inline void ModelCoordFunc(MD2CoordinateData *data, int v_idx)
         return;
     }
 
-    render_texture_coordinates = { point->skin_s * data->image_right_, point->skin_t * data->image_top_ };
+    render_texture_coordinates = {point->skin_s * data->image_right_, point->skin_t * data->image_top_};
 
     ColorMixer *col = &data->normal_colors_[(data->lerp_ < 0.5) ? vert1->normal_idx : vert2->normal_idx];
 
     if (!data->is_additive_)
     {
-        render_rgba = epi::MakeRGBAClamped(col->modulate_red_ * render_view_red_multiplier, col->modulate_green_ * render_view_green_multiplier,
-            col->modulate_blue_ * render_view_blue_multiplier);
+        render_rgba = epi::MakeRGBAClamped(col->modulate_red_ * render_view_red_multiplier,
+                                           col->modulate_green_ * render_view_green_multiplier,
+                                           col->modulate_blue_ * render_view_blue_multiplier);
     }
     else
     {
-        render_rgba = epi::MakeRGBAClamped(col->add_red_ * render_view_red_multiplier, col->add_green_ * render_view_green_multiplier,
-            col->add_blue_ * render_view_blue_multiplier);
+        render_rgba = epi::MakeRGBAClamped(col->add_red_ * render_view_red_multiplier,
+                                           col->add_green_ * render_view_green_multiplier,
+                                           col->add_blue_ * render_view_blue_multiplier);
     }
 }
 
@@ -1116,7 +1120,8 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
 
     /* draw the model */
 
-    int num_pass = data.is_fuzzy_ ? 1 : (detail_level > 0 ? 4 : 3);
+    // Sokol, setting this to one, models need a redo
+    int num_pass = 1;//data.is_fuzzy_ ? 1 : (detail_level > 0 ? 4 : 3);
 
     RGBAColor fc_to_use = mo->subsector_->sector->properties.fog_color;
     float     fd_to_use = mo->subsector_->sector->properties.fog_density;
@@ -1137,11 +1142,11 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
 
     if (!draw_culling.d_ && fc_to_use != kRGBANoValue)
     {
-        global_render_state->ClearColor(fc_to_use);
-        global_render_state->FogColor(fc_to_use);
-        global_render_state->FogMode(GL_EXP);
-        global_render_state->FogDensity(std::log1p(fd_to_use));
-        global_render_state->Enable(GL_FOG);
+        render_state->ClearColor(fc_to_use);
+        render_state->FogColor(fc_to_use);
+        render_state->FogMode(GL_EXP);
+        render_state->FogDensity(std::log1p(fd_to_use));
+        render_state->Enable(GL_FOG);
     }
     else if (draw_culling.d_)
     {
@@ -1172,15 +1177,15 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         {
             fogColor = kRGBABlack;
         }
-        global_render_state->ClearColor(fogColor);
-        global_render_state->FogMode(GL_LINEAR);
-        global_render_state->FogColor(fogColor);
-        global_render_state->FogStart(renderer_far_clip.f_ - 750.0f);
-        global_render_state->FogEnd(renderer_far_clip.f_ - 250.0f);
-        global_render_state->Enable(GL_FOG);
+        render_state->ClearColor(fogColor);
+        render_state->FogMode(GL_LINEAR);
+        render_state->FogColor(fogColor);
+        render_state->FogStart(renderer_far_clip.f_ - 750.0f);
+        render_state->FogEnd(renderer_far_clip.f_ - 250.0f);
+        render_state->Enable(GL_FOG);
     }
     else
-        global_render_state->Disable(GL_FOG);
+        render_state->Disable(GL_FOG);
 
     for (int pass = 0; pass < num_pass; pass++)
     {
@@ -1188,7 +1193,7 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         {
             blending &= ~kBlendingAlpha;
             blending |= kBlendingAdd;
-            global_render_state->Disable(GL_FOG);
+            render_state->Disable(GL_FOG);
         }
 
         data.is_additive_ = (pass > 0 && pass == num_pass - 1);
@@ -1205,66 +1210,66 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
                 continue;
         }
 
-        global_render_state->PolygonOffset(0, -pass);
+        render_state->PolygonOffset(0, -pass);
 
         if (blending & kBlendingLess)
         {
-            global_render_state->Enable(GL_ALPHA_TEST);
+            render_state->Enable(GL_ALPHA_TEST);
         }
         else if (blending & kBlendingMasked)
         {
-            global_render_state->Enable(GL_ALPHA_TEST);
-            global_render_state->AlphaFunction(GL_GREATER, 0);
+            render_state->Enable(GL_ALPHA_TEST);
+            render_state->AlphaFunction(GL_GREATER, 0);
         }
         else
-            global_render_state->Disable(GL_ALPHA_TEST);
+            render_state->Disable(GL_ALPHA_TEST);
 
         if (blending & kBlendingAdd)
         {
-            global_render_state->Enable(GL_BLEND);
-            global_render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE);
+            render_state->Enable(GL_BLEND);
+            render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE);
         }
         else if (blending & kBlendingAlpha)
         {
-            global_render_state->Enable(GL_BLEND);
-            global_render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            render_state->Enable(GL_BLEND);
+            render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
         else
-            global_render_state->Disable(GL_BLEND);
+            render_state->Disable(GL_BLEND);
 
         if (blending & (kBlendingCullBack | kBlendingCullFront))
         {
-            global_render_state->Enable(GL_CULL_FACE);
-            global_render_state->CullFace((blending & kBlendingCullFront) ? GL_FRONT : GL_BACK);
+            render_state->Enable(GL_CULL_FACE);
+            render_state->CullFace((blending & kBlendingCullFront) ? GL_FRONT : GL_BACK);
         }
         else
-            global_render_state->Disable(GL_CULL_FACE);
+            render_state->Disable(GL_CULL_FACE);
 
-        global_render_state->DepthMask((blending & kBlendingNoZBuffer) ? false : true);
+        render_state->DepthMask((blending & kBlendingNoZBuffer) ? false : true);
 
         if (blending & kBlendingLess)
         {
             // NOTE: assumes alpha is constant over whole model
-            global_render_state->AlphaFunction(GL_GREATER, trans * 0.66f);
+            render_state->AlphaFunction(GL_GREATER, trans * 0.66f);
         }
 
-        global_render_state->ActiveTexture(GL_TEXTURE1);
-        global_render_state->Disable(GL_TEXTURE_2D);
-        global_render_state->ActiveTexture(GL_TEXTURE0);
-        global_render_state->Enable(GL_TEXTURE_2D);
-        global_render_state->BindTexture(skin_tex);
+        render_state->ActiveTexture(GL_TEXTURE1);
+        render_state->Disable(GL_TEXTURE_2D);
+        render_state->ActiveTexture(GL_TEXTURE0);
+        render_state->Enable(GL_TEXTURE_2D);
+        render_state->BindTexture(skin_tex);
 
         if (data.is_additive_)
         {
-            global_render_state->TextureEnvironmentMode(GL_COMBINE);
-            global_render_state->TextureEnvironmentCombineRGB(GL_REPLACE);
-            global_render_state->TextureEnvironmentSource0RGB(GL_PREVIOUS);
+            render_state->TextureEnvironmentMode(GL_COMBINE);
+            render_state->TextureEnvironmentCombineRGB(GL_REPLACE);
+            render_state->TextureEnvironmentSource0RGB(GL_PREVIOUS);
         }
         else
         {
-            global_render_state->TextureEnvironmentMode(GL_MODULATE);
-            global_render_state->TextureEnvironmentCombineRGB(GL_MODULATE);
-            global_render_state->TextureEnvironmentSource0RGB(GL_TEXTURE);
+            render_state->TextureEnvironmentMode(GL_MODULATE);
+            render_state->TextureEnvironmentCombineRGB(GL_MODULATE);
+            render_state->TextureEnvironmentSource0RGB(GL_TEXTURE);
         }
 
         GLint old_clamp = kDummyClamp;
@@ -1277,60 +1282,127 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
                 old_clamp = existing->second;
             }
 
-            global_render_state->TextureWrapT(renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE);
+            render_state->TextureWrapT(renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE);
         }
+
+        sgl_enable_texture();
+        sg_image img;
+        img.id = skin_tex;
+
+        sg_sampler img_sampler;
+        GetImageSampler(skin_tex, &img_sampler.id);
+
+        sgl_texture(img, img_sampler);
+
+        uint32_t pipeline_flags = 0;
+        pipeline_flags |= kPipelineDepthWrite;
+
+        render_state->SetPipeline(pipeline_flags);
 
         if (md->strips_[0].mode == GL_TRIANGLES) // MD3 models, it's a pile of triangles :/
         {
-            glBegin(GL_TRIANGLES);
+            // glBegin(GL_TRIANGLES);
 
             for (int i = 0; i < md->total_strips_; i++)
             {
                 data.strip_ = &md->strips_[i];
 
-                for (int v_idx=0; v_idx < 3; v_idx++)
+                for (int v_idx = 0; v_idx < 3; v_idx++)
                 {
                     ModelCoordFunc(&data, v_idx);
 
                     epi::SetRGBAAlpha(render_rgba, trans);
 
-                    global_render_state->GLColor(render_rgba);
-                    global_render_state->MultiTexCoord(GL_TEXTURE0, &render_texture_coordinates);
+                    render_state->GLColor(render_rgba);
+                    render_state->MultiTexCoord(GL_TEXTURE0, &render_texture_coordinates);
                     // vertex must be last
-                    glVertex3fv((const GLfloat *)(&render_position));
+                    // glVertex3fv((const GLfloat *)(&render_position));
                 }
             }
 
-            glEnd();
+            // glEnd();
         }
         else
         {
             for (int i = 0; i < md->total_strips_; i++)
             {
-                data.strip_ = & md->strips_[i];
+                data.strip_ = &md->strips_[i];
 
-                glBegin(data.strip_->mode);
-
-                for (int v_idx=0; v_idx < md->strips_[i].count; v_idx++)
+                if (data.strip_->mode == GL_TRIANGLE_FAN)
                 {
-                    ModelCoordFunc(&data, v_idx);
+                    HMM_Vec2  uv[32];
+                    HMM_Vec3  pos[32];
+                    RGBAColor color[32];
 
-                    epi::SetRGBAAlpha(render_rgba, trans);
+                    if (md->strips_[i].count > 32)
+                    {
+                        FatalError("Too many fan verts");
+                    }
 
-                    global_render_state->GLColor(render_rgba);
-                    global_render_state->MultiTexCoord(GL_TEXTURE0, &render_texture_coordinates);
-                    // vertex must be last
-                    glVertex3fv((const GLfloat *)(&render_position));
+                    for (int v_idx = 0; v_idx < md->strips_[i].count; v_idx++)
+                    {
+                        ModelCoordFunc(&data, v_idx);
+
+                        pos[v_idx].X = render_position[0];
+                        pos[v_idx].Y = render_position[1];
+                        pos[v_idx].Z = render_position[2];
+
+                        uv[v_idx].X = render_texture_coordinates[0];
+                        uv[v_idx].Y = render_texture_coordinates[1];
+
+                        epi::SetRGBAAlpha(render_rgba, trans);
+                        color[v_idx] = render_rgba;
+                    }
+
+                    sgl_begin_triangles();
+
+                    for (int k = 0; k < md->strips_[i].count - 2; k++)
+                    {
+                        int idx = 0;
+                        sgl_v3f_t2f_c4b(pos[idx].X, pos[idx].Y, pos[idx].Z, uv[idx].X, uv[idx].Y,
+                                        epi::GetRGBARed(color[idx]), epi::GetRGBAGreen(color[idx]),
+                                        epi::GetRGBABlue(color[idx]), epi::GetRGBAAlpha(color[idx]));
+
+                        idx = k + 1;
+                        sgl_v3f_t2f_c4b(pos[idx].X, pos[idx].Y, pos[idx].Z, uv[idx].X, uv[idx].Y,
+                                        epi::GetRGBARed(color[idx]), epi::GetRGBAGreen(color[idx]),
+                                        epi::GetRGBABlue(color[idx]), epi::GetRGBAAlpha(color[idx]));
+
+                        idx = k + 2;
+                        sgl_v3f_t2f_c4b(pos[idx].X, pos[idx].Y, pos[idx].Z, uv[idx].X, uv[idx].Y,
+                                        epi::GetRGBARed(color[idx]), epi::GetRGBAGreen(color[idx]),
+                                        epi::GetRGBABlue(color[idx]), epi::GetRGBAAlpha(color[idx]));
+                    }
+
+                    sgl_end();
                 }
+                else
+                {
+                    sgl_begin_triangle_strip();
 
-                glEnd();
+                    for (int v_idx = 0; v_idx < md->strips_[i].count; v_idx++)
+                    {
+                        ModelCoordFunc(&data, v_idx);
+
+                        const GLfloat *pos = (const GLfloat *)(&render_position);
+                        const GLfloat *uv  = (const GLfloat *)(&render_texture_coordinates);
+
+                        epi::SetRGBAAlpha(render_rgba, trans);
+
+                        sgl_v3f_t2f_c4b(pos[0], pos[1], pos[2], uv[0], uv[1], epi::GetRGBARed(render_rgba),
+                                        epi::GetRGBAGreen(render_rgba), epi::GetRGBABlue(render_rgba),
+                                        epi::GetRGBAAlpha(render_rgba));
+                    }
+
+                    sgl_end();
+                }
             }
         }
 
         // restore the clamping mode
         if (old_clamp != kDummyClamp)
         {
-            global_render_state->TextureWrapT(old_clamp);
+            render_state->TextureWrapT(old_clamp);
         }
     }
 }
@@ -1344,89 +1416,93 @@ void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, f
 
     GLuint skin_tex = ImageCache(skin_img, false, info->palremap_);
 
-    float im_right = skin_img->Right();
-    float im_top   = skin_img->Top();
+    //float im_right = skin_img->Right();
+    //float im_top   = skin_img->Top();
 
     xscale = yscale * info->model_scale_ * info->model_aspect_;
     yscale = yscale * info->model_scale_;
 
-    global_render_state->Enable(GL_TEXTURE_2D);
-    global_render_state->BindTexture(skin_tex);
+    render_state->Enable(GL_TEXTURE_2D);
+    render_state->BindTexture(skin_tex);
 
-    global_render_state->Enable(GL_BLEND);
-    global_render_state->Enable(GL_CULL_FACE);
+    render_state->Enable(GL_BLEND);
+    render_state->Enable(GL_CULL_FACE);
 
     if (info->flags_ & kMapObjectFlagFuzzy)
-        global_render_state->GLColor(epi::MakeRGBA(0, 0, 0, 128));
+        render_state->GLColor(epi::MakeRGBA(0, 0, 0, 128));
     else
-        global_render_state->GLColor(kRGBAWhite);
+        render_state->GLColor(kRGBAWhite);
 
     if (md->strips_[0].mode == GL_TRIANGLES)
     {
-        glBegin(GL_TRIANGLES);
+        /*
+        // glBegin(GL_TRIANGLES);
 
         for (int i = 0; i < md->total_strips_; i++)
         {
             const MD2Strip *strip = &md->strips_[i];
 
-            for (int v_idx=0; v_idx < 3; v_idx++)
+            for (int v_idx = 0; v_idx < 3; v_idx++)
             {
-                const MD2Frame *frame_ptr = & md->frames_[frame];
+                const MD2Frame *frame_ptr = &md->frames_[frame];
 
                 EPI_ASSERT(strip->first + v_idx >= 0);
                 EPI_ASSERT(strip->first + v_idx < md->total_points_);
 
-                const MD2Point *point = &md->points_[strip->first + v_idx];
-                const MD2Vertex *vert = &frame_ptr->vertices[point->vert_idx];
-                const HMM_Vec2 texc = { point->skin_s * im_right, point->skin_t * im_top };
+                const MD2Point  *point = &md->points_[strip->first + v_idx];
+                const MD2Vertex *vert  = &frame_ptr->vertices[point->vert_idx];
+                const HMM_Vec2   texc  = {point->skin_s * im_right, point->skin_t * im_top};
 
-                global_render_state->MultiTexCoord(GL_TEXTURE0, &texc);
+                render_state->MultiTexCoord(GL_TEXTURE0, &texc);
 
                 float dx = vert->x * xscale;
                 float dy = vert->y * xscale;
                 float dz = (vert->z + info->model_bias_) * yscale;
 
-                glVertex3f(x + dy, y + dz, dx / 256.0f);
+                // glVertex3f(x + dy, y + dz, dx / 256.0f);
             }
         }
 
-        glEnd();
+        // glEnd();
+        */
     }
     else
     {
         for (int i = 0; i < md->total_strips_; i++)
         {
+            /*
             const MD2Strip *strip = &md->strips_[i];
 
-            glBegin(strip->mode);
+            // glBegin(strip->mode);
 
-            for (int v_idx=0; v_idx < md->strips_[i].count; v_idx++)
+            for (int v_idx = 0; v_idx < md->strips_[i].count; v_idx++)
             {
-                const MD2Frame *frame_ptr = & md->frames_[frame];
+                const MD2Frame *frame_ptr = &md->frames_[frame];
 
                 EPI_ASSERT(strip->first + v_idx >= 0);
                 EPI_ASSERT(strip->first + v_idx < md->total_points_);
 
-                const MD2Point *point = &md->points_[strip->first + v_idx];
-                const MD2Vertex *vert = &frame_ptr->vertices[point->vert_idx];
-                const HMM_Vec2 texc = { point->skin_s * im_right, point->skin_t * im_top };
+                const MD2Point  *point = &md->points_[strip->first + v_idx];
+                const MD2Vertex *vert  = &frame_ptr->vertices[point->vert_idx];
+                const HMM_Vec2   texc  = {point->skin_s * im_right, point->skin_t * im_top};
 
-                global_render_state->MultiTexCoord(GL_TEXTURE0, &texc);
+                render_state->MultiTexCoord(GL_TEXTURE0, &texc);
 
                 float dx = vert->x * xscale;
                 float dy = vert->y * xscale;
                 float dz = (vert->z + info->model_bias_) * yscale;
 
-                glVertex3f(x + dy, y + dz, dx / 256.0f);
+                // glVertex3f(x + dy, y + dz, dx / 256.0f);
             }
 
-            glEnd();
+            // glEnd();
+            */
         }
     }
 
-    global_render_state->Disable(GL_BLEND);
-    global_render_state->Disable(GL_TEXTURE_2D);
-    global_render_state->Disable(GL_CULL_FACE);
+    render_state->Disable(GL_BLEND);
+    render_state->Disable(GL_TEXTURE_2D);
+    render_state->Disable(GL_CULL_FACE);
 }
 
 //--- editor settings ---

@@ -87,13 +87,21 @@ void MovieVideoCallback(plm_t *mpeg, plm_frame_t *frame, void *user)
     (void)mpeg;
     (void)user;
 
-    plm_frame_to_rgb(frame, rgb_data, frame->width * 3);
-    global_render_state->BindTexture(canvas);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame->width, frame->height, 0, GL_RGB, GL_UNSIGNED_BYTE, rgb_data);
+    plm_frame_to_rgba(frame, rgb_data, frame->width * 4);
+
+    render_state->BindTexture(canvas);
+    render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frame->width, frame->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgb_data);
 }
 
 void PlayMovie(const std::string &name)
 {
+#ifdef EDGE_SOKOL
+    // Disabled until Dasho can figure out why the frame size changes between creating the texture and updating it
+    // Which is probably also an issue under GL1
+    playing_movie   = false;
+    skip_bar_active = false;
+    return;    
+#else    
     MovieDefinition *movie = moviedefs.Lookup(name.c_str());
 
     if (!movie)
@@ -157,12 +165,12 @@ void PlayMovie(const std::string &name)
     }
 
     if (canvas)
-        global_render_state->DeleteTexture(&canvas);
+        render_state->DeleteTexture(&canvas);
 
-    glGenTextures(1, &canvas);
-    global_render_state->BindTexture(canvas);
-    global_render_state->TextureMagFilter(GL_LINEAR);
-    global_render_state->TextureMinFilter(GL_LINEAR);
+    render_state->GenTextures(1, &canvas);
+    render_state->BindTexture(canvas);
+    render_state->TextureMagFilter(GL_LINEAR);
+    render_state->TextureMinFilter(GL_LINEAR);
 
     if (rgb_data)
     {
@@ -212,12 +220,18 @@ void PlayMovie(const std::string &name)
         frame_width  = current_screen_width;
     }
 
+#ifdef EDGE_SOKOL
+    // On sokol, this sets up the texture dimenions, for dynamic texture
+    render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frame_width, frame_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr, kRenderUsageDynamic);
+    render_state->FinishTextures(1, &canvas);
+#endif    
+
     vx1 = current_screen_width / 2 - frame_width / 2;
     vx2 = current_screen_width / 2 + frame_width / 2;
     vy1 = current_screen_height / 2 + frame_height / 2;
     vy2 = current_screen_height / 2 - frame_height / 2;
 
-    int num_pixels = movie_width * movie_height * 3;
+    int num_pixels = movie_width * movie_height * 4;
     rgb_data       = new uint8_t[num_pixels];
     memset(rgb_data, 0, num_pixels);
     plm_set_video_decode_callback(decoder, MovieVideoCallback, nullptr);
@@ -235,6 +249,7 @@ void PlayMovie(const std::string &name)
     fadeout   = 0;
 
     playing_movie = true;
+#endif;    
 }
 
 static void EndMovie()
@@ -250,7 +265,7 @@ static void EndMovie()
     }
     if (canvas)
     {
-        global_render_state->DeleteTexture(&canvas);
+        render_state->DeleteTexture(&canvas);
         canvas = 0;
     }
     ResumeMusic();

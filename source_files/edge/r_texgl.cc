@@ -31,6 +31,7 @@
 #include "m_argv.h"
 #include "m_misc.h"
 #include "p_local.h"
+#include "r_backend.h"
 #include "r_colormap.h"
 #include "r_gldefs.h"
 #include "r_image.h"
@@ -122,6 +123,15 @@ GLuint UploadTexture(ImageData *img, int flags, int max_pix)
      * assigned to it.
      */
 
+#ifdef EDGE_SOKOL
+    // Only OpenGL supports RGB format for textures, so promote to RGBA
+    if (img->depth_ == 3)
+    {
+        img->SetAlpha(255);
+    }
+#endif
+
+
     EPI_ASSERT(img->depth_ == 3 || img->depth_ == 4);
 
     bool clamp  = (flags & kUploadClamp) ? true : false;
@@ -131,14 +141,14 @@ GLuint UploadTexture(ImageData *img, int flags, int max_pix)
     int total_w = img->width_;
     int total_h = img->height_;
 
-    int new_w, new_h;
+    int new_w, new_h;    
 
     // scale down, if necessary, to fix the maximum size
-    for (new_w = total_w; new_w > maximum_texture_size; new_w /= 2)
+    for (new_w = total_w; new_w > render_backend->GetMaxTextureSize(); new_w /= 2)
     { /* nothing here */
     }
 
-    for (new_h = total_h; new_h > maximum_texture_size; new_h /= 2)
+    for (new_h = total_h; new_h > render_backend->GetMaxTextureSize(); new_h /= 2)
     { /* nothing here */
     }
 
@@ -150,26 +160,26 @@ GLuint UploadTexture(ImageData *img, int flags, int max_pix)
             new_w /= 2;
     }
 
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    render_state->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     GLuint id;
 
-    glGenTextures(1, &id);
-    global_render_state->BindTexture(id);
+    render_state->GenTextures(1, &id);
+    render_state->BindTexture(id);
 
     GLint tmode = GL_REPEAT;
 
     if (clamp)
         tmode = renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE;
 
-    global_render_state->TextureWrapS(tmode);
-    global_render_state->TextureWrapT(tmode);
+    render_state->TextureWrapS(tmode);
+    render_state->TextureWrapT(tmode);
 
     texture_clamp_s.emplace(id, tmode);
     texture_clamp_t.emplace(id, tmode);
 
     // magnification mode
-    global_render_state->TextureMagFilter(smooth ? GL_LINEAR : GL_NEAREST);
+    render_state->TextureMagFilter(smooth ? GL_LINEAR : GL_NEAREST);
 
     // minification mode
     int mip_level = HMM_Clamp(0, image_mipmapping, 2);
@@ -185,7 +195,7 @@ GLuint UploadTexture(ImageData *img, int flags, int max_pix)
 
                                         GL_LINEAR,  GL_LINEAR_MIPMAP_NEAREST,  GL_LINEAR_MIPMAP_LINEAR};
 
-    global_render_state->TextureMinFilter(minif_modes[(smooth ? 3 : 0) + (nomip ? 0 : mip_level)]);
+    render_state->TextureMinFilter(minif_modes[(smooth ? 3 : 0) + (nomip ? 0 : mip_level)]);
 
     for (int mip = 0;; mip++)
     {
@@ -197,8 +207,7 @@ GLuint UploadTexture(ImageData *img, int flags, int max_pix)
                 img->ThresholdAlpha((mip & 1) ? 96 : 144);
         }
 
-        glTexImage2D(GL_TEXTURE_2D, mip, (img->depth_ == 3) ? GL_RGB : GL_RGBA, new_w, new_h, 0 /* border */,
-                     (img->depth_ == 3) ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, img->PixelAt(0, 0));
+        render_state->TexImage2D(GL_TEXTURE_2D, mip, img->depth_ == 3 ? GL_RGB : GL_RGBA, new_w, new_h, 0, img->depth_ == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, img->PixelAt(0, 0));
 
         // stop if mipmapping disabled or we have reached the end
         if (nomip || !image_mipmapping || (new_w == 1 && new_h == 1))
@@ -207,6 +216,8 @@ GLuint UploadTexture(ImageData *img, int flags, int max_pix)
         new_w = HMM_MAX(1, new_w / 2);
         new_h = HMM_MAX(1, new_h / 2);
     }
+
+    render_state->FinishTextures(1, &id);
 
     return id;
 }

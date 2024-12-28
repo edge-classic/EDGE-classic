@@ -303,8 +303,8 @@ static bool TryWalk(MapObject *actor)
 // -ACB- 1998/09/06 actor is now an object; different movement choices.
 void NewChaseDir(MapObject *object)
 {
-    float         deltax;
-    float         deltay;
+    float         deltax = 0;
+    float         deltay = 0;
     DirectionType tdir;
 
     DirectionType d[3];
@@ -342,7 +342,7 @@ void NewChaseDir(MapObject *object)
         deltax = (object->support_object_->x - object->x) - (object->support_object_->radius_ * 4);
         deltay = (object->support_object_->y - object->y) - (object->support_object_->radius_ * 4);
     }
-    else
+    else if (olddir < kDirectionNone) // use old direction only if not turning/evading/immobile
     {
         deltax = 128 * xspeed[olddir];
         deltay = 128 * yspeed[olddir];

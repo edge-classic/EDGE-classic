@@ -195,7 +195,7 @@ class MDLModel
   public:
     MDLModel(int nframes, int npoints, int ntris, int swidth, int sheight)
         : total_frames_(nframes), total_points_(npoints), total_triangles_(ntris), skin_width_(swidth),
-          skin_height_(sheight), vertices_per_frame_(npoints)
+          skin_height_(sheight), vertices_per_frame_(0)
     {
         frames_      = new MDLFrame[total_frames_];
         points_      = new MDLPoint[total_points_];
@@ -274,7 +274,7 @@ MDLModel *MDLLoad(epi::File *f)
         return nullptr; /* NOT REACHED */
     }
 
-    int num_frames        = AlignedLittleEndianS32(header.num_frames);
+    int num_frames       = AlignedLittleEndianS32(header.num_frames);
     int num_tris         = AlignedLittleEndianS32(header.num_tris);
     int num_verts        = AlignedLittleEndianS32(header.num_verts);
     int swidth           = AlignedLittleEndianS32(header.skin_width);
@@ -329,7 +329,7 @@ MDLModel *MDLLoad(epi::File *f)
     for (int fr = 0; fr < num_frames; fr++)
     {
         frames[fr].frame.verts = new RawMDLVertex[num_verts];
-        f->Read(&frames[fr].type, sizeof(int));
+        f->Read(&frames[fr].type, sizeof(int32_t));
         f->Read(&frames[fr].frame.bboxmin, sizeof(RawMDLVertex));
         f->Read(&frames[fr].frame.bboxmax, sizeof(RawMDLVertex));
         f->Read(frames[fr].frame.name, 16 * sizeof(char));
@@ -337,6 +337,8 @@ MDLModel *MDLLoad(epi::File *f)
     }
 
     LogDebug("  frames:%d  points:%d  tris: %d\n", num_frames, num_points, num_tris);
+
+    md->vertices_per_frame_ = num_verts;
 
     LogDebug("  vertices_per_frame_:%d\n", md->vertices_per_frame_);
 

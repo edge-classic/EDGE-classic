@@ -91,7 +91,7 @@ if (MSVC)
   add_definitions("/wd4100")
 
   # warning level for edge specific source files 
-  set (EDGE_WARNINGS "/W4")
+  set (EDGE_WARNING_LEVEL "/W4")
 
   # To use the sanitizer with MSVC, you will need to either have your Visual Studio
   # or Build Tools install in your PATH variable, or copy the appropriate DLL to the program
@@ -116,7 +116,7 @@ else()
   endif()
 
   # warning level for edge specific source files 
-  set (EDGE_WARNINGS -Wextra)
+  set (EDGE_WARNING_LEVEL -Wextra)
 
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fno-exceptions -fno-strict-aliasing")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fno-exceptions -fno-rtti -fno-strict-aliasing")
@@ -124,11 +124,14 @@ else()
   if (EDGE_SANITIZE)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
-    set(CMAKE_EXE_LINKER_FLAGS "-fsanitize=address -static-libasan")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
+    if (NOT CLANG)
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libasan")
+    endif()
   endif()
 
   if (MSYS)
-    set(CMAKE_EXE_LINKER_FLAGS "-static -mwindows")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static -mwindows")
   endif()
 
 endif()

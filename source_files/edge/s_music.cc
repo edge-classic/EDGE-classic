@@ -36,7 +36,6 @@
 #include "s_flac.h"
 #endif
 #include "s_tsf.h"
-#include "s_fmm.h"
 #if EDGE_TRACKER_SUPPORT
 #include "s_m4p.h"
 #endif
@@ -249,10 +248,6 @@ void ChangeMusic(int entry_number, bool loop)
         if (var_midi_player == 0)
         {
             music_player = PlayTSFMusic(data, length, loop);
-        }
-        else if (var_midi_player == 1)
-        {
-            music_player = PlayFMMMusic(data, length, loop);
         }
         else
         {

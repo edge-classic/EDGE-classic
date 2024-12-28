@@ -24,6 +24,6 @@ endif()
 target_include_directories(edge_epi PUBLIC ./)
 
 target_compile_options(edge_epi PRIVATE
-  $<$<CXX_COMPILER_ID:MSVC>:${EDGE_WARNINGS}>
-  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:${EDGE_WARNINGS}>
+  $<$<CXX_COMPILER_ID:MSVC>:${EDGE_WARNING_LEVEL}>
+  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:${EDGE_WARNING_LEVEL}>
 )

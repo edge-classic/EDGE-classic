@@ -154,6 +154,7 @@ void OGGPlayer::Close()
 
     if (ogg_decoder_)
     {
+        delete[] ogg_decoder_->stream_start;
         stb_vorbis_close(ogg_decoder_);
         ogg_decoder_ = nullptr;
     }

@@ -109,7 +109,6 @@
 #include "s_cache.h"
 #include "s_emidi.h"
 #include "s_tsf.h"
-#include "s_fmm.h"
 #include "s_music.h"
 #include "s_sound.h"
 #include "stb_sprintf.h"
@@ -528,7 +527,7 @@ static OptionMenuItem soundoptions[] = {
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Stereo", "Off/On/Swapped", 3, &var_sound_stereo, nullptr, "NeedRestart", nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
-    {kOptionMenuItemTypeSwitch, "MIDI Player", "TinySoundFont/FMMIDI/Emu de MIDI (OPLL Mode)/Emu de MIDI (SCC-PSG Mode)", 4, &var_midi_player, OptionMenuChangeMidiPlayer,
+    {kOptionMenuItemTypeSwitch, "MIDI Player", "TinySoundFont/Emu de MIDI (OPLL Mode)/Emu de MIDI (SCC-PSG Mode)", 3, &var_midi_player, OptionMenuChangeMidiPlayer,
      nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeFunction, "TinySoundFont Bank", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr, nullptr, 0, 0, 0, ""},
 #if EDGE_DOOM_SFX_SUPPORT
@@ -2102,8 +2101,6 @@ static void OptionMenuChangeMidiPlayer(int key_pressed, ConsoleVariable *console
     EPI_UNUSED(console_variable);
     if (var_midi_player == 0)
         RestartTSF();
-    else if (var_midi_player == 1)
-        RestartFMM();
     else
         RestartEMIDI();
 }

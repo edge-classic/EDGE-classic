@@ -351,14 +351,10 @@ static void ParseConfig(const std::string &data, bool check_config_version)
 
         key = lex.state_.string;
 
-        LogPrint("%s\n", lex.state_.string.c_str());
-
         if (!lex.GetNextToken())
             FatalError("ParseConfig: missing value for key %s!\n", key.c_str());
 
         value = lex.state_.string;
-
-        LogPrint("%s\n", lex.state_.string.c_str());
 
         if (lex.state_.token == epi::Scanner::kStringConst)
         {

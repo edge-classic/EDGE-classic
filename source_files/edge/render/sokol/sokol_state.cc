@@ -38,9 +38,10 @@ class SokolRenderState : public RenderState
             enable_fog_ = enabled;
             break;
         case GL_ALPHA_TEST:
-            alpha_test_ = enabled ? 0.1f : 0.0f;
+            enable_alpha_test_ = enabled;
             break;
         case GL_BLEND:
+            enable_blend_ = enabled;
             break;
         case GL_CULL_FACE:
             break;
@@ -56,6 +57,7 @@ class SokolRenderState : public RenderState
         case GL_COLOR_MATERIAL:
             break;
         case GL_DEPTH_TEST:
+            enable_depth_test_ = enabled;
             break;
         case GL_STENCIL_TEST:
             break;
@@ -91,9 +93,10 @@ class SokolRenderState : public RenderState
             enable_fog_ = false;
             break;
         case GL_ALPHA_TEST:
-            alpha_test_ = 0.0f;
+            enable_alpha_test_ = false;
             break;
         case GL_BLEND:
+            enable_blend_ = false;
             break;
         case GL_CULL_FACE:
             break;
@@ -106,6 +109,7 @@ class SokolRenderState : public RenderState
         case GL_COLOR_MATERIAL:
             break;
         case GL_DEPTH_TEST:
+            enable_depth_test_ = false;
             break;
         case GL_STENCIL_TEST:
             break;
@@ -147,7 +151,8 @@ class SokolRenderState : public RenderState
     void AlphaFunction(GLenum func, GLfloat ref)
     {
         EPI_UNUSED(func);
-        EPI_UNUSED(ref);
+        
+        alpha_test_ = ref;
     }
 
     void ActiveTexture(GLenum activeTexture)
@@ -158,7 +163,7 @@ class SokolRenderState : public RenderState
     void Scissor(GLint x, GLint y, GLsizei width, GLsizei height)
     {
         // can't currently disable
-        sgl_scissor_rect(x, y, width, height, true);
+        sgl_scissor_rect(x, y, width, height, false);
     }
 
     void PolygonOffset(GLfloat factor, GLfloat units)
@@ -169,7 +174,10 @@ class SokolRenderState : public RenderState
 
     void Clear(GLbitfield mask)
     {
-        EPI_UNUSED(mask);
+        if (mask & GL_DEPTH_BUFFER_BIT)
+        {
+            sgl_clear_depth(1.0f);
+        }
     }
 
     void ClearColor(RGBAColor color)
@@ -209,8 +217,8 @@ class SokolRenderState : public RenderState
 
     void BlendFunction(GLenum sfactor, GLenum dfactor)
     {
-        EPI_UNUSED(sfactor);
-        EPI_UNUSED(dfactor);
+        blend_source_factor_      = sfactor;
+        blend_destination_factor_ = dfactor;
     }
 
     void TextureEnvironmentMode(GLint param)
@@ -407,6 +415,7 @@ class SokolRenderState : public RenderState
         case GL_LINEAR:
         case GL_NEAREST_MIPMAP_LINEAR:
             sampler_desc.min_filter = SG_FILTER_LINEAR;
+            sampler_desc.mipmap_filter = SG_FILTER_LINEAR;
             break;
         }
 
@@ -419,6 +428,7 @@ class SokolRenderState : public RenderState
         case GL_LINEAR:
         case GL_NEAREST_MIPMAP_LINEAR:
             sampler_desc.mag_filter = SG_FILTER_LINEAR;
+            sampler_desc.mipmap_filter = SG_FILTER_LINEAR;
             break;
         }
 
@@ -556,13 +566,9 @@ class SokolRenderState : public RenderState
 
     void ReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, void *pixels)
     {
-        EPI_UNUSED(x);
-        EPI_UNUSED(y);
-        EPI_UNUSED(width);
-        EPI_UNUSED(height);
-        EPI_UNUSED(format);
-        EPI_UNUSED(type);
-        EPI_UNUSED(pixels);
+#ifdef SOKOL_GLCORE
+        sg_gl_read_pixels(x, y, width, height, format, type, pixels);
+#endif        
     }
 
     void PixelZoom(GLfloat xfactor, GLfloat yfactor)
@@ -588,11 +594,18 @@ class SokolRenderState : public RenderState
             pipeline_flags |= kPipelineDepthWrite;
         if (depth_function_ == GL_GREATER)
             pipeline_flags |= kPipelineDepthGreater;
+        if (enable_depth_test_)
+            pipeline_flags |= kPipelineDepthTest;
+
+        if (enable_blend_)
+        {
+            pipeline_flags |= kPipelineBlend;
+        }
 
         pipeline_flags |= flags;
 
         sgl_context context = sgl_get_context();
-        sgl_load_pipeline(GetPipeline(context, pipeline_flags));
+        sgl_load_pipeline(GetPipeline(context, pipeline_flags, blend_source_factor_, blend_destination_factor_));
 
         float fogr = float(epi::GetRGBARed(fog_color_)) / 255.0f;
         float fogg = float(epi::GetRGBAGreen(fog_color_)) / 255.0f;
@@ -600,10 +613,12 @@ class SokolRenderState : public RenderState
 
         sgl_set_fog(enable_fog_, fogr, fogg, fogb, 1, fog_density_, fog_start_, fog_end_, 1);
 
-        sgl_set_alpha_test(alpha_test_);
+        float alpha_test = enable_alpha_test_ ? alpha_test_ : 0.0f;
+        sgl_set_alpha_test(alpha_test);
     }
 
     // state
+    bool   enable_depth_test_;
     GLenum depth_function_;
     bool   depth_mask_;
 
@@ -614,6 +629,11 @@ class SokolRenderState : public RenderState
     GLfloat   fog_density_;
     RGBAColor fog_color_;
 
+    bool   enable_blend_;
+    GLenum blend_source_factor_;
+    GLenum blend_destination_factor_;
+
+    bool    enable_alpha_test_ = false;
     GLfloat alpha_test_;
 
     // texture creation

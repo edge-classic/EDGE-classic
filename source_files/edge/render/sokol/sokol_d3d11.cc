@@ -38,7 +38,7 @@ static const IID _sapp_IID_IDXGIFactory = {
 typedef struct
 {
     HWND hwnd;
-    bool          is_win10_or_greater;
+    bool is_win10_or_greater;
 } _sapp_win32_t;
 
 typedef struct
@@ -65,7 +65,7 @@ typedef struct
     int           framebuffer_width;
     int           framebuffer_height;
     int           sample_count;
-    int           swap_interval;    
+    int           swap_interval;
 } _sapp_t;
 
 static _sapp_t _sapp;
@@ -73,18 +73,21 @@ static _sapp_t _sapp;
 /* don't laugh, but this seems to be the easiest and most robust
    way to check if we're running on Win10
 
-   From: https://github.com/videolan/vlc/blob/232fb13b0d6110c4d1b683cde24cf9a7f2c5c2ea/modules/video_output/win32/d3d11_swapchain.c#L263
+   From:
+   https://github.com/videolan/vlc/blob/232fb13b0d6110c4d1b683cde24cf9a7f2c5c2ea/modules/video_output/win32/d3d11_swapchain.c#L263
 */
-bool _sapp_win32_is_win10_or_greater(void) {
+static bool _sapp_win32_is_win10_or_greater(void)
+{
     HMODULE h = GetModuleHandleW(L"kernel32.dll");
-    if (NULL != h) {
+    if (NULL != h)
+    {
         return (NULL != GetProcAddress(h, "GetSystemCpuSetInformation"));
     }
-    else {
+    else
+    {
         return false;
     }
 }
-
 
 static inline HRESULT _sapp_dxgi_GetBuffer(IDXGISwapChain *self, UINT Buffer, REFIID riid, void **ppSurface)
 {
@@ -384,7 +387,7 @@ void sapp_d3d11_resize_default_render_target(int32_t width, int32_t height)
         {
             return;
         }
-        
+
         _sapp.framebuffer_width  = width;
         _sapp.framebuffer_height = height;
 
@@ -415,11 +418,11 @@ void sapp_d3d11_init(SDL_Window *window, int32_t width, int32_t height)
     SDL_SysWMinfo wmInfo;
     SDL_VERSION(&wmInfo.version);
     SDL_GetWindowWMInfo(window, &wmInfo);
-    _sapp.win32.hwnd         = wmInfo.info.win.window;
-    _sapp.framebuffer_width  = width;
-    _sapp.framebuffer_height = height;
-    _sapp.sample_count       = 1;
-    _sapp.swap_interval      = 0;
+    _sapp.win32.hwnd                = wmInfo.info.win.window;
+    _sapp.framebuffer_width         = width;
+    _sapp.framebuffer_height        = height;
+    _sapp.sample_count              = 1;
+    _sapp.swap_interval             = 0;
     _sapp.win32.is_win10_or_greater = _sapp_win32_is_win10_or_greater();
 
     _sapp_d3d11_create_device_and_swapchain();
@@ -481,3 +484,63 @@ void sapp_d3d11_destroy_device_and_swapchain(void)
     _SAPP_SAFE_RELEASE(_sapp.d3d11.device);
 }
 
+// D3D11CalcSubresource only exists with helpers enabled
+static UINT sapp_d3d11_calcsubresource(UINT mip_slice, UINT array_slice, UINT mip_levels)
+{
+    return mip_slice + array_slice * mip_levels;
+}
+
+void sapp_d3d11_capture_screen(int32_t width, int32_t height, int32_t stride, uint8_t *dest)
+{
+    ID3D11Texture2D *pSurface;
+    HRESULT hr = _sapp.d3d11.swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void **>(&pSurface));
+    SOKOL_ASSERT(SUCCEEDED(hr) && pSurface);
+    if (pSurface)
+    {
+        // const int    width  = static_cast<int>(m_window->Bounds.Width * m_dpi / 96.0f);
+        // const int    height = static_cast<int>(m_window->Bounds.Height * m_dpi / 96.0f);
+
+        ID3D11Texture2D *pNewTexture = NULL;
+
+        D3D11_TEXTURE2D_DESC description;
+        pSurface->GetDesc(&description);
+        description.BindFlags      = 0;
+        description.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
+        description.Usage          = D3D11_USAGE_STAGING;
+        uint32_t subresource       = sapp_d3d11_calcsubresource(0, 0, 0);
+
+        hr = _sapp.d3d11.device->CreateTexture2D(&description, NULL, &pNewTexture);
+        SOKOL_ASSERT(SUCCEEDED(hr));
+        if (pNewTexture)
+        {
+            _sapp.d3d11.device_context->CopyResource(pNewTexture, pSurface);
+            D3D11_MAPPED_SUBRESOURCE resource;
+            hr = _sapp.d3d11.device_context->Map(pNewTexture, subresource, D3D11_MAP_READ_WRITE, 0, &resource);
+            SOKOL_ASSERT(SUCCEEDED(hr));
+
+            const uint8_t *source = static_cast<const uint8_t *>(resource.pData);
+            for (int i = 0; i < height; ++i)
+            {
+                uint8_t *d = dest;
+                for (int j = 0; j < width; j++)
+                {
+                    // swizzle
+                    const uint8_t *src = &source[(height - i - 1) * resource.RowPitch + (j * 4)];
+                    d[0]               = src[2];
+                    d[1]               = src[1];
+                    d[2]               = src[0];
+                    d[3]               = src[3];
+                    d += 4;
+                }
+
+                dest += stride;
+            }
+        }
+
+        _sapp.d3d11.device_context->Unmap(pNewTexture, subresource);        
+
+        _SAPP_SAFE_RELEASE(pNewTexture);
+    }
+
+    _SAPP_SAFE_RELEASE(pSurface);
+}

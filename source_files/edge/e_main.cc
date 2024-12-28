@@ -158,7 +158,7 @@ GameFlags default_game_flags = {
 
 GameFlags global_flags;
 
-bool mus_pause_stop  = false;
+bool mus_pause_stop = false;
 
 std::string branding_file;
 std::string configuration_file;
@@ -268,13 +268,14 @@ class StartupProgress
 
         if (gamma_correction.f_ < 0)
         {
-            int col = (1.0f + gamma_correction.f_) * 255;
+            int       col      = (1.0f + gamma_correction.f_) * 255;
             RGBAColor unit_col = epi::MakeRGBA(col, col, col);
             epi::SetRGBAAlpha(unit_col, HUDGetAlpha());
 
             StartUnitBatch(false);
 
-            RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNegativeGamma);
+            RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0,
+                                                     0, kBlendingNegativeGamma);
 
             float x1 = 0;
             float x2 = current_screen_width;
@@ -282,14 +283,14 @@ class StartupProgress
             float y1 = current_screen_height;
             float y2 = 0;
 
-            glvert->rgba = unit_col;
+            glvert->rgba       = unit_col;
             glvert++->position = {{x1, y1, 0}};
-            glvert->rgba = unit_col;
+            glvert->rgba       = unit_col;
             glvert++->position = {{x2, y1, 0}};
-            glvert->rgba = unit_col;
+            glvert->rgba       = unit_col;
             glvert++->position = {{x2, y2, 0}};
-            glvert->rgba = unit_col;
-            glvert->position = {{x1, y2, 0}};
+            glvert->rgba       = unit_col;
+            glvert->position   = {{x1, y2, 0}};
 
             EndRenderUnit(4);
 
@@ -297,13 +298,14 @@ class StartupProgress
         }
         else if (gamma_correction.f_ > 0)
         {
-            int col = gamma_correction.f_ * 255;
+            int       col      = gamma_correction.f_ * 255;
             RGBAColor unit_col = epi::MakeRGBA(col, col, col);
             epi::SetRGBAAlpha(unit_col, HUDGetAlpha());
 
             StartUnitBatch(false);
 
-            RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingPositiveGamma);
+            RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0,
+                                                     0, kBlendingPositiveGamma);
 
             float x1 = 0;
             float x2 = current_screen_width;
@@ -311,14 +313,14 @@ class StartupProgress
             float y1 = current_screen_height;
             float y2 = 0;
 
-            glvert->rgba = unit_col;
+            glvert->rgba       = unit_col;
             glvert++->position = {{x1, y1, 0}};
-            glvert->rgba = unit_col;
+            glvert->rgba       = unit_col;
             glvert++->position = {{x2, y1, 0}};
-            glvert->rgba = unit_col;
+            glvert->rgba       = unit_col;
             glvert++->position = {{x2, y2, 0}};
-            glvert->rgba = unit_col;
-            glvert->position = {{x1, y2, 0}};
+            glvert->rgba       = unit_col;
+            glvert->position   = {{x1, y2, 0}};
 
             EndRenderUnit(4);
 
@@ -636,6 +638,8 @@ void EdgeDisplay(void)
 
     HUDFrameSetup();
 
+    bool draw_menu = true;
+
     if (!playing_movie)
     {
         switch (game_state)
@@ -652,6 +656,8 @@ void EdgeDisplay(void)
 #endif
             if (need_save_screenshot)
             {
+                // don't draw menu in save game shots
+                draw_menu = false;
                 CreateSaveScreenshot();
                 need_save_screenshot = false;
             }
@@ -701,7 +707,10 @@ void EdgeDisplay(void)
             DisplayPauseImage();
 
         // menus go directly to the screen
-        MenuDrawer(); // menu is drawn even on top of everything (except console)
+        if (draw_menu)
+        {
+            MenuDrawer(); // menu is drawn even on top of everything (except console)
+        }        
     }
     else
         MovieDrawer();
@@ -724,13 +733,14 @@ void EdgeDisplay(void)
 
     if (gamma_correction.f_ < 0)
     {
-        int col = (1.0f + gamma_correction.f_) * 255;
+        int       col      = (1.0f + gamma_correction.f_) * 255;
         RGBAColor unit_col = epi::MakeRGBA(col, col, col);
         epi::SetRGBAAlpha(unit_col, HUDGetAlpha());
 
         StartUnitBatch(false);
 
-        RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNegativeGamma);
+        RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0,
+                                                 kBlendingNegativeGamma);
 
         float x1 = 0;
         float x2 = current_screen_width;
@@ -738,14 +748,14 @@ void EdgeDisplay(void)
         float y1 = current_screen_height;
         float y2 = 0;
 
-        glvert->rgba = unit_col;
+        glvert->rgba       = unit_col;
         glvert++->position = {{x1, y1, 0}};
-        glvert->rgba = unit_col;
+        glvert->rgba       = unit_col;
         glvert++->position = {{x2, y1, 0}};
-        glvert->rgba = unit_col;
+        glvert->rgba       = unit_col;
         glvert++->position = {{x2, y2, 0}};
-        glvert->rgba = unit_col;
-        glvert->position = {{x1, y2, 0}};
+        glvert->rgba       = unit_col;
+        glvert->position   = {{x1, y2, 0}};
 
         EndRenderUnit(4);
 
@@ -753,13 +763,14 @@ void EdgeDisplay(void)
     }
     else if (gamma_correction.f_ > 0)
     {
-        int col = gamma_correction.f_ * 255;
+        int       col      = gamma_correction.f_ * 255;
         RGBAColor unit_col = epi::MakeRGBA(col, col, col);
         epi::SetRGBAAlpha(unit_col, HUDGetAlpha());
 
         StartUnitBatch(false);
 
-        RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingPositiveGamma);
+        RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0,
+                                                 kBlendingPositiveGamma);
 
         float x1 = 0;
         float x2 = current_screen_width;
@@ -767,14 +778,14 @@ void EdgeDisplay(void)
         float y1 = current_screen_height;
         float y2 = 0;
 
-        glvert->rgba = unit_col;
+        glvert->rgba       = unit_col;
         glvert++->position = {{x1, y1, 0}};
-        glvert->rgba = unit_col;
+        glvert->rgba       = unit_col;
         glvert++->position = {{x2, y1, 0}};
-        glvert->rgba = unit_col;
+        glvert->rgba       = unit_col;
         glvert++->position = {{x2, y2, 0}};
-        glvert->rgba = unit_col;
-        glvert->position = {{x1, y2, 0}};
+        glvert->rgba       = unit_col;
+        glvert->position   = {{x1, y2, 0}};
 
         EndRenderUnit(4);
 
@@ -784,14 +795,16 @@ void EdgeDisplay(void)
     if (m_screenshot_required)
     {
         m_screenshot_required = false;
-        TakeScreenshot(true);
+        render_backend->OnFrameFinished([]() -> void { TakeScreenshot(true); });
     }
     else if (screenshot_rate && (game_state >= kGameStateLevel))
     {
         EPI_ASSERT(single_tics);
 
         if (level_time_elapsed % screenshot_rate == 0)
-            TakeScreenshot(false);
+        {
+            render_backend->OnFrameFinished([]() -> void { TakeScreenshot(false); });
+        }            
     }
 
     FinishFrame(); // page flip or blit buffer

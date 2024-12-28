@@ -41,20 +41,5 @@ void NewScreenSize()
     render_state->Clear(GL_COLOR_BUFFER_BIT);
 }
 
-void ReadScreen(int x, int y, int w, int h, uint8_t *rgb_buffer)
-{
-    render_state->Flush();
-
-    render_state->PixelZoom(1.0f, 1.0f);
-    render_state->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    for (; h > 0; h--, y++)
-    {
-        render_state->ReadPixels(x, y, w, 1, GL_RGB, GL_UNSIGNED_BYTE, rgb_buffer);
-
-        rgb_buffer += w * 3;
-    }
-}
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

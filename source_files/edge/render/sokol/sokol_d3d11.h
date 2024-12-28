@@ -21,4 +21,6 @@ void sapp_d3d11_resize_default_render_target(int32_t width, int32_t height);
 
 void sapp_d3d11_destroy_device_and_swapchain(void);
 
+void sapp_d3d11_capture_screen(int32_t width, int32_t height, int32_t stride, uint8_t *dest);
+
 void sapp_d3d11_present(bool do_not_wait);

@@ -1114,7 +1114,6 @@ static void QuickSaveResponse(int ch)
     {
         M_DoSave(quicksave_page, quicksave_slot);
         StartSoundEffect(sound_effect_swtchx);
-        CreateSaveScreenshot();
     }
 }
 
@@ -1132,7 +1131,7 @@ static void MenuQuickSave(void)
         MenuReadSaveStrings();
         MenuSetupNextMenu(&SaveMenuDefinition);
         quicksave_slot = -2; // means to pick a slot now
-        CreateSaveScreenshot();
+        need_save_screenshot = true;
         return;
     }
 
@@ -1142,12 +1141,14 @@ static void MenuQuickSave(void)
             epi::StringFormat(language["QuickSaveOver"], save_extended_information_slots[quicksave_slot].description));
 
         StartMenuMessage(s.c_str(), QuickSaveResponse, true);
+
+        need_save_screenshot = true;
     }
     else
     {
         M_DoSave(quicksave_page, quicksave_slot);
         StartSoundEffect(sound_effect_swtchx);
-        CreateSaveScreenshot();
+        need_save_screenshot = true;
     }
 }
 

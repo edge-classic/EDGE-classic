@@ -4,10 +4,11 @@
 
 enum PipelineFlags
 {
-    kPipelineDepthWrite   = 1 << 0,
-    kPipelineDepthGreater = 1 << 1,
-    kPipelineAdditive     = 1 << 2,
-    kPipelineAlpha        = 1 << 3    
+    kPipelineDepthTest    = 1 << 0,
+    kPipelineDepthWrite   = 1 << 1,
+    kPipelineDepthGreater = 1 << 2,
+    kPipelineAdditive     = 1 << 3,
+    kPipelineAlpha        = 1 << 4    
 };
 
 void InitPipelines();

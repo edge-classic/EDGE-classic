@@ -364,7 +364,9 @@ bool SetScreenSize(DisplayMode *mode)
 #endif
 
     render_state->ClearColor(kRGBABlack);
+#ifndef EDGE_SOKOL
     render_state->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+#endif
 
 #ifndef SOKOL_D3D11
     SDL_GL_SwapWindow(program_window);

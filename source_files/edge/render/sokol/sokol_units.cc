@@ -251,14 +251,14 @@ void RenderCurrentUnits(void)
         if (unit->blending & kBlendingNegativeGamma)
         {
             continue;
-            //render_state->Enable(GL_BLEND);
-            //render_state->BlendFunction(GL_ZERO, GL_SRC_COLOR);
+            // render_state->Enable(GL_BLEND);
+            // render_state->BlendFunction(GL_ZERO, GL_SRC_COLOR);
         }
         else if (unit->blending & kBlendingPositiveGamma)
         {
             continue;
-            //render_state->Enable(GL_BLEND);
-            //render_state->BlendFunction(GL_DST_COLOR, GL_ONE);
+            // render_state->Enable(GL_BLEND);
+            // render_state->BlendFunction(GL_DST_COLOR, GL_ONE);
         }
 
         if (unit->blending & kBlendingLess)
@@ -271,13 +271,12 @@ void RenderCurrentUnits(void)
         else if (unit->blending & kBlendingMasked)
         {
             render_state->Enable(GL_ALPHA_TEST);
-            // render_state->AlphaFunction(GL_GREATER, 0);
+            render_state->AlphaFunction(GL_GREATER, 0.1);
         }
         else if (unit->blending & kBlendingGEqual)
         {
             render_state->Enable(GL_ALPHA_TEST);
-            // render_state->AlphaFunction(GL_GEQUAL, 1.0f - (epi::GetRGBAAlpha(local_verts[unit->first].rgba) /
-            // 255.0f));
+            render_state->AlphaFunction(GL_GEQUAL, 1.0f - (epi::GetRGBAAlpha(local_verts[unit->first].rgba) / 255.0f));
         }
         else
             render_state->Disable(GL_ALPHA_TEST);
@@ -297,6 +296,13 @@ void RenderCurrentUnits(void)
         else
             render_state->Disable(GL_FOG);
 
+        if (unit->blending & kBlendingLess)
+        {
+            // NOTE: assumes alpha is constant over whole polygon
+            float a = epi::GetRGBAAlpha(local_verts[unit->first].rgba) / 255.0f;
+            render_state->AlphaFunction(GL_GREATER, a * 0.66f);
+        }
+
         uint32_t pipeline_flags = 0;
         if (unit->blending & kBlendingAlpha)
             pipeline_flags |= kPipelineAlpha;
@@ -304,6 +310,25 @@ void RenderCurrentUnits(void)
             pipeline_flags |= kPipelineAdditive;
 
         render_state->SetPipeline(pipeline_flags);
+
+        // Map texture 1 to 0, which can happen with additive textures        
+        if ((!unit->texture[0] || unit->environment_mode[0] == kTextureEnvironmentDisable) &&
+            (unit->texture[1] && unit->environment_mode[1] != kTextureEnvironmentDisable))
+        {
+            unit->texture[0] = unit->texture[1];
+            unit->environment_mode[0] = unit->environment_mode[1];
+
+            unit->texture[1] = 0;
+            unit->environment_mode[1] = kTextureEnvironmentDisable;
+
+            RendererVertex *v = local_verts + unit->first;
+
+            for (int k = 0; k < unit->count; k++, v++)
+            {
+                v->texture_coordinates[0].X = v->texture_coordinates[1].X;
+                v->texture_coordinates[0].Y = v->texture_coordinates[1].Y;
+            }
+        }
 
         if (unit->texture[0] && unit->environment_mode[0] != kTextureEnvironmentDisable)
         {

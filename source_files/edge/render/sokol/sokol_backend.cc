@@ -19,8 +19,6 @@ class SokolRenderBackend : public RenderBackend
   public:
     void SetupMatrices2D()
     {
-        sgl_set_context(context_2d_);
-
         sgl_viewport(0, 0, current_screen_width, current_screen_height, false);
 
         sgl_matrix_mode_projection();
@@ -33,8 +31,6 @@ class SokolRenderBackend : public RenderBackend
 
     void SetupWorldMatrices2D()
     {
-        sgl_set_context(context_2d_);
-
         sgl_viewport(view_window_x, view_window_y, view_window_width, view_window_height, false);
 
         sgl_matrix_mode_projection();
@@ -48,8 +44,6 @@ class SokolRenderBackend : public RenderBackend
 
     void SetupMatrices3D()
     {
-        sgl_set_context(context_3d_);
-
         sgl_viewport(view_window_x, view_window_y, view_window_width, view_window_height, false);
 
         // calculate perspective matrix
@@ -81,6 +75,8 @@ class SokolRenderBackend : public RenderBackend
 #endif
 
         FinalizeDeletedImages();
+
+        sgl_set_context(context_);
 
         sg_pass_action pass_action;
         pass_action.colors[0].load_action = SG_LOADACTION_CLEAR;
@@ -123,8 +119,7 @@ class SokolRenderBackend : public RenderBackend
 
     void FinishFrame()
     {
-        sgl_context_draw(context_3d_);
-        sgl_context_draw(context_2d_);
+        sgl_context_draw(context_);
 
         /*
         sg_imgui_.caps_window.open        = false;
@@ -205,20 +200,10 @@ class SokolRenderBackend : public RenderBackend
         context_desc_2d.color_format       = SG_PIXELFORMAT_RGBA8;
         context_desc_2d.depth_format       = SG_PIXELFORMAT_DEPTH;
         context_desc_2d.sample_count       = 1;
-        context_desc_2d.max_commands       = 16 * 1024;
-        context_desc_2d.max_vertices       = 128 * 1024;
+        context_desc_2d.max_commands       = 256 * 1024;
+        context_desc_2d.max_vertices       = 1024 * 1024;
 
-        context_2d_ = sgl_make_context(&context_desc_2d);
-
-        // 3D
-        sgl_context_desc_t context_desc_3d = {0};
-        context_desc_3d.color_format       = SG_PIXELFORMAT_RGBA8;
-        context_desc_3d.depth_format       = SG_PIXELFORMAT_DEPTH;
-        context_desc_3d.sample_count       = 1;
-        context_desc_3d.max_commands       = 32 * 1024;
-        context_desc_3d.max_vertices       = 256 * 1024;
-
-        context_3d_ = sgl_make_context(&context_desc_3d);
+        context_ = sgl_make_context(&context_desc_2d);
 
         /*
                 // IMGUI
@@ -249,11 +234,7 @@ class SokolRenderBackend : public RenderBackend
     simgui_frame_desc_t imgui_frame_desc_;
     sgimgui_t           sg_imgui_;
 
-    // 2D
-    sgl_context context_2d_;
-
-    // 3D
-    sgl_context context_3d_;
+    sgl_context context_;
 
     sg_pass pass_;
 };

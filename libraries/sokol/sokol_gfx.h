@@ -4424,6 +4424,8 @@ typedef struct sg_gl_attachments_info {
 SOKOL_GFX_API_DECL const void* sg_d3d11_device(void);
 // D3D11: return ID3D11DeviceContext
 SOKOL_GFX_API_DECL const void* sg_d3d11_device_context(void);
+// D3D11: return ID3D11DepthStencilView
+SOKOL_GFX_API_DECL const void sg_d3d11_clear_depth(float value);
 // D3D11: get internal buffer resource objects
 SOKOL_GFX_API_DECL sg_d3d11_buffer_info sg_d3d11_query_buffer_info(sg_buffer buf);
 // D3D11: get internal image resource objects
@@ -4483,6 +4485,8 @@ SOKOL_GFX_API_DECL sg_gl_sampler_info sg_gl_query_sampler_info(sg_sampler smp);
 SOKOL_GFX_API_DECL sg_gl_shader_info sg_gl_query_shader_info(sg_shader shd);
 // GL: get internal pass resource objects
 SOKOL_GFX_API_DECL sg_gl_attachments_info sg_gl_query_attachments_info(sg_attachments atts);
+
+SOKOL_GFX_API_DECL void sg_gl_clear_depth(float value);
 
 #ifdef __cplusplus
 } // extern "C"
@@ -5721,6 +5725,7 @@ typedef struct {
     struct {
         ID3D11RenderTargetView* render_view;
         ID3D11RenderTargetView* resolve_view;
+        ID3D11DepthStencilView* depth_stencil_view;
     } cur_pass;
     // on-demand loaded d3dcompiler_47.dll handles
     HINSTANCE d3dcompiler_dll;
@@ -11432,6 +11437,9 @@ _SOKOL_PRIVATE void _sg_d3d11_begin_pass(const sg_pass* pass) {
         _sg.d3d11.cur_pass.render_view = (ID3D11RenderTargetView*) swapchain->d3d11.render_view;
         _sg.d3d11.cur_pass.resolve_view = (ID3D11RenderTargetView*) swapchain->d3d11.resolve_view;
     }
+
+    _sg.d3d11.cur_pass.depth_stencil_view = dsv;
+
     // apply the render-target- and depth-stencil-views
     _sg_d3d11_OMSetRenderTargets(_sg.d3d11.ctx, SG_MAX_COLOR_ATTACHMENTS, rtvs, dsv);
     _sg_stats_add(d3d11.pass.num_om_set_render_targets, 1);
@@ -19512,6 +19520,12 @@ SOKOL_API_IMPL const void* sg_d3d11_device_context(void) {
     #endif
 }
 
+SOKOL_API_IMPL const void sg_d3d11_clear_depth(float value) {
+    #if defined(SOKOL_D3D11)
+        _sg.d3d11.ctx->ClearDepthStencilView(_sg.d3d11.cur_pass.depth_stencil_view, D3D11_CLEAR_DEPTH, value, 0);
+    #endif
+}
+
 SOKOL_API_IMPL sg_d3d11_buffer_info sg_d3d11_query_buffer_info(sg_buffer buf_id) {
     SOKOL_ASSERT(_sg.valid);
     sg_d3d11_buffer_info res;
@@ -19874,6 +19888,14 @@ SOKOL_API_IMPL sg_wgpu_attachments_info sg_wgpu_query_attachments_info(sg_attach
         _SOKOL_UNUSED(atts_id);
     #endif
     return res;
+}
+
+SOKOL_API_IMPL void sg_gl_clear_depth(float value)
+{
+#if defined(SOKOL_GLCORE)    
+    float depth = value;
+    glClearBufferfv(GL_DEPTH, 0, &depth);
+#endif
 }
 
 SOKOL_API_IMPL sg_gl_buffer_info sg_gl_query_buffer_info(sg_buffer buf_id) {

@@ -20,7 +20,9 @@ sgl_pipeline GetPipeline(sgl_context context, uint32_t pipeline_flags)
     if (pipeline_itr == context_itr->second.end())
     {
         sg_pipeline_desc pipeline_desc = {0};
-        if (pipeline_flags & kPipelineDepthGreater)
+        if (!(pipeline_flags & kPipelineDepthTest))
+            pipeline_desc.depth.compare = SG_COMPAREFUNC_ALWAYS;
+        else if (pipeline_flags & kPipelineDepthGreater)
             pipeline_desc.depth.compare = SG_COMPAREFUNC_GREATER;
         else
             pipeline_desc.depth.compare = SG_COMPAREFUNC_LESS_EQUAL;

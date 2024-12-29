@@ -20,8 +20,6 @@ class SokolRenderBackend : public RenderBackend
   public:
     void SetupMatrices2D()
     {
-        sgl_set_context(context_2d_);
-
         sgl_viewport(0, 0, current_screen_width, current_screen_height, false);
 
         sgl_matrix_mode_projection();
@@ -34,8 +32,6 @@ class SokolRenderBackend : public RenderBackend
 
     void SetupWorldMatrices2D()
     {
-        sgl_set_context(context_2d_);
-
         sgl_viewport(view_window_x, view_window_y, view_window_width, view_window_height, false);
 
         sgl_matrix_mode_projection();
@@ -49,8 +45,6 @@ class SokolRenderBackend : public RenderBackend
 
     void SetupMatrices3D()
     {
-        sgl_set_context(context_3d_);
-
         sgl_viewport(view_window_x, view_window_y, view_window_width, view_window_height, false);
 
         // calculate perspective matrix
@@ -82,6 +76,8 @@ class SokolRenderBackend : public RenderBackend
 #endif
 
         FinalizeDeletedImages();
+
+        sgl_set_context(context_);
 
         sg_pass_action pass_action;
         pass_action.colors[0].load_action = SG_LOADACTION_CLEAR;
@@ -124,8 +120,7 @@ class SokolRenderBackend : public RenderBackend
 
     void FinishFrame()
     {
-        sgl_context_draw(context_3d_);
-        sgl_context_draw(context_2d_);
+        sgl_context_draw(context_);
 
         /*
         sg_imgui_.caps_window.open        = false;
@@ -142,6 +137,13 @@ class SokolRenderBackend : public RenderBackend
 
         sg_end_pass();
         sg_commit();
+
+        for (auto itr = on_frame_finished_.begin(); itr != on_frame_finished_.end(); itr++)
+        {
+            (*itr)();
+        }
+
+        on_frame_finished_.clear();
     }
 
     void Resize(int32_t width, int32_t height)
@@ -160,6 +162,28 @@ class SokolRenderBackend : public RenderBackend
     {
 #ifdef SOKOL_D3D11
         sapp_d3d11_destroy_device_and_swapchain();
+#endif
+    }
+
+#ifdef SOKOL_GLCORE
+    void CaptureScreenGL(int32_t width, int32_t height, int32_t stride, uint8_t *dest)
+    {
+        for (int32_t y = 0; y < height; y++)
+        {
+            render_state->ReadPixels(0, y, width, 1, GL_RGBA, GL_UNSIGNED_BYTE, dest);
+            dest += stride;
+        }
+    }
+#endif
+
+    void CaptureScreen(int32_t width, int32_t height, int32_t stride, uint8_t *dest)
+    {
+#ifdef SOKOL_GLCORE
+        CaptureScreenGL(width, height, stride, dest);
+#endif
+
+#ifdef SOKOL_D3D11
+        sapp_d3d11_capture_screen(width, height, stride, dest);
 #endif
     }
 
@@ -208,24 +232,15 @@ class SokolRenderBackend : public RenderBackend
         // 2D
         sgl_context_desc_t context_desc_2d;
         EPI_CLEAR_MEMORY(&context_desc_2d, sgl_context_desc_t, 1);
-        context_desc_2d.color_format       = SG_PIXELFORMAT_RGBA8;
-        context_desc_2d.depth_format       = SG_PIXELFORMAT_DEPTH;
-        context_desc_2d.sample_count       = 1;
-        context_desc_2d.max_commands       = 16 * 1024;
-        context_desc_2d.max_vertices       = 128 * 1024;
+        context_desc_2d.color_format = SG_PIXELFORMAT_RGBA8;
+        context_desc_2d.depth_format = SG_PIXELFORMAT_DEPTH;
+        context_desc_2d.sample_count = 1;
+        context_desc_2d.max_commands = 256 * 1024;
+        context_desc_2d.max_vertices = 1024 * 1024;
 
-        context_2d_ = sgl_make_context(&context_desc_2d);
+        context_ = sgl_make_context(&context_desc_2d);
 
-        // 3D
-        sgl_context_desc_t context_desc_3d;
-        EPI_CLEAR_MEMORY(&context_desc_3d, sgl_context_desc_t, 1);
-        context_desc_3d.color_format       = SG_PIXELFORMAT_RGBA8;
-        context_desc_3d.depth_format       = SG_PIXELFORMAT_DEPTH;
-        context_desc_3d.sample_count       = 1;
-        context_desc_3d.max_commands       = 32 * 1024;
-        context_desc_3d.max_vertices       = 256 * 1024;
-
-        context_3d_ = sgl_make_context(&context_desc_3d);
+        sgl_set_context(context_);
 
         /*
                 // IMGUI
@@ -244,7 +259,7 @@ class SokolRenderBackend : public RenderBackend
 
     void GetPassInfo(PassInfo &info)
     {
-        info.width_ = pass_.swapchain.width;
+        info.width_  = pass_.swapchain.width;
         info.height_ = pass_.swapchain.height;
     }
 
@@ -255,16 +270,12 @@ class SokolRenderBackend : public RenderBackend
     int32_t deferred_resize_height = 0;
 #endif
 
-/*
-    simgui_frame_desc_t imgui_frame_desc_;
-    sgimgui_t           sg_imgui_;
-*/
+    /*
+        simgui_frame_desc_t imgui_frame_desc_;
+        sgimgui_t           sg_imgui_;
+    */
 
-    // 2D
-    sgl_context context_2d_;
-
-    // 3D
-    sgl_context context_3d_;
+    sgl_context context_;
 
     sg_pass pass_;
 };

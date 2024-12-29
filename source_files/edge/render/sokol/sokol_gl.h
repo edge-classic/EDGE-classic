@@ -874,6 +874,8 @@ SOKOL_GL_API_DECL void sgl_texture(sg_image img0, sg_sampler smp0);
 SOKOL_GL_API_DECL void sgl_multi_texture(sg_image img0, sg_sampler smp0, sg_image img1, sg_sampler smp1);
 SOKOL_GL_API_DECL void sgl_layer(int layer_id);
 
+SOKOL_GL_API_DECL void sgl_clear_depth(float value);
+
 SOKOL_GL_API_DECL void sgl_set_fog(bool enabled, float r, float g, float b, float a, float density, float start, float end, float scale);
 SOKOL_GL_API_DECL void sgl_set_alpha_test(float alpha_test);
 
@@ -2803,6 +2805,7 @@ typedef enum {
     SGL_COMMAND_DRAW,
     SGL_COMMAND_VIEWPORT,
     SGL_COMMAND_SCISSOR_RECT,
+    SGL_COMMAND_CLEAR_DEPTH
 } _sgl_command_type_t;
 
 typedef struct {
@@ -2827,10 +2830,15 @@ typedef struct {
     bool origin_top_left;
 } _sgl_scissor_rect_args_t;
 
+typedef struct {
+    float value;
+} _sgl_clear_depth_args_t;
+
 typedef union {
     _sgl_draw_args_t draw;
     _sgl_viewport_args_t viewport;
     _sgl_scissor_rect_args_t scissor_rect;
+    _sgl_clear_depth_args_t clear_depth;
 } _sgl_args_t;
 
 typedef struct {
@@ -4018,6 +4026,19 @@ static void _sgl_draw(_sgl_context_t* ctx, int layer_id) {
                         sg_apply_scissor_rect(args->x, args->y, args->w, args->h, args->origin_top_left);
                     }
                     break;
+                case SGL_COMMAND_CLEAR_DEPTH:
+                    {
+                        const _sgl_clear_depth_args_t* args = &cmd->args.clear_depth;
+
+#ifdef SOKOL_GLCORE                        
+                        sg_gl_clear_depth(args->value);
+#endif
+
+#ifdef SOKOL_D3D11
+                        sg_d3d11_clear_depth(args->value);
+#endif                        
+                    }
+                    break;
                 case SGL_COMMAND_DRAW:
                     {
                         const _sgl_draw_args_t* args = &cmd->args.draw;
@@ -4352,6 +4373,21 @@ SOKOL_API_IMPL void sgl_scissor_rect(int x, int y, int w, int h, bool origin_top
         cmd->args.scissor_rect.w = w;
         cmd->args.scissor_rect.h = h;
         cmd->args.scissor_rect.origin_top_left = origin_top_left;
+    }
+}
+
+SOKOL_API_IMPL void sgl_clear_depth(float value) {
+    SOKOL_ASSERT(_SGL_INIT_COOKIE == _sgl.init_cookie);
+    _sgl_context_t* ctx = _sgl.cur_ctx;
+    if (!ctx) {
+        return;
+    }
+    SOKOL_ASSERT(!ctx->in_begin);
+    _sgl_command_t* cmd = _sgl_next_command(ctx);
+    if (cmd) {
+        cmd->cmd = SGL_COMMAND_CLEAR_DEPTH;
+        cmd->layer_id = ctx->layer_id;
+        cmd->args.clear_depth.value = value;
     }
 }
 

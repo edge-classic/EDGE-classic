@@ -83,11 +83,24 @@ class GLRenderBackend : public RenderBackend
         CheckExtensions();
 
         // read implementation limits
-        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size_);         
+        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size_);
 
         LogPrint("OpenGL: Tex: %d\n", max_texture_size_);
 
         RenderBackend::Init();
+    }
+
+    void CaptureScreen(int32_t width, int32_t height, int32_t stride, uint8_t *dest)
+    {
+        render_state->Flush();
+        render_state->PixelZoom(1.0f, 1.0f);
+        render_state->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+        for (int32_t y = 0; y < height; y++)
+        {
+            render_state->ReadPixels(0, y, width, 1, GL_RGBA, GL_UNSIGNED_BYTE, dest);
+            dest += stride;
+        }
     }
 
     void StartFrame(int32_t width, int32_t height)
@@ -99,12 +112,16 @@ class GLRenderBackend : public RenderBackend
 
     void SwapBuffers()
     {
-
     }
 
     void FinishFrame()
     {
+        for (auto itr = on_frame_finished_.begin(); itr != on_frame_finished_.end(); itr++)
+        {
+            (*itr)();
+        }
 
+        on_frame_finished_.clear();
     }
 
     void Resize(int32_t width, int32_t height)
@@ -115,16 +132,14 @@ class GLRenderBackend : public RenderBackend
 
     void Shutdown()
     {
-
     }
 
     void GetPassInfo(PassInfo &info)
     {
-        info.width_ = 0;
+        info.width_  = 0;
         info.height_ = 0;
     }
 };
 
 static GLRenderBackend gl_render_backend;
-RenderBackend *render_backend = &gl_render_backend;
-
+RenderBackend         *render_backend = &gl_render_backend;

@@ -55,6 +55,7 @@
 #include "m_option.h"
 #include "n_network.h"
 #include "p_spec.h"
+#include "r_backend.h"
 #include "r_colormap.h"
 #include "r_draw.h"
 #include "r_gldefs.h"
@@ -326,7 +327,8 @@ static void ParseConfig(const std::string &data, bool check_config_version)
             show_old_config_warning = true;
         }
 
-        if (!lex.GetNextToken() || lex.state_.token != epi::Scanner::kIntConst || lex.state_.number < kInternalConfigVersion)
+        if (!lex.GetNextToken() || lex.state_.token != epi::Scanner::kIntConst ||
+            lex.state_.number < kInternalConfigVersion)
         {
             show_old_config_warning = true;
         }
@@ -442,9 +444,10 @@ void TakeScreenshot(bool show_msg)
         }
     }
 
-    ImageData *img = new ImageData(current_screen_width, current_screen_height, 3);
+    ImageData *img = new ImageData(current_screen_width, current_screen_height, 4);
 
-    ReadScreen(0, 0, current_screen_width, current_screen_height, img->PixelAt(0, 0));
+    render_backend->CaptureScreen(current_screen_width, current_screen_height, current_screen_width * 4,
+                                  img->PixelAt(0, 0));
 
     // ReadScreen produces a bottom-up image, need to invert it
     img->Invert();
@@ -464,32 +467,35 @@ void TakeScreenshot(bool show_msg)
 
 void CreateSaveScreenshot(void)
 {
-    std::string temp(epi::StringFormat("%s/%s.png", "current", "head"));
-    std::string filename = epi::PathAppend(save_directory, temp);
+    render_backend->OnFrameFinished([]() -> void {
+        std::string temp(epi::StringFormat("%s/%s.png", "current", "head"));
+        std::string filename = epi::PathAppend(save_directory, temp);
 
-    epi::FileDelete(filename);
+        epi::FileDelete(filename);
 
-    ImageData *img = new ImageData(current_screen_width, current_screen_height, 3);
+        ImageData *img = new ImageData(current_screen_width, current_screen_height, 4);
 
-    ReadScreen(0, 0, current_screen_width, current_screen_height, img->PixelAt(0, 0));
+        render_backend->CaptureScreen(current_screen_width, current_screen_height, current_screen_width * 4,
+                                      img->PixelAt(0, 0));
 
-    // ReadScreen produces a bottom-up image, need to invert it
-    img->Invert();
+        // ReadScreen produces a bottom-up image, need to invert it
+        img->Invert();
 
-    bool result = SavePNG(filename, img);
+        bool result = SavePNG(filename, img);
 
-    if (result)
-        LogPrint("Captured to file: %s\n", filename.c_str());
-    else
-        LogPrint("Error saving file: %s\n", filename.c_str());
+        if (result)
+            LogPrint("Captured to file: %s\n", filename.c_str());
+        else
+            LogPrint("Error saving file: %s\n", filename.c_str());
 
-    delete img;
+        delete img;
 
-    epi::ReplaceExtension(filename, ".replace");
+        epi::ReplaceExtension(filename, ".replace");
 
-    epi::File *replace_touch = epi::FileOpen(filename, epi::kFileAccessWrite);
+        epi::File *replace_touch = epi::FileOpen(filename, epi::kFileAccessWrite);
 
-    delete replace_touch;
+        delete replace_touch;
+    });
 }
 
 void WarningOrError(const char *error, ...)

@@ -248,18 +248,33 @@ void RenderCurrentUnits(void)
 
         render_state->DepthMask((unit->blending & kBlendingNoZBuffer) ? false : true);
 
-        if (unit->blending & kBlendingNegativeGamma)
+        if (unit->blending & kBlendingAdd)
         {
-            continue;
-            //render_state->Enable(GL_BLEND);
-            //render_state->BlendFunction(GL_ZERO, GL_SRC_COLOR);
+            render_state->Enable(GL_BLEND);
+            render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE);
+        }
+        else if (unit->blending & kBlendingAlpha)
+        {
+            render_state->Enable(GL_BLEND);
+            render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        }
+        else if (unit->blending & kBlendingInvert)
+        {
+            render_state->Enable(GL_BLEND);
+            render_state->BlendFunction(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
+        }
+        else if (unit->blending & kBlendingNegativeGamma)
+        {
+            render_state->Enable(GL_BLEND);
+            render_state->BlendFunction(GL_ZERO, GL_SRC_COLOR);
         }
         else if (unit->blending & kBlendingPositiveGamma)
         {
-            continue;
-            //render_state->Enable(GL_BLEND);
-            //render_state->BlendFunction(GL_DST_COLOR, GL_ONE);
+            render_state->Enable(GL_BLEND);
+            render_state->BlendFunction(GL_DST_COLOR, GL_ONE);
         }
+        else
+            render_state->Disable(GL_BLEND);
 
         if (unit->blending & kBlendingLess)
         {
@@ -271,13 +286,12 @@ void RenderCurrentUnits(void)
         else if (unit->blending & kBlendingMasked)
         {
             render_state->Enable(GL_ALPHA_TEST);
-            // render_state->AlphaFunction(GL_GREATER, 0);
+            render_state->AlphaFunction(GL_GREATER, 0.1);
         }
         else if (unit->blending & kBlendingGEqual)
         {
             render_state->Enable(GL_ALPHA_TEST);
-            // render_state->AlphaFunction(GL_GEQUAL, 1.0f - (epi::GetRGBAAlpha(local_verts[unit->first].rgba) /
-            // 255.0f));
+            render_state->AlphaFunction(GL_GEQUAL, 1.0f - (epi::GetRGBAAlpha(local_verts[unit->first].rgba) / 255.0f));
         }
         else
             render_state->Disable(GL_ALPHA_TEST);
@@ -297,13 +311,35 @@ void RenderCurrentUnits(void)
         else
             render_state->Disable(GL_FOG);
 
+        if (unit->blending & kBlendingLess)
+        {
+            // NOTE: assumes alpha is constant over whole polygon
+            float a = epi::GetRGBAAlpha(local_verts[unit->first].rgba) / 255.0f;
+            render_state->AlphaFunction(GL_GREATER, a * 0.66f);
+        }
+
         uint32_t pipeline_flags = 0;
-        if (unit->blending & kBlendingAlpha)
-            pipeline_flags |= kPipelineAlpha;
-        if (unit->blending & kBlendingAdd)
-            pipeline_flags |= kPipelineAdditive;
 
         render_state->SetPipeline(pipeline_flags);
+
+        // Map texture 1 to 0, which can happen with additive textures
+        if ((!unit->texture[0] || unit->environment_mode[0] == kTextureEnvironmentDisable) &&
+            (unit->texture[1] && unit->environment_mode[1] != kTextureEnvironmentDisable))
+        {
+            unit->texture[0]          = unit->texture[1];
+            unit->environment_mode[0] = unit->environment_mode[1];
+
+            unit->texture[1]          = 0;
+            unit->environment_mode[1] = kTextureEnvironmentDisable;
+
+            RendererVertex *v = local_verts + unit->first;
+
+            for (int k = 0; k < unit->count; k++, v++)
+            {
+                v->texture_coordinates[0].X = v->texture_coordinates[1].X;
+                v->texture_coordinates[0].Y = v->texture_coordinates[1].Y;
+            }
+        }
 
         if (unit->texture[0] && unit->environment_mode[0] != kTextureEnvironmentDisable)
         {
@@ -389,9 +425,22 @@ void RenderCurrentUnits(void)
 
             continue;
         }
-
-        else
+        else if (unit->shape == GL_QUAD_STRIP)
         {
+            // Note mapping to triangle strip
+            sgl_begin_triangle_strip();
+
+            for (int k = 0; k < unit->count; k++)
+            {
+                const RendererVertex *V = local_verts + unit->first + k;
+
+                sgl_v3f_t4f_c4b(V->position.X, V->position.Y, V->position.Z, V->texture_coordinates[0].X,
+                                V->texture_coordinates[0].Y, V->texture_coordinates[1].X, V->texture_coordinates[1].Y,
+                                epi::GetRGBARed(V->rgba), epi::GetRGBAGreen(V->rgba), epi::GetRGBABlue(V->rgba),
+                                epi::GetRGBAAlpha(V->rgba));
+            }
+
+            sgl_end();
             continue;
         }
 

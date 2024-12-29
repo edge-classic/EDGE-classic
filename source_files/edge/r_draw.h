@@ -27,8 +27,6 @@
 
 #include "r_image.h"
 
-void ReadScreen(int x, int y, int w, int h, uint8_t *rgb_buffer);
-
 // This routine should inform the lower level system(s) that the
 // screen has changed size/depth.  Must be
 // called before any rendering has occurred (e.g. just before StartFrame).

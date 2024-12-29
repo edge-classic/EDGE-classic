@@ -109,7 +109,7 @@ void main()
 
     vec4 fcolor = color;
     vec4 c0 = texture(sampler2D(tex0, smp0), uv.xy);
-    if (alpha_test != 0 && c0.w <= alpha_test)
+    if (alpha_test != 0 && c0.w < alpha_test)
     {
         discard;
     }

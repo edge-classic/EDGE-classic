@@ -7,7 +7,7 @@ typedef std::unordered_map<uint32_t, std::unordered_map<uint32_t, uint32_t>> Pip
 // flags => pipeline
 static std::unordered_map<uint32_t, std::unordered_map<uint32_t, uint32_t>> pipelines;
 
-sgl_pipeline GetPipeline(sgl_context context, uint32_t pipeline_flags)
+sgl_pipeline GetPipeline(sgl_context context, uint32_t pipeline_flags, GLenum src_blend, GLenum dst_blend)
 {
     PipelineMap::iterator context_itr = pipelines.find(context.id);
 
@@ -17,13 +17,50 @@ sgl_pipeline GetPipeline(sgl_context context, uint32_t pipeline_flags)
         context_itr           = pipelines.find(context.id);
     }
 
+    if (pipeline_flags & kPipelineBlend)
+    {
+        switch (src_blend)
+        {
+        case GL_SRC_ALPHA:
+            pipeline_flags |= kPipelineBlendSrc_SrcAlpha;
+            break;
+        case GL_ONE_MINUS_DST_COLOR:
+            pipeline_flags |= kPipelineBlendSrc_OneMinusDestColor;
+            break;
+        case GL_DST_COLOR:
+            pipeline_flags |= kPipelineBlendSrc_DstColor;
+            break;
+        case GL_ZERO:
+            pipeline_flags |= kPipelineBlendSrc_Zero;
+            break;
+        }
+
+        switch (dst_blend)
+        {
+        case GL_ONE:
+            pipeline_flags |= kPipelineBlendDst_One;
+            break;
+        case GL_ONE_MINUS_SRC_ALPHA:
+            pipeline_flags |= kPipelineBlendDst_OneMinusSrcAlpha;
+            break;
+        case GL_SRC_COLOR:
+            pipeline_flags |= kPipelineBlendDst_SrcColor;
+            break;
+        case GL_ZERO:
+            pipeline_flags |= kPipelineBlendDst_Zero;
+            break;
+        }
+    }
+
     std::unordered_map<uint32_t, uint32_t>::iterator pipeline_itr = context_itr->second.find(pipeline_flags);
     uint32_t                                         pipeline_id  = 0xFFFFFFFF;
     if (pipeline_itr == context_itr->second.end())
     {
         sg_pipeline_desc pipeline_desc;
         EPI_CLEAR_MEMORY(&pipeline_desc, sg_pipeline_desc, 1);
-        if (pipeline_flags & kPipelineDepthGreater)
+        if (!(pipeline_flags & kPipelineDepthTest))
+            pipeline_desc.depth.compare = SG_COMPAREFUNC_ALWAYS;
+        else if (pipeline_flags & kPipelineDepthGreater)
             pipeline_desc.depth.compare = SG_COMPAREFUNC_GREATER;
         else
             pipeline_desc.depth.compare = SG_COMPAREFUNC_LESS_EQUAL;
@@ -31,17 +68,47 @@ sgl_pipeline GetPipeline(sgl_context context, uint32_t pipeline_flags)
         if (pipeline_flags & kPipelineDepthWrite)
             pipeline_desc.depth.write_enabled = true;
 
-        if (pipeline_flags & kPipelineAlpha)
+        if (pipeline_flags & kPipelineBlend)
         {
-            pipeline_desc.colors[0].blend.enabled        = true;
-            pipeline_desc.colors[0].blend.src_factor_rgb = SG_BLENDFACTOR_SRC_ALPHA;
-            pipeline_desc.colors[0].blend.dst_factor_rgb = SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
-        }
-        if (pipeline_flags & kPipelineAdditive)
-        {
-            pipeline_desc.colors[0].blend.enabled        = true;
-            pipeline_desc.colors[0].blend.src_factor_rgb = SG_BLENDFACTOR_SRC_ALPHA;
-            pipeline_desc.colors[0].blend.dst_factor_rgb = SG_BLENDFACTOR_ONE;
+            sg_blend_factor src_factor = SG_BLENDFACTOR_ZERO;
+            sg_blend_factor dst_factor = SG_BLENDFACTOR_ZERO;
+
+            pipeline_desc.colors[0].blend.enabled = true;
+
+            switch (src_blend)
+            {
+            case GL_SRC_ALPHA:
+                src_factor = SG_BLENDFACTOR_SRC_ALPHA;
+                break;
+            case GL_ONE_MINUS_DST_COLOR:
+                src_factor = SG_BLENDFACTOR_ONE_MINUS_DST_COLOR;
+                break;
+            case GL_DST_COLOR:
+                src_factor = SG_BLENDFACTOR_DST_COLOR;
+                break;
+            case GL_ZERO:
+                src_factor = SG_BLENDFACTOR_ZERO;
+                break;
+            }
+
+            switch (dst_blend)
+            {
+            case GL_ONE:
+                dst_factor = SG_BLENDFACTOR_ONE;
+                break;
+            case GL_ONE_MINUS_SRC_ALPHA:
+                dst_factor = SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+                break;
+            case GL_SRC_COLOR:
+                dst_factor = SG_BLENDFACTOR_SRC_COLOR;
+                break;
+            case GL_ZERO:
+                dst_factor = SG_BLENDFACTOR_ZERO;
+                break;
+            }
+
+            pipeline_desc.colors[0].blend.src_factor_rgb = src_factor;
+            pipeline_desc.colors[0].blend.dst_factor_rgb = dst_factor;
         }
 
         pipeline_id = sgl_context_make_pipeline(context, &pipeline_desc).id;

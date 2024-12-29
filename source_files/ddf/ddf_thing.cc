@@ -55,7 +55,6 @@ static void DDFMobjStateGetDEHSpawn(const char *arg, State *cur_state);
 static void DDFMobjStateGetDEHProjectile(const char *arg, State *cur_state);
 static void DDFMobjStateGetDEHBullet(const char *arg, State *cur_state);
 static void DDFMobjStateGetDEHMelee(const char *arg, State *cur_state);
-static void DDFMobjStateGetDEHFlagJump(const char *arg, State *cur_state);
 static void DDFMobjStateGetString(const char *arg, State *cur_state);
 
 static void AddPickupEffect(PickupEffect **list, PickupEffect *cur);
@@ -1387,7 +1386,7 @@ static void AddPickupEffect(PickupEffect **list, PickupEffect *cur)
     tail->next_ = cur;
 }
 
-void BA_ParsePowerupEffect(PickupEffect **list, int pnum, float par1, float par2, const char *word_par)
+void BA_ParsePowerupEffect(PickupEffect **list, float par1, float par2)
 {
     int p_up = (int)par1;
     int slot = (int)par2;
@@ -1402,6 +1401,8 @@ void BA_ParsePowerupEffect(PickupEffect **list, int pnum, float par1, float par2
 
 void BA_ParseScreenEffect(PickupEffect **list, int pnum, float par1, float par2, const char *word_par)
 {
+    EPI_UNUSED(pnum);
+    EPI_UNUSED(word_par);
     int slot = (int)par1;
 
     if (slot < 0 || slot >= kTotalEffectsSlots)
@@ -1415,6 +1416,8 @@ void BA_ParseScreenEffect(PickupEffect **list, int pnum, float par1, float par2,
 
 void BA_ParseSwitchWeapon(PickupEffect **list, int pnum, float par1, float par2, const char *word_par)
 {
+    EPI_UNUSED(par1);
+    EPI_UNUSED(par2);
     if (pnum != -1)
         DDFError("SWITCH_WEAPON: missing weapon name !\n");
 
@@ -1427,6 +1430,8 @@ void BA_ParseSwitchWeapon(PickupEffect **list, int pnum, float par1, float par2,
 
 void BA_ParseKeepPowerup(PickupEffect **list, int pnum, float par1, float par2, const char *word_par)
 {
+    EPI_UNUSED(par1);
+    EPI_UNUSED(par2);
     if (pnum != -1)
         DDFError("KEEP_POWERUP: missing powerup name !\n");
 
@@ -1495,7 +1500,7 @@ void DDFMobjGetPickupEffect(const char *info, void *storage)
         if (DDFCompareName(powertype_names[p].name, namebuf) != 0)
             continue;
 
-        BA_ParsePowerupEffect(fx_list, num_vals, p, temp.amount, parambuf);
+        BA_ParsePowerupEffect(fx_list, p, temp.amount);
 
         return;
     }
@@ -2172,6 +2177,7 @@ static bool ConditionTryAmmo(const char *name, const char *sub, ConditionCheck *
 
 static bool ConditionTryWeapon(const char *name, const char *sub, ConditionCheck *cond)
 {
+    EPI_UNUSED(sub);
     int idx = weapondefs.FindFirst(name, 0);
 
     if (idx < 0)
@@ -2185,6 +2191,7 @@ static bool ConditionTryWeapon(const char *name, const char *sub, ConditionCheck
 
 static bool ConditionTryKey(const char *name, const char *sub, ConditionCheck *cond)
 {
+    EPI_UNUSED(sub);
     if (kDDFCheckFlagPositive != DDFMainCheckSpecialFlag(name, keytype_names, &cond->sub.type, false, false))
     {
         return false;
@@ -2244,6 +2251,7 @@ static bool ConditionTryPowerup(const char *name, const char *sub, ConditionChec
 
 static bool ConditionTryPlayerState(const char *name, const char *sub, ConditionCheck *cond)
 {
+    EPI_UNUSED(sub);
     return (kDDFCheckFlagPositive ==
             DDFMainCheckSpecialFlag(name, simplecond_names, (int *)&cond->cond_type, false, false));
 }
@@ -2267,7 +2275,7 @@ bool DDFMainParseCondition(const char *info, ConditionCheck *cond)
     cond->cond_type = kConditionCheckTypeNone;
     cond->amount    = 1;
 
-    memset(&cond->sub, 0, sizeof(cond->sub));
+    EPI_CLEAR_MEMORY(&cond->sub, ConditionCheck::SubType, 1);
 
     pos = strchr(info, '(');
 
@@ -2677,7 +2685,7 @@ void MapObjectDefinition::DLightCompatibility(void)
 
 MapObjectDefinitionContainer::MapObjectDefinitionContainer()
 {
-    memset(lookup_cache_, 0, sizeof(MapObjectDefinition *) * kLookupCacheSize);
+    EPI_CLEAR_MEMORY(lookup_cache_, MapObjectDefinition *, kLookupCacheSize);
 }
 
 MapObjectDefinitionContainer::~MapObjectDefinitionContainer()
@@ -2690,10 +2698,8 @@ MapObjectDefinitionContainer::~MapObjectDefinitionContainer()
     }
 }
 
-int MapObjectDefinitionContainer::FindFirst(const char *name, int startpos)
+int MapObjectDefinitionContainer::FindFirst(const char *name, size_t startpos)
 {
-    startpos = HMM_MAX(startpos, 0);
-
     for (; startpos < size(); startpos++)
     {
         MapObjectDefinition *m = at(startpos);
@@ -2704,9 +2710,9 @@ int MapObjectDefinitionContainer::FindFirst(const char *name, int startpos)
     return -1;
 }
 
-int MapObjectDefinitionContainer::FindLast(const char *name, int startpos)
+int MapObjectDefinitionContainer::FindLast(const char *name)
 {
-    startpos = HMM_MIN(startpos, size() - 1);
+    int startpos = (int)size() - 1;
 
     for (; startpos >= 0; startpos--)
     {
@@ -2724,10 +2730,10 @@ bool MapObjectDefinitionContainer::MoveToEnd(int idx)
 
     MapObjectDefinition *m = nullptr;
 
-    if (idx < 0 || idx >= size())
+    if (idx < 0 || (size_t)idx >= size())
         return false;
 
-    if (idx == (size() - 1))
+    if ((size_t)idx == (size() - 1))
         return true; // Already at the end
 
     // Get a copy of the pointer

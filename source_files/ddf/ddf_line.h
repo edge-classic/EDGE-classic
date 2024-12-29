@@ -20,6 +20,7 @@
 
 #include "ddf_colormap.h"
 #include "ddf_types.h"
+#include "epi.h"
 
 constexpr float kFloatUnused = 3.18081979f;
 
@@ -727,11 +728,11 @@ class LineType
     // disable copy construct and assignment operator
     explicit LineType(LineType &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
     }
     LineType &operator=(LineType &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
         return *this;
     }
 };
@@ -865,11 +866,11 @@ class SectorType
     // disable copy construct and assignment operator
     explicit SectorType(SectorType &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
     }
     SectorType &operator=(SectorType &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
         return *this;
     }
 };

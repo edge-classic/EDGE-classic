@@ -22,6 +22,7 @@
 
 #include "HandmadeMath.h"
 #include "dm_state.h"
+#include "epi.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
 #include "i_movie.h"
@@ -140,7 +141,7 @@ class TSFPlayer : public AbstractMusicPlayer
     TSFInterface *tsf_interface_;
 
   public:
-    TSFPlayer(uint8_t *data, int _length, bool looping) : status_(kNotLoaded), looping_(looping)
+    TSFPlayer(bool looping) : status_(kNotLoaded), looping_(looping)
     {
         SequencerInit();
     }
@@ -155,57 +156,74 @@ class TSFPlayer : public AbstractMusicPlayer
 
     static void rtNoteOn(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity)
     {
+        EPI_UNUSED(userdata);
         tsf_channel_note_on(edge_tsf, channel, note, static_cast<float>(velocity) / 127.0f);
     }
 
     static void rtNoteOff(void *userdata, uint8_t channel, uint8_t note)
     {
+        EPI_UNUSED(userdata);
         tsf_channel_note_off(edge_tsf, channel, note);
     }
 
     static void rtNoteAfterTouch(void *userdata, uint8_t channel, uint8_t note, uint8_t atVal)
     {
-        (void)userdata; (void)channel; (void)note; (void)atVal;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(channel); 
+        EPI_UNUSED(note);
+        EPI_UNUSED(atVal);
     }
 
     static void rtChannelAfterTouch(void *userdata, uint8_t channel, uint8_t atVal)
     {
-        (void)userdata; (void)channel; (void)atVal;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(channel);
+        EPI_UNUSED(atVal);
     }
 
     static void rtControllerChange(void *userdata, uint8_t channel, uint8_t type, uint8_t value)
     {
+        EPI_UNUSED(userdata);
         tsf_channel_midi_control(edge_tsf, channel, type, value);
     }
 
     static void rtPatchChange(void *userdata, uint8_t channel, uint8_t patch)
     {
+        EPI_UNUSED(userdata);
         tsf_channel_set_presetnumber(edge_tsf, channel, patch, channel == 9);
     }
 
     static void rtPitchBend(void *userdata, uint8_t channel, uint8_t msb, uint8_t lsb)
     {
+        EPI_UNUSED(userdata);
         tsf_channel_set_pitchwheel(edge_tsf, channel, (msb << 7) | lsb);
     }
 
     static void rtSysEx(void *userdata, const uint8_t *msg, size_t size)
     {
-        (void)userdata; (void)msg; (void)size;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(msg);
+        EPI_UNUSED(size);
     }
 
     static void rtDeviceSwitch(void *userdata, size_t track, const char *data, size_t length)
     {
-        (void)userdata; (void)track; (void)data; (void)length;
+        EPI_UNUSED(userdata); 
+        EPI_UNUSED(track); 
+        EPI_UNUSED(data);
+        EPI_UNUSED(length);
     }
 
     static size_t rtCurrentDevice(void *userdata, size_t track)
     {
-        (void)userdata; (void)track;
+        EPI_UNUSED(userdata);
+        EPI_UNUSED(track);
         return 0;
     }
 
     static void playSynth(void *userdata, uint8_t *stream, size_t length)
     {
+        EPI_UNUSED(userdata);
         tsf_render_short(edge_tsf, (short *)stream, length / 2 / sizeof(int16_t), 0);
     }
 
@@ -213,7 +231,7 @@ class TSFPlayer : public AbstractMusicPlayer
     {
         tsf_sequencer_ = new TSFSequencer;
         tsf_interface_ = new TSFInterface;
-        memset(tsf_interface_, 0, sizeof(MidiRealTimeInterface));
+        EPI_CLEAR_MEMORY(tsf_interface_, MidiRealTimeInterface, 1);
 
         tsf_interface_->rtUserData           = this;
         tsf_interface_->rt_noteOn            = rtNoteOn;
@@ -371,7 +389,7 @@ AbstractMusicPlayer *PlayTSFMusic(uint8_t *data, int length, bool loop)
         return nullptr;
     }
 
-    TSFPlayer *player = new TSFPlayer(data, length, loop);
+    TSFPlayer *player = new TSFPlayer(loop);
 
     if (!player)
     {

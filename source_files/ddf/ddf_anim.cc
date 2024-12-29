@@ -109,7 +109,8 @@ static void AnimParseField(const char *field, const char *contents, int index, b
 #if (DDF_DEBUG)
     LogDebug("ANIM_PARSE: %s = %s;\n", field, contents);
 #endif
-
+    EPI_UNUSED(index);
+    EPI_UNUSED(is_last);
     if (DDFMainParseField(anim_commands, field, contents, (uint8_t *)dynamic_anim))
         return;
 
@@ -202,6 +203,7 @@ static void DDFAnimGetType(const char *info, void *storage)
 
 static void DDFAnimGetPic(const char *info, void *storage)
 {
+    EPI_UNUSED(storage);
     dynamic_anim->pics_.push_back(info);
 }
 
@@ -268,8 +270,8 @@ void DDFConvertAnimatedLump(const uint8_t *data, int size)
         char first[9];
 
         // Clear to zeroes to prevent garbage from being added
-        memset(last, 0, 9);
-        memset(first, 0, 9);
+        EPI_CLEAR_MEMORY(last, char, 9);
+        EPI_CLEAR_MEMORY(first, char, 9);
 
         // make sure names are NUL-terminated
         memcpy(last, data + 1, 8);

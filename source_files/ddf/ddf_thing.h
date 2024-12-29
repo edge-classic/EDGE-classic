@@ -21,6 +21,7 @@
 #include "ddf_colormap.h"
 #include "ddf_states.h"
 #include "ddf_types.h"
+#include "epi.h"
 #include "epi_bitset.h"
 
 inline float DynamicLightCompatibilityRadius(float x)
@@ -602,7 +603,7 @@ struct ConditionCheck
 
     // sub-type (specific type of ammo, weapon, key, powerup, inventory).  Not
     // used for health, jumping, crouching, etc.
-    union {
+    union SubType {
         int               type;
         WeaponDefinition *weap;
     } sub;
@@ -902,11 +903,11 @@ class MapObjectDefinition
     // disable copy construct and assignment operator
     explicit MapObjectDefinition(MapObjectDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
     }
     MapObjectDefinition &operator=(MapObjectDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
         return *this;
     }
 };
@@ -937,8 +938,8 @@ class MapObjectDefinitionContainer : public std::vector<MapObjectDefinition *>
     bool MoveToEnd(int idx);
 
     // Search Functions
-    int                        FindFirst(const char *name, int startpos = -1);
-    int                        FindLast(const char *name, int startpos = -1);
+    int                        FindFirst(const char *name, size_t startpos = 0);
+    int                        FindLast(const char *name);
     const MapObjectDefinition *Lookup(const char *refname);
     const MapObjectDefinition *Lookup(int id);
 

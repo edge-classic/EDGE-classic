@@ -98,7 +98,8 @@ static void SoundParseField(const char *field, const char *contents, int index, 
 #if (DDF_DEBUG)
     LogDebug("SOUND_PARSE: %s = %s;\n", field, contents);
 #endif
-
+    EPI_UNUSED(index);
+    EPI_UNUSED(is_last);
     // -AJA- ignore these for backwards compatibility
     if (DDFCompareName(field, "BITS") == 0 || DDFCompareName(field, "STEREO") == 0)
         return;

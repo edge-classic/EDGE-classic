@@ -242,10 +242,10 @@ static const char *GetLevelName(int level_index)
     return cur_wad->GetLump(lump_idx)->Name();
 }
 
-static Vertex *SafeLookupVertex(int num)
+static Vertex *SafeLookupVertex(size_t num)
 {
     if (num >= level_vertices.size())
-        FatalError("AJBSP: illegal vertex number #%d\n", num);
+        FatalError("AJBSP: illegal vertex number #%zu\n", num);
 
     return level_vertices[num];
 }
@@ -336,7 +336,7 @@ void GetSectors()
 
         Sector *sector = NewSector();
 
-        (void)sector;
+        EPI_UNUSED(sector);
     }
 }
 
@@ -498,7 +498,7 @@ void ParseSidedefField(Sidedef *side, const int &key, epi::Scanner &lex)
     {
         int num = lex.state_.number;
 
-        if (num < 0 || num >= level_sectors.size())
+        if (num < 0 || (size_t)num >= level_sectors.size())
             FatalError("AJBSP: illegal sector number #%d\n", (int)num);
 
         side->sector = level_sectors[num];
@@ -755,9 +755,9 @@ struct CompareSegPredicate
 void SortSegs()
 {
     // do a sanity check
-    for (int i = 0; i < level_segs.size(); i++)
+    for (size_t i = 0; i < level_segs.size(); i++)
         if (level_segs[i]->index_ < 0)
-            FatalError("AJBSP: Seg %d never reached a subsector!\n", i);
+            FatalError("AJBSP: Seg %zu never reached a subsector!\n", i);
 
     // sort segs into ascending index
     std::sort(level_segs.begin(), level_segs.end(), CompareSegPredicate());
@@ -777,15 +777,15 @@ static const uint8_t *level_ZGL3_magic = (uint8_t *)"ZGL3";
 
 void PutZVertices()
 {
-    int count, i;
-
     uint32_t orgverts = AlignedLittleEndianU32(num_old_vert);
     uint32_t newverts = AlignedLittleEndianU32(num_new_vert);
 
     ZLibAppendLump(&orgverts, 4);
     ZLibAppendLump(&newverts, 4);
 
-    for (i = 0, count = 0; i < level_vertices.size(); i++)
+    int count = 0;
+
+    for (size_t i = 0; i < level_vertices.size(); i++)
     {
         RawV2Vertex raw;
 
@@ -813,7 +813,7 @@ void PutZSubsecs()
 
     int cur_seg_index = 0;
 
-    for (int i = 0; i < level_subsecs.size(); i++)
+    for (size_t i = 0; i < level_subsecs.size(); i++)
     {
         const Subsector *sub = level_subsecs[i];
 
@@ -825,7 +825,7 @@ void PutZSubsecs()
         for (const Seg *seg = sub->seg_list_; seg; seg = seg->next_, cur_seg_index++)
         {
             if (cur_seg_index != seg->index_)
-                FatalError("AJBSP: PutZSubsecs: seg index mismatch in sub %d (%d != "
+                FatalError("AJBSP: PutZSubsecs: seg index mismatch in sub %zu (%d != "
                            "%d)\n",
                            i, cur_seg_index, seg->index_);
 
@@ -833,11 +833,11 @@ void PutZSubsecs()
         }
 
         if (count != sub->seg_count_)
-            FatalError("AJBSP: PutZSubsecs: miscounted segs in sub %d (%d != %d)\n", i, count, sub->seg_count_);
+            FatalError("AJBSP: PutZSubsecs: miscounted segs in sub %zu (%d != %d)\n", i, count, sub->seg_count_);
     }
 
-    if (cur_seg_index != level_segs.size())
-        FatalError("AJBSP: PutZSubsecs miscounted segs (%d != %d)\n", cur_seg_index, level_segs.size());
+    if ((size_t)cur_seg_index != level_segs.size())
+        FatalError("AJBSP: PutZSubsecs miscounted segs (%d != %zu)\n", cur_seg_index, level_segs.size());
 }
 
 void PutZSegs()
@@ -845,7 +845,7 @@ void PutZSegs()
     uint32_t Rawnum = AlignedLittleEndianU32(level_segs.size());
     ZLibAppendLump(&Rawnum, 4);
 
-    for (int i = 0; i < level_segs.size(); i++)
+    for (int i = 0; (size_t)i < level_segs.size(); i++)
     {
         const Seg *seg = level_segs[i];
 
@@ -870,7 +870,7 @@ void PutXGL3Segs()
     uint32_t Rawnum = AlignedLittleEndianU32(level_segs.size());
     ZLibAppendLump(&Rawnum, 4);
 
-    for (int i = 0; i < level_segs.size(); i++)
+    for (int i = 0; (size_t)i < level_segs.size(); i++)
     {
         const Seg *seg = level_segs[i];
 
@@ -965,8 +965,8 @@ void PutZNodes(Node *root)
     if (root)
         PutOneZNode(root);
 
-    if (node_cur_index != level_nodes.size())
-        FatalError("AJBSP: PutZNodes miscounted (%d != %d)\n", node_cur_index, level_nodes.size());
+    if ((size_t)node_cur_index != level_nodes.size())
+        FatalError("AJBSP: PutZNodes miscounted (%d != %zu)\n", node_cur_index, level_nodes.size());
 }
 
 void SaveXGL3Format(Lump *lump, Node *root_node)
@@ -1027,7 +1027,7 @@ void LoadLevel()
         PruneVerticesAtEnd();
     }
 
-    LogDebug("    Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n", level_vertices.size(),
+    LogDebug("    Loaded %zu vertices, %zu sectors, %zu sides, %zu lines, %zu things\n", level_vertices.size(),
              level_sectors.size(), level_sidedefs.size(), level_linedefs.size(), level_things.size());
 
     DetectOverlappingVertices();
@@ -1285,7 +1285,7 @@ BuildResult BuildLevel(int level_index)
 
     if (ret == kBuildOK)
     {
-        LogDebug("    Built %d NODES, %d SSECTORS, %d SEGS, %d VERTEXES\n", level_nodes.size(), level_subsecs.size(),
+        LogDebug("    Built %zu NODES, %zu SSECTORS, %zu SEGS, %d VERTEXES\n", level_nodes.size(), level_subsecs.size(),
                  level_segs.size(), num_old_vert + num_new_vert);
 
         if (root_node != nullptr)

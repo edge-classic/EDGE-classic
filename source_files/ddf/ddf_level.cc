@@ -164,7 +164,8 @@ static void LevelParseField(const char *field, const char *contents, int index, 
 #if (DDF_DEBUG)
     LogDebug("LEVEL_PARSE: %s = %s;\n", field, contents);
 #endif
-
+    EPI_UNUSED(index);
+    EPI_UNUSED(is_last);
     if (DDFCompareName(field, "TEMPLATE") == 0)
     {
         LevelDoTemplate(contents);

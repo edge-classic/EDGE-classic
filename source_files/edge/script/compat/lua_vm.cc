@@ -135,6 +135,7 @@ int LuaDoFile(lua_State *L, const char *filename, const char *source)
 static bool dbg_nop_warn = false;
 static int  LuaDbgNOP(lua_State *L)
 {
+    EPI_UNUSED(L);
     if (!dbg_nop_warn)
     {
         dbg_nop_warn = true;

@@ -297,11 +297,11 @@ static std::vector<DrawSeg>       draw_segs;
 static std::vector<DrawSubsector> draw_subsectors;
 static std::vector<DrawMirror>    draw_mirrors;
 
-static int draw_thing_position;
-static int draw_floor_position;
-static int draw_seg_position;
-static int draw_subsector_position;
-static int draw_mirror_position;
+static size_t draw_thing_position;
+static size_t draw_floor_position;
+static size_t draw_seg_position;
+static size_t draw_subsector_position;
+static size_t draw_mirror_position;
 
 //
 // AllocateDrawStructs

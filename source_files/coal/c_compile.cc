@@ -23,7 +23,6 @@
 //
 //----------------------------------------------------------------------
 
-#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <float.h>
@@ -37,6 +36,7 @@
 
 #include "AlmostEquals.h"
 #include "c_local.h"
+#include "epi.h"
 #include "stb_sprintf.h"
 
 extern void FatalError(const char *error, ...);
@@ -50,18 +50,18 @@ static constexpr const char *punctuation[] =
      "^",  "(",  ")",  "-",  "+",  "=",  "[",  "]",  "{",   "}",  ".", "<", ">", "#", "&", "|", nullptr};
 
 // simple types.  function types are dynamically Allocated
-static Type type_void     = {ev_void};
-static Type type_string   = {ev_string};
-static Type type_float    = {ev_float};
-static Type type_vector   = {ev_vector};
-static Type type_function = {ev_function, &type_void};
-static Type type_module   = {ev_module};
-static Type type_null     = {ev_null};
+static Type type_void     = {ev_void, nullptr, 0, {nullptr}};
+static Type type_string   = {ev_string, nullptr, 0, {nullptr}};
+static Type type_float    = {ev_float, nullptr, 0, {nullptr}};
+static Type type_vector   = {ev_vector, nullptr, 0, {nullptr}};
+static Type type_function = {ev_function, &type_void, 0, {nullptr}};
+static Type type_module   = {ev_module, nullptr, 0, {nullptr}};
+static Type type_null     = {ev_null, nullptr, 0, {nullptr}};
 
 static constexpr int type_size[10] = {1, 1, 1, 3, 1, 1, 1, 1, 1, 1};
 
 // definition used for void return functions
-static Definition def_void = {&type_void, "VOID_SPACE", 0};
+static Definition def_void = {&type_void, "VOID_SPACE", 0, nullptr, 0, nullptr};
 
 //
 //  OPERATOR TABLE
@@ -123,7 +123,7 @@ static OpCode all_operators[] = {
     {"&", OP_BITAND, 2, &type_float, &type_float, &type_float},
     {"|", OP_BITOR, 2, &type_float, &type_float, &type_float},
 
-    {nullptr} // end of list
+    {nullptr, 0, 0, nullptr, nullptr, nullptr} // end of list
 };
 
 static constexpr uint8_t kTopPriority = 6;
@@ -345,7 +345,7 @@ void RealVM::LexWhitespace(void)
 //
 void RealVM::LexNext()
 {
-    assert(comp_.parse_p);
+    EPI_ASSERT(comp_.parse_p);
 
     LexWhitespace();
 
@@ -511,7 +511,7 @@ Type *RealVM::ParseType()
         return type;
 
     // function type
-    memset(&t_new, 0, sizeof(t_new));
+    EPI_CLEAR_MEMORY(&t_new, Type, 1);
     t_new.type     = ev_function;
     t_new.aux_type = type; // return type
     t_new.parm_num = 0;
@@ -581,13 +581,13 @@ Definition *RealVM::NewGlobal(Type *type)
     int tsize = type_size[type->type];
 
     Definition *var = new Definition;
-    memset(var, 0, sizeof(Definition));
+    EPI_CLEAR_MEMORY(var, Definition, 1);
 
     var->ofs  = global_mem_.Alloc(tsize * sizeof(double));
     var->type = type;
 
     // clear it
-    memset(global_mem_.Deref(var->ofs), 0, tsize * sizeof(double));
+    EPI_CLEAR_MEMORY((double *)global_mem_.Deref(var->ofs), double, tsize);
 
     return var;
 }
@@ -595,7 +595,7 @@ Definition *RealVM::NewGlobal(Type *type)
 Definition *RealVM::NewLocal(Type *type)
 {
     Definition *var = new Definition;
-    memset(var, 0, sizeof(Definition));
+    EPI_CLEAR_MEMORY(var, Definition, 1);
 
     var->ofs  = -(comp_.locals_end + 1);
     var->type = type;
@@ -749,14 +749,14 @@ Definition *RealVM::EXPFunctionCall(Definition *func)
             if (arg >= t->parm_num)
                 CompileError("too many parameters (expected %d)\n", t->parm_num);
 
-            assert(arg < kMaximumParameters);
+            EPI_ASSERT(arg < kMaximumParameters);
 
             Definition *e = EXPExpression(kTopPriority);
 
             if (e->type != t->parm_types[arg])
                 CompileError("type mismatch on parameter %i\n", arg + 1);
 
-            assert(e->type->type != ev_void);
+            EPI_ASSERT(e->type->type != ev_void);
 
             exprs[arg++] = e;
         } while (LexCheck(","));
@@ -873,7 +873,7 @@ Definition *RealVM::DeclareDef(Type *type, char *name, Scope *scope)
 {
     // A new def will be Allocated if it can't be found
 
-    assert(type);
+    EPI_ASSERT(type);
 
     Definition *def = FindDef(type, name, scope);
     if (def)
@@ -1005,6 +1005,7 @@ Definition *RealVM::EXPShortCircuit(Definition *e, int n)
 
 Definition *RealVM::EXPFieldQuery(Definition *e, bool lvalue)
 {
+    EPI_UNUSED(lvalue);
     char *name = ParseName();
 
     if (e->type->type == ev_vector)
@@ -1432,7 +1433,7 @@ void RealVM::GLOBFunction()
 
     Type t_new;
 
-    memset(&t_new, 0, sizeof(t_new));
+    EPI_CLEAR_MEMORY(&t_new, Type, 1);
     t_new.type         = ev_function;
     t_new.parm_num     = 0;
     t_new.aux_type     = &type_void;
@@ -1484,7 +1485,7 @@ void RealVM::GLOBFunction()
 
     Definition *def = DeclareDef(func_type, func_name, comp_.scope);
 
-    assert(func_type->type == ev_function);
+    EPI_ASSERT(func_type->type == ev_function);
 
     LexExpect("=");
 
@@ -1492,7 +1493,7 @@ void RealVM::GLOBFunction()
     COAL_G_FLOAT(def->ofs) = (double)functions_.size();
 
     Function *df = new Function;
-    memset(df, 0, sizeof(Function));
+    EPI_CLEAR_MEMORY(df, Function, 1);
 
     functions_.push_back(df);
 
@@ -1638,7 +1639,7 @@ void RealVM::GLOBModule()
     else
     {
         def = new Definition;
-        memset(def, 0, sizeof(Definition));
+        EPI_CLEAR_MEMORY(def, Definition, 1);
 
         def->name  = mod_name;
         def->type  = &type_module;
@@ -1759,7 +1760,7 @@ RealVM::RealVM()
 
     // function #0 is the "null function"
     Function *df = new Function;
-    memset(df, 0, sizeof(Function));
+    EPI_CLEAR_MEMORY(df, Function, 1);
 
     functions_.push_back(df);
 
@@ -1774,8 +1775,8 @@ RealVM::RealVM()
     // global #1-#3 are reserved for function return values
     // global #4-#6 are reserved for a zero value
     ofs = global_mem_.Alloc(7 * sizeof(double));
-    assert(ofs == 0);
-    memset(global_mem_.Deref(0), 0, 7 * sizeof(double));
+    EPI_ASSERT(ofs == 0);
+    EPI_CLEAR_MEMORY((double *)global_mem_.Deref(0), double, 7);
 }
 
 RealVM::~RealVM()
@@ -2161,7 +2162,7 @@ void RealVM::SetVectorZ(const char *mod_name, const char *var_name, double val)
 
 VM *CreateVM()
 {
-    assert(sizeof(double) == 8);
+    EPI_ASSERT(sizeof(double) == 8);
 
     return new RealVM;
 }

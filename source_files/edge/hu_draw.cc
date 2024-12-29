@@ -360,7 +360,7 @@ void HUDCalcTurbulentTexCoords(float *tx, float *ty, float x, float y)
 //----------------------------------------------------------------------------
 
 void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image, float tx1, float ty1, float tx2,
-                 float ty2, float alpha, RGBAColor text_col, const Colormap *palremap, float sx, float sy, char ch)
+                 float ty2, float alpha, RGBAColor text_col, float sx, float sy)
 {
     if (hx1 >= hx2 || hy1 >= hy2)
         return;
@@ -634,7 +634,7 @@ void HUDStretchImage(float x, float y, float w, float h, const Image *img, float
 
     // HUDRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(),
     // current_alpha, text_col, colmap, sx, sy);
-    HUDRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(), current_alpha, text_col, nullptr, sx, sy);
+    HUDRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(), current_alpha, text_col, sx, sy);
 }
 
 void HUDStretchImageNoOffset(float x, float y, float w, float h, const Image *img, float sx, float sy)
@@ -654,7 +654,7 @@ void HUDStretchImageNoOffset(float x, float y, float w, float h, const Image *im
     float y1 = HUDToRealCoordinatesY(y + h);
     float y2 = HUDToRealCoordinatesY(y);
 
-    HUDRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(), current_alpha, kRGBANoValue, nullptr, sx, sy);
+    HUDRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(), current_alpha, kRGBANoValue, sx, sy);
 }
 
 void HUDDrawImageTitleWS(const Image *title_image)
@@ -1120,7 +1120,7 @@ void HUDDrawChar(float left_x, float top_y, const Image *img, char ch, float siz
     float y1 = HUDToRealCoordinatesY(y + h);
     float y2 = HUDToRealCoordinatesY(y);
 
-    HUDRawImage(x1, y1, x2, y2, img, tx1, ty1, tx2, ty2, current_alpha, current_color, nullptr, 0.0, 0.0, ch);
+    HUDRawImage(x1, y1, x2, y2, img, tx1, ty1, tx2, ty2, current_alpha, current_color, 0.0, 0.0);
 }
 
 void HUDDrawEndoomChar(float left_x, float top_y, float FNX, const Image *img, char ch, RGBAColor color1,

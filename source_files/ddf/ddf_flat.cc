@@ -85,7 +85,8 @@ static void FlatParseField(const char *field, const char *contents, int index, b
 #if (DDF_DEBUG)
     LogDebug("FLAT_PARSE: %s = %s;\n", field, contents);
 #endif
-
+    EPI_UNUSED(index);
+    EPI_UNUSED(is_last);
     if (DDFMainParseField(flat_commands, field, contents, (uint8_t *)dynamic_flatdef))
         return;
 

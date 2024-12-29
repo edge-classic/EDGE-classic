@@ -39,7 +39,7 @@
 #include "r_state.h"
 
 extern MapObject *FindTeleportMan(int tag, const MapObjectDefinition *info);
-extern Line      *p_FindTeleportLine(int tag, Line *original);
+extern Line      *FindTeleportLine(int tag, Line *original);
 
 extern unsigned int root_node;
 
@@ -420,6 +420,7 @@ static void BotCreateLinks()
 
 static float BotTraverseLinkCost(int cur, const nav_link_c &link, bool allow_doors)
 {
+    EPI_UNUSED(allow_doors); // remove? - Dasho
     const Sector *s1 = level_subsectors[cur].sector;
     const Sector *s2 = level_subsectors[link.dest_id].sector;
 
@@ -635,7 +636,7 @@ BotPath *BotFindPath(const Position *start, const Position *finish, int flags)
     //
     // the path may include manual lifts and doors, but more complicated
     // things (e.g. a door activated by a nearby switch) will fail.
-
+    EPI_UNUSED(flags);
     EPI_ASSERT(start);
     EPI_ASSERT(finish);
 

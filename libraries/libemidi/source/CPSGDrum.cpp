@@ -228,6 +228,8 @@ void CPSGDrum::PercKeyOff(uint8_t note)
 
 void CPSGDrum::PercSetProgram(uint8_t bank, uint8_t prog)
 {
+    (void)bank;
+    (void)prog;
 }
 
 void CPSGDrum::PercSetVelocity(uint8_t note, uint8_t velo)

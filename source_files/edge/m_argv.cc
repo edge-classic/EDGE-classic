@@ -55,8 +55,8 @@ static AddedParameter *added_parameters;
 #ifdef _WIN32
 void ParseArguments(const int argc, const char *const *argv)
 {
-    (void)argc;
-    (void)argv;
+    EPI_UNUSED(argc);
+    EPI_UNUSED(argv);
 
     int       win_argc = 0;
     size_t    i;

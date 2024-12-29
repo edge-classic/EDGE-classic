@@ -40,13 +40,13 @@ class CMIDIModule
   protected:
     virtual void     ControlChange(uint8_t ch, uint8_t msb, uint8_t lsb);
     virtual void     NoteOn(uint8_t ch, uint8_t note, uint8_t velo);
-    virtual void     NoteOff(uint8_t ch, uint8_t note, uint8_t velo);
+    virtual void     NoteOff(uint8_t ch, uint8_t note);
     virtual void     UpdatePitchBend(uint8_t ch);
     virtual void     PitchBend(uint8_t ch, uint8_t msb, uint8_t lsb);
     virtual void     ChannelPressure(uint8_t ch, uint8_t velo);
     virtual void     DataEntry(uint8_t midi_ch, bool is_low, uint8_t data);
-    virtual void     DataIncrement(uint8_t midi_ch, uint8_t data);
-    virtual void     DataDecrement(uint8_t midi_ch, uint8_t data);
+    virtual void     DataIncrement(uint8_t midi_ch);
+    virtual void     DataDecrement(uint8_t midi_ch);
     virtual void     MainVolume(uint8_t midi_ch, bool is_fine, uint8_t data);
     virtual void     NRPN(uint8_t midi_ch, bool is_fine, uint8_t data);
     virtual void     RPN(uint8_t midi_ch, bool is_fine, uint8_t data);

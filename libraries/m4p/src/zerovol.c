@@ -8,8 +8,8 @@
 */
 
 #include <stdint.h>
-#include "../it_structs.h"
-#include "../it_music.h"
+#include "it_structs.h"
+#include "it_music.h"
 
 void UpdateNoLoop(slaveChn_t *sc, uint32_t numSamples)
 {

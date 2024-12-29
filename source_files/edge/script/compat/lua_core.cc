@@ -63,6 +63,7 @@ static bool console_allocated = false;
 #endif
 static int SYS_AllocConsole(lua_State *L)
 {
+    EPI_UNUSED(L);
 #ifdef WIN32
     if (console_allocated)
     {
@@ -75,7 +76,6 @@ static int SYS_AllocConsole(lua_State *L)
     freopen("CONOUT$", "w", stdout);
     freopen("CONOUT$", "w", stderr);
 #endif
-
     return 0;
 }
 

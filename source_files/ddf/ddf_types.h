@@ -28,6 +28,7 @@
 #include <string>
 #include <vector>
 
+#include "epi.h"
 #include "epi_bam.h"
 #include "epi_bitset.h"
 #include "epi_color.h"
@@ -329,11 +330,11 @@ class AttackDefinition
     // disable copy construct and assignment operator
     explicit AttackDefinition(AttackDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
     }
     AttackDefinition &operator=(AttackDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
         return *this;
     }
 };
@@ -605,11 +606,11 @@ class WeaponDefinition
     // disable copy construct and assignment operator
     explicit WeaponDefinition(WeaponDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
     }
     WeaponDefinition &operator=(WeaponDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
         return *this;
     }
 };

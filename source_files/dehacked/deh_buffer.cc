@@ -85,7 +85,7 @@ int InputBuffer::GetCharacter()
 void InputBuffer::UngetCharacter(int character)
 {
     // NOTE: assumes c == last character read
-    (void)character; // what was supposed to be done with this? - Dasho
+    EPI_UNUSED(character); // what was supposed to be done with this? - Dasho
 
     if (pointer_ > data_)
         pointer_--;

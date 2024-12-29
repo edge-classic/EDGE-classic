@@ -150,7 +150,7 @@ static unsigned char default_inst[OPLL_TONE_NUM][(16 + 3) * 16] = {{
 
 /* Adjust envelope speed which depends on sampling rate. */
 #define RATE_ADJUST(x)                                                                                                 \
-    (rate == 49716 ? x : (e_uint32)((double)(x) * clk / 72 / rate + 0.5)) /* added 0.5 to round the value*/
+    (rate == 49716 ? (e_uint32)x : (e_uint32)((double)(x) * clk / 72 / rate + 0.5)) /* added 0.5 to round the value*/
 
 #define MOD(o, x) (&(o)->slot[(x) << 1])
 #define CAR(o, x) (&(o)->slot[((x) << 1) | 1])

@@ -479,7 +479,7 @@ MD2Model *MD2Load(epi::File *f)
 
         md->frames_[i].vertices = new MD2Vertex[md->vertices_per_frame_];
 
-        memset(which_normals, 0, sizeof(which_normals));
+        EPI_CLEAR_MEMORY(which_normals, uint8_t, kTotalMDFormatNormals);
 
         for (int v = 0; v < md->vertices_per_frame_; v++)
         {
@@ -730,7 +730,7 @@ MD2Model *MD3Load(epi::File *f)
     {
         md->frames_[i].vertices = new MD2Vertex[num_verts];
 
-        memset(which_normals, 0, sizeof(which_normals));
+        EPI_CLEAR_MEMORY(which_normals, uint8_t, kTotalMDFormatNormals);
 
         MD2Vertex *good_V = md->frames_[i].vertices;
 
@@ -954,7 +954,7 @@ static inline void ModelCoordFunc(MD2CoordinateData *data, int v_idx)
         return;
     }
 
-    render_texture_coordinates = { point->skin_s * data->image_right_, point->skin_t * data->image_top_ };
+    render_texture_coordinates = {{ point->skin_s * data->image_right_, point->skin_t * data->image_top_ }};
 
     ColorMixer *col = &data->normal_colors_[(data->lerp_ < 0.5) ? vert1->normal_idx : vert2->normal_idx];
 
@@ -1378,7 +1378,7 @@ void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, f
 
                 const MD2Point *point = &md->points_[strip->first + v_idx];
                 const MD2Vertex *vert = &frame_ptr->vertices[point->vert_idx];
-                const HMM_Vec2 texc = { point->skin_s * im_right, point->skin_t * im_top };
+                const HMM_Vec2 texc = {{ point->skin_s * im_right, point->skin_t * im_top }};
 
                 render_state->MultiTexCoord(GL_TEXTURE0, &texc);
 
@@ -1409,7 +1409,7 @@ void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, f
 
                 const MD2Point *point = &md->points_[strip->first + v_idx];
                 const MD2Vertex *vert = &frame_ptr->vertices[point->vert_idx];
-                const HMM_Vec2 texc = { point->skin_s * im_right, point->skin_t * im_top };
+                const HMM_Vec2 texc = {{ point->skin_s * im_right, point->skin_t * im_top }};
 
                 render_state->MultiTexCoord(GL_TEXTURE0, &texc);
 

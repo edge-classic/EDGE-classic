@@ -61,8 +61,7 @@ void HUDPushScissor(float x1, float y1, float x2, float y2, bool expand = false)
 void HUDPopScissor();
 
 void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image, float tx1, float ty1, float tx2,
-                 float ty2, float alpha = 1.0f, RGBAColor text_col = kRGBANoValue, const Colormap *palremap = nullptr,
-                 float sx = 0.0, float sy = 0.0, char ch = -1);
+                 float ty2, float alpha = 1.0f, RGBAColor text_col = kRGBANoValue, float sx = 0.0, float sy = 0.0);
 
 // Draw a solid colour box (possibly translucent) in the given
 // rectangle.

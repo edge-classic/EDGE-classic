@@ -1191,10 +1191,8 @@ WeaponDefinitionContainer::~WeaponDefinitionContainer()
 //
 // WeaponDefinitionContainer::FindFirst()
 //
-int WeaponDefinitionContainer::FindFirst(const char *name, int startpos)
+int WeaponDefinitionContainer::FindFirst(const char *name, size_t startpos)
 {
-    startpos = HMM_MAX(startpos, 0);
-
     for (; startpos < size(); startpos++)
     {
         WeaponDefinition *w = at(startpos);

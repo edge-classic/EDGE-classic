@@ -373,7 +373,7 @@ void MixAllSoundChannels(void *stream, int len)
     EPI_ASSERT(mix_buffer && samples <= mix_buffer_length);
 
     // clear mixer buffer
-    memset(mix_buffer, 0, mix_buffer_length * sizeof(int));
+    EPI_CLEAR_MEMORY(mix_buffer, int, mix_buffer_length);
 
     // add each channel
     for (int i = 0; i < total_channels; i++)
@@ -438,7 +438,7 @@ void FreeSoundChannels(void)
         delete chan;
     }
 
-    memset(mix_channels, 0, sizeof(mix_channels));
+    EPI_CLEAR_MEMORY(mix_channels, SoundChannel*, 256);
 }
 
 void KillSoundChannel(int k)

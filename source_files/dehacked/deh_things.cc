@@ -242,7 +242,7 @@ void AddAtkSpecial(const char *name)
     wad::Printf("%s", name);
 }
 
-void HandleAtkSpecials(const DehackedMapObjectDefinition *info, int mt_num, const ExtraAttack *ext, bool plr_rocket)
+void HandleAtkSpecials(const ExtraAttack *ext, bool plr_rocket)
 {
     flag_got_one = false;
 
@@ -463,7 +463,7 @@ void Attacks::ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num,
     if (strchr(ext->flags, kAttackFlagKeepFire))
         wad::Printf("KEEP_FIRING_CHANCE = 4%%;\n");
 
-    HandleAtkSpecials(info, mt_num, ext, plr_rocket);
+    HandleAtkSpecials(ext, plr_rocket);
     HandleSounds(info, mt_num);
     HandleFrames(info, mt_num);
 
@@ -512,7 +512,7 @@ int cast_mobjs[kCastMaximum];
 void BeginLump();
 void FinishLump();
 
-bool CheckIsMonster(const DehackedMapObjectDefinition *info, int mt_num, int player, bool use_act_flags);
+bool CheckIsMonster(const DehackedMapObjectDefinition *info, int player, bool use_act_flags);
 } // namespace things
 
 void things::Init()
@@ -575,7 +575,7 @@ void things::MarkThing(int mt_num)
     }
     else
     {
-        memset(entry, 0, sizeof(DehackedMapObjectDefinition));
+        EPI_CLEAR_MEMORY(entry, DehackedMapObjectDefinition, 1);
 
         entry->name      = "X"; // only needed to differentiate from an attack
         entry->doomednum = -1;
@@ -607,7 +607,7 @@ void things::MarkAllMonsters()
 
         const DehackedMapObjectDefinition *mobj = &mobjinfo[i];
 
-        if (CheckIsMonster(mobj, i, 0, false))
+        if (CheckIsMonster(mobj, 0, false))
             MarkThing(i);
     }
 }
@@ -832,7 +832,7 @@ int ParseBits(const FlagName *list, char *bit_str)
     return new_flags;
 }
 
-bool CheckIsMonster(const DehackedMapObjectDefinition *info, int mt_num, int player, bool use_act_flags)
+bool CheckIsMonster(const DehackedMapObjectDefinition *info, int player, bool use_act_flags)
 {
     if (player > 0)
         return false;
@@ -971,7 +971,7 @@ void HandleFlags(const DehackedMapObjectDefinition *info, int mt_num, int player
     if (info->mass < 0)
         cur_f |= kMF_SPAWNCEILING | kMF_NOGRAVITY;
 
-    bool is_monster     = CheckIsMonster(info, mt_num, player, true);
+    bool is_monster     = CheckIsMonster(info, player, true);
     bool force_disloyal = (is_monster && miscellaneous::monster_infight == 221);
 
     for (i = 0; flag_list[i].bex != nullptr; i++)
@@ -1297,7 +1297,7 @@ const PlayerInfo player_info[NUMPLAYERS] = {{"OUR_HERO", 1, "PLAYER_GREEN"},    
                                             {"PLAYER5", 4001, "PLAYER_ORANGE"}, {"PLAYER6", 4002, "PLAYER_LT_GREY"},
                                             {"PLAYER7", 4003, "PLAYER_LT_RED"}, {"PLAYER8", 4004, "PLAYER_PINK"}};
 
-void HandlePlayer(const DehackedMapObjectDefinition *info, int player)
+void HandlePlayer(int player)
 {
     if (player <= 0)
         return;
@@ -1386,7 +1386,7 @@ const PickupItem pickup_item[] = {
     {kSPR_PLAS, "PLASMA_RIFLE,CELLS", 1, 40, 0, "GotPlasmaGun", ksfx_wpnup},
     {kSPR_BFUG, "BFG9000,CELLS", 1, 40, 0, "GotBFG", ksfx_wpnup},
 
-    {-1, nullptr, 0, 0, 0, nullptr}};
+    {-1, nullptr, 0, 0, 0, nullptr, ksfx_None}};
 
 void HandleItem(const DehackedMapObjectDefinition *info, int mt_num)
 {
@@ -1531,7 +1531,7 @@ const char *cast_titles[17] = {
     "LostSoulName", "CacodemonName", "HellKnightName", "BaronOfHellName",      "ArachnotronName", "PainElementalName",
     "RevenantName", "MancubusName",  "ArchVileName",   "SpiderMastermindName", "CyberdemonName"};
 
-void HandleCastOrder(const DehackedMapObjectDefinition *info, int mt_num, int player)
+void HandleCastOrder(int mt_num, int player)
 {
     if (player >= 2)
         return;
@@ -1558,12 +1558,12 @@ void HandleCastOrder(const DehackedMapObjectDefinition *info, int mt_num, int pl
     wad::Printf("CAST_TITLE = %s;\n", cast_titles[pos - 1]);
 }
 
-void HandleDropItem(const DehackedMapObjectDefinition *info, int mt_num);
+void HandleDropItem(int mt_num);
 void HandleAttacks(const DehackedMapObjectDefinition *info, int mt_num);
 void ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num, int player, bool brain_missile, bool &got_one);
 } // namespace things
 
-void things::HandleDropItem(const DehackedMapObjectDefinition *info, int mt_num)
+void things::HandleDropItem(int mt_num)
 {
     const char *item = nullptr;
 
@@ -1679,9 +1679,9 @@ void things::ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num, in
     if (mt_num == kMT_BOSSSPIT)
         wad::Printf("SPIT_SPOT = BRAIN_SPAWNSPOT;\n");
 
-    HandleCastOrder(info, mt_num, player);
-    HandleDropItem(info, mt_num);
-    HandlePlayer(info, player);
+    HandleCastOrder(mt_num, player);
+    HandleDropItem(mt_num);
+    HandlePlayer(player);
     HandleItem(info, mt_num);
     HandleSounds(info, mt_num);
     HandleFrames(info, mt_num);

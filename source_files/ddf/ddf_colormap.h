@@ -19,6 +19,7 @@
 #pragma once
 
 #include "ddf_types.h"
+#include "epi.h"
 
 enum ColorSpecial
 {
@@ -71,11 +72,11 @@ class Colormap
     // disable copy construct and assignment operator
     explicit Colormap(Colormap &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
     }
     Colormap &operator=(Colormap &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
         return *this;
     }
 };

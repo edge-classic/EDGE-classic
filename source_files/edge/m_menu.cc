@@ -639,7 +639,7 @@ std::string LoboStringReplaceAll(std::string str, const std::string &from, const
     return str;
 }
 
-static void MenuDrawSaveLoadCommon(int row, int row2, Style *style, float LineHeight)
+static void MenuDrawSaveLoadCommon(Style *style, float LineHeight)
 {
     int   y         = 0;
     int   x         = 0;
@@ -874,7 +874,7 @@ void MenuDrawLoad(void)
         TempY += style->definition_->entry_spacing_;
     }
 
-    MenuDrawSaveLoadCommon(i, i + 1, load_style, LineHeight);
+    MenuDrawSaveLoadCommon(load_style, LineHeight);
 }
 
 //
@@ -899,6 +899,7 @@ void MenuLoadSelect(int choice)
 //
 void MenuLoadGame(int choice)
 {
+    EPI_UNUSED(choice);
     if (network_game)
     {
         StartMenuMessage(language["NoLoadInNetGame"], nullptr, false);
@@ -1032,7 +1033,7 @@ void MenuDrawSave(void)
         TempY += style->definition_->entry_spacing_;
     }
 
-    MenuDrawSaveLoadCommon(i, i + 1, save_style, LineHeight);
+    MenuDrawSaveLoadCommon(save_style, LineHeight);
 }
 
 //
@@ -1083,6 +1084,7 @@ void MenuSaveSelect(int choice)
 //
 void MenuSaveGame(int choice)
 {
+    EPI_UNUSED(choice);
     if (game_state != kGameStateLevel)
     {
         StartMenuMessage(language["SaveWhenNotPlaying"], nullptr, false);
@@ -1374,6 +1376,7 @@ static void CreateEpisodeMenu(void)
 
 void MenuNewGame(int choice)
 {
+    EPI_UNUSED(choice);
     if (network_game)
     {
         StartMenuMessage(language["NewNetGame"], nullptr, false);
@@ -1569,6 +1572,8 @@ static void EndGameResponse(int ch)
 
 void MenuEndGame(int choice, ConsoleVariable *cvar)
 {
+    EPI_UNUSED(choice);
+    EPI_UNUSED(cvar);
     if (game_state != kGameStateLevel)
     {
         StartSoundEffect(sound_effect_oof);
@@ -1589,16 +1594,19 @@ void MenuEndGame(int choice, ConsoleVariable *cvar)
 
 void MenuReadThis(int choice)
 {
+    EPI_UNUSED(choice);
     MenuSetupNextMenu(&ReadThisMenuDefinition1);
 }
 
 void MenuReadThis2(int choice)
 {
+    EPI_UNUSED(choice);
     MenuSetupNextMenu(&ReadThisMenuDefinition2);
 }
 
 void MenuFinishReadThis(int choice)
 {
+    EPI_UNUSED(choice);
     MenuSetupNextMenu(&MainMenuDefinition);
 }
 
@@ -1675,6 +1683,7 @@ static void QuitResponse(int ch)
 //
 void QuitEdge(int choice)
 {
+    EPI_UNUSED(choice);
 #ifdef EDGE_WEB
     StartMenuMessage(language["QuitWhenWebPlayer"], nullptr, false);
     return;

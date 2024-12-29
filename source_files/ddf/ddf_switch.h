@@ -54,9 +54,11 @@ class SwitchDefinition
     // disable copy construct and assignment operator
     explicit SwitchDefinition(SwitchDefinition &rhs)
     {
+        EPI_UNUSED(rhs);
     }
     SwitchDefinition &operator=(SwitchDefinition &rhs)
     {
+        EPI_UNUSED(rhs);
         return *this;
     }
 };

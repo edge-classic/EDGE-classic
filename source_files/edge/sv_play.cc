@@ -43,26 +43,26 @@ void *SaveGamePlayerFindByIndex(int index);
 void  SaveGamePlayerCreateElems(int num_elems);
 void  SaveGamePlayerFinaliseElems(void);
 
-bool SR_PlayerGetCounter(void *storage, int index, void *extra);
-bool SR_PlayerGetInv(void *storage, int index, void *extra);
-bool SR_PlayerGetAmmo(void *storage, int index, void *extra);
-bool SR_PlayerGetWeapon(void *storage, int index, void *extra);
-bool SR_PlayerGetPSprite(void *storage, int index, void *extra);
-bool SR_PlayerGetName(void *storage, int index, void *extra);
-bool SR_PlayerGetState(void *storage, int index, void *extra);
-bool SR_WeaponGetInfo(void *storage, int index, void *extra);
+bool SR_PlayerGetCounter(void *storage, int index);
+bool SR_PlayerGetInv(void *storage, int index);
+bool SR_PlayerGetAmmo(void *storage, int index);
+bool SR_PlayerGetWeapon(void *storage, int index);
+bool SR_PlayerGetPSprite(void *storage, int index);
+bool SR_PlayerGetName(void *storage, int index);
+bool SR_PlayerGetState(void *storage, int index);
+bool SR_WeaponGetInfo(void *storage, int index);
 
-void SR_PlayerPutCounter(void *storage, int index, void *extra);
-void SR_PlayerPutInv(void *storage, int index, void *extra);
-void SR_PlayerPutAmmo(void *storage, int index, void *extra);
-void SR_PlayerPutWeapon(void *storage, int index, void *extra);
-void SR_PlayerPutPSprite(void *storage, int index, void *extra);
-void SR_PlayerPutName(void *storage, int index, void *extra);
-void SR_PlayerPutState(void *storage, int index, void *extra);
-void SR_WeaponPutInfo(void *storage, int index, void *extra);
+void SR_PlayerPutCounter(void *storage, int index);
+void SR_PlayerPutInv(void *storage, int index);
+void SR_PlayerPutAmmo(void *storage, int index);
+void SR_PlayerPutWeapon(void *storage, int index);
+void SR_PlayerPutPSprite(void *storage, int index);
+void SR_PlayerPutName(void *storage, int index);
+void SR_PlayerPutState(void *storage, int index);
+void SR_WeaponPutInfo(void *storage, int index);
 
-extern bool SaveGameMapObjectGetType(void *storage, int index, void *extra);
-extern void SaveGameMapObjectPutType(void *storage, int index, void *extra);
+extern bool SaveGameMapObjectGetType(void *storage, int index);
+extern void SaveGameMapObjectPutType(void *storage, int index);
 
 //----------------------------------------------------------------------------
 //
@@ -502,7 +502,7 @@ void SaveGamePlayerFinaliseElems(void)
 //
 // SR_PlayerGetCounter
 //
-bool SR_PlayerGetCounter(void *storage, int index, void *extra)
+bool SR_PlayerGetCounter(void *storage, int index)
 {
     PlayerStock *dest = (PlayerStock *)storage + index;
 
@@ -515,7 +515,7 @@ bool SR_PlayerGetCounter(void *storage, int index, void *extra)
 //
 // SR_PlayerPutCounter
 //
-void SR_PlayerPutCounter(void *storage, int index, void *extra)
+void SR_PlayerPutCounter(void *storage, int index)
 {
     PlayerStock *src = (PlayerStock *)storage + index;
 
@@ -525,7 +525,7 @@ void SR_PlayerPutCounter(void *storage, int index, void *extra)
 //
 // SR_PlayerGetInv
 //
-bool SR_PlayerGetInv(void *storage, int index, void *extra)
+bool SR_PlayerGetInv(void *storage, int index)
 {
     PlayerStock *dest = (PlayerStock *)storage + index;
 
@@ -538,7 +538,7 @@ bool SR_PlayerGetInv(void *storage, int index, void *extra)
 //
 // SR_PlayerPutInv
 //
-void SR_PlayerPutInv(void *storage, int index, void *extra)
+void SR_PlayerPutInv(void *storage, int index)
 {
     PlayerStock *src = (PlayerStock *)storage + index;
 
@@ -548,7 +548,7 @@ void SR_PlayerPutInv(void *storage, int index, void *extra)
 //
 // SR_PlayerGetAmmo
 //
-bool SR_PlayerGetAmmo(void *storage, int index, void *extra)
+bool SR_PlayerGetAmmo(void *storage, int index)
 {
     PlayerStock *dest = (PlayerStock *)storage + index;
 
@@ -561,7 +561,7 @@ bool SR_PlayerGetAmmo(void *storage, int index, void *extra)
 //
 // SR_PlayerPutAmmo
 //
-void SR_PlayerPutAmmo(void *storage, int index, void *extra)
+void SR_PlayerPutAmmo(void *storage, int index)
 {
     PlayerStock *src = (PlayerStock *)storage + index;
 
@@ -571,7 +571,7 @@ void SR_PlayerPutAmmo(void *storage, int index, void *extra)
 //
 // SR_PlayerGetWeapon
 //
-bool SR_PlayerGetWeapon(void *storage, int index, void *extra)
+bool SR_PlayerGetWeapon(void *storage, int index)
 {
     PlayerWeapon *dest = (PlayerWeapon *)storage + index;
 
@@ -584,7 +584,7 @@ bool SR_PlayerGetWeapon(void *storage, int index, void *extra)
 //
 // SR_PlayerPutWeapon
 //
-void SR_PlayerPutWeapon(void *storage, int index, void *extra)
+void SR_PlayerPutWeapon(void *storage, int index)
 {
     PlayerWeapon *src = (PlayerWeapon *)storage + index;
 
@@ -594,7 +594,7 @@ void SR_PlayerPutWeapon(void *storage, int index, void *extra)
 //
 // SR_PlayerGetPSprite
 //
-bool SR_PlayerGetPSprite(void *storage, int index, void *extra)
+bool SR_PlayerGetPSprite(void *storage, int index)
 {
     PlayerSprite *dest = (PlayerSprite *)storage + index;
 
@@ -608,7 +608,7 @@ bool SR_PlayerGetPSprite(void *storage, int index, void *extra)
 //
 // SR_PlayerPutPSprite
 //
-void SR_PlayerPutPSprite(void *storage, int index, void *extra)
+void SR_PlayerPutPSprite(void *storage, int index)
 {
     PlayerSprite *src = (PlayerSprite *)storage + index;
 
@@ -618,7 +618,7 @@ void SR_PlayerPutPSprite(void *storage, int index, void *extra)
 //
 // SR_PlayerGetName
 //
-bool SR_PlayerGetName(void *storage, int index, void *extra)
+bool SR_PlayerGetName(void *storage, int index)
 {
     char       *dest = (char *)storage;
     const char *str;
@@ -635,7 +635,7 @@ bool SR_PlayerGetName(void *storage, int index, void *extra)
 //
 // SR_PlayerPutName
 //
-void SR_PlayerPutName(void *storage, int index, void *extra)
+void SR_PlayerPutName(void *storage, int index)
 {
     char *src = (char *)storage;
 
@@ -647,7 +647,7 @@ void SR_PlayerPutName(void *storage, int index, void *extra)
 //
 // SR_WeaponGetInfo
 //
-bool SR_WeaponGetInfo(void *storage, int index, void *extra)
+bool SR_WeaponGetInfo(void *storage, int index)
 {
     WeaponDefinition **dest = (WeaponDefinition **)storage + index;
     const char        *name;
@@ -663,7 +663,7 @@ bool SR_WeaponGetInfo(void *storage, int index, void *extra)
 //
 // SR_WeaponPutInfo
 //
-void SR_WeaponPutInfo(void *storage, int index, void *extra)
+void SR_WeaponPutInfo(void *storage, int index)
 {
     WeaponDefinition *info = ((WeaponDefinition **)storage)[index];
 
@@ -675,7 +675,7 @@ void SR_WeaponPutInfo(void *storage, int index, void *extra)
 //
 // SR_PlayerGetState
 //
-bool SR_PlayerGetState(void *storage, int index, void *extra)
+bool SR_PlayerGetState(void *storage, int index)
 {
     State **dest = (State **)storage + index;
 
@@ -755,7 +755,7 @@ bool SR_PlayerGetState(void *storage, int index, void *extra)
 // Alternatively, the string can be nullptr, which means the state
 // pointer should be nullptr.
 //
-void SR_PlayerPutState(void *storage, int index, void *extra)
+void SR_PlayerPutState(void *storage, int index)
 {
     State *S = ((State **)storage)[index];
 

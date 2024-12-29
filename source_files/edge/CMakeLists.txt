@@ -82,7 +82,6 @@ set (EDGE_SOURCE_FILES
   s_ogg.cc
   s_emidi.cc
   s_tsf.cc
-  s_fmm.cc
   sv_chunk.cc
   sv_glob.cc
   sv_level.cc
@@ -201,7 +200,6 @@ set (EDGE_LINK_LIBRARIES
   ${SDL2_LIBRARIES}
   almostequals
   dr_libs
-  fmmidi
   HandmadeMath
   libemidi
   lua
@@ -275,8 +273,8 @@ target_include_directories(edge-classic PRIVATE ./)
 target_link_libraries(edge-classic PRIVATE ${EDGE_LINK_LIBRARIES})
 
 target_compile_options(edge-classic PRIVATE
-  $<$<CXX_COMPILER_ID:MSVC>:${EDGE_WARNINGS}>
-  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:${EDGE_WARNINGS}>
+  $<$<CXX_COMPILER_ID:MSVC>:${EDGE_WARNING_LEVEL}>
+  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:${EDGE_WARNING_LEVEL}>
 )
 
 set(COPY_FILES "")

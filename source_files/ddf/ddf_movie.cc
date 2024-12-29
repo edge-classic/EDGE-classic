@@ -79,7 +79,8 @@ static void MovieParseField(const char *field, const char *contents, int index, 
 #if (DDF_DEBUG)
     LogDebug("MOVIE_PARSE: %s = %s;\n", field, contents);
 #endif
-
+    EPI_UNUSED(index);
+    EPI_UNUSED(is_last);
     if (DDFMainParseField(movie_commands, field, contents, (uint8_t *)dynamic_movie))
         return; // OK
 
@@ -134,6 +135,7 @@ static void MovieParseInfo(const char *value)
 
 static void DDFMovieGetType(const char *info, void *storage)
 {
+    EPI_UNUSED(storage);
     const char *colon = DDFMainDecodeList(info, ':', true);
 
     if (colon == nullptr || colon == info || (colon - info) >= 16 || colon[1] == 0)

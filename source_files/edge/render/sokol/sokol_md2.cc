@@ -481,7 +481,7 @@ MD2Model *MD2Load(epi::File *f)
 
         md->frames_[i].vertices = new MD2Vertex[md->vertices_per_frame_];
 
-        memset(which_normals, 0, sizeof(which_normals));
+        EPI_CLEAR_MEMORY(which_normals, uint8_t, kTotalMDFormatNormals);
 
         for (int v = 0; v < md->vertices_per_frame_; v++)
         {
@@ -732,7 +732,7 @@ MD2Model *MD3Load(epi::File *f)
     {
         md->frames_[i].vertices = new MD2Vertex[num_verts];
 
-        memset(which_normals, 0, sizeof(which_normals));
+        EPI_CLEAR_MEMORY(which_normals, uint8_t, kTotalMDFormatNormals);
 
         MD2Vertex *good_V = md->frames_[i].vertices;
 
@@ -956,7 +956,7 @@ static inline void ModelCoordFunc(MD2CoordinateData *data, int v_idx)
         return;
     }
 
-    render_texture_coordinates = {point->skin_s * data->image_right_, point->skin_t * data->image_top_};
+    render_texture_coordinates = {{ point->skin_s * data->image_right_, point->skin_t * data->image_top_}};
 
     ColorMixer *col = &data->normal_colors_[(data->lerp_ < 0.5) ? vert1->normal_idx : vert2->normal_idx];
 
@@ -1410,6 +1410,10 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
 void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, float y, float xscale, float yscale,
                       const MapObjectDefinition *info)
 {
+    // Review these after this function is updated
+    EPI_UNUSED(x);
+    EPI_UNUSED(y);
+    EPI_UNUSED(xscale);
     // check if frame is valid
     if (frame < 0 || frame >= md->total_frames_)
         return;

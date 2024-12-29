@@ -89,7 +89,8 @@ static void ColmapParseField(const char *field, const char *contents, int index,
 #if (DDF_DEBUG)
     LogDebug("COLMAP_PARSE: %s = %s;\n", field, contents);
 #endif
-
+    EPI_UNUSED(index);
+    EPI_UNUSED(is_last);
     // -AJA- backwards compatibility cruft...
     if (DDFCompareName(field, "PRIORITY") == 0)
         return;

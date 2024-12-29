@@ -1363,8 +1363,8 @@ void DDFMainGetTime(const char *info, void *storage)
 void DDFDummyFunction(const char *info, void *storage)
 {
     /* does nothing */
-    (void)info;
-    (void)storage;
+    EPI_UNUSED(info);
+    EPI_UNUSED(storage);
 }
 
 //

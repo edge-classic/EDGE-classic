@@ -19,6 +19,7 @@
 #pragma once
 
 #include "ddf_types.h"
+#include "epi.h"
 
 // ----------------------------------------------------------------
 // -------------------------MUSIC PLAYLIST-------------------------
@@ -90,11 +91,11 @@ class PlaylistEntry
     // disable copy construct and assignment operator
     explicit PlaylistEntry(PlaylistEntry &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
     }
     PlaylistEntry &operator=(PlaylistEntry &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
         return *this;
     }
 };

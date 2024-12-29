@@ -68,7 +68,7 @@ static std::deque<HUDMessage> queued_messages;
 static void UpdatePickupMessages(ConsoleVariable *self)
 {
     // Account for 0 index from options menu
-    while (queued_messages.size() > self->d_ + 1)
+    while (queued_messages.size() > (size_t)self->d_ + 1)
         queued_messages.pop_back();
 }
 
@@ -231,7 +231,7 @@ void HUDStartMessage(const char *msg)
 {
     // only display message if necessary
     queued_messages.push_front({msg, kHUDMessageTimeout});
-    if (queued_messages.size() > maximum_pickup_messages.d_ + 1)
+    if (queued_messages.size() > (size_t)maximum_pickup_messages.d_ + 1)
         queued_messages.pop_back();
 }
 

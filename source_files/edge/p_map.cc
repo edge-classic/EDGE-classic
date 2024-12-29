@@ -167,6 +167,7 @@ static inline int PointOnLineSide(float x, float y, Line *ld)
 
 static bool StompThingCallback(MapObject *thing, void *data)
 {
+    EPI_UNUSED(data);
     if (!(thing->flags_ & kMapObjectFlagShootable))
         return true;
 
@@ -263,6 +264,7 @@ bool TeleportMove(MapObject *thing, float x, float y, float z)
 
 static bool CheckAbsoluteLineCallback(Line *ld, void *data)
 {
+    EPI_UNUSED(data);
     if (BoxOnLineSide(move_check.bounding_box, ld) != -1)
         return true;
 
@@ -330,6 +332,7 @@ static bool CheckAbsoluteLineCallback(Line *ld, void *data)
 
 static bool CheckAbsoluteThingCallback(MapObject *thing, void *data)
 {
+    EPI_UNUSED(data);
     float blockdist;
     bool  solid;
 
@@ -452,6 +455,7 @@ bool CheckAbsolutePosition(MapObject *thing, float x, float y, float z)
 
 static bool CheckRelativeLineCallback(Line *ld, void *data)
 {
+    EPI_UNUSED(data);
     // Adjusts move_check.floor_z & move_check.ceiling_z as lines are contacted
 
     if (BoxOnLineSide(move_check.bounding_box, ld) != -1)
@@ -836,6 +840,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
 
 static bool CheckRelativeThingCallback(MapObject *thing, void *data)
 {
+    EPI_UNUSED(data);
     float blockdist;
     bool  solid = (thing->flags_ & kMapObjectFlagSolid) ? true : false;
 
@@ -1299,6 +1304,7 @@ static void HitSlideLine(Line *ld)
 
 static bool PTR_SlideTraverse(PathIntercept *in, void *dataptr)
 {
+    EPI_UNUSED(dataptr);
     Line *ld = in->line;
 
     EPI_ASSERT(ld);
@@ -1455,6 +1461,7 @@ void SlideMove(MapObject *mo, float x, float y)
 //
 static bool PTR_AimTraverse(PathIntercept *in, void *dataptr)
 {
+    EPI_UNUSED(dataptr);
     float dist = aim_check.range * in->along;
 
     if (dist < 0.01f)
@@ -1547,6 +1554,7 @@ static bool PTR_AimTraverse(PathIntercept *in, void *dataptr)
 //
 static bool PTR_AimTraverse2(PathIntercept *in, void *dataptr)
 {
+    EPI_UNUSED(dataptr);
     float dist = aim_check.range * in->along;
 
     if (dist < 0.01f)
@@ -2045,6 +2053,7 @@ void UnblockLineEffectDebris(Line *TheLine, const LineType *special)
 
 static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
 {
+    EPI_UNUSED(dataptr);
     float dist = shoot_check.range * in->along;
 
     if (dist < 0.1f)
@@ -2520,6 +2529,7 @@ static float      use_lower, use_upper;
 
 static bool PTR_UseTraverse(PathIntercept *in, void *dataptr)
 {
+    EPI_UNUSED(dataptr);
     // intercept is a thing ?
     if (in->thing)
     {
@@ -2639,6 +2649,7 @@ static RadiusAttackInfo radius_attack_check;
 //
 static bool RadiusAttackCallback(MapObject *thing, void *data)
 {
+    EPI_UNUSED(data);
     float dx, dy, dz;
     float dist;
 
@@ -2834,7 +2845,7 @@ static bool ChangeSectorCallback(MapObject *thing, bool widening)
 //
 // NOTE: the heights (floor_height, ceiling_height) currently broken.
 //
-static void ChangeSectorHeights(Sector *sec, float floor_height, float ceiling_height, float f_dh, float c_dh)
+static void ChangeSectorHeights(Sector *sec, float f_dh, float c_dh)
 {
     TouchNode *tn, *next;
     MapObject *mo;
@@ -2997,13 +3008,11 @@ bool SolidSectorMove(Sector *sec, bool is_ceiling, float dh, int crush, bool noc
     {
         if (is_ceiling)
         {
-            float h = sec->top_extrafloor ? sec->top_extrafloor->top_height : sec->floor_height;
-            ChangeSectorHeights(sec, h, sec->ceiling_height, 0, dh);
+            ChangeSectorHeights(sec, 0, dh);
         }
         else
         {
-            float h = sec->bottom_extrafloor ? sec->bottom_extrafloor->bottom_height : sec->ceiling_height;
-            ChangeSectorHeights(sec, sec->floor_height, h, dh, 0);
+            ChangeSectorHeights(sec, dh, 0);
         }
     }
 
@@ -3040,13 +3049,11 @@ bool SolidSectorMove(Sector *sec, bool is_ceiling, float dh, int crush, bool noc
             {
                 if (dh > 0)
                 {
-                    float h = ef->higher ? ef->higher->bottom_height : ef->sector->ceiling_height;
-                    ChangeSectorHeights(ef->sector, ef->top_height, h, dh, 0);
+                    ChangeSectorHeights(ef->sector, dh, 0);
                 }
                 else if (dh < 0)
                 {
-                    float h = ef->lower ? ef->lower->top_height : ef->sector->floor_height;
-                    ChangeSectorHeights(ef->sector, h, ef->top_height, 0, dh);
+                    ChangeSectorHeights(ef->sector, 0, dh);
                 }
                 continue;
             }
@@ -3054,16 +3061,14 @@ bool SolidSectorMove(Sector *sec, bool is_ceiling, float dh, int crush, bool noc
             // moving the top of a thick extrafloor ?
             if (is_ceiling && (ef->extrafloor_definition->type_ & kExtraFloorTypeThick))
             {
-                float h = ef->higher ? ef->higher->bottom_height : ef->sector->ceiling_height;
-                ChangeSectorHeights(ef->sector, ef->top_height, h, dh, 0);
+                ChangeSectorHeights(ef->sector, dh, 0);
                 continue;
             }
 
             // moving the bottom of a thick extrafloor ?
             if (!is_ceiling && (ef->extrafloor_definition->type_ & kExtraFloorTypeThick))
             {
-                float h = ef->lower ? ef->lower->top_height : ef->sector->floor_height;
-                ChangeSectorHeights(ef->sector, h, ef->bottom_height, 0, dh);
+                ChangeSectorHeights(ef->sector, 0, dh);
                 continue;
             }
         }
@@ -3088,6 +3093,7 @@ static float      raiser_try_y;
 
 static bool CorpseCheckCallback(MapObject *thing, void *data)
 {
+    EPI_UNUSED(data);
     float maxdist;
     float oldradius;
     float oldheight;
@@ -3209,6 +3215,7 @@ static float mt2;
 
 static bool CheckBlockingLineCallback(Line *line, void *data)
 {
+    EPI_UNUSED(data);
     // if the result is the same, we haven't crossed the line.
     if (PointOnLineSide(mx1, my1, line) == PointOnLineSide(mx2, my2, line))
         return true;

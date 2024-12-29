@@ -146,7 +146,7 @@ void COALCallFunction(coal::VM *vm, const char *name)
 //
 static void SYS_error(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     const char *s = vm->AccessParamString(0);
 
@@ -157,7 +157,7 @@ static void SYS_error(coal::VM *vm, int argc)
 //
 static void SYS_print(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     const char *s = vm->AccessParamString(0);
 
@@ -168,7 +168,7 @@ static void SYS_print(coal::VM *vm, int argc)
 //
 static void SYS_debug_print(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     const char *s = vm->AccessParamString(0);
 
@@ -179,7 +179,7 @@ static void SYS_debug_print(coal::VM *vm, int argc)
 //
 static void SYS_edge_version(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     vm->ReturnFloat(edge_version.f_);
 }
@@ -191,7 +191,7 @@ static void SYS_edge_version(coal::VM *vm, int argc)
 // math.rint(val)
 static void MATH_rint(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     double val = *vm->AccessParam(0);
     vm->ReturnFloat(RoundToInteger(val));
@@ -200,7 +200,7 @@ static void MATH_rint(coal::VM *vm, int argc)
 // math.floor(val)
 static void MATH_floor(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     double val = *vm->AccessParam(0);
     vm->ReturnFloat(floor(val));
@@ -209,7 +209,7 @@ static void MATH_floor(coal::VM *vm, int argc)
 // math.ceil(val)
 static void MATH_ceil(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     double val = *vm->AccessParam(0);
     vm->ReturnFloat(ceil(val));
@@ -218,7 +218,7 @@ static void MATH_ceil(coal::VM *vm, int argc)
 // math.random()
 static void MATH_random(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     vm->ReturnFloat(RandomShort() / double(0x10000));
 }
@@ -226,7 +226,7 @@ static void MATH_random(coal::VM *vm, int argc)
 // Lobo November 2021: math.random2() always between 0 and 10
 static void MATH_random2(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     vm->ReturnFloat(RandomShort() % 11);
 }
@@ -234,7 +234,7 @@ static void MATH_random2(coal::VM *vm, int argc)
 // math.cos(val)
 static void MATH_cos(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     double val = *vm->AccessParam(0);
     vm->ReturnFloat(cos(val * HMM_PI / 180.0));
@@ -243,7 +243,7 @@ static void MATH_cos(coal::VM *vm, int argc)
 // math.sin(val)
 static void MATH_sin(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     double val = *vm->AccessParam(0);
     vm->ReturnFloat(sin(val * HMM_PI / 180.0));
@@ -252,7 +252,7 @@ static void MATH_sin(coal::VM *vm, int argc)
 // math.tan(val)
 static void MATH_tan(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     double val = *vm->AccessParam(0);
     vm->ReturnFloat(tan(val * HMM_PI / 180.0));
@@ -261,7 +261,7 @@ static void MATH_tan(coal::VM *vm, int argc)
 // math.acos(val)
 static void MATH_acos(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     double val = *vm->AccessParam(0);
     vm->ReturnFloat(acos(val) * 180.0 / HMM_PI);
@@ -270,7 +270,7 @@ static void MATH_acos(coal::VM *vm, int argc)
 // math.asin(val)
 static void MATH_asin(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     double val = *vm->AccessParam(0);
     vm->ReturnFloat(asin(val) * 180.0 / HMM_PI);
@@ -279,7 +279,7 @@ static void MATH_asin(coal::VM *vm, int argc)
 // math.atan(val)
 static void MATH_atan(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     double val = *vm->AccessParam(0);
     vm->ReturnFloat(atan(val) * 180.0 / HMM_PI);
@@ -288,7 +288,7 @@ static void MATH_atan(coal::VM *vm, int argc)
 // math.atan2(x, y)
 static void MATH_atan2(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     double x = *vm->AccessParam(0);
     double y = *vm->AccessParam(1);
@@ -299,7 +299,7 @@ static void MATH_atan2(coal::VM *vm, int argc)
 // math.log(val)
 static void MATH_log(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     double val = *vm->AccessParam(0);
 
@@ -317,7 +317,7 @@ static void MATH_log(coal::VM *vm, int argc)
 //
 static void STRINGS_len(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     const char *s = vm->AccessParamString(0);
 
@@ -330,7 +330,7 @@ static void STRINGS_len(coal::VM *vm, int argc)
 //
 static void STRINGS_find(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     const char *s1 = vm->AccessParamString(0);
     const char *s2 = vm->AccessParamString(1);
@@ -347,7 +347,7 @@ static void STRINGS_find(coal::VM *vm, int argc)
 //
 static void STRINGS_sub(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     const char *s = vm->AccessParamString(0);
 
@@ -387,7 +387,7 @@ static void STRINGS_sub(coal::VM *vm, int argc)
 //
 static void STRINGS_tonumber(coal::VM *vm, int argc)
 {
-    (void)argc;
+    EPI_UNUSED(argc);
 
     const char *s = vm->AccessParamString(0);
 

@@ -309,7 +309,8 @@ static void LinedefParseField(const char *field, const char *contents, int index
 #if (DDF_DEBUG)
     LogDebug("LINEDEF_PARSE: %s = %s;\n", field, contents);
 #endif
-
+    EPI_UNUSED(index);
+    EPI_UNUSED(is_last);
     if (DDFCompareName(field, "TEMPLATE") == 0)
     {
         LinedefDoTemplate(contents);
@@ -463,6 +464,7 @@ void DDFLinedefCleanUp(void)
 //
 void DDFLineGetScroller(const char *info, void *storage)
 {
+    EPI_UNUSED(storage);
     for (int i = 0; s_scroll[i].s; i++)
     {
         if (DDFCompareName(info, s_scroll[i].s) == 0)
@@ -1022,6 +1024,7 @@ static void DDFLineGetSlopeType(const char *info, void *storage)
 
 static void DDFLineMakeCrush(const char *info)
 {
+    EPI_UNUSED(info);
     dynamic_line->f_.crush_damage_ = 10;
     dynamic_line->c_.crush_damage_ = 10;
 }
@@ -1736,7 +1739,7 @@ void LineTypeContainer::Reset()
         line = nullptr;
     }
     clear();
-    memset(lookup_cache_, 0, sizeof(LineType *) * kLookupCacheSize);
+    EPI_CLEAR_MEMORY(lookup_cache_, LineType *, kLookupCacheSize);
 }
 
 //--- editor settings ---

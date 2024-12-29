@@ -1191,7 +1191,7 @@ Seg *CreateSegs()
 {
     Seg *list = nullptr;
 
-    for (int i = 0; i < level_linedefs.size(); i++)
+    for (size_t i = 0; i < level_linedefs.size(); i++)
     {
         Linedef *line = level_linedefs[i];
 
@@ -1593,7 +1593,7 @@ void ClockwiseBSPTree()
 {
     int cur_seg_index = 0;
 
-    for (int i = 0; i < level_subsecs.size(); i++)
+    for (size_t i = 0; i < level_subsecs.size(); i++)
     {
         Subsector *sub = level_subsecs[i];
 

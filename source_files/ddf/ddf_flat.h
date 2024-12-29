@@ -19,6 +19,7 @@
 #pragma once
 
 #include "ddf_types.h"
+#include "epi.h"
 
 class FlatDefinition
 {
@@ -54,11 +55,11 @@ class FlatDefinition
     // disable copy construct and assignment operator
     explicit FlatDefinition(FlatDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
     }
     FlatDefinition &operator=(FlatDefinition &rhs)
     {
-        (void)rhs;
+        EPI_UNUSED(rhs);
         return *this;
     }
 };

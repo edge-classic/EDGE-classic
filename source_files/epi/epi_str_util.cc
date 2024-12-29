@@ -348,7 +348,7 @@ std::string WStringToUTF8(std::wstring_view instring)
             inpos++;
             len += 2;
         }
-        memset(u8c, 0, 4);
+        EPI_CLEAR_MEMORY(u8c, uint8_t, 4);
         if (!CodepointToUTF8(u32c, (char *)u8c, &len))
         {
             // print what was safely converted if present

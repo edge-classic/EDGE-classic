@@ -131,7 +131,7 @@ void MarkPolyobjSector(Sector *sector)
     // the sector from being split.
     sector->has_polyobject = true;
 
-    for (int i = 0; i < level_linedefs.size(); i++)
+    for (size_t i = 0; i < level_linedefs.size(); i++)
     {
         Linedef *L = level_linedefs[i];
 
@@ -144,7 +144,7 @@ void MarkPolyobjSector(Sector *sector)
 
 void MarkPolyobjPoint(double x, double y)
 {
-    int i;
+    size_t i;
     int inside_count = 0;
 
     double         best_dist  = 999999;
@@ -266,7 +266,7 @@ void MarkPolyobjPoint(double x, double y)
 //
 void DetectPolyobjSectors()
 {
-    int i;
+    size_t i;
 
     // -JL- There's a conflict between Hexen polyobj thing types and Doom thing
     //      types. In Doom type 3001 is for Imp and 3002 for Demon. To solve
@@ -359,7 +359,7 @@ static int VertexCompare(const void *p1, const void *p2)
 
 void DetectOverlappingVertices(void)
 {
-    int       i;
+    size_t       i;
     uint32_t *array = (uint32_t *)UtilCalloc(level_vertices.size() * sizeof(uint32_t));
 
     // sort array of indices
@@ -489,7 +489,7 @@ void DetectOverlappingLines(void)
     //   Overlapping lines will then be near each other in this set.
     //   Note: does not detect partially overlapping lines.
 
-    int  i;
+    size_t  i;
     int *array = (int *)UtilCalloc(level_linedefs.size() * sizeof(int));
 
     // sort array of indices
@@ -500,7 +500,7 @@ void DetectOverlappingLines(void)
 
     for (i = 0; i < level_linedefs.size() - 1; i++)
     {
-        int j;
+        size_t j;
 
         for (j = i + 1; j < level_linedefs.size(); j++)
         {
@@ -565,7 +565,7 @@ void Vertex::AddWallTip(double dx, double dy, bool open_left, bool open_right)
 
 void CalculateWallTips()
 {
-    for (int i = 0; i < level_linedefs.size(); i++)
+    for (size_t i = 0; i < level_linedefs.size(); i++)
     {
         const Linedef *L = level_linedefs[i];
 

@@ -1451,7 +1451,7 @@ static void IdentifyVersion(void)
         {
             EPI_ASSERT(game_paths.size() == game_buttons.size());
             SDL_MessageBoxData picker_data;
-            SDL_memset(&picker_data, 0, sizeof(SDL_MessageBoxData));
+            EPI_CLEAR_MEMORY(&picker_data, SDL_MessageBoxData, 1);
             picker_data.title = "EDGE-Classic Game Selector";
             if (game_paths.size() > 8)
             {
@@ -1808,7 +1808,7 @@ static void IdentifyVersion(void)
         {
             EPI_ASSERT(game_paths.size() == game_buttons.size());
             SDL_MessageBoxData picker_data;
-            SDL_memset(&picker_data, 0, sizeof(SDL_MessageBoxData));
+            EPI_CLEAR_MEMORY(&picker_data, SDL_MessageBoxData, 1);
             picker_data.title = "EDGE-Classic Game Selector";
             if (game_paths.size() > 8)
             {

@@ -1359,7 +1359,7 @@ void DeathBot::Think()
     EPI_ASSERT(pl_->map_object_ != nullptr);
 
     // initialize the BotCommand
-    memset(&cmd_, 0, sizeof(BotCommand));
+    EPI_CLEAR_MEMORY(&cmd_, BotCommand, 1);
     cmd_.weapon = -1;
 
     // do nothing when game is paused
@@ -1562,7 +1562,8 @@ void CreateBotPlayer(Player *p, bool recreate)
 
 void BotPlayerBuilder(const Player *p, void *data, EventTicCommand *cmd)
 {
-    memset(cmd, 0, sizeof(EventTicCommand));
+    EPI_UNUSED(p);
+    EPI_CLEAR_MEMORY(cmd, EventTicCommand, 1);
 
     if (game_state != kGameStateLevel)
         return;

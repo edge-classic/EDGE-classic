@@ -731,7 +731,7 @@ void PrecacheSprites(void)
     EPI_ASSERT(sprite_count > 1);
 
     uint8_t *sprite_present = new uint8_t[sprite_count];
-    memset(sprite_present, 0, sprite_count);
+    EPI_CLEAR_MEMORY(sprite_present, uint8_t, sprite_count);
 
     for (MapObject *mo = map_object_list_head; mo; mo = mo->next_)
     {

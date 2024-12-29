@@ -75,6 +75,8 @@ static void FixFinishEntry(void)
 
 static void FixParseField(const char *field, const char *contents, int index, bool is_last)
 {
+    EPI_UNUSED(index);
+    EPI_UNUSED(is_last);
 #if (DDF_DEBUG)
     LogDebug("FIX_PARSE: %s = %s;\n", field, contents);
 #endif

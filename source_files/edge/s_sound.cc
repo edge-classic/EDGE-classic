@@ -306,7 +306,7 @@ SoundEffectDefinition *LookupEffectDef(const SoundEffect *s)
     else
         num = s->sounds[0];
 
-    EPI_ASSERT(0 <= num && num < sfxdefs.size());
+    EPI_ASSERT(0 <= num && (size_t)num < sfxdefs.size());
 
     return sfxdefs[num];
 }
@@ -579,7 +579,7 @@ void PrecacheSounds(void)
     if (precache_sound_effects)
     {
         StartupProgressMessage("Precaching SFX...");
-        for (int i = 0; i < sfxdefs.size(); i++)
+        for (size_t i = 0; i < sfxdefs.size(); i++)
         {
             SoundCacheLoad(sfxdefs[i]);
         }

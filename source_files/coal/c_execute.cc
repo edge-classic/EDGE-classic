@@ -23,7 +23,6 @@
 //
 //----------------------------------------------------------------------
 
-#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <float.h>
@@ -37,6 +36,7 @@
 
 #include "AlmostEquals.h"
 #include "c_local.h"
+#include "epi.h"
 #include "stb_sprintf.h"
 
 extern void FatalError(const char *error, ...);
@@ -102,7 +102,7 @@ int RealVM::FindFunction(const char *func_name)
 int RealVM::FindVariable(const char *var_name)
 {
     // FIXME
-
+    EPI_UNUSED(var_name);
     return VM::NOT_FOUND;
 }
 
@@ -120,7 +120,7 @@ int RealVM::InternaliseString(const char *new_s)
 
 double *RealVM::AccessParam(int p)
 {
-    assert(exec_.func);
+    EPI_ASSERT(exec_.func);
 
     if (p >= functions_[exec_.func]->parm_num)
         RunError("PR_Parameter: p=%d out of range\n", p);
@@ -199,7 +199,7 @@ void RealVM::RunError(const char *error, ...)
     /* clear the stack so SV/Host_Error can shutdown functions */
     exec_.call_depth = 0;
 
-    FatalError(buffer);
+    FatalError("%s", buffer);
 }
 
 int RealVM::StringConcat(const char *s1, const char *s2)
@@ -257,7 +257,7 @@ int RealVM::StringConcatVector(const char *s, double *v)
 
 void RealVM::EnterFunction(int func)
 {
-    assert(func > 0);
+    EPI_ASSERT(func > 0);
 
     Function *new_f = functions_[func];
 
@@ -299,7 +299,7 @@ void RealVM::EnterNative(int func, int argc)
     Function *newf = functions_[func];
 
     int n = -(newf->first_statement + 1);
-    assert(n < (int)native_funcs_.size());
+    EPI_ASSERT(n < (int)native_funcs_.size());
 
     exec_.stack_depth += functions_[exec_.func]->locals_end;
     {
@@ -698,6 +698,7 @@ const char *RealVM::RegString(Statement *st, int who)
 
 void RealVM::PrintStatement(Function *f, int s)
 {
+    EPI_UNUSED(f);
     Statement *st = COAL_REF_OP(s);
 
     const char *op_name = OpcodeName(st->op);

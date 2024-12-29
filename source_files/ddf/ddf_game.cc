@@ -117,7 +117,8 @@ static void GameParseField(const char *field, const char *contents, int index, b
 #if (DDF_DEBUG)
     LogDebug("GAME_PARSE: %s = %s;\n", field, contents);
 #endif
-
+    EPI_UNUSED(index);
+    EPI_UNUSED(is_last);
     if (DDFCompareName(field, "TEMPLATE") == 0)
     {
         GameDoTemplate(contents);
@@ -274,6 +275,7 @@ static void ParseMap(const char *info, IntermissionMapPositionInfo *mp)
 
 static void DDFGameGetMap(const char *info, void *storage)
 {
+    EPI_UNUSED(storage);
     IntermissionMapPositionInfo *mp = new IntermissionMapPositionInfo();
 
     ParseMap(info, mp);
@@ -283,6 +285,7 @@ static void DDFGameGetMap(const char *info, void *storage)
 
 static void DDFGameGetPic(const char *info, void *storage)
 {
+    EPI_UNUSED(storage);
     dynamic_gamedef->titlepics_.push_back(info);
 }
 
@@ -362,7 +365,7 @@ IntermissionMapPositionInfoContainer::IntermissionMapPositionInfoContainer()
 //
 // wi_mapposdef_container_c Copy constructor
 //
-IntermissionMapPositionInfoContainer::IntermissionMapPositionInfoContainer(IntermissionMapPositionInfoContainer &rhs)
+IntermissionMapPositionInfoContainer::IntermissionMapPositionInfoContainer(IntermissionMapPositionInfoContainer &rhs) : std::vector<IntermissionMapPositionInfo *>()
 {
     Copy(rhs);
 }
@@ -487,7 +490,7 @@ IntermissionFrameInfoContainer::IntermissionFrameInfoContainer()
 //
 // wi_framedef_container_c Copy constructor
 //
-IntermissionFrameInfoContainer::IntermissionFrameInfoContainer(IntermissionFrameInfoContainer &rhs)
+IntermissionFrameInfoContainer::IntermissionFrameInfoContainer(IntermissionFrameInfoContainer &rhs) : std::vector<IntermissionFrameInfo *>()
 {
     Copy(rhs);
 }
@@ -614,7 +617,7 @@ IntermissionAnimationInfoContainer::IntermissionAnimationInfoContainer()
 //
 // wi_animdef_container_c Copy constructor
 //
-IntermissionAnimationInfoContainer::IntermissionAnimationInfoContainer(IntermissionAnimationInfoContainer &rhs)
+IntermissionAnimationInfoContainer::IntermissionAnimationInfoContainer(IntermissionAnimationInfoContainer &rhs) : std::vector<IntermissionAnimationInfo *>()
 {
     Copy(rhs);
 }

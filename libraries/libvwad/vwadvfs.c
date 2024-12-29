@@ -1470,7 +1470,7 @@ static intbool_t DecompressLZFF3 (const void *src, int srclen, void *dest, int u
       } else {
         len = WordPPMDecodeInt(&ppmMtLen, &dec) + 3;
         ofs = WordPPMDecodeInt(&ppmMtOfs, &dec) + 1;
-        error = error || (dec.spos > dec.send) || (len > unpsize) || (ofs > dictpos);
+        error = error || (dec.spos > dec.send) || (len > unpsize) || (ofs >= 0 && (vwad_uint)ofs > dictpos);
         if (!error) {
           spos = dictpos - ofs;
           while (!error && len != 0) {
@@ -2184,7 +2184,7 @@ VWAD_PUBLIC vwad_handle *vwad_open_archive (vwad_iostream *strm, vwad_uint flags
     return NULL;
   }
 
-  if (mhdr.dirofs <= 4+32+64+(int)sizeof(mhdr)+(int)mhdr.p_cmt_size) {
+  if (mhdr.dirofs <= 4+32+64+(vwad_uint)sizeof(mhdr)+(vwad_uint)mhdr.p_cmt_size) {
     logf(ERROR, "vwad_open_archive: invalid directory offset");
     return NULL;
   }
@@ -3142,8 +3142,7 @@ static CC25519_INLINE vwad_uint vwad_find_chunk (vwad_handle *wad, FileInfo *fi,
 //  `cidx` is absolute chunk number
 //
 //==========================================================================
-static vwad_result read_chunk (vwad_handle *wad, OpenedFile *fl, FileBuffer *buf,
-                               vwad_uint cidx)
+static vwad_result read_chunk (vwad_handle *wad, FileBuffer *buf, vwad_uint cidx)
 {
   vassert(wad);
   vassert(cidx < wad->chunkCount);
@@ -3276,7 +3275,7 @@ static FileBuffer *ensure_buffer (vwad_handle *wad, vwad_fd fd, OpenedFile *fl, 
         vwad_debug_read_chunk(wad, (int)ggevict, fl->fidx, fd, (int)cidx);
       }
       // we need to read the chunk
-      if (read_chunk(wad, fl, gb, cidx) != VWAD_OK) {
+      if (read_chunk(wad, gb, cidx) != VWAD_OK) {
         return NULL;
       }
       fl->bidx = ggevict;
@@ -3287,7 +3286,7 @@ static FileBuffer *ensure_buffer (vwad_handle *wad, vwad_fd fd, OpenedFile *fl, 
   res = wad->globCache[fl->bidx];
   vassert(res != NULL);
   vassert(res->cidx_abs == cidx);
-  vassert(res->size == wad->chunks[cidx].upksize + 1);
+  vassert(res->size == (vwad_uint)(wad->chunks[cidx].upksize + 1));
 
   // fix buffer era
   if (res->era != wad->lastera) {

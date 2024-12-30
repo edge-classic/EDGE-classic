@@ -28,6 +28,12 @@
         obj = 0;                                                                                                       \
     }
 
+extern "C" 
+{
+  __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+  __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+
 static const IID _sapp_IID_ID3D11Texture2D = {
     0x6f15aaf2, 0xd208, 0x4e89, {0x9a, 0xb4, 0x48, 0x95, 0x35, 0xd3, 0x4f, 0x9c}};
 static const IID _sapp_IID_IDXGIDevice1 = {
@@ -214,10 +220,11 @@ static void _sapp_d3d11_create_device_and_swapchain(void)
     sc_desc->BufferDesc.Width                   = (UINT)_sapp.framebuffer_width;
     sc_desc->BufferDesc.Height                  = (UINT)_sapp.framebuffer_height;
     sc_desc->BufferDesc.Format                  = DXGI_FORMAT_B8G8R8A8_UNORM;
-    sc_desc->BufferDesc.RefreshRate.Numerator   = info.refresh_rate ? info.refresh_rate : 60;
-    sc_desc->BufferDesc.RefreshRate.Denominator = 1;
+    sc_desc->BufferDesc.RefreshRate.Numerator   = 0;
+    sc_desc->BufferDesc.RefreshRate.Denominator = 0;
     sc_desc->OutputWindow                       = _sapp.win32.hwnd;
     sc_desc->Windowed                           = true;
+    sc_desc->Flags                              = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
     if (_sapp.win32.is_win10_or_greater)
     {
         sc_desc->BufferCount             = 2;
@@ -401,14 +408,14 @@ void sapp_d3d11_resize_default_render_target(int32_t width, int32_t height)
 
 void sapp_d3d11_present(bool do_not_wait)
 {
-    UINT flags = 0;
+    UINT flags = DXGI_PRESENT_ALLOW_TEARING;
     if (_sapp.win32.is_win10_or_greater && do_not_wait)
     {
         /* this hack/workaround somewhat improves window-movement and -sizing
             responsiveness when rendering is controlled via WM_TIMER during window
             move and resize on NVIDIA cards on Win10 with recent drivers.
         */
-        flags = DXGI_PRESENT_DO_NOT_WAIT;
+        flags |= DXGI_PRESENT_DO_NOT_WAIT;
     }
     _sapp_dxgi_Present(_sapp.d3d11.swap_chain, (UINT)_sapp.swap_interval, flags);
 }

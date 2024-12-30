@@ -18,9 +18,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Rendering Options
 
 # Sokol Renderer (Beta)
-option(EDGE_SOKOL "Enable Sokol Renderer (Beta)" OFF)
+option(EDGE_SOKOL "Enable Sokol Renderer (Beta)" ON)
 option(EDGE_SOKOL_GL "Sokol GL" OFF)
-option(EDGE_SOKOL_D3D11 "Sokol D3D11" OFF)
+option(EDGE_SOKOL_D3D11 "Sokol D3D11" ON)
 
 # GL4ES Backend 
 option(EDGE_GL_ES2 "Enable GLES2 Rendering Backend" OFF)

@@ -114,7 +114,7 @@ class SokolRenderBackend : public RenderBackend
     void SwapBuffers()
     {
 #ifdef SOKOL_D3D11
-        sapp_d3d11_present(false);
+        sapp_d3d11_present(true);
 #endif
     }
 

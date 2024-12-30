@@ -794,6 +794,7 @@ static unsigned char cRSID_emulateCPU(void)
 
         case 0:
             clrC();
+            // intentional fall-through
         case 1:
             if ((IR & 0xF) == 0xA)
             {
@@ -812,6 +813,7 @@ static unsigned char cRSID_emulateCPU(void)
 
         case 2:
             clrC();
+            // intentional fall-through
         case 3:
             if ((IR & 0xF) == 0xA)
             {

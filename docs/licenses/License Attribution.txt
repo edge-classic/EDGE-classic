@@ -16,11 +16,9 @@ AlmostEquals Google Test Framework Component - Copyright (c) 2005 Google, Inc.
 
 Blasphemer (various assets) - Copyright (c) 2021 Contributors to the Blasphemer project
 
-Emu de MIDI library - Copyright (C) 2004 Mitsutaka Okazaki
-
 Freedoom (various assets) - Copyright (c) 2001-2019 Contributors to the Freedoom project
 
-Mod4Play library - 	Copyright (c) 2024 dashodanger
+Mod4Play library - 	Copyright (c) 2024-2025 dashodanger
 					Copyright (c) 2022 Olav Sørensen
 
 ZDoom FName implementation - Copyright (c) 2005-2007 Randy Heit
@@ -30,6 +28,8 @@ CC 1.0 Universal License
 ===========================================================================================
 
 HandmadeMath.h - Ben Visness
+
+"ProtoSquare!" soundfont - Yingchun Soul
 
 ===========================================================================================
 CC-BY-3.0 Unported License
@@ -42,6 +42,12 @@ CC-BY-NC-4.0 International License
 ===========================================================================================
 
 REKKR (various assets) - Copyright (c) 2021 Mockingbird Softworks
+
+===========================================================================================
+CC-BY-SA-4.0 International License
+===========================================================================================
+
+"ChipFreak" soundfont - Copyright (c) Jayvee Enaguas
 
 ===========================================================================================
 GPL3 License
@@ -62,6 +68,8 @@ DEH_EDGE library - Copyright (c) 2004-2024 The EDGE Team
 EDGE-Classic - Copyright (c) 1999-2024 The EDGE Team
 
 EPI library - Copyright (c) 2002-2024 The EDGE Team
+
+Fluidlite - Copyright (c) 2016 Robin Lobel
 
 SLADE (IMF->WAV conversion and sky drawing routines) - Copyright (c) 2008 - 2023 Simon Judd
 
@@ -96,9 +104,6 @@ Dear ImGUI - Copyright (c) 2014-2023 Omar Cornut
 
 debugger.lua -Copyright (c) 2023 Scott Lembcke and Howling Moon Software
 
-gl4es library - Copyright (c) 2016-2018 Sebastien Chevalier
-				Copyright (c) 2013-2016 Ryan Hileman
-
 glad library - Copyright (c) 2013-2022 David Herberth
 
 json.lua - Copyright (c) 2020 rxi
@@ -112,18 +117,15 @@ PL_MPEG library - Copyright(c) 2019 Dominic Szablewski
 
 PNPOLY algorithm - Copyright (c) 1970-2003 Wm. Randolph Franklin
 
-TinySoundFont library - Copyright (C) 2017-2023 Bernhard Schelling 
-						(Based on SFZero, Copyright (C) 2012 Steve Folta, https://github.com/stevefolta/SFZero)
-
 ===========================================================================================
 Public Domain
 ===========================================================================================
 
-dr_wav, dr_mp3, and dr_flac libraries - David Reid
-
 Fraction.hpp - Bisqwit
 
-libRAD - Reality Productions
+Opal library - Reality Productions
+
+Miniaudio library - David Reid
 
 prns.h - Marc B. Reynolds
 

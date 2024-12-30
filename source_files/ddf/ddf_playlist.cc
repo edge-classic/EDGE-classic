@@ -48,9 +48,6 @@ static void InitializeMusicTypes()
 #if EDGE_TRACKER_SUPPORT
     supported_music_types.push_back("TRACKER");
 #endif
-#if EDGE_RAD_SUPPORT
-    supported_music_types.push_back("RAD");
-#endif
 #if EDGE_IMF_SUPPORT
     supported_music_types.push_back("IMF280");
     supported_music_types.push_back("IMF560");

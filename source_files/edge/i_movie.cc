@@ -18,6 +18,7 @@
 
 #include "e_event.h"
 #include "epi.h"
+#include "epi_sdl.h"
 #include "hu_draw.h"
 #include "i_defs_gl.h"
 #include "i_sound.h"
@@ -56,16 +57,34 @@ static float          tx2           = 1.0f;
 static float          ty1           = 0.0f;
 static float          ty2           = 1.0f;
 static double         last_time     = 0;
+static ma_pcm_rb      movie_ring_buffer;
+static ma_sound       movie_sound_buffer;
 
 // Disabled until Dasho can figure out why the frame size changes between creating the texture and updating it
 // Which is probably also an issue under GL1
 #ifndef EDGE_SOKOL
 static bool MovieSetupAudioStream(int rate)
 {
+    if (ma_pcm_rb_init(ma_format_f32, 2, PLM_AUDIO_SAMPLES_PER_FRAME * 4, NULL, NULL, &movie_ring_buffer)
+            != MA_SUCCESS) 
+    {
+        LogWarning("MovieSetupAudioStream: Failed to initialize the ring buffer.");
+        return false;
+    }
+    ma_pcm_rb_set_sample_rate(&movie_ring_buffer, rate);
+    if (ma_sound_init_from_data_source(&music_engine, &movie_ring_buffer, MA_SOUND_FLAG_NO_SPATIALIZATION, NULL, &movie_sound_buffer) != MA_SUCCESS)
+    {
+        ma_pcm_rb_uninit(&movie_ring_buffer);
+        LogWarning("MovieSetupAudioStream: Failed to initialize the ring buffer.");
+        return false;
+    }
     plm_set_audio_lead_time(decoder, (double)1024 / (double)rate);
+    // ring buffer based sounds need to unconditionally "loop" so that even if the buffer
+    // has no data ready to read it will not report being "finished"
+    ma_sound_set_looping(&movie_sound_buffer, MA_TRUE);
+    ma_sound_start(&movie_sound_buffer);
     PauseMusic();
-    SoundQueueStop();
-    SoundQueueInitialize();
+    ma_engine_set_volume(&music_engine, music_volume.f_);
     return true;
 }
 #endif
@@ -76,12 +95,33 @@ void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
     EPI_UNUSED(user);
     if (samples)
     {
-        SoundData *movie_buf = SoundQueueGetFreeBuffer(PLM_AUDIO_SAMPLES_PER_FRAME);
-        if (movie_buf)
-        {
-            movie_buf->length_ = PLM_AUDIO_SAMPLES_PER_FRAME;
-            memcpy(movie_buf->data_, samples->interleaved, PLM_AUDIO_SAMPLES_PER_FRAME * 2 * sizeof(int16_t));
-            SoundQueueAddBuffer(movie_buf, movie_sample_rate);
+        ma_result result;
+        ma_uint32 framesWritten;
+        ma_uint32 frameCount = samples->count;
+
+        /* We need to write to the ring buffer. Need to do this in a loop. */
+        framesWritten = 0;
+        while (framesWritten < frameCount) {
+            void* pMappedBuffer;
+            ma_uint32 framesToWrite = frameCount - framesWritten;
+
+            result = ma_pcm_rb_acquire_write(&movie_ring_buffer, &framesToWrite, &pMappedBuffer);
+            if (result != MA_SUCCESS) {
+                break;
+            }
+
+            if (framesToWrite == 0) {
+                break;
+            }
+
+            ma_copy_pcm_frames(pMappedBuffer, ma_offset_pcm_frames_const_ptr_f32(samples->interleaved, framesWritten, 2), framesToWrite, ma_format_f32, 2);
+
+            result = ma_pcm_rb_commit_write(&movie_ring_buffer, framesToWrite);
+            if (result != MA_SUCCESS) {
+                break;
+            }
+
+            framesWritten += framesToWrite;
         }
     }
 }
@@ -273,6 +313,10 @@ static void EndMovie()
         render_state->DeleteTexture(&canvas);
         canvas = 0;
     }
+    ma_sound_stop(&movie_sound_buffer);
+    ma_sound_uninit(&movie_sound_buffer);
+    ma_pcm_rb_uninit(&movie_ring_buffer);
+    ma_engine_set_volume(&music_engine, music_volume.f_ * 0.25f);
     ResumeMusic();
 }
 

@@ -83,24 +83,6 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
             data[offset + 4] == '}' && data[offset + 5] == 'u')
             return kSoundMIDI;
     }
-#if EDGE_RAD_SUPPORT
-    // Reality Adlib Tracker 2
-    if (song_len > 16)
-    {
-        bool        is_rad = true;
-        const char *hdrtxt = "RAD by REALiTY!!";
-        for (int i = 0; i < 16; i++)
-        {
-            if (data[i] != *hdrtxt++)
-            {
-                is_rad = false;
-                break;
-            }
-        }
-        if (is_rad)
-            return kSoundRAD;
-    }
-#endif
     // Moving on to more specialized or less reliable detections
 #if EDGE_TRACKER_SUPPORT
     if (m4p_TestFromData(data, song_len))
@@ -163,12 +145,8 @@ SoundFormat SoundFilenameToFormat(std::string_view filename)
         return kSoundMIDI;
 #endif
 #if EDGE_TRACKER_SUPPORT
-    if (ext == ".mod" || ext == ".s3m" || ext == ".xm" || ext == ".it")
+    if (ext == ".mod" || ext == ".s3m" || ext == ".xm" || ext == ".it" || ext == ".ft")
         return kSoundM4P;
-#endif
-#if EDGE_RAD_SUPPORT
-    if (ext == ".rad")
-        return kSoundRAD;
 #endif
 #if EDGE_DOOM_SFX_SUPPORT
     // Not sure if these will ever be encountered in the wild, but according to

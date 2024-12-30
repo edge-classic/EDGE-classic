@@ -19,12 +19,12 @@
 #include "s_flac.h"
 
 #include "ddf_playlist.h"
-#include "dr_flac.h"
 #include "epi.h"
 #include "epi_endian.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
 #include "i_movie.h"
+#include "i_sound.h"
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_music.h"
@@ -50,11 +50,10 @@ class FLACPlayer : public AbstractMusicPlayer
 
     int  status_;
     bool looping_;
-    bool is_stereo_;
 
-    drflac *flac_track_; // I had to make it rhyme
-
-    uint8_t *flac_data_; // Passed in from s_music; must be deleted on close
+    ma_decoder flac_decoder_;
+    ma_sound   flac_stream_;
+    uint8_t    *flac_data_;
 
   public:
     bool OpenMemory(uint8_t *data, int length);
@@ -68,17 +67,14 @@ class FLACPlayer : public AbstractMusicPlayer
     virtual void Resume(void);
 
     virtual void Ticker(void);
-
-    void PostOpen(void);
-
-  private:
-    bool StreamIntoBuffer(SoundData *buf);
 };
 
 //----------------------------------------------------------------------------
 
-FLACPlayer::FLACPlayer() : status_(kNotLoaded)
+FLACPlayer::FLACPlayer() : status_(kNotLoaded), flac_data_(nullptr)
 {
+    EPI_CLEAR_MEMORY(&flac_decoder_, ma_decoder, 1);
+    EPI_CLEAR_MEMORY(&flac_stream_, ma_sound, 1);
 }
 
 FLACPlayer::~FLACPlayer()
@@ -86,62 +82,32 @@ FLACPlayer::~FLACPlayer()
     Close();
 }
 
-void FLACPlayer::PostOpen()
-{
-    if (flac_track_->channels == 1)
-    {
-        is_stereo_ = false;
-    }
-    else
-    {
-        is_stereo_ = true;
-    }
-
-    // Loaded, but not playing
-
-    status_ = kStopped;
-}
-
-bool FLACPlayer::StreamIntoBuffer(SoundData *buf)
-{
-    bool song_done = false;
-
-    drflac_uint64 frames = drflac_read_pcm_frames_s16(flac_track_, kMusicBuffer, buf->data_);
-
-    if (frames < kMusicBuffer)
-        song_done = true;
-
-    buf->length_ = frames;
-
-    buf->frequency_ = flac_track_->sampleRate;
-
-    if (song_done) /* EOF */
-    {
-        if (!looping_)
-            return false;
-        drflac_seek_to_pcm_frame(flac_track_, 0);
-        return true;
-    }
-
-    return (true);
-}
-
 bool FLACPlayer::OpenMemory(uint8_t *data, int length)
 {
-    EPI_ASSERT(data);
+    if (status_ != kNotLoaded)
+        Close();
 
-    flac_track_ = drflac_open_memory(data, length, nullptr);
+    ma_decoder_config decode_config = ma_decoder_config_init_default();
+    decode_config.format = ma_format_f32;
 
-    if (!flac_track_)
+    if (ma_decoder_init_memory(data, length, &decode_config, &flac_decoder_) != MA_SUCCESS)
     {
-        LogWarning("PlayFLACMusic: Error opening song!\n");
+        LogWarning("Failed to load MP3 music (corrupt ogg?)\n");
         return false;
     }
 
-    // data is only released when the player is closed
+    if (ma_sound_init_from_data_source(&music_engine, &flac_decoder_, MA_SOUND_FLAG_STREAM|MA_SOUND_FLAG_NO_SPATIALIZATION, NULL, &flac_stream_) != MA_SUCCESS)
+    {
+        ma_decoder_uninit(&flac_decoder_);
+        LogWarning("Failed to load OGG music (corrupt ogg?)\n");
+        return false;
+    }
+
     flac_data_ = data;
 
-    PostOpen();
+    // Loaded, but not playing
+    status_ = kStopped;
+
     return true;
 }
 
@@ -151,14 +117,13 @@ void FLACPlayer::Close()
         return;
 
     // Stop playback
-    if (status_ != kStopped)
-        Stop();
+    Stop();
 
-    drflac_close(flac_track_);
+    ma_sound_uninit(&flac_stream_);
+
+    ma_decoder_uninit(&flac_decoder_);
+
     delete[] flac_data_;
-
-    // reset player gain
-    music_player_gain = 1.0f;
 
     status_ = kNotLoaded;
 }
@@ -168,6 +133,8 @@ void FLACPlayer::Pause()
     if (status_ != kPlaying)
         return;
 
+    ma_sound_stop(&flac_stream_);
+
     status_ = kPaused;
 }
 
@@ -175,6 +142,8 @@ void FLACPlayer::Resume()
 {
     if (status_ != kPaused)
         return;
+
+    ma_sound_start(&flac_stream_);
 
     status_ = kPlaying;
 }
@@ -184,14 +153,18 @@ void FLACPlayer::Play(bool loop)
     if (status_ != kNotLoaded && status_ != kStopped)
         return;
 
-    status_  = kPlaying;
     looping_ = loop;
 
-    // Set individual player type gain
-    music_player_gain = 0.6f;
+    ma_sound_set_looping(&flac_stream_, looping_ ? MA_TRUE : MA_FALSE);
 
-    // Load up initial buffer data
-    Ticker();
+    // Let 'er rip (maybe)
+    if (playing_movie)
+        status_ = kPaused;
+    else
+    {
+        status_  = kPlaying;
+        ma_sound_start(&flac_stream_);
+    }
 }
 
 void FLACPlayer::Stop()
@@ -199,37 +172,23 @@ void FLACPlayer::Stop()
     if (status_ != kPlaying && status_ != kPaused)
         return;
 
-    SoundQueueStop();
+    ma_sound_stop(&flac_stream_);
+
+    ma_decoder_seek_to_pcm_frame(&flac_decoder_, 0);
 
     status_ = kStopped;
 }
 
 void FLACPlayer::Ticker()
 {
-    while (status_ == kPlaying && !pc_speaker_mode && !playing_movie)
+    ma_engine_set_volume(&music_engine, music_volume.f_ * 0.25f);
+
+    if (status_ == kPlaying)
     {
-        SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer);
-
-        if (!buf)
-            break;
-
-        if (StreamIntoBuffer(buf))
-        {
-            if (buf->length_ > 0)
-            {
-                SoundQueueAddBuffer(buf, buf->frequency_);
-            }
-            else
-            {
-                SoundQueueReturnBuffer(buf);
-            }
-        }
-        else
-        {
-            // finished playing
-            SoundQueueReturnBuffer(buf);
+        if (pc_speaker_mode)
             Stop();
-        }
+        if (ma_sound_at_end(&flac_stream_)) // This should only be true if finished and not set to looping
+            Stop();
     }
 }
 

@@ -80,10 +80,9 @@ set (EDGE_SOURCE_FILES
   s_blit.cc
   s_cache.cc
   s_sound.cc
+  s_fluid.cc
   s_music.cc
   s_ogg.cc
-  s_emidi.cc
-  s_tsf.cc
   sv_chunk.cc
   sv_glob.cc
   sv_level.cc
@@ -172,10 +171,6 @@ if (EDGE_OGG_SUPPORT)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_ogg.cc)
 endif()
 
-if (EDGE_RAD_SUPPORT)
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_rad.cc)
-endif()
-
 if (EDGE_SID_SUPPORT)
   set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_sid.cc)
 endif()
@@ -201,15 +196,14 @@ set (EDGE_LINK_LIBRARIES
   edge_tracy
   ${SDL2_LIBRARIES}
   almostequals
-  dr_libs
+  fluidlite
   HandmadeMath
-  libemidi
   lua
+  miniaudio
   miniz
   pl_mpeg
   prns
   stb
-  tsf
   xxhash
 )
 
@@ -225,8 +219,8 @@ if (EDGE_DEHACKED_SUPPORT)
   set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} edge_deh)
 endif()
 
-if (EDGE_IMF_SUPPORT OR EDGE_RAD_SUPPORT)
-  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} libRAD)
+if (EDGE_IMF_SUPPORT)
+  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} opal)
 endif()
 
 if (EDGE_SID_SUPPORT)

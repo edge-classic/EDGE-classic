@@ -31,7 +31,6 @@
 #include "i_movie.h"
 #include "i_system.h"
 #include "m_misc.h"
-#include "s_emidi.h"
 #if EDGE_FLAC_SUPPORT
 #include "s_flac.h"
 #endif
@@ -245,14 +244,7 @@ void ChangeMusic(int entry_number, bool loop)
     case kSoundMUS:
 #endif
         delete F;
-        if (var_midi_player == 0)
-        {
-            music_player = PlayTSFMusic(data, length, loop);
-        }
-        else
-        {
-            music_player = PlayEMIDIMusic(data, length, loop);
-        }
+        music_player = PlayTSFMusic(data, length, loop);
         break;
 
     default:

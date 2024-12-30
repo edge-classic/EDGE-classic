@@ -14,7 +14,6 @@ else()
 endif()
 
 add_subdirectory(hmm)
-add_subdirectory(libemidi)
 if (EDGE_IMF_SUPPORT OR EDGE_RAD_SUPPORT)
   add_subdirectory(libRAD)
 endif()

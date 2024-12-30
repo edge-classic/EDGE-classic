@@ -80,7 +80,6 @@ set (EDGE_SOURCE_FILES
   s_sound.cc
   s_music.cc
   s_ogg.cc
-  s_emidi.cc
   s_tsf.cc
   sv_chunk.cc
   sv_glob.cc
@@ -201,7 +200,6 @@ set (EDGE_LINK_LIBRARIES
   almostequals
   dr_libs
   HandmadeMath
-  libemidi
   lua
   miniz
   pl_mpeg

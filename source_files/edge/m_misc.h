@@ -66,7 +66,6 @@ void DebugOrError(const char *error, ...);
 #endif
 
 extern bool show_obituaries;
-extern int  var_midi_player;
 extern int  var_sound_stereo;
 extern int  sound_mixing_channels;
 extern bool precache_sound_effects;

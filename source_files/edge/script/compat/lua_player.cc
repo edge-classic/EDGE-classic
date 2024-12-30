@@ -1690,6 +1690,9 @@ static void CreateLuaTable_Attacks(lua_State *L, WeaponDefinition *objWep)
             break;
     }
 
+     if (NumberOfAttacks < 1) //MBF21 weapons do not have DDF attack defs
+        return;
+
     lua_pushstring(L, "attacks");
 
     lua_createtable(L, NumberOfAttacks, 0); // create ATTACKS table

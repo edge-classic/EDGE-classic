@@ -41,7 +41,7 @@ int joystick_device;                  // choice in menu, 0 for none
 
 static int          total_joysticks;
 static int          current_joystick; // 0 for none
-static bool         need_mouse_recapture = false;
+bool         need_mouse_recapture = false;
 SDL_Joystick       *joystick_info        = nullptr;
 SDL_GameController *gamepad_info         = nullptr;
 SDL_JoystickID      current_gamepad      = -1;
@@ -258,7 +258,6 @@ void HandleKeyEvent(SDL_Event *ev)
         if (current_window_mode == kWindowModeWindowed)
         {
             GrabCursor(false);
-            need_mouse_recapture = true;
         }
         return;
     }
@@ -613,7 +612,6 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
         if (need_mouse_recapture)
         {
             GrabCursor(true);
-            need_mouse_recapture = false;
             break;
         }
         HandleMouseButtonEvent(sdl_ev);

@@ -284,6 +284,11 @@ static void ConsoleClearInputLine(void)
     input_position = 0;
 }
 
+bool ConsoleIsVisible()
+{
+    return (console_visible != kConsoleVisibilityNotVisible);
+}
+
 void SetConsoleVisible(ConsoleVisibility v)
 {
     if (v == kConsoleVisibilityToggle)

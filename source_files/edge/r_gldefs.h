@@ -198,8 +198,6 @@ DrawMirror    *GetDrawMirror();
 //  MIRRORS
 //
 
-extern int total_active_mirrors;
-
 void MirrorCoordinate(float &x, float &y);
 void MirrorHeight(float &z);
 void MirrorAngle(BAMAngle &ang);

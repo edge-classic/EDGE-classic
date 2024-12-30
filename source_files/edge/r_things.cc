@@ -51,6 +51,7 @@
 #include "r_mdl.h"
 #include "r_misc.h"
 #include "r_modes.h"
+#include "r_render.h"
 #include "r_shader.h"
 #include "r_texgl.h"
 #include "r_units.h"
@@ -809,7 +810,7 @@ static void RendererClipSpriteVertically(DrawSubsector *dsub, DrawThing *dthing)
     LinkDrawThingIntoDrawFloor(dfloor, dthing);
 }
 
-void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
+void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
 {
     EDGE_ZoneScoped;
 
@@ -818,7 +819,7 @@ void RendererWalkThing(DrawSubsector *dsub, MapObject *mo)
     EPI_ASSERT(mo->state_);
 
     // ignore the camera itself
-    if (mo == view_camera_map_object && total_active_mirrors == 0)
+    if (mo == view_camera_map_object && MirrorTotalActive() == 0)
         return;
 
     // ignore invisible things

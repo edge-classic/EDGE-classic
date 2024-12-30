@@ -165,19 +165,21 @@ static void UpdateMelt(int tics)
 
 void InitializeWipe(ScreenWipe effect)
 {
-    current_wipe_effect = effect;
+    render_backend->OnFrameFinished([effect]() -> void {
+        current_wipe_effect = effect;
 
-    current_wipe_progress  = 0;
-    current_wipe_last_time = -1;
+        current_wipe_progress  = 0;
+        current_wipe_last_time = -1;
 
-    if (current_wipe_effect == kScreenWipeNone)
-        return;
+        if (current_wipe_effect == kScreenWipeNone)
+            return;
 
-    render_backend->OnFrameFinished(
-        [effect]() -> void { CaptureScreenAsTexture(effect == kScreenWipePixelfade, effect == kScreenWipeSpooky); });
+        CaptureScreenAsTexture(effect == kScreenWipePixelfade, effect == kScreenWipeSpooky);
 
-    if (current_wipe_effect == kScreenWipeMelt)
-        AllocateDrawStructsMelt();
+        if (current_wipe_effect == kScreenWipeMelt)
+            AllocateDrawStructsMelt();
+    });
+
 }
 
 void StopWipe(void)
@@ -363,7 +365,7 @@ bool DoWipe(void)
 
     current_wipe_progress += tics;
 
-    if (current_wipe_progress > 40) // FIXME: have option for wipe time
+    if (current_wipe_progress >= 40) // FIXME: have option for wipe time
         return true;
 
     float how_far = 0.0f;
@@ -373,14 +375,14 @@ bool DoWipe(void)
     else
         how_far = (float)current_wipe_progress / 40.0f;
 
-    if (how_far < 0.05f)
+    if (how_far < 0.01f)
     {
-        how_far = 0.05f;
+        how_far = 0.01f;
     }
 
-    if (how_far > 0.95f)
+    if (how_far > 0.99f)
     {
-        how_far = 0.95f;
+        how_far = 0.99f;
     }
 
     StartUnitBatch(false);

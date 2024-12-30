@@ -824,9 +824,14 @@ typedef struct sgl_desc_t {
     sgl_logger_t logger;            // optional log function override (default: NO LOGGING)
 } sgl_desc_t;
 
+typedef enum sgl_fog_mode_t {
+    SGL_FOG_NONE = 0,
+    SGL_FOG_LINEAR = 1,
+    SGL_FOG_EXP = 2
+} sgl_fog_mode_t;
+
 typedef enum sg_state_flag {
-    SGL_STATE_MULTITEXTURE = 1,
-    SGL_STATE_FOG = 2
+    SGL_STATE_MULTITEXTURE = 1
 } sg_state_flag;
 
 /* the default context handle */
@@ -876,7 +881,7 @@ SOKOL_GL_API_DECL void sgl_layer(int layer_id);
 
 SOKOL_GL_API_DECL void sgl_clear_depth(float value);
 
-SOKOL_GL_API_DECL void sgl_set_fog(bool enabled, float r, float g, float b, float a, float density, float start, float end, float scale);
+SOKOL_GL_API_DECL void sgl_set_fog(sgl_fog_mode_t fog_mode, float r, float g, float b, float a, float density, float start, float end, float scale);
 SOKOL_GL_API_DECL void sgl_set_alpha_test(float alpha_test);
 
 SOKOL_GL_API_DECL void sgl_set_clipplane(int clipplane, float x, float y, float z, float d);
@@ -2790,10 +2795,12 @@ typedef struct {
 } _sgl_vertex_uniform_t;
 
 typedef struct {
-    int32_t flags;
+    int flags;
+    int layer;
     float alpha_test;
-    int32_t clipplanes;
-    uint8_t _pad_12[4];
+    int clipplanes;
+    int fog_mode;
+    uint8_t _pad_20[12];
     float fog_color[4];
     float fog_density;
     float fog_start;
@@ -4569,6 +4576,7 @@ SOKOL_API_IMPL void sgl_end(void) {
     if (fragment_uniforms_dirty) {
         ctx->fragment_uniforms_dirty = false;
         _sgl_fragment_uniform_t* current = _sgl_next_fragment_uniform(ctx);
+        current->layer = ctx->layer_id;
         _sgl_fragment_uniform_t* next = &ctx->fragment_uniforms.ptr[ctx->fragment_uniforms.next];        
         *next = *current;
     }
@@ -4951,7 +4959,7 @@ SOKOL_API_IMPL void sgl_set_alpha_test(float alpha_test)
     }
 }
 
-SOKOL_API_IMPL void sgl_set_fog(bool enabled, float r, float g, float b, float a, float density, float start, float end,
+SOKOL_API_IMPL void sgl_set_fog(sgl_fog_mode_t fog_mode, float r, float g, float b, float a, float density, float start, float end,
                                 float scale)
 {
     SOKOL_ASSERT(_SGL_INIT_COOKIE == _sgl.init_cookie);
@@ -4960,34 +4968,12 @@ SOKOL_API_IMPL void sgl_set_fog(bool enabled, float r, float g, float b, float a
     {
         _sgl_fragment_uniform_t *cf = &ctx->fragment_uniforms.ptr[ctx->fragment_uniforms.next];
 
-        bool dirty = false;
-        int32_t flags = cf->flags;
-        if (!enabled)
-        {
-            if (!(flags & SGL_STATE_FOG))
-            {
-                return;
-            }
-
-            dirty = true;
-            flags &= ~SGL_STATE_FOG;
-        }
-        else
-        {
-            if (!(flags & SGL_STATE_FOG))
-            {
-                dirty = true;
-            }
-
-            flags |= SGL_STATE_FOG;
-        }
-        
-        if (dirty || (cf->fog_color[0] != r) || (cf->fog_color[1] != g) || (cf->fog_color[2] != b) ||
+        if (fog_mode != cf->fog_mode || (cf->fog_color[0] != r) || (cf->fog_color[1] != g) || (cf->fog_color[2] != b) ||
             (cf->fog_color[3] != a) || (density != cf->fog_density) || (start != cf->fog_start) ||
             (end != cf->fog_end) || (scale != cf->fog_scale))
         {
             ctx->fragment_uniforms_dirty = true;
-            cf->flags                    = flags;
+            cf->fog_mode                 = fog_mode;
             cf->fog_color[0]             = r;
             cf->fog_color[1]             = g;
             cf->fog_color[2]             = b;

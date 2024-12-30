@@ -29,7 +29,7 @@
 #include "r_defs.h"
 #include "r_gldefs.h"
 
-void RendererWalkThing(DrawSubsector *dsub, MapObject *mo);
+void BSPWalkThing(DrawSubsector *dsub, MapObject *mo);
 void SortRenderThings(DrawFloor *dfloor);
 
 void RenderWeaponSprites(Player *p);

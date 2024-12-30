@@ -15,6 +15,8 @@
 
 // clang-format on
 
+constexpr int32_t kWorldStateInvalid = -1;
+
 class SokolRenderBackend : public RenderBackend
 {
   public:
@@ -67,6 +69,7 @@ class SokolRenderBackend : public RenderBackend
     void StartFrame(int32_t width, int32_t height)
     {
         frame_number_++;
+
 #ifdef SOKOL_D3D11
         if (deferred_resize)
         {
@@ -81,7 +84,7 @@ class SokolRenderBackend : public RenderBackend
 
         sg_pass_action pass_action;
         pass_action.colors[0].load_action = SG_LOADACTION_CLEAR;
-        pass_action.colors[0].clear_value = {0.0f, 0.0f, 0.0f, 1.0f};
+        pass_action.colors[0].clear_value = {0, 0, 0, 1.0f};
 
         pass_action.depth.load_action = SG_LOADACTION_CLEAR;
         pass_action.depth.clear_value = 1.0f;
@@ -100,13 +103,18 @@ class SokolRenderBackend : public RenderBackend
         pass_.swapchain.d3d11.depth_stencil_view = sapp_d3d11_get_depth_stencil_view();
 #endif
 
-        /*
-                imgui_frame_desc_            = {0};
-                imgui_frame_desc_.width      = width;
-                imgui_frame_desc_.height     = height;
-                imgui_frame_desc_.delta_time = 100;
-                imgui_frame_desc_.dpi_scale  = 1;
-        */
+        imgui_frame_desc_            = {0};
+        imgui_frame_desc_.width      = width;
+        imgui_frame_desc_.height     = height;
+        imgui_frame_desc_.delta_time = 100;
+        imgui_frame_desc_.dpi_scale  = 1;
+
+        EPI_CLEAR_MEMORY(world_state_, WorldState, kRenderWorldMax);
+
+        EPI_CLEAR_MEMORY(&render_state_, RenderState, 1);
+        render_state_.world_state_ = kWorldStateInvalid;
+
+        SetRenderLayer(kRenderLayerHUD);
 
         sg_begin_pass(&pass_);
     }
@@ -114,15 +122,28 @@ class SokolRenderBackend : public RenderBackend
     void SwapBuffers()
     {
 #ifdef SOKOL_D3D11
-        sapp_d3d11_present(false);
+        sapp_d3d11_present(true);
 #endif
     }
 
     void FinishFrame()
     {
-        sgl_context_draw(context_);
 
-        /*
+        // world passes
+        for (int32_t i = kRenderPassMax + 1; i < render_state_.max_frame_layer_; i++)
+        {
+            sgl_context_draw_layer(context_, i);
+        }
+
+        // Hud passes
+        for (int i = 1; i < kRenderPassMax + 1; i++)
+        {
+            sgl_context_draw_layer(context_, i);
+        }
+
+        // default layer
+        sgl_context_draw_layer(context_, 0);
+
         sg_imgui_.caps_window.open        = false;
         sg_imgui_.buffer_window.open      = false;
         sg_imgui_.pipeline_window.open    = false;
@@ -133,7 +154,6 @@ class SokolRenderBackend : public RenderBackend
         sgimgui_draw(&sg_imgui_);
 
         simgui_render();
-        */
 
         sg_end_pass();
         sg_commit();
@@ -242,42 +262,164 @@ class SokolRenderBackend : public RenderBackend
 
         sgl_set_context(context_);
 
-        /*
-                // IMGUI
-                simgui_desc_t imgui_desc = {0};
-                imgui_desc.logger.func   = slog_func;
-                simgui_setup(&imgui_desc);
+        // IMGUI
+        simgui_desc_t imgui_desc = {0};
+        imgui_desc.logger.func   = slog_func;
+        simgui_setup(&imgui_desc);
 
-                const sgimgui_desc_t sg_imgui_desc = {0};
-                sgimgui_init(&sg_imgui_, &sg_imgui_desc);
-        */
+        const sgimgui_desc_t sg_imgui_desc = {0};
+        sgimgui_init(&sg_imgui_, &sg_imgui_desc);
+
         InitPipelines();
         InitImages();
+
+        EPI_CLEAR_MEMORY(world_state_, WorldState, kRenderWorldMax);
+
+        EPI_CLEAR_MEMORY(&render_state_, RenderState, 1);
+        render_state_.world_state_ = kWorldStateInvalid;
 
         RenderBackend::Init();
     }
 
+    // FIXME: go away!
     void GetPassInfo(PassInfo &info)
     {
         info.width_  = pass_.swapchain.width;
         info.height_ = pass_.swapchain.height;
     }
 
+    void SetClearColor(RGBAColor color)
+    {
+        clear_color_ = color;
+    }
+
+    int32_t GetHUDLayer()
+    {
+        return kRenderLayerHUD;
+    }
+
+    virtual void SetRenderLayer(RenderLayer layer, bool clear_depth = false)
+    {
+        render_state_.layer_ = layer;
+        SetRenderPass(0);
+
+        if (clear_depth)
+        {
+            sgl_clear_depth(1.0f);
+        }
+    }
+
+    RenderLayer GetRenderLayer()
+    {
+        return render_state_.layer_;
+    }
+
+    // sole place that update sgl_layer
+    void SetRenderPass(int32_t pass)
+    {
+        if (pass < 0 || pass >= kRenderPassMax)
+        {
+            FatalError("SetRenderPass: Max render pass exceeded");
+        }
+        
+        render_state_.pass_ = pass;
+
+        int32_t layer = (render_state_.layer_ * kRenderPassMax) + pass + 1;
+
+        if (render_state_.world_state_ > 0)
+        {
+            layer += (render_state_.world_state_) * 4 * kRenderPassMax;
+        }
+
+        if (layer > render_state_.max_frame_layer_)
+        {
+            render_state_.max_frame_layer_ = layer;
+        }
+        sgl_layer(layer);
+    }
+
+    void BeginWorldRender()
+    {
+        int32_t i = 0;
+        for (; i < kRenderWorldMax; i++)
+        {
+            if (world_state_[i].active_)
+            {
+                FatalError("SokolRenderBackend: BeginWorldState called with active world");
+            }
+
+            if (!world_state_[i].used_)
+            {
+                break;
+            }
+        }
+
+        if (i == kRenderWorldMax)
+        {
+            FatalError("SokolRenderBackend: BeginWorldState max worlds exceeded");
+        }
+
+        world_state_[i].active_    = true;
+        world_state_[i].used_      = true;
+        render_state_.world_state_ = i;
+    }
+
+    void FinishWorldRender()
+    {
+        render_state_.world_state_ = kWorldStateInvalid;
+
+        int32_t i = 0;
+        for (; i < kRenderWorldMax; i++)
+        {
+            if (world_state_[i].active_)
+            {
+                world_state_[i].active_ = false;
+                break;
+            }
+        }
+
+        if (i == kRenderWorldMax)
+        {
+            FatalError("SokolRenderBackend: FinishWorldState called with no active world render");
+        }
+
+        SetRenderLayer(kRenderLayerHUD);
+        SetupWorldMatrices2D();
+    }
+
   private:
+    struct WorldState
+    {
+        bool active_;
+        bool used_;
+    };
+
+    struct RenderState
+    {
+        RenderLayer layer_;
+        int32_t     max_frame_layer_;
+        int32_t     pass_;
+        int32_t     world_state_;
+    };
+
+    simgui_frame_desc_t imgui_frame_desc_;
+    sgimgui_t           sg_imgui_;
+
+    RGBAColor clear_color_ = kRGBABlack;
+
+    sgl_context context_;
+
+    RenderState render_state_;
+
+    sg_pass pass_;
+
+    WorldState world_state_[kRenderWorldMax];
+
 #ifdef SOKOL_D3D11
     bool    deferred_resize        = false;
     int32_t deferred_resize_width  = 0;
     int32_t deferred_resize_height = 0;
 #endif
-
-    /*
-        simgui_frame_desc_t imgui_frame_desc_;
-        sgimgui_t           sg_imgui_;
-    */
-
-    sgl_context context_;
-
-    sg_pass pass_;
 };
 
 static SokolRenderBackend sokol_render_backend;

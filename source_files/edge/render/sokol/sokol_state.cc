@@ -127,6 +127,7 @@ class SokolRenderState : public RenderState
         case GL_CLIP_PLANE4:
         case GL_CLIP_PLANE5:
             sgl_set_clipplane_enabled(cap - GL_CLIP_PLANE0, false);
+
             break;
         default:
             FatalError("Unknown GL State %i", cap);
@@ -151,7 +152,7 @@ class SokolRenderState : public RenderState
     void AlphaFunction(GLenum func, GLfloat ref)
     {
         EPI_UNUSED(func);
-        
+
         alpha_test_ = ref;
     }
 
@@ -162,8 +163,22 @@ class SokolRenderState : public RenderState
 
     void Scissor(GLint x, GLint y, GLsizei width, GLsizei height)
     {
-        // can't currently disable
-        sgl_scissor_rect(x, y, width, height, false);
+        // FIXME: This applies a scissor to every layer globally
+        // instead having a pending scissor for passes, and if they get a draw
+        // command apply scissor first?
+        RenderLayer current_layer = render_backend->GetRenderLayer();
+        
+        for (int32_t i = 0; i < kRenderLayerMax; i++)
+        {
+            render_backend->SetRenderLayer((RenderLayer)i);
+            for (int32_t j = 0; j < kRenderPassMax; j++)
+            {
+                render_backend->SetRenderPass(j);
+                sgl_scissor_rect(x, y, width, height, false);
+            }
+        }
+
+        render_backend->SetRenderLayer(current_layer);
     }
 
     void PolygonOffset(GLfloat factor, GLfloat units)
@@ -363,11 +378,11 @@ class SokolRenderState : public RenderState
 
         sg_image_desc img_desc;
         EPI_CLEAR_MEMORY(&img_desc, sg_image_desc, 1);
-        img_desc.usage         = texture_usage_;
-        img_desc.width         = mip_levels_[0].width_;
-        img_desc.height        = mip_levels_[0].height_;
-        img_desc.pixel_format  = texture_format_;
-        img_desc.num_mipmaps   = (int)mip_levels_.size();
+        img_desc.usage        = texture_usage_;
+        img_desc.width        = mip_levels_[0].width_;
+        img_desc.height       = mip_levels_[0].height_;
+        img_desc.pixel_format = texture_format_;
+        img_desc.num_mipmaps  = (int)mip_levels_.size();
 
         if (texture_usage_ != SG_USAGE_DYNAMIC)
         {
@@ -414,7 +429,7 @@ class SokolRenderState : public RenderState
             break;
         case GL_LINEAR:
         case GL_NEAREST_MIPMAP_LINEAR:
-            sampler_desc.min_filter = SG_FILTER_LINEAR;
+            sampler_desc.min_filter    = SG_FILTER_LINEAR;
             sampler_desc.mipmap_filter = SG_FILTER_LINEAR;
             break;
         }
@@ -427,7 +442,7 @@ class SokolRenderState : public RenderState
             break;
         case GL_LINEAR:
         case GL_NEAREST_MIPMAP_LINEAR:
-            sampler_desc.mag_filter = SG_FILTER_LINEAR;
+            sampler_desc.mag_filter    = SG_FILTER_LINEAR;
             sampler_desc.mipmap_filter = SG_FILTER_LINEAR;
             break;
         }
@@ -547,7 +562,7 @@ class SokolRenderState : public RenderState
 
         sg_image_data image_data;
         EPI_CLEAR_MEMORY(&image_data, sg_image_data, 1);
-        sg_range      range;
+        sg_range range;
         range.ptr                 = pixels;
         range.size                = width * height * bpp;
         image_data.subimage[0][0] = range;
@@ -568,7 +583,7 @@ class SokolRenderState : public RenderState
     {
 #ifdef SOKOL_GLCORE
         sg_gl_read_pixels(x, y, width, height, format, type, pixels);
-#endif        
+#endif
     }
 
     void PixelZoom(GLfloat xfactor, GLfloat yfactor)
@@ -611,7 +626,20 @@ class SokolRenderState : public RenderState
         float fogg = float(epi::GetRGBAGreen(fog_color_)) / 255.0f;
         float fogb = float(epi::GetRGBABlue(fog_color_)) / 255.0f;
 
-        sgl_set_fog(enable_fog_, fogr, fogg, fogb, 1, fog_density_, fog_start_, fog_end_, 1);
+        sgl_fog_mode_t fog_mode = SGL_FOG_NONE;
+        if (enable_fog_)
+        {
+            if (fog_mode_ == GL_LINEAR)
+            {
+                fog_mode = SGL_FOG_LINEAR;
+            }
+            else if (fog_mode_ == GL_EXP)
+            {
+                fog_mode = SGL_FOG_EXP;
+            }
+        }
+
+        sgl_set_fog(fog_mode, fogr, fogg, fogb, 1, fog_density_, fog_start_, fog_end_, 1);
 
         float alpha_test = enable_alpha_test_ ? alpha_test_ : 0.0f;
         sgl_set_alpha_test(alpha_test);

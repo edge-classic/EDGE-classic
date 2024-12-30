@@ -1,16 +1,30 @@
 
 #pragma once
+#include <functional>
 
 #include "dm_defs.h"
-#include <functional>
+#include "epi_color.h"
 
 struct PassInfo
 {
     int32_t width_;
     int32_t height_;
 };
+constexpr int32_t kRenderWorldMax = 8;
+constexpr int32_t kRenderPassMax  = 16;
 
-typedef std::function<void()>  FrameFinishedCallback;
+enum RenderLayer
+{
+    kRenderLayerHUD = 0,
+    kRenderLayerSky,
+    kRenderLayerSolid,
+    kRenderLayerTransparent, // Transparent - additive renders on this layer
+    kRenderLayerWeapon,
+    kRenderLayerMax,
+    kRenderLayerInvalid
+};
+
+typedef std::function<void()> FrameFinishedCallback;
 
 class RenderBackend
 {
@@ -25,6 +39,8 @@ class RenderBackend
     // Setup the GL matrices for drawing 3D stuff.
     virtual void SetupMatrices3D() = 0;
 
+    virtual void SetClearColor(RGBAColor color) = 0;
+
     virtual void StartFrame(int32_t width, int32_t height) = 0;
 
     virtual void SwapBuffers() = 0;
@@ -36,6 +52,16 @@ class RenderBackend
         on_frame_finished_.push_back(callback);
     }
 
+    virtual void BeginWorldRender() = 0;
+
+    virtual void FinishWorldRender() = 0;
+
+    virtual void SetRenderLayer(RenderLayer layer, bool clear_depth = false) = 0;
+
+    // EDGE pass, not to be confused with a sokol pass
+    virtual void SetRenderPass(int32_t pass) = 0;
+
+    virtual RenderLayer GetRenderLayer() = 0;
 
     virtual void Resize(int32_t width, int32_t height) = 0;
 
@@ -45,9 +71,9 @@ class RenderBackend
 
     virtual void Init();
 
-    virtual void GetPassInfo(PassInfo& info) = 0;
+    virtual void GetPassInfo(PassInfo &info) = 0;
 
-    virtual void CaptureScreen(int32_t width, int32_t height, int32_t stride, uint8_t* dest) = 0;
+    virtual void CaptureScreen(int32_t width, int32_t height, int32_t stride, uint8_t *dest) = 0;
 
     int64_t GetFrameNumber()
     {
@@ -60,6 +86,7 @@ class RenderBackend
     }
 
   protected:
+
     int32_t max_texture_size_ = 0;
     int64_t frame_number_;
 

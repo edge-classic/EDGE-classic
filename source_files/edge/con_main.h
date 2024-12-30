@@ -107,6 +107,8 @@ void PlayerConsoleMessageLDF(int plyr, const char *message, ...);
 // this color will apply to the next ConsoleMessage or ConsolePrint call.
 void ConsoleMessageColor(RGBAColor col);
 
+bool ConsoleIsVisible();
+
 // Displays/Hides the console.
 void SetConsoleVisible(ConsoleVisibility v);
 

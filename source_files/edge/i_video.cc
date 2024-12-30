@@ -18,6 +18,7 @@
 
 #include "i_video.h"
 
+#include "con_main.h"
 #include "ddf_main.h"
 #include "dm_state.h"
 #include "edge_profiling.h"
@@ -72,6 +73,8 @@ extern ConsoleVariable renderer_far_clip;
 extern ConsoleVariable draw_culling;
 extern ConsoleVariable draw_culling_distance;
 
+extern bool need_mouse_recapture;
+
 void GrabCursor(bool enable)
 {
 #ifdef EDGE_WEB
@@ -83,6 +86,11 @@ void GrabCursor(bool enable)
         return;
 
     grab_state = enable;
+
+    if (grab_state)
+        need_mouse_recapture = false;
+    else
+        need_mouse_recapture = true;
 
     if (grab_state && grab_mouse.d_)
     {
@@ -416,8 +424,15 @@ void FinishFrame(void)
 
     EDGE_FrameMark;
 
-    if (grab_mouse.CheckModified())
-        GrabCursor(grab_state);
+    if (ConsoleIsVisible())
+        GrabCursor(false);
+    else
+    {
+        if (grab_mouse.CheckModified())
+            GrabCursor(grab_state);
+        else
+            GrabCursor(true);
+    }
 
     if (uncapped_frames.d_ && !single_tics)
     {

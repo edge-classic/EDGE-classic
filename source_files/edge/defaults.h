@@ -70,7 +70,6 @@
 
 // Sound and Music
 #define EDGE_DEFAULT_SOUND_STEREO (1) // Stereo
-#define EDGE_DEFAULT_MIX_CHANNELS (2) // 32 channels
 
 // Video Options
 #define EDGE_DEFAULT_USE_SMOOTHING  (0)

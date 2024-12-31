@@ -299,13 +299,6 @@ static int keyscan;
 
 static Style *options_menu_default_style;
 
-static void OptionMenuChangeMixChan(int key_pressed, ConsoleVariable *console_variable)
-{
-    EPI_UNUSED(key_pressed);
-    EPI_UNUSED(console_variable);
-    UpdateSoundCategoryLimits();
-}
-
 static int OptionMenuGetCurrentSwitchValue(OptionMenuItem *item)
 {
     int retval = 0;
@@ -534,10 +527,6 @@ static OptionMenuItem soundoptions[] = {
 #endif
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeBoolean, "Dynamic Reverb", YesNo, 2, &dynamic_reverb, nullptr, nullptr, nullptr, 0, 0, 0, ""},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
-    {kOptionMenuItemTypeSwitch, "Mix Channels", "32/64/96/128/160/192/224/256", 8, &sound_mixing_channels,
-     OptionMenuChangeMixChan, nullptr, nullptr, 0, 0, 0, ""},
-    {kOptionMenuItemTypeBoolean, "Precache SFX", YesNo, 2, &precache_sound_effects, nullptr, "NeedRestart", nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
 };
 

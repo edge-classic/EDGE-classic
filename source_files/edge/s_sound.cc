@@ -45,11 +45,6 @@ extern float listen_x;
 extern float listen_y;
 extern float listen_z;
 
-bool precache_sound_effects = true;
-
-/* See m_option.cc for corresponding menu items */
-const int channel_counts[8] = {32, 64, 96, 128, 160, 192, 224, 256};
-
 const int category_limit_table[3][8][3] = {
     /* 8 channel (TEST) */
     {
@@ -263,7 +258,7 @@ void InitializeSound(void)
 
     StartupProgressMessage("Initializing sound device...");
 
-    int want_chan = channel_counts[sound_mixing_channels];
+    int want_chan = 256;
 
     LogPrint("StartupSound: Init %d mixing channels\n", want_chan);
 
@@ -565,7 +560,7 @@ void UpdateSoundCategoryLimits(void)
 
     LockAudio();
     {
-        int want_chan = channel_counts[sound_mixing_channels];
+        int want_chan = 256;
 
         ReallocateSoundChannels(want_chan);
 
@@ -576,13 +571,10 @@ void UpdateSoundCategoryLimits(void)
 
 void PrecacheSounds(void)
 {
-    if (precache_sound_effects)
+    StartupProgressMessage("Precaching SFX...");
+    for (size_t i = 0; i < sfxdefs.size(); i++)
     {
-        StartupProgressMessage("Precaching SFX...");
-        for (size_t i = 0; i < sfxdefs.size(); i++)
-        {
-            SoundCacheLoad(sfxdefs[i]);
-        }
+        SoundCacheLoad(sfxdefs[i]);
     }
 }
 

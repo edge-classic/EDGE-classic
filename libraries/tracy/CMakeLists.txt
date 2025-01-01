@@ -5,12 +5,11 @@
 add_library(edge_tracy INTERFACE)
 
 if (EDGE_PROFILING)
-  add_definitions("-DEDGE_PROFILING" "-DTRACY_ENABLE")
   include(FetchContent)
   FetchContent_Declare (
     tracy
     GIT_REPOSITORY https://github.com/wolfpld/tracy.git
-    GIT_TAG master
+    GIT_TAG 5d542dc09f3d9378d005092a4ad446bd405f819a
     GIT_SHALLOW TRUE
     GIT_PROGRESS TRUE
   )

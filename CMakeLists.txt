@@ -223,5 +223,10 @@ if (EDGE_WAV_SUPPORT)
   add_definitions(-DEDGE_WAV_SUPPORT)
 endif()
 
+if (EDGE_PROFILING)
+  # these must be defined for all source files
+  add_compile_definitions(EDGE_PROFILING TRACY_ENABLE)
+endif()
+
 add_subdirectory(libraries)
 add_subdirectory(source_files)

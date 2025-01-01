@@ -21,8 +21,8 @@
 #include <string>
 #include <vector>
 
-#include "epi_sdl.h"
+#include "miniaudio.h"
 
 extern std::vector<std::string> available_soundfonts;
 
-extern SDL_AudioDeviceID current_sound_device;
+extern ma_engine sound_engine;

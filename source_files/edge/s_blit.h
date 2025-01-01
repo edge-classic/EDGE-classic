@@ -27,6 +27,7 @@
 
 #include "con_var.h"
 #include "ddf_types.h"
+#include "miniaudio.h"
 #include "snd_data.h"
 
 // Forward declarations
@@ -52,25 +53,14 @@ class SoundChannel
     SoundEffectDefinition *definition_;
     Position              *position_;
 
-    // We use a 22.10 fixed point for sound offsets.  It's a reasonable
-    // compromise between longest sound and accumulated round-off error.
-    uint32_t offset_;
-    uint32_t length_;
-    uint32_t delta_;
-
-    int volume_left_; // mixing volume
-    int volume_right_;
-
     bool loop_;       // will loop *one* more time
     bool boss_;
+
+    ma_sound channel_sound_;
 
   public:
     SoundChannel();
     ~SoundChannel();
-
-    void ComputeDelta();
-    void ComputeVolume();
-    void ComputeMusicVolume();
 };
 
 extern ConsoleVariable sound_effect_volume;
@@ -93,11 +83,6 @@ void FreeSoundChannels(void);
 
 void KillSoundChannel(int k);
 void ReallocateSoundChannels(int total);
-
-void MixAllSoundChannels(void *stream, int len);
-// mix all active channels into the output stream.
-// 'len' is the number of samples (for stereo: pairs)
-// to mix into the stream.
 
 void UpdateSounds(Position *listener, BAMAngle angle);
 

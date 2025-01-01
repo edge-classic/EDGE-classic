@@ -158,12 +158,6 @@ void StartupAudio(void);
 // main code never calls this function.
 void AudioShutdown(void);
 
-// wrappers around the SDL functions of the same name,
-// however UnlockAudio() may be called at any time,
-// even when LockAudio() hasn't been called.
-void LockAudio(void);
-void UnlockAudio(void);
-
 //--------------------------------------------------------
 //  VIDEO functions.
 //--------------------------------------------------------

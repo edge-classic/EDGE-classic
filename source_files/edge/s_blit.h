@@ -87,31 +87,5 @@ void ReallocateSoundChannels(int total);
 
 void UpdateSounds(Position *listener, BAMAngle angle);
 
-//-------- API for Synthesised MUSIC --------------------
-
-void SoundQueueInitialize(void);
-// initialise the queueing system.
-
-void SoundQueueShutdown(void);
-// finalise the queuing system, stopping all playback.
-// The data from all the buffers will be freed.
-
-void SoundQueueStop(void);
-// stop the currently playing queue.  All playing buffers
-// are moved into the free list.
-
-SoundData *SoundQueueGetFreeBuffer(int samples);
-// returns the next unused (or finished) buffer, or nullptr
-// if there are none.  The data_ field will be
-// updated to ensure they hold the requested number of
-// samples.
-
-void SoundQueueAddBuffer(SoundData *buf, int freq);
-// add a new buffer to be end of the queue.
-
-void SoundQueueReturnBuffer(SoundData *buf);
-// if something goes wrong and you cannot add the buffer,
-// then this call will return the buffer to the free list.
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

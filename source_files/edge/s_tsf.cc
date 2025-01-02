@@ -304,8 +304,6 @@ class TSFPlayer : public AbstractMusicPlayer
         for(int ch = 0; ch < 16; ch++)
             tsf_channel_sounds_off_all(edge_tsf, ch);
 
-        SoundQueueStop();
-
         status_ = kStopped;
     }
 
@@ -338,20 +336,18 @@ class TSFPlayer : public AbstractMusicPlayer
 
         while (status_ == kPlaying && !pc_speaker_mode && !playing_movie)
         {
-            SoundData *buf = SoundQueueGetFreeBuffer(kMusicBuffer);
+            SoundData *buf = nullptr;
 
             if (!buf)
                 break;
 
             if (StreamIntoBuffer(buf))
             {
-                SoundQueueAddBuffer(buf, sound_device_frequency);
+
             }
             else
             {
                 // finished playing
-                SoundQueueReturnBuffer(buf);
-
                 Stop();
             }
         }

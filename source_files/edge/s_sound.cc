@@ -267,8 +267,6 @@ void InitializeSound(void)
 
     SetupCategoryLimits();
 
-    SoundQueueInitialize();
-
     // okidoke, start the ball rolling!
     ma_engine_start(&sound_engine);
 }
@@ -279,8 +277,6 @@ void ShutdownSound(void)
         return;
 
     ma_engine_stop(&sound_engine);
-
-    SoundQueueShutdown();
 
     FreeSoundChannels();
 }

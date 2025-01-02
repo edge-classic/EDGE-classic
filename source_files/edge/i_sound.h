@@ -26,3 +26,4 @@
 extern std::vector<std::string> available_soundfonts;
 
 extern ma_engine sound_engine;
+extern ma_engine music_engine;

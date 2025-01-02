@@ -45,6 +45,7 @@ extern std::string       home_directory;
 extern ConsoleVariable   midi_soundfont;
 
 ma_engine sound_engine;
+ma_engine music_engine;
 
 void StartupAudio(void)
 {
@@ -59,6 +60,16 @@ void StartupAudio(void)
         LogPrint("StartupSound: Unable to find a working sound mode!\n");
         no_sound = true;
         return;
+    }
+
+    if (!no_music)
+    {
+        if (ma_engine_init(&config, &music_engine) != MA_SUCCESS)
+        {
+            LogPrint("StartupSound: Unable to find a working sound mode!\n");
+            no_music = true;
+            return;
+        }
     }
 
     sound_device_frequency = ma_engine_get_sample_rate(&sound_engine);

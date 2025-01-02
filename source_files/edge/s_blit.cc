@@ -56,13 +56,6 @@ int   ddf_reverb_ratio        = 0;
 int   ddf_reverb_delay        = 0;
 float music_player_gain       = 1.0f;
 
-static constexpr uint8_t kMaximumQueueBuffers = 16;
-
-static std::list<SoundData *> free_queue_buffers;
-static std::list<SoundData *> playing_queue_buffers;
-
-static SoundChannel *queue_channel;
-
 EDGE_DEFINE_CONSOLE_VARIABLE(sound_effect_volume, "0.15", kConsoleVariableFlagArchive)
 
 static bool sound_effects_paused = false;
@@ -83,25 +76,6 @@ SoundChannel::SoundChannel() : state_(kChannelEmpty), data_(nullptr)
 
 SoundChannel::~SoundChannel()
 {
-}
-
-//----------------------------------------------------------------------------
-
-static bool QueueNextBuffer(void)
-{
-    if (playing_queue_buffers.empty())
-    {
-        queue_channel->state_ = kChannelFinished;
-        queue_channel->data_  = nullptr;
-        return false;
-    }
-
-    SoundData *buf = playing_queue_buffers.front();
-
-    queue_channel->data_ = buf;
-
-    queue_channel->state_ = kChannelPlaying;
-    return true;
 }
 
 //----------------------------------------------------------------------------
@@ -202,6 +176,8 @@ void UpdateSounds(Position *listener, BAMAngle angle)
 {
     (void)angle;
 
+    ma_engine_set_volume(&sound_engine, sound_effect_volume.f_);
+
     listen_x = listener ? listener->x : 0;
     listen_y = listener ? listener->y : 0;
     listen_z = listener ? listener->z : 0;
@@ -246,124 +222,6 @@ void PauseSound(void)
 void ResumeSound(void)
 {
     sound_effects_paused = false;
-}
-
-//----------------------------------------------------------------------------
-
-void SoundQueueInitialize(void)
-{
-    if (no_sound)
-        return;
-
-    if (free_queue_buffers.empty())
-    {
-        for (int i = 0; i < kMaximumQueueBuffers; i++)
-        {
-            free_queue_buffers.push_back(new SoundData());
-        }
-    }
-
-    if (!queue_channel)
-        queue_channel = new SoundChannel();
-    else
-    {
-        ma_sound_uninit(&queue_channel->channel_sound_);
-        ma_audio_buffer_uninit(&queue_channel->ref_);
-    }
-
-    queue_channel->state_ = kChannelEmpty;
-    queue_channel->data_  = nullptr;
-}
-
-void SoundQueueShutdown(void)
-{
-    if (no_sound)
-        return;
-
-    if (queue_channel)
-    {
-        // free all data on the playing / free lists.
-        // The SoundData destructor takes care of data_left_/R.
-
-        for (; !playing_queue_buffers.empty(); playing_queue_buffers.pop_front())
-        {
-            delete playing_queue_buffers.front();
-        }
-        for (; !free_queue_buffers.empty(); free_queue_buffers.pop_front())
-        {
-            delete free_queue_buffers.front();
-        }
-
-        queue_channel->data_ = nullptr;
-
-        ma_sound_uninit(&queue_channel->channel_sound_);
-        ma_audio_buffer_uninit(&queue_channel->ref_);
-
-        delete queue_channel;
-        queue_channel = nullptr;
-    }
-}
-
-void SoundQueueStop(void)
-{
-    if (no_sound)
-        return;
-
-    EPI_ASSERT(queue_channel);
-
-    for (; !playing_queue_buffers.empty(); playing_queue_buffers.pop_front())
-    {
-        free_queue_buffers.push_back(playing_queue_buffers.front());
-    }
-
-    queue_channel->state_ = kChannelFinished;
-    queue_channel->data_  = nullptr;
-    if (queue_channel->channel_sound_.pDataSource)
-    {
-        ma_sound_uninit(&queue_channel->channel_sound_);
-        ma_audio_buffer_uninit(&queue_channel->ref_);
-    }
-}
-
-SoundData *SoundQueueGetFreeBuffer(int samples)
-{
-    if (no_sound)
-        return nullptr;
-
-    SoundData *buf = nullptr;
-
-    if (!free_queue_buffers.empty())
-    {
-        buf = free_queue_buffers.front();
-        free_queue_buffers.pop_front();
-
-        buf->Allocate(samples);
-    }
-
-    return buf;
-}
-
-void SoundQueueAddBuffer(SoundData *buf, int freq)
-{
-    EPI_ASSERT(!no_sound);
-    EPI_ASSERT(buf);
-
-    buf->frequency_ = freq;
-
-    playing_queue_buffers.push_back(buf);
-
-    if (queue_channel->state_ != kChannelPlaying)
-    {
-        QueueNextBuffer();
-    }
-}
-
-void SoundQueueReturnBuffer(SoundData *buf)
-{
-    EPI_ASSERT(!no_sound);
-    EPI_ASSERT(buf);
-
-    free_queue_buffers.push_back(buf);
 }
 
 //--- editor settings ---

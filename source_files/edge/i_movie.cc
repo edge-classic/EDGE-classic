@@ -65,8 +65,6 @@ static bool MovieSetupAudioStream(int rate)
 {
     plm_set_audio_lead_time(decoder, (double)1024 / (double)rate);
     PauseMusic();
-    SoundQueueStop();
-    SoundQueueInitialize();
     return true;
 }
 #endif
@@ -77,13 +75,7 @@ void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
     EPI_UNUSED(user);
     if (samples)
     {
-        SoundData *movie_buf = SoundQueueGetFreeBuffer(PLM_AUDIO_SAMPLES_PER_FRAME);
-        if (movie_buf)
-        {
-            movie_buf->length_ = PLM_AUDIO_SAMPLES_PER_FRAME;
-            memcpy(movie_buf->data_, samples->interleaved, PLM_AUDIO_SAMPLES_PER_FRAME * 2 * sizeof(int16_t));
-            SoundQueueAddBuffer(movie_buf, movie_sample_rate);
-        }
+
     }
 }
 

@@ -58,6 +58,7 @@ static bool TryOpenSound(int want_freq, bool want_stereo)
     sound_engine_config = ma_engine_config_init();
     sound_engine_config.channels = want_stereo ? 2 : 1;
     sound_engine_config.sampleRate = want_freq;
+    sound_engine_config.noAutoStart = MA_TRUE;
 
     sound_result = ma_engine_init(&sound_engine_config, &sound_engine);   
 

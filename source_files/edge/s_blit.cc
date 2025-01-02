@@ -82,6 +82,7 @@ extern bool sound_device_stereo;
 SoundChannel::SoundChannel() : state_(kChannelEmpty), data_(nullptr)
 {
     EPI_CLEAR_MEMORY(&channel_sound_, ma_sound, 1);
+    EPI_CLEAR_MEMORY(&ref_, ma_audio_buffer, 1);
 }
 
 SoundChannel::~SoundChannel()
@@ -145,6 +146,7 @@ void KillSoundChannel(int k)
         chan->state_ = kChannelEmpty;
         ma_sound_stop(&chan->channel_sound_);
         ma_sound_uninit(&chan->channel_sound_);
+        ma_audio_buffer_uninit(&chan->ref_);
     }
 }
 
@@ -201,23 +203,38 @@ void ReallocateSoundChannels(int total)
 
 void UpdateSounds(Position *listener, BAMAngle angle)
 {
-    ma_engine_listener_set_position(&sound_engine, 0, listener ? listener->x : 0, listener ? listener->y : 0,
-        listener ? listener->z : 0);
+    (void)angle; // attenuation disabled for now
+
+    float listen_x = listener ? listener->x : 0;
+    float listen_y = listener ? listener->y : 0;
+    float listen_z = listener ? listener->z : 0;
+
+    ma_engine_listener_set_position(&sound_engine, 0, listen_x, listen_z, -listen_y);
 
     for (int i = 0; i < total_channels; i++)
     {
         SoundChannel *chan = mix_channels[i];
 
         if (chan->state_ == kChannelPlaying && ma_sound_at_end(&chan->channel_sound_))
-            chan->state_ = kChannelFinished;
+        {
+            if (chan->loop_)
+                ma_sound_start(&chan->channel_sound_); // will rewind
+            else
+                chan->state_ = kChannelFinished;
+        }
 
         if (chan->state_ == kChannelFinished)
             KillSoundChannel(i);
 
         if (chan->state_ == kChannelPlaying)
         {
-            if (chan->position_)
-                ma_sound_set_position(&chan->channel_sound_, chan->position_->x, chan->position_->y, chan->position_->z);
+            if (listener)
+            {
+                if (chan->position_)
+                    ma_sound_set_position(&chan->channel_sound_, chan->position_->x, chan->position_->z, -chan->position_->y);
+                else
+                    ma_sound_set_position(&chan->channel_sound_, listen_x, listen_z, -listen_y);
+            }
             else
                 ma_sound_set_position(&chan->channel_sound_, 0, 0, 0);
         }

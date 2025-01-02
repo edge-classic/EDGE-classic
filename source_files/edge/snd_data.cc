@@ -22,7 +22,6 @@
 
 #include "epi.h"
 #include "HandmadeMath.h"
-#include "i_sound.h"
 
 SoundData::SoundData()
     : length_(0), frequency_(0), data_(nullptr), filter_data_(nullptr), reverb_buffer_(nullptr),
@@ -42,11 +41,8 @@ void SoundData::Free()
     length_ = 0;
 
     if (data_)
-    {
         delete[] data_;
-        data_ = nullptr;
-        ma_audio_buffer_uninit(&miniaudio_buffer_);
-    }
+    data_ = nullptr;
 
     if (filter_data_)
         delete[] filter_data_;
@@ -63,11 +59,6 @@ void SoundData::Allocate(int samples)
     if (data_ && length_ >= samples)
     {
         length_ = samples; 
-        // reset miniaudo params
-        ma_audio_buffer_uninit(&miniaudio_buffer_);
-        ma_audio_buffer_config config = ma_audio_buffer_config_init(ma_format_s16, 2, samples, data_, NULL);
-        config.sampleRate = frequency_;
-        ma_audio_buffer_init(&config, &miniaudio_buffer_);
         return;
     }
 
@@ -76,11 +67,6 @@ void SoundData::Allocate(int samples)
     length_ = samples;
 
     data_ = new int16_t[samples * 2];
-
-    ma_audio_buffer_config config = ma_audio_buffer_config_init(ma_format_s16, 2, samples, data_, NULL);
-    config.sampleRate = frequency_;
-
-    ma_audio_buffer_init(&config, &miniaudio_buffer_);
 }
 
 void SoundData::MixSubmerged()

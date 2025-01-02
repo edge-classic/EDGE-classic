@@ -19,12 +19,12 @@
 #include "s_mp3.h"
 
 #include "ddf_playlist.h"
-#include "dr_mp3.h"
 #include "epi.h"
 #include "epi_endian.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
 #include "i_movie.h"
+#include "miniaudio.h"
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_music.h"

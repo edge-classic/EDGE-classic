@@ -20,8 +20,6 @@
 
 #include <stdint.h>
 
-#include "miniaudio.h"
-
 enum SoundFilter
 {
     kFilterNone      = 0,
@@ -67,8 +65,6 @@ class SoundData
     int current_ddf_reverb_type_;
 
     bool reverb_is_outdoors_;
-
-    ma_audio_buffer miniaudio_buffer_;
 
   public:
     SoundData();

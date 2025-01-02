@@ -57,6 +57,7 @@ class SoundChannel
     bool boss_;
 
     ma_sound channel_sound_;
+    ma_audio_buffer ref_;
 
   public:
     SoundChannel();

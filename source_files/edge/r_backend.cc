@@ -44,6 +44,8 @@ void RenderBackend::SoftInit(void)
 
     render_state->Hint(GL_FOG_HINT, GL_NICEST);
     render_state->Hint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+    LockRenderUnits(false);
 }
 
 void RenderBackend::Init()

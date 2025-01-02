@@ -59,6 +59,16 @@ class RenderBackend
 
     virtual RenderLayer GetRenderLayer() = 0;
 
+    void LockRenderUnits(bool locked) 
+    {
+        units_locked_ = locked;
+    }
+
+    bool RenderUnitsLocked() 
+    {
+        return units_locked_;
+    }
+
     virtual void Resize(int32_t width, int32_t height) = 0;
 
     virtual void Shutdown() = 0;
@@ -85,6 +95,7 @@ class RenderBackend
 
     int32_t max_texture_size_ = 0;
     int64_t frame_number_;
+    bool units_locked_ = false;
 
     std::vector<FrameFinishedCallback> on_frame_finished_;
 };

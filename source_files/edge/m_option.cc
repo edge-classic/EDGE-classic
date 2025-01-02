@@ -518,8 +518,6 @@ static OptionMenuItem soundoptions[] = {
     {kOptionMenuItemTypeSlider, "Movie/Music Volume", nullptr, 0, &music_volume.f_,
      OptionMenuUpdateConsoleVariableFromFloat, nullptr, &music_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
-    {kOptionMenuItemTypeSwitch, "Stereo", "Off/On/Swapped", 3, &var_sound_stereo, nullptr, "NeedRestart", nullptr, 0, 0, 0, ""},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeFunction, "TinySoundFont Bank", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr, nullptr, 0, 0, 0, ""},
 #if EDGE_DOOM_SFX_SUPPORT
     {kOptionMenuItemTypeBoolean, "PC Speaker Mode", YesNo, 2, &pc_speaker_mode, OptionMenuChangePCSpeakerMode,

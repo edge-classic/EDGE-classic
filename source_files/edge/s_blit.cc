@@ -74,10 +74,6 @@ float    listen_z;
 BAMAngle listen_angle;
 
 extern int sound_device_frequency;
-extern int sound_device_bytes_per_sample;
-extern int sound_device_samples_per_buffer;
-
-extern bool sound_device_stereo;
 
 SoundChannel::SoundChannel() : state_(kChannelEmpty), data_(nullptr)
 {

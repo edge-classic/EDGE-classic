@@ -31,7 +31,7 @@
 bool LoadWAVSound(SoundData *buf, uint8_t *data, int length)
 {
     ma_decoder_config decode_config = ma_decoder_config_init_default();
-    decode_config.format = ma_format_s16;
+    decode_config.format = ma_format_f32;
     ma_decoder decode;
 
     //ma_decoder_init_memory(const void* pData, size_t dataSize, const ma_decoder_config* pConfig, ma_decoder* pDecoder);
@@ -66,7 +66,7 @@ bool LoadWAVSound(SoundData *buf, uint8_t *data, int length)
 
     SoundGatherer gather;
 
-    int16_t *buffer = gather.MakeChunk(frame_count, is_stereo);
+    float *buffer = gather.MakeChunk(frame_count, is_stereo);
 
     ma_uint64 frames_read = 0;
 

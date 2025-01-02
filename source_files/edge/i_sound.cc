@@ -38,72 +38,33 @@
 bool no_sound = false;
 
 int  sound_device_frequency;
-int  sound_device_bytes_per_sample;
-int  sound_device_samples_per_buffer;
-bool sound_device_stereo;
 
 std::vector<std::string> available_soundfonts;
 extern std::string       game_directory;
 extern std::string       home_directory;
 extern ConsoleVariable   midi_soundfont;
 
-static ma_result sound_result;
-static ma_engine_config sound_engine_config;
 ma_engine sound_engine;
-
-static bool TryOpenSound(int want_freq, bool want_stereo)
-{
-    LogPrint("StartupSound: trying %d Hz %s\n", want_freq, want_stereo ? "Stereo" : "Mono");
-
-    sound_engine_config = ma_engine_config_init();
-    sound_engine_config.channels = want_stereo ? 2 : 1;
-    sound_engine_config.sampleRate = want_freq;
-    sound_engine_config.noAutoStart = MA_TRUE;
-
-    sound_result = ma_engine_init(&sound_engine_config, &sound_engine);   
-
-    if (sound_result == MA_SUCCESS)
-        return true;
-
-    LogPrint("  failed\n");
-
-    return false;
-}
 
 void StartupAudio(void)
 {
     if (no_sound)
         return;
 
-    int  want_freq   = 44100;
-    bool want_stereo = (var_sound_stereo >= 1);
+    ma_engine_config config = ma_engine_config_init();
+    config.noAutoStart = MA_TRUE;
 
-    if (FindArgument("mono") > 0)
-        want_stereo = false;
-    if (FindArgument("stereo") > 0)
-        want_stereo = true;
-
-    bool success = false;
-
-    if (TryOpenSound(want_freq, want_stereo))
-        success = true;
-
-    if (!success)
+    if (ma_engine_init(&config, &sound_engine) != MA_SUCCESS)
     {
         LogPrint("StartupSound: Unable to find a working sound mode!\n");
         no_sound = true;
         return;
     }
 
-    sound_device_frequency = want_freq;
-    sound_device_stereo    = want_stereo ? true : false;
-
-    // update Sound Options menu
-    if (sound_device_stereo != (var_sound_stereo >= 1))
-        var_sound_stereo = sound_device_stereo ? 1 : 0;
+    sound_device_frequency = ma_engine_get_sample_rate(&sound_engine);
 
     // display some useful stuff
-    LogPrint("StartupSound: Success @ %d Hz %s\n", sound_device_frequency, sound_device_stereo ? "Stereo" : "Mono");
+    LogPrint("StartupSound: Success @ %d Hz, %d channels\n", sound_device_frequency, ma_engine_get_channels(&sound_engine));
 
     return;
 }

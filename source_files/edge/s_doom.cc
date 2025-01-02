@@ -50,12 +50,12 @@ bool LoadDoomSound(SoundData *buf, uint8_t *data, int length)
     const uint8_t *src   = data + 8;
     const uint8_t *s_end = src + length;
 
-    int16_t *dest = buf->data_;
-    int16_t out = 0;
+    float *dest = buf->data_;
+    float out = 0;
     
     for (; src < s_end; src++)
     {
-        out = (*src ^ 0x80) << 8;
+        ma_pcm_u8_to_f32(&out, src, 1, ma_dither_mode_none);
         *dest++ = out;
         *dest++ = out;
     }
@@ -102,7 +102,7 @@ bool LoadPCSpeakerSound(SoundData *buf, uint8_t *data, int length)
     data += 4;
     length -= 4;
     buf->Allocate(length * samples_per_byte);
-    int16_t *dst = buf->data_;
+    float *dst = buf->data_;
 	while (length--) 
 	{
         if (*data > 128)
@@ -112,13 +112,16 @@ bool LoadPCSpeakerSound(SoundData *buf, uint8_t *data, int length)
         }
 		tone = kFrequencyTable[*data++];
 		phase_length = (sound_device_frequency*tone)/(2*kPCInterruptTimer);
+        uint8_t value = 0;
+        float float_value = 0;
 		for (i=0; i<samples_per_byte; i++)
 		{
 			if (tone)
 			{
-                int16_t val = ((128 + sign * kPCVolume) ^ 0x80) << 8;
-				*dst++ = val;
-                *dst++ = val;
+                value = (128 + sign * kPCVolume);
+                ma_pcm_u8_to_f32(&float_value, &value, 1, ma_dither_mode_none);
+				*dst++ = float_value;
+                *dst++ = float_value;
 				if (phase_tic++ >= phase_length)
 				{
 					sign = -sign;

@@ -316,7 +316,7 @@ static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, Posit
     chan->loop_ = false;
     chan->boss_ = (flags & kSoundEffectBoss) ? true : false;
 
-    ma_audio_buffer_config config = ma_audio_buffer_config_init(ma_format_s16, 2, buf->length_, buf->data_, NULL);
+    ma_audio_buffer_config config = ma_audio_buffer_config_init(ma_format_f32, 2, buf->length_, buf->data_, NULL);
     config.sampleRate = buf->frequency_;
     ma_audio_buffer_init(&config, &chan->ref_);
     ma_sound_init_from_data_source(&sound_engine, &chan->ref_, 0, NULL, &chan->channel_sound_);

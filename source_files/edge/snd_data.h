@@ -42,8 +42,8 @@ class SoundData
     int length_;    // number of samples
     int frequency_; // frequency
 
-    // 16-bit signed samples.
-    int16_t *data_;
+    // floating point samples
+    float *data_;
 
     // Temp buffer for mixed SFX. Will be overwritten as needed.
     int16_t *filter_data_;

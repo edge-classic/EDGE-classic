@@ -92,25 +92,7 @@ void OGGPlayer::PostOpen()
 
 bool OGGPlayer::StreamIntoBuffer(SoundData *buf)
 {
-    int got_size = stb_vorbis_get_samples_short_interleaved(ogg_decoder_, 2, buf->data_, kMusicBuffer * 2);
-
-    if (got_size == 0) /* EOF */
-    {
-        if (!looping_)
-            return false;
-        stb_vorbis_seek_start(ogg_decoder_);
-        return true;
-    }
-
-    if (got_size < 0) /* ERROR */
-    {
-        LogDebug("[oggplayer_c::StreamIntoBuffer] Failed\n");
-        return false;
-    }
-
-    buf->length_ = got_size;
-
-    return true;
+    return false;
 }
 
 bool OGGPlayer::OpenMemory(uint8_t *data, int length)
@@ -275,9 +257,9 @@ bool LoadOGGSound(SoundData *buf, const uint8_t *data, int length)
 
     SoundGatherer gather;
 
-    int16_t *buffer = gather.MakeChunk(total_samples, true);
+    float *buffer = gather.MakeChunk(total_samples, true);
 
-    gather.CommitChunk(stb_vorbis_get_samples_short_interleaved(ogg, 2, buffer, total_samples * 2));
+    gather.CommitChunk(stb_vorbis_get_samples_float_interleaved(ogg, 2, buffer, total_samples * 2));
 
     if (!gather.Finalise(buf))
         FatalError("OGG SFX Loader: no samples!\n");

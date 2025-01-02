@@ -66,7 +66,6 @@ void DebugOrError(const char *error, ...);
 #endif
 
 extern bool show_obituaries;
-extern int  var_sound_stereo;
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

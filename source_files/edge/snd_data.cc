@@ -66,7 +66,7 @@ void SoundData::Allocate(int samples)
 
     length_ = samples;
 
-    data_ = new int16_t[samples * 2];
+    data_ = new float[samples * 2];
 }
 
 void SoundData::MixSubmerged()

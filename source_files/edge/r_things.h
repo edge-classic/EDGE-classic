@@ -30,11 +30,9 @@
 #include "r_gldefs.h"
 
 void BSPWalkThing(DrawSubsector *dsub, MapObject *mo);
-void SortRenderThings(DrawFloor *dfloor);
+void RenderThings(DrawFloor *dfloor, bool solid);
 
 void RenderWeaponSprites(Player *p);
 void RenderWeaponModel(Player *p);
 void RenderCrosshair(Player *p);
 
-//--- editor settings ---
-// vi:ts=4:sw=4:noexpandtab

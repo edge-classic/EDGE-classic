@@ -483,15 +483,17 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
     if (!props)
         props = dfloor->properties;
 
-    float trans = surf->translucency;
+    const float trans = surf->translucency;
 
     EPI_ASSERT(image);
 
     // (need to load the image to know the opacity)
     GLuint tex_id = ImageCache(image, true, render_view_effect_colormap);
 
+    int32_t blending = GetBlending(trans, (ImageOpacity)image->opacity_);
+
     // ignore non-solid walls in solid mode (& vice versa)
-    if ((trans < 0.99f || image->opacity_ >= kOpacityMasked) == solid_mode)
+    if ((solid_mode && (blending & kBlendingAlpha)) || (!solid_mode && !(blending & kBlendingAlpha)))
         return;
 
     // must determine bbox _before_ mirror flipping
@@ -596,18 +598,6 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
         v_count++;
     }
 
-    int blending;
-
-    if (trans >= 0.99f && image->opacity_ == kOpacitySolid)
-        blending = kBlendingNone;
-    else if (trans < 0.11f || image->opacity_ == kOpacityComplex)
-        blending = kBlendingMasked;
-    else
-        blending = kBlendingLess;
-
-    if (trans < 0.99f || image->opacity_ == kOpacityComplex)
-        blending |= kBlendingAlpha;
-
     // -AJA- 2006-06-22: fix for midmask wrapping bug
     if (mid_masked &&
         (!current_seg->linedef->special || AlmostEquals(current_seg->linedef->special->s_yspeed_,
@@ -660,9 +650,8 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
         int   old_blend = data.blending;
         float old_dt    = data.trans;
         data.blending   = kBlendingMasked | kBlendingAlpha;
-        data.trans      = 85;
-        trans           = 0.33f;
-        cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id, trans, &data.pass, data.blending, false, &data,
+        data.trans      = 85;        
+        cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id, 0.33f, &data.pass, data.blending, false, &data,
                               WallCoordFunc);
         data.blending = old_blend;
         data.trans    = old_dt;
@@ -893,7 +882,8 @@ static void DrawTile(Seg *seg, DrawFloor *dfloor, float lz1, float lz2, float rz
         tex_top_h += seg->sidedef->middle.offset.Y;
     }
 
-    bool opaque = (!seg->back_sector) || (surf->translucency >= 0.99f && image->opacity_ == kOpacitySolid);
+    int32_t blending = GetBlending(surf->translucency, (ImageOpacity)image->opacity_);
+    bool opaque = !seg->back_sector || !(blending * kBlendingAlpha);
 
     // check for horizontal sliders
     if ((flags & kWallTileMidMask) && seg->linedef->slide_door)
@@ -1571,7 +1561,7 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
     if (face_dir < 0 && dfloor->is_highest)
         slope = current_subsector->sector->ceiling_slope;
 
-    float trans = surf->translucency;
+    const float trans = surf->translucency;
 
     // ignore invisible planes
     if (trans < 0.01f)
@@ -1592,8 +1582,11 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
     // (need to load the image to know the opacity)
     GLuint tex_id = ImageCache(surf->image, true, render_view_effect_colormap);
 
-    // ignore non-solid planes in solid_mode (& vice versa)
-    if ((trans < 0.99f || surf->image->opacity_ >= kOpacityMasked) == solid_mode)
+
+    int32_t blending = GetBlending(trans, (ImageOpacity)surf->image->opacity_);
+
+    // ignore non-solid walls in solid mode (& vice versa)
+    if ((solid_mode && (blending & kBlendingAlpha)) || (!solid_mode && !(blending & kBlendingAlpha)))
         return;
 
     // count number of actual vertices
@@ -1661,18 +1654,6 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
         }
     }
 
-    int blending;
-
-    if (trans >= 0.99f && surf->image->opacity_ == kOpacitySolid)
-        blending = kBlendingNone;
-    else if (trans < 0.11f || surf->image->opacity_ == kOpacityComplex)
-        blending = kBlendingMasked;
-    else
-        blending = kBlendingLess;
-
-    if (trans < 0.99f || surf->image->opacity_ == kOpacityComplex)
-        blending |= kBlendingAlpha;
-
     PlaneCoordinateData data;
 
     data.v_count  = v_count;
@@ -1736,8 +1717,7 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
         float old_dt    = data.trans;
         data.blending   = kBlendingMasked | kBlendingAlpha;
         data.trans      = 0.33f;
-        trans           = 0.33f;
-        cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id, trans, &data.pass, data.blending, false, &data,
+        cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id, 0.33f, &data.pass, data.blending, false, &data,
                               PlaneCoordFunc);
         data.blending = old_blend;
         data.trans    = old_dt;
@@ -1824,10 +1804,7 @@ static void RenderSubsector(DrawSubsector *dsub, bool mirror_sub)
         RenderPlane(dfloor, dfloor->ceiling_height, dfloor->ceiling, -1);
         RenderPlane(dfloor, dfloor->floor_height, dfloor->floor, +1);
 
-        if (!solid_mode)
-        {
-            SortRenderThings(dfloor);
-        }
+        RenderThings(dfloor, solid_mode);
     }
 }
 

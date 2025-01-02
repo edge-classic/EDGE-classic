@@ -1138,7 +1138,7 @@ static void DLIT_Thing(MapObject *mo, void *dataptr)
     }
 }
 
-void RenderThing(DrawThing *dthing)
+static void RenderThing(DrawThing *dthing, bool solid)
 {
     EDGE_ZoneScoped;
 
@@ -1146,6 +1146,11 @@ void RenderThing(DrawThing *dthing)
 
     if (dthing->is_model)
     {
+        if (!solid)
+        {
+            return;
+        }
+
         RenderModel(dthing);
         return;
     }
@@ -1165,6 +1170,17 @@ void RenderThing(DrawThing *dthing)
 
     GLuint tex_id = ImageCache(
         image, false, render_view_effect_colormap ? render_view_effect_colormap : dthing->map_object->info_->palremap_);
+
+    int blending = GetBlending(trans, (ImageOpacity)image->opacity_);
+    if (is_fuzzy)
+    {
+        blending |= kBlendingAlpha;
+    }
+
+    if (solid && (blending & kBlendingAlpha) || !solid && !(blending & kBlendingAlpha))
+    {
+        return;
+    }
 
     float h     = image->ScaledHeightActual();
     float right = image->Right();
@@ -1246,14 +1262,6 @@ void RenderThing(DrawThing *dthing)
     data.colors[1].Clear();
     data.colors[2].Clear();
     data.colors[3].Clear();
-
-    int blending = kBlendingMasked;
-
-    if (trans >= 0.11f && image->opacity_ != kOpacityComplex)
-        blending = kBlendingLess;
-
-    if (trans < 0.99 || image->opacity_ == kOpacityComplex)
-        blending |= kBlendingAlpha;
 
     if (mo->hyper_flags_ & kHyperFlagNoZBufferUpdate)
         blending |= kBlendingNoZBuffer;
@@ -1385,7 +1393,7 @@ void RenderThing(DrawThing *dthing)
     }
 }
 
-void SortRenderThings(DrawFloor *dfloor)
+void RenderThings(DrawFloor *dfloor, bool solid)
 {
     //
     // As part my move to strip out Z_Zone usage and replace
@@ -1419,6 +1427,17 @@ void SortRenderThings(DrawFloor *dfloor)
     head_dt = dfloor->things;
     if (!head_dt)
         return;
+
+    if (solid)
+    {
+        while(head_dt)
+        {
+            RenderThing(head_dt, solid);
+            head_dt = head_dt->next;
+        }
+
+        return;
+    }
 
     DrawThing *curr_dt, *dt, *next_dt;
     float      cmp_val;
@@ -1491,7 +1510,7 @@ void SortRenderThings(DrawFloor *dfloor)
 
     // Draw...
     for (dt = head_dt; dt; dt = dt->render_next)
-        RenderThing(dt);
+        RenderThing(dt, solid);
 }
 
 //--- editor settings ---

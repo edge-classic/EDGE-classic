@@ -171,11 +171,7 @@ class SokolRenderState : public RenderState
         for (int32_t i = 0; i < kRenderLayerMax; i++)
         {
             render_backend->SetRenderLayer((RenderLayer)i);
-            for (int32_t j = 0; j < kRenderPassMax; j++)
-            {
-                render_backend->SetRenderPass(j);
-                sgl_scissor_rect(x, y, width, height, false);
-            }
+            sgl_scissor_rect(x, y, width, height, false);
         }
 
         render_backend->SetRenderLayer(current_layer);

@@ -161,12 +161,6 @@ class GLRenderBackend : public RenderBackend
         EPI_UNUSED(clear_depth);
     }
 
-    // EDGE pass, not to be confused with a sokol pass
-    void SetRenderPass(int32_t pass)
-    {
-        EPI_UNUSED(pass);
-    }
-
     RenderLayer GetRenderLayer()
     {
         return kRenderLayerInvalid;

@@ -11,7 +11,6 @@ struct PassInfo
     int32_t height_;
 };
 constexpr int32_t kRenderWorldMax = 8;
-constexpr int32_t kRenderPassMax  = 16;
 
 enum RenderLayer
 {
@@ -57,9 +56,6 @@ class RenderBackend
     virtual void FinishWorldRender() = 0;
 
     virtual void SetRenderLayer(RenderLayer layer, bool clear_depth = false) = 0;
-
-    // EDGE pass, not to be confused with a sokol pass
-    virtual void SetRenderPass(int32_t pass) = 0;
 
     virtual RenderLayer GetRenderLayer() = 0;
 

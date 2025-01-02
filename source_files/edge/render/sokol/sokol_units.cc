@@ -284,8 +284,6 @@ void RenderCurrentUnits(void)
 
         EPI_ASSERT(unit->count > 0);
 
-        render_backend->SetRenderPass(unit->pass);
-
         if (!culling && unit->fog_color != kRGBANoValue && !(unit->blending & kBlendingNoFog))
         {
             float density = unit->fog_density;

@@ -320,7 +320,7 @@ static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, Posit
     config.sampleRate = buf->frequency_;
     ma_audio_buffer_init(&config, &chan->ref_);
     ma_sound_init_from_data_source(&sound_engine, &chan->ref_, 0, NULL, &chan->channel_sound_);
-    ma_sound_set_attenuation_model(&chan->channel_sound_, ma_attenuation_model_none);
+    ma_sound_set_attenuation_model(&chan->channel_sound_, ma_attenuation_model_linear);
     ma_sound_set_looping(&chan->channel_sound_, false);
     ma_sound_start(&chan->channel_sound_);
 }

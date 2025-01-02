@@ -128,6 +128,7 @@ void FreeSoundChannels(void)
         {
             chan->data_ = nullptr;
             ma_sound_uninit(&chan->channel_sound_);
+            ma_audio_buffer_uninit(&chan->ref_);
         }
 
         delete chan;
@@ -203,11 +204,11 @@ void ReallocateSoundChannels(int total)
 
 void UpdateSounds(Position *listener, BAMAngle angle)
 {
-    (void)angle; // attenuation disabled for now
+    (void)angle;
 
-    float listen_x = listener ? listener->x : 0;
-    float listen_y = listener ? listener->y : 0;
-    float listen_z = listener ? listener->z : 0;
+    listen_x = listener ? listener->x : 0;
+    listen_y = listener ? listener->y : 0;
+    listen_z = listener ? listener->z : 0;
 
     ma_engine_listener_set_position(&sound_engine, 0, listen_x, listen_z, -listen_y);
 
@@ -269,7 +270,10 @@ void SoundQueueInitialize(void)
     if (!queue_channel)
         queue_channel = new SoundChannel();
     else
+    {
         ma_sound_uninit(&queue_channel->channel_sound_);
+        ma_audio_buffer_uninit(&queue_channel->ref_);
+    }
 
     queue_channel->state_ = kChannelEmpty;
     queue_channel->data_  = nullptr;
@@ -297,6 +301,7 @@ void SoundQueueShutdown(void)
         queue_channel->data_ = nullptr;
 
         ma_sound_uninit(&queue_channel->channel_sound_);
+        ma_audio_buffer_uninit(&queue_channel->ref_);
 
         delete queue_channel;
         queue_channel = nullptr;
@@ -318,7 +323,10 @@ void SoundQueueStop(void)
     queue_channel->state_ = kChannelFinished;
     queue_channel->data_  = nullptr;
     if (queue_channel->channel_sound_.pDataSource)
+    {
         ma_sound_uninit(&queue_channel->channel_sound_);
+        ma_audio_buffer_uninit(&queue_channel->ref_);
+    }
 }
 
 SoundData *SoundQueueGetFreeBuffer(int samples)

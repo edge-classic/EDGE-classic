@@ -384,7 +384,6 @@ class SokolRenderBackend : public RenderBackend
         }
 
         SetRenderLayer(kRenderLayerHUD);
-        SetupWorldMatrices2D();
     }
 
   private:

@@ -30,7 +30,7 @@ class GLRenderBackend : public RenderBackend
     }
 
     void SetupWorldMatrices2D()
-    {
+    {     
         glViewport(view_window_x, view_window_y, view_window_width, view_window_height);
 
         glMatrixMode(GL_PROJECTION);
@@ -134,11 +134,44 @@ class GLRenderBackend : public RenderBackend
     {
     }
 
+    void SetClearColor(RGBAColor color)
+    {
+        EPI_UNUSED(color);
+    }
+
     void GetPassInfo(PassInfo &info)
     {
         info.width_  = 0;
         info.height_ = 0;
     }
+
+    void BeginWorldRender()
+    {
+
+    }
+
+    void FinishWorldRender()
+    {
+
+    }
+
+    void SetRenderLayer(RenderLayer layer, bool clear_depth = false)
+    {
+        EPI_UNUSED(layer);
+        EPI_UNUSED(clear_depth);
+    }
+
+    // EDGE pass, not to be confused with a sokol pass
+    void SetRenderPass(int32_t pass)
+    {
+        EPI_UNUSED(pass);
+    }
+
+    RenderLayer GetRenderLayer()
+    {
+        return kRenderLayerInvalid;
+    }
+
 };
 
 static GLRenderBackend gl_render_backend;

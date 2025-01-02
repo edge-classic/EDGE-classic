@@ -203,6 +203,10 @@ class GLRenderState : public RenderState
 
     void Clear(GLbitfield mask)
     {
+        if (mask & GL_DEPTH_BUFFER_BIT)
+        {
+            DepthMask(true);
+        }
         glClear(mask);
     }
 

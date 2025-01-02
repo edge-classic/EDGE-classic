@@ -25,6 +25,7 @@
 #include "epi_str_compare.h"
 #include "g_game.h"
 #include "i_defs_gl.h"
+#include "r_backend.h"
 #include "r_colormap.h"
 #include "r_gldefs.h"
 #include "r_image.h"
@@ -1351,6 +1352,8 @@ void HUDDrawQuitScreen()
 
 void HUDRenderWorld(float x, float y, float w, float h, MapObject *camera, int flags)
 {
+    render_backend->BeginWorldRender();
+
     HUDPushScissor(x, y, x + w, y + h, (flags & 1) == 0);
 
     hud_visible_bottom = y + h;
@@ -1374,6 +1377,8 @@ void HUDRenderWorld(float x, float y, float w, float h, MapObject *camera, int f
     RenderView(x1, y1, x2 - x1, y2 - y1, camera, full_height, expand_w);
 
     HUDPopScissor();
+
+    render_backend->FinishWorldRender();    
 }
 
 void HUDRenderAutomap(float x, float y, float w, float h, MapObject *player, int flags)

@@ -59,11 +59,13 @@ set (EDGE_SOURCE_FILES
   rad_act.cc
   rad_pars.cc
   rad_trig.cc
+  r_bsp.cc
   r_draw.cc
   r_shader.cc
   r_render.cc
   r_effects.cc
   r_backend.cc
+  r_mirror.cc
   r_occlude.cc
   r_things.cc
   r_units.cc

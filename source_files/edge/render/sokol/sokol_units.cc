@@ -106,6 +106,11 @@ RGBAColor culling_fog_color;
 //
 void StartUnitBatch(bool sort_em)
 {
+    if (render_backend->RenderUnitsLocked())
+    {
+        FatalError("StartUnitBatch - Render units are locked");
+    }
+
     current_render_vert = current_render_unit = 0;
 
     batch_sort = sort_em;
@@ -120,6 +125,11 @@ void StartUnitBatch(bool sort_em)
 //
 void FinishUnitBatch(void)
 {
+    if (render_backend->RenderUnitsLocked())
+    {
+        FatalError("FinishUnitBatch - Render units are locked");
+    }
+
     RenderCurrentUnits();
 }
 
@@ -136,6 +146,11 @@ void FinishUnitBatch(void)
 RendererVertex *BeginRenderUnit(GLuint shape, int max_vert, GLuint env1, GLuint tex1, GLuint env2, GLuint tex2,
                                 int pass, int blending, RGBAColor fog_color, float fog_density)
 {
+    if (render_backend->RenderUnitsLocked())
+    {
+        FatalError("BeginRenderUnit - Render units are locked");
+    }
+
     RendererUnit *unit;
 
     EPI_ASSERT(max_vert > 0);
@@ -177,6 +192,11 @@ RendererVertex *BeginRenderUnit(GLuint shape, int max_vert, GLuint env1, GLuint 
 //
 void EndRenderUnit(int actual_vert)
 {
+    if (render_backend->RenderUnitsLocked())
+    {
+        FatalError("EndRenderUnit - Render units are locked");
+    }
+
     RendererUnit *unit;
 
     EPI_ASSERT(actual_vert >= 0);
@@ -227,6 +247,11 @@ struct Compare_Unit_pred
 void RenderCurrentUnits(void)
 {
     EDGE_ZoneScoped;
+
+    if (render_backend->RenderUnitsLocked())
+    {
+        FatalError("RenderCurrentUnits - Render units are locked");
+    }
 
     if (current_render_unit == 0)
         return;

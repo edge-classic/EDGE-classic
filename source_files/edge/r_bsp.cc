@@ -411,7 +411,7 @@ static void BSPWalkSeg(DrawSubsector *dsub, Seg *seg)
     {
         if (f_fh < b_fh)
         {
-            RenderSkyWall(seg, f_fh, b_fh);
+            QueueSkyWall(seg, f_fh, b_fh);
         }
     }
 
@@ -419,7 +419,7 @@ static void BSPWalkSeg(DrawSubsector *dsub, Seg *seg)
     {
         if (f_ch < fsector->sky_height && (!bsector || !EDGE_IMAGE_IS_SKY(*b_ceil) || b_fh >= f_ch))
         {
-            RenderSkyWall(seg, f_ch, fsector->sky_height);
+            QueueSkyWall(seg, f_ch, fsector->sky_height);
         }
         else if (bsector && EDGE_IMAGE_IS_SKY(*b_ceil))
         {
@@ -427,7 +427,7 @@ static void BSPWalkSeg(DrawSubsector *dsub, Seg *seg)
 
             if (b_ch <= max_f && max_f < fsector->sky_height)
             {
-                RenderSkyWall(seg, max_f, fsector->sky_height);
+                QueueSkyWall(seg, max_f, fsector->sky_height);
             }
         }
     }
@@ -435,7 +435,7 @@ static void BSPWalkSeg(DrawSubsector *dsub, Seg *seg)
     else if (!debug_hall_of_mirrors.d_ && bsector && EDGE_IMAGE_IS_SKY(*b_ceil) && seg->sidedef->top.image == nullptr &&
              b_ch < f_ch)
     {
-        RenderSkyWall(seg, b_ch, f_ch);
+        QueueSkyWall(seg, b_ch, f_ch);
     }
 }
 
@@ -660,12 +660,12 @@ static void BSPWalkSubsector(int num)
     {
         if (EDGE_IMAGE_IS_SKY(sub->sector->floor) && view_z > sub->sector->interpolated_floor_height)
         {
-            RenderSkyPlane(sub, sub->sector->interpolated_floor_height);
+            QueueSkyPlane(sub, sub->sector->interpolated_floor_height);
         }
 
         if (EDGE_IMAGE_IS_SKY(sub->sector->ceiling) && view_z < sub->sector->sky_height)
         {
-            RenderSkyPlane(sub, sub->sector->sky_height);
+            QueueSkyPlane(sub, sub->sector->sky_height);
         }
     }
 
@@ -703,11 +703,11 @@ static void BSPWalkSubsector(int num)
         }
         if (EDGE_IMAGE_IS_SKY(*floor_s) && view_z > floor_h)
         {
-            RenderSkyPlane(sub, floor_h);
+            QueueSkyPlane(sub, floor_h);
         }
         if (EDGE_IMAGE_IS_SKY(*ceil_s) && view_z < sub->sector->sky_height)
         {
-            RenderSkyPlane(sub, sub->sector->sky_height);
+            QueueSkyPlane(sub, sub->sector->sky_height);
         }
     }
     // -AJA- 2004/04/22: emulate the Deep-Water TRICK

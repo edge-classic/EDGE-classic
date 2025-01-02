@@ -59,7 +59,7 @@
 
 extern ConsoleVariable draw_culling;
 
-extern MapObject *view_camera_map_object;
+extern MapObject      *view_camera_map_object;
 extern ConsoleVariable debug_hall_of_mirrors;
 
 extern float sprite_skew;
@@ -69,14 +69,14 @@ extern ViewHeightZone view_height_zone;
 extern Subsector *current_subsector;
 extern Seg       *current_seg;
 
-extern unsigned int root_node;
+extern unsigned int               root_node;
 extern std::list<DrawSubsector *> draw_subsector_list;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(force_flat_lighting, "0", kConsoleVariableFlagArchive)
 
 bool solid_mode;
-int detail_level       = 1;
-int use_dynamic_lights = 0;
+int  detail_level       = 1;
+int  use_dynamic_lights = 0;
 
 float view_x_slope;
 float view_y_slope;
@@ -99,6 +99,26 @@ static bool thick_liquid = false;
 
 static float wave_now;    // value for doing wave table lookups
 static float plane_z_bob; // for floor/ceiling bob DDFSECT stuff
+
+// Sky
+enum kSkyQueueType
+{
+    kSkyQueueWall  = 0,
+    kSkyQueuePlane = 1
+};
+
+struct SkyQueueItem
+{
+    kSkyQueueType type_;
+
+    Seg       *wallSeg_;
+    Subsector *planeSubsector_;
+
+    float height1_;
+    float height2_;
+};
+
+static std::vector<SkyQueueItem> queued_skies_;
 
 static float Slope_GetHeight(SlopePlane *slope, float x, float y)
 {
@@ -1822,7 +1842,7 @@ static void DoWeaponModel(void)
     // by the world geometry.  NOTE: a tad expensive, but I don't
     // know how any better way to prevent clipping -- the model
     // needs the depth buffer for overlapping parts of itself.
-    
+
     render_state->Clear(GL_DEPTH_BUFFER_BIT);
 
     solid_mode = false;
@@ -2023,8 +2043,28 @@ void RenderTrueBsp(void)
     // needed for drawing the sky
     BeginSky();
 
+    render_backend->LockRenderUnits(true);
+
     // walk the bsp tree
     BspWalkNode(root_node);
+
+    render_backend->LockRenderUnits(false);
+
+    for (size_t i = 0; i < queued_skies_.size(); i++)
+    {
+        SkyQueueItem *item = &queued_skies_[i];
+        switch (item->type_)
+        {
+        case kSkyQueuePlane:
+            RenderSkyPlane(item->planeSubsector_, item->height1_);
+            break;
+        case kSkyQueueWall:
+            RenderSkyWall(item->wallSeg_, item->height1_, item->height2_);
+            break;
+        }
+    }
+
+    queued_skies_.clear();
 
     FinishSky();
 
@@ -2068,7 +2108,7 @@ void RenderTrueBsp(void)
     if (FlashFirst == true)
     {
         render_backend->SetRenderLayer(kRenderLayerWeapon);
-        render_backend->SetupMatrices3D();        
+        render_backend->SetupMatrices3D();
         render_state->Enable(GL_DEPTH_TEST);
         DoWeaponModel();
         render_state->Disable(GL_DEPTH_TEST);
@@ -2079,7 +2119,6 @@ void RenderTrueBsp(void)
     LogDebug("\n\n");
 #endif
 }
-
 
 void RenderView(int x, int y, int w, int h, MapObject *camera, bool full_height, float expand_w)
 {
@@ -2101,6 +2140,39 @@ void RenderView(int x, int y, int w, int h, MapObject *camera, bool full_height,
 
     seen_dynamic_lights.clear();
     RenderTrueBsp();
+}
+
+static void QueueSky(const SkyQueueItem &item)
+{
+    if (!queued_skies_.size())
+    {
+        queued_skies_.reserve(4 * 1024);
+    }
+    else if (queued_skies_.size() == queued_skies_.capacity())
+    {
+        queued_skies_.reserve(queued_skies_.size() * 2);
+    }
+
+    queued_skies_.emplace_back(item);
+}
+
+void QueueSkyWall(Seg *seg, float h1, float h2)
+{
+    SkyQueueItem item;
+    item.height1_ = h1;
+    item.height2_ = h2;
+    item.wallSeg_ = seg;
+    item.type_    = kSkyQueueWall;
+    QueueSky(item);
+}
+
+void QueueSkyPlane(Subsector *sub, float h)
+{
+    SkyQueueItem item;
+    item.height1_        = h;
+    item.planeSubsector_ = sub;
+    item.type_           = kSkyQueuePlane;
+    QueueSky(item);
 }
 
 #ifdef _DISABLE_FLOODPLANES

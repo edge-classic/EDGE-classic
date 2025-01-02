@@ -129,17 +129,23 @@ class SokolRenderBackend : public RenderBackend
     void FinishFrame()
     {
 
-        // world passes
-        for (int32_t i = kRenderPassMax + 1; i < render_state_.max_frame_layer_; i++)
+        // World
+        for (int32_t i = 0; i < kRenderWorldMax; i++)
         {
-            sgl_context_draw_layer(context_, i);
+            if (!world_state_[i].used_)
+            {
+                break;
+            }
+
+            int32_t base_layer = kRenderLayerSky + i * 4 + 1;
+            for (int32_t j = 0; j < 4; j++)
+            {
+                sgl_context_draw_layer(context_, base_layer + j);
+            }
         }
 
-        // Hud passes
-        for (int i = 1; i < kRenderPassMax + 1; i++)
-        {
-            sgl_context_draw_layer(context_, i);
-        }
+        // Hud
+        sgl_context_draw_layer(context_, kRenderLayerHUD + 1);
 
         // default layer
         sgl_context_draw_layer(context_, 0);
@@ -301,7 +307,17 @@ class SokolRenderBackend : public RenderBackend
     virtual void SetRenderLayer(RenderLayer layer, bool clear_depth = false)
     {
         render_state_.layer_ = layer;
-        SetRenderPass(0);
+
+        if (layer == kRenderLayerHUD)
+        {
+            render_state_.sokol_layer_ = 1;
+        }
+        else
+        {
+            render_state_.sokol_layer_ = kRenderLayerSky + render_state_.world_state_ * 4 + 1;
+        }
+
+        sgl_layer(render_state_.sokol_layer_);
 
         if (clear_depth)
         {
@@ -312,30 +328,6 @@ class SokolRenderBackend : public RenderBackend
     RenderLayer GetRenderLayer()
     {
         return render_state_.layer_;
-    }
-
-    // sole place that update sgl_layer
-    void SetRenderPass(int32_t pass)
-    {
-        if (pass < 0 || pass >= kRenderPassMax)
-        {
-            FatalError("SetRenderPass: Max render pass exceeded");
-        }
-        
-        render_state_.pass_ = pass;
-
-        int32_t layer = (render_state_.layer_ * kRenderPassMax) + pass + 1;
-
-        if (render_state_.world_state_ > 0)
-        {
-            layer += (render_state_.world_state_) * 4 * kRenderPassMax;
-        }
-
-        if (layer > render_state_.max_frame_layer_)
-        {
-            render_state_.max_frame_layer_ = layer;
-        }
-        sgl_layer(layer);
     }
 
     void BeginWorldRender()
@@ -384,6 +376,7 @@ class SokolRenderBackend : public RenderBackend
         }
 
         SetRenderLayer(kRenderLayerHUD);
+        SetupMatrices2D();
     }
 
   private:
@@ -396,8 +389,7 @@ class SokolRenderBackend : public RenderBackend
     struct RenderState
     {
         RenderLayer layer_;
-        int32_t     max_frame_layer_;
-        int32_t     pass_;
+        int32_t     sokol_layer_;
         int32_t     world_state_;
     };
 

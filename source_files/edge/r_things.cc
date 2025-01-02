@@ -49,6 +49,7 @@
 #include "r_image.h"
 #include "r_md2.h"
 #include "r_mdl.h"
+#include "r_mirror.h"
 #include "r_misc.h"
 #include "r_modes.h"
 #include "r_render.h"
@@ -733,13 +734,13 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my, b
         else
             ang = mo->angle_;
 
-        MirrorAngle(ang);
+        bsp_mirror_set.Angle(ang);
 
         BAMAngle from_view = PointToAngle(view_x, view_y, mx, my);
 
         ang = from_view - ang + kBAMAngle180;
 
-        if (MirrorReflective())
+        if (bsp_mirror_set.Reflective())
             ang = (BAMAngle)0 - ang;
 
         if (frame->rotations_ == 16)
@@ -752,7 +753,7 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my, b
 
     (*flip) = frame->flip_[rot] ? true : false;
 
-    if (MirrorReflective())
+    if (bsp_mirror_set.Reflective())
         (*flip) = !(*flip);
 
     if (!frame->images_[rot])
@@ -819,7 +820,7 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
     EPI_ASSERT(mo->state_);
 
     // ignore the camera itself
-    if (mo == view_camera_map_object && MirrorTotalActive() == 0)
+    if (mo == view_camera_map_object && bsp_mirror_set.TotalActive() == 0)
         return;
 
     // ignore invisible things
@@ -860,7 +861,7 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
         mz = mo->interpolation_from_.Z + (mz - mo->interpolation_from_.Z) * along;
     }
 
-    MirrorCoordinate(mx, my);
+    bsp_mirror_set.Coordinate(mx, my);
 
     float tr_x = mx - view_x;
     float tr_y = my - view_y;
@@ -1004,8 +1005,8 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
         if (gzb >= gzt)
             return;
 
-        MirrorHeight(gzb);
-        MirrorHeight(gzt);
+        bsp_mirror_set.Height(gzb);
+        bsp_mirror_set.Height(gzt);
     }
 
     // create new draw thing
@@ -1038,7 +1039,7 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
     dthing->top = dthing->original_top = gzt;
     dthing->bottom = dthing->original_bottom = gzb;
 
-    float mir_scale = MirrorXYScale();
+    float mir_scale = bsp_mirror_set.XYScale();
 
     dthing->left_delta_x  = pos1 * view_sine * mir_scale;
     dthing->left_delta_y  = pos1 * -view_cosine * mir_scale;
@@ -1066,7 +1067,7 @@ static void RenderModel(DrawThing *dthing)
 
     float z = dthing->map_z;
 
-    MirrorHeight(z);
+    render_mirror_set.Height(z);
 
     float   sink_mult = 0;
     float   bob_mult  = 0;
@@ -1138,7 +1139,7 @@ static void DLIT_Thing(MapObject *mo, void *dataptr)
     }
 }
 
-static void RenderThing(DrawThing *dthing, bool solid)
+static bool RenderThing(DrawThing *dthing, bool solid)
 {
     EDGE_ZoneScoped;
 
@@ -1148,11 +1149,11 @@ static void RenderThing(DrawThing *dthing, bool solid)
     {
         if (!solid)
         {
-            return;
+            return false;
         }
 
         RenderModel(dthing);
-        return;
+        return true;
     }
 
     MapObject *mo = dthing->map_object;
@@ -1164,7 +1165,7 @@ static void RenderThing(DrawThing *dthing, bool solid)
     float dx = 0, dy = 0;
 
     if (trans <= 0)
-        return;
+        return true;
 
     const Image *image = dthing->image;
 
@@ -1179,7 +1180,7 @@ static void RenderThing(DrawThing *dthing, bool solid)
 
     if (solid && (blending & kBlendingAlpha) || !solid && !(blending & kBlendingAlpha))
     {
-        return;
+        return false;
     }
 
     float h     = image->ScaledHeightActual();
@@ -1198,7 +1199,7 @@ static void RenderThing(DrawThing *dthing, bool solid)
     z1t = z2t = dthing->top;
 
     // MLook: tilt sprites so they look better
-    if (MirrorXYScale() >= 0.99)
+    if (render_mirror_set.XYScale() >= 0.99)
     {
         float _h    = dthing->original_top - dthing->original_bottom;
         float skew2 = _h;
@@ -1229,7 +1230,7 @@ static void RenderThing(DrawThing *dthing, bool solid)
     float tex_y1 = dthing->bottom - dthing->original_bottom;
     float tex_y2 = tex_y1 + (z1t - z1b);
 
-    float yscale = mo->scale_ * MirrorZScale();
+    float yscale = mo->scale_ * render_mirror_set.ZScale();
 
     EPI_ASSERT(h > 0);
     tex_y1 = top * tex_y1 / (h * yscale);
@@ -1391,9 +1392,11 @@ static void RenderThing(DrawThing *dthing, bool solid)
 
         EndRenderUnit(4);
     }
+
+    return solid;
 }
 
-void RenderThings(DrawFloor *dfloor, bool solid)
+bool RenderThings(DrawFloor *dfloor, bool solid)
 {
     //
     // As part my move to strip out Z_Zone usage and replace
@@ -1426,17 +1429,22 @@ void RenderThings(DrawFloor *dfloor, bool solid)
     // Check we have something to draw
     head_dt = dfloor->things;
     if (!head_dt)
-        return;
+        return true;
+
+    bool all_solid = true;
 
     if (solid)
     {
         while(head_dt)
         {
-            RenderThing(head_dt, solid);
+            if (!RenderThing(head_dt, solid))
+            {
+                all_solid = false;
+            }
             head_dt = head_dt->next;
         }
 
-        return;
+        return all_solid;
     }
 
     DrawThing *curr_dt, *dt, *next_dt;
@@ -1510,7 +1518,14 @@ void RenderThings(DrawFloor *dfloor, bool solid)
 
     // Draw...
     for (dt = head_dt; dt; dt = dt->render_next)
-        RenderThing(dt, solid);
+    {
+        if (!RenderThing(dt, solid))
+        {
+            all_solid = false;
+        }
+    }
+
+    return all_solid;
 }
 
 //--- editor settings ---

@@ -29,6 +29,7 @@
 #include "r_colormap.h"
 #include "r_gldefs.h"
 #include "r_image.h"
+#include "r_mirror.h"
 #include "r_misc.h"
 #include "r_modes.h"
 #include "r_sky.h"
@@ -714,14 +715,14 @@ void RenderSkyPlane(Subsector *sub, float h)
 
     float x0 = seg->vertex_1->X;
     float y0 = seg->vertex_1->Y;
-    MirrorCoordinate(x0, y0);
+    render_mirror_set.Coordinate(x0, y0);
     seg = seg->subsector_next;
     if (!seg)
         return;
 
     float x1 = seg->vertex_1->X;
     float y1 = seg->vertex_1->Y;
-    MirrorCoordinate(x1, y1);
+    render_mirror_set.Coordinate(x1, y1);
     seg = seg->subsector_next;
     if (!seg)
         return;
@@ -729,14 +730,14 @@ void RenderSkyPlane(Subsector *sub, float h)
     if (!sky_unit_started)
         BeginSkyUnit();
 
-    MirrorHeight(h);
+    render_mirror_set.Height(h);
     RGBAColor unit_col = kRGBAWhite;
 
     while (seg)
     {
         float x2 = seg->vertex_1->X;
         float y2 = seg->vertex_1->Y;
-        MirrorCoordinate(x2, y2);
+        render_mirror_set.Coordinate(x2, y2);
 
         sky_glvert->rgba = unit_col;
         sky_glvert++->position = {{x0, y0, h}};
@@ -778,11 +779,11 @@ void RenderSkyWall(Seg *seg, float h1, float h2)
     float x2 = seg->vertex_2->X;
     float y2 = seg->vertex_2->Y;
 
-    MirrorCoordinate(x1, y1);
-    MirrorCoordinate(x2, y2);
+    render_mirror_set.Coordinate(x1, y1);
+    render_mirror_set.Coordinate(x2, y2);
 
-    MirrorHeight(h1);
-    MirrorHeight(h2);
+    render_mirror_set.Height(h1);
+    render_mirror_set.Height(h2);
 
     RGBAColor unit_col = kRGBAWhite;
 

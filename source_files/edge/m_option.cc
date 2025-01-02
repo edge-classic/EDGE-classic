@@ -630,8 +630,10 @@ static OptionMenuDefinition gameplay_optmenu = {playoptions,
 //
 static OptionMenuItem perfoptions[] = {
     {kOptionMenuItemTypeSwitch, "Detail Level", "Low/Medium/High", 3, &detail_level, OptionMenuChangeMipMap, nullptr, nullptr, 0, 0, 0, ""},
+#ifndef EDGE_SOKOL    
     {kOptionMenuItemTypeBoolean, "Simple Skies", YesNo, 2, &renderer_dumb_sky.d_,
      OptionMenuUpdateConsoleVariableFromInt, "Speeds up sky drawing, but breaks sky flooding and other hacks", &renderer_dumb_sky, 0, 0, 0, ""},
+#endif     
     {kOptionMenuItemTypeBoolean, "Draw Distance Culling", YesNo, 2, &draw_culling.d_,
      OptionMenuUpdateConsoleVariableFromInt, "Sector/Level Fog will be disabled when this is On", &draw_culling, 0, 0, 0, ""},
     {kOptionMenuItemTypeSlider, "Maximum Draw Distance", nullptr, 0, &draw_culling_distance.f_,

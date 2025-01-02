@@ -23,6 +23,7 @@
 //
 //----------------------------------------------------------------------------
 
+#include <SDL2/SDL.h>
 #include <math.h>
 
 #include <unordered_map>
@@ -46,6 +47,7 @@
 #include "r_effects.h"
 #include "r_gldefs.h"
 #include "r_image.h"
+#include "r_mirror.h"
 #include "r_misc.h"
 #include "r_modes.h"
 #include "r_occlude.h"
@@ -54,6 +56,43 @@
 #include "r_sky.h"
 #include "r_things.h"
 #include "r_units.h"
+
+#ifdef EDGE_SOKOL
+#define BSP_MULTITHREAD
+#endif
+
+#ifdef BSP_MULTITHREAD
+#include "thread.h"
+
+constexpr int32_t kMaxRenderBatch = 65536 / 4;
+
+struct BSPThread
+{
+    thread_ptr_t    thread_;
+    thread_signal_t signal_start_;
+    thread_signal_t signal_stop_;
+
+    thread_queue_t      queue_;
+    RenderBatch        *render_queue_[kMaxRenderBatch];
+    thread_atomic_int_t exit_flag_;
+};
+
+static struct BSPThread bsp_thread;
+
+static RenderBatch *current_batch = nullptr;
+
+static void BSPQueueDrawSubsector(DrawSubsector *subsector);
+static void BSPQueueSkyWall(Seg *seg, float h1, float h2);
+static void BSPQueueSkyPlane(Subsector *sub, float h);
+static void BSPQueueRenderBatch(RenderBatch *batch);
+
+#else
+
+std::list<DrawSubsector *> draw_subsector_list;
+
+#endif
+
+MirrorSet bsp_mirror_set(kMirrorSetBSP);
 
 EDGE_DEFINE_CONSOLE_VARIABLE(debug_hall_of_mirrors, "0", kConsoleVariableFlagCheat)
 
@@ -83,10 +122,7 @@ ViewHeightZone view_height_zone;
 
 // common stuff
 
-Subsector *current_subsector;
-Seg       *current_seg;
-
-std::list<DrawSubsector *> draw_subsector_list;
+static Subsector *bsp_current_subsector;
 
 static constexpr uint8_t kMaximumEdgeVertices = 20;
 
@@ -131,9 +167,9 @@ static void BSPWalkMirror(DrawSubsector *dsub, Seg *seg, BAMAngle left, BAMAngle
 #endif
 
     // push mirror (translation matrix)
-    MirrorPush(mir);
+    bsp_mirror_set.Push(mir);
 
-    Subsector *save_sub = current_subsector;
+    Subsector *save_sub = bsp_current_subsector;
 
     BAMAngle save_clip_L = clip_left;
     BAMAngle save_clip_R = clip_right;
@@ -146,14 +182,14 @@ static void BSPWalkMirror(DrawSubsector *dsub, Seg *seg, BAMAngle left, BAMAngle
     // perform another BSP walk
     BspWalkNode(root_node);
 
-    current_subsector = save_sub;
+    bsp_current_subsector = save_sub;
 
     clip_left  = save_clip_L;
     clip_right = save_clip_R;
     clip_scope = save_scope;
 
     // pop mirror
-    MirrorPop();
+    bsp_mirror_set.Pop();
 
 #if defined(EDGE_GL_ES2)
     // GL4ES mirror fix for renderlist
@@ -172,7 +208,7 @@ static void BSPWalkSeg(DrawSubsector *dsub, Seg *seg)
     EDGE_ZoneScoped;
 
     // ignore segs sitting on current mirror
-    if (MirrorSegOnPortal(seg))
+    if (bsp_mirror_set.SegOnPortal(seg))
         return;
 
     float sx1 = seg->vertex_1->X;
@@ -184,15 +220,15 @@ static void BSPWalkSeg(DrawSubsector *dsub, Seg *seg)
     // when there are active mirror planes, segs not only need to
     // be flipped across them but also clipped across them.
 
-    int32_t active_mirrors = MirrorTotalActive();
+    int32_t active_mirrors = bsp_mirror_set.TotalActive();
     if (active_mirrors > 0)
     {
         for (int i = active_mirrors - 1; i >= 0; i--)
         {
-            MirrorTransform(i, sx1, sy1);
-            MirrorTransform(i, sx2, sy2);
+            bsp_mirror_set.Transform(i, sx1, sy1);
+            bsp_mirror_set.Transform(i, sx2, sy2);
 
-            if (!MirrorIsPortal(i))
+            if (!bsp_mirror_set.IsPortal(i))
             {
                 float tmp_x = sx1;
                 sx1         = sx2;
@@ -202,7 +238,7 @@ static void BSPWalkSeg(DrawSubsector *dsub, Seg *seg)
                 sy2         = tmp_y;
             }
 
-            Seg *clipper = MirrorSeg(i);
+            Seg *clipper = bsp_mirror_set.GetSeg(i);
 
             DividingLine div;
 
@@ -411,7 +447,11 @@ static void BSPWalkSeg(DrawSubsector *dsub, Seg *seg)
     {
         if (f_fh < b_fh)
         {
-            QueueSkyWall(seg, f_fh, b_fh);
+#ifdef BSP_MULTITHREAD
+            BSPQueueSkyWall(seg, f_fh, b_fh);
+#else
+            RenderSkyWall(seg, f_fh, b_fh);
+#endif
         }
     }
 
@@ -419,7 +459,11 @@ static void BSPWalkSeg(DrawSubsector *dsub, Seg *seg)
     {
         if (f_ch < fsector->sky_height && (!bsector || !EDGE_IMAGE_IS_SKY(*b_ceil) || b_fh >= f_ch))
         {
-            QueueSkyWall(seg, f_ch, fsector->sky_height);
+#ifdef BSP_MULTITHREAD
+            BSPQueueSkyWall(seg, f_ch, fsector->sky_height);
+#else
+            RenderSkyWall(seg, f_ch, fsector->sky_height);
+#endif
         }
         else if (bsector && EDGE_IMAGE_IS_SKY(*b_ceil))
         {
@@ -427,7 +471,11 @@ static void BSPWalkSeg(DrawSubsector *dsub, Seg *seg)
 
             if (b_ch <= max_f && max_f < fsector->sky_height)
             {
-                QueueSkyWall(seg, max_f, fsector->sky_height);
+#ifdef BSP_MULTITHREAD
+                BSPQueueSkyWall(seg, max_f, fsector->sky_height);
+#else
+                RenderSkyWall(seg, max_f, fsector->sky_height);
+#endif
             }
         }
     }
@@ -435,7 +483,11 @@ static void BSPWalkSeg(DrawSubsector *dsub, Seg *seg)
     else if (!debug_hall_of_mirrors.d_ && bsector && EDGE_IMAGE_IS_SKY(*b_ceil) && seg->sidedef->top.image == nullptr &&
              b_ch < f_ch)
     {
-        QueueSkyWall(seg, b_ch, f_ch);
+#ifdef BSP_MULTITHREAD
+        BSPQueueSkyWall(seg, b_ch, f_ch);
+#else
+        RenderSkyWall(seg, b_ch, f_ch);
+#endif
     }
 }
 
@@ -452,7 +504,7 @@ static bool BSPCheckBBox(float *bspcoord)
 {
     EDGE_ZoneScoped;
 
-    if (MirrorTotalActive() > 0)
+    if (bsp_mirror_set.TotalActive() > 0)
     {
         // a flipped bbox may no longer be axis aligned, hence we
         // need to find the bounding area of the transformed box.
@@ -465,7 +517,7 @@ static bool BSPCheckBBox(float *bspcoord)
             float tx = bspcoord[(p & 1) ? kBoundingBoxLeft : kBoundingBoxRight];
             float ty = bspcoord[(p & 2) ? kBoundingBoxBottom : kBoundingBoxTop];
 
-            MirrorCoordinate(tx, ty);
+            bsp_mirror_set.Coordinate(tx, ty);
 
             BoundingBoxAddPoint(new_bbox, tx, ty);
         }
@@ -636,7 +688,7 @@ static void BSPWalkSubsector(int num)
     Sector    *sector = sub->sector;
 
     // store subsector in a global var for other functions to use
-    current_subsector = sub;
+    bsp_current_subsector = sub;
 
 #if (DEBUG >= 1)
     LogDebug("\nVISITING SUBSEC %d (sector %d)\n\n", num, sub->sector - level_sectors);
@@ -660,12 +712,20 @@ static void BSPWalkSubsector(int num)
     {
         if (EDGE_IMAGE_IS_SKY(sub->sector->floor) && view_z > sub->sector->interpolated_floor_height)
         {
-            QueueSkyPlane(sub, sub->sector->interpolated_floor_height);
+#ifdef BSP_MULTITHREAD            
+            BSPQueueSkyPlane(sub, sub->sector->interpolated_floor_height);
+#else
+            RenderSkyPlane(sub, sub->sector->interpolated_floor_height);
+#endif            
         }
 
         if (EDGE_IMAGE_IS_SKY(sub->sector->ceiling) && view_z < sub->sector->sky_height)
         {
-            QueueSkyPlane(sub, sub->sector->sky_height);
+#ifdef BSP_MULTITHREAD            
+            BSPQueueSkyPlane(sub, sub->sector->sky_height);
+#else            
+            RenderSkyPlane(sub, sub->sector->sky_height);
+#endif
         }
     }
 
@@ -703,11 +763,19 @@ static void BSPWalkSubsector(int num)
         }
         if (EDGE_IMAGE_IS_SKY(*floor_s) && view_z > floor_h)
         {
-            QueueSkyPlane(sub, floor_h);
+#ifdef BSP_MULTITHREAD            
+            BSPQueueSkyPlane(sub, floor_h);
+#else
+            RenderSkyPlane(sub, floor_h);
+#endif
         }
         if (EDGE_IMAGE_IS_SKY(*ceil_s) && view_z < sub->sector->sky_height)
         {
-            QueueSkyPlane(sub, sub->sector->sky_height);
+#ifdef BSP_MULTITHREAD                        
+            BSPQueueSkyPlane(sub, sub->sector->sky_height);
+#else
+            RenderSkyPlane(sub, sub->sector->sky_height);
+#endif            
         }
     }
     // -AJA- 2004/04/22: emulate the Deep-Water TRICK
@@ -773,7 +841,7 @@ static void BSPWalkSubsector(int num)
 
         for (Seg *seg = sub->segs; seg; seg = seg->subsector_next)
         {
-            if (MirrorSegOnPortal(seg))
+            if (bsp_mirror_set.SegOnPortal(seg))
                 continue;
 
             float sx1 = seg->vertex_1->X;
@@ -802,11 +870,17 @@ static void BSPWalkSubsector(int num)
             }
 
             // add drawsub to list (closest -> furthest)
-            int32_t active_mirrors = MirrorTotalActive();
+            int32_t active_mirrors = bsp_mirror_set.TotalActive();
             if (active_mirrors > 0)
-                MirrorPushSubsector(active_mirrors - 1, K);
+                bsp_mirror_set.PushSubsector(active_mirrors - 1, K);
             else
+            {
+#ifdef BSP_MULTITHREAD
+                BSPQueueDrawSubsector(K);
+#else
                 draw_subsector_list.push_back(K);
+#endif
+            }
         }
     }
     else
@@ -822,11 +896,17 @@ static void BSPWalkSubsector(int num)
         }
 
         // add drawsub to list (closest -> furthest)
-        int32_t active_mirrors = MirrorTotalActive();
+        int32_t active_mirrors = bsp_mirror_set.TotalActive();
         if (active_mirrors > 0)
-            MirrorPushSubsector(active_mirrors - 1, K);
+            bsp_mirror_set.PushSubsector(active_mirrors - 1, K);
         else
+        {
+#ifdef BSP_MULTITHREAD
+            BSPQueueDrawSubsector(K);
+#else
             draw_subsector_list.push_back(K);
+#endif
+        }
     }
 }
 
@@ -861,10 +941,10 @@ void BspWalkNode(unsigned int bspnum)
     nd_div.delta_x = node->divider.x + node->divider.delta_x;
     nd_div.delta_y = node->divider.y + node->divider.delta_y;
 
-    MirrorCoordinate(nd_div.x, nd_div.y);
-    MirrorCoordinate(nd_div.delta_x, nd_div.delta_y);
+    bsp_mirror_set.Coordinate(nd_div.x, nd_div.y);
+    bsp_mirror_set.Coordinate(nd_div.delta_x, nd_div.delta_y);
 
-    if (MirrorReflective())
+    if (bsp_mirror_set.Reflective())
     {
         float tx       = nd_div.x;
         nd_div.x       = nd_div.delta_x;
@@ -887,3 +967,136 @@ void BspWalkNode(unsigned int bspnum)
     if (BSPCheckBBox(node->bounding_boxes[side ^ 1]))
         BspWalkNode(node->children[side ^ 1]);
 }
+
+#ifdef BSP_MULTITHREAD
+
+static int32_t BspTraverseProc(void *thread_data)
+{
+    EPI_UNUSED(thread_data);
+
+    while (thread_atomic_int_load(&bsp_thread.exit_flag_) == 0)
+    {
+        if (thread_signal_wait(&bsp_thread.signal_start_, 0))
+        {
+            current_batch = nullptr;
+
+            // walk the bsp tree
+            BspWalkNode(root_node);
+
+            if (current_batch->num_items_)
+            {
+                BSPQueueRenderBatch(current_batch);
+            }
+
+            thread_signal_raise(&bsp_thread.signal_stop_);
+        }
+    }
+
+    return 0;
+}
+
+static RenderBatch render_batches[kMaxRenderBatch];
+static uint32_t    render_batch_counter = 0;
+
+void BSPQueueRenderBatch(RenderBatch *batch)
+{
+    thread_queue_produce(&bsp_thread.queue_, batch, 100);
+}
+
+// TODO: This isn't really a ring buffer
+static RenderBatch *GetRenderBatch()
+{
+    RenderBatch *batch = &render_batches[render_batch_counter++];
+    EPI_CLEAR_MEMORY(batch, RenderBatch, 1);
+    render_batch_counter %= kMaxRenderBatch;
+    return batch;
+}
+
+static RenderItem *GetRenderItem()
+{
+    if (!current_batch || current_batch->num_items_ == kRenderItemBatchSize)
+    {
+        if (current_batch)
+        {
+            BSPQueueRenderBatch(current_batch);
+        }
+
+        current_batch = GetRenderBatch();
+    }
+
+    return &current_batch->items_[current_batch->num_items_++];
+}
+
+void BSPQueueSkyWall(Seg *seg, float h1, float h2)
+{
+    RenderItem *item = GetRenderItem();
+
+    item->type_    = kRenderSkyWall;
+    item->height1_ = h1;
+    item->height2_ = h2;
+    item->wallSeg_ = seg;
+}
+
+void BSPQueueSkyPlane(Subsector *sub, float h)
+{
+    RenderItem *item = GetRenderItem();
+
+    item->type_      = kRenderSkyPlane;
+    item->height1_   = h;
+    item->wallPlane_ = sub;
+}
+
+void BSPQueueDrawSubsector(DrawSubsector *subsector)
+{
+    subsector->solid = true;
+    RenderItem *item = GetRenderItem();
+    item->type_      = kRenderSubsector;
+    item->subsector_ = subsector;
+}
+
+static bool traverse_stop_signalled;
+
+RenderBatch *BSPReadRenderBatch()
+{
+    RenderBatch *batch = (RenderBatch *)thread_queue_consume(&bsp_thread.queue_, 0);
+    return batch;
+}
+
+void BSPTraverse()
+{
+    traverse_stop_signalled = false;
+    thread_signal_raise(&bsp_thread.signal_start_);
+}
+
+bool BSPTraversing()
+{
+    if (!traverse_stop_signalled)
+    {
+        traverse_stop_signalled = thread_signal_wait(&bsp_thread.signal_stop_, 0) ? true : false;
+    }
+
+    if (!thread_queue_count(&bsp_thread.queue_) && traverse_stop_signalled)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+void BSPStartThread()
+{
+    thread_atomic_int_store(&bsp_thread.exit_flag_, 0);
+    thread_signal_init(&bsp_thread.signal_start_);
+    thread_signal_init(&bsp_thread.signal_stop_);
+    thread_queue_init(&bsp_thread.queue_, kMaxRenderBatch, (void **)bsp_thread.render_queue_, 0);
+    bsp_thread.thread_ = thread_create(BspTraverseProc, nullptr, THREAD_STACK_SIZE_DEFAULT);
+}
+void BSPStopThread()
+{
+    thread_atomic_int_store(&bsp_thread.exit_flag_, 1);
+    thread_join(bsp_thread.thread_);
+    thread_signal_term(&bsp_thread.signal_start_);
+    thread_signal_term(&bsp_thread.signal_stop_);
+}
+
+#endif

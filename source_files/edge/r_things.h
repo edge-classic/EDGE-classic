@@ -30,7 +30,7 @@
 #include "r_gldefs.h"
 
 void BSPWalkThing(DrawSubsector *dsub, MapObject *mo);
-void RenderThings(DrawFloor *dfloor, bool solid);
+bool RenderThings(DrawFloor *dfloor, bool solid);
 
 void RenderWeaponSprites(Player *p);
 void RenderWeaponModel(Player *p);

@@ -15,6 +15,9 @@
 
 // clang-format on
 
+void BSPStartThread();
+void BSPStopThread();
+
 constexpr int32_t kWorldStateInvalid = -1;
 
 class SokolRenderBackend : public RenderBackend
@@ -189,6 +192,8 @@ class SokolRenderBackend : public RenderBackend
 #ifdef SOKOL_D3D11
         sapp_d3d11_destroy_device_and_swapchain();
 #endif
+
+        BSPStopThread();
     }
 
 #ifdef SOKOL_GLCORE
@@ -282,9 +287,11 @@ class SokolRenderBackend : public RenderBackend
         EPI_CLEAR_MEMORY(world_state_, WorldState, kRenderWorldMax);
 
         EPI_CLEAR_MEMORY(&render_state_, RenderState, 1);
-        render_state_.world_state_ = kWorldStateInvalid;
+        render_state_.world_state_ = kWorldStateInvalid;        
 
         RenderBackend::Init();
+
+        BSPStartThread();
     }
 
     // FIXME: go away!
@@ -314,7 +321,7 @@ class SokolRenderBackend : public RenderBackend
         }
         else
         {
-            render_state_.sokol_layer_ = kRenderLayerSky + render_state_.world_state_ * 4 + 1;
+            render_state_.sokol_layer_ = layer + render_state_.world_state_ * 4 + 1;
         }
 
         sgl_layer(render_state_.sokol_layer_);

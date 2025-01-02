@@ -4,26 +4,9 @@
 #include "r_image.h"
 #include "r_units.h"
 
-constexpr uint8_t kMaximumMirrors = 3;
-
-void MirrorPush(DrawMirror *mir);
-void MirrorPop();
-void RenderMirror(DrawMirror *mir);
-bool MirrorSegOnPortal(Seg *seg);
-void MirrorPushSubsector(int32_t index, DrawSubsector *subsector);
-
-void MirrorTransform(int32_t index, float &x, float &y);
-bool MirrorIsPortal(int32_t index);
-Seg *MirrorSeg(int32_t index);
-
-int32_t MirrorTotalActive();
-
 void RenderSubList(std::list<DrawSubsector *> &dsubs, bool for_mirror = false);
 
 void BspWalkNode(unsigned int);
-
-void QueueSkyWall(Seg *seg, float h1, float h2);
-void QueueSkyPlane(Subsector *sub, float h);
 
 inline BlendingMode GetBlending(float alpha, ImageOpacity opacity)
 {
@@ -41,3 +24,39 @@ inline BlendingMode GetBlending(float alpha, ImageOpacity opacity)
 
     return (BlendingMode)blending;
 }
+
+#ifdef EDGE_SOKOL
+
+constexpr int32_t kRenderItemBatchSize = 16;
+
+enum kRenderType
+{
+    kRenderSubsector = 0,
+    kRenderSkyWall,
+    kRenderSkyPlane
+};
+
+struct RenderItem
+{
+    kRenderType type_;
+
+    DrawSubsector *subsector_;
+
+    Seg       *wallSeg_;
+    Subsector *wallPlane_;
+
+    float height1_;
+    float height2_;
+};
+
+struct RenderBatch
+{
+    RenderItem items_[kRenderItemBatchSize];
+    int32_t    num_items_;
+};
+
+void         BSPTraverse();
+bool         BSPTraversing();
+RenderBatch *BSPReadRenderBatch();
+
+#endif

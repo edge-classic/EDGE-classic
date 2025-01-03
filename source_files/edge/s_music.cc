@@ -47,9 +47,6 @@
 #if EDGE_IMF_SUPPORT
 #include "s_imf.h"
 #endif
-#if EDGE_RAD_SUPPORT
-#include "s_rad.h"
-#endif
 #if EDGE_SID_SUPPORT
 #include "s_sid.h"
 #endif
@@ -219,12 +216,6 @@ void ChangeMusic(int entry_number, bool loop)
     case kSoundM4P:
         delete F;
         music_player = PlayM4PMusic(data, length, loop);
-        break;
-#endif
-#if EDGE_RAD_SUPPORT
-    case kSoundRAD:
-        delete F;
-        music_player = PlayRADMusic(data, length, loop);
         break;
 #endif
 #if EDGE_SID_SUPPORT

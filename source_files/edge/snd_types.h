@@ -43,9 +43,6 @@ enum SoundFormat
 #if EDGE_SID_SUPPORT
     kSoundSID,
 #endif
-#if EDGE_RAD_SUPPORT
-    kSoundRAD,
-#endif
 #if EDGE_MUS_SUPPORT
     kSoundMUS,
 #endif

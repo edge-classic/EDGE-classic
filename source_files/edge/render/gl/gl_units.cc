@@ -191,7 +191,6 @@ RendererVertex *BeginRenderUnit(GLuint shape, int max_vert, GLuint env1, GLuint 
 //
 void EndRenderUnit(int actual_vert)
 {
-
     if (render_backend->RenderUnitsLocked())
     {
         FatalError("EndRenderUnit - Render units are locked");
@@ -237,6 +236,31 @@ struct Compare_Unit_pred
     }
 };
 
+static void EnableCustomEnvironment(GLuint env, bool enable)
+{
+    RenderState *state = render_state;
+    switch (env)
+    {
+    case uint32_t(kTextureEnvironmentSkipRGB):
+        if (enable)
+        {
+            state->TextureEnvironmentMode(GL_COMBINE);
+            state->TextureEnvironmentCombineRGB(GL_REPLACE);
+            state->TextureEnvironmentSource0RGB(GL_PREVIOUS);
+        }
+        else
+        {
+            /* no need to modify TEXTURE_ENV_MODE */
+            state->TextureEnvironmentCombineRGB(GL_MODULATE);
+            state->TextureEnvironmentSource0RGB(GL_TEXTURE);
+        }
+        break;
+
+    default:
+        FatalError("INTERNAL ERROR: no such custom env: %08x\n", env);
+    }
+}
+
 //
 // RenderCurrentUnits
 //
@@ -254,6 +278,17 @@ void RenderCurrentUnits(void)
 
     if (current_render_unit == 0)
         return;
+
+    RenderState *state = render_state;
+
+    GLuint active_tex[2] = {0, 0};
+    GLuint active_env[2] = {0, 0};
+
+    int active_pass     = 0;
+    int active_blending = 0;
+
+    RGBAColor active_fog_rgb     = kRGBANoValue;
+    float     active_fog_density = 0;
 
     for (int i = 0; i < current_render_unit; i++)
         local_unit_map[i] = &local_units[i];
@@ -286,15 +321,15 @@ void RenderCurrentUnits(void)
             break;
         }
 
-        render_state->ClearColor(fogColor);
-        render_state->FogMode(GL_LINEAR);
-        render_state->FogColor(fogColor);
-        render_state->FogStart(renderer_far_clip.f_ - 750.0f);
-        render_state->FogEnd(renderer_far_clip.f_ - 250.0f);
-        render_state->Enable(GL_FOG);
+        state->ClearColor(fogColor);
+        state->FogMode(GL_LINEAR);
+        state->FogColor(fogColor);
+        state->FogStart(renderer_far_clip.f_ - 750.0f);
+        state->FogEnd(renderer_far_clip.f_ - 250.0f);
+        state->Enable(GL_FOG);
     }
     else
-        render_state->FogMode(GL_EXP); // if needed
+        state->FogMode(GL_EXP); // if needed
 
     for (int j = 0; j < current_render_unit; j++)
     {
@@ -304,85 +339,113 @@ void RenderCurrentUnits(void)
 
         EPI_ASSERT(unit->count > 0);
 
+        // detect changes in texture/alpha/blending state
+
         if (!draw_culling.d_ && unit->fog_color != kRGBANoValue && !(unit->blending & kBlendingNoFog))
         {
-            float density = unit->fog_density;
-            render_state->ClearColor(unit->fog_color);
-            render_state->FogColor(unit->fog_color);
-            render_state->FogDensity(std::log1p(density));
-            if (!AlmostEquals(density, 0.0f))
-                render_state->Enable(GL_FOG);
+            if (unit->fog_color != active_fog_rgb)
+            {
+                active_fog_rgb = unit->fog_color;
+                state->ClearColor(active_fog_rgb);
+                state->FogColor(active_fog_rgb);
+            }
+            if (!AlmostEquals(unit->fog_density, active_fog_density))
+            {
+                active_fog_density = unit->fog_density;
+                state->FogDensity(std::log1p(active_fog_density));
+            }
+            if (active_fog_density > 0.00009f)
+                state->Enable(GL_FOG);
             else
-                render_state->Disable(GL_FOG);
+                state->Disable(GL_FOG);
         }
-        else if (!draw_culling.d_ || (unit->blending & kBlendingNoFog))
-            render_state->Disable(GL_FOG);
+        else if (!draw_culling.d_)
+            state->Disable(GL_FOG);
 
-        render_state->PolygonOffset(0, -unit->pass);
+        if (active_pass != unit->pass)
+        {
+            active_pass = unit->pass;
 
-        if (unit->blending & kBlendingLess)
-        {
-            // Alpha function is updated below, because the alpha
-            // value can change from unit to unit while the
-            // kBlendingLess flag remains set.
-            render_state->Enable(GL_ALPHA_TEST);
+            state->PolygonOffset(0, -active_pass);
         }
-        else if (unit->blending & kBlendingMasked)
-        {
-            render_state->Enable(GL_ALPHA_TEST);
-            render_state->AlphaFunction(GL_GREATER, 0);
-        }
-        else if (unit->blending & kBlendingGEqual)
-        {
-            render_state->Enable(GL_ALPHA_TEST);
-            render_state->AlphaFunction(GL_GEQUAL, 1.0f - (epi::GetRGBAAlpha(local_verts[unit->first].rgba) / 255.0f));
-        }
-        else
-            render_state->Disable(GL_ALPHA_TEST);
 
-        if (unit->blending & kBlendingAdd)
+        if ((active_blending ^ unit->blending) & (kBlendingMasked | kBlendingLess | kBlendingGEqual))
         {
-            render_state->Enable(GL_BLEND);
-            render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE);
+            if (unit->blending & kBlendingLess)
+            {
+                // Alpha function is updated below, because the alpha
+                // value can change from unit to unit while the
+                // kBlendingLess flag remains set.
+                state->Enable(GL_ALPHA_TEST);
+            }
+            else if (unit->blending & kBlendingMasked)
+            {
+                state->Enable(GL_ALPHA_TEST);
+                state->AlphaFunction(GL_GREATER, 0);
+            }
+            else if (unit->blending & kBlendingGEqual)
+            {
+                state->Enable(GL_ALPHA_TEST);
+                state->AlphaFunction(GL_GEQUAL, 1.0f - (epi::GetRGBAAlpha(local_verts[unit->first].rgba) / 255.0f));
+            }
+            else
+                state->Disable(GL_ALPHA_TEST);
         }
-        else if (unit->blending & kBlendingAlpha)
-        {
-            render_state->Enable(GL_BLEND);
-            render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        }
-        else if (unit->blending & kBlendingInvert)
-        {
-            render_state->Enable(GL_BLEND);
-            render_state->BlendFunction(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
-        }
-        else if (unit->blending & kBlendingNegativeGamma)
-        {
-            render_state->Enable(GL_BLEND);
-            render_state->BlendFunction(GL_ZERO, GL_SRC_COLOR);
-        }
-        else if (unit->blending & kBlendingPositiveGamma)
-        {
-            render_state->Enable(GL_BLEND);
-            render_state->BlendFunction(GL_DST_COLOR, GL_ONE);
-        }
-        else
-            render_state->Disable(GL_BLEND);
 
-        if (unit->blending & (kBlendingCullBack | kBlendingCullFront))
+        if ((active_blending ^ unit->blending) & (kBlendingAlpha | kBlendingAdd | kBlendingInvert | kBlendingNegativeGamma | kBlendingPositiveGamma))
         {
-            render_state->Enable(GL_CULL_FACE);
-            render_state->CullFace((unit->blending & kBlendingCullFront) ? GL_FRONT : GL_BACK);
+            if (unit->blending & kBlendingAdd)
+            {
+                state->Enable(GL_BLEND);
+                state->BlendFunction(GL_SRC_ALPHA, GL_ONE);
+            }
+            else if (unit->blending & kBlendingAlpha)
+            {
+                state->Enable(GL_BLEND);
+                state->BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            }
+            else if (unit->blending & kBlendingInvert)
+            {
+                state->Enable(GL_BLEND);
+                state->BlendFunction(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
+            }
+            else if (unit->blending & kBlendingNegativeGamma)
+            {
+                state->Enable(GL_BLEND);
+                state->BlendFunction(GL_ZERO, GL_SRC_COLOR);
+            }
+            else if (unit->blending & kBlendingPositiveGamma)
+            {
+                state->Enable(GL_BLEND);
+                state->BlendFunction(GL_DST_COLOR, GL_ONE);
+            }
+            else
+                state->Disable(GL_BLEND);
         }
-        else
-            render_state->Disable(GL_CULL_FACE);
 
-        render_state->DepthMask((unit->blending & kBlendingNoZBuffer) ? false : true);
+        if ((active_blending ^ unit->blending) & (kBlendingCullBack | kBlendingCullFront))
+        {
+            if (unit->blending & (kBlendingCullBack | kBlendingCullFront))
+            {
+                state->Enable(GL_CULL_FACE);
+                state->CullFace((unit->blending & kBlendingCullFront) ? GL_FRONT : GL_BACK);
+            }
+            else
+                state->Disable(GL_CULL_FACE);
+        }
 
-        if (unit->blending & kBlendingLess)
+        if ((active_blending ^ unit->blending) & kBlendingNoZBuffer)
+        {
+            state->DepthMask((unit->blending & kBlendingNoZBuffer) ? false : true);
+        }
+
+        active_blending = unit->blending;
+
+        if (active_blending & kBlendingLess)
         {
             // NOTE: assumes alpha is constant over whole polygon
             float a = epi::GetRGBAAlpha(local_verts[unit->first].rgba) / 255.0f;
-            render_state->AlphaFunction(GL_GREATER, a * 0.66f);
+            state->AlphaFunction(GL_GREATER, a * 0.66f);
         }
 
         GLint old_clamp_s = kDummyClamp;
@@ -390,82 +453,93 @@ void RenderCurrentUnits(void)
 
         for (int t = 1; t >= 0; t--)
         {
-            render_state->ActiveTexture(GL_TEXTURE0 + t);
+            if (active_tex[t] != unit->texture[t] || active_env[t] != unit->environment_mode[t])
+            {
+                state->ActiveTexture(GL_TEXTURE0 + t);
+            }
 
-            if (draw_culling.d_ && !(unit->blending & kBlendingNoFog))
+            if (draw_culling.d_)
             {
                 if (unit->pass > 0)
-                    render_state->Disable(GL_FOG);
+                    state->Disable(GL_FOG);
                 else
-                    render_state->Enable(GL_FOG);
+                    state->Enable(GL_FOG);
             }
 
-            if (!unit->texture[t])
-                render_state->Disable(GL_TEXTURE_2D);
-            else
+            if (active_tex[t] != unit->texture[t])
             {
-                render_state->Enable(GL_TEXTURE_2D);
-                render_state->BindTexture(unit->texture[t]);
-            }
+                if (unit->texture[t] == 0)
+                    state->Disable(GL_TEXTURE_2D);
+                else if (active_tex[t] == 0)
+                    state->Enable(GL_TEXTURE_2D);
 
-            if (!t && (unit->blending & kBlendingRepeatX) && unit->texture[0])
-            {
-                auto existing = texture_clamp_s.find(unit->texture[0]);
-                if (existing != texture_clamp_s.end())
+                if (unit->texture[t] != 0)
+                    state->BindTexture(unit->texture[t]);
+
+                active_tex[t] = unit->texture[t];
+
+                if (!t && (active_blending & kBlendingRepeatX) && active_tex[0] != 0)
                 {
-                    if (existing->second != GL_REPEAT)
-                    {
-                        old_clamp_s = existing->second;
-                        render_state->TextureWrapS(GL_REPEAT);
-                    }
-                }
-                else
-                    render_state->TextureWrapS(GL_REPEAT);
-            }
-
-            if (!t && (unit->blending & (kBlendingClampY|kBlendingRepeatY)) && unit->texture[0])
-            {
-                auto existing = texture_clamp_t.find(unit->texture[0]);
-                if (existing != texture_clamp_t.end())
-                {
-                    if (unit->blending & kBlendingClampY)
-                    {
-                        if (existing->second != (renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE))
-                        {
-                            old_clamp_t = existing->second;
-                            render_state->TextureWrapT(renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE);
-                        }
-                    }
-                    else
+                    auto existing = texture_clamp_s.find(active_tex[0]);
+                    if (existing != texture_clamp_s.end())
                     {
                         if (existing->second != GL_REPEAT)
                         {
-                            old_clamp_t = existing->second;
-                            render_state->TextureWrapT(GL_REPEAT);
+                            old_clamp_s = existing->second;
+                            state->TextureWrapS(GL_REPEAT);
                         }
                     }
-                }
-                else
-                {
-                    if (unit->blending & kBlendingClampY)
-                        render_state->TextureWrapT(renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE);
                     else
-                        render_state->TextureWrapT(GL_REPEAT);
+                        state->TextureWrapS(GL_REPEAT);
+                }
+
+                if (!t && (active_blending & (kBlendingClampY|kBlendingRepeatY)) && active_tex[0] != 0)
+                {
+                    auto existing = texture_clamp_t.find(active_tex[0]);
+                    if (existing != texture_clamp_t.end())
+                    {
+                        if (unit->blending & kBlendingClampY)
+                        {
+                            if (existing->second != (renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE))
+                            {
+                                old_clamp_t = existing->second;
+                                state->TextureWrapT(renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE);
+                            }
+                        }
+                        else
+                        {
+                            if (existing->second != GL_REPEAT)
+                            {
+                                old_clamp_t = existing->second;
+                                state->TextureWrapT(GL_REPEAT);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (unit->blending & kBlendingClampY)
+                            state->TextureWrapT(renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE);
+                        else
+                            state->TextureWrapT(GL_REPEAT);
+                    }
                 }
             }
 
-            if (unit->environment_mode[t] == kTextureEnvironmentSkipRGB)
+            if (active_env[t] != unit->environment_mode[t])
             {
-                render_state->TextureEnvironmentMode(GL_COMBINE);
-                render_state->TextureEnvironmentCombineRGB(GL_REPLACE);
-                render_state->TextureEnvironmentSource0RGB(GL_PREVIOUS);
-            }
-            else
-            {
-                if (unit->environment_mode[t] != kTextureEnvironmentDisable)
-                    render_state->TextureEnvironmentMode(unit->environment_mode[t]);
-                render_state->TextureEnvironmentCombineRGB(GL_MODULATE);
-                render_state->TextureEnvironmentSource0RGB(GL_TEXTURE);
+                if (active_env[t] == kTextureEnvironmentSkipRGB)
+                {
+                    EnableCustomEnvironment(active_env[t], false);
+                }
+
+                if (unit->environment_mode[t] == kTextureEnvironmentSkipRGB)
+                {
+                    EnableCustomEnvironment(unit->environment_mode[t], true);
+                }
+                else if (unit->environment_mode[t] != kTextureEnvironmentDisable)
+                    state->TextureEnvironmentMode(unit->environment_mode[t]);
+
+                active_env[t] = unit->environment_mode[t];
             }
         }
 
@@ -475,9 +549,9 @@ void RenderCurrentUnits(void)
 
         for (int v_idx = 0, v_last_idx = unit->count; v_idx < v_last_idx; v_idx++, V++)
         {
-            render_state->GLColor(V->rgba);
-            render_state->MultiTexCoord(GL_TEXTURE0, &V->texture_coordinates[0]);
-            render_state->MultiTexCoord(GL_TEXTURE1, &V->texture_coordinates[1]);
+            state->GLColor(V->rgba);
+            state->MultiTexCoord(GL_TEXTURE0, &V->texture_coordinates[0]);
+            state->MultiTexCoord(GL_TEXTURE1, &V->texture_coordinates[1]);
             // vertex must be last
             glVertex3fv((const GLfloat *)(&V->position));
         }
@@ -491,18 +565,30 @@ void RenderCurrentUnits(void)
         // restore the clamping mode
         if (old_clamp_s != kDummyClamp)
         {
-            render_state->TextureWrapS(old_clamp_s);
+            state->TextureWrapS(old_clamp_s);
         }
         if (old_clamp_t != kDummyClamp)
         {
-            render_state->TextureWrapT(old_clamp_t);
+            state->TextureWrapT(old_clamp_t);
         }
     }
 
     // all done
     current_render_vert = current_render_unit = 0;
 
-    render_state->PolygonOffset(0, 0);
+    for (int t = 1; t >= 0; t--)
+    {
+        state->ActiveTexture(GL_TEXTURE0 + t);
+
+        if (active_env[t] == kTextureEnvironmentSkipRGB)
+        {
+            EnableCustomEnvironment(active_env[t], false);
+        }
+        state->TextureEnvironmentMode(GL_MODULATE);
+        state->Disable(GL_TEXTURE_2D);
+    }
+
+    state->ResetGLState();
 }
 
 //--- editor settings ---

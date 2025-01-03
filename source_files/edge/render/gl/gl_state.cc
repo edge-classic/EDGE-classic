@@ -516,6 +516,33 @@ class GLRenderState : public RenderState
         EPI_UNUSED(flags);
     }
 
+    // Might need to add more here since the state's scope has expanded - Dasho
+    void ResetGLState()
+    {
+        Disable(GL_BLEND);
+        BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        Disable(GL_ALPHA_TEST);
+
+        DepthMask(true);
+
+        CullFace(GL_BACK);
+        Disable(GL_CULL_FACE);
+
+        Disable(GL_FOG);
+
+        PolygonOffset(0, 0);
+
+        for (int i = 0; i < 2; i++)
+        {
+            bind_texture_2d_[i]                  = 0;
+            texture_environment_mode_[i]         = 0;
+            texture_environment_combine_rgb_[i]  = 0;
+            texture_environment_source_0_rgb_[i] = 0;
+            texture_wrap_t_[i]                   = 0;
+        }
+    }
+
     int frameStateChanges_ = 0;
 
   private:

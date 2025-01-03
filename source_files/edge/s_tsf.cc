@@ -338,7 +338,7 @@ static ma_result ma_tsf_read_pcm_frames(ma_tsf* pTSF, void* pFramesOut, ma_uint6
     ma_tsf_get_data_format(pTSF, &format, &channels, NULL, NULL, 0);
 
     if (format == ma_format_f32) {
-        totalFramesRead = pTSF->tsf_sequencer->PlayStream((uint8_t *)pFramesOut, frameCount * 2 * sizeof(float));
+        totalFramesRead = pTSF->tsf_sequencer->PlayStream((uint8_t *)pFramesOut, frameCount * 2 * sizeof(float)) / 2 / sizeof(float);
     } else {
         result = MA_INVALID_ARGS;
     }
@@ -597,7 +597,6 @@ class TSFPlayer : public AbstractMusicPlayer
 
     ma_decoder tsf_decoder_;
     ma_sound   tsf_stream_;
-    uint8_t    *tsf_data_;
 
   public:
     TSFPlayer(bool looping) : status_(kNotLoaded), looping_(looping)
@@ -636,8 +635,6 @@ class TSFPlayer : public AbstractMusicPlayer
             return false;
         }
 
-        tsf_data_ = data;
-
         // Loaded, but not playing
         status_ = kStopped;
 
@@ -656,15 +653,13 @@ class TSFPlayer : public AbstractMusicPlayer
 
         ma_decoder_uninit(&tsf_decoder_);
 
-        delete[] tsf_data_;
-
         status_ = kNotLoaded;
     }
 
     void Play(bool loop)
     {
         status_  = kPlaying;
-        looping_ = true;
+        looping_ = loop;
 
         ma_sound_set_looping(&tsf_stream_, looping_ ? MA_TRUE : MA_FALSE);
 
@@ -749,6 +744,8 @@ AbstractMusicPlayer *PlayTSFMusic(uint8_t *data, int length, bool loop)
         delete player;
         return nullptr;
     }
+
+    delete[] data;
 
     player->Play(loop);
 

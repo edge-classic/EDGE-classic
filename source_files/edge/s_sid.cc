@@ -138,9 +138,6 @@ void SIDPlayer::Close()
     if (status_ != kStopped)
         Stop();
 
-    // Reset individual player gain
-    music_player_gain = 1.0f;
-
     status_ = kNotLoaded;
 }
 
@@ -167,9 +164,6 @@ void SIDPlayer::Play(bool loop)
 
     status_  = kPlaying;
     looping_ = loop;
-
-    // Set individual player gain
-    music_player_gain = 0.6f;
 
     // Load up initial buffer data
     Ticker();

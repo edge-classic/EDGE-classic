@@ -157,9 +157,6 @@ void FLACPlayer::Close()
     drflac_close(flac_track_);
     delete[] flac_data_;
 
-    // reset player gain
-    music_player_gain = 1.0f;
-
     status_ = kNotLoaded;
 }
 
@@ -186,9 +183,6 @@ void FLACPlayer::Play(bool loop)
 
     status_  = kPlaying;
     looping_ = loop;
-
-    // Set individual player type gain
-    music_player_gain = 0.6f;
 
     // Load up initial buffer data
     Ticker();

@@ -222,22 +222,7 @@ static ma_result ma_stbvorbis_read_pcm_frames(ma_stbvorbis* pVorbis, void* pFram
     ma_stbvorbis_get_data_format(pVorbis, &format, &channels, NULL, NULL, 0);
 
     if (format == ma_format_f32) {
-        /* Pull mode. This is the simple case, but we still need to run in a loop because stb_vorbis loves using 32-bit instead of 64-bit. */
-        while (totalFramesRead < frameCount) {
-            ma_uint64 framesRemaining = (frameCount - totalFramesRead);
-            int framesRead;
-
-            if (framesRemaining > INT_MAX) {
-                framesRemaining = INT_MAX;
-            }
-
-            framesRead = stb_vorbis_get_samples_float_interleaved(pVorbis->stb, channels, (float*)ma_offset_pcm_frames_ptr(pFramesOut, totalFramesRead, format, channels), (int)framesRemaining * channels);   /* Safe cast. */
-            totalFramesRead += framesRead;
-
-            if (framesRead < (int)framesRemaining) {
-                break;  /* Nothing left to read. Get out. */
-            }
-        }
+        totalFramesRead = stb_vorbis_get_samples_float_interleaved(pVorbis->stb, channels, (float*)pFramesOut, (int)frameCount * channels);   /* Safe cast. */
     } else {
         result = MA_INVALID_ARGS;
     }
@@ -443,7 +428,7 @@ class OGGPlayer : public AbstractMusicPlayer
     bool looping_;
 
     ma_decoder ogg_decoder_;
-    ma_sound   ogg_stream_;
+    ma_sound ogg_stream_;
     uint8_t    *ogg_data_;
 
   public:
@@ -458,9 +443,6 @@ class OGGPlayer : public AbstractMusicPlayer
     virtual void Resume(void);
 
     virtual void Ticker(void);
-
-  private:
-    void PostOpen(void);
 };
 
 //----------------------------------------------------------------------------
@@ -474,12 +456,6 @@ OGGPlayer::OGGPlayer() : status_(kNotLoaded), ogg_data_(nullptr)
 OGGPlayer::~OGGPlayer()
 {
     Close();
-}
-
-void OGGPlayer::PostOpen()
-{
-    // Loaded, but not playing
-    status_ = kStopped;
 }
 
 bool OGGPlayer::OpenMemory(uint8_t *data, int length)
@@ -499,7 +475,7 @@ bool OGGPlayer::OpenMemory(uint8_t *data, int length)
         return false;
     }
 
-    if (ma_sound_init_from_data_source(&music_engine, &ogg_decoder_, MA_SOUND_FLAG_STREAM, NULL, &ogg_stream_) != MA_SUCCESS)
+    if (ma_sound_init_from_data_source(&music_engine, &ogg_decoder_, MA_SOUND_FLAG_STREAM|MA_SOUND_FLAG_NO_SPATIALIZATION, NULL, &ogg_stream_) != MA_SUCCESS)
     {
         ma_decoder_uninit(&ogg_decoder_);
         LogWarning("Failed to load OGG music (corrupt ogg?)\n");
@@ -508,7 +484,9 @@ bool OGGPlayer::OpenMemory(uint8_t *data, int length)
 
     ogg_data_ = data;
 
-    PostOpen();
+    // Loaded, but not playing
+    status_ = kStopped;
+
     return true;
 }
 
@@ -525,9 +503,6 @@ void OGGPlayer::Close()
     ma_decoder_uninit(&ogg_decoder_);
 
     delete[] ogg_data_;
-
-    // Reset player gain
-    music_player_gain = 1.0f;
 
     status_ = kNotLoaded;
 }
@@ -560,8 +535,7 @@ void OGGPlayer::Play(bool loop)
     status_  = kPlaying;
     looping_ = loop;
 
-    // Set individual player gain
-    music_player_gain = 0.6f;
+    ma_sound_set_looping(&ogg_stream_, looping_ ? MA_TRUE : MA_FALSE);
 
     // Let 'er rip
     ma_sound_start(&ogg_stream_);
@@ -582,22 +556,13 @@ void OGGPlayer::Stop()
 void OGGPlayer::Ticker()
 {
     ma_engine_set_volume(&music_engine, music_volume.f_);
-    while (status_ == kPlaying && !pc_speaker_mode)
+
+    if (status_ == kPlaying)
     {
-        SoundData *buf = nullptr;
-
-        if (!buf)
-            break;
-
-        if (true)
-        {
-
-        }
-        else
-        {
-            // finished playing
+        if (pc_speaker_mode)
             Stop();
-        }
+        if (ma_sound_at_end(&ogg_stream_)) // This should only be true if finished and not set to looping
+            Stop();
     }
 }
 

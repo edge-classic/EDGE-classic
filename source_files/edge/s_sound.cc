@@ -269,6 +269,7 @@ void InitializeSound(void)
 
     // okidoke, start the ball rolling!
     ma_engine_start(&sound_engine);
+    ma_engine_start(&music_engine);
 }
 
 void ShutdownSound(void)
@@ -531,6 +532,7 @@ void PrecacheSounds(void)
 void ResumeAudioDevice()
 {
     ma_engine_start(&sound_engine);
+    ma_engine_start(&music_engine);
 
 #ifdef EDGE_WEB
     // Yield back to main thread for audio processing

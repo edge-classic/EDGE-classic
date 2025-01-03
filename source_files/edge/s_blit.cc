@@ -54,7 +54,6 @@ bool  ddf_reverb              = false;
 int   ddf_reverb_type         = 0;
 int   ddf_reverb_ratio        = 0;
 int   ddf_reverb_delay        = 0;
-float music_player_gain       = 1.0f;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(sound_effect_volume, "0.15", kConsoleVariableFlagArchive)
 

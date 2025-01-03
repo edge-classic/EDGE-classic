@@ -209,10 +209,13 @@ set (EDGE_LINK_LIBRARIES
   pl_mpeg
   prns
   stb
-  thread
   tsf
   xxhash
 )
+
+if (NOT EMSCRIPTEN)
+  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} thread)
+endif()
 
 if (EDGE_COAL_SUPPORT)
   set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} edge_coal)

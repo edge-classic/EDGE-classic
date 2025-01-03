@@ -173,6 +173,7 @@ struct DrawSubsector
 
     bool visible;
     bool sorted;
+    bool solid;
 };
 
 extern int detail_level;
@@ -193,18 +194,6 @@ DrawFloor     *GetDrawFloor();
 DrawSeg       *GetDrawSeg();
 DrawSubsector *GetDrawSub();
 DrawMirror    *GetDrawMirror();
-
-//
-//  MIRRORS
-//
-
-void MirrorCoordinate(float &x, float &y);
-void MirrorHeight(float &z);
-void MirrorAngle(BAMAngle &ang);
-
-bool  MirrorReflective(void);
-float MirrorXYScale(void);
-float MirrorZScale(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

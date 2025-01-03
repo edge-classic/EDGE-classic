@@ -46,6 +46,7 @@
 #include "r_gldefs.h"
 #include "r_image.h"
 #include "r_mdcommon.h"
+#include "r_mirror.h"
 #include "r_misc.h"
 #include "r_modes.h"
 #include "r_shader.h"
@@ -628,7 +629,7 @@ static inline void ModelCoordFunc(MDLCoordinateData *data, int v_idx)
     float y1 = HMM_Lerp(vert1->y, data->lerp_, vert2->y);
     float z1 = HMM_Lerp(vert1->z, data->lerp_, vert2->z) + data->bias_;
 
-    if (MirrorReflective())
+    if (render_mirror_set.Reflective())
         y1 = -y1;
 
     data->CalculatePosition(render_position, x1, y1, z1);
@@ -694,7 +695,7 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
     if (mo->hyper_flags_ & kHyperFlagNoZBufferUpdate)
         blending |= kBlendingNoZBuffer;
 
-    if (MirrorReflective())
+    if (render_mirror_set.Reflective())
         blending |= kBlendingCullFront;
     else
         blending |= kBlendingCullBack;
@@ -713,8 +714,8 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
 
     data.is_weapon = is_weapon;
 
-    data.xy_scale_ = scale * aspect * MirrorXYScale();
-    data.z_scale_  = scale * MirrorZScale();
+    data.xy_scale_ = scale * aspect * render_mirror_set.XYScale();
+    data.z_scale_  = scale * render_mirror_set.ZScale();
     data.bias_     = bias;
 
     bool tilt = is_weapon || (mo->flags_ & kMapObjectFlagMissile) || (mo->hyper_flags_ & kHyperFlagForceModelTilt);
@@ -725,14 +726,14 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
         BAMAngleToMatrix(tilt ? ~epi::BAMInterpolate(mo->old_vertical_angle_, mo->vertical_angle_, fractional_tic) : 0,
                          &data.mouselook_x_vector_, &data.mouselook_z_vector_);
         BAMAngle ang = epi::BAMInterpolate(mo->old_angle_, mo->angle_, fractional_tic) + rotation;
-        MirrorAngle(ang);
+        render_mirror_set.Angle(ang);
         BAMAngleToMatrix(~ang, &data.rotation_vector_x_, &data.rotation_vector_y_);
     }
     else
     {
         BAMAngleToMatrix(tilt ? ~mo->vertical_angle_ : 0, &data.mouselook_x_vector_, &data.mouselook_z_vector_);
         BAMAngle ang = mo->angle_ + rotation;
-        MirrorAngle(ang);
+        render_mirror_set.Angle(ang);
         BAMAngleToMatrix(~ang, &data.rotation_vector_x_, &data.rotation_vector_y_);
     }
 

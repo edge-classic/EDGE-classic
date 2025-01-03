@@ -48,6 +48,7 @@
 #include "r_effects.h"
 #include "r_gldefs.h"
 #include "r_image.h"
+#include "r_mirror.h"
 #include "r_misc.h"
 #include "r_modes.h"
 #include "r_occlude.h"
@@ -66,11 +67,11 @@ extern float sprite_skew;
 
 extern ViewHeightZone view_height_zone;
 
-extern Subsector *current_subsector;
-extern Seg       *current_seg;
+static Subsector     *current_subsector;
+static DrawSubsector *current_draw_subsector;
+static Seg           *current_seg;
 
-extern unsigned int               root_node;
-extern std::list<DrawSubsector *> draw_subsector_list;
+extern unsigned int root_node;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(force_flat_lighting, "0", kConsoleVariableFlagArchive)
 
@@ -100,25 +101,11 @@ static bool thick_liquid = false;
 static float wave_now;    // value for doing wave table lookups
 static float plane_z_bob; // for floor/ceiling bob DDFSECT stuff
 
-// Sky
-enum kSkyQueueType
-{
-    kSkyQueueWall  = 0,
-    kSkyQueuePlane = 1
-};
+MirrorSet render_mirror_set(kMirrorSetRender);
 
-struct SkyQueueItem
-{
-    kSkyQueueType type_;
-
-    Seg       *wallSeg_;
-    Subsector *planeSubsector_;
-
-    float height1_;
-    float height2_;
-};
-
-static std::vector<SkyQueueItem> queued_skies_;
+#ifndef EDGE_SOKOL
+extern std::list<DrawSubsector *> draw_subsector_list;
+#endif
 
 static float Slope_GetHeight(SlopePlane *slope, float x, float y)
 {
@@ -344,7 +331,7 @@ static void DLIT_Wall(MapObject *mo, void *dataptr)
         float mx = mo->x;
         float my = mo->y;
 
-        MirrorCoordinate(mx, my);
+        render_mirror_set.Coordinate(mx, my);
 
         float dist = (mx - data->div.x) * data->div.delta_y - (my - data->div.y) * data->div.delta_x;
 
@@ -494,7 +481,14 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
 
     // ignore non-solid walls in solid mode (& vice versa)
     if ((solid_mode && (blending & kBlendingAlpha)) || (!solid_mode && !(blending & kBlendingAlpha)))
+    {
+        if (solid_mode)
+        {
+            current_draw_subsector->solid = false;
+        }
+
         return;
+    }
 
     // must determine bbox _before_ mirror flipping
     float v_bbox[4];
@@ -503,10 +497,10 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
     BoundingBoxAddPoint(v_bbox, x1, y1);
     BoundingBoxAddPoint(v_bbox, x2, y2);
 
-    MirrorCoordinate(x1, y1);
-    MirrorCoordinate(x2, y2);
+    render_mirror_set.Coordinate(x1, y1);
+    render_mirror_set.Coordinate(x2, y2);
 
-    if (MirrorReflective())
+    if (render_mirror_set.Reflective())
     {
         float tmp_x = x1;
         x1          = x2;
@@ -543,9 +537,9 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
     float tx0    = tex_x1;
     float tx_mul = tex_x2 - tex_x1;
 
-    MirrorHeight(tex_top_h);
+    render_mirror_set.Height(tex_top_h);
 
-    float ty_mul = surf->y_matrix.Y / (total_h * MirrorZScale());
+    float ty_mul = surf->y_matrix.Y / (total_h * render_mirror_set.ZScale());
     float ty0    = image->Top() - tex_top_h * ty_mul;
 
 #if (DEBUG >= 3)
@@ -582,7 +576,7 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
         vertices[v_count].Y = y1;
         vertices[v_count].Z = left_h[LI];
 
-        MirrorHeight(vertices[v_count].Z);
+        render_mirror_set.Height(vertices[v_count].Z);
 
         v_count++;
     }
@@ -593,7 +587,7 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
         vertices[v_count].Y = y2;
         vertices[v_count].Z = right_h[RI];
 
-        MirrorHeight(vertices[v_count].Z);
+        render_mirror_set.Height(vertices[v_count].Z);
 
         v_count++;
     }
@@ -650,7 +644,7 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
         int   old_blend = data.blending;
         float old_dt    = data.trans;
         data.blending   = kBlendingMasked | kBlendingAlpha;
-        data.trans      = 85;        
+        data.trans      = 85;
         cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id, 0.33f, &data.pass, data.blending, false, &data,
                               WallCoordFunc);
         data.blending = old_blend;
@@ -883,7 +877,7 @@ static void DrawTile(Seg *seg, DrawFloor *dfloor, float lz1, float lz2, float rz
     }
 
     int32_t blending = GetBlending(surf->translucency, (ImageOpacity)image->opacity_);
-    bool opaque = !seg->back_sector || !(blending * kBlendingAlpha);
+    bool    opaque   = !seg->back_sector || !(blending * kBlendingAlpha);
 
     // check for horizontal sliders
     if ((flags & kWallTileMidMask) && seg->linedef->slide_door)
@@ -1528,7 +1522,7 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
 
     float orig_h = h;
 
-    MirrorHeight(h);
+    render_mirror_set.Height(h);
 
     int num_vert, i;
 
@@ -1582,12 +1576,18 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
     // (need to load the image to know the opacity)
     GLuint tex_id = ImageCache(surf->image, true, render_view_effect_colormap);
 
-
     int32_t blending = GetBlending(trans, (ImageOpacity)surf->image->opacity_);
 
     // ignore non-solid walls in solid mode (& vice versa)
     if ((solid_mode && (blending & kBlendingAlpha)) || (!solid_mode && !(blending & kBlendingAlpha)))
+    {
+        if (solid_mode)
+        {
+            current_draw_subsector->solid = false;
+        }
+
         return;
+    }
 
     // count number of actual vertices
     Seg *seg;
@@ -1641,10 +1641,10 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
             {
                 z = orig_h + Slope_GetHeight(slope, x, y);
 
-                MirrorHeight(z);
+                render_mirror_set.Height(z);
             }
 
-            MirrorCoordinate(x, y);
+            render_mirror_set.Coordinate(x, y);
 
             vertices[v_count].X = x;
             vertices[v_count].Y = y;
@@ -1673,7 +1673,7 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
     data.image_h    = surf->image->ScaledHeightActual();
     data.x_mat      = surf->x_matrix;
     data.y_mat      = surf->y_matrix;
-    float mir_scale = MirrorXYScale();
+    float mir_scale = render_mirror_set.XYScale();
     data.x_mat.X /= mir_scale;
     data.x_mat.Y /= mir_scale;
     data.y_mat.X /= mir_scale;
@@ -1776,7 +1776,8 @@ static void RenderSubsector(DrawSubsector *dsub, bool mirror_sub)
     LogDebug("\nREVISITING SUBSEC %d\n\n", (int)(sub - subsectors));
 #endif
 
-    current_subsector = sub;
+    current_subsector      = sub;
+    current_draw_subsector = dsub;
 
     if (solid_mode)
     {
@@ -1788,7 +1789,8 @@ static void RenderSubsector(DrawSubsector *dsub, bool mirror_sub)
         }
     }
 
-    current_subsector = sub;
+    current_subsector      = sub;
+    current_draw_subsector = dsub;
 
     DrawFloor *dfloor;
 
@@ -1804,7 +1806,10 @@ static void RenderSubsector(DrawSubsector *dsub, bool mirror_sub)
         RenderPlane(dfloor, dfloor->ceiling_height, dfloor->ceiling, -1);
         RenderPlane(dfloor, dfloor->floor_height, dfloor->floor, +1);
 
-        RenderThings(dfloor, solid_mode);
+        if (!RenderThings(dfloor, solid_mode))
+        {
+            current_draw_subsector->solid = false;
+        }
     }
 }
 
@@ -2003,7 +2008,9 @@ void RenderTrueBsp(void)
     ClearBSP();
     OcclusionClear();
 
+#ifndef EDGE_SOKOL
     draw_subsector_list.clear();
+#endif
 
     Player *v_player = view_camera_map_object->player_;
 
@@ -2017,35 +2024,87 @@ void RenderTrueBsp(void)
     render_state->Clear(GL_DEPTH_BUFFER_BIT);
     render_state->Enable(GL_DEPTH_TEST);
 
+#ifdef EDGE_SOKOL
+
     // needed for drawing the sky
     BeginSky();
 
-    render_backend->LockRenderUnits(true);
+    // draw all solid walls and planes
+
+    solid_mode = true;
+    render_backend->SetRenderLayer(kRenderLayerSolid, false);
+    StartUnitBatch(solid_mode);
+
+    BSPTraverse();
+
+    std::list<RenderItem *> items;
+    std::list<RenderItem *> sky_items;
+    while (BSPTraversing())
+    {
+        RenderBatch *batch = BSPReadRenderBatch();
+        if (!batch)
+        {
+            continue;
+        }
+
+        for (int32_t i = 0; i < batch->num_items_; i++)
+        {
+            RenderItem *item = &batch->items_[i];
+
+            switch (item->type_)
+            {
+            case kRenderSubsector:
+                items.push_back(item);
+                RenderSubsector(item->subsector_, false);
+                break;
+            case kRenderSkyWall:
+                RenderSkyWall(item->wallSeg_, item->height1_, item->height2_);
+                break;
+            case kRenderSkyPlane:
+                RenderSkyPlane(item->wallPlane_, item->height1_);
+                break;
+            }
+        }
+    }
+    FinishUnitBatch();
+
+    // draw all sprites and masked/translucent walls/planes
+    solid_mode = false;
+    render_backend->SetRenderLayer(kRenderLayerTransparent, false);
+
+    StartUnitBatch(solid_mode);
+    std::list<RenderItem *>::reverse_iterator RI;
+
+    for (RI = items.rbegin(); RI != items.rend(); RI++)
+    {
+        if ((*RI)->type_ == kRenderSubsector)
+        {
+            if ((*RI)->subsector_->solid)
+            {
+                continue;
+            }
+
+            RenderSubsector((*RI)->subsector_, false);
+        }
+    }
+
+    FinishUnitBatch();
+    render_backend->SetRenderLayer(kRenderLayerSky);
+
+    FinishSky();
+
+#else
+    // needed for drawing the sky
+    BeginSky();
 
     // walk the bsp tree
     BspWalkNode(root_node);
 
-    render_backend->LockRenderUnits(false);
-
-    for (size_t i = 0; i < queued_skies_.size(); i++)
-    {
-        SkyQueueItem *item = &queued_skies_[i];
-        switch (item->type_)
-        {
-        case kSkyQueuePlane:
-            RenderSkyPlane(item->planeSubsector_, item->height1_);
-            break;
-        case kSkyQueueWall:
-            RenderSkyWall(item->wallSeg_, item->height1_, item->height2_);
-            break;
-        }
-    }
-
-    queued_skies_.clear();
-
     FinishSky();
 
     RenderSubList(draw_subsector_list);
+
+#endif
 
     // Lobo 2022:
     // Allow changing the order of weapon model rendering to be
@@ -2117,39 +2176,6 @@ void RenderView(int x, int y, int w, int h, MapObject *camera, bool full_height,
 
     seen_dynamic_lights.clear();
     RenderTrueBsp();
-}
-
-static void QueueSky(const SkyQueueItem &item)
-{
-    if (!queued_skies_.size())
-    {
-        queued_skies_.reserve(4 * 1024);
-    }
-    else if (queued_skies_.size() == queued_skies_.capacity())
-    {
-        queued_skies_.reserve(queued_skies_.size() * 2);
-    }
-
-    queued_skies_.emplace_back(item);
-}
-
-void QueueSkyWall(Seg *seg, float h1, float h2)
-{
-    SkyQueueItem item;
-    item.height1_ = h1;
-    item.height2_ = h2;
-    item.wallSeg_ = seg;
-    item.type_    = kSkyQueueWall;
-    QueueSky(item);
-}
-
-void QueueSkyPlane(Subsector *sub, float h)
-{
-    SkyQueueItem item;
-    item.height1_        = h;
-    item.planeSubsector_ = sub;
-    item.type_           = kSkyQueuePlane;
-    QueueSky(item);
 }
 
 #ifdef _DISABLE_FLOODPLANES

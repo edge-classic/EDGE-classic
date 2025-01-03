@@ -43,7 +43,8 @@
 #include "sokol_images.h"
 #include "sokol_pipeline.h"
 
-EDGE_DEFINE_CONSOLE_VARIABLE(renderer_dumb_sky, "0", kConsoleVariableFlagArchive)
+// renderer_dumb_sky forced in sokol renderer for now
+EDGE_DEFINE_CONSOLE_VARIABLE(renderer_dumb_sky, "1", kConsoleVariableFlagReadOnly)
 #ifdef APPLE_SILICON
 EDGE_DEFINE_CONSOLE_VARIABLE(renderer_dumb_clamp, "1", kConsoleVariableFlagNone)
 #else
@@ -264,9 +265,11 @@ void RenderCurrentUnits(void)
         std::sort(local_unit_map.begin(), local_unit_map.begin() + current_render_unit, Compare_Unit_pred());
     }
 
-    RenderLayer world_layer = render_backend->GetRenderLayer();
+    RenderLayer render_layer = render_backend->GetRenderLayer();
 
-    bool culling = draw_culling.d_ && (world_layer != kRenderLayerInvalid);
+    bool no_fog = (render_layer == kRenderLayerHUD) || (render_layer == kRenderLayerWeapon);
+
+    bool culling = draw_culling.d_ && !no_fog;
 
     if (culling)
     {
@@ -309,7 +312,7 @@ void RenderCurrentUnits(void)
 
         EPI_ASSERT(unit->count > 0);
 
-        if (!culling && unit->fog_color != kRGBANoValue && !(unit->blending & kBlendingNoFog))
+        if (!culling && unit->fog_color != kRGBANoValue && !(unit->blending & kBlendingNoFog) && !no_fog)
         {
             float density = unit->fog_density;
             render_state->FogMode(GL_EXP);
@@ -397,31 +400,16 @@ void RenderCurrentUnits(void)
             render_state->AlphaFunction(GL_GREATER, a * 0.66f);
         }
 
-        if (world_layer == kRenderLayerWeapon)
+        if (draw_culling.d_ && !(unit->blending & kBlendingNoFog) &&
+            (render_layer == kRenderLayerSolid || render_layer == kRenderLayerTransparent))
         {
-            render_state->Disable(GL_FOG);
-        }
-        else
-        {
-
-            if (draw_culling.d_ && !(unit->blending & kBlendingNoFog) &&
-                (world_layer == kRenderLayerSolid || world_layer == kRenderLayerTransparent))
+            if (unit->pass > 0)
             {
-                if (unit->pass > 0)
-                {
-                    render_state->Disable(GL_FOG);
-                }
-                else
-                {
-                    render_state->Enable(GL_FOG);
-                }
+                render_state->Disable(GL_FOG);
             }
-            else if (world_layer == kRenderLayerTransparent)
+            else
             {
-                if (unit->blending & kBlendingAdd)
-                {
-                    // render_state->Disable(GL_FOG);
-                }
+                render_state->Enable(GL_FOG);
             }
         }
 

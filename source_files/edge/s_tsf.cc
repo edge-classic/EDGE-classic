@@ -338,7 +338,7 @@ static ma_result ma_tsf_read_pcm_frames(ma_tsf* pTSF, void* pFramesOut, ma_uint6
     ma_tsf_get_data_format(pTSF, &format, &channels, NULL, NULL, 0);
 
     if (format == ma_format_f32) {
-        totalFramesRead = pTSF->tsf_sequencer->PlayStream((uint8_t *)pFramesOut, frameCount);
+        totalFramesRead = pTSF->tsf_sequencer->PlayStream((uint8_t *)pFramesOut, frameCount * 2 * sizeof(float));
     } else {
         result = MA_INVALID_ARGS;
     }
@@ -364,7 +364,7 @@ static ma_result ma_tsf_seek_to_pcm_frame(ma_tsf* pTSF, ma_uint64 frameIndex)
 
     pTSF->tsf_sequencer->Rewind();
 
-    pTSF->cursor = 0;
+    pTSF->cursor = frameIndex;
 
     return MA_SUCCESS;
 }

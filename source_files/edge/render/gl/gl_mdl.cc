@@ -997,6 +997,8 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
             render_state->TextureWrapT(old_clamp);
         }
     }
+
+    render_state->ResetGLState();
 }
 
 void MDLRenderModel2D(MDLModel *md, int frame, float x, float y, float xscale, float yscale,
@@ -1054,9 +1056,7 @@ void MDLRenderModel2D(MDLModel *md, int frame, float x, float y, float xscale, f
         glEnd();
     }
 
-    render_state->Disable(GL_BLEND);
-    render_state->Disable(GL_TEXTURE_2D);
-    render_state->Disable(GL_CULL_FACE);
+    render_state->ResetGLState();
 }
 
 //--- editor settings ---

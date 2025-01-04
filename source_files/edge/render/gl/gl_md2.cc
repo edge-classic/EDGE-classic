@@ -1334,6 +1334,8 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
             render_state->TextureWrapT(old_clamp);
         }
     }
+
+    render_state->ResetGLState();
 }
 
 void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, float y, float xscale, float yscale,
@@ -1425,9 +1427,7 @@ void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, f
         }
     }
 
-    render_state->Disable(GL_BLEND);
-    render_state->Disable(GL_TEXTURE_2D);
-    render_state->Disable(GL_CULL_FACE);
+    render_state->ResetGLState();
 }
 
 //--- editor settings ---

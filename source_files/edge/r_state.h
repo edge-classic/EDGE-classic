@@ -185,6 +185,11 @@ class RenderState
     virtual void Flush() = 0;
 
     virtual void SetPipeline(uint32_t flags) = 0;
+
+    // Needed only for the legacy GL render path when ending unit batches
+#ifndef EDGE_SOKOL
+    virtual void ResetGLState() = 0;
+#endif
 };
 
 extern RenderState *render_state;

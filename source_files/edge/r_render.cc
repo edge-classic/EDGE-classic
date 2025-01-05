@@ -2120,9 +2120,10 @@ void RenderTrueBsp(void)
         }
     }
 
+    render_backend->SetRenderLayer(kRenderLayerWeapon);
+
     if (FlashFirst == false)
-    {
-        render_backend->SetRenderLayer(kRenderLayerWeapon);
+    {        
         DoWeaponModel();
     }
 
@@ -2143,7 +2144,6 @@ void RenderTrueBsp(void)
 
     if (FlashFirst == true)
     {
-        render_backend->SetRenderLayer(kRenderLayerWeapon);
         render_backend->SetupMatrices3D();
         render_state->Enable(GL_DEPTH_TEST);
         DoWeaponModel();

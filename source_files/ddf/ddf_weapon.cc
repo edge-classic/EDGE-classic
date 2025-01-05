@@ -202,7 +202,7 @@ static const DDFActionCode weapon_actions[] = {{"NOTHING", nullptr, nullptr},
                                                {"STOP", A_StopMoving, nullptr},
                                                {"TURN", WA_TurnDir, DDFStateGetAngle},
                                                {"TURN_RANDOM", WA_TurnRandom, DDFStateGetInteger},
-                                               {"MLOOK_TURN", WA_MlookTurn, DDFStateGetSlope},
+                                               {"FACE", WA_FaceDir, DDFStateGetSlope},
 
                                                {"RTS_ENABLE_TAGGED", A_WeaponEnableRadTrig, DDFWStateGetRADTrigger},
                                                {"RTS_DISABLE_TAGGED", A_WeaponDisableRadTrig, DDFWStateGetRADTrigger},

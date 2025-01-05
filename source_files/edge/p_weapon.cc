@@ -2175,7 +2175,7 @@ void WA_TurnRandom(MapObject *mo)
     mo->angle_ = epi::BAMFromDegrees(turn);
 }
 
-void WA_MlookTurn(MapObject *mo)
+void WA_FaceDir(MapObject *mo)
 {
     Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];

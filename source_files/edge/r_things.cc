@@ -1178,7 +1178,7 @@ static bool RenderThing(DrawThing *dthing, bool solid)
         blending |= kBlendingAlpha;
     }
 
-    if (solid && (blending & kBlendingAlpha) || !solid && !(blending & kBlendingAlpha))
+    if ((solid && (blending & kBlendingAlpha)) || (!solid && !(blending & kBlendingAlpha)))
     {
         return false;
     }

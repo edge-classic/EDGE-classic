@@ -877,7 +877,7 @@ static void DrawTile(Seg *seg, DrawFloor *dfloor, float lz1, float lz2, float rz
     }
 
     int32_t blending = GetBlending(surf->translucency, (ImageOpacity)image->opacity_);
-    bool    opaque   = !seg->back_sector || !(blending * kBlendingAlpha);
+    bool    opaque   = !seg->back_sector || !(blending & kBlendingAlpha);
 
     // check for horizontal sliders
     if ((flags & kWallTileMidMask) && seg->linedef->slide_door)

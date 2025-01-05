@@ -15,6 +15,7 @@ New Features
 - Add "Simple Skies" to Performance Options menu
 - New states actions: GRAVITY and NO_GRAVITY
 - New states action: SET_SCALE(float)
+- New LUA function: mapobject.render_view(x, y, w, h, tid). See the world from the eyes of any mobj.
 
 
 General Improvements/Changes
@@ -29,6 +30,7 @@ General Improvements/Changes
 - Sky drawing improvements
 - Heretic/Blasphemer tweaks
 - Consolidate GL state changes and render calls
+- Autoscale intermission texts if there are too many lines to fit on the screen
  
 
 Bugs fixed
@@ -42,4 +44,7 @@ Bugs fixed
 - Boom line 242 support vastly improved
 - Fix for patch atlas lookups for invalid characters
 - Calling named RTS Tags via state action RTS_ENABLE_TAGGED did not work
+- PNG textures/flats did not tile
+- MLOOK_TURN and MLOOK_FACE thing.ddf actions were exactly the same. Changed MLOOK_TURN to behave like it's horizontal equivalent TURN.
+
 

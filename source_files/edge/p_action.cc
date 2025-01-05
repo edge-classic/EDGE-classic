@@ -1018,7 +1018,27 @@ void A_SetSkin(MapObject *mo)
 //------------------- MOVEMENT ROUTINES -----------------------------
 //-------------------------------------------------------------------
 
+
+void A_MlookFace(MapObject *mo)
+{
+    const State *st = mo->state_;
+
+    if (st && st->action_par)
+        mo->vertical_angle_ = epi::BAMFromATan(*(float *)st->action_par);
+    else
+        mo->vertical_angle_ = 0;
+}
+
 void A_FaceDir(MapObject *mo)
+{
+    const State *st = mo->state_;
+
+    if (st && st->action_par)
+        mo->vertical_angle_ += epi::BAMFromATan(*(float *)st->action_par);
+
+}
+
+void A_MlookTurn(MapObject *mo)
 {
     const State *st = mo->state_;
 
@@ -1027,6 +1047,7 @@ void A_FaceDir(MapObject *mo)
     else
         mo->angle_ = 0;
 }
+
 
 void A_TurnDir(MapObject *mo)
 {
@@ -1039,6 +1060,7 @@ void A_TurnDir(MapObject *mo)
 
     mo->angle_ += turn;
 }
+
 
 void A_TurnRandom(MapObject *mo)
 {
@@ -1058,24 +1080,9 @@ void A_TurnRandom(MapObject *mo)
         mo->angle_ += (BAMAngle)(turn << (kBAMAngleBits - 10));
 }
 
-void A_MlookFace(MapObject *mo)
-{
-    const State *st = mo->state_;
 
-    if (st && st->action_par)
-        mo->vertical_angle_ = epi::BAMFromATan(*(float *)st->action_par);
-    else
-        mo->vertical_angle_ = 0;
-}
 
-void A_MlookTurn(MapObject *mo)
-{
-    const State *st = mo->state_;
 
-    if (st && st->action_par)
-        mo->vertical_angle_ += epi::BAMFromATan(*(float *)st->action_par);
-
-}
 
 void A_MoveFwd(MapObject *mo)
 {

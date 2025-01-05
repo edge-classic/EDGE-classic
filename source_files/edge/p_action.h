@@ -103,7 +103,7 @@ void WA_MoveRight(MapObject *mo);
 void WA_MoveUp(MapObject *mo);
 void WA_TurnDir(MapObject *mo);
 void WA_TurnRandom(MapObject *mo);
-void WA_MlookTurn(MapObject *mo);
+void WA_FaceDir(MapObject *mo);
 
 // Needed for the bossbrain.
 void A_BrainScream(MapObject *mo);

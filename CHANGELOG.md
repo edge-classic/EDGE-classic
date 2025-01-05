@@ -31,6 +31,7 @@ General Improvements/Changes
 - Heretic/Blasphemer tweaks
 - Consolidate GL state changes and render calls
 - Autoscale intermission texts if there are too many lines to fit on the screen
+- MLOOK_TURN() Weapons.ddf action has been renamed to FACE() with identical behaviour
  
 
 Bugs fixed
@@ -45,6 +46,7 @@ Bugs fixed
 - Fix for patch atlas lookups for invalid characters
 - Calling named RTS Tags via state action RTS_ENABLE_TAGGED did not work
 - PNG textures/flats did not tile
-- MLOOK_TURN and MLOOK_FACE thing.ddf actions were exactly the same. Changed MLOOK_TURN to behave like it's horizontal equivalent TURN.
+- MLOOK_TURN() and MLOOK_FACE() thing.ddf actions were exactly the same. Now MLOOK_TURN() affects horizontal and MLOOK_FACE() affects vertical.
+- Changed FACE() thing.ddf action to behave like it's horizontal equivalent TURN().
 
 

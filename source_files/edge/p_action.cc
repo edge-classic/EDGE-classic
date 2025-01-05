@@ -1073,7 +1073,8 @@ void A_MlookTurn(MapObject *mo)
     const State *st = mo->state_;
 
     if (st && st->action_par)
-        mo->vertical_angle_ = epi::BAMFromATan(*(float *)st->action_par);
+        mo->vertical_angle_ += epi::BAMFromATan(*(float *)st->action_par);
+
 }
 
 void A_MoveFwd(MapObject *mo)

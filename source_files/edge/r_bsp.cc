@@ -982,7 +982,7 @@ static int32_t BspTraverseProc(void *thread_data)
             // walk the bsp tree
             BspWalkNode(root_node);
 
-            if (current_batch->num_items_)
+            if (current_batch && current_batch->num_items_)
             {
                 BSPQueueRenderBatch(current_batch);
             }

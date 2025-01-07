@@ -232,7 +232,15 @@ enum ImageLookupFlag
     kImageLookupFont  = 0x0008, // font character (be careful with backups)
 };
 
-Image       *ImageContainerLookup(std::list<Image *> &bucket, const char *name, int source_type = -1);
+enum ImageType
+{
+    kImageTypeTexture = 0,
+    kImageTypeGraphic,
+    kImageTypeFlat,
+    kImageTypeSprite
+};
+
+Image       *ImageContainerLookup(ImageType image_type, const char *name, int source_type = -1);
 const Image *ImageLookup(const char *name, ImageNamespace = kImageNamespaceGraphic, int flags = 0);
 
 const Image *ImageForDummySprite(void);
@@ -318,13 +326,9 @@ enum ImageSource
 };
 
 // Helper stuff for images in packages
-extern std::list<Image *>       real_graphics;
-extern std::list<Image *>       real_textures;
-extern std::list<Image *>       real_flats;
-extern std::list<Image *>       real_sprites;
 extern std::vector<std::string> TX_names;
 
-Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfile_name, std::list<Image *> &container,
+Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfile_name, ImageType image_type,
                          const Image *replaces = nullptr);
 
 //--- editor settings ---

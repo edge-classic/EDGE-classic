@@ -64,6 +64,8 @@ enum KnownEName
 #undef EPI_XY
 };
 
+typedef int32_t ENameIndex;
+
 class EName
 {
   public:
@@ -83,7 +85,7 @@ class EName
         index_ = index;
     }
 
-    int GetIndex() const
+    ENameIndex GetIndex() const
     {
         return index_;
     }
@@ -104,7 +106,7 @@ class EName
         return *this;
     }
 
-    int SetName(std::string_view text, bool no_create = false)
+    ENameIndex SetName(std::string_view text, bool no_create = false)
     {
         return index_ = name_data_.FindName(text, no_create);
     }
@@ -167,7 +169,7 @@ class EName
     }
 
   protected:
-    int index_;
+    ENameIndex index_;
 
     struct NameEntry
     {

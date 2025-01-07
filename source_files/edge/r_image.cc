@@ -114,7 +114,7 @@ static ImageMap real_textures;
 static ImageMap real_flats;
 static ImageMap real_sprites;
 
-static Image *ImageContainerLookupInternal(ImageMap &bucket, const epi::EName& ename,
+static Image *ImageContainerLookupInternal(ImageMap &bucket, const epi::EName &ename,
                                            int source_type = -1 /* use -2 to prevent USER override */)
 {
     // for a normal lookup, we want USER images to override
@@ -131,9 +131,15 @@ static Image *ImageContainerLookupInternal(ImageMap &bucket, const epi::EName& e
         return nullptr;
     }
 
-    if (!f->second.size())
+    // search backwards, we want newer image to override older ones
+    for (auto it = f->second.rbegin(); it != f->second.rend(); it++)
     {
-        FatalError("ImageContainerLookupInternal: ImageMap of zero size");
+        Image *rim = *it;
+
+        if (source_type >= 0 && source_type != (int)rim->source_type_)
+            continue;
+
+        return rim;
     }
 
     return f->second.back();

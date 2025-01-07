@@ -44,6 +44,7 @@
 #include "e_search.h"
 #include "epi.h"
 #include "epi_doomdefs.h"
+#include "epi_ename.h"
 #include "epi_endian.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
@@ -105,56 +106,87 @@ struct CachedImage
     bool is_whitened;
 };
 
-Image *ImageContainerLookup(std::list<Image *> &bucket, const char *name, int source_type
-                            /* use -2 to prevent USER override */)
+// total set of images
+typedef std::unordered_map<epi::ENameIndex, std::list<Image *>> ImageMap;
+
+static ImageMap real_graphics;
+static ImageMap real_textures;
+static ImageMap real_flats;
+static ImageMap real_sprites;
+
+static Image *ImageContainerLookupInternal(ImageMap &bucket, const epi::EName& ename,
+                                           int source_type = -1 /* use -2 to prevent USER override */)
 {
     // for a normal lookup, we want USER images to override
     if (source_type == -1)
     {
-        Image *rim = ImageContainerLookup(bucket, name, kImageSourceUser); // recursion
+        Image *rim = ImageContainerLookupInternal(bucket, ename, kImageSourceUser); // recursion
         if (rim)
             return rim;
     }
 
-    std::list<Image *>::reverse_iterator it;
-
-    // search backwards, we want newer image to override older ones
-    for (it = bucket.rbegin(); it != bucket.rend(); it++)
+    auto f = bucket.find(ename.GetIndex());
+    if (f == bucket.end())
     {
-        Image *rim = *it;
-
-        if (source_type >= 0 && source_type != (int)rim->source_type_)
-            continue;
-
-        if (epi::StringCaseCompareASCII(name, rim->name_) == 0)
-            return rim;
+        return nullptr;
     }
 
-    return nullptr; // not found
+    if (!f->second.size())
+    {
+        FatalError("ImageContainerLookupInternal: ImageMap of zero size");
+    }
+
+    return f->second.back();
 }
 
-static void do_Animate(std::list<Image *> &bucket)
+Image *ImageContainerLookup(ImageType image_type, const char *name, int source_type)
 {
-    std::list<Image *>::iterator it;
+    epi::EName ename(name);
 
-    for (it = bucket.begin(); it != bucket.end(); it++)
+    switch (image_type)
     {
-        Image *rim = *it;
+    case kImageTypeTexture:
+        return ImageContainerLookupInternal(real_textures, ename, source_type);
+        break;
+    case kImageTypeGraphic:
+        return ImageContainerLookupInternal(real_graphics, ename, source_type);
+        break;
+    case kImageTypeFlat:
+        return ImageContainerLookupInternal(real_flats, ename, source_type);
+        break;
+    case kImageTypeSprite:
+        return ImageContainerLookupInternal(real_sprites, ename, source_type);
+        break;
+    default:
+        FatalError("ImageContainerLookup: Unknown Image Type");
+    }
 
-        if (rim->animation_.speed == 0) // not animated ?
-            continue;
+    return nullptr;
+}
 
-        if (rim->liquid_type_ > kLiquidImageNone && swirling_flats > kLiquidSwirlVanilla)
-            continue;
-
-        EPI_ASSERT(rim->animation_.count > 0);
-
-        rim->animation_.count--;
-
-        if (rim->animation_.count == 0 && rim->animation_.current->animation_.next)
+static void do_Animate(ImageMap &bucket)
+{
+    for (auto mitr = bucket.begin(); mitr != bucket.end(); mitr++)
+    {
+        for (auto it = mitr->second.begin(); it != mitr->second.end(); it++)
         {
-            rim->animation_.current = rim->animation_.current->animation_.next;
-            rim->animation_.count   = rim->animation_.speed;
+            Image *rim = *it;
+
+            if (rim->animation_.speed == 0) // not animated ?
+                continue;
+
+            if (rim->liquid_type_ > kLiquidImageNone && swirling_flats > kLiquidSwirlVanilla)
+                continue;
+
+            EPI_ASSERT(rim->animation_.count > 0);
+
+            rim->animation_.count--;
+
+            if (rim->animation_.count == 0 && rim->animation_.current->animation_.next)
+            {
+                rim->animation_.current = rim->animation_.current->animation_.next;
+                rim->animation_.count   = rim->animation_.speed;
+            }
         }
     }
 }
@@ -167,12 +199,6 @@ int image_smoothing = 0;
 
 int hq2x_scaling = 0;
 
-// total set of images
-std::list<Image *> real_graphics;
-std::list<Image *> real_textures;
-std::list<Image *> real_flats;
-std::list<Image *> real_sprites;
-
 std::vector<std::string> TX_names;
 
 const Image *sky_flat_image;
@@ -183,6 +209,18 @@ static const Image *dummy_hom[2];
 
 // image cache (actually a ring structure)
 static std::list<CachedImage *> image_cache;
+
+static void AddImageToMap(ImageMap &map, const char *name, Image *image)
+{
+    epi::EName ename(name);
+    auto       result = real_textures.find(ename.GetIndex());
+    if (result == real_textures.end())
+    {
+        map.emplace(std::make_pair(ename.GetIndex(), std::list<Image *>()));
+    }
+
+    map[ename.GetIndex()].push_back(image);
+}
 
 //----------------------------------------------------------------------------
 //
@@ -288,8 +326,8 @@ static Image *CreateDummyImage(const char *name, RGBAColor fg, RGBAColor bg)
     return rim;
 }
 
-Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfile_name, std::list<Image *> &container,
-                         const Image *replaces)
+static Image *AddPackImageSmartInternal(const char *name, ImageSource type, const char *packfile_name,
+                                        ImageMap &container, const Image *replaces = nullptr)
 {
     /* used for Graphics, Sprites and TX/HI stuff */
     epi::File *f = OpenFileFromPack(packfile_name);
@@ -422,13 +460,13 @@ Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfil
         }
     }
 
-    container.push_back(rim);
+    AddImageToMap(container, name, rim);
 
     return rim;
 }
 
-static Image *AddImage_Smart(const char *name, ImageSource type, int lump, std::list<Image *> &container,
-                             const Image *replaces = nullptr)
+static Image *AddImage_SmartInternal(const char *name, ImageSource type, int lump, ImageMap &container,
+                                     const Image *replaces = nullptr)
 {
     /* used for Graphics, Sprites and TX/HI stuff */
 
@@ -561,7 +599,7 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump, std::
         }
     }
 
-    container.push_back(rim);
+    AddImageToMap(container, name, rim);
 
     return rim;
 }
@@ -583,7 +621,7 @@ static Image *AddImageTexture(const char *name, TextureDefinition *tdef)
     rim->source_.texture.tdef = tdef;
     rim->source_palette_      = tdef->palette_lump;
 
-    real_textures.push_back(rim);
+    AddImageToMap(real_textures, name, rim);
 
     return rim;
 }
@@ -642,7 +680,7 @@ static Image *AddImageFlat(const char *name, int lump)
             rim->liquid_type_ = kLiquidImageThick;
     }
 
-    real_flats.push_back(rim);
+    AddImageToMap(real_flats, name, rim);
 
     return rim;
 }
@@ -659,16 +697,16 @@ static Image *AddImage_DOOM(ImageDefinition *def, bool user_defined = false)
         switch (def->belong_)
         {
         case kImageNamespaceGraphic:
-            rim = AddPackImageSmart(name, kImageSourceGraphic, lump_name, real_graphics);
+            rim = AddPackImageSmartInternal(name, kImageSourceGraphic, lump_name, real_graphics);
             break;
         case kImageNamespaceTexture:
-            rim = AddPackImageSmart(name, kImageSourceTexture, lump_name, real_textures);
+            rim = AddPackImageSmartInternal(name, kImageSourceTexture, lump_name, real_textures);
             break;
         case kImageNamespaceFlat:
-            rim = AddPackImageSmart(name, kImageSourceFlat, lump_name, real_flats);
+            rim = AddPackImageSmartInternal(name, kImageSourceFlat, lump_name, real_flats);
             break;
         case kImageNamespaceSprite:
-            rim = AddPackImageSmart(name, kImageSourceSprite, lump_name, real_sprites);
+            rim = AddPackImageSmartInternal(name, kImageSourceSprite, lump_name, real_sprites);
             break;
 
         default:
@@ -680,16 +718,16 @@ static Image *AddImage_DOOM(ImageDefinition *def, bool user_defined = false)
         switch (def->belong_)
         {
         case kImageNamespaceGraphic:
-            rim = AddImage_Smart(name, kImageSourceGraphic, GetLumpNumberForName(lump_name), real_graphics);
+            rim = AddImage_SmartInternal(name, kImageSourceGraphic, GetLumpNumberForName(lump_name), real_graphics);
             break;
         case kImageNamespaceTexture:
-            rim = AddImage_Smart(name, kImageSourceTexture, GetLumpNumberForName(lump_name), real_textures);
+            rim = AddImage_SmartInternal(name, kImageSourceTexture, GetLumpNumberForName(lump_name), real_textures);
             break;
         case kImageNamespaceFlat:
-            rim = AddImage_Smart(name, kImageSourceFlat, GetLumpNumberForName(lump_name), real_flats);
+            rim = AddImage_SmartInternal(name, kImageSourceFlat, GetLumpNumberForName(lump_name), real_flats);
             break;
         case kImageNamespaceSprite:
-            rim = AddImage_Smart(name, kImageSourceSprite, GetLumpNumberForName(lump_name), real_sprites);
+            rim = AddImage_SmartInternal(name, kImageSourceSprite, GetLumpNumberForName(lump_name), real_sprites);
             break;
 
         default:
@@ -858,16 +896,16 @@ static Image *AddImageUser(ImageDefinition *def)
     switch (def->belong_)
     {
     case kImageNamespaceGraphic:
-        real_graphics.push_back(rim);
+        AddImageToMap(real_graphics, rim->name_.c_str(), rim);
         break;
     case kImageNamespaceTexture:
-        real_textures.push_back(rim);
+        AddImageToMap(real_textures, rim->name_.c_str(), rim);
         break;
     case kImageNamespaceFlat:
-        real_flats.push_back(rim);
+        AddImageToMap(real_flats, rim->name_.c_str(), rim);
         break;
     case kImageNamespaceSprite:
-        real_sprites.push_back(rim);
+        AddImageToMap(real_sprites, rim->name_.c_str(), rim);
         break;
 
     default:
@@ -936,7 +974,7 @@ const Image *CreateSprite(const char *name, int lump, bool is_weapon)
 {
     EPI_ASSERT(lump >= 0);
 
-    Image *rim = AddImage_Smart(name, kImageSourceSprite, lump, real_sprites);
+    Image *rim = AddImage_SmartInternal(name, kImageSourceSprite, lump, real_sprites);
     if (!rim)
         return nullptr;
 
@@ -960,7 +998,8 @@ const Image *CreatePackSprite(std::string packname, PackFile *pack, bool is_weap
 {
     EPI_ASSERT(pack);
 
-    Image *rim = AddPackImageSmart(epi::GetStem(packname).c_str(), kImageSourceSprite, packname.c_str(), real_sprites);
+    Image *rim =
+        AddPackImageSmartInternal(epi::GetStem(packname).c_str(), kImageSourceSprite, packname.c_str(), real_sprites);
     if (!rim)
         return nullptr;
 
@@ -998,26 +1037,27 @@ void CreateUserImages(void)
 
 void ImageAddTxHx(int lump, const char *name, bool hires)
 {
+    epi::EName ename(name);
     if (hires)
     {
-        const Image *rim = ImageContainerLookup(real_textures, name, -2);
+        const Image *rim = ImageContainerLookupInternal(real_textures, ename, -2);
         if (rim && rim->source_type_ != kImageSourceUser)
         {
-            AddImage_Smart(name, kImageSourceTXHI, lump, real_textures, rim);
+            AddImage_SmartInternal(name, kImageSourceTXHI, lump, real_textures, rim);
             return;
         }
 
-        rim = ImageContainerLookup(real_flats, name, -2);
+        rim = ImageContainerLookupInternal(real_flats, ename, -2);
         if (rim && rim->source_type_ != kImageSourceUser)
         {
-            AddImage_Smart(name, kImageSourceTXHI, lump, real_flats, rim);
+            AddImage_SmartInternal(name, kImageSourceTXHI, lump, real_flats, rim);
             return;
         }
 
-        rim = ImageContainerLookup(real_sprites, name, -2);
+        rim = ImageContainerLookupInternal(real_sprites, ename, -2);
         if (rim && rim->source_type_ != kImageSourceUser)
         {
-            AddImage_Smart(name, kImageSourceTXHI, lump, real_sprites, rim);
+            AddImage_SmartInternal(name, kImageSourceTXHI, lump, real_sprites, rim);
             return;
         }
 
@@ -1026,7 +1066,7 @@ void ImageAddTxHx(int lump, const char *name, bool hires)
 
         if (rim && rim->source_type_ != kImageSourceUser)
         {
-            AddImage_Smart(name, kImageSourceTXHI, lump, real_graphics, rim);
+            AddImage_SmartInternal(name, kImageSourceTXHI, lump, real_graphics, rim);
             return;
         }
 
@@ -1036,7 +1076,7 @@ void ImageAddTxHx(int lump, const char *name, bool hires)
 
     TX_names.push_back(name);
 
-    AddImage_Smart(name, kImageSourceTXHI, lump, real_textures);
+    AddImage_SmartInternal(name, kImageSourceTXHI, lump, real_textures);
 }
 
 //
@@ -1050,14 +1090,15 @@ const Image **GetUserSprites(int *count)
     // count number of user sprites
     (*count) = 0;
 
-    std::list<Image *>::iterator it;
-
-    for (it = real_sprites.begin(); it != real_sprites.end(); it++)
+    for (auto mitr = real_sprites.begin(); mitr != real_sprites.end(); mitr++)
     {
-        Image *rim = *it;
+        for (auto it = mitr->second.begin(); it != mitr->second.end(); it++)
+        {
+            Image *rim = *it;
 
-        if (rim->source_type_ == kImageSourceUser || rim->source_.graphic.user_defined)
-            (*count) += 1;
+            if (rim->source_type_ == kImageSourceUser || rim->source_.graphic.user_defined)
+                (*count) += 1;
+        }
     }
 
     if (*count == 0)
@@ -1069,12 +1110,16 @@ const Image **GetUserSprites(int *count)
     const Image **array = new const Image *[*count];
     int           pos   = 0;
 
-    for (it = real_sprites.begin(); it != real_sprites.end(); it++)
+    for (auto mitr = real_sprites.begin(); mitr != real_sprites.end(); mitr++)
     {
-        Image *rim = *it;
 
-        if (rim->source_type_ == kImageSourceUser || rim->source_.graphic.user_defined)
-            array[pos++] = rim;
+        for (auto it = mitr->second.begin(); it != mitr->second.end(); it++)
+        {
+            Image *rim = *it;
+
+            if (rim->source_type_ == kImageSourceUser || rim->source_.graphic.user_defined)
+                array[pos++] = rim;
+        }
     }
 
 #define EDGE_CMP(a, b) (strcmp(a->name_.c_str(), b->name_.c_str()) < 0)
@@ -1365,17 +1410,19 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
 //
 static const Image *BackupTexture(const char *tex_name, int flags)
 {
+    epi::EName ename(tex_name);
+
     const Image *rim;
 
     if (!(flags & kImageLookupExact))
     {
         // backup plan: try a flat with the same name
-        rim = ImageContainerLookup(real_flats, tex_name);
+        rim = ImageContainerLookupInternal(real_flats, ename);
         if (rim)
             return rim;
 
         // backup backup plan: try a graphic with the same name
-        rim = ImageContainerLookup(real_graphics, tex_name);
+        rim = ImageContainerLookupInternal(real_graphics, ename);
         if (rim)
             return rim;
 
@@ -1389,7 +1436,7 @@ static const Image *BackupTexture(const char *tex_name, int flags)
             {
                 if (patch_lump == checklump)
                 {
-                    rim = AddImage_Smart(tex_name, kImageSourceGraphic, patch_lump, real_graphics);
+                    rim = AddImage_SmartInternal(tex_name, kImageSourceGraphic, patch_lump, real_graphics);
                     if (rim)
                         return rim;
                 }
@@ -1410,13 +1457,14 @@ static const Image *BackupTexture(const char *tex_name, int flags)
         dummy = CreateDummyImage(tex_name, 0xAA5511, 0x663300);
 
     // keep dummy texture so that future lookups will succeed
-    real_textures.push_back(dummy);
+    AddImageToMap(real_textures, tex_name, dummy);
     return dummy;
 }
 
 void CreateFallbackTexture()
 {
-    real_textures.push_back(CreateDummyImage("EDGETEX", 0xAA5511, 0x663300));
+    Image *fallback = CreateDummyImage("EDGETEX", 0xAA5511, 0x663300);
+    AddImageToMap(real_textures, "EDGETEX", fallback);
 }
 
 //
@@ -1443,7 +1491,7 @@ static const Image *BackupFlat(const char *flat_name, int flags)
     // backup plan 2: Texture with the same name ?
     if (!(flags & kImageLookupExact))
     {
-        rim = ImageContainerLookup(real_textures, flat_name);
+        rim = ImageContainerLookupInternal(real_textures, epi::EName(flat_name));
         if (rim)
             return rim;
     }
@@ -1456,13 +1504,14 @@ static const Image *BackupFlat(const char *flat_name, int flags)
     Image *dummy = CreateDummyImage(flat_name, 0x11AA11, 0x115511);
 
     // keep dummy flat so that future lookups will succeed
-    real_flats.push_back(dummy);
+    AddImageToMap(real_flats, flat_name, dummy);
     return dummy;
 }
 
 void CreateFallbackFlat()
 {
-    real_flats.push_back(CreateDummyImage("EDGEFLAT", 0x11AA11, 0x115511));
+    Image *flat_fallback = CreateDummyImage("EDGEFLAT", 0x11AA11, 0x115511);
+    AddImageToMap(real_flats, "EDGEFLAT", flat_fallback);
 }
 
 //
@@ -1472,14 +1521,16 @@ static const Image *BackupGraphic(const char *gfx_name, int flags)
 {
     const Image *rim;
 
+    epi::EName ename(gfx_name);
+
     // backup plan 1: look for sprites and heretic-background
     if ((flags & (kImageLookupExact | kImageLookupFont)) == 0)
     {
-        rim = ImageContainerLookup(real_graphics, gfx_name, kImageSourceRawBlock);
+        rim = ImageContainerLookupInternal(real_graphics, ename, kImageSourceRawBlock);
         if (rim)
             return rim;
 
-        rim = ImageContainerLookup(real_sprites, gfx_name);
+        rim = ImageContainerLookupInternal(real_sprites, ename);
         if (rim)
             return rim;
     }
@@ -1491,7 +1542,7 @@ static const Image *BackupGraphic(const char *gfx_name, int flags)
 
         if (i >= 0)
         {
-            rim = AddImage_Smart(gfx_name, kImageSourceGraphic, i, real_graphics);
+            rim = AddImage_SmartInternal(gfx_name, kImageSourceGraphic, i, real_graphics);
             if (rim)
                 return rim;
         }
@@ -1510,7 +1561,7 @@ static const Image *BackupGraphic(const char *gfx_name, int flags)
         dummy = CreateDummyImage(gfx_name, 0xFF0000, kTransparentPixelIndex);
 
     // keep dummy graphic so that future lookups will succeed
-    real_graphics.push_back(dummy);
+    AddImageToMap(real_graphics, gfx_name, dummy);
     return dummy;
 }
 
@@ -1549,25 +1600,27 @@ const Image *ImageLookup(const char *name, ImageNamespace type, int flags)
 
     const Image *rim;
 
+    epi::EName ename(name);
+
     if (type == kImageNamespaceTexture)
     {
-        rim = ImageContainerLookup(real_textures, name);
+        rim = ImageContainerLookupInternal(real_textures, ename);
         return rim ? rim : BackupTexture(name, flags);
     }
     if (type == kImageNamespaceFlat)
     {
-        rim = ImageContainerLookup(real_flats, name);
+        rim = ImageContainerLookupInternal(real_flats, ename);
         return rim ? rim : BackupFlat(name, flags);
     }
     if (type == kImageNamespaceSprite)
     {
-        rim = ImageContainerLookup(real_sprites, name);
+        rim = ImageContainerLookupInternal(real_sprites, ename);
         return rim ? rim : BackupSprite(flags);
     }
 
     /* kImageNamespaceGraphic */
 
-    rim = ImageContainerLookup(real_graphics, name);
+    rim = ImageContainerLookupInternal(real_graphics, ename);
     return rim ? rim : BackupGraphic(name, flags);
 }
 
@@ -1825,7 +1878,7 @@ void ImagePrecache(const Image *image)
 
         alt_name[2] = (alt_name[2] == '1') ? '2' : '1';
 
-        Image *alt = ImageContainerLookup(real_textures, alt_name.c_str());
+        Image *alt = ImageContainerLookupInternal(real_textures, epi::EName(alt_name.c_str()));
 
         if (alt)
             ImageCache(alt, false);
@@ -1981,5 +2034,30 @@ void AnimateImageSet(const Image **images, int number, int speed)
     }
 }
 
-//--- editor settings ---
-// vi:ts=4:sw=4:noexpandtab
+Image *AddPackImageSmart(const char *name, ImageSource type, const char *packfile_name, ImageType image_type,
+                         const Image *replaces)
+{
+    ImageMap *map = nullptr;
+    switch (image_type)
+    {
+    case kImageTypeTexture:
+        map = &real_textures;
+        break;
+    case kImageTypeFlat:
+        map = &real_flats;
+        break;
+    case kImageTypeSprite:
+        map = &real_sprites;
+        break;
+    case kImageTypeGraphic:
+        map = &real_graphics;
+        break;
+    }
+
+    if (!map)
+    {
+        FatalError("AddPackImageSmart: Unknown image type");
+    }
+
+    return AddPackImageSmartInternal(name, type, packfile_name, *map, replaces);
+}

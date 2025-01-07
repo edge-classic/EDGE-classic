@@ -1164,13 +1164,13 @@ void ProcessPackSubstitutions(PackFile *pack, int pack_index)
                 LogDebug("- Adding image file in EPK: %s\n", entry.pack_path_.c_str());
 
                 if (dir_name == "textures")
-                    AddPackImageSmart(texname.c_str(), kImageSourceTXHI, entry.pack_path_.c_str(), real_textures);
+                    AddPackImageSmart(texname.c_str(), kImageSourceTXHI, entry.pack_path_.c_str(), kImageTypeTexture);
                 else if (dir_name == "graphics")
-                    AddPackImageSmart(texname.c_str(), kImageSourceGraphic, entry.pack_path_.c_str(), real_graphics);
+                    AddPackImageSmart(texname.c_str(), kImageSourceGraphic, entry.pack_path_.c_str(), kImageTypeGraphic);
                 else if (dir_name == "flats")
-                    AddPackImageSmart(texname.c_str(), kImageSourceGraphic, entry.pack_path_.c_str(), real_flats);
+                    AddPackImageSmart(texname.c_str(), kImageSourceGraphic, entry.pack_path_.c_str(), kImageTypeFlat);
                 else if (dir_name == "skins") // Not sure about this still
-                    AddPackImageSmart(texname.c_str(), kImageSourceSprite, entry.pack_path_.c_str(), real_sprites);
+                    AddPackImageSmart(texname.c_str(), kImageSourceSprite, entry.pack_path_.c_str(), kImageTypeSprite);
             }
             else
             {
@@ -1283,24 +1283,24 @@ void ProcessHiresPackSubstitutions(PackFile *pack, int pack_index)
 
             LogDebug("- Adding Hires substitute from EPK: %s\n", entry.pack_path_.c_str());
 
-            const Image *rim = ImageContainerLookup(real_textures, texname.c_str(), -2);
+            const Image *rim = ImageContainerLookup(kImageTypeTexture, texname.c_str(), -2);
             if (rim && rim->source_type_ != kImageSourceUser)
             {
-                AddPackImageSmart(texname.c_str(), kImageSourceTXHI, entry.pack_path_.c_str(), real_textures, rim);
+                AddPackImageSmart(texname.c_str(), kImageSourceTXHI, entry.pack_path_.c_str(), kImageTypeTexture, rim);
                 continue;
             }
 
-            rim = ImageContainerLookup(real_flats, texname.c_str(), -2);
+            rim = ImageContainerLookup(kImageTypeFlat, texname.c_str(), -2);
             if (rim && rim->source_type_ != kImageSourceUser)
             {
-                AddPackImageSmart(texname.c_str(), kImageSourceTXHI, entry.pack_path_.c_str(), real_flats, rim);
+                AddPackImageSmart(texname.c_str(), kImageSourceTXHI, entry.pack_path_.c_str(), kImageTypeFlat, rim);
                 continue;
             }
 
-            rim = ImageContainerLookup(real_sprites, texname.c_str(), -2);
+            rim = ImageContainerLookup(kImageTypeSprite, texname.c_str(), -2);
             if (rim && rim->source_type_ != kImageSourceUser)
             {
-                AddPackImageSmart(texname.c_str(), kImageSourceTXHI, entry.pack_path_.c_str(), real_sprites, rim);
+                AddPackImageSmart(texname.c_str(), kImageSourceTXHI, entry.pack_path_.c_str(), kImageTypeSprite, rim);
                 continue;
             }
 
@@ -1309,13 +1309,13 @@ void ProcessHiresPackSubstitutions(PackFile *pack, int pack_index)
 
             if (rim && rim->source_type_ != kImageSourceUser)
             {
-                AddPackImageSmart(texname.c_str(), kImageSourceTXHI, entry.pack_path_.c_str(), real_graphics, rim);
+                AddPackImageSmart(texname.c_str(), kImageSourceTXHI, entry.pack_path_.c_str(), kImageTypeGraphic, rim);
                 continue;
             }
 
             LogDebug("HIRES replacement '%s' has no counterpart.\n", texname.c_str());
 
-            AddPackImageSmart(texname.c_str(), kImageSourceTXHI, entry.pack_path_.c_str(), real_textures);
+            AddPackImageSmart(texname.c_str(), kImageSourceTXHI, entry.pack_path_.c_str(), kImageTypeTexture);
         }
         else
         {

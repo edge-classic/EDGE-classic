@@ -8,23 +8,6 @@ void RenderSubList(std::list<DrawSubsector *> &dsubs, bool for_mirror = false);
 
 void BspWalkNode(unsigned int);
 
-inline BlendingMode GetBlending(float alpha, ImageOpacity opacity)
-{
-    int blending;
-
-    if (alpha >= 0.99f && opacity == kOpacitySolid)
-        blending = kBlendingNone;
-    else if (alpha >= 0.99f && opacity == kOpacityMasked)
-        blending = kBlendingMasked;
-    else
-        blending = kBlendingLess;
-
-    if (alpha < 0.99f || opacity == kOpacityComplex)
-        blending |= kBlendingAlpha;
-
-    return (BlendingMode)blending;
-}
-
 #ifdef EDGE_SOKOL
 
 constexpr int32_t kRenderItemBatchSize = 16;

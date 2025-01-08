@@ -90,6 +90,22 @@ static constexpr float kMinimumSpriteDistance = 4.0f;
 static const Image *crosshair_image;
 static int          crosshair_which;
 
+inline BlendingMode GetThingBlending(float alpha, ImageOpacity opacity, int32_t hyper_flags = 0)
+{
+    int blending = kBlendingMasked;
+
+    if (alpha >= 0.11f &&opacity != kOpacityComplex)
+        blending = kBlendingLess;
+
+    if (alpha < 0.99 || opacity == kOpacityComplex)
+        blending |= kBlendingAlpha;
+
+    if (hyper_flags & kHyperFlagNoZBufferUpdate)
+        blending |= kBlendingNoZBuffer;
+
+    return (BlendingMode) blending;
+}
+
 static float GetHoverDeltaZ(MapObject *mo, float bob_mult = 0)
 {
     if (time_stop_active || erraticism_active)
@@ -1172,7 +1188,8 @@ static bool RenderThing(DrawThing *dthing, bool solid)
     GLuint tex_id = ImageCache(
         image, false, render_view_effect_colormap ? render_view_effect_colormap : dthing->map_object->info_->palremap_);
 
-    int blending = GetBlending(trans, (ImageOpacity)image->opacity_);
+    int blending = GetThingBlending(trans, (ImageOpacity)image->opacity_, mo->hyper_flags_);
+
     if (is_fuzzy)
     {
         blending |= kBlendingAlpha;
@@ -1180,14 +1197,14 @@ static bool RenderThing(DrawThing *dthing, bool solid)
 
     if (solid)
     {
-        if ((mo->hyper_flags_ & kHyperFlagNoZBufferUpdate) || (blending & kBlendingAlpha))
+        if ((blending & kBlendingNoZBuffer) || (blending & kBlendingAlpha))
         {
             return false;
         }
     }
     else
     {
-        if (!(mo->hyper_flags_ & kHyperFlagNoZBufferUpdate) && !(blending & kBlendingAlpha))
+        if (!(blending & kBlendingNoZBuffer) && !(blending & kBlendingAlpha))
         {
             return false;
         }
@@ -1273,9 +1290,6 @@ static bool RenderThing(DrawThing *dthing, bool solid)
     data.colors[1].Clear();
     data.colors[2].Clear();
     data.colors[3].Clear();
-
-    if (mo->hyper_flags_ & kHyperFlagNoZBufferUpdate)
-        blending |= kBlendingNoZBuffer;
 
     float    fuzz_mul = 0;
     HMM_Vec2 fuzz_add;

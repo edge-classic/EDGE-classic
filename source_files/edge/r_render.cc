@@ -107,6 +107,23 @@ MirrorSet render_mirror_set(kMirrorSetRender);
 extern std::list<DrawSubsector *> draw_subsector_list;
 #endif
 
+inline BlendingMode GetSurfaceBlending(float alpha, ImageOpacity opacity)
+{
+    int blending;
+
+    if (alpha >= 0.99f && opacity == kOpacitySolid)
+        blending = kBlendingNone;
+    else if (alpha < 0.11f || opacity == kOpacityComplex)
+        blending = kBlendingMasked;
+    else
+        blending = kBlendingLess;
+
+    if (alpha < 0.99f || opacity == kOpacityComplex)
+        blending |= kBlendingAlpha;
+
+    return (BlendingMode)blending;
+}
+
 static float Slope_GetHeight(SlopePlane *slope, float x, float y)
 {
     // FIXME: precompute (store in slope_plane_t)
@@ -477,7 +494,7 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
     // (need to load the image to know the opacity)
     GLuint tex_id = ImageCache(image, true, render_view_effect_colormap);
 
-    int32_t blending = GetBlending(trans, (ImageOpacity)image->opacity_);
+    int32_t blending = GetSurfaceBlending(trans, (ImageOpacity)image->opacity_);
 
     // ignore non-solid walls in solid mode (& vice versa)
     if ((solid_mode && (blending & kBlendingAlpha)) || (!solid_mode && !(blending & kBlendingAlpha)))
@@ -876,7 +893,7 @@ static void DrawTile(Seg *seg, DrawFloor *dfloor, float lz1, float lz2, float rz
         tex_top_h += seg->sidedef->middle.offset.Y;
     }
 
-    int32_t blending = GetBlending(surf->translucency, (ImageOpacity)image->opacity_);
+    int32_t blending = GetSurfaceBlending(surf->translucency, (ImageOpacity)image->opacity_);
     bool    opaque   = !seg->back_sector || !(blending & kBlendingAlpha);
 
     // check for horizontal sliders
@@ -1576,7 +1593,7 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
     // (need to load the image to know the opacity)
     GLuint tex_id = ImageCache(surf->image, true, render_view_effect_colormap);
 
-    int32_t blending = GetBlending(trans, (ImageOpacity)surf->image->opacity_);
+    int32_t blending = GetSurfaceBlending(trans, (ImageOpacity)surf->image->opacity_);
 
     // ignore non-solid walls in solid mode (& vice versa)
     if ((solid_mode && (blending & kBlendingAlpha)) || (!solid_mode && !(blending & kBlendingAlpha)))

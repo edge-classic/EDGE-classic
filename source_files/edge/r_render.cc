@@ -107,6 +107,8 @@ MirrorSet render_mirror_set(kMirrorSetRender);
 extern std::list<DrawSubsector *> draw_subsector_list;
 #endif
 
+static void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref, int face_dir, float h1, float h2);
+
 inline BlendingMode GetSurfaceBlending(float alpha, ImageOpacity opacity)
 {
     int blending;
@@ -1514,21 +1516,17 @@ static void RenderSeg(DrawFloor *dfloor, Seg *seg, bool mirror_sub = false)
         if (!debug_hall_of_mirrors.d_ && solid_mode && dfloor->is_lowest && sd->bottom.image == nullptr &&
             current_seg->back_subsector && b_fh > f_fh && b_fh < view_z)
         {
-            /*
             EmulateFloodPlane(dfloor, current_seg->back_subsector->sector, +1,
                             f_fh,
                             b_fh);
-            */
         }
 
         if (!debug_hall_of_mirrors.d_ && solid_mode && dfloor->is_highest && sd->top.image == nullptr &&
             current_seg->back_subsector && b_ch < f_ch && b_ch > view_z)
         {
-            /*
             EmulateFloodPlane(dfloor, current_seg->back_subsector->sector, -1,
                             b_ch,
                             f_ch);
-            */
         }
     }
 }
@@ -2195,7 +2193,6 @@ void RenderView(int x, int y, int w, int h, MapObject *camera, bool full_height,
     RenderTrueBsp();
 }
 
-#ifdef _DISABLE_FLOODPLANES
 
 static constexpr uint8_t kMaximumFloodVertices = 16;
 
@@ -2286,18 +2283,23 @@ static void DLIT_Flood(MapObject *mo, void *dataptr)
             data->vertices[col * 2 + 1] = {{x, y, z + data->dh / data->piece_row}};
         }
 
+        if (data->pass > 5)
+        {
+            break;
+        }
+
         mo->dynamic_light_.shader->WorldMix(GL_QUAD_STRIP, data->v_count, data->tex_id, 1.0, &data->pass, blending,
                                             false, data, FloodCoordFunc);
     }
 }
 
-static void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref, int face_dir, float h1, float h2)
+void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref, int face_dir, float h1, float h2)
 {
     EDGE_ZoneScoped;
 
     EPI_UNUSED(dfloor);
 
-    if (total_active_mirrors > 0)
+    if (render_mirror_set.TotalActive() > 0)
         return;
 
     const MapSurface *surf = (face_dir > 0) ? &flood_ref->floor : &flood_ref->ceiling;
@@ -2437,4 +2439,4 @@ static void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref, 
         DynamicLightIterator(lx1, ly1, data.plane_h, lx2, ly2, data.plane_h, DLIT_Flood, &data);
     }
 }
-#endif
+

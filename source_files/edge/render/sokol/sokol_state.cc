@@ -44,6 +44,7 @@ class SokolRenderState : public RenderState
             enable_blend_ = enabled;
             break;
         case GL_CULL_FACE:
+            cull_enabled_ = enabled;
             break;
         case GL_SCISSOR_TEST:
             if (!enabled)
@@ -99,6 +100,7 @@ class SokolRenderState : public RenderState
             enable_blend_ = false;
             break;
         case GL_CULL_FACE:
+            cull_enabled_ = false;
             break;
         case GL_SCISSOR_TEST:
             render_backend->GetPassInfo(pass_info);
@@ -146,7 +148,7 @@ class SokolRenderState : public RenderState
 
     void CullFace(GLenum mode)
     {
-        EPI_UNUSED(mode);
+        cull_mode_ = mode;
     }
 
     void AlphaFunction(GLenum func, GLfloat ref)
@@ -167,7 +169,7 @@ class SokolRenderState : public RenderState
         // instead having a pending scissor for passes, and if they get a draw
         // command apply scissor first?
         RenderLayer current_layer = render_backend->GetRenderLayer();
-        
+
         for (int32_t i = 0; i < kRenderLayerMax; i++)
         {
             render_backend->SetRenderLayer((RenderLayer)i);
@@ -613,6 +615,18 @@ class SokolRenderState : public RenderState
             pipeline_flags |= kPipelineBlend;
         }
 
+        if (cull_enabled_)
+        {
+            if (cull_mode_ == GL_BACK)
+            {
+                pipeline_flags |= kPipelineCullBack;
+            }
+            else if (cull_mode_ == GL_FRONT)
+            {
+                pipeline_flags |= kPipelineCullFront;
+            }
+        }
+
         pipeline_flags |= flags;
 
         sgl_context context = sgl_get_context();
@@ -652,6 +666,9 @@ class SokolRenderState : public RenderState
     GLfloat   fog_end_;
     GLfloat   fog_density_;
     RGBAColor fog_color_;
+
+    bool   cull_enabled_ = false;
+    GLenum cull_mode_    = GL_BACK;
 
     bool   enable_blend_;
     GLenum blend_source_factor_;

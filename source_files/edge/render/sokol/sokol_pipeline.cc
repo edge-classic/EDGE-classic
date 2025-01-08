@@ -68,6 +68,15 @@ sgl_pipeline GetPipeline(sgl_context context, uint32_t pipeline_flags, GLenum sr
         if (pipeline_flags & kPipelineDepthWrite)
             pipeline_desc.depth.write_enabled = true;
 
+        if (pipeline_flags & kPipelineCullBack)
+        {
+            pipeline_desc.cull_mode = SG_CULLMODE_BACK;
+        }
+        else if (pipeline_flags & kPipelineCullFront)
+        {
+            pipeline_desc.cull_mode = SG_CULLMODE_FRONT;
+        }
+
         if (pipeline_flags & kPipelineBlend)
         {
             sg_blend_factor src_factor = SG_BLENDFACTOR_ZERO;

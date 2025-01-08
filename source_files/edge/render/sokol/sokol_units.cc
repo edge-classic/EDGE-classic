@@ -361,7 +361,6 @@ void RenderCurrentUnits(void)
         else
             render_state->Disable(GL_BLEND);
 
-        /*
         if (unit->blending & (kBlendingCullBack | kBlendingCullFront))
         {
             render_state->Enable(GL_CULL_FACE);
@@ -369,7 +368,6 @@ void RenderCurrentUnits(void)
         }
         else
             render_state->Disable(GL_CULL_FACE);
-        */
 
         render_state->DepthMask((unit->blending & kBlendingNoZBuffer) ? false : true);
 

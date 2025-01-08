@@ -1178,9 +1178,19 @@ static bool RenderThing(DrawThing *dthing, bool solid)
         blending |= kBlendingAlpha;
     }
 
-    if ((solid && (blending & kBlendingAlpha)) || (!solid && !(blending & kBlendingAlpha)))
+    if (solid)
     {
-        return false;
+        if ((mo->hyper_flags_ & kHyperFlagNoZBufferUpdate) || (blending & kBlendingAlpha))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        if (!(mo->hyper_flags_ & kHyperFlagNoZBufferUpdate) && !(blending & kBlendingAlpha))
+        {
+            return false;
+        }
     }
 
     float h     = image->ScaledHeightActual();

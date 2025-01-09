@@ -38,6 +38,7 @@
 #include "n_network.h"
 #include "p_blockmap.h"
 #include "p_tick.h"
+#include "r_backend.h"
 #include "r_colormap.h"
 #include "r_effects.h"
 #include "r_gldefs.h"
@@ -50,9 +51,9 @@
 #include "r_shader.h"
 #include "r_state.h"
 #include "r_units.h"
+#include "sokol_images.h"
 #include "sokol_local.h"
 #include "sokol_pipeline.h"
-#include "sokol_images.h"
 
 // clamp cache used by runits to avoid an extremely expensive gl tex param
 // lookup
@@ -957,7 +958,7 @@ static inline void ModelCoordFunc(MD2CoordinateData *data, int v_idx)
         return;
     }
 
-    render_texture_coordinates = {{ point->skin_s * data->image_right_, point->skin_t * data->image_top_}};
+    render_texture_coordinates = {{point->skin_s * data->image_right_, point->skin_t * data->image_top_}};
 
     ColorMixer *col = &data->normal_colors_[(data->lerp_ < 0.5) ? vert1->normal_idx : vert2->normal_idx];
 
@@ -1122,7 +1123,7 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
     /* draw the model */
 
     // Sokol, setting this to one, models need a redo
-    int num_pass = 1;//data.is_fuzzy_ ? 1 : (detail_level > 0 ? 4 : 3);
+    int num_pass = 1; // data.is_fuzzy_ ? 1 : (detail_level > 0 ? 4 : 3);
 
     RGBAColor fc_to_use = mo->subsector_->sector->properties.fog_color;
     float     fd_to_use = mo->subsector_->sector->properties.fog_density;
@@ -1195,7 +1196,7 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
             blending &= ~kBlendingAlpha;
             blending |= kBlendingAdd;
             render_state->Disable(GL_FOG);
-        }        
+        }
 
         data.is_additive_ = (pass > 0 && pass == num_pass - 1);
 
@@ -1302,7 +1303,7 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
 
         if (md->strips_[0].mode == GL_TRIANGLES) // MD3 models, it's a pile of triangles :/
         {
-            // glBegin(GL_TRIANGLES);
+            sgl_begin_triangles();
 
             for (int i = 0; i < md->total_strips_; i++)
             {
@@ -1314,14 +1315,14 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
 
                     epi::SetRGBAAlpha(render_rgba, trans);
 
-                    render_state->GLColor(render_rgba);
-                    render_state->MultiTexCoord(GL_TEXTURE0, &render_texture_coordinates);
-                    // vertex must be last
-                    // glVertex3fv((const GLfloat *)(&render_position));
+                    sgl_v3f_t2f_c4b(render_position[0], render_position[1], render_position[2],
+                                    render_texture_coordinates[0], render_texture_coordinates[1],
+                                    epi::GetRGBARed(render_rgba), epi::GetRGBAGreen(render_rgba),
+                                    epi::GetRGBABlue(render_rgba), epi::GetRGBAAlpha(render_rgba));
                 }
             }
 
-            // glEnd();
+            sgl_end();
         }
         else
         {
@@ -1411,18 +1412,14 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
 void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, float y, float xscale, float yscale,
                       const MapObjectDefinition *info)
 {
-    // Review these after this function is updated
-    EPI_UNUSED(x);
-    EPI_UNUSED(y);
-    EPI_UNUSED(xscale);
     // check if frame is valid
     if (frame < 0 || frame >= md->total_frames_)
         return;
 
     GLuint skin_tex = ImageCache(skin_img, false, info->palremap_);
 
-    //float im_right = skin_img->Right();
-    //float im_top   = skin_img->Top();
+    float im_right = skin_img->Right();
+    float im_top   = skin_img->Top();
 
     xscale = yscale * info->model_scale_ * info->model_aspect_;
     yscale = yscale * info->model_scale_;
@@ -1433,15 +1430,25 @@ void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, f
     render_state->Enable(GL_BLEND);
     render_state->Enable(GL_CULL_FACE);
 
-    if (info->flags_ & kMapObjectFlagFuzzy)
-        render_state->GLColor(epi::MakeRGBA(0, 0, 0, 128));
-    else
-        render_state->GLColor(kRGBAWhite);
+    RGBAColor color = (info->flags_ & kMapObjectFlagFuzzy) ? epi::MakeRGBA(0, 0, 0, 128) : kRGBAWhite;
+
+    sgl_enable_texture();
+    sg_image img;
+    img.id = skin_tex;
+
+    sg_sampler img_sampler;
+    GetImageSampler(skin_tex, &img_sampler.id);
+
+    sgl_texture(img, img_sampler);
+
+    uint32_t pipeline_flags = 0;
+    pipeline_flags |= kPipelineDepthWrite;
+
+    render_state->SetPipeline(pipeline_flags);
 
     if (md->strips_[0].mode == GL_TRIANGLES)
     {
-        /*
-        // glBegin(GL_TRIANGLES);
+        sgl_begin_triangles();
 
         for (int i = 0; i < md->total_strips_; i++)
         {
@@ -1454,54 +1461,116 @@ void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, f
                 EPI_ASSERT(strip->first + v_idx >= 0);
                 EPI_ASSERT(strip->first + v_idx < md->total_points_);
 
-                const MD2Point  *point = &md->points_[strip->first + v_idx];
-                const MD2Vertex *vert  = &frame_ptr->vertices[point->vert_idx];
-                const HMM_Vec2   texc  = {point->skin_s * im_right, point->skin_t * im_top};
-
-                render_state->MultiTexCoord(GL_TEXTURE0, &texc);
+                const MD2Point  *pos  = &md->points_[strip->first + v_idx];
+                const MD2Vertex *vert = &frame_ptr->vertices[pos->vert_idx];
+                const HMM_Vec2   texc = {{pos->skin_s * im_right, pos->skin_t * im_top}};
 
                 float dx = vert->x * xscale;
                 float dy = vert->y * xscale;
                 float dz = (vert->z + info->model_bias_) * yscale;
 
-                // glVertex3f(x + dy, y + dz, dx / 256.0f);
+                sgl_v3f_t2f_c4b(x + dy, y + dz, dx / 256.0f, texc.U, texc.V, epi::GetRGBARed(color),
+                                epi::GetRGBAGreen(color), epi::GetRGBABlue(color), epi::GetRGBAAlpha(color));
             }
         }
 
-        // glEnd();
-        */
+        sgl_end();
     }
     else
     {
         for (int i = 0; i < md->total_strips_; i++)
         {
-            /*
             const MD2Strip *strip = &md->strips_[i];
 
-            // glBegin(strip->mode);
-
-            for (int v_idx = 0; v_idx < md->strips_[i].count; v_idx++)
+            if (strip->mode == GL_TRIANGLE_STRIP)
             {
-                const MD2Frame *frame_ptr = &md->frames_[frame];
 
-                EPI_ASSERT(strip->first + v_idx >= 0);
-                EPI_ASSERT(strip->first + v_idx < md->total_points_);
+                sgl_begin_triangle_strip();
 
-                const MD2Point  *point = &md->points_[strip->first + v_idx];
-                const MD2Vertex *vert  = &frame_ptr->vertices[point->vert_idx];
-                const HMM_Vec2   texc  = {point->skin_s * im_right, point->skin_t * im_top};
+                for (int v_idx = 0; v_idx < strip->count; v_idx++)
+                {
+                    const MD2Frame *frame_ptr = &md->frames_[frame];
 
-                render_state->MultiTexCoord(GL_TEXTURE0, &texc);
+                    EPI_ASSERT(strip->first + v_idx >= 0);
+                    EPI_ASSERT(strip->first + v_idx < md->total_points_);
 
-                float dx = vert->x * xscale;
-                float dy = vert->y * xscale;
-                float dz = (vert->z + info->model_bias_) * yscale;
+                    const MD2Point  *point = &md->points_[strip->first + v_idx];
+                    const MD2Vertex *vert  = &frame_ptr->vertices[point->vert_idx];
+                    const HMM_Vec2   texc  = {{point->skin_s * im_right, point->skin_t * im_top}};
 
-                // glVertex3f(x + dy, y + dz, dx / 256.0f);
+                    float dx = vert->x * xscale;
+                    float dy = vert->y * xscale;
+                    float dz = (vert->z + info->model_bias_) * yscale;
+
+                    sgl_v3f_t2f_c4b(x + dy, y + dz, dx / 256.0f, texc.U, texc.V, epi::GetRGBARed(color),
+                                    epi::GetRGBAGreen(color), epi::GetRGBABlue(color), epi::GetRGBAAlpha(color));
+                }
+
+                sgl_end();
             }
+            else if (strip->mode == GL_TRIANGLE_FAN)
+            {
+                HMM_Vec2  uv[32];
+                HMM_Vec3  pos[32];
+                RGBAColor colors[32];
 
-            // glEnd();
-            */
+                if (strip->count > 32)
+                {
+                    FatalError("Too many fan verts");
+                }
+
+                for (int v_idx = 0; v_idx < strip->count; v_idx++)
+                {
+
+                    const MD2Frame *frame_ptr = &md->frames_[frame];
+
+                    EPI_ASSERT(strip->first + v_idx >= 0);
+                    EPI_ASSERT(strip->first + v_idx < md->total_points_);
+
+                    const MD2Point  *point = &md->points_[strip->first + v_idx];
+                    const MD2Vertex *vert  = &frame_ptr->vertices[point->vert_idx];
+                    const HMM_Vec2   texc  = {{point->skin_s * im_right, point->skin_t * im_top}};
+
+                    float dx = vert->x * xscale;
+                    float dy = vert->y * xscale;
+                    float dz = (vert->z + info->model_bias_) * yscale;
+
+                    pos[v_idx].X = x + dy;
+                    pos[v_idx].Y = y + dz;
+                    pos[v_idx].Z = dx / 256.0f;
+
+                    uv[v_idx].X = texc.U;
+                    uv[v_idx].Y = texc.V;
+
+                    colors[v_idx] = color;
+                }
+
+                sgl_begin_triangles();
+
+                for (int k = 0; k < strip->count - 2; k++)
+                {
+                    int idx = 0;
+                    sgl_v3f_t2f_c4b(pos[idx].X, pos[idx].Y, pos[idx].Z, uv[idx].X, uv[idx].Y,
+                                    epi::GetRGBARed(colors[idx]), epi::GetRGBAGreen(colors[idx]),
+                                    epi::GetRGBABlue(colors[idx]), epi::GetRGBAAlpha(colors[idx]));
+
+                    idx = k + 1;
+                    sgl_v3f_t2f_c4b(pos[idx].X, pos[idx].Y, pos[idx].Z, uv[idx].X, uv[idx].Y,
+                                    epi::GetRGBARed(colors[idx]), epi::GetRGBAGreen(colors[idx]),
+                                    epi::GetRGBABlue(colors[idx]), epi::GetRGBAAlpha(colors[idx]));
+
+                    idx = k + 2;
+                    sgl_v3f_t2f_c4b(pos[idx].X, pos[idx].Y, pos[idx].Z, uv[idx].X, uv[idx].Y,
+                                    epi::GetRGBARed(colors[idx]), epi::GetRGBAGreen(colors[idx]),
+                                    epi::GetRGBABlue(colors[idx]), epi::GetRGBAAlpha(colors[idx]));
+                }
+
+                sgl_end();
+            }
+            else
+            {
+                FatalError("MD2RenderModel2D: Unexpected Render Mode");
+            }
         }
     }
 

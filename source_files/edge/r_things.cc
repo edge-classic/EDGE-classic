@@ -1165,11 +1165,12 @@ static bool RenderThing(DrawThing *dthing, bool solid)
     {
         if (!solid)
         {
+            RenderModel(dthing);
             return false;
         }
 
-        RenderModel(dthing);
-        return true;
+        
+        return false;
     }
 
     MapObject *mo = dthing->map_object;

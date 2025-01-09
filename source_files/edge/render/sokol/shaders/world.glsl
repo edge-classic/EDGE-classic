@@ -2,6 +2,9 @@
 @ctype mat4 HMM_Mat4
 
 @vs vs
+// This is required on D3D to address clipspace issues with 3d model rendering using an ortho projection, D3D and GL disagree on clipspace
+// https://github.com/floooh/sokol-tools/blob/master/docs/sokol-shdc.md#glsl_options-hlsl_options-msl_options
+@hlsl_options fixup_clipspace
 layout(binding=0) uniform vs_params {
     mat4 mvp;
     mat4 tm;

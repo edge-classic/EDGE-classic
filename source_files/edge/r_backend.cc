@@ -28,9 +28,7 @@ void RenderBackend::SoftInit(void)
 
     render_state->Disable(GL_LINE_SMOOTH);
 
-#ifndef EDGE_GL_ES2
     render_state->Disable(GL_POLYGON_SMOOTH);
-#endif
 
     render_state->Enable(GL_NORMALIZE);
 

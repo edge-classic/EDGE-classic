@@ -37,3 +37,6 @@ source_files/glew/glew.pc
 *.WAD
 
 /web/preload/*.epk
+
+# WSL files created when exploring linux filesystem
+*Zone.Identifier

@@ -20,10 +20,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Sokol Renderer (Beta)
 option(EDGE_SOKOL "Enable Sokol Renderer (Beta)" OFF)
 option(EDGE_SOKOL_GL "Sokol GL" OFF)
+option(EDGE_SOKOL_GLES3 "Sokol GLES3" OFF)
 option(EDGE_SOKOL_D3D11 "Sokol D3D11" OFF)
-
-# GL4ES Backend 
-option(EDGE_GL_ES2 "Enable GLES2 Rendering Backend" OFF)
 
 # Optional Features
 option(EDGE_COAL_SUPPORT "Enable support for COAL scripting" ON)
@@ -161,10 +159,8 @@ endif()
 
 if (EDGE_SOKOL)
   add_definitions(-DEDGE_SOKOL)
-elseif (NOT EDGE_GL_ES2)
-  find_package(OpenGL REQUIRED)
 else()
-  add_definitions(-DEDGE_GL_ES2)
+  find_package(OpenGL REQUIRED)
 endif()
 
 if (EDGE_COAL_SUPPORT)

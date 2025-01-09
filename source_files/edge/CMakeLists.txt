@@ -262,12 +262,9 @@ endif()
 
 if (EDGE_SOKOL)
   set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} sokol imgui)
-elseif (NOT EDGE_GL_ES2)
+else ()
   target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/glad/include/glad)
 	set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} glad ${OPENGL_LIBRARIES})
-else()
-  target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/gl4es/include ${EDGE_LIBRARY_DIR}/gl4es/include/GL)
-	set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} gl4es)
 endif()
 
 if(WIN32 AND (MSVC OR CLANG))
@@ -302,7 +299,7 @@ else()
   add_custom_command(
   TARGET edge-classic
   PRE_BUILD
-  COMMAND python ${EMPACKAGER} ${DEST_DIR}/edge-classic.data --preload
+  COMMAND python3 ${EMPACKAGER} ${DEST_DIR}/edge-classic.data --preload
     ${CMAKE_SOURCE_DIR}/web/preload@/
     ${CMAKE_SOURCE_DIR}/edge_base@/edge_base
     ${CMAKE_SOURCE_DIR}/edge_defs@/edge_defs

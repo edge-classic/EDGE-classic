@@ -163,11 +163,6 @@ static void BSPWalkMirror(DrawSubsector *dsub, Seg *seg, BAMAngle left, BAMAngle
 
     dsub->mirrors.push_back(mir);
 
-#if defined(EDGE_GL_ES2)
-    // GL4ES mirror fix for renderlist
-    gl4es_flush();
-#endif
-
     // push mirror (translation matrix)
     bsp_mirror_set.Push(mir);
 
@@ -192,11 +187,6 @@ static void BSPWalkMirror(DrawSubsector *dsub, Seg *seg, BAMAngle left, BAMAngle
 
     // pop mirror
     bsp_mirror_set.Pop();
-
-#if defined(EDGE_GL_ES2)
-    // GL4ES mirror fix for renderlist
-    gl4es_flush();
-#endif
 }
 
 //

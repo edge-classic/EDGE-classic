@@ -558,10 +558,6 @@ void RenderCurrentUnits(void)
 
         glEnd();
 
-#if defined(EDGE_GL_ES2)
-        gl4es_flush();
-#endif
-
         // restore the clamping mode
         if (old_clamp_s != kDummyClamp)
         {

@@ -133,11 +133,6 @@ void RenderMirror(DrawMirror *mir)
 
     FinishUnitBatch();
 
-#if defined(EDGE_GL_ES2)
-    // GL4ES mirror fix for renderlist
-    gl4es_flush();
-#endif
-
     render_mirror_set.Push(mir);
     {
         RenderSubList(mir->draw_subsectors, true);
@@ -152,11 +147,6 @@ void RenderMirror(DrawMirror *mir)
         DrawMirrorPolygon(mir);
 
     FinishUnitBatch();
-
-#if defined(EDGE_GL_ES2)
-    // GL4ES mirror fix for renderlist
-    gl4es_flush();
-#endif
 
     solid_mode = true;
     StartUnitBatch(solid_mode);

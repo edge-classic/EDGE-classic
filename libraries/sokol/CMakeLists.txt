@@ -13,6 +13,8 @@ target_compile_definitions(sokol PUBLIC SOKOL_NO_DEPRECATED SOKOL_TRACE_HOOKS SO
 if (EDGE_SOKOL)
     if(EDGE_SOKOL_GL)
         target_compile_definitions (sokol PUBLIC SOKOL_GLCORE)
+    elseif(EDGE_SOKOL_GLES3)
+        target_compile_definitions (sokol PUBLIC SOKOL_GLES3)
     elseif(EDGE_SOKOL_D3D11)
         target_compile_definitions (sokol PUBLIC SOKOL_D3D11)
     endif()

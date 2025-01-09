@@ -175,12 +175,14 @@ void StartupGraphics(void)
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0);
-#ifdef EDGE_GL_ES2
-    SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "1");
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+
+#ifdef SOKOL_GLES3
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-    initialize_gl4es();
 #endif
+
+
 #endif
 
     // -DS- 2005/06/27 Detect SDL Resolutions
@@ -310,13 +312,11 @@ static bool InitializeWindow(DisplayMode *mode)
     }
 
 #ifndef EDGE_SOKOL
-#ifndef EDGE_GL_ES2
     gladLoadGL();
 
     if (GLVersion.major == 1 && GLVersion.minor < 3)
         FatalError("System only supports GL %d.%d. Minimum GL version 1.3 required!\n", GLVersion.major,
                    GLVersion.minor);
-#endif
 #endif
 
     return true;
@@ -506,10 +506,6 @@ void ShutdownGraphics(void)
 
         SDL_Quit();
     }
-
-#ifdef EDGE_GL_ES2
-    close_gl4es();
-#endif
 }
 
 //--- editor settings ---

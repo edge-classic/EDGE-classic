@@ -78,13 +78,11 @@ class GLRenderState : public RenderState
                 return;
             enable_clip_plane_[cap - GL_CLIP_PLANE0] = enabled;
             break;
-#ifndef EDGE_GL_ES2
         case GL_POLYGON_SMOOTH:
             if (enable_polygon_smooth_ == enabled)
                 return;
             enable_polygon_smooth_ = enabled;
             break;
-#endif
         default:
             FatalError("Unknown GL State %i", cap);
         }
@@ -509,7 +507,7 @@ class GLRenderState : public RenderState
     {
         EPI_UNUSED(n);
         EPI_UNUSED(textures);
-    }    
+    }
 
     void SetPipeline(uint32_t flags)
     {
@@ -599,9 +597,7 @@ class GLRenderState : public RenderState
 
     bool enable_normalize_;
 
-#ifndef EDGE_GL_ES2
     bool enable_polygon_smooth_;
-#endif
 
     bool      enable_fog_;
     GLint     fog_mode_;

@@ -23,8 +23,6 @@
 //
 //----------------------------------------------------------------------------
 
-#include "r_mdl.h"
-
 #include <stddef.h>
 
 #include <unordered_map>
@@ -46,6 +44,7 @@
 #include "r_gldefs.h"
 #include "r_image.h"
 #include "r_mdcommon.h"
+#include "r_mdl.h"
 #include "r_mirror.h"
 #include "r_misc.h"
 #include "r_modes.h"
@@ -53,6 +52,9 @@
 #include "r_state.h"
 #include "r_texgl.h"
 #include "r_units.h"
+#include "sokol_images.h"
+#include "sokol_local.h"
+#include "sokol_pipeline.h"
 
 // clamp cache used by runits to avoid an extremely expensive gl tex param
 // lookup
@@ -198,9 +200,9 @@ class MDLModel
         : total_frames_(nframes), total_points_(npoints), total_triangles_(ntris), skin_width_(swidth),
           skin_height_(sheight), vertices_per_frame_(0)
     {
-        frames_      = new MDLFrame[total_frames_];
-        points_      = new MDLPoint[total_points_];
-        triangles_   = new MDLTriangle[total_triangles_];
+        frames_    = new MDLFrame[total_frames_];
+        points_    = new MDLPoint[total_points_];
+        triangles_ = new MDLTriangle[total_triangles_];
     }
 
     ~MDLModel()
@@ -211,9 +213,9 @@ class MDLModel
     }
 };
 
-static HMM_Vec3 render_position;
+static HMM_Vec3  render_position;
 static RGBAColor render_rgba;
-static HMM_Vec2 render_texture_coordinates;
+static HMM_Vec2  render_texture_coordinates;
 
 /*============== LOADING CODE ====================*/
 
@@ -275,12 +277,12 @@ MDLModel *MDLLoad(epi::File *f)
         return nullptr; /* NOT REACHED */
     }
 
-    int num_frames       = AlignedLittleEndianS32(header.num_frames);
-    int num_tris         = AlignedLittleEndianS32(header.num_tris);
-    int num_verts        = AlignedLittleEndianS32(header.num_verts);
-    int swidth           = AlignedLittleEndianS32(header.skin_width);
-    int sheight          = AlignedLittleEndianS32(header.skin_height);
-    int num_points       = num_tris * 3;
+    int num_frames = AlignedLittleEndianS32(header.num_frames);
+    int num_tris   = AlignedLittleEndianS32(header.num_tris);
+    int num_verts  = AlignedLittleEndianS32(header.num_verts);
+    int swidth     = AlignedLittleEndianS32(header.skin_width);
+    int sheight    = AlignedLittleEndianS32(header.skin_height);
+    int num_points = num_tris * 3;
 
     MDLModel *md = new MDLModel(num_frames, num_points, num_tris, swidth, sheight);
 
@@ -643,25 +645,26 @@ static inline void ModelCoordFunc(MDLCoordinateData *data, int v_idx)
         return;
     }
 
-    render_texture_coordinates = {{ point->skin_s, point->skin_t }};
+    render_texture_coordinates = {{point->skin_s, point->skin_t}};
 
     ColorMixer *col = &data->normal_colors_[(data->lerp_ < 0.5) ? vert1->normal_idx : vert2->normal_idx];
 
     if (!data->is_additive_)
     {
-        render_rgba = epi::MakeRGBAClamped(col->modulate_red_ * render_view_red_multiplier, col->modulate_green_ * render_view_green_multiplier,
-            col->modulate_blue_ * render_view_blue_multiplier);
+        render_rgba = epi::MakeRGBAClamped(col->modulate_red_ * render_view_red_multiplier,
+                                           col->modulate_green_ * render_view_green_multiplier,
+                                           col->modulate_blue_ * render_view_blue_multiplier);
     }
     else
     {
-        render_rgba = epi::MakeRGBAClamped(col->add_red_ * render_view_red_multiplier, col->add_green_ * render_view_green_multiplier,
-            col->add_blue_ * render_view_blue_multiplier);
+        render_rgba = epi::MakeRGBAClamped(col->add_red_ * render_view_red_multiplier,
+                                           col->add_green_ * render_view_green_multiplier,
+                                           col->add_blue_ * render_view_blue_multiplier);
     }
 }
 
-void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float lerp, float x,
-                    float y, float z, MapObject *mo, RegionProperties *props, float scale, float aspect, float bias,
-                    int rotation)
+void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float lerp, float x, float y, float z,
+                    MapObject *mo, RegionProperties *props, float scale, float aspect, float bias, int rotation)
 {
     // check if frames are valid
     if (frame1 < 0 || frame1 >= md->total_frames_)
@@ -807,7 +810,7 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
 
     /* draw the model */
 
-    int num_pass = data.is_fuzzy_ ? 1 : (detail_level > 0 ? 4 : 3);
+    int num_pass = 1; // data.is_fuzzy_ ? 1 : (detail_level > 0 ? 4 : 3);
 
     RGBAColor fc_to_use = mo->subsector_->sector->properties.fog_color;
     float     fd_to_use = mo->subsector_->sector->properties.fog_density;
@@ -970,7 +973,21 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
             render_state->TextureWrapT(renderer_dumb_clamp.d_ ? GL_CLAMP : GL_CLAMP_TO_EDGE);
         }
 
-        //glBegin(GL_TRIANGLES);
+        sgl_enable_texture();
+        sg_image img;
+        img.id = skin_tex;
+
+        sg_sampler img_sampler;
+        GetImageSampler(skin_tex, &img_sampler.id);
+
+        sgl_texture(img, img_sampler);
+
+        uint32_t pipeline_flags = 0;
+        pipeline_flags |= kPipelineDepthWrite;
+
+        render_state->SetPipeline(pipeline_flags);
+
+        sgl_begin_triangles();
 
         for (int i = 0; i < md->total_triangles_; i++)
         {
@@ -982,14 +999,14 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
 
                 epi::SetRGBAAlpha(render_rgba, trans);
 
-                render_state->GLColor(render_rgba);
-                render_state->MultiTexCoord(GL_TEXTURE0, &render_texture_coordinates);
-                // vertex must be last
-                //glVertex3fv((const GLfloat *)(&render_position));
+                sgl_v3f_t2f_c4b(render_position[0], render_position[1], render_position[2],
+                                render_texture_coordinates[0], render_texture_coordinates[1],
+                                epi::GetRGBARed(render_rgba), epi::GetRGBAGreen(render_rgba),
+                                epi::GetRGBABlue(render_rgba), epi::GetRGBAAlpha(render_rgba));
             }
         }
 
-        //glEnd();
+        sgl_end();
 
         // restore the clamping mode
         if (old_clamp != kDummyClamp)

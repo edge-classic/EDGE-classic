@@ -87,7 +87,9 @@ class SokolRenderBackend : public RenderBackend
 
         sg_pass_action pass_action;
         pass_action.colors[0].load_action = SG_LOADACTION_CLEAR;
-        pass_action.colors[0].clear_value = {epi::GetRGBARed(clear_color_) / 255.0f, epi::GetRGBAGreen(clear_color_) / 255.0f, epi::GetRGBABlue(clear_color_) / 255.0f, 1.0f};
+        pass_action.colors[0].clear_value = {epi::GetRGBARed(clear_color_) / 255.0f,
+                                             epi::GetRGBAGreen(clear_color_) / 255.0f,
+                                             epi::GetRGBABlue(clear_color_) / 255.0f, 1.0f};
 
         pass_action.depth.load_action = SG_LOADACTION_CLEAR;
         pass_action.depth.clear_value = 1.0f;
@@ -287,7 +289,7 @@ class SokolRenderBackend : public RenderBackend
         EPI_CLEAR_MEMORY(world_state_, WorldState, kRenderWorldMax);
 
         EPI_CLEAR_MEMORY(&render_state_, RenderState, 1);
-        render_state_.world_state_ = kWorldStateInvalid;        
+        render_state_.world_state_ = kWorldStateInvalid;
 
         RenderBackend::Init();
 

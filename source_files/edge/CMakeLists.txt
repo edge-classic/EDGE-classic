@@ -261,7 +261,7 @@ else()
 endif()
 
 if (EDGE_SOKOL)
-  set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} sokol imgui)
+  set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} sokol)
 else ()
   target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/glad/include/glad)
 	set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} glad ${OPENGL_LIBRARIES})

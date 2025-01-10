@@ -195,7 +195,7 @@ void RendererColourmapEffect(Player *player)
             HUDSetAlpha(0.0f);
             s = HMM_MAX(0.5f, s);
             HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                       epi::MakeRGBAFloat(s, s, s, 0.25f), kBlendingInvert);
+                       epi::MakeRGBAFloat(s, s, s), 25.0f, kBlendingInvert);
             HUDSetAlpha(old_alpha);
         }
     }
@@ -231,7 +231,7 @@ void RendererPaletteEffect(Player *player)
         {
             HUDSetAlpha(0.20f * s);
             HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                       epi::MakeRGBAFloat(r, g, b, 0.25f));
+                       epi::MakeRGBAFloat(r, g, b), 25.0f);
         }
     }
     else
@@ -254,7 +254,7 @@ void RendererPaletteEffect(Player *player)
             HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
                        epi::MakeRGBAFloat((float)rgb_data[0] / rgb_max,
                                      (float)rgb_data[1] / rgb_max,
-                                     (float)rgb_data[2] / rgb_max), 0.25f);
+                                     (float)rgb_data[2] / rgb_max), 25.0f);
         }
     }
 

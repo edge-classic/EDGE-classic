@@ -1,11 +1,13 @@
 
 add_library(sokol sokol.cc)
 
-target_link_libraries(sokol imgui)
+set (SOKOL_LINK_LIBRARIES imgui)
 
-if (CMAKE_HOST_UNIX)
-    target_link_libraries(sokol GL)
+if (EDGE_SOKOL_GL)
+    set (SOKOL_LINK_LIBRARIES ${SOKOL_LINK_LIBRARIES} ${OPENGL_LIBRARIES})
 endif()
+
+target_link_libraries(sokol PUBLIC ${SOKOL_LINK_LIBRARIES})
 
 target_include_directories(sokol PUBLIC ./)
 target_compile_definitions(sokol PUBLIC SOKOL_NO_DEPRECATED SOKOL_TRACE_HOOKS SOKOL_IMGUI_NO_SOKOL_APP)

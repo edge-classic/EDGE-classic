@@ -77,9 +77,9 @@ constexpr int32_t kMaxRenderBatch = 65536 / 4;
 
 struct BSPThread
 {
-    thread_ptr_t    thread_;
-    thread_signal_t signal_start_;
-    thread_signal_t signal_stop_;
+    thread_ptr_t        thread_;
+    thread_signal_t     signal_start_;
+    thread_atomic_int_t traverse_finished_;
 
     thread_queue_t      queue_;
     RenderBatch        *render_queue_[kMaxRenderBatch];
@@ -970,8 +970,13 @@ static int32_t BspTraverseProc(void *thread_data)
 
     while (thread_atomic_int_load(&bsp_thread.exit_flag_) == 0)
     {
-        if (thread_signal_wait(&bsp_thread.signal_start_, 0))
+        if (thread_signal_wait(&bsp_thread.signal_start_, THREAD_SIGNAL_WAIT_INFINITE))
         {
+            if (thread_atomic_int_load(&bsp_thread.exit_flag_))
+            {
+                break;
+            }
+
             current_batch = nullptr;
 
             // walk the bsp tree
@@ -982,7 +987,7 @@ static int32_t BspTraverseProc(void *thread_data)
                 BSPQueueRenderBatch(current_batch);
             }
 
-            thread_signal_raise(&bsp_thread.signal_stop_);
+            thread_atomic_int_store(&bsp_thread.traverse_finished_, 1);
         }
     }
 
@@ -1048,17 +1053,18 @@ void BSPQueueDrawSubsector(DrawSubsector *subsector)
     item->subsector_ = subsector;
 }
 
-static bool traverse_stop_signalled;
-
 RenderBatch *BSPReadRenderBatch()
 {
     RenderBatch *batch = (RenderBatch *)thread_queue_consume(&bsp_thread.queue_, 0);
     return batch;
 }
 
+static bool traverse_stop_signalled;
+
 void BSPTraverse()
 {
     traverse_stop_signalled = false;
+    thread_atomic_int_store(&bsp_thread.traverse_finished_, 0);
     thread_signal_raise(&bsp_thread.signal_start_);
 }
 
@@ -1066,9 +1072,9 @@ bool BSPTraversing()
 {
     if (!traverse_stop_signalled)
     {
-        traverse_stop_signalled = thread_signal_wait(&bsp_thread.signal_stop_, 0) ? true : false;
+        traverse_stop_signalled = !!thread_atomic_int_load(&bsp_thread.traverse_finished_);
     }
-
+    
     if (!thread_queue_count(&bsp_thread.queue_) && traverse_stop_signalled)
     {
         return false;
@@ -1080,17 +1086,17 @@ bool BSPTraversing()
 void BSPStartThread()
 {
     thread_atomic_int_store(&bsp_thread.exit_flag_, 0);
+    thread_atomic_int_store(&bsp_thread.traverse_finished_, 1);
     thread_signal_init(&bsp_thread.signal_start_);
-    thread_signal_init(&bsp_thread.signal_stop_);
     thread_queue_init(&bsp_thread.queue_, kMaxRenderBatch, (void **)bsp_thread.render_queue_, 0);
     bsp_thread.thread_ = thread_create(BspTraverseProc, nullptr, THREAD_STACK_SIZE_DEFAULT);
 }
 void BSPStopThread()
 {
     thread_atomic_int_store(&bsp_thread.exit_flag_, 1);
+    thread_signal_raise(&bsp_thread.signal_start_);
     thread_join(bsp_thread.thread_);
     thread_signal_term(&bsp_thread.signal_start_);
-    thread_signal_term(&bsp_thread.signal_stop_);
 }
 
 #else

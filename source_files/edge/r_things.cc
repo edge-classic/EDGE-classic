@@ -94,7 +94,7 @@ inline BlendingMode GetThingBlending(float alpha, ImageOpacity opacity, int32_t 
 {
     int blending = kBlendingMasked;
 
-    if (alpha >= 0.11f &&opacity != kOpacityComplex)
+    if (alpha >= 0.11f && opacity != kOpacityComplex)
         blending = kBlendingLess;
 
     if (alpha < 0.99 || opacity == kOpacityComplex)
@@ -103,7 +103,7 @@ inline BlendingMode GetThingBlending(float alpha, ImageOpacity opacity, int32_t 
     if (hyper_flags & kHyperFlagNoZBufferUpdate)
         blending |= kBlendingNoZBuffer;
 
-    return (BlendingMode) blending;
+    return (BlendingMode)blending;
 }
 
 static float GetHoverDeltaZ(MapObject *mo, float bob_mult = 0)
@@ -263,7 +263,7 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
     // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
     if ((state->flags & kStateFrameFlagWeapon) && (player->ready_weapon_ >= 0))
         ty1 += LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") +
-                player->weapons_[player->ready_weapon_].info->y_adjust_;
+               player->weapons_[player->ready_weapon_].info->y_adjust_;
 #endif
     float ty2 = ty1 + h;
 
@@ -351,15 +351,16 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
         if (fc_to_use != kRGBANoValue)
         {
             int       mix_factor = RoundToInteger(255.0f * (fd_to_use * 75));
-            RGBAColor mixme = epi::MixRGBA(epi::MakeRGBAClamped(data.colors[0].modulate_red_, data.colors[0].modulate_green_,
-                                                         data.colors[0].modulate_blue_),
-                                           fc_to_use, mix_factor);
+            RGBAColor mixme =
+                epi::MixRGBA(epi::MakeRGBAClamped(data.colors[0].modulate_red_, data.colors[0].modulate_green_,
+                                                  data.colors[0].modulate_blue_),
+                             fc_to_use, mix_factor);
             data.colors[0].modulate_red_   = epi::GetRGBARed(mixme);
             data.colors[0].modulate_green_ = epi::GetRGBAGreen(mixme);
             data.colors[0].modulate_blue_  = epi::GetRGBABlue(mixme);
             mixme                          = epi::MixRGBA(
-                epi::MakeRGBAClamped(data.colors[0].add_red_, data.colors[0].add_green_, data.colors[0].add_blue_), fc_to_use,
-                mix_factor);
+                epi::MakeRGBAClamped(data.colors[0].add_red_, data.colors[0].add_green_, data.colors[0].add_blue_),
+                fc_to_use, mix_factor);
             data.colors[0].add_red_   = epi::GetRGBARed(mixme);
             data.colors[0].add_green_ = epi::GetRGBAGreen(mixme);
             data.colors[0].add_blue_  = epi::GetRGBABlue(mixme);
@@ -442,8 +443,9 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
             }
             else if (!is_additive)
             {
-                dest->rgba = epi::MakeRGBAClamped(data.colors[v_idx].modulate_red_ * render_view_red_multiplier, (data.colors[v_idx].modulate_green_ * render_view_green_multiplier),
-                    data.colors[v_idx].modulate_blue_ * render_view_blue_multiplier);
+                dest->rgba = epi::MakeRGBAClamped(data.colors[v_idx].modulate_red_ * render_view_red_multiplier,
+                                                  (data.colors[v_idx].modulate_green_ * render_view_green_multiplier),
+                                                  data.colors[v_idx].modulate_blue_ * render_view_blue_multiplier);
 
                 data.colors[v_idx].modulate_red_ -= 256;
                 data.colors[v_idx].modulate_green_ -= 256;
@@ -451,8 +453,9 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
             }
             else
             {
-                dest->rgba = epi::MakeRGBAClamped(data.colors[v_idx].add_red_ * render_view_red_multiplier, (data.colors[v_idx].add_green_ * render_view_green_multiplier),
-                    data.colors[v_idx].add_blue_ * render_view_blue_multiplier);
+                dest->rgba = epi::MakeRGBAClamped(data.colors[v_idx].add_red_ * render_view_red_multiplier,
+                                                  (data.colors[v_idx].add_green_ * render_view_green_multiplier),
+                                                  data.colors[v_idx].add_blue_ * render_view_blue_multiplier);
             }
 
             epi::SetRGBAAlpha(dest->rgba, trans);
@@ -466,10 +469,8 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
     render_state->Disable(GL_SCISSOR_TEST);
 }
 
-static const RGBAColor crosshair_colors[8] = {
-    kRGBALightGray, kRGBABlue,    kRGBAGreen,  kRGBACyan,
-    kRGBARed, kRGBAFuchsia, kRGBAYellow, kRGBADarkOrange
-};
+static const RGBAColor crosshair_colors[8] = {kRGBALightGray, kRGBABlue,    kRGBAGreen,  kRGBACyan,
+                                              kRGBARed,       kRGBAFuchsia, kRGBAYellow, kRGBADarkOrange};
 
 static void DrawStdCrossHair(void)
 {
@@ -488,12 +489,13 @@ static void DrawStdCrossHair(void)
 
     GLuint tex_id = ImageCache(crosshair_image);
 
-    RGBAColor color     = crosshair_colors[crosshair_color.d_ & 7];
+    RGBAColor color = crosshair_colors[crosshair_color.d_ & 7];
 
     float intensity = 1.0f * crosshair_brightness.f_;
 
-    RGBAColor unit_col = epi::MakeRGBA((uint8_t)(epi::GetRGBARed(color) * intensity), (uint8_t)(epi::GetRGBAGreen(color) * intensity), 
-        (uint8_t)(epi::GetRGBABlue(color) * intensity));
+    RGBAColor unit_col =
+        epi::MakeRGBA((uint8_t)(epi::GetRGBARed(color) * intensity), (uint8_t)(epi::GetRGBAGreen(color) * intensity),
+                      (uint8_t)(epi::GetRGBABlue(color) * intensity));
 
     float x = view_window_x + view_window_width / 2;
     float y = view_window_y + view_window_height / 2;
@@ -503,20 +505,19 @@ static void DrawStdCrossHair(void)
     StartUnitBatch(false);
 
     RendererVertex *glvert =
-            BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, tex_id,
-                            (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAdd);
+        BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAdd);
 
-    glvert->rgba = unit_col;
-    glvert->position = {{x - w, y - w, 0.0f}};
+    glvert->rgba                     = unit_col;
+    glvert->position                 = {{x - w, y - w, 0.0f}};
     glvert++->texture_coordinates[0] = {{0.0f, 0.0f}};
-    glvert->rgba = unit_col;
-    glvert->position = {{x - w, y + w, 0.0f}};
+    glvert->rgba                     = unit_col;
+    glvert->position                 = {{x - w, y + w, 0.0f}};
     glvert++->texture_coordinates[0] = {{0.0f, 1.0f}};
-    glvert->rgba = unit_col;
-    glvert->position = {{x + w, y + w, 0.0f}};
+    glvert->rgba                     = unit_col;
+    glvert->position                 = {{x + w, y + w, 0.0f}};
     glvert++->texture_coordinates[0] = {{1.0f, 1.0f}};
-    glvert->rgba = unit_col;
-    glvert->position = {{x + w, y - w, 0.0f}};
+    glvert->rgba                     = unit_col;
+    glvert->position                 = {{x + w, y - w, 0.0f}};
     glvert++->texture_coordinates[0] = {{1.0f, 0.0f}};
 
     EndRenderUnit(4);
@@ -688,8 +689,7 @@ void RenderWeaponModel(Player *p)
         bias = COALGetFloat(ui_vm, "hud", "universal_y_adjust") + p->weapons_[p->ready_weapon_].info->y_adjust_;
     }
 #else
-    bias =
-            LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") + p->weapons_[p->ready_weapon_].info->y_adjust_;
+    bias = LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") + p->weapons_[p->ready_weapon_].info->y_adjust_;
 #endif
     bias /= 5;
     bias += w->model_bias_;
@@ -1122,9 +1122,9 @@ static void RenderModel(DrawThing *dthing)
                        dthing->map_y, z, mo, mo->region_properties_, mo->model_scale_, mo->model_aspect_,
                        mo->info_->model_bias_, mo->info_->model_rotate_);
     else if (md->mdl_model_)
-        MDLRenderModel(md->mdl_model_, false, last_frame, mo->state_->frame, lerp, dthing->map_x,
-                       dthing->map_y, z, mo, mo->region_properties_, mo->model_scale_, mo->model_aspect_,
-                       mo->info_->model_bias_, mo->info_->model_rotate_);
+        MDLRenderModel(md->mdl_model_, false, last_frame, mo->state_->frame, lerp, dthing->map_x, dthing->map_y, z, mo,
+                       mo->region_properties_, mo->model_scale_, mo->model_aspect_, mo->info_->model_bias_,
+                       mo->info_->model_rotate_);
 }
 
 struct ThingCoordinateData
@@ -1163,14 +1163,23 @@ static bool RenderThing(DrawThing *dthing, bool solid)
 
     if (dthing->is_model)
     {
-        if (!solid)
-        {
-            RenderModel(dthing);
-            return false;
+        bool             is_solid = true;
+        MapObject       *mo       = dthing->map_object;
+        ModelDefinition *md       = GetModel(mo->state_->sprite);
+        const Image     *skin_img = md->skins_[mo->model_skin_];
+
+        if ((mo->visibility_ < 0.99f) || (skin_img && skin_img->opacity_ == kOpacityComplex) || mo->hyper_flags_ & kHyperFlagNoZBufferUpdate)
+        { 
+            is_solid = false;
         }
 
-        
-        return false;
+        if (solid == is_solid)
+        {
+            RenderModel(dthing);
+            return is_solid;
+        }
+
+        return is_solid;
     }
 
     MapObject *mo = dthing->map_object;
@@ -1399,8 +1408,9 @@ static bool RenderThing(DrawThing *dthing, bool solid)
             }
             else if (!is_additive)
             {
-                dest->rgba = epi::MakeRGBAClamped(data.colors[v_idx].modulate_red_ * render_view_red_multiplier, (data.colors[v_idx].modulate_green_ * render_view_green_multiplier),
-                    data.colors[v_idx].modulate_blue_ * render_view_blue_multiplier);
+                dest->rgba = epi::MakeRGBAClamped(data.colors[v_idx].modulate_red_ * render_view_red_multiplier,
+                                                  (data.colors[v_idx].modulate_green_ * render_view_green_multiplier),
+                                                  data.colors[v_idx].modulate_blue_ * render_view_blue_multiplier);
 
                 data.colors[v_idx].modulate_red_ -= 256;
                 data.colors[v_idx].modulate_green_ -= 256;
@@ -1408,8 +1418,9 @@ static bool RenderThing(DrawThing *dthing, bool solid)
             }
             else
             {
-                dest->rgba = epi::MakeRGBAClamped(data.colors[v_idx].add_red_ * render_view_red_multiplier, (data.colors[v_idx].add_green_ * render_view_green_multiplier),
-                    data.colors[v_idx].add_blue_ * render_view_blue_multiplier);
+                dest->rgba = epi::MakeRGBAClamped(data.colors[v_idx].add_red_ * render_view_red_multiplier,
+                                                  (data.colors[v_idx].add_green_ * render_view_green_multiplier),
+                                                  data.colors[v_idx].add_blue_ * render_view_blue_multiplier);
             }
 
             epi::SetRGBAAlpha(dest->rgba, trans);
@@ -1460,7 +1471,7 @@ bool RenderThings(DrawFloor *dfloor, bool solid)
 
     if (solid)
     {
-        while(head_dt)
+        while (head_dt)
         {
             if (!RenderThing(head_dt, solid))
             {

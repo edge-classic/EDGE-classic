@@ -126,8 +126,6 @@ ViewHeightZone view_height_zone;
 
 static Subsector *bsp_current_subsector;
 
-static constexpr uint8_t kMaximumEdgeVertices = 20;
-
 static void UpdateSectorInterpolation(Sector *sector)
 {
     if (uncapped_frames.d_ && !time_stop_active && !paused && !erraticism_active && !menu_active && !rts_menu_active)

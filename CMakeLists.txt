@@ -17,11 +17,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Rendering Options
 
-# Sokol Renderer (Beta)
-option(EDGE_SOKOL "Enable Sokol Renderer (Beta)" OFF)
+# Sokol Renderer
 option(EDGE_SOKOL_GL "Sokol GL" OFF)
 option(EDGE_SOKOL_GLES3 "Sokol GLES3" OFF)
 option(EDGE_SOKOL_D3D11 "Sokol D3D11" OFF)
+
+if (EDGE_SOKOL_GL OR EDGE_SOKOL_GLES3 OR EDGE_SOKOL_D3D11)
+  set (EDGE_SOKOL ON)
+endif()
 
 # Optional Features
 option(EDGE_COAL_SUPPORT "Enable support for COAL scripting" ON)

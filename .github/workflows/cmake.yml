@@ -155,7 +155,7 @@ jobs:
       run: git clone https://github.com/edge-classic/web-player-wads ${{github.workspace}}/web-player-wads && cp ${{github.workspace}}/web-player-wads/freedoom/freedoom2.wad ${{github.workspace}}/web/preload/ && cp ${{github.workspace}}/web-player-wads/blasphemer/blasphem.wad ${{github.workspace}}/web/preload/
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -DEDGE_SOKOL_GLES3=ON
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
   
     - uses: actions/upload-artifact@v4
       with:

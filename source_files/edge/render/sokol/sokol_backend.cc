@@ -15,6 +15,7 @@
 
 // clang-format on
 
+extern ConsoleVariable vsync;
 void BSPStartThread();
 void BSPStopThread();
 
@@ -127,7 +128,7 @@ class SokolRenderBackend : public RenderBackend
     void SwapBuffers()
     {
 #ifdef SOKOL_D3D11
-        sapp_d3d11_present(true);
+        sapp_d3d11_present(false, vsync.d_ ? 1 : 0);
 #endif
     }
 

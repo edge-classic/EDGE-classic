@@ -65,7 +65,6 @@ typedef struct
     int           framebuffer_width;
     int           framebuffer_height;
     int           sample_count;
-    int           swap_interval;
 } _sapp_t;
 
 static _sapp_t _sapp;
@@ -399,7 +398,7 @@ void sapp_d3d11_resize_default_render_target(int32_t width, int32_t height)
     }
 }
 
-void sapp_d3d11_present(bool do_not_wait)
+void sapp_d3d11_present(bool do_not_wait, int swap_interval)
 {
     UINT flags = 0;
     if (_sapp.win32.is_win10_or_greater && do_not_wait)
@@ -410,7 +409,7 @@ void sapp_d3d11_present(bool do_not_wait)
         */
         flags = DXGI_PRESENT_DO_NOT_WAIT;
     }
-    _sapp_dxgi_Present(_sapp.d3d11.swap_chain, (UINT)_sapp.swap_interval, flags);
+    _sapp_dxgi_Present(_sapp.d3d11.swap_chain, (UINT)swap_interval, flags);
 }
 
 void sapp_d3d11_init(SDL_Window *window, int32_t width, int32_t height)
@@ -422,7 +421,6 @@ void sapp_d3d11_init(SDL_Window *window, int32_t width, int32_t height)
     _sapp.framebuffer_width         = width;
     _sapp.framebuffer_height        = height;
     _sapp.sample_count              = 1;
-    _sapp.swap_interval             = 0;
     _sapp.win32.is_win10_or_greater = _sapp_win32_is_win10_or_greater();
 
     _sapp_d3d11_create_device_and_swapchain();
@@ -537,7 +535,7 @@ void sapp_d3d11_capture_screen(int32_t width, int32_t height, int32_t stride, ui
             }
         }
 
-        _sapp.d3d11.device_context->Unmap(pNewTexture, subresource);        
+        _sapp.d3d11.device_context->Unmap(pNewTexture, subresource);
 
         _SAPP_SAFE_RELEASE(pNewTexture);
     }

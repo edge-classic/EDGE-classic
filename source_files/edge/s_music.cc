@@ -31,11 +31,10 @@
 #include "i_movie.h"
 #include "i_system.h"
 #include "m_misc.h"
-#include "s_emidi.h"
 #if EDGE_FLAC_SUPPORT
 #include "s_flac.h"
 #endif
-#include "s_tsf.h"
+#include "s_fluid.h"
 #if EDGE_TRACKER_SUPPORT
 #include "s_m4p.h"
 #endif
@@ -47,9 +46,6 @@
 #endif
 #if EDGE_IMF_SUPPORT
 #include "s_imf.h"
-#endif
-#if EDGE_RAD_SUPPORT
-#include "s_rad.h"
 #endif
 #if EDGE_SID_SUPPORT
 #include "s_sid.h"
@@ -222,12 +218,6 @@ void ChangeMusic(int entry_number, bool loop)
         music_player = PlayM4PMusic(data, length, loop);
         break;
 #endif
-#if EDGE_RAD_SUPPORT
-    case kSoundRAD:
-        delete F;
-        music_player = PlayRADMusic(data, length, loop);
-        break;
-#endif
 #if EDGE_SID_SUPPORT
     case kSoundSID:
         delete F;
@@ -245,14 +235,7 @@ void ChangeMusic(int entry_number, bool loop)
     case kSoundMUS:
 #endif
         delete F;
-        if (var_midi_player == 0)
-        {
-            music_player = PlayTSFMusic(data, length, loop);
-        }
-        else
-        {
-            music_player = PlayEMIDIMusic(data, length, loop);
-        }
+        music_player = PlayFluidMusic(data, length, loop);
         break;
 
     default:

@@ -73,9 +73,6 @@ bool show_old_config_warning = false;
 
 extern ConsoleVariable midi_soundfont;
 extern bool            pc_speaker_mode;
-int                    var_midi_player       = 0;
-int                    var_sound_stereo      = 0;
-int                    sound_mixing_channels = 0;
 
 static bool done_first_init = false;
 
@@ -85,11 +82,8 @@ static ConfigurationDefault defaults[] = {
     {kConfigInteger, "screendepth", &current_screen_depth, EDGE_DEFAULT_SCREENBITS},
     {kConfigInteger, "displaymode", &current_window_mode, EDGE_DEFAULT_DISPLAYMODE},
 
-    {kConfigInteger, "sound_stereo", &var_sound_stereo, EDGE_DEFAULT_SOUND_STEREO},
     {kConfigBoolean, "pc_speaker_mode", &pc_speaker_mode, 0},
-    {kConfigInteger, "midi_player", &var_midi_player, 0},
     {kConfigBoolean, "dynamic_reverb", &dynamic_reverb, 0},
-    {kConfigInteger, "mix_channels", &sound_mixing_channels, EDGE_DEFAULT_MIX_CHANNELS},
 
     // -ES- 1998/11/28 Save fade settings
     {kConfigInteger, "reduce_flash", &reduce_flash, 0},
@@ -138,7 +132,6 @@ static ConfigurationDefault defaults[] = {
     // -------------------- VARS --------------------
 
     {kConfigBoolean, "show_obituaries", &show_obituaries, 1},
-    {kConfigBoolean, "precache_sound_effects", &precache_sound_effects, 1},
 
     // -------------------- KEYS --------------------
 

@@ -27,6 +27,8 @@
 
 #include "con_var.h"
 #include "ddf_types.h"
+#include "miniaudio.h"
+#include "p_mobj.h"
 #include "snd_data.h"
 
 // Forward declarations
@@ -52,25 +54,16 @@ class SoundChannel
     SoundEffectDefinition *definition_;
     Position              *position_;
 
-    // We use a 22.10 fixed point for sound offsets.  It's a reasonable
-    // compromise between longest sound and accumulated round-off error.
-    uint32_t offset_;
-    uint32_t length_;
-    uint32_t delta_;
-
-    int volume_left_; // mixing volume
-    int volume_right_;
-
     bool loop_;       // will loop *one* more time
     bool boss_;
+
+    ma_audio_buffer_config ref_config_;
+    ma_audio_buffer ref_;
+    ma_sound channel_sound_;
 
   public:
     SoundChannel();
     ~SoundChannel();
-
-    void ComputeDelta();
-    void ComputeVolume();
-    void ComputeMusicVolume();
 };
 
 extern ConsoleVariable sound_effect_volume;
@@ -86,7 +79,6 @@ extern bool  ddf_reverb;
 extern int   ddf_reverb_type; // 0 = None, 1 = Reverb, 2 = Echo
 extern int   ddf_reverb_ratio;
 extern int   ddf_reverb_delay;
-extern float music_player_gain;
 
 void InitializeSoundChannels(int total);
 void FreeSoundChannels(void);
@@ -94,38 +86,7 @@ void FreeSoundChannels(void);
 void KillSoundChannel(int k);
 void ReallocateSoundChannels(int total);
 
-void MixAllSoundChannels(void *stream, int len);
-// mix all active channels into the output stream.
-// 'len' is the number of samples (for stereo: pairs)
-// to mix into the stream.
-
-void UpdateSounds(Position *listener, BAMAngle angle);
-
-//-------- API for Synthesised MUSIC --------------------
-
-void SoundQueueInitialize(void);
-// initialise the queueing system.
-
-void SoundQueueShutdown(void);
-// finalise the queuing system, stopping all playback.
-// The data from all the buffers will be freed.
-
-void SoundQueueStop(void);
-// stop the currently playing queue.  All playing buffers
-// are moved into the free list.
-
-SoundData *SoundQueueGetFreeBuffer(int samples);
-// returns the next unused (or finished) buffer, or nullptr
-// if there are none.  The data_ field will be
-// updated to ensure they hold the requested number of
-// samples.
-
-void SoundQueueAddBuffer(SoundData *buf, int freq);
-// add a new buffer to be end of the queue.
-
-void SoundQueueReturnBuffer(SoundData *buf);
-// if something goes wrong and you cannot add the buffer,
-// then this call will return the buffer to the free list.
+void UpdateSounds(MapObject *listener, BAMAngle angle);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

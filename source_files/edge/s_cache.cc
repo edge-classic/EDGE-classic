@@ -50,7 +50,9 @@
 #include "s_ogg.h"
 #endif
 #include "s_sound.h"
+#if EDGE_WAV_SUPPORT
 #include "s_wav.h"
+#endif
 #include "snd_data.h"
 #include "snd_types.h"
 #include "w_files.h"
@@ -68,7 +70,7 @@ static void LoadSilence(SoundData *buf)
     buf->frequency_ = sound_device_frequency;
     buf->Allocate(length);
 
-    EPI_CLEAR_MEMORY(buf->data_, int16_t, length * 2);
+    EPI_CLEAR_MEMORY(buf->data_, float, length * 2);
 }
 #if EDGE_DOOM_SFX_SUPPORT
 static bool LoadDoom(SoundData *buf, uint8_t *lump, int length)
@@ -253,10 +255,6 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
     }
 
     delete[] data;
-
-    // Tag sound as SFX for environmental effects - Dasho
-    if (OK)
-        buf->is_sound_effect_ = true;
 
     return OK;
 }

@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include "snd_data.h"
 
 bool LoadWAVSound(SoundData *buf, uint8_t *data, int length);

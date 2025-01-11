@@ -107,8 +107,7 @@
 #include "r_wipe.h"
 #include "s_blit.h"
 #include "s_cache.h"
-#include "s_emidi.h"
-#include "s_tsf.h"
+#include "s_fluid.h"
 #include "s_music.h"
 #include "s_sound.h"
 #include "stb_sprintf.h"
@@ -196,7 +195,9 @@ static void OptionMenuChangeMonitorSize(int key_pressed, ConsoleVariable *consol
 static void OptionMenuChangeKicking(int key_pressed, ConsoleVariable *console_variable);
 static void OptionMenuChangeWeaponSwitch(int key_pressed, ConsoleVariable *console_variable);
 static void OptionMenuChangeMipMap(int key_pressed, ConsoleVariable *console_variable);
+#if EDGE_DOOM_SFX_SUPPORT
 static void OptionMenuChangePCSpeakerMode(int key_pressed, ConsoleVariable *console_variable);
+#endif
 
 // -ES- 1998/08/20 Added resolution options
 // -ACB- 1998/08/29 Moved to top and tried different system
@@ -211,7 +212,6 @@ void OptionMenuHostNetGame(int key_pressed, ConsoleVariable *console_variable);
 
 static void OptionMenuLanguageDrawer(int x, int y, int deltay);
 static void OptionMenuChangeLanguage(int key_pressed, ConsoleVariable *console_variable);
-static void OptionMenuChangeMidiPlayer(int key_pressed, ConsoleVariable *console_variable);
 static void OptionMenuChangeSoundfont(int key_pressed, ConsoleVariable *console_variable);
 static void InitMonitorSize();
 
@@ -298,13 +298,6 @@ static int                   current_key_menu;
 static int keyscan;
 
 static Style *options_menu_default_style;
-
-static void OptionMenuChangeMixChan(int key_pressed, ConsoleVariable *console_variable)
-{
-    EPI_UNUSED(key_pressed);
-    EPI_UNUSED(console_variable);
-    UpdateSoundCategoryLimits();
-}
 
 static int OptionMenuGetCurrentSwitchValue(OptionMenuItem *item)
 {
@@ -525,21 +518,13 @@ static OptionMenuItem soundoptions[] = {
     {kOptionMenuItemTypeSlider, "Movie/Music Volume", nullptr, 0, &music_volume.f_,
      OptionMenuUpdateConsoleVariableFromFloat, nullptr, &music_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
-    {kOptionMenuItemTypeSwitch, "Stereo", "Off/On/Swapped", 3, &var_sound_stereo, nullptr, "NeedRestart", nullptr, 0, 0, 0, ""},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
-    {kOptionMenuItemTypeSwitch, "MIDI Player", "TinySoundFont/Emu de MIDI (OPLL Mode)/Emu de MIDI (SCC-PSG Mode)", 3, &var_midi_player, OptionMenuChangeMidiPlayer,
-     nullptr, nullptr, 0, 0, 0, ""},
-    {kOptionMenuItemTypeFunction, "TinySoundFont Bank", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeFunction, "MIDI Instrument Bank", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr, nullptr, 0, 0, 0, ""},
 #if EDGE_DOOM_SFX_SUPPORT
     {kOptionMenuItemTypeBoolean, "PC Speaker Mode", YesNo, 2, &pc_speaker_mode, OptionMenuChangePCSpeakerMode,
      "Music will be Off while this is enabled", nullptr, 0, 0, 0, ""},
 #endif
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeBoolean, "Dynamic Reverb", YesNo, 2, &dynamic_reverb, nullptr, nullptr, nullptr, 0, 0, 0, ""},
-    {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
-    {kOptionMenuItemTypeSwitch, "Mix Channels", "32/64/96/128/160/192/224/256", 8, &sound_mixing_channels,
-     OptionMenuChangeMixChan, nullptr, nullptr, 0, 0, 0, ""},
-    {kOptionMenuItemTypeBoolean, "Precache SFX", YesNo, 2, &precache_sound_effects, nullptr, "NeedRestart", nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
 };
 
@@ -2040,6 +2025,7 @@ static void OptionMenuChangeWeaponSwitch(int key_pressed, ConsoleVariable *conso
     level_flags.weapon_switch = global_flags.weapon_switch;
 }
 
+#if EDGE_DOOM_SFX_SUPPORT
 static void OptionMenuChangePCSpeakerMode(int key_pressed, ConsoleVariable *console_variable)
 {
     EPI_UNUSED(key_pressed);
@@ -2047,8 +2033,9 @@ static void OptionMenuChangePCSpeakerMode(int key_pressed, ConsoleVariable *cons
     // Clear SFX cache and restart music
     StopAllSoundEffects();
     SoundCacheClearAll();
-    OptionMenuChangeMidiPlayer(0, nullptr);
+    RestartFluid();
 }
+#endif
 
 //
 // OptionMenuChangeLanguage
@@ -2094,20 +2081,6 @@ static void OptionMenuChangeLanguage(int key_pressed, ConsoleVariable *console_v
 }
 
 //
-// OptionMenuChangeMidiPlayer
-//
-//
-static void OptionMenuChangeMidiPlayer(int key_pressed, ConsoleVariable *console_variable)
-{
-    EPI_UNUSED(key_pressed);
-    EPI_UNUSED(console_variable);
-    if (var_midi_player == 0)
-        RestartTSF();
-    else
-        RestartEMIDI();
-}
-
-//
 // OptionMenuChangeSoundfont
 //
 //
@@ -2150,7 +2123,7 @@ static void OptionMenuChangeSoundfont(int key_pressed, ConsoleVariable *console_
 
     // update console_variable
     midi_soundfont = available_soundfonts.at(sf_pos);
-    RestartTSF();
+    RestartFluid();
 }
 
 //

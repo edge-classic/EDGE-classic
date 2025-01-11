@@ -35,7 +35,7 @@
 static ModelDefinition **models;
 static int               total_models = 0;
 
-ModelDefinition::ModelDefinition(const char *prefix) : md2_model_(nullptr), mdl_model_(nullptr)
+ModelDefinition::ModelDefinition(const char *prefix) : radius_(1.0f), md2_model_(nullptr), mdl_model_(nullptr)
 {
     strcpy(name_, prefix);
 
@@ -164,7 +164,7 @@ ModelDefinition *LoadModelFromLump(int model_num)
             if (f)
             {
                 LogDebug("Loading MD3 model from pack file : %s\n", packname.c_str());
-                def->md2_model_ = MD3Load(f);
+                def->md2_model_ = MD3Load(f, def->radius_);
                 pack_file       = true;
             }
         }
@@ -173,7 +173,7 @@ ModelDefinition *LoadModelFromLump(int model_num)
             LogDebug("Loading MD3 model from lump : %s\n", lumpname.c_str());
             f = LoadLumpAsFile(lumpname.c_str());
             if (f)
-                def->md2_model_ = MD3Load(f);
+                def->md2_model_ = MD3Load(f, def->radius_);
         }
     }
 
@@ -196,7 +196,7 @@ ModelDefinition *LoadModelFromLump(int model_num)
                 if (f)
                 {
                     LogDebug("Loading MD2 model from pack file : %s\n", packname.c_str());
-                    def->md2_model_ = MD2Load(f);
+                    def->md2_model_ = MD2Load(f, def->radius_);
                     pack_file       = true;
                 }
             }
@@ -205,7 +205,7 @@ ModelDefinition *LoadModelFromLump(int model_num)
                 LogDebug("Loading MD2 model from lump : %s\n", lumpname.c_str());
                 f = LoadLumpAsFile(lumpname.c_str());
                 if (f)
-                    def->md2_model_ = MD2Load(f);
+                    def->md2_model_ = MD2Load(f, def->radius_);
             }
         }
     }
@@ -229,7 +229,7 @@ ModelDefinition *LoadModelFromLump(int model_num)
                 if (f)
                 {
                     LogDebug("Loading MDL model from pack file : %s\n", packname.c_str());
-                    def->mdl_model_ = MDLLoad(f);
+                    def->mdl_model_ = MDLLoad(f, def->radius_);
                     pack_file       = true;
                 }
             }
@@ -238,7 +238,7 @@ ModelDefinition *LoadModelFromLump(int model_num)
                 LogDebug("Loading MDL model from lump : %s\n", lumpname.c_str());
                 f = LoadLumpAsFile(lumpname.c_str());
                 if (f)
-                    def->mdl_model_ = MDLLoad(f);
+                    def->mdl_model_ = MDLLoad(f, def->radius_);
             }
         }
     }

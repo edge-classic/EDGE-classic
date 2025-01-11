@@ -253,8 +253,9 @@ static short *CreateNormalList(uint8_t *which_normals)
     return n_list;
 }
 
-MDLModel *MDLLoad(epi::File *f)
+MDLModel *MDLLoad(epi::File *f, float &radius)
 {
+    radius = 1;
     RawMDLHeader header;
 
     /* read header */
@@ -437,6 +438,14 @@ MDLModel *MDLLoad(epi::File *f)
             }
 
             which_normals[good_V->normal_idx] = 1;
+
+            HMM_Vec3 vr = {good_V->x, good_V->y, good_V->z};
+            float    r  = HMM_Len(vr);
+
+            if (r > radius)
+            {
+                radius = r;
+            }
         }
 
         md->frames_[i].used_normals = CreateNormalList(which_normals);

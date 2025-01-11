@@ -885,8 +885,20 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
     float tz = tr_x * view_cosine + tr_y * view_sine;
 
     // thing is behind view plane?
-    if (clip_scope != kBAMAngle180 && tz <= 0) // && !is_model)
-        return;
+    if (!is_model)
+    {
+        if (clip_scope != kBAMAngle180 && tz <= 0)
+            return;
+    }
+    else
+    {
+        ModelDefinition *md = GetModel(mo->state_->sprite);
+        EPI_ASSERT(md);
+        if (clip_scope != kBAMAngle180 && tz < -(md->radius_ * mo->scale_))
+        {
+            return;
+        }
+    }
 
     float tx = tr_x * view_sine - tr_y * view_cosine;
 
@@ -894,7 +906,7 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
     // -ES- 1999/03/13 Fixed clipping to work with large FOVs (up to 176 deg)
     // rejects all sprites where angle>176 deg (arctan 32), since those
     // sprites would result in overflow in future calculations
-    if (tz >= kMinimumSpriteDistance && fabs(tx) / 32 > tz)
+    if (!is_model && (tz >= kMinimumSpriteDistance) && ((fabs(tx) / 32) > tz))
         return;
 
     float   sink_mult = 0;
@@ -1168,8 +1180,9 @@ static bool RenderThing(DrawThing *dthing, bool solid)
         ModelDefinition *md       = GetModel(mo->state_->sprite);
         const Image     *skin_img = md->skins_[mo->model_skin_];
 
-        if ((mo->visibility_ < 0.99f) || (skin_img && skin_img->opacity_ == kOpacityComplex) || mo->hyper_flags_ & kHyperFlagNoZBufferUpdate)
-        { 
+        if ((mo->visibility_ < 0.99f) || (skin_img && skin_img->opacity_ == kOpacityComplex) ||
+            mo->hyper_flags_ & kHyperFlagNoZBufferUpdate)
+        {
             is_solid = false;
         }
 

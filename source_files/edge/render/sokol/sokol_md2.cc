@@ -336,8 +336,10 @@ static short *CreateNormalList(uint8_t *which_normals)
     return n_list;
 }
 
-MD2Model *MD2Load(epi::File *f)
+MD2Model *MD2Load(epi::File *f, float &radius)
 {
+    radius = 1;
+    
     int i;
 
     RawMD2Header header;
@@ -402,7 +404,7 @@ MD2Model *MD2Load(epi::File *f)
     // convert glcmds into strips and points
     MD2Strip *strip = md->strips_;
     MD2Point *point = md->points_;
-
+    
     for (i = 0; i < num_glcmds && glcmds[i] != 0;)
     {
         int count = glcmds[i++];
@@ -512,6 +514,14 @@ MD2Model *MD2Load(epi::File *f)
             }
 
             which_normals[good_V->normal_idx] = 1;
+
+            HMM_Vec3 vr = {good_V->x, good_V->y, good_V->z};
+            float    r  = HMM_Len(vr);
+
+            if (r > radius)
+            {
+                radius = r;
+            }
         }
 
         md->frames_[i].used_normals_ = CreateNormalList(which_normals);
@@ -619,8 +629,10 @@ static void MD3CreateNormalMap(void)
     md3_normal_map_built = true;
 }
 
-MD2Model *MD3Load(epi::File *f)
+MD2Model *MD3Load(epi::File *f, float &radius)
 {
+    radius = 1;
+
     int    i;
     float *ff;
 
@@ -729,7 +741,7 @@ MD2Model *MD3Load(epi::File *f)
     f->Seek(mesh_base + AlignedLittleEndianS32(mesh.ofs_verts), epi::File::kSeekpointStart);
 
     uint8_t which_normals[kTotalMDFormatNormals];
-
+    
     for (i = 0; i < num_frames; i++)
     {
         md->frames_[i].vertices = new MD2Vertex[num_verts];
@@ -751,6 +763,14 @@ MD2Model *MD3Load(epi::File *f)
             good_V->normal_idx = md3_normal_to_md2[vert.pitch >> 1][vert.yaw >> 1];
 
             which_normals[good_V->normal_idx] = 1;
+
+            HMM_Vec3 vr = {good_V->x, good_V->y, good_V->z};
+            float    r  = HMM_Len(vr);
+
+            if (r > radius)
+            {
+                radius = r;
+            }
         }
 
         md->frames_[i].used_normals_ = CreateNormalList(which_normals);

@@ -31,6 +31,9 @@ class ModelDefinition
     // four letter model name (e.g. "TROO").
     char name_[6];
 
+    // radius in model (vertex) space
+    float radius_;
+
     MD2Model *md2_model_;
     MDLModel *mdl_model_;
 

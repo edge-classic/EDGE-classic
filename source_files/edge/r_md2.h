@@ -25,8 +25,8 @@
 // opaque handle for rest of the engine
 class MD2Model;
 
-MD2Model *MD2Load(epi::File *f);
-MD2Model *MD3Load(epi::File *f);
+MD2Model *MD2Load(epi::File *f, float& radius);
+MD2Model *MD3Load(epi::File *f, float& radius);
 
 short MD2FindFrame(MD2Model *md, const char *name);
 
@@ -36,6 +36,3 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
 
 void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, float y, float xscale, float yscale,
                       const MapObjectDefinition *info);
-
-//--- editor settings ---
-// vi:ts=4:sw=4:noexpandtab

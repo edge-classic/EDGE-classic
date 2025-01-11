@@ -25,7 +25,7 @@
 // opaque handle for rest of the engine
 class MDLModel;
 
-MDLModel *MDLLoad(epi::File *f);
+MDLModel *MDLLoad(epi::File *f, float& radius);
 
 short MDLFindFrame(MDLModel *md, const char *name);
 

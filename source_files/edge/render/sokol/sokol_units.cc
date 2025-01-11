@@ -381,7 +381,7 @@ void RenderCurrentUnits(void)
         else if (unit->blending & kBlendingMasked)
         {
             render_state->Enable(GL_ALPHA_TEST);
-            render_state->AlphaFunction(GL_GREATER, 0.1);
+            render_state->AlphaFunction(GL_GREATER, 0.01);
         }
         else if (unit->blending & kBlendingGEqual)
         {

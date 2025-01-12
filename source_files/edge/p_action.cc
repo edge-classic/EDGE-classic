@@ -1081,9 +1081,6 @@ void A_TurnRandom(MapObject *mo)
 }
 
 
-
-
-
 void A_MoveFwd(MapObject *mo)
 {
     const State *st = mo->state_;
@@ -1095,8 +1092,7 @@ void A_MoveFwd(MapObject *mo)
         float dx = epi::BAMCos(mo->angle_);
         float dy = epi::BAMSin(mo->angle_);
 
-        mo->momentum_.X += dx * amount;
-        mo->momentum_.Y += dy * amount;
+        mo->AddMomentum(dx * amount, dy * amount, 0);
     }
 }
 
@@ -1111,8 +1107,7 @@ void A_MoveRight(MapObject *mo)
         float dx = epi::BAMCos(mo->angle_ - kBAMAngle90);
         float dy = epi::BAMSin(mo->angle_ - kBAMAngle90);
 
-        mo->momentum_.X += dx * amount;
-        mo->momentum_.Y += dy * amount;
+        mo->AddMomentum(dx * amount, dy * amount, 0);
     }
 }
 
@@ -1121,7 +1116,9 @@ void A_MoveUp(MapObject *mo)
     const State *st = mo->state_;
 
     if (st && st->action_par)
-        mo->momentum_.Z += *(float *)st->action_par;
+    {
+        mo->AddMomentum(0, 0, *(float *)st->action_par);
+    }
 }
 
 void A_StopMoving(MapObject *mo)

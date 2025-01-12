@@ -1067,18 +1067,17 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
 
     bool tilt = is_weapon || (mo->flags_ & kMapObjectFlagMissile) || (mo->hyper_flags_ & kHyperFlagForceModelTilt);
 
+    BAMAngleToMatrix(tilt ? ~mo->vertical_angle_ : 0, &data.mouselook_x_matrix_, &data.mouselook_z_matrix_);
+
     if (uncapped_frames.d_ && !paused && !menu_active && !rts_menu_active &&
         (is_weapon || (!time_stop_active && !erraticism_active)))
     {
-        BAMAngleToMatrix(tilt ? ~epi::BAMInterpolate(mo->old_vertical_angle_, mo->vertical_angle_, fractional_tic) : 0,
-                         &data.mouselook_x_matrix_, &data.mouselook_z_matrix_);
         BAMAngle ang = epi::BAMInterpolate(mo->old_angle_, mo->angle_, fractional_tic) + rotation;
         render_mirror_set.Angle(ang);
         BAMAngleToMatrix(~ang, &data.rotation_x_matrix_, &data.rotation_y_matrix_);
     }
     else
     {
-        BAMAngleToMatrix(tilt ? ~mo->vertical_angle_ : 0, &data.mouselook_x_matrix_, &data.mouselook_z_matrix_);
         BAMAngle ang = mo->angle_ + rotation;
         render_mirror_set.Angle(ang);
         BAMAngleToMatrix(~ang, &data.rotation_x_matrix_, &data.rotation_y_matrix_);

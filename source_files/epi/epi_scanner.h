@@ -56,111 +56,132 @@ namespace epi
 
 class Scanner
 {
-	public:
-		struct ParserState
-		{
-			std::string		string;
-			int				number;
-			double			decimal;
-			bool			boolean;
-			char			token;
-			uint32_t		token_line;
-			uint32_t		token_line_position;
-			uint32_t		scan_position;
-		};
+  public:
+    struct ParserState
+    {
+        std::string string;
+        int         number;
+        double      decimal;
+        bool        boolean;
+        char        token;
+        uint32_t    token_line;
+        uint32_t    token_line_position;
+        uint32_t    scan_position;
+    };
 
-		enum
-		{
-			kIdentifier,		// Ex: SomeIdentifier
-			kStringConst,		// Ex: "Some String"
-			kIntConst,			// Ex: 27
-			kFloatConst,		// Ex: 1.5
-			kBoolConst,			// Ex: true
-			kAndAnd,			// &&
-			kOrOr,				// ||
-			kEqEq,				// ==
-			kNotEq,				// !=
-			kGtrEq,				// >=
-			kLessEq,			// <=
-			kShiftLeft,			// <<
-			kShiftRight,		// >>
-			kIncrement,			// ++
-			kDecrement,			// --
-			kPointerMember,		// ->
-			kScopeResolution,	// ::
-			kMacroConcat,		// ##
-			kAddEq,				// +=
-			kSubEq,				// -=
-			kMulEq,				// *=
-			kDivEq,				// /=
-			kModEq,				// %=
-			kShiftLeftEq,		// <<=
-			kShiftRightEq,		// >>=
-			kAndEq,				// &=
-			kOrEq,				// |=
-			kXorEq,				// ^=
-			kEllipsis,			// ...
-			kAnnotateStart,		// Block comment start
-			kAnnotateEnd,		// Block comment end
+    enum
+    {
+        kIdentifier,      // Ex: SomeIdentifier
+        kStringConst,     // Ex: "Some String"
+        kIntConst,        // Ex: 27
+        kFloatConst,      // Ex: 1.5
+        kBoolConst,       // Ex: true
+        kAndAnd,          // &&
+        kOrOr,            // ||
+        kEqEq,            // ==
+        kNotEq,           // !=
+        kGtrEq,           // >=
+        kLessEq,          // <=
+        kShiftLeft,       // <<
+        kShiftRight,      // >>
+        kIncrement,       // ++
+        kDecrement,       // --
+        kPointerMember,   // ->
+        kScopeResolution, // ::
+        kMacroConcat,     // ##
+        kAddEq,           // +=
+        kSubEq,           // -=
+        kMulEq,           // *=
+        kDivEq,           // /=
+        kModEq,           // %=
+        kShiftLeftEq,     // <<=
+        kShiftRightEq,    // >>=
+        kAndEq,           // &=
+        kOrEq,            // |=
+        kXorEq,           // ^=
+        kEllipsis,        // ...
+        kAnnotateStart,   // Block comment start
+        kAnnotateEnd,     // Block comment end
 
-			kTotalSpecialTokens,
+        kTotalSpecialTokens,
 
-			kNoToken = -1
-		};
+        kNoToken = -1
+    };
 
-		enum MessageLevel
-		{
-			kError,
-			kWarning,
-			kNotice
-		};
+    enum MessageLevel
+    {
+        kError,
+        kWarning,
+        kNotice
+    };
 
-		Scanner(std::string_view data, size_t length=0);
-		~Scanner();
+    Scanner(std::string_view data, size_t length = 0);
+    ~Scanner();
 
-		void			CheckForMeta();
-		void			CheckForWhitespace();
-		bool			CheckToken(char token);
-		void			ExpandState();
-		//const char*	GetData() const { return data; }
-		int				GetLine() const { return state_.token_line; }
-		int				GetLinePosition() const { return state_.token_line_position; }
-		int				GetPosition() const { return logical_position_; }
-		uint32_t		GetScanPosition() const { return scan_position_; }
-		bool			GetNextString();
-		bool			GetNextToken(bool expandState=true);
-		void			MustGetToken(char token);
-		void			Rewind(); /// Only can rewind one step.
-		void			ScriptMessage(MessageLevel level, const char* error, ...) const;
-		void			SetScriptIdentifier(std::string_view ident) { script_identifier_ = ident; }
-		int				SkipLine();
-		bool			TokensLeft() const;
-		const ParserState &operator*() const { return state_; }
-		const ParserState *operator->() const { return &state_; }
+    void CheckForMeta();
+    void CheckForWhitespace();
+    bool CheckToken(char token);
+    void ExpandState();
+    // const char*	GetData() const { return data; }
+    int GetLine() const
+    {
+        return state_.token_line;
+    }
+    int GetLinePosition() const
+    {
+        return state_.token_line_position;
+    }
+    int GetPosition() const
+    {
+        return logical_position_;
+    }
+    uint32_t GetScanPosition() const
+    {
+        return scan_position_;
+    }
+    bool GetNextString();
+    bool GetNextToken(bool expandState = true);
+    void MustGetToken(char token);
+    void Rewind(); /// Only can rewind one step.
+    void ScriptMessage(MessageLevel level, const char *error, ...) const;
+    void SetScriptIdentifier(std::string_view ident)
+    {
+        script_identifier_ = ident;
+    }
+    int                SkipLine();
+    bool               TokensLeft() const;
+    const ParserState &operator*() const
+    {
+        return state_;
+    }
+    const ParserState *operator->() const
+    {
+        return &state_;
+    }
 
-		static const std::string	&Escape(std::string &str);
-		static const std::string	Escape(const char *str);
-		static const std::string	&Unescape(std::string &str);
+    static const std::string &Escape(std::string &str);
+    static const std::string  Escape(const char *str);
+    static const std::string &Unescape(std::string &str);
 
-		ParserState		state_;
+    ParserState state_;
 
-	protected:
-		void	IncrementLine();
+  protected:
+    void IncrementLine();
 
-	private:
-		ParserState		next_state_, previous_state_;
+  private:
+    ParserState next_state_, previous_state_;
 
-		std::string_view data_;
-		size_t	length_;
+    std::string_view data_;
+    size_t           length_;
 
-		uint32_t	line_;
-		uint32_t	line_start_;
-		uint32_t	logical_position_;
-		uint32_t	scan_position_;
+    uint32_t line_;
+    uint32_t line_start_;
+    uint32_t logical_position_;
+    uint32_t scan_position_;
 
-		bool			need_next_; // If checkToken returns false this will be false.
+    bool need_next_; // If checkToken returns false this will be false.
 
-		std::string		script_identifier_;
+    std::string script_identifier_;
 };
 
 } // namespace epi

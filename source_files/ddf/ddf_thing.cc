@@ -63,18 +63,19 @@ static int dlight_radius_warnings = 0;
 
 static DynamicLightDefinition dummy_dlight;
 
-const DDFCommandList dlight_commands[] = {DDF_FIELD("TYPE", dummy_dlight, type_, DDFMobjGetDLight),
-                                          DDF_FIELD("GRAPHIC", dummy_dlight, shape_, DDFMainGetString),
-                                          DDF_FIELD("RADIUS", dummy_dlight, radius_, DDFMainGetFloat),
-                                          DDF_FIELD("COLOUR", dummy_dlight, colour_, DDFMainGetRGB),
-                                          DDF_FIELD("HEIGHT", dummy_dlight, height_, DDFMainGetPercent),
-                                          DDF_FIELD("LEAKY", dummy_dlight, leaky_, DDFMainGetBoolean),
-                                          DDF_FIELD("AUTOCOLOUR", dummy_dlight, autocolour_reference_, DDFMainGetString),
+const DDFCommandList dlight_commands[] = {
+    DDF_FIELD("TYPE", dummy_dlight, type_, DDFMobjGetDLight),
+    DDF_FIELD("GRAPHIC", dummy_dlight, shape_, DDFMainGetString),
+    DDF_FIELD("RADIUS", dummy_dlight, radius_, DDFMainGetFloat),
+    DDF_FIELD("COLOUR", dummy_dlight, colour_, DDFMainGetRGB),
+    DDF_FIELD("HEIGHT", dummy_dlight, height_, DDFMainGetPercent),
+    DDF_FIELD("LEAKY", dummy_dlight, leaky_, DDFMainGetBoolean),
+    DDF_FIELD("AUTOCOLOUR", dummy_dlight, autocolour_reference_, DDFMainGetString),
 
-                                          // backwards compatibility
-                                          DDF_FIELD("INTENSITY", dummy_dlight, radius_, DDFMainGetFloat),
+    // backwards compatibility
+    DDF_FIELD("INTENSITY", dummy_dlight, radius_, DDFMainGetFloat),
 
-                                          {nullptr, nullptr, 0, nullptr}};
+    {nullptr, nullptr, 0, nullptr}};
 
 static WeaknessDefinition dummy_weakness;
 
@@ -309,11 +310,11 @@ const DDFActionCode thing_actions[] = {{"NOTHING", nullptr, nullptr},
                                        {"SET_INVULNERABLE", A_SetInvuln, nullptr},
                                        {"CLEAR_INVULNERABLE", A_ClearInvuln, nullptr},
                                        {"SET_PAINCHANCE", A_PainChanceSet, DDFStateGetPercent},
-									   
+
                                        {"GRAVITY", A_Gravity, nullptr},
                                        {"NO_GRAVITY", A_NoGravity, nullptr},
 
-									   {"CLEAR_TARGET", A_ClearTarget, nullptr},
+                                       {"CLEAR_TARGET", A_ClearTarget, nullptr},
                                        {"FRIEND_LOOKOUT", A_FriendLook, nullptr},
 
                                        {"SET_SCALE", A_ScaleSet, DDFStateGetFloat},
@@ -1569,7 +1570,7 @@ static DDFSpecialFlags extended_specials[] = {{"RESPAWN", kExtendedFlagNoRespawn
                                               {"USABLE", kExtendedFlagUsable, 0},
                                               {"BLOCK_SHOTS", kExtendedFlagBlockShots, 0},
                                               {"TUNNEL", kExtendedFlagTunnel, 0},
-                                              {"BORE", (kExtendedFlagTunnel|kExtendedFlagBore), 0},
+                                              {"BORE", (kExtendedFlagTunnel | kExtendedFlagBore), 0},
                                               {"SIMPLE_ARMOUR", kExtendedFlagSimpleArmour, 0},
                                               {nullptr, 0, 0}};
 
@@ -1600,12 +1601,11 @@ static DDFSpecialFlags hyper_specials[] = {
 
 // MBF21 Boss Flags are already handled and converted to RTS in the Dehacked processor,
 // so they do not appear here
-static DDFSpecialFlags mbf21_specials[] = {
-    {"LOGRAV", kMBF21FlagLowGravity, 0},
-    {"SHORTMRANGE", kMBF21FlagShortMissileRange, 0},
-    {"LONGMELEE", kMBF21FlagLongMeleeRange, 0},
-    {"FORCERADIUSDMG", kMBF21FlagForceRadiusDamage, 0},
-    {nullptr, 0, 0}};
+static DDFSpecialFlags mbf21_specials[] = {{"LOGRAV", kMBF21FlagLowGravity, 0},
+                                           {"SHORTMRANGE", kMBF21FlagShortMissileRange, 0},
+                                           {"LONGMELEE", kMBF21FlagLongMeleeRange, 0},
+                                           {"FORCERADIUSDMG", kMBF21FlagForceRadiusDamage, 0},
+                                           {nullptr, 0, 0}};
 
 //
 // DDFMobjGetSpecial
@@ -1828,7 +1828,7 @@ static void DDFMobjStateGetRADTrigger(const char *arg, State *cur_state)
     if (!arg || !arg[0])
         return;
 
-    //int *val_ptr = new int;
+    // int *val_ptr = new int;
     uint64_t *val_ptr = new uint64_t;
 
     // Modified RAD_CheckForInt
@@ -1939,15 +1939,15 @@ static void DDFMobjStateGetDEHMelee(const char *arg, State *cur_state)
         return;
 
     AttackDefinition *atk = new AttackDefinition();
-    atk->name_ = arg;
-    atk->attackstyle_ = kAttackStyleCloseCombat;
-    atk->attack_class_ = epi::BitSetFromChar('C');
-    atk->flags_ = (AttackFlags)(kAttackFlagFaceTarget | kAttackFlagNeedSight);
+    atk->name_            = arg;
+    atk->attackstyle_     = kAttackStyleCloseCombat;
+    atk->attack_class_    = epi::BitSetFromChar('C');
+    atk->flags_           = (AttackFlags)(kAttackFlagFaceTarget | kAttackFlagNeedSight);
     atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
-    atk->damage_.nominal_ = 3.0f;
+    atk->damage_.nominal_    = 3.0f;
     atk->damage_.linear_max_ = 24.0f;
-    atk->puff_ref_ = "PUFF";
-    atk->range_ = 64.0f;
+    atk->puff_ref_           = "PUFF";
+    atk->range_              = 64.0f;
 
     size_t arg_size = args.size();
 
@@ -1969,7 +1969,7 @@ static void DDFMobjStateGetDEHMelee(const char *arg, State *cur_state)
         if (sscanf(args[2].c_str(), "%d", &sound_id) == 1 && sound_id != 0)
         {
             SoundEffectDefinition *sound = sfxdefs.DEHLookup(sound_id);
-            atk->sound_ = sfxdefs.GetEffect(sound->name_.c_str());
+            atk->sound_                  = sfxdefs.GetEffect(sound->name_.c_str());
         }
     }
     if (arg_size > 3)
@@ -1993,8 +1993,8 @@ static void DDFMobjStateGetDEHProjectile(const char *arg, State *cur_state)
 
     // Sort of a WAG based on the avergage 32 attack height vs. 56 thing height in stock DDF
     // for a lot of stock Doom monsters
-    float dynamic_atk_height = dynamic_mobj->height_ * 0.5714285714285714f;
-    std::string atk_check_name = epi::StringFormat("%s_%d", arg, (int)dynamic_atk_height);
+    float       dynamic_atk_height = dynamic_mobj->height_ * 0.5714285714285714f;
+    std::string atk_check_name     = epi::StringFormat("%s_%d", arg, (int)dynamic_atk_height);
 
     AttackDefinition *atk_check = atkdefs.Lookup(atk_check_name.c_str());
 
@@ -2010,15 +2010,15 @@ static void DDFMobjStateGetDEHProjectile(const char *arg, State *cur_state)
         return;
 
     AttackDefinition *atk = new AttackDefinition();
-    atk->name_ = atk_check_name;
-    atk->atk_mobj_ref_ = args[0];
+    atk->name_            = atk_check_name;
+    atk->atk_mobj_ref_    = args[0];
 
     size_t arg_size = args.size();
 
-    atk->range_ = 2048.0f;
-    atk->attackstyle_ = kAttackStyleProjectile;
+    atk->range_        = 2048.0f;
+    atk->attackstyle_  = kAttackStyleProjectile;
     atk->attack_class_ = epi::BitSetFromChar('M');
-    atk->flags_ = (AttackFlags)(kAttackFlagFaceTarget|kAttackFlagInheritTracerFromTarget);
+    atk->flags_        = (AttackFlags)(kAttackFlagFaceTarget | kAttackFlagInheritTracerFromTarget);
     atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
     atk->height_ = dynamic_atk_height;
 
@@ -2071,16 +2071,16 @@ static void DDFMobjStateGetDEHBullet(const char *arg, State *cur_state)
         return;
 
     AttackDefinition *atk = new AttackDefinition();
-    atk->name_ = arg;
-    atk->range_ = 2048.0f;
-    atk->attackstyle_ = kAttackStyleShot;
-    atk->attack_class_ = epi::BitSetFromChar('B');
-    atk->flags_ = kAttackFlagFaceTarget;
+    atk->name_            = arg;
+    atk->range_           = 2048.0f;
+    atk->attackstyle_     = kAttackStyleShot;
+    atk->attack_class_    = epi::BitSetFromChar('B');
+    atk->flags_           = kAttackFlagFaceTarget;
     atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
-    atk->count_ = 1;
-    atk->damage_.nominal_ = 3.0f;
+    atk->count_              = 1;
+    atk->damage_.nominal_    = 3.0f;
     atk->damage_.linear_max_ = 15.0f;
-    atk->puff_ref_ = "PUFF";
+    atk->puff_ref_           = "PUFF";
 
     size_t arg_size = args.size();
 
@@ -2646,7 +2646,7 @@ void MapObjectDefinition::Default()
     splash_group_  = -2;
     fast_speed_    = -1;
     melee_range_   = -1;
-    deh_thing_id_  =  0;
+    deh_thing_id_  = 0;
 }
 
 void MapObjectDefinition::DLightCompatibility(void)

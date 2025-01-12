@@ -377,5 +377,3 @@ class MirrorSet
 
 extern MirrorSet render_mirror_set;
 extern MirrorSet bsp_mirror_set;
-
-

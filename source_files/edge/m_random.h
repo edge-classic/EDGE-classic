@@ -41,8 +41,8 @@ bool RandomByteTest(float chance);
 bool RandomByteTestDeterministic(float chance);
 
 // Savegame support
-uint64_t  RandomStateRead(void);
-void RandomStateWrite(uint64_t value);
+uint64_t RandomStateRead(void);
+void     RandomStateWrite(uint64_t value);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

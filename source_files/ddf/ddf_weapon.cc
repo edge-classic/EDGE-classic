@@ -660,7 +660,6 @@ static DDFSpecialFlags weapon_specials[] = {{"SILENT_TO_MONSTERS", WeaponFlagSil
                                             {"NOAUTOFIRE", WeaponFlagNoAutoFire, 0},
                                             {nullptr, WeaponFlagNone, 0}};
 
-
 //
 // DDFWStateGetDEHMelee
 //
@@ -681,18 +680,18 @@ static void DDFWStateGetDEHMelee(const char *arg, State *cur_state)
         return;
 
     AttackDefinition *atk = new AttackDefinition();
-    atk->name_ = arg;
-    atk->attackstyle_ = kAttackStyleCloseCombat;
-    atk->attack_class_ = epi::BitSetFromChar('C');
-    atk->flags_ = kAttackFlagPlayer;
+    atk->name_            = arg;
+    atk->attackstyle_     = kAttackStyleCloseCombat;
+    atk->attack_class_    = epi::BitSetFromChar('C');
+    atk->flags_           = kAttackFlagPlayer;
     atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
-    atk->damage_.nominal_ = 2.0f;
+    atk->damage_.nominal_    = 2.0f;
     atk->damage_.linear_max_ = 20.0f;
-    atk->puff_ref_ = "PUFF";
-    atk->range_ = 64.0f;
+    atk->puff_ref_           = "PUFF";
+    atk->range_              = 64.0f;
     // In case player melee range has been modified, find the first
     // player mobj and use its range to calculate the default.
-    // This shouldn't really fail or else it would be hard to 
+    // This shouldn't really fail or else it would be hard to
     // play the game
     for (int i = 0, i_end = mobjtypes.size(); i < i_end; i++)
     {
@@ -730,7 +729,7 @@ static void DDFWStateGetDEHMelee(const char *arg, State *cur_state)
         if (sscanf(args[3].c_str(), "%d", &sound_id) == 1 && sound_id != 0)
         {
             SoundEffectDefinition *sound = sfxdefs.DEHLookup(sound_id);
-            atk->sound_ = sfxdefs.GetEffect(sound->name_.c_str());
+            atk->sound_                  = sfxdefs.GetEffect(sound->name_.c_str());
         }
     }
     if (arg_size > 4)
@@ -764,16 +763,16 @@ static void DDFWStateGetDEHBullet(const char *arg, State *cur_state)
         return;
 
     AttackDefinition *atk = new AttackDefinition();
-    atk->name_ = arg;
-    atk->range_ = 2048.0f;
-    atk->attackstyle_ = kAttackStyleShot;
-    atk->attack_class_ = epi::BitSetFromChar('B');
-    atk->flags_ = kAttackFlagPlayer;
+    atk->name_            = arg;
+    atk->range_           = 2048.0f;
+    atk->attackstyle_     = kAttackStyleShot;
+    atk->attack_class_    = epi::BitSetFromChar('B');
+    atk->flags_           = kAttackFlagPlayer;
     atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
-    atk->count_ = 1;
-    atk->damage_.nominal_ = 5.0f;
+    atk->count_              = 1;
+    atk->damage_.nominal_    = 5.0f;
     atk->damage_.linear_max_ = 15.0f;
-    atk->puff_ref_ = "PUFF";
+    atk->puff_ref_           = "PUFF";
 
     size_t arg_size = args.size();
 
@@ -832,20 +831,20 @@ static void DDFWStateGetDEHProjectile(const char *arg, State *cur_state)
         return;
 
     AttackDefinition *atk = new AttackDefinition();
-    atk->name_ = arg;
-    atk->atk_mobj_ref_ = args[0];
+    atk->name_            = arg;
+    atk->atk_mobj_ref_    = args[0];
 
     size_t arg_size = args.size();
 
-    atk->range_ = 2048.0f;
-    atk->attackstyle_ = kAttackStyleProjectile;
+    atk->range_        = 2048.0f;
+    atk->attackstyle_  = kAttackStyleProjectile;
     atk->attack_class_ = epi::BitSetFromChar('M');
-    atk->flags_ = (AttackFlags)(kAttackFlagPlayer|kAttackFlagInheritTracerFromTarget);
+    atk->flags_        = (AttackFlags)(kAttackFlagPlayer | kAttackFlagInheritTracerFromTarget);
     atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
     atk->height_ = 32.0f;
     // In case player heights have been modified, find the first
     // player mobj and use its height to calculate the default.
-    // This shouldn't really fail or else it would be hard to 
+    // This shouldn't really fail or else it would be hard to
     // play the game
     for (int i = 0, i_end = mobjtypes.size(); i < i_end; i++)
     {
@@ -904,9 +903,8 @@ static void DDFWStateGetRADTrigger(const char *arg, State *cur_state)
     if (!arg || !arg[0])
         return;
 
-    //int *val_ptr = new int;
+    // int *val_ptr = new int;
     uint64_t *val_ptr = new uint64_t;
-
 
     // Modified RAD_CheckForInt
     const char *pos    = arg;

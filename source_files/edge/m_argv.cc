@@ -107,7 +107,7 @@ void ParseArguments(const int argc, const char *const *argv)
 
 #ifdef __APPLE__
         // ignore MacOS X rubbish
-        if (!strcmp(argv[i],"-psn"))
+        if (!strcmp(argv[i], "-psn"))
             continue;
 #endif
         // Just place argv[0] as is

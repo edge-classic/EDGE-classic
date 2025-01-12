@@ -180,7 +180,8 @@ static bool StompThingCallback(MapObject *thing, void *data)
         return true;
 
     // In COOP: Bots and human players will not stomp each other
-    if (InCooperativeMatch() && thing->player_ && move_check.mover->player_ && (!thing->is_voodoo_ && !move_check.mover->is_voodoo_))
+    if (InCooperativeMatch() && thing->player_ && move_check.mover->player_ &&
+        (!thing->is_voodoo_ && !move_check.mover->is_voodoo_))
         return true;
 
     float blockdist = thing->radius_ + move_check.mover->radius_;
@@ -340,7 +341,8 @@ static bool CheckAbsoluteThingCallback(MapObject *thing, void *data)
         return true;
 
     // In COOP: Bots and human players will not clip each other
-    if (InCooperativeMatch() && thing->player_ && move_check.mover->player_ && (!thing->is_voodoo_ && !move_check.mover->is_voodoo_))
+    if (InCooperativeMatch() && thing->player_ && move_check.mover->player_ &&
+        (!thing->is_voodoo_ && !move_check.mover->is_voodoo_))
         return true;
 
     if (!(thing->flags_ & (kMapObjectFlagSolid | kMapObjectFlagShootable)))
@@ -848,7 +850,8 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
         return true;
 
     // In COOP: Bots and human players will not clip each other
-    if (InCooperativeMatch() && thing->player_ && move_check.mover->player_ && (!thing->is_voodoo_ && !move_check.mover->is_voodoo_))
+    if (InCooperativeMatch() && thing->player_ && move_check.mover->player_ &&
+        (!thing->is_voodoo_ && !move_check.mover->is_voodoo_))
         return true;
 
     if (0 == (thing->flags_ &
@@ -869,7 +872,8 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
         // see if we went over
         if (move_check.z >= top_z)
         {
-            if (top_z > move_check.floor_z && !((move_check.flags & kMapObjectFlagMissile) || (thing->flags_ & kMapObjectFlagMissile)))
+            if (top_z > move_check.floor_z &&
+                !((move_check.flags & kMapObjectFlagMissile) || (thing->flags_ & kMapObjectFlagMissile)))
             {
                 move_check.floor_z = top_z;
                 move_check.below   = thing;
@@ -880,7 +884,8 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
         // see if we went underneath
         if (move_check.z + move_check.mover->height_ <= thing->z)
         {
-            if (thing->z < move_check.ceiling_z && !((move_check.flags & kMapObjectFlagMissile) || (thing->flags_ & kMapObjectFlagMissile)))
+            if (thing->z < move_check.ceiling_z &&
+                !((move_check.flags & kMapObjectFlagMissile) || (thing->flags_ & kMapObjectFlagMissile)))
             {
                 move_check.ceiling_z = thing->z;
             }
@@ -2673,7 +2678,8 @@ static bool RadiusAttackCallback(MapObject *thing, void *data)
     }
 
     // MBF21: If in same splash group, don't damage it
-    if (thing->info_->splash_group_ > 0 && radius_attack_check.source && radius_attack_check.source->info_->splash_group_ > 0 &&
+    if (thing->info_->splash_group_ > 0 && radius_attack_check.source &&
+        radius_attack_check.source->info_->splash_group_ > 0 &&
         (thing->info_->splash_group_ == radius_attack_check.source->info_->splash_group_))
     {
         return true;

@@ -54,12 +54,12 @@ class SoundChannel
     SoundEffectDefinition *definition_;
     Position              *position_;
 
-    bool loop_;       // will loop *one* more time
+    bool loop_; // will loop *one* more time
     bool boss_;
 
     ma_audio_buffer_config ref_config_;
-    ma_audio_buffer ref_;
-    ma_sound channel_sound_;
+    ma_audio_buffer        ref_;
+    ma_sound               channel_sound_;
 
   public:
     SoundChannel();
@@ -71,14 +71,14 @@ extern ConsoleVariable sound_effect_volume;
 extern SoundChannel *mix_channels[];
 extern int           total_channels;
 
-extern bool  vacuum_sound_effects;
-extern bool  submerged_sound_effects;
-extern bool  outdoor_reverb;
-extern bool  dynamic_reverb;
-extern bool  ddf_reverb;
-extern int   ddf_reverb_type; // 0 = None, 1 = Reverb, 2 = Echo
-extern int   ddf_reverb_ratio;
-extern int   ddf_reverb_delay;
+extern bool vacuum_sound_effects;
+extern bool submerged_sound_effects;
+extern bool outdoor_reverb;
+extern bool dynamic_reverb;
+extern bool ddf_reverb;
+extern int  ddf_reverb_type; // 0 = None, 1 = Reverb, 2 = Echo
+extern int  ddf_reverb_ratio;
+extern int  ddf_reverb_delay;
 
 void InitializeSoundChannels(int total);
 void FreeSoundChannels(void);

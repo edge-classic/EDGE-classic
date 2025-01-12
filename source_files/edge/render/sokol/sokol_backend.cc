@@ -16,8 +16,8 @@
 // clang-format on
 
 extern ConsoleVariable vsync;
-void BSPStartThread();
-void BSPStopThread();
+void                   BSPStartThread();
+void                   BSPStopThread();
 
 constexpr int32_t kWorldStateInvalid = -1;
 

@@ -35,4 +35,3 @@ bool RenderThings(DrawFloor *dfloor, bool solid);
 void RenderWeaponSprites(Player *p);
 void RenderWeaponModel(Player *p);
 void RenderCrosshair(Player *p);
-

@@ -700,7 +700,7 @@ void DDFStateGetDEHParams(const char *arg, State *cur_state)
     if (!arg)
         return;
 
-    values = new int[8]{0,0,0,0,0,0,0,0};
+    values = new int[8]{0, 0, 0, 0, 0, 0, 0, 0};
 
     std::vector<std::string> args = epi::SeparatedStringVector(arg, ',');
 
@@ -817,7 +817,7 @@ void DDFStateGetJumpInt(const char *arg, State *cur_state)
     }
     else
     {
-        DDFMainGetNumeric(s+1, &jump->amount);
+        DDFMainGetNumeric(s + 1, &jump->amount);
         len = s - arg;
     }
 
@@ -866,16 +866,16 @@ void DDFStateGetJumpIntPair(const char *arg, State *cur_state)
     }
     else
     {
-        const char *s2 = strchr(s+1, ',');
+        const char *s2 = strchr(s + 1, ',');
         if (!s2)
         {
-            DDFMainGetNumeric(s+1, &jump->amount);
+            DDFMainGetNumeric(s + 1, &jump->amount);
             jump->amount2 = 0;
         }
         else
         {
-            if (sscanf(s+1, " %i , %i ", &jump->amount, &jump->amount2) != 2)
-                DDFError("DDFStateGetJumpIntPair: bad values: %s\n", s+1);
+            if (sscanf(s + 1, " %i , %i ", &jump->amount, &jump->amount2) != 2)
+                DDFError("DDFStateGetJumpIntPair: bad values: %s\n", s + 1);
         }
         len = s - arg;
     }

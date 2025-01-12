@@ -1072,7 +1072,7 @@ bool BSPTraversing()
     {
         traverse_stop_signalled = !!thread_atomic_int_load(&bsp_thread.traverse_finished_);
     }
-    
+
     if (!thread_queue_count(&bsp_thread.queue_) && traverse_stop_signalled)
     {
         return false;

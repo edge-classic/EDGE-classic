@@ -148,8 +148,8 @@ static void GetMUSINFOTracksForLevel(void)
         musinfo_tracks.try_emplace({current_map->name_, {}});
     for (;;)
     {
-        std::string    section;
-        
+        std::string section;
+
         lex.GetNextToken();
 
         if (lex.state_.token != epi::Scanner::kIntConst && lex.state_.token != epi::Scanner::kIdentifier)
@@ -164,8 +164,8 @@ static void GetMUSINFOTracksForLevel(void)
         int mus_number = -1;
         while (lex.TokensLeft())
         {
-            std::string    value;
-            
+            std::string value;
+
             lex.GetNextToken();
 
             if (lex.state_.token != epi::Scanner::kIntConst && lex.state_.token != epi::Scanner::kIdentifier)
@@ -666,8 +666,8 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x, float 
     {
         mo->side_ = 1; //~0;
         mo->hyper_flags_ |= kHyperFlagUltraLoyal;
-		//mo->extended_flags_ &= ~kExtendedFlagDisloyalToOwnType; //remove this flag just in case
-		
+        // mo->extended_flags_ &= ~kExtendedFlagDisloyalToOwnType; //remove this flag just in case
+
         /*
         player_t *player;
         player = players[0];
@@ -1363,7 +1363,7 @@ static void LoadUDMFVertexes()
 
     while (lex.TokensLeft())
     {
-        std::string    section;
+        std::string section;
 
         if (!lex.GetNextToken())
             break;
@@ -1394,8 +1394,8 @@ static void LoadUDMFVertexes()
                 if (lex.CheckToken('}'))
                     break;
 
-                std::string    key;
-                std::string    value;
+                std::string key;
+                std::string value;
 
                 if (!lex.GetNextToken())
                     FatalError("Malformed TEXTMAP lump: unclosed block\n");
@@ -1470,7 +1470,7 @@ static void LoadUDMFSectors()
 
     while (lex.TokensLeft())
     {
-        std::string    section;
+        std::string section;
 
         if (!lex.GetNextToken())
             break;
@@ -1513,8 +1513,8 @@ static void LoadUDMFSectors()
                 if (lex.CheckToken('}'))
                     break;
 
-                std::string    key;
-                std::string    value;
+                std::string key;
+                std::string value;
 
                 if (!lex.GetNextToken())
                     FatalError("Malformed TEXTMAP lump: unclosed block\n");
@@ -1693,7 +1693,7 @@ static void LoadUDMFSectors()
 
             // Allow UDMF sector light/fog information to override DDFSECT types
             if (fog_color != kRGBABlack) // All black is the established
-                                              // UDMF "no fog" color
+                                         // UDMF "no fog" color
             {
                 // Prevent UDMF-specified fog color from having our internal 'no
                 // value'...uh...value
@@ -1780,7 +1780,7 @@ static void LoadUDMFSideDefs()
 
     for (;;)
     {
-        std::string    section;
+        std::string section;
 
         if (!lex.GetNextToken())
             break;
@@ -1822,8 +1822,8 @@ static void LoadUDMFSideDefs()
                 if (lex.CheckToken('}'))
                     break;
 
-                std::string    key;
-                std::string    value;
+                std::string key;
+                std::string value;
 
                 if (!lex.GetNextToken())
                     FatalError("Malformed TEXTMAP lump: unclosed block\n");
@@ -2044,7 +2044,7 @@ static void LoadUDMFLineDefs()
 
     for (;;)
     {
-        std::string    section;
+        std::string section;
 
         if (!lex.GetNextToken())
             break;
@@ -2077,8 +2077,8 @@ static void LoadUDMFLineDefs()
                 if (lex.CheckToken('}'))
                     break;
 
-                std::string    key;
-                std::string    value;
+                std::string key;
+                std::string value;
 
                 if (!lex.GetNextToken())
                     FatalError("Malformed TEXTMAP lump: unclosed block\n");
@@ -2233,7 +2233,7 @@ static void LoadUDMFThings()
     LogDebug("LoadUDMFThings: parsing TEXTMAP\n");
     while (lex.TokensLeft())
     {
-        std::string    section;
+        std::string section;
 
         if (!lex.GetNextToken())
             break;
@@ -2271,8 +2271,8 @@ static void LoadUDMFThings()
                 if (lex.CheckToken('}'))
                     break;
 
-                std::string    key;
-                std::string    value;
+                std::string key;
+                std::string value;
 
                 if (!lex.GetNextToken())
                     FatalError("Malformed TEXTMAP lump: unclosed block\n");
@@ -2319,31 +2319,31 @@ static void LoadUDMFThings()
                     options |= (lex.state_.boolean ? kThingEasy : 0);
                     break;
                 case epi::kENameSkill2:
-                    options |= (lex.state_.boolean  ? kThingEasy : 0);
+                    options |= (lex.state_.boolean ? kThingEasy : 0);
                     break;
                 case epi::kENameSkill3:
-                    options |= (lex.state_.boolean  ? kThingMedium : 0);
+                    options |= (lex.state_.boolean ? kThingMedium : 0);
                     break;
                 case epi::kENameSkill4:
-                    options |= (lex.state_.boolean  ? kThingHard : 0);
+                    options |= (lex.state_.boolean ? kThingHard : 0);
                     break;
                 case epi::kENameSkill5:
-                    options |= (lex.state_.boolean  ? kThingHard : 0);
+                    options |= (lex.state_.boolean ? kThingHard : 0);
                     break;
                 case epi::kENameAmbush:
-                    options |= (lex.state_.boolean  ? kThingAmbush : 0);
+                    options |= (lex.state_.boolean ? kThingAmbush : 0);
                     break;
                 case epi::kENameSingle:
-                    options &= (lex.state_.boolean  ? ~kThingNotSinglePlayer : options);
+                    options &= (lex.state_.boolean ? ~kThingNotSinglePlayer : options);
                     break;
                 case epi::kENameDm:
-                    options &= (lex.state_.boolean  ? ~kThingNotDeathmatch : options);
+                    options &= (lex.state_.boolean ? ~kThingNotDeathmatch : options);
                     break;
                 case epi::kENameCoop:
-                    options &= (lex.state_.boolean  ? ~kThingNotCooperative : options);
+                    options &= (lex.state_.boolean ? ~kThingNotCooperative : options);
                     break;
                 case epi::kENameFriend:
-                    options |= (lex.state_.boolean  ? kThingFriend : 0);
+                    options |= (lex.state_.boolean ? kThingFriend : 0);
                     break;
                 case epi::kENameHealth:
                     healthfac = lex.state_.decimal;
@@ -2477,7 +2477,7 @@ static void LoadUDMFCounts()
 
     while (lex.TokensLeft())
     {
-        std::string    section;
+        std::string section;
 
         if (!lex.GetNextToken())
             break;
@@ -3511,7 +3511,7 @@ void LevelSetup(void)
     else
         LoadUDMFThings();
 
-        // OK, CRC values have now been computed
+    // OK, CRC values have now been computed
 #ifdef DEVELOPERS
     LogDebug("MAP CRCS: S=%08x L=%08x T=%08x\n", map_sectors_crc.crc, map_lines_crc.crc, map_things_crc.crc);
 #endif

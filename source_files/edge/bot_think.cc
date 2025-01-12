@@ -450,7 +450,7 @@ void DeathBot::LookForEnemies(float radius)
     // pick a random nearby monster, then check sight, since the enemy
     // may be on the other side of a wall.
 
-    //MapObject *enemy = BotFindEnemy(this, radius);
+    // MapObject *enemy = BotFindEnemy(this, radius);
 
     MapObject *enemy = A_LookForBlockmapTarget(pl_->map_object_, (uint32_t)radius / kBlockmapUnitSize);
 
@@ -1394,7 +1394,7 @@ void DeathBot::Think()
     // in combat
     if (!mo->target_ && leader && leader->player_ && !InDeathmatch())
     {
-        Position pos  = {leader->x, leader->y, leader->z};
+        Position pos = {leader->x, leader->y, leader->z};
         if (DistTo(pos) > 1024)
         {
             switch (task_)

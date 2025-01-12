@@ -339,7 +339,7 @@ static short *CreateNormalList(uint8_t *which_normals)
 MD2Model *MD2Load(epi::File *f, float &radius)
 {
     radius = 1;
-    
+
     int i;
 
     RawMD2Header header;
@@ -404,7 +404,7 @@ MD2Model *MD2Load(epi::File *f, float &radius)
     // convert glcmds into strips and points
     MD2Strip *strip = md->strips_;
     MD2Point *point = md->points_;
-    
+
     for (i = 0; i < num_glcmds && glcmds[i] != 0;)
     {
         int count = glcmds[i++];
@@ -741,7 +741,7 @@ MD2Model *MD3Load(epi::File *f, float &radius)
     f->Seek(mesh_base + AlignedLittleEndianS32(mesh.ofs_verts), epi::File::kSeekpointStart);
 
     uint8_t which_normals[kTotalMDFormatNormals];
-    
+
     for (i = 0; i < num_frames; i++)
     {
         md->frames_[i].vertices = new MD2Vertex[num_verts];

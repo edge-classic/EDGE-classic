@@ -30,94 +30,98 @@
 #include "snd_gather.h"
 #include "w_wad.h"
 
-extern int  sound_device_frequency;
+extern int sound_device_frequency;
 
 typedef struct
 {
-    ma_data_source_base ds;
-    ma_read_proc onRead;
-    ma_seek_proc onSeek;
-    ma_tell_proc onTell;
-    void* pReadSeekTellUserData;
+    ma_data_source_base     ds;
+    ma_read_proc            onRead;
+    ma_seek_proc            onSeek;
+    ma_tell_proc            onTell;
+    void                   *pReadSeekTellUserData;
     ma_allocation_callbacks allocationCallbacks;
-    ma_format format;
-    ma_uint32 channels;
-    ma_uint32 sampleRate;
-    ma_uint64 cursor;
+    ma_format               format;
+    ma_uint32               channels;
+    ma_uint32               sampleRate;
+    ma_uint64               cursor;
 } ma_m4p;
 
-static ma_result ma_m4p_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void* pReadSeekTellUserData, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_m4p* pM4P);
-static ma_result ma_m4p_init_memory(const void* pData, size_t dataSize, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_m4p* pM4P);
-static void ma_m4p_uninit(ma_m4p* pM4P, const ma_allocation_callbacks* pAllocationCallbacks);
-static ma_result ma_m4p_read_pcm_frames(ma_m4p* pM4P, void* pFramesOut, ma_uint64 frameCount, ma_uint64* pFramesRead);
-static ma_result ma_m4p_seek_to_pcm_frame(ma_m4p* pM4P, ma_uint64 frameIndex);
-static ma_result ma_m4p_get_data_format(ma_m4p* pM4P, ma_format* pFormat, ma_uint32* pChannels, ma_uint32* pSampleRate, ma_channel* pChannelMap, size_t channelMapCap);
-static ma_result ma_m4p_get_cursor_in_pcm_frames(ma_m4p* pM4P, ma_uint64* pCursor);
-static ma_result ma_m4p_get_length_in_pcm_frames(ma_m4p* pM4P, ma_uint64* pLength);
+static ma_result ma_m4p_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void *pReadSeekTellUserData,
+                             const ma_decoding_backend_config *pConfig,
+                             const ma_allocation_callbacks *pAllocationCallbacks, ma_m4p *pM4P);
+static ma_result ma_m4p_init_memory(const void *pData, size_t dataSize, const ma_decoding_backend_config *pConfig,
+                                    const ma_allocation_callbacks *pAllocationCallbacks, ma_m4p *pM4P);
+static void      ma_m4p_uninit(ma_m4p *pM4P, const ma_allocation_callbacks *pAllocationCallbacks);
+static ma_result ma_m4p_read_pcm_frames(ma_m4p *pM4P, void *pFramesOut, ma_uint64 frameCount, ma_uint64 *pFramesRead);
+static ma_result ma_m4p_seek_to_pcm_frame(ma_m4p *pM4P, ma_uint64 frameIndex);
+static ma_result ma_m4p_get_data_format(ma_m4p *pM4P, ma_format *pFormat, ma_uint32 *pChannels, ma_uint32 *pSampleRate,
+                                        ma_channel *pChannelMap, size_t channelMapCap);
+static ma_result ma_m4p_get_cursor_in_pcm_frames(ma_m4p *pM4P, ma_uint64 *pCursor);
+static ma_result ma_m4p_get_length_in_pcm_frames(ma_m4p *pM4P, ma_uint64 *pLength);
 
-static ma_result ma_m4p_ds_read(ma_data_source* pDataSource, void* pFramesOut, ma_uint64 frameCount, ma_uint64* pFramesRead)
+static ma_result ma_m4p_ds_read(ma_data_source *pDataSource, void *pFramesOut, ma_uint64 frameCount,
+                                ma_uint64 *pFramesRead)
 {
-    return ma_m4p_read_pcm_frames((ma_m4p*)pDataSource, pFramesOut, frameCount, pFramesRead);
+    return ma_m4p_read_pcm_frames((ma_m4p *)pDataSource, pFramesOut, frameCount, pFramesRead);
 }
 
-static ma_result ma_m4p_ds_seek(ma_data_source* pDataSource, ma_uint64 frameIndex)
+static ma_result ma_m4p_ds_seek(ma_data_source *pDataSource, ma_uint64 frameIndex)
 {
-    return ma_m4p_seek_to_pcm_frame((ma_m4p*)pDataSource, frameIndex);
+    return ma_m4p_seek_to_pcm_frame((ma_m4p *)pDataSource, frameIndex);
 }
 
-static ma_result ma_m4p_ds_get_data_format(ma_data_source* pDataSource, ma_format* pFormat, ma_uint32* pChannels, ma_uint32* pSampleRate, ma_channel* pChannelMap, size_t channelMapCap)
+static ma_result ma_m4p_ds_get_data_format(ma_data_source *pDataSource, ma_format *pFormat, ma_uint32 *pChannels,
+                                           ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
 {
-    return ma_m4p_get_data_format((ma_m4p*)pDataSource, pFormat, pChannels, pSampleRate, pChannelMap, channelMapCap);
+    return ma_m4p_get_data_format((ma_m4p *)pDataSource, pFormat, pChannels, pSampleRate, pChannelMap, channelMapCap);
 }
 
-static ma_result ma_m4p_ds_get_cursor(ma_data_source* pDataSource, ma_uint64* pCursor)
+static ma_result ma_m4p_ds_get_cursor(ma_data_source *pDataSource, ma_uint64 *pCursor)
 {
-    return ma_m4p_get_cursor_in_pcm_frames((ma_m4p*)pDataSource, pCursor);
+    return ma_m4p_get_cursor_in_pcm_frames((ma_m4p *)pDataSource, pCursor);
 }
 
-static ma_result ma_m4p_ds_get_length(ma_data_source* pDataSource, ma_uint64* pLength)
+static ma_result ma_m4p_ds_get_length(ma_data_source *pDataSource, ma_uint64 *pLength)
 {
-    return ma_m4p_get_length_in_pcm_frames((ma_m4p*)pDataSource, pLength);
+    return ma_m4p_get_length_in_pcm_frames((ma_m4p *)pDataSource, pLength);
 }
 
-static ma_data_source_vtable g_ma_m4p_ds_vtable =
-{
-    ma_m4p_ds_read,
-    ma_m4p_ds_seek,
-    ma_m4p_ds_get_data_format,
-    ma_m4p_ds_get_cursor,
-    ma_m4p_ds_get_length,
-    NULL,   /* onSetLooping */
-    0
-};
+static ma_data_source_vtable g_ma_m4p_ds_vtable = {ma_m4p_ds_read,
+                                                   ma_m4p_ds_seek,
+                                                   ma_m4p_ds_get_data_format,
+                                                   ma_m4p_ds_get_cursor,
+                                                   ma_m4p_ds_get_length,
+                                                   NULL, /* onSetLooping */
+                                                   0};
 
-
-static ma_result ma_m4p_init_internal(const ma_decoding_backend_config* pConfig, ma_m4p* pM4P)
+static ma_result ma_m4p_init_internal(const ma_decoding_backend_config *pConfig, ma_m4p *pM4P)
 {
-    ma_result result;
+    ma_result             result;
     ma_data_source_config dataSourceConfig;
 
     EPI_UNUSED(pConfig);
 
-    if (pM4P == NULL) {
+    if (pM4P == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
     EPI_CLEAR_MEMORY(pM4P, ma_m4p, 1);
-    pM4P->format = ma_format_f32;    /* Only supporting f32. */
+    pM4P->format = ma_format_f32; /* Only supporting f32. */
 
-    dataSourceConfig = ma_data_source_config_init();
+    dataSourceConfig        = ma_data_source_config_init();
     dataSourceConfig.vtable = &g_ma_m4p_ds_vtable;
 
     result = ma_data_source_init(&dataSourceConfig, &pM4P->ds);
-    if (result != MA_SUCCESS) {
-        return result;  /* Failed to initialize the base data source. */
+    if (result != MA_SUCCESS)
+    {
+        return result; /* Failed to initialize the base data source. */
     }
 
     return MA_SUCCESS;
 }
 
-static ma_result ma_m4p_post_init(ma_m4p* pM4P)
+static ma_result ma_m4p_post_init(ma_m4p *pM4P)
 {
     EPI_ASSERT(pM4P != NULL);
 
@@ -129,35 +133,41 @@ static ma_result ma_m4p_post_init(ma_m4p* pM4P)
     return MA_SUCCESS;
 }
 
-static ma_result ma_m4p_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void* pReadSeekTellUserData, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_m4p* pM4P)
+static ma_result ma_m4p_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void *pReadSeekTellUserData,
+                             const ma_decoding_backend_config *pConfig,
+                             const ma_allocation_callbacks *pAllocationCallbacks, ma_m4p *pM4P)
 {
     EPI_UNUSED(pAllocationCallbacks);
 
     ma_result result;
 
     result = ma_m4p_init_internal(pConfig, pM4P);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         return result;
     }
 
-    if (onRead == NULL || onSeek == NULL) {
+    if (onRead == NULL || onSeek == NULL)
+    {
         return MA_INVALID_ARGS; /* onRead and onSeek are mandatory. */
     }
 
-    pM4P->onRead = onRead;
-    pM4P->onSeek = onSeek;
-    pM4P->onTell = onTell;
+    pM4P->onRead                = onRead;
+    pM4P->onSeek                = onSeek;
+    pM4P->onTell                = onTell;
     pM4P->pReadSeekTellUserData = pReadSeekTellUserData;
 
     return MA_SUCCESS;
 }
 
-static ma_result ma_m4p_init_memory(const void* pData, size_t dataSize, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_m4p* pM4P)
+static ma_result ma_m4p_init_memory(const void *pData, size_t dataSize, const ma_decoding_backend_config *pConfig,
+                                    const ma_allocation_callbacks *pAllocationCallbacks, ma_m4p *pM4P)
 {
     ma_result result;
 
     result = ma_m4p_init_internal(pConfig, pM4P);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         return result;
     }
 
@@ -174,11 +184,12 @@ static ma_result ma_m4p_init_memory(const void* pData, size_t dataSize, const ma
     return MA_SUCCESS;
 }
 
-static void ma_m4p_uninit(ma_m4p* pM4P, const ma_allocation_callbacks* pAllocationCallbacks)
+static void ma_m4p_uninit(ma_m4p *pM4P, const ma_allocation_callbacks *pAllocationCallbacks)
 {
     EPI_UNUSED(pAllocationCallbacks);
 
-    if (pM4P == NULL) {
+    if (pM4P == NULL)
+    {
         return;
     }
 
@@ -188,55 +199,65 @@ static void ma_m4p_uninit(ma_m4p* pM4P, const ma_allocation_callbacks* pAllocati
     ma_data_source_uninit(&pM4P->ds);
 }
 
-static ma_result ma_m4p_read_pcm_frames(ma_m4p* pM4P, void* pFramesOut, ma_uint64 frameCount, ma_uint64* pFramesRead)
+static ma_result ma_m4p_read_pcm_frames(ma_m4p *pM4P, void *pFramesOut, ma_uint64 frameCount, ma_uint64 *pFramesRead)
 {
-    if (pFramesRead != NULL) {
+    if (pFramesRead != NULL)
+    {
         *pFramesRead = 0;
     }
 
-    if (frameCount == 0) {
+    if (frameCount == 0)
+    {
         return MA_INVALID_ARGS;
     }
 
-    if (pM4P == NULL) {
+    if (pM4P == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
     /* We always use floating point format. */
-    ma_result result = MA_SUCCESS;  /* Must be initialized to MA_SUCCESS. */
+    ma_result result          = MA_SUCCESS; /* Must be initialized to MA_SUCCESS. */
     ma_uint64 totalFramesRead = 0;
     ma_format format;
     ma_uint32 channels;
 
     ma_m4p_get_data_format(pM4P, &format, &channels, NULL, NULL, 0);
 
-    if (format == ma_format_f32) {
+    if (format == ma_format_f32)
+    {
         m4p_GenerateFloatSamples((float *)pFramesOut, frameCount);
         totalFramesRead = frameCount;
-    } else {
+    }
+    else
+    {
         result = MA_INVALID_ARGS;
     }
 
     pM4P->cursor += totalFramesRead;
 
-    if (totalFramesRead == 0) {
+    if (totalFramesRead == 0)
+    {
         result = MA_AT_END;
     }
 
-    if (pFramesRead != NULL) {
+    if (pFramesRead != NULL)
+    {
         *pFramesRead = totalFramesRead;
     }
 
-    if (result == MA_SUCCESS && totalFramesRead == 0) {
-        result  = MA_AT_END;
+    if (result == MA_SUCCESS && totalFramesRead == 0)
+    {
+        result = MA_AT_END;
     }
 
     return result;
 }
 
-static ma_result ma_m4p_seek_to_pcm_frame(ma_m4p* pM4P, ma_uint64 frameIndex)
+static ma_result ma_m4p_seek_to_pcm_frame(ma_m4p *pM4P, ma_uint64 frameIndex)
 {
-    if (pM4P == NULL || frameIndex != 0) {
+    if (pM4P == NULL || frameIndex != 0)
+    {
         return MA_INVALID_ARGS;
     }
 
@@ -248,54 +269,66 @@ static ma_result ma_m4p_seek_to_pcm_frame(ma_m4p* pM4P, ma_uint64 frameIndex)
     return MA_SUCCESS;
 }
 
-static ma_result ma_m4p_get_data_format(ma_m4p* pM4P, ma_format* pFormat, ma_uint32* pChannels, ma_uint32* pSampleRate, ma_channel* pChannelMap, size_t channelMapCap)
+static ma_result ma_m4p_get_data_format(ma_m4p *pM4P, ma_format *pFormat, ma_uint32 *pChannels, ma_uint32 *pSampleRate,
+                                        ma_channel *pChannelMap, size_t channelMapCap)
 {
     /* Defaults for safety. */
-    if (pFormat != NULL) {
+    if (pFormat != NULL)
+    {
         *pFormat = ma_format_unknown;
     }
-    if (pChannels != NULL) {
+    if (pChannels != NULL)
+    {
         *pChannels = 0;
     }
-    if (pSampleRate != NULL) {
+    if (pSampleRate != NULL)
+    {
         *pSampleRate = 0;
     }
-    if (pChannelMap != NULL) {
+    if (pChannelMap != NULL)
+    {
         EPI_CLEAR_MEMORY(pChannelMap, ma_channel, channelMapCap);
     }
 
-    if (pM4P == NULL) {
+    if (pM4P == NULL)
+    {
         return MA_INVALID_OPERATION;
     }
 
-    if (pFormat != NULL) {
+    if (pFormat != NULL)
+    {
         *pFormat = pM4P->format;
     }
 
-    if (pChannels != NULL) {
+    if (pChannels != NULL)
+    {
         *pChannels = pM4P->channels;
     }
 
-    if (pSampleRate != NULL) {
+    if (pSampleRate != NULL)
+    {
         *pSampleRate = pM4P->sampleRate;
     }
 
-    if (pChannelMap != NULL) {
+    if (pChannelMap != NULL)
+    {
         ma_channel_map_init_standard(ma_standard_channel_map_default, pChannelMap, channelMapCap, pM4P->channels);
     }
 
     return MA_SUCCESS;
 }
 
-static ma_result ma_m4p_get_cursor_in_pcm_frames(ma_m4p* pM4P, ma_uint64* pCursor)
+static ma_result ma_m4p_get_cursor_in_pcm_frames(ma_m4p *pM4P, ma_uint64 *pCursor)
 {
-    if (pCursor == NULL) {
+    if (pCursor == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
-    *pCursor = 0;   /* Safety. */
+    *pCursor = 0; /* Safety. */
 
-    if (pM4P == NULL) {
+    if (pM4P == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
@@ -304,36 +337,44 @@ static ma_result ma_m4p_get_cursor_in_pcm_frames(ma_m4p* pM4P, ma_uint64* pCurso
     return MA_SUCCESS;
 }
 
-static ma_result ma_m4p_get_length_in_pcm_frames(ma_m4p* pM4P, ma_uint64* pLength)
+static ma_result ma_m4p_get_length_in_pcm_frames(ma_m4p *pM4P, ma_uint64 *pLength)
 {
-    if (pLength == NULL) {
+    if (pLength == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
-    *pLength = 0;   /* Safety. */
+    *pLength = 0; /* Safety. */
 
-    if (pM4P == NULL) {
+    if (pM4P == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
     return MA_SUCCESS;
 }
 
-static ma_result ma_decoding_backend_init__m4p(void* pUserData, ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void* pReadSeekTellUserData, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_data_source** ppBackend)
+static ma_result ma_decoding_backend_init__m4p(void *pUserData, ma_read_proc onRead, ma_seek_proc onSeek,
+                                               ma_tell_proc onTell, void *pReadSeekTellUserData,
+                                               const ma_decoding_backend_config *pConfig,
+                                               const ma_allocation_callbacks    *pAllocationCallbacks,
+                                               ma_data_source                  **ppBackend)
 {
     ma_result result;
-    ma_m4p* pM4P;
+    ma_m4p   *pM4P;
 
     EPI_UNUSED(pUserData);
 
     /* For now we're just allocating the decoder backend on the heap. */
-    pM4P = (ma_m4p*)ma_malloc(sizeof(*pM4P), pAllocationCallbacks);
-    if (pM4P == NULL) {
+    pM4P = (ma_m4p *)ma_malloc(sizeof(*pM4P), pAllocationCallbacks);
+    if (pM4P == NULL)
+    {
         return MA_OUT_OF_MEMORY;
     }
 
     result = ma_m4p_init(onRead, onSeek, onTell, pReadSeekTellUserData, pConfig, pAllocationCallbacks, pM4P);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         ma_free(pM4P, pAllocationCallbacks);
         return result;
     }
@@ -343,21 +384,26 @@ static ma_result ma_decoding_backend_init__m4p(void* pUserData, ma_read_proc onR
     return MA_SUCCESS;
 }
 
-static ma_result ma_decoding_backend_init_memory__m4p(void* pUserData, const void* pData, size_t dataSize, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_data_source** ppBackend)
+static ma_result ma_decoding_backend_init_memory__m4p(void *pUserData, const void *pData, size_t dataSize,
+                                                      const ma_decoding_backend_config *pConfig,
+                                                      const ma_allocation_callbacks    *pAllocationCallbacks,
+                                                      ma_data_source                  **ppBackend)
 {
     ma_result result;
-    ma_m4p* pM4P;
+    ma_m4p   *pM4P;
 
     EPI_UNUSED(pUserData);
 
     /* For now we're just allocating the decoder backend on the heap. */
-    pM4P = (ma_m4p*)ma_malloc(sizeof(*pM4P), pAllocationCallbacks);
-    if (pM4P == NULL) {
+    pM4P = (ma_m4p *)ma_malloc(sizeof(*pM4P), pAllocationCallbacks);
+    if (pM4P == NULL)
+    {
         return MA_OUT_OF_MEMORY;
     }
 
     result = ma_m4p_init_memory(pData, dataSize, pConfig, pAllocationCallbacks, pM4P);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         ma_free(pM4P, pAllocationCallbacks);
         return result;
     }
@@ -367,9 +413,10 @@ static ma_result ma_decoding_backend_init_memory__m4p(void* pUserData, const voi
     return MA_SUCCESS;
 }
 
-static void ma_decoding_backend_uninit__m4p(void* pUserData, ma_data_source* pBackend, const ma_allocation_callbacks* pAllocationCallbacks)
+static void ma_decoding_backend_uninit__m4p(void *pUserData, ma_data_source *pBackend,
+                                            const ma_allocation_callbacks *pAllocationCallbacks)
 {
-    ma_m4p* pM4P = (ma_m4p*)pBackend;
+    ma_m4p *pM4P = (ma_m4p *)pBackend;
 
     EPI_UNUSED(pUserData);
 
@@ -377,14 +424,11 @@ static void ma_decoding_backend_uninit__m4p(void* pUserData, ma_data_source* pBa
     ma_free(pM4P, pAllocationCallbacks);
 }
 
-static ma_decoding_backend_vtable g_ma_decoding_backend_vtable_m4p =
-{
-    ma_decoding_backend_init__m4p,
-    NULL, // onInitFile()
-    NULL, // onInitFileW()
-    ma_decoding_backend_init_memory__m4p,
-    ma_decoding_backend_uninit__m4p
-};
+static ma_decoding_backend_vtable g_ma_decoding_backend_vtable_m4p = {ma_decoding_backend_init__m4p,
+                                                                      NULL, // onInitFile()
+                                                                      NULL, // onInitFileW()
+                                                                      ma_decoding_backend_init_memory__m4p,
+                                                                      ma_decoding_backend_uninit__m4p};
 
 static ma_decoding_backend_vtable *custom_vtable = &g_ma_decoding_backend_vtable_m4p;
 
@@ -441,9 +485,9 @@ bool M4PPlayer::OpenMemory(uint8_t *data, int length)
     if (status_ != kNotLoaded)
         Close();
 
-    ma_decoder_config decode_config = ma_decoder_config_init_default();
-    decode_config.format = ma_format_f32;
-    decode_config.customBackendCount = 1;
+    ma_decoder_config decode_config      = ma_decoder_config_init_default();
+    decode_config.format                 = ma_format_f32;
+    decode_config.customBackendCount     = 1;
     decode_config.pCustomBackendUserData = NULL;
     decode_config.ppCustomBackendVTables = &custom_vtable;
 
@@ -453,7 +497,10 @@ bool M4PPlayer::OpenMemory(uint8_t *data, int length)
         return false;
     }
 
-    if (ma_sound_init_from_data_source(&music_engine, &m4p_decoder_, MA_SOUND_FLAG_NO_PITCH|MA_SOUND_FLAG_UNKNOWN_LENGTH|MA_SOUND_FLAG_STREAM|MA_SOUND_FLAG_NO_SPATIALIZATION, NULL, &m4p_stream_) != MA_SUCCESS)
+    if (ma_sound_init_from_data_source(&music_engine, &m4p_decoder_,
+                                       MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_UNKNOWN_LENGTH | MA_SOUND_FLAG_STREAM |
+                                           MA_SOUND_FLAG_NO_SPATIALIZATION,
+                                       NULL, &m4p_stream_) != MA_SUCCESS)
     {
         ma_decoder_uninit(&m4p_decoder_);
         LogWarning("Failed to load tracker music\n");
@@ -515,7 +562,7 @@ void M4PPlayer::Play(bool loop)
         status_ = kPaused;
     else
     {
-        status_  = kPlaying;
+        status_ = kPlaying;
         ma_sound_start(&m4p_stream_);
     }
 }
@@ -564,7 +611,6 @@ AbstractMusicPlayer *PlayM4PMusic(uint8_t *data, int length, bool looping)
 
     return player;
 }
-
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

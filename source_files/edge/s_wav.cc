@@ -31,10 +31,11 @@
 bool LoadWAVSound(SoundData *buf, uint8_t *data, int length)
 {
     ma_decoder_config decode_config = ma_decoder_config_init_default();
-    decode_config.format = ma_format_f32;
+    decode_config.format            = ma_format_f32;
     ma_decoder decode;
 
-    //ma_decoder_init_memory(const void* pData, size_t dataSize, const ma_decoder_config* pConfig, ma_decoder* pDecoder);
+    // ma_decoder_init_memory(const void* pData, size_t dataSize, const ma_decoder_config* pConfig, ma_decoder*
+    // pDecoder);
 
     if (ma_decoder_init_memory(data, length, &decode_config, &decode) != MA_SUCCESS)
     {

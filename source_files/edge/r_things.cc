@@ -864,7 +864,7 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
         fz = mo->floor_z_;
     }
 
-    // This applies to kStateFrameFlagModel and kMapObjectFlagFloat 
+    // This applies to kStateFrameFlagModel and kMapObjectFlagFloat
     if (mo->interpolation_number_ > 1)
     {
         float along = mo->interpolation_position_ / (float)mo->interpolation_number_;

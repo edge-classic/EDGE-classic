@@ -28,7 +28,7 @@
 ImageAtlas::ImageAtlas(int w, int h)
 {
     data_ = new ImageData(w, h, 4);
-    EPI_CLEAR_MEMORY(data_->pixels_, uint8_t, w * h * 4);
+    EPI_CLEAR_MEMORY(data_->pixels_, uint8_t, w *h * 4);
 }
 
 ImageAtlas::~ImageAtlas()
@@ -299,8 +299,8 @@ bool SavePNG(std::string filename, ImageData *image)
         return false;
 
     size_t png_size = 0;
-    void *png_out = tdefl_write_image_to_png_file_in_memory_ex(image->pixels_, image->width_, image->height_, 
-        image->depth_, &png_size, MZ_DEFAULT_LEVEL, MZ_FALSE);
+    void  *png_out  = tdefl_write_image_to_png_file_in_memory_ex(image->pixels_, image->width_, image->height_,
+                                                                 image->depth_, &png_size, MZ_DEFAULT_LEVEL, MZ_FALSE);
 
     if (png_out)
     {

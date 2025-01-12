@@ -1010,7 +1010,7 @@ static void ScriptParseTag(std::vector<const char *> &pars)
 static void ScriptParseWhenAppear(std::vector<const char *> &pars)
 {
     // When_Appear 1:2:3:4:5:SP:COOP:DM
-    
+
     DDFMainGetWhenAppear(pars[1], &this_script->appear);
 }
 

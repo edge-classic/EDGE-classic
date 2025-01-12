@@ -33,96 +33,102 @@
 #include "snd_gather.h"
 #include "w_wad.h"
 
-extern int  sound_device_frequency;
+extern int sound_device_frequency;
 
 typedef struct
 {
-    ma_data_source_base ds;
-    ma_read_proc onRead;
-    ma_seek_proc onSeek;
-    ma_tell_proc onTell;
-    void* pReadSeekTellUserData;
+    ma_data_source_base     ds;
+    ma_read_proc            onRead;
+    ma_seek_proc            onSeek;
+    ma_tell_proc            onTell;
+    void                   *pReadSeekTellUserData;
     ma_allocation_callbacks allocationCallbacks;
-    ma_format format;
-    ma_uint32 channels;
-    ma_uint32 sampleRate;
-    ma_uint64 cursor;
-    cRSID_C64instance *C64;
-    cRSID_SIDheader   *C64_song;
+    ma_format               format;
+    ma_uint32               channels;
+    ma_uint32               sampleRate;
+    ma_uint64               cursor;
+    cRSID_C64instance      *C64;
+    cRSID_SIDheader        *C64_song;
 } ma_crsid;
 
-static ma_result ma_crsid_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void* pReadSeekTellUserData, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_crsid* pcrSID);
-static ma_result ma_crsid_init_memory(const void* pData, size_t dataSize, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_crsid* pcrSID);
-static void ma_crsid_uninit(ma_crsid* pcrSID, const ma_allocation_callbacks* pAllocationCallbacks);
-static ma_result ma_crsid_read_pcm_frames(ma_crsid* pcrSID, void* pFramesOut, ma_uint64 frameCount, ma_uint64* pFramesRead);
-static ma_result ma_crsid_seek_to_pcm_frame(ma_crsid* pcrSID, ma_uint64 frameIndex);
-static ma_result ma_crsid_get_data_format(ma_crsid* pcrSID, ma_format* pFormat, ma_uint32* pChannels, ma_uint32* pSampleRate, ma_channel* pChannelMap, size_t channelMapCap);
-static ma_result ma_crsid_get_cursor_in_pcm_frames(ma_crsid* pcrSID, ma_uint64* pCursor);
-static ma_result ma_crsid_get_length_in_pcm_frames(ma_crsid* pcrSID, ma_uint64* pLength);
+static ma_result ma_crsid_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell,
+                               void *pReadSeekTellUserData, const ma_decoding_backend_config *pConfig,
+                               const ma_allocation_callbacks *pAllocationCallbacks, ma_crsid *pcrSID);
+static ma_result ma_crsid_init_memory(const void *pData, size_t dataSize, const ma_decoding_backend_config *pConfig,
+                                      const ma_allocation_callbacks *pAllocationCallbacks, ma_crsid *pcrSID);
+static void      ma_crsid_uninit(ma_crsid *pcrSID, const ma_allocation_callbacks *pAllocationCallbacks);
+static ma_result ma_crsid_read_pcm_frames(ma_crsid *pcrSID, void *pFramesOut, ma_uint64 frameCount,
+                                          ma_uint64 *pFramesRead);
+static ma_result ma_crsid_seek_to_pcm_frame(ma_crsid *pcrSID, ma_uint64 frameIndex);
+static ma_result ma_crsid_get_data_format(ma_crsid *pcrSID, ma_format *pFormat, ma_uint32 *pChannels,
+                                          ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap);
+static ma_result ma_crsid_get_cursor_in_pcm_frames(ma_crsid *pcrSID, ma_uint64 *pCursor);
+static ma_result ma_crsid_get_length_in_pcm_frames(ma_crsid *pcrSID, ma_uint64 *pLength);
 
-static ma_result ma_crsid_ds_read(ma_data_source* pDataSource, void* pFramesOut, ma_uint64 frameCount, ma_uint64* pFramesRead)
+static ma_result ma_crsid_ds_read(ma_data_source *pDataSource, void *pFramesOut, ma_uint64 frameCount,
+                                  ma_uint64 *pFramesRead)
 {
-    return ma_crsid_read_pcm_frames((ma_crsid*)pDataSource, pFramesOut, frameCount, pFramesRead);
+    return ma_crsid_read_pcm_frames((ma_crsid *)pDataSource, pFramesOut, frameCount, pFramesRead);
 }
 
-static ma_result ma_crsid_ds_seek(ma_data_source* pDataSource, ma_uint64 frameIndex)
+static ma_result ma_crsid_ds_seek(ma_data_source *pDataSource, ma_uint64 frameIndex)
 {
-    return ma_crsid_seek_to_pcm_frame((ma_crsid*)pDataSource, frameIndex);
+    return ma_crsid_seek_to_pcm_frame((ma_crsid *)pDataSource, frameIndex);
 }
 
-static ma_result ma_crsid_ds_get_data_format(ma_data_source* pDataSource, ma_format* pFormat, ma_uint32* pChannels, ma_uint32* pSampleRate, ma_channel* pChannelMap, size_t channelMapCap)
+static ma_result ma_crsid_ds_get_data_format(ma_data_source *pDataSource, ma_format *pFormat, ma_uint32 *pChannels,
+                                             ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
 {
-    return ma_crsid_get_data_format((ma_crsid*)pDataSource, pFormat, pChannels, pSampleRate, pChannelMap, channelMapCap);
+    return ma_crsid_get_data_format((ma_crsid *)pDataSource, pFormat, pChannels, pSampleRate, pChannelMap,
+                                    channelMapCap);
 }
 
-static ma_result ma_crsid_ds_get_cursor(ma_data_source* pDataSource, ma_uint64* pCursor)
+static ma_result ma_crsid_ds_get_cursor(ma_data_source *pDataSource, ma_uint64 *pCursor)
 {
-    return ma_crsid_get_cursor_in_pcm_frames((ma_crsid*)pDataSource, pCursor);
+    return ma_crsid_get_cursor_in_pcm_frames((ma_crsid *)pDataSource, pCursor);
 }
 
-static ma_result ma_crsid_ds_get_length(ma_data_source* pDataSource, ma_uint64* pLength)
+static ma_result ma_crsid_ds_get_length(ma_data_source *pDataSource, ma_uint64 *pLength)
 {
-    return ma_crsid_get_length_in_pcm_frames((ma_crsid*)pDataSource, pLength);
+    return ma_crsid_get_length_in_pcm_frames((ma_crsid *)pDataSource, pLength);
 }
 
-static ma_data_source_vtable g_ma_crsid_ds_vtable =
-{
-    ma_crsid_ds_read,
-    ma_crsid_ds_seek,
-    ma_crsid_ds_get_data_format,
-    ma_crsid_ds_get_cursor,
-    ma_crsid_ds_get_length,
-    NULL,   /* onSetLooping */
-    0
-};
+static ma_data_source_vtable g_ma_crsid_ds_vtable = {ma_crsid_ds_read,
+                                                     ma_crsid_ds_seek,
+                                                     ma_crsid_ds_get_data_format,
+                                                     ma_crsid_ds_get_cursor,
+                                                     ma_crsid_ds_get_length,
+                                                     NULL, /* onSetLooping */
+                                                     0};
 
-
-static ma_result ma_crsid_init_internal(const ma_decoding_backend_config* pConfig, ma_crsid* pcrSID)
+static ma_result ma_crsid_init_internal(const ma_decoding_backend_config *pConfig, ma_crsid *pcrSID)
 {
-    ma_result result;
+    ma_result             result;
     ma_data_source_config dataSourceConfig;
 
     EPI_UNUSED(pConfig);
 
-    if (pcrSID == NULL) {
+    if (pcrSID == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
     EPI_CLEAR_MEMORY(pcrSID, ma_crsid, 1);
-    pcrSID->format = ma_format_f32;    /* Only supporting f32. */
+    pcrSID->format = ma_format_f32; /* Only supporting f32. */
 
-    dataSourceConfig = ma_data_source_config_init();
+    dataSourceConfig        = ma_data_source_config_init();
     dataSourceConfig.vtable = &g_ma_crsid_ds_vtable;
 
     result = ma_data_source_init(&dataSourceConfig, &pcrSID->ds);
-    if (result != MA_SUCCESS) {
-        return result;  /* Failed to initialize the base data source. */
+    if (result != MA_SUCCESS)
+    {
+        return result; /* Failed to initialize the base data source. */
     }
 
     return MA_SUCCESS;
 }
 
-static ma_result ma_crsid_post_init(ma_crsid* pcrSID)
+static ma_result ma_crsid_post_init(ma_crsid *pcrSID)
 {
     EPI_ASSERT(pcrSID != NULL);
 
@@ -133,35 +139,41 @@ static ma_result ma_crsid_post_init(ma_crsid* pcrSID)
     return MA_SUCCESS;
 }
 
-static ma_result ma_crsid_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void* pReadSeekTellUserData, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_crsid* pcrSID)
+static ma_result ma_crsid_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell,
+                               void *pReadSeekTellUserData, const ma_decoding_backend_config *pConfig,
+                               const ma_allocation_callbacks *pAllocationCallbacks, ma_crsid *pcrSID)
 {
     EPI_UNUSED(pAllocationCallbacks);
 
     ma_result result;
 
     result = ma_crsid_init_internal(pConfig, pcrSID);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         return result;
     }
 
-    if (onRead == NULL || onSeek == NULL) {
+    if (onRead == NULL || onSeek == NULL)
+    {
         return MA_INVALID_ARGS; /* onRead and onSeek are mandatory. */
     }
 
-    pcrSID->onRead = onRead;
-    pcrSID->onSeek = onSeek;
-    pcrSID->onTell = onTell;
+    pcrSID->onRead                = onRead;
+    pcrSID->onSeek                = onSeek;
+    pcrSID->onTell                = onTell;
     pcrSID->pReadSeekTellUserData = pReadSeekTellUserData;
 
     return MA_SUCCESS;
 }
 
-static ma_result ma_crsid_init_memory(const void* pData, size_t dataSize, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_crsid* pcrSID)
+static ma_result ma_crsid_init_memory(const void *pData, size_t dataSize, const ma_decoding_backend_config *pConfig,
+                                      const ma_allocation_callbacks *pAllocationCallbacks, ma_crsid *pcrSID)
 {
     ma_result result;
 
     result = ma_crsid_init_internal(pConfig, pcrSID);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         return result;
     }
 
@@ -169,13 +181,15 @@ static ma_result ma_crsid_init_memory(const void* pData, size_t dataSize, const 
 
     pcrSID->C64 = cRSID_init(sound_device_frequency);
 
-    if (!pcrSID->C64) {
+    if (!pcrSID->C64)
+    {
         return MA_ERROR;
     }
 
     pcrSID->C64_song = cRSID_processSIDfile(pcrSID->C64, (unsigned char *)pData, dataSize);
 
-    if (!pcrSID->C64_song) {
+    if (!pcrSID->C64_song)
+    {
         return MA_INVALID_DATA;
     }
 
@@ -184,11 +198,12 @@ static ma_result ma_crsid_init_memory(const void* pData, size_t dataSize, const 
     return MA_SUCCESS;
 }
 
-static void ma_crsid_uninit(ma_crsid* pcrSID, const ma_allocation_callbacks* pAllocationCallbacks)
+static void ma_crsid_uninit(ma_crsid *pcrSID, const ma_allocation_callbacks *pAllocationCallbacks)
 {
     EPI_UNUSED(pAllocationCallbacks);
 
-    if (pcrSID == NULL) {
+    if (pcrSID == NULL)
+    {
         return;
     }
 
@@ -197,55 +212,66 @@ static void ma_crsid_uninit(ma_crsid* pcrSID, const ma_allocation_callbacks* pAl
     ma_data_source_uninit(&pcrSID->ds);
 }
 
-static ma_result ma_crsid_read_pcm_frames(ma_crsid* pcrSID, void* pFramesOut, ma_uint64 frameCount, ma_uint64* pFramesRead)
+static ma_result ma_crsid_read_pcm_frames(ma_crsid *pcrSID, void *pFramesOut, ma_uint64 frameCount,
+                                          ma_uint64 *pFramesRead)
 {
-    if (pFramesRead != NULL) {
+    if (pFramesRead != NULL)
+    {
         *pFramesRead = 0;
     }
 
-    if (frameCount == 0) {
+    if (frameCount == 0)
+    {
         return MA_INVALID_ARGS;
     }
 
-    if (pcrSID == NULL) {
+    if (pcrSID == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
     /* We always use floating point format. */
-    ma_result result = MA_SUCCESS;  /* Must be initialized to MA_SUCCESS. */
+    ma_result result          = MA_SUCCESS; /* Must be initialized to MA_SUCCESS. */
     ma_uint64 totalFramesRead = 0;
     ma_format format;
     ma_uint32 channels;
 
     ma_crsid_get_data_format(pcrSID, &format, &channels, NULL, NULL, 0);
 
-    if (format == ma_format_f32) {
+    if (format == ma_format_f32)
+    {
         cRSID_generateFloat(pcrSID->C64, (float *)pFramesOut, frameCount * 2 * sizeof(float));
         totalFramesRead = frameCount;
-    } else {
+    }
+    else
+    {
         result = MA_INVALID_ARGS;
     }
 
     pcrSID->cursor += totalFramesRead;
 
-    if (totalFramesRead == 0) {
+    if (totalFramesRead == 0)
+    {
         result = MA_AT_END;
     }
 
-    if (pFramesRead != NULL) {
+    if (pFramesRead != NULL)
+    {
         *pFramesRead = totalFramesRead;
     }
 
-    if (result == MA_SUCCESS && totalFramesRead == 0) {
-        result  = MA_AT_END;
+    if (result == MA_SUCCESS && totalFramesRead == 0)
+    {
+        result = MA_AT_END;
     }
 
     return result;
 }
 
-static ma_result ma_crsid_seek_to_pcm_frame(ma_crsid* pcrSID, ma_uint64 frameIndex)
+static ma_result ma_crsid_seek_to_pcm_frame(ma_crsid *pcrSID, ma_uint64 frameIndex)
 {
-    if (pcrSID == NULL || frameIndex != 0) {
+    if (pcrSID == NULL || frameIndex != 0)
+    {
         return MA_INVALID_ARGS;
     }
 
@@ -256,54 +282,66 @@ static ma_result ma_crsid_seek_to_pcm_frame(ma_crsid* pcrSID, ma_uint64 frameInd
     return MA_SUCCESS;
 }
 
-static ma_result ma_crsid_get_data_format(ma_crsid* pcrSID, ma_format* pFormat, ma_uint32* pChannels, ma_uint32* pSampleRate, ma_channel* pChannelMap, size_t channelMapCap)
+static ma_result ma_crsid_get_data_format(ma_crsid *pcrSID, ma_format *pFormat, ma_uint32 *pChannels,
+                                          ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
 {
     /* Defaults for safety. */
-    if (pFormat != NULL) {
+    if (pFormat != NULL)
+    {
         *pFormat = ma_format_unknown;
     }
-    if (pChannels != NULL) {
+    if (pChannels != NULL)
+    {
         *pChannels = 0;
     }
-    if (pSampleRate != NULL) {
+    if (pSampleRate != NULL)
+    {
         *pSampleRate = 0;
     }
-    if (pChannelMap != NULL) {
+    if (pChannelMap != NULL)
+    {
         EPI_CLEAR_MEMORY(pChannelMap, ma_channel, channelMapCap);
     }
 
-    if (pcrSID == NULL) {
+    if (pcrSID == NULL)
+    {
         return MA_INVALID_OPERATION;
     }
 
-    if (pFormat != NULL) {
+    if (pFormat != NULL)
+    {
         *pFormat = pcrSID->format;
     }
 
-    if (pChannels != NULL) {
+    if (pChannels != NULL)
+    {
         *pChannels = pcrSID->channels;
     }
 
-    if (pSampleRate != NULL) {
+    if (pSampleRate != NULL)
+    {
         *pSampleRate = pcrSID->sampleRate;
     }
 
-    if (pChannelMap != NULL) {
+    if (pChannelMap != NULL)
+    {
         ma_channel_map_init_standard(ma_standard_channel_map_default, pChannelMap, channelMapCap, pcrSID->channels);
     }
 
     return MA_SUCCESS;
 }
 
-static ma_result ma_crsid_get_cursor_in_pcm_frames(ma_crsid* pcrSID, ma_uint64* pCursor)
+static ma_result ma_crsid_get_cursor_in_pcm_frames(ma_crsid *pcrSID, ma_uint64 *pCursor)
 {
-    if (pCursor == NULL) {
+    if (pCursor == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
-    *pCursor = 0;   /* Safety. */
+    *pCursor = 0; /* Safety. */
 
-    if (pcrSID == NULL) {
+    if (pcrSID == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
@@ -312,36 +350,44 @@ static ma_result ma_crsid_get_cursor_in_pcm_frames(ma_crsid* pcrSID, ma_uint64* 
     return MA_SUCCESS;
 }
 
-static ma_result ma_crsid_get_length_in_pcm_frames(ma_crsid* pcrSID, ma_uint64* pLength)
+static ma_result ma_crsid_get_length_in_pcm_frames(ma_crsid *pcrSID, ma_uint64 *pLength)
 {
-    if (pLength == NULL) {
+    if (pLength == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
-    *pLength = 0;   /* Safety. */
+    *pLength = 0; /* Safety. */
 
-    if (pcrSID == NULL) {
+    if (pcrSID == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
     return MA_SUCCESS;
 }
 
-static ma_result ma_decoding_backend_init__crsid(void* pUserData, ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void* pReadSeekTellUserData, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_data_source** ppBackend)
+static ma_result ma_decoding_backend_init__crsid(void *pUserData, ma_read_proc onRead, ma_seek_proc onSeek,
+                                                 ma_tell_proc onTell, void *pReadSeekTellUserData,
+                                                 const ma_decoding_backend_config *pConfig,
+                                                 const ma_allocation_callbacks    *pAllocationCallbacks,
+                                                 ma_data_source                  **ppBackend)
 {
     ma_result result;
-    ma_crsid* pcrSID;
+    ma_crsid *pcrSID;
 
     EPI_UNUSED(pUserData);
 
     /* For now we're just allocating the decoder backend on the heap. */
-    pcrSID = (ma_crsid*)ma_malloc(sizeof(*pcrSID), pAllocationCallbacks);
-    if (pcrSID == NULL) {
+    pcrSID = (ma_crsid *)ma_malloc(sizeof(*pcrSID), pAllocationCallbacks);
+    if (pcrSID == NULL)
+    {
         return MA_OUT_OF_MEMORY;
     }
 
     result = ma_crsid_init(onRead, onSeek, onTell, pReadSeekTellUserData, pConfig, pAllocationCallbacks, pcrSID);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         ma_free(pcrSID, pAllocationCallbacks);
         return result;
     }
@@ -351,21 +397,26 @@ static ma_result ma_decoding_backend_init__crsid(void* pUserData, ma_read_proc o
     return MA_SUCCESS;
 }
 
-static ma_result ma_decoding_backend_init_memory__crsid(void* pUserData, const void* pData, size_t dataSize, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_data_source** ppBackend)
+static ma_result ma_decoding_backend_init_memory__crsid(void *pUserData, const void *pData, size_t dataSize,
+                                                        const ma_decoding_backend_config *pConfig,
+                                                        const ma_allocation_callbacks    *pAllocationCallbacks,
+                                                        ma_data_source                  **ppBackend)
 {
     ma_result result;
-    ma_crsid* pcrSID;
+    ma_crsid *pcrSID;
 
     EPI_UNUSED(pUserData);
 
     /* For now we're just allocating the decoder backend on the heap. */
-    pcrSID = (ma_crsid*)ma_malloc(sizeof(*pcrSID), pAllocationCallbacks);
-    if (pcrSID == NULL) {
+    pcrSID = (ma_crsid *)ma_malloc(sizeof(*pcrSID), pAllocationCallbacks);
+    if (pcrSID == NULL)
+    {
         return MA_OUT_OF_MEMORY;
     }
 
     result = ma_crsid_init_memory(pData, dataSize, pConfig, pAllocationCallbacks, pcrSID);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         ma_free(pcrSID, pAllocationCallbacks);
         return result;
     }
@@ -375,9 +426,10 @@ static ma_result ma_decoding_backend_init_memory__crsid(void* pUserData, const v
     return MA_SUCCESS;
 }
 
-static void ma_decoding_backend_uninit__crsid(void* pUserData, ma_data_source* pBackend, const ma_allocation_callbacks* pAllocationCallbacks)
+static void ma_decoding_backend_uninit__crsid(void *pUserData, ma_data_source *pBackend,
+                                              const ma_allocation_callbacks *pAllocationCallbacks)
 {
-    ma_crsid* pcrSID = (ma_crsid*)pBackend;
+    ma_crsid *pcrSID = (ma_crsid *)pBackend;
 
     EPI_UNUSED(pUserData);
 
@@ -385,14 +437,11 @@ static void ma_decoding_backend_uninit__crsid(void* pUserData, ma_data_source* p
     ma_free(pcrSID, pAllocationCallbacks);
 }
 
-static ma_decoding_backend_vtable g_ma_decoding_backend_vtable_crsid =
-{
-    ma_decoding_backend_init__crsid,
-    NULL, // onInitFile()
-    NULL, // onInitFileW()
-    ma_decoding_backend_init_memory__crsid,
-    ma_decoding_backend_uninit__crsid
-};
+static ma_decoding_backend_vtable g_ma_decoding_backend_vtable_crsid = {ma_decoding_backend_init__crsid,
+                                                                        NULL, // onInitFile()
+                                                                        NULL, // onInitFileW()
+                                                                        ma_decoding_backend_init_memory__crsid,
+                                                                        ma_decoding_backend_uninit__crsid};
 
 static ma_decoding_backend_vtable *custom_vtable = &g_ma_decoding_backend_vtable_crsid;
 
@@ -449,9 +498,9 @@ bool SIDPlayer::OpenMemory(uint8_t *data, int length)
     if (status_ != kNotLoaded)
         Close();
 
-    ma_decoder_config decode_config = ma_decoder_config_init_default();
-    decode_config.format = ma_format_f32;
-    decode_config.customBackendCount = 1;
+    ma_decoder_config decode_config      = ma_decoder_config_init_default();
+    decode_config.format                 = ma_format_f32;
+    decode_config.customBackendCount     = 1;
     decode_config.pCustomBackendUserData = NULL;
     decode_config.ppCustomBackendVTables = &custom_vtable;
 
@@ -461,7 +510,10 @@ bool SIDPlayer::OpenMemory(uint8_t *data, int length)
         return false;
     }
 
-    if (ma_sound_init_from_data_source(&music_engine, &sid_decoder_, MA_SOUND_FLAG_NO_PITCH|MA_SOUND_FLAG_UNKNOWN_LENGTH|MA_SOUND_FLAG_STREAM|MA_SOUND_FLAG_NO_SPATIALIZATION, NULL, &sid_stream_) != MA_SUCCESS)
+    if (ma_sound_init_from_data_source(&music_engine, &sid_decoder_,
+                                       MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_UNKNOWN_LENGTH | MA_SOUND_FLAG_STREAM |
+                                           MA_SOUND_FLAG_NO_SPATIALIZATION,
+                                       NULL, &sid_stream_) != MA_SUCCESS)
     {
         ma_decoder_uninit(&sid_decoder_);
         LogWarning("Failed to load SID music (corrupt sid?)\n");
@@ -523,7 +575,7 @@ void SIDPlayer::Play(bool loop)
         status_ = kPaused;
     else
     {
-        status_  = kPlaying;
+        status_ = kPlaying;
         ma_sound_start(&sid_stream_);
     }
 }

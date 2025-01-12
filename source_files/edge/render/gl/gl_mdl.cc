@@ -23,8 +23,6 @@
 //
 //----------------------------------------------------------------------------
 
-#include "r_mdl.h"
-
 #include <stddef.h>
 
 #include <unordered_map>
@@ -46,6 +44,7 @@
 #include "r_gldefs.h"
 #include "r_image.h"
 #include "r_mdcommon.h"
+#include "r_mdl.h"
 #include "r_mirror.h"
 #include "r_misc.h"
 #include "r_modes.h"
@@ -198,9 +197,9 @@ class MDLModel
         : total_frames_(nframes), total_points_(npoints), total_triangles_(ntris), skin_width_(swidth),
           skin_height_(sheight), vertices_per_frame_(0)
     {
-        frames_      = new MDLFrame[total_frames_];
-        points_      = new MDLPoint[total_points_];
-        triangles_   = new MDLTriangle[total_triangles_];
+        frames_    = new MDLFrame[total_frames_];
+        points_    = new MDLPoint[total_points_];
+        triangles_ = new MDLTriangle[total_triangles_];
     }
 
     ~MDLModel()
@@ -211,9 +210,9 @@ class MDLModel
     }
 };
 
-static HMM_Vec3 render_position;
+static HMM_Vec3  render_position;
 static RGBAColor render_rgba;
-static HMM_Vec2 render_texture_coordinates;
+static HMM_Vec2  render_texture_coordinates;
 
 /*============== LOADING CODE ====================*/
 
@@ -276,12 +275,12 @@ MDLModel *MDLLoad(epi::File *f, float &radius)
         return nullptr; /* NOT REACHED */
     }
 
-    int num_frames       = AlignedLittleEndianS32(header.num_frames);
-    int num_tris         = AlignedLittleEndianS32(header.num_tris);
-    int num_verts        = AlignedLittleEndianS32(header.num_verts);
-    int swidth           = AlignedLittleEndianS32(header.skin_width);
-    int sheight          = AlignedLittleEndianS32(header.skin_height);
-    int num_points       = num_tris * 3;
+    int num_frames = AlignedLittleEndianS32(header.num_frames);
+    int num_tris   = AlignedLittleEndianS32(header.num_tris);
+    int num_verts  = AlignedLittleEndianS32(header.num_verts);
+    int swidth     = AlignedLittleEndianS32(header.skin_width);
+    int sheight    = AlignedLittleEndianS32(header.skin_height);
+    int num_points = num_tris * 3;
 
     MDLModel *md = new MDLModel(num_frames, num_points, num_tris, swidth, sheight);
 
@@ -444,7 +443,6 @@ MDLModel *MDLLoad(epi::File *f, float &radius)
             {
                 radius = r;
             }
-
         }
 
         md->frames_[i].used_normals = CreateNormalList(which_normals);
@@ -653,25 +651,26 @@ static inline void ModelCoordFunc(MDLCoordinateData *data, int v_idx)
         return;
     }
 
-    render_texture_coordinates = {{ point->skin_s, point->skin_t }};
+    render_texture_coordinates = {{point->skin_s, point->skin_t}};
 
     ColorMixer *col = &data->normal_colors_[(data->lerp_ < 0.5) ? vert1->normal_idx : vert2->normal_idx];
 
     if (!data->is_additive_)
     {
-        render_rgba = epi::MakeRGBAClamped(col->modulate_red_ * render_view_red_multiplier, col->modulate_green_ * render_view_green_multiplier,
-            col->modulate_blue_ * render_view_blue_multiplier);
+        render_rgba = epi::MakeRGBAClamped(col->modulate_red_ * render_view_red_multiplier,
+                                           col->modulate_green_ * render_view_green_multiplier,
+                                           col->modulate_blue_ * render_view_blue_multiplier);
     }
     else
     {
-        render_rgba = epi::MakeRGBAClamped(col->add_red_ * render_view_red_multiplier, col->add_green_ * render_view_green_multiplier,
-            col->add_blue_ * render_view_blue_multiplier);
+        render_rgba = epi::MakeRGBAClamped(col->add_red_ * render_view_red_multiplier,
+                                           col->add_green_ * render_view_green_multiplier,
+                                           col->add_blue_ * render_view_blue_multiplier);
     }
 }
 
-void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float lerp, float x,
-                    float y, float z, MapObject *mo, RegionProperties *props, float scale, float aspect, float bias,
-                    int rotation)
+void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float lerp, float x, float y, float z,
+                    MapObject *mo, RegionProperties *props, float scale, float aspect, float bias, int rotation)
 {
     // check if frames are valid
     if (frame1 < 0 || frame1 >= md->total_frames_)
@@ -1052,7 +1051,7 @@ void MDLRenderModel2D(MDLModel *md, int frame, float x, float y, float xscale, f
 
             const MDLPoint  *point = &md->points_[strip->first + v_idx];
             const MDLVertex *vert  = &frame_ptr->vertices[point->vert_idx];
-            const HMM_Vec2   texc  = {{ point->skin_s, point->skin_t }};
+            const HMM_Vec2   texc  = {{point->skin_s, point->skin_t}};
 
             render_state->MultiTexCoord(GL_TEXTURE0, &texc);
 

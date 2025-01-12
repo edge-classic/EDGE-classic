@@ -135,8 +135,8 @@ static void DoLight(LightSpecial *light)
             if (light->sector->properties.light_level <= light->minimum_light)
             {
                 light->sector->properties.light_level += type->step_;
-                light->count                          = type->brighttime_;
-                light->direction                      = +1;
+                light->count     = type->brighttime_;
+                light->direction = +1;
             }
             else
             {
@@ -150,8 +150,8 @@ static void DoLight(LightSpecial *light)
             if (light->sector->properties.light_level >= light->maximum_light)
             {
                 light->sector->properties.light_level -= type->step_;
-                light->count                          = type->darktime_;
-                light->direction                      = -1;
+                light->count     = type->darktime_;
+                light->direction = -1;
             }
             else
             {

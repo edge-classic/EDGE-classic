@@ -40,9 +40,9 @@ enum WindowMode
 // Screen mode information
 struct DisplayMode
 {
-    int width       = 0;
-    int height      = 0;
-    int depth       = 0;
+    int        width       = 0;
+    int        height      = 0;
+    int        depth       = 0;
     WindowMode window_mode = kWindowModeWindowed;
 };
 

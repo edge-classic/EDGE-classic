@@ -18,16 +18,16 @@
 
 #include "s_imf.h"
 
+#include "ddf_playlist.h"
 #include "dm_state.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "i_movie.h"
 #include "i_sound.h"
 #include "i_system.h"
 #include "m_misc.h"
-#include "ddf_playlist.h"
-#include "epi_str_compare.h"
-#include "epi_str_util.h"
 #include "opal.h"
 #include "s_blit.h"
 // clang-format off
@@ -41,7 +41,7 @@ typedef struct MidiRealTimeInterface IMFInterface;
 #include "w_files.h"
 #include "w_wad.h"
 
-extern int  sound_device_frequency;
+extern int sound_device_frequency;
 
 static uint16_t imf_rate = 0;
 
@@ -130,7 +130,7 @@ static void rtRawOPL(void *userdata, uint8_t reg, uint8_t value)
 
 static void playSynth(void *userdata, uint8_t *stream, size_t length)
 {
-    Opal *imf_opl = (Opal *)userdata;
+    Opal  *imf_opl     = (Opal *)userdata;
     size_t real_length = length / sizeof(float);
     for (size_t i = 0; i < real_length; i += 2)
         imf_opl->SampleFloat((float *)stream + i, (float *)stream + i + 1);
@@ -138,19 +138,19 @@ static void playSynth(void *userdata, uint8_t *stream, size_t length)
 
 typedef struct
 {
-    ma_data_source_base ds;
-    ma_read_proc onRead;
-    ma_seek_proc onSeek;
-    ma_tell_proc onTell;
-    void* pReadSeekTellUserData;
+    ma_data_source_base     ds;
+    ma_read_proc            onRead;
+    ma_seek_proc            onSeek;
+    ma_tell_proc            onTell;
+    void                   *pReadSeekTellUserData;
     ma_allocation_callbacks allocationCallbacks;
-    ma_format format;
-    ma_uint32 channels;
-    ma_uint32 sampleRate;
-    ma_uint64 cursor;
-    IMFInterface *imf_interface;
-    IMFSequencer *imf_sequencer;
-    Opal *imf_opl;
+    ma_format               format;
+    ma_uint32               channels;
+    ma_uint32               sampleRate;
+    ma_uint64               cursor;
+    IMFInterface           *imf_interface;
+    IMFSequencer           *imf_sequencer;
+    Opal                   *imf_opl;
 } ma_imf;
 
 static void IMFSequencerInit(ma_imf *synth)
@@ -179,77 +179,82 @@ static void IMFSequencerInit(ma_imf *synth)
     synth->imf_sequencer->SetInterface(synth->imf_interface);
 }
 
-static ma_result ma_imf_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void* pReadSeekTellUserData, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_imf* pIMF);
-static ma_result ma_imf_init_memory(const void* pData, size_t dataSize, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_imf* pIMF);
-static void ma_imf_uninit(ma_imf* pIMF, const ma_allocation_callbacks* pAllocationCallbacks);
-static ma_result ma_imf_read_pcm_frames(ma_imf* pIMF, void* pFramesOut, ma_uint64 frameCount, ma_uint64* pFramesRead);
-static ma_result ma_imf_seek_to_pcm_frame(ma_imf* pIMF, ma_uint64 frameIndex);
-static ma_result ma_imf_get_data_format(ma_imf* pIMF, ma_format* pFormat, ma_uint32* pChannels, ma_uint32* pSampleRate, ma_channel* pChannelMap, size_t channelMapCap);
-static ma_result ma_imf_get_cursor_in_pcm_frames(ma_imf* pIMF, ma_uint64* pCursor);
-static ma_result ma_imf_get_length_in_pcm_frames(ma_imf* pIMF, ma_uint64* pLength);
+static ma_result ma_imf_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void *pReadSeekTellUserData,
+                             const ma_decoding_backend_config *pConfig,
+                             const ma_allocation_callbacks *pAllocationCallbacks, ma_imf *pIMF);
+static ma_result ma_imf_init_memory(const void *pData, size_t dataSize, const ma_decoding_backend_config *pConfig,
+                                    const ma_allocation_callbacks *pAllocationCallbacks, ma_imf *pIMF);
+static void      ma_imf_uninit(ma_imf *pIMF, const ma_allocation_callbacks *pAllocationCallbacks);
+static ma_result ma_imf_read_pcm_frames(ma_imf *pIMF, void *pFramesOut, ma_uint64 frameCount, ma_uint64 *pFramesRead);
+static ma_result ma_imf_seek_to_pcm_frame(ma_imf *pIMF, ma_uint64 frameIndex);
+static ma_result ma_imf_get_data_format(ma_imf *pIMF, ma_format *pFormat, ma_uint32 *pChannels, ma_uint32 *pSampleRate,
+                                        ma_channel *pChannelMap, size_t channelMapCap);
+static ma_result ma_imf_get_cursor_in_pcm_frames(ma_imf *pIMF, ma_uint64 *pCursor);
+static ma_result ma_imf_get_length_in_pcm_frames(ma_imf *pIMF, ma_uint64 *pLength);
 
-static ma_result ma_imf_ds_read(ma_data_source* pDataSource, void* pFramesOut, ma_uint64 frameCount, ma_uint64* pFramesRead)
+static ma_result ma_imf_ds_read(ma_data_source *pDataSource, void *pFramesOut, ma_uint64 frameCount,
+                                ma_uint64 *pFramesRead)
 {
-    return ma_imf_read_pcm_frames((ma_imf*)pDataSource, pFramesOut, frameCount, pFramesRead);
+    return ma_imf_read_pcm_frames((ma_imf *)pDataSource, pFramesOut, frameCount, pFramesRead);
 }
 
-static ma_result ma_imf_ds_seek(ma_data_source* pDataSource, ma_uint64 frameIndex)
+static ma_result ma_imf_ds_seek(ma_data_source *pDataSource, ma_uint64 frameIndex)
 {
-    return ma_imf_seek_to_pcm_frame((ma_imf*)pDataSource, frameIndex);
+    return ma_imf_seek_to_pcm_frame((ma_imf *)pDataSource, frameIndex);
 }
 
-static ma_result ma_imf_ds_get_data_format(ma_data_source* pDataSource, ma_format* pFormat, ma_uint32* pChannels, ma_uint32* pSampleRate, ma_channel* pChannelMap, size_t channelMapCap)
+static ma_result ma_imf_ds_get_data_format(ma_data_source *pDataSource, ma_format *pFormat, ma_uint32 *pChannels,
+                                           ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
 {
-    return ma_imf_get_data_format((ma_imf*)pDataSource, pFormat, pChannels, pSampleRate, pChannelMap, channelMapCap);
+    return ma_imf_get_data_format((ma_imf *)pDataSource, pFormat, pChannels, pSampleRate, pChannelMap, channelMapCap);
 }
 
-static ma_result ma_imf_ds_get_cursor(ma_data_source* pDataSource, ma_uint64* pCursor)
+static ma_result ma_imf_ds_get_cursor(ma_data_source *pDataSource, ma_uint64 *pCursor)
 {
-    return ma_imf_get_cursor_in_pcm_frames((ma_imf*)pDataSource, pCursor);
+    return ma_imf_get_cursor_in_pcm_frames((ma_imf *)pDataSource, pCursor);
 }
 
-static ma_result ma_imf_ds_get_length(ma_data_source* pDataSource, ma_uint64* pLength)
+static ma_result ma_imf_ds_get_length(ma_data_source *pDataSource, ma_uint64 *pLength)
 {
-    return ma_imf_get_length_in_pcm_frames((ma_imf*)pDataSource, pLength);
+    return ma_imf_get_length_in_pcm_frames((ma_imf *)pDataSource, pLength);
 }
 
-static ma_data_source_vtable g_ma_imf_ds_vtable =
-{
-    ma_imf_ds_read,
-    ma_imf_ds_seek,
-    ma_imf_ds_get_data_format,
-    ma_imf_ds_get_cursor,
-    ma_imf_ds_get_length,
-    NULL,   /* onSetLooping */
-    0
-};
+static ma_data_source_vtable g_ma_imf_ds_vtable = {ma_imf_ds_read,
+                                                   ma_imf_ds_seek,
+                                                   ma_imf_ds_get_data_format,
+                                                   ma_imf_ds_get_cursor,
+                                                   ma_imf_ds_get_length,
+                                                   NULL, /* onSetLooping */
+                                                   0};
 
-static ma_result ma_imf_init_internal(const ma_decoding_backend_config* pConfig, ma_imf* pIMF)
+static ma_result ma_imf_init_internal(const ma_decoding_backend_config *pConfig, ma_imf *pIMF)
 {
-    ma_result result;
+    ma_result             result;
     ma_data_source_config dataSourceConfig;
 
     EPI_UNUSED(pConfig);
 
-    if (pIMF == NULL) {
+    if (pIMF == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
     EPI_CLEAR_MEMORY(pIMF, ma_imf, 1);
-    pIMF->format = ma_format_f32;    /* Only supporting f32. */
+    pIMF->format = ma_format_f32; /* Only supporting f32. */
 
-    dataSourceConfig = ma_data_source_config_init();
+    dataSourceConfig        = ma_data_source_config_init();
     dataSourceConfig.vtable = &g_ma_imf_ds_vtable;
 
     result = ma_data_source_init(&dataSourceConfig, &pIMF->ds);
-    if (result != MA_SUCCESS) {
-        return result;  /* Failed to initialize the base data source. */
+    if (result != MA_SUCCESS)
+    {
+        return result; /* Failed to initialize the base data source. */
     }
 
     return MA_SUCCESS;
 }
 
-static ma_result ma_imf_post_init(ma_imf* pIMF)
+static ma_result ma_imf_post_init(ma_imf *pIMF)
 {
     EPI_ASSERT(pIMF != NULL);
 
@@ -259,35 +264,41 @@ static ma_result ma_imf_post_init(ma_imf* pIMF)
     return MA_SUCCESS;
 }
 
-static ma_result ma_imf_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void* pReadSeekTellUserData, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_imf* pIMF)
+static ma_result ma_imf_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void *pReadSeekTellUserData,
+                             const ma_decoding_backend_config *pConfig,
+                             const ma_allocation_callbacks *pAllocationCallbacks, ma_imf *pIMF)
 {
     EPI_UNUSED(pAllocationCallbacks);
 
     ma_result result;
 
     result = ma_imf_init_internal(pConfig, pIMF);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         return result;
     }
 
-    if (onRead == NULL || onSeek == NULL) {
+    if (onRead == NULL || onSeek == NULL)
+    {
         return MA_INVALID_ARGS; /* onRead and onSeek are mandatory. */
     }
 
-    pIMF->onRead = onRead;
-    pIMF->onSeek = onSeek;
-    pIMF->onTell = onTell;
+    pIMF->onRead                = onRead;
+    pIMF->onSeek                = onSeek;
+    pIMF->onTell                = onTell;
     pIMF->pReadSeekTellUserData = pReadSeekTellUserData;
 
     return MA_SUCCESS;
 }
 
-static ma_result ma_imf_init_memory(const void* pData, size_t dataSize, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_imf* pIMF)
+static ma_result ma_imf_init_memory(const void *pData, size_t dataSize, const ma_decoding_backend_config *pConfig,
+                                    const ma_allocation_callbacks *pAllocationCallbacks, ma_imf *pIMF)
 {
     ma_result result;
 
     result = ma_imf_init_internal(pConfig, pIMF);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         return result;
     }
 
@@ -295,27 +306,30 @@ static ma_result ma_imf_init_memory(const void* pData, size_t dataSize, const ma
 
     pIMF->imf_sequencer = new IMFSequencer;
     pIMF->imf_interface = new IMFInterface;
-    pIMF->imf_opl = new Opal(sound_device_frequency);
+    pIMF->imf_opl       = new Opal(sound_device_frequency);
 
     IMFSequencerInit(pIMF);
 
-    if (!pIMF->imf_sequencer->LoadMidi((const uint8_t *)pData, dataSize, imf_rate)) {
+    if (!pIMF->imf_sequencer->LoadMidi((const uint8_t *)pData, dataSize, imf_rate))
+    {
         return MA_INVALID_FILE;
     }
 
     result = ma_imf_post_init(pIMF);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         return result;
     }
 
     return MA_SUCCESS;
 }
 
-static void ma_imf_uninit(ma_imf* pIMF, const ma_allocation_callbacks* pAllocationCallbacks)
+static void ma_imf_uninit(ma_imf *pIMF, const ma_allocation_callbacks *pAllocationCallbacks)
 {
     EPI_UNUSED(pAllocationCallbacks);
 
-    if (pIMF == NULL) {
+    if (pIMF == NULL)
+    {
         return;
     }
 
@@ -329,50 +343,60 @@ static void ma_imf_uninit(ma_imf* pIMF, const ma_allocation_callbacks* pAllocati
     ma_data_source_uninit(&pIMF->ds);
 }
 
-static ma_result ma_imf_read_pcm_frames(ma_imf* pIMF, void* pFramesOut, ma_uint64 frameCount, ma_uint64* pFramesRead)
+static ma_result ma_imf_read_pcm_frames(ma_imf *pIMF, void *pFramesOut, ma_uint64 frameCount, ma_uint64 *pFramesRead)
 {
-    if (pFramesRead != NULL) {
+    if (pFramesRead != NULL)
+    {
         *pFramesRead = 0;
     }
 
-    if (frameCount == 0) {
+    if (frameCount == 0)
+    {
         return MA_INVALID_ARGS;
     }
 
-    if (pIMF == NULL) {
+    if (pIMF == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
     /* We always use floating point format. */
-    ma_result result = MA_SUCCESS;  /* Must be initialized to MA_SUCCESS. */
+    ma_result result          = MA_SUCCESS; /* Must be initialized to MA_SUCCESS. */
     ma_uint64 totalFramesRead = 0;
     ma_format format;
     ma_uint32 channels;
 
     ma_imf_get_data_format(pIMF, &format, &channels, NULL, NULL, 0);
 
-    if (format == ma_format_f32) {
-        totalFramesRead = pIMF->imf_sequencer->PlayStream((uint8_t *)pFramesOut, frameCount * 2 * sizeof(float)) / 2 / sizeof(float);
-    } else {
+    if (format == ma_format_f32)
+    {
+        totalFramesRead =
+            pIMF->imf_sequencer->PlayStream((uint8_t *)pFramesOut, frameCount * 2 * sizeof(float)) / 2 / sizeof(float);
+    }
+    else
+    {
         result = MA_INVALID_ARGS;
     }
 
     pIMF->cursor += totalFramesRead;
 
-    if (pFramesRead != NULL) {
+    if (pFramesRead != NULL)
+    {
         *pFramesRead = totalFramesRead;
     }
 
-    if (result == MA_SUCCESS && pIMF->imf_sequencer->PositionAtEnd()) {
-        result  = MA_AT_END;
+    if (result == MA_SUCCESS && pIMF->imf_sequencer->PositionAtEnd())
+    {
+        result = MA_AT_END;
     }
 
     return result;
 }
 
-static ma_result ma_imf_seek_to_pcm_frame(ma_imf* pIMF, ma_uint64 frameIndex)
+static ma_result ma_imf_seek_to_pcm_frame(ma_imf *pIMF, ma_uint64 frameIndex)
 {
-    if (pIMF == NULL || frameIndex != 0) {
+    if (pIMF == NULL || frameIndex != 0)
+    {
         return MA_INVALID_ARGS;
     }
 
@@ -383,54 +407,66 @@ static ma_result ma_imf_seek_to_pcm_frame(ma_imf* pIMF, ma_uint64 frameIndex)
     return MA_SUCCESS;
 }
 
-static ma_result ma_imf_get_data_format(ma_imf* pIMF, ma_format* pFormat, ma_uint32* pChannels, ma_uint32* pSampleRate, ma_channel* pChannelMap, size_t channelMapCap)
+static ma_result ma_imf_get_data_format(ma_imf *pIMF, ma_format *pFormat, ma_uint32 *pChannels, ma_uint32 *pSampleRate,
+                                        ma_channel *pChannelMap, size_t channelMapCap)
 {
     /* Defaults for safety. */
-    if (pFormat != NULL) {
+    if (pFormat != NULL)
+    {
         *pFormat = ma_format_unknown;
     }
-    if (pChannels != NULL) {
+    if (pChannels != NULL)
+    {
         *pChannels = 0;
     }
-    if (pSampleRate != NULL) {
+    if (pSampleRate != NULL)
+    {
         *pSampleRate = 0;
     }
-    if (pChannelMap != NULL) {
+    if (pChannelMap != NULL)
+    {
         EPI_CLEAR_MEMORY(pChannelMap, ma_channel, channelMapCap);
     }
 
-    if (pIMF == NULL) {
+    if (pIMF == NULL)
+    {
         return MA_INVALID_OPERATION;
     }
 
-    if (pFormat != NULL) {
+    if (pFormat != NULL)
+    {
         *pFormat = pIMF->format;
     }
 
-    if (pChannels != NULL) {
+    if (pChannels != NULL)
+    {
         *pChannels = pIMF->channels;
     }
 
-    if (pSampleRate != NULL) {
+    if (pSampleRate != NULL)
+    {
         *pSampleRate = pIMF->sampleRate;
     }
 
-    if (pChannelMap != NULL) {
+    if (pChannelMap != NULL)
+    {
         ma_channel_map_init_standard(ma_standard_channel_map_default, pChannelMap, channelMapCap, pIMF->channels);
     }
 
     return MA_SUCCESS;
 }
 
-static ma_result ma_imf_get_cursor_in_pcm_frames(ma_imf* pIMF, ma_uint64* pCursor)
+static ma_result ma_imf_get_cursor_in_pcm_frames(ma_imf *pIMF, ma_uint64 *pCursor)
 {
-    if (pCursor == NULL) {
+    if (pCursor == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
-    *pCursor = 0;   /* Safety. */
+    *pCursor = 0; /* Safety. */
 
-    if (pIMF == NULL) {
+    if (pIMF == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
@@ -439,36 +475,45 @@ static ma_result ma_imf_get_cursor_in_pcm_frames(ma_imf* pIMF, ma_uint64* pCurso
     return MA_SUCCESS;
 }
 
-static ma_result ma_imf_get_length_in_pcm_frames(ma_imf* pIMF, ma_uint64* pLength)
+static ma_result ma_imf_get_length_in_pcm_frames(ma_imf *pIMF, ma_uint64 *pLength)
 {
-    if (pLength == NULL) {
+    if (pLength == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
-    *pLength = 0;   /* Safety. */
+    *pLength = 0; /* Safety. */
 
-    if (pIMF == NULL) {
+    if (pIMF == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
     return MA_SUCCESS;
 }
 
-static ma_result ma_decoding_backend_init__imf(void* pUserData, ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void* pReadSeekTellUserData, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_data_source** ppBackend)
+static ma_result ma_decoding_backend_init__imf(void *pUserData, ma_read_proc onRead, ma_seek_proc onSeek,
+                                               ma_tell_proc onTell, void *pReadSeekTellUserData,
+                                               const ma_decoding_backend_config *pConfig,
+                                               const ma_allocation_callbacks    *pAllocationCallbacks,
+                                               ma_data_source                  **ppBackend)
 {
     ma_result result;
-    ma_imf* pIMF;
+    ma_imf   *pIMF;
 
-    EPI_UNUSED(pUserData);    /* For now not using pUserData, but once we start storing the vorbis decoder state within the ma_decoder structure this will be set to the decoder so we can avoid a malloc. */
+    EPI_UNUSED(pUserData); /* For now not using pUserData, but once we start storing the vorbis decoder state within the
+                              ma_decoder structure this will be set to the decoder so we can avoid a malloc. */
 
     /* For now we're just allocating the decoder backend on the heap. */
-    pIMF = (ma_imf*)ma_malloc(sizeof(*pIMF), pAllocationCallbacks);
-    if (pIMF == NULL) {
+    pIMF = (ma_imf *)ma_malloc(sizeof(*pIMF), pAllocationCallbacks);
+    if (pIMF == NULL)
+    {
         return MA_OUT_OF_MEMORY;
     }
 
     result = ma_imf_init(onRead, onSeek, onTell, pReadSeekTellUserData, pConfig, pAllocationCallbacks, pIMF);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         ma_free(pIMF, pAllocationCallbacks);
         return result;
     }
@@ -478,21 +523,27 @@ static ma_result ma_decoding_backend_init__imf(void* pUserData, ma_read_proc onR
     return MA_SUCCESS;
 }
 
-static ma_result ma_decoding_backend_init_memory__imf(void* pUserData, const void* pData, size_t dataSize, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_data_source** ppBackend)
+static ma_result ma_decoding_backend_init_memory__imf(void *pUserData, const void *pData, size_t dataSize,
+                                                      const ma_decoding_backend_config *pConfig,
+                                                      const ma_allocation_callbacks    *pAllocationCallbacks,
+                                                      ma_data_source                  **ppBackend)
 {
     ma_result result;
-    ma_imf* pIMF;
+    ma_imf   *pIMF;
 
-    EPI_UNUSED(pUserData);    /* For now not using pUserData, but once we start storing the vorbis decoder state within the ma_decoder structure this will be set to the decoder so we can avoid a malloc. */
+    EPI_UNUSED(pUserData); /* For now not using pUserData, but once we start storing the vorbis decoder state within the
+                              ma_decoder structure this will be set to the decoder so we can avoid a malloc. */
 
     /* For now we're just allocating the decoder backend on the heap. */
-    pIMF = (ma_imf*)ma_malloc(sizeof(*pIMF), pAllocationCallbacks);
-    if (pIMF == NULL) {
+    pIMF = (ma_imf *)ma_malloc(sizeof(*pIMF), pAllocationCallbacks);
+    if (pIMF == NULL)
+    {
         return MA_OUT_OF_MEMORY;
     }
 
     result = ma_imf_init_memory(pData, dataSize, pConfig, pAllocationCallbacks, pIMF);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         ma_free(pIMF, pAllocationCallbacks);
         return result;
     }
@@ -502,9 +553,10 @@ static ma_result ma_decoding_backend_init_memory__imf(void* pUserData, const voi
     return MA_SUCCESS;
 }
 
-static void ma_decoding_backend_uninit__imf(void* pUserData, ma_data_source* pBackend, const ma_allocation_callbacks* pAllocationCallbacks)
+static void ma_decoding_backend_uninit__imf(void *pUserData, ma_data_source *pBackend,
+                                            const ma_allocation_callbacks *pAllocationCallbacks)
 {
-    ma_imf* pIMF = (ma_imf*)pBackend;
+    ma_imf *pIMF = (ma_imf *)pBackend;
 
     EPI_UNUSED(pUserData);
 
@@ -512,14 +564,11 @@ static void ma_decoding_backend_uninit__imf(void* pUserData, ma_data_source* pBa
     ma_free(pIMF, pAllocationCallbacks);
 }
 
-static ma_decoding_backend_vtable g_ma_decoding_backend_vtable_imf =
-{
-    ma_decoding_backend_init__imf,
-    NULL, // onInitFile()
-    NULL, // onInitFileW()
-    ma_decoding_backend_init_memory__imf,
-    ma_decoding_backend_uninit__imf
-};
+static ma_decoding_backend_vtable g_ma_decoding_backend_vtable_imf = {ma_decoding_backend_init__imf,
+                                                                      NULL, // onInitFile()
+                                                                      NULL, // onInitFileW()
+                                                                      ma_decoding_backend_init_memory__imf,
+                                                                      ma_decoding_backend_uninit__imf};
 
 static ma_decoding_backend_vtable *imf_custom_vtable = &g_ma_decoding_backend_vtable_imf;
 
@@ -558,9 +607,9 @@ class IMFPlayer : public AbstractMusicPlayer
         if (status_ != kNotLoaded)
             Close();
 
-        ma_decoder_config decode_config = ma_decoder_config_init_default();
-        decode_config.format = ma_format_f32;
-        decode_config.customBackendCount = 1;
+        ma_decoder_config decode_config      = ma_decoder_config_init_default();
+        decode_config.format                 = ma_format_f32;
+        decode_config.customBackendCount     = 1;
         decode_config.ppCustomBackendVTables = &imf_custom_vtable;
 
         if (ma_decoder_init_memory(data, length, &decode_config, &imf_decoder_) != MA_SUCCESS)
@@ -569,7 +618,10 @@ class IMFPlayer : public AbstractMusicPlayer
             return false;
         }
 
-        if (ma_sound_init_from_data_source(&music_engine, &imf_decoder_, MA_SOUND_FLAG_NO_PITCH|MA_SOUND_FLAG_STREAM|MA_SOUND_FLAG_UNKNOWN_LENGTH|MA_SOUND_FLAG_NO_SPATIALIZATION, NULL, &imf_stream_) != MA_SUCCESS)
+        if (ma_sound_init_from_data_source(&music_engine, &imf_decoder_,
+                                           MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_STREAM |
+                                               MA_SOUND_FLAG_UNKNOWN_LENGTH | MA_SOUND_FLAG_NO_SPATIALIZATION,
+                                           NULL, &imf_stream_) != MA_SUCCESS)
         {
             ma_decoder_uninit(&imf_decoder_);
             LogWarning("Failed to load IMF music\n");
@@ -608,7 +660,7 @@ class IMFPlayer : public AbstractMusicPlayer
             status_ = kPaused;
         else
         {
-            status_  = kPlaying;
+            status_ = kPlaying;
             ma_sound_start(&imf_stream_);
         }
     }
@@ -624,7 +676,6 @@ class IMFPlayer : public AbstractMusicPlayer
 
         status_ = kStopped;
     }
-
 
     void Pause(void)
     {
@@ -692,7 +743,7 @@ AbstractMusicPlayer *PlayIMFMusic(uint8_t *data, int length, bool loop, int type
         LogDebug("IMF player: no IMF sample rate provided!\n");
         delete[] data;
         delete player;
-        return nullptr;  
+        return nullptr;
     }
 
     if (!player->OpenMemory(data, length)) // Lobo: quietly log it instead of completely exiting EDGE

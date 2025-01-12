@@ -709,7 +709,7 @@ void EdgeDisplay(void)
         if (draw_menu)
         {
             MenuDrawer(); // menu is drawn even on top of everything (except console)
-        }        
+        }
     }
     else
         MovieDrawer();
@@ -803,7 +803,7 @@ void EdgeDisplay(void)
         if (level_time_elapsed % screenshot_rate == 0)
         {
             render_backend->OnFrameFinished([]() -> void { TakeScreenshot(false); });
-        }            
+        }
     }
 
     FinishFrame(); // page flip or blit buffer

@@ -131,7 +131,6 @@ GLuint UploadTexture(ImageData *img, int flags, int max_pix)
     }
 #endif
 
-
     EPI_ASSERT(img->depth_ == 3 || img->depth_ == 4);
 
     bool clamp  = (flags & kUploadClamp) ? true : false;
@@ -141,7 +140,7 @@ GLuint UploadTexture(ImageData *img, int flags, int max_pix)
     int total_w = img->width_;
     int total_h = img->height_;
 
-    int new_w, new_h;    
+    int new_w, new_h;
 
     // scale down, if necessary, to fix the maximum size
     for (new_w = total_w; new_w > render_backend->GetMaxTextureSize(); new_w /= 2)
@@ -207,7 +206,8 @@ GLuint UploadTexture(ImageData *img, int flags, int max_pix)
                 img->ThresholdAlpha((mip & 1) ? 96 : 144);
         }
 
-        render_state->TexImage2D(GL_TEXTURE_2D, mip, img->depth_ == 3 ? GL_RGB : GL_RGBA, new_w, new_h, 0, img->depth_ == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, img->PixelAt(0, 0));
+        render_state->TexImage2D(GL_TEXTURE_2D, mip, img->depth_ == 3 ? GL_RGB : GL_RGBA, new_w, new_h, 0,
+                                 img->depth_ == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, img->PixelAt(0, 0));
 
         // stop if mipmapping disabled or we have reached the end
         if (nomip || !image_mipmapping || (new_w == 1 && new_h == 1))

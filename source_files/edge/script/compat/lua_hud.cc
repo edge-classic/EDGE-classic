@@ -170,9 +170,9 @@ static int HD_text_font(lua_State *L)
     if (!DEF)
     {
         lua_pushboolean(L, 0);
-        return 1;  
+        return 1;
     }
-       
+
     Font *font = hud_fonts.Lookup(DEF);
     if (!font)
     {
@@ -338,11 +338,11 @@ static int HD_draw_image(lua_State *L)
         else
             HUDDrawImage(x, y, img);
 
-        lua_pushboolean(L, 1); 
+        lua_pushboolean(L, 1);
     }
     else
     {
-        lua_pushboolean(L, 0); 
+        lua_pushboolean(L, 0);
     }
 
     return 1;
@@ -376,7 +376,7 @@ static int HD_scroll_image(lua_State *L)
     }
     else
     {
-        lua_pushboolean(L, 0); 
+        lua_pushboolean(L, 0);
     }
 
     return 1;
@@ -408,7 +408,7 @@ static int HD_stretch_image(lua_State *L)
     }
     else
     {
-        lua_pushboolean(L, 0); 
+        lua_pushboolean(L, 0);
     }
 
     return 1;
@@ -437,7 +437,7 @@ static int HD_tile_image(lua_State *L)
     }
     else
     {
-        lua_pushboolean(L, 0); 
+        lua_pushboolean(L, 0);
     }
 
     return 1;
@@ -765,13 +765,13 @@ static int HD_play_sound(lua_State *L)
     {
         StartSoundEffect(fx);
         lua_pushboolean(L, 1);
-    } 
+    }
     else
     {
         LogWarning("hud.play_sound: unknown sfx '%s'\n", name);
         lua_pushboolean(L, 0);
     }
-        
+
     return 1;
 }
 
@@ -1033,7 +1033,6 @@ static int HD_get_image_height(lua_State *L)
 
     return 1;
 }
-
 
 static const luaL_Reg hudlib[] = {{"game_mode", HD_game_mode},
                                   {"game_name", HD_game_name},

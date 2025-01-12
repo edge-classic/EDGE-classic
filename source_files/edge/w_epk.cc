@@ -66,7 +66,7 @@ class PackEntry
     vwad_fidx vwad_index_;
 
     PackEntry(const std::string &name, const std::string &path, const std::string &ppath, mz_uint idx, vwad_fidx vidx)
-    : name_(name), full_path_(path), pack_path_(ppath), zip_index_(idx), vwad_index_(vidx)
+        : name_(name), full_path_(path), pack_path_(ppath), zip_index_(idx), vwad_index_(vidx)
     {
     }
 #else
@@ -181,7 +181,7 @@ class PackFile
             vwad_close_archive(&vwad_archive_);
     }
 #else
-public:
+  public:
     PackFile(DataFile *par, bool folder, bool is_zip)
         : parent_(par), is_folder_(folder), is_zip_(is_zip), directories_(), archive_(nullptr)
     {
@@ -841,7 +841,7 @@ class VWADFile : public epi::File
             return 0;
 
         // never read more than what GetLength() reports
-        if (count > (unsigned int) length_ - position_)
+        if (count > (unsigned int)length_ - position_)
             count = length_ - position_;
 
         int got = vwad_read(pack_->vwad_archive_, vwad_file_descriptor_, dest, count);
@@ -1166,7 +1166,8 @@ void ProcessPackSubstitutions(PackFile *pack, int pack_index)
                 if (dir_name == "textures")
                     AddPackImageSmart(texname.c_str(), kImageSourceTXHI, entry.pack_path_.c_str(), kImageTypeTexture);
                 else if (dir_name == "graphics")
-                    AddPackImageSmart(texname.c_str(), kImageSourceGraphic, entry.pack_path_.c_str(), kImageTypeGraphic);
+                    AddPackImageSmart(texname.c_str(), kImageSourceGraphic, entry.pack_path_.c_str(),
+                                      kImageTypeGraphic);
                 else if (dir_name == "flats")
                     AddPackImageSmart(texname.c_str(), kImageSourceGraphic, entry.pack_path_.c_str(), kImageTypeFlat);
                 else if (dir_name == "skins") // Not sure about this still
@@ -1590,9 +1591,10 @@ void PopulatePackOnly(DataFile *df)
         epi::File *df_file = epi::FileOpen(df->name_, epi::kFileAccessBinary | epi::kFileAccessRead);
         EPI_ASSERT(df_file);
         uint8_t vwad_check[4];
-        size_t bytes_read = df_file->Read(vwad_check, 4);
+        size_t  bytes_read = df_file->Read(vwad_check, 4);
         delete df_file;
-        if (bytes_read == 4 && vwad_check[0] == 'V' && vwad_check[1] == 'W' && vwad_check[2] == 'A' && vwad_check[3] == 'D')
+        if (bytes_read == 4 && vwad_check[0] == 'V' && vwad_check[1] == 'W' && vwad_check[2] == 'A' &&
+            vwad_check[3] == 'D')
 #if EDGE_VWAD_SUPPORT
             df->pack_ = ProcessVWAD(df);
 #else
@@ -1643,9 +1645,10 @@ void ProcessAllInPack(DataFile *df, size_t file_index)
         epi::File *df_file = epi::FileOpen(df->name_, epi::kFileAccessBinary | epi::kFileAccessRead);
         EPI_ASSERT(df_file);
         uint8_t vwad_check[4];
-        size_t bytes_read = df_file->Read(vwad_check, 4);
+        size_t  bytes_read = df_file->Read(vwad_check, 4);
         delete df_file;
-        if (bytes_read == 4 && vwad_check[0] == 'V' && vwad_check[1] == 'W' && vwad_check[2] == 'A' && vwad_check[3] == 'D')
+        if (bytes_read == 4 && vwad_check[0] == 'V' && vwad_check[1] == 'W' && vwad_check[2] == 'A' &&
+            vwad_check[3] == 'D')
 #if EDGE_VWAD_SUPPORT
             df->pack_ = ProcessVWAD(df);
 #else

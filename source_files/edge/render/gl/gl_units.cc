@@ -19,8 +19,6 @@
 // -AJA- 2000/10/09: Began work on this new unit system.
 //
 
-#include "r_units.h"
-
 #include <algorithm>
 #include <unordered_map>
 #include <vector>
@@ -41,6 +39,7 @@
 #include "r_shader.h"
 #include "r_sky.h"
 #include "r_texgl.h"
+#include "r_units.h"
 
 EDGE_DEFINE_CONSOLE_VARIABLE(renderer_dumb_sky, "0", kConsoleVariableFlagArchive)
 #ifdef APPLE_SILICON
@@ -49,7 +48,7 @@ EDGE_DEFINE_CONSOLE_VARIABLE(renderer_dumb_clamp, "1", kConsoleVariableFlagNone)
 EDGE_DEFINE_CONSOLE_VARIABLE(renderer_dumb_clamp, "0", kConsoleVariableFlagNone)
 #endif
 
-static constexpr uint16_t kMaximumLocalUnits    = 1024;
+static constexpr uint16_t kMaximumLocalUnits = 1024;
 
 extern ConsoleVariable draw_culling;
 extern ConsoleVariable cull_fog_color;
@@ -200,7 +199,8 @@ void EndRenderUnit(int actual_vert)
 
     EPI_ASSERT(actual_vert >= 0);
 
-    if (actual_vert == 0) return;
+    if (actual_vert == 0)
+        return;
 
     unit = local_units + current_render_unit;
 
@@ -392,7 +392,8 @@ void RenderCurrentUnits(void)
                 state->Disable(GL_ALPHA_TEST);
         }
 
-        if ((active_blending ^ unit->blending) & (kBlendingAlpha | kBlendingAdd | kBlendingInvert | kBlendingNegativeGamma | kBlendingPositiveGamma))
+        if ((active_blending ^ unit->blending) &
+            (kBlendingAlpha | kBlendingAdd | kBlendingInvert | kBlendingNegativeGamma | kBlendingPositiveGamma))
         {
             if (unit->blending & kBlendingAdd)
             {
@@ -493,7 +494,7 @@ void RenderCurrentUnits(void)
                         state->TextureWrapS(GL_REPEAT);
                 }
 
-                if (!t && (active_blending & (kBlendingClampY|kBlendingRepeatY)) && active_tex[0] != 0)
+                if (!t && (active_blending & (kBlendingClampY | kBlendingRepeatY)) && active_tex[0] != 0)
                 {
                     auto existing = texture_clamp_t.find(active_tex[0]);
                     if (existing != texture_clamp_t.end())

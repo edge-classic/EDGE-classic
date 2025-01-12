@@ -179,7 +179,6 @@ void InitializeWipe(ScreenWipe effect)
         if (current_wipe_effect == kScreenWipeMelt)
             AllocateDrawStructsMelt();
     });
-
 }
 
 void StopWipe(void)

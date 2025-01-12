@@ -270,11 +270,10 @@ void AutomapInitLevel(void)
 
     FindMinMaxBoundaries();
 
-    if (map_scale == 0.0f)  //Not been changed yet so set a default
+    if (map_scale == 0.0f) // Not been changed yet so set a default
     {
         map_scale = kAutomapInitialScale;
     }
-        
 }
 
 void AutomapStop(void)

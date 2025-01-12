@@ -216,7 +216,7 @@ static void SaveGlobalGetImage(const char *info, void *storage)
 static const char *SaveGlobalPutU64(void *storage)
 {
     uint64_t *src = (uint64_t *)storage;
-    char buffer[40];
+    char      buffer[40];
 
     EPI_ASSERT(storage);
 

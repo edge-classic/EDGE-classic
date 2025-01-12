@@ -311,10 +311,12 @@ static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, Posit
 
     bool attenuate = (pos && !chan->boss_ && category != kCategoryWeapon);
 
-    chan->ref_config_ = ma_audio_buffer_config_init(ma_format_f32, 2, buf->length_, buf->data_, NULL);
+    chan->ref_config_            = ma_audio_buffer_config_init(ma_format_f32, 2, buf->length_, buf->data_, NULL);
     chan->ref_config_.sampleRate = buf->frequency_;
     ma_audio_buffer_init(&chan->ref_config_, &chan->ref_);
-    ma_sound_init_from_data_source(&sound_engine, &chan->ref_, attenuate ? 0 : (MA_SOUND_FLAG_NO_PITCH|MA_SOUND_FLAG_NO_SPATIALIZATION), NULL, &chan->channel_sound_);
+    ma_sound_init_from_data_source(&sound_engine, &chan->ref_,
+                                   attenuate ? 0 : (MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_NO_SPATIALIZATION), NULL,
+                                   &chan->channel_sound_);
     if (attenuate)
     {
         ma_sound_set_attenuation_model(&chan->channel_sound_, ma_attenuation_model_inverse);

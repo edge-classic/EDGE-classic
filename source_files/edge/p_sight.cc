@@ -420,7 +420,7 @@ static bool CheckSightSameSubsector(MapObject *src, MapObject *dest)
 
 bool CheckSight(MapObject *src, MapObject *dest)
 {
-    if (!dest) 
+    if (!dest)
         return false;
 
     // -ACB- 1998/07/20 t2 is Invisible, t1 cannot possibly see it.
@@ -466,10 +466,9 @@ bool CheckSight(MapObject *src, MapObject *dest)
     {
         if (src->info_->sight_distance_ < dist_a)
         {
-            //src->SetTarget(nullptr); //forget we even saw the guy?
-            return false;                 // too far away for this thing to see
+            // src->SetTarget(nullptr); //forget we even saw the guy?
+            return false; // too far away for this thing to see
         }
-            
     }
 
 #if (EDGE_DEBUG_SIGHT >= 1)

@@ -99,8 +99,7 @@ void FatalError(const char *error, ...)
     abort();
 #else
     CloseProgram(EXIT_FAILURE);
-#endif    
-
+#endif
 }
 
 void LogPrint(const char *message, ...)

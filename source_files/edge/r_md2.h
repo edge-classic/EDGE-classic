@@ -25,8 +25,8 @@
 // opaque handle for rest of the engine
 class MD2Model;
 
-MD2Model *MD2Load(epi::File *f, float& radius);
-MD2Model *MD3Load(epi::File *f, float& radius);
+MD2Model *MD2Load(epi::File *f, float &radius);
+MD2Model *MD3Load(epi::File *f, float &radius);
 
 short MD2FindFrame(MD2Model *md, const char *name);
 

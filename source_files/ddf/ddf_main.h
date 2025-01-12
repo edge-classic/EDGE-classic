@@ -66,8 +66,8 @@ constexpr float kRideFrictionDefault = 0.7f;
 
 struct JumpActionInfo
 {
-    float chance = 1.0f;
-    int   amount = 0;
+    float chance  = 1.0f;
+    int   amount  = 0;
     int   amount2 = 0;
 };
 

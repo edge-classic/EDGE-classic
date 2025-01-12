@@ -365,7 +365,8 @@ IntermissionMapPositionInfoContainer::IntermissionMapPositionInfoContainer()
 //
 // wi_mapposdef_container_c Copy constructor
 //
-IntermissionMapPositionInfoContainer::IntermissionMapPositionInfoContainer(IntermissionMapPositionInfoContainer &rhs) : std::vector<IntermissionMapPositionInfo *>()
+IntermissionMapPositionInfoContainer::IntermissionMapPositionInfoContainer(IntermissionMapPositionInfoContainer &rhs)
+    : std::vector<IntermissionMapPositionInfo *>()
 {
     Copy(rhs);
 }
@@ -490,7 +491,8 @@ IntermissionFrameInfoContainer::IntermissionFrameInfoContainer()
 //
 // wi_framedef_container_c Copy constructor
 //
-IntermissionFrameInfoContainer::IntermissionFrameInfoContainer(IntermissionFrameInfoContainer &rhs) : std::vector<IntermissionFrameInfo *>()
+IntermissionFrameInfoContainer::IntermissionFrameInfoContainer(IntermissionFrameInfoContainer &rhs)
+    : std::vector<IntermissionFrameInfo *>()
 {
     Copy(rhs);
 }
@@ -617,7 +619,8 @@ IntermissionAnimationInfoContainer::IntermissionAnimationInfoContainer()
 //
 // wi_animdef_container_c Copy constructor
 //
-IntermissionAnimationInfoContainer::IntermissionAnimationInfoContainer(IntermissionAnimationInfoContainer &rhs) : std::vector<IntermissionAnimationInfo *>()
+IntermissionAnimationInfoContainer::IntermissionAnimationInfoContainer(IntermissionAnimationInfoContainer &rhs)
+    : std::vector<IntermissionAnimationInfo *>()
 {
     Copy(rhs);
 }

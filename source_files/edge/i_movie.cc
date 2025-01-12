@@ -37,42 +37,42 @@
 
 extern int sound_device_frequency;
 
-bool                  playing_movie      = false;
-static bool           skip_bar_active;
-static GLuint         canvas            = 0;
-static uint8_t       *rgb_data          = nullptr;
-static plm_t         *decoder           = nullptr;
-static int            movie_sample_rate = 0;
-static float          skip_time;
-static uint8_t       *movie_bytes   = nullptr;
-static double         fadein        = 0;
-static double         fadeout       = 0;
-static double         elapsed_time  = 0;
-static float          vx1           = 0.0f;
-static float          vx2           = 0.0f;
-static float          vy1           = 0.0f;
-static float          vy2           = 0.0f;
-static float          tx1           = 0.0f;
-static float          tx2           = 1.0f;
-static float          ty1           = 0.0f;
-static float          ty2           = 1.0f;
-static double         last_time     = 0;
-static ma_pcm_rb      movie_ring_buffer;
-static ma_sound       movie_sound_buffer;
+bool             playing_movie = false;
+static bool      skip_bar_active;
+static GLuint    canvas            = 0;
+static uint8_t  *rgb_data          = nullptr;
+static plm_t    *decoder           = nullptr;
+static int       movie_sample_rate = 0;
+static float     skip_time;
+static uint8_t  *movie_bytes  = nullptr;
+static double    fadein       = 0;
+static double    fadeout      = 0;
+static double    elapsed_time = 0;
+static float     vx1          = 0.0f;
+static float     vx2          = 0.0f;
+static float     vy1          = 0.0f;
+static float     vy2          = 0.0f;
+static float     tx1          = 0.0f;
+static float     tx2          = 1.0f;
+static float     ty1          = 0.0f;
+static float     ty2          = 1.0f;
+static double    last_time    = 0;
+static ma_pcm_rb movie_ring_buffer;
+static ma_sound  movie_sound_buffer;
 
 // Disabled until Dasho can figure out why the frame size changes between creating the texture and updating it
 // Which is probably also an issue under GL1
 #ifndef EDGE_SOKOL
 static bool MovieSetupAudioStream(int rate)
 {
-    if (ma_pcm_rb_init(ma_format_f32, 2, PLM_AUDIO_SAMPLES_PER_FRAME * 4, NULL, NULL, &movie_ring_buffer)
-            != MA_SUCCESS) 
+    if (ma_pcm_rb_init(ma_format_f32, 2, PLM_AUDIO_SAMPLES_PER_FRAME * 4, NULL, NULL, &movie_ring_buffer) != MA_SUCCESS)
     {
         LogWarning("MovieSetupAudioStream: Failed to initialize the ring buffer.");
         return false;
     }
     ma_pcm_rb_set_sample_rate(&movie_ring_buffer, rate);
-    if (ma_sound_init_from_data_source(&music_engine, &movie_ring_buffer, MA_SOUND_FLAG_NO_SPATIALIZATION, NULL, &movie_sound_buffer) != MA_SUCCESS)
+    if (ma_sound_init_from_data_source(&music_engine, &movie_ring_buffer, MA_SOUND_FLAG_NO_SPATIALIZATION, NULL,
+                                       &movie_sound_buffer) != MA_SUCCESS)
     {
         ma_pcm_rb_uninit(&movie_ring_buffer);
         LogWarning("MovieSetupAudioStream: Failed to initialize the ring buffer.");
@@ -101,23 +101,29 @@ void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
 
         /* We need to write to the ring buffer. Need to do this in a loop. */
         framesWritten = 0;
-        while (framesWritten < frameCount) {
-            void* pMappedBuffer;
+        while (framesWritten < frameCount)
+        {
+            void     *pMappedBuffer;
             ma_uint32 framesToWrite = frameCount - framesWritten;
 
             result = ma_pcm_rb_acquire_write(&movie_ring_buffer, &framesToWrite, &pMappedBuffer);
-            if (result != MA_SUCCESS) {
+            if (result != MA_SUCCESS)
+            {
                 break;
             }
 
-            if (framesToWrite == 0) {
+            if (framesToWrite == 0)
+            {
                 break;
             }
 
-            ma_copy_pcm_frames(pMappedBuffer, ma_offset_pcm_frames_const_ptr_f32(samples->interleaved, framesWritten, 2), framesToWrite, ma_format_f32, 2);
+            ma_copy_pcm_frames(pMappedBuffer,
+                               ma_offset_pcm_frames_const_ptr_f32(samples->interleaved, framesWritten, 2),
+                               framesToWrite, ma_format_f32, 2);
 
             result = ma_pcm_rb_commit_write(&movie_ring_buffer, framesToWrite);
-            if (result != MA_SUCCESS) {
+            if (result != MA_SUCCESS)
+            {
                 break;
             }
 
@@ -134,7 +140,8 @@ void MovieVideoCallback(plm_t *mpeg, plm_frame_t *frame, void *user)
     plm_frame_to_rgba(frame, rgb_data, frame->width * 4);
 
     render_state->BindTexture(canvas);
-    render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frame->width, frame->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgb_data);
+    render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frame->width, frame->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                             rgb_data);
 }
 
 void PlayMovie(const std::string &name)
@@ -145,8 +152,8 @@ void PlayMovie(const std::string &name)
     EPI_UNUSED(name);
     playing_movie   = false;
     skip_bar_active = false;
-    return;    
-#else    
+    return;
+#else
     MovieDefinition *movie = moviedefs.Lookup(name.c_str());
 
     if (!movie)
@@ -267,9 +274,10 @@ void PlayMovie(const std::string &name)
 
 #ifdef EDGE_SOKOL
     // On sokol, this sets up the texture dimenions, for dynamic texture
-    render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frame_width, frame_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr, kRenderUsageDynamic);
+    render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frame_width, frame_height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                             nullptr, kRenderUsageDynamic);
     render_state->FinishTextures(1, &canvas);
-#endif    
+#endif
 
     vx1 = current_screen_width / 2 - frame_width / 2;
     vx2 = current_screen_width / 2 + frame_width / 2;
@@ -327,24 +335,25 @@ void MovieDrawer()
 
     if (!plm_has_ended(decoder))
     {
-        StartUnitBatch (false);
+        StartUnitBatch(false);
 
         RGBAColor unit_col = kRGBAWhite;
 
-        RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, canvas, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
+        RendererVertex *glvert =
+            BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, canvas, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
 
-        glvert->rgba = unit_col;
+        glvert->rgba                   = unit_col;
         glvert->texture_coordinates[0] = {{tx1, ty2}};
-        glvert++->position = {{vx1, vy2, 0}};
-        glvert->rgba = unit_col;
+        glvert++->position             = {{vx1, vy2, 0}};
+        glvert->rgba                   = unit_col;
         glvert->texture_coordinates[0] = {{tx2, ty2}};
-        glvert++->position = {{vx2, vy2, 0}};
-        glvert->rgba = unit_col;
+        glvert++->position             = {{vx2, vy2, 0}};
+        glvert->rgba                   = unit_col;
         glvert->texture_coordinates[0] = {{tx2, ty1}};
-        glvert++->position = {{vx2, vy1, 0}};
-        glvert->rgba = unit_col;
+        glvert++->position             = {{vx2, vy1, 0}};
+        glvert->rgba                   = unit_col;
         glvert->texture_coordinates[0] = {{tx1, ty1}};
-        glvert->position = {{vx1, vy1, 0}};
+        glvert->position               = {{vx1, vy1, 0}};
 
         EndRenderUnit(4);
 
@@ -353,17 +362,18 @@ void MovieDrawer()
         if (fadein <= 0.25f)
         {
             unit_col = epi::MakeRGBAFloat(0.0f, 0.0f, 0.0f, ((0.25f - (float)fadein) / 0.25f));
-            
-            glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAlpha);
 
-            glvert->rgba = unit_col;
+            glvert =
+                BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAlpha);
+
+            glvert->rgba       = unit_col;
             glvert++->position = {{vx1, vy2, 0}};
-            glvert->rgba = unit_col;
+            glvert->rgba       = unit_col;
             glvert++->position = {{vx2, vy2, 0}};
-            glvert->rgba = unit_col;
+            glvert->rgba       = unit_col;
             glvert++->position = {{vx2, vy1, 0}};
-            glvert->rgba = unit_col;
-            glvert->position = {{vx1, vy1, 0}};
+            glvert->rgba       = unit_col;
+            glvert->position   = {{vx1, vy1, 0}};
 
             EndRenderUnit(4);
         }
@@ -388,36 +398,37 @@ void MovieDrawer()
 
         RGBAColor unit_col = kRGBAWhite;
 
-        RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, canvas, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
+        RendererVertex *glvert =
+            BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, canvas, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
 
-        glvert->rgba = unit_col;
+        glvert->rgba                   = unit_col;
         glvert->texture_coordinates[0] = {{tx1, ty2}};
-        glvert++->position = {{vx1, vy2, 0}};
-        glvert->rgba = unit_col;
+        glvert++->position             = {{vx1, vy2, 0}};
+        glvert->rgba                   = unit_col;
         glvert->texture_coordinates[0] = {{tx2, ty2}};
-        glvert++->position = {{vx2, vy2, 0}};
-        glvert->rgba = unit_col;
+        glvert++->position             = {{vx2, vy2, 0}};
+        glvert->rgba                   = unit_col;
         glvert->texture_coordinates[0] = {{tx2, ty1}};
-        glvert++->position = {{vx2, vy1, 0}};
-        glvert->rgba = unit_col;
+        glvert++->position             = {{vx2, vy1, 0}};
+        glvert->rgba                   = unit_col;
         glvert->texture_coordinates[0] = {{tx1, ty1}};
-        glvert->position = {{vx1, vy1, 0}};
+        glvert->position               = {{vx1, vy1, 0}};
 
         EndRenderUnit(4);
 
         // Fade-out
         unit_col = epi::MakeRGBAFloat(0.0f, 0.0f, 0.0f, (HMM_MAX(0.0f, 1.0f - ((0.25f - (float)fadeout) / 0.25f))));
-            
+
         glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAlpha);
 
-        glvert->rgba = unit_col;
+        glvert->rgba       = unit_col;
         glvert++->position = {{vx1, vy2, 0}};
-        glvert->rgba = unit_col;
+        glvert->rgba       = unit_col;
         glvert++->position = {{vx2, vy2, 0}};
-        glvert->rgba = unit_col;
+        glvert->rgba       = unit_col;
         glvert++->position = {{vx2, vy1, 0}};
-        glvert->rgba = unit_col;
-        glvert->position = {{vx1, vy1, 0}};
+        glvert->rgba       = unit_col;
+        glvert->position   = {{vx1, vy1, 0}};
 
         EndRenderUnit(4);
 

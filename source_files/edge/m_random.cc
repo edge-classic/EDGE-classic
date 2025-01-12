@@ -30,7 +30,7 @@
 #include "i_system.h"
 #include "prns.h"
 
-prns_t stateful_rng;
+prns_t      stateful_rng;
 prns_down_t stateless_rng;
 
 void InitRandomState(void)

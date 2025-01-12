@@ -68,8 +68,8 @@ void SetupMatrices3d(void)
     glLoadIdentity();
 
     glFrustum(-view_x_slope * renderer_near_clip.f_, view_x_slope * renderer_near_clip.f_,
-                -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
-                renderer_far_clip.f_);
+              -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
+              renderer_far_clip.f_);
 
     // calculate look-at matrix
 

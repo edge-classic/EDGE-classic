@@ -367,13 +367,13 @@ void DDFAttackCleanUp(void)
             a->atk_mobj_ = mobjtypes.Lookup(a->atk_mobj_ref_.c_str());
             if (a->atk_mobj_)
             {
-                a->damage_.nominal_ = a->atk_mobj_->explode_damage_.nominal_;
-                a->damage_.linear_max_ = a->atk_mobj_->explode_damage_.linear_max_;
+                a->damage_.nominal_          = a->atk_mobj_->explode_damage_.nominal_;
+                a->damage_.linear_max_       = a->atk_mobj_->explode_damage_.linear_max_;
                 MapObjectDefinition *atk_mod = (MapObjectDefinition *)a->atk_mobj_; // const override
                 if (atk_mod->dlight_.type_ == kDynamicLightTypeNone)
                 {
-                    atk_mod->dlight_.type_ = kDynamicLightTypeModulate;
-                    atk_mod->dlight_.radius_ = atk_mod->radius_ * 4;
+                    atk_mod->dlight_.type_              = kDynamicLightTypeModulate;
+                    atk_mod->dlight_.radius_            = atk_mod->radius_ * 4;
                     atk_mod->dlight_.autocolour_sprite_ = states[atk_mod->idle_state_].sprite;
                 }
             }
@@ -581,7 +581,7 @@ void AttackDefinition::Default()
     keepfirechance_ = 0.0f;
     atk_mobj_       = nullptr;
     atk_mobj_ref_.clear();
-    spawnedobj_     = nullptr;
+    spawnedobj_ = nullptr;
     spawnedobj_ref_.clear();
     spawn_limit_ = 0; // unlimited
     puff_        = nullptr;

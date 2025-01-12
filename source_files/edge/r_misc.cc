@@ -244,7 +244,7 @@ RegionProperties *GetPointProperties(Subsector *sub, float z)
         Extrafloor *S, *L, *C;
         float       floor_h;
         // traverse extrafloors upwards
-        
+
         floor_h = sub->sector->floor_height;
 
         S = sub->sector->bottom_extrafloor;

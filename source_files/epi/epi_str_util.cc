@@ -76,7 +76,7 @@ static int GetNextUTF8Codepoint(const char *_str, size_t length, uint32_t *u32c)
         octet -= (128 + 64);
         if (length > 1)
         {
-            octet2 = (uint32_t)((uint8_t) * (++str));
+            octet2 = (uint32_t)((uint8_t)*(++str));
             advance++;
         }
         if ((octet2 & (128 + 64)) != 128) /* Format isn't 10xxxxxx? */
@@ -103,7 +103,7 @@ static int GetNextUTF8Codepoint(const char *_str, size_t length, uint32_t *u32c)
         octet -= (128 + 64 + 32);
         if (length > 1)
         {
-            octet2 = (uint32_t)((uint8_t) * (++str));
+            octet2 = (uint32_t)((uint8_t)*(++str));
             advance++;
         }
         if ((octet2 & (128 + 64)) != 128) /* Format isn't 10xxxxxx? */
@@ -114,7 +114,7 @@ static int GetNextUTF8Codepoint(const char *_str, size_t length, uint32_t *u32c)
 
         if (length > 2)
         {
-            octet3 = (uint32_t)((uint8_t) * (++str));
+            octet3 = (uint32_t)((uint8_t)*(++str));
             advance++;
         }
         if ((octet3 & (128 + 64)) != 128) /* Format isn't 10xxxxxx? */
@@ -158,7 +158,7 @@ static int GetNextUTF8Codepoint(const char *_str, size_t length, uint32_t *u32c)
         octet -= (128 + 64 + 32 + 16);
         if (length > 1)
         {
-            octet2 = (uint32_t)((uint8_t) * (++str));
+            octet2 = (uint32_t)((uint8_t)*(++str));
             advance++;
         }
         if ((octet2 & (128 + 64)) != 128) /* Format isn't 10xxxxxx? */
@@ -169,7 +169,7 @@ static int GetNextUTF8Codepoint(const char *_str, size_t length, uint32_t *u32c)
 
         if (length > 2)
         {
-            octet3 = (uint32_t)((uint8_t) * (++str));
+            octet3 = (uint32_t)((uint8_t)*(++str));
             advance++;
         }
         if ((octet3 & (128 + 64)) != 128) /* Format isn't 10xxxxxx? */
@@ -180,7 +180,7 @@ static int GetNextUTF8Codepoint(const char *_str, size_t length, uint32_t *u32c)
 
         if (length > 3)
         {
-            octet4 = (uint32_t)((uint8_t) * (++str));
+            octet4 = (uint32_t)((uint8_t)*(++str));
             advance++;
         }
         if ((octet4 & (128 + 64)) != 128) /* Format isn't 10xxxxxx? */

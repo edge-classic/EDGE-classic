@@ -302,7 +302,8 @@ void FinaleTicker(void)
             finale_count = (int)(strlen(finale_text) * finale->text_speed_);
             skip_finale  = false;
         }
-        else if (skip_finale || finale_count > (int) finale->text_wait_ + (int)(strlen(finale_text) * finale->text_speed_))
+        else if (skip_finale ||
+                 finale_count > (int)finale->text_wait_ + (int)(strlen(finale_text) * finale->text_speed_))
         {
             DoBumpFinale();
             skip_finale = false;
@@ -434,19 +435,19 @@ static void TextWrite(void)
         h = h * txtscale;
     }
 
-     //Autoscale if there are too many lines of text to fit onscreen
+    // Autoscale if there are too many lines of text to fit onscreen
     float TempHeight = StringLines(finale_text) * h;
     TempHeight += h;
     if (TempHeight > 200)
     {
-        //Too big, need to scale
+        // Too big, need to scale
         float TempScale = 1.0f;
 
         TempScale = 200.0f / TempHeight;
-        txtscale = TempScale;
+        txtscale  = TempScale;
         HUDSetScale(txtscale);
 
-        //Need to recalculate this
+        // Need to recalculate this
         h = 11; // set a default
         if (style->fonts_[t_type])
         {
@@ -860,8 +861,8 @@ static void CastDrawer(void)
     width *= scale_x;
     height *= scale_y;
 
-    HUDRawImage(pos_x - offset_x, pos_y + offset_y, pos_x - offset_x + width, pos_y + offset_y + height, image,  flip ? image->Right() : 0, 0,
-                flip ? 0 : image->Right(), image->Top(), 1.0f, kRGBANoValue);
+    HUDRawImage(pos_x - offset_x, pos_y + offset_y, pos_x - offset_x + width, pos_y + offset_y + height, image,
+                flip ? image->Right() : 0, 0, flip ? 0 : image->Right(), image->Top(), 1.0f, kRGBANoValue);
 }
 
 //

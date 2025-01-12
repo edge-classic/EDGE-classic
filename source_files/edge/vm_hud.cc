@@ -905,7 +905,7 @@ static void HD_get_average_hue(coal::VM *vm, int argc)
     }
 
     RGBAColor hue = tmp_img_data->AverageHue(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
-                             to_y ? *to_y : 1000000);
+                                             to_y ? *to_y : 1000000);
     delete tmp_img_data;
     rgb[0] = epi::GetRGBARed(hue);
     rgb[1] = epi::GetRGBAGreen(hue);

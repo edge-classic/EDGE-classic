@@ -648,7 +648,7 @@ void ParseUDMF_Pass(const std::string &data, int pass)
 
     while (lex.TokensLeft())
     {
-        std::string    section;
+        std::string section;
 
         if (!lex.GetNextToken())
             return;

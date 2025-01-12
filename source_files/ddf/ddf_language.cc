@@ -66,7 +66,7 @@ std::string DDFSanitizeName(const std::string &s)
 class LanguageChoice
 {
   public:
-    std::string                                  name;
+    std::string                                                            name;
     std::unordered_map<std::string, std::string, epi::ContainerStringHash> refs;
 
     LanguageChoice() : name(), refs()

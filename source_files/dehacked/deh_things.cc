@@ -1569,20 +1569,20 @@ void things::HandleDropItem(int mt_num)
 
     switch (mt_num)
     {
-        case kMT_WOLFSS:
-        case kMT_POSSESSED:
-            item = "CLIP";
-            break;
+    case kMT_WOLFSS:
+    case kMT_POSSESSED:
+        item = "CLIP";
+        break;
 
-        case kMT_SHOTGUY:
-            item = "SHOTGUN";
-            break;
-        case kMT_CHAINGUY:
-            item = "CHAINGUN";
-            break;
+    case kMT_SHOTGUY:
+        item = "SHOTGUN";
+        break;
+    case kMT_CHAINGUY:
+        item = "CHAINGUN";
+        break;
 
-        default:
-            return;
+    default:
+        return;
     }
 
     EPI_ASSERT(item);
@@ -1636,7 +1636,7 @@ void things::ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num, in
     else
         wad::Printf("[%s:%d]\n", ddf_name, info->doomednum);
 
-    wad::Printf("DEH_THING_ID = %d;\n", mt_num+1);
+    wad::Printf("DEH_THING_ID = %d;\n", mt_num + 1);
 
     wad::Printf("RADIUS = %1.1f;\n", FixedToFloat(info->radius));
 
@@ -1668,12 +1668,14 @@ void things::ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num, in
         wad::Printf("PAINCHANCE = %1.1f%%;\n", (float)info->painchance * 100.0 / 256.0);
 
     if (info->splash_group >= 0)
-        wad::Printf("SPLASH_GROUP = %d;\n", info->splash_group+1); // We don't want a '0' splash group when it hits DDF
+        wad::Printf("SPLASH_GROUP = %d;\n",
+                    info->splash_group + 1); // We don't want a '0' splash group when it hits DDF
 
     if (info->infight_group >= 0)
-        wad::Printf("INFIGHTING_GROUP = %d;\n", info->infight_group+1); // We don't want a '0' infighting group when it hits DDF
+        wad::Printf("INFIGHTING_GROUP = %d;\n",
+                    info->infight_group + 1); // We don't want a '0' infighting group when it hits DDF
 
-    if (info->proj_group > -2) // -1 is a special value here, so negative is still valid
+    if (info->proj_group > -2)                // -1 is a special value here, so negative is still valid
         wad::Printf("PROJECTILE_GROUP = %d;\n", info->proj_group);
 
     if (mt_num == kMT_BOSSSPIT)

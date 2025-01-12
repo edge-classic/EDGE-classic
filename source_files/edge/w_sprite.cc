@@ -688,9 +688,9 @@ bool CheckSpritesExist(const std::vector<StateRange> &group)
         {
             if (states[i].sprite == 0)
                 continue;
-            
-            if (states[i].flags & kStateFrameFlagModel)  //Lobo 2024: check 3d models too?
-                 return true;
+
+            if (states[i].flags & kStateFrameFlagModel) // Lobo 2024: check 3d models too?
+                return true;
 
             if (sprites[states[i].sprite]->frames_)
                 return true;

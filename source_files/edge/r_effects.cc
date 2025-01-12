@@ -33,9 +33,9 @@
 
 int render_view_extra_light;
 
-float render_view_red_multiplier = 1.0f;
+float render_view_red_multiplier   = 1.0f;
 float render_view_green_multiplier = 1.0f;
-float render_view_blue_multiplier = 1.0f;
+float render_view_blue_multiplier  = 1.0f;
 
 const Colormap *render_view_effect_colormap;
 
@@ -82,7 +82,7 @@ void RendererRainbowEffect(Player *player)
         }
         else
         {
-            render_view_red_multiplier = 0.90f;
+            render_view_red_multiplier   = 0.90f;
             render_view_green_multiplier = render_view_red_multiplier;
             render_view_blue_multiplier  = render_view_red_multiplier;
         }
@@ -168,7 +168,8 @@ void RendererColourmapEffect(Player *player)
 
             RGBAColor unit_col = kRGBAWhite;
 
-            RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingInvert);
+            RendererVertex *glvert =
+                BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingInvert);
 
             x1 = view_window_x;
             x2 = view_window_x + view_window_width;
@@ -176,14 +177,14 @@ void RendererColourmapEffect(Player *player)
             y1 = view_window_y + view_window_height;
             y2 = view_window_y;
 
-            glvert->rgba = unit_col;
+            glvert->rgba       = unit_col;
             glvert++->position = {{x1, y1, 0}};
-            glvert->rgba = unit_col;
+            glvert->rgba       = unit_col;
             glvert++->position = {{x2, y1, 0}};
-            glvert->rgba = unit_col;
+            glvert->rgba       = unit_col;
             glvert++->position = {{x2, y2, 0}};
-            glvert->rgba = unit_col;
-            glvert->position = {{x1, y2, 0}};
+            glvert->rgba       = unit_col;
+            glvert->position   = {{x1, y2, 0}};
 
             EndRenderUnit(4);
 
@@ -194,8 +195,8 @@ void RendererColourmapEffect(Player *player)
             float old_alpha = HUDGetAlpha();
             HUDSetAlpha(0.0f);
             s = HMM_MAX(0.5f, s);
-            HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                       epi::MakeRGBAFloat(s, s, s), 25.0f, kBlendingInvert);
+            HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom, epi::MakeRGBAFloat(s, s, s), 25.0f,
+                       kBlendingInvert);
             HUDSetAlpha(old_alpha);
         }
     }
@@ -226,12 +227,12 @@ void RendererPaletteEffect(Player *player)
         float r, g, b;
         GetColormapRGB(player->effect_colourmap_, &r, &g, &b);
         if (!reduce_flash)
-            unit_col = epi::MakeRGBAFloat(r, g , b , 0.20f * s);
+            unit_col = epi::MakeRGBAFloat(r, g, b, 0.20f * s);
         else
         {
             HUDSetAlpha(0.20f * s);
-            HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                       epi::MakeRGBAFloat(r, g, b), 25.0f);
+            HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom, epi::MakeRGBAFloat(r, g, b),
+                       25.0f);
         }
     }
     else
@@ -247,14 +248,14 @@ void RendererPaletteEffect(Player *player)
 
         if (!reduce_flash)
             unit_col = epi::MakeRGBAFloat((float)rgb_data[0] / (float)rgb_max, (float)rgb_data[1] / (float)rgb_max,
-                      (float)rgb_data[2] / (float)rgb_max, (float)rgb_max / 255.0f);
+                                          (float)rgb_data[2] / (float)rgb_max, (float)rgb_max / 255.0f);
         else
         {
             HUDSetAlpha((float)rgb_max / 255.0f);
             HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                       epi::MakeRGBAFloat((float)rgb_data[0] / rgb_max,
-                                     (float)rgb_data[1] / rgb_max,
-                                     (float)rgb_data[2] / rgb_max), 25.0f);
+                       epi::MakeRGBAFloat((float)rgb_data[0] / rgb_max, (float)rgb_data[1] / rgb_max,
+                                          (float)rgb_data[2] / rgb_max),
+                       25.0f);
         }
     }
 
@@ -264,16 +265,17 @@ void RendererPaletteEffect(Player *player)
     {
         StartUnitBatch(false);
 
-        RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAlpha);
+        RendererVertex *glvert =
+            BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAlpha);
 
-        glvert->rgba = unit_col;
+        glvert->rgba       = unit_col;
         glvert++->position = {{0, (float)current_screen_height, 0}};
-        glvert->rgba = unit_col;
+        glvert->rgba       = unit_col;
         glvert++->position = {{(float)current_screen_width, (float)current_screen_height, 0}};
-        glvert->rgba = unit_col;
+        glvert->rgba       = unit_col;
         glvert++->position = {{(float)current_screen_width, 0, 0}};
-        glvert->rgba = unit_col;
-        glvert->position = {{0, 0, 0}};
+        glvert->rgba       = unit_col;
+        glvert->position   = {{0, 0, 0}};
 
         EndRenderUnit(4);
 

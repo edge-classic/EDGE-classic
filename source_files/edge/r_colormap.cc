@@ -104,7 +104,7 @@ static int FindBestRGBMatch(int r, int g, int b)
 
 void InitializePalette(void)
 {
-    EPI_CLEAR_MEMORY(&playpal_data[0][0][0], uint8_t, 14*256*3);
+    EPI_CLEAR_MEMORY(&playpal_data[0][0][0], uint8_t, 14 * 256 * 3);
 
     int t, i;
 
@@ -123,8 +123,8 @@ void InitializePalette(void)
             if (index + 2 < pal_length)
             {
                 playpal_data[t][i][0] = pal[index];
-                playpal_data[t][i][1] = pal[index+1];
-                playpal_data[t][i][2] = pal[index+2];
+                playpal_data[t][i][1] = pal[index + 1];
+                playpal_data[t][i][2] = pal[index + 2];
             }
         }
     }
@@ -658,8 +658,7 @@ class ColormapShader : public AbstractShader
 
             HMM_Vec3 lit_pos;
 
-            (*func)(data, v_idx, &dest->position, &dest->rgba, &dest->texture_coordinates[0], &dest->normal,
-                    &lit_pos);
+            (*func)(data, v_idx, &dest->position, &dest->rgba, &dest->texture_coordinates[0], &dest->normal, &lit_pos);
 
             TextureCoordinates(dest, 1, &lit_pos);
         }

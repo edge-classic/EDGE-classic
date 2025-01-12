@@ -328,8 +328,8 @@ class dynlight_shader_c : public AbstractShader
                             (is_additive && masked) ? (GLuint)kTextureEnvironmentSkipRGB
                             : is_additive           ? (GLuint)kTextureEnvironmentDisable
                                                     : GL_MODULATE,
-                            (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim->TextureId(), *pass_var,
-                            blending, *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->properties.fog_color,
+                            (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim->TextureId(), *pass_var, blending,
+                            *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->properties.fog_color,
                             mo->subsector_->sector->properties.fog_density);
 
         for (int v_idx = 0; v_idx < num_vert; v_idx++)
@@ -338,14 +338,14 @@ class dynlight_shader_c : public AbstractShader
 
             HMM_Vec3 lit_pos;
 
-            (*func)(data, v_idx, &dest->position, &dest->rgba, &dest->texture_coordinates[0], &dest->normal,
-                    &lit_pos);
+            (*func)(data, v_idx, &dest->position, &dest->rgba, &dest->texture_coordinates[0], &dest->normal, &lit_pos);
 
             float dist = TexCoord(&dest->texture_coordinates[1], WhatRadius(), &lit_pos, &dest->normal);
 
             float ity = exp(-5.44 * dist * dist);
 
-            dest->rgba = epi::MakeRGBA((uint8_t)(R * ity), (uint8_t)(G * ity), (uint8_t)(B * ity), (uint8_t)(alpha * 255.0f));
+            dest->rgba =
+                epi::MakeRGBA((uint8_t)(R * ity), (uint8_t)(G * ity), (uint8_t)(B * ity), (uint8_t)(alpha * 255.0f));
         }
 
         EndRenderUnit(num_vert);
@@ -502,8 +502,8 @@ class plane_glow_c : public AbstractShader
                             (is_additive && masked) ? (GLuint)kTextureEnvironmentSkipRGB
                             : is_additive           ? (GLuint)kTextureEnvironmentDisable
                                                     : GL_MODULATE,
-                            (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim->TextureId(), *pass_var,
-                            blending, *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->properties.fog_color,
+                            (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim->TextureId(), *pass_var, blending,
+                            *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->properties.fog_color,
                             mo->subsector_->sector->properties.fog_density);
 
         for (int v_idx = 0; v_idx < num_vert; v_idx++)
@@ -512,8 +512,7 @@ class plane_glow_c : public AbstractShader
 
             HMM_Vec3 lit_pos;
 
-            (*func)(data, v_idx, &dest->position, &dest->rgba, &dest->texture_coordinates[0], &dest->normal,
-                    &lit_pos);
+            (*func)(data, v_idx, &dest->position, &dest->rgba, &dest->texture_coordinates[0], &dest->normal, &lit_pos);
 
             TexCoord(&dest->texture_coordinates[1], WhatRadius(), sec, &lit_pos, &dest->normal);
 
@@ -660,8 +659,8 @@ class wall_glow_c : public AbstractShader
                             (is_additive && masked) ? (GLuint)kTextureEnvironmentSkipRGB
                             : is_additive           ? (GLuint)kTextureEnvironmentDisable
                                                     : GL_MODULATE,
-                            (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim->TextureId(), *pass_var,
-                            blending, *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->properties.fog_color,
+                            (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim->TextureId(), *pass_var, blending,
+                            *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->properties.fog_color,
                             mo->subsector_->sector->properties.fog_density);
 
         for (int v_idx = 0; v_idx < num_vert; v_idx++)
@@ -670,13 +669,13 @@ class wall_glow_c : public AbstractShader
 
             HMM_Vec3 lit_pos;
 
-            (*func)(data, v_idx, &dest->position, &dest->rgba, &dest->texture_coordinates[0], &dest->normal,
-                    &lit_pos);
+            (*func)(data, v_idx, &dest->position, &dest->rgba, &dest->texture_coordinates[0], &dest->normal, &lit_pos);
 
             TexCoord(&dest->texture_coordinates[1], WhatRadius(), sec, &lit_pos, &dest->normal);
 
-            dest->rgba = epi::MakeRGBA((uint8_t)(R * render_view_red_multiplier), (uint8_t)(G * render_view_green_multiplier), 
-                (uint8_t)(B * render_view_blue_multiplier), (uint8_t)(alpha * 255.0f));
+            dest->rgba =
+                epi::MakeRGBA((uint8_t)(R * render_view_red_multiplier), (uint8_t)(G * render_view_green_multiplier),
+                              (uint8_t)(B * render_view_blue_multiplier), (uint8_t)(alpha * 255.0f));
         }
 
         EndRenderUnit(num_vert);

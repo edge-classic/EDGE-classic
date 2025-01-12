@@ -1932,14 +1932,14 @@ DynamicLightDefinition::DynamicLightDefinition(DynamicLightDefinition &rhs)
 
 void DynamicLightDefinition::Copy(DynamicLightDefinition &src)
 {
-    type_   = src.type_;
-    shape_  = src.shape_;
-    radius_ = src.radius_;
-    colour_ = src.colour_;
-    height_ = src.height_;
-    leaky_  = src.leaky_;
+    type_                 = src.type_;
+    shape_                = src.shape_;
+    radius_               = src.radius_;
+    colour_               = src.colour_;
+    height_               = src.height_;
+    leaky_                = src.leaky_;
     autocolour_reference_ = src.autocolour_reference_;
-    autocolour_sprite_ = src.autocolour_sprite_;
+    autocolour_sprite_    = src.autocolour_sprite_;
 
     cache_data_ = nullptr;
 }

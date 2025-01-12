@@ -126,8 +126,7 @@ class ImageData
     // compute the average Hue of the RGB(A) image, storing the
     // result in the 'hue' array (r, g, b).  The average intensity
     // will be stored in 'intensity' when given.
-    RGBAColor AverageHue(int from_x = -1, int to_x = 1000000, int from_y = -1,
-                    int to_y = 1000000);
+    RGBAColor AverageHue(int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
 
     // compute the average color of the RGB image, based on modal average
     RGBAColor AverageColor(int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);

@@ -137,6 +137,28 @@ bool MapObject::IsRemoved() const
     return state_ == nullptr;
 }
 
+bool MapObject::IsSpawning()
+{
+    if (!info_ || !info_->spawn_state_)
+    {
+        return false;
+    }
+
+    return state_ == &states[info_->spawn_state_];
+}
+
+void MapObject::AddMomentum(float xm, float ym, float zm)
+{
+    momentum_.X += xm;
+    momentum_.Y += ym;
+    momentum_.Z += zm;
+
+    if (IsSpawning())
+    {
+        old_x_ = old_y_ = old_z_ = kInvalidPosition;
+    }
+}
+
 #if 1 // DEBUGGING
 void P_DumpMobjs(void)
 {
@@ -1354,15 +1376,7 @@ static void P_MobjThinker(MapObject *mobj)
 
     if (!(mobj->player_ != NULL && mobj == mobj->player_->map_object_))
     {
-        // Assume we can interpolate at the beginning
-        // of the tic unless mid-teleport
-        if (mobj->teleport_tic_)
-        {
-            mobj->teleport_tic_--;
-            mobj->interpolate_ = false;
-        }
-        else
-            mobj->interpolate_ = true;
+        mobj->interpolate_ = mobj->old_x_ == kInvalidPosition ? false : true;
 
         // Store starting position for mobj interpolation.
         mobj->old_x_     = mobj->x;

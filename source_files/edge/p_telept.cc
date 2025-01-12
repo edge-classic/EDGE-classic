@@ -256,7 +256,9 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing, const TeleportDefi
         player->delta_view_height_ = 0;
     }
     else
-        thing->teleport_tic_ = 18;
+    {        
+        thing->old_x_ = thing->old_y_ = thing->old_z_ = kInvalidPosition;
+    }
 
     /* --- Momentum handling --- */
 

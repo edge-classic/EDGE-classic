@@ -175,6 +175,8 @@ struct DynamicLightState
     bool            bad_wall_glow = false;
 };
 
+constexpr float kInvalidPosition = -999999.0f;
+
 // Map Object definition.
 struct Position
 {
@@ -378,8 +380,6 @@ class MapObject : public Position
 
     bool slope_sight_hit_ = false;
 
-    int teleport_tic_ = 0;
-
     // Uncapped test - Dasho
     bool interpolate_ = false;
 
@@ -393,6 +393,10 @@ class MapObject : public Position
     void SetAboveObject(MapObject *ref);
     void SetBelowObject(MapObject *ref);
     void SetRealSource(MapObject *ref);
+
+    bool IsSpawning();
+
+    void AddMomentum(float xm, float ym, float zm);
 
     void ClearStaleReferences();
 

@@ -44,6 +44,8 @@
 #include "s_sound.h"
 #include "w_wad.h"
 
+extern ConsoleVariable uncapped_frames;
+
 DirectionType opposite[] = {kDirectionWest,      kDirectionSouthwest, kDirectionSouth,
                             kDirectionSoutheast, kDirectionEast,      kDirectionNorthEast,
                             kDirectionNorth,     kDirectionNorthWest, kDirectionNone};
@@ -271,10 +273,17 @@ bool DoMove(MapObject *actor, bool path)
     // -AJA- 2008/01/16: position interpolation
     if ((actor->state_->flags & kStateFrameFlagModel) || (actor->flags_ & kMapObjectFlagFloat))
     {
-        actor->interpolation_number_   = HMM_Clamp(2, actor->state_->tics, 10);
-        actor->interpolation_position_ = 1;
+        if (!uncapped_frames.d_ || actor->old_x_ != kInvalidPosition)
+        {
+            actor->interpolation_number_   = HMM_Clamp(2, actor->state_->tics, 10);
+            actor->interpolation_position_ = 1;
 
-        actor->interpolation_from_ = orig_pos;
+            actor->interpolation_from_ = orig_pos;
+        }
+        else
+        {
+            actor->interpolation_number_ = 0;
+        }
     }
 
     return true;
@@ -517,8 +526,8 @@ bool LookForPlayers(MapObject *actor, BAMAngle range, bool ToSupport)
             actor->SetSupportObject(player->map_object_);
         else // target the player
             actor->SetTarget(player->map_object_);
-           
-         return true;
+
+        return true;
        
     }
 

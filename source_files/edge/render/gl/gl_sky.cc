@@ -1,6 +1,4 @@
 
-#include "r_sky.h"
-
 #include <math.h>
 
 #include "dm_state.h"

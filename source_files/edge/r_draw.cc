@@ -33,7 +33,7 @@
 
 void NewScreenSize()
 {
-    
+
     render_backend->SetupMatrices2D();
 
     // prevent a visible border with certain cards/drivers

@@ -1516,17 +1516,13 @@ static void RenderSeg(DrawFloor *dfloor, Seg *seg, bool mirror_sub = false)
         if (!debug_hall_of_mirrors.d_ && solid_mode && dfloor->is_lowest && sd->bottom.image == nullptr &&
             current_seg->back_subsector && b_fh > f_fh && b_fh < view_z)
         {
-            EmulateFloodPlane(dfloor, current_seg->back_subsector->sector, +1,
-                            f_fh,
-                            b_fh);
+            EmulateFloodPlane(dfloor, current_seg->back_subsector->sector, +1, f_fh, b_fh);
         }
 
         if (!debug_hall_of_mirrors.d_ && solid_mode && dfloor->is_highest && sd->top.image == nullptr &&
             current_seg->back_subsector && b_ch < f_ch && b_ch > view_z)
         {
-            EmulateFloodPlane(dfloor, current_seg->back_subsector->sector, -1,
-                            b_ch,
-                            f_ch);
+            EmulateFloodPlane(dfloor, current_seg->back_subsector->sector, -1, b_ch, f_ch);
         }
     }
 }
@@ -2138,7 +2134,7 @@ void RenderTrueBsp(void)
     render_backend->SetRenderLayer(kRenderLayerWeapon);
 
     if (FlashFirst == false)
-    {        
+    {
         DoWeaponModel();
     }
 
@@ -2192,7 +2188,6 @@ void RenderView(int x, int y, int w, int h, MapObject *camera, bool full_height,
     seen_dynamic_lights.clear();
     RenderTrueBsp();
 }
-
 
 static constexpr uint8_t kMaximumFloodVertices = 16;
 
@@ -2439,4 +2434,3 @@ void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref, int fac
         DynamicLightIterator(lx1, ly1, data.plane_h, lx2, ly2, data.plane_h, DLIT_Flood, &data);
     }
 }
-

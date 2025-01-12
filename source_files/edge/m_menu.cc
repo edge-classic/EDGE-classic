@@ -1130,7 +1130,7 @@ static void MenuQuickSave(void)
         StartControlPanel();
         MenuReadSaveStrings();
         MenuSetupNextMenu(&SaveMenuDefinition);
-        quicksave_slot = -2; // means to pick a slot now
+        quicksave_slot       = -2; // means to pick a slot now
         need_save_screenshot = true;
         return;
     }
@@ -2407,10 +2407,10 @@ static void DrawMessage(void)
     {
 
 // We're already in a sokol frame
-#ifndef EDGE_SOKOL        
-        StartFrame();   // To clear and ensure solid black background regardless
-                        // of style
-#endif                        
+#ifndef EDGE_SOKOL
+        StartFrame(); // To clear and ensure solid black background regardless
+                      // of style
+#endif
 
         if (exit_style->definition_->text_[StyleDefinition::kTextSectionText].colmap_)
         {

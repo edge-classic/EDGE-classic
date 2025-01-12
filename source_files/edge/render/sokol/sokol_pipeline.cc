@@ -69,7 +69,8 @@ sgl_pipeline GetPipeline(sgl_context context, uint32_t pipeline_flags, GLenum sr
             pipeline_desc.depth.write_enabled = true;
 
         // Note: This is set in the r_state, and only this value, if culling issues, check if this ever changes
-        // in external code.  I didn't want to eat up another state bit with this, and the state handling needs a reboot anyway
+        // in external code.  I didn't want to eat up another state bit with this, and the state handling needs a reboot
+        // anyway
         pipeline_desc.face_winding = SG_FACEWINDING_CW;
 
         if (pipeline_flags & kPipelineCullBack)

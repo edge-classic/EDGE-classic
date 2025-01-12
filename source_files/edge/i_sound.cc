@@ -37,7 +37,7 @@
 // If true, sound system is off/not working. Changed to false if sound init ok.
 bool no_sound = false;
 
-int  sound_device_frequency;
+int sound_device_frequency;
 
 std::vector<std::string> available_soundfonts;
 extern std::string       game_directory;
@@ -75,7 +75,8 @@ void StartupAudio(void)
     sound_device_frequency = ma_engine_get_sample_rate(&sound_engine);
 
     // display some useful stuff
-    LogPrint("StartupSound: Success @ %d Hz, %d channels\n", sound_device_frequency, ma_engine_get_channels(&sound_engine));
+    LogPrint("StartupSound: Success @ %d Hz, %d channels\n", sound_device_frequency,
+             ma_engine_get_channels(&sound_engine));
 
     return;
 }

@@ -195,16 +195,12 @@ bool DoMove(MapObject *actor, bool path)
         if (actor->move_direction_ == kDirectionNone)
             return false;
 
-
         if ((unsigned)actor->move_direction_ >= 8)
         {
-            //FatalError("Weird actor->move_direction_! = %d",(int)actor->move_direction_);
+            // FatalError("Weird actor->move_direction_! = %d",(int)actor->move_direction_);
             actor->move_direction_ = kDirectionNone;
             return false;
-           
         }
-            
-
 
         tryx = actor->x + actor->speed_ * xspeed[actor->move_direction_];
         tryy = actor->y + actor->speed_ * yspeed[actor->move_direction_];
@@ -461,7 +457,6 @@ void NewChaseDir(MapObject *object)
     object->move_direction_ = kDirectionNone;
 }
 
-
 //
 // Used to find a player, either to set as support object or to set as a target.
 // Range is angle range on either side of eyes, 90 degrees for normal
@@ -499,7 +494,7 @@ bool LookForPlayers(MapObject *actor, BAMAngle range, bool ToSupport)
         // on the same team ?
         if ((actor->side_ & player->map_object_->side_) != 0)
         {
-            if (!ToSupport) //not looking to support a player
+            if (!ToSupport) // not looking to support a player
                 continue;
         }
 
@@ -522,18 +517,16 @@ bool LookForPlayers(MapObject *actor, BAMAngle range, bool ToSupport)
         if (!CheckSight(actor, player->map_object_))
             continue;
 
-        if (ToSupport) //support the player
+        if (ToSupport) // support the player
             actor->SetSupportObject(player->map_object_);
-        else // target the player
+        else           // target the player
             actor->SetTarget(player->map_object_);
 
         return true;
-       
     }
 
     return false;
 }
-
 
 //
 //   BOSS-BRAIN HANDLING

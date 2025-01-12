@@ -1545,7 +1545,7 @@ void A_GunFlashTo(MapObject *mo)
 
     // Set flash to true (it may already be true, but this code pointer does not
     // do anything different if flash is already true unlike our regular GunFlash)
-    p->flash_ = true; 
+    p->flash_ = true;
     SetPlayerSpriteDeferred(p, kPlayerSpriteFlash, psp->state->jumpstate);
 }
 
@@ -1681,7 +1681,7 @@ void A_WeaponEject(MapObject *mo)
 
 void A_CloseShotgun2(MapObject *mo)
 {
-    Player       *p   = mo->player_;
+    Player *p = mo->player_;
 
     SoundEffect *sound = sfxdefs.GetEffect("DBCLS");
 
@@ -1696,11 +1696,11 @@ void A_CloseShotgun2(MapObject *mo)
 void A_WeaponSound(MapObject *mo)
 {
     // Generate an arbitrary sound from this weapon.
-    Player       *p   = mo->player_;
-    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
-    WeaponDefinition *info   = p->weapons_[p->ready_weapon_].info;
-    SoundEffect *sound = nullptr;
-    int *args = nullptr;
+    Player           *p     = mo->player_;
+    PlayerSprite     *psp   = &p->player_sprites_[p->action_player_sprite_];
+    WeaponDefinition *info  = p->weapons_[p->ready_weapon_].info;
+    SoundEffect      *sound = nullptr;
+    int              *args  = nullptr;
 
     if (psp->state && psp->state->action_par)
         args = (int *)psp->state->action_par;
@@ -1723,10 +1723,10 @@ void A_WeaponSound(MapObject *mo)
 
 void A_ConsumeAmmo(MapObject *mo)
 {
-    Player       *p   = mo->player_;
-    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
-    WeaponDefinition *info   = p->weapons_[p->ready_weapon_].info;
-    AmmunitionType ammotype = info->ammo_[0];
+    Player           *p        = mo->player_;
+    PlayerSprite     *psp      = &p->player_sprites_[p->action_player_sprite_];
+    WeaponDefinition *info     = p->weapons_[p->ready_weapon_].info;
+    AmmunitionType    ammotype = info->ammo_[0];
 
     if (ammotype == kAmmunitionTypeNoAmmo)
         return;
@@ -1747,10 +1747,10 @@ void A_ConsumeAmmo(MapObject *mo)
 
 void A_CheckAmmo(MapObject *mo)
 {
-    Player       *p   = mo->player_;
-    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
-    WeaponDefinition *info   = p->weapons_[p->ready_weapon_].info;
-    AmmunitionType ammotype = info->ammo_[0];
+    Player           *p        = mo->player_;
+    PlayerSprite     *psp      = &p->player_sprites_[p->action_player_sprite_];
+    WeaponDefinition *info     = p->weapons_[p->ready_weapon_].info;
+    AmmunitionType    ammotype = info->ammo_[0];
 
     if (ammotype == kAmmunitionTypeNoAmmo)
         return;

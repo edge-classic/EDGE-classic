@@ -145,7 +145,7 @@ void MarkPolyobjSector(Sector *sector)
 void MarkPolyobjPoint(double x, double y)
 {
     size_t i;
-    int inside_count = 0;
+    int    inside_count = 0;
 
     double         best_dist  = 999999;
     const Linedef *best_match = nullptr;
@@ -359,7 +359,7 @@ static int VertexCompare(const void *p1, const void *p2)
 
 void DetectOverlappingVertices(void)
 {
-    size_t       i;
+    size_t    i;
     uint32_t *array = (uint32_t *)UtilCalloc(level_vertices.size() * sizeof(uint32_t));
 
     // sort array of indices
@@ -489,8 +489,8 @@ void DetectOverlappingLines(void)
     //   Overlapping lines will then be near each other in this set.
     //   Note: does not detect partially overlapping lines.
 
-    size_t  i;
-    int *array = (int *)UtilCalloc(level_linedefs.size() * sizeof(int));
+    size_t i;
+    int   *array = (int *)UtilCalloc(level_linedefs.size() * sizeof(int));
 
     // sort array of indices
     for (i = 0; i < level_linedefs.size(); i++)

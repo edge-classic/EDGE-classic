@@ -447,7 +447,7 @@ RGBAColor ImageData::AverageHue(int from_x, int to_x, int from_y, int to_y)
 
     int weight = 0;
 
-    uint8_t hue[3] = {0,0,0};
+    uint8_t hue[3] = {0, 0, 0};
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
     from_x = HMM_Clamp(0, from_x, used_width_ - 1);

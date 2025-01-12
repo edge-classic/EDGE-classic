@@ -101,7 +101,7 @@ std::string StringFormat(const char *fmt, ...);
 std::vector<std::string> SeparatedStringVector(std::string_view str, char separator);
 uint64_t                 StringHash64(std::string_view str_to_hash);
 
-//struct to pass when creating unordered_map, etc, to use xxHash with strings
+// struct to pass when creating unordered_map, etc, to use xxHash with strings
 struct ContainerStringHash
 {
     uint64_t operator()(const std::string &k) const

@@ -1,12 +1,13 @@
 
+#include "r_mirror.h"
+
 #include "epi_doomdefs.h"
 #include "r_image.h"
-#include "r_mirror.h"
 #include "r_render.h"
 #include "r_units.h"
 
 extern MirrorSet render_mirror_set;
-extern bool solid_mode;
+extern bool      solid_mode;
 
 static void DrawMirrorPolygon(DrawMirror *mir)
 {

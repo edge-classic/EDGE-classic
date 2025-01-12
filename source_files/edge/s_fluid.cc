@@ -25,13 +25,13 @@
 #include "epi.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
+#include "epi_str_compare.h"
+#include "epi_str_util.h"
 #include "fluidlite.h"
 #include "i_movie.h"
 #include "i_sound.h"
 #include "i_system.h"
 #include "m_misc.h"
-#include "epi_str_compare.h"
-#include "epi_str_util.h"
 #include "s_blit.h"
 // clang-format off
 #define MidiFraction FluidFraction
@@ -41,7 +41,7 @@ typedef struct MidiRealTimeInterface FluidInterface;
 // clang-format on
 #include "s_music.h"
 
-extern int  sound_device_frequency;
+extern int sound_device_frequency;
 
 bool fluid_disabled = false;
 
@@ -49,7 +49,8 @@ fluid_synth_t    *edge_fluid            = nullptr;
 fluid_settings_t *edge_fluid_settings   = nullptr;
 fluid_sfloader_t *edge_fluid_sf2_loader = nullptr;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(midi_soundfont, "", (ConsoleVariableFlag)(kConsoleVariableFlagArchive | kConsoleVariableFlagFilepath))
+EDGE_DEFINE_CONSOLE_VARIABLE(midi_soundfont, "",
+                             (ConsoleVariableFlag)(kConsoleVariableFlagArchive | kConsoleVariableFlagFilepath))
 
 EDGE_DEFINE_CONSOLE_VARIABLE(fluid_player_gain, "0.6", kConsoleVariableFlagArchive)
 
@@ -121,8 +122,8 @@ void rtSysEx(void *userdata, const uint8_t *msg, size_t size)
 
 void rtDeviceSwitch(void *userdata, size_t track, const char *data, size_t length)
 {
-    EPI_UNUSED(userdata); 
-    EPI_UNUSED(track); 
+    EPI_UNUSED(userdata);
+    EPI_UNUSED(track);
     EPI_UNUSED(data);
     EPI_UNUSED(length);
 }
@@ -142,18 +143,18 @@ void playSynth(void *userdata, uint8_t *stream, size_t length)
 
 typedef struct
 {
-    ma_data_source_base ds;
-    ma_read_proc onRead;
-    ma_seek_proc onSeek;
-    ma_tell_proc onTell;
-    void* pReadSeekTellUserData;
+    ma_data_source_base     ds;
+    ma_read_proc            onRead;
+    ma_seek_proc            onSeek;
+    ma_tell_proc            onTell;
+    void                   *pReadSeekTellUserData;
     ma_allocation_callbacks allocationCallbacks;
-    ma_format format;
-    ma_uint32 channels;
-    ma_uint32 sampleRate;
-    ma_uint64 cursor;
-    FluidInterface *fluid_interface;
-    FluidSequencer *fluid_sequencer;
+    ma_format               format;
+    ma_uint32               channels;
+    ma_uint32               sampleRate;
+    ma_uint64               cursor;
+    FluidInterface         *fluid_interface;
+    FluidSequencer         *fluid_sequencer;
 } ma_fluid;
 
 static void FluidSequencerInit(ma_fluid *synth)
@@ -181,77 +182,84 @@ static void FluidSequencerInit(ma_fluid *synth)
     synth->fluid_sequencer->SetInterface(synth->fluid_interface);
 }
 
-static ma_result ma_fluid_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void* pReadSeekTellUserData, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_fluid* pFluid);
-static ma_result ma_fluid_init_memory(const void* pData, size_t dataSize, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_fluid* pFluid);
-static void ma_fluid_uninit(ma_fluid* pFluid, const ma_allocation_callbacks* pAllocationCallbacks);
-static ma_result ma_fluid_read_pcm_frames(ma_fluid* pFluid, void* pFramesOut, ma_uint64 frameCount, ma_uint64* pFramesRead);
-static ma_result ma_fluid_seek_to_pcm_frame(ma_fluid* pFluid, ma_uint64 frameIndex);
-static ma_result ma_fluid_get_data_format(ma_fluid* pFluid, ma_format* pFormat, ma_uint32* pChannels, ma_uint32* pSampleRate, ma_channel* pChannelMap, size_t channelMapCap);
-static ma_result ma_fluid_get_cursor_in_pcm_frames(ma_fluid* pFluid, ma_uint64* pCursor);
-static ma_result ma_fluid_get_length_in_pcm_frames(ma_fluid* pFluid, ma_uint64* pLength);
+static ma_result ma_fluid_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell,
+                               void *pReadSeekTellUserData, const ma_decoding_backend_config *pConfig,
+                               const ma_allocation_callbacks *pAllocationCallbacks, ma_fluid *pFluid);
+static ma_result ma_fluid_init_memory(const void *pData, size_t dataSize, const ma_decoding_backend_config *pConfig,
+                                      const ma_allocation_callbacks *pAllocationCallbacks, ma_fluid *pFluid);
+static void      ma_fluid_uninit(ma_fluid *pFluid, const ma_allocation_callbacks *pAllocationCallbacks);
+static ma_result ma_fluid_read_pcm_frames(ma_fluid *pFluid, void *pFramesOut, ma_uint64 frameCount,
+                                          ma_uint64 *pFramesRead);
+static ma_result ma_fluid_seek_to_pcm_frame(ma_fluid *pFluid, ma_uint64 frameIndex);
+static ma_result ma_fluid_get_data_format(ma_fluid *pFluid, ma_format *pFormat, ma_uint32 *pChannels,
+                                          ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap);
+static ma_result ma_fluid_get_cursor_in_pcm_frames(ma_fluid *pFluid, ma_uint64 *pCursor);
+static ma_result ma_fluid_get_length_in_pcm_frames(ma_fluid *pFluid, ma_uint64 *pLength);
 
-static ma_result ma_fluid_ds_read(ma_data_source* pDataSource, void* pFramesOut, ma_uint64 frameCount, ma_uint64* pFramesRead)
+static ma_result ma_fluid_ds_read(ma_data_source *pDataSource, void *pFramesOut, ma_uint64 frameCount,
+                                  ma_uint64 *pFramesRead)
 {
-    return ma_fluid_read_pcm_frames((ma_fluid*)pDataSource, pFramesOut, frameCount, pFramesRead);
+    return ma_fluid_read_pcm_frames((ma_fluid *)pDataSource, pFramesOut, frameCount, pFramesRead);
 }
 
-static ma_result ma_fluid_ds_seek(ma_data_source* pDataSource, ma_uint64 frameIndex)
+static ma_result ma_fluid_ds_seek(ma_data_source *pDataSource, ma_uint64 frameIndex)
 {
-    return ma_fluid_seek_to_pcm_frame((ma_fluid*)pDataSource, frameIndex);
+    return ma_fluid_seek_to_pcm_frame((ma_fluid *)pDataSource, frameIndex);
 }
 
-static ma_result ma_fluid_ds_get_data_format(ma_data_source* pDataSource, ma_format* pFormat, ma_uint32* pChannels, ma_uint32* pSampleRate, ma_channel* pChannelMap, size_t channelMapCap)
+static ma_result ma_fluid_ds_get_data_format(ma_data_source *pDataSource, ma_format *pFormat, ma_uint32 *pChannels,
+                                             ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
 {
-    return ma_fluid_get_data_format((ma_fluid*)pDataSource, pFormat, pChannels, pSampleRate, pChannelMap, channelMapCap);
+    return ma_fluid_get_data_format((ma_fluid *)pDataSource, pFormat, pChannels, pSampleRate, pChannelMap,
+                                    channelMapCap);
 }
 
-static ma_result ma_fluid_ds_get_cursor(ma_data_source* pDataSource, ma_uint64* pCursor)
+static ma_result ma_fluid_ds_get_cursor(ma_data_source *pDataSource, ma_uint64 *pCursor)
 {
-    return ma_fluid_get_cursor_in_pcm_frames((ma_fluid*)pDataSource, pCursor);
+    return ma_fluid_get_cursor_in_pcm_frames((ma_fluid *)pDataSource, pCursor);
 }
 
-static ma_result ma_fluid_ds_get_length(ma_data_source* pDataSource, ma_uint64* pLength)
+static ma_result ma_fluid_ds_get_length(ma_data_source *pDataSource, ma_uint64 *pLength)
 {
-    return ma_fluid_get_length_in_pcm_frames((ma_fluid*)pDataSource, pLength);
+    return ma_fluid_get_length_in_pcm_frames((ma_fluid *)pDataSource, pLength);
 }
 
-static ma_data_source_vtable g_ma_fluid_ds_vtable =
-{
-    ma_fluid_ds_read,
-    ma_fluid_ds_seek,
-    ma_fluid_ds_get_data_format,
-    ma_fluid_ds_get_cursor,
-    ma_fluid_ds_get_length,
-    NULL,   /* onSetLooping */
-    0
-};
+static ma_data_source_vtable g_ma_fluid_ds_vtable = {ma_fluid_ds_read,
+                                                     ma_fluid_ds_seek,
+                                                     ma_fluid_ds_get_data_format,
+                                                     ma_fluid_ds_get_cursor,
+                                                     ma_fluid_ds_get_length,
+                                                     NULL, /* onSetLooping */
+                                                     0};
 
-static ma_result ma_fluid_init_internal(const ma_decoding_backend_config* pConfig, ma_fluid* pFluid)
+static ma_result ma_fluid_init_internal(const ma_decoding_backend_config *pConfig, ma_fluid *pFluid)
 {
-    ma_result result;
+    ma_result             result;
     ma_data_source_config dataSourceConfig;
 
     EPI_UNUSED(pConfig);
 
-    if (pFluid == NULL) {
+    if (pFluid == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
     EPI_CLEAR_MEMORY(pFluid, ma_fluid, 1);
-    pFluid->format = ma_format_f32;    /* Only supporting f32. */
+    pFluid->format = ma_format_f32; /* Only supporting f32. */
 
-    dataSourceConfig = ma_data_source_config_init();
+    dataSourceConfig        = ma_data_source_config_init();
     dataSourceConfig.vtable = &g_ma_fluid_ds_vtable;
 
     result = ma_data_source_init(&dataSourceConfig, &pFluid->ds);
-    if (result != MA_SUCCESS) {
-        return result;  /* Failed to initialize the base data source. */
+    if (result != MA_SUCCESS)
+    {
+        return result; /* Failed to initialize the base data source. */
     }
 
     return MA_SUCCESS;
 }
 
-static ma_result ma_fluid_post_init(ma_fluid* pFluid)
+static ma_result ma_fluid_post_init(ma_fluid *pFluid)
 {
     EPI_ASSERT(pFluid != NULL);
 
@@ -261,7 +269,9 @@ static ma_result ma_fluid_post_init(ma_fluid* pFluid)
     return MA_SUCCESS;
 }
 
-static ma_result ma_fluid_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void* pReadSeekTellUserData, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_fluid* pFluid)
+static ma_result ma_fluid_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell,
+                               void *pReadSeekTellUserData, const ma_decoding_backend_config *pConfig,
+                               const ma_allocation_callbacks *pAllocationCallbacks, ma_fluid *pFluid)
 {
     if (fluid_disabled || edge_fluid == NULL)
         return MA_ERROR;
@@ -271,28 +281,32 @@ static ma_result ma_fluid_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell
     ma_result result;
 
     result = ma_fluid_init_internal(pConfig, pFluid);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         return result;
     }
 
-    if (onRead == NULL || onSeek == NULL) {
+    if (onRead == NULL || onSeek == NULL)
+    {
         return MA_INVALID_ARGS; /* onRead and onSeek are mandatory. */
     }
 
-    pFluid->onRead = onRead;
-    pFluid->onSeek = onSeek;
-    pFluid->onTell = onTell;
+    pFluid->onRead                = onRead;
+    pFluid->onSeek                = onSeek;
+    pFluid->onTell                = onTell;
     pFluid->pReadSeekTellUserData = pReadSeekTellUserData;
 
     return MA_SUCCESS;
 }
 
-static ma_result ma_fluid_init_memory(const void* pData, size_t dataSize, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_fluid* pFluid)
+static ma_result ma_fluid_init_memory(const void *pData, size_t dataSize, const ma_decoding_backend_config *pConfig,
+                                      const ma_allocation_callbacks *pAllocationCallbacks, ma_fluid *pFluid)
 {
     ma_result result;
 
     result = ma_fluid_init_internal(pConfig, pFluid);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         return result;
     }
 
@@ -303,23 +317,26 @@ static ma_result ma_fluid_init_memory(const void* pData, size_t dataSize, const 
 
     FluidSequencerInit(pFluid);
 
-    if (!pFluid->fluid_sequencer->LoadMidi((const uint8_t *)pData, dataSize)) {
+    if (!pFluid->fluid_sequencer->LoadMidi((const uint8_t *)pData, dataSize))
+    {
         return MA_INVALID_FILE;
     }
 
     result = ma_fluid_post_init(pFluid);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         return result;
     }
 
     return MA_SUCCESS;
 }
 
-static void ma_fluid_uninit(ma_fluid* pFluid, const ma_allocation_callbacks* pAllocationCallbacks)
+static void ma_fluid_uninit(ma_fluid *pFluid, const ma_allocation_callbacks *pAllocationCallbacks)
 {
     EPI_UNUSED(pAllocationCallbacks);
 
-    if (pFluid == NULL) {
+    if (pFluid == NULL)
+    {
         return;
     }
 
@@ -331,50 +348,61 @@ static void ma_fluid_uninit(ma_fluid* pFluid, const ma_allocation_callbacks* pAl
     ma_data_source_uninit(&pFluid->ds);
 }
 
-static ma_result ma_fluid_read_pcm_frames(ma_fluid* pFluid, void* pFramesOut, ma_uint64 frameCount, ma_uint64* pFramesRead)
+static ma_result ma_fluid_read_pcm_frames(ma_fluid *pFluid, void *pFramesOut, ma_uint64 frameCount,
+                                          ma_uint64 *pFramesRead)
 {
-    if (pFramesRead != NULL) {
+    if (pFramesRead != NULL)
+    {
         *pFramesRead = 0;
     }
 
-    if (frameCount == 0) {
+    if (frameCount == 0)
+    {
         return MA_INVALID_ARGS;
     }
 
-    if (pFluid == NULL || pFluid->fluid_sequencer == NULL) {
+    if (pFluid == NULL || pFluid->fluid_sequencer == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
     /* We always use floating point format. */
-    ma_result result = MA_SUCCESS;  /* Must be initialized to MA_SUCCESS. */
+    ma_result result          = MA_SUCCESS; /* Must be initialized to MA_SUCCESS. */
     ma_uint64 totalFramesRead = 0;
     ma_format format;
     ma_uint32 channels;
 
     ma_fluid_get_data_format(pFluid, &format, &channels, NULL, NULL, 0);
 
-    if (format == ma_format_f32) {
-        totalFramesRead = pFluid->fluid_sequencer->PlayStream((uint8_t *)pFramesOut, frameCount * 2 * sizeof(float)) / 2 / sizeof(float);
-    } else {
+    if (format == ma_format_f32)
+    {
+        totalFramesRead = pFluid->fluid_sequencer->PlayStream((uint8_t *)pFramesOut, frameCount * 2 * sizeof(float)) /
+                          2 / sizeof(float);
+    }
+    else
+    {
         result = MA_INVALID_ARGS;
     }
 
     pFluid->cursor += totalFramesRead;
 
-    if (pFramesRead != NULL) {
+    if (pFramesRead != NULL)
+    {
         *pFramesRead = totalFramesRead;
     }
 
-    if (result == MA_SUCCESS && pFluid->fluid_sequencer->PositionAtEnd()) {
-        result  = MA_AT_END;
+    if (result == MA_SUCCESS && pFluid->fluid_sequencer->PositionAtEnd())
+    {
+        result = MA_AT_END;
     }
 
     return result;
 }
 
-static ma_result ma_fluid_seek_to_pcm_frame(ma_fluid* pFluid, ma_uint64 frameIndex)
+static ma_result ma_fluid_seek_to_pcm_frame(ma_fluid *pFluid, ma_uint64 frameIndex)
 {
-    if (pFluid == NULL || frameIndex != 0 || pFluid->fluid_sequencer == NULL) {
+    if (pFluid == NULL || frameIndex != 0 || pFluid->fluid_sequencer == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
@@ -385,54 +413,66 @@ static ma_result ma_fluid_seek_to_pcm_frame(ma_fluid* pFluid, ma_uint64 frameInd
     return MA_SUCCESS;
 }
 
-static ma_result ma_fluid_get_data_format(ma_fluid* pFluid, ma_format* pFormat, ma_uint32* pChannels, ma_uint32* pSampleRate, ma_channel* pChannelMap, size_t channelMapCap)
+static ma_result ma_fluid_get_data_format(ma_fluid *pFluid, ma_format *pFormat, ma_uint32 *pChannels,
+                                          ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
 {
     /* Defaults for safety. */
-    if (pFormat != NULL) {
+    if (pFormat != NULL)
+    {
         *pFormat = ma_format_unknown;
     }
-    if (pChannels != NULL) {
+    if (pChannels != NULL)
+    {
         *pChannels = 0;
     }
-    if (pSampleRate != NULL) {
+    if (pSampleRate != NULL)
+    {
         *pSampleRate = 0;
     }
-    if (pChannelMap != NULL) {
+    if (pChannelMap != NULL)
+    {
         EPI_CLEAR_MEMORY(pChannelMap, ma_channel, channelMapCap);
     }
 
-    if (pFluid == NULL) {
+    if (pFluid == NULL)
+    {
         return MA_INVALID_OPERATION;
     }
 
-    if (pFormat != NULL) {
+    if (pFormat != NULL)
+    {
         *pFormat = pFluid->format;
     }
 
-    if (pChannels != NULL) {
+    if (pChannels != NULL)
+    {
         *pChannels = pFluid->channels;
     }
 
-    if (pSampleRate != NULL) {
+    if (pSampleRate != NULL)
+    {
         *pSampleRate = pFluid->sampleRate;
     }
 
-    if (pChannelMap != NULL) {
+    if (pChannelMap != NULL)
+    {
         ma_channel_map_init_standard(ma_standard_channel_map_default, pChannelMap, channelMapCap, pFluid->channels);
     }
 
     return MA_SUCCESS;
 }
 
-static ma_result ma_fluid_get_cursor_in_pcm_frames(ma_fluid* pFluid, ma_uint64* pCursor)
+static ma_result ma_fluid_get_cursor_in_pcm_frames(ma_fluid *pFluid, ma_uint64 *pCursor)
 {
-    if (pCursor == NULL) {
+    if (pCursor == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
-    *pCursor = 0;   /* Safety. */
+    *pCursor = 0; /* Safety. */
 
-    if (pFluid == NULL) {
+    if (pFluid == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
@@ -441,36 +481,45 @@ static ma_result ma_fluid_get_cursor_in_pcm_frames(ma_fluid* pFluid, ma_uint64* 
     return MA_SUCCESS;
 }
 
-static ma_result ma_fluid_get_length_in_pcm_frames(ma_fluid* pFluid, ma_uint64* pLength)
+static ma_result ma_fluid_get_length_in_pcm_frames(ma_fluid *pFluid, ma_uint64 *pLength)
 {
-    if (pLength == NULL) {
+    if (pLength == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
-    *pLength = 0;   /* Safety. */
+    *pLength = 0; /* Safety. */
 
-    if (pFluid == NULL) {
+    if (pFluid == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
     return MA_SUCCESS;
 }
 
-static ma_result ma_decoding_backend_init__fluid(void* pUserData, ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void* pReadSeekTellUserData, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_data_source** ppBackend)
+static ma_result ma_decoding_backend_init__fluid(void *pUserData, ma_read_proc onRead, ma_seek_proc onSeek,
+                                                 ma_tell_proc onTell, void *pReadSeekTellUserData,
+                                                 const ma_decoding_backend_config *pConfig,
+                                                 const ma_allocation_callbacks    *pAllocationCallbacks,
+                                                 ma_data_source                  **ppBackend)
 {
     ma_result result;
-    ma_fluid* pFluid;
+    ma_fluid *pFluid;
 
-    EPI_UNUSED(pUserData);    /* For now not using pUserData, but once we start storing the vorbis decoder state within the ma_decoder structure this will be set to the decoder so we can avoid a malloc. */
+    EPI_UNUSED(pUserData); /* For now not using pUserData, but once we start storing the vorbis decoder state within the
+                              ma_decoder structure this will be set to the decoder so we can avoid a malloc. */
 
     /* For now we're just allocating the decoder backend on the heap. */
-    pFluid = (ma_fluid*)ma_malloc(sizeof(*pFluid), pAllocationCallbacks);
-    if (pFluid == NULL) {
+    pFluid = (ma_fluid *)ma_malloc(sizeof(*pFluid), pAllocationCallbacks);
+    if (pFluid == NULL)
+    {
         return MA_OUT_OF_MEMORY;
     }
 
     result = ma_fluid_init(onRead, onSeek, onTell, pReadSeekTellUserData, pConfig, pAllocationCallbacks, pFluid);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         ma_free(pFluid, pAllocationCallbacks);
         return result;
     }
@@ -480,21 +529,27 @@ static ma_result ma_decoding_backend_init__fluid(void* pUserData, ma_read_proc o
     return MA_SUCCESS;
 }
 
-static ma_result ma_decoding_backend_init_memory__fluid(void* pUserData, const void* pData, size_t dataSize, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_data_source** ppBackend)
+static ma_result ma_decoding_backend_init_memory__fluid(void *pUserData, const void *pData, size_t dataSize,
+                                                        const ma_decoding_backend_config *pConfig,
+                                                        const ma_allocation_callbacks    *pAllocationCallbacks,
+                                                        ma_data_source                  **ppBackend)
 {
     ma_result result;
-    ma_fluid* pFluid;
+    ma_fluid *pFluid;
 
-    EPI_UNUSED(pUserData);    /* For now not using pUserData, but once we start storing the vorbis decoder state within the ma_decoder structure this will be set to the decoder so we can avoid a malloc. */
+    EPI_UNUSED(pUserData); /* For now not using pUserData, but once we start storing the vorbis decoder state within the
+                              ma_decoder structure this will be set to the decoder so we can avoid a malloc. */
 
     /* For now we're just allocating the decoder backend on the heap. */
-    pFluid = (ma_fluid*)ma_malloc(sizeof(*pFluid), pAllocationCallbacks);
-    if (pFluid == NULL) {
+    pFluid = (ma_fluid *)ma_malloc(sizeof(*pFluid), pAllocationCallbacks);
+    if (pFluid == NULL)
+    {
         return MA_OUT_OF_MEMORY;
     }
 
     result = ma_fluid_init_memory(pData, dataSize, pConfig, pAllocationCallbacks, pFluid);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         ma_free(pFluid, pAllocationCallbacks);
         return result;
     }
@@ -504,9 +559,10 @@ static ma_result ma_decoding_backend_init_memory__fluid(void* pUserData, const v
     return MA_SUCCESS;
 }
 
-static void ma_decoding_backend_uninit__fluid(void* pUserData, ma_data_source* pBackend, const ma_allocation_callbacks* pAllocationCallbacks)
+static void ma_decoding_backend_uninit__fluid(void *pUserData, ma_data_source *pBackend,
+                                              const ma_allocation_callbacks *pAllocationCallbacks)
 {
-    ma_fluid* pFluid = (ma_fluid*)pBackend;
+    ma_fluid *pFluid = (ma_fluid *)pBackend;
 
     EPI_UNUSED(pUserData);
 
@@ -514,14 +570,11 @@ static void ma_decoding_backend_uninit__fluid(void* pUserData, ma_data_source* p
     ma_free(pFluid, pAllocationCallbacks);
 }
 
-static ma_decoding_backend_vtable g_ma_decoding_backend_vtable_fluid =
-{
-    ma_decoding_backend_init__fluid,
-    NULL, // onInitFile()
-    NULL, // onInitFileW()
-    ma_decoding_backend_init_memory__fluid,
-    ma_decoding_backend_uninit__fluid
-};
+static ma_decoding_backend_vtable g_ma_decoding_backend_vtable_fluid = {ma_decoding_backend_init__fluid,
+                                                                        NULL, // onInitFile()
+                                                                        NULL, // onInitFileW()
+                                                                        ma_decoding_backend_init_memory__fluid,
+                                                                        ma_decoding_backend_uninit__fluid};
 
 static ma_decoding_backend_vtable *fluid_custom_vtable = &g_ma_decoding_backend_vtable_fluid;
 
@@ -652,9 +705,9 @@ class FluidPlayer : public AbstractMusicPlayer
         if (status_ != kNotLoaded)
             Close();
 
-        ma_decoder_config decode_config = ma_decoder_config_init_default();
-        decode_config.format = ma_format_f32;
-        decode_config.customBackendCount = 1;
+        ma_decoder_config decode_config      = ma_decoder_config_init_default();
+        decode_config.format                 = ma_format_f32;
+        decode_config.customBackendCount     = 1;
         decode_config.pCustomBackendUserData = NULL;
         decode_config.ppCustomBackendVTables = &fluid_custom_vtable;
 
@@ -664,7 +717,10 @@ class FluidPlayer : public AbstractMusicPlayer
             return false;
         }
 
-        if (ma_sound_init_from_data_source(&music_engine, &fluid_decoder_, MA_SOUND_FLAG_NO_PITCH|MA_SOUND_FLAG_STREAM|MA_SOUND_FLAG_UNKNOWN_LENGTH|MA_SOUND_FLAG_NO_SPATIALIZATION, NULL, &fluid_stream_) != MA_SUCCESS)
+        if (ma_sound_init_from_data_source(&music_engine, &fluid_decoder_,
+                                           MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_STREAM |
+                                               MA_SOUND_FLAG_UNKNOWN_LENGTH | MA_SOUND_FLAG_NO_SPATIALIZATION,
+                                           NULL, &fluid_stream_) != MA_SUCCESS)
         {
             ma_decoder_uninit(&fluid_decoder_);
             LogWarning("Failed to load MIDI music\n");
@@ -703,7 +759,7 @@ class FluidPlayer : public AbstractMusicPlayer
             status_ = kPaused;
         else
         {
-            status_  = kPlaying;
+            status_ = kPlaying;
             ma_sound_start(&fluid_stream_);
         }
     }
@@ -781,7 +837,7 @@ AbstractMusicPlayer *PlayFluidMusic(uint8_t *data, int length, bool loop)
     }
 
     if (!player->OpenMemory(data,
-                           length)) // Lobo: quietly log it instead of completely exiting EDGE
+                            length)) // Lobo: quietly log it instead of completely exiting EDGE
     {
         LogDebug("Fluidlite player: failed to load MIDI file!\n");
         delete[] data;

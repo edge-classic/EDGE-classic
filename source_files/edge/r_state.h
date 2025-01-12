@@ -168,17 +168,20 @@ class RenderState
 
     virtual void ShadeModel(GLenum model) = 0;
 
-    virtual void Scissor(GLint x, GLint y, GLsizei width, GLsizei height)  = 0;
+    virtual void Scissor(GLint x, GLint y, GLsizei width, GLsizei height) = 0;
 
     virtual void GenTextures(GLsizei n, GLuint *textures) = 0;
 
     virtual void FinishTextures(GLsizei n, GLuint *textures) = 0;
 
-    virtual void TexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const void *pixels, RenderUsage usage = kRenderUsageImmutable) = 0;
+    virtual void TexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height,
+                            GLint border, GLenum format, GLenum type, const void *pixels,
+                            RenderUsage usage = kRenderUsageImmutable) = 0;
 
     virtual void PixelStorei(GLenum pname, GLint param) = 0;
 
-    virtual void ReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, void *pixels) = 0;
+    virtual void ReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type,
+                            void *pixels) = 0;
 
     virtual void PixelZoom(GLfloat xfactor, GLfloat yfactor) = 0;
 

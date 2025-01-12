@@ -37,7 +37,7 @@ namespace coal
 struct MemoryBlock
 {
     int used = 0;
-    
+
     double data[4096];
 };
 

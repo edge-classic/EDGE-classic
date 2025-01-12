@@ -46,14 +46,14 @@ static constexpr uint16_t kMaximumSoundChannels = 256;
 SoundChannel *mix_channels[kMaximumSoundChannels];
 int           total_channels;
 
-bool  vacuum_sound_effects    = false;
-bool  submerged_sound_effects = false;
-bool  outdoor_reverb          = false;
-bool  dynamic_reverb          = false;
-bool  ddf_reverb              = false;
-int   ddf_reverb_type         = 0;
-int   ddf_reverb_ratio        = 0;
-int   ddf_reverb_delay        = 0;
+bool vacuum_sound_effects    = false;
+bool submerged_sound_effects = false;
+bool outdoor_reverb          = false;
+bool dynamic_reverb          = false;
+bool ddf_reverb              = false;
+int  ddf_reverb_type         = 0;
+int  ddf_reverb_ratio        = 0;
+int  ddf_reverb_delay        = 0;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(sound_effect_volume, "0.15", kConsoleVariableFlagArchive)
 
@@ -104,7 +104,7 @@ void FreeSoundChannels(void)
         delete chan;
     }
 
-    EPI_CLEAR_MEMORY(mix_channels, SoundChannel*, 256);
+    EPI_CLEAR_MEMORY(mix_channels, SoundChannel *, 256);
 }
 
 void KillSoundChannel(int k)
@@ -181,11 +181,12 @@ void UpdateSounds(MapObject *listener, BAMAngle angle)
     listen_z = listener ? listener->z : 0;
 
     ma_engine_listener_set_position(&sound_engine, 0, listen_x, listen_z, -listen_y);
-    
+
     if (listener)
     {
         ma_engine_listener_set_direction(&sound_engine, 0, epi::BAMCos(angle), 0, -epi::BAMSin(angle));
-        BAMAngle velocity_angle = PointToAngle(listener->x, listener->y, listener->x + listener->momentum_.X, listener->y + listener->momentum_.Y);
+        BAMAngle velocity_angle = PointToAngle(listener->x, listener->y, listener->x + listener->momentum_.X,
+                                               listener->y + listener->momentum_.Y);
         ma_engine_listener_set_velocity(&sound_engine, 0, epi::BAMCos(velocity_angle), 0, -epi::BAMSin(velocity_angle));
     }
     else

@@ -3442,9 +3442,9 @@ bool MidiSequencer::BuildSMFTrackData(const std::vector<std::vector<uint8_t>> &t
             if (!ok)
             {
                 int len = stbsp_snprintf(error, 150,
-                                   "buildTrackData: Can't read variable-length "
-                                   "value at begin of track %d.\n",
-                                   (int)tk);
+                                         "buildTrackData: Can't read variable-length "
+                                         "value at begin of track %d.\n",
+                                         (int)tk);
                 if ((len > 0) && (len < 150))
                     midi_parsing_errors_string_ += std::string(error, (size_t)len);
                 return false;

@@ -41,7 +41,7 @@ int joystick_device;                  // choice in menu, 0 for none
 
 static int          total_joysticks;
 static int          current_joystick; // 0 for none
-bool         need_mouse_recapture = false;
+bool                need_mouse_recapture = false;
 SDL_Joystick       *joystick_info        = nullptr;
 SDL_GameController *gamepad_info         = nullptr;
 SDL_JoystickID      current_gamepad      = -1;

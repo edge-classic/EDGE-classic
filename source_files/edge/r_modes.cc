@@ -45,9 +45,9 @@
 #include "r_wipe.h"
 
 // Globals
-int current_screen_width;
-int current_screen_height;
-int current_screen_depth;
+int        current_screen_width;
+int        current_screen_height;
+int        current_screen_depth;
 WindowMode current_window_mode;
 
 DisplayMode borderless_mode;
@@ -130,9 +130,7 @@ void DumpResolutionList(void)
             LogPrint("\n");
 
         LogPrint("  %4dx%4d @ %02d %s", cur->width, cur->height, cur->depth,
-                 cur->window_mode == kWindowModeBorderless
-                     ? "BL"
-                     : "win");
+                 cur->window_mode == kWindowModeBorderless ? "BL" : "win");
     }
 
     LogPrint("\n");

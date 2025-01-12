@@ -40,91 +40,97 @@
 
 typedef struct
 {
-    ma_data_source_base ds;
-    ma_read_proc onRead;
-    ma_seek_proc onSeek;
-    ma_tell_proc onTell;
-    void* pReadSeekTellUserData;
+    ma_data_source_base     ds;
+    ma_read_proc            onRead;
+    ma_seek_proc            onSeek;
+    ma_tell_proc            onTell;
+    void                   *pReadSeekTellUserData;
     ma_allocation_callbacks allocationCallbacks;
-    ma_format format;
-    ma_uint32 channels;
-    ma_uint32 sampleRate;
-    ma_uint64 cursor;
-    stb_vorbis* stb;
+    ma_format               format;
+    ma_uint32               channels;
+    ma_uint32               sampleRate;
+    ma_uint64               cursor;
+    stb_vorbis             *stb;
 } ma_stbvorbis;
 
-static ma_result ma_stbvorbis_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void* pReadSeekTellUserData, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_stbvorbis* pVorbis);
-static ma_result ma_stbvorbis_init_memory(const void* pData, size_t dataSize, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_stbvorbis* pVorbis);
-static void ma_stbvorbis_uninit(ma_stbvorbis* pVorbis, const ma_allocation_callbacks* pAllocationCallbacks);
-static ma_result ma_stbvorbis_read_pcm_frames(ma_stbvorbis* pVorbis, void* pFramesOut, ma_uint64 frameCount, ma_uint64* pFramesRead);
-static ma_result ma_stbvorbis_seek_to_pcm_frame(ma_stbvorbis* pVorbis, ma_uint64 frameIndex);
-static ma_result ma_stbvorbis_get_data_format(ma_stbvorbis* pVorbis, ma_format* pFormat, ma_uint32* pChannels, ma_uint32* pSampleRate, ma_channel* pChannelMap, size_t channelMapCap);
-static ma_result ma_stbvorbis_get_cursor_in_pcm_frames(ma_stbvorbis* pVorbis, ma_uint64* pCursor);
-static ma_result ma_stbvorbis_get_length_in_pcm_frames(ma_stbvorbis* pVorbis, ma_uint64* pLength);
+static ma_result ma_stbvorbis_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell,
+                                   void *pReadSeekTellUserData, const ma_decoding_backend_config *pConfig,
+                                   const ma_allocation_callbacks *pAllocationCallbacks, ma_stbvorbis *pVorbis);
+static ma_result ma_stbvorbis_init_memory(const void *pData, size_t dataSize, const ma_decoding_backend_config *pConfig,
+                                          const ma_allocation_callbacks *pAllocationCallbacks, ma_stbvorbis *pVorbis);
+static void      ma_stbvorbis_uninit(ma_stbvorbis *pVorbis, const ma_allocation_callbacks *pAllocationCallbacks);
+static ma_result ma_stbvorbis_read_pcm_frames(ma_stbvorbis *pVorbis, void *pFramesOut, ma_uint64 frameCount,
+                                              ma_uint64 *pFramesRead);
+static ma_result ma_stbvorbis_seek_to_pcm_frame(ma_stbvorbis *pVorbis, ma_uint64 frameIndex);
+static ma_result ma_stbvorbis_get_data_format(ma_stbvorbis *pVorbis, ma_format *pFormat, ma_uint32 *pChannels,
+                                              ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap);
+static ma_result ma_stbvorbis_get_cursor_in_pcm_frames(ma_stbvorbis *pVorbis, ma_uint64 *pCursor);
+static ma_result ma_stbvorbis_get_length_in_pcm_frames(ma_stbvorbis *pVorbis, ma_uint64 *pLength);
 
-static ma_result ma_stbvorbis_ds_read(ma_data_source* pDataSource, void* pFramesOut, ma_uint64 frameCount, ma_uint64* pFramesRead)
+static ma_result ma_stbvorbis_ds_read(ma_data_source *pDataSource, void *pFramesOut, ma_uint64 frameCount,
+                                      ma_uint64 *pFramesRead)
 {
-    return ma_stbvorbis_read_pcm_frames((ma_stbvorbis*)pDataSource, pFramesOut, frameCount, pFramesRead);
+    return ma_stbvorbis_read_pcm_frames((ma_stbvorbis *)pDataSource, pFramesOut, frameCount, pFramesRead);
 }
 
-static ma_result ma_stbvorbis_ds_seek(ma_data_source* pDataSource, ma_uint64 frameIndex)
+static ma_result ma_stbvorbis_ds_seek(ma_data_source *pDataSource, ma_uint64 frameIndex)
 {
-    return ma_stbvorbis_seek_to_pcm_frame((ma_stbvorbis*)pDataSource, frameIndex);
+    return ma_stbvorbis_seek_to_pcm_frame((ma_stbvorbis *)pDataSource, frameIndex);
 }
 
-static ma_result ma_stbvorbis_ds_get_data_format(ma_data_source* pDataSource, ma_format* pFormat, ma_uint32* pChannels, ma_uint32* pSampleRate, ma_channel* pChannelMap, size_t channelMapCap)
+static ma_result ma_stbvorbis_ds_get_data_format(ma_data_source *pDataSource, ma_format *pFormat, ma_uint32 *pChannels,
+                                                 ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
 {
-    return ma_stbvorbis_get_data_format((ma_stbvorbis*)pDataSource, pFormat, pChannels, pSampleRate, pChannelMap, channelMapCap);
+    return ma_stbvorbis_get_data_format((ma_stbvorbis *)pDataSource, pFormat, pChannels, pSampleRate, pChannelMap,
+                                        channelMapCap);
 }
 
-static ma_result ma_stbvorbis_ds_get_cursor(ma_data_source* pDataSource, ma_uint64* pCursor)
+static ma_result ma_stbvorbis_ds_get_cursor(ma_data_source *pDataSource, ma_uint64 *pCursor)
 {
-    return ma_stbvorbis_get_cursor_in_pcm_frames((ma_stbvorbis*)pDataSource, pCursor);
+    return ma_stbvorbis_get_cursor_in_pcm_frames((ma_stbvorbis *)pDataSource, pCursor);
 }
 
-static ma_result ma_stbvorbis_ds_get_length(ma_data_source* pDataSource, ma_uint64* pLength)
+static ma_result ma_stbvorbis_ds_get_length(ma_data_source *pDataSource, ma_uint64 *pLength)
 {
-    return ma_stbvorbis_get_length_in_pcm_frames((ma_stbvorbis*)pDataSource, pLength);
+    return ma_stbvorbis_get_length_in_pcm_frames((ma_stbvorbis *)pDataSource, pLength);
 }
 
-static ma_data_source_vtable g_ma_stbvorbis_ds_vtable =
-{
-    ma_stbvorbis_ds_read,
-    ma_stbvorbis_ds_seek,
-    ma_stbvorbis_ds_get_data_format,
-    ma_stbvorbis_ds_get_cursor,
-    ma_stbvorbis_ds_get_length,
-    NULL,   /* onSetLooping */
-    0
-};
+static ma_data_source_vtable g_ma_stbvorbis_ds_vtable = {ma_stbvorbis_ds_read,
+                                                         ma_stbvorbis_ds_seek,
+                                                         ma_stbvorbis_ds_get_data_format,
+                                                         ma_stbvorbis_ds_get_cursor,
+                                                         ma_stbvorbis_ds_get_length,
+                                                         NULL, /* onSetLooping */
+                                                         0};
 
-
-static ma_result ma_stbvorbis_init_internal(const ma_decoding_backend_config* pConfig, ma_stbvorbis* pVorbis)
+static ma_result ma_stbvorbis_init_internal(const ma_decoding_backend_config *pConfig, ma_stbvorbis *pVorbis)
 {
-    ma_result result;
+    ma_result             result;
     ma_data_source_config dataSourceConfig;
 
     EPI_UNUSED(pConfig);
 
-    if (pVorbis == NULL) {
+    if (pVorbis == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
     EPI_CLEAR_MEMORY(pVorbis, ma_stbvorbis, 1);
-    pVorbis->format = ma_format_f32;    /* Only supporting f32. */
+    pVorbis->format = ma_format_f32; /* Only supporting f32. */
 
-    dataSourceConfig = ma_data_source_config_init();
+    dataSourceConfig        = ma_data_source_config_init();
     dataSourceConfig.vtable = &g_ma_stbvorbis_ds_vtable;
 
     result = ma_data_source_init(&dataSourceConfig, &pVorbis->ds);
-    if (result != MA_SUCCESS) {
-        return result;  /* Failed to initialize the base data source. */
+    if (result != MA_SUCCESS)
+    {
+        return result; /* Failed to initialize the base data source. */
     }
 
     return MA_SUCCESS;
 }
 
-static ma_result ma_stbvorbis_post_init(ma_stbvorbis* pVorbis)
+static ma_result ma_stbvorbis_post_init(ma_stbvorbis *pVorbis)
 {
     stb_vorbis_info info;
 
@@ -138,52 +144,61 @@ static ma_result ma_stbvorbis_post_init(ma_stbvorbis* pVorbis)
     return MA_SUCCESS;
 }
 
-static ma_result ma_stbvorbis_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void* pReadSeekTellUserData, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_stbvorbis* pVorbis)
+static ma_result ma_stbvorbis_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell,
+                                   void *pReadSeekTellUserData, const ma_decoding_backend_config *pConfig,
+                                   const ma_allocation_callbacks *pAllocationCallbacks, ma_stbvorbis *pVorbis)
 {
     EPI_UNUSED(pAllocationCallbacks);
 
     ma_result result;
 
     result = ma_stbvorbis_init_internal(pConfig, pVorbis);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         return result;
     }
 
-    if (onRead == NULL || onSeek == NULL) {
+    if (onRead == NULL || onSeek == NULL)
+    {
         return MA_INVALID_ARGS; /* onRead and onSeek are mandatory. */
     }
 
-    pVorbis->onRead = onRead;
-    pVorbis->onSeek = onSeek;
-    pVorbis->onTell = onTell;
+    pVorbis->onRead                = onRead;
+    pVorbis->onSeek                = onSeek;
+    pVorbis->onTell                = onTell;
     pVorbis->pReadSeekTellUserData = pReadSeekTellUserData;
 
     return MA_SUCCESS;
 }
 
-static ma_result ma_stbvorbis_init_memory(const void* pData, size_t dataSize, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_stbvorbis* pVorbis)
+static ma_result ma_stbvorbis_init_memory(const void *pData, size_t dataSize, const ma_decoding_backend_config *pConfig,
+                                          const ma_allocation_callbacks *pAllocationCallbacks, ma_stbvorbis *pVorbis)
 {
     ma_result result;
 
     result = ma_stbvorbis_init_internal(pConfig, pVorbis);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         return result;
     }
 
     EPI_UNUSED(pAllocationCallbacks);
 
     /* stb_vorbis uses an int as it's size specifier, restricting it to 32-bit even on 64-bit systems. *sigh*. */
-    if (dataSize > INT_MAX) {
+    if (dataSize > INT_MAX)
+    {
         return MA_TOO_BIG;
     }
 
-    pVorbis->stb = stb_vorbis_open_memory((const unsigned char*)pData, (int)dataSize, NULL, NULL);
-    if (pVorbis->stb == NULL) {
+    pVorbis->stb = stb_vorbis_open_memory((const unsigned char *)pData, (int)dataSize, NULL, NULL);
+    if (pVorbis->stb == NULL)
+    {
         return MA_INVALID_FILE;
     }
 
     result = ma_stbvorbis_post_init(pVorbis);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         stb_vorbis_close(pVorbis->stb);
         return result;
     }
@@ -191,11 +206,12 @@ static ma_result ma_stbvorbis_init_memory(const void* pData, size_t dataSize, co
     return MA_SUCCESS;
 }
 
-static void ma_stbvorbis_uninit(ma_stbvorbis* pVorbis, const ma_allocation_callbacks* pAllocationCallbacks)
+static void ma_stbvorbis_uninit(ma_stbvorbis *pVorbis, const ma_allocation_callbacks *pAllocationCallbacks)
 {
     EPI_UNUSED(pAllocationCallbacks);
 
-    if (pVorbis == NULL) {
+    if (pVorbis == NULL)
+    {
         return;
     }
 
@@ -204,66 +220,80 @@ static void ma_stbvorbis_uninit(ma_stbvorbis* pVorbis, const ma_allocation_callb
     ma_data_source_uninit(&pVorbis->ds);
 }
 
-static ma_result ma_stbvorbis_read_pcm_frames(ma_stbvorbis* pVorbis, void* pFramesOut, ma_uint64 frameCount, ma_uint64* pFramesRead)
+static ma_result ma_stbvorbis_read_pcm_frames(ma_stbvorbis *pVorbis, void *pFramesOut, ma_uint64 frameCount,
+                                              ma_uint64 *pFramesRead)
 {
-    if (pFramesRead != NULL) {
+    if (pFramesRead != NULL)
+    {
         *pFramesRead = 0;
     }
 
-    if (frameCount == 0) {
+    if (frameCount == 0)
+    {
         return MA_INVALID_ARGS;
     }
 
-    if (pVorbis == NULL) {
+    if (pVorbis == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
     /* We always use floating point format. */
-    ma_result result = MA_SUCCESS;  /* Must be initialized to MA_SUCCESS. */
+    ma_result result          = MA_SUCCESS; /* Must be initialized to MA_SUCCESS. */
     ma_uint64 totalFramesRead = 0;
     ma_format format;
     ma_uint32 channels;
 
     ma_stbvorbis_get_data_format(pVorbis, &format, &channels, NULL, NULL, 0);
 
-    if (format == ma_format_f32) {
-        totalFramesRead = stb_vorbis_get_samples_float_interleaved(pVorbis->stb, channels, (float*)pFramesOut, (int)frameCount * channels);   /* Safe cast. */
-    } else {
+    if (format == ma_format_f32)
+    {
+        totalFramesRead = stb_vorbis_get_samples_float_interleaved(pVorbis->stb, channels, (float *)pFramesOut,
+                                                                   (int)frameCount * channels); /* Safe cast. */
+    }
+    else
+    {
         result = MA_INVALID_ARGS;
     }
 
     pVorbis->cursor += totalFramesRead;
 
-    if (totalFramesRead == 0) {
+    if (totalFramesRead == 0)
+    {
         result = MA_AT_END;
     }
 
-    if (pFramesRead != NULL) {
+    if (pFramesRead != NULL)
+    {
         *pFramesRead = totalFramesRead;
     }
 
-    if (result == MA_SUCCESS && totalFramesRead == 0) {
-        result  = MA_AT_END;
+    if (result == MA_SUCCESS && totalFramesRead == 0)
+    {
+        result = MA_AT_END;
     }
 
     return result;
 }
 
-static ma_result ma_stbvorbis_seek_to_pcm_frame(ma_stbvorbis* pVorbis, ma_uint64 frameIndex)
+static ma_result ma_stbvorbis_seek_to_pcm_frame(ma_stbvorbis *pVorbis, ma_uint64 frameIndex)
 {
-    if (pVorbis == NULL) {
+    if (pVorbis == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
     int vorbisResult;
 
-    if (frameIndex > UINT_MAX) {
+    if (frameIndex > UINT_MAX)
+    {
         return MA_INVALID_ARGS; /* Trying to seek beyond the 32-bit maximum of stb_vorbis. */
     }
 
-    vorbisResult = stb_vorbis_seek(pVorbis->stb, (unsigned int)frameIndex);  /* Safe cast. */
-    if (vorbisResult == 0) {
-        return MA_ERROR;    /* See failed. */
+    vorbisResult = stb_vorbis_seek(pVorbis->stb, (unsigned int)frameIndex); /* Safe cast. */
+    if (vorbisResult == 0)
+    {
+        return MA_ERROR;                                                    /* See failed. */
     }
 
     pVorbis->cursor = frameIndex;
@@ -271,54 +301,66 @@ static ma_result ma_stbvorbis_seek_to_pcm_frame(ma_stbvorbis* pVorbis, ma_uint64
     return MA_SUCCESS;
 }
 
-static ma_result ma_stbvorbis_get_data_format(ma_stbvorbis* pVorbis, ma_format* pFormat, ma_uint32* pChannels, ma_uint32* pSampleRate, ma_channel* pChannelMap, size_t channelMapCap)
+static ma_result ma_stbvorbis_get_data_format(ma_stbvorbis *pVorbis, ma_format *pFormat, ma_uint32 *pChannels,
+                                              ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
 {
     /* Defaults for safety. */
-    if (pFormat != NULL) {
+    if (pFormat != NULL)
+    {
         *pFormat = ma_format_unknown;
     }
-    if (pChannels != NULL) {
+    if (pChannels != NULL)
+    {
         *pChannels = 0;
     }
-    if (pSampleRate != NULL) {
+    if (pSampleRate != NULL)
+    {
         *pSampleRate = 0;
     }
-    if (pChannelMap != NULL) {
+    if (pChannelMap != NULL)
+    {
         EPI_CLEAR_MEMORY(pChannelMap, ma_channel, channelMapCap);
     }
 
-    if (pVorbis == NULL) {
+    if (pVorbis == NULL)
+    {
         return MA_INVALID_OPERATION;
     }
 
-    if (pFormat != NULL) {
+    if (pFormat != NULL)
+    {
         *pFormat = pVorbis->format;
     }
 
-    if (pChannels != NULL) {
+    if (pChannels != NULL)
+    {
         *pChannels = pVorbis->channels;
     }
 
-    if (pSampleRate != NULL) {
+    if (pSampleRate != NULL)
+    {
         *pSampleRate = pVorbis->sampleRate;
     }
 
-    if (pChannelMap != NULL) {
+    if (pChannelMap != NULL)
+    {
         ma_channel_map_init_standard(ma_standard_channel_map_vorbis, pChannelMap, channelMapCap, pVorbis->channels);
     }
 
     return MA_SUCCESS;
 }
 
-static ma_result ma_stbvorbis_get_cursor_in_pcm_frames(ma_stbvorbis* pVorbis, ma_uint64* pCursor)
+static ma_result ma_stbvorbis_get_cursor_in_pcm_frames(ma_stbvorbis *pVorbis, ma_uint64 *pCursor)
 {
-    if (pCursor == NULL) {
+    if (pCursor == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
-    *pCursor = 0;   /* Safety. */
+    *pCursor = 0; /* Safety. */
 
-    if (pVorbis == NULL) {
+    if (pVorbis == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
@@ -327,15 +369,17 @@ static ma_result ma_stbvorbis_get_cursor_in_pcm_frames(ma_stbvorbis* pVorbis, ma
     return MA_SUCCESS;
 }
 
-static ma_result ma_stbvorbis_get_length_in_pcm_frames(ma_stbvorbis* pVorbis, ma_uint64* pLength)
+static ma_result ma_stbvorbis_get_length_in_pcm_frames(ma_stbvorbis *pVorbis, ma_uint64 *pLength)
 {
-    if (pLength == NULL) {
+    if (pLength == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
-    *pLength = 0;   /* Safety. */
+    *pLength = 0; /* Safety. */
 
-    if (pVorbis == NULL) {
+    if (pVorbis == NULL)
+    {
         return MA_INVALID_ARGS;
     }
 
@@ -344,21 +388,28 @@ static ma_result ma_stbvorbis_get_length_in_pcm_frames(ma_stbvorbis* pVorbis, ma
     return MA_SUCCESS;
 }
 
-static ma_result ma_decoding_backend_init__stbvorbis(void* pUserData, ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void* pReadSeekTellUserData, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_data_source** ppBackend)
+static ma_result ma_decoding_backend_init__stbvorbis(void *pUserData, ma_read_proc onRead, ma_seek_proc onSeek,
+                                                     ma_tell_proc onTell, void *pReadSeekTellUserData,
+                                                     const ma_decoding_backend_config *pConfig,
+                                                     const ma_allocation_callbacks    *pAllocationCallbacks,
+                                                     ma_data_source                  **ppBackend)
 {
-    ma_result result;
-    ma_stbvorbis* pVorbis;
+    ma_result     result;
+    ma_stbvorbis *pVorbis;
 
-    EPI_UNUSED(pUserData);    /* For now not using pUserData, but once we start storing the vorbis decoder state within the ma_decoder structure this will be set to the decoder so we can avoid a malloc. */
+    EPI_UNUSED(pUserData); /* For now not using pUserData, but once we start storing the vorbis decoder state within the
+                              ma_decoder structure this will be set to the decoder so we can avoid a malloc. */
 
     /* For now we're just allocating the decoder backend on the heap. */
-    pVorbis = (ma_stbvorbis*)ma_malloc(sizeof(*pVorbis), pAllocationCallbacks);
-    if (pVorbis == NULL) {
+    pVorbis = (ma_stbvorbis *)ma_malloc(sizeof(*pVorbis), pAllocationCallbacks);
+    if (pVorbis == NULL)
+    {
         return MA_OUT_OF_MEMORY;
     }
 
     result = ma_stbvorbis_init(onRead, onSeek, onTell, pReadSeekTellUserData, pConfig, pAllocationCallbacks, pVorbis);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         ma_free(pVorbis, pAllocationCallbacks);
         return result;
     }
@@ -368,21 +419,27 @@ static ma_result ma_decoding_backend_init__stbvorbis(void* pUserData, ma_read_pr
     return MA_SUCCESS;
 }
 
-static ma_result ma_decoding_backend_init_memory__stbvorbis(void* pUserData, const void* pData, size_t dataSize, const ma_decoding_backend_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_data_source** ppBackend)
+static ma_result ma_decoding_backend_init_memory__stbvorbis(void *pUserData, const void *pData, size_t dataSize,
+                                                            const ma_decoding_backend_config *pConfig,
+                                                            const ma_allocation_callbacks    *pAllocationCallbacks,
+                                                            ma_data_source                  **ppBackend)
 {
-    ma_result result;
-    ma_stbvorbis* pVorbis;
+    ma_result     result;
+    ma_stbvorbis *pVorbis;
 
-    EPI_UNUSED(pUserData);    /* For now not using pUserData, but once we start storing the vorbis decoder state within the ma_decoder structure this will be set to the decoder so we can avoid a malloc. */
+    EPI_UNUSED(pUserData); /* For now not using pUserData, but once we start storing the vorbis decoder state within the
+                              ma_decoder structure this will be set to the decoder so we can avoid a malloc. */
 
     /* For now we're just allocating the decoder backend on the heap. */
-    pVorbis = (ma_stbvorbis*)ma_malloc(sizeof(*pVorbis), pAllocationCallbacks);
-    if (pVorbis == NULL) {
+    pVorbis = (ma_stbvorbis *)ma_malloc(sizeof(*pVorbis), pAllocationCallbacks);
+    if (pVorbis == NULL)
+    {
         return MA_OUT_OF_MEMORY;
     }
 
     result = ma_stbvorbis_init_memory(pData, dataSize, pConfig, pAllocationCallbacks, pVorbis);
-    if (result != MA_SUCCESS) {
+    if (result != MA_SUCCESS)
+    {
         ma_free(pVorbis, pAllocationCallbacks);
         return result;
     }
@@ -392,9 +449,10 @@ static ma_result ma_decoding_backend_init_memory__stbvorbis(void* pUserData, con
     return MA_SUCCESS;
 }
 
-static void ma_decoding_backend_uninit__stbvorbis(void* pUserData, ma_data_source* pBackend, const ma_allocation_callbacks* pAllocationCallbacks)
+static void ma_decoding_backend_uninit__stbvorbis(void *pUserData, ma_data_source *pBackend,
+                                                  const ma_allocation_callbacks *pAllocationCallbacks)
 {
-    ma_stbvorbis* pVorbis = (ma_stbvorbis*)pBackend;
+    ma_stbvorbis *pVorbis = (ma_stbvorbis *)pBackend;
 
     EPI_UNUSED(pUserData);
 
@@ -402,14 +460,11 @@ static void ma_decoding_backend_uninit__stbvorbis(void* pUserData, ma_data_sourc
     ma_free(pVorbis, pAllocationCallbacks);
 }
 
-static ma_decoding_backend_vtable g_ma_decoding_backend_vtable_stbvorbis =
-{
-    ma_decoding_backend_init__stbvorbis,
-    NULL, // onInitFile()
-    NULL, // onInitFileW()
-    ma_decoding_backend_init_memory__stbvorbis,
-    ma_decoding_backend_uninit__stbvorbis
-};
+static ma_decoding_backend_vtable g_ma_decoding_backend_vtable_stbvorbis = {ma_decoding_backend_init__stbvorbis,
+                                                                            NULL, // onInitFile()
+                                                                            NULL, // onInitFileW()
+                                                                            ma_decoding_backend_init_memory__stbvorbis,
+                                                                            ma_decoding_backend_uninit__stbvorbis};
 
 static ma_decoding_backend_vtable *custom_vtable = &g_ma_decoding_backend_vtable_stbvorbis;
 
@@ -433,8 +488,8 @@ class OGGPlayer : public AbstractMusicPlayer
     bool looping_;
 
     ma_decoder ogg_decoder_;
-    ma_sound ogg_stream_;
-    uint8_t    *ogg_data_;
+    ma_sound   ogg_stream_;
+    uint8_t   *ogg_data_;
 
   public:
     bool OpenMemory(uint8_t *data, int length);
@@ -468,9 +523,9 @@ bool OGGPlayer::OpenMemory(uint8_t *data, int length)
     if (status_ != kNotLoaded)
         Close();
 
-    ma_decoder_config decode_config = ma_decoder_config_init_default();
-    decode_config.format = ma_format_f32;
-    decode_config.customBackendCount = 1;
+    ma_decoder_config decode_config      = ma_decoder_config_init_default();
+    decode_config.format                 = ma_format_f32;
+    decode_config.customBackendCount     = 1;
     decode_config.pCustomBackendUserData = NULL;
     decode_config.ppCustomBackendVTables = &custom_vtable;
 
@@ -480,7 +535,9 @@ bool OGGPlayer::OpenMemory(uint8_t *data, int length)
         return false;
     }
 
-    if (ma_sound_init_from_data_source(&music_engine, &ogg_decoder_, MA_SOUND_FLAG_STREAM|MA_SOUND_FLAG_NO_SPATIALIZATION, NULL, &ogg_stream_) != MA_SUCCESS)
+    if (ma_sound_init_from_data_source(&music_engine, &ogg_decoder_,
+                                       MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION, NULL,
+                                       &ogg_stream_) != MA_SUCCESS)
     {
         ma_decoder_uninit(&ogg_decoder_);
         LogWarning("Failed to load OGG music (corrupt ogg?)\n");
@@ -546,7 +603,7 @@ void OGGPlayer::Play(bool loop)
         status_ = kPaused;
     else
     {
-        status_  = kPlaying;
+        status_ = kPlaying;
         ma_sound_start(&ogg_stream_);
     }
 }
@@ -596,9 +653,9 @@ AbstractMusicPlayer *PlayOGGMusic(uint8_t *data, int length, bool looping)
 
 bool LoadOGGSound(SoundData *buf, const uint8_t *data, int length)
 {
-    ma_decoder_config decode_config = ma_decoder_config_init_default();
-    decode_config.format = ma_format_f32;
-    decode_config.customBackendCount = 1;
+    ma_decoder_config decode_config      = ma_decoder_config_init_default();
+    decode_config.format                 = ma_format_f32;
+    decode_config.customBackendCount     = 1;
     decode_config.pCustomBackendUserData = NULL;
     decode_config.ppCustomBackendVTables = &custom_vtable;
     ma_decoder decode;

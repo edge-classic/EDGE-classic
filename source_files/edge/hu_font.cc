@@ -433,8 +433,8 @@ void Font::LoadFontTTF()
             uint8_t *font_bitmap = new uint8_t[bitmap_size * bitmap_size * 4];
             memset(font_bitmap, 255, bitmap_size * bitmap_size * 4);
 
-            uint8_t* src = temp_bitmap;
-            uint8_t* dest = &font_bitmap[3];
+            uint8_t *src  = temp_bitmap;
+            uint8_t *dest = &font_bitmap[3];
             for (int32_t j = 0; j < bitmap_size * bitmap_size; j++, src++, dest += 4)
             {
                 *dest = *src;
@@ -444,16 +444,16 @@ void Font::LoadFontTTF()
             render_state->BindTexture(truetype_texture_id_[i]);
             render_state->TextureMinFilter(GL_NEAREST);
             render_state->TextureMagFilter(GL_NEAREST);
-            render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap_size, bitmap_size, 0, GL_RGBA,
-                                     GL_UNSIGNED_BYTE, font_bitmap);
+            render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap_size, bitmap_size, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                                     font_bitmap);
             render_state->FinishTextures(1, &truetype_texture_id_[i]);
 
             render_state->GenTextures(1, &truetype_smoothed_texture_id_[i]);
             render_state->BindTexture(truetype_smoothed_texture_id_[i]);
             render_state->TextureMinFilter(GL_LINEAR);
             render_state->TextureMagFilter(GL_LINEAR);
-            render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap_size, bitmap_size, 0, GL_RGBA,
-                                     GL_UNSIGNED_BYTE, font_bitmap);
+            render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap_size, bitmap_size, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                                     font_bitmap);
             render_state->FinishTextures(1, &truetype_smoothed_texture_id_[i]);
 
             delete[] temp_bitmap;

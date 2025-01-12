@@ -95,7 +95,7 @@ void ComputeSkyHeights(void)
 
     SectorSkyRing *rings = new SectorSkyRing[total_level_sectors];
 
-    EPI_CLEAR_MEMORY(rings, SectorSkyRing, total_level_sectors); 
+    EPI_CLEAR_MEMORY(rings, SectorSkyRing, total_level_sectors);
 
     for (i = 0, sec = level_sectors; i < total_level_sectors; i++, sec++)
     {
@@ -232,7 +232,8 @@ static void BeginSkyUnit(void)
 {
     total_sky_verts = 0;
     StartUnitBatch(false);
-    sky_glvert = BeginRenderUnit(GL_TRIANGLES, kMaximumLocalVertices, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
+    sky_glvert       = BeginRenderUnit(GL_TRIANGLES, kMaximumLocalVertices, GL_MODULATE, 0,
+                                       (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
     sky_unit_started = true;
 }
 
@@ -264,7 +265,8 @@ static void BuildSkyCircle()
 // Renders a cylindrical 'slice' of the sky between [top] and [bottom] on the z
 // axis
 // -----------------------------------------------------------------------------
-static void RenderSkySlice(float top, float bottom, float atop, float abottom, float dist, float tx, float ty, GLuint sky_tex_id, BlendingMode blend, RGBAColor fc_to_use, float fd_to_use)
+static void RenderSkySlice(float top, float bottom, float atop, float abottom, float dist, float tx, float ty,
+                           GLuint sky_tex_id, BlendingMode blend, RGBAColor fc_to_use, float fd_to_use)
 {
     float tc_x  = 0.0f;
     float tc_y1 = (top + 1.0f) * (ty * 0.5f);
@@ -276,27 +278,28 @@ static void RenderSkySlice(float top, float bottom, float atop, float abottom, f
         tc_y2 = -tc_y2;
     }
 
-    RGBAColor topcol = epi::MakeRGBA(255, 255, 255, (uint8_t)(atop * 255.0f));
+    RGBAColor topcol    = epi::MakeRGBA(255, 255, 255, (uint8_t)(atop * 255.0f));
     RGBAColor bottomcol = epi::MakeRGBA(255, 255, 255, (uint8_t)(abottom * 255.0f));
 
-    RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 128, GL_MODULATE, sky_tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, blend, fc_to_use, fd_to_use);
+    RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 128, GL_MODULATE, sky_tex_id, (GLuint)kTextureEnvironmentDisable,
+                                             0, 0, blend, fc_to_use, fd_to_use);
 
     // Go through circular points
     for (unsigned a = 0; a < 31; a++)
     {
         // Top
-        glvert->rgba = topcol;
+        glvert->rgba                   = topcol;
         glvert->texture_coordinates[0] = {{tc_x + tx, tc_y1}};
-        glvert++->position = {{(sky_circle[a + 1].X * dist), -(sky_circle[a + 1].Y * dist), (top * dist)}};
-        glvert->rgba = topcol;
+        glvert++->position             = {{(sky_circle[a + 1].X * dist), -(sky_circle[a + 1].Y * dist), (top * dist)}};
+        glvert->rgba                   = topcol;
         glvert->texture_coordinates[0] = {{tc_x, tc_y1}};
-        glvert++->position = {{(sky_circle[a].X * dist), -(sky_circle[a].Y * dist), (top * dist)}};
+        glvert++->position             = {{(sky_circle[a].X * dist), -(sky_circle[a].Y * dist), (top * dist)}};
 
         // Bottom
-        glvert->rgba = bottomcol;
+        glvert->rgba                   = bottomcol;
         glvert->texture_coordinates[0] = {{tc_x, tc_y2}};
-        glvert++->position = {{(sky_circle[a].X * dist), -(sky_circle[a].Y * dist), (bottom * dist)}};
-        glvert->rgba = bottomcol;
+        glvert++->position             = {{(sky_circle[a].X * dist), -(sky_circle[a].Y * dist), (bottom * dist)}};
+        glvert->rgba                   = bottomcol;
         glvert->texture_coordinates[0] = {{tc_x + tx, tc_y2}};
         glvert++->position = {{(sky_circle[a + 1].X * dist), -(sky_circle[a + 1].Y * dist), (bottom * dist)}};
 
@@ -305,20 +308,20 @@ static void RenderSkySlice(float top, float bottom, float atop, float abottom, f
 
     // Link last point -> first
     // Top
-    glvert->rgba = topcol;
+    glvert->rgba                   = topcol;
     glvert->texture_coordinates[0] = {{tc_x + tx, tc_y1}};
-    glvert++->position = {{(sky_circle[0].X * dist), -(sky_circle[0].Y * dist), (top * dist)}};
-    glvert->rgba = topcol;
+    glvert++->position             = {{(sky_circle[0].X * dist), -(sky_circle[0].Y * dist), (top * dist)}};
+    glvert->rgba                   = topcol;
     glvert->texture_coordinates[0] = {{tc_x, tc_y1}};
-    glvert++->position = {{(sky_circle[31].X * dist), -(sky_circle[31].Y * dist), (top * dist)}};
+    glvert++->position             = {{(sky_circle[31].X * dist), -(sky_circle[31].Y * dist), (top * dist)}};
 
     // Bottom
-    glvert->rgba = bottomcol;
+    glvert->rgba                   = bottomcol;
     glvert->texture_coordinates[0] = {{tc_x, tc_y2}};
-    glvert++->position = {{(sky_circle[31].X * dist), -(sky_circle[31].Y * dist), (bottom * dist)}};
-    glvert->rgba = bottomcol;
+    glvert++->position             = {{(sky_circle[31].X * dist), -(sky_circle[31].Y * dist), (bottom * dist)}};
+    glvert->rgba                   = bottomcol;
     glvert->texture_coordinates[0] = {{tc_x + tx, tc_y2}};
-    glvert->position = {{(sky_circle[0].X * dist), -(sky_circle[0].Y * dist), (bottom * dist)}};
+    glvert->position               = {{(sky_circle[0].X * dist), -(sky_circle[0].Y * dist), (bottom * dist)}};
 
     EndRenderUnit(128);
 }
@@ -354,9 +357,9 @@ static void RenderSkyCylinder(void)
         solid_sky_h = sky_h_ratio * 0.75f;
     float cap_z = dist * sky_h_ratio;
 
-    RGBAColor fc_to_use = current_map->outdoor_fog_color_;
-    float     fd_to_use = 0.01f * current_map->outdoor_fog_density_;
-    BlendingMode blend = kBlendingNoZBuffer;
+    RGBAColor    fc_to_use = current_map->outdoor_fog_color_;
+    float        fd_to_use = 0.01f * current_map->outdoor_fog_density_;
+    BlendingMode blend     = kBlendingNoZBuffer;
     // check for sector fog
     if (fc_to_use == kRGBANoValue)
     {
@@ -367,26 +370,27 @@ static void RenderSkyCylinder(void)
     {
         fc_to_use = kRGBANoValue;
         fd_to_use = 0.0f;
-        blend = (BlendingMode)(blend|kBlendingNoFog);
+        blend     = (BlendingMode)(blend | kBlendingNoFog);
     }
     else if (fc_to_use != kRGBANoValue)
     {
-       fd_to_use *= 0.005f;
+        fd_to_use *= 0.005f;
     }
 
     // Render top cap
-    RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, blend, fc_to_use, fd_to_use);
-    RGBAColor unit_col = sky_cap_color;
+    RendererVertex *glvert   = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0,
+                                               blend, fc_to_use, fd_to_use);
+    RGBAColor       unit_col = sky_cap_color;
 
-    glvert->rgba = unit_col;
+    glvert->rgba       = unit_col;
     glvert++->position = {{-cap_dist, -cap_dist, cap_z}};
-    glvert->rgba = unit_col;
+    glvert->rgba       = unit_col;
     glvert++->position = {{-cap_dist, cap_dist, cap_z}};
-    glvert->rgba = unit_col;
+    glvert->rgba       = unit_col;
     glvert++->position = {{cap_dist, cap_dist, cap_z}};
-    glvert->rgba = unit_col;
-    glvert->position = {{cap_dist, -cap_dist, cap_z}};
-   
+    glvert->rgba       = unit_col;
+    glvert->position   = {{cap_dist, -cap_dist, cap_z}};
+
     EndRenderUnit(4);
 
     // Render bottom cap
@@ -394,23 +398,24 @@ static void RenderSkyCylinder(void)
         unit_col = culling_fog_color;
     if (current_sky_stretch == kSkyStretchVanilla)
         cap_z = 0;
-        
-    glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, blend, fc_to_use, fd_to_use);
 
-    glvert->rgba = unit_col;
+    glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, blend, fc_to_use,
+                             fd_to_use);
+
+    glvert->rgba       = unit_col;
     glvert++->position = {{-cap_dist, -cap_dist, -cap_z}};
-    glvert->rgba = unit_col;
+    glvert->rgba       = unit_col;
     glvert++->position = {{-cap_dist, cap_dist, -cap_z}};
-    glvert->rgba = unit_col;
+    glvert->rgba       = unit_col;
     glvert++->position = {{cap_dist, cap_dist, -cap_z}};
-    glvert->rgba = unit_col;
-    glvert->position = {{cap_dist, -cap_dist, -cap_z}};
+    glvert->rgba       = unit_col;
+    glvert->position   = {{cap_dist, -cap_dist, -cap_z}};
 
     EndRenderUnit(4);
 
     // Render skybox sides
 
-    blend = (BlendingMode)(blend|kBlendingAlpha);
+    blend = (BlendingMode)(blend | kBlendingAlpha);
 
     // Check for odd sky sizes
     float tx = 0.125f;
@@ -422,43 +427,43 @@ static void RenderSkyCylinder(void)
     {
         if (sky_image->ScaledHeightActual() > 128)
         {
-            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Top Fade
-            RenderSkySlice(solid_sky_h, 0.0f, 1.0f, 1.0f, dist, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Top Solid
-            RenderSkySlice(0.0f, -solid_sky_h, 1.0f, 1.0f, dist, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Bottom Solid
-            RenderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Bottom Fade
+            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use); // Top Fade
+            RenderSkySlice(solid_sky_h, 0.0f, 1.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use); // Top Solid
+            RenderSkySlice(0.0f, -solid_sky_h, 1.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use); // Bottom Solid
+            RenderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use); // Bottom Fade
         }
         else
         {
             RenderSkySlice(1.0f, 0.75f, 0.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Top Fade
             RenderSkySlice(0.75f, 0.0f, 1.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Top Solid
-            RenderSkySlice(0.0f, -0.75f, 1.0f, 1.0f, dist, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use);                                    // Bottom Solid
-            RenderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use);                                    // Bottom Fade
+            RenderSkySlice(0.0f, -0.75f, 1.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use); // Bottom Solid
+            RenderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use); // Bottom Fade
         }
     }
     else if (current_sky_stretch == kSkyStretchRepeat)
     {
         if (sky_image->ScaledHeightActual() > 128)
         {
-            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Top Fade
-            RenderSkySlice(solid_sky_h, -solid_sky_h, 1.0f, 1.0f, dist, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Middle Solid
-            RenderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Bottom Fade
+            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use); // Top Fade
+            RenderSkySlice(solid_sky_h, -solid_sky_h, 1.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use); // Middle Solid
+            RenderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use); // Bottom Fade
         }
         else
         {
             RenderSkySlice(1.0f, 0.75f, 0.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Top Fade
-            RenderSkySlice(0.75f, -0.75f, 1.0f, 1.0f, dist, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use);                                    // Middle Solid
-            RenderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use);                                    // Bottom Fade
+            RenderSkySlice(0.75f, -0.75f, 1.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use); // Middle Solid
+            RenderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use); // Bottom Fade
         }
     }
     else if (current_sky_stretch == kSkyStretchStretch)
@@ -466,42 +471,44 @@ static void RenderSkyCylinder(void)
         if (sky_image->ScaledHeightActual() > 128)
         {
             ty = ((float)sky_image->ScaledHeightActual() / 256.0f);
-            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Top Fade
-            RenderSkySlice(solid_sky_h, -solid_sky_h, 1.0f, 1.0f, dist, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Middle Solid
-            RenderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Bottom Fade
+            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use); // Top Fade
+            RenderSkySlice(solid_sky_h, -solid_sky_h, 1.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use); // Middle Solid
+            RenderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use); // Bottom Fade
         }
         else
         {
             ty = 1.0f;
             RenderSkySlice(1.0f, 0.75f, 0.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Top Fade
-            RenderSkySlice(0.75f, -0.75f, 1.0f, 1.0f, dist, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use);                                    // Middle Solid
-            RenderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use);                                    // Bottom Fade
+            RenderSkySlice(0.75f, -0.75f, 1.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use); // Middle Solid
+            RenderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use); // Bottom Fade
         }
     }
-    else // Vanilla (or sane value if somehow this gets set out of expected
-         // range)
+    else                               // Vanilla (or sane value if somehow this gets set out of expected
+                                       // range)
     {
         if (sky_image->ScaledHeightActual() > 128)
         {
-            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist / 2, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use);                                                                   // Top Fade
-            RenderSkySlice(solid_sky_h, sky_h_ratio - solid_sky_h, 1.0f, 1.0f, dist / 2, tx, ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Middle Solid
-            RenderSkySlice(sky_h_ratio - solid_sky_h, 0.0f, 1.0f, 0.0f, dist / 2, tx, ty, sky_tex_id, blend, fc_to_use, fd_to_use);        // Bottom Fade
+            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist / 2, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use);            // Top Fade
+            RenderSkySlice(solid_sky_h, sky_h_ratio - solid_sky_h, 1.0f, 1.0f, dist / 2, tx, ty, sky_tex_id, blend,
+                           fc_to_use, fd_to_use); // Middle Solid
+            RenderSkySlice(sky_h_ratio - solid_sky_h, 0.0f, 1.0f, 0.0f, dist / 2, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use);            // Bottom Fade
         }
         else
         {
             ty *= 1.5f;
-            RenderSkySlice(1.0f, 0.98f, 0.0f, 1.0f, dist / 3, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Top Fade
-            RenderSkySlice(0.98f, 0.35f, 1.0f, 1.0f, dist / 3, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Middle Solid
-            RenderSkySlice(0.35f, 0.33f, 1.0f, 0.0f, dist / 3, tx,
-                           ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Bottom Fade
+            RenderSkySlice(1.0f, 0.98f, 0.0f, 1.0f, dist / 3, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use); // Top Fade
+            RenderSkySlice(0.98f, 0.35f, 1.0f, 1.0f, dist / 3, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use); // Middle Solid
+            RenderSkySlice(0.35f, 0.33f, 1.0f, 0.0f, dist / 3, tx, ty, sky_tex_id, blend, fc_to_use,
+                           fd_to_use); // Bottom Fade
         }
     }
 }
@@ -536,114 +543,122 @@ static void RenderSkybox(void)
         fd_to_use = view_properties->fog_density;
     }
 
-    RGBAColor unit_col = epi::MakeRGBA((uint8_t)(render_view_red_multiplier * 255.0f), 
-        (uint8_t)(render_view_green_multiplier * 255.0f), (uint8_t)(render_view_blue_multiplier * 255.0f));
+    RGBAColor unit_col =
+        epi::MakeRGBA((uint8_t)(render_view_red_multiplier * 255.0f), (uint8_t)(render_view_green_multiplier * 255.0f),
+                      (uint8_t)(render_view_blue_multiplier * 255.0f));
     // top
-    RendererVertex *glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxTop], (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
+    RendererVertex *glvert =
+        BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxTop], (GLuint)kTextureEnvironmentDisable,
+                        0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
 
-    glvert->rgba = unit_col;
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v0, v0}};
-    glvert++->position = {{-dist, dist, +dist}};
-    glvert->rgba = unit_col;
+    glvert++->position             = {{-dist, dist, +dist}};
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v0, v1}};
-    glvert++->position = {{-dist, -dist, +dist}};
-    glvert->rgba = unit_col;
+    glvert++->position             = {{-dist, -dist, +dist}};
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v1, v1}};
-    glvert++->position = {{dist, -dist, +dist}};
-    glvert->rgba = unit_col;
+    glvert++->position             = {{dist, -dist, +dist}};
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v1, v0}};
-    glvert++->position = {{dist, dist, +dist}};
-    
+    glvert++->position             = {{dist, dist, +dist}};
+
     EndRenderUnit(4);
 
     // bottom
-    glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxBottom], (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
+    glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxBottom],
+                             (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
 
-    glvert->rgba = unit_col;
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v0, v0}};
-    glvert++->position = {{-dist, -dist, -dist}};
-    glvert->rgba = unit_col;
+    glvert++->position             = {{-dist, -dist, -dist}};
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v0, v1}};
-    glvert++->position = {{-dist, dist, -dist}};
-    glvert->rgba = unit_col;
+    glvert++->position             = {{-dist, dist, -dist}};
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v1, v1}};
-    glvert++->position = {{dist, dist, -dist}};
-    glvert->rgba = unit_col;
+    glvert++->position             = {{dist, dist, -dist}};
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v1, v0}};
-    glvert++->position = {{dist, -dist, -dist}};
-    
+    glvert++->position             = {{dist, -dist, -dist}};
+
     EndRenderUnit(4);
 
     // north
-    glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxNorth], (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
+    glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxNorth],
+                             (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
 
-    glvert->rgba = unit_col;
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v0, v0}};
-    glvert++->position = {{-dist, dist, -dist}};
-    glvert->rgba = unit_col;
+    glvert++->position             = {{-dist, dist, -dist}};
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v0, v1}};
-    glvert++->position = {{-dist, dist, +dist}};
-    glvert->rgba = unit_col;
+    glvert++->position             = {{-dist, dist, +dist}};
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v1, v1}};
-    glvert++->position = {{dist, dist, +dist}};
-    glvert->rgba = unit_col;
+    glvert++->position             = {{dist, dist, +dist}};
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v1, v0}};
-    glvert++->position = {{dist, dist, -dist}};
-    
+    glvert++->position             = {{dist, dist, -dist}};
+
     EndRenderUnit(4);
 
     // east
-    glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxEast], (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
+    glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxEast],
+                             (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
 
-    glvert->rgba = unit_col;
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v0, v0}};
-    glvert++->position = {{dist, dist, -dist}};
-    glvert->rgba = unit_col;
+    glvert++->position             = {{dist, dist, -dist}};
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v0, v1}};
-    glvert++->position = {{dist, dist, +dist}};
-    glvert->rgba = unit_col;
+    glvert++->position             = {{dist, dist, +dist}};
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v1, v1}};
-    glvert++->position = {{dist, -dist, +dist}};
-    glvert->rgba = unit_col;
+    glvert++->position             = {{dist, -dist, +dist}};
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v1, v0}};
-    glvert++->position = {{dist, -dist, -dist}};
-    
+    glvert++->position             = {{dist, -dist, -dist}};
+
     EndRenderUnit(4);
 
     // south
-    glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxSouth], (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
+    glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxSouth],
+                             (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
 
-    glvert->rgba = unit_col;
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v0, v0}};
-    glvert++->position = {{dist, -dist, -dist}};
-    glvert->rgba = unit_col;
+    glvert++->position             = {{dist, -dist, -dist}};
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v0, v1}};
-    glvert++->position = {{dist, -dist, +dist}};
-    glvert->rgba = unit_col;
+    glvert++->position             = {{dist, -dist, +dist}};
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v1, v1}};
-    glvert++->position = {{-dist, -dist, +dist}};
-    glvert->rgba = unit_col;
+    glvert++->position             = {{-dist, -dist, +dist}};
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v1, v0}};
-    glvert++->position = {{-dist, -dist, -dist}};
-    
+    glvert++->position             = {{-dist, -dist, -dist}};
+
     EndRenderUnit(4);
 
     // west
-    glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxWest], (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
+    glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxWest],
+                             (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
 
-    glvert->rgba = unit_col;
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v0, v0}};
-    glvert++->position = {{-dist, -dist, -dist}};
-    glvert->rgba = unit_col;
+    glvert++->position             = {{-dist, -dist, -dist}};
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v0, v1}};
-    glvert++->position = {{-dist, -dist, +dist}};
-    glvert->rgba = unit_col;
+    glvert++->position             = {{-dist, -dist, +dist}};
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v1, v1}};
-    glvert++->position = {{-dist, dist, +dist}};
-    glvert->rgba = unit_col;
+    glvert++->position             = {{-dist, dist, +dist}};
+    glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v1, v0}};
-    glvert++->position = {{-dist, dist, -dist}};
-    
+    glvert++->position             = {{-dist, dist, -dist}};
+
     EndRenderUnit(4);
 }
 
@@ -651,8 +666,8 @@ static void FinishSkyUnit(void)
 {
     EndRenderUnit(total_sky_verts);
     FinishUnitBatch();
-    sky_glvert = nullptr;
-    total_sky_verts = 0;
+    sky_glvert       = nullptr;
+    total_sky_verts  = 0;
     sky_unit_started = false;
 }
 
@@ -678,7 +693,7 @@ void FinishSky(void)
 
 #ifdef APPLE_SILICON
     uint8_t old_dumb_clamp = renderer_dumb_clamp.d_;
-    renderer_dumb_clamp = 1;
+    renderer_dumb_clamp    = 1;
 #endif
 
     if (custom_skybox)
@@ -739,11 +754,11 @@ void RenderSkyPlane(Subsector *sub, float h)
         float y2 = seg->vertex_1->Y;
         render_mirror_set.Coordinate(x2, y2);
 
-        sky_glvert->rgba = unit_col;
+        sky_glvert->rgba       = unit_col;
         sky_glvert++->position = {{x0, y0, h}};
-        sky_glvert->rgba = unit_col;
+        sky_glvert->rgba       = unit_col;
         sky_glvert++->position = {{x1, y1, h}};
-        sky_glvert->rgba = unit_col;
+        sky_glvert->rgba       = unit_col;
         sky_glvert++->position = {{x2, y2, h}};
 
         total_sky_verts += 3;
@@ -759,7 +774,8 @@ void RenderSkyPlane(Subsector *sub, float h)
         EndRenderUnit(total_sky_verts);
         FinishUnitBatch();
         StartUnitBatch(false);
-        sky_glvert = BeginRenderUnit(GL_TRIANGLES, kMaximumLocalVertices, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
+        sky_glvert      = BeginRenderUnit(GL_TRIANGLES, kMaximumLocalVertices, GL_MODULATE, 0,
+                                          (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
         total_sky_verts = 0;
     }
 }
@@ -787,17 +803,17 @@ void RenderSkyWall(Seg *seg, float h1, float h2)
 
     RGBAColor unit_col = kRGBAWhite;
 
-    sky_glvert->rgba = unit_col;
+    sky_glvert->rgba       = unit_col;
     sky_glvert++->position = {{x1, y1, h1}};
-    sky_glvert->rgba = unit_col;
+    sky_glvert->rgba       = unit_col;
     sky_glvert++->position = {{x1, y1, h2}};
-    sky_glvert->rgba = unit_col;
+    sky_glvert->rgba       = unit_col;
     sky_glvert++->position = {{x2, y2, h2}};
-    sky_glvert->rgba = unit_col;
+    sky_glvert->rgba       = unit_col;
     sky_glvert++->position = {{x2, y2, h1}};
-    sky_glvert->rgba = unit_col;
+    sky_glvert->rgba       = unit_col;
     sky_glvert++->position = {{x2, y2, h2}};
-    sky_glvert->rgba = unit_col;
+    sky_glvert->rgba       = unit_col;
     sky_glvert++->position = {{x1, y1, h1}};
 
     total_sky_verts += 6;
@@ -808,7 +824,8 @@ void RenderSkyWall(Seg *seg, float h1, float h2)
         EndRenderUnit(total_sky_verts);
         FinishUnitBatch();
         StartUnitBatch(false);
-        sky_glvert = BeginRenderUnit(GL_TRIANGLES, kMaximumLocalVertices, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
+        sky_glvert      = BeginRenderUnit(GL_TRIANGLES, kMaximumLocalVertices, GL_MODULATE, 0,
+                                          (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
         total_sky_verts = 0;
     }
 }
@@ -864,9 +881,10 @@ int UpdateSkyboxTextures(void)
         tmp_img_data = rgb_img_data;
     }
     culling_fog_color = tmp_img_data->AverageColor(0, sky_image->actual_width_, 0, sky_image->actual_height_ / 2);
-    sky_cap_color = tmp_img_data->AverageColor(0, sky_image->actual_width_, sky_image->actual_height_ * 3 / 4, sky_image->actual_height_);
+    sky_cap_color     = tmp_img_data->AverageColor(0, sky_image->actual_width_, sky_image->actual_height_ * 3 / 4,
+                                                   sky_image->actual_height_);
     delete tmp_img_data;
-    
+
     if (what_palette != (const uint8_t *)&playpal_data[0])
         delete[] what_palette;
 

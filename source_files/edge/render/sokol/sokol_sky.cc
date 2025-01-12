@@ -1,7 +1,7 @@
 
 #include "sokol_local.h"
 
-extern bool            custom_skybox;
+extern bool       custom_skybox;
 extern SkyStretch current_sky_stretch;
 
 void SetupSkyMatrices(void)

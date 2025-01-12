@@ -173,9 +173,9 @@ class EName
 
     struct NameEntry
     {
-        char        *text;
-        uint64_t     hash;
-        int          next_hash;
+        char    *text;
+        uint64_t hash;
+        int      next_hash;
     };
 
     class NameManager

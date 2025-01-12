@@ -20,11 +20,10 @@
 
 #include <string.h>
 
-#include "epi.h"
 #include "HandmadeMath.h"
+#include "epi.h"
 
-SoundData::SoundData()
-    : length_(0), frequency_(0), data_(nullptr), definition_data_(nullptr)
+SoundData::SoundData() : length_(0), frequency_(0), data_(nullptr), definition_data_(nullptr)
 {
 }
 
@@ -47,7 +46,7 @@ void SoundData::Allocate(int samples)
     // early out when requirements are already met
     if (data_ && length_ >= samples)
     {
-        length_ = samples; 
+        length_ = samples;
         return;
     }
 

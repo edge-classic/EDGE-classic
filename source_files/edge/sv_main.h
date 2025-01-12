@@ -216,12 +216,12 @@ struct SaveGlobals
     int         hub_tag;
     const char *hub_first;
 
-    int level_time;
-    int exit_time;
+    int      level_time;
+    int      exit_time;
     uint64_t p_random;
-    int total_kills;
-    int total_items;
-    int total_secrets;
+    int      total_kills;
+    int      total_items;
+    int      total_secrets;
 
     int console_player;
     int skill;

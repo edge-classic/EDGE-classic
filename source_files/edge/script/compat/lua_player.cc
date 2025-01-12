@@ -1690,7 +1690,7 @@ static void CreateLuaTable_Attacks(lua_State *L, WeaponDefinition *objWep)
             break;
     }
 
-     if (NumberOfAttacks < 1) //MBF21 weapons do not have DDF attack defs
+    if (NumberOfAttacks < 1) // MBF21 weapons do not have DDF attack defs
         return;
 
     lua_pushstring(L, "attacks");
@@ -1897,25 +1897,24 @@ static int MO_count(lua_State *L)
     return 1;
 }
 
-
 // mapobject.render_view(x, y, w, h, tag/pointer/tid)
 //
 static int MO_render_view(lua_State *L)
 {
-    float x     = (float)luaL_checknumber(L, 1);
-    float y     = (float)luaL_checknumber(L, 2);
-    float w     = (float)luaL_checknumber(L, 3);
-    float h     = (float)luaL_checknumber(L, 4);
-    //int         whattag = (int)luaL_checknumber(L, 5);
+    float x = (float)luaL_checknumber(L, 1);
+    float y = (float)luaL_checknumber(L, 2);
+    float w = (float)luaL_checknumber(L, 3);
+    float h = (float)luaL_checknumber(L, 4);
+    // int         whattag = (int)luaL_checknumber(L, 5);
 
-    const void* whatmobj = lua_topointer(L, 5);
+    const void *whatmobj = lua_topointer(L, 5);
 
     MapObject  *mo;
     std::string temp_value;
 
     for (mo = map_object_list_head; mo; mo = mo->next_)
     {
-        //if (mo->tag_ == whattag)
+        // if (mo->tag_ == whattag)
         if (mo == whatmobj)
         {
             temp_value = "FOUNDIT";
@@ -1933,7 +1932,6 @@ static int MO_render_view(lua_State *L)
 
     return 1;
 }
-
 
 // player.query_weapon(maxdistance,whatinfo,[SecAttack])
 //

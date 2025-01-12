@@ -30,7 +30,7 @@ class GLRenderBackend : public RenderBackend
     }
 
     void SetupWorldMatrices2D()
-    {     
+    {
         glViewport(view_window_x, view_window_y, view_window_width, view_window_height);
 
         glMatrixMode(GL_PROJECTION);
@@ -85,7 +85,7 @@ class GLRenderBackend : public RenderBackend
         // read implementation limits
         glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size_);
 
-        LogPrint("OpenGL: Tex: %d\n", max_texture_size_);        
+        LogPrint("OpenGL: Tex: %d\n", max_texture_size_);
 
         RenderBackend::Init();
     }
@@ -147,12 +147,10 @@ class GLRenderBackend : public RenderBackend
 
     void BeginWorldRender()
     {
-
     }
 
     void FinishWorldRender()
     {
-
     }
 
     void SetRenderLayer(RenderLayer layer, bool clear_depth = false)
@@ -165,7 +163,6 @@ class GLRenderBackend : public RenderBackend
     {
         return kRenderLayerInvalid;
     }
-
 };
 
 static GLRenderBackend gl_render_backend;

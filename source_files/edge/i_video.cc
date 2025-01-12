@@ -297,14 +297,14 @@ static bool InitializeWindow(DisplayMode *mode)
 
     if (vsync.d_ == 2)
     {
-#ifndef SOKOL_D3D11        
+#ifndef SOKOL_D3D11
         // Fallback to normal VSync if Adaptive doesn't work
         if (SDL_GL_SetSwapInterval(-1) == -1)
         {
             vsync = 1;
             SDL_GL_SetSwapInterval(vsync.d_);
         }
-#endif        
+#endif
     }
     else
     {
@@ -361,7 +361,7 @@ bool SetScreenSize(DisplayMode *mode)
     {
         render_backend->Resize(mode->width, mode->height);
     }
-    
+
     // -AJA- turn off cursor -- BIG performance increase.
     //       Plus, the combination of no-cursor + grab gives
     //       continuous relative mouse motion.
@@ -407,8 +407,7 @@ static void SwapBuffers(void)
 #ifndef SOKOL_D3D11
     // move me and other SDL_GL to backend
     SDL_GL_SwapWindow(program_window);
-#endif        
-
+#endif
 }
 
 void FinishFrame(void)
@@ -472,20 +471,20 @@ void FinishFrame(void)
     {
         if (vsync.d_ == 2)
         {
-#ifndef SOKOL_D3D11            
+#ifndef SOKOL_D3D11
             // Fallback to normal VSync if Adaptive doesn't work
             if (SDL_GL_SetSwapInterval(-1) == -1)
             {
                 vsync = 1;
                 SDL_GL_SetSwapInterval(vsync.d_);
             }
-#endif            
+#endif
         }
         else
         {
-#ifndef SOKOL_D3D11            
+#ifndef SOKOL_D3D11
             SDL_GL_SetSwapInterval(vsync.d_);
-#endif            
+#endif
         }
     }
 

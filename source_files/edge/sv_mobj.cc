@@ -872,7 +872,7 @@ void SaveGameMapObjectPutState(void *storage, int index)
     }
 
     stbsp_sprintf(swizzle, "%s:%s:%d", (actual == mo->info_) ? "*" : actual->name_.c_str(),
-            states[base].label ? states[base].label : "*", 1 + s_num - base);
+                  states[base].label ? states[base].label : "*", 1 + s_num - base);
 
     SaveChunkPutString(swizzle);
 }

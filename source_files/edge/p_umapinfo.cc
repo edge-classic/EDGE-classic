@@ -292,7 +292,7 @@ static std::unordered_map<int, std::pair<int16_t, int16_t>> ActorNames = {
     {epi::kENameDeh_Actor_246, {247, -1}}, // MT_EXTRA96
     {epi::kENameDeh_Actor_247, {248, -1}}, // MT_EXTRA97
     {epi::kENameDeh_Actor_248, {249, -1}}, // MT_EXTRA98
-    {epi::kENameDeh_Actor_249, {250, -1}} // MT_EXTRA99
+    {epi::kENameDeh_Actor_249, {250, -1}}  // MT_EXTRA99
 };
 
 static void FreeMap(MapEntry *mape)
@@ -352,7 +352,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
         key = lex.state_.string;
 
         if (!lex.CheckToken('='))
-            FatalError("Malformed UMAPINFO lump: missing '='\n");   
+            FatalError("Malformed UMAPINFO lump: missing '='\n");
 
         if (!lex.GetNextToken() || lex.state_.token == '}')
             FatalError("Malformed UMAPINFO lump: missing value\n");
@@ -364,7 +364,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
         case epi::kENameLevelname: {
             if (val->levelname)
                 free(val->levelname);
-            value = lex.state_.string;
+            value          = lex.state_.string;
             val->levelname = (char *)calloc(value.size() + 1, sizeof(char));
             epi::CStringCopyMax(val->levelname, value.c_str(), value.size());
         }
@@ -381,7 +381,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
             {
                 if (val->label)
                     free(val->label);
-                value = lex.state_.string;
+                value      = lex.state_.string;
                 val->label = (char *)calloc(value.size() + 1, sizeof(char));
                 epi::CStringCopyMax(val->label, value.c_str(), value.size());
             }
@@ -597,7 +597,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
         case epi::kENameBossaction: {
             int special = 0;
             int tag     = 0;
-            value = lex.state_.string;
+            value       = lex.state_.string;
             if (epi::StringCaseCompareASCII(value, "clear") == 0)
             {
                 special = tag = -1;
@@ -617,7 +617,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
                     std::pair<int16_t, int16_t> nums = ActorNames[actor_check];
                     if (nums.second != -1) // DoomEd number exists already
                         actor_num = nums.second;
-                    else // See if modified by Dehacked, else skip
+                    else                   // See if modified by Dehacked, else skip
                     {
                         for (const MapObjectDefinition *mob : mobjtypes)
                         {
@@ -661,7 +661,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
         case epi::kENameAuthor: {
             if (val->authorname)
                 free(val->authorname);
-            value = lex.state_.string;
+            value           = lex.state_.string;
             val->authorname = (char *)calloc(value.size() + 1, sizeof(char));
             epi::CStringCopyMax(val->authorname, value.c_str(), value.size());
         }
@@ -700,7 +700,7 @@ void ParseUMAPINFO(const std::string &buffer)
 {
     epi::Scanner lex(buffer);
 
-    while(lex.TokensLeft())
+    while (lex.TokensLeft())
     {
         if (!lex.GetNextToken())
             break;
@@ -713,10 +713,10 @@ void ParseUMAPINFO(const std::string &buffer)
         if (lex.state_.token != epi::Scanner::kIdentifier)
             FatalError("UMAPINFO: No mapname for map entry!\n");
 
-        unsigned int i      = 0;
+        unsigned int i = 0;
         MapEntry     parsed;
         EPI_CLEAR_MEMORY(&parsed, MapEntry, 1);
-        parsed.mapname      = (char *)calloc(lex.state_.string.size() + 1, sizeof(char));
+        parsed.mapname = (char *)calloc(lex.state_.string.size() + 1, sizeof(char));
         epi::CStringCopyMax(parsed.mapname, lex.state_.string.data(), lex.state_.string.size());
 
         if (!lex.CheckToken('{'))

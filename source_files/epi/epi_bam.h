@@ -121,9 +121,9 @@ inline bool BAMCheckFOV(BAMAngle angle, BAMAngle fov, BAMAngle fov_reference)
 {
     BAMAngle min_angle = fov_reference - fov / 2;
     BAMAngle max_angle = fov_reference + fov / 2;
-    
-    return((min_angle > max_angle) ? angle >= min_angle || angle <= max_angle
-                            : angle >= min_angle && angle <= max_angle);
+
+    return ((min_angle > max_angle) ? angle >= min_angle || angle <= max_angle
+                                    : angle >= min_angle && angle <= max_angle);
 }
 
 } // namespace epi

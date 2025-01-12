@@ -52,7 +52,7 @@ class MP3Player : public AbstractMusicPlayer
 
     ma_decoder mp3_decoder_;
     ma_sound   mp3_stream_;
-    uint8_t    *mp3_data_;
+    uint8_t   *mp3_data_;
 
   public:
     bool OpenMemory(uint8_t *data, int length);
@@ -87,7 +87,7 @@ bool MP3Player::OpenMemory(uint8_t *data, int length)
         Close();
 
     ma_decoder_config decode_config = ma_decoder_config_init_default();
-    decode_config.format = ma_format_f32;
+    decode_config.format            = ma_format_f32;
 
     if (ma_decoder_init_memory(data, length, &decode_config, &mp3_decoder_) != MA_SUCCESS)
     {
@@ -95,7 +95,9 @@ bool MP3Player::OpenMemory(uint8_t *data, int length)
         return false;
     }
 
-    if (ma_sound_init_from_data_source(&music_engine, &mp3_decoder_, MA_SOUND_FLAG_STREAM|MA_SOUND_FLAG_NO_SPATIALIZATION, NULL, &mp3_stream_) != MA_SUCCESS)
+    if (ma_sound_init_from_data_source(&music_engine, &mp3_decoder_,
+                                       MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION, NULL,
+                                       &mp3_stream_) != MA_SUCCESS)
     {
         ma_decoder_uninit(&mp3_decoder_);
         LogWarning("Failed to load OGG music (corrupt ogg?)\n");
@@ -161,7 +163,7 @@ void MP3Player::Play(bool loop)
         status_ = kPaused;
     else
     {
-        status_  = kPlaying;
+        status_ = kPlaying;
         ma_sound_start(&mp3_stream_);
     }
 }
@@ -212,10 +214,11 @@ AbstractMusicPlayer *PlayMP3Music(uint8_t *data, int length, bool looping)
 bool LoadMP3Sound(SoundData *buf, const uint8_t *data, int length)
 {
     ma_decoder_config decode_config = ma_decoder_config_init_default();
-    decode_config.format = ma_format_f32;
+    decode_config.format            = ma_format_f32;
     ma_decoder decode;
 
-    //ma_decoder_init_memory(const void* pData, size_t dataSize, const ma_decoder_config* pConfig, ma_decoder* pDecoder);
+    // ma_decoder_init_memory(const void* pData, size_t dataSize, const ma_decoder_config* pConfig, ma_decoder*
+    // pDecoder);
 
     if (ma_decoder_init_memory(data, length, &decode_config, &decode) != MA_SUCCESS)
     {

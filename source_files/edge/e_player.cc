@@ -67,7 +67,7 @@ int console_player = -1; // player taking events
 int display_player = -1; // view being displayed
 
 // For COAL/Lua VMs
-Player *ui_hud_who = nullptr;
+Player *ui_hud_who    = nullptr;
 Player *ui_player_who = nullptr;
 
 static constexpr uint8_t kMaximumBodies = 50;

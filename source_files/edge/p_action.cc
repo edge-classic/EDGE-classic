@@ -234,35 +234,35 @@ bool A_LookForTargets(MapObject *we)
     return false;
 }
 
-// Same as above, but iterate through the blockmap within a 
+// Same as above, but iterate through the blockmap within a
 // given radius and return the first valid target (or nullptr if none)
 // Also, does not actually set the target unlike A_LookForTargets
 MapObject *A_LookForBlockmapTarget(MapObject *we, uint32_t rangeblocks, BAMAngle fov)
 {
     MapObject *them = nullptr;
 
-    float we_x = we->x;
-    float we_y = we->y;
+    float we_x     = we->x;
+    float we_y     = we->y;
     float we_angle = we->angle_;
 
     float radius = kBlockmapUnitSize * rangeblocks;
-    float x1 = we_x - radius;
-    float x2 = we_x + radius;
-    float y1 = we_y - radius;
-    float y2 = we_y + radius;
+    float x1     = we_x - radius;
+    float x2     = we_x + radius;
+    float y1     = we_y - radius;
+    float y2     = we_y + radius;
 
     int we_bx = BlockmapGetX(we_x);
     int we_by = BlockmapGetY(we_y);
-    we_bx = HMM_Clamp(0, we_bx, blockmap_width - 1);
-    we_by = HMM_Clamp(0, we_by, blockmap_height - 1);
-    int lx = we_bx - rangeblocks - 1;
-    int ly = we_by - rangeblocks - 1;
-    int hx = we_bx + rangeblocks + 1;
-    int hy = we_by + rangeblocks + 1;
-    lx = HMM_MAX(0, lx);
-    hx = HMM_MIN(blockmap_width - 1, hx);
-    ly = HMM_MAX(0, ly);
-    hy = HMM_MIN(blockmap_height - 1, hy);
+    we_bx     = HMM_Clamp(0, we_bx, blockmap_width - 1);
+    we_by     = HMM_Clamp(0, we_by, blockmap_height - 1);
+    int lx    = we_bx - rangeblocks - 1;
+    int ly    = we_by - rangeblocks - 1;
+    int hx    = we_bx + rangeblocks + 1;
+    int hy    = we_by + rangeblocks + 1;
+    lx        = HMM_MAX(0, lx);
+    hx        = HMM_MIN(blockmap_width - 1, hx);
+    ly        = HMM_MAX(0, ly);
+    hy        = HMM_MIN(blockmap_height - 1, hy);
 
     // first check the blockmap in our immediate vicinity
     for (MapObject *mo = blockmap_things[we_by * blockmap_width + we_bx]; mo; mo = mo->blockmap_next_)
@@ -281,7 +281,7 @@ MapObject *A_LookForBlockmapTarget(MapObject *we, uint32_t rangeblocks, BAMAngle
 
         bool same_side = ((mo->side_ & we->side_) != 0);
 
-            // only target monsters or players (not barrels)
+        // only target monsters or players (not barrels)
         if (!(mo->extended_flags_ & kExtendedFlagMonster) && !mo->player_)
             continue;
 
@@ -306,48 +306,48 @@ MapObject *A_LookForBlockmapTarget(MapObject *we, uint32_t rangeblocks, BAMAngle
         }
     }
 
-    int blockX;
-	int blockY;
-	int blockIndex;
-	int firstStop;
-	int secondStop;
-	int thirdStop;
-	int finalStop;
-	uint32_t count;
+    int      blockX;
+    int      blockY;
+    int      blockIndex;
+    int      firstStop;
+    int      secondStop;
+    int      thirdStop;
+    int      finalStop;
+    uint32_t count;
 
     for (count = 1; count <= rangeblocks; count++)
-	{
-		blockX = HMM_Clamp(we_bx-count, 0, blockmap_width-1);
-		blockY = HMM_Clamp(we_by-count, 0, blockmap_height-1);
+    {
+        blockX = HMM_Clamp(we_bx - count, 0, blockmap_width - 1);
+        blockY = HMM_Clamp(we_by - count, 0, blockmap_height - 1);
 
-		blockIndex = blockY*blockmap_width+blockX;
-		firstStop = we_bx+count;
-		if (firstStop < 0)
-		{
-			continue;
-		}
-		if (firstStop >= blockmap_width)
-		{
-			firstStop = blockmap_width-1;
-		}
-		secondStop = we_by+count;
-		if (secondStop < 0)
-		{
-			continue;
-		}
-		if (secondStop >= blockmap_height)
-		{
-			secondStop = blockmap_height-1;
-		}
-		thirdStop = secondStop*blockmap_width+blockX;
-		secondStop = secondStop*blockmap_width+firstStop;
-		firstStop += blockY*blockmap_width;
-		finalStop = blockIndex;		
+        blockIndex = blockY * blockmap_width + blockX;
+        firstStop  = we_bx + count;
+        if (firstStop < 0)
+        {
+            continue;
+        }
+        if (firstStop >= blockmap_width)
+        {
+            firstStop = blockmap_width - 1;
+        }
+        secondStop = we_by + count;
+        if (secondStop < 0)
+        {
+            continue;
+        }
+        if (secondStop >= blockmap_height)
+        {
+            secondStop = blockmap_height - 1;
+        }
+        thirdStop  = secondStop * blockmap_width + blockX;
+        secondStop = secondStop * blockmap_width + firstStop;
+        firstStop += blockY * blockmap_width;
+        finalStop = blockIndex;
 
-		// Trace the first block section (along the top)
-		for (; blockIndex <= firstStop; blockIndex++)
-		{
-			for (MapObject *mo = blockmap_things[blockIndex]; mo; mo = mo->blockmap_next_)
+        // Trace the first block section (along the top)
+        for (; blockIndex <= firstStop; blockIndex++)
+        {
+            for (MapObject *mo = blockmap_things[blockIndex]; mo; mo = mo->blockmap_next_)
             {
                 // check whether thing touches the given bbox
                 float r = mo->radius_;
@@ -363,7 +363,7 @@ MapObject *A_LookForBlockmapTarget(MapObject *we, uint32_t rangeblocks, BAMAngle
 
                 bool same_side = ((mo->side_ & we->side_) != 0);
 
-                    // only target monsters or players (not barrels)
+                // only target monsters or players (not barrels)
                 if (!(mo->extended_flags_ & kExtendedFlagMonster) && !mo->player_)
                     continue;
 
@@ -387,11 +387,11 @@ MapObject *A_LookForBlockmapTarget(MapObject *we, uint32_t rangeblocks, BAMAngle
                     return them;
                 }
             }
-		}
-		// Trace the second block section (right edge)
-		for (blockIndex--; blockIndex <= secondStop; blockIndex += blockmap_width)
-		{
-			for (MapObject *mo = blockmap_things[blockIndex]; mo; mo = mo->blockmap_next_)
+        }
+        // Trace the second block section (right edge)
+        for (blockIndex--; blockIndex <= secondStop; blockIndex += blockmap_width)
+        {
+            for (MapObject *mo = blockmap_things[blockIndex]; mo; mo = mo->blockmap_next_)
             {
                 // check whether thing touches the given bbox
                 float r = mo->radius_;
@@ -407,7 +407,7 @@ MapObject *A_LookForBlockmapTarget(MapObject *we, uint32_t rangeblocks, BAMAngle
 
                 bool same_side = ((mo->side_ & we->side_) != 0);
 
-                    // only target monsters or players (not barrels)
+                // only target monsters or players (not barrels)
                 if (!(mo->extended_flags_ & kExtendedFlagMonster) && !mo->player_)
                     continue;
 
@@ -431,11 +431,11 @@ MapObject *A_LookForBlockmapTarget(MapObject *we, uint32_t rangeblocks, BAMAngle
                     return them;
                 }
             }
-		}		
-		// Trace the third block section (bottom edge)
-		for (blockIndex -= blockmap_width; blockIndex >= thirdStop; blockIndex--)
-		{
-			for (MapObject *mo = blockmap_things[blockIndex]; mo; mo = mo->blockmap_next_)
+        }
+        // Trace the third block section (bottom edge)
+        for (blockIndex -= blockmap_width; blockIndex >= thirdStop; blockIndex--)
+        {
+            for (MapObject *mo = blockmap_things[blockIndex]; mo; mo = mo->blockmap_next_)
             {
                 // check whether thing touches the given bbox
                 float r = mo->radius_;
@@ -451,7 +451,7 @@ MapObject *A_LookForBlockmapTarget(MapObject *we, uint32_t rangeblocks, BAMAngle
 
                 bool same_side = ((mo->side_ & we->side_) != 0);
 
-                    // only target monsters or players (not barrels)
+                // only target monsters or players (not barrels)
                 if (!(mo->extended_flags_ & kExtendedFlagMonster) && !mo->player_)
                     continue;
 
@@ -475,11 +475,11 @@ MapObject *A_LookForBlockmapTarget(MapObject *we, uint32_t rangeblocks, BAMAngle
                     return them;
                 }
             }
-		}
-		// Trace the final block section (left edge)
-		for (blockIndex++; blockIndex > finalStop; blockIndex -= blockmap_width)
-		{
-			for (MapObject *mo = blockmap_things[blockIndex]; mo; mo = mo->blockmap_next_)
+        }
+        // Trace the final block section (left edge)
+        for (blockIndex++; blockIndex > finalStop; blockIndex -= blockmap_width)
+        {
+            for (MapObject *mo = blockmap_things[blockIndex]; mo; mo = mo->blockmap_next_)
             {
                 // check whether thing touches the given bbox
                 float r = mo->radius_;
@@ -495,7 +495,7 @@ MapObject *A_LookForBlockmapTarget(MapObject *we, uint32_t rangeblocks, BAMAngle
 
                 bool same_side = ((mo->side_ & we->side_) != 0);
 
-                    // only target monsters or players (not barrels)
+                // only target monsters or players (not barrels)
                 if (!(mo->extended_flags_ & kExtendedFlagMonster) && !mo->player_)
                     continue;
 
@@ -519,8 +519,8 @@ MapObject *A_LookForBlockmapTarget(MapObject *we, uint32_t rangeblocks, BAMAngle
                     return them;
                 }
             }
-		}
-	}
+        }
+    }
 
     return them;
 }
@@ -608,7 +608,8 @@ static bool DecideRangeAttack(MapObject *object)
                 for (int state_check = missile_check; state_check < group.last; state_check++)
                 {
                     State *check = states + state_check;
-                    if (check && check->action && (check->action == A_MonsterProjectile || check->action == A_MonsterBulletAttack))
+                    if (check && check->action &&
+                        (check->action == A_MonsterProjectile || check->action == A_MonsterBulletAttack))
                     {
                         // TODO: Store this to avoid repeat checks
                         attack = (const AttackDefinition *)check->action_par;
@@ -618,7 +619,7 @@ static bool DecideRangeAttack(MapObject *object)
             }
         }
     }
-   
+
     if (!attack)
         return false; // cannot evaluate range with no attack range
 
@@ -1018,7 +1019,6 @@ void A_SetSkin(MapObject *mo)
 //------------------- MOVEMENT ROUTINES -----------------------------
 //-------------------------------------------------------------------
 
-
 void A_MlookFace(MapObject *mo)
 {
     const State *st = mo->state_;
@@ -1035,7 +1035,6 @@ void A_FaceDir(MapObject *mo)
 
     if (st && st->action_par)
         mo->vertical_angle_ += epi::BAMFromATan(*(float *)st->action_par);
-
 }
 
 void A_MlookTurn(MapObject *mo)
@@ -1048,7 +1047,6 @@ void A_MlookTurn(MapObject *mo)
         mo->angle_ = 0;
 }
 
-
 void A_TurnDir(MapObject *mo)
 {
     const State *st = mo->state_;
@@ -1060,7 +1058,6 @@ void A_TurnDir(MapObject *mo)
 
     mo->angle_ += turn;
 }
-
 
 void A_TurnRandom(MapObject *mo)
 {
@@ -1079,7 +1076,6 @@ void A_TurnRandom(MapObject *mo)
     else
         mo->angle_ += (BAMAngle)(turn << (kBAMAngleBits - 10));
 }
-
 
 void A_MoveFwd(MapObject *mo)
 {
@@ -1738,7 +1734,8 @@ int MissileContact(MapObject *object, MapObject *target)
         // "Real" missile source check
         if (source->source_ && source->source_->info_ == target->info_)
         {
-            if (!(target->extended_flags_ & kExtendedFlagDisloyalToOwnType) && (source->source_->info_->proj_group_ != -1))
+            if (!(target->extended_flags_ & kExtendedFlagDisloyalToOwnType) &&
+                (source->source_->info_->proj_group_ != -1))
                 return 0;
         }
 
@@ -4605,7 +4602,7 @@ void A_JumpIfFlagsSet(MapObject *mo)
     }
     if (jump->amount2)
     {
-        if ((mo->mbf21_flags_& jump->amount2) != jump->amount2)
+        if ((mo->mbf21_flags_ & jump->amount2) != jump->amount2)
             jumpit = false;
     }
 
@@ -4628,7 +4625,8 @@ void A_JumpIfTracerCloser(MapObject *mo)
     else
         jump = (JumpActionInfo *)mo->state_->action_par;
 
-    if (mo->tracer_ && ApproximateDistance(mo->tracer_->x - mo->x, mo->tracer_->y - mo->y) < (float)jump->amount / 65536.0f)
+    if (mo->tracer_ &&
+        ApproximateDistance(mo->tracer_->x - mo->x, mo->tracer_->y - mo->y) < (float)jump->amount / 65536.0f)
         mo->next_state_ = states + mo->state_->jumpstate;
 }
 
@@ -4647,7 +4645,9 @@ void A_JumpIfTracerInSight(MapObject *mo)
     else
         jump = (JumpActionInfo *)mo->state_->action_par;
 
-    if (mo->tracer_ && CheckSight(mo, mo->tracer_) && (!jump->amount || epi::BAMCheckFOV(PointToAngle(mo->x, mo->y, mo->tracer_->x, mo->tracer_->y), epi::BAMFromDegrees((float)jump->amount / 65536.0f), mo->angle_)))
+    if (mo->tracer_ && CheckSight(mo, mo->tracer_) &&
+        (!jump->amount || epi::BAMCheckFOV(PointToAngle(mo->x, mo->y, mo->tracer_->x, mo->tracer_->y),
+                                           epi::BAMFromDegrees((float)jump->amount / 65536.0f), mo->angle_)))
         mo->next_state_ = states + mo->state_->jumpstate;
 }
 
@@ -4666,7 +4666,8 @@ void A_JumpIfTargetCloser(MapObject *mo)
     else
         jump = (JumpActionInfo *)mo->state_->action_par;
 
-    if (mo->target_ && ApproximateDistance(mo->target_->x - mo->x, mo->target_->y - mo->y) < (float)jump->amount / 65536.0f)
+    if (mo->target_ &&
+        ApproximateDistance(mo->target_->x - mo->x, mo->target_->y - mo->y) < (float)jump->amount / 65536.0f)
         mo->next_state_ = states + mo->state_->jumpstate;
 }
 
@@ -4685,7 +4686,9 @@ void A_JumpIfTargetInSight(MapObject *mo)
     else
         jump = (JumpActionInfo *)mo->state_->action_par;
 
-    if (mo->target_ && CheckSight(mo, mo->target_) && (!jump->amount || epi::BAMCheckFOV(PointToAngle(mo->x, mo->y, mo->target_->x, mo->target_->y), epi::BAMFromDegrees((float)jump->amount / 65536.0f), mo->angle_)))
+    if (mo->target_ && CheckSight(mo, mo->target_) &&
+        (!jump->amount || epi::BAMCheckFOV(PointToAngle(mo->x, mo->y, mo->target_->x, mo->target_->y),
+                                           epi::BAMFromDegrees((float)jump->amount / 65536.0f), mo->angle_)))
         mo->next_state_ = states + mo->state_->jumpstate;
 }
 
@@ -4704,7 +4707,7 @@ void A_FindTracer(MapObject *mo)
 
     int *args = (int *)mo->state_->action_par;
 
-    BAMAngle fov = args[0] == 0 ? kBAMAngle0 : epi::BAMFromDegrees((float)args[0] / 65536.0f);
+    BAMAngle fov         = args[0] == 0 ? kBAMAngle0 : epi::BAMFromDegrees((float)args[0] / 65536.0f);
     uint32_t rangeblocks = args[1] != 0 ? args[1] : 10;
 
     MapObject *target = A_LookForBlockmapTarget(mo, rangeblocks, fov);
@@ -4755,8 +4758,7 @@ void A_SeekTracer(MapObject *mo)
     mo->momentum_.Y = mo->speed_ * epi::BAMSin(mo->angle_);
 
     // change slope
-    float slope = ApproximateSlope(destination->x - mo->x, destination->y - mo->y,
-                                   MapObjectMidZ(destination) - mo->z);
+    float slope = ApproximateSlope(destination->x - mo->x, destination->y - mo->y, MapObjectMidZ(destination) - mo->z);
 
     slope *= mo->speed_;
 
@@ -4858,10 +4860,10 @@ void A_MonsterBulletAttack(MapObject *object)
 
 void A_WeaponMeleeAttack(MapObject *mo)
 {
-    Player       *p   = mo->player_;
-    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
-    WeaponDefinition *info   = p->weapons_[p->ready_weapon_].info;
-    const AttackDefinition *atk = nullptr;
+    Player                 *p    = mo->player_;
+    PlayerSprite           *psp  = &p->player_sprites_[p->action_player_sprite_];
+    WeaponDefinition       *info = p->weapons_[p->ready_weapon_].info;
+    const AttackDefinition *atk  = nullptr;
 
     if (psp->state && psp->state->action_par)
         atk = (const AttackDefinition *)psp->state->action_par;
@@ -4878,10 +4880,10 @@ void A_WeaponMeleeAttack(MapObject *mo)
 
 void A_WeaponBulletAttack(MapObject *mo)
 {
-    Player       *p   = mo->player_;
-    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
-    WeaponDefinition *info   = p->weapons_[p->ready_weapon_].info;
-    const AttackDefinition *atk = nullptr;
+    Player                 *p    = mo->player_;
+    PlayerSprite           *psp  = &p->player_sprites_[p->action_player_sprite_];
+    WeaponDefinition       *info = p->weapons_[p->ready_weapon_].info;
+    const AttackDefinition *atk  = nullptr;
 
     if (psp->state && psp->state->action_par)
         atk = (const AttackDefinition *)psp->state->action_par;
@@ -4898,10 +4900,10 @@ void A_WeaponBulletAttack(MapObject *mo)
 
 void A_WeaponProjectile(MapObject *mo)
 {
-    Player       *p   = mo->player_;
-    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
-    WeaponDefinition *info   = p->weapons_[p->ready_weapon_].info;
-    const AttackDefinition *atk = nullptr;
+    Player                 *p    = mo->player_;
+    PlayerSprite           *psp  = &p->player_sprites_[p->action_player_sprite_];
+    WeaponDefinition       *info = p->weapons_[p->ready_weapon_].info;
+    const AttackDefinition *atk  = nullptr;
 
     if (psp->state && psp->state->action_par)
         atk = (const AttackDefinition *)psp->state->action_par;
@@ -5012,17 +5014,19 @@ void A_SpawnObject(MapObject *mo)
         FatalError("A_SpawnObject action used with %s, but it doesn't exist?\n", ref->spawn_name);
 
     BAMAngle newangle = mo->angle_ + ref->angle;
-    float newcos = epi::BAMCos(newangle);
-    float newsin = epi::BAMSin(newangle);
+    float    newcos   = epi::BAMCos(newangle);
+    float    newsin   = epi::BAMSin(newangle);
 
-    MapObject *spawn = CreateMapObject(mo->x + (ref->x_offset * newcos - ref->y_offset * newsin), mo->y + (ref->x_offset * newsin + ref->y_offset * newcos), mo->z + ref->z_offset, type);
+    MapObject *spawn =
+        CreateMapObject(mo->x + (ref->x_offset * newcos - ref->y_offset * newsin),
+                        mo->y + (ref->x_offset * newsin + ref->y_offset * newcos), mo->z + ref->z_offset, type);
     EPI_ASSERT(spawn);
 
     MapObjectSetDirectionAndSpeed(spawn, newangle, 0, type->speed_);
     spawn->momentum_.X += newcos * ref->x_velocity - ref->y_velocity * newsin;
     spawn->momentum_.Y += newsin * ref->x_velocity + newcos * ref->y_velocity;
     spawn->momentum_.Z += ref->z_velocity;
-    spawn->side_  = mo->side_;
+    spawn->side_ = mo->side_;
 
     spawn->SetRealSource(mo);
 
@@ -5094,29 +5098,28 @@ void A_PainChanceSet(MapObject *mo)
 
 void A_ScaleSet(MapObject *mo)
 {
-    float valueSprite = mo->info_->scale_; //grab the default scale for this thing as a fallback
-    float valueModel = mo->info_->model_scale_; //grab the default scale for this thing as a fallback
+    float valueSprite = mo->info_->scale_;       // grab the default scale for this thing as a fallback
+    float valueModel  = mo->info_->model_scale_; // grab the default scale for this thing as a fallback
 
     const State *st = mo->state_;
 
     if (st && st->action_par)
     {
         valueSprite = ((float *)st->action_par)[0];
-        valueModel = valueSprite;
+        valueModel  = valueSprite;
     }
-    mo->scale_ = valueSprite;
+    mo->scale_       = valueSprite;
     mo->model_scale_ = valueModel;
-
 }
 
 void A_Gravity(MapObject *mo)
 {
-    mo->flags_ &= ~kMapObjectFlagNoGravity; //Remove NoGravity flag
+    mo->flags_ &= ~kMapObjectFlagNoGravity; // Remove NoGravity flag
 }
 
 void A_NoGravity(MapObject *mo)
 {
-    mo->flags_ |= kMapObjectFlagNoGravity; //Set NoGravity flag
+    mo->flags_ |= kMapObjectFlagNoGravity; // Set NoGravity flag
 }
 
 // Thing will forget both current target and supported player
@@ -5134,29 +5137,30 @@ void A_ClearTarget(MapObject *object)
 // - If we see an enemy then we target him.
 void A_FriendLook(MapObject *object)
 {
-    object->threshold_ = 0; // any shot will wake up
+    object->threshold_ = 0;              // any shot will wake up
 
-    if (!object->support_object_)  //no player to support yet
+    if (!object->support_object_)        // no player to support yet
     {
-        if (FindPlayerToSupport(object)) //try and find a player. One way or the other we will have a side at least
+        if (FindPlayerToSupport(object)) // try and find a player. One way or the other we will have a side at least
         {
             if (object->info_->seesound_)
             {
-                StartSoundEffect(object->info_->seesound_, GetSoundEffectCategory(object), object, SfxFlags(object->info_));
+                StartSoundEffect(object->info_->seesound_, GetSoundEffectCategory(object), object,
+                                 SfxFlags(object->info_));
             }
         }
     }
 
-/*
-    if (object->flags_ & kMapObjectFlagStealth)
-        object->target_visibility_ = 1.0f;
+    /*
+        if (object->flags_ & kMapObjectFlagStealth)
+            object->target_visibility_ = 1.0f;
 
-    if (force_infighting.d_)
-        if (CreateAggression(object) || CreateAggression(object))
-            return;
-*/
+        if (force_infighting.d_)
+            if (CreateAggression(object) || CreateAggression(object))
+                return;
+    */
 
-    if (!A_LookForTargets(object)) //No target found
+    if (!A_LookForTargets(object)) // No target found
         return;
     else
     {
@@ -5165,8 +5169,6 @@ void A_FriendLook(MapObject *object)
             StartSoundEffect(object->info_->seesound_, GetSoundEffectCategory(object), object, SfxFlags(object->info_));
         }
     }
-
-    
 }
 
 //
@@ -5179,7 +5181,7 @@ bool FindPlayerToSupport(MapObject *object)
     if (object->flags_ & kMapObjectFlagStealth)
         object->target_visibility_ = 1.0f;
 
-    if (LookForPlayers(object, object->info_->sight_angle_, true)) //any players around to support?
+    if (LookForPlayers(object, object->info_->sight_angle_, true)) // any players around to support?
     {
         // join the player's side
         if (object->side_ == 0)
@@ -5191,13 +5193,11 @@ bool FindPlayerToSupport(MapObject *object)
         return true;
     }
 
-    //default to something at least
+    // default to something at least
     object->side_ = 1;
 
     return false;
-
 }
-
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

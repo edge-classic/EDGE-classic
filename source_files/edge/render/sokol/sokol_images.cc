@@ -63,7 +63,7 @@ void DeleteImage(sg_image image)
             return;
         }
     }
-    
+
     deleted_images.push_back(image);
 }
 
@@ -73,8 +73,6 @@ void FinalizeDeletedImages()
     {
         image_samplers.erase(image_samplers.find(itr->id));
         sg_destroy_image(*itr);
-
-
     }
 
     deleted_images.clear();

@@ -701,7 +701,11 @@ bool frames::SpreadGroupPass(bool alt_jumps)
         if (alt_jumps)
         {
             next = kS_NULL;
-            if (st->action == kA_RandomJump || st->action == kA_WeaponJump || st->action == kA_RefireTo || st->action == kA_CheckAmmo || st->action == kA_GunFlashTo || st->action == kA_HealChase || st->action == kA_JumpIfHealthBelow || st->action == kA_JumpIfTargetInSight || st->action == kA_JumpIfTargetCloser || st->action == kA_JumpIfTracerCloser || st->action == kA_JumpIfTracerInSight || st->action == kA_JumpIfFlagsSet)
+            if (st->action == kA_RandomJump || st->action == kA_WeaponJump || st->action == kA_RefireTo ||
+                st->action == kA_CheckAmmo || st->action == kA_GunFlashTo || st->action == kA_HealChase ||
+                st->action == kA_JumpIfHealthBelow || st->action == kA_JumpIfTargetInSight ||
+                st->action == kA_JumpIfTargetCloser || st->action == kA_JumpIfTracerCloser ||
+                st->action == kA_JumpIfTracerInSight || st->action == kA_JumpIfFlagsSet)
                 next = ReadArg(st, 0); // arg0
         }
 
@@ -1068,8 +1072,8 @@ void frames::SpecialAction(char *act_name, const State *st)
         int damagebase = ReadArg(st, 0);
         int damagedice = ReadArg(st, 1);
         int zerkfactor = ReadArg(st, 2);
-        int sound = ReadArg(st, 3);
-        int range = ReadArg(st, 4);
+        int sound      = ReadArg(st, 3);
+        int range      = ReadArg(st, 4);
 
         sounds::MarkSound(sound);
 
@@ -1078,7 +1082,7 @@ void frames::SpecialAction(char *act_name, const State *st)
     break;
 
     case kA_WeaponSound: {
-        int sound = ReadArg(st, 0);
+        int sound       = ReadArg(st, 0);
         int full_volume = ReadArg(st, 1);
 
         sounds::MarkSound(sound);
@@ -1088,20 +1092,21 @@ void frames::SpecialAction(char *act_name, const State *st)
     break;
 
     case kA_WeaponBulletAttack: {
-        int hspread = ReadArg(st, 0);
-        int vspread = ReadArg(st, 1);
+        int hspread    = ReadArg(st, 0);
+        int vspread    = ReadArg(st, 1);
         int numbullets = ReadArg(st, 2);
         int damagebase = ReadArg(st, 3);
         int damagedice = ReadArg(st, 4);
 
-        stbsp_sprintf(act_name, "DEH_WEAPON_BULLET(%d,%d,%d,%d,%d)", hspread, vspread, numbullets, damagebase, damagedice);
+        stbsp_sprintf(act_name, "DEH_WEAPON_BULLET(%d,%d,%d,%d,%d)", hspread, vspread, numbullets, damagebase,
+                      damagedice);
     }
     break;
 
     case kA_WeaponProjectile: {
-        int type = ReadArg(st, 0) - 1;
-        int angle = ReadArg(st, 1);
-        int pitch = ReadArg(st, 2);
+        int type    = ReadArg(st, 0) - 1;
+        int angle   = ReadArg(st, 1);
+        int pitch   = ReadArg(st, 2);
         int hoffset = ReadArg(st, 3);
         int voffset = ReadArg(st, 4);
 
@@ -1124,7 +1129,7 @@ void frames::SpecialAction(char *act_name, const State *st)
     break;
 
     case kA_CheckAmmo: {
-        int next = ReadArg(st, 0); // state
+        int next   = ReadArg(st, 0); // state
         int amount = ReadArg(st, 1); // ammocheck
 
         if (next <= 0 || NewStateElseOld(next) == nullptr)
@@ -1135,7 +1140,7 @@ void frames::SpecialAction(char *act_name, const State *st)
     break;
 
     case kA_GunFlashTo: {
-        int state = ReadArg(st, 0);
+        int state         = ReadArg(st, 0);
         int nothirdperson = ReadArg(st, 1);
 
         if (state <= 0 || NewStateElseOld(state) == nullptr)
@@ -1175,11 +1180,11 @@ void frames::SpecialAction(char *act_name, const State *st)
     break;
 
     case kA_SpawnObject: {
-        int type = ReadArg(st, 0) - 1;
-        int angle = ReadArg(st, 1);
-        int x_offset = ReadArg(st, 2);
-        int y_offset = ReadArg(st, 3);
-        int z_offset = ReadArg(st, 4);
+        int type       = ReadArg(st, 0) - 1;
+        int angle      = ReadArg(st, 1);
+        int x_offset   = ReadArg(st, 2);
+        int y_offset   = ReadArg(st, 3);
+        int z_offset   = ReadArg(st, 4);
         int x_velocity = ReadArg(st, 5);
         int y_velocity = ReadArg(st, 6);
         int z_velocity = ReadArg(st, 7);
@@ -1191,14 +1196,15 @@ void frames::SpecialAction(char *act_name, const State *st)
         if (name[0] == '*')
             name = name.substr(1);
 
-        stbsp_sprintf(act_name, "DEH_SPAWN_OBJECT(%s,%d,%d,%d,%d,%d,%d,%d)", name.c_str(), angle, x_offset, y_offset, z_offset, x_velocity, y_velocity, z_velocity);
+        stbsp_sprintf(act_name, "DEH_SPAWN_OBJECT(%s,%d,%d,%d,%d,%d,%d,%d)", name.c_str(), angle, x_offset, y_offset,
+                      z_offset, x_velocity, y_velocity, z_velocity);
     }
     break;
 
     case kA_MonsterProjectile: {
-        int type = ReadArg(st, 0) - 1;
-        int angle = ReadArg(st, 1);
-        int pitch = ReadArg(st, 2);
+        int type    = ReadArg(st, 0) - 1;
+        int angle   = ReadArg(st, 1);
+        int pitch   = ReadArg(st, 2);
         int hoffset = ReadArg(st, 3);
         int voffset = ReadArg(st, 4);
 
@@ -1214,21 +1220,22 @@ void frames::SpecialAction(char *act_name, const State *st)
     break;
 
     case kA_MonsterBulletAttack: {
-        int hspread = ReadArg(st, 0);
-        int vspread = ReadArg(st, 1);
+        int hspread    = ReadArg(st, 0);
+        int vspread    = ReadArg(st, 1);
         int numbullets = ReadArg(st, 2);
         int damagebase = ReadArg(st, 3);
         int damagedice = ReadArg(st, 4);
 
-        stbsp_sprintf(act_name, "DEH_MONSTER_BULLET(%d,%d,%d,%d,%d)", hspread, vspread, numbullets, damagebase, damagedice);
+        stbsp_sprintf(act_name, "DEH_MONSTER_BULLET(%d,%d,%d,%d,%d)", hspread, vspread, numbullets, damagebase,
+                      damagedice);
     }
     break;
 
     case kA_MonsterMeleeAttack: {
         int damagebase = ReadArg(st, 0);
         int damagedice = ReadArg(st, 1);
-        int sound = ReadArg(st, 2);
-        int range = ReadArg(st, 3);
+        int sound      = ReadArg(st, 2);
+        int range      = ReadArg(st, 3);
 
         sounds::MarkSound(sound);
 
@@ -1237,7 +1244,7 @@ void frames::SpecialAction(char *act_name, const State *st)
     break;
 
     case kA_JumpIfHealthBelow: {
-        int next = ReadArg(st, 0);
+        int next   = ReadArg(st, 0);
         int health = ReadArg(st, 1);
 
         if (next <= 0 || NewStateElseOld(next) == nullptr)
@@ -1248,7 +1255,7 @@ void frames::SpecialAction(char *act_name, const State *st)
     break;
 
     case kA_SeekTracer: {
-        int threshold = ReadArg(st, 0);
+        int threshold    = ReadArg(st, 0);
         int maxturnangle = ReadArg(st, 1);
 
         stbsp_sprintf(act_name, "DEH_SEEK_TRACER(%d,%d)", threshold, maxturnangle);
@@ -1256,7 +1263,7 @@ void frames::SpecialAction(char *act_name, const State *st)
     break;
 
     case kA_FindTracer: {
-        int fov = ReadArg(st, 0);
+        int fov         = ReadArg(st, 0);
         int rangeblocks = ReadArg(st, 1);
 
         stbsp_sprintf(act_name, "DEH_FIND_TRACER(%d,%d)", fov, rangeblocks);
@@ -1265,7 +1272,7 @@ void frames::SpecialAction(char *act_name, const State *st)
 
     case kA_JumpIfTargetInSight: {
         int next = ReadArg(st, 0);
-        int fov = ReadArg(st, 1);
+        int fov  = ReadArg(st, 1);
 
         if (next <= 0 || NewStateElseOld(next) == nullptr)
             strcpy(act_name, "NOTHING");
@@ -1275,7 +1282,7 @@ void frames::SpecialAction(char *act_name, const State *st)
     break;
 
     case kA_JumpIfTargetCloser: {
-        int next = ReadArg(st, 0);
+        int next     = ReadArg(st, 0);
         int distance = ReadArg(st, 1);
 
         if (next <= 0 || NewStateElseOld(next) == nullptr)
@@ -1287,7 +1294,7 @@ void frames::SpecialAction(char *act_name, const State *st)
 
     case kA_JumpIfTracerInSight: {
         int next = ReadArg(st, 0);
-        int fov = ReadArg(st, 1);
+        int fov  = ReadArg(st, 1);
 
         if (next <= 0 || NewStateElseOld(next) == nullptr)
             strcpy(act_name, "NOTHING");
@@ -1297,7 +1304,7 @@ void frames::SpecialAction(char *act_name, const State *st)
     break;
 
     case kA_JumpIfTracerCloser: {
-        int next = ReadArg(st, 0);
+        int next     = ReadArg(st, 0);
         int distance = ReadArg(st, 1);
 
         if (next <= 0 || NewStateElseOld(next) == nullptr)
@@ -1308,8 +1315,8 @@ void frames::SpecialAction(char *act_name, const State *st)
     break;
 
     case kA_JumpIfFlagsSet: {
-        int next = ReadArg(st, 0);
-        int flags = ReadArg(st, 1);
+        int next   = ReadArg(st, 0);
+        int flags  = ReadArg(st, 1);
         int flags2 = ReadArg(st, 2);
 
         if (next <= 0 || NewStateElseOld(next) == nullptr)
@@ -1406,8 +1413,7 @@ void frames::OutputState(char group, int cur, bool do_action)
     if (action_info[action].act_flags & kActionFlagMakeDead)
     {
         wad::Printf("    %s:%c:0:%s:MAKEDEAD,  // %s\n", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31),
-                    st->frame >= 32768 ? "BRIGHT" : "NORMAL",
-                    (action == kA_PainDie) ? "A_PainDie" : "A_KeenDie");
+                    st->frame >= 32768 ? "BRIGHT" : "NORMAL", (action == kA_PainDie) ? "A_PainDie" : "A_KeenDie");
     }
 
     if (action_info[action].act_flags & kActionFlagFaceTarget)
@@ -1426,8 +1432,7 @@ void frames::OutputState(char group, int cur, bool do_action)
         }
 
         wad::Printf("    %s:%c:0:%s:%s,  // kA_FatAttack\n", sprites::GetSprite(st->sprite),
-                    'A' + ((int)st->frame & 31), st->frame >= 32768 ? "BRIGHT" : "NORMAL",
-                    act_name);
+                    'A' + ((int)st->frame & 31), st->frame >= 32768 ? "BRIGHT" : "NORMAL", act_name);
     }
 
     int tics = (int)st->tics;

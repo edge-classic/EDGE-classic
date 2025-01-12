@@ -31,7 +31,7 @@
 #include "snd_gather.h"
 #include "w_wad.h"
 
-extern int  sound_device_frequency;
+extern int sound_device_frequency;
 
 class FLACPlayer : public AbstractMusicPlayer
 {
@@ -53,7 +53,7 @@ class FLACPlayer : public AbstractMusicPlayer
 
     ma_decoder flac_decoder_;
     ma_sound   flac_stream_;
-    uint8_t    *flac_data_;
+    uint8_t   *flac_data_;
 
   public:
     bool OpenMemory(uint8_t *data, int length);
@@ -88,7 +88,7 @@ bool FLACPlayer::OpenMemory(uint8_t *data, int length)
         Close();
 
     ma_decoder_config decode_config = ma_decoder_config_init_default();
-    decode_config.format = ma_format_f32;
+    decode_config.format            = ma_format_f32;
 
     if (ma_decoder_init_memory(data, length, &decode_config, &flac_decoder_) != MA_SUCCESS)
     {
@@ -96,7 +96,9 @@ bool FLACPlayer::OpenMemory(uint8_t *data, int length)
         return false;
     }
 
-    if (ma_sound_init_from_data_source(&music_engine, &flac_decoder_, MA_SOUND_FLAG_STREAM|MA_SOUND_FLAG_NO_SPATIALIZATION, NULL, &flac_stream_) != MA_SUCCESS)
+    if (ma_sound_init_from_data_source(&music_engine, &flac_decoder_,
+                                       MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION, NULL,
+                                       &flac_stream_) != MA_SUCCESS)
     {
         ma_decoder_uninit(&flac_decoder_);
         LogWarning("Failed to load OGG music (corrupt ogg?)\n");
@@ -162,7 +164,7 @@ void FLACPlayer::Play(bool loop)
         status_ = kPaused;
     else
     {
-        status_  = kPlaying;
+        status_ = kPlaying;
         ma_sound_start(&flac_stream_);
     }
 }

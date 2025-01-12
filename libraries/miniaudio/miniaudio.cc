@@ -2,6 +2,7 @@
 #define MA_NO_GENERATION
 #define MA_NO_RESOURCE_MANAGER
 #define MA_NO_WINMM
+#define MA_NO_DSOUND
 #ifndef EDGE_FLAC_SUPPORT
 #define MA_NO_FLAC
 #endif

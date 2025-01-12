@@ -35,9 +35,7 @@ enum ConsoleVariableFlag
     kConsoleVariableFlagArchive  = (1 << 0), // saved in the config file
     kConsoleVariableFlagCheat    = (1 << 1), // disabled in multi-player games
     kConsoleVariableFlagNoReset  = (1 << 2), // do not reset to default
-    kConsoleVariableFlagReadOnly = (1 << 3), // read-only
-    kConsoleVariableFlagFilepath = (1 << 4), // a filesystem path and needs to be sanitized for
-                                             // certain characters
+    kConsoleVariableFlagReadOnly = (1 << 3)  // read-only
 };
 
 class ConsoleVariable

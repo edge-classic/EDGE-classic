@@ -292,10 +292,6 @@ void ResetDefaults(int dummy, ConsoleVariable *dummy_cvar)
 
     ResetAllConsoleVariables();
 
-    // Set default SF2 location in midi_soundfont CVAR
-    // We can't store this as a CVAR default since it is path-dependent
-    midi_soundfont = epi::SanitizePath(epi::PathAppend(game_directory, "soundfont/Default.sf2"));
-
     // Needed so that Smoothing/Upscaling is properly reset
     DeleteAllImages();
 

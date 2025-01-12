@@ -309,7 +309,7 @@ static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, Posit
     chan->loop_ = false;
     chan->boss_ = (flags & kSoundEffectBoss) ? true : false;
 
-    bool attenuate = (pos && !chan->boss_ && category != kCategoryWeapon);
+    bool attenuate = (pos && !chan->boss_ && category != kCategoryWeapon && category != kCategoryPlayer && category != kCategoryUi);
 
     chan->ref_config_            = ma_audio_buffer_config_init(ma_format_f32, 2, buf->length_, buf->data_, NULL);
     chan->ref_config_.sampleRate = buf->frequency_;
@@ -317,6 +317,7 @@ static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, Posit
     ma_sound_init_from_data_source(&sound_engine, &chan->ref_,
                                    attenuate ? 0 : (MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_NO_SPATIALIZATION), NULL,
                                    &chan->channel_sound_);
+    float volume = def->volume_;
     if (attenuate)
     {
         ma_sound_set_attenuation_model(&chan->channel_sound_, ma_attenuation_model_inverse);
@@ -324,7 +325,11 @@ static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, Posit
         ma_sound_set_position(&chan->channel_sound_, pos->x, pos->z, -pos->y);
     }
     else
+    {
         ma_sound_set_attenuation_model(&chan->channel_sound_, ma_attenuation_model_none);
+        volume *= 0.5f;
+    }
+    ma_sound_set_volume(&chan->channel_sound_, volume);
     ma_sound_set_looping(&chan->channel_sound_, false);
     ma_sound_start(&chan->channel_sound_);
 }

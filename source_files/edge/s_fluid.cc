@@ -20,6 +20,8 @@
 
 #include <stdint.h>
 
+#include <set>
+
 #include "HandmadeMath.h"
 #include "dm_state.h"
 #include "epi.h"
@@ -40,6 +42,7 @@ typedef struct MidiRealTimeInterface FluidInterface;
 #include "s_midi.h"
 // clang-format on
 #include "s_music.h"
+#include "w_files.h"
 
 extern int sound_device_frequency;
 
@@ -49,12 +52,14 @@ fluid_synth_t    *edge_fluid            = nullptr;
 fluid_settings_t *edge_fluid_settings   = nullptr;
 fluid_sfloader_t *edge_fluid_sf2_loader = nullptr;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(midi_soundfont, "",
-                             (ConsoleVariableFlag)(kConsoleVariableFlagArchive | kConsoleVariableFlagFilepath))
+EDGE_DEFINE_CONSOLE_VARIABLE(midi_soundfont, "Default", kConsoleVariableFlagArchive)
 
 EDGE_DEFINE_CONSOLE_VARIABLE(fluid_player_gain, "0.6", kConsoleVariableFlagArchive)
 
-extern std::vector<std::string> available_soundfonts;
+extern std::set<std::string> available_soundfonts;
+
+static constexpr uint8_t kFluidOk = 0;
+static constexpr int8_t kFluidFailed = -1;
 
 static void FluidError(int level, char *message, void *data)
 {
@@ -66,10 +71,110 @@ static void FluidError(int level, char *message, void *data)
 static void *edge_fluid_fopen(fluid_fileapi_t *fileapi, const char *filename)
 {
     EPI_UNUSED(fileapi);
-    FILE *fp = epi::FileOpenRaw(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
-    if (!fp)
-        return nullptr;
+    epi::File *fp = nullptr;
+    // If default, look for SNDFONT. This can be a lump or pack file
+    if (epi::StringCompare(filename, "Default") == 0)
+    {
+        int raw_length = 0;
+        uint8_t *raw_sf2 = OpenPackOrLumpInMemory("SNDFONT", {".sf2", ".sf3"}, &raw_length);
+        if (raw_sf2)
+        {
+            fp = new epi::MemFile(raw_sf2, raw_length);
+            delete[] raw_sf2;
+        }
+    }   
+    else // Check home, then game directory for SF2/SF3 file
+    {
+        std::string soundfont_dir = epi::PathAppend(home_directory, "soundfont");
+        std::string sf_check = epi::PathAppend(soundfont_dir, filename);
+        epi::ReplaceExtension(sf_check, ".sf2");
+        if (epi::FileExists(sf_check))
+            fp = epi::FileOpen(sf_check, epi::kFileAccessRead|epi::kFileAccessBinary);
+        else
+        {
+            epi::ReplaceExtension(sf_check, ".sf3");
+            if (epi::FileExists(sf_check))
+                fp = epi::FileOpen(sf_check, epi::kFileAccessRead|epi::kFileAccessBinary);
+        }
+        if (!fp && home_directory != game_directory)
+        {
+            soundfont_dir = epi::PathAppend(game_directory, "soundfont");
+            sf_check = epi::PathAppend(soundfont_dir, filename);
+            epi::ReplaceExtension(sf_check, ".sf2");
+            if (epi::FileExists(sf_check))
+                fp = epi::FileOpen(sf_check, epi::kFileAccessRead|epi::kFileAccessBinary);
+            else
+            {
+                epi::ReplaceExtension(sf_check, ".sf3");
+                if (epi::FileExists(sf_check))
+                    fp = epi::FileOpen(sf_check, epi::kFileAccessRead|epi::kFileAccessBinary);
+            }
+        }
+    }
+
     return fp;
+}
+
+static int edge_fluid_fread(void *buf, int count, void* handle)
+{
+    if (count < 0)
+        return kFluidFailed;
+    epi::File *fp = (epi::File *)handle;
+    if (fp->Read(buf, count) == (unsigned int)count)
+        return kFluidOk;
+    else
+        return kFluidFailed;
+}
+
+static int edge_fluid_fclose(void *handle)
+{
+    epi::File *fp = (epi::File *)handle;
+    delete fp;
+    fp = nullptr;
+    return kFluidOk;
+}
+
+static long edge_fluid_ftell(void *handle)
+{
+    epi::File *fp = (epi::File *)handle;
+    long ret = fp->GetPosition();
+    if (ret == -1)
+        return kFluidFailed;
+    return ret;
+}
+
+static int edge_fluid_free(fluid_fileapi_t* fileapi)
+{
+    if (fileapi)
+    {
+        delete fileapi;
+        fileapi = nullptr;
+    }
+    return kFluidOk;
+}
+
+static int edge_fluid_fseek(void *handle, long offset, int origin)
+{
+    epi::File *fp = (epi::File *)handle;
+    bool did_seek = false;
+    switch (origin)
+    {
+        case SEEK_SET:
+            did_seek = fp->Seek(offset, epi::File::kSeekpointStart);
+            break;
+        case SEEK_CUR:
+            did_seek = fp->Seek(offset, epi::File::kSeekpointCurrent);
+            break;
+        case SEEK_END:
+            did_seek = fp->Seek(-offset, epi::File::kSeekpointEnd);
+            break;
+        default:
+            break;
+    }
+    if (did_seek)
+        return kFluidOk;
+    else
+        return kFluidFailed;
 }
 
 void rtNoteOn(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity)
@@ -583,26 +688,12 @@ bool StartupFluid(void)
     LogPrint("Initializing Fluidlite...\n");
 
     // Check for presence of previous CVAR value's file
-    bool cvar_good = false;
-    for (size_t i = 0; i < available_soundfonts.size(); i++)
-    {
-        if (epi::StringCaseCompareASCII(midi_soundfont.s_, available_soundfonts.at(i)) == 0)
-        {
-            cvar_good = true;
-            break;
-        }
-    }
-
-    if (!cvar_good)
+    if (!available_soundfonts.count(midi_soundfont.s_))
     {
         LogWarning("Cannot find previously used soundfont %s, falling back to "
                    "default!\n",
                    midi_soundfont.c_str());
-        midi_soundfont = epi::SanitizePath(epi::PathAppend(game_directory, "soundfont/Default.sf2"));
-        if (!epi::FileExists(midi_soundfont.s_))
-            FatalError("Fluidlite: Cannot locate default soundfont (Default.sf2)! "
-                       "Please check the /soundfont directory "
-                       "of your EDGE-Classic install!\n");
+        midi_soundfont = "Default";
     }
 
     // Initialize settings and change values from default if needed
@@ -625,6 +716,11 @@ bool StartupFluid(void)
     edge_fluid_sf2_loader->fileapi = new fluid_fileapi_t;
     fluid_init_default_fileapi(edge_fluid_sf2_loader->fileapi);
     edge_fluid_sf2_loader->fileapi->fopen = edge_fluid_fopen;
+    edge_fluid_sf2_loader->fileapi->fclose = edge_fluid_fclose;
+    edge_fluid_sf2_loader->fileapi->ftell = edge_fluid_ftell;
+    edge_fluid_sf2_loader->fileapi->fseek = edge_fluid_fseek;
+    edge_fluid_sf2_loader->fileapi->fread = edge_fluid_fread;
+    edge_fluid_sf2_loader->fileapi->free= edge_fluid_free;
     fluid_synth_add_sfloader(edge_fluid, edge_fluid_sf2_loader);
 
     if (fluid_synth_sfload(edge_fluid, midi_soundfont.c_str(), 1) == -1)
@@ -741,9 +837,9 @@ class FluidPlayer : public AbstractMusicPlayer
         // Stop playback
         Stop();
 
-        ma_sound_uninit(&fluid_stream_);
-
         ma_decoder_uninit(&fluid_decoder_);
+
+        ma_sound_uninit(&fluid_stream_);
 
         status_ = kNotLoaded;
     }
@@ -781,9 +877,9 @@ class FluidPlayer : public AbstractMusicPlayer
         if (status_ != kPlaying)
             return;
 
-        fluid_synth_all_voices_pause(edge_fluid);
-
         ma_sound_stop(&fluid_stream_);
+
+        fluid_synth_all_voices_pause(edge_fluid);
 
         status_ = kPaused;
     }

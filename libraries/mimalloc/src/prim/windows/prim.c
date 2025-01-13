@@ -833,6 +833,13 @@ static void NTAPI mi_win_main(PVOID module, DWORD reason, LPVOID reserved) {
   }
 #endif
 
+// pbdot
+
+#ifdef __MINGW32__
+bool _mi_prim_thread_is_in_threadpool(void) {
+  return false;
+}
+#else
 bool _mi_prim_thread_is_in_threadpool(void) {
   #if (MI_ARCH_X64 || MI_ARCH_X86)
   if (win_major_version >= 6) {
@@ -845,3 +852,4 @@ bool _mi_prim_thread_is_in_threadpool(void) {
   #endif
   return false;
 }
+#endif

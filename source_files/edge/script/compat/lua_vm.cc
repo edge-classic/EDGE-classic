@@ -240,13 +240,25 @@ static void LuaSandbox(lua_State *L)
     }
 }
 
+static void *LUA_DefaultAllocator(void *user, void *ptr, size_t osize, size_t nsize)
+{
+    (void)user;
+    (void)osize; /* not used */
+    if (nsize == 0)
+    {
+        if (ptr)
+        {
+            Mem_Free(ptr);
+        }        
+        return NULL;
+    }
+    else
+        return Mem_Realloc(ptr, nsize);
+}
+
 lua_State *LuaCreateVM()
 {
-    // we could specify a lua allocator, which would be a good idea to hook up
-    // to a debug allocator library for tracing l = lua_newstate(lua_Alloc
-    // alloc, nullptr);
-
-    lua_State *L = luaL_newstate();
+    lua_State *L = lua_newstate(LUA_DefaultAllocator, nullptr);
 
     /*
     ** these libs are loaded by lua.c and are readily available to any Lua

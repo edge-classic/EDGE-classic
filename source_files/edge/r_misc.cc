@@ -285,23 +285,25 @@ RegionProperties *GetPointProperties(Subsector *sub, float z)
 //----------------------------------------------------------------------------
 
 // large buffers for cache coherency vs allocating each on heap
-static constexpr uint16_t kDefaultDrawThings     = 32768;
-static constexpr uint16_t kDefaultDrawFloors     = 32768;
+static constexpr uint32_t kDefaultDrawThings     = 65536;
+static constexpr uint32_t kDefaultDrawFloors     = 65536;
 static constexpr uint32_t kDefaultDrawSegs       = 65536;
 static constexpr uint32_t kDefaultDrawSubsectors = 65536;
-static constexpr uint16_t kDefaultDrawMirrors    = 512;
+static constexpr uint32_t kDefaultDrawMirrors    = 512;
 
-static std::vector<DrawThing>     draw_things;
-static std::vector<DrawFloor>     draw_floors;
-static std::vector<DrawSeg>       draw_segs;
-static std::vector<DrawSubsector> draw_subsectors;
-static std::vector<DrawMirror>    draw_mirrors;
+static std::vector<DrawThing *>     draw_things;
+static std::vector<DrawFloor *>     draw_floors;
+static std::vector<DrawSeg *>       draw_segs;
+static std::vector<DrawSubsector *> draw_subsectors;
+static std::vector<DrawMirror *>    draw_mirrors;
 
 static size_t draw_thing_position;
 static size_t draw_floor_position;
 static size_t draw_seg_position;
 static size_t draw_subsector_position;
 static size_t draw_mirror_position;
+
+static void *draw_memory_buffer = nullptr;
 
 //
 // AllocateDrawStructs
@@ -310,11 +312,48 @@ static size_t draw_mirror_position;
 //
 void AllocateDrawStructs(void)
 {
-    draw_things.resize(kDefaultDrawThings);
-    draw_floors.resize(kDefaultDrawFloors);
-    draw_segs.resize(kDefaultDrawSegs);
-    draw_subsectors.resize(kDefaultDrawSubsectors);
-    draw_mirrors.resize(kDefaultDrawMirrors);
+    EPI_ASSERT(!draw_memory_buffer);
+
+    size_t size = sizeof(DrawThing) * kDefaultDrawThings;
+    size += sizeof(DrawFloor) * kDefaultDrawFloors;
+    size += sizeof(DrawSeg) * kDefaultDrawSegs;
+    size += sizeof(DrawSubsector) * kDefaultDrawSubsectors;
+    size += sizeof(DrawMirror) * kDefaultDrawMirrors;
+
+    draw_things.reserve(kDefaultDrawThings);
+    draw_floors.reserve(kDefaultDrawFloors);
+    draw_segs.reserve(kDefaultDrawSegs);
+    draw_subsectors.reserve(kDefaultDrawSubsectors);
+    draw_mirrors.reserve(kDefaultDrawMirrors);
+
+    draw_memory_buffer = Mem_Alloc(size);
+
+    uint8_t *dst = (uint8_t *)draw_memory_buffer;
+
+    for (uint32_t i = 0; i < kDefaultDrawThings; i++, dst += sizeof(DrawThing))
+    {
+        draw_things.emplace_back(new (dst) DrawThing());
+    }
+
+    for (uint32_t i = 0; i < kDefaultDrawFloors; i++, dst += sizeof(DrawFloor))
+    {
+        draw_floors.emplace_back(new (dst) DrawFloor());
+    }
+
+    for (uint32_t i = 0; i < kDefaultDrawSegs; i++, dst += sizeof(DrawSeg))
+    {
+        draw_segs.emplace_back(new (dst) DrawSeg());
+    }
+
+    for (uint32_t i = 0; i < kDefaultDrawSubsectors; i++, dst += sizeof(DrawSubsector))
+    {
+        draw_subsectors.emplace_back(new (dst) DrawSubsector());
+    }
+
+    for (uint32_t i = 0; i < kDefaultDrawMirrors; i++, dst += sizeof(DrawMirror))
+    {
+        draw_mirrors.emplace_back(new (dst) DrawMirror());
+    }
 }
 
 // bsp clear function
@@ -330,6 +369,39 @@ void ClearBSP(void)
 
 void FreeBSP(void)
 {
+    if (draw_memory_buffer)
+    {
+        Mem_Free(draw_memory_buffer);
+        draw_memory_buffer = nullptr;
+    }
+
+    // Free any dynamically allocated structures
+
+    for (size_t i = kDefaultDrawThings; i < draw_things.size(); i++)
+    {
+        Mem_Free(draw_things[i]);
+    } 
+
+    for (size_t i = kDefaultDrawFloors; i < draw_floors.size(); i++)
+    {
+        Mem_Free(draw_floors[i]);
+    } 
+
+    for (size_t i = kDefaultDrawSegs; i < draw_segs.size(); i++)
+    {
+        Mem_Free(draw_segs[i]);
+    } 
+
+    for (size_t i = kDefaultDrawSubsectors; i < draw_subsectors.size(); i++)
+    {
+        Mem_Free(draw_subsectors[i]);
+    } 
+
+    for (size_t i = kDefaultDrawMirrors; i < draw_mirrors.size(); i++)
+    {
+        Mem_Free(draw_mirrors[i]);
+    } 
+
     draw_things.clear();
     draw_floors.clear();
     draw_segs.clear();
@@ -342,41 +414,41 @@ void FreeBSP(void)
 DrawThing *GetDrawThing()
 {
     if (draw_thing_position == draw_things.size())
-        draw_things.push_back(DrawThing());
+        draw_things.push_back(new (Mem_Alloc(sizeof(DrawThing))) DrawThing());
 
-    return &draw_things[draw_thing_position++];
+    return draw_things[draw_thing_position++];
 }
 
 DrawFloor *GetDrawFloor()
 {
     if (draw_floor_position == draw_floors.size())
-        draw_floors.push_back(DrawFloor());
+        draw_floors.push_back(new (Mem_Alloc(sizeof(DrawFloor))) DrawFloor());
 
-    return &draw_floors[draw_floor_position++];
+    return draw_floors[draw_floor_position++];
 }
 
 DrawSeg *GetDrawSeg()
 {
     if (draw_seg_position == draw_segs.size())
-        draw_segs.push_back(DrawSeg());
+        draw_segs.push_back(new (Mem_Alloc(sizeof(DrawSeg))) DrawSeg());
 
-    return &draw_segs[draw_seg_position++];
+    return draw_segs[draw_seg_position++];
 }
 
 DrawSubsector *GetDrawSub()
 {
     if (draw_subsector_position == draw_subsectors.size())
-        draw_subsectors.push_back(DrawSubsector());
+        draw_subsectors.push_back(new (Mem_Alloc(sizeof(DrawSubsector))) DrawSubsector());
 
-    return &draw_subsectors[draw_subsector_position++];
+    return draw_subsectors[draw_subsector_position++];
 }
 
 DrawMirror *GetDrawMirror()
 {
     if (draw_mirror_position == draw_mirrors.size())
-        draw_mirrors.push_back(DrawMirror());
+        draw_mirrors.push_back(new (Mem_Alloc(sizeof(DrawMirror))) DrawMirror());
 
-    return &draw_mirrors[draw_mirror_position++];
+    return draw_mirrors[draw_mirror_position++];
 }
 
 //--- editor settings ---

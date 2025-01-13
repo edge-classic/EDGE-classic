@@ -15,7 +15,13 @@ add_library(
   epi_scanner.cpp
 )
 
-target_link_libraries(edge_epi PRIVATE almostequals HandmadeMath stb xxhash)
+set (EDGE_EPI_LIBRARIES almostequals HandmadeMath stb xxhash)
+
+if (NOT EMSCRIPTEN)
+  list(APPEND EDGE_EPI_LIBRARIES mimalloc)
+endif()
+
+target_link_libraries(edge_epi PUBLIC ${EDGE_EPI_LIBRARIES})
 
 if(WIN32 AND (MSVC OR CLANG))
   target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/include)

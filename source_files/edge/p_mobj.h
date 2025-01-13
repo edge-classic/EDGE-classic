@@ -402,6 +402,13 @@ class MapObject : public Position
 
     // Stores what this mobj was before being MORPHed/BECOMEing
     const MapObjectDefinition *pre_become_ = nullptr;
+
+    static MapObject* Allocate();
+    void Delete();
+
+protected:
+    MapObject() {};
+    ~MapObject() {};
 };
 
 // Item-in-Respawn-que Structure -ACB- 1998/07/30

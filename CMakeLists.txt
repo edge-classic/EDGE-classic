@@ -57,6 +57,10 @@ if (EMSCRIPTEN)
   include("${CMAKE_SOURCE_DIR}/cmake/Emscripten.cmake")  
 endif()
 
+if (WIN32)
+  add_definitions(-D_WIN32_WINNT=0x601)
+endif()
+
 if (MSVC)
 
   # Disable RTTI

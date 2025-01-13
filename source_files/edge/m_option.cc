@@ -77,6 +77,8 @@
 
 #include <math.h>
 
+#include <set>
+
 #include "am_map.h"
 #include "ddf_font.h"
 #include "ddf_main.h"
@@ -225,7 +227,7 @@ static constexpr char JoystickAxis[] = "Off/Turn/Turn (Reversed)/Look (Inverted)
 // Screen resolution changes
 static DisplayMode new_window_mode;
 
-extern std::vector<std::string> available_soundfonts;
+extern std::set<std::string> available_soundfonts;
 
 //
 //  OPTION STRUCTURES
@@ -1134,7 +1136,7 @@ void OptionMenuDrawer()
             fontType  = StyleDefinition::kTextSectionAlternate;
             TEXTscale = style->definition_->text_[fontType].scale_;
             HUDWriteText(style, fontType, (current_menu->menu_center) + 15, curry,
-                         epi::GetStem(midi_soundfont.s_).c_str());
+                         midi_soundfont.s_.c_str());
         }
 
         // -ACB- 1998/07/15 Menu Cursor is colour indexed.
@@ -2132,42 +2134,39 @@ static void OptionMenuChangeLanguage(int key_pressed, ConsoleVariable *console_v
 static void OptionMenuChangeSoundfont(int key_pressed, ConsoleVariable *console_variable)
 {
     EPI_UNUSED(console_variable);
-    int sf_pos = -1;
-    for (int i = 0; i < (int)available_soundfonts.size(); i++)
-    {
-        if (epi::StringCaseCompareASCII(midi_soundfont.s_, available_soundfonts.at(i)) == 0)
-        {
-            sf_pos = i;
-            break;
-        }
-    }
 
-    if (sf_pos < 0)
+    std::set<std::string>::iterator sf_pos;
+
+    if (!available_soundfonts.count(midi_soundfont.s_)) // Something is weird
     {
         LogWarning("OptionMenuChangeSoundfont: Could not read list of available "
                    "soundfonts. "
                    "Falling back to default!\n");
-        midi_soundfont = epi::SanitizePath(epi::PathAppend(game_directory, "soundfont/Default.sf2"));
+        midi_soundfont = "Default";
         return;
     }
+    else
+        sf_pos = available_soundfonts.find(midi_soundfont.s_);
 
     if (key_pressed == kLeftArrow || key_pressed == kGamepadLeft)
     {
-        if (sf_pos - 1 >= 0)
+        if (sf_pos != available_soundfonts.begin())
             sf_pos--;
         else
-            sf_pos = available_soundfonts.size() - 1;
+        {
+            sf_pos = available_soundfonts.end();
+            sf_pos--;
+        }
     }
     else if (key_pressed == kRightArrow || key_pressed == kGamepadRight)
     {
-        if (sf_pos + 1 >= (int)available_soundfonts.size())
-            sf_pos = 0;
-        else
-            sf_pos++;
+        sf_pos++;
+        if (sf_pos == available_soundfonts.end())
+            sf_pos = available_soundfonts.begin();
     }
 
     // update console_variable
-    midi_soundfont = available_soundfonts.at(sf_pos);
+    midi_soundfont = *sf_pos;
     RestartFluid();
 }
 

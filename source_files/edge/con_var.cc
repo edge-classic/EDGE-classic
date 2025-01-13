@@ -335,11 +335,7 @@ void WriteConsoleVariables(FILE *f)
     {
         if (var->flags_ & kConsoleVariableFlagArchive)
         {
-            std::string line;
-            if (var->flags_ & kConsoleVariableFlagFilepath)
-                line = epi::SanitizePath(epi::StringFormat("/%s\t\"%s\"\n", var->name_, var->c_str()));
-            else
-                line = epi::StringFormat("/%s\t\"%s\"\n", var->name_, var->c_str());
+            std::string line = epi::StringFormat("/%s\t\"%s\"\n", var->name_, var->c_str());
             fwrite(line.data(), line.size(), 1, f);
         }
     }

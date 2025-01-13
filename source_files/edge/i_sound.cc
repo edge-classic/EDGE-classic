@@ -18,6 +18,8 @@
 
 #include "i_sound.h"
 
+#include <set>
+
 #include "epi.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
@@ -39,10 +41,10 @@ bool no_sound = false;
 
 int sound_device_frequency;
 
-std::vector<std::string> available_soundfonts;
-extern std::string       game_directory;
-extern std::string       home_directory;
-extern ConsoleVariable   midi_soundfont;
+std::set<std::string>       available_soundfonts;
+extern std::string          game_directory;
+extern std::string          home_directory;
+extern ConsoleVariable      midi_soundfont;
 
 ma_engine sound_engine;
 ma_engine music_engine;
@@ -95,11 +97,15 @@ void StartupMusic(void)
 {
     // Check for soundfonts and instrument banks
     std::vector<epi::DirectoryEntry> sfd;
-    std::string                      soundfont_dir = epi::PathAppend(game_directory, "soundfont");
+    std::string                      soundfont_dir = epi::PathAppend(home_directory, "soundfont");
 
-    // Set default SF2 location in CVAR if needed
-    if (midi_soundfont.s_.empty())
-        midi_soundfont = epi::SanitizePath(epi::PathAppend(soundfont_dir, "Default.sf2"));
+    available_soundfonts.emplace("Default");
+
+    // Create home directory soundfont folder if it doesn't aleady exist
+    if (!epi::IsDirectory(soundfont_dir))
+        epi::MakeDirectory(soundfont_dir);
+
+    sfd.clear();
 
     if (!ReadDirectory(sfd, soundfont_dir, "*.sf2"))
     {
@@ -110,7 +116,11 @@ void StartupMusic(void)
         for (size_t i = 0; i < sfd.size(); i++)
         {
             if (!sfd[i].is_dir)
-                available_soundfonts.push_back(epi::SanitizePath(sfd[i].name));
+            {
+                std::string filename = epi::GetStem(sfd[i].name);
+                if (!available_soundfonts.count(filename))
+                    available_soundfonts.emplace(filename);
+            }
         }
     }
     if (!ReadDirectory(sfd, soundfont_dir, "*.sf3"))
@@ -122,18 +132,19 @@ void StartupMusic(void)
         for (size_t i = 0; i < sfd.size(); i++)
         {
             if (!sfd[i].is_dir)
-                available_soundfonts.push_back(epi::SanitizePath(sfd[i].name));
+            {
+                std::string filename = epi::GetStem(sfd[i].name);
+                if (!available_soundfonts.count(filename))
+                    available_soundfonts.emplace(filename);
+            }
         }
     }
 
     if (home_directory != game_directory)
     {
-        // Check home_directory soundfont folder as well; create it if it
-        // doesn't exist (home_directory only)
+        // Read the program directory, but only add names we haven't encountered yet
         sfd.clear();
-        soundfont_dir = epi::PathAppend(home_directory, "soundfont");
-        if (!epi::IsDirectory(soundfont_dir))
-            epi::MakeDirectory(soundfont_dir);
+        soundfont_dir = epi::PathAppend(game_directory, "soundfont");
 
         if (!ReadDirectory(sfd, soundfont_dir, "*.sf2"))
         {
@@ -144,7 +155,11 @@ void StartupMusic(void)
             for (size_t i = 0; i < sfd.size(); i++)
             {
                 if (!sfd[i].is_dir)
-                    available_soundfonts.push_back(epi::SanitizePath(sfd[i].name));
+                {
+                    std::string filename = epi::GetStem(sfd[i].name);
+                    if (!available_soundfonts.count(filename))
+                        available_soundfonts.emplace(filename);
+                }
             }
         }
         if (!ReadDirectory(sfd, soundfont_dir, "*.sf3"))
@@ -156,7 +171,11 @@ void StartupMusic(void)
             for (size_t i = 0; i < sfd.size(); i++)
             {
                 if (!sfd[i].is_dir)
-                    available_soundfonts.push_back(epi::SanitizePath(sfd[i].name));
+                {
+                    std::string filename = epi::GetStem(sfd[i].name);
+                    if (!available_soundfonts.count(filename))
+                        available_soundfonts.emplace(filename);
+                }
             }
         }
     }

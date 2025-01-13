@@ -666,10 +666,7 @@ void TryConsoleCommand(const char *cmd)
     {
         if (argc <= 1)
         {
-            if (var->flags_ & kConsoleVariableFlagFilepath)
-                LogPrint("%s \"%s\"\n", argv[0], epi::SanitizePath(var->s_).c_str());
-            else
-                LogPrint("%s \"%s\"\n", argv[0], var->c_str());
+            LogPrint("%s \"%s\"\n", argv[0], var->c_str());
         }
         else if (argc - 1 >= 2) // Assume string with spaces; concat args into
                                 // one string and try it
@@ -680,19 +677,13 @@ void TryConsoleCommand(const char *cmd)
                 // preserve spaces in original string
                 concatter.append(" ").append(argv[i]);
             }
-            if (var->flags_ & kConsoleVariableFlagFilepath)
-                *var = epi::SanitizePath(concatter).c_str();
-            else
-                *var = concatter.c_str();
+            *var = concatter.c_str();
         }
         else if ((var->flags_ & kConsoleVariableFlagReadOnly) != 0)
             LogPrint("The cvar '%s' is read only.\n", var->name_);
         else
         {
-            if (var->flags_ & kConsoleVariableFlagFilepath)
-                *var = epi::SanitizePath(argv[1]).c_str();
-            else
-                *var = argv[1];
+            *var = argv[1];
         }
 
         KillArgs(argv, argc);

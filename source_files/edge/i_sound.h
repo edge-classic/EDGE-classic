@@ -18,12 +18,12 @@
 
 #pragma once
 
+#include <set>
 #include <string>
-#include <vector>
 
 #include "miniaudio.h"
 
-extern std::vector<std::string> available_soundfonts;
+extern std::set<std::string> available_soundfonts;
 
 extern ma_engine sound_engine;
 extern ma_engine music_engine;

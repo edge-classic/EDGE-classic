@@ -132,6 +132,18 @@ static void AddItemToQueue(const MapObject *mo)
     }
 }
 
+MapObject *MapObject::Allocate()
+{
+    void *buffer = Mem_Alloc(sizeof(MapObject));
+    return new (buffer) MapObject();
+}
+
+void MapObject::Delete()
+{
+    this->~MapObject();
+    Mem_Free(this);
+}
+
 bool MapObject::IsRemoved() const
 {
     return state_ == nullptr;
@@ -1637,7 +1649,7 @@ static void DeleteMobj(MapObject *mo)
     mo->next_     = (MapObject *)-1;
     mo->previous_ = (MapObject *)-1;
 
-    delete mo;
+    mo->Delete();
 }
 
 static inline void UpdateMobjRef(MapObject *self, MapObject *&field, MapObject *other)
@@ -2190,7 +2202,7 @@ void RemoveMissile(MapObject *missile)
 //
 MapObject *CreateMapObject(float x, float y, float z, const MapObjectDefinition *info)
 {
-    MapObject *mobj = new MapObject;
+    MapObject *mobj = MapObject::Allocate();
 
 #if (EDGE_DEBUG_MAP_OBJECTS > 0)
     LogDebug("tics=%05d  CREATE %p [%s]  AT %1.0f,%1.0f,%1.0f\n", level_time_elapsed, mobj, info->name.c_str(), x, y,

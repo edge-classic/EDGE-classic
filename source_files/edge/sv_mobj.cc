@@ -68,7 +68,13 @@ void SaveGameMapObjectPutWUDs(void *storage, int index);
 //
 //  MOBJ STRUCTURE AND ARRAY
 //
-static MapObject dummy_map_object;
+
+class DummyMapObject : public MapObject
+{
+
+};
+
+static DummyMapObject dummy_map_object;
 
 static SaveField sv_fields_mobj[] = {
     EDGE_SAVE_FIELD(dummy_map_object, x, "x", 1, kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat, SaveGamePutFloat),
@@ -364,7 +370,7 @@ void SaveGameMapObjectCreateElems(int num_elems)
 
     for (; num_elems > 0; num_elems--)
     {
-        MapObject *cur = new MapObject;
+        MapObject *cur = MapObject::Allocate();
 
         cur->next_     = map_object_list_head;
         cur->previous_ = nullptr;

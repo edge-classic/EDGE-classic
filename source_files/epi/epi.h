@@ -21,7 +21,7 @@
 #include <math.h>
 #include <string.h>
 
-#ifndef EDGE_WEB
+#if !defined(EDGE_WEB) && !defined(__MINGW32__)
 #include <mimalloc.h>
 #define Mem_Alloc   mi_malloc
 #define Mem_Realloc mi_realloc

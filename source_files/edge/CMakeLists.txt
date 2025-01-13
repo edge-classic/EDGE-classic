@@ -80,7 +80,7 @@ set (EDGE_SOURCE_FILES
   s_blit.cc
   s_cache.cc
   s_sound.cc
-  s_fluid.cc
+  s_midi.cc
   s_music.cc
   s_ogg.cc
   sv_chunk.cc
@@ -219,8 +219,8 @@ if (EDGE_DEHACKED_SUPPORT)
   set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} edge_deh)
 endif()
 
-if (EDGE_IMF_SUPPORT)
-  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} opal)
+if (EDGE_IMF_SUPPORT OR EDGE_OPL_SUPPORT)
+  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} opalmidi)
 endif()
 
 if (EDGE_SID_SUPPORT)

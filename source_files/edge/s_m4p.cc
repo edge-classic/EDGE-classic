@@ -107,7 +107,7 @@ static ma_result ma_m4p_init_internal(const ma_decoding_backend_config *pConfig,
     }
 
     EPI_CLEAR_MEMORY(pM4P, ma_m4p, 1);
-    pM4P->format = ma_format_f32; /* Only supporting f32. */
+    pM4P->format = ma_format_s16;
 
     dataSourceConfig        = ma_data_source_config_init();
     dataSourceConfig.vtable = &g_ma_m4p_ds_vtable;
@@ -126,7 +126,7 @@ static ma_result ma_m4p_post_init(ma_m4p *pM4P)
     EPI_ASSERT(pM4P != NULL);
 
     pM4P->channels   = 2;
-    pM4P->sampleRate = sound_device_frequency;
+    pM4P->sampleRate = HMM_MIN(64000, sound_device_frequency);
 
     m4p_PlaySong();
 
@@ -173,7 +173,7 @@ static ma_result ma_m4p_init_memory(const void *pData, size_t dataSize, const ma
 
     EPI_UNUSED(pAllocationCallbacks);
 
-    if (!m4p_LoadFromData((uint8_t *)pData, dataSize, sound_device_frequency, kMusicBuffer))
+    if (!m4p_LoadFromData((uint8_t *)pData, dataSize, HMM_MIN(64000, sound_device_frequency), kMusicBuffer))
     {
         LogWarning("M4P: failure to load song!\n");
         return MA_INVALID_DATA;
@@ -216,7 +216,6 @@ static ma_result ma_m4p_read_pcm_frames(ma_m4p *pM4P, void *pFramesOut, ma_uint6
         return MA_INVALID_ARGS;
     }
 
-    /* We always use floating point format. */
     ma_result result          = MA_SUCCESS; /* Must be initialized to MA_SUCCESS. */
     ma_uint64 totalFramesRead = 0;
     ma_format format;
@@ -224,9 +223,9 @@ static ma_result ma_m4p_read_pcm_frames(ma_m4p *pM4P, void *pFramesOut, ma_uint6
 
     ma_m4p_get_data_format(pM4P, &format, &channels, NULL, NULL, 0);
 
-    if (format == ma_format_f32)
+    if (format == ma_format_s16)
     {
-        m4p_GenerateFloatSamples((float *)pFramesOut, frameCount);
+        m4p_GenerateSamples((int16_t *)pFramesOut, frameCount);
         totalFramesRead = frameCount;
     }
     else
@@ -486,7 +485,7 @@ bool M4PPlayer::OpenMemory(uint8_t *data, int length)
         Close();
 
     ma_decoder_config decode_config      = ma_decoder_config_init_default();
-    decode_config.format                 = ma_format_f32;
+    decode_config.format                 = ma_format_s16;
     decode_config.customBackendCount     = 1;
     decode_config.pCustomBackendUserData = NULL;
     decode_config.ppCustomBackendVTables = &custom_vtable;

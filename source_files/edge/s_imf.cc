@@ -34,7 +34,7 @@
 #define MidiFraction IMFFraction
 #define MidiSequencer IMFSequencer
 typedef struct MidiRealTimeInterface IMFInterface;
-#include "s_midi.h"
+#include "s_midi_seq.h"
 // clang-format on
 #include "s_music.h"
 #include "snd_types.h"
@@ -131,9 +131,9 @@ static void rtRawOPL(void *userdata, uint8_t reg, uint8_t value)
 static void playSynth(void *userdata, uint8_t *stream, size_t length)
 {
     Opal  *imf_opl     = (Opal *)userdata;
-    size_t real_length = length / sizeof(float);
+    size_t real_length = length / sizeof(int16_t);
     for (size_t i = 0; i < real_length; i += 2)
-        imf_opl->SampleFloat((float *)stream + i, (float *)stream + i + 1);
+        imf_opl->Sample((int16_t *)stream + i, (int16_t *)stream + i + 1);
 }
 
 typedef struct
@@ -171,7 +171,7 @@ static void IMFSequencerInit(ma_imf *synth)
     synth->imf_interface->onPcmRender_userdata = synth->imf_opl;
 
     synth->imf_interface->pcmSampleRate = sound_device_frequency;
-    synth->imf_interface->pcmFrameSize  = 2 /*channels*/ * sizeof(float) /*size of one sample*/;
+    synth->imf_interface->pcmFrameSize  = 2 /*channels*/ * sizeof(int16_t) /*size of one sample*/;
 
     synth->imf_interface->rt_deviceSwitch  = rtDeviceSwitch;
     synth->imf_interface->rt_currentDevice = rtCurrentDevice;
@@ -240,7 +240,7 @@ static ma_result ma_imf_init_internal(const ma_decoding_backend_config *pConfig,
     }
 
     EPI_CLEAR_MEMORY(pIMF, ma_imf, 1);
-    pIMF->format = ma_format_f32; /* Only supporting f32. */
+    pIMF->format = ma_format_s16;
 
     dataSourceConfig        = ma_data_source_config_init();
     dataSourceConfig.vtable = &g_ma_imf_ds_vtable;
@@ -368,10 +368,10 @@ static ma_result ma_imf_read_pcm_frames(ma_imf *pIMF, void *pFramesOut, ma_uint6
 
     ma_imf_get_data_format(pIMF, &format, &channels, NULL, NULL, 0);
 
-    if (format == ma_format_f32)
+    if (format == ma_format_s16)
     {
         totalFramesRead =
-            pIMF->imf_sequencer->PlayStream((uint8_t *)pFramesOut, frameCount * 2 * sizeof(float)) / 2 / sizeof(float);
+            pIMF->imf_sequencer->PlayStream((uint8_t *)pFramesOut, frameCount * 2 * sizeof(int16_t)) / 2 / sizeof(int16_t);
     }
     else
     {
@@ -608,7 +608,7 @@ class IMFPlayer : public AbstractMusicPlayer
             Close();
 
         ma_decoder_config decode_config      = ma_decoder_config_init_default();
-        decode_config.format                 = ma_format_f32;
+        decode_config.format                 = ma_format_s16;
         decode_config.customBackendCount     = 1;
         decode_config.ppCustomBackendVTables = &imf_custom_vtable;
 
@@ -699,7 +699,7 @@ class IMFPlayer : public AbstractMusicPlayer
 
     void Ticker(void)
     {
-        ma_engine_set_volume(&music_engine, music_volume.f_ * 0.25f);
+        ma_engine_set_volume(&music_engine, music_volume.f_);
 
         if (status_ == kPlaying)
         {

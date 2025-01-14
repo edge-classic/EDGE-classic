@@ -20,9 +20,7 @@ add_library(fluidlite
     src/fluid_voice.c
 )
 
-if (EDGE_OGG_SUPPORT)
-  add_compile_definitions(SF3_SUPPORT=SF3_STB_VORBIS)
-endif()
+add_compile_definitions(SF3_SUPPORT=SF3_STB_VORBIS)
 
 target_include_directories(fluidlite PRIVATE ./src ../stb)
 target_include_directories(fluidlite PUBLIC ./include)

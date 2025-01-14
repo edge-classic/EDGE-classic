@@ -62,7 +62,7 @@
 #include "sv_chunk.h"
 #include "sv_main.h"
 #include "version.h"
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
 #include "vm_coal.h"
 #endif
 #include "w_wad.h"
@@ -310,7 +310,7 @@ void DoLoadLevel(void)
     LoadLevel_Bits();
 
     SpawnInitialPlayers();
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
     if (LuaUseLuaHUD())
         LuaBeginLevel();
     else
@@ -858,7 +858,7 @@ static void GameDoLoadGame(void)
     HUDStart();
 
     SetPalette(kPaletteNormal, 0);
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
     if (LuaUseLuaHUD())
         LuaLoadGame();
     else
@@ -959,7 +959,7 @@ static bool GameSaveGameToFile(std::string filename, const char *description)
 
 static void GameDoSaveGame(void)
 {
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
     if (LuaUseLuaHUD())
         LuaSaveGame();
     else
@@ -1095,7 +1095,7 @@ static void GameDoNewGame(void)
 
     delete defer_params;
     defer_params = nullptr;
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
     if (LuaUseLuaHUD())
         LuaNewGame();
     else

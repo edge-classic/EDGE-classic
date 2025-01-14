@@ -197,7 +197,7 @@ static void OptionMenuChangeMonitorSize(int key_pressed, ConsoleVariable *consol
 static void OptionMenuChangeKicking(int key_pressed, ConsoleVariable *console_variable);
 static void OptionMenuChangeWeaponSwitch(int key_pressed, ConsoleVariable *console_variable);
 static void OptionMenuChangeMipMap(int key_pressed, ConsoleVariable *console_variable);
-#if EDGE_DOOM_SFX_SUPPORT
+#ifdef EDGE_CLASSIC
 static void OptionMenuChangePCSpeakerMode(int key_pressed, ConsoleVariable *console_variable);
 #endif
 
@@ -545,7 +545,7 @@ static OptionMenuItem soundoptions[] = {
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeFunction, "MIDI Instrument Set", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr,
      nullptr, 0, 0, 0, ""},
-#if EDGE_DOOM_SFX_SUPPORT
+#ifdef EDGE_CLASSIC
     {kOptionMenuItemTypeBoolean, "PC Speaker Mode", YesNo, 2, &pc_speaker_mode, OptionMenuChangePCSpeakerMode,
      "Music will be Off while this is enabled", nullptr, 0, 0, 0, ""},
 #endif
@@ -2072,7 +2072,7 @@ static void OptionMenuChangeWeaponSwitch(int key_pressed, ConsoleVariable *conso
     level_flags.weapon_switch = global_flags.weapon_switch;
 }
 
-#if EDGE_DOOM_SFX_SUPPORT
+#ifdef EDGE_CLASSIC
 static void OptionMenuChangePCSpeakerMode(int key_pressed, ConsoleVariable *console_variable)
 {
     EPI_UNUSED(key_pressed);

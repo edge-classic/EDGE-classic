@@ -102,7 +102,7 @@ void StartupMusic(void)
     // Add our built-in options first so they take precedence over a soundfont that might 
     // somehow have the same file stem
     available_soundfonts.emplace("Default");
-#ifdef EDGE_OPL_SUPPORT
+#ifdef EDGE_CLASSIC
     available_soundfonts.emplace("OPL Emulation");
 #endif
 

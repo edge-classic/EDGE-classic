@@ -27,7 +27,7 @@
 
 #include "AlmostEquals.h"
 #include "bot_think.h"
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
 #include "coal.h"
 #endif
 #include "ddf_colormap.h"
@@ -45,7 +45,7 @@
 #include "s_sound.h"
 #include "script/compat/lua_compat.h"
 #include "stb_sprintf.h"
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
 #include "vm_coal.h"
 
 extern coal::VM *ui_vm;
@@ -858,7 +858,7 @@ bool PlayerThink(Player *player)
 
     player->action_button_down_[0] = (cmd->extended_buttons & kExtendedButtonCodeAction1) ? true : false;
     player->action_button_down_[1] = (cmd->extended_buttons & kExtendedButtonCodeAction2) ? true : false;
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
     if (LuaUseLuaHUD())
         LuaSetVector3(LuaGetGlobalVM(), "player", "inventory_event_handler",
                       HMM_Vec3{{cmd->extended_buttons & kExtendedButtonCodeInventoryPrevious ? 1.0f : 0.0f,

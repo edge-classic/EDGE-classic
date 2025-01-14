@@ -32,6 +32,8 @@
 
 extern int sound_device_frequency;
 
+static ma_decoder m4p_decoder;
+static ma_sound   m4p_stream;
 typedef struct
 {
     ma_data_source_base     ds;
@@ -173,7 +175,7 @@ static ma_result ma_m4p_init_memory(const void *pData, size_t dataSize, const ma
 
     EPI_UNUSED(pAllocationCallbacks);
 
-    if (!m4p_LoadFromData((uint8_t *)pData, dataSize, HMM_MIN(64000, sound_device_frequency), kMusicBuffer))
+    if (!m4p_LoadFromData((uint8_t *)pData, dataSize, HMM_MIN(64000, sound_device_frequency), 1024))
     {
         LogWarning("M4P: failure to load song!\n");
         return MA_INVALID_DATA;
@@ -437,22 +439,6 @@ class M4PPlayer : public AbstractMusicPlayer
     M4PPlayer();
     ~M4PPlayer();
 
-  private:
-    enum Status
-    {
-        kNotLoaded,
-        kPlaying,
-        kPaused,
-        kStopped
-    };
-
-    int  status_;
-    bool looping_;
-
-    ma_decoder m4p_decoder_;
-    ma_sound   m4p_stream_;
-
-  public:
     bool OpenMemory(uint8_t *data, int length);
 
     virtual void Close(void);
@@ -468,10 +454,9 @@ class M4PPlayer : public AbstractMusicPlayer
 
 //----------------------------------------------------------------------------
 
-M4PPlayer::M4PPlayer() : status_(kNotLoaded)
+M4PPlayer::M4PPlayer()
 {
-    EPI_CLEAR_MEMORY(&m4p_decoder_, ma_decoder, 1);
-    EPI_CLEAR_MEMORY(&m4p_stream_, ma_sound, 1);
+    status_ = kNotLoaded;
 }
 
 M4PPlayer::~M4PPlayer()
@@ -490,18 +475,18 @@ bool M4PPlayer::OpenMemory(uint8_t *data, int length)
     decode_config.pCustomBackendUserData = NULL;
     decode_config.ppCustomBackendVTables = &custom_vtable;
 
-    if (ma_decoder_init_memory(data, length, &decode_config, &m4p_decoder_) != MA_SUCCESS)
+    if (ma_decoder_init_memory(data, length, &decode_config, &m4p_decoder) != MA_SUCCESS)
     {
         LogWarning("Failed to load tracker music\n");
         return false;
     }
 
-    if (ma_sound_init_from_data_source(&music_engine, &m4p_decoder_,
+    if (ma_sound_init_from_data_source(&music_engine, &m4p_decoder,
                                        MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_UNKNOWN_LENGTH | MA_SOUND_FLAG_STREAM |
                                            MA_SOUND_FLAG_NO_SPATIALIZATION,
-                                       NULL, &m4p_stream_) != MA_SUCCESS)
+                                       NULL, &m4p_stream) != MA_SUCCESS)
     {
-        ma_decoder_uninit(&m4p_decoder_);
+        ma_decoder_uninit(&m4p_decoder);
         LogWarning("Failed to load tracker music\n");
         return false;
     }
@@ -520,9 +505,9 @@ void M4PPlayer::Close()
     // Stop playback
     Stop();
 
-    ma_sound_uninit(&m4p_stream_);
+    ma_sound_uninit(&m4p_stream);
 
-    ma_decoder_uninit(&m4p_decoder_);
+    ma_decoder_uninit(&m4p_decoder);
 
     status_ = kNotLoaded;
 }
@@ -532,7 +517,7 @@ void M4PPlayer::Pause()
     if (status_ != kPlaying)
         return;
 
-    ma_sound_stop(&m4p_stream_);
+    ma_sound_stop(&m4p_stream);
 
     status_ = kPaused;
 }
@@ -542,7 +527,7 @@ void M4PPlayer::Resume()
     if (status_ != kPaused)
         return;
 
-    ma_sound_start(&m4p_stream_);
+    ma_sound_start(&m4p_stream);
 
     status_ = kPlaying;
 }
@@ -554,7 +539,7 @@ void M4PPlayer::Play(bool loop)
 
     looping_ = loop;
 
-    ma_sound_set_looping(&m4p_stream_, looping_ ? MA_TRUE : MA_FALSE);
+    ma_sound_set_looping(&m4p_stream, looping_ ? MA_TRUE : MA_FALSE);
 
     // Let 'er rip (maybe)
     if (playing_movie)
@@ -562,7 +547,7 @@ void M4PPlayer::Play(bool loop)
     else
     {
         status_ = kPlaying;
-        ma_sound_start(&m4p_stream_);
+        ma_sound_start(&m4p_stream);
     }
 }
 
@@ -571,22 +556,21 @@ void M4PPlayer::Stop()
     if (status_ != kPlaying && status_ != kPaused)
         return;
 
-    ma_sound_stop(&m4p_stream_);
-
-    ma_decoder_seek_to_pcm_frame(&m4p_decoder_, 0);
+    ma_sound_set_volume(&m4p_stream, 0);
+    ma_sound_stop(&m4p_stream);
 
     status_ = kStopped;
 }
 
 void M4PPlayer::Ticker()
 {
-    ma_engine_set_volume(&music_engine, music_volume.f_ * 0.25f);
-
     if (status_ == kPlaying)
     {
+        ma_engine_set_volume(&music_engine, music_volume.f_ * 0.25f);
+
         if (pc_speaker_mode)
             Stop();
-        if (ma_sound_at_end(&m4p_stream_)) // This should only be true if finished and not set to looping
+        if (ma_sound_at_end(&m4p_stream)) // This should only be true if finished and not set to looping
             Stop();
     }
 }

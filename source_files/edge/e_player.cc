@@ -43,7 +43,7 @@
 #include "m_random.h"
 #include "p_local.h"
 #include "script/compat/lua_compat.h"
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
 #include "vm_coal.h"
 #endif
 
@@ -149,7 +149,7 @@ void PlayerFinishLevel(Player *p, bool keep_cards)
     // Lobo 2023: uncomment if still getting
     //  "INTERNAL ERROR: player has a removed attacker"
     p->attacker_ = nullptr;
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
     if (LuaUseLuaHUD())
         LuaEndLevel();
     else

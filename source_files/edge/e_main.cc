@@ -87,7 +87,7 @@
 #include "sv_chunk.h"
 #include "sv_main.h"
 #include "version.h"
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
 #include "vm_coal.h"
 #endif
 #include "w_files.h"
@@ -646,7 +646,7 @@ void EdgeDisplay(void)
         {
         case kGameStateLevel:
             PaletteTicker();
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
             if (LuaUseLuaHUD())
                 LuaRunHUD();
             else
@@ -1981,7 +1981,7 @@ static void AddSingleCommandLineFile(std::string name, bool ignore_unknown)
 
     if (ext == ".wad")
         kind = kFileKindPWAD;
-    else if (ext == ".pk3" || ext == ".epk" || ext == ".zip" || ext == ".vwad")
+    else if (ext == ".pk3" || ext == ".epk" || ext == ".zip")
         kind = kFileKindEPK;
     else if (ext == ".rts")
         kind = kFileKindRTS;
@@ -2041,8 +2041,8 @@ static void AddCommandLineFiles(void)
             // sanity check...
             if (epi::StringCaseCompareASCII(ext, ".wad") == 0 || epi::StringCaseCompareASCII(ext, ".pk3") == 0 ||
                 epi::StringCaseCompareASCII(ext, ".zip") == 0 || epi::StringCaseCompareASCII(ext, ".epk") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".vwad") == 0 || epi::StringCaseCompareASCII(ext, ".ddf") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".deh") == 0 || epi::StringCaseCompareASCII(ext, ".bex") == 0)
+                epi::StringCaseCompareASCII(ext, ".ddf") == 0 || epi::StringCaseCompareASCII(ext, ".deh") == 0 || 
+                epi::StringCaseCompareASCII(ext, ".bex") == 0)
             {
                 FatalError("Illegal filename for -script: %s\n", program_argument_list[p].c_str());
             }
@@ -2069,8 +2069,7 @@ static void AddCommandLineFiles(void)
             // sanity check...
             if (epi::StringCaseCompareASCII(ext, ".wad") == 0 || epi::StringCaseCompareASCII(ext, ".epk") == 0 ||
                 epi::StringCaseCompareASCII(ext, ".pk3") == 0 || epi::StringCaseCompareASCII(ext, ".zip") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".vwad") == 0 || epi::StringCaseCompareASCII(ext, ".ddf") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".rts") == 0)
+                epi::StringCaseCompareASCII(ext, ".ddf") == 0 || epi::StringCaseCompareASCII(ext, ".rts") == 0)
             {
                 FatalError("Illegal filename for -deh: %s\n", program_argument_list[p].c_str());
             }
@@ -2251,7 +2250,9 @@ static void EdgeStartup(void)
 
     DDFCleanUp();
     SetLanguage();
+#ifdef EDGE_CLASSIC
     ReadUMAPINFOLumps();
+#endif
 
     InitializeFlats();
     InitializeTextures();
@@ -2284,7 +2285,7 @@ static void EdgeStartup(void)
     InitializeSound();
     NetworkInitialize();
     CheatInitialize();
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
     if (LuaUseLuaHUD())
     {
         LuaInit();

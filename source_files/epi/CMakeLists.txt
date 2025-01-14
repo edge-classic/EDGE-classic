@@ -3,7 +3,7 @@
 ##########################################
 
 add_library(
-  edge_epi
+  epi
   epi_color.cc
   epi_crc.cc
   epi_ename.cc
@@ -15,21 +15,21 @@ add_library(
   epi_scanner.cpp
 )
 
-set (EDGE_EPI_LIBRARIES almostequals HandmadeMath stb xxhash)
+set (epi_LIBRARIES almostequals HandmadeMath stb xxhash)
 
 if (NOT EMSCRIPTEN AND NOT MINGW)
-  list(APPEND EDGE_EPI_LIBRARIES mimalloc)
+  list(APPEND epi_LIBRARIES mimalloc)
 endif()
 
-target_link_libraries(edge_epi PUBLIC ${EDGE_EPI_LIBRARIES})
+target_link_libraries(epi PUBLIC ${epi_LIBRARIES})
 
 if(WIN32 AND (MSVC OR CLANG))
-  target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/include)
+  target_include_directories(epi PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/include)
 endif()
 
-target_include_directories(edge_epi PUBLIC ./)
+target_include_directories(epi PUBLIC ./)
 
-target_compile_options(edge_epi PRIVATE
+target_compile_options(epi PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:${EDGE_WARNING_LEVEL}>
   $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:${EDGE_WARNING_LEVEL}>
 )

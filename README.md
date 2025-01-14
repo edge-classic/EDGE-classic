@@ -61,9 +61,9 @@ An optional texture pack to enhance the experience can be found [here.](https://
 
 - UDMF map support
 - DEHEXTRA compatibility
-- A soundfont-capable MIDI player (SF2 support)
-- OPL emulation with external OP2/AIL/TMB instrument support
-- Support for MP3 music and sound effects
+- A soundfont-capable MIDI player (SF2/SF3 support)
+- OPL emulation with external OP2/AIL/TMB/WOPL instrument support
+- Many more music and sound formats (MP3, OGG, FLAC, IT/S3M/XM/MOD Tracker music)
 - UMAPINFO compatibility
 - Migration from SDL1 to SDL2 (longevity and potential new features)
 - Improved support for gamepads
@@ -76,7 +76,6 @@ An optional texture pack to enhance the experience can be found [here.](https://
 - Inventory system
 - Autoload folder
 - New Liquid animation (SMMU, SMMU+Swirl and Parallax)
-- Many more music formats (OGG, FLAC, IT/S3M/XM/MOD/RAD Tracker music and even C64 SID!)
 - Optional Dynamic Sound Reverb
 - Optional Pistol Start feature
 - Support for image/spritesheet and TrueType fonts
@@ -86,13 +85,12 @@ Bugfixes and detailed changes can be found in CHANGELOG.txt
 
 # Currently Supported Platforms
 
-- Windows 32/64-bit (x86 architecture), XP or later
-  - Windows XP builds are created with w64devkit; instructions are in COMPILING.md
+- Windows 7 or later
 - [Web Browsers](https://edge-classic.github.io/play.html) (Desktop browsers are supported, mobile browsers require future touch and gamepad input work)
-- Linux 32/64-bit (x86 and ARM architecture - ARM tested with Raspberry Pi OS on a Pi 4B)
-- BSD 32/64-bit (x86 and ARM64 architecture - tested with FreeBSD 13.1; ARM64 tested on a Pi 4B but not recommended unless proper video acceleration is available
+- Linux (x86 and ARM architecture - ARM tested with Raspberry Pi OS on a Pi 4B)
+- BSD (x86 and ARM64 architecture - tested with FreeBSD 13.1; ARM64 tested on a Pi 4B but not recommended unless proper video acceleration is available
                  as playable framerates are too difficult to achieve otherwise)
-- Mac 64-bit (x86 and M1 architecture)
+- Mac (x86 and M1 architecture)
 
 # Currently Supported IWADs
 

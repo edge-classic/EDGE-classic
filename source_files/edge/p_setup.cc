@@ -55,7 +55,9 @@
 #include "r_image.h"
 #include "r_misc.h"
 #include "r_sky.h"
+#ifdef EDGE_CLASSIC
 #include "rad_trig.h" // MUSINFO changers
+#endif
 #include "s_music.h"
 #include "s_sound.h"
 #include "sv_main.h"
@@ -119,6 +121,7 @@ static std::string udmf_lump;
 // There is two values for every line: side0 and side1.
 static int *temp_line_sides;
 
+#ifdef EDGE_CLASSIC
 // "MUSINFO" is used here to refer to the traditional MUSINFO lump
 struct MUSINFOMapping
 {
@@ -269,6 +272,7 @@ static void CheckDoom2Map05Bug(uint8_t *data, int length)
 
     LogPrint("Detected Doom2 MAP05 bug, adding fix.\n");
 }
+#endif
 
 static void LoadVertexes(int lump)
 {
@@ -414,9 +418,9 @@ static void LoadSectors(int lump)
 
     data = LoadLumpIntoMemory(lump);
     map_sectors_crc.AddBlock((const uint8_t *)data, GetLumpLength(lump));
-
+#ifdef EDGE_CLASSIC
     CheckDoom2Map05Bug((uint8_t *)data, GetLumpLength(lump)); // Lobo: 2023
-
+#endif
     ms = (const RawSector *)data;
     ss = level_sectors;
     for (i = 0; i < total_level_sectors; i++, ss++, ms++)
@@ -709,9 +713,9 @@ static void LoadThings(int lump)
 
     data = LoadLumpIntoMemory(lump);
     map_things_crc.AddBlock((const uint8_t *)data, GetLumpLength(lump));
-
+#ifdef EDGE_CLASSIC
     CheckEvilutionBug((uint8_t *)data, GetLumpLength(lump));
-
+#endif
     // -AJA- 2004/11/04: check the options in all things to see whether
     // we can use new option flags or not.  Same old wads put 1 bits in
     // unused locations (unusued for original Doom anyway).  The logic
@@ -752,6 +756,7 @@ static void LoadThings(int lump)
 
         Sector *sec = PointInSubsector(x, y)->sector;
 
+#ifdef EDGE_CLASSIC
         if ((objtype->hyper_flags_ & kHyperFlagMusicChanger) && !musinfo_tracks[current_map->name_].processed)
         {
             // This really should only be used with the original DoomEd number
@@ -781,6 +786,7 @@ static void LoadThings(int lump)
                 }
             }
         }
+#endif
 
         z = sec->floor_height;
 
@@ -804,9 +810,11 @@ static void LoadThings(int lump)
         SpawnMapThing(objtype, x, y, z, sec, angle, options, 0);
     }
 
+#ifdef EDGE_CLASSIC
     // Mark MUSINFO for this level as done processing, even if it was empty,
     // so we can avoid re-checks
     musinfo_tracks[current_map->name_].processed = true;
+#endif
 
     delete[] data;
 }
@@ -2376,6 +2384,7 @@ static void LoadUDMFThings()
 
             Sector *sec = PointInSubsector(x, y)->sector;
 
+#ifdef EDGE_CLASSIC
             if ((objtype->hyper_flags_ & kHyperFlagMusicChanger) && !musinfo_tracks[current_map->name_].processed)
             {
                 // This really should only be used with the original DoomEd
@@ -2407,6 +2416,7 @@ static void LoadUDMFThings()
                     }
                 }
             }
+#endif
 
             if (objtype->flags_ & kMapObjectFlagSpawnCeiling)
                 z += sec->ceiling_height - objtype->height_;
@@ -2463,10 +2473,11 @@ static void LoadUDMFThings()
             }
         }
     }
-
+#ifdef EDGE_CLASSIC
     // Mark MUSINFO for this level as done processing, even if it was empty,
     // so we can avoid re-checks
     musinfo_tracks[current_map->name_].processed = true;
+#endif
 
     LogDebug("LoadUDMFThings: finished parsing TEXTMAP\n");
 }
@@ -3503,8 +3514,10 @@ void LevelSetup(void)
 
     unknown_thing_map.clear();
 
+#ifdef EDGE_CLASSIC
     // Must do before loading things
     GetMUSINFOTracksForLevel();
+#endif
 
     if (!udmf_level)
         LoadThings(lumpnum + kLumpThings);

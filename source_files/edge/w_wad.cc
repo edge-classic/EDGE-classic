@@ -60,16 +60,18 @@
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "i_system.h"
-#if EDGE_DEHACKED_SUPPORT
+#ifdef EDGE_CLASSIC
 #include "l_deh.h"
 #endif
 #include "m_misc.h"
+#ifdef EDGE_CLASSIC
 #include "p_umapinfo.h" //Lobo 2022
+#endif
 #include "r_image.h"
 #include "rad_trig.h"
 #include "script/compat/lua_compat.h"
 #include "stb_sprintf.h"
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
 #include "vm_coal.h"
 #endif
 #include "w_epk.h"
@@ -581,6 +583,7 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
             wad->lua_huds_ = lump;
         return;
     }
+#ifdef EDGE_CLASSIC
     else if (strcmp(info.name, "UMAPINFO") == 0)
     {
         lump_p->kind = kLumpNormal;
@@ -588,6 +591,7 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
             wad->umapinfo_lump_ = lump;
         return;
     }
+#endif
     else if (strcmp(info.name, "ANIMATED") == 0)
     {
         lump_p->kind = kLumpDDFRTS;
@@ -986,7 +990,7 @@ void ProcessFixersForWAD(DataFile *df)
         }
     }
 }
-#if EDGE_DEHACKED_SUPPORT
+#ifdef EDGE_CLASSIC
 void ProcessDehackedInWad(DataFile *df)
 {
     int deh_lump = df->wad_->dehacked_lump_;
@@ -1033,7 +1037,7 @@ static void ProcessDDFInWad(DataFile *df)
         }
     }
 }
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
 static void ProcessCOALInWad(DataFile *df)
 {
     std::string bare_filename = epi::GetFilename(df->name_);
@@ -1065,7 +1069,7 @@ static void ProcessLuaInWad(DataFile *df)
     if (wad->lua_huds_ >= 0)
     {
         int lump = wad->lua_huds_;
-#if EDGE_COAL_SUPPORT // This part only matters if in a potentially mixed Lua/COAL environment
+#ifdef EDGE_CLASSIC // This part only matters if in a potentially mixed Lua/COAL environment
         LuaSetLuaHUDDetected(true);
 #endif
         std::string data   = LoadLumpAsString(lump);
@@ -1200,12 +1204,12 @@ void ProcessWad(DataFile *df, size_t file_index)
     LogDebug("   md5hash = %s\n", wad->md5_string_.c_str());
 
     delete[] raw_info;
-#if EDGE_DEHACKED_SUPPORT
+#ifdef EDGE_CLASSIC
     ProcessDehackedInWad(df);
 #endif
     ProcessBoomStuffInWad(df);
     ProcessDDFInWad(df);
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
     ProcessCOALInWad(df);
 #endif
     ProcessLuaInWad(df);
@@ -1260,7 +1264,7 @@ std::string BuildXGLNodesForWAD(DataFile *df)
 
     return xwa_filename;
 }
-
+#ifdef EDGE_CLASSIC
 void ReadUMAPINFOLumps(void)
 {
     for (auto df : data_files)
@@ -1778,7 +1782,7 @@ void ReadUMAPINFOLumps(void)
         FreeMapList();
     }
 }
-
+#endif
 epi::File *LoadLumpAsFile(int lump)
 {
     EPI_ASSERT(IsLumpIndexValid(lump));

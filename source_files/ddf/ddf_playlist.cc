@@ -30,25 +30,12 @@ static void InitializeMusicTypes()
 {
     supported_music_types.push_back("UNKNOWN");
     supported_music_types.push_back("MIDI");
-#if EDGE_MUS_SUPPORT
-    supported_music_types.push_back("MUS");
-#endif
-#if EDGE_OGG_SUPPORT
     supported_music_types.push_back("OGG");
-#endif
-#if EDGE_MP3_SUPPORT
     supported_music_types.push_back("MP3");
-#endif
-#if EDGE_SID_SUPPORT
-    supported_music_types.push_back("SID");
-#endif
-#if EDGE_FLAC_SUPPORT
     supported_music_types.push_back("FLAC");
-#endif
-#if EDGE_TRACKER_SUPPORT
+#ifdef EDGE_CLASSIC
+    supported_music_types.push_back("MUS");
     supported_music_types.push_back("TRACKER");
-#endif
-#if EDGE_IMF_SUPPORT
     supported_music_types.push_back("IMF280");
     supported_music_types.push_back("IMF560");
     supported_music_types.push_back("IMF700");

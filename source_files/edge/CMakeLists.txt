@@ -54,7 +54,6 @@ set (EDGE_SOURCE_FILES
   p_user.cc
   p_forces.cc
   p_telept.cc
-  p_umapinfo.cc
   p_weapon.cc
   rad_act.cc
   rad_pars.cc
@@ -79,10 +78,12 @@ set (EDGE_SOURCE_FILES
   r_texgl.cc
   s_blit.cc
   s_cache.cc
-  s_sound.cc
-  s_midi.cc
+  s_flac.cc
+  s_mp3.cc
   s_music.cc
   s_ogg.cc
+  s_sound.cc
+  s_wav.cc
   sv_chunk.cc
   sv_glob.cc
   sv_level.cc
@@ -143,44 +144,23 @@ else()
 
 endif()
 
-if (EDGE_COAL_SUPPORT)
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} vm_coal.cc vm_hud.cc vm_player.cc)
-endif()
-
-if (EDGE_DEHACKED_SUPPORT)
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} l_deh.cc)
-endif()
-
-if (EDGE_DOOM_SFX_SUPPORT)
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_doom.cc)
-endif()
-
-if (EDGE_FLAC_SUPPORT)
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_flac.cc)
-endif()
-
-if (EDGE_IMF_SUPPORT)
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_imf.cc)
-endif()
-
-if (EDGE_MP3_SUPPORT)
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_mp3.cc)
-endif()
-
-if (EDGE_OGG_SUPPORT)
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_ogg.cc)
-endif()
-
-if (EDGE_SID_SUPPORT)
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_sid.cc)
-endif()
-
-if (EDGE_TRACKER_SUPPORT)
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_m4p.cc)
-endif()
-
-if (EDGE_WAV_SUPPORT)
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} s_wav.cc)
+if (EDGE_CLASSIC)
+  set (EDGE_SOURCE_FILES 
+    ${EDGE_SOURCE_FILES} 
+    l_deh.cc
+    p_umapinfo.cc
+    s_doom.cc
+    s_m4p.cc
+    s_midi_ec.cc
+    vm_coal.cc
+    vm_hud.cc
+    vm_player.cc    
+  )
+else()
+  set (EDGE_SOURCE_FILES 
+    ${EDGE_SOURCE_FILES} 
+    s_midi.cc  
+  )
 endif()
 
 if (EMSCRIPTEN)
@@ -190,9 +170,9 @@ else()
 endif()
 
 set (EDGE_LINK_LIBRARIES
-  edge_ajbsp
-  edge_ddf
-  edge_epi
+  ajbsp
+  ddf
+  epi
   edge_tracy
   ${SDL2_LIBRARIES}
   almostequals
@@ -211,28 +191,14 @@ if (NOT EMSCRIPTEN)
   set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} thread)
 endif()
 
-if (EDGE_COAL_SUPPORT)
-  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} edge_coal)
-endif()
-
-if (EDGE_DEHACKED_SUPPORT)
-  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} edge_deh)
-endif()
-
-if (EDGE_IMF_SUPPORT OR EDGE_OPL_SUPPORT)
-  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} opalmidi)
-endif()
-
-if (EDGE_SID_SUPPORT)
-  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} crsid)
-endif()
-
-if (EDGE_TRACKER_SUPPORT)
-  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} m4p)
-endif()
-
-if (EDGE_VWAD_SUPPORT)
-  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} libvwad)
+if (EDGE_CLASSIC)
+  set (EDGE_LINK_LIBRARIES 
+    ${EDGE_LINK_LIBRARIES} 
+    coal
+    dehacked
+    m4p
+    opalmidi
+  )
 endif()
 
 if (WIN32)

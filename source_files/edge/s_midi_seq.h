@@ -39,7 +39,7 @@
 #include "epi.h"
 #include "stb_sprintf.h"
 
-#if EDGE_MUS_SUPPORT
+#ifdef EDGE_CLASSIC
 static constexpr uint8_t kMusFrequency = 140;
 static constexpr int     kMusTempo     = 0x00068A1B; /* MPQN: 60000000 / 140BPM (140Hz) = 428571 */
                                                      /*  0x000D1436 -> MPQN: 60000000 /  70BPM  (70Hz) = 857142 */
@@ -488,9 +488,7 @@ _end: /* cleanup */
 
     return (ret);
 }
-#endif
 
-#if EDGE_XMI_SUPPORT
 enum XMIConversionType
 {
     kXMINoConversion           = 0x00,
@@ -2386,13 +2384,11 @@ class MidiSequencer
     {
         //! MIDI format
         kFormatMidi,
-#if EDGE_IMF_SUPPORT
-        //! Id-Software Music File
-        kFormatIMF,
-#endif
         //! EA-MUS format
         kFormatRSXX,
-#if EDGE_XMI_SUPPORT
+#ifdef EDGE_CLASSIC
+        //! Id-Software Music File
+        kFormatIMF,
         //! AIL's XMIDI format (act same as MIDI, but with exceptions)
         kFormatXMidi
 #endif
@@ -2864,15 +2860,6 @@ class MidiSequencer
     void SetTempo(double tempo);
 
   private:
-#if EDGE_IMF_SUPPORT
-    /**
-     * @brief Load file as Id-software-Music-File (Wolfenstein)
-     * @param mfr mem_file_c with opened source file
-     * @param rate For IMF formats, the proper playback rate in Hz
-     * @return true on successful load
-     */
-    bool ParseIMF(epi::MemFile *mfr, uint16_t rate);
-#endif
     /**
      * @brief Load file as EA MUS
      * @param mfr mem_file_c with opened source file
@@ -2900,15 +2887,20 @@ class MidiSequencer
      * @return true on successful load
      */
     bool ParseRMI(epi::MemFile *mfr);
-#if EDGE_MUS_SUPPORT
+#ifdef EDGE_CLASSIC
     /**
      * @brief Load file as DMX MUS file (Doom)
      * @param mfr mem_file_c with opened source file
      * @return true on successful load
      */
     bool ParseMUS(epi::MemFile *mfr);
-#endif
-#if EDGE_XMI_SUPPORT
+    /**
+     * @brief Load file as Id-software-Music-File (Wolfenstein)
+     * @param mfr mem_file_c with opened source file
+     * @param rate For IMF formats, the proper playback rate in Hz
+     * @return true on successful load
+     */
+    bool ParseIMF(epi::MemFile *mfr, uint16_t rate);
     /**
      * @brief Load file as AIL eXtended MIdi
      * @param mfr mem_file_c with opened source file
@@ -3261,7 +3253,7 @@ void MidiSequencer::SetSoloTrack(size_t track)
 void MidiSequencer::SetSongNum(int track)
 {
     midi_load_track_number_ = track;
-#if EDGE_XMI_SUPPORT
+#ifdef EDGE_CLASSIC
     if (!midi_raw_songs_data_.empty() && midi_format_ == kFormatXMidi) // Reload the song
     {
         if (midi_load_track_number_ >= (int)midi_raw_songs_data_.size())
@@ -4357,7 +4349,7 @@ MidiSequencer::MidiEvent MidiSequencer::ParseEvent(const uint8_t **pptr, const u
                     break;
                 }
             }
-#if EDGE_XMI_SUPPORT
+#ifdef EDGE_CLASSIC
             if (midi_format_ == kFormatXMidi)
             {
                 switch (evt.data[0])
@@ -4849,7 +4841,7 @@ static bool detectRSXX(const char *head, epi::MemFile *mfr)
     mfr->Seek(0, epi::File::kSeekpointStart);
     return ret;
 }
-#if EDGE_IMF_SUPPORT
+#ifdef EDGE_CLASSIC
 /**
  * @brief Detect the Id-software Music File format
  * @param head Header part
@@ -4887,6 +4879,10 @@ static bool detectIMF(const char *head, epi::MemFile *mfr)
 #endif
 bool MidiSequencer::LoadMidi(epi::MemFile *mfr, uint16_t rate)
 {
+#ifndef EDGE_CLASSIC
+    EPI_UNUSED(rate);
+#endif
+
     midi_parsing_errors_string_.clear();
 
     EPI_ASSERT(midi_output_interface_); // MIDI output interface must be defined!
@@ -4928,38 +4924,34 @@ bool MidiSequencer::LoadMidi(epi::MemFile *mfr, uint16_t rate)
         mfr->Seek(0, epi::File::kSeekpointStart);
         return ParseGMF(mfr);
     }
-#if EDGE_MUS_SUPPORT
+    if (detectRSXX(headerBuf, mfr))
+    {
+        mfr->Seek(0, epi::File::kSeekpointStart);
+        return ParseRSXX(mfr);
+    }
+#ifdef EDGE_CLASSIC
     if (memcmp(headerBuf, "MUS\x1A", 4) == 0)
     {
         mfr->Seek(0, epi::File::kSeekpointStart);
         return ParseMUS(mfr);
     }
-#endif
-#if EDGE_XMI_SUPPORT
     if ((memcmp(headerBuf, "FORM", 4) == 0) && (memcmp(headerBuf + 8, "XDIR", 4) == 0))
     {
         mfr->Seek(0, epi::File::kSeekpointStart);
         return ParseXMI(mfr);
     }
-#endif
-#if EDGE_IMF_SUPPORT
     if (detectIMF(headerBuf, mfr))
     {
         mfr->Seek(0, epi::File::kSeekpointStart);
         return ParseIMF(mfr, rate);
     }
 #endif
-    if (detectRSXX(headerBuf, mfr))
-    {
-        mfr->Seek(0, epi::File::kSeekpointStart);
-        return ParseRSXX(mfr);
-    }
 
     midi_error_string_ = "Unknown or unsupported file format";
     delete mfr;
     return false;
 }
-#if EDGE_IMF_SUPPORT
+#ifdef EDGE_CLASSIC
 bool MidiSequencer::ParseIMF(epi::MemFile *mfr, uint16_t rate)
 {
     const size_t deltaTicks   = 1;
@@ -5365,7 +5357,7 @@ bool MidiSequencer::ParseRMI(epi::MemFile *mfr)
     mfr->Seek(6l, epi::File::kSeekpointCurrent);
     return ParseSMF(mfr);
 }
-#if EDGE_MUS_SUPPORT
+#ifdef EDGE_CLASSIC
 bool MidiSequencer::ParseMUS(epi::MemFile *mfr)
 {
     const size_t         headerSize            = 14;
@@ -5432,7 +5424,7 @@ bool MidiSequencer::ParseMUS(epi::MemFile *mfr)
     return ParseSMF(mfr);
 }
 #endif
-#if EDGE_XMI_SUPPORT
+#ifdef EDGE_CLASSIC
 bool MidiSequencer::ParseXMI(epi::MemFile *mfr)
 {
     const size_t                      headerSize            = 14;

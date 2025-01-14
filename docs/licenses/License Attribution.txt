@@ -21,6 +21,10 @@ Freedoom (various assets) - Copyright (c) 2001-2019 Contributors to the Freedoom
 Mod4Play library - 	Copyright (c) 2024-2025 dashodanger
 					Copyright (c) 2022 Olav Sørensen
 
+OpalMIDI library - Copyright (c) 2025, Dashodanger
+				   Copyright (c) 2021-2024, Devin Acker
+				   Opal Emulation released into Public Domain by Reality Productions
+
 ZDoom FName implementation - Copyright (c) 2005-2007 Randy Heit
 
 ===========================================================================================
@@ -122,8 +126,6 @@ Public Domain
 ===========================================================================================
 
 Fraction.hpp - Bisqwit
-
-Opal library - Reality Productions
 
 Miniaudio library - David Reid
 

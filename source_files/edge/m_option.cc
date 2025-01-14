@@ -109,7 +109,7 @@
 #include "r_wipe.h"
 #include "s_blit.h"
 #include "s_cache.h"
-#include "s_fluid.h"
+#include "s_midi.h"
 #include "s_music.h"
 #include "s_sound.h"
 #include "stb_sprintf.h"
@@ -543,7 +543,7 @@ static OptionMenuItem soundoptions[] = {
     {kOptionMenuItemTypeSlider, "Movie/Music Volume", nullptr, 0, &music_volume.f_,
      OptionMenuUpdateConsoleVariableFromFloat, nullptr, &music_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
-    {kOptionMenuItemTypeFunction, "MIDI Instrument Bank", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr,
+    {kOptionMenuItemTypeFunction, "MIDI Instrument Set", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr,
      nullptr, 0, 0, 0, ""},
 #if EDGE_DOOM_SFX_SUPPORT
     {kOptionMenuItemTypeBoolean, "PC Speaker Mode", YesNo, 2, &pc_speaker_mode, OptionMenuChangePCSpeakerMode,
@@ -2080,7 +2080,7 @@ static void OptionMenuChangePCSpeakerMode(int key_pressed, ConsoleVariable *cons
     // Clear SFX cache and restart music
     StopAllSoundEffects();
     SoundCacheClearAll();
-    RestartFluid();
+    RestartMIDI();
 }
 #endif
 
@@ -2167,7 +2167,7 @@ static void OptionMenuChangeSoundfont(int key_pressed, ConsoleVariable *console_
 
     // update console_variable
     midi_soundfont = *sf_pos;
-    RestartFluid();
+    RestartMIDI();
 }
 
 //

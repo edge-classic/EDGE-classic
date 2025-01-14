@@ -114,7 +114,7 @@ static ma_result ma_crsid_init_internal(const ma_decoding_backend_config *pConfi
     }
 
     EPI_CLEAR_MEMORY(pcrSID, ma_crsid, 1);
-    pcrSID->format = ma_format_f32; /* Only supporting f32. */
+    pcrSID->format = ma_format_s16;
 
     dataSourceConfig        = ma_data_source_config_init();
     dataSourceConfig.vtable = &g_ma_crsid_ds_vtable;
@@ -238,9 +238,9 @@ static ma_result ma_crsid_read_pcm_frames(ma_crsid *pcrSID, void *pFramesOut, ma
 
     ma_crsid_get_data_format(pcrSID, &format, &channels, NULL, NULL, 0);
 
-    if (format == ma_format_f32)
+    if (format == ma_format_s16)
     {
-        cRSID_generateFloat(pcrSID->C64, (float *)pFramesOut, frameCount * 2 * sizeof(float));
+        cRSID_generateSound(pcrSID->C64, (uint8_t *)pFramesOut, frameCount * 2 * sizeof(int16_t));
         totalFramesRead = frameCount;
     }
     else
@@ -499,7 +499,7 @@ bool SIDPlayer::OpenMemory(uint8_t *data, int length)
         Close();
 
     ma_decoder_config decode_config      = ma_decoder_config_init_default();
-    decode_config.format                 = ma_format_f32;
+    decode_config.format                 = ma_format_s16;
     decode_config.customBackendCount     = 1;
     decode_config.pCustomBackendUserData = NULL;
     decode_config.ppCustomBackendVTables = &custom_vtable;

@@ -32,7 +32,7 @@
 #include "miniaudio.h"
 #include "s_blit.h"
 #include "s_cache.h"
-#include "s_fluid.h"
+#include "s_midi.h"
 #include "s_sound.h"
 #include "w_wad.h"
 
@@ -99,7 +99,12 @@ void StartupMusic(void)
     std::vector<epi::DirectoryEntry> sfd;
     std::string                      soundfont_dir = epi::PathAppend(home_directory, "soundfont");
 
+    // Add our built-in options first so they take precedence over a soundfont that might 
+    // somehow have the same file stem
     available_soundfonts.emplace("Default");
+#ifdef EDGE_OPL_SUPPORT
+    available_soundfonts.emplace("OPL Emulation");
+#endif
 
     // Create home directory soundfont folder if it doesn't aleady exist
     if (!epi::IsDirectory(soundfont_dir))
@@ -180,8 +185,8 @@ void StartupMusic(void)
         }
     }
 
-    if (!StartupFluid())
-        fluid_disabled = true;
+    if (!StartupMIDI())
+        midi_disabled = true;
 
     return;
 }

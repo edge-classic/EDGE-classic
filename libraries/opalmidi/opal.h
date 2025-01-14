@@ -203,7 +203,6 @@ class Opal
     void SetSampleRate(int sample_rate);
     void Port(uint16_t reg_num, uint8_t val);
     void Sample(int16_t *left, int16_t *right);
-    void SampleFloat(float *left, float *right);
 
   protected:
     void Init(int sample_rate);

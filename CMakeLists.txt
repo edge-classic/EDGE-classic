@@ -35,6 +35,7 @@ option(EDGE_IMF_SUPPORT "Enable support for IMF music format" ON)
 option(EDGE_MP3_SUPPORT "Enable support for MP3 music format" ON)
 option(EDGE_MUS_SUPPORT "Enable support for MUS MIDI format" ON)
 option(EDGE_OGG_SUPPORT "Enable support for OGG music format" ON)
+option(EDGE_OPL_SUPPORT "Enable support for MIDI playback via OPL emulation" ON)
 option(EDGE_SID_SUPPORT "Enable support for C64 SID music" ON)
 option(EDGE_TRACKER_SUPPORT "Enable support for Tracker music (MOD/XM/S3M/IT)" ON)
 option(EDGE_XMI_SUPPORT "Enable support for XMI MIDI format" ON)
@@ -202,6 +203,10 @@ endif()
 
 if (EDGE_OGG_SUPPORT)
   add_definitions(-DEDGE_OGG_SUPPORT)
+endif()
+
+if (EDGE_OPL_SUPPORT)
+  add_definitions(-DEDGE_OPL_SUPPORT)
 endif()
 
 if (EDGE_SID_SUPPORT)

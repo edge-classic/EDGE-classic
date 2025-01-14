@@ -34,7 +34,7 @@
 #if EDGE_FLAC_SUPPORT
 #include "s_flac.h"
 #endif
-#include "s_fluid.h"
+#include "s_midi.h"
 #if EDGE_TRACKER_SUPPORT
 #include "s_m4p.h"
 #endif
@@ -235,7 +235,7 @@ void ChangeMusic(int entry_number, bool loop)
     case kSoundMUS:
 #endif
         delete F;
-        music_player = PlayFluidMusic(data, length, loop);
+        music_player = PlayMIDIMusic(data, length, loop);
         break;
 
     default:

@@ -26,62 +26,6 @@ EPI_XX(None)
 EPI_XX(Null)
 EPI_XX(_)
 
-//------------ File Extensions ---------------------------
-
-// Must strip leading . when creating ENames to compare
-
-// images
-EPI_XX(PNG)
-EPI_XX(TGA)
-EPI_XX(JPG)
-EPI_XX(JPEG)
-EPI_XX(LMP)
-EPI_XX(GIF)
-EPI_XX(BMP)
-EPI_XX(DDS)
-
-// instrument banks
-EPI_XX(SF2)
-EPI_XX(OP2)
-EPI_XX(AD)
-EPI_XX(OPL)
-EPI_XX(TMB)
-
-// EDGE-specific
-EPI_XX(EDM)
-EPI_XX(EPK)
-EPI_XX(RTS)
-EPI_XX(DDF)
-EPI_XX(LDF)
-
-// DOOM-related
-EPI_XX(WAD)
-EPI_XX(PK3)
-EPI_XX(DEH)
-EPI_XX(BEX)
-
-// sounds
-EPI_XX(WAV)
-EPI_XX(WAVE)
-EPI_XX(FLAC)
-EPI_XX(OGG)
-EPI_XX(MP3)
-EPI_XX(MUS)
-EPI_XX(MID)
-EPI_XX(MIDI)
-EPI_XX(XMI)
-EPI_XX(RMI)
-EPI_XX(RMID)
-EPI_XX(MOD)
-EPI_XX(S3M)
-EPI_XX(XM)
-EPI_XX(IT)
-EPI_XX(RAD)
-EPI_XX(DSP)
-EPI_XX(PCS)
-EPI_XX(GSP)
-EPI_XX(GSW)
-
 //------------ UDMF ---------------------------
 
 // generic keys
@@ -179,6 +123,7 @@ EPI_XX(Scale)
 EPI_XX(Scalex)
 EPI_XX(Scaley)
 
+#ifdef EDGE_CLASSIC
 //------------ UMAPINFO ---------------------------
 EPI_XX(Levelname)
 EPI_XX(Label)
@@ -455,4 +400,5 @@ EPI_XX(Deh_Actor_246)
 EPI_XX(Deh_Actor_247)
 EPI_XX(Deh_Actor_248)
 EPI_XX(Deh_Actor_249)
+#endif
 // clang-format on

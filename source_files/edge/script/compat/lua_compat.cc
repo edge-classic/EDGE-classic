@@ -5,7 +5,7 @@
 #include "epi_file.h"
 #include "w_wad.h"
 
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
 bool GetCOALDetected();
 #endif
 
@@ -36,7 +36,7 @@ void LuaAddScript(const std::string &data, const std::string &source)
 
 void LuaLoadScripts()
 {
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
     if (LuaGetLuaHUDDetected() && GetCOALDetected())
     {
         LogWarning("Lua and COAL huds detected, selecting Lua hud\n");
@@ -66,7 +66,7 @@ lua_State *LuaGetGlobalVM()
 {
     return global_lua_state;
 }
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
 static bool lua_detected = false;
 void        LuaSetLuaHUDDetected(bool detected)
 {

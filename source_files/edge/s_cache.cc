@@ -40,19 +40,13 @@
 #include "m_random.h"
 #include "p_mobj.h"
 #include "r_defs.h"
-#if EDGE_DOOM_SFX_SUPPORT
+#ifdef EDGE_CLASSIC
 #include "s_doom.h"
 #endif
-#if EDGE_MP3_SUPPORT
 #include "s_mp3.h"
-#endif
-#if EDGE_OGG_SUPPORT
 #include "s_ogg.h"
-#endif
 #include "s_sound.h"
-#if EDGE_WAV_SUPPORT
 #include "s_wav.h"
-#endif
 #include "snd_data.h"
 #include "snd_types.h"
 #include "w_files.h"
@@ -72,7 +66,7 @@ static void LoadSilence(SoundData *buf)
 
     EPI_CLEAR_MEMORY(buf->data_, float, length * 2);
 }
-#if EDGE_DOOM_SFX_SUPPORT
+#ifdef EDGE_CLASSIC
 static bool LoadDoom(SoundData *buf, uint8_t *lump, int length)
 {
     return LoadDoomSound(buf, lump, length);
@@ -82,24 +76,18 @@ static bool LoadPCSpeaker(SoundData *buf, uint8_t *lump, int length)
     return LoadPCSpeakerSound(buf, lump, length);
 }
 #endif
-#if EDGE_WAV_SUPPORT
 static bool LoadWav(SoundData *buf, uint8_t *lump, int length)
 {
     return LoadWAVSound(buf, lump, length);
 }
-#endif
-#if EDGE_OGG_SUPPORT
 static bool LoadOGG(SoundData *buf, const uint8_t *lump, int length)
 {
     return LoadOGGSound(buf, lump, length);
 }
-#endif
-#if EDGE_MP3_SUPPORT
 static bool LoadMP3(SoundData *buf, const uint8_t *lump, int length)
 {
     return LoadMP3Sound(buf, lump, length);
 }
-#endif
 
 //----------------------------------------------------------------------------
 
@@ -220,22 +208,16 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
 
     switch (fmt)
     {
-#if EDGE_WAV_SUPPORT
     case kSoundWAV:
         OK = LoadWav(buf, data, length);
         break;
-#endif
-#if EDGE_OGG_SUPPORT
     case kSoundOGG:
         OK = LoadOGG(buf, data, length);
         break;
-#endif
-#if EDGE_MP3_SUPPORT
     case kSoundMP3:
         OK = LoadMP3(buf, data, length);
         break;
-#endif
-#if EDGE_DOOM_SFX_SUPPORT
+#ifdef EDGE_CLASSIC
     // Double-check first byte here because pack filename detection could
     // return kSoundPCSpeaker for either
     case kSoundPCSpeaker:

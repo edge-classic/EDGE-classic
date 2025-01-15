@@ -39,7 +39,7 @@
 #include "ddf_style.h"
 #include "ddf_switch.h"
 #include "ddf_wadfixes.h"
-#if EDGE_DEHACKED_SUPPORT
+#ifdef EDGE_CLASSIC
 #include "deh_edge.h"
 #endif
 #include "dm_state.h"
@@ -48,7 +48,7 @@
 #include "epi_file.h"
 #include "epi_filesystem.h"
 #include "i_system.h"
-#if EDGE_DEHACKED_SUPPORT
+#ifdef EDGE_CLASSIC
 #include "l_deh.h"
 #endif
 #include "rad_trig.h"
@@ -102,7 +102,7 @@ extern void ProcessFixersForWAD(DataFile *df);
 extern void ProcessWad(DataFile *df, size_t file_index);
 
 extern std::string BuildXGLNodesForWAD(DataFile *df);
-#if EDGE_DEHACKED_SUPPORT
+#ifdef EDGE_CLASSIC
 static void DEH_ConvertFile(std::string &filename)
 {
     epi::File *F = epi::FileOpen(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
@@ -222,7 +222,7 @@ void ProcessFile(DataFile *df)
     }
     else if (df->kind_ == kFileKindDehacked)
     {
-#if EDGE_DEHACKED_SUPPORT
+#ifdef EDGE_CLASSIC
         // handle stand-alone DeHackEd patches
         LogPrint("Converting DEH file: %s\n", df->name_.c_str());
 

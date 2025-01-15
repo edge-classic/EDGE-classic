@@ -31,6 +31,8 @@
 #include "snd_gather.h"
 #include "w_wad.h"
 
+static ma_decoder mp3_decoder;
+static ma_sound   mp3_stream;
 class MP3Player : public AbstractMusicPlayer
 {
   public:
@@ -38,20 +40,6 @@ class MP3Player : public AbstractMusicPlayer
     ~MP3Player();
 
   private:
-    enum Status
-    {
-        kNotLoaded,
-        kPlaying,
-        kPaused,
-        kStopped
-    };
-
-    int status_;
-
-    bool looping_;
-
-    ma_decoder mp3_decoder_;
-    ma_sound   mp3_stream_;
     uint8_t   *mp3_data_;
 
   public:
@@ -70,10 +58,9 @@ class MP3Player : public AbstractMusicPlayer
 
 //----------------------------------------------------------------------------
 
-MP3Player::MP3Player() : status_(kNotLoaded), mp3_data_(nullptr)
+MP3Player::MP3Player() : mp3_data_(nullptr)
 {
-    EPI_CLEAR_MEMORY(&mp3_decoder_, ma_decoder, 1);
-    EPI_CLEAR_MEMORY(&mp3_stream_, ma_sound, 1);
+    status_ = kNotLoaded;
 }
 
 MP3Player::~MP3Player()
@@ -88,18 +75,19 @@ bool MP3Player::OpenMemory(uint8_t *data, int length)
 
     ma_decoder_config decode_config = ma_decoder_config_init_default();
     decode_config.format            = ma_format_f32;
+    decode_config.encodingFormat    = ma_encoding_format_mp3;
 
-    if (ma_decoder_init_memory(data, length, &decode_config, &mp3_decoder_) != MA_SUCCESS)
+    if (ma_decoder_init_memory(data, length, &decode_config, &mp3_decoder) != MA_SUCCESS)
     {
         LogWarning("Failed to load MP3 music (corrupt ogg?)\n");
         return false;
     }
 
-    if (ma_sound_init_from_data_source(&music_engine, &mp3_decoder_,
+    if (ma_sound_init_from_data_source(&music_engine, &mp3_decoder,
                                        MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION, NULL,
-                                       &mp3_stream_) != MA_SUCCESS)
+                                       &mp3_stream) != MA_SUCCESS)
     {
-        ma_decoder_uninit(&mp3_decoder_);
+        ma_decoder_uninit(&mp3_decoder);
         LogWarning("Failed to load OGG music (corrupt ogg?)\n");
         return false;
     }
@@ -120,9 +108,9 @@ void MP3Player::Close()
     // Stop playback
     Stop();
 
-    ma_sound_uninit(&mp3_stream_);
+    ma_sound_uninit(&mp3_stream);
 
-    ma_decoder_uninit(&mp3_decoder_);
+    ma_decoder_uninit(&mp3_decoder);
 
     delete[] mp3_data_;
 
@@ -134,7 +122,7 @@ void MP3Player::Pause()
     if (status_ != kPlaying)
         return;
 
-    ma_sound_stop(&mp3_stream_);
+    ma_sound_stop(&mp3_stream);
 
     status_ = kPaused;
 }
@@ -144,7 +132,7 @@ void MP3Player::Resume()
     if (status_ != kPaused)
         return;
 
-    ma_sound_start(&mp3_stream_);
+    ma_sound_start(&mp3_stream);
 
     status_ = kPlaying;
 }
@@ -156,7 +144,7 @@ void MP3Player::Play(bool loop)
 
     looping_ = loop;
 
-    ma_sound_set_looping(&mp3_stream_, looping_ ? MA_TRUE : MA_FALSE);
+    ma_sound_set_looping(&mp3_stream, looping_ ? MA_TRUE : MA_FALSE);
 
     // Let 'er rip (maybe)
     if (playing_movie)
@@ -164,7 +152,7 @@ void MP3Player::Play(bool loop)
     else
     {
         status_ = kPlaying;
-        ma_sound_start(&mp3_stream_);
+        ma_sound_start(&mp3_stream);
     }
 }
 
@@ -173,22 +161,21 @@ void MP3Player::Stop()
     if (status_ != kPlaying && status_ != kPaused)
         return;
 
-    ma_sound_stop(&mp3_stream_);
-
-    ma_decoder_seek_to_pcm_frame(&mp3_decoder_, 0);
+    ma_sound_set_volume(&mp3_stream, 0);
+    ma_sound_stop(&mp3_stream);
 
     status_ = kStopped;
 }
 
 void MP3Player::Ticker()
 {
-    ma_engine_set_volume(&music_engine, music_volume.f_ * 0.25f);
-
     if (status_ == kPlaying)
     {
+        ma_engine_set_volume(&music_engine, music_volume.f_ * 0.25f);
+
         if (pc_speaker_mode)
             Stop();
-        if (ma_sound_at_end(&mp3_stream_)) // This should only be true if finished and not set to looping
+        if (ma_sound_at_end(&mp3_stream)) // This should only be true if finished and not set to looping
             Stop();
     }
 }
@@ -215,10 +202,9 @@ bool LoadMP3Sound(SoundData *buf, const uint8_t *data, int length)
 {
     ma_decoder_config decode_config = ma_decoder_config_init_default();
     decode_config.format            = ma_format_f32;
-    ma_decoder decode;
+    decode_config.encodingFormat    = ma_encoding_format_mp3;
 
-    // ma_decoder_init_memory(const void* pData, size_t dataSize, const ma_decoder_config* pConfig, ma_decoder*
-    // pDecoder);
+    ma_decoder decode;
 
     if (ma_decoder_init_memory(data, length, &decode_config, &decode) != MA_SUCCESS)
     {

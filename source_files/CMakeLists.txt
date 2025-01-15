@@ -1,11 +1,10 @@
 
 add_subdirectory(ajbsp)
-if (EDGE_COAL_SUPPORT)
-  add_subdirectory(coal)
-endif ()
 add_subdirectory(ddf)
-if (EDGE_DEHACKED_SUPPORT)
-  add_subdirectory(dehacked)
-endif()
 add_subdirectory(epi)
 add_subdirectory(edge)
+
+if (EDGE_CLASSIC)
+  add_subdirectory(coal)
+  add_subdirectory(dehacked)
+endif()

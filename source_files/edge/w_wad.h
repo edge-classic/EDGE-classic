@@ -101,7 +101,9 @@ bool IsLumpInAnyWad(const char *name);
 int CheckForUniqueGameLumps(epi::File *file);
 
 void BuildXGLNodes(void);
+#ifdef EDGE_CLASSIC
 void ReadUMAPINFOLumps(void);
+#endif
 
 int GetKindForLump(int lump);
 

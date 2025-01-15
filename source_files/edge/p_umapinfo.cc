@@ -30,9 +30,7 @@
 #include "ddf_game.h"
 #include "ddf_language.h"
 #include "ddf_thing.h"
-#if EDGE_DEHACKED_SUPPORT
 #include "deh_text.h"
-#endif
 #include "epi_ename.h"
 #include "epi_scanner.h"
 #include "epi_str_compare.h"

@@ -33,6 +33,8 @@
 
 extern int sound_device_frequency;
 
+static ma_decoder flac_decoder;
+static ma_sound   flac_stream;
 class FLACPlayer : public AbstractMusicPlayer
 {
   public:
@@ -40,19 +42,6 @@ class FLACPlayer : public AbstractMusicPlayer
     ~FLACPlayer();
 
   private:
-    enum Status
-    {
-        kNotLoaded,
-        kPlaying,
-        kPaused,
-        kStopped
-    };
-
-    int  status_;
-    bool looping_;
-
-    ma_decoder flac_decoder_;
-    ma_sound   flac_stream_;
     uint8_t   *flac_data_;
 
   public:
@@ -71,10 +60,9 @@ class FLACPlayer : public AbstractMusicPlayer
 
 //----------------------------------------------------------------------------
 
-FLACPlayer::FLACPlayer() : status_(kNotLoaded), flac_data_(nullptr)
+FLACPlayer::FLACPlayer() : flac_data_(nullptr)
 {
-    EPI_CLEAR_MEMORY(&flac_decoder_, ma_decoder, 1);
-    EPI_CLEAR_MEMORY(&flac_stream_, ma_sound, 1);
+    status_ = kNotLoaded;
 }
 
 FLACPlayer::~FLACPlayer()
@@ -89,18 +77,19 @@ bool FLACPlayer::OpenMemory(uint8_t *data, int length)
 
     ma_decoder_config decode_config = ma_decoder_config_init_default();
     decode_config.format            = ma_format_f32;
+    decode_config.encodingFormat    = ma_encoding_format_flac;
 
-    if (ma_decoder_init_memory(data, length, &decode_config, &flac_decoder_) != MA_SUCCESS)
+    if (ma_decoder_init_memory(data, length, &decode_config, &flac_decoder) != MA_SUCCESS)
     {
         LogWarning("Failed to load MP3 music (corrupt ogg?)\n");
         return false;
     }
 
-    if (ma_sound_init_from_data_source(&music_engine, &flac_decoder_,
+    if (ma_sound_init_from_data_source(&music_engine, &flac_decoder,
                                        MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION, NULL,
-                                       &flac_stream_) != MA_SUCCESS)
+                                       &flac_stream) != MA_SUCCESS)
     {
-        ma_decoder_uninit(&flac_decoder_);
+        ma_decoder_uninit(&flac_decoder);
         LogWarning("Failed to load OGG music (corrupt ogg?)\n");
         return false;
     }
@@ -121,9 +110,9 @@ void FLACPlayer::Close()
     // Stop playback
     Stop();
 
-    ma_sound_uninit(&flac_stream_);
+    ma_sound_uninit(&flac_stream);
 
-    ma_decoder_uninit(&flac_decoder_);
+    ma_decoder_uninit(&flac_decoder);
 
     delete[] flac_data_;
 
@@ -135,7 +124,7 @@ void FLACPlayer::Pause()
     if (status_ != kPlaying)
         return;
 
-    ma_sound_stop(&flac_stream_);
+    ma_sound_stop(&flac_stream);
 
     status_ = kPaused;
 }
@@ -145,7 +134,7 @@ void FLACPlayer::Resume()
     if (status_ != kPaused)
         return;
 
-    ma_sound_start(&flac_stream_);
+    ma_sound_start(&flac_stream);
 
     status_ = kPlaying;
 }
@@ -157,7 +146,7 @@ void FLACPlayer::Play(bool loop)
 
     looping_ = loop;
 
-    ma_sound_set_looping(&flac_stream_, looping_ ? MA_TRUE : MA_FALSE);
+    ma_sound_set_looping(&flac_stream, looping_ ? MA_TRUE : MA_FALSE);
 
     // Let 'er rip (maybe)
     if (playing_movie)
@@ -165,7 +154,7 @@ void FLACPlayer::Play(bool loop)
     else
     {
         status_ = kPlaying;
-        ma_sound_start(&flac_stream_);
+        ma_sound_start(&flac_stream);
     }
 }
 
@@ -174,22 +163,21 @@ void FLACPlayer::Stop()
     if (status_ != kPlaying && status_ != kPaused)
         return;
 
-    ma_sound_stop(&flac_stream_);
-
-    ma_decoder_seek_to_pcm_frame(&flac_decoder_, 0);
+    ma_sound_set_volume(&flac_stream, 0);
+    ma_sound_stop(&flac_stream);
 
     status_ = kStopped;
 }
 
 void FLACPlayer::Ticker()
 {
-    ma_engine_set_volume(&music_engine, music_volume.f_ * 0.25f);
-
     if (status_ == kPlaying)
     {
+        ma_engine_set_volume(&music_engine, music_volume.f_ * 0.25f);
+
         if (pc_speaker_mode)
             Stop();
-        if (ma_sound_at_end(&flac_stream_)) // This should only be true if finished and not set to looping
+        if (ma_sound_at_end(&flac_stream)) // This should only be true if finished and not set to looping
             Stop();
     }
 }

@@ -34,6 +34,7 @@
 #include "i_sound.h"
 #include "i_system.h"
 #include "m_misc.h"
+#include "opalmidi.h"
 #include "s_blit.h"
 #include "s_midi_seq.h"
 #include "s_music.h"
@@ -46,6 +47,9 @@ bool midi_disabled = false;
 static fluid_synth_t    *edge_fluid            = nullptr;
 static fluid_settings_t *edge_fluid_settings   = nullptr;
 static fluid_sfloader_t *edge_fluid_sf2_loader = nullptr;
+static OPLPlayer        *edge_opl              = nullptr;
+static bool              opl_playback          = false;
+static uint16_t imf_rate = 0;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(midi_soundfont, "Default", kConsoleVariableFlagArchive)
 
@@ -175,55 +179,82 @@ static int edge_fluid_fseek(void *handle, long offset, int origin)
 void rtNoteOn(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity)
 {
     EPI_UNUSED(userdata);
-    fluid_synth_noteon(edge_fluid, channel, note, velocity);
+    if (opl_playback)
+        edge_opl->midiNoteOn(channel, note, velocity);
+    else
+        fluid_synth_noteon(edge_fluid, channel, note, velocity);
 }
 
 void rtNoteOff(void *userdata, uint8_t channel, uint8_t note)
 {
     EPI_UNUSED(userdata);
-    fluid_synth_noteoff(edge_fluid, channel, note);
+    if (opl_playback)
+        edge_opl->midiNoteOff(channel, note);
+    else
+        fluid_synth_noteoff(edge_fluid, channel, note);
 }
 
 void rtNoteAfterTouch(void *userdata, uint8_t channel, uint8_t note, uint8_t atVal)
 {
     EPI_UNUSED(userdata);
-    fluid_synth_key_pressure(edge_fluid, channel, note, atVal);
+    if (!opl_playback)
+        fluid_synth_key_pressure(edge_fluid, channel, note, atVal);
 }
 
 void rtChannelAfterTouch(void *userdata, uint8_t channel, uint8_t atVal)
 {
     EPI_UNUSED(userdata);
-    fluid_synth_channel_pressure(edge_fluid, channel, atVal);
+    if (!opl_playback)
+        fluid_synth_channel_pressure(edge_fluid, channel, atVal);
 }
 
 void rtControllerChange(void *userdata, uint8_t channel, uint8_t type, uint8_t value)
 {
     EPI_UNUSED(userdata);
-    fluid_synth_cc(edge_fluid, channel, type, value);
+    if (opl_playback)
+        edge_opl->midiControlChange(channel, type, value);
+    else
+        fluid_synth_cc(edge_fluid, channel, type, value);
 }
 
 void rtPatchChange(void *userdata, uint8_t channel, uint8_t patch)
 {
     EPI_UNUSED(userdata);
-    fluid_synth_program_change(edge_fluid, channel, patch);
+    if (opl_playback)
+        edge_opl->midiProgramChange(channel, patch);
+    else
+        fluid_synth_program_change(edge_fluid, channel, patch);
 }
 
 void rtPitchBend(void *userdata, uint8_t channel, uint8_t msb, uint8_t lsb)
 {
     EPI_UNUSED(userdata);
-    fluid_synth_pitch_bend(edge_fluid, channel, (msb << 7) | lsb);
+    if (opl_playback)
+        edge_opl->midiPitchControl(channel, (msb - 64) / 127.0);
+    else
+        fluid_synth_pitch_bend(edge_fluid, channel, (msb << 7) | lsb);
 }
 
 void rtSysEx(void *userdata, const uint8_t *msg, size_t size)
 {
     EPI_UNUSED(userdata);
-    fluid_synth_sysex(edge_fluid, (const char *)msg, (int)size, nullptr, nullptr, nullptr, 0);
+    if (!opl_playback)
+        fluid_synth_sysex(edge_fluid, (const char *)msg, (int)size, nullptr, nullptr, nullptr, 0);
+}
+
+static void rtRawOPL(void *userdata, uint8_t reg, uint8_t value)
+{
+    EPI_UNUSED(userdata);
+    edge_opl->midiRawOPL(reg, value);
 }
 
 void playSynth(void *userdata, uint8_t *stream, size_t length)
 {
     EPI_UNUSED(userdata);
-    fluid_synth_write_float(edge_fluid, (int)length / 2 / sizeof(float), stream, 0, 2, stream + sizeof(float), 0, 2);
+    if (opl_playback)
+        edge_opl->generate((int16_t *)(stream), length / (2 * sizeof(int16_t)));
+    else
+        fluid_synth_write_float(edge_fluid, (int)length / 2 / sizeof(float), stream, 0, 2, stream + sizeof(float), 0, 2);
 }
 
 static MidiRealTimeInterface *midi_interface = nullptr;
@@ -307,7 +338,10 @@ static ma_result ma_midi_init_internal(const ma_decoding_backend_config *pConfig
 
     EPI_CLEAR_MEMORY(pMIDI, ma_midi, 1);
 
-    pMIDI->format = ma_format_f32;
+    if (opl_playback)
+        pMIDI->format = ma_format_s16;
+    else
+        pMIDI->format = ma_format_f32;
 
     dataSourceConfig        = ma_data_source_config_init();
     dataSourceConfig.vtable = &g_ma_midi_ds_vtable;
@@ -336,6 +370,9 @@ static ma_result ma_midi_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_
                                const ma_allocation_callbacks *pAllocationCallbacks, ma_midi *pMIDI)
 {
     if (midi_disabled || edge_fluid == NULL)
+        return MA_ERROR;
+
+    if (edge_opl == NULL)
         return MA_ERROR;
 
     EPI_UNUSED(pAllocationCallbacks);
@@ -374,10 +411,10 @@ static ma_result ma_midi_init_memory(const void *pData, size_t dataSize, const m
 
     EPI_UNUSED(pAllocationCallbacks);
 
-    midi_interface->pcmFrameSize = 2 * sizeof(float);
+    midi_interface->pcmFrameSize = 2 * (opl_playback ? sizeof(int16_t) : sizeof(float));
     midi_sequencer->SetInterface(midi_interface);
 
-    if (!midi_sequencer->LoadMidi((const uint8_t *)pData, dataSize))
+    if (!midi_sequencer->LoadMidi((const uint8_t *)pData, dataSize, imf_rate))
     {
         return MA_INVALID_FILE;
     }
@@ -657,6 +694,7 @@ bool StartupMIDI(void)
         midi_interface->rt_patchChange       = rtPatchChange;
         midi_interface->rt_pitchBend         = rtPitchBend;
         midi_interface->rt_systemExclusive   = rtSysEx;
+        midi_interface->rt_rawOPL            = rtRawOPL;
 
         midi_interface->onPcmRender          = playSynth;
         midi_interface->onPcmRender_userdata = NULL;
@@ -723,19 +761,56 @@ bool StartupMIDI(void)
     if (add_loader)
         fluid_synth_add_sfloader(edge_fluid, edge_fluid_sf2_loader);
 
-    if (fluid_synth_sfload(edge_fluid, midi_soundfont.c_str(), 1) == -1)
+    if (epi::StringCompare(midi_soundfont.s_, "OPL Emulation") != 0)
     {
-        LogWarning("MIDI: Initialization failure.\n");
-        delete_fluid_synth(edge_fluid);
-        delete_fluid_defsfloader(edge_fluid_sf2_loader);
-        delete_fluid_settings(edge_fluid_settings);
-        edge_fluid = nullptr;
-        edge_fluid_sf2_loader = nullptr;
-        edge_fluid_settings = nullptr;
-        return false;
+        if (fluid_synth_sfload(edge_fluid, midi_soundfont.c_str(), 1) == -1)
+        {
+            LogWarning("MIDI: Initialization failure.\n");
+            delete_fluid_synth(edge_fluid);
+            delete_fluid_defsfloader(edge_fluid_sf2_loader);
+            delete_fluid_settings(edge_fluid_settings);
+            edge_fluid = nullptr;
+            edge_fluid_sf2_loader = nullptr;
+            edge_fluid_settings = nullptr;
+            return false;
+        }
+
+        fluid_synth_program_reset(edge_fluid);
     }
 
-    fluid_synth_program_reset(edge_fluid);
+    if (!edge_opl)
+    {
+        edge_opl = new OPLPlayer(sound_device_frequency);
+
+        if (!edge_opl)
+        {
+            LogWarning("MIDI: Initialization failure.\n");
+            delete_fluid_synth(edge_fluid);
+            delete_fluid_defsfloader(edge_fluid_sf2_loader);
+            delete_fluid_settings(edge_fluid_settings);
+            edge_fluid = nullptr;
+            edge_fluid_sf2_loader = nullptr;
+            edge_fluid_settings = nullptr;
+            return false;
+        }
+
+        // Check for GENMIDI bank; this is not a failure if absent as OpalMIDI has
+        // built-in instruments
+
+        int raw_length = 0;
+        uint8_t *raw_bank = OpenPackOrLumpInMemory("GENMIDI", {".wopl", ".op2", ".ad", ".opl", ".tmb"}, &raw_length);
+        if (raw_bank)
+        {
+            if (!edge_opl->loadPatches((const uint8_t *)raw_bank, (size_t)raw_length))
+            {
+                LogWarning("MIDI: Error loading external OPL instruments! Falling back to default!\n");
+                edge_opl->loadDefaultPatches();
+            }
+            delete[] raw_bank;
+        }
+        else
+            edge_opl->loadDefaultPatches();
+    }
 
     return true; // OK!
 }
@@ -751,6 +826,9 @@ void RestartMIDI(void)
     int old_entry = entry_playing;
 
     StopMusic();
+    // We only unload the Fluidlite font, OPL instruments are determined once on startup,
+    // no need to reload; just reset it
+    edge_opl->reset();
     fluid_synth_sfunload(edge_fluid, 0, 1);
 
     if (!StartupMIDI())
@@ -782,13 +860,17 @@ class MIDIPlayer : public AbstractMusicPlayer
         Close();
     }
 
-  public:
     bool OpenMemory(uint8_t *data, int length)
     {
         if (status_ != kNotLoaded)
             Close();
 
-        midi_decoder_config.format                 = ma_format_f32;
+        opl_playback = ((epi::StringCompare(midi_soundfont.s_, "OPL Emulation") == 0) || imf_rate > 0);
+
+        if (opl_playback)
+            edge_opl->reset();
+
+        midi_decoder_config.format                 = opl_playback ? ma_format_s16 : ma_format_f32;
 
         if (ma_decoder_init_memory(data, length, &midi_decoder_config, &midi_decoder) != MA_SUCCESS)
         {
@@ -850,7 +932,14 @@ class MIDIPlayer : public AbstractMusicPlayer
 
         ma_sound_set_volume(&midi_stream, 0);
         ma_sound_stop(&midi_stream);
-        fluid_synth_system_reset(edge_fluid);
+
+        if (opl_playback)
+            edge_opl->reset();
+        else
+            fluid_synth_system_reset(edge_fluid);
+
+        // reset imf_rate in case tracks are switched to another format
+        imf_rate = 0;
 
         status_ = kStopped;
     }
@@ -861,7 +950,8 @@ class MIDIPlayer : public AbstractMusicPlayer
             return;
 
         ma_sound_stop(&midi_stream);
-        fluid_synth_all_voices_pause(edge_fluid);
+        if (!opl_playback)
+            fluid_synth_all_voices_pause(edge_fluid);
 
         status_ = kPaused;
     }
@@ -887,7 +977,7 @@ class MIDIPlayer : public AbstractMusicPlayer
 
         if (status_ == kPlaying)
         {
-            ma_engine_set_volume(&music_engine, music_volume.f_ * 0.25f);
+            ma_engine_set_volume(&music_engine, music_volume.f_ * (opl_playback ? 0.75f : 0.25f));
 
             if (pc_speaker_mode)
                 Stop();
@@ -918,6 +1008,56 @@ AbstractMusicPlayer *PlayMIDIMusic(uint8_t *data, int length, bool loop)
                             length)) // Lobo: quietly log it instead of completely exiting EDGE
     {
         LogDebug("MIDI player: failed to load MIDI file!\n");
+        delete[] data;
+        delete player;
+        return nullptr;
+    }
+
+    delete[] data;
+
+    player->Play(loop);
+
+    return player;
+}
+
+AbstractMusicPlayer *PlayIMFMusic(uint8_t *data, int length, bool loop, int type)
+{
+    MIDIPlayer *player = new MIDIPlayer(loop);
+
+    if (!player)
+    {
+        LogDebug("IMF player: error initializing!\n");
+        delete[] data;
+        return nullptr;
+    }
+
+    switch (type)
+    {
+    case kDDFMusicIMF280:
+        imf_rate = 280;
+        break;
+    case kDDFMusicIMF560:
+        imf_rate = 560;
+        break;
+    case kDDFMusicIMF700:
+        imf_rate = 700;
+        break;
+    default:
+        imf_rate = 0;
+        break;
+    }
+
+    if (imf_rate == 0)
+    {
+        LogDebug("IMF player: no IMF sample rate provided!\n");
+        delete[] data;
+        delete player;
+        return nullptr;
+    }
+
+    if (!player->OpenMemory(data, length)) // Lobo: quietly log it instead of completely exiting EDGE
+    {
+        LogDebug("IMF player: failed to load IMF file!\n");
         delete[] data;
         delete player;
         return nullptr;

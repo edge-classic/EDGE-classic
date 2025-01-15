@@ -29,11 +29,21 @@
 
 #include "con_var.h"
 
-constexpr uint16_t kMusicBuffer = 1024;
-
 /* abstract base class */
 class AbstractMusicPlayer
 {
+  public:
+    enum Status
+    {
+        kNotLoaded,
+        kPlaying,
+        kPaused,
+        kStopped
+    };
+
+    Status  status_;
+    bool    looping_;
+
   public:
     AbstractMusicPlayer()
     {

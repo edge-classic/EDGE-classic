@@ -26,7 +26,7 @@
 #include <math.h>
 
 #include "AlmostEquals.h"
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
 #include "coal.h"
 #endif
 #include "dm_defs.h"
@@ -57,13 +57,13 @@
 #include "r_texgl.h"
 #include "r_units.h"
 #include "script/compat/lua_compat.h"
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
 #include "vm_coal.h"
 #endif
 #include "w_model.h"
 #include "w_sprite.h"
 
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
 extern coal::VM *ui_vm;
 extern double    COALGetFloat(coal::VM *vm, const char *mod_name, const char *var_name);
 #endif
@@ -244,7 +244,7 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
     float tx2 = tx1 + w;
 
     float ty1 = -psp_y + image->ScaledOffsetY() - ((h - image->ScaledHeightActual()) * 0.5f);
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
     if (LuaUseLuaHUD())
     {
         // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
@@ -678,7 +678,7 @@ void RenderWeaponModel(Player *p)
     }
 
     float bias = 0.0f;
-#if EDGE_COAL_SUPPORT
+#ifdef EDGE_CLASSIC
     if (LuaUseLuaHUD())
     {
         bias =

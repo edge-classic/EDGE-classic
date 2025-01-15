@@ -31,25 +31,13 @@
 #include "i_movie.h"
 #include "i_system.h"
 #include "m_misc.h"
-#if EDGE_FLAC_SUPPORT
 #include "s_flac.h"
-#endif
 #include "s_midi.h"
-#if EDGE_TRACKER_SUPPORT
+#ifdef EDGE_CLASSIC
 #include "s_m4p.h"
 #endif
-#if EDGE_MP3_SUPPORT
 #include "s_mp3.h"
-#endif
-#if EDGE_OGG_SUPPORT
 #include "s_ogg.h"
-#endif
-#if EDGE_IMF_SUPPORT
-#include "s_imf.h"
-#endif
-#if EDGE_SID_SUPPORT
-#include "s_sid.h"
-#endif
 #include "s_sound.h"
 #include "snd_types.h"
 #include "w_files.h"
@@ -159,7 +147,7 @@ void ChangeMusic(int entry_number, bool loop)
 
     SoundFormat fmt = kSoundUnknown;
 
-#if EDGE_IMF_SUPPORT
+#ifdef EDGE_CLASSIC
     // IMF Music is the outlier in that it must be predefined in DDFPLAY with
     // the appropriate IMF frequency, as there is no way of determining this
     // from file information alone
@@ -194,46 +182,30 @@ void ChangeMusic(int entry_number, bool loop)
 
     switch (fmt)
     {
-#if EDGE_OGG_SUPPORT
     case kSoundOGG:
         delete F;
         music_player = PlayOGGMusic(data, length, loop);
         break;
-#endif
-#if EDGE_MP3_SUPPORT
     case kSoundMP3:
         delete F;
         music_player = PlayMP3Music(data, length, loop);
         break;
-#endif
-#if EDGE_FLAC_SUPPORT
     case kSoundFLAC:
         delete F;
         music_player = PlayFLACMusic(data, length, loop);
         break;
-#endif
-#if EDGE_TRACKER_SUPPORT
+#ifdef EDGE_CLASSIC
     case kSoundM4P:
         delete F;
         music_player = PlayM4PMusic(data, length, loop);
         break;
-#endif
-#if EDGE_SID_SUPPORT
-    case kSoundSID:
-        delete F;
-        music_player = PlaySIDMusic(data, length, loop);
-        break;
-#endif
-#if EDGE_IMF_SUPPORT
     case kSoundIMF:
         delete F;
         music_player = PlayIMFMusic(data, length, loop, play->type_);
         break;
-#endif
-    case kSoundMIDI:
-#if EDGE_MUS_SUPPORT
     case kSoundMUS:
 #endif
+    case kSoundMIDI:
         delete F;
         music_player = PlayMIDIMusic(data, length, loop);
         break;

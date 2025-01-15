@@ -28,5 +28,11 @@ void RestartMIDI(void);
 
 AbstractMusicPlayer *PlayMIDIMusic(uint8_t *data, int length, bool loop);
 
+#ifdef EDGE_CLASSIC
+// IMF music actually uses our MIDI sequencer which can
+// send raw OPL events
+AbstractMusicPlayer *PlayIMFMusic(uint8_t *data, int length, bool loop, int type);
+#endif
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

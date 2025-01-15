@@ -3,7 +3,7 @@
 ##########################################
 
 add_library(
-  edge_deh
+  dehacked
   deh_ammo.cc
   deh_buffer.cc
   deh_field.cc
@@ -24,11 +24,11 @@ add_library(
   deh_weapons.cc
 )
 
-target_link_libraries(edge_deh PRIVATE edge_ddf edge_epi stb)
+target_link_libraries(dehacked PRIVATE ddf epi stb)
 
-target_include_directories(edge_deh PUBLIC ./)
+target_include_directories(dehacked PUBLIC ./)
 
-target_compile_options(edge_deh PRIVATE
+target_compile_options(dehacked PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:${EDGE_WARNING_LEVEL}>
   $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:${EDGE_WARNING_LEVEL}>
 )

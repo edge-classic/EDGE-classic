@@ -27,20 +27,7 @@ if (EDGE_SOKOL_GL OR EDGE_SOKOL_GLES3 OR EDGE_SOKOL_D3D11)
 endif()
 
 # Optional Features
-option(EDGE_COAL_SUPPORT "Enable support for COAL scripting" ON)
-option(EDGE_DEHACKED_SUPPORT "Enable support for Dehacked patch conversion" ON)
-option(EDGE_DOOM_SFX_SUPPORT "Enable support for Doom/PC Speaker sound format" ON)
-option(EDGE_FLAC_SUPPORT "Enable support for FLAC music format" ON)
-option(EDGE_IMF_SUPPORT "Enable support for IMF music format" ON)
-option(EDGE_MP3_SUPPORT "Enable support for MP3 music format" ON)
-option(EDGE_MUS_SUPPORT "Enable support for MUS MIDI format" ON)
-option(EDGE_OGG_SUPPORT "Enable support for OGG music format" ON)
-option(EDGE_OPL_SUPPORT "Enable support for MIDI playback via OPL emulation" ON)
-option(EDGE_SID_SUPPORT "Enable support for C64 SID music" ON)
-option(EDGE_TRACKER_SUPPORT "Enable support for Tracker music (MOD/XM/S3M/IT)" ON)
-option(EDGE_XMI_SUPPORT "Enable support for XMI MIDI format" ON)
-option(EDGE_VWAD_SUPPORT "Enable support for k8vavoom VWAD archives" ON)
-option(EDGE_WAV_SUPPORT "Enable support for WAV sound format" ON)
+option(EDGE_CLASSIC "Enable default features for EDGE-Classic" ON)
 
 # Development 
 option(EDGE_SANITIZE "Enable code sanitizing" OFF)
@@ -173,60 +160,8 @@ else()
   find_package(OpenGL REQUIRED)
 endif()
 
-if (EDGE_COAL_SUPPORT)
-  add_definitions(-DEDGE_COAL_SUPPORT)
-endif()
-
-if (EDGE_DEHACKED_SUPPORT)
-  add_definitions(-DEDGE_DEHACKED_SUPPORT)
-endif()
-
-if (EDGE_DOOM_SFX_SUPPORT)
-  add_definitions(-DEDGE_DOOM_SFX_SUPPORT)
-endif()
-
-if (EDGE_FLAC_SUPPORT)
-  add_definitions(-DEDGE_FLAC_SUPPORT)
-endif()
-
-if (EDGE_IMF_SUPPORT)
-  add_definitions(-DEDGE_IMF_SUPPORT)
-endif()
-
-if (EDGE_MP3_SUPPORT)
-  add_definitions(-DEDGE_MP3_SUPPORT)
-endif()
-
-if (EDGE_MUS_SUPPORT)
-  add_definitions(-DEDGE_MUS_SUPPORT)
-endif()
-
-if (EDGE_OGG_SUPPORT)
-  add_definitions(-DEDGE_OGG_SUPPORT)
-endif()
-
-if (EDGE_OPL_SUPPORT)
-  add_definitions(-DEDGE_OPL_SUPPORT)
-endif()
-
-if (EDGE_SID_SUPPORT)
-  add_definitions(-DEDGE_SID_SUPPORT)
-endif()
-
-if (EDGE_TRACKER_SUPPORT)
-  add_definitions(-DEDGE_TRACKER_SUPPORT)
-endif()
-
-if (EDGE_VWAD_SUPPORT)
-  add_definitions(-DEDGE_VWAD_SUPPORT)
-endif()
-
-if (EDGE_XMI_SUPPORT)
-  add_definitions(-DEDGE_XMI_SUPPORT)
-endif()
-
-if (EDGE_WAV_SUPPORT)
-  add_definitions(-DEDGE_WAV_SUPPORT)
+if (EDGE_CLASSIC)
+  add_definitions(-DEDGE_CLASSIC)
 endif()
 
 if (EDGE_PROFILING)

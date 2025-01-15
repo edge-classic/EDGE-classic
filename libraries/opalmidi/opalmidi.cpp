@@ -79,8 +79,10 @@ void OPLPlayer::updateMIDI()
 // ----------------------------------------------------------------------------
 void OPLPlayer::reset()
 {
-    delete m_opl3;
-    m_opl3 = new Opal(rate);
+    if (!m_opl3)
+        m_opl3 = new Opal(rate);
+    else
+        m_opl3->Init(rate);
     // enable OPL3 stuff
     write(REG_NEW, 1);
 

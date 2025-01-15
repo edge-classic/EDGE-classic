@@ -3,7 +3,7 @@
 ##########################################
 
 add_library(
-  edge_ddf
+  ddf
   ddf_anim.cc
   ddf_attack.cc
   ddf_boom.cc
@@ -28,13 +28,13 @@ add_library(
   ddf_weapon.cc
 )
 
-target_link_libraries(edge_ddf PRIVATE almostequals edge_epi HandmadeMath stb)
+target_link_libraries(ddf PRIVATE almostequals epi HandmadeMath stb)
 
-target_include_directories(edge_ddf PRIVATE ../edge)
+target_include_directories(ddf PRIVATE ../edge)
 
-target_include_directories(edge_ddf PUBLIC ./)
+target_include_directories(ddf PUBLIC ./)
 
-target_compile_options(edge_ddf PRIVATE
+target_compile_options(ddf PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:${EDGE_WARNING_LEVEL}>
   $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:${EDGE_WARNING_LEVEL}>
 )

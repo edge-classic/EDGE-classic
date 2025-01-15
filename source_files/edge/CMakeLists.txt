@@ -228,7 +228,7 @@ else ()
 endif()
 
 if(WIN32 AND (MSVC OR CLANG))
-  target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/msvc/include)
+  target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/msvc/include)
 elseif (MINGW)
   target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/mingw/include)
 endif()

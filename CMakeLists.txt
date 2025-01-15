@@ -45,7 +45,7 @@ if (EMSCRIPTEN)
   include("${CMAKE_SOURCE_DIR}/cmake/Emscripten.cmake")  
 endif()
 
-if (WIN32)
+if (WIN32 OR MINGW)
   add_definitions(-D_WIN32_WINNT=0x601)
 endif()
 
@@ -122,8 +122,8 @@ else()
     endif()
   endif()
 
-  if (MSYS)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static -mwindows")
+  if (MINGW)
+    set(CMAKE_EXE_LINKER_FLAGS "-lmingw32 ${CMAKE_EXE_LINKER_FLAGS}")
   endif()
 
 endif()
@@ -134,7 +134,7 @@ if(${CMAKE_SYSTEM} MATCHES "BSD")
   include_directories("/usr/local/include")  
 endif()
 
-if (MSVC)
+if(MINGW OR MSVC OR (WIN32 AND CLANG))
   set(SDL2_DIR "${CMAKE_SOURCE_DIR}/libraries/sdl2")
 endif()
 

@@ -133,20 +133,18 @@ set (EDGE_SOKOL_SOURCE_FILES
 )
 
 if (NOT EDGE_SOKOL)
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} ${EDGE_GL_SOURCE_FILES})
+  list (APPEND EDGE_SOURCE_FILES ${EDGE_GL_SOURCE_FILES})
 else()
-
   if (EDGE_SOKOL_D3D11)
-    set (EDGE_SOKOL_SOURCE_FILES ${EDGE_SOKOL_SOURCE_FILES} render/sokol/sokol_d3d11.cc)
+    list (APPEND EDGE_SOKOL_SOURCE_FILES render/sokol/sokol_d3d11.cc)
   endif()
 
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} ${EDGE_SOKOL_SOURCE_FILES})
-
+  list (APPEND EDGE_SOURCE_FILES ${EDGE_SOKOL_SOURCE_FILES})
 endif()
 
 if (EDGE_CLASSIC)
-  set (EDGE_SOURCE_FILES 
-    ${EDGE_SOURCE_FILES} 
+  list (APPEND 
+    EDGE_SOURCE_FILES
     l_deh.cc
     p_umapinfo.cc
     s_doom.cc
@@ -157,17 +155,40 @@ if (EDGE_CLASSIC)
     vm_player.cc    
   )
 else()
-  set (EDGE_SOURCE_FILES 
-    ${EDGE_SOURCE_FILES} 
+  list (APPEND
+    EDGE_SOURCE_FILES 
     s_midi.cc  
   )
 endif()
 
 if (EMSCRIPTEN)
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} i_web.cc)
+  list (APPEND EDGE_SOURCE_FILES i_web.cc)
 else()
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} i_main.cc)
+  list (APPEND EDGE_SOURCE_FILES i_main.cc)
 endif()
+
+if (WIN32 OR MINGW)
+  list (APPEND EDGE_SOURCE_FILES w32_res.rc)
+endif()
+
+add_executable(
+  edge-classic
+  ${EDGE_SOURCE_FILES}
+)
+
+if(WIN32 OR MINGW)
+  target_compile_definitions(edge-classic PRIVATE WIN32)
+else()
+  target_compile_definitions(edge-classic PRIVATE UNIX)
+endif()
+
+if(WIN32 AND (MSVC OR CLANG))
+  target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/msvc/include)
+elseif (MINGW)
+  target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/mingw/include)
+endif()
+
+target_include_directories(edge-classic PRIVATE ./)
 
 set (EDGE_LINK_LIBRARIES
   ajbsp
@@ -188,12 +209,12 @@ set (EDGE_LINK_LIBRARIES
 )
 
 if (NOT EMSCRIPTEN)
-  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} thread)
+  list (APPEND EDGE_LINK_LIBRARIES thread)
 endif()
 
 if (EDGE_CLASSIC)
-  set (EDGE_LINK_LIBRARIES 
-    ${EDGE_LINK_LIBRARIES} 
+  list (APPEND
+    EDGE_LINK_LIBRARIES
     coal
     dehacked
     m4p
@@ -201,39 +222,23 @@ if (EDGE_CLASSIC)
   )
 endif()
 
-if (WIN32 OR MINGW)
-  set (EDGE_SOURCE_FILES ${EDGE_SOURCE_FILES} w32_res.rc)
-endif()
-
 if (EDGE_PROFILING)
-  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} TracyClient)
-endif()
-
-add_executable(
-  edge-classic
-  ${EDGE_SOURCE_FILES}
-)
-
-if(WIN32 OR MINGW)
-  target_compile_definitions(edge-classic PRIVATE WIN32)
-else()
-  target_compile_definitions(edge-classic PRIVATE UNIX)
+  list (APPEND EDGE_LINK_LIBRARIES TracyClient)
 endif()
 
 if (EDGE_SOKOL)
-  set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} sokol)
+  list(APPEND EDGE_LINK_LIBRARIES sokol)
+  if (MINGW)
+    if (EDGE_SOKOL_GL)
+      list(APPEND EDGE_LINK_LIBRARIES winmm kernel32)
+    else ()
+      list(APPEND EDGE_LINK_LIBRARIES d3d11 winmm kernel32)
+    endif()
+  endif()
 else ()
   target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/glad/include/glad)
-	set(EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} glad ${OPENGL_LIBRARIES})
+	list(APPEND EDGE_LINK_LIBRARIES glad ${OPENGL_LIBRARIES})
 endif()
-
-if(WIN32 AND (MSVC OR CLANG))
-  target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/msvc/include)
-elseif (MINGW)
-  target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/mingw/include)
-endif()
-
-target_include_directories(edge-classic PRIVATE ./)
 
 target_link_libraries(edge-classic PRIVATE ${EDGE_LINK_LIBRARIES})
 
@@ -283,15 +288,14 @@ if (WIN32)
       list(APPEND COPY_FILES "${CMAKE_SOURCE_DIR}/libraries/sdl2/msvc/x86/SDL2.dll")
     endif ()
   elseif(MINGW)
-  if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
-    list(APPEND COPY_FILES "${CMAKE_SOURCE_DIR}/libraries/sdl2/mingw/x64/SDL2.dll")
-  else ()
-    list(APPEND COPY_FILES "${CMAKE_SOURCE_DIR}/libraries/sdl2/mingw/x86/SDL2.dll")
-  endif ()
+    if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
+      list(APPEND COPY_FILES "${CMAKE_SOURCE_DIR}/libraries/sdl2/mingw/x64/SDL2.dll")
+    else ()
+      list(APPEND COPY_FILES "${CMAKE_SOURCE_DIR}/libraries/sdl2/mingw/x86/SDL2.dll")
+    endif ()
   endif()
 endif()
 
 if (COPY_FILES)
   add_custom_command( TARGET edge-classic POST_BUILD COMMAND_EXPAND_LISTS COMMAND ${CMAKE_COMMAND} -E copy_if_different ${COPY_FILES} ${DEST_DIR})
 endif()
-

@@ -298,12 +298,17 @@ static void DDFImageGetType(const char *info, void *storage)
         DDFError("Unknown image type: %s\n", keyword);
 }
 
-static DDFSpecialFlags image_specials[] = {
-    {"NOALPHA", kImageSpecialNoAlpha, 0},         {"FORCE_MIP", kImageSpecialMip, 0},
-    {"FORCE_NOMIP", kImageSpecialNoMip, 0},       {"FORCE_CLAMP", kImageSpecialClamp, 0},
-    {"FORCE_SMOOTH", kImageSpecialSmooth, 0},     {"FORCE_NOSMOOTH", kImageSpecialNoSmooth, 0},
-    {"CROSSHAIR", kImageSpecialCrosshair, 0},     {"GRAYSCALE", kImageSpecialGrayscale, 0},
-    {"FORCE_PRECACHE", kImageSpecialPrecache, 0}, {nullptr, 0, 0}};
+static DDFSpecialFlags image_specials[] = {{"NOALPHA", kImageSpecialNoAlpha, 0},
+                                           {"FORCE_MIP", kImageSpecialMip, 0},
+                                           {"FORCE_NOMIP", kImageSpecialNoMip, 0},
+                                           {"FORCE_CLAMP", kImageSpecialClamp, 0},
+                                           {"FORCE_REPEAT", kImageSpecialRepeat, 0},
+                                           {"FORCE_SMOOTH", kImageSpecialSmooth, 0},
+                                           {"FORCE_NOSMOOTH", kImageSpecialNoSmooth, 0},
+                                           {"CROSSHAIR", kImageSpecialCrosshair, 0},
+                                           {"GRAYSCALE", kImageSpecialGrayscale, 0},
+                                           {"FORCE_PRECACHE", kImageSpecialPrecache, 0},
+                                           {nullptr, 0, 0}};
 
 static void DDFImageGetSpecial(const char *info, void *storage)
 {

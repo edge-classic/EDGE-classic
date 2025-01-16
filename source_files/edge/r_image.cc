@@ -1155,8 +1155,9 @@ static bool IM_ShouldClamp(const Image *rim)
         {
         case kImageNamespaceGraphic:
         case kImageNamespaceSprite:
-            return true;
-
+            if (!(rim->source_.user.def->special_ & kImageSpecialRepeat))
+                return true;
+            return false;
         default:
             return false;
         }

@@ -466,11 +466,6 @@ void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
         HUDCalcScrollTexCoords(sx, sy, &tx1, &ty1, &tx2, &ty2);
     }
 
-    if (epi::StringCaseCompareASCII(image->name_, hud_overlays.at(video_overlay.d_)) == 0)
-    {
-        blend = (BlendingMode)(blend | kBlendingRepeatX | kBlendingRepeatY);
-    }
-
     bool hud_swirl = false;
 
     if (image->liquid_type_ > kLiquidImageNone && swirling_flats > kLiquidSwirlSmmu)

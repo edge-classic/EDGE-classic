@@ -41,18 +41,19 @@ enum ImageDataType
     kImageDataPackage    // load from an EPK package
 };
 
-enum ImageSpecial
+enum ImageSpecial : uint32_t
 {
     kImageSpecialNone      = 0,
-    kImageSpecialNoAlpha   = 0x0001, // image does not require an alpha channel
-    kImageSpecialMip       = 0x0002, // force   mip-mapping
-    kImageSpecialNoMip     = 0x0004, // disable mip-mapping
-    kImageSpecialClamp     = 0x0008, // clamp image
-    kImageSpecialSmooth    = 0x0010, // force smoothing
-    kImageSpecialNoSmooth  = 0x0020, // disable smoothing
-    kImageSpecialCrosshair = 0x0040, // weapon crosshair (center vertically)
-    kImageSpecialGrayscale = 0x0080, // forces image to be grayscaled upon creation
-    kImageSpecialPrecache  = 0x0100, // forces image to be precached upon creation
+    kImageSpecialNoAlpha   = 1 << 0, // image does not require an alpha channel
+    kImageSpecialMip       = 1 << 1, // force   mip-mapping
+    kImageSpecialNoMip     = 1 << 2, // disable mip-mapping
+    kImageSpecialClamp     = 1 << 3, // clamp image
+    kImageSpecialRepeat    = 1 << 4, // repeat image
+    kImageSpecialSmooth    = 1 << 5, // force smoothing
+    kImageSpecialNoSmooth  = 1 << 6, // disable smoothing
+    kImageSpecialCrosshair = 1 << 7, // weapon crosshair (center vertically)
+    kImageSpecialGrayscale = 1 << 8, // forces image to be grayscaled upon creation
+    kImageSpecialPrecache  = 1 << 9, // forces image to be precached upon creation
 };
 
 enum ImageTransparencyFix

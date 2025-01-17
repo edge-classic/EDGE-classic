@@ -785,10 +785,7 @@ enum SectorFlag
     kSectorFlagSubmergedSFX = 0x0080,
 
     // sounds will be heavily muffled in this sector
-    kSectorFlagVacuumSFX = 0x0100,
-
-    // sounds will reverberate/echo in this sector
-    kSectorFlagReverbSFX = 0x0200
+    kSectorFlagVacuumSFX = 0x0100
 };
 
 class SectorType
@@ -849,11 +846,6 @@ class SectorType
     float    push_speed_;
     float    push_zspeed_;
     BAMAngle push_angle_;
-
-    // Dasho 2022 - Params for user-defined reverb in sectors
-    std::string reverb_type_;
-    float       reverb_ratio_;
-    float       reverb_delay_;
 
     float floor_bob_;
     float ceiling_bob_;

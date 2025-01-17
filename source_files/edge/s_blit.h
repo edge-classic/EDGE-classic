@@ -73,12 +73,7 @@ extern int           total_channels;
 
 extern bool vacuum_sound_effects;
 extern bool submerged_sound_effects;
-extern bool outdoor_reverb;
 extern bool dynamic_reverb;
-extern bool ddf_reverb;
-extern int  ddf_reverb_type; // 0 = None, 1 = Reverb, 2 = Echo
-extern int  ddf_reverb_ratio;
-extern int  ddf_reverb_delay;
 
 void InitializeSoundChannels(int total);
 void FreeSoundChannels(void);

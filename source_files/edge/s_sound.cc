@@ -35,8 +35,6 @@
 #include "s_sound.h"
 #include "w_wad.h"
 
-extern float room_area;
-
 extern void StartupProgressMessage(const char *message);
 
 static bool allow_hogs = true;
@@ -323,10 +321,31 @@ static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, Posit
         ma_sound_set_attenuation_model(&chan->channel_sound_, ma_attenuation_model_inverse);
         ma_sound_set_rolloff(&chan->channel_sound_, 0.01f);
         ma_sound_set_position(&chan->channel_sound_, pos->x, pos->z, -pos->y);
+        if (vacuum_sound_effects)
+            ma_node_attach_output_bus(&chan->channel_sound_, 0, &vacuum_node, 0);
+        else if (submerged_sound_effects)
+            ma_node_attach_output_bus(&chan->channel_sound_, 0, &underwater_node, 0);
+        else if (dynamic_reverb)
+            ma_node_attach_output_bus(&chan->channel_sound_, 0, &reverb_node, 0);
+        else
+            ma_node_attach_output_bus(&chan->channel_sound_, 0, &sound_engine, 0);
     }
     else
     {
         ma_sound_set_attenuation_model(&chan->channel_sound_, ma_attenuation_model_none);
+        if (category != kCategoryUi)
+        {
+            if (vacuum_sound_effects)
+                ma_node_attach_output_bus(&chan->channel_sound_, 0, &vacuum_node, 0);
+            else if (submerged_sound_effects)
+                ma_node_attach_output_bus(&chan->channel_sound_, 0, &underwater_node, 0);
+            else if (dynamic_reverb)
+                ma_node_attach_output_bus(&chan->channel_sound_, 0, &reverb_node, 0);
+            else
+                ma_node_attach_output_bus(&chan->channel_sound_, 0, &sound_engine, 0);
+        }
+        else
+            ma_node_attach_output_bus(&chan->channel_sound_, 0, &sound_engine, 0);
         volume *= 0.5f;
     }
     ma_sound_set_volume(&chan->channel_sound_, volume);
@@ -434,19 +453,6 @@ void StartSoundEffect(SoundEffect *sfx, int category, Position *pos, int flags)
     SoundData *buf = SoundCacheLoad(def);
     if (!buf)
         return;
-
-    /*if (vacuum_sound_effects)
-        buf->MixVacuum();
-    else if (submerged_sound_effects)
-        buf->MixSubmerged();
-    else
-    {
-        if (ddf_reverb)
-            buf->MixReverb(dynamic_reverb, room_area, outdoor_reverb, ddf_reverb_type, ddf_reverb_ratio,
-                           ddf_reverb_delay);
-        else
-            buf->MixReverb(dynamic_reverb, room_area, outdoor_reverb, 0, 0, 0);
-    }*/
 
     DoStartFX(def, category, pos, flags, buf);
 }

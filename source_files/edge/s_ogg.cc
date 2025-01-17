@@ -18,28 +18,74 @@
 
 #include "s_ogg.h"
 
-#include <limits.h>
-
 #include "epi.h"
 #include "epi_endian.h"
+#include "epi_file.h"
 #include "epi_filesystem.h"
 #include "i_movie.h"
 #include "i_sound.h"
+// clang-format off
+#define OV_EXCLUDE_STATIC_CALLBACKS
+#include "minivorbis.h"
+// clang-format on
 #include "s_blit.h"
 #include "s_cache.h"
 #include "s_music.h"
 #include "snd_gather.h"
-// clang-format off
-#define STB_VORBIS_HEADER_ONLY
-#include "stb_vorbis.h"
-// clang-format on
 
 static ma_decoder ogg_decoder;
 static ma_sound   ogg_stream;
 
-// This is a stripped-down version of the built-in midiaudio stb_vorbis decoder to account for the fact
-// that we do not use stdio or the pushdata API with stb_vorbis. MA_NO_VORBIS has been defined
-// for miniaudio to prevent conflicts - Dasho
+static size_t ogg_epi_memread(void *ptr, size_t size, size_t nmemb, void *datasource)
+{
+    epi::MemFile *d  = (epi::MemFile *)datasource;
+    return d->Read(ptr, size * nmemb) / size;
+}
+
+static int ogg_epi_memseek(void *datasource, ogg_int64_t offset, int whence)
+{
+    epi::MemFile *d = (epi::MemFile *)datasource;
+
+    switch (whence)
+    {
+        case SEEK_SET: {
+            return d->Seek(offset, epi::File::kSeekpointStart) ? 0 : -1;
+            break;
+        }
+        case SEEK_CUR: {
+            return d->Seek(offset, epi::File::kSeekpointCurrent) ? 0 : -1;
+            break;
+        }
+        case SEEK_END: {
+            return d->Seek(-offset, epi::File::kSeekpointEnd) ? 0 : -1;
+            break;
+        }
+        default: {
+            return -1;
+        } // WTF?
+    }
+}
+
+static int ogg_epi_memclose(void *datasource)
+{
+    // we don't free the data here
+    EPI_UNUSED(datasource);
+    return 0;
+}
+
+static long ogg_epi_memtell(void *datasource)
+{
+    epi::MemFile *d = (epi::MemFile *)datasource;
+    return d->GetPosition();
+}
+
+static constexpr ov_callbacks ogg_epi_callbacks = 
+{
+    ogg_epi_memread,
+    ogg_epi_memseek,
+    ogg_epi_memclose,
+    ogg_epi_memtell
+};
 
 typedef struct
 {
@@ -53,7 +99,8 @@ typedef struct
     ma_uint32               channels;
     ma_uint32               sampleRate;
     ma_uint64               cursor;
-    stb_vorbis             *stb;
+    epi::MemFile           *memfile;
+    OggVorbis_File          ogg;
 } ma_stbvorbis;
 
 static ma_result ma_stbvorbis_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell,
@@ -135,14 +182,17 @@ static ma_result ma_stbvorbis_init_internal(const ma_decoding_backend_config *pC
 
 static ma_result ma_stbvorbis_post_init(ma_stbvorbis *pVorbis)
 {
-    stb_vorbis_info info;
-
     EPI_ASSERT(pVorbis != NULL);
 
-    info = stb_vorbis_get_info(pVorbis->stb);
+    vorbis_info *info = ov_info(&pVorbis->ogg, -1);
 
-    pVorbis->channels   = info.channels;
-    pVorbis->sampleRate = info.sample_rate;
+    if (info == NULL)
+    {
+        return MA_INVALID_DATA;
+    }
+
+    pVorbis->channels   = info->channels;
+    pVorbis->sampleRate = info->rate;
 
     return MA_SUCCESS;
 }
@@ -187,22 +237,23 @@ static ma_result ma_stbvorbis_init_memory(const void *pData, size_t dataSize, co
 
     EPI_UNUSED(pAllocationCallbacks);
 
-    /* stb_vorbis uses an int as it's size specifier, restricting it to 32-bit even on 64-bit systems. *sigh*. */
-    if (dataSize > INT_MAX)
+    pVorbis->memfile = new epi::MemFile((const uint8_t *)pData, dataSize);
+
+    if (pVorbis->memfile == NULL)
     {
-        return MA_TOO_BIG;
+        return MA_INVALID_DATA;
     }
 
-    pVorbis->stb = stb_vorbis_open_memory((const unsigned char *)pData, (int)dataSize, NULL, NULL);
-    if (pVorbis->stb == NULL)
+    if (ov_open_callbacks((void *)pVorbis->memfile, &pVorbis->ogg, NULL, 0, ogg_epi_callbacks) < 0)
     {
-        return MA_INVALID_FILE;
+        delete pVorbis->memfile;
+        return MA_INVALID_DATA;
     }
 
     result = ma_stbvorbis_post_init(pVorbis);
     if (result != MA_SUCCESS)
     {
-        stb_vorbis_close(pVorbis->stb);
+        delete pVorbis->memfile;
         return result;
     }
 
@@ -218,7 +269,9 @@ static void ma_stbvorbis_uninit(ma_stbvorbis *pVorbis, const ma_allocation_callb
         return;
     }
 
-    stb_vorbis_close(pVorbis->stb);
+    ov_clear(&pVorbis->ogg);
+
+    delete(pVorbis->memfile);
 
     ma_data_source_uninit(&pVorbis->ds);
 }
@@ -244,15 +297,35 @@ static ma_result ma_stbvorbis_read_pcm_frames(ma_stbvorbis *pVorbis, void *pFram
     /* We always use floating point format. */
     ma_result result          = MA_SUCCESS; /* Must be initialized to MA_SUCCESS. */
     ma_uint64 totalFramesRead = 0;
+    int section = 0;
     ma_format format;
     ma_uint32 channels;
+    ma_uint64 framesLeft = frameCount;
+    float *pFramesOutF = (float *)pFramesOut;
 
     ma_stbvorbis_get_data_format(pVorbis, &format, &channels, NULL, NULL, 0);
 
     if (format == ma_format_f32)
     {
-        totalFramesRead = stb_vorbis_get_samples_float_interleaved(pVorbis->stb, channels, (float *)pFramesOut,
-                                                                   (int)frameCount * channels); /* Safe cast. */
+        while(framesLeft > 0)
+        {
+            float **outFrames = NULL;
+            long framesRead = ov_read_float(&pVorbis->ogg, &outFrames, framesLeft, &section);
+            if(framesRead <= 0)
+                break;
+
+            for(ma_uint32 j=0; j < channels; ++j) 
+            {
+                for(int i=0;i<framesRead;++i) 
+                {
+                    pFramesOutF[i*channels+j] = outFrames[j][i];
+                }
+            }
+
+            framesLeft      -= framesRead;
+            totalFramesRead += framesRead;
+            pFramesOutF     += framesRead * channels;
+        }
     }
     else
     {
@@ -286,15 +359,9 @@ static ma_result ma_stbvorbis_seek_to_pcm_frame(ma_stbvorbis *pVorbis, ma_uint64
         return MA_INVALID_ARGS;
     }
 
-    int vorbisResult;
+    int vorbisResult = ov_pcm_seek(&pVorbis->ogg, frameIndex);
 
-    if (frameIndex > UINT_MAX)
-    {
-        return MA_INVALID_ARGS; /* Trying to seek beyond the 32-bit maximum of stb_vorbis. */
-    }
-
-    vorbisResult = stb_vorbis_seek(pVorbis->stb, (unsigned int)frameIndex); /* Safe cast. */
-    if (vorbisResult == 0)
+    if (vorbisResult != 0)
     {
         return MA_ERROR;                                                    /* See failed. */
     }
@@ -386,7 +453,14 @@ static ma_result ma_stbvorbis_get_length_in_pcm_frames(ma_stbvorbis *pVorbis, ma
         return MA_INVALID_ARGS;
     }
 
-    *pLength = stb_vorbis_stream_length_in_samples(pVorbis->stb);
+    ogg_int64_t res = ov_pcm_total(&pVorbis->ogg, -1);
+
+    if (res <= 0)
+    {
+        return MA_INVALID_DATA;
+    }
+
+    *pLength = (ma_uint64)res;
 
     return MA_SUCCESS;
 }

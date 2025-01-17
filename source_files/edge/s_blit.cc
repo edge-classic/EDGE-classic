@@ -48,12 +48,7 @@ int           total_channels;
 
 bool vacuum_sound_effects    = false;
 bool submerged_sound_effects = false;
-bool outdoor_reverb          = false;
 bool dynamic_reverb          = false;
-bool ddf_reverb              = false;
-int  ddf_reverb_type         = 0;
-int  ddf_reverb_ratio        = 0;
-int  ddf_reverb_delay        = 0;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(sound_effect_volume, "0.15", kConsoleVariableFlagArchive)
 

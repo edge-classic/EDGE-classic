@@ -20,7 +20,7 @@ add_library(fluidlite
     src/fluid_voice.c
 )
 
-add_compile_definitions(SF3_SUPPORT=SF3_STB_VORBIS)
+add_compile_definitions(SF3_SUPPORT=SF3_XIPH_VORBIS)
 
-target_include_directories(fluidlite PRIVATE ./src ../stb)
+target_include_directories(fluidlite PRIVATE ./src ../minivorbis)
 target_include_directories(fluidlite PUBLIC ./include)

@@ -28,9 +28,8 @@
 #include "fluid_sys.h"
 
 #if SF3_SUPPORT == SF3_XIPH_VORBIS
-#include "vorbis/codec.h"
-#include "vorbis/vorbisenc.h"
-#include "vorbis/vorbisfile.h"
+#define OV_EXCLUDE_STATIC_CALLBACKS
+#include "minivorbis.h"
 
 struct VorbisData {
     int pos;          // current position in audio->data()

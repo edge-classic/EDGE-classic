@@ -24,6 +24,7 @@
 //----------------------------------------------------------------------------
 
 #include <float.h>
+#include <math.h>
 
 #include "AlmostEquals.h"
 #include "bot_think.h"
@@ -34,6 +35,7 @@
 #include "dm_state.h"
 #include "e_input.h"
 #include "g_game.h"
+#include "i_sound.h"
 #include "i_system.h"
 #include "m_random.h"
 #include "n_network.h"
@@ -804,11 +806,6 @@ bool PlayerThink(Player *player)
     // - Dasho
     vacuum_sound_effects    = false;
     submerged_sound_effects = false;
-    outdoor_reverb          = false;
-    ddf_reverb              = false;
-    ddf_reverb_type         = 0;
-    ddf_reverb_delay        = 0;
-    ddf_reverb_ratio        = 0;
 
     if (player->map_object_->region_properties_->special ||
         player->map_object_->subsector_->sector->extrafloor_used > 0 || player->underwater_ || player->swimming_ ||
@@ -816,9 +813,6 @@ bool PlayerThink(Player *player)
     {
         PlayerInSpecialSector(player, player->map_object_->subsector_->sector, should_think);
     }
-
-    if (EDGE_IMAGE_IS_SKY(player->map_object_->subsector_->sector->ceiling))
-        outdoor_reverb = true;
 
     // Check for weapon change.
     if (cmd->buttons & kButtonCodeChangeWeapon)
@@ -905,9 +899,9 @@ bool PlayerThink(Player *player)
 
     player->kick_offset_ /= 1.6f;
 
+    // Adjust reverb node parameters if applicable
     if (players[console_player] == player && dynamic_reverb)
     {
-        // Approximate "room size" determination for reverb system - Dasho
         HMM_Vec2 room_checker;
         float    line_lengths = 0;
         float    player_x     = player->map_object_->x;
@@ -932,7 +926,8 @@ bool PlayerThink(Player *player)
         line_lengths += abs(player_x - room_checker.X);
         PathTraverse(player_x, player_y, 32768.0f, player_y, kPathAddLines, P_RoomPath, &room_checker);
         line_lengths += abs(room_checker.X - player_x);
-        room_area = line_lengths / 8;
+        // not reverb per se, but approximately matches how we used to do "reverb" - Dasho
+        ma_delay_node_set_decay(&reverb_node, log1p(line_lengths * 0.125f) * .020f);
     }
 
     return should_think;

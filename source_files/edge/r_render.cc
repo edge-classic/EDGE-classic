@@ -2069,10 +2069,10 @@ void RenderTrueBsp(void)
                 RenderSubsector(item->subsector_, false);
                 break;
             case kRenderSkyWall:
-                RenderSkyWall(item->wallSeg_, item->height1_, item->height2_);
+                sky_items.push_back(item);
                 break;
             case kRenderSkyPlane:
-                RenderSkyPlane(item->wallPlane_, item->height1_);
+                sky_items.push_back(item);
                 break;
             }
         }
@@ -2084,23 +2084,39 @@ void RenderTrueBsp(void)
     render_backend->SetRenderLayer(kRenderLayerTransparent, false);
 
     StartUnitBatch(solid_mode);
-    std::list<RenderItem *>::reverse_iterator RI;
 
+    std::list<RenderItem *>::reverse_iterator RI;
     for (RI = items.rbegin(); RI != items.rend(); RI++)
     {
-        if ((*RI)->type_ == kRenderSubsector)
+        RenderItem *item = *RI;
+        if (item->type_ == kRenderSubsector)
         {
-            if ((*RI)->subsector_->solid)
+            if (item->subsector_->solid)
             {
                 continue;
             }
 
-            RenderSubsector((*RI)->subsector_, false);
+            RenderSubsector(item->subsector_, false);
         }
     }
 
     FinishUnitBatch();
     render_backend->SetRenderLayer(kRenderLayerSky);
+
+    std::list<RenderItem *>::iterator I;
+    for (I = sky_items.begin(); I != sky_items.end(); I++)
+    {
+        RenderItem *item = (*I);
+
+        if (item->type_ == kRenderSkyWall)
+        {
+            RenderSkyWall(item->wallSeg_, item->height1_, item->height2_);
+        }
+        else
+        {
+            RenderSkyPlane(item->wallPlane_, item->height1_);
+        }
+    }
 
     FinishSky();
 

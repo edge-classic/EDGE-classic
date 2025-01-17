@@ -43,8 +43,7 @@
 #include "sokol_images.h"
 #include "sokol_pipeline.h"
 
-// renderer_dumb_sky forced in sokol renderer for now
-EDGE_DEFINE_CONSOLE_VARIABLE(renderer_dumb_sky, "1", kConsoleVariableFlagReadOnly)
+EDGE_DEFINE_CONSOLE_VARIABLE(renderer_dumb_sky, "0", kConsoleVariableFlagArchive)
 #ifdef APPLE_SILICON
 EDGE_DEFINE_CONSOLE_VARIABLE(renderer_dumb_clamp, "1", kConsoleVariableFlagNone)
 #else

@@ -24,6 +24,7 @@
 //----------------------------------------------------------------------------
 
 #include <float.h>
+#include <math.h>
 
 #include "AlmostEquals.h"
 #include "bot_think.h"
@@ -925,7 +926,7 @@ bool PlayerThink(Player *player)
         line_lengths += abs(player_x - room_checker.X);
         PathTraverse(player_x, player_y, 32768.0f, player_y, kPathAddLines, P_RoomPath, &room_checker);
         line_lengths += abs(room_checker.X - player_x);
-        // not reverbe per se, but approximately matches how we use to do "reverb" - Dasho
+        // not reverb per se, but approximately matches how we used to do "reverb" - Dasho
         ma_delay_node_set_decay(&reverb_node, log1p(line_lengths * 0.125f) * .020f);
     }
 

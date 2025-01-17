@@ -201,6 +201,7 @@ set (EDGE_LINK_LIBRARIES
   HandmadeMath
   lua
   miniaudio
+  minivorbis
   miniz
   pl_mpeg
   prns

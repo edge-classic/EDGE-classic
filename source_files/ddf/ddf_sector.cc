@@ -71,10 +71,6 @@ static const DDFCommandList sect_commands[] = {
     DDF_FIELD("DAMAGE", dummy_sector, damage_.nominal_, DDFMainGetFloat),
     DDF_FIELD("DAMAGETIME", dummy_sector, damage_.delay_, DDFMainGetTime),
 
-    DDF_FIELD("REVERB_TYPE", dummy_sector, reverb_type_, DDFMainGetString),
-    DDF_FIELD("REVERB_RATIO", dummy_sector, reverb_ratio_, DDFMainGetFloat),
-    DDF_FIELD("REVERB_DELAY", dummy_sector, reverb_delay_, DDFMainGetFloat),
-
     DDF_FIELD("FLOOR_BOB", dummy_sector, floor_bob_, DDFMainGetFloat),
     DDF_FIELD("CEILING_BOB", dummy_sector, ceiling_bob_, DDFMainGetFloat),
 
@@ -225,7 +221,6 @@ static DDFSpecialFlags sector_specials[] = {{"WHOLE_REGION", kSectorFlagWholeReg
                                             {"SWIM", kSectorFlagSwimming, 0},
                                             {"SUBMERGED_SFX", kSectorFlagSubmergedSFX, 0},
                                             {"VACUUM_SFX", kSectorFlagVacuumSFX, 0},
-                                            {"REVERB_SFX", kSectorFlagReverbSFX, 0},
                                             {nullptr, 0, 0}};
 
 //
@@ -484,10 +479,6 @@ void SectorType::CopyDetail(SectorType &src)
     push_zspeed_ = src.push_zspeed_;
     push_angle_  = src.push_angle_;
 
-    reverb_type_  = src.reverb_type_;
-    reverb_ratio_ = src.reverb_ratio_;
-    reverb_delay_ = src.reverb_delay_;
-
     floor_bob_   = src.floor_bob_;
     ceiling_bob_ = src.ceiling_bob_;
 
@@ -525,10 +516,6 @@ void SectorType::Default()
     push_zspeed_ = 0.0f;
 
     push_angle_ = 0;
-
-    reverb_type_  = "NONE";
-    reverb_delay_ = 0;
-    reverb_ratio_ = 0;
 
     floor_bob_   = 0.0f;
     ceiling_bob_ = 0.0f;

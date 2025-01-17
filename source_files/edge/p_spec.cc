@@ -1790,17 +1790,6 @@ static inline void PlayerInProperties(Player *player, float bz, float tz, float 
     if (special->special_flags_ & kSectorFlagVacuumSFX)
         vacuum_sound_effects = true;
 
-    if (special->special_flags_ & kSectorFlagReverbSFX)
-    {
-        ddf_reverb = true;
-        if (epi::StringCaseCompareASCII(special->reverb_type_, "REVERB") == 0)
-            ddf_reverb_type = 1;
-        else if (epi::StringCaseCompareASCII(special->reverb_type_, "ECHO") == 0)
-            ddf_reverb_type = 2;
-        ddf_reverb_delay = HMM_MAX(0, special->reverb_delay_);
-        ddf_reverb_ratio = HMM_Clamp(0, special->reverb_ratio_, 100);
-    }
-
     factor = 1.0f;
 
     if (special->special_flags_ & kSectorFlagWholeRegion)

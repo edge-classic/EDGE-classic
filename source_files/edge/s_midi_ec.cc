@@ -767,10 +767,9 @@ bool StartupMIDI(void)
         {
             LogWarning("MIDI: Initialization failure.\n");
             delete_fluid_synth(edge_fluid);
-            delete_fluid_defsfloader(edge_fluid_sf2_loader);
             delete_fluid_settings(edge_fluid_settings);
             edge_fluid = nullptr;
-            edge_fluid_sf2_loader = nullptr;
+            edge_fluid_sf2_loader = nullptr; // already deleted when deleting the synth
             edge_fluid_settings = nullptr;
             return false;
         }
@@ -786,10 +785,9 @@ bool StartupMIDI(void)
         {
             LogWarning("MIDI: Initialization failure.\n");
             delete_fluid_synth(edge_fluid);
-            delete_fluid_defsfloader(edge_fluid_sf2_loader);
             delete_fluid_settings(edge_fluid_settings);
             edge_fluid = nullptr;
-            edge_fluid_sf2_loader = nullptr;
+            edge_fluid_sf2_loader = nullptr; // already deleted when deleting the synth
             edge_fluid_settings = nullptr;
             return false;
         }

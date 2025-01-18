@@ -48,5 +48,5 @@ Bugs fixed
 - PNG textures/flats did not tile
 - MLOOK_TURN() and MLOOK_FACE() thing.ddf actions were exactly the same. Now MLOOK_TURN() affects horizontal and MLOOK_FACE() affects vertical.
 - Changed FACE() thing.ddf action to behave like it's horizontal equivalent TURN().
-
+- Stopped looping SFX still playing on intermission screen
 

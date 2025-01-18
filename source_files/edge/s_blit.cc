@@ -48,7 +48,6 @@ int           total_channels;
 
 bool vacuum_sound_effects    = false;
 bool submerged_sound_effects = false;
-bool dynamic_reverb          = false;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(sound_effect_volume, "0.15", kConsoleVariableFlagArchive)
 

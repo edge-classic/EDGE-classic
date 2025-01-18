@@ -900,34 +900,79 @@ bool PlayerThink(Player *player)
     player->kick_offset_ /= 1.6f;
 
     // Adjust reverb node parameters if applicable
-    if (players[console_player] == player && dynamic_reverb)
+    if (players[console_player] == player && dynamic_reverb.d_)
     {
         HMM_Vec2 room_checker;
-        float    line_lengths = 0;
+        float    room_check = 0;
         float    player_x     = player->map_object_->x;
         float    player_y     = player->map_object_->y;
         PathTraverse(player_x, player_y, player_x, 32768.0f, kPathAddLines, P_RoomPath, &room_checker);
-        line_lengths += abs(room_checker.Y - player_y);
+        room_check += abs(room_checker.Y - player_y);
         PathTraverse(player_x, player_y, 32768.0f + player_x, 32768.0f + player_y, kPathAddLines, P_RoomPath,
                      &room_checker);
-        line_lengths += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
+        room_check += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
         PathTraverse(player_x, player_y, -32768.0f + player_x, 32768.0f + player_y, kPathAddLines, P_RoomPath,
                      &room_checker);
-        line_lengths += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
+        room_check += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
         PathTraverse(player_x, player_y, player_x, -32768.0f, kPathAddLines, P_RoomPath, &room_checker);
-        line_lengths += abs(player_y - room_checker.Y);
+        room_check += abs(player_y - room_checker.Y);
         PathTraverse(player_x, player_y, -32768.0f + player_x, -32768.0f + player_y, kPathAddLines, P_RoomPath,
                      &room_checker);
-        line_lengths += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
+        room_check += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
         PathTraverse(player_x, player_y, 32768.0f + player_x, -32768.0f + player_y, kPathAddLines, P_RoomPath,
                      &room_checker);
-        line_lengths += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
+        room_check += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
         PathTraverse(player_x, player_y, -32768.0f, player_y, kPathAddLines, P_RoomPath, &room_checker);
-        line_lengths += abs(player_x - room_checker.X);
+        room_check += abs(player_x - room_checker.X);
         PathTraverse(player_x, player_y, 32768.0f, player_y, kPathAddLines, P_RoomPath, &room_checker);
-        line_lengths += abs(room_checker.X - player_x);
-        // not reverb per se, but approximately matches how we used to do "reverb" - Dasho
-        ma_delay_node_set_decay(&reverb_node, log1p(line_lengths * 0.125f) * .020f);
+        room_check += abs(room_checker.X - player_x);
+        if (dynamic_reverb.d_ == 1) // Headphones
+        {
+            if (EDGE_IMAGE_IS_SKY(player->map_object_->subsector_->sector->ceiling))
+            {
+                outdoor_reverb = true;
+                ma_delay_node_set_decay(&reverb_delay_node, room_check * 0.000005395f);
+                verblib_set_damping(&reverb_node.reverb, 1.0f);
+                verblib_set_dry(&reverb_node.reverb, 0.75f);
+                verblib_set_wet(&reverb_node.reverb, 0.20f);
+            }
+            else
+            {
+                outdoor_reverb = false;
+                verblib_set_dry(&reverb_node.reverb, 0.75f);
+                verblib_set_wet(&reverb_node.reverb, 0.25f);
+                room_check *= 0.125f;
+                if (room_check > 750.0f)
+                {
+                    verblib_set_damping(&reverb_node.reverb, 0.25f);
+                    verblib_set_room_size(&reverb_node.reverb, 0.75f);
+                }
+                else
+                {
+                    room_check *= 0.001f;
+                    verblib_set_damping(&reverb_node.reverb, 1.0f - room_check);
+                    verblib_set_room_size(&reverb_node.reverb, room_check);
+                }
+            }
+        }
+        else // Speakers
+        {
+            if (EDGE_IMAGE_IS_SKY(player->map_object_->subsector_->sector->ceiling))
+            {
+                outdoor_reverb = true;
+                ma_delay_node_set_decay(&reverb_delay_node, room_check * 0.000005395f);
+                verblib_set_damping(&reverb_node.reverb, 1.0f);
+                verblib_set_dry(&reverb_node.reverb, 0.75f);
+                verblib_set_wet(&reverb_node.reverb, 0.20f);
+            }
+            else
+            {
+                outdoor_reverb = false;
+                verblib_set_damping(&reverb_node.reverb, 0.5f);
+                verblib_set_dry(&reverb_node.reverb, 0.75f);
+                verblib_set_wet(&reverb_node.reverb, 0.25f);
+            }
+        }
     }
 
     return should_think;

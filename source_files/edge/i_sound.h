@@ -21,12 +21,17 @@
 #include <set>
 #include <string>
 
+#include "con_var.h"
 #include "miniaudio.h"
+#include "ma_reverb_node.h"
 
 extern std::set<std::string> available_soundfonts;
 
 extern ma_engine sound_engine;
 extern ma_engine music_engine;
-extern ma_delay_node reverb_node;
+extern ma_reverb_node reverb_node;
 extern ma_delay_node underwater_node;
+extern ma_delay_node reverb_delay_node;
 extern ma_lpf_node vacuum_node;
+extern bool outdoor_reverb; // governs node attachment for dynamic reverb
+extern ConsoleVariable dynamic_reverb;

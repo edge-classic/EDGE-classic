@@ -550,7 +550,8 @@ static OptionMenuItem soundoptions[] = {
      "Music will be Off while this is enabled", nullptr, 0, 0, 0, ""},
 #endif
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
-    {kOptionMenuItemTypeBoolean, "Dynamic Reverb", YesNo, 2, &dynamic_reverb, nullptr, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeSwitch, "Dynamic Reverb", "None/Headphones/Speakers", 3, &dynamic_reverb.d_, 
+     OptionMenuUpdateConsoleVariableFromInt, "Adds reverb to sounds in normal areas. Headphones-Low, Speakers-High", &dynamic_reverb, 0, 0, 0, ""},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
 };
 

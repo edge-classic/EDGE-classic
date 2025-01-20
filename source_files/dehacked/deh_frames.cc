@@ -488,11 +488,7 @@ const State *frames::NewStateElseOld(int st_num)
     {
         if (new_states[st_num] != nullptr)
             return new_states[st_num];
-    }
-    else if (patch::doom_ver == 21) // DSDehacked stuff has to exist I guess - Dasho
-    {
-        size_t to_add = st_num + 1 - new_states.size();
-        for (size_t i = 0; i < to_add; i++)
+        else if (st_num >= kTotalMBFStates)
         {
             State *entry = new State;
             // these defaults follow the DSDehacked specs
@@ -502,9 +498,29 @@ const State *frames::NewStateElseOld(int st_num)
             entry->action      = kA_NULL;
             entry->next_state  = st_num;
             entry->arg_pointer = 0;
-            new_states.push_back(entry);
+            new_states[st_num] = entry;
+            return entry;
         }
-        return new_states[st_num];
+    }
+    else
+    {
+        while ((int)new_states.size() < st_num + 1)
+        {
+            new_states.push_back(nullptr);
+        }
+        if (st_num >= kTotalMBFStates)
+        {
+            State *entry = new State;
+            // these defaults follow the DSDehacked specs
+            entry->sprite      = kSPR_TNT1;
+            entry->frame       = 0;
+            entry->tics        = -1;
+            entry->action      = kA_NULL;
+            entry->next_state  = st_num;
+            entry->arg_pointer = 0;
+            new_states[st_num] = entry;
+            return entry;
+        }
     }
 
     if (st_num < kTotalMBFStates)

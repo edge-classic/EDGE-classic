@@ -7,3 +7,5 @@
 #define MA_NO_VORBIS
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
+#define VERBLIB_IMPLEMENTATION
+#include "ma_reverb_node.cc"

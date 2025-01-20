@@ -83,7 +83,6 @@ static ConfigurationDefault defaults[] = {
     {kConfigInteger, "displaymode", &current_window_mode, EDGE_DEFAULT_DISPLAYMODE},
 
     {kConfigBoolean, "pc_speaker_mode", &pc_speaker_mode, 0},
-    {kConfigBoolean, "dynamic_reverb", &dynamic_reverb, 0},
 
     // -ES- 1998/11/28 Save fade settings
     {kConfigInteger, "reduce_flash", &reduce_flash, 0},

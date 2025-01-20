@@ -73,7 +73,7 @@ extern int           total_channels;
 
 extern bool vacuum_sound_effects;
 extern bool submerged_sound_effects;
-extern bool dynamic_reverb;
+extern ConsoleVariable dynamic_reverb;
 
 void InitializeSoundChannels(int total);
 void FreeSoundChannels(void);

@@ -21,6 +21,24 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 option(EDGE_SOKOL_GL "Sokol GL" OFF)
 option(EDGE_SOKOL_GLES3 "Sokol GLES3" OFF)
 option(EDGE_SOKOL_D3D11 "Sokol D3D11" OFF)
+option(EDGE_LEGACY_GL "Legacy GL Renderer" OFF)
+
+# If the legacy GL renderer has not been selected and
+# a Sokol backend is not already specified by CMake params, 
+# choose a default based on platform
+if (NOT EDGE_LEGACY_GL)
+  if (NOT EDGE_SOKOL_GL AND NOT EDGE_SOKOL_D3D11 AND NOT EDGE_SOKOL_GLES3)
+    if (WIN32 OR MINGW)
+      set (EDGE_SOKOL_D3D11 ON)
+    elseif (EMSCRIPTEN)
+      set (EDGE_SOKOL_GLES3 ON)
+  # Unix; Apple will eventually have a Metal backend but it should support 
+  # the level of GL in use by Sokol GFX/GL
+    else ()
+      set (EDGE_SOKOL_GL ON)
+    endif()
+  endif()
+endif()
 
 if (EDGE_SOKOL_GL OR EDGE_SOKOL_GLES3 OR EDGE_SOKOL_D3D11)
   set (EDGE_SOKOL ON)

@@ -1092,7 +1092,7 @@ static void AutomapDrawPlayer(MapObject *mo)
 
     float mx, my, ma;
 
-    if (uncapped_frames.d_ && !paused && !menu_active)
+    if (!paused && !menu_active)
     {
         mx = HMM_Lerp(mo->old_x_, fractional_tic, mo->x);
         my = HMM_Lerp(mo->old_y_, fractional_tic, mo->y);
@@ -1162,7 +1162,7 @@ static void AutomapWalkThing(MapObject *mo)
 
     float mx, my, ma;
 
-    if (uncapped_frames.d_ && !paused && !menu_active)
+    if (!paused && !menu_active)
     {
         mx = HMM_Lerp(mo->old_x_, fractional_tic, mo->x);
         my = HMM_Lerp(mo->old_y_, fractional_tic, mo->y);
@@ -1304,7 +1304,7 @@ void AutomapRender(float x, float y, float w, float h, MapObject *focus)
 
     if (follow_player)
     {
-        if (uncapped_frames.d_ && !paused && !menu_active)
+        if (!paused && !menu_active)
         {
             map_center_x = HMM_Lerp(frame_focus->old_x_, fractional_tic, frame_focus->x);
             map_center_y = HMM_Lerp(frame_focus->old_y_, fractional_tic, frame_focus->y);

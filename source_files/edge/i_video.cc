@@ -435,7 +435,7 @@ void FinishFrame(void)
             GrabCursor(true);
     }
 
-    if (uncapped_frames.d_ && !single_tics)
+    if (!single_tics)
     {
         if (framerate_limit.d_ >= kTicRate)
         {
@@ -464,8 +464,7 @@ void FinishFrame(void)
         }
     }
 
-    if (uncapped_frames.d_)
-        fractional_tic = (float)(GetMilliseconds() * kTicRate % 1000) / 1000;
+    fractional_tic = (float)(GetMilliseconds() * kTicRate % 1000) / 1000;
 
     if (vsync.CheckModified())
     {

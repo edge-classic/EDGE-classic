@@ -305,16 +305,8 @@ void FuzzUpdate(void)
 
 void FuzzAdjust(HMM_Vec2 *tc, MapObject *mo)
 {
-    if (uncapped_frames.d_)
-    {
-        tc->X += fmod(HMM_Lerp(mo->old_x_, fractional_tic, mo->x) / 520.0, 1.0);
-        tc->Y += fmod(HMM_Lerp(mo->old_y_, fractional_tic, mo->y) / 520.0, 1.0) + fuzz_y_offset;
-    }
-    else
-    {
-        tc->X += fmod(mo->x / 520.0, 1.0);
-        tc->Y += fmod(mo->y / 520.0, 1.0) + fuzz_y_offset;
-    }
+    tc->X += fmod(HMM_Lerp(mo->old_x_, fractional_tic, mo->x) / 520.0, 1.0);
+    tc->Y += fmod(HMM_Lerp(mo->old_y_, fractional_tic, mo->y) / 520.0, 1.0) + fuzz_y_offset;
 }
 
 //--- editor settings ---

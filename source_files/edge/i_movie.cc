@@ -59,10 +59,8 @@ static float     ty2          = 1.0f;
 static double    last_time    = 0;
 static ma_pcm_rb movie_ring_buffer;
 static ma_sound  movie_sound_buffer;
+static bool      canvas_can_update;
 
-// Disabled until Dasho can figure out why the frame size changes between creating the texture and updating it
-// Which is probably also an issue under GL1
-#ifndef EDGE_SOKOL
 static bool MovieSetupAudioStream(int rate)
 {
     if (ma_pcm_rb_init(ma_format_f32, 2, PLM_AUDIO_SAMPLES_PER_FRAME * 4, NULL, NULL, &movie_ring_buffer) != MA_SUCCESS)
@@ -87,7 +85,6 @@ static bool MovieSetupAudioStream(int rate)
     ma_engine_set_volume(&music_engine, music_volume.f_);
     return true;
 }
-#endif
 
 void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
 {
@@ -137,23 +134,20 @@ void MovieVideoCallback(plm_t *mpeg, plm_frame_t *frame, void *user)
     EPI_UNUSED(mpeg);
     EPI_UNUSED(user);
 
-    plm_frame_to_rgba(frame, rgb_data, frame->width * 4);
+    if (canvas_can_update)
+    {
+        plm_frame_to_rgba(frame, rgb_data, frame->width * 4);
 
-    render_state->BindTexture(canvas);
-    render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frame->width, frame->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                             rgb_data);
+        render_state->BindTexture(canvas);
+        render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frame->width, frame->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                                rgb_data);
+    
+        canvas_can_update = false;
+    }
 }
 
 void PlayMovie(const std::string &name)
 {
-#ifdef EDGE_SOKOL
-    // Disabled until Dasho can figure out why the frame size changes between creating the texture and updating it
-    // Which is probably also an issue under GL1
-    EPI_UNUSED(name);
-    playing_movie   = false;
-    skip_bar_active = false;
-    return;
-#else
     MovieDefinition *movie = moviedefs.Lookup(name.c_str());
 
     if (!movie)
@@ -274,7 +268,7 @@ void PlayMovie(const std::string &name)
 
 #ifdef EDGE_SOKOL
     // On sokol, this sets up the texture dimenions, for dynamic texture
-    render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frame_width, frame_height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+    render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, movie_width, movie_height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                              nullptr, kRenderUsageDynamic);
     render_state->FinishTextures(1, &canvas);
 #endif
@@ -302,7 +296,7 @@ void PlayMovie(const std::string &name)
     fadeout   = 0;
 
     playing_movie = true;
-#endif
+    canvas_can_update = true;
 }
 
 static void EndMovie()
@@ -434,6 +428,8 @@ void MovieDrawer()
 
         FinishUnitBatch();
     }
+
+    canvas_can_update = true;
 }
 
 bool MovieResponder(InputEvent *ev)

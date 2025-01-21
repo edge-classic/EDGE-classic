@@ -229,7 +229,7 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
 
     float psp_x, psp_y;
 
-    if (uncapped_frames.d_ && !paused && !menu_active && !rts_menu_active)
+    if (!paused && !menu_active && !rts_menu_active)
     {
         psp_x = HMM_Lerp(psp->old_screen_x, fractional_tic, psp->screen_x);
         psp_y = HMM_Lerp(psp->old_screen_y, fractional_tic, psp->screen_y);
@@ -636,7 +636,7 @@ void RenderWeaponModel(Player *p)
 
     float psp_x, psp_y;
 
-    if (uncapped_frames.d_ && !paused && !menu_active && !erraticism_active && !rts_menu_active)
+    if (!paused && !menu_active && !erraticism_active && !rts_menu_active)
     {
         psp_x = HMM_Lerp(psp->old_screen_x, fractional_tic, psp->screen_x);
         psp_y = HMM_Lerp(psp->old_screen_y, fractional_tic, psp->screen_y);
@@ -745,7 +745,7 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my, b
     {
         BAMAngle ang;
 
-        if (uncapped_frames.d_ && mo->interpolate_ && !paused && !menu_active && !erraticism_active && !rts_menu_active)
+        if (mo->interpolate_ && !paused && !menu_active && !erraticism_active && !rts_menu_active)
             ang = epi::BAMInterpolate(mo->old_angle_, mo->angle_, fractional_tic);
         else
             ang = mo->angle_;
@@ -849,7 +849,7 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
     float mx, my, mz, fz;
 
     // position interpolation
-    if (uncapped_frames.d_ && mo->interpolate_ && !paused && !menu_active && !erraticism_active && !rts_menu_active)
+    if (mo->interpolate_ && !paused && !menu_active && !erraticism_active && !rts_menu_active)
     {
         mx = HMM_Lerp(mo->old_x_, fractional_tic, mo->x);
         my = HMM_Lerp(mo->old_y_, fractional_tic, mo->y);

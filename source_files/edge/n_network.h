@@ -23,7 +23,6 @@
 extern bool            network_game;
 extern int             game_tic;
 extern float           fractional_tic;
-extern ConsoleVariable uncapped_frames;
 
 void NetworkInitialize(void);
 void NetworkShutdown(void);

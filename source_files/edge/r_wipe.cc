@@ -248,12 +248,7 @@ static void RendererWipeMelt(void)
 
     for (int x = 0; x <= kMeltSections; x++, glvert++)
     {
-        int yoffs = 0;
-
-        if (uncapped_frames.d_)
-            yoffs = HMM_MAX(0, HMM_Lerp(old_melt_yoffs[x], fractional_tic, melt_yoffs[x]));
-        else
-            yoffs = HMM_MAX(0, melt_yoffs[x]);
+        int yoffs = HMM_MAX(0, HMM_Lerp(old_melt_yoffs[x], fractional_tic, melt_yoffs[x]));
 
         float sx = (float)x * current_screen_width / kMeltSections;
         float sy = (float)(200 - yoffs) * current_screen_height / 200.0f;
@@ -369,7 +364,7 @@ bool DoWipe(void)
 
     float how_far = 0.0f;
 
-    if (uncapped_frames.d_ && tics == 0)
+    if (tics == 0)
         how_far = ((float)current_wipe_progress + fractional_tic) / 40.0f;
     else
         how_far = (float)current_wipe_progress / 40.0f;

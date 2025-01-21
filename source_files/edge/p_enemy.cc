@@ -44,8 +44,6 @@
 #include "s_sound.h"
 #include "w_wad.h"
 
-extern ConsoleVariable uncapped_frames;
-
 DirectionType opposite[] = {kDirectionWest,      kDirectionSouthwest, kDirectionSouth,
                             kDirectionSoutheast, kDirectionEast,      kDirectionNorthEast,
                             kDirectionNorth,     kDirectionNorthWest, kDirectionNone};
@@ -269,7 +267,7 @@ bool DoMove(MapObject *actor, bool path)
     // -AJA- 2008/01/16: position interpolation
     if ((actor->state_->flags & kStateFrameFlagModel) || (actor->flags_ & kMapObjectFlagFloat))
     {
-        if (!uncapped_frames.d_ || actor->old_x_ != kInvalidPosition)
+        if (actor->old_x_ != kInvalidPosition)
         {
             actor->interpolation_number_   = HMM_Clamp(2, actor->state_->tics, 10);
             actor->interpolation_position_ = 1;

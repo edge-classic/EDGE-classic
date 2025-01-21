@@ -128,7 +128,7 @@ static Subsector *bsp_current_subsector;
 
 static void UpdateSectorInterpolation(Sector *sector)
 {
-    if (uncapped_frames.d_ && !time_stop_active && !paused && !erraticism_active && !menu_active && !rts_menu_active)
+    if (!time_stop_active && !paused && !erraticism_active && !menu_active && !rts_menu_active)
     {
         // Interpolate between current and last floor/ceiling position.
         if (!AlmostEquals(sector->floor_height, sector->old_floor_height))

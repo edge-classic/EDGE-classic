@@ -695,7 +695,7 @@ static void DrawSlidingDoor(DrawFloor *dfloor, float c, float f, float tex_top_h
 
     if (smov)
     {
-        if (uncapped_frames.d_ && !menu_active && !paused && !time_stop_active && !erraticism_active &&
+        if (!menu_active && !paused && !time_stop_active && !erraticism_active &&
             !rts_menu_active)
             opening = HMM_Lerp(smov->old_opening, fractional_tic, smov->opening);
         else
@@ -871,12 +871,12 @@ static void DrawTile(Seg *seg, DrawFloor *dfloor, float lz1, float lz2, float rz
 
     float offx, offy;
 
-    if (uncapped_frames.d_ && !AlmostEquals(surf->old_offset.X, surf->offset.X) && !paused && !menu_active &&
+    if (!AlmostEquals(surf->old_offset.X, surf->offset.X) && !paused && !menu_active &&
         !time_stop_active && !erraticism_active)
         offx = fmod(HMM_Lerp(surf->old_offset.X, fractional_tic, surf->offset.X), surf->image->actual_width_);
     else
         offx = surf->offset.X;
-    if (uncapped_frames.d_ && !AlmostEquals(surf->old_offset.Y, surf->offset.Y) && !paused && !menu_active &&
+    if (!AlmostEquals(surf->old_offset.Y, surf->offset.Y) && !paused && !menu_active &&
         !time_stop_active && !erraticism_active)
         offy = fmod(HMM_Lerp(surf->old_offset.Y, fractional_tic, surf->offset.Y), surf->image->actual_height_);
     else
@@ -1670,12 +1670,12 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
     data.v_count  = v_count;
     data.vertices = vertices;
     data.R = data.G = data.B = 255;
-    if (uncapped_frames.d_ && !AlmostEquals(surf->old_offset.X, surf->offset.X) && !paused && !menu_active &&
+    if (!AlmostEquals(surf->old_offset.X, surf->offset.X) && !paused && !menu_active &&
         !time_stop_active && !erraticism_active)
         data.tx0 = fmod(HMM_Lerp(surf->old_offset.X, fractional_tic, surf->offset.X), surf->image->actual_width_);
     else
         data.tx0 = surf->offset.X;
-    if (uncapped_frames.d_ && !AlmostEquals(surf->old_offset.Y, surf->offset.Y) && !paused && !menu_active &&
+    if (!AlmostEquals(surf->old_offset.Y, surf->offset.Y) && !paused && !menu_active &&
         !time_stop_active && !erraticism_active)
         data.ty0 = fmod(HMM_Lerp(surf->old_offset.Y, fractional_tic, surf->offset.Y), surf->image->actual_height_);
     else
@@ -1885,7 +1885,7 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
 
     view_x_slope *= widescreen_view_width_multiplier;
 
-    if (uncapped_frames.d_ && level_time_elapsed && mo->player_ && mo->interpolate_ && !paused && !menu_active &&
+    if (level_time_elapsed && mo->player_ && mo->interpolate_ && !paused && !menu_active &&
         !rts_menu_active)
     {
         view_x     = HMM_Lerp(mo->old_x_, fractional_tic, mo->x);

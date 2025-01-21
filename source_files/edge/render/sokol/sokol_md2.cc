@@ -1067,7 +1067,7 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
 
     bool tilt = is_weapon || (mo->flags_ & kMapObjectFlagMissile) || (mo->hyper_flags_ & kHyperFlagForceModelTilt);
 
-    if (uncapped_frames.d_ && !paused && !menu_active && !rts_menu_active &&
+    if (!paused && !menu_active && !rts_menu_active &&
         (is_weapon || (!time_stop_active && !erraticism_active)))
     {
         if (is_weapon)

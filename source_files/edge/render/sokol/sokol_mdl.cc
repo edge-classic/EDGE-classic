@@ -734,7 +734,7 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
 
     BAMAngleToMatrix(tilt ? ~mo->vertical_angle_ : 0, &data.mouselook_x_vector_, &data.mouselook_z_vector_);
 
-    if (uncapped_frames.d_ && !paused && !menu_active && !rts_menu_active &&
+    if (!paused && !menu_active && !rts_menu_active &&
         (is_weapon || (!time_stop_active && !erraticism_active)))
     {
         if (is_weapon)

@@ -51,7 +51,6 @@ bool network_game = false;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(busy_wait, "1",
                              kConsoleVariableFlagReadOnly) // Not sure what to rename this yet - Dasho
-EDGE_DEFINE_CONSOLE_VARIABLE(uncapped_frames, "1", kConsoleVariableFlagArchive)
 
 #if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
 HANDLE windows_timer = nullptr;
@@ -262,7 +261,7 @@ int TryRunTicCommands()
     // decide how many tics to run...
     int tics = make_tic - game_tic;
 
-    if (tics == 0 && game_tic && uncapped_frames.d_)
+    if (tics == 0 && game_tic)
         return 0;
 
     if (tics < 0)

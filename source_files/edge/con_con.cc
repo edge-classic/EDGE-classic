@@ -860,12 +860,9 @@ void ConsoleDrawer(void)
 
     if (console_wipe_active)
     {
-        if (uncapped_frames.d_)
-            y = (int)((float)y - CON_GFX_HT *
-                                     HMM_Lerp(old_console_wipe_position, fractional_tic, console_wipe_position) /
-                                     kConsoleWipeTics);
-        else
-            y = y - CON_GFX_HT * console_wipe_position / kConsoleWipeTics;
+        y = (int)((float)y - CON_GFX_HT *
+                                    HMM_Lerp(old_console_wipe_position, fractional_tic, console_wipe_position) /
+                                    kConsoleWipeTics);
     }
     else
         y = y - CON_GFX_HT;

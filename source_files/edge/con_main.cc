@@ -332,6 +332,8 @@ int ConsoleCommandScreenShot(char **argv, int argc)
 int ConsoleCommandQuitEDGE(char **argv, int argc)
 {
 #ifdef EDGE_WEB
+    EPI_UNUSED(argv);
+    EPI_UNUSED(argc);
     ConsolePrint("%s\n", language["QuitWhenWebPlayer"]);
     return 1;
 #else

@@ -44,6 +44,12 @@ if (EDGE_SOKOL_GL OR EDGE_SOKOL_GLES3 OR EDGE_SOKOL_D3D11)
   set (EDGE_SOKOL ON)
 endif()
 
+if (EDGE_SOKOL_GLES3 AND NOT EMSCRIPTEN)
+  # This is lifted from upstream CMake so that we can use it without having
+  # to bump to miniumum version 3.27
+  include("${CMAKE_SOURCE_DIR}/cmake/EDGEFindOpenGL.cmake")
+endif()
+
 # Optional Features
 option(EDGE_CLASSIC "Enable default features for EDGE-Classic" ON)
 
@@ -173,6 +179,8 @@ if (EDGE_SOKOL)
   add_definitions(-DEDGE_SOKOL)
   if (EDGE_SOKOL_GL)  
     find_package(OpenGL REQUIRED)
+  elseif (EDGE_SOKOL_GLES3 AND NOT EMSCRIPTEN)
+    find_package(OpenGL COMPONENTS GLES3 REQUIRED)
   endif()
 else()
   find_package(OpenGL REQUIRED)

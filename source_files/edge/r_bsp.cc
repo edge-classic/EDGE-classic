@@ -57,7 +57,7 @@
 #include "r_units.h"
 
 #ifdef EDGE_SOKOL
-#ifndef SOKOL_GLES3
+#ifndef EDGE_WEB
 #define BSP_MULTITHREAD
 #endif
 

@@ -238,7 +238,7 @@ if (EDGE_SOKOL)
   endif()
 else ()
   target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/glad/include/glad)
-	list(APPEND EDGE_LINK_LIBRARIES glad ${OPENGL_LIBRARIES})
+	list(APPEND EDGE_LINK_LIBRARIES glad OpenGL::GL)
 endif()
 
 target_link_libraries(edge-classic PRIVATE ${EDGE_LINK_LIBRARIES})

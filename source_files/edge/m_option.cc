@@ -206,7 +206,7 @@ static void OptionMenuChangePCSpeakerMode(int key_pressed, ConsoleVariable *cons
 
 static void OptionMenuResOptDrawer(Style *style, int topy, int bottomy, int dy, int centrex);
 static void OptionMenuResolutionOptions(int key_pressed, ConsoleVariable *console_variable);
-static void OptionMenuionSetResolution(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuSetResolution(int key_pressed, ConsoleVariable *console_variable);
 static void OptionMenuChangeResSize(int key_pressed, ConsoleVariable *console_variable);
 static void OptionMenuChangeResFull(int key_pressed, ConsoleVariable *console_variable);
 
@@ -409,10 +409,8 @@ static OptionMenuItem vidoptions[] = {
      &video_overlay.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &video_overlay, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Invulnerability", "Simple/Textured", kTotalInvulnerabilityEffects,
      &invulnerability_effect, nullptr, nullptr, nullptr, 0, 0, 0, ""},
-#ifndef EDGE_WEB
     {kOptionMenuItemTypeSwitch, "Wipe method", "None/Melt/Crossfade/Pixelfade/Top/Bottom/Left/Right/Spooky/Doors",
      kTotalScreenWipeTypes, &wipe_method, nullptr, nullptr, nullptr, 0, 0, 0, ""},
-#endif
     {kOptionMenuItemTypeSwitch, "Animated Liquid Type", "Vanilla/SMMU/SMMU+Swirl/Parallax", 4, &swirling_flats, nullptr,
      nullptr, nullptr, 0, 0, 0, ""}};
 
@@ -464,7 +462,7 @@ static OptionMenuItem resoptions[] = {
      ""},
     {kOptionMenuItemTypeFunction, "New Resolution", nullptr, 0, nullptr, OptionMenuChangeResSize, nullptr, nullptr, 0,
      0, 0, ""},
-    {kOptionMenuItemTypeFunction, "Apply Mode/Resolution", nullptr, 0, nullptr, OptionMenuionSetResolution, nullptr,
+    {kOptionMenuItemTypeFunction, "Apply Mode/Resolution", nullptr, 0, nullptr, OptionMenuSetResolution, nullptr,
      nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
@@ -2205,9 +2203,9 @@ static void OptionMenuChangeResFull(int key_pressed, ConsoleVariable *console_va
 }
 
 //
-// OptionMenuionSetResolution
+// OptionMenuSetResolution
 //
-static void OptionMenuionSetResolution(int key_pressed, ConsoleVariable *console_variable)
+static void OptionMenuSetResolution(int key_pressed, ConsoleVariable *console_variable)
 {
     EPI_UNUSED(key_pressed);
     EPI_UNUSED(console_variable);

@@ -579,7 +579,7 @@ class SokolRenderState : public RenderState
 
     void ReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, void *pixels)
     {
-#ifdef SOKOL_GLCORE
+#if defined (SOKOL_GLCORE) || defined (SOKOL_GLES3)
         sg_gl_read_pixels(x, y, width, height, format, type, pixels);
 #endif
     }

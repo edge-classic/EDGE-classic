@@ -4037,7 +4037,7 @@ static void _sgl_draw(_sgl_context_t* ctx, int layer_id) {
                     {
                         const _sgl_clear_depth_args_t* args = &cmd->args.clear_depth;
 
-#ifdef SOKOL_GLCORE                        
+#if defined (SOKOL_GLCORE) || defined (SOKOL_GLES3)                 
                         sg_gl_clear_depth(args->value);
 #endif
 

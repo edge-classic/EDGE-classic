@@ -86,12 +86,8 @@ void StopAllSoundEffects(void);
 
 void ResumeSound(void);
 void PauseSound(void);
-void ResumeAudioDevice();
-void PauseAudioDevice();
 
 void SoundTicker(void);
-
-void UpdateSoundCategoryLimits(void);
 
 void PrecacheSounds(void);
 

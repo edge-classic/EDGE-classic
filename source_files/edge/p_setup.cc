@@ -3541,11 +3541,6 @@ void LevelSetup(void)
     if (precache)
         PrecacheLevelGraphics();
 
-    // setup categories based on game mode (SP/COOP/DM)
-    UpdateSoundCategoryLimits();
-
-    // FIXME: cache sounds (esp. for player)
-
     ChangeMusic(current_map->music_, true); // start level music
 
     level_active = true;

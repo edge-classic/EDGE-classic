@@ -199,7 +199,7 @@ class SokolRenderBackend : public RenderBackend
         BSPStopThread();
     }
 
-#ifdef SOKOL_GLCORE
+#if defined (SOKOL_GLCORE) || defined (SOKOL_GLES3)
     void CaptureScreenGL(int32_t width, int32_t height, int32_t stride, uint8_t *dest)
     {
         for (int32_t y = 0; y < height; y++)
@@ -212,7 +212,7 @@ class SokolRenderBackend : public RenderBackend
 
     void CaptureScreen(int32_t width, int32_t height, int32_t stride, uint8_t *dest)
     {
-#ifdef SOKOL_GLCORE
+#if defined (SOKOL_GLCORE) || defined (SOKOL_GLES3)
         CaptureScreenGL(width, height, stride, dest);
 #endif
 
@@ -223,7 +223,13 @@ class SokolRenderBackend : public RenderBackend
 
     void Init()
     {
-        LogPrint("Sokol: Initialising...\n");
+#if SOKOL_GLES3
+        LogPrint("Sokol GLES3: Initialising...\n");
+#elif SOKOL_GLCORE
+        LogPrint("Sokol GL: Initialising...\n");
+#else
+        LogPrint("Sokol D3D11: Initialising...\n");
+#endif
 
         // TODO: should be able to query from sokol?
         max_texture_size_ = 4096;

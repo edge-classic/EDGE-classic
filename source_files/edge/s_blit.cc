@@ -116,57 +116,6 @@ void KillSoundChannel(int k)
     }
 }
 
-void ReallocateSoundChannels(int total)
-{
-    if (total > total_channels)
-    {
-        for (int i = total_channels; i < total; i++)
-            mix_channels[i] = new SoundChannel();
-    }
-
-    if (total < total_channels)
-    {
-        // kill all non-UI sounds, pack the UI sounds into the
-        // remaining slots (normally there will be enough), and
-        // delete the unused channels
-        int i, j;
-
-        for (i = 0; i < total_channels; i++)
-        {
-            SoundChannel *chan = mix_channels[i];
-
-            if (chan->state_ == kChannelPlaying)
-            {
-                if (chan->category_ != kCategoryUi)
-                    KillSoundChannel(i);
-            }
-        }
-
-        for (i = j = 0; i < total_channels; i++)
-        {
-            if (mix_channels[i])
-            {
-                /* SWAP ! */
-                SoundChannel *tmp = mix_channels[j];
-
-                mix_channels[j] = mix_channels[i];
-                mix_channels[i] = tmp;
-            }
-        }
-
-        for (i = total; i < total_channels; i++)
-        {
-            if (mix_channels[i]->state_ == kChannelPlaying)
-                KillSoundChannel(i);
-
-            delete mix_channels[i];
-            mix_channels[i] = nullptr;
-        }
-    }
-
-    total_channels = total;
-}
-
 void UpdateSounds(MapObject *listener, BAMAngle angle)
 {
     ma_engine_set_volume(&sound_engine, sound_effect_volume.f_ * 0.25f);

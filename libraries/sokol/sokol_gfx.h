@@ -19895,7 +19895,7 @@ SOKOL_API_IMPL sg_wgpu_attachments_info sg_wgpu_query_attachments_info(sg_attach
 
 SOKOL_API_IMPL void sg_gl_clear_depth(float value)
 {
-#if defined(SOKOL_GLCORE)    
+#if defined(SOKOL_GLCORE) || defined(SOKOL_GLES3)    
     float depth = value;
     glClearBufferfv(GL_DEPTH, 0, &depth);
 #endif
@@ -19903,7 +19903,7 @@ SOKOL_API_IMPL void sg_gl_clear_depth(float value)
 
 SOKOL_API_IMPL void sg_gl_read_pixels(int x, int y, int width, int height, int format, int type, void* data)
 {
-#if defined(SOKOL_GLCORE)  
+#if defined(SOKOL_GLCORE) || defined(SOKOL_GLES3)  
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glReadPixels(x, y, width, height, format, type, data);
     _SG_GL_CHECK_ERROR();

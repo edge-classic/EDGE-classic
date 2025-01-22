@@ -43,42 +43,17 @@ extern float listen_x;
 extern float listen_y;
 extern float listen_z;
 
-const int category_limit_table[3][8][3] = {
-    /* 8 channel (TEST) */
-    {
-        {1, 1, 1}, // UI
-        {1, 1, 1}, // Player
-        {1, 1, 1}, // Weapon
-
-        {1, 1, 1}, // Opponent
-        {1, 1, 1}, // Monster
-        {1, 1, 1}, // Object
-        {1, 1, 1}, // Level
-    },
-
-    /* 16 channel */
-    {
-        {1, 1, 1}, // UI
-        {1, 1, 1}, // Player
-        {2, 2, 2}, // Weapon
-
-        {0, 2, 7}, // Opponent
-        {7, 5, 0}, // Monster
-        {3, 3, 3}, // Object
-        {2, 2, 2}, // Level
-    },
+const int category_limit_table[kTotalCategories] = {
 
     /* 32 channel */
-    {
-        {2, 2, 2},   // UI
-        {2, 2, 2},   // Player
-        {3, 3, 3},   // Weapon
+    2,   // UI
+    2,   // Player
+    3,   // Weapon
 
-        {0, 5, 12},  // Opponent
-        {14, 10, 2}, // Monster
-        {7, 6, 7},   // Object
-        {4, 4, 4},   // Level
-    },
+    3,  // Opponent
+    12, // Monster
+    6,   // Object
+    4,   // Level
 
     // NOTE: never put a '0' on the WEAPON line, since the top
     // four categories should never be merged with the rest.
@@ -89,28 +64,13 @@ static int category_counts[kTotalCategories];
 
 static void SetupCategoryLimits(void)
 {
-    // Assumes: num_chan to be already set, and the InDeathmatch()
-    //          and InCooperativeMatch() macros are working.
-
-    int mode = 0;
-    if (InCooperativeMatch())
-        mode = 1;
-    if (InDeathmatch())
-        mode = 2;
-
-    int idx = 0;
-    if (total_channels >= 16)
-        idx = 1;
-    if (total_channels >= 32)
-        idx = 2;
-
     int multiply = 1;
     if (total_channels >= 64)
         multiply = total_channels / 32;
 
     for (int t = 0; t < kTotalCategories; t++)
     {
-        category_limits[t] = category_limit_table[idx][t][mode] * multiply;
+        category_limits[t] = category_limit_table[t] * multiply;
         category_counts[t] = 0;
     }
 }
@@ -536,18 +496,6 @@ void SoundTicker(void)
     }
 }
 
-void UpdateSoundCategoryLimits(void)
-{
-    if (no_sound)
-        return;
-
-    int want_chan = 256;
-
-    ReallocateSoundChannels(want_chan);
-
-    SetupCategoryLimits();
-}
-
 void PrecacheSounds(void)
 {
     StartupProgressMessage("Precaching SFX...");
@@ -555,35 +503,6 @@ void PrecacheSounds(void)
     {
         SoundCacheLoad(sfxdefs[i]);
     }
-}
-
-void ResumeAudioDevice()
-{
-    ma_engine_start(&sound_engine);
-    ma_engine_start(&music_engine);
-
-#ifdef EDGE_WEB
-    // Yield back to main thread for audio processing
-    if (emscripten_has_asyncify())
-    {
-        emscripten_sleep(100);
-    }
-#endif
-}
-
-void PauseAudioDevice()
-{
-    StopAllSoundEffects();
-    ma_engine_stop(&sound_engine);
-
-#ifdef EDGE_WEB
-    // Yield back to main thread for audio processing
-    // If complied without async support, as with debug build, will stutter
-    if (emscripten_has_asyncify())
-    {
-        emscripten_sleep(100);
-    }
-#endif
 }
 
 //--- editor settings ---

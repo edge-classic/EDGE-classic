@@ -147,10 +147,6 @@ void LoadLevel_Bits(void)
     if (current_map == nullptr)
         FatalError("DoLoadLevel: No Current Map selected");
 
-#ifdef EDGE_WEB
-    PauseAudioDevice();
-#endif
-
     // Set the sky map.
     //
     // First thing, we have a dummy sky texture name, a flat. The data is
@@ -256,10 +252,6 @@ void LoadLevel_Bits(void)
 
     // clear cmd building stuff
     ClearEventInput();
-
-#ifdef EDGE_WEB
-    ResumeAudioDevice();
-#endif
 
     paused = false;
 }
@@ -895,10 +887,6 @@ static bool GameSaveGameToFile(std::string filename, const char *description)
         return false; /* NOT REACHED */
     }
 
-#ifdef EDGE_WEB
-    PauseAudioDevice();
-#endif
-
     SaveGlobals *globs = SaveGlobalsNew();
 
     // --- fill in global structure ---
@@ -949,10 +937,6 @@ static bool GameSaveGameToFile(std::string filename, const char *description)
     SaveFileCloseWrite();
 
     epi::SyncFilesystem();
-
-#ifdef EDGE_WEB
-    ResumeAudioDevice();
-#endif
 
     return true; // OK
 }

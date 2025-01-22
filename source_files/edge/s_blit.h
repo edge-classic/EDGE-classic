@@ -79,7 +79,6 @@ void InitializeSoundChannels(int total);
 void FreeSoundChannels(void);
 
 void KillSoundChannel(int k);
-void ReallocateSoundChannels(int total);
 
 void UpdateSounds(MapObject *listener, BAMAngle angle);
 

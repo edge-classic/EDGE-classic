@@ -206,7 +206,7 @@ static void OptionMenuChangePCSpeakerMode(int key_pressed, ConsoleVariable *cons
 
 static void OptionMenuResOptDrawer(Style *style, int topy, int bottomy, int dy, int centrex);
 static void OptionMenuResolutionOptions(int key_pressed, ConsoleVariable *console_variable);
-static void OptionMenuionSetResolution(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuSetResolution(int key_pressed, ConsoleVariable *console_variable);
 static void OptionMenuChangeResSize(int key_pressed, ConsoleVariable *console_variable);
 static void OptionMenuChangeResFull(int key_pressed, ConsoleVariable *console_variable);
 
@@ -464,7 +464,7 @@ static OptionMenuItem resoptions[] = {
      ""},
     {kOptionMenuItemTypeFunction, "New Resolution", nullptr, 0, nullptr, OptionMenuChangeResSize, nullptr, nullptr, 0,
      0, 0, ""},
-    {kOptionMenuItemTypeFunction, "Apply Mode/Resolution", nullptr, 0, nullptr, OptionMenuionSetResolution, nullptr,
+    {kOptionMenuItemTypeFunction, "Apply Mode/Resolution", nullptr, 0, nullptr, OptionMenuSetResolution, nullptr,
      nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
@@ -2205,9 +2205,9 @@ static void OptionMenuChangeResFull(int key_pressed, ConsoleVariable *console_va
 }
 
 //
-// OptionMenuionSetResolution
+// OptionMenuSetResolution
 //
-static void OptionMenuionSetResolution(int key_pressed, ConsoleVariable *console_variable)
+static void OptionMenuSetResolution(int key_pressed, ConsoleVariable *console_variable)
 {
     EPI_UNUSED(key_pressed);
     EPI_UNUSED(console_variable);

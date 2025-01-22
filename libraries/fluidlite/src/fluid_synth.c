@@ -1597,7 +1597,7 @@ fluid_synth_program_change(fluid_synth_t* synth, int chan, int prognum)
     subst_prog = prognum;
 
     /* Melodic instrument? */
-    if (banknum != DRUM_INST_BANK)
+    if (channel->channum != 9 && banknum != DRUM_INST_BANK)
     {
       subst_bank = 0;
 

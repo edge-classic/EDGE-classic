@@ -1092,7 +1092,7 @@ static void AutomapDrawPlayer(MapObject *mo)
 
     float mx, my, ma;
 
-    if (!paused && !menu_active)
+    if (!paused && !menu_active && mo->interpolate_)
     {
         mx = HMM_Lerp(mo->old_x_, fractional_tic, mo->x);
         my = HMM_Lerp(mo->old_y_, fractional_tic, mo->y);
@@ -1162,7 +1162,7 @@ static void AutomapWalkThing(MapObject *mo)
 
     float mx, my, ma;
 
-    if (!paused && !menu_active)
+    if (!paused && !menu_active && mo->interpolate_)
     {
         mx = HMM_Lerp(mo->old_x_, fractional_tic, mo->x);
         my = HMM_Lerp(mo->old_y_, fractional_tic, mo->y);

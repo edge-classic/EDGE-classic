@@ -63,9 +63,9 @@ class SpriteDefinition
     SpriteFrame *frames_;
 
   public:
-    SpriteDefinition(std::string name) : total_frames_(0), frames_(nullptr)
+    SpriteDefinition(std::string_view name) : name_(name), total_frames_(0), frames_(nullptr)
     {
-        name_ = name;
+
     }
 
     ~SpriteDefinition()
@@ -238,7 +238,7 @@ static void InstallSpriteLump(SpriteDefinition *def, int lump, const char *lumpn
         frame->finished_ = true;
 }
 
-static void InstallSpritePack(SpriteDefinition *def, PackFile *pack, std::string spritebase, std::string packname,
+static void InstallSpritePack(SpriteDefinition *def, PackFile *pack, const std::string &spritebase, const std::string &packname,
                               int pos, uint8_t flip)
 {
     SpriteFrame *frame = WhatFrame(def, spritebase.c_str(), pos);
@@ -296,7 +296,7 @@ static void FillSpriteFrames(int file)
 {
     if (data_files[file]->wad_)
     {
-        std::vector<int> *lumps = GetSpriteListForWAD(file);
+        const std::vector<int> *lumps = GetSpriteListForWAD(file);
         if (lumps == nullptr)
             return;
 
@@ -490,7 +490,6 @@ static void MarkCompletedFrames(void)
 
         for (int f = 0; f < def->total_frames_; f++)
         {
-            char         frame_ch = 'A' + f;
             SpriteFrame *frame    = def->frames_ + f;
 
             if (frame->finished_)
@@ -513,7 +512,7 @@ static void MarkCompletedFrames(void)
 
             if (rot_count < frame->rotations_)
             {
-                LogWarning("Sprite %s:%c is missing rotations (%d of %d).\n", def->name_.c_str(), frame_ch,
+                LogWarning("Sprite %s:%c is missing rotations (%d of %d).\n", def->name_.c_str(), 'A' + f,
                            frame->rotations_ - rot_count, frame->rotations_);
 
                 // try to fix cases where some dumbass used A1 instead of A0
@@ -632,10 +631,8 @@ void InitializeSprites(void)
         if (st->sprite == 0)
             continue;
 
-        SpriteDefinition *def = sprites[st->sprite];
-
         if (st->flags & kStateFrameFlagWeapon)
-            def->frames_[st->frame].is_weapon_ = true;
+            sprites[st->sprite]->frames_[st->frame].is_weapon_ = true;
     }
 
     // 5. Fill in frames using wad lumps + images.ddf

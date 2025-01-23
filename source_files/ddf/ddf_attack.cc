@@ -509,7 +509,7 @@ AttackDefinition::~AttackDefinition()
 //
 // AttackDefinition::CopyDetail()
 //
-void AttackDefinition::CopyDetail(AttackDefinition &src)
+void AttackDefinition::CopyDetail(const AttackDefinition &src)
 {
     attackstyle_    = src.attackstyle_;
     flags_          = src.flags_;

@@ -79,7 +79,7 @@ static int FindFreeChannel(void)
 {
     for (int i = 0; i < total_channels; i++)
     {
-        SoundChannel *chan = mix_channels[i];
+        const SoundChannel *chan = mix_channels[i];
 
         if (chan->state_ == kChannelFinished)
             KillSoundChannel(i);
@@ -91,11 +91,11 @@ static int FindFreeChannel(void)
     return -1; // not found
 }
 
-static int FindPlayingFX(SoundEffectDefinition *def, int cat, Position *pos)
+static int FindPlayingFX(const SoundEffectDefinition *def, int cat, const Position *pos)
 {
     for (int i = 0; i < total_channels; i++)
     {
-        SoundChannel *chan = mix_channels[i];
+        const SoundChannel *chan = mix_channels[i];
 
         if (chan->state_ == kChannelPlaying && chan->category_ == cat && chan->position_ == pos)
         {
@@ -145,14 +145,14 @@ static void CountPlayingCats(void)
 
     for (int i = 0; i < total_channels; i++)
     {
-        SoundChannel *chan = mix_channels[i];
+        const SoundChannel *chan = mix_channels[i];
 
         if (chan->state_ == kChannelPlaying)
             category_counts[chan->category_] += 1;
     }
 }
 
-static int ChannelScore(SoundEffectDefinition *def, int category, Position *pos, bool boss)
+static int ChannelScore(const SoundEffectDefinition *def, int category, const Position *pos, bool boss)
 {
     // for full-volume sounds, use the priority from DDF
     if (category <= kCategoryWeapon)
@@ -179,7 +179,7 @@ static int FindChannelToKill(int kill_cat, int real_cat, int new_score)
     // new_score);
     for (int j = 0; j < total_channels; j++)
     {
-        SoundChannel *chan = mix_channels[j];
+        const SoundChannel *chan = mix_channels[j];
 
         if (chan->state_ != kChannelPlaying)
             continue;
@@ -253,7 +253,7 @@ SoundEffectDefinition *LookupEffectDef(const SoundEffect *s)
     return sfxdefs[num];
 }
 
-static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, Position *pos, int flags, SoundData *buf)
+static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category, const Position *pos, int flags, SoundData *buf)
 {
     SoundChannel *chan = mix_channels[idx];
 
@@ -323,7 +323,7 @@ static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, Posit
     ma_sound_start(&chan->channel_sound_);
 }
 
-static void DoStartFX(SoundEffectDefinition *def, int category, Position *pos, int flags, SoundData *buf)
+static void DoStartFX(const SoundEffectDefinition *def, int category, const Position *pos, int flags, SoundData *buf)
 {
     CountPlayingCats();
 
@@ -386,7 +386,7 @@ static void DoStartFX(SoundEffectDefinition *def, int category, Position *pos, i
     S_PlaySound(k, def, category, pos, flags, buf);
 }
 
-void StartSoundEffect(SoundEffect *sfx, int category, Position *pos, int flags)
+void StartSoundEffect(const SoundEffect *sfx, int category, const Position *pos, int flags)
 {
     if (no_sound || !sfx)
         return;
@@ -427,14 +427,14 @@ void StartSoundEffect(SoundEffect *sfx, int category, Position *pos, int flags)
     DoStartFX(def, category, pos, flags, buf);
 }
 
-void StopSoundEffect(Position *pos)
+void StopSoundEffect(const Position *pos)
 {
     if (no_sound)
         return;
 
     for (int i = 0; i < total_channels; i++)
     {
-        SoundChannel *chan = mix_channels[i];
+        const SoundChannel *chan = mix_channels[i];
 
         if (chan->state_ == kChannelPlaying && chan->position_ == pos)
         {
@@ -451,7 +451,7 @@ void StopLevelSoundEffects(void)
 
     for (int i = 0; i < total_channels; i++)
     {
-        SoundChannel *chan = mix_channels[i];
+        const SoundChannel *chan = mix_channels[i];
 
         if (chan->state_ != kChannelEmpty && chan->category_ != kCategoryUi)
         {
@@ -467,7 +467,7 @@ void StopAllSoundEffects(void)
 
     for (int i = 0; i < total_channels; i++)
     {
-        SoundChannel *chan = mix_channels[i];
+        const SoundChannel *chan = mix_channels[i];
 
         if (chan->state_ != kChannelEmpty)
         {

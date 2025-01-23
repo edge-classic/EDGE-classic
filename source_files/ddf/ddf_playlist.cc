@@ -253,7 +253,7 @@ PlaylistEntry::~PlaylistEntry()
 //
 // Copy everything with exception ddf identifier
 //
-void PlaylistEntry::CopyDetail(PlaylistEntry &src)
+void PlaylistEntry::CopyDetail(const PlaylistEntry &src)
 {
     type_     = src.type_;
     infotype_ = src.infotype_;

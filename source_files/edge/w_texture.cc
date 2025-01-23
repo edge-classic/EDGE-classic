@@ -465,8 +465,8 @@ void InitializeTextures(void)
 
     for (int k = 1; k < numtextures; k++)
     {
-        TextureDefinition *a = textures[k - 1];
-        TextureDefinition *b = textures[k];
+        const TextureDefinition *a = textures[k - 1];
+        const TextureDefinition *b = textures[k];
 
         if (strcmp(a->name, b->name) == 0)
         {

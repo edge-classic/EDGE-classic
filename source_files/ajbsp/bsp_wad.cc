@@ -207,12 +207,12 @@ bool Lump::Finish()
 //  WAD Reading Interface
 //------------------------------------------------------------------------
 
-WadFile::WadFile(std::string name, char mode, FILE *file_pointer, epi::File *memory_file_pointer)
-    : mode_(mode), file_pointer_(file_pointer), memory_file_pointer_(memory_file_pointer), kind_('P'), total_size_(0),
+WadFile::WadFile(const std::string &name, char mode, FILE *file_pointer, epi::File *memory_file_pointer)
+    : filename_(name), mode_(mode), file_pointer_(file_pointer), memory_file_pointer_(memory_file_pointer), kind_('P'), total_size_(0),
       directory_(), directory_start_(0), directory_count_(0), levels_(), patches_(), sprites_(), flats_(),
       tx_textures_(), begun_write_(false), insert_point_(-1)
 {
-    filename_ = name;
+
 }
 
 WadFile::~WadFile()
@@ -236,7 +236,7 @@ WadFile::~WadFile()
     filename_.clear();
 }
 
-WadFile *WadFile::Open(std::string filename, char mode)
+WadFile *WadFile::Open(const std::string &filename, char mode)
 {
     EPI_ASSERT(mode == 'r' || mode == 'w' || mode == 'a');
 
@@ -294,7 +294,7 @@ retry:
     return w;
 }
 
-WadFile *WadFile::OpenMem(std::string filename, epi::File *memfile)
+WadFile *WadFile::OpenMem(const std::string &filename, epi::File *memfile)
 {
     EPI_ASSERT(memfile);
 
@@ -314,7 +314,7 @@ WadFile *WadFile::OpenMem(std::string filename, epi::File *memfile)
     return w;
 }
 
-WadFile *WadFile::Create(std::string filename, char mode)
+WadFile *WadFile::Create(const std::string &filename, char mode)
 {
     FileMessage("Creating new WAD file: %s\n", filename.c_str());
 

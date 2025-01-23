@@ -642,7 +642,7 @@ static void ThingStartEntry(const char *buffer, bool extend)
     {
         // not found, create a new one
         dynamic_mobj          = new MapObjectDefinition;
-        dynamic_mobj->name_   = name.c_str();
+        dynamic_mobj->name_   = name;
         dynamic_mobj->number_ = number;
 
         mobjtypes.push_back(dynamic_mobj);
@@ -2338,7 +2338,7 @@ MapObjectDefinition::~MapObjectDefinition()
 {
 }
 
-void MapObjectDefinition::CopyDetail(MapObjectDefinition &src)
+void MapObjectDefinition::CopyDetail(const MapObjectDefinition &src)
 {
     state_grp_.clear();
 

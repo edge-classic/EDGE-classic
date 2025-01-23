@@ -45,12 +45,12 @@ void SystemStartup(void);
 void LogPrint(const char *message, ...) __attribute__((format(printf, 1, 2)));
 void LogWarning(const char *warning, ...) __attribute__((format(printf, 1, 2)));
 void LogDebug(const char *message, ...) __attribute__((format(printf, 1, 2)));
-void FatalError(const char *error, ...) __attribute__((format(printf, 1, 2)));
+[[noreturn]] void FatalError(const char *error, ...) __attribute__((format(printf, 1, 2)));
 #else
 void LogPrint(const char *message, ...);
 void LogWarning(const char *warning, ...);
 void LogDebug(const char *message, ...);
-void FatalError(const char *error, ...);
+[[noreturn]] void FatalError(const char *error, ...);
 #endif
 
 // The opposite of the SystemStartup routine.  This will shutdown

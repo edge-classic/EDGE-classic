@@ -50,15 +50,12 @@ static int ogg_epi_memseek(void *datasource, ogg_int64_t offset, int whence)
     {
         case SEEK_SET: {
             return d->Seek(offset, epi::File::kSeekpointStart) ? 0 : -1;
-            break;
         }
         case SEEK_CUR: {
             return d->Seek(offset, epi::File::kSeekpointCurrent) ? 0 : -1;
-            break;
         }
         case SEEK_END: {
             return d->Seek(-offset, epi::File::kSeekpointEnd) ? 0 : -1;
-            break;
         }
         default: {
             return -1;
@@ -112,9 +109,9 @@ static void      ma_stbvorbis_uninit(ma_stbvorbis *pVorbis, const ma_allocation_
 static ma_result ma_stbvorbis_read_pcm_frames(ma_stbvorbis *pVorbis, void *pFramesOut, ma_uint64 frameCount,
                                               ma_uint64 *pFramesRead);
 static ma_result ma_stbvorbis_seek_to_pcm_frame(ma_stbvorbis *pVorbis, ma_uint64 frameIndex);
-static ma_result ma_stbvorbis_get_data_format(ma_stbvorbis *pVorbis, ma_format *pFormat, ma_uint32 *pChannels,
+static ma_result ma_stbvorbis_get_data_format(const ma_stbvorbis *pVorbis, ma_format *pFormat, ma_uint32 *pChannels,
                                               ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap);
-static ma_result ma_stbvorbis_get_cursor_in_pcm_frames(ma_stbvorbis *pVorbis, ma_uint64 *pCursor);
+static ma_result ma_stbvorbis_get_cursor_in_pcm_frames(const ma_stbvorbis *pVorbis, ma_uint64 *pCursor);
 static ma_result ma_stbvorbis_get_length_in_pcm_frames(ma_stbvorbis *pVorbis, ma_uint64 *pLength);
 
 static ma_result ma_stbvorbis_ds_read(ma_data_source *pDataSource, void *pFramesOut, ma_uint64 frameCount,
@@ -184,7 +181,7 @@ static ma_result ma_stbvorbis_post_init(ma_stbvorbis *pVorbis)
 {
     EPI_ASSERT(pVorbis != NULL);
 
-    vorbis_info *info = ov_info(&pVorbis->ogg, -1);
+    const vorbis_info *info = ov_info(&pVorbis->ogg, -1);
 
     if (info == NULL)
     {
@@ -371,7 +368,7 @@ static ma_result ma_stbvorbis_seek_to_pcm_frame(ma_stbvorbis *pVorbis, ma_uint64
     return MA_SUCCESS;
 }
 
-static ma_result ma_stbvorbis_get_data_format(ma_stbvorbis *pVorbis, ma_format *pFormat, ma_uint32 *pChannels,
+static ma_result ma_stbvorbis_get_data_format(const ma_stbvorbis *pVorbis, ma_format *pFormat, ma_uint32 *pChannels,
                                               ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
 {
     /* Defaults for safety. */
@@ -420,7 +417,7 @@ static ma_result ma_stbvorbis_get_data_format(ma_stbvorbis *pVorbis, ma_format *
     return MA_SUCCESS;
 }
 
-static ma_result ma_stbvorbis_get_cursor_in_pcm_frames(ma_stbvorbis *pVorbis, ma_uint64 *pCursor)
+static ma_result ma_stbvorbis_get_cursor_in_pcm_frames(const ma_stbvorbis *pVorbis, ma_uint64 *pCursor)
 {
     if (pCursor == NULL)
     {
@@ -549,23 +546,23 @@ class OGGPlayer : public AbstractMusicPlayer
 {
   public:
     OGGPlayer();
-    ~OGGPlayer();
+    ~OGGPlayer() override;
 
   private:
-    uint8_t   *ogg_data_;
+    const uint8_t   *ogg_data_;
 
   public:
-    bool OpenMemory(uint8_t *data, int length);
+    bool OpenMemory(const uint8_t *data, int length);
 
-    virtual void Close(void);
+    void Close(void) override;
 
-    virtual void Play(bool loop);
-    virtual void Stop(void);
+    void Play(bool loop) override;
+    void Stop(void) override;
 
-    virtual void Pause(void);
-    virtual void Resume(void);
+    void Pause(void) override;
+    void Resume(void) override;
 
-    virtual void Ticker(void);
+    void Ticker(void) override;
 };
 
 //----------------------------------------------------------------------------
@@ -580,7 +577,7 @@ OGGPlayer::~OGGPlayer()
     Close();
 }
 
-bool OGGPlayer::OpenMemory(uint8_t *data, int length)
+bool OGGPlayer::OpenMemory(const uint8_t *data, int length)
 {
     if (status_ != kNotLoaded)
         Close();

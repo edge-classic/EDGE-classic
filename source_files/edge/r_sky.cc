@@ -114,7 +114,7 @@ void ComputeSkyHeights(void)
 
     for (i = 0, ld = level_lines; i < total_level_lines; i++, ld++)
     {
-        Sector        *sec1, *sec2;
+        const Sector        *sec1, *sec2;
         SectorSkyRing *ring1, *ring2, *tmp_R;
 
         if (!ld->side[0] || !ld->side[1])
@@ -870,13 +870,14 @@ int UpdateSkyboxTextures(void)
     }
 
     // Set colors for culling fog and faux skybox caps - Dasho
-    const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
+    const uint8_t *what_palette = nullptr;
     if (sky_image->source_palette_ >= 0)
         what_palette = (const uint8_t *)LoadLumpIntoMemory(sky_image->source_palette_);
     ImageData *tmp_img_data = ReadAsEpiBlock((Image *)sky_image);
     if (tmp_img_data->depth_ == 1)
     {
-        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, sky_image->opacity_);
+        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette ? what_palette :
+            (const uint8_t *)&playpal_data[0], sky_image->opacity_);
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
@@ -885,7 +886,7 @@ int UpdateSkyboxTextures(void)
                                                    sky_image->actual_height_);
     delete tmp_img_data;
 
-    if (what_palette != (const uint8_t *)&playpal_data[0])
+    if (what_palette)
         delete[] what_palette;
 
     if (info->face[kSkyboxNorth])

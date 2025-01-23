@@ -16,6 +16,8 @@
 //
 //----------------------------------------------------------------------------
 
+#include <mimalloc.h>
+
 #include "dm_defs.h"
 #include "e_main.h"
 #include "epi_filesystem.h"
@@ -31,6 +33,9 @@ extern "C"
 {
     int main(int argc, char *argv[])
     {
+        if (SDL_SetMemoryFunctions(mi_malloc, mi_calloc, mi_realloc, mi_free) != 0)
+            FatalError("Couldn't init SDL memory functions!!\n%s\n", SDL_GetError());
+
         if (SDL_Init(0) < 0)
             FatalError("Couldn't init SDL!!\n%s\n", SDL_GetError());
 

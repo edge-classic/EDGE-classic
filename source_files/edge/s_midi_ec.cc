@@ -47,6 +47,7 @@ bool midi_disabled = false;
 static fluid_synth_t    *edge_fluid            = nullptr;
 static fluid_settings_t *edge_fluid_settings   = nullptr;
 static fluid_sfloader_t *edge_fluid_sf2_loader = nullptr;
+static int               edge_fluid_sf2_index  = -1;
 static OPLPlayer        *edge_opl              = nullptr;
 static bool              opl_playback          = false;
 static uint16_t imf_rate = 0;
@@ -145,10 +146,7 @@ static long edge_fluid_ftell(void *handle)
 static int edge_fluid_free(fluid_fileapi_t* fileapi)
 {
     if (fileapi)
-    {
         delete fileapi;
-        fileapi = nullptr;
-    }
     return kFluidOk;
 }
 
@@ -283,10 +281,10 @@ static void      ma_midi_uninit(ma_midi *pMIDI, const ma_allocation_callbacks *p
 static ma_result ma_midi_read_pcm_frames(ma_midi *pMIDI, void *pFramesOut, ma_uint64 frameCount,
                                           ma_uint64 *pFramesRead);
 static ma_result ma_midi_seek_to_pcm_frame(ma_midi *pMIDI, ma_uint64 frameIndex);
-static ma_result ma_midi_get_data_format(ma_midi *pMIDI, ma_format *pFormat, ma_uint32 *pChannels,
+static ma_result ma_midi_get_data_format(const ma_midi *pMIDI, ma_format *pFormat, ma_uint32 *pChannels,
                                           ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap);
-static ma_result ma_midi_get_cursor_in_pcm_frames(ma_midi *pMIDI, ma_uint64 *pCursor);
-static ma_result ma_midi_get_length_in_pcm_frames(ma_midi *pMIDI, ma_uint64 *pLength);
+static ma_result ma_midi_get_cursor_in_pcm_frames(const ma_midi *pMIDI, ma_uint64 *pCursor);
+static ma_result ma_midi_get_length_in_pcm_frames(const ma_midi *pMIDI, ma_uint64 *pLength);
 
 static ma_result ma_midi_ds_read(ma_data_source *pDataSource, void *pFramesOut, ma_uint64 frameCount,
                                   ma_uint64 *pFramesRead)
@@ -510,7 +508,7 @@ static ma_result ma_midi_seek_to_pcm_frame(ma_midi *pMIDI, ma_uint64 frameIndex)
     return MA_SUCCESS;
 }
 
-static ma_result ma_midi_get_data_format(ma_midi *pMIDI, ma_format *pFormat, ma_uint32 *pChannels,
+static ma_result ma_midi_get_data_format(const ma_midi *pMIDI, ma_format *pFormat, ma_uint32 *pChannels,
                                           ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
 {
     /* Defaults for safety. */
@@ -559,7 +557,7 @@ static ma_result ma_midi_get_data_format(ma_midi *pMIDI, ma_format *pFormat, ma_
     return MA_SUCCESS;
 }
 
-static ma_result ma_midi_get_cursor_in_pcm_frames(ma_midi *pMIDI, ma_uint64 *pCursor)
+static ma_result ma_midi_get_cursor_in_pcm_frames(const ma_midi *pMIDI, ma_uint64 *pCursor)
 {
     if (pCursor == NULL)
     {
@@ -578,7 +576,7 @@ static ma_result ma_midi_get_cursor_in_pcm_frames(ma_midi *pMIDI, ma_uint64 *pCu
     return MA_SUCCESS;
 }
 
-static ma_result ma_midi_get_length_in_pcm_frames(ma_midi *pMIDI, ma_uint64 *pLength)
+static ma_result ma_midi_get_length_in_pcm_frames(const ma_midi *pMIDI, ma_uint64 *pLength)
 {
     if (pLength == NULL)
     {
@@ -763,7 +761,8 @@ bool StartupMIDI(void)
 
     if (epi::StringCompare(midi_soundfont.s_, "OPL Emulation") != 0)
     {
-        if (fluid_synth_sfload(edge_fluid, midi_soundfont.c_str(), 1) == -1)
+        edge_fluid_sf2_index  = fluid_synth_sfload(edge_fluid, midi_soundfont.c_str(), 1);
+        if (edge_fluid_sf2_index == -1)
         {
             LogWarning("MIDI: Initialization failure.\n");
             delete_fluid_synth(edge_fluid);
@@ -827,7 +826,11 @@ void RestartMIDI(void)
     // We only unload the Fluidlite font, OPL instruments are determined once on startup,
     // no need to reload; just reset it
     edge_opl->reset();
-    fluid_synth_sfunload(edge_fluid, 0, 1);
+    if (edge_fluid_sf2_index > -1)
+    {
+        fluid_synth_sfunload(edge_fluid, edge_fluid_sf2_index, 1);
+        edge_fluid_sf2_index = -1;
+    }
 
     if (!StartupMIDI())
     {
@@ -853,12 +856,12 @@ class MIDIPlayer : public AbstractMusicPlayer
         looping_ = looping;
     }
 
-    ~MIDIPlayer()
+    ~MIDIPlayer() override
     {
         Close();
     }
 
-    bool OpenMemory(uint8_t *data, int length)
+    bool OpenMemory(const uint8_t *data, int length)
     {
         if (status_ != kNotLoaded)
             Close();
@@ -892,7 +895,7 @@ class MIDIPlayer : public AbstractMusicPlayer
         return true;
     }
 
-    void Close(void)
+    void Close(void) override
     {
         if (status_ == kNotLoaded)
             return;
@@ -907,7 +910,7 @@ class MIDIPlayer : public AbstractMusicPlayer
         status_ = kNotLoaded;
     }
 
-    void Play(bool loop)
+    void Play(bool loop) override
     {
         looping_ = loop;
 
@@ -923,7 +926,7 @@ class MIDIPlayer : public AbstractMusicPlayer
         }
     }
 
-    void Stop(void)
+    void Stop(void) override
     {
         if (status_ != kPlaying && status_ != kPaused)
             return;
@@ -942,7 +945,7 @@ class MIDIPlayer : public AbstractMusicPlayer
         status_ = kStopped;
     }
 
-    void Pause(void)
+    void Pause(void) override
     {
         if (status_ != kPlaying)
             return;
@@ -954,7 +957,7 @@ class MIDIPlayer : public AbstractMusicPlayer
         status_ = kPaused;
     }
 
-    void Resume(void)
+    void Resume(void) override
     {
         if (status_ != kPaused)
             return;
@@ -964,7 +967,7 @@ class MIDIPlayer : public AbstractMusicPlayer
         status_ = kPlaying;
     }
 
-    void Ticker(void)
+    void Ticker(void) override
     {
         if (fluidlite_gain.CheckModified())
         {

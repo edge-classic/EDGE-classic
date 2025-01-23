@@ -178,7 +178,7 @@ FlatDefinition::FlatDefinition() : name_()
     Default();
 }
 
-void FlatDefinition::CopyDetail(FlatDefinition &src)
+void FlatDefinition::CopyDetail(const FlatDefinition &src)
 {
     liquid_           = src.liquid_;
     footstep_         = src.footstep_;

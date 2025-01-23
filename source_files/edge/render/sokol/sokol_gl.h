@@ -1066,7 +1066,7 @@ inline sgl_pipeline sgl_context_make_pipeline(sgl_context ctx, const sg_pipeline
         uv = mat4(vs_params[4], vs_params[5], vs_params[6], vs_params[7]) * vec4(texcoord0, 0.0, 1.0);
         color = color0;
     }
-*/
+
 static const char* _sgl_vs_source_glsl410 = "#version 410 core\n\
     uniform vec4 vs_params[12]; \
     layout(location = 0) in vec4 position; \
@@ -1088,7 +1088,7 @@ static const char* _sgl_vs_source_glsl410 = "#version 410 core\n\
         fog_src = vertex.z;\
     }\
  ";
-/*
+
     #version 410
 
     uniform sampler2D tex_smp;
@@ -1101,7 +1101,7 @@ static const char* _sgl_vs_source_glsl410 = "#version 410 core\n\
     {
         frag_color = texture(tex_smp, uv.xy) * color;
     }
-*/
+
 
 static const char* _sgl_fs_source_glsl410 = "#version 410 core\n\
 \
@@ -1145,6 +1145,7 @@ static const char* _sgl_fs_source_glsl410 = "#version 410 core\n\
         frag_color = c0;\
     }\
 ";
+*/
 #elif defined(SOKOL_GLES3)
 /*
     #version 300 es

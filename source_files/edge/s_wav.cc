@@ -28,7 +28,7 @@
 #include "snd_gather.h"
 #include "w_wad.h"
 
-bool LoadWAVSound(SoundData *buf, uint8_t *data, int length)
+bool LoadWAVSound(SoundData *buf, const uint8_t *data, int length)
 {
     ma_decoder_config decode_config = ma_decoder_config_init_default();
     decode_config.format            = ma_format_f32;

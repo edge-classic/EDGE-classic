@@ -845,19 +845,20 @@ static void AutocolourForMapObject(MapObjectDefinition *mobj)
             const Image *img = ImageLookup(mobj->dlight_.autocolour_reference_.c_str());
             if (img)
             {
-                const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
+                const uint8_t *what_palette = nullptr;
                 if (img->source_palette_ >= 0)
                     what_palette = (const uint8_t *)LoadLumpIntoMemory(img->source_palette_);
                 ImageData *tmp_img_data = ReadAsEpiBlock((Image *)img);
                 if (tmp_img_data->depth_ == 1)
                 {
-                    ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, img->opacity_);
+                    ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette ? what_palette :
+                        (const uint8_t *)&playpal_data[0], img->opacity_);
                     delete tmp_img_data;
                     tmp_img_data = rgb_img_data;
                 }
                 mobj->dlight_.colour_ = tmp_img_data->AverageHue();
                 delete tmp_img_data;
-                if (what_palette != (const uint8_t *)&playpal_data[0])
+                if (what_palette)
                     delete[] what_palette;
                 mobj->dlight_.autocolour_reference_.clear();
             }
@@ -878,19 +879,20 @@ static void AutocolourForMapObject(MapObjectDefinition *mobj)
                 }
                 if (img)
                 {
-                    const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
+                    const uint8_t *what_palette = nullptr;
                     if (img->source_palette_ >= 0)
                         what_palette = (const uint8_t *)LoadLumpIntoMemory(img->source_palette_);
                     ImageData *tmp_img_data = ReadAsEpiBlock((Image *)img);
                     if (tmp_img_data->depth_ == 1)
                     {
-                        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, img->opacity_);
+                        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette ? what_palette :
+                            (const uint8_t *)&playpal_data[0], img->opacity_);
                         delete tmp_img_data;
                         tmp_img_data = rgb_img_data;
                     }
                     mobj->dlight_.colour_ = tmp_img_data->AverageHue();
                     delete tmp_img_data;
-                    if (what_palette != (const uint8_t *)&playpal_data[0])
+                    if (what_palette)
                         delete[] what_palette;
                     mobj->dlight_.autocolour_sprite_ = -1;
                 }
@@ -1322,7 +1324,7 @@ static void PurgeCache(void)
 
 // If a valid IWAD (or EDGEGAME) is found, return the appopriate game_base
 // string ("doom2", "heretic", etc)
-static int CheckPackForGameFiles(std::string check_pack, FileKind check_kind)
+static int CheckPackForGameFiles(std::string_view check_pack, FileKind check_kind)
 {
     DataFile *check_pack_df = new DataFile(check_pack, check_kind);
     EPI_ASSERT(check_pack_df);
@@ -1517,7 +1519,7 @@ static void IdentifyVersion(void)
 
     if (!s.empty())
     {
-        for (auto dir : epi::SeparatedStringVector(s, ':'))
+        for (const std::string &dir : epi::SeparatedStringVector(s, ':'))
             iwad_dir_vector.push_back(dir);
     }
 
@@ -1962,7 +1964,7 @@ static void SetupLogAndDebugFiles(void)
     }
 }
 
-static void AddSingleCommandLineFile(std::string name, bool ignore_unknown)
+static void AddSingleCommandLineFile(const std::string &name, bool ignore_unknown)
 {
     if (epi::IsDirectory(name))
     {

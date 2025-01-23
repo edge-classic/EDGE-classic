@@ -356,7 +356,7 @@ static void ParseConfig(const std::string &data, bool check_config_version)
         {
             for (int i = 0; i < total_defaults; i++)
             {
-                if (0 == epi::StringCompare(key.c_str(), defaults[i].name))
+                if (0 == epi::StringCompare(key, defaults[i].name))
                 {
                     if (defaults[i].type == kConfigBoolean)
                     {

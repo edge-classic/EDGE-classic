@@ -449,7 +449,7 @@ SectorType::~SectorType()
 //
 // SectorType::CopyDetail()
 //
-void SectorType::CopyDetail(SectorType &src)
+void SectorType::CopyDetail(const SectorType &src)
 {
     secret_ = src.secret_;
     hub_    = src.hub_;

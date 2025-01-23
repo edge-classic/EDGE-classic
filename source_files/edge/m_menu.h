@@ -94,7 +94,7 @@ void MenuEndGame(int choice, ConsoleVariable *cvar = nullptr);
 void QuitEdge(int choice);
 void ImmediateQuit(void);
 void DrawMenuSlider(int x, int y, float slider_position, float increment, int div, float min, float max,
-                    std::string format_string);
+                    const std::string &format_string);
 void MenuClear(void);
 
 //--- editor settings ---

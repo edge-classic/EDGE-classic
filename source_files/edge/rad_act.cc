@@ -83,13 +83,16 @@ void InitializeScriptTips(void)
         ScriptDrawTip *current = tip_slots + i;
 
         // initial properties
-        EPI_CLEAR_MEMORY(current, ScriptDrawTip, 1);
-
+        current->dirty = false;
+        current->tip_text = nullptr;
+        current->tip_graphic = nullptr;
+        current->playsound = false;
+        current->scale = 0.0f;
+        current->fade_time = 0;
+        current->fade_target = 0.0f;
         current->p = fixed_props[i % kFixedSlots];
-
         current->delay = -1;
         current->color = kRGBANoValue;
-
         current->p.slot_num = i;
     }
 }

@@ -1736,9 +1736,7 @@ static void AddMobjToList(MapObject *mo)
     }
 
     map_object_list_head = mo;
-
-    if (seen_monsters.count(mo->info_) == 0)
-        seen_monsters.insert(mo->info_);
+    seen_monsters.insert(mo->info_);
 
 #if (EDGE_DEBUG_MAP_OBJECTS > 0)
     LogDebug("tics=%05d  ADD %p [%s]\n", level_time_elapsed, mo, mo->info_ ? mo->info_->name_.c_str() : "???");

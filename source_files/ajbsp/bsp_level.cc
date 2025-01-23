@@ -470,7 +470,7 @@ void GetLinedefs()
 
 /* ----- UDMF reading routines ------------------------- */
 
-void ParseThingField(Thing *thing, const int &key, epi::Scanner &lex)
+static void ParseThingField(Thing *thing, const int &key, const epi::Scanner &lex)
 {
     // Do we need more precision than an int for things? I think this would only
     // be an issue if/when polyobjects happen, as I think other thing types are
@@ -484,7 +484,7 @@ void ParseThingField(Thing *thing, const int &key, epi::Scanner &lex)
         thing->type = lex.state_.number;
 }
 
-void ParseVertexField(Vertex *vertex, const int &key, epi::Scanner &lex)
+static void ParseVertexField(Vertex *vertex, const int &key, const epi::Scanner &lex)
 {
     if (key == epi::kENameX)
         vertex->x_ = lex.state_.decimal;
@@ -492,7 +492,7 @@ void ParseVertexField(Vertex *vertex, const int &key, epi::Scanner &lex)
         vertex->y_ = lex.state_.decimal;
 }
 
-void ParseSidedefField(Sidedef *side, const int &key, epi::Scanner &lex)
+static void ParseSidedefField(Sidedef *side, const int &key, const epi::Scanner &lex)
 {
     if (key == epi::kENameSector)
     {
@@ -505,7 +505,7 @@ void ParseSidedefField(Sidedef *side, const int &key, epi::Scanner &lex)
     }
 }
 
-void ParseLinedefField(Linedef *line, const int &key, epi::Scanner &lex)
+static void ParseLinedefField(Linedef *line, const int &key, const epi::Scanner &lex)
 {
     switch (key)
     {
@@ -992,7 +992,7 @@ void SaveXGL3Format(Lump *lump, Node *root_node)
 
 void LoadLevel()
 {
-    Lump *LEV = cur_wad->GetLump(level_current_start);
+    const Lump *LEV = cur_wad->GetLump(level_current_start);
 
     level_current_name = LEV->Name();
     level_long_name    = false;
@@ -1201,21 +1201,21 @@ void ResetInfo()
     current_build_info.split_cost         = kSplitCostDefault;
 }
 
-void OpenWad(std::string filename)
+void OpenWad(const std::string &filename)
 {
     cur_wad = WadFile::Open(filename, 'r');
     if (cur_wad == nullptr)
         FatalError("AJBSP: Cannot open file: %s\n", filename.c_str());
 }
 
-void OpenMem(std::string filename, epi::File *memfile)
+void OpenMem(const std::string &filename, epi::File *memfile)
 {
     cur_wad = WadFile::OpenMem(filename, memfile);
     if (cur_wad == nullptr)
         FatalError("AJBSP: Cannot open file from memory: %s\n", filename.c_str());
 }
 
-void CreateXWA(std::string filename)
+void CreateXWA(const std::string &filename)
 {
     xwa_wad = WadFile::Open(filename, 'w');
     if (xwa_wad == nullptr)

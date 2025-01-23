@@ -131,8 +131,8 @@ static void InitNew(NewGameParameters &params);
 static void RespawnPlayer(Player *p);
 static void SpawnInitialPlayers(void);
 
-static bool GameLoadGameFromFile(std::string filename, bool is_hub = false);
-static bool GameSaveGameToFile(std::string filename, const char *description);
+static bool GameLoadGameFromFile(const std::string &filename, bool is_hub = false);
+static bool GameSaveGameToFile(const std::string &filename, const char *description);
 
 static void HandleLevelFlag(bool *special, MapFlag flag)
 {
@@ -713,7 +713,7 @@ void DeferredLoadGame(int slot)
     game_action     = kGameActionLoadGame;
 }
 
-static bool GameLoadGameFromFile(std::string filename, bool is_hub)
+static bool GameLoadGameFromFile(const std::string &filename, bool is_hub)
 {
     if (!SaveFileOpenRead(filename))
     {
@@ -874,7 +874,7 @@ void DeferredSaveGame(int slot, const char *description)
     game_action = kGameActionSaveGame;
 }
 
-static bool GameSaveGameToFile(std::string filename, const char *description)
+static bool GameSaveGameToFile(const std::string &filename, const char *description)
 {
     time_t cur_time;
     char   timebuf[100];

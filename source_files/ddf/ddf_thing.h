@@ -658,15 +658,15 @@ class DynamicLightDefinition
 {
   public:
     DynamicLightDefinition();
-    DynamicLightDefinition(DynamicLightDefinition &rhs);
+    DynamicLightDefinition(const DynamicLightDefinition &rhs);
     ~DynamicLightDefinition() {};
 
   private:
-    void Copy(DynamicLightDefinition &src);
+    void Copy(const DynamicLightDefinition &src);
 
   public:
     void                    Default(void);
-    DynamicLightDefinition &operator=(DynamicLightDefinition &rhs);
+    DynamicLightDefinition &operator=(const DynamicLightDefinition &rhs);
 
     DynamicLightType type_;
     std::string      shape_; // IMAGES.DDF reference
@@ -684,15 +684,15 @@ class WeaknessDefinition
 {
   public:
     WeaknessDefinition();
-    WeaknessDefinition(WeaknessDefinition &rhs);
+    WeaknessDefinition(const WeaknessDefinition &rhs);
     ~WeaknessDefinition() {};
 
   private:
-    void Copy(WeaknessDefinition &src);
+    void Copy(const WeaknessDefinition &src);
 
   public:
     void                Default(void);
-    WeaknessDefinition &operator=(WeaknessDefinition &rhs);
+    WeaknessDefinition &operator=(const WeaknessDefinition &rhs);
 
     float    height_[2];
     BAMAngle angle_[2];
@@ -895,7 +895,7 @@ class MapObjectDefinition
 
   public:
     void Default();
-    void CopyDetail(MapObjectDefinition &src);
+    void CopyDetail(const MapObjectDefinition &src);
 
     void DLightCompatibility(void);
 

@@ -146,7 +146,7 @@ static void AddFlatAnimation(AnimationDefinition *anim)
             return;
         }
 
-        std::vector<int> *lumps = GetFlatListForWAD(file);
+        const std::vector<int> *lumps = GetFlatListForWAD(file);
         if (lumps == nullptr)
             return;
 

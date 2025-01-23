@@ -113,7 +113,7 @@ class MirrorSet
 
         return result;
     }
-    bool SegOnPortal(Seg *seg)
+    bool SegOnPortal(const Seg *seg)
     {
         if (active_ == 0)
             return false;
@@ -121,7 +121,7 @@ class MirrorSet
         if (seg->miniseg)
             return false;
 
-        DrawMirror *def = active_mirrors_[active_ - 1].draw_mirror_;
+        const DrawMirror *def = active_mirrors_[active_ - 1].draw_mirror_;
 
         if (def->is_portal)
         {

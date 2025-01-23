@@ -284,10 +284,8 @@ ModelDefinition *LoadModelFromLump(int model_num)
             else
                 FatalError("Missing model skin: %sSKN1\n", basename.c_str());
         }
-    }
-
-    if (def->md2_model_)
         FindModelFrameNames(def->md2_model_, model_num);
+    }
 
     if (def->mdl_model_)
         FindModelFrameNames(def->mdl_model_, model_num);
@@ -390,7 +388,7 @@ void PrecacheModels(void)
         {
             LogDebug("Precaching model: %s\n", ddf_model_names[i].c_str());
 
-            ModelDefinition *def = GetModel(i);
+            const ModelDefinition *def = GetModel(i);
 
             // precache skins too
             for (int n = 0; n < 10; n++)

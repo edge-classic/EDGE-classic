@@ -67,7 +67,7 @@ static constexpr char kExtraFlagNoRaise      = 'R';
 static constexpr char kExtraFlagNoGrudge     = 'G';
 static constexpr char kExtraFlagNoItemBk     = 'I';
 
-static constexpr uint8_t kCastMaximum = 20;
+static constexpr uint8_t kCastMaximum = 17;
 
 extern DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibility];
 
@@ -1526,7 +1526,7 @@ void HandleItem(const DehackedMapObjectDefinition *info, int mt_num)
         wad::Printf("PICKUP_SOUND = %s;\n", sounds::GetSound(pu->sound));
 }
 
-const char *cast_titles[17] = {
+const char *cast_titles[kCastMaximum] = {
     "OurHeroName",  "ZombiemanName", "ShotgunGuyName", "HeavyWeaponDudeName",  "ImpName",         "DemonName",
     "LostSoulName", "CacodemonName", "HellKnightName", "BaronOfHellName",      "ArachnotronName", "PainElementalName",
     "RevenantName", "MancubusName",  "ArchVileName",   "SpiderMastermindName", "CyberdemonName"};

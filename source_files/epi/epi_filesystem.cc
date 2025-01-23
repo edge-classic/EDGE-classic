@@ -162,7 +162,7 @@ bool TestFileAccess(std::string_view name)
     else
         return false;
 }
-bool ReadDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir, const char *mask)
+bool ReadDirectory(std::vector<DirectoryEntry> &fsd, const std::string &dir, const char *mask)
 {
     if (dir.empty() || !FileExists(dir) || !mask)
         return false;
@@ -210,7 +210,7 @@ bool ReadDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir, const cha
     CurrentDirectorySet(prev_dir);
     return true;
 }
-bool WalkDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir)
+bool WalkDirectory(std::vector<DirectoryEntry> &fsd, const std::string &dir)
 {
     if (dir.empty() || !FileExists(dir))
         return false;
@@ -357,7 +357,7 @@ bool TestFileAccess(std::string_view name)
     EPI_ASSERT(!name.empty());
     return access(std::string(name).c_str(), R_OK) == 0;
 }
-bool ReadDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir, const char *mask)
+bool ReadDirectory(std::vector<DirectoryEntry> &fsd, const std::string &dir, const char *mask)
 {
     if (dir.empty() || !FileExists(dir) || !mask)
         return false;
@@ -380,7 +380,7 @@ bool ReadDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir, const cha
 
     for (;;)
     {
-        struct dirent *fdata = readdir(handle);
+        const struct dirent *fdata = readdir(handle);
         if (!fdata)
             break;
 
@@ -433,7 +433,7 @@ static int WalkDirectoryCallback(const char *filename, const struct stat *stat_p
     }
     return 0;
 }
-bool WalkDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir)
+bool WalkDirectory(std::vector<DirectoryEntry> &fsd, const std::string &dir)
 {
     if (dir.empty() || !FileExists(dir))
         return false;
@@ -619,7 +619,7 @@ void ReplaceExtension(std::string &path, std::string_view ext)
     // back up until a dot
     for (int p = path.size() - 1; p >= 0; p--)
     {
-        char &ch = path[p];
+        const char &ch = path[p];
         if (IsDirectorySeparator(ch))
             break;
 

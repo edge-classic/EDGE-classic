@@ -39,7 +39,7 @@ class FLACPlayer : public AbstractMusicPlayer
 {
   public:
     FLACPlayer();
-    ~FLACPlayer();
+    ~FLACPlayer() override;
 
   private:
     uint8_t   *flac_data_;
@@ -47,15 +47,15 @@ class FLACPlayer : public AbstractMusicPlayer
   public:
     bool OpenMemory(uint8_t *data, int length);
 
-    virtual void Close(void);
+    void Close(void) override;
 
-    virtual void Play(bool loop);
-    virtual void Stop(void);
+    void Play(bool loop) override;
+    void Stop(void) override;
 
-    virtual void Pause(void);
-    virtual void Resume(void);
+    void Pause(void) override;
+    void Resume(void) override;
 
-    virtual void Ticker(void);
+    void Ticker(void) override;
 };
 
 //----------------------------------------------------------------------------

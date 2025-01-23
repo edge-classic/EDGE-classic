@@ -244,7 +244,7 @@ void Opal::Port(uint16_t reg_num, uint8_t val)
             {
 
                 // The 4-op channels are 0, 1, 2, 9, 10, 11
-                uint16_t chan      = i < 3 ? i : i + 6;
+                uint16_t chan      = i < 3 ? i : (i + 6);
                 Channel *primary   = &Chan[chan];
                 Channel *secondary = &Chan[chan + 3];
 

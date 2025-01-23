@@ -42,7 +42,7 @@ class SoundEffectDefinition
 
   public:
     void Default(void);
-    void CopyDetail(SoundEffectDefinition &src);
+    void CopyDetail(const SoundEffectDefinition &src);
 
     // Member vars....
     std::string name_;

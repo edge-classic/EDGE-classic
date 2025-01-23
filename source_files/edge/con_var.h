@@ -77,8 +77,7 @@ class ConsoleVariable
 
     ConsoleVariable &operator=(int value);
     ConsoleVariable &operator=(float value);
-    ConsoleVariable &operator=(const char *value);
-    ConsoleVariable &operator=(std::string value);
+    ConsoleVariable &operator=(std::string_view value);
 
     inline const char *c_str() const
     {

@@ -29,7 +29,7 @@ class FlatDefinition
 
   public:
     void Default(void);
-    void CopyDetail(FlatDefinition &src);
+    void CopyDetail(const FlatDefinition &src);
 
     // Member vars....
     std::string name_;

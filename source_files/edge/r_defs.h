@@ -269,8 +269,8 @@ struct Sector
     // UDMF vertex slope stuff
     bool                  floor_vertex_slope;
     bool                  ceiling_vertex_slope;
-    std::vector<HMM_Vec3> floor_z_vertices;
-    std::vector<HMM_Vec3> ceiling_z_vertices;
+    HMM_Vec3              floor_z_vertices[3];
+    HMM_Vec3              ceiling_z_vertices[3];
     HMM_Vec3              floor_vertex_slope_normal;
     HMM_Vec3              ceiling_vertex_slope_normal;
     HMM_Vec2              floor_vertex_slope_high_low;

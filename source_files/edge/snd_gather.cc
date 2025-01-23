@@ -116,7 +116,7 @@ bool SoundGatherer::Finalise(SoundData *buf)
     return true;
 }
 
-void SoundGatherer::TransferStereo(GatherChunk *chunk, SoundData *buf, int pos)
+void SoundGatherer::TransferStereo(GatherChunk *chunk, const SoundData *buf, int pos)
 {
     int count = chunk->total_samples_;
 

@@ -235,9 +235,8 @@ static void AddImageToMap(ImageMap &map, const char *name, Image *image)
 
 Image::Image()
     : actual_width_(0), actual_height_(0), total_width_(0), total_height_(0), width_ratio_(0.0), height_ratio_(0.0),
-      source_type_(kImageSourceDummy), source_palette_(-1), cache_()
+      name_("_UNINIT_"), source_type_(kImageSourceDummy), source_palette_(-1), cache_()
 {
-    name_ = "_UNINIT_";
     EPI_CLEAR_MEMORY(&source_, ImageSource, 1);
     EPI_CLEAR_MEMORY(&animation_, ImageAnimation, 1);
 }
@@ -932,7 +931,7 @@ static Image *AddImageUser(ImageDefinition *def)
 // NOTE: should only be called once, as it assumes none of the flats
 // in the list have names colliding with existing flat images.
 //
-void CreateFlats(std::vector<int> &lumps)
+void CreateFlats(const std::vector<int> &lumps)
 {
     for (size_t i = 0; i < lumps.size(); i++)
     {
@@ -1000,7 +999,7 @@ const Image *CreateSprite(const char *name, int lump, bool is_weapon)
     return rim;
 }
 
-const Image *CreatePackSprite(std::string packname, PackFile *pack, bool is_weapon)
+const Image *CreatePackSprite(const std::string &packname, const PackFile *pack, bool is_weapon)
 {
     EPI_ASSERT(pack);
 
@@ -1100,7 +1099,7 @@ const Image **GetUserSprites(int *count)
     {
         for (auto it = mitr->second.begin(); it != mitr->second.end(); it++)
         {
-            Image *rim = *it;
+            const Image *rim = *it;
 
             if (rim->source_type_ == kImageSourceUser || rim->source_.graphic.user_defined)
                 (*count) += 1;
@@ -1167,7 +1166,7 @@ static bool IM_ShouldClamp(const Image *rim)
     }
 }
 
-static bool IM_ShouldMipmap(Image *rim)
+static bool IM_ShouldMipmap(const Image *rim)
 {
     // the "SKY" check here is a hack...
     if (epi::StringPrefixCaseCompareASCII(rim->name_, "SKY") == 0)
@@ -1199,7 +1198,7 @@ static bool IM_ShouldMipmap(Image *rim)
     }
 }
 
-static bool IM_ShouldSmooth(Image *rim)
+static bool IM_ShouldSmooth(const Image *rim)
 {
     if (!AlmostEquals(rim->blur_sigma_, 0.0f))
         return true;
@@ -1207,7 +1206,7 @@ static bool IM_ShouldSmooth(Image *rim)
     return image_smoothing ? true : false;
 }
 
-static bool IM_ShouldHQ2X(Image *rim)
+static bool IM_ShouldHQ2X(const Image *rim)
 {
     // Note: no need to check kImageSourceUser, since those images are
     //       always PNG or JPEG (etc) and never palettised, hence
@@ -1885,7 +1884,7 @@ void ImagePrecache(const Image *image)
 
         alt_name[2] = (alt_name[2] == '1') ? '2' : '1';
 
-        Image *alt = ImageContainerLookupInternal(real_textures, epi::EName(alt_name.c_str()));
+        const Image *alt = ImageContainerLookupInternal(real_textures, epi::EName(alt_name));
 
         if (alt)
             ImageCache(alt, false);

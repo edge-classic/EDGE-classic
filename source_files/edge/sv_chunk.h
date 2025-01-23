@@ -38,7 +38,7 @@ int SaveGetError(void);
 //  READING
 //
 
-bool SaveFileOpenRead(std::string filename);
+bool SaveFileOpenRead(const std::string &filename);
 bool SaveFileCloseRead(void);
 bool SaveFileVerifyHeader(int *version);
 bool SaveFileVerifyContents(void);
@@ -65,7 +65,7 @@ bool SaveChunkGetMarker(char id[5]);
 //  WRITING
 //
 
-bool SaveFileOpenWrite(std::string filename, int version);
+bool SaveFileOpenWrite(const std::string &filename, int version);
 bool SaveFileCloseWrite(void);
 
 bool SavePushWriteChunk(const char *id);

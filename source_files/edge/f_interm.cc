@@ -603,8 +603,8 @@ static void DrawEnteringLevel(void)
         if (world_intermission.map_positions_[i].done)
             DrawOnLnode(&world_intermission.map_positions_[i], splat);
 
-        if (intermission_pointer_on && !epi::StringCompare(intermission_stats.next_level->name_.c_str(),
-                                                           world_intermission.map_positions_[i].info->name_.c_str()))
+        if (intermission_pointer_on && !epi::StringCompare(intermission_stats.next_level->name_,
+                                                           world_intermission.map_positions_[i].info->name_))
             DrawOnLnode(&world_intermission.map_positions_[i], you_are_here);
     }
 
@@ -913,8 +913,8 @@ static void ShowNextLocationInit(void)
 
     for (i = 0; i < world_intermission.total_map_positions_; i++)
     {
-        if (epi::StringCompare(world_intermission.map_positions_[i].info->name_.c_str(),
-                               intermission_stats.current_level->name_.c_str()) == 0)
+        if (epi::StringCompare(world_intermission.map_positions_[i].info->name_,
+                               intermission_stats.current_level->name_) == 0)
             world_intermission.map_positions_[i].done = true;
     }
 
@@ -941,8 +941,8 @@ static void DrawShowNextLocation(void)
                 DrawOnLnode(&world_intermission.map_positions_[i], splat);
 
             if (intermission_pointer_on && intermission_stats.next_level &&
-                !epi::StringCompare(intermission_stats.next_level->name_.c_str(),
-                                    world_intermission.map_positions_[i].info->name_.c_str()))
+                !epi::StringCompare(intermission_stats.next_level->name_,
+                                    world_intermission.map_positions_[i].info->name_))
                 DrawOnLnode(&world_intermission.map_positions_[i], you_are_here);
         }
     }
@@ -1836,8 +1836,8 @@ void IntermissionDrawer(void)
                 {
                     if (!intermission_stats.next_level)
                         f = nullptr;
-                    else if (!epi::StringCompare(intermission_stats.next_level->name_.c_str(),
-                                                 a->info_->level_.c_str()))
+                    else if (!epi::StringCompare(intermission_stats.next_level->name_,
+                                                 a->info_->level_))
                         f = &a->frames_[a->frame_on_];
                 }
                 else

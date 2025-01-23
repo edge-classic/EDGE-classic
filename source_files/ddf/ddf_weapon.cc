@@ -1003,7 +1003,7 @@ WeaponDefinition::~WeaponDefinition()
 //
 // WeaponDefinition::CopyDetail()
 //
-void WeaponDefinition::CopyDetail(WeaponDefinition &src)
+void WeaponDefinition::CopyDetail(const WeaponDefinition &src)
 {
     state_grp_.clear();
 

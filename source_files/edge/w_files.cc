@@ -57,7 +57,7 @@
 
 std::vector<DataFile *> data_files;
 
-DataFile::DataFile(std::string name, FileKind kind)
+DataFile::DataFile(std::string_view name, FileKind kind)
     : name_(name), kind_(kind), file_(nullptr), wad_(nullptr), pack_(nullptr)
 {
 }
@@ -71,7 +71,7 @@ int GetTotalFiles()
     return (int)data_files.size();
 }
 
-size_t AddDataFile(std::string file, FileKind kind)
+size_t AddDataFile(const std::string &file, FileKind kind)
 {
     LogDebug("Added filename: %s\n", file.c_str());
 
@@ -87,7 +87,7 @@ size_t AddDataFile(std::string file, FileKind kind)
 
 std::vector<DataFile *> pending_files;
 
-size_t AddPendingFile(std::string file, FileKind kind)
+size_t AddPendingFile(std::string_view file, FileKind kind)
 {
     size_t index = pending_files.size();
 
@@ -103,7 +103,7 @@ extern void ProcessWad(DataFile *df, size_t file_index);
 
 extern std::string BuildXGLNodesForWAD(DataFile *df);
 #ifdef EDGE_CLASSIC
-static void DEH_ConvertFile(std::string &filename)
+static void DEH_ConvertFile(const std::string &filename)
 {
     epi::File *F = epi::FileOpen(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
     if (F == nullptr)

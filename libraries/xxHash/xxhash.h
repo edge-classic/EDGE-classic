@@ -4492,7 +4492,7 @@ XXH3_mul128_fold64(xxh_u64 lhs, xxh_u64 rhs)
 XXH_FORCE_INLINE XXH_CONSTF xxh_u64 XXH_xorshift64(xxh_u64 v64, int shift)
 {
     XXH_ASSERT(0 <= shift && shift < 64);
-    return v64 ^ (v64 >> shift);
+    return v64 ^ (v64 >> (unsigned int)shift);
 }
 
 /*

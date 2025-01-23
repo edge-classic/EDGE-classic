@@ -326,19 +326,13 @@ void RenderCurrentUnits(void)
         else if (!culling || (unit->blending & kBlendingNoFog))
             render_state->Disable(GL_FOG);
 
-        // render_state->PolygonOffset(0, -unit->pass);
-
-        bool blend = false;
-
         if (unit->blending & kBlendingAdd)
         {
-            blend = true;
             render_state->Enable(GL_BLEND);
             render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE);
         }
         else if (unit->blending & kBlendingAlpha)
         {
-            blend = true;
             render_state->Enable(GL_BLEND);
             render_state->BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }

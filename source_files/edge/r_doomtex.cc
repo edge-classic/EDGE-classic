@@ -82,7 +82,7 @@ static constexpr uint8_t dummy_graphic[kDummyImageSize * kDummyImageSize] = {
 //
 //  UTILITY
 //
-static void DrawColumnIntoEpiBlock(Image *rim, ImageData *img, const TexturePost *patchcol, int x, int y)
+static void DrawColumnIntoEpiBlock(const Image *rim, const ImageData *img, const TexturePost *patchcol, int x, int y)
 {
     EPI_ASSERT(patchcol);
 
@@ -460,7 +460,7 @@ epi::File *OpenUserFileOrLump(ImageDefinition *def)
     {
     case kImageDataFile: {
         // -AJA- 2005/01/15: filenames in DDF relative to APPDIR
-        std::string data_file = epi::PathAppendIfNotAbsolute(game_directory.c_str(), def->info_.c_str());
+        std::string data_file = epi::PathAppendIfNotAbsolute(game_directory, def->info_);
         return epi::FileOpen(data_file, epi::kFileAccessRead | epi::kFileAccessBinary);
     }
 

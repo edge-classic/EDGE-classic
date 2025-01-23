@@ -149,7 +149,7 @@ WadFixDefinition::WadFixDefinition() : name_()
 //
 // Copies all the detail with the exception of ddf info
 //
-void WadFixDefinition::CopyDetail(WadFixDefinition &src)
+void WadFixDefinition::CopyDetail(const WadFixDefinition &src)
 {
     md5_string_ = src.md5_string_;
 }

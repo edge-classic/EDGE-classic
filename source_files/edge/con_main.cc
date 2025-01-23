@@ -145,7 +145,7 @@ int ConsoleCommandReadme(char **argv, int argc)
     epi::File *readme_file = nullptr;
 
     // Check well known readme filenames
-    for (auto name : readme_names)
+    for (const std::string &name : readme_names)
     {
         readme_file = OpenFileFromPack(name);
         if (readme_file)

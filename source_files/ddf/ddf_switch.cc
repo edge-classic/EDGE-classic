@@ -176,7 +176,7 @@ SwitchDefinition::SwitchDefinition() : name_()
 //
 // Copies all the detail with the exception of ddf info
 //
-void SwitchDefinition::CopyDetail(SwitchDefinition &src)
+void SwitchDefinition::CopyDetail(const SwitchDefinition &src)
 {
     on_name_  = src.on_name_;
     off_name_ = src.off_name_;

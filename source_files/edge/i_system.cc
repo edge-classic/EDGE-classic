@@ -70,7 +70,7 @@ void LogWarning(const char *warning, ...)
     LogPrint("WARNING: %s", message_buffer);
 }
 
-void FatalError(const char *error, ...)
+[[noreturn]] void FatalError(const char *error, ...)
 {
     va_list argptr;
 

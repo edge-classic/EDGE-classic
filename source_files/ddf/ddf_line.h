@@ -181,15 +181,15 @@ class ExtraFloorDefinition
 {
   public:
     ExtraFloorDefinition();
-    ExtraFloorDefinition(ExtraFloorDefinition &rhs);
+    ExtraFloorDefinition(const ExtraFloorDefinition &rhs);
     ~ExtraFloorDefinition();
 
   private:
-    void Copy(ExtraFloorDefinition &src);
+    void Copy(const ExtraFloorDefinition &src);
 
   public:
     void                  Default(void);
-    ExtraFloorDefinition &operator=(ExtraFloorDefinition &src);
+    ExtraFloorDefinition &operator=(const ExtraFloorDefinition &src);
 
     ExtraFloorType    type_;
     ExtraFloorControl control_;
@@ -199,7 +199,7 @@ class PlaneMoverDefinition
 {
   public:
     PlaneMoverDefinition();
-    PlaneMoverDefinition(PlaneMoverDefinition &rhs);
+    PlaneMoverDefinition(const PlaneMoverDefinition &rhs);
     ~PlaneMoverDefinition();
 
     enum PlaneMoverDefault
@@ -213,11 +213,11 @@ class PlaneMoverDefinition
     };
 
   private:
-    void Copy(PlaneMoverDefinition &src);
+    void Copy(const PlaneMoverDefinition &src);
 
   public:
     void                  Default(PlaneMoverDefault def);
-    PlaneMoverDefinition &operator=(PlaneMoverDefinition &rhs);
+    PlaneMoverDefinition &operator=(const PlaneMoverDefinition &rhs);
 
     // Type of floor: raise/lower/etc
     PlaneMoverType type_;
@@ -286,15 +286,15 @@ class SlidingDoor
 {
   public:
     SlidingDoor();
-    SlidingDoor(SlidingDoor &rhs);
+    SlidingDoor(const SlidingDoor &rhs);
     ~SlidingDoor();
 
   private:
-    void Copy(SlidingDoor &src);
+    void Copy(const SlidingDoor &src);
 
   public:
     void         Default(void);
-    SlidingDoor &operator=(SlidingDoor &rhs);
+    SlidingDoor &operator=(const SlidingDoor &rhs);
 
     // type of slider, normally kSlidingDoorTypeNone
     SlidingDoorType type_;
@@ -323,15 +323,15 @@ class DonutDefinition
 {
   public:
     DonutDefinition();
-    DonutDefinition(DonutDefinition &rhs);
+    DonutDefinition(const DonutDefinition &rhs);
     ~DonutDefinition();
 
   private:
-    void Copy(DonutDefinition &src);
+    void Copy(const DonutDefinition &src);
 
   public:
     void             Default(void);
-    DonutDefinition &operator=(DonutDefinition &rhs);
+    DonutDefinition &operator=(const DonutDefinition &rhs);
 
     // Do Donut?
 
@@ -372,15 +372,15 @@ class TeleportDefinition
 {
   public:
     TeleportDefinition();
-    TeleportDefinition(TeleportDefinition &rhs);
+    TeleportDefinition(const TeleportDefinition &rhs);
     ~TeleportDefinition();
 
   private:
-    void Copy(TeleportDefinition &src);
+    void Copy(const TeleportDefinition &src);
 
   public:
     void                Default(void);
-    TeleportDefinition &operator=(TeleportDefinition &rhs);
+    TeleportDefinition &operator=(const TeleportDefinition &rhs);
 
     // If true, teleport activator
     //
@@ -427,15 +427,15 @@ class LightSpecialDefinition
 {
   public:
     LightSpecialDefinition();
-    LightSpecialDefinition(LightSpecialDefinition &rhs);
+    LightSpecialDefinition(const LightSpecialDefinition &rhs);
     ~LightSpecialDefinition();
 
   private:
-    void Copy(LightSpecialDefinition &src);
+    void Copy(const LightSpecialDefinition &src);
 
   public:
     void                    Default(void);
-    LightSpecialDefinition &operator=(LightSpecialDefinition &rhs);
+    LightSpecialDefinition &operator=(const LightSpecialDefinition &rhs);
 
     LightSpecialType type_;
 
@@ -460,15 +460,15 @@ class LadderDefinition
 {
   public:
     LadderDefinition();
-    LadderDefinition(LadderDefinition &rhs);
+    LadderDefinition(const LadderDefinition &rhs);
     ~LadderDefinition();
 
   private:
-    void Copy(LadderDefinition &src);
+    void Copy(const LadderDefinition &src);
 
   public:
     void              Default(void);
-    LadderDefinition &operator=(LadderDefinition &rhs);
+    LadderDefinition &operator=(const LadderDefinition &rhs);
 
     // height of ladder itself.  Zero or negative disables.  Bottom of
     // ladder comes from Y_OFFSET on the linedef.
@@ -602,7 +602,7 @@ class LineType
 
   public:
     void Default(void);
-    void CopyDetail(LineType &src);
+    void CopyDetail(const LineType &src);
 
     // Member vars....
     int number_;
@@ -796,7 +796,7 @@ class SectorType
 
   public:
     void Default(void);
-    void CopyDetail(SectorType &src);
+    void CopyDetail(const SectorType &src);
 
     // Member vars....
     int number_;

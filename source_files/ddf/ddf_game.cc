@@ -320,7 +320,7 @@ IntermissionMapPositionInfo::IntermissionMapPositionInfo()
 //
 // wi_mapposdef_c Copy constructor
 //
-IntermissionMapPositionInfo::IntermissionMapPositionInfo(IntermissionMapPositionInfo &rhs)
+IntermissionMapPositionInfo::IntermissionMapPositionInfo(const IntermissionMapPositionInfo &rhs)
 {
     Copy(rhs);
 }
@@ -335,7 +335,7 @@ IntermissionMapPositionInfo::~IntermissionMapPositionInfo()
 //
 // wi_mapposdef_c::Copy()
 //
-void IntermissionMapPositionInfo::Copy(IntermissionMapPositionInfo &src)
+void IntermissionMapPositionInfo::Copy(const IntermissionMapPositionInfo &src)
 {
     name_ = src.name_;
     x_    = src.x_;
@@ -345,7 +345,7 @@ void IntermissionMapPositionInfo::Copy(IntermissionMapPositionInfo &src)
 //
 // wi_mapposdef_c assignment operator
 //
-IntermissionMapPositionInfo &IntermissionMapPositionInfo::operator=(IntermissionMapPositionInfo &rhs)
+IntermissionMapPositionInfo &IntermissionMapPositionInfo::operator=(const IntermissionMapPositionInfo &rhs)
 {
     if (&rhs != this)
         Copy(rhs);
@@ -365,7 +365,7 @@ IntermissionMapPositionInfoContainer::IntermissionMapPositionInfoContainer()
 //
 // wi_mapposdef_container_c Copy constructor
 //
-IntermissionMapPositionInfoContainer::IntermissionMapPositionInfoContainer(IntermissionMapPositionInfoContainer &rhs)
+IntermissionMapPositionInfoContainer::IntermissionMapPositionInfoContainer(const IntermissionMapPositionInfoContainer &rhs)
     : std::vector<IntermissionMapPositionInfo *>()
 {
     Copy(rhs);
@@ -388,7 +388,7 @@ IntermissionMapPositionInfoContainer::~IntermissionMapPositionInfoContainer()
 //
 // wi_mapposdef_container_c::Copy()
 //
-void IntermissionMapPositionInfoContainer::Copy(IntermissionMapPositionInfoContainer &src)
+void IntermissionMapPositionInfoContainer::Copy(const IntermissionMapPositionInfoContainer &src)
 {
     for (IntermissionMapPositionInfo *wi : src)
     {
@@ -404,7 +404,7 @@ void IntermissionMapPositionInfoContainer::Copy(IntermissionMapPositionInfoConta
 // wi_mapposdef_container_c assignment operator
 //
 IntermissionMapPositionInfoContainer &IntermissionMapPositionInfoContainer::operator=(
-    IntermissionMapPositionInfoContainer &rhs)
+    const IntermissionMapPositionInfoContainer &rhs)
 {
     if (&rhs != this)
     {
@@ -435,7 +435,7 @@ IntermissionFrameInfo::IntermissionFrameInfo()
 //
 // wi_framedef_c Copy constructor
 //
-IntermissionFrameInfo::IntermissionFrameInfo(IntermissionFrameInfo &rhs)
+IntermissionFrameInfo::IntermissionFrameInfo(const IntermissionFrameInfo &rhs)
 {
     Copy(rhs);
 }
@@ -450,7 +450,7 @@ IntermissionFrameInfo::~IntermissionFrameInfo()
 //
 // wi_framedef_c::Copy()
 //
-void IntermissionFrameInfo::Copy(IntermissionFrameInfo &src)
+void IntermissionFrameInfo::Copy(const IntermissionFrameInfo &src)
 {
     pic_  = src.pic_;
     tics_ = src.tics_;
@@ -471,7 +471,7 @@ void IntermissionFrameInfo::Default()
 //
 // wi_framedef_c assignment operator
 //
-IntermissionFrameInfo &IntermissionFrameInfo::operator=(IntermissionFrameInfo &rhs)
+IntermissionFrameInfo &IntermissionFrameInfo::operator=(const IntermissionFrameInfo &rhs)
 {
     if (&rhs != this)
         Copy(rhs);
@@ -491,7 +491,7 @@ IntermissionFrameInfoContainer::IntermissionFrameInfoContainer()
 //
 // wi_framedef_container_c Copy constructor
 //
-IntermissionFrameInfoContainer::IntermissionFrameInfoContainer(IntermissionFrameInfoContainer &rhs)
+IntermissionFrameInfoContainer::IntermissionFrameInfoContainer(const IntermissionFrameInfoContainer &rhs)
     : std::vector<IntermissionFrameInfo *>()
 {
     Copy(rhs);
@@ -513,7 +513,7 @@ IntermissionFrameInfoContainer::~IntermissionFrameInfoContainer()
 //
 // wi_framedef_container_c::Copy()
 //
-void IntermissionFrameInfoContainer::Copy(IntermissionFrameInfoContainer &src)
+void IntermissionFrameInfoContainer::Copy(const IntermissionFrameInfoContainer &src)
 {
     for (IntermissionFrameInfo *f : src)
     {
@@ -528,7 +528,7 @@ void IntermissionFrameInfoContainer::Copy(IntermissionFrameInfoContainer &src)
 //
 // wi_framedef_container_c assignment operator
 //
-IntermissionFrameInfoContainer &IntermissionFrameInfoContainer::operator=(IntermissionFrameInfoContainer &rhs)
+IntermissionFrameInfoContainer &IntermissionFrameInfoContainer::operator=(const IntermissionFrameInfoContainer &rhs)
 {
     if (&rhs != this)
     {
@@ -558,7 +558,7 @@ IntermissionAnimationInfo::IntermissionAnimationInfo()
 //
 // wi_animdef_c Copy constructor
 //
-IntermissionAnimationInfo::IntermissionAnimationInfo(IntermissionAnimationInfo &rhs)
+IntermissionAnimationInfo::IntermissionAnimationInfo(const IntermissionAnimationInfo &rhs)
 {
     Copy(rhs);
 }
@@ -573,7 +573,7 @@ IntermissionAnimationInfo::~IntermissionAnimationInfo()
 //
 // void Copy()
 //
-void IntermissionAnimationInfo::Copy(IntermissionAnimationInfo &src)
+void IntermissionAnimationInfo::Copy(const IntermissionAnimationInfo &src)
 {
     type_   = src.type_;
     level_  = src.level_;
@@ -599,7 +599,7 @@ void IntermissionAnimationInfo::Default()
 //
 // wi_animdef_c assignment operator
 //
-IntermissionAnimationInfo &IntermissionAnimationInfo::operator=(IntermissionAnimationInfo &rhs)
+IntermissionAnimationInfo &IntermissionAnimationInfo::operator=(const IntermissionAnimationInfo &rhs)
 {
     if (&rhs != this)
         Copy(rhs);
@@ -619,7 +619,7 @@ IntermissionAnimationInfoContainer::IntermissionAnimationInfoContainer()
 //
 // wi_animdef_container_c Copy constructor
 //
-IntermissionAnimationInfoContainer::IntermissionAnimationInfoContainer(IntermissionAnimationInfoContainer &rhs)
+IntermissionAnimationInfoContainer::IntermissionAnimationInfoContainer(const IntermissionAnimationInfoContainer &rhs)
     : std::vector<IntermissionAnimationInfo *>()
 {
     Copy(rhs);
@@ -641,7 +641,7 @@ IntermissionAnimationInfoContainer::~IntermissionAnimationInfoContainer()
 //
 // wi_animdef_container_c::Copy()
 //
-void IntermissionAnimationInfoContainer::Copy(IntermissionAnimationInfoContainer &src)
+void IntermissionAnimationInfoContainer::Copy(const IntermissionAnimationInfoContainer &src)
 {
     for (IntermissionAnimationInfo *a : src)
     {
@@ -657,7 +657,7 @@ void IntermissionAnimationInfoContainer::Copy(IntermissionAnimationInfoContainer
 // wi_animdef_container_c assignment operator
 //
 IntermissionAnimationInfoContainer &IntermissionAnimationInfoContainer::operator=(
-    IntermissionAnimationInfoContainer &rhs)
+    const IntermissionAnimationInfoContainer &rhs)
 {
     if (&rhs != this)
     {
@@ -695,7 +695,7 @@ GameDefinition::~GameDefinition()
 //
 // gamedef_c::CopyDetail()
 //
-void GameDefinition::CopyDetail(GameDefinition &src)
+void GameDefinition::CopyDetail(const GameDefinition &src)
 {
     anims_  = src.anims_;
     mappos_ = src.mappos_;

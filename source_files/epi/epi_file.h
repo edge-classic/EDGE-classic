@@ -75,16 +75,16 @@ class ANSIFile : public File
 
   public:
     ANSIFile(FILE *filep);
-    ~ANSIFile();
+    ~ANSIFile() override;
 
   public:
-    int GetLength();
-    int GetPosition();
+    int GetLength() override;
+    int GetPosition() override;
 
-    unsigned int Read(void *dest, unsigned int size);
-    unsigned int Write(const void *src, unsigned int size);
+    unsigned int Read(void *dest, unsigned int size) override;
+    unsigned int Write(const void *src, unsigned int size) override;
 
-    bool Seek(int offset, int seekpoint);
+    bool Seek(int offset, int seekpoint) override;
 };
 
 class SubFile : public File
@@ -98,21 +98,21 @@ class SubFile : public File
 
   public:
     SubFile(File *parent, int start, int len);
-    ~SubFile();
+    ~SubFile() override;
 
-    int GetLength()
+    int GetLength() override
     {
         return length_;
     }
-    int GetPosition()
+    int GetPosition() override
     {
         return pos_;
     }
 
-    unsigned int Read(void *dest, unsigned int size);
-    unsigned int Write(const void *src, unsigned int size);
+    unsigned int Read(void *dest, unsigned int size) override;
+    unsigned int Write(const void *src, unsigned int size) override;
 
-    bool Seek(int offset, int seekpoint);
+    bool Seek(int offset, int seekpoint) override;
 };
 
 class MemFile : public File
@@ -126,21 +126,21 @@ class MemFile : public File
 
   public:
     MemFile(const uint8_t *block, int len, bool copy_it = true);
-    ~MemFile();
+    ~MemFile() override;
 
-    int GetLength()
+    int GetLength() override
     {
         return length_;
     }
-    int GetPosition()
+    int GetPosition() override
     {
         return pos_;
     }
 
-    unsigned int Read(void *dest, unsigned int size);
-    unsigned int Write(const void *src, unsigned int size);
+    unsigned int Read(void *dest, unsigned int size) override;
+    unsigned int Write(const void *src, unsigned int size) override;
 
-    bool Seek(int offset, int seekpoint);
+    bool Seek(int offset, int seekpoint) override;
 };
 
 } // namespace epi

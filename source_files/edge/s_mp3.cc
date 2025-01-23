@@ -37,23 +37,23 @@ class MP3Player : public AbstractMusicPlayer
 {
   public:
     MP3Player();
-    ~MP3Player();
+    ~MP3Player() override;
 
   private:
-    uint8_t   *mp3_data_;
+    const uint8_t   *mp3_data_;
 
   public:
-    bool OpenMemory(uint8_t *data, int length);
+    bool OpenMemory(const uint8_t *data, int length);
 
-    virtual void Close(void);
+    void Close(void) override;
 
-    virtual void Play(bool loop);
-    virtual void Stop(void);
+    void Play(bool loop) override;
+    void Stop(void) override;
 
-    virtual void Pause(void);
-    virtual void Resume(void);
+    void Pause(void) override;
+    void Resume(void) override;
 
-    virtual void Ticker(void);
+    void Ticker(void) override;
 };
 
 //----------------------------------------------------------------------------
@@ -68,7 +68,7 @@ MP3Player::~MP3Player()
     Close();
 }
 
-bool MP3Player::OpenMemory(uint8_t *data, int length)
+bool MP3Player::OpenMemory(const uint8_t *data, int length)
 {
     if (status_ != kNotLoaded)
         Close();

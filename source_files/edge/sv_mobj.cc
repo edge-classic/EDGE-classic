@@ -419,8 +419,7 @@ void SaveGameMapObjectFinaliseElems(void)
 
         // Lobo fix for RTS ONDEATH actions not working
         // when loading a game
-        if (seen_monsters.count(mo->info_) == 0)
-            seen_monsters.insert(mo->info_);
+        seen_monsters.insert(mo->info_);
     }
 }
 

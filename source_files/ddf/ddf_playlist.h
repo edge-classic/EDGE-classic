@@ -61,7 +61,7 @@ class PlaylistEntry
 
   public:
     void Default(void);
-    void CopyDetail(PlaylistEntry &src);
+    void CopyDetail(const PlaylistEntry &src);
 
     // Member vars....
     int number_;

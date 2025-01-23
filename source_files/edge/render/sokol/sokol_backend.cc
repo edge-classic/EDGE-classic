@@ -94,6 +94,7 @@ class SokolRenderBackend : public RenderBackend
 
         pass_action.depth.load_action = SG_LOADACTION_CLEAR;
         pass_action.depth.clear_value = 1.0f;
+        pass_action.stencil = {SG_LOADACTION_CLEAR, SG_STOREACTION_DONTCARE, 0};
 
         EPI_CLEAR_MEMORY(&pass_, sg_pass, 1);
         pass_.action                   = pass_action;

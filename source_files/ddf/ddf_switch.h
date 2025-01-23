@@ -35,7 +35,7 @@ class SwitchDefinition
 
   public:
     void Default(void);
-    void CopyDetail(SwitchDefinition &src);
+    void CopyDetail(const SwitchDefinition &src);
 
     // Member vars....
     std::string name_;

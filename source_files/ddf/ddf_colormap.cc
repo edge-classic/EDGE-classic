@@ -230,7 +230,7 @@ Colormap::~Colormap()
 //
 // Colormap::CopyDetail()
 //
-void Colormap::CopyDetail(Colormap &src)
+void Colormap::CopyDetail(const Colormap &src)
 {
     lump_name_  = src.lump_name_;
     pack_name_  = src.pack_name_;

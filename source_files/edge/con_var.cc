@@ -100,20 +100,7 @@ ConsoleVariable &ConsoleVariable::operator=(float value)
     return *this;
 }
 
-ConsoleVariable &ConsoleVariable::operator=(const char *value)
-{
-    s_ = value;
-    ParseString();
-
-    if (callback_)
-    {
-        callback_(this);
-    }
-    modified_++;
-    return *this;
-}
-
-ConsoleVariable &ConsoleVariable::operator=(std::string value)
+ConsoleVariable &ConsoleVariable::operator=(std::string_view value)
 {
     s_ = value;
     ParseString();

@@ -44,7 +44,7 @@ class Colormap
     ~Colormap();
 
   public:
-    void CopyDetail(Colormap &src);
+    void CopyDetail(const Colormap &src);
     void Default();
 
     // Member vars...

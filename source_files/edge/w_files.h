@@ -73,18 +73,18 @@ class DataFile
     PackFile *pack_;
 
   public:
-    DataFile(std::string name, FileKind kind);
+    DataFile(std::string_view name, FileKind kind);
     ~DataFile();
 };
 
 extern std::vector<DataFile *> data_files;
 
-size_t AddDataFile(std::string file, FileKind kind);
+size_t AddDataFile(const std::string &file, FileKind kind);
 int    GetTotalFiles();
 void   ShowLoadedFiles();
 
 void   ProcessMultipleFiles();
-size_t AddPendingFile(std::string file, FileKind kind);
+size_t AddPendingFile(std::string_view file, FileKind kind);
 void   ProcessFile(DataFile *df);
 
 epi::File *OpenFileFromPack(const std::string &name);

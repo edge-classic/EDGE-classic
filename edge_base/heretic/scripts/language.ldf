@@ -264,10 +264,29 @@ LevelQ="level warp";
 ENDOOMOnQuit="Show ENDTEXT on Quit";
  
  
- 
- 
- 
- 
+OB_CHICKEN = "%o was pecked to death.";
+OB_BEAST = "%o was charred by a weredragon.";
+OB_CLINK = "%o was slashed by a sabreclaw.";
+OB_DSPARIL1 = "%o was scalded by D'Sparil's serpent.";
+OB_DSPARIL1HIT = "%o was chewed up by D'Sparil's serpent.";
+OB_DSPARIL2 = "%o was no match for D'Sparil.";
+OB_DSPARIL2HIT = "%o was smacked down by D'Sparil.";
+OB_HERETICIMP = "%o was scarred by a gargoyle.";
+OB_HERETICIMPHIT = "%o was hacked by a gargoyle.";
+OB_IRONLICH = "%o was devastated by an ironlich.";
+OB_IRONLICHHIT = "%o got up-close and personal with an ironlich.";
+OB_BONEKNIGHT = "%o was axed by an undead warrior.";
+OB_BONEKNIGHTHIT = "%o was slain by an undead warrior.";
+OB_MINOTAUR = "%o was blasted into cinders by a Maulotaur.";
+OB_MINOTAURHIT = "%o was pulped by a Maulotaur.";
+OB_MUMMY = "%o was smashed by a golem.";
+OB_MUMMYLEADER = "%o was shrieked to death by a nitrogolem.";
+OB_SNAKE = "%o was rattled by an ophidian.";
+OB_WIZARD = "%o was cursed by a wizard.";
+OB_WIZARDHIT = "%o was palpated by a wizard.";
+
+
+
  
  
  

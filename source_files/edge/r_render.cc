@@ -769,7 +769,6 @@ static void DrawSlidingDoor(DrawFloor *dfloor, float c, float f, float tex_top_h
 
         default:
             FatalError("INTERNAL ERROR: unknown slidemove type!\n");
-            return; /* NOT REACHED */
         }
 
         // limit sliding door coordinates to current seg

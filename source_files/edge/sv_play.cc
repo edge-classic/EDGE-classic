@@ -359,7 +359,6 @@ void *SaveGamePlayerFindByIndex(int index)
     }
 
     FatalError("Internal error in SaveGamePlayerFindByIndex: index not found.\n");
-    return nullptr;
 }
 
 int SaveGamePlayerGetIndex(Player *elem)
@@ -379,7 +378,6 @@ int SaveGamePlayerGetIndex(Player *elem)
     }
 
     FatalError("Internal error in SaveGamePlayerGetIndex: No such PlayerPtr: %p\n", elem);
-    return 0;
 }
 
 void SaveGamePlayerCreateElems(int num_elems)

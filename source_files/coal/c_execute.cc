@@ -182,7 +182,7 @@ void RealVM::ReturnString(const char *s, int len)
 //
 // Aborts the currently executing functions
 //
-void RealVM::RunError(const char *error, ...)
+[[noreturn]] void RealVM::RunError(const char *error, ...)
 {
     va_list argptr;
     char    buffer[1024];
@@ -420,7 +420,6 @@ void RealVM::DoExecute(int fnum)
 
             case OP_ERROR:
                 RunError("Assertion failed @ %s:%d\n", COAL_REF_STRING(st->a), st->b);
-                break; /* NOT REACHED */
 
             default:
                 RunError("Bad opcode %i", st->op);

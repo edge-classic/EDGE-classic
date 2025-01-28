@@ -393,7 +393,6 @@ bool ChangeResolution(DisplayMode *mode)
 
     // This ain't good - current and previous resolutions do not work.
     FatalError("Switch back to old resolution failed!\n");
-    return false; /* NOT REACHED */
 }
 
 //--- editor settings ---

@@ -542,8 +542,6 @@ static ImageData *ReadUserAsEpiBlock(Image *rim)
     default:
         FatalError("ReadUserAsEpiBlock: Coding error, unknown type %d\n", def->type_);
     }
-
-    return nullptr; /* NOT REACHED */
 }
 
 //
@@ -580,7 +578,6 @@ ImageData *ReadAsEpiBlock(Image *rim)
 
     default:
         FatalError("ReadAsBlock: unknown source_type %d !\n", rim->source_type_);
-        return nullptr;
     }
 }
 

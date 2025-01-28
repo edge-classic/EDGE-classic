@@ -76,7 +76,6 @@ int MakeValidTextureSize(int value)
         return 4096;
 
     FatalError("Texture size (%d) too large !\n", value);
-    return -1; /* NOT REACHED */
 }
 
 ImageData *RGBFromPalettised(ImageData *src, const uint8_t *palette, int opacity)

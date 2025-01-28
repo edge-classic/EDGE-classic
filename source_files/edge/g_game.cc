@@ -884,7 +884,7 @@ static bool GameSaveGameToFile(const std::string &filename, const char *descript
     if (!SaveFileOpenWrite(filename, 0xEC))
     {
         LogPrint("Unable to create savegame file: %s\n", filename.c_str());
-        return false; /* NOT REACHED */
+        return false;
     }
 
     SaveGlobals *globs = SaveGlobalsNew();

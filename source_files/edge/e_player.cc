@@ -544,8 +544,6 @@ static SpawnPoint *GameFindHubPlayer(int player_number_, int tag)
         FatalError("Missing hub starts with tag %d\n", tag);
     else
         FatalError("No usable hub start for player %d (tag %d)\n", player_number_ + 1, tag);
-
-    return nullptr; /* NOT REACHED */
 }
 
 void GameHubSpawnPlayer(Player *p, int tag)

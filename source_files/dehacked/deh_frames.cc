@@ -933,8 +933,6 @@ const char *frames::GroupToName(char group)
     default:
         FatalError("Dehacked: Error - GroupToName: BAD GROUP '%c'\n", group);
     }
-
-    return nullptr;
 }
 
 const char *frames::RedirectorName(int next_st)

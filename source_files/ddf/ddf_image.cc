@@ -73,7 +73,6 @@ static ImageNamespace GetImageNamespace(const char *prefix)
         return kImageNamespacePatch;
 
     DDFError("Invalid image prefix '%s' (use: gfx,tex,flat,spr)\n", prefix);
-    return kImageNamespaceFlat; /* NOT REACHED */
 }
 
 //

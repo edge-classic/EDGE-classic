@@ -95,7 +95,6 @@ bool ANSIFile::Seek(int offset, int seekpoint)
 
     default:
         FatalError("ANSIFile::Seek : illegal seekpoint value.\n");
-        return false; /* NOT REACHED */
     }
 
     int result = fseek(fp_, offset, whence);
@@ -217,8 +216,6 @@ unsigned int SubFile::Write(const void *src, unsigned int size)
     EPI_UNUSED(size);
 
     FatalError("SubFile::Write called.\n");
-
-    return 0; /* read only, cobber */
 }
 
 MemFile::MemFile(const uint8_t *block, int len, bool copy_it)
@@ -319,8 +316,6 @@ unsigned int MemFile::Write(const void *src, unsigned int size)
     EPI_UNUSED(size);
 
     FatalError("MemFile::Write called.\n");
-
-    return 0; /* read only, cobber */
 }
 
 } // namespace epi

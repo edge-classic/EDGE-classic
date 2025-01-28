@@ -143,7 +143,7 @@ void RealVM::LexNewLine()
 // Aborts the current function parse.
 // The given message should have a trailing \n
 //
-void RealVM::CompileError(const char *error, ...)
+[[noreturn]] void RealVM::CompileError(const char *error, ...)
 {
     va_list argptr;
     char    buffer[1024];
@@ -958,11 +958,9 @@ Definition *RealVM::EXPTerm()
         }
 
         CompileError("type mismatch for %s\n", op->name);
-        break;
     }
 
     CompileError("expected value, got %s\n", comp_.token_buf);
-    return nullptr; /* NOT REACHED */
 }
 
 Definition *RealVM::EXPShortCircuit(Definition *e, int n)
@@ -1041,7 +1039,6 @@ Definition *RealVM::EXPFieldQuery(Definition *e, bool lvalue)
     }
 
     CompileError("type mismatch with . operator\n");
-    return nullptr; // NOT REACHED
 }
 
 Definition *RealVM::EXPExpression(int priority, bool *lvalue)
@@ -1277,13 +1274,11 @@ void RealVM::STATStatement(bool allow_def)
     if (allow_def && LexCheck("function"))
     {
         CompileError("functions must be global\n");
-        return;
     }
 
     if (allow_def && LexCheck("constant"))
     {
         CompileError("constants must be global\n");
-        return;
     }
 
     if (LexCheck("{"))
@@ -1818,8 +1813,6 @@ double RealVM::GetFloat(const char *mod_name, const char *var_name)
         return COAL_G_FLOAT(var->ofs);
 
     RunError("GetFloat failed: Could not find variable %s\n", var_name);
-
-    return 0; // Not reached
 }
 
 const char *RealVM::GetString(const char *mod_name, const char *var_name)
@@ -1848,8 +1841,6 @@ const char *RealVM::GetString(const char *mod_name, const char *var_name)
     }
 
     RunError("GetString failed: Could not find variable %s\n", var_name);
-
-    return 0; // Not reached
 }
 
 double *RealVM::GetVector(const char *mod_name, const char *var_name)
@@ -1878,8 +1869,6 @@ double *RealVM::GetVector(const char *mod_name, const char *var_name)
     }
 
     RunError("GetVector failed: Could not find variable %s\n", var_name);
-
-    return 0; // Not reached
 }
 
 double RealVM::GetVectorX(const char *mod_name, const char *var_name)
@@ -1908,8 +1897,6 @@ double RealVM::GetVectorX(const char *mod_name, const char *var_name)
     }
 
     RunError("GetVectorX failed: Could not find variable %s\n", var_name);
-
-    return 0; // Not reached
 }
 
 double RealVM::GetVectorY(const char *mod_name, const char *var_name)
@@ -1938,8 +1925,6 @@ double RealVM::GetVectorY(const char *mod_name, const char *var_name)
     }
 
     RunError("GetVectorY failed: Could not find variable %s\n", var_name);
-
-    return 0; // Not reached
 }
 
 double RealVM::GetVectorZ(const char *mod_name, const char *var_name)
@@ -1968,8 +1953,6 @@ double RealVM::GetVectorZ(const char *mod_name, const char *var_name)
     }
 
     RunError("GetVectorZ failed: Could not find variable %s\n", var_name);
-
-    return 0; // Not reached
 }
 
 void RealVM::SetFloat(const char *mod_name, const char *var_name, double value)

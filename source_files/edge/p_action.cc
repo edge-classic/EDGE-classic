@@ -4008,7 +4008,6 @@ void A_Become(MapObject *mo)
     if (!mo->state_ || !mo->state_->action_par)
     {
         FatalError("BECOME action used in [%s] without arguments!\n", mo->info_->name_.c_str());
-        return; /* NOT REACHED */
     }
 
     BecomeActionInfo *become = (BecomeActionInfo *)mo->state_->action_par;
@@ -4170,7 +4169,6 @@ void A_Morph(MapObject *mo)
     if (!mo->state_ || !mo->state_->action_par)
     {
         FatalError("MORPH action used in [%s] without arguments!\n", mo->info_->name_.c_str());
-        return; /* NOT REACHED */
     }
 
     MorphActionInfo *morph = (MorphActionInfo *)mo->state_->action_par;

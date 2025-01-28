@@ -495,7 +495,7 @@ class RealVM : public VM
     void  LexName();
     void  LexPunctuation();
 
-    void CompileError(const char *error, ...);
+    [[noreturn]] void CompileError(const char *error, ...);
 
     // c_execute.cc
   private:
@@ -512,7 +512,7 @@ class RealVM : public VM
     int StringConcatFloat(const char *s, double f);
     int StringConcatVector(const char *s, double *v);
 
-    void RunError(const char *error, ...);
+    [[noreturn]] void RunError(const char *error, ...);
 
     void        StackTrace();
     void        PrintStatement(Function *f, int s);

@@ -269,13 +269,11 @@ MDLModel *MDLLoad(epi::File *f, float &radius)
     if (epi::StringPrefixCompare(header.ident, kMDLIdentifier) != 0)
     {
         FatalError("MDL_LoadModel: lump is not an MDL model!");
-        return nullptr; /* NOT REACHED */
     }
 
     if (version != kMDLVersion)
     {
         FatalError("MDL_LoadModel: strange version!");
-        return nullptr; /* NOT REACHED */
     }
 
     int num_frames = AlignedLittleEndianS32(header.num_frames);
@@ -299,7 +297,6 @@ MDLModel *MDLLoad(epi::File *f, float &radius)
         if (AlignedLittleEndianS32(group))
         {
             FatalError("MDL_LoadModel: Group skins unsupported!\n");
-            return nullptr; // Not reached
         }
 
         f->Read(pixels, sheight * swidth * sizeof(uint8_t));

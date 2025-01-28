@@ -355,13 +355,11 @@ MD2Model *MD2Load(epi::File *f, float &radius)
     if (epi::StringPrefixCompare(header.ident, kMD2Identifier) != 0)
     {
         FatalError("MD2LoadModel: file is not an MD2 model!");
-        return nullptr; /* NOT REACHED */
     }
 
     if (version != kMD2Version)
     {
         FatalError("MD2LoadModel: strange version!");
-        return nullptr; /* NOT REACHED */
     }
 
     int num_frames = AlignedLittleEndianS32(header.num_frames);
@@ -652,13 +650,11 @@ MD2Model *MD3Load(epi::File *f, float &radius)
     if (strncmp(header.ident, kMD3Identifier, 4) != 0)
     {
         FatalError("MD3LoadModel: file is not an MD3 model!");
-        return nullptr; /* NOT REACHED */
     }
 
     if (version != kMD3Version)
     {
         FatalError("MD3LoadModel: strange version!");
-        return nullptr; /* NOT REACHED */
     }
 
     if (AlignedLittleEndianS32(header.num_meshes) > 1)

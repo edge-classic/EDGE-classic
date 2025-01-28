@@ -538,7 +538,6 @@ class ZIPFile : public epi::File
         EPI_UNUSED(count);
         // not implemented
         FatalError("ZIPFile::Write called, but this is not implemented!\n");
-        return 0;
     }
 
     bool Seek(int offset, int seekpoint) override

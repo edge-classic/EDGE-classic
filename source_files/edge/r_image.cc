@@ -866,7 +866,6 @@ static Image *AddImageUser(ImageDefinition *def)
 
     default:
         FatalError("AddImageUser: Coding error, unknown type %d\n", def->type_);
-        return nullptr; /* NOT REACHED */
     }
 
     Image *rim = NewImage(width, height, solid ? kOpacitySolid : kOpacityUnknown);

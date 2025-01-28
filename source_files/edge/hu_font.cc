@@ -505,7 +505,6 @@ void Font::Load()
 
     default:
         FatalError("Coding error, unknown font type %d\n", definition_->type_);
-        break; /* NOT REACHED */
     }
 }
 
@@ -521,7 +520,6 @@ float Font::NominalWidth() const
         return truetype_character_width_[current_font_size] + spacing_;
 
     FatalError("font_c::NominalWidth : unknown FONT type %d\n", definition_->type_);
-    return 1; /* NOT REACHED */
 }
 
 float Font::NominalHeight() const
@@ -536,7 +534,6 @@ float Font::NominalHeight() const
         return truetype_character_height_[current_font_size];
 
     FatalError("font_c::NominalHeight : unknown FONT type %d\n", definition_->type_);
-    return 1; /* NOT REACHED */
 }
 
 const Image *Font::CharImage(char ch) const

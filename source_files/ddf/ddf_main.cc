@@ -85,7 +85,7 @@ std::string cur_ddf_filename;
 std::string cur_ddf_entryname;
 std::string cur_ddf_linedata;
 
-void DDFError(const char *err, ...)
+[[noreturn]] void DDFError(const char *err, ...)
 {
     va_list argptr;
     char    buffer[2048];

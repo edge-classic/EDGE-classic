@@ -129,7 +129,6 @@ const char *ammo::GetAmmo(int type)
     }
 
     FatalError("Dehacked: Internal Error - Bad ammo type %d\n", type);
-    return nullptr;
 }
 
 void ammo::AlterAmmo(int new_val)

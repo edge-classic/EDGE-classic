@@ -208,7 +208,6 @@ static int WhatRot(SpriteFrame *frame, const char *name, int pos)
 
     default:
         FatalError("INTERNAL ERROR: frame->rotations_ = %d\n", frame->rotations_);
-        return -1; /* NOT REACHED */
     }
 }
 

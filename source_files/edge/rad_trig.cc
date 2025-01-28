@@ -292,7 +292,6 @@ RADScript *FindScriptByName(const char *map_name, const char *name)
     }
 
     FatalError("RTS: No such script `%s' on map %s.\n", name, map_name);
-    return nullptr;
 }
 
 RADScriptTrigger *FindScriptTriggerByName(const char *name)

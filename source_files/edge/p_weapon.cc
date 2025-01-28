@@ -2034,7 +2034,6 @@ void A_WeaponBecome(MapObject *mo)
     if (!psp->state || !psp->state->action_par)
     {
         FatalError("BECOME used in weapon [%s] without a label !\n", oldWep->name_.c_str());
-        return; /* NOT REACHED */
     }
 
     WeaponBecomeActionInfo *become = (WeaponBecomeActionInfo *)psp->state->action_par;

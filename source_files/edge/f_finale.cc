@@ -121,8 +121,6 @@ static bool HasFinale(const FinaleDefinition *F, FinaleStage cur)
     default:
         FatalError("Bad parameter passed to HasFinale().\n");
     }
-
-    return false; /* NOT REACHED */
 }
 
 // returns kFinaleStageDone if nothing found

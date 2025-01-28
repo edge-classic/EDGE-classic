@@ -270,8 +270,6 @@ uint8_t SaveChunkGetByte(void)
         if (c == EOF)
         {
             FatalError("LOADGAME: Corrupt Savegame (reached EOF).\n");
-            last_error = 1;
-            return 0;
         }
 
         current_crc += (uint8_t)c;
@@ -299,8 +297,6 @@ uint8_t SaveChunkGetByte(void)
     if (cur->position == cur->end)
     {
         FatalError("LOADGAME: Corrupt Savegame (reached end of [%s] chunk).\n", cur->start_marker);
-        last_error = 2;
-        return 0;
     }
 
     result = cur->position[0];

@@ -287,7 +287,6 @@ static ArmourType ScriptCheckForArmourType(const char *info)
 
     // this never returns
     ScriptError("Unknown armour type: %s\n", info);
-    return kArmourTypeGreen;
 }
 
 static ScriptChangeTexturetureType ScriptCheckForChangetexType(const char *info)
@@ -313,7 +312,6 @@ static ScriptChangeTexturetureType ScriptCheckForChangetexType(const char *info)
 
     // this never returns
     ScriptError("Unknown ChangeTex type '%s'\n", info);
-    return kChangeTextureRightUpper;
 }
 
 //
@@ -2408,9 +2406,6 @@ void ScriptParseLine()
                 ScriptError("RTS command '%s' used in wrong place "
                             "(found in %s, should be in %s).\n",
                             pars[0], rad_level_names[current_script_level], rad_level_names[cur->level]);
-
-                // NOT REACHED
-                return;
             }
         }
 

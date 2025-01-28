@@ -142,8 +142,6 @@ static float GetSecHeightReference(TriggerHeightReference ref, Sector *sec, Sect
     default:
         FatalError("GetSecHeightReference: undefined reference %d\n", ref);
     }
-
-    return 0;
 }
 
 static constexpr uint8_t kReloopTics = 6;

@@ -225,8 +225,6 @@ const char *ObjectName(int o_kind)
     default:
         FatalError("Dehacked: Error - Illegal object kind: %d\n", o_kind);
     }
-
-    return nullptr; // not reached
 }
 
 void MarkObject(int o_kind, int o_num)

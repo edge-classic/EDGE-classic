@@ -512,7 +512,7 @@ class RealVM : public VM
     int StringConcatFloat(const char *s, double f);
     int StringConcatVector(const char *s, double *v);
 
-    void RunError(const char *error, ...);
+    [[noreturn]] void RunError(const char *error, ...);
 
     void        StackTrace();
     void        PrintStatement(Function *f, int s);

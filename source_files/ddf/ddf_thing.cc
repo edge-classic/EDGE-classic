@@ -2760,7 +2760,6 @@ const MapObjectDefinition *MapObjectDefinitionContainer::Lookup(const char *refn
         return default_mobjtype;
 
     DDFError("Unknown thing type: %s\n", refname);
-    return nullptr; /* NOT REACHED */
 }
 
 const MapObjectDefinition *MapObjectDefinitionContainer::Lookup(int id)
@@ -2873,7 +2872,6 @@ const MapObjectDefinition *MapObjectDefinitionContainer::LookupPlayer(int player
     }
 
     FatalError("Missing DDF entry for player number %d\n", playernum);
-    return nullptr; /* NOT REACHED */
 }
 
 const MapObjectDefinition *MapObjectDefinitionContainer::LookupDoorKey(int theKey)

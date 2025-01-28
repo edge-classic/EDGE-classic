@@ -29,7 +29,6 @@ static int SYS_error(lua_State *L)
 {
     const char *s = luaL_checkstring(L, 1);
     FatalError("%s\n", s);
-    return 0;
 }
 
 // sys.print(str)

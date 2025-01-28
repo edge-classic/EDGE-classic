@@ -134,14 +134,14 @@ static void AddItemToQueue(const MapObject *mo)
 
 MapObject *MapObject::Allocate()
 {
-    void *buffer = Mem_Alloc(sizeof(MapObject));
+    void *buffer = malloc(sizeof(MapObject));
     return new (buffer) MapObject();
 }
 
 void MapObject::Delete()
 {
     this->~MapObject();
-    Mem_Free(this);
+    free(this);
 }
 
 bool MapObject::IsRemoved() const

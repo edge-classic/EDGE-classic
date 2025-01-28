@@ -326,7 +326,7 @@ void AllocateDrawStructs(void)
     draw_subsectors.reserve(kDefaultDrawSubsectors);
     draw_mirrors.reserve(kDefaultDrawMirrors);
 
-    draw_memory_buffer = Mem_Alloc(size);
+    draw_memory_buffer = malloc(size);
 
     uint8_t *dst = (uint8_t *)draw_memory_buffer;
 
@@ -371,7 +371,7 @@ void FreeBSP(void)
 {
     if (draw_memory_buffer)
     {
-        Mem_Free(draw_memory_buffer);
+        free(draw_memory_buffer);
         draw_memory_buffer = nullptr;
     }
 
@@ -379,27 +379,27 @@ void FreeBSP(void)
 
     for (size_t i = kDefaultDrawThings; i < draw_things.size(); i++)
     {
-        Mem_Free(draw_things[i]);
+        free(draw_things[i]);
     } 
 
     for (size_t i = kDefaultDrawFloors; i < draw_floors.size(); i++)
     {
-        Mem_Free(draw_floors[i]);
+        free(draw_floors[i]);
     } 
 
     for (size_t i = kDefaultDrawSegs; i < draw_segs.size(); i++)
     {
-        Mem_Free(draw_segs[i]);
+        free(draw_segs[i]);
     } 
 
     for (size_t i = kDefaultDrawSubsectors; i < draw_subsectors.size(); i++)
     {
-        Mem_Free(draw_subsectors[i]);
+        free(draw_subsectors[i]);
     } 
 
     for (size_t i = kDefaultDrawMirrors; i < draw_mirrors.size(); i++)
     {
-        Mem_Free(draw_mirrors[i]);
+        free(draw_mirrors[i]);
     } 
 
     draw_things.clear();
@@ -414,7 +414,7 @@ void FreeBSP(void)
 DrawThing *GetDrawThing()
 {
     if (draw_thing_position == draw_things.size())
-        draw_things.push_back(new (Mem_Alloc(sizeof(DrawThing))) DrawThing());
+        draw_things.push_back(new (malloc(sizeof(DrawThing))) DrawThing());
 
     return draw_things[draw_thing_position++];
 }
@@ -422,7 +422,7 @@ DrawThing *GetDrawThing()
 DrawFloor *GetDrawFloor()
 {
     if (draw_floor_position == draw_floors.size())
-        draw_floors.push_back(new (Mem_Alloc(sizeof(DrawFloor))) DrawFloor());
+        draw_floors.push_back(new (malloc(sizeof(DrawFloor))) DrawFloor());
 
     return draw_floors[draw_floor_position++];
 }
@@ -430,7 +430,7 @@ DrawFloor *GetDrawFloor()
 DrawSeg *GetDrawSeg()
 {
     if (draw_seg_position == draw_segs.size())
-        draw_segs.push_back(new (Mem_Alloc(sizeof(DrawSeg))) DrawSeg());
+        draw_segs.push_back(new (malloc(sizeof(DrawSeg))) DrawSeg());
 
     return draw_segs[draw_seg_position++];
 }
@@ -438,7 +438,7 @@ DrawSeg *GetDrawSeg()
 DrawSubsector *GetDrawSub()
 {
     if (draw_subsector_position == draw_subsectors.size())
-        draw_subsectors.push_back(new (Mem_Alloc(sizeof(DrawSubsector))) DrawSubsector());
+        draw_subsectors.push_back(new (malloc(sizeof(DrawSubsector))) DrawSubsector());
 
     return draw_subsectors[draw_subsector_position++];
 }
@@ -446,7 +446,7 @@ DrawSubsector *GetDrawSub()
 DrawMirror *GetDrawMirror()
 {
     if (draw_mirror_position == draw_mirrors.size())
-        draw_mirrors.push_back(new (Mem_Alloc(sizeof(DrawMirror))) DrawMirror());
+        draw_mirrors.push_back(new (malloc(sizeof(DrawMirror))) DrawMirror());
 
     return draw_mirrors[draw_mirror_position++];
 }

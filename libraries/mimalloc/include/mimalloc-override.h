@@ -15,7 +15,7 @@ each source file in a project (but be careful when using external code to
 not accidentally mix pointers from different allocators).
 -----------------------------------------------------------------------------*/
 
-#include <mimalloc.h>
+#include "mimalloc.h"
 
 // Standard C allocation
 #define malloc(n)               mi_malloc(n)
@@ -29,12 +29,18 @@ not accidentally mix pointers from different allocators).
 
 // Microsoft extensions
 #define _expand(p,n)            mi_expand(p,n)
-#define _msize(p)               mi_usable_size(p)
+// EDGE-Classic, uncommenting as causes compilation issue on MSVC and unlikely to be used by EC code
+// If it is, this WILL cause problems, though should be caught by ASAN/mimalloc in that case
+// #define _msize(p)               mi_usable_size(p)
 #define _recalloc(p,n,c)        mi_recalloc(p,n,c)
 
 #define _strdup(s)              mi_strdup(s)
 #define _strndup(s,n)           mi_strndup(s,n)
-#define _wcsdup(s)              (wchar_t*)mi_wcsdup((const unsigned short*)(s))
+
+// EDGE-Classic, uncommenting as causes compilation issue on MSVC and unlikely to be used by EC code
+// If it is, this WILL cause problems, though should be caught by ASAN/mimalloc in that case
+// #define _wcsdup(s)              (wchar_t*)mi_wcsdup((const unsigned short*)(s))
+
 #define _mbsdup(s)              mi_mbsdup(s)
 #define _dupenv_s(b,n,v)        mi_dupenv_s(b,n,v)
 #define _wdupenv_s(b,n,v)       mi_wdupenv_s((unsigned short*)(b),n,(const unsigned short*)(v))
@@ -59,7 +65,9 @@ not accidentally mix pointers from different allocators).
 #define _aligned_malloc(n,a)                  mi_malloc_aligned(n,a)
 #define _aligned_realloc(p,n,a)               mi_realloc_aligned(p,n,a)
 #define _aligned_recalloc(p,s,n,a)            mi_aligned_recalloc(p,s,n,a)
-#define _aligned_msize(p,a,o)                 mi_usable_size(p)
+// EDGE-Classic, uncommenting as causes compilation issue on MSVC and unlikely to be used by EC code
+// If it is, this WILL cause problems, though should be caught by ASAN/mimalloc in that case
+// #define _aligned_msize(p,a,o)                 mi_usable_size(p)
 #define _aligned_free(p)                      mi_free(p)
 #define _aligned_offset_malloc(n,a,o)         mi_malloc_aligned_at(n,a,o)
 #define _aligned_offset_realloc(p,n,a,o)      mi_realloc_aligned_at(p,n,a,o)

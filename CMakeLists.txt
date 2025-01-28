@@ -73,6 +73,13 @@ if (WIN32 OR MINGW)
   add_definitions(-D_WIN32_WINNT=0x601)
 endif()
 
+if(MSVC)
+    # Override memory allocations to use mimalloc
+    add_definitions(/FI"${CMAKE_SOURCE_DIR}/libraries/mimalloc/include/mimalloc-override.h")
+    # Use static C runtime, necessary for mimalloc and also means matching C runtiume doesn't need to be on users box
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:Debug>")   
+endif()
+
 if (MSVC)
 
   # Disable RTTI

@@ -143,7 +143,7 @@ void RealVM::LexNewLine()
 // Aborts the current function parse.
 // The given message should have a trailing \n
 //
-void RealVM::CompileError(const char *error, ...)
+[[noreturn]] void RealVM::CompileError(const char *error, ...)
 {
     va_list argptr;
     char    buffer[1024];
@@ -958,7 +958,6 @@ Definition *RealVM::EXPTerm()
         }
 
         CompileError("type mismatch for %s\n", op->name);
-        break;
     }
 
     CompileError("expected value, got %s\n", comp_.token_buf);
@@ -1275,13 +1274,11 @@ void RealVM::STATStatement(bool allow_def)
     if (allow_def && LexCheck("function"))
     {
         CompileError("functions must be global\n");
-        return;
     }
 
     if (allow_def && LexCheck("constant"))
     {
         CompileError("constants must be global\n");
-        return;
     }
 
     if (LexCheck("{"))

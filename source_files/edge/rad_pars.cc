@@ -78,7 +78,7 @@ static char      *this_map = nullptr;
 static int   pending_wait_tics = 0;
 static char *pending_label     = nullptr;
 
-void ScriptError(const char *err, ...)
+[[noreturn]] static void ScriptError(const char *err, ...)
 {
     va_list argptr;
     char    buffer[2048];

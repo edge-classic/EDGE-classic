@@ -224,7 +224,7 @@ GLuint UploadTexture(ImageData *img, int flags, int max_pix)
 
 //----------------------------------------------------------------------------
 
-void PaletteRemapRGBA(ImageData *img, const uint8_t *new_pal, const uint8_t *old_pal)
+void PaletteRemapRGBA(const ImageData *img, const uint8_t *new_pal, const uint8_t *old_pal)
 {
     const int max_prev = 16;
 
@@ -320,7 +320,7 @@ void PaletteRemapRGBA(ImageData *img, const uint8_t *new_pal, const uint8_t *old
         }
 }
 
-int DetermineOpacity(ImageData *img, bool *is_empty_)
+int DetermineOpacity(const ImageData *img, bool *is_empty_)
 {
     if (img->depth_ == 3)
     {

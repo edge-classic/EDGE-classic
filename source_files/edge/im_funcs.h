@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <string>
 #include <unordered_map>
 
 #include "epi_file.h"
@@ -94,7 +95,7 @@ bool GetImageInfo(epi::File *file, int *width, int *height, int *depth);
 // saves the image (in PNG format) to the given file.
 // Returns false if failed to save (e.g. file already exists).
 // The image _MUST_ be RGB or RGBA.
-bool SavePNG(std::string filename, ImageData *image);
+bool SavePNG(std::string_view filename, ImageData *image);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

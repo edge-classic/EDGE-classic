@@ -29,7 +29,7 @@
 
 extern int sound_device_frequency;
 
-bool LoadDoomSound(SoundData *buf, uint8_t *data, int length)
+bool LoadDoomSound(SoundData *buf, const uint8_t *data, int length)
 {
     buf->frequency_ = data[2] + (data[3] << 8);
 
@@ -75,7 +75,7 @@ static constexpr uint16_t kFrequencyTable[128] = {
     452,  439,  427,  415,  403,  391,  380,  369,  359,  348,  339,  329,  319,  310,  302,  293,  285,  276,  269,
     261,  253,  246,  239,  232,  226,  219,  213,  207,  201,  195,  190,  184,  179};
 
-bool LoadPCSpeakerSound(SoundData *buf, uint8_t *data, int length)
+bool LoadPCSpeakerSound(SoundData *buf, const uint8_t *data, int length)
 {
     if (length < 4)
     {
@@ -83,7 +83,7 @@ bool LoadPCSpeakerSound(SoundData *buf, uint8_t *data, int length)
         return false;
     }
     int      sign = -1;
-    uint32_t tone, i, phase_length, phase_tic = 0;
+    uint32_t i, phase_tic = 0;
     uint32_t samples_per_byte = sound_device_frequency / kPCRate;
     uint16_t zeroed, total_samples;
     memcpy(&zeroed, data, 2);
@@ -109,10 +109,10 @@ bool LoadPCSpeakerSound(SoundData *buf, uint8_t *data, int length)
             LogWarning("Invalid PC Speaker Sound (bad tone value %d)\n", *data);
             return false;
         }
-        tone                = kFrequencyTable[*data++];
-        phase_length        = (sound_device_frequency * tone) / (2 * kPCInterruptTimer);
-        uint8_t value       = 0;
+        uint32_t tone                = kFrequencyTable[*data++];
+        uint32_t phase_length        = (sound_device_frequency * tone) / (2 * kPCInterruptTimer);
         float   float_value = 0;
+        uint8_t value;
         for (i = 0; i < samples_per_byte; i++)
         {
             if (tone)

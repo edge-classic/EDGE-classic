@@ -29,7 +29,7 @@ class AnimationDefinition
 
   public:
     void Default(void);
-    void CopyDetail(AnimationDefinition &src);
+    void CopyDetail(const AnimationDefinition &src);
 
     std::string name_;
 

@@ -48,11 +48,11 @@ class SoundChannel
   public:
     int state_; // CHAN_xxx
 
-    SoundData *data_;
+    const SoundData *data_;
 
     int                    category_;
-    SoundEffectDefinition *definition_;
-    Position              *position_;
+    const SoundEffectDefinition *definition_;
+    const Position              *position_;
 
     bool loop_; // will loop *one* more time
     bool boss_;

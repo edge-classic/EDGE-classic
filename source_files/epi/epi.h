@@ -34,12 +34,12 @@
 
 /* Important functions provided by Engine code */
 #ifdef __GNUC__
-void FatalError(const char *error, ...) __attribute__((format(printf, 1, 2)));
+[[noreturn]] void FatalError(const char *error, ...) __attribute__((format(printf, 1, 2)));
 void LogWarning(const char *warning, ...) __attribute__((format(printf, 1, 2)));
 void LogPrint(const char *message, ...) __attribute__((format(printf, 1, 2)));
 void LogDebug(const char *message, ...) __attribute__((format(printf, 1, 2)));
 #else
-void FatalError(const char *error, ...);
+[[noreturn]] void FatalError(const char *error, ...);
 void LogWarning(const char *warning, ...);
 void LogPrint(const char *message, ...);
 void LogDebug(const char *message, ...);

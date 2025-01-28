@@ -217,6 +217,9 @@ ImageAtlas *PackImages(const std::unordered_map<int, ImageData *> &image_pack_da
         rect.id = im.first;
         rect.w  = im.second->used_width_ + 2;
         rect.h  = im.second->used_height_ + 2;
+        rect.x = 0;
+        rect.y = 0;
+        rect.was_packed = false;
         if (rect.w > atlas_w)
         {
             atlas_w = 1;
@@ -289,7 +292,7 @@ bool GetImageInfo(epi::File *file, int *width, int *height, int *depth)
 
 //------------------------------------------------------------------------
 
-bool SavePNG(std::string filename, ImageData *image)
+bool SavePNG(std::string_view filename, ImageData *image)
 {
     EPI_ASSERT(image->depth_ >= 3);
 

@@ -2971,11 +2971,13 @@ void GroupLines(void)
         {
             sector->floor_vertex_slope_high_low   = {{-40000, 40000}};
             sector->ceiling_vertex_slope_high_low = {{-40000, 40000}};
+            std::vector<HMM_Vec3> f_zverts;
+            std::vector<HMM_Vec3> c_zverts;
             for (j = 0; j < 3; j++)
             {
                 Vertex *vert   = sector->lines[j]->vertex_1;
                 bool    add_it = true;
-                for (HMM_Vec3 v : sector->floor_z_vertices)
+                for (HMM_Vec3 v : f_zverts)
                     if (AlmostEquals(v.X, vert->X) && AlmostEquals(v.Y, vert->Y))
                         add_it = false;
                 if (add_it)
@@ -2983,29 +2985,29 @@ void GroupLines(void)
                     if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
                         sector->floor_vertex_slope = true;
-                        sector->floor_z_vertices.push_back({{vert->X, vert->Y, vert->Z}});
+                        f_zverts.push_back({{vert->X, vert->Y, vert->Z}});
                         if (vert->Z > sector->floor_vertex_slope_high_low.X)
                             sector->floor_vertex_slope_high_low.X = vert->Z;
                         if (vert->Z < sector->floor_vertex_slope_high_low.Y)
                             sector->floor_vertex_slope_high_low.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_vertices.push_back({{vert->X, vert->Y, sector->floor_height}});
+                        f_zverts.push_back({{vert->X, vert->Y, sector->floor_height}});
                     if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
                         sector->ceiling_vertex_slope = true;
-                        sector->ceiling_z_vertices.push_back({{vert->X, vert->Y, vert->W}});
+                        c_zverts.push_back({{vert->X, vert->Y, vert->W}});
                         if (vert->W > sector->ceiling_vertex_slope_high_low.X)
                             sector->ceiling_vertex_slope_high_low.X = vert->W;
                         if (vert->W < sector->ceiling_vertex_slope_high_low.Y)
                             sector->ceiling_vertex_slope_high_low.Y = vert->W;
                     }
                     else
-                        sector->ceiling_z_vertices.push_back({{vert->X, vert->Y, sector->ceiling_height}});
+                        c_zverts.push_back({{vert->X, vert->Y, sector->ceiling_height}});
                 }
                 vert   = sector->lines[j]->vertex_2;
                 add_it = true;
-                for (HMM_Vec3 v : sector->floor_z_vertices)
+                for (HMM_Vec3 v : f_zverts)
                     if (AlmostEquals(v.X, vert->X) && AlmostEquals(v.Y, vert->Y))
                         add_it = false;
                 if (add_it)
@@ -3013,31 +3015,30 @@ void GroupLines(void)
                     if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
                         sector->floor_vertex_slope = true;
-                        sector->floor_z_vertices.push_back({{vert->X, vert->Y, vert->Z}});
+                        f_zverts.push_back({{vert->X, vert->Y, vert->Z}});
                         if (vert->Z > sector->floor_vertex_slope_high_low.X)
                             sector->floor_vertex_slope_high_low.X = vert->Z;
                         if (vert->Z < sector->floor_vertex_slope_high_low.Y)
                             sector->floor_vertex_slope_high_low.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_vertices.push_back({{vert->X, vert->Y, sector->floor_height}});
+                        f_zverts.push_back({{vert->X, vert->Y, sector->floor_height}});
                     if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
                         sector->ceiling_vertex_slope = true;
-                        sector->ceiling_z_vertices.push_back({{vert->X, vert->Y, vert->W}});
+                        c_zverts.push_back({{vert->X, vert->Y, vert->W}});
                         if (vert->W > sector->ceiling_vertex_slope_high_low.X)
                             sector->ceiling_vertex_slope_high_low.X = vert->W;
                         if (vert->W < sector->ceiling_vertex_slope_high_low.Y)
                             sector->ceiling_vertex_slope_high_low.Y = vert->W;
                     }
                     else
-                        sector->ceiling_z_vertices.push_back({{vert->X, vert->Y, sector->ceiling_height}});
+                        c_zverts.push_back({{vert->X, vert->Y, sector->ceiling_height}});
                 }
             }
-            if (!sector->floor_vertex_slope)
-                sector->floor_z_vertices.clear();
-            else
+            if (sector->floor_vertex_slope)
             {
+                memcpy(sector->floor_z_vertices, f_zverts.data(), 3 * sizeof(HMM_Vec3));
                 sector->floor_vertex_slope_normal = TripleCrossProduct(
                     sector->floor_z_vertices[0], sector->floor_z_vertices[1], sector->floor_z_vertices[2]);
                 if (sector->floor_height > sector->floor_vertex_slope_high_low.X)
@@ -3045,10 +3046,9 @@ void GroupLines(void)
                 if (sector->floor_height < sector->floor_vertex_slope_high_low.Y)
                     sector->floor_vertex_slope_high_low.Y = sector->floor_height;
             }
-            if (!sector->ceiling_vertex_slope)
-                sector->ceiling_z_vertices.clear();
-            else
+            if (sector->ceiling_vertex_slope)
             {
+                memcpy(sector->ceiling_z_vertices, c_zverts.data(), 3 * sizeof(HMM_Vec3));
                 sector->ceiling_vertex_slope_normal = TripleCrossProduct(
                     sector->ceiling_z_vertices[0], sector->ceiling_z_vertices[1], sector->ceiling_z_vertices[2]);
                 if (sector->ceiling_height < sector->ceiling_vertex_slope_high_low.Y)
@@ -3063,63 +3063,65 @@ void GroupLines(void)
             int ceil_z_lines                      = 0;
             sector->floor_vertex_slope_high_low   = {{-40000, 40000}};
             sector->ceiling_vertex_slope_high_low = {{-40000, 40000}};
+            std::vector<HMM_Vec3> f_zverts;
+            std::vector<HMM_Vec3> c_zverts;
             for (j = 0; j < 4; j++)
             {
                 Vertex *vert      = sector->lines[j]->vertex_1;
                 Vertex *vert2     = sector->lines[j]->vertex_2;
                 bool    add_it_v1 = true;
                 bool    add_it_v2 = true;
-                for (HMM_Vec3 v : sector->floor_z_vertices)
+                for (HMM_Vec3 v : f_zverts)
                     if (AlmostEquals(v.X, vert->X) && AlmostEquals(v.Y, vert->Y))
                         add_it_v1 = false;
-                for (HMM_Vec3 v : sector->floor_z_vertices)
+                for (HMM_Vec3 v : f_zverts)
                     if (AlmostEquals(v.X, vert2->X) && AlmostEquals(v.Y, vert2->Y))
                         add_it_v2 = false;
                 if (add_it_v1)
                 {
                     if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
-                        sector->floor_z_vertices.push_back({{vert->X, vert->Y, vert->Z}});
+                        f_zverts.push_back({{vert->X, vert->Y, vert->Z}});
                         if (vert->Z > sector->floor_vertex_slope_high_low.X)
                             sector->floor_vertex_slope_high_low.X = vert->Z;
                         if (vert->Z < sector->floor_vertex_slope_high_low.Y)
                             sector->floor_vertex_slope_high_low.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_vertices.push_back({{vert->X, vert->Y, sector->floor_height}});
+                        f_zverts.push_back({{vert->X, vert->Y, sector->floor_height}});
                     if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
-                        sector->ceiling_z_vertices.push_back({{vert->X, vert->Y, vert->W}});
+                        c_zverts.push_back({{vert->X, vert->Y, vert->W}});
                         if (vert->W > sector->ceiling_vertex_slope_high_low.X)
                             sector->ceiling_vertex_slope_high_low.X = vert->W;
                         if (vert->W < sector->ceiling_vertex_slope_high_low.Y)
                             sector->ceiling_vertex_slope_high_low.Y = vert->W;
                     }
                     else
-                        sector->ceiling_z_vertices.push_back({{vert->X, vert->Y, sector->ceiling_height}});
+                        c_zverts.push_back({{vert->X, vert->Y, sector->ceiling_height}});
                 }
                 if (add_it_v2)
                 {
                     if (vert2->Z < 32767.0f && vert2->Z > -32768.0f)
                     {
-                        sector->floor_z_vertices.push_back({{vert2->X, vert2->Y, vert2->Z}});
+                        f_zverts.push_back({{vert2->X, vert2->Y, vert2->Z}});
                         if (vert2->Z > sector->floor_vertex_slope_high_low.X)
                             sector->floor_vertex_slope_high_low.X = vert2->Z;
                         if (vert2->Z < sector->floor_vertex_slope_high_low.Y)
                             sector->floor_vertex_slope_high_low.Y = vert2->Z;
                     }
                     else
-                        sector->floor_z_vertices.push_back({{vert2->X, vert2->Y, sector->floor_height}});
+                        f_zverts.push_back({{vert2->X, vert2->Y, sector->floor_height}});
                     if (vert2->W < 32767.0f && vert2->W > -32768.0f)
                     {
-                        sector->ceiling_z_vertices.push_back({{vert2->X, vert2->Y, vert2->W}});
+                        c_zverts.push_back({{vert2->X, vert2->Y, vert2->W}});
                         if (vert2->W > sector->ceiling_vertex_slope_high_low.X)
                             sector->ceiling_vertex_slope_high_low.X = vert2->W;
                         if (vert2->W < sector->ceiling_vertex_slope_high_low.Y)
                             sector->ceiling_vertex_slope_high_low.Y = vert2->W;
                     }
                     else
-                        sector->ceiling_z_vertices.push_back({{vert2->X, vert2->Y, sector->ceiling_height}});
+                        c_zverts.push_back({{vert2->X, vert2->Y, sector->ceiling_height}});
                 }
                 if ((vert->Z < 32767.0f && vert->Z > -32768.0f) && (vert2->Z < 32767.0f && vert2->Z > -32768.0f) &&
                     AlmostEquals(vert->Z, vert2->Z))
@@ -3132,9 +3134,13 @@ void GroupLines(void)
                     ceil_z_lines++;
                 }
             }
-            if (floor_z_lines == 1 && sector->floor_z_vertices.size() == 4)
+            if (floor_z_lines == 1 && f_zverts.size() == 4)
             {
                 sector->floor_vertex_slope        = true;
+                // Only need three of the verts, as with the way we regulate rectangular
+                // vert slopes, any 3 of the 4 vertices that comprise the sector
+                // will result in the same plane calculation
+                memcpy(sector->floor_z_vertices, f_zverts.data(), 3 * sizeof(HMM_Vec3));
                 sector->floor_vertex_slope_normal = TripleCrossProduct(
                     sector->floor_z_vertices[0], sector->floor_z_vertices[1], sector->floor_z_vertices[2]);
                 if (sector->floor_height > sector->floor_vertex_slope_high_low.X)
@@ -3142,11 +3148,13 @@ void GroupLines(void)
                 if (sector->floor_height < sector->floor_vertex_slope_high_low.Y)
                     sector->floor_vertex_slope_high_low.Y = sector->floor_height;
             }
-            else
-                sector->floor_z_vertices.clear();
-            if (ceil_z_lines == 1 && sector->ceiling_z_vertices.size() == 4)
+            if (ceil_z_lines == 1 && c_zverts.size() == 4)
             {
                 sector->ceiling_vertex_slope        = true;
+                // Only need three of the verts, as with the way we regulate rectangular
+                // vert slopes, any 3 of the 4 vertices that comprise the sector
+                // will result in the same plane calculation
+                memcpy(sector->ceiling_z_vertices, c_zverts.data(), 3 * sizeof(HMM_Vec3));
                 sector->ceiling_vertex_slope_normal = TripleCrossProduct(
                     sector->ceiling_z_vertices[0], sector->ceiling_z_vertices[1], sector->ceiling_z_vertices[2]);
                 if (sector->ceiling_height < sector->ceiling_vertex_slope_high_low.Y)
@@ -3154,8 +3162,6 @@ void GroupLines(void)
                 if (sector->ceiling_height > sector->ceiling_vertex_slope_high_low.X)
                     sector->ceiling_vertex_slope_high_low.X = sector->ceiling_height;
             }
-            else
-                sector->ceiling_z_vertices.clear();
         }
 
         // set the degenmobj_t to the middle of the bounding box

@@ -731,6 +731,9 @@ static PlaneMover *P_SetupSectorAction(Sector *sector, const PlaneMoverDefinitio
         // 2023.08.01 - If already at dest height, run the
         // texture/type changes that were intended
 
+        plane->destination_height = dest;
+        plane->new_special = -1;
+
         // change to surrounding
         if (def->tex_ != "" && def->tex_[0] == '-')
         {
@@ -1479,7 +1482,7 @@ void RunActivePlanes(void)
             if (pmov->type->type_ == kPlaneMoverOnce || pmov->type->type_ == kPlaneMoverStairs ||
                 pmov->type->type_ == kPlaneMoverToggle)
             {
-                for (auto anim : sector_animations)
+                for (const SectorAnimation &anim : sector_animations)
                 {
                     if (anim.scroll_sector_reference &&
                         (anim.scroll_sector_reference->ceiling_move == pmov ||
@@ -1524,7 +1527,7 @@ void RunActivePlanes(void)
                         }
                     }
                 }
-                for (auto anim : line_animations)
+                for (const LineAnimation &anim : line_animations)
                 {
                     if (anim.scroll_sector_reference &&
                         (anim.scroll_sector_reference->ceiling_move == pmov ||

@@ -1748,7 +1748,7 @@ void ImmediateQuit()
 //----------------------------------------------------------------------------
 
 void DrawMenuSlider(int x, int y, float slider_position, float increment, int div, float min, float max,
-                    std::string format_string)
+                    const std::string &format_string)
 {
     float basex      = x;
     int   step       = (8 / div);
@@ -1946,7 +1946,7 @@ bool MenuResponder(InputEvent *ev)
 
         if ((ch == kBackspace || ch == kDelete) && !input_string.empty())
         {
-            std::string s = input_string.c_str();
+            std::string s = input_string;
 
             if (input_string != "")
             {

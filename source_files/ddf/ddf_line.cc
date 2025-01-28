@@ -1043,7 +1043,7 @@ DonutDefinition::DonutDefinition()
 //
 // donutdef_c Copy constructor
 //
-DonutDefinition::DonutDefinition(DonutDefinition &rhs)
+DonutDefinition::DonutDefinition(const DonutDefinition &rhs)
 {
     Copy(rhs);
 }
@@ -1058,7 +1058,7 @@ DonutDefinition::~DonutDefinition()
 //
 // donutdef_c::Copy()
 //
-void DonutDefinition::Copy(DonutDefinition &src)
+void DonutDefinition::Copy(const DonutDefinition &src)
 {
     dodonut_ = src.dodonut_;
 
@@ -1085,7 +1085,7 @@ void DonutDefinition::Default()
 //
 // donutdef_c assignment operator
 //
-DonutDefinition &DonutDefinition::operator=(DonutDefinition &rhs)
+DonutDefinition &DonutDefinition::operator=(const DonutDefinition &rhs)
 {
     if (&rhs != this)
         Copy(rhs);
@@ -1105,7 +1105,7 @@ ExtraFloorDefinition::ExtraFloorDefinition()
 //
 // extrafloordef_c Copy constructor
 //
-ExtraFloorDefinition::ExtraFloorDefinition(ExtraFloorDefinition &rhs)
+ExtraFloorDefinition::ExtraFloorDefinition(const ExtraFloorDefinition &rhs)
 {
     Copy(rhs);
 }
@@ -1120,7 +1120,7 @@ ExtraFloorDefinition::~ExtraFloorDefinition()
 //
 // extrafloordef_c::Copy()
 //
-void ExtraFloorDefinition::Copy(ExtraFloorDefinition &src)
+void ExtraFloorDefinition::Copy(const ExtraFloorDefinition &src)
 {
     control_ = src.control_;
     type_    = src.type_;
@@ -1138,7 +1138,7 @@ void ExtraFloorDefinition::Default()
 //
 // extrafloordef_c assignment operator
 //
-ExtraFloorDefinition &ExtraFloorDefinition::operator=(ExtraFloorDefinition &rhs)
+ExtraFloorDefinition &ExtraFloorDefinition::operator=(const ExtraFloorDefinition &rhs)
 {
     if (&rhs != this)
         Copy(rhs);
@@ -1158,7 +1158,7 @@ LadderDefinition::LadderDefinition()
 //
 // ladderdef_c Copy constructor
 //
-LadderDefinition::LadderDefinition(LadderDefinition &rhs)
+LadderDefinition::LadderDefinition(const LadderDefinition &rhs)
 {
     Copy(rhs);
 }
@@ -1173,7 +1173,7 @@ LadderDefinition::~LadderDefinition()
 //
 // ladderdef_c::Copy()
 //
-void LadderDefinition::Copy(LadderDefinition &src)
+void LadderDefinition::Copy(const LadderDefinition &src)
 {
     height_ = src.height_;
 }
@@ -1189,7 +1189,7 @@ void LadderDefinition::Default()
 //
 // ladderdef_c assignment operator
 //
-LadderDefinition &LadderDefinition::operator=(LadderDefinition &rhs)
+LadderDefinition &LadderDefinition::operator=(const LadderDefinition &rhs)
 {
     if (&rhs != this)
         Copy(rhs);
@@ -1209,7 +1209,7 @@ LightSpecialDefinition::LightSpecialDefinition()
 //
 // lightdef_c Copy constructor
 //
-LightSpecialDefinition::LightSpecialDefinition(LightSpecialDefinition &rhs)
+LightSpecialDefinition::LightSpecialDefinition(const LightSpecialDefinition &rhs)
 {
     Copy(rhs);
 }
@@ -1224,7 +1224,7 @@ LightSpecialDefinition::~LightSpecialDefinition()
 //
 // lightdef_c::Copy()
 //
-void LightSpecialDefinition::Copy(LightSpecialDefinition &src)
+void LightSpecialDefinition::Copy(const LightSpecialDefinition &src)
 {
     type_       = src.type_;
     level_      = src.level_;
@@ -1252,7 +1252,7 @@ void LightSpecialDefinition::Default()
 //
 // lightdef_c assignment operator
 //
-LightSpecialDefinition &LightSpecialDefinition::operator=(LightSpecialDefinition &rhs)
+LightSpecialDefinition &LightSpecialDefinition::operator=(const LightSpecialDefinition &rhs)
 {
     if (&rhs != this)
         Copy(rhs);
@@ -1272,7 +1272,7 @@ PlaneMoverDefinition::PlaneMoverDefinition()
 //
 // movplanedef_c Copy constructor
 //
-PlaneMoverDefinition::PlaneMoverDefinition(PlaneMoverDefinition &rhs)
+PlaneMoverDefinition::PlaneMoverDefinition(const PlaneMoverDefinition &rhs)
 {
     Copy(rhs);
 }
@@ -1287,7 +1287,7 @@ PlaneMoverDefinition::~PlaneMoverDefinition()
 //
 // movplanedef_c::Copy()
 //
-void PlaneMoverDefinition::Copy(PlaneMoverDefinition &src)
+void PlaneMoverDefinition::Copy(const PlaneMoverDefinition &src)
 {
     type_           = src.type_;
     is_ceiling_     = src.is_ceiling_;
@@ -1392,7 +1392,7 @@ void PlaneMoverDefinition::Default(PlaneMoverDefinition::PlaneMoverDefault def)
 //
 // movplanedef_c assignment operator
 //
-PlaneMoverDefinition &PlaneMoverDefinition::operator=(PlaneMoverDefinition &rhs)
+PlaneMoverDefinition &PlaneMoverDefinition::operator=(const PlaneMoverDefinition &rhs)
 {
     if (&rhs != this)
         Copy(rhs);
@@ -1412,7 +1412,7 @@ SlidingDoor::SlidingDoor()
 //
 // sliding_door_c Copy constructor
 //
-SlidingDoor::SlidingDoor(SlidingDoor &rhs)
+SlidingDoor::SlidingDoor(const SlidingDoor &rhs)
 {
     Copy(rhs);
 }
@@ -1427,7 +1427,7 @@ SlidingDoor::~SlidingDoor()
 //
 // sliding_door_c::Copy()
 //
-void SlidingDoor::Copy(SlidingDoor &src)
+void SlidingDoor::Copy(const SlidingDoor &src)
 {
     type_        = src.type_;
     speed_       = src.speed_;
@@ -1459,7 +1459,7 @@ void SlidingDoor::Default()
 //
 // sliding_door_c assignment operator
 //
-SlidingDoor &SlidingDoor::operator=(SlidingDoor &rhs)
+SlidingDoor &SlidingDoor::operator=(const SlidingDoor &rhs)
 {
     if (&rhs != this)
         Copy(rhs);
@@ -1479,7 +1479,7 @@ TeleportDefinition::TeleportDefinition()
 //
 // teleportdef_c Copy constructor
 //
-TeleportDefinition::TeleportDefinition(TeleportDefinition &rhs)
+TeleportDefinition::TeleportDefinition(const TeleportDefinition &rhs)
 {
     Copy(rhs);
 }
@@ -1494,7 +1494,7 @@ TeleportDefinition::~TeleportDefinition()
 //
 // teleportdef_c::Copy()
 //
-void TeleportDefinition::Copy(TeleportDefinition &src)
+void TeleportDefinition::Copy(const TeleportDefinition &src)
 {
     teleport_ = src.teleport_;
 
@@ -1528,7 +1528,7 @@ void TeleportDefinition::Default()
 //
 // teleportdef_c assignment operator
 //
-TeleportDefinition &TeleportDefinition::operator=(TeleportDefinition &rhs)
+TeleportDefinition &TeleportDefinition::operator=(const TeleportDefinition &rhs)
 {
     if (&rhs != this)
         Copy(rhs);
@@ -1553,7 +1553,7 @@ LineType::~LineType()
 {
 }
 
-void LineType::CopyDetail(LineType &src)
+void LineType::CopyDetail(const LineType &src)
 {
     newtrignum_ = src.newtrignum_;
     type_       = src.type_;

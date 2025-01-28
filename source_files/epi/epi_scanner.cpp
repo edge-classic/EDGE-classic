@@ -361,7 +361,6 @@ bool Scanner::GetNextToken(bool expandState)
     unsigned int end              = scan_position_;
     int          integerBase      = 10;
     bool         floatHasDecimal  = false;
-    bool         floatHasExponent = false;
     bool         stringFinished   = false; // Strings are the only things that can have 0 length tokens.
 
     char cur = data_.at(scan_position_++);
@@ -487,6 +486,7 @@ bool Scanner::GetNextToken(bool expandState)
 
     if (start == end)
     {
+        bool floatHasExponent = false;
         while (scan_position_ < length_)
         {
             cur = data_.at(scan_position_);

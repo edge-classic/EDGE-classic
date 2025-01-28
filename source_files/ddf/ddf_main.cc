@@ -865,7 +865,7 @@ void DDFMainReadFile(DDFReadInfo *readinfo, const std::string &data)
 
         case kDDFReadCharReturnCommand:
             if (!token.empty())
-                current_cmd = token.c_str();
+                current_cmd = token;
             else
                 current_cmd.clear();
 
@@ -1741,7 +1741,7 @@ DamageClass::DamageClass()
 //
 // DamageClass Copy constructor
 //
-DamageClass::DamageClass(DamageClass &rhs)
+DamageClass::DamageClass(const DamageClass &rhs)
 {
     Copy(rhs);
 }
@@ -1756,7 +1756,7 @@ DamageClass::~DamageClass()
 //
 // DamageClass::Copy
 //
-void DamageClass::Copy(DamageClass &src)
+void DamageClass::Copy(const DamageClass &src)
 {
     nominal_    = src.nominal_;
     linear_max_ = src.linear_max_;
@@ -1856,7 +1856,7 @@ void DamageClass::Default(DamageClassDefault def)
 //
 // DamageClass assignment operator
 //
-DamageClass &DamageClass::operator=(DamageClass &rhs)
+DamageClass &DamageClass::operator=(const DamageClass &rhs)
 {
     if (&rhs != this)
         Copy(rhs);
@@ -1877,7 +1877,7 @@ LabelOffset::LabelOffset()
 //
 // LabelOffset Copy constructor
 //
-LabelOffset::LabelOffset(LabelOffset &rhs)
+LabelOffset::LabelOffset(const LabelOffset &rhs)
 {
     Copy(rhs);
 }
@@ -1892,7 +1892,7 @@ LabelOffset::~LabelOffset()
 //
 // LabelOffset::Copy
 //
-void LabelOffset::Copy(LabelOffset &src)
+void LabelOffset::Copy(const LabelOffset &src)
 {
     label_  = src.label_;
     offset_ = src.offset_;
@@ -1910,7 +1910,7 @@ void LabelOffset::Default()
 //
 // LabelOffset assignment operator
 //
-LabelOffset &LabelOffset::operator=(LabelOffset &rhs)
+LabelOffset &LabelOffset::operator=(const LabelOffset &rhs)
 {
     if (&rhs != this)
         Copy(rhs);
@@ -1925,12 +1925,12 @@ DynamicLightDefinition::DynamicLightDefinition()
     Default();
 }
 
-DynamicLightDefinition::DynamicLightDefinition(DynamicLightDefinition &rhs)
+DynamicLightDefinition::DynamicLightDefinition(const DynamicLightDefinition &rhs)
 {
     Copy(rhs);
 }
 
-void DynamicLightDefinition::Copy(DynamicLightDefinition &src)
+void DynamicLightDefinition::Copy(const DynamicLightDefinition &src)
 {
     type_                 = src.type_;
     shape_                = src.shape_;
@@ -1958,7 +1958,7 @@ void DynamicLightDefinition::Default()
     cache_data_ = nullptr;
 }
 
-DynamicLightDefinition &DynamicLightDefinition::operator=(DynamicLightDefinition &rhs)
+DynamicLightDefinition &DynamicLightDefinition::operator=(const DynamicLightDefinition &rhs)
 {
     if (this == &rhs)
         return *this;
@@ -1975,12 +1975,12 @@ WeaknessDefinition::WeaknessDefinition()
     Default();
 }
 
-WeaknessDefinition::WeaknessDefinition(WeaknessDefinition &rhs)
+WeaknessDefinition::WeaknessDefinition(const WeaknessDefinition &rhs)
 {
     Copy(rhs);
 }
 
-void WeaknessDefinition::Copy(WeaknessDefinition &src)
+void WeaknessDefinition::Copy(const WeaknessDefinition &src)
 {
     height_[0] = src.height_[0];
     height_[1] = src.height_[1];
@@ -2005,7 +2005,7 @@ void WeaknessDefinition::Default()
     painchance_ = -1; // disabled
 }
 
-WeaknessDefinition &WeaknessDefinition::operator=(WeaknessDefinition &rhs)
+WeaknessDefinition &WeaknessDefinition::operator=(const WeaknessDefinition &rhs)
 {
     if (this == &rhs)
         return *this;

@@ -62,7 +62,7 @@ class SoundGatherer
     // otherwise returns true (success).
 
   private:
-    void TransferStereo(GatherChunk *chunk, SoundData *buf, int pos);
+    void TransferStereo(GatherChunk *chunk, const SoundData *buf, int pos);
 };
 
 //--- editor settings ---

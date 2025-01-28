@@ -645,7 +645,7 @@ void text_strings::WriteTextString(const LanguageInfo *info)
 
 const char *text_strings::GetLDFForBex(const char *bex_name)
 {
-    for (auto entry : lang_list)
+    for (const dehacked::LanguageInfo &entry : lang_list)
     {
         if (entry.deh_name && epi::StringCaseCompareASCII(entry.deh_name, bex_name) == 0)
             return entry.ldf_name;

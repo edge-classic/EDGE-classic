@@ -600,6 +600,8 @@ fluid_voice_write(fluid_voice_t* voice,
       fluid_voice_off(voice);
   }
 
+  voice->dsp_buf = NULL;
+
  post_process:
   voice->ticks += FLUID_BUFSIZE;
   return FLUID_OK;

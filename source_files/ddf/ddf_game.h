@@ -30,28 +30,28 @@ class IntermissionMapPositionInfo
 
   public:
     IntermissionMapPositionInfo();
-    IntermissionMapPositionInfo(IntermissionMapPositionInfo &rhs);
+    IntermissionMapPositionInfo(const IntermissionMapPositionInfo &rhs);
     ~IntermissionMapPositionInfo();
 
   public:
-    IntermissionMapPositionInfo &operator=(IntermissionMapPositionInfo &rhs);
+    IntermissionMapPositionInfo &operator=(const IntermissionMapPositionInfo &rhs);
 
   private:
-    void Copy(IntermissionMapPositionInfo &src);
+    void Copy(const IntermissionMapPositionInfo &src);
 };
 
 class IntermissionMapPositionInfoContainer : public std::vector<IntermissionMapPositionInfo *>
 {
   public:
     IntermissionMapPositionInfoContainer();
-    IntermissionMapPositionInfoContainer(IntermissionMapPositionInfoContainer &rhs);
+    IntermissionMapPositionInfoContainer(const IntermissionMapPositionInfoContainer &rhs);
     ~IntermissionMapPositionInfoContainer();
 
   private:
-    void Copy(IntermissionMapPositionInfoContainer &src);
+    void Copy(const IntermissionMapPositionInfoContainer &src);
 
   public:
-    IntermissionMapPositionInfoContainer &operator=(IntermissionMapPositionInfoContainer &rhs);
+    IntermissionMapPositionInfoContainer &operator=(const IntermissionMapPositionInfoContainer &rhs);
 };
 
 class IntermissionFrameInfo
@@ -63,29 +63,29 @@ class IntermissionFrameInfo
 
   public:
     IntermissionFrameInfo();
-    IntermissionFrameInfo(IntermissionFrameInfo &rhs);
+    IntermissionFrameInfo(const IntermissionFrameInfo &rhs);
     ~IntermissionFrameInfo();
 
   public:
     void                   Default(void);
-    IntermissionFrameInfo &operator=(IntermissionFrameInfo &rhs);
+    IntermissionFrameInfo &operator=(const IntermissionFrameInfo &rhs);
 
   private:
-    void Copy(IntermissionFrameInfo &src);
+    void Copy(const IntermissionFrameInfo &src);
 };
 
 class IntermissionFrameInfoContainer : public std::vector<IntermissionFrameInfo *>
 {
   public:
     IntermissionFrameInfoContainer();
-    IntermissionFrameInfoContainer(IntermissionFrameInfoContainer &rhs);
+    IntermissionFrameInfoContainer(const IntermissionFrameInfoContainer &rhs);
     ~IntermissionFrameInfoContainer();
 
   private:
-    void Copy(IntermissionFrameInfoContainer &rhs);
+    void Copy(const IntermissionFrameInfoContainer &rhs);
 
   public:
-    IntermissionFrameInfoContainer &operator=(IntermissionFrameInfoContainer &rhs);
+    IntermissionFrameInfoContainer &operator=(const IntermissionFrameInfoContainer &rhs);
 };
 
 class IntermissionAnimationInfo
@@ -105,29 +105,29 @@ class IntermissionAnimationInfo
 
   public:
     IntermissionAnimationInfo();
-    IntermissionAnimationInfo(IntermissionAnimationInfo &rhs);
+    IntermissionAnimationInfo(const IntermissionAnimationInfo &rhs);
     ~IntermissionAnimationInfo();
 
   public:
-    IntermissionAnimationInfo &operator=(IntermissionAnimationInfo &rhs);
+    IntermissionAnimationInfo &operator=(const IntermissionAnimationInfo &rhs);
     void                       Default(void);
 
   private:
-    void Copy(IntermissionAnimationInfo &rhs);
+    void Copy(const IntermissionAnimationInfo &rhs);
 };
 
 class IntermissionAnimationInfoContainer : public std::vector<IntermissionAnimationInfo *>
 {
   public:
     IntermissionAnimationInfoContainer();
-    IntermissionAnimationInfoContainer(IntermissionAnimationInfoContainer &rhs);
+    IntermissionAnimationInfoContainer(const IntermissionAnimationInfoContainer &rhs);
     ~IntermissionAnimationInfoContainer();
 
   private:
-    void Copy(IntermissionAnimationInfoContainer &src);
+    void Copy(const IntermissionAnimationInfoContainer &src);
 
   public:
-    IntermissionAnimationInfoContainer &operator=(IntermissionAnimationInfoContainer &rhs);
+    IntermissionAnimationInfoContainer &operator=(const IntermissionAnimationInfoContainer &rhs);
 };
 
 enum LightingModel
@@ -153,7 +153,7 @@ class GameDefinition
 
   public:
     void Default(void);
-    void CopyDetail(GameDefinition &src);
+    void CopyDetail(const GameDefinition &src);
 
     std::string name_;
 
@@ -199,11 +199,11 @@ class GameDefinition
 
   private:
     // disable copy construct and assignment operator
-    explicit GameDefinition(GameDefinition &rhs)
+    explicit GameDefinition(const GameDefinition &rhs)
     {
         EPI_UNUSED(rhs);
     }
-    GameDefinition &operator=(GameDefinition &rhs)
+    GameDefinition &operator=(const GameDefinition &rhs)
     {
         EPI_UNUSED(rhs);
         return *this;

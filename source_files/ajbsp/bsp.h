@@ -62,17 +62,17 @@ void ResetInfo();
 
 // attempt to open a wad.  on failure, the FatalError method in the
 // BuildInfo interface is called.
-void OpenWad(std::string filename);
+void OpenWad(const std::string &filename);
 
 // attempt to open a wad from memory; only intended for the use
 // of WAD files inside archives
-void OpenMem(std::string filename, epi::File *memfile);
+void OpenMem(const std::string &filename, epi::File *memfile);
 
 // close a previously opened wad.
 void CloseWad();
 
 // create/finish an XWA file
-void CreateXWA(std::string filename);
+void CreateXWA(const std::string &filename);
 void FinishXWA();
 
 // give the number of levels detected in the wad.

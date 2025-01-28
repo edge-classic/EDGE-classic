@@ -39,7 +39,7 @@
 #include "epi.h"
 #include "stb_sprintf.h"
 
-extern void FatalError(const char *error, ...);
+[[noreturn]] extern void FatalError(const char *error, ...);
 
 namespace coal
 {

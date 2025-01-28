@@ -46,6 +46,7 @@ bool midi_disabled = false;
 static fluid_synth_t    *edge_fluid            = nullptr;
 static fluid_settings_t *edge_fluid_settings   = nullptr;
 static fluid_sfloader_t *edge_fluid_sf2_loader = nullptr;
+static int               edge_fluid_sf2_index  = -1;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(midi_soundfont, "Default", kConsoleVariableFlagArchive)
 
@@ -141,10 +142,7 @@ static long edge_fluid_ftell(void *handle)
 static int edge_fluid_free(fluid_fileapi_t* fileapi)
 {
     if (fileapi)
-    {
         delete fileapi;
-        fileapi = nullptr;
-    }
     return kFluidOk;
 }
 
@@ -723,7 +721,9 @@ bool StartupMIDI(void)
     if (add_loader)
         fluid_synth_add_sfloader(edge_fluid, edge_fluid_sf2_loader);
 
-    if (fluid_synth_sfload(edge_fluid, midi_soundfont.c_str(), 1) == -1)
+    edge_fluid_sf2_index = fluid_synth_sfload(edge_fluid, midi_soundfont.c_str(), 1);
+
+    if (edge_fluid_sf2_index == -1)
     {
         LogWarning("MIDI: Initialization failure.\n");
         delete_fluid_synth(edge_fluid);
@@ -750,7 +750,11 @@ void RestartMIDI(void)
     int old_entry = entry_playing;
 
     StopMusic();
-    fluid_synth_sfunload(edge_fluid, 0, 1);
+    if (edge_fluid_sf2_index > -1)
+    {
+        fluid_synth_sfunload(edge_fluid, edge_fluid_sf2_index, 1);
+        edge_fluid_sf2_index = -1;
+    }
 
     if (!StartupMIDI())
     {

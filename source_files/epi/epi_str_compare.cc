@@ -33,8 +33,8 @@ int StringCompare(std::string_view A, std::string_view B)
     size_t        B_pos = 0;
     size_t        A_end = A.size();
     size_t        B_end = B.size();
-    unsigned char AC    = 0;
-    unsigned char BC    = 0;
+    unsigned char AC;
+    unsigned char BC;
 
     for (;; A_pos++, B_pos++)
     {
@@ -64,8 +64,8 @@ int StringCompareMax(std::string_view A, std::string_view B, size_t n)
     size_t        B_pos = 0;
     size_t        A_end = A.size();
     size_t        B_end = B.size();
-    unsigned char AC    = 0;
-    unsigned char BC    = 0;
+    unsigned char AC;
+    unsigned char BC;
 
     for (;; A_pos++, B_pos++)
     {
@@ -99,8 +99,8 @@ int StringCaseCompareASCII(std::string_view A, std::string_view B)
     size_t        B_pos = 0;
     size_t        A_end = A.size();
     size_t        B_end = B.size();
-    unsigned char AC    = 0;
-    unsigned char BC    = 0;
+    unsigned char AC;
+    unsigned char BC;
 
     for (;; A_pos++, B_pos++)
     {
@@ -138,8 +138,8 @@ int StringCaseCompareMaxASCII(std::string_view A, std::string_view B, size_t n)
     size_t        B_pos = 0;
     size_t        A_end = A.size();
     size_t        B_end = B.size();
-    unsigned char AC    = 0;
-    unsigned char BC    = 0;
+    unsigned char AC;
+    unsigned char BC;
 
     for (;; A_pos++, B_pos++)
     {
@@ -181,8 +181,8 @@ int StringPrefixCompare(std::string_view A, std::string_view B)
     size_t        B_pos = 0;
     size_t        A_end = A.size();
     size_t        B_end = B.size();
-    unsigned char AC    = 0;
-    unsigned char BC    = 0;
+    unsigned char AC;
+    unsigned char BC;
 
     for (;; A_pos++, B_pos++)
     {

@@ -175,7 +175,7 @@ bool IncrementResolution(DisplayMode *mode, int what, int dir)
         return true;
     }
 
-    DisplayMode *best      = nullptr;
+    const DisplayMode *best      = nullptr;
     int          best_diff = (1 << 30);
 
     for (int i = 0; i < (int)screen_modes.size(); i++)

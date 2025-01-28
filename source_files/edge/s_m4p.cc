@@ -56,10 +56,10 @@ static ma_result ma_m4p_init_memory(const void *pData, size_t dataSize, const ma
 static void      ma_m4p_uninit(ma_m4p *pM4P, const ma_allocation_callbacks *pAllocationCallbacks);
 static ma_result ma_m4p_read_pcm_frames(ma_m4p *pM4P, void *pFramesOut, ma_uint64 frameCount, ma_uint64 *pFramesRead);
 static ma_result ma_m4p_seek_to_pcm_frame(ma_m4p *pM4P, ma_uint64 frameIndex);
-static ma_result ma_m4p_get_data_format(ma_m4p *pM4P, ma_format *pFormat, ma_uint32 *pChannels, ma_uint32 *pSampleRate,
+static ma_result ma_m4p_get_data_format(const ma_m4p *pM4P, ma_format *pFormat, ma_uint32 *pChannels, ma_uint32 *pSampleRate,
                                         ma_channel *pChannelMap, size_t channelMapCap);
-static ma_result ma_m4p_get_cursor_in_pcm_frames(ma_m4p *pM4P, ma_uint64 *pCursor);
-static ma_result ma_m4p_get_length_in_pcm_frames(ma_m4p *pM4P, ma_uint64 *pLength);
+static ma_result ma_m4p_get_cursor_in_pcm_frames(const ma_m4p *pM4P, ma_uint64 *pCursor);
+static ma_result ma_m4p_get_length_in_pcm_frames(const ma_m4p *pM4P, ma_uint64 *pLength);
 
 static ma_result ma_m4p_ds_read(ma_data_source *pDataSource, void *pFramesOut, ma_uint64 frameCount,
                                 ma_uint64 *pFramesRead)
@@ -270,7 +270,7 @@ static ma_result ma_m4p_seek_to_pcm_frame(ma_m4p *pM4P, ma_uint64 frameIndex)
     return MA_SUCCESS;
 }
 
-static ma_result ma_m4p_get_data_format(ma_m4p *pM4P, ma_format *pFormat, ma_uint32 *pChannels, ma_uint32 *pSampleRate,
+static ma_result ma_m4p_get_data_format(const ma_m4p *pM4P, ma_format *pFormat, ma_uint32 *pChannels, ma_uint32 *pSampleRate,
                                         ma_channel *pChannelMap, size_t channelMapCap)
 {
     /* Defaults for safety. */
@@ -319,7 +319,7 @@ static ma_result ma_m4p_get_data_format(ma_m4p *pM4P, ma_format *pFormat, ma_uin
     return MA_SUCCESS;
 }
 
-static ma_result ma_m4p_get_cursor_in_pcm_frames(ma_m4p *pM4P, ma_uint64 *pCursor)
+static ma_result ma_m4p_get_cursor_in_pcm_frames(const ma_m4p *pM4P, ma_uint64 *pCursor)
 {
     if (pCursor == NULL)
     {
@@ -338,7 +338,7 @@ static ma_result ma_m4p_get_cursor_in_pcm_frames(ma_m4p *pM4P, ma_uint64 *pCurso
     return MA_SUCCESS;
 }
 
-static ma_result ma_m4p_get_length_in_pcm_frames(ma_m4p *pM4P, ma_uint64 *pLength)
+static ma_result ma_m4p_get_length_in_pcm_frames(const ma_m4p *pM4P, ma_uint64 *pLength)
 {
     if (pLength == NULL)
     {
@@ -437,19 +437,19 @@ class M4PPlayer : public AbstractMusicPlayer
 {
   public:
     M4PPlayer();
-    ~M4PPlayer();
+    ~M4PPlayer() override;
 
-    bool OpenMemory(uint8_t *data, int length);
+    bool OpenMemory(const uint8_t *data, int length);
 
-    virtual void Close(void);
+    void Close(void) override;
 
-    virtual void Play(bool loop);
-    virtual void Stop(void);
+    void Play(bool loop) override;
+    void Stop(void) override;
 
-    virtual void Pause(void);
-    virtual void Resume(void);
+    void Pause(void) override;
+    void Resume(void) override;
 
-    virtual void Ticker(void);
+    void Ticker(void) override;
 };
 
 //----------------------------------------------------------------------------
@@ -464,7 +464,7 @@ M4PPlayer::~M4PPlayer()
     Close();
 }
 
-bool M4PPlayer::OpenMemory(uint8_t *data, int length)
+bool M4PPlayer::OpenMemory(const uint8_t *data, int length)
 {
     if (status_ != kNotLoaded)
         Close();

@@ -315,12 +315,12 @@ static bool IsP_END(char *name)
 //
 // Is the name a colourmap list start/end flag?
 //
-static bool IsC_START(char *name)
+static bool IsC_START(const char *name)
 {
     return (strncmp(name, "C_START", 8) == 0);
 }
 
-static bool IsC_END(char *name)
+static bool IsC_END(const char *name)
 {
     return (strncmp(name, "C_END", 8) == 0);
 }
@@ -328,12 +328,12 @@ static bool IsC_END(char *name)
 //
 // Is the name a texture list start/end flag?
 //
-static bool IsTX_START(char *name)
+static bool IsTX_START(const char *name)
 {
     return (strncmp(name, "TX_START", 8) == 0);
 }
 
-static bool IsTX_END(char *name)
+static bool IsTX_END(const char *name)
 {
     return (strncmp(name, "TX_END", 8) == 0);
 }
@@ -341,12 +341,12 @@ static bool IsTX_END(char *name)
 //
 // Is the name a high-resolution start/end flag?
 //
-static bool IsHI_START(char *name)
+static bool IsHI_START(const char *name)
 {
     return (strncmp(name, "HI_START", 8) == 0);
 }
 
-static bool IsHI_END(char *name)
+static bool IsHI_END(const char *name)
 {
     return (strncmp(name, "HI_END", 8) == 0);
 }
@@ -354,12 +354,12 @@ static bool IsHI_END(char *name)
 //
 // Is the name a XGL nodes start/end flag?
 //
-static bool IsXG_START(char *name)
+static bool IsXG_START(const char *name)
 {
     return (strncmp(name, "XG_START", 8) == 0);
 }
 
-static bool IsXG_END(char *name)
+static bool IsXG_END(const char *name)
 {
     return (strncmp(name, "XG_END", 8) == 0);
 }
@@ -884,7 +884,7 @@ int CheckForUniqueGameLumps(epi::File *file)
             if (lump1_found && lump2_found)
                 break;
 
-            RawWadEntry &entry = raw_info[i];
+            const RawWadEntry &entry = raw_info[i];
 
             if (strncmp(lump0, entry.name, 8) == 0)
             {
@@ -1042,7 +1042,7 @@ static void ProcessCOALInWad(DataFile *df)
 {
     std::string bare_filename = epi::GetFilename(df->name_);
 
-    WadFile *wad = df->wad_;
+    const WadFile *wad = df->wad_;
 
     if (wad->coal_huds_ >= 0)
     {
@@ -1064,7 +1064,7 @@ static void ProcessLuaInWad(DataFile *df)
 {
     std::string bare_filename = epi::GetFilename(df->name_);
 
-    WadFile *wad = df->wad_;
+    const WadFile *wad = df->wad_;
 
     if (wad->lua_huds_ >= 0)
     {
@@ -1160,7 +1160,7 @@ void ProcessWad(DataFile *df, size_t file_index)
 
     for (size_t i = 0; i < header.total_entries; i++)
     {
-        RawWadEntry &entry = raw_info[i];
+        const RawWadEntry &entry = raw_info[i];
 
         bool allow_ddf = (epi::StringCompare(game_base, "custom") == 0 || df->kind_ == kFileKindPWAD ||
                           df->kind_ == kFileKindPackWAD || df->kind_ == kFileKindIPK || df->kind_ == kFileKindIFolder);
@@ -1787,7 +1787,7 @@ epi::File *LoadLumpAsFile(int lump)
 {
     EPI_ASSERT(IsLumpIndexValid(lump));
 
-    LumpInfo *l = &lump_info[lump];
+    const LumpInfo *l = &lump_info[lump];
 
     DataFile *df = data_files[l->file];
 
@@ -2063,7 +2063,7 @@ int CheckPatchLumpNumberForName(const char *name)
 
     for (; i < (int)lump_info.size() && epi::StringCompareMax(lump_info[sorted_lumps[i]].name, buf, 8) == 0; i++)
     {
-        LumpInfo *L = &lump_info[sorted_lumps[i]];
+        const LumpInfo *L = &lump_info[sorted_lumps[i]];
 
         if (L->kind == kLumpPatch || L->kind == kLumpSprite || L->kind == kLumpNormal)
         {
@@ -2453,16 +2453,15 @@ bool IsLumpInPwad(const char *name)
 
     // if we're here then check pwad lumps
     int  lumpnum = CheckLumpNumberForName(name);
-    int  filenum = -1;
     bool in_pwad = false;
 
     if (lumpnum != -1)
     {
-        filenum = GetDataFileIndexForLump(lumpnum);
+        int filenum = GetDataFileIndexForLump(lumpnum);
 
         if (filenum >= 2) // ignore edge_defs and the IWAD itself
         {
-            DataFile *df = data_files[filenum];
+            const DataFile *df = data_files[filenum];
 
             // we only want pwads
             if (df->kind_ == kFileKindPWAD || df->kind_ == kFileKindPackWAD)

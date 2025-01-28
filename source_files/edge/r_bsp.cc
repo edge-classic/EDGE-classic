@@ -361,10 +361,10 @@ static void BSPWalkSeg(DrawSubsector *dsub, Seg *seg)
     float       f_ch    = 0;
     float       b_fh    = 0;
     float       b_ch    = 0;
-    MapSurface *f_floor = nullptr;
-    MapSurface *f_ceil  = nullptr;
-    MapSurface *b_floor = nullptr;
-    MapSurface *b_ceil  = nullptr;
+    const MapSurface *f_floor = nullptr;
+    const MapSurface *f_ceil  = nullptr;
+    const MapSurface *b_floor = nullptr;
+    const MapSurface *b_ceil  = nullptr;
 
     if (!fsector->height_sector)
     {
@@ -490,7 +490,7 @@ static void BSPWalkSeg(DrawSubsector *dsub, Seg *seg)
 // Placed here to be close to BSPWalkSeg(), which has similiar angle
 // clipping stuff in it.
 //
-static bool BSPCheckBBox(float *bspcoord)
+static bool BSPCheckBBox(const float *bspcoord)
 {
     EDGE_ZoneScoped;
 

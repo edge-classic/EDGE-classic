@@ -149,7 +149,7 @@ class WadFile
     int insert_point_;
 
     // constructor is private
-    WadFile(std::string name, char mode, FILE *file_pointer, epi::File *memory_file_pointer);
+    WadFile(const std::string &name, char mode, FILE *file_pointer, epi::File *memory_file_pointer);
 
   public:
     ~WadFile();
@@ -164,9 +164,9 @@ class WadFile
     // Note: if 'a' is used and the file is read-only, it will be
     //       silently opened in 'r' mode instead.
     //
-    static WadFile *Open(std::string filename, char mode = 'a');
+    static WadFile *Open(const std::string &filename, char mode = 'a');
 
-    static WadFile *OpenMem(std::string filename, epi::File *memfile);
+    static WadFile *OpenMem(const std::string &filename, epi::File *memfile);
 
     bool IsReadOnly() const
     {
@@ -235,7 +235,7 @@ class WadFile
     void InsertPoint(int index = -1);
 
   private:
-    static WadFile *Create(std::string filename, char mode);
+    static WadFile *Create(const std::string &filename, char mode);
 
     // read the existing directory.
     void ReadDirectory();

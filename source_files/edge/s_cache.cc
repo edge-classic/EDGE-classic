@@ -67,16 +67,16 @@ static void LoadSilence(SoundData *buf)
     EPI_CLEAR_MEMORY(buf->data_, float, length * 2);
 }
 #ifdef EDGE_CLASSIC
-static bool LoadDoom(SoundData *buf, uint8_t *lump, int length)
+static bool LoadDoom(SoundData *buf, const uint8_t *lump, int length)
 {
     return LoadDoomSound(buf, lump, length);
 }
-static bool LoadPCSpeaker(SoundData *buf, uint8_t *lump, int length)
+static bool LoadPCSpeaker(SoundData *buf, const uint8_t *lump, int length)
 {
     return LoadPCSpeakerSound(buf, lump, length);
 }
 #endif
-static bool LoadWav(SoundData *buf, uint8_t *lump, int length)
+static bool LoadWav(SoundData *buf, const uint8_t *lump, int length)
 {
     return LoadWAVSound(buf, lump, length);
 }

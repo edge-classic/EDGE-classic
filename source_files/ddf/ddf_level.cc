@@ -356,7 +356,7 @@ FinaleDefinition::FinaleDefinition() : pics_()
     Default();
 }
 
-FinaleDefinition::FinaleDefinition(FinaleDefinition &rhs) : pics_()
+FinaleDefinition::FinaleDefinition(const FinaleDefinition &rhs) : pics_()
 {
     Copy(rhs);
 }
@@ -365,7 +365,7 @@ FinaleDefinition::~FinaleDefinition()
 {
 }
 
-void FinaleDefinition::Copy(FinaleDefinition &src)
+void FinaleDefinition::Copy(const FinaleDefinition &src)
 {
     text_ = src.text_;
 
@@ -404,7 +404,7 @@ void FinaleDefinition::Default()
     music_   = 0;
 }
 
-FinaleDefinition &FinaleDefinition::operator=(FinaleDefinition &rhs)
+FinaleDefinition &FinaleDefinition::operator=(const FinaleDefinition &rhs)
 {
     if (&rhs != this)
         Copy(rhs);
@@ -423,7 +423,7 @@ MapDefinition::~MapDefinition()
 {
 }
 
-void MapDefinition::CopyDetail(MapDefinition &src)
+void MapDefinition::CopyDetail(const MapDefinition &src)
 {
     description_ = src.description_;
     namegraphic_ = src.namegraphic_;

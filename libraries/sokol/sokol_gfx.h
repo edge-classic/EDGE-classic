@@ -4425,7 +4425,7 @@ SOKOL_GFX_API_DECL const void* sg_d3d11_device(void);
 // D3D11: return ID3D11DeviceContext
 SOKOL_GFX_API_DECL const void* sg_d3d11_device_context(void);
 // D3D11: return ID3D11DepthStencilView
-SOKOL_GFX_API_DECL const void sg_d3d11_clear_depth(float value);
+SOKOL_GFX_API_DECL void sg_d3d11_clear_depth(float value);
 // D3D11: get internal buffer resource objects
 SOKOL_GFX_API_DECL sg_d3d11_buffer_info sg_d3d11_query_buffer_info(sg_buffer buf);
 // D3D11: get internal image resource objects
@@ -19523,7 +19523,7 @@ SOKOL_API_IMPL const void* sg_d3d11_device_context(void) {
     #endif
 }
 
-SOKOL_API_IMPL const void sg_d3d11_clear_depth(float value) {
+SOKOL_API_IMPL void sg_d3d11_clear_depth(float value) {
     #if defined(SOKOL_D3D11)
         _sg.d3d11.ctx->ClearDepthStencilView(_sg.d3d11.cur_pass.depth_stencil_view, D3D11_CLEAR_DEPTH, value, 0);
     #endif

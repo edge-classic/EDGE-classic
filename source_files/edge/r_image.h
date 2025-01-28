@@ -274,10 +274,10 @@ bool InitializeImages(void);
 void AnimationTicker(void);
 void DeleteAllImages(void);
 
-void         CreateFlats(std::vector<int> &lumps);
+void         CreateFlats(const std::vector<int> &lumps);
 void         CreateTextures(struct TextureDefinition **defs, int number);
 const Image *CreateSprite(const char *name, int lump, bool is_weapon);
-const Image *CreatePackSprite(std::string packname, PackFile *pack, bool is_weapon);
+const Image *CreatePackSprite(const std::string &packname, const PackFile *pack, bool is_weapon);
 void         CreateUserImages(void);
 void         ImageAddTxHx(int lump, const char *name, bool hires);
 void         AnimateImageSet(const Image **images, int number, int speed);

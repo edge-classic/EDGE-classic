@@ -111,7 +111,7 @@ int SaveGetError(void)
 //  READING PRIMITIVES
 //----------------------------------------------------------------------------
 
-bool SaveFileOpenRead(std::string filename)
+bool SaveFileOpenRead(const std::string &filename)
 {
     LogDebug("Opening savegame file (R): %s\n", filename.c_str());
 
@@ -457,7 +457,7 @@ bool SaveSkipReadChunk(const char *id)
 //  WRITING PRIMITIVES
 //----------------------------------------------------------------------------
 
-bool SaveFileOpenWrite(std::string filename, int version)
+bool SaveFileOpenWrite(const std::string &filename, int version)
 {
     LogDebug("Opening savegame file (W): %s\n", filename.c_str());
 

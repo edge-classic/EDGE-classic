@@ -295,7 +295,7 @@ void PackFile::SortEntries()
 //  DIRECTORY READING
 //----------------------------------------------------------------------------
 
-static void ProcessSubDirectory(PackFile *pack, std::string &fullpath)
+static void ProcessSubDirectory(PackFile *pack, const std::string &fullpath)
 {
     std::vector<epi::DirectoryEntry> fsd;
 
@@ -373,7 +373,7 @@ static PackFile *ProcessFolder(DataFile *df)
 
 epi::File *PackFile::OpenFolderEntry(size_t dir, size_t index)
 {
-    std::string &filename = directories_[dir].entries_[index].full_path_;
+    const std::string &filename = directories_[dir].entries_[index].full_path_;
 
     epi::File *F = epi::FileOpen(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
 
@@ -500,23 +500,23 @@ class ZIPFile : public epi::File
         EPI_ASSERT(iter);
     }
 
-    ~ZIPFile()
+    ~ZIPFile() override
     {
         if (iter != nullptr)
             mz_zip_reader_extract_iter_free(iter);
     }
 
-    int GetLength()
+    int GetLength() override
     {
         return (int)length;
     }
 
-    int GetPosition()
+    int GetPosition() override
     {
         return (int)pos;
     }
 
-    unsigned int Read(void *dest, unsigned int count)
+    unsigned int Read(void *dest, unsigned int count) override
     {
         if (pos >= length)
             return 0;
@@ -532,7 +532,7 @@ class ZIPFile : public epi::File
         return got;
     }
 
-    unsigned int Write(const void *src, unsigned int count)
+    unsigned int Write(const void *src, unsigned int count) override
     {
         EPI_UNUSED(src);
         EPI_UNUSED(count);
@@ -541,7 +541,7 @@ class ZIPFile : public epi::File
         return 0;
     }
 
-    bool Seek(int offset, int seekpoint)
+    bool Seek(int offset, int seekpoint) override
     {
         mz_uint want_pos = pos;
 
@@ -649,7 +649,7 @@ static void ProcessDDFInPack(PackFile *pack)
     {
         for (size_t entry = 0; entry < pack->directories_[dir].entries_.size(); entry++)
         {
-            PackEntry &ent = pack->directories_[dir].entries_[entry];
+            const PackEntry &ent = pack->directories_[dir].entries_[entry];
 
             std::string source = ent.name_;
             source += " in ";
@@ -1202,7 +1202,7 @@ epi::File *OpenPackMatch(PackFile *pack, const std::string &name, const std::vec
     auto results = pack->search_files_.equal_range(open_stem);
     for (auto file = results.first; file != results.second; ++file)
     {
-        for (auto ext : extensions)
+        for (const std::string &ext : extensions)
         {
             epi::ReplaceExtension(stem_match, ext);
             if (epi::StringCaseCompareASCII(stem_match, epi::GetFilename(file->second)) == 0)
@@ -1304,7 +1304,7 @@ int CheckPackForIWADs(DataFile *df)
     {
         for (size_t i = 0; i < pack->directories_[d].entries_.size(); i++)
         {
-            PackEntry &entry = pack->directories_[d].entries_[i];
+            const PackEntry &entry = pack->directories_[d].entries_[i];
 
             if (!entry.HasExtension(".wad"))
                 continue;

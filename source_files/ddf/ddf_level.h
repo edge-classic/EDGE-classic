@@ -28,15 +28,15 @@ class FinaleDefinition
 {
   public:
     FinaleDefinition();
-    FinaleDefinition(FinaleDefinition &rhs);
+    FinaleDefinition(const FinaleDefinition &rhs);
     ~FinaleDefinition();
 
   private:
-    void Copy(FinaleDefinition &src);
+    void Copy(const FinaleDefinition &src);
 
   public:
     void              Default(void);
-    FinaleDefinition &operator=(FinaleDefinition &rhs);
+    FinaleDefinition &operator=(const FinaleDefinition &rhs);
 
     // Text
     std::string     text_;
@@ -115,7 +115,7 @@ class MapDefinition
 
   public:
     void Default(void);
-    void CopyDetail(MapDefinition &src);
+    void CopyDetail(const MapDefinition &src);
 
     // Member vars....
     std::string name_;

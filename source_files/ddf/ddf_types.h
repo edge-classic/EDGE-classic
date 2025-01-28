@@ -131,15 +131,15 @@ class LabelOffset
 {
   public:
     LabelOffset();
-    LabelOffset(LabelOffset &rhs);
+    LabelOffset(const LabelOffset &rhs);
     ~LabelOffset();
 
   private:
-    void Copy(LabelOffset &src);
+    void Copy(const LabelOffset &src);
 
   public:
     void         Default();
-    LabelOffset &operator=(LabelOffset &rhs);
+    LabelOffset &operator=(const LabelOffset &rhs);
 
     std::string label_;
     int         offset_;
@@ -149,7 +149,7 @@ class DamageClass
 {
   public:
     DamageClass();
-    DamageClass(DamageClass &rhs);
+    DamageClass(const DamageClass &rhs);
     ~DamageClass();
 
     enum DamageClassDefault
@@ -162,11 +162,11 @@ class DamageClass
     };
 
   private:
-    void Copy(DamageClass &src);
+    void Copy(const DamageClass &src);
 
   public:
     void         Default(DamageClassDefault def);
-    DamageClass &operator=(DamageClass &rhs);
+    DamageClass &operator=(const DamageClass &rhs);
 
     // nominal damage amount (required)
     float nominal_;
@@ -265,7 +265,7 @@ class AttackDefinition
 
   public:
     void Default();
-    void CopyDetail(AttackDefinition &src);
+    void CopyDetail(const AttackDefinition &src);
 
     // Member vars
     std::string name_;
@@ -473,7 +473,7 @@ class WeaponDefinition
 
   public:
     void Default(void);
-    void CopyDetail(WeaponDefinition &src);
+    void CopyDetail(const WeaponDefinition &src);
 
     // Weapon's name, etc...
     std::string name_;

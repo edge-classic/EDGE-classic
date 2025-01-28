@@ -192,7 +192,7 @@ SoundEffectDefinition::~SoundEffectDefinition()
 //
 // SoundEffectDefinition::CopyDetail()
 //
-void SoundEffectDefinition::CopyDetail(SoundEffectDefinition &src)
+void SoundEffectDefinition::CopyDetail(const SoundEffectDefinition &src)
 {
     lump_name_        = src.lump_name_;
     pc_speaker_sound_ = src.pc_speaker_sound_;

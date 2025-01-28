@@ -222,7 +222,7 @@ AnimationDefinition::AnimationDefinition() : name_(), pics_()
 //
 // Copies all the detail with the exception of ddf info
 //
-void AnimationDefinition::CopyDetail(AnimationDefinition &src)
+void AnimationDefinition::CopyDetail(const AnimationDefinition &src)
 {
     type_       = src.type_;
     pics_       = src.pics_;

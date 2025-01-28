@@ -166,7 +166,7 @@ void PlayMovie(const std::string &name)
         movie_bytes = LoadLumpIntoMemory(movie->info_.c_str(), &length);
     else
     {
-        epi::File *mf = OpenFileFromPack(movie->info_.c_str());
+        epi::File *mf = OpenFileFromPack(movie->info_);
         if (mf)
         {
             movie_bytes = mf->LoadIntoMemory();

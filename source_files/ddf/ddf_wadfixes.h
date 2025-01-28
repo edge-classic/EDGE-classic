@@ -28,7 +28,7 @@ class WadFixDefinition
 
   public:
     void Default(void);
-    void CopyDetail(WadFixDefinition &src);
+    void CopyDetail(const WadFixDefinition &src);
 
     // Member vars....
     std::string name_;

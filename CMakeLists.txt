@@ -44,12 +44,6 @@ if (EDGE_SOKOL_GL OR EDGE_SOKOL_GLES3 OR EDGE_SOKOL_D3D11)
   set (EDGE_SOKOL ON)
 endif()
 
-if (EDGE_SOKOL_GLES3 AND NOT EMSCRIPTEN)
-  # This is lifted from upstream CMake so that we can use it without having
-  # to bump to miniumum version 3.27
-  include("${CMAKE_SOURCE_DIR}/cmake/EDGEFindOpenGL.cmake")
-endif()
-
 # Optional Features
 option(EDGE_CLASSIC "Enable default features for EDGE-Classic" ON)
 
@@ -82,7 +76,7 @@ endif()
 if(MSVC)
     # Override memory allocations to use mimalloc
     add_definitions(/FI"${CMAKE_SOURCE_DIR}/libraries/mimalloc/include/mimalloc-override.h")
-    # Use static C runtime, necessary for mimalloc and also means matching C runtiume doesn't need to be on users box
+    # Use static C runtime, necessary for mimalloc and also means matching C runtime doesn't need to be on users box
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:Debug>")   
 endif()
 

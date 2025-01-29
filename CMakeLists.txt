@@ -44,6 +44,13 @@ if (EDGE_SOKOL_GL OR EDGE_SOKOL_GLES3 OR EDGE_SOKOL_D3D11)
   set (EDGE_SOKOL ON)
 endif()
 
+# memory allocator
+option(EDGE_MIMALLOC "Enable mimalloc" ON)
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86|i[3456]86)$" OR CMAKE_GENERATOR_PLATFORM MATCHES "^(x86|Win32|win32)$")
+  set(EDGE_MIMALLOC OFF)
+  message(STATUS "Forcing mimalloc off for 32 bit build")
+endif()
+
 # Optional Features
 option(EDGE_CLASSIC "Enable default features for EDGE-Classic" ON)
 
@@ -74,10 +81,12 @@ if (WIN32 OR MINGW)
 endif()
 
 if(MSVC)
-    # Override memory allocations to use mimalloc
-    add_definitions(/FI"${CMAKE_SOURCE_DIR}/libraries/mimalloc/include/mimalloc-override.h")
     # Use static C runtime, necessary for mimalloc and also means matching C runtime doesn't need to be on users box
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:Debug>")   
+      if (EDGE_MIMALLOC)
+      # Override memory allocations to use mimalloc
+      add_definitions(/FI"${CMAKE_SOURCE_DIR}/libraries/mimalloc/include/mimalloc-override.h")
+    endif()
 endif()
 
 if (MSVC)
@@ -202,10 +211,13 @@ if (EDGE_PROFILING)
   add_compile_definitions(EDGE_PROFILING TRACY_ENABLE)
 endif()
 
-if (EDGE_MEMORY_CHECK)
-  add_compile_definitions(EDGE_MEMORY_CHECK)
-  if (EDGE_MEMORY_CHECK_FATAL)
-    add_compile_definitions(EDGE_MEMORY_CHECK_FATAL)
+if (EDGE_MEMORY_MIMALLOC)
+  add_compile_definitions(EDGE_MIMALLOC)
+  if (EDGE_MEMORY_CHECK)
+    add_compile_definitions(EDGE_MEMORY_CHECK)
+    if (EDGE_MEMORY_CHECK_FATAL)
+      add_compile_definitions(EDGE_MEMORY_CHECK_FATAL)
+    endif()
   endif()
 endif()
 

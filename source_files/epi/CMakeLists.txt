@@ -17,7 +17,7 @@ add_library(
 
 set (EPI_LIBRARIES almostequals HandmadeMath stb xxhash)
 
-if (NOT EMSCRIPTEN)
+if (NOT EMSCRIPTEN AND EDGE_MIMALLOC)
   list(APPEND EPI_LIBRARIES mimalloc)
 endif()
 

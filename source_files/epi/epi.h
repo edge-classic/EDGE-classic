@@ -21,17 +21,6 @@
 #include <math.h>
 #include <string.h>
 
-#if !defined(EDGE_WEB) && !defined(__MINGW32__)
-#include <mimalloc.h>
-#define Mem_Alloc   mi_malloc
-#define Mem_Realloc mi_realloc
-#define Mem_Free    mi_free
-#else
-#define Mem_Alloc malloc
-#define Mem_Realloc realloc
-#define Mem_Free  free
-#endif
-
 /* Important functions provided by Engine code */
 #ifdef __GNUC__
 [[noreturn]] void FatalError(const char *error, ...) __attribute__((format(printf, 1, 2)));

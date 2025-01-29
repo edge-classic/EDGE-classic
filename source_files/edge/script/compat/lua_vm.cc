@@ -248,12 +248,12 @@ static void *LUA_DefaultAllocator(void *user, void *ptr, size_t osize, size_t ns
     {
         if (ptr)
         {
-            Mem_Free(ptr);
+            free(ptr);
         }        
         return NULL;
     }
     else
-        return Mem_Realloc(ptr, nsize);
+        return realloc(ptr, nsize);
 }
 
 lua_State *LuaCreateVM()

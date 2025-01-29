@@ -18,6 +18,7 @@
 
 #include "con_main.h"
 
+#include <mimalloc.h>
 #include <stdarg.h>
 #include <string.h>
 
@@ -536,6 +537,22 @@ int ConsoleCommandClear(char **argv, int argc)
     return 0;
 }
 
+static void MemoryPrint(const char *msg, void *arg)
+{
+    EPI_UNUSED(arg);
+    LogPrint("%s", msg);
+}
+
+static int ConsoleCommandMemory(char **argv, int argc)
+{
+    EPI_UNUSED(argv);
+    EPI_UNUSED(argc);
+
+    LogPrint("---- mimalloc memory stats ---\n\n");
+    mi_stats_print_out(MemoryPrint, nullptr);
+    return 0;
+}
+
 //----------------------------------------------------------------------------
 
 // oh lordy....
@@ -631,7 +648,7 @@ const ConsoleCommand builtin_commands[] = {{"cat", ConsoleCommandType},
                                            {"version", ConsoleCommandVersion},
                                            {"quit", ConsoleCommandQuitEDGE},
                                            {"exit", ConsoleCommandQuitEDGE},
-
+                                           {"memory", ConsoleCommandMemory},
                                            // end of list
                                            {nullptr, nullptr}};
 

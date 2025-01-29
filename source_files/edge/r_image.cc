@@ -166,8 +166,6 @@ Image *ImageContainerLookup(ImageType image_type, const char *name, int source_t
     default:
         FatalError("ImageContainerLookup: Unknown Image Type");
     }
-
-    return nullptr;
 }
 
 static void do_Animate(ImageMap &bucket)

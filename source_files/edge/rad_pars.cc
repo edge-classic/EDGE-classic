@@ -362,7 +362,6 @@ static bool CheckForBoolean(const char *s)
 
     // Nope, it's an error.
     ScriptError("Bad boolean value (should be TRUE or FALSE): %s\n", s);
-    return false;
 }
 
 // AddStateToScript

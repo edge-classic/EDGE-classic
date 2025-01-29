@@ -1,11 +1,13 @@
-cmake_minimum_required(VERSION 3.18)
+#cmake_minimum_required(VERSION 3.18)
 project(libmimalloc C CXX)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
-option(MI_SECURE            "Use full security mitigations (like guard pages, allocation randomization, double-free mitigation, and free-list corruption detection)" OFF)
-option(MI_DEBUG_FULL        "Use full internal heap invariant checking in DEBUG mode (expensive)" OFF)
+include(CMakeDependentOption)
+
+cmake_dependent_option(MI_SECURE "Use full security mitigations (like guard pages, allocation randomization, double-free mitigation, and free-list corruption detection)" ON "EDGE_MEMORY_CHECK" OFF)
+cmake_dependent_option(MI_DEBUG_FULL "Use full internal heap invariant checking in DEBUG mode (expensive)" ON "EDGE_MEMORY_CHECK" OFF)
 option(MI_PADDING           "Enable padding to detect heap block overflow (always on in DEBUG or SECURE mode, or with Valgrind/ASAN)" OFF)
 option(MI_OVERRIDE          "Override the standard malloc interface (i.e. define entry points for 'malloc', 'free', etc)" ON)
 option(MI_XMALLOC           "Enable abort() call on memory allocation failure by default" OFF)

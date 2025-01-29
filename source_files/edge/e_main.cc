@@ -96,6 +96,10 @@
 #include "w_texture.h"
 #include "w_wad.h"
 
+#ifdef EDGE_MEMORY_CHECK
+#include <mimalloc.h>
+#endif
+
 extern ImageData *ReadAsEpiBlock(Image *rim);
 
 extern ConsoleVariable busy_wait;
@@ -851,8 +855,8 @@ static void AutocolourForMapObject(MapObjectDefinition *mobj)
                 ImageData *tmp_img_data = ReadAsEpiBlock((Image *)img);
                 if (tmp_img_data->depth_ == 1)
                 {
-                    ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette ? what_palette :
-                        (const uint8_t *)&playpal_data[0], img->opacity_);
+                    ImageData *rgb_img_data = RGBFromPalettised(
+                        tmp_img_data, what_palette ? what_palette : (const uint8_t *)&playpal_data[0], img->opacity_);
                     delete tmp_img_data;
                     tmp_img_data = rgb_img_data;
                 }
@@ -885,8 +889,9 @@ static void AutocolourForMapObject(MapObjectDefinition *mobj)
                     ImageData *tmp_img_data = ReadAsEpiBlock((Image *)img);
                     if (tmp_img_data->depth_ == 1)
                     {
-                        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette ? what_palette :
-                            (const uint8_t *)&playpal_data[0], img->opacity_);
+                        ImageData *rgb_img_data = RGBFromPalettised(
+                            tmp_img_data, what_palette ? what_palette : (const uint8_t *)&playpal_data[0],
+                            img->opacity_);
                         delete tmp_img_data;
                         tmp_img_data = rgb_img_data;
                     }
@@ -2043,7 +2048,7 @@ static void AddCommandLineFiles(void)
             // sanity check...
             if (epi::StringCaseCompareASCII(ext, ".wad") == 0 || epi::StringCaseCompareASCII(ext, ".pk3") == 0 ||
                 epi::StringCaseCompareASCII(ext, ".zip") == 0 || epi::StringCaseCompareASCII(ext, ".epk") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".ddf") == 0 || epi::StringCaseCompareASCII(ext, ".deh") == 0 || 
+                epi::StringCaseCompareASCII(ext, ".ddf") == 0 || epi::StringCaseCompareASCII(ext, ".deh") == 0 ||
                 epi::StringCaseCompareASCII(ext, ".bex") == 0)
             {
                 FatalError("Illegal filename for -script: %s\n", program_argument_list[p].c_str());
@@ -2204,6 +2209,40 @@ void EdgeShutdown(void)
     RendererShutdown();
     NetworkShutdown();
 }
+
+#ifdef EDGE_MEMORY_CHECK
+static void MemoryCheckOutput(const char *msg, void *arg)
+{
+    EPI_UNUSED(arg);
+
+    int    i   = 0;
+    size_t len = strlen(msg);
+    for (i = 0; i < len; i++)
+    {
+        if (msg[i] != '\n' && msg[i] != '\r' && msg[i] != '\t' && msg[i] != ' ')
+            break;
+    }
+    if (len && i != len)
+    {
+
+        LogDebug("%s", msg);
+#ifdef EDGE_MEMORY_CHECK_FATAL
+        // skip the prefix
+        if (!strcmp(msg, "mimalloc: warning: ") || !strcmp(msg, "mimalloc: error: "))
+        {
+            return;
+        }
+        FatalError("Memory Check Error: %s", msg);
+#endif
+    }
+}
+
+static void InitializeMemoryCheck()
+{
+    mi_option_enable(mi_option_show_errors);
+    mi_register_output(MemoryCheckOutput, nullptr);
+}
+#endif
 
 static void EdgeStartup(void)
 {
@@ -2419,6 +2458,11 @@ static void InitialState(void)
 //
 void EdgeMain(int argc, const char **argv)
 {
+
+#ifdef EDGE_MEMORY_CHECK
+    InitializeMemoryCheck();
+#endif
+
     // Seed RandomByte RNG
     InitRandomState();
 

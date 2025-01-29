@@ -2,7 +2,7 @@
 # Edge Classic - CMake Script
 ##########################################
 
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.27)
 
 project(
   edge-classic
@@ -56,6 +56,12 @@ option(EDGE_CLASSIC "Enable default features for EDGE-Classic" ON)
 # Development 
 option(EDGE_SANITIZE "Enable code sanitizing" OFF)
 option(EDGE_PROFILING "Enable Profiling" OFF)
+
+# Enables exhaustive memory checks, see mimalloc CMakeLists.txt for what is enabled
+# Memory error logging goes to debug.txt
+option(EDGE_MEMORY_CHECK "Enable Memory Checks" OFF)
+# If fatal memory checks are enabled, any memory error will be fatal and provide a callstack
+option(EDGE_MEMORY_CHECK_FATAL "Enable Fatal Memory Checks" OFF)
 
 include("${CMAKE_SOURCE_DIR}/cmake/EDGEClassic.cmake")
 
@@ -200,6 +206,13 @@ endif()
 if (EDGE_PROFILING)
   # these must be defined for all source files
   add_compile_definitions(EDGE_PROFILING TRACY_ENABLE)
+endif()
+
+if (EDGE_MEMORY_CHECK)
+  add_compile_definitions(EDGE_MEMORY_CHECK)
+  if (EDGE_MEMORY_CHECK_FATAL)
+    add_compile_definitions(EDGE_MEMORY_CHECK_FATAL)
+  endif()
 endif()
 
 add_subdirectory(libraries)

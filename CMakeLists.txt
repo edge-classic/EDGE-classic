@@ -46,7 +46,7 @@ endif()
 
 # memory allocator
 option(EDGE_MIMALLOC "Enable mimalloc" ON)
-if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86|i[3456]86)$" OR CMAKE_GENERATOR_PLATFORM MATCHES "^(x86|Win32|win32)$")
+if (${CMAKE_SIZEOF_VOID_P} MATCHES 4)
   set(EDGE_MIMALLOC OFF)
   message(STATUS "Forcing mimalloc off for 32 bit build")
 endif()

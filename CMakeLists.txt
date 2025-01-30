@@ -80,7 +80,7 @@ if(MSVC)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:Debug>")   
       if (EDGE_MIMALLOC)
       # Override memory allocations to use mimalloc
-      add_definitions(/FI"${CMAKE_SOURCE_DIR}/libraries/mimalloc/include/mimalloc-override.h")
+      add_compile_options(/FI"${CMAKE_SOURCE_DIR}/libraries/mimalloc/include/mimalloc-override.h")
     endif()
 endif()
 

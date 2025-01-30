@@ -51,6 +51,8 @@ option(EDGE_CLASSIC "Enable default features for EDGE-Classic" ON)
 option(EDGE_SANITIZE "Enable code sanitizing" OFF)
 option(EDGE_PROFILING "Enable Profiling" OFF)
 
+# memory allocator
+option(EDGE_MIMALLOC "Enable mimalloc" ON)
 # Enables exhaustive memory checks, see mimalloc CMakeLists.txt for what is enabled
 # Memory error logging goes to debug.txt
 option(EDGE_MEMORY_CHECK "Enable Memory Checks" OFF)
@@ -74,10 +76,12 @@ if (WIN32 OR MINGW)
 endif()
 
 if(MSVC)
-    # Override memory allocations to use mimalloc
-    add_definitions(/FI"${CMAKE_SOURCE_DIR}/libraries/mimalloc/include/mimalloc-override.h")
     # Use static C runtime, necessary for mimalloc and also means matching C runtime doesn't need to be on users box
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:Debug>")   
+      if (EDGE_MIMALLOC)
+      # Override memory allocations to use mimalloc
+      add_definitions(/FI"${CMAKE_SOURCE_DIR}/libraries/mimalloc/include/mimalloc-override.h")
+    endif()
 endif()
 
 if (MSVC)
@@ -202,10 +206,13 @@ if (EDGE_PROFILING)
   add_compile_definitions(EDGE_PROFILING TRACY_ENABLE)
 endif()
 
-if (EDGE_MEMORY_CHECK)
-  add_compile_definitions(EDGE_MEMORY_CHECK)
-  if (EDGE_MEMORY_CHECK_FATAL)
-    add_compile_definitions(EDGE_MEMORY_CHECK_FATAL)
+if (EDGE_MEMORY_MIMALLOC)
+  add_compile_definitions(EDGE_MIMALLOC)
+  if (EDGE_MEMORY_CHECK)
+    add_compile_definitions(EDGE_MEMORY_CHECK)
+    if (EDGE_MEMORY_CHECK_FATAL)
+      add_compile_definitions(EDGE_MEMORY_CHECK_FATAL)
+    endif()
   endif()
 endif()
 

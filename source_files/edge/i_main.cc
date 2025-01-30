@@ -16,7 +16,9 @@
 //
 //----------------------------------------------------------------------------
 
+#ifdef EDGE_MIMALLOC
 #include <mimalloc.h>
+#endif
 
 #include "dm_defs.h"
 #include "e_main.h"
@@ -33,8 +35,10 @@ extern "C"
 {
     int main(int argc, char *argv[])
     {
+#ifdef EDGE_MIMALLOC        
         if (SDL_SetMemoryFunctions(mi_malloc, mi_calloc, mi_realloc, mi_free) != 0)
             FatalError("Couldn't init SDL memory functions!!\n%s\n", SDL_GetError());
+#endif
 
         if (SDL_Init(0) < 0)
             FatalError("Couldn't init SDL!!\n%s\n", SDL_GetError());

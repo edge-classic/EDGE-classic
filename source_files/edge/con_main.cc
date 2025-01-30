@@ -18,7 +18,9 @@
 
 #include "con_main.h"
 
+#ifdef EDGE_MIMALLOC
 #include <mimalloc.h>
+#endif
 #include <stdarg.h>
 #include <string.h>
 
@@ -537,11 +539,13 @@ int ConsoleCommandClear(char **argv, int argc)
     return 0;
 }
 
+#ifdef EDGE_MIMALLOC    
 static void MemoryPrint(const char *msg, void *arg)
 {
     EPI_UNUSED(arg);
     LogPrint("%s", msg);
 }
+#endif
 
 static int ConsoleCommandMemory(char **argv, int argc)
 {
@@ -549,7 +553,9 @@ static int ConsoleCommandMemory(char **argv, int argc)
     EPI_UNUSED(argc);
 
     LogPrint("---- mimalloc memory stats ---\n\n");
+#ifdef EDGE_MIMALLOC    
     mi_stats_print_out(MemoryPrint, nullptr);
+#endif
     return 0;
 }
 

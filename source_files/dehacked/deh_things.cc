@@ -67,7 +67,7 @@ static constexpr char kExtraFlagNoRaise      = 'R';
 static constexpr char kExtraFlagNoGrudge     = 'G';
 static constexpr char kExtraFlagNoItemBk     = 'I';
 
-static constexpr uint8_t kCastMaximum = 17;
+static constexpr uint8_t kCastMaximum = 18;
 
 extern DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibility];
 
@@ -1147,6 +1147,11 @@ void CollectTheCast()
 
         default:
             continue;
+        }
+
+        if (order >= kCastMaximum)
+        {
+            FatalError("CollectTheCast() - Overflow");
         }
 
         cast_mobjs[order] = mt_num;

@@ -44,13 +44,6 @@ if (EDGE_SOKOL_GL OR EDGE_SOKOL_GLES3 OR EDGE_SOKOL_D3D11)
   set (EDGE_SOKOL ON)
 endif()
 
-# memory allocator
-option(EDGE_MIMALLOC "Enable mimalloc" ON)
-if (${CMAKE_SIZEOF_VOID_P} MATCHES 4)
-  set(EDGE_MIMALLOC OFF)
-  message(STATUS "Forcing mimalloc off for 32 bit build")
-endif()
-
 # Optional Features
 option(EDGE_CLASSIC "Enable default features for EDGE-Classic" ON)
 
@@ -58,6 +51,8 @@ option(EDGE_CLASSIC "Enable default features for EDGE-Classic" ON)
 option(EDGE_SANITIZE "Enable code sanitizing" OFF)
 option(EDGE_PROFILING "Enable Profiling" OFF)
 
+# memory allocator
+option(EDGE_MIMALLOC "Enable mimalloc" ON)
 # Enables exhaustive memory checks, see mimalloc CMakeLists.txt for what is enabled
 # Memory error logging goes to debug.txt
 option(EDGE_MEMORY_CHECK "Enable Memory Checks" OFF)

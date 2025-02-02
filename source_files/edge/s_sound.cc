@@ -285,10 +285,12 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
             ma_node_attach_output_bus(&chan->channel_sound_, 0, &vacuum_node, 0);
         else if (submerged_sound_effects)
             ma_node_attach_output_bus(&chan->channel_sound_, 0, &underwater_node, 0);
+        else if (sector_reverb)
+            ma_node_attach_output_bus(&chan->channel_sound_, 0, &reverb_node, 0);
         else if (dynamic_reverb.d_)
         {
             if (outdoor_reverb)
-                    ma_node_attach_output_bus(&chan->channel_sound_, 0, &reverb_delay_node, 0);
+                ma_node_attach_output_bus(&chan->channel_sound_, 0, &reverb_delay_node, 0);
             else
                 ma_node_attach_output_bus(&chan->channel_sound_, 0, &reverb_node, 0);
         }
@@ -304,6 +306,8 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
                 ma_node_attach_output_bus(&chan->channel_sound_, 0, &vacuum_node, 0);
             else if (submerged_sound_effects)
                 ma_node_attach_output_bus(&chan->channel_sound_, 0, &underwater_node, 0);
+            else if (sector_reverb)
+                ma_node_attach_output_bus(&chan->channel_sound_, 0, &reverb_node, 0);
             else if (dynamic_reverb.d_)
             {
                 if (outdoor_reverb)

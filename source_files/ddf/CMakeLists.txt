@@ -18,6 +18,7 @@ add_library(
   ddf_main.cc
   ddf_movie.cc
   ddf_playlist.cc
+  ddf_reverb.cc
   ddf_sector.cc
   ddf_sfx.cc
   ddf_states.cc
@@ -30,7 +31,7 @@ add_library(
 
 target_link_libraries(ddf PRIVATE almostequals epi HandmadeMath stb)
 
-target_include_directories(ddf PRIVATE ../edge)
+target_include_directories(ddf PRIVATE ../edge ../../libraries/miniaudio)
 
 target_include_directories(ddf PUBLIC ./)
 

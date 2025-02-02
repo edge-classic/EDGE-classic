@@ -129,6 +129,10 @@ Note: All <bool> fields default to false unless mentioned otherwise.
                                  // - EDGE-Classic additionally supports fogdensity values of 510-1020, which would be equivalent to the 50-100% SECTORS.DDF
                                  //   FOG_DENSITY scale, but map editors may clamp this value to 510. Switching editors, manually editing
                                  //   the map's TEXTMAP, or using a DDF sector fog special instead may be necessary in these cases.
+
+      reverbpreset = <string>;   // When the player is in this sector, sounds will have this DDF reverb preset applied to them.
+                                 // If present, will override any reverb preset that a DDF sector special defines, as well as dynamic
+                                 // reverb
    }
 
    thing

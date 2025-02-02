@@ -297,6 +297,10 @@ struct Sector
     // origin for any sounds played by the sector
     Position sound_effects_origin;
 
+    // DDF reverb effect to use
+    // Will override dynamic reverb
+    ReverbDefinition *sound_reverb;
+
     int           line_count;
     struct Line **lines; // [line_count] size
 

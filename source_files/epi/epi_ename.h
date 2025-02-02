@@ -207,4 +207,13 @@ class EName
     static NameManager name_data_;
 };
 
+// struct to pass when creating unordered_map, etc, to use ENames
+struct ContainerENameHash
+{
+    uint64_t operator()(const epi::EName &k) const
+    {
+        return k.GetIndex();
+    }
+};
+
 } // namespace epi

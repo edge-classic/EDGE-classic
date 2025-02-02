@@ -198,6 +198,7 @@ void DDFMainGetString(const char *info, void *storage);
 void DDFMainGetLumpName(const char *info, void *storage);
 void DDFMainGetTime(const char *info, void *storage);
 void DDFMainGetColourmap(const char *info, void *storage);
+void DDFMainGetReverb(const char *info, void *storage);
 void DDFMainGetRGB(const char *info, void *storage);
 void DDFMainGetWhenAppear(const char *info, void *storage);
 void DDFMainGetBitSet(const char *info, void *storage);
@@ -337,6 +338,10 @@ void DDFFixCleanUp(void);
 // MOVIES 2023
 void DDFMovieInit(void);
 void DDFMovieCleanUp(void);
+
+// REVERBS 2025
+void DDFReverbsInit(void);
+void DDFReverbsCleanUp(void);
 
 // Miscellaneous stuff needed here & there
 extern const DDFCommandList floor_commands[];

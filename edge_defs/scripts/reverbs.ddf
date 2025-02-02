@@ -1,0 +1,32 @@
+<REVERBS>
+
+// These four must exist for the "Dynamic Reverb" option in the Sound Options menu
+// to function properly! If any of these are missing on startup it is a fatal error!
+
+[INDOOR_DYNAMIC_REVERB_STRONG]
+ROOM_SIZE = 45%;
+DAMPING_LEVEL = 35%;
+WET_LEVEL = 35%;
+DRY_LEVEL = 50%;
+REVERB_WIDTH = 65%;
+
+[OUTDOOR_DYNAMIC_REVERB_STRONG]
+ROOM_SIZE = 30%;
+DAMPING_LEVEL = 35%;
+WET_LEVEL = 25%;
+DRY_LEVEL = 50%;
+REVERB_WIDTH = 15%;
+
+[INDOOR_DYNAMIC_REVERB_WEAK]
+ROOM_SIZE = 40%;
+DAMPING_LEVEL = 50%;
+WET_LEVEL = 20%;
+DRY_LEVEL = 70%;
+REVERB_WIDTH = 50%;
+
+[OUTDOOR_DYNAMIC_REVERB_WEAK]
+ROOM_SIZE = 30%;
+DAMPING_LEVEL = 45%;
+WET_LEVEL = 20%;
+DRY_LEVEL = 65%;
+REVERB_WIDTH = 15%;

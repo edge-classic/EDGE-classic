@@ -26,6 +26,12 @@ EPI_XX(None)
 EPI_XX(Null)
 EPI_XX(_)
 
+//------------ DDF Miscellany ---------------------------
+EPI_XX(Outdoordynamicreverbstrong)
+EPI_XX(Indoordynamicreverbstrong)
+EPI_XX(Outdoordynamicreverbweak)
+EPI_XX(Indoordynamicreverbweak)
+
 //------------ UDMF ---------------------------
 
 // generic keys
@@ -102,6 +108,7 @@ EPI_XX(Alphaceiling)
 EPI_XX(Rotationfloor)
 EPI_XX(Rotationceiling)
 EPI_XX(Gravity)
+EPI_XX(Reverbpreset)
 
 // things
 EPI_XX(Height)

@@ -32,6 +32,7 @@
 #include "am_map.h"
 #include "ddf_colormap.h"
 #include "ddf_main.h"
+#include "ddf_reverb.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_main.h"
@@ -496,6 +497,9 @@ static void LoadSectors(int lump)
             ss->properties.fog_color   = kRGBANoValue;
             ss->properties.fog_density = 0;
         }
+
+        if (ss->properties.special && ss->properties.special->reverb_preset_)
+            ss->sound_reverb = ss->properties.special->reverb_preset_;
 
         ss->active_properties = &ss->properties;
 
@@ -1514,6 +1518,7 @@ static void LoadUDMFSectors()
             int       fog_density = 0;
             char      floor_tex[10];
             char      ceil_tex[10];
+            ReverbDefinition *reverb = nullptr;
             strcpy(floor_tex, "-");
             strcpy(ceil_tex, "-");
             for (;;)
@@ -1615,6 +1620,9 @@ static void LoadUDMFSectors()
                     break;
                 case epi::kENameGravity:
                     gravfactor = lex.state_.decimal;
+                    break;
+                case epi::kENameReverbpreset:
+                    reverb = reverbdefs.Lookup(value);
                     break;
                 default:
                     break;
@@ -1725,6 +1733,13 @@ static void LoadUDMFSectors()
                 ss->properties.fog_color   = kRGBANoValue;
                 ss->properties.fog_density = 0;
             }
+
+            // Allow UDMF sector reverb information to override DDFSECT types
+            if (reverb)
+                ss->sound_reverb = reverb;
+            else if (ss->properties.special && ss->properties.special->reverb_preset_)
+                ss->sound_reverb = ss->properties.special->reverb_preset_;
+
             if (light_color != kRGBAWhite)
             {
                 if (light_color == kRGBANoValue)

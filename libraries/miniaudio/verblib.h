@@ -101,6 +101,12 @@ extern "C" {
     /* Get the mode of the reverb. */
     float verblib_get_mode ( const verblib* verb );
 
+    /* Set the gain of the reverb */
+    void verblib_set_gain ( verblib* verb, float value );
+
+    /* Get the gain of the reverb */
+    float verblib_get_gain ( const verblib* verb );
+
     /* Get the decay time in sample frames based on the current room size setting. */
     /* If freeze mode is active, the decay time is infinite and this function returns 0. */
     unsigned long verblib_get_decay_time_in_frames ( const verblib* verb );
@@ -191,6 +197,7 @@ extern "C" {
         float width;
         float input_width;
         float mode;
+        float user_gain;
 
         /*
         * The following are all declared inline
@@ -360,7 +367,7 @@ static void verblib_update ( verblib* verb )
     {
         verb->roomsize1 = verb->roomsize;
         verb->damp1 = verb->damp;
-        verb->gain = verblib_fixedgain;
+        verb->gain = verb->user_gain;
     }
 
     for ( i = 0; i < verblib_numcombs; i++ )
@@ -461,6 +468,7 @@ int verblib_initialize ( verblib* verb, unsigned long sample_rate, unsigned int 
     verblib_set_width ( verb, verblib_initialwidth );
     verblib_set_input_width ( verb, verblib_initialinputwidth );
     verblib_set_mode ( verb, verblib_initialmode );
+    verblib_set_gain ( verb, verblib_fixedgain );
 
     /* The buffers will be full of rubbish - so we MUST mute them. */
     verblib_mute ( verb );
@@ -659,6 +667,17 @@ float verblib_get_mode ( const verblib* verb )
         return 1.0f;
     }
     return 0.0f;
+}
+
+float verblib_get_gain ( const verblib* verb )
+{
+    return verb->user_gain;
+}
+
+void verblib_set_gain ( verblib* verb, float value )
+{
+    verb->user_gain = value;
+    verblib_update ( verb );
 }
 
 unsigned long verblib_get_decay_time_in_frames ( const verblib* verb )

@@ -20,6 +20,7 @@
 
 #include <set>
 
+#include "ddf_reverb.h"
 #include "epi.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
@@ -41,6 +42,7 @@ bool no_sound = false;
 
 int sound_device_frequency;
 bool outdoor_reverb = false;
+bool sector_reverb = false;
 
 std::set<std::string>       available_soundfonts;
 extern std::string          game_directory;
@@ -56,7 +58,7 @@ static ma_lpf_node underwater_lpf_node;
 ma_delay_node underwater_node;
 // Dynamic reverb
 ma_delay_node reverb_delay_node;
-ma_reverb_node reverb_node;
+ma_freeverb_node reverb_node;
 
 EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(dynamic_reverb, "0", kConsoleVariableFlagArchive, 0, 2)
 
@@ -81,7 +83,7 @@ void StartupAudio(void)
         // Underwater/Submerged
         ma_delay_node_config delay_node_config = ma_delay_node_config_init(channels, sound_device_frequency, (ma_uint32)(sound_device_frequency * 0.15f), 0.15f);
         ma_delay_node_init(ma_engine_get_node_graph(&sound_engine), &delay_node_config, NULL, &underwater_node);
-        ma_lpf_node_config lpf_config = ma_lpf_node_config_init(channels, sound_device_frequency, 400.0f, 2);
+        ma_lpf_node_config lpf_config = ma_lpf_node_config_init(channels, sound_device_frequency, 800.0f, 2);
         ma_lpf_node_init(ma_engine_get_node_graph(&sound_engine), &lpf_config, NULL, &underwater_lpf_node);
         ma_node_attach_output_bus(&underwater_lpf_node, 0, ma_engine_get_endpoint(&sound_engine), 0);
         ma_node_attach_output_bus(&underwater_node, 0, &underwater_lpf_node, 0);
@@ -94,8 +96,8 @@ void StartupAudio(void)
         // Dynamic Reverb
         delay_node_config = ma_delay_node_config_init(channels, sound_device_frequency, (ma_uint32)(sound_device_frequency * 0.25f), 0.20f);
         ma_delay_node_init(ma_engine_get_node_graph(&sound_engine), &delay_node_config, NULL, &reverb_delay_node);
-        ma_reverb_node_config reverb_node_config = ma_reverb_node_config_init(2, sound_device_frequency);
-        ma_reverb_node_init(ma_engine_get_node_graph(&sound_engine), &reverb_node_config, NULL, &reverb_node);
+        ma_freeverb_node_config reverb_node_config = ma_freeverb_node_config_init(2, sound_device_frequency);
+        ma_freeverb_node_init(ma_engine_get_node_graph(&sound_engine), &reverb_node_config, NULL, &reverb_node);
         ma_node_attach_output_bus(&reverb_node, 0, ma_engine_get_endpoint(&sound_engine), 0);
         ma_node_attach_output_bus(&reverb_delay_node, 0, &reverb_node, 0);
     }

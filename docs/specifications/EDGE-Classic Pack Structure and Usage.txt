@@ -98,6 +98,7 @@ DDFSFX               sounds.ddf
 DDFSTYLE             styles.ddf
 DDFSWTH              switch.ddf
 DDFTHING             things.ddf
+DDFVERB              reverbs.ddf
 DDFWEAP              weapons.ddf
 LUAHUDS              edge_hud.lua
 RSCRIPT              rscript.rts

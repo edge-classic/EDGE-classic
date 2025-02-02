@@ -315,7 +315,7 @@ static const char *tag_conversion_table[] = {
     "FIXES",      "WADFIXES", "FONTS",   "DDFFONT", "GAMES",      "DDFGAME",  "IMAGES",    "DDFIMAGE",
     "LANGUAGES",  "DDFLANG",  "LEVELS",  "DDFLEVL", "LINES",      "DDFLINE",  "PLAYLISTS", "DDFPLAY",
     "SECTORS",    "DDFSECT",  "SOUNDS",  "DDFSFX",  "STYLES",     "DDFSTYLE", "SWITCHES",  "DDFSWTH",
-    "THINGS",     "DDFTHING", "WEAPONS", "DDFWEAP", "MOVIES",     "DDFMOVIE",
+    "THINGS",     "DDFTHING", "WEAPONS", "DDFWEAP", "MOVIES",     "DDFMOVIE", "REVERBS",   "DDFVERB",
 
     nullptr,      nullptr};
 
@@ -2041,6 +2041,7 @@ static ddf_reader_t ddf_readers[kTotalDDFTypes] = {
     {kDDFTypeThing, "DDFTHING", "things.ddf", "Things", DDFReadThings},
     {kDDFTypePlaylist, "DDFPLAY", "playlist.ddf", "Playlists", DDFReadMusicPlaylist},
     {kDDFTypeLine, "DDFLINE", "lines.ddf", "Lines", DDFReadLines},
+    {kDDFTypeReverb, "DDFVERB", "reverbs.ddf", "Reverbs", ddf::ReverbDefinition::ReadDDF},
     {kDDFTypeSector, "DDFSECT", "sectors.ddf", "Sectors", DDFReadSectors},
     {kDDFTypeSwitch, "DDFSWTH", "switch.ddf", "Switches", DDFReadSwitch},
     {kDDFTypeAnim, "DDFANIM", "anims.ddf", "Anims", DDFReadAnims},
@@ -2161,6 +2162,24 @@ void DDFParseEverything()
 
     for (size_t d = 0; d < kTotalDDFTypes; d++)
         DDFParseUnreadFile(d);
+}
+
+static char ename_buffer[256];
+
+epi::EName DDFCreateEName(std::string_view name, bool no_create)
+{
+    if (name.empty())
+        return epi::kENameNone;
+    if (name.size() > 255)
+        DDFError("DDFCreateEname: %s exceeds 256 character limit.\n", std::string(name).c_str());
+    char *ename_ptr = ename_buffer;
+    for (const char ch : name)
+    {
+        if (ch != ' ' && ch != '_')
+            *ename_ptr++ = ch;
+    }
+    *ename_ptr = '\0';
+    return epi::EName(ename_buffer, no_create);
 }
 
 //--- editor settings ---

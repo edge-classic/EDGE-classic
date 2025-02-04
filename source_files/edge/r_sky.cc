@@ -374,7 +374,11 @@ static void RenderSkyCylinder(void)
     }
     else if (fc_to_use != kRGBANoValue)
     {
+#ifdef EDGE_SOKOL
+        fd_to_use *= (current_sky_stretch == kSkyStretchVanilla ? 0.009f : 0.003f);
+#else
         fd_to_use *= (current_sky_stretch == kSkyStretchVanilla ? 0.015f : 0.005f);
+#endif
     }
 
     // Render top cap

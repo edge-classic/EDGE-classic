@@ -102,6 +102,7 @@ EPI_XX(Alphaceiling)
 EPI_XX(Rotationfloor)
 EPI_XX(Rotationceiling)
 EPI_XX(Gravity)
+EPI_XX(Reverbpreset)
 
 // things
 EPI_XX(Height)

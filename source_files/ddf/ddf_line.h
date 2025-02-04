@@ -19,6 +19,7 @@
 #pragma once
 
 #include "ddf_colormap.h"
+#include "ddf_reverb.h"
 #include "ddf_types.h"
 #include "epi.h"
 
@@ -853,6 +854,8 @@ class SectorType
     Colormap *fog_cmap_;
     RGBAColor fog_color_;
     float     fog_density_;
+
+    ddf::ReverbDefinition *reverb_preset_;
 
   private:
     // disable copy construct and assignment operator

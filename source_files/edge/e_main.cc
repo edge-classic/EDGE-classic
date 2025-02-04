@@ -61,6 +61,7 @@
 #include "hu_stuff.h"
 #include "i_defs_gl.h"
 #include "i_movie.h"
+#include "i_sound.h"
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_bbox.h"

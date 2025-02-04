@@ -32,6 +32,7 @@
 #include "coal.h"
 #endif
 #include "ddf_colormap.h"
+#include "ddf_reverb.h"
 #include "dm_state.h"
 #include "e_input.h"
 #include "g_game.h"
@@ -58,8 +59,6 @@ extern void      COALSetVector(coal::VM *vm, const char *mod_name, const char *v
 EDGE_DEFINE_CONSOLE_VARIABLE(erraticism, "0", kConsoleVariableFlagArchive)
 
 EDGE_DEFINE_CONSOLE_VARIABLE(view_bobbing, "0", kConsoleVariableFlagArchive)
-
-float room_area;
 
 static constexpr float   kMaximumBob       = 16.0f;
 static constexpr uint8_t kZoomAngleDivisor = 4;
@@ -900,79 +899,75 @@ bool PlayerThink(Player *player)
     player->kick_offset_ /= 1.6f;
 
     // Adjust reverb node parameters if applicable
-    if (players[console_player] == player && dynamic_reverb.d_)
+    if (players[console_player] == player)
     {
-        HMM_Vec2 room_checker;
-        float    room_check = 0;
-        float    player_x     = player->map_object_->x;
-        float    player_y     = player->map_object_->y;
-        PathTraverse(player_x, player_y, player_x, 32768.0f, kPathAddLines, P_RoomPath, &room_checker);
-        room_check += abs(room_checker.Y - player_y);
-        PathTraverse(player_x, player_y, 32768.0f + player_x, 32768.0f + player_y, kPathAddLines, P_RoomPath,
-                     &room_checker);
-        room_check += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
-        PathTraverse(player_x, player_y, -32768.0f + player_x, 32768.0f + player_y, kPathAddLines, P_RoomPath,
-                     &room_checker);
-        room_check += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
-        PathTraverse(player_x, player_y, player_x, -32768.0f, kPathAddLines, P_RoomPath, &room_checker);
-        room_check += abs(player_y - room_checker.Y);
-        PathTraverse(player_x, player_y, -32768.0f + player_x, -32768.0f + player_y, kPathAddLines, P_RoomPath,
-                     &room_checker);
-        room_check += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
-        PathTraverse(player_x, player_y, 32768.0f + player_x, -32768.0f + player_y, kPathAddLines, P_RoomPath,
-                     &room_checker);
-        room_check += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
-        PathTraverse(player_x, player_y, -32768.0f, player_y, kPathAddLines, P_RoomPath, &room_checker);
-        room_check += abs(player_x - room_checker.X);
-        PathTraverse(player_x, player_y, 32768.0f, player_y, kPathAddLines, P_RoomPath, &room_checker);
-        room_check += abs(room_checker.X - player_x);
-        if (dynamic_reverb.d_ == 1) // Headphones
+        if (player->map_object_->subsector_->sector->sound_reverb)
         {
+            sector_reverb = true;
+            player->map_object_->subsector_->sector->sound_reverb->ApplyReverb(&reverb_node.reverb);
+        }
+        else if (dynamic_reverb.d_)
+        {
+            sector_reverb = false;
+            HMM_Vec2 room_checker;
+            float    room_check = 0;
+            float    player_x     = player->map_object_->x;
+            float    player_y     = player->map_object_->y;
+            PathTraverse(player_x, player_y, player_x, 32768.0f, kPathAddLines, P_RoomPath, &room_checker);
+            room_check += abs(room_checker.Y - player_y);
+            PathTraverse(player_x, player_y, 32768.0f + player_x, 32768.0f + player_y, kPathAddLines, P_RoomPath,
+                        &room_checker);
+            room_check += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
+            PathTraverse(player_x, player_y, -32768.0f + player_x, 32768.0f + player_y, kPathAddLines, P_RoomPath,
+                        &room_checker);
+            room_check += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
+            PathTraverse(player_x, player_y, player_x, -32768.0f, kPathAddLines, P_RoomPath, &room_checker);
+            room_check += abs(player_y - room_checker.Y);
+            PathTraverse(player_x, player_y, -32768.0f + player_x, -32768.0f + player_y, kPathAddLines, P_RoomPath,
+                        &room_checker);
+            room_check += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
+            PathTraverse(player_x, player_y, 32768.0f + player_x, -32768.0f + player_y, kPathAddLines, P_RoomPath,
+                        &room_checker);
+            room_check += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
+            PathTraverse(player_x, player_y, -32768.0f, player_y, kPathAddLines, P_RoomPath, &room_checker);
+            room_check += abs(player_x - room_checker.X);
+            PathTraverse(player_x, player_y, 32768.0f, player_y, kPathAddLines, P_RoomPath, &room_checker);
+            room_check += abs(room_checker.X - player_x);
+            room_check *= 0.125f;
             if (EDGE_IMAGE_IS_SKY(player->map_object_->subsector_->sector->ceiling))
             {
                 outdoor_reverb = true;
-                ma_delay_node_set_decay(&reverb_delay_node, room_check * 0.000005395f);
-                verblib_set_damping(&reverb_node.reverb, 1.0f);
-                verblib_set_dry(&reverb_node.reverb, 0.75f);
-                verblib_set_wet(&reverb_node.reverb, 0.20f);
+                ma_delay_node_set_decay(&reverb_delay_node, room_check * 0.00004316f);
+                if (dynamic_reverb.d_ == 1) // Headphones
+                    ddf::ReverbDefinition::kOutdoorWeak.ApplyReverb(&reverb_node.reverb);
+                else // Speakers
+                    ddf::ReverbDefinition::kOutdoorStrong.ApplyReverb(&reverb_node.reverb);
+                if (room_check < 700)
+                {
+                    if (room_check > 350)
+                        verblib_set_room_size(&reverb_node.reverb, 0.3f);
+                    else
+                        verblib_set_room_size(&reverb_node.reverb, 0.2f);
+                }
             }
             else
             {
                 outdoor_reverb = false;
-                verblib_set_dry(&reverb_node.reverb, 0.75f);
-                verblib_set_wet(&reverb_node.reverb, 0.25f);
-                room_check *= 0.125f;
-                if (room_check > 750.0f)
+                if (dynamic_reverb.d_ == 1) // Headphones
+                    ddf::ReverbDefinition::kIndoorWeak.ApplyReverb(&reverb_node.reverb);
+                else // Speakers
+                    ddf::ReverbDefinition::kIndoorStrong.ApplyReverb(&reverb_node.reverb);
+                if (room_check < 700)
                 {
-                    verblib_set_damping(&reverb_node.reverb, 0.25f);
-                    verblib_set_room_size(&reverb_node.reverb, 0.75f);
-                }
-                else
-                {
-                    room_check *= 0.001f;
-                    verblib_set_damping(&reverb_node.reverb, 1.0f - room_check);
-                    verblib_set_room_size(&reverb_node.reverb, room_check);
+                    if (room_check > 350)
+                        verblib_set_room_size(&reverb_node.reverb, 0.2f);
+                    else
+                        verblib_set_room_size(&reverb_node.reverb, 0.1f);
                 }
             }
         }
-        else // Speakers
-        {
-            if (EDGE_IMAGE_IS_SKY(player->map_object_->subsector_->sector->ceiling))
-            {
-                outdoor_reverb = true;
-                ma_delay_node_set_decay(&reverb_delay_node, room_check * 0.000005395f);
-                verblib_set_damping(&reverb_node.reverb, 1.0f);
-                verblib_set_dry(&reverb_node.reverb, 0.75f);
-                verblib_set_wet(&reverb_node.reverb, 0.20f);
-            }
-            else
-            {
-                outdoor_reverb = false;
-                verblib_set_damping(&reverb_node.reverb, 0.5f);
-                verblib_set_dry(&reverb_node.reverb, 0.75f);
-                verblib_set_wet(&reverb_node.reverb, 0.25f);
-            }
-        }
+        else
+            sector_reverb = false; // keep sound from being hooked up to the reverb node
     }
 
     return should_think;

@@ -35,6 +35,7 @@ enum DDFType
     kDDFTypeLine,
     kDDFTypeMovie,
     kDDFTypePlaylist,
+    kDDFTypeReverb,
     kDDFTypeSFX,
     kDDFTypeSector,
     kDDFTypeStyle,

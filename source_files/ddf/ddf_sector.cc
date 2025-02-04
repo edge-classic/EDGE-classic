@@ -77,6 +77,8 @@ static const DDFCommandList sect_commands[] = {
     DDF_FIELD("FOG_COLOR", dummy_sector, fog_cmap_, DDFMainGetColourmap),
     DDF_FIELD("FOG_DENSITY", dummy_sector, fog_density_, DDFMainGetPercent),
 
+    DDF_FIELD("REVERB_PRESET", dummy_sector, reverb_preset_, ddf::ReverbDefinition::AssignReverb),
+
     {nullptr, nullptr, 0, nullptr}};
 
 //
@@ -485,6 +487,8 @@ void SectorType::CopyDetail(const SectorType &src)
     fog_cmap_    = src.fog_cmap_;
     fog_color_   = src.fog_color_;
     fog_density_ = src.fog_density_;
+
+    reverb_preset_      = src.reverb_preset_;
 }
 
 void SectorType::Default()
@@ -523,6 +527,8 @@ void SectorType::Default()
     fog_cmap_    = nullptr;
     fog_color_   = kRGBANoValue;
     fog_density_ = 0;
+
+    reverb_preset_      = nullptr;
 }
 
 SectorTypeContainer::SectorTypeContainer()

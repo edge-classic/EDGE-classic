@@ -354,7 +354,7 @@ void RenderCurrentUnits(void)
                 active_fog_density = unit->fog_density;
                 state->FogDensity(std::log1p(active_fog_density));
             }
-            if (active_fog_density > 0.00009f)
+            if (!AlmostEquals(active_fog_density, 0.0f))
                 state->Enable(GL_FOG);
             else
                 state->Disable(GL_FOG);

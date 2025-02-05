@@ -328,7 +328,7 @@ static void RenderSkySlice(float top, float bottom, float atop, float abottom, f
 
 static void RenderSkyCylinder(void)
 {
-    GLuint sky_tex_id = ImageCache(sky_image, false, render_view_effect_colormap);
+    GLuint sky_tex_id = ImageCache(sky_image, true, render_view_effect_colormap);
 
     if (current_map->forced_skystretch_ > kSkyStretchUnset)
         current_sky_stretch = current_map->forced_skystretch_;
@@ -903,7 +903,7 @@ int UpdateSkyboxTextures(void)
             info->face[i] = ImageLookup(UserSkyFaceName(sky_image->name_.c_str(), i), kImageNamespaceTexture);
 
         for (int k = 0; k < 6; k++)
-            info->texture[k] = ImageCache(info->face[k], false, render_view_effect_colormap);
+            info->texture[k] = ImageCache(info->face[k], true, render_view_effect_colormap);
 
         return SK;
     }

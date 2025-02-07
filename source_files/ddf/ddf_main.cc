@@ -2166,12 +2166,12 @@ void DDFParseEverything()
 
 static char ename_buffer[256];
 
-epi::EName DDFCreateEName(std::string_view name, bool no_create)
+epi::StringHash DDFCreateStringHash(std::string_view name)
 {
     if (name.empty())
-        return epi::EName::kNone;
+        return epi::StringHash::kEmpty;
     if (name.size() > 255)
-        DDFError("DDFCreateEname: %s exceeds 256 character limit.\n", std::string(name).c_str());
+        DDFError("DDFCreateStringHash: %s exceeds 255 character limit.\n", std::string(name).c_str());
     char *ename_ptr = ename_buffer;
     for (const char ch : name)
     {
@@ -2179,7 +2179,7 @@ epi::EName DDFCreateEName(std::string_view name, bool no_create)
             *ename_ptr++ = ch;
     }
     *ename_ptr = '\0';
-    return epi::EName(ename_buffer, no_create);
+    return epi::StringHash(ename_buffer);
 }
 
 //--- editor settings ---

@@ -132,8 +132,8 @@ class PackFile
     std::vector<PackDirectory> directories_;
 
     // for faster file lookups
-    // stored as filename stems as keys; packpath as values
-    std::unordered_multimap<std::string, std::string, epi::ContainerStringHash> search_files_;
+    // stored as filename stem hashes as keys; packpath as values
+    std::unordered_multimap<epi::StringHash, std::string> search_files_;
 
     mz_zip_archive *archive_;
 
@@ -231,9 +231,9 @@ class PackFile
     epi::File *OpenZipEntryByName(const std::string &name);
 };
 
-int FindStemInPack(PackFile *pack, const std::string &name)
+int FindStemInPack(PackFile *pack, epi::StringHash name_hash)
 {
-    return pack->search_files_.count(name);
+    return pack->search_files_.count(name_hash);
 }
 
 //----------------------------------------------------------------------------
@@ -322,10 +322,8 @@ static void ProcessSubDirectory(PackFile *pack, const std::string &fullpath)
             }
             std::string filename = epi::GetFilename(fsd[i].name);
             std::string packpath = epi::MakePathRelative(pack->parent_->name_, fsd[i].name);
-            std::string stem     = epi::GetStem(filename);
-            epi::StringUpperASCII(stem);
             pack->directories_[d].AddEntry(filename, fsd[i].name, packpath, 0);
-            pack->search_files_.insert({stem, packpath});
+            pack->search_files_.insert({epi::GetStem(filename), packpath});
         }
     }
 }
@@ -361,10 +359,8 @@ static PackFile *ProcessFolder(DataFile *df)
             }
             std::string filename = fsd[i].name;
             std::string packpath = epi::MakePathRelative(df->name_, fsd[i].name);
-            std::string stem     = epi::GetStem(filename);
-            epi::StringUpperASCII(stem);
             pack->directories_[0].AddEntry(filename, fsd[i].name, packpath, 0);
-            pack->search_files_.insert({stem, packpath});
+            pack->search_files_.insert({epi::GetStem(filename), packpath});
         }
     }
 
@@ -467,10 +463,8 @@ static PackFile *ProcessZip(DataFile *df)
             dir_idx = pack->AddDirectory(filename);
         }
         std::string add_name = basename;
-        std::string stem     = epi::GetStem(basename);
-        epi::StringUpperASCII(stem);
         pack->directories_[dir_idx].AddEntry(epi::GetFilename(add_name), "", packpath, idx);
-        pack->search_files_.insert({stem, packpath});
+        pack->search_files_.insert({epi::GetStem(basename), packpath});
     }
 
     return pack;
@@ -1061,8 +1055,7 @@ bool FindPackFile(PackFile *pack, const std::string &name)
             root_only = true;
     }
 
-    std::string find_stem = epi::GetStem(name);
-    epi::StringUpperASCII(find_stem);
+    epi::StringHash find_stem(epi::GetStem(name));
 
     // quick file stem check to see if it's present at all
     if (!FindStemInPack(pack, find_stem))
@@ -1140,8 +1133,7 @@ epi::File *OpenPackFile(PackFile *pack, const std::string &name)
             root_only = true;
     }
 
-    std::string open_stem = epi::GetStem(open_name);
-    epi::StringUpperASCII(open_stem);
+    epi::StringHash open_stem(epi::GetStem(open_name));
 
     // quick file stem check to see if it's present at all
     if (!FindStemInPack(pack, open_stem))
@@ -1189,14 +1181,13 @@ epi::File *OpenPackMatch(PackFile *pack, const std::string &name, const std::vec
     if (extensions.empty())
         return nullptr;
 
-    std::string open_stem = name;
-    epi::StringUpperASCII(open_stem);
+    epi::StringHash open_stem(name);
 
     // quick file stem check to see if it's present at all
     if (!FindStemInPack(pack, open_stem))
         return nullptr;
 
-    std::string stem_match = open_stem;
+    std::string stem_match = name;
 
     auto results = pack->search_files_.equal_range(open_stem);
     for (auto file = results.first; file != results.second; ++file)

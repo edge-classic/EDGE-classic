@@ -6,16 +6,16 @@ add_library(
   epi
   epi_color.cc
   epi_crc.cc
-  epi_ename.cc
   epi_file.cc
   epi_filesystem.cc
   epi_md5.cc
   epi_str_compare.cc
+  epi_str_hash.cc
   epi_str_util.cc
   epi_scanner.cpp
 )
 
-set (EPI_LIBRARIES almostequals HandmadeMath stb xxhash)
+set (EPI_LIBRARIES almostequals HandmadeMath stb)
 
 if (NOT EMSCRIPTEN AND EDGE_MIMALLOC)
   list(APPEND EPI_LIBRARIES mimalloc)

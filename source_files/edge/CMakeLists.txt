@@ -206,7 +206,6 @@ set (EDGE_LINK_LIBRARIES
   pl_mpeg
   prns
   stb
-  xxhash
 )
 
 if (NOT EMSCRIPTEN)

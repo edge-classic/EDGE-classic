@@ -392,7 +392,7 @@ void ScriptEnableByTag(const char *name, bool disable)
 {
     RADScriptTrigger *trig;
 
-    uint64_t tag = epi::StringHash64(name);
+    uint64_t tag = epi::StringHash(name).Value();
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
@@ -414,7 +414,7 @@ bool CheckActiveScriptByTag(const char *name)
 {
     RADScriptTrigger *trig;
 
-    uint64_t tag = epi::StringHash64(name);
+    uint64_t tag = epi::StringHash(name).Value();
 
     for (trig = active_triggers; trig; trig = trig->next)
     {

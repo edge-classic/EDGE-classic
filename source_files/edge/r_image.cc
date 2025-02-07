@@ -44,11 +44,11 @@
 #include "e_search.h"
 #include "epi.h"
 #include "epi_doomdefs.h"
-#include "epi_ename.h"
 #include "epi_endian.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
 #include "epi_str_compare.h"
+#include "epi_str_hash.h"
 #include "epi_str_util.h"
 #include "hu_draw.h" // hud_tic
 #include "i_defs_gl.h"
@@ -107,25 +107,25 @@ struct CachedImage
 };
 
 // total set of images
-typedef std::unordered_map<epi::ENameIndex, std::list<Image *>> ImageMap;
+typedef std::unordered_map<epi::StringHash, std::list<Image *>> ImageMap;
 
 static ImageMap real_graphics;
 static ImageMap real_textures;
 static ImageMap real_flats;
 static ImageMap real_sprites;
 
-static Image *ImageContainerLookupInternal(ImageMap &bucket, const epi::EName &ename,
+static Image *ImageContainerLookupInternal(ImageMap &bucket, const epi::StringHash &name_hash,
                                            int source_type = -1 /* use -2 to prevent USER override */)
 {
     // for a normal lookup, we want USER images to override
     if (source_type == -1)
     {
-        Image *rim = ImageContainerLookupInternal(bucket, ename, kImageSourceUser); // recursion
+        Image *rim = ImageContainerLookupInternal(bucket, name_hash, kImageSourceUser); // recursion
         if (rim)
             return rim;
     }
 
-    auto f = bucket.find(ename.GetIndex());
+    auto f = bucket.find(name_hash);
     if (f == bucket.end())
     {
         return nullptr;
@@ -147,21 +147,21 @@ static Image *ImageContainerLookupInternal(ImageMap &bucket, const epi::EName &e
 
 Image *ImageContainerLookup(ImageType image_type, const char *name, int source_type)
 {
-    epi::EName ename(name);
+    epi::StringHash name_hash(name);
 
     switch (image_type)
     {
     case kImageTypeTexture:
-        return ImageContainerLookupInternal(real_textures, ename, source_type);
+        return ImageContainerLookupInternal(real_textures, name_hash, source_type);
         break;
     case kImageTypeGraphic:
-        return ImageContainerLookupInternal(real_graphics, ename, source_type);
+        return ImageContainerLookupInternal(real_graphics, name_hash, source_type);
         break;
     case kImageTypeFlat:
-        return ImageContainerLookupInternal(real_flats, ename, source_type);
+        return ImageContainerLookupInternal(real_flats, name_hash, source_type);
         break;
     case kImageTypeSprite:
-        return ImageContainerLookupInternal(real_sprites, ename, source_type);
+        return ImageContainerLookupInternal(real_sprites, name_hash, source_type);
         break;
     default:
         FatalError("ImageContainerLookup: Unknown Image Type");
@@ -216,14 +216,14 @@ static std::list<CachedImage *> image_cache;
 
 static void AddImageToMap(ImageMap &map, const char *name, Image *image)
 {
-    epi::EName ename(name);
-    auto       result = real_textures.find(ename.GetIndex());
+    epi::StringHash name_hash(name);
+    auto       result = real_textures.find(name_hash);
     if (result == real_textures.end())
     {
-        map.emplace(std::make_pair(ename.GetIndex(), std::list<Image *>()));
+        map.emplace(std::make_pair(name_hash, std::list<Image *>()));
     }
 
-    map[ename.GetIndex()].push_back(image);
+    map[name_hash].push_back(image);
 }
 
 //----------------------------------------------------------------------------
@@ -1039,24 +1039,24 @@ void CreateUserImages(void)
 
 void ImageAddTxHx(int lump, const char *name, bool hires)
 {
-    epi::EName ename(name);
+    epi::StringHash name_hash(name);
     if (hires)
     {
-        const Image *rim = ImageContainerLookupInternal(real_textures, ename, -2);
+        const Image *rim = ImageContainerLookupInternal(real_textures, name_hash, -2);
         if (rim && rim->source_type_ != kImageSourceUser)
         {
             AddImage_SmartInternal(name, kImageSourceTXHI, lump, real_textures, rim);
             return;
         }
 
-        rim = ImageContainerLookupInternal(real_flats, ename, -2);
+        rim = ImageContainerLookupInternal(real_flats, name_hash, -2);
         if (rim && rim->source_type_ != kImageSourceUser)
         {
             AddImage_SmartInternal(name, kImageSourceTXHI, lump, real_flats, rim);
             return;
         }
 
-        rim = ImageContainerLookupInternal(real_sprites, ename, -2);
+        rim = ImageContainerLookupInternal(real_sprites, name_hash, -2);
         if (rim && rim->source_type_ != kImageSourceUser)
         {
             AddImage_SmartInternal(name, kImageSourceTXHI, lump, real_sprites, rim);
@@ -1413,19 +1413,19 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
 //
 static const Image *BackupTexture(const char *tex_name, int flags)
 {
-    epi::EName ename(tex_name);
+    epi::StringHash name_hash(tex_name);
 
     const Image *rim;
 
     if (!(flags & kImageLookupExact))
     {
         // backup plan: try a flat with the same name
-        rim = ImageContainerLookupInternal(real_flats, ename);
+        rim = ImageContainerLookupInternal(real_flats, name_hash);
         if (rim)
             return rim;
 
         // backup backup plan: try a graphic with the same name
-        rim = ImageContainerLookupInternal(real_graphics, ename);
+        rim = ImageContainerLookupInternal(real_graphics, name_hash);
         if (rim)
             return rim;
 
@@ -1494,7 +1494,7 @@ static const Image *BackupFlat(const char *flat_name, int flags)
     // backup plan 2: Texture with the same name ?
     if (!(flags & kImageLookupExact))
     {
-        rim = ImageContainerLookupInternal(real_textures, epi::EName(flat_name));
+        rim = ImageContainerLookupInternal(real_textures, epi::StringHash(flat_name));
         if (rim)
             return rim;
     }
@@ -1524,16 +1524,16 @@ static const Image *BackupGraphic(const char *gfx_name, int flags)
 {
     const Image *rim;
 
-    epi::EName ename(gfx_name);
+    epi::StringHash name_hash(gfx_name);
 
     // backup plan 1: look for sprites and heretic-background
     if ((flags & (kImageLookupExact | kImageLookupFont)) == 0)
     {
-        rim = ImageContainerLookupInternal(real_graphics, ename, kImageSourceRawBlock);
+        rim = ImageContainerLookupInternal(real_graphics, name_hash, kImageSourceRawBlock);
         if (rim)
             return rim;
 
-        rim = ImageContainerLookupInternal(real_sprites, ename);
+        rim = ImageContainerLookupInternal(real_sprites, name_hash);
         if (rim)
             return rim;
     }
@@ -1603,27 +1603,27 @@ const Image *ImageLookup(const char *name, ImageNamespace type, int flags)
 
     const Image *rim;
 
-    epi::EName ename(name);
+    epi::StringHash name_hash(name);
 
     if (type == kImageNamespaceTexture)
     {
-        rim = ImageContainerLookupInternal(real_textures, ename);
+        rim = ImageContainerLookupInternal(real_textures, name_hash);
         return rim ? rim : BackupTexture(name, flags);
     }
     if (type == kImageNamespaceFlat)
     {
-        rim = ImageContainerLookupInternal(real_flats, ename);
+        rim = ImageContainerLookupInternal(real_flats, name_hash);
         return rim ? rim : BackupFlat(name, flags);
     }
     if (type == kImageNamespaceSprite)
     {
-        rim = ImageContainerLookupInternal(real_sprites, ename);
+        rim = ImageContainerLookupInternal(real_sprites, name_hash);
         return rim ? rim : BackupSprite(flags);
     }
 
     /* kImageNamespaceGraphic */
 
-    rim = ImageContainerLookupInternal(real_graphics, ename);
+    rim = ImageContainerLookupInternal(real_graphics, name_hash);
     return rim ? rim : BackupGraphic(name, flags);
 }
 
@@ -1881,7 +1881,7 @@ void ImagePrecache(const Image *image)
 
         alt_name[2] = (alt_name[2] == '1') ? '2' : '1';
 
-        const Image *alt = ImageContainerLookupInternal(real_textures, epi::EName(alt_name));
+        const Image *alt = ImageContainerLookupInternal(real_textures, epi::StringHash(alt_name));
 
         if (alt)
             ImageCache(alt, false);

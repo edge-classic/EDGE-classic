@@ -22,10 +22,10 @@
 
 #include "ddf_types.h"
 #include "epi.h"
-#include "epi_ename.h"
+#include "epi_str_hash.h"
 #include "verblib.h"
 
-extern epi::EName DDFCreateEName(std::string_view name, bool no_create);
+extern epi::StringHash DDFCreateStringHash(std::string_view name);
 #ifdef __GNUC__
 [[noreturn]] extern void DDFError(const char *err, ...) __attribute__((format(printf, 1, 2)));
 #else
@@ -49,39 +49,15 @@ class ReverbDefinition final
         if (refname.empty())
             return nullptr;
 
-        epi::EName verb_ename = DDFCreateEName(refname, true);
+        epi::StringHash verb_hash = DDFCreateStringHash(refname);
 
-        if (verb_ename == epi::EName::kNone)
+        if (verb_hash == epi::StringHash::kEmpty)
             return nullptr;
 
-        if (reverb_defs_.find(verb_ename) != reverb_defs_.end())
-            return reverb_defs_[verb_ename];
+        if (reverb_defs_.find(verb_hash) != reverb_defs_.end())
+            return reverb_defs_[verb_hash];
         else
             return nullptr;
-    }
-    static inline ReverbDefinition *Lookup(epi::EName::KnownEName refname)
-    {
-        if (refname == epi::EName::kNone)
-            return nullptr;
-
-        if (reverb_defs_.find(refname) != reverb_defs_.end())
-            return reverb_defs_[refname];
-        else
-            return nullptr;
-    }
-    static inline ReverbDefinition *Lookup(epi::EName refname)
-    {
-        if (refname == epi::EName::kNone)
-            return nullptr;
-
-        if (reverb_defs_.find(refname) != reverb_defs_.end())
-            return reverb_defs_[refname];
-        else
-            return nullptr;
-    }
-    static inline void StoreReverb(epi::EName name, ReverbDefinition *reverb_def)
-    {
-        reverb_defs_.try_emplace(name, reverb_def);
     }
     // Called when parsing DDF sectors using the REVERB_PRESET special
     static inline void AssignReverb(const char *info, void *storage)
@@ -90,14 +66,6 @@ class ReverbDefinition final
         if (*(const ReverbDefinition **)storage == nullptr)
             DDFError("AssignReverb: No such reverb preset '%s'\n", info);
     }
-
-    // Member vars....
-    float room_size_;
-    float damping_level_;
-    float wet_level_;
-    float dry_level_;
-    float reverb_width_;
-    float reverb_gain_;
 
     // Presets for Dynamic Reverb
     static const ReverbDefinition kOutdoorStrong;
@@ -118,8 +86,36 @@ class ReverbDefinition final
         return *this;
     }
 
+    static inline void StoreReverb(epi::StringHash name, ReverbDefinition *reverb_def)
+    {
+        reverb_defs_.try_emplace(name, reverb_def);
+    }
+
+    // Member vars
+
+    float room_size_;
+    float damping_level_;
+    float wet_level_;
+    float dry_level_;
+    float reverb_width_;
+    float reverb_gain_;
+
+    // Constants and functions for DDF parsing
+
+    EPI_KNOWN_STRINGHASH(kRoomSize,     "ROOMSIZE")
+    EPI_KNOWN_STRINGHASH(kDampingLevel, "DAMPINGLEVEL")
+    EPI_KNOWN_STRINGHASH(kWetLevel,     "WETLEVEL")
+    EPI_KNOWN_STRINGHASH(kDryLevel,     "DRYLEVEL")
+    EPI_KNOWN_STRINGHASH(kReverbWidth,  "REVERBWIDTH")
+    EPI_KNOWN_STRINGHASH(kReverbGain,   "REVERBGAIN")
+
+    static void StartEntry(const char *name, bool extend);
+    static void ParseField(const char *field, const char *contents, int index, bool is_last);
+    static void FinishEntry();
+    static void ClearEntries();
+
   protected:
-    class Container final : public std::unordered_map<epi::EName, ReverbDefinition *, epi::ContainerENameHash>
+    class Container final : public std::unordered_map<epi::StringHash, ReverbDefinition *>
     {
       public:
         Container()
@@ -127,7 +123,7 @@ class ReverbDefinition final
         }
         ~Container()
         {
-            for (std::unordered_map<epi::EName, ReverbDefinition *, epi::ContainerENameHash>::iterator iter = begin(), 
+            for (std::unordered_map<epi::StringHash, ReverbDefinition *>::iterator iter = begin(), 
                 iter_end = end(); iter != iter_end; iter++)
             {
                 ReverbDefinition *verb = iter->second;

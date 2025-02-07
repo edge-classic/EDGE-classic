@@ -25,6 +25,7 @@
 #include "dm_state.h"
 #include "epi.h"
 #include "epi_str_compare.h"
+#include "epi_str_hash.h"
 #include "epi_str_util.h"
 #include "g_game.h"
 #include "m_argv.h"
@@ -997,7 +998,7 @@ static void ScriptParseTag(std::vector<const char *> &pars)
     // Is the value an integer?
     if (length != count)
     {
-        this_script->tag[1] = epi::StringHash64(pars[1]);
+        this_script->tag[1] = epi::StringHash::Create(pars[1]).Value();
         parsed_string_tags.try_emplace(this_script->tag[1], pars[1]);
     }
     else
@@ -1248,7 +1249,7 @@ static void ScriptParseEnableTagged(std::vector<const char *> &pars)
 
     // Is the value an integer?
     if (length != count)
-        t->tag[1] = epi::StringHash64(pars[1]);
+        t->tag[1] = epi::StringHash::Create(pars[1]).Value();
     else
         t->tag[0] = atoi(pars[1]);
 

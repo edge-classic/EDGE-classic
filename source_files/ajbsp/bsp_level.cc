@@ -24,7 +24,6 @@
 #include "bsp_utility.h"
 #include "bsp_wad.h"
 #include "epi_doomdefs.h"
-#include "epi_ename.h"
 #include "epi_endian.h"
 #include "epi_scanner.h"
 #include "epi_str_util.h"
@@ -470,31 +469,31 @@ void GetLinedefs()
 
 /* ----- UDMF reading routines ------------------------- */
 
-static void ParseThingField(Thing *thing, const int &key, const epi::Scanner &lex)
+static void ParseThingField(Thing *thing, const uint32_t &key, const epi::Scanner &lex)
 {
     // Do we need more precision than an int for things? I think this would only
     // be an issue if/when polyobjects happen, as I think other thing types are
     // ignored - Dasho
 
-    if (key == epi::EName::kX)
+    if (key == udmf::kX)
         thing->x = RoundToInteger(lex.state_.decimal);
-    else if (key == epi::EName::kY)
+    else if (key == udmf::kY)
         thing->y = RoundToInteger(lex.state_.decimal);
-    else if (key == epi::EName::kType)
+    else if (key == udmf::kType)
         thing->type = lex.state_.number;
 }
 
-static void ParseVertexField(Vertex *vertex, const int &key, const epi::Scanner &lex)
+static void ParseVertexField(Vertex *vertex, const uint32_t &key, const epi::Scanner &lex)
 {
-    if (key == epi::EName::kX)
+    if (key == udmf::kX)
         vertex->x_ = lex.state_.decimal;
-    else if (key == epi::EName::kY)
+    else if (key == udmf::kY)
         vertex->y_ = lex.state_.decimal;
 }
 
-static void ParseSidedefField(Sidedef *side, const int &key, const epi::Scanner &lex)
+static void ParseSidedefField(Sidedef *side, const uint32_t &key, const epi::Scanner &lex)
 {
-    if (key == epi::EName::kSector)
+    if (key == udmf::kSector)
     {
         int num = lex.state_.number;
 
@@ -505,23 +504,23 @@ static void ParseSidedefField(Sidedef *side, const int &key, const epi::Scanner 
     }
 }
 
-static void ParseLinedefField(Linedef *line, const int &key, const epi::Scanner &lex)
+static void ParseLinedefField(Linedef *line, const uint32_t &key, const epi::Scanner &lex)
 {
     switch (key)
     {
-    case epi::EName::kV1:
+    case udmf::kV1:
         line->start = SafeLookupVertex(lex.state_.number);
         break;
-    case epi::EName::kV2:
+    case udmf::kV2:
         line->end = SafeLookupVertex(lex.state_.number);
         break;
-    case epi::EName::kSpecial:
+    case udmf::kSpecial:
         line->type = lex.state_.number;
         break;
-    case epi::EName::kTwoSided:
+    case udmf::kTwoSided:
         line->two_sided = lex.state_.boolean;
         break;
-    case epi::EName::kSideFront: {
+    case udmf::kSideFront: {
         int num = lex.state_.number;
 
         if (num < 0 || num >= (int)level_sidedefs.size())
@@ -530,7 +529,7 @@ static void ParseLinedefField(Linedef *line, const int &key, const epi::Scanner 
             line->right = level_sidedefs[num];
     }
     break;
-    case epi::EName::kSideBack: {
+    case udmf::kSideBack: {
         int num = lex.state_.number;
 
         if (num < 0 || num >= (int)level_sidedefs.size())
@@ -599,21 +598,21 @@ void ParseUDMF_Block(epi::Scanner &lex, int cur_type)
         if (!lex.CheckToken(';'))
             FatalError("AJBSP: Malformed TEXTMAP lump: missing ';'\n");
 
-        epi::EName key_ename(key, true);
+        epi::StringHash key_hash(key);
 
         switch (cur_type)
         {
         case kUDMFVertex:
-            ParseVertexField(vertex, key_ename.GetIndex(), lex);
+            ParseVertexField(vertex, key_hash.Value(), lex);
             break;
         case kUDMFThing:
-            ParseThingField(thing, key_ename.GetIndex(), lex);
+            ParseThingField(thing, key_hash.Value(), lex);
             break;
         case kUDMFSidedef:
-            ParseSidedefField(side, key_ename.GetIndex(), lex);
+            ParseSidedefField(side, key_hash.Value(), lex);
             break;
         case kUDMFLinedef:
-            ParseLinedefField(line, key_ename.GetIndex(), lex);
+            ParseLinedefField(line, key_hash.Value(), lex);
             break;
         case kUDMFSector:
         default: /* just skip it */
@@ -676,27 +675,27 @@ void ParseUDMF_Pass(const std::string &data, int pass)
 
         int cur_type = 0;
 
-        epi::EName section_ename(section, true);
+        epi::StringHash section_hash(section);
 
-        switch (section_ename.GetIndex())
+        switch (section_hash.Value())
         {
-        case epi::EName::kThing:
+        case udmf::kThing:
             if (pass == 1)
                 cur_type = kUDMFThing;
             break;
-        case epi::EName::kVertex:
+        case udmf::kVertex:
             if (pass == 1)
                 cur_type = kUDMFVertex;
             break;
-        case epi::EName::kSector:
+        case udmf::kSector:
             if (pass == 1)
                 cur_type = kUDMFSector;
             break;
-        case epi::EName::kSidedef:
+        case udmf::kSidedef:
             if (pass == 2)
                 cur_type = kUDMFSidedef;
             break;
-        case epi::EName::kLinedef:
+        case udmf::kLinedef:
             if (pass == 3)
                 cur_type = kUDMFLinedef;
             break;

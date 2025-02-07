@@ -2480,7 +2480,7 @@ bool IsLumpInPwad(const char *name)
             if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
                 df->kind_ == kFileKindEEPK)
             {
-                if (FindStemInPack(df->pack_, name))
+                if (FindStemInPack(df->pack_, epi::StringHash::Create(name)))
                 {
                     in_pwad = true;
                     break;
@@ -2517,7 +2517,7 @@ bool IsLumpInAnyWad(const char *name)
             if (df->kind_ == kFileKindFolder || df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEPK ||
                 df->kind_ == kFileKindEEPK || df->kind_ == kFileKindIFolder || df->kind_ == kFileKindIPK)
             {
-                if (FindStemInPack(df->pack_, name))
+                if (FindStemInPack(df->pack_, epi::StringHash::Create(name)))
                 {
                     in_anywad = true;
                     break;

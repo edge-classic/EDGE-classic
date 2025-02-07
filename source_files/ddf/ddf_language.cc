@@ -40,34 +40,18 @@
 #include <unordered_map>
 
 #include "ddf_local.h"
+#include "ddf_main.h"
+#include "epi_str_hash.h"
 #include "epi_str_util.h"
 
 // Globals
 Language language; // -ACB- 2004/07/28 Languages instance
 
-std::string DDFSanitizeName(const std::string &s)
-{
-    std::string out;
-
-    for (char ch : s)
-    {
-        if (ch == ' ' || ch == '_')
-            continue;
-
-        out.push_back((char)epi::ToUpperASCII((int)ch));
-    }
-
-    if (out.empty())
-        out.push_back('_');
-
-    return out;
-}
-
 class LanguageChoice
 {
   public:
-    std::string                                                            name;
-    std::unordered_map<std::string, std::string, epi::ContainerStringHash> refs;
+    std::string                                      name;
+    std::unordered_map<epi::StringHash, std::string> refs;
 
     LanguageChoice() : name(), refs()
     {
@@ -77,17 +61,14 @@ class LanguageChoice
     {
     }
 
-    bool HasEntry(const std::string &refname) const
+    bool HasEntry(epi::StringHash refhash) const
     {
-        return refs.find(refname) != refs.end();
+        return refs.find(refhash) != refs.end();
     }
 
-    void AddEntry(const char *refname, const char *value)
+    void AddEntry(std::string_view refname, const char *value)
     {
-        // ensure ref name is uppercase, with no spaces
-        std::string ref = DDFSanitizeName(refname);
-
-        refs[ref] = value;
+        refs[DDFCreateStringHash(refname)] = value;
     }
 };
 
@@ -200,7 +181,7 @@ const char *Language::GetReferenceOrNull(const char *refname)
         return nullptr;
 
     // ensure ref name is uppercase, with no spaces
-    std::string ref = DDFSanitizeName(refname);
+    epi::StringHash ref = DDFCreateStringHash(refname);
 
     if (umapinfo_choice_ != nullptr)
     {
@@ -297,7 +278,7 @@ bool Language::IsValidRef(const char *refname)
         return false;
 
     // ensure ref name is uppercase, with no spaces
-    std::string ref = DDFSanitizeName(refname);
+    epi::StringHash ref = DDFCreateStringHash(refname);
 
     if (umapinfo_choice_ != nullptr)
         if (umapinfo_choice_->HasEntry(ref))
@@ -316,7 +297,7 @@ const char *Language::operator[](const char *refname)
         return refname;
 
     // ensure ref name is uppercase, with no spaces
-    std::string ref = DDFSanitizeName(refname);
+    epi::StringHash ref = DDFCreateStringHash(refname);
 
     if (umapinfo_choice_ != nullptr)
     {

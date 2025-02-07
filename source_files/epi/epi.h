@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-//  EDGE Platform Interface Header
+//  EDGE Platform Interface Main Header
 //----------------------------------------------------------------------------
 //
 //  Copyright (c) 2002-2024 The EDGE Team.
@@ -52,5 +52,11 @@ inline int RoundToInteger(double x)
 
 // Used for params/variables that we know are unused but still need to exist
 #define EPI_UNUSED(x) (void)x
+
+namespace epi
+{
+    void Initialize(void);
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

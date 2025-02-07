@@ -28,28 +28,17 @@ namespace ddf
 
 static ReverbDefinition *dynamic_reverb = nullptr;
 
-static ReverbDefinition dummy_reverb;
-
-static const DDFCommandList reverb_commands[] = {DDF_FIELD("ROOM_SIZE", dummy_reverb, room_size_, DDFMainGetPercent),
-                                                DDF_FIELD("DAMPING_LEVEL", dummy_reverb, damping_level_, DDFMainGetPercent),
-                                                DDF_FIELD("WET_LEVEL", dummy_reverb, wet_level_, DDFMainGetPercent),
-                                                DDF_FIELD("DRY_LEVEL", dummy_reverb, dry_level_, DDFMainGetPercent),
-                                                DDF_FIELD("REVERB_WIDTH", dummy_reverb, reverb_width_, DDFMainGetPercent),
-                                                DDF_FIELD("REVERB_GAIN", dummy_reverb, reverb_gain_, DDFMainGetPercent),
-                                                {nullptr, nullptr, 0, nullptr}};
-
 //
 //  DDF PARSE ROUTINES
 //
 
-static void ReverbStartEntry(const char *name, bool extend)
+void ReverbDefinition::StartEntry(const char *name, bool extend)
 {
-    if (!name || !name[0])
+    if (!name)
         DDFError("New movie entry is missing a name!\n");
 
-    epi::EName verb_ename = DDFCreateEName(name, false);
 
-    dynamic_reverb = ReverbDefinition::Lookup(verb_ename);
+    dynamic_reverb = Lookup(name);
 
     if (extend)
     {
@@ -68,30 +57,53 @@ static void ReverbStartEntry(const char *name, bool extend)
     // not found, create a new one
     dynamic_reverb = new ReverbDefinition;
 
-    ReverbDefinition::StoreReverb(verb_ename, dynamic_reverb);
+    StoreReverb(DDFCreateStringHash(name), dynamic_reverb);
 }
 
-static void ReverbParseField(const char *field, const char *contents, int index, bool is_last)
+void ReverbDefinition::ParseField(const char *field, const char *contents, int index, bool is_last)
 {
 #if (DDF_DEBUG)
     LogDebug("REVERB_PARSE: %s = %s;\n", field, contents);
 #endif
     EPI_UNUSED(index);
     EPI_UNUSED(is_last);
-    if (DDFMainParseField(reverb_commands, field, contents, (uint8_t *)dynamic_reverb))
-        return; // OK
-
-    DDFError("Unknown reverbs.ddf command: %s\n", field);
+    float *member = nullptr;
+    switch(DDFCreateStringHash(field).Value())
+    {
+        case kRoomSize:
+            member = &dynamic_reverb->room_size_;
+            break;
+        case kDampingLevel:
+            member = &dynamic_reverb->damping_level_;
+            break;
+        case kWetLevel:
+            member = &dynamic_reverb->wet_level_;
+            break;
+        case kDryLevel:
+            member = &dynamic_reverb->dry_level_;
+            break;
+        case kReverbWidth:
+            member = &dynamic_reverb->reverb_width_;
+            break;
+        case kReverbGain:
+            member = &dynamic_reverb->reverb_gain_;
+            break;
+        default:
+            DDFError("Unknown reverbs.ddf command: %s\n", field);
+            break;
+    }
+    EPI_ASSERT(member);
+    DDFMainGetPercent(contents, member);
 }
 
-static void ReverbFinishEntry(void)
+void ReverbDefinition::FinishEntry(void)
 {
     // Map the 0.0-1.0 range presented to the user via DDF
     // to the range of 0.000-0.100
     dynamic_reverb->reverb_gain_ *= 0.1f;
 }
 
-static void ReverbClearAll(void)
+void ReverbDefinition::ClearEntries(void)
 {
     LogWarning("Ignoring #CLEARALL in reverbs.ddf\n");
 }
@@ -103,10 +115,10 @@ void ReverbDefinition::ReadDDF(const std::string &data)
     reverbs.tag      = "REVERBS";
     reverbs.lumpname = "DDFVERB";
 
-    reverbs.start_entry  = ReverbStartEntry;
-    reverbs.parse_field  = ReverbParseField;
-    reverbs.finish_entry = ReverbFinishEntry;
-    reverbs.clear_all    = ReverbClearAll;
+    reverbs.start_entry  = StartEntry;
+    reverbs.parse_field  = ParseField;
+    reverbs.finish_entry = FinishEntry;
+    reverbs.clear_all    = ClearEntries;
 
     DDFMainReadFile(&reverbs, data);
 }

@@ -52,7 +52,7 @@ class WeaponDefinition;
 #include "ddf_states.h"
 #include "ddf_thing.h"
 #include "ddf_weapon.h"
-#include "epi_ename.h"
+#include "epi_str_hash.h"
 
 // State updates, number of tics / second.
 constexpr uint8_t kTicRate = 35;
@@ -160,9 +160,9 @@ void DDFParseEverything();
 void DDFDumpFile(const std::string &data);
 void DDFDumpCollection(const std::vector<DDFFile> &col);
 
-// Strip spaces and underscores before producing an EName
+// Strip spaces and underscores before producing a StringHash
 // from a DDF name entry
-epi::EName DDFCreateEName(std::string_view name, bool no_create);
+epi::StringHash DDFCreateStringHash(std::string_view name);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

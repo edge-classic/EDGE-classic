@@ -32,6 +32,7 @@
 #include "ddf_local.h"
 #include "ddf_types.h"
 #include "epi_str_compare.h"
+#include "epi_str_hash.h"
 #include "epi_str_util.h"
 #include "p_action.h"
 
@@ -1842,7 +1843,7 @@ static void DDFMobjStateGetRADTrigger(const char *arg, State *cur_state)
     // Is the value an integer?
     if (length != count)
     {
-        *val_ptr                = epi::StringHash64(arg);
+        *val_ptr                = epi::StringHash::Create(arg).Value();
         cur_state->rts_tag_type = 1;
     }
     else

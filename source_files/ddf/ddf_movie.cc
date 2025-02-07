@@ -81,6 +81,7 @@ static void MovieParseField(const char *field, const char *contents, int index, 
 #endif
     EPI_UNUSED(index);
     EPI_UNUSED(is_last);
+
     if (DDFMainParseField(movie_commands, field, contents, (uint8_t *)dynamic_movie))
         return; // OK
 

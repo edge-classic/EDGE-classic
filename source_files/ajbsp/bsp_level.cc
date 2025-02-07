@@ -476,25 +476,25 @@ static void ParseThingField(Thing *thing, const int &key, const epi::Scanner &le
     // be an issue if/when polyobjects happen, as I think other thing types are
     // ignored - Dasho
 
-    if (key == epi::kENameX)
+    if (key == epi::EName::kX)
         thing->x = RoundToInteger(lex.state_.decimal);
-    else if (key == epi::kENameY)
+    else if (key == epi::EName::kY)
         thing->y = RoundToInteger(lex.state_.decimal);
-    else if (key == epi::kENameType)
+    else if (key == epi::EName::kType)
         thing->type = lex.state_.number;
 }
 
 static void ParseVertexField(Vertex *vertex, const int &key, const epi::Scanner &lex)
 {
-    if (key == epi::kENameX)
+    if (key == epi::EName::kX)
         vertex->x_ = lex.state_.decimal;
-    else if (key == epi::kENameY)
+    else if (key == epi::EName::kY)
         vertex->y_ = lex.state_.decimal;
 }
 
 static void ParseSidedefField(Sidedef *side, const int &key, const epi::Scanner &lex)
 {
-    if (key == epi::kENameSector)
+    if (key == epi::EName::kSector)
     {
         int num = lex.state_.number;
 
@@ -509,19 +509,19 @@ static void ParseLinedefField(Linedef *line, const int &key, const epi::Scanner 
 {
     switch (key)
     {
-    case epi::kENameV1:
+    case epi::EName::kV1:
         line->start = SafeLookupVertex(lex.state_.number);
         break;
-    case epi::kENameV2:
+    case epi::EName::kV2:
         line->end = SafeLookupVertex(lex.state_.number);
         break;
-    case epi::kENameSpecial:
+    case epi::EName::kSpecial:
         line->type = lex.state_.number;
         break;
-    case epi::kENameTwosided:
+    case epi::EName::kTwoSided:
         line->two_sided = lex.state_.boolean;
         break;
-    case epi::kENameSidefront: {
+    case epi::EName::kSideFront: {
         int num = lex.state_.number;
 
         if (num < 0 || num >= (int)level_sidedefs.size())
@@ -530,7 +530,7 @@ static void ParseLinedefField(Linedef *line, const int &key, const epi::Scanner 
             line->right = level_sidedefs[num];
     }
     break;
-    case epi::kENameSideback: {
+    case epi::EName::kSideBack: {
         int num = lex.state_.number;
 
         if (num < 0 || num >= (int)level_sidedefs.size())
@@ -680,23 +680,23 @@ void ParseUDMF_Pass(const std::string &data, int pass)
 
         switch (section_ename.GetIndex())
         {
-        case epi::kENameThing:
+        case epi::EName::kThing:
             if (pass == 1)
                 cur_type = kUDMFThing;
             break;
-        case epi::kENameVertex:
+        case epi::EName::kVertex:
             if (pass == 1)
                 cur_type = kUDMFVertex;
             break;
-        case epi::kENameSector:
+        case epi::EName::kSector:
             if (pass == 1)
                 cur_type = kUDMFSector;
             break;
-        case epi::kENameSidedef:
+        case epi::EName::kSidedef:
             if (pass == 2)
                 cur_type = kUDMFSidedef;
             break;
-        case epi::kENameLinedef:
+        case epi::EName::kLinedef:
             if (pass == 3)
                 cur_type = kUDMFLinedef;
             break;

@@ -1432,20 +1432,20 @@ static void LoadUDMFVertexes()
 
                 switch (key_ename.GetIndex())
                 {
-                case epi::kENameX:
+                case epi::EName::kX:
                     x     = lex.state_.decimal;
                     min_x = HMM_MIN((int)x, min_x);
                     max_x = HMM_MAX((int)x, max_x);
                     break;
-                case epi::kENameY:
+                case epi::EName::kY:
                     y     = lex.state_.decimal;
                     min_y = HMM_MIN((int)y, min_y);
                     max_y = HMM_MAX((int)y, max_y);
                     break;
-                case epi::kENameZfloor:
+                case epi::EName::kZFloor:
                     zf = lex.state_.decimal;
                     break;
-                case epi::kENameZceiling:
+                case epi::EName::kZCeiling:
                     zc = lex.state_.decimal;
                     break;
                 default:
@@ -1552,76 +1552,76 @@ static void LoadUDMFSectors()
 
                 switch (key_ename.GetIndex())
                 {
-                case epi::kENameHeightfloor:
+                case epi::EName::kHeightFloor:
                     fz = lex.state_.number;
                     break;
-                case epi::kENameHeightceiling:
+                case epi::EName::kHeightCeiling:
                     cz = lex.state_.number;
                     break;
-                case epi::kENameTexturefloor:
+                case epi::EName::kTextureFloor:
                     epi::CStringCopyMax(floor_tex, value.c_str(), 8);
                     break;
-                case epi::kENameTextureceiling:
+                case epi::EName::kTextureCeiling:
                     epi::CStringCopyMax(ceil_tex, value.c_str(), 8);
                     break;
-                case epi::kENameLightlevel:
+                case epi::EName::kLightLevel:
                     light = lex.state_.number;
                     break;
-                case epi::kENameSpecial:
+                case epi::EName::kSpecial:
                     type = lex.state_.number;
                     break;
-                case epi::kENameId:
+                case epi::EName::kID:
                     tag = lex.state_.number;
                     break;
-                case epi::kENameLightcolor:
+                case epi::EName::kLightColor:
                     light_color = ((uint32_t)lex.state_.number << 8 | 0xFF);
                     break;
-                case epi::kENameFadecolor:
+                case epi::EName::kFadeColor:
                     fog_color = ((uint32_t)lex.state_.number << 8 | 0xFF);
                     break;
-                case epi::kENameFogdensity:
+                case epi::EName::kFogDensity:
                     fog_density = HMM_Clamp(0, lex.state_.number, 1020);
                     break;
-                case epi::kENameXpanningfloor:
+                case epi::EName::kXPanningFloor:
                     fx = lex.state_.decimal;
                     break;
-                case epi::kENameYpanningfloor:
+                case epi::EName::kYPanningFloor:
                     fy = lex.state_.decimal;
                     break;
-                case epi::kENameXpanningceiling:
+                case epi::EName::kXPanningCeiling:
                     cx = lex.state_.decimal;
                     break;
-                case epi::kENameYpanningceiling:
+                case epi::EName::kYPanningCeiling:
                     cy = lex.state_.decimal;
                     break;
-                case epi::kENameXscalefloor:
+                case epi::EName::kXScaleFloor:
                     fx_sc = lex.state_.decimal;
                     break;
-                case epi::kENameYscalefloor:
+                case epi::EName::kYScaleFloor:
                     fy_sc = lex.state_.decimal;
                     break;
-                case epi::kENameXscaleceiling:
+                case epi::EName::kXScaleCeiling:
                     cx_sc = lex.state_.decimal;
                     break;
-                case epi::kENameYscaleceiling:
+                case epi::EName::kYScaleCeiling:
                     cy_sc = lex.state_.decimal;
                     break;
-                case epi::kENameAlphafloor:
+                case epi::EName::kAlphaFloor:
                     falph = lex.state_.decimal;
                     break;
-                case epi::kENameAlphaceiling:
+                case epi::EName::kAlphaCeiling:
                     calph = lex.state_.decimal;
                     break;
-                case epi::kENameRotationfloor:
+                case epi::EName::kRotationFloor:
                     rf = lex.state_.decimal;
                     break;
-                case epi::kENameRotationceiling:
+                case epi::EName::kRotationCeiling:
                     rc = lex.state_.decimal;
                     break;
-                case epi::kENameGravity:
+                case epi::EName::kGravity:
                     gravfactor = lex.state_.decimal;
                     break;
-                case epi::kENameReverbpreset:
+                case epi::EName::kReverbPreset:
                     reverb = ddf::ReverbDefinition::Lookup(value);
                     break;
                 default:
@@ -1871,58 +1871,58 @@ static void LoadUDMFSideDefs()
 
                 switch (key_ename.GetIndex())
                 {
-                case epi::kENameOffsetx:
+                case epi::EName::kOffsetX:
                     x = lex.state_.number;
                     break;
-                case epi::kENameOffsety:
+                case epi::EName::kOffsetY:
                     y = lex.state_.number;
                     break;
-                case epi::kENameOffsetx_bottom:
+                case epi::EName::kOffsetX_Bottom:
                     lowx = lex.state_.decimal;
                     break;
-                case epi::kENameOffsetx_mid:
+                case epi::EName::kOffsetX_Mid:
                     midx = lex.state_.decimal;
                     break;
-                case epi::kENameOffsetx_top:
+                case epi::EName::kOffsetX_Top:
                     highx = lex.state_.decimal;
                     break;
-                case epi::kENameOffsety_bottom:
+                case epi::EName::kOffsetY_Bottom:
                     lowy = lex.state_.decimal;
                     break;
-                case epi::kENameOffsety_mid:
+                case epi::EName::kOffsetY_Mid:
                     midy = lex.state_.decimal;
                     break;
-                case epi::kENameOffsety_top:
+                case epi::EName::kOffsetY_Top:
                     highy = lex.state_.decimal;
                     break;
-                case epi::kENameScalex_bottom:
+                case epi::EName::kScaleX_Bottom:
                     low_scx = lex.state_.decimal;
                     break;
-                case epi::kENameScalex_mid:
+                case epi::EName::kScaleX_Mid:
                     mid_scx = lex.state_.decimal;
                     break;
-                case epi::kENameScalex_top:
+                case epi::EName::kScaleX_Top:
                     high_scx = lex.state_.decimal;
                     break;
-                case epi::kENameScaley_bottom:
+                case epi::EName::kScaleY_Bottom:
                     low_scy = lex.state_.decimal;
                     break;
-                case epi::kENameScaley_mid:
+                case epi::EName::kScaleY_Mid:
                     mid_scy = lex.state_.decimal;
                     break;
-                case epi::kENameScaley_top:
+                case epi::EName::kScaleY_Top:
                     high_scy = lex.state_.decimal;
                     break;
-                case epi::kENameTexturetop:
+                case epi::EName::kTextureTop:
                     epi::CStringCopyMax(top_tex, value.c_str(), 8);
                     break;
-                case epi::kENameTexturebottom:
+                case epi::EName::kTextureBottom:
                     epi::CStringCopyMax(bottom_tex, value.c_str(), 8);
                     break;
-                case epi::kENameTexturemiddle:
+                case epi::EName::kTextureMiddle:
                     epi::CStringCopyMax(middle_tex, value.c_str(), 8);
                     break;
-                case epi::kENameSector:
+                case epi::EName::kSector:
                     sec_num = lex.state_.number;
                     break;
                 default:
@@ -2126,61 +2126,61 @@ static void LoadUDMFLineDefs()
 
                 switch (key_ename.GetIndex())
                 {
-                case epi::kENameId:
+                case epi::EName::kID:
                     tag = lex.state_.number;
                     break;
-                case epi::kENameV1:
+                case epi::EName::kV1:
                     v1 = lex.state_.number;
                     break;
-                case epi::kENameV2:
+                case epi::EName::kV2:
                     v2 = lex.state_.number;
                     break;
-                case epi::kENameSpecial:
+                case epi::EName::kSpecial:
                     special = lex.state_.number;
                     break;
-                case epi::kENameSidefront:
+                case epi::EName::kSideFront:
                     side0 = lex.state_.number;
                     break;
-                case epi::kENameSideback:
+                case epi::EName::kSideBack:
                     side1 = lex.state_.number;
                     break;
-                case epi::kENameAlpha:
+                case epi::EName::kAlpha:
                     alpha = lex.state_.decimal;
                     break;
-                case epi::kENameBlocking:
+                case epi::EName::kBlocking:
                     flags |= (lex.state_.boolean ? kLineFlagBlocking : 0);
                     break;
-                case epi::kENameBlockmonsters:
+                case epi::EName::kBlockMonsters:
                     flags |= (lex.state_.boolean ? kLineFlagBlockMonsters : 0);
                     break;
-                case epi::kENameTwosided:
+                case epi::EName::kTwoSided:
                     flags |= (lex.state_.boolean ? kLineFlagTwoSided : 0);
                     break;
-                case epi::kENameDontpegtop:
+                case epi::EName::kDontPegTop:
                     flags |= (lex.state_.boolean ? kLineFlagUpperUnpegged : 0);
                     break;
-                case epi::kENameDontpegbottom:
+                case epi::EName::kDontPegBottom:
                     flags |= (lex.state_.boolean ? kLineFlagLowerUnpegged : 0);
                     break;
-                case epi::kENameSecret:
+                case epi::EName::kSecret:
                     flags |= (lex.state_.boolean ? kLineFlagSecret : 0);
                     break;
-                case epi::kENameBlocksound:
+                case epi::EName::kBlockSound:
                     flags |= (lex.state_.boolean ? kLineFlagSoundBlock : 0);
                     break;
-                case epi::kENameDontdraw:
+                case epi::EName::kDontDraw:
                     flags |= (lex.state_.boolean ? kLineFlagDontDraw : 0);
                     break;
-                case epi::kENameMapped:
+                case epi::EName::kMapped:
                     flags |= (lex.state_.boolean ? kLineFlagMapped : 0);
                     break;
-                case epi::kENamePassuse:
+                case epi::EName::kPassUse:
                     flags |= (lex.state_.boolean ? kLineFlagBoomPassThrough : 0);
                     break;
-                case epi::kENameBlockplayers:
+                case epi::EName::kBlockPlayers:
                     flags |= (lex.state_.boolean ? kLineFlagBlockPlayers : 0);
                     break;
-                case epi::kENameBlocksight:
+                case epi::EName::kBlockSight:
                     flags |= (lex.state_.boolean ? kLineFlagSightBlock : 0);
                     break;
                 default:
@@ -2320,67 +2320,67 @@ static void LoadUDMFThings()
 
                 switch (key_ename.GetIndex())
                 {
-                case epi::kENameId:
+                case epi::EName::kID:
                     tag = lex.state_.number;
                     break;
-                case epi::kENameX:
+                case epi::EName::kX:
                     x = lex.state_.decimal;
                     break;
-                case epi::kENameY:
+                case epi::EName::kY:
                     y = lex.state_.decimal;
                     break;
-                case epi::kENameHeight:
+                case epi::EName::kHeight:
                     z = lex.state_.decimal;
                     break;
-                case epi::kENameAngle:
+                case epi::EName::kAngle:
                     angle = epi::BAMFromDegrees(lex.state_.number);
                     break;
-                case epi::kENameType:
+                case epi::EName::kType:
                     typenum = lex.state_.number;
                     break;
-                case epi::kENameSkill1:
+                case epi::EName::kSkill1:
                     options |= (lex.state_.boolean ? kThingEasy : 0);
                     break;
-                case epi::kENameSkill2:
+                case epi::EName::kSkill2:
                     options |= (lex.state_.boolean ? kThingEasy : 0);
                     break;
-                case epi::kENameSkill3:
+                case epi::EName::kSkill3:
                     options |= (lex.state_.boolean ? kThingMedium : 0);
                     break;
-                case epi::kENameSkill4:
+                case epi::EName::kSkill4:
                     options |= (lex.state_.boolean ? kThingHard : 0);
                     break;
-                case epi::kENameSkill5:
+                case epi::EName::kSkill5:
                     options |= (lex.state_.boolean ? kThingHard : 0);
                     break;
-                case epi::kENameAmbush:
+                case epi::EName::kAmbush:
                     options |= (lex.state_.boolean ? kThingAmbush : 0);
                     break;
-                case epi::kENameSingle:
+                case epi::EName::kSingle:
                     options &= (lex.state_.boolean ? ~kThingNotSinglePlayer : options);
                     break;
-                case epi::kENameDm:
+                case epi::EName::kDM:
                     options &= (lex.state_.boolean ? ~kThingNotDeathmatch : options);
                     break;
-                case epi::kENameCoop:
+                case epi::EName::kCoop:
                     options &= (lex.state_.boolean ? ~kThingNotCooperative : options);
                     break;
-                case epi::kENameFriend:
+                case epi::EName::kFriend:
                     options |= (lex.state_.boolean ? kThingFriend : 0);
                     break;
-                case epi::kENameHealth:
+                case epi::EName::kHealth:
                     healthfac = lex.state_.decimal;
                     break;
-                case epi::kENameAlpha:
+                case epi::EName::kAlpha:
                     alpha = lex.state_.decimal;
                     break;
-                case epi::kENameScale:
+                case epi::EName::kScale:
                     scale = lex.state_.decimal;
                     break;
-                case epi::kENameScalex:
+                case epi::EName::kScaleX:
                     scalex = lex.state_.decimal;
                     break;
-                case epi::kENameScaley:
+                case epi::EName::kScaleY:
                     scaley = lex.state_.decimal;
                     break;
                 default:
@@ -2546,16 +2546,16 @@ static void LoadUDMFCounts()
         // side counts are computed during linedef loading
         switch (section_ename.GetIndex())
         {
-        case epi::kENameThing:
+        case epi::EName::kThing:
             total_map_things++;
             break;
-        case epi::kENameVertex:
+        case epi::EName::kVertex:
             total_level_vertexes++;
             break;
-        case epi::kENameSector:
+        case epi::EName::kSector:
             total_level_sectors++;
             break;
-        case epi::kENameLinedef:
+        case epi::EName::kLinedef:
             total_level_lines++;
             break;
         default:

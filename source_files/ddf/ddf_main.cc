@@ -2169,7 +2169,7 @@ static char ename_buffer[256];
 epi::EName DDFCreateEName(std::string_view name, bool no_create)
 {
     if (name.empty())
-        return epi::kENameNone;
+        return epi::EName::kNone;
     if (name.size() > 255)
         DDFError("DDFCreateEname: %s exceeds 256 character limit.\n", std::string(name).c_str());
     char *ename_ptr = ename_buffer;

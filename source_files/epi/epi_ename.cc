@@ -75,7 +75,7 @@ EName::NameManager EName::name_data_;
 bool               EName::NameManager::inited_;
 size_t             EName::NameManager::known_name_count_;
 
-const char *predefined_names[] = {
+static const char *predefined_names[] = {
 #define EPI_XX(n)    #n,
 #define EPI_XY(n, s) s,
 #include "epi_known_enames.h"

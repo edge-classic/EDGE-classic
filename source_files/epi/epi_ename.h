@@ -55,20 +55,20 @@
 namespace epi
 {
 
-enum KnownEName
-{
-#define EPI_XX(n)    kEName##n,
-#define EPI_XY(n, s) kEName##n,
-#include "epi_known_enames.h"
-#undef EPI_XX
-#undef EPI_XY
-};
-
 typedef int32_t ENameIndex;
 
 class EName
 {
   public:
+    enum KnownEName
+    {
+    #define EPI_XX(n)    k##n,
+    #define EPI_XY(n, s) k##n,
+    #include "epi_known_enames.h"
+    #undef EPI_XX
+    #undef EPI_XY
+    };
+
     EName() = default;
     EName(std::string_view text)
     {

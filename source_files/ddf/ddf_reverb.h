@@ -51,7 +51,7 @@ class ReverbDefinition final
 
         epi::EName verb_ename = DDFCreateEName(refname, true);
 
-        if (verb_ename == epi::kENameNone)
+        if (verb_ename == epi::EName::kNone)
             return nullptr;
 
         if (reverb_defs_.find(verb_ename) != reverb_defs_.end())
@@ -59,9 +59,9 @@ class ReverbDefinition final
         else
             return nullptr;
     }
-    static inline ReverbDefinition *Lookup(epi::KnownEName refname)
+    static inline ReverbDefinition *Lookup(epi::EName::KnownEName refname)
     {
-        if (refname == epi::kENameNone)
+        if (refname == epi::EName::kNone)
             return nullptr;
 
         if (reverb_defs_.find(refname) != reverb_defs_.end())
@@ -71,7 +71,7 @@ class ReverbDefinition final
     }
     static inline ReverbDefinition *Lookup(epi::EName refname)
     {
-        if (refname == epi::kENameNone)
+        if (refname == epi::EName::kNone)
             return nullptr;
 
         if (reverb_defs_.find(refname) != reverb_defs_.end())

@@ -39,258 +39,258 @@
 MapList Maps;
 
 static std::unordered_map<int, std::pair<int16_t, int16_t>> ActorNames = {
-    {epi::kENameDoomPlayer, {1, -1}},
-    {epi::kENameZombieMan, {2, 3004}},
-    {epi::kENameShotgunGuy, {3, 9}},
-    {epi::kENameArchvile, {4, 64}},
-    {epi::kENameArchvileFire, {5, -1}},
-    {epi::kENameRevenant, {6, 66}},
-    {epi::kENameRevenantTracer, {7, -1}},
-    {epi::kENameRevenantTracerSmoke, {8, -1}},
-    {epi::kENameFatso, {9, 67}},
-    {epi::kENameFatShot, {10, -1}},
-    {epi::kENameChaingunGuy, {11, 65}},
-    {epi::kENameDoomImp, {12, 3001}},
-    {epi::kENameDemon, {13, 3002}},
-    {epi::kENameSpectre, {14, 58}},
-    {epi::kENameCacodemon, {15, 3005}},
-    {epi::kENameBaronOfHell, {16, 3003}},
-    {epi::kENameBaronBall, {17, -1}},
-    {epi::kENameHellKnight, {18, 69}},
-    {epi::kENameLostSoul, {19, 3006}},
-    {epi::kENameSpiderMastermind, {20, 7}},
-    {epi::kENameArachnotron, {21, 68}},
-    {epi::kENameCyberdemon, {22, 16}},
-    {epi::kENamePainElemental, {23, 71}},
-    {epi::kENameWolfensteinSS, {24, 84}},
-    {epi::kENameCommanderKeen, {25, 72}},
-    {epi::kENameBossBrain, {26, 88}},
-    {epi::kENameBossEye, {27, 89}},
-    {epi::kENameBossTarget, {28, 87}},
-    {epi::kENameSpawnShot, {29, -1}},
-    {epi::kENameSpawnFire, {30, -1}},
-    {epi::kENameExplosiveBarrel, {31, 2035}},
-    {epi::kENameDoomImpBall, {32, -1}},
-    {epi::kENameCacodemonBall, {33, -1}},
-    {epi::kENameRocket, {34, -1}},
-    {epi::kENamePlasmaBall, {35, -1}},
-    {epi::kENameBFGBall, {36, -1}},
-    {epi::kENameArachnotronPlasma, {37, -1}},
-    {epi::kENameBulletPuff, {38, -1}},
-    {epi::kENameBlood, {39, -1}},
-    {epi::kENameTeleportFog, {40, -1}},
-    {epi::kENameItemFog, {41, -1}},
-    {epi::kENameTeleportDest, {42, 14}},
-    {epi::kENameBFGExtra, {43, -1}},
-    {epi::kENameGreenArmor, {44, 2018}},
-    {epi::kENameBlueArmor, {45, 2019}},
-    {epi::kENameHealthBonus, {46, 2014}},
-    {epi::kENameArmorBonus, {47, 2015}},
-    {epi::kENameBlueCard, {48, 5}},
-    {epi::kENameRedCard, {49, 13}},
-    {epi::kENameYellowCard, {50, 6}},
-    {epi::kENameYellowSkull, {51, 39}},
-    {epi::kENameRedSkull, {52, 38}},
-    {epi::kENameBlueSkull, {53, 40}},
-    {epi::kENameStimpack, {54, 2011}},
-    {epi::kENameMedikit, {55, 2012}},
-    {epi::kENameSoulsphere, {56, 2013}},
-    {epi::kENameInvulnerabilitySphere, {57, 2022}},
-    {epi::kENameBerserk, {58, 2023}},
-    {epi::kENameBlurSphere, {59, 2024}},
-    {epi::kENameRadSuit, {60, 2025}},
-    {epi::kENameAllmap, {61, 2026}},
-    {epi::kENameInfrared, {62, 2045}},
-    {epi::kENameMegasphere, {63, 83}},
-    {epi::kENameClip, {64, 2007}},
-    {epi::kENameClipBox, {65, 2048}},
-    {epi::kENameRocketAmmo, {66, 2010}},
-    {epi::kENameRocketBox, {67, 2046}},
-    {epi::kENameCell, {68, 2047}},
-    {epi::kENameCellPack, {69, 17}},
-    {epi::kENameShell, {70, 2008}},
-    {epi::kENameShellBox, {71, 2049}},
-    {epi::kENameBackpack, {72, 8}},
-    {epi::kENameBFG9000, {73, 2006}},
-    {epi::kENameChaingun, {74, 2002}},
-    {epi::kENameChainsaw, {75, 2005}},
-    {epi::kENameRocketLauncher, {76, 2003}},
-    {epi::kENamePlasmaRifle, {77, 2004}},
-    {epi::kENameShotgun, {78, 2001}},
-    {epi::kENameSuperShotgun, {79, 82}},
-    {epi::kENameTechLamp, {80, 85}},
-    {epi::kENameTechLamp2, {81, 86}},
-    {epi::kENameColumn, {82, 2028}},
-    {epi::kENameTallGreenColumn, {83, 30}},
-    {epi::kENameShortGreenColumn, {84, 31}},
-    {epi::kENameTallRedColumn, {85, 32}},
-    {epi::kENameShortRedColumn, {86, 33}},
-    {epi::kENameSkullColumn, {87, 37}},
-    {epi::kENameHeartColumn, {88, 36}},
-    {epi::kENameEvilEye, {89, 41}},
-    {epi::kENameFloatingSkull, {90, 42}},
-    {epi::kENameTorchTree, {91, 43}},
-    {epi::kENameBlueTorch, {92, 44}},
-    {epi::kENameGreenTorch, {93, 45}},
-    {epi::kENameRedTorch, {94, 46}},
-    {epi::kENameShortBlueTorch, {95, 55}},
-    {epi::kENameShortGreenTorch, {96, 56}},
-    {epi::kENameShortRedTorch, {97, 57}},
-    {epi::kENameStalagtite, {98, 47}},
-    {epi::kENameTechPillar, {99, 48}},
-    {epi::kENameCandleStick, {100, 34}},
-    {epi::kENameCandelabra, {101, 35}},
-    {epi::kENameBloodyTwitch, {102, 49}},
-    {epi::kENameMeat2, {103, 50}},
-    {epi::kENameMeat3, {104, 51}},
-    {epi::kENameMeat4, {105, 52}},
-    {epi::kENameMeat5, {106, 53}},
-    {epi::kENameNonsolidMeat2, {107, 59}},
-    {epi::kENameNonsolidMeat4, {108, 60}},
-    {epi::kENameNonsolidMeat3, {109, 61}},
-    {epi::kENameNonsolidMeat5, {110, 62}},
-    {epi::kENameNonsolidTwitch, {111, 63}},
-    {epi::kENameDeadCacodemon, {112, 22}},
-    {epi::kENameDeadMarine, {113, 15}},
-    {epi::kENameDeadZombieMan, {114, 18}},
-    {epi::kENameDeadDemon, {115, 21}},
-    {epi::kENameDeadLostSoul, {116, 23}},
-    {epi::kENameDeadDoomImp, {117, 20}},
-    {epi::kENameDeadShotgunGuy, {118, 19}},
-    {epi::kENameGibbedMarine, {119, 10}},
-    {epi::kENameGibbedMarineExtra, {120, 12}},
-    {epi::kENameHeadsOnAStick, {121, 28}},
-    {epi::kENameGibs, {122, 24}},
-    {epi::kENameHeadOnAStick, {123, 27}},
-    {epi::kENameHeadCandles, {124, 29}},
-    {epi::kENameDeadStick, {125, 25}},
-    {epi::kENameLiveStick, {126, 26}},
-    {epi::kENameBigTree, {127, 54}},
-    {epi::kENameBurningBarrel, {128, 70}},
-    {epi::kENameHangNoGuts, {129, 73}},
-    {epi::kENameHangBNoBrain, {130, 74}},
-    {epi::kENameHangTLookingDown, {131, 75}},
-    {epi::kENameHangTSkull, {132, 76}},
-    {epi::kENameHangTLookingUp, {133, 77}},
-    {epi::kENameHangTNoBrain, {134, 78}},
-    {epi::kENameColonGibs, {135, 79}},
-    {epi::kENameSmallBloodPool, {136, 80}},
-    {epi::kENameBrainStem, {137, 81}},
+    {epi::EName::kDoomPlayer, {1, -1}},
+    {epi::EName::kZombieMan, {2, 3004}},
+    {epi::EName::kShotgunGuy, {3, 9}},
+    {epi::EName::kArchvile, {4, 64}},
+    {epi::EName::kArchvileFire, {5, -1}},
+    {epi::EName::kRevenant, {6, 66}},
+    {epi::EName::kRevenantTracer, {7, -1}},
+    {epi::EName::kRevenantTracerSmoke, {8, -1}},
+    {epi::EName::kFatso, {9, 67}},
+    {epi::EName::kFatShot, {10, -1}},
+    {epi::EName::kChaingunGuy, {11, 65}},
+    {epi::EName::kDoomImp, {12, 3001}},
+    {epi::EName::kDemon, {13, 3002}},
+    {epi::EName::kSpectre, {14, 58}},
+    {epi::EName::kCacodemon, {15, 3005}},
+    {epi::EName::kBaronOfHell, {16, 3003}},
+    {epi::EName::kBaronBall, {17, -1}},
+    {epi::EName::kHellKnight, {18, 69}},
+    {epi::EName::kLostSoul, {19, 3006}},
+    {epi::EName::kSpiderMastermind, {20, 7}},
+    {epi::EName::kArachnotron, {21, 68}},
+    {epi::EName::kCyberdemon, {22, 16}},
+    {epi::EName::kPainElemental, {23, 71}},
+    {epi::EName::kWolfensteinSS, {24, 84}},
+    {epi::EName::kCommanderKeen, {25, 72}},
+    {epi::EName::kBossBrain, {26, 88}},
+    {epi::EName::kBossEye, {27, 89}},
+    {epi::EName::kBossTarget, {28, 87}},
+    {epi::EName::kSpawnShot, {29, -1}},
+    {epi::EName::kSpawnFire, {30, -1}},
+    {epi::EName::kExplosiveBarrel, {31, 2035}},
+    {epi::EName::kDoomImpBall, {32, -1}},
+    {epi::EName::kCacodemonBall, {33, -1}},
+    {epi::EName::kRocket, {34, -1}},
+    {epi::EName::kPlasmaBall, {35, -1}},
+    {epi::EName::kBFGBall, {36, -1}},
+    {epi::EName::kArachnotronPlasma, {37, -1}},
+    {epi::EName::kBulletPuff, {38, -1}},
+    {epi::EName::kBlood, {39, -1}},
+    {epi::EName::kTeleportFog, {40, -1}},
+    {epi::EName::kItemFog, {41, -1}},
+    {epi::EName::kTeleportDest, {42, 14}},
+    {epi::EName::kBFGExtra, {43, -1}},
+    {epi::EName::kGreenArmor, {44, 2018}},
+    {epi::EName::kBlueArmor, {45, 2019}},
+    {epi::EName::kHealthBonus, {46, 2014}},
+    {epi::EName::kArmorBonus, {47, 2015}},
+    {epi::EName::kBlueCard, {48, 5}},
+    {epi::EName::kRedCard, {49, 13}},
+    {epi::EName::kYellowCard, {50, 6}},
+    {epi::EName::kYellowSkull, {51, 39}},
+    {epi::EName::kRedSkull, {52, 38}},
+    {epi::EName::kBlueSkull, {53, 40}},
+    {epi::EName::kStimpack, {54, 2011}},
+    {epi::EName::kMedikit, {55, 2012}},
+    {epi::EName::kSoulsphere, {56, 2013}},
+    {epi::EName::kInvulnerabilitySphere, {57, 2022}},
+    {epi::EName::kBerserk, {58, 2023}},
+    {epi::EName::kBlurSphere, {59, 2024}},
+    {epi::EName::kRadSuit, {60, 2025}},
+    {epi::EName::kAllmap, {61, 2026}},
+    {epi::EName::kInfrared, {62, 2045}},
+    {epi::EName::kMegasphere, {63, 83}},
+    {epi::EName::kClip, {64, 2007}},
+    {epi::EName::kClipBox, {65, 2048}},
+    {epi::EName::kRocketAmmo, {66, 2010}},
+    {epi::EName::kRocketBox, {67, 2046}},
+    {epi::EName::kCell, {68, 2047}},
+    {epi::EName::kCellPack, {69, 17}},
+    {epi::EName::kShell, {70, 2008}},
+    {epi::EName::kShellBox, {71, 2049}},
+    {epi::EName::kBackpack, {72, 8}},
+    {epi::EName::kBFG9000, {73, 2006}},
+    {epi::EName::kChaingun, {74, 2002}},
+    {epi::EName::kChainsaw, {75, 2005}},
+    {epi::EName::kRocketLauncher, {76, 2003}},
+    {epi::EName::kPlasmaRifle, {77, 2004}},
+    {epi::EName::kShotgun, {78, 2001}},
+    {epi::EName::kSuperShotgun, {79, 82}},
+    {epi::EName::kTechLamp, {80, 85}},
+    {epi::EName::kTechLamp2, {81, 86}},
+    {epi::EName::kColumn, {82, 2028}},
+    {epi::EName::kTallGreenColumn, {83, 30}},
+    {epi::EName::kShortGreenColumn, {84, 31}},
+    {epi::EName::kTallRedColumn, {85, 32}},
+    {epi::EName::kShortRedColumn, {86, 33}},
+    {epi::EName::kSkullColumn, {87, 37}},
+    {epi::EName::kHeartColumn, {88, 36}},
+    {epi::EName::kEvilEye, {89, 41}},
+    {epi::EName::kFloatingSkull, {90, 42}},
+    {epi::EName::kTorchTree, {91, 43}},
+    {epi::EName::kBlueTorch, {92, 44}},
+    {epi::EName::kGreenTorch, {93, 45}},
+    {epi::EName::kRedTorch, {94, 46}},
+    {epi::EName::kShortBlueTorch, {95, 55}},
+    {epi::EName::kShortGreenTorch, {96, 56}},
+    {epi::EName::kShortRedTorch, {97, 57}},
+    {epi::EName::kStalagtite, {98, 47}},
+    {epi::EName::kTechPillar, {99, 48}},
+    {epi::EName::kCandleStick, {100, 34}},
+    {epi::EName::kCandelabra, {101, 35}},
+    {epi::EName::kBloodyTwitch, {102, 49}},
+    {epi::EName::kMeat2, {103, 50}},
+    {epi::EName::kMeat3, {104, 51}},
+    {epi::EName::kMeat4, {105, 52}},
+    {epi::EName::kMeat5, {106, 53}},
+    {epi::EName::kNonsolidMeat2, {107, 59}},
+    {epi::EName::kNonsolidMeat4, {108, 60}},
+    {epi::EName::kNonsolidMeat3, {109, 61}},
+    {epi::EName::kNonsolidMeat5, {110, 62}},
+    {epi::EName::kNonsolidTwitch, {111, 63}},
+    {epi::EName::kDeadCacodemon, {112, 22}},
+    {epi::EName::kDeadMarine, {113, 15}},
+    {epi::EName::kDeadZombieMan, {114, 18}},
+    {epi::EName::kDeadDemon, {115, 21}},
+    {epi::EName::kDeadLostSoul, {116, 23}},
+    {epi::EName::kDeadDoomImp, {117, 20}},
+    {epi::EName::kDeadShotgunGuy, {118, 19}},
+    {epi::EName::kGibbedMarine, {119, 10}},
+    {epi::EName::kGibbedMarineExtra, {120, 12}},
+    {epi::EName::kHeadsOnAStick, {121, 28}},
+    {epi::EName::kGibs, {122, 24}},
+    {epi::EName::kHeadOnAStick, {123, 27}},
+    {epi::EName::kHeadCandles, {124, 29}},
+    {epi::EName::kDeadStick, {125, 25}},
+    {epi::EName::kLiveStick, {126, 26}},
+    {epi::EName::kBigTree, {127, 54}},
+    {epi::EName::kBurningBarrel, {128, 70}},
+    {epi::EName::kHangNoGuts, {129, 73}},
+    {epi::EName::kHangBNoBrain, {130, 74}},
+    {epi::EName::kHangTLookingDown, {131, 75}},
+    {epi::EName::kHangTSkull, {132, 76}},
+    {epi::EName::kHangTLookingUp, {133, 77}},
+    {epi::EName::kHangTNoBrain, {134, 78}},
+    {epi::EName::kColonGibs, {135, 79}},
+    {epi::EName::kSmallBloodPool, {136, 80}},
+    {epi::EName::kBrainStem, {137, 81}},
     // Boom/MBF additions
-    {epi::kENamePointPusher, {138, 5001}},
-    {epi::kENamePointPuller, {139, 5002}},
-    {epi::kENameMBFHelperDog, {140, 888}},
-    {epi::kENamePlasmaBall1, {141, -1}},
-    {epi::kENamePlasmaBall2, {142, -1}},
-    {epi::kENameEvilSceptre, {143, -1}},
-    {epi::kENameUnholyBible, {144, -1}},
-    {epi::kENameMusicChanger, {145, -1}},
-    {epi::kENameDeh_Actor_145, {145, -1}},
-    {epi::kENameDeh_Actor_146, {146, -1}},
-    {epi::kENameDeh_Actor_147, {147, -1}},
-    {epi::kENameDeh_Actor_148, {148, -1}},
-    {epi::kENameDeh_Actor_149, {149, -1}},
+    {epi::EName::kPointPusher, {138, 5001}},
+    {epi::EName::kPointPuller, {139, 5002}},
+    {epi::EName::kMBFHelperDog, {140, 888}},
+    {epi::EName::kPlasmaBall1, {141, -1}},
+    {epi::EName::kPlasmaBall2, {142, -1}},
+    {epi::EName::kEvilSceptre, {143, -1}},
+    {epi::EName::kUnholyBible, {144, -1}},
+    {epi::EName::kMusicChanger, {145, -1}},
+    {epi::EName::kDeh_Actor_145, {145, -1}},
+    {epi::EName::kDeh_Actor_146, {146, -1}},
+    {epi::EName::kDeh_Actor_147, {147, -1}},
+    {epi::EName::kDeh_Actor_148, {148, -1}},
+    {epi::EName::kDeh_Actor_149, {149, -1}},
     // DEHEXTRA Actors start here
-    {epi::kENameDeh_Actor_150, {151, -1}}, // MT_EXTRA0
-    {epi::kENameDeh_Actor_151, {152, -1}}, // MT_EXTRA1
-    {epi::kENameDeh_Actor_152, {153, -1}}, // MT_EXTRA2
-    {epi::kENameDeh_Actor_153, {154, -1}}, // MT_EXTRA3
-    {epi::kENameDeh_Actor_154, {155, -1}}, // MT_EXTRA4
-    {epi::kENameDeh_Actor_155, {156, -1}}, // MT_EXTRA5
-    {epi::kENameDeh_Actor_156, {157, -1}}, // MT_EXTRA6
-    {epi::kENameDeh_Actor_157, {158, -1}}, // MT_EXTRA7
-    {epi::kENameDeh_Actor_158, {159, -1}}, // MT_EXTRA8
-    {epi::kENameDeh_Actor_159, {160, -1}}, // MT_EXTRA9
-    {epi::kENameDeh_Actor_160, {161, -1}}, // MT_EXTRA10
-    {epi::kENameDeh_Actor_161, {162, -1}}, // MT_EXTRA11
-    {epi::kENameDeh_Actor_162, {163, -1}}, // MT_EXTRA12
-    {epi::kENameDeh_Actor_163, {164, -1}}, // MT_EXTRA13
-    {epi::kENameDeh_Actor_164, {165, -1}}, // MT_EXTRA14
-    {epi::kENameDeh_Actor_165, {166, -1}}, // MT_EXTRA15
-    {epi::kENameDeh_Actor_166, {167, -1}}, // MT_EXTRA16
-    {epi::kENameDeh_Actor_167, {168, -1}}, // MT_EXTRA17
-    {epi::kENameDeh_Actor_168, {169, -1}}, // MT_EXTRA18
-    {epi::kENameDeh_Actor_169, {170, -1}}, // MT_EXTRA19
-    {epi::kENameDeh_Actor_170, {171, -1}}, // MT_EXTRA20
-    {epi::kENameDeh_Actor_171, {172, -1}}, // MT_EXTRA21
-    {epi::kENameDeh_Actor_172, {173, -1}}, // MT_EXTRA22
-    {epi::kENameDeh_Actor_173, {174, -1}}, // MT_EXTRA23
-    {epi::kENameDeh_Actor_174, {175, -1}}, // MT_EXTRA24
-    {epi::kENameDeh_Actor_175, {176, -1}}, // MT_EXTRA25
-    {epi::kENameDeh_Actor_176, {177, -1}}, // MT_EXTRA26
-    {epi::kENameDeh_Actor_177, {178, -1}}, // MT_EXTRA27
-    {epi::kENameDeh_Actor_178, {179, -1}}, // MT_EXTRA28
-    {epi::kENameDeh_Actor_179, {180, -1}}, // MT_EXTRA29
-    {epi::kENameDeh_Actor_180, {181, -1}}, // MT_EXTRA30
-    {epi::kENameDeh_Actor_181, {182, -1}}, // MT_EXTRA31
-    {epi::kENameDeh_Actor_182, {183, -1}}, // MT_EXTRA32
-    {epi::kENameDeh_Actor_183, {184, -1}}, // MT_EXTRA33
-    {epi::kENameDeh_Actor_184, {185, -1}}, // MT_EXTRA34
-    {epi::kENameDeh_Actor_185, {186, -1}}, // MT_EXTRA35
-    {epi::kENameDeh_Actor_186, {187, -1}}, // MT_EXTRA36
-    {epi::kENameDeh_Actor_187, {188, -1}}, // MT_EXTRA37
-    {epi::kENameDeh_Actor_188, {189, -1}}, // MT_EXTRA38
-    {epi::kENameDeh_Actor_189, {190, -1}}, // MT_EXTRA39
-    {epi::kENameDeh_Actor_190, {191, -1}}, // MT_EXTRA40
-    {epi::kENameDeh_Actor_191, {192, -1}}, // MT_EXTRA41
-    {epi::kENameDeh_Actor_192, {193, -1}}, // MT_EXTRA42
-    {epi::kENameDeh_Actor_193, {194, -1}}, // MT_EXTRA43
-    {epi::kENameDeh_Actor_194, {195, -1}}, // MT_EXTRA44
-    {epi::kENameDeh_Actor_195, {196, -1}}, // MT_EXTRA45
-    {epi::kENameDeh_Actor_196, {197, -1}}, // MT_EXTRA46
-    {epi::kENameDeh_Actor_197, {198, -1}}, // MT_EXTRA47
-    {epi::kENameDeh_Actor_198, {199, -1}}, // MT_EXTRA48
-    {epi::kENameDeh_Actor_199, {200, -1}}, // MT_EXTRA49
-    {epi::kENameDeh_Actor_200, {201, -1}}, // MT_EXTRA50
-    {epi::kENameDeh_Actor_201, {202, -1}}, // MT_EXTRA51
-    {epi::kENameDeh_Actor_202, {203, -1}}, // MT_EXTRA52
-    {epi::kENameDeh_Actor_203, {204, -1}}, // MT_EXTRA53
-    {epi::kENameDeh_Actor_204, {205, -1}}, // MT_EXTRA54
-    {epi::kENameDeh_Actor_205, {206, -1}}, // MT_EXTRA55
-    {epi::kENameDeh_Actor_206, {207, -1}}, // MT_EXTRA56
-    {epi::kENameDeh_Actor_207, {208, -1}}, // MT_EXTRA57
-    {epi::kENameDeh_Actor_208, {209, -1}}, // MT_EXTRA58
-    {epi::kENameDeh_Actor_209, {210, -1}}, // MT_EXTRA59
-    {epi::kENameDeh_Actor_210, {211, -1}}, // MT_EXTRA60
-    {epi::kENameDeh_Actor_211, {212, -1}}, // MT_EXTRA61
-    {epi::kENameDeh_Actor_212, {213, -1}}, // MT_EXTRA62
-    {epi::kENameDeh_Actor_213, {214, -1}}, // MT_EXTRA63
-    {epi::kENameDeh_Actor_214, {215, -1}}, // MT_EXTRA64
-    {epi::kENameDeh_Actor_215, {216, -1}}, // MT_EXTRA65
-    {epi::kENameDeh_Actor_216, {217, -1}}, // MT_EXTRA66
-    {epi::kENameDeh_Actor_217, {218, -1}}, // MT_EXTRA67
-    {epi::kENameDeh_Actor_218, {219, -1}}, // MT_EXTRA68
-    {epi::kENameDeh_Actor_219, {220, -1}}, // MT_EXTRA69
-    {epi::kENameDeh_Actor_220, {221, -1}}, // MT_EXTRA70
-    {epi::kENameDeh_Actor_221, {222, -1}}, // MT_EXTRA71
-    {epi::kENameDeh_Actor_222, {223, -1}}, // MT_EXTRA72
-    {epi::kENameDeh_Actor_223, {224, -1}}, // MT_EXTRA73
-    {epi::kENameDeh_Actor_224, {225, -1}}, // MT_EXTRA74
-    {epi::kENameDeh_Actor_225, {226, -1}}, // MT_EXTRA75
-    {epi::kENameDeh_Actor_226, {227, -1}}, // MT_EXTRA76
-    {epi::kENameDeh_Actor_227, {228, -1}}, // MT_EXTRA77
-    {epi::kENameDeh_Actor_228, {229, -1}}, // MT_EXTRA78
-    {epi::kENameDeh_Actor_229, {230, -1}}, // MT_EXTRA79
-    {epi::kENameDeh_Actor_230, {231, -1}}, // MT_EXTRA80
-    {epi::kENameDeh_Actor_231, {232, -1}}, // MT_EXTRA81
-    {epi::kENameDeh_Actor_232, {233, -1}}, // MT_EXTRA82
-    {epi::kENameDeh_Actor_233, {234, -1}}, // MT_EXTRA83
-    {epi::kENameDeh_Actor_234, {235, -1}}, // MT_EXTRA84
-    {epi::kENameDeh_Actor_235, {236, -1}}, // MT_EXTRA85
-    {epi::kENameDeh_Actor_236, {237, -1}}, // MT_EXTRA86
-    {epi::kENameDeh_Actor_237, {238, -1}}, // MT_EXTRA87
-    {epi::kENameDeh_Actor_238, {239, -1}}, // MT_EXTRA88
-    {epi::kENameDeh_Actor_239, {240, -1}}, // MT_EXTRA89
-    {epi::kENameDeh_Actor_240, {241, -1}}, // MT_EXTRA90
-    {epi::kENameDeh_Actor_241, {242, -1}}, // MT_EXTRA91
-    {epi::kENameDeh_Actor_242, {243, -1}}, // MT_EXTRA92
-    {epi::kENameDeh_Actor_243, {244, -1}}, // MT_EXTRA93
-    {epi::kENameDeh_Actor_244, {245, -1}}, // MT_EXTRA94
-    {epi::kENameDeh_Actor_245, {246, -1}}, // MT_EXTRA95
-    {epi::kENameDeh_Actor_246, {247, -1}}, // MT_EXTRA96
-    {epi::kENameDeh_Actor_247, {248, -1}}, // MT_EXTRA97
-    {epi::kENameDeh_Actor_248, {249, -1}}, // MT_EXTRA98
-    {epi::kENameDeh_Actor_249, {250, -1}}  // MT_EXTRA99
+    {epi::EName::kDeh_Actor_150, {151, -1}}, // MT_EXTRA0
+    {epi::EName::kDeh_Actor_151, {152, -1}}, // MT_EXTRA1
+    {epi::EName::kDeh_Actor_152, {153, -1}}, // MT_EXTRA2
+    {epi::EName::kDeh_Actor_153, {154, -1}}, // MT_EXTRA3
+    {epi::EName::kDeh_Actor_154, {155, -1}}, // MT_EXTRA4
+    {epi::EName::kDeh_Actor_155, {156, -1}}, // MT_EXTRA5
+    {epi::EName::kDeh_Actor_156, {157, -1}}, // MT_EXTRA6
+    {epi::EName::kDeh_Actor_157, {158, -1}}, // MT_EXTRA7
+    {epi::EName::kDeh_Actor_158, {159, -1}}, // MT_EXTRA8
+    {epi::EName::kDeh_Actor_159, {160, -1}}, // MT_EXTRA9
+    {epi::EName::kDeh_Actor_160, {161, -1}}, // MT_EXTRA10
+    {epi::EName::kDeh_Actor_161, {162, -1}}, // MT_EXTRA11
+    {epi::EName::kDeh_Actor_162, {163, -1}}, // MT_EXTRA12
+    {epi::EName::kDeh_Actor_163, {164, -1}}, // MT_EXTRA13
+    {epi::EName::kDeh_Actor_164, {165, -1}}, // MT_EXTRA14
+    {epi::EName::kDeh_Actor_165, {166, -1}}, // MT_EXTRA15
+    {epi::EName::kDeh_Actor_166, {167, -1}}, // MT_EXTRA16
+    {epi::EName::kDeh_Actor_167, {168, -1}}, // MT_EXTRA17
+    {epi::EName::kDeh_Actor_168, {169, -1}}, // MT_EXTRA18
+    {epi::EName::kDeh_Actor_169, {170, -1}}, // MT_EXTRA19
+    {epi::EName::kDeh_Actor_170, {171, -1}}, // MT_EXTRA20
+    {epi::EName::kDeh_Actor_171, {172, -1}}, // MT_EXTRA21
+    {epi::EName::kDeh_Actor_172, {173, -1}}, // MT_EXTRA22
+    {epi::EName::kDeh_Actor_173, {174, -1}}, // MT_EXTRA23
+    {epi::EName::kDeh_Actor_174, {175, -1}}, // MT_EXTRA24
+    {epi::EName::kDeh_Actor_175, {176, -1}}, // MT_EXTRA25
+    {epi::EName::kDeh_Actor_176, {177, -1}}, // MT_EXTRA26
+    {epi::EName::kDeh_Actor_177, {178, -1}}, // MT_EXTRA27
+    {epi::EName::kDeh_Actor_178, {179, -1}}, // MT_EXTRA28
+    {epi::EName::kDeh_Actor_179, {180, -1}}, // MT_EXTRA29
+    {epi::EName::kDeh_Actor_180, {181, -1}}, // MT_EXTRA30
+    {epi::EName::kDeh_Actor_181, {182, -1}}, // MT_EXTRA31
+    {epi::EName::kDeh_Actor_182, {183, -1}}, // MT_EXTRA32
+    {epi::EName::kDeh_Actor_183, {184, -1}}, // MT_EXTRA33
+    {epi::EName::kDeh_Actor_184, {185, -1}}, // MT_EXTRA34
+    {epi::EName::kDeh_Actor_185, {186, -1}}, // MT_EXTRA35
+    {epi::EName::kDeh_Actor_186, {187, -1}}, // MT_EXTRA36
+    {epi::EName::kDeh_Actor_187, {188, -1}}, // MT_EXTRA37
+    {epi::EName::kDeh_Actor_188, {189, -1}}, // MT_EXTRA38
+    {epi::EName::kDeh_Actor_189, {190, -1}}, // MT_EXTRA39
+    {epi::EName::kDeh_Actor_190, {191, -1}}, // MT_EXTRA40
+    {epi::EName::kDeh_Actor_191, {192, -1}}, // MT_EXTRA41
+    {epi::EName::kDeh_Actor_192, {193, -1}}, // MT_EXTRA42
+    {epi::EName::kDeh_Actor_193, {194, -1}}, // MT_EXTRA43
+    {epi::EName::kDeh_Actor_194, {195, -1}}, // MT_EXTRA44
+    {epi::EName::kDeh_Actor_195, {196, -1}}, // MT_EXTRA45
+    {epi::EName::kDeh_Actor_196, {197, -1}}, // MT_EXTRA46
+    {epi::EName::kDeh_Actor_197, {198, -1}}, // MT_EXTRA47
+    {epi::EName::kDeh_Actor_198, {199, -1}}, // MT_EXTRA48
+    {epi::EName::kDeh_Actor_199, {200, -1}}, // MT_EXTRA49
+    {epi::EName::kDeh_Actor_200, {201, -1}}, // MT_EXTRA50
+    {epi::EName::kDeh_Actor_201, {202, -1}}, // MT_EXTRA51
+    {epi::EName::kDeh_Actor_202, {203, -1}}, // MT_EXTRA52
+    {epi::EName::kDeh_Actor_203, {204, -1}}, // MT_EXTRA53
+    {epi::EName::kDeh_Actor_204, {205, -1}}, // MT_EXTRA54
+    {epi::EName::kDeh_Actor_205, {206, -1}}, // MT_EXTRA55
+    {epi::EName::kDeh_Actor_206, {207, -1}}, // MT_EXTRA56
+    {epi::EName::kDeh_Actor_207, {208, -1}}, // MT_EXTRA57
+    {epi::EName::kDeh_Actor_208, {209, -1}}, // MT_EXTRA58
+    {epi::EName::kDeh_Actor_209, {210, -1}}, // MT_EXTRA59
+    {epi::EName::kDeh_Actor_210, {211, -1}}, // MT_EXTRA60
+    {epi::EName::kDeh_Actor_211, {212, -1}}, // MT_EXTRA61
+    {epi::EName::kDeh_Actor_212, {213, -1}}, // MT_EXTRA62
+    {epi::EName::kDeh_Actor_213, {214, -1}}, // MT_EXTRA63
+    {epi::EName::kDeh_Actor_214, {215, -1}}, // MT_EXTRA64
+    {epi::EName::kDeh_Actor_215, {216, -1}}, // MT_EXTRA65
+    {epi::EName::kDeh_Actor_216, {217, -1}}, // MT_EXTRA66
+    {epi::EName::kDeh_Actor_217, {218, -1}}, // MT_EXTRA67
+    {epi::EName::kDeh_Actor_218, {219, -1}}, // MT_EXTRA68
+    {epi::EName::kDeh_Actor_219, {220, -1}}, // MT_EXTRA69
+    {epi::EName::kDeh_Actor_220, {221, -1}}, // MT_EXTRA70
+    {epi::EName::kDeh_Actor_221, {222, -1}}, // MT_EXTRA71
+    {epi::EName::kDeh_Actor_222, {223, -1}}, // MT_EXTRA72
+    {epi::EName::kDeh_Actor_223, {224, -1}}, // MT_EXTRA73
+    {epi::EName::kDeh_Actor_224, {225, -1}}, // MT_EXTRA74
+    {epi::EName::kDeh_Actor_225, {226, -1}}, // MT_EXTRA75
+    {epi::EName::kDeh_Actor_226, {227, -1}}, // MT_EXTRA76
+    {epi::EName::kDeh_Actor_227, {228, -1}}, // MT_EXTRA77
+    {epi::EName::kDeh_Actor_228, {229, -1}}, // MT_EXTRA78
+    {epi::EName::kDeh_Actor_229, {230, -1}}, // MT_EXTRA79
+    {epi::EName::kDeh_Actor_230, {231, -1}}, // MT_EXTRA80
+    {epi::EName::kDeh_Actor_231, {232, -1}}, // MT_EXTRA81
+    {epi::EName::kDeh_Actor_232, {233, -1}}, // MT_EXTRA82
+    {epi::EName::kDeh_Actor_233, {234, -1}}, // MT_EXTRA83
+    {epi::EName::kDeh_Actor_234, {235, -1}}, // MT_EXTRA84
+    {epi::EName::kDeh_Actor_235, {236, -1}}, // MT_EXTRA85
+    {epi::EName::kDeh_Actor_236, {237, -1}}, // MT_EXTRA86
+    {epi::EName::kDeh_Actor_237, {238, -1}}, // MT_EXTRA87
+    {epi::EName::kDeh_Actor_238, {239, -1}}, // MT_EXTRA88
+    {epi::EName::kDeh_Actor_239, {240, -1}}, // MT_EXTRA89
+    {epi::EName::kDeh_Actor_240, {241, -1}}, // MT_EXTRA90
+    {epi::EName::kDeh_Actor_241, {242, -1}}, // MT_EXTRA91
+    {epi::EName::kDeh_Actor_242, {243, -1}}, // MT_EXTRA92
+    {epi::EName::kDeh_Actor_243, {244, -1}}, // MT_EXTRA93
+    {epi::EName::kDeh_Actor_244, {245, -1}}, // MT_EXTRA94
+    {epi::EName::kDeh_Actor_245, {246, -1}}, // MT_EXTRA95
+    {epi::EName::kDeh_Actor_246, {247, -1}}, // MT_EXTRA96
+    {epi::EName::kDeh_Actor_247, {248, -1}}, // MT_EXTRA97
+    {epi::EName::kDeh_Actor_248, {249, -1}}, // MT_EXTRA98
+    {epi::EName::kDeh_Actor_249, {250, -1}}  // MT_EXTRA99
 };
 
 static void FreeMap(MapEntry *mape)
@@ -359,7 +359,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
 
         switch (key_ename.GetIndex())
         {
-        case epi::kENameLevelname: {
+        case epi::EName::kLevelName: {
             if (val->levelname)
                 free(val->levelname);
             value          = lex.state_.string;
@@ -367,7 +367,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
             epi::CStringCopyMax(val->levelname, value.c_str(), value.size());
         }
         break;
-        case epi::kENameLabel: {
+        case epi::EName::kLabel: {
             if (epi::StringCaseCompareASCII(value, "clear") == 0)
             {
                 if (val->label)
@@ -385,7 +385,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
             }
         }
         break;
-        case epi::kENameNext: {
+        case epi::EName::kNext: {
             EPI_CLEAR_MEMORY(val->next_map, char, 9);
             value = lex.state_.string;
             if (value.size() > 8)
@@ -393,7 +393,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
             epi::CStringCopyMax(val->next_map, value.data(), 8);
         }
         break;
-        case epi::kENameNextsecret: {
+        case epi::EName::kNextSecret: {
             EPI_CLEAR_MEMORY(val->nextsecret, char, 9);
             value = lex.state_.string;
             if (value.size() > 8)
@@ -402,7 +402,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
             epi::CStringCopyMax(val->nextsecret, value.data(), 8);
         }
         break;
-        case epi::kENameLevelpic: {
+        case epi::EName::kLevelPic: {
             EPI_CLEAR_MEMORY(val->levelpic, char, 9);
             value = lex.state_.string;
             if (value.size() > 8)
@@ -411,7 +411,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
             epi::CStringCopyMax(val->levelpic, value.data(), 8);
         }
         break;
-        case epi::kENameSkytexture: {
+        case epi::EName::kSkyTexture: {
             EPI_CLEAR_MEMORY(val->skytexture, char, 9);
             value = lex.state_.string;
             if (value.size() > 8)
@@ -420,7 +420,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
             epi::CStringCopyMax(val->skytexture, value.data(), 8);
         }
         break;
-        case epi::kENameMusic: {
+        case epi::EName::kMusic: {
             EPI_CLEAR_MEMORY(val->music, char, 9);
             value = lex.state_.string;
             if (value.size() > 8)
@@ -428,7 +428,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
             epi::CStringCopyMax(val->music, value.data(), 8);
         }
         break;
-        case epi::kENameEndpic: {
+        case epi::EName::kEndPic: {
             EPI_CLEAR_MEMORY(val->endpic, char, 9);
             value = lex.state_.string;
             if (value.size() > 8)
@@ -436,16 +436,16 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
             epi::CStringCopyMax(val->endpic, value.data(), 8);
         }
         break;
-        case epi::kENameEndcast:
+        case epi::EName::kEndCast:
             val->docast = lex.state_.boolean;
             break;
-        case epi::kENameEndbunny:
+        case epi::EName::kEndBunny:
             val->dobunny = lex.state_.boolean;
             break;
-        case epi::kENameEndgame:
+        case epi::EName::kEndGame:
             val->endgame = lex.state_.boolean;
             break;
-        case epi::kENameExitpic: {
+        case epi::EName::kExitPic: {
             EPI_CLEAR_MEMORY(val->exitpic, char, 9);
             value = lex.state_.string;
             if (value.size() > 8)
@@ -453,7 +453,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
             epi::CStringCopyMax(val->exitpic, value.data(), 8);
         }
         break;
-        case epi::kENameEnterpic: {
+        case epi::EName::kEnterPic: {
             EPI_CLEAR_MEMORY(val->enterpic, char, 9);
             value = lex.state_.string;
             if (value.size() > 8)
@@ -462,13 +462,13 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
             epi::CStringCopyMax(val->enterpic, value.data(), 8);
         }
         break;
-        case epi::kENameNointermission:
+        case epi::EName::kNoIntermission:
             val->nointermission = lex.state_.boolean;
             break;
-        case epi::kENamePartime:
+        case epi::EName::kParTime:
             val->partime = 35 * lex.state_.number;
             break;
-        case epi::kENameIntertext: {
+        case epi::EName::kIntertext: {
             std::string it_builder = value;
             while (lex.CheckToken(','))
             {
@@ -482,7 +482,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
             epi::CStringCopyMax(val->intertext, it_builder.c_str(), it_builder.size());
         }
         break;
-        case epi::kENameIntertextsecret: {
+        case epi::EName::kIntertextSecret: {
             std::string it_builder = value;
             while (lex.CheckToken(','))
             {
@@ -496,7 +496,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
             epi::CStringCopyMax(val->intertextsecret, it_builder.c_str(), it_builder.size());
         }
         break;
-        case epi::kENameInterbackdrop: {
+        case epi::EName::kInterbackdrop: {
             EPI_CLEAR_MEMORY(val->interbackdrop, char, 9);
             value = lex.state_.string;
             if (value.size() > 8)
@@ -505,7 +505,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
             epi::CStringCopyMax(val->interbackdrop, value.data(), 8);
         }
         break;
-        case epi::kENameIntermusic: {
+        case epi::EName::kIntermusic: {
             EPI_CLEAR_MEMORY(val->intermusic, char, 9);
             value = lex.state_.string;
             if (value.size() > 8)
@@ -514,7 +514,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
             epi::CStringCopyMax(val->intermusic, value.data(), 8);
         }
         break;
-        case epi::kENameEpisode: {
+        case epi::EName::kEpisode: {
             value = lex.state_.string;
             if (epi::StringCaseCompareASCII(value, "clear") == 0)
             {
@@ -592,7 +592,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
             }
         }
         break;
-        case epi::kENameBossaction: {
+        case epi::EName::kBossAction: {
             int special = 0;
             int tag     = 0;
             value       = lex.state_.string;
@@ -656,7 +656,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
             }
         }
         break;
-        case epi::kENameAuthor: {
+        case epi::EName::kAuthor: {
             if (val->authorname)
                 free(val->authorname);
             value           = lex.state_.string;

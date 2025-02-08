@@ -94,7 +94,7 @@ class SokolRenderBackend : public RenderBackend
 
         pass_action.depth.load_action = SG_LOADACTION_CLEAR;
         pass_action.depth.clear_value = 1.0f;
-        pass_action.stencil = {SG_LOADACTION_CLEAR, SG_STOREACTION_DONTCARE, 0};
+        pass_action.stencil           = {SG_LOADACTION_CLEAR, SG_STOREACTION_DONTCARE, 0};
 
         EPI_CLEAR_MEMORY(&pass_, sg_pass, 1);
         pass_.action                   = pass_action;
@@ -135,41 +135,61 @@ class SokolRenderBackend : public RenderBackend
 
     void FinishFrame()
     {
+        EDGE_ZoneNamedN(ZoneFinishFrame, "BackendFinishFrame", true);
 
-        // World
-        for (int32_t i = 0; i < kRenderWorldMax; i++)
         {
-            if (!world_state_[i].used_)
+            EDGE_ZoneNamedN(ZoneDrawWorlds, "DrawWorlds", true);
+            // World
+            for (int32_t i = 0; i < kRenderWorldMax; i++)
             {
-                break;
-            }
+                if (!world_state_[i].used_)
+                {
+                    break;
+                }
 
-            int32_t base_layer = kRenderLayerSky + i * 4 + 1;
-            for (int32_t j = 0; j < 4; j++)
-            {
-                sgl_context_draw_layer(context_, base_layer + j);
+                int32_t base_layer = kRenderLayerSky + i * 4 + 1;
+                for (int32_t j = 0; j < 4; j++)
+                {
+                    sgl_context_draw_layer(context_, base_layer + j);
+                }
             }
         }
 
-        // Hud
-        sgl_context_draw_layer(context_, kRenderLayerHUD + 1);
+        {
+            EDGE_ZoneNamedN(ZoneDrawHud, "DrawHud", true);
+            // Hud
+            sgl_context_draw_layer(context_, kRenderLayerHUD + 1);
+        }
 
-        // default layer
-        sgl_context_draw_layer(context_, 0);
+        {
+            EDGE_ZoneNamedN(ZoneDrawDefaultLayer, "DrawDefaultLayer", true);
+            // default layer
+            sgl_context_draw_layer(context_, 0);
+        }
 
-        sg_imgui_.caps_window.open        = false;
-        sg_imgui_.buffer_window.open      = false;
-        sg_imgui_.pipeline_window.open    = false;
-        sg_imgui_.attachments_window.open = false;
-        sg_imgui_.frame_stats_window.open = false;
+        {
+            EDGE_ZoneNamedN(ZoneDrawImGui, "DrawImGui", true);
+            sg_imgui_.caps_window.open        = false;
+            sg_imgui_.buffer_window.open      = false;
+            sg_imgui_.pipeline_window.open    = false;
+            sg_imgui_.attachments_window.open = false;
+            sg_imgui_.frame_stats_window.open = false;
 
-        simgui_new_frame(&imgui_frame_desc_);
-        sgimgui_draw(&sg_imgui_);
+            simgui_new_frame(&imgui_frame_desc_);
+            sgimgui_draw(&sg_imgui_);
 
-        simgui_render();
+            simgui_render();
+        }
 
-        sg_end_pass();
-        sg_commit();
+        {
+            EDGE_ZoneNamedN(ZoneDrawEndPass, "DrawEndPass", true);
+            sg_end_pass();
+        }
+
+        {
+            EDGE_ZoneNamedN(ZoneDrawCommit, "DrawCommit", true);
+            sg_commit();
+        }
 
         for (auto itr = on_frame_finished_.begin(); itr != on_frame_finished_.end(); itr++)
         {
@@ -200,7 +220,7 @@ class SokolRenderBackend : public RenderBackend
         BSPStopThread();
     }
 
-#if defined (SOKOL_GLCORE) || defined (SOKOL_GLES3)
+#if defined(SOKOL_GLCORE) || defined(SOKOL_GLES3)
     void CaptureScreenGL(int32_t width, int32_t height, int32_t stride, uint8_t *dest)
     {
         for (int32_t y = 0; y < height; y++)
@@ -213,7 +233,7 @@ class SokolRenderBackend : public RenderBackend
 
     void CaptureScreen(int32_t width, int32_t height, int32_t stride, uint8_t *dest)
     {
-#if defined (SOKOL_GLCORE) || defined (SOKOL_GLES3)
+#if defined(SOKOL_GLCORE) || defined(SOKOL_GLES3)
         CaptureScreenGL(width, height, stride, dest);
 #endif
 

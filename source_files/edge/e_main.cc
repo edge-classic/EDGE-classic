@@ -666,9 +666,14 @@ void EdgeDisplay(void)
                 CreateSaveScreenshot();
                 need_save_screenshot = false;
             }
-
-            HUDDrawer();
-            ScriptDrawer();
+            {
+                EDGE_ZoneNamedN(ZoneHUDDrawer, "HUDDrawer", true);
+                HUDDrawer();
+            }
+            {
+                EDGE_ZoneNamedN(ZoneScriptDrawer, "ScriptDrawer", true);
+                ScriptDrawer();
+            }
             break;
 
         case kGameStateIntermission:
@@ -687,52 +692,73 @@ void EdgeDisplay(void)
             break;
         }
 
-        if (wipe_gl_active)
         {
-            // -AJA- Wipe code for GL.  Sorry for all this ugliness, but it just
-            //       didn't fit into the existing wipe framework.
-            if (DoWipe())
+            EDGE_ZoneNamedN(ZoneWipe, "Wipe", true);
+
+            if (wipe_gl_active)
             {
-                StopWipe();
-                wipe_gl_active = false;
+                // -AJA- Wipe code for GL.  Sorry for all this ugliness, but it just
+                //       didn't fit into the existing wipe framework.
+                if (DoWipe())
+                {
+                    StopWipe();
+                    wipe_gl_active = false;
+                }
             }
-        }
 
-        // save the current screen if about to wipe
-        if (need_wipe)
-        {
-            need_wipe      = false;
-            wipe_gl_active = true;
+            // save the current screen if about to wipe
+            if (need_wipe)
+            {
+                need_wipe      = false;
+                wipe_gl_active = true;
 
-            InitializeWipe(wipe_method);
+                InitializeWipe(wipe_method);
+            }
         }
 
         if (paused)
             DisplayPauseImage();
 
-        // menus go directly to the screen
-        if (draw_menu)
         {
-            MenuDrawer(); // menu is drawn even on top of everything (except console)
+            EDGE_ZoneNamedN(ZoneDrawMenu, "DrawMenu", true);
+
+            // menus go directly to the screen
+            if (draw_menu)
+            {
+                MenuDrawer(); // menu is drawn even on top of everything (except console)
+            }
         }
     }
     else
+    {
+        EDGE_ZoneNamedN(ZoneMovieDrawer, "MovieDrawer", true);
         MovieDrawer();
+    }
 
     // process mouse and keyboard events
-    NetworkUpdate();
-
-    if (!playing_movie)
-        ConsoleDrawer();
-
-    if (!hud_overlays.at(video_overlay.d_).empty())
     {
-        const Image *overlay =
-            ImageLookup(hud_overlays.at(video_overlay.d_).c_str(), kImageNamespaceGraphic, kImageLookupNull);
-        if (overlay)
-            HUDRawImage(0, 0, current_screen_width, current_screen_height, overlay, 0, 0,
-                        current_screen_width / overlay->ScaledWidthActual(),
-                        current_screen_height / overlay->ScaledHeightActual());
+        EDGE_ZoneNamedN(ZoneNetworkUpdate, "NetworkUpdate", true);
+        NetworkUpdate();
+    }
+
+    {
+        EDGE_ZoneNamedN(ZoneConsoleDraw, "ConsoleDraw", true);
+
+        if (!playing_movie)
+            ConsoleDrawer();
+    }
+
+    {
+        EDGE_ZoneNamedN(ZoneHudOverlays, "HudOverlays", true);
+        if (!hud_overlays.at(video_overlay.d_).empty())
+        {
+            const Image *overlay =
+                ImageLookup(hud_overlays.at(video_overlay.d_).c_str(), kImageNamespaceGraphic, kImageLookupNull);
+            if (overlay)
+                HUDRawImage(0, 0, current_screen_width, current_screen_height, overlay, 0, 0,
+                            current_screen_width / overlay->ScaledWidthActual(),
+                            current_screen_height / overlay->ScaledHeightActual());
+        }
     }
 
     if (gamma_correction.f_ < 0)

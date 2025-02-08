@@ -12,7 +12,7 @@ endif()
 target_link_libraries(sokol PUBLIC ${SOKOL_LINK_LIBRARIES})
 
 target_include_directories(sokol PUBLIC ./)
-target_compile_definitions(sokol PUBLIC SOKOL_NO_DEPRECATED SOKOL_TRACE_HOOKS SOKOL_IMGUI_NO_SOKOL_APP)
+target_compile_definitions(sokol PUBLIC SOKOL_NO_DEPRECATED SOKOL_IMGUI_NO_SOKOL_APP)
 
 if (EDGE_SOKOL)
     if(EDGE_SOKOL_GL)

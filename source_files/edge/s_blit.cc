@@ -118,6 +118,8 @@ void KillSoundChannel(int k)
 
 void UpdateSounds(MapObject *listener, BAMAngle angle)
 {
+    EDGE_ZoneScoped;
+        
     ma_engine_set_volume(&sound_engine, sound_effect_volume.f_ * 0.25f);
 
     listen_x = listener ? listener->x : 0;

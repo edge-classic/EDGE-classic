@@ -423,48 +423,54 @@ void FinishFrame(void)
     EDGE_TracyPlot("draw_light_iterator", (int64_t)ec_frame_stats.draw_light_iterator);
     EDGE_TracyPlot("draw_sector_glow_iterator", (int64_t)ec_frame_stats.draw_sector_glow_iterator);
 
-    EDGE_FrameMark;
-
-    if (ConsoleIsVisible())
-        GrabCursor(false);
-    else
     {
-        if (grab_mouse.CheckModified())
-            GrabCursor(grab_state);
+        EDGE_ZoneNamedN(ZoneHandleCursor, "HandleCursor", true);
+
+        if (ConsoleIsVisible())
+            GrabCursor(false);
         else
-            GrabCursor(true);
-    }
-
-    if (!single_tics)
-    {
-        if (framerate_limit.d_ >= kTicRate)
         {
-            uint64_t        target_time = 1000000ull / framerate_limit.d_;
-            static uint64_t start_time;
-
-            while (1)
-            {
-                uint64_t current_time   = GetMicroseconds();
-                uint64_t elapsed_time   = current_time - start_time;
-                uint64_t remaining_time = 0;
-
-                if (elapsed_time >= target_time)
-                {
-                    start_time = current_time;
-                    break;
-                }
-
-                remaining_time = target_time - elapsed_time;
-
-                if (remaining_time > 1000)
-                {
-                    SleepForMilliseconds((remaining_time - 1000) / 1000);
-                }
-            }
+            if (grab_mouse.CheckModified())
+                GrabCursor(grab_state);
+            else
+                GrabCursor(true);
         }
     }
 
-    fractional_tic = (float)(GetMilliseconds() * kTicRate % 1000) / 1000;
+    {
+        EDGE_ZoneNamedN(ZoneFrameLimiting, "FrameLimiting", true);
+
+        if (!single_tics)
+        {
+            if (framerate_limit.d_ >= kTicRate)
+            {
+                uint64_t        target_time = 1000000ull / framerate_limit.d_;
+                static uint64_t start_time;
+
+                while (1)
+                {
+                    uint64_t current_time   = GetMicroseconds();
+                    uint64_t elapsed_time   = current_time - start_time;
+                    uint64_t remaining_time = 0;
+
+                    if (elapsed_time >= target_time)
+                    {
+                        start_time = current_time;
+                        break;
+                    }
+
+                    remaining_time = target_time - elapsed_time;
+
+                    if (remaining_time > 1000)
+                    {
+                        SleepForMilliseconds((remaining_time - 1000) / 1000);
+                    }
+                }
+            }
+        }
+
+        fractional_tic = (float)(GetMilliseconds() * kTicRate % 1000) / 1000;
+    }
 
     if (vsync.CheckModified())
     {
@@ -489,6 +495,8 @@ void FinishFrame(void)
 
     if (monitor_aspect_ratio.CheckModified() || forced_pixel_aspect_ratio.CheckModified())
         DeterminePixelAspect();
+
+    EDGE_FrameMark;
 }
 
 void ShutdownGraphics(void)

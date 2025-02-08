@@ -3497,7 +3497,8 @@ static void _sgl_rewind(_sgl_context_t* ctx) {
     ctx->vertices.next = 0;
     ctx->vertex_uniforms.next = 0;
     ctx->fragment_uniforms.next = 0;
-    _sgl_clear(&ctx->fragment_uniforms.ptr[0], sizeof(_sgl_fragment_uniform_t ) * ctx->fragment_uniforms.cap);
+    // EC: This can be a significant amount of memory, should only need to clear first, as these are copied into next uniform
+    _sgl_clear(&ctx->fragment_uniforms.ptr[0], sizeof(_sgl_fragment_uniform_t ));
     ctx->commands.next = 0;
     ctx->base_vertex = 0;
     ctx->error = _sgl_error_defaults();

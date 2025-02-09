@@ -105,6 +105,9 @@ MirrorSet render_mirror_set(kMirrorSetRender);
 
 #ifndef EDGE_SOKOL
 extern std::list<DrawSubsector *> draw_subsector_list;
+#else
+// Sky items from previous frame, delayed a frame so can render the BSP as we traverse it
+static std::list<RenderItem *> deferred_sky_items;
 #endif
 
 static void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref, int face_dir, float h1, float h2);
@@ -695,8 +698,7 @@ static void DrawSlidingDoor(DrawFloor *dfloor, float c, float f, float tex_top_h
 
     if (smov)
     {
-        if (!menu_active && !paused && !time_stop_active && !erraticism_active &&
-            !rts_menu_active)
+        if (!menu_active && !paused && !time_stop_active && !erraticism_active && !rts_menu_active)
             opening = HMM_Lerp(smov->old_opening, fractional_tic, smov->opening);
         else
             opening = smov->opening;
@@ -870,13 +872,13 @@ static void DrawTile(Seg *seg, DrawFloor *dfloor, float lz1, float lz2, float rz
 
     float offx, offy;
 
-    if (!AlmostEquals(surf->old_offset.X, surf->offset.X) && !paused && !menu_active &&
-        !time_stop_active && !erraticism_active)
+    if (!AlmostEquals(surf->old_offset.X, surf->offset.X) && !paused && !menu_active && !time_stop_active &&
+        !erraticism_active)
         offx = fmod(HMM_Lerp(surf->old_offset.X, fractional_tic, surf->offset.X), surf->image->actual_width_);
     else
         offx = surf->offset.X;
-    if (!AlmostEquals(surf->old_offset.Y, surf->offset.Y) && !paused && !menu_active &&
-        !time_stop_active && !erraticism_active)
+    if (!AlmostEquals(surf->old_offset.Y, surf->offset.Y) && !paused && !menu_active && !time_stop_active &&
+        !erraticism_active)
         offy = fmod(HMM_Lerp(surf->old_offset.Y, fractional_tic, surf->offset.Y), surf->image->actual_height_);
     else
         offy = surf->offset.Y;
@@ -1669,13 +1671,13 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
     data.v_count  = v_count;
     data.vertices = vertices;
     data.R = data.G = data.B = 255;
-    if (!AlmostEquals(surf->old_offset.X, surf->offset.X) && !paused && !menu_active &&
-        !time_stop_active && !erraticism_active)
+    if (!AlmostEquals(surf->old_offset.X, surf->offset.X) && !paused && !menu_active && !time_stop_active &&
+        !erraticism_active)
         data.tx0 = fmod(HMM_Lerp(surf->old_offset.X, fractional_tic, surf->offset.X), surf->image->actual_width_);
     else
         data.tx0 = surf->offset.X;
-    if (!AlmostEquals(surf->old_offset.Y, surf->offset.Y) && !paused && !menu_active &&
-        !time_stop_active && !erraticism_active)
+    if (!AlmostEquals(surf->old_offset.Y, surf->offset.Y) && !paused && !menu_active && !time_stop_active &&
+        !erraticism_active)
         data.ty0 = fmod(HMM_Lerp(surf->old_offset.Y, fractional_tic, surf->offset.Y), surf->image->actual_height_);
     else
         data.ty0 = surf->offset.Y;
@@ -1884,8 +1886,7 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
 
     view_x_slope *= widescreen_view_width_multiplier;
 
-    if (level_time_elapsed && mo->player_ && mo->interpolate_ && !paused && !menu_active &&
-        !rts_menu_active)
+    if (level_time_elapsed && mo->player_ && mo->interpolate_ && !paused && !menu_active && !rts_menu_active)
     {
         view_x     = HMM_Lerp(mo->old_x_, fractional_tic, mo->x);
         view_y     = HMM_Lerp(mo->old_y_, fractional_tic, mo->y);
@@ -2001,6 +2002,20 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
     }
 }
 
+// Render world index, the root world render is 0
+static int32_t render_world_index = 0;
+void    RendererEndFrame()
+{
+    render_world_index = 0;
+}
+
+void    RendererShutdownLevel()
+{
+#ifdef EDGE_SOKOL    
+    deferred_sky_items.clear();
+#endif
+}
+
 //
 // RenderTrueBsp
 //
@@ -2018,28 +2033,75 @@ void RenderTrueBsp(void)
     ClearBSP();
     OcclusionClear();
 
-#ifndef EDGE_SOKOL
-    draw_subsector_list.clear();
-#endif
-
     Player *v_player = view_camera_map_object->player_;
 
     // handle powerup effects and BOOM colormaps
     RendererRainbowEffect(v_player);
+    
+#ifdef EDGE_SOKOL
 
     render_backend->SetRenderLayer(kRenderLayerSky);
 
-    render_backend->SetupMatrices3D();
-
-    render_state->Clear(GL_DEPTH_BUFFER_BIT);
-    render_state->Enable(GL_DEPTH_TEST);
-
-#ifdef EDGE_SOKOL
+    bool simple_sky = render_world_index > 0 || renderer_dumb_sky.d_ == 1;
 
     // needed for drawing the sky
     BeginSky();
 
+    if (!render_world_index)
+    {
+        if (deferred_sky_items.size())
+        {
+            need_to_draw_sky = true;
+        }
+
+        if (!simple_sky && need_to_draw_sky)
+        {
+            // Render deferred sky walls and planes from previous frame
+            std::list<RenderItem *>::iterator I;
+            for (I = deferred_sky_items.begin(); I != deferred_sky_items.end(); I++)
+            {
+                RenderItem *item = (*I);
+
+                if (item->type_ == kRenderSkyWall)
+                {
+                    RenderSkyWall(item->wallSeg_, item->height1_, item->height2_);
+                }
+                else
+                {
+                    RenderSkyPlane(item->wallPlane_, item->height1_);
+                }
+            }
+        }
+
+        deferred_sky_items.clear();
+    }
+    else
+    {
+        // Always render simple skies for additional world renders
+        need_to_draw_sky = true;
+    }
+
+    if (need_to_draw_sky)
+    {
+        int current = renderer_dumb_sky.d_;
+
+        // Always render a simple sky, when rendering sky walls/planes they are deferred
+        // from previous frame, so fast movement will cause issus on screen edges
+        renderer_dumb_sky.d_ = 1;
+        FinishSky();
+
+        if (!simple_sky)
+        {
+            renderer_dumb_sky.d_ = 0;
+            FinishSky();
+        }
+
+        renderer_dumb_sky.d_ = current;
+    }
+
     // draw all solid walls and planes
+
+    render_state->Enable(GL_DEPTH_TEST);
 
     solid_mode = true;
     render_backend->SetRenderLayer(kRenderLayerSolid, false);
@@ -2048,7 +2110,6 @@ void RenderTrueBsp(void)
     BSPTraverse();
 
     std::list<RenderItem *> items;
-    std::list<RenderItem *> sky_items;
     while (BSPTraversing())
     {
         RenderBatch *batch = BSPReadRenderBatch();
@@ -2068,10 +2129,14 @@ void RenderTrueBsp(void)
                 RenderSubsector(item->subsector_, false);
                 break;
             case kRenderSkyWall:
-                sky_items.push_back(item);
+                // Save off item for next frame
+                if (!render_world_index)
+                    deferred_sky_items.push_back(item);
                 break;
             case kRenderSkyPlane:
-                sky_items.push_back(item);
+                // Save off item for next frame
+                if (!render_world_index)
+                    deferred_sky_items.push_back(item);
                 break;
             }
         }
@@ -2100,26 +2165,15 @@ void RenderTrueBsp(void)
     }
 
     FinishUnitBatch();
-    render_backend->SetRenderLayer(kRenderLayerSky);
-
-    std::list<RenderItem *>::iterator I;
-    for (I = sky_items.begin(); I != sky_items.end(); I++)
-    {
-        RenderItem *item = (*I);
-
-        if (item->type_ == kRenderSkyWall)
-        {
-            RenderSkyWall(item->wallSeg_, item->height1_, item->height2_);
-        }
-        else
-        {
-            RenderSkyPlane(item->wallPlane_, item->height1_);
-        }
-    }
-
-    FinishSky();
 
 #else
+
+    draw_subsector_list.clear();
+
+    render_backend->SetupMatrices3D();
+    render_state->Clear(GL_DEPTH_BUFFER_BIT);
+    render_state->Enable(GL_DEPTH_TEST);
+
     // needed for drawing the sky
     BeginSky();
 
@@ -2202,6 +2256,8 @@ void RenderView(int x, int y, int w, int h, MapObject *camera, bool full_height,
 
     seen_dynamic_lights.clear();
     RenderTrueBsp();
+
+    render_world_index++;
 }
 
 static constexpr uint8_t kMaximumFloodVertices = 16;

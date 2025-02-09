@@ -238,6 +238,42 @@ struct Compare_Unit_pred
     }
 };
 
+static void RenderFlush()
+{
+
+    int num_commands = 0;
+    int num_vertices = 0;
+
+    for (int32_t i = 0; i < current_render_unit; i++)
+    {
+        RendererUnit *unit = &local_units[i];
+
+        // assume unit will require a command
+        num_commands++;
+
+        switch (unit->shape)
+        {
+        case GL_QUADS:
+            num_vertices += unit->count;
+            break;
+        case GL_TRIANGLES:
+            num_vertices += unit->count;
+            break;
+        case GL_POLYGON:
+            num_vertices += (unit->count - 1) * 3;
+            break;
+        case GL_QUAD_STRIP:
+            num_vertices += unit->count;
+            break;
+        case GL_LINES:
+            num_vertices += unit->count;
+            break;
+        }
+    }
+
+    render_backend->Flush(num_commands, num_vertices);
+}
+
 //
 // RenderCurrentUnits
 //
@@ -265,6 +301,8 @@ void RenderCurrentUnits(void)
     }
 
     RenderLayer render_layer = render_backend->GetRenderLayer();
+
+    RenderFlush();
 
     bool no_fog = (render_layer == kRenderLayerHUD) || (render_layer == kRenderLayerWeapon);
 

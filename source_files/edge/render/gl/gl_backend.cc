@@ -163,6 +163,10 @@ class GLRenderBackend : public RenderBackend
     {
         return kRenderLayerInvalid;
     }
+
+    void Flush(int32_t commands, int32_t vertices)
+    {
+    }
 };
 
 static GLRenderBackend gl_render_backend;

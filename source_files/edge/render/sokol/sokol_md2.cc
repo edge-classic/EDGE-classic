@@ -1008,6 +1008,8 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         return;
     }
 
+    render_backend->Flush(1, md->vertices_per_frame_);
+
     MD2CoordinateData data;
 
     data.is_fuzzy_ = (mo->flags_ & kMapObjectFlagFuzzy) ? true : false;

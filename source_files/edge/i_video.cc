@@ -389,7 +389,9 @@ void StartFrame(void)
 {
     ec_frame_stats.Clear();
     render_state->ClearColor(kRGBABlack);
+#ifndef EDGE_SOKOL    
     render_state->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+#endif
     if (draw_culling.d_)
         renderer_far_clip.f_ = draw_culling_distance.f_;
     else

@@ -39,6 +39,7 @@
 #include "n_network.h"
 #include "p_blockmap.h"
 #include "p_tick.h"
+#include "r_backend.h"
 #include "r_colormap.h"
 #include "r_effects.h"
 #include "r_gldefs.h"
@@ -683,6 +684,8 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
         LogDebug("Render model: bad frame %d\n", frame1);
         return;
     }
+
+    render_backend->Flush(1, md->vertices_per_frame_);
 
     MDLCoordinateData data;
 

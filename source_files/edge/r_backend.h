@@ -86,6 +86,8 @@ class RenderBackend
         return frame_number_;
     }
 
+    virtual void Flush(int32_t commands, int32_t vertices) = 0;
+
     int32_t GetMaxTextureSize() const
     {
         return max_texture_size_;

@@ -6,6 +6,10 @@
 #pragma once
 
 #include <string>
+#ifdef EPI_DEBUG_STRING_HASH
+#include <mutex>
+#include <unordered_map>
+#endif
 
 #include "epi_str_util.h"
 
@@ -55,6 +59,9 @@ class StringHash
     /// Construct from a string.
     StringHash(const std::string &str) : StringHash(std::string_view{str})
     {
+#ifdef EPI_DEBUG_STRING_HASH
+        Register(*this, str);
+#endif
     }
 
     /// Construct from a string.
@@ -112,6 +119,13 @@ class StringHash
     /// Return as string.
     std::string ToString() const;
 
+    /// Return debug string that contains hash value, and reversed hash string if possible.
+    std::string ToDebugString() const;
+
+    /// Return string which has specific hash value. Return first string if many (in order of calculation).
+    /// Use for debug purposes only. Return empty string if EPI_STRING_HASH_DEBUG is off.
+    std::string Reverse() const;
+
     /// Return hash value for HashSet & HashMap.
     constexpr uint32_t ToHash() const
     {
@@ -143,6 +157,12 @@ class StringHash
   protected:
     /// Hash value.
     uint32_t value_;
+#ifdef EPI_DEBUG_STRING_HASH
+    static std::unordered_map<StringHash, std::string> global_hash_registry_;
+    static std::mutex global_hash_mutex_;
+    static void Register(StringHash hash, std::string_view str);
+    static std::string GetRegistered(StringHash hash);
+#endif
 };
 
 static_assert(sizeof(StringHash) == sizeof(uint32_t), "Unexpected StringHash size.");

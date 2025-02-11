@@ -38,7 +38,7 @@ struct MemoryBlock
 {
     int used = 0;
 
-    double data[4096];
+    char data[4096];
 };
 
 class MemoryBlockGroup

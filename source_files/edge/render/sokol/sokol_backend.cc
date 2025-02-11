@@ -1,8 +1,6 @@
 // clang-format off
 #include "../../r_backend.h"
 #include "sokol_local.h"
-#include "sokol_imgui.h"
-#include "sokol_gfx_imgui.h"
 #include "sokol_pipeline.h"
 #include "sokol_images.h"
 
@@ -16,8 +14,10 @@
 // clang-format on
 
 extern ConsoleVariable vsync;
-void                   BSPStartThread();
-void                   BSPStopThread();
+extern ConsoleVariable debug_fps;
+
+void BSPStartThread();
+void BSPStopThread();
 
 // from r_render.cc
 void RendererEndFrame();
@@ -102,6 +102,21 @@ class SokolRenderBackend : public RenderBackend
     {
         frame_number_++;
 
+        if (debug_fps.d_ >= 3)
+        {
+            if (!sg_frame_stats_enabled())
+            {
+                sg_enable_frame_stats();
+            }
+        }
+        else
+        {
+            if (sg_frame_stats_enabled())
+            {
+                sg_disable_frame_stats();
+            }
+        }
+
 #ifdef SOKOL_D3D11
         if (deferred_resize)
         {
@@ -142,11 +157,13 @@ class SokolRenderBackend : public RenderBackend
         pass_.swapchain.d3d11.depth_stencil_view = sapp_d3d11_get_depth_stencil_view();
 #endif
 
+        /*
         imgui_frame_desc_            = {0};
         imgui_frame_desc_.width      = width;
         imgui_frame_desc_.height     = height;
         imgui_frame_desc_.delta_time = 100;
         imgui_frame_desc_.dpi_scale  = 1;
+        */
 
         EPI_CLEAR_MEMORY(world_state_, WorldState, kRenderWorldMax);
 
@@ -195,20 +212,22 @@ class SokolRenderBackend : public RenderBackend
     void FinishFrame()
     {
         EDGE_ZoneNamedN(ZoneFinishFrame, "BackendFinishFrame", true);
-        
+
         RendererEndFrame();
 
         if (sgl_num_vertices())
         {
             sgl_context_draw(context_pool_[current_context_]);
         }
-        
+
+        /*
         {
             EDGE_ZoneNamedN(ZoneDrawImGui, "DrawImGui", true);
             sg_imgui_.caps_window.open        = false;
             sg_imgui_.buffer_window.open      = false;
             sg_imgui_.pipeline_window.open    = false;
             sg_imgui_.attachments_window.open = false;
+            // NOTE: debug_fps controls stat gathering
             sg_imgui_.frame_stats_window.open = false;
 
             simgui_new_frame(&imgui_frame_desc_);
@@ -216,6 +235,7 @@ class SokolRenderBackend : public RenderBackend
 
             simgui_render();
         }
+            */
 
         {
             EDGE_ZoneNamedN(ZoneDrawEndPass, "DrawEndPass", true);
@@ -361,12 +381,14 @@ class SokolRenderBackend : public RenderBackend
         sgl_set_context(context_pool_[0]);
 
         // IMGUI
+        /*
         simgui_desc_t imgui_desc = {0};
         imgui_desc.logger.func   = slog_func;
         simgui_setup(&imgui_desc);
 
         const sgimgui_desc_t sg_imgui_desc = {0};
         sgimgui_init(&sg_imgui_, &sg_imgui_desc);
+        */
 
         InitPipelines();
         InitImages();
@@ -408,17 +430,17 @@ class SokolRenderBackend : public RenderBackend
                 if (sgl_num_vertices())
                 {
                     sgl_context_draw(context_pool_[current_context_++]);
-                }                
+                }
                 sgl_set_context(sky_context_[render_state_.world_state_]);
             }
 
             if (layer != kRenderLayerSky && sgl_get_context().id == sky_context_[render_state_.world_state_].id)
-            {                
+            {
                 if (sgl_num_vertices())
                 {
                     sgl_context_draw(sky_context_[render_state_.world_state_]);
                 }
-                
+
                 sgl_set_context(context_pool_[current_context_]);
                 matrix_mode_ = kMatrixModeUndefined;
             }
@@ -500,6 +522,22 @@ class SokolRenderBackend : public RenderBackend
         SetRenderLayer(kRenderLayerHUD);
     }
 
+    void GetFrameStats(FrameStats &stats)
+    {
+        sg_frame_stats sg_stats = sg_query_frame_stats();
+
+        stats.num_apply_pipeline_ = sg_stats.num_apply_pipeline;
+        stats.num_apply_bindings_ = sg_stats.num_apply_bindings;
+        stats.num_apply_uniforms_ = sg_stats.num_apply_uniforms;
+        stats.num_draw_           = sg_stats.num_draw;
+        stats.num_update_buffer_  = sg_stats.num_update_buffer;
+        stats.num_update_image_   = sg_stats.num_update_image;
+
+        stats.size_apply_uniforms_ = sg_stats.size_apply_uniforms;
+        stats.size_update_buffer_  = sg_stats.size_update_buffer;
+        stats.size_append_buffer_  = sg_stats.size_append_buffer;
+    }
+
   private:
     enum MatrixMode
     {
@@ -523,8 +561,10 @@ class SokolRenderBackend : public RenderBackend
 
     MatrixMode matrix_mode_;
 
+    /*
     simgui_frame_desc_t imgui_frame_desc_;
     sgimgui_t           sg_imgui_;
+    */
 
     RGBAColor clear_color_ = kRGBABlack;
 

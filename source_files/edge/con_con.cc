@@ -47,6 +47,7 @@
 #include "i_system.h"
 #include "m_argv.h"
 #include "n_network.h"
+#include "r_backend.h"
 #include "r_draw.h"
 #include "r_image.h"
 #include "r_modes.h"
@@ -860,9 +861,8 @@ void ConsoleDrawer(void)
 
     if (console_wipe_active)
     {
-        y = (int)((float)y - CON_GFX_HT *
-                                    HMM_Lerp(old_console_wipe_position, fractional_tic, console_wipe_position) /
-                                    kConsoleWipeTics);
+        y = (int)((float)y - CON_GFX_HT * HMM_Lerp(old_console_wipe_position, fractional_tic, console_wipe_position) /
+                                 kConsoleWipeTics);
     }
     else
         y = y - CON_GFX_HT;
@@ -1612,6 +1612,24 @@ void ConsoleStart(void)
     StartupProgressMessage("Starting console...");
 }
 
+static char *GetHumanSize(uint32_t bytes, char *hrbytes)
+{
+    char *suffix[] = {"B", "KB", "MB", "GB", "TB"};
+    char  length   = sizeof(suffix) / sizeof(suffix[0]);
+    int   i;
+
+    for (i = 0; i < length; i++)
+    {
+        if (bytes < 1024)
+            break;
+
+        bytes >>= 10;
+    }
+
+    snprintf(hrbytes, 128, "%lu %s", bytes, suffix[i]);
+    return (hrbytes);
+}
+
 void ConsoleShowFPS(void)
 {
     if (debug_fps.d_ == 0)
@@ -1656,14 +1674,19 @@ void ConsoleShowFPS(void)
         }
     }
 
-    int x = current_screen_width - XMUL * 16;
+    int x = current_screen_width - XMUL * 20;
     int y = current_screen_height - FNSZ * 2;
 
     if (abs(debug_fps.d_) >= 2)
         y -= FNSZ;
 
     if (abs(debug_fps.d_) >= 3)
+    {
         y -= (FNSZ * 4);
+#ifdef EDGE_SOKOL
+        y -= (FNSZ * 7);
+#endif
+    }
 
     SolidBox(x, y, current_screen_width, current_screen_height, kRGBABlack, 0.5);
 
@@ -1712,11 +1735,44 @@ void ConsoleShowFPS(void)
         stbsp_sprintf(textbuf, "%i thing", ec_frame_stats.draw_things);
         DrawText(x, y, textbuf, kRGBAWebGray);
         y -= FNSZ;
-        stbsp_sprintf(textbuf, "%i state", ec_frame_stats.draw_state_change);
+
+#ifdef EDGE_SOKOL
+
+        FrameStats stats;
+        render_backend->GetFrameStats(stats);
+
+        stbsp_sprintf(textbuf, "%i draw", stats.num_draw_);
         DrawText(x, y, textbuf, kRGBAWebGray);
         y -= FNSZ;
-        stbsp_sprintf(textbuf, "%i texture", ec_frame_stats.draw_texture_change);
+
+        stbsp_sprintf(textbuf, "%i pipelines", stats.num_apply_pipeline_);
         DrawText(x, y, textbuf, kRGBAWebGray);
+        y -= FNSZ;
+
+        stbsp_sprintf(textbuf, "%i bindings", stats.num_apply_bindings_);
+        DrawText(x, y, textbuf, kRGBAWebGray);
+        y -= FNSZ;
+
+        stbsp_sprintf(textbuf, "%i uniforms", stats.num_apply_uniforms_);
+        DrawText(x, y, textbuf, kRGBAWebGray);
+        y -= FNSZ;
+
+        stbsp_sprintf(textbuf, "%i buffers", stats.num_update_buffer_);
+        DrawText(x, y, textbuf, kRGBAWebGray);
+        y -= FNSZ;
+
+        char hrbytes[128];
+
+        GetHumanSize(stats.size_apply_uniforms_, hrbytes);
+        stbsp_sprintf(textbuf, "%s uniform size", hrbytes);
+        DrawText(x, y, textbuf, kRGBAWebGray);
+        y -= FNSZ;
+        GetHumanSize(stats.size_update_buffer_, hrbytes);
+        stbsp_sprintf(textbuf, "%s buffer size", hrbytes);
+        DrawText(x, y, textbuf, kRGBAWebGray);
+        y -= FNSZ;
+
+#endif
     }
 
     FinishUnitBatch();

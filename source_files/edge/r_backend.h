@@ -25,6 +25,19 @@ enum RenderLayer
 
 typedef std::function<void()> FrameFinishedCallback;
 
+struct FrameStats {
+    uint32_t num_apply_pipeline_;
+    uint32_t num_apply_bindings_;
+    uint32_t num_apply_uniforms_;
+    uint32_t num_draw_;
+    uint32_t num_update_buffer_;
+    uint32_t num_update_image_;
+
+    uint32_t size_apply_uniforms_;
+    uint32_t size_update_buffer_;
+    uint32_t size_append_buffer_;    
+};
+
 class RenderBackend
 {
   public:
@@ -80,6 +93,8 @@ class RenderBackend
     virtual void GetPassInfo(PassInfo &info) = 0;
 
     virtual void CaptureScreen(int32_t width, int32_t height, int32_t stride, uint8_t *dest) = 0;
+
+    virtual void GetFrameStats(FrameStats& stats) = 0;
 
     int64_t GetFrameNumber()
     {

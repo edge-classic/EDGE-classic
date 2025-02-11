@@ -813,7 +813,6 @@ void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, floa
                           void *data)
 {
     EDGE_ZoneScoped;
-    ec_frame_stats.draw_light_iterator++;
 
     int lx = LightmapGetX(x1) - 1;
     int ly = LightmapGetY(y1) - 1;
@@ -877,7 +876,6 @@ void SectorGlowIterator(Sector *sec, float x1, float y1, float z1, float x2, flo
     EPI_UNUSED(y2);
     EPI_UNUSED(z2);
     EDGE_ZoneScoped;
-    ec_frame_stats.draw_sector_glow_iterator++;
 
     for (MapObject *mo = sec->glow_things; mo; mo = mo->dynamic_light_next_)
     {

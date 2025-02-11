@@ -246,6 +246,8 @@ static void RenderFlush()
 
     for (int32_t i = 0; i < current_render_unit; i++)
     {
+        ec_frame_stats.draw_render_units++;
+        
         RendererUnit *unit = &local_units[i];
 
         // assume unit will require a command

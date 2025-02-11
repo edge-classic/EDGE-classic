@@ -9,10 +9,6 @@ struct ECFrameStats
 	int draw_planes;
 	int draw_wall_parts;
 	int draw_things;
-	int draw_light_iterator;
-	int draw_sector_glow_iterator;
-	int draw_state_change;
-	int draw_texture_change;
 
 	void Clear()
 	{		
@@ -20,10 +16,6 @@ struct ECFrameStats
 		draw_wall_parts = 0;
 		draw_planes = 0;
 		draw_things = 0;
-		draw_light_iterator  = 0;
-		draw_sector_glow_iterator = 0;
-		draw_state_change = 0;
-		draw_texture_change = 0;
 	}	
 };
 

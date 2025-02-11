@@ -166,6 +166,12 @@ class GLRenderBackend : public RenderBackend
 
     void Flush(int32_t commands, int32_t vertices)
     {
+
+    }
+
+    void GetFrameStats(FrameStats& stats)
+    {
+        
     }
 };
 

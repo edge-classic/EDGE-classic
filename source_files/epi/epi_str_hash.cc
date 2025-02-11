@@ -30,7 +30,7 @@ void StringHash::Register(StringHash hash, std::string_view str)
     }
     else if (std::string_view(iter->second) != str)
     {
-        LogWarning("StringHash collision detected! Both \"%s\" and \"%s\" have hash #%s",
+        FatalError("StringHash collision detected! Both \"%s\" and \"%s\" have hash #%s",
             std::string(str).c_str(), iter->second.c_str(), hash.ToString().c_str());
     }
 
@@ -40,6 +40,10 @@ std::string StringHash::GetRegistered(StringHash hash)
 {
     auto iter = global_hash_registry_.find(hash);
     return iter == global_hash_registry_.end() ? EMPTY_STRING : iter->second;
+}
+const std::unordered_map<StringHash, std::string> &StringHash::GetHashRegistry()
+{
+    return global_hash_registry_;
 }
 #endif
 

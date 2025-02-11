@@ -205,6 +205,7 @@ void DDFWarnError(const char *err, ...)
 
 void DDFInit()
 {
+    ddf::ReverbDefinition::DDFInit();
     DDFStateInit();
     DDFSFXInit();
     DDFColmapInit();

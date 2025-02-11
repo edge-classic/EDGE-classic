@@ -53,6 +53,7 @@
 #include "epi_filesystem.h"
 #include "epi_sdl.h"
 #include "epi_str_compare.h"
+#include "epi_str_hash.h"
 #include "epi_str_util.h"
 #include "f_finale.h"
 #include "f_interm.h"
@@ -2310,6 +2311,15 @@ static void EdgeStartup(void)
     InitializeRADScripts();
     ProcessMultipleFiles();
     DDFParseEverything();
+
+#ifdef EPI_DEBUG_STRING_HASH
+    // String Hash Debug Test
+    for (auto entry : epi::StringHash::GetHashRegistry())
+    {
+        LogPrint("%s\n", entry.first.ToDebugString().c_str());
+    }
+#endif
+
     // Must be done after WAD and DDF loading to check for potential
     // overrides of lump-specific image/sound/DDF defines
     DoPackSubstitutions();

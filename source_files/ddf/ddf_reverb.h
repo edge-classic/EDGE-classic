@@ -43,6 +43,7 @@ class ReverbDefinition final
     void Default(void);
     void CopyDetail(const ReverbDefinition &src);
     void ApplyReverb(verblib *reverb) const;
+    static void DDFInit(void);
     static void ReadDDF(const std::string &data);
     static inline ReverbDefinition *Lookup(std::string_view refname)
     {

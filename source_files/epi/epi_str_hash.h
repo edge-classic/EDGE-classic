@@ -5,6 +5,8 @@
 
 #pragma once
 
+#define EPI_DEBUG_STRING_HASH
+
 #include <string>
 #ifdef EPI_DEBUG_STRING_HASH
 #include <mutex>
@@ -66,6 +68,12 @@ class StringHash
 
     /// Construct from a string.
     StringHash(const std::string_view &str);
+
+#ifdef EPI_DEBUG_STRING_HASH
+    static std::string GetRegistered(StringHash hash);
+    static void Register(StringHash hash, std::string_view str);
+    static const std::unordered_map<StringHash, std::string> &GetHashRegistry();
+#endif
 
     /// Test for equality with another hash.
     constexpr bool operator==(const StringHash &rhs) const
@@ -160,8 +168,6 @@ class StringHash
 #ifdef EPI_DEBUG_STRING_HASH
     static std::unordered_map<StringHash, std::string> global_hash_registry_;
     static std::mutex global_hash_mutex_;
-    static void Register(StringHash hash, std::string_view str);
-    static std::string GetRegistered(StringHash hash);
 #endif
 };
 

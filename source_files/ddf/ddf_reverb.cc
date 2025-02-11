@@ -28,6 +28,18 @@ namespace ddf
 
 static ReverbDefinition *dynamic_reverb = nullptr;
 
+void ReverbDefinition::DDFInit()
+{
+#ifdef EPI_DEBUG_STRING_HASH
+    epi::StringHash::Register(kRoomSize, kRoomSize_known_string_);
+    epi::StringHash::Register(kDampingLevel, kDampingLevel_known_string_);
+    epi::StringHash::Register(kWetLevel, kWetLevel_known_string_);
+    epi::StringHash::Register(kDryLevel, kDryLevel_known_string_);
+    epi::StringHash::Register(kReverbWidth, kReverbWidth_known_string_);
+    epi::StringHash::Register(kReverbGain, kReverbGain_known_string_);
+#endif
+}
+
 //
 //  DDF PARSE ROUTINES
 //

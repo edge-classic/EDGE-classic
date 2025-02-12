@@ -777,7 +777,7 @@ class SokolRenderState : public RenderState
         float equation_[4];
     };
 
-    EClipPlane clip_planes_[4];
+    EClipPlane clip_planes_[kMaxClipPlane];
 
     struct EScissor
     {

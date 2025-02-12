@@ -685,7 +685,7 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
         return;
     }
 
-    render_backend->Flush(1, md->vertices_per_frame_);
+    render_backend->Flush(1, md->total_triangles_ * 3);
 
     MDLCoordinateData data;
 

@@ -23,12 +23,31 @@ struct TexInfo
     int64_t update_frame_;
 };
 
+constexpr int32_t kMaxClipPlane = 6;
+
 class SokolRenderState : public RenderState
 {
   public:
+    SokolRenderState()
+    {
+        Reset();
+    }
+
+    void Reset()
+    {
+        for (int32_t i = 0; i < kMaxClipPlane; i++)
+        {
+            clip_planes_[i].enabled_ = false;
+            clip_planes_[i].dirty_   = false;
+        }
+
+        scissor_.enabled_ = false;
+        scissor_.dirty_   = false;
+    }
+
     void Enable(GLenum cap, bool enabled = true)
     {
-        PassInfo pass_info;
+        int32_t index;
 
         switch (cap)
         {
@@ -47,10 +66,10 @@ class SokolRenderState : public RenderState
             cull_enabled_ = enabled;
             break;
         case GL_SCISSOR_TEST:
-            if (!enabled)
+            if (enabled != scissor_.enabled_)
             {
-                render_backend->GetPassInfo(pass_info);
-                Scissor(0, 0, pass_info.width_, pass_info.height_);
+                scissor_.enabled_ = enabled;
+                scissor_.dirty_   = true;
             }
             break;
         case GL_LIGHTING:
@@ -75,7 +94,13 @@ class SokolRenderState : public RenderState
         case GL_CLIP_PLANE3:
         case GL_CLIP_PLANE4:
         case GL_CLIP_PLANE5:
-            sgl_set_clipplane_enabled(cap - GL_CLIP_PLANE0, enabled);
+            index = cap - GL_CLIP_PLANE0;
+            EPI_ASSERT(index < kMaxClipPlane);
+            if (clip_planes_[index].enabled_ != enabled)
+            {
+                clip_planes_[index].enabled_ = enabled;
+                clip_planes_[index].dirty_   = true;
+            }
             break;
         default:
             FatalError("Unknown GL State %i", cap);
@@ -84,7 +109,7 @@ class SokolRenderState : public RenderState
 
     void Disable(GLenum cap)
     {
-        PassInfo pass_info;
+        int32_t index;
 
         switch (cap)
         {
@@ -103,8 +128,11 @@ class SokolRenderState : public RenderState
             cull_enabled_ = false;
             break;
         case GL_SCISSOR_TEST:
-            render_backend->GetPassInfo(pass_info);
-            Scissor(0, 0, pass_info.width_, pass_info.height_);
+            if (scissor_.enabled_)
+            {
+                scissor_.enabled_ = false;
+                scissor_.dirty_   = true;
+            }
             break;
         case GL_LIGHTING:
             break;
@@ -128,8 +156,13 @@ class SokolRenderState : public RenderState
         case GL_CLIP_PLANE3:
         case GL_CLIP_PLANE4:
         case GL_CLIP_PLANE5:
-            sgl_set_clipplane_enabled(cap - GL_CLIP_PLANE0, false);
-
+            index = cap - GL_CLIP_PLANE0;
+            EPI_ASSERT(index < kMaxClipPlane);
+            if (clip_planes_[index].enabled_)
+            {
+                clip_planes_[index].enabled_ = false;
+                clip_planes_[index].dirty_   = true;
+            }
             break;
         default:
             FatalError("Unknown GL State %i", cap);
@@ -165,7 +198,10 @@ class SokolRenderState : public RenderState
 
     void Scissor(GLint x, GLint y, GLsizei width, GLsizei height)
     {
-        sgl_scissor_rect(x, y, width, height, false);
+        scissor_.x_      = x;
+        scissor_.y_      = y;
+        scissor_.width_  = width;
+        scissor_.height_ = height;
     }
 
     void PolygonOffset(GLfloat factor, GLfloat units)
@@ -583,10 +619,33 @@ class SokolRenderState : public RenderState
     {
     }
 
+    void OnContextSwitch()
+    {
+        for (int32_t i = 0; i < kMaxClipPlane; i++)
+        {
+            if (clip_planes_[i].enabled_)
+            {
+                clip_planes_[i].dirty_ = true;
+            }
+        }
+
+        if (scissor_.enabled_)
+        {
+            scissor_.dirty_ = true;
+        }
+    }
+
     void ClipPlane(GLenum plane, GLdouble *equation)
     {
-        sgl_set_clipplane(int(plane) - int(GL_CLIP_PLANE0), float(equation[0]), float(equation[1]), float(equation[2]),
-                          float(equation[3]));
+        int32_t index = plane - GL_CLIP_PLANE0;
+        EPI_ASSERT(index < kMaxClipPlane);
+
+        EClipPlane *clip = &clip_planes_[index];
+
+        clip->equation_[0] = equation[0];
+        clip->equation_[1] = equation[1];
+        clip->equation_[2] = equation[2];
+        clip->equation_[3] = equation[3];
     }
 
     void SetPipeline(uint32_t flags)
@@ -642,6 +701,36 @@ class SokolRenderState : public RenderState
 
         float alpha_test = enable_alpha_test_ ? alpha_test_ : 0.0f;
         sgl_set_alpha_test(alpha_test);
+
+        if (scissor_.dirty_)
+        {
+            scissor_.dirty_ = false;
+
+            if (scissor_.enabled_)
+            {
+                sgl_scissor_rect(scissor_.x_, scissor_.y_, scissor_.width_, scissor_.height_, false);
+            }
+            else
+            {
+                PassInfo pass_info;
+                render_backend->GetPassInfo(pass_info);
+                sgl_scissor_rect(0, 0, pass_info.width_, pass_info.height_, false);
+            }
+        }
+
+        for (int32_t i = 0; i < kMaxClipPlane; i++)
+        {
+            EClipPlane *clip = &clip_planes_[i];
+            if (!clip->dirty_)
+            {
+                continue;
+            }
+
+            clip->dirty_ = false;
+
+            sgl_set_clipplane_enabled(i, clip->enabled_);
+            sgl_set_clipplane(i, clip->equation_[0], clip->equation_[1], clip->equation_[2], clip->equation_[3]);
+        }
     }
 
     // state
@@ -680,6 +769,27 @@ class SokolRenderState : public RenderState
     GLint texture_mag_filter_;
     GLint texture_wrap_s_;
     GLint texture_wrap_t_;
+
+    struct EClipPlane
+    {
+        bool  enabled_;
+        bool  dirty_;
+        float equation_[4];
+    };
+
+    EClipPlane clip_planes_[4];
+
+    struct EScissor
+    {
+        bool    enabled_;
+        bool    dirty_;
+        int32_t x_;
+        int32_t y_;
+        int32_t width_;
+        int32_t height_;
+    };
+
+    EScissor scissor_;
 };
 
 static SokolRenderState state;

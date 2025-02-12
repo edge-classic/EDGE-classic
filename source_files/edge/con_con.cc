@@ -1674,7 +1674,13 @@ void ConsoleShowFPS(void)
         }
     }
 
-    int x = current_screen_width - XMUL * 20;
+    int32_t chars = 16;
+    if (debug_fps.d_ >= 3)
+    {
+        chars = 20;
+    }
+
+    int x = current_screen_width - XMUL * chars;
     int y = current_screen_height - FNSZ * 2;
 
     if (abs(debug_fps.d_) >= 2)

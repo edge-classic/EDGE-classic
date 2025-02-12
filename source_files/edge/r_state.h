@@ -187,6 +187,10 @@ class RenderState
 
     virtual void Flush() = 0;
 
+    virtual void OnContextSwitch() = 0;
+
+    virtual void Reset() = 0;
+
     virtual void SetPipeline(uint32_t flags) = 0;
 
     // Needed only for the legacy GL render path when ending unit batches

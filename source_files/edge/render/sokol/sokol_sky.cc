@@ -9,7 +9,7 @@ void SetupSkyMatrices(void)
     if (custom_skybox)
     {
         sgl_matrix_mode_projection();
-        sgl_push_matrix();
+        //sgl_push_matrix();
         sgl_load_identity();
 
         sgl_frustum(view_x_slope * renderer_near_clip.f_, -view_x_slope * renderer_near_clip.f_,
@@ -17,7 +17,7 @@ void SetupSkyMatrices(void)
                     renderer_far_clip.f_);
 
         sgl_matrix_mode_modelview();
-        sgl_push_matrix();
+        //sgl_push_matrix();
         sgl_load_identity();
 
         sgl_rotate(sgl_rad(270.0f) - epi::RadiansFromBAM(view_vertical_angle), 1.0f, 0.0f, 0.0f);
@@ -26,7 +26,7 @@ void SetupSkyMatrices(void)
     else
     {
         sgl_matrix_mode_projection();
-        sgl_push_matrix();
+        //sgl_push_matrix();
         sgl_load_identity();
 
         sgl_frustum(-view_x_slope * renderer_near_clip.f_, view_x_slope * renderer_near_clip.f_,
@@ -34,7 +34,7 @@ void SetupSkyMatrices(void)
                     renderer_far_clip.f_ * 4.0);
 
         sgl_matrix_mode_modelview();
-        sgl_push_matrix();
+        //sgl_push_matrix();
         sgl_load_identity();
 
         sgl_rotate(sgl_rad(270.0f) - epi::RadiansFromBAM(view_vertical_angle), 1.0f, 0.0f, 0.0f);
@@ -51,9 +51,11 @@ void SetupSkyMatrices(void)
 
 void RendererRevertSkyMatrices(void)
 {
+    /*
     sgl_matrix_mode_projection();
     sgl_pop_matrix();
 
     sgl_matrix_mode_modelview();
     sgl_pop_matrix();
+    */
 }

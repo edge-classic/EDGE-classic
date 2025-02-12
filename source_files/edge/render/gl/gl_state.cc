@@ -483,6 +483,16 @@ class GLRenderState : public RenderState
     {
         EPI_UNUSED(flags);
     }
+    
+    void OnContextSwitch()
+    {
+
+    }
+
+    void Reset()
+    {
+
+    }
 
     // Might need to add more here since the state's scope has expanded - Dasho
     void ResetGLState()

@@ -374,13 +374,13 @@ class SokolRenderBackend : public RenderBackend
         return kRenderLayerHUD;
     }
 
-    void SetupMatrices(RenderLayer layer)
+    void SetupMatrices(RenderLayer layer, bool context_change = false)
     {
         if (layer == kRenderLayerHUD)
         {
             SetupMatrices2D();
         }
-        else if (layer == kRenderLayerSky)
+        else if (layer == kRenderLayerSky && context_change)
         {
             SetupSkyMatrices();
         }
@@ -403,7 +403,7 @@ class SokolRenderBackend : public RenderBackend
         sgl_set_context(context_pool_[current_context_]);
         render_state->OnContextSwitch();
 
-        SetupMatrices(render_state_.layer_);
+        SetupMatrices(render_state_.layer_, true);
     }
 
     virtual void SetRenderLayer(RenderLayer layer, bool clear_depth = false)

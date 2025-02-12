@@ -38,10 +38,10 @@
 #include "e_main.h"
 #include "epi_crc.h"
 #include "epi_doomdefs.h"
-#include "epi_ename.h"
 #include "epi_endian.h"
 #include "epi_scanner.h"
 #include "epi_str_compare.h"
+#include "epi_str_hash.h"
 #include "epi_str_util.h"
 #include "g_game.h"
 #include "i_system.h"
@@ -133,11 +133,12 @@ struct MUSINFOMapping
 // This is wonky, but essentially the idea is to not continually create
 // duplicate RTS music changing scripts for the same level if warping back and
 // forth, or using a hub or somesuch that happens to have music changers
-static std::unordered_map<std::string, MUSINFOMapping, epi::ContainerStringHash> musinfo_tracks;
+static std::unordered_map<epi::StringHash, MUSINFOMapping> musinfo_tracks;
 
 static void GetMUSINFOTracksForLevel(void)
 {
-    if (musinfo_tracks.count(current_map->name_) && musinfo_tracks[current_map->name_].processed)
+    epi::StringHash ref(current_map->name_);
+    if (musinfo_tracks.count(ref) && musinfo_tracks[ref].processed)
         return;
     int      raw_length  = 0;
     uint8_t *raw_musinfo = OpenPackOrLumpInMemory("MUSINFO", {".txt"}, &raw_length);
@@ -148,8 +149,8 @@ static void GetMUSINFOTracksForLevel(void)
     memcpy(musinfo.data(), raw_musinfo, raw_length);
     delete[] raw_musinfo;
     epi::Scanner lex(musinfo);
-    if (!musinfo_tracks.count(current_map->name_))
-        musinfo_tracks.try_emplace({current_map->name_, {}});
+    if (!musinfo_tracks.count(ref))
+        musinfo_tracks.try_emplace(ref, MUSINFOMapping{});
     for (;;)
     {
         std::string section;
@@ -1428,24 +1429,24 @@ static void LoadUDMFVertexes()
                 if (!lex.CheckToken(';'))
                     FatalError("Malformed TEXTMAP lump: missing ';'\n");
 
-                epi::EName key_ename(key, true);
+                epi::StringHash key_hash(key);
 
-                switch (key_ename.GetIndex())
+                switch (key_hash.Value())
                 {
-                case epi::EName::kX:
+                case udmf::kX:
                     x     = lex.state_.decimal;
                     min_x = HMM_MIN((int)x, min_x);
                     max_x = HMM_MAX((int)x, max_x);
                     break;
-                case epi::EName::kY:
+                case udmf::kY:
                     y     = lex.state_.decimal;
                     min_y = HMM_MIN((int)y, min_y);
                     max_y = HMM_MAX((int)y, max_y);
                     break;
-                case epi::EName::kZFloor:
+                case udmf::kZFloor:
                     zf = lex.state_.decimal;
                     break;
-                case epi::EName::kZCeiling:
+                case udmf::kZCeiling:
                     zc = lex.state_.decimal;
                     break;
                 default:
@@ -1548,80 +1549,80 @@ static void LoadUDMFSectors()
                 if (!lex.CheckToken(';'))
                     FatalError("Malformed TEXTMAP lump: missing ';'\n");
 
-                epi::EName key_ename(key, true);
+                epi::StringHash key_hash(key);
 
-                switch (key_ename.GetIndex())
+                switch (key_hash.Value())
                 {
-                case epi::EName::kHeightFloor:
+                case udmf::kHeightFloor:
                     fz = lex.state_.number;
                     break;
-                case epi::EName::kHeightCeiling:
+                case udmf::kHeightCeiling:
                     cz = lex.state_.number;
                     break;
-                case epi::EName::kTextureFloor:
+                case udmf::kTextureFloor:
                     epi::CStringCopyMax(floor_tex, value.c_str(), 8);
                     break;
-                case epi::EName::kTextureCeiling:
+                case udmf::kTextureCeiling:
                     epi::CStringCopyMax(ceil_tex, value.c_str(), 8);
                     break;
-                case epi::EName::kLightLevel:
+                case udmf::kLightLevel:
                     light = lex.state_.number;
                     break;
-                case epi::EName::kSpecial:
+                case udmf::kSpecial:
                     type = lex.state_.number;
                     break;
-                case epi::EName::kID:
+                case udmf::kID:
                     tag = lex.state_.number;
                     break;
-                case epi::EName::kLightColor:
+                case udmf::kLightColor:
                     light_color = ((uint32_t)lex.state_.number << 8 | 0xFF);
                     break;
-                case epi::EName::kFadeColor:
+                case udmf::kFadeColor:
                     fog_color = ((uint32_t)lex.state_.number << 8 | 0xFF);
                     break;
-                case epi::EName::kFogDensity:
+                case udmf::kFogDensity:
                     fog_density = HMM_Clamp(0, lex.state_.number, 1020);
                     break;
-                case epi::EName::kXPanningFloor:
+                case udmf::kXPanningFloor:
                     fx = lex.state_.decimal;
                     break;
-                case epi::EName::kYPanningFloor:
+                case udmf::kYPanningFloor:
                     fy = lex.state_.decimal;
                     break;
-                case epi::EName::kXPanningCeiling:
+                case udmf::kXPanningCeiling:
                     cx = lex.state_.decimal;
                     break;
-                case epi::EName::kYPanningCeiling:
+                case udmf::kYPanningCeiling:
                     cy = lex.state_.decimal;
                     break;
-                case epi::EName::kXScaleFloor:
+                case udmf::kXScaleFloor:
                     fx_sc = lex.state_.decimal;
                     break;
-                case epi::EName::kYScaleFloor:
+                case udmf::kYScaleFloor:
                     fy_sc = lex.state_.decimal;
                     break;
-                case epi::EName::kXScaleCeiling:
+                case udmf::kXScaleCeiling:
                     cx_sc = lex.state_.decimal;
                     break;
-                case epi::EName::kYScaleCeiling:
+                case udmf::kYScaleCeiling:
                     cy_sc = lex.state_.decimal;
                     break;
-                case epi::EName::kAlphaFloor:
+                case udmf::kAlphaFloor:
                     falph = lex.state_.decimal;
                     break;
-                case epi::EName::kAlphaCeiling:
+                case udmf::kAlphaCeiling:
                     calph = lex.state_.decimal;
                     break;
-                case epi::EName::kRotationFloor:
+                case udmf::kRotationFloor:
                     rf = lex.state_.decimal;
                     break;
-                case epi::EName::kRotationCeiling:
+                case udmf::kRotationCeiling:
                     rc = lex.state_.decimal;
                     break;
-                case epi::EName::kGravity:
+                case udmf::kGravity:
                     gravfactor = lex.state_.decimal;
                     break;
-                case epi::EName::kReverbPreset:
+                case udmf::kReverbPreset:
                     reverb = ddf::ReverbDefinition::Lookup(value);
                     break;
                 default:
@@ -1867,62 +1868,62 @@ static void LoadUDMFSideDefs()
                 if (!lex.CheckToken(';'))
                     FatalError("Malformed TEXTMAP lump: missing ';'\n");
 
-                epi::EName key_ename(key, true);
+                epi::StringHash key_hash(key);
 
-                switch (key_ename.GetIndex())
+                switch (key_hash.Value())
                 {
-                case epi::EName::kOffsetX:
+                case udmf::kOffsetX:
                     x = lex.state_.number;
                     break;
-                case epi::EName::kOffsetY:
+                case udmf::kOffsetY:
                     y = lex.state_.number;
                     break;
-                case epi::EName::kOffsetX_Bottom:
+                case udmf::kOffsetX_Bottom:
                     lowx = lex.state_.decimal;
                     break;
-                case epi::EName::kOffsetX_Mid:
+                case udmf::kOffsetX_Mid:
                     midx = lex.state_.decimal;
                     break;
-                case epi::EName::kOffsetX_Top:
+                case udmf::kOffsetX_Top:
                     highx = lex.state_.decimal;
                     break;
-                case epi::EName::kOffsetY_Bottom:
+                case udmf::kOffsetY_Bottom:
                     lowy = lex.state_.decimal;
                     break;
-                case epi::EName::kOffsetY_Mid:
+                case udmf::kOffsetY_Mid:
                     midy = lex.state_.decimal;
                     break;
-                case epi::EName::kOffsetY_Top:
+                case udmf::kOffsetY_Top:
                     highy = lex.state_.decimal;
                     break;
-                case epi::EName::kScaleX_Bottom:
+                case udmf::kScaleX_Bottom:
                     low_scx = lex.state_.decimal;
                     break;
-                case epi::EName::kScaleX_Mid:
+                case udmf::kScaleX_Mid:
                     mid_scx = lex.state_.decimal;
                     break;
-                case epi::EName::kScaleX_Top:
+                case udmf::kScaleX_Top:
                     high_scx = lex.state_.decimal;
                     break;
-                case epi::EName::kScaleY_Bottom:
+                case udmf::kScaleY_Bottom:
                     low_scy = lex.state_.decimal;
                     break;
-                case epi::EName::kScaleY_Mid:
+                case udmf::kScaleY_Mid:
                     mid_scy = lex.state_.decimal;
                     break;
-                case epi::EName::kScaleY_Top:
+                case udmf::kScaleY_Top:
                     high_scy = lex.state_.decimal;
                     break;
-                case epi::EName::kTextureTop:
+                case udmf::kTextureTop:
                     epi::CStringCopyMax(top_tex, value.c_str(), 8);
                     break;
-                case epi::EName::kTextureBottom:
+                case udmf::kTextureBottom:
                     epi::CStringCopyMax(bottom_tex, value.c_str(), 8);
                     break;
-                case epi::EName::kTextureMiddle:
+                case udmf::kTextureMiddle:
                     epi::CStringCopyMax(middle_tex, value.c_str(), 8);
                     break;
-                case epi::EName::kSector:
+                case udmf::kSector:
                     sec_num = lex.state_.number;
                     break;
                 default:
@@ -2122,65 +2123,65 @@ static void LoadUDMFLineDefs()
                 if (!lex.CheckToken(';'))
                     FatalError("Malformed TEXTMAP lump: missing ';'\n");
 
-                epi::EName key_ename(key, true);
+                epi::StringHash key_hash(key);
 
-                switch (key_ename.GetIndex())
+                switch (key_hash.Value())
                 {
-                case epi::EName::kID:
+                case udmf::kID:
                     tag = lex.state_.number;
                     break;
-                case epi::EName::kV1:
+                case udmf::kV1:
                     v1 = lex.state_.number;
                     break;
-                case epi::EName::kV2:
+                case udmf::kV2:
                     v2 = lex.state_.number;
                     break;
-                case epi::EName::kSpecial:
+                case udmf::kSpecial:
                     special = lex.state_.number;
                     break;
-                case epi::EName::kSideFront:
+                case udmf::kSideFront:
                     side0 = lex.state_.number;
                     break;
-                case epi::EName::kSideBack:
+                case udmf::kSideBack:
                     side1 = lex.state_.number;
                     break;
-                case epi::EName::kAlpha:
+                case udmf::kAlpha:
                     alpha = lex.state_.decimal;
                     break;
-                case epi::EName::kBlocking:
+                case udmf::kBlocking:
                     flags |= (lex.state_.boolean ? kLineFlagBlocking : 0);
                     break;
-                case epi::EName::kBlockMonsters:
+                case udmf::kBlockMonsters:
                     flags |= (lex.state_.boolean ? kLineFlagBlockMonsters : 0);
                     break;
-                case epi::EName::kTwoSided:
+                case udmf::kTwoSided:
                     flags |= (lex.state_.boolean ? kLineFlagTwoSided : 0);
                     break;
-                case epi::EName::kDontPegTop:
+                case udmf::kDontPegTop:
                     flags |= (lex.state_.boolean ? kLineFlagUpperUnpegged : 0);
                     break;
-                case epi::EName::kDontPegBottom:
+                case udmf::kDontPegBottom:
                     flags |= (lex.state_.boolean ? kLineFlagLowerUnpegged : 0);
                     break;
-                case epi::EName::kSecret:
+                case udmf::kSecret:
                     flags |= (lex.state_.boolean ? kLineFlagSecret : 0);
                     break;
-                case epi::EName::kBlockSound:
+                case udmf::kBlockSound:
                     flags |= (lex.state_.boolean ? kLineFlagSoundBlock : 0);
                     break;
-                case epi::EName::kDontDraw:
+                case udmf::kDontDraw:
                     flags |= (lex.state_.boolean ? kLineFlagDontDraw : 0);
                     break;
-                case epi::EName::kMapped:
+                case udmf::kMapped:
                     flags |= (lex.state_.boolean ? kLineFlagMapped : 0);
                     break;
-                case epi::EName::kPassUse:
+                case udmf::kPassUse:
                     flags |= (lex.state_.boolean ? kLineFlagBoomPassThrough : 0);
                     break;
-                case epi::EName::kBlockPlayers:
+                case udmf::kBlockPlayers:
                     flags |= (lex.state_.boolean ? kLineFlagBlockPlayers : 0);
                     break;
-                case epi::EName::kBlockSight:
+                case udmf::kBlockSight:
                     flags |= (lex.state_.boolean ? kLineFlagSightBlock : 0);
                     break;
                 default:
@@ -2316,71 +2317,71 @@ static void LoadUDMFThings()
                 if (!lex.CheckToken(';'))
                     FatalError("Malformed TEXTMAP lump: missing ';'\n");
 
-                epi::EName key_ename(key, true);
+                epi::StringHash key_hash(key);
 
-                switch (key_ename.GetIndex())
+                switch (key_hash.Value())
                 {
-                case epi::EName::kID:
+                case udmf::kID:
                     tag = lex.state_.number;
                     break;
-                case epi::EName::kX:
+                case udmf::kX:
                     x = lex.state_.decimal;
                     break;
-                case epi::EName::kY:
+                case udmf::kY:
                     y = lex.state_.decimal;
                     break;
-                case epi::EName::kHeight:
+                case udmf::kHeight:
                     z = lex.state_.decimal;
                     break;
-                case epi::EName::kAngle:
+                case udmf::kAngle:
                     angle = epi::BAMFromDegrees(lex.state_.number);
                     break;
-                case epi::EName::kType:
+                case udmf::kType:
                     typenum = lex.state_.number;
                     break;
-                case epi::EName::kSkill1:
+                case udmf::kSkill1:
                     options |= (lex.state_.boolean ? kThingEasy : 0);
                     break;
-                case epi::EName::kSkill2:
+                case udmf::kSkill2:
                     options |= (lex.state_.boolean ? kThingEasy : 0);
                     break;
-                case epi::EName::kSkill3:
+                case udmf::kSkill3:
                     options |= (lex.state_.boolean ? kThingMedium : 0);
                     break;
-                case epi::EName::kSkill4:
+                case udmf::kSkill4:
                     options |= (lex.state_.boolean ? kThingHard : 0);
                     break;
-                case epi::EName::kSkill5:
+                case udmf::kSkill5:
                     options |= (lex.state_.boolean ? kThingHard : 0);
                     break;
-                case epi::EName::kAmbush:
+                case udmf::kAmbush:
                     options |= (lex.state_.boolean ? kThingAmbush : 0);
                     break;
-                case epi::EName::kSingle:
+                case udmf::kSingle:
                     options &= (lex.state_.boolean ? ~kThingNotSinglePlayer : options);
                     break;
-                case epi::EName::kDM:
+                case udmf::kDM:
                     options &= (lex.state_.boolean ? ~kThingNotDeathmatch : options);
                     break;
-                case epi::EName::kCoop:
+                case udmf::kCoop:
                     options &= (lex.state_.boolean ? ~kThingNotCooperative : options);
                     break;
-                case epi::EName::kFriend:
+                case udmf::kFriend:
                     options |= (lex.state_.boolean ? kThingFriend : 0);
                     break;
-                case epi::EName::kHealth:
+                case udmf::kHealth:
                     healthfac = lex.state_.decimal;
                     break;
-                case epi::EName::kAlpha:
+                case udmf::kAlpha:
                     alpha = lex.state_.decimal;
                     break;
-                case epi::EName::kScale:
+                case udmf::kScale:
                     scale = lex.state_.decimal;
                     break;
-                case epi::EName::kScaleX:
+                case udmf::kScaleX:
                     scalex = lex.state_.decimal;
                     break;
-                case epi::EName::kScaleY:
+                case udmf::kScaleY:
                     scaley = lex.state_.decimal;
                     break;
                 default:
@@ -2541,21 +2542,21 @@ static void LoadUDMFCounts()
         if (!lex.CheckToken('{'))
             FatalError("Malformed TEXTMAP lump: missing '{'\n");
 
-        epi::EName section_ename(section, true);
+        epi::StringHash section_hash(section);
 
         // side counts are computed during linedef loading
-        switch (section_ename.GetIndex())
+        switch (section_hash.Value())
         {
-        case epi::EName::kThing:
+        case udmf::kThing:
             total_map_things++;
             break;
-        case epi::EName::kVertex:
+        case udmf::kVertex:
             total_level_vertexes++;
             break;
-        case epi::EName::kSector:
+        case udmf::kSector:
             total_level_sectors++;
             break;
-        case epi::EName::kLinedef:
+        case udmf::kLinedef:
             total_level_lines++;
             break;
         default:

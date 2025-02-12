@@ -22,7 +22,6 @@
 
 #include "epi.h"
 #include "stb_sprintf.h"
-#include "xxhash.h"
 
 namespace epi
 {
@@ -455,16 +454,6 @@ std::vector<std::string> SeparatedStringVector(std::string_view str, char separa
             oldpos = pos + 1;
     }
     return vec;
-}
-
-uint64_t StringHash64(std::string_view str_to_hash)
-{
-    if (str_to_hash.empty())
-    {
-        return 0;
-    }
-
-    return XXH3_64bits(str_to_hash.data(), str_to_hash.length());
 }
 
 // Copies up to max characters of src into dest, and then applies a

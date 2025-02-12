@@ -53,6 +53,7 @@
 #include "epi_filesystem.h"
 #include "epi_sdl.h"
 #include "epi_str_compare.h"
+#include "epi_str_hash.h"
 #include "epi_str_util.h"
 #include "f_finale.h"
 #include "f_interm.h"
@@ -1361,7 +1362,7 @@ static int CheckPackForGameFiles(std::string_view check_pack, FileKind check_kin
     DataFile *check_pack_df = new DataFile(check_pack, check_kind);
     EPI_ASSERT(check_pack_df);
     PopulatePackOnly(check_pack_df);
-    if (FindStemInPack(check_pack_df->pack_, "EDGEGAME"))
+    if (FindStemInPack(check_pack_df->pack_, epi::StringHash::Create("EDGEGAME")))
     {
         delete check_pack_df;
         return 0; // Custom game index value in game_checker vector
@@ -2300,6 +2301,7 @@ static void EdgeStartup(void)
 
     DoSystemStartup();
 
+    epi::Initialize();
     InitializeDDF();
     IdentifyVersion();
     AddBasePack();
@@ -2310,6 +2312,7 @@ static void EdgeStartup(void)
     InitializeRADScripts();
     ProcessMultipleFiles();
     DDFParseEverything();
+
     // Must be done after WAD and DDF loading to check for potential
     // overrides of lump-specific image/sound/DDF defines
     DoPackSubstitutions();
@@ -2320,6 +2323,14 @@ static void EdgeStartup(void)
     SetLanguage();
 #ifdef EDGE_CLASSIC
     ReadUMAPINFOLumps();
+#endif
+
+#ifdef EDGE_EXTRA_CHECKS
+    LogDebug("String Hash Registry:\n\n");
+    for (auto entry : epi::StringHash::GetHashRegistry())
+    {
+        LogDebug("%s\n", entry.first.ToDebugString().c_str());
+    }
 #endif
 
     InitializeFlats();

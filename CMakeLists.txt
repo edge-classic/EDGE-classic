@@ -50,6 +50,7 @@ option(EDGE_CLASSIC "Enable default features for EDGE-Classic" ON)
 # Development 
 option(EDGE_SANITIZE "Enable code sanitizing" OFF)
 option(EDGE_PROFILING "Enable Profiling" OFF)
+option(EDGE_EXTRA_CHECKS "Enable diagnostic checks/functions" OFF)
 
 # memory allocator
 option(EDGE_MIMALLOC "Enable mimalloc" ON)
@@ -204,6 +205,10 @@ endif()
 if (EDGE_PROFILING)
   # these must be defined for all source files
   add_compile_definitions(EDGE_PROFILING TRACY_ENABLE)
+endif()
+
+if (EDGE_EXTRA_CHECKS)
+  add_compile_definitions(EDGE_EXTRA_CHECKS)
 endif()
 
 if (EDGE_MEMORY_MIMALLOC)

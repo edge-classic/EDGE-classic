@@ -21,7 +21,6 @@ if (EDGE_MIMALLOC)
 endif()
 endif()
 add_subdirectory(tracy)
-add_subdirectory(xxHash)
 
 if (EDGE_CLASSIC)
   add_subdirectory(m4p)

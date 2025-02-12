@@ -73,7 +73,7 @@ inline int ToLowerASCII(int character)
     else
         return character;
 }
-inline int ToUpperASCII(int character)
+inline constexpr int ToUpperASCII(int character)
 {
     if (character > '`' && character < '{')
         return character ^ 0x20;
@@ -99,16 +99,7 @@ std::string StringFormat(const char *fmt, ...) __attribute__((format(printf, 1, 
 std::string StringFormat(const char *fmt, ...);
 #endif
 std::vector<std::string> SeparatedStringVector(std::string_view str, char separator);
-uint64_t                 StringHash64(std::string_view str_to_hash);
 
-// struct to pass when creating unordered_map, etc, to use xxHash with strings
-struct ContainerStringHash
-{
-    uint64_t operator()(const std::string &k) const
-    {
-        return StringHash64(k);
-    }
-};
 } // namespace epi
 
 //--- editor settings ---

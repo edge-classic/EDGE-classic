@@ -173,6 +173,11 @@ class GLRenderBackend : public RenderBackend
     {
         
     }
+
+    void OnContextSwitch()
+    {
+        
+    }
 };
 
 static GLRenderBackend gl_render_backend;

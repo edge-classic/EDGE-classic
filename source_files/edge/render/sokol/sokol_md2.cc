@@ -992,6 +992,40 @@ static inline void ModelCoordFunc(MD2CoordinateData *data, int v_idx)
     }
 }
 
+// note md->vertices_per_frame_ is invalid, so calculate number of vertices
+// Models rendering needs an overhaul
+static int32_t MD2GetVertexCount(MD2Model *md)
+{
+    
+    if (md->strips_[0].mode == GL_TRIANGLES)
+    {
+        return md->total_strips_ * 3;
+    }
+    else
+    {
+        int32_t num_vertices = 0;
+
+        MD2CoordinateData data;
+
+        for (int i = 0; i < md->total_strips_; i++)
+        {
+            data.strip_ = &md->strips_[i];
+
+            if (data.strip_->mode == GL_TRIANGLE_FAN)
+            {
+                num_vertices += (md->strips_[i].count - 2) * 3;
+            }
+            else
+            {
+
+                num_vertices += md->strips_[i].count;
+            }
+        }
+        
+        return num_vertices;
+    }    
+}
+
 void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int frame1, int frame2, float lerp, float x,
                     float y, float z, MapObject *mo, RegionProperties *props, float scale, float aspect, float bias,
                     int rotation)
@@ -1008,7 +1042,7 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         return;
     }
 
-    render_backend->Flush(1, md->vertices_per_frame_);
+    render_backend->Flush(1, MD2GetVertexCount(md));
 
     MD2CoordinateData data;
 
@@ -1065,15 +1099,15 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
 
     bool tilt = is_weapon || (mo->flags_ & kMapObjectFlagMissile) || (mo->hyper_flags_ & kHyperFlagForceModelTilt);
 
-    if (!paused && !menu_active && !rts_menu_active &&
-        (is_weapon || (!time_stop_active && !erraticism_active)))
+    if (!paused && !menu_active && !rts_menu_active && (is_weapon || (!time_stop_active && !erraticism_active)))
     {
         if (is_weapon)
-            BAMAngleToMatrix(tilt ? ~epi::BAMInterpolate(mo->old_vertical_angle_, mo->vertical_angle_, fractional_tic) : 0,
-                            &data.mouselook_x_matrix_, &data.mouselook_z_matrix_);
+            BAMAngleToMatrix(tilt ? ~epi::BAMInterpolate(mo->old_vertical_angle_, mo->vertical_angle_, fractional_tic)
+                                  : 0,
+                             &data.mouselook_x_matrix_, &data.mouselook_z_matrix_);
         else
             BAMAngleToMatrix(tilt ? ~mo->vertical_angle_ : 0, &data.mouselook_x_matrix_, &data.mouselook_z_matrix_);
-        
+
         BAMAngle ang = epi::BAMInterpolate(mo->old_angle_, mo->angle_, fractional_tic) + rotation;
         render_mirror_set.Angle(ang);
         BAMAngleToMatrix(~ang, &data.rotation_x_matrix_, &data.rotation_y_matrix_);
@@ -1437,6 +1471,8 @@ void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, f
     // check if frame is valid
     if (frame < 0 || frame >= md->total_frames_)
         return;
+
+    render_backend->Flush(1, MD2GetVertexCount(md));
 
     GLuint skin_tex = ImageCache(skin_img, false, info->palremap_);
 

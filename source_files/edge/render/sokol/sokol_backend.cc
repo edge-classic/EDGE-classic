@@ -27,9 +27,9 @@ void SetupSkyMatrices(void);
 
 constexpr int32_t kWorldStateInvalid = -1;
 
-constexpr int32_t kContextPoolSize   = 16;
-constexpr int32_t kContextMaxVertex  = 64 * 1024;
-constexpr int32_t kContextMaxCommand = 4 * 1024;
+constexpr int32_t kContextPoolSize   = 32;
+constexpr int32_t kContextMaxVertex  = 32 * 1024;
+constexpr int32_t kContextMaxCommand = 2 * 1024;
 
 class SokolRenderBackend : public RenderBackend
 {

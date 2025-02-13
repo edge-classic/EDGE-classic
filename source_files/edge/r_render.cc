@@ -2004,14 +2004,14 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
 
 // Render world index, the root world render is 0
 static int32_t render_world_index = 0;
-void    RendererEndFrame()
+void           RendererEndFrame()
 {
     render_world_index = 0;
 }
 
-void    RendererShutdownLevel()
+void RendererShutdownLevel()
 {
-#ifdef EDGE_SOKOL    
+#ifdef EDGE_SOKOL
     deferred_sky_items.clear();
 #endif
 }
@@ -2037,25 +2037,22 @@ void RenderTrueBsp(void)
 
     // handle powerup effects and BOOM colormaps
     RendererRainbowEffect(v_player);
-    
+
 #ifdef EDGE_SOKOL
 
-    render_backend->SetRenderLayer(kRenderLayerSky);
+    render_state->Enable(GL_DEPTH_TEST);
 
-    bool simple_sky = render_world_index > 0 || renderer_dumb_sky.d_ == 1;
-
-    // needed for drawing the sky
     BeginSky();
 
     if (!render_world_index)
     {
-        if (deferred_sky_items.size())
-        {
-            need_to_draw_sky = true;
-        }
+        bool simple_sky  = renderer_dumb_sky.d_ == 1;
+        need_to_draw_sky = deferred_sky_items.size();
 
-        if (!simple_sky && need_to_draw_sky)
+        if (need_to_draw_sky && !simple_sky)
         {
+            render_backend->SetRenderLayer(kRenderLayerSkyDeferred, true);
+
             // Render deferred sky walls and planes from previous frame
             std::list<RenderItem *>::iterator I;
             for (I = deferred_sky_items.begin(); I != deferred_sky_items.end(); I++)
@@ -2071,6 +2068,27 @@ void RenderTrueBsp(void)
                     RenderSkyPlane(item->wallPlane_, item->height1_);
                 }
             }
+
+            FlushSky(); // flush any deferred sky units
+
+            int current = renderer_dumb_sky.d_;
+
+            // Always render a simple sky, when rendering sky walls/planes they are deferred
+            // from previous frame, so fast movement will cause issus on screen edges
+            renderer_dumb_sky.d_ = 1;
+
+            render_backend->SetRenderLayer(kRenderLayerSky, false);
+            FinishSky();
+
+            renderer_dumb_sky.d_ = 0;
+            FinishSky();
+
+            renderer_dumb_sky.d_ = current;
+        }
+        else if (need_to_draw_sky)
+        {
+            render_backend->SetRenderLayer(kRenderLayerSky, true);
+            FinishSky();
         }
 
         deferred_sky_items.clear();
@@ -2079,30 +2097,14 @@ void RenderTrueBsp(void)
     {
         // Always render simple skies for additional world renders
         need_to_draw_sky = true;
-    }
-
-    if (need_to_draw_sky)
-    {
-        int current = renderer_dumb_sky.d_;
-
-        // Always render a simple sky, when rendering sky walls/planes they are deferred
-        // from previous frame, so fast movement will cause issus on screen edges
+        render_backend->SetRenderLayer(kRenderLayerSky, true);
+        int current          = renderer_dumb_sky.d_;
         renderer_dumb_sky.d_ = 1;
         FinishSky();
-
-        if (!simple_sky)
-        {
-            renderer_dumb_sky.d_ = 0;
-            FinishSky();
-        }
-
         renderer_dumb_sky.d_ = current;
     }
 
     // draw all solid walls and planes
-
-    render_state->Enable(GL_DEPTH_TEST);
-
     solid_mode = true;
     render_backend->SetRenderLayer(kRenderLayerSolid, false);
     StartUnitBatch(solid_mode);
@@ -2180,6 +2182,7 @@ void RenderTrueBsp(void)
     // walk the bsp tree
     BspWalkNode(root_node);
 
+    FlushSky();
     FinishSky();
 
     RenderSubList(draw_subsector_list);

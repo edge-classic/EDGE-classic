@@ -6,6 +6,8 @@ extern SkyStretch current_sky_stretch;
 
 void SetupSkyMatrices(void)
 {
+    sgl_viewport(view_window_x, view_window_y, view_window_width, view_window_height, false);
+    
     if (custom_skybox)
     {
         sgl_matrix_mode_projection();

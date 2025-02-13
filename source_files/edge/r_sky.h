@@ -47,6 +47,7 @@ enum SkyboxFace
 void ComputeSkyHeights(void);
 
 void BeginSky(void);
+void FlushSky(void);
 void FinishSky(void);
 
 void RenderSkyPlane(Subsector *sub, float h);

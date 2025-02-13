@@ -777,7 +777,7 @@ void RenderSkyPlane(Subsector *sub, float h)
     }
 
     // Break up large batches
-    if (total_sky_verts > kMaximumLocalVertices / 2)
+    if (total_sky_verts > kMaximumLocalVertices / 4)
     {
         EndRenderUnit(total_sky_verts);
         FinishUnitBatch();
@@ -827,7 +827,7 @@ void RenderSkyWall(Seg *seg, float h1, float h2)
     total_sky_verts += 6;
 
     // Break up large batches
-    if (total_sky_verts > kMaximumLocalVertices / 2)
+    if (total_sky_verts > kMaximumLocalVertices / 4)
     {
         EndRenderUnit(total_sky_verts);
         FinishUnitBatch();

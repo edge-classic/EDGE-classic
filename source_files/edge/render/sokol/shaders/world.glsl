@@ -120,6 +120,22 @@ void main()
         discard;
     }
 
+    // line drawing
+    if ((flags & 2) == 2)
+    {
+        float u = uv[0];
+        float v = uv[1];
+        float line_width = uv[2];
+        float line_length = uv[3];
+        float aa_radius = 1.0;
+
+        float au = 1.0 - smoothstep( 1.0 - ((3.0*aa_radius) / line_width),  1.0, abs( u / line_width ) );
+        float av = 1.0 - smoothstep( 1.0 - ((3.0*aa_radius) / line_length), 1.0, abs( v / line_length ) );     
+        frag_color = color;
+        frag_color.a *= min( au, av );
+        return;
+    }
+
     vec4 c0 = texture(sampler2D(tex0, smp0), uv.xy);
     if (alpha_test != 0 && c0.w < alpha_test)
     {

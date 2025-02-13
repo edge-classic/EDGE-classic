@@ -15,6 +15,7 @@ constexpr int32_t kRenderWorldMax = 8;
 enum RenderLayer
 {
     kRenderLayerHUD = 0,
+    kRenderLayerSkyDeferred,
     kRenderLayerSky,
     kRenderLayerSolid,
     kRenderLayerTransparent, // Transparent - additive renders on this layer

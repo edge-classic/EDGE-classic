@@ -27,9 +27,9 @@ void SetupSkyMatrices(void);
 
 constexpr int32_t kWorldStateInvalid = -1;
 
-constexpr int32_t kContextPoolSize   = 32;
-constexpr int32_t kContextMaxVertex  = 32 * 1024;
-constexpr int32_t kContextMaxCommand = 2 * 1024;
+constexpr int32_t kContextPoolSize   = 16;
+constexpr int32_t kContextMaxVertex  = 64 * 1024;
+constexpr int32_t kContextMaxCommand = 4 * 1024;
 
 class SokolRenderBackend : public RenderBackend
 {
@@ -159,6 +159,16 @@ class SokolRenderBackend : public RenderBackend
 
     void Flush(int32_t commands, int32_t vertices)
     {
+        if (commands >= kContextMaxCommand)
+        {
+            FatalError("RenderBackend: Flush called with commands that exceed context limit");
+        }
+
+        if (vertices >= kContextMaxVertex)
+        {
+            FatalError("RenderBackend: Flush called with vertices that exceed context limit");
+        }
+
         int num_commands = sgl_num_commands();
         int num_vertices = sgl_num_vertices();
 

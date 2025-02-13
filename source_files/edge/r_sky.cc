@@ -675,10 +675,14 @@ static void FinishSkyUnit(void)
     sky_unit_started = false;
 }
 
-void FinishSky(void)
+void FlushSky(void)
 {
     if (sky_unit_started)
-        FinishSkyUnit();
+        FinishSkyUnit();    
+}
+
+void FinishSky()
+{
 
     render_state->ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 

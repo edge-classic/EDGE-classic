@@ -247,7 +247,7 @@ static void RenderFlush()
     for (int32_t i = 0; i < current_render_unit; i++)
     {
         ec_frame_stats.draw_render_units++;
-        
+
         RendererUnit *unit = &local_units[i];
 
         // assume unit will require a command
@@ -538,16 +538,83 @@ void RenderCurrentUnits(void)
         else if (unit->shape == GL_LINES)
         {
             sgl_disable_texture();
-            sgl_begin_lines();
-            const RendererVertex *V = local_verts + unit->first;
 
-            for (int v_idx = 0, v_last_idx = unit->count; v_idx < v_last_idx; v_idx++, V++)
+            float state_width = render_state->GetLineWidth();
+
+            // Use native lines if possible, not this does not do AA smoothing, and if enabled will need to use alternate rending below
+            if (AlmostEquals(state_width, 1.0f))
             {
-                sgl_v3f_c4b(V->position.X, V->position.Y, V->position.Z, epi::GetRGBARed(V->rgba),
-                            epi::GetRGBAGreen(V->rgba), epi::GetRGBABlue(V->rgba), epi::GetRGBAAlpha(V->rgba));
-            }
+                sgl_begin_lines();
+                const RendererVertex *V = local_verts + unit->first;
 
-            sgl_end();
+                for (int v_idx = 0, v_last_idx = unit->count; v_idx < v_last_idx; v_idx++, V++)
+                {
+                    sgl_v3f_c4b(V->position.X, V->position.Y, V->position.Z, epi::GetRGBARed(V->rgba),
+                                epi::GetRGBAGreen(V->rgba), epi::GetRGBABlue(V->rgba), epi::GetRGBAAlpha(V->rgba));
+                }
+
+                sgl_end();
+            }
+            else
+            {
+
+                // This does not currently do AA smoothing
+                // https://github.com/pbdot/Lines
+                // see cpu_lines.h for AA shader, once multishader support is in
+                // so can have a shader specifically for lines
+
+                sgl_begin_triangles();
+
+                const RendererVertex *V = local_verts + unit->first;
+
+                float line_width = HMM_MAX(1.0f, state_width);
+
+                for (int v_idx = 0; v_idx < unit->count; v_idx += 2)
+                {
+                    const RendererVertex *src_v0 = V + v_idx;
+                    const RendererVertex *src_v1 = src_v0 + 1;
+
+                    // use first vertice color
+                    uint8_t red   = epi::GetRGBARed(src_v0->rgba);
+                    uint8_t green = epi::GetRGBAGreen(src_v0->rgba);
+                    uint8_t blue  = epi::GetRGBABlue(src_v0->rgba);
+                    uint8_t alpha = epi::GetRGBAAlpha(src_v0->rgba);
+
+                    HMM_Vec2 v0 = {src_v0->position[0], src_v0->position[1]};
+                    HMM_Vec2 v1 = {src_v1->position[0], src_v1->position[1]};
+
+                    HMM_Vec2 line_vector = HMM_SubV2(v1, v0);
+                    float    line_length = HMM_LenV2(line_vector);
+                    HMM_Vec2 dir         = HMM_NormV2(line_vector);
+                    HMM_Vec2 normal      = {-dir.Y, dir.X};
+
+                    HMM_Vec2 a1 = {v0.X - normal.X, v0.Y - normal.Y};
+                    HMM_Vec2 a0 = {v0.X + normal.X, v0.Y + normal.Y};
+
+                    HMM_Vec2 b1 = {v1.X - normal.X, v1.Y - normal.Y};
+                    HMM_Vec2 b0 = {v1.X + normal.X, v1.Y + normal.Y};
+
+                    sgl_v3f_t4f_c4b(a0.X, a0.Y, src_v0->position.Z, -line_width, -0.5f * line_length, line_width,
+                                    0.5f * line_length, red, green, blue, alpha);
+
+                    sgl_v3f_t4f_c4b(a1.X, a1.Y, src_v0->position.Z, line_width, -0.5f * line_length, line_width,
+                                    0.5f * line_length, red, green, blue, alpha);
+
+                    sgl_v3f_t4f_c4b(b0.X, b0.Y, src_v1->position.Z, -line_width, 0.5f * line_length, line_width,
+                                    0.5f * line_length, red, green, blue, alpha);
+
+                    sgl_v3f_t4f_c4b(a1.X, a1.Y, src_v0->position.Z, line_width, -0.5f * line_length, line_width,
+                                    0.5f * line_length, red, green, blue, alpha);
+
+                    sgl_v3f_t4f_c4b(b0.X, b0.Y, src_v1->position.Z, -line_width, 0.5f * line_length, line_width,
+                                    0.5f * line_length, red, green, blue, alpha);
+
+                    sgl_v3f_t4f_c4b(b1.X, b1.Y, src_v1->position.Z, line_width, 0.5f * line_length, line_width,
+                                    0.5f * line_length, red, green, blue, alpha);
+                }
+
+                sgl_end();
+            }
 
             continue;
         }

@@ -2797,11 +2797,9 @@ typedef struct {
 
 typedef struct {
     int flags;
-    int layer;
     float alpha_test;
     int clipplanes;
     int fog_mode;
-    uint8_t _pad_20[12];
     float fog_color[4];
     float fog_density;
     float fog_start;
@@ -4577,8 +4575,7 @@ SOKOL_API_IMPL void sgl_end(void) {
     bool fragment_uniforms_dirty = ctx->fragment_uniforms_dirty;
     if (fragment_uniforms_dirty) {
         ctx->fragment_uniforms_dirty = false;
-        _sgl_fragment_uniform_t* current = _sgl_next_fragment_uniform(ctx);
-        current->layer = ctx->layer_id;
+        _sgl_fragment_uniform_t* current = _sgl_next_fragment_uniform(ctx);        
         _sgl_fragment_uniform_t* next = &ctx->fragment_uniforms.ptr[ctx->fragment_uniforms.next];        
         *next = *current;
     }

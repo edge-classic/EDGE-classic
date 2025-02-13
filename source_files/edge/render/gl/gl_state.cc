@@ -393,6 +393,11 @@ class GLRenderState : public RenderState
         glLineWidth(line_width_);
     }
 
+    float GetLineWidth()
+    {
+        return line_width_;
+    }
+
     void DeleteTexture(const GLuint *tex_id)
     {
         if (tex_id && *tex_id > 0)

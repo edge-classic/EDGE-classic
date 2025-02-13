@@ -162,6 +162,8 @@ class RenderState
 
     virtual void LineWidth(float width) = 0;
 
+    virtual float GetLineWidth() = 0;
+
     virtual void DeleteTexture(const GLuint *tex_id) = 0;
 
     virtual void FrontFace(GLenum wind) = 0;

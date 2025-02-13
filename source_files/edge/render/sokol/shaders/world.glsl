@@ -60,7 +60,6 @@ void main()
 
 layout(binding=1) uniform state {
     int flags;
-    int layer;
     float alpha_test;
     int clipplanes;
     int fog_mode;

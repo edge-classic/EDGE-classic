@@ -35,6 +35,8 @@ class SokolRenderState : public RenderState
 
     void Reset()
     {
+        line_width_ = 1.0f;
+
         for (int32_t i = 0; i < kMaxClipPlane; i++)
         {
             clip_planes_[i].enabled_ = false;
@@ -288,7 +290,12 @@ class SokolRenderState : public RenderState
 
     void LineWidth(float width)
     {
-        EPI_UNUSED(width);
+        line_width_ = width;
+    }
+
+    float GetLineWidth()
+    {
+        return line_width_;
     }
 
     void DeleteTexture(const GLuint *tex_id)
@@ -769,6 +776,8 @@ class SokolRenderState : public RenderState
     GLint texture_mag_filter_;
     GLint texture_wrap_s_;
     GLint texture_wrap_t_;
+
+    float line_width_;
 
     struct EClipPlane
     {

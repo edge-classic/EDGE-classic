@@ -541,7 +541,7 @@ void RenderCurrentUnits(void)
 
             float state_width = render_state->GetLineWidth();
 
-            // Use native lines if possible, not this does not do AA smoothing, and if enabled will need to use alternate rending below
+            /*
             if (AlmostEquals(state_width, 1.0f))
             {
                 sgl_begin_lines();
@@ -556,6 +556,7 @@ void RenderCurrentUnits(void)
                 sgl_end();
             }
             else
+            */
             {
 
                 // This does not currently do AA smoothing
@@ -563,11 +564,15 @@ void RenderCurrentUnits(void)
                 // see cpu_lines.h for AA shader, once multishader support is in
                 // so can have a shader specifically for lines
 
+                sgl_enable_line();
                 sgl_begin_triangles();
 
                 const RendererVertex *V = local_verts + unit->first;
 
-                float line_width = HMM_MAX(1.0f, state_width);
+                HMM_Vec2 aa_radius = {2.0f, 2.0f};
+
+                float line_width       = HMM_MAX(1.0f, state_width) + aa_radius.X;
+                float extension_length = aa_radius.Y;
 
                 for (int v_idx = 0; v_idx < unit->count; v_idx += 2)
                 {
@@ -584,36 +589,41 @@ void RenderCurrentUnits(void)
                     HMM_Vec2 v1 = {src_v1->position[0], src_v1->position[1]};
 
                     HMM_Vec2 line_vector = HMM_SubV2(v1, v0);
-                    float    line_length = HMM_LenV2(line_vector);
+                    float    line_length = HMM_LenV2(line_vector) + 2.0f * extension_length;
                     HMM_Vec2 dir         = HMM_NormV2(line_vector);
-                    HMM_Vec2 normal      = {-dir.Y, dir.X};
+                    HMM_Vec2 normal      = {-dir.Y * line_width * 0.5f, dir.X * line_width * 0.5f};
 
-                    HMM_Vec2 a1 = {v0.X - normal.X, v0.Y - normal.Y};
-                    HMM_Vec2 a0 = {v0.X + normal.X, v0.Y + normal.Y};
+                    HMM_Vec2 extension = HMM_MulV2({extension_length, extension_length}, dir);
 
-                    HMM_Vec2 b1 = {v1.X - normal.X, v1.Y - normal.Y};
-                    HMM_Vec2 b0 = {v1.X + normal.X, v1.Y + normal.Y};
+                    HMM_Vec2 a1 = {v0.X - normal.X - extension.X, v0.Y - normal.Y - extension.Y};
+                    HMM_Vec2 a0 = {v0.X + normal.X - extension.X, v0.Y + normal.Y - extension.Y};
 
-                    sgl_v3f_t4f_c4b(a0.X, a0.Y, src_v0->position.Z, -line_width, -0.5f * line_length, line_width,
-                                    0.5f * line_length, red, green, blue, alpha);
+                    HMM_Vec2 b1 = {v1.X - normal.X + extension.X, v1.Y - normal.Y + extension.Y};
+                    HMM_Vec2 b0 = {v1.X + normal.X + extension.X, v1.Y + normal.Y + extension.Y};
 
-                    sgl_v3f_t4f_c4b(a1.X, a1.Y, src_v0->position.Z, line_width, -0.5f * line_length, line_width,
-                                    0.5f * line_length, red, green, blue, alpha);
+                    float factor = 0.5f;
 
-                    sgl_v3f_t4f_c4b(b0.X, b0.Y, src_v1->position.Z, -line_width, 0.5f * line_length, line_width,
-                                    0.5f * line_length, red, green, blue, alpha);
+                    sgl_v3f_t4f_c4b(a0.X, a0.Y, src_v0->position.Z, -line_width, -factor * line_length, line_width,
+                                    factor * line_length, red, green, blue, alpha);
 
-                    sgl_v3f_t4f_c4b(a1.X, a1.Y, src_v0->position.Z, line_width, -0.5f * line_length, line_width,
-                                    0.5f * line_length, red, green, blue, alpha);
+                    sgl_v3f_t4f_c4b(a1.X, a1.Y, src_v0->position.Z, line_width, -factor * line_length, line_width,
+                                    factor * line_length, red, green, blue, alpha);
 
-                    sgl_v3f_t4f_c4b(b0.X, b0.Y, src_v1->position.Z, -line_width, 0.5f * line_length, line_width,
-                                    0.5f * line_length, red, green, blue, alpha);
+                    sgl_v3f_t4f_c4b(b0.X, b0.Y, src_v1->position.Z, -line_width, factor * line_length, line_width,
+                                    factor * line_length, red, green, blue, alpha);
 
-                    sgl_v3f_t4f_c4b(b1.X, b1.Y, src_v1->position.Z, line_width, 0.5f * line_length, line_width,
-                                    0.5f * line_length, red, green, blue, alpha);
+                    sgl_v3f_t4f_c4b(a1.X, a1.Y, src_v0->position.Z, line_width, -factor * line_length, line_width,
+                                    factor * line_length, red, green, blue, alpha);
+
+                    sgl_v3f_t4f_c4b(b0.X, b0.Y, src_v1->position.Z, -line_width, factor * line_length, line_width,
+                                    factor * line_length, red, green, blue, alpha);
+
+                    sgl_v3f_t4f_c4b(b1.X, b1.Y, src_v1->position.Z, line_width, factor * line_length, line_width,
+                                    factor * line_length, red, green, blue, alpha);
                 }
 
                 sgl_end();
+                sgl_disable_line();
             }
 
             continue;

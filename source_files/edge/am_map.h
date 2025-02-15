@@ -25,41 +25,11 @@
 
 #pragma once
 
+#include <vector>
+
 #include "con_var.h"
 #include "e_event.h"
 #include "p_mobj.h"
-
-extern bool            automap_active;
-extern bool            rotate_map;
-extern bool            automap_keydoor_blink;
-extern ConsoleVariable automap_keydoor_text;
-
-struct AutomapPoint
-{
-    float x, y;
-};
-
-struct AutomapLine
-{
-    AutomapPoint a, b;
-};
-
-void AutomapInitLevel(void);
-
-// Called by main loop.
-bool AutomapResponder(InputEvent *ev);
-
-// Called by main loop.
-void AutomapTicker(void);
-
-// Called to draw the automap on the screen.
-void AutomapRender(float x, float y, float w, float h, MapObject *focus);
-
-// Called to force the automap to quit
-// if the level is completed while it is up.
-void AutomapStop(void);
-
-// color setting API
 
 // NOTE: these numbers here must match the COAL API script
 enum AutomapColor
@@ -80,8 +50,6 @@ enum AutomapColor
     kTotalAutomapColors
 };
 
-void AutomapSetColor(int which, RGBAColor color);
-
 // NOTE: the bit numbers here must match the COAL API script
 enum AutomapState
 {
@@ -100,6 +68,34 @@ enum AutomapArrowStyle
     kAutomapArrowStyleHeretic,
     kTotalAutomapArrowStyles
 };
+struct AutomapLine
+{
+    HMM_Vec4 points;
+    RGBAColor color;
+};
+
+extern std::vector<AutomapLine *> automap_lines;
+extern bool            automap_active;
+extern bool            rotate_map;
+extern bool            automap_keydoor_blink;
+extern ConsoleVariable automap_keydoor_text;
+
+void AutomapInitLevel(void);
+
+// Called by main loop.
+bool AutomapResponder(InputEvent *ev);
+
+// Called by main loop.
+void AutomapTicker(void);
+
+// Called to draw the automap on the screen.
+void AutomapRender(float x, float y, float w, float h, MapObject *focus);
+
+// Called to force the automap to quit
+// if the level is completed while it is up.
+void AutomapStop(void);
+
+void AutomapSetColor(int which, RGBAColor color);
 
 void AutomapSetArrow(AutomapArrowStyle type);
 

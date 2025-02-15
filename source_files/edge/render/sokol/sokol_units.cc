@@ -268,7 +268,7 @@ static void RenderFlush()
             num_vertices += unit->count;
             break;
         case GL_LINES:
-            num_vertices += unit->count;
+            num_vertices += unit->count * 2; // quads
             break;
         }
     }
@@ -565,7 +565,7 @@ void RenderCurrentUnits(void)
                 // so can have a shader specifically for lines
 
                 sgl_enable_line();
-                sgl_begin_triangles();
+                sgl_begin_quads();
 
                 const RendererVertex *V = local_verts + unit->first;
 
@@ -603,23 +603,17 @@ void RenderCurrentUnits(void)
 
                     float factor = 0.5f;
 
+                    sgl_v3f_t4f_c4b(a1.X, a1.Y, src_v0->position.Z, line_width, -factor * line_length, line_width,
+                        factor * line_length, red, green, blue, alpha);
+
                     sgl_v3f_t4f_c4b(a0.X, a0.Y, src_v0->position.Z, -line_width, -factor * line_length, line_width,
-                                    factor * line_length, red, green, blue, alpha);
-
-                    sgl_v3f_t4f_c4b(a1.X, a1.Y, src_v0->position.Z, line_width, -factor * line_length, line_width,
-                                    factor * line_length, red, green, blue, alpha);
+                        factor * line_length, red, green, blue, alpha);
 
                     sgl_v3f_t4f_c4b(b0.X, b0.Y, src_v1->position.Z, -line_width, factor * line_length, line_width,
-                                    factor * line_length, red, green, blue, alpha);
+                        factor * line_length, red, green, blue, alpha);
 
-                    sgl_v3f_t4f_c4b(a1.X, a1.Y, src_v0->position.Z, line_width, -factor * line_length, line_width,
-                                    factor * line_length, red, green, blue, alpha);
-
-                    sgl_v3f_t4f_c4b(b0.X, b0.Y, src_v1->position.Z, -line_width, factor * line_length, line_width,
-                                    factor * line_length, red, green, blue, alpha);
-
-                    sgl_v3f_t4f_c4b(b1.X, b1.Y, src_v1->position.Z, line_width, factor * line_length, line_width,
-                                    factor * line_length, red, green, blue, alpha);
+                    sgl_v3f_t4f_c4b(b1.X, b1.Y, src_v1->position.Z, line_width, -factor * line_length, line_width,
+                        factor * line_length, red, green, blue, alpha);
                 }
 
                 sgl_end();

@@ -37,7 +37,6 @@ void ReverbDefinition::StartEntry(const char *name, bool extend)
     if (!name)
         DDFError("New movie entry is missing a name!\n");
 
-
     dynamic_reverb = Lookup(name);
 
     if (extend)
@@ -68,29 +67,29 @@ void ReverbDefinition::ParseField(const char *field, const char *contents, int i
     EPI_UNUSED(index);
     EPI_UNUSED(is_last);
     float *member = nullptr;
-    switch(DDFCreateStringHash(field).Value())
+    switch (DDFCreateStringHash(field).Value())
     {
-        case kRoomSize:
-            member = &dynamic_reverb->room_size_;
-            break;
-        case kDampingLevel:
-            member = &dynamic_reverb->damping_level_;
-            break;
-        case kWetLevel:
-            member = &dynamic_reverb->wet_level_;
-            break;
-        case kDryLevel:
-            member = &dynamic_reverb->dry_level_;
-            break;
-        case kReverbWidth:
-            member = &dynamic_reverb->reverb_width_;
-            break;
-        case kReverbGain:
-            member = &dynamic_reverb->reverb_gain_;
-            break;
-        default:
-            DDFError("Unknown reverbs.ddf command: %s\n", field);
-            break;
+    case kRoomSize:
+        member = &dynamic_reverb->room_size_;
+        break;
+    case kDampingLevel:
+        member = &dynamic_reverb->damping_level_;
+        break;
+    case kWetLevel:
+        member = &dynamic_reverb->wet_level_;
+        break;
+    case kDryLevel:
+        member = &dynamic_reverb->dry_level_;
+        break;
+    case kReverbWidth:
+        member = &dynamic_reverb->reverb_width_;
+        break;
+    case kReverbGain:
+        member = &dynamic_reverb->reverb_gain_;
+        break;
+    default:
+        DDFError("Unknown reverbs.ddf command: %s\n", field);
+        break;
     }
     EPI_ASSERT(member);
     DDFMainGetPercent(contents, member);
@@ -130,10 +129,9 @@ ReverbDefinition::ReverbDefinition()
     Default();
 }
 
-ReverbDefinition::ReverbDefinition(float size, float damp, float wet, float dry, float width, float gain) :
-room_size_(size), damping_level_(damp), wet_level_(wet), dry_level_(dry), reverb_width_(width), reverb_gain_(gain)
+ReverbDefinition::ReverbDefinition(float size, float damp, float wet, float dry, float width, float gain)
+    : room_size_(size), damping_level_(damp), wet_level_(wet), dry_level_(dry), reverb_width_(width), reverb_gain_(gain)
 {
-
 }
 
 //
@@ -141,12 +139,12 @@ room_size_(size), damping_level_(damp), wet_level_(wet), dry_level_(dry), reverb
 //
 void ReverbDefinition::CopyDetail(const ReverbDefinition &src)
 {
-    room_size_ = src.room_size_;
+    room_size_     = src.room_size_;
     damping_level_ = src.damping_level_;
-    wet_level_ = src.wet_level_;
-    dry_level_ = src.dry_level_;
-    reverb_width_ = src.reverb_width_;
-    reverb_gain_ = src.reverb_gain_;
+    wet_level_     = src.wet_level_;
+    dry_level_     = src.dry_level_;
+    reverb_width_  = src.reverb_width_;
+    reverb_gain_   = src.reverb_gain_;
 }
 
 void ReverbDefinition::ApplyReverb(verblib *reverb) const
@@ -161,12 +159,12 @@ void ReverbDefinition::ApplyReverb(verblib *reverb) const
 
 void ReverbDefinition::Default()
 {
-    room_size_ = 0.0f;
+    room_size_     = 0.0f;
     damping_level_ = 0.0f;
-    wet_level_ = 0.0f;
-    dry_level_ = 0.0f;
-    reverb_width_ = 0.0f;
-    reverb_gain_ = 0.0f;
+    wet_level_     = 0.0f;
+    dry_level_     = 0.0f;
+    reverb_width_  = 0.0f;
+    reverb_gain_   = 0.0f;
 }
 
 const ReverbDefinition ReverbDefinition::kOutdoorStrong(0.30f, 0.35f, 0.25f, 0.50f, 0.15f, 0.015f);

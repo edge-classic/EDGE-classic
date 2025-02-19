@@ -20,9 +20,9 @@
 
 #include "con_var.h"
 
-extern bool            network_game;
-extern int             game_tic;
-extern float           fractional_tic;
+extern bool  network_game;
+extern int   game_tic;
+extern float fractional_tic;
 
 void NetworkInitialize(void);
 void NetworkShutdown(void);

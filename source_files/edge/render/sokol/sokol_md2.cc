@@ -996,7 +996,7 @@ static inline void ModelCoordFunc(MD2CoordinateData *data, int v_idx)
 // Models rendering needs an overhaul
 static int32_t MD2GetVertexCount(MD2Model *md)
 {
-    
+
     if (md->strips_[0].mode == GL_TRIANGLES)
     {
         return md->total_strips_ * 3;
@@ -1021,9 +1021,9 @@ static int32_t MD2GetVertexCount(MD2Model *md)
                 num_vertices += md->strips_[i].count;
             }
         }
-        
+
         return num_vertices;
-    }    
+    }
 }
 
 void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int frame1, int frame2, float lerp, float x,

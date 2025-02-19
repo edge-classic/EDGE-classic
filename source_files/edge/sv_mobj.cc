@@ -71,7 +71,6 @@ void SaveGameMapObjectPutWUDs(void *storage, int index);
 
 class DummyMapObject : public MapObject
 {
-
 };
 
 static DummyMapObject dummy_map_object;

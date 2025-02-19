@@ -42,7 +42,7 @@ class FLACPlayer : public AbstractMusicPlayer
     ~FLACPlayer() override;
 
   private:
-    uint8_t   *flac_data_;
+    uint8_t *flac_data_;
 
   public:
     bool OpenMemory(uint8_t *data, int length);

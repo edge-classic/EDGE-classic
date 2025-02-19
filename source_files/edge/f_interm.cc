@@ -603,8 +603,8 @@ static void DrawEnteringLevel(void)
         if (world_intermission.map_positions_[i].done)
             DrawOnLnode(&world_intermission.map_positions_[i], splat);
 
-        if (intermission_pointer_on && !epi::StringCompare(intermission_stats.next_level->name_,
-                                                           world_intermission.map_positions_[i].info->name_))
+        if (intermission_pointer_on &&
+            !epi::StringCompare(intermission_stats.next_level->name_, world_intermission.map_positions_[i].info->name_))
             DrawOnLnode(&world_intermission.map_positions_[i], you_are_here);
     }
 
@@ -1836,8 +1836,7 @@ void IntermissionDrawer(void)
                 {
                     if (!intermission_stats.next_level)
                         f = nullptr;
-                    else if (!epi::StringCompare(intermission_stats.next_level->name_,
-                                                 a->info_->level_))
+                    else if (!epi::StringCompare(intermission_stats.next_level->name_, a->info_->level_))
                         f = &a->frames_[a->frame_on_];
                 }
                 else
@@ -2057,7 +2056,7 @@ void IntermissionStart(void)
     }
 
     // Lobo 2025: if we have a camera set up we probably don't mind still hearing level sfx, otherwise nuke 'em ;)
-    if (!background_camera_map_object) 
+    if (!background_camera_map_object)
     {
         StopLevelSoundEffects();
         DestroyAllAmbientSounds();

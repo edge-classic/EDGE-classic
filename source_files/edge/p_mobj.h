@@ -403,10 +403,10 @@ class MapObject : public Position
     // Stores what this mobj was before being MORPHed/BECOMEing
     const MapObjectDefinition *pre_become_ = nullptr;
 
-    static MapObject* Allocate();
-    void Delete();
+    static MapObject *Allocate();
+    void              Delete();
 
-protected:
+  protected:
     MapObject() {};
     ~MapObject() {};
 };

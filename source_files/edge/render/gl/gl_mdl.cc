@@ -726,15 +726,15 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
 
     bool tilt = is_weapon || (mo->flags_ & kMapObjectFlagMissile) || (mo->hyper_flags_ & kHyperFlagForceModelTilt);
 
-    if (!paused && !menu_active && !rts_menu_active &&
-        (is_weapon || (!time_stop_active && !erraticism_active)))
+    if (!paused && !menu_active && !rts_menu_active && (is_weapon || (!time_stop_active && !erraticism_active)))
     {
         if (is_weapon)
-            BAMAngleToMatrix(tilt ? ~epi::BAMInterpolate(mo->old_vertical_angle_, mo->vertical_angle_, fractional_tic) : 0,
-                            &data.mouselook_x_vector_, &data.mouselook_z_vector_);
+            BAMAngleToMatrix(tilt ? ~epi::BAMInterpolate(mo->old_vertical_angle_, mo->vertical_angle_, fractional_tic)
+                                  : 0,
+                             &data.mouselook_x_vector_, &data.mouselook_z_vector_);
         else
             BAMAngleToMatrix(tilt ? ~mo->vertical_angle_ : 0, &data.mouselook_x_vector_, &data.mouselook_z_vector_);
-        
+
         BAMAngle ang = epi::BAMInterpolate(mo->old_angle_, mo->angle_, fractional_tic) + rotation;
         render_mirror_set.Angle(ang);
         BAMAngleToMatrix(~ang, &data.rotation_vector_x_, &data.rotation_vector_y_);

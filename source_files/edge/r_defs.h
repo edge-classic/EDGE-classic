@@ -267,14 +267,14 @@ struct Sector
     SlopePlane *ceiling_slope;
 
     // UDMF vertex slope stuff
-    bool                  floor_vertex_slope;
-    bool                  ceiling_vertex_slope;
-    HMM_Vec3              floor_z_vertices[3];
-    HMM_Vec3              ceiling_z_vertices[3];
-    HMM_Vec3              floor_vertex_slope_normal;
-    HMM_Vec3              ceiling_vertex_slope_normal;
-    HMM_Vec2              floor_vertex_slope_high_low;
-    HMM_Vec2              ceiling_vertex_slope_high_low;
+    bool     floor_vertex_slope;
+    bool     ceiling_vertex_slope;
+    HMM_Vec3 floor_z_vertices[3];
+    HMM_Vec3 ceiling_z_vertices[3];
+    HMM_Vec3 floor_vertex_slope_normal;
+    HMM_Vec3 ceiling_vertex_slope_normal;
+    HMM_Vec2 floor_vertex_slope_high_low;
+    HMM_Vec2 ceiling_vertex_slope_high_low;
 
     // linked list of extrafloors that this sector controls.  nullptr means
     // that this sector is not a controller.

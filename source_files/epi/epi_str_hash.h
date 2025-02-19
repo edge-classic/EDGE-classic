@@ -21,7 +21,7 @@ static constexpr uint32_t CalculateStringHash(const std::string_view &x)
 {
     std::string_view::const_iterator p      = x.cbegin();
     std::string_view::const_iterator end    = x.cend();
-    uint32_t                    result = 2166136261U; // We implement an FNV-like string hash.
+    uint32_t                         result = 2166136261U; // We implement an FNV-like string hash.
     while (p != end)
         result = (result * 16777619) ^ (uint8_t)ToUpperASCII(*p++);
     return result;
@@ -53,9 +53,9 @@ class StringHash
     /// Construct from a string view.
     StringHash(const std::string_view &str) : value_(Calculate(str.data(), str.length()))
     {
-    #ifdef EDGE_EXTRA_CHECKS
+#ifdef EDGE_EXTRA_CHECKS
         Register(*this, str);
-    #endif
+#endif
     }
 
     /// Construct from a string.
@@ -65,14 +65,14 @@ class StringHash
 
     /// Used to create a hash at run-time from a const char*
     /// since the const char* constructor is protected
-    static inline StringHash Create(const char* value)
+    static inline StringHash Create(const char *value)
     {
         return StringHash(std::string_view(value));
     }
 
 #ifdef EDGE_EXTRA_CHECKS
-    static std::string GetRegistered(StringHash hash);
-    static void RegisterKnownStrings();
+    static std::string                                        GetRegistered(StringHash hash);
+    static void                                               RegisterKnownStrings();
     static const std::unordered_map<StringHash, std::string> &GetHashRegistry();
 #endif
 
@@ -172,15 +172,15 @@ class StringHash
     uint32_t value_;
 #ifdef EDGE_EXTRA_CHECKS
     static std::unordered_map<StringHash, std::string> global_hash_registry_;
-    static void Register(StringHash hash, const std::string_view &str);
-    static void Register(const char *str);
+    static void                                        Register(StringHash hash, const std::string_view &str);
+    static void                                        Register(const char *str);
 #endif
 };
 
 static_assert(sizeof(StringHash) == sizeof(uint32_t), "Unexpected StringHash size.");
 
 #define EPI_KNOWN_STRINGHASH(v, s)                                                                                     \
-    static constexpr char                                    v##_known_string_[] = s;                                 \
+    static constexpr char                                    v##_known_string_[] = s;                                  \
     static constexpr epi::KnownStringHash<v##_known_string_> v{};
 
 template <const char *known_string> class KnownStringHash : public StringHash
@@ -198,10 +198,9 @@ template <const char *known_string> class KnownStringHash : public StringHash
 };
 
 } // namespace epi
-template <>
-struct std::hash<epi::StringHash>
+template <> struct std::hash<epi::StringHash>
 {
-    size_t operator()(const epi::StringHash& k) const
+    size_t operator()(const epi::StringHash &k) const
     {
         return k.ToHash();
     }

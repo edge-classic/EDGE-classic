@@ -119,7 +119,7 @@ void KillSoundChannel(int k)
 void UpdateSounds(MapObject *listener, BAMAngle angle)
 {
     EDGE_ZoneScoped;
-        
+
     ma_engine_set_volume(&sound_engine, sound_effect_volume.f_ * 0.25f);
 
     listen_x = listener ? listener->x : 0;
@@ -133,12 +133,13 @@ void UpdateSounds(MapObject *listener, BAMAngle angle)
         float mom_x = listener->x + listener->momentum_.X;
         float mom_y = listener->y + listener->momentum_.Y;
         float mom_z = listener->z + listener->momentum_.Z;
-        ma_engine_listener_set_direction(&sound_engine, 0, epi::BAMCos(angle), epi::BAMTan(listener->vertical_angle_), -epi::BAMSin(angle));
+        ma_engine_listener_set_direction(&sound_engine, 0, epi::BAMCos(angle), epi::BAMTan(listener->vertical_angle_),
+                                         -epi::BAMSin(angle));
         BAMAngle velocity_angle = PointToAngle(listener->x, listener->y, mom_x, mom_y);
-        float velocity_slope = ApproximateSlope(listener->x - mom_x, listener->y - mom_y,
-                                       listener->z - mom_z);
-        velocity_slope = HMM_Clamp(-1.0f, velocity_slope, 1.0f);
-        ma_engine_listener_set_velocity(&sound_engine, 0, epi::BAMCos(velocity_angle), velocity_slope, -epi::BAMSin(velocity_angle));
+        float    velocity_slope = ApproximateSlope(listener->x - mom_x, listener->y - mom_y, listener->z - mom_z);
+        velocity_slope          = HMM_Clamp(-1.0f, velocity_slope, 1.0f);
+        ma_engine_listener_set_velocity(&sound_engine, 0, epi::BAMCos(velocity_angle), velocity_slope,
+                                        -epi::BAMSin(velocity_angle));
     }
     else
     {

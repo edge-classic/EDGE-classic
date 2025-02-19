@@ -884,7 +884,7 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
             }
             else
             {
-                int actor_num   = -1;
+                int             actor_num = -1;
                 epi::StringHash actor_check(value);
                 if (!ActorNames.count(actor_check))
                     FatalError("UMAPINFO: Unknown thing type %s\n", value.c_str());

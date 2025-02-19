@@ -157,7 +157,7 @@ class GLRenderState : public RenderState
         }
 
         active_texture_ = activeTexture;
-        glActiveTexture(active_texture_);        
+        glActiveTexture(active_texture_);
     }
 
     void BindTexture(GLuint textureid)
@@ -169,7 +169,7 @@ class GLRenderState : public RenderState
         }
 
         bind_texture_2d_[index] = textureid;
-        glBindTexture(GL_TEXTURE_2D, textureid);        
+        glBindTexture(GL_TEXTURE_2D, textureid);
     }
 
     void Scissor(GLint x, GLint y, GLsizei width, GLsizei height)
@@ -186,7 +186,7 @@ class GLRenderState : public RenderState
 
         polygon_offset_factor_ = factor;
         polygon_offset_units_  = units;
-        glPolygonOffset(polygon_offset_factor_, polygon_offset_units_);        
+        glPolygonOffset(polygon_offset_factor_, polygon_offset_units_);
     }
 
     void Clear(GLbitfield mask)
@@ -207,7 +207,7 @@ class GLRenderState : public RenderState
 
         clear_color_ = color;
         glClearColor(epi::GetRGBARed(clear_color_) / 255.0f, epi::GetRGBAGreen(clear_color_) / 255.0f,
-                     epi::GetRGBABlue(clear_color_) / 255.0f, epi::GetRGBAAlpha(clear_color_) / 255.0f);        
+                     epi::GetRGBABlue(clear_color_) / 255.0f, epi::GetRGBAAlpha(clear_color_) / 255.0f);
     }
 
     void FogMode(GLint fogMode)
@@ -218,7 +218,7 @@ class GLRenderState : public RenderState
         }
 
         fog_mode_ = fogMode;
-        glFogi(GL_FOG_MODE, fog_mode_);        
+        glFogi(GL_FOG_MODE, fog_mode_);
     }
 
     void FogColor(RGBAColor color)
@@ -232,7 +232,7 @@ class GLRenderState : public RenderState
 
         float gl_fc[4] = {epi::GetRGBARed(fog_color_) / 255.0f, epi::GetRGBAGreen(fog_color_) / 255.0f,
                           epi::GetRGBABlue(fog_color_) / 255.0f, epi::GetRGBAAlpha(fog_color_) / 255.0f};
-        glFogfv(GL_FOG_COLOR, gl_fc);        
+        glFogfv(GL_FOG_COLOR, gl_fc);
     }
 
     void FogStart(GLfloat start)
@@ -243,7 +243,7 @@ class GLRenderState : public RenderState
         }
 
         fog_start_ = start;
-        glFogf(GL_FOG_START, fog_start_);        
+        glFogf(GL_FOG_START, fog_start_);
     }
 
     void FogEnd(GLfloat end)
@@ -254,7 +254,7 @@ class GLRenderState : public RenderState
         }
 
         fog_end_ = end;
-        glFogf(GL_FOG_END, fog_end_);        
+        glFogf(GL_FOG_END, fog_end_);
     }
 
     void FogDensity(GLfloat density)
@@ -265,7 +265,7 @@ class GLRenderState : public RenderState
         }
 
         fog_density_ = density;
-        glFogf(GL_FOG_DENSITY, fog_density_);        
+        glFogf(GL_FOG_DENSITY, fog_density_);
     }
 
     void GLColor(RGBAColor color)
@@ -301,7 +301,7 @@ class GLRenderState : public RenderState
         }
 
         texture_environment_mode_[index] = param;
-        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, texture_environment_mode_[index]);        
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, texture_environment_mode_[index]);
     }
 
     void TextureEnvironmentCombineRGB(GLint param)
@@ -488,15 +488,13 @@ class GLRenderState : public RenderState
     {
         EPI_UNUSED(flags);
     }
-    
+
     void OnContextSwitch()
     {
-
     }
 
     void Reset()
     {
-
     }
 
     // Might need to add more here since the state's scope has expanded - Dasho

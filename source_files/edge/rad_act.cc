@@ -83,17 +83,17 @@ void InitializeScriptTips(void)
         ScriptDrawTip *current = tip_slots + i;
 
         // initial properties
-        current->dirty = false;
-        current->tip_text = nullptr;
+        current->dirty       = false;
+        current->tip_text    = nullptr;
         current->tip_graphic = nullptr;
-        current->playsound = false;
-        current->scale = 0.0f;
-        current->fade_time = 0;
+        current->playsound   = false;
+        current->scale       = 0.0f;
+        current->fade_time   = 0;
         current->fade_target = 0.0f;
-        current->p = fixed_props[i % kFixedSlots];
-        current->delay = -1;
-        current->color = kRGBANoValue;
-        current->p.slot_num = i;
+        current->p           = fixed_props[i % kFixedSlots];
+        current->delay       = -1;
+        current->color       = kRGBANoValue;
+        current->p.slot_num  = i;
     }
 }
 

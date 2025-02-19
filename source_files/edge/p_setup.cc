@@ -1507,18 +1507,18 @@ static void LoadUDMFSectors()
 
         if (section == "sector")
         {
-            int       cz = 0, fz = 0;
-            float     fx = 0.0f, fy = 0.0f, cx = 0.0f, cy = 0.0f;
-            float     fx_sc = 1.0f, fy_sc = 1.0f, cx_sc = 1.0f, cy_sc = 1.0f;
-            float     falph = 1.0f, calph = 1.0f;
-            float     rf = 0.0f, rc = 0.0f;
-            float     gravfactor = 1.0f;
-            int       light = 160, type = 0, tag = 0;
-            RGBAColor fog_color   = kRGBABlack;
-            RGBAColor light_color = kRGBAWhite;
-            int       fog_density = 0;
-            char      floor_tex[10];
-            char      ceil_tex[10];
+            int                    cz = 0, fz = 0;
+            float                  fx = 0.0f, fy = 0.0f, cx = 0.0f, cy = 0.0f;
+            float                  fx_sc = 1.0f, fy_sc = 1.0f, cx_sc = 1.0f, cy_sc = 1.0f;
+            float                  falph = 1.0f, calph = 1.0f;
+            float                  rf = 0.0f, rc = 0.0f;
+            float                  gravfactor = 1.0f;
+            int                    light = 160, type = 0, tag = 0;
+            RGBAColor              fog_color   = kRGBABlack;
+            RGBAColor              light_color = kRGBAWhite;
+            int                    fog_density = 0;
+            char                   floor_tex[10];
+            char                   ceil_tex[10];
             ddf::ReverbDefinition *reverb = nullptr;
             strcpy(floor_tex, "-");
             strcpy(ceil_tex, "-");
@@ -3152,7 +3152,7 @@ void GroupLines(void)
             }
             if (floor_z_lines == 1 && f_zverts.size() == 4)
             {
-                sector->floor_vertex_slope        = true;
+                sector->floor_vertex_slope = true;
                 // Only need three of the verts, as with the way we regulate rectangular
                 // vert slopes, any 3 of the 4 vertices that comprise the sector
                 // will result in the same plane calculation
@@ -3166,7 +3166,7 @@ void GroupLines(void)
             }
             if (ceil_z_lines == 1 && c_zverts.size() == 4)
             {
-                sector->ceiling_vertex_slope        = true;
+                sector->ceiling_vertex_slope = true;
                 // Only need three of the verts, as with the way we regulate rectangular
                 // vert slopes, any 3 of the 4 vertices that comprise the sector
                 // will result in the same plane calculation
@@ -3356,9 +3356,9 @@ void ShutdownLevel(void)
 #endif
 
     level_active = false;
-    
+
     RendererShutdownLevel();
-    
+
     ClearRespawnQueue();
 
     P_RemoveSectorStuff();

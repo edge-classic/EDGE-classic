@@ -65,7 +65,6 @@ class SpriteDefinition
   public:
     SpriteDefinition(std::string_view name) : name_(name), total_frames_(0), frames_(nullptr)
     {
-
     }
 
     ~SpriteDefinition()
@@ -237,8 +236,8 @@ static void InstallSpriteLump(SpriteDefinition *def, int lump, const char *lumpn
         frame->finished_ = true;
 }
 
-static void InstallSpritePack(SpriteDefinition *def, PackFile *pack, const std::string &spritebase, const std::string &packname,
-                              int pos, uint8_t flip)
+static void InstallSpritePack(SpriteDefinition *def, PackFile *pack, const std::string &spritebase,
+                              const std::string &packname, int pos, uint8_t flip)
 {
     SpriteFrame *frame = WhatFrame(def, spritebase.c_str(), pos);
     if (!frame)
@@ -489,7 +488,7 @@ static void MarkCompletedFrames(void)
 
         for (int f = 0; f < def->total_frames_; f++)
         {
-            SpriteFrame *frame    = def->frames_ + f;
+            SpriteFrame *frame = def->frames_ + f;
 
             if (frame->finished_)
             {

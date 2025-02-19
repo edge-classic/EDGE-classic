@@ -42,14 +42,14 @@
 void SystemStartup(void);
 
 #ifdef __GNUC__
-void LogPrint(const char *message, ...) __attribute__((format(printf, 1, 2)));
-void LogWarning(const char *warning, ...) __attribute__((format(printf, 1, 2)));
-void LogDebug(const char *message, ...) __attribute__((format(printf, 1, 2)));
+void              LogPrint(const char *message, ...) __attribute__((format(printf, 1, 2)));
+void              LogWarning(const char *warning, ...) __attribute__((format(printf, 1, 2)));
+void              LogDebug(const char *message, ...) __attribute__((format(printf, 1, 2)));
 [[noreturn]] void FatalError(const char *error, ...) __attribute__((format(printf, 1, 2)));
 #else
-void LogPrint(const char *message, ...);
-void LogWarning(const char *warning, ...);
-void LogDebug(const char *message, ...);
+void              LogPrint(const char *message, ...);
+void              LogWarning(const char *warning, ...);
+void              LogDebug(const char *message, ...);
 [[noreturn]] void FatalError(const char *error, ...);
 #endif
 

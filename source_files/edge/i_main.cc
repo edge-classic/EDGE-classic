@@ -35,7 +35,7 @@ extern "C"
 {
     int main(int argc, char *argv[])
     {
-#ifdef EDGE_MIMALLOC        
+#ifdef EDGE_MIMALLOC
         if (SDL_SetMemoryFunctions(mi_malloc, mi_calloc, mi_realloc, mi_free) != 0)
             FatalError("Couldn't init SDL memory functions!!\n%s\n", SDL_GetError());
 #endif

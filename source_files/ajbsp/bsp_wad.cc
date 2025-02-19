@@ -208,11 +208,10 @@ bool Lump::Finish()
 //------------------------------------------------------------------------
 
 WadFile::WadFile(const std::string &name, char mode, FILE *file_pointer, epi::File *memory_file_pointer)
-    : filename_(name), mode_(mode), file_pointer_(file_pointer), memory_file_pointer_(memory_file_pointer), kind_('P'), total_size_(0),
-      directory_(), directory_start_(0), directory_count_(0), levels_(), patches_(), sprites_(), flats_(),
-      tx_textures_(), begun_write_(false), insert_point_(-1)
+    : filename_(name), mode_(mode), file_pointer_(file_pointer), memory_file_pointer_(memory_file_pointer), kind_('P'),
+      total_size_(0), directory_(), directory_start_(0), directory_count_(0), levels_(), patches_(), sprites_(),
+      flats_(), tx_textures_(), begun_write_(false), insert_point_(-1)
 {
-
 }
 
 WadFile::~WadFile()

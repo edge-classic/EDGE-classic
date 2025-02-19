@@ -124,9 +124,9 @@ static bool show_allmap = false;
 static bool hide_lines  = false;
 
 // location and size of window on screen
-static float frame_x, frame_y;
-static float frame_width, frame_height;
-static float frame_lerped_x, frame_lerped_y;
+static float    frame_x, frame_y;
+static float    frame_width, frame_height;
+static float    frame_lerped_x, frame_lerped_y;
 static BAMAngle frame_lerped_ang;
 
 // scale value which makes the whole map fit into the on-screen area
@@ -181,13 +181,13 @@ bool automap_keydoor_blink = false;
 extern Style *automap_style; // FIXME: put in header
 
 // Used for batching GL_LINES (or Sokol equivalent) calls
-static float map_alpha = 1.0f;
+static float map_alpha       = 1.0f;
 static float map_pulse_width = 2.0f;
-static float map_dx = 0.0f;
-static float map_dy = 0.0f;
+static float map_dx          = 0.0f;
+static float map_dy          = 0.0f;
 
 std::vector<AutomapLine *> automap_lines;
-static size_t automap_line_position = 0;
+static size_t              automap_line_position = 0;
 
 // Automap line "buckets"
 // 4 potential thicknesses (1.0, 1.5, 3.5, and whatever the pulsing
@@ -210,8 +210,8 @@ static constexpr uint16_t kMaximumLineVerts = kDefaultAutomapLines / 4;
 
 static void DrawAllLines()
 {
-    size_t current_vert_count = 0;
-    RendererVertex *current_glvert = nullptr;
+    size_t          current_vert_count = 0;
+    RendererVertex *current_glvert     = nullptr;
     for (int i = 3; i >= 0; i--)
     {
         if (!map_line_pointers[i].empty())
@@ -225,11 +225,11 @@ static void DrawAllLines()
                 render_state->LineWidth(1.5f);
             else
                 render_state->LineWidth(1.0f);
-            current_glvert = BeginRenderUnit(GL_LINES, kMaximumLineVerts, GL_MODULATE, 0, 
-                (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAlpha);
+            current_glvert = BeginRenderUnit(GL_LINES, kMaximumLineVerts, GL_MODULATE, 0,
+                                             (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAlpha);
             for (AutomapLine *line : map_line_pointers[i])
             {
-                RGBAColor col = line->color;
+                RGBAColor col    = line->color;
                 HMM_Vec4 *points = &line->points;
                 if (current_vert_count > kMaximumLineVerts - 2)
                 {
@@ -237,13 +237,13 @@ static void DrawAllLines()
                     FinishUnitBatch();
                     current_vert_count = 0;
                     StartUnitBatch(false);
-                    current_glvert = BeginRenderUnit(GL_LINES, kMaximumLineVerts, GL_MODULATE, 0, 
-                        (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAlpha);
+                    current_glvert = BeginRenderUnit(GL_LINES, kMaximumLineVerts, GL_MODULATE, 0,
+                                                     (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAlpha);
                 }
                 current_glvert->position = {points->X, points->Y, 0};
-                current_glvert++->rgba = col;
+                current_glvert++->rgba   = col;
                 current_glvert->position = {points->Z, points->W, 0};
-                current_glvert++->rgba = col;
+                current_glvert++->rgba   = col;
                 current_vert_count += 2;
             }
             EndRenderUnit(current_vert_count);
@@ -696,8 +696,8 @@ static HMM_Vec4 player_dagger[] = {
 
 static constexpr uint8_t kAutomapPlayerDaggerLines = (sizeof(player_dagger) / sizeof(HMM_Vec4));
 
-static void DrawLineCharacter(HMM_Vec4 *lineguy, int lineguylines, float radius, BAMAngle angle, RGBAColor rgb,
-                              float x, float y)
+static void DrawLineCharacter(HMM_Vec4 *lineguy, int lineguylines, float radius, BAMAngle angle, RGBAColor rgb, float x,
+                              float y)
 {
     float cx, cy;
 
@@ -1191,39 +1191,39 @@ static void DrawObjectBounds(MapObject *mo, RGBAColor rgb)
 
 static HMM_Vec4 player_arrow[] = {{{-0.875f, 0.0f, 1.0f, 0.0f}},     // -----
 
-                                     {{1.0f, 0.0f, 0.5f, 0.25f}},       // ----->
-                                     {{1.0f, 0.0f, 0.5f, -0.25f}},
+                                  {{1.0f, 0.0f, 0.5f, 0.25f}},       // ----->
+                                  {{1.0f, 0.0f, 0.5f, -0.25f}},
 
-                                     {{-0.875f, 0.0f, -1.125f, 0.25f}}, // >---->
-                                     {{-0.875f, 0.0f, -1.125f, -0.25f}},
+                                  {{-0.875f, 0.0f, -1.125f, 0.25f}}, // >---->
+                                  {{-0.875f, 0.0f, -1.125f, -0.25f}},
 
-                                     {{-0.625f, 0.0f, -0.875f, 0.25f}}, // >>--->
-                                     {{-0.625f, 0.0f, -0.875f, -0.25f}}};
+                                  {{-0.625f, 0.0f, -0.875f, 0.25f}}, // >>--->
+                                  {{-0.625f, 0.0f, -0.875f, -0.25f}}};
 
 static constexpr uint8_t kAutomapPlayerArrowLines = (sizeof(player_arrow) / sizeof(HMM_Vec4));
 
 static HMM_Vec4 cheat_player_arrow[] = {{{-0.875f, 0.0f, 1.0f, 0.0f}},      // -----
 
-                                           {{1.0f, 0.0f, 0.5f, 0.167f}},       // ----->
-                                           {{1.0f, 0.0f, 0.5f, -0.167f}},
+                                        {{1.0f, 0.0f, 0.5f, 0.167f}},       // ----->
+                                        {{1.0f, 0.0f, 0.5f, -0.167f}},
 
-                                           {{-0.875f, 0.0f, -1.125f, 0.167f}}, // >----->
-                                           {{-0.875f, 0.0f, -1.125f, -0.167f}},
+                                        {{-0.875f, 0.0f, -1.125f, 0.167f}}, // >----->
+                                        {{-0.875f, 0.0f, -1.125f, -0.167f}},
 
-                                           {{-0.625f, 0.0f, -0.875f, 0.167f}}, // >>----->
-                                           {{-0.625f, 0.0f, -0.875f, -0.167f}},
+                                        {{-0.625f, 0.0f, -0.875f, 0.167f}}, // >>----->
+                                        {{-0.625f, 0.0f, -0.875f, -0.167f}},
 
-                                           {{-0.5f, 0.0f, -0.5f, -0.167f}},    // >>-d--->
-                                           {{-0.5f, -0.167f, -0.5f + 0.167f, -0.167f}},
-                                           {{-0.5f + 0.167f, -0.167f, -0.5f + 0.167f, 0.25f}},
+                                        {{-0.5f, 0.0f, -0.5f, -0.167f}},    // >>-d--->
+                                        {{-0.5f, -0.167f, -0.5f + 0.167f, -0.167f}},
+                                        {{-0.5f + 0.167f, -0.167f, -0.5f + 0.167f, 0.25f}},
 
-                                           {{-0.167f, 0.0f, -0.167f, -0.167f}}, // >>-dd-->
-                                           {{-0.167f, -0.167f, 0.0f, -0.167f}},
-                                           {{0.0f, -0.167f, 0.0f, 0.25f}},
+                                        {{-0.167f, 0.0f, -0.167f, -0.167f}}, // >>-dd-->
+                                        {{-0.167f, -0.167f, 0.0f, -0.167f}},
+                                        {{0.0f, -0.167f, 0.0f, 0.25f}},
 
-                                           {{0.167f, 0.25f, 0.167f, -0.143f}}, // >>-ddt->
-                                           {{0.167f, -0.143f, 0.167f + 0.031f, -0.143f - 0.031f}},
-                                           {{0.167f + 0.031f, -0.143f - 0.031f, 0.167f + 0.1f, -0.143f}}};
+                                        {{0.167f, 0.25f, 0.167f, -0.143f}}, // >>-ddt->
+                                        {{0.167f, -0.143f, 0.167f + 0.031f, -0.143f - 0.031f}},
+                                        {{0.167f + 0.031f, -0.143f - 0.031f, 0.167f + 0.1f, -0.143f}}};
 
 static constexpr uint8_t kAutomapCheatPlayerArrowLines = (sizeof(cheat_player_arrow) / sizeof(HMM_Vec4));
 
@@ -1262,21 +1262,20 @@ static void AddPlayer(MapObject *mo)
 
     switch (current_arrow_type)
     {
-        case kAutomapArrowStyleHeretic:
-            DrawLineCharacter(player_dagger, kAutomapPlayerDaggerLines, mo->radius_, ma, am_colors[kAutomapColorPlayer],
-                                mx, my);
-            break;
-        case kAutomapArrowStyleDoom:
-        default:
-        {
-            if (cheating)
-                DrawLineCharacter(cheat_player_arrow, kAutomapCheatPlayerArrowLines, mo->radius_, ma,
-                                    am_colors[kAutomapColorPlayer], mx, my);
-            else
-                DrawLineCharacter(player_arrow, kAutomapPlayerArrowLines, mo->radius_, ma,
-                                    am_colors[kAutomapColorPlayer], mx, my);
-            break;
-        }
+    case kAutomapArrowStyleHeretic:
+        DrawLineCharacter(player_dagger, kAutomapPlayerDaggerLines, mo->radius_, ma, am_colors[kAutomapColorPlayer], mx,
+                          my);
+        break;
+    case kAutomapArrowStyleDoom:
+    default: {
+        if (cheating)
+            DrawLineCharacter(cheat_player_arrow, kAutomapCheatPlayerArrowLines, mo->radius_, ma,
+                              am_colors[kAutomapColorPlayer], mx, my);
+        else
+            DrawLineCharacter(player_arrow, kAutomapPlayerArrowLines, mo->radius_, ma, am_colors[kAutomapColorPlayer],
+                              mx, my);
+        break;
+    }
     }
 }
 
@@ -1341,7 +1340,7 @@ static void CollectMapLines()
     for (int i = 0; i < total_players; i++)
     {
         if (i == display_player || InCooperativeMatch())
-            AddPlayer(players[i]->map_object_);      
+            AddPlayer(players[i]->map_object_);
     }
 
     if (show_things)
@@ -1427,16 +1426,16 @@ void AutomapRender(float x, float y, float w, float h, MapObject *focus)
     }
 
     // Update various render values
-    map_alpha = HUDGetAlpha();
+    map_alpha       = HUDGetAlpha();
     map_pulse_width = (float)(game_tic % 32);
     if (map_pulse_width >= 16.0f)
         map_pulse_width = 2.0 + (map_pulse_width * 0.1f);
     else
         map_pulse_width = 2.0 - (map_pulse_width * 0.1f);
-    map_dx = HUDToRealCoordinatesX(MapToFrameDistanceX(-map_center_x)) - HUDToRealCoordinatesX(0);
-    map_dy = HUDToRealCoordinatesY(0) - HUDToRealCoordinatesY(MapToFrameDistanceY(-map_center_y));
-    frame_lerped_x = HMM_Lerp(frame_focus->old_x_, fractional_tic, frame_focus->x);
-    frame_lerped_y = HMM_Lerp(frame_focus->old_y_, fractional_tic, frame_focus->y);
+    map_dx           = HUDToRealCoordinatesX(MapToFrameDistanceX(-map_center_x)) - HUDToRealCoordinatesX(0);
+    map_dy           = HUDToRealCoordinatesY(0) - HUDToRealCoordinatesY(MapToFrameDistanceY(-map_center_y));
+    frame_lerped_x   = HMM_Lerp(frame_focus->old_x_, fractional_tic, frame_focus->x);
+    frame_lerped_y   = HMM_Lerp(frame_focus->old_y_, fractional_tic, frame_focus->y);
     frame_lerped_ang = epi::BAMInterpolate(frame_focus->old_angle_, frame_focus->angle_, fractional_tic);
 
     if (grid && !rotate_map)

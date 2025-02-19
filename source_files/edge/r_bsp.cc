@@ -357,10 +357,10 @@ static void BSPWalkSeg(DrawSubsector *dsub, Seg *seg)
         UpdateSectorInterpolation(bsector);
 
     // --- handle sky (using the depth buffer) ---
-    float       f_fh    = 0;
-    float       f_ch    = 0;
-    float       b_fh    = 0;
-    float       b_ch    = 0;
+    float             f_fh    = 0;
+    float             f_ch    = 0;
+    float             b_fh    = 0;
+    float             b_ch    = 0;
     const MapSurface *f_floor = nullptr;
     const MapSurface *f_ceil  = nullptr;
     const MapSurface *b_floor = nullptr;

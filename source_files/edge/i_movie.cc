@@ -140,8 +140,8 @@ void MovieVideoCallback(plm_t *mpeg, plm_frame_t *frame, void *user)
 
         render_state->BindTexture(canvas);
         render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frame->width, frame->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                                rgb_data);
-    
+                                 rgb_data);
+
         canvas_can_update = false;
     }
 }
@@ -295,7 +295,7 @@ void PlayMovie(const std::string &name)
     fadein    = 0;
     fadeout   = 0;
 
-    playing_movie = true;
+    playing_movie     = true;
     canvas_can_update = true;
 }
 

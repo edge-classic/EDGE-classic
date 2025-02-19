@@ -249,7 +249,7 @@ static void *LUA_DefaultAllocator(void *user, void *ptr, size_t osize, size_t ns
         if (ptr)
         {
             free(ptr);
-        }        
+        }
         return NULL;
     }
     else

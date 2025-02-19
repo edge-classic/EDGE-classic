@@ -730,7 +730,7 @@ static PlaneMover *P_SetupSectorAction(Sector *sector, const PlaneMoverDefinitio
         // texture/type changes that were intended
 
         plane->destination_height = dest;
-        plane->new_special = -1;
+        plane->new_special        = -1;
 
         // change to surrounding
         if (def->tex_ != "" && def->tex_[0] == '-')

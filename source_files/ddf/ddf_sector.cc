@@ -488,7 +488,7 @@ void SectorType::CopyDetail(const SectorType &src)
     fog_color_   = src.fog_color_;
     fog_density_ = src.fog_density_;
 
-    reverb_preset_      = src.reverb_preset_;
+    reverb_preset_ = src.reverb_preset_;
 }
 
 void SectorType::Default()
@@ -528,7 +528,7 @@ void SectorType::Default()
     fog_color_   = kRGBANoValue;
     fog_density_ = 0;
 
-    reverb_preset_      = nullptr;
+    reverb_preset_ = nullptr;
 }
 
 SectorTypeContainer::SectorTypeContainer()

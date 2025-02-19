@@ -54,8 +54,8 @@ EDGE_DEFINE_CONSOLE_VARIABLE(fluidlite_gain, "0.6", kConsoleVariableFlagArchive)
 
 extern std::set<std::string> available_soundfonts;
 
-static constexpr uint8_t kFluidOk = 0;
-static constexpr int8_t kFluidFailed = -1;
+static constexpr uint8_t kFluidOk     = 0;
+static constexpr int8_t  kFluidFailed = -1;
 
 static void FluidError(int level, char *message, void *data)
 {
@@ -71,39 +71,39 @@ static void *edge_fluid_fopen(fluid_fileapi_t *fileapi, const char *filename)
     // If default, look for SNDFONT. This can be a lump or pack file
     if (epi::StringCompare(filename, "Default") == 0)
     {
-        int raw_length = 0;
-        uint8_t *raw_sf2 = OpenPackOrLumpInMemory("SNDFONT", {".sf2", ".sf3"}, &raw_length);
+        int      raw_length = 0;
+        uint8_t *raw_sf2    = OpenPackOrLumpInMemory("SNDFONT", {".sf2", ".sf3"}, &raw_length);
         if (raw_sf2)
         {
             fp = new epi::MemFile(raw_sf2, raw_length);
             delete[] raw_sf2;
         }
-    }   
+    }
     else // Check home, then game directory for SF2/SF3 file
     {
         std::string soundfont_dir = epi::PathAppend(home_directory, "soundfont");
-        std::string sf_check = epi::PathAppend(soundfont_dir, filename);
+        std::string sf_check      = epi::PathAppend(soundfont_dir, filename);
         epi::ReplaceExtension(sf_check, ".sf2");
         if (epi::FileExists(sf_check))
-            fp = epi::FileOpen(sf_check, epi::kFileAccessRead|epi::kFileAccessBinary);
+            fp = epi::FileOpen(sf_check, epi::kFileAccessRead | epi::kFileAccessBinary);
         else
         {
             epi::ReplaceExtension(sf_check, ".sf3");
             if (epi::FileExists(sf_check))
-                fp = epi::FileOpen(sf_check, epi::kFileAccessRead|epi::kFileAccessBinary);
+                fp = epi::FileOpen(sf_check, epi::kFileAccessRead | epi::kFileAccessBinary);
         }
         if (!fp && home_directory != game_directory)
         {
             soundfont_dir = epi::PathAppend(game_directory, "soundfont");
-            sf_check = epi::PathAppend(soundfont_dir, filename);
+            sf_check      = epi::PathAppend(soundfont_dir, filename);
             epi::ReplaceExtension(sf_check, ".sf2");
             if (epi::FileExists(sf_check))
-                fp = epi::FileOpen(sf_check, epi::kFileAccessRead|epi::kFileAccessBinary);
+                fp = epi::FileOpen(sf_check, epi::kFileAccessRead | epi::kFileAccessBinary);
             else
             {
                 epi::ReplaceExtension(sf_check, ".sf3");
                 if (epi::FileExists(sf_check))
-                    fp = epi::FileOpen(sf_check, epi::kFileAccessRead|epi::kFileAccessBinary);
+                    fp = epi::FileOpen(sf_check, epi::kFileAccessRead | epi::kFileAccessBinary);
             }
         }
     }
@@ -111,7 +111,7 @@ static void *edge_fluid_fopen(fluid_fileapi_t *fileapi, const char *filename)
     return fp;
 }
 
-static int edge_fluid_fread(void *buf, int count, void* handle)
+static int edge_fluid_fread(void *buf, int count, void *handle)
 {
     if (count < 0)
         return kFluidFailed;
@@ -132,14 +132,14 @@ static int edge_fluid_fclose(void *handle)
 
 static long edge_fluid_ftell(void *handle)
 {
-    epi::File *fp = (epi::File *)handle;
-    long ret = fp->GetPosition();
+    epi::File *fp  = (epi::File *)handle;
+    long       ret = fp->GetPosition();
     if (ret == -1)
         return kFluidFailed;
     return ret;
 }
 
-static int edge_fluid_free(fluid_fileapi_t* fileapi)
+static int edge_fluid_free(fluid_fileapi_t *fileapi)
 {
     if (fileapi)
         delete fileapi;
@@ -148,21 +148,21 @@ static int edge_fluid_free(fluid_fileapi_t* fileapi)
 
 static int edge_fluid_fseek(void *handle, long offset, int origin)
 {
-    epi::File *fp = (epi::File *)handle;
-    bool did_seek = false;
+    epi::File *fp       = (epi::File *)handle;
+    bool       did_seek = false;
     switch (origin)
     {
-        case SEEK_SET:
-            did_seek = fp->Seek(offset, epi::File::kSeekpointStart);
-            break;
-        case SEEK_CUR:
-            did_seek = fp->Seek(offset, epi::File::kSeekpointCurrent);
-            break;
-        case SEEK_END:
-            did_seek = fp->Seek(-offset, epi::File::kSeekpointEnd);
-            break;
-        default:
-            break;
+    case SEEK_SET:
+        did_seek = fp->Seek(offset, epi::File::kSeekpointStart);
+        break;
+    case SEEK_CUR:
+        did_seek = fp->Seek(offset, epi::File::kSeekpointCurrent);
+        break;
+    case SEEK_END:
+        did_seek = fp->Seek(-offset, epi::File::kSeekpointEnd);
+        break;
+    default:
+        break;
     }
     if (did_seek)
         return kFluidOk;
@@ -225,7 +225,7 @@ void playSynth(void *userdata, uint8_t *stream, size_t length)
 }
 
 static MidiRealTimeInterface *midi_interface = nullptr;
-static MidiSequencer *midi_sequencer = nullptr;
+static MidiSequencer         *midi_sequencer = nullptr;
 
 typedef struct
 {
@@ -242,21 +242,21 @@ typedef struct
 } ma_midi;
 
 static ma_result ma_midi_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell,
-                               void *pReadSeekTellUserData, const ma_decoding_backend_config *pConfig,
-                               const ma_allocation_callbacks *pAllocationCallbacks, ma_midi *pMIDI);
+                              void *pReadSeekTellUserData, const ma_decoding_backend_config *pConfig,
+                              const ma_allocation_callbacks *pAllocationCallbacks, ma_midi *pMIDI);
 static ma_result ma_midi_init_memory(const void *pData, size_t dataSize, const ma_decoding_backend_config *pConfig,
-                                      const ma_allocation_callbacks *pAllocationCallbacks, ma_midi *pMIDI);
+                                     const ma_allocation_callbacks *pAllocationCallbacks, ma_midi *pMIDI);
 static void      ma_midi_uninit(ma_midi *pMIDI, const ma_allocation_callbacks *pAllocationCallbacks);
 static ma_result ma_midi_read_pcm_frames(ma_midi *pMIDI, void *pFramesOut, ma_uint64 frameCount,
-                                          ma_uint64 *pFramesRead);
+                                         ma_uint64 *pFramesRead);
 static ma_result ma_midi_seek_to_pcm_frame(ma_midi *pMIDI, ma_uint64 frameIndex);
 static ma_result ma_midi_get_data_format(ma_midi *pMIDI, ma_format *pFormat, ma_uint32 *pChannels,
-                                          ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap);
+                                         ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap);
 static ma_result ma_midi_get_cursor_in_pcm_frames(ma_midi *pMIDI, ma_uint64 *pCursor);
 static ma_result ma_midi_get_length_in_pcm_frames(ma_midi *pMIDI, ma_uint64 *pLength);
 
 static ma_result ma_midi_ds_read(ma_data_source *pDataSource, void *pFramesOut, ma_uint64 frameCount,
-                                  ma_uint64 *pFramesRead)
+                                 ma_uint64 *pFramesRead)
 {
     return ma_midi_read_pcm_frames((ma_midi *)pDataSource, pFramesOut, frameCount, pFramesRead);
 }
@@ -267,10 +267,9 @@ static ma_result ma_midi_ds_seek(ma_data_source *pDataSource, ma_uint64 frameInd
 }
 
 static ma_result ma_midi_ds_get_data_format(ma_data_source *pDataSource, ma_format *pFormat, ma_uint32 *pChannels,
-                                             ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
+                                            ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
 {
-    return ma_midi_get_data_format((ma_midi *)pDataSource, pFormat, pChannels, pSampleRate, pChannelMap,
-                                    channelMapCap);
+    return ma_midi_get_data_format((ma_midi *)pDataSource, pFormat, pChannels, pSampleRate, pChannelMap, channelMapCap);
 }
 
 static ma_result ma_midi_ds_get_cursor(ma_data_source *pDataSource, ma_uint64 *pCursor)
@@ -284,12 +283,12 @@ static ma_result ma_midi_ds_get_length(ma_data_source *pDataSource, ma_uint64 *p
 }
 
 static ma_data_source_vtable g_ma_midi_ds_vtable = {ma_midi_ds_read,
-                                                     ma_midi_ds_seek,
-                                                     ma_midi_ds_get_data_format,
-                                                     ma_midi_ds_get_cursor,
-                                                     ma_midi_ds_get_length,
-                                                     NULL, /* onSetLooping */
-                                                     0};
+                                                    ma_midi_ds_seek,
+                                                    ma_midi_ds_get_data_format,
+                                                    ma_midi_ds_get_cursor,
+                                                    ma_midi_ds_get_length,
+                                                    NULL, /* onSetLooping */
+                                                    0};
 
 static ma_result ma_midi_init_internal(const ma_decoding_backend_config *pConfig, ma_midi *pMIDI)
 {
@@ -330,8 +329,8 @@ static ma_result ma_midi_post_init(ma_midi *pMIDI)
 }
 
 static ma_result ma_midi_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell,
-                               void *pReadSeekTellUserData, const ma_decoding_backend_config *pConfig,
-                               const ma_allocation_callbacks *pAllocationCallbacks, ma_midi *pMIDI)
+                              void *pReadSeekTellUserData, const ma_decoding_backend_config *pConfig,
+                              const ma_allocation_callbacks *pAllocationCallbacks, ma_midi *pMIDI)
 {
     if (midi_disabled || edge_fluid == NULL)
         return MA_ERROR;
@@ -360,7 +359,7 @@ static ma_result ma_midi_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_
 }
 
 static ma_result ma_midi_init_memory(const void *pData, size_t dataSize, const ma_decoding_backend_config *pConfig,
-                                      const ma_allocation_callbacks *pAllocationCallbacks, ma_midi *pMIDI)
+                                     const ma_allocation_callbacks *pAllocationCallbacks, ma_midi *pMIDI)
 {
     ma_result result;
 
@@ -401,8 +400,7 @@ static void ma_midi_uninit(ma_midi *pMIDI, const ma_allocation_callbacks *pAlloc
     ma_data_source_uninit(&pMIDI->ds);
 }
 
-static ma_result ma_midi_read_pcm_frames(ma_midi *pMIDI, void *pFramesOut, ma_uint64 frameCount,
-                                          ma_uint64 *pFramesRead)
+static ma_result ma_midi_read_pcm_frames(ma_midi *pMIDI, void *pFramesOut, ma_uint64 frameCount, ma_uint64 *pFramesRead)
 {
     if (pFramesRead != NULL)
     {
@@ -429,13 +427,13 @@ static ma_result ma_midi_read_pcm_frames(ma_midi *pMIDI, void *pFramesOut, ma_ui
 
     if (format == ma_format_f32)
     {
-        totalFramesRead = midi_sequencer->PlayStream((uint8_t *)pFramesOut, frameCount * 2 * sizeof(float)) /
-                          2 / sizeof(float);
+        totalFramesRead =
+            midi_sequencer->PlayStream((uint8_t *)pFramesOut, frameCount * 2 * sizeof(float)) / 2 / sizeof(float);
     }
     else if (format == ma_format_s16)
     {
-        totalFramesRead = midi_sequencer->PlayStream((uint8_t *)pFramesOut, frameCount * 2 * sizeof(int16_t)) /
-                          2 / sizeof(int16_t);
+        totalFramesRead =
+            midi_sequencer->PlayStream((uint8_t *)pFramesOut, frameCount * 2 * sizeof(int16_t)) / 2 / sizeof(int16_t);
     }
     else
     {
@@ -472,7 +470,7 @@ static ma_result ma_midi_seek_to_pcm_frame(ma_midi *pMIDI, ma_uint64 frameIndex)
 }
 
 static ma_result ma_midi_get_data_format(ma_midi *pMIDI, ma_format *pFormat, ma_uint32 *pChannels,
-                                          ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
+                                         ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
 {
     /* Defaults for safety. */
     if (pFormat != NULL)
@@ -557,13 +555,13 @@ static ma_result ma_midi_get_length_in_pcm_frames(ma_midi *pMIDI, ma_uint64 *pLe
 }
 
 static ma_result ma_decoding_backend_init__midi(void *pUserData, ma_read_proc onRead, ma_seek_proc onSeek,
-                                                 ma_tell_proc onTell, void *pReadSeekTellUserData,
-                                                 const ma_decoding_backend_config *pConfig,
-                                                 const ma_allocation_callbacks    *pAllocationCallbacks,
-                                                 ma_data_source                  **ppBackend)
+                                                ma_tell_proc onTell, void *pReadSeekTellUserData,
+                                                const ma_decoding_backend_config *pConfig,
+                                                const ma_allocation_callbacks    *pAllocationCallbacks,
+                                                ma_data_source                  **ppBackend)
 {
     ma_result result;
-    ma_midi *pMIDI;
+    ma_midi  *pMIDI;
 
     EPI_UNUSED(pUserData); /* For now not using pUserData, but once we start storing the vorbis decoder state within the
                               ma_decoder structure this will be set to the decoder so we can avoid a malloc. */
@@ -588,12 +586,12 @@ static ma_result ma_decoding_backend_init__midi(void *pUserData, ma_read_proc on
 }
 
 static ma_result ma_decoding_backend_init_memory__midi(void *pUserData, const void *pData, size_t dataSize,
-                                                        const ma_decoding_backend_config *pConfig,
-                                                        const ma_allocation_callbacks    *pAllocationCallbacks,
-                                                        ma_data_source                  **ppBackend)
+                                                       const ma_decoding_backend_config *pConfig,
+                                                       const ma_allocation_callbacks    *pAllocationCallbacks,
+                                                       ma_data_source                  **ppBackend)
 {
     ma_result result;
-    ma_midi *pMIDI;
+    ma_midi  *pMIDI;
 
     EPI_UNUSED(pUserData); /* For now not using pUserData, but once we start storing the vorbis decoder state within the
                               ma_decoder structure this will be set to the decoder so we can avoid a malloc. */
@@ -618,7 +616,7 @@ static ma_result ma_decoding_backend_init_memory__midi(void *pUserData, const vo
 }
 
 static void ma_decoding_backend_uninit__midi(void *pUserData, ma_data_source *pBackend,
-                                              const ma_allocation_callbacks *pAllocationCallbacks)
+                                             const ma_allocation_callbacks *pAllocationCallbacks)
 {
     ma_midi *pMIDI = (ma_midi *)pBackend;
 
@@ -629,10 +627,10 @@ static void ma_decoding_backend_uninit__midi(void *pUserData, ma_data_source *pB
 }
 
 static ma_decoding_backend_vtable g_ma_decoding_backend_vtable_midi = {ma_decoding_backend_init__midi,
-                                                                        NULL, // onInitFile()
-                                                                        NULL, // onInitFileW()
-                                                                        ma_decoding_backend_init_memory__midi,
-                                                                        ma_decoding_backend_uninit__midi};
+                                                                       NULL, // onInitFile()
+                                                                       NULL, // onInitFileW()
+                                                                       ma_decoding_backend_init_memory__midi,
+                                                                       ma_decoding_backend_uninit__midi};
 
 static ma_decoding_backend_vtable *midi_custom_vtable = &g_ma_decoding_backend_vtable_midi;
 
@@ -666,7 +664,7 @@ bool StartupMIDI(void)
     if (!midi_sequencer)
         midi_sequencer = new MidiSequencer;
 
-    midi_decoder_config = ma_decoder_config_init_default();
+    midi_decoder_config                        = ma_decoder_config_init_default();
     midi_decoder_config.customBackendCount     = 1;
     midi_decoder_config.pCustomBackendUserData = NULL;
     midi_decoder_config.ppCustomBackendVTables = &midi_custom_vtable;
@@ -710,12 +708,12 @@ bool StartupMIDI(void)
         edge_fluid_sf2_loader          = new_fluid_defsfloader();
         edge_fluid_sf2_loader->fileapi = new fluid_fileapi_t;
         fluid_init_default_fileapi(edge_fluid_sf2_loader->fileapi);
-        edge_fluid_sf2_loader->fileapi->fopen = edge_fluid_fopen;
+        edge_fluid_sf2_loader->fileapi->fopen  = edge_fluid_fopen;
         edge_fluid_sf2_loader->fileapi->fclose = edge_fluid_fclose;
-        edge_fluid_sf2_loader->fileapi->ftell = edge_fluid_ftell;
-        edge_fluid_sf2_loader->fileapi->fseek = edge_fluid_fseek;
-        edge_fluid_sf2_loader->fileapi->fread = edge_fluid_fread;
-        edge_fluid_sf2_loader->fileapi->free= edge_fluid_free;
+        edge_fluid_sf2_loader->fileapi->ftell  = edge_fluid_ftell;
+        edge_fluid_sf2_loader->fileapi->fseek  = edge_fluid_fseek;
+        edge_fluid_sf2_loader->fileapi->fread  = edge_fluid_fread;
+        edge_fluid_sf2_loader->fileapi->free   = edge_fluid_free;
     }
 
     if (add_loader)
@@ -728,9 +726,9 @@ bool StartupMIDI(void)
         LogWarning("MIDI: Initialization failure.\n");
         delete_fluid_synth(edge_fluid);
         delete_fluid_settings(edge_fluid_settings);
-        edge_fluid = nullptr;
+        edge_fluid            = nullptr;
         edge_fluid_sf2_loader = nullptr; // already deleted when deleting the synth
-        edge_fluid_settings = nullptr;
+        edge_fluid_settings   = nullptr;
         return false;
     }
 
@@ -776,7 +774,7 @@ class MIDIPlayer : public AbstractMusicPlayer
   public:
     MIDIPlayer(bool looping)
     {
-        status_ = kNotLoaded;
+        status_  = kNotLoaded;
         looping_ = looping;
     }
 
@@ -791,7 +789,7 @@ class MIDIPlayer : public AbstractMusicPlayer
         if (status_ != kNotLoaded)
             Close();
 
-        midi_decoder_config.format                 = ma_format_f32;
+        midi_decoder_config.format = ma_format_f32;
 
         if (ma_decoder_init_memory(data, length, &midi_decoder_config, &midi_decoder) != MA_SUCCESS)
         {

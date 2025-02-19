@@ -31,6 +31,7 @@
 #include <math.h>
 
 #include "AlmostEquals.h"
+#include "am_map.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_main.h"
@@ -319,12 +320,14 @@ void AllocateDrawStructs(void)
     size += sizeof(DrawSeg) * kDefaultDrawSegs;
     size += sizeof(DrawSubsector) * kDefaultDrawSubsectors;
     size += sizeof(DrawMirror) * kDefaultDrawMirrors;
+    size += sizeof(AutomapLine) * kDefaultAutomapLines;
 
     draw_things.reserve(kDefaultDrawThings);
     draw_floors.reserve(kDefaultDrawFloors);
     draw_segs.reserve(kDefaultDrawSegs);
     draw_subsectors.reserve(kDefaultDrawSubsectors);
     draw_mirrors.reserve(kDefaultDrawMirrors);
+    automap_lines.reserve(kDefaultAutomapLines);
 
     draw_memory_buffer = malloc(size);
 
@@ -353,6 +356,11 @@ void AllocateDrawStructs(void)
     for (uint32_t i = 0; i < kDefaultDrawMirrors; i++, dst += sizeof(DrawMirror))
     {
         draw_mirrors.emplace_back(new (dst) DrawMirror());
+    }
+
+    for (uint32_t i = 0; i < kDefaultAutomapLines; i++, dst += sizeof(AutomapLine))
+    {
+        automap_lines.emplace_back(new (dst) AutomapLine());
     }
 }
 
@@ -402,11 +410,17 @@ void FreeBSP(void)
         free(draw_mirrors[i]);
     } 
 
+    for (size_t i = kDefaultAutomapLines; i < automap_lines.size(); i++)
+    {
+        free(automap_lines[i]);
+    } 
+
     draw_things.clear();
     draw_floors.clear();
     draw_segs.clear();
     draw_subsectors.clear();
     draw_mirrors.clear();
+    automap_lines.clear();
 
     ClearBSP();
 }

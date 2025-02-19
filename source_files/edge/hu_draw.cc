@@ -85,12 +85,12 @@ std::vector<std::string> hud_overlays = {
     "OVERLAY_GRILL_2X",
 };
 
-static inline float HUDToRealCoordinatesX(float x)
+float HUDToRealCoordinatesX(float x)
 {
     return margin_x + x * margin_x_multiplier;
 }
 
-static inline float HUDToRealCoordinatesY(float y)
+float HUDToRealCoordinatesY(float y)
 {
     return margin_y - y * margin_y_multiplier;
 }
@@ -792,21 +792,14 @@ void HUDSolidBox(float x1, float y1, float x2, float y2, RGBAColor col)
     FinishUnitBatch();
 }
 
-void HUDSolidLine(float x1, float y1, float x2, float y2, RGBAColor col, float thickness, bool smooth, float dx,
-                  float dy)
+void HUDSolidLine(float x1, float y1, float x2, float y2, RGBAColor col)
 {
     x1 = HUDToRealCoordinatesX(x1);
     y1 = HUDToRealCoordinatesY(y1);
     x2 = HUDToRealCoordinatesX(x2);
     y2 = HUDToRealCoordinatesY(y2);
 
-    dx = HUDToRealCoordinatesX(dx) - HUDToRealCoordinatesX(0);
-    dy = HUDToRealCoordinatesY(0) - HUDToRealCoordinatesY(dy);
-
-    render_state->LineWidth(thickness);
-
-    if (smooth)
-        render_state->Enable(GL_LINE_SMOOTH);
+    render_state->Enable(GL_LINE_SMOOTH);
 
     StartUnitBatch(false);
 
@@ -814,22 +807,21 @@ void HUDSolidLine(float x1, float y1, float x2, float y2, RGBAColor col, float t
     epi::SetRGBAAlpha(unit_col, current_alpha);
     BlendingMode blend = kBlendingNone;
 
-    if (smooth || current_alpha < 0.99f)
+    if (current_alpha < 0.99f)
         blend = kBlendingAlpha;
 
     RendererVertex *glvert =
         BeginRenderUnit(GL_LINES, 2, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
 
     glvert->rgba       = unit_col;
-    glvert++->position = {{x1 + dx, y1 + dy, 0}};
+    glvert++->position = {{x1, y1, 0}};
     glvert->rgba       = unit_col;
-    glvert->position   = {{x2 + dx, y2 + dy, 0}};
+    glvert->position   = {{x2, y2, 0}};
 
     EndRenderUnit(2);
 
     FinishUnitBatch();
     render_state->Disable(GL_LINE_SMOOTH);
-    render_state->LineWidth(1.0f);
 }
 
 void HUDThinBox(float x1, float y1, float x2, float y2, RGBAColor col, float thickness, BlendingMode special_blend)

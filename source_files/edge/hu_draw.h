@@ -38,6 +38,8 @@ extern float                    hud_visible_bottom;
 extern std::vector<std::string> hud_overlays;
 
 void HUDSetCoordinateSystem(int width, int height);
+float HUDToRealCoordinatesX(float x);
+float HUDToRealCoordinatesY(float y);
 
 void  HUDSetFont(Font *font = nullptr);
 void  HUDSetScale(float scale = 1.0f);
@@ -69,10 +71,8 @@ void HUDSolidBox(float x1, float y1, float x2, float y2, RGBAColor col);
 
 // Draw a solid colour line (possibly translucent) between the two
 // end points.  Coordinates are inclusive.  Drawing will be clipped
-// to the current scissor rectangle.  The dx/dy fields are used by
-// the automap code to reduce the wobblies.
-void HUDSolidLine(float x1, float y1, float x2, float y2, RGBAColor col, float thickness = 1, bool smooth = true,
-                  float dx = 0, float dy = 0);
+// to the current scissor rectangle.
+void HUDSolidLine(float x1, float y1, float x2, float y2, RGBAColor col);
 
 // Draw a thin outline of a box.
 void HUDThinBox(float x1, float y1, float x2, float y2, RGBAColor col, float thickness = 0.0f,

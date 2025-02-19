@@ -51,11 +51,9 @@
 #include "r_gldefs.h"
 #include "r_modes.h"
 
-EDGE_DEFINE_CONSOLE_VARIABLE(automap_debug_bsp, "0", kConsoleVariableFlagNone)
 EDGE_DEFINE_CONSOLE_VARIABLE(automap_debug_collisions, "0", kConsoleVariableFlagNone)
-EDGE_DEFINE_CONSOLE_VARIABLE(automap_gridsize, "128", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(automap_keydoor_text, "0", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(automap_smoothing, "1", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(automap_gridsize, "128", kConsoleVariableFlagArchive, 16, 1024)
 
 extern unsigned int root_node;
 
@@ -128,6 +126,8 @@ static bool hide_lines  = false;
 // location and size of window on screen
 static float frame_x, frame_y;
 static float frame_width, frame_height;
+static float frame_lerped_x, frame_lerped_y;
+static BAMAngle frame_lerped_ang;
 
 // scale value which makes the whole map fit into the on-screen area
 // (multiplying map coords by this value).
@@ -159,7 +159,7 @@ static float panning_y = 0;
 static float zooming = -1;
 
 // where the points are
-static AutomapPoint mark_points[kAutomapTotalMarkPoints];
+static HMM_Vec2 mark_points[kAutomapTotalMarkPoints];
 
 static constexpr int16_t kAutomapNoMarkX = -777;
 
@@ -179,6 +179,85 @@ bool rotate_map            = false;
 bool automap_keydoor_blink = false;
 
 extern Style *automap_style; // FIXME: put in header
+
+// Used for batching GL_LINES (or Sokol equivalent) calls
+static float map_alpha = 1.0f;
+static float map_pulse_width = 2.0f;
+static float map_dx = 0.0f;
+static float map_dy = 0.0f;
+
+std::vector<AutomapLine *> automap_lines;
+static size_t automap_line_position = 0;
+
+// Automap line "buckets"
+// 4 potential thicknesses (1.0, 1.5, 3.5, and whatever the pulsing
+// door thickness is at that tic)
+static std::vector<AutomapLine *> map_line_pointers[4];
+
+static AutomapLine *GetMapLine()
+{
+    if (automap_line_position == automap_lines.size())
+        automap_lines.push_back(new (malloc(sizeof(AutomapLine))) AutomapLine());
+
+    return automap_lines[automap_line_position++];
+}
+
+#ifndef EDGE_SOKOL
+static constexpr uint16_t kMaximumLineVerts = kDefaultAutomapLines / 2;
+#else
+static constexpr uint16_t kMaximumLineVerts = kDefaultAutomapLines / 4;
+#endif
+
+static void DrawAllLines()
+{
+    size_t current_vert_count = 0;
+    RendererVertex *current_glvert = nullptr;
+    for (int i = 3; i >= 0; i--)
+    {
+        if (!map_line_pointers[i].empty())
+        {
+            StartUnitBatch(false);
+            if (i == 3)
+                render_state->LineWidth(map_pulse_width);
+            else if (i == 2)
+                render_state->LineWidth(3.5f);
+            else if (i == 1)
+                render_state->LineWidth(1.5f);
+            else
+                render_state->LineWidth(1.0f);
+            current_glvert = BeginRenderUnit(GL_LINES, kMaximumLineVerts, GL_MODULATE, 0, 
+                (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAlpha);
+            for (AutomapLine *line : map_line_pointers[i])
+            {
+                RGBAColor col = line->color;
+                HMM_Vec4 *points = &line->points;
+                if (current_vert_count > kMaximumLineVerts - 2)
+                {
+                    EndRenderUnit(current_vert_count);
+                    FinishUnitBatch();
+                    current_vert_count = 0;
+                    StartUnitBatch(false);
+                    current_glvert = BeginRenderUnit(GL_LINES, kMaximumLineVerts, GL_MODULATE, 0, 
+                        (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAlpha);
+                }
+                current_glvert->position = {points->X, points->Y, 0};
+                current_glvert++->rgba = col;
+                current_glvert->position = {points->Z, points->W, 0};
+                current_glvert++->rgba = col;
+                current_vert_count += 2;
+            }
+            EndRenderUnit(current_vert_count);
+            FinishUnitBatch();
+            current_vert_count = 0;
+        }
+    }
+    render_state->LineWidth(1.0f);
+    automap_line_position = 0;
+    map_line_pointers[0].clear();
+    map_line_pointers[1].clear();
+    map_line_pointers[2].clear();
+    map_line_pointers[3].clear();
+}
 
 // translates between frame-buffer and map distances
 static inline float MapToFrameDistanceX(float x)
@@ -209,8 +288,8 @@ static inline float MapToFrameCoordinatesY(float y, float dy)
 //
 static void AddMark(void)
 {
-    mark_points[mark_point_number].x = map_center_x;
-    mark_points[mark_point_number].y = map_center_y;
+    mark_points[mark_point_number].X = map_center_x;
+    mark_points[mark_point_number].Y = map_center_y;
 
     mark_point_number = (mark_point_number + 1) % kAutomapTotalMarkPoints;
 }
@@ -248,7 +327,7 @@ static void FindMinMaxBoundaries(void)
 static void ClearMarks(void)
 {
     for (int i = 0; i < kAutomapTotalMarkPoints; i++)
-        mark_points[i].x = kAutomapNoMarkX;
+        mark_points[i].X = kAutomapNoMarkX;
 
     mark_point_number = 0;
 }
@@ -269,6 +348,15 @@ void AutomapInitLevel(void)
     ClearMarks();
 
     FindMinMaxBoundaries();
+
+    // Initial reservation if necessary
+    if (map_line_pointers[0].capacity() < kDefaultAutomapLines)
+    {
+        map_line_pointers[0].reserve(kDefaultAutomapLines);
+        map_line_pointers[1].reserve(kDefaultAutomapLines);
+        map_line_pointers[2].reserve(kDefaultAutomapLines);
+        map_line_pointers[3].reserve(kDefaultAutomapLines);
+    }
 
     if (map_scale == 0.0f) // Not been changed yet so set a default
     {
@@ -513,21 +601,43 @@ static void GetRotatedCoords(float sx, float sy, float &dx, float &dy)
 
     if (rotate_map)
     {
-        // rotate coordinates so they are on the map correctly
-        dx -= frame_focus->x;
-        dy -= frame_focus->y;
+        if (!paused && !menu_active)
+        {
+            dx -= frame_lerped_x;
+            dy -= frame_lerped_y;
 
-        Rotate(dx, dy, kBAMAngle90 - frame_focus->angle_);
+            Rotate(dx, dy, kBAMAngle90 - frame_lerped_ang);
 
-        dx += frame_focus->x;
-        dy += frame_focus->y;
+            dx += frame_lerped_x;
+            dy += frame_lerped_y;
+        }
+        else
+        {
+            dx -= frame_focus->x;
+            dy -= frame_focus->y;
+
+            Rotate(dx, dy, kBAMAngle90 - frame_focus->angle_);
+
+            dx += frame_focus->x;
+            dy += frame_focus->y;
+        }
     }
 }
 
 static inline BAMAngle GetRotatedAngle(BAMAngle src)
 {
     if (rotate_map)
-        return src + kBAMAngle90 - frame_focus->angle_;
+    {
+        if (!paused && !menu_active)
+        {
+            float ang = epi::BAMInterpolate(frame_focus->old_angle_, frame_focus->angle_, fractional_tic);
+            return src + kBAMAngle90 - ang;
+        }
+        else
+        {
+            return src + kBAMAngle90 - frame_focus->angle_;
+        }
+    }
 
     return src;
 }
@@ -535,72 +645,58 @@ static inline BAMAngle GetRotatedAngle(BAMAngle src)
 //
 // Draw visible parts of lines.
 //
-static void DrawMLine(AutomapLine *ml, RGBAColor rgb, bool thick = true)
+static void DrawMLine(AutomapLine *ml, bool thick = true)
 {
-    if (hide_lines)
-        return;
+    HMM_Vec4 *points = &ml->points;
 
-    if (!automap_smoothing.d_)
-        thick = false;
+    points->X = HUDToRealCoordinatesX(MapToFrameCoordinatesX(points->X, 0)) + map_dx;
+    points->Y = HUDToRealCoordinatesY(MapToFrameCoordinatesY(points->Y, 0)) + map_dy;
 
-    float x1 = MapToFrameCoordinatesX(ml->a.x, 0);
-    float y1 = MapToFrameCoordinatesY(ml->a.y, 0);
+    points->Z = HUDToRealCoordinatesX(MapToFrameCoordinatesX(points->Z, 0)) + map_dx;
+    points->W = HUDToRealCoordinatesY(MapToFrameCoordinatesY(points->W, 0)) + map_dy;
 
-    float x2 = MapToFrameCoordinatesX(ml->b.x, 0);
-    float y2 = MapToFrameCoordinatesY(ml->b.y, 0);
+    epi::SetRGBAAlpha(ml->color, map_alpha);
 
-    // these are separate to reduce the wobblies
-    float dx = MapToFrameDistanceX(-map_center_x);
-    float dy = MapToFrameDistanceY(-map_center_y);
-
-    HUDSolidLine(x1, y1, x2, y2, rgb, thick ? 1.5f : 1.0f, thick, dx, dy);
+    if (thick)
+        map_line_pointers[1].push_back(ml); // 1.5f
+    else
+        map_line_pointers[0].push_back(ml); // 1.0f
 }
 
 // Lobo 2022: keyed doors automap colouring
-static void DrawMLineDoor(AutomapLine *ml, RGBAColor rgb)
+static void DrawMLineDoor(AutomapLine *ml)
 {
-    if (hide_lines)
-        return;
+    HMM_Vec4 *points = &ml->points;
 
-    float x1 = MapToFrameCoordinatesX(ml->a.x, 0);
-    float y1 = MapToFrameCoordinatesY(ml->a.y, 0);
+    points->X = HUDToRealCoordinatesX(MapToFrameCoordinatesX(points->X, 0)) + map_dx;
+    points->Y = HUDToRealCoordinatesY(MapToFrameCoordinatesY(points->Y, 0)) + map_dy;
 
-    float x2 = MapToFrameCoordinatesX(ml->b.x, 0);
-    float y2 = MapToFrameCoordinatesY(ml->b.y, 0);
+    points->Z = HUDToRealCoordinatesX(MapToFrameCoordinatesX(points->Z, 0)) + map_dx;
+    points->W = HUDToRealCoordinatesY(MapToFrameCoordinatesY(points->W, 0)) + map_dy;
 
-    float dx = MapToFrameDistanceX(-map_center_x);
-    float dy = MapToFrameDistanceY(-map_center_y);
-
-    float linewidth = 3.5f;
+    epi::SetRGBAAlpha(ml->color, map_alpha);
 
     // Lobo 2023: Make keyed doors pulse
     if (automap_keydoor_blink)
-    {
-        linewidth = game_tic % 32;
-
-        if (linewidth >= 16)
-            linewidth = 2.0 + (linewidth * 0.1f);
-        else
-            linewidth = 2.0 - (linewidth * 0.1f);
-    }
-
-    HUDSolidLine(x1, y1, x2, y2, rgb, linewidth, true, dx, dy);
+        map_line_pointers[3].push_back(ml); // variable pulse width
+    else
+        map_line_pointers[2].push_back(ml); // 3.5f
 }
 
-static AutomapLine player_dagger[] = {
-    {{-0.75f, 0.0f}, {0.0f, 0.0f}},                                          // center line
+static HMM_Vec4 player_dagger[] = {
+    {{-0.75f, 0.0f, 0.0f, 0.0f}},                                        // center line
 
-    {{-0.75f, 0.125f}, {1.0f, 0.0f}},                                        // blade
-    {{-0.75f, -0.125f}, {1.0f, 0.0f}},
+    {{-0.75f, 0.125f, 1.0f, 0.0f}},                                      // blade
+    {{-0.75f, -0.125f, 1.0f, 0.0f}},
 
-    {{-0.75, -0.25}, {-0.75, 0.25}},                                         // crosspiece
-    {{-0.875, -0.25}, {-0.875, 0.25}},  {{-0.875, -0.25}, {-0.75, -0.25}},   // crosspiece connectors
-    {{-0.875, 0.25}, {-0.75, 0.25}},    {{-1.125, 0.125}, {-1.125, -0.125}}, // pommel
-    {{-1.125, 0.125}, {-0.875, 0.125}}, {{-1.125, -0.125}, {-0.875, -0.125}}};
+    {{-0.75, -0.25, -0.75, 0.25}},                                       // crosspiece
+    {{-0.875, -0.25, -0.875, 0.25}},  {{-0.875, -0.25, -0.75, -0.25}},   // crosspiece connectors
+    {{-0.875, 0.25, -0.75, 0.25}},    {{-1.125, 0.125, -1.125, -0.125}}, // pommel
+    {{-1.125, 0.125, -0.875, 0.125}}, {{-1.125, -0.125, -0.875, -0.125}}};
 
-static constexpr uint8_t kAutomapPlayerDaggerLines = (sizeof(player_dagger) / sizeof(AutomapLine));
+static constexpr uint8_t kAutomapPlayerDaggerLines = (sizeof(player_dagger) / sizeof(HMM_Vec4));
 
-static void DrawLineCharacter(AutomapLine *lineguy, int lineguylines, float radius, BAMAngle angle, RGBAColor rgb,
+static void DrawLineCharacter(HMM_Vec4 *lineguy, int lineguylines, float radius, BAMAngle angle, RGBAColor rgb,
                               float x, float y)
 {
     float cx, cy;
@@ -615,16 +711,19 @@ static void DrawLineCharacter(AutomapLine *lineguy, int lineguylines, float radi
 
     angle = GetRotatedAngle(angle);
 
+    RGBAColor line_col = rgb;
+    epi::SetRGBAAlpha(line_col, map_alpha);
+
     for (int i = 0; i < lineguylines; i++)
     {
-        float ax = lineguy[i].a.x;
-        float ay = lineguy[i].a.y;
+        float ax = lineguy[i].X;
+        float ay = lineguy[i].Y;
 
         if (angle)
             Rotate(ax, ay, angle);
 
-        float bx = lineguy[i].b.x;
-        float by = lineguy[i].b.y;
+        float bx = lineguy[i].Z;
+        float by = lineguy[i].W;
 
         if (angle)
             Rotate(bx, by, angle);
@@ -634,7 +733,19 @@ static void DrawLineCharacter(AutomapLine *lineguy, int lineguylines, float radi
         bx = bx * MapToFrameDistanceX(radius);
         by = by * MapToFrameDistanceY(radius);
 
-        HUDSolidLine(cx + ax, cy - ay, cx + bx, cy - by, rgb);
+        AutomapLine *ml = GetMapLine();
+
+        HMM_Vec4 *points = &ml->points;
+
+        points->X = HUDToRealCoordinatesX(cx + ax);
+        points->Y = HUDToRealCoordinatesY(cy - ay);
+
+        points->Z = HUDToRealCoordinatesX(cx + bx);
+        points->W = HUDToRealCoordinatesY(cy - by);
+
+        ml->color = line_col;
+
+        map_line_pointers[0].push_back(ml); // 1.0f
     }
 }
 
@@ -654,9 +765,6 @@ std::string Aux2StringReplaceAll(std::string str, const std::string &from, const
 // Lobo 2023: draw some key info in the middle of a line
 static void DrawKeyOnLine(AutomapLine *ml, int theKey, RGBAColor rgb = kRGBAWhite)
 {
-    if (hide_lines)
-        return;
-
     if (automap_keydoor_text.d_ == 0) // Only if we have Keyed Doors Named turned on
         return;
 
@@ -679,8 +787,8 @@ static void DrawKeyOnLine(AutomapLine *ml, int theKey, RGBAColor rgb = kRGBAWhit
     // *********************
     // Draw Text description
     // Calculate midpoint
-    float midx = (ml->a.x + ml->b.x) / 2;
-    float midy = (ml->a.y + ml->b.y) / 2;
+    float midx = (ml->points.X + ml->points.Z) / 2;
+    float midy = (ml->points.Y + ml->points.W) / 2;
 
     // Translate map coords to hud coords
     float x1 = MapToFrameCoordinatesX(midx, map_center_x);
@@ -724,8 +832,8 @@ static void DrawKeyOnLine(AutomapLine *ml, int theKey, RGBAColor rgb = kRGBAWhit
     /*
     // *********************
     // Draw Graphical description
-        float x2 = ml->a.x;
-        float y2 = ml->a.y;
+        float x2 = ml->X;
+        float y2 = ml->Y;
 
         DrawLineCharacter(door_key, NUMDOORKEYLINES,
                     5, kBAMAngle90,
@@ -738,10 +846,8 @@ static void DrawKeyOnLine(AutomapLine *ml, int theKey, RGBAColor rgb = kRGBAWhit
 //
 // Draws flat (floor/ceiling tile) aligned grid lines.
 //
-static void DrawGrid()
+static void CollectGridLines()
 {
-    AutomapLine ml;
-
     int grid_size = HMM_MAX(4, automap_gridsize.d_);
 
     int mx0 = int(map_center_x);
@@ -767,13 +873,19 @@ static void DrawGrid()
         if (x1 < frame_x && x2 >= frame_x + frame_width)
             break;
 
-        ml.a.x = mx0 + jx * ((j & 1) ? -grid_size : grid_size);
-        ml.b.x = ml.a.x;
+        AutomapLine *ml = GetMapLine();
 
-        ml.a.y = -9e6;
-        ml.b.y = +9e6;
+        HMM_Vec4 *points = &ml->points;
 
-        DrawMLine(&ml, am_colors[kAutomapColorGrid], false);
+        points->X = mx0 + jx * ((j & 1) ? -grid_size : grid_size);
+        points->Z = points->X;
+
+        points->Y = -9e6;
+        points->W = +9e6;
+
+        ml->color = am_colors[kAutomapColorGrid];
+
+        DrawMLine(ml, false);
     }
 
     for (int k = 1; k < 1024; k++)
@@ -787,13 +899,19 @@ static void DrawGrid()
         if (y1 < frame_y && y2 >= frame_y + frame_height)
             break;
 
-        ml.a.x = -9e6;
-        ml.b.x = +9e6;
+        AutomapLine *ml = GetMapLine();
 
-        ml.a.y = my0 + ky * ((k & 1) ? -grid_size : grid_size);
-        ml.b.y = ml.a.y;
+        HMM_Vec4 *points = &ml->points;
 
-        DrawMLine(&ml, am_colors[kAutomapColorGrid], false);
+        points->X = -9e6;
+        points->Z = +9e6;
+
+        points->Y = my0 + ky * ((k & 1) ? -grid_size : grid_size);
+        points->W = points->Y;
+
+        ml->color = am_colors[kAutomapColorGrid];
+
+        DrawMLine(ml, false);
     }
 }
 
@@ -833,48 +951,38 @@ static bool CheckSimiliarRegions(Sector *front, Sector *back)
 //
 // Determines visible lines, draws them.
 //
-// -AJA- This is now *lineseg* based, not linedef.
-//
-static void AutomapWalkSeg(Seg *seg)
+static void AddWall(const Line *line)
 {
-    AutomapLine l;
-    Line       *line;
-
-    Sector *front = seg->front_sector;
-    Sector *back  = seg->back_sector;
-
-    if (seg->miniseg)
-    {
-        if (automap_debug_bsp.d_)
-        {
-            if (seg->partner && seg > seg->partner)
-                return;
-
-            GetRotatedCoords(seg->vertex_1->X, seg->vertex_1->Y, l.a.x, l.a.y);
-            GetRotatedCoords(seg->vertex_2->X, seg->vertex_2->Y, l.b.x, l.b.y);
-            DrawMLine(&l, epi::MakeRGBA(0, 0, 128), false);
-        }
-        return;
-    }
-
-    line = seg->linedef;
     EPI_ASSERT(line);
-
-    // only draw segs on the _right_ side of linedefs
-    if (line->side[1] == seg->sidedef)
-        return;
-
-    GetRotatedCoords(seg->vertex_1->X, seg->vertex_1->Y, l.a.x, l.a.y);
-    GetRotatedCoords(seg->vertex_2->X, seg->vertex_2->Y, l.b.x, l.b.y);
 
     if ((line->flags & kLineFlagMapped) || show_walls)
     {
         if ((line->flags & kLineFlagDontDraw) && !show_walls)
             return;
 
+        AutomapLine *l = GetMapLine();
+        GetRotatedCoords(line->vertex_1->X, line->vertex_1->Y, l->points.X, l->points.Y);
+        GetRotatedCoords(line->vertex_2->X, line->vertex_2->Y, l->points.Z, l->points.W);
+
+        // clip to map frame
+        float x1 = MapToFrameCoordinatesX(l->points.X, map_center_x);
+        float x2 = MapToFrameCoordinatesX(l->points.Z, map_center_x);
+        float y1 = MapToFrameCoordinatesY(l->points.Y, map_center_y);
+        float y2 = MapToFrameCoordinatesY(l->points.W, map_center_y);
+        if ((x1 < frame_x && x2 < frame_x) || (x1 > frame_x + frame_width && x2 > frame_x + frame_width) ||
+            (y1 < frame_y && y2 < frame_y) || (y1 > frame_y + frame_height && y2 > frame_y + frame_height))
+        {
+            automap_line_position--;
+            return;
+        }
+
+        Sector *front = line->front_sector;
+        Sector *back  = line->back_sector;
+
         if (!front || !back)
         {
-            DrawMLine(&l, am_colors[kAutomapColorWall]);
+            l->color = am_colors[kAutomapColorWall];
+            DrawMLine(l);
         }
         else
         {
@@ -885,64 +993,70 @@ static void AutomapWalkSeg(Seg *seg)
                 {
                     if (line->special->keys_ & kDoorKeyStrictlyAllKeys)
                     {
-                        DrawMLineDoor(&l, kRGBAPurple); // purple
-                        DrawKeyOnLine(&l, kDoorKeyStrictlyAllKeys);
+                        l->color = kRGBAPurple;
+                        DrawMLineDoor(l); // purple
+                        DrawKeyOnLine(l, kDoorKeyStrictlyAllKeys);
                     }
                     else if (line->special->keys_ & kDoorKeyBlueCard || line->special->keys_ & kDoorKeyBlueSkull)
                     {
-                        DrawMLineDoor(&l, kRGBABlue); // blue
+                        l->color = kRGBABlue;
+                        DrawMLineDoor(l); // blue
                         if (line->special->keys_ & (kDoorKeyBlueSkull | kDoorKeyBlueCard))
                         {
-                            DrawKeyOnLine(&l, kDoorKeyBlueCard);
-                            DrawKeyOnLine(&l, kDoorKeyBlueSkull);
+                            DrawKeyOnLine(l, kDoorKeyBlueCard);
+                            DrawKeyOnLine(l, kDoorKeyBlueSkull);
                         }
                         else if (line->special->keys_ & kDoorKeyBlueCard)
-                            DrawKeyOnLine(&l, kDoorKeyBlueCard);
+                            DrawKeyOnLine(l, kDoorKeyBlueCard);
                         else
-                            DrawKeyOnLine(&l, kDoorKeyBlueSkull);
+                            DrawKeyOnLine(l, kDoorKeyBlueSkull);
                     }
                     else if (line->special->keys_ & kDoorKeyYellowCard || line->special->keys_ & kDoorKeyYellowSkull)
                     {
-                        DrawMLineDoor(&l, kRGBAYellow); // yellow
+                        l->color = kRGBAYellow;
+                        DrawMLineDoor(l); // yellow
                         if (line->special->keys_ & (kDoorKeyYellowSkull | kDoorKeyYellowCard))
                         {
-                            DrawKeyOnLine(&l, kDoorKeyYellowCard);
-                            DrawKeyOnLine(&l, kDoorKeyYellowSkull);
+                            DrawKeyOnLine(l, kDoorKeyYellowCard);
+                            DrawKeyOnLine(l, kDoorKeyYellowSkull);
                         }
                         else if (line->special->keys_ & kDoorKeyYellowCard)
-                            DrawKeyOnLine(&l, kDoorKeyYellowCard);
+                            DrawKeyOnLine(l, kDoorKeyYellowCard);
                         else
-                            DrawKeyOnLine(&l, kDoorKeyYellowSkull);
+                            DrawKeyOnLine(l, kDoorKeyYellowSkull);
                     }
                     else if (line->special->keys_ & kDoorKeyRedCard || line->special->keys_ & kDoorKeyRedSkull)
                     {
-                        DrawMLineDoor(&l, kRGBARed); // red
+                        l->color = kRGBARed;
+                        DrawMLineDoor(l); // red
                         if (line->special->keys_ & (kDoorKeyRedSkull | kDoorKeyRedCard))
                         {
-                            DrawKeyOnLine(&l, kDoorKeyRedCard);
-                            DrawKeyOnLine(&l, kDoorKeyRedSkull);
+                            DrawKeyOnLine(l, kDoorKeyRedCard);
+                            DrawKeyOnLine(l, kDoorKeyRedSkull);
                         }
                         else if (line->special->keys_ & kDoorKeyRedCard)
-                            DrawKeyOnLine(&l, kDoorKeyRedCard);
+                            DrawKeyOnLine(l, kDoorKeyRedCard);
                         else
-                            DrawKeyOnLine(&l, kDoorKeyRedSkull);
+                            DrawKeyOnLine(l, kDoorKeyRedSkull);
                     }
                     else if (line->special->keys_ & kDoorKeyGreenCard || line->special->keys_ & kDoorKeyGreenSkull)
                     {
-                        DrawMLineDoor(&l, kRGBAGreen); // green
+                        l->color = kRGBAGreen;
+                        DrawMLineDoor(l); // green
                         if (line->special->keys_ & (kDoorKeyGreenSkull | kDoorKeyGreenCard))
                         {
-                            DrawKeyOnLine(&l, kDoorKeyGreenCard);
-                            DrawKeyOnLine(&l, kDoorKeyGreenSkull);
+                            DrawKeyOnLine(l, kDoorKeyGreenCard);
+                            DrawKeyOnLine(l, kDoorKeyGreenSkull);
                         }
                         else if (line->special->keys_ & kDoorKeyGreenCard)
-                            DrawKeyOnLine(&l, kDoorKeyGreenCard);
+                            DrawKeyOnLine(l, kDoorKeyGreenCard);
                         else
-                            DrawKeyOnLine(&l, kDoorKeyGreenSkull);
+                            DrawKeyOnLine(l, kDoorKeyGreenSkull);
                     }
                     else
                     {
-                        DrawMLineDoor(&l, kRGBAPurple); // purple
+                        l->color = kRGBAPurple;
+                        DrawMLineDoor(l); // purple
                     }
                     return;
                 }
@@ -951,9 +1065,10 @@ static void AutomapWalkSeg(Seg *seg)
             {
                 // secret door
                 if (show_walls)
-                    DrawMLine(&l, am_colors[kAutomapColorSecret]);
+                    l->color = am_colors[kAutomapColorSecret];
                 else
-                    DrawMLine(&l, am_colors[kAutomapColorWall]);
+                    l->color = am_colors[kAutomapColorWall];
+                DrawMLine(l);
             }
             else if (!AlmostEquals(back->floor_height, front->floor_height))
             {
@@ -961,28 +1076,33 @@ static void AutomapWalkSeg(Seg *seg)
 
                 // floor level change
                 if (diff > 24)
-                    DrawMLine(&l, am_colors[kAutomapColorLedge]);
+                    l->color = am_colors[kAutomapColorLedge];
                 else
-                    DrawMLine(&l, am_colors[kAutomapColorStep]);
+                    l->color = am_colors[kAutomapColorStep];
+                DrawMLine(l);
             }
             else if (!AlmostEquals(back->ceiling_height, front->ceiling_height))
             {
                 // ceiling level change
-                DrawMLine(&l, am_colors[kAutomapColorCeil]);
+                l->color = am_colors[kAutomapColorCeil];
+                DrawMLine(l);
             }
             else if ((front->extrafloor_used > 0 || back->extrafloor_used > 0) &&
                      (front->extrafloor_used != back->extrafloor_used || !CheckSimiliarRegions(front, back)))
             {
                 // -AJA- 1999/10/09: extra floor change.
-                DrawMLine(&l, am_colors[kAutomapColorLedge]);
+                l->color = am_colors[kAutomapColorLedge];
+                DrawMLine(l);
             }
             else if (show_walls)
             {
-                DrawMLine(&l, am_colors[kAutomapColorAllmap]);
+                l->color = am_colors[kAutomapColorAllmap];
+                DrawMLine(l);
             }
             else if (line->slide_door)
             { // Lobo: draw sliding doors on automap
-                DrawMLine(&l, am_colors[kAutomapColorCeil]);
+                l->color = am_colors[kAutomapColorCeil];
+                DrawMLine(l);
             }
         }
     }
@@ -990,51 +1110,78 @@ static void AutomapWalkSeg(Seg *seg)
              (show_allmap || !AlmostEquals(frame_focus->player_->powers_[kPowerTypeAllMap], 0.0f)))
     {
         if (!(line->flags & kLineFlagDontDraw))
-            DrawMLine(&l, am_colors[kAutomapColorAllmap]);
+        {
+            AutomapLine *l = GetMapLine();
+            GetRotatedCoords(line->vertex_1->X, line->vertex_1->Y, l->points.X, l->points.Y);
+            GetRotatedCoords(line->vertex_2->X, line->vertex_2->Y, l->points.Z, l->points.W);
+            // clip to map frame
+            float x1 = MapToFrameCoordinatesX(l->points.X, map_center_x);
+            float x2 = MapToFrameCoordinatesX(l->points.Z, map_center_x);
+            float y1 = MapToFrameCoordinatesY(l->points.Y, map_center_y);
+            float y2 = MapToFrameCoordinatesY(l->points.W, map_center_y);
+            if ((x1 < frame_x && x2 < frame_x) || (x1 > frame_x + frame_width && x2 > frame_x + frame_width) ||
+                (y1 < frame_y && y2 < frame_y) || (y1 > frame_y + frame_height && y2 > frame_y + frame_height))
+            {
+                automap_line_position--;
+                return;
+            }
+            l->color = am_colors[kAutomapColorAllmap];
+            DrawMLine(l);
+        }
     }
 }
 
 static void DrawObjectBounds(MapObject *mo, RGBAColor rgb)
 {
     float R = mo->radius_;
+    float lx, ly, hx, hy;
 
     if (R < 2)
         R = 2;
 
-    float lx = mo->x - R;
-    float ly = mo->y - R;
-    float hx = mo->x + R;
-    float hy = mo->y + R;
+    if (!paused && !menu_active)
+    {
+        lx = HMM_Lerp(mo->old_x_, fractional_tic, mo->x) - R;
+        ly = HMM_Lerp(mo->old_y_, fractional_tic, mo->y) - R;
+        hx = HMM_Lerp(mo->old_x_, fractional_tic, mo->x) + R;
+        hy = HMM_Lerp(mo->old_y_, fractional_tic, mo->y) + R;
+    }
+    else
+    {
+        lx = mo->x - R;
+        ly = mo->y - R;
+        hx = mo->x + R;
+        hy = mo->y + R;
+    }
 
-    AutomapLine ml;
+    AutomapLine *ml = GetMapLine();
 
-    GetRotatedCoords(lx, ly, ml.a.x, ml.a.y);
-    GetRotatedCoords(lx, hy, ml.b.x, ml.b.y);
-    DrawMLine(&ml, rgb);
+    GetRotatedCoords(lx, ly, ml->points.X, ml->points.Y);
+    GetRotatedCoords(lx, hy, ml->points.Z, ml->points.W);
+    ml->color = rgb;
+    DrawMLine(ml);
 
-    GetRotatedCoords(lx, hy, ml.a.x, ml.a.y);
-    GetRotatedCoords(hx, hy, ml.b.x, ml.b.y);
-    DrawMLine(&ml, rgb);
+    ml = GetMapLine();
 
-    GetRotatedCoords(hx, hy, ml.a.x, ml.a.y);
-    GetRotatedCoords(hx, ly, ml.b.x, ml.b.y);
-    DrawMLine(&ml, rgb);
+    GetRotatedCoords(lx, hy, ml->points.X, ml->points.Y);
+    GetRotatedCoords(hx, hy, ml->points.Z, ml->points.W);
+    ml->color = rgb;
+    DrawMLine(ml);
 
-    GetRotatedCoords(hx, ly, ml.a.x, ml.a.y);
-    GetRotatedCoords(lx, ly, ml.b.x, ml.b.y);
-    DrawMLine(&ml, rgb);
+    ml = GetMapLine();
+
+    GetRotatedCoords(hx, hy, ml->points.X, ml->points.Y);
+    GetRotatedCoords(hx, ly, ml->points.Z, ml->points.W);
+    ml->color = rgb;
+    DrawMLine(ml);
+
+    ml = GetMapLine();
+
+    GetRotatedCoords(hx, ly, ml->points.X, ml->points.Y);
+    GetRotatedCoords(lx, ly, ml->points.Z, ml->points.W);
+    ml->color = rgb;
+    DrawMLine(ml);
 }
-
-static RGBAColor player_colors[8] = {
-    epi::MakeRGBA(5, 255, 5),     // GREEN,
-    epi::MakeRGBA(80, 80, 80),    // GRAY + GRAY_LEN*2/3,
-    epi::MakeRGBA(160, 100, 50),  // BROWN,
-    epi::MakeRGBA(255, 255, 255), // RED + RED_LEN/2,
-    epi::MakeRGBA(255, 176, 5),   // ORANGE,
-    epi::MakeRGBA(170, 170, 170), // GRAY + GRAY_LEN*1/3,
-    epi::MakeRGBA(255, 5, 5),     // RED,
-    epi::MakeRGBA(255, 185, 225), // PINK
-};
 
 //
 // The vector graphics for the automap.
@@ -1042,51 +1189,59 @@ static RGBAColor player_colors[8] = {
 // A line drawing of the player pointing right, starting from the
 // middle.
 
-static AutomapLine player_arrow[] = {{{-0.875f, 0.0f}, {1.0f, 0.0f}},     // -----
+static HMM_Vec4 player_arrow[] = {{{-0.875f, 0.0f, 1.0f, 0.0f}},     // -----
 
-                                     {{1.0f, 0.0f}, {0.5f, 0.25f}},       // ----->
-                                     {{1.0f, 0.0f}, {0.5f, -0.25f}},
+                                     {{1.0f, 0.0f, 0.5f, 0.25f}},       // ----->
+                                     {{1.0f, 0.0f, 0.5f, -0.25f}},
 
-                                     {{-0.875f, 0.0f}, {-1.125f, 0.25f}}, // >---->
-                                     {{-0.875f, 0.0f}, {-1.125f, -0.25f}},
+                                     {{-0.875f, 0.0f, -1.125f, 0.25f}}, // >---->
+                                     {{-0.875f, 0.0f, -1.125f, -0.25f}},
 
-                                     {{-0.625f, 0.0f}, {-0.875f, 0.25f}}, // >>--->
-                                     {{-0.625f, 0.0f}, {-0.875f, -0.25f}}};
+                                     {{-0.625f, 0.0f, -0.875f, 0.25f}}, // >>--->
+                                     {{-0.625f, 0.0f, -0.875f, -0.25f}}};
 
-static constexpr uint8_t kAutomapPlayerArrowLines = (sizeof(player_arrow) / sizeof(AutomapLine));
+static constexpr uint8_t kAutomapPlayerArrowLines = (sizeof(player_arrow) / sizeof(HMM_Vec4));
 
-static AutomapLine cheat_player_arrow[] = {{{-0.875f, 0.0f}, {1.0f, 0.0f}},      // -----
+static HMM_Vec4 cheat_player_arrow[] = {{{-0.875f, 0.0f, 1.0f, 0.0f}},      // -----
 
-                                           {{1.0f, 0.0f}, {0.5f, 0.167f}},       // ----->
-                                           {{1.0f, 0.0f}, {0.5f, -0.167f}},
+                                           {{1.0f, 0.0f, 0.5f, 0.167f}},       // ----->
+                                           {{1.0f, 0.0f, 0.5f, -0.167f}},
 
-                                           {{-0.875f, 0.0f}, {-1.125f, 0.167f}}, // >----->
-                                           {{-0.875f, 0.0f}, {-1.125f, -0.167f}},
+                                           {{-0.875f, 0.0f, -1.125f, 0.167f}}, // >----->
+                                           {{-0.875f, 0.0f, -1.125f, -0.167f}},
 
-                                           {{-0.625f, 0.0f}, {-0.875f, 0.167f}}, // >>----->
-                                           {{-0.625f, 0.0f}, {-0.875f, -0.167f}},
+                                           {{-0.625f, 0.0f, -0.875f, 0.167f}}, // >>----->
+                                           {{-0.625f, 0.0f, -0.875f, -0.167f}},
 
-                                           {{-0.5f, 0.0f}, {-0.5f, -0.167f}},    // >>-d--->
-                                           {{-0.5f, -0.167f}, {-0.5f + 0.167f, -0.167f}},
-                                           {{-0.5f + 0.167f, -0.167f}, {-0.5f + 0.167f, 0.25f}},
+                                           {{-0.5f, 0.0f, -0.5f, -0.167f}},    // >>-d--->
+                                           {{-0.5f, -0.167f, -0.5f + 0.167f, -0.167f}},
+                                           {{-0.5f + 0.167f, -0.167f, -0.5f + 0.167f, 0.25f}},
 
-                                           {{-0.167f, 0.0f}, {-0.167f, -0.167f}}, // >>-dd-->
-                                           {{-0.167f, -0.167f}, {0.0f, -0.167f}},
-                                           {{0.0f, -0.167f}, {0.0f, 0.25f}},
+                                           {{-0.167f, 0.0f, -0.167f, -0.167f}}, // >>-dd-->
+                                           {{-0.167f, -0.167f, 0.0f, -0.167f}},
+                                           {{0.0f, -0.167f, 0.0f, 0.25f}},
 
-                                           {{0.167f, 0.25f}, {0.167f, -0.143f}}, // >>-ddt->
-                                           {{0.167f, -0.143f}, {0.167f + 0.031f, -0.143f - 0.031f}},
-                                           {{0.167f + 0.031f, -0.143f - 0.031f}, {0.167f + 0.1f, -0.143f}}};
+                                           {{0.167f, 0.25f, 0.167f, -0.143f}}, // >>-ddt->
+                                           {{0.167f, -0.143f, 0.167f + 0.031f, -0.143f - 0.031f}},
+                                           {{0.167f + 0.031f, -0.143f - 0.031f, 0.167f + 0.1f, -0.143f}}};
 
-static constexpr uint8_t kAutomapCheatPlayerArrowLines = (sizeof(cheat_player_arrow) / sizeof(AutomapLine));
+static constexpr uint8_t kAutomapCheatPlayerArrowLines = (sizeof(cheat_player_arrow) / sizeof(HMM_Vec4));
 
-static AutomapLine thin_triangle_guy[] = {
-    {{-0.5f, -0.7f}, {1.0f, 0.0f}}, {{1.0f, 0.0f}, {-0.5f, 0.7f}}, {{-0.5f, 0.7f}, {-0.5f, -0.7f}}};
+static HMM_Vec4 thin_triangle_guy[] = {
+    {{-0.5f, -0.7f, 1.0f, 0.0f}}, {{1.0f, 0.0f, -0.5f, 0.7f}}, {{-0.5f, 0.7f, -0.5f, -0.7f}}};
 
-static constexpr uint8_t kAutomapThinTriangleGuyLines = (sizeof(thin_triangle_guy) / sizeof(AutomapLine));
+static constexpr uint8_t kAutomapThinTriangleGuyLines = (sizeof(thin_triangle_guy) / sizeof(HMM_Vec4));
 
-static void AutomapDrawPlayer(MapObject *mo)
+static void AddPlayer(MapObject *mo)
 {
+    // clip to map frame
+    float x = MapToFrameCoordinatesX(mo->x, map_center_x);
+    float y = MapToFrameCoordinatesY(mo->y, map_center_y);
+    if (x < frame_x || x > frame_x + frame_width || y < frame_y || y > frame_y + frame_height)
+    {
+        return;
+    }
+
     if (automap_debug_collisions.d_)
         DrawObjectBounds(mo, am_colors[kAutomapColorPlayer]);
 
@@ -1105,44 +1260,37 @@ static void AutomapDrawPlayer(MapObject *mo)
         ma = mo->angle_;
     }
 
-    if (!network_game)
+    switch (current_arrow_type)
     {
-        switch (current_arrow_type)
-        {
         case kAutomapArrowStyleHeretic:
             DrawLineCharacter(player_dagger, kAutomapPlayerDaggerLines, mo->radius_, ma, am_colors[kAutomapColorPlayer],
-                              mx, my);
+                                mx, my);
             break;
         case kAutomapArrowStyleDoom:
         default:
+        {
             if (cheating)
                 DrawLineCharacter(cheat_player_arrow, kAutomapCheatPlayerArrowLines, mo->radius_, ma,
-                                  am_colors[kAutomapColorPlayer], mx, my);
+                                    am_colors[kAutomapColorPlayer], mx, my);
             else
                 DrawLineCharacter(player_arrow, kAutomapPlayerArrowLines, mo->radius_, ma,
-                                  am_colors[kAutomapColorPlayer], mx, my);
+                                    am_colors[kAutomapColorPlayer], mx, my);
             break;
         }
-        return;
     }
-
-    DrawLineCharacter(player_arrow, kAutomapPlayerArrowLines, mo->radius_, ma,
-                      player_colors[mo->player_->player_number_ & 0x07], mx, my);
 }
 
-static void AutomapWalkThing(MapObject *mo)
+static void AddThing(MapObject *mo)
 {
-    int index = kAutomapColorScenery;
-
-    if (mo->player_ && (InCooperativeMatch() || (mo->player_ == players[display_player])) &&
-        mo->player_->map_object_ == mo)
+    // clip to map frame
+    float x = MapToFrameCoordinatesX(mo->x, map_center_x);
+    float y = MapToFrameCoordinatesY(mo->y, map_center_y);
+    if (x < frame_x || x > frame_x + frame_width || y < frame_y || y > frame_y + frame_height)
     {
-        AutomapDrawPlayer(mo);
         return;
     }
 
-    if (!show_things)
-        return;
+    int index = kAutomapColorScenery;
 
     // -AJA- more colourful things
     if (mo->flags_ & kMapObjectFlagSpecial)
@@ -1178,90 +1326,32 @@ static void AutomapWalkThing(MapObject *mo)
     DrawLineCharacter(thin_triangle_guy, kAutomapThinTriangleGuyLines, mo->radius_, ma, am_colors[index], mx, my);
 }
 
-//
-// Visit a subsector and draw everything.
-//
-static void AutomapWalkSubsector(unsigned int num)
+static void CollectMapLines()
 {
-    Subsector *sub = &level_subsectors[num];
-
-    // handle each seg
-    for (Seg *seg = sub->segs; seg; seg = seg->subsector_next)
+    if (!hide_lines)
     {
-        AutomapWalkSeg(seg);
+        for (int i = 0; i < total_level_lines; i++)
+        {
+            AddWall(&level_lines[i]);
+        }
     }
 
-    // handle each thing
-    for (MapObject *mo = sub->thing_list; mo; mo = mo->subsector_next_)
+    // draw player arrows first, then things
+    // if we are cheating
+    for (int i = 0; i < total_players; i++)
     {
-        AutomapWalkThing(mo);
-    }
-}
-
-//
-// Checks BSP node/subtree bounding box.
-// Returns true if some part of the bbox might be visible.
-//
-static bool AutomapCheckBBox(float *bspcoord)
-{
-    float L = bspcoord[kBoundingBoxLeft];
-    float R = bspcoord[kBoundingBoxRight];
-    float T = bspcoord[kBoundingBoxTop];
-    float B = bspcoord[kBoundingBoxBottom];
-
-    if (rotate_map)
-    {
-        float x1, x2, x3, x4;
-        float y1, y2, y3, y4;
-
-        GetRotatedCoords(L, T, x1, y1);
-        GetRotatedCoords(R, T, x2, y2);
-        GetRotatedCoords(L, B, x3, y3);
-        GetRotatedCoords(R, B, x4, y4);
-
-        L = HMM_MIN(HMM_MIN(x1, x2), HMM_MIN(x3, x4));
-        B = HMM_MIN(HMM_MIN(y1, y2), HMM_MIN(y3, y4));
-
-        R = HMM_MAX(HMM_MAX(x1, x2), HMM_MAX(x3, x4));
-        T = HMM_MAX(HMM_MAX(y1, y2), HMM_MAX(y3, y4));
+        if (i == display_player || InCooperativeMatch())
+            AddPlayer(players[i]->map_object_);      
     }
 
-    // convert from map to hud coordinates
-    float x1 = MapToFrameCoordinatesX(L, map_center_x);
-    float x2 = MapToFrameCoordinatesX(R, map_center_x);
-
-    float y1 = MapToFrameCoordinatesY(T, map_center_y);
-    float y2 = MapToFrameCoordinatesY(B, map_center_y);
-
-    return !(x2 < frame_x - 1 || x1 > frame_x + frame_width + 1 || y2 < frame_y - 1 || y1 > frame_y + frame_height + 1);
-}
-
-//
-// Walks all subsectors below a given node, traversing subtree
-// recursively.  Just call with BSP root.
-//
-static void AutomapWalkBSPNode(unsigned int bspnum)
-{
-    BspNode *node;
-    int      side;
-
-    // Found a subsector?
-    if (bspnum & kLeafSubsector)
+    if (show_things)
     {
-        AutomapWalkSubsector(bspnum & (~kLeafSubsector));
-        return;
+        for (MapObject *mo = map_object_list_head; mo; mo = mo->next_)
+        {
+            if (!mo->player_)
+                AddThing(mo);
+        }
     }
-
-    node = &level_nodes[bspnum];
-    side = 0;
-
-    // Recursively divide right space
-    if (AutomapCheckBBox(node->bounding_boxes[0]))
-        AutomapWalkBSPNode(node->children[side]);
-
-    // Recursively divide back space
-    if (AutomapCheckBBox(node->bounding_boxes[side ^ 1]))
-        AutomapWalkBSPNode(node->children[side ^ 1]);
 }
 
 static void DrawMarks(void)
@@ -1275,12 +1365,12 @@ static void DrawMarks(void)
 
     for (int i = 0; i < kAutomapTotalMarkPoints; i++)
     {
-        if (AlmostEquals(mark_points[i].x, (float)kAutomapNoMarkX))
+        if (AlmostEquals(mark_points[i].X, (float)kAutomapNoMarkX))
             continue;
 
         float mx, my;
 
-        GetRotatedCoords(mark_points[i].x, mark_points[i].y, mx, my);
+        GetRotatedCoords(mark_points[i].X, mark_points[i].Y, mx, my);
 
         buffer[0] = ('1' + i);
         buffer[1] = 0;
@@ -1336,11 +1426,27 @@ void AutomapRender(float x, float y, float w, float h, MapObject *focus)
         HUDSetAlpha(old_alpha);
     }
 
-    if (grid && !rotate_map)
-        DrawGrid();
+    // Update various render values
+    map_alpha = HUDGetAlpha();
+    map_pulse_width = (float)(game_tic % 32);
+    if (map_pulse_width >= 16.0f)
+        map_pulse_width = 2.0 + (map_pulse_width * 0.1f);
+    else
+        map_pulse_width = 2.0 - (map_pulse_width * 0.1f);
+    map_dx = HUDToRealCoordinatesX(MapToFrameDistanceX(-map_center_x)) - HUDToRealCoordinatesX(0);
+    map_dy = HUDToRealCoordinatesY(0) - HUDToRealCoordinatesY(MapToFrameDistanceY(-map_center_y));
+    frame_lerped_x = HMM_Lerp(frame_focus->old_x_, fractional_tic, frame_focus->x);
+    frame_lerped_y = HMM_Lerp(frame_focus->old_y_, fractional_tic, frame_focus->y);
+    frame_lerped_ang = epi::BAMInterpolate(frame_focus->old_angle_, frame_focus->angle_, fractional_tic);
 
-    // walk the bsp tree
-    AutomapWalkBSPNode(root_node);
+    if (grid && !rotate_map)
+        CollectGridLines();
+
+    DrawAllLines();
+
+    CollectMapLines();
+
+    DrawAllLines();
 
     DrawMarks();
 }

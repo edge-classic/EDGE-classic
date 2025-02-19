@@ -50,7 +50,7 @@ class SoundChannel
 
     const SoundData *data_;
 
-    int                    category_;
+    int                          category_;
     const SoundEffectDefinition *definition_;
     const Position              *position_;
 
@@ -71,8 +71,8 @@ extern ConsoleVariable sound_effect_volume;
 extern SoundChannel *mix_channels[];
 extern int           total_channels;
 
-extern bool vacuum_sound_effects;
-extern bool submerged_sound_effects;
+extern bool            vacuum_sound_effects;
+extern bool            submerged_sound_effects;
 extern ConsoleVariable dynamic_reverb;
 
 void InitializeSoundChannels(int total);

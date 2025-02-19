@@ -40,10 +40,10 @@ class ReverbDefinition final
     ReverbDefinition();
     ~ReverbDefinition() {};
 
-    void Default(void);
-    void CopyDetail(const ReverbDefinition &src);
-    void ApplyReverb(verblib *reverb) const;
-    static void ReadDDF(const std::string &data);
+    void                            Default(void);
+    void                            CopyDetail(const ReverbDefinition &src);
+    void                            ApplyReverb(verblib *reverb) const;
+    static void                     ReadDDF(const std::string &data);
     static inline ReverbDefinition *Lookup(std::string_view refname)
     {
         if (refname.empty())
@@ -102,12 +102,12 @@ class ReverbDefinition final
 
     // Constants and functions for DDF parsing
 
-    EPI_KNOWN_STRINGHASH(kRoomSize,     "ROOMSIZE")
+    EPI_KNOWN_STRINGHASH(kRoomSize, "ROOMSIZE")
     EPI_KNOWN_STRINGHASH(kDampingLevel, "DAMPINGLEVEL")
-    EPI_KNOWN_STRINGHASH(kWetLevel,     "WETLEVEL")
-    EPI_KNOWN_STRINGHASH(kDryLevel,     "DRYLEVEL")
-    EPI_KNOWN_STRINGHASH(kReverbWidth,  "REVERBWIDTH")
-    EPI_KNOWN_STRINGHASH(kReverbGain,   "REVERBGAIN")
+    EPI_KNOWN_STRINGHASH(kWetLevel, "WETLEVEL")
+    EPI_KNOWN_STRINGHASH(kDryLevel, "DRYLEVEL")
+    EPI_KNOWN_STRINGHASH(kReverbWidth, "REVERBWIDTH")
+    EPI_KNOWN_STRINGHASH(kReverbGain, "REVERBGAIN")
 
     static void StartEntry(const char *name, bool extend);
     static void ParseField(const char *field, const char *contents, int index, bool is_last);
@@ -123,8 +123,8 @@ class ReverbDefinition final
         }
         ~Container()
         {
-            for (std::unordered_map<epi::StringHash, ReverbDefinition *>::iterator iter = begin(), 
-                iter_end = end(); iter != iter_end; iter++)
+            for (std::unordered_map<epi::StringHash, ReverbDefinition *>::iterator iter = begin(), iter_end = end();
+                 iter != iter_end; iter++)
             {
                 ReverbDefinition *verb = iter->second;
                 delete verb;
@@ -132,7 +132,7 @@ class ReverbDefinition final
             }
         }
     };
-    
+
     static Container reverb_defs_;
 };
 

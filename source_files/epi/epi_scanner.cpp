@@ -357,11 +357,11 @@ bool Scanner::GetNextToken(bool expandState)
         return false;
     }
 
-    unsigned int start            = scan_position_;
-    unsigned int end              = scan_position_;
-    int          integerBase      = 10;
-    bool         floatHasDecimal  = false;
-    bool         stringFinished   = false; // Strings are the only things that can have 0 length tokens.
+    unsigned int start           = scan_position_;
+    unsigned int end             = scan_position_;
+    int          integerBase     = 10;
+    bool         floatHasDecimal = false;
+    bool         stringFinished  = false; // Strings are the only things that can have 0 length tokens.
 
     char cur = data_.at(scan_position_++);
     // Determine by first character

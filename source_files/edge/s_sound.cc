@@ -46,14 +46,14 @@ extern float listen_z;
 const int category_limit_table[kTotalCategories] = {
 
     /* 32 channel */
-    2,   // UI
-    2,   // Player
-    3,   // Weapon
+    2,  // UI
+    2,  // Player
+    3,  // Weapon
 
     3,  // Opponent
     12, // Monster
-    6,   // Object
-    4,   // Level
+    6,  // Object
+    4,  // Level
 
     // NOTE: never put a '0' on the WEAPON line, since the top
     // four categories should never be merged with the rest.
@@ -253,10 +253,11 @@ SoundEffectDefinition *LookupEffectDef(const SoundEffect *s)
     return sfxdefs[num];
 }
 
-static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category, const Position *pos, int flags, SoundData *buf)
+static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category, const Position *pos, int flags,
+                        SoundData *buf)
 {
     EDGE_ZoneScoped;
-        
+
     SoundChannel *chan = mix_channels[idx];
 
     chan->state_ = kChannelPlaying;
@@ -269,7 +270,8 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
     chan->loop_ = false;
     chan->boss_ = (flags & kSoundEffectBoss) ? true : false;
 
-    bool attenuate = (pos && !chan->boss_ && category != kCategoryWeapon && category != kCategoryPlayer && category != kCategoryUi);
+    bool attenuate =
+        (pos && !chan->boss_ && category != kCategoryWeapon && category != kCategoryPlayer && category != kCategoryUi);
 
     chan->ref_config_            = ma_audio_buffer_config_init(ma_format_f32, 2, buf->length_, buf->data_, NULL);
     chan->ref_config_.sampleRate = buf->frequency_;

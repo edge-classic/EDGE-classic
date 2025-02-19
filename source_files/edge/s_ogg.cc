@@ -38,7 +38,7 @@ static ma_sound   ogg_stream;
 
 static size_t ogg_epi_memread(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
-    epi::MemFile *d  = (epi::MemFile *)datasource;
+    epi::MemFile *d = (epi::MemFile *)datasource;
     return d->Read(ptr, size * nmemb) / size;
 }
 
@@ -48,18 +48,18 @@ static int ogg_epi_memseek(void *datasource, ogg_int64_t offset, int whence)
 
     switch (whence)
     {
-        case SEEK_SET: {
-            return d->Seek(offset, epi::File::kSeekpointStart) ? 0 : -1;
-        }
-        case SEEK_CUR: {
-            return d->Seek(offset, epi::File::kSeekpointCurrent) ? 0 : -1;
-        }
-        case SEEK_END: {
-            return d->Seek(-offset, epi::File::kSeekpointEnd) ? 0 : -1;
-        }
-        default: {
-            return -1;
-        } // WTF?
+    case SEEK_SET: {
+        return d->Seek(offset, epi::File::kSeekpointStart) ? 0 : -1;
+    }
+    case SEEK_CUR: {
+        return d->Seek(offset, epi::File::kSeekpointCurrent) ? 0 : -1;
+    }
+    case SEEK_END: {
+        return d->Seek(-offset, epi::File::kSeekpointEnd) ? 0 : -1;
+    }
+    default: {
+        return -1;
+    } // WTF?
     }
 }
 
@@ -76,13 +76,7 @@ static long ogg_epi_memtell(void *datasource)
     return d->GetPosition();
 }
 
-static constexpr ov_callbacks ogg_epi_callbacks = 
-{
-    ogg_epi_memread,
-    ogg_epi_memseek,
-    ogg_epi_memclose,
-    ogg_epi_memtell
-};
+static constexpr ov_callbacks ogg_epi_callbacks = {ogg_epi_memread, ogg_epi_memseek, ogg_epi_memclose, ogg_epi_memtell};
 
 typedef struct
 {
@@ -268,7 +262,7 @@ static void ma_stbvorbis_uninit(ma_stbvorbis *pVorbis, const ma_allocation_callb
 
     ov_clear(&pVorbis->ogg);
 
-    delete(pVorbis->memfile);
+    delete (pVorbis->memfile);
 
     ma_data_source_uninit(&pVorbis->ds);
 }
@@ -294,34 +288,34 @@ static ma_result ma_stbvorbis_read_pcm_frames(ma_stbvorbis *pVorbis, void *pFram
     /* We always use floating point format. */
     ma_result result          = MA_SUCCESS; /* Must be initialized to MA_SUCCESS. */
     ma_uint64 totalFramesRead = 0;
-    int section = 0;
+    int       section         = 0;
     ma_format format;
     ma_uint32 channels;
-    ma_uint64 framesLeft = frameCount;
-    float *pFramesOutF = (float *)pFramesOut;
+    ma_uint64 framesLeft  = frameCount;
+    float    *pFramesOutF = (float *)pFramesOut;
 
     ma_stbvorbis_get_data_format(pVorbis, &format, &channels, NULL, NULL, 0);
 
     if (format == ma_format_f32)
     {
-        while(framesLeft > 0)
+        while (framesLeft > 0)
         {
-            float **outFrames = NULL;
-            long framesRead = ov_read_float(&pVorbis->ogg, &outFrames, framesLeft, &section);
-            if(framesRead <= 0)
+            float **outFrames  = NULL;
+            long    framesRead = ov_read_float(&pVorbis->ogg, &outFrames, framesLeft, &section);
+            if (framesRead <= 0)
                 break;
 
-            for(ma_uint32 j=0; j < channels; ++j) 
+            for (ma_uint32 j = 0; j < channels; ++j)
             {
-                for(int i=0;i<framesRead;++i) 
+                for (int i = 0; i < framesRead; ++i)
                 {
-                    pFramesOutF[i*channels+j] = outFrames[j][i];
+                    pFramesOutF[i * channels + j] = outFrames[j][i];
                 }
             }
 
-            framesLeft      -= framesRead;
+            framesLeft -= framesRead;
             totalFramesRead += framesRead;
-            pFramesOutF     += framesRead * channels;
+            pFramesOutF += framesRead * channels;
         }
     }
     else
@@ -360,7 +354,7 @@ static ma_result ma_stbvorbis_seek_to_pcm_frame(ma_stbvorbis *pVorbis, ma_uint64
 
     if (vorbisResult != 0)
     {
-        return MA_ERROR;                                                    /* See failed. */
+        return MA_ERROR; /* See failed. */
     }
 
     pVorbis->cursor = frameIndex;
@@ -549,7 +543,7 @@ class OGGPlayer : public AbstractMusicPlayer
     ~OGGPlayer() override;
 
   private:
-    const uint8_t   *ogg_data_;
+    const uint8_t *ogg_data_;
 
   public:
     bool OpenMemory(const uint8_t *data, int length);

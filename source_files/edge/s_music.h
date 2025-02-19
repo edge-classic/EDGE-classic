@@ -41,8 +41,8 @@ class AbstractMusicPlayer
         kStopped
     };
 
-    Status  status_;
-    bool    looping_;
+    Status status_;
+    bool   looping_;
 
   public:
     AbstractMusicPlayer()

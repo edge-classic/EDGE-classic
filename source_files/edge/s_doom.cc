@@ -109,10 +109,10 @@ bool LoadPCSpeakerSound(SoundData *buf, const uint8_t *data, int length)
             LogWarning("Invalid PC Speaker Sound (bad tone value %d)\n", *data);
             return false;
         }
-        uint32_t tone                = kFrequencyTable[*data++];
-        uint32_t phase_length        = (sound_device_frequency * tone) / (2 * kPCInterruptTimer);
-        float   float_value = 0;
-        uint8_t value;
+        uint32_t tone         = kFrequencyTable[*data++];
+        uint32_t phase_length = (sound_device_frequency * tone) / (2 * kPCInterruptTimer);
+        float    float_value  = 0;
+        uint8_t  value;
         for (i = 0; i < samples_per_byte; i++)
         {
             if (tone)

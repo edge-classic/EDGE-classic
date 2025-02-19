@@ -27,12 +27,12 @@
 
 extern std::set<std::string> available_soundfonts;
 
-extern ma_engine sound_engine;
-extern ma_engine music_engine;
+extern ma_engine        sound_engine;
+extern ma_engine        music_engine;
 extern ma_freeverb_node reverb_node;
-extern ma_delay_node underwater_node;
-extern ma_delay_node reverb_delay_node;
-extern ma_lpf_node vacuum_node;
-extern bool sector_reverb; // true if we are in a sector with DDF reverb
-extern bool outdoor_reverb; // governs node attachment for dynamic reverb
-extern ConsoleVariable dynamic_reverb;
+extern ma_delay_node    underwater_node;
+extern ma_delay_node    reverb_delay_node;
+extern ma_lpf_node      vacuum_node;
+extern bool             sector_reverb;  // true if we are in a sector with DDF reverb
+extern bool             outdoor_reverb; // governs node attachment for dynamic reverb
+extern ConsoleVariable  dynamic_reverb;

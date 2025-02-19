@@ -114,7 +114,7 @@ void ComputeSkyHeights(void)
 
     for (i = 0, ld = level_lines; i < total_level_lines; i++, ld++)
     {
-        const Sector        *sec1, *sec2;
+        const Sector  *sec1, *sec2;
         SectorSkyRing *ring1, *ring2, *tmp_R;
 
         if (!ld->side[0] || !ld->side[1])
@@ -678,7 +678,7 @@ static void FinishSkyUnit(void)
 void FlushSky(void)
 {
     if (sky_unit_started)
-        FinishSkyUnit();    
+        FinishSkyUnit();
 }
 
 void FinishSky()
@@ -884,8 +884,8 @@ int UpdateSkyboxTextures(void)
     ImageData *tmp_img_data = ReadAsEpiBlock((Image *)sky_image);
     if (tmp_img_data->depth_ == 1)
     {
-        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette ? what_palette :
-            (const uint8_t *)&playpal_data[0], sky_image->opacity_);
+        ImageData *rgb_img_data = RGBFromPalettised(
+            tmp_img_data, what_palette ? what_palette : (const uint8_t *)&playpal_data[0], sky_image->opacity_);
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }

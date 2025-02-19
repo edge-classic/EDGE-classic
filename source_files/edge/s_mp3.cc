@@ -40,7 +40,7 @@ class MP3Player : public AbstractMusicPlayer
     ~MP3Player() override;
 
   private:
-    const uint8_t   *mp3_data_;
+    const uint8_t *mp3_data_;
 
   public:
     bool OpenMemory(const uint8_t *data, int length);

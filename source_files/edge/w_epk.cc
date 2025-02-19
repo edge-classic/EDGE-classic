@@ -93,7 +93,7 @@ class PackDirectory
     {
     }
 
-    void SortEntries();
+    void   SortEntries();
     size_t AddEntry(const std::string &name, const std::string &path, const std::string &ppath, mz_uint idx)
     {
         // check if already there
@@ -138,8 +138,7 @@ class PackFile
     mz_zip_archive *archive_;
 
   public:
-    PackFile(DataFile *par, bool folder)
-        : parent_(par), is_folder_(folder), directories_(), archive_(nullptr)
+    PackFile(DataFile *par, bool folder) : parent_(par), is_folder_(folder), directories_(), archive_(nullptr)
     {
     }
 

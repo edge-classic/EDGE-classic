@@ -365,7 +365,8 @@ IntermissionMapPositionInfoContainer::IntermissionMapPositionInfoContainer()
 //
 // wi_mapposdef_container_c Copy constructor
 //
-IntermissionMapPositionInfoContainer::IntermissionMapPositionInfoContainer(const IntermissionMapPositionInfoContainer &rhs)
+IntermissionMapPositionInfoContainer::IntermissionMapPositionInfoContainer(
+    const IntermissionMapPositionInfoContainer &rhs)
     : std::vector<IntermissionMapPositionInfo *>()
 {
     Copy(rhs);

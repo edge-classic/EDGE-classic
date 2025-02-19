@@ -14,14 +14,14 @@
 namespace epi
 {
 
-static const int  CONVERSION_BUFFER_LENGTH = 128;
+static const int         CONVERSION_BUFFER_LENGTH = 128;
 static const std::string EMPTY_STRING{};
 
 const StringHash StringHash::kEmpty{""};
 
 #ifdef EDGE_EXTRA_CHECKS
 std::unordered_map<StringHash, std::string> StringHash::global_hash_registry_;
-void StringHash::Register(StringHash hash, const std::string_view &str)
+void                                        StringHash::Register(StringHash hash, const std::string_view &str)
 {
     auto iter = global_hash_registry_.find(hash);
     if (iter == global_hash_registry_.end())
@@ -30,8 +30,8 @@ void StringHash::Register(StringHash hash, const std::string_view &str)
     }
     else if (epi::StringCaseCompareASCII(iter->second, str) != 0)
     {
-        FatalError("StringHash collision detected! Both \"%s\" and \"%s\" have hash #%s",
-            std::string(str).c_str(), iter->second.c_str(), hash.ToString().c_str());
+        FatalError("StringHash collision detected! Both \"%s\" and \"%s\" have hash #%s", std::string(str).c_str(),
+                   iter->second.c_str(), hash.ToString().c_str());
     }
 }
 void StringHash::Register(const char *str)

@@ -56,8 +56,8 @@ static ma_result ma_m4p_init_memory(const void *pData, size_t dataSize, const ma
 static void      ma_m4p_uninit(ma_m4p *pM4P, const ma_allocation_callbacks *pAllocationCallbacks);
 static ma_result ma_m4p_read_pcm_frames(ma_m4p *pM4P, void *pFramesOut, ma_uint64 frameCount, ma_uint64 *pFramesRead);
 static ma_result ma_m4p_seek_to_pcm_frame(ma_m4p *pM4P, ma_uint64 frameIndex);
-static ma_result ma_m4p_get_data_format(const ma_m4p *pM4P, ma_format *pFormat, ma_uint32 *pChannels, ma_uint32 *pSampleRate,
-                                        ma_channel *pChannelMap, size_t channelMapCap);
+static ma_result ma_m4p_get_data_format(const ma_m4p *pM4P, ma_format *pFormat, ma_uint32 *pChannels,
+                                        ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap);
 static ma_result ma_m4p_get_cursor_in_pcm_frames(const ma_m4p *pM4P, ma_uint64 *pCursor);
 static ma_result ma_m4p_get_length_in_pcm_frames(const ma_m4p *pM4P, ma_uint64 *pLength);
 
@@ -270,8 +270,8 @@ static ma_result ma_m4p_seek_to_pcm_frame(ma_m4p *pM4P, ma_uint64 frameIndex)
     return MA_SUCCESS;
 }
 
-static ma_result ma_m4p_get_data_format(const ma_m4p *pM4P, ma_format *pFormat, ma_uint32 *pChannels, ma_uint32 *pSampleRate,
-                                        ma_channel *pChannelMap, size_t channelMapCap)
+static ma_result ma_m4p_get_data_format(const ma_m4p *pM4P, ma_format *pFormat, ma_uint32 *pChannels,
+                                        ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
 {
     /* Defaults for safety. */
     if (pFormat != NULL)

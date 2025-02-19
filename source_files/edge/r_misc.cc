@@ -388,32 +388,32 @@ void FreeBSP(void)
     for (size_t i = kDefaultDrawThings; i < draw_things.size(); i++)
     {
         free(draw_things[i]);
-    } 
+    }
 
     for (size_t i = kDefaultDrawFloors; i < draw_floors.size(); i++)
     {
         free(draw_floors[i]);
-    } 
+    }
 
     for (size_t i = kDefaultDrawSegs; i < draw_segs.size(); i++)
     {
         free(draw_segs[i]);
-    } 
+    }
 
     for (size_t i = kDefaultDrawSubsectors; i < draw_subsectors.size(); i++)
     {
         free(draw_subsectors[i]);
-    } 
+    }
 
     for (size_t i = kDefaultDrawMirrors; i < draw_mirrors.size(); i++)
     {
         free(draw_mirrors[i]);
-    } 
+    }
 
     for (size_t i = kDefaultAutomapLines; i < automap_lines.size(); i++)
     {
         free(automap_lines[i]);
-    } 
+    }
 
     draw_things.clear();
     draw_floors.clear();

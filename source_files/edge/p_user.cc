@@ -911,23 +911,23 @@ bool PlayerThink(Player *player)
             sector_reverb = false;
             HMM_Vec2 room_checker;
             float    room_check = 0;
-            float    player_x     = player->map_object_->x;
-            float    player_y     = player->map_object_->y;
+            float    player_x   = player->map_object_->x;
+            float    player_y   = player->map_object_->y;
             PathTraverse(player_x, player_y, player_x, 32768.0f, kPathAddLines, P_RoomPath, &room_checker);
             room_check += abs(room_checker.Y - player_y);
             PathTraverse(player_x, player_y, 32768.0f + player_x, 32768.0f + player_y, kPathAddLines, P_RoomPath,
-                        &room_checker);
+                         &room_checker);
             room_check += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
             PathTraverse(player_x, player_y, -32768.0f + player_x, 32768.0f + player_y, kPathAddLines, P_RoomPath,
-                        &room_checker);
+                         &room_checker);
             room_check += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
             PathTraverse(player_x, player_y, player_x, -32768.0f, kPathAddLines, P_RoomPath, &room_checker);
             room_check += abs(player_y - room_checker.Y);
             PathTraverse(player_x, player_y, -32768.0f + player_x, -32768.0f + player_y, kPathAddLines, P_RoomPath,
-                        &room_checker);
+                         &room_checker);
             room_check += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
             PathTraverse(player_x, player_y, 32768.0f + player_x, -32768.0f + player_y, kPathAddLines, P_RoomPath,
-                        &room_checker);
+                         &room_checker);
             room_check += PointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
             PathTraverse(player_x, player_y, -32768.0f, player_y, kPathAddLines, P_RoomPath, &room_checker);
             room_check += abs(player_x - room_checker.X);
@@ -940,7 +940,7 @@ bool PlayerThink(Player *player)
                 ma_delay_node_set_decay(&reverb_delay_node, room_check * 0.00004316f);
                 if (dynamic_reverb.d_ == 1) // Headphones
                     ddf::ReverbDefinition::kOutdoorWeak.ApplyReverb(&reverb_node.reverb);
-                else // Speakers
+                else                        // Speakers
                     ddf::ReverbDefinition::kOutdoorStrong.ApplyReverb(&reverb_node.reverb);
                 if (room_check < 700)
                 {
@@ -955,7 +955,7 @@ bool PlayerThink(Player *player)
                 outdoor_reverb = false;
                 if (dynamic_reverb.d_ == 1) // Headphones
                     ddf::ReverbDefinition::kIndoorWeak.ApplyReverb(&reverb_node.reverb);
-                else // Speakers
+                else                        // Speakers
                     ddf::ReverbDefinition::kIndoorStrong.ApplyReverb(&reverb_node.reverb);
                 if (room_check < 700)
                 {

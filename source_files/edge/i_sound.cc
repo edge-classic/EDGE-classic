@@ -40,14 +40,14 @@
 // If true, sound system is off/not working. Changed to false if sound init ok.
 bool no_sound = false;
 
-int sound_device_frequency;
+int  sound_device_frequency;
 bool outdoor_reverb = false;
-bool sector_reverb = false;
+bool sector_reverb  = false;
 
-std::set<std::string>       available_soundfonts;
-extern std::string          game_directory;
-extern std::string          home_directory;
-extern ConsoleVariable      midi_soundfont;
+std::set<std::string>  available_soundfonts;
+extern std::string     game_directory;
+extern std::string     home_directory;
+extern ConsoleVariable midi_soundfont;
 
 ma_engine sound_engine;
 ma_engine music_engine;
@@ -55,9 +55,9 @@ ma_engine music_engine;
 ma_lpf_node vacuum_node;
 // Underwater sector sounds; these two chain into each other
 static ma_lpf_node underwater_lpf_node;
-ma_delay_node underwater_node;
+ma_delay_node      underwater_node;
 // Dynamic reverb
-ma_delay_node reverb_delay_node;
+ma_delay_node    reverb_delay_node;
 ma_freeverb_node reverb_node;
 
 EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(dynamic_reverb, "0", kConsoleVariableFlagArchive, 0, 2)
@@ -76,12 +76,13 @@ void StartupAudio(void)
     else
     {
         sound_device_frequency = ma_engine_get_sample_rate(&sound_engine);
-        ma_uint32 channels = ma_engine_get_channels(&sound_engine);
+        ma_uint32 channels     = ma_engine_get_channels(&sound_engine);
         ma_engine_set_volume(&sound_engine, sound_effect_volume.f_ * 0.25f);
         // configure FX nodes
 
         // Underwater/Submerged
-        ma_delay_node_config delay_node_config = ma_delay_node_config_init(channels, sound_device_frequency, (ma_uint32)(sound_device_frequency * 0.15f), 0.15f);
+        ma_delay_node_config delay_node_config = ma_delay_node_config_init(
+            channels, sound_device_frequency, (ma_uint32)(sound_device_frequency * 0.15f), 0.15f);
         ma_delay_node_init(ma_engine_get_node_graph(&sound_engine), &delay_node_config, NULL, &underwater_node);
         ma_lpf_node_config lpf_config = ma_lpf_node_config_init(channels, sound_device_frequency, 800.0f, 2);
         ma_lpf_node_init(ma_engine_get_node_graph(&sound_engine), &lpf_config, NULL, &underwater_lpf_node);
@@ -94,7 +95,8 @@ void StartupAudio(void)
         ma_node_attach_output_bus(&vacuum_node, 0, ma_engine_get_endpoint(&sound_engine), 0);
 
         // Dynamic Reverb
-        delay_node_config = ma_delay_node_config_init(channels, sound_device_frequency, (ma_uint32)(sound_device_frequency * 0.25f), 0.20f);
+        delay_node_config = ma_delay_node_config_init(channels, sound_device_frequency,
+                                                      (ma_uint32)(sound_device_frequency * 0.25f), 0.20f);
         ma_delay_node_init(ma_engine_get_node_graph(&sound_engine), &delay_node_config, NULL, &reverb_delay_node);
         ma_freeverb_node_config reverb_node_config = ma_freeverb_node_config_init(2, sound_device_frequency);
         ma_freeverb_node_init(ma_engine_get_node_graph(&sound_engine), &reverb_node_config, NULL, &reverb_node);
@@ -136,7 +138,7 @@ void StartupMusic(void)
     std::vector<epi::DirectoryEntry> sfd;
     std::string                      soundfont_dir = epi::PathAppend(home_directory, "soundfont");
 
-    // Add our built-in options first so they take precedence over a soundfont that might 
+    // Add our built-in options first so they take precedence over a soundfont that might
     // somehow have the same file stem
     available_soundfonts.emplace("Default");
 #ifdef EDGE_CLASSIC

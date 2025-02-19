@@ -37,7 +37,7 @@ extern float                    hud_visible_top;
 extern float                    hud_visible_bottom;
 extern std::vector<std::string> hud_overlays;
 
-void HUDSetCoordinateSystem(int width, int height);
+void  HUDSetCoordinateSystem(int width, int height);
 float HUDToRealCoordinatesX(float x);
 float HUDToRealCoordinatesY(float y);
 

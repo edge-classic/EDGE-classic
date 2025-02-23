@@ -1841,7 +1841,7 @@ void StartMenuMessage(const char *string, void (*routine)(int response), bool in
     message_input_routine = nullptr;
     message_needs_input   = input;
     menu_active           = true;
-    SetConsoleVisible(kConsoleVisibilityNotVisible);
+    SetConsoleVisibility(kConsoleNotVisible);
     return;
 }
 
@@ -1865,7 +1865,7 @@ void StartMenuMessageInput(const char *string, void (*routine)(const char *respo
     message_key_routine   = nullptr;
     message_needs_input   = true;
     menu_active           = true;
-    SetConsoleVisible(kConsoleVisibilityNotVisible);
+    SetConsoleVisibility(kConsoleNotVisible);
     return;
 }
 
@@ -2200,7 +2200,7 @@ bool MenuResponder(InputEvent *ev)
             }
 
             if (!msg.empty())
-                ConsolePlayerMessage(console_player, "%s", msg.c_str());
+                ConsoleMessage(kConsoleHUDTop, "%s", msg.c_str());
 
             // -AJA- 1999/07/03: removed PLAYPAL reference.
             return true;
@@ -2368,7 +2368,7 @@ void StartControlPanel(void)
         return;
 
     menu_active = true;
-    SetConsoleVisible(kConsoleVisibilityNotVisible);
+    SetConsoleVisibility(kConsoleNotVisible);
 
     current_menu = &MainMenuDefinition;   // JDC
     item_on      = current_menu->last_on; // JDC

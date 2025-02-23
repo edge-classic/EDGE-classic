@@ -125,7 +125,7 @@ void LogPrint(const char *message, ...)
     LogDebug("%s", printbuf);
 
     // Send the message to the console.
-    ConsolePrint("%s", printbuf);
+    ConsoleMessage(kConsoleOnly, "%s", printbuf);
 
 #ifdef EDGE_WEB
     // Send to debug console in browser

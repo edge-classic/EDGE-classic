@@ -1932,7 +1932,7 @@ static void CheckTurbo(void)
         if (turbo_scale > 400)
             turbo_scale = 400;
 
-        ConsoleMessageLDF("TurboScale", turbo_scale);
+        ConsoleMessage(kConsoleOnly, "%s %d", language["TurboScale"], turbo_scale);
     }
 
     SetTurboScale(turbo_scale);
@@ -2341,7 +2341,7 @@ static void EdgeStartup(void)
 
     HUDInit();
     ConsoleStart();
-    ConsoleCreateQuitScreen();
+    CreateQuitScreen();
     SpecialWadVerify();
     BuildXGLNodes();
     ShowNotice();

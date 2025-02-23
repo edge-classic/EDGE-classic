@@ -59,13 +59,13 @@ struct ConsoleCommand
 extern const ConsoleCommand builtin_commands[];
 
 extern void M_ChangeLevelCheat(const char *string);
-extern void I_ShowGamepads(void);
+extern void ShowGamepads(void);
 
 int ConsoleCommandExec(char **argv, int argc)
 {
     if (argc != 2)
     {
-        ConsolePrint("Usage: exec <filename>\n");
+        ConsoleMessage(kConsoleOnly, "Usage: exec <filename>\n");
         return 1;
     }
 
@@ -86,7 +86,7 @@ int ConsoleCommandExec(char **argv, int argc)
     FILE *script = epi::FileOpenRaw(path, epi::kFileAccessRead | epi::kFileAccessBinary);
     if (!script)
     {
-        ConsolePrint("Unable to open file: %s\n", argv[1]);
+        ConsoleMessage(kConsoleOnly, "Unable to open file: %s\n", argv[1]);
         return 1;
     }
 
@@ -108,7 +108,7 @@ int ConsoleCommandType(char **argv, int argc)
 
     if (argc != 2)
     {
-        ConsolePrint("Usage: %s <filename>\n", argv[0]);
+        ConsoleMessage(kConsoleOnly, "Usage: %s <filename>\n", argv[0]);
         return 2;
     }
 
@@ -129,12 +129,12 @@ int ConsoleCommandType(char **argv, int argc)
     script = epi::FileOpenRaw(path, epi::kFileAccessRead);
     if (!script)
     {
-        ConsolePrint("Unable to open \'%s\'!\n", argv[1]);
+        ConsoleMessage(kConsoleOnly, "Unable to open \'%s\'!\n", argv[1]);
         return 3;
     }
     while (fgets(buffer, sizeof(buffer) - 1, script))
     {
-        ConsolePrint("%s", buffer);
+        ConsoleMessage(kConsoleOnly, "%s", buffer);
     }
     fclose(script);
 
@@ -195,7 +195,7 @@ int ConsoleCommandReadme(char **argv, int argc)
 
     if (!readme_file)
     {
-        ConsolePrint("No readme files found in current load order!\n");
+        ConsoleMessage(kConsoleOnly, "No readme files found in current load order!\n");
         return 1;
     }
     else
@@ -205,7 +205,7 @@ int ConsoleCommandReadme(char **argv, int argc)
         std::vector<std::string> readme_strings = epi::SeparatedStringVector(readme, '\n');
         for (std::string &line : readme_strings)
         {
-            ConsolePrint("%s\n", line.c_str());
+            ConsoleMessage(kConsoleOnly, "%s\n", line.c_str());
         }
     }
 
@@ -337,7 +337,7 @@ int ConsoleCommandQuitEDGE(char **argv, int argc)
 #ifdef EDGE_WEB
     EPI_UNUSED(argv);
     EPI_UNUSED(argc);
-    ConsolePrint("%s\n", language["QuitWhenWebPlayer"]);
+    ConsoleMessage(kConsoleOnly, "%s\n", language["QuitWhenWebPlayer"]);
     return 1;
 #else
     if (argc >= 2 && epi::StringCaseCompareASCII(argv[1], "now") == 0)
@@ -356,14 +356,14 @@ int ConsoleCommandPlaySound(char **argv, int argc)
 
     if (argc != 2)
     {
-        ConsolePrint("Usage: playsound <name>\n");
+        ConsoleMessage(kConsoleOnly, "Usage: playsound <name>\n");
         return 1;
     }
 
     sfx = sfxdefs.GetEffect(argv[1], false);
     if (!sfx)
     {
-        ConsolePrint("No such sound: %s\n", argv[1]);
+        ConsoleMessage(kConsoleOnly, "No such sound: %s\n", argv[1]);
     }
     else
     {
@@ -395,7 +395,7 @@ int ConsoleCommandBrowse(char **argv, int argc)
     EPI_UNUSED(argv);
     EPI_UNUSED(argc);
 #ifdef EDGE_WEB
-    ConsolePrint("%s\n", language["NoBrowseFromWeb"]);
+    ConsoleMessage(kConsoleOnly, "%s\n", language["NoBrowseFromWeb"]);
     return 1;
 #else
     epi::OpenDirectory(working_directory);
@@ -477,7 +477,7 @@ int ConsoleCommandShowGamepads(char **argv, int argc)
     EPI_UNUSED(argv);
     EPI_UNUSED(argc);
 
-    I_ShowGamepads();
+    ShowGamepads();
     return 0;
 }
 
@@ -515,7 +515,7 @@ int ConsoleCommandMap(char **argv, int argc)
 {
     if (argc <= 1)
     {
-        ConsolePrint("Usage: map <level>\n");
+        ConsoleMessage(kConsoleOnly, "Usage: map <level>\n");
         return 0;
     }
 
@@ -527,7 +527,7 @@ int ConsoleCommandEndoom(char **argv, int argc)
 {
     EPI_UNUSED(argv);
     EPI_UNUSED(argc);
-    ConsolePrintEndoom();
+    ConsoleENDOOM();
     return 0;
 }
 
@@ -535,7 +535,7 @@ int ConsoleCommandClear(char **argv, int argc)
 {
     EPI_UNUSED(argv);
     EPI_UNUSED(argc);
-    ClearConsoleLines();
+    ClearConsole();
     return 0;
 }
 
@@ -734,56 +734,6 @@ int MatchConsoleCommands(std::vector<const char *> &list, const char *pattern)
     }
 
     return (int)list.size();
-}
-
-//
-// ConsolePlayerMessage
-//
-// -ACB- 1999/09/22 Console Player Message Only. Changed from
-//                  #define to procedure because of compiler
-//                  differences.
-//
-void ConsolePlayerMessage(int plyr, const char *message, ...)
-{
-    va_list argptr;
-    char    buffer[256];
-
-    if (console_player != plyr)
-        return;
-
-    va_start(argptr, message);
-    stbsp_vsnprintf(buffer, sizeof(buffer), message, argptr);
-    va_end(argptr);
-
-    buffer[sizeof(buffer) - 1] = 0;
-
-    ConsoleMessage("%s", buffer);
-}
-
-//
-// PlayerConsoleMessageLDF
-//
-// -ACB- 1999/09/22 Console Player Message Only. Changed from
-//                  #define to procedure because of compiler
-//                  differences.
-//
-void PlayerConsoleMessageLDF(int plyr, const char *message, ...)
-{
-    va_list argptr;
-    char    buffer[256];
-
-    if (console_player != plyr)
-        return;
-
-    message = language[message];
-
-    va_start(argptr, message);
-    stbsp_vsnprintf(buffer, sizeof(buffer), message, argptr);
-    va_end(argptr);
-
-    buffer[sizeof(buffer) - 1] = 0;
-
-    ConsoleMessage("%s", buffer);
 }
 
 //--- editor settings ---

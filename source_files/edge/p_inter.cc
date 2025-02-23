@@ -904,7 +904,7 @@ void TouchSpecialThing(MapObject *special, MapObject *toucher)
 
         if (special->info_->pickup_message_ != "" && language.IsValidRef(special->info_->pickup_message_.c_str()))
         {
-            ConsolePlayerMessage(info.player->player_number_, "%s", language[special->info_->pickup_message_]);
+            ConsoleMessage(kConsoleHUDTop, "%s", language[special->info_->pickup_message_]);
         }
 
         if (sound)
@@ -994,7 +994,7 @@ static void DoObituary(const char *format, MapObject *victim, MapObject *killer)
 
     std::string msg = PatternSubstitution(format, keywords);
 
-    ConsolePlayerMessage(victim->player_->player_number_, "%s", msg.c_str());
+    ConsoleMessage(kConsoleHUDTop, "%s", msg.c_str());
 }
 
 void ObituaryMessage(MapObject *victim, MapObject *killer, const DamageClass *damtype)

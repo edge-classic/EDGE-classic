@@ -336,7 +336,8 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing, const TeleportDefi
             if (player == players[display_player] && reduce_flash)
             {
                 fog->target_visibility_ = fog->visibility_ = 0.0f;
-                ImportantConsoleMessageLDF("Teleporting...");
+                // TODO: Language entry - Dasho
+                ConsoleMessage(kConsoleHUDCenter,  "Teleporting...");
             }
         }
     }

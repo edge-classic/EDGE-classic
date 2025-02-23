@@ -144,7 +144,7 @@ static void SendTip(RADScriptTrigger *R, ScriptTip *tip, int slot)
     // send message to the console (unless it would clog it up)
     if (current->tip_text && current->tip_text != R->last_con_message)
     {
-        ConsolePrint("%s\n", current->tip_text);
+        ConsoleMessage(kConsoleOnly, "%s\n", current->tip_text);
         R->last_con_message = current->tip_text;
     }
 

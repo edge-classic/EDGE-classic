@@ -25,17 +25,18 @@
 
 extern std::string working_directory;
 
-constexpr uint8_t kEndoomLines = 25;
-
-const RGBAColor endoom_colors[16] = {0x000000FF, 0x0000AAFF, 0x00AA00FF, 0x00AAAAFF, 0xAA0000FF, 0xAA00AAFF,
-                                     0xAA5500FF, 0xAAAAAAFF, 0x555555FF, 0x5555FFFF, 0x55FF55FF, 0x55FFFFFF,
-                                     0xFF5555FF, 0xFF55FFFF, 0xFFFF55FF, 0xFFFFFFFF};
+constexpr uint8_t   kENDOOMLines = 25;
+constexpr uint8_t   kENDOOMBytesPerLine = 160;
+constexpr uint16_t  kENDOOMTotalVerts = kENDOOMLines * 80 * 4; // 80 characters per line * 4 verts per quad
+constexpr RGBAColor kENDOOMColors[16] = {0x000000FF, 0x0000AAFF, 0x00AA00FF, 0x00AAAAFF, 0xAA0000FF, 0xAA00AAFF,
+                                        0xAA5500FF, 0xAAAAAAFF, 0x555555FF, 0x5555FFFF, 0x55FF55FF, 0x55FFFFFF,
+                                        0xFF5555FF, 0xFF55FFFF, 0xFFFF55FF, 0xFFFFFFFF};
 
 enum ConsoleVisibility
 {
-    kConsoleVisibilityNotVisible, // invisible
-    kConsoleVisibilityMaximal,    // fullscreen + a command line
-    kConsoleVisibilityToggle
+    kConsoleNotVisible, // invisible
+    kConsoleMaximal,    // fullscreen + a command line
+    kConsoleToggle
 };
 
 class ConsoleLine
@@ -48,6 +49,10 @@ class ConsoleLine
     std::vector<uint8_t> endoom_bytes_;
 
   public:
+    ConsoleLine() : color_(kRGBANoValue)
+    {
+    }
+
     ConsoleLine(const std::string &text, RGBAColor col = kRGBALightGray) : line_(text), color_(col)
     {
     }
@@ -65,11 +70,6 @@ class ConsoleLine
         line_.append(text);
     }
 
-    void AppendEndoom(uint8_t endoom_byte)
-    {
-        endoom_bytes_.push_back(endoom_byte);
-    }
-
     void Clear()
     {
         line_.clear();
@@ -79,30 +79,24 @@ class ConsoleLine
 
 void TryConsoleCommand(const char *cmd);
 
+enum ConsoleMessageTarget
+{
+    kConsoleOnly,
+    kConsoleHUDTop,
+    kConsoleHUDCenter
+};
+
 #ifdef __GNUC__
-void ConsolePrint(const char *message, ...) __attribute__((format(printf, 1, 2)));
-void ConsoleMessage(const char *message, ...) __attribute__((format(printf, 1, 2)));
-void ConsolePlayerMessage(int plyr, const char *message, ...) __attribute__((format(printf, 2, 3)));
+void ConsoleMessage(ConsoleMessageTarget target, const char *message, ...) __attribute__((format(printf, 2, 3)));
 #else
-void ConsolePrint(const char *message, ...);
-void ConsoleMessage(const char *message, ...);
-void ConsolePlayerMessage(int plyr, const char *message, ...);
+void ConsoleMessage(ConsoleMessageTarget target, const char *message, ...);
 #endif
 
-void ConsolePrintEndoom();
+void ConsoleENDOOM();
 
-void ConsoleCreateQuitScreen();
+void CreateQuitScreen();
 
-void ClearConsoleLines();
-
-// Looks up the string in LDF, appends an extra '\n', and then writes it to
-// the console. Should be used for most player messages.
-void ConsoleMessageLDF(const char *lookup, ...);
-
-void ImportantConsoleMessageLDF(const char *lookup, ...);
-
-// Looks up in LDF.
-void PlayerConsoleMessageLDF(int plyr, const char *message, ...);
+void ClearConsole();
 
 // this color will apply to the next ConsoleMessage or ConsolePrint call.
 void ConsoleMessageColor(RGBAColor col);
@@ -110,7 +104,7 @@ void ConsoleMessageColor(RGBAColor col);
 bool ConsoleIsVisible();
 
 // Displays/Hides the console.
-void SetConsoleVisible(ConsoleVisibility v);
+void SetConsoleVisibility(ConsoleVisibility v);
 
 int MatchConsoleCommands(std::vector<const char *> &list, const char *pattern);
 

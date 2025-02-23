@@ -37,7 +37,7 @@
 // FIXME: this seems totally arbitrary, review it.
 static constexpr float kVerticalSpacing = 1.0f;
 
-extern ConsoleLine    *quit_lines[kEndoomLines];
+extern ConsoleLine    *quit_lines[kENDOOMLines];
 extern int             console_cursor;
 extern Font           *endoom_font;
 extern ConsoleVariable video_overlay;
@@ -1121,80 +1121,6 @@ void HUDDrawChar(float left_x, float top_y, const Image *img, char ch, float siz
     HUDRawImage(x1, y1, x2, y2, img, tx1, ty1, tx2, ty2, current_alpha, current_color, 0.0, 0.0);
 }
 
-void HUDDrawEndoomChar(float left_x, float top_y, float FNX, const Image *img, char ch, RGBAColor color1,
-                       RGBAColor color2, bool blink)
-{
-    float w, h;
-    float tx1, tx2, ty1, ty2;
-
-    uint8_t character = (uint8_t)ch;
-
-    if (blink && console_cursor >= 16)
-        character = 0x20;
-
-    uint8_t px = character % 16;
-    uint8_t py = 15 - character / 16;
-    tx1        = (px)*endoom_font->font_image_->width_ratio_;
-    tx2        = (px + 1) * endoom_font->font_image_->width_ratio_;
-    ty1        = (py)*endoom_font->font_image_->height_ratio_;
-    ty2        = (py + 1) * endoom_font->font_image_->height_ratio_;
-
-    w = FNX;
-    h = FNX * 2;
-
-    RGBAColor unit_col = color2;
-
-    RendererVertex *glvert =
-        BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
-
-    glvert->rgba       = unit_col;
-    glvert++->position = {{left_x, top_y, 0}};
-    glvert->rgba       = unit_col;
-    glvert++->position = {{left_x, top_y + h, 0}};
-    glvert->rgba       = unit_col;
-    glvert++->position = {{left_x + w, top_y + h, 0}};
-    glvert->rgba       = unit_col;
-    glvert->position   = {{left_x + w, top_y, 0}};
-
-    EndRenderUnit(4);
-
-    unit_col = color1;
-
-    GLuint       tex_id = ImageCache(img, true, (const Colormap *)0, true);
-    BlendingMode blend  = kBlendingNone;
-
-    if (img->opacity_ == kOpacitySolid)
-        blend = kBlendingNone;
-    else
-    {
-        if (img->opacity_ != kOpacityComplex)
-            blend = kBlendingLess;
-        else
-            blend = kBlendingAlpha;
-    }
-
-    glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
-
-    float width_adjust = FNX / 2 + .5;
-
-    glvert->rgba                   = unit_col;
-    glvert->texture_coordinates[0] = {{tx1, ty1}};
-    glvert++->position             = {{left_x - width_adjust, top_y, 0}};
-    glvert->rgba                   = unit_col;
-    glvert->texture_coordinates[0] = {{tx2, ty1}};
-    glvert++->position             = {{left_x + w + width_adjust, top_y, 0}};
-    glvert->rgba                   = unit_col;
-    glvert->texture_coordinates[0] = {{tx2, ty2}};
-    glvert++->position             = {{left_x + w + width_adjust, top_y + h, 0}};
-    glvert->rgba                   = unit_col;
-    glvert->texture_coordinates[0] = {{tx1, ty2}};
-    glvert->position               = {{left_x - width_adjust, top_y + h, 0}};
-
-    EndRenderUnit(4);
-
-    FinishUnitBatch();
-}
-
 //
 // Write a string using the current font
 //
@@ -1299,45 +1225,107 @@ void HUDDrawText(float x, float y, const char *str, float size)
     }
 }
 
-void HUDDrawQuitText(int line, float FNX, float FNY, float cx)
-{
-    EPI_ASSERT(quit_lines[line]);
-
-    float cy = (float)current_screen_height - ((25 - line) * FNY);
-
-    const Image *img = endoom_font->font_image_;
-
-    EPI_ASSERT(img);
-
-    for (int i = 0; i < 80; i++)
-    {
-        uint8_t info = quit_lines[line]->endoom_bytes_.at(i);
-
-        HUDDrawEndoomChar(cx, cy, FNX, img, quit_lines[line]->line_.at(i), endoom_colors[info & 15],
-                          endoom_colors[(info >> 4) & 7], info & 128);
-
-        cx += FNX;
-    }
-}
-
 //
 // Draw the ENDOOM screen
 //
 
 void HUDDrawQuitScreen()
 {
-    EPI_ASSERT(endoom_font);
-
-    if (quit_lines[0])
+    if (quit_lines[0] && quit_lines[0]->endoom_bytes_.size() == kENDOOMBytesPerLine)
     {
+        EPI_ASSERT(endoom_font);
         float FNX = HMM_MIN((float)current_screen_width / 80.0f,
                             320.0f / 80.0f * ((float)current_screen_height * 0.90f / 200.0f));
         float FNY = FNX * 2;
-        float cx  = HMM_MAX(0, (((float)current_screen_width - (FNX * 80.0f)) / 2.0f));
-        for (int i = 0; i < kEndoomLines; i++)
+        StartUnitBatch(false);
+        RendererVertex *endoom_vert = BeginRenderUnit(GL_QUADS, kENDOOMTotalVerts, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
+        uint32_t endoom_vert_count = 0;
+        // First pass, draw solid blocks
+        for (int i = 0; i < kENDOOMLines; i++)
         {
-            HUDDrawQuitText(i, FNX, FNY, cx);
+            float cy = (float)current_screen_height - ((i+1) * FNY);
+            float cx  = HMM_MAX(0, (((float)current_screen_width - (FNX * 80.0f)) / 2.0f));
+            for (int j = 1; j < kENDOOMBytesPerLine; j+=2)
+            {
+                uint8_t info = quit_lines[i]->endoom_bytes_[j];
+                RGBAColor unit_col = kENDOOMColors[(info >> 4) & 7];
+
+                endoom_vert->rgba         = unit_col;
+                endoom_vert++->position   = {{cx, cy, 0}};
+                endoom_vert->rgba         = unit_col;
+                endoom_vert++->position   = {{cx, cy + FNX*2, 0}};
+                endoom_vert->rgba         = unit_col;
+                endoom_vert++->position   = {{cx + FNX, cy + FNX*2, 0}};
+                endoom_vert->rgba         = unit_col;
+                endoom_vert++->position   = {{cx + FNX, cy, 0}};
+
+                cx += FNX;
+                endoom_vert_count += 4;
+            }
         }
+        EndRenderUnit(endoom_vert_count);
+        // Second pass, draw characters
+        const Image *img = endoom_font->font_image_;
+        EPI_ASSERT(img);
+        GLuint       tex_id = ImageCache(img, true, (const Colormap *)0, true);
+        BlendingMode blend  = kBlendingNone;
+        if (img->opacity_ == kOpacitySolid)
+            blend = kBlendingNone;
+        else
+        {
+            if (img->opacity_ != kOpacityComplex)
+                blend = kBlendingLess;
+            else
+                blend = kBlendingAlpha;
+        }
+        endoom_vert = BeginRenderUnit(GL_QUADS, kENDOOMTotalVerts, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
+        endoom_vert_count = 0;
+        for (int i = 0; i < kENDOOMLines; i++)
+        {
+            float cy = (float)current_screen_height - ((i+1) * FNY);
+            float cx  = HMM_MAX(0, (((float)current_screen_width - (FNX * 80.0f)) / 2.0f));
+            for (int j = 0; j < kENDOOMBytesPerLine; j+=2)
+            {
+                uint8_t info = quit_lines[i]->endoom_bytes_[j+1];
+                // Check for blinking
+                if ((info & 128) && console_cursor >= 16)
+                {
+                    cx += FNX;
+                    continue;
+                }
+
+                float tx1, tx2, ty1, ty2;
+                uint8_t character = quit_lines[i]->endoom_bytes_[j];
+                RGBAColor unit_col = kENDOOMColors[info & 15];
+
+                uint8_t px = character % 16;
+                uint8_t py = 15 - character / 16;
+                tx1        = (px)*endoom_font->font_image_->width_ratio_;
+                tx2        = (px + 1) * endoom_font->font_image_->width_ratio_;
+                ty1        = (py)*endoom_font->font_image_->height_ratio_;
+                ty2        = (py + 1) * endoom_font->font_image_->height_ratio_;
+
+                float width_adjust = FNX / 2 + .5;
+
+                endoom_vert->rgba                     = unit_col;
+                endoom_vert->texture_coordinates[0]   = {{tx1, ty1}};
+                endoom_vert++->position               = {{cx - width_adjust, cy, 0}};
+                endoom_vert->rgba                     = unit_col;
+                endoom_vert->texture_coordinates[0]   = {{tx2, ty1}};
+                endoom_vert++->position               = {{cx + FNX + width_adjust, cy, 0}};
+                endoom_vert->rgba                     = unit_col;
+                endoom_vert->texture_coordinates[0]   = {{tx2, ty2}};
+                endoom_vert++->position               = {{cx + FNX + width_adjust, cy + FNX*2, 0}};
+                endoom_vert->rgba                     = unit_col;
+                endoom_vert->texture_coordinates[0]   = {{tx1, ty2}};
+                endoom_vert++->position               = {{cx - width_adjust, cy + FNX*2, 0}};
+
+                cx += FNX;
+                endoom_vert_count += 4;
+            }
+        }
+        EndRenderUnit(endoom_vert_count);
+        FinishUnitBatch();
         HUDSetAlignment(0, -1);
         HUDDrawText(160, 195 - HUDStringHeight(language["PressToQuit"]), language["PressToQuit"]);
     }

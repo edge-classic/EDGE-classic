@@ -1385,8 +1385,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special, int tag, 
             if (failedsecurity)
             {
                 if (special->failedmessage_ != "")
-                    ImportantConsoleMessageLDF(special->failedmessage_.c_str());
-                // PlayerConsoleMessageLDF(thing->player_->player_number_, special->failedmessage_.c_str());
+                    ConsoleMessage(kConsoleHUDCenter,  "%s", language[special->failedmessage_.c_str()]);
 
                 if (special->failed_sfx_)
                     StartSoundEffect(special->failed_sfx_, kCategoryLevel, thing);
@@ -1845,12 +1844,9 @@ static inline void PlayerInProperties(Player *player, float bz, float tz, float 
 
         if (!InDeathmatch())
         {
-            ImportantConsoleMessageLDF("FoundSecret"); // Lobo: get text from language.ddf
+            ConsoleMessage(kConsoleHUDCenter,  "%s", language["FoundSecret"]); // Lobo: get text from language.ddf
 
             StartSoundEffect(player->map_object_->info_->secretsound_, kCategoryUi, player->map_object_);
-            // StartSoundEffect(player->map_object_->info_->secretsound_,
-            //		P_MobjGetSfxCategory(player->map_object_),
-            // player->map_object_);
         }
 
         props->secret_found = true;

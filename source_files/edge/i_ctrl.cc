@@ -690,7 +690,7 @@ void InactiveEventProcess(SDL_Event *sdl_ev)
     }
 }
 
-void I_ShowGamepads(void)
+void ShowGamepads(void)
 {
     if (no_joystick)
     {

@@ -502,9 +502,9 @@ bool AutomapResponder(InputEvent *ev)
 
         // -ACB- 1998/08/10 Use DDF Lang Reference
         if (follow_player)
-            PlayerConsoleMessageLDF(console_player, "AutoMapFollowOn");
+            ConsoleMessage(kConsoleHUDTop, "%s", language["AutoMapFollowOn"]);
         else
-            PlayerConsoleMessageLDF(console_player, "AutoMapFollowOff");
+            ConsoleMessage(kConsoleHUDTop, "%s", language["AutoMapFollowOff"]);
 
         return true;
     }
@@ -514,9 +514,9 @@ bool AutomapResponder(InputEvent *ev)
         grid = !grid;
         // -ACB- 1998/08/10 Use DDF Lang Reference
         if (grid)
-            PlayerConsoleMessageLDF(console_player, "AutoMapGridOn");
+            ConsoleMessage(kConsoleHUDTop, "%s", language["AutoMapGridOn"]);
         else
-            PlayerConsoleMessageLDF(console_player, "AutoMapGridOff");
+            ConsoleMessage(kConsoleHUDTop, "%s", language["AutoMapGridOff"]);
 
         return true;
     }
@@ -524,7 +524,7 @@ bool AutomapResponder(InputEvent *ev)
     if (CheckKeyMatch(key_automap_mark, sym))
     {
         // -ACB- 1998/08/10 Use DDF Lang Reference
-        ConsolePlayerMessage(console_player, "%s %d", language["AutoMapMarkedSpot"], mark_point_number + 1);
+        ConsoleMessage(kConsoleHUDTop, "%s %d", language["AutoMapMarkedSpot"], mark_point_number + 1);
         AddMark();
         return true;
     }
@@ -532,7 +532,7 @@ bool AutomapResponder(InputEvent *ev)
     if (CheckKeyMatch(key_automap_clear, sym))
     {
         // -ACB- 1998/08/10 Use DDF Lang Reference
-        PlayerConsoleMessageLDF(console_player, "AutoMapMarksClear");
+        ConsoleMessage(kConsoleHUDTop, "%s", language["AutoMapMarksClear"]);
         ClearMarks();
         return true;
     }

@@ -133,7 +133,7 @@ void M_ChangeLevelCheat(const char *string)
     params.map_ = LookupMap(string);
     if (!params.map_)
     {
-        ImportantConsoleMessageLDF("ImpossibleChange");
+        ConsoleMessage(kConsoleHUDCenter,  "%s", language["ImpossibleChange"]);
         return;
     }
 
@@ -148,7 +148,7 @@ void M_ChangeLevelCheat(const char *string)
 
     DeferredNewGame(params);
 
-    ImportantConsoleMessageLDF("LevelChange");
+    ConsoleMessage(kConsoleHUDCenter,  "%s", language["LevelChange"]);
 }
 
 //
@@ -168,7 +168,7 @@ static void M_ChangeMusicCheat(const char *string)
         return;
 
     ChangeMusic(entry_num, true);
-    ImportantConsoleMessageLDF("MusChange");
+    ConsoleMessage(kConsoleHUDCenter,  "%s", language["MusChange"]);
 }
 
 static void CheatGiveWeapons(Player *pl, int key = -2)
@@ -226,12 +226,10 @@ bool CheatResponder(InputEvent *ev)
             {
                 pl->health_ = pl->map_object_->health_ = pl->map_object_->spawn_health_;
             }
-            // ConsoleMessageLDF("GodModeOn");
-            ImportantConsoleMessageLDF("GodModeOn");
+            ConsoleMessage(kConsoleHUDCenter,  "%s", language["GodModeOn"]);
         }
         else
-            ImportantConsoleMessageLDF("GodModeOff");
-        // ConsoleMessageLDF("GodModeOff");
+            ConsoleMessage(kConsoleHUDCenter,  "%s", language["GodModeOff"]);
     }
 
     // 'fa' cheat for killer fucking arsenal
@@ -249,8 +247,7 @@ bool CheatResponder(InputEvent *ev)
 
         CheatGiveWeapons(pl);
 
-        ImportantConsoleMessageLDF("AmmoAdded");
-        // ConsoleMessageLDF("AmmoAdded");
+        ConsoleMessage(kConsoleHUDCenter,  "%s", language["AmmoAdded"]);
     }
 
     // 'kfa' cheat for key full ammo
@@ -270,21 +267,20 @@ bool CheatResponder(InputEvent *ev)
 
         CheatGiveWeapons(pl);
 
-        ImportantConsoleMessageLDF("VeryHappyAmmo");
-        // ConsoleMessageLDF("VeryHappyAmmo");
+        ConsoleMessage(kConsoleHUDCenter,  "%s", language["VeryHappyAmmo"]);
     }
     else if (CheckCheatSequence(&cheat_keys, key))
     {
         pl->cards_ = kDoorKeyBitmask;
 
-        ImportantConsoleMessageLDF("UnlockCheat");
+        ConsoleMessage(kConsoleHUDCenter,  "%s", language["UnlockCheat"]);
     }
     else if (CheckCheatSequence(&cheat_loaded, key))
     {
         for (i = 0; i < kTotalAmmunitionTypes; i++)
             pl->ammo_[i].count = pl->ammo_[i].maximum;
 
-        ImportantConsoleMessageLDF("LoadedCheat");
+        ConsoleMessage(kConsoleHUDCenter,  "%s", language["LoadedCheat"]);
     }
     else if (CheckCheatSequence(&cheat_take_all, key))
     {
@@ -295,15 +291,14 @@ bool CheatResponder(InputEvent *ev)
         GiveInitialBenefits(pl, pl->map_object_->info_);
         pl->ready_weapon_ = KWeaponSelectionNone;
         SelectNewWeapon(pl, -100, kAmmunitionTypeDontCare);
-        // -ACB- 1998/08/26 Stuff removed language reference
-        ConsoleMessageLDF("StuffRemoval");
+        ConsoleMessage(kConsoleHUDCenter,  "%s", language["StuffRemoval"]);
     }
     else if (CheckCheatSequence(&cheat_suicide, key))
     {
         TelefragMapObject(pl->map_object_, pl->map_object_, nullptr);
 
         // -ACB- 1998/08/26 Suicide language reference
-        ImportantConsoleMessageLDF("SuicideCheat");
+        ConsoleMessage(kConsoleHUDCenter,  "%s", language["SuicideCheat"]);
     }
     // -ACB- 1998/08/27 Used Mobj linked-list code, much cleaner.
     else if (CheckCheatSequence(&cheat_kill_all, key))
@@ -324,7 +319,7 @@ bool CheatResponder(InputEvent *ev)
             }
         }
 
-        ImportantConsoleMessageLDF("MonstersKilled", killcount);
+        ConsoleMessage(kConsoleHUDCenter,  "%s %d", language["MonstersKilled"], killcount);
     }
     // Simplified, accepting both "noclip" and "idspispopd".
     // no clipping mode cheat
@@ -333,18 +328,18 @@ bool CheatResponder(InputEvent *ev)
         pl->cheats_ ^= kCheatingNoClip;
 
         if (pl->cheats_ & kCheatingNoClip)
-            ImportantConsoleMessageLDF("ClipOn");
+            ConsoleMessage(kConsoleHUDCenter,  "%s", language["ClipOn"]);
         else
-            ImportantConsoleMessageLDF("ClipOff");
+            ConsoleMessage(kConsoleHUDCenter,  "%s", language["ClipOff"]);
     }
     else if (CheckCheatSequence(&cheat_hall_of_mirrors, key))
     {
         debug_hall_of_mirrors = debug_hall_of_mirrors.d_ ? 0 : 1;
 
         if (debug_hall_of_mirrors.d_)
-            ImportantConsoleMessageLDF("HomDetectOn");
+            ConsoleMessage(kConsoleHUDCenter,  "%s", language["HomDetectOn"]);
         else
-            ImportantConsoleMessageLDF("HomDetectOff");
+            ConsoleMessage(kConsoleHUDCenter,  "%s", language["HomDetectOff"]);
     }
 
     // 'behold?' power-up cheats
@@ -360,7 +355,7 @@ bool CheatResponder(InputEvent *ev)
             if (i == kPowerTypeBerserk)
                 pl->keep_powers_ |= (1 << kPowerTypeBerserk);
 
-            ImportantConsoleMessageLDF("BeholdUsed");
+            ConsoleMessage(kConsoleHUDCenter,  "%s", language["BeholdUsed"]);
         }
     }
 
@@ -381,15 +376,17 @@ bool CheatResponder(InputEvent *ev)
         {
             AddWeapon(pl, w, nullptr);
             pl->powers_[kPowerTypeInvulnerable] = 1;
-            ImportantConsoleMessageLDF("CHOPPERSNote");
+            ConsoleMessage(kConsoleHUDCenter,  "%s", language["CHOPPERSNote"]);
         }
     }
 
     // 'mypos' for player position
     else if (CheckCheatSequence(&cheat_my_position, key))
     {
-        ConsoleMessage("ang=%f;x,y=(%f,%f)", epi::DegreesFromBAM(pl->map_object_->angle_), pl->map_object_->x,
-                       pl->map_object_->y);
+        if (debug_position.d_ <= 0)
+            debug_position = 1;
+        else
+            debug_position = 0;
     }
 
     if (CheckCheatSequence(&cheat_change_level, key))

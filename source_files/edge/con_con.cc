@@ -83,9 +83,7 @@ extern ConsoleVariable pixel_aspect_ratio;
 static constexpr uint8_t kMaximumConsoleLines = 160;
 
 // For Quit Screen ENDOOM (create once, always store)
-ConsoleLine *quit_lines[kEndoomLines];
-static int   quit_used_lines        = 0;
-static bool  quit_partial_last_line = false;
+ConsoleLine *quit_lines[kENDOOMLines];
 
 // entry [0] is the bottom-most one
 static ConsoleLine *console_lines[kMaximumConsoleLines];
@@ -162,102 +160,22 @@ static void ConsoleAddLine(const char *s, bool partial)
         console_used_lines++;
 }
 
-static void ConsoleEndoomAddLine(uint8_t endoom_byte, const char *s, bool partial)
+static void ConsoleAddENDOOMLine(const ConsoleLine *line)
 {
-    if (console_partial_last_line)
-    {
-        EPI_ASSERT(console_lines[0]);
-
-        console_lines[0]->Append(s);
-
-        console_lines[0]->AppendEndoom(endoom_byte);
-
-        console_partial_last_line = partial;
-        return;
-    }
-
     // scroll everything up
-
     delete console_lines[kMaximumConsoleLines - 1];
 
     for (int i = kMaximumConsoleLines - 1; i > 0; i--)
         console_lines[i] = console_lines[i - 1];
 
-    RGBAColor col = current_color;
+    console_lines[0] = new ConsoleLine();
+    console_lines[0]->endoom_bytes_.resize(kENDOOMBytesPerLine);
+    memcpy(console_lines[0]->endoom_bytes_.data(), line->endoom_bytes_.data(), kENDOOMBytesPerLine);
 
-    if (col == kRGBAGray && (epi::StringPrefixCaseCompareASCII(s, "WARNING") == 0))
-        col = kRGBADarkOrange;
-
-    console_lines[0] = new ConsoleLine(s, col);
-
-    console_lines[0]->AppendEndoom(endoom_byte);
-
-    console_partial_last_line = partial;
+    console_partial_last_line = false;
 
     if (console_used_lines < kMaximumConsoleLines)
         console_used_lines++;
-}
-
-static void ConsoleQuitAddLine(const char *s, bool partial)
-{
-    if (quit_partial_last_line)
-    {
-        EPI_ASSERT(quit_lines[0]);
-
-        quit_lines[0]->Append(s);
-
-        quit_partial_last_line = partial;
-        return;
-    }
-
-    // scroll everything up
-
-    delete quit_lines[kEndoomLines - 1];
-
-    for (int i = kEndoomLines - 1; i > 0; i--)
-        quit_lines[i] = quit_lines[i - 1];
-
-    RGBAColor col = current_color;
-
-    quit_lines[0] = new ConsoleLine(s, col);
-
-    quit_partial_last_line = partial;
-
-    if (quit_used_lines < kEndoomLines)
-        quit_used_lines++;
-}
-
-static void ConsoleQuitEndoomAddLine(uint8_t endoom_byte, const char *s, bool partial)
-{
-    if (quit_partial_last_line)
-    {
-        EPI_ASSERT(quit_lines[0]);
-
-        quit_lines[0]->Append(s);
-
-        quit_lines[0]->AppendEndoom(endoom_byte);
-
-        quit_partial_last_line = partial;
-        return;
-    }
-
-    // scroll everything up
-
-    delete quit_lines[kEndoomLines - 1];
-
-    for (int i = kEndoomLines - 1; i > 0; i--)
-        quit_lines[i] = quit_lines[i - 1];
-
-    RGBAColor col = current_color;
-
-    quit_lines[0] = new ConsoleLine(s, col);
-
-    quit_lines[0]->AppendEndoom(endoom_byte);
-
-    quit_partial_last_line = partial;
-
-    if (quit_used_lines < kEndoomLines)
-        quit_used_lines++;
 }
 
 static void ConsoleAddCmdHistory(const char *s)
@@ -287,15 +205,15 @@ static void ConsoleClearInputLine(void)
 
 bool ConsoleIsVisible()
 {
-    return (console_visible != kConsoleVisibilityNotVisible);
+    return (console_visible != kConsoleNotVisible);
 }
 
-void SetConsoleVisible(ConsoleVisibility v)
+void SetConsoleVisibility(ConsoleVisibility v)
 {
-    if (v == kConsoleVisibilityToggle)
+    if (v == kConsoleToggle)
     {
-        v = (console_visible == kConsoleVisibilityNotVisible) ? kConsoleVisibilityMaximal
-                                                              : kConsoleVisibilityNotVisible;
+        v = (console_visible == kConsoleNotVisible) ? kConsoleMaximal
+                                                              : kConsoleNotVisible;
 
         scroll_direction = 0;
     }
@@ -305,7 +223,7 @@ void SetConsoleVisible(ConsoleVisibility v)
 
     console_visible = v;
 
-    if (v == kConsoleVisibilityMaximal)
+    if (v == kConsoleMaximal)
     {
         tabbed_last = false;
     }
@@ -313,7 +231,7 @@ void SetConsoleVisible(ConsoleVisibility v)
     if (!console_wipe_active)
     {
         console_wipe_active       = true;
-        console_wipe_position     = (v == kConsoleVisibilityMaximal) ? 0 : kConsoleWipeTics;
+        console_wipe_position     = (v == kConsoleMaximal) ? 0 : kConsoleWipeTics;
         old_console_wipe_position = console_wipe_position;
     }
 }
@@ -370,91 +288,7 @@ static void SplitIntoLines(char *src)
     current_color = kRGBAGray;
 }
 
-static void EndoomSplitIntoLines(uint8_t endoom_byte, char *src)
-{
-    char *dest = src;
-    char *line = dest;
-
-    while (*src)
-    {
-        if (*src == '\n')
-        {
-            *dest++ = 0;
-
-            ConsoleAddLine(line, false);
-
-            line = dest;
-
-            src++;
-            continue;
-        }
-
-        *dest++ = *src++;
-    }
-
-    *dest++ = 0;
-
-    if (line[0])
-    {
-        ConsoleEndoomAddLine(endoom_byte, line, true);
-    }
-
-    current_color = kRGBAGray;
-}
-
-static void QuitSplitIntoLines(char *src)
-{
-    char *dest = src;
-    char *line = dest;
-
-    while (*src)
-    {
-        if (*src == '\n')
-        {
-            *dest++ = 0;
-
-            ConsoleQuitAddLine(line, false);
-
-            line = dest;
-
-            src++;
-            continue;
-        }
-
-        *dest++ = *src++;
-    }
-
-    *dest++ = 0;
-
-    if (line[0])
-    {
-        ConsoleQuitAddLine(line, true);
-    }
-
-    current_color = kRGBAGray;
-}
-
-static void QuitEndoomSplitIntoLines(uint8_t endoom_byte, char *src)
-{
-    char *dest = src;
-    char *line = dest;
-
-    while (*src)
-    {
-        *dest++ = *src++;
-    }
-
-    *dest++ = 0;
-
-    if (line[0])
-    {
-        ConsoleQuitEndoomAddLine(endoom_byte, line, true);
-    }
-
-    current_color = kRGBAGray;
-}
-
-void ConsolePrint(const char *message, ...)
+void ConsoleMessage(ConsoleMessageTarget target, const char *message, ...)
 {
     va_list argptr;
     char    buffer[1024];
@@ -463,96 +297,20 @@ void ConsolePrint(const char *message, ...)
     stbsp_vsprintf(buffer, message, argptr);
     va_end(argptr);
 
-    SplitIntoLines(buffer);
-}
-
-void ConsoleEndoomPrintf(uint8_t endoom_byte, const char *message, ...)
-{
-    va_list argptr;
-    char    buffer[1024];
-
-    va_start(argptr, message);
-    stbsp_vsprintf(buffer, message, argptr);
-    va_end(argptr);
-
-    EndoomSplitIntoLines(endoom_byte, buffer);
-}
-
-void ConsoleQuitPrintf(const char *message, ...)
-{
-    va_list argptr;
-    char    buffer[1024];
-
-    va_start(argptr, message);
-    stbsp_vsprintf(buffer, message, argptr);
-    va_end(argptr);
-
-    QuitSplitIntoLines(buffer);
-}
-
-void ConsoleQuitEndoomPrintf(uint8_t endoom_byte, const char *message, ...)
-{
-    va_list argptr;
-    char    buffer[1024];
-
-    va_start(argptr, message);
-    stbsp_vsprintf(buffer, message, argptr);
-    va_end(argptr);
-
-    QuitEndoomSplitIntoLines(endoom_byte, buffer);
-}
-
-void ConsoleMessage(const char *message, ...)
-{
-    va_list argptr;
-    char    buffer[1024];
-
-    va_start(argptr, message);
-
-    // Print the message into a text string
-    stbsp_vsprintf(buffer, message, argptr);
-
-    va_end(argptr);
-
-    HUDStartMessage(buffer);
-
-    strcat(buffer, "\n");
-
-    SplitIntoLines(buffer);
-}
-
-void ConsoleMessageLDF(const char *lookup, ...)
-{
-    va_list argptr;
-    char    buffer[1024];
-
-    lookup = language[lookup];
-
-    va_start(argptr, lookup);
-    stbsp_vsprintf(buffer, lookup, argptr);
-    va_end(argptr);
-
-    HUDStartMessage(buffer);
-
-    strcat(buffer, "\n");
-
-    SplitIntoLines(buffer);
-}
-
-void ImportantConsoleMessageLDF(const char *lookup, ...)
-{
-    va_list argptr;
-    char    buffer[1024];
-
-    lookup = language[lookup];
-
-    va_start(argptr, lookup);
-    stbsp_vsprintf(buffer, lookup, argptr);
-    va_end(argptr);
-
-    HUDStartImportantMessage(buffer);
-
-    strcat(buffer, "\n");
+    switch(target)
+    {
+        case kConsoleHUDTop:
+            HUDStartMessage(buffer);
+            strcat(buffer, "\n");
+            break;
+        case kConsoleHUDCenter:
+            HUDStartImportantMessage(buffer);
+            strcat(buffer, "\n");
+            break;
+        case kConsoleOnly:
+        default:
+            break;
+    }
 
     SplitIntoLines(buffer);
 }
@@ -599,117 +357,8 @@ static void SolidBox(float x, float y, float w, float h, RGBAColor col, float al
     EndRenderUnit(4);
 }
 
-static void HorizontalLine(int y, RGBAColor col)
-{
-    float alpha = 1.0f;
-
-    SolidBox(0, y, current_screen_width - 1, 1, col, alpha);
-}
-
-static void DrawChar(float x, float y, char ch, RendererVertex *glvert, RGBAColor col)
-{
-    if (x + FNSZ < 0)
-        return;
-
-    if (console_font->definition_->type_ == kFontTypeTrueType)
-    {
-        float chwidth  = console_font->CharWidth(ch);
-        XMUL           = RoundToInteger(chwidth * FNSZ_ratio / pixel_aspect_ratio.f_);
-        float width    = (chwidth - console_font->spacing_) * FNSZ_ratio / pixel_aspect_ratio.f_;
-        float x_adjust = (XMUL - width) / 2;
-        float y_adjust = console_font->truetype_glyph_map_.at((uint8_t)ch).y_shift[current_font_size] * FNSZ_ratio;
-        float height   = console_font->truetype_glyph_map_.at((uint8_t)ch).height[current_font_size] * FNSZ_ratio;
-        stbtt_aligned_quad *q = console_font->truetype_glyph_map_.at((uint8_t)ch).character_quad[current_font_size];
-        glvert->rgba          = col;
-        glvert->position      = {{x + x_adjust, y - y_adjust, 0}};
-        glvert++->texture_coordinates[0] = {{q->s0, q->t0}};
-        glvert->rgba                     = col;
-        glvert->position                 = {{x + x_adjust + width, y - y_adjust, 0}};
-        glvert++->texture_coordinates[0] = {{q->s1, q->t0}};
-        glvert->rgba                     = col;
-        glvert->position                 = {{x + x_adjust + width, y - y_adjust - height, 0}};
-        glvert++->texture_coordinates[0] = {{q->s1, q->t1}};
-        glvert->rgba                     = col;
-        glvert->position                 = {{x + x_adjust, y - y_adjust - height, 0}};
-        glvert->texture_coordinates[0]   = {{q->s0, q->t1}};
-        return;
-    }
-
-    uint8_t px = (uint8_t)ch % 16;
-    uint8_t py = 15 - (uint8_t)ch / 16;
-
-    float tx1 = (px)*console_font->font_image_->width_ratio_;
-    float tx2 = (px + 1) * console_font->font_image_->width_ratio_;
-    float ty1 = (py)*console_font->font_image_->height_ratio_;
-    float ty2 = (py + 1) * console_font->font_image_->height_ratio_;
-
-    glvert->rgba                     = col;
-    glvert->position                 = {{x, y, 0}};
-    glvert++->texture_coordinates[0] = {{tx1, ty1}};
-    glvert->rgba                     = col;
-    glvert->position                 = {{x, y + FNSZ, 0}};
-    glvert++->texture_coordinates[0] = {{tx1, ty2}};
-    glvert->rgba                     = col;
-    glvert->position                 = {{x + FNSZ, y + FNSZ, 0}};
-    glvert++->texture_coordinates[0] = {{tx2, ty2}};
-    glvert->rgba                     = col;
-    glvert->position                 = {{x + FNSZ, y, 0}};
-    glvert->texture_coordinates[0]   = {{tx2, ty1}};
-}
-
-static void DrawEndoomChar(float x, float y, char ch, RGBAColor col, RGBAColor col2, bool blink, int enwidth,
-                           GLuint tex_id)
-{
-    if (x + FNSZ < 0)
-        return;
-
-    RendererVertex *glvert =
-        BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
-
-    glvert->rgba       = col2;
-    glvert++->position = {{x - (enwidth / 2), y, 0}};
-    glvert->rgba       = col2;
-    glvert++->position = {{x - (enwidth / 2), y + FNSZ, 0}};
-    glvert->rgba       = col2;
-    glvert++->position = {{x + (enwidth / 2), y + FNSZ, 0}};
-    glvert->rgba       = col2;
-    glvert->position   = {{x + (enwidth / 2), y, 0}};
-
-    EndRenderUnit(4);
-
-    if (blink && console_cursor >= 16)
-        ch = 0x20;
-
-    uint8_t px = (uint8_t)ch % 16;
-    uint8_t py = 15 - (uint8_t)ch / 16;
-
-    float tx1 = (px)*endoom_font->font_image_->width_ratio_;
-    float tx2 = (px + 1) * endoom_font->font_image_->width_ratio_;
-
-    float ty1 = (py)*endoom_font->font_image_->height_ratio_;
-    float ty2 = (py + 1) * endoom_font->font_image_->height_ratio_;
-
-    glvert =
-        BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingMasked);
-
-    glvert->rgba                   = col;
-    glvert->texture_coordinates[0] = {{tx1, ty1}};
-    glvert++->position             = {{x - enwidth, y, 0}};
-    glvert->rgba                   = col;
-    glvert->texture_coordinates[0] = {{tx1, ty2}};
-    glvert++->position             = {{x - enwidth, y + FNSZ, 0}};
-    glvert->rgba                   = col;
-    glvert->texture_coordinates[0] = {{tx2, ty2}};
-    glvert++->position             = {{x + enwidth, y + FNSZ, 0}};
-    glvert->rgba                   = col;
-    glvert->texture_coordinates[0] = {{tx2, ty1}};
-    glvert->position               = {{x + enwidth, y, 0}};
-
-    EndRenderUnit(4);
-}
-
-// writes the text on coords (x,y) of the console
-static void DrawText(float x, float y, const char *s, RGBAColor col)
+// set params and starts render unit for console text drawing
+static RendererVertex *StartText()
 {
     GLuint       tex_id = 0;
     BlendingMode blend  = kBlendingNone;
@@ -732,24 +381,68 @@ static void DrawText(float x, float y, const char *s, RGBAColor col)
         blend = kBlendingAlpha;
     }
 
-    bool draw_cursor = false;
+    return BeginRenderUnit(GL_QUADS, kMaximumLocalVertices, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
+}
 
-    if (s == input_line)
+static void AddChar(float x, float y, char ch, RendererVertex *&glvert, RGBAColor col)
+{   
+    if (console_font->definition_->type_ == kFontTypeTrueType)
     {
-        if (console_cursor < 16)
-            draw_cursor = true;
+        float chwidth  = console_font->CharWidth(ch);
+        XMUL           = RoundToInteger(chwidth * FNSZ_ratio / pixel_aspect_ratio.f_);
+        float width    = (chwidth - console_font->spacing_) * FNSZ_ratio / pixel_aspect_ratio.f_;
+        float x_adjust = (XMUL - width) / 2;
+        float y_adjust = console_font->truetype_glyph_map_.at((uint8_t)ch).y_shift[current_font_size] * FNSZ_ratio;
+        float height   = console_font->truetype_glyph_map_.at((uint8_t)ch).height[current_font_size] * FNSZ_ratio;
+        stbtt_aligned_quad *q = console_font->truetype_glyph_map_.at((uint8_t)ch).character_quad[current_font_size];
+        glvert->rgba          = col;
+        glvert->position      = {{x + x_adjust, y - y_adjust, 0}};
+        glvert++->texture_coordinates[0]   = {{q->s0, q->t0}};
+        glvert->rgba                       = col;
+        glvert->position                   = {{x + x_adjust + width, y - y_adjust, 0}};
+        glvert++->texture_coordinates[0]   = {{q->s1, q->t0}};
+        glvert->rgba                       = col;
+        glvert->position                   = {{x + x_adjust + width, y - y_adjust - height, 0}};
+        glvert++->texture_coordinates[0]   = {{q->s1, q->t1}};
+        glvert->rgba                       = col;
+        glvert->position                   = {{x + x_adjust, y - y_adjust - height, 0}};
+        glvert++->texture_coordinates[0]   = {{q->s0, q->t1}};
     }
+    else // spritesheet font
+    {
+        uint8_t px = (uint8_t)ch % 16;
+        uint8_t py = 15 - (uint8_t)ch / 16;
 
-    RendererVertex *glvert = nullptr;
+        float tx1 = (px)*console_font->font_image_->width_ratio_;
+        float tx2 = (px + 1) * console_font->font_image_->width_ratio_;
+        float ty1 = (py)*console_font->font_image_->height_ratio_;
+        float ty2 = (py + 1) * console_font->font_image_->height_ratio_;
 
+        glvert->rgba                       = col;
+        glvert->position                   = {{x, y, 0}};
+        glvert++->texture_coordinates[0]   = {{tx1, ty1}};
+        glvert->rgba                       = col;
+        glvert->position                   = {{x, y + FNSZ, 0}};
+        glvert++->texture_coordinates[0]   = {{tx1, ty2}};
+        glvert->rgba                       = col;
+        glvert->position                   = {{x + FNSZ, y + FNSZ, 0}};
+        glvert++->texture_coordinates[0]   = {{tx2, ty2}};
+        glvert->rgba                       = col;
+        glvert->position                   = {{x + FNSZ, y, 0}};
+        glvert++->texture_coordinates[0]   = {{tx2, ty1}};
+    }
+}
+
+// Add characters to current render unit; return total number of verts added
+static uint16_t AddText(float x, float y, const char *s, RGBAColor col, RendererVertex *&runit)
+{
+    bool draw_cursor = (s == input_line && console_cursor < 16);
+    uint16_t verts_added = 0;
     int pos = 0;
     for (; *s; s++, pos++)
     {
-        glvert = BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
-
-        DrawChar(x, y, *s, glvert, col);
-
-        EndRenderUnit(4);
+        AddChar(x, y, *s, runit, col);
+        verts_added += 4;
 
         if (console_font->definition_->type_ == kFontTypeTrueType)
         {
@@ -763,13 +456,8 @@ static void DrawText(float x, float y, const char *s, RGBAColor col)
 
         if (pos == input_position && draw_cursor)
         {
-            glvert =
-                BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
-
-            DrawChar(x, y, 95, glvert, col);
-
-            EndRenderUnit(4);
-
+            AddChar(x, y, 95, runit, col);
+            verts_added += 4;
             draw_cursor = false;
         }
 
@@ -781,34 +469,11 @@ static void DrawText(float x, float y, const char *s, RGBAColor col)
 
     if (draw_cursor)
     {
-        glvert = BeginRenderUnit(GL_POLYGON, 4, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
-
-        DrawChar(x, y, 95, glvert, col);
-
-        EndRenderUnit(4);
+        AddChar(x, y, 95, runit, col);
+        verts_added += 4;
     }
-}
 
-static void EndoomDrawText(int x, int y, ConsoleLine *endoom_line)
-{
-    // Always whiten the font when used with console output
-    GLuint tex_id = ImageCache(endoom_font->font_image_, true, (const Colormap *)0, true);
-
-    int enwidth = RoundToInteger((float)endoom_font->image_monospace_width_ *
-                                 ((float)FNSZ / endoom_font->image_monospace_width_) / 2);
-
-    for (int i = 0; i < 80; i++)
-    {
-        uint8_t info = endoom_line->endoom_bytes_.at(i);
-
-        DrawEndoomChar(x, y, endoom_line->line_.at(i), endoom_colors[info & 15], endoom_colors[(info >> 4) & 7],
-                       info & 128, enwidth, tex_id);
-
-        x += enwidth;
-
-        if (x >= current_screen_width)
-            break;
-    }
+    return verts_added;
 }
 
 void ConsoleSetupFont(void)
@@ -848,7 +513,7 @@ void ConsoleDrawer(void)
 {
     ConsoleSetupFont();
 
-    if (console_visible == kConsoleVisibilityNotVisible && !console_wipe_active)
+    if (console_visible == kConsoleNotVisible && !console_wipe_active)
         return;
 
     // -- background --
@@ -886,9 +551,142 @@ void ConsoleDrawer(void)
 
     // -- input line --
 
+    int bottom_y = y;
+
+    // -- text lines --
+    bool draw_endoom = false;
+    RendererVertex *console_glvert = nullptr;
+    int console_verts = 0;
+
+    y = bottom_y + ((FNSZ / 2) + (bottom_row == -1 ? FNSZ : 0));
+    // First pass, draw ENDOOM background colors if needed
+    for (int i = HMM_MAX(0, bottom_row); i < kMaximumConsoleLines; i++)
+    {
+        ConsoleLine *CL = console_lines[i];
+
+        if (!CL)
+            break;
+
+        if (CL->endoom_bytes_.size() == kENDOOMBytesPerLine && CL->line_.empty())
+        {
+            if (!draw_endoom)
+            {
+                console_glvert =
+                    BeginRenderUnit(GL_QUADS, kENDOOMTotalVerts, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
+                draw_endoom = true;
+            }
+
+            int x = 0;
+            int enwidth = RoundToInteger((float)endoom_font->image_monospace_width_ *
+                ((float)FNSZ / endoom_font->image_monospace_width_) / 2) / 2;
+            for (int j = 1; j < kENDOOMBytesPerLine; j+=2)
+            {
+                RGBAColor col = kENDOOMColors[(CL->endoom_bytes_[j] >> 4) & 7];
+
+                console_glvert->rgba                   = col;
+                console_glvert++->position             = {{(float)(x - enwidth), (float)y, 0}};
+                console_glvert->rgba                   = col;
+                console_glvert++->position             = {{(float)(x - enwidth), (float)(y + FNSZ), 0}};
+                console_glvert->rgba                   = col;
+                console_glvert++->position             = {{(float)(x + enwidth), (float)(y + FNSZ), 0}};
+                console_glvert->rgba                   = col;
+                console_glvert++->position               = {{(float)(x + enwidth), (float)y, 0}};
+
+                x += enwidth * 2;
+                console_verts += 4;
+
+                if (x >= current_screen_width)
+                    break;
+            }
+        }
+
+        y += FNSZ;
+
+        if (y >= current_screen_height)
+            break;
+    }
+
+    y = bottom_y + ((FNSZ / 2) + (bottom_row == -1 ? FNSZ : 0));
+    // Second pass (if drawing ENDOOM); draw ASCII characters
+    if (draw_endoom)
+    {
+        // Finish previous unit
+        EndRenderUnit(console_verts);
+        console_verts = 0;
+        console_glvert = BeginRenderUnit(GL_QUADS, kENDOOMTotalVerts, GL_MODULATE, ImageCache(endoom_font->font_image_, true, 
+            (const Colormap *)0, true), (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingMasked);
+        int enwidth = RoundToInteger((float)endoom_font->image_monospace_width_ *
+            ((float)FNSZ / endoom_font->image_monospace_width_) / 2);
+
+        for (int i = HMM_MAX(0, bottom_row); i < kMaximumConsoleLines; i++)
+        {
+            ConsoleLine *CL = console_lines[i];
+
+            if (!CL)
+                break;
+
+            if (CL->endoom_bytes_.size() == kENDOOMBytesPerLine && CL->line_.empty())
+            {
+                int x = 0;
+                for (int j = 0; j < kENDOOMBytesPerLine; j+=2)
+                {
+                    uint8_t ch = CL->endoom_bytes_[j];
+                    uint8_t info = CL->endoom_bytes_[j+1];
+                    RGBAColor col = kENDOOMColors[info & 15];
+
+                    // blink
+                    if ((info & 128) && console_cursor >= 16)
+                    {
+                        x += enwidth;
+                        continue;
+                    }
+
+                    uint8_t px = ch % 16;
+                    uint8_t py = 15 - ch / 16;
+
+                    float tx1 = (px)*endoom_font->font_image_->width_ratio_;
+                    float tx2 = (px + 1) * endoom_font->font_image_->width_ratio_;
+
+                    float ty1 = (py)*endoom_font->font_image_->height_ratio_;
+                    float ty2 = (py + 1) * endoom_font->font_image_->height_ratio_;
+
+                    console_glvert->rgba                   = col;
+                    console_glvert->texture_coordinates[0] = {{tx1, ty1}};
+                    console_glvert++->position             = {{(float)(x - enwidth), (float)y, 0}};
+                    console_glvert->rgba                   = col;
+                    console_glvert->texture_coordinates[0] = {{tx1, ty2}};
+                    console_glvert++->position             = {{(float)(x - enwidth), (float)(y + FNSZ), 0}};
+                    console_glvert->rgba                   = col;
+                    console_glvert->texture_coordinates[0] = {{tx2, ty2}};
+                    console_glvert++->position             = {{(float)(x + enwidth), (float)(y + FNSZ), 0}};
+                    console_glvert->rgba                   = col;
+                    console_glvert->texture_coordinates[0] = {{tx2, ty1}};
+                    console_glvert++->position               = {{(float)(x + enwidth), (float)y, 0}};
+
+                    x += enwidth;
+                    console_verts += 4;
+
+                    if (x >= current_screen_width)
+                        break;
+                }
+            }
+
+            y += FNSZ;
+
+            if (y >= current_screen_height)
+                break;
+        }
+        EndRenderUnit(console_verts);
+        console_verts = 0;
+    }
+
+    console_glvert = StartText();
+
+    // Third pass, draw regular text
     if (bottom_row == -1)
     {
-        DrawText(0, y, ">", kRGBAMagenta);
+        y = bottom_y;
+        console_verts += AddText(0, y, ">", kRGBAMagenta, console_glvert);
 
         if (command_history_position >= 0)
         {
@@ -897,20 +695,15 @@ void ConsoleDrawer(void)
             if (console_cursor < 16)
                 text.append("_");
 
-            DrawText(XMUL, y, text.c_str(), kRGBAMagenta);
+            console_verts += AddText(XMUL, y, text.c_str(), kRGBAMagenta, console_glvert);
         }
         else
         {
-            DrawText(XMUL, y, input_line, kRGBAMagenta);
+            console_verts += AddText(XMUL, y, input_line, kRGBAMagenta, console_glvert);
         }
-
-        y += FNSZ;
     }
 
-    y += FNSZ / 2;
-
-    // -- text lines --
-
+    y = bottom_y + ((FNSZ / 2) + (bottom_row == -1 ? FNSZ : 0));
     for (int i = HMM_MAX(0, bottom_row); i < kMaximumConsoleLines; i++)
     {
         ConsoleLine *CL = console_lines[i];
@@ -918,18 +711,19 @@ void ConsoleDrawer(void)
         if (!CL)
             break;
 
-        if (epi::StringPrefixCompare(CL->line_, "--------") == 0)
-            HorizontalLine(y + FNSZ / 2, CL->color_);
-        else if (CL->endoom_bytes_.size() == 80 && CL->line_.size() == 80) // 80 ENDOOM characters + newline
-            EndoomDrawText(0, y, CL);
-        else
-            DrawText(0, y, CL->line_.c_str(), CL->color_);
+        if (CL->endoom_bytes_.empty() && !CL->line_.empty())
+        {
+            console_verts += AddText(0, y, CL->line_.c_str(), CL->color_, console_glvert);
+        }
 
         y += FNSZ;
 
         if (y >= current_screen_height)
             break;
     }
+
+    if (console_verts > 0)
+        EndRenderUnit(console_verts);
 
     FinishUnitBatch();
 }
@@ -1070,7 +864,7 @@ static void ListCompletions(std::vector<const char *> &list, int word_len, int m
         if (n_len >= max_col * 2 / 3)
         {
             ConsoleMessageColor(color);
-            ConsolePrint("  %s\n", name);
+            ConsoleMessage(kConsoleOnly, "  %s\n", name);
             max_row--;
             continue;
         }
@@ -1078,7 +872,7 @@ static void ListCompletions(std::vector<const char *> &list, int word_len, int m
         if (buf_len + 1 + n_len > max_col)
         {
             ConsoleMessageColor(color);
-            ConsolePrint("  %s\n", buffer);
+            ConsoleMessage(kConsoleOnly, "  %s\n", buffer);
             max_row--;
 
             buf_len         = 0;
@@ -1087,7 +881,7 @@ static void ListCompletions(std::vector<const char *> &list, int word_len, int m
             if (max_row <= 0)
             {
                 ConsoleMessageColor(color);
-                ConsolePrint("  etc...\n");
+                ConsoleMessage(kConsoleOnly, "  etc...\n");
                 break;
             }
         }
@@ -1103,7 +897,7 @@ static void ListCompletions(std::vector<const char *> &list, int word_len, int m
     if (buf_len > 0)
     {
         ConsoleMessageColor(color);
-        ConsolePrint("  %s\n", buffer);
+        ConsoleMessage(kConsoleOnly, "  %s\n", buffer);
     }
 }
 
@@ -1160,33 +954,33 @@ static void TabComplete(void)
 
     // show what we were trying to match
     ConsoleMessageColor(kRGBALightBlue);
-    ConsolePrint(">%s\n", input_line);
+    ConsoleMessage(kConsoleOnly, ">%s\n", input_line);
 
     input_line[input_position] = save_ch;
 
     if (num_cmd + num_var + num_key == 0)
     {
-        ConsolePrint("No matches.\n");
+        ConsoleMessage(kConsoleOnly, "No matches.\n");
         return;
     }
 
     if (match_vars.size() > 0)
     {
-        ConsolePrint("%u Possible variables:\n", (int)match_vars.size());
+        ConsoleMessage(kConsoleOnly, "%u Possible variables:\n", (int)match_vars.size());
 
         ListCompletions(match_vars, input_position, 7, kRGBASpringGreen);
     }
 
     if (match_keys.size() > 0)
     {
-        ConsolePrint("%u Possible keys:\n", (int)match_keys.size());
+        ConsoleMessage(kConsoleOnly, "%u Possible keys:\n", (int)match_keys.size());
 
         ListCompletions(match_keys, input_position, 4, kRGBASpringGreen);
     }
 
     if (match_cmds.size() > 0)
     {
-        ConsolePrint("%u Possible commands:\n", (int)match_cmds.size());
+        ConsoleMessage(kConsoleOnly, "%u Possible commands:\n", (int)match_cmds.size());
 
         ListCompletions(match_cmds, input_position, 3, kRGBASpringGreen);
     }
@@ -1328,7 +1122,7 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
         if (strlen(input_line) == 0)
         {
             ConsoleMessageColor(kRGBALightBlue);
-            ConsolePrint(">\n");
+            ConsoleMessage(kConsoleOnly, ">\n");
         }
         else
         {
@@ -1336,7 +1130,7 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
             ConsoleAddCmdHistory(input_line);
 
             ConsoleMessageColor(kRGBALightBlue);
-            ConsolePrint(">%s\n", input_line);
+            ConsoleMessage(kConsoleOnly, ">%s\n", input_line);
 
             // Run it!
             TryConsoleCommand(input_line);
@@ -1398,7 +1192,7 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
         command_history_position = -1;
         tabbed_last              = false;
 
-        SetConsoleVisible(kConsoleVisibilityNotVisible);
+        SetConsoleVisibility(kConsoleNotVisible);
         break;
 
     // Allow screenshotting of console too - Dasho
@@ -1472,11 +1266,11 @@ bool ConsoleResponder(InputEvent *ev)
     if (ev->type == kInputEventKeyDown && CheckKeyMatch(key_console, ev->value.key.sym))
     {
         ClearEventInput();
-        SetConsoleVisible(kConsoleVisibilityToggle);
+        SetConsoleVisibility(kConsoleToggle);
         return true;
     }
 
-    if (console_visible == kConsoleVisibilityNotVisible)
+    if (console_visible == kConsoleNotVisible)
         return false;
 
     int key = GetKeycode(ev);
@@ -1535,7 +1329,7 @@ void ConsoleTicker(void)
 
     console_cursor = (console_cursor + 1) & 31;
 
-    if (console_visible != kConsoleVisibilityNotVisible)
+    if (console_visible != kConsoleNotVisible)
     {
         // Handle repeating keys
         switch (scroll_direction)
@@ -1568,7 +1362,7 @@ void ConsoleTicker(void)
     if (console_wipe_active)
     {
         old_console_wipe_position = console_wipe_position;
-        if (console_visible == kConsoleVisibilityNotVisible)
+        if (console_visible == kConsoleNotVisible)
         {
             console_wipe_position--;
             if (console_wipe_position <= 0)
@@ -1607,14 +1401,14 @@ void ConsoleInit(void)
 void ConsoleStart(void)
 {
     working_directory = home_directory;
-    console_visible   = kConsoleVisibilityNotVisible;
+    console_visible   = kConsoleNotVisible;
     console_cursor    = 0;
     StartupProgressMessage("Starting console...");
 }
 
 static char *GetHumanSize(uint32_t bytes, char *hrbytes)
 {
-    char *suffix[] = {"B", "KB", "MB", "GB", "TB"};
+    const char *suffix[] = {"B", "KB", "MB", "GB", "TB"};
     char  length   = sizeof(suffix) / sizeof(suffix[0]);
     int   i;
 
@@ -1626,7 +1420,7 @@ static char *GetHumanSize(uint32_t bytes, char *hrbytes)
         bytes >>= 10;
     }
 
-    snprintf(hrbytes, 128, "%lu %s", bytes, suffix[i]);
+    snprintf(hrbytes, 128, "%u %s", bytes, suffix[i]);
     return (hrbytes);
 }
 
@@ -1699,6 +1493,9 @@ void ConsoleShowFPS(void)
     x += XMUL;
     y = current_screen_height - FNSZ - FNSZ * (console_font->definition_->type_ == kFontTypeTrueType ? -0.5 : 0.5);
 
+    RendererVertex *console_glvert = StartText();
+    uint16_t console_verts = 0;
+
     // show average...
 
     char textbuf[128];
@@ -1708,7 +1505,7 @@ void ConsoleShowFPS(void)
     else
         stbsp_sprintf(textbuf, " %6.2f fps", 1000 / avg_shown);
 
-    DrawText(x, y, textbuf, kRGBAWebGray);
+    console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
 
     // show worst...
 
@@ -1721,7 +1518,7 @@ void ConsoleShowFPS(void)
         else if (worst_shown > 0)
             stbsp_sprintf(textbuf, " %6.2f min", 1000 / worst_shown);
 
-        DrawText(x, y, textbuf, kRGBAWebGray);
+        console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
     }
 
     // show frame metrics...
@@ -1730,16 +1527,16 @@ void ConsoleShowFPS(void)
     {
         y -= FNSZ;
         stbsp_sprintf(textbuf, "%i runit", ec_frame_stats.draw_render_units);
-        DrawText(x, y, textbuf, kRGBAWebGray);
+        console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
         y -= FNSZ;
         stbsp_sprintf(textbuf, "%i wall", ec_frame_stats.draw_wall_parts);
-        DrawText(x, y, textbuf, kRGBAWebGray);
+        console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
         y -= FNSZ;
         stbsp_sprintf(textbuf, "%i plane", ec_frame_stats.draw_planes);
-        DrawText(x, y, textbuf, kRGBAWebGray);
+        console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
         y -= FNSZ;
         stbsp_sprintf(textbuf, "%i thing", ec_frame_stats.draw_things);
-        DrawText(x, y, textbuf, kRGBAWebGray);
+        console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
         y -= FNSZ;
 
 #ifdef EDGE_SOKOL
@@ -1748,39 +1545,39 @@ void ConsoleShowFPS(void)
         render_backend->GetFrameStats(stats);
 
         stbsp_sprintf(textbuf, "%i draw", stats.num_draw_);
-        DrawText(x, y, textbuf, kRGBAWebGray);
+        console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
         y -= FNSZ;
 
         stbsp_sprintf(textbuf, "%i pipelines", stats.num_apply_pipeline_);
-        DrawText(x, y, textbuf, kRGBAWebGray);
+        console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
         y -= FNSZ;
 
         stbsp_sprintf(textbuf, "%i bindings", stats.num_apply_bindings_);
-        DrawText(x, y, textbuf, kRGBAWebGray);
+        console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
         y -= FNSZ;
 
         stbsp_sprintf(textbuf, "%i uniforms", stats.num_apply_uniforms_);
-        DrawText(x, y, textbuf, kRGBAWebGray);
+        console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
         y -= FNSZ;
 
         stbsp_sprintf(textbuf, "%i buffers", stats.num_update_buffer_);
-        DrawText(x, y, textbuf, kRGBAWebGray);
+        console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
         y -= FNSZ;
 
         char hrbytes[128];
 
         GetHumanSize(stats.size_apply_uniforms_, hrbytes);
         stbsp_sprintf(textbuf, "%s uniform size", hrbytes);
-        DrawText(x, y, textbuf, kRGBAWebGray);
+        console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
         y -= FNSZ;
         GetHumanSize(stats.size_update_buffer_, hrbytes);
         stbsp_sprintf(textbuf, "%s buffer size", hrbytes);
-        DrawText(x, y, textbuf, kRGBAWebGray);
+        console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
         y -= FNSZ;
 
 #endif
     }
-
+    EndRenderUnit(console_verts);
     FinishUnitBatch();
 }
 
@@ -1800,94 +1597,74 @@ void ConsoleShowPosition(void)
     char textbuf[128];
 
     int x = current_screen_width - XMUL * 16;
-    int y = current_screen_height - FNSZ * 5;
+    int y;
+    
+    if (debug_fps.d_ <= 0)
+        y = current_screen_height;
+    else if (debug_fps.d_ == 1)
+        y = current_screen_height - FNSZ * 3;
+    else if (debug_fps.d_ == 2)
+        y = current_screen_height - FNSZ * 4;
+    else
+        y = current_screen_height - FNSZ * 15;
 
     SolidBox(x, y - FNSZ * 10, XMUL * 16, FNSZ * 10 + 2, kRGBABlack, 0.5);
+
+    RendererVertex *console_glvert = StartText();
+    uint16_t console_verts = 0;
 
     x += XMUL;
     y -= FNSZ * (console_font->definition_->type_ == kFontTypeTrueType ? 0.25 : 1.25);
     stbsp_sprintf(textbuf, "    x: %d", (int)p->map_object_->x);
-    DrawText(x, y, textbuf, kRGBAWebGray);
+    console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
 
     y -= FNSZ;
     stbsp_sprintf(textbuf, "    y: %d", (int)p->map_object_->y);
-    DrawText(x, y, textbuf, kRGBAWebGray);
+    console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
 
     y -= FNSZ;
     stbsp_sprintf(textbuf, "    z: %d", (int)p->map_object_->z);
-    DrawText(x, y, textbuf, kRGBAWebGray);
+    console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
 
     y -= FNSZ;
     stbsp_sprintf(textbuf, "angle: %d", (int)epi::DegreesFromBAM(p->map_object_->angle_));
-    DrawText(x, y, textbuf, kRGBAWebGray);
+    console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
 
     y -= FNSZ;
     stbsp_sprintf(textbuf, "x mom: %.4f", p->map_object_->momentum_.X);
-    DrawText(x, y, textbuf, kRGBAWebGray);
+    console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
 
     y -= FNSZ;
     stbsp_sprintf(textbuf, "y mom: %.4f", p->map_object_->momentum_.Y);
-    DrawText(x, y, textbuf, kRGBAWebGray);
+    console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
 
     y -= FNSZ;
     stbsp_sprintf(textbuf, "z mom: %.4f", p->map_object_->momentum_.Z);
-    DrawText(x, y, textbuf, kRGBAWebGray);
+    console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
 
     y -= FNSZ;
     stbsp_sprintf(textbuf, "  sec: %d", (int)(p->map_object_->subsector_->sector - level_sectors));
-    DrawText(x, y, textbuf, kRGBAWebGray);
+    console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
 
     y -= FNSZ;
     stbsp_sprintf(textbuf, "  sub: %d", (int)(p->map_object_->subsector_ - level_subsectors));
-    DrawText(x, y, textbuf, kRGBAWebGray);
+    console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
 
+    EndRenderUnit(console_verts);
     FinishUnitBatch();
 }
 
-void ConsolePrintEndoom()
+void ConsoleENDOOM()
 {
-    int      length = 0;
-    uint8_t *data   = nullptr;
-
-    data = OpenPackOrLumpInMemory("ENDOOM", {".bin"}, &length);
-    if (!data)
-        data = OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
-    if (!data)
-        data = OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
-    if (!data)
-        data = OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
-    if (!data)
+    ConsoleMessage(kConsoleOnly, "\n");
+    for (int i = 0; i < kENDOOMLines; i++)
     {
-        ConsolePrint("ConsolePrintEndoom: No ENDOOM screen found!\n");
-        return;
+        ConsoleAddENDOOMLine(quit_lines[i]);
     }
-    if (length != 4000)
-    {
-        ConsolePrint("ConsolePrintEndoom: Lump exists, but is malformed! (Length not "
-                     "equal "
-                     "to 4000 bytes)\n");
-        delete[] data;
-        return;
-    }
-    ConsolePrint("\n\n");
-    int row_counter = 0;
-    for (int i = 0; i < 4000; i += 2)
-    {
-        ConsoleEndoomPrintf(data[i + 1], "%c",
-                            ((int)data[i] == 0 || (int)data[i] == 255) ? 0x20
-                                                                       : (int)data[i]); // Fix crumpled up ENDOOMs lol
-        row_counter++;
-        if (row_counter == 80)
-        {
-            ConsolePrint("\n");
-            row_counter = 0;
-        }
-    }
-    ConsolePrint("\n");
-    delete[] data;
+    ConsoleMessage(kConsoleOnly, "\n");
 }
 
-void ConsoleCreateQuitScreen()
+void CreateQuitScreen()
 {
     int      length = 0;
     uint8_t *data   = nullptr;
@@ -1901,32 +1678,28 @@ void ConsoleCreateQuitScreen()
         data = OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
     if (!data)
     {
-        ConsolePrint("No ENDOOM screen found for this WAD!\n");
+        ConsoleMessage(kConsoleOnly, "No ENDOOM screen found!\n");
         return;
     }
     if (length != 4000)
     {
-        ConsolePrint("ConsoleCreateQuitScreen: ENDOOM exists, but is malformed! (Length "
+        ConsoleMessage(kConsoleOnly, "CreateQuitScreen: ENDOOM exists, but is malformed! (Length "
                      "not equal to 4000 bytes)\n");
         delete[] data;
         return;
     }
-    int row_counter = 0;
-    for (int i = 0; i < 4000; i += 2)
+
+    for (int i = kENDOOMLines-1; i >= 0; i--)
     {
-        ConsoleQuitEndoomPrintf(data[i + 1], "%c",
-                                ((uint8_t)data[i] == 0 || (uint8_t)data[i] == 255) ? 0x20 : (uint8_t)data[i]);
-        row_counter++;
-        if (row_counter == 80)
-        {
-            ConsoleQuitPrintf("\n");
-            row_counter = 0;
-        }
+        quit_lines[i] = new ConsoleLine();
+        quit_lines[i]->endoom_bytes_.resize(kENDOOMBytesPerLine);
+        memcpy(quit_lines[i]->endoom_bytes_.data(), &data[i * kENDOOMBytesPerLine], kENDOOMBytesPerLine);
     }
+
     delete[] data;
 }
 
-void ClearConsoleLines()
+void ClearConsole()
 {
     for (int i = 0; i < console_used_lines; i++)
     {

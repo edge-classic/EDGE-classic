@@ -248,7 +248,7 @@ void LoadLevel_Bits(void)
 
     game_state = kGameStateLevel;
 
-    SetConsoleVisible(kConsoleVisibilityNotVisible);
+    SetConsoleVisibility(kConsoleNotVisible);
 
     // clear cmd building stuff
     ClearEventInput();
@@ -961,7 +961,7 @@ static void GameDoSaveGame(void)
         SaveClearSlot(dir_name);
         SaveCopySlot("current", dir_name);
 
-        ConsolePrint("%s", language["GameSaved"]);
+        ConsoleMessage(kConsoleOnly, "%s", language["GameSaved"]);
     }
     else
     {

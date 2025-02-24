@@ -774,8 +774,8 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
 
         trans = 1.0f;
 
-        blending |= kBlendingAlpha | kBlendingMasked;
-        blending &= ~kBlendingLess;
+        blending = (BlendingMode)(blending | (kBlendingAlpha | kBlendingMasked));
+        blending = (BlendingMode)(blending & ~kBlendingLess);
     }
     else /* (! data.is_fuzzy) */
     {
@@ -886,8 +886,8 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
     {
         if (pass == 1)
         {
-            blending &= ~kBlendingAlpha;
-            blending |= kBlendingAdd;
+            blending = (BlendingMode)(blending & ~kBlendingAlpha);
+            blending = (BlendingMode)(blending | kBlendingAdd);
             render_state->Disable(GL_FOG);
         }
 

@@ -1106,8 +1106,8 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
 
         trans = 1.0f;
 
-        blending |= kBlendingAlpha | kBlendingMasked;
-        blending &= ~kBlendingLess;
+        blending = (BlendingMode)(blending | (kBlendingAlpha | kBlendingMasked));
+        blending = (BlendingMode)(blending & ~kBlendingLess);
     }
     else /* (! data.is_fuzzy_) */
     {
@@ -1207,8 +1207,8 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
     {
         if (pass == 1)
         {
-            blending &= ~kBlendingAlpha;
-            blending |= kBlendingAdd;
+            blending = (BlendingMode)(blending & ~kBlendingAlpha);
+            blending = (BlendingMode)(blending | kBlendingAdd);
             render_state->Disable(GL_FOG);
         }
 

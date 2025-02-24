@@ -696,15 +696,15 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
     if (trans <= 0)
         return;
 
-    int blending = kBlendingNone;
+    BlendingMode blending = kBlendingNone;
 
     if (mo->hyper_flags_ & kHyperFlagNoZBufferUpdate)
-        blending |= kBlendingNoZBuffer;
+        blending = (BlendingMode)(blending | kBlendingNoZBuffer);
 
     if (render_mirror_set.Reflective())
-        blending |= kBlendingCullFront;
+        blending = (BlendingMode)(blending | kBlendingCullFront);
     else
-        blending |= kBlendingCullBack;
+        blending = (BlendingMode)(blending | kBlendingCullBack);
 
     data.map_object_ = mo;
     data.model_      = md;

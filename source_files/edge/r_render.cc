@@ -114,7 +114,7 @@ static void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref, 
 
 inline BlendingMode GetSurfaceBlending(float alpha, ImageOpacity opacity)
 {
-    int blending;
+    BlendingMode blending;
 
     if (alpha >= 0.99f && opacity == kOpacitySolid)
         blending = kBlendingNone;
@@ -124,9 +124,9 @@ inline BlendingMode GetSurfaceBlending(float alpha, ImageOpacity opacity)
         blending = kBlendingLess;
 
     if (alpha < 0.99f || opacity == kOpacityComplex)
-        blending |= kBlendingAlpha;
+        blending = (BlendingMode)(blending | kBlendingAlpha);
 
-    return (BlendingMode)blending;
+    return blending;
 }
 
 static float Slope_GetHeight(SlopePlane *slope, float x, float y)
@@ -216,7 +216,7 @@ struct WallCoordinateData
     GLuint tex_id;
 
     int pass;
-    int blending;
+    BlendingMode blending;
 
     uint8_t R, G, B;
     uint8_t trans;
@@ -280,7 +280,7 @@ struct PlaneCoordinateData
     GLuint tex_id;
 
     int pass;
-    int blending;
+    BlendingMode blending;
 
     float R, G, B;
     float trans;
@@ -363,7 +363,7 @@ static void DLIT_Wall(MapObject *mo, void *dataptr)
 
     EPI_ASSERT(mo->dynamic_light_.shader);
 
-    int blending = (data->blending & ~kBlendingAlpha) | kBlendingAdd;
+    BlendingMode blending = (BlendingMode)((data->blending & ~kBlendingAlpha) | kBlendingAdd);
 
     mo->dynamic_light_.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id, data->trans, &data->pass, blending,
                                         data->mid_masked, data, WallCoordFunc);
@@ -375,7 +375,7 @@ static void GLOWLIT_Wall(MapObject *mo, void *dataptr)
 
     EPI_ASSERT(mo->dynamic_light_.shader);
 
-    int blending = (data->blending & ~kBlendingAlpha) | kBlendingAdd;
+    BlendingMode blending = (BlendingMode)((data->blending & ~kBlendingAlpha) | kBlendingAdd);
 
     mo->dynamic_light_.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id, data->trans, &data->pass, blending,
                                         data->mid_masked, data, WallCoordFunc);
@@ -402,7 +402,7 @@ static void DLIT_Plane(MapObject *mo, void *dataptr)
 
     EPI_ASSERT(mo->dynamic_light_.shader);
 
-    int blending = (data->blending & ~kBlendingAlpha) | kBlendingAdd;
+    BlendingMode blending = (BlendingMode)((data->blending & ~kBlendingAlpha) | kBlendingAdd);
 
     mo->dynamic_light_.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id, data->trans, &data->pass, blending,
                                         false /* masked */, data, PlaneCoordFunc);
@@ -414,7 +414,7 @@ static void GLOWLIT_Plane(MapObject *mo, void *dataptr)
 
     EPI_ASSERT(mo->dynamic_light_.shader);
 
-    int blending = (data->blending & ~kBlendingAlpha) | kBlendingAdd;
+    BlendingMode blending = (BlendingMode)((data->blending & ~kBlendingAlpha) | kBlendingAdd);
 
     mo->dynamic_light_.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id, data->trans, &data->pass, blending,
                                         false, data, PlaneCoordFunc);
@@ -499,7 +499,7 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
     // (need to load the image to know the opacity)
     GLuint tex_id = ImageCache(image, true, render_view_effect_colormap);
 
-    int32_t blending = GetSurfaceBlending(trans, (ImageOpacity)image->opacity_);
+    BlendingMode blending = GetSurfaceBlending(trans, (ImageOpacity)image->opacity_);
 
     // ignore non-solid walls in solid mode (& vice versa)
     if ((solid_mode && (blending & kBlendingAlpha)) || (!solid_mode && !(blending & kBlendingAlpha)))
@@ -618,7 +618,7 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
     if (mid_masked &&
         (!current_seg->linedef->special || AlmostEquals(current_seg->linedef->special->s_yspeed_,
                                                         0.0f))) // Allow vertical scroller midmasks - Dasho
-        blending |= kBlendingClampY;
+        blending = (BlendingMode)(blending | kBlendingClampY);
 
     WallCoordinateData data;
 
@@ -663,9 +663,9 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
         data.tx0        = data.tx0 + 25;
         data.ty0        = data.ty0 + 25;
         swirl_pass      = 2;
-        int   old_blend = data.blending;
+        BlendingMode old_blend = data.blending;
         float old_dt    = data.trans;
-        data.blending   = kBlendingMasked | kBlendingAlpha;
+        data.blending   = (BlendingMode)(kBlendingMasked | kBlendingAlpha);
         data.trans      = 85;
         cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id, 0.33f, &data.pass, data.blending, false, &data,
                               WallCoordFunc);
@@ -1588,7 +1588,7 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
     // (need to load the image to know the opacity)
     GLuint tex_id = ImageCache(surf->image, true, render_view_effect_colormap);
 
-    int32_t blending = GetSurfaceBlending(trans, (ImageOpacity)surf->image->opacity_);
+    BlendingMode blending = GetSurfaceBlending(trans, (ImageOpacity)surf->image->opacity_);
 
     // ignore non-solid walls in solid mode (& vice versa)
     if ((solid_mode && (blending & kBlendingAlpha)) || (!solid_mode && !(blending & kBlendingAlpha)))
@@ -1725,9 +1725,9 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
         data.tx0        = data.tx0 + 25;
         data.ty0        = data.ty0 + 25;
         swirl_pass      = 2;
-        int   old_blend = data.blending;
+        BlendingMode old_blend = data.blending;
         float old_dt    = data.trans;
-        data.blending   = kBlendingMasked | kBlendingAlpha;
+        data.blending   = (BlendingMode)(kBlendingMasked | kBlendingAlpha);
         data.trans      = 0.33f;
         cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id, 0.33f, &data.pass, data.blending, false, &data,
                               PlaneCoordFunc);
@@ -2337,7 +2337,7 @@ static void DLIT_Flood(MapObject *mo, void *dataptr)
     float dx = current_seg->vertex_2->X - sx;
     float dy = current_seg->vertex_2->Y - sy;
 
-    int blending = kBlendingAdd;
+    BlendingMode blending = kBlendingAdd;
 
     for (int row = 0; row < data->piece_row; row++)
     {

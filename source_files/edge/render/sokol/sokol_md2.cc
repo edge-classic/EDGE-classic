@@ -1059,7 +1059,7 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
     if (trans <= 0)
         return;
 
-    int blending;
+    BlendingMode blending;
 
     if (trans >= 0.99f && skin_img->opacity_ == kOpacitySolid)
         blending = kBlendingNone;
@@ -1069,15 +1069,15 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         blending = kBlendingLess;
 
     if (trans < 0.99f || skin_img->opacity_ == kOpacityComplex)
-        blending |= kBlendingAlpha;
+        blending = (BlendingMode)(blending | kBlendingAlpha);
 
     if (mo->hyper_flags_ & kHyperFlagNoZBufferUpdate)
-        blending |= kBlendingNoZBuffer;
+        blending = (BlendingMode)(blending | kBlendingNoZBuffer);
 
     if (render_mirror_set.Reflective())
-        blending |= kBlendingCullFront;
+        blending = (BlendingMode)(blending | kBlendingCullFront);
     else
-        blending |= kBlendingCullBack;
+        blending = (BlendingMode)(blending | kBlendingCullBack);
 
     data.map_object_ = mo;
     data.model_      = md;
@@ -1147,8 +1147,8 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
 
         trans = 1.0f;
 
-        blending |= kBlendingAlpha | kBlendingMasked;
-        blending &= ~kBlendingLess;
+        blending = (BlendingMode)(blending | (kBlendingAlpha | kBlendingMasked));
+        blending = (BlendingMode)(blending & ~kBlendingLess);
     }
     else /* (! data.is_fuzzy_) */
     {
@@ -1249,8 +1249,8 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
     {
         if (pass == 1)
         {
-            blending &= ~kBlendingAlpha;
-            blending |= kBlendingAdd;
+            blending = (BlendingMode)(blending & ~kBlendingAlpha);
+            blending = (BlendingMode)(blending | kBlendingAdd);
             render_state->Disable(GL_FOG);
         }
 

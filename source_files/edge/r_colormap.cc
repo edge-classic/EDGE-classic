@@ -626,7 +626,7 @@ class ColormapShader : public AbstractShader
         Sample(col, mx, my, mz);
     }
 
-    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
+    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, BlendingMode blending, bool masked,
                           void *data, ShaderCoordinateFunction func)
     {
         EPI_UNUSED(masked);

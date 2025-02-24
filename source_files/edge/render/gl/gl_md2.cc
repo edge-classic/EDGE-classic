@@ -1018,7 +1018,7 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
     if (trans <= 0)
         return;
 
-    int blending;
+    BlendingMode blending;
 
     if (trans >= 0.99f && skin_img->opacity_ == kOpacitySolid)
         blending = kBlendingNone;
@@ -1028,15 +1028,15 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         blending = kBlendingLess;
 
     if (trans < 0.99f || skin_img->opacity_ == kOpacityComplex)
-        blending |= kBlendingAlpha;
+        blending = (BlendingMode)(blending | kBlendingAlpha);
 
     if (mo->hyper_flags_ & kHyperFlagNoZBufferUpdate)
-        blending |= kBlendingNoZBuffer;
+        blending = (BlendingMode)(blending | kBlendingNoZBuffer);
 
     if (render_mirror_set.Reflective())
-        blending |= kBlendingCullFront;
+        blending = (BlendingMode)(blending | kBlendingCullFront);
     else
-        blending |= kBlendingCullBack;
+        blending = (BlendingMode)(blending | kBlendingCullBack);
 
     data.map_object_ = mo;
     data.model_      = md;

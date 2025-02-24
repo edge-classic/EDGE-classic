@@ -21,6 +21,7 @@
 #include "ddf_types.h"
 #include "i_defs_gl.h"
 #include "p_mobj.h"
+#include "r_units.h"
 
 class ColorMixer
 {
@@ -105,7 +106,7 @@ class AbstractShader
     virtual void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon = false) = 0;
 
     // used to render overlay textures (world polygons)
-    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
+    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, BlendingMode blending, bool masked,
                           void *data, ShaderCoordinateFunction func) = 0;
 };
 

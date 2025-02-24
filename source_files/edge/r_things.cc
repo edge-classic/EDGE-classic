@@ -92,18 +92,18 @@ static int          crosshair_which;
 
 inline BlendingMode GetThingBlending(float alpha, ImageOpacity opacity, int32_t hyper_flags = 0)
 {
-    int blending = kBlendingMasked;
+    BlendingMode blending = kBlendingMasked;
 
     if (alpha >= 0.11f && opacity != kOpacityComplex)
         blending = kBlendingLess;
 
     if (alpha < 0.99 || opacity == kOpacityComplex)
-        blending |= kBlendingAlpha;
+        blending = (BlendingMode)(blending | kBlendingAlpha);
 
     if (hyper_flags & kHyperFlagNoZBufferUpdate)
-        blending |= kBlendingNoZBuffer;
+        blending = (BlendingMode)(blending | kBlendingNoZBuffer);
 
-    return (BlendingMode)blending;
+    return blending;
 }
 
 static float GetHoverDeltaZ(MapObject *mo, float bob_mult = 0)
@@ -311,17 +311,17 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
 
     data.colors[0].Clear();
 
-    int blending = kBlendingMasked;
+    BlendingMode blending = kBlendingMasked;
 
     if (trans >= 0.11f && image->opacity_ != kOpacityComplex)
         blending = kBlendingLess;
 
     if (trans < 0.99 || image->opacity_ == kOpacityComplex)
-        blending |= kBlendingAlpha;
+        blending = (BlendingMode)(blending | kBlendingAlpha);
 
     if (is_fuzzy)
     {
-        blending = kBlendingMasked | kBlendingAlpha;
+        blending = (BlendingMode)(kBlendingMasked | kBlendingAlpha);
         trans    = 1.0f;
     }
 
@@ -399,8 +399,8 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
     {
         if (pass == 1)
         {
-            blending &= ~kBlendingAlpha;
-            blending |= kBlendingAdd;
+            blending = (BlendingMode)(blending & ~kBlendingAlpha);
+            blending = (BlendingMode)(blending | kBlendingAdd);
         }
 
         bool is_additive = (pass > 0 && pass == num_pass - 1);
@@ -1208,11 +1208,11 @@ static bool RenderThing(DrawThing *dthing, bool solid)
     GLuint tex_id = ImageCache(
         image, false, render_view_effect_colormap ? render_view_effect_colormap : dthing->map_object->info_->palremap_);
 
-    int blending = GetThingBlending(trans, (ImageOpacity)image->opacity_, mo->hyper_flags_);
+    BlendingMode blending = GetThingBlending(trans, (ImageOpacity)image->opacity_, mo->hyper_flags_);
 
     if (is_fuzzy)
     {
-        blending |= kBlendingAlpha;
+        blending = (BlendingMode)(blending | kBlendingAlpha);
     }
 
     if (solid)
@@ -1318,7 +1318,7 @@ static bool RenderThing(DrawThing *dthing, bool solid)
 
     if (is_fuzzy)
     {
-        blending = kBlendingMasked | kBlendingAlpha;
+        blending = (BlendingMode)(kBlendingMasked | kBlendingAlpha);
         trans    = 1.0f;
 
         float dist = ApproximateDistance(mo->x - view_x, mo->y - view_y, mo->z - view_z);
@@ -1374,8 +1374,8 @@ static bool RenderThing(DrawThing *dthing, bool solid)
     {
         if (pass == 1)
         {
-            blending &= ~kBlendingAlpha;
-            blending |= kBlendingAdd;
+            blending = (BlendingMode)(blending & ~kBlendingAlpha);
+            blending = (BlendingMode)(blending | kBlendingAdd);
         }
 
         bool is_additive = (pass > 0 && pass == num_pass - 1);

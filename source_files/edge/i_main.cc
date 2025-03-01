@@ -45,12 +45,6 @@ extern "C"
 
         executable_path = SDL_GetBasePath();
 
-#ifdef _WIN32
-        // -AJA- change current dir to match executable
-        if (!epi::CurrentDirectorySet(executable_path))
-            FatalError("Couldn't set program directory to %s!!\n", executable_path.c_str());
-#endif
-
         // Run EDGE. it never returns
         EdgeMain(argc, (const char **)argv);
 

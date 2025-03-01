@@ -58,7 +58,6 @@ bool        IsPathAbsolute(std::string_view path);
 void        ReplaceExtension(std::string &path, std::string_view ext);
 
 // Directory Functions
-bool CurrentDirectorySet(std::string_view dir);
 bool IsDirectory(std::string_view dir);
 bool MakeDirectory(std::string_view dir);
 bool ReadDirectory(std::vector<DirectoryEntry> &fsd, const std::string &dir, const char *mask);

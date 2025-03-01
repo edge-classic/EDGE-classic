@@ -123,20 +123,6 @@ bool IsDirectory(std::string_view dir)
 #endif
     return (dircheck.st_mode & _S_IFDIR);
 }
-static std::string CurrentDirectoryGet()
-{
-    std::string    directory;
-    const wchar_t *dir = _wgetcwd(nullptr, 0);
-    if (dir)
-        directory = epi::WStringToUTF8(dir);
-    return directory; // can be empty
-}
-bool CurrentDirectorySet(std::string_view dir)
-{
-    EPI_ASSERT(!dir.empty());
-    std::wstring wdir = epi::UTF8ToWString(dir);
-    return _wchdir(wdir.c_str()) == 0;
-}
 bool MakeDirectory(std::string_view dir)
 {
     EPI_ASSERT(!dir.empty());
@@ -167,23 +153,11 @@ bool ReadDirectory(std::vector<DirectoryEntry> &fsd, const std::string &dir, con
     if (dir.empty() || !FileExists(dir) || !mask)
         return false;
 
-    std::string prev_dir = CurrentDirectoryGet();
-
-    if (prev_dir.empty()) // Something goofed up, don't make it worse
-        return false;
-
-    if (!CurrentDirectorySet(dir))
-        return false;
-
-    std::wstring     fmask = epi::UTF8ToWString(mask);
     WIN32_FIND_DATAW fdataw;
-    HANDLE           fhandle = FindFirstFileW(fmask.c_str(), &fdataw);
+    HANDLE           fhandle = FindFirstFileW(epi::UTF8ToWString(epi::PathAppend(dir, mask)).c_str(), &fdataw);
 
     if (fhandle == INVALID_HANDLE_VALUE)
-    {
-        CurrentDirectorySet(prev_dir);
         return false;
-    }
 
     fsd.clear();
 
@@ -200,14 +174,14 @@ bool ReadDirectory(std::vector<DirectoryEntry> &fsd, const std::string &dir, con
             new_entry.name   = dir;
             new_entry.is_dir = (fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? true : false;
             new_entry.size   = new_entry.is_dir ? 0 : fdataw.nFileSizeLow;
-            new_entry.name.push_back('/');
+            if (!IsDirectorySeparator(filename[0]))
+                new_entry.name.push_back('/');
             new_entry.name.append(filename);
             fsd.push_back(new_entry);
         }
     } while (FindNextFileW(fhandle, &fdataw));
 
     FindClose(fhandle);
-    CurrentDirectorySet(prev_dir);
     return true;
 }
 bool WalkDirectory(std::vector<DirectoryEntry> &fsd, const std::string &dir)
@@ -215,22 +189,11 @@ bool WalkDirectory(std::vector<DirectoryEntry> &fsd, const std::string &dir)
     if (dir.empty() || !FileExists(dir))
         return false;
 
-    std::string prev_dir = CurrentDirectoryGet();
-
-    if (prev_dir.empty()) // Something goofed up, don't make it worse
-        return false;
-
-    if (!CurrentDirectorySet(dir))
-        return false;
-
     WIN32_FIND_DATAW fdataw;
-    HANDLE           fhandle = FindFirstFileW(L"*.*", &fdataw);
+    HANDLE           fhandle = FindFirstFileW(epi::UTF8ToWString(epi::PathAppend(dir, "*.*")).c_str(), &fdataw);
 
     if (fhandle == INVALID_HANDLE_VALUE)
-    {
-        CurrentDirectorySet(prev_dir);
         return false;
-    }
 
     do
     {
@@ -242,7 +205,8 @@ bool WalkDirectory(std::vector<DirectoryEntry> &fsd, const std::string &dir)
         else if (fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
         {
             std::string subdir = dir;
-            subdir.push_back('/');
+            if (!IsDirectorySeparator(filename[0]))
+                subdir.push_back('/');
             subdir.append(filename);
             if (!WalkDirectory(fsd, subdir))
                 return false;
@@ -253,14 +217,14 @@ bool WalkDirectory(std::vector<DirectoryEntry> &fsd, const std::string &dir)
             new_entry.name   = dir;
             new_entry.is_dir = false;
             new_entry.size   = fdataw.nFileSizeLow;
-            new_entry.name.push_back('/');
+            if (!IsDirectorySeparator(filename[0]))
+                new_entry.name.push_back('/');
             new_entry.name.append(filename);
             fsd.push_back(new_entry);
         }
     } while (FindNextFileW(fhandle, &fdataw));
 
     FindClose(fhandle);
-    CurrentDirectorySet(prev_dir);
     return true;
 }
 #else // POSIX API
@@ -326,19 +290,6 @@ bool IsDirectory(std::string_view dir)
     if (stat(std::string(dir).c_str(), &dircheck) == -1)
         return false;
     return S_ISDIR(dircheck.st_mode);
-}
-static std::string CurrentDirectoryGet()
-{
-    std::string directory;
-    const char *dir = getcwd(nullptr, 0);
-    if (dir)
-        directory = dir;
-    return directory;
-}
-bool CurrentDirectorySet(std::string_view dir)
-{
-    EPI_ASSERT(!dir.empty());
-    return chdir(std::string(dir).c_str()) == 0;
 }
 bool MakeDirectory(std::string_view dir)
 {

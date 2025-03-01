@@ -312,13 +312,9 @@ static void ProcessSubDirectory(PackFile *pack, const std::string &fullpath)
     {
         if (!fsd[i].is_dir)
         {
+            // Do not allow filenames without extensions to be added to the pack directory
             if (epi::GetExtension(fsd[i].name).empty())
-            {
-                LogWarning("%s has no extension. Bare filenames are not supported for "
-                           "mounted directories.\n",
-                           fsd[i].name.c_str());
                 continue;
-            }
             std::string filename = epi::GetFilename(fsd[i].name);
             std::string packpath = epi::MakePathRelative(pack->parent_->name_, fsd[i].name);
             pack->directories_[d].AddEntry(filename, fsd[i].name, packpath, 0);

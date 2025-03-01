@@ -362,15 +362,7 @@ bool ReadDirectory(std::vector<DirectoryEntry> &fsd, const std::string &dir, con
     if (dir.empty() || !FileExists(dir) || !mask)
         return false;
 
-    std::string prev_dir = CurrentDirectoryGet();
-
     std::string mask_ext = epi::GetExtension(mask); // Allows us to retain "*.*" style syntax
-
-    if (prev_dir.empty())                           // Something goofed up, don't make it worse
-        return false;
-
-    if (!CurrentDirectorySet(dir))
-        return false;
 
     DIR *handle = opendir(dir.c_str());
     if (!handle)
@@ -400,19 +392,18 @@ bool ReadDirectory(std::vector<DirectoryEntry> &fsd, const std::string &dir, con
 
         struct stat finfo;
 
+        filename = epi::PathAppend(dir, filename);
+
         if (stat(filename.c_str(), &finfo) != 0)
             continue;
 
         epi::DirectoryEntry new_entry;
-        new_entry.name   = dir;
+        new_entry.name   = filename;
         new_entry.is_dir = S_ISDIR(finfo.st_mode) ? true : false;
         new_entry.size   = finfo.st_size;
-        new_entry.name.push_back('/');
-        new_entry.name.append(filename);
         fsd.push_back(new_entry);
     }
 
-    CurrentDirectorySet(prev_dir);
     closedir(handle);
     return true;
 }

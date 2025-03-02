@@ -510,6 +510,12 @@ void ShutdownGraphics(void)
 
     render_backend->Shutdown();
 
+    if (program_window != nullptr)
+    {
+        SDL_DestroyWindow(program_window);
+        program_window = nullptr;
+    }
+
     if (SDL_WasInit(SDL_INIT_EVERYTHING))
     {
         DeterminePixelAspect();

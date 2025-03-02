@@ -19,7 +19,7 @@ const void *sapp_d3d11_get_depth_stencil_view(void);
 
 void sapp_d3d11_resize_default_render_target(int32_t width, int32_t height);
 
-void sapp_d3d11_destroy_device_and_swapchain(void);
+void sapp_d3d11_shutdown(void);
 
 void sapp_d3d11_capture_screen(int32_t width, int32_t height, int32_t stride, uint8_t *dest);
 

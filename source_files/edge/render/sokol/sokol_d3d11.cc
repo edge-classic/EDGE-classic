@@ -474,13 +474,20 @@ const void *sapp_d3d11_get_depth_stencil_view(void)
     return _sapp.d3d11.dsv;
 }
 
-void sapp_d3d11_destroy_device_and_swapchain(void)
+static void _sapp_d3d11_destroy_device_and_swapchain(void)
 {
     _SAPP_SAFE_RELEASE(_sapp.d3d11.swap_chain);
     _SAPP_SAFE_RELEASE(_sapp.d3d11.dxgi_device);
     _SAPP_SAFE_RELEASE(_sapp.d3d11.device_context);
     _SAPP_SAFE_RELEASE(_sapp.d3d11.device);
 }
+
+void sapp_d3d11_shutdown(void)
+{
+    _sapp_d3d11_destroy_default_render_target();
+    _sapp_d3d11_destroy_device_and_swapchain();
+}
+
 
 // D3D11CalcSubresource only exists with helpers enabled
 static UINT sapp_d3d11_calcsubresource(UINT mip_slice, UINT array_slice, UINT mip_levels)

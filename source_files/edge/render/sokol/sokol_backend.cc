@@ -246,7 +246,7 @@ class SokolRenderBackend : public RenderBackend
     void Shutdown()
     {
 #ifdef SOKOL_D3D11
-        sapp_d3d11_destroy_device_and_swapchain();
+        sapp_d3d11_shutdown();
 #endif
 
         BSPStopThread();

@@ -1742,7 +1742,8 @@ void A_ConsumeAmmo(MapObject *mo)
     int count = args[0] == 0 ? info->ammopershot_[0] : args[0];
 
     p->ammo_[ammotype].count -= count;
-    EPI_ASSERT(p->ammo_[ammotype].count >= 0);
+    if (p->ammo_[ammotype].count < 0)
+        p->ammo_[ammotype].count = 0;
 }
 
 void A_CheckAmmo(MapObject *mo)

@@ -304,6 +304,10 @@ void ConvertWeapon(int w_num)
     }
     else if (info->ammo_per_shot != 0)
         wad::Printf("AMMOPERSHOT = %d;\n", info->ammo_per_shot);
+    else if (w_num == kwp_supershotgun)
+        wad::Printf("AMMOPERSHOT = 2;\n");
+    else
+        wad::Printf("AMMOPERSHOT = 1;\n");
 
     wad::Printf("AUTOMATIC = TRUE;\n");
 

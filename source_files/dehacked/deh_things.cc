@@ -581,10 +581,12 @@ void things::MarkThing(int mt_num)
         entry->doomednum = -1;
 
         // DEHEXTRA things have a default doomednum
-        if (kMT_EXTRA00 <= mt_num && mt_num <= kMT_EXTRA99)
+        // Dasho: Only specify a doomed number if the "ID #" field
+        // is used
+        /*if (kMT_EXTRA00 <= mt_num && mt_num <= kMT_EXTRA99)
         {
             entry->doomednum = mt_num;
-        }
+        }*/
 
         // Set some default MBF21 values to be non-applicable unless actually set
         entry->proj_group = entry->splash_group = entry->infight_group = entry->fast_speed = entry->melee_range = -2;

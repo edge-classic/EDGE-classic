@@ -449,17 +449,17 @@ enum AmmunitionType
 // -AJA- 2000/01/12: Weapon special flags
 enum WeaponFlag
 {
-    WeaponFlagNone             = 0,
-    WeaponFlagSilentToMonsters = (1 << 0), // monsters cannot hear this weapon
-    WeaponFlagAnimated         = (1 << 1), // raise/lower states are animated
-    WeaponFlagSwitchAway       = (1 << 4), // select new weapon when we run out of ammo
+    WeaponFlagNone               = 0,
+    WeaponFlagSilentToMonsters   = (1 << 0), // monsters cannot hear this weapon
+    WeaponFlagAnimated           = (1 << 1), // raise/lower states are animated
+    WeaponFlagSwitchAway         = (1 << 4), // select new weapon when we run out of ammo
     // reload flags:
     WeaponFlagReloadWhileTrigger = (1 << 8),  // allow reload while holding trigger
     WeaponFlagFreshReload        = (1 << 9),  // automatically reload when new ammo is avail
     WeaponFlagManualReload       = (1 << 10), // enables the manual reload key
     WeaponFlagPartialReload      = (1 << 11), // manual reload: allow partial refill
     // MBF21 flags:
-    WeaponFlagNoAutoFire = (1 << 12), // Do not fire if switched to while trigger is held
+    WeaponFlagNoAutoFire         = (1 << 12), // Do not fire if switched to while trigger is held
 };
 
 constexpr WeaponFlag kDefaultWeaponFlags = (WeaponFlag)(WeaponFlagReloadWhileTrigger | WeaponFlagManualReload |

@@ -2409,16 +2409,27 @@ static void LaunchTracker(MapObject *object)
 //
 void A_EffectTracker(MapObject *object)
 {
-    MapObject              *tracker;
-    MapObject              *target;
-    const AttackDefinition *attack;
+    MapObject              *tracker = nullptr;
+    MapObject              *target = nullptr;
+    const AttackDefinition *attack = nullptr;
     BAMAngle                angle;
     float                   damage;
 
-    if (!object->target_ || !object->current_attack_)
+    if (!object->target_)
         return;
 
-    attack = object->current_attack_;
+    if (object->current_attack_)     
+        attack = object->current_attack_;
+    else
+    {
+        // If the object's current attack is null, hope that this is Dehacked using
+        // A_VileAttack directly and that ARCHVILE_FIRE is the intended attack - Dasho
+        attack = atkdefs.Lookup("ARCHVILE_FIRE");
+    }
+
+    if (!attack)
+        return;
+
     target = object->target_;
 
     if (attack->flags_ & kAttackFlagFaceTarget)
@@ -5020,7 +5031,7 @@ void A_SpawnObject(MapObject *mo)
                         mo->y + (ref->x_offset * newsin + ref->y_offset * newcos), mo->z + ref->z_offset, type);
     EPI_ASSERT(spawn);
 
-    MapObjectSetDirectionAndSpeed(spawn, newangle, 0, type->speed_);
+    spawn->angle_ = newangle;
     spawn->momentum_.X += newcos * ref->x_velocity - ref->y_velocity * newsin;
     spawn->momentum_.Y += newsin * ref->x_velocity + newcos * ref->y_velocity;
     spawn->momentum_.Z += ref->z_velocity;

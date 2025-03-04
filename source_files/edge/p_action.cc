@@ -605,7 +605,7 @@ static bool DecideRangeAttack(MapObject *object)
         {
             for (StateRange group : object->info_->state_grp_)
             {
-                for (int state_check = missile_check; state_check < group.last; state_check++)
+                for (int state_check = group.first; state_check < group.last; state_check++)
                 {
                     State *check = states + state_check;
                     if (check && check->action &&
@@ -663,6 +663,8 @@ static bool DecideRangeAttack(MapObject *object)
     // Object likes to fire? if so, double the chance of it happening
     if (object->extended_flags_ & kExtendedFlagTriggerHappy)
         distance /= 2;
+
+    distance = HMM_MIN(distance, 200.0f);
 
     // The chance in the object is one given that the attack will happen, so
     // we inverse the result (since its one in 255) to get the chance that

@@ -73,16 +73,8 @@ NightmareCheck = "Careful, this will be tough.\n"
 NoQLoadInNetGame = "you can't quickload during a netquest!\n"
   "\n"
   "press a key.";
-QuickLoad = "do you want to quickload the quest named\n"
-  "\n"
-  "'%s'?\n"
-  "\n"
-  "press y or n.";
-QuickSaveOver = "quicksave over your quest named\n"
-  "\n"
-  "'%s'?\n"
-  "\n"
-  "press y or n.";
+QuickLoad = "do you want to quickload the quest named";
+QuickSaveOver = "quicksave over your quest named";
 ChoppersNote = "... Eat Chex(R)!";
 GodModeOFF = "Invincible Mode Off";
 GodModeON = "Invincible Mode On";

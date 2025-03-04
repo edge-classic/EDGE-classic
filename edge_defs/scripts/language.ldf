@@ -80,14 +80,14 @@ DevelopmentMode="Development Mode is enabled.\n";
 PressKey="Press A Key";
 PressYorN="Press Y or N";
 
-QuickSaveOver="quicksave over your game named\n\n'%s'?\n\npress y or n.";
+QuickSaveOver="quicksave over your game named";
 NoQuickSaveSlot="you haven't picked a quicksave slot yet!\n\npress a key.";
 SaveWhenNotPlaying="you can't save if you aren't playing!\n\npress a key.";
 QuitWhenWebPlayer="You can't quit from the web player!\nPress Escape to release the cursor and close your browser.";
 
 NoLoadInNetGame="you can't load while in a net game!\n\npress a key.";
 NoQLoadInNetGame="you can't quickload during a netgame!\n\npress a key." ;
-QuickLoad="do you want to quickload the game named\n\n'%s'?\n\npress y or n.";
+QuickLoad="do you want to quickload the game named";
 
 NewNetGame="you can't start a new game\n"
            "while in a network game.\n\npress a key.";
@@ -374,9 +374,7 @@ PlayerTargetingOff="Monsters will not target player";
 PlayerTargetingOn="Monsters will target player";
 UnlockCheat="Got all the keys!";
 LoadedCheat="Full ammo added!";
-MonstersKilled="%d Monsters Killed.";
-CDdisabled="CD Audio has not been enabled";
-CDPlayTrack="Now Playing Track %d";
+MonstersKilled="Monsters Killed.";
 
 LevelQ="Level Change!\nEnter Level Name:\n\n";
 MusicQ="Music Change!\nEnter Music Name:\n\n";
@@ -546,8 +544,7 @@ PlayState=       "P_Init: Init Playloop state.\n";
 SoundInit=       "S_Init: Setting up sound.\n";
 STBarInit=       "ST_Init: Init status bar.\n";
 SendNet=         "sending network start info...\n";
-TurboScale=      "turbo scale: %i%%\n";
-IsTurbo=         "%s is turbo!";
+TurboScale=      "turbo scale:";
 AllocScreens=    "V_Init: allocate screens.\n";
 WadFileInit=     "W_Init: Init WADfiles.\n";
 ZoneMemoryAlloc= "Z_Init: Init Zone Memory Allocation. \n";
@@ -577,21 +574,7 @@ Notice=
  " and implemented by the EDGE-Classic Team (https://edge-classic.github.io)\n"
  "=======================================================================================\n";
 
-JoystickCentre= "CENTRE the joystick\n\npress a key.";
-JoystickTL=     "Push the joystick to the UPPER LEFT corner\n\npress a key.";
-JoystickBR=     "Push the joystick to the BOTTOM RIGHT corner\n\npress a key.";
-JoystickHAT=    "Move the hat to the %s position\n\npress a key.";
-JoyThrottleMAX= "Set the throttle to MAXIMUM\n\npress a key.";
-JoyThrottleMIN= "Set the throttle to MINIMUM\n\npress a key.";
-JoystickCentreT= "CENTRE the joystick and press a key:";
-JoystickTLT=     "Push the joystick to the UPPER LEFT corner and press a key:";
-JoystickBRT=     "Push the joystick to the BOTTOM RIGHT corner and press a key:";
-JoystickHATT=    "Move the hat to the %s position and press a key:";
-JoyThrottleMAXT= "Set the throttle to MAXIMUM and press a key:";
-JoyThrottleMINT= "Set the throttle to MINIMUM and press a key:";
-
-ModeSelErrT=      "Unable to Initialise Graphics Mode %d x %d x %dbpp!";
-ModeSelErr=       "Unable to Initialise\nGraphics Mode %d x %d x %dbpp!\n\npress a key.";
+ModeSelErr=      "Unable to Initialise Graphics Mode";
 
 // Menu option text (so menu's can change to other languages)
 OptStandardControls="Standard Controls";
@@ -834,11 +817,7 @@ DevelopmentMode = "Modo de Desarrollo ON.\n";
 PressKey = "Presiona una tecla.";
 PressYorN = "Presiona y o n.";
 
-QuickSaveOver = "Guardado rapido sobre tu juego llamado\n"
-	"\n"
-	"'%s'?\n"
-	"\n"
-	"presiona y o n.";
+QuickSaveOver = "Guardado rapido sobre tu juego llamado";
 NoQuickSaveSlot = "No has elegido una casilla de guardado rapido todavia!\n"
 	"\n"
 	"presiona una tecla.";
@@ -852,11 +831,7 @@ NoLoadInNetGame = "No puedes usar cargar durante un juego en red!\n"
 NoQLoadInNetGame = "No puedes usar cargado rapido durante un juego en red!\n"
 	"\n"
 	"presiona una tecla.";
-QuickLoad = "Quieres cargar rapido el juego llamado\n"
-	"\n"
-	"'%s'?\n"
-	"\n"
-	"presiona y o n.";
+QuickLoad = "Quieres cargar rapido el juego llamado";
 
 NewNetGame = "No puedes empezar un juego nuevo\n"
 	"mientras estes en un juego en red.\n"
@@ -1022,9 +997,7 @@ PlayerTargetingOff = "Monsters will not target player";
 PlayerTargetingOn = "Monsters will target player";
 UnlockCheat = "Got all the keys!";
 LoadedCheat = "Full ammo added!";
-MonstersKilled = "%d Monsters Killed";
-CDdisabled = "CD Audio is not enabled";
-CDPlayTrack = "Now Playing Track %d";
+MonstersKilled = "Monsters Killed";
 
 LevelQ = "Level Change!\n"
 	"Enter Level Name:\n"
@@ -1218,8 +1191,7 @@ HeadsUpInit = "HU_Init: Setting up heads up display.\n";
 STBarInit = "ST_Init: Init status bar.\n";
 ListenNet = "listening for network start info...\n";
 SendNet = "sending network start info...\n";
-TurboScale = "turbo scale: %i%%\n";
-IsTurbo = "%s is turbo!";
+TurboScale = "turbo scale:";
 
 ArachnotronName=      "ARACHNOTRON";
 ArchVileName=         "ARCH-VILE";
@@ -1246,37 +1218,7 @@ Notice =
  " and implemented by the EDGE-Classic Team (https://edge-classic.github.io)\n"
  "=======================================================================================\n";
 
-JoystickCentre = "CENTRE the joystick\n"
-	"\n"
-	"press a key.";
-JoystickTL = "Push the joystick to the UPPER LEFT corner\n"
-	"\n"
-	"press a key.";
-JoystickBR = "Push the joystick to the BOTTOM RIGHT corner\n"
-	"\n"
-	"press a key.";
-JoystickHAT = "Move the hat to the %s position\n"
-	"\n"
-	"press a key.";
-JoyThrottleMAX = "Set the throttle to MAXIMUM\n"
-	"\n"
-	"press a key.";
-JoyThrottleMIN = "Set the throttle to MINIMUM\n"
-	"\n"
-	"press a key.";
-JoystickCentreT = "CENTRE the joystick and press a key:";
-JoystickTLT = "Push the joystick to the UPPER LEFT corner and press a key:";
-JoystickBRT = "Push the joystick to the BOTTOM RIGHT corner and press a key:";
-JoystickHATT = "Move the hat to the %s position and press a key:";
-JoyThrottleMAXT = "Set the throttle to MAXIMUM and press a key:";
-JoyThrottleMINT = "Set the throttle to MINIMUM and press a key:";
-
-ModeSelErrT = "Unable to Initialise Graphics Mode %d x %d x %dc!";
-ModeSelErr = "Unable to Initialise\n"
-	"Graphics Mode %d x %d x %dc!\n"
-	"\n"
-	"press a key.";
-	
+ModeSelErr = "Unable to Initialise Graphics Mode";	
 
 // ---- French Language Definition File ----------
 
@@ -1285,11 +1227,7 @@ DevelopmentMode = "MODE DEVELOPPEMENT ON.\n";
 PressKey = "APPUYEZ SUR UNE TOUCHE.";
 PressYorN = "APPUYEZ SUR Y OU N";
 
-QuickSaveOver = "SAUVEGARDE RAPIDE DANS LE FICHIER \n"
-	"\n"
-	"'%s'?\n"
-	"\n"
-	"APPUYEZ SUR Y OU N";
+QuickSaveOver = "SAUVEGARDE RAPIDE DANS LE FICHIER";
 NoQuickSaveSlot = "VOUS N'AVEZ PAS CHOISI UN EMPLACEMENT!\n"
 	"\n"
 	"APPUYEZ SUR UNE TOUCHE.";
@@ -1304,11 +1242,7 @@ NoLoadInNetGame = "VOUS NE POUVEZ PAS CHARGER\n"
 NoQLoadInNetGame = "CHARGEMENT RAPIDE INTERDIT EN RESEAU!\n"
 	"\n"
 	"APPUYEZ SUR UNE TOUCHE.";
-QuickLoad = "VOULEZ-VOUS CHARGER LA SAUVEGARDE\n"
-	"\n"
-	"'%s'?\n"
-	"\n"
-	"APPUYEZ SUR Y OU N";
+QuickLoad = "VOULEZ-VOUS CHARGER LA SAUVEGARDE";
 
 AllocScreens = "V_Init: allocate screens.\n";
 DefaultLoad = "M_LoadDefaults: Load system defaults.\n";
@@ -1324,8 +1258,7 @@ HeadsUpInit = "HU_Init: Setting up heads up display.\n";
 STBarInit = "ST_Init: Init status bar.\n";
 ListenNet = "listening for network start info...\n";
 SendNet = "sending network start info...\n";
-TurboScale = "turbo scale: %i%%\n";
-IsTurbo = "%s is turbo!";
+TurboScale = "turbo scale:";
 
 
 NewNetGame = "VOUS NE POUVEZ PAS LANCER\n"
@@ -1492,9 +1425,7 @@ PlayerTargetingOff = "Monsters will not target player";
 PlayerTargetingOn = "Monsters will target player";
 UnlockCheat = "Got all the keys!";
 LoadedCheat = "Full ammo added!";
-MonstersKilled = "%d Monsters Killed";
-CDdisabled = "CD Audio is not enabled";
-CDPlayTrack = "Now Playing Track %d";
+MonstersKilled = "Monsters Killed";
 
 LevelQ = "Level Change!\n"
 	"Enter Level Name:\n"
@@ -1698,38 +1629,7 @@ Notice =
 " designed and implemented by the EDGE Team (https://edge-classic.github.io/).     \n"
 "==============================================================================\n";
 
-JoystickCentre = "CENTRE the joystick\n"
-	"\n"
-	"press a key.";
-JoystickTL = "Push the joystick to the UPPER LEFT corner\n"
-	"\n"
-	"press a key.";
-JoystickBR = "Push the joystick to the BOTTOM RIGHT corner\n"
-	"\n"
-	"press a key.";
-JoystickHAT = "Move the hat to the %s position\n"
-	"\n"
-	"press a key.";
-JoyThrottleMAX = "Set the throttle to MAXIMUM\n"
-	"\n"
-	"press a key.";
-JoyThrottleMIN = "Set the throttle to MINIMUM\n"
-	"\n"
-	"press a key.";
-JoystickCentreT = "CENTRE the joystick and press a key:";
-JoystickTLT = "Push the joystick to the UPPER LEFT corner and press a key:";
-JoystickBRT = "Push the joystick to the BOTTOM RIGHT corner and press a key:";
-JoystickHATT = "Move the hat to the %s position and press a key:";
-JoyThrottleMAXT = "Set the throttle to MAXIMUM and press a key:";
-JoyThrottleMINT = "Set the throttle to MINIMUM and press a key:";
-
-ModeSelErrT = "Unable to Initialise Graphics Mode %d x %d x %dc!";
-ModeSelErr = "Unable to Initialise\n"
-	"Graphics Mode %d x %d x %dc!\n"
-	"\n"
-	"press a key.";
-
-
+ModeSelErr = "Unable to Initialise Graphics Mode";
 
 // -------- Swedish Language Definition File ------------
 //
@@ -1750,13 +1650,13 @@ DevelopmentMode="Development Mode is enabled.";
 PressKey="Tryck p? valfri tangent.";
 PressYorN="Tryck Y eller N";
 
-QuickSaveOver="Vill du verkligen skriva ?ver\n\n\"%s\"?\n\ntryck y eller n";
+QuickSaveOver="Vill du verkligen skriva ver";
 NoQuickSaveSlot="du har inte valt ett snabbsparsf?lt ?nnu!\n\ntryck p? valfri tangent";
 SaveWhenNotPlaying="du kan inte spara om du inte spelar!\n\ntryck p? valfri tangent";
 
 NoLoadInNetGame="du kan inte ladda i ett n?tverksspel!\n\ntryck p? valfri tangent";
 NoQLoadInNetGame="du kan inte snabbladda i ett n?tverksspel!\n\ntryck p? valfri tangent";
-QuickLoad="vill du snabbladda spelet\n\n\"%s\"?\n\ntryck y eller n";
+QuickLoad="vill du snabbladda spelet";
 
 NewNetGame="Du kan inte starta ett nytt spel\n"
            "i ett n?tverksspel.\n\ntryck p? valfri tangent";
@@ -1919,9 +1819,7 @@ PlayerTargetingOff = "Monsters will not target player";
 PlayerTargetingOn = "Monsters will target player";
 UnlockCheat = "Alla nycklar!";
 LoadedCheat = "Full ammunition!";
-MonstersKilled = "D?dade %d monster";
-CDdisabled = "CD Audio ?r inaktiverat";
-CDPlayTrack = "Spelar nu sp?r %d";
+MonstersKilled = "D?dade monster";
 
 LevelQ = "Byter bana!\n"
 	"Skriv in banans namn:\n"
@@ -2123,8 +2021,7 @@ PlayState=       "P_Init: Init Playloop state.\n";
 SoundInit=       "S_Init: Setting up sound.\n";
 STBarInit=       "ST_Init: Init status bar.\n";
 SendNet=         "sending network start info...\n";
-TurboScale=      "turbo scale: %i%%\n";
-IsTurbo=         "%s is turbo!";
+TurboScale=      "turbo scale:";
 AllocScreens=    "V_Init: allocate screens.\n";
 WadFileInit=     "W_Init: Init WADfiles.\n";
 ZoneMemoryAlloc= "Z_Init: Init Zone Memory Allocation. \n";
@@ -2136,37 +2033,7 @@ Notice=
 " planerats och utf?rts av EDGE-Classicteamet (https://edge-classic.github.io) \n"
 "=============================================================================================\n";
 
-JoystickCentre = "CENTRERA joysticken\n"
-	"\n"
-	"tryck p? valfri tangent.";
-JoystickTL = "Drag joysticken maximalt UPP?T och ?t V?NSTER\n"
-	"\n"
-	"tryck p? valfri tangent.";
-JoystickBR = "Drag joysticken maximalt NED?T och ?t H?GER\n"
-	"\n"
-	"tryck p? valfri tangent.";
-JoystickHAT = "Move the hat to the %s position\n"
-	"\n"
-	"tryck p? valfri tangent.";
-JoyThrottleMAX = "Set the throttle to MAXIMUM\n"
-	"\n"
-	"tryck p? valfri tangent.";
-JoyThrottleMIN = "Set the throttle to MINIMUM\n"
-	"\n"
-	"tryck p? valfri tangent.";
-JoystickCentreT = "CENTRE the joystick and press a key:";
-JoystickTLT = "Push the joystick to the UPPER LEFT corner and press a key:";
-JoystickBRT = "Push the joystick to the BOTTOM RIGHT corner and press a key:";
-JoystickHATT = "Move the hat to the %s position and press a key:";
-JoyThrottleMAXT = "Set the throttle to MAXIMUM and press a key:";
-JoyThrottleMINT = "Set the throttle to MINIMUM and press a key:";
-
-ModeSelErrT = "Kunde inte s?tta uppl?sningen till %d x %d x %dc!";
-ModeSelErr = "Kunte inte ?ndra\n"
-	"uppl?sningen till %d x %d x %dc!\n"
-	"\n"
-	"tryck p? valfri tangent.";
-
+ModeSelErr = "Kunde inte s?tta uppl?sningen till";
 
 // ------ Dutch Language Definition File ---------------
 
@@ -2175,11 +2042,7 @@ DevelopmentMode = "Ontwikkelingsmodus AAN.\n";
 PressKey = "druk op een toets.";
 PressYorN = "toets y of n.";
 
-QuickSaveOver = "versneld opslaan over je spel genaamd\n"
-	"\n"
-	"'%s'?\n"
-	"\n"
-	"toets y of n.";
+QuickSaveOver = "versneld opslaan over je spel genaamd";
 NoQuickSaveSlot = "je hebt nog geen quicksave veld gekozen!\n"
 	"\n"
 	"druk op een toets.";
@@ -2193,11 +2056,7 @@ NoLoadInNetGame = "je kunt niet laden in netwerkmodus!\n"
 NoQLoadInNetGame = "je kunt niet versneld laden in netwerkmodus!\n"
 	"\n"
 	"druk op een toets.";
-QuickLoad = "wil je het spel\n"
-	"\n"
-	"'%s' versneld laden?\n"
-	"\n"
-	"toets y of n.";
+QuickLoad = "wil je het spel";
 
 NewNetGame = "je kunt geen nieuw spel\n"
 	"in netwerkmodus beginnen.\n"
@@ -2363,9 +2222,7 @@ PlayerTargetingOff = "Monsters will not target player";
 PlayerTargetingOn = "Monsters will target player";
 UnlockCheat = "Got all the keys!";
 LoadedCheat = "Full ammo added!";
-MonstersKilled = "%d Monsters Killed";
-CDdisabled = "CD Audio is not enabled";
-CDPlayTrack = "Now Playing Track %d";
+MonstersKilled = "Monsters Killed";
 
 LevelQ = "Level Change!\n"
 	"Enter Level Name:\n"
@@ -2565,8 +2422,7 @@ HeadsUpInit = "HU_Init: Setting up heads up display.\n";
 STBarInit = "ST_Init: Init status balk.\n";
 ListenNet = "luisteren naar netwerk start info...\n";
 SendNet = "verzenden netwerk start info...\n";
-TurboScale = "turbo schaal: %i%%\n";
-IsTurbo = "%s is turbo!";
+TurboScale = "turbo schaal:";
 
 Notice = 
  "=======================================================================================\n"
@@ -2575,36 +2431,7 @@ Notice =
  " and implemented by the EDGE-Classic Team (https://edge-classic.github.io)\n"
  "=======================================================================================\n";
 
-JoystickCentre = "CENTRE the joystick\n"
-	"\n"
-	"press a key.";
-JoystickTL = "Push the joystick to the UPPER LEFT corner\n"
-	"\n"
-	"press a key.";
-JoystickBR = "Push the joystick to the BOTTOM RIGHT corner\n"
-	"\n"
-	"press a key.";
-JoystickHAT = "Move the hat to the %s position\n"
-	"\n"
-	"press a key.";
-JoyThrottleMAX = "Set the throttle to MAXIMUM\n"
-	"\n"
-	"press a key.";
-JoyThrottleMIN = "Set the throttle to MINIMUM\n"
-	"\n"
-	"press a key.";
-JoystickCentreT = "CENTRE the joystick and press a key:";
-JoystickTLT = "Push the joystick to the UPPER LEFT corner and press a key:";
-JoystickBRT = "Push the joystick to the BOTTOM RIGHT corner and press a key:";
-JoystickHATT = "Move the hat to the %s position and press a key:";
-JoyThrottleMAXT = "Set the throttle to MAXIMUM and press a key:";
-JoyThrottleMINT = "Set the throttle to MINIMUM and press a key:";
-
-ModeSelErrT = "Unable to Initialise Graphics Mode %d x %d x %dc!";
-ModeSelErr = "Unable to Initialise\n"
-	"Graphics Mode %d x %d x %dc!\n"
-	"\n"
-	"press a key.";
+ModeSelErr = "Unable to Initialise Graphics Mode";
 
 // -------- Formal German Language Definition File -----------
 
@@ -2613,11 +2440,7 @@ DevelopmentMode = "Entwicklungsmodus AN.\n";
 PressKey = "Bitte eine Taste druecken.";
 PressYorN = "Bitte Taste Y oder N druecken.";
 
-QuickSaveOver = "Schnellspeicherung entfernt vorhandene Speicherung\n"
-	"\n"
-	"'%s'?\n"
-	"\n"
-	"Bitte Taste Y oder N druecken.";
+QuickSaveOver = "Schnellspeicherung entfernt vorhandene Speicherung";
 NoQuickSaveSlot = "Du hast noch kein Schnellspeicherungsfeld gewaehlt!\n"
 	"\n"
 	"Bitte eine Taste druecken.";
@@ -2630,11 +2453,7 @@ NoLoadInNetGame = "Du kannst im Netzwerk-Modus nicht laden.\n"
 NoQLoadInNetGame = "Du kannst im Netzwerk-Modus nicht schnellladen\n"
 	"\n"
 	"Bitte eine Taste druecken.";
-QuickLoad = "Willst du die Schnellspeicherung laden?\n"
-	"\n"
-	"'%s'?\n"
-	"\n"
-	"Bitte Taste Y oder N druecken.";
+QuickLoad = "Willst du die Schnellspeicherung laden";
 
 NewNetGame = "Du kannst kein neues Spiel im\n"
 	"Netzwerkmodus anfangen."
@@ -2802,9 +2621,7 @@ PlayerTargetingOff = "Die Monster werden nicht auf den Spieler zielen";
 PlayerTargetingOn = "Die Monster werden auf den Spieler zielen";
 UnlockCheat = "Du habst alle Schluessel gefunden!";
 LoadedCheat = "Volle Munition!";
-MonstersKilled = "%d Monster getoetet";
-CDdisabled = "CD Audio ist nicht eingeschaltet";
-CDPlayTrack = "Abspielen von Track %d";
+MonstersKilled = "Monster getoetet";
 
 LevelQ = "Levelwechsel!\n"
 	"Bitte Levelnamen eingeben:\n"
@@ -2995,8 +2812,7 @@ HeadsUpInit = "HU_Init: Setting up heads up display.\n";
 STBarInit = "ST_Init: Init status bar.\n";
 ListenNet = "listening for network start info...\n";
 SendNet = "sending network start info...\n";
-TurboScale = "Turbo-Skala: %i%%\n";
-IsTurbo = "%s ist turbo!";
+TurboScale = "Turbo-Skala:";
 
 Notice = 
  "=======================================================================================\n"
@@ -3005,36 +2821,7 @@ Notice =
  " and implemented by the EDGE-Classic Team (https://edge-classic.github.io)\n"
  "=======================================================================================\n";
 
-JoystickCentre = "Joystick ZENTRIEREN\n"
-	"\n"
-	"Bitte eine Taste druecken.";
-JoystickTL = "Joystick nach OBEN LINKS bewegen\n"
-	"\n"
-	"Bitte eine Taste druecken.";
-JoystickBR = "Joystick nach UNTEN RECHTS bewegen\n"
-	"\n"
-	"Bitte eine Taste druecken.";
-JoystickHAT = "Bitte Huetchen in Position %s bringen\n"
-	"\n"
-	"Bitte eine Taste druecken.";
-JoyThrottleMAX = "Schub auf MAXIMUM stellen\n"
-	"\n"
-	"Bitte eine Taste druecken.";
-JoyThrottleMIN = "Schub auf MINIMUM stellen\n"
-	"\n"
-	"Bitte eine Taste druecken.";
-JoystickCentreT = "Joystick zentrieren und eine Taste druecken:";
-JoystickTLT = "Joystick nach OBEN LINKS bewegen und eine Taste druecken:";
-JoystickBRT = "Joystick nach UNTEN RECHTS bewegen und eine Taste druecken:";
-JoystickHATT = "Bitte Huetchen in Position %s bringen und eine Taste druecken:";
-JoyThrottleMAXT = "Geschwindigkeitsregler auf MAXIMUM einstellen und eine Taste druecken:";
-JoyThrottleMINT = "Geschwindigkeitsregler auf MINIMUM einstellen und eine Taste druecken:";
-
-ModeSelErrT = "Fehler beim Starten des Grafikmodus %d x %d x %dc!";
-ModeSelErr = "Fehler beim Starten des\n"
-        "Grafikmodus %d x %d x %dc!\n"
-	"\n"
-	"Bitte eine Taste druecken.";
+ModeSelErr = "Fehler beim Starten des Grafikmodus";
 
 // -------- Finnish Language Definition File -------------
 
@@ -3043,13 +2830,13 @@ DevelopmentMode="Rakennus moodi p??ll?.\n";
 PressKey="Paina nappia";
 PressYorN="Paina Y tai N";
 
-QuickSaveOver="pikatallennus nimell?\n\n'%s'?\n\npaina y tai n.";
+QuickSaveOver="pikatallennus nimell";
 NoQuickSaveSlot="et ole valinnut pikatallennuspaikkaa viel?!\n\npaina jotain nappia.";
 SaveWhenNotPlaying="et voi tallentaa jos et pelaa!\n\npaina jotain nappia.";
 
 NoLoadInNetGame="et voi ladata peli? nettipeliss?!\n\npaina nappia.";
 NoQLoadInNetGame="et voi pika-ladata peli? nettipeliss?!\n\npaina nappia." ;
-QuickLoad="haluatko pika-ladata pelin nimelt?\n\n'%s'?\n\npaina y tai n.";
+QuickLoad="haluatko pika-ladata pelin nimelt";
 
 NewNetGame="et voi aloittaa uutta peli?\n"
            "nettipeliss?\n\npaina nappia.";
@@ -3208,9 +2995,7 @@ PlayerTargetingOff="Hirvi?t eiv?t hy?kk??";
 PlayerTargetingOn="Hirvi?t hy?kk??v?t";
 UnlockCheat="Kaikki avaimet!";
 LoadedCheat="T?ydet ammukset!";
-MonstersKilled="%d Hirvi?t? tapettu.";
-CDdisabled="CD-musiikki ei ole p??ll?";
-CDPlayTrack="Soitetaan raitaa %d";
+MonstersKilled="Hirvi?t? tapettu.";
 
 LevelQ="Kent?n vaihto!\nAnna kent?n nimi:\n\n";
 MusicQ="Musiikin vaihto!\nAnna musiikin nimi:\n\n";
@@ -3288,8 +3073,7 @@ PlayState=       "P_Init: Init Playloop state.\n";
 SoundInit=       "S_Init: Setting up sound.\n";
 STBarInit=       "ST_Init: Init status bar.\n";
 SendNet=         "L?hetet??n verkkodataa...\n";
-TurboScale=      "turbo scale: %i%%\n";
-IsTurbo=         "%s is turbo!";
+TurboScale=      "turbo scale:";
 AllocScreens=    "V_Init: allocate screens.\n";
 WadFileInit=     "W_Init: Init WADfiles.\n";
 ZoneMemoryAlloc= "Z_Init: Init Zone Memory Allocation. \n";
@@ -3302,22 +3086,7 @@ Notice=
 " Finnish Translation by Jari Nevala.\n"
 "===========================================================================================\n";
 
-JoystickCentre= "KESKIT? joystickki\n\npaino jotain nappia.";
-JoystickTL=     "Ty?nn? joystickki vasempaan yl?kulmaan\n\npaina jotain nappia.";
-JoystickBR=     "Ty?nn? joystickki oikeaan alakulmaan\n\npaina jotain nappia.";
-JoystickHAT=    "Siirr? hattu %s paikkaan\n\npaina jotain nappia.";
-JoyThrottleMAX= "Aseta kuristin MAKSIMIIN\n\npaina jotain nappia.";
-JoyThrottleMIN= "Aseta kuristin MINIMIIN\n\npaina jotain nappia.";
-JoystickCentreT= "KESKIT? joystickkija paina jotain nappia:";
-JoystickTLT=     "Ty?nn? joystickki vasempaan yl?kulmaan ja paina jotain nappia:";
-JoystickBRT=     "Ty?nn? joystickki oikeaan alakulmaan ja paina jotain nappia:";
-JoystickHATT=    "Siirr? hattu %s paikkaan ja paina jotain nappia:";
-JoyThrottleMAXT= "Aseta kuristin MAKSIMIIN ja paina jotain nappia:";
-JoyThrottleMINT= "Aseta kuristin MINIMIIN ja paina jotain nappia:";
-
-ModeSelErrT=      "Ei pystyt? k?ytt?m??n Grafiikka Moodia %d x %d x %dc!";
-ModeSelErr=       "Ei pystyt? k?ytt?m??n\nGrafiikka Moodia %d x %d x %dc!\n\npaina nappia.";
- 
+ModeSelErr=      "Ei pystyt? k?ytt?m??n Grafiikka Moodia"; 
  
  
  

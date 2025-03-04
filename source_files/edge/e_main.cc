@@ -1932,7 +1932,7 @@ static void CheckTurbo(void)
         if (turbo_scale > 400)
             turbo_scale = 400;
 
-        ConsoleMessage(kConsoleOnly, "%s %d", language["TurboScale"], turbo_scale);
+        ConsoleMessage(kConsoleOnly, "%s %d%%\n", language["TurboScale"], turbo_scale);
     }
 
     SetTurboScale(turbo_scale);

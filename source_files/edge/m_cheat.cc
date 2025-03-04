@@ -319,7 +319,7 @@ bool CheatResponder(InputEvent *ev)
             }
         }
 
-        ConsoleMessage(kConsoleHUDCenter,  "%s %d", language["MonstersKilled"], killcount);
+        ConsoleMessage(kConsoleHUDCenter,  "%d %s", killcount, language["MonstersKilled"]);
     }
     // Simplified, accepting both "noclip" and "idspispopd".
     // no clipping mode cheat

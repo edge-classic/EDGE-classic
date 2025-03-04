@@ -87,6 +87,7 @@ static const DDFCommandList attack_commands[] = {
     DDF_FIELD("SHOTCOUNT", dummy_atk, count_, DDFMainGetNumeric),
     DDF_FIELD("X_OFFSET", dummy_atk, xoffset_, DDFMainGetFloat),
     DDF_FIELD("Y_OFFSET", dummy_atk, yoffset_, DDFMainGetFloat),
+    DDF_FIELD("Z_OFFSET", dummy_atk, zoffset_, DDFMainGetFloat),
     DDF_FIELD("ANGLE_OFFSET", dummy_atk, angle_offset_, DDFMainGetAngle),
     DDF_FIELD("SLOPE_OFFSET", dummy_atk, slope_offset_, DDFMainGetSlope),
     DDF_FIELD("ATTACKRANGE", dummy_atk, range_, DDFMainGetFloat),
@@ -414,6 +415,7 @@ static const DDFSpecialFlags attack_specials[] = {{"SMOKING_TRACER", kAttackFlag
                                                   {"SILENT_TO_MONSTERS", kAttackFlagSilentToMonsters, 0},
                                                   {"TARGET", kAttackFlagNoTarget, 1},
                                                   {"VAMPIRE", kAttackFlagVampire, 0},
+                                                  {"OFFSETS_LAST", kAttackFlagOffsetsLast, 0},
 
                                                   // -AJA- backwards compatibility cruft...
                                                   {"NOAMMO", kAttackFlagNone, 0},
@@ -519,6 +521,7 @@ void AttackDefinition::CopyDetail(const AttackDefinition &src)
     accuracy_angle_ = src.accuracy_angle_;
     xoffset_        = src.xoffset_;
     yoffset_        = src.yoffset_;
+    zoffset_        = src.zoffset_;
     angle_offset_   = src.angle_offset_;
     slope_offset_   = src.slope_offset_;
     trace_angle_    = src.trace_angle_;
@@ -562,6 +565,7 @@ void AttackDefinition::Default()
     accuracy_angle_ = 0;
     xoffset_        = 0;
     yoffset_        = 0;
+    zoffset_        = 0;
     angle_offset_   = 0;
     slope_offset_   = 0;
     trace_angle_    = (kBAMAngle270 / 16);

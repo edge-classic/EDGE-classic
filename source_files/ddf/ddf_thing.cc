@@ -1606,6 +1606,7 @@ static DDFSpecialFlags mbf21_specials[] = {{"LOGRAV", kMBF21FlagLowGravity, 0},
                                            {"SHORTMRANGE", kMBF21FlagShortMissileRange, 0},
                                            {"LONGMELEE", kMBF21FlagLongMeleeRange, 0},
                                            {"FORCERADIUSDMG", kMBF21FlagForceRadiusDamage, 0},
+                                           {"HIGHERMPROB", kMBF21FlagHigherMissileProb, 0},
                                            {nullptr, 0, 0}};
 
 //
@@ -2019,7 +2020,7 @@ static void DDFMobjStateGetDEHProjectile(const char *arg, State *cur_state)
     atk->range_        = 2048.0f;
     atk->attackstyle_  = kAttackStyleProjectile;
     atk->attack_class_ = epi::BitSetFromChar('M');
-    atk->flags_        = (AttackFlags)(kAttackFlagFaceTarget | kAttackFlagInheritTracerFromTarget);
+    atk->flags_        = (AttackFlags)(kAttackFlagFaceTarget | kAttackFlagInheritTracerFromTarget | kAttackFlagOffsetsLast);
     atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
     atk->height_ = dynamic_atk_height;
 
@@ -2043,9 +2044,9 @@ static void DDFMobjStateGetDEHProjectile(const char *arg, State *cur_state)
     }
     if (arg_size > 4)
     {
-        int height = 0;
-        if (sscanf(args[4].c_str(), "%d", &height) == 1 && height != 0)
-            atk->height_ += (float)height / 65536.0f;
+        int zoffset = 0;
+        if (sscanf(args[4].c_str(), "%d", &zoffset) == 1 && zoffset != 0)
+            atk->zoffset_ = (float)zoffset / 65536.0f;
     }
 
     atkdefs.push_back(atk);

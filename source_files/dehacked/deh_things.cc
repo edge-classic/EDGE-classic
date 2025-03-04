@@ -755,7 +755,6 @@ const FlagName mbf21flag_list[] = {
     {kMBF21_LOGRAV, "LOGRAV", "LOGRAV"},
     {kMBF21_DMGIGNORED, "DMGIGNORED", "NEVERTARGETED"},
     {kMBF21_NORADIUSDMG, "NORADIUSDMG", "EXPLODE_IMMUNE"},
-    {kMBF21_HIGHERMPROB, "HIGHERMPROB", "TRIGGER_HAPPY"}, // FIXME: not quite the same
     {kMBF21_RANGEHALF, "RANGEHALF", "TRIGGER_HAPPY"},
     {kMBF21_NOTHRESHOLD, "NOTHRESHOLD", "NOGRUDGE"},
     {kMBF21_BOSS, "BOSS", "BOSSMAN"},
@@ -763,6 +762,7 @@ const FlagName mbf21flag_list[] = {
     {kMBF21_FULLVOLSOUNDS, "FULLVOLSOUNDS", "ALWAYS_LOUD"},
 
     // flags which don't produce an Edge special
+    {kMBF21_HIGHERMPROB, "HIGHERMPROB", nullptr},
     {kMBF21_SHORTMRANGE, "SHORTMRANGE", nullptr},
     {kMBF21_LONGMELEE, "LONGMELEE", nullptr},
     {kMBF21_FORCERADIUSDMG, "FORCERADIUSDMG", nullptr},

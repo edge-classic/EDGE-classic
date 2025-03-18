@@ -2401,12 +2401,9 @@ static void DrawMessage(void)
         show_endoom.d_) // Respect dialog styles with custom
                         // backgrounds and user preference
     {
-
-// We're already in a sokol frame
-#ifndef EDGE_SOKOL
-        StartFrame(); // To clear and ensure solid black background regardless
-                      // of style
-#endif
+        // To clear and ensure solid black background regardless
+        // of style
+        HUDSolidBox(hud_x_left, 0, hud_x_right, 200, kRGBABlack);
 
         if (exit_style->definition_->text_[StyleDefinition::kTextSectionText].colmap_)
         {

@@ -262,6 +262,7 @@ static const DDFActionCode weapon_actions[] = {{"NOTHING", nullptr, nullptr},
 
                                                // Internal: Dehacked direct codepointer testing
                                                {"DEH_CLOSE_SHOTGUN2", A_CloseShotgun2, nullptr},
+                                               {"DEH_FIRE_CHAINGUN",  A_FireCGun, DDFStateGetJump},
                                                {"DEH_WEAPON_MELEE", A_WeaponMeleeAttack, DDFWStateGetDEHMelee},
                                                {"DEH_WEAPON_SOUND", A_WeaponSound, DDFStateGetDEHParams},
                                                {"DEH_WEAPON_BULLET", A_WeaponBulletAttack, DDFWStateGetDEHBullet},

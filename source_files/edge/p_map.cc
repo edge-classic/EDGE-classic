@@ -300,7 +300,7 @@ static bool CheckAbsoluteLineCallback(Line *ld, void *data)
         if ((move_check.extended_flags & kExtendedFlagMonster) &&
             ((ld->flags & kLineFlagBlockGroundedMonsters) ||
              (ld->special && (ld->special->line_effect_ & kLineEffectTypeBlockGroundedMonsters))) &&
-            (move_check.mover->z <= move_check.mover->floor_z_ + 1.0f))
+            (AlmostEquals(move_check.mover->z, move_check.mover->floor_z_)))
         {
             return false;
         }
@@ -502,7 +502,7 @@ static bool CheckRelativeLineCallback(Line *ld, void *data)
             (((ld->special && (ld->special->line_effect_ & kLineEffectTypeBlockGroundedMonsters)) ||
               (ld->flags & kLineFlagBlockGroundedMonsters)) &&
              (move_check.extended_flags & kExtendedFlagMonster) &&
-             (move_check.mover->z <= move_check.mover->floor_z_ + 1.0f)) ||
+             (AlmostEquals(move_check.mover->z, move_check.mover->floor_z_))) ||
             (((ld->special && (ld->special->line_effect_ & kLineEffectTypeBlockPlayers)) ||
               (ld->flags & kLineFlagBlockPlayers)) &&
              (move_check.mover->player_)))

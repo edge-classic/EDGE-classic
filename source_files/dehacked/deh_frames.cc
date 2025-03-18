@@ -84,7 +84,7 @@ void         WriteArg(State *st, int i, int value);
 const char  *GroupToName(char group);
 const char  *RedirectorName(int next_st);
 
-void SpecialAction(char *buf, const State *st);
+void SpecialAction(char *buf, const State *st, int cur = -1);
 void OutputState(char group, int cur, bool do_action);
 bool OutputSpawnState(int first);
 bool SpreadGroupPass(bool alt_jumps);
@@ -137,7 +137,7 @@ const ActionInfo action_info[kTotalMBF21Actions] = {
     {"A_OpenShotgun2", 0, "W:PLAYSOUND(DBOPN)", nullptr, nullptr},
     {"A_LoadShotgun2", 0, "W:PLAYSOUND(DBLOAD)", nullptr, nullptr},
     {"A_CloseShotgun2", 0, "W:DEH_CLOSE_SHOTGUN2", nullptr, nullptr},
-    {"A_FireCGun", kActionFlagFlash, "W:SHOOT", "R:PLAYER_CHAINGUN", nullptr},
+    {"A_FireCGun", kActionFlagSpecial, nullptr, "R:PLAYER_CHAINGUN", nullptr},
     {"A_GunFlash", kActionFlagFlash, "W:FLASH", nullptr, nullptr},
     {"A_FireMissile", 0, "W:SHOOT", "R:PLAYER_MISSILE", nullptr},
     {"A_Saw", 0, "W:SHOOT", "C:PLAYER_SAW", nullptr},
@@ -723,6 +723,8 @@ bool frames::SpreadGroupPass(bool alt_jumps)
                 st->action == kA_JumpIfTargetCloser || st->action == kA_JumpIfTracerCloser ||
                 st->action == kA_JumpIfTracerInSight || st->action == kA_JumpIfFlagsSet)
                 next = ReadArg(st, 0); // arg0
+            if (st->action == kA_FireCGun)
+                next = weapon_info[kwp_chaingun].flashstate + i - kS_CHAIN1;
         }
 
         if (next == kS_NULL)
@@ -961,7 +963,7 @@ const char *frames::RedirectorName(int next_st)
     return name_buf;
 }
 
-void frames::SpecialAction(char *act_name, const State *st)
+void frames::SpecialAction(char *act_name, const State *st, int cur)
 {
     switch (st->action)
     {
@@ -1356,6 +1358,12 @@ void frames::SpecialAction(char *act_name, const State *st)
     }
     break;
 
+    case kA_FireCGun: {
+        int flash_to = weapon_info[kwp_chaingun].flashstate + cur - kS_CHAIN1;
+        stbsp_sprintf(act_name, "DEH_FIRE_CHAINGUN(%s)", RedirectorName(flash_to));
+    }
+    break;
+
     default:
         FatalError("Dehacked: Error - Bad special action %d\n", st->action);
     }
@@ -1389,8 +1397,8 @@ void frames::OutputState(char group, int cur, bool do_action)
 
     if (action_info[action].act_flags & kActionFlagSpecial)
     {
-        SpecialAction(act_name, st);
-        if (action >= kTotalMBFActions && action <= kA_WeaponAlert)
+        SpecialAction(act_name, st, cur);
+        if (action == kA_FireCGun || (action >= kTotalMBFActions && action <= kA_WeaponAlert))
             weap_act = true;
     }
     else

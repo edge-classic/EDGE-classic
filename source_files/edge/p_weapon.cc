@@ -1698,6 +1698,92 @@ void A_CloseShotgun2(MapObject *mo)
     A_ReFire(mo);
 }
 
+// Essentially a combination of DoWeaponShoot and A_GunFlashTo,
+// This pointer is necessary to work with Dehacked that alters
+// the chaingun - Dasho
+void A_FireCGun(MapObject *mo)
+{   
+    Player       *p   = mo->player_;
+    PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
+
+    EPI_ASSERT(p->ready_weapon_ >= 0);
+
+    WeaponDefinition *info   = p->weapons_[p->ready_weapon_].info;
+    AttackDefinition *attack = info->attack_[0];
+
+    if (!attack)
+        FatalError("Weapon [%s] missing attack for %s action.\n", info->name_.c_str(), 0 ? "XXXSHOOT" : "SHOOT");
+
+    // Some do not need ammunition anyway.
+    // Return if current ammunition sufficient.
+    if (!WeaponCanFire(p, p->ready_weapon_, 0))
+        return;
+
+    AmmunitionType ammo = info->ammo_[0];
+
+    // Minimal amount for one shot varies.
+    int count = info->ammopershot_[0];
+
+    if (info->clip_size_[0] > 0)
+    {
+        p->weapons_[p->ready_weapon_].clip_size[0] -= count;
+        EPI_ASSERT(p->weapons_[p->ready_weapon_].clip_size[0] >= 0);
+    }
+    else if (ammo != kAmmunitionTypeNoAmmo)
+    {
+        p->ammo_[ammo].count -= count;
+        EPI_ASSERT(p->ammo_[ammo].count >= 0);
+    }
+
+    PlayerAttack(mo, attack);
+
+    if (level_flags.kicking && !erraticism.d_)
+    {
+        p->delta_view_height_ -= info->kick_;
+        p->kick_offset_ = info->kick_;
+    }
+
+    if (mo->target_)
+    {
+        if (info->hit_)
+            StartSoundEffect(info->hit_, WeaponSoundEffectCategory(p), mo);
+
+        if (info->feedback_)
+            mo->flags_ |= kMapObjectFlagJustAttacked;
+    }
+    else
+    {
+        if (info->engaged_)
+            StartSoundEffect(info->engaged_, WeaponSoundEffectCategory(p), mo);
+    }
+
+    // show the player making the shot/attack...
+    if (attack && attack->attackstyle_ == kAttackStyleCloseCombat && mo->info_->melee_state_)
+    {
+        MapObjectSetStateDeferred(mo, mo->info_->melee_state_, 0);
+    }
+    else if (mo->info_->missile_state_)
+    {
+        MapObjectSetStateDeferred(mo, mo->info_->missile_state_, 0);
+    }
+
+    if (psp->state->jumpstate > 0)
+    {
+        // Set flash to true (it may already be true, but this code pointer does not
+        // do anything different if flash is already true unlike our regular GunFlash)
+        p->flash_ = true;
+        SetPlayerSpriteDeferred(p, kPlayerSpriteFlash, psp->state->jumpstate);
+    }
+
+    // wake up monsters
+    if (!(info->specials_[0] & WeaponFlagSilentToMonsters) && !(attack->flags_ & kAttackFlagSilentToMonsters))
+    {
+        NoiseAlert(p);
+    }
+
+    p->idle_wait_ = 0;
+}
+
 void A_WeaponSound(MapObject *mo)
 {
     // Generate an arbitrary sound from this weapon.

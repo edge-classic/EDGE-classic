@@ -658,7 +658,7 @@ static DDFSpecialFlags weapon_specials[] = {{"SILENT_TO_MONSTERS", WeaponFlagSil
                                             {"FRESH", WeaponFlagFreshReload, 0},
                                             {"MANUAL", WeaponFlagManualReload, 0},
                                             {"PARTIAL", WeaponFlagPartialReload, 0},
-                                            {"NOAUTOFIRE", WeaponFlagNoAutoFire, 0},
+                                            {"NOAUTOFIRE", WeaponFlagNoAutofireOnReady, 0},
                                             {nullptr, WeaponFlagNone, 0}};
 
 //
@@ -787,7 +787,12 @@ static void DDFWStateGetDEHBullet(const char *arg, State *cur_state)
     {
         int vspread = 0;
         if (sscanf(args[1].c_str(), "%d", &vspread) == 1 && vspread != 0)
+        {
             atk->accuracy_slope_ = tan((float)vspread / 65536.0f * HMM_PI / 180.0);
+
+            if (vspread < 0)
+                atk->accuracy_slope_ = -atk->accuracy_slope_;
+        }
     }
     if (arg_size > 2)
     {
@@ -840,7 +845,7 @@ static void DDFWStateGetDEHProjectile(const char *arg, State *cur_state)
     atk->range_        = 2048.0f;
     atk->attackstyle_  = kAttackStyleProjectile;
     atk->attack_class_ = epi::BitSetFromChar('M');
-    atk->flags_        = (AttackFlags)(kAttackFlagPlayer | kAttackFlagInheritTracerFromTarget);
+    atk->flags_        = (AttackFlags)(kAttackFlagPlayer | kAttackFlagInheritTracerFromTarget | kAttackFlagOffsetsLast);
     atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
     atk->height_ = 32.0f;
     // In case player heights have been modified, find the first
@@ -866,7 +871,12 @@ static void DDFWStateGetDEHProjectile(const char *arg, State *cur_state)
     {
         int slope = 0;
         if (sscanf(args[2].c_str(), "%d", &slope) == 1 && slope != 0)
+        {
             atk->slope_offset_ = tan((float)slope / 65536.0f * HMM_PI / 180.0);
+            
+            if (slope < 0)
+                atk->slope_offset_ = -atk->slope_offset_;
+        }
     }
     if (arg_size > 3)
     {
@@ -876,9 +886,9 @@ static void DDFWStateGetDEHProjectile(const char *arg, State *cur_state)
     }
     if (arg_size > 4)
     {
-        int height = 0;
-        if (sscanf(args[4].c_str(), "%d", &height) == 1 && height != 0)
-            atk->height_ += (float)height / 65536.0f;
+        int zoffset = 0;
+        if (sscanf(args[4].c_str(), "%d", &zoffset) == 1 && zoffset != 0)
+            atk->zoffset_ = (float)zoffset / 65536.0f;
     }
 
     atkdefs.push_back(atk);

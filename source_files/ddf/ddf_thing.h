@@ -249,8 +249,9 @@ enum MBF21Flag
     // Gravity affects this thing as if it were 1/8 of the normal value
     kMBF21FlagLowGravity        = (1 << 0),
     kMBF21FlagShortMissileRange = (1 << 1),
-    kMBF21FlagForceRadiusDamage = (1 << 4),
-    kMBF21FlagLongMeleeRange    = (1 << 8),
+    kMBF21FlagForceRadiusDamage = (1 << 2),
+    kMBF21FlagLongMeleeRange    = (1 << 3),
+    kMBF21FlagHigherMissileProb = (1 << 4),
 };
 
 constexpr uint8_t kTotalEffectsSlots = 30;

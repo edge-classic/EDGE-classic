@@ -982,6 +982,11 @@ void A_WeaponReady(MapObject *mo)
             if (!info->attack_state_[ATK])
                 continue;
 
+            // This differs from the autofire check below, which covers refires as well; this
+            // corresponds to the MBF21 NOAUTOFIRE flag
+            if (p->attack_button_down_[ATK] && (info->specials_[ATK] & WeaponFlagNoAutofireOnReady))
+                continue;
+
             // check for fire: the missile launcher and bfg do not auto fire
             if (!p->attack_button_down_[ATK] || info->autofire_[ATK])
             {

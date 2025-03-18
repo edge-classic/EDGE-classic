@@ -591,37 +591,15 @@ static bool DecideRangeAttack(MapObject *object)
 {
     float                   chance;
     float                   distance;
-    const AttackDefinition *attack = nullptr;
+    const AttackDefinition *attack = object->info_->rangeattack_;
 
     if (!object->target_)
         return false;
 
-    if (object->info_->rangeattack_)
-        attack = object->info_->rangeattack_;
-    else // MBF21 check
-    {
-        int missile_check = object->info_->missile_state_;
-        if (missile_check)
-        {
-            for (StateRange group : object->info_->state_grp_)
-            {
-                for (int state_check = missile_check; state_check < group.last; state_check++)
-                {
-                    State *check = states + state_check;
-                    if (check && check->action &&
-                        (check->action == A_MonsterProjectile || check->action == A_MonsterBulletAttack))
-                    {
-                        // TODO: Store this to avoid repeat checks
-                        attack = (const AttackDefinition *)check->action_par;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    if (!attack)
-        return false; // cannot evaluate range with no attack range
+    // If no rangeattack present, continue if the mobj
+    // still has a missile state (most likely Dehacked/MBF21)
+    if (!attack && !object->info_->missile_state_)
+        return false;
 
     // Just been hit (and have felt pain), so in true tit-for-tat
     // style, the object - without regard to anything else - hits back.
@@ -649,7 +627,7 @@ static bool DecideRangeAttack(MapObject *object)
         distance -= 64;
 
     // Object is too far away to attack?
-    if (attack->range_ && distance >= attack->range_)
+    if (attack && attack->range_ && distance >= attack->range_)
         return false;
 
     // MBF21 SHORTMRANGE flag
@@ -657,12 +635,17 @@ static bool DecideRangeAttack(MapObject *object)
         return false;
 
     // Object is too close to target
-    if (attack->tooclose_ && attack->tooclose_ >= distance)
+    if (attack && attack->tooclose_ && attack->tooclose_ >= distance)
         return false;
 
     // Object likes to fire? if so, double the chance of it happening
     if (object->extended_flags_ & kExtendedFlagTriggerHappy)
         distance /= 2;
+
+    if (object->mbf21_flags_ & kMBF21FlagHigherMissileProb)
+        distance = HMM_MIN(distance, 160.0f);
+    else
+        distance = HMM_MIN(distance, 200.0f);
 
     // The chance in the object is one given that the attack will happen, so
     // we inverse the result (since its one in 255) to get the chance that
@@ -1434,6 +1417,9 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty, floa
     float   projy          = source->y;
     float   projz          = source->z + attack->height_ * source->height_ / source->info_->height_;
     Sector *cur_source_sec = source->subsector_->sector;
+    BAMAngle angle = 0;
+    float slope = 0.0f;
+    MapObject *projectile = nullptr; 
 
     if (source->player_)
         projz += (source->player_->view_z_ - source->player_->standard_view_height_);
@@ -1441,23 +1427,115 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty, floa
              abs(source->z - cur_source_sec->floor_height) < 1)
         projz -= (source->height_ * 0.5 * cur_source_sec->sink_depth);
 
-    BAMAngle angle = source->angle_;
-
-    projx += attack->xoffset_ * epi::BAMCos(angle + kBAMAngle90);
-    projy += attack->xoffset_ * epi::BAMSin(angle + kBAMAngle90);
-
-    float yoffset;
-
-    if (attack->yoffset_)
-        yoffset = attack->yoffset_;
+    if (attack->flags_ & kAttackFlagOffsetsLast)
+        angle = PointToAngle(projx, projy, tx, ty);
     else
-        yoffset = source->radius_ - 0.5f;
+        angle = source->angle_;
 
-    projx += yoffset * epi::BAMCos(angle) * epi::BAMCos(source->vertical_angle_);
-    projy += yoffset * epi::BAMSin(angle) * epi::BAMCos(source->vertical_angle_);
-    projz += yoffset * epi::BAMSin(source->vertical_angle_);
+    if (!(attack->flags_ & kAttackFlagOffsetsLast))
+    {
+        projx += attack->xoffset_ * epi::BAMCos(angle + kBAMAngle90);
+        projy += attack->xoffset_ * epi::BAMSin(angle + kBAMAngle90);
 
-    MapObject *projectile = CreateMapObject(projx, projy, projz, type);
+        float yoffset;
+
+        if (!AlmostEquals(attack->yoffset_, 0.0f))
+            yoffset = attack->yoffset_;
+        else
+            yoffset = source->radius_ - 0.5f;
+
+        projx += yoffset * epi::BAMCos(angle) * epi::BAMCos(source->vertical_angle_);
+        projy += yoffset * epi::BAMSin(angle) * epi::BAMCos(source->vertical_angle_);
+        projz += yoffset * epi::BAMSin(source->vertical_angle_) + attack->zoffset_;
+
+        projectile = CreateMapObject(projx, projy, projz, type);
+
+        if (!target)
+        {
+            tz += attack->height_;
+        }
+        else
+        {
+            projectile->extended_flags_ |= kExtendedFlagFirstTracerCheck;
+    
+            if (!(attack->flags_ & kAttackFlagPlayer))
+            {
+                if (target->flags_ & kMapObjectFlagFuzzy)
+                    angle += RandomByteSkewToZeroDeterministic() << (kBAMAngleBits - 12);
+    
+                if (target->visibility_ < 1.0f)
+                    angle += (BAMAngle)(RandomByteSkewToZeroDeterministic() * 64 * (1.0f - target->visibility_));
+            }
+    
+            Sector *cur_target_sec = target->subsector_->sector;
+    
+            if (cur_target_sec->sink_depth > 0 && !cur_target_sec->extrafloor_used && !cur_target_sec->height_sector &&
+                abs(target->z - cur_target_sec->floor_height) < 1)
+                tz -= (target->height_ * 0.5 * cur_target_sec->sink_depth);
+        }
+
+        slope = ApproximateSlope(tx - projx, ty - projy, tz - projz);
+    }
+    else
+    {
+        projectile = CreateMapObject(projx, projy, projz, type);
+
+        if (!target)
+        {
+            tz += attack->height_;
+        }
+        else
+        {
+            projectile->extended_flags_ |= kExtendedFlagFirstTracerCheck;
+    
+            if (!(attack->flags_ & kAttackFlagPlayer))
+            {
+                if (target->flags_ & kMapObjectFlagFuzzy)
+                    angle += RandomByteSkewToZeroDeterministic() << (kBAMAngleBits - 12);
+    
+                if (target->visibility_ < 1.0f)
+                    angle += (BAMAngle)(RandomByteSkewToZeroDeterministic() * 64 * (1.0f - target->visibility_));
+            }
+    
+            Sector *cur_target_sec = target->subsector_->sector;
+    
+            if (cur_target_sec->sink_depth > 0 && !cur_target_sec->extrafloor_used && !cur_target_sec->height_sector &&
+                abs(target->z - cur_target_sec->floor_height) < 1)
+                tz -= (target->height_ * 0.5 * cur_target_sec->sink_depth);
+        }
+
+        slope = ApproximateSlope(tx - projx, ty - projy, tz - projz);
+        projx += attack->xoffset_ * epi::BAMCos(angle + kBAMAngle90);
+        projy += attack->xoffset_ * epi::BAMSin(angle + kBAMAngle90);
+
+        float yoffset;
+
+        if (!AlmostEquals(attack->yoffset_, 0.0f))
+            yoffset = attack->yoffset_;
+        else
+            yoffset = source->radius_ - 0.5f;
+
+        projx += yoffset * epi::BAMCos(angle) * epi::BAMCos(source->vertical_angle_);
+        projy += yoffset * epi::BAMSin(angle) * epi::BAMCos(source->vertical_angle_);
+        projz += yoffset * epi::BAMSin(source->vertical_angle_) + attack->zoffset_;
+        ChangeThingPosition(projectile, projx, projy, projz);
+    }
+
+    // -AJA- 1999/09/11: add in attack's angle & slope offsets.
+    angle -= attack->angle_offset_;
+    slope += attack->slope_offset_;
+
+    // is the attack not accurate?
+    if (!source->player_ || source->player_->refire_ > 0)
+    {
+        if (attack->accuracy_angle_ > 0.0f)
+            angle += (attack->accuracy_angle_ >> 8) * RandomByteSkewToZeroDeterministic();
+
+        if (attack->accuracy_slope_ > 0.0f)
+            slope += attack->accuracy_slope_ * (RandomByteSkewToZeroDeterministic() / 255.0f);
+    }
+
+    MapObjectSetDirectionAndSpeed(projectile, angle, slope, projectile->speed_);
 
     // currentattack is held so that when a collision takes place
     // with another object, we know whether or not the object hit
@@ -1486,8 +1564,6 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty, floa
         StartSoundEffect(projectile->info_->seesound_, category, sfx_source, flags);
     }
 
-    angle = PointToAngle(projx, projy, tx, ty);
-
     // Now add the fact that the target may be difficult to spot and
     // make the projectile's target the same as the sources. Only
     // do these if the object is not a dummy object, otherwise just
@@ -1499,48 +1575,6 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty, floa
     if (attack->flags_ & kAttackFlagInheritTracerFromTarget) // MBF21
         projectile->SetTracer(source->target_);
 
-    if (!target)
-    {
-        tz += attack->height_;
-    }
-    else
-    {
-        projectile->extended_flags_ |= kExtendedFlagFirstTracerCheck;
-
-        if (!(attack->flags_ & kAttackFlagPlayer))
-        {
-            if (target->flags_ & kMapObjectFlagFuzzy)
-                angle += RandomByteSkewToZeroDeterministic() << (kBAMAngleBits - 12);
-
-            if (target->visibility_ < 1.0f)
-                angle += (BAMAngle)(RandomByteSkewToZeroDeterministic() * 64 * (1.0f - target->visibility_));
-        }
-
-        Sector *cur_target_sec = target->subsector_->sector;
-
-        if (cur_target_sec->sink_depth > 0 && !cur_target_sec->extrafloor_used && !cur_target_sec->height_sector &&
-            abs(target->z - cur_target_sec->floor_height) < 1)
-            tz -= (target->height_ * 0.5 * cur_target_sec->sink_depth);
-    }
-
-    // Calculate slope
-    float slope = ApproximateSlope(tx - projx, ty - projy, tz - projz);
-
-    // -AJA- 1999/09/11: add in attack's angle & slope offsets.
-    angle -= attack->angle_offset_;
-    slope += attack->slope_offset_;
-
-    // is the attack not accurate?
-    if (!source->player_ || source->player_->refire_ > 0)
-    {
-        if (attack->accuracy_angle_ > 0.0f)
-            angle += (attack->accuracy_angle_ >> 8) * RandomByteSkewToZeroDeterministic();
-
-        if (attack->accuracy_slope_ > 0.0f)
-            slope += attack->accuracy_slope_ * (RandomByteSkewToZeroDeterministic() / 255.0f);
-    }
-
-    MapObjectSetDirectionAndSpeed(projectile, angle, slope, projectile->speed_);
     if (projectile->flags_ & kMapObjectFlagPreserveMomentum)
     {
         projectile->momentum_.X += source->momentum_.X;
@@ -3486,7 +3520,11 @@ void A_StandardLook(MapObject *object)
     {
         // targ = nullptr;
         // A_PlayerSupportLook(object);
-        A_PlayerSupportMeander(object);
+
+        // Dasho - MBF21 testing - A_PlayerSupportMeander was really jacking
+        // up projectiles and spawned objects with the MF_FRIENDLY MBF flag
+        //A_PlayerSupportMeander(object);
+        A_FriendLook(object);
         return;
     }
 

@@ -254,7 +254,8 @@ enum AttackFlags
     kAttackFlagNoTarget         = (1 << 11),
     kAttackFlagVampire          = (1 << 12),
     // MBF21 stuff
-    kAttackFlagInheritTracerFromTarget = (1 << 13)
+    kAttackFlagInheritTracerFromTarget = (1 << 13),
+    kAttackFlagOffsetsLast             = (1 << 14)
 };
 
 class AttackDefinition
@@ -278,6 +279,7 @@ class AttackDefinition
     BAMAngle            accuracy_angle_;
     float               xoffset_;
     float               yoffset_;
+    float               zoffset_;
     BAMAngle            angle_offset_; // -AJA- 1999/09/10.
     float               slope_offset_; //
     BAMAngle            trace_angle_;  // -AJA- 2005/02/08.
@@ -459,7 +461,7 @@ enum WeaponFlag
     WeaponFlagManualReload       = (1 << 10), // enables the manual reload key
     WeaponFlagPartialReload      = (1 << 11), // manual reload: allow partial refill
     // MBF21 flags:
-    WeaponFlagNoAutoFire         = (1 << 12), // Do not fire if switched to while trigger is held
+    WeaponFlagNoAutofireOnReady  = (1 << 12), // Do not autofire in A_WeaponReady
 };
 
 constexpr WeaponFlag kDefaultWeaponFlags = (WeaponFlag)(WeaponFlagReloadWhileTrigger | WeaponFlagManualReload |

@@ -237,6 +237,7 @@ void A_TrackerStart(MapObject *mo);
 
 // Dehacked
 void A_CloseShotgun2(MapObject *mo);
+void A_FireCGun(MapObject *mo);
 
 // MBF / MBF21
 void A_Mushroom(MapObject *mo);

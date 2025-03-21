@@ -692,7 +692,7 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz, 
                 {
                     SectorFlag tn_flags = tn_props.special ? tn_props.special->special_flags_ : kSectorFlagPushConstant;
 
-                    if (!(tn_flags & kSectorFlagWholeRegion) && bz > tn->sector->floor_height + 1)
+                    if (!(tn_flags & kSectorFlagWholeRegion) && !AlmostEquals(bz, tn->sector->floor_height))
                         continue;
 
                     push_mul = 1.0f;
@@ -732,7 +732,7 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz, 
     {
         if (p->push.X || p->push.Y || p->push.Z)
         {
-            if (!(flags & kSectorFlagWholeRegion) && bz > floor_height + 1)
+            if (!(flags & kSectorFlagWholeRegion) && !AlmostEquals(bz, floor_height))
                 return;
 
             push_mul = 1.0f;
@@ -1101,10 +1101,10 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props)
 
         // LogDebug("Actual speed = %1.4f\n", mo->player_->actual_speed_);
 
-        if (fabs(mo->momentum_.X) < kStopSpeed && fabs(mo->momentum_.Y) < kStopSpeed &&
-            mo->player_->command_.forward_move == 0 && mo->player_->command_.side_move == 0)
+        if (fabs(mo->momentum_.X) < kStopSpeed && fabs(mo->momentum_.Y) < kStopSpeed)
         {
-            mo->momentum_.X = mo->momentum_.Y = 0;
+            if (!(mo->player_->command_.forward_move | mo->player_->command_.side_move) || mo->is_voodoo_)
+                mo->momentum_.X = mo->momentum_.Y = 0;
         }
     }
 }
@@ -1464,7 +1464,7 @@ static void P_MobjThinker(MapObject *mobj)
                     SectorFlag flags = tn_props.special ? tn_props.special->special_flags_ : kSectorFlagPushConstant;
 
                     if (!((mobj->flags_ & kMapObjectFlagNoGravity) || (flags & kSectorFlagPushAll)) &&
-                        (mobj->z <= mobj->floor_z_ + 1.0f || (flags & kSectorFlagWholeRegion)))
+                        (AlmostEquals(mobj->z, mobj->floor_z_) || (flags & kSectorFlagWholeRegion)))
                     {
                         float push_mul = 1.0f;
 
@@ -1483,7 +1483,7 @@ static void P_MobjThinker(MapObject *mobj)
         props = mobj->region_properties_;
 
         // Only damage grounded monsters (not players)
-        if (props->special && props->special->damage_.grounded_monsters_ && mobj->z <= mobj->floor_z_ + 1.0f)
+        if (props->special && props->special->damage_.grounded_monsters_ && AlmostEquals(mobj->z, mobj->floor_z_))
         {
             DamageMapObject(mobj, nullptr, nullptr, 5.0, &props->special->damage_, false);
         }
@@ -1708,9 +1708,11 @@ void MapObject::SetBelowObject(MapObject *other)
 //       really want to know is who spawned the original missile
 //       (the "instigator" of all the mayhem :-).
 //
+// Dasho - Test removing the MISSILE requirement, as in MBF21 this
+// does not necessarily work with A_SpawnObject
 void MapObject::SetRealSource(MapObject *ref)
 {
-    while (ref && ref->source_ && (ref->flags_ & kMapObjectFlagMissile))
+    while (ref && ref->source_)// && (ref->flags_ & kMapObjectFlagMissile))
         ref = ref->source_;
 
     SetSource(ref);

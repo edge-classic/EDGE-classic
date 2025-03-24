@@ -366,16 +366,7 @@ static void MovePlayer(Player *player)
     U_vec[1] = -ev * dy * base_xy_speed;
     U_vec[2] = eh * base_z_speed;
 
-    float fric = player->map_object_->region_properties_->friction;
-
-    if (!AlmostEquals(fric, kFrictionDefault))
-    {
-        if (fric > kFrictionDefault)       // ice
-            fric = fric - kFrictionDefault;
-        else
-            fric = kFrictionDefault - fric;
-        //fric = HMM_MAX(kMoveFactorMinimum, fric);
-    }
+    float fric = player->map_object_->region_properties_->movefactor;
 
     player->map_object_->momentum_.X +=
         (F_vec[0] * cmd->forward_move + S_vec[0] * cmd->side_move + U_vec[0] * cmd->upward_move) * fric;

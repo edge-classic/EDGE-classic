@@ -881,10 +881,20 @@ static void SectorEffect(Sector *target, Line *source, const LineType *special)
         //       code, the custom value is either permanent or forgotten.
         if (target->properties.type & kBoomSectorFlagFriction)
         {
-            if (length > 100)
-                target->properties.friction = HMM_MIN(1.0f, 0.8125f + length / 1066.7f);
-            else
-                target->properties.friction = HMM_MAX(0.2f, length / 100.0f);
+            if (!AlmostEquals(length, 100.0f))
+            {
+                float bigfric = ((0x1EB8*length)/0x80 + 0xD000);
+                target->properties.friction = bigfric / 65536.0f;
+                target->properties.friction = HMM_Clamp(0.0f, target->properties.friction, 1.0f);
+                float movefactor;
+                if (target->properties.friction > kFrictionDefault)
+                    movefactor = (((0x10092 - bigfric)*(0x70))/0x158) / 65536.0f;
+                else
+                    movefactor = (((bigfric - 0xDB34)*(0xA))/0x80) / 65536.0f;
+                movefactor = HMM_Clamp(kMoveFactorMinimum, movefactor, kMoveFactorDefault);
+                movefactor *= 32.0f;
+                target->properties.movefactor = movefactor;
+            }
         }
     }
 
@@ -1554,6 +1564,14 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special, int tag, 
         for (tsec = FindSectorFromTag(tag); tsec; tsec = tsec->tag_next)
         {
             tsec->properties.friction = special->friction_;
+            float movefactor;
+            if (special->friction_ > kFrictionDefault)
+                movefactor = (((0x10092 - (special->friction_ * 65536.0f))*(0x70))/0x158) / 65536.0f;
+            else
+                movefactor = ((((special->friction_ * 65536.0f) - 0xDB34)*(0xA))/0x80) / 65536.0f;
+            movefactor = HMM_Clamp(kMoveFactorMinimum, movefactor, kMoveFactorDefault);
+            movefactor *= 32.0f;
+            tsec->properties.movefactor = movefactor;
             texSwitch                 = true;
         }
     }

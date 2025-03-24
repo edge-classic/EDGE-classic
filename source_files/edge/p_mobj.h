@@ -57,7 +57,7 @@ extern bool time_stop_active;
 
 extern ConsoleVariable gravity_factor;
 
-constexpr float kStopSpeed = 0.07f;
+constexpr float kStopSpeed = 0.0625f;
 
 //
 // NOTES: MapObject

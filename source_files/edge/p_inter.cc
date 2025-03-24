@@ -840,8 +840,8 @@ void TouchSpecialThing(MapObject *special, MapObject *toucher)
     if (toucher->health_ <= 0)
         return;
 
-    // VOODOO DOLLS: Do not pick up the item if completely still
-    if (toucher->is_voodoo_ && AlmostEquals(toucher->momentum_.X, 0.0f) && AlmostEquals(toucher->momentum_.Y, 0.0f) &&
+    // Do not pick up the item if completely still
+    if (AlmostEquals(toucher->momentum_.X, 0.0f) && AlmostEquals(toucher->momentum_.Y, 0.0f) &&
         AlmostEquals(toucher->momentum_.Z, 0.0f))
         return;
 

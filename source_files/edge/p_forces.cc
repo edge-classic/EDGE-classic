@@ -44,7 +44,7 @@
 #include "p_local.h"
 #include "r_state.h"
 
-constexpr float kPushFactor = 64.0f; // should be 128 ?? (why? - Dasho)
+constexpr float kPushFactor = 128.0f;
 
 std::vector<Force *> active_forces;
 
@@ -92,25 +92,19 @@ static bool PushThingCallback(MapObject *mo, void *dataptr)
     if (mo->flags_ & kMapObjectFlagNoClip)
         return true;
 
-    float dx = mo->x - current_force->point.X;
-    float dy = mo->y - current_force->point.Y;
-
-    float d_unit = ApproximateDistance(dx, dy);
-    float dist   = d_unit * 2.0f / current_force->radius;
-
-    if (dist >= 2.0f)
-        return true;
-
     // don't apply the force through walls
     if (!CheckSightToPoint(mo, current_force->point.X, current_force->point.Y, current_force->point.Z))
         return true;
 
-    float speed;
+    float dx = mo->x - current_force->point.X;
+    float dy = mo->y - current_force->point.Y;
 
-    if (dist >= 1.0f)
-        speed = (2.0f - dist);
-    else
-        speed = 1.0 / HMM_MAX(0.05f, dist);
+    float d_unit = ApproximateDistance(dx, dy);
+
+    if (d_unit >= current_force->radius)
+        return true;
+
+    float speed = 1.0f - (d_unit / current_force->radius);
 
     // the speed factor is squared, giving similar results to BOOM.
     // NOTE: magnitude is negative for PULL mode.
@@ -187,9 +181,9 @@ void AddPointForce(Sector *sec, float length)
                 f->is_point  = true;
                 f->point.X   = mo->x;
                 f->point.Y   = mo->y;
-                f->point.Z   = mo->z + 28.0f;
+                f->point.Z   = mo->z;
                 f->radius    = length * 2.0f;
-                f->magnitude = length * mo->info_->speed_ / kPushFactor / 24.0f;
+                f->magnitude = length * mo->info_->speed_ / kPushFactor;
                 f->sector    = sec;
             }
 }

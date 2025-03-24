@@ -881,10 +881,15 @@ static void SectorEffect(Sector *target, Line *source, const LineType *special)
         //       code, the custom value is either permanent or forgotten.
         if (target->properties.type & kBoomSectorFlagFriction)
         {
-            if (length > 100)
-                target->properties.friction = HMM_MIN(1.0f, 0.8125f + length / 1066.7f);
-            else
-                target->properties.friction = HMM_MAX(0.2f, length / 100.0f);
+            if (!AlmostEquals(length, 100.0f))
+            {
+                if (length > 100.0f)
+                    target->properties.friction = 0.8125f + HMM_MIN(200, length) / 1066.7f;
+                else
+                    target->properties.friction = length / 100.0f;
+                    
+                target->properties.friction = HMM_Clamp(0.0f, target->properties.friction, 1.0f);
+            }
         }
     }
 

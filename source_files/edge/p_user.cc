@@ -366,16 +366,23 @@ static void MovePlayer(Player *player)
     U_vec[1] = -ev * dy * base_xy_speed;
     U_vec[2] = eh * base_z_speed;
 
+    float fric = kFrictionDefault;
+
+    if (!AlmostEquals(player->map_object_->region_properties_->friction, kFrictionDefault))
+    {
+        fric = kMoveFactorDefault;
+    }
+
     player->map_object_->momentum_.X +=
-        F_vec[0] * cmd->forward_move + S_vec[0] * cmd->side_move + U_vec[0] * cmd->upward_move;
+        (F_vec[0] * cmd->forward_move + S_vec[0] * cmd->side_move + U_vec[0] * cmd->upward_move) * fric;
 
     player->map_object_->momentum_.Y +=
-        F_vec[1] * cmd->forward_move + S_vec[1] * cmd->side_move + U_vec[1] * cmd->upward_move;
+        (F_vec[1] * cmd->forward_move + S_vec[1] * cmd->side_move + U_vec[1] * cmd->upward_move) * fric;
 
     if (flying || swimming || !onground || onladder)
     {
         player->map_object_->momentum_.Z +=
-            F_vec[2] * cmd->forward_move + S_vec[2] * cmd->side_move + U_vec[2] * cmd->upward_move;
+            F_vec[2] * cmd->forward_move + S_vec[2] * cmd->side_move + U_vec[2] * cmd->upward_move; // Mult by drag? - Dasho
     }
 
     if (flying && !swimming)

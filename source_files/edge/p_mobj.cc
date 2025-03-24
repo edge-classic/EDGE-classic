@@ -80,7 +80,7 @@ static constexpr float kOofSpeed = 9.0f; // Lobo: original value 20.0f too high,
 
 static constexpr uint8_t kMaxThinkLoop = 8;
 
-static constexpr float   kMaximumMove  = 200.0f;
+static constexpr float   kMaximumMove  = 30.0f;
 static constexpr float   kStepMove     = 16.0f;
 static constexpr uint8_t kRespawnDelay = (kTicRate / 2);
 
@@ -720,13 +720,10 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz, 
                 }
             }
         }
-        // Average it out a la ZDoom so we aren't getting sent to the shadow
-        // realm in certain Boom maps. Don't think it is necessary for z
-        // push at this time - Dasho
         if (countx)
-            new_p->push.X += (cumulative.X / countx);
+            new_p->push.X += cumulative.X;
         if (county)
-            new_p->push.Y += (cumulative.Y / county);
+            new_p->push.Y += cumulative.Y;
     }
     else
     {
@@ -838,19 +835,8 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props)
     float absx, absy;
     float maxstep;
 
-    if (fabs(mo->momentum_.X) > kMaximumMove)
-    {
-        float factor = kMaximumMove / fabs(mo->momentum_.X);
-        mo->momentum_.X *= factor;
-        mo->momentum_.Y *= factor;
-    }
-
-    if (fabs(mo->momentum_.Y) > kMaximumMove)
-    {
-        float factor = kMaximumMove / fabs(mo->momentum_.Y);
-        mo->momentum_.X *= factor;
-        mo->momentum_.Y *= factor;
-    }
+    mo->momentum_.X = HMM_Clamp(-kMaximumMove, mo->momentum_.X, kMaximumMove);
+    mo->momentum_.Y = HMM_Clamp(-kMaximumMove, mo->momentum_.Y, kMaximumMove);
 
     float xmove = mo->momentum_.X;
     float ymove = mo->momentum_.Y;
@@ -1075,7 +1061,7 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props)
     //
     float friction = props->friction;
 
-    if ((mo->z > mo->floor_z_) && !(mo->on_ladder_ >= 0) &&
+    if (!AlmostEquals(mo->z, mo->floor_z_) && (mo->z > mo->floor_z_) && !(mo->on_ladder_ >= 0) &&
         !(mo->player_ && mo->player_->powers_[kPowerTypeJetpack] > 0) && !mo->on_slope_)
     {
         // apply drag when airborne

@@ -366,11 +366,15 @@ static void MovePlayer(Player *player)
     U_vec[1] = -ev * dy * base_xy_speed;
     U_vec[2] = eh * base_z_speed;
 
-    float fric = kFrictionDefault;
+    float fric = player->map_object_->region_properties_->friction;
 
-    if (!AlmostEquals(player->map_object_->region_properties_->friction, kFrictionDefault))
+    if (!AlmostEquals(fric, kFrictionDefault))
     {
-        fric = kMoveFactorDefault;
+        if (fric > kFrictionDefault)       // ice
+            fric = fric - kFrictionDefault;
+        else
+            fric = kFrictionDefault - fric;
+        //fric = HMM_MAX(kMoveFactorMinimum, fric);
     }
 
     player->map_object_->momentum_.X +=
@@ -382,7 +386,7 @@ static void MovePlayer(Player *player)
     if (flying || swimming || !onground || onladder)
     {
         player->map_object_->momentum_.Z +=
-            F_vec[2] * cmd->forward_move + S_vec[2] * cmd->side_move + U_vec[2] * cmd->upward_move; // Mult by drag? - Dasho
+            F_vec[2] * cmd->forward_move + S_vec[2] * cmd->side_move + U_vec[2] * cmd->upward_move;
     }
 
     if (flying && !swimming)

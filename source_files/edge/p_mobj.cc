@@ -835,8 +835,24 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props)
     float absx, absy;
     float maxstep;
 
-    mo->momentum_.X = HMM_Clamp(-kMaximumMove, mo->momentum_.X, kMaximumMove);
-    mo->momentum_.Y = HMM_Clamp(-kMaximumMove, mo->momentum_.Y, kMaximumMove);
+    // Dasho - Not sure which method of capping momentum components to use yet
+
+    //mo->momentum_.X = HMM_Clamp(-kMaximumMove, mo->momentum_.X, kMaximumMove);
+    //mo->momentum_.Y = HMM_Clamp(-kMaximumMove, mo->momentum_.Y, kMaximumMove);
+
+    if (fabs(mo->momentum_.X) > kMaximumMove)
+    {
+        float factor = kMaximumMove / fabs(mo->momentum_.X);
+        mo->momentum_.X *= factor;
+        mo->momentum_.Y *= factor;
+    }
+
+    if (fabs(mo->momentum_.Y) > kMaximumMove)
+    {
+        float factor = kMaximumMove / fabs(mo->momentum_.Y);
+        mo->momentum_.X *= factor;
+        mo->momentum_.Y *= factor;
+    }
 
     float xmove = mo->momentum_.X;
     float ymove = mo->momentum_.Y;

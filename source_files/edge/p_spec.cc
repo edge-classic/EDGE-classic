@@ -893,7 +893,7 @@ static void SectorEffect(Sector *target, Line *source, const LineType *special)
                     movefactor = (((bigfric - 0xDB34)*(0xA))/0x80) / 65536.0f;
                 movefactor = HMM_Clamp(kMoveFactorMinimum, movefactor, kMoveFactorDefault);
                 movefactor *= 32.0f;
-                target->properties.movefactor = target->properties.friction * movefactor;
+                target->properties.movefactor = movefactor;
             }
         }
     }
@@ -1571,7 +1571,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special, int tag, 
                 movefactor = ((((special->friction_ * 65536.0f) - 0xDB34)*(0xA))/0x80) / 65536.0f;
             movefactor = HMM_Clamp(kMoveFactorMinimum, movefactor, kMoveFactorDefault);
             movefactor *= 32.0f;
-            tsec->properties.movefactor = tsec->properties.friction * movefactor;
+            tsec->properties.movefactor = movefactor;
             texSwitch                 = true;
         }
     }

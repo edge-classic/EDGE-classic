@@ -366,7 +366,24 @@ static void MovePlayer(Player *player)
     U_vec[1] = -ev * dy * base_xy_speed;
     U_vec[2] = eh * base_z_speed;
 
-    float fric = player->map_object_->region_properties_->movefactor;
+    float fric = player->map_object_->region_properties_->friction;
+    float factor = player->map_object_->region_properties_->movefactor;
+
+    if (!AlmostEquals(fric, kFrictionDefault))
+    {
+        float velocity = mo->player_->actual_speed_;
+        if (velocity > kFootingFactor * 4)
+			factor *= 8;
+		else if (velocity > kFootingFactor * 2)
+			factor *= 4;
+		else if (velocity > kFootingFactor)
+			factor *= 2;
+    }
+
+    fric *= factor;
+
+    // Dasho - Should this be clamped to a max of the sector's actual friction?
+    fric = HMM_Clamp(0.0f, fric, 1.0f);
 
     player->map_object_->momentum_.X +=
         (F_vec[0] * cmd->forward_move + S_vec[0] * cmd->side_move + U_vec[0] * cmd->upward_move) * fric;

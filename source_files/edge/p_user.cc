@@ -366,8 +366,31 @@ static void MovePlayer(Player *player)
     U_vec[1] = -ev * dy * base_xy_speed;
     U_vec[2] = eh * base_z_speed;
 
-    float fric = player->map_object_->region_properties_->friction;
-    float factor = player->map_object_->region_properties_->movefactor;
+    float fric = -1.0f;
+    float factor = -1.0f;
+    Sector *sector = player->map_object_->subsector_->sector;
+
+    for (TouchNode *tn = mo->touch_sectors_; tn; tn = tn->map_object_next)
+    {
+        if (tn->sector)
+        {
+            float sec_fh = (tn->sector->floor_vertex_slope && sector == tn->sector) ? mo->floor_z_ : tn->sector->floor_height;
+            if (!AlmostEquals(mo->z, sec_fh))
+                continue;
+            if (fric < 0.0f || tn->sector->properties.friction < fric)
+            {
+                fric = tn->sector->properties.friction;
+                factor = tn->sector->properties.movefactor;
+            }
+        }
+    }
+
+    // safety net
+    if (fric < 0.0f)
+    {
+        fric = player->map_object_->region_properties_->friction;
+        factor = player->map_object_->region_properties_->movefactor;     
+    }
 
     if (!AlmostEquals(fric, kFrictionDefault))
     {

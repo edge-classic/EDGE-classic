@@ -779,13 +779,36 @@ void CalculateFullRegionProperties(const MapObject *mo, RegionProperties *new_p)
     new_p->type    = 0; // these shouldn't be used
     new_p->special = nullptr;
 
-    // Note: friction not averaged: comes from region foot is in
-    new_p->friction = sector->active_properties->friction;
-
     floor_h = sector->floor_height;
 
     if (sector->floor_vertex_slope)
         floor_h = mo->floor_z_;
+
+    // Note: friction not averaged: comes from region foot is in
+
+    // Dasho: Changed to be closer to Boom behavior, which is thus:
+    // For all sectors the mobj is touching and whose floor height matches
+    // its z-value, use the lowest friction value
+
+    new_p->friction = -1.0f;
+
+    for (TouchNode *tn = mo->touch_sectors_; tn; tn = tn->map_object_next)
+    {
+        if (tn->sector)
+        {
+            float sec_fh = (tn->sector->floor_vertex_slope && sector == tn->sector) ? mo->floor_z_ : tn->sector->floor_height;
+            if (!AlmostEquals(mo->z, sec_fh))
+                continue;
+            if (new_p->friction < 0.0f || tn->sector->properties.friction < new_p->friction)
+                new_p->friction = tn->sector->properties.friction;
+        }
+    }
+
+    LogPrint("FRICTION: %f\n", new_p->friction);
+
+    // Safety net in case we are not touching the floor of any sectors
+    if (new_p->friction < 0.0f)
+        new_p->friction = sector->active_properties->friction;
 
     S = sector->bottom_extrafloor;
     L = sector->bottom_liquid;

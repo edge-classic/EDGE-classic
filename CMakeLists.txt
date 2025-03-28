@@ -54,6 +54,11 @@ option(EDGE_EXTRA_CHECKS "Enable diagnostic checks/functions" OFF)
 
 # memory allocator
 option(EDGE_MIMALLOC "Enable mimalloc" ON)
+# disable Mimalloc if targeting Emscripten or using MSY2 MinGW32,
+# which fails for some reason
+if (EMSCRIPTEN OR (MSYS AND ${CMAKE_SIZEOF_VOID_P} MATCHES 4))
+  set(EDGE_MIMALLOC OFF)
+endif()
 # Enables exhaustive memory checks, see mimalloc CMakeLists.txt for what is enabled
 # Memory error logging goes to debug.txt
 option(EDGE_MEMORY_CHECK "Enable Memory Checks" OFF)
@@ -157,9 +162,13 @@ else()
       set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libasan")
     endif()
   endif()
-
+ 
   if (MINGW)
     set(CMAKE_EXE_LINKER_FLAGS "-lmingw32 ${CMAKE_EXE_LINKER_FLAGS}")
+  endif()
+
+  if (MSYS)
+    set(CMAKE_EXE_LINKER_FLAGS "-static -mwindows ${CMAKE_EXE_LINKER_FLAGS}")
   endif()
 
 endif()
@@ -211,7 +220,7 @@ if (EDGE_EXTRA_CHECKS)
   add_compile_definitions(EDGE_EXTRA_CHECKS)
 endif()
 
-if (EDGE_MEMORY_MIMALLOC)
+if (EDGE_MIMALLOC)
   add_compile_definitions(EDGE_MIMALLOC)
   if (EDGE_MEMORY_CHECK)
     add_compile_definitions(EDGE_MEMORY_CHECK)

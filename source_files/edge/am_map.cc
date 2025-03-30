@@ -202,11 +202,7 @@ static AutomapLine *GetMapLine()
     return automap_lines[automap_line_position++];
 }
 
-#ifndef EDGE_SOKOL
 static constexpr uint16_t kMaximumLineVerts = kDefaultAutomapLines / 2;
-#else
-static constexpr uint16_t kMaximumLineVerts = kDefaultAutomapLines / 4;
-#endif
 
 static void DrawAllLines()
 {

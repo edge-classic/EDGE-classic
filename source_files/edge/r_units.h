@@ -32,11 +32,7 @@
 constexpr uint16_t kDummyClamp             = 789;
 constexpr uint8_t  kMaximumPolygonVertices = 64;
 constexpr uint16_t kMaximumLocalVertices   = 65535;
-#ifndef EDGE_SOKOL
 constexpr uint16_t kDefaultAutomapLines = kMaximumLocalVertices / 2;
-#else
-constexpr uint16_t kDefaultAutomapLines = kMaximumLocalVertices / 4;
-#endif
 
 // a single vertex to pass to the GPU
 struct RendererVertex

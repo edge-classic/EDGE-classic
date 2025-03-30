@@ -159,7 +159,7 @@ RendererVertex *BeginRenderUnit(GLuint shape, int max_vert, GLuint env1, GLuint 
     EPI_ASSERT((blending & (kBlendingCullBack | kBlendingCullFront)) != (kBlendingCullBack | kBlendingCullFront));
 
     // check we have enough space left
-    if (current_render_vert + max_vert > kMaximumLocalVertices || current_render_unit >= kMaximumLocalUnits)
+    if (current_render_vert + max_vert >= kMaximumLocalVertices || current_render_unit >= kMaximumLocalUnits)
     {
         RenderCurrentUnits();
     }
@@ -268,7 +268,7 @@ static void RenderFlush()
             num_vertices += unit->count;
             break;
         case GL_LINES:
-            num_vertices += unit->count * 2; // quads
+            num_vertices += (unit->count / 2) * 6; // quads are emulated as triangle strips, and use 6 vertices internally
             break;
         }
     }

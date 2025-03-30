@@ -28,7 +28,7 @@ void SetupSkyMatrices(void);
 constexpr int32_t kWorldStateInvalid = -1;
 
 constexpr int32_t kContextPoolSize   = 32;
-constexpr int32_t kContextMaxVertex  = 32 * 1024;
+constexpr int32_t kContextMaxVertex  = 64 * 1024;
 constexpr int32_t kContextMaxCommand = 2 * 1024;
 
 class SokolRenderBackend : public RenderBackend
@@ -327,22 +327,18 @@ class SokolRenderBackend : public RenderBackend
         sgl_desc.logger.func        = slog_func;
         sgl_setup(&sgl_desc);
 
-        // 2D
-        sgl_context_desc_t context_desc_2d;
-        EPI_CLEAR_MEMORY(&context_desc_2d, sgl_context_desc_t, 1);
-        context_desc_2d.color_format = SG_PIXELFORMAT_RGBA8;
-        context_desc_2d.depth_format = SG_PIXELFORMAT_DEPTH;
-        context_desc_2d.sample_count = 1;
-        context_desc_2d.max_commands = kContextMaxCommand;
-        context_desc_2d.max_vertices = kContextMaxVertex;
+        sgl_context_desc_t context_desc;
+        EPI_CLEAR_MEMORY(&context_desc, sgl_context_desc_t, 1);
+        context_desc.color_format = SG_PIXELFORMAT_RGBA8;
+        context_desc.depth_format = SG_PIXELFORMAT_DEPTH;
+        context_desc.sample_count = 1;
+        context_desc.max_commands = kContextMaxCommand;
+        context_desc.max_vertices = kContextMaxVertex;
 
         for (int32_t i = 0; i < kContextPoolSize; i++)
         {
-            context_pool_[i] = sgl_make_context(&context_desc_2d);
+            context_pool_[i] = sgl_make_context(&context_desc);
         }
-
-        context_desc_2d.max_commands = 4096;
-        context_desc_2d.max_vertices = 256 * 1024;
 
         sgl_set_context(context_pool_[0]);
 

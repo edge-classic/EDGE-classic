@@ -63,6 +63,9 @@ Line *FindTeleportLine(int tag, Line *original)
         if (level_lines + i == original)
             continue;
 
+        if (!level_lines[i].back_sector)
+            continue;
+
         return level_lines + i;
     }
 

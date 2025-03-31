@@ -1450,6 +1450,8 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty, floa
 
         projectile = CreateMapObject(projx, projy, projz, type);
 
+        angle = PointToAngle(projx, projy, tx, ty);
+
         if (!target)
         {
             tz += attack->height_;

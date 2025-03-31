@@ -80,7 +80,7 @@ static constexpr float kOofSpeed = 9.0f; // Lobo: original value 20.0f too high,
 
 static constexpr uint8_t kMaxThinkLoop = 8;
 
-static constexpr float   kMaximumMove  = 200.0f;
+static constexpr float   kMaximumMove  = 30.0f;
 static constexpr float   kStepMove     = 16.0f;
 static constexpr uint8_t kRespawnDelay = (kTicRate / 2);
 
@@ -679,15 +679,18 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz, 
 
     if (iterate_pushers)
     {
-        int      countx     = 0;
-        int      county     = 0;
-        HMM_Vec2 cumulative = {{0, 0}};
         // handle push sectors
         for (TouchNode *tn = mo->touch_sectors_; tn; tn = tn->map_object_next)
         {
             if (tn->sector)
             {
                 RegionProperties tn_props = tn->sector->properties;
+                float sec_fh = (tn->sector->floor_vertex_slope && mo->subsector_->sector == tn->sector) ? mo->floor_z_ : tn->sector->floor_height;
+                if (AlmostEquals(bz, sec_fh))
+                {
+                    if (new_p->friction < 0.0f || tn_props.friction < new_p->friction)
+                        new_p->friction = tn_props.friction;
+                }
                 if (tn_props.push.X || tn_props.push.Y || tn_props.push.Z)
                 {
                     SectorFlag tn_flags = tn_props.special ? tn_props.special->special_flags_ : kSectorFlagPushConstant;
@@ -707,26 +710,14 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz, 
                         push_mul *= factor;
 
                     if (tn_props.push.X)
-                    {
-                        countx++;
-                        cumulative.X += push_mul * tn_props.push.X;
-                    }
+                        new_p->push.X += push_mul * tn_props.push.X;
                     if (tn_props.push.Y)
-                    {
-                        county++;
-                        cumulative.Y += push_mul * tn_props.push.Y;
-                    }
-                    new_p->push.Z += push_mul * tn_props.push.Z;
+                        new_p->push.Y += push_mul * tn_props.push.Y;
+                    if (tn_props.push.Z)
+                        new_p->push.Z += push_mul * tn_props.push.Z;
                 }
             }
         }
-        // Average it out a la ZDoom so we aren't getting sent to the shadow
-        // realm in certain Boom maps. Don't think it is necessary for z
-        // push at this time - Dasho
-        if (countx)
-            new_p->push.X += (cumulative.X / countx);
-        if (county)
-            new_p->push.Y += (cumulative.Y / county);
     }
     else
     {
@@ -746,9 +737,12 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz, 
             if (flags & kSectorFlagProportional)
                 push_mul *= factor;
 
-            new_p->push.X += push_mul * p->push.X;
-            new_p->push.Y += push_mul * p->push.Y;
-            new_p->push.Z += push_mul * p->push.Z;
+            if (p->push.X)
+                new_p->push.X += push_mul * p->push.X;
+            if (p->push.Y)
+                new_p->push.Y += push_mul * p->push.Y;
+            if (p->push.Z)
+                new_p->push.Z += push_mul * p->push.Z;
         }
     }
 }
@@ -782,13 +776,12 @@ void CalculateFullRegionProperties(const MapObject *mo, RegionProperties *new_p)
     new_p->type    = 0; // these shouldn't be used
     new_p->special = nullptr;
 
-    // Note: friction not averaged: comes from region foot is in
-    new_p->friction = sector->active_properties->friction;
-
     floor_h = sector->floor_height;
 
     if (sector->floor_vertex_slope)
         floor_h = mo->floor_z_;
+
+    new_p->friction = -1.0f;
 
     S = sector->bottom_extrafloor;
     L = sector->bottom_liquid;
@@ -813,7 +806,10 @@ void CalculateFullRegionProperties(const MapObject *mo, RegionProperties *new_p)
             continue;
 
         if (bz < C->bottom_height)
-            new_p->friction = C->properties->friction;
+        {
+            if (new_p->friction < 0.0f || C->properties->friction < new_p->friction)
+                new_p->friction = C->properties->friction;
+        }
 
         AddRegionProperties(mo, bz, tz, new_p, floor_h, C->top_height, C->properties, false);
 
@@ -821,6 +817,10 @@ void CalculateFullRegionProperties(const MapObject *mo, RegionProperties *new_p)
     }
 
     AddRegionProperties(mo, bz, tz, new_p, floor_h, sector->ceiling_height, sector->active_properties, true);
+
+    // Safety net in case we are not touching the floor of any sectors
+    if (new_p->friction < 0.0f)
+        new_p->friction = sector->active_properties->friction;
 }
 
 //
@@ -837,6 +837,11 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props)
     float ystep;
     float absx, absy;
     float maxstep;
+
+    // Dasho - Not sure which method of capping momentum components to use yet
+
+    //mo->momentum_.X = HMM_Clamp(-kMaximumMove, mo->momentum_.X, kMaximumMove);
+    //mo->momentum_.Y = HMM_Clamp(-kMaximumMove, mo->momentum_.Y, kMaximumMove);
 
     if (fabs(mo->momentum_.X) > kMaximumMove)
     {
@@ -1075,7 +1080,7 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props)
     //
     float friction = props->friction;
 
-    if ((mo->z > mo->floor_z_) && !(mo->on_ladder_ >= 0) &&
+    if (!AlmostEquals(mo->z, mo->floor_z_) && (mo->z > mo->floor_z_) && !(mo->on_ladder_ >= 0) &&
         !(mo->player_ && mo->player_->powers_[kPowerTypeJetpack] > 0) && !mo->on_slope_)
     {
         // apply drag when airborne
@@ -1397,8 +1402,8 @@ static void P_MobjThinker(MapObject *mobj)
         mobj->old_angle_ = mobj->angle_;
     }
 
-    const RegionProperties *props;
-    RegionProperties        player_props;
+    RegionProperties        mobj_props;
+    const RegionProperties *props = &mobj_props;
 
     mobj->old_z_       = mobj->z;
     mobj->old_floor_z_ = mobj->floor_z_;
@@ -1443,22 +1448,28 @@ static void P_MobjThinker(MapObject *mobj)
 
     if (mobj->player_)
     {
-        CalculateFullRegionProperties(mobj, &player_props);
+        CalculateFullRegionProperties(mobj, &mobj_props);
 
-        mobj->momentum_.X += player_props.push.X;
-        mobj->momentum_.Y += player_props.push.Y;
-        mobj->momentum_.Z += player_props.push.Z;
-
-        props = &player_props;
+        mobj->momentum_.X += mobj_props.push.X;
+        mobj->momentum_.Y += mobj_props.push.Y;
+        mobj->momentum_.Z += mobj_props.push.Z;
     }
     else
     {
-        // handle push sectors
+        mobj_props = *mobj->region_properties_;
+        mobj_props.friction = -1.0f;
+        // handle push sectors and friction
         for (TouchNode *tn = mobj->touch_sectors_; tn; tn = tn->map_object_next)
         {
             if (tn->sector)
             {
                 RegionProperties tn_props = tn->sector->properties;
+                float sec_fh = (tn->sector->floor_vertex_slope && mobj->subsector_->sector == tn->sector) ? mobj->floor_z_ : tn->sector->floor_height;
+                if (AlmostEquals(mobj->z, sec_fh))
+                {
+                    if (mobj_props.friction < 0.0f || tn_props.friction < mobj_props.friction)
+                        mobj_props.friction = tn_props.friction;
+                }
                 if (tn_props.push.X || tn_props.push.Y || tn_props.push.Z)
                 {
                     SectorFlag flags = tn_props.special ? tn_props.special->special_flags_ : kSectorFlagPushConstant;
@@ -1472,15 +1483,20 @@ static void P_MobjThinker(MapObject *mobj)
                         if (!(flags & kSectorFlagPushConstant))
                             push_mul = 100.0f / mobj->info_->mass_;
 
-                        mobj->momentum_.X += push_mul * tn_props.push.X;
-                        mobj->momentum_.Y += push_mul * tn_props.push.Y;
-                        mobj->momentum_.Z += push_mul * tn_props.push.Z;
+                        if (tn_props.push.X)
+                            mobj->momentum_.X += push_mul * tn_props.push.X;
+                        if (tn_props.push.Y)
+                            mobj->momentum_.Y += push_mul * tn_props.push.Y;
+                        if (tn_props.push.Z)
+                            mobj->momentum_.Z += push_mul * tn_props.push.Z;
                     }
                 }
             }
         }
 
-        props = mobj->region_properties_;
+        // Safety net in case the mobj is not touching the floor of any sectors
+        if (mobj_props.friction < 0.0f)
+            mobj_props.friction = mobj->region_properties_->friction;
 
         // Only damage grounded monsters (not players)
         if (props->special && props->special->damage_.grounded_monsters_ && AlmostEquals(mobj->z, mobj->floor_z_))

@@ -183,10 +183,51 @@ bool DoMove(MapObject *actor, bool path)
     float tryx;
     float tryy;
 
+    float fric = -1.0f;
+    float factor = -1.0f;
+    Sector *sector = actor->subsector_->sector;
+    float speed = actor->speed_;
+
+    for (TouchNode *tn = actor->touch_sectors_; tn; tn = tn->map_object_next)
+    {
+        if (tn->sector)
+        {
+            float sec_fh = (tn->sector->floor_vertex_slope && sector == tn->sector) ? actor->floor_z_ : tn->sector->floor_height;
+            if (!AlmostEquals(actor->z, sec_fh))
+                continue;
+            if (fric < 0.0f || tn->sector->properties.friction < fric)
+            {
+                fric = tn->sector->properties.friction;
+                factor = tn->sector->properties.movefactor;
+            }
+        }
+    }
+   
+    // Dasho: This section deviates from Boom/MBF a bit since we can't really
+    // use momentum or the delta between x/y and old_x/y here. Results look pretty
+    // similar for high friction areas, but I've afforded a little more traction
+    // for monsters on ice/low friction
+    if (fric < 0.0f || AlmostEquals(fric, kFrictionDefault))
+        fric = 1.0f;
+    else if (fric < kFrictionDefault)
+    {
+        factor *= 32;
+        fric *= factor;
+    }
+    else
+    {
+        factor *= 16;
+        fric *= factor;
+    }
+
+    speed *= fric;
+
+    speed = HMM_Clamp(1.0f, speed, actor->speed_);
+
     if (path)
     {
-        tryx = actor->x + actor->speed_ * epi::BAMCos(actor->angle_);
-        tryy = actor->y + actor->speed_ * epi::BAMSin(actor->angle_);
+        tryx = actor->x + speed * epi::BAMCos(actor->angle_);
+        tryy = actor->y + speed * epi::BAMSin(actor->angle_);
     }
     else
     {
@@ -200,8 +241,8 @@ bool DoMove(MapObject *actor, bool path)
             return false;
         }
 
-        tryx = actor->x + actor->speed_ * xspeed[actor->move_direction_];
-        tryy = actor->y + actor->speed_ * yspeed[actor->move_direction_];
+        tryx = actor->x + speed * xspeed[actor->move_direction_];
+        tryy = actor->y + speed * yspeed[actor->move_direction_];
     }
 
     if (!TryMove(actor, tryx, tryy))

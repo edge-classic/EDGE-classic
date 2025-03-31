@@ -101,6 +101,7 @@ struct RegionProperties
     // -KM- 1998/10/29 Added gravity + friction
     float gravity;
     float friction;
+    float movefactor;
     float viscosity;
     float drag;
 

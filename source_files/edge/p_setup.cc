@@ -483,10 +483,11 @@ static void LoadSectors(int lump)
 
         ss->properties.colourmap = nullptr;
 
-        ss->properties.gravity   = kGravityDefault;
-        ss->properties.friction  = kFrictionDefault;
-        ss->properties.viscosity = kViscosityDefault;
-        ss->properties.drag      = kDragDefault;
+        ss->properties.gravity      = kGravityDefault;
+        ss->properties.friction     = kFrictionDefault;
+        ss->properties.movefactor   = 1.0f;
+        ss->properties.viscosity    = kViscosityDefault;
+        ss->properties.drag         = kDragDefault;
 
         if (ss->properties.special && ss->properties.special->fog_color_ != kRGBANoValue)
         {
@@ -1703,10 +1704,11 @@ static void LoadUDMFSectors()
 
             ss->properties.colourmap = nullptr;
 
-            ss->properties.gravity   = kGravityDefault * gravfactor;
-            ss->properties.friction  = kFrictionDefault;
-            ss->properties.viscosity = kViscosityDefault;
-            ss->properties.drag      = kDragDefault;
+            ss->properties.gravity      = kGravityDefault * gravfactor;
+            ss->properties.friction     = kFrictionDefault;
+            ss->properties.movefactor   = 1.0f;
+            ss->properties.viscosity    = kViscosityDefault;
+            ss->properties.drag         = kDragDefault;
 
             // Allow UDMF sector light/fog information to override DDFSECT types
             if (fog_color != kRGBABlack) // All black is the established

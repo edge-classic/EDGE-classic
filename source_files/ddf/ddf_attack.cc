@@ -391,7 +391,13 @@ void DDFAttackCleanUp(void)
             if (a->objinitstate_ref_.empty())
                 a->objinitstate_ = a->spawnedobj_->spawn_state_;
             else
+            {
                 a->objinitstate_ = DDFMainLookupDirector(a->spawnedobj_, a->objinitstate_ref_.c_str());
+                // Fallback to spawn state if objinitstate isn't valid (could be a DDFTHING entry modified
+                // via mods or Dehacked)
+                if (a->objinitstate_ == 0)
+                    a->objinitstate_ = a->spawnedobj_->spawn_state_;
+            }
         }
 
         cur_ddf_entryname.clear();

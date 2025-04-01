@@ -256,7 +256,7 @@ static void RenderFlush()
         switch (unit->shape)
         {
         case GL_QUADS:
-            num_vertices += unit->count;
+            num_vertices += unit->count / 4 * 6; // quads are emulated as triangle strips, and use 6 vertices internally
             break;
         case GL_TRIANGLES:
             num_vertices += unit->count;
@@ -268,8 +268,8 @@ static void RenderFlush()
             num_vertices += unit->count;
             break;
         case GL_LINES:
-            num_vertices += (unit->count / 2) * 6; // quads are emulated as triangle strips, and use 6 vertices internally
-            break;
+            num_vertices += (unit->count / 2) * 6; // thick lines are emulated as quads
+            break;                                 // quads are emulated as triangle strips, and use 6 vertices internally
         }
     }
 

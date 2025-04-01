@@ -360,13 +360,10 @@ static DDFSpecialFlags reference_types[] = {
     {"TRIGGERFLOOR", kTriggerHeightReferenceTriggeringLinedef, false},
     {"TRIGGERCEILING", kTriggerHeightReferenceTriggeringLinedef + kTriggerHeightReferenceCeiling, false},
 
-    // Note that LOSURROUNDINGFLOOR has the kTriggerHeightReferenceInclude flag,
-    // but the others do not.  It's there to maintain backwards compatibility.
-    //
     {"LOSURROUNDINGCEILING", kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceCeiling, false},
     {"HISURROUNDINGCEILING",
      kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceCeiling + kTriggerHeightReferenceHighest, false},
-    {"LOSURROUNDINGFLOOR", kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceInclude, false},
+    {"LOSURROUNDINGFLOOR", kTriggerHeightReferenceSurrounding, false},
     {"HISURROUNDINGFLOOR", kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceHighest, false},
 
     // Note that kTriggerHeightReferenceHighest is used for the NextLowest

@@ -383,6 +383,8 @@ class MapObject : public Position
     // Uncapped test - Dasho
     bool interpolate_ = false;
 
+    bool pecca_flight_ = false;
+
   public:
     bool IsRemoved() const;
 

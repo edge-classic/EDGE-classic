@@ -201,7 +201,7 @@ static void CalcHeight(Player *player)
     // if ((player->map_object_->momentum_.z <=
     // -35.0)&&(player->map_object_->momentum_.z >= -40.0))
     if ((player->map_object_->momentum_.Z <= -35.0) && (player->map_object_->momentum_.Z >= -36.0))
-        if (player->map_object_->info_->falling_sound_)
+        if (player->map_object_->info_->falling_sound_ && !AlmostEquals(player->map_object_->floor_z_, -32768.0f))
         {
             int sfx_cat;
 

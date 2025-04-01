@@ -251,6 +251,8 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing, const TeleportDefi
 
     if (!TeleportMove(thing, new_x, new_y, new_z))
         return false;
+    else // a successful teleport will cancel pecca flight
+        thing->pecca_flight_ = false;
 
     if (player)
     {

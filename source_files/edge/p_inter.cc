@@ -1259,8 +1259,11 @@ void ThrustMapObject(MapObject *target, MapObject *inflictor, float thrust)
     {
         float dz    = MapObjectMidZ(target) - MapObjectMidZ(inflictor);
         float slope = ApproximateSlope(dx, dy, dz);
-
-        target->momentum_.Z += push * slope / 2;
+        float z_thrust = push * slope / 2;
+        // Don't apply downward Z momentum if the target is on the ground
+        // (this was screwing up mikoportal/peccaflight levels - Dasho)
+        if (z_thrust >= 0.0f || target->z > target->floor_z_)
+            target->momentum_.Z += push * slope / 2;
     }
 }
 

@@ -799,7 +799,7 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
         data.image_right_ = (float)md->skin_width_ / (float)MakeValidTextureSize(md->skin_width_);
         data.image_top_   = (float)md->skin_height_ / (float)MakeValidTextureSize(md->skin_height_);
 
-        AbstractShader *shader = GetColormapShader(props, mo->state_->bright);
+        AbstractShader *shader = GetColormapShader(props, mo->info_->force_fullbright_ ? 255 : mo->state_->bright, mo->subsector_->sector);
 
         ShadeNormals(shader, &data, true);
 

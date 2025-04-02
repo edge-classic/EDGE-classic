@@ -858,7 +858,13 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
               (kMapObjectFlagSolid | kMapObjectFlagSpecial | kMapObjectFlagShootable | kMapObjectFlagTouchy)))
         return true;
 
-    blockdist = move_check.mover->radius_ + thing->radius_;
+    blockdist = move_check.mover->radius_;
+ 
+    if ((thing->flags_ & kMapObjectFlagSpecial) && thing->info_->pickup_width_ > 0)
+        blockdist += thing->info_->pickup_width_; // The DEHEXTRA field is called "Pickup width" but looking at Doom Retro's
+                                                  // code this appears to act as a radius
+    else
+        blockdist += thing->radius_;
 
     // Check that we didn't hit it
     if (fabs(thing->x - move_check.x) >= blockdist || fabs(thing->y - move_check.y) >= blockdist)
@@ -922,11 +928,21 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
     if (move_check.flags & kMapObjectFlagMissile)
     {
         // see if it went over / under
-        if (move_check.z > thing->z + thing->height_)
-            return true; // overhead
 
-        if (move_check.z + move_check.mover->height_ < thing->z)
-            return true; // underneath
+        if (thing->info_->projectile_pass_height_ > 0)
+        {
+            if (move_check.z > thing->z + thing->info_->projectile_pass_height_)
+                return true; // overhead
+            else if (move_check.z + move_check.mover->height_ < thing->z + (thing->height_ - thing->info_->projectile_pass_height_))
+                return true; // underneath
+        }
+        else
+        {
+            if (move_check.z > thing->z + thing->height_)
+                return true;  // overhead
+            else if (move_check.z + move_check.mover->height_ < thing->z)
+                return true; // underneath
+        }
 
         // ignore the missile's shooter
         if (move_check.mover->source_ && move_check.mover->source_ == thing)

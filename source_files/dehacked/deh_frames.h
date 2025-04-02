@@ -55,6 +55,7 @@ enum AttackMethod
 
 extern const char *attack_slot[3];
 extern int         act_flags;
+extern bool        force_fullbright; // DEHEXTRA compatibility
 
 void Init();
 void Shutdown();

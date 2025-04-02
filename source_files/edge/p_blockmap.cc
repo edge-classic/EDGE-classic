@@ -833,7 +833,7 @@ void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, floa
                 EPI_ASSERT(mo->state_);
 
                 // skip "off" lights
-                if (mo->state_->bright <= 0 || mo->dynamic_light_.r <= 0)
+                if (!mo->info_->force_fullbright_ && (mo->state_->bright <= 0 || mo->dynamic_light_.r <= 0))
                     continue;
 
                 if (draw_culling.d_ && PointToDistance(view_x, view_y, mo->x, mo->y) > renderer_far_clip.f_)
@@ -882,7 +882,7 @@ void SectorGlowIterator(Sector *sec, float x1, float y1, float z1, float x2, flo
         EPI_ASSERT(mo->state_);
 
         // skip "off" lights
-        if (mo->state_->bright <= 0 || mo->dynamic_light_.r <= 0)
+        if (!mo->info_->force_fullbright_ && (mo->state_->bright <= 0 || mo->dynamic_light_.r <= 0))
             continue;
 
         if (draw_culling.d_ && PointToDistance(view_x, view_y, mo->x, mo->y) > renderer_far_clip.f_)

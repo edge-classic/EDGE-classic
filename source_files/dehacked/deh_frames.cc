@@ -76,6 +76,7 @@ std::unordered_map<int, int>        offset_for_state;
 
 const char *attack_slot[3];
 int         act_flags;
+bool        force_fullbright = false;
 
 // forward decls
 const State *NewStateElseOld(int st_num);
@@ -1435,13 +1436,13 @@ void frames::OutputState(char group, int cur, bool do_action)
     if (action_info[action].act_flags & kActionFlagMakeDead)
     {
         wad::Printf("    %s:%c:0:%s:MAKEDEAD,  // %s\n", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31),
-                    st->frame >= 32768 ? "BRIGHT" : "NORMAL", (action == kA_PainDie) ? "A_PainDie" : "A_KeenDie");
+            (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL", (action == kA_PainDie) ? "A_PainDie" : "A_KeenDie");
     }
 
     if (action_info[action].act_flags & kActionFlagFaceTarget)
     {
         wad::Printf("    %s:%c:0:%s:FACE_TARGET,\n", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31),
-                    st->frame >= 32768 ? "BRIGHT" : "NORMAL");
+            (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL");
     }
 
     // special handling for Mancubus attacks...
@@ -1450,11 +1451,11 @@ void frames::OutputState(char group, int cur, bool do_action)
         if ((act_flags & kActionFlagSpread) == 0)
         {
             wad::Printf("    %s:%c:0:%s:RESET_SPREADER,\n", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31),
-                        st->frame >= 32768 ? "BRIGHT" : "NORMAL");
+                (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL");
         }
 
         wad::Printf("    %s:%c:0:%s:%s,  // kA_FatAttack\n", sprites::GetSprite(st->sprite),
-                    'A' + ((int)st->frame & 31), st->frame >= 32768 ? "BRIGHT" : "NORMAL", act_name);
+                    'A' + ((int)st->frame & 31), (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL", act_name);
     }
 
     int tics = (int)st->tics;
@@ -1466,7 +1467,7 @@ void frames::OutputState(char group, int cur, bool do_action)
         tics = 44;
 
     wad::Printf("    %s:%c:%d:%s:%s", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31), tics,
-                st->frame >= 32768 ? "BRIGHT" : "NORMAL", act_name);
+        (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL", act_name);
 
     if (action != kA_NULL && weap_act == !IS_WEAPON(group))
         return;

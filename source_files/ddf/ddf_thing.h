@@ -881,6 +881,12 @@ class MapObjectDefinition
 
     int morphtimeout_;     // lobo 2023: Go to MORPH states when times up
 
+    // DEHEXTRA
+    float gib_health_;
+    float pickup_width_;
+    float projectile_pass_height_;
+    bool  force_fullbright_;
+
     // MBF 21
     int   infight_group_;
     int   proj_group_;

@@ -178,6 +178,9 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
 {
     frames::ResetGroups();
 
+    if (info->fullbright)
+        frames::force_fullbright = true;
+
     // special cases...
 
     if (mt_num == kMT_SPAWNSHOT)
@@ -198,13 +201,17 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
                      "states.\n");
 
         if (count == 0)
+        {
+            frames::force_fullbright = false;
             return;
+        }
 
         frames::SpreadGroups();
 
         frames::OutputGroup('S');
         frames::OutputGroup('D');
 
+        frames::force_fullbright = false;
         return;
     }
 
@@ -219,6 +226,7 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
     if (count == 0)
     {
         LogDebug("Dehacked: Warning - Attack [%s] has no states.\n", things::GetMobjName(mt_num) + 1);
+        frames::force_fullbright = false;
         return;
     }
 
@@ -227,6 +235,8 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
     frames::OutputGroup('S');
     frames::OutputGroup('E');
     frames::OutputGroup('D');
+    
+    frames::force_fullbright = false;
 }
 
 void AddAtkSpecial(const char *name)
@@ -1565,36 +1575,67 @@ void HandleCastOrder(int mt_num, int player)
     wad::Printf("CAST_TITLE = %s;\n", cast_titles[pos - 1]);
 }
 
-void HandleDropItem(int mt_num);
+void HandleDropItem(const DehackedMapObjectDefinition*info, int mt_num);
 void HandleAttacks(const DehackedMapObjectDefinition *info, int mt_num);
 void ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num, int player, bool brain_missile, bool &got_one);
+void HandleBlood(const DehackedMapObjectDefinition *info);
 } // namespace things
 
-void things::HandleDropItem(int mt_num)
+void things::HandleDropItem(const DehackedMapObjectDefinition *info, int mt_num)
 {
-    const char *item = nullptr;
+	const char *item = nullptr;
 
-    switch (mt_num)
+	if (info->dropped_item == 0)
+	{
+		return; // I think '0' is used to clear out normal drops - Dasho
+	}
+	else if (info->dropped_item - 1 > kMT_PLAYER)
+	{
+		item = GetMobjName(info->dropped_item - 1);
+		if (!item) return;
+	}
+	else
+	{
+		switch (mt_num)
+		{
+			case kMT_WOLFSS:
+			case kMT_POSSESSED: item = "CLIP"; break;
+
+			case kMT_SHOTGUY:   item = "SHOTGUN"; break;
+			case kMT_CHAINGUY:  item = "CHAINGUN"; break;
+
+			default:
+				return;
+		}
+	}
+
+	EPI_ASSERT(item);
+
+	wad::Printf("DROPITEM = \"%s\";\n", item);
+}
+
+void things::HandleBlood(const DehackedMapObjectDefinition *info)
+{
+	const char *splat = nullptr;
+
+    switch (info->blood_color)
     {
-    case kMT_WOLFSS:
-    case kMT_POSSESSED:
-        item = "CLIP";
-        break;
-
-    case kMT_SHOTGUY:
-        item = "SHOTGUN";
-        break;
-    case kMT_CHAINGUY:
-        item = "CHAINGUN";
-        break;
-
-    default:
-        return;
+        case 1: splat = "DEHEXTRA_BLOOD_GREY"; break;
+        case 2: splat = "DEHEXTRA_BLOOD_GREEN"; break;
+        case 3: splat = "DEHEXTRA_BLOOD_BLUE"; break;
+        case 4: splat = "DEHEXTRA_BLOOD_YELLOW"; break;
+        case 5: splat = "DEHEXTRA_BLOOD_BLACK"; break;
+        case 6: splat = "DEHEXTRA_BLOOD_PURPLE"; break;
+        case 7: splat = "DEHEXTRA_BLOOD_WHITE"; break;
+        case 8: splat = "DEHEXTRA_BLOOD_ORANGE"; break;
+        // Red, or fallback if a bad value
+        case 0:
+        default:
+            break;
     }
 
-    EPI_ASSERT(item);
-
-    wad::Printf("DROPITEM = \"%s\";\n", item);
+	if (splat)
+	    wad::Printf("BLOOD = \"%s\";\n", splat);
 }
 
 void things::HandleAttacks(const DehackedMapObjectDefinition *info, int mt_num)
@@ -1685,15 +1726,27 @@ void things::ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num, in
     if (info->proj_group > -2)                // -1 is a special value here, so negative is still valid
         wad::Printf("PROJECTILE_GROUP = %d;\n", info->proj_group);
 
+    if (info->gib_health != 0)
+        wad::Printf("GIB_HEALTH = %1.1f;\n", FixedToFloat(info->gib_health));
+
+    if (info->pickup_width != 0)
+        wad::Printf("PICKUP_WIDTH = %1.1f;\n", FixedToFloat(info->pickup_width));
+
+    if (info->projectile_pass_height != 0)
+        wad::Printf("PROJECTILE_PASS_HEIGHT = %1.1f;\n", FixedToFloat(info->projectile_pass_height));
+
     if (mt_num == kMT_BOSSSPIT)
         wad::Printf("SPIT_SPOT = BRAIN_SPAWNSPOT;\n");
 
     HandleCastOrder(mt_num, player);
-    HandleDropItem(mt_num);
+    HandleDropItem(info, mt_num);
     HandlePlayer(player);
     HandleItem(info, mt_num);
     HandleSounds(info, mt_num);
     HandleFrames(info, mt_num);
+
+    // DEHEXTRA
+    HandleBlood(info);
 
     wad::Printf("\n");
 
@@ -1823,6 +1876,12 @@ const FieldReference mobj_field[] = {
     {"Rip sound", offsetof(DehackedMapObjectDefinition, rip_sound), kFieldTypeSoundNumber},
     {"Fast speed", offsetof(DehackedMapObjectDefinition, fast_speed), kFieldTypeZeroOrGreater},
     {"Melee range", offsetof(DehackedMapObjectDefinition, melee_range), kFieldTypeZeroOrGreater},
+    {"Gib health", offsetof(DehackedMapObjectDefinition, gib_health),    kFieldTypeAny },
+    {"Dropped item", offsetof(DehackedMapObjectDefinition, dropped_item),  kFieldTypeZeroOrGreater },
+    {"Pickup width", offsetof(DehackedMapObjectDefinition, pickup_width),    kFieldTypeZeroOrGreater },
+    {"Projectile pass height", offsetof(DehackedMapObjectDefinition, projectile_pass_height), kFieldTypeZeroOrGreater },
+    {"Fullbright", offsetof(DehackedMapObjectDefinition, fullbright), kFieldTypeZeroOrGreater },
+    {"Blood color", offsetof(DehackedMapObjectDefinition, blood_color), kFieldTypeZeroOrGreater },
     {"Respawn frame", offsetof(DehackedMapObjectDefinition, raisestate), kFieldTypeFrameNumber},
 
     {nullptr, 0, kFieldTypeAny} // End sentinel

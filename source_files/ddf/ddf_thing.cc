@@ -207,6 +207,10 @@ const DDFCommandList thing_commands[] = {
               DDFMainGetTime),       // Lobo 2023
 
     // MBF21/DEHEXTRA
+    DDF_FIELD("GIB_HEALTH", dummy_mobj, gib_health_, DDFMainGetFloat),
+    DDF_FIELD("PICKUP_WIDTH", dummy_mobj, pickup_width_, DDFMainGetFloat),
+    DDF_FIELD("PROJECTILE_PASS_HEIGHT", dummy_mobj, projectile_pass_height_, DDFMainGetFloat),
+    DDF_FIELD("FORCE_FULLBRIGHT", dummy_mobj, force_fullbright_, DDFMainGetBoolean),
     DDF_FIELD("INFIGHTING_GROUP", dummy_mobj, infight_group_, DDFMainGetNumeric),
     DDF_FIELD("PROJECTILE_GROUP", dummy_mobj, proj_group_, DDFMainGetNumeric),
     DDF_FIELD("SPLASH_GROUP", dummy_mobj, splash_group_, DDFMainGetNumeric),
@@ -2497,6 +2501,11 @@ void MapObjectDefinition::CopyDetail(const MapObjectDefinition &src)
 
     morphtimeout_ = src.morphtimeout_;
 
+    gib_health_ = src.gib_health_;
+    pickup_width_ = src.pickup_width_;
+    projectile_pass_height_ = src.projectile_pass_height_;
+    force_fullbright_ = src.force_fullbright_;
+
     infight_group_ = src.infight_group_;
     proj_group_    = src.proj_group_;
     splash_group_  = src.splash_group_;
@@ -2637,6 +2646,11 @@ void MapObjectDefinition::Default()
     respawneffect_ref_.clear();
     spitspot_ = nullptr;
     spitspot_ref_.clear();
+
+    gib_health_ = 0;
+    pickup_width_ = 0;
+    projectile_pass_height_ = 0;
+    force_fullbright_ = false;
 
     sight_distance_ = -1;
     hear_distance_  = -1;

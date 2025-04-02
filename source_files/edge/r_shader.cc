@@ -244,7 +244,7 @@ class dynlight_shader_c : public AbstractShader
 
         RGBAColor new_col = lim->CurvePoint(dist / WhatRadius(), WhatColor());
 
-        float L = mo->state_->bright / 255.0;
+        float L = (mo->info_->force_fullbright_ ? 255.0f : mo->state_->bright) / 255.0;
 
         if (new_col != kRGBABlack && L > 1 / 256.0)
         {
@@ -291,7 +291,7 @@ class dynlight_shader_c : public AbstractShader
 
         float L = 0.6 - 0.7 * (dx * nx + dy * ny + dz * nz);
 
-        L *= mo->state_->bright / 255.0;
+        L *= (mo->info_->force_fullbright_ ? 255.0f : mo->state_->bright) / 255.0;
 
         if (WhatType() == kDynamicLightTypeNone)
             return;
@@ -317,7 +317,7 @@ class dynlight_shader_c : public AbstractShader
 
         RGBAColor col = WhatColor();
 
-        float L = mo->state_->bright / 255.0;
+        float L = (mo->info_->force_fullbright_ ? 255.0f : mo->state_->bright) / 255.0;
 
         float R = L * epi::GetRGBARed(col);
         float G = L * epi::GetRGBAGreen(col);
@@ -425,7 +425,7 @@ class plane_glow_c : public AbstractShader
 
         RGBAColor new_col = lim->CurvePoint(dist / WhatRadius(), WhatColor());
 
-        float L = mo->state_->bright / 255.0;
+        float L = (mo->info_->force_fullbright_ ? 255.0f : mo->state_->bright) / 255.0;
 
         if (new_col != kRGBABlack && L > 1 / 256.0)
         {
@@ -463,7 +463,7 @@ class plane_glow_c : public AbstractShader
 
         float L = 0.6 - 0.7 * (dz * nz);
 
-        L *= mo->state_->bright / 255.0;
+        L *= (mo->info_->force_fullbright_ ? 255.0f : mo->state_->bright) / 255.0;
 
         if (WhatType() == kDynamicLightTypeNone)
             return;
@@ -491,7 +491,7 @@ class plane_glow_c : public AbstractShader
 
         RGBAColor col = WhatColor();
 
-        float L = mo->state_->bright / 255.0;
+        float L = (mo->info_->force_fullbright_ ? 255.0f : mo->state_->bright) / 255.0;
 
         float R = L * epi::GetRGBARed(col);
         float G = L * epi::GetRGBAGreen(col);
@@ -594,7 +594,7 @@ class wall_glow_c : public AbstractShader
 
         float L = std::log1p(dist);
 
-        L *= mo->state_->bright / 255.0;
+        L *= (mo->info_->force_fullbright_ ? 255.0f : mo->state_->bright) / 255.0;
 
         if (WhatType() == kDynamicLightTypeNone)
             return;
@@ -620,7 +620,7 @@ class wall_glow_c : public AbstractShader
 
         float L = std::log1p(dist);
 
-        L *= mo->state_->bright / 255.0;
+        L *= (mo->info_->force_fullbright_ ? 255.0f : mo->state_->bright) / 255.0;
 
         if (WhatType() == kDynamicLightTypeNone)
             return;
@@ -648,7 +648,7 @@ class wall_glow_c : public AbstractShader
 
         RGBAColor col = WhatColor();
 
-        float L = mo->state_->bright / 255.0;
+        float L = (mo->info_->force_fullbright_ ? 255.0f : mo->state_->bright) / 255.0;
 
         float R = L * epi::GetRGBARed(col);
         float G = L * epi::GetRGBAGreen(col);

@@ -1087,19 +1087,27 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props)
         friction = props->drag;
     }
 
+    float x_diff = fabs(orig_x - mo->x);
+    float y_diff = fabs(orig_y - mo->y);
+
     // when we are confident that a mikoportal is being used, do not apply
     // friction or drag
     if (!AlmostEquals(mo->floor_z_, -32768.0f) || AlmostEquals(mo->momentum_.Z, 0.0f))
     {
         mo->momentum_.X *= friction;
         mo->momentum_.Y *= friction;
+
+        // Test: Do not allow X/Y momentum to exceed the distance an object actually moved
+        // to prevent building momentum against a door/wall
+        // Not sure if we need an equivalent for P_ZMovement - Dasho
+        if (x_diff < fabs(mo->momentum_.X))
+            mo->momentum_.X = mo->x - orig_x;
+        if (y_diff < fabs(mo->momentum_.Y))
+            mo->momentum_.Y = mo->y - orig_y;
     }
 
     if (mo->player_)
     {
-        float x_diff = fabs(orig_x - mo->x);
-        float y_diff = fabs(orig_y - mo->y);
-
         float speed = FastApproximateDistance(x_diff, y_diff);
 
         mo->player_->actual_speed_ = (mo->player_->actual_speed_ * 0.8 + speed * 0.2);

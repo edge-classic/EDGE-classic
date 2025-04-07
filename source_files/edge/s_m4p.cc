@@ -566,7 +566,7 @@ void M4PPlayer::Ticker()
 {
     if (status_ == kPlaying)
     {
-        ma_engine_set_volume(&music_engine, music_volume.f_ * 0.25f);
+        ma_engine_set_volume(&music_engine, music_volume.f_);
 
         if (pc_speaker_mode)
             Stop();

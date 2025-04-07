@@ -438,8 +438,8 @@ void Opal::Output(int16_t &left, int16_t &right)
         int16_t chanleft, chanright;
         Chan[i].Output(chanleft, chanright);
 
-        leftmix += chanleft;
-        rightmix += chanright;
+        leftmix += chanleft << 1;
+        rightmix += chanright << 1;
     }
 
     // Clamp

@@ -41,8 +41,6 @@
 #include "s_music.h"
 #include "s_sound.h"
 
-static constexpr uint16_t kMaximumSoundChannels = 256;
-
 SoundChannel *mix_channels[kMaximumSoundChannels];
 int           total_channels;
 
@@ -98,7 +96,7 @@ void FreeSoundChannels(void)
         delete chan;
     }
 
-    EPI_CLEAR_MEMORY(mix_channels, SoundChannel *, 256);
+    EPI_CLEAR_MEMORY(mix_channels, SoundChannel *, total_channels);
 }
 
 void KillSoundChannel(int k)
@@ -120,7 +118,7 @@ void UpdateSounds(MapObject *listener, BAMAngle angle)
 {
     EDGE_ZoneScoped;
 
-    ma_engine_set_volume(&sound_engine, sound_effect_volume.f_ * 0.25f);
+    ma_engine_set_volume(&sound_engine, sound_effect_volume.f_ * 0.5f);
 
     listen_x = listener ? listener->x : 0;
     listen_y = listener ? listener->y : 0;

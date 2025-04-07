@@ -318,7 +318,7 @@ static void EndMovie()
     ma_sound_stop(&movie_sound_buffer);
     ma_sound_uninit(&movie_sound_buffer);
     ma_pcm_rb_uninit(&movie_ring_buffer);
-    ma_engine_set_volume(&music_engine, music_volume.f_ * 0.25f);
+    ma_engine_set_volume(&music_engine, music_volume.f_);
     ResumeMusic();
 }
 

@@ -77,7 +77,7 @@ void StartupAudio(void)
     {
         sound_device_frequency = ma_engine_get_sample_rate(&sound_engine);
         ma_uint32 channels     = ma_engine_get_channels(&sound_engine);
-        ma_engine_set_volume(&sound_engine, sound_effect_volume.f_ * 0.25f);
+        ma_engine_set_volume(&sound_engine, sound_effect_volume.f_ * 0.5f);
         // configure FX nodes
 
         // Underwater/Submerged
@@ -112,7 +112,7 @@ void StartupAudio(void)
             no_music = true;
         }
         else
-            ma_engine_set_volume(&music_engine, music_volume.f_ * 0.25f);
+            ma_engine_set_volume(&music_engine, music_volume.f_);
     }
 
     // display some useful stuff

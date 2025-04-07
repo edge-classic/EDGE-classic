@@ -66,6 +66,8 @@ class SoundChannel
     ~SoundChannel();
 };
 
+constexpr uint16_t kMaximumSoundChannels = 32;
+
 extern ConsoleVariable sound_effect_volume;
 
 extern SoundChannel *mix_channels[];

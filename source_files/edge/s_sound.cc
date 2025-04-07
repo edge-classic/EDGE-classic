@@ -43,7 +43,10 @@ extern float listen_x;
 extern float listen_y;
 extern float listen_z;
 
-const int category_limit_table[kTotalCategories] = {
+static constexpr uint8_t  kMinimumSoundClipDistance = 200.0f;
+static constexpr uint16_t kMaximumSoundClipDistance = 1200.0f;
+
+static constexpr uint8_t category_limit_table[kTotalCategories] = {
 
     /* 32 channel */
     2,  // UI
@@ -216,12 +219,10 @@ void InitializeSound(void)
 
     StartupProgressMessage("Initializing sound device...");
 
-    int want_chan = 256;
-
-    LogPrint("StartupSound: Init %d mixing channels\n", want_chan);
+    LogPrint("StartupSound: Init %d mixing channels\n", kMaximumSoundChannels);
 
     // setup channels
-    InitializeSoundChannels(want_chan);
+    InitializeSoundChannels(kMaximumSoundChannels);
 
     SetupCategoryLimits();
 }
@@ -271,7 +272,7 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
     chan->boss_ = (flags & kSoundEffectBoss) ? true : false;
 
     bool attenuate =
-        (pos && !chan->boss_ && category != kCategoryWeapon && category != kCategoryPlayer && category != kCategoryUi);
+        (pos && category != kCategoryWeapon && category != kCategoryPlayer && category != kCategoryUi);
 
     chan->ref_config_            = ma_audio_buffer_config_init(ma_format_f32, 2, buf->length_, buf->data_, NULL);
     chan->ref_config_.sampleRate = buf->frequency_;
@@ -282,8 +283,13 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
     float volume = def->volume_;
     if (attenuate)
     {
-        ma_sound_set_attenuation_model(&chan->channel_sound_, ma_attenuation_model_inverse);
-        ma_sound_set_rolloff(&chan->channel_sound_, 0.01f);
+        // We do not want boss noises to be completely attenuated out, so set the model accordingly
+        if (chan->boss_)
+            ma_sound_set_attenuation_model(&chan->channel_sound_, ma_attenuation_model_exponential);
+        else
+            ma_sound_set_attenuation_model(&chan->channel_sound_, ma_attenuation_model_linear);
+        ma_sound_set_min_distance(&chan->channel_sound_, kMinimumSoundClipDistance);
+        ma_sound_set_max_distance(&chan->channel_sound_, kMaximumSoundClipDistance);
         ma_sound_set_position(&chan->channel_sound_, pos->x, pos->z, -pos->y);
         if (vacuum_sound_effects)
             ma_node_attach_output_bus(&chan->channel_sound_, 0, &vacuum_node, 0);
@@ -324,9 +330,11 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
         }
         else
             ma_node_attach_output_bus(&chan->channel_sound_, 0, &sound_engine, 0);
-        volume *= 0.5f;
     }
-    ma_sound_set_volume(&chan->channel_sound_, volume);
+    if (chan->boss_)
+        ma_sound_set_volume(&chan->channel_sound_, 1.0f);
+    else
+        ma_sound_set_volume(&chan->channel_sound_, volume);
     ma_sound_set_looping(&chan->channel_sound_, false);
     ma_sound_start(&chan->channel_sound_);
 }

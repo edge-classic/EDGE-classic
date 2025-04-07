@@ -77,7 +77,8 @@ if (EMSCRIPTEN)
   include("${CMAKE_SOURCE_DIR}/cmake/Emscripten.cmake")  
 endif()
 
-if (WIN32 OR MINGW)
+# Set WIN32_WINNT to Windows 7 if using the new renderer or mimalloc
+if ((WIN32 OR MINGW) AND (EDGE_SOKOL OR EDGE_MIMALLOC))
   add_definitions(-D_WIN32_WINNT=0x601)
 endif()
 

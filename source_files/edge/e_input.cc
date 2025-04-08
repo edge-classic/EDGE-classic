@@ -287,6 +287,7 @@ static bool allow_autorun            = true;
 static bool allow_inventory_previous = true;
 static bool allow_inventory_use      = true;
 static bool allow_inventory_next     = true;
+static bool allow_weapon_switch      = true;
 
 void BuildEventTicCommand(EventTicCommand *cmd)
 {
@@ -432,27 +433,49 @@ void BuildEventTicCommand(EventTicCommand *cmd)
     if (IsKeyPressed(key_look_center))
         cmd->extended_buttons |= kExtendedButtonCodeCenter;
 
+    bool weapon_switch_pressed = false;
+
     // -KM- 1998/11/25 Weapon change key
     for (int w = 0; w < 10; w++)
     {
         if (IsKeyPressed(key_weapons[w]))
         {
-            cmd->buttons |= kButtonCodeChangeWeapon;
-            cmd->buttons |= w << kButtonCodeWeaponMaskShift;
+            weapon_switch_pressed = true;
+            if (allow_weapon_switch)
+            {
+                cmd->buttons |= kButtonCodeChangeWeapon;
+                cmd->buttons |= w << kButtonCodeWeaponMaskShift;
+                allow_weapon_switch = false;
+            }
             break;
         }
     }
 
     if (IsKeyPressed(key_next_weapon))
     {
-        cmd->buttons |= kButtonCodeChangeWeapon;
-        cmd->buttons |= (kButtonCodeNextWeapon << kButtonCodeWeaponMaskShift);
+        weapon_switch_pressed = true;
+        if (allow_weapon_switch)
+        {
+            cmd->buttons |= kButtonCodeChangeWeapon;
+            cmd->buttons |= (kButtonCodeNextWeapon << kButtonCodeWeaponMaskShift);
+            allow_weapon_switch = false;
+        }
     }
     else if (IsKeyPressed(key_previous_weapon))
     {
-        cmd->buttons |= kButtonCodeChangeWeapon;
-        cmd->buttons |= (kButtonCodePreviousWeapon << kButtonCodeWeaponMaskShift);
+        weapon_switch_pressed = true;
+        if (allow_weapon_switch)
+        {
+            cmd->buttons |= kButtonCodeChangeWeapon;
+            cmd->buttons |= (kButtonCodePreviousWeapon << kButtonCodeWeaponMaskShift);
+            allow_weapon_switch = false;
+        }
     }
+
+    // You have to release any applicable weapon switching key before you can manually
+    // switch weapons again
+    if (!weapon_switch_pressed)
+        allow_weapon_switch = true;
 
     // You have to release the 180 deg turn key before you can press it again
     if (IsKeyPressed(key_180))

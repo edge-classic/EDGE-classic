@@ -80,6 +80,7 @@ enum WeaponType
 };
 
 extern WeaponInfo weapon_info[kTotalWeapons];
+extern const WeaponInfo *current_weap;
 
 namespace weapons
 {

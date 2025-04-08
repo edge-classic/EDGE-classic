@@ -725,7 +725,10 @@ bool frames::SpreadGroupPass(bool alt_jumps)
                 st->action == kA_JumpIfTracerInSight || st->action == kA_JumpIfFlagsSet)
                 next = ReadArg(st, 0); // arg0
             if (st->action == kA_FireCGun)
-                next = weapon_info[kwp_chaingun].flashstate + i - kS_CHAIN1;
+            {
+                EPI_ASSERT(current_weap);
+                next = current_weap->flashstate + i - kS_CHAIN1;
+            }
         }
 
         if (next == kS_NULL)
@@ -1360,7 +1363,8 @@ void frames::SpecialAction(char *act_name, const State *st, int cur)
     break;
 
     case kA_FireCGun: {
-        int flash_to = weapon_info[kwp_chaingun].flashstate + cur - kS_CHAIN1;
+        EPI_ASSERT(current_weap);
+        int flash_to = current_weap->flashstate + cur - kS_CHAIN1;
         stbsp_sprintf(act_name, "DEH_FIRE_CHAINGUN(%s)", RedirectorName(flash_to));
     }
     break;

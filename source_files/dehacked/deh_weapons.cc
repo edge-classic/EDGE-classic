@@ -69,6 +69,8 @@ WeaponInfo weapon_info[kTotalWeapons] = {
      0},
 };
 
+const WeaponInfo *current_weap = nullptr;
+
 bool weapon_modified[kTotalWeapons];
 
 //----------------------------------------------------------------------------
@@ -238,6 +240,8 @@ void HandleFrames(const WeaponInfo *info)
         return;
     }
 
+    current_weap = info;
+
     frames::SpreadGroups();
 
     frames::OutputGroup('u');
@@ -247,6 +251,8 @@ void HandleFrames(const WeaponInfo *info)
 
     if (has_flash)
         frames::OutputGroup('f');
+
+    current_weap = nullptr;
 }
 
 void HandleAttacks(const WeaponInfo *info, int w_num)

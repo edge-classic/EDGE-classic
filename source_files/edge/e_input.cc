@@ -149,12 +149,12 @@ static int joy_last_raw[4];
 static float ball_deltas[6] = {0, 0, 0, 0, 0, 0};
 static float joy_forces[6]  = {0, 0, 0, 0, 0, 0};
 
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_0, "0.30", kConsoleVariableFlagArchive, 0.01f, 0.99f)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_1, "0.30", kConsoleVariableFlagArchive, 0.01f, 0.99f)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_2, "0.30", kConsoleVariableFlagArchive, 0.01f, 0.99f)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_3, "0.30", kConsoleVariableFlagArchive, 0.01f, 0.99f)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_4, "0.30", kConsoleVariableFlagArchive, 0.01f, 0.99f)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_5, "0.30", kConsoleVariableFlagArchive, 0.01f, 0.99f)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_0, "0.1", kConsoleVariableFlagArchive, 0.01f, 0.99f)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_1, "0.1", kConsoleVariableFlagArchive, 0.01f, 0.99f)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_2, "0.1", kConsoleVariableFlagArchive, 0.01f, 0.99f)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_3, "0.1", kConsoleVariableFlagArchive, 0.01f, 0.99f)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_4, "0.1", kConsoleVariableFlagArchive, 0.01f, 0.99f)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_5, "0.1", kConsoleVariableFlagArchive, 0.01f, 0.99f)
 float *joystick_deadzones[6] = {
     &joystick_deadzone_axis_0.f_, &joystick_deadzone_axis_1.f_, &joystick_deadzone_axis_2.f_,
     &joystick_deadzone_axis_3.f_, &joystick_deadzone_axis_4.f_, &joystick_deadzone_axis_5.f_,

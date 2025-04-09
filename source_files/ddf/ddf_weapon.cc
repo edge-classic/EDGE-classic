@@ -883,7 +883,7 @@ static void DDFWStateGetDEHProjectile(const char *arg, State *cur_state)
     {
         int xoffset = 0;
         if (sscanf(args[3].c_str(), "%d", &xoffset) == 1 && xoffset != 0)
-            atk->xoffset_ = (float)xoffset / 65536.0f;
+            atk->xoffset_ = (float)xoffset / -65536.0f;
     }
     if (arg_size > 4)
     {

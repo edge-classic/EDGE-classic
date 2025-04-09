@@ -657,7 +657,7 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz, 
                                        float floor_height, float ceiling_height, const RegionProperties *p,
                                        bool iterate_pushers)
 {
-    int flags = p->special ? p->special->special_flags_ : kSectorFlagPushConstant;
+    int flags = p->special ? p->special->special_flags_ : kSectorFlagNone;
 
     float factor = 1.0f;
     float push_mul;
@@ -693,14 +693,14 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz, 
                 }
                 if (tn_props.push.X || tn_props.push.Y || tn_props.push.Z)
                 {
-                    SectorFlag tn_flags = tn_props.special ? tn_props.special->special_flags_ : kSectorFlagPushConstant;
+                    SectorFlag tn_flags = tn_props.special ? tn_props.special->special_flags_ : kSectorFlagNone;
 
                     if (!(tn_flags & kSectorFlagWholeRegion) && !AlmostEquals(bz, tn->sector->floor_height))
                         continue;
 
                     push_mul = 1.0f;
 
-                    if (!(tn_flags & kSectorFlagPushConstant))
+                    if (!tn_props.push_constant)
                     {
                         EPI_ASSERT(mo->info_->mass_ > 0);
                         push_mul = 100.0f / mo->info_->mass_;
@@ -728,7 +728,7 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz, 
 
             push_mul = 1.0f;
 
-            if (!(flags & kSectorFlagPushConstant))
+            if (!p->push_constant)
             {
                 EPI_ASSERT(mo->info_->mass_ > 0);
                 push_mul = 100.0f / mo->info_->mass_;
@@ -1491,16 +1491,18 @@ static void P_MobjThinker(MapObject *mobj)
                 }
                 if (tn_props.push.X || tn_props.push.Y || tn_props.push.Z)
                 {
-                    SectorFlag flags = tn_props.special ? tn_props.special->special_flags_ : kSectorFlagPushConstant;
+                    SectorFlag flags = tn_props.special ? tn_props.special->special_flags_ : kSectorFlagNone;
 
                     if (!((mobj->flags_ & kMapObjectFlagNoGravity) || (flags & kSectorFlagPushAll)) &&
                         (AlmostEquals(mobj->z, mobj->floor_z_) || (flags & kSectorFlagWholeRegion)))
                     {
                         float push_mul = 1.0f;
 
-                        EPI_ASSERT(mobj->info_->mass_ > 0);
-                        if (!(flags & kSectorFlagPushConstant))
+                        if (!tn_props.push_constant)
+                        {
+                            EPI_ASSERT(mobj->info_->mass_ > 0);
                             push_mul = 100.0f / mobj->info_->mass_;
+                        }
 
                         if (tn_props.push.X)
                             mobj->momentum_.X += push_mul * tn_props.push.X;

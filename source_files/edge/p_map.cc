@@ -2213,13 +2213,13 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
                 return true;
         }
 
-        // position puff off the wall
-        x -= trace.delta_x * (shoot_check.puff->radius_ + 1.0f) / shoot_check.range;
-        y -= trace.delta_y * (shoot_check.puff->radius_ + 1.0f) / shoot_check.range;
-
-        // Spawn bullet puffs.
+        // position puff off the wall and spawn
         if (shoot_check.puff)
-            SpawnPuff(x, y, z, shoot_check.puff, shoot_check.angle + kBAMAngle180);
+        {
+            float puff_x = x - trace.delta_x * (shoot_check.puff->radius_ + 1.0f) / shoot_check.range;
+            float puff_y = y - trace.delta_y * (shoot_check.puff->radius_ + 1.0f) / shoot_check.range;
+            SpawnPuff(puff_x, puff_y, z, shoot_check.puff, shoot_check.angle + kBAMAngle180);
+        }
 
         // Lobo:2022
         // Check if we're using EFFECT_OBJECT for this line
@@ -2232,7 +2232,9 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
 
             if (info && tempspecial->type_ == kLineTriggerShootable)
             {
-                SpawnDebris(x, y, z, shoot_check.angle + kBAMAngle180, info);
+                float info_x = x - trace.delta_x * (info->radius_ + 1.0f) / shoot_check.range;
+                float info_y = y - trace.delta_y * (info->radius_ + 1.0f) / shoot_check.range;
+                SpawnDebris(info_x, info_y, z, shoot_check.angle + kBAMAngle180, info);
             }
             UnblockLineEffectDebris(ld, tempspecial);
         }

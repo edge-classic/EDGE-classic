@@ -270,6 +270,7 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
 
     chan->loop_ = false;
     chan->boss_ = (flags & kSoundEffectBoss) ? true : false;
+    chan->pos_ = 0;
 
     bool attenuate =
         (pos && category != kCategoryWeapon && category != kCategoryPlayer && category != kCategoryUi);
@@ -278,9 +279,8 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
     chan->ref_config_.sampleRate = buf->frequency_;
     ma_audio_buffer_init(&chan->ref_config_, &chan->ref_);
     ma_sound_init_from_data_source(&sound_engine, &chan->ref_,
-                                   attenuate ? 0 : (MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_NO_SPATIALIZATION), NULL,
+                                   attenuate ? 0 : MA_SOUND_FLAG_NO_SPATIALIZATION, NULL,
                                    &chan->channel_sound_);
-    float volume = def->volume_;
     if (attenuate)
     {
         // We do not want boss noises to be completely attenuated out, so set the model accordingly
@@ -334,8 +334,8 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
     if (chan->boss_)
         ma_sound_set_volume(&chan->channel_sound_, 1.0f);
     else
-        ma_sound_set_volume(&chan->channel_sound_, volume);
-    ma_sound_set_looping(&chan->channel_sound_, false);
+        ma_sound_set_volume(&chan->channel_sound_, def->volume_);
+    ma_sound_set_looping(&chan->channel_sound_, MA_FALSE);
     ma_sound_start(&chan->channel_sound_);
 }
 
@@ -352,6 +352,8 @@ static void DoStartFX(const SoundEffectDefinition *def, int category, const Posi
         if (def->looping_ && def == chan->definition_)
         {
             chan->loop_ = true;
+            ma_sound_set_looping(&chan->channel_sound_, MA_TRUE);
+            chan->pos_ = 0;
             return;
         }
         else if (flags & kSoundEffectSingle)

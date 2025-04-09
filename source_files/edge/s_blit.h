@@ -60,6 +60,7 @@ class SoundChannel
     ma_audio_buffer_config ref_config_;
     ma_audio_buffer        ref_;
     ma_sound               channel_sound_;
+    ma_uint64              pos_;
 
   public:
     SoundChannel();

@@ -1202,7 +1202,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props)
             bool  fly_or_swim = mo->player_ && (mo->player_->swimming_ || mo->player_->powers_[kPowerTypeJetpack] > 0 ||
                                                mo->on_ladder_ >= 0);
 
-            if (mo->player_ && gravity > 0 && -zmove > kOofSpeed && !fly_or_swim)
+            if (mo->player_ && mo->player_->map_object_ == mo && gravity > 0 && -zmove > kOofSpeed && !fly_or_swim)
             {
                 // Squat down. Decrease viewheight for a moment after hitting
                 // the ground (hard), and utter appropriate sound.
@@ -1309,7 +1309,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props)
             bool  fly_or_swim = mo->player_ && (mo->player_->swimming_ || mo->player_->powers_[kPowerTypeJetpack] > 0 ||
                                                mo->on_ladder_ >= 0);
 
-            if (mo->player_ && gravity < 0 && zmove > kOofSpeed && !fly_or_swim)
+            if (mo->player_ && mo->player_->map_object_ == mo && gravity < 0 && zmove > kOofSpeed && !fly_or_swim)
             {
                 mo->player_->delta_view_height_ = zmove / 8.0f;
                 StartSoundEffect(mo->info_->oof_sound_, GetSoundEffectCategory(mo), mo);

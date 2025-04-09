@@ -127,36 +127,31 @@ void UpdateSounds(MapObject *listener, BAMAngle angle)
     ma_engine_listener_set_position(&sound_engine, 0, listen_x, listen_z, -listen_y);
 
     if (listener)
-    {
-        float mom_x = listener->x + listener->momentum_.X;
-        float mom_y = listener->y + listener->momentum_.Y;
-        float mom_z = listener->z + listener->momentum_.Z;
         ma_engine_listener_set_direction(&sound_engine, 0, epi::BAMCos(angle), epi::BAMTan(listener->vertical_angle_),
                                          -epi::BAMSin(angle));
-        BAMAngle velocity_angle = PointToAngle(listener->x, listener->y, mom_x, mom_y);
-        float    velocity_slope = ApproximateSlope(listener->x - mom_x, listener->y - mom_y, listener->z - mom_z);
-        velocity_slope          = HMM_Clamp(-1.0f, velocity_slope, 1.0f);
-        ma_engine_listener_set_velocity(&sound_engine, 0, epi::BAMCos(velocity_angle), velocity_slope,
-                                        -epi::BAMSin(velocity_angle));
-    }
     else
-    {
         ma_engine_listener_set_direction(&sound_engine, 0, 0, 0, 0);
-        ma_engine_listener_set_velocity(&sound_engine, 0, 0, 0, 0);
-    }
 
     for (int i = 0; i < total_channels; i++)
     {
         SoundChannel *chan = mix_channels[i];
 
-        if (chan->state_ == kChannelPlaying && ma_sound_at_end(&chan->channel_sound_))
+        if (chan->state_ == kChannelPlaying)
         {
             if (chan->loop_)
             {
-                ma_sound_start(&chan->channel_sound_); // will rewind
-                chan->loop_ = false;
+                ma_uint64 cur_pos = 0;
+                ma_sound_get_cursor_in_pcm_frames(&chan->channel_sound_, &cur_pos);
+                if (cur_pos < chan->pos_) // has looped already
+                {
+                    chan->loop_ = false;
+                    ma_sound_set_looping(&chan->channel_sound_, MA_FALSE);
+                }
+                else
+                    chan->pos_ = cur_pos;
             }
-            else
+
+            if (ma_sound_at_end(&chan->channel_sound_))
                 chan->state_ = kChannelFinished;
         }
 

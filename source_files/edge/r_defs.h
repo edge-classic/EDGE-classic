@@ -107,6 +107,7 @@ struct RegionProperties
 
     // pushing sector information (normally all zero)
     HMM_Vec3 push;
+    bool     push_constant = false;
 
     HMM_Vec3 net_push = {{0, 0, 0}};
 

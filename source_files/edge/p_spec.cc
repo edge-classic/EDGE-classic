@@ -870,6 +870,8 @@ static void SectorEffect(Sector *target, Line *source, const LineType *special)
                 anim.last_height = anim.scroll_sector_reference->original_height;
             }
         }
+        if (special->sector_effect_ & kSectorEffectTypePushThings)
+            target->properties.push_constant = true;
         sector_animations.push_back(anim);
         AddSpecialSector(target);
     }
@@ -2605,6 +2607,8 @@ void SpawnMapSpecials2(int autotag)
             sector->properties.push.X += epi::BAMCos(secSpecial->push_angle_) * mul;
             sector->properties.push.Y += epi::BAMSin(secSpecial->push_angle_) * mul;
             sector->properties.push.Z += secSpecial->push_zspeed_ / 100.0f;
+            if (secSpecial->special_flags_ & kSectorFlagPushConstant)
+                sector->properties.push_constant = true;
         }
 
         // Scrollers

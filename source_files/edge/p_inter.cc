@@ -1416,10 +1416,12 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
     {
         int i;
 
-        // Don't damage player if sector type should only affect grounded
-        // monsters Note: flesh this out be be more versatile - Dasho
-        if (damtype && damtype->grounded_monsters_)
-            return;
+        // Don't damage player if sector type shouldn't affect players
+        if (damtype && damtype->only_affects_)
+        {
+            if (!(damtype->only_affects_ & epi::BitSetFromChar('P')))
+                return;
+        }
 
         // ignore damage in GOD mode, or with INVUL powerup
         if ((player->cheats_ & kCheatingGodMode) || player->powers_[kPowerTypeInvulnerable] > 0)

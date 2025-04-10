@@ -211,8 +211,11 @@ class DamageClass
     Benefit *damage_unless_;
     // Apply damage if one of these benefits is in effect
     Benefit *damage_if_;
-    // Apply to (grounded) monsters instead (MBF21)
-    bool grounded_monsters_;
+    // What (broad) class of things this damage affects; introduced
+    // to help integrate MBF21 instakill sector damage. Only considered
+    // if non-zero for backwards compatability. "P" indicates players,
+    // "M" indicates monsters, and "O" indicates other
+    BitSet only_affects_;
 };
 
 enum AttackStyle

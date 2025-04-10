@@ -156,6 +156,7 @@ void DDFBoomMakeGeneralizedSector(SectorType *sec, int number)
     // handle bit 12: Alternate damage mode (MBF21)
     if ((number >> 12) & 1)
     {
+        sec->damage_.only_affects_ |= epi::BitSetFromChar('P');
         switch ((number >> 5) & 0x3)
         {
         case 0: // Kill player if no radsuit or invul status
@@ -199,7 +200,7 @@ void DDFBoomMakeGeneralizedSector(SectorType *sec, int number)
     {
         sec->damage_.delay_             = 0;
         sec->damage_.instakill_         = true;
-        sec->damage_.grounded_monsters_ = true;
+        sec->damage_.only_affects_     |= epi::BitSetFromChar('M');
     }
 }
 

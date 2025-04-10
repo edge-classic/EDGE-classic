@@ -1519,10 +1519,16 @@ static void P_MobjThinker(MapObject *mobj)
         if (mobj_props.friction < 0.0f)
             mobj_props.friction = mobj->region_properties_->friction;
 
-        // Only damage grounded monsters (not players)
-        if (props->special && props->special->damage_.grounded_monsters_ && AlmostEquals(mobj->z, mobj->floor_z_))
+        // Damage mobj if applicable
+        // Dasho - So far this is just for MBF21 instakill sectors
+        if (props->special && props->special->damage_.only_affects_)
         {
-            DamageMapObject(mobj, nullptr, nullptr, 5.0, &props->special->damage_, false);
+            if (((props->special->damage_.only_affects_ & epi::BitSetFromChar('M')) && (mobj->info_->extended_flags_ & kExtendedFlagMonster))
+                || (!(mobj->info_->extended_flags_ & kExtendedFlagMonster) && (props->special->damage_.only_affects_ & epi::BitSetFromChar('O'))))
+            {
+                if (AlmostEquals(mobj->z, mobj->floor_z_) || (props->special->special_flags_ & kSectorFlagWholeRegion))
+                    DamageMapObject(mobj, nullptr, nullptr, props->special->damage_.nominal_, &props->special->damage_, false);
+            }
         }
     }
 

@@ -350,7 +350,7 @@ const DDFActionCode thing_actions[] = {{"NOTHING", nullptr, nullptr},
                                        // Boom/MBF compatibility
                                        {"DIE", A_Die, nullptr},
                                        {"KEEN_DIE", A_KeenDie, nullptr},
-                                       {"MUSHROOM", A_Mushroom, nullptr},
+                                       {"MUSHROOM", A_Mushroom, DDFStateGetIntPair},
                                        {"NOISE_ALERT", A_NoiseAlert, nullptr},
                                        {"DEH_RADIUS_DAMAGE", A_RadiusDamage, DDFStateGetDEHParams},
                                        {"DEH_HEAL_CHASE", A_HealChase, DDFStateGetJumpInt},

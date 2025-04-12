@@ -920,30 +920,6 @@ STATES(DEATH)=GLS1:A:3:NORMAL:NOTHING,
               GLS9:A:35:NORMAL:TRANSFADE(0%),
               #REMOVE;
   
- 
- 
- 
-[MUSHROOM_FIREBALL]
-ATTACKTYPE=PROJECTILE;
-HEIGHT=8;
-RADIUS=6;
-DAMAGE.VAL=8;
-DAMAGE.MAX=64;
-SPEED=20;
-PROJECTILE_SPECIAL=NOBLOCKMAP,MISSILE,DROPOFF;
-LAUNCH_SOUND=FIRSHT;
-TRANSLUCENCY=80%;
-
-STATES(IDLE)=MANF:A:4:BRIGHT:NOTHING,
-             MANF:B:4:BRIGHT:NOTHING;
-
-STATES(DEATH)=MISL:B:0:BRIGHT:TRANS_FADE(10%),
-              MISL:B:0:BRIGHT:KILLSOUND,
-              MISL:B:8:BRIGHT:PLAYSOUND(FIRXPL),
-              MISL:C:6:BRIGHT:NOTHING,
-              MISL:D:4:BRIGHT:NOTHING,
-              #REMOVE;
- 
 // These are named INTERNAL_ to try to avoid conflicting with existing mods
 // They are the default attacks used by the A_FireOldBFG and A_BetaSkullAttack pointers
 

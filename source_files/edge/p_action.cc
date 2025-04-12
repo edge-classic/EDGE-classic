@@ -5100,33 +5100,72 @@ void A_SpawnObject(MapObject *mo)
 //
 void A_Mushroom(MapObject *mo)
 {
-    float height = 4.0;
-    int   spread = 32;
+    float height = 4.0f;
+    float speed  = 0.5f;
+
+    const State *st = mo->state_;
+
+    if (!mo->state_ || !mo->state_->action_par)
+        return;
+
+    if (st && st->action_par)
+    {
+        int *values = (int *)mo->state_->action_par;
+        if (values[0])
+        {
+            height = (float)values[0] / 65536.0f;
+        }
+        if (values[1])
+        {
+            speed  = (float)values[1] / 65536.0f;
+        }
+    }
 
     // First make normal explosion damage
     A_DamageExplosion(mo);
 
     // Now launch mushroom cloud
-    const AttackDefinition *atk = mo->info_->spareattack_;
-    if (atk == nullptr)
-        atk = atkdefs.Lookup("MUSHROOM_FIREBALL");
-    if (atk == nullptr)
+    const MapObjectDefinition *fireball = mobjtypes.Lookup("MANCUBUS_FIREBALL");
+    if (!fireball)
         return;
 
-    for (int i = -spread; i <= spread; i += 16)
+    // Spread is determined by the 'missile damage' mobj property,
+    // which from our Dehacked conversion equates to nominal
+    // explode damage
+    int i,j,spread = mo->info_->explode_damage_.nominal_;
+
+    for (i = -spread; i <= spread; i += 8)
     {
-        for (int j = -spread; j <= spread; j += 16)
+        for (j = -spread; j <= spread; j += 8)
         {
             // Aim in many directions from source
             float tx = mo->x + i;
             float ty = mo->y + j;
             float tz = mo->z + ApproximateDistance(i, j) * height;
 
-            mo->current_attack_ = atk;
-
-            MapObject *proj = DoLaunchProjectile(mo, tx, ty, tz, nullptr, atk->atk_mobj_);
-            if (proj == nullptr)
-                continue;
+            MapObject *proj = CreateMapObject(mo->x, mo->y, mo->z + 32.0f, fireball);
+            if (proj)
+            {
+                proj->flags_ &= ~kMapObjectFlagNoGravity;
+                proj->angle_ = PointToAngle(mo->x, mo->y, tx, ty);
+                float dist = ApproximateDistance(i, j);
+                dist /= proj->info_->speed_;
+              
+                if (dist < 1.0f)
+                  dist = 1.0f;
+              
+                proj->momentum_.Z = (tz - mo->z) / dist;
+                proj->momentum_.X = proj->info_->speed_ * epi::BAMCos(proj->angle_);
+                proj->momentum_.Y = proj->info_->speed_ * epi::BAMSin(proj->angle_);
+                proj->momentum_ = HMM_MulV3F(proj->momentum_, speed);
+                if (proj->flags_ & kMapObjectFlagPreserveMomentum)
+                {
+                    proj->momentum_.X += mo->momentum_.X;
+                    proj->momentum_.Y += mo->momentum_.Y;
+                    proj->momentum_.Z += mo->momentum_.Z;
+                }
+                proj->SetRealSource(mo);
+            }
         }
     }
 }

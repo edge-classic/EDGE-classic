@@ -205,7 +205,7 @@ const ActionInfo action_info[kTotalMBF21Actions] = {
     {"A_Die", kActionFlagSpecial, "", nullptr, nullptr},
     {"A_Stop", 0, "STOP", nullptr, nullptr},
     {"A_Detonate", kActionFlagDetonate, "EXPLOSIONDAMAGE", nullptr, nullptr},
-    {"A_Mushroom", 0, "MUSHROOM", nullptr, nullptr},
+    {"A_Mushroom", kActionFlagSpecial, "", nullptr, nullptr},
 
     {"A_Spawn", kActionFlagSpecial, "", nullptr, nullptr},
     {"A_Turn", kActionFlagSpecial, "", nullptr, nullptr},
@@ -1366,6 +1366,14 @@ void frames::SpecialAction(char *act_name, const State *st, int cur)
         EPI_ASSERT(current_weap);
         int flash_to = current_weap->flashstate + cur - kS_CHAIN1;
         stbsp_sprintf(act_name, "DEH_FIRE_CHAINGUN(%s)", RedirectorName(flash_to));
+    }
+    break;
+
+    case kA_Mushroom: {
+        int height = ReadArg(st, 0);
+        int speed  = ReadArg(st, 1);
+
+        stbsp_sprintf(act_name, "MUSHROOM(%d,%d)", height, speed);
     }
     break;
 

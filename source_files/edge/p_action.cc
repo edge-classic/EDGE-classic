@@ -1796,11 +1796,10 @@ int MissileContact(MapObject *object, MapObject *target)
 
     const DamageClass *damtype;
 
-    // transitional hack
     if (object->current_attack_)
         damtype = &object->current_attack_->damage_;
     else
-        damtype = &object->info_->explode_damage_;
+        damtype = &object->info_->proj_damage_;
 
     float damage;
     EDGE_DAMAGE_COMPUTE(damage, damtype);
@@ -1828,18 +1827,14 @@ int MissileContact(MapObject *object, MapObject *target)
     // the first impact.
     if (object->extended_flags_ & kExtendedFlagTunnel)
     {
-        // unless it uses the new BORE special - Dasho
-        if (!(object->extended_flags_ & kExtendedFlagBore))
-        {
-            // this hash is very basic, but should work OK
-            uint32_t hash = (uint32_t)(long long)target;
+        // this hash is very basic, but should work OK
+        uint32_t hash = (uint32_t)(long long)target;
 
-            if (object->tunnel_hash_[0] == hash || object->tunnel_hash_[1] == hash)
-                return -1;
+        if (object->tunnel_hash_[0] == hash || object->tunnel_hash_[1] == hash)
+            return -1;
 
-            object->tunnel_hash_[0] = object->tunnel_hash_[1];
-            object->tunnel_hash_[1] = hash;
-        }
+        object->tunnel_hash_[0] = object->tunnel_hash_[1];
+        object->tunnel_hash_[1] = hash;
         if (object->info_->rip_sound_)
             StartSoundEffect(object->info_->rip_sound_, kCategoryObject, object, 0);
     }
@@ -1862,6 +1857,7 @@ int MissileContact(MapObject *object, MapObject *target)
         return 0;
     }
 
+    LogPrint("DAMAGE: %f\n", damage);
     DamageMapObject(target, object, object->source_, damage, damtype, weak_spot);
     return 1;
 }
@@ -5131,8 +5127,8 @@ void A_Mushroom(MapObject *mo)
 
     // Spread is determined by the 'missile damage' mobj property,
     // which from our Dehacked conversion equates to nominal
-    // explode damage
-    int i,j,spread = mo->info_->explode_damage_.nominal_;
+    // projectile damage
+    int i,j,spread = mo->info_->proj_damage_.nominal_;
 
     for (i = -spread; i <= spread; i += 8)
     {

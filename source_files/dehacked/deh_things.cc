@@ -491,8 +491,10 @@ void Attacks::ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num,
         wad::Printf("EXPLODE_DAMAGE.VAL = 128;\n");
     else if (info->damage)
     {
-        wad::Printf("EXPLODE_DAMAGE.VAL = %d;\n", info->damage);
-        wad::Printf("EXPLODE_DAMAGE.MAX = %d;\n", info->damage * 8);
+        if (frames::act_flags & kActionFlagDetonate)
+            wad::Printf("EXPLODE_DAMAGE.VAL = %d;\n", info->damage);
+        wad::Printf("PROJECTILE_DAMAGE.VAL = %d;\n", info->damage);
+        wad::Printf("PROJECTILE_DAMAGE.MAX = %d;\n", info->damage * 8);
     }
 
     wad::Printf("\n");
@@ -1757,8 +1759,10 @@ void things::ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num, in
         wad::Printf("EXPLODE_DAMAGE.VAL = 128;\n");
     else if (info->damage)
     {
-        wad::Printf("EXPLODE_DAMAGE.VAL = %d;\n", info->damage);
-        wad::Printf("EXPLODE_DAMAGE.MAX = %d;\n", info->damage * 8);
+        if (frames::act_flags & kActionFlagDetonate)
+            wad::Printf("EXPLODE_DAMAGE.VAL = %d;\n", info->damage);
+        wad::Printf("PROJECTILE_DAMAGE.VAL = %d;\n", info->damage);
+        wad::Printf("PROJECTILE_DAMAGE.MAX = %d;\n", info->damage * 8);
     }
 
     if ((frames::act_flags & kActionFlagKeenDie))

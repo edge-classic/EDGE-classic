@@ -217,6 +217,7 @@ const DDFCommandList thing_commands[] = {
     DDF_FIELD("FAST_SPEED", dummy_mobj, fast_speed_, DDFMainGetNumeric),
     DDF_FIELD("MELEE_RANGE", dummy_mobj, melee_range_, DDFMainGetFloat),
     DDF_FIELD("DEH_THING_ID", dummy_mobj, deh_thing_id_, DDFMainGetNumeric),
+    DDF_SUB_LIST("PROJECTILE_DAMAGE", dummy_mobj, proj_damage_, damage_commands),
 
     // -AJA- backwards compatibility cruft...
     DDF_FIELD("EXPLOD_DAMAGE", dummy_mobj, explode_damage_.nominal_, DDFMainGetFloat),
@@ -2662,6 +2663,7 @@ void MapObjectDefinition::Default()
     splash_group_  = -2;
     fast_speed_    = -1;
     melee_range_   = -1;
+    proj_damage_.Default(DamageClass::kDamageClassDefaultMobj);
     deh_thing_id_  = 0;
 }
 

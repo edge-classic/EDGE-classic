@@ -1475,6 +1475,13 @@ static void P_MobjThinker(MapObject *mobj)
     }
     else
     {
+        // Reset tunnel hashes for BORE special so it can damage the same
+        // mobj again if appropriate
+        if (mobj->extended_flags_ & kExtendedFlagBore)
+        {
+            mobj->tunnel_hash_[0] = 0;
+            mobj->tunnel_hash_[1] = 0;
+        }
         mobj_props = *mobj->region_properties_;
         mobj_props.friction = -1.0f;
         // handle push sectors and friction

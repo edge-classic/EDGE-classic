@@ -368,8 +368,8 @@ void DDFAttackCleanUp(void)
             a->atk_mobj_ = mobjtypes.Lookup(a->atk_mobj_ref_.c_str());
             if (a->atk_mobj_)
             {
-                a->damage_.nominal_          = a->atk_mobj_->explode_damage_.nominal_;
-                a->damage_.linear_max_       = a->atk_mobj_->explode_damage_.linear_max_;
+                a->damage_.nominal_          = a->atk_mobj_->proj_damage_.nominal_;
+                a->damage_.linear_max_       = a->atk_mobj_->proj_damage_.linear_max_;
                 MapObjectDefinition *atk_mod = (MapObjectDefinition *)a->atk_mobj_; // const override
                 if (atk_mod->dlight_.type_ == kDynamicLightTypeNone)
                 {

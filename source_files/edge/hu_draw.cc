@@ -1132,7 +1132,7 @@ void HUDDrawText(float x, float y, const char *str, float size)
 
     if (current_y_alignment >= 0)
     {
-        float total_h = HUDStringHeight(str);
+        float total_h = size > 0 ? size : HUDStringHeight(str);
 
         if (current_y_alignment == 0)
             total_h /= 2.0f;

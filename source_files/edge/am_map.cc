@@ -186,6 +186,15 @@ static float map_pulse_width = 2.0f;
 static float map_dx          = 0.0f;
 static float map_dy          = 0.0f;
 
+struct AutomapKey
+{
+    float     x;
+    float     y;
+    int       type;
+};
+
+static std::vector<AutomapKey> automap_keys;
+
 std::vector<AutomapLine *> automap_lines;
 static size_t              automap_line_position = 0;
 
@@ -759,84 +768,70 @@ std::string Aux2StringReplaceAll(std::string str, const std::string &from, const
 }
 
 // Lobo 2023: draw some key info in the middle of a line
-static void DrawKeyOnLine(AutomapLine *ml, int theKey, RGBAColor rgb = kRGBAWhite)
+static void DrawKeys()
 {
     if (automap_keydoor_text.d_ == 0) // Only if we have Keyed Doors Named turned on
         return;
 
-    static const MapObjectDefinition *TheObject;
-    std::string                       CleanName;
-    CleanName.clear();
+    const MapObjectDefinition *TheObject = nullptr;
+    Font                      *am_font   = nullptr;
+    std::string                CleanName;
 
-    if (theKey == kDoorKeyStrictlyAllKeys)
+    if (automap_keydoor_text.d_ == 1)
     {
-        CleanName = "All keys";
+        am_font = automap_style->fonts_[0];
+        EPI_ASSERT(am_font);
+        HUDSetFont(am_font);
+        HUDSetTextColor(kRGBAWhite);
     }
-    else
+
+    HUDSetAlignment(0, 0); // centre
+
+    for (const AutomapKey &key : automap_keys)
     {
-        TheObject = mobjtypes.LookupDoorKey(theKey);
+        TheObject = mobjtypes.LookupDoorKey(key.type);
         if (!TheObject)
-            return; // Very rare, only zombiesTC hits this so far
-        CleanName = Aux2StringReplaceAll(TheObject->name_, std::string("_"), std::string(" "));
-    }
+            continue; // Very rare, only zombiesTC hits this so far
 
-    // *********************
-    // Draw Text description
-    // Calculate midpoint
-    float midx = (ml->points.X + ml->points.Z) / 2;
-    float midy = (ml->points.Y + ml->points.W) / 2;
-
-    // Translate map coords to hud coords
-    float x1 = MapToFrameCoordinatesX(midx, map_center_x);
-    float y1 = MapToFrameCoordinatesY(midy, map_center_y);
-
-    Font *am_font = automap_style->fonts_[0];
-
-    HUDSetFont(am_font);
-    HUDSetAlignment(0, 0); // centre the characters
-    HUDSetTextColor(rgb);
-    float TextSize = 0.4f * map_scale;
-    if (map_scale > 5.0f)  // only draw the text if we're zoomed in?
-    {
         if (automap_keydoor_text.d_ == 1)
         {
-            HUDDrawText(x1, y1, CleanName.c_str(), TextSize);
+            CleanName.clear();
+
+            if (key.type == kDoorKeyStrictlyAllKeys)
+            {
+                CleanName = "All keys";
+            }
+            else
+            {
+                CleanName = Aux2StringReplaceAll(TheObject->name_, std::string("_"), std::string(" "));
+            }
+
+            HUDDrawText(key.x, key.y, CleanName.c_str(), 0.75f * map_scale);
         }
         else if (automap_keydoor_text.d_ > 1)
         {
-            if (TheObject)
+            State *idlestate = &states[TheObject->idle_state_];
+            if (!(idlestate->flags & kStateFrameFlagModel)) // Can't handle 3d models...yet
             {
-                static State *idlestate;
-                idlestate = &states[TheObject->idle_state_];
-                if (!(idlestate->flags & kStateFrameFlagModel)) // Can't handle 3d models...yet
-                {
-                    bool         flip;
-                    const Image *img = GetOtherSprite(idlestate->sprite, idlestate->frame, &flip);
+                bool         flip;
+                const Image *img = GetOtherSprite(idlestate->sprite, idlestate->frame, &flip);
 
-                    if (epi::StringCaseCompareASCII("DUMMY_SPRITE", img->name_) != 0)
-                        HUDDrawImageNoOffset(x1, y1, img);
-                    // HUDStretchImage(x1, y1, 16, 16, img, 0.0, 0.0);
-                }
+                if (epi::StringCaseCompareASCII("DUMMY_SPRITE", img->name_) != 0)
+                    HUDStretchImageNoOffset(key.x, key.y, 2 * map_scale * 
+                        ((float)img->actual_width_/img->actual_height_), 2 * map_scale, img, 0, 0);
             }
         }
     }
 
-    HUDSetFont();
-    HUDSetTextColor();
+    if (automap_keydoor_text.d_ == 1)
+    {
+        HUDSetFont();
+        HUDSetTextColor();
+    }
+
     HUDSetAlignment();
 
-    /*
-    // *********************
-    // Draw Graphical description
-        float x2 = ml->X;
-        float y2 = ml->Y;
-
-        DrawLineCharacter(door_key, NUMDOORKEYLINES,
-                    5, kBAMAngle90,
-                    epi::MakeRGBA(0,0,255), x2, y2);
-    */
-
-    return;
+    automap_keys.clear();
 }
 
 //
@@ -987,67 +982,47 @@ static void AddWall(const Line *line)
             {
                 if (line->special->keys_)
                 {
+                    float midx = MapToFrameCoordinatesX((l->points.X + l->points.Z) / 2, map_center_x);
+                    float midy = MapToFrameCoordinatesY((l->points.Y + l->points.W) / 2, map_center_y);
+
                     if (line->special->keys_ & kDoorKeyStrictlyAllKeys)
                     {
                         l->color = kRGBAPurple;
                         DrawMLineDoor(l); // purple
-                        DrawKeyOnLine(l, kDoorKeyStrictlyAllKeys);
+                        if (automap_keydoor_text.d_ > 0) 
+                            automap_keys.push_back({ midx, midy, (int)kDoorKeyStrictlyAllKeys });
                     }
-                    else if (line->special->keys_ & kDoorKeyBlueCard || line->special->keys_ & kDoorKeyBlueSkull)
+                    else if (line->special->keys_ & (kDoorKeyBlueSkull | kDoorKeyBlueCard))
                     {
                         l->color = kRGBABlue;
                         DrawMLineDoor(l); // blue
-                        if (line->special->keys_ & (kDoorKeyBlueSkull | kDoorKeyBlueCard))
-                        {
-                            DrawKeyOnLine(l, kDoorKeyBlueCard);
-                            DrawKeyOnLine(l, kDoorKeyBlueSkull);
-                        }
-                        else if (line->special->keys_ & kDoorKeyBlueCard)
-                            DrawKeyOnLine(l, kDoorKeyBlueCard);
-                        else
-                            DrawKeyOnLine(l, kDoorKeyBlueSkull);
+                        if (automap_keydoor_text.d_ > 0) 
+                            automap_keys.push_back({ midx, midy, (int)(line->special->keys_ & 
+                                kDoorKeyBlueSkull ? kDoorKeyBlueSkull : kDoorKeyBlueCard) });
                     }
-                    else if (line->special->keys_ & kDoorKeyYellowCard || line->special->keys_ & kDoorKeyYellowSkull)
+                    else if (line->special->keys_ & (kDoorKeyYellowSkull | kDoorKeyYellowCard))
                     {
                         l->color = kRGBAYellow;
                         DrawMLineDoor(l); // yellow
-                        if (line->special->keys_ & (kDoorKeyYellowSkull | kDoorKeyYellowCard))
-                        {
-                            DrawKeyOnLine(l, kDoorKeyYellowCard);
-                            DrawKeyOnLine(l, kDoorKeyYellowSkull);
-                        }
-                        else if (line->special->keys_ & kDoorKeyYellowCard)
-                            DrawKeyOnLine(l, kDoorKeyYellowCard);
-                        else
-                            DrawKeyOnLine(l, kDoorKeyYellowSkull);
+                        if (automap_keydoor_text.d_ > 0) 
+                            automap_keys.push_back({ midx, midy, (int)(line->special->keys_ & 
+                                kDoorKeyYellowSkull ? kDoorKeyYellowSkull : kDoorKeyYellowCard) });
                     }
-                    else if (line->special->keys_ & kDoorKeyRedCard || line->special->keys_ & kDoorKeyRedSkull)
+                    else if (line->special->keys_ & (kDoorKeyRedSkull | kDoorKeyRedCard))
                     {
                         l->color = kRGBARed;
                         DrawMLineDoor(l); // red
-                        if (line->special->keys_ & (kDoorKeyRedSkull | kDoorKeyRedCard))
-                        {
-                            DrawKeyOnLine(l, kDoorKeyRedCard);
-                            DrawKeyOnLine(l, kDoorKeyRedSkull);
-                        }
-                        else if (line->special->keys_ & kDoorKeyRedCard)
-                            DrawKeyOnLine(l, kDoorKeyRedCard);
-                        else
-                            DrawKeyOnLine(l, kDoorKeyRedSkull);
+                        if (automap_keydoor_text.d_ > 0) 
+                            automap_keys.push_back({ midx, midy, (int)(line->special->keys_ & 
+                                kDoorKeyRedSkull ? kDoorKeyRedSkull : kDoorKeyRedCard) });
                     }
-                    else if (line->special->keys_ & kDoorKeyGreenCard || line->special->keys_ & kDoorKeyGreenSkull)
+                    else if (line->special->keys_ & (kDoorKeyGreenSkull | kDoorKeyGreenCard))
                     {
                         l->color = kRGBAGreen;
                         DrawMLineDoor(l); // green
-                        if (line->special->keys_ & (kDoorKeyGreenSkull | kDoorKeyGreenCard))
-                        {
-                            DrawKeyOnLine(l, kDoorKeyGreenCard);
-                            DrawKeyOnLine(l, kDoorKeyGreenSkull);
-                        }
-                        else if (line->special->keys_ & kDoorKeyGreenCard)
-                            DrawKeyOnLine(l, kDoorKeyGreenCard);
-                        else
-                            DrawKeyOnLine(l, kDoorKeyGreenSkull);
+                        if (automap_keydoor_text.d_ > 0) 
+                            automap_keys.push_back({ midx, midy, (int)(line->special->keys_ & 
+                                kDoorKeyGreenSkull ? kDoorKeyGreenSkull : kDoorKeyGreenCard) });
                     }
                     else
                     {
@@ -1444,6 +1419,8 @@ void AutomapRender(float x, float y, float w, float h, MapObject *focus)
     DrawAllLines();
 
     DrawMarks();
+
+    DrawKeys();
 }
 
 void AutomapSetColor(int which, RGBAColor color)

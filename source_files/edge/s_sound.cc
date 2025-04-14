@@ -43,8 +43,9 @@ extern float listen_x;
 extern float listen_y;
 extern float listen_z;
 
-static constexpr uint8_t  kMinimumSoundClipDistance = 200.0f;
-static constexpr uint16_t kMaximumSoundClipDistance = 1200.0f;
+static constexpr uint8_t  kMinimumSoundClipDistance = 160.0f;
+static constexpr uint16_t kBossSoundClipDistance    = 1200.0f;
+static constexpr uint16_t kMaximumSoundClipDistance = 4000.0f;
 
 static constexpr uint8_t category_limit_table[kTotalCategories] = {
 
@@ -279,17 +280,13 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
     chan->ref_config_.sampleRate = buf->frequency_;
     ma_audio_buffer_init(&chan->ref_config_, &chan->ref_);
     ma_sound_init_from_data_source(&sound_engine, &chan->ref_,
-                                   attenuate ? 0 : MA_SOUND_FLAG_NO_SPATIALIZATION, NULL,
+                                   attenuate ? MA_SOUND_FLAG_NO_PITCH : (MA_SOUND_FLAG_NO_PITCH|MA_SOUND_FLAG_NO_SPATIALIZATION), NULL,
                                    &chan->channel_sound_);
     if (attenuate)
     {
-        // We do not want boss noises to be completely attenuated out, so set the model accordingly
-        if (chan->boss_)
-            ma_sound_set_attenuation_model(&chan->channel_sound_, ma_attenuation_model_exponential);
-        else
-            ma_sound_set_attenuation_model(&chan->channel_sound_, ma_attenuation_model_linear);
+        ma_sound_set_attenuation_model(&chan->channel_sound_, ma_attenuation_model_inverse);
         ma_sound_set_min_distance(&chan->channel_sound_, kMinimumSoundClipDistance);
-        ma_sound_set_max_distance(&chan->channel_sound_, kMaximumSoundClipDistance);
+        ma_sound_set_max_distance(&chan->channel_sound_, chan->boss_ ? kBossSoundClipDistance : kMaximumSoundClipDistance);
         ma_sound_set_position(&chan->channel_sound_, pos->x, pos->z, -pos->y);
         if (vacuum_sound_effects)
             ma_node_attach_output_bus(&chan->channel_sound_, 0, &vacuum_node, 0);

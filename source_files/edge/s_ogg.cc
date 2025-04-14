@@ -589,7 +589,7 @@ bool OGGPlayer::OpenMemory(const uint8_t *data, int length)
     }
 
     if (ma_sound_init_from_data_source(&music_engine, &ogg_decoder,
-                                       MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION, NULL,
+                                       MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION, NULL,
                                        &ogg_stream) != MA_SUCCESS)
     {
         ma_decoder_uninit(&ogg_decoder);

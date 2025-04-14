@@ -69,7 +69,7 @@ static bool MovieSetupAudioStream(int rate)
         return false;
     }
     ma_pcm_rb_set_sample_rate(&movie_ring_buffer, rate);
-    if (ma_sound_init_from_data_source(&music_engine, &movie_ring_buffer, MA_SOUND_FLAG_NO_SPATIALIZATION, NULL,
+    if (ma_sound_init_from_data_source(&music_engine, &movie_ring_buffer, MA_SOUND_FLAG_NO_PITCH|MA_SOUND_FLAG_NO_SPATIALIZATION, NULL,
                                        &movie_sound_buffer) != MA_SUCCESS)
     {
         ma_pcm_rb_uninit(&movie_ring_buffer);

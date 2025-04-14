@@ -1857,7 +1857,6 @@ int MissileContact(MapObject *object, MapObject *target)
         return 0;
     }
 
-    LogPrint("DAMAGE: %f\n", damage);
     DamageMapObject(target, object, object->source_, damage, damtype, weak_spot);
     return 1;
 }

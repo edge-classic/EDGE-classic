@@ -130,7 +130,7 @@ class WadFile
     WadTextureResource wadtex_;
 
     // DeHackEd support
-    int dehacked_lump_;
+    std::vector<int> dehacked_lumps_;
 
     // COAL scripts
     int coal_huds_;
@@ -150,7 +150,7 @@ class WadFile
   public:
     WadFile()
         : sprite_lumps_(), flat_lumps_(), patch_lumps_(), colormap_lumps_(), tx_lumps_(), hires_lumps_(), xgl_lumps_(),
-          level_markers_(), skin_markers_(), wadtex_(), dehacked_lump_(-1), coal_huds_(-1), lua_huds_(-1),
+          level_markers_(), skin_markers_(), wadtex_(), dehacked_lumps_(), coal_huds_(-1), lua_huds_(-1),
           umapinfo_lump_(-1), animated_(-1), switches_(-1), md5_string_()
     {
         for (int d = 0; d < kTotalDDFTypes; d++)
@@ -566,7 +566,7 @@ static void AddLump(DataFile *df, const char *raw_name, int pos, int size, int f
     {
         lump_p->kind = kLumpDDFRTS;
         if (wad != nullptr && info.size > 0)
-            wad->dehacked_lump_ = lump;
+            wad->dehacked_lumps_.push_back(lump);
         return;
     }
     else if (strcmp(info.name, "COALHUDS") == 0)
@@ -993,26 +993,25 @@ void ProcessFixersForWAD(DataFile *df)
 #ifdef EDGE_CLASSIC
 void ProcessDehackedInWad(DataFile *df)
 {
-    int deh_lump = df->wad_->dehacked_lump_;
-    if (deh_lump < 0)
-        return;
+    for (const int deh_lump : df->wad_->dehacked_lumps_)
+    {
+        const char *lump_name = lump_info[deh_lump].name;
 
-    const char *lump_name = lump_info[deh_lump].name;
+        LogPrint("Converting [%s] lump in: %s\n", lump_name, df->name_.c_str());
 
-    LogPrint("Converting [%s] lump in: %s\n", lump_name, df->name_.c_str());
+        int            length = -1;
+        const uint8_t *data   = (const uint8_t *)LoadLumpIntoMemory(deh_lump, &length);
 
-    int            length = -1;
-    const uint8_t *data   = (const uint8_t *)LoadLumpIntoMemory(deh_lump, &length);
+        std::string bare_name = epi::GetFilename(df->name_);
 
-    std::string bare_name = epi::GetFilename(df->name_);
+        std::string source = lump_name;
+        source += " in ";
+        source += bare_name;
 
-    std::string source = lump_name;
-    source += " in ";
-    source += bare_name;
+        ConvertDehacked(data, length, source);
 
-    ConvertDehacked(data, length, source);
-
-    delete[] data;
+        delete[] data;
+    }
 }
 #endif
 static void ProcessDDFInWad(DataFile *df)

@@ -1890,7 +1890,7 @@ static void DDFMobjStateGetDEHSpawn(const char *arg, State *cur_state)
     {
         int x_offset = 0;
         if (sscanf(args[2].c_str(), "%d", &x_offset) == 1 && x_offset != 0)
-            params->x_offset = (float)x_offset / -65536.0f;
+            params->x_offset = (float)x_offset / 65536.0f;
     }
     if (arg_size > 3)
     {

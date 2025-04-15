@@ -26,6 +26,8 @@
 #include "i_defs_gl.h"
 #include "im_data.h"
 #include "m_math.h"
+#include "n_network.h"
+#include "p_tick.h"
 #include "r_colormap.h"
 #include "r_gldefs.h"
 #include "r_image.h"
@@ -41,6 +43,9 @@
 
 const Image *sky_image;
 
+// Reference for Boom sky transfer, if applicable
+MapSurface  *sky_ref = nullptr;
+
 bool custom_skybox;
 
 // needed for SKY
@@ -55,6 +60,10 @@ static uint32_t total_sky_verts = 0;
 static RendererVertex *sky_glvert = nullptr;
 
 static bool sky_unit_started = false;
+
+static HMM_Vec2 ddf_sky_scroll = {{ 0,0 }};
+static HMM_Vec2 ddf_old_sky_scroll = {{ 0,0 }};
+static int      ddf_scroll_tic = -1;
 
 SkyStretch current_sky_stretch = kSkyStretchUnset;
 
@@ -266,11 +275,22 @@ static void BuildSkyCircle()
 // axis
 // -----------------------------------------------------------------------------
 static void RenderSkySlice(float top, float bottom, float atop, float abottom, float dist, float tx, float ty,
-                           GLuint sky_tex_id, BlendingMode blend, RGBAColor fc_to_use, float fd_to_use)
+                           float offx, float offy, GLuint sky_tex_id, BlendingMode blend, RGBAColor fc_to_use, float fd_to_use)
 {
-    float tc_x  = 0.0f;
+    float tc_x  = offx;
     float tc_y1 = (top + 1.0f) * (ty * 0.5f);
     float tc_y2 = (bottom + 1.0f) * (ty * 0.5f);
+
+    if (current_sky_stretch == kSkyStretchMirror && bottom < -0.5f)
+    {
+        tc_y1 += offy;
+        tc_y2 += offy;
+    }
+    else
+    {
+        tc_y1 -= offy;
+        tc_y2 -= offy;
+    }
 
     if (current_sky_stretch == kSkyStretchMirror && bottom < -0.5f)
     {
@@ -424,29 +444,73 @@ static void RenderSkyCylinder(void)
     // Check for odd sky sizes
     float tx = 0.125f;
     float ty = 2.0f;
+    float offx = 0;
+    float offy = 0;
     if (sky_image->ScaledWidthActual() > 256)
         tx = 0.125f / ((float)sky_image->ScaledWidthActual() / 256.0f);
+
+    // Set scrolling...I guess Boom transfers should take precedence since part of their purpose is to
+    // override the normal sky - Dasho
+    if (sky_ref)
+    {
+        if (!AlmostEquals(sky_ref->old_offset.X, sky_ref->offset.X) && !paused && !menu_active && !time_stop_active &&
+            !erraticism_active)
+            offx = HMM_Lerp(sky_ref->old_offset.X, fractional_tic, sky_ref->offset.X);
+        else
+            offx = sky_ref->offset.X;
+        offx /= 128.0f;
+        if (!AlmostEquals(sky_ref->old_offset.Y, sky_ref->offset.Y) && !paused && !menu_active && !time_stop_active &&
+            !erraticism_active)
+            offy = HMM_Lerp(sky_ref->old_offset.Y, fractional_tic, sky_ref->offset.Y);
+        else
+            offy = sky_ref->offset.Y;
+        offy /= 128.0f;
+    }
+    else
+    {
+        if (ddf_scroll_tic != game_tic)
+        {
+            ddf_old_sky_scroll = ddf_sky_scroll;
+            ddf_sky_scroll.X += current_map->sky_scroll_x_;
+            ddf_sky_scroll.Y += current_map->sky_scroll_y_;
+            ddf_scroll_tic = game_tic;
+        }
+        if (!AlmostEquals(current_map->sky_scroll_x_, 0.0f))
+        {
+            if (!paused && !menu_active && !time_stop_active && !erraticism_active)
+                offx = HMM_Lerp(ddf_old_sky_scroll.X, fractional_tic, ddf_sky_scroll.X);
+            else
+                offx = ddf_sky_scroll.X;
+        }
+        if (!AlmostEquals(current_map->sky_scroll_y_, 0.0f))
+        {
+            if (!paused && !menu_active && !time_stop_active && !erraticism_active)
+                offy = HMM_Lerp(ddf_old_sky_scroll.Y, fractional_tic, ddf_sky_scroll.Y);
+            else
+                offy = ddf_sky_scroll.Y;
+        }
+    }
 
     if (current_sky_stretch == kSkyStretchMirror)
     {
         if (sky_image->ScaledHeightActual() > 128)
         {
-            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Top Fade
-            RenderSkySlice(solid_sky_h, 0.0f, 1.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(solid_sky_h, 0.0f, 1.0f, 1.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Top Solid
-            RenderSkySlice(0.0f, -solid_sky_h, 1.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(0.0f, -solid_sky_h, 1.0f, 1.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Bottom Solid
-            RenderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Bottom Fade
         }
         else
         {
-            RenderSkySlice(1.0f, 0.75f, 0.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Top Fade
-            RenderSkySlice(0.75f, 0.0f, 1.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Top Solid
-            RenderSkySlice(0.0f, -0.75f, 1.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(1.0f, 0.75f, 0.0f, 1.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use, fd_to_use); // Top Fade
+            RenderSkySlice(0.75f, 0.0f, 1.0f, 1.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use, fd_to_use); // Top Solid
+            RenderSkySlice(0.0f, -0.75f, 1.0f, 1.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Bottom Solid
-            RenderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Bottom Fade
         }
     }
@@ -454,19 +518,19 @@ static void RenderSkyCylinder(void)
     {
         if (sky_image->ScaledHeightActual() > 128)
         {
-            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Top Fade
-            RenderSkySlice(solid_sky_h, -solid_sky_h, 1.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(solid_sky_h, -solid_sky_h, 1.0f, 1.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Middle Solid
-            RenderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Bottom Fade
         }
         else
         {
-            RenderSkySlice(1.0f, 0.75f, 0.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Top Fade
-            RenderSkySlice(0.75f, -0.75f, 1.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(1.0f, 0.75f, 0.0f, 1.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use, fd_to_use); // Top Fade
+            RenderSkySlice(0.75f, -0.75f, 1.0f, 1.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Middle Solid
-            RenderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Bottom Fade
         }
     }
@@ -475,20 +539,20 @@ static void RenderSkyCylinder(void)
         if (sky_image->ScaledHeightActual() > 128)
         {
             ty = ((float)sky_image->ScaledHeightActual() / 256.0f);
-            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Top Fade
-            RenderSkySlice(solid_sky_h, -solid_sky_h, 1.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(solid_sky_h, -solid_sky_h, 1.0f, 1.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Middle Solid
-            RenderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(-solid_sky_h, -sky_h_ratio, 1.0f, 0.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Bottom Fade
         }
         else
         {
             ty = 1.0f;
-            RenderSkySlice(1.0f, 0.75f, 0.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use, fd_to_use); // Top Fade
-            RenderSkySlice(0.75f, -0.75f, 1.0f, 1.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(1.0f, 0.75f, 0.0f, 1.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use, fd_to_use); // Top Fade
+            RenderSkySlice(0.75f, -0.75f, 1.0f, 1.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Middle Solid
-            RenderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Bottom Fade
         }
     }
@@ -497,21 +561,21 @@ static void RenderSkyCylinder(void)
     {
         if (sky_image->ScaledHeightActual() > 128)
         {
-            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist / 2, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist / 2, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use);            // Top Fade
-            RenderSkySlice(solid_sky_h, sky_h_ratio - solid_sky_h, 1.0f, 1.0f, dist / 2, tx, ty, sky_tex_id, blend,
+            RenderSkySlice(solid_sky_h, sky_h_ratio - solid_sky_h, 1.0f, 1.0f, dist / 2, tx, ty, offx, offy, sky_tex_id, blend,
                            fc_to_use, fd_to_use); // Middle Solid
-            RenderSkySlice(sky_h_ratio - solid_sky_h, 0.0f, 1.0f, 0.0f, dist / 2, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(sky_h_ratio - solid_sky_h, 0.0f, 1.0f, 0.0f, dist / 2, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use);            // Bottom Fade
         }
         else
         {
             ty *= 1.5f;
-            RenderSkySlice(1.0f, 0.98f, 0.0f, 1.0f, dist / 3, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(1.0f, 0.98f, 0.0f, 1.0f, dist / 3, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Top Fade
-            RenderSkySlice(0.98f, 0.35f, 1.0f, 1.0f, dist / 3, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(0.98f, 0.35f, 1.0f, 1.0f, dist / 3, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Middle Solid
-            RenderSkySlice(0.35f, 0.33f, 1.0f, 0.0f, dist / 3, tx, ty, sky_tex_id, blend, fc_to_use,
+            RenderSkySlice(0.35f, 0.33f, 1.0f, 0.0f, dist / 3, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Bottom Fade
         }
     }
@@ -922,6 +986,14 @@ int UpdateSkyboxTextures(void)
 void PrecacheSky(void)
 {
     BuildSkyCircle();
+}
+
+void ShutdownSky(void)
+{
+    sky_ref = nullptr;
+    ddf_scroll_tic = -1;
+    ddf_sky_scroll = {{ 0,0 }};
+    ddf_old_sky_scroll = {{ 0,0 }};
 }
 
 //--- editor settings ---

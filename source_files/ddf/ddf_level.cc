@@ -68,6 +68,8 @@ static const DDFCommandList level_commands[] = {
     DDF_FIELD("NAME_GRAPHIC", dummy_level, namegraphic_, DDFMainGetLumpName),
     DDF_FIELD("SKY_TEXTURE", dummy_level, sky_, DDFMainGetLumpName),
     DDF_FIELD("SKY_STRETCH", dummy_level, forced_skystretch_, DDFLevelGetSkyStretch),
+    DDF_FIELD("SKY_SCROLL_X", dummy_level, sky_scroll_x_, DDFMainGetPercentAny),
+    DDF_FIELD("SKY_SCROLL_Y", dummy_level, sky_scroll_y_, DDFMainGetPercentAny),
     DDF_FIELD("MUSIC_ENTRY", dummy_level, music_, DDFMainGetNumeric),
     DDF_FIELD("SURROUND_FLAT", dummy_level, surround_, DDFMainGetLumpName),
     DDF_FIELD("NEXT_MAP", dummy_level, next_mapname_, DDFMainGetLumpName),
@@ -453,6 +455,8 @@ void MapDefinition::CopyDetail(const MapDefinition &src)
     f_end_ = src.f_end_;
 
     forced_skystretch_ = src.forced_skystretch_;
+    sky_scroll_x_      = src.sky_scroll_x_;
+    sky_scroll_y_      = src.sky_scroll_y_;
 
     indoor_fog_cmap_     = src.indoor_fog_cmap_;
     indoor_fog_color_    = src.indoor_fog_color_;
@@ -494,6 +498,8 @@ void MapDefinition::Default()
     f_end_.Default();
 
     forced_skystretch_ = kSkyStretchUnset;
+    sky_scroll_x_      = 0;
+    sky_scroll_y_      = 0;
 
     indoor_fog_cmap_     = nullptr;
     indoor_fog_color_    = kRGBANoValue;

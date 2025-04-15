@@ -164,6 +164,8 @@ class MapDefinition
 
     // sky stretch override
     SkyStretch forced_skystretch_;
+    float      sky_scroll_x_;
+    float      sky_scroll_y_;
 
     Colormap *indoor_fog_cmap_;
     RGBAColor indoor_fog_color_;

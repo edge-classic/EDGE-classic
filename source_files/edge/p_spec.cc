@@ -643,16 +643,16 @@ static void P_LineEffect(Line *target, Line *source, const LineType *special)
         {
             // BOOM spec states that the front sector is the height reference
             // for displace/accel scrollers
-            if (source->front_sector)
+            if (source->side[0]->sector)
             {
-                anim.scroll_sector_reference  = source->front_sector;
+                anim.scroll_sector_reference  = source->side[0]->sector;
                 anim.scroll_special_reference = special;
                 anim.scroll_line_reference    = source;
                 anim.side_0_x_offset_speed    = -source->side[0]->middle.offset.X / 8.0;
                 anim.side_0_y_offset_speed    = source->side[0]->middle.offset.Y / 8.0;
                 for (int i = 0; i < total_level_lines; i++)
                 {
-                    if (level_lines[i].tag == source->front_sector->tag)
+                    if (level_lines[i].tag == source->side[0]->sector->tag)
                     {
                         if (!level_lines[i].special || level_lines[i].special->count_ == 1)
                             anim.permanent = true;
@@ -710,16 +710,16 @@ static void P_LineEffect(Line *target, Line *source, const LineType *special)
             {
                 // BOOM spec states that the front sector is the height
                 // reference for displace/accel scrollers
-                if (source->front_sector)
+                if (source->side[0]->sector)
                 {
-                    anim.scroll_sector_reference  = source->front_sector;
+                    anim.scroll_sector_reference  = source->side[0]->sector;
                     anim.scroll_special_reference = special;
                     anim.scroll_line_reference    = source;
                     anim.dynamic_delta_x += x;
                     anim.dynamic_delta_y += y;
                     for (int i = 0; i < total_level_lines; i++)
                     {
-                        if (level_lines[i].tag == source->front_sector->tag)
+                        if (level_lines[i].tag == source->side[0]->sector->tag)
                         {
                             if (!level_lines[i].special || level_lines[i].special->count_ == 1)
                                 anim.permanent = true;
@@ -790,7 +790,10 @@ static void P_LineEffect(Line *target, Line *source, const LineType *special)
     if ((special->line_effect_ & kLineEffectTypeSkyTransfer) && source->side[0])
     {
         if (source->side[0]->top.image)
+        {
             sky_image = ImageLookup(source->side[0]->top.image->name_.c_str(), kImageNamespaceTexture);
+            sky_ref   = &source->side[0]->top;
+        }
     }
 
     // experimental: stretch wall texture(s) by line length
@@ -854,14 +857,14 @@ static void SectorEffect(Sector *target, Line *source, const LineType *special)
         {
             // BOOM spec states that the front sector is the height reference
             // for displace/accel scrollers
-            if (source->front_sector)
+            if (source->side[0]->sector)
             {
-                anim.scroll_sector_reference  = source->front_sector;
+                anim.scroll_sector_reference  = source->side[0]->sector;
                 anim.scroll_special_reference = special;
                 anim.scroll_line_reference    = source;
                 for (int i = 0; i < total_level_lines; i++)
                 {
-                    if (level_lines[i].tag == source->front_sector->tag)
+                    if (level_lines[i].tag == source->side[0]->sector->tag)
                     {
                         if (!level_lines[i].special || level_lines[i].special->count_ == 1)
                             anim.permanent = true;

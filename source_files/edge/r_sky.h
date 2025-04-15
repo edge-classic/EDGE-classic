@@ -28,6 +28,7 @@
 #include "r_image.h"
 
 extern const Image *sky_image;
+extern MapSurface  *sky_ref;
 
 // true when a custom sky box is present
 extern bool custom_skybox;
@@ -58,6 +59,8 @@ void PrecacheSky(void);
 
 void SetupSkyMatrices(void);
 void RendererRevertSkyMatrices(void);
+
+void ShutdownSky(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

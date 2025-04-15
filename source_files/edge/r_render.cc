@@ -2014,6 +2014,7 @@ void RendererShutdownLevel()
 #ifdef EDGE_SOKOL
     deferred_sky_items.clear();
 #endif
+    ShutdownSky();
 }
 
 //

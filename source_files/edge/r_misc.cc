@@ -207,7 +207,7 @@ void RendererShutdown(void)
 
 Subsector *PointInSubsector(float x, float y)
 {
-    BspNode     *node;
+    BSPNode     *node;
     int          side;
     unsigned int nodenum;
 

@@ -910,7 +910,7 @@ void BspWalkNode(unsigned int bspnum)
 {
     EDGE_ZoneScoped;
 
-    BspNode *node;
+    BSPNode *node;
     int      side;
 
     // Found a subsector?

@@ -92,7 +92,7 @@ Subsector          *level_subsectors;
 int                 total_level_extrafloors;
 Extrafloor         *level_extrafloors;
 int                 total_level_nodes;
-BspNode            *level_nodes;
+BSPNode            *level_nodes;
 int                 total_level_lines;
 Line               *level_lines;
 float              *level_line_alphas; // UDMF processing
@@ -1316,9 +1316,9 @@ static void LoadXGL3Nodes(int lumpnum)
     td += 4;
     LogDebug("LoadXGL3Nodes: Num nodes = %d\n", total_level_nodes);
 
-    level_nodes = new BspNode[total_level_nodes + 1];
-    EPI_CLEAR_MEMORY(level_nodes, BspNode, total_level_nodes);
-    BspNode *nd = level_nodes;
+    level_nodes = new BSPNode[total_level_nodes + 1];
+    EPI_CLEAR_MEMORY(level_nodes, BSPNode, total_level_nodes);
+    BSPNode *nd = level_nodes;
 
     for (i = 0; i < total_level_nodes; i++, nd++)
     {

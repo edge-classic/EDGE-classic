@@ -842,7 +842,7 @@ static void BotEnemiesInNode(unsigned int bspnum, DeathBot *bot, float radius, M
         return;
     }
 
-    const BspNode *node = &level_nodes[bspnum];
+    const BSPNode *node = &level_nodes[bspnum];
 
     Position pos{bot->pl_->map_object_->x, bot->pl_->map_object_->y, bot->pl_->map_object_->z};
 

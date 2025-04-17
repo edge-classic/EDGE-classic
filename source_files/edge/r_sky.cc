@@ -458,7 +458,7 @@ static void RenderSkyCylinder(void)
             offx = HMM_Lerp(sky_ref->old_offset.X, fractional_tic, sky_ref->offset.X);
         else
             offx = sky_ref->offset.X;
-        offx /= 128.0f;
+        offx /= (1024.0f * 16);
         if (!AlmostEquals(sky_ref->old_offset.Y, sky_ref->offset.Y) && !paused && !menu_active && !time_stop_active &&
             !erraticism_active)
             offy = HMM_Lerp(sky_ref->old_offset.Y, fractional_tic, sky_ref->offset.Y);

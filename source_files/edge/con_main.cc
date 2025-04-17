@@ -36,6 +36,8 @@
 #include "i_system.h"
 #include "m_menu.h"
 #include "m_misc.h"
+#include "p_local.h"
+#include "r_misc.h"
 #include "s_sound.h"
 #include "stb_sprintf.h"
 #include "version.h"
@@ -99,6 +101,169 @@ int ConsoleCommandExec(char **argv, int argc)
 
     fclose(script);
     return 0;
+}
+
+int ConsoleCommandMove(char **argv, int argc)
+{
+    if (argc != 3)
+    {
+        ConsoleMessage(kConsoleOnly, "Usage: move <x> <y>\n");
+        return 1;
+    }
+
+    MapObject *mo = nullptr;
+
+    if (players[console_player])
+        mo = players[console_player]->map_object_;
+
+    if (!mo || game_state != kGameStateLevel)
+    {
+        ConsoleMessage(kConsoleOnly, "No player to move! (are you in a level?)\n");
+        return 1;
+    }
+    else
+    {
+        float x = atof(argv[1]);
+        float y = atof(argv[2]);
+
+        if (BlockmapGetX(x) < 0 || BlockmapGetX(x) > blockmap_width - 1)
+        {
+            ConsoleMessage(kConsoleOnly, "Invalid X coordinate %g\n", x);
+            return 1;
+        }
+        
+        if (BlockmapGetY(y) < 0 || BlockmapGetY(y) > blockmap_height - 1)
+        {
+            ConsoleMessage(kConsoleOnly, "Invalid Y coordinate %g\n", y);
+            return 1;
+        }
+
+        if (!TryMove(mo, x, y))
+        {
+            ConsoleMessage(kConsoleOnly, "Move from (%g,%g) to (%g,%g) failed!\n", mo->x, mo->y, x, y);
+            return 1;
+        }
+
+        return 0;
+    }
+}
+
+int ConsoleCommandSpawn(char **argv, int argc)
+{
+    if (argc != 4)
+    {
+        ConsoleMessage(kConsoleOnly, "Usage: spawn <name> <x> <y>\n");
+        return 1;
+    }
+
+    if (game_state != kGameStateLevel)
+    {
+        ConsoleMessage(kConsoleOnly, "Need to be in a level to spawn something!\n");
+        return 1;
+    }
+
+    const MapObjectDefinition *info = nullptr;
+
+    int id = atoi(argv[1]);
+
+    if (id)
+        info = mobjtypes.Lookup(id);
+    else
+        info = mobjtypes.Lookup(argv[1], true);
+
+    if (!info)
+    {
+        ConsoleMessage(kConsoleOnly, "Unknown DDF thing %s; cannot spawn\n", argv[1]);
+        return 1;
+    }
+
+    float x = atof(argv[2]);
+    float y = atof(argv[3]);
+
+    if (BlockmapGetX(x) < 0 || BlockmapGetX(x) > blockmap_width - 1)
+    {
+        ConsoleMessage(kConsoleOnly, "Invalid X coordinate %g\n", x);
+        return 1;
+    }
+    
+    if (BlockmapGetY(y) < 0 || BlockmapGetY(y) > blockmap_height - 1)
+    {
+        ConsoleMessage(kConsoleOnly, "Invalid Y coordinate %g\n", y);
+        return 1;
+    }
+
+    MapObject *mo = CreateMapObject(x, y, info->flags_ & kMapObjectFlagSpawnCeiling ? kOnCeilingZ : kOnFloorZ, info);
+
+    if (!mo)
+    {
+        ConsoleMessage(kConsoleOnly, "Spawn %s at (%g,%g) failed!\n", argv[1], x, y);
+        return 1;
+    }
+
+    return 0;
+}
+
+int ConsoleCommandGodMode(char **argv, int argc)
+{
+    EPI_UNUSED(argv);
+
+    if (argc != 1)
+    {
+        ConsoleMessage(kConsoleOnly, "Usage: god\n");
+        return 1;
+    }
+
+    Player *pl = players[console_player];
+
+    if (!pl || game_state != kGameStateLevel)
+    {
+        ConsoleMessage(kConsoleOnly, "Cannot toggle God Mode! (are you in a level?)\n");
+        return 1;
+    }
+    else
+    {
+        pl->cheats_ ^= kCheatingGodMode;
+        if (pl->cheats_ & kCheatingGodMode)
+        {
+            if (pl->map_object_)
+            {
+                pl->health_ = pl->map_object_->health_ = pl->map_object_->spawn_health_;
+            }
+            ConsoleMessage(kConsoleOnly,  "%s\n", language["GodModeOn"]);
+        }
+        else
+            ConsoleMessage(kConsoleOnly,  "%s\n", language["GodModeOff"]);
+        return 0;
+    }
+}
+
+int ConsoleCommandNoClip(char **argv, int argc)
+{
+    EPI_UNUSED(argv);
+
+    if (argc != 1)
+    {
+        ConsoleMessage(kConsoleOnly, "Usage: noclip\n");
+        return 1;
+    }
+
+    Player *pl = players[console_player];
+
+    if (!pl || game_state != kGameStateLevel)
+    {
+        ConsoleMessage(kConsoleOnly, "Cannot toggle NoClilp! (are you in a level?)\n");
+        return 1;
+    }
+    else
+    {
+        pl->cheats_ ^= kCheatingNoClip;
+
+        if (pl->cheats_ & kCheatingNoClip)
+            ConsoleMessage(kConsoleOnly,  "%s\n", language["ClipOn"]);
+        else
+            ConsoleMessage(kConsoleOnly,  "%s\n", language["ClipOff"]);
+        return 0;
+    }
 }
 
 int ConsoleCommandType(char **argv, int argc)
@@ -655,6 +820,10 @@ const ConsoleCommand builtin_commands[] = {{"cat", ConsoleCommandType},
                                            {"quit", ConsoleCommandQuitEDGE},
                                            {"exit", ConsoleCommandQuitEDGE},
                                            {"memory", ConsoleCommandMemory},
+                                           {"move", ConsoleCommandMove},
+                                           {"spawn", ConsoleCommandSpawn},
+                                           {"god", ConsoleCommandGodMode},
+                                           {"noclip", ConsoleCommandNoClip},
                                            // end of list
                                            {nullptr, nullptr}};
 

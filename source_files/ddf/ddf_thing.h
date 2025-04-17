@@ -948,7 +948,7 @@ class MapObjectDefinitionContainer : public std::vector<MapObjectDefinition *>
     // Search Functions
     int                        FindFirst(const char *name, size_t startpos = 0);
     int                        FindLast(const char *name);
-    const MapObjectDefinition *Lookup(const char *refname);
+    const MapObjectDefinition *Lookup(const char *refname, bool allow_null = false);
     const MapObjectDefinition *Lookup(int id);
 
     // FIXME!!! Move to a more appropriate location

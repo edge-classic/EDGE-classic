@@ -1267,7 +1267,11 @@ bool ConsoleResponder(InputEvent *ev)
     {
         ClearEventInput();
         SetConsoleVisibility(kConsoleToggle);
-        return true;
+        // Dasho - Was "return true", now sneakily change the
+        // input to key_pause and let GameResponder pause if appropriate
+        // Will I regret this?
+        ev->value.key.sym = key_pause;
+        return false;
     }
 
     if (console_visible == kConsoleNotVisible)

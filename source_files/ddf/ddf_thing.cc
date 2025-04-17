@@ -2764,7 +2764,7 @@ bool MapObjectDefinitionContainer::MoveToEnd(int idx)
     return true;
 }
 
-const MapObjectDefinition *MapObjectDefinitionContainer::Lookup(const char *refname)
+const MapObjectDefinition *MapObjectDefinitionContainer::Lookup(const char *refname, bool allow_null)
 {
     // Looks an mobjdef by name.
     // Fatal error if it does not exist.
@@ -2777,7 +2777,10 @@ const MapObjectDefinition *MapObjectDefinitionContainer::Lookup(const char *refn
     if (lax_errors)
         return default_mobjtype;
 
-    DDFError("Unknown thing type: %s\n", refname);
+    if (allow_null)
+        return nullptr;
+    else
+        DDFError("Unknown thing type: %s\n", refname);
 }
 
 const MapObjectDefinition *MapObjectDefinitionContainer::Lookup(int id)

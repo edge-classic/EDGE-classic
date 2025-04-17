@@ -540,7 +540,7 @@ struct DividingLine
 //
 // BSP node.
 //
-struct BspNode
+struct BSPNode
 {
     DividingLine divider;
     float        divider_length;

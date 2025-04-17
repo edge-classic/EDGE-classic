@@ -955,7 +955,7 @@ static inline bool CheckBoundingBoxOverlap(float *bspcoord, float *test)
 static bool TraverseSubsector(unsigned int bspnum, float *bbox, bool (*func)(MapObject *mo))
 {
     Subsector *sub;
-    BspNode   *node;
+    BSPNode   *node;
     MapObject *obj;
 
     // just a normal node ?

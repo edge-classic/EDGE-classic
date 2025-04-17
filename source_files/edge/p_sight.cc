@@ -210,7 +210,7 @@ static bool CrossSubsector(Subsector *sub)
 
             // parallel ?
             // -AJA- probably can't happen due to the above Divline checks
-            if (fabs(den) < 0.0001)
+            if (AlmostEquals(den, 0.0f))
                 continue;
 
             num = (divl.x - sight_check.source.x) * divl.delta_y + (sight_check.source.y - divl.y) * divl.delta_x;
@@ -218,7 +218,7 @@ static bool CrossSubsector(Subsector *sub)
             frac = num / den;
 
             // too close to source ?
-            if (frac < 0.0001f)
+            if (AlmostEquals(frac, 0.0f))
                 continue;
         }
 
@@ -261,7 +261,7 @@ static bool CheckSightBSP(unsigned int bspnum)
 {
     while (!(bspnum & kLeafSubsector))
     {
-        BspNode *node = level_nodes + bspnum;
+        BSPNode *node = level_nodes + bspnum;
         int      s1, s2;
 
 #if (EDGE_DEBUG_SIGHT >= 2)

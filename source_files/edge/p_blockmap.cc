@@ -133,15 +133,6 @@ void DestroyBlockmap(void)
 //  THING POSITION SETTING
 //
 
-// stats
-#ifdef DEVELOPERS
-int touchstat_moves;
-int touchstat_hit;
-int touchstat_miss;
-int touchstat_alloc;
-int touchstat_free;
-#endif
-
 // quick-alloc list
 // FIXME: incorporate into FlushCaches
 TouchNode *free_touch_nodes;
@@ -149,10 +140,6 @@ TouchNode *free_touch_nodes;
 static inline TouchNode *TouchNodeAlloc(void)
 {
     TouchNode *tn;
-
-#ifdef DEVELOPERS
-    touchstat_alloc++;
-#endif
 
     if (free_touch_nodes)
     {
@@ -169,10 +156,6 @@ static inline TouchNode *TouchNodeAlloc(void)
 
 static inline void TouchNodeFree(TouchNode *tn)
 {
-#ifdef DEVELOPERS
-    touchstat_free++;
-#endif
-
     // PREV field is ignored in quick-alloc list
     tn->map_object_next = free_touch_nodes;
     free_touch_nodes    = tn;
@@ -215,107 +198,11 @@ static inline void TouchNodeUnlinkFromSector(TouchNode *tn)
         tn->sector->touch_things = tn->sector_next;
 }
 
-struct BspThingPosition
+struct BSPThingPosition
 {
     MapObject *thing;
     float      bbox[4];
 };
-
-//
-// SetPositionBSP
-//
-static void SetPositionBSP(BspThingPosition *info, int nodenum)
-{
-    TouchNode *tn;
-    Sector    *sec;
-    Subsector *sub;
-    Seg       *seg;
-
-    while (!(nodenum & kLeafSubsector))
-    {
-        BspNode *nd = level_nodes + nodenum;
-
-        int side = BoxOnDividingLineSide(info->bbox, &nd->divider);
-
-        // if box touches partition line, we must traverse both sides
-        if (side == -1)
-        {
-            SetPositionBSP(info, nd->children[0]);
-            side = 1;
-        }
-
-        EPI_ASSERT(side == 0 || side == 1);
-
-        nodenum = nd->children[side];
-    }
-
-    // reached a leaf of the BSP.  Need to check BBOX against all
-    // linedef segs.  This is because we can get false positives, since
-    // we don't actually split the thing's BBOX when it intersects with
-    // a partition line.
-
-    sub = level_subsectors + (nodenum & ~kLeafSubsector);
-
-    for (seg = sub->segs; seg; seg = seg->subsector_next)
-    {
-        DividingLine div;
-
-        if (seg->miniseg)
-            continue;
-
-        div.x       = seg->vertex_1->X;
-        div.y       = seg->vertex_1->Y;
-        div.delta_x = seg->vertex_2->X - div.x;
-        div.delta_y = seg->vertex_2->Y - div.y;
-
-        if (BoxOnDividingLineSide(info->bbox, &div) == 1)
-            return;
-    }
-
-    // Perform linkage...
-
-    sec = sub->sector;
-
-#ifdef DEVELOPERS
-    touchstat_miss++;
-#endif
-
-    for (tn = info->thing->touch_sectors_; tn; tn = tn->map_object_next)
-    {
-        if (!tn->map_object)
-        {
-            // found unused touch node.  We reuse it.
-            tn->map_object = info->thing;
-
-            if (tn->sector != sec)
-            {
-                TouchNodeUnlinkFromSector(tn);
-                TouchNodeLinkIntoSector(tn, sec);
-            }
-#ifdef DEVELOPERS
-            else
-            {
-                touchstat_miss--;
-                touchstat_hit++;
-            }
-#endif
-
-            return;
-        }
-
-        EPI_ASSERT(tn->map_object == info->thing);
-
-        // sector already present ?
-        if (tn->sector == sec)
-            return;
-    }
-
-    // need to allocate a new touch node
-    tn = TouchNodeAlloc();
-
-    TouchNodeLinkIntoThing(tn, info->thing);
-    TouchNodeLinkIntoSector(tn, sec);
-}
 
 //
 // UnsetThingPosition
@@ -529,6 +416,65 @@ void UnsetThingFinal(MapObject *mo)
     }
 }
 
+static void AddSectorNode(Sector *sec, MapObject *mo)
+{
+    EPI_ASSERT(sec && mo);
+
+    TouchNode *tn = nullptr;
+
+    for (tn = mo->touch_sectors_; tn; tn = tn->map_object_next)
+    {
+        if (!tn->map_object)
+        {
+            // found unused touch node.  We reuse it.
+            tn->map_object = mo;
+
+            if (tn->sector != sec)
+            {
+                TouchNodeUnlinkFromSector(tn);
+                TouchNodeLinkIntoSector(tn, sec);
+            }
+
+            return;
+        }
+
+        EPI_ASSERT(tn->map_object == mo);
+
+        // sector already present ?
+        if (tn->sector == sec)
+            return;
+    }
+
+    // need to allocate a new touch node
+    tn = TouchNodeAlloc();
+
+    TouchNodeLinkIntoThing(tn, mo);
+    TouchNodeLinkIntoSector(tn, sec);
+}
+
+// Adapted from Boom's PIT_GetSectors - Dasho
+static bool CheckSectorCallback(Line *ld, void *data)
+{ 
+    BSPThingPosition *pos = (BSPThingPosition *)data;
+    EPI_ASSERT(pos);
+
+    if (BoxOnLineSide(pos->bbox, ld) != -1)
+        return true;
+  
+    // This line crosses through the object. Add it to the 
+    // front/back sector touchnode lists if appropriate
+    // The sector containing the thing's subsector is skipped here,
+    // as that is manually linked afterwards
+    
+    if (ld->front_sector != pos->thing->subsector_->sector)
+        AddSectorNode(ld->front_sector, pos->thing);
+   
+    if (ld->back_sector && ld->back_sector != ld->front_sector && ld->back_sector != pos->thing->subsector_->sector)
+        AddSectorNode(ld->back_sector, pos->thing);
+  
+    return true;
+}
+
 //
 // SetThingPosition
 //
@@ -542,7 +488,7 @@ void SetThingPosition(MapObject *mo)
     int        blocky;
     int        bnum;
 
-    BspThingPosition pos;
+    BSPThingPosition pos;
     TouchNode       *tn;
 
     // -ES- 1999/12/04 The position must be unset before it's set again.
@@ -570,21 +516,18 @@ void SetThingPosition(MapObject *mo)
     }
 
     // link into touching list
-
-#ifdef DEVELOPERS
-    touchstat_moves++;
-#endif
-
     pos.thing                    = mo;
     pos.bbox[kBoundingBoxLeft]   = mo->x - mo->radius_;
     pos.bbox[kBoundingBoxRight]  = mo->x + mo->radius_;
     pos.bbox[kBoundingBoxBottom] = mo->y - mo->radius_;
     pos.bbox[kBoundingBoxTop]    = mo->y + mo->radius_;
 
-    SetPositionBSP(&pos, root_node);
+    BlockmapLineIterator(pos.bbox[kBoundingBoxLeft], pos.bbox[kBoundingBoxBottom],
+        pos.bbox[kBoundingBoxRight], pos.bbox[kBoundingBoxTop], CheckSectorCallback, &pos);
+
+    AddSectorNode(ss->sector, mo);
 
     // handle any left-over unused touch nodes
-
     for (tn = mo->touch_sectors_; tn && tn->map_object; tn = tn->map_object_next)
     { /* nothing here */
     }

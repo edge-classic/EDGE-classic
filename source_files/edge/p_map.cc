@@ -1240,7 +1240,7 @@ bool TryMove(MapObject *thing, float x, float y)
 //
 static bool ThingHeightClip(MapObject *thing)
 {
-    bool onfloor = (fabs(thing->z - thing->floor_z_) < 1);
+    bool onfloor = AlmostEquals(thing->z, thing->floor_z_);
 
     CheckRelativePosition(thing, thing->x, thing->y);
 

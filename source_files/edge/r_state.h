@@ -55,7 +55,7 @@ extern int         total_level_extrafloors;
 extern Extrafloor *level_extrafloors;
 
 extern int      total_level_nodes;
-extern BspNode *level_nodes;
+extern BSPNode *level_nodes;
 
 extern int   total_level_lines;
 extern Line *level_lines;

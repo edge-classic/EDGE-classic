@@ -1632,7 +1632,8 @@ static void P_MobjThinker(MapObject *mobj)
     for (int loop_count = 0; loop_count < kMaxThinkLoop; loop_count++)
     {
         if (level_flags.fast_monsters)
-            mobj->tics_ -= (1 * mobj->info_->fast_ + mobj->tic_skip_);
+            mobj->tics_ -= (1 * (mobj->state_->flags & 
+                kStateFrameFlagFast ? 2 : mobj->info_->fast_) + mobj->tic_skip_);
         else
             mobj->tics_ -= (1 + mobj->tic_skip_);
 

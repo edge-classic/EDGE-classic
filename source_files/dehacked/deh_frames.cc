@@ -101,6 +101,27 @@ inline int MISC_TO_ANGLE(int m)
 {
     return m / 11930465;
 }
+
+struct FlagName
+{
+    int         flag;
+    const char *name; // for EDGE
+    const char *bex;  // nullptr if same as EDGE name
+};
+
+enum FrameFlagMBF21
+{
+    // Tics for this frame are halved on Nightmare difficulty
+    kMBF21_SKILL5FAST = 1,
+};
+
+const FlagName mbf21flag_list[] = {
+    
+    {kMBF21_SKILL5FAST, "FAST", "SKILL5FAST"},
+
+    {0, nullptr, nullptr} // End sentinel
+};
+
 } // namespace frames
 
 struct ActionInfo
@@ -1478,8 +1499,31 @@ void frames::OutputState(char group, int cur, bool do_action)
     if (tics >= 0 && tics < 44 && epi::StringCaseCompareASCII(act_name, "BRAINDIE") == 0)
         tics = 44;
 
-    wad::Printf("    %s:%c:%d:%s:%s", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31), tics,
-        (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL", act_name);
+    std::string flagstring;
+
+    int  cur_f = st->mbf21_flags;
+
+    for (int i = 0; mbf21flag_list[i].name != nullptr; i++)
+    {
+        if (0 == (cur_f & mbf21flag_list[i].flag))
+            continue;
+
+        cur_f &= ~mbf21flag_list[i].flag;
+
+        if (!flagstring.empty())
+            flagstring.push_back('+');
+        flagstring.append(mbf21flag_list[i].name);
+    }
+
+    if (cur_f != 0)
+        LogDebug("Dehacked: Warning - Unconverted flags 0x%08x in frame %d\n", cur_f, st->frame);
+
+    if (flagstring.empty())
+        wad::Printf("    %s:%c:%d:%s:%s", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31), tics,
+            (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL", act_name);
+    else
+        wad::Printf("    %s:%c:%d:%s:%s:%s", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31), tics,
+            (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL", act_name, flagstring.c_str());
 
     if (action != kA_NULL && weap_act == !IS_WEAPON(group))
         return;
@@ -1580,14 +1624,17 @@ void frames::OutputGroup(char group)
 
 namespace frames
 {
+
 const FieldReference frame_field[] = {
     {"Sprite number", offsetof(State, sprite), kFieldTypeSpriteNumber},
     {"Sprite subnumber", offsetof(State, frame), kFieldTypeSubspriteNumber},
     {"Duration", offsetof(State, tics), kFieldTypeAny},
     {"Next frame", offsetof(State, next_state), kFieldTypeFrameNumber},
+    {"MBF21 Bits", offsetof(State, mbf21_flags), kFieldTypeBitflags},
 
     {nullptr, 0, kFieldTypeAny} // End sentinel
 };
+
 } // namespace frames
 
 void frames::AlterFrame(int new_val)

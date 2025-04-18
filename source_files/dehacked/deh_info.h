@@ -1276,6 +1276,7 @@ struct State
     int action;
     int next_state;
     int arg_pointer;
+    int mbf21_flags;
 };
 
 } // namespace dehacked

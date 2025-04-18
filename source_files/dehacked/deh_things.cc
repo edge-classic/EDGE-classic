@@ -773,11 +773,10 @@ const FlagName mbf21flag_list[] = {
     {kMBF21_RIP, "RIP", "BORE"},
     {kMBF21_FULLVOLSOUNDS, "FULLVOLSOUNDS", "ALWAYS_LOUD"},
 
-    // flags which don't produce an Edge special
-    {kMBF21_HIGHERMPROB, "HIGHERMPROB", nullptr},
-    {kMBF21_SHORTMRANGE, "SHORTMRANGE", nullptr},
-    {kMBF21_LONGMELEE, "LONGMELEE", nullptr},
-    {kMBF21_FORCERADIUSDMG, "FORCERADIUSDMG", nullptr},
+    {kMBF21_HIGHERMPROB, "HIGHERMPROB", "HIGHERMPROB"},
+    {kMBF21_SHORTMRANGE, "SHORTMRANGE", "SHORTMRANGE"},
+    {kMBF21_LONGMELEE, "LONGMELEE", "LONGMELEE"},
+    {kMBF21_FORCERADIUSDMG, "FORCERADIUSDMG", "FORCERADIUSDMG"},
 
     {kMBF21_MAP07BOSS1, "MAP07BOSS1", nullptr},
     {kMBF21_MAP07BOSS2, "MAP07BOSS2", nullptr},
@@ -1204,10 +1203,10 @@ void HandleSounds(const DehackedMapObjectDefinition *info, int mt_num)
     else if (mt_num == kMT_BOSSSPIT)
         wad::Printf("SIGHTING_SOUND = \"%s\";\n", sounds::GetSound(ksfx_bossit));
 
-    if (info->attacksound != ksfx_None && info->meleestate != kS_NULL)
-    {
+    // Dasho - Removed melee state requirement, as the MBF21 A_MonsterBulletAttack codepointer
+    // uses this sound
+    if (info->attacksound != ksfx_None)// && info->meleestate != kS_NULL)
         wad::Printf("STARTCOMBAT_SOUND = \"%s\";\n", sounds::GetSound(info->attacksound));
-    }
 
     if (info->painsound != ksfx_None)
         wad::Printf("PAIN_SOUND = \"%s\";\n", sounds::GetSound(info->painsound));

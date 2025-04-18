@@ -29,9 +29,10 @@
 
 enum StateFrameFlag
 {
-    kStateFrameFlagWeapon   = (1 << 0),
-    kStateFrameFlagModel    = (1 << 1),
-    kStateFrameFlagUnmapped = (1 << 2), // model_frame not yet looked up
+    kStateFrameFlagWeapon     = (1 << 0),
+    kStateFrameFlagModel      = (1 << 1),
+    kStateFrameFlagUnmapped   = (1 << 2), // model_frame not yet looked up
+    kStateFrameFlagFast       = (1 << 3)  // MBF21: Specific frame is twice as fast on Nightmare 
 };
 
 struct State

@@ -288,6 +288,14 @@ int DDFStateFindLabel(const std::vector<StateRange> &group, const char *label, b
     return 0;
 }
 
+// Dasho - If this gets really fleshed out, either via MBF* standards or our
+// own DDF, add and scope known string hashes
+
+static std::unordered_map<std::string, StateFrameFlag> frame_flags = 
+{
+    { "FAST", kStateFrameFlagFast }
+};
+
 //
 // DDFStateReadState
 //
@@ -501,6 +509,24 @@ void DDFStateReadState(const char *info, const char *label, std::vector<StateRan
 
             if (action_list[i].handle_arg)
                 (*action_list[i].handle_arg)(action_arg, cur);
+        }
+    }
+
+    //--------------------------------------------------
+    //------------STATE FLAG HANDLING-------------------
+    //--------------------------------------------------
+
+    // Dasho - I am only considering these additive, and not trying to juggle
+    // anything crazy like the NO prefixes
+    if (!stateinfo[5].empty())
+    {
+        std::vector<std::string> flags = epi::SeparatedStringVector(stateinfo[5], '+');
+        for (const std::string &flag : flags)
+        {
+            if (frame_flags.count(flag))
+            {
+                cur->flags |= frame_flags.at(flag);
+            }
         }
     }
 }

@@ -4898,6 +4898,9 @@ void A_MonsterBulletAttack(MapObject *object)
     if (attack->flags_ & kAttackFlagFaceTarget)
         A_FaceTarget(object);
 
+    if (object->info_->attacksound_)
+        StartSoundEffect(object->info_->attacksound_, GetSoundEffectCategory(object), object);
+
     object->current_attack_ = attack;
     P_DoAttack(object);
 }

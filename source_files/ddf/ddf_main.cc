@@ -1159,11 +1159,6 @@ void DDFMainGetLumpName(const char *info, void *storage)
 
     std::string *LN = (std::string *)storage;
 
-    if (strlen(info) > 8)
-        DDFDebug("Name %s too long for a lump; this is acceptable if referring to a "
-                 "pack file or other special value.\n",
-                 info);
-
     (*LN) = info;
 }
 
@@ -1277,7 +1272,13 @@ void DDFMainGetPercent(const char *info, void *storage)
 
     // the number must be followed by %
     if (*p != '%')
+    {
         DDFWarnError("Bad percent value '%s': Should be a number followed by %%\n", info);
+        // -AJA- 2001/01/27: backwards compatibility
+        DoGetFloat(s, &f);
+        *dest = HMM_MAX(0, HMM_MIN(1, f));
+        return;
+    }
 
     *p = 0;
 
@@ -1309,7 +1310,12 @@ void DDFMainGetPercentAny(const char *info, void *storage)
 
     // the number must be followed by %
     if (*p != '%')
+    {
         DDFWarnError("Bad percent value '%s': Should be a number followed by %%\n", info);
+        // -AJA- 2001/01/27: backwards compatibility
+        DoGetFloat(s, dest);
+        return;
+    }
 
     *p = 0;
 

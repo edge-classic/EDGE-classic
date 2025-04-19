@@ -1023,7 +1023,9 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
             float diff = (float)(image->actual_height_ - image->real_top_) * image->scale_y_;
             if (gzt - diff > mo->ceiling_z_)
             {
-                gzb -= gzt + diff - mo->ceiling_z_;
+                // Dasho - Removed adjustment of gzb when clipping to the ceiling; this
+                // caused jitter with the first visible wall torch in Heretic E1M1, possibly
+                // other situations
                 gzt = mo->ceiling_z_ + diff;
             }
         }

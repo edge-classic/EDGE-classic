@@ -1390,6 +1390,23 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
     if (do_whiten)
         tmp_img->Whiten();
 
+    if (tmp_img->depth_ == 4 || (tmp_img->depth_ == 3 && rim->is_font_))
+    {
+        RGBAColor background = kRGBATransparent;
+
+        if (tmp_img->depth_ == 3)
+            background = epi::MakeRGBA(tmp_img->pixels_[0], tmp_img->pixels_[1], tmp_img->pixels_[2]);
+
+        tmp_img->DetermineRealBounds(&rim->real_bottom_, &rim->real_left_, &rim->real_right_, &rim->real_top_, background);
+    }
+    else
+    {
+        rim->real_left_ = 0;
+        rim->real_bottom_ = 0;
+        rim->real_top_ = rim->actual_height_;
+        rim->real_right_ = rim->actual_width_;
+    }
+
     GLuint tex_id =
         UploadTexture(tmp_img,
                       (clamp ? kUploadClamp : 0) | (mip ? kUploadMipMap : 0) | (smooth ? kUploadSmooth : 0) |

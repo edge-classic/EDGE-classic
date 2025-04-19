@@ -984,31 +984,31 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
         }
     } // if (! is_model)
 
-    // fix for sprites that sit wrongly into the floor/ceiling
-    int y_clipping = kVerticalClipSoft;
-
     if (is_model || (mo->flags_ & kMapObjectFlagFuzzy) ||
         ((mo->hyper_flags_ & kHyperFlagHover) && AlmostEquals(sink_mult, 0.0f)))
     {
-        y_clipping = kVerticalClipNever;
+        /* nothing, don't adjust clipping */
     }
     // Lobo: new FLOOR_CLIP flag
     else if (mo->hyper_flags_ & kHyperFlagFloorClip || sink_mult > 0)
     {
-        // do nothing? just skip the other elseifs below
-        y_clipping = kVerticalClipHard;
+        /* nothing, don't adjust clipping */
     }
     else if (sprite_kludge == 0 && gzb < fz)
     {
         // explosion ?
         if (mo->info_->flags_ & kMapObjectFlagMissile)
         {
-            y_clipping = kVerticalClipHard;
+            /* nothing, don't adjust clipping */
         }
         else
         {
-            gzt += fz - gzb;
-            gzb = fz;
+            float diff = (float)(image->real_bottom_) * image->scale_y_;
+            if (gzb + diff < fz)
+            {
+                gzt += fz - gzb - diff;
+                gzb = fz - diff;
+            }
         }
     }
     else if (sprite_kludge == 0 && gzt > mo->ceiling_z_)
@@ -1016,12 +1016,16 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
         // explosion ?
         if (mo->info_->flags_ & kMapObjectFlagMissile)
         {
-            y_clipping = kVerticalClipHard;
+            /* nothing, don't adjust clipping */
         }
         else
         {
-            gzb -= gzt - mo->ceiling_z_;
-            gzt = mo->ceiling_z_;
+            float diff = (float)(image->actual_height_ - image->real_top_) * image->scale_y_;
+            if (gzt - diff > mo->ceiling_z_)
+            {
+                gzb -= gzt + diff - mo->ceiling_z_;
+                gzt = mo->ceiling_z_ + diff;
+            }
         }
     }
 
@@ -1053,7 +1057,6 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
     dthing->map_z      = mz;
 
     dthing->properties = dsub->floors[0]->properties;
-    dthing->y_clipping = y_clipping;
     dthing->is_model   = is_model;
 
     dthing->image = image;

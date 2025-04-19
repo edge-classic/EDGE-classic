@@ -62,13 +62,6 @@ struct DrawFloor;
 
 struct DrawSubsector;
 
-enum VerticalClipMode
-{
-    kVerticalClipNever = 0,
-    kVerticalClipSoft  = 1, // only clip at translucent water
-    kVerticalClipHard  = 2, // vertically clip sprites at all solid surfaces
-};
-
 //
 // DrawThing
 //
@@ -90,8 +83,6 @@ struct DrawThing
     // vertical extent of sprite (world coords)
     float top;
     float bottom;
-
-    int y_clipping;
 
     // sprite image to use
     const Image *image;

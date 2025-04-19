@@ -400,40 +400,136 @@ void ImageData::EightWaySymmetry()
     FourWaySymmetry();
 }
 
-int ImageData::ImageCharacterWidth(int x1, int y1, int x2, int y2)
+void ImageData::DetermineRealBounds(uint16_t *bottom, uint16_t *left, uint16_t *right, uint16_t *top, RGBAColor background_color,
+    int from_x, int to_x, int from_y, int to_y)
 {
-    uint8_t *src         = pixels_;
-    int      last_last   = x1;
-    int      first_first = x2;
-    for (int i = y1; i < y2; i++)
+    from_x = HMM_MAX(0, from_x);
+    to_x   = HMM_MIN(to_x, used_width_);
+    from_y = HMM_MAX(0, from_y);
+    to_y   = HMM_MIN(to_y, used_height_);
+
+    EPI_ASSERT(bottom || left || right || top);
+
+    if (left)
     {
-        bool found_first = false;
-        bool found_last  = false;
-        int  first       = 0;
-        int  last        = 0;
-        for (int j = x1; j < x2; j++)
+        *left = from_x;
+        bool found = false;
+        while (*left < to_x) 
         {
-            uint8_t *checker = PixelAt(j, i);
-            if (src[0] != checker[0] || src[1] != checker[1] || src[2] != checker[2])
+            for (int y = from_y; y < to_y; ++y)
             {
-                if (!found_first)
+                const uint8_t *src = PixelAt(*left, y);
+                if (background_color == kRGBATransparent)
                 {
-                    first       = j;
-                    found_first = true;
+                    if (src[3] != 0)
+                    {
+                        found = true;
+                        break;
+                    }
                 }
                 else
                 {
-                    last       = j;
-                    found_last = true;
+                    if (epi::MakeRGBA(src[0], src[1], src[2]) != background_color)
+                    {
+                        found = true;
+                        break;
+                    }
                 }
             }
+            if (found) break;
+            ++*left;
         }
-        if (found_first && first >= x1 && first < first_first)
-            first_first = first;
-        if (found_last && last <= x2 && last > last_last)
-            last_last = last;
     }
-    return HMM_MAX(last_last - first_first, 0) + 3; // Some padding on each side of the letter
+    if (bottom)
+    {
+        *bottom = from_y;
+        bool found = false;
+        while (*bottom < to_y) 
+        {
+            for (int x = from_x; x < to_x; ++x)
+            {
+                const uint8_t *src = PixelAt(x, *bottom);
+                if (background_color == kRGBATransparent)
+                {
+                    if (src[3] != 0)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                else
+                {
+                    if (epi::MakeRGBA(src[0], src[1], src[2]) != background_color)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            if (found) break;
+            ++*bottom;
+        }
+    }
+    if (right)
+    {
+        *right = to_x;
+        bool found = false;
+        while (*right > from_x) 
+        {
+            for (int y = from_y; y < to_y; ++y)
+            {
+                const uint8_t *src = PixelAt(*right, y);
+                if (background_color == kRGBATransparent)
+                {
+                    if (src[3] != 0)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                else
+                {
+                    if (epi::MakeRGBA(src[0], src[1], src[2]) != background_color)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            if (found) break;
+            --*right;
+        }
+    }
+    if (top)
+    {
+        *top = to_y;
+        bool found = false;
+        while (*top > from_y) 
+        {
+            for (int x = from_x; x < to_x; ++x)
+            {
+                const uint8_t *src = PixelAt(x, *top);
+                if (background_color == kRGBATransparent)
+                {
+                    if (src[3] != 0)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                else
+                {
+                    if (epi::MakeRGBA(src[0], src[1], src[2]) != background_color)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            if (found) break;
+            --*top;
+        }
+    }
 }
 
 RGBAColor ImageData::AverageHue(int from_x, int to_x, int from_y, int to_y)
@@ -451,7 +547,7 @@ RGBAColor ImageData::AverageHue(int from_x, int to_x, int from_y, int to_y)
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
     from_x = HMM_Clamp(0, from_x, used_width_ - 1);
-    to_x   = HMM_Clamp(1, to_x, used_height_);
+    to_x   = HMM_Clamp(1, to_x, used_width_);
     from_y = HMM_Clamp(0, from_y, used_height_ - 1);
     to_y   = HMM_Clamp(1, to_y, used_height_);
 
@@ -524,7 +620,7 @@ RGBAColor ImageData::AverageColor(int from_x, int to_x, int from_y, int to_y)
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
     from_x = HMM_Clamp(0, from_x, used_width_ - 1);
-    to_x   = HMM_Clamp(1, to_x, used_height_);
+    to_x   = HMM_Clamp(1, to_x, used_width_);
     from_y = HMM_Clamp(0, from_y, used_height_ - 1);
     to_y   = HMM_Clamp(1, to_y, used_height_);
 
@@ -576,7 +672,7 @@ RGBAColor ImageData::LightestColor(int from_x, int to_x, int from_y, int to_y)
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
     from_x = HMM_Clamp(0, from_x, used_width_ - 1);
-    to_x   = HMM_Clamp(1, to_x, used_height_);
+    to_x   = HMM_Clamp(1, to_x, used_width_);
     from_y = HMM_Clamp(0, from_y, used_height_ - 1);
     to_y   = HMM_Clamp(1, to_y, used_height_);
 
@@ -614,7 +710,7 @@ RGBAColor ImageData::DarkestColor(int from_x, int to_x, int from_y, int to_y)
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
     from_x = HMM_Clamp(0, from_x, used_width_ - 1);
-    to_x   = HMM_Clamp(1, to_x, used_height_);
+    to_x   = HMM_Clamp(1, to_x, used_width_);
     from_y = HMM_Clamp(0, from_y, used_height_ - 1);
     to_y   = HMM_Clamp(1, to_y, used_height_);
 

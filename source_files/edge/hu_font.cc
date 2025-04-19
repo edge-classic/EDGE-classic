@@ -304,14 +304,20 @@ void Font::LoadFontImage()
         individual_char_widths_ = new float[256];
         individual_char_ratios_ = new float[256];
         ImageData *char_data    = ReadAsEpiBlock((Image *)font_image_);
+        uint16_t real_left = 0;
+        uint16_t real_right = 0;
+        RGBAColor background = kRGBATransparent;
+        // Assumes that first pixel is part of the background; for a spritesheet font this is almost certainly
+        // the case
+        if (char_data->depth_ == 3)
+            background = epi::MakeRGBA(char_data->pixels_[0], char_data->pixels_[1], char_data->pixels_[2]);
         for (int i = 0; i < 256; i++)
         {
             int px = i % 16;
             int py = 15 - i / 16;
-            individual_char_widths_[i] =
-                char_data->ImageCharacterWidth(px * char_width, py * char_height, px * char_width + char_width,
-                                               py * char_height + char_height) *
-                font_image_->scale_x_;
+            char_data->DetermineRealBounds(nullptr, &real_left, &real_right, nullptr, background,
+                px * char_width, py * char_height, px * char_width + char_width, py * char_height + char_height);
+            individual_char_widths_[i] = font_image_->scale_x_ * (real_right - real_left);
             if (definition_->default_size_ > 0.0)
                 individual_char_widths_[i] *= (definition_->default_size_ / char_width);
             if (individual_char_widths_[i] > image_monospace_width_)

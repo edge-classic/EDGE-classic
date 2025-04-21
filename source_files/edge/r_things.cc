@@ -984,44 +984,33 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
         }
     } // if (! is_model)
 
-    // fix for sprites that sit wrongly into the floor/ceiling
-    int y_clipping = kVerticalClipSoft;
-
     if (is_model || (mo->flags_ & kMapObjectFlagFuzzy) ||
         ((mo->hyper_flags_ & kHyperFlagHover) && AlmostEquals(sink_mult, 0.0f)))
     {
-        y_clipping = kVerticalClipNever;
+        /* nothing, don't adjust clipping */
     }
     // Lobo: new FLOOR_CLIP flag
     else if (mo->hyper_flags_ & kHyperFlagFloorClip || sink_mult > 0)
     {
-        // do nothing? just skip the other elseifs below
-        y_clipping = kVerticalClipHard;
+        /* nothing, don't adjust clipping */
     }
     else if (sprite_kludge == 0 && gzb < fz)
     {
         // explosion ?
         if (mo->info_->flags_ & kMapObjectFlagMissile)
         {
-            y_clipping = kVerticalClipHard;
+            /* nothing, don't adjust clipping */
         }
         else
         {
-            gzt += fz - gzb;
-            gzb = fz;
-        }
-    }
-    else if (sprite_kludge == 0 && gzt > mo->ceiling_z_)
-    {
-        // explosion ?
-        if (mo->info_->flags_ & kMapObjectFlagMissile)
-        {
-            y_clipping = kVerticalClipHard;
-        }
-        else
-        {
-            gzb -= gzt - mo->ceiling_z_;
-            gzt = mo->ceiling_z_;
+            // Dasho - The sprite boundaries are clipped by the floor; this checks
+            // the actual visible portion of the image to see if we need to do any adjustments.
+            float diff = (float)image->real_bottom_ * image->scale_y_ * mo->scale_;
+            if (gzb + diff < fz)
+            {
+                gzt += fz - (gzb + diff);
+                gzb = fz - diff;
+            }
         }
     }
 
@@ -1053,7 +1042,6 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
     dthing->map_z      = mz;
 
     dthing->properties = dsub->floors[0]->properties;
-    dthing->y_clipping = y_clipping;
     dthing->is_model   = is_model;
 
     dthing->image = image;

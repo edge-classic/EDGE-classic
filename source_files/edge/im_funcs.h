@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include <string>
 #include <unordered_map>
 
@@ -43,8 +45,8 @@ class ImageAtlasRectangle
     float texture_coordinate_width;
     float texture_coordinate_height;
     // Actual sub-image information
-    short image_width;
-    short image_height;
+    int16_t image_width;
+    int16_t image_height;
     float offset_x;
     float offset_y;
 };

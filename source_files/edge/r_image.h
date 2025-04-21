@@ -70,6 +70,13 @@ class Image
     uint16_t total_width_;
     uint16_t total_height_;
 
+    // bounds of the "real", i.e. visible pixels within the
+    // image. Used for sprite clipping, font patch atlas characters, etc
+    uint16_t real_bottom_;
+    uint16_t real_top_;
+    uint16_t real_left_;
+    uint16_t real_right_;
+
     // ratio of actual w/h to total w/h of the image for calculating texcoords
     float width_ratio_;
     float height_ratio_;

@@ -18,23 +18,25 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include "epi_color.h"
 
 class ImageData
 {
   public:
-    short width_;
-    short height_;
+    int16_t width_;
+    int16_t height_;
 
     // Bytes Per Pixel, determines image mode:
     // 1 = palettised
     // 3 = format is RGB
     // 4 = format is RGBA
-    short depth_;
+    int16_t depth_;
 
     // for image loading, these will be the actual image size
-    short used_width_;
-    short used_height_;
+    int16_t used_width_;
+    int16_t used_height_;
 
     // in case offset/scaling from a parent image_c need to be stored (atlases)
     float offset_x_;
@@ -118,10 +120,10 @@ class ImageData
     // NOTE: the image must be SQUARE (width == height).
     void EightWaySymmetry();
 
-    // For the IMAGE DDFFONT type, determines the width of a character
-    // by finding the row with the largest distance between the first
-    // and last non-background-colored pixel
-    int ImageCharacterWidth(int x1, int y1, int x2, int y2);
+    // Determine the bounds of the image data that actually contain 
+    // non-backgroundpixels, based on the provided color
+    void DetermineRealBounds(uint16_t *bottom, uint16_t *left, uint16_t *right, uint16_t *top, RGBAColor background_color,
+      int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
 
     // compute the average Hue of the RGB(A) image, storing the
     // result in the 'hue' array (r, g, b).  The average intensity

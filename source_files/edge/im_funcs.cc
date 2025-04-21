@@ -257,9 +257,9 @@ ImageAtlas *PackImages(const std::unordered_map<int, ImageData *> &image_pack_da
         int        rect_x = rects[i].x + 1;
         int        rect_y = rects[i].y + 1;
         ImageData *im     = image_pack_data.at(rects[i].id);
-        for (short x = 0; x < im->used_width_; x++)
+        for (int16_t x = 0; x < im->used_width_; x++)
         {
-            for (short y = 0; y < im->used_height_; y++)
+            for (int16_t y = 0; y < im->used_height_; y++)
             {
                 memcpy(atlas->data_->PixelAt(rect_x + x, rect_y + y), im->PixelAt(x, y), 4);
             }

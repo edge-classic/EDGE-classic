@@ -2233,7 +2233,7 @@ void EdgeShutdown(void)
     }
 
     LevelShutdown();
-    ShutdownSound();
+    AudioShutdown();
     RendererShutdown();
     NetworkShutdown();
 }

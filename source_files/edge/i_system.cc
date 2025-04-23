@@ -175,7 +175,6 @@ void SleepForMilliseconds(int millisecs)
 
 void SystemShutdown(void)
 {
-    ShutdownSound();
     ShutdownControl();
     ShutdownGraphics();
 

@@ -55,13 +55,48 @@ Font::Font(FontDefinition *definition) : definition_(definition)
     font_image_      = nullptr;
     truetype_info_   = nullptr;
     truetype_buffer_ = nullptr;
+    individual_char_widths_ = nullptr;
+    individual_char_ratios_ = nullptr;
+    EPI_CLEAR_MEMORY(truetype_atlas_, stbtt_pack_range *, 3);
     EPI_CLEAR_MEMORY(truetype_kerning_scale_, float, 3);
     EPI_CLEAR_MEMORY(truetype_reference_yshift_, float, 3);
     EPI_CLEAR_MEMORY(truetype_reference_height_, float, 3);
 }
 
+// TODO: Break each font type out into its own class; sort out what should be
+// allocated with malloc v. new, etc - Dasho
 Font::~Font()
 {
+    if (individual_char_widths_)
+    {
+        delete[] individual_char_widths_;
+        individual_char_widths_ = nullptr;
+    }
+    if (individual_char_ratios_)
+    {
+        delete[] individual_char_ratios_;
+        individual_char_ratios_ = nullptr;
+    }
+    for (int i = 0; i < 3; ++i)
+    {
+        if (truetype_atlas_[i])
+        {
+            if (truetype_atlas_[i]->chardata_for_range)
+                delete[] truetype_atlas_[i]->chardata_for_range;
+            delete truetype_atlas_[i];
+            truetype_atlas_[i] = nullptr;
+        }
+    }
+    if (truetype_buffer_)
+    {
+        delete[] truetype_buffer_;
+        truetype_buffer_ = nullptr;
+    }
+    if (truetype_info_)
+    {
+        delete truetype_info_;
+        truetype_info_ = nullptr;
+    }
 }
 
 void Font::BumpPatchName(char *name)
@@ -197,6 +232,8 @@ void Font::LoadPatches()
                 patch_data.try_emplace(kCP437UnicodeValues[(uint8_t)ch], missing_imdata);
         }
     }
+
+    delete[] images;
 
     ImageAtlas *atlas = PackImages(patch_data);
     for (auto patch : temp_imdata)
@@ -429,11 +466,11 @@ void Font::LoadFontTTF()
 
             uint8_t *temp_bitmap = new uint8_t[bitmap_size * bitmap_size];
 
-            stbtt_pack_context *spc = new stbtt_pack_context;
-            stbtt_PackBegin(spc, temp_bitmap, bitmap_size, bitmap_size, 0, 1, nullptr);
-            stbtt_PackSetOversampling(spc, 2, 2);
-            stbtt_PackFontRanges(spc, truetype_buffer_, 0, truetype_atlas_[i], 1);
-            stbtt_PackEnd(spc);
+            stbtt_pack_context spc;
+            stbtt_PackBegin(&spc, temp_bitmap, bitmap_size, bitmap_size, 0, 1, nullptr);
+            stbtt_PackSetOversampling(&spc, 2, 2);
+            stbtt_PackFontRanges(&spc, truetype_buffer_, 0, truetype_atlas_[i], 1);
+            stbtt_PackEnd(&spc);
 
             // Convert to RGBA, couldn't get the pack stride to work properly above
             uint8_t *font_bitmap = new uint8_t[bitmap_size * bitmap_size * 4];
@@ -469,21 +506,20 @@ void Font::LoadFontTTF()
             float ascent          = 0.0f;
             float descent         = 0.0f;
             float linegap         = 0.0f;
-            ref.character_quad[i] = new stbtt_aligned_quad;
             stbtt_GetPackedQuad(truetype_atlas_[i]->chardata_for_range, bitmap_size, bitmap_size, (uint8_t)ch, &x, &y,
-                                ref.character_quad[i], 0);
+                                &ref.character_quad[i], 0);
             stbtt_GetScaledFontVMetrics(truetype_buffer_, 0, truetype_scaling_font_sizes[i], &ascent, &descent,
                                         &linegap);
-            ref.width[i] = (ref.character_quad[i]->x1 - ref.character_quad[i]->x0) *
+            ref.width[i] = (ref.character_quad[i].x1 - ref.character_quad[i].x0) *
                            (definition_->default_size_ / truetype_scaling_font_sizes[i]);
-            ref.height[i] = (ref.character_quad[i]->y1 - ref.character_quad[i]->y0) *
+            ref.height[i] = (ref.character_quad[i].y1 - ref.character_quad[i].y0) *
                             (definition_->default_size_ / truetype_scaling_font_sizes[i]);
             truetype_character_width_[i] = ref.width[i];
             truetype_character_height_[i] =
                 (ascent - descent) * (definition_->default_size_ / truetype_scaling_font_sizes[i]);
             ref.y_shift[i] =
                 (truetype_character_height_[i] - ref.height[i]) +
-                (ref.character_quad[i]->y1 * (definition_->default_size_ / truetype_scaling_font_sizes[i]));
+                (ref.character_quad[i].y1 * (definition_->default_size_ / truetype_scaling_font_sizes[i]));
             truetype_reference_yshift_[i] = ref.y_shift[i];
             truetype_reference_height_[i] = ref.height[i];
         }
@@ -600,22 +636,21 @@ float Font::CharWidth(char ch)
             TrueTypeCharacter character;
             for (int i = 0; i < 3; i++)
             {
-                character.character_quad[i] = new stbtt_aligned_quad;
                 float x                     = 0.0f;
                 float y                     = 0.0f;
                 stbtt_GetPackedQuad(truetype_atlas_[i]->chardata_for_range, truetype_scaling_bitmap_sizes[i],
-                                    truetype_scaling_bitmap_sizes[i], (uint8_t)ch, &x, &y, character.character_quad[i],
+                                    truetype_scaling_bitmap_sizes[i], (uint8_t)ch, &x, &y, &character.character_quad[i],
                                     0);
                 if (ch == ' ')
                     character.width[i] = truetype_character_width_[i] * 3 / 5;
                 else
-                    character.width[i] = (character.character_quad[i]->x1 - character.character_quad[i]->x0) *
+                    character.width[i] = (character.character_quad[i].x1 - character.character_quad[i].x0) *
                                          (definition_->default_size_ / truetype_scaling_font_sizes[i]);
-                character.height[i] = (character.character_quad[i]->y1 - character.character_quad[i]->y0) *
+                character.height[i] = (character.character_quad[i].y1 - character.character_quad[i].y0) *
                                       (definition_->default_size_ / truetype_scaling_font_sizes[i]);
                 character.y_shift[i] =
                     (truetype_character_height_[i] - character.height[i]) +
-                    (character.character_quad[i]->y1 * (definition_->default_size_ / truetype_scaling_font_sizes[i]));
+                    (character.character_quad[i].y1 * (definition_->default_size_ / truetype_scaling_font_sizes[i]));
             }
             character.glyph_index = stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)ch]);
             truetype_glyph_map_.try_emplace((uint8_t)ch, character);
@@ -687,21 +722,20 @@ int Font::GetGlyphIndex(char ch)
         TrueTypeCharacter character;
         for (int i = 0; i < 3; i++)
         {
-            character.character_quad[i] = new stbtt_aligned_quad;
             float x                     = 0.0f;
             float y                     = 0.0f;
             stbtt_GetPackedQuad(truetype_atlas_[i]->chardata_for_range, truetype_scaling_bitmap_sizes[i],
-                                truetype_scaling_bitmap_sizes[i], (uint8_t)ch, &x, &y, character.character_quad[i], 0);
+                                truetype_scaling_bitmap_sizes[i], (uint8_t)ch, &x, &y, &character.character_quad[i], 0);
             if (ch == ' ')
                 character.width[i] = truetype_character_width_[i] * 3 / 5;
             else
-                character.width[i] = (character.character_quad[i]->x1 - character.character_quad[i]->x0) *
+                character.width[i] = (character.character_quad[i].x1 - character.character_quad[i].x0) *
                                      (definition_->default_size_ / truetype_scaling_font_sizes[i]);
-            character.height[i] = (character.character_quad[i]->y1 - character.character_quad[i]->y0) *
+            character.height[i] = (character.character_quad[i].y1 - character.character_quad[i].y0) *
                                   (definition_->default_size_ / truetype_scaling_font_sizes[i]);
             character.y_shift[i] =
                 (truetype_character_height_[i] - character.height[i]) +
-                (character.character_quad[i]->y1 * (definition_->default_size_ / truetype_scaling_font_sizes[i]));
+                (character.character_quad[i].y1 * (definition_->default_size_ / truetype_scaling_font_sizes[i]));
         }
         character.glyph_index = stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)ch]);
         truetype_glyph_map_.try_emplace((uint8_t)ch, character);

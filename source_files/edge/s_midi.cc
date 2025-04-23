@@ -821,9 +821,11 @@ class MIDIPlayer : public AbstractMusicPlayer
         // Stop playback
         Stop();
 
+        ma_sound_uninit(&midi_stream);
+
         ma_decoder_uninit(&midi_decoder);
 
-        ma_sound_uninit(&midi_stream);
+        fluid_synth_system_reset(edge_fluid);
 
         status_ = kNotLoaded;
     }
@@ -851,7 +853,6 @@ class MIDIPlayer : public AbstractMusicPlayer
 
         ma_sound_set_volume(&midi_stream, 0);
         ma_sound_stop(&midi_stream);
-        fluid_synth_system_reset(edge_fluid);
 
         status_ = kStopped;
     }

@@ -233,9 +233,12 @@ void ShutdownSound(void)
     if (no_sound)
         return;
 
-    ma_engine_stop(&sound_engine);
-
     FreeSoundChannels();
+
+    SoundCacheClearAll();
+
+    ma_engine_uninit(&music_engine);
+    ma_engine_uninit(&sound_engine);
 }
 
 // Not-rejigged-yet stuff..

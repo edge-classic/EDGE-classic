@@ -404,9 +404,9 @@ void ImageData::DetermineRealBounds(uint16_t *bottom, uint16_t *left, uint16_t *
     int from_x, int to_x, int from_y, int to_y)
 {
     from_x = HMM_MAX(0, from_x);
-    to_x   = HMM_MIN(to_x, used_width_);
+    to_x   = HMM_MIN(to_x, used_width_ - 1);
     from_y = HMM_MAX(0, from_y);
-    to_y   = HMM_MIN(to_y, used_height_);
+    to_y   = HMM_MIN(to_y, used_height_ - 1);
 
     EPI_ASSERT(bottom || left || right || top);
 

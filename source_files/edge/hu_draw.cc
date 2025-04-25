@@ -1057,7 +1057,7 @@ void HUDDrawChar(float left_x, float top_y, const Image *img, char ch, float siz
     {
         if (current_font->definition_->type_ == kFontTypeTrueType)
         {
-            stbtt_aligned_quad *q = current_font->truetype_glyph_map_.at((uint8_t)ch).character_quad[current_font_size];
+            stbtt_aligned_quad *q = &current_font->truetype_glyph_map_.at((uint8_t)ch).character_quad[current_font_size];
             y = top_y + (current_font->truetype_glyph_map_.at((uint8_t)ch).y_shift[current_font_size] *
                          (size > 0 ? (size / current_font->definition_->default_size_) : 1.0) * sc_y);
             w = ((size > 0 ? (current_font->CharWidth(ch) * (size / current_font->definition_->default_size_))

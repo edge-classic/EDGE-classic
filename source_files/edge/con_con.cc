@@ -394,7 +394,7 @@ static void AddChar(float x, float y, char ch, RendererVertex *&glvert, RGBAColo
         float x_adjust = (XMUL - width) / 2;
         float y_adjust = console_font->truetype_glyph_map_.at((uint8_t)ch).y_shift[current_font_size] * FNSZ_ratio;
         float height   = console_font->truetype_glyph_map_.at((uint8_t)ch).height[current_font_size] * FNSZ_ratio;
-        stbtt_aligned_quad *q = console_font->truetype_glyph_map_.at((uint8_t)ch).character_quad[current_font_size];
+        stbtt_aligned_quad *q = &console_font->truetype_glyph_map_.at((uint8_t)ch).character_quad[current_font_size];
         glvert->rgba          = col;
         glvert->position      = {{x + x_adjust, y - y_adjust, 0}};
         glvert++->texture_coordinates[0]   = {{q->s0, q->t0}};

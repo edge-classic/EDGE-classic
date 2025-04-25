@@ -854,8 +854,6 @@ void DeleteColourmapTextures(void)
     if (standard_colormap_shader)
         standard_colormap_shader->DeleteTex();
 
-    standard_colormap_shader = nullptr;
-
     for (Colormap *cmap : colormaps)
     {
         if (cmap->analysis_)

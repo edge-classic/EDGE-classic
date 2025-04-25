@@ -4,12 +4,11 @@
 # Set EDGE_SANITIZE cmake option 
 # export ASAN_OPTIONS=detect_leaks=1
 # export LSAN_OPTIONS=suppressions=ASanSuppress.txt
-# If using GL4ES, export LIBGL_DEEPBIND=0
 
 ##################################################
 # Investigate: High Priority
 ##################################################
-leak:gl4es_glCreateProgram
+
 
 ##################################################
 # Investigate: Low Priority
@@ -18,40 +17,19 @@ leak:gl4es_glCreateProgram
 # ignore anything cached images, though should be investigated
 leak:ImageCacheOGL
 
-# this is probably fine, should be investigated
-leak:RGL_UpdateSkyBoxTextures
-
-leak:LoadColourmap
-leak:GetLightImage
-
 # should be once per font, needs investigation
-leak:LoadFontImage
-leak:font_c::LoadFontTTF
-leak:font_c::LoadPatches
-leak:font_c::CharWidth
-leak:font_c::GetGlyphIndex
-leak:font_c::CharImage
-
-# These are cached it appears, S_CacheClearAll would delete instances, though is never called and not sure if frees members
-leak:sound_data_c::Mix_Reverb
-leak:sound_data_c::Mix_Submerged
-
+leak:Font::LoadFontTTF
+leak:Font::LoadPatches
+leak:Font::CharImage
 # assuming cached, should be investigated
 leak:HD_draw_image
 
-# gles, some minor leaks, look into sometime
-leak:kh_init_attribloclist
-leak:kh_init_uniformlist
-leak:gl4es_useProgramBinary
-leak:kh_resize_programlist
-leak:kh_resize_attribloclist
-leak:kh_resize_uniformlist
-
-
+# need to investigate
+leak:BspTraverseProc
 
 ##################################################
 # Ignore
 ##################################################
 
 # anything that leaks in E_Startup, assuming lifetime is process
-leak:E_Startup
+leak:EdgeStartup

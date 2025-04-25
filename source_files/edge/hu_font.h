@@ -34,7 +34,7 @@ struct TrueTypeCharacter
     float               height[3];
     int                 glyph_index; // For faster kerning table lookups
     float               y_shift[3];
-    stbtt_aligned_quad *character_quad[3];
+    stbtt_aligned_quad  character_quad[3];
 };
 
 struct PatchFontCache

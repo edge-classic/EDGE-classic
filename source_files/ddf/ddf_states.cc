@@ -291,10 +291,7 @@ int DDFStateFindLabel(const std::vector<StateRange> &group, const char *label, b
 // Dasho - If this gets really fleshed out, either via MBF* standards or our
 // own DDF, add and scope known string hashes
 
-static std::unordered_map<std::string, StateFrameFlag> frame_flags = 
-{
-    { "FAST", kStateFrameFlagFast }
-};
+static std::unordered_map<std::string, StateFrameFlag> frame_flags = {{"FAST", kStateFrameFlagFast}};
 
 //
 // DDFStateReadState

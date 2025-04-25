@@ -47,8 +47,8 @@ class ImageAtlasRectangle
     // Actual sub-image information
     int16_t image_width;
     int16_t image_height;
-    float offset_x;
-    float offset_y;
+    float   offset_x;
+    float   offset_y;
 };
 
 class ImageAtlas

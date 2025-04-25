@@ -84,8 +84,8 @@ bool MP3Player::OpenMemory(const uint8_t *data, int length)
     }
 
     if (ma_sound_init_from_data_source(&music_engine, &mp3_decoder,
-                                       MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION, NULL,
-                                       &mp3_stream) != MA_SUCCESS)
+                                       MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION,
+                                       NULL, &mp3_stream) != MA_SUCCESS)
     {
         ma_decoder_uninit(&mp3_decoder);
         LogWarning("Failed to load OGG music (corrupt ogg?)\n");

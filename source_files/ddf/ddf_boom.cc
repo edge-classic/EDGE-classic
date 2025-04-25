@@ -198,9 +198,9 @@ void DDFBoomMakeGeneralizedSector(SectorType *sec, int number)
     // handle bit 13: Kill grounded monsters (MBF21)
     if ((number >> 13) & 1)
     {
-        sec->damage_.delay_             = 0;
-        sec->damage_.instakill_         = true;
-        sec->damage_.only_affects_     |= epi::BitSetFromChar('M');
+        sec->damage_.delay_     = 0;
+        sec->damage_.instakill_ = true;
+        sec->damage_.only_affects_ |= epi::BitSetFromChar('M');
     }
 }
 

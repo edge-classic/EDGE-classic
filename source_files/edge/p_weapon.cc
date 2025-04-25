@@ -1702,7 +1702,7 @@ void A_CloseShotgun2(MapObject *mo)
 // This pointer is necessary to work with Dehacked that alters
 // the chaingun - Dasho
 void A_FireCGun(MapObject *mo)
-{   
+{
     Player       *p   = mo->player_;
     PlayerSprite *psp = &p->player_sprites_[p->action_player_sprite_];
 

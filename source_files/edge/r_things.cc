@@ -344,7 +344,9 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
 
     if (!is_fuzzy)
     {
-        AbstractShader *shader = GetColormapShader(props, player->map_object_->info_->force_fullbright_ ? 255 : state->bright, player->map_object_->subsector_->sector);
+        AbstractShader *shader =
+            GetColormapShader(props, player->map_object_->info_->force_fullbright_ ? 255 : state->bright,
+                              player->map_object_->subsector_->sector);
 
         shader->Sample(data.colors + 0, data.light_position.X, data.light_position.Y, data.light_position.Z);
 
@@ -1318,7 +1320,8 @@ static bool RenderThing(DrawThing *dthing, bool solid)
 
     if (!is_fuzzy)
     {
-        AbstractShader *shader = GetColormapShader(dthing->properties, mo->info_->force_fullbright_ ? 255 : mo->state_->bright, mo->subsector_->sector);
+        AbstractShader *shader = GetColormapShader(
+            dthing->properties, mo->info_->force_fullbright_ ? 255 : mo->state_->bright, mo->subsector_->sector);
 
         for (int v = 0; v < 4; v++)
         {

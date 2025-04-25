@@ -2225,8 +2225,11 @@ static void OptionMenuSetResolution(int key_pressed, ConsoleVariable *console_va
     }
     else
     {
-        StartMenuMessage(epi::StringFormat("%s %d x %d x %dbpp! %s\n", language["ModeSelErr"], new_window_mode.width, new_window_mode.height,
-            (new_window_mode.depth < 20) ? 16 : 32, language["PressKey"]).c_str(), nullptr, false);
+        StartMenuMessage(epi::StringFormat("%s %d x %d x %dbpp! %s\n", language["ModeSelErr"], new_window_mode.width,
+                                           new_window_mode.height, (new_window_mode.depth < 20) ? 16 : 32,
+                                           language["PressKey"])
+                             .c_str(),
+                         nullptr, false);
     }
 }
 

@@ -626,8 +626,8 @@ class ColormapShader : public AbstractShader
         Sample(col, mx, my, mz);
     }
 
-    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, BlendingMode blending, bool masked,
-                          void *data, ShaderCoordinateFunction func)
+    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, BlendingMode blending,
+                          bool masked, void *data, ShaderCoordinateFunction func)
     {
         EPI_UNUSED(masked);
         RGBAColor fc_to_use = fog_color_;

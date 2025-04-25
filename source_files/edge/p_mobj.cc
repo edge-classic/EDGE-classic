@@ -685,7 +685,9 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz, 
             if (tn->sector)
             {
                 RegionProperties tn_props = tn->sector->properties;
-                float sec_fh = (tn->sector->floor_vertex_slope && mo->subsector_->sector == tn->sector) ? mo->floor_z_ : tn->sector->floor_height;
+                float            sec_fh   = (tn->sector->floor_vertex_slope && mo->subsector_->sector == tn->sector)
+                                                ? mo->floor_z_
+                                                : tn->sector->floor_height;
                 if (AlmostEquals(bz, sec_fh))
                 {
                     if (new_p->friction < 0.0f || tn_props.friction < new_p->friction)
@@ -840,8 +842,8 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props)
 
     // Dasho - Not sure which method of capping momentum components to use yet
 
-    //mo->momentum_.X = HMM_Clamp(-kMaximumMove, mo->momentum_.X, kMaximumMove);
-    //mo->momentum_.Y = HMM_Clamp(-kMaximumMove, mo->momentum_.Y, kMaximumMove);
+    // mo->momentum_.X = HMM_Clamp(-kMaximumMove, mo->momentum_.X, kMaximumMove);
+    // mo->momentum_.Y = HMM_Clamp(-kMaximumMove, mo->momentum_.Y, kMaximumMove);
 
     if (fabs(mo->momentum_.X) > kMaximumMove)
     {
@@ -1482,7 +1484,7 @@ static void P_MobjThinker(MapObject *mobj)
             mobj->tunnel_hash_[0] = 0;
             mobj->tunnel_hash_[1] = 0;
         }
-        mobj_props = *mobj->region_properties_;
+        mobj_props          = *mobj->region_properties_;
         mobj_props.friction = -1.0f;
         // handle push sectors and friction
         for (TouchNode *tn = mobj->touch_sectors_; tn; tn = tn->map_object_next)
@@ -1490,7 +1492,9 @@ static void P_MobjThinker(MapObject *mobj)
             if (tn->sector)
             {
                 RegionProperties tn_props = tn->sector->properties;
-                float sec_fh = (tn->sector->floor_vertex_slope && mobj->subsector_->sector == tn->sector) ? mobj->floor_z_ : tn->sector->floor_height;
+                float            sec_fh   = (tn->sector->floor_vertex_slope && mobj->subsector_->sector == tn->sector)
+                                                ? mobj->floor_z_
+                                                : tn->sector->floor_height;
                 if (AlmostEquals(mobj->z, sec_fh))
                 {
                     if (mobj_props.friction < 0.0f || tn_props.friction < mobj_props.friction)
@@ -1530,11 +1534,14 @@ static void P_MobjThinker(MapObject *mobj)
         // Dasho - So far this is just for MBF21 instakill sectors
         if (props->special && props->special->damage_.only_affects_)
         {
-            if (((props->special->damage_.only_affects_ & epi::BitSetFromChar('M')) && (mobj->info_->extended_flags_ & kExtendedFlagMonster))
-                || (!(mobj->info_->extended_flags_ & kExtendedFlagMonster) && (props->special->damage_.only_affects_ & epi::BitSetFromChar('O'))))
+            if (((props->special->damage_.only_affects_ & epi::BitSetFromChar('M')) &&
+                 (mobj->info_->extended_flags_ & kExtendedFlagMonster)) ||
+                (!(mobj->info_->extended_flags_ & kExtendedFlagMonster) &&
+                 (props->special->damage_.only_affects_ & epi::BitSetFromChar('O'))))
             {
                 if (AlmostEquals(mobj->z, mobj->floor_z_) || (props->special->special_flags_ & kSectorFlagWholeRegion))
-                    DamageMapObject(mobj, nullptr, nullptr, props->special->damage_.nominal_, &props->special->damage_, false);
+                    DamageMapObject(mobj, nullptr, nullptr, props->special->damage_.nominal_, &props->special->damage_,
+                                    false);
             }
         }
     }
@@ -1632,8 +1639,7 @@ static void P_MobjThinker(MapObject *mobj)
     for (int loop_count = 0; loop_count < kMaxThinkLoop; loop_count++)
     {
         if (level_flags.fast_monsters)
-            mobj->tics_ -= (1 * (mobj->state_->flags & 
-                kStateFrameFlagFast ? 2 : mobj->info_->fast_) + mobj->tic_skip_);
+            mobj->tics_ -= (1 * (mobj->state_->flags & kStateFrameFlagFast ? 2 : mobj->info_->fast_) + mobj->tic_skip_);
         else
             mobj->tics_ -= (1 + mobj->tic_skip_);
 
@@ -1763,7 +1769,7 @@ void MapObject::SetBelowObject(MapObject *other)
 // does not necessarily work with A_SpawnObject
 void MapObject::SetRealSource(MapObject *ref)
 {
-    while (ref && ref->source_)// && (ref->flags_ & kMapObjectFlagMissile))
+    while (ref && ref->source_) // && (ref->flags_ & kMapObjectFlagMissile))
         ref = ref->source_;
 
     SetSource(ref);

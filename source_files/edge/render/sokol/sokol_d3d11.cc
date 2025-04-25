@@ -488,7 +488,6 @@ void sapp_d3d11_shutdown(void)
     _sapp_d3d11_destroy_device_and_swapchain();
 }
 
-
 // D3D11CalcSubresource only exists with helpers enabled
 static UINT sapp_d3d11_calcsubresource(UINT mip_slice, UINT array_slice, UINT mip_levels)
 {

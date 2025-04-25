@@ -888,11 +888,11 @@ class MapObjectDefinition
     bool  force_fullbright_;
 
     // MBF 21
-    int   infight_group_;
-    int   proj_group_;
-    int   splash_group_;
-    int   fast_speed_;
-    float melee_range_;
+    int         infight_group_;
+    int         proj_group_;
+    int         splash_group_;
+    int         fast_speed_;
+    float       melee_range_;
     DamageClass proj_damage_;
 
     int deh_thing_id_;

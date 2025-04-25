@@ -400,8 +400,8 @@ void ImageData::EightWaySymmetry()
     FourWaySymmetry();
 }
 
-void ImageData::DetermineRealBounds(uint16_t *bottom, uint16_t *left, uint16_t *right, uint16_t *top, RGBAColor background_color,
-    int from_x, int to_x, int from_y, int to_y)
+void ImageData::DetermineRealBounds(uint16_t *bottom, uint16_t *left, uint16_t *right, uint16_t *top,
+                                    RGBAColor background_color, int from_x, int to_x, int from_y, int to_y)
 {
     from_x = HMM_MAX(0, from_x);
     to_x   = HMM_MIN(to_x, used_width_ - 1);
@@ -412,9 +412,9 @@ void ImageData::DetermineRealBounds(uint16_t *bottom, uint16_t *left, uint16_t *
 
     if (left)
     {
-        *left = from_x;
+        *left      = from_x;
         bool found = false;
-        while (*left < to_x) 
+        while (*left < to_x)
         {
             for (int y = from_y; y < to_y; ++y)
             {
@@ -436,15 +436,16 @@ void ImageData::DetermineRealBounds(uint16_t *bottom, uint16_t *left, uint16_t *
                     }
                 }
             }
-            if (found) break;
+            if (found)
+                break;
             ++*left;
         }
     }
     if (bottom)
     {
-        *bottom = from_y;
+        *bottom    = from_y;
         bool found = false;
-        while (*bottom < to_y) 
+        while (*bottom < to_y)
         {
             for (int x = from_x; x < to_x; ++x)
             {
@@ -466,15 +467,16 @@ void ImageData::DetermineRealBounds(uint16_t *bottom, uint16_t *left, uint16_t *
                     }
                 }
             }
-            if (found) break;
+            if (found)
+                break;
             ++*bottom;
         }
     }
     if (right)
     {
-        *right = to_x;
+        *right     = to_x;
         bool found = false;
-        while (*right > from_x) 
+        while (*right > from_x)
         {
             for (int y = from_y; y < to_y; ++y)
             {
@@ -496,15 +498,16 @@ void ImageData::DetermineRealBounds(uint16_t *bottom, uint16_t *left, uint16_t *
                     }
                 }
             }
-            if (found) break;
+            if (found)
+                break;
             --*right;
         }
     }
     if (top)
     {
-        *top = to_y;
+        *top       = to_y;
         bool found = false;
-        while (*top > from_y) 
+        while (*top > from_y)
         {
             for (int x = from_x; x < to_x; ++x)
             {
@@ -526,7 +529,8 @@ void ImageData::DetermineRealBounds(uint16_t *bottom, uint16_t *left, uint16_t *
                     }
                 }
             }
-            if (found) break;
+            if (found)
+                break;
             --*top;
         }
     }

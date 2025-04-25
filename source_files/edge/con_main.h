@@ -25,12 +25,12 @@
 
 extern std::string working_directory;
 
-constexpr uint8_t   kENDOOMLines = 25;
+constexpr uint8_t   kENDOOMLines        = 25;
 constexpr uint8_t   kENDOOMBytesPerLine = 160;
-constexpr uint16_t  kENDOOMTotalVerts = kENDOOMLines * 80 * 4; // 80 characters per line * 4 verts per quad
-constexpr RGBAColor kENDOOMColors[16] = {0x000000FF, 0x0000AAFF, 0x00AA00FF, 0x00AAAAFF, 0xAA0000FF, 0xAA00AAFF,
-                                        0xAA5500FF, 0xAAAAAAFF, 0x555555FF, 0x5555FFFF, 0x55FF55FF, 0x55FFFFFF,
-                                        0xFF5555FF, 0xFF55FFFF, 0xFFFF55FF, 0xFFFFFFFF};
+constexpr uint16_t  kENDOOMTotalVerts   = kENDOOMLines * 80 * 4; // 80 characters per line * 4 verts per quad
+constexpr RGBAColor kENDOOMColors[16]   = {0x000000FF, 0x0000AAFF, 0x00AA00FF, 0x00AAAAFF, 0xAA0000FF, 0xAA00AAFF,
+                                           0xAA5500FF, 0xAAAAAAFF, 0x555555FF, 0x5555FFFF, 0x55FF55FF, 0x55FFFFFF,
+                                           0xFF5555FF, 0xFF55FFFF, 0xFFFF55FF, 0xFFFFFFFF};
 
 enum ConsoleVisibility
 {

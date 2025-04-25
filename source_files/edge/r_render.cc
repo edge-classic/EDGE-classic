@@ -215,7 +215,7 @@ struct WallCoordinateData
 
     GLuint tex_id;
 
-    int pass;
+    int          pass;
     BlendingMode blending;
 
     uint8_t R, G, B;
@@ -279,7 +279,7 @@ struct PlaneCoordinateData
 
     GLuint tex_id;
 
-    int pass;
+    int          pass;
     BlendingMode blending;
 
     float R, G, B;
@@ -660,13 +660,13 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
 
     if (surf->image && surf->image->liquid_type_ > kLiquidImageNone && swirling_flats == kLiquidSwirlParallax)
     {
-        data.tx0        = data.tx0 + 25;
-        data.ty0        = data.ty0 + 25;
-        swirl_pass      = 2;
+        data.tx0               = data.tx0 + 25;
+        data.ty0               = data.ty0 + 25;
+        swirl_pass             = 2;
         BlendingMode old_blend = data.blending;
-        float old_dt    = data.trans;
-        data.blending   = (BlendingMode)(kBlendingMasked | kBlendingAlpha);
-        data.trans      = 85;
+        float        old_dt    = data.trans;
+        data.blending          = (BlendingMode)(kBlendingMasked | kBlendingAlpha);
+        data.trans             = 85;
         cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id, 0.33f, &data.pass, data.blending, false, &data,
                               WallCoordFunc);
         data.blending = old_blend;
@@ -1722,13 +1722,13 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
     if (surf->image->liquid_type_ > kLiquidImageNone &&
         swirling_flats == kLiquidSwirlParallax) // Kept as an example for future effects
     {
-        data.tx0        = data.tx0 + 25;
-        data.ty0        = data.ty0 + 25;
-        swirl_pass      = 2;
+        data.tx0               = data.tx0 + 25;
+        data.ty0               = data.ty0 + 25;
+        swirl_pass             = 2;
         BlendingMode old_blend = data.blending;
-        float old_dt    = data.trans;
-        data.blending   = (BlendingMode)(kBlendingMasked | kBlendingAlpha);
-        data.trans      = 0.33f;
+        float        old_dt    = data.trans;
+        data.blending          = (BlendingMode)(kBlendingMasked | kBlendingAlpha);
+        data.trans             = 0.33f;
         cmap_shader->WorldMix(GL_POLYGON, data.v_count, data.tex_id, 0.33f, &data.pass, data.blending, false, &data,
                               PlaneCoordFunc);
         data.blending = old_blend;

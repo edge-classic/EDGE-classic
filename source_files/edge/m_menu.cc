@@ -1137,8 +1137,11 @@ static void MenuQuickSave(void)
 
     if (confirm_quicksave.d_)
     {
-        StartMenuMessage(epi::StringFormat("%s\n\n%s ?\n\n%s", language["QuickSaveOver"], 
-            save_extended_information_slots[quicksave_slot].description, language["PressYorN"]).c_str(), QuickSaveResponse, true);
+        StartMenuMessage(epi::StringFormat("%s\n\n%s ?\n\n%s", language["QuickSaveOver"],
+                                           save_extended_information_slots[quicksave_slot].description,
+                                           language["PressYorN"])
+                             .c_str(),
+                         QuickSaveResponse, true);
 
         need_save_screenshot = true;
     }
@@ -1180,8 +1183,11 @@ void MenuQuickLoad(void)
 
     if (confirm_quickload.d_)
     {
-        StartMenuMessage(epi::StringFormat("%s\n\n%s ?\n\n%s", language["QuickLoad"], 
-            save_extended_information_slots[quicksave_slot].description, language["PressYorN"]).c_str(), QuickLoadResponse, true);
+        StartMenuMessage(epi::StringFormat("%s\n\n%s ?\n\n%s", language["QuickLoad"],
+                                           save_extended_information_slots[quicksave_slot].description,
+                                           language["PressYorN"])
+                             .c_str(),
+                         QuickLoadResponse, true);
     }
     else
     {

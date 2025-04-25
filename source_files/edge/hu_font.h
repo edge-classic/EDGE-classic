@@ -30,11 +30,11 @@ class FontDefinition;
 
 struct TrueTypeCharacter
 {
-    float               width[3];
-    float               height[3];
-    int                 glyph_index; // For faster kerning table lookups
-    float               y_shift[3];
-    stbtt_aligned_quad  character_quad[3];
+    float              width[3];
+    float              height[3];
+    int                glyph_index; // For faster kerning table lookups
+    float              y_shift[3];
+    stbtt_aligned_quad character_quad[3];
 };
 
 struct PatchFontCache

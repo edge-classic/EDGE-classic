@@ -2025,7 +2025,7 @@ static void DDFMobjStateGetDEHProjectile(const char *arg, State *cur_state)
     atk->range_        = 2048.0f;
     atk->attackstyle_  = kAttackStyleProjectile;
     atk->attack_class_ = epi::BitSetFromChar('M');
-    atk->flags_        = (AttackFlags)(kAttackFlagFaceTarget | kAttackFlagInheritTracerFromTarget | kAttackFlagOffsetsLast);
+    atk->flags_ = (AttackFlags)(kAttackFlagFaceTarget | kAttackFlagInheritTracerFromTarget | kAttackFlagOffsetsLast);
     atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
     atk->height_ = dynamic_atk_height;
 
@@ -2502,10 +2502,10 @@ void MapObjectDefinition::CopyDetail(const MapObjectDefinition &src)
 
     morphtimeout_ = src.morphtimeout_;
 
-    gib_health_ = src.gib_health_;
-    pickup_width_ = src.pickup_width_;
+    gib_health_             = src.gib_health_;
+    pickup_width_           = src.pickup_width_;
     projectile_pass_height_ = src.projectile_pass_height_;
-    force_fullbright_ = src.force_fullbright_;
+    force_fullbright_       = src.force_fullbright_;
 
     infight_group_ = src.infight_group_;
     proj_group_    = src.proj_group_;
@@ -2648,10 +2648,10 @@ void MapObjectDefinition::Default()
     spitspot_ = nullptr;
     spitspot_ref_.clear();
 
-    gib_health_ = 0;
-    pickup_width_ = 0;
+    gib_health_             = 0;
+    pickup_width_           = 0;
     projectile_pass_height_ = 0;
-    force_fullbright_ = false;
+    force_fullbright_       = false;
 
     sight_distance_ = -1;
     hear_distance_  = -1;
@@ -2664,7 +2664,7 @@ void MapObjectDefinition::Default()
     fast_speed_    = -1;
     melee_range_   = -1;
     proj_damage_.Default(DamageClass::kDamageClassDefaultMobj);
-    deh_thing_id_  = 0;
+    deh_thing_id_ = 0;
 }
 
 void MapObjectDefinition::DLightCompatibility(void)

@@ -195,8 +195,8 @@ static SaveField sv_fields_mobj[] = {
                     SaveGamePutInteger),
     EDGE_SAVE_FIELD(dummy_map_object, is_voodoo_, "is_voodoo", 1, kSaveFieldNumeric, 4, nullptr, SaveGameGetBoolean,
                     SaveGamePutBoolean),
-    EDGE_SAVE_FIELD(dummy_map_object, pecca_flight_, "pecca_flight", 1, kSaveFieldNumeric, 4, nullptr, SaveGameGetBoolean,
-                    SaveGamePutBoolean),
+    EDGE_SAVE_FIELD(dummy_map_object, pecca_flight_, "pecca_flight", 1, kSaveFieldNumeric, 4, nullptr,
+                    SaveGameGetBoolean, SaveGamePutBoolean),
     // NOT HERE:
     //   subsector & region: these are regenerated.
     //   next,prev,snext,sprev,bnext,bprev: links are regenerated.

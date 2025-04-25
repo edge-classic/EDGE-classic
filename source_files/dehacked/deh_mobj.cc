@@ -68,10 +68,10 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         0,                                                                    // Fast speed
         0,                                                                    // Melee range
         0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
+        -1,                                                                   // Dropped item
+        0,                                                                    // Pickup width
+        0,                                                                    // Projectile pass height
+        0,                                                                    // Fullbright
         0,                                                                    // Blood color
         kS_NULL                                                               // raisestate
     },
@@ -108,12 +108,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                         // Gib health
+        -1,                                        // Dropped item
+        0,                                         // Pickup width
+        0,                                         // Projectile pass height
+        0,                                         // Fullbright
+        0,                                         // Blood color
         kS_POSS_RAISE1                             // raisestate
     },
 
@@ -149,12 +149,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                         // Gib health
+        -1,                                        // Dropped item
+        0,                                         // Pickup width
+        0,                                         // Projectile pass height
+        0,                                         // Fullbright
+        0,                                         // Blood color
         kS_SPOS_RAISE1                             // raisestate
     },
 
@@ -190,12 +190,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                         // Gib health
+        -1,                                        // Dropped item
+        0,                                         // Pickup width
+        0,                                         // Projectile pass height
+        0,                                         // Fullbright
+        0,                                         // Blood color
         kS_NULL                                    // raisestate
     },
 
@@ -231,12 +231,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                      // Rip sound
         0,                              // Fast speed
         0,                              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                              // Gib health
+        -1,                             // Dropped item
+        0,                              // Pickup width
+        0,                              // Projectile pass height
+        0,                              // Fullbright
+        0,                              // Blood color
         kS_NULL                         // raisestate
     },
 
@@ -272,12 +272,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                         // Gib health
+        -1,                                        // Dropped item
+        0,                                         // Pickup width
+        0,                                         // Projectile pass height
+        0,                                         // Fullbright
+        0,                                         // Blood color
         kS_SKEL_RAISE1                             // raisestate
     },
 
@@ -313,12 +313,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                  // Rip sound
         0,                                                          // Fast speed
         0,                                                          // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                                          // Gib health
+        -1,                                                         // Dropped item
+        0,                                                          // Pickup width
+        0,                                                          // Projectile pass height
+        0,                                                          // Fullbright
+        0,                                                          // Blood color
         kS_NULL                                                     // raisestate
     },
 
@@ -354,12 +354,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                      // Rip sound
         0,                              // Fast speed
         0,                              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                              // Gib health
+        -1,                             // Dropped item
+        0,                              // Pickup width
+        0,                              // Projectile pass height
+        0,                              // Fullbright
+        0,                              // Blood color
         kS_NULL                         // raisestate
     },
 
@@ -395,12 +395,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                         // Gib health
+        -1,                                        // Dropped item
+        0,                                         // Pickup width
+        0,                                         // Projectile pass height
+        0,                                         // Fullbright
+        0,                                         // Blood color
         kS_FATT_RAISE1                             // raisestate
     },
 
@@ -436,12 +436,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                  // Rip sound
         0,                                                          // Fast speed
         0,                                                          // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                                          // Gib health
+        -1,                                                         // Dropped item
+        0,                                                          // Pickup width
+        0,                                                          // Projectile pass height
+        0,                                                          // Fullbright
+        0,                                                          // Blood color
         kS_NULL                                                     // raisestate
     },
 
@@ -477,12 +477,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                         // Gib health
+        -1,                                        // Dropped item
+        0,                                         // Pickup width
+        0,                                         // Projectile pass height
+        0,                                         // Fullbright
+        0,                                         // Blood color
         kS_CPOS_RAISE1                             // raisestate
     },
 
@@ -518,12 +518,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                         // Gib health
+        -1,                                        // Dropped item
+        0,                                         // Pickup width
+        0,                                         // Projectile pass height
+        0,                                         // Fullbright
+        0,                                         // Blood color
         kS_TROO_RAISE1                             // raisestate
     },
 
@@ -559,12 +559,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                         // Gib health
+        -1,                                        // Dropped item
+        0,                                         // Pickup width
+        0,                                         // Projectile pass height
+        0,                                         // Fullbright
+        0,                                         // Blood color
         kS_SARG_RAISE1                             // raisestate
     },
 
@@ -600,12 +600,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                              // Rip sound
         0,                                                      // Fast speed
         0,                                                      // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                                      // Gib health
+        -1,                                                     // Dropped item
+        0,                                                      // Pickup width
+        0,                                                      // Projectile pass height
+        0,                                                      // Fullbright
+        0,                                                      // Blood color
         kS_SARG_RAISE1                                          // raisestate
     },
 
@@ -641,12 +641,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                             // Rip sound
         0,                                                                     // Fast speed
         0,                                                                     // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                                                     // Gib health
+        -1,                                                                    // Dropped item
+        0,                                                                     // Pickup width
+        0,                                                                     // Projectile pass height
+        0,                                                                     // Fullbright
+        0,                                                                     // Blood color
         kS_HEAD_RAISE1                                                         // raisestate
     },
 
@@ -682,12 +682,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                         // Gib health
+        -1,                                        // Dropped item
+        0,                                         // Pickup width
+        0,                                         // Projectile pass height
+        0,                                         // Fullbright
+        0,                                         // Blood color
         kS_BOSS_RAISE1                             // raisestate
     },
 
@@ -723,12 +723,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                  // Rip sound
         0,                                                          // Fast speed
         0,                                                          // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                                          // Gib health
+        -1,                                                         // Dropped item
+        0,                                                          // Pickup width
+        0,                                                          // Projectile pass height
+        0,                                                          // Fullbright
+        0,                                                          // Blood color
         kS_NULL                                                     // raisestate
     },
 
@@ -764,12 +764,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                         // Gib health
+        -1,                                        // Dropped item
+        0,                                         // Pickup width
+        0,                                         // Projectile pass height
+        0,                                         // Fullbright
+        0,                                         // Blood color
         kS_BOS2_RAISE1                             // raisestate
     },
 
@@ -805,12 +805,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                             // Rip sound
         0,                                                     // Fast speed
         0,                                                     // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                                     // Gib health
+        -1,                                                    // Dropped item
+        0,                                                     // Pickup width
+        0,                                                     // Projectile pass height
+        0,                                                     // Fullbright
+        0,                                                     // Blood color
         kS_NULL                                                // raisestate
     },
 
@@ -846,12 +846,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                         // Gib health
+        -1,                                        // Dropped item
+        0,                                         // Pickup width
+        0,                                         // Projectile pass height
+        0,                                         // Fullbright
+        0,                                         // Blood color
         kS_NULL                                    // raisestate
     },
 
@@ -887,12 +887,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                         // Gib health
+        -1,                                        // Dropped item
+        0,                                         // Pickup width
+        0,                                         // Projectile pass height
+        0,                                         // Fullbright
+        0,                                         // Blood color
         kS_BSPI_RAISE1                             // raisestate
     },
 
@@ -928,12 +928,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                         // Gib health
+        -1,                                        // Dropped item
+        0,                                         // Pickup width
+        0,                                         // Projectile pass height
+        0,                                         // Fullbright
+        0,                                         // Blood color
         kS_NULL                                    // raisestate
     },
 
@@ -969,12 +969,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                             // Rip sound
         0,                                                                     // Fast speed
         0,                                                                     // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                                                     // Gib health
+        -1,                                                                    // Dropped item
+        0,                                                                     // Pickup width
+        0,                                                                     // Projectile pass height
+        0,                                                                     // Fullbright
+        0,                                                                     // Blood color
         kS_PAIN_RAISE1                                                         // raisestate
     },
 
@@ -1010,12 +1010,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                         // Gib health
+        -1,                                        // Dropped item
+        0,                                         // Pickup width
+        0,                                         // Projectile pass height
+        0,                                         // Fullbright
+        0,                                         // Blood color
         kS_SSWV_RAISE1                             // raisestate
     },
 
@@ -1051,12 +1051,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                                    // Rip sound
         0,                                                                            // Fast speed
         0,                                                                            // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                                                            // Gib health
+        -1,                                                                           // Dropped item
+        0,                                                                            // Pickup width
+        0,                                                                            // Projectile pass height
+        0,                                                                            // Fullbright
+        0,                                                                            // Blood color
         kS_NULL                                                                       // raisestate
     },
 
@@ -1092,12 +1092,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                 // Rip sound
         0,                         // Fast speed
         0,                         // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                         // Gib health
+        -1,                        // Dropped item
+        0,                         // Pickup width
+        0,                         // Projectile pass height
+        0,                         // Fullbright
+        0,                         // Blood color
         kS_NULL                    // raisestate
     },
 
@@ -1133,12 +1133,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                     // Rip sound
         0,                             // Fast speed
         0,                             // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                             // Gib health
+        -1,                            // Dropped item
+        0,                             // Pickup width
+        0,                             // Projectile pass height
+        0,                             // Fullbright
+        0,                             // Blood color
         kS_NULL                        // raisestate
     },
 
@@ -1174,12 +1174,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                     // Rip sound
         0,                             // Fast speed
         0,                             // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                             // Gib health
+        -1,                            // Dropped item
+        0,                             // Pickup width
+        0,                             // Projectile pass height
+        0,                             // Fullbright
+        0,                             // Blood color
         kS_NULL                        // raisestate
     },
 
@@ -1215,12 +1215,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                               // Rip sound
         0,                                                                       // Fast speed
         0,                                                                       // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                                                       // Gib health
+        -1,                                                                      // Dropped item
+        0,                                                                       // Pickup width
+        0,                                                                       // Projectile pass height
+        0,                                                                       // Fullbright
+        0,                                                                       // Blood color
         kS_NULL                                                                  // raisestate
     },
 
@@ -1256,12 +1256,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                      // Rip sound
         0,                              // Fast speed
         0,                              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                              // Gib health
+        -1,                             // Dropped item
+        0,                              // Pickup width
+        0,                              // Projectile pass height
+        0,                              // Fullbright
+        0,                              // Blood color
         kS_NULL                         // raisestate
     },
 
@@ -1297,12 +1297,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                               // Rip sound
         0,                                       // Fast speed
         0,                                       // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                       // Gib health
+        -1,                                      // Dropped item
+        0,                                       // Pickup width
+        0,                                       // Projectile pass height
+        0,                                       // Fullbright
+        0,                                       // Blood color
         kS_NULL                                  // raisestate
     },
 
@@ -1338,12 +1338,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                  // Rip sound
         0,                                                          // Fast speed
         0,                                                          // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                                          // Gib health
+        -1,                                                         // Dropped item
+        0,                                                          // Pickup width
+        0,                                                          // Projectile pass height
+        0,                                                          // Fullbright
+        0,                                                          // Blood color
         kS_NULL                                                     // raisestate
     },
 
@@ -1379,12 +1379,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                  // Rip sound
         0,                                                          // Fast speed
         0,                                                          // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                                          // Gib health
+        -1,                                                         // Dropped item
+        0,                                                          // Pickup width
+        0,                                                          // Projectile pass height
+        0,                                                          // Fullbright
+        0,                                                          // Blood color
         kS_NULL                                                     // raisestate
     },
 
@@ -1420,12 +1420,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                  // Rip sound
         0,                                                          // Fast speed
         0,                                                          // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                                          // Gib health
+        -1,                                                         // Dropped item
+        0,                                                          // Pickup width
+        0,                                                          // Projectile pass height
+        0,                                                          // Fullbright
+        0,                                                          // Blood color
         kS_NULL                                                     // raisestate
     },
 
@@ -1461,12 +1461,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                  // Rip sound
         0,                                                          // Fast speed
         0,                                                          // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                                          // Gib health
+        -1,                                                         // Dropped item
+        0,                                                          // Pickup width
+        0,                                                          // Projectile pass height
+        0,                                                          // Fullbright
+        0,                                                          // Blood color
         kS_NULL                                                     // raisestate
     },
 
@@ -1502,12 +1502,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                  // Rip sound
         0,                                                          // Fast speed
         0,                                                          // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                                          // Gib health
+        -1,                                                         // Dropped item
+        0,                                                          // Pickup width
+        0,                                                          // Projectile pass height
+        0,                                                          // Fullbright
+        0,                                                          // Blood color
         kS_NULL                                                     // raisestate
     },
 
@@ -1543,12 +1543,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                  // Rip sound
         0,                                                          // Fast speed
         0,                                                          // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                                          // Gib health
+        -1,                                                         // Dropped item
+        0,                                                          // Pickup width
+        0,                                                          // Projectile pass height
+        0,                                                          // Fullbright
+        0,                                                          // Blood color
         kS_NULL                                                     // raisestate
     },
 
@@ -1584,12 +1584,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                      // Rip sound
         0,                              // Fast speed
         0,                              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                              // Gib health
+        -1,                             // Dropped item
+        0,                              // Pickup width
+        0,                              // Projectile pass height
+        0,                              // Fullbright
+        0,                              // Blood color
         kS_NULL                         // raisestate
     },
 
@@ -1625,12 +1625,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -1666,12 +1666,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                      // Rip sound
         0,                              // Fast speed
         0,                              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                              // Gib health
+        -1,                             // Dropped item
+        0,                              // Pickup width
+        0,                              // Projectile pass height
+        0,                              // Fullbright
+        0,                              // Blood color
         kS_NULL                         // raisestate
     },
 
@@ -1707,12 +1707,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                      // Rip sound
         0,                              // Fast speed
         0,                              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                              // Gib health
+        -1,                             // Dropped item
+        0,                              // Pickup width
+        0,                              // Projectile pass height
+        0,                              // Fullbright
+        0,                              // Blood color
         kS_NULL                         // raisestate
     },
 
@@ -1748,12 +1748,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                     // Rip sound
         0,                             // Fast speed
         0,                             // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                             // Gib health
+        -1,                            // Dropped item
+        0,                             // Pickup width
+        0,                             // Projectile pass height
+        0,                             // Fullbright
+        0,                             // Blood color
         kS_NULL                        // raisestate
     },
 
@@ -1789,12 +1789,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                      // Rip sound
         0,                              // Fast speed
         0,                              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                              // Gib health
+        -1,                             // Dropped item
+        0,                              // Pickup width
+        0,                              // Projectile pass height
+        0,                              // Fullbright
+        0,                              // Blood color
         kS_NULL                         // raisestate
     },
 
@@ -1830,12 +1830,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -1871,12 +1871,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -1912,12 +1912,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                           // Gib health
+        -1,                          // Dropped item
+        0,                           // Pickup width
+        0,                           // Projectile pass height
+        0,                           // Fullbright
+        0,                           // Blood color
         kS_NULL                      // raisestate
     },
 
@@ -1953,12 +1953,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                           // Gib health
+        -1,                          // Dropped item
+        0,                           // Pickup width
+        0,                           // Projectile pass height
+        0,                           // Fullbright
+        0,                           // Blood color
         kS_NULL                      // raisestate
     },
 
@@ -1994,12 +1994,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                           // Gib health
+        -1,                          // Dropped item
+        0,                           // Pickup width
+        0,                           // Projectile pass height
+        0,                           // Fullbright
+        0,                           // Blood color
         kS_NULL                      // raisestate
     },
 
@@ -2035,12 +2035,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                           // Gib health
+        -1,                          // Dropped item
+        0,                           // Pickup width
+        0,                           // Projectile pass height
+        0,                           // Fullbright
+        0,                           // Blood color
         kS_NULL                      // raisestate
     },
 
@@ -2076,12 +2076,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                           // Gib health
+        -1,                          // Dropped item
+        0,                           // Pickup width
+        0,                           // Projectile pass height
+        0,                           // Fullbright
+        0,                           // Blood color
         kS_NULL                      // raisestate
     },
 
@@ -2117,12 +2117,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                           // Gib health
+        -1,                          // Dropped item
+        0,                           // Pickup width
+        0,                           // Projectile pass height
+        0,                           // Fullbright
+        0,                           // Blood color
         kS_NULL                      // raisestate
     },
 
@@ -2158,12 +2158,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                           // Gib health
+        -1,                          // Dropped item
+        0,                           // Pickup width
+        0,                           // Projectile pass height
+        0,                           // Fullbright
+        0,                           // Blood color
         kS_NULL                      // raisestate
     },
 
@@ -2199,12 +2199,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                           // Gib health
+        -1,                          // Dropped item
+        0,                           // Pickup width
+        0,                           // Projectile pass height
+        0,                           // Fullbright
+        0,                           // Blood color
         kS_NULL                      // raisestate
     },
 
@@ -2240,12 +2240,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -2281,12 +2281,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -2322,12 +2322,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                           // Gib health
+        -1,                          // Dropped item
+        0,                           // Pickup width
+        0,                           // Projectile pass height
+        0,                           // Fullbright
+        0,                           // Blood color
         kS_NULL                      // raisestate
     },
 
@@ -2363,12 +2363,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                           // Gib health
+        -1,                          // Dropped item
+        0,                           // Pickup width
+        0,                           // Projectile pass height
+        0,                           // Fullbright
+        0,                           // Blood color
         kS_NULL                      // raisestate
     },
 
@@ -2404,12 +2404,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                           // Gib health
+        -1,                          // Dropped item
+        0,                           // Pickup width
+        0,                           // Projectile pass height
+        0,                           // Fullbright
+        0,                           // Blood color
         kS_NULL                      // raisestate
     },
 
@@ -2445,12 +2445,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                           // Gib health
+        -1,                          // Dropped item
+        0,                           // Pickup width
+        0,                           // Projectile pass height
+        0,                           // Fullbright
+        0,                           // Blood color
         kS_NULL                      // raisestate
     },
 
@@ -2486,12 +2486,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,        // Rip sound
         0,                // Fast speed
         0,                // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                // Gib health
+        -1,               // Dropped item
+        0,                // Pickup width
+        0,                // Projectile pass height
+        0,                // Fullbright
+        0,                // Blood color
         kS_NULL           // raisestate
     },
 
@@ -2527,12 +2527,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                           // Gib health
+        -1,                          // Dropped item
+        0,                           // Pickup width
+        0,                           // Projectile pass height
+        0,                           // Fullbright
+        0,                           // Blood color
         kS_NULL                      // raisestate
     },
 
@@ -2568,12 +2568,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                           // Gib health
+        -1,                          // Dropped item
+        0,                           // Pickup width
+        0,                           // Projectile pass height
+        0,                           // Fullbright
+        0,                           // Blood color
         kS_NULL                      // raisestate
     },
 
@@ -2609,12 +2609,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                           // Gib health
+        -1,                          // Dropped item
+        0,                           // Pickup width
+        0,                           // Projectile pass height
+        0,                           // Fullbright
+        0,                           // Blood color
         kS_NULL                      // raisestate
     },
 
@@ -2650,12 +2650,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -2691,12 +2691,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,        // Rip sound
         0,                // Fast speed
         0,                // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                // Gib health
+        -1,               // Dropped item
+        0,                // Pickup width
+        0,                // Projectile pass height
+        0,                // Fullbright
+        0,                // Blood color
         kS_NULL           // raisestate
     },
 
@@ -2732,12 +2732,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -2773,12 +2773,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,        // Rip sound
         0,                // Fast speed
         0,                // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                // Gib health
+        -1,               // Dropped item
+        0,                // Pickup width
+        0,                // Projectile pass height
+        0,                // Fullbright
+        0,                // Blood color
         kS_NULL           // raisestate
     },
 
@@ -2814,12 +2814,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -2855,12 +2855,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -2896,12 +2896,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -2937,12 +2937,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,       // Rip sound
         0,               // Fast speed
         0,               // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,               // Gib health
+        -1,              // Dropped item
+        0,               // Pickup width
+        0,               // Projectile pass height
+        0,               // Fullbright
+        0,               // Blood color
         kS_NULL          // raisestate
     },
 
@@ -2978,12 +2978,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -3019,12 +3019,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -3060,12 +3060,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -3101,12 +3101,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -3142,12 +3142,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,          // Rip sound
         0,                  // Fast speed
         0,                  // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                  // Gib health
+        -1,                 // Dropped item
+        0,                  // Pickup width
+        0,                  // Projectile pass height
+        0,                  // Fullbright
+        0,                  // Blood color
         kS_NULL             // raisestate
     },
 
@@ -3183,12 +3183,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -3224,12 +3224,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -3265,12 +3265,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,       // Rip sound
         0,               // Fast speed
         0,               // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,               // Gib health
+        -1,              // Dropped item
+        0,               // Pickup width
+        0,               // Projectile pass height
+        0,               // Fullbright
+        0,               // Blood color
         kS_NULL          // raisestate
     },
 
@@ -3306,12 +3306,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,        // Rip sound
         0,                // Fast speed
         0,                // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                // Gib health
+        -1,               // Dropped item
+        0,                // Pickup width
+        0,                // Projectile pass height
+        0,                // Fullbright
+        0,                // Blood color
         kS_NULL           // raisestate
     },
 
@@ -3347,12 +3347,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,         // Rip sound
         0,                 // Fast speed
         0,                 // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                 // Gib health
+        -1,                // Dropped item
+        0,                 // Pickup width
+        0,                 // Projectile pass height
+        0,                 // Fullbright
+        0,                 // Blood color
         kS_NULL            // raisestate
     },
 
@@ -3388,12 +3388,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,            // Rip sound
         0,                    // Fast speed
         0,                    // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                    // Gib health
+        -1,                   // Dropped item
+        0,                    // Pickup width
+        0,                    // Projectile pass height
+        0,                    // Fullbright
+        0,                    // Blood color
         kS_NULL               // raisestate
     },
 
@@ -3429,12 +3429,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,           // Rip sound
         0,                   // Fast speed
         0,                   // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                   // Gib health
+        -1,                  // Dropped item
+        0,                   // Pickup width
+        0,                   // Projectile pass height
+        0,                   // Fullbright
+        0,                   // Blood color
         kS_NULL              // raisestate
     },
 
@@ -3470,12 +3470,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,            // Rip sound
         0,                    // Fast speed
         0,                    // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                    // Gib health
+        -1,                   // Dropped item
+        0,                    // Pickup width
+        0,                    // Projectile pass height
+        0,                    // Fullbright
+        0,                    // Blood color
         kS_NULL               // raisestate
     },
 
@@ -3511,12 +3511,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,         // Rip sound
         0,                 // Fast speed
         0,                 // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                 // Gib health
+        -1,                // Dropped item
+        0,                 // Pickup width
+        0,                 // Projectile pass height
+        0,                 // Fullbright
+        0,                 // Blood color
         kS_NULL            // raisestate
     },
 
@@ -3552,12 +3552,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,          // Rip sound
         0,                  // Fast speed
         0,                  // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                  // Gib health
+        -1,                 // Dropped item
+        0,                  // Pickup width
+        0,                  // Projectile pass height
+        0,                  // Fullbright
+        0,                  // Blood color
         kS_NULL             // raisestate
     },
 
@@ -3593,12 +3593,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,         // Rip sound
         0,                 // Fast speed
         0,                 // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                 // Gib health
+        -1,                // Dropped item
+        0,                 // Pickup width
+        0,                 // Projectile pass height
+        0,                 // Fullbright
+        0,                 // Blood color
         kS_NULL            // raisestate
     },
 
@@ -3634,12 +3634,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,              // Rip sound
         0,                      // Fast speed
         0,                      // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                      // Gib health
+        -1,                     // Dropped item
+        0,                      // Pickup width
+        0,                      // Projectile pass height
+        0,                      // Fullbright
+        0,                      // Blood color
         kS_NULL                 // raisestate
     },
 
@@ -3675,12 +3675,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -3716,12 +3716,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,            // Rip sound
         0,                    // Fast speed
         0,                    // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                    // Gib health
+        -1,                   // Dropped item
+        0,                    // Pickup width
+        0,                    // Projectile pass height
+        0,                    // Fullbright
+        0,                    // Blood color
         kS_NULL               // raisestate
     },
 
@@ -3757,12 +3757,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -3798,12 +3798,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,           // Rip sound
         0,                   // Fast speed
         0,                   // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                   // Gib health
+        -1,                  // Dropped item
+        0,                   // Pickup width
+        0,                   // Projectile pass height
+        0,                   // Fullbright
+        0,                   // Blood color
         kS_NULL              // raisestate
     },
 
@@ -3839,12 +3839,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,            // Rip sound
         0,                    // Fast speed
         0,                    // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                    // Gib health
+        -1,                   // Dropped item
+        0,                    // Pickup width
+        0,                    // Projectile pass height
+        0,                    // Fullbright
+        0,                    // Blood color
         kS_NULL               // raisestate
     },
 
@@ -3880,12 +3880,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,          // Rip sound
         0,                  // Fast speed
         0,                  // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                  // Gib health
+        -1,                 // Dropped item
+        0,                  // Pickup width
+        0,                  // Projectile pass height
+        0,                  // Fullbright
+        0,                  // Blood color
         kS_NULL             // raisestate
     },
 
@@ -3921,12 +3921,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,           // Rip sound
         0,                   // Fast speed
         0,                   // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                   // Gib health
+        -1,                  // Dropped item
+        0,                   // Pickup width
+        0,                   // Projectile pass height
+        0,                   // Fullbright
+        0,                   // Blood color
         kS_NULL              // raisestate
     },
 
@@ -3962,12 +3962,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,            // Rip sound
         0,                    // Fast speed
         0,                    // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                    // Gib health
+        -1,                   // Dropped item
+        0,                    // Pickup width
+        0,                    // Projectile pass height
+        0,                    // Fullbright
+        0,                    // Blood color
         kS_NULL               // raisestate
     },
 
@@ -4003,12 +4003,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,          // Rip sound
         0,                  // Fast speed
         0,                  // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                  // Gib health
+        -1,                 // Dropped item
+        0,                  // Pickup width
+        0,                  // Projectile pass height
+        0,                  // Fullbright
+        0,                  // Blood color
         kS_NULL             // raisestate
     },
 
@@ -4044,12 +4044,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -4085,12 +4085,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -4126,12 +4126,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -4167,12 +4167,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -4208,12 +4208,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                            // Gib health
+        -1,                                           // Dropped item
+        0,                                            // Pickup width
+        0,                                            // Projectile pass height
+        0,                                            // Fullbright
+        0,                                            // Blood color
         kS_NULL                                       // raisestate
     },
 
@@ -4249,12 +4249,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                            // Gib health
+        -1,                                           // Dropped item
+        0,                                            // Pickup width
+        0,                                            // Projectile pass height
+        0,                                            // Fullbright
+        0,                                            // Blood color
         kS_NULL                                       // raisestate
     },
 
@@ -4290,12 +4290,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                            // Gib health
+        -1,                                           // Dropped item
+        0,                                            // Pickup width
+        0,                                            // Projectile pass height
+        0,                                            // Fullbright
+        0,                                            // Blood color
         kS_NULL                                       // raisestate
     },
 
@@ -4331,12 +4331,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                            // Gib health
+        -1,                                           // Dropped item
+        0,                                            // Pickup width
+        0,                                            // Projectile pass height
+        0,                                            // Fullbright
+        0,                                            // Blood color
         kS_NULL                                       // raisestate
     },
 
@@ -4372,12 +4372,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                            // Gib health
+        -1,                                           // Dropped item
+        0,                                            // Pickup width
+        0,                                            // Projectile pass height
+        0,                                            // Fullbright
+        0,                                            // Blood color
         kS_NULL                                       // raisestate
     },
 
@@ -4413,12 +4413,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                        // Rip sound
         0,                                // Fast speed
         0,                                // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                // Gib health
+        -1,                               // Dropped item
+        0,                                // Pickup width
+        0,                                // Projectile pass height
+        0,                                // Fullbright
+        0,                                // Blood color
         kS_NULL                           // raisestate
     },
 
@@ -4454,12 +4454,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                        // Rip sound
         0,                                // Fast speed
         0,                                // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                // Gib health
+        -1,                               // Dropped item
+        0,                                // Pickup width
+        0,                                // Projectile pass height
+        0,                                // Fullbright
+        0,                                // Blood color
         kS_NULL                           // raisestate
     },
 
@@ -4495,12 +4495,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                        // Rip sound
         0,                                // Fast speed
         0,                                // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                // Gib health
+        -1,                               // Dropped item
+        0,                                // Pickup width
+        0,                                // Projectile pass height
+        0,                                // Fullbright
+        0,                                // Blood color
         kS_NULL                           // raisestate
     },
 
@@ -4536,12 +4536,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                        // Rip sound
         0,                                // Fast speed
         0,                                // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                // Gib health
+        -1,                               // Dropped item
+        0,                                // Pickup width
+        0,                                // Projectile pass height
+        0,                                // Fullbright
+        0,                                // Blood color
         kS_NULL                           // raisestate
     },
 
@@ -4577,12 +4577,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                        // Rip sound
         0,                                // Fast speed
         0,                                // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                // Gib health
+        -1,                               // Dropped item
+        0,                                // Pickup width
+        0,                                // Projectile pass height
+        0,                                // Fullbright
+        0,                                // Blood color
         kS_NULL                           // raisestate
     },
 
@@ -4618,12 +4618,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,        // Rip sound
         0,                // Fast speed
         0,                // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                // Gib health
+        -1,               // Dropped item
+        0,                // Pickup width
+        0,                // Projectile pass height
+        0,                // Fullbright
+        0,                // Blood color
         kS_NULL           // raisestate
     },
 
@@ -4659,12 +4659,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -4700,12 +4700,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,           // Rip sound
         0,                   // Fast speed
         0,                   // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                   // Gib health
+        -1,                  // Dropped item
+        0,                   // Pickup width
+        0,                   // Projectile pass height
+        0,                   // Fullbright
+        0,                   // Blood color
         kS_NULL              // raisestate
     },
 
@@ -4741,12 +4741,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -4782,12 +4782,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,       // Rip sound
         0,               // Fast speed
         0,               // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,               // Gib health
+        -1,              // Dropped item
+        0,               // Pickup width
+        0,               // Projectile pass height
+        0,               // Fullbright
+        0,               // Blood color
         kS_NULL          // raisestate
     },
 
@@ -4823,12 +4823,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -4864,12 +4864,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,          // Rip sound
         0,                  // Fast speed
         0,                  // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                  // Gib health
+        -1,                 // Dropped item
+        0,                  // Pickup width
+        0,                  // Projectile pass height
+        0,                  // Fullbright
+        0,                  // Blood color
         kS_NULL             // raisestate
     },
 
@@ -4905,12 +4905,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,             // Rip sound
         0,                     // Fast speed
         0,                     // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                     // Gib health
+        -1,                    // Dropped item
+        0,                     // Pickup width
+        0,                     // Projectile pass height
+        0,                     // Fullbright
+        0,                     // Blood color
         kS_NULL                // raisestate
     },
 
@@ -4946,12 +4946,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,             // Rip sound
         0,                     // Fast speed
         0,                     // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                     // Gib health
+        -1,                    // Dropped item
+        0,                     // Pickup width
+        0,                     // Projectile pass height
+        0,                     // Fullbright
+        0,                     // Blood color
         kS_NULL                // raisestate
     },
 
@@ -4987,12 +4987,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,          // Rip sound
         0,                  // Fast speed
         0,                  // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                  // Gib health
+        -1,                 // Dropped item
+        0,                  // Pickup width
+        0,                  // Projectile pass height
+        0,                  // Fullbright
+        0,                  // Blood color
         kS_NULL             // raisestate
     },
 
@@ -5028,12 +5028,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,       // Rip sound
         0,               // Fast speed
         0,               // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,               // Gib health
+        -1,              // Dropped item
+        0,               // Pickup width
+        0,               // Projectile pass height
+        0,               // Fullbright
+        0,               // Blood color
         kS_NULL          // raisestate
     },
 
@@ -5069,12 +5069,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,          // Rip sound
         0,                  // Fast speed
         0,                  // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                  // Gib health
+        -1,                 // Dropped item
+        0,                  // Pickup width
+        0,                  // Projectile pass height
+        0,                  // Fullbright
+        0,                  // Blood color
         kS_NULL             // raisestate
     },
 
@@ -5110,12 +5110,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,           // Rip sound
         0,                   // Fast speed
         0,                   // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                   // Gib health
+        -1,                  // Dropped item
+        0,                   // Pickup width
+        0,                   // Projectile pass height
+        0,                   // Fullbright
+        0,                   // Blood color
         kS_NULL              // raisestate
     },
 
@@ -5151,12 +5151,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,        // Rip sound
         0,                // Fast speed
         0,                // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                // Gib health
+        -1,               // Dropped item
+        0,                // Pickup width
+        0,                // Projectile pass height
+        0,                // Fullbright
+        0,                // Blood color
         kS_NULL           // raisestate
     },
 
@@ -5192,12 +5192,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,              // Rip sound
         0,                      // Fast speed
         0,                      // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                      // Gib health
+        -1,                     // Dropped item
+        0,                      // Pickup width
+        0,                      // Projectile pass height
+        0,                      // Fullbright
+        0,                      // Blood color
         kS_NULL                 // raisestate
     },
 
@@ -5233,12 +5233,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -5274,12 +5274,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,        // Rip sound
         0,                // Fast speed
         0,                // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                // Gib health
+        -1,               // Dropped item
+        0,                // Pickup width
+        0,                // Projectile pass height
+        0,                // Fullbright
+        0,                // Blood color
         kS_NULL           // raisestate
     },
 
@@ -5315,12 +5315,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                            // Gib health
+        -1,                                           // Dropped item
+        0,                                            // Pickup width
+        0,                                            // Projectile pass height
+        0,                                            // Fullbright
+        0,                                            // Blood color
         kS_NULL                                       // raisestate
     },
 
@@ -5356,12 +5356,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                            // Gib health
+        -1,                                           // Dropped item
+        0,                                            // Pickup width
+        0,                                            // Projectile pass height
+        0,                                            // Fullbright
+        0,                                            // Blood color
         kS_NULL                                       // raisestate
     },
 
@@ -5397,12 +5397,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                            // Gib health
+        -1,                                           // Dropped item
+        0,                                            // Pickup width
+        0,                                            // Projectile pass height
+        0,                                            // Fullbright
+        0,                                            // Blood color
         kS_NULL                                       // raisestate
     },
 
@@ -5438,12 +5438,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                            // Gib health
+        -1,                                           // Dropped item
+        0,                                            // Pickup width
+        0,                                            // Projectile pass height
+        0,                                            // Fullbright
+        0,                                            // Blood color
         kS_NULL                                       // raisestate
     },
 
@@ -5479,12 +5479,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                            // Gib health
+        -1,                                           // Dropped item
+        0,                                            // Pickup width
+        0,                                            // Projectile pass height
+        0,                                            // Fullbright
+        0,                                            // Blood color
         kS_NULL                                       // raisestate
     },
 
@@ -5520,12 +5520,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                    // Rip sound
         0,                                            // Fast speed
         0,                                            // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                            // Gib health
+        -1,                                           // Dropped item
+        0,                                            // Pickup width
+        0,                                            // Projectile pass height
+        0,                                            // Fullbright
+        0,                                            // Blood color
         kS_NULL                                       // raisestate
     },
 
@@ -5561,12 +5561,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,         // Rip sound
         0,                 // Fast speed
         0,                 // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                 // Gib health
+        -1,                // Dropped item
+        0,                 // Pickup width
+        0,                 // Projectile pass height
+        0,                 // Fullbright
+        0,                 // Blood color
         kS_NULL            // raisestate
     },
 
@@ -5602,12 +5602,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,          // Rip sound
         0,                  // Fast speed
         0,                  // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                  // Gib health
+        -1,                 // Dropped item
+        0,                  // Pickup width
+        0,                  // Projectile pass height
+        0,                  // Fullbright
+        0,                  // Blood color
         kS_NULL             // raisestate
     },
 
@@ -5643,12 +5643,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -5686,12 +5686,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -5727,12 +5727,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -5770,12 +5770,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                 // Rip sound
         0,                                         // Fast speed
         0,                                         // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                         // Gib health
+        -1,                                        // Dropped item
+        0,                                         // Pickup width
+        0,                                         // Projectile pass height
+        0,                                         // Fullbright
+        0,                                         // Blood color
         kS_DOGS_RAISE1                             // raisestate
     },
 
@@ -5811,12 +5811,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                // Rip sound
         0,                                                        // Fast speed
         0,                                                        // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                                        // Gib health
+        -1,                                                       // Dropped item
+        0,                                                        // Pickup width
+        0,                                                        // Projectile pass height
+        0,                                                        // Fullbright
+        0,                                                        // Blood color
         kS_NULL                                                   // raisestate
     },
 
@@ -5852,12 +5852,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                                                // Rip sound
         0,                                                        // Fast speed
         0,                                                        // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                                                        // Gib health
+        -1,                                                       // Dropped item
+        0,                                                        // Pickup width
+        0,                                                        // Projectile pass height
+        0,                                                        // Fullbright
+        0,                                                        // Blood color
         kS_NULL                                                   // raisestate
     },
 
@@ -5893,12 +5893,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                           // Gib health
+        -1,                          // Dropped item
+        0,                           // Pickup width
+        0,                           // Projectile pass height
+        0,                           // Fullbright
+        0,                           // Blood color
         kS_NULL                      // raisestate
     },
 
@@ -5934,12 +5934,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                   // Rip sound
         0,                           // Fast speed
         0,                           // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                           // Gib health
+        -1,                          // Dropped item
+        0,                           // Pickup width
+        0,                           // Projectile pass height
+        0,                           // Fullbright
+        0,                           // Blood color
         kS_NULL                      // raisestate
     },
 
@@ -5975,12 +5975,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,      // Rip sound
         0,              // Fast speed
         0,              // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,              // Gib health
+        -1,             // Dropped item
+        0,              // Pickup width
+        0,              // Projectile pass height
+        0,              // Fullbright
+        0,              // Blood color
         kS_NULL         // raisestate
     },
 
@@ -6016,12 +6016,12 @@ DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibili
         ksfx_None,                    // Rip sound
         0,                            // Fast speed
         0,                            // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+        0,                            // Gib health
+        -1,                           // Dropped item
+        0,                            // Pickup width
+        0,                            // Projectile pass height
+        0,                            // Fullbright
+        0,                            // Blood color
         kS_NULL                       // raisestate
     },
 };
@@ -6057,12 +6057,12 @@ DehackedMapObjectDefinition brain_explode_mobj = {
     ksfx_None,                                                  // Rip sound
     0,                                                          // Fast speed
     0,                                                          // Melee range
-        0,                                                                    // Gib health
- 	   -1,                                                                    // Dropped item
- 		0,                                                                    // Pickup width
- 		0,                                                                    // Projectile pass height
- 		0,                                                                    // Fullbright
-        0,                                                                    // Blood color
+    0,                                                          // Gib health
+    -1,                                                         // Dropped item
+    0,                                                          // Pickup width
+    0,                                                          // Projectile pass height
+    0,                                                          // Fullbright
+    0,                                                          // Blood color
     kS_NULL                                                     // raisestate
 };
 

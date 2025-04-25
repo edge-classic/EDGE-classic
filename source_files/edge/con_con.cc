@@ -212,8 +212,7 @@ void SetConsoleVisibility(ConsoleVisibility v)
 {
     if (v == kConsoleToggle)
     {
-        v = (console_visible == kConsoleNotVisible) ? kConsoleMaximal
-                                                              : kConsoleNotVisible;
+        v = (console_visible == kConsoleNotVisible) ? kConsoleMaximal : kConsoleNotVisible;
 
         scroll_direction = 0;
     }
@@ -297,19 +296,19 @@ void ConsoleMessage(ConsoleMessageTarget target, const char *message, ...)
     stbsp_vsprintf(buffer, message, argptr);
     va_end(argptr);
 
-    switch(target)
+    switch (target)
     {
-        case kConsoleHUDTop:
-            HUDStartMessage(buffer);
-            strcat(buffer, "\n");
-            break;
-        case kConsoleHUDCenter:
-            HUDStartImportantMessage(buffer);
-            strcat(buffer, "\n");
-            break;
-        case kConsoleOnly:
-        default:
-            break;
+    case kConsoleHUDTop:
+        HUDStartMessage(buffer);
+        strcat(buffer, "\n");
+        break;
+    case kConsoleHUDCenter:
+        HUDStartImportantMessage(buffer);
+        strcat(buffer, "\n");
+        break;
+    case kConsoleOnly:
+    default:
+        break;
     }
 
     SplitIntoLines(buffer);
@@ -381,11 +380,12 @@ static RendererVertex *StartText()
         blend = kBlendingAlpha;
     }
 
-    return BeginRenderUnit(GL_QUADS, kMaximumLocalVertices, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0, 0, blend);
+    return BeginRenderUnit(GL_QUADS, kMaximumLocalVertices, GL_MODULATE, tex_id, (GLuint)kTextureEnvironmentDisable, 0,
+                           0, blend);
 }
 
 static void AddChar(float x, float y, char ch, RendererVertex *&glvert, RGBAColor col)
-{   
+{
     if (console_font->definition_->type_ == kFontTypeTrueType)
     {
         float chwidth  = console_font->CharWidth(ch);
@@ -397,16 +397,16 @@ static void AddChar(float x, float y, char ch, RendererVertex *&glvert, RGBAColo
         stbtt_aligned_quad *q = &console_font->truetype_glyph_map_.at((uint8_t)ch).character_quad[current_font_size];
         glvert->rgba          = col;
         glvert->position      = {{x + x_adjust, y - y_adjust, 0}};
-        glvert++->texture_coordinates[0]   = {{q->s0, q->t0}};
-        glvert->rgba                       = col;
-        glvert->position                   = {{x + x_adjust + width, y - y_adjust, 0}};
-        glvert++->texture_coordinates[0]   = {{q->s1, q->t0}};
-        glvert->rgba                       = col;
-        glvert->position                   = {{x + x_adjust + width, y - y_adjust - height, 0}};
-        glvert++->texture_coordinates[0]   = {{q->s1, q->t1}};
-        glvert->rgba                       = col;
-        glvert->position                   = {{x + x_adjust, y - y_adjust - height, 0}};
-        glvert++->texture_coordinates[0]   = {{q->s0, q->t1}};
+        glvert++->texture_coordinates[0] = {{q->s0, q->t0}};
+        glvert->rgba                     = col;
+        glvert->position                 = {{x + x_adjust + width, y - y_adjust, 0}};
+        glvert++->texture_coordinates[0] = {{q->s1, q->t0}};
+        glvert->rgba                     = col;
+        glvert->position                 = {{x + x_adjust + width, y - y_adjust - height, 0}};
+        glvert++->texture_coordinates[0] = {{q->s1, q->t1}};
+        glvert->rgba                     = col;
+        glvert->position                 = {{x + x_adjust, y - y_adjust - height, 0}};
+        glvert++->texture_coordinates[0] = {{q->s0, q->t1}};
     }
     else // spritesheet font
     {
@@ -418,27 +418,27 @@ static void AddChar(float x, float y, char ch, RendererVertex *&glvert, RGBAColo
         float ty1 = (py)*console_font->font_image_->height_ratio_;
         float ty2 = (py + 1) * console_font->font_image_->height_ratio_;
 
-        glvert->rgba                       = col;
-        glvert->position                   = {{x, y, 0}};
-        glvert++->texture_coordinates[0]   = {{tx1, ty1}};
-        glvert->rgba                       = col;
-        glvert->position                   = {{x, y + FNSZ, 0}};
-        glvert++->texture_coordinates[0]   = {{tx1, ty2}};
-        glvert->rgba                       = col;
-        glvert->position                   = {{x + FNSZ, y + FNSZ, 0}};
-        glvert++->texture_coordinates[0]   = {{tx2, ty2}};
-        glvert->rgba                       = col;
-        glvert->position                   = {{x + FNSZ, y, 0}};
-        glvert++->texture_coordinates[0]   = {{tx2, ty1}};
+        glvert->rgba                     = col;
+        glvert->position                 = {{x, y, 0}};
+        glvert++->texture_coordinates[0] = {{tx1, ty1}};
+        glvert->rgba                     = col;
+        glvert->position                 = {{x, y + FNSZ, 0}};
+        glvert++->texture_coordinates[0] = {{tx1, ty2}};
+        glvert->rgba                     = col;
+        glvert->position                 = {{x + FNSZ, y + FNSZ, 0}};
+        glvert++->texture_coordinates[0] = {{tx2, ty2}};
+        glvert->rgba                     = col;
+        glvert->position                 = {{x + FNSZ, y, 0}};
+        glvert++->texture_coordinates[0] = {{tx2, ty1}};
     }
 }
 
 // Add characters to current render unit; return total number of verts added
 static uint16_t AddText(float x, float y, const char *s, RGBAColor col, RendererVertex *&runit)
 {
-    bool draw_cursor = (s == input_line && console_cursor < 16);
+    bool     draw_cursor = (s == input_line && console_cursor < 16);
     uint16_t verts_added = 0;
-    int pos = 0;
+    int      pos         = 0;
     for (; *s; s++, pos++)
     {
         AddChar(x, y, *s, runit, col);
@@ -554,9 +554,9 @@ void ConsoleDrawer(void)
     int bottom_y = y;
 
     // -- text lines --
-    bool draw_endoom = false;
+    bool            draw_endoom    = false;
     RendererVertex *console_glvert = nullptr;
-    int console_verts = 0;
+    int             console_verts  = 0;
 
     y = bottom_y + ((FNSZ / 2) + (bottom_row == -1 ? FNSZ : 0));
     // First pass, draw ENDOOM background colors if needed
@@ -571,26 +571,27 @@ void ConsoleDrawer(void)
         {
             if (!draw_endoom)
             {
-                console_glvert =
-                    BeginRenderUnit(GL_QUADS, kENDOOMTotalVerts, GL_MODULATE, 0, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
-                draw_endoom = true;
+                console_glvert = BeginRenderUnit(GL_QUADS, kENDOOMTotalVerts, GL_MODULATE, 0,
+                                                 (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
+                draw_endoom    = true;
             }
 
-            int x = 0;
+            int x       = 0;
             int enwidth = RoundToInteger((float)endoom_font->image_monospace_width_ *
-                ((float)FNSZ / endoom_font->image_monospace_width_) / 2) / 2;
-            for (int j = 1; j < kENDOOMBytesPerLine; j+=2)
+                                         ((float)FNSZ / endoom_font->image_monospace_width_) / 2) /
+                          2;
+            for (int j = 1; j < kENDOOMBytesPerLine; j += 2)
             {
                 RGBAColor col = kENDOOMColors[(CL->endoom_bytes_[j] >> 4) & 7];
 
-                console_glvert->rgba                   = col;
-                console_glvert++->position             = {{(float)(x - enwidth), (float)y, 0}};
-                console_glvert->rgba                   = col;
-                console_glvert++->position             = {{(float)(x - enwidth), (float)(y + FNSZ), 0}};
-                console_glvert->rgba                   = col;
-                console_glvert++->position             = {{(float)(x + enwidth), (float)(y + FNSZ), 0}};
-                console_glvert->rgba                   = col;
-                console_glvert++->position               = {{(float)(x + enwidth), (float)y, 0}};
+                console_glvert->rgba       = col;
+                console_glvert++->position = {{(float)(x - enwidth), (float)y, 0}};
+                console_glvert->rgba       = col;
+                console_glvert++->position = {{(float)(x - enwidth), (float)(y + FNSZ), 0}};
+                console_glvert->rgba       = col;
+                console_glvert++->position = {{(float)(x + enwidth), (float)(y + FNSZ), 0}};
+                console_glvert->rgba       = col;
+                console_glvert++->position = {{(float)(x + enwidth), (float)y, 0}};
 
                 x += enwidth * 2;
                 console_verts += 4;
@@ -612,11 +613,12 @@ void ConsoleDrawer(void)
     {
         // Finish previous unit
         EndRenderUnit(console_verts);
-        console_verts = 0;
-        console_glvert = BeginRenderUnit(GL_QUADS, kENDOOMTotalVerts, GL_MODULATE, ImageCache(endoom_font->font_image_, true, 
-            (const Colormap *)0, true), (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingMasked);
-        int enwidth = RoundToInteger((float)endoom_font->image_monospace_width_ *
-            ((float)FNSZ / endoom_font->image_monospace_width_) / 2);
+        console_verts  = 0;
+        console_glvert = BeginRenderUnit(GL_QUADS, kENDOOMTotalVerts, GL_MODULATE,
+                                         ImageCache(endoom_font->font_image_, true, (const Colormap *)0, true),
+                                         (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingMasked);
+        int enwidth    = RoundToInteger((float)endoom_font->image_monospace_width_ *
+                                        ((float)FNSZ / endoom_font->image_monospace_width_) / 2);
 
         for (int i = HMM_MAX(0, bottom_row); i < kMaximumConsoleLines; i++)
         {
@@ -628,11 +630,11 @@ void ConsoleDrawer(void)
             if (CL->endoom_bytes_.size() == kENDOOMBytesPerLine && CL->line_.empty())
             {
                 int x = 0;
-                for (int j = 0; j < kENDOOMBytesPerLine; j+=2)
+                for (int j = 0; j < kENDOOMBytesPerLine; j += 2)
                 {
-                    uint8_t ch = CL->endoom_bytes_[j];
-                    uint8_t info = CL->endoom_bytes_[j+1];
-                    RGBAColor col = kENDOOMColors[info & 15];
+                    uint8_t   ch   = CL->endoom_bytes_[j];
+                    uint8_t   info = CL->endoom_bytes_[j + 1];
+                    RGBAColor col  = kENDOOMColors[info & 15];
 
                     // blink
                     if ((info & 128) && console_cursor >= 16)
@@ -661,7 +663,7 @@ void ConsoleDrawer(void)
                     console_glvert++->position             = {{(float)(x + enwidth), (float)(y + FNSZ), 0}};
                     console_glvert->rgba                   = col;
                     console_glvert->texture_coordinates[0] = {{tx2, ty1}};
-                    console_glvert++->position               = {{(float)(x + enwidth), (float)y, 0}};
+                    console_glvert++->position             = {{(float)(x + enwidth), (float)y, 0}};
 
                     x += enwidth;
                     console_verts += 4;
@@ -1413,8 +1415,8 @@ void ConsoleStart(void)
 static char *GetHumanSize(uint32_t bytes, char *hrbytes)
 {
     const char *suffix[] = {"B", "KB", "MB", "GB", "TB"};
-    char  length   = sizeof(suffix) / sizeof(suffix[0]);
-    int   i;
+    char        length   = sizeof(suffix) / sizeof(suffix[0]);
+    int         i;
 
     for (i = 0; i < length; i++)
     {
@@ -1498,7 +1500,7 @@ void ConsoleShowFPS(void)
     y = current_screen_height - FNSZ - FNSZ * (console_font->definition_->type_ == kFontTypeTrueType ? -0.5 : 0.5);
 
     RendererVertex *console_glvert = StartText();
-    uint16_t console_verts = 0;
+    uint16_t        console_verts  = 0;
 
     // show average...
 
@@ -1602,7 +1604,7 @@ void ConsoleShowPosition(void)
 
     int x = current_screen_width - XMUL * 16;
     int y;
-    
+
     if (debug_fps.d_ <= 0)
         y = current_screen_height;
     else if (debug_fps.d_ == 1)
@@ -1615,7 +1617,7 @@ void ConsoleShowPosition(void)
     SolidBox(x, y - FNSZ * 10, XMUL * 16, FNSZ * 10 + 2, kRGBABlack, 0.5);
 
     RendererVertex *console_glvert = StartText();
-    uint16_t console_verts = 0;
+    uint16_t        console_verts  = 0;
 
     x += XMUL;
     y -= FNSZ * (console_font->definition_->type_ == kFontTypeTrueType ? 0.25 : 1.25);
@@ -1688,12 +1690,12 @@ void CreateQuitScreen()
     if (length != 4000)
     {
         ConsoleMessage(kConsoleOnly, "CreateQuitScreen: ENDOOM exists, but is malformed! (Length "
-                     "not equal to 4000 bytes)\n");
+                                     "not equal to 4000 bytes)\n");
         delete[] data;
         return;
     }
 
-    for (int i = kENDOOMLines-1; i >= 0; i--)
+    for (int i = kENDOOMLines - 1; i >= 0; i--)
     {
         quit_lines[i] = new ConsoleLine();
         quit_lines[i]->endoom_bytes_.resize(kENDOOMBytesPerLine);

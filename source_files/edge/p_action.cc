@@ -1413,13 +1413,13 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty, floa
         return nullptr;
 
     // -AJA- projz now handles crouching
-    float   projx          = source->x;
-    float   projy          = source->y;
-    float   projz          = source->z + attack->height_ * source->height_ / source->info_->height_;
-    Sector *cur_source_sec = source->subsector_->sector;
-    BAMAngle angle = 0;
-    float slope = 0.0f;
-    MapObject *projectile = nullptr; 
+    float      projx          = source->x;
+    float      projy          = source->y;
+    float      projz          = source->z + attack->height_ * source->height_ / source->info_->height_;
+    Sector    *cur_source_sec = source->subsector_->sector;
+    BAMAngle   angle          = 0;
+    float      slope          = 0.0f;
+    MapObject *projectile     = nullptr;
 
     if (source->player_)
         projz += (source->player_->view_z_ - source->player_->standard_view_height_);
@@ -1459,18 +1459,18 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty, floa
         else
         {
             projectile->extended_flags_ |= kExtendedFlagFirstTracerCheck;
-    
+
             if (!(attack->flags_ & kAttackFlagPlayer))
             {
                 if (target->flags_ & kMapObjectFlagFuzzy)
                     angle += RandomByteSkewToZeroDeterministic() << (kBAMAngleBits - 12);
-    
+
                 if (target->visibility_ < 1.0f)
                     angle += (BAMAngle)(RandomByteSkewToZeroDeterministic() * 64 * (1.0f - target->visibility_));
             }
-    
+
             Sector *cur_target_sec = target->subsector_->sector;
-    
+
             if (cur_target_sec->sink_depth > 0 && !cur_target_sec->extrafloor_used && !cur_target_sec->height_sector &&
                 abs(target->z - cur_target_sec->floor_height) < 1)
                 tz -= (target->height_ * 0.5 * cur_target_sec->sink_depth);
@@ -1489,18 +1489,18 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty, floa
         else
         {
             projectile->extended_flags_ |= kExtendedFlagFirstTracerCheck;
-    
+
             if (!(attack->flags_ & kAttackFlagPlayer))
             {
                 if (target->flags_ & kMapObjectFlagFuzzy)
                     angle += RandomByteSkewToZeroDeterministic() << (kBAMAngleBits - 12);
-    
+
                 if (target->visibility_ < 1.0f)
                     angle += (BAMAngle)(RandomByteSkewToZeroDeterministic() * 64 * (1.0f - target->visibility_));
             }
-    
+
             Sector *cur_target_sec = target->subsector_->sector;
-    
+
             if (cur_target_sec->sink_depth > 0 && !cur_target_sec->extrafloor_used && !cur_target_sec->height_sector &&
                 abs(target->z - cur_target_sec->floor_height) < 1)
                 tz -= (target->height_ * 0.5 * cur_target_sec->sink_depth);
@@ -2441,15 +2441,15 @@ static void LaunchTracker(MapObject *object)
 void A_EffectTracker(MapObject *object)
 {
     MapObject              *tracker = nullptr;
-    MapObject              *target = nullptr;
-    const AttackDefinition *attack = nullptr;
+    MapObject              *target  = nullptr;
+    const AttackDefinition *attack  = nullptr;
     BAMAngle                angle;
     float                   damage;
 
     if (!object->target_)
         return;
 
-    if (object->current_attack_)     
+    if (object->current_attack_)
         attack = object->current_attack_;
     else
     {
@@ -3520,7 +3520,7 @@ void A_StandardLook(MapObject *object)
 
         // Dasho - MBF21 testing - A_PlayerSupportMeander was really jacking
         // up projectiles and spawned objects with the MF_FRIENDLY MBF flag
-        //A_PlayerSupportMeander(object);
+        // A_PlayerSupportMeander(object);
         A_FriendLook(object);
         return;
     }
@@ -5115,7 +5115,7 @@ void A_Mushroom(MapObject *mo)
         }
         if (values[1])
         {
-            speed  = (float)values[1] / 65536.0f;
+            speed = (float)values[1] / 65536.0f;
         }
     }
 
@@ -5130,7 +5130,7 @@ void A_Mushroom(MapObject *mo)
     // Spread is determined by the 'missile damage' mobj property,
     // which from our Dehacked conversion equates to nominal
     // projectile damage
-    int i,j,spread = mo->info_->proj_damage_.nominal_;
+    int i, j, spread = mo->info_->proj_damage_.nominal_;
 
     for (i = -spread; i <= spread; i += 8)
     {
@@ -5146,16 +5146,16 @@ void A_Mushroom(MapObject *mo)
             {
                 proj->flags_ &= ~kMapObjectFlagNoGravity;
                 proj->angle_ = PointToAngle(mo->x, mo->y, tx, ty);
-                float dist = ApproximateDistance(i, j);
+                float dist   = ApproximateDistance(i, j);
                 dist /= proj->info_->speed_;
-              
+
                 if (dist < 1.0f)
-                  dist = 1.0f;
-              
+                    dist = 1.0f;
+
                 proj->momentum_.Z = (tz - mo->z) / dist;
                 proj->momentum_.X = proj->info_->speed_ * epi::BAMCos(proj->angle_);
                 proj->momentum_.Y = proj->info_->speed_ * epi::BAMSin(proj->angle_);
-                proj->momentum_ = HMM_MulV3F(proj->momentum_, speed);
+                proj->momentum_   = HMM_MulV3F(proj->momentum_, speed);
                 if (proj->flags_ & kMapObjectFlagPreserveMomentum)
                 {
                     proj->momentum_.X += mo->momentum_.X;

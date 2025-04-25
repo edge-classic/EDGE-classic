@@ -235,7 +235,7 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
     frames::OutputGroup('S');
     frames::OutputGroup('E');
     frames::OutputGroup('D');
-    
+
     frames::force_fullbright = false;
 }
 
@@ -1205,7 +1205,7 @@ void HandleSounds(const DehackedMapObjectDefinition *info, int mt_num)
 
     // Dasho - Removed melee state requirement, as the MBF21 A_MonsterBulletAttack codepointer
     // uses this sound
-    if (info->attacksound != ksfx_None)// && info->meleestate != kS_NULL)
+    if (info->attacksound != ksfx_None) // && info->meleestate != kS_NULL)
         wad::Printf("STARTCOMBAT_SOUND = \"%s\";\n", sounds::GetSound(info->attacksound));
 
     if (info->painsound != ksfx_None)
@@ -1576,7 +1576,7 @@ void HandleCastOrder(int mt_num, int player)
     wad::Printf("CAST_TITLE = %s;\n", cast_titles[pos - 1]);
 }
 
-void HandleDropItem(const DehackedMapObjectDefinition*info, int mt_num);
+void HandleDropItem(const DehackedMapObjectDefinition *info, int mt_num);
 void HandleAttacks(const DehackedMapObjectDefinition *info, int mt_num);
 void ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num, int player, bool brain_missile, bool &got_one);
 void HandleBlood(const DehackedMapObjectDefinition *info);
@@ -1584,59 +1584,82 @@ void HandleBlood(const DehackedMapObjectDefinition *info);
 
 void things::HandleDropItem(const DehackedMapObjectDefinition *info, int mt_num)
 {
-	const char *item = nullptr;
+    const char *item = nullptr;
 
-	if (info->dropped_item == 0)
-	{
-		return; // I think '0' is used to clear out normal drops - Dasho
-	}
-	else if (info->dropped_item - 1 > kMT_PLAYER)
-	{
-		item = GetMobjName(info->dropped_item - 1);
-		if (!item) return;
-	}
-	else
-	{
-		switch (mt_num)
-		{
-			case kMT_WOLFSS:
-			case kMT_POSSESSED: item = "CLIP"; break;
+    if (info->dropped_item == 0)
+    {
+        return; // I think '0' is used to clear out normal drops - Dasho
+    }
+    else if (info->dropped_item - 1 > kMT_PLAYER)
+    {
+        item = GetMobjName(info->dropped_item - 1);
+        if (!item)
+            return;
+    }
+    else
+    {
+        switch (mt_num)
+        {
+        case kMT_WOLFSS:
+        case kMT_POSSESSED:
+            item = "CLIP";
+            break;
 
-			case kMT_SHOTGUY:   item = "SHOTGUN"; break;
-			case kMT_CHAINGUY:  item = "CHAINGUN"; break;
+        case kMT_SHOTGUY:
+            item = "SHOTGUN";
+            break;
+        case kMT_CHAINGUY:
+            item = "CHAINGUN";
+            break;
 
-			default:
-				return;
-		}
-	}
+        default:
+            return;
+        }
+    }
 
-	EPI_ASSERT(item);
+    EPI_ASSERT(item);
 
-	wad::Printf("DROPITEM = \"%s\";\n", item);
+    wad::Printf("DROPITEM = \"%s\";\n", item);
 }
 
 void things::HandleBlood(const DehackedMapObjectDefinition *info)
 {
-	const char *splat = nullptr;
+    const char *splat = nullptr;
 
     switch (info->blood_color)
     {
-        case 1: splat = "DEHEXTRA_BLOOD_GREY"; break;
-        case 2: splat = "DEHEXTRA_BLOOD_GREEN"; break;
-        case 3: splat = "DEHEXTRA_BLOOD_BLUE"; break;
-        case 4: splat = "DEHEXTRA_BLOOD_YELLOW"; break;
-        case 5: splat = "DEHEXTRA_BLOOD_BLACK"; break;
-        case 6: splat = "DEHEXTRA_BLOOD_PURPLE"; break;
-        case 7: splat = "DEHEXTRA_BLOOD_WHITE"; break;
-        case 8: splat = "DEHEXTRA_BLOOD_ORANGE"; break;
-        // Red, or fallback if a bad value
-        case 0:
-        default:
-            break;
+    case 1:
+        splat = "DEHEXTRA_BLOOD_GREY";
+        break;
+    case 2:
+        splat = "DEHEXTRA_BLOOD_GREEN";
+        break;
+    case 3:
+        splat = "DEHEXTRA_BLOOD_BLUE";
+        break;
+    case 4:
+        splat = "DEHEXTRA_BLOOD_YELLOW";
+        break;
+    case 5:
+        splat = "DEHEXTRA_BLOOD_BLACK";
+        break;
+    case 6:
+        splat = "DEHEXTRA_BLOOD_PURPLE";
+        break;
+    case 7:
+        splat = "DEHEXTRA_BLOOD_WHITE";
+        break;
+    case 8:
+        splat = "DEHEXTRA_BLOOD_ORANGE";
+        break;
+    // Red, or fallback if a bad value
+    case 0:
+    default:
+        break;
     }
 
-	if (splat)
-	    wad::Printf("BLOOD = \"%s\";\n", splat);
+    if (splat)
+        wad::Printf("BLOOD = \"%s\";\n", splat);
 }
 
 void things::HandleAttacks(const DehackedMapObjectDefinition *info, int mt_num)
@@ -1879,12 +1902,12 @@ const FieldReference mobj_field[] = {
     {"Rip sound", offsetof(DehackedMapObjectDefinition, rip_sound), kFieldTypeSoundNumber},
     {"Fast speed", offsetof(DehackedMapObjectDefinition, fast_speed), kFieldTypeZeroOrGreater},
     {"Melee range", offsetof(DehackedMapObjectDefinition, melee_range), kFieldTypeZeroOrGreater},
-    {"Gib health", offsetof(DehackedMapObjectDefinition, gib_health),    kFieldTypeAny },
-    {"Dropped item", offsetof(DehackedMapObjectDefinition, dropped_item),  kFieldTypeZeroOrGreater },
-    {"Pickup width", offsetof(DehackedMapObjectDefinition, pickup_width),    kFieldTypeZeroOrGreater },
-    {"Projectile pass height", offsetof(DehackedMapObjectDefinition, projectile_pass_height), kFieldTypeZeroOrGreater },
-    {"Fullbright", offsetof(DehackedMapObjectDefinition, fullbright), kFieldTypeZeroOrGreater },
-    {"Blood color", offsetof(DehackedMapObjectDefinition, blood_color), kFieldTypeZeroOrGreater },
+    {"Gib health", offsetof(DehackedMapObjectDefinition, gib_health), kFieldTypeAny},
+    {"Dropped item", offsetof(DehackedMapObjectDefinition, dropped_item), kFieldTypeZeroOrGreater},
+    {"Pickup width", offsetof(DehackedMapObjectDefinition, pickup_width), kFieldTypeZeroOrGreater},
+    {"Projectile pass height", offsetof(DehackedMapObjectDefinition, projectile_pass_height), kFieldTypeZeroOrGreater},
+    {"Fullbright", offsetof(DehackedMapObjectDefinition, fullbright), kFieldTypeZeroOrGreater},
+    {"Blood color", offsetof(DehackedMapObjectDefinition, blood_color), kFieldTypeZeroOrGreater},
     {"Respawn frame", offsetof(DehackedMapObjectDefinition, raisestate), kFieldTypeFrameNumber},
 
     {nullptr, 0, kFieldTypeAny} // End sentinel

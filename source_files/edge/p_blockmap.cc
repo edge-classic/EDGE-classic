@@ -454,24 +454,24 @@ static void AddSectorNode(Sector *sec, MapObject *mo)
 
 // Adapted from Boom's PIT_GetSectors - Dasho
 static bool CheckSectorCallback(Line *ld, void *data)
-{ 
+{
     BSPThingPosition *pos = (BSPThingPosition *)data;
     EPI_ASSERT(pos);
 
     if (BoxOnLineSide(pos->bbox, ld) != -1)
         return true;
-  
-    // This line crosses through the object. Add it to the 
+
+    // This line crosses through the object. Add it to the
     // front/back sector touchnode lists if appropriate
     // The sector containing the thing's subsector is skipped here,
     // as that is manually linked afterwards
-    
+
     if (ld->front_sector != pos->thing->subsector_->sector)
         AddSectorNode(ld->front_sector, pos->thing);
-   
+
     if (ld->back_sector && ld->back_sector != ld->front_sector && ld->back_sector != pos->thing->subsector_->sector)
         AddSectorNode(ld->back_sector, pos->thing);
-  
+
     return true;
 }
 
@@ -522,8 +522,8 @@ void SetThingPosition(MapObject *mo)
     pos.bbox[kBoundingBoxBottom] = mo->y - mo->radius_;
     pos.bbox[kBoundingBoxTop]    = mo->y + mo->radius_;
 
-    BlockmapLineIterator(pos.bbox[kBoundingBoxLeft], pos.bbox[kBoundingBoxBottom],
-        pos.bbox[kBoundingBoxRight], pos.bbox[kBoundingBoxTop], CheckSectorCallback, &pos);
+    BlockmapLineIterator(pos.bbox[kBoundingBoxLeft], pos.bbox[kBoundingBoxBottom], pos.bbox[kBoundingBoxRight],
+                         pos.bbox[kBoundingBoxTop], CheckSectorCallback, &pos);
 
     AddSectorNode(ss->sector, mo);
 

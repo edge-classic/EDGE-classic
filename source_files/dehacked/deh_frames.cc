@@ -116,7 +116,7 @@ enum FrameFlagMBF21
 };
 
 const FlagName mbf21flag_list[] = {
-    
+
     {kMBF21_SKILL5FAST, "FAST", "SKILL5FAST"},
 
     {0, nullptr, nullptr} // End sentinel
@@ -1469,13 +1469,14 @@ void frames::OutputState(char group, int cur, bool do_action)
     if (action_info[action].act_flags & kActionFlagMakeDead)
     {
         wad::Printf("    %s:%c:0:%s:MAKEDEAD,  // %s\n", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31),
-            (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL", (action == kA_PainDie) ? "A_PainDie" : "A_KeenDie");
+                    (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL",
+                    (action == kA_PainDie) ? "A_PainDie" : "A_KeenDie");
     }
 
     if (action_info[action].act_flags & kActionFlagFaceTarget)
     {
         wad::Printf("    %s:%c:0:%s:FACE_TARGET,\n", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31),
-            (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL");
+                    (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL");
     }
 
     // special handling for Mancubus attacks...
@@ -1484,11 +1485,12 @@ void frames::OutputState(char group, int cur, bool do_action)
         if ((act_flags & kActionFlagSpread) == 0)
         {
             wad::Printf("    %s:%c:0:%s:RESET_SPREADER,\n", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31),
-                (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL");
+                        (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL");
         }
 
         wad::Printf("    %s:%c:0:%s:%s,  // kA_FatAttack\n", sprites::GetSprite(st->sprite),
-                    'A' + ((int)st->frame & 31), (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL", act_name);
+                    'A' + ((int)st->frame & 31), (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL",
+                    act_name);
     }
 
     int tics = (int)st->tics;
@@ -1501,7 +1503,7 @@ void frames::OutputState(char group, int cur, bool do_action)
 
     std::string flagstring;
 
-    int  cur_f = st->mbf21_flags;
+    int cur_f = st->mbf21_flags;
 
     for (int i = 0; mbf21flag_list[i].name != nullptr; i++)
     {
@@ -1520,10 +1522,10 @@ void frames::OutputState(char group, int cur, bool do_action)
 
     if (flagstring.empty())
         wad::Printf("    %s:%c:%d:%s:%s", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31), tics,
-            (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL", act_name);
+                    (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL", act_name);
     else
         wad::Printf("    %s:%c:%d:%s:%s:%s", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31), tics,
-            (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL", act_name, flagstring.c_str());
+                    (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL", act_name, flagstring.c_str());
 
     if (action != kA_NULL && weap_act == !IS_WEAPON(group))
         return;

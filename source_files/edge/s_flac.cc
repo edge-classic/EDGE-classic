@@ -86,8 +86,8 @@ bool FLACPlayer::OpenMemory(uint8_t *data, int length)
     }
 
     if (ma_sound_init_from_data_source(&music_engine, &flac_decoder,
-                                       MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION, NULL,
-                                       &flac_stream) != MA_SUCCESS)
+                                       MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION,
+                                       NULL, &flac_stream) != MA_SUCCESS)
     {
         ma_decoder_uninit(&flac_decoder);
         LogWarning("Failed to load OGG music (corrupt ogg?)\n");

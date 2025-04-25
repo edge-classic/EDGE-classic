@@ -32,7 +32,7 @@
 constexpr uint16_t kDummyClamp             = 789;
 constexpr uint8_t  kMaximumPolygonVertices = 64;
 constexpr uint16_t kMaximumLocalVertices   = 65535;
-constexpr uint16_t kDefaultAutomapLines = kMaximumLocalVertices / 2;
+constexpr uint16_t kDefaultAutomapLines    = kMaximumLocalVertices / 2;
 
 // a single vertex to pass to the GPU
 struct RendererVertex
@@ -90,7 +90,8 @@ enum CustomTextureEnvironment
 };
 
 RendererVertex *BeginRenderUnit(GLuint shape, int max_vert, GLuint env1, GLuint tex1, GLuint env2, GLuint tex2,
-                                int pass, BlendingMode blending, RGBAColor fog_color = kRGBANoValue, float fog_density = 0);
+                                int pass, BlendingMode blending, RGBAColor fog_color = kRGBANoValue,
+                                float fog_density = 0);
 void            EndRenderUnit(int actual_vert);
 
 //--- editor settings ---

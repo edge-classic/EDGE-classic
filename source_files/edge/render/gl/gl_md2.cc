@@ -1119,7 +1119,8 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         data.image_right_ = skin_img->Right();
         data.image_top_   = skin_img->Top();
 
-        AbstractShader *shader = GetColormapShader(props, mo->info_->force_fullbright_ ? 255 : mo->state_->bright, mo->subsector_->sector);
+        AbstractShader *shader =
+            GetColormapShader(props, mo->info_->force_fullbright_ ? 255 : mo->state_->bright, mo->subsector_->sector);
         ShadeNormals(shader, &data, true);
 
         if (use_dynamic_lights && render_view_extra_light < 250)

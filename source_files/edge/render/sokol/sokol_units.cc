@@ -269,7 +269,7 @@ static void RenderFlush()
             break;
         case GL_LINES:
             num_vertices += (unit->count / 2) * 6; // thick lines are emulated as quads
-            break;                                 // quads are emulated as triangle strips, and use 6 vertices internally
+            break; // quads are emulated as triangle strips, and use 6 vertices internally
         }
     }
 

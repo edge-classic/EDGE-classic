@@ -262,7 +262,7 @@ static const DDFActionCode weapon_actions[] = {{"NOTHING", nullptr, nullptr},
 
                                                // Internal: Dehacked direct codepointer testing
                                                {"DEH_CLOSE_SHOTGUN2", A_CloseShotgun2, nullptr},
-                                               {"DEH_FIRE_CHAINGUN",  A_FireCGun, DDFStateGetJump},
+                                               {"DEH_FIRE_CHAINGUN", A_FireCGun, DDFStateGetJump},
                                                {"DEH_WEAPON_MELEE", A_WeaponMeleeAttack, DDFWStateGetDEHMelee},
                                                {"DEH_WEAPON_SOUND", A_WeaponSound, DDFStateGetDEHParams},
                                                {"DEH_WEAPON_BULLET", A_WeaponBulletAttack, DDFWStateGetDEHBullet},
@@ -874,7 +874,7 @@ static void DDFWStateGetDEHProjectile(const char *arg, State *cur_state)
         if (sscanf(args[2].c_str(), "%d", &slope) == 1 && slope != 0)
         {
             atk->slope_offset_ = tan((float)slope / 65536.0f * HMM_PI / 180.0);
-            
+
             if (slope < 0)
                 atk->slope_offset_ = -atk->slope_offset_;
         }

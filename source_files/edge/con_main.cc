@@ -131,7 +131,7 @@ int ConsoleCommandMove(char **argv, int argc)
             ConsoleMessage(kConsoleOnly, "Invalid X coordinate %g\n", x);
             return 1;
         }
-        
+
         if (BlockmapGetY(y) < 0 || BlockmapGetY(y) > blockmap_height - 1)
         {
             ConsoleMessage(kConsoleOnly, "Invalid Y coordinate %g\n", y);
@@ -185,7 +185,7 @@ int ConsoleCommandSpawn(char **argv, int argc)
         ConsoleMessage(kConsoleOnly, "Invalid X coordinate %g\n", x);
         return 1;
     }
-    
+
     if (BlockmapGetY(y) < 0 || BlockmapGetY(y) > blockmap_height - 1)
     {
         ConsoleMessage(kConsoleOnly, "Invalid Y coordinate %g\n", y);
@@ -229,10 +229,10 @@ int ConsoleCommandGodMode(char **argv, int argc)
             {
                 pl->health_ = pl->map_object_->health_ = pl->map_object_->spawn_health_;
             }
-            ConsoleMessage(kConsoleOnly,  "%s\n", language["GodModeOn"]);
+            ConsoleMessage(kConsoleOnly, "%s\n", language["GodModeOn"]);
         }
         else
-            ConsoleMessage(kConsoleOnly,  "%s\n", language["GodModeOff"]);
+            ConsoleMessage(kConsoleOnly, "%s\n", language["GodModeOff"]);
         return 0;
     }
 }
@@ -259,9 +259,9 @@ int ConsoleCommandNoClip(char **argv, int argc)
         pl->cheats_ ^= kCheatingNoClip;
 
         if (pl->cheats_ & kCheatingNoClip)
-            ConsoleMessage(kConsoleOnly,  "%s\n", language["ClipOn"]);
+            ConsoleMessage(kConsoleOnly, "%s\n", language["ClipOn"]);
         else
-            ConsoleMessage(kConsoleOnly,  "%s\n", language["ClipOff"]);
+            ConsoleMessage(kConsoleOnly, "%s\n", language["ClipOff"]);
         return 0;
     }
 }

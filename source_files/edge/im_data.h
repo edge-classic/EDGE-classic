@@ -120,10 +120,11 @@ class ImageData
     // NOTE: the image must be SQUARE (width == height).
     void EightWaySymmetry();
 
-    // Determine the bounds of the image data that actually contain 
+    // Determine the bounds of the image data that actually contain
     // non-backgroundpixels, based on the provided color
-    void DetermineRealBounds(uint16_t *bottom, uint16_t *left, uint16_t *right, uint16_t *top, RGBAColor background_color,
-      int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
+    void DetermineRealBounds(uint16_t *bottom, uint16_t *left, uint16_t *right, uint16_t *top,
+                             RGBAColor background_color, int from_x = -1, int to_x = 1000000, int from_y = -1,
+                             int to_y = 1000000);
 
     // compute the average Hue of the RGB(A) image, storing the
     // result in the 'hue' array (r, g, b).  The average intensity

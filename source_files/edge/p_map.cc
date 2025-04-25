@@ -859,10 +859,10 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
         return true;
 
     blockdist = move_check.mover->radius_;
- 
+
     if ((thing->flags_ & kMapObjectFlagSpecial) && thing->info_->pickup_width_ > 0)
-        blockdist += thing->info_->pickup_width_; // The DEHEXTRA field is called "Pickup width" but looking at Doom Retro's
-                                                  // code this appears to act as a radius
+        blockdist += thing->info_->pickup_width_; // The DEHEXTRA field is called "Pickup width" but looking at Doom
+                                                  // Retro's code this appears to act as a radius
     else
         blockdist += thing->radius_;
 
@@ -933,13 +933,14 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
         {
             if (move_check.z > thing->z + thing->info_->projectile_pass_height_)
                 return true; // overhead
-            else if (move_check.z + move_check.mover->height_ < thing->z + (thing->height_ - thing->info_->projectile_pass_height_))
+            else if (move_check.z + move_check.mover->height_ <
+                     thing->z + (thing->height_ - thing->info_->projectile_pass_height_))
                 return true; // underneath
         }
         else
         {
             if (move_check.z > thing->z + thing->height_)
-                return true;  // overhead
+                return true; // overhead
             else if (move_check.z + move_check.mover->height_ < thing->z)
                 return true; // underneath
         }

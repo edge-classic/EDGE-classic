@@ -342,7 +342,7 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing, const TeleportDefi
             {
                 fog->target_visibility_ = fog->visibility_ = 0.0f;
                 // TODO: Language entry - Dasho
-                ConsoleMessage(kConsoleHUDCenter,  "Teleporting...");
+                ConsoleMessage(kConsoleHUDCenter, "Teleporting...");
             }
         }
     }

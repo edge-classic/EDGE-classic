@@ -52,9 +52,9 @@ static constexpr int truetype_scaling_bitmap_sizes[3] = {512, 1024, 2048};
 
 Font::Font(FontDefinition *definition) : definition_(definition)
 {
-    font_image_      = nullptr;
-    truetype_info_   = nullptr;
-    truetype_buffer_ = nullptr;
+    font_image_             = nullptr;
+    truetype_info_          = nullptr;
+    truetype_buffer_        = nullptr;
     individual_char_widths_ = nullptr;
     individual_char_ratios_ = nullptr;
     EPI_CLEAR_MEMORY(truetype_atlas_, stbtt_pack_range *, 3);
@@ -341,9 +341,9 @@ void Font::LoadFontImage()
         individual_char_widths_ = new float[256];
         individual_char_ratios_ = new float[256];
         ImageData *char_data    = ReadAsEpiBlock((Image *)font_image_);
-        uint16_t real_left = 0;
-        uint16_t real_right = 0;
-        RGBAColor background = kRGBATransparent;
+        uint16_t   real_left    = 0;
+        uint16_t   real_right   = 0;
+        RGBAColor  background   = kRGBATransparent;
         // Assumes that first pixel is part of the background; for a spritesheet font this is almost certainly
         // the case
         if (char_data->depth_ == 3)
@@ -352,8 +352,9 @@ void Font::LoadFontImage()
         {
             int px = i % 16;
             int py = 15 - i / 16;
-            char_data->DetermineRealBounds(nullptr, &real_left, &real_right, nullptr, background,
-                px * char_width, py * char_height, px * char_width + char_width, py * char_height + char_height);
+            char_data->DetermineRealBounds(nullptr, &real_left, &real_right, nullptr, background, px * char_width,
+                                           py * char_height, px * char_width + char_width,
+                                           py * char_height + char_height);
             individual_char_widths_[i] = font_image_->scale_x_ * (real_right - real_left);
             if (definition_->default_size_ > 0.0)
                 individual_char_widths_[i] *= (definition_->default_size_ / char_width);
@@ -501,11 +502,11 @@ void Font::LoadFontTTF()
 
             delete[] temp_bitmap;
             delete[] font_bitmap;
-            float x               = 0.0f;
-            float y               = 0.0f;
-            float ascent          = 0.0f;
-            float descent         = 0.0f;
-            float linegap         = 0.0f;
+            float x       = 0.0f;
+            float y       = 0.0f;
+            float ascent  = 0.0f;
+            float descent = 0.0f;
+            float linegap = 0.0f;
             stbtt_GetPackedQuad(truetype_atlas_[i]->chardata_for_range, bitmap_size, bitmap_size, (uint8_t)ch, &x, &y,
                                 &ref.character_quad[i], 0);
             stbtt_GetScaledFontVMetrics(truetype_buffer_, 0, truetype_scaling_font_sizes[i], &ascent, &descent,
@@ -517,9 +518,8 @@ void Font::LoadFontTTF()
             truetype_character_width_[i] = ref.width[i];
             truetype_character_height_[i] =
                 (ascent - descent) * (definition_->default_size_ / truetype_scaling_font_sizes[i]);
-            ref.y_shift[i] =
-                (truetype_character_height_[i] - ref.height[i]) +
-                (ref.character_quad[i].y1 * (definition_->default_size_ / truetype_scaling_font_sizes[i]));
+            ref.y_shift[i] = (truetype_character_height_[i] - ref.height[i]) +
+                             (ref.character_quad[i].y1 * (definition_->default_size_ / truetype_scaling_font_sizes[i]));
             truetype_reference_yshift_[i] = ref.y_shift[i];
             truetype_reference_height_[i] = ref.height[i];
         }
@@ -636,8 +636,8 @@ float Font::CharWidth(char ch)
             TrueTypeCharacter character;
             for (int i = 0; i < 3; i++)
             {
-                float x                     = 0.0f;
-                float y                     = 0.0f;
+                float x = 0.0f;
+                float y = 0.0f;
                 stbtt_GetPackedQuad(truetype_atlas_[i]->chardata_for_range, truetype_scaling_bitmap_sizes[i],
                                     truetype_scaling_bitmap_sizes[i], (uint8_t)ch, &x, &y, &character.character_quad[i],
                                     0);
@@ -722,8 +722,8 @@ int Font::GetGlyphIndex(char ch)
         TrueTypeCharacter character;
         for (int i = 0; i < 3; i++)
         {
-            float x                     = 0.0f;
-            float y                     = 0.0f;
+            float x = 0.0f;
+            float y = 0.0f;
             stbtt_GetPackedQuad(truetype_atlas_[i]->chardata_for_range, truetype_scaling_bitmap_sizes[i],
                                 truetype_scaling_bitmap_sizes[i], (uint8_t)ch, &x, &y, &character.character_quad[i], 0);
             if (ch == ' ')

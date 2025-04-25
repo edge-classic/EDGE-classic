@@ -183,26 +183,27 @@ bool DoMove(MapObject *actor, bool path)
     float tryx;
     float tryy;
 
-    float fric = -1.0f;
-    float factor = -1.0f;
+    float   fric   = -1.0f;
+    float   factor = -1.0f;
     Sector *sector = actor->subsector_->sector;
-    float speed = actor->speed_;
+    float   speed  = actor->speed_;
 
     for (TouchNode *tn = actor->touch_sectors_; tn; tn = tn->map_object_next)
     {
         if (tn->sector)
         {
-            float sec_fh = (tn->sector->floor_vertex_slope && sector == tn->sector) ? actor->floor_z_ : tn->sector->floor_height;
+            float sec_fh =
+                (tn->sector->floor_vertex_slope && sector == tn->sector) ? actor->floor_z_ : tn->sector->floor_height;
             if (!AlmostEquals(actor->z, sec_fh))
                 continue;
             if (fric < 0.0f || tn->sector->properties.friction < fric)
             {
-                fric = tn->sector->properties.friction;
+                fric   = tn->sector->properties.friction;
                 factor = tn->sector->properties.movefactor;
             }
         }
     }
-   
+
     // Dasho: This section deviates from Boom/MBF a bit since we can't really
     // use momentum or the delta between x/y and old_x/y here. Results look pretty
     // similar for high friction areas, but I've afforded a little more traction

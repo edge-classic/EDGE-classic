@@ -1397,14 +1397,15 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
         if (tmp_img->depth_ == 3)
             background = epi::MakeRGBA(tmp_img->pixels_[0], tmp_img->pixels_[1], tmp_img->pixels_[2]);
 
-        tmp_img->DetermineRealBounds(&rim->real_bottom_, &rim->real_left_, &rim->real_right_, &rim->real_top_, background);
+        tmp_img->DetermineRealBounds(&rim->real_bottom_, &rim->real_left_, &rim->real_right_, &rim->real_top_,
+                                     background);
     }
     else
     {
-        rim->real_left_ = 0;
+        rim->real_left_   = 0;
         rim->real_bottom_ = 0;
-        rim->real_top_ = rim->actual_height_;
-        rim->real_right_ = rim->actual_width_;
+        rim->real_top_    = rim->actual_height_;
+        rim->real_right_  = rim->actual_width_;
     }
 
     GLuint tex_id =

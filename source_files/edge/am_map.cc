@@ -188,9 +188,9 @@ static float map_dy          = 0.0f;
 
 struct AutomapKey
 {
-    float     x;
-    float     y;
-    int       type;
+    float x;
+    float y;
+    int   type;
 };
 
 static std::vector<AutomapKey> automap_keys;
@@ -817,8 +817,9 @@ static void DrawKeys()
                 const Image *img = GetOtherSprite(idlestate->sprite, idlestate->frame, &flip);
 
                 if (epi::StringCaseCompareASCII("DUMMY_SPRITE", img->name_) != 0)
-                    HUDStretchImageNoOffset(key.x, key.y, 2 * map_scale * 
-                        ((float)img->actual_width_/img->actual_height_), 2 * map_scale, img, 0, 0);
+                    HUDStretchImageNoOffset(key.x, key.y,
+                                            2 * map_scale * ((float)img->actual_width_ / img->actual_height_),
+                                            2 * map_scale, img, 0, 0);
             }
         }
     }
@@ -989,40 +990,47 @@ static void AddWall(const Line *line)
                     {
                         l->color = kRGBAPurple;
                         DrawMLineDoor(l); // purple
-                        if (automap_keydoor_text.d_ > 0) 
-                            automap_keys.push_back({ midx, midy, (int)kDoorKeyStrictlyAllKeys });
+                        if (automap_keydoor_text.d_ > 0)
+                            automap_keys.push_back({midx, midy, (int)kDoorKeyStrictlyAllKeys});
                     }
                     else if (line->special->keys_ & (kDoorKeyBlueSkull | kDoorKeyBlueCard))
                     {
                         l->color = kRGBABlue;
                         DrawMLineDoor(l); // blue
-                        if (automap_keydoor_text.d_ > 0) 
-                            automap_keys.push_back({ midx, midy, (int)(line->special->keys_ & 
-                                kDoorKeyBlueSkull ? kDoorKeyBlueSkull : kDoorKeyBlueCard) });
+                        if (automap_keydoor_text.d_ > 0)
+                            automap_keys.push_back(
+                                {midx, midy,
+                                 (int)(line->special->keys_ & kDoorKeyBlueSkull ? kDoorKeyBlueSkull
+                                                                                : kDoorKeyBlueCard)});
                     }
                     else if (line->special->keys_ & (kDoorKeyYellowSkull | kDoorKeyYellowCard))
                     {
                         l->color = kRGBAYellow;
                         DrawMLineDoor(l); // yellow
-                        if (automap_keydoor_text.d_ > 0) 
-                            automap_keys.push_back({ midx, midy, (int)(line->special->keys_ & 
-                                kDoorKeyYellowSkull ? kDoorKeyYellowSkull : kDoorKeyYellowCard) });
+                        if (automap_keydoor_text.d_ > 0)
+                            automap_keys.push_back(
+                                {midx, midy,
+                                 (int)(line->special->keys_ & kDoorKeyYellowSkull ? kDoorKeyYellowSkull
+                                                                                  : kDoorKeyYellowCard)});
                     }
                     else if (line->special->keys_ & (kDoorKeyRedSkull | kDoorKeyRedCard))
                     {
                         l->color = kRGBARed;
                         DrawMLineDoor(l); // red
-                        if (automap_keydoor_text.d_ > 0) 
-                            automap_keys.push_back({ midx, midy, (int)(line->special->keys_ & 
-                                kDoorKeyRedSkull ? kDoorKeyRedSkull : kDoorKeyRedCard) });
+                        if (automap_keydoor_text.d_ > 0)
+                            automap_keys.push_back(
+                                {midx, midy,
+                                 (int)(line->special->keys_ & kDoorKeyRedSkull ? kDoorKeyRedSkull : kDoorKeyRedCard)});
                     }
                     else if (line->special->keys_ & (kDoorKeyGreenSkull | kDoorKeyGreenCard))
                     {
                         l->color = kRGBAGreen;
                         DrawMLineDoor(l); // green
-                        if (automap_keydoor_text.d_ > 0) 
-                            automap_keys.push_back({ midx, midy, (int)(line->special->keys_ & 
-                                kDoorKeyGreenSkull ? kDoorKeyGreenSkull : kDoorKeyGreenCard) });
+                        if (automap_keydoor_text.d_ > 0)
+                            automap_keys.push_back(
+                                {midx, midy,
+                                 (int)(line->special->keys_ & kDoorKeyGreenSkull ? kDoorKeyGreenSkull
+                                                                                 : kDoorKeyGreenCard)});
                     }
                     else
                     {

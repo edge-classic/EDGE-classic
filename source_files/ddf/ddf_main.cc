@@ -1184,8 +1184,9 @@ int DDFMainLookupDirector(const MapObjectDefinition *info, const char *ref)
 
     std::string director(ref, len);
 
-    int state  = DDFStateFindLabel(info->state_grp_, director.c_str(), true);
-    if (state == 0) return state;
+    int state = DDFStateFindLabel(info->state_grp_, director.c_str(), true);
+    if (state == 0)
+        return state;
     int offset = p ? HMM_MAX(0, atoi(p + 1) - 1) : 0;
 
     // FIXME: check for overflow
@@ -1779,8 +1780,8 @@ void DamageClass::Copy(const DamageClass &src)
         damage_if_  = new Benefit;
         *damage_if_ = *src.damage_if_;
     }
-    only_affects_      = src.only_affects_;
-    all_players_       = src.all_players_;
+    only_affects_ = src.only_affects_;
+    all_players_  = src.all_players_;
 }
 
 //

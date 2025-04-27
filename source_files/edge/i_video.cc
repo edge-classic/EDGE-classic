@@ -516,12 +516,7 @@ void ShutdownGraphics(void)
         program_window = nullptr;
     }
 
-    if (SDL_WasInit(SDL_INIT_EVERYTHING))
-    {
-        DeterminePixelAspect();
-
-        SDL_Quit();
-    }
+    SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
 //--- editor settings ---

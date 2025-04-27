@@ -166,10 +166,13 @@ class GLRenderBackend : public RenderBackend
 
     void Flush(int32_t commands, int32_t vertices)
     {
+        EPI_UNUSED(commands);
+        EPI_UNUSED(vertices);
     }
 
     void GetFrameStats(FrameStats &stats)
     {
+        EPI_UNUSED(stats);
     }
 
     void OnContextSwitch()

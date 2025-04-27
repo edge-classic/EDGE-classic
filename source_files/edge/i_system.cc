@@ -190,6 +190,8 @@ void SystemShutdown(void)
         fclose(debug_file);
         debug_file = nullptr;
     }
+
+    SDL_Quit();
 }
 
 //--- editor settings ---

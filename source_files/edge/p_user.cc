@@ -942,7 +942,7 @@ bool PlayerThink(Player *player)
         if (player->map_object_->subsector_->sector->sound_reverb)
         {
             sector_reverb = true;
-            player->map_object_->subsector_->sector->sound_reverb->ApplyReverb(&reverb_node.reverb);
+            player->map_object_->subsector_->sector->sound_reverb->ApplyReverb(&reverb_node);
         }
         else if (dynamic_reverb.d_)
         {
@@ -977,30 +977,34 @@ bool PlayerThink(Player *player)
                 outdoor_reverb = true;
                 ma_delay_node_set_decay(&reverb_delay_node, room_check * 0.00004316f);
                 if (dynamic_reverb.d_ == 1) // Headphones
-                    ddf::ReverbDefinition::kOutdoorWeak.ApplyReverb(&reverb_node.reverb);
+                    ddf::ReverbDefinition::kOutdoorWeak.ApplyReverb(&reverb_node);
                 else                        // Speakers
-                    ddf::ReverbDefinition::kOutdoorStrong.ApplyReverb(&reverb_node.reverb);
+                    ddf::ReverbDefinition::kOutdoorStrong.ApplyReverb(&reverb_node);
                 if (room_check < 700)
                 {
+                    float new_room_size;
                     if (room_check > 350)
-                        verblib_set_room_size(&reverb_node.reverb, 0.3f);
+                        new_room_size = 0.3f;
                     else
-                        verblib_set_room_size(&reverb_node.reverb, 0.2f);
+                        new_room_size = 0.2f;
+                    ma_freeverb_update_verb(&reverb_node, &new_room_size, NULL, NULL, NULL, NULL, NULL);
                 }
             }
             else
             {
                 outdoor_reverb = false;
                 if (dynamic_reverb.d_ == 1) // Headphones
-                    ddf::ReverbDefinition::kIndoorWeak.ApplyReverb(&reverb_node.reverb);
+                    ddf::ReverbDefinition::kIndoorWeak.ApplyReverb(&reverb_node);
                 else                        // Speakers
-                    ddf::ReverbDefinition::kIndoorStrong.ApplyReverb(&reverb_node.reverb);
+                    ddf::ReverbDefinition::kIndoorStrong.ApplyReverb(&reverb_node);
                 if (room_check < 700)
                 {
+                    float new_room_size;
                     if (room_check > 350)
-                        verblib_set_room_size(&reverb_node.reverb, 0.2f);
+                        new_room_size = 0.2f;
                     else
-                        verblib_set_room_size(&reverb_node.reverb, 0.1f);
+                        new_room_size = 0.1f;
+                    ma_freeverb_update_verb(&reverb_node, &new_room_size, NULL, NULL, NULL, NULL, NULL);
                 }
             }
         }

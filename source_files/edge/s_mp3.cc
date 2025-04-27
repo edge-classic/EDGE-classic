@@ -83,7 +83,7 @@ bool MP3Player::OpenMemory(const uint8_t *data, int length)
         return false;
     }
 
-    if (ma_sound_init_from_data_source(&music_engine, &mp3_decoder,
+    if (ma_sound_init_from_data_source(&sound_engine, &mp3_decoder,
                                        MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION,
                                        NULL, &mp3_stream) != MA_SUCCESS)
     {
@@ -171,7 +171,7 @@ void MP3Player::Ticker()
 {
     if (status_ == kPlaying)
     {
-        ma_engine_set_volume(&music_engine, music_volume.f_);
+        ma_sound_set_volume(&mp3_stream, music_volume.f_);
 
         if (pc_speaker_mode)
             Stop();

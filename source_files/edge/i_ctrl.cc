@@ -776,15 +776,19 @@ void ControlGetEvents(void)
 
 void ShutdownControl(void)
 {
-    if (gamepad_info)
+    if (SDL_WasInit(SDL_INIT_GAMECONTROLLER))
     {
-        SDL_GameControllerClose(gamepad_info);
-        gamepad_info = nullptr;
-    }
-    if (joystick_info)
-    {
-        SDL_JoystickClose(joystick_info);
-        joystick_info = nullptr;
+        if (gamepad_info)
+        {
+            SDL_GameControllerClose(gamepad_info);
+            gamepad_info = nullptr;
+        }
+        if (joystick_info)
+        {
+            SDL_JoystickClose(joystick_info);
+            joystick_info = nullptr;
+        }
+        SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
     }
 }
 

@@ -569,7 +569,7 @@ void RenderCurrentUnits(void)
 
                 const RendererVertex *V = local_verts + unit->first;
 
-                HMM_Vec2 aa_radius = {2.0f, 2.0f};
+                HMM_Vec2 aa_radius = {{2.0f, 2.0f}};
 
                 float line_width       = HMM_MAX(1.0f, state_width) + aa_radius.X;
                 float extension_length = aa_radius.Y;
@@ -585,21 +585,21 @@ void RenderCurrentUnits(void)
                     uint8_t blue  = epi::GetRGBABlue(src_v0->rgba);
                     uint8_t alpha = epi::GetRGBAAlpha(src_v0->rgba);
 
-                    HMM_Vec2 v0 = {src_v0->position[0], src_v0->position[1]};
-                    HMM_Vec2 v1 = {src_v1->position[0], src_v1->position[1]};
+                    HMM_Vec2 v0 = {{src_v0->position[0], src_v0->position[1]}};
+                    HMM_Vec2 v1 = {{src_v1->position[0], src_v1->position[1]}};
 
                     HMM_Vec2 line_vector = HMM_SubV2(v1, v0);
                     float    line_length = HMM_LenV2(line_vector) + 2.0f * extension_length;
                     HMM_Vec2 dir         = HMM_NormV2(line_vector);
-                    HMM_Vec2 normal      = {-dir.Y * line_width * 0.5f, dir.X * line_width * 0.5f};
+                    HMM_Vec2 normal      = {{-dir.Y * line_width * 0.5f, dir.X * line_width * 0.5f}};
 
-                    HMM_Vec2 extension = HMM_MulV2({extension_length, extension_length}, dir);
+                    HMM_Vec2 extension = HMM_MulV2({{extension_length, extension_length}}, dir);
 
-                    HMM_Vec2 a1 = {v0.X - normal.X - extension.X, v0.Y - normal.Y - extension.Y};
-                    HMM_Vec2 a0 = {v0.X + normal.X - extension.X, v0.Y + normal.Y - extension.Y};
+                    HMM_Vec2 a1 = {{v0.X - normal.X - extension.X, v0.Y - normal.Y - extension.Y}};
+                    HMM_Vec2 a0 = {{v0.X + normal.X - extension.X, v0.Y + normal.Y - extension.Y}};
 
-                    HMM_Vec2 b1 = {v1.X - normal.X + extension.X, v1.Y - normal.Y + extension.Y};
-                    HMM_Vec2 b0 = {v1.X + normal.X + extension.X, v1.Y + normal.Y + extension.Y};
+                    HMM_Vec2 b1 = {{v1.X - normal.X + extension.X, v1.Y - normal.Y + extension.Y}};
+                    HMM_Vec2 b0 = {{v1.X + normal.X + extension.X, v1.Y + normal.Y + extension.Y}};
 
                     float factor = 0.5f;
 

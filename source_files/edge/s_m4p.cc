@@ -481,7 +481,7 @@ bool M4PPlayer::OpenMemory(const uint8_t *data, int length)
         return false;
     }
 
-    if (ma_sound_init_from_data_source(&music_engine, &m4p_decoder,
+    if (ma_sound_init_from_data_source(&sound_engine, &m4p_decoder,
                                        MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_UNKNOWN_LENGTH | MA_SOUND_FLAG_STREAM |
                                            MA_SOUND_FLAG_NO_SPATIALIZATION,
                                        NULL, &m4p_stream) != MA_SUCCESS)
@@ -566,8 +566,7 @@ void M4PPlayer::Ticker()
 {
     if (status_ == kPlaying)
     {
-        ma_engine_set_volume(&music_engine, music_volume.f_);
-
+        ma_sound_set_volume(&m4p_stream, music_volume.f_);
         if (pc_speaker_mode)
             Stop();
         if (ma_sound_at_end(&m4p_stream)) // This should only be true if finished and not set to looping

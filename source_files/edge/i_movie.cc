@@ -69,7 +69,7 @@ static bool MovieSetupAudioStream(int rate)
         return false;
     }
     ma_pcm_rb_set_sample_rate(&movie_ring_buffer, rate);
-    if (ma_sound_init_from_data_source(&music_engine, &movie_ring_buffer,
+    if (ma_sound_init_from_data_source(&sound_engine, &movie_ring_buffer,
                                        MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_NO_SPATIALIZATION, NULL,
                                        &movie_sound_buffer) != MA_SUCCESS)
     {
@@ -83,7 +83,7 @@ static bool MovieSetupAudioStream(int rate)
     ma_sound_set_looping(&movie_sound_buffer, MA_TRUE);
     ma_sound_start(&movie_sound_buffer);
     PauseMusic();
-    ma_engine_set_volume(&music_engine, music_volume.f_);
+    ma_sound_set_volume(&movie_sound_buffer, music_volume.f_);
     return true;
 }
 
@@ -319,7 +319,6 @@ static void EndMovie()
     ma_sound_stop(&movie_sound_buffer);
     ma_sound_uninit(&movie_sound_buffer);
     ma_pcm_rb_uninit(&movie_ring_buffer);
-    ma_engine_set_volume(&music_engine, music_volume.f_);
     ResumeMusic();
 }
 

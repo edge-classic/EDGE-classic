@@ -797,7 +797,7 @@ class MIDIPlayer : public AbstractMusicPlayer
             return false;
         }
 
-        if (ma_sound_init_from_data_source(&music_engine, &midi_decoder,
+        if (ma_sound_init_from_data_source(&sound_engine, &midi_decoder,
                                            MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_STREAM |
                                                MA_SOUND_FLAG_UNKNOWN_LENGTH | MA_SOUND_FLAG_NO_SPATIALIZATION,
                                            NULL, &midi_stream) != MA_SUCCESS)
@@ -880,16 +880,9 @@ class MIDIPlayer : public AbstractMusicPlayer
 
     void Ticker(void)
     {
-        if (fluidlite_gain.CheckModified())
-        {
-            fluidlite_gain.f_ = HMM_Clamp(0.0, fluidlite_gain.f_, 2.0f);
-            fluidlite_gain    = fluidlite_gain.f_;
-            fluid_synth_set_gain(edge_fluid, fluidlite_gain.f_);
-        }
-
         if (status_ == kPlaying)
         {
-            ma_engine_set_volume(&music_engine, music_volume.f_);
+            ma_sound_set_volume(&midi_stream, music_volume.f_);
 
             if (pc_speaker_mode)
                 Stop();

@@ -85,7 +85,7 @@ bool FLACPlayer::OpenMemory(uint8_t *data, int length)
         return false;
     }
 
-    if (ma_sound_init_from_data_source(&music_engine, &flac_decoder,
+    if (ma_sound_init_from_data_source(&sound_engine, &flac_decoder,
                                        MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION,
                                        NULL, &flac_stream) != MA_SUCCESS)
     {
@@ -173,7 +173,7 @@ void FLACPlayer::Ticker()
 {
     if (status_ == kPlaying)
     {
-        ma_engine_set_volume(&music_engine, music_volume.f_);
+        ma_sound_set_volume(&flac_stream, music_volume.f_);
 
         if (pc_speaker_mode)
             Stop();

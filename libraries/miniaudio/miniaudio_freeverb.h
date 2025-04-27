@@ -31,10 +31,19 @@ typedef struct
 {
     ma_node_base baseNode;
     verblib reverb;
+    ma_atomic_float  roomSize;
+    ma_atomic_float  damping;
+    ma_atomic_float  width;
+    ma_atomic_float  wetVolume;
+    ma_atomic_float  dryVolume;
+    ma_atomic_float  mode;
+    ma_atomic_float  gain;
+    ma_atomic_bool32 pending_change;
 } ma_freeverb_node;
 
 MA_API ma_result ma_freeverb_node_init(ma_node_graph* pNodeGraph, const ma_freeverb_node_config* pConfig, const ma_allocation_callbacks* pAllocationCallbacks, ma_freeverb_node* pReverbNode);
 MA_API void ma_freeverb_node_uninit(ma_freeverb_node* pReverbNode, const ma_allocation_callbacks* pAllocationCallbacks);
+MA_API void ma_freeverb_update_verb(ma_freeverb_node* pReverbNode, const float *room_size, const float *damping, const float *wet, const float *dry, const float *width, const float *gain);
 
 #ifdef __cplusplus
 }
@@ -64,12 +73,23 @@ MA_API ma_freeverb_node_config ma_freeverb_node_config_init(ma_uint32 channels, 
     return config;
 }
 
-
 static void ma_freeverb_node_process_pcm_frames(ma_node* pNode, const float** ppFramesIn, ma_uint32* pFrameCountIn, float** ppFramesOut, ma_uint32* pFrameCountOut)
 {
     ma_freeverb_node* pReverbNode = (ma_freeverb_node*)pNode;
 
     (void)pFrameCountIn;
+
+    if (ma_atomic_bool32_get(&pReverbNode->pending_change) == MA_TRUE)
+    {
+        verblib *verb = &pReverbNode->reverb;
+        verblib_set_room_size(verb, ma_atomic_float_get(&pReverbNode->roomSize));
+        verblib_set_damping(verb, ma_atomic_float_get(&pReverbNode->damping));
+        verblib_set_wet(verb, ma_atomic_float_get(&pReverbNode->wetVolume));
+        verblib_set_dry(verb, ma_atomic_float_get(&pReverbNode->dryVolume));
+        verblib_set_width(verb, ma_atomic_float_get(&pReverbNode->width));
+        verblib_set_gain(verb, ma_atomic_float_get(&pReverbNode->gain));
+        ma_atomic_bool32_set(&pReverbNode->pending_change, MA_FALSE);
+    }
 
     verblib_process(&pReverbNode->reverb, ppFramesIn[0], ppFramesOut[0], *pFrameCountOut);
 }
@@ -112,6 +132,15 @@ MA_API ma_result ma_freeverb_node_init(ma_node_graph* pNodeGraph, const ma_freev
         return result;
     }
 
+    ma_atomic_float_set(&pReverbNode->damping, pConfig->damping);
+    ma_atomic_float_set(&pReverbNode->dryVolume, pConfig->dryVolume);
+    ma_atomic_float_set(&pReverbNode->mode, pConfig->mode);
+    ma_atomic_float_set(&pReverbNode->gain, verblib_fixedgain);
+    ma_atomic_float_set(&pReverbNode->width, pConfig->width);
+    ma_atomic_float_set(&pReverbNode->roomSize, pConfig->roomSize);
+    ma_atomic_float_set(&pReverbNode->wetVolume, pConfig->wetVolume);
+    ma_atomic_bool32_set(&pReverbNode->pending_change, MA_FALSE);
+
     return MA_SUCCESS;
 }
 
@@ -119,6 +148,27 @@ MA_API void ma_freeverb_node_uninit(ma_freeverb_node* pReverbNode, const ma_allo
 {
     /* The base node is always uninitialized first. */
     ma_node_uninit(pReverbNode, pAllocationCallbacks);
+}
+
+MA_API void ma_freeverb_update_verb(ma_freeverb_node* pReverbNode, const float *room_size, const float *damping, const float *wet, const float *dry, const float *width, const float *gain)
+{
+    if (pReverbNode == NULL)
+        return;
+   
+    if (room_size != NULL)
+        ma_atomic_float_set(&pReverbNode->roomSize, *room_size);
+    if (damping != NULL)
+        ma_atomic_float_set(&pReverbNode->damping, *damping);
+    if (wet != NULL)
+        ma_atomic_float_set(&pReverbNode->wetVolume, *wet);
+    if (dry != NULL)
+        ma_atomic_float_set(&pReverbNode->dryVolume, *dry);
+    if (width != NULL)
+        ma_atomic_float_set(&pReverbNode->width, *width);
+    if (gain != NULL)
+        ma_atomic_float_set(&pReverbNode->gain, *gain);
+
+    ma_atomic_bool32_set(&pReverbNode->pending_change, MA_TRUE);
 }
 
 #ifdef __cplusplus

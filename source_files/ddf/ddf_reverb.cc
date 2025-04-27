@@ -147,14 +147,10 @@ void ReverbDefinition::CopyDetail(const ReverbDefinition &src)
     reverb_gain_   = src.reverb_gain_;
 }
 
-void ReverbDefinition::ApplyReverb(verblib *reverb) const
+void ReverbDefinition::ApplyReverb(ma_freeverb_node *reverb) const
 {
-    verblib_set_room_size(reverb, room_size_);
-    verblib_set_damping(reverb, damping_level_);
-    verblib_set_wet(reverb, wet_level_);
-    verblib_set_dry(reverb, dry_level_);
-    verblib_set_width(reverb, reverb_width_);
-    verblib_set_gain(reverb, reverb_gain_);
+    ma_freeverb_update_verb(reverb, &room_size_, &damping_level_, &wet_level_,
+        &dry_level_, &reverb_width_, &reverb_gain_);
 }
 
 void ReverbDefinition::Default()

@@ -23,7 +23,8 @@
 #include "ddf_types.h"
 #include "epi.h"
 #include "epi_str_hash.h"
-#include "verblib.h"
+#include "miniaudio.h"
+#include "miniaudio_freeverb.h"
 
 extern epi::StringHash DDFCreateStringHash(std::string_view name);
 #ifdef __GNUC__
@@ -42,7 +43,7 @@ class ReverbDefinition final
 
     void                            Default(void);
     void                            CopyDetail(const ReverbDefinition &src);
-    void                            ApplyReverb(verblib *reverb) const;
+    void                            ApplyReverb(ma_freeverb_node *reverb) const;
     static void                     ReadDDF(const std::string &data);
     static inline ReverbDefinition *Lookup(std::string_view refname)
     {

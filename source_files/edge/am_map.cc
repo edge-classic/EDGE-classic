@@ -245,9 +245,9 @@ static void DrawAllLines()
                     current_glvert = BeginRenderUnit(GL_LINES, kMaximumLineVerts, GL_MODULATE, 0,
                                                      (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingAlpha);
                 }
-                current_glvert->position = {points->X, points->Y, 0};
+                current_glvert->position = {{points->X, points->Y, 0}};
                 current_glvert++->rgba   = col;
-                current_glvert->position = {points->Z, points->W, 0};
+                current_glvert->position = {{points->Z, points->W, 0}};
                 current_glvert++->rgba   = col;
                 current_vert_count += 2;
             }
@@ -689,15 +689,15 @@ static void DrawMLineDoor(AutomapLine *ml)
 }
 
 static HMM_Vec4 player_dagger[] = {
-    {{-0.75f, 0.0f, 0.0f, 0.0f}},                                        // center line
+    {{{{{-0.75f, 0.0f, 0.0f}}}, 0.0f}},                                              // center line
 
-    {{-0.75f, 0.125f, 1.0f, 0.0f}},                                      // blade
-    {{-0.75f, -0.125f, 1.0f, 0.0f}},
+    {{{{{-0.75f, 0.125f, 1.0f}}}, 0.0f}},                                            // blade
+    {{{{{-0.75f, -0.125f, 1.0f}}}, 0.0f}},
 
-    {{-0.75, -0.25, -0.75, 0.25}},                                       // crosspiece
-    {{-0.875, -0.25, -0.875, 0.25}},  {{-0.875, -0.25, -0.75, -0.25}},   // crosspiece connectors
-    {{-0.875, 0.25, -0.75, 0.25}},    {{-1.125, 0.125, -1.125, -0.125}}, // pommel
-    {{-1.125, 0.125, -0.875, 0.125}}, {{-1.125, -0.125, -0.875, -0.125}}};
+    {{{{{-0.75, -0.25, -0.75}}}, 0.25}},                                             // crosspiece
+    {{{{{-0.875, -0.25, -0.875}}}, 0.25}},  {{{{{-0.875, -0.25, -0.75}}}, -0.25}},   // crosspiece connectors
+    {{{{{-0.875, 0.25, -0.75}}}, 0.25}},    {{{{{-1.125, 0.125, -1.125}}}, -0.125}}, // pommel
+    {{{{{-1.125, 0.125, -0.875}}}, 0.125}}, {{{{{-1.125, -0.125, -0.875}}}, -0.125}}};
 
 static constexpr uint8_t kAutomapPlayerDaggerLines = (sizeof(player_dagger) / sizeof(HMM_Vec4));
 
@@ -1168,46 +1168,46 @@ static void DrawObjectBounds(MapObject *mo, RGBAColor rgb)
 // A line drawing of the player pointing right, starting from the
 // middle.
 
-static HMM_Vec4 player_arrow[] = {{{-0.875f, 0.0f, 1.0f, 0.0f}},     // -----
+static HMM_Vec4 player_arrow[] = {{{{{{-0.875f, 0.0f, 1.0f}}}, 0.0f}},     // -----
 
-                                  {{1.0f, 0.0f, 0.5f, 0.25f}},       // ----->
-                                  {{1.0f, 0.0f, 0.5f, -0.25f}},
+                                  {{{{{1.0f, 0.0f, 0.5f}}}, 0.25f}},       // ----->
+                                  {{{{{1.0f, 0.0f, 0.5f}}}, -0.25f}},
 
-                                  {{-0.875f, 0.0f, -1.125f, 0.25f}}, // >---->
-                                  {{-0.875f, 0.0f, -1.125f, -0.25f}},
+                                  {{{{{-0.875f, 0.0f, -1.125f}}}, 0.25f}}, // >---->
+                                  {{{{{-0.875f, 0.0f, -1.125f}}}, -0.25f}},
 
-                                  {{-0.625f, 0.0f, -0.875f, 0.25f}}, // >>--->
-                                  {{-0.625f, 0.0f, -0.875f, -0.25f}}};
+                                  {{{{{-0.625f, 0.0f, -0.875f}}}, 0.25f}}, // >>--->
+                                  {{{{{-0.625f, 0.0f, -0.875f}}}, -0.25f}}};
 
 static constexpr uint8_t kAutomapPlayerArrowLines = (sizeof(player_arrow) / sizeof(HMM_Vec4));
 
-static HMM_Vec4 cheat_player_arrow[] = {{{-0.875f, 0.0f, 1.0f, 0.0f}},      // -----
+static HMM_Vec4 cheat_player_arrow[] = {{{{{{-0.875f, 0.0f, 1.0f}}}, 0.0f}},      // -----
 
-                                        {{1.0f, 0.0f, 0.5f, 0.167f}},       // ----->
-                                        {{1.0f, 0.0f, 0.5f, -0.167f}},
+                                        {{{{{1.0f, 0.0f, 0.5f}}}, 0.167f}},       // ----->
+                                        {{{{{1.0f, 0.0f, 0.5f}}}, -0.167f}},
 
-                                        {{-0.875f, 0.0f, -1.125f, 0.167f}}, // >----->
-                                        {{-0.875f, 0.0f, -1.125f, -0.167f}},
+                                        {{{{{-0.875f, 0.0f, -1.125f}}}, 0.167f}}, // >----->
+                                        {{{{{-0.875f, 0.0f, -1.125f}}}, -0.167f}},
 
-                                        {{-0.625f, 0.0f, -0.875f, 0.167f}}, // >>----->
-                                        {{-0.625f, 0.0f, -0.875f, -0.167f}},
+                                        {{{{{-0.625f, 0.0f, -0.875f}}}, 0.167f}}, // >>----->
+                                        {{{{{-0.625f, 0.0f, -0.875f}}}, -0.167f}},
 
-                                        {{-0.5f, 0.0f, -0.5f, -0.167f}},    // >>-d--->
-                                        {{-0.5f, -0.167f, -0.5f + 0.167f, -0.167f}},
-                                        {{-0.5f + 0.167f, -0.167f, -0.5f + 0.167f, 0.25f}},
+                                        {{{{{-0.5f, 0.0f, -0.5f}}}, -0.167f}},    // >>-d--->
+                                        {{{{{-0.5f, -0.167f, -0.5f + 0.167f}}}, -0.167f}},
+                                        {{{{{-0.5f + 0.167f, -0.167f, -0.5f + 0.167f}}}, 0.25f}},
 
-                                        {{-0.167f, 0.0f, -0.167f, -0.167f}}, // >>-dd-->
-                                        {{-0.167f, -0.167f, 0.0f, -0.167f}},
-                                        {{0.0f, -0.167f, 0.0f, 0.25f}},
+                                        {{{{{-0.167f, 0.0f, -0.167f}}}, -0.167f}}, // >>-dd-->
+                                        {{{{{-0.167f, -0.167f, 0.0f}}}, -0.167f}},
+                                        {{{{{0.0f, -0.167f, 0.0f}}}, 0.25f}},
 
-                                        {{0.167f, 0.25f, 0.167f, -0.143f}}, // >>-ddt->
-                                        {{0.167f, -0.143f, 0.167f + 0.031f, -0.143f - 0.031f}},
-                                        {{0.167f + 0.031f, -0.143f - 0.031f, 0.167f + 0.1f, -0.143f}}};
+                                        {{{{{0.167f, 0.25f, 0.167f}}}, -0.143f}}, // >>-ddt->
+                                        {{{{{0.167f, -0.143f, 0.167f + 0.031f}}}, -0.143f - 0.031f}},
+                                        {{{{{0.167f + 0.031f, -0.143f - 0.031f, 0.167f + 0.1f}}}, -0.143f}}};
 
 static constexpr uint8_t kAutomapCheatPlayerArrowLines = (sizeof(cheat_player_arrow) / sizeof(HMM_Vec4));
 
 static HMM_Vec4 thin_triangle_guy[] = {
-    {{-0.5f, -0.7f, 1.0f, 0.0f}}, {{1.0f, 0.0f, -0.5f, 0.7f}}, {{-0.5f, 0.7f, -0.5f, -0.7f}}};
+    {{{{{-0.5f, -0.7f, 1.0f}}}, 0.0f}}, {{{{{1.0f, 0.0f, -0.5f}}}, 0.7f}}, {{{{{-0.5f, 0.7f, -0.5f}}}, -0.7f}}};
 
 static constexpr uint8_t kAutomapThinTriangleGuyLines = (sizeof(thin_triangle_guy) / sizeof(HMM_Vec4));
 

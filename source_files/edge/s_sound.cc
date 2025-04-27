@@ -237,7 +237,6 @@ void ShutdownSound(void)
 
     SoundCacheClearAll();
 
-    ma_engine_uninit(&music_engine);
     ma_engine_uninit(&sound_engine);
 }
 

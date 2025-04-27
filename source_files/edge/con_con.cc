@@ -1412,6 +1412,7 @@ void ConsoleStart(void)
     StartupProgressMessage("Starting console...");
 }
 
+#ifdef EDGE_SOKOL
 static char *GetHumanSize(uint32_t bytes, char *hrbytes)
 {
     const char *suffix[] = {"B", "KB", "MB", "GB", "TB"};
@@ -1429,6 +1430,7 @@ static char *GetHumanSize(uint32_t bytes, char *hrbytes)
     snprintf(hrbytes, 128, "%u %s", bytes, suffix[i]);
     return (hrbytes);
 }
+#endif
 
 void ConsoleShowFPS(void)
 {

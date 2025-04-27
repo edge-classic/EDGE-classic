@@ -513,7 +513,7 @@ MD2Model *MD2Load(epi::File *f, float &radius)
 
             which_normals[good_V->normal_idx] = 1;
 
-            HMM_Vec3 vr = {good_V->x, good_V->y, good_V->z};
+            HMM_Vec3 vr = {{good_V->x, good_V->y, good_V->z}};
             float    r  = HMM_Len(vr);
 
             if (r > radius)
@@ -760,7 +760,7 @@ MD2Model *MD3Load(epi::File *f, float &radius)
 
             which_normals[good_V->normal_idx] = 1;
 
-            HMM_Vec3 vr = {good_V->x, good_V->y, good_V->z};
+            HMM_Vec3 vr = {{good_V->x, good_V->y, good_V->z}};
             float    r  = HMM_Len(vr);
 
             if (r > radius)

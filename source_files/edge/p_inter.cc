@@ -984,6 +984,7 @@ static std::string PatternSubstitution(const char *format, const std::vector<std
 static void DoObituary(const char *format, MapObject *victim, MapObject *killer)
 {
     EPI_UNUSED(killer); // eventually use DDFLANG to actually state the killer - Dasho
+    EPI_UNUSED(victim); // and uhhh the victim
     std::vector<std::string> keywords;
 
     keywords.push_back("o");

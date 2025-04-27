@@ -50,7 +50,6 @@ extern std::string     home_directory;
 extern ConsoleVariable midi_soundfont;
 
 ma_engine sound_engine;
-ma_engine music_engine;
 // Airless/Vacuum SFX sector sounds
 ma_lpf_node vacuum_node;
 // Underwater sector sounds; these two chain into each other
@@ -77,7 +76,8 @@ void StartupAudio(void)
     {
         sound_device_frequency = ma_engine_get_sample_rate(&sound_engine);
         ma_uint32 channels     = ma_engine_get_channels(&sound_engine);
-        ma_engine_set_volume(&sound_engine, sound_effect_volume.f_ * 0.5f);
+        // This seems to be the sweet spot for not getting burnt sounds - Dasho
+        ma_engine_set_volume(&sound_engine, 0.5f);
         // configure FX nodes
 
         // Underwater/Submerged
@@ -102,17 +102,6 @@ void StartupAudio(void)
         ma_freeverb_node_init(ma_engine_get_node_graph(&sound_engine), &reverb_node_config, NULL, &reverb_node);
         ma_node_attach_output_bus(&reverb_node, 0, ma_engine_get_endpoint(&sound_engine), 0);
         ma_node_attach_output_bus(&reverb_delay_node, 0, &reverb_node, 0);
-    }
-
-    if (!no_music)
-    {
-        if (ma_engine_init(NULL, &music_engine) != MA_SUCCESS)
-        {
-            LogPrint("StartupAudio: Unable to initialize music engine!\n");
-            no_music = true;
-        }
-        else
-            ma_engine_set_volume(&music_engine, music_volume.f_);
     }
 
     // display some useful stuff

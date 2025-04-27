@@ -982,7 +982,7 @@ static void SectorEffect(Sector *target, Line *source, const LineType *special)
     // support for drawn heights coming from different sector
     if (special->sector_effect_ & kSectorEffectTypeBoomHeights)
     {
-        target->height_sector      = source->front_sector;
+        target->height_sector      = source->side[0]->sector;
         target->height_sector_side = source->side[0];
         for (int i = 0; i < target->line_count; i++)
         {

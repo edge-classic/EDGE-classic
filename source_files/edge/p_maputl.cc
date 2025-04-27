@@ -623,8 +623,9 @@ void ComputeGaps(Line *ld)
     {
         // closed door.
 
-        // -AJA- MUNDO HACK for slopes!!!!
-        if (front->floor_slope || back->floor_slope || front->ceiling_slope || back->ceiling_slope)
+        // -AJA- MUNDO HACK for slopes (and line 242)!!!!
+        if (front->floor_slope || back->floor_slope || front->ceiling_slope || back->ceiling_slope
+            || front->height_sector || back->height_sector)
         {
             ld->blocked = false;
         }

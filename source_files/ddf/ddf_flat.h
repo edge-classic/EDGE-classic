@@ -25,7 +25,7 @@ class FlatDefinition
 {
   public:
     FlatDefinition();
-    ~FlatDefinition() {};
+    ~FlatDefinition(){};
 
   public:
     void Default(void);

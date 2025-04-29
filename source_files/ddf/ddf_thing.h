@@ -660,7 +660,7 @@ class DynamicLightDefinition
   public:
     DynamicLightDefinition();
     DynamicLightDefinition(const DynamicLightDefinition &rhs);
-    ~DynamicLightDefinition() {};
+    ~DynamicLightDefinition(){};
 
   private:
     void Copy(const DynamicLightDefinition &src);
@@ -686,7 +686,7 @@ class WeaknessDefinition
   public:
     WeaknessDefinition();
     WeaknessDefinition(const WeaknessDefinition &rhs);
-    ~WeaknessDefinition() {};
+    ~WeaknessDefinition(){};
 
   private:
     void Copy(const WeaknessDefinition &src);

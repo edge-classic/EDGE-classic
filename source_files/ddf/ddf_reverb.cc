@@ -149,8 +149,8 @@ void ReverbDefinition::CopyDetail(const ReverbDefinition &src)
 
 void ReverbDefinition::ApplyReverb(ma_freeverb_node *reverb) const
 {
-    ma_freeverb_update_verb(reverb, &room_size_, &damping_level_, &wet_level_,
-        &dry_level_, &reverb_width_, &reverb_gain_);
+    ma_freeverb_update_verb(reverb, &room_size_, &damping_level_, &wet_level_, &dry_level_, &reverb_width_,
+                            &reverb_gain_);
 }
 
 void ReverbDefinition::Default()

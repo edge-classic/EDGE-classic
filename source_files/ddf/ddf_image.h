@@ -72,7 +72,7 @@ class ImageDefinition
 {
   public:
     ImageDefinition();
-    ~ImageDefinition() {};
+    ~ImageDefinition(){};
 
   public:
     void Default(void);

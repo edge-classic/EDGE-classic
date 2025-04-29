@@ -3550,7 +3550,7 @@ void LevelSetup(void)
     else
         LoadUDMFThings();
 
-    // OK, CRC values have now been computed
+        // OK, CRC values have now been computed
 #ifdef DEVELOPERS
     LogDebug("MAP CRCS: S=%08x L=%08x T=%08x\n", map_sectors_crc.crc, map_lines_crc.crc, map_things_crc.crc);
 #endif

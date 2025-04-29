@@ -18,8 +18,11 @@
 
 #include "r_shader.h"
 
+#include <unordered_map>
+
 #include "ddf_main.h"
 #include "epi.h"
+#include "epi_str_hash.h"
 #include "i_defs_gl.h"
 #include "im_data.h"
 #include "p_mobj.h"
@@ -48,7 +51,7 @@ class LightImage
     RGBAColor curve_[kLightImageCurveSize];
 
   public:
-    LightImage(const char *name, const Image *img) : name_(name), image_(img)
+    LightImage(std::string_view name, const Image *img) : name_(name), image_(img)
     {
     }
 
@@ -113,6 +116,8 @@ class LightImage
     }
 };
 
+static std::unordered_map<epi::StringHash, LightImage *> known_light_images;
+
 static LightImage *GetLightImage(const MapObjectDefinition *info)
 {
     // Intentional Const Overrides
@@ -120,22 +125,29 @@ static LightImage *GetLightImage(const MapObjectDefinition *info)
 
     if (!D_info->cache_data_)
     {
-        // FIXME !!!! share light_image_c instances
+        const std::string &shape = D_info->shape_;
 
-        const char *shape = D_info->shape_.c_str();
+        EPI_ASSERT(!shape.empty());
 
-        EPI_ASSERT(shape && strlen(shape) > 0);
+        if (known_light_images.count(shape))
+        {
+            D_info->cache_data_ = known_light_images[shape];
+        }
+        else
+        {
+            const Image *image = ImageLookup(shape.c_str(), kImageNamespaceGraphic, kImageLookupNull);
 
-        const Image *image = ImageLookup(shape, kImageNamespaceGraphic, kImageLookupNull);
+            if (!image)
+                FatalError("Missing dynamic light graphic: %s\n", shape.c_str());
 
-        if (!image)
-            FatalError("Missing dynamic light graphic: %s\n", shape);
+            LightImage *lim = new LightImage(shape, image);
 
-        LightImage *lim = new LightImage(shape, image);
+            lim->MakeStandardCurve();
 
-        lim->MakeStandardCurve();
+            known_light_images.try_emplace(shape, lim);
 
-        D_info->cache_data_ = lim;
+            D_info->cache_data_ = lim;
+        }
     }
 
     return (LightImage *)D_info->cache_data_;
@@ -687,6 +699,17 @@ class wall_glow_c : public AbstractShader
 AbstractShader *MakeWallGlow(MapObject *mo)
 {
     return new wall_glow_c(mo);
+}
+
+void DeleteAllLightImages()
+{
+    for (std::unordered_map<epi::StringHash, LightImage *>::iterator iter     = known_light_images.begin(),
+                                                                     iter_end = known_light_images.end();
+         iter != iter_end; ++iter)
+    {
+        delete iter->second;
+    }
+    known_light_images.clear();
 }
 
 //--- editor settings ---

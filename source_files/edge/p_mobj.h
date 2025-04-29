@@ -409,8 +409,8 @@ class MapObject : public Position
     void              Delete();
 
   protected:
-    MapObject() {};
-    ~MapObject() {};
+    MapObject(){};
+    ~MapObject(){};
 };
 
 // Item-in-Respawn-que Structure -ACB- 1998/07/30

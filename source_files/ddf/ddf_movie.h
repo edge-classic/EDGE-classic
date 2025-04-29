@@ -49,7 +49,7 @@ class MovieDefinition
 {
   public:
     MovieDefinition();
-    ~MovieDefinition() {};
+    ~MovieDefinition(){};
 
   public:
     void Default(void);

@@ -24,7 +24,7 @@ class WadFixDefinition
 {
   public:
     WadFixDefinition();
-    ~WadFixDefinition() {};
+    ~WadFixDefinition(){};
 
   public:
     void Default(void);

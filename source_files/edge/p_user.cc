@@ -45,6 +45,7 @@
 #include "r_misc.h"
 #include "rad_trig.h"
 #include "s_blit.h"
+#include "s_music.h"
 #include "s_sound.h"
 #include "script/compat/lua_compat.h"
 #include "stb_sprintf.h"
@@ -939,7 +940,9 @@ bool PlayerThink(Player *player)
     // Adjust reverb node parameters if applicable
     if (players[console_player] == player)
     {
-        if (player->map_object_->subsector_->sector->sound_reverb)
+        if (pc_speaker_mode)
+            sector_reverb = false;
+        else if (player->map_object_->subsector_->sector->sound_reverb)
         {
             sector_reverb = true;
             player->map_object_->subsector_->sector->sound_reverb->ApplyReverb(&reverb_node);

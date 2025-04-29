@@ -29,6 +29,7 @@
 #include "epi_filesystem.h"
 #include "epi_str_util.h"
 #include "i_movie.h"
+#include "i_sound.h"
 #include "i_system.h"
 #include "m_misc.h"
 #include "s_flac.h"
@@ -247,6 +248,8 @@ void StopMusic(void)
 
 void MusicTicker(void)
 {
+    ma_sound_group_set_volume(&music_node, music_volume.f_);
+
     if (music_player)
         music_player->Ticker();
 }

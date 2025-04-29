@@ -28,6 +28,8 @@
 extern std::set<std::string> available_soundfonts;
 
 extern ma_engine        sound_engine;
+extern ma_sound_group   sfx_node;
+extern ma_sound_group   music_node;
 extern ma_freeverb_node reverb_node;
 extern ma_delay_node    underwater_node;
 extern ma_delay_node    reverb_delay_node;

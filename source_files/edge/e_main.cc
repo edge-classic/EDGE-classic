@@ -2224,14 +2224,7 @@ static void InitializeDDF(void)
 void EdgeShutdown(void)
 {
     StopMusic();
-
-    // Pause to allow sounds to finish
-    for (int loop = 0; loop < 30; loop++)
-    {
-        SoundTicker();
-        SleepForMilliseconds(50);
-    }
-
+    StopAllSoundEffects();
     LevelShutdown();
     AudioShutdown();
     RendererShutdown();

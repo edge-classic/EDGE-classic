@@ -94,6 +94,8 @@ bool FLACPlayer::OpenMemory(uint8_t *data, int length)
         return false;
     }
 
+    ma_node_attach_output_bus(&flac_stream, 0, &music_node, 0);
+
     flac_data_ = data;
 
     // Loaded, but not playing
@@ -173,8 +175,6 @@ void FLACPlayer::Ticker()
 {
     if (status_ == kPlaying)
     {
-        ma_sound_set_volume(&flac_stream, music_volume.f_);
-
         if (pc_speaker_mode)
             Stop();
         if (ma_sound_at_end(&flac_stream)) // This should only be true if finished and not set to looping

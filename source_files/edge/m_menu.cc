@@ -1622,42 +1622,6 @@ static void QuitResponse(int ch)
     if (ch != 'y' && ch != kGamepadA && ch != kMouse1)
         return;
 
-    if (!network_game)
-    {
-        int  numsounds = 0;
-        char refname[64];
-        char sound[64];
-        int  i, start;
-
-        // Count the quit messages
-        do
-        {
-            stbsp_sprintf(refname, "QuitSnd%d", numsounds + 1);
-            if (language.IsValidRef(refname))
-                numsounds++;
-            else
-                break;
-        } while (true);
-
-        if (numsounds)
-        {
-            // cycle through all the quit sounds, until one of them exists
-            // (some of the default quit sounds do not exist in DOOM 1)
-            start = i = RandomByte() % numsounds;
-            do
-            {
-                stbsp_sprintf(refname, "QuitSnd%d", i + 1);
-                stbsp_sprintf(sound, "DS%s", language[refname]);
-                if (CheckLumpNumberForName(sound) != -1)
-                {
-                    StartSoundEffect(sfxdefs.GetEffect(language[refname]));
-                    break;
-                }
-                i = (i + 1) % numsounds;
-            } while (i != start);
-        }
-    }
-
     // -ACB- 1999/09/20 New exit code order
     // Write the default config file first
     LogPrint("Saving system defaults...\n");

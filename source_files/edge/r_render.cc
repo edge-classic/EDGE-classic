@@ -41,6 +41,7 @@
 #include "m_bbox.h"
 #include "n_network.h" // NetworkUpdate
 #include "p_local.h"
+#include "p_spec.h"
 #include "p_tick.h"
 #include "r_backend.h"
 #include "r_colormap.h"
@@ -57,6 +58,9 @@
 #include "r_state.h"
 #include "r_things.h"
 #include "r_units.h"
+
+extern std::vector<PlaneMover *> active_planes;
+std::unordered_set<Line *> newly_seen_lines;
 
 extern ConsoleVariable draw_culling;
 
@@ -1438,8 +1442,9 @@ static void RenderSeg(DrawFloor *dfloor, Seg *seg, bool mirror_sub = false)
 
     EPI_ASSERT(!seg->miniseg && seg->linedef);
 
-    // mark the segment on the automap
-    seg->linedef->flags |= kLineFlagMapped;
+    // mark the line on the automap
+    if (!(seg->linedef->flags & kLineFlagMapped))
+        newly_seen_lines.emplace(seg->linedef);
 
     front_sector = seg->front_subsector->sector;
     back_sector  = nullptr;
@@ -2017,15 +2022,38 @@ void RendererShutdownLevel()
     ShutdownSky();
 }
 
+static void UpdateSectorInterpolation(Sector *sector)
+{
+    if (!time_stop_active && !paused && !erraticism_active && !menu_active && !rts_menu_active)
+    {
+        // Interpolate between current and last floor/ceiling position.
+        if (!AlmostEquals(sector->floor_height, sector->old_floor_height))
+            sector->interpolated_floor_height =
+                HMM_Lerp(sector->old_floor_height, fractional_tic, sector->floor_height);
+        else
+            sector->interpolated_floor_height = sector->floor_height;
+        if (!AlmostEquals(sector->ceiling_height, sector->old_ceiling_height))
+            sector->interpolated_ceiling_height =
+                HMM_Lerp(sector->old_ceiling_height, fractional_tic, sector->ceiling_height);
+        else
+            sector->interpolated_ceiling_height = sector->ceiling_height;
+    }
+    else
+    {
+        sector->interpolated_floor_height   = sector->floor_height;
+        sector->interpolated_ceiling_height = sector->ceiling_height;
+    }
+}
+
 //
-// RenderTrueBsp
+// RenderTrueBSP
 //
 // OpenGL BSP rendering.  Initialises all structures, then walks the
 // BSP tree collecting information, then renders each subsector:
 // firstly front to back (drawing all solid walls & planes) and then
 // from back to front (drawing everything else, sprites etc..).
 //
-void RenderTrueBsp(void)
+void RenderTrueBSP(void)
 {
     EDGE_ZoneScoped;
 
@@ -2038,6 +2066,15 @@ void RenderTrueBsp(void)
 
     // handle powerup effects and BOOM colormaps
     RendererRainbowEffect(v_player);
+
+    // update interpolation for moving sectors
+    for (std::vector<PlaneMover *>::iterator PMI = active_planes.begin(), PMI_END = active_planes.end(); PMI != PMI_END;
+         ++PMI)
+    {
+        PlaneMover *pmov = *PMI;
+        if (pmov->sector)
+            UpdateSectorInterpolation(pmov->sector);
+    }
 
 #ifdef EDGE_SOKOL
 
@@ -2190,6 +2227,16 @@ void RenderTrueBsp(void)
 
 #endif
 
+    // Add lines seen during render to the automap
+    if (!newly_seen_lines.empty())
+    {
+        for (Line *li : newly_seen_lines)
+        {
+            li->flags |= kLineFlagMapped;
+        }
+        newly_seen_lines.clear();
+    }
+
     // Lobo 2022:
     // Allow changing the order of weapon model rendering to be
     // after RenderWeaponSprites() so that FLASH states are
@@ -2259,7 +2306,7 @@ void RenderView(int x, int y, int w, int h, MapObject *camera, bool full_height,
     valid_count++;
 
     seen_dynamic_lights.clear();
-    RenderTrueBsp();
+    RenderTrueBSP();
 
     render_world_index++;
 }

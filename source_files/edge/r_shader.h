@@ -110,5 +110,9 @@ class AbstractShader
                           bool masked, void *data, ShaderCoordinateFunction func) = 0;
 };
 
+// Delete all dynamic light "images"; cannot be done in the various shader
+// destructors as these images are shared amongst multiple instances - Dasho
+void DeleteAllLightImages();
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

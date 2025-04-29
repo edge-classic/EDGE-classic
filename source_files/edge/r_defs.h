@@ -30,6 +30,10 @@
 #include "m_math.h"
 #include "p_mobj.h"
 
+#if defined (EDGE_SOKOL) && !defined (EDGE_WEB)
+#include "thread.h"
+#endif
+
 class Image;
 
 //

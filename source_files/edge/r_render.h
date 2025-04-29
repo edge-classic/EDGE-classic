@@ -4,9 +4,11 @@
 #include "r_image.h"
 #include "r_units.h"
 
+extern std::unordered_set<Line *> newly_seen_lines;
+
 void RenderSubList(std::list<DrawSubsector *> &dsubs, bool for_mirror = false);
 
-void BspWalkNode(unsigned int);
+void BSPWalkNode(unsigned int);
 
 #ifdef EDGE_SOKOL
 

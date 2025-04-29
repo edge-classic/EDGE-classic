@@ -80,6 +80,7 @@ static bool MovieSetupAudioStream(int rate)
     plm_set_audio_lead_time(decoder, (double)1024 / (double)rate);
     // ring buffer based sounds need to unconditionally "loop" so that even if the buffer
     // has no data ready to read it will not report being "finished"
+    ma_node_attach_output_bus(&movie_sound_buffer, 0, &music_node, 0);
     ma_sound_set_looping(&movie_sound_buffer, MA_TRUE);
     ma_sound_start(&movie_sound_buffer);
     PauseMusic();

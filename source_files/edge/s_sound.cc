@@ -32,6 +32,7 @@
 #include "p_local.h" // ApproximateDistance
 #include "s_blit.h"
 #include "s_cache.h"
+#include "s_music.h"
 #include "s_sound.h"
 #include "w_wad.h"
 
@@ -237,6 +238,9 @@ void ShutdownSound(void)
 
     SoundCacheClearAll();
 
+    if (!no_music)
+        ma_sound_group_uninit(&music_node);
+    ma_sound_group_uninit(&sfx_node);
     ma_engine_uninit(&sound_engine);
 }
 
@@ -291,7 +295,9 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
         ma_sound_set_max_distance(&chan->channel_sound_,
                                   chan->boss_ ? kBossSoundClipDistance : kMaximumSoundClipDistance);
         ma_sound_set_position(&chan->channel_sound_, pos->x, pos->z, -pos->y);
-        if (vacuum_sound_effects)
+        if (pc_speaker_mode)
+            ma_node_attach_output_bus(&chan->channel_sound_, 0, &sfx_node, 0);
+        else if (vacuum_sound_effects)
             ma_node_attach_output_bus(&chan->channel_sound_, 0, &vacuum_node, 0);
         else if (submerged_sound_effects)
             ma_node_attach_output_bus(&chan->channel_sound_, 0, &underwater_node, 0);
@@ -305,12 +311,14 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
                 ma_node_attach_output_bus(&chan->channel_sound_, 0, &reverb_node, 0);
         }
         else
-            ma_node_attach_output_bus(&chan->channel_sound_, 0, &sound_engine, 0);
+            ma_node_attach_output_bus(&chan->channel_sound_, 0, &sfx_node, 0);
     }
     else
     {
         ma_sound_set_attenuation_model(&chan->channel_sound_, ma_attenuation_model_none);
-        if (category != kCategoryUi)
+        if (pc_speaker_mode)
+            ma_node_attach_output_bus(&chan->channel_sound_, 0, &sfx_node, 0);
+        else if (category != kCategoryUi)
         {
             if (vacuum_sound_effects)
                 ma_node_attach_output_bus(&chan->channel_sound_, 0, &vacuum_node, 0);
@@ -326,10 +334,10 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
                     ma_node_attach_output_bus(&chan->channel_sound_, 0, &reverb_node, 0);
             }
             else
-                ma_node_attach_output_bus(&chan->channel_sound_, 0, &sound_engine, 0);
+                ma_node_attach_output_bus(&chan->channel_sound_, 0, &sfx_node, 0);
         }
         else
-            ma_node_attach_output_bus(&chan->channel_sound_, 0, &sound_engine, 0);
+            ma_node_attach_output_bus(&chan->channel_sound_, 0, &sfx_node, 0);
     }
     if (chan->boss_)
         ma_sound_set_volume(&chan->channel_sound_, 1.0f);

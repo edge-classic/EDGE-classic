@@ -807,6 +807,8 @@ class MIDIPlayer : public AbstractMusicPlayer
             return false;
         }
 
+        ma_node_attach_output_bus(&midi_stream, 0, &music_node, 0);
+
         // Loaded, but not playing
         status_ = kStopped;
 
@@ -882,8 +884,6 @@ class MIDIPlayer : public AbstractMusicPlayer
     {
         if (status_ == kPlaying)
         {
-            ma_sound_set_volume(&midi_stream, music_volume.f_);
-
             if (pc_speaker_mode)
                 Stop();
             if (ma_sound_at_end(&midi_stream)) // This should only be true if finished and not set to looping

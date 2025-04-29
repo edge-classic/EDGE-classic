@@ -491,6 +491,8 @@ bool M4PPlayer::OpenMemory(const uint8_t *data, int length)
         return false;
     }
 
+    ma_node_attach_output_bus(&m4p_stream, 0, &music_node, 0);
+
     // Loaded, but not playing
     status_ = kStopped;
 
@@ -566,7 +568,6 @@ void M4PPlayer::Ticker()
 {
     if (status_ == kPlaying)
     {
-        ma_sound_set_volume(&m4p_stream, music_volume.f_);
         if (pc_speaker_mode)
             Stop();
         if (ma_sound_at_end(&m4p_stream)) // This should only be true if finished and not set to looping

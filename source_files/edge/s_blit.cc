@@ -118,6 +118,8 @@ void UpdateSounds(MapObject *listener, BAMAngle angle)
 {
     EDGE_ZoneScoped;
 
+    ma_sound_group_set_volume(&sfx_node, sound_effect_volume.f_ * 0.5f);
+
     listen_x = listener ? listener->x : 0;
     listen_y = listener ? listener->y : 0;
     listen_z = listener ? listener->z : 0;
@@ -136,8 +138,6 @@ void UpdateSounds(MapObject *listener, BAMAngle angle)
 
         if (chan->state_ == kChannelPlaying)
         {
-            ma_sound_set_volume(&chan->channel_sound_, sound_effect_volume.f_);
-
             if (chan->loop_)
             {
                 ma_uint64 cur_pos = 0;

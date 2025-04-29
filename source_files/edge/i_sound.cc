@@ -49,7 +49,9 @@ extern std::string     game_directory;
 extern std::string     home_directory;
 extern ConsoleVariable midi_soundfont;
 
-ma_engine sound_engine;
+ma_engine      sound_engine;
+ma_sound_group sfx_node;
+ma_sound_group music_node;
 // Airless/Vacuum SFX sector sounds
 ma_lpf_node vacuum_node;
 // Underwater sector sounds; these two chain into each other
@@ -76,8 +78,22 @@ void StartupAudio(void)
     {
         sound_device_frequency = ma_engine_get_sample_rate(&sound_engine);
         ma_uint32 channels     = ma_engine_get_channels(&sound_engine);
-        // This seems to be the sweet spot for not getting burnt sounds - Dasho
-        ma_engine_set_volume(&sound_engine, 0.5f);
+
+        // configure sound groups; this allows us to regulate sound/music
+        // volumes independently
+        if (ma_sound_group_init(&sound_engine, 0, NULL, &sfx_node) != MA_SUCCESS)
+        {
+            ma_engine_uninit(&sound_engine);
+            LogPrint("StartupSound: Unable to initialize sound engine!\n");
+            no_sound = true;
+            return;
+        }
+        if (ma_sound_group_init(&sound_engine, 0, NULL, &music_node) != MA_SUCCESS)
+        {
+            LogPrint("StartupSound: Unable to initialize music engine!\n");
+            no_music = true;
+        }
+
         // configure FX nodes
 
         // Underwater/Submerged
@@ -86,13 +102,13 @@ void StartupAudio(void)
         ma_delay_node_init(ma_engine_get_node_graph(&sound_engine), &delay_node_config, NULL, &underwater_node);
         ma_lpf_node_config lpf_config = ma_lpf_node_config_init(channels, sound_device_frequency, 800.0f, 2);
         ma_lpf_node_init(ma_engine_get_node_graph(&sound_engine), &lpf_config, NULL, &underwater_lpf_node);
-        ma_node_attach_output_bus(&underwater_lpf_node, 0, ma_engine_get_endpoint(&sound_engine), 0);
+        ma_node_attach_output_bus(&underwater_lpf_node, 0, &sfx_node, 0);
         ma_node_attach_output_bus(&underwater_node, 0, &underwater_lpf_node, 0);
 
         // Vacuum/Airless
         lpf_config = ma_lpf_node_config_init(channels, sound_device_frequency, 200.0f, 2);
         ma_lpf_node_init(ma_engine_get_node_graph(&sound_engine), &lpf_config, NULL, &vacuum_node);
-        ma_node_attach_output_bus(&vacuum_node, 0, ma_engine_get_endpoint(&sound_engine), 0);
+        ma_node_attach_output_bus(&vacuum_node, 0, &sfx_node, 0);
 
         // Dynamic Reverb
         delay_node_config = ma_delay_node_config_init(channels, sound_device_frequency,
@@ -100,7 +116,7 @@ void StartupAudio(void)
         ma_delay_node_init(ma_engine_get_node_graph(&sound_engine), &delay_node_config, NULL, &reverb_delay_node);
         ma_freeverb_node_config reverb_node_config = ma_freeverb_node_config_init(2, sound_device_frequency);
         ma_freeverb_node_init(ma_engine_get_node_graph(&sound_engine), &reverb_node_config, NULL, &reverb_node);
-        ma_node_attach_output_bus(&reverb_node, 0, ma_engine_get_endpoint(&sound_engine), 0);
+        ma_node_attach_output_bus(&reverb_node, 0, &sfx_node, 0);
         ma_node_attach_output_bus(&reverb_delay_node, 0, &reverb_node, 0);
     }
 
@@ -123,6 +139,9 @@ void AudioShutdown(void)
 
 void StartupMusic(void)
 {
+    if (no_music)
+        return;
+
     // Check for soundfonts and instrument banks
     std::vector<epi::DirectoryEntry> sfd;
     std::string                      soundfont_dir = epi::PathAppend(home_directory, "soundfont");

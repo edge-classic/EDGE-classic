@@ -871,8 +871,11 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props)
     }
 
     // -AJA- 1999/10/09: Reworked viscosity.
-    xmove *= 1.0f - props->viscosity;
-    ymove *= 1.0f - props->viscosity;
+    // Dasho - Reduce impact of viscosity now that
+    // movefactor and an overall lower MAXMOVE have been
+    // implemented
+    xmove *= 1.0f - (props->viscosity * 0.5f);
+    ymove *= 1.0f - (props->viscosity * 0.5f);
 
     // -ES- 1999/10/16 For fast mobjs, break down
     //  the move into steps of max half radius for collision purposes.

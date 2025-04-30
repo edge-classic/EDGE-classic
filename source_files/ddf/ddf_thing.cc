@@ -59,6 +59,7 @@ static void DDFMobjStateGetDEHMelee(const char *arg, State *cur_state);
 static void DDFMobjStateGetString(const char *arg, State *cur_state);
 
 static void AddPickupEffect(PickupEffect **list, PickupEffect *cur);
+static void BenefitAdd(Benefit **list, Benefit *source);
 
 static int dlight_radius_warnings = 0;
 
@@ -803,8 +804,12 @@ static void ThingFinishEntry(void)
         {
             if (other->lose_benefits_)
             {
-                dynamic_mobj->lose_benefits_  = new Benefit;
-                *dynamic_mobj->lose_benefits_ = *other->lose_benefits_;
+                Benefit *src_bene = other->lose_benefits_;
+                while (src_bene)
+                {
+                    BenefitAdd(&dynamic_mobj->lose_benefits_, src_bene);
+                    src_bene = src_bene->next;
+                }
             }
         }
 
@@ -812,8 +817,12 @@ static void ThingFinishEntry(void)
         {
             if (other->pickup_benefits_)
             {
-                dynamic_mobj->pickup_benefits_  = new Benefit;
-                *dynamic_mobj->pickup_benefits_ = *other->pickup_benefits_;
+                Benefit *src_bene = other->pickup_benefits_;
+                while (src_bene)
+                {
+                    BenefitAdd(&dynamic_mobj->pickup_benefits_, src_bene);
+                    src_bene = src_bene->next;
+                }
             }
         }
 
@@ -821,8 +830,12 @@ static void ThingFinishEntry(void)
         {
             if (other->kill_benefits_)
             {
-                dynamic_mobj->kill_benefits_  = new Benefit;
-                *dynamic_mobj->kill_benefits_ = *other->kill_benefits_;
+                Benefit *src_bene = other->kill_benefits_;
+                while (src_bene)
+                {
+                    BenefitAdd(&dynamic_mobj->kill_benefits_, src_bene);
+                    src_bene = src_bene->next;
+                }
             }
         }
 
@@ -1307,9 +1320,7 @@ static void BenefitAdd(Benefit **list, Benefit *source)
     }
 
     // nope, create a new one and link it onto the _TAIL_
-    cur = new Benefit;
-
-    cur[0]    = source[0];
+    cur       = new Benefit(*source);
     cur->next = nullptr;
 
     if ((*list) == nullptr)
@@ -2343,6 +2354,36 @@ MapObjectDefinition::MapObjectDefinition() : name_(), state_grp_()
 
 MapObjectDefinition::~MapObjectDefinition()
 {
+    while (initial_benefits_)
+    {
+        Benefit *bene     = initial_benefits_;
+        initial_benefits_ = initial_benefits_->next;
+        delete bene;
+    }
+    while (lose_benefits_)
+    {
+        Benefit *bene  = lose_benefits_;
+        lose_benefits_ = lose_benefits_->next;
+        delete bene;
+    }
+    while (pickup_benefits_)
+    {
+        Benefit *bene    = pickup_benefits_;
+        pickup_benefits_ = pickup_benefits_->next;
+        delete bene;
+    }
+    while (kill_benefits_)
+    {
+        Benefit *bene  = kill_benefits_;
+        kill_benefits_ = kill_benefits_->next;
+        delete bene;
+    }
+    while (pickup_effects_)
+    {
+        PickupEffect *pick = pickup_effects_;
+        pickup_effects_    = pickup_effects_->next_;
+        delete pick;
+    }
 }
 
 void MapObjectDefinition::CopyDetail(const MapObjectDefinition &src)
@@ -2387,27 +2428,36 @@ void MapObjectDefinition::CopyDetail(const MapObjectDefinition &src)
     explode_damage_ = src.explode_damage_;
     explode_radius_ = src.explode_radius_;
 
-    // pickup_message_ = src.pickup_message_;
-    // lose_benefits_ = src.lose_benefits_;
-    // pickup_benefits_ = src.pickup_benefits_;
     if (src.pickup_message_ != "")
     {
         pickup_message_ = src.pickup_message_;
     }
 
-    lose_benefits_   = nullptr;
-    pickup_benefits_ = nullptr;
-    kill_benefits_   = nullptr; // I think? - Dasho
-    /*
-    if(src.pickup_benefits_)
-    {
-        LogDebug("%s: Benefits info not inherited from '%s', ",name,
-    src.name_.c_str()); LogDebug("You should define it explicitly.\n");
-    }
-    */
+    pickup_effects_   = nullptr;
+    initial_benefits_ = nullptr;
+    lose_benefits_    = nullptr;
+    pickup_benefits_  = nullptr;
+    kill_benefits_    = nullptr;
 
-    pickup_effects_   = src.pickup_effects_;
-    initial_benefits_ = src.initial_benefits_;
+    // Dasho - Can't remember why these are the only two we copy over
+    if (src.initial_benefits_)
+    {
+        Benefit *src_bene = src.initial_benefits_;
+        while (src_bene)
+        {
+            BenefitAdd(&initial_benefits_, src_bene);
+            src_bene = src_bene->next;
+        }
+    }
+    if (src.pickup_effects_)
+    {
+        PickupEffect *src_effect = src.pickup_effects_;
+        while (src_effect)
+        {
+            AddPickupEffect(&pickup_effects_, src_effect);
+            src_effect = src_effect->next_;
+        }
+    }
 
     castorder_    = src.castorder_;
     cast_title_   = src.cast_title_;
@@ -2554,12 +2604,38 @@ void MapObjectDefinition::Default()
     explode_damage_.Default(DamageClass::kDamageClassDefaultMobj);
     explode_radius_ = 0;
 
-    lose_benefits_    = nullptr;
-    pickup_benefits_  = nullptr;
-    kill_benefits_    = nullptr;
-    pickup_effects_   = nullptr;
-    pickup_message_   = "";
-    initial_benefits_ = nullptr;
+    while (initial_benefits_)
+    {
+        Benefit *bene     = initial_benefits_;
+        initial_benefits_ = initial_benefits_->next;
+        delete bene;
+    }
+    while (lose_benefits_)
+    {
+        Benefit *bene  = lose_benefits_;
+        lose_benefits_ = lose_benefits_->next;
+        delete bene;
+    }
+    while (pickup_benefits_)
+    {
+        Benefit *bene    = pickup_benefits_;
+        pickup_benefits_ = pickup_benefits_->next;
+        delete bene;
+    }
+    while (kill_benefits_)
+    {
+        Benefit *bene  = kill_benefits_;
+        kill_benefits_ = kill_benefits_->next;
+        delete bene;
+    }
+    while (pickup_effects_)
+    {
+        PickupEffect *pick = pickup_effects_;
+        pickup_effects_    = pickup_effects_->next_;
+        delete pick;
+    }
+
+    pickup_message_ = "";
 
     castorder_ = 0;
     cast_title_.clear();
@@ -2713,6 +2789,10 @@ MapObjectDefinitionContainer::~MapObjectDefinitionContainer()
         MapObjectDefinition *m = *iter;
         delete m;
         m = nullptr;
+    }
+    for (MapObjectDefinition *atk : dynamic_atk_mobjtypes)
+    {
+        delete atk;
     }
 }
 

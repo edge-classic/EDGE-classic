@@ -75,6 +75,10 @@ void MenuDrawer(void);
 // loads the config file.
 void MenuInitialize(void);
 
+// Deletes save slot GPU textures
+// if applicable
+void MenuShutdown(void);
+
 // Called by intro code to force menu up upon a keypress,
 // does nothing if menu is already up.
 void StartControlPanel(void);

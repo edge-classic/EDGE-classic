@@ -206,10 +206,10 @@ void HandleSounds(const WeaponInfo *info, int w_num)
 {
     if (w_num == kwp_chainsaw)
     {
-        wad::Printf("START_SOUND = \"%s\";\n", sounds::GetSound(ksfx_sawup));
+        wad::Printf("START_SOUND = \"%s\";\n", sounds::GetSound(ksfx_sawup).c_str());
         if (info->readystate == kS_SAW)
-            wad::Printf("IDLE_SOUND = \"%s\";\n", sounds::GetSound(ksfx_sawidl));
-        wad::Printf("ENGAGED_SOUND = \"%s\";\n", sounds::GetSound(ksfx_sawful));
+            wad::Printf("IDLE_SOUND = \"%s\";\n", sounds::GetSound(ksfx_sawidl).c_str());
+        wad::Printf("ENGAGED_SOUND = \"%s\";\n", sounds::GetSound(ksfx_sawful).c_str());
         return;
     }
 
@@ -283,7 +283,7 @@ void HandleAttacks(const WeaponInfo *info, int w_num)
     // chainsaw attack Fixes, for instance, the Harmony Compatible knife swing
     // being silent
     if (epi::StringCaseCompareASCII(atk, "PLAYER_SAW") == 0 && w_num != kwp_chainsaw)
-        wad::Printf("ENGAGED_SOUND = \"%s\";\n", sounds::GetSound(ksfx_sawful));
+        wad::Printf("ENGAGED_SOUND = \"%s\";\n", sounds::GetSound(ksfx_sawful).c_str());
 }
 
 void ConvertWeapon(int w_num)

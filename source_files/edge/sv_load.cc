@@ -113,6 +113,15 @@ static void LoadFreeStruct(SaveStruct *S)
     SaveChunkFreeString(S->struct_name);
     SaveChunkFreeString(S->marker);
 
+    for (SaveField *F = S->fields; F->type.kind != kSaveFieldInvalid; F++)
+    {
+        SaveChunkFreeString(F->field_name);
+        if (F->type.kind == kSaveFieldStruct || F->type.kind == kSaveFieldIndex)
+        {
+            SaveChunkFreeString(F->type.name);
+        }
+    }
+
     delete[] S->fields;
 
     delete S;

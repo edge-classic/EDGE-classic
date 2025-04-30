@@ -796,20 +796,21 @@ static void HD_get_average_color(coal::VM *vm, int argc)
 {
     EPI_UNUSED(argc);
 
-    double         rgb[3];
-    const char    *name         = vm->AccessParamString(0);
-    double        *from_x       = vm->AccessParam(1);
-    double        *to_x         = vm->AccessParam(2);
-    double        *from_y       = vm->AccessParam(3);
-    double        *to_y         = vm->AccessParam(4);
-    const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    double       rgb[3];
+    const char  *name         = vm->AccessParamString(0);
+    double      *from_x       = vm->AccessParam(1);
+    double      *to_x         = vm->AccessParam(2);
+    double      *from_y       = vm->AccessParam(3);
+    double      *to_y         = vm->AccessParam(4);
+    uint8_t     *what_palette = nullptr;
+    const Image *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
-        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
+        what_palette = LoadLumpIntoMemory(tmp_img_c->source_palette_);
     ImageData *tmp_img_data = ReadAsEpiBlock((Image *)tmp_img_c);
     if (tmp_img_data->depth_ == 1)
     {
-        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, tmp_img_c->opacity_);
+        ImageData *rgb_img_data = RGBFromPalettised(
+            tmp_img_data, what_palette ? what_palette : (const uint8_t *)&playpal_data[0], tmp_img_c->opacity_);
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
@@ -819,6 +820,8 @@ static void HD_get_average_color(coal::VM *vm, int argc)
     rgb[1] = epi::GetRGBAGreen(col);
     rgb[2] = epi::GetRGBABlue(col);
     delete tmp_img_data;
+    if (what_palette)
+        delete[] what_palette;
     vm->ReturnVector(rgb);
 }
 
@@ -826,20 +829,21 @@ static void HD_get_lightest_color(coal::VM *vm, int argc)
 {
     EPI_UNUSED(argc);
 
-    double         rgb[3];
-    const char    *name         = vm->AccessParamString(0);
-    double        *from_x       = vm->AccessParam(1);
-    double        *to_x         = vm->AccessParam(2);
-    double        *from_y       = vm->AccessParam(3);
-    double        *to_y         = vm->AccessParam(4);
-    const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    double       rgb[3];
+    const char  *name         = vm->AccessParamString(0);
+    double      *from_x       = vm->AccessParam(1);
+    double      *to_x         = vm->AccessParam(2);
+    double      *from_y       = vm->AccessParam(3);
+    double      *to_y         = vm->AccessParam(4);
+    uint8_t     *what_palette = nullptr;
+    const Image *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
-        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
+        what_palette = LoadLumpIntoMemory(tmp_img_c->source_palette_);
     ImageData *tmp_img_data = ReadAsEpiBlock((Image *)tmp_img_c);
     if (tmp_img_data->depth_ == 1)
     {
-        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, tmp_img_c->opacity_);
+        ImageData *rgb_img_data = RGBFromPalettised(
+            tmp_img_data, what_palette ? what_palette : (const uint8_t *)&playpal_data[0], tmp_img_c->opacity_);
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
@@ -849,6 +853,8 @@ static void HD_get_lightest_color(coal::VM *vm, int argc)
     rgb[1] = epi::GetRGBAGreen(col);
     rgb[2] = epi::GetRGBABlue(col);
     delete tmp_img_data;
+    if (what_palette)
+        delete[] what_palette;
     vm->ReturnVector(rgb);
 }
 
@@ -856,20 +862,21 @@ static void HD_get_darkest_color(coal::VM *vm, int argc)
 {
     EPI_UNUSED(argc);
 
-    double         rgb[3];
-    const char    *name         = vm->AccessParamString(0);
-    double        *from_x       = vm->AccessParam(1);
-    double        *to_x         = vm->AccessParam(2);
-    double        *from_y       = vm->AccessParam(3);
-    double        *to_y         = vm->AccessParam(4);
-    const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    double       rgb[3];
+    const char  *name         = vm->AccessParamString(0);
+    double      *from_x       = vm->AccessParam(1);
+    double      *to_x         = vm->AccessParam(2);
+    double      *from_y       = vm->AccessParam(3);
+    double      *to_y         = vm->AccessParam(4);
+    uint8_t     *what_palette = nullptr;
+    const Image *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
-        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
+        what_palette = LoadLumpIntoMemory(tmp_img_c->source_palette_);
     ImageData *tmp_img_data = ReadAsEpiBlock((Image *)tmp_img_c);
     if (tmp_img_data->depth_ == 1)
     {
-        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, tmp_img_c->opacity_);
+        ImageData *rgb_img_data = RGBFromPalettised(
+            tmp_img_data, what_palette ? what_palette : (const uint8_t *)&playpal_data[0], tmp_img_c->opacity_);
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
@@ -879,6 +886,8 @@ static void HD_get_darkest_color(coal::VM *vm, int argc)
     rgb[1] = epi::GetRGBAGreen(col);
     rgb[2] = epi::GetRGBABlue(col);
     delete tmp_img_data;
+    if (what_palette)
+        delete[] what_palette;
     vm->ReturnVector(rgb);
 }
 
@@ -886,20 +895,21 @@ static void HD_get_average_hue(coal::VM *vm, int argc)
 {
     EPI_UNUSED(argc);
 
-    double         rgb[3];
-    const char    *name         = vm->AccessParamString(0);
-    double        *from_x       = vm->AccessParam(1);
-    double        *to_x         = vm->AccessParam(2);
-    double        *from_y       = vm->AccessParam(3);
-    double        *to_y         = vm->AccessParam(4);
-    const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    double       rgb[3];
+    const char  *name         = vm->AccessParamString(0);
+    double      *from_x       = vm->AccessParam(1);
+    double      *to_x         = vm->AccessParam(2);
+    double      *from_y       = vm->AccessParam(3);
+    double      *to_y         = vm->AccessParam(4);
+    uint8_t     *what_palette = nullptr;
+    const Image *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
-        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
+        what_palette = LoadLumpIntoMemory(tmp_img_c->source_palette_);
     ImageData *tmp_img_data = ReadAsEpiBlock((Image *)tmp_img_c);
     if (tmp_img_data->depth_ == 1)
     {
-        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, tmp_img_c->opacity_);
+        ImageData *rgb_img_data = RGBFromPalettised(
+            tmp_img_data, what_palette ? what_palette : (const uint8_t *)&playpal_data[0], tmp_img_c->opacity_);
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
@@ -910,6 +920,8 @@ static void HD_get_average_hue(coal::VM *vm, int argc)
     rgb[0] = epi::GetRGBARed(hue);
     rgb[1] = epi::GetRGBAGreen(hue);
     rgb[2] = epi::GetRGBABlue(hue);
+    if (what_palette)
+        delete[] what_palette;
     vm->ReturnVector(rgb);
 }
 
@@ -919,16 +931,17 @@ static void HD_get_average_top_border_color(coal::VM *vm, int argc)
 {
     EPI_UNUSED(argc);
 
-    double         rgb[3];
-    const char    *name         = vm->AccessParamString(0);
-    const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    double       rgb[3];
+    const char  *name         = vm->AccessParamString(0);
+    uint8_t     *what_palette = nullptr;
+    const Image *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
-        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
+        what_palette = LoadLumpIntoMemory(tmp_img_c->source_palette_);
     ImageData *tmp_img_data = ReadAsEpiBlock((Image *)tmp_img_c);
     if (tmp_img_data->depth_ == 1)
     {
-        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, tmp_img_c->opacity_);
+        ImageData *rgb_img_data = RGBFromPalettised(
+            tmp_img_data, what_palette ? what_palette : (const uint8_t *)&playpal_data[0], tmp_img_c->opacity_);
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
@@ -938,22 +951,25 @@ static void HD_get_average_top_border_color(coal::VM *vm, int argc)
     rgb[1]        = epi::GetRGBAGreen(col);
     rgb[2]        = epi::GetRGBABlue(col);
     delete tmp_img_data;
+    if (what_palette)
+        delete[] what_palette;
     vm->ReturnVector(rgb);
 }
 static void HD_get_average_bottom_border_color(coal::VM *vm, int argc)
 {
     EPI_UNUSED(argc);
 
-    double         rgb[3];
-    const char    *name         = vm->AccessParamString(0);
-    const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    double       rgb[3];
+    const char  *name         = vm->AccessParamString(0);
+    uint8_t     *what_palette = nullptr;
+    const Image *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
-        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
+        what_palette = LoadLumpIntoMemory(tmp_img_c->source_palette_);
     ImageData *tmp_img_data = ReadAsEpiBlock((Image *)tmp_img_c);
     if (tmp_img_data->depth_ == 1)
     {
-        ImageData *rgb_img_data = RGBFromPalettised(tmp_img_data, what_palette, tmp_img_c->opacity_);
+        ImageData *rgb_img_data = RGBFromPalettised(
+            tmp_img_data, what_palette ? what_palette : (const uint8_t *)&playpal_data[0], tmp_img_c->opacity_);
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
@@ -962,6 +978,8 @@ static void HD_get_average_bottom_border_color(coal::VM *vm, int argc)
     rgb[1]        = epi::GetRGBAGreen(col);
     rgb[2]        = epi::GetRGBABlue(col);
     delete tmp_img_data;
+    if (what_palette)
+        delete[] what_palette;
     vm->ReturnVector(rgb);
 }
 

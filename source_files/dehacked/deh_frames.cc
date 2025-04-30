@@ -1031,12 +1031,12 @@ void frames::SpecialAction(char *act_name, const State *st, int cur)
         break;
 
     case kA_PlaySound: {
-        const char *sfx = sounds::GetSound(ReadArg(st, 0));
+        std::string sfx = sounds::GetSound(ReadArg(st, 0));
 
         if (epi::StringCaseCompareASCII(sfx, "NULL") == 0)
             strcpy(act_name, "NOTHING");
         else
-            stbsp_sprintf(act_name, "PLAYSOUND(\"%s\")", sfx);
+            stbsp_sprintf(act_name, "PLAYSOUND(\"%s\")", sfx.c_str());
     }
     break;
 
@@ -1050,11 +1050,11 @@ void frames::SpecialAction(char *act_name, const State *st, int cur)
         }
         else
         {
-            const char *sfx = nullptr;
+            std::string sfx;
             if (sfx_id > 0)
                 sfx = sounds::GetSound(sfx_id);
-            if (sfx != nullptr && epi::StringCaseCompareASCII(sfx, "NULL") == 0)
-                sfx = nullptr;
+            if (!sfx.empty() && epi::StringCaseCompareASCII(sfx, "NULL") == 0)
+                sfx.clear();
 
             const char *atk_name = things::AddScratchAttack(damage, sfx);
             stbsp_sprintf(act_name, "CLOSE_ATTACK(%s)", atk_name);

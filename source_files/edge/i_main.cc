@@ -45,10 +45,11 @@ extern "C"
 
         executable_path = SDL_GetBasePath();
 
-        // Run EDGE. it never returns
         EdgeMain(argc, (const char **)argv);
+        EdgeShutdown();
+        SystemShutdown();
 
-        return 0;
+        return EXIT_SUCCESS;
     }
 
 } // extern "C"

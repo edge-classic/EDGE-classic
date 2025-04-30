@@ -1,9 +1,8 @@
 ##################################################
 # Setup Info
 ##################################################
-# Set EDGE_SANITIZE cmake option 
-# export ASAN_OPTIONS=detect_leaks=1
-# export LSAN_OPTIONS=suppressions=ASanSuppress.txt
+# Set EDGE_SANITIZE_THREADS cmake option 
+# export TSAN_OPTIONS=suppressions=TSanSuppress.txt
 
 ##################################################
 # Investigate: High Priority
@@ -14,10 +13,16 @@
 # Investigate: Low Priority
 ##################################################
 
+# Various data races get triggered throughout the 
+# lifetime of the program on Linux, starting from 
+# the initialization of the program window. Unsure
+# if this can be addressed
+called_from_lib:libgallium*
+
+# Usually triggered on shutdown on Linux; like
+# the above, not sure if it can be addressed
+deadlock:_dbus_*
 
 ##################################################
 # Ignore
 ##################################################
-
-# SDL internal; likely cannot do anything about this
-leak:SDL_InitSubSystem_REAL

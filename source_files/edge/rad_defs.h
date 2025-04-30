@@ -225,8 +225,15 @@ struct ScriptBenefitParameter : public RADScriptParameter
 {
     ~ScriptBenefitParameter()
     {
-        delete benefit;
-        benefit = nullptr;
+        if (benefit)
+        {
+            while (benefit)
+            {
+                Benefit *bene = benefit;
+                benefit       = benefit->next;
+                delete bene;
+            }
+        }
     }
 
     Benefit *benefit = nullptr;
@@ -611,6 +618,11 @@ struct ScriptWaitUntilDeadParameter : public RADScriptParameter
 {
     ~ScriptWaitUntilDeadParameter()
     {
+        for (int i = 0; i < 10; ++i)
+        {
+            if (mon_names[i])
+                epi::CStringFree(mon_names[i]);
+        }
     }
 
     // tag number to give the monsters which we'll wait on

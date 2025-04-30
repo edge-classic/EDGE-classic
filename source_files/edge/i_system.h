@@ -60,11 +60,6 @@ void              LogDebug(const char *message, ...);
 // the platform code needs to (e.g. freeing all other resources).
 void SystemShutdown(void);
 
-// Exit the program immediately, using the given `exitnum' as the
-// program's exit status.  This is the very last thing done, and
-// SystemShutdown() is guaranteed to have already been called.
-[[noreturn]] void CloseProgram(int exitnum);
-
 // -AJA- 2005/01/21: sleep for the given number of milliseconds.
 void SleepForMilliseconds(int millisecs);
 

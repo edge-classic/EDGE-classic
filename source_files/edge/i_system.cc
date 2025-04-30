@@ -54,11 +54,6 @@ void SystemStartup(void)
     StartupAudio();
 }
 
-void CloseProgram(int exitnum)
-{
-    exit(exitnum);
-}
-
 void LogWarning(const char *warning, ...)
 {
     va_list argptr;
@@ -98,7 +93,7 @@ void LogWarning(const char *warning, ...)
     // trigger debugger
     abort();
 #else
-    CloseProgram(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 #endif
 }
 

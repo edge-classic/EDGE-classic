@@ -89,7 +89,8 @@ class VM
 };
 
 // create a new COAL virtual machine
-VM *CreateVM();
+VM  *CreateVM();
+void DeleteVM(VM *vm);
 
 } // namespace coal
 

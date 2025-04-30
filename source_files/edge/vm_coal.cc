@@ -452,6 +452,12 @@ void InitializeCOAL()
     COALRegisterPlaysim();
 }
 
+void ShutdownCOAL()
+{
+    if (ui_vm)
+        coal::DeleteVM(ui_vm);
+}
+
 void COALAddScript(int type, std::string &data, const std::string &source)
 {
     unread_scripts.push_back(PendingCOALScript{type, "", source});

@@ -1363,7 +1363,7 @@ void DeathBot::Think()
     cmd_.weapon = -1;
 
     // do nothing when game is paused
-    if (paused)
+    if (paused || console_active)
         return;
 
     MapObject *mo = pl_->map_object_;

@@ -454,14 +454,14 @@ static void RenderSkyCylinder(void)
     // override the normal sky - Dasho
     if (sky_ref)
     {
-        if (!AlmostEquals(sky_ref->old_offset.X, sky_ref->offset.X) && !paused && !menu_active && !time_stop_active &&
-            !erraticism_active)
+        if (!AlmostEquals(sky_ref->old_offset.X, sky_ref->offset.X) && !console_active && !paused && !menu_active &&
+            !time_stop_active && !erraticism_active)
             offx = HMM_Lerp(sky_ref->old_offset.X, fractional_tic, sky_ref->offset.X);
         else
             offx = sky_ref->offset.X;
         offx /= (1024.0f * 16);
-        if (!AlmostEquals(sky_ref->old_offset.Y, sky_ref->offset.Y) && !paused && !menu_active && !time_stop_active &&
-            !erraticism_active)
+        if (!AlmostEquals(sky_ref->old_offset.Y, sky_ref->offset.Y) && !console_active && !paused && !menu_active &&
+            !time_stop_active && !erraticism_active)
             offy = HMM_Lerp(sky_ref->old_offset.Y, fractional_tic, sky_ref->offset.Y);
         else
             offy = sky_ref->offset.Y;
@@ -478,14 +478,14 @@ static void RenderSkyCylinder(void)
         }
         if (!AlmostEquals(current_map->sky_scroll_x_, 0.0f))
         {
-            if (!paused && !menu_active && !time_stop_active && !erraticism_active)
+            if (!console_active && !paused && !menu_active && !time_stop_active && !erraticism_active)
                 offx = HMM_Lerp(ddf_old_sky_scroll.X, fractional_tic, ddf_sky_scroll.X);
             else
                 offx = ddf_sky_scroll.X;
         }
         if (!AlmostEquals(current_map->sky_scroll_y_, 0.0f))
         {
-            if (!paused && !menu_active && !time_stop_active && !erraticism_active)
+            if (!console_active && !paused && !menu_active && !time_stop_active && !erraticism_active)
                 offy = HMM_Lerp(ddf_old_sky_scroll.Y, fractional_tic, ddf_sky_scroll.Y);
             else
                 offy = ddf_sky_scroll.Y;

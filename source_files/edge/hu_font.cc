@@ -325,7 +325,7 @@ void Font::LoadFontImage()
             font_image_ = ImageLookup(definition_->image_name_.c_str(), kImageNamespaceGraphic,
                                       kImageLookupExact | kImageLookupNull);
         else
-            FatalError("LoadFontImage: nullptr image name provided for font %s!", definition_->name_.c_str());
+            FatalError("LoadFontImage: No image name provided for font %s!", definition_->name_.c_str());
         if (!font_image_)
             FatalError("LoadFontImage: Image %s not found for font %s!", definition_->image_name_.c_str(),
                        definition_->name_.c_str());
@@ -353,7 +353,7 @@ void Font::LoadFontImage()
             int px = i % 16;
             int py = 15 - i / 16;
             char_data->DetermineRealBounds(nullptr, &real_left, &real_right, nullptr, background, px * char_width,
-                                           py * char_height, px * char_width + char_width,
+                                           px * char_width + char_width, py * char_height,
                                            py * char_height + char_height);
             individual_char_widths_[i] = font_image_->scale_x_ * (real_right - real_left);
             if (definition_->default_size_ > 0.0)

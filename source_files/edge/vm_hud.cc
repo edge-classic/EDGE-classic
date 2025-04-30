@@ -583,7 +583,7 @@ static void HD_game_paused(coal::VM *vm, int argc)
 {
     EPI_UNUSED(argc);
 
-    if (paused || menu_active || rts_menu_active || time_stop_active || erraticism_active)
+    if (console_active || paused || menu_active || rts_menu_active || time_stop_active || erraticism_active)
     {
         vm->ReturnFloat(1);
     }

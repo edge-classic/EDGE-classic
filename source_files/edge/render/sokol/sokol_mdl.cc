@@ -734,7 +734,8 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
 
     BAMAngleToMatrix(tilt ? ~mo->vertical_angle_ : 0, &data.mouselook_x_vector_, &data.mouselook_z_vector_);
 
-    if (!paused && !menu_active && !rts_menu_active && (is_weapon || (!time_stop_active && !erraticism_active)))
+    if (!console_active && !paused && !menu_active && !rts_menu_active &&
+        (is_weapon || (!time_stop_active && !erraticism_active)))
     {
         if (is_weapon)
             BAMAngleToMatrix(tilt ? ~epi::BAMInterpolate(mo->old_vertical_angle_, mo->vertical_angle_, fractional_tic)

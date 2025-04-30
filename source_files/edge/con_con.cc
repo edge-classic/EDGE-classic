@@ -101,6 +101,8 @@ static int  input_position = 0;
 
 int console_cursor;
 
+bool console_active = false;
+
 static constexpr uint8_t kConsoleKeyRepeatDelay = ((250 * kTicRate) / 1000);
 static constexpr uint8_t kConsoleKeyRepeatRate  = (kTicRate / 15);
 
@@ -1269,15 +1271,16 @@ bool ConsoleResponder(InputEvent *ev)
     {
         ClearEventInput();
         SetConsoleVisibility(kConsoleToggle);
-        // Dasho - Was "return true", now sneakily change the
-        // input to key_pause and let GameResponder pause if appropriate
-        // Will I regret this?
-        ev->value.key.sym = key_pause;
-        return false;
+        return true;
     }
 
     if (console_visible == kConsoleNotVisible)
+    {
+        console_active = false;
         return false;
+    }
+    else
+        console_active = true;
 
     int key = GetKeycode(ev);
     if (key < 0)

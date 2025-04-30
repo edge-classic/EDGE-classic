@@ -606,7 +606,7 @@ static void GetRotatedCoords(float sx, float sy, float &dx, float &dy)
 
     if (rotate_map)
     {
-        if (!paused && !menu_active)
+        if (!console_active && !paused && !menu_active)
         {
             dx -= frame_lerped_x;
             dy -= frame_lerped_y;
@@ -633,7 +633,7 @@ static inline BAMAngle GetRotatedAngle(BAMAngle src)
 {
     if (rotate_map)
     {
-        if (!paused && !menu_active)
+        if (!console_active && !paused && !menu_active)
         {
             float ang = epi::BAMInterpolate(frame_focus->old_angle_, frame_focus->angle_, fractional_tic);
             return src + kBAMAngle90 - ang;
@@ -1118,7 +1118,7 @@ static void DrawObjectBounds(MapObject *mo, RGBAColor rgb)
     if (R < 2)
         R = 2;
 
-    if (!paused && !menu_active)
+    if (!console_active && !paused && !menu_active)
     {
         lx = HMM_Lerp(mo->old_x_, fractional_tic, mo->x) - R;
         ly = HMM_Lerp(mo->old_y_, fractional_tic, mo->y) - R;
@@ -1226,7 +1226,7 @@ static void AddPlayer(MapObject *mo)
 
     float mx, my, ma;
 
-    if (!paused && !menu_active && mo->interpolate_)
+    if (!console_active && !paused && !menu_active && mo->interpolate_)
     {
         mx = HMM_Lerp(mo->old_x_, fractional_tic, mo->x);
         my = HMM_Lerp(mo->old_y_, fractional_tic, mo->y);
@@ -1288,7 +1288,7 @@ static void AddThing(MapObject *mo)
 
     float mx, my, ma;
 
-    if (!paused && !menu_active && mo->interpolate_)
+    if (!console_active && !paused && !menu_active && mo->interpolate_)
     {
         mx = HMM_Lerp(mo->old_x_, fractional_tic, mo->x);
         my = HMM_Lerp(mo->old_y_, fractional_tic, mo->y);
@@ -1372,7 +1372,7 @@ void AutomapRender(float x, float y, float w, float h, MapObject *focus)
 
     if (follow_player)
     {
-        if (!paused && !menu_active)
+        if (!console_active && !paused && !menu_active)
         {
             map_center_x = HMM_Lerp(frame_focus->old_x_, fractional_tic, frame_focus->x);
             map_center_y = HMM_Lerp(frame_focus->old_y_, fractional_tic, frame_focus->y);

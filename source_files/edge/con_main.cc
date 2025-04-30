@@ -150,13 +150,18 @@ int ConsoleCommandMove(char **argv, int argc)
 
 int ConsoleCommandSpawn(char **argv, int argc)
 {
-    if (argc != 4)
+    if (argc < 2)
     {
-        ConsoleMessage(kConsoleOnly, "Usage: spawn <name> <x> <y>\n");
+        ConsoleMessage(kConsoleOnly, "Usage: spawn <name or id #> <optional x y>\n");
+        return 1;
+    }
+    if (argc > 2 && argc != 4)
+    {
+        ConsoleMessage(kConsoleOnly, "Usage: spawn <name or id #> <optional x y>\n");
         return 1;
     }
 
-    if (game_state != kGameStateLevel)
+    if (game_state != kGameStateLevel || !players[console_player] || !players[console_player]->map_object_)
     {
         ConsoleMessage(kConsoleOnly, "Need to be in a level to spawn something!\n");
         return 1;
@@ -177,8 +182,28 @@ int ConsoleCommandSpawn(char **argv, int argc)
         return 1;
     }
 
-    float x = atof(argv[2]);
-    float y = atof(argv[3]);
+    float x;
+    float y;
+    float z;
+
+    if (argc == 2)
+    {
+        MapObject *pl = players[console_player]->map_object_;
+
+        x = pl->x;
+        y = pl->y;
+        z = pl->z;
+
+        // spawn thing a little bit in front of the player
+        x += info->radius_ * 4 * epi::BAMCos(pl->angle_);
+        y += info->radius_ * 4 * epi::BAMSin(pl->angle_);
+    }
+    else
+    {
+        x = atof(argv[2]);
+        y = atof(argv[3]);
+        z = info->flags_ & kMapObjectFlagSpawnCeiling ? kOnCeilingZ : kOnFloorZ;
+    }
 
     if (BlockmapGetX(x) < 0 || BlockmapGetX(x) > blockmap_width - 1)
     {
@@ -192,13 +217,15 @@ int ConsoleCommandSpawn(char **argv, int argc)
         return 1;
     }
 
-    MapObject *mo = CreateMapObject(x, y, info->flags_ & kMapObjectFlagSpawnCeiling ? kOnCeilingZ : kOnFloorZ, info);
+    MapObject *mo = CreateMapObject(x, y, z, info);
 
     if (!mo)
     {
         ConsoleMessage(kConsoleOnly, "Spawn %s at (%g,%g) failed!\n", argv[1], x, y);
         return 1;
     }
+    else
+        mo->angle_ = players[console_player]->map_object_->angle_;
 
     return 0;
 }

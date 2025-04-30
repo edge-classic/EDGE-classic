@@ -52,7 +52,7 @@ extern ConsoleVariable erraticism;
 //
 void MapObjectTicker()
 {
-    if (paused)
+    if (paused || console_active)
         return;
 
     // pause if in menu and at least one tic has been run

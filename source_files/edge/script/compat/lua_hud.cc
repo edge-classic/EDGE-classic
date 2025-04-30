@@ -571,7 +571,7 @@ static int HD_draw_number(lua_State *L)
 //
 static int HD_game_paused(lua_State *L)
 {
-    if (paused || menu_active || rts_menu_active || time_stop_active || erraticism_active)
+    if (console_active || paused || menu_active || rts_menu_active || time_stop_active || erraticism_active)
     {
         lua_pushboolean(L, 1);
     }

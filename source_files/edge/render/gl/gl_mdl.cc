@@ -726,7 +726,8 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
 
     bool tilt = is_weapon || (mo->flags_ & kMapObjectFlagMissile) || (mo->hyper_flags_ & kHyperFlagForceModelTilt);
 
-    if (!paused && !menu_active && !rts_menu_active && (is_weapon || (!time_stop_active && !erraticism_active)))
+    if (!console_active && !paused && !menu_active && !rts_menu_active &&
+        (is_weapon || (!time_stop_active && !erraticism_active)))
     {
         if (is_weapon)
             BAMAngleToMatrix(tilt ? ~epi::BAMInterpolate(mo->old_vertical_angle_, mo->vertical_angle_, fractional_tic)

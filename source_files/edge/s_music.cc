@@ -141,7 +141,7 @@ void ChangeMusic(int entry_number, bool loop)
     if (length < 4)
     {
         delete F;
-        delete data;
+        delete[] data;
         LogPrint("ChangeMusic: ignored short data (%d bytes)\n", length);
         return;
     }
@@ -213,7 +213,7 @@ void ChangeMusic(int entry_number, bool loop)
 
     default:
         delete F;
-        delete data;
+        delete[] data;
         LogPrint("ChangeMusic: unknown format\n");
         break;
     }

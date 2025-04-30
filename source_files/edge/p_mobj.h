@@ -36,6 +36,7 @@
 #include "con_var.h"
 #include "ddf_types.h"
 #include "m_math.h"
+#include "r_shader.h"
 
 // forward decl.
 class AttackDefinition;
@@ -410,7 +411,11 @@ class MapObject : public Position
 
   protected:
     MapObject(){};
-    ~MapObject(){};
+    ~MapObject()
+    {
+        if (dynamic_light_.shader)
+            delete dynamic_light_.shader;
+    };
 };
 
 // Item-in-Respawn-que Structure -ACB- 1998/07/30

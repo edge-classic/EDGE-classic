@@ -39,16 +39,15 @@ extern "C"
         if (SDL_SetMemoryFunctions(mi_malloc, mi_calloc, mi_realloc, mi_free) != 0)
             FatalError("Couldn't init SDL memory functions!!\n%s\n", SDL_GetError());
 #endif
-
         if (SDL_Init(0) < 0)
             FatalError("Couldn't init SDL!!\n%s\n", SDL_GetError());
 
         executable_path = SDL_GetBasePath();
 
-        // Run EDGE. it never returns
         EdgeMain(argc, (const char **)argv);
-
-        return 0;
+        EdgeShutdown();
+        SystemShutdown();
+        return EXIT_SUCCESS;
     }
 
 } // extern "C"

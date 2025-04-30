@@ -114,6 +114,8 @@ class Font
 
 class FontContainer : public std::vector<Font *>
 {
+    friend class Font;
+
   public:
     FontContainer()
     {
@@ -126,11 +128,27 @@ class FontContainer : public std::vector<Font *>
             delete f;
             f = nullptr;
         }
+        for (std::unordered_map<epi::StringHash, stbtt_fontinfo *>::iterator iter     = ttf_infos.begin(),
+                                                                             iter_end = ttf_infos.end();
+             iter != iter_end; ++iter)
+        {
+            delete iter->second;
+        }
+        for (std::unordered_map<epi::StringHash, uint8_t *>::iterator iter     = ttf_buffers.begin(),
+                                                                      iter_end = ttf_buffers.end();
+             iter != iter_end; ++iter)
+        {
+            delete[] iter->second;
+        }
     }
 
   public:
     // Search Functions
     Font *Lookup(FontDefinition *definition);
+
+  private:
+    std::unordered_map<epi::StringHash, stbtt_fontinfo *> ttf_infos;
+    std::unordered_map<epi::StringHash, uint8_t *>        ttf_buffers;
 };
 
 extern FontContainer hud_fonts;

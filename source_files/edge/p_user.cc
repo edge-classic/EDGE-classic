@@ -977,8 +977,6 @@ bool PlayerThink(Player *player)
             room_check *= 0.125f;
             if (EDGE_IMAGE_IS_SKY(player->map_object_->subsector_->sector->ceiling))
             {
-                outdoor_reverb = true;
-                ma_delay_node_set_decay(&reverb_delay_node, room_check * 0.00004316f);
                 if (dynamic_reverb.d_ == 1) // Headphones
                     ddf::ReverbDefinition::kOutdoorWeak.ApplyReverb(&reverb_node);
                 else                        // Speakers
@@ -995,7 +993,6 @@ bool PlayerThink(Player *player)
             }
             else
             {
-                outdoor_reverb = false;
                 if (dynamic_reverb.d_ == 1) // Headphones
                     ddf::ReverbDefinition::kIndoorWeak.ApplyReverb(&reverb_node);
                 else                        // Speakers

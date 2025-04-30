@@ -1748,6 +1748,18 @@ DamageClass::DamageClass(const DamageClass &rhs)
 //
 DamageClass::~DamageClass()
 {
+    while (damage_unless_)
+    {
+        Benefit *bene  = damage_unless_;
+        damage_unless_ = damage_unless_->next;
+        delete bene;
+    }
+    while (damage_if_)
+    {
+        Benefit *bene = damage_if_;
+        damage_if_    = damage_if_->next;
+        delete bene;
+    }
 }
 
 //
@@ -1772,13 +1784,25 @@ void DamageClass::Copy(const DamageClass &src)
     instakill_  = src.instakill_;
     if (src.damage_unless_)
     {
-        damage_unless_  = new Benefit;
-        *damage_unless_ = *src.damage_unless_;
+        Benefit *src_bene = src.damage_unless_;
+        while (src_bene)
+        {
+            damage_unless_       = new Benefit(*src_bene);
+            src_bene             = src_bene->next;
+            damage_unless_->next = nullptr;
+            damage_unless_       = damage_unless_->next;
+        }
     }
     if (src.damage_if_)
     {
-        damage_if_  = new Benefit;
-        *damage_if_ = *src.damage_if_;
+        Benefit *src_bene = src.damage_if_;
+        while (src_bene)
+        {
+            damage_unless_       = new Benefit(*src_bene);
+            src_bene             = src_bene->next;
+            damage_unless_->next = nullptr;
+            damage_unless_       = damage_unless_->next;
+        }
     }
     only_affects_ = src.only_affects_;
     all_players_  = src.all_players_;
@@ -1794,16 +1818,26 @@ void DamageClass::Default(DamageClassDefault def)
     switch (def)
     {
     case kDamageClassDefaultMobjChoke: {
-        nominal_             = 6.0f;
-        linear_max_          = 14.0f;
-        error_               = -1.0f;
-        delay_               = 2 * kTicRate;
-        obituary_            = "OB_DROWN";
-        no_armour_           = true;
-        bypass_all_          = false;
-        instakill_           = false;
-        damage_unless_       = nullptr;
-        damage_if_           = nullptr;
+        nominal_    = 6.0f;
+        linear_max_ = 14.0f;
+        error_      = -1.0f;
+        delay_      = 2 * kTicRate;
+        obituary_   = "OB_DROWN";
+        no_armour_  = true;
+        bypass_all_ = false;
+        instakill_  = false;
+        while (damage_unless_)
+        {
+            Benefit *bene  = damage_unless_;
+            damage_unless_ = damage_unless_->next;
+            delete bene;
+        }
+        while (damage_if_)
+        {
+            Benefit *bene = damage_if_;
+            damage_if_    = damage_if_->next;
+            delete bene;
+        }
         only_affects_        = 0;
         damage_flash_colour_ = kRGBANoValue;
         all_players_         = false;
@@ -1811,15 +1845,25 @@ void DamageClass::Default(DamageClassDefault def)
     }
 
     case kDamageClassDefaultSector: {
-        nominal_             = 0.0f;
-        linear_max_          = -1.0f;
-        error_               = -1.0f;
-        delay_               = 31;
-        no_armour_           = false;
-        bypass_all_          = false;
-        instakill_           = false;
-        damage_unless_       = nullptr;
-        damage_if_           = nullptr;
+        nominal_    = 0.0f;
+        linear_max_ = -1.0f;
+        error_      = -1.0f;
+        delay_      = 31;
+        no_armour_  = false;
+        bypass_all_ = false;
+        instakill_  = false;
+        while (damage_unless_)
+        {
+            Benefit *bene  = damage_unless_;
+            damage_unless_ = damage_unless_->next;
+            delete bene;
+        }
+        while (damage_if_)
+        {
+            Benefit *bene = damage_if_;
+            damage_if_    = damage_if_->next;
+            delete bene;
+        }
         only_affects_        = 0;
         damage_flash_colour_ = kRGBANoValue;
         all_players_         = false;
@@ -1829,15 +1873,25 @@ void DamageClass::Default(DamageClassDefault def)
     case kDamageClassDefaultAttack:
     case kDamageClassDefaultMobj:
     default: {
-        nominal_             = 0.0f;
-        linear_max_          = -1.0f;
-        error_               = -1.0f;
-        delay_               = 0;
-        no_armour_           = false;
-        bypass_all_          = false;
-        instakill_           = false;
-        damage_unless_       = nullptr;
-        damage_if_           = nullptr;
+        nominal_    = 0.0f;
+        linear_max_ = -1.0f;
+        error_      = -1.0f;
+        delay_      = 0;
+        no_armour_  = false;
+        bypass_all_ = false;
+        instakill_  = false;
+        while (damage_unless_)
+        {
+            Benefit *bene  = damage_unless_;
+            damage_unless_ = damage_unless_->next;
+            delete bene;
+        }
+        while (damage_if_)
+        {
+            Benefit *bene = damage_if_;
+            damage_if_    = damage_if_->next;
+            delete bene;
+        }
         only_affects_        = 0;
         damage_flash_colour_ = kRGBANoValue;
         all_players_         = false;

@@ -279,7 +279,7 @@ extern LiquidSwirl swirling_flats;
 
 bool InitializeImages(void);
 void AnimationTicker(void);
-void DeleteAllImages(void);
+void DeleteAllImages(bool shutdown = false);
 
 void         CreateFlats(const std::vector<int> &lumps);
 void         CreateTextures(struct TextureDefinition **defs, int number);

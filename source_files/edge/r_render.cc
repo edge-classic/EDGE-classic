@@ -2023,7 +2023,7 @@ void RendererShutdownLevel()
     ShutdownSky();
 }
 
-static void UpdateSectorInterpolation(Sector *sector)
+void UpdateSectorInterpolation(Sector *sector)
 {
     if (!time_stop_active && !console_active && !paused && !erraticism_active && !menu_active && !rts_menu_active)
     {

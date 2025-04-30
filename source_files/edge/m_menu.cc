@@ -1629,10 +1629,7 @@ static void QuitResponse(int ch)
 
     LogPrint("Exiting...\n");
 
-    EdgeShutdown();
-    SystemShutdown();
-
-    CloseProgram(EXIT_SUCCESS);
+    app_state = kApplicationPendingQuit;
 }
 
 //
@@ -1704,9 +1701,7 @@ void ImmediateQuit()
 
     LogPrint("Exiting...\n");
 
-    SystemShutdown();
-
-    CloseProgram(EXIT_SUCCESS);
+    app_state = kApplicationPendingQuit;
 }
 
 //----------------------------------------------------------------------------
@@ -3229,6 +3224,15 @@ void MenuInitialize(void)
 
     OptionMenuInitialize();
     NetworkGameInitialize();
+}
+
+void MenuShutdown(void)
+{
+    for (int i = 0; i < 8; ++i)
+    {
+        if (save_extended_information_slots[i].save_texture_id)
+            render_state->DeleteTexture(&save_extended_information_slots[i].save_texture_id);
+    }
 }
 
 //--- editor settings ---

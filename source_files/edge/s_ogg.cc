@@ -92,59 +92,60 @@ typedef struct
     ma_uint64               cursor;
     epi::MemFile           *memfile;
     OggVorbis_File          ogg;
-} ma_stbvorbis;
+} ma_minivorbis;
 
-static ma_result ma_stbvorbis_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell,
-                                   void *pReadSeekTellUserData, const ma_decoding_backend_config *pConfig,
-                                   const ma_allocation_callbacks *pAllocationCallbacks, ma_stbvorbis *pVorbis);
-static ma_result ma_stbvorbis_init_memory(const void *pData, size_t dataSize, const ma_decoding_backend_config *pConfig,
-                                          const ma_allocation_callbacks *pAllocationCallbacks, ma_stbvorbis *pVorbis);
-static void      ma_stbvorbis_uninit(ma_stbvorbis *pVorbis, const ma_allocation_callbacks *pAllocationCallbacks);
-static ma_result ma_stbvorbis_read_pcm_frames(ma_stbvorbis *pVorbis, void *pFramesOut, ma_uint64 frameCount,
-                                              ma_uint64 *pFramesRead);
-static ma_result ma_stbvorbis_seek_to_pcm_frame(ma_stbvorbis *pVorbis, ma_uint64 frameIndex);
-static ma_result ma_stbvorbis_get_data_format(const ma_stbvorbis *pVorbis, ma_format *pFormat, ma_uint32 *pChannels,
-                                              ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap);
-static ma_result ma_stbvorbis_get_cursor_in_pcm_frames(const ma_stbvorbis *pVorbis, ma_uint64 *pCursor);
-static ma_result ma_stbvorbis_get_length_in_pcm_frames(ma_stbvorbis *pVorbis, ma_uint64 *pLength);
+static ma_result ma_minivorbis_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell,
+                                    void *pReadSeekTellUserData, const ma_decoding_backend_config *pConfig,
+                                    const ma_allocation_callbacks *pAllocationCallbacks, ma_minivorbis *pVorbis);
+static ma_result ma_minivorbis_init_memory(const void *pData, size_t dataSize,
+                                           const ma_decoding_backend_config *pConfig,
+                                           const ma_allocation_callbacks *pAllocationCallbacks, ma_minivorbis *pVorbis);
+static void      ma_minivorbis_uninit(ma_minivorbis *pVorbis, const ma_allocation_callbacks *pAllocationCallbacks);
+static ma_result ma_minivorbis_read_pcm_frames(ma_minivorbis *pVorbis, void *pFramesOut, ma_uint64 frameCount,
+                                               ma_uint64 *pFramesRead);
+static ma_result ma_minivorbis_seek_to_pcm_frame(ma_minivorbis *pVorbis, ma_uint64 frameIndex);
+static ma_result ma_minivorbis_get_data_format(const ma_minivorbis *pVorbis, ma_format *pFormat, ma_uint32 *pChannels,
+                                               ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap);
+static ma_result ma_minivorbis_get_cursor_in_pcm_frames(const ma_minivorbis *pVorbis, ma_uint64 *pCursor);
+static ma_result ma_minivorbis_get_length_in_pcm_frames(ma_minivorbis *pVorbis, ma_uint64 *pLength);
 
-static ma_result ma_stbvorbis_ds_read(ma_data_source *pDataSource, void *pFramesOut, ma_uint64 frameCount,
-                                      ma_uint64 *pFramesRead)
+static ma_result ma_minivorbis_ds_read(ma_data_source *pDataSource, void *pFramesOut, ma_uint64 frameCount,
+                                       ma_uint64 *pFramesRead)
 {
-    return ma_stbvorbis_read_pcm_frames((ma_stbvorbis *)pDataSource, pFramesOut, frameCount, pFramesRead);
+    return ma_minivorbis_read_pcm_frames((ma_minivorbis *)pDataSource, pFramesOut, frameCount, pFramesRead);
 }
 
-static ma_result ma_stbvorbis_ds_seek(ma_data_source *pDataSource, ma_uint64 frameIndex)
+static ma_result ma_minivorbis_ds_seek(ma_data_source *pDataSource, ma_uint64 frameIndex)
 {
-    return ma_stbvorbis_seek_to_pcm_frame((ma_stbvorbis *)pDataSource, frameIndex);
+    return ma_minivorbis_seek_to_pcm_frame((ma_minivorbis *)pDataSource, frameIndex);
 }
 
-static ma_result ma_stbvorbis_ds_get_data_format(ma_data_source *pDataSource, ma_format *pFormat, ma_uint32 *pChannels,
-                                                 ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
+static ma_result ma_minivorbis_ds_get_data_format(ma_data_source *pDataSource, ma_format *pFormat, ma_uint32 *pChannels,
+                                                  ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
 {
-    return ma_stbvorbis_get_data_format((ma_stbvorbis *)pDataSource, pFormat, pChannels, pSampleRate, pChannelMap,
-                                        channelMapCap);
+    return ma_minivorbis_get_data_format((ma_minivorbis *)pDataSource, pFormat, pChannels, pSampleRate, pChannelMap,
+                                         channelMapCap);
 }
 
-static ma_result ma_stbvorbis_ds_get_cursor(ma_data_source *pDataSource, ma_uint64 *pCursor)
+static ma_result ma_minivorbis_ds_get_cursor(ma_data_source *pDataSource, ma_uint64 *pCursor)
 {
-    return ma_stbvorbis_get_cursor_in_pcm_frames((ma_stbvorbis *)pDataSource, pCursor);
+    return ma_minivorbis_get_cursor_in_pcm_frames((ma_minivorbis *)pDataSource, pCursor);
 }
 
-static ma_result ma_stbvorbis_ds_get_length(ma_data_source *pDataSource, ma_uint64 *pLength)
+static ma_result ma_minivorbis_ds_get_length(ma_data_source *pDataSource, ma_uint64 *pLength)
 {
-    return ma_stbvorbis_get_length_in_pcm_frames((ma_stbvorbis *)pDataSource, pLength);
+    return ma_minivorbis_get_length_in_pcm_frames((ma_minivorbis *)pDataSource, pLength);
 }
 
-static ma_data_source_vtable g_ma_stbvorbis_ds_vtable = {ma_stbvorbis_ds_read,
-                                                         ma_stbvorbis_ds_seek,
-                                                         ma_stbvorbis_ds_get_data_format,
-                                                         ma_stbvorbis_ds_get_cursor,
-                                                         ma_stbvorbis_ds_get_length,
-                                                         NULL, /* onSetLooping */
-                                                         0};
+static ma_data_source_vtable g_ma_minivorbis_ds_vtable = {ma_minivorbis_ds_read,
+                                                          ma_minivorbis_ds_seek,
+                                                          ma_minivorbis_ds_get_data_format,
+                                                          ma_minivorbis_ds_get_cursor,
+                                                          ma_minivorbis_ds_get_length,
+                                                          NULL, /* onSetLooping */
+                                                          0};
 
-static ma_result ma_stbvorbis_init_internal(const ma_decoding_backend_config *pConfig, ma_stbvorbis *pVorbis)
+static ma_result ma_minivorbis_init_internal(const ma_decoding_backend_config *pConfig, ma_minivorbis *pVorbis)
 {
     ma_result             result;
     ma_data_source_config dataSourceConfig;
@@ -156,11 +157,11 @@ static ma_result ma_stbvorbis_init_internal(const ma_decoding_backend_config *pC
         return MA_INVALID_ARGS;
     }
 
-    EPI_CLEAR_MEMORY(pVorbis, ma_stbvorbis, 1);
+    EPI_CLEAR_MEMORY(pVorbis, ma_minivorbis, 1);
     pVorbis->format = ma_format_f32; /* Only supporting f32. */
 
     dataSourceConfig        = ma_data_source_config_init();
-    dataSourceConfig.vtable = &g_ma_stbvorbis_ds_vtable;
+    dataSourceConfig.vtable = &g_ma_minivorbis_ds_vtable;
 
     result = ma_data_source_init(&dataSourceConfig, &pVorbis->ds);
     if (result != MA_SUCCESS)
@@ -171,7 +172,7 @@ static ma_result ma_stbvorbis_init_internal(const ma_decoding_backend_config *pC
     return MA_SUCCESS;
 }
 
-static ma_result ma_stbvorbis_post_init(ma_stbvorbis *pVorbis)
+static ma_result ma_minivorbis_post_init(ma_minivorbis *pVorbis)
 {
     EPI_ASSERT(pVorbis != NULL);
 
@@ -188,15 +189,15 @@ static ma_result ma_stbvorbis_post_init(ma_stbvorbis *pVorbis)
     return MA_SUCCESS;
 }
 
-static ma_result ma_stbvorbis_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell,
-                                   void *pReadSeekTellUserData, const ma_decoding_backend_config *pConfig,
-                                   const ma_allocation_callbacks *pAllocationCallbacks, ma_stbvorbis *pVorbis)
+static ma_result ma_minivorbis_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell,
+                                    void *pReadSeekTellUserData, const ma_decoding_backend_config *pConfig,
+                                    const ma_allocation_callbacks *pAllocationCallbacks, ma_minivorbis *pVorbis)
 {
     EPI_UNUSED(pAllocationCallbacks);
 
     ma_result result;
 
-    result = ma_stbvorbis_init_internal(pConfig, pVorbis);
+    result = ma_minivorbis_init_internal(pConfig, pVorbis);
     if (result != MA_SUCCESS)
     {
         return result;
@@ -215,12 +216,13 @@ static ma_result ma_stbvorbis_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_
     return MA_SUCCESS;
 }
 
-static ma_result ma_stbvorbis_init_memory(const void *pData, size_t dataSize, const ma_decoding_backend_config *pConfig,
-                                          const ma_allocation_callbacks *pAllocationCallbacks, ma_stbvorbis *pVorbis)
+static ma_result ma_minivorbis_init_memory(const void *pData, size_t dataSize,
+                                           const ma_decoding_backend_config *pConfig,
+                                           const ma_allocation_callbacks *pAllocationCallbacks, ma_minivorbis *pVorbis)
 {
     ma_result result;
 
-    result = ma_stbvorbis_init_internal(pConfig, pVorbis);
+    result = ma_minivorbis_init_internal(pConfig, pVorbis);
     if (result != MA_SUCCESS)
     {
         return result;
@@ -241,7 +243,7 @@ static ma_result ma_stbvorbis_init_memory(const void *pData, size_t dataSize, co
         return MA_INVALID_DATA;
     }
 
-    result = ma_stbvorbis_post_init(pVorbis);
+    result = ma_minivorbis_post_init(pVorbis);
     if (result != MA_SUCCESS)
     {
         delete pVorbis->memfile;
@@ -251,7 +253,7 @@ static ma_result ma_stbvorbis_init_memory(const void *pData, size_t dataSize, co
     return MA_SUCCESS;
 }
 
-static void ma_stbvorbis_uninit(ma_stbvorbis *pVorbis, const ma_allocation_callbacks *pAllocationCallbacks)
+static void ma_minivorbis_uninit(ma_minivorbis *pVorbis, const ma_allocation_callbacks *pAllocationCallbacks)
 {
     EPI_UNUSED(pAllocationCallbacks);
 
@@ -267,8 +269,8 @@ static void ma_stbvorbis_uninit(ma_stbvorbis *pVorbis, const ma_allocation_callb
     ma_data_source_uninit(&pVorbis->ds);
 }
 
-static ma_result ma_stbvorbis_read_pcm_frames(ma_stbvorbis *pVorbis, void *pFramesOut, ma_uint64 frameCount,
-                                              ma_uint64 *pFramesRead)
+static ma_result ma_minivorbis_read_pcm_frames(ma_minivorbis *pVorbis, void *pFramesOut, ma_uint64 frameCount,
+                                               ma_uint64 *pFramesRead)
 {
     if (pFramesRead != NULL)
     {
@@ -294,7 +296,7 @@ static ma_result ma_stbvorbis_read_pcm_frames(ma_stbvorbis *pVorbis, void *pFram
     ma_uint64 framesLeft  = frameCount;
     float    *pFramesOutF = (float *)pFramesOut;
 
-    ma_stbvorbis_get_data_format(pVorbis, &format, &channels, NULL, NULL, 0);
+    ma_minivorbis_get_data_format(pVorbis, &format, &channels, NULL, NULL, 0);
 
     if (format == ma_format_f32)
     {
@@ -343,7 +345,7 @@ static ma_result ma_stbvorbis_read_pcm_frames(ma_stbvorbis *pVorbis, void *pFram
     return result;
 }
 
-static ma_result ma_stbvorbis_seek_to_pcm_frame(ma_stbvorbis *pVorbis, ma_uint64 frameIndex)
+static ma_result ma_minivorbis_seek_to_pcm_frame(ma_minivorbis *pVorbis, ma_uint64 frameIndex)
 {
     if (pVorbis == NULL)
     {
@@ -362,8 +364,8 @@ static ma_result ma_stbvorbis_seek_to_pcm_frame(ma_stbvorbis *pVorbis, ma_uint64
     return MA_SUCCESS;
 }
 
-static ma_result ma_stbvorbis_get_data_format(const ma_stbvorbis *pVorbis, ma_format *pFormat, ma_uint32 *pChannels,
-                                              ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
+static ma_result ma_minivorbis_get_data_format(const ma_minivorbis *pVorbis, ma_format *pFormat, ma_uint32 *pChannels,
+                                               ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
 {
     /* Defaults for safety. */
     if (pFormat != NULL)
@@ -411,7 +413,7 @@ static ma_result ma_stbvorbis_get_data_format(const ma_stbvorbis *pVorbis, ma_fo
     return MA_SUCCESS;
 }
 
-static ma_result ma_stbvorbis_get_cursor_in_pcm_frames(const ma_stbvorbis *pVorbis, ma_uint64 *pCursor)
+static ma_result ma_minivorbis_get_cursor_in_pcm_frames(const ma_minivorbis *pVorbis, ma_uint64 *pCursor)
 {
     if (pCursor == NULL)
     {
@@ -430,7 +432,7 @@ static ma_result ma_stbvorbis_get_cursor_in_pcm_frames(const ma_stbvorbis *pVorb
     return MA_SUCCESS;
 }
 
-static ma_result ma_stbvorbis_get_length_in_pcm_frames(ma_stbvorbis *pVorbis, ma_uint64 *pLength)
+static ma_result ma_minivorbis_get_length_in_pcm_frames(ma_minivorbis *pVorbis, ma_uint64 *pLength)
 {
     if (pLength == NULL)
     {
@@ -456,26 +458,26 @@ static ma_result ma_stbvorbis_get_length_in_pcm_frames(ma_stbvorbis *pVorbis, ma
     return MA_SUCCESS;
 }
 
-static ma_result ma_decoding_backend_init__stbvorbis(void *pUserData, ma_read_proc onRead, ma_seek_proc onSeek,
-                                                     ma_tell_proc onTell, void *pReadSeekTellUserData,
-                                                     const ma_decoding_backend_config *pConfig,
-                                                     const ma_allocation_callbacks    *pAllocationCallbacks,
-                                                     ma_data_source                  **ppBackend)
+static ma_result ma_decoding_backend_init__minivorbis(void *pUserData, ma_read_proc onRead, ma_seek_proc onSeek,
+                                                      ma_tell_proc onTell, void *pReadSeekTellUserData,
+                                                      const ma_decoding_backend_config *pConfig,
+                                                      const ma_allocation_callbacks    *pAllocationCallbacks,
+                                                      ma_data_source                  **ppBackend)
 {
-    ma_result     result;
-    ma_stbvorbis *pVorbis;
+    ma_result      result;
+    ma_minivorbis *pVorbis;
 
     EPI_UNUSED(pUserData); /* For now not using pUserData, but once we start storing the vorbis decoder state within the
                               ma_decoder structure this will be set to the decoder so we can avoid a malloc. */
 
     /* For now we're just allocating the decoder backend on the heap. */
-    pVorbis = (ma_stbvorbis *)ma_malloc(sizeof(*pVorbis), pAllocationCallbacks);
+    pVorbis = (ma_minivorbis *)ma_malloc(sizeof(*pVorbis), pAllocationCallbacks);
     if (pVorbis == NULL)
     {
         return MA_OUT_OF_MEMORY;
     }
 
-    result = ma_stbvorbis_init(onRead, onSeek, onTell, pReadSeekTellUserData, pConfig, pAllocationCallbacks, pVorbis);
+    result = ma_minivorbis_init(onRead, onSeek, onTell, pReadSeekTellUserData, pConfig, pAllocationCallbacks, pVorbis);
     if (result != MA_SUCCESS)
     {
         ma_free(pVorbis, pAllocationCallbacks);
@@ -487,25 +489,25 @@ static ma_result ma_decoding_backend_init__stbvorbis(void *pUserData, ma_read_pr
     return MA_SUCCESS;
 }
 
-static ma_result ma_decoding_backend_init_memory__stbvorbis(void *pUserData, const void *pData, size_t dataSize,
-                                                            const ma_decoding_backend_config *pConfig,
-                                                            const ma_allocation_callbacks    *pAllocationCallbacks,
-                                                            ma_data_source                  **ppBackend)
+static ma_result ma_decoding_backend_init_memory__minivorbis(void *pUserData, const void *pData, size_t dataSize,
+                                                             const ma_decoding_backend_config *pConfig,
+                                                             const ma_allocation_callbacks    *pAllocationCallbacks,
+                                                             ma_data_source                  **ppBackend)
 {
-    ma_result     result;
-    ma_stbvorbis *pVorbis;
+    ma_result      result;
+    ma_minivorbis *pVorbis;
 
     EPI_UNUSED(pUserData); /* For now not using pUserData, but once we start storing the vorbis decoder state within the
                               ma_decoder structure this will be set to the decoder so we can avoid a malloc. */
 
     /* For now we're just allocating the decoder backend on the heap. */
-    pVorbis = (ma_stbvorbis *)ma_malloc(sizeof(*pVorbis), pAllocationCallbacks);
+    pVorbis = (ma_minivorbis *)ma_malloc(sizeof(*pVorbis), pAllocationCallbacks);
     if (pVorbis == NULL)
     {
         return MA_OUT_OF_MEMORY;
     }
 
-    result = ma_stbvorbis_init_memory(pData, dataSize, pConfig, pAllocationCallbacks, pVorbis);
+    result = ma_minivorbis_init_memory(pData, dataSize, pConfig, pAllocationCallbacks, pVorbis);
     if (result != MA_SUCCESS)
     {
         ma_free(pVorbis, pAllocationCallbacks);
@@ -517,24 +519,24 @@ static ma_result ma_decoding_backend_init_memory__stbvorbis(void *pUserData, con
     return MA_SUCCESS;
 }
 
-static void ma_decoding_backend_uninit__stbvorbis(void *pUserData, ma_data_source *pBackend,
-                                                  const ma_allocation_callbacks *pAllocationCallbacks)
+static void ma_decoding_backend_uninit__minivorbis(void *pUserData, ma_data_source *pBackend,
+                                                   const ma_allocation_callbacks *pAllocationCallbacks)
 {
-    ma_stbvorbis *pVorbis = (ma_stbvorbis *)pBackend;
+    ma_minivorbis *pVorbis = (ma_minivorbis *)pBackend;
 
     EPI_UNUSED(pUserData);
 
-    ma_stbvorbis_uninit(pVorbis, pAllocationCallbacks);
+    ma_minivorbis_uninit(pVorbis, pAllocationCallbacks);
     ma_free(pVorbis, pAllocationCallbacks);
 }
 
-static ma_decoding_backend_vtable g_ma_decoding_backend_vtable_stbvorbis = {ma_decoding_backend_init__stbvorbis,
-                                                                            NULL, // onInitFile()
-                                                                            NULL, // onInitFileW()
-                                                                            ma_decoding_backend_init_memory__stbvorbis,
-                                                                            ma_decoding_backend_uninit__stbvorbis};
+static ma_decoding_backend_vtable g_ma_decoding_backend_vtable_minivorbis = {
+    ma_decoding_backend_init__minivorbis,
+    NULL, // onInitFile()
+    NULL, // onInitFileW()
+    ma_decoding_backend_init_memory__minivorbis, ma_decoding_backend_uninit__minivorbis};
 
-static ma_decoding_backend_vtable *custom_vtable = &g_ma_decoding_backend_vtable_stbvorbis;
+static ma_decoding_backend_vtable *custom_vtable = &g_ma_decoding_backend_vtable_minivorbis;
 
 class OGGPlayer : public AbstractMusicPlayer
 {

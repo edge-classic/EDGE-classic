@@ -40,7 +40,7 @@ class FontDefinition
 {
   public:
     FontDefinition();
-    ~FontDefinition(){};
+    ~FontDefinition();
 
   public:
     void Default(void);
@@ -51,7 +51,7 @@ class FontDefinition
 
     FontType type_;
 
-    FontPatch  *patches_;
+    FontPatch  *patches_ = nullptr;
     std::string missing_patch_;
 
     std::string image_name_;

@@ -137,19 +137,6 @@ void UpdateSounds(MapObject *listener, BAMAngle angle)
 
         if (chan->state_ == kChannelPlaying)
         {
-            if (chan->loop_)
-            {
-                ma_uint64 cur_pos = 0;
-                ma_sound_get_cursor_in_pcm_frames(&chan->channel_sound_, &cur_pos);
-                if (cur_pos < chan->pos_) // has looped already
-                {
-                    chan->loop_ = false;
-                    ma_sound_set_looping(&chan->channel_sound_, MA_FALSE);
-                }
-                else
-                    chan->pos_ = cur_pos;
-            }
-
             if (ma_sound_at_end(&chan->channel_sound_))
                 chan->state_ = kChannelFinished;
         }

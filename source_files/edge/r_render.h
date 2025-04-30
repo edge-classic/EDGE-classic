@@ -10,6 +10,8 @@ void RenderSubList(std::list<DrawSubsector *> &dsubs, bool for_mirror = false);
 
 void BSPWalkNode(unsigned int);
 
+void UpdateSectorInterpolation(Sector *sector);
+
 #ifdef EDGE_SOKOL
 
 constexpr int32_t kRenderItemBatchSize = 16;
